@@ -1,0 +1,73 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>Reading a Configuration File</h1>
+
+<p>
+	The FileUtil package contains classes and functions for file I/O.
+	In particular, it supports handling of configuration files
+	that help to control and keep track of experiments.
+</p>
+
+<p>
+	Let's consider a program with three variables <tt>n</tt>, <tt>d</tt>,
+	and <tt>f</tt>, with default values 4, 3.14, and 3.14, respectively.
+	A configuration file should be used to overwrite some of these values.
+	This can be realized by the following program:
+</p>
+
+<pre><div class="code">#include &lt;fstream&gt;
+#include &lt;FileUtil/FileUtil.h&gt;
+#include &lt;cmath&gt;
+int main(int argc, char **argv)
+{
+        // default values
+        unsigned n = 4;
+        double   d = 3.14;
+        double   f = 3.14;         
+
+        if (argc &gt; 1) {
+                std::ifstream ifs(argv[1]);
+                if (ifs) {
+                        FileUtil::scanFrom_strict(ifs, "n", n, true); 
+                        FileUtil::scanFrom_strict(ifs, "d", d, true);
+                }
+                ifs.close();
+
+                std::cout &lt;&lt; "n=" &lt;&lt; n &lt;&lt; " \td=" &lt;&lt; d
+	                        &lt;&lt; " \tf=" &lt;&lt; f &lt;&lt; std::endl;
+        }
+}
+</div></pre>
+
+<p>
+	Assume that the corresponding executable is called
+	&quot;FileUtilSimple&quot; and that the configuration
+	file &quot;parameter.conf&quot; contains:
+</p>
+
+<pre><div class="code">Parameters for my insightful experiment:
+d   42.42
+n   11</div></pre>
+
+<p>
+	Now, if we pass &quot;parameter.conf&quot; as the first argument
+	to &quot;FileUtilSimple&quot; we get:
+</p>
+
+<div class="shell">&gt; ./FileUtilSimple parameters.conf 
+n=11 	d=42.42 	f=3.14</div>
+
+<p>
+	The flag <tt>true</tt> indicates that <tt>scanFrom_strict</tt>
+	should always start from the first line of the configuration file.
+</p>
+
+</body>
+
+</html>

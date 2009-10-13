@@ -1,0 +1,5 @@
+<config name="Array-Examples" basedir="../..">
+	<project name="mean-var" type="executable" lib="Shark">
+		<source path="examples/Array" name="mean-var.cpp"></source>
+	</project>
+</config>

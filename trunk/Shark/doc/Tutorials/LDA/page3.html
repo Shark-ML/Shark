@@ -1,0 +1,76 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>LDA Training</h1>
+
+<p>
+	Following the
+	<a target="_parent" href="../ReClaM-Architecture/index.html">ReClaM architecture</a>
+	we need a model making the predictions, an error function, and
+	an optimization strategy for machine training. The model should be
+	able to output a three-dimensional standard basis vector, which corresponds to a class
+	label, for each two-dimensional input according to the LDA rule.
+	The <tt>LinearClassifier</tt> class, a sub-class of <tt>Model</tt>,
+	realizes this functionality. We use the <tt>LDA</tt> optimizer to
+	find the parameters of the model which make up the LDA solution:
+</p>
+
+<pre><div class="code">#include &lt;Rng/GlobalRng.h&gt;
+#include &lt;ReClaM/Dataset.h&gt;
+<div class="newcode">#include &lt;ReClaM/LinearModel.h&gt;
+#include &lt;ReClaM/LDA.h&gt;</div>
+
+class MultiClassProblem : public DataSource
+{
+public:
+    MultiClassProblem()
+    {
+        dataDim = 2;
+        targetDim = 3;
+    }
+
+    bool GetData(Array&lt;double&gt;&amp; data, Array&lt;double&gt;&amp; target, int count)
+    {
+        data.resize(count, 2, false);
+        target.resize(count, 3, false);
+        target = 0.0;
+        int i, c;
+        for (i=0; i&lt;count; i++)
+        {
+            c = Rng::discrete(0, 2);
+            data(i, 1) = 0.7 * Rng::gauss();
+            data(i, 0) = 0.7 * Rng::gauss() - 1.0 * data(i, 1);
+            if (c == 0) data(i, 0) -= 1.0;
+            else if (c == 1) data(i, 1) += 2.0;
+            else if (c == 2) data(i, 0) += 1.0;
+            target(i, c) = 1.0;
+        }
+        return true;
+    }
+};
+
+int main(int argc, char** argv)
+{
+    MultiClassProblem problem;
+    Dataset dataset(problem, 100, 1000);
+<div class="newcode">
+    LinearClassifier model(2, 3);
+    LDA optimizer;
+    optimizer.init(model);
+    optimizer.optimize(model, dataset.getTrainingData(),
+                              dataset.getTrainingTarget());</div>}
+</div></pre>
+
+<p>
+	Now the model realizes the LDA solution and can be used to predict
+	the class of an unseen pattern.
+</p>
+
+</body>
+
+</html>

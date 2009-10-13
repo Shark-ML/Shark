@@ -1,0 +1,111 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>Genes and Chromosomes</h1>
+
+<p>
+	Evolutionary algorithms are formulated in terms of populations,
+	individuals, chromosomes, and genetic operators working on them.  In
+	the EALib, Chromosomes,
+	individuals, and populations are
+	essentially sequences of items and are derived from the
+	Standard Template Library class <tt>vector</tt>.
+</p>
+
+<h2>Basic Data Structures of Genes and Chromosomes</h2>
+
+<p>
+	The representation (genome) of an individual consists of a
+	variable number of sequences (chomosomes) of variable length.
+	These sequences may contain binary, integer, continuous values, or any
+	other type of values (alleles). The base class
+	<tt>Chromosome</tt> defines the common properties of all types of
+	chromosomes.  Furthermore, it declares genetic operators which can be
+	applied to any sequence of items such as crossover, inversion,
+	duplication, rotation, translation.  The more specific operators like
+	initialisation, mutation, and special forms of
+	recombination, are defined in the derived template class
+	<tt>ChromosomeT&lt; Type ></tt>. Some general operators, like input from
+	streams and output to streams, depend on the special type of
+	a chromosome and may not be defined for that type.  However, they are
+	declared in the base class <tt>Chromosome</tt> to be accessible by any
+	derived class.  Unless they are overloaded by the derived classes a
+	call of these operators may cause the exception <tt>undefined
+	operator</tt>.
+</p>
+
+<h2>Binary  Alleles</h2>
+<p>
+	Chromosomes with binary valued alleles are essentially strings of
+	Boolean values. The class <tt>ChromosomeT&lt; bool ></tt> is
+	derived from class <tt>Chromosome</tt> and class <tt>vector< bool ></tt>.
+	All operators which are defined for class <tt>vector< bool ></tt> such
+	as assignment, subscript, test for equality, and change of size are
+	available for class <tt>ChromosomeT< bool ></tt> in the same way.
+	Instances of class <tt>ChromosomeT< bool ></tt> can be used 
+	when a binary representation is needed. Furthermore, some genetic
+	operators specific for strings of boolean values like flipping
+	particular alleles or interpreting the genome as a binary encoded
+	floating point number are defined in this class.
+</p>
+
+<pre><div class="code">#include &lt;EALib/ChromosomeT.h>       
+...
+  ChromosomeT< bool > chrom( 10 ); // define chromosome with 10 alleles
+  chrom.initialize( );             // initialize alleles with random values
+
+  for( int i = 0; i < chrom.size( ); i++ ) {
+    cout << "allele " << i << " = "
+         << chrom[ i ];          // send ith allele to standard output
+         << endl;
+  }
+...
+</div></pre>
+
+<h2>Integer Alleles</h2>
+<p>
+	Analogously, the class <tt>Chromosome< int ></tt> is derived from class
+	<tt>Chromosome</tt> and class <tt>vector< int ></tt>.
+	Alleles of an instance of <tt>ChromosomeT< int ></tt> may
+	contain integer values as well as symbols.
+</p>
+
+<pre><div class="code">#include &lt;EALib/ChromosomeT.h>  
+...
+  ChromosomeT< int > chrom( 3 );   // define chromosome with 3 alleles
+...
+</div></pre>
+
+<h2>Continuous Alleles</h2>
+<p>
+	The class <tt>ChromosomeT< double ></tt> is specially designed
+	for continuous parameter optimisation problems. All variants of
+	evolution strategies rely on this data type. A variety of mutation
+	operators, mainly based on normally distributed random numbers, and
+	special forms of recombination are implemented in this class.
+</p>
+<pre><div class="code">#include &lt;EALib/ChromosomeT.h>  
+...
+  ChromosomeT< double > chrom( 20, 1.2 ); // define chromosome with 20
+                                          // alleles with initial value 1.2
+...
+</div></pre>
+
+<h2>User Defined Alleles</h2>
+<p>
+	For many tasks the standard types introduced above are not
+	applicable, in particular if different basic types must be
+	combined to represent a suitable chromosome or if additional
+	complex methods must be available at chromosome level. Then
+	it is recommended to derive a user defined sub-class from
+	Chromosome or one of the ChromosomeT&lt;T&gt; classes.
+</p>
+
+</body>
+
+</html>

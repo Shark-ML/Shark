@@ -1,0 +1,8 @@
+<config name="Mixture-Examples" basedir="../..">
+	<project name="mg-example" type="executable" lib="Shark">
+		<source path="examples/Mixture" name="mg-example.cpp"></source>
+	</project>
+	<project name="rbfn-example" type="executable" lib="Shark">
+		<source path="examples/Mixture" name="rbfn-example.cpp"></source>
+	</project>
+</config>

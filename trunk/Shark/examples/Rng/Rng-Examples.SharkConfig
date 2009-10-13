@@ -1,0 +1,11 @@
+<config name="Rng-Examples" basedir="../..">
+	<project name="RngTest" type="executable" lib="Shark">
+		<source path="examples/Rng" name="RngTest.cpp"></source>
+	</project>
+	<project name="RngTest2" type="executable" lib="Shark">
+		<source path="examples/Rng" name="RngTest2.cpp"></source>
+	</project>
+	<project name="RngTestSimple" type="executable" lib="Shark">
+		<source path="examples/Rng" name="RngTestSimple.cpp"></source>
+	</project>
+</config>

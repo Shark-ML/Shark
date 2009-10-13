@@ -1,0 +1,176 @@
+//
+// The following comment defines the EALib main help page.
+//
+/*!
+
+\mainpage
+
+Reference for the <strong>E</strong>volutionary
+<strong>A</strong>lgorithms library.<br>
+
+<br><hr><br>
+
+<p> The EALib supports the implementation of evolutionary algorithms
+and related techniques.  Flexibility was the main design criterion in
+the development of the library.  This documentation gives a short
+overview of how evolutionary algorithms work, the most important
+operators, the programming interface and the examples illustrating the
+usage of the EALib classes.  </p>
+<p>
+For a detailed description see <a href="../EALibManual/EALib.pdf"> Evolutionary Algorithms-Class Library</a>.
+</p>
+
+<p>
+<center>
+<img src="../images/evolution.png">
+</center>
+</p>
+
+
+<h1>Structure of the EALib</h1>
+
+<p>
+	The EALib provides special data structures for the
+	implementation of typical evolutionaly algorithms.
+	These include chromosomes (encoding properties),
+	individuals (encoding potential solutions), and
+	populations (multi-sets of solutions).
+	Standard evolutionary algorithms rely on a fitness
+	function for optimization. EALib provides a rather
+	flexible template interface for the implementation of
+	all types of fitness functions.
+	For convenience and unification there exists a
+	standard interface for search algorithms operating on
+	the above data structures and fitness functions.
+	With these elements EALib has a modular structure,
+	making single components are easy to exchange and to
+	extend.
+</p>
+
+<p>
+	In the following the most important predefined components
+	are briefly introduced.
+</p>
+
+<h2>Chromosomes</h2>
+
+<p>
+	All types of chromosomes are sub-classes of the basic
+	Chromosome interface. For concrete implementations there
+	are two different strategies. First, the template class
+	ChromosomeT can be used to store simple vectors. The most
+	common use case is ChromosomeT&lt;double&gt; for real
+	vectors. Second, algorithm specific sub-classes, holding
+	any type of data members, can be defined. The most
+	important example of this proceeding is ChromosomeCMA.
+</p>
+
+<h2>Individuals</h2>
+
+<p>
+	Individuals basically consist of their chromosomes.
+	However, a single individual may hold chromosomes of
+	different types. For example, one chromosome may encode
+	a search point, while a second chromosome
+	may encode search strategy information, for example
+	probabilities for the application of certain mutation
+	operators. Therefore, the interface for retrieving
+	chromosomes from individuals can not be type-safe.
+</p>
+<p>
+	For individuals consisting only of a single type of
+	chromosome there is a type-safe alternative. The template
+	IndividualCT&lt;C&gt; consists of chromosomes of type C,
+	while objects of type IndividualT&lt;T&gt; hold
+	chromosomes of type ChromosomeT&lt;T&gt;. Both templates
+	provide type-safe access to the corresponding chromosomes,
+	avoiding error-prone code and dynamic_cast constructions.
+</p>
+
+<h2>Populations</h2>
+
+<p>
+	On the data level, a population is a set of individuals.
+	Again, there is no type-safe interface to access
+	non-standard individuals in a population. The templates
+	PopulationCT&lt;C&gt;, holding individuals of type
+	IndividualCT&lt;C&gt;, and PopulationT&lt;T&gt;, holding
+	IndividualT&lt;T&gt; objects, provide type-safe
+	interfaces for the most important default cases.
+</p>
+
+<h2>Fitness Functions</h2>
+
+<p>
+	The ObjectiveFunction class is the abstract base class of
+	all EALib fitness functions. It counts the function
+	evaluations and provides a name for the objective function
+	object.
+</p>
+<p>
+	Concrete objective functions are descendants of the
+	template ObjectiveFunctionT&lt;T&gt;, where the template
+	type T encodes the search space. The template provides
+	a standard interface for function evaluations
+	(the result method) for single-objective and multi-objective
+	problems, and the operator () for single-objective problems
+	only. Furthermore, this superclass provides optional
+	interfaces for constraint handling and the possibility to
+	provide starting points for the evolutionary search.
+</p>
+<p>
+	A further specialization is the ObjectiveFunctionVS
+	template for fitness functions on vector spaces. The most
+	common type is ObjectiveFunctionVS&lt;double&gt; using
+	double values for the components. This type inherits
+	ObjectiveFunction&lt;T*&gt;. Thus, pointers are used to
+	represent vectors.
+</p>
+
+<h2>Search Algorithms</h2>
+
+<p>
+	The abstract class SearchAlgorithmBase is the base class
+	of all search algorithms. It counts the iterations
+	(generations) and provides a name for the algorithm.
+</p>
+<p>
+	Concrete implementations inherit the template
+	SearchAlgorithm&lt;T&gt;, where T encodes the search space.
+	Like for fitness functions, pointers to double (type double*)
+	are used for real vectors. This interface provides three
+	virtual methods that need to be implemented by every concrete
+	algorithm: The run() method performs a single search iteration
+	(or generation). The methods bestSolutions() and
+	bestSolutionsFitness() return the currently best solutions,
+	which may be a single search point or a set of Pareto optimal
+	solutions in the case of multiple objectives.
+</p>
+
+<h1>How to start?</h1>
+
+<p>
+Looking at the <a href="examples.html">examples</a>
+may be the best way to start working with the EALib.
+</p>
+
+*/
+
+//
+// The following comment lists all examples.
+//
+/*!
+
+	\example TSP_GA.cpp
+	\example ackleyES.cpp
+	\example countingOnes.cpp
+	\example integerES.cpp
+	\example paraboloidCMA.cpp
+	\example paraboloidElitistCMA.cpp
+	\example pvmSphereGA.cpp
+	\example saveState.cpp
+	\example saveStateNew.cpp
+	\example sphereGA.cpp
+	\example steadyState.cpp
+	\example SchwefelEllipsoidCMSA.cpp
+*/

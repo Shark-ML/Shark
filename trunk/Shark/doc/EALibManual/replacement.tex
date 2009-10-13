@@ -1,0 +1,57 @@
+%
+%% 
+%% file: replacement.tex
+%%
+%
+
+% =======================================================================
+	\subsection{Replacement}
+% =======================================================================
+
+A number of candidates (the offsprings) are generated from the current
+population, e.\,g.\ by recombination and mutation,
+and may replace some or all of the parents top produce the next
+generation.
+
+% -----------------------------------------------------------------------
+	\subsubsection{Generational Replacement}
+% -----------------------------------------------------------------------
+
+In the generational replacement scheme the entire population is
+replaced at once.  The generational replacement technique has some
+potential drawbacks.  Even with an elitist strategy many of the best
+individuals found may not reproduce at all or their chromosomes may be
+lost due to \myindex{crossover} and \index{mutation}.  But generational
+replacement is fairly robust against noisy objective functions\index{objective function!noisy} and
+\myindex{changing environments} since each individual is re-evaluated whenenver
+it turns up in the population.
+
+
+% -----------------------------------------------------------------------
+	\subsubsection{Steady-State Replacement}
+	\label{replacement:subsubs:steadyStateReplacement}
+% -----------------------------------------------------------------------
+
+In the steady-state replacement scheme only a few members are
+replaced at a time \cite{Whitley:89,Syswerda:89}.  Steady-state
+replacement has one parameter---the number of new individuals to
+create (the number of old individuals to replace, respectively). Note
+that generational replacement is a special case of steady-state
+replacement where the number of replaced individuals equals the
+population size.  For a comparison of the two replacement schemes see
+\cite{Syswerda:91}.
+
+The condition can be imposed that only one copy of any individual
+exists in the population at any time so that the population never
+fully converges.  This variant is called \emph{steady-state without
+duplicates}.  It involves some computational overhead, in that it
+requires a large number of equality tests whenever an offspring is
+created, but applying genetic algorithms to \emph{real} problems most
+of the time is spent in evaluation.  So this additional computation
+time is negligible with regard to the total computing time.
+
+It should be noted that steady-state replacement may not work well
+when the \myindex{objective function} is noisy or the environment is changing
+since good individuals won't be deleted from the population even if
+they are bad in the changed environment.  For further discussion see
+\cite{Davis:91}, chapter 2.

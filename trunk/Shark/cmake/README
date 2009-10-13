@@ -1,0 +1,7 @@
+
+Building the Shark library with cmake is supported since
+version 2.2.2 of the library. However, note that cmake
+support is still experimental. CMake is not the primary
+way to build the library. In case of errors or other
+problems please stick to the much better tested makefiles
+or to the visual studio workspace and project files.

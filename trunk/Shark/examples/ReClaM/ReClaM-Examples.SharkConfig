@@ -1,0 +1,62 @@
+<config name="ReClaM-Examples" basedir="../..">
+	<project name="simpleRBFNet" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="simpleRBFNet.cpp"></source>
+	</project>
+	<project name="simpleFFNet" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="simpleFFNet.cpp"></source>
+	</project>
+	<project name="simpleRNNet" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="simpleRNNet.cpp"></source>
+	</project>
+	<project name="simpleFFNetSource" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="simpleFFNetSource.cpp"></source>
+	</project>
+	<project name="simpleMSERNNet" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="simpleMSERNNet.cpp"></source>
+	</project>
+	<project name="SVMclassification" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="SVMclassification.cpp"></source>
+	</project>
+	<project name="SVMclassification-gnuplot" type="executable" system="makefile" lib="Shark">
+		<source path="examples/ReClaM" name="SVMclassification-gnuplot.cpp"></source>
+	</project>
+	<project name="SVMregression" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="SVMregression.cpp"></source>
+	</project>
+	<project name="SVMregression-gnuplot" type="executable" system="makefile" lib="Shark">
+		<source path="examples/ReClaM" name="SVMregression-gnuplot.cpp"></source>
+	</project>
+	<project name="KNN" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="KNN.cpp"></source>
+	</project>
+	<project name="KM" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="KM.cpp"></source>
+	</project>
+	<project name="CrossValidation" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="CrossValidation.cpp"></source>
+	</project>
+	<project name="KernelOptimization" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="KernelOptimization.cpp"></source>
+	</project>
+	<project name="SvmApproximationExample" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="SvmApproximationExample.cpp"></source>
+	</project>
+	<project name="LinearClassifierTest" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="LinearClassifierTest.cpp"></source>
+	</project>
+	<project name="PCAtest" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="PCAtest.cpp"></source>
+	</project>
+	<project name="LinearRegressionTest" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="LinearRegressionTest.cpp"></source>
+	</project>
+	<project name="KalmanFilterTest" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="KalmanFilterTest.cpp"></source>
+	</project>
+	<project name="McSvm" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="McSvm.cpp"></source>
+	</project>
+	<project name="whitening" type="executable" lib="Shark">
+		<source path="examples/ReClaM" name="whitening.cpp"></source>
+	</project>
+</config>

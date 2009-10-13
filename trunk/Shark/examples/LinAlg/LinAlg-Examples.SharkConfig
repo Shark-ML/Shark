@@ -1,0 +1,59 @@
+<config name="LinAlg-Examples" basedir="../..">
+	<project name="rank_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="rank_test.cpp"></source>
+	</project>
+	<project name="rank_decomp_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="rank_decomp_test.cpp"></source>
+	</project>
+	<project name="svd_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="svd_test.cpp"></source>
+	</project>
+	<project name="svdrank_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="svdrank_test.cpp"></source>
+	</project>
+	<project name="svdsort_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="svdsort_test.cpp"></source>
+	</project>
+	<project name="eigensymm_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="eigensymm_test.cpp"></source>
+	</project>
+	<project name="eigensymmJacobi_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="eigensymmJacobi_test.cpp"></source>
+	</project>
+	<project name="eigensymmJacobi2_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="eigensymmJacobi2_test.cpp"></source>
+	</project>
+	<project name="eigensort_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="eigensort_test.cpp"></source>
+	</project>
+	<project name="eigenerr_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="eigenerr_test.cpp"></source>
+	</project>
+	<project name="g_inverse_matrix" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="g_inverse_matrix.cpp"></source>
+	</project>
+	<project name="detsymm_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="detsymm_test.cpp"></source>
+	</project>
+	<project name="lnsrch_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="lnsrch_test.cpp"></source>
+	</project>
+	<project name="cblnsrch_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="cblnsrch_test.cpp"></source>
+	</project>
+	<project name="linmin_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="linmin_test.cpp"></source>
+	</project>
+	<project name="dlinmin_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="dlinmin_test.cpp"></source>
+	</project>
+	<project name="linalg_simple_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="linalg_simple_test.cpp"></source>
+	</project>
+	<project name="covar_corrcoef_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="covar_corrcoef_test.cpp"></source>
+	</project>
+	<project name="fft_test" type="executable" lib="Shark">
+		<source path="examples/LinAlg" name="fft_test.cpp"></source>
+	</project>
+</config>

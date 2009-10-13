@@ -1,0 +1,65 @@
+#!/bin/sh
+
+
+makearchive()
+{
+	echo "Archiving and compressing $1 ..."
+	ARCHIVENAME=`echo $1-$VERSION`
+	for i in $FILELIST
+	do
+		tar rf $ARCHIVENAME.tar Shark-$VERSION/$i
+	done
+	gzip --best $ARCHIVENAME.tar; mv $ARCHIVENAME.tar.gz Archives/$ARCHIVENAME.tar.gz
+}
+
+
+echo ""
+echo "Input the new version number:"
+read VERSION
+sed -e "s/\(^[ 	]\{0,\}[vV][eE][rR]\([sS][iI][oO][nN]\)\{0,1\}[ 	]\{0,\}=[ 	]\{0,\}\)\([0-9]\{1,\}\.\)\{0,\}[0-9]\{1,\}\([# 	]\{0,\}.\{0,\}\$\)/\1$VERSION\4/g" configure.in >configure.in.new
+mv -f configure.in.new configure.in
+
+if test ! -d Shark-$VERSION
+then
+	mkdir Shark-$VERSION
+fi
+
+if test ! -d Archives
+then
+	mkdir Archives
+fi
+rm -f Archives/*
+
+echo "Generating file lists ..."
+
+global='COPYING.txt INDEX.txt INSTALL.txt Makefile.in configure.in configure Shark_Libs.dsw Shark_All.dsw selftest.sh makerights installShark cmake/CMakeLists.txt cmake/README'
+include=`find include \! -type d -a \( -iname "*.h" -o -iname "*.hpp" -iname "README" \)`
+src=`find src \! -type d -a \( -iname "*.c" -o -iname "*.cc" -o -iname "*.cpp" -o -iname "Makefile.in" -o -iname "*.pro" -o -iname "*.dsw" -o -iname "*.dsp" -o -iname "Documentation" -o -iname "CMakeLists.txt" \)`
+examples=`find examples \! -type d -a \! -path "*/QT/*" -a \( -iname "*.c" -o -iname "*.cc" -o -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" -o -iname "Makefile.in" -o -iname "configure.in" -o -iname "configure" -o -iname "*.txt" -o -iname "*.dsw" -o -iname "*.dsp" -o -iname "*.conf" -o -iname "mg.data" -o -iname "ran.40000pts.3d.1" -o -iname "timeseries" -o -iname "CMakeLists.txt" \)`
+doc=`find doc \! -type d -a \! -iname "footer" -a \! -iname "homepage_index.html" -a \( -iname "*.txt" -o -iname "*.html" -o -iname "*.css" -o -iname "*.js" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.jpg" -o -iname "*.pdf" \)`
+GUI=`find examples \! -type d -a -path "*/QT/*" -a \! -iname "moc_*" -a \( -iname "*.c" -o -iname "*.cc" -o -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" -o -iname "*.pro" -o -iname "*.sln" -o -iname "*.vcproj" -o -iname "CMakeLists.txt" \)`
+
+echo "Copying files ..."
+for i in $global ; do tar cf - $i | ( cd Shark-$VERSION/ ; tar xvf - ) ; done
+for i in $include ; do tar cf - $i | ( cd Shark-$VERSION/ ; tar xvf - )  ; done
+for i in $src ; do tar cf - $i | ( cd Shark-$VERSION/ ; tar xvf - )  ; done
+for i in $examples ; do tar cf - $i | ( cd Shark-$VERSION/ ; tar xvf - ) ; done
+for i in $doc ; do tar cf - $i | ( cd Shark-$VERSION/ ; tar xvf - ) ; done
+for i in $GUI ; do tar cf - $i | ( cd Shark-$VERSION/ ; tar xvf - ) ; done
+
+FILELIST=`echo $global $include $src $examples $doc $GUI`
+makearchive shark
+
+echo "deleting temporary files"
+if test -d Shark-$VERSION
+then
+	cd Shark-$VERSION
+	rm -rf *
+	cd ..
+	rmdir Shark-$VERSION
+fi
+
+echo "Done."
+echo ""
+echo "The archives were placed in the Archives/ directory."
+echo ""

@@ -1,0 +1,87 @@
+%
+% the following code has been adopted from
+%     supertabular sty
+%     Theo Jurriens 1988
+%     TAJ@hgrrug5        P.O Box 800, 9700 AV Groningen
+%
+\newcount\numline
+\newcount\maxline
+
+\def\listingcr{
+    \global\advance\numline by 1 \cr
+    \ifnum\numline=\maxline
+        \\\hline
+        \multicolumn{1}{c}{}\\
+        \multicolumn{1}{c}{\normalsize\rm\programname~\theprogram}
+        \end{tabular}
+	\vspace*{-4\baselineskip}
+        \end{center}
+        \end{program}
+        \global\numline=0
+        \begin{program}[!t]
+	\small\tt
+        \let\@tabularcr\listingcr
+        \begin{center}
+        \begin{tabular}{|l|}
+        \hline
+        \makebox[\listingwidth]{}\\
+    \fi
+}
+
+
+%
+% program listing environment
+%
+\newlength\listingwidth
+\newenvironment{plisting}[3]{
+    \gdef\shortcaption{#1}
+    \gdef\longcaption{#2}
+    \listingwidth=\columnwidth
+    \advance\listingwidth-4em
+    \addtocounter{program}{1}
+    \catcode`\_=11
+    \catcode`\&=11
+    \catcode`\#=11
+    \catcode`\%=11
+    \catcode`\^=11
+    \catcode`\~=11
+    \obeyspaces
+    \obeylines
+    \tabcolsep2em
+    \begin{program}[#3]
+    \small\tt
+    %
+    % calculate maxline
+    %
+    \global\maxline = \textheight
+    \global\advance\maxline -\baselineskip % table head
+    \global\advance\maxline -\baselineskip % table tail
+    \global\divide\maxline by \baselineskip
+    %
+    \numline=0
+    \let\@tabularcr\listingcr
+    \begin{center}
+    \begin{tabular}{|l|}
+    \hline
+    \makebox[\listingwidth]{}\\
+}{
+    \\\hline
+    \end{tabular}
+    \end{center}
+    \addtocounter{program}{-1}
+    \normalsize\rm
+    {\vspace{-10pt}\centerline{\parbox{13cm}{\caption[\shortcaption]{\longcaption}}}}
+    \end{program}
+}
+
+\newenvironment{programlisting}[2]{%
+	\begin{plisting}{#1}{#2}{\csname !hbt\endcsname}
+}{%
+	\end{plisting}
+}
+
+\newenvironment{programlistinghereandnow}[2]{%
+	\begin{plisting}{#1}{#2}{H}
+}{%
+	\end{plisting}
+}

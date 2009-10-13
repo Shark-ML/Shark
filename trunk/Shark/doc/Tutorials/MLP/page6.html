@@ -1,0 +1,81 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>Training the Network</h1>
+
+<p>
+	Now, training the network is done by simply applying
+	iteratively the optimizer to the network model given
+	the error function and the 
+	input and target training data.
+</p>
+
+<pre><div class="code">#include &lt;Array/Array.h&gt;
+#include &lt;ReClaM/FFNet.h&gt;
+#include &lt;ReClaM/createConnectionMatrix.h&gt;
+#include &lt;ReClaM/CrossEntropy.h&gt;
+#include &lt;ReClaM/Rprop.h&gt;
+
+int main()
+{
+  // just index variables
+  unsigned i, j, k, t;
+	
+  // construct xor problem
+  Array&lt;double&gt; trainInput(4, 2);
+  Array&lt;double&gt; trainTarget(4, 1);
+  for(k=0, i=0; i<2; i++) {
+    for(j=0; j<2; j++) {
+      trainInput(k, 0) = i;
+      trainInput(k, 1) = j;
+      trainTarget(k, 0) = (i+j) % 2;
+      k++;
+    }
+  }
+  // define topology
+  unsigned inputs = 2;
+  unsigned hidden = 2;
+  unsigned outputs = 1;
+
+  // create connection matrix 
+  Array&lt;int&gt; con;
+  createConnectionMatrix(con, 
+                         inputs, hidden, outputs);
+
+  // feed-forward neural network
+  FFNet net(inputs, outputs, con);
+  // error function
+  CrossEntropy error;
+
+  // optimizer
+  IRpropPlus optimizer;
+  optimizer.init(net);
+
+  // initialize the weights uniformly between -0.1 and 0.1
+  net.initWeights(-0.1, 0.1);
+<div class="newcode">
+  // training loop
+  unsigned numberOfLearningCycles = 150;
+  for (t = 1; t <= numberOfLearningCycles; t++) {
+    // train the network
+    optimizer.optimize(net, error, trainInput, trainTarget);
+		
+    // show results
+    std::cout << t << "\t" 
+              << error.error(net, trainInput, trainTarget) << std::endl;
+  }
+</div>
+  return EXIT_SUCCESS;
+}
+</div></pre>
+
+<p>The cross-entropy is written to the standard output.</p>
+
+</body>
+
+</html>

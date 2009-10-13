@@ -1,0 +1,50 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>SunOS/Linux/MacOS Installation from the Repository</h1>
+
+<p>
+	Usually you want to install a standard  stable Shark distribution.
+	This is explained <a href="javascript: parent.GotoPage(1);">here</a>.
+</p>
+
+<p>
+	However, if you want to install a Shark snapshot from the repository,
+	you should first read the
+	<a href="javascript: parent.GotoPage(1);">standard installation tutorial</a>
+	and then call <tt>installAdmin</tt> instead of <tt>installShark</tt>:
+</p>
+
+<div class="shell">&gt; cd [SharkRoot]
+&gt; ./installAdmin
+</div>
+
+<p>
+	The script <tt>installAdmin</tt> looks like this:
+</p>
+
+<pre><div class="code">#!/bin/sh
+
+make -f Makefile-SharkConfig
+./SharkConfig
+make all
+./makedoc
+./makerights
+</div></pre>
+
+<p>
+	In addition to the commands carried out by the standard installation script,
+	<tt>installAdmin</tt> generates ".in" files for <tt>configure</tt> first,
+	executes <tt>autoconf</tt> and <tt>./configure</tt> and generates the
+	documentation using <tt>doxygen</tt>. A proper installation of current
+	versions of <tt>autoconf</tt> and <tt>doxygen</tt> as well as
+	<tt>LaTeX</tt> is required.
+</p>
+
+</body>
+</html>

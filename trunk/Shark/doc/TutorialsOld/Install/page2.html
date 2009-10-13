@@ -1,0 +1,160 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>SunOS/Linux/MacOS Installation</h1>
+
+<p>
+	The installation can be carried out as an ordinary user
+	or with root privileges. The library is extracted to
+	the so called Shark root directory (named Shark).
+	The full path to this directory is denoted by <b>[SharkRoot]</b>
+	in the following. Open a shell and enter the Shark
+	directory. Then invoke the shell script <tt>installShark</tt>.
+</p>
+
+<div class="shell">&gt; cd <b>[SharkRoot]</b>
+&gt; ./installShark
+</div>
+
+<p>
+	These are the only commands needed for the installation.
+</p>
+<p>
+	Remember to
+	<a target="_blank" href="http://en.wikipedia.org/wiki/Environment_variable#UNIX">set the environment variable</a>
+	<a target="_blank" href="http://en.wikipedia.org/wiki/Dynamic_linker#Unix_and_Unix-likes">LD_LIBRARY_PATH</a>
+	under Linux and SunOS or
+	<a target="_blank" href="http://en.wikipedia.org/wiki/Environment_variable#UNIX">DYLD_LIBRARY_PATH</a>
+	under MacOS accordingly.
+</p>
+
+<h2>Inside the Install Script</h2>
+
+<p>
+	The script <tt>installShark</tt> simply looks like this:
+</p>
+<pre><div class="code">#!/bin/sh
+autoconf 2>/dev/null 
+./configure
+make all
+</div></pre>
+<p>
+	If available, the script calls <tt>autoconf</tt> first to create
+	a configure script. As a backup mechanism a default
+	configure script is provided. The configure script
+	adapts the necessary Makefiles to your environment.
+</p>
+<p>
+	Then the script invokes <tt>make all</tt>
+	which builds the library in relase and debug mode as well as all examples.
+	This can take quite a while. Then Shark is installed.
+	Per default, the libraries are copied to <b>[SharkRoot]</b>/lib,
+	the include files to <b>[SharkRoot]</b>/include, and the
+	documentation to <b>[SharkRoot]</b>/share/doc&nbsp;.
+</p>
+
+<h2>Changing the Main Installation Path</h2>
+
+<p>
+	Shark can be installed to a different location by calling
+	<tt>configure</tt> with the option <tt>--prefix=</tt>. For
+	example, if you want to install Shark to /usr, just type:
+</p>
+<div class="shell">./configure --prefix=/usr
+make all</div>
+<p>
+	Note that usually root permissions are required for installing
+	to a system directory.
+</p>
+
+<h2>Customized Installation</h2>
+
+<p>
+	Invoking <tt>make</tt> without arguments lists all relevant make
+	targets and the current directory settings for the installation.
+</p>
+
+<div class="shell">&gt; make
+
+Shark Main Makefile - List of Commands and Directories
+------------------------------------------------------
+
+all:             makes 'libs', 'debug', 'install', and 'examples'
+libs:            builds the Shark library (in release mode)
+debug:           builds the Shark library (in debug mode)
+install:         installs the libraries, the headers, and the documentation
+installlibs:     installs the libraries
+installdocs:     installs the documentation
+installheaders:  installs the header files
+examples:        builds example programs, make 'libs' and 'install' first
+clean:           removes all objects, libraries, and executable examples
+
+libs are installed to    /usr/lib
+headers are installed to /usr/include
+docs are installed to    /usr/share/doc/
+</div>
+
+<p>
+	That is, if you only want to install the main library, call 
+ 	<tt>make installibs</tt> instead of
+ 	<tt>make all</tt>. If you are a developer but do not need
+	the documentation, you may prefer <tt>make libs debug installibs
+	installheaders</tt>. 
+</p>
+
+<p>
+	You may customize the installation directories through options
+	to the configure script. For example, it is reasonable to install
+	the include files to /usr/include/Shark/ insted of /usr/include.
+	This can be achieved using the following options:
+</p>
+
+<div class="shell">./configure --prefix=/usr --includedir=/usr/Shark
+</div>
+
+<p>
+	The most relevant configure options are:
+</p>
+
+<div class="shell">&gt; ./configure -help
+`configure' configures Shark 2.1.0 to adapt to many kinds of systems.
+
+Usage: ./configure [OPTION]... [VAR=VALUE]...
+
+...
+
+Installation directories:
+  --prefix=PREFIX         install architecture-independent files in PREFIX
+			  [<b>[SharkRoot]</b>]
+  --exec-prefix=EPREFIX   install architecture-dependent files in EPREFIX
+			  [PREFIX]
+
+...
+
+By default, `make install' will install all the files in
+`<b>[SharkRoot]</b>/bin', `<b>[SharkRoot]</b>/lib' etc.  You can specify
+an installation prefix other than `<b>[SharkRoot]</b>' using `--prefix',
+for instance `--prefix=$HOME'.
+
+For better control, use the options below.
+
+Fine tuning of the installation directories:
+...
+  --libdir=DIR           object code libraries [EPREFIX/lib]
+  --includedir=DIR       C header files [PREFIX/include]
+  --datarootdir=DIR      read-only arch.-independent data root [PREFIX/share]
+  --docdir=DIR           documentation root [DATAROOTDIR/doc/shark]
+</div>
+
+<p>
+	We recommend to call <tt>make</tt> without arguments before
+	installation to check that everything is put to the right place.
+</p>
+
+</body>
+</html>

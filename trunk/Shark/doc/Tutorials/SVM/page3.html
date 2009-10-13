@@ -1,0 +1,69 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>Classes and Objects</h1>
+
+<p>
+	It is time to constuct and initialize all the objects
+	we need for Support Vector Machine training. For this
+	purpose we extend our program:
+</p>
+
+<pre><div class="code">#include &lt;ReClaM/ArtificialDistributions.h&gt;
+#include &lt;ReClaM/Dataset.h&gt;
+<div class="newcode">#include &lt;ReClaM/Svm.h&gt;</div>
+
+int main(int argc, char** argv)
+{
+    Chessboard chess;
+    Dataset dataset(chess, 500, 10000);
+<div class="newcode">
+    double C = 100.0;
+    double gamma = 1.0;
+
+    RBFKernel kernel(gamma);
+    SVM svm(&amp;kernel);
+    C_SVM csvm(&amp;svm, C, C);
+    SVM_Optimizer opt;
+
+    opt.init(csvm);
+</div>
+    return EXIT_SUCCESS;
+}
+</div></pre>
+
+<p>
+	First we set values for the regularization parameter C
+	and the kernel parameter gamma.
+</p>
+<p>
+	We introduce four new classes: <tt>RBFKernel</tt> is a subclass
+	of the <tt>KernelFunction</tt> class, which encapsulates the
+	kernel defining the feature Hilbert space. In this case
+	it computes the standard Gaussian kernel and has a
+	single parameter called gamma.<br>
+	The <tt>SVM</tt> class represents an affine linear kernel
+	expansion which is nothing but the classifier resulting
+	from SVM training. Then, the <tt>C_SVM</tt> class, derived from
+	<tt>MetaSVM</tt>, holds the SVM hyperparameters, that is, the
+	regularization parameter C and the parameters of the
+	kernel function (gamma in this case). The parameter C
+	is provided twice, once for positive and once for
+	negative examples.<br>
+	Finally, the <tt>SVM_Optimizer</tt> class organizes the SVM
+	training process, depending on the type of <tt>MetaSVM</tt> used.
+</p>
+<p>
+	Like any optimizer object in ReClaM, the <tt>SVM_Optimizer</tt>
+	object needs to be initialized with the (model-derived)
+	<tt>C_SVM</tt> object.
+</p>
+
+</body>
+
+</html>

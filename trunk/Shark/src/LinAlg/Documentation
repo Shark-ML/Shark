@@ -1,0 +1,186 @@
+//
+// The following comment defines the LinAlg main help page.
+//
+/*!
+
+\mainpage
+
+	<p>
+		Reference for the <strong>Lin</strong>ear
+		<strong>Alg</strong>ebra module.<br>
+	</p>
+
+	<BR>
+	<BR>
+	 <a href="#analyse">Data Analysis</a><BR>
+		&nbsp; &nbsp;  <a href="#simple">Simple analysis</a><BR>
+		&nbsp; &nbsp;  <a href="#eigen">Eigensystems</a><BR>
+		&nbsp; &nbsp;  <a href="#solution">Finding equations solution</a><BR>
+	 <a href="#manipulate">Data Manipulation</a><BR>
+		&nbsp; &nbsp;  <a href="#matrix">Simple matrix manipulations</a><BR>
+		&nbsp; &nbsp;  <a href="#opt">Optimization</a><BR>
+		&nbsp; &nbsp;  <a href="#comprimation">Data comprimation</a><BR>
+		&nbsp; &nbsp;  <a href="#transform">Discrete Fourier transformation</a><BR>
+	 <a href="#vecmat">Vectors and Matrices</a><BR>
+
+
+	<br><br>
+	<a name="analyse">
+	<h2>Data Analysis</h2>
+	<p>
+		<a name="simple">
+		<h3>Simple analysis</h3>
+		<ul>
+			<li>Stochastic</li>
+			<ul>
+				<li>Calculate mean values</li>
+				<ul>
+					<li><a href="_lin_alg_8cpp.html#bf0946c983ad589902e35ceb9026ef60">Alone</a></li>
+					<li><a href="_lin_alg_8cpp.html#8417afc1eb4dce58abce2373da455d6a">With variances</a></li>
+				</ul>
+				<li>Calculate variances</li>
+				<ul>
+					<li><a href="_lin_alg_8cpp.html#f52620c3e1c24b07a79433a5ff8810a5">Alone</a></li>
+					<li><a href="_lin_alg_8cpp.html#8417afc1eb4dce58abce2373da455d6a">With mean values</a></li>
+				</ul>
+				<li>Calculate covariances</li>
+				<ul>
+					<li><a href="_lin_alg_8cpp.html#437d4802b7879e45892424b725c98569">version 1</a></li>
+					<li><a href="_lin_alg_8cpp.html#1e4cab9b3d1cee09566d351056991591">version 2</a></li>
+				</ul>
+				<li>Calculate correlation coefficient</li>
+				<ul>
+					<li><a href="_lin_alg_8cpp.html#ba9bcc2edca1f75235f0ab355a97a985">version 1</a></li>
+					<li><a href="_lin_alg_8cpp.html#a30f87b59d8e027f6dc621afc4a7ed83">version 2</a></li>
+				</ul>
+			</ul>
+			<li>Matrix-oriented</li>
+			<ul>
+				<li><a href="detsymm_8cpp.html#44ada29d9de0ab64d3dc6cd1ca91e47f">Calculate matrix determinants</a></li>
+				<li>Calculate matrix rank</li>
+				<ul>
+					<li><a href="rank_8cpp.html#bdf9047a23f1401d37417454e5ce4b55">Normal calculation</a></li>
+					<li><a href="rank_decomp_8cpp.html#44a6bc0eed7b59bda939e3602f6fb0bc">Using eigenvalues</a></li>
+					<li><a href="svdrank_8cpp.html#68df2fc67b9bf10bb9ef079230fe23d3">Using singular values</a></li>
+				</ul>  
+				<li>Calculate generalized inverse matrix</li>
+				<ul>
+					<li><a href="g__inverse_8cpp.html#e4ef8af7e7acdcd9f071460e0569d63d">version 1</a></li>
+					<li><a href="invert_8cpp.html#14300a28536489d2d29e609f5176d970">version 2</a></li>
+				</ul>
+				<li><a href="_lin_alg_8h.html#b6af2de50659417cf1e06d6ccb28a76c">Calculate sum of matrix diagonal</a></li>
+			</ul>
+		</ul>
+		<a name="eigen">
+		<h3>Eigensystems</h3>
+		<ul>
+			<li>Calculating eigenvectors and eigenvalues of symmetric matrices</li>
+			<ul>
+				<li><a href="eigensymm_8cpp.html#b030e103592a6769e7848d27c0b9bdaa">Alone</a></li>
+				<li>Alone, using Jacobi rotation</li>
+				<ul>
+					<li><a href="eigensymm_jacobi_8cpp.html#cd05caa966d2ee1bf5f85fb8d4360d4a">version 1</a></li>
+					<li><a href="eigensymm_jacobi2_8cpp.html#b11a543dec385422cc31d628396e9c7a">version 2</a></li>
+				</ul>
+				<li><a href="rank_decomp_8cpp.html#44a6bc0eed7b59bda939e3602f6fb0bc">Together with matrix rank</a></li>
+				<li><a href="detsymm_8cpp.html#44ada29d9de0ab64d3dc6cd1ca91e47f">Together with matrix determinant</a></li>
+			</ul>
+		<li>Calculating eigenvalues of non-symmetric matrices</li>
+			<ul>
+		 <li><a href="eigen_8cpp.html#9b513d1303e889e8ba79263e8fc34cbd">Alone</a></li>
+		</ul>
+			<li><a href="eigensort_8cpp.html#a85867998d5a6b2ca11626cda4dde9d5">Sorting eigenvectors and eigenvalues</a></li>
+			<li><a href="eigenerr_8cpp.html#19601b671142e21554e4709521fddb51">Calculating the relative errors of eigenvalues</a></li>
+		</ul>
+		<a name="solution">
+		<h3>Finding equations solution</h3>
+		<ul>
+			<li>Singular value decomposition</li>
+			<ul>
+				<li>Calculating singular values</li>
+				<ul>
+					<li><a href="svd_8cpp.html#e4cc09ab9f816fc371017f61a50eefac">Alone</a></li>
+					<li><a href="svdrank_8cpp.html#68df2fc67b9bf10bb9ef079230fe23d3">Together with matrix rank</a></li>
+					<li>Together with generalized inverse matrix</li>
+					<ul>
+						<li><a href="g__inverse_8cpp.html#e4ef8af7e7acdcd9f071460e0569d63d">version 1</a></li>
+						<li><a href="invert_8cpp.html#14300a28536489d2d29e609f5176d970">version 2</a></li>
+					</ul> 
+				</ul>
+				<li><a href="svdsort_8cpp.html#12f83de2c8c11c875eafc3d4fef3e492">Sorting singular values</a></li>
+			</ul>
+			<li><a href="lnsrch_8cpp.html#748b23953390802421b9a0b2352fdab2">Line search</a></li>
+			<li><a href="cblnsrch_8cpp.html#21ed6b1d5c1f2093cf686a99a206370c">Cubic line search</a></li>
+		</ul>
+	</p>
+
+    <br><br>
+    <a name="manipulate"> 
+	<h2>Data Manipulation</h2>
+	<p>
+		<a name="matrix">
+		<h3>Simple matrix manipulation</h3>
+		<ul>
+			<li><a href="_lin_alg_8h.html#aa164073a51840262b1be68a17f91a73">Matrix transposition</a></li>
+			<li><a href="_lin_alg_8h.html#9b1705b71b00806be6951614c700abf0">Creating matrix with input vector as diagonal</a></li>
+		</ul>    
+		<a name="opt">
+		<h3>Optimization</h3>
+		<ul>
+			<li>For one dimension</li>
+			<ul>
+				<li><a href="lnsrch_8cpp.html#748b23953390802421b9a0b2352fdab2">Minimization with line search</a></li>
+				<li><a href="cblnsrch_8cpp.html#21ed6b1d5c1f2093cf686a99a206370c">Minimization with cubic line search</a></li>
+				<li><a href="linmin_8cpp.html#7959fc36ce2808dc7b76979487573903">Minimization with linmin</a></li>
+				<li><a href="dlinmin_8cpp.html#c15fd36ef4cc844c02d1737b0fc830fd">Minimization with linmin using derivative information</a></li>
+			</ul>
+		</ul>
+		<a name="transform">
+		<h3>Discrete Fourier transformation</h3>
+		<ul>
+			<li><a href="fft_8cpp.html#0afbb89eb11a9e8810d6e613a00eaf9b">Fast Fourier transformation</a></li>
+		</ul>
+	</p>
+
+
+	<br><br>
+	<a name="vecmat">
+	<h2>Vectors and Matrices</h2>
+	<p>
+		The LinAlg module uses the class Array&lt;double&gt; to
+		represent both vectors and matrices. For convenience,
+		in particular for using overloaded operators, specialized
+		sub-classes
+		<ul>
+			<li>Vector</li>
+			<li>Matrix</li>
+		</ul>
+		are provided.
+	</p>
+
+*/
+
+//
+// The following comment lists all examples.
+//
+/*!
+	\example cblnsrch_test.cpp
+	\example covar_corrcoef_test.cpp
+	\example detsymm_test.cpp
+	\example dlinmin_test.cpp
+	\example eigenerr_test.cpp
+	\example eigensort_test.cpp
+	\example eigensymmJacobi2_test.cpp
+	\example eigensymmJacobi_test.cpp
+	\example eigensymm_test.cpp
+	\example fft_test.cpp
+	\example g_inverse_matrix.cpp
+	\example linalg_simple_test.cpp
+	\example linmin_test.cpp
+	\example lnsrch_test.cpp
+	\example rank_decomp_test.cpp
+	\example rank_test.cpp
+	\example svd_test.cpp
+	\example svdrank_test.cpp
+	\example svdsort_test.cpp
+*/

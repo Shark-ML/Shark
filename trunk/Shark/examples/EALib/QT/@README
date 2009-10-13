@@ -1,0 +1,107 @@
+
+***************************************************************
+***  Shark Direct Search Demonstration and Test Environment ***
+***************************************************************
+
+
+about:
+
+This file provides a minimal documentation for the
+Shark Direct Search Demonstration and Test Environment.
+
+
+intended audience:
+
+If you just want to play around with the graphical direct
+search environment then read section 1. Basic knowledge about
+direct search algorithms (and in particular about evolutionary
+search algorithms) is required.
+If you plan to use the program for experiments either with
+new algorithms or different fitness functions, then proceed
+with section 2.
+
+
+1 - Direct Search Graphical User Interface
+
+After starting the program you face a dialog consisting of a
+button at the top for starting experiments, an initially empty
+list of already finished experiments, and some boxes and buttons
+at the bottom for later evaluation. Start by clicking the
+    "New Experiment ..."
+Button at the top. This will open the experiment configuration
+wizard.
+
+The wizard takes you through the configuration of your experiment
+in seven steps. Hopefully, the wizard is rather self-explanatory.
+If you are unsure about a choice you can try to just move the cursor
+over a label in order to obtain a short explanation. If this does
+not work in your case or turns out not to be helpful then just stick
+to the defaults.
+
+The most complex decisions you have to take are the configuration
+of the fitness (or objective) function modeling the problem at hand
+and the configuration of the search algorithm. Both types of objects
+may take arbitrary parameters. If you do not know the benchmark
+problems and search algorithms just stick to the defaults.
+
+The most interesting possibility is to select views (small widgets)
+to monitor the behavior of the algorithm online. These include
+plotting curves as well as illustrations of the search space.
+One of the most beautiful examples is to choose the single objective
+fitness function "canyon" with the CMA-ES search strategy, running
+for 4000 fitness evaluations at a rate of 4 generations per second
+WITH 3D-VIEW TURNED ON. Have fun!
+
+Tip: You can close any views at any time without stopping the
+experiment. Even an experiment without open views runs until it is
+finished. Finished experiments appear in the central list of the
+main application window.
+
+You can select multiple experiments from the experiment list by
+clicking on them. Then you can use the combo-boxes and the buttons
+at the bottom to compare the results of different experiments. The
+program can output comparison plots over time or compare
+experiments with multiple trials with a Mann-Whitney U-test (also
+known as Wilcoxon rank sum test).
+Right clicking on experiments in the list opens a context menu.
+
+
+2 - Structure of the Code, or: How to add new problems/algorithms?
+
+Because we have a graphical environment there are changes necessary
+at a number of points in order to extend the program. Luckily, only
+two files are involved.
+Let us assume that you want to add a new benchmark problem (i.e.,
+a fitness function) to the collection. Proceed in the following steps:
+
+1). Write code for your fitness function that fulfills the interface
+    ObjectiveFunctionVS<double> found in Shark/EALib. Examples are
+    found in "[shark]/src/EALib/ObjectiveFunctions.cpp".
+    Add the new class either to Shark library or directly to the
+    "demo.pro" file. The program implicitly assumes that 0.0 is the
+    optimal value of your optimization problem and that this value
+    is attained with zero probability. I.e., make sure that the
+    logarithm of your fitness values is well defined.
+    Note that in this version the visualiation of the fitness
+    landscape is restricted to the square [-2,2] x [-2,2] of
+    two-dimensional search spaces. You may which to transform your
+    problem accordingly.
+2). Open "Experiment.cpp"
+3). Extend the data structure problemSooDef for a single objective
+    problem or problemMooDef for a multi objective problem. A short
+    introduction to the syntax is given in "config.h". This step
+    will add new options to the wizard page where you select the
+    fitness function.
+4). Open "Optimization.cpp"
+5). Extend the function EncapsulatedProblem::Init() such that it
+    constructs an object of your fitness function written in 1).
+    From the other examples you find there it should be quite
+    obvious how to extract the properties defined in 3).
+6). Test extensively :)
+
+Adding a search algorithm is analogous. The main difference is that
+you should add some code to EncapsulatedSearchAlgorithm::getObservation
+in "Optimization.cpp". This code should provide current values of
+named properties like "fitness" or "population" in a standard manner
+to enable the application to monitor and record their values for
+display and analysis.
