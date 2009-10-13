@@ -1,0 +1,105 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>Defining an Own Class of Parameters</h1>
+
+<p>
+	Sometimes it is more convenient to gather all parameters in
+	a class, which can, for example, be passed as an argument to functions.
+</p>
+
+<p>
+	For our three variables <tt>n</tt>, <tt>d</tt>, and <tt>f</tt>,
+	with default values 4, 3.14, and 3.14, this may look like this:
+</p>
+
+<pre><div class="code">#include &lt;FileUtil/Params.h&gt;
+
+class MyParams : public Params
+{
+public:
+        MyParams(int argc, char **argv) : Params(argc, argv)
+        {
+                setDefault();
+                scanFrom(confFile);
+        }
+
+        void io(std::istream&amp; is, std::ostream&amp; os, FileUtil::iotype type)
+        {
+                FileUtil::io_strict(is, os, "n" , n     , 4u     , type);
+                FileUtil::io_strict(is, os, "d" , d     , 3.14   , type);
+                FileUtil::io_strict(is, os, "f" , f     , 3.14   , type);
+        }
+
+        // Method to show the current content of the class variable:
+        void monitor(std::ostream &amp;os) const
+        {
+                os &lt;&lt; "n\t" &lt;&lt; n &lt;&lt; "\t(the n)\n"
+                   &lt;&lt; "d\t" &lt;&lt; d &lt;&lt; "\t(the d)\n"
+                   &lt;&lt; "f\t" &lt;&lt; f &lt;&lt; "\t(the f)\n" &lt;&lt; std::endl;
+        }
+
+        friend std::ostream&amp; operator &lt;&lt;(std::ostream &amp;os, const MyParams &amp;obj);
+
+        unsigned n;
+        double   d;
+        double   f;
+};
+
+int main(int argc, char **argv)
+{
+        MyParams p(argc, argv);
+        ...
+}</div></pre>
+
+<p>
+	To stream the content of the parameter class to an output
+	(e.g., for monitoring or saving the current parameter configuration),
+	we define an operator:
+</p>
+<pre><div class="code">std::ostream&amp; operator &lt;&lt;(std::ostream &amp;os, const MyParams &amp;obj)
+{
+        obj.monitor(os);
+        return os;
+}
+</div></pre>
+<p>Now we can add</p>
+<pre><div class="code">        std::cout &lt;&lt; p &lt;&lt; std::endl;
+</div></pre>
+<p>
+	to our main function.
+	Calling the program, say it is named &quot;FileUtilClass&quot;,
+	without passing a configuration file results in the following output
+</p>
+<div class="shell">&gt; ./FileUtilClass 
+n	4	(the n)
+d	3.14	(the d)
+f	3.14	(the f)
+</div>
+<p>
+	while specifying the parameter file shown previously
+	by using the &quot;-conf&quot; option gives:
+</p>
+<div class="shell">&gt; ./FileUtilClass -conf parameters.conf 
+n	11	(the n)
+d	42.42	(the d)
+f	3.14	(the f)
+</div>
+<p>
+	Note that the option &quot;-conf&quot; is required. This works
+	fine with other command line options:
+</p>
+<div class="shell">&gt; ./FileUtilClass -v -conf parameters.conf 47 11 --fast
+n	11	(the n)
+d	42.42	(the d)
+f	3.14	(the f)
+</div>
+
+</body>
+
+</html>

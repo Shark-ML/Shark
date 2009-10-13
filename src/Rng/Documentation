@@ -1,0 +1,447 @@
+//
+// The following comment defines the Rng main help page.
+//
+/*!
+
+\mainpage
+
+
+    Reference for the <strong>R</strong>andom 
+    <strong>N</strong>umber <strong>G</strong>enerators module.<br>
+    <br>
+    <br>
+
+	<img src="../images/gauss3d.png">
+     <a href="#intro">Introduction</a><br>
+     <a href="#types">Random number generator types</a><br>
+     <a href="#character">Random number generator characteristics</a><br>
+     <a href="#links">Class reference links</a><br>
+
+    <br><br>
+    <a name="intro">
+    <h2>Introduction</h2>
+    <p>
+
+        The class <a href="class_r_n_g.html">RNG</a> supports the use
+				of random numbers draw according to various distributions.  It
+				implements a pseudo random number generator that creates
+				uniformly distributed pseudo random numbers in the interval
+				[0,1). All other distributions then use a so-called "inverse
+				transformation" to transform a random number from this pseudo
+				generator to a random number for the specific
+				distribution. For details about this inverse transformation
+				and the implementation of the pseudo random number generator,
+				please refer to the description of class <a
+				href="class_r_n_g.html">RNG</a>. <p> The class <a
+				href="class_random_var.html">RandomVar</a> defines methods
+				that are implemented by all random number generators.  Each
+				random number generator will provide the parenthesis operator
+				"( )" to return a random number according to the specific distribution
+				of the generator, and each generator will offer the
+				method "p( x )" that returns the occurrence probability for
+				the random number "x" or the value of the probability density
+				function evaluated at "x", respectively. <p> The class <a
+				href="class_random_var.html">RandomVar</a> implements methods
+				that can be used with all types of random number
+				generators.  <p> To simplify the generation of random numbers
+				you can use class <a href="class_rng.html">Rng</a> that
+				subsumes several commonly used random number generator types:
+				You just have to include the header file of this class to have
+				access to various types of random number generators.  </p>
+
+    <br><br>
+    <a name="types">
+    <h2>Random number generator types</h2>
+    <p>
+        <h4>Discrete Random Number Generators:</h4>
+        <ul>
+            <li><a href="class_bernoulli.html">Bernoulli</a></li>
+            <li><a href="class_binomial.html">Binomial</a></li>
+            <li><a href="class_geometric.html">Geometric</a></li>
+            <li><a href="class_diff_geometric.html">DiffGeometric</a></li>
+            <li><a href="class_hyper_geometric.html">HyperGeometric</a></li>
+            <li><a href="class_discrete_uniform.html">DiscreteUniform</a></li>
+            <li><a href="class_poisson.html">Poisson</a></li>
+        </ul>
+        <h4>Continuous Random Number Generators:</h4>
+        <ul>
+            <li><a href="class_cauchy.html">Cauchy</a></li>
+            <li><a href="class_erlang.html">Erlang</a></li>
+            <li><a href="class_log_normal.html">LogNormal</a></li>
+            <li><a href="class_neg_exponential.html">NegExponential</a></li>
+            <li><a href="class_normal.html">Normal</a></li>
+            <li><a href="class_uniform.html">Uniform</a></li>
+            <li><a href="class_weibull.html">Weibull</a></li>
+            <li><a href="class_gamma.html">Gamma</a></li>
+            <li><a href="class_dirichlet.html">Dirichlet</a></li>
+        </ul>
+    </p>
+
+    <br><br>
+    <a name="character">
+    <h2>Random number generator characteristics</h2>
+    <p>
+        <table cellpadding="5" border="1">
+            <tr>
+                <th align="left"> 
+                    Name
+                </th>
+                <th align="left">
+                    (D)iscrete/ <br>
+                    (C)ontinuous
+                </th>
+                <th align="center">
+                    Parameters
+                </th>
+                <th align="center">
+                    Possible <br>
+                    Values
+                </th>
+                <th align="center">
+                    Density <br>
+                    Function
+                </th> 
+                <th align="center">
+                    Expected <br>
+                    Value
+                </th>  
+                <th align="center">
+                    Variance
+                </th> 
+            </tr>
+            <tr>
+                <td>
+                    <a href="class_bernoulli.html">Bernoulli</a>
+                </td>
+                <td>
+                    <strong>D</strong> 
+                </td>
+                <td>
+                    <img src="../images/bern_par.gif">
+                </td>
+                <td>
+                    <img src="../images/bern_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/bern_df.gif">
+                </td>
+                <td>
+                    <img src="../images/bern_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/bern_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_binomial.html">Binomial</a>
+                </td>
+                <td>
+                    <strong>D</strong> 
+                </td>
+                <td>
+                    <img src="../images/bin_par.gif">
+                </td>
+                <td>
+                    <img src="../images/bin_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/bin_df.gif">
+                </td>
+                <td>
+                    <img src="../images/bin_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/bin_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_cauchy.html">Cauchy</a>
+                </td>
+                <td>
+                    <strong>C</strong>
+                </td>
+                <td>
+                    <img src="../images/cau_par.gif">
+                </td>
+                <td>
+                    <img src="../images/cau_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/cau_df.gif">
+                </td>
+                <td>
+                    <img src="../images/cau_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/cau_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_diff_geometric.html">Differential Geometric</a>
+                </td>
+                <td>
+                    <strong>D</strong>  
+                </td>
+                <td>
+                    <img src="../images/diffgeom_par.gif">
+                </td>
+                <td>
+                    <img src="../images/diffgeom_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/diffgeom_df.gif">
+                </td>
+                <td>
+                    <img src="../images/diffgeom_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/diffgeom_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_discrete_uniform.html">Discrete Uniform</a>
+                </td>
+                <td>
+                    <strong>D</strong>  
+                </td>
+                <td>
+                    <img src="../images/discuni_par.gif">
+                </td>
+                <td>
+                    <img src="../images/discuni_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/discuni_df.gif">
+                </td>
+                <td>
+                    <img src="../images/discuni_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/discuni_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_erlang.html">Erlang</a>
+                </td>
+                <td>
+                    <strong>C</strong> 
+                </td>
+                <td>
+                    <img src="../images/erl_par.gif">
+                </td>
+                <td>
+                    <img src="../images/erl_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/erl_df.gif">
+                </td>
+                <td>
+                    <img src="../images/erl_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/erl_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_geometric.html">Geometric</a>
+                </td>
+                <td>
+                    <strong>D</strong>  
+                </td>
+                <td>
+                    <img src="../images/geom_par.gif">
+                </td>
+                <td>
+                    <img src="../images/geom_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/geom_df.gif">
+                </td>
+                <td>
+                    <img src="../images/geom_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/geom_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_hyper_geometric.html">Hyper Geometric</a>
+                </td>
+                <td>
+                    <strong>D</strong>  
+                </td>
+                <td>
+                    <img src="../images/hypgeom_par.gif">
+                </td>
+                <td>
+                    <img src="../images/hypgeom_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/hypgeom_df.gif">
+                </td>
+                <td>
+                    <img src="../images/hypgeom_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/hypgeom_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_log_normal.html">Log Normal</a>
+                </td>
+                <td>
+                    <strong>C</strong>  
+                </td>
+                <td>
+                    <img src="../images/lognorm_par.gif">
+                </td>
+                <td>
+                    <img src="../images/lognorm_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/lognorm_df.gif">
+                </td>
+                <td>
+                    <img src="../images/lognorm_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/lognorm_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_neg_exponential.html">(Negative) Exponential</a>
+                </td>
+                <td>
+                    <strong>C</strong>  
+                </td>
+                <td>
+                    <img src="../images/negexp_par.gif">
+                </td>
+                <td>
+                    <img src="../images/negexp_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/negexp_df.gif">
+                </td>
+                <td>
+                    <img src="../images/negexp_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/negexp_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_normal.html">Normal</a>
+                </td>
+                <td>
+                    <strong>C</strong> 
+                </td>
+                <td>
+                    <img src="../images/norm_par.gif">
+                </td>
+                <td>
+                    <img src="../images/norm_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/norm_df.gif">
+                </td>
+                <td>
+                    <img src="../images/norm_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/norm_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_poisson.html">Poisson</a>
+                </td>
+                <td>
+                    <strong>D</strong>  
+                </td>
+                <td>
+                    <img src="../images/poiss_par.gif">
+                </td>
+                <td>
+                    <img src="../images/poiss_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/poiss_df.gif">
+                </td>
+                <td>
+                    <img src="../images/poiss_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/poiss_var.gif">
+                </td>
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_uniform.html">Uniform</a>
+                </td>
+                <td>
+                    <strong>C</strong>  
+                </td>
+                <td>
+                    <img src="../images/uni_par.gif">
+                </td>
+                <td>
+                    <img src="../images/uni_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/uni_df.gif">
+                </td>
+                <td>
+                    <img src="../images/uni_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/uni_var.gif">
+                </td> 
+            </tr> 
+            <tr>
+                <td>
+                    <a href="class_weibull.html">Weibull</a>
+                </td>
+                <td>
+                    <strong>C</strong>  
+                </td>
+                <td>
+                    <img src="../images/wei_par.gif">
+                </td>
+                <td>
+                    <img src="../images/wei_poss.gif">
+                </td>
+                <td>
+                    <img src="../images/wei_df.gif">
+                </td>
+                <td>
+                    <img src="../images/wei_exp.gif">
+                </td>
+                <td>
+                    <img src="../images/wei_var.gif">
+                </td>
+            </tr>  
+        </table>
+    </p>
+
+*/
+
+//
+// The following comment lists all examples.
+//
+/*!
+
+	\example RngTest.cpp
+	\example RngTest2.cpp
+	\example RngTestSimple.cpp
+*/

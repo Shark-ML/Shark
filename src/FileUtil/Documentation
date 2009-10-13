@@ -1,0 +1,49 @@
+//
+// The following comment defines the FileUtil main help page.
+//
+/*!
+
+\mainpage
+
+<h2>Reference for the FileUtil package</h2>
+
+<p>
+FileUtil provides basic functions for file input/output,
+extending the standard C++ libraries.
+The package provides special support for reading tagged
+values from configuration files.
+</p>
+
+<p>
+The usage of configuration files can significantly improve
+the flexibility of Shark based software. There are two
+different levels of configuration file support, which are
+illustrated by the <a href="examples.html">examples</a>
+provided with the library.
+</p>
+
+<p>
+A very simple and easy to use functionality is provided by
+the methods scanFrom and scanFrom_strict, which search a
+text based configuration file for a tagged value. The
+template based implementation ensures type safety. This
+set of functions is completely sufficient for simple
+configuration settings.
+</p>
+
+<p>
+For more complicated configuration files with lots of
+parameters FileUtil provides the Params class. It serves
+as a base class of an application specific configuration
+class holding all parameters in a single central object.
+</p>
+
+*/
+
+//
+// The following comment lists all examples.
+//
+/*!
+	\example FileUtilClass.cpp
+	\example FileUtilSimple.cpp
+*/

@@ -1,0 +1,149 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>Training and Monitoring the Network</h1>
+
+<p>
+	Now we add an error function, the mean-squared error, and
+	an optimizer, the improved Rprop algorithm.
+	Further, we write the error trajectories on training and
+	validation data set to files.
+</p>
+<pre><div class="code">#include &lt;ReClaM/FFNet.h><div class="newcode">#include &lt;ReClaM/Rprop.h&gt;
+#include &lt;ReClaM/MeanSquaredError.h></div>#include &lt;ReClaM/createConnectionMatrix.h&gt;
+
+class MyNet : public FFNet {
+public:
+  MyNet(unsigned i, unsigned o, const Array&lt;int&gt; c) : FFNet(i, o, c) {};
+  double g(double a) {
+    return tanh(a);
+  }
+  double dg(double ga) {
+    return 1 - ga * ga;
+  }
+  double gOutput(double a) {
+    return a;
+  }double dgOutput(double ga) {
+    return 1.;
+  }
+};
+
+int main()
+{
+  unsigned i, t; // just index variables
+  double x, y;
+
+  // construct sinc problem
+  const unsigned numberTrainingPatterns = 50;
+  Array&lt;double&gt; trainInput (numberTrainingPatterns, 1);
+  Array&lt;double&gt; trainTarget(numberTrainingPatterns, 1);	
+  Array&lt;double&gt; valInput(numberValPatterns, 1);
+  Array&lt;double&gt; valTarget(numberValPatterns, 1);
+  for(i=0; i&lt;numberTrainingPatterns; i++) {
+    x = Rng::uni(-10., 10);
+    y = sin(x)/x + Rng::gauss(0, 0.001);
+    trainInput(i, 0)  = x;
+    trainTarget(i, 0) = y;
+    x = Rng::uni(-10., 10);
+    y = sin(x)/x;
+    valInput(i, 0)  = x;
+    valTarget(i, 0) = y;
+  } 
+
+  // define topology unsigned 
+  unsigned inputs = 1; 
+  unsigned firstHiddenLayer = 3; 
+  unsigned secondHiddenLayer = 2; 
+  unsigned outputs = 1;
+
+  Array&lt;int&gt; con;
+  createConnectionMatrix(con, inputs, 
+                         firstHiddenLayer, secondHiddenLayer, outputs);
+
+  // feed-forward neural network
+  MyNet net(inputs, outputs, con);
+
+<div class="newcode">  
+  // error function
+  MeanSquaredError error;
+  // optimizer
+  IRpropPlus optimizer;
+  optimizer.init(net);
+
+  // initialize the weights uniformly between -0.1 and 0.1
+  net.initWeights(-0.1, 0.1);
+
+  std::ofstream trajectory("trajectory");
+  // training loop
+  unsigned numberOfLearningCycles = 1000;
+  for (t = 1; t &lt;= numberOfLearningCycles; t++) {
+    // train the network
+    optimizer.optimize(net, error, trainInput, trainTarget);
+		
+    // write results
+    trajectory &lt;&lt;  t &lt;&lt; "\t" &lt;&lt; error.error(net, trainInput, trainTarget) 
+               &lt;&lt; "\t" &lt;&lt; error.error(net, valInput, valTarget) &lt;&lt; std::endl;
+  }
+  trajectory.close();
+</div>
+  return EXIT_SUCCESS;
+}
+</div></pre>
+
+<p>
+	Further, we add the following lines to assess the performance of the
+	model and to visualize the training data:
+</p>
+
+<pre><div class="code">  
+  std::ofstream trainData ("trainingData");
+  for(i=0; i&lt;numberTrainingPatterns; i++) 
+    trainData &lt;&lt; trainInput(i, 0) &lt;&lt; &quot; &quot; &lt;&lt; trainTarget(i, 0) &lt;&lt; std::endl;
+
+  Array&lt;double> in(1), out(1);
+  std::ofstream model("model");
+  for(x=-10.; x&lt;=10; x+=.5) {
+    in(0) = x;
+    net.model(in, out); 
+    model &lt;&lt; x &lt;&lt; &quot; &quot; &lt;&lt; out(0) &lt;&lt; std::endl;
+  }
+  model.close();
+</div></pre>
+
+<p>
+	The program generates three data files, containing
+	the evolution of the error on the two data sets, the training data,
+	and the final model evaluated at equidistant test data points. 
+</p>
+<p>
+	For example, if gnuplot is available for visualization, the lines
+</p>
+<div class="shell" style="white-space:normal">  
+gnuplot> plot &quot;trainingData&quot; t &quot;noisy training data&quot;, sin(x)/x<br>
+gnuplot> plot &quot;model&quot; t &quot;neural network&quot;, sin(x)/x<br>
+gnuplot> plot &quot;trajectory&quot; u 1:2 w l t &quot;training&quot;, &quot;trajectory&quot; u 1:3 w l t &quot;validation&quot;
+</div>
+
+<p>will produce plots like this:</p>
+
+<img src="trainingData.png" alt="training data">
+
+<img src="trajectories.png" alt="training process">
+
+<img src="model.png" alt="trained model">
+
+<p>
+	Note that this tutorial does not teach the most difficult parts of
+	neural network training, namely model selection and how to regularized
+	the training process.  However, it is straight-forward to modify the
+	code above to do some kind of cross-validation (early-stopping).
+</p>
+
+</body>
+
+</html>

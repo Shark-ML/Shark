@@ -1,0 +1,83 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>Compilation of an Example Program</h1>
+<p>
+	This tutorial will explain how to compile the
+	example programs which come with the Shark library.
+</p>
+
+<h2>Prerequisites</h2>
+<p>
+	It is assumed that the Shark library is properly installed
+	on your system. For help on this topic you can consult the
+	<a href="../InstallWin/index.html" target="_parent">Installation Tutorial</a>.
+</p>
+
+<h2>Organization of Shark Examples</h2>
+<p>
+	All example programs are located in the &quot;examples&quot;
+	directory under the Shark root directory (which is where you
+	extracted the library). This directory contains one
+	sub-directory for each Shark module. For example, let us have
+	a look at the LinAlg examples:
+</p>
+
+<center><img src="explorer.png" style="margin:8px; border-width:1px; border-color:#666666; border-style:solid;"></center>
+
+<h2>The Example Program</h2>
+<p>
+	Each *.cpp file in this folder is a separate example program.
+	That is, there are 19 examples demonstrating the usage of the
+	LinAlg module. The <tt>g_inverse_matrix</tt> example computes
+	the (generalized) inverse of a 3x3-matrix, see g_inverse_matrix.cpp:
+</p>
+
+<pre><div class="code">#include &lt;iostream&gt;
+#include &lt;Array/ArrayIo.h&gt;
+#include &lt;LinAlg/LinAlg.h&gt;
+
+using namespace std;
+
+// Values used for initialization of input matrix:
+double values[9] = {
+                       1.0, 2.0, -1.0,
+                       2.0, 5.0, -1.0,
+                       1.0, 2.0,  0.0
+                   };
+
+int main()
+{
+    unsigned          i, j;      // Counter variables
+    Array&lt; double &gt; A(3, 3),   // Input matrix
+    B(3, 3);   // Generalized inverse matrix
+
+    // Initialize matrices:
+    for (i = 0; i &lt; 3; i++) {
+        for (j = 0; j &lt; 3; j++) {
+            A(i, j) = values[ i * 3 + j ];
+        }
+    }
+    B = .0;
+
+    // Output of input matrix:
+    cout &lt;&lt; "input matrix:" &lt;&lt; endl;
+    writeArray(A, cout);
+
+    // Calculate generalized inverse matrix:
+    g_inverse(A, B);
+
+    // Output of generalized inverse matrix:
+    cout &lt;&lt; "generalized inverse matrix:" &lt;&lt; endl;
+    writeArray(B, cout);
+}
+</div></pre>
+
+</body>
+
+</html>

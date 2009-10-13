@@ -1,0 +1,137 @@
+//
+// The following comment defines the MOO-EALib main help page.
+//
+/*!
+
+\mainpage
+
+Reference for the <b>M</b>ulti <b>O</b>bjective<b>O</b>ptimization <b>E</b>volutionary <b>A</b>lgorithms library.<br>
+
+<h2>Introduction</h2> 
+
+
+<p> 
+
+  Many real-world optimization problems have more than one
+  objective and require multi objective optimization (MOO), also known
+  as vector optimization. In "real" MOO one tries to approximate the
+  set of Pareto-optimal trade-offs, that is, those solutions that
+  cannot be improved in any objective without getting worse in at
+  least one other objective.  That is, we are interested in the set of
+  non-dominated solutions. Considering an MOO with m objectives, a
+  solution x dominates  a solution y, if x is at least
+  as good as y in any objective and is strictly better than y in at
+  least one objective (refer to the figure on the right).  The
+  following figure illustrates the situation in objective space for a
+  minimization problem. The green points correspond to non-dominated
+  solutions and make up the so-called Pareto front. The red point
+  corresponds to a solution that is dominated by at least one of the
+  solutions corresponding to the Pareto-front. Now, a major difference
+  between single- and multi-objective optimization becomes obvious:
+  the set of solutions consists of more than one point in the latter
+  case.
+</p>
+<div style="text-align:center" align="center">
+	<img src="../images/ExampleParetoFront.png" alt="ExampleParetoFront.png">
+</div>
+<p>
+	As an example, we consider the development of an industrial product.
+	We want to decrease the cost and the size of the product.  Often these objectives are conflicting,
+	thus it is reasonable to ask for the set of trade-offs we can
+	get. This set of trade-offs, which correspond to the Pareto-front
+	(refer to the figure above), can be regarded as the solution of an
+	MOO problem.
+</p>
+<p>
+	MOO-EALib is a library providing basic components to easily build
+	evolutionary algorithms for multi objective optimization. It extends
+	the <a href="../EALib/index.html">EALib</a> which
+	focuses on the evolutionary optimization of single-objective
+	optimization problems (SOO). The library was originally developed
+	by the Honda Research Institute Europe.
+</p>
+
+<h2>Structure</h2>
+<p>
+	In SOO, each individual is evaluated with respect to only one
+	objective, i.e. it is assigned a single scalar fitness value. In
+	MOO, two or more objective function values have to be considered for
+	eachindividual and thus the selection of individuals needs to be
+	adapted.
+</p>
+<p>
+	However, there is no need for changes at the chromosome level.  That
+	is, the search space or genotype space remains the same.  Thus, the
+	MOO-EALib imports all chromosome types used from the EALib.
+</p>
+<p>
+	Technically, individuals have to handle multiple fitness values
+	and populations have to cope with more complicated sorting and
+	selection procedures. In order to take advantage of the structure
+	of EALib, the new classes IndividualMOO and PopulationMOO are
+	derived from the EALib classes <b>Individual</b> and <b>Population</b>,
+	respectively. The following figure gives an overview of the data
+	structure upon which the library is based and its relation to
+	the EALib.
+</p>
+<div style="text-align:center" align="center">
+	<img src="../images/Figure016.png" alt="Figure016.png">
+</div>
+
+<h2>Algorithms</h2>
+<p>
+	Multiple multi-objective evolutionary algorithms have been
+	implemented in Shark, most of them relying on the concept of
+	indicator-based selection operators. First of all, they provide
+	users and developers with a simple and quick entry to MOO.
+	Secondly, they serve as an example on how to assemble quite
+	complex optimization procedures from the basic building blocks
+	provided by the MOO-EALib and Shark in general.
+</p>
+<p>
+	The following performance indicators needed to evaluate candidate
+	solutions in the objective space have been implemented in Shark:
+	<ul>
+		<li>Crowding Distance: originally suggested as second level sorting criterion in the NSGA-II</li>
+		<li>Epsilon Measure: performs quite good and is not that complex computationally-wise.</li>
+		<li>Hypervolume Measure: perhaps the best indicator from a theoretical point of view, although it takes exponential time for the computation</li>
+	</ul>
+	Finally, we list the algorithms that are available in Shark:
+	<ul>
+		<li>MO-CMA-ES - Multi-Objective Covariance Matrix Adaption Evolution Strategy (see <code>examples/fonSteadyStateMO-CMA.cpp</code>)</li>
+		<li>NSGAII - Non-Dominated Sorting Genetic Algorithm II (see <code>examples/NSGA2.cpp</code>)</li>
+		<li>PAES - Pareto Archived Evolution Strategy (see <code>examples/PAES.cpp</code>)</li>
+		<li>SPEA2 - Strength Pareto Evolutionary Algorithm 2 (see <code>examples/SPEA2.cpp</code>)</li>
+		<li>MOGA - Multi-Objective Optimization GA (see <code>examples/MOGA.cpp</code>)</li>
+		<li>DWA - Dynamic Weighted Aggregation (see <code>examples/DWA.cpp</code>)</li>
+	</ul>
+</p>
+
+<p>
+	To get a quick overview refer to the
+	<a href="annotated.html">class</a> or <a href="files.html">file</a>
+	list or have a look at the <a href="examples.html">examples</a>.
+</p>
+
+*/
+
+//
+// The following comment lists all examples.
+//
+/*!
+	\example DWA-SCAT.cpp
+	\example DWA.cpp
+	\example MOGA-SCAT.cpp
+	\example MOGA.cpp
+	\example NSGA2-SCAT.cpp
+	\example NSGA2.cpp
+	\example NSGA2example.cpp
+	\example PAES-SCAT.cpp
+	\example PAES.cpp
+	\example VEGA-SCAT.cpp
+	\example VEGA.cpp
+	\example fonMO-CMA.cpp
+	\example fonSteadyStateMO-CMA.cpp
+	\example realcoded-NSGA2.cpp
+	\example HypervolumeBenchmark.cpp
+*/

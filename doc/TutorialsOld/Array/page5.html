@@ -1,0 +1,81 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1><i>n</i>-dimensional Arrays</h1>
+
+<p>
+	In the following example we instantiate an Array whose entries are
+	double values and resize it to be a real matrix of
+	order <i>2</i>-by-<i>3</i>. The matrix entries are 0 by default.
+	A single element is set to 1, and the matrix and its traspose are 
+	written to the output.
+</p>
+
+<pre><div class="code">#include &lt;Array/ArrayIo.h&gt;
+
+int main(int argc, char** argv)
+{
+    Array&lt;double&gt; m;
+    m.resize(2, 3u);
+    
+    m(1,2) = 1;
+    writeArray(m, std::cout);	
+    writeArray(m.transpose(), std::cout);	
+
+    return EXIT_SUCCESS;
+}
+</div></pre>
+<div class="shell">0       0       0
+0       0       1
+
+0       0
+0       0
+0       1
+</div>
+
+<p>
+	It is important to note that it is necessary to write <tt>m.resize(2,
+	3u)</tt> or <tt>m.resize(2, 3, false)</tt> instead of <tt>m.resize(2,
+	3)</tt>, because the latter could be interpreted as
+	either <tt>m.resize(2, 3u)</tt> or <tt>m.resize(2, true)</tt>.
+</p>
+
+<p>
+	Instead of resizing, one can specify the Array dimensions directly
+	in the constructor as in the next example.
+</p>
+
+<p>
+	Assessing elements and determining the number of elements
+	per dimensions works similar as in the case of one-dimensional
+	Arrays.
+</p>
+
+<pre><div class="code">#include &lt;Array/ArrayIo.h&gt;
+
+int main(int argc, char** argv)
+{
+    Array&lt;double&gt; m(2,3);
+
+    for(unsigned i=0; i&lt;m.dim(0); i++) 
+      for(unsigned j=0; j&lt;m.dim(1); j++) 
+        m(i,j)=(i+j*m.dim(0))/10.;
+
+    writeArray(m, std::cout);
+
+    return EXIT_SUCCESS;
+}
+</div></pre>
+
+<div class="shell">0       0.2     0.4
+0.1     0.3     0.5
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo "Setting read access for all and write access for the group"
+chmod -f -R a+rX *
+chmod -f -R g+w *

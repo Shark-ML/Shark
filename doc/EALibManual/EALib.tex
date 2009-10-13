@@ -1,0 +1,264 @@
+%% ####### PREAMBLE
+%% #
+\documentclass{manual}
+\usepackage{graphicx}
+\usepackage{listing}
+\usepackage{pstricks,psfrag}
+\usepackage{latexsym}
+\usepackage{bbm}
+\usepackage{amsmath}
+
+\raggedbottom
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\pname{EALib}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newenvironment{smalltext}{
+%  \renewcommand{\baselinestretch}{0.8}\scriptsize}{}
+
+\newgray{mygray}{.5}
+\newcommand{\mybox}{\mbox{\mygray\rule{1ex}{1ex}}}
+\newcommand{\mydaggerbox}{\mybox\hspace*{-12pt}\raisebox{-1pt}{\dag}}
+
+\newlength{\hans}
+\newenvironment{methods}{\begin{list}{\mybox}{%
+  \labelwidth1ex 
+  \labelsep2.5ex
+  \leftmargin10pt
+  \addtolength{\leftmargin}{\labelwidth}
+  \addtolength{\leftmargin}{\labelsep}
+  \rightmargin10pt
+  \addtolength{\itemsep}{5pt}
+  \def\parameters{%
+    \hspace*{10pt}\textsl{Parameters}\newline%
+    \hspace*{10pt}\rule[11pt]{\hans}{.3pt}%
+    \vspace*{-9pt}\newline
+  }
+  \def\returnvalues{%
+    \hspace*{10pt}\textsl{Return Values}\newline%
+    \hspace*{10pt}\rule[11pt]{\hans}{.3pt}%
+    \vspace*{-9pt}\newline
+  }
+}}{\end{list}}  
+
+
+\newenvironment{smalltext}{
+  \renewcommand{\baselinestretch}{0.9}\small}{}
+
+\newenvironment{normaltext}{
+  \baselineskip13pt\normalsize}{}
+
+\newenvironment{shortlisting}{
+    \tt
+    \listingwidth=\columnwidth
+    \advance\listingwidth-6em
+    \obeyspaces
+    \obeylines
+    \begin{center}
+    \tabcolsep3em
+    \begin{tabular}{|l|}
+    \hline\makebox[\listingwidth]{}\\
+}{
+    \\\hline
+    \end{tabular}
+    \end{center}
+}
+
+\newenvironment{algorithmbox}{
+    \listingwidth=\columnwidth
+    \advance\listingwidth-16em
+    \begin{center}
+    \tabcolsep8em
+    \begin{tabular}{|l|}
+    \hline\makebox[\listingwidth]{}\\
+}{
+    \\\hline
+    \end{tabular}
+    \end{center}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Ein paar Defines von mir (und wer zur Hoelle ist 'mir'?)
+\def\abs#1{|{#1}|}
+\def\norm#1{\|{#1}\|}
+\def\trans#1{{#1}^{\!\top}}
+\def\trace#1{{\hbox{tr~}}{#1}}
+\def\rank#1{{\hbox{rank~}}({#1})}
+\def\diag#1{{\hbox{diag}}\langle{#1}\rangle}
+\def\minisqrt#1{{#1}^{^1\!/\!_2}}
+\def\negsqrt#1{{#1}^{{\hbox{-}}^1\!/\!_2}}
+\def\smallneg{\hbox{-}}
+
+%%\def\genref#1#2{\mbox{#1\ \ref{#2}}}
+%%\def\figref#1{\genref{Fig.}{#1}}
+%%\def\eqnref#1{\genref{Eqn.}{#1}}
+%%\def\tabref#1{\genref{Tab.}{#1}}
+%%\def\secref#1{\genref{Sec.}{#1}}
+%%\def\chapref#1{\genref{Chap.}{#1}}
+%%\def\algref#1{\genref{Alg.}{#1}}
+%%\def\exref#1{\genref{Ex.}{#1}}
+%%\def\progref#1{\genref{Prog.}{#1}}
+
+\def\genref#1#2{\mbox{#1\ \ref{#2}}}
+\def\figref#1{\genref{Figure}{#1}}
+\def\eqnref#1{\genref{Eqation}{#1}}
+\def\tabref#1{\genref{Table}{#1}}
+\def\secref#1{\genref{Section}{#1}}
+\def\chapref#1{\genref{Chapter}{#1}}
+\def\algref#1{\genref{Algorithm}{#1}}
+\def\exref#1{\genref{Example}{#1}}
+\def\progref#1{\genref{Program}{#1}}
+\def\appref#1{\genref{Appendix}{#1}}
+
+\def\etal{\hbox{\em et al.\/}}
+
+\def\half{$^1\!/\!_2$}
+\def\deg{$^\circ$}
+\def\tim{$\times$}
+
+
+\makeindex
+\makeglossary
+
+\def\myindex#1{#1\index{#1}}
+
+\def\algbox#1#2{
+    \noindent\fbox{
+        \addtolength{\expandafter\columnwidth}{-1.9em}
+        \parbox{\expandafter\columnwidth}{
+            \begin{list}{}{\topsep1ex\parskip1ex\leftmargin#1}\item[]
+                #2
+            \end{list}
+        }
+        \addtolength{\columnwidth}{1.9em}
+    }
+}
+
+
+\newenvironment{refcard}[4]{
+    \def\refcmd{#1}
+    \newpage
+    \index{\refcmd@\sf\refcmd\rm|(}
+    \noindent {\LARGE\bf\refcmd} \hfill
+    {\bf #2} \\[0.7ex]
+    \noindent #3 \hfill (#4) \\
+    \rule[0.5ex]{\columnwidth}{0.5ex}
+
+    \bigskip
+
+    \begin{list}{}{\itemsep0em \leftmargin2em}\item[]
+}{
+    \end{list}
+    \index{\refcmd@\sf\refcmd\rm|)}
+    \clearpage
+}
+
+\def\heading#1#2{
+    \hspace*{-2em}{\bf #1}\\[0.2em]
+    {#2}
+
+    \bigskip
+}
+
+
+%% ####### Macros
+%% #
+\newcommand{\hone}{\hspace*{1cm}}
+\newcommand{\htwo}{\hspace*{2cm}}
+
+\newcommand{\cpp}{%
+  \mbox{\emph{\textrm{C\hspace{-1.5pt}\raisebox{1.75pt}{\scriptsize +}%
+  \hspace{-2pt}\raisebox{.75pt}{\scriptsize +}}}}%
+}
+
+%% #
+%% ####### end of Macro section
+
+
+%% With the following line we declare all graphic extensions which
+%% shall be automatically recognised by the graphicx package. Thus
+%% the extensions .ps and .ps.gz may be omitted in any
+%% /includegraphics... command. If a graphic shall be compressed via gzip
+%% use the `gzipeps' tool to zip the .ps file and have the bounding box 
+%% dimensions automatically extracted and stored in a corresponding
+%% .ps.bb file.
+\DeclareGraphicsExtensions{.eps,.ps,.ps.gz}
+\graphicspath{{./Figures/}{../Pagode/doc/Figures/}{../SpreadCAT/doc}}
+
+%% ####### Begin the document
+%% #
+\begin{document}
+
+\author{Copyright \copyright\ 1996--2008 Martin Kreutz, Bernhard
+  Sendhoff and Christian Igel\\[1em]
+Institut f\"ur Neuroinformatik, Ruhr-Universit\"at Bochum\\[2em]
+\normalsize\tt
+http://www.neuroinformatik.ruhr-uni-bochum.de/ini/PEOPLE/kreutz/top.html\\
+\normalsize\tt
+Martin.Kreutz@neuroinformatik.ruhr-uni-bochum.de
+}
+\date{\today}
+\title{{\pname}: A C++ class library for evolutionary algorithms}
+%\version{1.5}
+\miniabstract{The {\pname} 
+C++ library is part of the Shark library. It contains classes
+for the implementation of evolutionary algorithms and related techniques.
+The library also includes example programs, which can be used as templates
+for own programs to do evolutionary optimization.
+The whole package is intended to be used in evolutionary algorithms research.
+Therefore, the main emphasis has been put on providing as much flexibility
+and extendability as possible.
+Efficiency has been another major design issue, but has been sacrificed
+where it conflicts with flexibility.
+This documentation gives a short overview of how evolutionary algorithms
+work, the most important operators, the programming interface, and 
+examples illustrating the usage of the {\pname} classes.
+}
+
+\maketitle
+
+\setcounter{page}{1}
+
+\tableofcontents
+
+%% ######################################################################
+        \chapter{Evolutionary Algorithms -- Class Library}
+        \label{evoalg:s:evolutionaryAlgorithmsClassLibrary}
+%% ######################################################################
+        \input evoalg
+        \input datastruct
+
+        \section{Genetic Operators}
+        \input selection
+        \input replacement
+        \input recombination
+        \input mutation
+        \input esAdap
+
+%% force pagebreak
+        \newpage
+        \input examples
+
+%%%%%%% The Appendix
+%
+
+
+
+\cleardoublepage
+\addcontentsline{toc}{chapter}{\bibname}
+\bibliographystyle{abbrv}
+\bibliography{manual,proceedings}
+
+%\cleardoublepage
+%\addcontentsline{toc}{chapter}{Glossary}
+%\printglossary
+
+\cleardoublepage
+\addcontentsline{toc}{chapter}{\indexname}
+\printindex
+
+\end{document}
+%% #
+%% ####### end the document

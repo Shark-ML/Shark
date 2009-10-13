@@ -1,0 +1,63 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>Defining the Learning Problem</h1>
+
+<p>
+	This tutorial serves as a primer for using the Shark implementation of 
+	feed-forward multi-layer perceptron neural networks. The whole functionality
+	can be discovered in the ReClaM documentation. It is recommended to read the
+	mini-tutorials on how to compile a program using Shark and on Arrays first.
+</p>
+
+<p>
+	We start with solving the infamous XOR-problem using a standard
+	feed-forward multi-layer perceptron network.
+</p>
+
+<p>
+	First we define the problem by generating the training data.
+	We consider to binary inputs that are to be mapped to one if they
+	have the same value and to zero otherwise.
+	Input patterns and  corresponding target patterns are stored in
+	separate Arrays. 
+</p>
+
+<pre><div class="code">#include &lt;Array/Array.h&gt;
+
+int main()
+{
+  // just index variables
+  unsigned i, j, k, t;
+  Array&lt;double&gt; trainInput(4, 2);
+  Array&lt;double&gt; trainTarget(4, 1);
+
+  // construct xor problem
+  for(k=0, i=0; i<2; i++) {
+    for(j=0; j<2; j++) {
+      trainInput(k, 0) = i;
+      trainInput(k, 1) = j;
+      trainTarget(k, 0) = (i+j) % 2;
+      k++;
+    }
+  }
+
+  return EXIT_SUCCESS;
+}
+</div></pre>
+
+<p>
+	There are four different input patterns.
+	For example, <tt>trainInput(3, 0)</tt> and <tt>trainInput(3, 1)</tt> 
+	correspond to the values of the first and second input variable of the 
+	input pattern (1,1). The corresponding target  <tt>trainTarget(3, 0)</tt> is 0.
+</p>
+
+</body>
+
+</html>

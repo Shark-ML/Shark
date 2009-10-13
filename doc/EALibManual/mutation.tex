@@ -1,0 +1,87 @@
+%
+%%
+%% file: mutation.tex
+%%
+%
+
+% =======================================================================
+        \subsection{Mutation\index{mutation}}
+% =======================================================================
+
+After selection and recombination the reproduced individuals are
+subject to mutation.  The main differences between the mutation
+operators used in GAs and ESs are due to the different representation
+of the genome. In GAs the genome is encoded into symbol strings and
+therefore discrete mutations apply, whereas in ESs floating point
+numbers are used combined with continuous mutations\index{mutation!continuous} (see
+\secref{mutation:subsubs:continuesMutations}).
+
+
+% -----------------------------------------------------------------------
+        \subsubsection{Discrete Mutations\index{mutation!discrete}}
+% -----------------------------------------------------------------------
+
+The standard mutation operator for GAs was first proposed by Holland
+\cite{Holland:75}. Each position of the genome is given a chance $p_m$
+(the mutation rate) of undergoing mutation.  In the case of mutation a
+random value is chosen from the set of allowed symbols for the
+selected allele.  Using binary strings a simpler mechanism can be
+employed.  For each position to be mutated the corresponding bit is
+simply flipped.
+
+
+% .......................................................................
+        \paragraph{Adaptive/Variable Mutation Rates\index{mutation!adaptive}}
+
+Adopting the idea of self-adaptation of the strategy parameters from
+ES, variable mutation rates can be defined.  This has been proposed by
+B\"ack, results can be found in \cite{Baeck:91}.
+
+
+% -----------------------------------------------------------------------
+        \subsubsection{Continuous Mutations\index{mutation!continuous}}
+        \label{mutation:subsubs:continuesMutations}
+% -----------------------------------------------------------------------
+
+ESs rely heavily on the mutation operator, which adds a normally distributed
+random number to each allele.
+The step size of the mutation is controlled by the standard deviation of
+the \myindex{normal distribution}.
+
+
+% .......................................................................
+        \paragraph{Correlated Mutations\index{mutation!correlated}}
+
+In order to allow for more flexible distributions in the mutation
+operator correlations may be considered.  Schwefel \cite{Schwefel:77}
+has proposed a correlated mutation scheme where the correlations were
+implicitly defined by a \myindex{rotation matrix} (see also \cite{Rudolph:92}).
+
+
+% .......................................................................
+%       \paragraph{Self--Adaptation of Mutations\index{mutation!self-adaptati% on}}
+%       
+% One essential part of mutation is the possibility of
+% self-adaptation of the step sizes.  Various adaptation schemes
+% have been proposed. In most cases the mutative adaptation scheme
+% proposed by Schwefel
+% \cite{Schwefel:77} is employed, which works well in the case of large
+% populations. A better \emph{derandomised} adaptation scheme\index{mutation!% derandomised adaptation}
+% has been proposed by Ostermeier
+% \cite{Ostermeier:92,Ostermeier:94} which can cope with rather small
+% populations and allows for a controlled adaptation of the step sizes
+% as well as of the direction of mutations.
+
+
+
+% -----------------------------------------------------------------------
+        \subsubsection{Inversion}
+% -----------------------------------------------------------------------
+
+Holland \cite{Holland:75} describes an inversion operator which works
+on a single chromosome.  It inverts the order of the elements between
+two randomly chosen points on the chromosome.  While inversion was
+inspired by a biological mechanism it has not in general been found to
+be useful in genetic algorithms.  In combination with a transcription
+operator which works on chromosomes that are several times longer,
+inversion proves to be useful in some applications \cite{Wienholt:93}.

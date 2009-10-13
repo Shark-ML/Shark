@@ -1,0 +1,101 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>Minimal Implementation of the (1+1)-CMA-ES</h1>
+
+<p>
+	In the example files coming with Shark and the EALib, you find source
+	code showing the application of the elitist CMA-ES, the non-elitist
+	CMA-ES, and the multi-objective CMA-ES. All these examples strictly
+	use the population, individual, chromosome concept of the EALib.  For
+	the (1+1)-CMA-ES, which is essentially a clever hill-climber with
+	adaptation of the search distribution based on feedback from the
+	optimization process, this may seem to be too much overhead.  However,
+	the modular structure of the EALib allows you to easily implement
+	algorithms using only parts of the library as demonstrated in the
+	remainder of this tutorial.
+</p>
+<p>
+	Without prior assumption about scaling and correlations of object
+	parameters, the only relevant hyperparameter of the (1+1)-CMA-ES is
+	the initial global step size. 
+</p>
+<pre><div class=code>  const double GlobalStepInit = 1.;
+</div></pre>
+<p>
+	Further, we define one parent and one offspring chromosome
+	from the type <tt>ChromosomeCMA</tt>, which is a
+	<tt>ChromosomeT&lt;double></tt> keeping track of an evolution
+	path and parameters of the search distribution, and two variables
+	for storing the fitness values of parent and offspring:
+</p>
+<pre><div class=code>  ChromosomeCMA parent(Dimension), offspring(Dimension);
+  double fitnessParent, fitnessOffspring;
+</div></pre>
+<p>
+	Next, we initialize the parent chromosome in the interval
+	[<tt>MinInit</tt>,<tt>MaxInit</tt>] and compute the fitness
+	of the parent.
+</p>
+<pre><div class=code>  parent.init(Dimension, GlobalStepInit, MinInit, MaxInit);
+  fitnessParent=fitness(parent);
+</div></pre>
+<p>
+	Now come the main evolutionary loop.
+	First the parent generates an offspring by reproduction. Then
+	the offspring is mutated. If the offspring is fitter than the
+	parent (we consider minimization) the offspring replaces the
+	parent.
+</p>
+<pre><div class=code>  ...
+  // loop over generations
+  for (unsigned t = 0; t &lt; Iterations; t++) {
+    offspring = parent;
+    offspring.mutate();
+    fitnessOffspring = fitness(offspring);
+
+    bool success = (fitnessOffspring &lt; fitnessParent);
+
+    if(success) {
+      parent = offspring;
+      fitnessParent = fitnessOffspring;
+    }
+
+    cout << t << " " << fitnessParent << endl;
+  }
+}
+</div></pre>
+<p>
+	Finally, we add the adaptation of the covariance matrix
+	and the global step size:
+</p>
+<pre><div class=code>  ...
+	// loop over generations
+  for (unsigned t = 0; t &lt; Iterations; t++) {
+    offspring = parent;
+    offspring.mutate();
+    fitnessOffspring = fitness(offspring);
+
+    bool success = (fitnessOffspring &lt; fitnessParent);
+
+    if(success) {<div class=newcode>      offspring.updateCovariance();</div>      parent = offspring;
+      fitnessParent = fitnessOffspring;
+    }<div class=newcode>    parent.updateGlobalStepsize(success);</div>
+    cout << t << " " << fitnessParent << endl;
+  }
+}
+</div></pre>
+<p>
+	The global step size is updated according to the (low pass
+	filtered) success rate in every generation. The covariance
+	matrix is only adjusted after a successful mutation.
+</p>
+
+</body>
+
+</html>

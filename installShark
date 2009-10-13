@@ -1,0 +1,4 @@
+#!/bin/sh
+autoconf 2>/dev/null 
+./configure
+make all

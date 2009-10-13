@@ -1,0 +1,21 @@
+MOO-EALib has been developed by Honda R&D Europe (Deutschland) GmbH 
+under the collaboration with Bochum University.
+
+MOO-EALib is released under GPL2. Hopefully, this library helps you a 
+lot. However, we can not compensate any damage caused by this library.
+Please use this library under your risk. 
+
+If you face to some problems or find out some bugs, 
+we would like to correct it as soon as possible.. 
+In that case, please inform Tatsuya Okabe in HONDA.
+
+tatsuya.okabe@honda-ir.de
+
+Several functions are redundant from the point of programming. Thus, 
+I am working for shortening the code. Perhaps, my code is one of 
+the worst example. Your comment is also welcome.
+
+Tatsuya Okabe
+Honda Research Institute Europe GmbH
+Future Technology Research
+

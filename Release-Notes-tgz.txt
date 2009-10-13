@@ -1,0 +1,55 @@
+*******************************
+ Shark-2.2.2.tgz 
+ Release Notes 
+ 2009/04/06, shark-admin
+*******************************
+
+SHARK is a modular package of C++ libraries for the design and optimization of
+adaptive systems. It provides methods for nonlinear optimization, in particular
+evolutionary algorithms, and modeling using neural networks. 
+
+Release 2.2.2 is mainly a bug fix release.
+
+Up to version 2.1.0 Shark was split into a number of packages including
+an obligatory core library package and a number of add-on packages.
+Starting with version 2.1.1 Shark comes to you as a single file
+tgz-distribution
+
+    Shark-2.x.x.tgz
+
+
+
+
+The older packages
+
+    SimAnn-x.x.x.tgz
+     (simulated annealing)
+
+    Metric-x.x.x.tgz
+     (bit vector metrics)
+
+    SpreadCAT-x.x.x.tgz
+     (creating spread sheets)
+
+    selftest-x.x.x.tgz
+     (old selftest framework)
+
+    Pagode-x.x.x.tgz
+     (a package for plotting curves and lists of data)
+
+are not supported any more.
+The graphical examples
+
+    GUI-x.x.x.tgz
+     (Graphical User Interface examples)
+
+are now shipped with the main library package.
+
+
+----------------------------------------------------------
+Hints for the installation of Shark-library
+----------------------------------------------------------
+
+- Create a directory for your Shark core library, e.g., 'Shark-2.2.2'
+- Extract the Shark archive 'Shark-2.2.2.tgz' within this directory
+- Refer then to the file 'INSTALL.txt' or execute the shell script 'installShark'

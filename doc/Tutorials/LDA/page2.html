@@ -1,0 +1,86 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>A 3-Class Problem</h1>
+
+<p>
+	We define a simple data generating distribution which is ideally
+	suited for LDA, because all classes conditional densities are
+	Gaussians with equal covariance matrix and different means.
+</p>
+
+<p>
+	We have to fix two spaces: The input space and the label space.
+	ReClaM's LDA implementation uses a symmetric representation of
+	the class labels. For a problem with three classes the label
+	space is three dimensional and the labels are represented by the
+	unit vectors (1,&nbsp;0,&nbsp;0)<sup>T</sup>,
+	(0,&nbsp;1,&nbsp;0)<sup>T</sup>, and (0,&nbsp;0,&nbsp;1)<sup>T</sup>.
+</p>
+<p>
+	Of course, we can choose to use any input space dimension.  In the
+	following we will consider a two-dimensional setup. We chose the
+	class means (-1,&nbsp;0)<sup>T</sup>, (0,&nbsp;2)<sup>T</sup>, and
+	(1,&nbsp;0)<sup>T</sup>. All classes are equally probable (i.e.,
+	have the same prior).  In ReClaM, such a distribution can be
+	represented as a class fulfilling the <tt>DataSource</tt> interface:
+</p>
+
+<pre><div class="code">#include &lt;Rng/GlobalRng.h&gt;
+#include &lt;ReClaM/Dataset.h&gt;
+
+class MultiClassProblem : public DataSource
+{
+public:
+    MultiClassProblem()
+    {
+        dataDim = 2;
+        targetDim = 3;
+    }
+
+    bool GetData(Array&lt;double&gt;&amp; data, Array&lt;double&gt;&amp; target, int count)
+    {
+        data.resize(count, 2, false);
+        target.resize(count, 3, false);
+        target = 0.0;
+        int i, c;
+        for (i=0; i&lt;count; i++)
+        {
+            c = Rng::discrete(0, 2);
+            data(i, 1) = 0.7 * Rng::gauss();
+            data(i, 0) = 0.7 * Rng::gauss() - 1.0 * data(i, 1);
+            if (c == 0) data(i, 0) -= 1.0;
+            else if (c == 1) data(i, 1) += 2.0;
+            else if (c == 2) data(i, 0) += 1.0;
+            target(i, c) = 1.0;
+        }
+        return true;
+    }
+};
+</div></pre>
+
+<p>
+	We sample 100 training and 1000 test patterns from this distribution.
+</p>
+
+<pre><div class="code">int main(int argc, char** argv)
+{
+    MultiClassProblem problem;
+    Dataset dataset(problem, 100, 1000);
+}
+</div></pre>
+
+<p>
+	The resulting training data could be distributed as follows:
+</p>
+
+<img src="TrainingData.png">
+
+</body>
+
+</html>

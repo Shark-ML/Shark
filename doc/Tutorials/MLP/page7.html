@@ -1,0 +1,101 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>Evaluating the Network</h1>
+
+<p>
+	Training is based on the differentiable  mean-squared error.
+	However, the XOR-problem is a classification task.
+	To assess the classification performance of our network, we simply 
+	instantiate a new error function measuring the classification accuracy
+	and evaluate the network model using this error measure.
+</p>
+<pre><div class="code">#include &lt;Array/Array.h&gt;
+#include &lt;ReClaM/FFNet.h&gt;
+#include &lt;ReClaM/createConnectionMatrix.h&gt;
+#include &lt;ReClaM/CrossEntropy.h&gt;
+#include &lt;ReClaM/Rprop.h&gt;<div class="newcode">#include &lt;ReClaM/ClassificationError.hh&gt;</div>
+int main()
+{
+  // just index variables
+  unsigned i, j, k, t;
+	
+  // construct xor problem
+  Array&lt;double&gt; trainInput(4, 2);
+  Array&lt;double&gt; trainTarget(4, 1);
+  for(k=0, i=0; i&lt;2; i++) {
+    for(j=0; j&lt;2; j++) {
+      trainInput(k, 0) = i;
+      trainInput(k, 1) = j;
+      trainTarget(k, 0) = (i+j) % 2;
+      k++;
+    }
+  }
+  // define topology
+  unsigned inputs = 2;
+  unsigned hidden = 2;
+  unsigned outputs = 1;
+
+  // create connection matrix 
+  Array&lt;int&gt; con;
+  createConnectionMatrix(con, 
+                         inputs, hidden, outputs);
+
+  // feed-forward neural network
+  FFNet net(inputs, outputs, con);
+  // error function
+  CrossEntropy error;<div class="newcode">  ClassificationError accuracy(.5);</div>
+  // optimizer
+  IRpropPlus optimizer;
+  optimizer.init(net);
+
+  // initialize the weights uniformly between -0.1 and 0.1
+  net.initWeights(-0.1, 0.1);
+  // training loop
+  unsigned numberOfLearningCycles = 150;
+  for (t = 1; t &lt;= numberOfLearningCycles; t++) {
+    // train the network
+    optimizer.optimize(net, error, trainInput, trainTarget);
+		
+    // show results
+    std::cout &lt;&lt; t &lt;&lt; "\t" <div class="newcode">              &lt;&lt; acuracy.error(net, trainInput, trainTarget) &lt;&lt; "\t" </div>              &lt;&lt; error.error(net, trainInput, trainTarget) &lt;&lt; std::endl;
+  }
+
+  return EXIT_SUCCESS;
+}
+</div></pre>
+
+<p>
+	The targets are zero and one. The parameter in the constructor of the
+	classification error defines a threshold.  If the real-valued output
+	of the network is above this threshold, the output is interpreted as class
+	"1" and  as class "0" otherwise.
+</p>
+<p>
+	The network model can be applied to input data as every other ReClaM
+	model. For example
+</p>
+<pre><div class="code">  Array<double> out;
+  net.model(trainInput, out);
+  writeArray(out, std::cout);
+  writeArray(trainTarget, std::cout);
+</div></pre>
+<p>will result in an output similar to:</p>
+<div class="shell">0.00221524
+0.967379
+0.977853
+0.0389593
+
+0
+1
+1
+0</div>
+
+</body>
+
+</html>

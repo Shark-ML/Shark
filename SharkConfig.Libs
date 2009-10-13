@@ -1,0 +1,3 @@
+ <libs>
+	<lib path="./Shark/lib" name="Shark"></lib>
+</libs>

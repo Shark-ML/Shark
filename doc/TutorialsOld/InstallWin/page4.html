@@ -1,0 +1,38 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>Prepare Own Programs</h1>
+
+<p>
+	To use Shark in your programs you need to make the header files
+	and the library known to the compiler and linker, respectively.
+	Both settings are done in the project settings dialog.
+	This tutorial provides screenshots of Developer Studio&nbsp;6.0.
+	In Developer Studio&nbsp;.net the same settings may be located
+	in slightly different places in the project settings dialog.
+</p>
+
+<h2>Include Path</h2>
+<p>
+	Open the tab <b>C/C++</b> in the project properties dialog and
+	add <b>[shark-root]\include</b> as an additional include path.
+	<center><img src="IncludePath.png" style="margin:8px;"></center>
+</p>
+
+<h2>Library Path and Name</h2>
+<p>
+	Then switch to the <b>Link</b> tab and add the library name
+	<b>Shark.lib</b> to the list of libraries used.
+	Set <b>[shark-root]\lib\WinNT\Release</b> or
+	<b>[shark-root]\lib\WinNT\Debug</b> as an additional library path.
+	<center><img src="LibPath.png" style="margin:8px;"></center>
+</p>
+
+</body>
+
+</html>

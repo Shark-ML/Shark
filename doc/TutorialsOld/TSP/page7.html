@@ -1,0 +1,106 @@
+
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h2>Generate offspring II</h2>
+
+<p>
+	We use <i>crossover</i> for recombination. Two individuals
+	exchange parts of their parameters (their genome) while
+	taking care that the outcome remains a valid solution.
+	(In genetic algorithms recombination between two parent
+	individuals typically produce two offspring individuals.)
+</p>
+<pre><div class="code">goldbergsCrossoverPMX(
+   offsprings[i][ 0 ], 
+   offsprings[i+1][ 0 ]
+);
+</div></pre>
+
+<p>
+	In order to perform the crossover we first randomly choose
+	the starting and ending index for the crossover (<i>lo_cross</i>
+	and <i>ho_cross</i>):
+</p>
+<pre><div class="code">        SIZE_CHECK( mom.size() == dad.size());
+
+        unsigned                n_city          = mom.size()-1;
+        unsigned                lo_cross        = 0;
+        unsigned                hi_cross        = 0;
+	unsigned		i		= 0;
+
+        while(lo_cross == hi_cross || lo_cross == hi_cross+1) {
+           lo_cross = Rng::discrete(0,n_city-1);
+           hi_cross = Rng::discrete(0,n_city-1);
+        }
+</div></pre>
+
+<p>We create a copy of both individuals (<i>mom</i> and <i>dad</i>)</p>
+<pre><div class="code">        
+    std::vector&lt;unsigned&gt;   mom_vector(n_city);
+        std::vector&lt;unsigned&gt;   dad_vector(n_city);
+        std::vector&lt;unsigned&gt;   new_mom_vector(n_city);
+        std::vector&lt;unsigned&gt;   new_dad_vector(n_city);
+
+        for(i = 0; i&lt;n_city; i++) {
+           mom_vector[i] = mom[i+1];
+           dad_vector[i] = dad[i+1];
+        }
+</div></pre>
+<p>
+	and use these copies to generate the recombined individuals
+	(The function <tt>cross_tour</tt> will be explained in the next part.):
+</p>
+<pre><div class="code">   /* cross tours */ 
+   cross_tour(n_city, lo_cross, hi_cross,  mom_vector, 
+               dad_vector, new_mom_vector, new_dad_vector);
+</div></pre>
+<p>Copy the new parameters to the original parent candidates:</p>
+<pre><div class="code">	for(i = 0 ; i &lt; n_city; i++) {
+           mom[i+1] = new_mom_vector[i];
+           dad[i+1] = new_dad_vector[i];
+	}
+</div></pre>
+
+<p>So the we have the crossover function:</p>
+<pre><div class="code">void goldbergsCrossoverPMX(ChromosomeT &lt; unsigned int &gt; & mom, 
+                           ChromosomeT &lt; unsigned int &gt; & dad) {
+        SIZE_CHECK( mom.size() == dad.size());
+
+   unsigned                n_city          = mom.size()-1;
+   unsigned                lo_cross        = 0;
+   unsigned                hi_cross        = 0;
+   unsigned	           i		   = 0;
+
+    while(lo_cross == hi_cross || lo_cross == hi_cross+1) {
+        lo_cross = Rng::discrete(0,n_city-1);
+            hi_cross = Rng::discrete(0,n_city-1);
+    }
+
+    std::vector&lt;unsigned&gt;   mom_vector(n_city);
+    std::vector&lt;unsigned&gt;   dad_vector(n_city);
+    std::vector&lt;unsigned&gt;   new_mom_vector(n_city);
+    std::vector&lt;unsigned&gt;   new_dad_vector(n_city);
+
+    for(i = 0; i &lt; n_city; i++) {
+       mom_vector[i] = mom[i+1];
+       dad_vector[i] = dad[i+1];
+    }
+
+    /* cross tours */
+
+    for(i = 0 ; i &lt; n_city; i++) {
+        mom[i+1] = new_mom_vector[i];
+        dad[i+1] = new_dad_vector[i];
+    }
+}
+</div></pre>
+
+</body>
+
+</html>

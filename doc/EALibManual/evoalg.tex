@@ -1,0 +1,146 @@
+%
+%%
+%% file: evoalg.tex
+%%
+%
+%% ######################################################################
+\section{Introduction}
+%% ######################################################################
+
+Evolutionary Algorithms\index{evolutionary algorithms} (EA) are
+direct, probabilistic search and optimization algorithms.  They are
+inspired by principles of neo-Darwinean evolution theory.  In
+particular, they usually maintain a \emph{\myindex{population}} of
+candidate solutions (i.e, points in the search space).  The main
+variation operators are \emph{\myindex{mutation}} and
+\emph{\myindex{recombination}}.  During one search cycle, or
+\emph{\myindex{generation}}, the members of the population are ranked
+according to their associated quality or \emph{\myindex{fitness}}
+which determines the probability of being reproduced in the next
+generation. This process is called (environmental)
+\emph{\myindex{selection}}. The definiton of the fitness is problem
+dependent and represents the goal of optimization.  Another crucial
+point in the successful application of evolutionary algorithms is the
+appropriate choice of the \emph{coding}.  Although the right
+combination of the evolutionary operators and the coding depends on
+the specific problem or at least the problem domain, the basic
+structure of an evolutionary algorithm remains, in principle, the same
+(see \algref{evoalg:algo:outlineEA}).  In order to simplify the
+formulation and implementation of specific EAs we have developed a
+class library which contains a set of data structures and evolutionary
+operators acting upon them.  In the remainder of this chapter, basic
+components of this library are introduced and explained with the help
+of some simple examples.
+
+\begin{algorithm}[htb]
+  \begin{algorithmbox}
+      $t:=0;$ \\
+      $initialize(P(t));$ \\
+      $evaluate(P(t));$ \\
+      {\bf while not} $terminate(P(t))$ {\bf do} \\
+      \hspace*{3em} $P(t+1):=select(P(t));$ \\
+      \hspace*{3em} $recombine(P(t+1));$ \\
+      \hspace*{3em} $mutate(P(t+1));$ \\
+      \hspace*{3em} $evaluate(P(t+1));$ \\
+      \hspace*{3em} $t:=t+1;$ \\
+      {\bf od}\\
+  \end{algorithmbox}
+  \vspace{-15pt}\centerline{\parbox{13cm}{%
+    \caption[Outline of an Evolutionary Algorithm]{%
+    \label{evoalg:algo:outlineEA} Outline of an Evolutionary Algorithm.
+    $P(t)$ denotes the population at generation $t$.}}}
+\end{algorithm}
+
+
+
+%% ######################################################################
+	\section{Mainstream Paradigms}
+	\label{evoalg:s:mainstreamParadigms}
+%% ######################################################################
+
+% =======================================================================
+	\subsection{Genetic Algorithms}
+	\label{evoalg:subs:geneticAlgorithms}
+% =======================================================================
+
+Genetic algorithms\index{genetic algorithms} (GAs) in their classical form were invented
+by John Holland, a computer scientist and psychologist at the
+University of Michigan, in the 1970s to mimic features of natural
+evolution \cite{Holland:75}.  However,  earlier predecessors of
+these type of algorithms were developed by Fraser, a biologist, in the
+late 1950s. He started with the intention to simulate natural
+evolution in order to improve the understanding of evolution from the
+biological point of view rather than having practical applications in
+mind.
+
+The main difference between GAs and other evolutionary paradigms like
+evolution strategy (ES) or evolutionary programming (EP) lies in the
+representation of the \emph{\myindex{genotype}}. GAs operate on
+\myindex{symbol strings} (usually on \myindex{bitstrings}) of a fixed
+length, that is the \emph{\myindex{phenotype}} has to be encoded into
+this string.  For pseudoboolean fitness functions this represention
+needs no special encoding procedure. For general fitness functions,
+however, the coding plays a significant role and has an important
+impact on the applicability or at least on the performance of a GA.
+In the domain of continuous parameter optimization\index{parameter
+  optimisation!continuous}, for example, the bitstring has to be
+decoded to a vector of continuous values.  Two encoding schemes are
+commonly used in this domain, the \myindex{binary code} and the
+\myindex{Gray code}.  For tasks where the size and structure of the
+phenotype is no longer fixed, like in the field of structure
+optimization of neural networks, more complicated encoding schemes
+have to be employed.
+
+
+% =======================================================================
+	\subsection{Evolution Strategies}
+	\label{evoalg:subs:evolutionStrategies}
+% =======================================================================
+
+Evolution Strategies\index{evolution strategy} (ES) were developed in the 1960s at the
+Technical University of Berlin by Bienert, Rechenberg and Schwefel.
+Although GAs and ESs share some basic concepts (adopted from nature)
+they were developed independently from each other.  The first version
+of ES worked with only one parent and one offspring individual and
+therefore did not incorporate the population principle.  An outline of
+this first (1+1)-ES is shown in \algref{evoalg:algo:outlineSimpleES}.
+
+\begin{algorithm}[htb]
+  \begin{algorithmbox}
+      $t:=0;$ \\
+      $initialize(parent);$ \\
+      $evaluate(parent);$ \\
+      {\bf while not} $terminate(t)$ {\bf do} \\
+      \hspace*{3em} $offspring:=mutate(parent);$ \\
+      \hspace*{3em} $evaluate(offspring);$ \\
+      \hspace*{3em} $parent:=best(parent,offspring);$ \\
+      \hspace*{3em} $t:=t+1;$ \\
+      {\bf od}\\
+  \end{algorithmbox}
+  \vspace{-15pt}\centerline{\parbox{13cm}{
+  \caption[Outline of the (1+1)-Evolution Strategy]{
+    \label{evoalg:algo:outlineSimpleES}
+    Outline of the (1+1)-Evolution Strategy\index{evolution strategy!(1+1) strategy}.
+    The offspring individual is created from its parent by applying
+    the mutation operator to the genome of the parent.
+    The resulting individual is evaluated and compared to its parent.
+    The better one of both survives to become the parent of the next generation
+    while the other one is discarded.
+  }}}
+\end{algorithm}
+
+In later versions of ES the population concept were introduced, which
+led to ($\mu$+$\lambda$)-ES and ($\mu$,$\lambda$)-ES (for details see
+\secref{selection:subsubs:deterministicSelection}). First applications
+of ES dealt with hydrodynamical problems like shape optimization of a
+bended pipe, drag minimization of a joint plate, and structure
+optimization of a two-phase flashing nozzle. The first two
+applications dealt with parameter optimization, whereas the latter one
+was a first example of structure optimization.  However, most
+applications of ES come from the domain of continuous parameter
+optimization, in which ES have proven to be very successful.  The
+advantage compared to other evolutionary algorithms like GAs seems to
+abe that the encoding, a vector of floating point numbers combined
+with normally distributed mutation steps (and an adaptation of the
+mutation distribution) is well suited for \myindex{parameter
+  optimisation} problems.

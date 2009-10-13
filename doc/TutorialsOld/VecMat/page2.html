@@ -1,0 +1,118 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>Operations on Vectors and Matrices</h1>
+<p>
+	Until now, vectors and matrices are just arrays with fixed
+	number of dimensions. However, the need for
+	these classes arises from something different, namely from
+	the implementation of standard algebraic operations on these
+	objects.
+</p>
+
+<h2>Vector Access</h2>
+<p>
+	It is regularly convenient to interpret a matrix as composed
+	of (row or column) vectors. Therefore, the Matrix
+	<tt>operator []</tt> is overloaded and returns a Vector
+	(instead or an ArrayReference&lt;double&gt;).
+</p>
+
+<h2>Algebraic Operations</h2>
+<p>
+	The operations addition, subtraction and (matrix) multiplication
+	are defined. It is possible to multiply a matrix with a vector
+	or with another matrix. Scalar multiplication is defined, too,
+	such that all operations of the algebra of matrices can be
+	carried out with the corresponding C++ operators +, -, and *
+	as expected. The compound assignment operators +=, -=, and *=
+	are defined whenever they make sense.
+</p>
+<p>
+	Two special operators remain:
+	The operator * for two vectors computes the standard inner
+	product (scalar product), while the operator % of two vectors
+	computes their outer product, resulting in a matrix.
+</p>
+<p>
+	Furthermore, vectors provide their Euclidean norm or squared
+	norm, or are easily normalizable through the member functions
+	<ul>
+		<li><tt>double Vector::norm()</tt></li>
+		<li><tt>double Vector::norm2()</tt></li>
+		<li><tt>void Vector::normalize()</tt></li>
+	</ul>
+</p>
+
+<h2>An Example</h2>
+<p>
+	Assume we want to compute the value of a quadratic function
+</p>
+<p align="center">
+	<i><b>f(x) = x<sup>T</sup> M x + v<sup>T</sup>x + c</b></i>
+</p>
+<p>
+	with a 3x3-matrix M, a 3-vector v and a constant c. Without the
+	classes Vector and Matrix the code could look like this:
+</p>
+
+<pre><div class="code">    class QuadFunc
+    {
+        Array&lt;double&gt; M;
+        Array&lt;double&gt; v;
+        double c;
+
+    public:
+        QuadFunc()
+        : M(3, 3), v(3)
+        {
+            ... [set entries of M] ...
+            ... [set entries of v] ...
+            ... [set c] ...
+        }
+
+        double eval(const Array&lt;double&gt;&amp; x)
+        {
+            return vecMatVec(x, M, x) + scalarProduct(v, x) + c;
+        }
+    };
+</div></pre>
+
+With the classes Vector and Matrix the example becomes:
+
+<pre><div class="code">    class QuadFunc
+    {
+        Matrix M;
+        Vector v;
+        double c;
+
+    public:
+        QuadFunc()
+        : M(3, 3), v(3)
+        {
+            ... [set entries of M] ...
+            ... [set entries of v] ...
+            ... [set c] ...
+        }
+
+        double eval(const Vector&amp; x)
+        {
+            return x * (M * x) + v * x + c;
+        }
+    };
+</div></pre>
+
+<p>
+	The obvious advantage of the second version is that
+	intuitive C++ operators replace C-style functions, saving
+	the need to remember their names and calling conventions.
+</p>
+
+</body>
+
+</html>

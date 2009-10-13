@@ -1,0 +1,195 @@
+
+<h2>Resources</h2>
+<p>
+<table class="regular" >
+<tr>
+	<td>
+		<a href="pathprefix/tutorials/index.html">
+			<img src="tutorial.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/tutorials/index.html">Tutorials</a></h3>
+	</td>
+</tr>
+<tr>
+	<td>
+		<a href="pathprefix/faq/index.html">
+			<img src="faq.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/faq/index.html">Frequently Asked Questions (FAQ)</a></h3>
+	</td>
+</tr>
+</table>
+</p>
+
+<br>
+
+<h2>Main Library Documentation</h2>
+<p>
+<table class="regular" >
+<tr>
+	<td>
+		<a href="pathprefix/ReClaM/index.html">
+			<img src="ReClaM.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/ReClaM/index.html">ReClaM</a></h3>
+
+		<p>This library serves as a toolbox for Regression and
+			Classification Methods. It provides different
+			models for regression and classification, in particular
+			kernel-based algorithms (e.g., SVMs, Gaussian Processes) and
+			neural networks.  For the adaptation of model parameters, ReClaM
+			offers several gradient-based algorithms.  To achieve high
+			flexibility, ReClaM has a modular structure, in which model,
+			error functional, and optimizer can freely be combined.
+		</p>
+
+	</td>
+</tr>
+<tr>
+	<td>
+		<a href="pathprefix/EALib/index.html">
+			<img src="EALib.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/EALib/index.html">EALib</a></h3>
+		<p>
+			The EALib is a library providing Evolutionary
+			Algorithms (in particular evolution strategies and 
+			genetic algorithms) and related techniques.
+		</p>
+	</td>
+</tr>
+<tr>
+	<td>
+		<a href="pathprefix/MOO-EALib/index.html">
+			<img src="MOO-EALib.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/MOO-EALib/index.html">MOO-EALib</a></h3>
+		<p>
+			The MOO-EALib extends the EALib by providing various evolutionary
+			Multi-Objective Optimization algorithms.
+		</p>
+	</td>
+</tr>
+
+<tr>
+	<td>
+		<a href="pathprefix/Fuzzy/index.html">
+			<img src="MOO-EALib.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/Fuzzy/index.html">Fuzzy</a></h3>
+		<p>
+			The Fuzzy module provides classes and methods for working with fuzzy control.
+			It supports the definition of fuzzy control systems by a custom XML dialect. Additionally, it is able to parse the fuzzy control language (FCL).
+		</p>
+	</td>
+</tr>
+
+</table>
+</p>
+
+<br>
+
+<h2>Tools Documentation</h2>
+<p>
+<table class="regular" >
+<tr>
+	<td>
+		<a href="pathprefix/Mixture/index.html">
+			<img src="Mixture.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/Mixture/index.html">Mixture</a></h3>
+		<p>
+			Library for the representation and optimization
+			of mixture density models. 
+		</p>
+	</td>
+</tr>
+<tr>
+	<td>
+		<a href="pathprefix/Array/index.html">
+			<img src="Array.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/Array/index.html">Array</a></h3>
+		<p>
+			A convenient array/matrix library.
+		</p>
+	</td>
+</tr>
+<tr>
+	<td>
+		<a href="pathprefix/Rng/index.html">
+			<img src="Rng.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/Rng/index.html">Rng</a></h3>
+		<p>
+			A system independent random number generator with support
+			for lots of common discrete and continuous distributions.
+		</p>
+	</td>
+</tr>
+<tr>
+	<td>
+		<a href="pathprefix/LinAlg/index.html">
+			<img src="LinAlg.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/LinAlg/index.html">LinAlg</a></h3>
+		<p>
+			This library provides basic methods from linear algebra for 
+			matrix inversion, SVD, etc.
+		</p>
+	</td>
+</tr>
+<tr>
+	<td>
+		<a href="pathprefix/FileUtil/index.html">
+			<img src="FileUtil.png">
+		</a>
+	</td>
+	<td>
+		<h3><a href="pathprefix/FileUtil/index.html">FileUtil</a></h3>
+		<p>
+			Convenient file input/output and support for configuration files.
+		</p>
+	</td>
+</tr>
+</table>
+</p>
+
+
+<h2>Paper Describing the Library</h2>
+<p>
+<div class=publication>
+Christian Igel, Verena Heidrich-Meisner, and Tobias
+Glasmachers.  <a href="http://jmlr.csail.mit.edu/papers/volume9/igel08a/igel08a.pdf">Shark</a>.
+<em>Journal of Machine Learning Research</em> <vol>9</vol>, pp. 993-996,
+2008 
+
+<pre><div class=code>@Article{shark08,
+  author = {Christian Igel and Tobias Glasmachers and Verena Heidrich-Meisner},
+  title = {Shark},
+  journal = {Journal of Machine Learning Research},
+  year = {2008},
+  volume = {9},
+  pages = {993-996},
+}</div><pre></div></p>
+</p>

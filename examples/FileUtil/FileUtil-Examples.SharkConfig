@@ -1,0 +1,8 @@
+<config name="FileUtil-Examples" basedir="../..">
+	<project name="FileUtilSimple" type="executable" lib="Shark">
+		<source path="examples/FileUtil" name="FileUtilSimple.cpp"></source>
+	</project>
+	<project name="FileUtilClass" type="executable" lib="Shark">
+		<source path="examples/FileUtil" name="FileUtilClass.cpp"></source>
+	</project>
+</config>
