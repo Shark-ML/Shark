@@ -1,7 +1,0 @@
-#!/bin/sh
-
-make -f Makefile-SharkConfig
-./SharkConfig
-make all
-./makedoc
-./makerights
