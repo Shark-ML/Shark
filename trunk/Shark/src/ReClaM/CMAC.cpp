@@ -23,7 +23,7 @@ size_t CMACFunction::getArrayIndexForTiling(size_t indexOfTiling,Array<double> c
 Array<size_t> CMACFunction::getIndizes(Array<double> const& point)const
 {
     Array<size_t> output(m_tilings);
-    output=0.0;
+    output=0;
 
     for(size_t tiling = 0; tiling != m_tilings; ++tiling)
     {

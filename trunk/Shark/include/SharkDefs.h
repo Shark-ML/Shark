@@ -53,6 +53,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+// Disable some warnings
+#pragma warning( disable : 4507 34 )
 
 ////////////////////////////////////////////////////////////
 // 64bit integer type

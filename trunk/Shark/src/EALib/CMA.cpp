@@ -282,7 +282,7 @@ const  Array<double> &CMA::getLambda() const {
 std::ostream & operator<<( std::ostream & stream, const CMA& cma)
 {
     //change precision and save the old precision
-    double precision=stream.precision(21);
+    std::streamsize precision=stream.precision(21);
 
     //writing states
     stream<<cma.n<<" ";
