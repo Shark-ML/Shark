@@ -3,6 +3,7 @@ updated 2001-05-04
         2003-12-10
         2007-04-10
         2008-02-14
+	2010-02-18
 
 Some notes on the compilation and installation of the Shark
 libraries, served chilled. If something goes wrong remember:
@@ -11,88 +12,48 @@ It's not the bite, it's the fight!
 For an overview about all references and manuals attached to this Shark 
 distribution please refer to the file "doc/index.html".
 
-If you have no idea how to install a library from sources
-you will probabily find the Shark installation tutorials at
-    doc/tutorials/Install/index.html        (Unix/Linux/Mac OS)
-    doc/tutorials/InstallWin/index.html     (Windows)
-helpful. They give step-by-step explanations of the commands
-involved with additional helpful comments.
+If you have no idea how to install a library from sources you will
+probabily find the Shark installation tutorials at
+
+doc/tutorials/Install/index.html (Unix/Linux/Mac OS)
+doc/tutorials/InstallWin/index.html (Windows) 
+
+helpful. They give step-by-step explanations of the commands involved
+with additional helpful comments. Additionally, pre-compiled versions
+for Linux (Ubuntu) and Windows (Visual Studio 2008 Express) are available from our homepage:
+
+	 http://shark-project.sourceforge.net
 
 
 Unix/Linux/Mac/compatible:
 --------------------------
 
-####### Compilation
-#
+####### Compilation #######
 
-The Shark library uses the GNU "autoconf" tool to create a top-level
-Makefile. Run "autoconf" in the Shark-directory; this will generate a
-configure-script from the "configure.in" file. For convenience Shark
-comes with a ready-made configure script. So, if you do not have
-autoconf installed you can try to just skip this step.
+The Shark library uses the cmake tool (http://www.cmake.org) to create
+a top-level Makefile. Run "cmake ." in the cmake directory;
 
-Run the configure script, i.e., do something like "./configure". This
-will produce the top-level Makefile from the "Makefile.in" template,
-as well as several other Makefiles hidden in sub-directories.
-
-Run "make libs" to compile the library and "make all" to compile and
-install the library and to compile the examples.
+Run "make" to compile the library and "make test" to run the
+accompanying unit tests of the library.
 
 To sum up, the whole procedure should be as easy as:
 
-> autoconf (if available)
-> ./configure
-> make libs (make all)
-
-or simply say:
-> ./installShark
-This script summarizes the Shark installation as described above.
+> cd cmake
+> cmake .
+> make
 
 Make sure to include Shark in your LD_LIBRARY_PATH environment
 variable or run
+
 > make install
-as a root user to install Shark to a central path.
 
-
-####### Makefile Rules
-#
-
-The top-level Makefile comes with various rules intended to ease
-compilation and installation of the Shark library. Before you even
-consider digging into the details of the Makefile, just try saying
-"make" in the Shark-directory to get a concise list of the
-available commands.
-
-Anyway, for a quick start it should suffice to say "make libs" in
-the Shark-directory.
-
-
+as a root user to install Shark to a central path (/usr/local by default).
 
 Windows:
 --------
 
-There are "*.dsp" files (Visual Studio 6.0 project files) for
-the Shark library and each example program shipped with Shark.
-These project files are accompanied by a set of "*.dsw" (Visual
-Studio 6.0 workspace files). In the Shark-directory there are the
-basic workspace files "Shark_Libs.dsw" and "Shark_All.dsw" which
-contain the projects for all libraries and for the libraries with
-examples, respectively.
-
-1. Shark_All.dsw     Will create the release and debug versions
-                     of all libraries and example programs.
-2. Shark_Libs.dsw    Will create the release and debug versions
-                     of all libraries.
-
-Choose the batch creation when compiling.
-Versions later than 6.0 of the IDE support the automated conversion
-of project and workspace files into more recent formats.
-
-After compilation you will find the directories "lib/WinNT/Release"
-and/or "lib/WinNT/Debug" in the root directory of Shark, containing
-the release and debug versions of the library.
-The directory "win_tmp" will contain all temporary files created by
-the Visual C++ compiler.
-The executable example programs can be found in the "examples"
-directory, located in the sub-directories of the corresponding
-packages.
+On the Microsoft Windows platform, you need to run the cmake (either
+the command-line program or the GUI program) on the directory
+cmake. This procedure generates project files suitable for the
+compiler/IDE that is installed on your system. Thereafter, open the
+project files in your IDE or invoke your build system.

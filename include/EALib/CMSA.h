@@ -108,7 +108,7 @@ protected:
 	Array<double> w;      // weights for weighted recombination
 };
 
-
+/*! \brief Non-elitist CMSA-ES implementing the interface EvolutionaryAlgorithm. */
 class CMSASearch : public EvolutionaryAlgorithm<double*>
 {
 public:

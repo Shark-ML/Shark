@@ -44,10 +44,10 @@
 #include<Rng/GlobalRng.h>
 
 //!
-//! The CMACFunction class represents a simple non-linear function
-//! \f$ f : R^n \rightarrow R\f$
+//! The CMACMap class represents a simple non-linear function
+//! \f$ f : R^n \rightarrow R^m\f$
 //!
-class CMACFunction : public Model
+class CMACMap : public Model
 {
     private:
         /**
@@ -71,6 +71,10 @@ class CMACFunction : public Model
         size_t m_tilings;
 
         /**
+        *number of parameters for each output dimension
+        **/
+        size_t m_parameters;
+        /**
         *calculates the index in the parameter vector for the activated feature in the tiling
         **/
         size_t getArrayIndexForTiling(size_t indexOfTiling,Array<double> const& point)const;
@@ -79,6 +83,51 @@ class CMACFunction : public Model
         *returns an index in the parameter array for each activated feature
         **/
         Array<size_t> getIndizes(Array<double> const& point)const;
+    public:
+        CMACMap();
+        /**
+        *construct the CMAC
+        *
+        *\param inputs number of input dimensions
+        *\param outputs number of output dimensions
+        *\param numberOfTilings number of Tilings to be created
+        *\param numberOfTiles amount of tiles per dimension
+        *\param lower lower bound of input values
+        *\param upper upper bound of input values
+        **/
+        CMACMap(size_t inputs, size_t outputs, size_t numberOfTilings, size_t numberOfTiles, double lower = 0., double upper = 1.);
+        /**
+        *construct the CMAC
+        *
+        *\param inputs number of input dimensions
+        *\param outputs number of output dimensions
+        *\param numberOfTilings number of Tilings to be created
+        *\param numberOfTiles amount of tiles per dimension
+        *\param bounds lower and upper bounts for every input dimension
+        **/
+        CMACMap(size_t inputs, size_t outputs, size_t numberOfTilings, size_t numberOfTiles, Array<double> const& bounds);
+        /**
+        *initialize internal variables
+        *
+        *\param randomTiles if this is true, tilings will have a random offset
+        **/
+        void init(bool randomTiles=false);
+
+        void model(Array<double> const& input, Array<double>& output);
+        void modelDerivative(Array<double> const& input, Array<double>& derivative);
+
+        /**
+        *returns the mapped feature vector
+        **/
+        Array<double> getFeatureVector(Array<double> const& point)const;
+};
+
+//!
+//! The CMACFunction class represents a simple non-linear function
+//! \f$ f : R^n \rightarrow R\f$
+//!
+class CMACFunction : public CMACMap
+{
     public:
         CMACFunction();
         /**
@@ -90,7 +139,7 @@ class CMACFunction : public Model
         *\param lower lower bound of input values
         *\param upper upper bound of input values
         **/
-        CMACFunction(int inputs, size_t numberOfTilings, size_t numberOfTiles, double lower = 0., double upper = 1.);
+        CMACFunction(size_t inputs, size_t numberOfTilings, size_t numberOfTiles, double lower = 0., double upper = 1.);
         /**
         *construct the CMAC
         *
@@ -99,16 +148,7 @@ class CMACFunction : public Model
         *\param numberOfTiles amount of tiles per dimension
         *\param bounds lower and upper bounts for every input dimension
         **/
-        CMACFunction(int inputs, size_t numberOfTilings, size_t numberOfTiles, Array<double> const& bounds);
-        /**
-        *initialize internal variables
-        *
-        *\param randomTiles if this is true, tilings will have a random offset
-        **/
-        void init(bool randomTiles=false);
-
-        void model(Array<double> const& input, Array<double>& output);
-        void modelDerivative(Array<double> const& input, Array<double>& derivative);
+        CMACFunction(size_t inputs, size_t numberOfTilings, size_t numberOfTiles, Array<double> const& bounds);
 };
 #endif
 

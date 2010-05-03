@@ -219,7 +219,7 @@ protected:
 	Array2D<double> transformation;
 };
 
-
+//! \brief Class modeling a multi-class test problem.
 class MultiClassTestProblem : public DataSource
 {
 public:

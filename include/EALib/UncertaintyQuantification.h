@@ -55,8 +55,8 @@
 #include <EALib/Population.h>
 
 
-// just a wrapper, which allows to reevaluate objective functions and
-// which counts the number of evaluations
+//! \brief Wrapper class, which allows to reevaluate objective functions and
+//! which counts the number of evaluations.
 class NoisyFitnessFunction {
 public:
 	NoisyFitnessFunction() { evals = 1; count = 0; }

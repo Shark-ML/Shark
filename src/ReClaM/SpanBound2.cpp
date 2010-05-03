@@ -1,6 +1,6 @@
 //===========================================================================
 /*!
-*  \file SpanBound.cpp
+*  \file SpanBound2.cpp
 *
 *  \brief Compute the SpanBound for the 2-norm SVM
 *
@@ -37,25 +37,25 @@
 //===========================================================================
 
 
-#include <ReClaM/SpanBound.h>
+#include <ReClaM/SpanBound2.h>
 #include <ReClaM/Svm.h>
 
 
-SpanBound::SpanBound(bool verbose)
+SpanBound2::SpanBound2(bool verbose)
 {
 	this->verbose = verbose;
 	maxIter = -1;
 }
 
-SpanBound::~SpanBound()
+SpanBound2::~SpanBound2()
 {
 }
 
 
-double SpanBound::error(Model& model, const Array<double>& input, const Array<double>& target)
+double SpanBound2::error(Model& model, const Array<double>& input, const Array<double>& target)
 {
 	C_SVM* csvm = dynamic_cast<C_SVM*>(&model);
-	if (csvm == NULL) throw SHARKEXCEPTION("[SpanBound::error] model is not a valid C_SVM");
+	if (csvm == NULL) throw SHARKEXCEPTION("[SpanBound2::error] model is not a valid C_SVM");
 
 	bool norm2 = csvm->is2norm();
 	SVM* svm = csvm->getSVM();
@@ -174,7 +174,7 @@ double SpanBound::error(Model& model, const Array<double>& input, const Array<do
 	}
 	else
 	{
-		throw SHARKEXCEPTION("[Spanbound::error] The span bound for the 1-norm-SVM is not implemented yet.");
+		throw SHARKEXCEPTION("[SpanBound2::error] The span bound for the 1-norm-SVM is not implemented yet.");
 	}
 
 	return 0.0;		// dead code

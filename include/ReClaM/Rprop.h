@@ -59,6 +59,7 @@
 
 #include <SharkDefs.h>
 #include <Array/Array.h>
+#include <Array/ArrayOp.h>
 #include <ReClaM/Optimizer.h>
 
 
@@ -322,6 +323,12 @@ public:
 			}
 		}
 		return currentError;
+	}
+
+	//! return the maximal step size component
+	double maxDelta() const
+	{
+		return maxElement(delta);
 	}
 
 protected:
@@ -618,6 +625,12 @@ public:
 			}
 		}
 		return currentError;
+	}
+
+	//! return the maximal step size component
+	double maxDelta() const
+	{
+		return maxElement(delta);
 	}
 
 protected:
@@ -963,6 +976,12 @@ public:
 		return currentError;
 	}
 
+	//! return the maximal step size component
+	double maxDelta() const
+	{
+		return maxElement(delta);
+	}
+
 protected:
 
 	//===========================================================================
@@ -1273,6 +1292,11 @@ public:
 		return currentError;
 	}
 
+	//! return the maximal step size component
+	double maxDelta() const
+	{
+		return maxElement(delta);
+	}
 
 protected:
 

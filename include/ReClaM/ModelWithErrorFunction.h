@@ -2,7 +2,7 @@
 /*!
 *  \file ModelWithErrorFunction.h
 *
-*  \brief Abstarct base class for objects which are both models and error functions.
+*  \brief Abstract base class for objects which are both models and error functions.
 *
 *  \author  Igel
 *  \date    2005
@@ -47,6 +47,7 @@
 
 #include <ReClaM/ErrorFunction.h>
 
+//! \brief Abstract base class for objects which are both models and error functions.
 class ModelWithErrorFunction : public Model, public ErrorFunction {
 };
 

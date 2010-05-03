@@ -124,7 +124,14 @@ public:
 	}
 };
 
-
+//! \brief Evolutionary algorithm template with flexible search space
+//!
+//! The EvolutionaryAlgorithm template class represents an abstract
+//! evolutionary algorithm for search on the space represented by the
+//! template type T. The search is guided by a single- or multi-
+//! objective fitness function, defined on this space. Additionally, the 
+//! number of parent individuals $\mu$ and the number of offspring individuals $\lambda$ are
+//! modelled.
 template <class T>
 class EvolutionaryAlgorithm : public SearchAlgorithm<T>
 {

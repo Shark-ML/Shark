@@ -38,6 +38,8 @@
 
 #include <MOO-EALib/MO-CMA.h>
 
+//! \brief Interprets integers as indices in a population and returns a comparison of
+//! the corresponding individuals based on their rank and share.
 struct IndexComparator {
 	IndexComparator( PopulationMOO & pop ) : m_pop( pop ) {}
 	

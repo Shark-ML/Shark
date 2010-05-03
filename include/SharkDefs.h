@@ -54,7 +54,9 @@
 #include <math.h>
 
 // Disable some warnings
+#ifdef WIN32
 #pragma warning( disable : 4507 34 )
+#endif
 
 ////////////////////////////////////////////////////////////
 // 64bit integer type

@@ -123,7 +123,7 @@ double LOO::error(Model& model, const Array<double>& input, const Array<double>&
 	QpSvmDecomp qp(cm);
 	qp.setMaxIterations(maxIter);
 	qp.Solve(linear, lower, upper, alpha);
-	if (! qp.isOptimal()) return 1e100;
+// 	if (! qp.isOptimal()) return 1e100;
 	iter = qp.iterations();
 	b = ComputeB(qp, lower, upper, alpha);
 
@@ -181,7 +181,7 @@ double LOO::error(Model& model, const Array<double>& input, const Array<double>&
 
 		// compute the solution
 		qp.Solve(linear, lower, upper, loo_alpha);
-		if (! qp.isOptimal()) return 1e100;
+// 		if (! qp.isOptimal()) return 1e100;
 		b = ComputeB(qp, lower, upper, loo_alpha);
 
 		// check for an error
@@ -235,4 +235,3 @@ void LOO::setMaxIterations(SharkInt64 maxiter)
 {
 	this->maxIter = maxiter;
 }
-

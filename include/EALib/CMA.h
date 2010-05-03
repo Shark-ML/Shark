@@ -136,6 +136,9 @@ protected:
 std::ostream & operator<<( std::ostream & stream, const CMA& cma);
 std::istream & operator>>( std::istream & stream, CMA& cma);
 
+//!
+//! \brief Non-elitist CMA-ES implementing the interface EvolutionaryAlgorithm
+//!
 class CMASearch : public EvolutionaryAlgorithm<double*>
 {
 public:

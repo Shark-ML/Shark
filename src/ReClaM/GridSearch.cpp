@@ -137,6 +137,48 @@ void GridSearch::init(int params, const Array<int>& nodes, const Array<double>& 
 	nodeValues = values;
 }
 
+void GridSearch::init(const Model& model, unsigned max_values)
+{
+	if ( max_values < 1 ) throw SHARKEXCEPTION("[GridSearch::init]"
+		"need at least one set of parameters for the grid.");
+	unsigned num_params = model.getParameterDimension();
+	if ( ( !model.isFeasible() ) || ( num_params < 1 ) ) throw SHARKEXCEPTION("[GridSearch::init]"
+		"need a feasible model with at least one parameter.");
+		
+	//size and fill member arrays
+	numberOfValues.resize( num_params, false );
+	nodeValues.resize( num_params, max_values, false );
+	for (unsigned i = 0; i < num_params; i++) {
+		numberOfValues(i) = 1;
+		nodeValues(i, 0) = model.getParameter(i);
+	}
+}
+
+void GridSearch::assignLinearRange(unsigned index, unsigned no_of_points, double min, double max)
+{
+	RANGE_CHECK( (no_of_points >= 1.0) && (no_of_points <= nodeValues.dim(1)) );
+	RANGE_CHECK( min <= max );
+	RANGE_CHECK( index < nodeValues.dim(0) );
+	if ( no_of_points == 1 ) {
+		nodeValues(index, 0) = ( min+max) / 2.0;
+	}
+	else {
+		for (unsigned j = 0; j < no_of_points; j++)
+			nodeValues(index, j) = min + j*( max-min ) / ( no_of_points-1.0 );
+	}
+	numberOfValues(index) = no_of_points;
+}
+
+void GridSearch::assignExponentialRange(unsigned index, double base_factor, double exp_base, int min, int max)
+{
+	RANGE_CHECK( min <= max );
+	RANGE_CHECK( index < nodeValues.dim(0) );
+	for (int j = 0; j <= (max-min); j++)
+		nodeValues(index, j) = base_factor * pow( exp_base, j+min );
+	numberOfValues(index) = max-min+1;
+}
+
+
 double GridSearch::optimize(Model& model, ErrorFunction& errorfunction, const Array<double>& input, const Array<double>& target)
 {
 	int params = numberOfValues.dim(0);

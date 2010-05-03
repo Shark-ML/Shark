@@ -183,7 +183,7 @@ double ZeroOneLoss::error(Model& model, const Array<double>& input, const Array<
 	Array<double> output;
 	model.model(input, output);
 
-	if (target.dim(1) != output.dim(1)) throw SHARKEXCEPTION("[ZeroOneLoss::error] target and output dimension are incompatible.");
+	if (target.dim(1) != output.dim(1)) throw SHARKEXCEPTION("[ZeroOneLoss::error] target and output dimensions are incompatible.");
 
 	unsigned int err = 0;
 	for (i = 0; i < ic; i++)

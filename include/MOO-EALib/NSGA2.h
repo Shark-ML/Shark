@@ -43,7 +43,7 @@
 #include <EALib/SearchAlgorithm.h>
 #include <EALib/ChromosomeCMA.h>
 
-
+//! \brief NSGA-2 algorithm for multi-objective optimization
 class NSGA2Search : public EvolutionaryAlgorithm<double*>
 {
 public:

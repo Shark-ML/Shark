@@ -74,7 +74,11 @@ int main( int argc, char ** argv ) {
 	unsigned int noPoints 	= 40000;
 	unsigned int dimension 	= 3;
 	
+	
 	std::string dataFile( "ran.40000pts.3d.1" );
+	if( argc > 1 )
+		dataFile = argv[1];
+		
 	
 	double * regUp = new double[dimension];
 	std::fill( regUp, regUp + dimension, -MAXDOUBLE );

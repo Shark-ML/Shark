@@ -127,7 +127,7 @@ double UncertaintyQuantification(Population& p, NoisyFitnessFunction& f, double 
 	for (i=0; i<2*l; i++) v[i].rankOld = i+1;
 
 	// compute rank using reevaluated fitness
-	std::sort(v.begin(), v.end(), &rankingObjectLessFitnessNew);
+	std::stable_sort(v.begin(), v.end(), &rankingObjectLessFitnessNew);
 	for (i=0; i<2*l; i++) v[i].rankNew = i+1;
 
 	// compute absoulte rank change, i.e., how many ranks lie strictly

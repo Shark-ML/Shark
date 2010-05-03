@@ -47,6 +47,8 @@
 #include <ReClaM/QuadraticProgram.h>
 #include <Rng/GlobalRng.h>
 
+#include <Array/ArrayIo.h>
+
 class SvmApproximation;
 
 
@@ -103,6 +105,16 @@ public:
 
 	//! Destructor
 	~SVM();
+
+
+	//! Set the output mode to sign or real mode.
+	//! In sign mode (bSignOutput = true), the machine
+	//! predicts the class encoded as a +1 or -1. In
+	//! real number mode, the machine outputs a
+	//! (non-normalized) confidence score, with positive
+	//! values indicating class +1.
+	inline void setSignOutput(bool bSignOutput = true)
+	{ signOutput = bSignOutput; }
 
 	//! \par
 	//! As the SVM can be constructed without training data
@@ -345,22 +357,9 @@ protected:
 //!
 //! \par In constrast to the binary classification or
 //! regression SVM the MultiClassSVM maps inputs not to
-//! the reals but to a vector space. For each class there
-//! exists a prototype label vector in this space. The
-//! classifier predicts the class label whose prototype
-//! vector has the largest inner product to the output
-//! vector. That is, the label prototype most similar to
-//! the output vector is used for prediction.
-//!
-//! \par Due to the fact that the number of classes is
-//! always finite we use the linear kernel on the outputs
-//! without loss of generality. However, there are two
-//! concurrent standard initializations of the label
-//! prototypes: Either the standard basis of \f$ R^n \f$
-//! can be used, or the corners of a symmetric simplex in
-//! \f$ R^{n-1} \f$ centered at the origin, which
-//! coincides with the labels \f$ \pm 1 \in R \f$ of the
-//! binary case.
+//! the reals but to a vector space, using one component
+//! per class. The prediction of the machine is simply
+//! the index of the largest component.
 //!
 //! \par The parameters of this machine are organized
 //! into one decision function per class. Therefore there
@@ -377,19 +376,22 @@ public:
 	//! Constructor
 	//! \param  pKernel             input space kernel
 	//! \param  numberOfClasses     number of classes with indices starting from 0
-	//! \param  bOrthogonalVectors  true: standard basis prototypes; false: simplex prototypes
 	//! \param  bNumberOutput       true: output class index; false: output vector
-	MultiClassSVM(KernelFunction* pKernel, unsigned int numberOfClasses, bool bOrthogonalVectors, bool bNumberOutput = true);
-
-	//! Constructor
-	//! \param  pKernel        input space kernel
-	//! \param  prototypes     label prototype vectors
-	//! \param  bNumberOutput  true: output class index; false: output vector
-	MultiClassSVM(KernelFunction* pKernel, Array<double> prototypes, bool bNumberOutput = true);
+	MultiClassSVM(KernelFunction* pKernel, unsigned int numberOfClasses, bool bNumberOutput = true);
 
 	//! Destructor
 	~MultiClassSVM();
 
+
+	//! Set the output mode to integer or vector mode.
+	//! In number mode (bNumberOutput = true), the machine
+	//! predicts the class encoded as a single number in
+	//! the set \f$ \{0, \dots, c-1\} \f$, where c is the
+	//! number of classes. In vector mode, the machine
+	//! outputs a (non-normalized) vector of confidence
+	//! values, with one real value per class.
+	inline void setNumberOutput(bool bNumberOutput = true)
+	{ numberOutput = bNumberOutput; }
 
 	//! \brief Make the training data known to the SVM.
 	//!
@@ -399,17 +401,15 @@ public:
 	//! relative to these data.
 	//!
 	//! \param  input        training data points
+	//! \param  target       training data labels
 	//! \param  copy         maintain a copy of the input data
-	void SetTrainingData(const Array<double>& input, bool copy = false);
+	void SetTrainingData(const Array<double>& input, const Array<double>& target, bool copy = false);
 
 	//! compute the SVM prediction on data
 	void model(const Array<double>& input, Array<double>& output);
 
 	//! compute the SVM prediction on data
 	unsigned int model(const Array<double>& input);
-
-	//! normalize the class-wise decision functions
-	void Normalize();
 
 	//! return the kernel function object
 	inline KernelFunction* getKernel()
@@ -421,6 +421,12 @@ public:
 	inline const Array<double>& getPoints()
 	{
 		return *x;
+	}
+
+	//! return the training data labels
+	inline const Array<double>& getTargets()
+	{
+		return *y;
 	}
 
 	//! return the coefficient of a given example and label
@@ -444,15 +450,23 @@ public:
 		return classes;
 	}
 
-	//! return the class representing prototype vector
-	//! \param  c  zero-based class index (0, ..., classes-1)
-	inline const ArrayReference<double> getClassPrototype(unsigned int c) const
+	//! return the number of examples
+	inline unsigned int getExamples() const
 	{
-		return prototypes[c];
+		return x->dim(0);
 	}
 
 	//! convert a label vector into a class index
 	unsigned int VectorToClass(const Array<double>& v);
+
+	//!
+	//! \brief Discard zero coefficients and corresponding training data
+	//!
+	//! \par
+	//! If the SVM object onws its training data array,
+	//! it can make itself sparse after training.
+	//!
+	void MakeSparse();
 
 protected:
 	void Predict(const Array<double>& input, Array<double>& output);
@@ -467,6 +481,9 @@ protected:
 	//! training data points
 	const Array<double>* x;
 
+	//! training data labels
+	const Array<double>* y;
+
 	//! true if the SVM outputs the class label only
 	//! false if the SVM outputs the value of the linear feature space function.
 	bool numberOutput;
@@ -476,9 +493,6 @@ protected:
 
 	//! number of classes
 	unsigned int classes;
-
-	//! vectors associated with the classes
-	Array<double> prototypes;
 };
 
 
@@ -582,9 +596,9 @@ protected:
 //! specific complexity parameters \f$ C_+ \f$ and \f$ C_- \f$
 //! instead of a single constant C. These parameters are usually
 //! coupled by the equation \f$ \ell_- C_+ = \ell_+ C_- \f$, where
-//! \f$\ell_{\pm}\f$ are the class magnitudes. Therefore, the C_SVM
+//! $\ell_{\pm}$ are the class magnitudes. Therefore, the C_SVM
 //! model introduces only the \f$ C_+ \f$ parameter as a model
-//! parameter, whereas \f$ C_- = \ell_- / \ell_+ C_+ \f$ can be
+//! parameter, whereas \f$ C_- = \ell_ / \ell_+ C_+ \f$ can be
 //! computed from this parameter. As only the \f$ C_+ \f$ parameter
 //! is subject to optimization, all derivatives have to be computed
 //! w.r.t \f$ C_+ \f$, even if \f$ C_- \f$ is used for the
@@ -618,7 +632,7 @@ public:
 	//! of the SVM parameters w.r.t. the regularization
 	//! and kernel parameters for later reference by
 	//! the modelDerivative function.
-	void PrepareDerivative();
+	const Array<double>& PrepareDerivative();
 
 	//! Computes the derivative of the model w.r.t.
 	//! regularization and kernel parameters.
@@ -647,7 +661,7 @@ public:
 		return norm2penalty;
 	}
 
-	//! return true if the 2-norm slack penalty is in use
+	//! return true if the exponential function is used to parameterize C
 	inline bool isUnconstrained()
 	{
 		return exponential;
@@ -783,8 +797,7 @@ public:
 	void setParameter(unsigned int index, double value);
 
 	//! return regularization parameter \f$ \nu \f$
-	inline double getNu()
-	{
+	inline double getNu(){
 		return nu;
 	}
 
@@ -835,23 +848,59 @@ public:
 //!
 //! \par
 //! Canonical multi class SVM meta model, covering the machines
-//! proposed independently by Weston and Watkins and by Wahba.
+//! proposed independently by Weston and Watkins and by Vapnik.
 //!
 class AllInOneMcSVM : public MetaSVM
 {
 public:
 	//! Constructor
-	AllInOneMcSVM(MultiClassSVM* pSVM, double C);
+	AllInOneMcSVM(MultiClassSVM* pSVM, double C, bool unconstrained = false);
 
 	//! Destructor
 	~AllInOneMcSVM();
 
 
-	inline double get_C() { return parameter(0); }
-	inline void set_C(double C) { setParameter(0, C); }
+	//! get the regularization constant
+	inline double get_C()
+	{
+		if (exponential) return exp(parameter(0));
+		else return parameter(0);
+	}
+
+	//! set the regularization constant
+	inline void set_C(double C)
+	{
+		if (exponential) setParameter(0, log(C));
+		else setParameter(0, C);
+	}
+
+	//! return true if the exponential function is used to parameterize C
+	inline bool isUnconstrained()
+	{
+		return exponential;
+	}
 
 	//! ensure C is positive
 	bool isFeasible();
+
+	//! Prepare the computation of modelDerivative.
+	//! This method computes and stores the derivatives
+	//! of the SVM parameters w.r.t. the regularization
+	//! and kernel parameters for later reference by
+	//! the modelDerivative function.
+	const Array<double>& PrepareDerivative();
+
+	//! Computes the derivative of the model w.r.t.
+	//! regularization and kernel parameters.
+	//! Be sure to call PrepareDerivative after SVM
+	//! training and before calling this function!
+	void modelDerivative(const Array<double>& input, Array<double>& derivative);
+
+protected:
+	//! is C stored as log(C)?
+	bool exponential;
+
+	Array<double> alphaDerivative;
 };
 
 
@@ -1093,10 +1142,10 @@ public:
 		cacheMB = cacheSize;
 	}
 
-	inline bool isOptimal()
+	inline bool isOptimal( )
 	{
-		return optimal;
-	}
+	    return optimal;
+	}	
 
 protected:
 	enum eMode
@@ -1144,7 +1193,7 @@ protected:
 	//! beta parameter of the crammer and singler SVM
 	double beta;
 
-	//! fraction of outliers for One-Class SVM XXX
+	//! Fraction of outliers for One-Class SVM XXX
 	double fractionOfOutliers;
 
 	//! upper bound for all One Class SVM Lagrange multipliers XXX
@@ -1154,7 +1203,8 @@ protected:
 	bool printInfo;
 
 	//! kernel cache size in megabytes used by the quadratic program solver
-	unsigned int cacheMB;
+	//unsigned int cacheMB;
+	double cacheMB;
 
 	//! accuracy up to which the KKT conditions have to be fulfilled
 	double accuracy;
@@ -1165,7 +1215,7 @@ protected:
 	//! maximum time for the #QpSvmDecomp
 	int maxSeconds;
 
-	//! variable that checks if the solver converged
+	//! Variable That checks if the solver converged
 	bool optimal;
 };
 

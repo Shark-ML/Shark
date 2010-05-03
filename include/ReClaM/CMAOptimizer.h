@@ -127,7 +127,15 @@ public:
 	//! evaluations per generation.
 	int getLambda();
 
+	inline double getSigma() const
+	{
+		if ((cmaMode == modeRankMuUpdate) || (cmaMode == modeRankOneUpdate)) return cma.getSigma();
+		else if (cmaMode == modeOnePlusOne) return (*(PopulationCT<ChromosomeCMA>*)parents)[0][0].getSigma();
+		else { throw SHARKEXCEPTION("[CMAOptimizer::getSigma] invalid mode"); return 0.0; }
+	}
+
 protected:
+	//! Inner class that handles NoisyFitnessFunctions as a ReClaM-model.
 	class ModelFitness : public NoisyFitnessFunction
 	{
 	public:
@@ -189,4 +197,3 @@ protected:
 
 
 #endif
-

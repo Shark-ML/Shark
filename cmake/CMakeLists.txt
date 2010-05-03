@@ -1,19 +1,21 @@
 PROJECT( shark )
 
-CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
+CMAKE_MINIMUM_REQUIRED( VERSION 2.4 )
 
-FIND_PACKAGE( OpenMP )
+FIND_PACKAGE( OpenMP QUIET )
+
+ENABLE_TESTING()
 
 SET( CPACK_PACKAGE_NAME "libshark-i386" )
 SET( CPACK_BUNDLE_NAME "libshark" )
 SET( CPACK_PACKAGE_VENDOR "Institut fur Neuroinformatik, Ruhr-Universität Bochum" )
 SET( CPACK_PACKAGE_VERSION_MAJOR 2 )
 SET( CPACK_PACKAGE_VERSION_MINOR 3 )
-SET( CPACK_PACKAGE_VERSION_PATCH 0 )
+SET( CPACK_PACKAGE_VERSION_PATCH 2 )
 SET( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/gpl-2.0.txt )
 
 SET( CPACK_DEBIAN_PACKAGE_NAME libshark-i386 )
-SET( CPACK_DEBIAN_PACKAGE_VERSION 2.3.0 )
+SET( CPACK_DEBIAN_PACKAGE_VERSION 2.3.2 )
 SET( CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386 )
 SET( CPACK_DEBIAN_PACKAGE_DESCRIPTION "SHARK is a modular C++ library for the design and optimization of adaptive systems. It provides methods for linear and nonlinear optimization, in particular evolutionary and gradient-based algorithms, kernel-based learning algorithms and neural networks, and various other machine learning techniques. SHARK serves as a toolbox to support real world applications as well as research in different domains of computational intelligence and machine learning. The sources are compatible with the following platforms: Windows, Solaris, MacOS X, and Linux." )
 # SET( CPACK_DEBIAN_PACKAGE_DEPENDS ... )
@@ -25,12 +27,12 @@ IF( UNIX )
 	SET( SHARK_INSTALL_LIB_DIR lib/shark/ )
 	SET( SHARK_INSTALL_EXAMPLE_DIR share/shark/examples/ )
 	SET( SHARK_INSTALL_DOC_DIR share/shark/doc/ )
-ELSE()
+ELSE( UNIX )
 	SET( SHARK_INSTALL_INCLUDE_DIR include/ )
 	SET( SHARK_INSTALL_LIB_DIR lib/ )
 	SET( SHARK_INSTALL_EXAMPLE_DIR examples/ )
 	SET( SHARK_INSTALL_DOC_DIR doc/ )
-ENDIF()
+ENDIF( UNIX )
 
 INCLUDE( CPack )
 
@@ -286,6 +288,7 @@ SET( RECLAM_HEADERS
 ../include/ReClaM/NormedModels.h
 ../include/ReClaM/Optimizer.h
 ../include/ReClaM/PCA.h
+../include/ReClaM/FisherLDA.h
 ../include/ReClaM/Paraboloid.h
 ../include/ReClaM/Perceptron.h
 ../include/ReClaM/ProbenBNet.h
@@ -298,8 +301,11 @@ SET( RECLAM_HEADERS
 ../include/ReClaM/Rprop.h
 ../include/ReClaM/SigmoidFit.h
 ../include/ReClaM/SigmoidModel.h
-../include/ReClaM/SpanBound.h
+# ../include/ReClaM/SpanBound.h
+../include/ReClaM/Softmax.h
 ../include/ReClaM/SpanBound1.h
+../include/ReClaM/SpanBound2.h
+../include/ReClaM/SpanBoundA.h
 ../include/ReClaM/SquaredError.h
 ../include/ReClaM/SteepestDescent.h
 ../include/ReClaM/StochasticGradientDescent.h
@@ -354,14 +360,18 @@ SET( RECLAM_SRCS
 	../src/ReClaM/NoisySvmLikelihood.cpp
 	../src/ReClaM/Optimizer.cpp
 	../src/ReClaM/PCA.cpp
+	../src/ReClaM/FisherLDA.cpp
 	../src/ReClaM/Perceptron.cpp
 	../src/ReClaM/QuadraticProgram.cpp
 	../src/ReClaM/ROC.cpp
 	../src/ReClaM/RadiusMargin.cpp
 	../src/ReClaM/SigmoidFit.cpp
 	../src/ReClaM/SigmoidModel.cpp
-	../src/ReClaM/SpanBound.cpp
+	../src/ReClaM/Softmax.cpp
+#	../src/ReClaM/SpanBound.cpp
 	../src/ReClaM/SpanBound1.cpp
+	../src/ReClaM/SpanBound2.cpp
+	../src/ReClaM/SpanBoundA.cpp
 	../src/ReClaM/Svm.cpp
 	../src/ReClaM/SvmApproximation.cpp
 	../src/ReClaM/ValidationError.cpp
@@ -554,20 +564,91 @@ SET( PUBLIC_HEADERS
     ${FUZZY_HEADERS}	
 )
 
-
-IF(WIN32)
+IF( WIN32 )
 ADD_LIBRARY( shark ${SRCS} )
 SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_PREFIX ../ )
 SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_POSTFIX _debug )
-ELSE()
+ELSE( WIN32 )
 ADD_LIBRARY( shark SHARED ${SRCS} )
 SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_POSTFIX _debug )
-ENDIF()
+ENDIF( WIN32 )
 
-OPTION( OPT_COMPILE_EXAMPLES "Compile example programs." OFF )
+OPTION( OPT_COMPILE_EXAMPLES "Compile example programs." ON )
 
 IF( OPT_COMPILE_EXAMPLES )
 	ADD_SUBDIRECTORY( ../examples ../examples )
+
+	ADD_TEST( SchwefelEllipsoidCMSA ../examples/EALib/SchwefelEllipsoidCMSA )
+	ADD_TEST( TSP_GA ../examples/EALib/TSP_GA )
+	ADD_TEST( ackleyES ../examples/EALib/ackleyES )
+	ADD_TEST( countingOnes ../examples/EALib/countingOnes )
+	ADD_TEST( integerES ../examples/EALib/integerES )
+	ADD_TEST( paraboloidCMA ../examples/EALib/paraboloidCMA )
+	ADD_TEST( paraboloidElitistCMA ../examples/EALib/paraboloidElitistCMA )
+	ADD_TEST( sphereGA ../examples/EALib/sphereGA )
+	ADD_TEST( steadyState ../examples/EALib/steadyState )
+
+#	ADD_TEST( sugeno ../examples/Fuzzy/sugeno )
+
+ADD_TEST( cblnsrch_test ../examples/LinAlg/cblnsrch_test )
+ADD_TEST( covar_corrcoef_test ../examples/LinAlg/covar_corrcoef_test )
+ADD_TEST( detsymm_test ../examples/LinAlg/detsymm_test )
+ADD_TEST( dlinmin_test ../examples/LinAlg/dlinmin_test )
+ADD_TEST( eigenerr_test ../examples/LinAlg/eigenerr_test )
+ADD_TEST( eigensort_test ../examples/LinAlg/eigensort_test )
+ADD_TEST( eigensymmJacobi2_test ../examples/LinAlg/eigensymmJacobi2_test )
+ADD_TEST( eigensymmJacobi_test ../examples/LinAlg/eigensymmJacobi_test )
+ADD_TEST( eigensymm_test ../examples/LinAlg/eigensymm_test )
+ADD_TEST( fft_test ../examples/LinAlg/fft_test )
+ADD_TEST( g_inverse_matrix ../examples/LinAlg/g_inverse_matrix )
+ADD_TEST( linalg_simple_test ../examples/LinAlg/linalg_simple_test )
+ADD_TEST( linmin_test ../examples/LinAlg/linmin_test )
+ADD_TEST( lnsrch_test ../examples/LinAlg/lnsrch_test )
+ADD_TEST( rank_decomp_test ../examples/LinAlg/rank_decomp_test )
+ADD_TEST( rank_test ../examples/LinAlg/rank_test )
+ADD_TEST( svd_test ../examples/LinAlg/svd_test )
+ADD_TEST( svdrank_test ../examples/LinAlg/svdrank_test )
+ADD_TEST( svdsort_test ../examples/LinAlg/svdsort_test )
+
+ADD_TEST( mg-example ../examples/Mixture/mg-example )
+ADD_TEST( rbfn-example ../examples/Mixture/rbfn-example )
+
+ADD_TEST( HypervolumeBenchmark ../examples/MOO-EALib/HypervolumeBenchmark ../examples/MOO-EALib/ran.40000pts.3d.1 )
+# ADD_TEST( MOGA ../examples/MOO-EALib/MOGA )
+#ADD_TEST( NSGA2 ../examples/MOO-EALib/NSGA2 )
+#ADD_TEST( NSGA2example ../examples/MOO-EALib/NSGA2example )
+# ADD_TEST( PAES ../examples/MOO-EALib/PAES )
+ADD_TEST( RMMEDAtest ../examples/MOO-EALib/RMMEDAtest )
+#ADD_TEST( VEGA ../examples/MOO-EALib/VEGA )
+ADD_TEST( fonMO-CMA ../examples/MOO-EALib/fonMO-CMA )
+ADD_TEST( fonSteadyStateMO-CMA ../examples/MOO-EALib/fonSteadyStateMO-CMA )
+ADD_TEST( realcoded-NSGA2 ../examples/MOO-EALib/realcoded-NSGA2 )
+
+ADD_TEST( CrossValidation ../examples/ReClaM/CrossValidation )
+ADD_TEST( KM ../examples/ReClaM/KM )
+ADD_TEST( KNN ../examples/ReClaM/KNN )
+ADD_TEST( KalmanFilterTest ../examples/ReClaM/KalmanFilterTest )
+ADD_TEST( KernelOptimization ../examples/ReClaM/KernelOptimization )
+ADD_TEST( LinearClassifierTest ../examples/ReClaM/LinearClassifierTest )
+ADD_TEST( LinearRegressionTest ../examples/ReClaM/LinearRegressionTest )
+ADD_TEST( McSvm ../examples/ReClaM/McSvm )
+ADD_TEST( PCAtest ../examples/ReClaM/PCAtest )
+ADD_TEST( SVMclassification ../examples/ReClaM/SVMclassification )
+ADD_TEST( SVMregression ../examples/ReClaM/SVMregression )
+ADD_TEST( SvmApproximationExample ../examples/ReClaM/SvmApproximationExample )
+ADD_TEST( simpleFFNet ../examples/ReClaM/simpleFFNet )
+ADD_TEST( simpleFFNetSource ../examples/ReClaM/simpleFFNetSource )
+ADD_TEST( simpleMSERNNet ../examples/ReClaM/simpleMSERNNet ../examples/ReClaM/timeseries )
+ADD_TEST( simpleRBFNet ../examples/ReClaM/simpleRBFNet )
+ADD_TEST( simpleRNNet ../examples/ReClaM/simpleRNNet )
+
+ADD_TEST( RngTest ../examples/Rng/RngTest )
+ADD_TEST( RngTest2 ../examples/Rng/RngTest2 )
+ADD_TEST( RngTestSimple ../examples/Rng/RngTestSimple )
+
+ADD_TEST( embeddingTest ../examples/TimeSeries/embeddingTest )
+ADD_TEST( lorenz84 ../examples/TimeSeries/lorenz84 )
+
 ENDIF( OPT_COMPILE_EXAMPLES )
 
 OPTION( OPT_COMPILE_DOCUMENTATION "Compile documentation." OFF )

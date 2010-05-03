@@ -491,6 +491,7 @@ typedef int (*avl_compare_t)(const void *, const void *);
  */
 typedef void (*avl_freeitem_t)(void *);
 
+//! \brief Node in an AVL tree.
 typedef struct avl_node_t {
 	struct avl_node_t *next;
 	struct avl_node_t *prev;
@@ -506,6 +507,7 @@ typedef struct avl_node_t {
 #endif
 } avl_node_t;
 
+//! \brief Struct modeling an AVL tree.
 typedef struct avl_tree_t {
 	avl_node_t *head;
 	avl_node_t *tail;
@@ -1181,6 +1183,7 @@ void avl_rebalance(avl_tree_t *avltree, avl_node_t *avlnode) {
 	}
 }
 
+//! \brief For internal use only.
 typedef struct dlnode {
   double *x;                    /* The data vector              */
   struct dlnode **next;         /* Next-node vector             */
@@ -1591,7 +1594,7 @@ void sortByLastObjective(double* points, unsigned int noObjectives, unsigned int
 	}
 }
 		
-template<typename T>
+/*template<typename T>
 struct LinearArrayIterator {
 	LinearArrayIterator( T * array, unsigned int noObjectives ) : mep_array( array ),
 	mep_currentPosition( array ),
@@ -1646,9 +1649,9 @@ struct LinearArrayIterator {
 	T * mep_currentPosition;
 	
 	unsigned int m_noObjectives;
-};
+};*/
 		
-		
+//! \brief Comparison of the last component of two fitness vectors.		
 struct LastObjectiveComparator {
 	static unsigned int NO_OBJECTIVES;
 	static int compare( const void * p1, const void * p2 ) {

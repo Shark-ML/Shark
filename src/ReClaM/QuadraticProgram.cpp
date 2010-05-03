@@ -56,6 +56,7 @@ using namespace std;
 #define XCHG_V(t, a, i, j) {t temp; temp = a[i]; a[i] = a[j]; a[j] = temp;}
 
 
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -86,8 +87,8 @@ QPMatrix::~QPMatrix()
 
 KernelMatrix::KernelMatrix(KernelFunction* kernelfunction,
 						   const Array<double>& data)
-		: QPMatrix(data.dim(0))
-		, kernel(kernelfunction)
+: QPMatrix(data.dim(0))
+, kernel(kernelfunction)
 {
 	x.resize(matrixsize, false);
 	unsigned int i;
@@ -154,7 +155,7 @@ void RegularizedKernelMatrix::FlipColumnsAndRows(unsigned int i, unsigned int j)
 
 
 QPMatrix2::QPMatrix2(QPMatrix* base)
-		: QPMatrix(2 * base->getMatrixSize())
+: QPMatrix(2 * base->getMatrixSize())
 {
 	baseMatrix = base;
 
@@ -182,57 +183,6 @@ float QPMatrix2::Entry(unsigned int i, unsigned int j)
 void QPMatrix2::FlipColumnsAndRows(unsigned int i, unsigned int j)
 {
 	XCHG_A(unsigned int, mapping, i, j);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-InputLabelMatrix::InputLabelMatrix(KernelFunction* kernelfunction,
-								   const Array<double>& input,
-								   const Array<double>& target,
-								   const Array<double>& prototypes)
-		: QPMatrix(input.dim(0))
-		, kernel(kernelfunction)
-{
-	unsigned int i, j, m, classes = prototypes.dim(0);
-
-	x.resize(matrixsize, false);
-	y.resize(matrixsize);
-	for (i = 0; i < matrixsize; i++)
-	{
-		x(i) = new ArrayReference<double>(input[i]);
-		y[i] = (unsigned int)target(i, 0);
-	}
-
-	prototypeProduct.resize(classes, classes, false);
-	for (i = 0; i < classes; i++)
-	{
-		for (j = 0; j <= i; j++)
-		{
-			double scp = 0.0;
-			for (m = 0; m < classes; m++) scp += prototypes(i, m) * prototypes(j, m);
-			prototypeProduct(i, j) = prototypeProduct(j, i) = scp;
-		}
-	}
-}
-
-InputLabelMatrix::~InputLabelMatrix()
-{
-	unsigned int i;
-	for (i = 0; i < matrixsize; i++) delete x(i);
-}
-
-
-float InputLabelMatrix::Entry(unsigned int i, unsigned int j)
-{
-	return (float)(kernel->eval(*x(i), *x(j)) * prototypeProduct(y[i], y[j]));
-}
-
-void InputLabelMatrix::FlipColumnsAndRows(unsigned int i, unsigned int j)
-{
-	XCHG_A(ArrayReference<double>*, x, i, j);
-	XCHG_V(unsigned int, y, i, j);
 }
 
 
@@ -473,261 +423,8 @@ void CachedMatrix::cacheClear()
 ////////////////////////////////////////////////////////////
 
 
-void QpSvmCG::Solve(const Array<double>& quadratic,
-					const Array<double>& linear,
-					const Array<double>& boxMin,
-					const Array<double>& boxMax,
-					Array<double>& point,
-					double accuracy)
-{
-	SIZE_CHECK(quadratic.ndim() == 2);
-	SIZE_CHECK(linear.ndim() == 1);
-	SIZE_CHECK(boxMin.ndim() == 1);
-	SIZE_CHECK(boxMax.ndim() == 1);
-	SIZE_CHECK(point.ndim() == 1);
-
-	int dimension = quadratic.dim(0);
-
-	SIZE_CHECK((int)quadratic.dim(1) == dimension);
-	SIZE_CHECK((int)linear.dim(0) == dimension);
-	SIZE_CHECK((int)boxMin.dim(0) == dimension);
-	SIZE_CHECK((int)boxMax.dim(0) == dimension);
-	SIZE_CHECK((int)point.dim(0) == dimension);
-
-	int i, j;
-	Array<double> direction(dimension);
-	Array<bool> active(dimension);
-	Array<double> gradient(dimension);
-	Array<double> conjugate(dimension);
-	conjugate = 0.0;
-	double DirLen2 = 0.0;
-	double DirLen2old = 0.0;
-	double accuracy2 = accuracy * accuracy;
-	bool changed, bounds_changed;
-	int nActive = 0;
-	int nUpdatesLeft = -1;
-	int bound = -1;
-	int nReset = 0;
-	double step = 0.0;
-	double clipped = 0.0;
-	double value;
-	double first = 0.0;
-	double second = 0.0;
-	double scp, sub;
-	double norm2;
-
-	active = false;
-
-	int iter, maxiter = 10 * dimension * dimension;
-	for (iter = 0; iter < maxiter; iter++)
-	{
-		if (nUpdatesLeft == -1)
-		{
-			// compute the gradient from scratch
-			for (i = 0; i < dimension; i++)
-			{
-				value = linear(i);
-				for (j = 0; j < dimension; j++) value += quadratic(i, j) * point(j);
-				gradient(i) = value;
-			}
-			nUpdatesLeft = 100;
-		}
-
-		// compute the set of active inequality constraints
-		scp = 0.0;
-		for (i = 0; i < dimension; i++)
-		{
-			if (active(i)) continue;
-			scp += gradient(i);
-		}
-		sub = scp / (dimension - nActive);
-		bounds_changed = false;
-		do
-		{
-			changed = false;
-			for (i = 0; i < dimension; i++)
-			{
-				if (active(i))
-				{
-					double g = gradient(i) - (scp + gradient(i)) / (dimension - nActive + 1.0);
-					if ((g <= 0.0 && point(i) == boxMin(i))
-							|| (g >= 0.0 && point(i) == boxMax(i)))
-					{
-						active(i) = false;
-						nActive--;
-						scp += gradient(i);
-						sub = scp / (dimension - nActive);
-						changed = true;
-					}
-				}
-				else
-				{
-					double g = gradient(i) - sub;
-					if ((g > 0.0 && point(i) == boxMin(i))
-							|| (g < 0.0 && point(i) == boxMax(i)))
-					{
-						active(i) = true;
-						nActive++;
-						scp -= gradient(i);
-						sub = scp / (dimension - nActive);
-						changed = true;
-					}
-				}
-			}
-			bounds_changed = bounds_changed || changed;
-		}
-		while (changed);
-		if (bounds_changed && iter > 0) nReset = 0;
-
-		// check corner condition
-		if (nActive + 1 >= dimension) break;
-
-		// compute the gradient of the sub problem
-		// projected onto the equality constraint
-		DirLen2old = DirLen2;
-		DirLen2 = 0.0;
-		for (i = 0; i < dimension; i++)
-		{
-			if (active(i)) continue;
-			value = gradient(i) - sub;
-			direction(i) = value;
-			DirLen2 += value * value;
-		}
-
-		// update the conjugate direction
-		nReset--;
-		if (nReset == 0)
-		{
-			// In theory we are done.
-			// However, we may which to continue
-			// in order to avoid numerical problems.
-			break;
-		}
-		else if (nReset < 0)
-		{
-			// the set of active constraints has changed
-			conjugate = direction;
-			nReset = dimension - 1 - nActive;
-		}
-		else
-		{
-			double beta = DirLen2 / DirLen2old;
-			for (i = 0; i < dimension; i++)
-			{
-				if (active(i)) continue;
-				else conjugate(i) = direction(i) + beta * conjugate(i);
-			}
-		}
-
-		// compute the unconstrained Newton step
-		first = 0.0;
-		second = 0.0;
-		norm2 = 0.0;
-		for (i = 0; i < dimension; i++)
-		{
-			if (active(i)) continue;
-			double c = conjugate(i);
-			double Qc = 0.0;
-			for (j = 0; j < dimension; j++)
-			{
-				if (active(j)) continue;
-				Qc += quadratic(i, j) * conjugate(j);
-			}
-			first += gradient(i) * c;
-			second += c * Qc;
-			norm2 += c * c;
-		}
-		if (second <= 0.0) break;
-		step = -first / second;
-
-		// check stopping condition
-		if (nReset <= 1 && step * step * norm2 < accuracy2) break;
-
-		// clip the step
-		bound = -1;
-		clipped = step;
-		for (i = 0; i < dimension; i++)
-		{
-			if (active(i)) continue;
-			if (point(i) + clipped * conjugate(i) > boxMax(i))
-			{
-				clipped = (boxMax(i) - point(i)) / conjugate(i);
-				bound = i;
-			}
-			else if (point(i) + clipped * conjugate(i) < boxMin(i))
-			{
-				clipped = (boxMin(i) - point(i)) / conjugate(i);
-				bound = i;
-			}
-		}
-
-		// update the gradient to avoid full recomputation
-		if (5 * nActive > dimension && nUpdatesLeft > 0)
-		{
-			// update the gradient
-			for (i = 0; i < dimension; i++)
-			{
-				if (active(i)) continue;
-				double delta = clipped * conjugate(i);
-				for (j = 0; j < dimension; j++) gradient(j) += quadratic(i, j) * delta;
-			}
-			nUpdatesLeft--;
-		}
-		else nUpdatesLeft = -1;
-
-		// go!
-		changed = false;
-		for (i = 0; i < dimension; i++)
-		{
-			if (active(i)) continue;
-			double p = point(i);
-			double newp = p + clipped * conjugate(i);
-			point(i) = newp;
-			if (p != newp) changed = true;
-		}
-
-		// stop if the step has no numerical effect
-		if (! changed) break;
-
-		// check the bound carefully
-		if (bound != -1)
-		{
-// 			if (point(bound) > (1.0 - 1e-12) * boxMax(bound)) point(bound) = boxMax(bound);
-// 			else if (point(bound) < (1.0 + 1e-12) * boxMin(bound)) point(bound) = boxMin(bound);
-			double threshold = 0.5 * (boxMax(bound) + boxMin(bound));
-			if (point(bound) > threshold) point(bound) = boxMax(bound);
-			else point(bound) = boxMin(bound);
-			nReset = 0;
-		}
-	}
-
-	if (iter >= maxiter)
-	{
-		throw SHARKEXCEPTION("QpSvmCG did not converge");
-		printf("\n\n***************** QpSvmCG did not converge!!!\n\n");
-		printf("boxMin:\n");
-		writeArray(boxMin, std::cout);
-		printf("boxMax:\n");
-		writeArray(boxMax, std::cout);
-		printf("point:\n");
-		writeArray(point, std::cout);
-		printf("gradient:\n");
-		writeArray(gradient, std::cout);
-		printf("direction:\n");
-		writeArray(direction, std::cout);
-		printf("conjugate:\n");
-		writeArray(conjugate, std::cout);
-		printf("active:\n");
-		writeArray(active, std::cout);
-	}
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
 QpSvmDecomp::QpSvmDecomp(CachedMatrix& quadraticPart)
-		: quadratic(quadraticPart)
+: quadratic(quadraticPart)
 {
 	printInfo = false;
 	WSS_Strategy = NULL;
@@ -761,11 +458,11 @@ QpSvmDecomp::~QpSvmDecomp()
 
 
 double QpSvmDecomp::Solve(const Array<double>& linearPart,
-						  const Array<double>& boxLower,
-						  const Array<double>& boxUpper,
-						  Array<double>& solutionVector,
-						  double eps,
-						  double threshold)
+							   const Array<double>& boxLower,
+							   const Array<double>& boxUpper,
+							   Array<double>& solutionVector,
+							   double eps,
+							   double threshold)
 {
 	SIZE_CHECK(linearPart.ndim() == 1);
 	SIZE_CHECK(boxLower.ndim() == 1);
@@ -1376,7 +1073,7 @@ void QpSvmDecomp::FlipCoordinates(unsigned int i, unsigned int j)
 
 
 QpBoxDecomp::QpBoxDecomp(CachedMatrix& quadraticPart)
-		: quadratic(quadraticPart)
+: quadratic(quadraticPart)
 {
 	dimension = quadratic.getMatrixSize();
 
@@ -1406,10 +1103,10 @@ QpBoxDecomp::~QpBoxDecomp()
 
 
 void QpBoxDecomp::Solve(const Array<double>& linearPart,
-						const Array<double>& boxLower,
-						const Array<double>& boxUpper,
-						Array<double>& solutionVector,
-						double eps)
+							   const Array<double>& boxLower,
+							   const Array<double>& boxUpper,
+							   Array<double>& solutionVector,
+							   double eps)
 {
 	SIZE_CHECK(linearPart.ndim() == 1);
 	SIZE_CHECK(boxLower.ndim() == 1);
@@ -1452,7 +1149,7 @@ void QpBoxDecomp::Solve(const Array<double>& linearPart,
 	Shrink();
 
 	// decomposition loop
-	SMO();
+	Loop();
 
 	// return alpha
 	for (i = 0; i < dimension; i++)
@@ -1461,68 +1158,148 @@ void QpBoxDecomp::Solve(const Array<double>& linearPart,
 	}
 }
 
-void QpBoxDecomp::Continue(const Array<double>& boxLower,
-						   const Array<double>& boxUpper,
-						   Array<double>& solutionVector)
+// Compute the optimal step mu given the current point
+// alpha, the gradient g, and the quadratic term Q in the
+// interval [L, U]. Return the corresponding gain.
+double QpBoxDecomp::StepEdge(double alpha, double g, double Q, double L, double U, double& mu)
 {
-	SIZE_CHECK(boxLower.ndim() == 1);
-	SIZE_CHECK(boxUpper.ndim() == 1);
-	SIZE_CHECK(boxLower.dim(0) == dimension);
-	SIZE_CHECK(boxUpper.dim(0) == dimension);
-	solutionVector.resize(alpha.dim(0), false);
+	// compute the optimal unconstrained step
+	double muHat = g / Q;
 
-	unsigned int i, j;
+	// compute the optimal constrained step
+	if (muHat < L - alpha) mu = L - alpha;
+	else if (muHat > U - alpha) mu = U - alpha;
+	else mu = muHat;
 
-	for (i = 0; i < dimension; i++)
+	// compute (twice) the gain
+	if (! finite(muHat)) return 1e100;
+	double deltaMu = muHat - mu;
+	return (muHat * muHat - deltaMu * deltaMu) * Q;
+}
+
+// Compute the optimal step (mui, muj) given the current
+// point (alphai, alphaj), the gradient (gi, gj), and the
+// symmetric positive semi definite matrix (Qii, Qij; Qij, Qjj)
+// in the square [Li, Ui] x [Lj, Uj].
+void QpBoxDecomp::Solve2D(double alphai, double alphaj,					// point
+							double gi, double gj,						// gradient
+							double Qii, double Qij, double Qjj,			// Q-matrix
+							double Li, double Ui, double Lj, double Uj,	// bounds
+							double& mui, double& muj)					// step
+{
+	double QD = Qii * Qjj;
+	double detQ = QD - Qij * Qij;
+	if (detQ < 1e-10 * QD)
 	{
-		j = permutation(i);
-		boxMin(i) = boxLower(j);
-		boxMax(i) = boxUpper(j);
+		if (Qii == 0.0 && Qjj == 0.0)
+		{
+			// Q has rank zero (is the zero matrix)
+			// just follow the gradient
+			if (gi > 0.0) mui = Ui - alphai;
+			else if (gi < 0.0) mui = Li - alphai;
+			else mui = 0.0;
+			if (gj > 0.0) muj = Uj - alphaj;
+			else if (gj < 0.0) muj = Lj - alphaj;
+			else muj = 0.0;
+		}
+		else
+		{
+			// Q has rank one
+			double gamma = Qii * gj - Qij * gi;
+			double edgei_mui = 0.0, edgei_muj = 0.0, edgei_gain = 0.0;
+			double edgej_mui = 0.0, edgej_muj = 0.0, edgej_gain = 0.0;
+
+			// edge with fixed mu_i
+			if (Qij * gamma > 0.0)
+			{
+				edgei_mui = Li - alphai;
+				edgei_gain = StepEdge(alphaj, gj - Qij * edgei_mui, Qjj, Lj, Uj, edgei_muj);
+			}
+			else if (Qij * gamma < 0.0)
+			{
+				edgei_mui = Ui - alphai;
+				edgei_gain = StepEdge(alphaj, gj - Qij * edgei_mui, Qjj, Lj, Uj, edgei_muj);
+			}
+
+			// edge with fixed mu_j
+			if (Qii * gamma < 0.0)
+			{
+				edgej_muj = Lj - alphaj;
+				edgej_gain = StepEdge(alphai, gi - Qij * edgej_muj, Qii, Li, Ui, edgej_mui);
+			}
+			else if (Qii * gamma > 0.0)
+			{
+				edgej_muj = Uj - alphaj;
+				edgej_gain = StepEdge(alphai, gi - Qij * edgej_muj, Qii, Li, Ui, edgej_mui);
+			}
+
+			// keep the better edge point
+			if (edgei_gain > edgej_gain)
+			{
+				mui = edgei_mui;
+				muj = edgei_muj;
+			}
+			else
+			{
+				mui = edgej_mui;
+				muj = edgej_muj;
+			}
+		}
 	}
-
-	// initial shrinking
-	Shrink();
-
-	// decomposition loop
-	SMO();
-
-	// return alpha
-	for (i = 0; i < dimension; i++)
+	else
 	{
-		solutionVector(permutation(i)) = alpha(i);
+		// Q has full rank of two, thus it is invertible
+		double muiHat = (Qjj * gi - Qij * gj) / detQ;
+		double mujHat = (Qii * gj - Qij * gi) / detQ;
+		double edgei_mui = 0.0, edgei_muj = 0.0, edgei_gain = 0.0;
+		double edgej_mui = 0.0, edgej_muj = 0.0, edgej_gain = 0.0;
+
+		// edge with fixed mu_i
+		if (muiHat < Li - alphai)
+		{
+			edgei_mui = Li - alphai;
+			edgei_gain = StepEdge(alphaj, gj - Qij * edgei_mui, Qjj, Lj, Uj, edgei_muj);
+		}
+		else if (muiHat > Ui - alphai)
+		{
+			edgei_mui = Ui - alphai;
+			edgei_gain = StepEdge(alphaj, gj - Qij * edgei_mui, Qjj, Lj, Uj, edgei_muj);
+		}
+
+		// edge with fixed mu_j
+		if (mujHat < Lj - alphaj)
+		{
+			edgej_muj = Lj - alphaj;
+			edgej_gain = StepEdge(alphai, gi - Qij * edgej_muj, Qii, Li, Ui, edgej_mui);
+		}
+		else if (mujHat > Uj - alphaj)
+		{
+			edgej_muj = Uj - alphaj;
+			edgej_gain = StepEdge(alphai, gi - Qij * edgej_muj, Qii, Li, Ui, edgej_mui);
+		}
+
+		// keep the unconstrained optimum or the better edge point
+		if (edgei_gain == 0.0 && edgej_gain == 0.0)
+		{
+			mui = muiHat;
+			muj = mujHat;
+		}
+		else if (edgei_gain > edgej_gain)
+		{
+			mui = edgei_mui;
+			muj = edgei_muj;
+		}
+		else
+		{
+			mui = edgej_mui;
+			muj = edgej_muj;
+		}
 	}
 }
 
-void QpBoxDecomp::Continue(const Array<double>& gradientUpdate,
-						   Array<double>& solutionVector)
+void QpBoxDecomp::Loop()
 {
-	SIZE_CHECK(gradientUpdate.ndim() == 1);
-	SIZE_CHECK(gradientUpdate.dim(0) == dimension);
-	solutionVector.resize(alpha.dim(0), false);
-
-	unsigned int i;
-
-	// update the gradient
-	for (i = 0; i < dimension; i++)
-	{
-		double value = gradientUpdate(permutation(i));
-		gradient(i) += value;
-		linear(i) = value;
-	}
-
-	// re-compute active set
-	Unshrink(false);
-
-	// decomposition loop
-	SMO();
-
-	// return alpha
-	for (i = 0; i < dimension; i++) solutionVector(permutation(i)) = alpha(i);
-}
-
-void QpBoxDecomp::SMO()
-{
-	unsigned int a, i;
+	unsigned int a, i,j;
 	float* q;
 
 	bUnshrinked = false;
@@ -1533,58 +1310,130 @@ void QpBoxDecomp::SMO()
 	optimal = false;
 	while (iter != maxIter)
 	{
-		// select a working set and check for optimality
-		if (SelectWorkingSet(i))
+		if (WSS_Strategy == 1)
 		{
-			// seems to be optimal
-
-			// do costly unshrinking
-			Unshrink(true);
-
-			// check again on the whole problem
+			// select a working set and check for optimality
 			if (SelectWorkingSet(i))
 			{
-				optimal = true;
-				break;
+				// seems to be optimal
+
+				// do costly unshrinking
+				Unshrink(true);
+
+				// check again on the whole problem
+				if (SelectWorkingSet(i))
+				{
+					optimal = true;
+					break;
+				}
+
+				// shrink again
+				Shrink();
+				shrinkCounter = (active < 1000) ? active : 1000;
 			}
 
-			// shrink again
-			Shrink();
-			shrinkCounter = (active < 1000) ? active : 1000;
-		}
+			// update
+			{
+				double ai = alpha(i);
+				double Li = boxMin(i);
+				double Ui = boxMax(i);
 
-		// SMO update
+				// update alpha, that is, solve the sub-problem defined by i
+				double nominator = gradient(i);
+				double denominator = diagonal(i);
+				double mu = nominator / denominator;
+				if (ai + mu < Li) mu = Li - ai;
+				else if (ai + mu > Ui) mu = Ui - ai;
+				alpha(i) += mu;
+
+				// get the matrix row corresponding to the working set
+				q = quadratic.Row(i, 0, active);
+
+				// update the gradient
+				for (a = 0; a < active; a++) gradient(a) -= mu * q[a];
+			}
+
+			shrinkCounter--;
+			if (shrinkCounter == 0)
+			{
+				// shrink the problem
+				Shrink();
+
+				shrinkCounter = (active < 1000) ? active : 1000;
+			}
+
+			iter++;
+		}
+		else if (WSS_Strategy == 2)
 		{
-			double ai = alpha(i);
-			double Li = boxMin(i);
-			double Ui = boxMax(i);
+			if (SelectWorkingSet(i, j))
+			{
+				// seems to be optimal
 
-			// update alpha, that is, solve the sub-problem defined by i
-			double nominator = gradient(i);
-			double denominator = diagonal(i);
-			double mu = nominator / denominator;
-			if (ai + mu < Li) mu = Li - ai;
-			else if (ai + mu > Ui) mu = Ui - ai;
-			alpha(i) += mu;
+				// do costly unshrinking
+				Unshrink(true);
 
-			// get the matrix rows corresponding to the working set
-			q = quadratic.Row(i, 0, active);
+				// check again on the whole problem
+				if (SelectWorkingSet(i, j))
+				{
+					optimal = true;
+					break;
+				}
 
-			// update the gradient
-			for (a = 0; a < active; a++) gradient(a) -= mu * q[a];
+				// shrink again
+				Shrink();
+				shrinkCounter = (active < 1000) ? active : 1000;
+			}
+
+			// update
+			{
+				double ai = alpha(i);
+				double Li = boxMin(i);
+				double Ui = boxMax(i);
+
+				double aj = alpha(j);
+				double Lj = boxMin(j);
+				double Uj = boxMax(j);
+
+				// get the matrix rows corresponding to the working set
+				float* q_i = quadratic.Row(i, 0, active);
+				float* q_j = quadratic.Row(j, 0, active);
+
+				// get the Q-matrix restricted to the working set
+				double Qii = diagonal(i);
+				double Qjj = diagonal(j);
+				double Qij = q_i[j];
+
+				// solve the sub-problem
+				double mu_i = 0.0;
+				double mu_j = 0.0;
+				Solve2D(ai, aj,
+						gradient(i), gradient(j),
+						Qii, Qij, Qjj,
+						Li, Ui, Lj, Uj,
+						mu_i, mu_j);
+
+				// update alpha
+				alpha(i) += mu_i;
+				alpha(j) += mu_j;
+
+				// update the gradient
+				for (a = 0; a < active; a++) gradient(a) -= (mu_i * q_i[a] + mu_j * q_j[a]);
+			}
+
+			shrinkCounter--;
+			if (shrinkCounter == 0)
+			{
+				// shrink the problem
+				Shrink();
+
+				shrinkCounter = (active < 1000) ? active : 1000;
+			}
+
+			iter++;
 		}
-
-		shrinkCounter--;
-		if (shrinkCounter == 0)
-		{
-			// shrink the problem
-			Shrink();
-
-			shrinkCounter = (active < 1000) ? active : 1000;
-		}
-
-		iter++;
 	}
+
 	if (iter == maxIter) optimal = false;
 }
 
@@ -1617,6 +1466,106 @@ bool QpBoxDecomp::SelectWorkingSet(unsigned int& i)
 
 	// KKT stopping condition
 	return (largest < epsilon);
+}
+
+bool QpBoxDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
+{
+	double maxGrad = 0.0;
+	unsigned int a;
+
+	// select first variable i
+	// with first order method
+	for (a = 0; a < active; a++)
+	{
+		double v = alpha(a);
+		double g = gradient(a);
+		if (v < boxMax(a))
+		{
+			if (g > maxGrad)
+			{
+				maxGrad = g;
+				i = a;
+			}
+		}
+		if (v > boxMin(a))
+		{
+			if (-g > maxGrad)
+			{
+				maxGrad = -g;
+				i = a;
+			}
+		}
+	}
+
+	// KKT stopping condition
+	if (maxGrad < epsilon) return true;
+
+	double gi = gradient(i);
+	float* q = quadratic.Row(i, 0, active);
+	double Qii = diagonal(i);
+
+	// select second variable j
+	// with second order method
+	double maxGain = 0.0;
+	for (a=0; a<active; a++)
+	{
+		if (a == i) continue;
+
+		double ga = gradient(a);
+		if ((alpha(a) > boxMin(a) && ga < 0.0)
+				|| (alpha(a) < boxMax(a) && ga > 0.0))
+		{
+			double ga = gradient(a);
+			double Qia = q[a];
+			double Qaa = diagonal(a);
+
+			double QD = Qii * Qaa;
+			double detQ = QD - Qia * Qia;
+			if (detQ < 1e-10 * QD)
+			{
+				if (Qii == 0.0 && Qaa == 0.0)
+				{
+					// Q has rank zero
+					if (gi != 0.0 || ga != 0.0)
+					{
+						j = a;
+						return false;		// infinite gain, return immediately
+					}
+				}
+				else
+				{
+					// Q has rank one
+					if (Qii * ga - Qia * gi != 0.0)
+					{
+						j = a;
+						return false;		// infinite gain, return immediately
+					}
+					else
+					{
+						double g2 = ga*ga + gi*gi;
+						double gain = (g2*g2) / (ga*ga*Qaa + 2.0*ga*gi*Qia + gi*gi*Qii);
+						if (gain > maxGain)
+						{
+							maxGain = gain;
+							j = a;
+						}
+					}
+				}
+			}
+			else
+			{
+				// Q has rank two
+				double gain = (ga*ga*Qii - 2.0*ga*gi*Qia + gi*gi*Qaa) / detQ;
+				if (gain > maxGain)
+				{
+					maxGain = gain;
+					j = a;
+				}
+			}
+		}
+	}
+
+	return false;		// solution is not optimal
 }
 
 void QpBoxDecomp::Shrink()
@@ -1739,55 +1688,189 @@ void QpBoxDecomp::FlipCoordinates(unsigned int i, unsigned int j)
 ////////////////////////////////////////////////////////////
 
 
-QpBoxAllInOneDecomp::QpBoxAllInOneDecomp(CachedMatrix& kernel)
-		: kernelMatrix(kernel)
+QpMcDecomp::QpMcDecomp(CachedMatrix& kernel)
+: kernelMatrix(kernel)
 {
 	examples = kernelMatrix.getMatrixSize();
 	maxIter = -1;
+	WSS_Strategy = 2;
 }
 
-QpBoxAllInOneDecomp::~QpBoxAllInOneDecomp()
+QpMcDecomp::~QpMcDecomp()
 {
 }
 
 
-void QpBoxAllInOneDecomp::Solve(unsigned int classes,
-								const Array<double>& target,
-								const Array<double>& prototypes,
-								double C,
-								Array<double>& solutionVector,
-								double eps)
+// Compute the optimal step mu given the current point
+// alpha, the gradient g, and the quadratic term Q in the
+// interval [L, U]. Return the corresponding gain.
+double QpMcDecomp::StepEdge(double alpha, double g, double Q, double L, double U, double& mu)
+{
+	// compute the optimal unconstrained step
+	double muHat = g / Q;
+
+	// compute the optimal constrained step
+	if (muHat < L - alpha) mu = L - alpha;
+	else if (muHat > U - alpha) mu = U - alpha;
+	else mu = muHat;
+
+	// compute (twice) the gain
+	if (! finite(muHat)) return 1e100;
+	double deltaMu = muHat - mu;
+	return (muHat * muHat - deltaMu * deltaMu) * Q;
+}
+
+// Compute the optimal step (mui, muj) given the current
+// point (alphai, alphaj), the gradient (gi, gj), and the
+// symmetric positive semi definite matrix (Qii, Qij; Qij, Qjj)
+// in the square [Li, Ui] x [Lj, Uj].
+void QpMcDecomp::Solve2D(double alphai, double alphaj,					// point
+							double gi, double gj,						// gradient
+							double Qii, double Qij, double Qjj,			// Q-matrix
+							double Li, double Ui, double Lj, double Uj,	// bounds
+							double& mui, double& muj)					// step
+{
+	double QD = Qii * Qjj;
+	double detQ = QD - Qij * Qij;
+	if (detQ < 1e-10 * QD)
+	{
+		if (Qii == 0.0 && Qjj == 0.0)
+		{
+			// Q has rank zero (is the zero matrix)
+			// just follow the gradient
+			if (gi > 0.0) mui = Ui - alphai;
+			else if (gi < 0.0) mui = Li - alphai;
+			else mui = 0.0;
+			if (gj > 0.0) muj = Uj - alphaj;
+			else if (gj < 0.0) muj = Lj - alphaj;
+			else muj = 0.0;
+		}
+		else
+		{
+			// Q has rank one
+			double gamma = Qii * gj - Qij * gi;
+			double edgei_mui = 0.0, edgei_muj = 0.0, edgei_gain = 0.0;
+			double edgej_mui = 0.0, edgej_muj = 0.0, edgej_gain = 0.0;
+
+			// edge with fixed mu_i
+			if (Qij * gamma > 0.0)
+			{
+				edgei_mui = Li - alphai;
+				edgei_gain = StepEdge(alphaj, gj - Qij * edgei_mui, Qjj, Lj, Uj, edgei_muj);
+			}
+			else if (Qij * gamma < 0.0)
+			{
+				edgei_mui = Ui - alphai;
+				edgei_gain = StepEdge(alphaj, gj - Qij * edgei_mui, Qjj, Lj, Uj, edgei_muj);
+			}
+
+			// edge with fixed mu_j
+			if (Qii * gamma < 0.0)
+			{
+				edgej_muj = Lj - alphaj;
+				edgej_gain = StepEdge(alphai, gi - Qij * edgej_muj, Qii, Li, Ui, edgej_mui);
+			}
+			else if (Qii * gamma > 0.0)
+			{
+				edgej_muj = Uj - alphaj;
+				edgej_gain = StepEdge(alphai, gi - Qij * edgej_muj, Qii, Li, Ui, edgej_mui);
+			}
+
+			// keep the better edge point
+			if (edgei_gain > edgej_gain)
+			{
+				mui = edgei_mui;
+				muj = edgei_muj;
+			}
+			else
+			{
+				mui = edgej_mui;
+				muj = edgej_muj;
+			}
+		}
+	}
+	else
+	{
+		// Q has full rank of two, thus it is invertible
+		double muiHat = (Qjj * gi - Qij * gj) / detQ;
+		double mujHat = (Qii * gj - Qij * gi) / detQ;
+		double edgei_mui = 0.0, edgei_muj = 0.0, edgei_gain = 0.0;
+		double edgej_mui = 0.0, edgej_muj = 0.0, edgej_gain = 0.0;
+
+		// edge with fixed mu_i
+		if (muiHat < Li - alphai)
+		{
+			edgei_mui = Li - alphai;
+			edgei_gain = StepEdge(alphaj, gj - Qij * edgei_mui, Qjj, Lj, Uj, edgei_muj);
+		}
+		else if (muiHat > Ui - alphai)
+		{
+			edgei_mui = Ui - alphai;
+			edgei_gain = StepEdge(alphaj, gj - Qij * edgei_mui, Qjj, Lj, Uj, edgei_muj);
+		}
+
+		// edge with fixed mu_j
+		if (mujHat < Lj - alphaj)
+		{
+			edgej_muj = Lj - alphaj;
+			edgej_gain = StepEdge(alphai, gi - Qij * edgej_muj, Qii, Li, Ui, edgej_mui);
+		}
+		else if (mujHat > Uj - alphaj)
+		{
+			edgej_muj = Uj - alphaj;
+			edgej_gain = StepEdge(alphai, gi - Qij * edgej_muj, Qii, Li, Ui, edgej_mui);
+		}
+
+		// keep the unconstrained optimum or the better edge point
+		if (edgei_gain == 0.0 && edgej_gain == 0.0)
+		{
+			mui = muiHat;
+			muj = mujHat;
+		}
+		else if (edgei_gain > edgej_gain)
+		{
+			mui = edgei_mui;
+			muj = edgei_muj;
+		}
+		else
+		{
+			mui = edgej_mui;
+			muj = edgej_muj;
+		}
+	}
+}
+
+void QpMcDecomp::Solve(unsigned int classes,
+						const double* modifiers,
+						const Array<double>& target,
+						const Array<double>& linearPart,
+						const Array<double>& lower,
+						const Array<double>& upper,
+						Array<double>& solutionVector,
+						double eps)
 {
 	SIZE_CHECK(target.ndim() == 2);
+	SIZE_CHECK(linearPart.ndim() == 1);
+	SIZE_CHECK(lower.ndim() == 1);
+	SIZE_CHECK(upper.ndim() == 1);
+	SIZE_CHECK(solutionVector.ndim() == 1);
 
 	this->classes = classes;
 	variables = examples * classes;
+	memcpy(m_modifier, modifiers, sizeof(m_modifier));
 
 	SIZE_CHECK(target.dim(0) == examples);
 	SIZE_CHECK(target.dim(1) == 1);
+	SIZE_CHECK(linearPart.dim(0) == variables);
+	SIZE_CHECK(lower.dim(0) == variables);
+	SIZE_CHECK(upper.dim(0) == variables);
+	SIZE_CHECK(solutionVector.dim(0) == variables);
 
 	unsigned int a, b, bc, i, j;
 	float* q = NULL;
 
-	// precompute inner products of prototypes
-	// and lengths of differences of prototypes
-	m_prototypeProduct.resize(classes, classes, false);
-	m_prototypeLength.resize(classes, classes, false);
-	for (a = 0; a < classes; a++)
-	{
-		for (b = 0; b <= a; b++)
-		{
-			m_prototypeProduct(a, b) = m_prototypeProduct(b, a)
-									   = scalarProduct(prototypes[a], prototypes[b]);
-			Array<double> diff = prototypes[a] - prototypes[b];
-			m_prototypeLength(a, b) = m_prototypeLength(b, a)
-									  = sqrt(scalarProduct(diff, diff));
-		}
-	}
-
 	// prepare lists
 	alpha.resize(variables, false);
-	diagonal.resize(examples, false);
 	gradient.resize(variables, false);
 	linear.resize(variables, false);
 	boxMin.resize(variables, false);
@@ -1799,7 +1882,6 @@ void QpBoxAllInOneDecomp::Solve(unsigned int classes,
 	// prepare list contents
 	for (i = 0; i < examples; i++)
 	{
-		diagonal(i) = kernelMatrix.Entry(i, i);
 		example[i].index = i;
 		example[i].label = (unsigned int)target(i, 0);
 		example[i].active = classes;
@@ -1807,28 +1889,22 @@ void QpBoxAllInOneDecomp::Solve(unsigned int classes,
 	}
 	for (i = 0; i < variables; i++)
 	{
-		variable[i].example = i / classes;
-		variable[i].index = i % classes;
-		variable[i].label = i % classes;
+		unsigned int e = i / classes;
+		unsigned int y = example[e].label;
+		unsigned int v = i % classes;
+		variable[i].example = e;
+		variable[i].index = v;
+		variable[i].label = v;
+		variable[i].diagonal = Modifier(y, y, v, v) * kernelMatrix.Entry(e, e);
 		storage[i] = i;
 	}
 
 	// prepare the solver internal variables
-	for (a = 0; a < examples; a++)
-	{
-		unsigned int y = example[a].label;
-		for (b = 0; b < classes; b++)
-		{
-			j = example[a].variables[b];
-			unsigned int v = variable[j].label;
-			alpha(j) = solutionVector(j);
-			linear(j) = 1.0;
-			boxMin(j) = 0.0;
-			if (y == v) boxMax(j) = 0.0;
-			else boxMax(j) = C;
-		}
-	}
-	gradient = linear;
+	boxMin = lower;
+	boxMax = upper;
+	linear = linearPart;
+	gradient = linearPart;
+	alpha = solutionVector;
 
 	epsilon = eps;
 
@@ -1838,7 +1914,7 @@ void QpBoxAllInOneDecomp::Solve(unsigned int classes,
 	unsigned int e = 0xffffffff;
 	for (i = 0; i < variables; i++)
 	{
-		if (boxMax(i) < boxMin(i)) throw SHARKEXCEPTION("[QpBoxAllInOneDecomp::Solve] The feasible region is empty.");
+		if (boxMax(i) < boxMin(i)) throw SHARKEXCEPTION("[QpMcDecomp::Solve] The feasible region is empty.");
 
 		double v = alpha(i);
 		if (v != 0.0)
@@ -1856,13 +1932,13 @@ void QpBoxAllInOneDecomp::Solve(unsigned int classes,
 			{
 				double k = q[a];
 				tExample* ex = &example[a];
+				unsigned int yj = ex->label;
 				bc = ex->active;
 				for (b = 0; b < bc; b++)
 				{
 					j = ex->variables[b];
 					unsigned int vj = variable[j].label;
-					unsigned int yj = ex->label;
-					double km = Modifier(vi, vj, yi, yj);
+					double km = Modifier(yi, yj, vi, vj);
 					gradient(j) -= v * km * k;
 				}
 			}
@@ -1880,76 +1956,172 @@ void QpBoxAllInOneDecomp::Solve(unsigned int classes,
 	optimal = false;
 	while (iter != maxIter)
 	{
-		// select a working set and check for optimality
-		if (SelectWorkingSet(i))
+		if (WSS_Strategy == 1)
 		{
-			// seems to be optimal
-
-			// do costly unshrinking
-			Unshrink(true);
-
-			// check again on the whole problem
+			// select a working set and check for optimality
 			if (SelectWorkingSet(i))
 			{
-				optimal = true;
-				break;
+				// seems to be optimal
+
+				// do costly unshrinking
+				Unshrink(true);
+
+				// check again on the whole problem
+				if (SelectWorkingSet(i))
+				{
+					optimal = true;
+					break;
+				}
+
+				// shrink again
+				Shrink();
+				shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
 			}
 
-			// shrink again
-			Shrink();
-			shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
-		}
-
-		// update
-		{
-			double ai = alpha(i);
-			double Li = boxMin(i);
-			double Ui = boxMax(i);
-			unsigned int ei = variable[i].example;
-			unsigned int vi = variable[i].label;
-			unsigned int yi = example[ei].label;
-
-			// update alpha, that is, solve the sub-problem defined by i
-			double km = Modifier(vi, vi, yi, yi);
-			double nominator = gradient(i);
-			double denominator = km * diagonal(ei);
-			double mu = nominator / denominator;
-			if (ai + mu < Li) mu = Li - ai;
-			else if (ai + mu > Ui) mu = Ui - ai;
-			alpha(i) += mu;
-
-			// get the matrix row corresponding to the working set
-			q = kernelMatrix.Row(ei, 0, activeEx);
-
-			// update the gradient
-			for (a = 0; a < activeEx; a++)
+			// update
 			{
-				double k = q[a];
-				tExample* ex = &example[a];
-				bc = ex->active;
-				for (b = 0; b < bc; b++)
-				{
-					j = ex->variables[b];
+				double ai = alpha(i);
+				double Li = boxMin(i);
+				double Ui = boxMax(i);
+				unsigned int ei = variable[i].example;
+				unsigned int vi = variable[i].label;
+				unsigned int yi = example[ei].label;
 
-					unsigned int vj = variable[j].label;
+				// update alpha, that is, solve the sub-problem defined by i
+				double nominator = gradient(i);
+				double denominator = variable[i].diagonal;
+				double mu = nominator / denominator;
+				if (ai + mu < Li) mu = Li - ai;
+				else if (ai + mu > Ui) mu = Ui - ai;
+				alpha(i) += mu;
+
+				// get the matrix row corresponding to the working set
+				q = kernelMatrix.Row(ei, 0, activeEx);
+
+				// update the gradient
+				for (a = 0; a < activeEx; a++)
+				{
+					double k = q[a];
+					tExample* ex = &example[a];
 					unsigned int yj = ex->label;
-					double km = Modifier(vi, vj, yi, yj);
-					gradient(j) -= mu * km * k;
+					bc = ex->active;
+					for (b = 0; b < bc; b++)
+					{
+						j = ex->variables[b];
+
+						unsigned int vj = variable[j].label;
+						double km = Modifier(yi, yj, vi, vj);
+						gradient(j) -= mu * km * k;
+					}
 				}
 			}
-		}
 
-		shrinkCounter--;
-		if (shrinkCounter == 0)
+			shrinkCounter--;
+			if (shrinkCounter == 0)
+			{
+				// shrink the problem
+				Shrink();
+
+				shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+			}
+
+			iter++;
+		} 
+		else if (WSS_Strategy == 2)
 		{
-			// shrink the problem
-			Shrink();
+			if (SelectWorkingSet(i, j))
+			{
+				// seems to be optimal
 
-			shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+				// do costly unshrinking
+				Unshrink(true);
+
+				// check again on the whole problem
+				if (SelectWorkingSet(i,j))
+				{
+					optimal = true;
+					break;
+				}
+
+				// shrink again
+				Shrink();
+				shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+			}
+
+			// update
+			{
+				double ai = alpha(i);
+				double Li = boxMin(i);
+				double Ui = boxMax(i);
+				unsigned int ei = variable[i].example;
+				unsigned int vi = variable[i].label;
+				unsigned int yi = example[ei].label;
+
+				double aj = alpha(j);
+				double Lj = boxMin(j);
+				double Uj = boxMax(j);
+				unsigned int ej = variable[j].example;
+				unsigned int vj = variable[j].label;
+				unsigned int yj = example[ej].label;
+
+				// get the matrix rows corresponding to the working set
+				float* q_i = NULL;
+				float* q_j = NULL;
+				q_i = kernelMatrix.Row(ei, 0, activeEx);
+				q_j = kernelMatrix.Row(ej, 0, activeEx);
+
+				// get the Q-matrix restricted to the working set
+				double k = q_i[ej];
+				double km = Modifier(yi, yj, vi, vj);
+				double Qii = variable[i].diagonal;
+				double Qjj = variable[j].diagonal;
+				double Qij = km * k;
+
+				// solve the sub-problem
+				double mu_i = 0.0;
+				double mu_j = 0.0;
+				Solve2D(ai, aj,
+						gradient(i), gradient(j),
+						Qii, Qij, Qjj,
+						Li, Ui, Lj, Uj,
+						mu_i, mu_j);
+
+				// update alpha
+				alpha(i) += mu_i;
+				alpha(j) += mu_j;
+
+				// update the gradient
+				for (a = 0; a < activeEx; a++)
+				{
+					double k_i = q_i[a];
+					double k_j = q_j[a];
+					tExample* ex = &example[a];
+					unsigned int ya = ex->label;
+					bc = ex->active;
+					for (b = 0; b < bc; b++)
+					{
+						unsigned int p = ex->variables[b];
+						unsigned int vp = variable[p].label;
+						double km_i = Modifier(yi, ya, vi, vp);
+						double km_j = Modifier(yj, ya, vj, vp);
+						gradient(p) -= ((mu_i * km_i * k_i) + (mu_j * km_j * k_j));
+					}
+				}
+			}  
+
+			shrinkCounter--;
+			if (shrinkCounter == 0)
+			{
+				// shrink the problem
+				Shrink();
+
+				shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+			}
+
+			iter++;
 		}
-
-		iter++;
 	}
+
 	if (iter == maxIter) optimal = false;
 
 	// return alpha
@@ -1960,114 +2132,7 @@ void QpBoxAllInOneDecomp::Solve(unsigned int classes,
 	}
 }
 
-void QpBoxAllInOneDecomp::Continue(double largerC, Array<double>& solutionVector)
-{
-	unsigned int a, b, bc, i = 0, j;
-	float* q = NULL;
-
-	solutionVector.resize(variables, false);
-
-	// set the new box size
-	for (a = 0; a < variables; a++)
-	{
-		if (boxMax(a) > 0.0) boxMax(a) = largerC;
-	}
-
-	// initial shrinking (useful for dummy variables
-	// AND recent non-support-vectors)
-	// Shrink();
-
-	bUnshrinked = false;
-	unsigned int shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
-
-	// decomposition loop
-	while (true)
-	{
-		// select a working set and check for optimality
-		if (SelectWorkingSet(i))
-		{
-			// seems to be optimal
-
-			// do costly unshrinking
-			Unshrink(true);
-
-			// check again on the whole problem
-			if (SelectWorkingSet(i)) break;
-
-			// shrink again
-			Shrink();
-			shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
-		}
-
-		// update
-		{
-			double ai = alpha(i);
-			double Li = boxMin(i);
-			double Ui = boxMax(i);
-			unsigned int ei = variable[i].example;
-			unsigned int vi = variable[i].label;
-			unsigned int yi = example[ei].label;
-
-			// update alpha, that is, solve the sub-problem defined by i
-			double km = Modifier(vi, vi, yi, yi);
-			double nominator = gradient(i);
-			double denominator = km * diagonal(ei);
-			double mu = nominator / denominator;
-			if (ai + mu < Li) mu = Li - ai;
-			else if (ai + mu > Ui) mu = Ui - ai;
-			alpha(i) += mu;
-
-			// get the matrix row corresponding to the working set
-			q = kernelMatrix.Row(ei, 0, activeEx);
-
-			// update the gradient
-			for (a = 0; a < activeEx; a++)
-			{
-				double k = q[a];
-				tExample* ex = &example[a];
-				bc = ex->active;
-				for (b = 0; b < bc; b++)
-				{
-					j = ex->variables[b];
-
-					unsigned int vj = variable[j].label;
-					unsigned int yj = ex->label;
-					double km = Modifier(vi, vj, yi, yj);
-					gradient(j) -= mu * km * k;
-				}
-			}
-		}
-
-		shrinkCounter--;
-		if (shrinkCounter == 0)
-		{
-			// shrink the problem
-			Shrink();
-
-			shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
-		}
-
-		iter++;
-	}
-
-	// return alpha
-	for (i = 0; i < variables; i++)
-	{
-		unsigned int j = classes * example[variable[i].example].index + variable[i].label;
-		solutionVector(j) = alpha(i);
-	}
-}
-
-double QpBoxAllInOneDecomp::Modifier(unsigned int v_i, unsigned int v_j, unsigned int y_i, unsigned int y_j)
-{
-	double p = m_prototypeProduct(y_i, y_j) - m_prototypeProduct(v_i, y_j) - m_prototypeProduct(y_i, v_j) + m_prototypeProduct(v_i, v_j);
-	// check for zero entry in sparse matrix
-	if (p == 0.0) return 0.0;
-	p /= (m_prototypeLength(y_i, v_i) * m_prototypeLength(y_j, v_j));
-	return p;
-}
-
-bool QpBoxAllInOneDecomp::SelectWorkingSet(unsigned int& i)
+bool QpMcDecomp::SelectWorkingSet(unsigned int& i)
 {
 	double largest = 0.0;
 	unsigned int a;
@@ -2098,7 +2163,117 @@ bool QpBoxAllInOneDecomp::SelectWorkingSet(unsigned int& i)
 	return (largest < epsilon);
 }
 
-void QpBoxAllInOneDecomp::Shrink()
+bool QpMcDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
+{
+	double maxGrad = 0.0;
+	unsigned int a;
+
+	// select first variable i
+	// with first order method
+	for (a = 0; a < activeVar; a++)
+	{
+		double v = alpha(a);
+		double g = gradient(a);
+		if (v < boxMax(a))
+		{
+			if (g > maxGrad)
+			{
+				maxGrad = g;
+				i = a;
+			}
+		}
+		if (v > boxMin(a))
+		{
+			if (-g > maxGrad)
+			{
+				maxGrad = -g;
+				i = a;
+			}
+		}
+	}
+
+	// KKT stopping condition
+	if (maxGrad < epsilon) return true;
+
+	unsigned int ei = variable[i].example;
+	unsigned int vi = variable[i].label;
+	unsigned int yi = example[ei].label;
+	double gi = gradient(i);
+
+	float* q = kernelMatrix.Row(ei,0, activeEx);
+	double Qii = variable[i].diagonal;
+
+	// select second variable j
+	// with second order method
+	double maxGain = 0.0;
+	for (a=0; a<activeVar; a++)
+	{
+		if (a == i) continue;
+
+		double ga = gradient(a);
+		if ((alpha(a) > boxMin(a) && ga < 0.0)
+				|| (alpha(a) < boxMax(a) && ga > 0.0))
+		{
+			unsigned int ea = variable[a].example;
+			unsigned int va = variable[a].label;
+			unsigned int ya = example[ea].label;
+			double ga = gradient(a);
+
+			double k = q[ea];
+			double km = Modifier(yi, ya, vi, va);
+			double Qia = km * k;
+			double Qaa = variable[a].diagonal;
+
+			double QD = Qii * Qaa;
+			double detQ = QD - Qia * Qia;
+			if (detQ < 1e-10 * QD)
+			{
+				if (Qii == 0.0 && Qaa == 0.0)
+				{
+					// Q has rank zero
+					if (gi != 0.0 || ga != 0.0)
+					{
+						j = a;
+						return false;		// infinite gain, return immediately
+					}
+				}
+				else
+				{
+					// Q has rank one
+					if (Qii * ga - Qia * gi != 0.0)
+					{
+						j = a;
+						return false;		// infinite gain, return immediately
+					}
+					else
+					{
+						double g2 = ga*ga + gi*gi;
+						double gain = (g2*g2) / (ga*ga*Qaa + 2.0*ga*gi*Qia + gi*gi*Qii);
+						if (gain > maxGain)
+						{
+							maxGain = gain;
+							j = a;
+						}
+					}
+				}
+			}
+			else
+			{
+				// Q has rank two
+				double gain = (ga*ga*Qii - 2.0*ga*gi*Qia + gi*gi*Qaa) / detQ;
+				if (gain > maxGain)
+				{
+					maxGain = gain;
+					j = a;
+				}
+			}
+		}
+	}
+
+	return false;		// solution is not optimal
+}
+
+void QpMcDecomp::Shrink()
 {
 	int a;
 	double v, g;
@@ -2162,7 +2337,7 @@ void QpBoxAllInOneDecomp::Shrink()
 	}
 }
 
-void QpBoxAllInOneDecomp::Unshrink(bool complete)
+void QpMcDecomp::Unshrink(bool complete)
 {
 	if (activeVar == variables) return;
 
@@ -2187,7 +2362,7 @@ void QpBoxAllInOneDecomp::Unshrink(bool complete)
 			unsigned int va = variable[a].label;
 			unsigned int ya = example[ea].label;
 
-			double km = Modifier(vi, va, yi, ya);
+			double km = Modifier(yi, ya, vi, va);
 			double k = q[ea];
 			gradient(a) -= km * k * v;
 		}
@@ -2200,7 +2375,7 @@ void QpBoxAllInOneDecomp::Unshrink(bool complete)
 	if (! complete) Shrink();
 }
 
-void QpBoxAllInOneDecomp::DeactivateVariable(unsigned int v)
+void QpMcDecomp::DeactivateVariable(unsigned int v)
 {
 	unsigned int ev = variable[v].example;
 	unsigned int iv = variable[v].index;
@@ -2231,11 +2406,10 @@ void QpBoxAllInOneDecomp::DeactivateVariable(unsigned int v)
 	activeVar--;
 }
 
-void QpBoxAllInOneDecomp::DeactivateExample(unsigned int e)
+void QpMcDecomp::DeactivateExample(unsigned int e)
 {
 	unsigned int j = activeEx - 1;
 
-	XCHG_A(double, diagonal, e, j);
 	XCHG_V(tExample, example, e, j);
 
 	unsigned int v;
@@ -2259,7 +2433,7 @@ void QpBoxAllInOneDecomp::DeactivateExample(unsigned int e)
 
 
 QpCrammerSingerDecomp::QpCrammerSingerDecomp(CachedMatrix& kernel, const Array<double>& y, unsigned int classes)
-		: kernelMatrix(kernel)
+: kernelMatrix(kernel)
 {
 	SIZE_CHECK(y.ndim() == 2);
 
@@ -2300,6 +2474,8 @@ QpCrammerSingerDecomp::QpCrammerSingerDecomp(CachedMatrix& kernel, const Array<d
 	}
 
 	maxIter = -1;
+	
+	shrinkCheck = true;
 }
 
 QpCrammerSingerDecomp::~QpCrammerSingerDecomp()
@@ -2308,10 +2484,10 @@ QpCrammerSingerDecomp::~QpCrammerSingerDecomp()
 
 
 void QpCrammerSingerDecomp::Solve(Array<double>& solutionVector,
-								  double beta,
-								  double eps)
+									double beta,
+									double eps)
 {
-	unsigned int a, b, bc, i = 0, j = 0;
+	unsigned int a, b, bc, i, j = 0;
 	float* q = NULL;
 
 	// prepare the solver internal variables
@@ -2346,7 +2522,7 @@ void QpCrammerSingerDecomp::Solve(Array<double>& solutionVector,
 	// compute the initial gradient
 	gradient = linear;
 	unsigned int e = 0xffffffff;
-	for (a = 0; a < activeEx; a++)
+	for (a=0; a<activeEx; a++)
 	{
 		tExample* ex = &example[a];
 		bc = ex->active;
@@ -2363,7 +2539,7 @@ void QpCrammerSingerDecomp::Solve(Array<double>& solutionVector,
 					q = kernelMatrix.Row(a, 0, activeEx);
 					e = a;
 				}
-				for (h = 0; h < activeVar; h++)
+				for (h=0; h<activeVar; h++)
 				{
 					unsigned int vh = variable[h].label;
 					if (vh == vj)
@@ -2387,6 +2563,8 @@ void QpCrammerSingerDecomp::Solve(Array<double>& solutionVector,
 	optimal = false;
 	while (iter != maxIter)
 	{
+	    if(shrinkCheck==true)
+	    {
 		// select a working set and check for optimality
 		if (SelectWorkingSet(i, j) <= epsilon)
 		{
@@ -2406,7 +2584,15 @@ void QpCrammerSingerDecomp::Solve(Array<double>& solutionVector,
 			Shrink();
 			shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
 		}
-
+	      }
+	      else 
+	      {
+		if (SelectWorkingSet(i, j) <= epsilon)
+			{
+				optimal = true;
+				break;
+			}
+	      }
 		// SMO update
 		{
 			// there is only one example corresponding to both variables:
@@ -2452,18 +2638,23 @@ void QpCrammerSingerDecomp::Solve(Array<double>& solutionVector,
 			}
 		}
 
-		shrinkCounter--;
-		if (shrinkCounter == 0)
+		if(shrinkCheck)
 		{
-			// shrink the problem
-			Shrink();
+		    shrinkCounter--;
+		    if (shrinkCounter == 0)
+		    {
+			    // shrink the problem
+			    Shrink();
 
-			shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+			    shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+		    }
 		}
 
 		iter++;
 	}
 	if (iter == maxIter) optimal = false;
+	  
+// 	std::cout<<"iter = "<<iter<<std::endl;
 
 	// return alpha
 	for (i = 0; i < variables; i++)
@@ -2480,14 +2671,14 @@ double QpCrammerSingerDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
 	double largest = 0.0;
 
 	unsigned int a, b, bc, w;
-	for (a = 0; a < activeEx; a++)
+	for (a=0; a<activeEx; a++)
 	{
 		tExample* ex = &example[a];
 		bc = ex->active;
 		double m = 1e100;
 		double M = -1e100;
 		unsigned int n = 0, N = 1;
-		for (b = 0; b < bc; b++)
+		for (b=0; b<bc; b++)
 		{
 			w = ex->variables[b];
 			double v = alpha(w);
@@ -2537,14 +2728,14 @@ void QpCrammerSingerDecomp::Shrink()
 	// loop through the examples
 	bool se = false;
 	int a;
-	for (a = activeEx - 1; a >= 0; a--)
+	for (a = activeEx-1; a >= 0; a--)
 	{
 		// loop through the variables corresponding to the example
 		tExample* ex = &example[a];
 		unsigned int b, bc = ex->active;
 		double m = 1e100;
 		double M = -1e100;
-		for (b = 0; b < bc; b++)
+		for (b=0; b<bc; b++)
 		{
 			unsigned int w = ex->variables[b];
 			double v = alpha(w);
@@ -2564,7 +2755,7 @@ void QpCrammerSingerDecomp::Shrink()
 				}
 			}
 		}
-		for (b = 0; b < bc; b++)
+		for (b=0; b<bc; b++)
 		{
 			unsigned int w = ex->variables[b];
 			double v = alpha(w);
@@ -2675,7 +2866,7 @@ void QpCrammerSingerDecomp::DeactivateExample(unsigned int e)
 	unsigned int v;
 	unsigned int* pe = example[e].variables;
 	unsigned int* pj = example[j].variables;
-	for (v = 0; v < classes; v++)
+	for (v=0; v<classes; v++)
 	{
 		variable[pe[v]].example = e;
 		variable[pj[v]].example = j;
@@ -2687,895 +2878,3 @@ void QpCrammerSingerDecomp::DeactivateExample(unsigned int e)
 
 	activeEx--;
 }
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-void QpBoxAndEqCG::Solve(const Array<double>& quadratic,
-						 const Array<double>& linear,
-						 const Array<double>& boxMin,
-						 const Array<double>& boxMax,
-						 const Array<double>& eqMat,
-						 Array<double>& point,
-						 double accuracy)
-{
-	SIZE_CHECK(quadratic.ndim() == 2);
-	SIZE_CHECK(linear.ndim() == 1);
-	SIZE_CHECK(boxMin.ndim() == 1);
-	SIZE_CHECK(boxMax.ndim() == 1);
-	SIZE_CHECK(eqMat.ndim() == 2);
-	SIZE_CHECK(point.ndim() == 1);
-
-	int dimension = quadratic.dim(0);
-	int equations = eqMat.dim(0);
-
-	SIZE_CHECK((int)quadratic.dim(1) == dimension);
-	SIZE_CHECK((int)linear.dim(0) == dimension);
-	SIZE_CHECK((int)boxMin.dim(0) == dimension);
-	SIZE_CHECK((int)boxMax.dim(0) == dimension);
-	SIZE_CHECK((int)eqMat.dim(1) == dimension);
-	SIZE_CHECK((int)point.dim(0) == dimension);
-
-	int i, j;
-	Array<double> direction(dimension);
-	Array<bool> active(dimension);
-	Array<double> gradient(dimension);
-	Array<double> conjugate(dimension);
-	Array<double> equality(eqMat);
-	conjugate = 0.0;
-	double DirLen2 = 0.0;
-	double DirLen2old = 0.0;
-	double accuracy2 = accuracy * accuracy;
-	bool changed, bounds_changed;
-	int nActive = 0;
-	int nUpdatesLeft = -1;
-	int bound = -1;
-	int nReset = 0;
-	double step = 0.0;
-	double clipped = 0.0;
-	double value;
-	double first = 0.0;
-	double second = 0.0;
-	double norm2;
-
-	active = false;
-
-	int iter, maxiter = 10 * dimension * dimension;
-	for (iter = 0; iter < maxiter; iter++)
-	{
-		if (nUpdatesLeft == -1)
-		{
-			// compute the gradient from scratch
-			for (i = 0; i < dimension; i++)
-			{
-				value = linear(i);
-				for (j = 0; j < dimension; j++) value += quadratic(i, j) * point(j);
-				gradient(i) = value;
-			}
-			nUpdatesLeft = 100;
-		}
-
-		// compute the set of active inequality constraints
-		bounds_changed = false;
-		do
-		{
-			changed = false;
-			for (i = 0; i < dimension; i++)
-			{
-				if (active(i))
-				{
-					equality = eqMat;
-					active(i) = false;
-					Project(active, equality, gradient, direction);
-					double g = direction(i);
-					if ((g <= 0.0 && point(i) == boxMin(i))
-							|| (g >= 0.0 && point(i) == boxMax(i)))
-					{
-						nActive--;
-						changed = true;
-					}
-					else active(i) = true;
-				}
-				else
-				{
-					equality = eqMat;
-					active(i) = true;
-					Project(active, equality, gradient, direction);
-					double g = direction(i);
-					if ((g > 0.0 && point(i) == boxMin(i))
-							|| (g < 0.0 && point(i) == boxMax(i)))
-					{
-						nActive++;
-						changed = true;
-					}
-					else active(i) = false;
-				}
-			}
-			bounds_changed = bounds_changed || changed;
-		}
-		while (changed);
-		if (bounds_changed && iter > 0) nReset = 0;
-
-		// check corner condition
-		if (nActive + 1 >= dimension) break;
-
-		// compute the gradient of the sub problem
-		// projected onto the equality constraint
-		equality = eqMat;
-		Project(active, equality, gradient, direction);
-
-		// compute the length of the remaining vector
-		DirLen2old = DirLen2;
-		DirLen2 = 0.0;
-		for (i = 0; i < dimension; i++)
-		{
-			if (active(i)) continue;
-			value = direction(i);
-			DirLen2 += value * value;
-		}
-
-		// update the conjugate direction
-		nReset--;
-		if (nReset == 0)
-		{
-			// In theory we are done.
-			// However, we may which to continue
-			// in order to avoid numerical problems.
-			break;
-		}
-		else if (nReset < 0)
-		{
-			// the set of active constraints has changed
-			conjugate = direction;
-			nReset = dimension - equations - nActive;
-		}
-		else
-		{
-			double beta = DirLen2 / DirLen2old;
-			for (i = 0; i < dimension; i++)
-			{
-				if (active(i)) continue;
-				else conjugate(i) = direction(i) + beta * conjugate(i);
-			}
-		}
-
-		// compute the unconstrained Newton step
-		first = 0.0;
-		second = 0.0;
-		norm2 = 0.0;
-		for (i = 0; i < dimension; i++)
-		{
-			if (active(i)) continue;
-			double c = conjugate(i);
-			double Qc = 0.0;
-			for (j = 0; j < dimension; j++)
-			{
-				if (active(j)) continue;
-				Qc += quadratic(i, j) * conjugate(j);
-			}
-			first += gradient(i) * c;
-			second += c * Qc;
-			norm2 += c * c;
-		}
-		if (second <= 0.0) break;
-		step = -first / second;
-
-		// check stopping condition
-		if (nReset <= 1 && step * step * norm2 < accuracy2) break;
-
-		// clip the step
-		bound = -1;
-		clipped = step;
-		for (i = 0; i < dimension; i++)
-		{
-			if (active(i)) continue;
-			if (point(i) + clipped * conjugate(i) > boxMax(i))
-			{
-				clipped = (boxMax(i) - point(i)) / conjugate(i);
-				bound = i;
-			}
-			else if (point(i) + clipped * conjugate(i) < boxMin(i))
-			{
-				clipped = (boxMin(i) - point(i)) / conjugate(i);
-				bound = i;
-			}
-		}
-
-		// update the gradient to avoid full recomputation
-		if (5 * nActive > dimension && nUpdatesLeft > 0)
-		{
-			// update the gradient
-			for (i = 0; i < dimension; i++)
-			{
-				if (active(i)) continue;
-				double delta = clipped * conjugate(i);
-				for (j = 0; j < dimension; j++) gradient(j) += quadratic(i, j) * delta;
-			}
-			nUpdatesLeft--;
-		}
-		else nUpdatesLeft = -1;
-
-		// go!
-		changed = false;
-		for (i = 0; i < dimension; i++)
-		{
-			if (active(i)) continue;
-			double p = point(i);
-			double newp = p + clipped * conjugate(i);
-			point(i) = newp;
-			if (p != newp) changed = true;
-		}
-
-		// stop if the step has no numerical effect
-		if (! changed) break;
-
-		// check the bound carefully
-		if (bound != -1)
-		{
-// 			if (point(bound) > (1.0 - 1e-12) * boxMax(bound)) point(bound) = boxMax(bound);
-// 			else if (point(bound) < (1.0 + 1e-12) * boxMin(bound)) point(bound) = boxMin(bound);
-			double threshold = 0.5 * (boxMax(bound) + boxMin(bound));
-			if (point(bound) > threshold) point(bound) = boxMax(bound);
-			else point(bound) = boxMin(bound);
-			nReset = 0;
-		}
-	}
-
-	if (iter >= maxiter)
-	{
-		throw SHARKEXCEPTION("QpBoxAndEqCG did not converge");
-		printf("\n\n***************** QpBoxAndEqCG did not converge!!!\n\n");
-		printf("boxMin:\n");
-		writeArray(boxMin, std::cout);
-		printf("boxMax:\n");
-		writeArray(boxMax, std::cout);
-		printf("point:\n");
-		writeArray(point, std::cout);
-		printf("gradient:\n");
-		writeArray(gradient, std::cout);
-		printf("direction:\n");
-		writeArray(direction, std::cout);
-		printf("conjugate:\n");
-		writeArray(conjugate, std::cout);
-		printf("active:\n");
-		writeArray(active, std::cout);
-	}
-}
-
-void QpBoxAndEqCG::Orthogonalize(int oc, const Array<double>& ortho, const Array<bool>& active, ArrayReference<double> vec)
-{
-	int o, d, dim = ortho.dim(1);
-	double scp, norm;
-
-	// orthogonalize
-	for (o = 0; o < oc; o++)
-	{
-		scp = 0.0;
-		for (d = 0; d < dim; d++)
-		{
-			if (active(d)) continue;
-			scp += ortho(o, d) * vec(d);
-		}
-		for (d = 0; d < dim; d++)
-		{
-			if (active(d)) vec(d) = 0.0;
-			else vec(d) -= scp * ortho(o, d);
-		}
-	}
-
-	// normalize
-	scp = 0.0;
-	for (d = 0; d < dim; d++)
-	{
-		if (active(d)) continue;
-		scp += vec(d) * vec(d);
-	}
-	norm = sqrt(scp);
-	for (d = 0; d < dim; d++)
-	{
-		if (active(d)) continue;
-		vec(d) /= norm;
-	}
-}
-
-void QpBoxAndEqCG::Orthogonalize(Array<double>& eq, const Array<bool>& active)
-{
-	int e, ec = eq.dim(0);
-	for (e = 0; e < ec; e++)
-	{
-		Orthogonalize(e, eq, active, eq[e]);
-	}
-}
-
-void QpBoxAndEqCG::Project(const Array<bool>& active, Array<double>& eq, const Array<double>& gradient, Array<double>& direction)
-{
-	Orthogonalize(eq, active);
-
-	int o, oc = eq.dim(0);
-	int d, dim = eq.dim(1);
-	double scp;
-	for (o = 0; o < oc; o++)
-	{
-		scp = 0.0;
-		for (d = 0; d < dim; d++)
-		{
-			if (active(d)) continue;
-			scp += eq(o, d) * gradient(d);
-		}
-		for (d = 0; d < dim; d++)
-		{
-			if (active(d)) direction(d) = 0.0;
-			else direction(d) = gradient(d) - scp * eq(o, d);
-		}
-	}
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-void QpBoxAndEqDecomp::Solve(const Array<double>& quadratic,
-							 const Array<double>& linear,
-							 const Array<double>& boxMin,
-							 const Array<double>& boxMax,
-							 const Array<double>& eqMat,
-							 Array<double>& point,
-							 double accuracy)
-{
-	SIZE_CHECK(quadratic.ndim() == 2);
-	SIZE_CHECK(linear.ndim() == 1);
-	SIZE_CHECK(boxMin.ndim() == 1);
-	SIZE_CHECK(boxMax.ndim() == 1);
-	SIZE_CHECK(eqMat.ndim() == 2);
-	SIZE_CHECK(point.ndim() == 1);
-
-	int dimension = quadratic.dim(0);
-	int equations = eqMat.dim(0);
-
-	SIZE_CHECK((int)quadratic.dim(1) == dimension);
-	SIZE_CHECK((int)linear.dim(0) == dimension);
-	SIZE_CHECK((int)boxMin.dim(0) == dimension);
-	SIZE_CHECK((int)boxMax.dim(0) == dimension);
-	SIZE_CHECK((int)eqMat.dim(1) == dimension);
-	SIZE_CHECK((int)point.dim(0) == dimension);
-
-	Array<double> eq(eqMat);
-	Orthogonalize(eq);
-
-	Array<double> gradient(linear);
-	Array<double> direction(dimension);
-	int workingsize = 2 * equations + 1;
-	int i, j, k;
-
-	Array<int> workingset(workingsize);
-	Array<double> subQ(workingsize, workingsize);
-	Array<double> subL(workingsize);
-	Array<double> subBoxMin(workingsize);
-	Array<double> subBoxMax(workingsize);
-	Array<double> subEqMat(equations, workingsize);
-	Array<double> subPoint(workingsize);
-
-	// initialize the gradient
-	for (i = 0; i < dimension; i++)
-	{
-		double p = point(i);
-		if (p != 0.0)
-		{
-			for (j = 0; j < dimension; j++) gradient(j) += p * quadratic(i, j);
-		}
-	}
-
-	// decomposition loop
-	while (true)
-	{
-		// select a working set
-		double gNorm1 = 0.0;
-		{
-			// project the gradient onto the equality constraints
-			Project(eq, gradient, direction);
-
-			// find the k largest free components of the direction
-			for (i = 0; i < workingsize; i++)
-			{
-				int best = 0;
-				double bestG = 0.0;
-				for (j = 0; j < dimension; j++)
-				{
-					double d = direction(j);
-					if (point(j) == boxMin(j) && d >= 0.0) continue;
-					if (point(j) == boxMax(j) && d <= 0.0) continue;
-					d = fabs(d);
-					if (d > bestG)
-					{
-						for (k = 0; k < i; k++) if (workingset(k) == j) break;
-						if (k == i)
-						{
-							bestG = d;
-							best = j;
-						}
-					}
-				}
-				workingset(i) = best;
-				gNorm1 += bestG;
-			}
-		}
-
-		// check the stopping condition
-		if (gNorm1 < accuracy) break;
-
-		// define the sub problem and solve it
-		for (i = 0; i < workingsize; i++)
-		{
-			j = workingset(i);
-			for (k = 0; k < workingsize; k++) subQ(i, k) = quadratic(j, workingset(k));
-			subL(i) = linear(j);
-			subBoxMin(i) = boxMin(j);
-			subBoxMax(i) = boxMax(j);
-			for (k = 0; k < equations; k++) subEqMat(k, i) = eqMat(k, j);
-			subPoint(i) = point(j);
-		}
-		QpBoxAndEqCG::Solve(subQ, subL, subBoxMin, subBoxMax, subEqMat, subPoint);
-
-		// update point and gradient
-		for (i = 0; i < workingsize; i++)
-		{
-			j = workingset(i);
-			double delta = subPoint(i) - point(j);
-			if (delta == 0.0) continue;
-			for (k = 0; k < dimension; k++) gradient(k) += delta * quadratic(j, k);
-			point(j) = subPoint(i);
-		}
-	}
-}
-
-void QpBoxAndEqDecomp::Orthogonalize(Array<double>& eq)
-{
-	int e, ec = eq.dim(0);
-	int o, d, dim = eq.dim(1);
-	double scp, norm;
-	for (e = 0; e < ec; e++)
-	{
-		// orthogonalize
-		for (o = 0; o < e; o++)
-		{
-			scp = 0.0;
-			for (d = 0; d < dim; d++)
-			{
-				scp += eq(o, d) * eq(e, d);
-			}
-			for (d = 0; d < dim; d++)
-			{
-				eq(e, d) -= scp * eq(o, d);
-			}
-		}
-
-		// normalize
-		scp = 0.0;
-		for (d = 0; d < dim; d++)
-		{
-			scp += eq(e, d) * eq(e, d);
-		}
-		norm = sqrt(scp);
-		for (d = 0; d < dim; d++)
-		{
-			eq(e, d) /= norm;
-		}
-	}
-}
-
-void QpBoxAndEqDecomp::Project(const Array<double>& eq, const Array<double>& gradient, Array<double>& direction)
-{
-	int o, oc = eq.dim(0);
-	int d, dim = eq.dim(1);
-	double scp;
-	for (o = 0; o < oc; o++)
-	{
-		scp = 0.0;
-		for (d = 0; d < dim; d++)
-		{
-			scp += eq(o, d) * gradient(d);
-		}
-		for (d = 0; d < dim; d++)
-		{
-			direction(d) = gradient(d) - scp * eq(o, d);
-		}
-	}
-}
-
-
-////////////////////////////////////////////////////////////
-
-
-// #define ACCURACY 1e-12
-//
-//
-// //
-// // perform an affine linear transformation
-// // of the given problem with a twofold
-// // purpose:
-// //
-// // (1) reduce the dimension according to
-// //     the equality constraints
-// // (2) make the objective functions
-// //     isotropic
-// //
-// QpAffine::QpAffine(
-// 			const Array<double>& quadratic,
-// 			const Array<double>& linear,
-// 			const Array<double>& eqMat,
-// 			const Array<double>& ineqMat,
-// 			const Array<double>& ineqVec
-// 	  )
-// : quadraticOrig(quadratic)
-// , constraintMatOrig(ineqMat)
-// , constraintVecOrig(ineqVec)
-// {
-// 	SIZE_CHECK(quadratic.ndim() == 2);
-// 	SIZE_CHECK(linear.ndim() == 1);
-// 	SIZE_CHECK(eqMat.ndim() == 2);
-// 	SIZE_CHECK(ineqMat.ndim() == 2);
-// 	SIZE_CHECK(ineqVec.ndim() == 1);
-//
-// 	dimension = quadratic.dim(0);
-//
-// 	SIZE_CHECK((int)quadratic.dim(1) == dimension);
-// 	SIZE_CHECK((int)linear.dim(0) == dimension);
-// 	SIZE_CHECK((int)eqMat.dim(1) == dimension);
-// 	SIZE_CHECK((int)ineqMat.dim(1) == dimension);
-// 	SIZE_CHECK(ineqMat.dim(0) == ineqVec.dim(0));
-//
-// 	int i, j, k;
-// 	int c, cc;
-// 	std::vector<double*> list;
-//
-// 	// compute an orthogonal transformation
-// 	// s.t. the last k coordinates are within
-// 	// the equality constraint normal space
-// 	Array<double> trans1(dimension, dimension);
-// 	Array<double> inverse1(dimension, dimension);
-// 	cc = eqMat.dim(0);
-// 	for (i=dimension-1, c=0; c<cc; c++)
-// 	{
-// 		for (j=0; j<dimension; j++) trans1(i, j) = eqMat(c, j);
-// 		Orthogonalize(list, trans1[i]);
-// 		if (Normalize(trans1[i]))
-// 		{
-// 			list.push_back(&trans1(i, 0));
-// 			i--;
-// 		}
-// 		if ((int)list.size() >= dimension) throw SHARKEXCEPTION("[QpAffine::QpAffine] too many equality constraints");
-// 	}
-// 	freedim = i + 1;
-// 	for (; i >= 0; i--)
-// 	{
-// 		do
-// 		{
-// 			for (j=0; j<dimension; j++) trans1(i, j) = Rng::gauss();
-// 			Orthogonalize(list, trans1[i]);
-// 		}
-// 		while (! Normalize(trans1[i]));
-// 		list.push_back(&trans1(i, 0));
-// 	}
-// 	inverse1 = trans1;
-// 	inverse1.transpose();
-//
-// 	// compute a positive definite transformation
-// 	// s.t. the quadratic term vanishes on the
-// 	// last k components and becomes the unit
-// 	// matrix in the remaining components.
-// 	Array<double> trans2(freedim, freedim);
-// 	Array<double> inverse2(freedim, freedim);
-// 	Array2D<double> tmp(freedim, dimension);
-// 	Array2D<double> A(freedim, freedim);
-// 	Array2D<double> U(freedim, freedim);
-// 	Array2D<double> V(freedim, freedim);
-// 	Array<double> lambda(freedim);
-// 	MatMul(trans1, quadratic, tmp);
-// 	MatMul(tmp, inverse1, A);
-// 	svd(A, U, V, lambda);
-// 	for (k=0; k<freedim; k++) lambda(k) = sqrt(lambda(k));
-// 	V.transpose();
-// 	for (i=0; i<freedim; i++)
-// 	{
-// 		for (j=0; j<freedim; j++)
-// 		{
-// 			double value;
-// 			value = 0.0;
-// 			for (k=0; k<freedim; k++) value += U(i, k) / lambda(k) * V(k, j);
-// 			trans2(i, j) = value;
-// 			value = 0.0;
-// 			for (k=0; k<freedim; k++) value += U(i, k) * lambda(k) * V(k, j);
-// 			inverse2(i, j) = value;
-// 		}
-// 	}
-//
-// 	// compute the composed transformation,
-// 	// its inverse and its transpose
-// 	transform.resize(freedim, dimension, false);
-// 	inverse.resize(dimension, freedim, false);
-// 	MatMul(trans2, trans1, transform);
-// 	MatMul(inverse1, inverse2, inverse);
-//
-// 	// transform the objective function and
-// 	// the inequality constraints
-// 	this->linear.resize(freedim, false);
-// 	MatVec(transform, linear, this->linear);
-//
-// 	cc = ineqMat.dim(0);
-// 	constraintMatTrans.resize(cc, freedim, false);
-// 	for (c=0; c<cc; c++) MatVec(transform, ineqMat[c], constraintMatTrans[c]);
-// }
-//
-// QpAffine::~QpAffine()
-// {
-// }
-//
-//
-// void QpAffine::Solve(Array<double>& point)
-// {
-// 	// strategy:
-// 	// transform point
-// 	// loop
-// 	//   compute direction
-// 	//   determine active constraints
-// 	//   transform active constraints into an orthogonal system
-// 	//   project direction onto constraints
-// 	//   compute the newton step
-// 	//   check when we bump into the next inactive constraint
-// 	//   check if we can reach the optimum, then move there and break
-// 	//   move to the collision position
-// 	// end loop
-// 	// retransform point
-//
-// 	SIZE_CHECK(point.ndim() == 1);
-// 	SIZE_CHECK((int)point.dim(0) == dimension);
-//
-// 	int c, cc = constraintVecOrig.dim(0);
-// 	int a;
-// 	int i, j;
-// 	bool changed;
-// 	Array<bool> active(cc);
-// 	std::vector<double*> list;
-// 	std::vector<double*> single(1);
-// 	Array<double> ortho(cc, freedim);
-// 	Array<double> direction(freedim);
-// 	Array<double> pt(freedim);
-// 	Array<double> constraintVecTrans(cc);
-// 	Array<double> linearTrans(freedim);
-//
-// 	// compute the linear part
-// 	Array<double> tmp1(dimension);
-// 	Array<double> tmp2(freedim);
-// 	MatVec(quadraticOrig, point, tmp1);
-// 	MatVec(transform, tmp1, tmp2);
-// 	for (i=0; i<freedim; i++) linearTrans(i) = linear(i) + tmp2(i);
-//
-// 	// compute the inequality constraint vector
-// 	for (c=0; c<cc; c++)
-// 	{
-// 		double value = constraintVecOrig(c);
-// 		for (i=0; i<dimension; i++) value += constraintMatOrig(c, i) * point(i);
-// 		constraintVecTrans(c) = value;
-// 	}
-//
-// 	// transform the point
-// 	pt = 0.0;
-//
-// 	// loop
-// 	while (true)
-// 	{
-// 		list.clear();
-// 		a = 0;
-//
-// 		for (i=0; i<freedim; i++) direction(i) = -(linearTrans(i) + pt(i));
-//
-// 		active = false;
-// 		do
-// 		{
-// 			changed = false;
-// 			for (c=0; c<cc; c++)
-// 			{
-// 				if (active(c)) continue;
-// 				double scp = Scp(direction, constraintMatTrans[c]);
-// 				double value = Scp(pt, constraintMatTrans[c]) + constraintVecTrans(c);
-// 				if (scp > 0.0 && value >= -ACCURACY)
-// 				{
-// 					active(c) = true;
-// 					changed = true;
-// 					for (i=0; i<freedim; i++) ortho(a, i) = constraintMatTrans(c, i);
-// 					Orthogonalize(list, ortho[a]);
-// 					if (Normalize(ortho[a]))
-// 					{
-// 						list.push_back(&ortho(a, 0));
-// 						single[0] = &ortho(a, 0);
-// 						Orthogonalize(single, direction);
-// 						a++;
-// 					}
-// 				}
-// 			}
-// 		}
-// 		while (changed);
-//
-// 		if (! Normalize(direction)) break;
-//
-// 		// compute the newton step
-// 		double step = 0.0;
-// 		for (i=0; i<freedim; i++)
-// 		{
-// 			step -= (linearTrans(i) + pt(i)) * direction(i);
-// 		}
-// 		if (fabs(step) < ACCURACY) break;
-//
-// 		// check inactive constraints
-// 		double bestDist = step;
-// 		for (c=0; c<cc; c++)
-// 		{
-// 			if (active(c)) continue;
-// 			double scp = Scp(direction, constraintMatTrans[c]);
-// 			if (scp <= 0.0) continue;
-// 			double t = -(constraintVecTrans(c) + Scp(pt, constraintMatTrans[c])) / scp;
-// 			if (t < bestDist) bestDist = t;
-// 		}
-//
-// 		// move
-// 		for (i=0; i<freedim; i++) pt(i) += bestDist * direction(i);
-//
-// 		// check stopping condition
-// 		if (bestDist == step) break;
-// 	}
-//
-// 	// transform the point back
-// 	for (j=0; j<dimension; j++)
-// 	{
-// 		double value = 0.0;
-// 		for (i=0; i<freedim; i++) value += transform(i, j) * pt(i);
-// 		point(j) += value;
-// 	}
-// }
-//
-// // static
-// void QpAffine::Orthogonalize(const std::vector<double*>& ortho, Array<double>& vec)
-// {
-// 	int i, dim = vec.dim(0);
-// 	int e, ec = ortho.size();
-//
-// 	// orthogonalize
-// 	for (e=0; e<ec; e++)
-// 	{
-// 		double* o = ortho[e];
-// 		double scp = 0.0;
-// 		for (i=0; i<dim; i++) scp += o[i] * vec(i);
-// 		for (i=0; i<dim; i++) vec(i) -= scp * o[i];
-// 	}
-// }
-//
-// // static
-// void QpAffine::Orthogonalize(const std::vector<double*>& ortho, ArrayReference<double> vec)
-// {
-// 	int i, dim = vec.dim(0);
-// 	int e, ec = ortho.size();
-//
-// 	// orthogonalize
-// 	for (e=0; e<ec; e++)
-// 	{
-// 		double* o = ortho[e];
-// 		double scp = 0.0;
-// 		for (i=0; i<dim; i++) scp += o[i] * vec(i);
-// 		for (i=0; i<dim; i++) vec(i) -= scp * o[i];
-// 	}
-// }
-//
-// // static
-// bool QpAffine::Normalize(Array<double>& vec)
-// {
-// 	// normalize
-// 	double len2 = 0.0;
-// 	int i, dim = vec.dim(0);
-// 	for (i=0; i<dim; i++)
-// 	{
-// 		double entry = vec(i);
-// 		len2 += entry * entry;
-// 	}
-// 	if (len2 == 0.0) return false;
-// 	double len = sqrt(len2);
-// 	for (i=0; i<dim; i++) vec(i) /= len;
-//
-// 	return true;
-// }
-//
-// // static
-// bool QpAffine::Normalize(ArrayReference<double> vec)
-// {
-// 	// normalize
-// 	double len2 = 0.0;
-// 	int i, dim = vec.dim(0);
-// 	for (i=0; i<dim; i++)
-// 	{
-// 		double entry = vec(i);
-// 		len2 += entry * entry;
-// 	}
-// 	if (len2 == 0.0) return false;
-// 	double len = sqrt(len2);
-// 	for (i=0; i<dim; i++) vec(i) /= len;
-//
-// 	return true;
-// }
-//
-// // static
-// void QpAffine::MatMul(const Array<double>& M1, const Array<double>& M2, Array<double>& result)
-// {
-// 	SIZE_CHECK(M1.ndim() == 2);
-// 	SIZE_CHECK(M2.ndim() == 2);
-// 	SIZE_CHECK(result.ndim() == 2);
-//
-// 	int i, j, k;
-// 	int dx = result.dim(1);
-// 	int dy = result.dim(0);
-// 	int d = (M1.dim(1) < M2.dim(0)) ? M1.dim(1) : M2.dim(0);
-// 	for (i=0; i<dy; i++)
-// 	{
-// 		for (j=0; j<dx; j++)
-// 		{
-// 			double value = 0.0;
-// 			for (k=0; k<d; k++) value += M1(i, k) * M2(k, j);
-// 			result(i, j) = value;
-// 		}
-// 	}
-// }
-//
-// // static
-// void QpAffine::MatVec(const Array<double>& Mat, const Array<double>& vec, Array<double>& result)
-// {
-// 	SIZE_CHECK(Mat.ndim() == 2);
-// 	SIZE_CHECK(vec.ndim() == 1);
-// 	SIZE_CHECK(result.ndim() == 1);
-// 	SIZE_CHECK(Mat.dim(1) == vec.dim(0));
-// 	SIZE_CHECK(Mat.dim(0) == result.dim(0));
-//
-// 	int v, vc = vec.dim(0);
-// 	int r, rc = result.dim(0);
-//
-// 	for (r=0; r<rc; r++)
-// 	{
-// 		double value = 0.0;
-// 		for (v=0; v<vc; v++) value += Mat(r, v) * vec(v);
-// 		result(r) = value;
-// 	}
-// }
-//
-// static
-// void QpAffine::MatVec(const Array<double>& Mat, const ArrayReference<double> vec, ArrayReference<double> result)
-// {
-// 	SIZE_CHECK(Mat.ndim() == 2);
-// 	SIZE_CHECK(vec.ndim() == 1);
-// 	SIZE_CHECK(result.ndim() == 1);
-// 	SIZE_CHECK(Mat.dim(1) == vec.dim(0));
-// 	SIZE_CHECK(Mat.dim(0) == result.dim(0));
-//
-// 	int v, vc = vec.dim(0);
-// 	int r, rc = result.dim(0);
-//
-// 	for (r=0; r<rc; r++)
-// 	{
-// 		double value = 0.0;
-// 		for (v=0; v<vc; v++) value += Mat(r, v) * vec(v);
-// 		result(r) = value;
-// 	}
-// }
-//
-// // static
-// double QpAffine::Scp(const Array<double>& vec1, ArrayReference<double> vec2)
-// {
-// 	SIZE_CHECK(vec1.ndim() == 1);
-// 	SIZE_CHECK(vec2.ndim() == 1);
-// 	SIZE_CHECK(vec1.dim(0) == vec2.dim(0));
-//
-// 	double ret = 0.0;
-// 	int i, ic = vec1.dim(0);
-// 	for (i=0; i<ic; i++)
-// 	{
-// 		ret += vec1(i) * vec2(i);
-// 	}
-// 	return ret;
-// }

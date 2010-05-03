@@ -36,7 +36,7 @@
 #include <EALib/IndividualT.h>
 #include <LinAlg/VecMat.h>
 
-
+//! \brief simple 1+1-ES
 class OnePlusOneES : public SearchAlgorithm<double*>
 {
 public:

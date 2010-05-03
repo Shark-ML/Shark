@@ -1,7 +1,6 @@
 #include <ReClaM/CMAC.h>
 
-
-size_t CMACFunction::getArrayIndexForTiling(size_t indexOfTiling,Array<double> const& point)const
+size_t CMACMap::getArrayIndexForTiling(size_t indexOfTiling,Array<double> const& point)const
 {
 
     size_t index = indexOfTiling * m_dimOffset(inputDimension);
@@ -20,10 +19,10 @@ size_t CMACFunction::getArrayIndexForTiling(size_t indexOfTiling,Array<double> c
     return index;
 }
 
-Array<size_t> CMACFunction::getIndizes(Array<double> const& point)const
+Array<size_t> CMACMap::getIndizes(Array<double> const& point)const
 {
     Array<size_t> output(m_tilings);
-    output=0;
+    output=0.0;
 
     for(size_t tiling = 0; tiling != m_tilings; ++tiling)
     {
@@ -33,13 +32,13 @@ Array<size_t> CMACFunction::getIndizes(Array<double> const& point)const
     return output;
 }
 
-CMACFunction::CMACFunction():m_tilings(0){}
+CMACMap::CMACMap():m_tilings(0){}
 
-CMACFunction::CMACFunction(int inputs, size_t numberOfTilings, size_t numberOfTiles, double lower, double upper)
+CMACMap::CMACMap(size_t inputs, size_t outputs, size_t numberOfTilings, size_t numberOfTiles, double lower, double upper)
     :m_offset(numberOfTilings, inputs), m_dimOffset(inputs + 1), m_tileBounds(inputs, 2), m_tilings(numberOfTilings)
 {
     inputDimension  = inputs;
-    outputDimension = 1;
+    outputDimension = outputs;
     m_tilings       = numberOfTilings;
 
     //initialize bounds
@@ -53,12 +52,19 @@ CMACFunction::CMACFunction(int inputs, size_t numberOfTilings, size_t numberOfTi
 
     //calculate number of parameters and the offsets for every input dimension
     size_t numberOfParameters = 1;
-    for(size_t inputDim = 0;inputDim != inputDimension + 1; ++inputDim)
+    for(size_t inputDim = 0;inputDim != inputDimension; ++inputDim)
     {
         m_dimOffset(inputDim) = numberOfParameters;
         numberOfParameters *= numberOfTiles;
     }
+    //parameters per tiling
+    m_dimOffset(inputDimension) = numberOfParameters;
+
+    //parameters for each output dimension
     numberOfParameters *= m_tilings;
+    m_parameters=numberOfParameters;
+    //parameters total
+    numberOfParameters *= outputs;
 
     //initialize parameter array with random values
     parameter.resize(numberOfParameters);
@@ -66,11 +72,11 @@ CMACFunction::CMACFunction(int inputs, size_t numberOfTilings, size_t numberOfTi
         parameter(i) = Rng::gauss(0,1);
 }
 
-CMACFunction::CMACFunction(int inputs, size_t numberOfTilings, size_t numberOfTiles, Array<double> const& bounds)
+CMACMap::CMACMap(size_t inputs, size_t outputs, size_t numberOfTilings, size_t numberOfTiles, Array<double> const& bounds)
     :m_offset(numberOfTilings, inputs), m_dimOffset(inputs + 1), m_tileBounds(inputs, 2), m_tilings(numberOfTilings)
 {
     inputDimension  = inputs;
-    outputDimension = 1;
+    outputDimension = outputs;
     m_tilings       = numberOfTilings;
 
     //initialize bounds
@@ -83,19 +89,27 @@ CMACFunction::CMACFunction(int inputs, size_t numberOfTilings, size_t numberOfTi
 
     //calculate number of parameters and the offsets for every input dimension
     size_t numberOfParameters = 1;
-    for(size_t inputDim = 0; inputDim != inputDimension + 1; ++inputDim)
+    for(size_t inputDim = 0;inputDim != inputDimension; ++inputDim)
     {
         m_dimOffset(inputDim) = numberOfParameters;
         numberOfParameters *= numberOfTiles;
     }
+    //parameters per tiling
+    m_dimOffset(inputDimension) = numberOfParameters;
+
+    //parameters for each output dimension
     numberOfParameters *= m_tilings;
+    m_parameters=numberOfParameters;
+    //parameters total
+    numberOfParameters *= outputs;
+
     //initialize parameter array with random values
     parameter.resize(numberOfParameters);
     for(size_t i=0;i!=numberOfParameters;++i)
         parameter(i) = Rng::gauss(0,1);
 }
 
-void CMACFunction::init(bool randomTiles)
+void CMACMap::init(bool randomTiles)
 {
     m_offset = 0;
     for(unsigned tiling = 0; tiling < m_tilings; ++tiling)
@@ -110,41 +124,86 @@ void CMACFunction::init(bool randomTiles)
     }
 }
 
-void CMACFunction::model(Array<double> const& input, Array<double>& output)
+void CMACMap::model(Array<double> const& input, Array<double>& output)
 {
     if (input.ndim() == 1)
     {
-        output.resize(1);
+        output.resize(outputDimension);
         output = 0;
 
         Array<size_t> indizes = getIndizes(input);
-        for(size_t i = 0; i != m_tilings; ++i)
-            output(0) += parameter( indizes(i) );
+        for(size_t o=0;o!=outputDimension;++o)
+        {
+            for(size_t i = 0; i != m_tilings; ++i)
+            {
+                output(o) += parameter( indizes(i)+ o*m_parameters);
+            }
+        }
     }
     else if (input.ndim() == 2)
     {
-        output.resize(input.dim(0), 1u);
+        output.resize(input.dim(0), outputDimension,false);
         output = 0;
+
+        Array<size_t> indizes = getIndizes(input);
 
         for(size_t i = 0;i != input.dim(0); ++i)
         {
-            Array<size_t> indizes = getIndizes(input);
-            for(size_t j = 0;j != m_tilings; ++j)
-                output(i,0) += parameter( indizes(j) );
+            for(size_t o=0;o!=outputDimension;++o)
+            {
+                for(size_t j = 0;j != m_tilings; ++j)
+                {
+                    output(i,o) += parameter( indizes(j) + o*m_parameters );
+                }
+            }
         }
     }
     else throw SHARKEXCEPTION("[CMAC::model] invalid number of dimensions.");
 }
 
-void CMACFunction::modelDerivative(Array<double> const& input, Array<double>& derivative)
+Array<double> CMACMap::getFeatureVector(Array<double> const& point)const
+{
+    Array<double> featureVector(m_parameters);
+    featureVector = 0;
+
+    Array<size_t> indizes = getIndizes(point);
+
+    for(size_t j=0; j != m_tilings; ++j)
+    {
+        featureVector(indizes(j)) = 1;
+    }
+
+    return featureVector;
+}
+
+void CMACMap::modelDerivative(Array<double> const& input, Array<double>& derivative)
 {
     if (input.ndim() != 1)
         throw SHARKEXCEPTION("[CMAC::modelDerivative] invalid number of dimensions.");
 
-    derivative.resize(1, getParameterDimension());
+    derivative.resize(outputDimension,getParameterDimension(),false);
     derivative = 0;
 
     Array<size_t> indizes = getIndizes(input);
-    for(size_t j=0; j != m_tilings; ++j)
-        derivative(0, indizes(j) ) = 1;
+
+    for(size_t o=0;o!=outputDimension;++o)
+    {
+        for(size_t j=0; j != m_tilings; ++j)
+        {
+            derivative(o, indizes(j) + o*m_parameters ) = 1;
+        }
+    }
 }
+
+//CMACFunction
+
+
+CMACFunction::CMACFunction(){}
+
+CMACFunction::CMACFunction(size_t inputs, size_t numberOfTilings, size_t numberOfTiles, double lower, double upper)
+    :CMACMap(inputs,1,numberOfTilings,numberOfTiles,lower,upper)
+{}
+
+CMACFunction::CMACFunction(size_t inputs, size_t numberOfTilings, size_t numberOfTiles, Array<double> const& bounds)
+    :CMACMap(inputs,1,numberOfTilings,numberOfTiles,bounds)
+{}

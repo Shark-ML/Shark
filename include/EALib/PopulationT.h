@@ -118,14 +118,13 @@ public:
 	~PopulationCT() { }
 
 
-	IndividualCT<CT>& operator [ ](unsigned i)
-	{
-		return dynamic_cast<IndividualCT<CT>&>(Population::operator [] (i));
+	IndividualCT<CT> & operator[](unsigned i) {
+		return( dynamic_cast< IndividualCT<CT>& >( Population::operator[]( i ) ) );
+		// return dynamic_cast<IndividualCT<CT>&>(Population::operator [] (i));
 	}
 
-	const IndividualCT<CT>& operator [ ](unsigned i) const
-	{
-		return dynamic_cast<const IndividualCT<CT>&>(Population::operator [] (i));
+	const IndividualCT<CT>& operator [ ](unsigned i) const {
+		return( dynamic_cast<const IndividualCT<CT>&>(Population::operator[]( i ) ) );
 	}
 
 	PopulationCT<CT> operator()(unsigned from, unsigned to) const
@@ -264,7 +263,7 @@ public:
 		this->ascending = pop.ascending;
 		this->spinOnce  = pop.spinOnce;
 	}
-
+	
 	PopulationT(const std::vector< IndividualT<T> * >& v)
 	{
 		std::vector<Individual*>::resize(v.size());
@@ -289,8 +288,10 @@ public:
 	PopulationT< T > operator()(unsigned from, unsigned to) const
 	{
 		RANGE_CHECK(from <= to && to < this->size())
-		return PopulationT< T >(std::vector< IndividualT< T > * >(
-							  this->begin() + from, this->begin() + to + 1));
+		std::vector<IndividualT<T>*> v( to-from+1 );
+		for( unsigned int i = from; i <= to; i++ )
+			v[i] = dynamic_cast<IndividualT<T>*>( *(this->begin() + i) );
+		return( PopulationT< T >( v ) ); 
 	}
 
 	PopulationT< T >& operator = (const IndividualT< T >& ind)
@@ -302,7 +303,32 @@ public:
 	PopulationT< T >& operator = (const PopulationT< T >& pop)
 	{
 		super::operator = (pop);
+		
 		return *this;
+	}
+	
+	void append( const IndividualT<T> & ind ) {
+		
+		push_back( new IndividualT<T>( ind ) );
+		
+	}
+	
+	void replace(unsigned i, const IndividualT<T> & ind) {
+		RANGE_CHECK(i < Population::size())
+		delete *( PopulationT<T>::begin() + i );
+		*( PopulationT<T>::begin() + i ) = new IndividualT<T>( ind );
+	}
+	
+	void insert(unsigned i, const IndividualT<T> & ind) {
+		RANGE_CHECK(i <= Population::size())
+		std::vector< Individual * >::insert( PopulationT<T>::begin() + i, new IndividualT<T>(ind));
+	}
+	
+	void insert(unsigned i, const PopulationT<T> & pop) {
+		RANGE_CHECK(i <= Population::size())
+		std::vector< Individual * >::insert( PopulationT<T>::begin() + i, pop.size(), NULL);
+		for (unsigned j = pop.size(); j--;)
+			*(PopulationT<T>::begin() + i + j) = new IndividualT<T>( pop[ j ] );
 	}
 
 	IndividualT< T >& oneOfBest()
@@ -319,6 +345,7 @@ public:
 	{
 		return dynamic_cast<IndividualT< T >&>(super::best());
 	}
+	
 	const IndividualT< T >& best() const
 	{
 		return dynamic_cast<const IndividualT< T >&>(super::best());

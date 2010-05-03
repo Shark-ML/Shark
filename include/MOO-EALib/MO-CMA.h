@@ -42,7 +42,7 @@
 #include <EALib/SearchAlgorithm.h>
 #include <EALib/ChromosomeCMA.h>
 
-
+//! \brief CMA-ES for multi-objective optimization
 class MOCMASearch : public EvolutionaryAlgorithm<double*>
 {
 public:

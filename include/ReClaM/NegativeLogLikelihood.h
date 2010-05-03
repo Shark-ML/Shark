@@ -65,8 +65,15 @@
 class NegativeLogLikelihood : public ErrorFunction
 {
 public:
+	enum eLabelType
+	{
+		elBinary,			//! -1 or +1
+		elNumber,			//! 0, ..., #classes-1
+		elVector,			//! n-th unit vector
+	};
+
 	//! Constructor
-	NegativeLogLikelihood();
+	NegativeLogLikelihood(eLabelType labelType = elBinary, unsigned int classes = 2);
 
 	//! Destructor
 	~NegativeLogLikelihood();
@@ -77,6 +84,13 @@ public:
 
 	//! error computation with derivatives, see class description
 	double errorDerivative(Model& model, const Array<double>& input, const Array<double>& target, Array<double>& derivative);
+
+protected:
+	//! type of label information expected
+	eLabelType m_LabelType;
+
+	//! number of classes spanning the probability simplex
+	unsigned int m_classes;
 };
 
 

@@ -195,9 +195,10 @@ double CMAOptimizer::optimize(Model& model, ErrorFunction& errorfunction, const 
 				Ind2Model(*pI, model);
 			}
 			while (! model.isFeasible());
-// 			pI->setFitness(errorfunction.error(model, input, target));
 			pC = (ChromosomeCMA*)(&((*pI)[0]));
-			pI->setFitness(objective.fitness(*pC));
+			double f = objective.fitness(*pC);
+// 			printf("[%g]", f);
+			pI->setFitness(f);
 		}
 
 		if (uncertaintyHandling)
@@ -238,7 +239,6 @@ double CMAOptimizer::optimize(Model& model, ErrorFunction& errorfunction, const 
 		}
 		while (! model.isFeasible());
 		pC = (ChromosomeCMA*)(&((*pI)[0]));
-// 		pI->setFitness(errorfunction.error(model, input, target));
 		pI->setFitness(objective.fitness(*pC));
 
 		// selection and strategy adaptation

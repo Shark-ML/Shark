@@ -2,8 +2,6 @@
 /*!
  *  \file ElitistCMA.h
  *
- *  \brief Implements the the elitist version of the CMA-ES
- *
  *  \par Copyright (c) 2006:
  *      Institut f&uuml;r Neuroinformatik<BR>
  *      Ruhr-Universit&auml;t Bochum<BR>
@@ -44,13 +42,12 @@
 #include <EALib/SearchAlgorithm.h>
 
 
-//!
-//! \brief Implements the elitist version of the CMA-ES
-//!
-//! The ElitistCMA class is a simple implementation
-//! of the elitist CMA. However, Most of the work
-//! is done by the ChromosomeCMA class.
-//!
+/*! \brief Implements the elitist version of the CMA-ES
+*
+* The ElitistCMA class is a simple implementation
+* of the elitist CMA. However, Most of the work
+* is done by the ChromosomeCMA class.
+*/
 class ElitistCMA
 {
 public:
@@ -92,7 +89,7 @@ public:
 	static void SelectAndUpdateStrategyParameters(IndividualCT<ChromosomeCMA>& parent, PopulationCT<ChromosomeCMA>& offspring);
 };
 
-
+/*! \brief Elitist CMA-ES that implements the interface EvolutionaryAlgorithm. */
 class CMAElitistSearch : public EvolutionaryAlgorithm<double*>
 {
 public:

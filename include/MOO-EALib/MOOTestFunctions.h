@@ -1960,7 +1960,7 @@ double IHR6F2(const std::vector<double> &x, Array<double> &coord)
 #include <Array/ArrayOp.h>
 #include <Rng/Uniform.h>
 
-
+//! \brief Renders a fitness function unseparable.
 template<typename DTLZ_T>
 class Linkage_2
 {
@@ -1981,6 +1981,7 @@ public:
 	}
 };
 
+//! \brief Renders a fitness function unseparable.
 template<typename DTLZ_T>
 class Linkage_3
 {

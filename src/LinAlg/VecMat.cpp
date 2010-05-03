@@ -183,7 +183,7 @@ Matrix Matrix::transpose() const
 {
 	SIZE_CHECK(ndim() == 2);
 	Matrix ret(*this);
-	::transpose(ret);
+	ret.Array<double>::transpose();
 	return ret;
 }
 

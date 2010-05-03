@@ -414,6 +414,9 @@ bool ZDT4::nadirFitness(std::vector<double>& value) const
 ////////////////////////////////////////////////////////////
 
 
+// /**
+//  * \todo grenzen richtigrum?
+//  */
 // bool CuboidConstraintHandler::isFeasible(const double*& point) const
 // {
 // 	if (point[0] < m_lower_1 || point[0] > m_upper_1)
@@ -426,6 +429,9 @@ bool ZDT4::nadirFitness(std::vector<double>& value) const
 // 	return true;
 // }
 
+// /**
+//  * \todo grenzen richtigrum?
+//  */
 // bool CuboidConstraintHandler::closestFeasible(double*& point) const
 // {
 // 	if (point[0] < m_lower_1)

@@ -110,6 +110,33 @@ public:
 	//! \param  values  values used. The first dimension is the parameter, the second dimension is the node. Unused entries are ignored.
 	void init(int params, const Array<int>& nodes, const Array<double>& values);
 
+	/*! Construct naive grid with as many dimensions as parameters in the model 
+	 *  passed. For each dimension, only one parameter is assigned: the current value 
+	 *  of the respective model parameter. To make the grid non-trivial, combine 
+	 *  this init routine with the functions #assignLinearRange or #assignExponentialRange.
+	 *  \param model the model from which the trivial grid will be constructed
+	 *  \param max_values maximum number of grid values that are later allowed for each dimension of this grid. */
+	void init(const Model& model, unsigned max_values);
+
+	/*! Assign linearly progressing grid values to one certain parameter only. 
+	 *  This is especially useful in combination with init'ing from a model.
+	 *  \param index the index of the parameter to which grid values are assigned
+	 *  \param no_of_points how many grid points should be assigned to that parameter
+	 *  \param min smallest value for that parameter
+	 *  \param max largest value for that parameter */
+	void assignLinearRange(unsigned index, unsigned no_of_points, double min, double max);
+	
+	/*! Set exponentially progressing grid values for one certain parameter only. 
+	 *  This is especially useful in combination with init'ing from a model. The 
+	 *  grid points will be filled with values \f$ base_factor \cdot exp_base ^i \f$, 
+	 *  where i does integer steps between min and max.
+	 *  \param index the index of the parameter that gets new grid values
+	 *  \param base_factor the value that the exponential base grid should be multiplied by
+	 *  \param exp_base the exponential grid will progress on this base (e.g. 2, 10)
+	 *  \param min the smallest exponent for #exp_base
+	 *  \param max the largest exponent for #exp_base  */
+	void assignExponentialRange(unsigned index, double base_factor, double exp_base, int min, int max);
+
 	//! Please note that for the grid search optimizer it does
 	//! not make sense to call #optimize more than once, as the
 	//! solution does not improve iteratively.

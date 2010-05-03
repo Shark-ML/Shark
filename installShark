@@ -1,0 +1,5 @@
+#!/bin/sh
+cd cmake 
+cmake .
+make
+make test

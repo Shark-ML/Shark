@@ -1,6 +1,41 @@
+//===========================================================================
+/*!
+ *  \file FuzzyControlLanguageParser.h
+ *
+ *  \brief Parser for the Fuzzy Control Language (see http://en.wikipedia.org/wiki/Fuzzy_Control_Language)
+ *
+ *  \par Copyright (c) 2008:
+ *      Institut f&uuml;r Neuroinformatik<BR>
+ *      Ruhr-Universit&auml;t Bochum<BR>
+ *      D-44780 Bochum, Germany<BR>
+ *      Phone: +49-234-32-25558<BR>
+ *      Fax:   +49-234-32-14209<BR>
+ *      eMail: shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *      <BR>
+ *
+ *
+ *  <BR><HR>
+ *  This file is part of Shark. This library is free software;
+ *  you can redistribute it and/or modify it under the terms of the
+ *  GNU General Public License as published by the Free Software
+ *  Foundation; either version 2, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+//===========================================================================
+
 #ifndef FUZZYCONTROLLANGUAGEPARSER_H
 #define FUZZYCONTROLLANGUAGEPARSER_H
 
+/*! \brief Parser for the Fuzzy Control Language (see http://en.wikipedia.org/wiki/Fuzzy_Control_Language) */
 template<typename CharType>
 struct FuzzyControlLanguageParserBase {
 	
@@ -18,6 +53,7 @@ struct FuzzyControlLanguageParserBase {
 		m_defaultState.activate();
 	}
 	
+	/*! \brief Base class for parser states. */
 	struct State {
 		State( FuzzyControlLanguageParserBase<CharType> & parent ) : m_parent( parent ) {}
 		virtual ~State() {}
@@ -46,6 +82,7 @@ struct FuzzyControlLanguageParserBase {
 	std::string m_buffer;
 	
 	
+	/*! \brief The default parser state. */
 	struct DefaultState : public State {
 		DefaultState( FuzzyControlLanguageParserBase<CharType> & parent ) : State( parent ) {
 		};
@@ -64,6 +101,7 @@ struct FuzzyControlLanguageParserBase {
 		
 	} m_defaultState;
 	
+	/*! \brief Parser state that handles function block definitions. */
 	struct FunctionBlockState : public State {
 		FunctionBlockState( FuzzyControlLanguageParserBase<CharType> & parent ) : State( parent ) {
 		};
@@ -85,6 +123,7 @@ struct FuzzyControlLanguageParserBase {
 		}
 	} m_functionBlockState;
 	
+	/*! \brief Parser state that handles input variable definitions. */
 	struct InputVariableState : public State {
 		InputVariableState( FuzzyControlLanguageParserBase<CharType> & parent ) : State( parent ) {
 		};
@@ -116,6 +155,7 @@ struct FuzzyControlLanguageParserBase {
 		std::string m_variableName;
 	} m_inputVariableState;
 	
+	/*! \brief Parser state that handles output variable definitions. */
 	struct OutputVariableState : public State {
 		OutputVariableState( FuzzyControlLanguageParserBase<CharType> & parent ) : State( parent ) {
 		};
@@ -145,6 +185,7 @@ struct FuzzyControlLanguageParserBase {
 		}
 	} m_outputVariableState;
 	
+	/*! \brief Parser state that handles fuzzify-blocks. */
 	struct FuzzyifyState : public State {
 		FuzzyifyState( FuzzyControlLanguageParserBase<CharType> & parent ) : State( parent ) {
 		};
@@ -176,6 +217,7 @@ struct FuzzyControlLanguageParserBase {
 		std::string m_termName;
 	} m_fuzzifyState;
 	
+	/*! \brief Parser state that handles defuzzify states. */
 	struct DefuzzyifyState : public State {
 		DefuzzyifyState( FuzzyControlLanguageParserBase<CharType> & parent ) : State( parent ) {
 		};
@@ -185,6 +227,7 @@ struct FuzzyControlLanguageParserBase {
 		}
 	} m_defuzzifyState;
 	
+	/*! \brief Parser state that handles rule blocks. */
 	struct RuleBlockState : public State {
 		RuleBlockState( FuzzyControlLanguageParserBase<CharType> & parent ) : State( parent ) {
 		};
@@ -194,6 +237,7 @@ struct FuzzyControlLanguageParserBase {
 		}
 	} m_ruleBlockState;
 	
+	/*! \brief Parser state that handles rule definitions. */
 	struct RuleState : public State {
 		RuleState( FuzzyControlLanguageParserBase<CharType> & parent ) : State( parent ) {
 		};
@@ -203,6 +247,7 @@ struct FuzzyControlLanguageParserBase {
 		}
 	} m_ruleState;
 	
+	/*! \brief Parser state that handles operator definitions. */
 	struct OperatorState : public State {
 		OperatorState( FuzzyControlLanguageParserBase<CharType> & parent ) : State( parent ) {
 		};
@@ -212,6 +257,7 @@ struct FuzzyControlLanguageParserBase {
 		}
 	} m_operatorState;
 	
+	/*! \brief Parser state that handles term definitions. */
 	struct TermState : public State {
 		TermState( FuzzyControlLanguageParserBase<CharType> & parent ) : State( parent ) {
 		};
@@ -223,9 +269,5 @@ struct FuzzyControlLanguageParserBase {
 };
 
 typedef FuzzyControlLanguageParserBase<char> FuzzyControlLanguageParser;
-
-int main( int argc, char ** argv ) {
-	FuzzyControlLanguageParser parser;
-}
 
 #endif // FUZZYCONTROLLANGUAGEPARSER_H

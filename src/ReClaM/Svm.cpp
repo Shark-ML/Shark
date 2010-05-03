@@ -632,7 +632,7 @@ void SVM::MakeSparse()
 	// count support vectors and compute a map
 	int i, ic = getExamples();
 	std::vector<int> map;
-	for (i = 0; i < ic; i++)
+	for (i=0; i<ic; i++)
 	{
 		if (parameter(i) != 0.0)
 		{
@@ -646,7 +646,7 @@ void SVM::MakeSparse()
 	Array<double> p(sc + 1);
 	Array<double>* xx = new Array<double>(sc, dim);
 
-	for (s = 0; s < sc; s++)
+	for (s=0; s<sc; s++)
 	{
 		i = map[s];
 		(*xx)[s] = (*x)[i];
@@ -699,7 +699,7 @@ int SVM::DiscardUntil(std::istream& is, const char* separators)
 ////////////////////////////////////////////////////////////////////////////////
 
 
-MultiClassSVM::MultiClassSVM(KernelFunction* pKernel, unsigned int numberOfClasses, bool bOrthogonalVectors, bool bNumberOutput)
+MultiClassSVM::MultiClassSVM(KernelFunction* pKernel, unsigned int numberOfClasses, bool bNumberOutput)
 {
 	this->kernel = pKernel;
 	this->classes = numberOfClasses;
@@ -707,53 +707,27 @@ MultiClassSVM::MultiClassSVM(KernelFunction* pKernel, unsigned int numberOfClass
 	this->bOwnMemory = false;
 	this->numberOutput = bNumberOutput;
 
-	prototypes.resize(classes, classes, false);
-	if (bOrthogonalVectors)
-	{
-		prototypes = 0.0;
-		unsigned int i;
-		for (i = 0; i < classes; i++) prototypes(i, i) = 1.0;
-	}
-	else
-	{
-		throw SHARKEXCEPTION("[MultiClassSVM::MultiClassSVM] simplex vector initialization not implemented yet");
-	}
-
 	inputDimension = 0;
 	outputDimension = (numberOutput ? 1 : classes);
 	x = NULL;
-}
-
-MultiClassSVM::MultiClassSVM(KernelFunction* pKernel, Array<double> prototypes, bool bNumberOutput)
-{
-	SIZE_CHECK(prototypes.ndim() == 2);
-	SIZE_CHECK(prototypes.dim(0) == prototypes.dim(1));
-
-	this->kernel = pKernel;
-	this->classes = prototypes.dim(0);
-	this->examples = 0;
-	this->bOwnMemory = false;
-	this->numberOutput = bNumberOutput;
-	this->prototypes = prototypes;
-
-	inputDimension = 0;
-	outputDimension = (numberOutput ? 1 : classes);
-	x = NULL;
+	y = NULL;
 }
 
 MultiClassSVM::~MultiClassSVM()
 {
-	if (bOwnMemory) delete x;
+	if (bOwnMemory) { delete x; delete y; }
 }
 
 
-void MultiClassSVM::SetTrainingData(const Array<double>& input, bool copy)
+void MultiClassSVM::SetTrainingData(const Array<double>& input, const Array<double>& target, bool copy)
 {
 	SIZE_CHECK(input.ndim() == 2);
-	if (bOwnMemory) delete x;
+	SIZE_CHECK(target.ndim() == 2);
+	if (bOwnMemory) { delete x; delete y; }
 
 	examples = input.dim(0);
 	inputDimension = input.dim(1);
+	SIZE_CHECK(target.dim(0) == examples);
 
 	parameter.resize(examples * classes + classes, false);
 	parameter = 0.0;
@@ -761,11 +735,13 @@ void MultiClassSVM::SetTrainingData(const Array<double>& input, bool copy)
 	if (copy)
 	{
 		x = new Array<double>(input);
+		y = new Array<double>(target);
 		bOwnMemory = true;
 	}
 	else
 	{
 		x = &input;
+		y = &target;
 		bOwnMemory = false;
 	}
 }
@@ -785,7 +761,7 @@ void MultiClassSVM::model(const Array<double>& input, Array<double>& output)
 		{
 			unsigned int i, ic = input.dim(0);
 			output.resize(ic, 1, false);
-			for (i = 0; i < ic; i++)
+			for (i=0; i<ic; i++)
 			{
 				Predict(input[i], tmp);
 				output(i, 0) = VectorToClass(tmp);
@@ -804,7 +780,7 @@ void MultiClassSVM::model(const Array<double>& input, Array<double>& output)
 		{
 			unsigned int i, ic = input.dim(0);
 			output.resize(ic, classes, false);
-			for (i = 0; i < ic; i++)
+			for (i=0; i<ic; i++)
 			{
 				Predict(input[i], output[i]);
 			}
@@ -823,48 +799,19 @@ unsigned int MultiClassSVM::model(const Array<double>& input)
 	return VectorToClass(tmp);
 }
 
-void MultiClassSVM::Normalize()
-{
-	unsigned int c;
-	unsigned int i, j;
-	for (c = 0; c < classes; c++)
-	{
-		// compute the squared norm
-		double norm2 = 0.0;
-		for (i = 0; i < examples; i++)
-		{
-			for (j = 0; j < i; j++)
-			{
-				double k = kernel->eval((*x)[i], (*x)[j]);
-				norm2 += 2.0 * parameter(classes * i + c) * parameter(classes * j + c) * k;
-			}
-			double k = kernel->eval((*x)[i], (*x)[i]);
-			norm2 += parameter(classes * i + c) * parameter(classes * i + c) * k;
-		}
-
-		// normalize
-		double norm = sqrt(norm2);
-		for (i = 0; i < examples; i++) parameter(classes*i + c) /= norm;
-	}
-}
-
 unsigned int MultiClassSVM::VectorToClass(const Array<double>& v)
 {
 	SIZE_CHECK(v.ndim() == 1);
 	SIZE_CHECK(v.dim(0) == classes);
 
-	unsigned int c, i, best = 0;
-	double scp, bestscp = -1e100;
-	for (c = 0; c < classes; c++)
+	unsigned int c;
+	unsigned int best = 0;
+	double bestval = v(0);
+	for (c=1; c<classes; c++)
 	{
-		scp = 0.0;
-		for (i = 0; i < classes; i++)
+		if (v(c) > bestval)
 		{
-			scp += v(i) * prototypes(c, i);
-		}
-		if (scp > bestscp)
-		{
-			bestscp = scp;
+			bestval = v(c);
 			best = c;
 		}
 	}
@@ -872,29 +819,65 @@ unsigned int MultiClassSVM::VectorToClass(const Array<double>& v)
 	return best;
 }
 
+void MultiClassSVM::MakeSparse()
+{
+	if (! bOwnMemory) return;
+
+	// count support vectors and compute a map
+	unsigned int e, c, i = 0;
+	unsigned int s, sc = 0;
+	std::vector<unsigned int> map(examples);
+	for (e=0; e<examples; e++)
+	{
+		for (c=0; c<classes; c++) if (parameter(i + c) != 0.0) break;
+		if (c < classes)
+		{
+			map[sc] = e;
+			sc++;
+		}
+		i += classes;
+	}
+
+	// copy relevant coefficients and training data
+	unsigned int dim = x->dim(1);
+	Array<double> p(classes * (sc + 1));
+	Array<double>* xx = new Array<double>(sc, dim);
+	Array<double>* yy = new Array<double>(sc, 1);
+
+	unsigned int j = 0;
+	for (s=0; s<sc; s++)
+	{
+		e = map[s];
+		(*xx)[s] = (*x)[e];
+		(*yy)[s] = (*y)[e];
+		i = e * classes;
+		for (c=0; c<classes; c++) p(j + c) = parameter(i + c);
+		j += classes;
+	}
+	j = sc * classes;
+	i = examples * classes;
+	for (c=0; c<classes; c++) p(j + c) = parameter(i + c);
+
+	parameter = p;
+	examples = sc;
+	delete x;
+	delete y;
+	x = xx;
+	y = yy;
+}
+
 // We assume that the output array has correct size.
 void MultiClassSVM::Predict(const Array<double>& input, Array<double>& output)
 {
-	unsigned int c, e, m;
-	output = 0.0;
-
-	for (e = 0; e < examples; e++)
+	unsigned int c, e, i = 0;
+	for (c=0; c<classes; c++) output(c) = getOffset(c);
+	for (e=0; e<examples; e++)
 	{
 		double k = kernel->eval((*x)[e], input);
-		for (c = 0; c < classes; c++)
+		for (c=0; c<classes; c++)
 		{
-			for (m = 0; m < classes; m++)
-			{
-				output(m) += getAlpha(e, c) * k * prototypes(c, m);
-			}
-		}
-	}
-
-	for (c = 0; c < classes; c++)
-	{
-		for (m = 0; m < classes; m++)
-		{
-			output(m) += getOffset(c) * prototypes(c, m);
+			output(c) += parameter(i) * k;
+			i++;
 		}
 	}
 }
@@ -902,26 +885,15 @@ void MultiClassSVM::Predict(const Array<double>& input, Array<double>& output)
 // We assume that the output array has correct size.
 void MultiClassSVM::Predict(const Array<double>& input, ArrayReference<double> output)
 {
-	unsigned int c, e, m;
-	output = 0.0;
-
-	for (e = 0; e < examples; e++)
+	unsigned int c, e, i = 0;
+	for (c=0; c<classes; c++) output(c) = getOffset(c);
+	for (e=0; e<examples; e++)
 	{
 		double k = kernel->eval((*x)[e], input);
-		for (c = 0; c < classes; c++)
+		for (c=0; c<classes; c++)
 		{
-			for (m = 0; m < classes; m++)
-			{
-				output(m) += getAlpha(e, c) * k * prototypes(c, m);
-			}
-		}
-	}
-
-	for (c = 0; c < classes; c++)
-	{
-		for (m = 0; m < classes; m++)
-		{
-			output(m) += getOffset(c) * prototypes(c, m);
+			output(c) += parameter(i) * k;
+			i++;
 		}
 	}
 }
@@ -984,7 +956,7 @@ bool MetaSVM::isFeasible()
 
 
 C_SVM::C_SVM(SVM* pSVM, double Cplus, double Cminus, bool norm2, bool unconst)
-		: MetaSVM(pSVM, 1)
+: MetaSVM(pSVM, 1)
 {
 	C_ratio = Cminus / Cplus;
 	norm2penalty = norm2;
@@ -998,7 +970,7 @@ C_SVM::~C_SVM()
 }
 
 
-void C_SVM::PrepareDerivative()
+const Array<double>& C_SVM::PrepareDerivative()
 {
 	if (norm2penalty) throw SHARKEXCEPTION("[C_SVM::PrepareDerivative] PrepareDerivative works only in the 1-norm case.");
 
@@ -1016,7 +988,7 @@ void C_SVM::PrepareDerivative()
 	// determine free and bounded support vectors
 	std::vector<int> fi;
 	std::vector<int> ri;
-	for (a = 0; a < ac; a++)
+	for (a=0; a<ac; a++)
 	{
 		double alpha = svm->getAlpha(a);
 		if (alpha != 0.0)
@@ -1029,88 +1001,90 @@ void C_SVM::PrepareDerivative()
 	int r, rc = ri.size();
 	fi.push_back(ac);
 
-	Array2D<double> H(fc + 1, fc + 1);
-	Array2D<double> H_inv(fc + 1, fc + 1);
-	Array2D<double> R(fc + 1, rc);
-	Array<double> dH(kc, fc + 1, fc + 1);
-	Array<double> dR(kc, fc + 1, rc);
-	Array<double> alpha_f(fc + 1);
+	Array2D<double> H(fc+1, fc+1);
+	Array2D<double> H_inv(fc+1, fc+1);
+	Array2D<double> R(fc+1, rc);
+	Array<double> dH(kc, fc+1, fc+1);
+	Array<double> dR(kc, fc+1, rc);
+	Array<double> alpha_f(fc+1);
 	Array<double> alpha_r(rc);
-	for (f = 0; f < fc; f++) alpha_f(f) = svm->getAlpha(fi[f]);
+	for (f=0; f<fc; f++) alpha_f(f) = svm->getAlpha(fi[f]);
 	alpha_f(fc) = svm->getOffset();
-	for (r = 0; r < rc; r++) alpha_r(r) = svm->getAlpha(ri[r]);
+	for (r=0; r<rc; r++) alpha_r(r) = svm->getAlpha(ri[r]);
 
 	// initialize H and dH
-	for (f = 0; f < fc; f++)
+	for (f=0; f<fc; f++)
 	{
 		int f2;
-		for (f2 = 0; f2 < f; f2++)
+		for (f2=0; f2<f; f2++)
 		{
 			H(f, f2) = H(f2, f) = kernel->evalDerivative(pt[fi[f]], pt[fi[f2]], der);
-			for (k = 0; k < kc; k++)
+			for (k=0; k<kc; k++)
 			{
 				dH(k, f, f2) = dH(k, f2, f) = der(k);
 			}
 		}
 		H(f, f) = kernel->evalDerivative(pt[fi[f]], pt[fi[f]], der);
-		for (k = 0; k < kc; k++)
+		for (k=0; k<kc; k++)
 		{
 			dH(k, f, f) = der(k);
 		}
 		H(fc, f) = H(f, fc) = 1.0;
-		for (k = 0; k < kc; k++) dH(k, fc, f) = dH(k, f, fc) = 0.0;
+		for (k=0; k<kc; k++) dH(k, fc, f) = dH(k, f, fc) = 0.0;
 	}
 	H(fc, fc) = 0.0;
-	for (k = 0; k < kc; k++) dH(k, fc, fc) = 0.0;
+	for (k=0; k<kc; k++) dH(k, fc, fc) = 0.0;
 
 	// compute H_inv
 // 	invertSymm(H_inv, H);
 	g_inverse(H, H_inv, 200, 1e-10, true);
 
 	// initialize R and dR
-	for (r = 0; r < rc; r++)
+	for (r=0; r<rc; r++)
 	{
-		for (f = 0; f < fc; f++)
+		for (f=0; f<fc; f++)
 		{
 			R(f, r) = kernel->evalDerivative(pt[fi[f]], pt[ri[r]], der);
-			for (k = 0; k < kc; k++)
+			for (k=0; k<kc; k++)
 			{
 				dR(k, f, r) = der(k);
 			}
 		}
 		R(fc, r) = 1.0;
-		for (k = 0; k < kc; k++) dR(k, fc, r) = 0.0;
+		for (k=0; k<kc; k++) dR(k, fc, r) = 0.0;
 	}
 
-	der.resize(fc + 1, false);
+	der.resize(fc+1, false);
 
 	// compute the derivative of (\alpha, b) w.r.t. C
 	if (rc > 0)
 	{
 		Array<double> y(rc);
-		for (r = 0; r < rc; r++) y(r) = ((alpha_r(r) > 0.0) ? 1.0 : -1.0);
-		Array<double> Ry(fc + 1);
+		for (r=0; r<rc; r++) y(r) = ((alpha_r(r) > 0.0) ? 1.0 : -1.0);
+		Array<double> Ry(fc+1);
 		matColVec(Ry, R, y);
 		matColVec(der, H_inv, Ry);
-		for (f = 0; f <= fc; f++) alpha_b_Derivative(fi[f], 0) = -der(f);
-		for (r = 0; r < rc; r++) alpha_b_Derivative(ri[r], 0) = ((alpha_r(r) > 0.0) ? 1.0 : -C_ratio);
+		for (f=0; f<=fc; f++) alpha_b_Derivative(fi[f], 0) = -der(f);
+		for (r=0; r<rc; r++) alpha_b_Derivative(ri[r], 0) = ((alpha_r(r) > 0.0) ? 1.0 : -C_ratio);
 		if (exponential)
 		{
-			for (s = 0; s < sc; s++) alpha_b_Derivative(s, 0) *= C_plus;
+			for (s=0; s<sc; s++) alpha_b_Derivative(s, 0) *= C_plus;
 		}
 	}
 
 	// compute the derivative of (\alpha, b) w.r.t. the kernel parameters
-	for (k = 0; k < kc; k++)
+	for (k=0; k<kc; k++)
 	{
-		Array<double> sum(fc + 1);
-		Array<double> tmp(fc + 1);
+		Array<double> sum(fc+1);
+		Array<double> tmp(fc+1);
 		matColVec(sum, dH[k], alpha_f);
 		matColVec(tmp, dR[k], alpha_r);
-		for (f = 0; f <= fc; f++) sum(f) += tmp(f);
+		for (f=0; f<=fc; f++) sum(f) += tmp(f);
 		matColVec(der, H_inv, sum);
-		for (f = 0; f <= fc; f++) alpha_b_Derivative(fi[f], k + 1) = -der(f);
+		for (f=0; f<=fc; f++) alpha_b_Derivative(fi[f], k+1) = -der(f);
 	}
+
+	return alpha_b_Derivative;
 }
 
 void C_SVM::modelDerivative(const Array<double>& input, Array<double>& derivative)
@@ -1122,18 +1096,18 @@ void C_SVM::modelDerivative(const Array<double>& input, Array<double>& derivativ
 	int pc = getParameterDimension();
 
 	derivative.resize(1, pc, false);
-	for (k = 0; k <= kc; k++) derivative(0, k) = alpha_b_Derivative(ac, k);
+	for (k=0; k<=kc; k++) derivative(0, k) = alpha_b_Derivative(ac, k);
 
 	Array<double> der(pc);
 
-	for (a = 0; a < ac; a++)
+	for (a=0; a<ac; a++)
 	{
 		double alpha = svm->getAlpha(a);
 		double ker = kernel->evalDerivative(input, pt[a], der);
 		derivative(0, 0) += ker * alpha_b_Derivative(a, 0);
-		for (k = 0; k < kc; k++)
+		for (k=0; k<kc; k++)
 		{
-			derivative(0, k + 1) += alpha * der(k) + ker * alpha_b_Derivative(a, k + 1);
+			derivative(0, k+1) += alpha * der(k) + ker * alpha_b_Derivative(a, k+1);
 		}
 	}
 }
@@ -1163,7 +1137,7 @@ bool C_SVM::isFeasible()
 
 
 OneClassSVM::OneClassSVM(SVM* pSVM, double fractionNu)
-		: MetaSVM(pSVM, 1)
+: MetaSVM(pSVM, 1)
 {
 	setParameter(0, fractionNu);
 }
@@ -1196,7 +1170,7 @@ bool OneClassSVM::isFeasible()
 
 
 Epsilon_SVM::Epsilon_SVM(SVM* pSVM, double C, double epsilon, bool unconst)
-		: MetaSVM(pSVM, 2)
+: MetaSVM(pSVM, 2)
 {
 	this->C = C;
 	this->epsilon = epsilon;
@@ -1242,7 +1216,7 @@ bool Epsilon_SVM::isFeasible()
 
 
 RegularizationNetwork::RegularizationNetwork(SVM* pSVM, double gamma)
-		: MetaSVM(pSVM, 1)
+: MetaSVM(pSVM, 1)
 {
 	parameter(0) = gamma;
 }
@@ -1261,10 +1235,11 @@ bool RegularizationNetwork::isFeasible()
 ////////////////////////////////////////////////////////////////////////////////
 
 
-AllInOneMcSVM::AllInOneMcSVM(MultiClassSVM* pSVM, double C)
-		: MetaSVM(pSVM, 1)
+AllInOneMcSVM::AllInOneMcSVM(MultiClassSVM* pSVM, double C, bool unconstrained)
+: MetaSVM(pSVM, 1)
 {
-	parameter(0) = C;
+	exponential = unconstrained;
+	set_C(C);
 }
 
 AllInOneMcSVM::~AllInOneMcSVM()
@@ -1274,7 +1249,313 @@ AllInOneMcSVM::~AllInOneMcSVM()
 
 bool AllInOneMcSVM::isFeasible()
 {
-	return (parameter(0) > 0.0 && MetaSVM::isFeasible());
+	if (! MetaSVM::isFeasible()) return false;
+	if (exponential && parameter(0) <= 0.0) return false;
+	return true;
+}
+
+const Array<double>& AllInOneMcSVM::PrepareDerivative()
+{
+	MultiClassSVM* svm = getMultiClassSVM();
+	KernelFunction* kernel = svm->getKernel();
+	const Array<double>& points = svm->getPoints();
+	const Array<double>& target = svm->getTargets();
+	int x, x2, xc = svm->getExamples();
+	int c, cc = svm->getClasses();
+	int a, ac = xc * cc;
+	int k, kc = kernel->getParameterDimension();
+	int pc = getParameterDimension();
+	Array<double> der;
+	double C = get_C();
+	SIZE_CHECK(kc + 1 == pc);
+
+	alphaDerivative.resize(ac, pc, false);
+	alphaDerivative = 0.0;
+
+	std::vector<unsigned int> fI;			// indices of free SVs
+	std::vector<unsigned int> bI;			// indices of bounded SVs
+	Array<bool> sv(xc);						// is the EXAMPLE a SV?
+	sv = false;
+	a = 0;
+	for (x=0; x<xc; x++)
+	{
+		for (c=0; c<cc; c++)
+		{
+			double alpha = svm->getParameter(a);
+			if (alpha > 0.0)
+			{
+				if (alpha < C)
+				{
+					fI.push_back(a);
+				}
+				else
+				{
+					bI.push_back(a);
+				}
+				sv(x) = true;
+			}
+			a++;
+		}
+	}
+	unsigned int f, f2, fc = fI.size();
+	unsigned int b, bc = bI.size();
+
+	// compute required parts of K and dK
+	Array<double> K(xc, xc);					// kernel matrix
+	Array<double> dK(xc, xc, kc);				// kernel derivatives
+	for (x=0; x<xc; x++)
+	{
+		if (! sv(x)) continue;
+		for (x2=0; x2<x; x2++)
+		{
+			if (! sv(x2)) continue;
+			K(x, x2) = kernel->evalDerivative(points[x], points[x2], der);
+			for (k=0; k<kc; k++) dK(x, x2, k) = der(k);
+		}
+		K(x, x) = kernel->evalDerivative(points[x], points[x], der);
+		for (k=0; k<kc; k++) dK(x, x, k) = der(k);
+	}
+
+	// build matrices F and B
+	Matrix F(fc, fc);
+	Vector B1(fc);
+	for (f=0; f<fc; f++)
+	{
+		unsigned int x = fI[f] / cc;
+		unsigned int v = fI[f] % cc;
+		unsigned int y = (unsigned int)target(x, 0);
+		for (f2=0; f2<0; f2++)
+		{
+			unsigned int x2 = fI[f2] / cc;
+			unsigned int v2 = fI[f2] % cc;
+			unsigned int y2 = (unsigned int)target(x2, 0);
+			double mod = 0.0;
+			if (y == y2) mod += 0.5;
+			if (y == v2) mod -= 0.5;
+			if (y2 == v) mod -= 0.5;
+			if (v == v2) mod += 0.5;
+
+			F(f, f2) = F(f2, f) = mod * K(x, x2);
+		}
+		if (y != v) F(f, f) = K(x, x);
+
+		double sum = 0.0;
+		for (b=0; b<bc; b++)
+		{
+			unsigned int x2 = bI[b] / cc;
+			unsigned int v2 = bI[b] % cc;
+			unsigned int y2 = (unsigned int)target(x2, 0);
+			double mod = 0.0;
+			if (y == y2) mod += 0.5;
+			if (y == v2) mod -= 0.5;
+			if (y2 == v) mod -= 0.5;
+			if (v == v2) mod += 0.5;
+
+			sum += mod * K(x, x2);
+		}
+		B1(f) = sum;
+	}
+
+	// invert F
+	Matrix invF = F.inverse();
+
+	// compute derivative of alpha w.r.t. C
+	Vector tmp = invF * B1;
+	for (f=0; f<fc; f++) alphaDerivative(fI[f], 0) = -tmp(f);
+	for (b=0; b<bc; b++) alphaDerivative(bI[b], 0) = 1.0;
+
+	// compute derivative of alpha w.r.t. all kernel parameters
+	for (k=0; k<kc; k++)
+	{
+		Matrix dF(fc, fc);
+		Vector dB1(fc);
+		for (f=0; f<fc; f++)
+		{
+			unsigned int x = fI[f] / cc;
+			unsigned int v = fI[f] % cc;
+			unsigned int y = (unsigned int)target(x, 0);
+			for (f2=0; f2<0; f2++)
+			{
+				unsigned int x2 = fI[f2] / cc;
+				unsigned int v2 = fI[f2] % cc;
+				unsigned int y2 = (unsigned int)target(x2, 0);
+				double mod = 0.0;
+				if (y == y2) mod += 0.5;
+				if (y == v2) mod -= 0.5;
+				if (y2 == v) mod -= 0.5;
+				if (v == v2) mod += 0.5;
+	
+				dF(f, f2) = dF(f2, f) = mod * dK(x, x2, k);
+			}
+			if (y != v) dF(f, f) = dK(x, x, k);
+
+			double sum = 0.0;
+			for (b=0; b<bc; b++)
+			{
+				unsigned int x2 = bI[b] / cc;
+				unsigned int v2 = bI[b] % cc;
+				unsigned int y2 = (unsigned int)target(x2, 0);
+				double mod = 0.0;
+				if (y == y2) mod += 0.5;
+				if (y == v2) mod -= 0.5;
+				if (y2 == v) mod -= 0.5;
+				if (v == v2) mod += 0.5;
+
+				sum += mod * dK(x, x2, k);
+			}
+			dB1(f) = sum;
+		}
+
+		Vector inner(fc);
+		for (f=0; f<fc; f++)
+		{
+			double sum = B1(f);
+			for (f2=0; f2<0; f2++) sum += svm->getParameter(fI[f]) * dF(f, f2);
+			inner(f) = sum;
+		}
+		Vector tmp = invF * inner;
+		for (f=0; f<fc; f++) alphaDerivative(fI[f], k + 1) = -tmp(f);
+	}
+
+	return alphaDerivative;
+
+
+// 	// determine free and bounded support vectors
+// 	std::vector<int> fi;
+// 	std::vector<int> ri;
+// 	for (a=0; a<ac; a++)
+// 	{
+// 		double alpha = svm->getAlpha(a);
+// 		if (alpha != 0.0)
+// 		{
+// 			if ((alpha == -C_minus) || (alpha == C_plus)) ri.push_back(a);
+// 			else fi.push_back(a);
+// 		}
+// 	}
+// 	int f, fc = fi.size();
+// 	int r, rc = ri.size();
+// 	fi.push_back(ac);
+// 
+// 	Array2D<double> H(fc+1, fc+1);
+// 	Array2D<double> H_inv(fc+1, fc+1);
+// 	Array2D<double> R(fc+1, rc);
+// 	Array<double> dH(kc, fc+1, fc+1);
+// 	Array<double> dR(kc, fc+1, rc);
+// 	Array<double> alpha_f(fc+1);
+// 	Array<double> alpha_r(rc);
+// 	for (f=0; f<fc; f++) alpha_f(f) = svm->getAlpha(fi[f]);
+// 	alpha_f(fc) = svm->getOffset();
+// 	for (r=0; r<rc; r++) alpha_r(r) = svm->getAlpha(ri[r]);
+// 
+// 	// initialize H and dH
+// 	for (f=0; f<fc; f++)
+// 	{
+// 		int f2;
+// 		for (f2=0; f2<f; f2++)
+// 		{
+// 			H(f, f2) = H(f2, f) = kernel->evalDerivative(pt[fi[f]], pt[fi[f2]], der);
+// 			for (k=0; k<kc; k++)
+// 			{
+// 				dH(k, f, f2) = dH(k, f2, f) = der(k);
+// 			}
+// 		}
+// 		H(f, f) = kernel->evalDerivative(pt[fi[f]], pt[fi[f]], der);
+// 		for (k=0; k<kc; k++)
+// 		{
+// 			dH(k, f, f) = der(k);
+// 		}
+// 		H(fc, f) = H(f, fc) = 1.0;
+// 		for (k=0; k<kc; k++) dH(k, fc, f) = dH(k, f, fc) = 0.0;
+// 	}
+// 	H(fc, fc) = 0.0;
+// 	for (k=0; k<kc; k++) dH(k, fc, fc) = 0.0;
+// 
+// 	// compute H_inv
+// // 	invertSymm(H_inv, H);
+// 	g_inverse(H, H_inv, 200, 1e-10, true);
+// 
+// 	// initialize R and dR
+// 	for (r=0; r<rc; r++)
+// 	{
+// 		for (f=0; f<fc; f++)
+// 		{
+// 			R(f, r) = kernel->evalDerivative(pt[fi[f]], pt[ri[r]], der);
+// 			for (k=0; k<kc; k++)
+// 			{
+// 				dR(k, f, r) = der(k);
+// 			}
+// 		}
+// 		R(fc, r) = 1.0;
+// 		for (k=0; k<kc; k++) dR(k, fc, r) = 0.0;
+// 	}
+// 
+// 	der.resize(fc+1, false);
+// 
+// 	// compute the derivative of (\alpha, b) w.r.t. C
+// 	if (rc > 0)
+// 	{
+// 		Array<double> y(rc);
+// 		for (r=0; r<rc; r++) y(r) = ((alpha_r(r) > 0.0) ? 1.0 : -1.0);
+// 		Array<double> Ry(fc+1);
+// 		matColVec(Ry, R, y);
+// 		matColVec(der, H_inv, Ry);
+// 		for (f=0; f<=fc; f++) alpha_b_Derivative(fi[f], 0) = -der(f);
+// 		for (r=0; r<rc; r++) alpha_b_Derivative(ri[r], 0) = ((alpha_r(r) > 0.0) ? 1.0 : -C_ratio);
+// 		if (exponential)
+// 		{
+// 			for (s=0; s<sc; s++) alpha_b_Derivative(s, 0) *= C_plus;
+// 		}
+// 	}
+// 
+// 	// compute the derivative of (\alpha, b) w.r.t. the kernel parameters
+// 	for (k=0; k<kc; k++)
+// 	{
+// 		Array<double> sum(fc+1);
+// 		Array<double> tmp(fc+1);
+// 		matColVec(sum, dH[k], alpha_f);
+// 		matColVec(tmp, dR[k], alpha_r);
+// 		for (f=0; f<=fc; f++) sum(f) += tmp(f);
+// 		matColVec(der, H_inv, sum);
+// 		for (f=0; f<=fc; f++) alphaDerivative(fi[f], k+1) = -der(f);
+// 	}
+// 
+// 	return alphaDerivative;
+}
+
+void AllInOneMcSVM::modelDerivative(const Array<double>& input, Array<double>& derivative)
+{
+	MultiClassSVM* svm = getMultiClassSVM();
+	const Array<double>& pt = svm->getPoints();
+	unsigned int k, kc = kernel->getParameterDimension();
+	unsigned int x, xc = svm->getExamples();
+	unsigned int c, cc = svm->getClasses();
+	unsigned int pc = getParameterDimension();
+	Array<double> der(kc);
+	SIZE_CHECK(kc + 1 == pc);
+
+	derivative.resize(cc, pc, false);
+	derivative = 0.0;
+
+	unsigned int a = 0;
+	for (x=0; x<xc; x++)
+	{
+		double ker = kernel->evalDerivative(input, pt[x], der);
+		for (c=0; c<cc; c++)
+		{
+			double alpha = svm->getAlpha(x, c);
+
+			// exclude dummies and exploit sparseness
+			if (alpha != 0.0)
+			{
+				derivative(c, 0) += ker * alphaDerivative(a, 0);
+				for (k=0; k<kc; k++)
+				{
+					derivative(c, k+1) += alpha * der(k) + ker * alphaDerivative(a, k+1);
+				}
+			}
+			a++;
+		}
+	}
 }
 
 
@@ -1282,7 +1563,7 @@ bool AllInOneMcSVM::isFeasible()
 
 
 CrammerSingerMcSVM::CrammerSingerMcSVM(MultiClassSVM* pSVM, double beta)
-		: MetaSVM(pSVM, 1)
+: MetaSVM(pSVM, 1)
 {
 	parameter(0) = beta;
 }
@@ -1302,7 +1583,7 @@ bool CrammerSingerMcSVM::isFeasible()
 
 
 OVAMcSVM::OVAMcSVM(MultiClassSVM* pSVM, double C)
-		: MetaSVM(pSVM, 1)
+: MetaSVM(pSVM, 1)
 {
 	parameter(0) = C;
 }
@@ -1322,7 +1603,7 @@ bool OVAMcSVM::isFeasible()
 
 
 OCCMcSVM::OCCMcSVM(MultiClassSVM* pSVM, double C)
-		: MetaSVM(pSVM, 1)
+: MetaSVM(pSVM, 1)
 {
 	parameter(0) = C;
 }
@@ -1458,53 +1739,53 @@ double SVM_Optimizer::optimize(Model& model, ErrorFunction& error, const Array<d
 {
 	switch (mode)
 	{
-	case eC1:
-	case eC2:
-	case eEpsilon:
-	case eNu:
-	case eRegularizationNetwork:
-	case e1Class:
-	{
-		SVM* svm = dynamic_cast<SVM*>(&model);
-		if (svm == NULL)
+		case eC1:
+		case eC2:
+		case eEpsilon:
+		case eNu:
+		case eRegularizationNetwork:
+		case e1Class:
 		{
-			MetaSVM* meta = dynamic_cast<MetaSVM*>(&model);;
-			if (meta != NULL) svm = meta->getSVM();
+			SVM* svm = dynamic_cast<SVM*>(&model);
+			if (svm == NULL)
+			{
+				MetaSVM* meta = dynamic_cast<MetaSVM*>(&model);;
+				if (meta != NULL) svm = meta->getSVM();
+			}
+			if (svm == NULL) throw SHARKEXCEPTION("[SVM_Optimizer::optimize] The model is not a valid SVM or SVM meta model.");
+
+			return optimize(*svm, input, target);
 		}
-		if (svm == NULL) throw SHARKEXCEPTION("[SVM_Optimizer::optimize] The model is not a valid SVM or SVM meta model.");
 
-		return optimize(*svm, input, target);
-	}
-
-	case eGaussianProcess:
-	{
-		GaussianProcess* gaussproc = dynamic_cast<GaussianProcess*>(&model);
-		gaussproc->train(input, target);
-		return 0.0;
-	}
-
-	case eAllInOne:
-	case eCrammerSinger:
-	case eOVA:
-	case eOCC:
-	{
-		MultiClassSVM* svm = dynamic_cast<MultiClassSVM*>(&model);
-		if (svm == NULL)
+		case eGaussianProcess:
 		{
-			MetaSVM* meta = dynamic_cast<MetaSVM*>(&model);;
-			if (meta != NULL) svm = meta->getMultiClassSVM();
+			GaussianProcess* gaussproc = dynamic_cast<GaussianProcess*>(&model);
+			gaussproc->train( input, target );
+			return 0.0;
 		}
-		if (svm == NULL) throw SHARKEXCEPTION("[SVM_Optimizer::optimize] The model is not a valid MultiClassSVM or SVM meta model.");
 
-		optimize(*svm, input, target);
-		return 0.0;
-	}
+		case eAllInOne:
+		case eCrammerSinger:
+		case eOVA:
+		case eOCC:
+		{
+			MultiClassSVM* svm = dynamic_cast<MultiClassSVM*>(&model);
+			if (svm == NULL)
+			{
+				MetaSVM* meta = dynamic_cast<MetaSVM*>(&model);;
+				if (meta != NULL) svm = meta->getMultiClassSVM();
+			}
+			if (svm == NULL) throw SHARKEXCEPTION("[SVM_Optimizer::optimize] The model is not a valid MultiClassSVM or SVM meta model.");
 
-	default:
-	{
-		throw SHARKEXCEPTION("[SVM_Optimizer::optimize] call init(...) before optimize(...)");
-		return 0.0;
-	}
+			optimize(*svm, input, target);
+			return 0.0;
+		}
+
+		default:
+		{
+			throw SHARKEXCEPTION("[SVM_Optimizer::optimize] call init(...) before optimize(...)");
+			return 0.0;
+		}
 	}
 }
 
@@ -1783,7 +2064,7 @@ double SVM_Optimizer::optimize(SVM& model, const Array<double>& input, const Arr
 			alpha(e)  = upperBox;
 		}
 
-		// INITIALIZATION: Check if too much SVs are at bounds
+		// INITIALIZATION: Check if too many SVs are at bounds
 		if (NrInitialSVs != examples)
 		{
 			int index;
@@ -1792,12 +2073,12 @@ double SVM_Optimizer::optimize(SVM& model, const Array<double>& input, const Arr
 			for (int s = 0; s < diff; s++)
 			{
 				// choose randomly a example
-				index = Rng::discrete(0, examples - 1);
+				index = Rng::discrete(0, examples-1);
 
-				while (alpha(index) == 0)
+				while(alpha(index) == 0)
 				{
 					// try again if the example has already been used
-					index = Rng::discrete(0, examples - 1);
+					index = Rng::discrete(0, examples-1);
 				}
 				// and free the SV
 				alpha(index) = 0;
@@ -1811,11 +2092,11 @@ double SVM_Optimizer::optimize(SVM& model, const Array<double>& input, const Arr
 			if (sumAlpha < (examples * fractionOfOutliers))
 			{
 				// if yes, find a free example
-				index = Rng::discrete(0, examples - 1);
-				while (alpha(index) != 0)
+				index = Rng::discrete(0, examples-1);
+				while(alpha(index) != 0)
 				{
 					// try again if the example already has been used
-					index = Rng::discrete(0, examples - 1);
+					index = Rng::discrete(0, examples-1);
 				}
 				// and now we get sumAlpha = 1
 				alpha(index) = (examples * fractionOfOutliers) - sumAlpha;
@@ -1891,7 +2172,7 @@ double SVM_Optimizer::optimize(SVM& model, const Array<double>& input, const Arr
 	for (e = 0; e < examples; e++) model.setParameter(e, alpha(e));
 	model.setParameter(examples, b);
 
-	model.MakeSparse();
+	if (copy) model.MakeSparse();
 
 	return ret;
 }
@@ -1919,57 +2200,68 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 	unsigned int classes = model.getClasses();
 	unsigned int variables = examples * classes;
 
-	model.SetTrainingData(input, copy);
+	model.SetTrainingData(input, target, copy);
 	KernelFunction* kernel = model.getKernel();
 
 	if (mode == eAllInOne)
 	{
 		Array<double> alpha(variables);
-		for (i = 0; i < variables; i++) alpha(i) = model.getParameter(i);
+		Array<double> linear(variables);
+		Array<double> lower(variables);
+		Array<double> upper(variables);
 
 		matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
-		Array<double> prototypes(Matrix::unitmatrix(classes));
 
-		QpBoxAllInOneDecomp* solver = new QpBoxAllInOneDecomp(*cache);
+		unsigned int e, c;
+		unsigned int index = 0;
+		for (e=0; e<examples; e++)
+		{
+			for (c=0; c<classes; c++)
+			{
+				alpha(index) = model.getParameter(index);
+				unsigned int y = (unsigned int)target(e, 0);
+				linear(index) = 1.0;
+				lower(index) = 0.0;
+				if (y == c) upper(index) = 0.0;
+				else upper(index) = C;
+				index++;
+			}
+		}
+
+		double mod[64] = {
+			0.0, 0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.0, -0.5, 0.0, -0.5, 0.0, -1.0, -0.5, -1.0, -0.5,
+			0.0, 0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.0, -0.5, 0.0, -0.5, 0.0, -1.0, -0.5, -1.0, -0.5,
+			0.5, 1.0, 0.5, 1.0, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.0,
+			0.5, 1.0, 0.5, 1.0, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.0
+		};
+
+		QpMcDecomp* solver = new QpMcDecomp(*cache);
 		this->solver = solver;
 		solver->setMaxIterations(maxIter);
-		solver->Solve(classes, target, prototypes, C, alpha, accuracy);
-
-		i = 0;
-		unsigned int e, c, p, m;
-		for (e = 0; e < examples; e++)
-		{
-			double sum = 0.0;
-			p = (unsigned int)target(e, 0);
-			for (c = 0; c < classes; c++)
-			{
-				if (c == p)
-				{
-					i++;
-					continue;
-				}
-				double len2 = 0.0;
-				for (m = 0; m < classes; m++)
-				{
-					double diff = prototypes(p, m) - prototypes(c, m);
-					len2 += diff * diff;
-				}
-				double value = 0.5 * alpha(i) / sqrt(len2);
-				model.setParameter(i, -value);
-				sum += value;
-				i++;
-			}
-
-			model.setParameter(e * classes + p, sum);
-		}
+		solver->Set_WSS_Strategy(2);
+		solver->Solve(classes, mod, target, linear, lower, upper, alpha, accuracy);
 		optimal = solver->isOptimal();
 
+		i = 0;
+		for (e=0; e<examples; e++)
+		{
+			unsigned int t = (unsigned int)target(e, 0);
+			double sum = 0.0;
+			for (c=0; c<classes; c++) sum += alpha(i + c);
+			for (c=0; c<classes; c++)
+			{
+				double value = -alpha(i + c);
+				if (c == t) value += sum;
+				model.setParameter(i + c, value);
+			}
+			i += classes;
+		}
 	}
 	else if (mode == eCrammerSinger)
 	{
 		Array<double> alpha(variables);
-		for (i = 0; i < variables; i++) alpha(i) = model.getParameter(i);
+		for (i=0; i < variables; i++) alpha(i) = model.getParameter(i);
 
 		matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
@@ -1982,7 +2274,7 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 		solver->Solve(alpha, beta, beta / 2.0 * accuracy);
 		optimal = solver->isOptimal();
 
-		for (i = 0; i < variables; i++) model.setParameter(i, alpha(i));
+		for (i=0; i < variables; i++) model.setParameter(i, alpha(i));
 	}
 	else if (mode == eOVA)
 	{
@@ -1998,11 +2290,12 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 
 		QpBoxDecomp* solver = new QpBoxDecomp(*cache);
 		solver->setMaxIterations(maxIter);
+		solver->Set_WSS_Strategy(2);
 		this->solver = solver;
 
-		for (c = 0; c < classes; c++)
+		for (c=0; c<classes; c++)
 		{
-			for (e = 0; e < examples; e++)
+			for (e=0; e<examples; e++)
 			{
 				alpha(e) = model.getParameter(e * classes + c);
 				if (target(e, 0) == c)
@@ -2021,7 +2314,7 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 			solver->Solve(linear, lower, upper, alpha, accuracy);
 			optimal = solver->isOptimal();
 
-			for (e = 0; e < examples; e++)
+			for (e=0; e<examples; e++)
 			{
 				model.setParameter(e * classes + c, alpha(e));
 			}
@@ -2034,44 +2327,51 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 		Array<double> lower(examples);
 		Array<double> upper(examples);
 
-		unsigned int c, e;
-		Array<double> prototypes(Matrix::unitmatrix(classes));
-		matrix = new InputLabelMatrix(kernel, input, target, prototypes);
+		matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
-		QpBoxDecomp* solver = new QpBoxDecomp(*cache);
-		solver->setMaxIterations(maxIter);
-		this->solver = solver;
-
-		for (e = 0; e < examples; e++)
+		unsigned int e, c;
+		for (e=0; e<examples; e++)
 		{
-			c = (unsigned int)target(e, 0);
-			alpha(e) = model.getParameter(e * classes + c);
+			alpha(e) = model.getParameter(e);
 			linear(e) = 1.0;
 			lower(e) = 0.0;
 			upper(e) = C;
 		}
-		solver->Solve(linear, lower, upper, alpha, accuracy);
+
+		double mod[64];
+
+		// (standard) orthogonal label prototypes
+		for (c=0; c<64; c++) mod[c] = (c & 1) ? 1.0 : 0.0;
+
+		// simplex label prototypes
+// 		for (c=0; c<64; c++) mod[c] = (c & 1) ? 1.0 : -1.0 / classes;
+
+		QpMcDecomp* solver = new QpMcDecomp(*cache);
+		this->solver = solver;
+		solver->setMaxIterations(maxIter);
+		solver->Set_WSS_Strategy(2);
+		solver->Solve(1, mod, target, linear, lower, upper, alpha, accuracy);
 		optimal = solver->isOptimal();
 
-		for (e = 0; e < examples; e++)
+		unsigned int index = 0;
+		for (e=0; e<examples; e++)
 		{
 			unsigned int label = (unsigned int)target(e, 0);
-			for (c = 0; c < classes; c++)
+			for (c=0; c<classes; c++)
 			{
 				double value = (label == c) ? alpha(e) : 0.0;
-				model.setParameter(e * classes + c, value);
+				model.setParameter(index, value);
+				index++;
 			}
 		}
 	}
 
 	// set the bias term to zero
-	for (i = 0; i < classes; i++) model.setParameter(variables + i, 0.0);
+	for (i=0; i < classes; i++) model.setParameter(variables + i, 0.0);
 
-	// TODO:
-// 	model.MakeSparse();
+	if (copy) model.MakeSparse();
 }
 
 // static dummy member
 ErrorFunction& SVM_Optimizer::dummyError = * ((ErrorFunction*) NULL);
-

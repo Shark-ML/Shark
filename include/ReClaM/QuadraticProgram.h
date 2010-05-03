@@ -63,6 +63,8 @@
 #include <ReClaM/KernelFunction.h>
 #include <Array/Array2D.h>
 #include <vector>
+#include <cmath>
+#include<time.h>
 
 
 //! \brief Abstract base class of all quadratic program solvers
@@ -229,50 +231,6 @@ protected:
 };
 
 
-//! \brief Kernel Gram matrix with input and label kernel
-//!
-//! \par
-//! The entries of this matrix are of the form
-//! \f$ k(x, x') \langle y, y' \rangle \f$
-//! with the standard inner product on the label
-//! prototype vectors y.
-class InputLabelMatrix : public QPMatrix
-{
-public:
-	//! Constructor
-	//! \param kernelfunction  kernel function
-	//! \param input           data to evaluate the kernel function
-	//! \param target          labels as indices into the prototype matrix
-	//! \param prototypes      label (target space) prototype vectors
-	InputLabelMatrix(KernelFunction* kernelfunction,
-					 const Array<double>& input,
-					 const Array<double>& target,
-					 const Array<double>& prototypes);
-
-	//! Destructor
-	~InputLabelMatrix();
-
-	//! overriden virtual function, see #QPMatrix
-	float Entry(unsigned int i, unsigned int j);
-
-	//! overriden virtual function, see #QPMatrix
-	void FlipColumnsAndRows(unsigned int i, unsigned int j);
-
-protected:
-	//! Underlying input space kernel function
-	KernelFunction* kernel;
-
-	//! Array of data vectors for kernel evaluations
-	Array<ArrayReference<double>* > x;
-
-	//! integer targets
-	std::vector<unsigned int> y;
-
-	//! inner products of the prototype vectors
-	Array<double> prototypeProduct;
-};
-
-
 //! \brief Efficient quadratic matrix cache
 //!
 //! \par
@@ -389,122 +347,40 @@ protected:
 
 
 //!
-//! \brief Quadratic program solver for SVMs
+//! \brief Quadratic program solver for binary SVMs
 //!
 //! \par
-//! The purpose of the QpSvmCG class is two-fold:
-//! First, a QpSvmCG object is a description of a
-//! quadratic program, that is, an optimization problem
-//! composed of a quadratic objective function and a set of
-//! linear constraints. Second, this class is a solver
-//! for this kind of problem.
-//!
-//! \par
-//! This class is designed for the representation and
-//! solution of a special family of quadratic programs
-//! occuring as dual optimization problems in various kinds
-//! of support vector machine (#SVM) formulations. These
-//! problems have the following structure (for
-//! \f$ \alpha \in R^{\ell} \f$):
-//!
-//! \par
-//! minimize \f$ W(\alpha) = \frac{1}{2} \alpha^T M \alpha + v^T \alpha \f$<br>
-//! s.t. \f$ \sum_{i=1}^{\ell} \alpha_i = z \f$ (equality constraint)<br>
-//! and \f$ l_i \leq \alpha_i \leq u_i \f$ for all \f$ 1 \leq i \leq \ell \f$ (box constraints).<br>
-//! Here, z is a number, v is any vector and M is a
-//! positive definite symmetric quadratic matrix.
-//! \f$ l_i \leq u_i \f$ are lower and upper bounds
-//! on the variables.
-//!
-//! \par
-//! In contrast to a general quadratic program there is
-//! only one equality constraint, which is restricted to
-//! a special form. The inequality constraints have to
-//! take the special form of a box. These properties make
-//! allow for an efficient treatment of the constraints.
-//!
-//! \par
-//! This solver implements a conjugate gradient method
-//! which is specially altered in order to handle the
-//! box constraints. The advantage of this proceeding
-//! is that the solution is exact (in theory), that is,
-//! the algorithm does not solve the problem up to a
-//! given accuracy.
-//! However, in practice due to limited floating point
-//! accuracy the solution found is only a good
-//! approximation.
-//!
-//! \par
-//! The optimizer is designed to handle small problems.
-//! It is not advisable to process large scale problems
-//! for several reasons. One disadvantage is that the
-//! whole positive definite quadratic Hessian is assumed
-//! to fit into memory. Another consideration is that the
-//! solver is simply slower than the decomposition method
-//! implemented in QpSvmDecomp for more than a few dozens
-//! of dimensions.
-//!
-class QpSvmCG : public QPSolver
-{
-public:
-	//! \param quadratic  quadratic part M of the objective function
-	//! \param linear     linear part v of the target function
-	//! \param lower      vector l of lower bounds
-	//! \param upper      vector u of upper bounds
-	//! \param point      input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
-	//! \param accuracy   solution accuracy, in terms of the maximum KKT violation
-	static void Solve(const Array<double>& quadratic,
-					  const Array<double>& linear,
-					  const Array<double>& lower,
-					  const Array<double>& upper,
-					  Array<double>& point,
-					  double accuracy = 1e-10);
-};
-
-
-//!
-//! \brief Quadratic program solver for SVMs
-//!
-//! \par
-//! The purpose of the QpSvmDecomp class is two-fold:
-//! First, a QpSvmDecomp object is a description of a
-//! quadratic program, that is, an optimization problem
-//! composed of a quadratic objective function and a set of
-//! linear constraints. Second, this class is an efficient
-//! solver for this kind of problem.
-//!
-//! \par
-//! This class is designed for the representation and
-//! solution of a special family of quadratic programs
-//! occuring as dual optimization problems in various kinds
-//! of support vector machine (#SVM) formulations. These
-//! problems have the following structure (for
+//! The QpSvmDecomp class is a decomposition-based solver
+//! for the quadratic program occuring when training a
+//! standard binary support vector machine (SVM).
+//! This problem has the following structure (for
 //! \f$ \alpha \in R^{\ell} \f$):
 //!
 //! \par
 //! maximize \f$ W(\alpha) = v^T \alpha - \frac{1}{2} \alpha^T M \alpha \f$<br>
 //! s.t. \f$ \sum_{i=1}^{\ell} \alpha_i = z \f$ (equality constraint)<br>
-//! and \f$ l_i \leq \alpha_i \leq u_i \f$ for all \f$ 1 \leq i \leq \ell \f$ (box constraints).<br>
-//! Here, z is a number, v is any vector and M is a
+//! and \f$ l_i \leq \alpha_i \leq u_i \f$ for all \f$ 1 \leq i \leq \ell \f$ (box constraints).
+//!
+//! \par
+//! Here, z is a number, v is any vector and, M is a
 //! positive definite symmetric quadratic matrix.
 //! \f$ l_i \leq u_i \f$ are lower and upper bounds
 //! on the variables.
 //!
 //! \par
-//! In contrast to a general quadratic program there is
-//! only one equality constraint, which is restricted to
-//! a special form. The inequality constraints have to
-//! take the special form of a box. These properties make
-//! the SMO algorithm (Platt, 1999) and variants thereof
-//! (Fan et al., 2005; Glasmachers and Igel, 2006) directly
-//! applicable.
+//! The quadratic program is special in that it has a
+//! special box form of its inequality constraints, and
+//! that is has a single specially aligned equality
+//! constraint. These properties make the SMO algorithm
+//! (Platt, 1999) and variants thereof (Fan et al., 2005;
+//! Glasmachers and Igel, 2006) directly applicable.
 //!
 //! \par
 //! This solver uses the basic SMO algorithm with
 //! caching and shrinking techniques (Joachims, 1998) and
 //! a switching between two highly efficient worling set
 //! selection algorithms based on second order information.
-//! Because the #SelectWorkingSet method is virtual,
+//! Because the SelectWorkingSet method is virtual,
 //! it is easy to implement other strategies if needed.
 //!
 //! \par
@@ -751,8 +627,8 @@ protected:
 //! \par
 //! This algorithm solves the same problem as QpSvmDecomp but
 //! without the equality constraint. For example, this problem
-//! corresponds to SVMs without bias. The same techniques are
-//! applied.
+//! corresponds to SVMs without bias. Similar techniques are
+//! applied, but this solver solves more complicated sub-problems.
 //!
 class QpBoxDecomp : public QPSolver
 {
@@ -774,44 +650,10 @@ public:
 	//! \param eps              solution accuracy, in terms of the maximum KKT violation
 	//!
 	void Solve(const Array<double>& linearPart,
-			   const Array<double>& boxLower,
-			   const Array<double>& boxUpper,
-			   Array<double>& solutionVector,
-			   double eps = 0.001);
-
-	//!
-	//! \brief continue solving the quadratic program
-	//!
-	//! \param boxLower         vector l of lower bounds
-	//! \param boxUpper         vector u of upper bounds
-	//! \param solutionVector   output: solution \f$ \alpha^* \f$
-	//!
-	//! \par
-	//! The Continue method assumes that a quadratic program
-	//! with strictly smaller box has already been solved.
-	//! It re-uses the previous solution, the kernel cache,
-	//! and the active set for a warm start.
-	//!
-	void Continue(const Array<double>& boxLower,
-				  const Array<double>& boxUpper,
-				  Array<double>& solutionVector);
-
-	//!
-	//! \brief continue solving the quadratic program
-	//!
-	//! \param gradientUpdate  this vector is added to the current gradient
-	//! \param solutionVector  output: solution \f$ \alpha^* \f$
-	//!
-	//! \par
-	//! The Continue method assumes that a quadratic program
-	//! has already been solved, such that current solution and
-	//! gradient are consistent. This method allows the user to
-	//! alter the linear part of the program by adding a vector
-	//! to the current gradient. The method re-uses the previous
-	//! solution and the kernel cache for a warm start.
-	//!
-	void Continue(const Array<double>& gradientUpdate,
-				  Array<double>& solutionVector);
+				 const Array<double>& boxLower,
+				 const Array<double>& boxUpper,
+				 Array<double>& solutionVector,
+				 double eps = 0.001);
 
 	//! Return the number of iterations used to solve the problem
 	inline SharkInt64 iterations()
@@ -833,9 +675,27 @@ public:
 		this->maxIter = maxiter;
 	}
 
+	inline void Set_WSS_Strategy(int i = 1)
+	{
+		RANGE_CHECK(i == 1 || i == 2);
+		WSS_Strategy = i;
+	}
+
 protected:
-	//! SMO loop
-	void SMO();
+	//! Internally used by Solve2D;
+	//! computes the solution of a
+	//! one-dimensional sub-problem.
+	double StepEdge(double alpha, double g, double Q, double L, double U, double& mu);
+
+	//! Exact solver for a two-dimensional sub-problem.
+	void Solve2D(double alphai, double alphaj,
+					double gi, double gj,
+					double Qii, double Qij, double Qjj,
+					double Li, double Ui, double Lj, double Uj,
+					double& mui, double& muj);
+
+	//! decomposition loop
+	void Loop();
 
 	//! problem dimension
 	unsigned int dimension;
@@ -872,7 +732,14 @@ protected:
 	//! stopping condition - solution accuracy
 	double epsilon;
 
+	//! number of variables in the working set (1 or 2)
+	int WSS_Strategy;
+
+	//! working set selection in the case of a single variable
 	virtual bool SelectWorkingSet(unsigned int& i);
+
+	//! working set selection in the case of two variables
+	virtual bool SelectWorkingSet(unsigned int& i, unsigned int& j);
 
 	//! Shrink the problem
 	void Shrink();
@@ -907,54 +774,38 @@ protected:
 //! with the difference that the structure of the quadratic
 //! program of multi class classification is exploited for
 //! more efficient caching and a more natural problem
-//! encoding (see also class McMethod).
+//! encoding.
 //!
-class QpBoxAllInOneDecomp : public QPSolver
+class QpMcDecomp : public QPSolver
 {
 public:
 	//! Constructor
 	//! \param  kernel  kernel matrix cache
-	//! \param  method  problem properties
-	QpBoxAllInOneDecomp(CachedMatrix& kernel);
+	QpMcDecomp(CachedMatrix& kernel);
 
 	//! Destructor
-	virtual ~QpBoxAllInOneDecomp();
+	~QpMcDecomp();
 
 	//!
 	//! \brief solve the quadratic program
 	//!
 	//! \param  classes         number of classes
+	//! \param  modifiers       list of 64 kernel modifiers, see method QpMcDecomp::Modifier
 	//! \param  target          class label indices in {0, ..., classes-1}
-	//! \param  prototypes      label prototype vectors
-	//! \param  C               component wide upper bound
+	//! \param  linearPart      linear part of the objective function
+	//! \param  lower           coordinate-wise lower bound
+	//! \param  upper           coordinate-wise upper bound
 	//! \param  solutionVector  input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
 	//! \param  eps             solution accuracy, in terms of the maximum KKT violation
 	//!
 	void Solve(unsigned int classes,
-			   const Array<double>& target,
-			   const Array<double>& prototypes,
-			   double C,
-			   Array<double>& solutionVector,
-			   double eps = 0.001);
-
-	//!
-	//! \brief special method for fast grid search
-	//!
-	//! \par
-	//! This method re-solves a given problem for a
-	//! different value of the regularization parameter
-	//! C which must not be smaller than the most
-	//! recently used value. The solution vector is
-	//! used for output only, thus it does not need to
-	//! pose a feasible solution initially.
-	//! This method is particularly efficient because
-	//! it reuses the previous optimal solution for
-	//! warm starting the solver. Furthermore, the
-	//! previous gradient information is reused, and
-	//! all previous non-support-vectors are shrinked
-	//! initially.
-	//!
-	void Continue(double largerC, Array<double>& solutionVector);
+					const double* modifiers,
+					const Array<double>& target,
+					const Array<double>& linearPart,
+					const Array<double>& lower,
+					const Array<double>& upper,
+					Array<double>& solutionVector,
+					double eps);
 
 	//! Return the number of iterations used to solve the problem
 	inline SharkInt64 iterations()
@@ -976,7 +827,41 @@ public:
 		this->maxIter = maxiter;
 	}
 
+	//! Set number of variables in the working set,
+	//! accepted values are one or two.
+	inline void Set_WSS_Strategy (int i = 1)
+	{
+		RANGE_CHECK(i == 1 || i == 2);
+		WSS_Strategy = i;
+	}
+
 protected:
+	//! Return the "kernel modifier" which is used to
+	//! compute the Q-matrix form the kernel matrix.
+	inline double Modifier(unsigned int yi, unsigned int yj, unsigned int vi, unsigned int vj) const
+	{
+		unsigned int index = 0;
+		if (yi == yj) index += 1;
+		if (yi == vi) index += 2;
+		if (yi == vj) index += 4;
+		if (yj == vi) index += 8;
+		if (yj == vj) index += 16;
+		if (vi == vj) index += 32;
+		return m_modifier[index];
+	}
+
+	//! Internally used by Solve2D;
+	//! computes the solution of a
+	//! one-dimensional sub-problem.
+	double StepEdge(double alpha, double g, double Q, double L, double U, double& mu);
+
+	//! Exact solver for a two-dimensional sub-problem.
+	void Solve2D(double alphai, double alphaj,
+					double gi, double gj,
+					double Qii, double Qij, double Qjj,
+					double Li, double Ui, double Lj, double Uj,
+					double& mui, double& muj);
+
 	//! data structure describing one training example
 	struct tExample
 	{
@@ -992,6 +877,7 @@ protected:
 		unsigned int example;		// index into the example list
 		unsigned int index;			// index into example->variables
 		unsigned int label;			// label corresponding to this variable
+		double diagonal;			// diagonal entry of the big Q-matrix
 	};
 
 	//! information about each training example
@@ -1003,8 +889,13 @@ protected:
 	//! space for the example[i].variables pointers
 	std::vector<unsigned int> storage;
 
+	//! number of examples in the problem (size of the kernel matrix)
 	unsigned int examples;
+
+	//! number of classes in the problem
 	unsigned int classes;
+
+	//! number of variables in the problem = examples times classes
 	unsigned int variables;
 
 	//! kernel matrix cache
@@ -1025,10 +916,6 @@ protected:
 	//! number of currently active variables
 	unsigned int activeVar;
 
-	//! diagonal matrix entries
-	//! The diagonal array is of fixed size and not subject to shrinking.
-	Array<double> diagonal;
-
 	//! gradient of the objective function
 	//! The gradient array is of fixed size and not subject to shrinking.
 	Array<double> gradient;
@@ -1039,11 +926,11 @@ protected:
 	//! stopping condition - solution accuracy
 	double epsilon;
 
-	//! compute the "non-kernel" part of the quadratic matrix
-	double Modifier(unsigned int v_i, unsigned int v_j, unsigned int y_i, unsigned int y_j);
-
 	//! select an optimization direction
-	bool SelectWorkingSet(unsigned int& i);
+	virtual bool SelectWorkingSet(unsigned int& i);
+
+	//! select  optimization directions i and j
+	virtual bool SelectWorkingSet(unsigned int& i, unsigned int& j);
 
 	//! Shrink the problem
 	void Shrink();
@@ -1060,12 +947,6 @@ protected:
 	//! shrink an examples
 	void DeactivateExample(unsigned int e);
 
-	//! inner products of pairs of prototype vectors
-	Array<double> m_prototypeProduct;
-
-	//! distances of pairs of prototype vectors
-	Array<double> m_prototypeLength;
-
 	//! solution statistics: number of iterations
 	SharkInt64 iter;
 
@@ -1076,12 +957,18 @@ protected:
 
 	//! maximum number of iterations
 	SharkInt64 maxIter;
+
+	//! number of variables in the working set
+	int WSS_Strategy;
+
+	//! kernel modifiers under six binary conditions
+	double m_modifier[64];
 };
 
 
 //!
 //! \brief Quadratic program solver for the multi class
-//!        SVM as proposed by Crammer and Singer
+//!        SVM proposed by Crammer and Singer
 //!
 //! \par
 //! This algorithm solves the same quadratic program introduced in:
@@ -1092,12 +979,17 @@ protected:
 //! Vector Machines.</a>
 //! In Journal of Machine Learning Research, pp. 265-292 (2001).
 //!
+//! This problem is special among mutli-class SVMs in that it has
+//! as many equality constraints as there are training examples.
+//! It is solved with a straight-forward variant of the SMO scheme
+//! (Platt, 1999).
+//!
 class QpCrammerSingerDecomp : public QPSolver
 {
 public:
 	//! Constructor
 	//! \param  kernel   kernel matrix cache
-	//! \param  method   problem properties
+	//! \param  y        classification targets
 	//! \param  classes  number of classes
 	QpCrammerSingerDecomp(CachedMatrix& kernel, const Array<double>& y, unsigned int classes);
 
@@ -1112,8 +1004,8 @@ public:
 	//! \param  eps             solution accuracy, in terms of the maximum KKT violation
 	//!
 	void Solve(Array<double>& solutionVector,
-			   double beta,
-			   double eps = 0.001);
+				double beta,
+				double eps = 0.001);
 
 	//! Return the number of iterations used to solve the problem
 	inline SharkInt64 iterations()
@@ -1209,6 +1101,9 @@ protected:
 	//! true if the problem has already been unshrinked
 	bool bUnshrinked;
 
+      	//! true if the the user wants to use shrinking mechanism (default = true)
+	bool shrinkCheck;
+
 	//! shrink a variable
 	void DeactivateVariable(unsigned int v);
 
@@ -1228,203 +1123,4 @@ protected:
 };
 
 
-//! \brief Quadratic program solver for box constrained problems using conjugate gradients
-class QpBoxAndEqCG : public QPSolver
-{
-public:
-	//! \param quadratic  quadratic part M of the objective function
-	//! \param linear     linear part v of the target function
-	//! \param boxMin     vector l of lower bounds
-	//! \param boxMax     vector u of upper bounds
-	//! \param eqMat      matrix A of the equality constraints
-	//! \param point      input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
-	static void Solve(const Array<double>& quadratic,
-					  const Array<double>& linear,
-					  const Array<double>& boxMin,
-					  const Array<double>& boxMax,
-					  const Array<double>& eqMat,
-					  Array<double>& point,
-					  double accuracy = 1e-10);
-
-protected:
-	static void Orthogonalize(int oc, const Array<double>& ortho, const Array<bool>& active, ArrayReference<double> vec);
-	static void Orthogonalize(Array<double>& eq, const Array<bool>& active);
-	static void Project(const Array<bool>& active, Array<double>& eq, const Array<double>& gradient, Array<double>& direction);
-};
-
-
-//! \brief Very simple quadratic program solver for box constrained problems
-class QpBoxAndEqDecomp : public QPSolver
-{
-public:
-	//! \param quadratic  quadratic part M of the objective function
-	//! \param linear     linear part v of the target function
-	//! \param boxMin     vector l of lower bounds
-	//! \param boxMax     vector u of upper bounds
-	//! \param eqMat      matrix A of the equality constraints
-	//! \param point      input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
-	static void Solve(const Array<double>& quadratic,
-					  const Array<double>& linear,
-					  const Array<double>& boxMin,
-					  const Array<double>& boxMax,
-					  const Array<double>& eqMat,
-					  Array<double>& point,
-					  double accuracy = 1e-3);
-
-protected:
-	static void Orthogonalize(Array<double>& eq);
-	static void Project(const Array<double>& eq, const Array<double>& gradient, Array<double>& direction);
-};
-
-
-// //!
-// //! \brief Quadratic program solver with affine linear constraints
-// //!
-// //! \par
-// //! The purpose of the QpAffine class is two-fold:
-// //! First, a QpAffine object is a description of a
-// //! quadratic program, that is, an optimization problem
-// //! composed of a quadratic objective function and a set
-// //! of affine linear constraints. Second, this class is
-// //! a solver for this kind of problem.
-// //!
-// //! \par
-// //! This class is designed for the representation and
-// //! solution of a quite general family of quadratic
-// //! programs. These problems have the following
-// //! structure (for \f$ \alpha \in R^{\ell} \f$):
-// //!
-// //! \par
-// //! minimize \f$ W(\alpha) = \frac{1}{2} \alpha^T M \alpha + v^T \alpha\f$<br>
-// //! s.t. \f$ E \alpha + e = 0 \f$ (equality constraints)<br>
-// //! and \f$ I \leq \alpha + i \leq 0 \f$ component wise (inequality constraints).<br>
-// //! Here, E is an \f$ n \times \ell \f$ matrix,
-// //! e is an n-dimensional vector, I is an
-// //! \f$ m \times \ell \f$ matrix and i is an
-// //! m-dimensional vector.
-// //! The \f$ \ell \times \ell \f$ matrix M is required
-// //! to be symmetric and positive definite, while there
-// //! are no constraints for the vector v.
-// //! In practive the vector e is not needed as long as
-// //! the optimization starts at a feasible point.
-// //!
-// //! \par
-// //! The solution strategy followed by the QpAffine
-// //! solver is (probably, I don't have a proof) cubic
-// //! in the number of variables, as long as the number
-// //! of inequality constraints is linear in the number
-// //! of variables. This excludes too large programs.
-// //! The algorithm itself imposes an even stronger
-// //! constraint, because the Gram-Schmidt
-// //! orthogonalization and singular value decomposition
-// //! algorithms used are numerically sensitive.
-// //! Therefore the solver is suited only for small
-// //! problems or, in case of well conditioned problems,
-// //! for moderate size problems.
-// //!
-// //! \par
-// //! In theory, the solution computed by QpAffine is
-// //! exact. The solver internally solves a transformed
-// //! problem and afterwards backtransforms the solution
-// //! found. These transformations can decrease the
-// //! accuracy. This is usually only visible at the
-// //! contraints which are not fulfilled exactly.
-// //!
-// class QpAffine : public QPSolver
-// {
-// public:
-// 	//! Constructor defining the quadratic program.
-// 	//! Important preprocessing steps are precomputed
-// 	//! to facilitate storage of the problem and the
-// 	//! computations necessary to solve the problem.
-// 	//!
-// 	//! \param  quadratic  Matrix M, see class description
-// 	//! \param  linear     vector v, see class description
-// 	//! \param  eqMat      Matrix E, see class description
-// 	//! \param  ineqMat    Matrix I, see class description
-// 	//! \param  ineqVec    Vector i, see class description
-// 	QpAffine(const Array<double>& quadratic,
-// 			 const Array<double>& linear,
-// 			 const Array<double>& eqMat,
-// 			 const Array<double>& ineqMat,
-// 			 const Array<double>& ineqVec);
-//
-// 	//! Destructor
-// 	virtual ~QpAffine();
-//
-// 	//!
-// 	//! \brief solve the quadratic program
-// 	//!
-// 	//! \par
-// 	//! This is the core method of the #QpAffine class.
-// 	//! It computes the solution of the problem defined
-// 	//! by the QpAffine instance.
-// 	//!
-// 	//! \param point   input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
-// 	//!
-// 	void Solve(Array<double>& point);
-//
-// protected:
-// 	//! dimension of the original problem
-// 	int dimension;
-//
-// 	//! dimension of the transformed problem
-// 	int freedim;
-//
-// 	//! problem transformation
-// 	Array<double> transform;
-//
-// 	//! inverse problem transformation
-// 	Array<double> inverse;
-//
-// 	//! quardatic part of the original problem
-// 	const Array<double>& quadraticOrig;
-//
-// 	//! linear part of the transformed problem
-// 	Array<double> linear;
-//
-// 	//! inequality constraint matrix of the original problem
-// 	Array<double> constraintMatOrig;
-//
-// 	//! inequality constraint matrix of the transformed problem
-// 	Array<double> constraintMatTrans;
-//
-// 	//! inequality constraint vector of the original problem
-// 	const Array<double>& constraintVecOrig;
-//
-// 	//! Gram-Schmidt algorithm
-// 	//! \param  ortho  set of orthonormal vectors
-// 	//! \param  vec    input: vector to process, output: orthogonal vector
-// 	static void Orthogonalize(const std::vector<double*>& ortho, Array<double>& vec);
-//
-// 	//! Gram-Schmidt algorithm
-// 	//! \param  ortho  set of orthonormal vectors
-// 	//! \param  vec    input: vector to process, output: orthogonal vector
-// 	static void Orthogonalize(const std::vector<double*>& ortho, ArrayReference<double> vec);
-//
-// 	//! Gram-Schmidt algorithm
-// 	//! \param  vec    input: vector to process, output: unit vector
-// 	//! \return  true on success, false if vec has zero length
-// 	static bool Normalize(Array<double>& vec);
-//
-// 	//! Vector Normalization
-// 	//! \param  vec    input: vector to process, output: unit vector
-// 	//! \return  true on success, false if vec has zero length
-// 	static bool Normalize(ArrayReference<double> vec);
-//
-// 	//! result := M1 * M2
-// 	static void MatMul(const Array<double>& M1, const Array<double>& M2, Array<double>& result);
-//
-// 	//! result := Mat * vec
-// 	static void MatVec(const Array<double>& Mat, const Array<double>& vec, Array<double>& result);
-//
-// 	//! result := Mat * vec
-// 	static void MatVec(const Array<double>& Mat, const ArrayReference<double> vec, ArrayReference<double> result);
-//
-// 	//! result := <vec1, vec2>
-// 	static double Scp(const Array<double>& vec1, ArrayReference<double> vec2);
-// };
-
-
 #endif
-

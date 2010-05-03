@@ -12,7 +12,7 @@ http://creativecommons.org/licenses/GPL/2.0/
 */
 
 /* THE BIG GUYS */
-* {margin:0;padding:0}
+* {margin:0}
 /*body {padding: 0 0 20px;background: #fff url("images/body_bg.gif") repeat-x 0 100%;color:#333;font:83%/1.5 arial,tahoma,verdana,sans-serif}*/
 body {
     padding: 0 0 20px;
@@ -154,11 +154,12 @@ h6 {font-size: 96%}
 small {font-size:11px}
 
 /* LISTS */
-ul {margin: .3em 0 1.5em 0;list-style-type:none}
+ul {margin: .3em 0 1.5em 0;list-style-type:square;}
 	ul.related {margin-top: -1em}
 ol {margin: .5em .5em 1.5em}
 ol li {margin-left: 1.4em;padding-left: 0;background: none; list-style-type: decimal}
-li {line-height: 1.4em;padding-left: 25px;background: transparent url("images/sprites.gif") no-repeat 0 0}
+/*li {line-height: 1.4em;padding-left: 25px;background: transparent url("images/sprites.gif") no-repeat 0 0}*/
+li {line-height: 1.4em;}
 li.doc {background-position: 3px -500px}
 ul.nomarker li {background:none;padding-left:0}
 

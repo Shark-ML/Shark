@@ -75,8 +75,6 @@ public:
 
 
 	//! Compute the leave one out error for the C-SVM model.
-	//! If the optimizer does not reach the optimum within
-	//! the maximal number of iterations, 1e100 is returned.
 	double error(Model& model, const Array<double>& input, const Array<double>& target);
 
 	//! Compute the SVM offset b.

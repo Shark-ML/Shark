@@ -1,0 +1,73 @@
+#!/bin/sh
+
+mymkdir()
+{
+	if ! test -d $1
+	then
+		mkdir $1
+	fi
+}
+
+copy_lib_doc()
+{
+	if test -d doc/$1
+	then
+		mymkdir homepage/$VERSION/doc/$1
+		cp -f doc/$1/* homepage/$VERSION/doc/$1/
+	fi
+}
+
+echo "Input the new version number:"
+read VERSION
+
+mymkdir homepage
+mymkdir homepage/$VERSION
+mymkdir homepage/$VERSION/doc
+mymkdir homepage/$VERSION/doc/images
+mymkdir homepage/$VERSION/doc/EALibManual
+
+echo "copying documentation to homepage/ ..."
+cp -f doc/*.png homepage/
+cp -f doc/*.gif homepage/
+cp -f doc/*.css homepage/
+cp -f doc/*.png homepage/$VERSION/doc/
+cp -f doc/*.gif homepage/$VERSION/doc/
+cp -f doc/*.css homepage/$VERSION/doc/
+cp -f doc/*.html homepage/$VERSION/doc/
+cp -f COPYING.txt homepage/$VERSION/
+cp -f INSTALL.txt homepage/$VERSION/
+cp -f INDEX.txt homepage/$VERSION/
+cp -rf doc/faq homepage/$VERSION/doc/
+cp -rf doc/tutorials homepage/$VERSION/doc/
+cp -f doc/images/* homepage/$VERSION/doc/images/
+cp -f doc/EALibManual/*.pdf homepage/$VERSION/doc/EALibManual/
+
+copy_lib_doc Array
+copy_lib_doc Rng
+copy_lib_doc LinAlg
+copy_lib_doc FileUtil
+copy_lib_doc EALib
+copy_lib_doc MOO-EALib
+copy_lib_doc ReClaM
+copy_lib_doc Fuzzy
+copy_lib_doc Mixture
+
+echo "changing main page ..."
+echo "Generating main page" >> doc.log
+rm -f homepage/index.html
+cat doc/template-head > homepage/index.html
+cat doc/template-homepage >> homepage/index.html
+sed -e "s_pathprefix/_$VERSION/doc/_" doc/template-main >> homepage/index.html
+cat doc/template-tail >> homepage/index.html
+
+echo "setting rights ..."
+cd homepage
+chmod -R a+rX *
+
+echo "checking links ..."
+../doc/LinkChecker --quiet
+
+echo "homepage upload"
+echo "please enter the shark-admin password or press CTRL+c to cancel"
+scp -r * shark-admin,shark-project@web.sourceforge.net:/home/groups/s/sh/shark-project/htdocs/
+cd ..

@@ -105,6 +105,6 @@ double Cauchy::operator()()
  */
 double Cauchy::p(const double& x) const
 {
-	return 1. / M_PI *(1 + x*x);
+	return 1. / M_PI / (1 + x*x);
 }
 

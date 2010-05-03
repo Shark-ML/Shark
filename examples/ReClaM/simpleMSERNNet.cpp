@@ -40,7 +40,7 @@
 
 #include<ReClaM/MSERNNet.h>
 #include<ReClaM/Rprop.h>
-#include <ReClaM/createConnectionMatrix.h>
+#include<ReClaM/createConnectionMatrix.h>
 #include<Array/ArrayIo.h>
 
 using namespace std;
@@ -74,7 +74,9 @@ int main(int argc, char *argv[])
 	// some parameters
 
 	unsigned iterations = 1000;
-	const char* datafile = "timeseries";
+	char* datafile = "timeseries";
+	if(argc >1) datafile = argv[1];
+	
 	unsigned episode = 1000;
 	int forecast = 5;
 	bool checkGradient = false;     //if this is true, the gradient calculation is checked
