@@ -1,0 +1,45 @@
+
+<BODY>
+<h1 class="head">Shark Documentation</h1>
+
+<div class="links">
+
+<div id="sfmarquee">
+<a href="http://shark-project.sourceforge.net/"><h4><strong>SourceForge.net</strong></h4></a>
+</div>
+
+<p>
+<div class="sponsored">
+SHARK is supported by
+<br><br>
+	<a href="http://www.neuroinformatik.rub.de/thbio/group/neuralnet/index.html" class="werbung">
+		<img src="tb_logo.gif" border="0" alt="INI" class="sourceforge_logo">
+	</a>
+<br> 
+<br>
+	<a href="http://www.honda-ri.de" class="werbung">
+		<img src="HRI-EU-small.gif" border="0" width="164px" height="67px" alt="Honda Research Institutes" class="sourceforge_logo">
+	</a>
+<br><br>
+</div>
+</p>
+
+</div>
+
+<div class="intro">
+
+<h2>Scope</h2>
+<p>
+	SHARK is a modular C++ library for the design and
+	optimization of adaptive systems. It provides methods for linear and
+	nonlinear optimization, in particular evolutionary and gradient-based
+	algorithms, kernel-based learning algorithms and neural networks, and
+	various other machine learning techniques. SHARK serves as a toolbox to
+	support real world applications as well as research in different
+	domains of computational intelligence. The libraries are not
+	necessarily dependent on any third party software. The sources are
+	compatible with the following platforms: Windows, Solaris, MacOS X,
+	and Linux.
+</p>
+
+<br>

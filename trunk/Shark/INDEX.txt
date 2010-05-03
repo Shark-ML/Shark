@@ -1,0 +1,60 @@
+
+FILE STRUCTURE
+--------------
+
+
+doc/index.html      Overview about all references and manuals attached 
+                    to this Shark distribution.
+
+src                 Source files for all packages.
+include             Header files for all packages.
+examples            Example programs
+doc                 Documentation
+lib                 Library files (if created)
+
+COPYING.txt         GNU general public license.
+INSTALL.txt         Installation information and notes.
+INDEX.txt           This file.
+
+Makefile.in         A template to produce the main makefile.
+configure.in        Template for the 'autoconf' program, 
+                    cf. INSTALL.txt for details.
+configure           configure shell script
+
+makerights          Sets the UNIX file rights to allow for general
+                    read and group wide write access to all files.
+
+Shark_Libs.dsw      Microsoft Visual Studio workspace file containing
+                    the Shark libraries only.
+Shark_All.dsw       Microsoft Visual Studio workspace file containing
+                    all Shark projects including example programs.
+
+
+
+PACKAGE STRUCTURE
+-----------------
+
+
+Array               Package for dynamic arrays
+
+Rng                 Package containing numerous random number generators
+
+LinAlg              Linear algebra tools package
+
+FileUtil            Support for configuration file I/O
+
+EALib               Evolutionary algorithms package
+
+MOO-EALib           "Evolutionary Multi Objective Optimization".
+                    MOO-EALib is an extension of the original
+                    EALib and is able to optimize with respect 
+                    to vector-valued quality indicators
+                    instead of only scalar valued quality.
+
+Mixture             Mixture of gaussians, local linear regression, etc.
+
+ReClaM              Regression and classification methods toolbox,
+                    including artifical neural networks and support
+                    vector machines
+
+TimeSeries          Various test data

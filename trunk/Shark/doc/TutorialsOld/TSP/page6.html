@@ -1,0 +1,144 @@
+
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h2>Generate offspring I</h2>
+
+<p>
+	All offspring individuals are generated from the current
+	parent population (no elitism).
+	We use fitness proportional to generate the offspring
+	population form the parents: 
+</p>
+<pre><div class="code">  offsprings.selectProportional(parents);
+</div></pre>
+
+<p>
+	Each offspring candidate is recombined (see next
+	section) with its successor with probability <i>Pc</i>:
+</p>
+<pre><div class="code">  const double	 Pc            = 0.6;
+
+  for(i=0; i &lt; offsprings.size()-1; i+=2) {
+     if(Rng::coinToss(Pc)) {
+        /* mutate */
+     }
+  }
+</div></pre>
+
+<p>
+	and the offspring population becomes the parent population
+	of the next generation.
+</p>
+
+<pre><div class="code">  parents = offsprings;</div></pre>
+
+<p>The program now looks like this:</p>
+<pre><div class="code">#include &lt;vector&gt;
+#include &lt;EALib/PopulationT.h&gt;
+#include &lt;Array/ArrayOp.h&gt;
+
+
+const unsigned int cities10[10][10] =
+{
+{    0,   28,  57,  72,  81,  85,  80,  113, 89,  80},
+{    28,  0,   28,  45,  54,  57,  63,  85,  63,  63},
+{    57,  28,  0,   20,  30,  28,  57,  57,  40,  57},
+{    72,  45,  20,  0,   10,  20,  72,  45,  20,  45},
+{    81,  54,  30,  10,  0,   22,  81,  41,  10,  41},
+{    85,  57,  28,  20,  22,  0,   63,  28,  28,  63},
+{    80,  63,  57,  72,  81,  63,  0,   80,  89,  113},
+{    113, 85,  57,  45,  41,  28,  80,  0,   40,  80},
+{    89,  63,  40,  20,  10,  28,  89,  40,  0,   40},
+{    80,  63,  57,  45,  41,  63,  113, 80,  40,  0}
+};
+
+void generatePermutation(ChromosomeT&lt;unsigned int&gt;& chromo) {
+   unsigned                size	= chromo.size();
+   unsigned		i	= 0;
+   Array&lt;unsigned int&gt;     numbers(size-1);
+   numbers.resize(size-1);
+  
+   for(i=0; i &lt; numbers.nelem(); i++) {
+      numbers(i)            = i+1;
+   }
+
+   chromo[0] = 0;
+   for(i=1; i &lt; size; i++) {
+      unsigned index  = Rng::discrete (0,numbers.nelem()-1);
+      chromo[i]       = numbers(index);
+      numbers.remove_row(index);
+   }
+}
+
+
+signed int evaluate(ChromosomeT &lt; unsigned int &gt; & chromo) {
+  unsigned	size 	= chromo.size();
+  signed int	sum	= 0;
+  for(unsigned i=0; i &lt; size; i++) {
+     sum += cities10[chromo[i]][chromo[ (i+1) % size ]];
+  }
+  return sum;
+}
+
+int main( int argc, char **argv ) {
+  const	unsigned cities    	= 10;
+  Rng::seed(98765433);
+
+  const unsigned Mu            = 200;
+  const unsigned Lambda        = 200;
+  const	unsigned MaxEvals      = 200*30;
+  const	unsigned Generations   = (unsigned int)(MaxEvals/Lambda);
+<div class="newcode">
+  const double	 Pc            = 0.6;
+</div>
+  vector&lt;double&gt; window;
+
+  window.resize(Lambda);
+
+  PopulationT< unsigned int > parents   ( Mu,     
+             ChromosomeT&lt; unsigned int &gt;( cities ) );
+  PopulationT< unsigned int > offsprings( Lambda, 
+             ChromosomeT&lt; unsigned int &gt;( cities ) );
+
+  parents   .setMinimize( );
+  offsprings.setMinimize( );
+
+  parents.spinWheelMultipleTimes( );
+  offsprings.spinWheelMultipleTimes( );
+
+  for( i = 0; i &lt; parents.size( ); ++i ) 
+       generatePermutation(parents[ i ][ 0 ]);
+  
+  for( unsigned t = 0; t &lt; Generations; ++t ) {
+    for( i = 0; i &lt; parents.size( ); i++ ) {
+       double fitness = evaluate(parents[i][0]);
+       parents[i].setFitness(fitness);
+    }
+    parents.linearDynamicScaling(window,0);
+
+    /* generate new offsprings */
+<div class="newcode">
+    offsprings.selectProportional(parents);
+
+    for(i=0; i &lt; offsprings.size()-1; i+=2) {
+       if(Rng::coinToss(Pc)) {
+          /* recombine */
+       }
+    }
+
+    parents = offsprings;
+</div>
+  }
+  return EXIT_SUCCESS;
+}
+</div></pre>
+
+</body>
+
+</html>

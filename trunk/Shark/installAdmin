@@ -1,0 +1,6 @@
+#!/bin/sh
+cd cmake 
+cmake .
+make
+make test
+make install

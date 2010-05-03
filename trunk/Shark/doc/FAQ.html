@@ -1,0 +1,336 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!--
+Copyright: Daemon Pty Limited 2006, http://www.daemon.com.au
+Community: Mollio http://www.mollio.org $
+License: Released Under the "Common Public License 1.0", 
+http://www.opensource.org/licenses/cpl.php
+License: Released Under the "Creative Commons License", 
+http://creativecommons.org/licenses/by/2.5/
+License: Released Under the "GNU Creative Commons License", 
+http://creativecommons.org/licenses/GPL/2.0/
+-->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Shark Machine Learning Library</title>
+<link rel="stylesheet" type="text/css" href="css/main.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="css/print.css" media="print" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" type="text/css" href="css/ie6_or_less.css" />
+<![endif]-->
+<script type="text/javascript" src="js/common.js"></script>
+</head>
+<body id="type-b">
+<div id="wrap">
+  
+<div id="header">
+<div id="site-name">Shark Machine Learning Library</div>
+<div id="poweredby">
+<img style="width: 95%;" src="images/SharkLogo.png"/>
+</div>		
+  
+<ul id="nav">
+  <li class="first"><a href="index.html">About Shark</a></li>
+  <li><a href="#">Sourceforge</a>
+  
+  <ul>
+    <li class="first"><a href="http://shark-project.sourceforge.net">Project Summary</a></li>
+    <li><a href="http://sourceforge.net/projects/shark-project/files/">Downloads</a></li>
+    <li><a href="http://sourceforge.net/projects/shark-project/develop">Subversion Repository</a></li>
+  </ul>
+  
+</li>
+<li class="first"><a href="GettingStarted.html">Getting Started</a>
+<li class="first"><a href="Tutorials.html">Tutorials</a>
+<li class="active"><a href="FAQ.html">FAQ</a>
+
+<li class="first"><a href="#">Main Modules</a>
+<ul>
+  <li class="first"><a href="ReClaM/index.html">ReClaM</a>
+  <li class="first"><a href="EALib/index.html">EALib</a>
+  <li class="first"><a href="MOO-EALib/index.html">MOO-EALib</a>
+  <li class="first"><a href="Fuzzy/index.html">Fuzzy</a>
+</ul>
+</li>
+<li class="first"><a href="#">Tools</a>
+<ul>
+  <li class="first"><a href="Mixture/index.html">Mixture</a>
+  <li><a href="Array/index.html">Array</a>
+  <li><a href="Rng/index.html">Rng</a>
+  <li><a href="LinAlg/index.html">LinAlg</a>
+  <li class="last"><a href="FileUtil/index.html">FileUtil</a>		    
+</ul>
+</li>
+</ul>
+</div>
+      
+<div id="content">
+  
+  <h1>FAQ - Frequently Asked Questions</h1>
+  
+  <p>
+  The following list of frequently asked questions may prove helpful
+  if you experience any problems with the Shark machine learning library.
+  Please consult this FAQ before reporting any problems or bugs.
+  </p>
+
+  <h3>Question</h3>
+  Is there a mailing list available for users of the Shark library.
+  <h3>Answer</h3>
+  <p>
+  Yes, the mailing list is available at <a href="https://lists.sourceforge.net/lists/listinfo/shark-project-user">https://lists.sourceforge.net/lists/listinfo/shark-project-user</a>.
+  </p>
+  
+  <h3>Question</h3>
+  What are the differences between Shark and other libraries? Why should I use Shark?
+  <h3>Answer</h3>
+  <p>
+  Shark is a native C++ library designed for development and
+  real-world application of state-of-the-art machine learning and
+  optimization algorithms. The library has a history of more than 10
+  years of successful applications. It is actively supported and still
+  growing. We are continuously extending and improving the algorithms
+  in various domains of machine learning and computational
+  intelligence.
+  </p>
+  <p>
+  Flexibility and speed are the main design criteria (see the
+  question "How fast is the Shark?").
+  We think that its flexibility and extensibility makes Shark stand
+  out from other libraries.
+  </p>
+
+  <p>
+  It is self-contained and offers computational intelligence
+  techniques such as single- and multi-objective evolutionary
+  algorithms and neural networks as well as kernel-based machine
+  learning methods and classical optimization techniques in a coherent
+  framework. This is unique.
+  </p>
+  
+  <p>
+  Shark is an object-oriented software library and to use it
+  requires knowledge in C++ programming. If a graphical user interface
+  is important for you, you may go for other machine learning software
+  (or feel free to contribute such a front-end for Shark).
+  </p>
+  
+  <p>
+  Shark implements a lot of powerful algorithms not available in
+  any other machine learning library, of course in particular
+  methods based on the research of the developers.
+  </p>
+  
+  <p>
+  Some highlights:
+  <ul>
+    <li>The Shark SVM is the only SVM package implementing the fastest
+    SMO-based learning algorithm for dense large-scale problems
+    (using hybrid maximum gain working set selection).</li>
+    <li>Shark provides a variety of model-selection algorithms for SVMs,
+    for example gradient-based optimization of the kernel-target
+    alignment, which is not available in any other library.</li>
+    <li>Shark provides a large collection of efficient gradient-based
+    optimization techniques, for example the frequently applied
+    iRprop+, a fast and robust method not available in other
+    machine learning libraries.</li>
+    <li>We do not know any software library for single-objective
+    evolutionary algorithms that comes close to the EALib in terms
+    of variety and quality of algorithms for real-valued
+    optimization.</li>
+    <li>To our knowledge, the MOO-EALib is the most comprehensive
+    library for evolutionary multi-objective optimization. The
+    efficient implementation of the hypervolume metric (S or
+    Lebesgue measure) and of the powerful MO-CMA-ES are special
+    features.</li>
+  </ul>
+  </p>
+
+  <h3>Question</h3>
+  How fast is the Shark?
+
+  <h3>Answer</h3> 
+  Shark is a C++ library, because we aim at high performance.
+  Flexibility and speed are the main design criteria of the
+  library. However, sometimes these objectives are conflicting and in
+  some cases we had to sacrifice speed for flexibility. For example:
+  <ul>
+    <li>
+    Support Vector Machine (SVMs) were added after examining the
+    best implementations we could find on the web. In Shark, the
+    kernel function is an object passed to the learning machine
+    during runtime, while in the competing SVM code the kernel is
+    a fixed function and you have to recompile the code if you want
+    to change it. Thus, for medium sized problems, Shark is a negligible
+    bit slower, because of the object-oriented architecture. However,
+    because Shark is the only library implementing a special strategy
+    (HMG working set selection) for large-scale problems, it is
+    significantly faster than the competing library for large datasets.
+    </li>
+    <li>
+    The modular architecture of ReClaM allows you to instantiate
+    neural networks (NNs) with arbitrary topology, different error
+    functions, and various learning algorithms during runtime. This
+    modular architecture results in communication costs. Further,
+    the NNs rely on Shark's convenient Array data structure, which
+    is appropriate for dense structures and dense data, but not
+    optimal for sparse data. Thus, there may be faster network
+    implementations, however, the highly efficient learning algorithms
+    in ReClaM compensate for that. And ReClaM offers to export NNs
+    after training as independent, plain C source code, which is as
+    fast as it can get.
+    </li>
+  </ul>
+  
+  Some benchmark examples:
+  
+  <ul>
+    <li>
+    We did a simple test to demonstrate the performance of
+    the SVM quadratic program solver, compared to LIBSVM (which is the
+    best reference available). We generated a toy dataset as follows:
+    <pre><div class="code">#include &lt;ReClaM/ArtificialDistributions.h&gt;
+
+int main(int argc, char** argv)
+{
+    Chessboard chess(3, 4);
+    Dataset ds(chess, 100000, 0);
+    ds.Save("chessboard.shark.data", true, false, "ascii");
+    ds.SaveLIBSVM("chessboard.libsvm.data", true, false);
+}
+</div></pre>
+This poses a very difficult problem for SMO-based solvers and the
+problem size makes sure that the initial kernel matrix does not fit
+into memory, such that the HMG working set selection strategy is
+active in Shark.
+We ran both LIBSVM&nbsp;2.85 and Shark&nbsp;2.1.0 on this problem
+with the settings
+<ul>
+  <li>C-SVM with 1-norm slack penalty, C=1,000,000</li>
+  <li>Gaussian RBF kernel with parameter gamma=1</li>
+  <li>256&nbsp;MB of kernel cache (default for the Shark SVM)</li>
+  <li>Accuracy epsilon=0.001 (default)</li>
+</ul>
+The training times on a 3&nbsp;GHz intel machine running Fedora Linux
+were
+<ul>
+  <li>31493 seconds (about 08:45) for Shark&nbsp;2.1.0</li>
+  <li>40902 seconds (about 11:22) for LIBSVM&nbsp;2.85</li>
+</ul>
+In fact, for large scale problems (where speed really matters) the
+Shark solver profits from its cache-friendly HMG working set
+selection algorithm.
+</li>
+<li>
+Not only in ReClaM, but also in the EALib and MOO-EAlib performance
+is an issue.
+For example, the functions for computing the hypervolume  (Lebesgue measure) in the MOO-EALib are pretty
+fast. Let us consider the benchmark data set <a href="http://www.wfg.csse.uwa.edu.au/hypervolume/zipfiles/random_3d.zip">ran.40000pts.3d.1</a> provided by the Walking Fish Group.
+It contains 40000 non-dominated  points in three dimensions. 
+Running the implementation of the algorithm by Overmars and Yap on
+a MacBook with 2.16 GHz Intel Core 2 Duo
+and 2GB RAM takes 4.18652 seconds to compute the hypervolume.
+</li></ul>
+
+
+<h2>Installation</h2>
+
+
+<h3>Question</h3>
+How do I install the Shark library?
+
+<h3>Answer</h3>
+Please refer to the section <a href="GettingStarted.html">Getting Started</a>.
+
+
+<h3>Question</h3>
+Do I need root/Administrator access to install the Shark library?
+
+<h3>Answer</h3>
+No, root/Administrator access is not required.
+However, if you want to install the library to a central location
+(like /usr/lib/ on Linux) you will of course need write access to
+that directory.
+
+<h3>Question</h3>
+I get an &quot;internal compiler error&quot;.</br>
+What can I do?
+
+<h3>Answer</h3>
+Under Windows using the Microsoft Developer Studio this error
+appears regularly without any obvious reason. You can do the
+following:
+<ul>
+  <li>Be sure to have all service packs installed.</li>
+  <li>Delete all temporary files and restart the compilation in batch mode.</li>
+</ul>
+
+<h3>Question</h3>
+Do I need Qt and Qwt?</br>
+Where can I get these libraries?
+
+<h3>Answer</h3>
+No, you do not need these libraries unless you want to compile the graphical examples.
+The libraries are available from:
+<ul>
+  <li><a href="http://trolltech.com/products/qt">Qt</a></li>
+  <li><a href="http://qwt.sourceforge.net/">Qwt</a></li>
+</ul>
+
+<h3>Question</h3>
+I get strange warnings when I compile Shark using a certain Microsoft compiler.
+What should I do?
+
+<h3>Answer</h3>
+Don't worry, ignore them.
+</td></tr></table>
+
+<h2>Packages</h2>
+
+
+<h3>Question</h3>
+What happened to the Fuzzy library?
+
+<h3>Answer</h3>
+The Fuzzy library for multi-valued logic and fuzzy
+control, which was available as an add-on package, was removed from
+the library some years ago. Recently the library was revised and we
+included an easy version into the current release. However, the
+Fuzzy module is still in the beta stage.
+
+
+<h3>Question</h3>
+What happened to the [...] library, the [...] add-on package, the function [...]?
+
+<h3>Answer</h3>
+<ul>
+  <li>Some libraries and functions were dropped in Shark
+  2.0.0, either because they were not used by many people,
+  the implemented algorithms were outdated, or the code did not pass
+  the code review.
+  </li>
+  <li>In Shark 2.1.0, all libraries were merged into one big Shark library.
+  Noone seemed to install just one component of Shark and the different libraries
+  required a lot of typing in Makefiles etc.
+  </li>
+  <li>
+  The add-on packages are no longer maintained
+  together with the main library.
+  </li>
+  <li>
+  In Shark 2.1.1 the GUI
+  example package was added to the main library package.
+  </li>
+</ul>
+  
+<div id="footer">
+  Copyright &copy; Institut f&uuml;r Neuroinformatik, Ruhr-Universit&auml;t Bochum, 2008.<br>
+  <A HREF="mailto:shark-admin@neuroinformatik.rub.de">Administrator</A>
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

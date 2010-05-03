@@ -1,0 +1,33 @@
+//
+// The following comment defines the Mixture main help page.
+//
+/*!
+
+\mainpage
+
+
+<p>
+<center>
+<table border="0"><tr>
+<td><img src="../images/model1.png"></td>
+<td><img src="../images/model1.5.png"></td>
+<td><img src="../images/model2.png"></td>
+</tr></table>
+</center>
+</p>
+
+<p>
+  The <strong>Mixture</strong> library provides classes for the
+  representation and optimization of mixture density models.
+</p>
+
+
+*/
+
+//
+// The following comment lists all examples.
+//
+/*!
+	\example mg-example.cpp
+	\example rbfn-example.cpp
+*/

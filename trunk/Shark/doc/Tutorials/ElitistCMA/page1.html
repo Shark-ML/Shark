@@ -1,0 +1,61 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>The (1+1)-Evolution Strategy</h1>
+
+<p>
+	The covariance matrix adaptation evolution strategy (CMA-ES) is
+	one of the most powerful evolutionary algorithms for real-valued
+	optimization.
+	The CMA-ES is a variable metric algorithm, which efficiently adapts
+	its search distribution to the problem at hand. This, together with
+	the fact that it can be reliably used with small population sizes,
+	is the reason for the high efficiency of the CMA-ES.
+</p>
+
+<p>
+	The CMA-ES possesses several important invariance properties. It
+	is solely based on the ranking of candidate solutions and therefore
+	invariant under order-preserving transformations of the objective
+	function.  The CMA-ES is invariant under angle-preserving
+	transformations of the input space, like translation, rotation and
+	reflection, given that the initial solution is transformed
+	accordingly. The algorithm is not affected by an overall rescaling of
+	the search space, given that the initial scaling parameter is chosen
+	accordingly. In the end, the CMA-ES is even invariant under any full
+	rank linear transformation of the search space, given that the initial
+	covariance matrix is also transformed accordingly.
+</p>
+
+<div class=publication>Nikolaus Hansen and Andreas Ostermeier. Completely
+derandomized selfadaptation in evolution strategies.
+<em>Evolutionary Computation</em> <vol>9</vol>(2), pp. 159-195, 2001</div>
+
+<p>
+	Several variants of the CMA-ES are implemented in the EALib. In this
+	tutorial, we consider the elitist (1+1)-CMA-ES as an example.
+	Elitism means that the best solution is never discarded from the
+	population.  It is generally faster for fine-tuning on unimodal
+	functions, but for noisy and/or multimodal optimization problems the
+	standard variant is preferable.  For step size adaption, the
+	(1+1)-CMA-ES uses an improved 1/5-th success rule, which replaces the
+	cumulative path length control in the standard CMA-ES.
+</p>
+
+<div class=publication>Christian Igel, Nikolaus Hansen, and Stefan Roth.
+<a target="_blank" href="http://www.mitpressjournals.org/doi/pdf/10.1162/evco.2007.15.1.1">Covariance Matrix Adaptation for Multi-objective Optimization</a>.
+<em>Evolutionary Computation</em> <vol>15</vol>(1), pp. 1-28, 2007</div>
+
+<p>
+	Please see the Shark example files for more sophisticated
+	CMA-ES examples.
+</p>
+
+</body>
+
+</html>

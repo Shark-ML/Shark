@@ -1,0 +1,32 @@
+<config name="EALib-Examples" basedir="../..">
+	<project name="ackleyES" type="executable" lib="Shark">
+		<source path="examples/EALib" name="ackleyES.cpp"></source>
+	</project>
+	<project name="paraboloidCMA" type="executable" lib="Shark">
+		<source path="examples/EALib" name="paraboloidCMA.cpp"></source>
+	</project>
+	<project name="paraboloidElitistCMA" type="executable" lib="Shark">
+		<source path="examples/EALib" name="paraboloidElitistCMA.cpp"></source>
+	</project>
+	<project name="countingOnes" type="executable" lib="Shark">
+		<source path="examples/EALib" name="countingOnes.cpp"></source>
+	</project>
+	<project name="integerES" type="executable" lib="Shark">
+		<source path="examples/EALib" name="integerES.cpp"></source>
+	</project>
+	<project name="sphereGA" type="executable" lib="Shark">
+		<source path="examples/EALib" name="sphereGA.cpp"></source>
+	</project>
+	<project name="steadyState" type="executable" lib="Shark">
+		<source path="examples/EALib" name="steadyState.cpp"></source>
+	</project>
+	<project name="pvmSphereGA" type="executable" dependflag="FLAG_PVM" lib="Shark">
+		<source path="examples/EALib" name="pvmSphereGA.cpp"></source>
+	</project>
+	<project name="TSP_GA" type="executable" lib="Shark">
+		<source path="examples/EALib" name="TSP_GA.cpp"></source>
+	</project>
+	<project name="SchwefelEllipsoidCMSA" type="executable" lib="Shark">
+		<source path="examples/EALib" name="SchwefelEllipsoidCMSA.cpp"></source>
+	</project>
+</config>

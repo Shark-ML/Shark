@@ -1,0 +1,6 @@
+
+SharkConfig: SharkConfig.o
+	g++ -o SharkConfig SharkConfig.o
+
+clean:
+	rm -f SharkConfig.o SharkConfig

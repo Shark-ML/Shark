@@ -1,0 +1,63 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>Vector and Matrix Classes</h1>
+<p>
+	The LinAlg module builds on Arrays, in particular on the
+	class <tt>Array&lt;double&gt;</tt>, to represent both
+	Vectors and Matrices. Alternatively, LinAlg provides a
+	more object oriented interface to these concept in terms
+	of two specialized classes:
+	<ul>
+		<li>
+			<tt>class Vector : public Array&lt;double&gt;</tt>
+			&nbsp;&nbsp;&nbsp;
+			<a href="../../LinAlg/class_vector.html" target="_blank">[reference]</a>
+		</li>
+		<li>
+			<tt>class Matrix : public Array&lt;double&gt;</tt>
+			&nbsp;&nbsp;&nbsp;
+			<a href="../../LinAlg/class_matrix.html" target="_blank">[reference]</a>
+		</li>
+	</ul>
+	This tutorial teaches how these classes are used and
+	introduces their capabilities beyond simple arrays.
+</p>
+
+<p>
+	The classes are accessible after including the header
+</p>
+
+<pre><div class="code">#include &lt;LinAlg/VecMat.h&gt;
+</div></pre>
+
+<h2>Array Access</h2>
+<p>
+	As a rule of thumb you may think of Vectors as
+	one-dimensional instances of <tt>Array&lt;double&gt;</tt>
+	while, of course, a Matrix object is two-dimensional.
+	All access operations from the superclass
+	<tt>Array&lt;double&gt;</tt> are available, but some
+	functionalities have been overloaded in order to
+	reflect the special needs of vectors and matrices.
+</p>
+
+<h2>Size information</h2>
+<p>
+	In contrast to simple Arrays, the dimensions of vectors
+	and matrices are fixed. Therefore it is impossible to
+	construct these objects with a default constructur.
+	Instead, the programmer is forced to provide the
+	necessary size information already at construction time.
+	Of course it is possible to resize vectors and matrices
+	later, but the number of dimensions is always kept correct.
+</p>
+
+</body>
+
+</html>

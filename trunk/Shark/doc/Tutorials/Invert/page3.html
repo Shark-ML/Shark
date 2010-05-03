@@ -1,0 +1,43 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>Advanced Options</h1>
+
+<p>
+	The g_inverse method has some optional parameters, which usually need no tunig by the user:
+</p>
+
+<div class="code"><pre>#include &lt;LinAlg/LinAlg.h&gt;
+[...]
+
+  unsigned maxIterations = 75
+  double tolerance = 1e-10;
+  bool ignoreException = true;
+
+  g_inverse(matrix, inverse, maxIterations, tolerance, ignoreException);
+
+[...]
+</pre></div>
+The method is based on a singular value decomposition (SVD).
+The variable
+<tt>maxIterations</tt> defines the maximum number of iterations the
+algorithms spends for diagonalization of the bidiagonal form in the SVD.
+
+<p>All singular values below the threshold 
+<tt>tolerance</tt> will be set to zero.
+
+<p>If <tt>maxIterations</tt> iterations are not enough for
+the diagonalization to converge, the SVD method throws a <tt>SharkException</tt>.
+If 
+<tt>ignoreException</tt> is true this exception is ignored by
+g_inverse. The default is <tt>ignoreException = false</tt>.
+
+
+</body>
+
+</html>

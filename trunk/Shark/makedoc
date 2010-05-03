@@ -1,0 +1,71 @@
+#!/bin/sh
+CURRENTDIR=`pwd`
+
+mymkdir()
+{
+	if ! test -d $1
+	then
+		mkdir $1
+	fi
+}
+
+mkdoc()
+{
+	sed -e "s_LIBNAME_$1_" SharkDoc.cfg > tmp.cfg
+
+	echo "  Creating documentation for library $1" >> doc.log
+	echo "    Running doxygen (1) ..." >> doc.log
+	doxygen tmp.cfg; 1>/dev/null 2>/dev/null
+	echo "    Running doxygen (2) ..." >> doc.log
+	doxygen tmp.cfg; 1>/dev/null 2>/dev/null
+	echo "    done." >> doc.log
+	mymkdir $1
+	mv -f html/* $1/
+	rm -f tmp.cfg
+}
+
+cd doc
+rm -f doc.log
+
+echo "Generating the Shark documentation" > doc.log
+
+mkdoc Array
+mkdoc Rng
+mkdoc LinAlg
+mkdoc Mixture
+mkdoc ReClaM
+mkdoc FileUtil
+mkdoc EALib
+mkdoc MOO-EALib
+mkdoc Fuzzy
+
+echo "Compiling EALib pdf Manual" >> doc.log
+cd EALibManual
+latex EALib.tex
+bibtex EALib
+latex EALib.tex
+latex EALib.tex
+dvips -o EALib.ps EALib.dvi
+ps2pdf EALib.ps EALib.pdf
+cd $CURRENTDIR/doc
+
+echo "Generating main page" >> doc.log
+rm -f index.html
+cat template-head > index.html
+cat template-documentation >> index.html
+sed -e "s_pathprefix/__" template-main >> index.html
+cat template-tail >> index.html
+
+echo "Compiling the LinkChecker"
+g++ -O3 -Wall -c -D__LINUX__ LinkChecker.cpp
+g++ -o LinkChecker LinkChecker.o
+echo "Checking Links"
+./LinkChecker --quiet >> doc.log
+
+echo ""
+echo "BEGIN logfile content (doc/doc.log)"
+cat doc.log
+echo "END logfile content (doc/doc.log)"
+echo ""
+
+cd $CURRENTDIR

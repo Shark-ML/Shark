@@ -1,0 +1,589 @@
+%
+%%
+%% file: selection.tex
+%%
+%
+
+% =======================================================================
+        \subsection{Selection}
+% =======================================================================
+
+Selection occurs two times in the evolutionary loop.
+First, in order to generate offsprings, parents must be selected from the
+current population (mating selection).
+Second, the new parent population has to be selected
+from the offspring and the previous parents.
+A number of selection operators were proposed, which usually base the
+chance of selection of particular individuals on their fitness values or their
+rank in the population, respectively.
+
+% -----------------------------------------------------------------------
+        \subsubsection{General Schemes}
+% -----------------------------------------------------------------------
+
+% Takeover Time:
+% \cite{Goldberg:91d} % FOGA91
+% \cite{Baeck:94} % Diss
+% \cite{Thierens:94} % PPSN3
+
+% takeover time - growth ratio (reproduction rate)
+
+% Exploite vs Explore: (measured with population diversity)
+% \cite{Baeck:91e} % 4th ICGA
+
+
+% .......................................................................
+        \paragraph{Extinctiveness}
+
+With respect to the selection probability\index{selection!probability} of each individual,
+selection schemes divide into two major groups:
+\emph{preservative\index{selection!preservative}} and
+\emph{extinctive\index{selection!extinctive}} selection. In the preservative
+version each individual is assigned a nonzero selection probability,
+hence each individual has (in principle) the chance to reproduce,
+whereas in extinctive selection schemes some individuals are
+definitely discarded, that is their associated selection probability
+equals to zero.  A typical example is the \index{selection!$(\mu,\lambda)$ selection}$(\mu,\lambda)$--Selection
+(see
+\secref{selection:subsubs:deterministicSelection}).  More details and
+a comparison of the different selection schemes can be found in
+\cite{Baeck:91}.
+
+
+% .......................................................................
+        \paragraph{Elitism\index{elitism}}
+
+The best member of the population may fail to reproduce offspring in
+the next generation.  Examples of fixing this potential source of loss
+are always keeping the best individual found so far (\emph{elitist
+strategy}), or conversely, systematically replacing only the worst
+members of the population with newly generated individuals
+(\emph{\myindex{steady-state reproduction}}, see
+\secref{replacement:subsubs:steadyStateReplacement}).  As shown by
+Rudolph \cite{Rudolph:94} such a strategy is necessary to ensure
+global convergence of an evolutionary algorithm.  The effect is to
+shift the balance towards more \myindex{exploitation} and less
+\myindex{exploration}.
+However, for some classes of functions this can result in local
+hill-climbing behavior.
+
+\begin{example}[htb]
+\begin{shortlisting}
+            \vdots\\
+\#include <EALib/Population.h>\\
+            \vdots\\
+const unsigned PopSize     = 20;\\
+const unsigned NumElitists = 1;\\
+\\
+Population parents   ( PopSize, $\cdots$ );\\
+Population offsprings( PopSize, $\cdots$ );\\
+            \vdots\\
+parents.selectProportional( offsprings, NumElitists );\\
+            \vdots\\
+\end{shortlisting}
+\vspace{-10pt}\caption[Proportional Selection with Elitists]{
+    Proportional selection with elitists.
+}
+\end{example}
+
+
+
+% -----------------------------------------------------------------------
+        \subsubsection{Deterministic Selection}
+        \label{selection:subsubs:deterministicSelection}
+% -----------------------------------------------------------------------
+
+The selection operators described in this section
+are mainly used in evolutionary strategies and are completely
+deterministic.  Schwefel \cite{Schwefel:77} introduced the notation of
+$(\mu,\lambda)$-- and $(\mu+\lambda)$--selection.
+
+
+% .......................................................................
+        \paragraph{($\mu$,$\lambda$)-Selection\index{selection!($\mu$,$\lambda$) selection}}
+
+In $(\mu,\lambda)$--selection the $\mu$ parents for the next
+generation are only taken from the $\lambda$ offsprings.  The previous
+parent generation is completely discarded, that is the lifetime of
+each individual is restricted to one generation.  The capability of
+$(\mu,\lambda)$--selection to forget good solutions in principle
+allows for leaving local optima and is therefore advantageous in the
+case of multimodal fitness landscapes or changing environments
+\cite{Baeck:94}. The usage of the implemented operators is outlined in
+\exref{selection:example:mu-lambda}.
+
+% .......................................................................
+        \paragraph{($\mu$+$\lambda$)-Selection\index{selection!($\mu$+$\lambda$) selection}}
+
+This operator selects the $\mu$ best individuals out of the union of
+parents and offsprings to form the next parent generation. In this
+respect, $(\mu+\lambda)$--selection can be viewed as the elitist
+version of $(\mu,\lambda)$--selection.  Since the survival of the best
+individuals is guaranteed, the course of evolution is monotonously in
+that good individuals can only be replaced by better ones. This may
+be dangerous if the population gets stuck in a poor local optimum.
+
+\begin{example}[htb]
+\begin{shortlisting}
+            \vdots\\
+\#include <EALib/Population.h>\\
+            \vdots\\
+const unsigned Mu     = 15;\\
+const unsigned Lambda = 100;\\
+\\
+Population parents   ( Mu,     $\cdots$ );\\
+Population offsprings( Lambda, $\cdots$ );\\
+            \vdots\\
+parents.selectMuLambda( offsprings );\\
+            \vdots\\
+\end{shortlisting}
+
+(a) $(\mu,\lambda)$ - selection.
+
+\begin{shortlisting}
+            \vdots\\
+Population parents   ( Mu,     $\cdots$ );\\
+Population offsprings( Lambda, $\cdots$ );\\
+            \vdots\\
+parents.selectMuLambda( offsprings, Mu );\\
+            \vdots\\
+\end{shortlisting}
+
+(b) $(\mu+\lambda)$ - selection, the number of elitists is set to {\em Mu}.
+
+\caption[$(\mu,\lambda)$ and $(\mu+\lambda)$ -- Selection]{
+    \label{selection:example:mu-lambda}
+    $(\mu,\lambda)$ and $(\mu+\lambda)$ -- selection.
+}
+\end{example}
+
+
+% -----------------------------------------------------------------------
+        \subsubsection{Stochastic Selection}
+% -----------------------------------------------------------------------
+
+A number of \index{selection!stochastic}stochastic selection operators
+exist, which base the chance of selection of particular individuals on
+their associated fitness.  A comparative analysis of selection schemes
+has been carried out in \cite{Goldberg:91}. Depending on what we are
+looking for, the minimum or maximum fitness, and on the range of the
+fitness values, the fitness has to be normalized.  Normalized fitness
+values are always positive and total to $1.0$ across the entire parent
+population.  In the case of extinctive selection this might be also a
+sub-population.  In this respect the fitness values can be directly
+interpreted as selection probabilities.  A variety of normalization
+methods are provided.  They rely either on the fitness value itself or
+on the rank of the respective individual in the population.  The
+rank--based normalization is summarized in special selection
+operators, whereas fitness-based normalization is performed by special
+scaling procedures which have to be called beforehand.
+
+% .......................................................................
+        \paragraph{Roulette Wheel}
+
+\begin{algorithm}[htb]
+  \begin{algorithmbox}
+      {\bf for} $i:=\mu_{min}$ {\bf to} $\mu_{max}$ {\bf do} \\
+      \hspace*{3em} $j:=\lambda_{min};$ \\
+      \hspace*{3em} $s:=0;$ \\
+      \hspace*{3em} $x:=\chi \in [\,0,1\,[;$ \\
+      \hspace*{3em} {\bf while} $s<x$ {\bf and} $j\le\lambda_{max}$ {\bf do} \\
+      \hspace*{6em} $s:=s+p_s(a_j(t));$ \\
+      \hspace*{6em} $j:=j+1;$ \\
+      \hspace*{3em} {\bf od} \\
+      \hspace*{3em} $a_i(t+1):=a_{j-1}(t);$ \\
+      {\bf od}\\
+  \end{algorithmbox}
+  \vspace{-10pt}\centerline{\parbox{13cm}{
+  \caption[Roulette Wheel Selection]{\label{selection:alg:rouletteWheelSelection}
+      Roulette wheel selection; notation see \tabref{selection:table:notation}.
+  }}}
+\end{algorithm}
+
+
+\begin{algorithm}[htb]
+  \begin{algorithmbox}
+      $i:=\mu_{min};$ \\
+      $s:=0;$ \\
+      $x:=\chi \in [\,0,1\,[;$ \\
+      {\bf for} $j:=\lambda_{min}$ {\bf to} $\lambda_{max}$ {\bf do} \\
+      \hspace*{3em} $s:=s+\eta\left(a_j(t)\right);$ \\
+      \hspace*{3em} {\bf while} $s>x$ {\bf and} $i\le\mu_{max}$ {\bf do} \\
+      \hspace*{6em} $a_i(t+1):=a_j(t);$ \\
+      \hspace*{6em} $i:=i+1;$ \\
+      \hspace*{6em} $x:=x+1;$ \\
+      \hspace*{3em} {\bf od} \\
+      {\bf od}\\
+  \end{algorithmbox}
+  \vspace{-10pt}\centerline{\parbox{13cm}{%
+  \caption[Stochastic Universal Sampling]{\label{selection:alg:stochasticUniversalSampling}
+      Stochastic universal sampling according to \cite{Baker:87}; notation see \tabref{selection:table:notation}..
+  }}}
+\end{algorithm}
+
+
+Various methods have been suggested for sampling the selection
+probability.
+
+\begin{itemize}
+  \item[(a)] \emph{Roulette Wheel Selection}\index{selection!roulette wheel}
+             \cite{Jong:75,Goldberg:89}. The simplest implementation
+             is to simulate the spin of a weighted roulette wheel.  If
+             the localization of the chosen slot is performed via
+             linear search $O(n)$, roulette wheel selection requires
+             $O(n^2)$ steps because in a generation $n$ spins are
+             necessary to fill the population.  If a binary search is
+             used to locate the correct slot the overall complexity
+             reduces to $O(n\;\log\,n)$.  The standard implementation
+             of roulette wheel selection is outlined in
+             \algref{selection:alg:rouletteWheelSelection}.
+
+  \item[(b)] \emph{Stochastic Remainder Selection}\index{selection!stochastic remainder}
+             \cite{Booker:82}. In this method the integer portions of
+             the expected number of copies are assigned
+             deterministically.  The remainders are selected via the
+             standard roulette wheel.  Because $O(n)$ of the
+             individuals are likely to have fractional parts to their
+             reproduction rate, the complexity is $O(n^2)$.
+
+  \item[(c)] \emph{Stochastic Universal Selection}\index{selection!stochastic universal}
+             \cite{Baker:87,Grefenstette:89}. Like in (a) the slots of
+             a weighted roulette wheel are sized according to the
+             selection probabilities. Equally space markers are placed
+             along the outside of the wheel and the wheel is spinned
+             only once.  The number of markers that fall in each slot
+             determine the number of copies the corresponding
+             individual receives.  The complexity of this algorithm is
+             $O(n)$ because only a single pass is needed.  An outline
+             of the standard implementation is shown in
+             \algref{selection:alg:stochasticUniversalSampling}.
+
+\end{itemize}
+
+\noindent The selection operators presented in the following are completely
+stochastic in that each individual is assigned a selection probability
+which determines the chance of the respective individual to be
+reproduced in the next generation.  This holds also for
+\emph{steady-state} reproduction schemes
+(cf.~\secref{replacement:subsubs:steadyStateReplacement}).  Before the
+different operators and the calculations of the respective selection
+probabilies are presented, we introduce the following notations:
+
+\medskip
+
+\begin{tabular}{ll}\label{selection:table:notation}
+$\mu$ & size of the parent population \\
+$\lambda$ & size of the offspring population from which individuals are selected \\
+$\mu_{min}, \mu_{max}$ & indices of the subpopulation which is replaced by
+ selected individuals. \\
+$\lambda_{min}, \lambda_{max}$ & indices of the subpopulation from which
+ individuals are selected.\\
+& This is used to model extinctiveness. \\
+$a_i$ & individuals in the offspring population at generation $t$ \\
+$p_s(a_i)$ & probability that the $i$th individual is selected \\
+$\eta(a_i)$ & expected number of copies of $a_i$ in the the next generation \\
+& (reproduction rate of $a_i$) \\
+$\tilde\mu$ & $= \mu_{max} - \mu_{min} + 1$ \\
+$\tilde\lambda$ & $= \lambda_{max} - \lambda_{min} + 1$
+\end{tabular}
+
+
+\bigskip\bigskip
+\noindent The selection probabilities have to sum up to $1$ across the entire
+population ($\lambda_{min}$ -- $\lambda_{max}$):
+
+\begin{equation}
+  \sum_{j=\lambda_{min}}^{\lambda_{max}}p_s(a_j) \; = \; 1
+\end{equation}
+
+\noindent $\eta(a_i)$ denotes the reproduction rate of individual $a_i$,
+that is the expected number of copies of $a_i$ in the next generation:
+
+\begin{equation}
+  \eta(a_i) \; = \; \left\{
+    \begin{array}{c@{\hspace{0.5em},\hspace{0.5em}}l}
+      p_s(a_i) \cdot (\mu_{max} - \mu_{min} + 1)
+        & \lambda_{min} \le i \le \lambda_{max} \\[0.3em]
+      0 & i < \lambda_{min} \, \vee \, i > \lambda_{max}
+    \end{array}
+  \right.
+\end{equation}
+
+\noindent If some of the individuals $\{\,a_j,...,\,a_{\lambda_{eli}}\,\}$ 
+with 
+%\begin{equation}
+$
+  \{\,a_j,...,\,a_{\lambda_{eli}}\,\} \subset
+  \{\,a_{\lambda_{min}},...,\,a_{\lambda_{max}}\,\}
+$
+%\end{equation}
+have been already selected as elitists,
+we have to correct their selection probabilities.  This ensures that
+the reproduction rate of elitists never exceeds $\max(1,\eta(a_i))$.
+
+\smallskip
+\noindent $\tilde p_s(a_i)$ denotes the corrected selection probability:
+\begin{eqnarray}
+  \Delta p & = & \frac{1}{\mu_{max} - \mu_{min} + 1} \\
+  \Delta s & = & \sum_{a_i \in \{\,a_j,...,\,a_{\lambda_{eli}}\,\}}
+    \min\left(\Delta p,\,p_s(a_i)\right) \\
+  \tilde p_s(a_i) & = & \left\{
+    \begin{array}{c@{\hspace{0.5em},\hspace{0.5em}}l}
+      \left(p_s(a_i) - \min\left(\Delta p,\,p_s(a_i)\right)
+      \right)\,\big/\,(1-\Delta s)
+        & a_i \in \{\,a_j,...,\,a_{\lambda_{eli}}\,\} \\[0.3em]
+      p_s(a_i)\,\big/\,(1-\Delta s)
+        & a_i \notin \{\,a_j,...,\,a_{\lambda_{eli}}\,\}
+    \end{array}
+  \right.
+\end{eqnarray}
+
+
+% .......................................................................
+        \paragraph{Proportional Selection}
+
+The name \index{selection!proportional} proportional selection describes a group of
+selection schemes that choose individuals for reproduction according
+to their objective function values, e.\,g.\ the probabilty of selection
+$p_s$ of an individual is proportional to the value:
+
+\begin{equation}
+  p_s(a_i) \; = \; \left\{
+    \begin{array}{c@{\hspace{0.5em},\hspace{0.5em}}l}
+      \Phi(a_i) \; \Big/ \displaystyle\sum_{j=\lambda_{min}}^{\lambda_{max}}\Phi(a_j)
+        & \lambda_{min} \le i \le \lambda_{max} \\[0.3em]
+      0 & i < \lambda_{min} \, \vee \, i > \lambda_{max}
+    \end{array}
+  \right.
+\end{equation}
+
+
+\subparagraph{Scaling} % __________________________________________________
+
+Without \myindex{scaling}, proportional selection is not effective in
+keeping a steady pressure between competing individuals in the current
+population \cite{Goldberg:91}. Furthermore, the fitness values have to
+be positive.  If the scaled fitness values total to $1$ they are often
+called normalized fitnesses.  A variety of different scaling methods
+have been proposed.
+These, mainly, divide into two groups: fitness-based scaling and
+rank-based scaling.
+For a detailed description refer to
+\cite{Grefenstette:89,Baeck:94}.
+An example for linear dynamic scaling\index{scaling!linear dynamic}
+is outlined in \exref{selection:example:lindyn-scaling}.
+
+\begin{example}[!htb]
+\begin{shortlisting}
+            \vdots\\
+\#include <EALib/Population.h>\\
+            \vdots\\
+const unsigned PopSize     = 20;\\
+const unsigned NumElitists = 1;\\
+const unsigned WindowSize  = 5;\\
+\\
+//\\
+// {\rm defined scaling window}\\
+//\\
+vector< double > window( WindowSize );\\
+\\
+//\\
+// {\rm define populations}\\
+//\\
+Population parents   ( PopSize, $\cdots$ );\\
+Population offsprings( PopSize, $\cdots$ );\\
+            \vdots\\
+for( t = 0; t < MaxGeneration; ++t ) \{\\
+    //\\
+    // {\rm generate new offsprings (recombination, mutation)}\\
+    //\\
+            \vdots\\
+    //\\
+    // {\rm evaluate fitness of offsprings}\\
+    //\\
+            \vdots\\
+    //\\
+    // {\rm scale fitness values and use proportional selection}\\
+    //\\
+    offsprings.linearDynamicScaling( window, t );\\
+    parents.selectProportional( offsprings, NumElitists );\\
+            \vdots\\
+\}\\
+            \vdots\\
+\end{shortlisting}
+\vspace{-10pt}\centerline{\parbox{13cm}{\caption[Scaled fitness Values]{
+    \label{selection:example:lindyn-scaling}
+    Fitness values are scaled according to the method described in
+    \cite{Grefenstette:87}.
+}}}
+\end{example}
+
+
+% .......................................................................
+        \paragraph{Ranking Selection}
+
+Ranking selection\index{selection!ranking} schemes assign each individual
+a selection
+probability according to a non--increasing assignment function which
+is solely based upon the relative rank $i$ of an individual
+(individuals are assumed to be in descending order with respect to
+their fitness values).  The absolute fitness value is completely
+ignored, scaling is no longer necessary\footnote{
+In principle, this selection scheme can be seen as a combination of
+rank-based scaling and proportional selection}.
+Once the selection
+probabilities are determined, roulette wheel selection or stochastic
+universal selection is performed.  Since sorting the population and
+sampling of the selection probabilities, as well, can be performed in
+$O(n\;\log\,n)$ ranking selection has the time complexity
+$O(n\;\log\,n)$.
+
+
+\subparagraph{Linear Ranking\index{ranking!linear}} % __________________________________________________
+
+The most common form of an assignment function is linear
+\cite{Baker:85,Grefenstette:89}:
+
+\begin{equation}
+    p_s(a_i) \; = \; \left\{
+    \begin{array}{c@{\hspace{0.5em},\hspace{0.5em}}l}
+            \left(\eta_{max} - \displaystyle\frac{i\!-\!\lambda_{min}}
+              {\lambda_{max}\!-\!\lambda_{min}}\,
+              \left(\eta_{max}\!-\!\eta_{min}\right)  
+            \right)\,
+            \displaystyle\frac{1}{\lambda_{max}\!-\!\lambda_{min}\!+\!1}
+        & \lambda_{min} \le i \le \lambda_{max} \\[0.3em]
+      0 & i < \lambda_{min} \, \vee \, i > \lambda_{max}
+    \end{array}
+  \right.
+\end{equation}
+
+\begin{example}[!htb]
+\begin{shortlisting}
+            \vdots\\
+//\\
+// {\rm define the reproduction rate of the best individual}\\
+//\\
+const double EtaMax = 1.1;\\
+\\
+Population parents   ( $\cdots$ );\\
+Population offsprings( $\cdots$ );\\
+            \vdots\\
+parents.selectLinearRanking( offsprings, EtaMax );\\
+            \vdots\\
+\end{shortlisting}
+\vspace*{-10pt}\caption[Definition of the Reproduction Rate of the Best
+Individual]{Definition of the reproduction rate of the best
+individual.}
+\end{example}
+
+\subparagraph{Whitley's Linear Ranking\index{ranking!Whitley's linear}} % __________________________________________________
+
+With respect to the selection probabilies this scheme is identical to
+linear ranking (see above), but rather than assigning each individual
+a particular selection probability it returns directly the index of
+the individual to be selected \cite{Whitley:89}.  $\chi$ denotes a
+uniformly distributed random number on the interval $[0,1[$.
+
+\begin{equation}
+    i(\chi,a) \; = \; \lambda_{min} + \frac{\lambda_{max}-\lambda_{min}+1}
+                {2\,(a-1)}\cdot
+                \left(a - \sqrt{a^2 - 4\,(a-1)\,\chi} \right)
+\end{equation}
+
+The parameter $a$ corresponds to $\eta_{max}$ in linear ranking.  For
+this selection operator the correction of the selection probabilities
+of elitists is not defined.
+
+\subparagraph{Uniform Ranking\index{ranking!uniform}}
+
+Uniform ranking corresponds to linear ranking with $\eta_{max}=1$.
+
+\begin{equation}
+    p_s(a_i) \; = \; \left\{
+    \begin{array}{c@{\hspace{0.5em},\hspace{0.5em}}l}
+      \displaystyle\frac{1}{\lambda_{max}-\lambda_{min}+1}
+        & \lambda_{min} \le i \le \lambda_{max} \\[0.3em]
+      0 & i < \lambda_{min} \, \vee \, i > \lambda_{max}
+    \end{array}
+  \right.
+\end{equation}
+
+For given $\mu$ and $\lambda$ it can be viewed as the stochastic
+version of $(\mu,\lambda)$--selection.
+
+
+% .......................................................................
+        \paragraph{Tournament Selection\index{selection!tournament}}
+
+In a \emph{q-tournament} the best individual out of randomly sampled
+group of $q$ individuals is selected \cite{Goldberg:91}. This process
+is repeated as often as necessary to fill the population for the next
+generation.  For the generational reproduction scheme this is done by
+a single call of the selection operator as outlined in
+\exref{selection:example:tournament}. Each competition in the
+tournament requires the random selection of a constant number of
+individuals from the population. The comparison among those
+individuals can be performed in $O(1)$, and $n$ competitions are
+necessary to fill the population. This results in a time complexity
+of $O(n)$.
+
+\begin{example}[htb]
+\begin{shortlisting}
+            \vdots\\
+//\\
+// {\rm define the tournament size}\\
+//\\
+const unsigned Q = 2;\\
+\\
+Population parents   ( $\cdots$ );\\
+Population offsprings( $\cdots$ );\\
+            \vdots\\
+parents.selectTournament( offsprings, Q );\\
+            \vdots\\
+\end{shortlisting}
+\vspace*{-10pt}\caption[Definition of the Tournament Size]{Definition of the
+tournament size.\label{selection:example:tournament}}
+\end{example}
+
+% .......................................................................
+        \paragraph{EP-Style Tournament Selection\index{selection!tournament, EP-style}}
+
+In EP-style tournament selection \cite{fogel:95}, every individual in
+the parent and offspring population is compared with $q$ randomly
+selected opponents out of the union of parents and offsprings. For
+each comparison in which the individuals's fitness is better or equal,
+it receives a win.  Then the $\mu$ best individuals out of the union
+of parents and offsprings form the next parent generatiton.  In
+EP-style tournament selection an individual is considered to be better
+than another if it recieved more wins in the last tournament. If two
+individuals recieved the same number of wins, the one with the better
+fitness value is considered to be better.  EP-style tournament
+selection is an elitist, preservative strategy.
+
+% \paragraph{Boltzmann Selection}
+
+% Simulated Annealing:
+% \cite{Laarhoven:87}
+
+% Boltzmann--tournament--selection:
+% \cite{Goldberg:90b,Mahfoud:91}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "EALib-standalone"
+%%% End: 

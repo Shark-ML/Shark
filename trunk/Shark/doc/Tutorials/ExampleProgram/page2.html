@@ -1,0 +1,71 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>SunOS/Linux/MacOS</h1>
+
+<h2>Compilation</h2>
+
+<p>
+	To compile all LinAlg examples open a shell, change to the
+	examples/LinAlg directory and type make:
+</p>
+
+<div class="shell">&gt; cd <b>[SharkRoot]</b>/examples/LinAlg
+&gt; make
+</div>
+
+<p>
+	Wait until the compilation is done. If you precompiled all examples
+	during the installation it is possible that make just outputs a
+	message like<br>
+</p>
+
+<div class="shell">make: Nothing to be done.
+</div>
+
+<p>
+	The Makefile is automatically configured to provide the location
+	of the header files and the Shark library. After the compilation
+	the directory contains one object file and one executable per
+	example program.
+</p>
+
+<h2>Execute the Program</h2>
+
+<p>
+	To run the executable just type its name in the current directory:
+</p>
+
+<div class="shell">&gt; ./g_inverse_matrix
+input matrix:
+1       2       -1
+2       5       -1
+1       2       0
+
+generalized inverse matrix:
+2       -2      3
+-1      1       -1
+-1      -8.88978e-17    1
+</div>
+
+<p>
+	The program outputs a matrix and its inverse, which is computed
+	with a call to Shark's LinAlg module. As you can see the computation
+	is not 100% exact, as the computation of the inverse is a numerically
+	challenging task (although the inaccuracy is very close to the
+	numerical limits).
+</p>
+
+<p>
+	That's it! You can use the example programs (including the Makefiles)
+	as a starting point for own programs and experiments.
+</p>
+
+</body>
+
+</html>

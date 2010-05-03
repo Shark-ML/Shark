@@ -1,0 +1,1190 @@
+//
+// The following comment defines the ReClaM main help page.
+//
+/*!
+
+\mainpage
+
+<p>
+Reference for the <strong>Re</strong>gression and 
+<strong>Cla</strong>ssification <strong>M</strong>odels Toolbox.<br>
+</p>
+
+<h2>Overview</h2>
+<p>
+ReClaM offers a rich set of methods for supervised learning,
+reaching from basic to state of the art tools.
+For example, the library provides simple linear models as
+well as different flavors of neural network and support
+vector machine models and training algorithms. Sophisticated
+model selection tools complete the collection.
+</p>
+
+<p>
+This introduction is organized as follows:
+</p>
+
+<ul>
+	<li><a href="#architecture">ReClaM Architecture</a></li>
+	<li><a href="#linearmethods">Linear Methods</a></li>
+	<li><a href="#neuralnetworks">Neural Networks</a></li>
+	<li><a href="#kernelmethods">Kernel Methods</a></li>
+	<li><a href="#supportvectormachines">Support Vector Machines</a></li>
+	<li><a href="#modelselection">Model Selection</a></li>
+	<li><a href="#lists">Models, Error Functions, and Optimizers</a></li>
+	<li><a href="#further">Further features</a></li>
+</ul>
+
+<a name="architecture"></a><h1>The ReClaM Architecture</h1>
+
+<p>
+	<b>NOTE:</b>
+	In the transition from Shark version 1.4.x to 1.5.x
+	there was a major change of the ReClaM architecture.
+	For details on design goals and technical considerations
+	refer to the following documents:
+</p>
+<ul>
+	<li><a href="../ReClaM_NewArchitecture.html">Changed ReClaM Architecture</a></li>
+	<li><a href="../ReClaM_MigrationGuide.html">ReClaM Migration Guide</a></li>
+</ul>
+
+<p>
+To achieve most flexibility, the ReClaM package is build like
+a construction kit. The main components are:
+</p>
+<ul>
+	<li>an adaptable (usually data processing) model</li>
+	<li>an error function for model evaluation</li>
+	<li>a (usually general purpose) optimizer adapting the model
+		in order to minimize the error</li>
+</ul>
+<p>
+These components are modeled by the three ReClaM base classes
+</p>
+<ul>
+	<li>Model</li>
+	<li>ErrorFunction</li>
+	<li>Optimizer</li>
+</ul>
+<center><img src="../images/ReClaMBaseClasses.png"></center>
+<p>
+The organization of the ReClaM base classes with an illustration
+of the information flow.
+</p>
+
+<h2>A Typical ReClaM Application</h2>
+<p>
+To give a motivation and a context for the following introduction,
+we will very briefly outline the general structure of a typical
+supervised learning scenario, that is, data driven model adaptation,
+within the ReClaM architecture:
+<br>
+An instance of a problem specific Model
+subclass, an ErrorFunction and a suitable Optimizer object are
+constructed. The training data, that is, input patterns with labels,
+are loaded into the system. Model and optimizer are initialized.
+The optimization takes the form of a loop calling the optimizer. In
+each iteration the optimizer modifies the model parameters in order
+to achieve a smaller error function value than before. The error
+computation usually involves the model prediction on the data and
+the labels. This proceeding is illustrated by the following
+code sniplet:
+</p>
+
+<div style="font-family: monospace; color: #000080; background-color:#cccccc; padding: 12px; border-width: 1px; border-color: #000080; border-style: dashed;">
+&nbsp;// prepare data<br>
+&nbsp;Array&lt;double&gt; trainingData;<br>
+&nbsp;Array&lt;double&gt; trainingTargets;<br>
+&nbsp;LoadOrGenerateData(trainingData, trainingTargets);<br>
+<br>
+&nbsp;// prepare basic objects<br>
+&nbsp;MyModel model;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// sub class of Model<br>
+&nbsp;MyErrorFunction error;&nbsp;&nbsp;&nbsp;&nbsp;// sub class of ErrorFunction<br>
+&nbsp;MyOptimizer optimizer;&nbsp;&nbsp;&nbsp;&nbsp;// sub class of Optimizer<br>
+<br>
+&nbsp;// optimize / learn<br>
+&nbsp;optimizer.init(model);<br>
+&nbsp;for (int i=0; i&lt;ITERATIONS; i++)<br>
+&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;optimizer.optimize(model, error, trainingData, trainingTargets);<br>
+&nbsp;}<br>
+</div>
+
+<p>
+The base class interfaces provide all functionality that
+is needed for this general scheme. Therefore, the core of all
+ReClaM programs looks quite similar. Now, most of the ReClaM
+classes are specialized subclasses implementing models, error
+functions or optimizers. This document will first introduce the
+base class interfaces and then turn to the most prominent model
+types.
+</p>
+
+<h2>The Model Base Class</h2>
+<p>
+The Model class provides an interface
+for an adaptable data processing model. A typical model can be
+thought of as a parameterized family of functions or maps. The
+interface provides the following functionality:
+</p>
+<ul>
+	<li>management of a parameter vector with corresponding get and set methods:
+		<ul>
+			<li>Model::getParameter</li>
+			<li>Model::setParameter</li>
+		</ul>
+	</li>
+	<li>processing of input data, that is, computation of model outputs
+		<ul>
+			<li>Model::model</li>
+		</ul>
+	</li>
+	<li>computation of the derivative of the model outputs w.r.t. the model parameters
+		<ul>
+			<li>Model::modelDerivative</li>
+			<li>Model::generalDerivative</li>
+		</ul>
+	</li>
+	<li>restriction of the feasibility of models to certain parameter ranges
+		<ul>
+			<li>Model::isFeasible</li>
+		</ul>
+	</li>
+	<li>loading and saving model parameters
+		<ul>
+			<li>Model::Load</li>
+			<li>Model::Save</li>
+		</ul>
+	</li>
+</ul>
+<p>
+A model needs input patterns to perform its computations.
+See the Model documentation for a complete list of models.
+</p>
+
+<h2>The ErrorFunction Base Class</h2>
+<p>
+The ErrorFunction class is a quite simple interface providing only
+the following functions:
+<ul>
+	<li>computation of the error value
+		<ul>
+			<li>ErrorFunction::error</li>
+		</ul>
+	</li>
+	<li>computation of the derivative of the error with respect
+		to the model parameters
+		<ul>
+			<li>ErrorFunction::errorDerivative</li>
+		</ul>
+	</li>
+</ul>
+An error function needs a model, input patterns and label information
+to perform its computations.
+See the ErrorFunction documentation for a complete list of
+error functions.
+</p>
+
+<h2>The Optimizer Base Class</h2>
+<p>
+The Optimizer class unifies standard initialization and
+iterative optimization steps of all ReClaM optimizers.
+It provides the following interface:
+<ul>
+	<li>standard initialization of the optimizer
+		<ul>
+			<li>Optimizer::init</li>
+		</ul>
+	</li>
+	<li>iterative optimization step
+		<ul>
+			<li>Optimizer::optimize</li>
+		</ul>
+	</li>
+</ul>
+An optimizer needs a model, an error function as well as input
+patterns with labels to perform its computations.
+These computations result in a data driven adaptation of the
+model parameters in order to reduce the error evaluated on the
+training data.
+See the Optimizer documentation for a complete list of
+optimizers.
+</p>
+
+<a name="linearmethods"></a><h1>Linear Methods</h1>
+
+<p>
+ReClaM offers five simple linear models for learning in vector
+spaces:
+</p>
+<ul>
+	<li>LinearMap</li>
+	<li>LinearFunction</li>
+	<li>AffineLinearMap</li>
+	<li>AffineLinearFunction</li>
+	<li>LinearClassifier</li>
+</ul>
+<p>
+The following standard learning methods operating on these
+models are available as optimizers:
+</p>
+<ul>
+	<li>Principal Component Analysis (PCA)</li>
+	<li>Linear Regression</li>
+	<li>Linear Discriminant Analysis</li>
+</ul>
+<p>
+These optimizers deviate from the standard ReClaM philosophy
+because they solve the underlying problems analytically, that
+is, without the need for an iterative update loop. In most
+cases, these algorithms can serve for preprocessing or as
+base line methods.
+</p>
+
+<a name="neuralnetworks"></a><h1>Neural Networks</h1>
+
+<h3>Predefined Network Models</h3>
+<p>
+ReClaM comes with several predefined network types. These networks
+cover a wide variety of applications. Whenever these prototypes
+prove inappropriate they can hopefully serve as base classes or
+starting points for refined implementations. The following table
+lists several properties:
+<ul>
+	<li><strong>Name</strong> - The name of the class implementing
+		the network</li>
+	<li><strong>Type</strong> - There are several base types of networks,
+		possible types are <em>Feed Forward</em>, <em>Recurrent</em>
+		and <em>Radial Basis Function</em></li>
+	<li><strong>Activation Functions</strong> - Each neuron of the
+		network has an activation function that determines
+		how input values will be propagated through the network. The
+		activation functions of the hidden layer and
+		output layer neurons can be set separately.</li>
+	<li><strong>Error Measures</strong> - Several networks come with
+		built in error functions, that is, they are derived from
+		Model as well as from ErrorFunction. This mixing of concepts
+		can in some cases speed up computations. The built-in error
+		function is used for training only - it is straight forward
+		to use a different function for evaluation.</li>
+</ul>
+</p>
+
+<table border="1" cellpadding="5" frame="box">
+	<tr>
+		<th>
+			Name
+		</th>    
+		<th>
+			Type
+		</th>
+		<th colspan="2">
+			Activation Functions
+		</th>    
+		<th>
+			Training Error Measure
+		</th>
+	</tr>
+	<tr>
+		<th>
+		</th>    
+		<th>
+		</th>    
+		<th>
+			Hidden Neurons
+		</th>
+		<th>
+			Output Neurons
+		</th>    
+	</tr>
+	<tr>
+		<td>
+			FFNet
+		</td>    
+		<td>
+			Feed Forward
+		</td>    
+		<td align="center">
+			<img src="../images/sigm1.gif">
+		</td>
+		<td align="center">
+			<img src="../images/sigm1.gif">
+		</td>    
+		<td align="center">
+			none
+		</td>
+	</tr>
+	<tr>
+		<td>
+			MSEFFNet
+		</td>
+		<td>
+			Feed Forward
+		</td>    
+		<td align="center">
+			<img src="../images/sigm1.gif">
+		</td>
+		<td align="center">
+			<img src="../images/sigm1.gif">
+		</td>    
+		<td align="center">
+			Mean Squared Error
+		</td>
+	</tr>
+	<tr>
+		<td>
+			LinOutFFNet
+		</td>    
+		<td>
+			Feed Forward
+		</td>    
+		<td align="center">
+			<img src="../images/sigm1.gif">
+		</td>
+		<td align="center">
+			<img src="../images/lin.gif">
+		</td>    
+		<td align="center">
+			none
+		</td>
+	</tr>
+	<tr>
+		<td>
+			LinOutMSEBFFNet
+		</td>    
+		<td>
+			Feed Forward
+		</td>    
+		<td align="center">
+			<img src="../images/sigm1.gif">
+		</td>
+		<td align="center">
+			<img src="../images/lin.gif">
+		</td>    
+		<td align="center">
+			Mean Squared Error
+		</td>
+	</tr>
+	<tr>
+		<td>
+			TanhNet
+		</td>    
+		<td>
+			Feed Forward
+		</td>    
+		<td align="center">
+			<img src="../images/tanh.gif">
+		</td>
+		<td align="center">
+			<img src="../images/tanh.gif">
+		</td>    
+		<td align="center">
+			Squared Error
+		</td>
+	</tr>
+	<tr>
+		<td>
+			LinearOutputTanhNet
+		</td>    
+		<td>
+			Feed Forward
+		</td>    
+		<td align="center">
+			<img src="../images/tanh.gif">
+		</td>
+		<td align="center">
+			<img src="../images/lin.gif">
+		</td>
+		<td align="center">
+			Squared Error
+		</td>
+	</tr>
+	<tr>
+		<td>
+			ProbenNet
+		</td>    
+		<td>
+			Feed Forward
+		</td>    
+		<td align="center">
+			<img src="../images/fabs.gif">
+		</td>
+		<td align="center">
+			<img src="../images/lin.gif">
+		</td>    
+		<td align="center">
+			Mean Squared Error
+		</td>
+	</tr>
+	<tr>
+		<td>
+			ProbenBNet
+		</td>    
+		<td>
+			Feed Forward
+		</td>    
+		<td align="center">
+			<img src="../images/fabs.gif">
+		</td>
+		<td align="center">
+			<img src="../images/lin.gif">
+		</td>    
+		<td align="center">
+			Mean Squared Error
+		</td>
+	</tr>
+	<tr>
+		<td>
+			MSERNNet
+		</td>    
+		<td>
+			Recurrent
+		</td>    
+		<td align="center">
+			<img src="../images/sigm1.gif">
+		</td>
+		<td align="center">
+			<img src="../images/sigm1.gif">
+		</td>    
+		<td align="center">
+			Mean Squared Error
+		</td>
+	</tr>
+	<tr>
+		<td>
+			RBFNet
+		</td>
+		<td>
+			Radial Basis Function
+		</td>    
+		<td align="center">
+			special
+		</td>
+		<td align="center">
+			special
+		</td>    
+		<td align="center">
+			none
+		</td>
+	</tr>
+	<tr>
+		<td>
+			MSERBFNet
+		</td>    
+		<td>
+			Radial Basis Function
+		</td>    
+		<td align="center">
+			special
+		</td>
+		<td align="center">
+			special
+		</td>    
+		<td align="center">
+			Mean Squared Error
+		</td>
+	</tr>
+</table>
+
+<h2>Connection matrix creation</h2>
+<p>
+The methods in the file createConnectionMatrix.h 
+automatically create connection matrices for 
+feed-forward and recurrent networks
+with several layers.<BR>
+Flags are offered that can be set to establish standard
+connections between the neurons of the network.
+</p>
+
+<h2>Monitoring the training</h2>
+<p>
+The EarlyStopping class provides measures 
+that can be used to fight overfitting during
+the training process.
+</p>
+
+<h2>Active Learning</h2>
+<p>
+By means of the VarianceEstimator class it is possible to
+enhance the learning speed of your network by allowing it to
+add a new pattern to the training set at each step. This
+pattern is chosen in a way that it will minimize the
+network error.
+</p>
+
+<a name="kernelmethods"></a><h1>Kernel Methods</h1>
+
+<p>
+ReClaM offers a variety of kernel based learning algorithms.
+In the following the basic concepts and the corresponding classes
+are introduced.
+</p>
+
+<p>
+<center>
+<img src="../images/svm.png">
+</center>
+</p>
+
+<h2>Kernel Functions</h2>
+<p>
+Kernel based learning algorithms rely on a positive definite
+kernel function taking two input patterns as arguments.
+The kernel function can be interpreted as first mapping the
+inputs into a (usually high dimensional) Hilbert space and
+then computing the inner product in this space.
+A kernel based algorithm is a learning algorithm that can be
+formulated in terms of inner products of pairs of input
+patterns. These inner products are then computed using a
+kernel function.
+</p>
+<p>
+The KernelFunction
+interface encapsulates this functionality.
+Usually a parameterized family of kernel functions is considered.
+Because we are interested in the optimization of its
+parameters, KernelFunction is derived from Model. A kernel does not provide an output given an input.
+Therefore it defines a new interface:
+<ul>
+	<li>KernelFunction::eval</li>
+	<li>KernelFunction::evalDerivative</li>
+</ul>
+Of course the KernelFunction inherits the Model members
+for retrieving and setting parameters and checking the
+feasibility of the parameters.
+</p>
+<p>
+Several standard kernel functions are available,
+together with combinations of kernels to new kernels:
+</p>
+
+<table border="1" cellspacing="0" cellpadding="10">
+	<tr>
+		<th>Class</th>
+		<th>Parameters</th>
+		<th>Formula</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>LinearKernel</td>
+		<td>none</td>
+		<td>\f$ \langle x, z \rangle = x^T z \f$</td>
+		<td>The linear kernel is the canonical inner product.</td>
+	</tr>
+	<tr>
+		<td>PolynomialKernel</td>
+		<td>degree d and offset v</td>
+		<td>\f$ (\langle x, z \rangle + v)^d \f$</td>
+		<td>The polynomial kernel is a polynomial of the
+			linear kernel. This representation corresponds
+			to a feature space of monomials of the input
+			coordinates.</td>
+	</tr>
+	<tr>
+		<td>RBFKernel</td>
+		<td>concentration \f$ \gamma \f$</td>
+		<td>\f$ \exp(-\gamma \|x-z\|^2) \f$</td>
+		<td>The Gaussian Radial Basis Function kernel
+			is one of the most widely used kernels for
+			vector valued data. It is known to be
+			universal.</td>
+	</tr>
+	<tr>
+		<td>DiagGaussKernel</td>
+		<td>diagonal inverse covariance matrix M</td>
+		<td>\f$ \exp(-(x-z)^T M (x-z)) \f$</td>
+		<td>Gaussian kernel with adaptible covariance
+			matrix. The extent of the Gaussian along
+			each coordinate axis can be controlled.</td>
+	</tr>
+	<tr>
+		<td>GeneralGaussKernel</td>
+		<td>inverse covariance matrix M</td>
+		<td>\f$ \exp(-(x-z)^T M (x-z)) \f$</td>
+		<td>Gaussian kernel with adaptible covariance
+			matrix. The complete shape of the Gaussian
+			can be controlled.</td>
+	</tr>
+	<tr>
+		<td>NormalizedKernel</td>
+		<td>parameters of a base kernel k</td>
+		<td>\f$ \frac{k(x, z)}{\sqrt{k(x, x) \cdot k(z, z)}} \f$</td>
+		<td>The normalization of a positive definite
+			kernel is again a valid positive definite
+			kernel. The normalization ensures that the
+			norm of each example in feature space is 1.</td>
+	</tr>
+	<tr>
+		<td>WeightedSumKernel</td>
+		<td>non-negative weights w<sub>i</sub> and parameters of base
+			kernels k<sub>i</sub></td>
+		<td>\f$ \sum_i w_i k_i(x, z) \f$</td>
+		<td>The non-negative linear combination of
+			positive definite kernels is a valid
+			positive definite kernel again.</td>
+	</tr>
+</table>
+
+<h2>Simple Algorithms</h2>
+<p>
+	The most simple kernel based algorithms available are
+</p>
+<ul>
+	<li>KernelNearestNeighbor</li>
+	<li>KernelMeanClassifier</li>
+</ul>
+<p>
+	Their standard vector space versions can be obtained
+	by simply using the linear kernel. These algorithms can
+	serve as a baseline for the evaluation of more
+	advanced methods. A special aspect of these algorithms
+	is that they do not have any hyperparameters and 
+	do not need any special optimization. That is, once the training
+	data are provided the models can be used immediately.
+</p>
+
+<a name="supportvectormachines"></a><h1>Support Vector Machines</h1>
+
+<p>
+	Support Vector Machines (SVMs)
+	are the most prominent kernel based learning algorithms.
+	The basic ideas of support vector machines are as follows:
+</p>
+
+<ul>
+	<li>The input patterns are mapped into a Hilbert space using a kernel function.</li>
+	<li>In the Hilbert space patterns of different classes are linearly separated by a hyperplane with maximal margin.</li>
+	<li>To avoid overfitting only classification functions with a limited norm are considered.</li>
+</ul>
+
+<h2>SVM Model</h2>
+
+<p>
+Support vector machines usually result in a sparse affine
+sum of the form
+\f[
+	f(x) = \sum_{i \in S} \alpha_i k(x_i, x) + b
+\f]
+where the support vector index set S is a subset of the
+training data indices. In the case of classification with
+more than two classes the expansion becomes
+\f[
+	f(x) = \sum_{i \in S} \sum_c \alpha_{i,c} k(x_i, x) y_c + b
+\f]
+</p>
+where c sums over the classes and \f$ y_i \f$ are class
+prototype vectors.
+
+<p>
+In ReClaM, a support vector machine is a Model holding the
+coefficients \f$ \alpha_i \f$ and \f$ b \f$. Its prediction
+can be restricted to the sign of the computed value, which
+is the standard form for binary classification problems.
+For multi-class problems, the output vector can analogously
+be transformed into an integer class label.
+In contrast to other ReClaM models, support vector machines
+output only one value per input pattern. They can be viewed
+as affine linear functions mapping from the span of the
+support vectors in feature space to the real line (or to
+\f$R^n\f$).
+</p>
+
+<h2>SVM Training</h2>
+<p>
+Training an SVM involves several
+so called hyperparameters. These are encapsulated by the
+MetaSVM class and its descendants:
+</p>
+
+<table border="1" cellspacing="0" cellpadding="10">
+	<tr>
+		<th>Class</th>
+		<th>Parameters</th>
+		<th>Problem Type</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>C_SVM</td>
+		<td>regularization parameter C</td>
+		<td>binary classification</td>
+		<td>C-SVM formulation using either 1-norm or 2-norm
+			slack penalty. This is the most usual way to
+			train a support vector machine.</td>
+	</tr>
+	<tr>
+		<td>Epsilon_SVM</td>
+		<td>regularization parameter C, accuracy parameter \f$ \varepsilon \f$</td>
+		<td>regression</td>
+		<td>Standard SVM for regression</td>
+	</tr>
+	<tr>
+		<td>RegularizationNetwork</td>
+		<td>regularization parameter \f$ \gamma \f$</td>
+		<td>regression</td>
+		<td>regularized linear regression in feature space</td>
+	</tr>
+	<tr>
+		<td>GaussianProcess</td>
+		<td>none</td>
+		<td>regression</td>
+		<td>Bayesian inference is used to estimate the
+			regularization and kernel parameters.</td>
+	</tr>
+	<tr>
+		<td>OneClassSVM</td>
+		<td>regularization parameter \f$ \nu \f$</td>
+		<td>support / density quantile estimation</td>
+		<td>Estimation of an area of high density</td>
+	</tr>
+	<tr>
+		<td>AllInOneMcSVM</td>
+		<td>regularization parameter C</td>
+		<td>multi-category classification</td>
+		<td>Covers the methods by Weston and Watkins
+			and by Wahba (without bias)</td>
+	</tr>
+	<tr>
+		<td>CrammerSingerMcSVM</td>
+		<td>regularization parameter \f$ \beta \f$</td>
+		<td>multi-category classification</td>
+		<td>Multi-Class SVM by Crammer and Singer (without bias)</td>
+	</tr>
+	<tr>
+		<td>OVAMcSVM</td>
+		<td>regularization parameter C</td>
+		<td>multi-category classification</td>
+		<td>A simple one-versus-all machine (without bias)</td>
+	</tr>
+	<tr>
+		<td>BinaryCostMcSVM</td>
+		<td>regularization parameter C</td>
+		<td>multi-category classification</td>
+		<td>Multi-class classification at the training cost
+			of a binary machine (without bias)</td>
+	</tr>
+</table>
+
+<p>
+	For the adaptation of the hyperparameters of the
+	C_SVM or the Epsilon_SVM, please refer to the model
+	selection section below.
+</p>
+
+<p>
+	SVMs are trained solving a special
+	quadratic program. For this purpose ReClaM comes with a
+	various efficient solvers for the particular types of
+	optimization problems. The quadratic programming is hidden
+	from the user of the library.
+	An SVM is trained using the special SVM_Optimizer class. This
+	class constructs a QuadraticProgram object, solves the
+	corresponding problem and copies the solution into the SVM
+	parameter vector. The optimization involves a special
+	quadratic objective function.
+	For efficiency reasons it is not desirable to define this
+	objective function as an ErrorFunction derived class and
+	use a standard purpose gradient based optimizer.
+	Because of this special situation the SVM_Optimizer can be
+	called without an error function parameter. When called with
+	an error function through the standard Optimizer interface
+	the error function is ignored.
+</p>
+
+<a name="modelselection"></a><h1>Model Selection</h1>
+<p>
+	The process of model selection is the choice of a model
+	from a family of candidate models. This may correspond to
+	the selection of the hyperparameters of a MetaSVM subclass.
+	In this case the model family is parameterized by the
+	MetaSVM parameter vector.
+</p>
+
+<h2>General Model Selection</h2>
+<p>
+	A model selection problem is usually solved by an outer
+	optimization loop investigating a model family and an inner
+	optimization loop finding the best model within this family.
+	The fitness of a model family is simply the fitness of its
+	best element.
+</p>
+<p>
+	In general, model selection can be carried out on complicated spaces
+	like the possible topologies of a neural network. These problems
+	require specialized evolutionary algorithms not provided by the
+	ReClaM library. However, in the case of support vector machines
+	the model selection problem can usually be reduced to real valued
+	parameter adaptation, to which ReClaM is perfectly suited.
+	Therefore most model selection support is available for this
+	model type. Only the cross validation method is applicable to
+	general model selection problems.
+</p>
+
+<h2>Model Selection for Support Vector Machines</h2>
+<p>
+	The model of a support vector machine is made up by the
+	kernel function and the complexity control. The kernel
+	parameters and the SVM training parameters are to be chosen.
+	These parameters are captured by the
+	MetaSVM class and its subclasses.
+</p>
+<p>
+	Several objective functions have been proposed for model selection
+	for support vector machines. Besides the usual cross validation
+	measures ReClaM provides the following ErrorFunction subclasses:
+</p>
+<ul>
+	<li>RadiusMargin - radius margin quotient</li>
+	<li>NegativeKTA - (negative) kernel target alignment</li>
+	<li>NegativeBKTA - (negative) balanced kernel target alignment</li>
+	<li>NegativePolarization - (negative) kernel polarization</li>
+	<li>LOO - leave one out error (specially tuned for SVMs)</li>
+	<li>SpanBound - span bound computation</li>
+</ul>
+
+<a name="examples"></a>
+<h2>Example Programs</h2>
+<p>
+	To give you a better idea, how using the several components
+	of ReClaM to build your own networks, you can take a look
+	at some commented source codes of <a href="examples.html">example programs</a> for different types
+	of predefined networks. To run these programs please go to
+	the examples directory of ReClaM.
+</p>
+<p>
+Please have a look at our introductory tutorials 
+on using multi-layer perceptron networks, <a href="../tutorials/MLP/index.html">part 1</a> and <a href="../tutorials/MLP2/index.html">part 2</a>.
+</p>
+
+<a name="lists"></a><h1>Models, Error Functions, and Optimizers</h1>
+
+<h2>Models</h2>
+
+<p>
+The following table lists the most prominent ReClaM model types:
+</p>
+
+<table border="1" cellspacing="0" cellpadding="10">
+	<tr>
+		<th>Name</th>
+		<th>Inputs</th>
+		<th>Outputs</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>LinearMap</td>
+		<td>\f$ R^n \f$</td>
+		<td>\f$ R^m \f$</td>
+		<td>Linear mapping \f$ x \mapsto y = A x \f$. An affine version is available, too.</td>
+	</tr>
+	<tr>
+		<td>LinearFunction</td>
+		<td>\f$ R^n \f$</td>
+		<td>\f$ R \f$</td>
+		<td>Special case of a linear map with one output dimension.  An affine version is available, too.</td>
+	</tr>
+	<tr>
+		<td>ComponentWiseModel</td>
+		<td>\f$ X^k \f$</td>
+		<td>\f$ Y^k \f$</td>
+		<td>Apply a base model \f$ f : X \rightarrow Y \f$
+			\f$k\f$-fold and component wise, making up a
+			model \f$ F : X^k \rightarrow Y^k \f$.</td>
+	</tr>
+	<tr>
+		<td>ConcatenatedModel</td>
+		<td>\f$ X \f$</td>
+		<td>\f$ Y \f$</td>
+		<td>Apply a chain \f$ f_1 \circ f_2 \circ \dots \circ f_k \f$
+			of models. The output space of model \f$ f_i \f$ and
+			the input space of model \f$ f_{i+1} \f$ must match.</td>
+	</tr>
+	<tr>
+		<td>FFNet</td>
+		<td>\f$ R^n \f$</td>
+		<td>\f$ R^m \f$</td>
+		<td>feed forward neural network</td>
+	</tr>
+	<tr>
+		<td>RBFNet</td>
+		<td>\f$ R^n \f$</td>
+		<td>\f$ R \f$</td>
+		<td>radial basis function network</td>
+	</tr>
+	<tr>
+		<td>MSERNNet</td>
+		<td>\f$ R^n \f$</td>
+		<td>\f$ R^m \f$</td>
+		<td>recurrent neural network with built-in
+			mean squared error computation</td>
+	</tr>
+	<tr>
+		<td>KernelFunction</td>
+		<td>\f$ X \times X \f$</td>
+		<td>\f$ R \f$</td>
+		<td>Please refer to the
+			<a href="#kernelmethods">Kernel Methods</a>
+			documentation.</td>
+	</tr>
+	<tr>
+		<td>KernelMeanClassifier</td>
+		<td>\f$ X \f$</td>
+		<td>\f$ R \f$</td>
+		<td>Simple mean classifier in a kernel defined feature space</td>
+	</tr>
+	<tr>
+		<td>KernelNearestNeighbor</td>
+		<td>\f$ X \f$</td>
+		<td>\f$ \{-1, +1\} \f$</td>
+		<td>Simple k-nearest-neighbor classifier
+			in a kernel defined feature space</td>
+	</tr>
+	<tr>
+		<td>SVM</td>
+		<td>\f$ X \f$</td>
+		<td>\f$ \{-1, +1\} \f$ or \f$ R \f$</td>
+		<td>Support Vector Machine model, that is,
+			affine linear function in a kernel defined
+			feature space.</td>
+	</tr>
+	<tr>
+		<td>MultiClassSVM</td>
+		<td>\f$ X \f$</td>
+		<td>\f$ \{0, \dots, \#classes-1\} \f$ or \f$ R^n \f$</td>
+		<td>Support Vector Machine model, that is,
+			affine linear function in a kernel defined
+			feature space.</td>
+	</tr>
+	<tr>
+		<td>SvmApproximationModel</td>
+		<td></td>
+		<td></td>
+		<td>Used internally. Please refer to the
+			SvmApproximation class for documentation.</td>
+	</tr>
+	<tr>
+		<td>MetaSVM</td>
+		<td>---</td>
+		<td>---</td>
+		<td>Base class of all SVM training schemes. See
+			the MetaSVM documentation or the section
+			<a href="#supportvectormachines">Support Vector Machines</a>
+			for details.</td>
+	</tr>
+	<tr>
+		<td>SigmoidModel</td>
+		<td>R</td>
+		<td>(0, 1)</td>
+		<td>sigmoidal function
+			\f$ f(x) = \frac{1}{1 + \exp(ax+b)} \f$</td>
+	</tr>
+</table>
+
+<br><br><hr><br>
+
+<h2>Error Functions</h2>
+
+<p>
+This table gives an overview over the error functions available:
+</p>
+
+<table border="1" cellspacing="0" cellpadding="10">
+	<tr>
+		<th>Class</th>
+		<th>Differentiable</th>
+		<th>Restrictions</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>SquaredError</td>
+		<td>yes</td>
+		<td>none</td>
+		<td>squared error between model output and target</td>
+	</tr>
+	<tr>
+		<td>MeanSquaredError / DF_MeanSquaredError</td>
+		<td>yes</td>
+		<td>none</td>
+		<td>mean squared error between model output and target</td>
+	</tr>
+	<tr>
+		<td>CrossEntropy / DF_CrossEntropy</td>
+		<td>yes</td>
+		<td>unit interval model outputs</td>
+		<td>cross entropy measure for neural network classifier training</td>
+	</tr>
+	<tr>
+		<td>CrossEntropyIndependent / DF_CrossEntropyIndependent</td>
+		<td>yes</td>
+		<td>unit interval model outputs</td>
+		<td>cross entropy measure for neural network classifier training
+			with non exclusive attributes</td>
+	</tr>
+	<tr>
+		<td>ClassificationError</td>
+		<td>no</td>
+		<td>Classifiers</td>
+		<td>fraction of misclassified patterns</td>
+	</tr>
+	<tr>
+		<td>BalancedClassificationError</td>
+		<td>no</td>
+		<td>Classifiers</td>
+		<td>mean fraction of misclassified patterns per class</td>
+	</tr>
+	<tr>
+		<td>ErrorPercentage</td>
+		<td>no</td>
+		<td>none</td>
+		<td>error percentage based on the mean squared error</td>
+	</tr>
+	<tr>
+		<td>RadiusMargin</td>
+		<td>yes</td>
+		<td>KernelFunction derived classes and C_SVM with 2-norm
+			slack penalty</td>
+		<td>squared radius margin quotient for SVM model selection</td>
+	</tr>
+	<tr>
+		<td>NegativeKTA</td>
+		<td>yes</td>
+		<td>KernelFunction derived classes and C_SVM with 2-norm
+			slack penalty</td>
+		<td>negative kernel target alignment</td>
+	</tr>
+	<tr>
+		<td>NegativeBKTA</td>
+		<td>yes</td>
+		<td>KernelFunction derived classes and C_SVM with 2-norm
+			slack penalty</td>
+		<td>negative balanced kernel target alignment</td>
+	</tr>
+	<tr>
+		<td>NegativePolarization</td>
+		<td>yes</td>
+		<td>KernelFunction derived classes and C_SVM with 2-norm
+			slack penalty</td>
+		<td>negative kernel polarization measure</td>
+	</tr>
+	<tr>
+		<td>SpanBound</td>
+		<td>no</td>
+		<td>SVM classifier</td>
+		<td>span bound for a support vector machine classifier model selection</td>
+	</tr>
+	<tr>
+		<td>LOO</td>
+		<td>no</td>
+		<td>SVM classifier</td>
+		<td>leave one out error especially tuned
+			towards support vector machines</td>
+	</tr>
+	<tr>
+		<td>InverseClassSeparability</td>
+		<td>yes</td>
+		<td>KernelFunction derived classes</td>
+		<td>inverse of the class separability measure
+			termed J, by Huilin Xiong and M. N. S. Swamy</td>
+	</tr>
+</table>
+
+<br><br><hr><br>
+
+<h2>Optimizers</h2>
+
+<p>
+Among others, here come the most used optimizers:
+</p>
+
+<table border="1" cellspacing="0" cellpadding="10">
+	<tr>
+		<th>Class</th>
+		<th>Parameters</th>
+		<th>Gradient-Based?</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>IRpropPlus</td>
+		<td>initial step sizes, increase and decrease factors,
+		    minimal and maximal step sizes</td>
+		<td>yes</td>
+		<td>Improved resilent backpropagation with weight backtracking.
+			Other variants without improvement or backtracking are available.</td>
+	</tr>
+	<tr>
+		<td>CG</td>
+		<td>line search type and several tuning parameters with default values</td>
+		<td>yes</td>
+		<td>Conjugate Gradient method</td>
+	</tr>
+	<tr>
+		<td>BFGS</td>
+		<td>line search type and several tuning parameters with default values</td>
+		<td>yes</td>
+		<td>Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm</td>
+	</tr>
+	<tr>
+		<td>CMAOptimizer</td>
+		<td>CMA type, initial standard deviations</td>
+		<td>no</td>
+		<td>Covariance Matrix Adaptation Evolution Strategy.
+			This is a wrapper class for the EALib CMA implementation.
+			The CMA is the first choice optimizer if the derivative
+			is not available or lots of undesirable local minima are
+			a concern.</td>
+	</tr>
+	<tr>
+		<td>GridSearch</td>
+		<td>grid definition</td>
+		<td>no</td>
+		<td>Grid search is the most basic optimization method available.
+			Several variants add flexibility and/or improve efficiency.</td>
+	</tr>
+</table>
+
+<a name="further"></a><h1>Further features</h1>
+
+ReClaM offers a bunch of other models, error functions,
+and optimizers, as well as tools, e.g. for data handling,
+unified exception handling, and even more. Check out the
+<a href="annotated.html">class</a> or
+<a href="files.html">file</a> lists for a full overview.
+
+For example, have a look at the tools defined in
+<ul>
+	<li>createConnectionMatrix.h</li>
+	<li>Dataset.h, ArtificialDistributions.h</li>
+	<li>CrossValidation.h</li>
+	<li>RException.h</li>
+	<li>SvmApproximation.h</li>
+</ul>
+
+Maybe the fastest way to get a grip on ReClaM is to
+have a look at the <a href="examples.html">examples</a>.
+
+*/
+
+//
+// The following comment lists all examples.
+//
+/*!
+	\example CrossValidation.cpp
+	\example KM.cpp
+	\example KNN.cpp
+	\example KalmanFilterTest.cpp
+	\example KernelOptimization.cpp
+	\example LinearClassifierTest.cpp
+	\example LinearRegressionTest.cpp
+	\example PCAtest.cpp
+	\example SVMclassification-gnuplot.cpp
+	\example SVMclassification.cpp
+	\example SVMregression-gnuplot.cpp
+	\example SVMregression.cpp
+	\example SvmApproximationExample.cpp
+	\example McSvm.cpp
+	\example simpleFFNet.cpp
+	\example simpleFFNetSource.cpp
+	\example simpleMSERNNet.cpp
+	\example simpleRBFNet.cpp
+	\example simpleRNNet.cpp
+*/

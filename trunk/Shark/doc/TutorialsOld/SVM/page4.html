@@ -1,0 +1,67 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>Machine Training</h1>
+
+<p>
+	The training of the support vector machine in the
+	simplest part. We just need to call the optimizer
+	with the adjustable model and the training data.
+</p>
+
+<pre><div class="code">#include &lt;ReClaM/ArtificialDistributions.h&gt;
+#include &lt;ReClaM/Dataset.h&gt;
+#include &lt;ReClaM/Svm.h&gt;
+
+int main(int argc, char** argv)
+{
+    Chessboard chess;
+    Dataset dataset(chess, 500, 10000);
+
+    double C = 100.0;
+    double gamma = 1.0;
+
+    RBFKernel kernel(gamma);
+    SVM svm(&amp;kernel);
+    C_SVM csvm(&amp;svm, C, C);
+    SVM_Optimizer opt;
+
+    opt.init(csvm);
+<div class="newcode">
+    opt.optimize(svm,
+                 dataset.getTrainingData(),
+                 dataset.getTrainingTarget() );
+</div>
+    return EXIT_SUCCESS;
+}
+</div></pre>
+
+<p>
+	That's all! Now the svm object represents the function
+	resulting from SVM training. The sign of this function
+	is the prediction of the resulting SVM classifier.
+</p>
+
+<p>The SVM optimization algorithm in Shark is pretty fast.
+If you want to know what is under the hood, please read:
+</p>
+
+<div class=publication>Tobias Glasmachers and Christian Igel.
+<a href="http://jmlr.csail.mit.edu/papers/volume7/glasmachers06a/glasmachers06a.pdf">Maximum-Gain Working Set Selection for SVMs</a>.
+<em>Journal of Machine Learning Research</em>
+<vol>7</vol>: 1437-1466, 2006.</div>
+
+<div class=publication>
+Rong-Eng Fan, Pai-Hsuen Chen, and Chih-Jen Lin.
+<a href="http://www.csie.ntu.edu.tw/~cjlin/papers/quadworkset.pdf">Working Set Selection Using Second Order Information for Training SVM<a>.
+<em>Journal of Machine Learning Research</em>
+<vol>6</vol>: 1889-1918, 2005.</div>
+
+</body>
+
+</html>

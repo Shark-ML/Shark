@@ -1,0 +1,8 @@
+<config name="TimeSeries-Examples" basedir="../..">
+	<project name="embeddingTest" type="executable" lib="Shark">
+		<source path="examples/TimeSeries" name="embeddingTest.cpp"></source>
+	</project>
+	<project name="lorenz84" type="executable" lib="Shark">
+		<source path="examples/TimeSeries" name="lorenz84.cpp"></source>
+	</project>
+</config>

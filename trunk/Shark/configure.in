@@ -1,0 +1,183 @@
+dnl process this file with autoconf to produce a configure script
+AC_INIT(shark,2.2.2,c.igel@ieee.org)
+
+dnl determine version numbers
+AC_MSG_CHECKING(shark version number)
+SHARK_MAJOR_VERSION=`echo $PACKAGE_VERSION | awk -F . '{ print $1 }'`
+SHARK_MINOR_VERSION=`echo $PACKAGE_VERSION | awk -F . '{ print $2 }'`
+SHARK_MICRO_VERSION=`echo $PACKAGE_VERSION | awk -F . '{ print $3 }'`
+
+VERSION=${SHARK_MAJOR_VERSION}.${SHARK_MINOR_VERSION}.${SHARK_MICRO_VERSION}
+
+AC_SUBST(SHARK_MAJOR_VERSION)
+AC_SUBST(SHARK_MINOR_VERSION)
+AC_SUBST(SHARK_MICRO_VERSION)
+AC_SUBST(VERSION)
+AC_MSG_RESULT($VERSION)
+
+dnl set prefix for install
+AC_PREFIX_DEFAULT(`pwd`)
+
+
+define(ACX_HAVE_LIB, [
+		AC_PROVIDE([$0]) 
+		AC_MSG_CHECKING(for lib[$1])
+		havelib="yes"
+		if test -f /lib/lib[$1].so.1 ; then LIBS="-l[$1] $LIBS"
+		elif test -f /lib/lib[$1].a ; then LIBS="-l[$1] $LIBS"
+		elif test -f /lib/lib[$1].so ; then LIBS="-l[$1] $LIBS"
+		elif test -f /usr/ucblib/lib[$1].a ; then LIBS="-L/usr/ucblib -l[$1] $LIBS"
+		elif test -f /usr/local/lib[$1].a ; then LIBS="-L/usr/local/lib -l[$1] $LIBS"
+		else havelib="no"
+		fi
+		AC_MSG_RESULT($havelib)
+	])dnl
+
+define(ACX_HAVE_PVM, [
+                AC_PROVIDE([$0])
+                AC_MSG_CHECKING(for pvm)
+                havepvm="yes"
+                if test -f "${PVM_ROOT}/lib/${PVM_ARCH}/libpvm3.a"; then 
+                        LIBS_PVM="-L${PVM_ROOT}/lib/${PVM_ARCH}/"
+                elif test -f /usr/share/pvm3/lib/LINUX/libpvm3.a; then 
+                        LIBS_PVM="-L/usr/share/pvm3/lib/LINUX"
+						PVM_ROOT="/usr/share/pvm3/"
+                elif test -f /usr/share/pvm3/lib/SUN4SOL2/libpvm3.a; then 
+                        LIBS_PVM="-L/usr/share/pvm3/lib/SUN4SOL2"
+						PVM_ROOT="/usr/share/pvm3/"
+                elif test -f /usr/lib/pvm3/lib/LINUX/libpvm3.a; then
+                        LIBS_PVM="-L/usr/lib/pvm3/lib/LINUX"
+						PVM_ROOT="/usr/lib/pvm3/"
+                elif test -f /usr/lib/pvm3/lib/SUN4SOL2/libpvm3.a; then
+                        LIBS_PVM="-L/usr/lib/pvm3/lib/SUN4SOL2"
+						PVM_ROOT="/usr/lib/pvm3/"
+                elif test -f /usr/share/pvm3/lib/LINUXI386/libpvm3.a; then 
+                        LIBS_PVM="-L/usr/share/pvm3/lib/LINUXI386"
+						PVM_ROOT="/usr/share/pvm3/"
+                elif test -f /opt/pvm3/lib/SUN4SOL2/libpvm3.a; then 
+                        LIBS_PVM="-L/opt/pvm3/lib/SUN4SOL2"
+						PVM_ROOT="/opt/pvm3/"
+                else havepvm="no"
+                fi
+                AC_MSG_RESULT($havepvm)
+        ])dnl
+
+
+dnl Check for programs
+
+AC_MSG_CHECKING(machine hardware name)
+ARCH_MACH=`uname -m | tr -d " "`
+AC_MSG_RESULT(${ARCH_MACH})
+AC_SUBST(ARCH_MACH)
+AC_MSG_CHECKING(kernel name)
+HOST=`uname -s`
+AC_MSG_RESULT(${HOST})
+AC_SUBST(HOST)
+
+AC_PROG_CC
+AC_PROG_CXX
+
+dnl Check for libraries
+ACX_HAVE_PVM
+
+if test ${havepvm} = yes; then
+   PVM_LDLIBS="-lpvm3 -lgpvm3 -lnsl"
+   if test "$HOST" = SunOS; then	
+     PVM_LDLIBS="${PVM_LDLIBS} -lsocket"
+     LIBS_PVM_R="${LIBS_PVM//-L/-R}"
+     LIBS_PVM="${LIBS_PVM} ${LIBS_PVM_R}"
+		 FLAG_PVM="-DPVM_EXISTS" 
+   fi
+   AC_MSG_CHECKING(root of pvm)
+   AC_MSG_RESULT($PVM_ROOT)
+   AC_SUBST(PVM_ROOT)	
+   AC_MSG_CHECKING(libraries paths for pvm)
+   AC_MSG_RESULT($LIBS_PVM)
+   AC_SUBST(LIBS_PVM)	
+   AC_MSG_CHECKING(libraries for pvm)
+   AC_MSG_RESULT($PVM_LDLIBS)
+   AC_SUBST(PVM_LDLIBS)	
+fi
+
+
+ACX_HAVE_PVM dnl
+AC_SUBST(FLAG_PVM)
+
+PATHS_TO_OUTPUT="$PATHS_TO_OUTPUT \
+  Makefile\
+  src/Makefile\
+  examples/Array/Makefile\
+  examples/Rng/Makefile\
+  examples/LinAlg/Makefile\
+  examples/FileUtil/Makefile\
+  examples/EALib/Makefile\
+  examples/MOO-EALib/Makefile\
+  examples/ReClaM/Makefile\
+  examples/Mixture/Makefile\
+  examples/TimeSeries/Makefile\
+  examples/Fuzzy/Makefile"
+
+if test "$HOST" = Linux; then
+	CFLAGS="-D__LINUX__ -fpic"
+	LD_SHARED=-shared
+	LIBEXT=".so"
+	LIBSONAMEEXT=".so.${SHARK_MAJOR_VERSION}"
+	LIBFULLEXT=".so.${PACKAGE_VERSION}"
+	RPATHFLAG="-Wl,-rpath=${libdir}"
+	SONAMEFLAG="-Wl,-soname,libshark.so.${SHARK_MAJOR_VERSION}"
+	SONAMEFLAG_D="-Wl,-soname,libshark_debug.so.${SHARK_MAJOR_VERSION}"
+fi
+if test "$HOST" = SunOS; then
+	CFLAGS="-D__SOLARIS__ -fPIC"
+	LD_SHARED=-G
+	LIBEXT=".so"
+	LIBSONAMEEXT=".so.${SHARK_MAJOR_VERSION}"
+	LIBFULLEXT=".so.${PACKAGE_VERSION}"
+	RPATHFLAG="-R${libdir}"
+	SONAMEFLAG="-h libshark.so.${SHARK_MAJOR_VERSION}"
+	SONAMEFLAG_D="-h libshark_debug.so.${SHARK_MAJOR_VERSION}"
+fi
+if test "$HOST" = Darwin; then
+	CFLAGS="-D__MAC__ -fPIC"
+	LD_SHARED="-dynamiclib"
+	LIBEXT=".dylib"
+	LIBSONAMEEXT=".${SHARK_MAJOR_VERSION}.dylib"
+	LIBFULLEXT=".${PACKAGE_VERSION}.dylib"
+	RPATHFLAG=""
+	SONAMEFLAG="-compatibility_version  ${SHARK_MAJOR_VERSION} -current_version ${PACKAGE_VERSION} -install_name ${libdir}/libshark.${SHARK_MAJOR_VERSION}.dylib"
+	SONAMEFLAG_D="-compatibility_version  ${SHARK_MAJOR_VERSION} -current_version ${PACKAGE_VERSION} -install_name ${libdir}/libshark_debug.${SHARK_MAJOR_VERSION}.dylib"
+fi
+AC_MSG_CHECKING(shared library suffix LIBEXT)
+AC_MSG_RESULT($LIBEXT)
+AC_MSG_CHECKING(compiler flags CFLAGS)
+AC_MSG_RESULT($CFLAGS)
+AC_MSG_CHECKING(shared library flag LD_SHARED)
+AC_MSG_RESULT($LD_SHARED)
+AC_MSG_CHECKING(RPATHFLAG)
+AC_MSG_RESULT($RPATHFLAG)
+AC_MSG_CHECKING(SONAMEFLAG)
+AC_MSG_RESULT($SONAMEFLAG)
+AC_MSG_CHECKING(SONAMEFLAG_D)
+AC_MSG_RESULT($SONAMEFLAG_D)
+
+AC_MSG_CHECKING(flags for release mode)
+dnl CFLAGS_ND="-Wall -O3 -DNDEBUG  -fomit-frame-pointer  -finline-functions -ffast-math"
+CFLAGS_ND="-Wall -O3 -DNDEBUG  -fomit-frame-pointer  -finline-functions"
+AC_MSG_RESULT($CFLAGS_ND)
+AC_SUBST(CFLAGS_ND)
+
+AC_MSG_CHECKING(flags for debug mode)
+CFLAGS_D="-Wall -g -DDEBUG"
+AC_MSG_RESULT($CFLAGS_D)
+AC_SUBST(CFLAGS_D)
+
+AC_SUBST(LIBEXT)	
+AC_SUBST(LD_SHARED)	
+AC_SUBST(CFLAGS)	
+AC_SUBST(RPATHFLAG)	
+AC_SUBST(SONAMEFLAG)	
+AC_SUBST(SONAMEFLAG_D)	
+AC_SUBST(LIBSONAMEEXT)	
+AC_SUBST(LIBFULLEXT)	
+
+AC_OUTPUT($PATHS_TO_OUTPUT)

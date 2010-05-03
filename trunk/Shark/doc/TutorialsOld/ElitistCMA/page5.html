@@ -1,0 +1,62 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../content.css">
+</head>
+
+<body>
+
+<h1>Alternative Implementation</h1>
+
+<p>
+	EALib provides classes for objective functions
+	and search algorithms. In the following, we use
+	the classes Sphere, which is a simple quadratic
+	benchmark function, and CMAElitistSearch, which
+	is an encapsulation of the 1+1-CMA-ES.
+</p>
+
+<pre><div class=code>#include &lt;EALib/ObjectiveFunctions.h>
+#include &lt;EALib/ElitistCMA.h>
+using namespace std;
+
+
+int main(int argc, char* argv[])
+{
+    //
+    // EA parameters
+    //
+    const unsigned Dimension      = 10;
+    const unsigned Iterations     = 2000;
+    const double   MinInit        = -3.;
+    const double   MaxInit        = 7.;
+    const double   GlobalStepInit = 1.;
+
+    // fitness function
+    Sphere f(Dimension);
+
+    // search algorithm
+    Array&lt;double&gt; start(Dimension);
+    start = Rng::uni(MinInit, MaxInit);
+    CMAElitistSearch cma;
+    cma.init(start, GlobalStepInit);
+
+    // loop over generations
+    for (unsigned t = 0; t &lt; Iterations; t++) {
+        cma.run(f);
+        cout &lt;&lt; f.timesCalled() &lt;&lt; " "
+            &lt;&lt; cma.bestSolutionFitness() &lt;&lt; endl;
+    }
+}
+</div></pre>
+
+<p>
+	Note that the main loop of this program is completely generic,
+	that is, search algorithm and fitness function can be exchanged
+	easily. Further, the program is much shorter, because most of
+	the work is already done in the class CMAElitistSearch.
+</p>
+
+</body>
+
+</html>

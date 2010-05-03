@@ -1,0 +1,126 @@
+//
+// The following comment defines the Array main help page.
+//
+/*!
+
+\mainpage
+
+   <p>
+    The package "Array" provides structures and methods for constructing
+    and dealing with arrays. In principle an array can be viewed as an 
+    instance of an ordinary C-array, like type <em>item[10][5][3]</em>. 
+    However, this is a static instantiation of an array. <BR>
+    The arrays in package "Array" are more flexible in that it is possible 
+    to dynamically resize or change the number of dimensions. <BR>
+    Furthermore, parameter passing by value and
+    assignment works properly (i.e., the value is passed or assigned and
+    not a pointer to the value) and the subscript operator <em>[ ]</em> may
+    perform a range check at run-time.
+    </p>
+
+    <BR>
+    <BR>
+     <a href="#types">Types of Arrays</a><BR>
+     <a href="#ops">Array Operations</a><BR>
+
+	<br><br>
+	<a name="types">
+	<h2>Types of Arrays</h2>
+	<p>
+	There are several classes for different types of arrays in package
+	"Array":
+	<ul>
+		<li>
+			<b>Arrays for any number of dimensions:</b><BR>
+			These Arrays can have any number of dimensions with
+			arbitrary sizes.<BR>
+			Therefore, class <a href="class_array_base.html">ArrayBase</a>
+			offers the basic structures and methods and class 
+			<a href="class_array.html">Array&lt; T &gt;</a>
+			can be used to really create Arrays and deal with them.
+			This is the default Array type of the Shark library.
+		</li>
+		<li>
+			<b>3-dimensional Arrays:</b><BR>
+			Class <a href="class_array_table.html">ArrayTable&lt; T &gt;</a>
+			offers 3-dimensional arrays, that are sometimes more efficient
+			to speed up the work compared with using the "normal" 
+			Array type.
+		</li>
+		<li>
+			<b>References to Arrays:</b><BR>
+			Sometimes it is more efficient to work with references
+			to Arrays to avoid copies of the same Array, wasting
+			memory. References to Arrays are implemented in class
+			<a href="class_array_reference.html">Array&lt; T &gt;</a>.
+		</li>
+	</ul>
+    </p>
+
+    <br><br>
+    <a name="ops">
+    <h2>Array Operations</h2>
+    <p>
+    Please notice, that the lists of methods for each operation type are not 
+    complete. In many classes of the library "Array" you can find further 
+    methods, that are so special, that they couldn't be associated to one 
+    of the operation types listed here. This list here will give you a 
+    survey only.
+    <ul>
+        <li>
+            <a href="group___create.html"><b>Creating Arrays</b></a><BR>
+            Methods for creating Arrays of different types
+            with or without content.
+        </li>
+        <li>
+            <a href="group___information.html"><b>Information Retrieval</b></a><BR>
+            Get some information about the used Arrays, such as
+            the number of elements or the size of the different dimensions.
+        </li>
+        <li>
+            <a href="group___resize.html"><b>Resizing Arrays</b></a><BR>
+            Dynamically change the size of Arrays.
+        </li>
+        <li>
+            <a href="group___extract.html"><b>Extracting Array elements:</b></a><BR>
+            Extract one or several elements stored in an Array.
+        </li>
+        <li>
+            <a href="group___copy.html"><b>Copying</b></a><BR>
+            Copy Arrays or parts of them.
+        </li>
+        <li>
+            <a href="group___assign.html"><b>Assigning values to an Array</b></a><BR>
+        </li>
+        <li>
+            <a href="group___add.html"><b>Adding content to an Array</b></a><BR>
+        </li>
+        <li>
+            <a href="group___del.html"><b>Removing content from an Array</b></a><BR>
+        </li>
+        <li>
+            <a href="group___in_out.html"><b>Input/Output of Arrays</b></a><BR>
+            Read in an Array from an input stream or write an Array's
+            content to an output stream.
+        </li>
+        <li>
+            <a href="group___compare.html"><b>Comparing Arrays</b></a><BR>
+            The contents of two Arrays is compared.
+        </li>
+        <li>
+            <a href="group___math.html"><b>Mathematic Functions</b></a><BR>
+            Many mathematic functions, such as logical or arithmetic
+            functions, matrix functions, etc.
+        </li>
+    </ul>
+    </p>
+
+*/
+
+//
+// The following comment lists all examples.
+//
+/*!
+
+	\example mean-var.cpp
+*/

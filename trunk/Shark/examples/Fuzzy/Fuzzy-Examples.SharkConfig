@@ -1,0 +1,5 @@
+<config name="Fuzzy-Examples" basedir="../..">
+	<project name="sugeno" type="executable" lib="Shark">
+		<source path="examples/Fuzzy" name="sugeno.cpp"></source>
+	</project>
+</config>

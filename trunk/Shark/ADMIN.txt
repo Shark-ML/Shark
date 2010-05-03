@@ -1,0 +1,228 @@
+
+Shark Administration Guide
+--------------------------
+
+
+This file documents all knowledge needed to administrate
+the Shark library, given you have access to a UNIX or LINUX
+computer. It covers the following topics:
+
+(1)       Sourceforge.net subversion repository
+(2)       Shark website at Sourceforge.net
+(3)       How to build a release version?
+(4)       SharkConfig build system
+(5)       Further tools
+
+
+
+(1)       Sourceforge.net subversion repository
+-----------------------------------------------
+
+The Shark files are deposited in an SVN repository located
+at sourceforge.net. For access to the archive you should
+make the following handy definitions in your .cshrc file:
+
+	setenv SVN_EDITOR /usr/bin/kate
+	alias svnco 'svn co https://shark-project.svn.sourceforge.net/svnroot/shark-project/ .'
+
+As a first step to work with the repository you must create
+a local working copy. Go to the directory of your choice and
+execute
+	svnco
+which creates a new directory "Shark" with the whole repository
+content.
+
+Insert a new source or header library file:
+	Place source files in src/<library>/
+	and header files in include/<library>/ .
+	Use "svn add" and "svn ci" to include the
+	file into the subversion repository.
+
+	For the Mixture library, create an entry
+	in the file src/Mixture/Mixture.SharkConfig
+	and check it in using svn ci.
+
+Change a source or header library file:
+	Use "svn ci" to archive the new version in
+	the subversion repository.
+
+Delete a source or header library file:
+	execute the sequence
+		rm <filename>
+		svn del <filename>
+		svn ci
+	in this order to delete the file locally
+	and remove it from the subversion repository.
+
+	For the Mixture library, remove the
+	corresponding entry from the file
+	Mixture/Mixture.SharkConfig and check it
+	in using "svn ci".
+
+Insert a new example file:
+	Place the source file in examples/<library>/ .
+	Use "svn add" and "svn ci" to include the file
+	into the subversion repository. Add entries to
+	the files
+	examples/<library>/<library>Examples.SharkConfig
+	src/<library>/Documentation (near end of file)
+	and check them in using "svn ci".
+
+Change an example file:
+	Use "svn ci" to archive the new version in
+	the subversion repository.
+
+Delete an example file:
+	execute the sequence
+		svn del <filename>
+		svn ci
+	in this order to delete the file locally
+	and remove it from the subversion repository.
+	Remove the corresponding entries from the files
+	examples/<library>/<library>Examples.SharkConfig
+	src/<library>/Documentation (near end of file)
+	and check them in using "svn add".
+
+All changes to the SVN repository are assigned a unique
+revision number. It is perfectly ok to perform several
+changes (svn add, svn del, change files) and then commit
+them all to the repositiry at one (svn ci). If you are
+not familiar with the svn client try typing "svn help"
+and have a look at commands like "svn help stat",
+"svn help log" or "svn help move" which can be very
+helpful.
+
+
+(2)       Shark website at Sourceforge.net
+------------------------------------------
+
+The website
+	http://shark-project.sourceforge.net/
+can be modified via ssh, for example:
+
+	ssh shark-admin@shark-project.sourceforge.net
+
+You can download and upload files easily via scp,
+for example with
+
+	scp shark-admin@shark-project.sourceforge.net:/home/groups/s/sh/shark-project/htdocs/index.html .
+
+The shell script makehomepage, which should be
+executed only after a successful run of makedoc,
+builds the homepage mainly from the documentation
+and uploads it to sourceforge.net.
+
+
+(3)       How to build a release version?
+-----------------------------------------
+
+Check out a copy of Shark and all addon packages from
+the subversion repository, e.g.:
+
+	svnco
+
+Change the version number in the configure.in file.
+In the Shark directory, do
+
+	make -f Makefile-SharkConfig
+	./SharkConfig
+
+to create all Makefile.in and Microsoft Developer Studio
+files needed to build the library and the examples.
+
+First you have to update the release notes
+"Release-Notes-tgz.txt".
+Then call the administration scripts
+
+	makedoc
+	makerights
+	makedistribution
+
+in this order to build a set of release archives.
+Extract the archives to a new folder and extensively
+test the library on all supported platforms. In
+particular check that the unit test passes without
+errors.
+
+If everything works, you are ready to upload a new
+release version to sourceforge.
+
+Surf to
+	http://shark-project.sourceforge.net/
+and to the RELEASE area. Log in as shark-admin
+and go to SHARK. Choose "File Releases" from the
+ADMIN menu.
+
+Upload the archives using the link
+	https://frs.sourceforge.net/webupload
+*****************************************************
+**  Exactly follow the instructions of the
+**  SourceForge "Guide to the Release System"
+*****************************************************
+
+Execute the shell script
+
+	makehomepage
+
+which will copy all content to the directory
+"./homepage". It will ask for the password of
+shark-admin@shark-project.sourceforge.net to
+automatically upload the files to sourceforge.
+NOTE: this feature seems to change regularly,
+      so be prepared for error messages :(
+
+
+(4)       SharkConfig build system
+----------------------------------
+
+To minimize the amount of administrative work
+the Shark library is maintained in a platform
+independent manner. Because Makefiles as well as
+Visual Studio workspace and project files are
+available, these have to be generated from a common
+source. This source are the *.SharkConfig files
+found in many directories of the Shark library.
+
+For details have a look at SharkConfig.cpp, which
+gives a minimal introduction to the syntax of the
+configuration files. Or just take a look at some
+of the *.SharkConfig files themselves, they are
+pretty much self explaining.
+
+Each time files are added or removed from the library
+the build system has to be notified. Instead of
+maintaining makefiles AND visual studio files you
+only need to maintain the corresponding *.SharkConfig
+file. This proceeding minimizes the risk of errors
+and inconsistencies. A further simplification is the
+possibility to use masks like "*.cpp" for the
+description of the file list making changes to the
+*.SharkConfig files unnecessary in most cases.
+
+
+
+(5)       Further tools
+-----------------------
+
+The following scripts are available:
+
+makeastyle          unify source formatting using the
+                    astyle utility (which must be
+                    available from the path)
+makedistclean       remove all Makefile.in and visual
+                    studio files
+makedoc             create the html documentation
+makerights          allow all users to read and the
+                    user group to write all files
+makedistribution    assemble all files to be included
+                    into a release version and create
+                    archives
+makehomepage        create a folder called homepage and
+                    copy the html documentation (which
+                    is assumed to exist, see makedoc)
+                    into this folder. Further, prepare
+                    the Shark main page.
+installShark        install Shark when it comes as a
+                    release version
+installAdmin        install Shark when it comes from
+                    the repository

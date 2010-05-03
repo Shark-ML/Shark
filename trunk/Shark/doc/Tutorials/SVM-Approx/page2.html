@@ -1,0 +1,113 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>The class SvmApproximation</h1>
+
+<p>
+	The approximation algorithm is hidden in the class SvmApproximation.
+	This class encapsulates an algorithm published in:
+</p>
+
+<div class="publication">
+Thorsten Suttorp and Christian Igel.
+<i>Resilient Approximation of Kernel Classifiers.</i>
+In J. Marques de Sá et al., eds., International Conference on Artificial Neural Networks (ICANN 2007),
+pp. 139-148, LNCS 4668, Springer-Verlag, 2007
+</div>
+
+<p>
+	To apply the algorithm to the SVM model, we first need an
+	SvmApproximation object. Then several parameters that influence the
+	internal optimization have to be set. These parameters control the
+	initial guess of support vector candidates and the optimization
+	algorithm. Usually the parameter can be set to the values below.
+</p>
+
+<pre><div class="code">    SvmApproximation approximateSVM(&amp;svm);
+
+    approximateSVM.setApproximationAlgorithm(SvmApproximation::iRpropPlus);
+    approximateSVM.setVectorGenerationMode(SvmApproximation::randomSelection);
+    approximateSVM.setApproximationTarget(SvmApproximation::noSVs);
+    approximateSVM.setNoGradientDescentIterations(100);
+</div></pre>
+
+<p>
+	The most important parameter is the maximum number of support
+	vectors to use for the approximation. Of course, a too small number
+	will destroy the accuracy, while a too large number unnecessarily
+	costs performance. Therefore it is good practice to try out several
+	values before an approximation is used. A value of 50 should be
+	sufficient for the chess board problem.
+</p>
+
+<pre><div class="code">    approximateSVM.setTargetNoVecsForApproximatedSVM(50);
+</div></pre>
+
+<p>
+	Now everything is in place. We call the SvmApproximation class to
+	find a good approximation of the given model and ask it for a
+	pointer to a new SVM object, as the algorithm leaves the original
+	model untouched.
+</p>
+
+<pre><div class="code">    approximateSVM.approximate();
+    SVM* approx = approximateSVM.getApproximatedSVM();
+</div></pre>
+
+<p>
+	With these additions the example now looks like this:
+</p>
+
+<pre><div class="code">#include &lt;ReClaM/ArtificialDistributions.h&gt;
+#include &lt;ReClaM/Dataset.h&gt;
+#include &lt;ReClaM/Svm.h&gt;
+#include &lt;ReClaM/ClassificationError.h&gt;
+<div class="newcode">#include &lt;ReClaM/SvmApproximation.h&gt;</div>
+
+int main(int argc, char** argv)
+{
+    Chessboard chess;
+    Dataset dataset(chess, 5000, 10000);
+
+    double C = 100.0;
+    double gamma = 1.0;
+
+    RBFKernel kernel(gamma);
+    SVM svm(&amp;kernel);
+    C_SVM csvm(&amp;svm, C, C);
+    SVM_Optimizer opt;
+
+    opt.init(csvm);
+
+    opt.optimize(svm,
+                    dataset.getTrainingData(),
+                    dataset.getTrainingTarget() );
+
+    ClassificationError err;
+    double e = err.error(svm,
+                         dataset.getTestData(),
+                         dataset.getTestTarget() );
+<div class="newcode">
+    SvmApproximation approximateSVM(&amp;svm);
+
+    approximateSVM.setApproximationAlgorithm(SvmApproximation::iRpropPlus);
+    approximateSVM.setVectorGenerationMode(SvmApproximation::randomSelection);
+    approximateSVM.setApproximationTarget(SvmApproximation::noSVs);
+    approximateSVM.setNoGradientDescentIterations(100);
+    approximateSVM.setTargetNoVecsForApproximatedSVM(50);
+
+    approximateSVM.approximate();
+    SVM* approx = approximateSVM.getApproximatedSVM();
+</div>
+    return EXIT_SUCCESS;
+}
+</div></pre>
+
+</body>
+
+</html>

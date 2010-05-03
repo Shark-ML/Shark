@@ -1,0 +1,32 @@
+<config name="MOO-EALib-Examples" basedir="../..">
+	<project name="MOGA" type="executable" lib="Shark">
+		<source path="examples/MOO-EALib" name="MOGA.cpp"></source>
+	</project>
+	<project name="NSGA2" type="executable" lib="Shark">
+		<source path="examples/MOO-EALib" name="NSGA2.cpp"></source>
+	</project>
+	<project name="PAES" type="executable" lib="Shark">
+		<source path="examples/MOO-EALib" name="PAES.cpp"></source>
+	</project>
+	<project name="VEGA" type="executable" lib="Shark">
+		<source path="examples/MOO-EALib" name="VEGA.cpp"></source>
+	</project>
+	<project name="NSGA2example" type="executable" lib="Shark">
+		<source path="examples/MOO-EALib" name="NSGA2example.cpp"></source>
+	</project>
+	<project name="RMMEDAtest" type="executable" lib="Shark">
+		<source path="examples/MOO-EALib" name="RMMEDAtest.cpp"></source>
+	</project>
+	<project name="realcoded-NSGA2" type="executable" lib="Shark">
+		<source path="examples/MOO-EALib" name="realcoded-NSGA2.cpp"></source>
+	</project>
+	<project name="fonMO-CMA" type="executable" lib="Shark">
+		<source path="examples/MOO-EALib" name="fonMO-CMA.cpp"></source>
+	</project>
+	<project name="fonSteadyStateMO-CMA" type="executable" lib="Shark">
+		<source path="examples/MOO-EALib" name="fonSteadyStateMO-CMA.cpp"></source>
+	</project>
+	<project name="HypervolumeBenchmark" type="executable" lib="Shark">
+		<source path="examples/MOO-EALib" name="HypervolumeBenchmark.cpp"></source>
+	</project>
+</config>

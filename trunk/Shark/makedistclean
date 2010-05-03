@@ -1,0 +1,12 @@
+#!/bin/sh
+echo "Cleaning distribution"
+
+cleandir()
+{
+	rm -f $1*.dsp $1*.dsw $1Makefile $1Makefile.in
+}
+
+cleandir ""
+cleandir "*/"
+cleandir "*/*/"
+cleandir "*/*/*/"

@@ -1,0 +1,617 @@
+%
+%%
+%% file: examples.tex
+%%
+%
+        \section{Examples}
+
+
+% -----------------------------------------------------------------------
+        \subsection{Canonical Genetic Algorithm}
+% -----------------------------------------------------------------------
+
+\begin{programlisting}{Canonical Genetic Algorithm solving the Counting Ones Problem}{
+    Canonical Genetic Algorithm solving counting ones problem.}
+\global\advance\numline by 5
+#include <EALib/PopulationT.h>\\
+\\
+using namespace std;\\
+\\
+//=======================================================================\\
+//\\
+// fitness function: counting ones problem\\
+//\\
+double ones( const vector< bool >& x )\\
+\{\\
+    unsigned i;\\
+    double   sum;\\
+    for( sum = 0., i = 0; i < x.size( ); sum += x[ i++ ] );\\
+    return sum;\\
+\}\\
+\\
+//=======================================================================\\
+//\\
+// main program\\
+//\\
+int main( int argc, char **argv )\\
+\{\\
+    //\\
+    // constants\\
+    //\\
+    const unsigned PopSize     = 20;\\
+    const unsigned Dimension   = 200;\\
+    const unsigned Iterations  = 1000;\\
+    const unsigned Interval    = 10;\\
+    const unsigned NElitists   = 1;\\
+    const unsigned Omega       = 5;\\
+    const unsigned CrossPoints = 2;\\
+    const double   CrossProb   = 0.6;\\
+    const double   FlipProb    = 1. / Dimension;\\
+\\
+    unsigned i, t;\\
+\\
+    //\\
+    // initialize random number generator\\
+    //\\
+    Rng::seed( argc > 1 ? atoi( argv[ 1 ] ) : 1234 );\\
+\\
+    //\\
+    // define populations\\
+    //\\
+    PopulationT<bool> parents   ( PopSize, ChromosomeT< bool >( Dimension ) );\\
+    PopulationT<bool> offsprings( PopSize, ChromosomeT< bool >( Dimension ) );\\
+\\
+    //\\
+    // scaling window\\
+    //\\
+    vector< double > window( Omega );\\
+\\
+    //\\
+    // maximization task\\
+    //\\
+    parents   .setMaximize( );\\
+    offsprings.setMaximize( );\\
+\\
+    //\\
+    // initialize all chromosomes of parent population\\
+    //\\
+    for( i = 0; i < parents.size( ); ++i )\\
+            parents[ i ][ 0 ].initialize( );\\
+\\
+    //\\
+    // evaluate parents (only needed for elitist strategy)\\
+    //\\
+    if( NElitists > 0 )\\
+        for( i = 0; i < parents.size( ); ++i )\\
+            parents[ i ].setFitness( ones(parents[ i ][ 0 ] ) );\\
+\\
+    //\\
+    // iterate\\
+    //\\
+    for( t = 0; t < Iterations; ++t ) \{\\
+        //\\
+        // recombine by crossing over two parents\\
+        //\\
+        offsprings = parents;\\
+        for( i = 0; i < offsprings.size( )-1; i += 2 )\\
+            if( Rng::coinToss( CrossProb ) )\\
+                offsprings[ i ][ 0 ]\\
+                    .crossover( offsprings[ i+1 ][ 0 ], CrossPoints );\\
+        //\\
+        // mutate by flipping bits\\
+        //\\
+        for( i = 0; i < offsprings.size( ); ++i )\\
+            offsprings[ i ][ 0 ].flip( FlipProb );\\
+        //\\
+        // evaluate objective function\\
+        //\\
+        for( i = 0; i < offsprings.size( ); ++i )\\
+            offsprings[ i ].setFitness( ones(offsprings[ i ][ 0 ] ) );\hspace{-10ex}\\
+        //\\
+        // scale fitness values and use proportional selection\\
+        //\\
+        offsprings.linearDynamicScaling( window, t );\\
+        parents.selectProportional( offsprings, NElitists );\\
+\\
+        //\\
+        // print out best value found so far\\
+        //\\
+        if( t % Interval == 0 )\\
+            cout << t << "$\backslash$tbest value = "\\
+                 << parents.best( ).fitnessValue( ) << endl;\\
+    \}\\
+\}\\
+\end{programlisting}
+
+\begin{programlisting}{Canonical Genetic Algorithm minimizing the Sphere Model}{
+    Canonical Genetic Algorithm minimizing the sphere model.}
+#include <SharkDefs.h>\\
+#include <EALib/PopulationT.h>\\
+\\
+using namespace std;\\
+\\
+//=======================================================================\\
+//\\
+// fitness function: sphere model\\
+//\\
+double sphere( const vector< double >& x )\\
+\{\\
+    unsigned i;\\
+    double   sum;\\
+    for( sum = 0., i = 0; i < x.size( ); i++ )\\
+        sum += Shark::sqr( x[ i ] );\\
+    return sum;\\
+\}\\
+\\
+//=======================================================================\\
+//\\
+// main program\\
+//\\
+int main( int argc, char **argv )\\
+\{\\
+    //\\
+    // constants\\
+    //\\
+    const unsigned PopSize     = 50;\\
+    const unsigned Dimension   = 20;\\
+    const unsigned NumOfBits   = 10;\\
+    const unsigned ChromLen    = Dimension * NumOfBits;\\
+    const unsigned Iterations  = 2000;\\
+    const unsigned DspInterval = 10;\\
+    const unsigned NElitists   = 1;\\
+    const unsigned Omega       = 5;\\
+    const unsigned CrossPoints = 2;\\
+    const double   CrossProb   = 0.6;\\
+    const double   FlipProb    = 1. / ChromLen;\\
+    const bool     UseGrayCode = true;\\
+    const Interval RangeOfValues( -3, +5 );\\
+\\
+    unsigned i, t;\\
+\\
+    //\\
+    // initialize random number generator\\
+    //\\
+    Rng::seed( argc > 1 ? atoi( argv[ 1 ] ) : 1234 );\\
+\\
+    //\\
+    // define populations\\
+    //\\
+    PopulationT<bool> parents   ( PopSize, ChromosomeT< bool >( ChromLen ) );\\
+    PopulationT<bool> offsprings( PopSize, ChromosomeT< bool >( ChromLen ) );\\
+\\
+    //\\
+    // scaling window\\
+    //\\
+    vector< double > window( Omega );\\
+\\
+    //\\
+    // temporary chromosome for decoding\\
+    //\\
+    ChromosomeT< double > dblchrom;\\
+\\
+    //\\
+    // minimization task\\
+    //\\
+    parents   .setMinimize( );\\
+    offsprings.setMinimize( );\\
+\\
+    //\\
+    // initialize all chromosomes of parent population\\
+    //\\
+    for( i = 0; i < parents.size( ); ++i )\\
+        parents[ i ][ 0 ].initialize( );\\
+\\
+    //\\
+    // evaluate parents (only needed for elitist strategy)\\
+    //\\
+    if( NElitists > 0 )\\
+        for( i = 0; i < parents.size( ); ++i ) \{\\
+            dblchrom.decodeBinary( parents[ i ][ 0 ], RangeOfValues,\\
+                                   NumOfBits, UseGrayCode );\\
+            parents[ i ].setFitness( sphere( dblchrom ) );\\
+        \}\\
+\\
+    //\\
+    // iterate\\
+    //\\
+    for( t = 0; t < Iterations; ++t ) \{\\
+        //\\
+        // recombine by crossing over two parents\\
+        //\\
+        offsprings = parents;\\
+        for( i = 0; i < offsprings.size( )-1; i += 2 )\\
+            if( Rng::coinToss( CrossProb ) )\\
+                offsprings[ i ][ 0 ]\\
+                  .crossover( offsprings[ i+1 ][ 0 ], CrossPoints );\\
+\\
+        //\\
+        // mutate by flipping bits\\
+        //\\
+        for( i = 0; i < offsprings.size( ); ++i )\\
+            offsprings[ i ][ 0 ].flip( FlipProb );\\
+\\
+        //\\
+        // evaluate objective function\\
+        //\\
+        for( i = 0; i < offsprings.size( ); ++i ) \{\\
+            dblchrom.decodeBinary( offsprings[ i ][ 0 ], RangeOfValues,\\
+                                   NumOfBits, UseGrayCode );\\
+            offsprings[ i ].setFitness( sphere( dblchrom ) );\\
+        \}\\
+\\
+        //\\
+        // scale fitness values and use proportional selection\\
+        //\\
+        offsprings.linearDynamicScaling( window, t );\\
+        parents.selectProportional( offsprings, NElitists );\\
+\\
+        //\\
+        // print out best value found so far\\
+        //\\
+        if( t % DspInterval == 0 )\\
+            cout << t << "$\backslash$tbest value = "\\
+                 << parents.best( ).fitnessValue( ) << endl;\\
+    \}\\
+\}\\
+\end{programlisting}
+
+\clearpage
+\subsection{Steady-State Genetic Algorithm}
+
+\begin{programlisting}{Steady--State Genetic Algorithm solving the Counting Ones Problem}{
+    Steady--State Genetic Algorithm solving the counting ones problem.}
+\global\advance\numline by 3
+#include <SharkDefs.h>\\
+#include <EALib/PopulationT.h>\\
+\\
+using namespace std;\\
+\\
+//=======================================================================\\
+//\\
+// fitness function: sphere model\\
+//\\
+double sphere( const vector< double >& x )\\
+\{\\
+    unsigned i;\\
+    double   sum;\\
+    for( sum = 0., i = 0; i < x.size( ); i++ )\\
+        sum += Shark::sqr( x[ i ] );\\
+    return sum;\\
+\}\\
+\\
+//=======================================================================\\
+//\\
+// main program\\
+//\\
+int main( int argc, char **argv )\\
+\{\\
+    //\\
+    // constants\\
+    //\\
+    const unsigned PopSize     = 50;\\
+    const unsigned Dimension   = 20;\\
+    const unsigned NumOfBits   = 10;\\
+    const unsigned Iterations  = 15000;\\
+    const unsigned DspInterval = 100;\\
+    const unsigned Omega       = 5;\\
+    const unsigned CrossPoints = 2;\\
+    const double   CrossProb   = 0.6;\\
+    const double   FlipProb    = 1. / ( Dimension * NumOfBits );\\
+    const bool     UseGrayCode = true;\\
+    const Interval RangeOfValues( -3, +5 );\\
+\\
+    unsigned i, t;\\
+\\
+    //\\
+    // initialize random number generator\\
+    //\\
+    Rng::seed( argc > 1 ? atoi( argv[ 1 ] ) : 1234 );\\
+\\
+    //\\
+    // define populations\\
+    //\\
+    IndividualT<bool> kid( ChromosomeT< bool >( Dimension * NumOfBits ) );\\
+    PopulationT<bool> pop( PopSize, kid );\\
+\\
+    //\\
+    // scaling window\\
+    //\\
+    vector< double > window( Omega );\\
+\\
+    //\\
+    // temporary chromosome for decoding\\
+    //\\
+    ChromosomeT< double > dblchrom;\\
+\\
+    //\\
+    // minimization task\\
+    //\\
+    pop.setMinimize( );\\
+\\
+    //\\
+    // initialize all chromosomes of the population\\
+    //\\
+    for( i = 0; i < pop.size( ); ++i ) \{\\
+        pop[ i ][ 0 ].initialize( );\\
+        dblchrom.decodeBinary( pop[ i ][ 0 ], RangeOfValues,\\
+                               NumOfBits, UseGrayCode );\\
+        pop[ i ].setFitness( sphere( dblchrom ) );\\
+    \}\\
+\\
+    //\\
+    // iterate\\
+    //\\
+    for( t = 0; t < Iterations; ++t ) \{\\
+        //\\
+        // scale fitness values and use proportional selection\\
+        //\\
+        pop.linearDynamicScaling( window, t );\\
+\\
+        //\\
+        // recombine by crossing over two parents\\
+        //\\
+        if( Rng::coinToss( CrossProb ) )\\
+            kid[ 0 ].crossover( pop.selectOneIndividual( )[ 0 ],\\
+                                pop.selectOneIndividual( )[ 0 ],\\
+                                CrossPoints );\\
+        else\\
+            kid = pop.selectOneIndividual( );\\
+\\
+        //\\
+        // mutate by flipping bits\\
+        //\\
+        kid[ 0 ].flip( FlipProb );\\
+\\
+        //\\
+        // evaluate objective function\\
+        //\\
+        dblchrom.decodeBinary( kid[ 0 ], RangeOfValues,\\
+                               NumOfBits, UseGrayCode );\\
+        kid.setFitness( sphere( dblchrom ) );\\
+\\
+        //\\
+        // replace the worst individual in the population\\
+        //\\
+        pop.worst( ) = kid;\\
+\\
+        //\\
+        // print out best value found so far\\
+        //\\
+        if( t % DspInterval == 0 )\\
+            cout << t << "$\backslash$tbest value = "\\
+                 << pop.best( ).fitnessValue( ) << endl;\\
+    \}\\
+\}\\
+\end{programlisting}
+
+\clearpage
+\subsection{Canonical Evolution Strategy}
+
+\begin{programlisting}{Canonical Evolution Strategy which Minimizes Ackley's Function}{
+    Canonical Evolution Strategy which minimizes Ackley's function.
+    The flag ``PlusStrategy'' is used to switch between $(\mu,\lambda)$
+    and $(\mu+\lambda)$ selection.}
+\global\advance\numline by 3
+#include <SharkDefs.h>\\
+#include <EALib/PopulationT.h>\\
+\\
+using namespace std;\\
+\\
+//=======================================================================\\
+//\\
+// fitness function: Ackley's function\\
+//\\
+double ackley( const vector< double >& x )\\
+\{\\
+    const double A = 20.;\\
+    const double B = 0.2;\\
+    const double C = M_2PI;\\
+\\
+    unsigned i, n;\\
+    double   a, b;\\
+\\
+    for( a = b = 0., i = 0, n = x.size( ); i < n; ++i ) \{\\
+        a += x[ i ] * x[ i ];\\
+        b += cos( C * x[ i ] );\\
+    \}\\
+\\
+    return -A * exp( -B * sqrt( a / n ) ) - exp( b / n ) + A + M_E;\\
+\}\\
+\\
+//=======================================================================\\
+//\\
+// main program\\
+//\\
+int main( int argc, char **argv )\\
+\{\\
+    //\\
+    // constants\\
+    //\\
+    const unsigned Mu           = 15;\\
+    const unsigned Lambda       = 100;\\
+    const unsigned Dimension    = 30;\\
+    const unsigned Iterations   = 500;\\
+    const unsigned Interval     = 10;\\
+    const unsigned NSigma       = 1;\\
+\\
+    const double   MinInit      = -3;\\
+    const double   MaxInit      = +15;\\
+    const double   SigmaInit    = 3;\\
+\\
+    const bool     PlusStrategy = false;\\
+\\
+    unsigned       i, t;\\
+\\
+    //\\
+    // initialize random number generator\\
+    //\\
+    Rng::seed( argc > 1 ? atoi( argv[ 1 ] ) : 1234 );\\
+\\
+    //\\
+    // define populations\\
+    //\\
+    PopulationT<double> parents   ( Mu,     ChromosomeT< double >( Dimension ),\\
+                                            ChromosomeT< double >( NSigma    ) );\\
+    PopulationT<double> offsprings( Lambda, ChromosomeT< double >( Dimension ),\\
+                                            ChromosomeT< double >( NSigma    ) );\\
+\\
+    //\\
+    // minimization task\\
+    //\\
+    parents   .setMinimize( );\\
+    offsprings.setMinimize( );\\
+\\
+    //\\
+    // initialize parent population\\
+    //\\
+    for( i = 0; i < parents.size( ); ++i ) \{\\
+       parents[ i ][ 0 ].initialize( MinInit,   MaxInit   );\\
+       parents[ i ][ 1 ].initialize( SigmaInit, SigmaInit );\\
+    \}\\
+\\
+    //\\
+    // selection parameters (number of elitists)\\
+    //\\
+    unsigned numElitists = PlusStrategy ? Mu : 0;\\
+\\
+    //\\
+    // standard deviations for mutation of sigma\\
+    //\\
+    double     tau0 = 1. / sqrt( 2. * Dimension );\\
+    double     tau1 = 1. / sqrt( 2. * sqrt( ( double )Dimension ) );\\
+\\
+    //\\
+    // evaluate parents (only needed for elitist strategy)\\
+    //\\
+    if( PlusStrategy )\\
+        for( i = 0; i < parents.size( ); ++i )\\
+            parents[ i ].setFitness( ackley(parents[ i ][ 0 ] ) );\\
+\\
+    //\\
+    // iterate\\
+    //\\
+    for( t = 0; t < Iterations; ++t ) \{\\
+        //\\
+        // generate new offsprings\\
+        //\\
+        for( i = 0; i < offsprings.size( ); ++i ) \{\\
+            //\\
+            // select two random parents\\
+            //\\
+            Individual& mom = parents.random( );\\
+            Individual& dad = parents.random( );\\
+\\
+            //\\
+            // recombine object variables discrete,\\
+            // step sizes intermediate\\
+            //\\
+            offsprings[ i ][ 0 ].recombineDiscrete       ( mom[ 0 ], dad[ 0 ] );\\
+            offsprings[ i ][ 1 ].recombineGenIntermediate( mom[ 1 ], dad[ 1 ] );\\
+\\
+            //\\
+            // mutate object variables normal distributed,\\
+            // step sizes log normal distributed\\
+            //\\
+            offsprings[ i ][ 1 ].mutateLogNormal( tau0,  tau1 );\\
+            offsprings[ i ][ 0 ].mutateNormal   ( offsprings[ i ][ 1 ], true );\\
+        \}\\
+\\
+        //\\
+        // evaluate objective function (parameters in chromosome #0)\\
+        //\\
+        for( i = 0; i < offsprings.size( ); ++i )\\
+            offsprings[ i ].setFitness( ackley(offsprings[ i ][ 0 ] ) );\\
+\\
+        //\\
+        // select (mu,lambda) or (mu+lambda)\\
+        //\\
+        parents.selectMuLambda( offsprings, numElitists );\\
+\\
+        //\\
+        // print out best value found so far\\
+        //\\
+        if( t % Interval == 0 )\\
+            cout << t << "$\backslash$tbest value = "\\
+                 << parents.best( ).fitnessValue( ) << endl;\\
+    \}\\
+\}\\
+\end{programlisting}
+
+\clearpage
+\subsection{Covariance Matrix Adaptation  Evolution Strategy}\label{ex:cma}
+
+\begin{programlisting}{Covariance Matrix Adaptation  Evolution Strategy (CMA-ES)}{Covariance Matrix Adaptation  Evolution Strategy (CMA-ES).}
+\global\advance\numline by 3
+#include <EALib/CMA.h>\\
+    \vdots\\
+// EA parameters\\
+CMA cma;\\
+\\
+const unsigned Iterations     = 1000;\\
+const double   MinInit        = 1.;\\
+const double   MaxInit        = 1.;\\
+const double   GlobalStepInit = 1.;\\
+\\
+unsigned Lambda             = cma.suggestLambda(Dimension);\\
+unsigned Mu                 = cma.suggestMu(Lambda);\\
+\\
+// define populations for minimization task\\
+Population parents (Mu,     \\
+                    ChromosomeT< double >( Dimension ),\\
+                    ChromosomeT< double >( Dimension ));\\
+Population offsprings (Lambda,     \\
+                       ChromosomeT< double >( Dimension ),\\
+                       ChromosomeT< double >( Dimension ));\\
+offsprings.setMinimize( );\\
+parents   .setMinimize( );\\
+\\
+// initialize parent populations center of gravity\\
+for(i = 0; i < parents.size( ); ++i ) \\
+  static_cast< ChromosomeT< double >\& >( parents[0][0] ).\\
+    initialize(MinInit, MaxInit);\\
+for(j = 1; j < parents.size( ); ++j ) \\
+  static_cast< ChromosomeT< double >\& >(parents[j][0]) =\\
+    static_cast< ChromosomeT< double >\& >(parents[0][0]);\\
+\\
+// strategy parameters\\
+vector< double > variance( Dimension );\\
+for(i = 0; i < Dimension; i++) variance[i] = 1.;\\
+\\
+cma.init(Dimension, variance, GlobalStepInit, parents,\\
+         CMA::superlinear, CMA::rankmu); \\
+// the previous three lines are equal to \\
+//\\
+// cma.init(Dimension, 1., parents);\\
+//\\
+// but demonstrates initialization with different variances\\
+    \vdots\\
+//\\
+// iterate\\
+//\\
+for( unsigned t = 0; t < Iterations; ++t ) \{\\
+  for(unsigned k = 0; k < offsprings.size( ); k++ ) \{\\
+    cma.create(offsprings[k]);\\
+    offsprings[k].setFitness(myfitness(offsprings[k]));\\
+  \}\\
+\\
+  // select (mu,lambda) or (mu+lambda)\\
+\\
+  parents.selectMuLambda(offsprings, 0u);\\
+\\
+  // update strategy parameters\\
+  cma.updateStrategyParameters(parents);\\
+\}\\
+    \vdots\\
+\end{programlisting}
+
+
+
+
+
+
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "EALib-standalone"
+%%% End: 

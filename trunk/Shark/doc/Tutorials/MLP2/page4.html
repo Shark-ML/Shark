@@ -1,0 +1,135 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>Producing Fast, Independent Source Code from the Network</h1>
+
+<p>
+	In the last part of this tutorial, we want to
+	list the complete example program augmented 
+	with an additional gimmick, which is only available for
+	feed-forward perceptron networks, namely to generate source
+	code from the trained network. The allows for maximum efficiency
+	and independence of an application. 
+</p>
+
+<pre><div class="code">#include &lt;ReClaM/FFNet.h><div class="newcode">#include &lt;ReClaM/FFNetSource.h></div>#include &lt;ReClaM/Rprop.h>
+#include &lt;ReClaM/MeanSquaredError.h>
+#include &lt;ReClaM/createConnectionMatrix.h>
+
+class MyNet : public FFNet {
+public:
+  MyNet(unsigned i, unsigned o, const Array&lt;int&gt; c) : FFNet(i, o, c) {};
+  double g(double a) {
+    return tanh(a);
+  }
+  double dg(double ga) {
+    return 1 - ga * ga;
+  }
+  double gOutput(double a) {
+    return a;
+  }double dgOutput(double ga) {
+    return 1.;
+  }
+};
+
+int main()
+{
+  unsigned i, t; // just index variables
+  double x, y;
+
+  // construct sinc problem
+  const unsigned numberTrainingPatterns = 50;
+  Array&lt;double> trainInput (numberTrainingPatterns, 1);
+  Array&lt;double> trainTarget(numberTrainingPatterns, 1);	
+  Array&lt;double> valInput(numberValPatterns, 1);
+  Array&lt;double> valTarget(numberValPatterns, 1);
+  for(i=0; i&lt;numberTrainingPatterns; i++) {
+    x = Rng::uni(-10., 10);
+    y = sin(x)/x + Rng::gauss(0, 0.001);
+    trainInput(i, 0)  = x;
+    trainTarget(i, 0) = y;
+    x = Rng::uni(-10., 10);
+    y = sin(x)/x;
+    valInput(i, 0)  = x;
+    valTarget(i, 0) = y;
+  } 
+
+  // define topology unsigned 
+  unsigned inputs = 1; 
+  unsigned firstHiddenLayer = 3; 
+  unsigned secondHiddenLayer = 2; 
+  unsigned outputs = 1;
+
+  Array&lt;int&gt; con;
+  createConnectionMatrix(con, inputs, 
+                         firstHiddenLayer, secondHiddenLayer, outputs);
+
+  // feed-forward neural network
+  MyNet net(inputs, outputs, con);
+
+  // error function
+  MeanSquaredError error;
+  // optimizer
+  IRpropPlus optimizer;
+  optimizer.init(net);
+
+  // initialize the weights uniformly between -0.1 and 0.1
+  net.initWeights(-0.1, 0.1);
+
+  std::ofstream trajectory("trajectory");
+  // training loop
+  unsigned numberOfLearningCycles = 1000;
+  for (t = 1; t &lt;= numberOfLearningCycles; t++) {
+    // train the network
+    optimizer.optimize(net, error, trainInput, trainTarget);
+		
+    // write results
+    trajectory &lt;&lt;  t &lt;&lt; "\t" &lt;&lt; error.error(net, trainInput, trainTarget) 
+               &lt;&lt; "\t" &lt;&lt; error.error(net, valInput, valTarget) &lt;&lt; std::endl;
+  }
+  trajectory.close();
+<div class="newcode">  // output network as source code
+  FFNetSource(std::cout, inputs, outputs, con, net.getWeights(), 
+              "tanh(#)", "#", 10);
+</div>
+  return EXIT_SUCCESS;
+}
+</div></pre>
+<p>
+The first argument of <tt>FFNetSource</tt> specifies the output, the
+next four specify the neural network. Then an expression for the
+transfer function of the hidden neurons is given, where "#" stands for
+the argument of the transfer function, followed by the corresponding
+expression for the transfer function of the output neurons (here the
+outputs are linear, thus the expression is simply the identity
+"#"). The final number specifies the accuracy of the representation of the
+real-valued weights. The output may look like this:
+</p>
+<div class="shell"> void model(double *in, double *out) {<br>
+  double z0 = in[0];
+  double z1 = z0 * -0.8054949678 + -1.643851915;
+  z1 = tanh(z1);
+  double z2 = z0 * -0.6811683258 + 2.150346261;
+  z2 = tanh(z2);
+  double z3 = z0 * 0.06001496795 + -0.1202703273;
+  z3 = tanh(z3);
+  double z4 = z0 * -0.2391504809 + z1 * 0.02241712828 + 
+              z2 * -1.030013348 + z3 * -5.521287379 + 1.340819759;
+  z4 = tanh(z4);
+  double z5 = z0 * -0.4692993651 + z1 * 0.9494228833 + z2 * 1.11009148 + 
+              z3 * -7.631227375 + 0.3816064369;
+  z5 = tanh(z5);
+  out[0] = z0 * -0.06361101954 + z1 * -0.7176450879 + z2 * 0.2249994649 + 
+           z3 * -0.04663457985 + z4 * -0.5492966502 + z5 * 0.4781054759 + 
+           0.09322551791;
+};
+</div>
+
+</body>
+
+</html>

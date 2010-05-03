@@ -1,0 +1,88 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>Defining a Noisy Learning Problem</h1>
+
+<p>
+	This is the second part of the tutorial on training feed-forward
+	neural networks. It is recommended to read the first part beforehand.
+</p>
+
+<p>
+	Here, we consider a regression problem, namely to learn
+	the sinc function <i>y</i>=sin(<i>x</i>)/<i>x</i>. First,
+	let us define the problem by constructing the training data.
+</p>
+<pre><div class="code">#include &lt;Array/Array.h&gt;
+#include &lt;Rng/GlobalRng.h>
+
+int main()
+{
+  unsigned i, t; // just index variables
+  double x, y;
+
+  // construct sinc problem
+  const unsigned numberTrainingPatterns = 50;
+  Array&lt;double> trainInput (numberTrainingPatterns, 1);
+  Array&lt;double> trainTarget(numberTrainingPatterns, 1);
+  for(i=0; i&lt;numberTrainingPatterns; i++) {
+    x = Rng::uni(-10., 10);
+    trainInput(i, 0)  = x;
+    trainTarget(i, 0) = sin(x)/x;
+  } 
+
+  return EXIT_SUCCESS;
+}
+</div></pre>
+
+<p>
+	Here, <tt>Rng::uni(l, u)</tt> returns a 
+	real-valued random number draw uniformly from the interval
+	[<i>l</i>,<i>u</i>] from the global random number generator
+	(<tt>#include &lt;Rng/GlobalRng.h></tt>).
+</p>
+
+<p>
+	We want to consider two separate data sets for training and
+	validation. The training set should be noisy.
+</p>
+<pre><div class="code">#include &lt;Array/Array.h&gt;
+#include &lt;Rng/GlobalRng.h>
+
+int main()
+{
+  unsigned i, t; // just index variables
+  double x, y;
+
+  // construct sinc problem
+  const unsigned numberTrainingPatterns = 50;
+  Array&lt;double> trainInput (numberTrainingPatterns, 1);
+  Array&lt;double> trainTarget(numberTrainingPatterns, 1);	<div class="newcode">  Array&lt;double&gt; valInput(numberValPatterns, 1);
+  Array&lt;double> valTarget(numberValPatterns, 1);</div>
+  for(i=0; i&lt;numberTrainingPatterns; i++) {
+    x = Rng::uni(-10., 10);
+		<div class="newcode">    y = sin(x)/x + Rng::gauss(0, 0.001);</div>    trainInput(i, 0)  = x;
+    trainTarget(i, 0) = y;
+		<div class="newcode">    x = Rng::uni(-10., 10);
+    y = sin(x)/x;
+    valInput(i, 0)  = x;
+    valTarget(i, 0) = y;</div>  } 
+
+  return EXIT_SUCCESS;
+}
+</div></pre>
+<p>
+	Here we added normally distributed noise to the target patterns used
+	for training.  The first argument of <tt>Rng::gauss(m, v)</tt>
+	determines the mean, the second the variance of the Gaussian
+	distribution.
+</p>
+
+</body>
+
+</html>

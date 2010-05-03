@@ -1,0 +1,119 @@
+<html>
+
+<head>
+	<link type="text/css" rel="stylesheet" href="../../css/main.css">
+</head>
+
+<body>
+
+<h1>Non-Linear Fit</h1>
+<p>
+	As the underlying data are non-linear we should try a non-linear
+	model to achieve a better fit. For this purpose we will use a feed
+	forward neural network with an ad-hoc chosen architecture of one
+	input, one output, 10 hidden neurons in a hidden layer, and a bias
+	neuron, fully connected.
+	We will stick to the mean squared error and the Rprop algorithm and
+	only replace the affine linear model with the neural network.
+	(For an introduction to neural network programming consult the
+	<a target="_parent" href="../MLP/index.html">Neural Network</a>
+	tutorial.)
+</p>
+
+<pre><div class="code">#include &lt;iostream&gt;
+#include &lt;Rng/GlobalRng.h&gt;
+#include &lt;ReClaM/Dataset.h&gt;
+#include &lt;ReClaM/MeanSquaredError.h&gt;
+#include &lt;ReClaM/Rprop.h&gt;
+<div class="newcode">#include &lt;ReClaM/FFNet.h&gt;
+#include &lt;ReClaM/createConnectionMatrix.h&gt;
+</div>
+class MyProblem : public DataSource
+{
+public:
+    MyProblem()
+    {
+        dataDim = 1;
+        targetDim = 1;
+    }
+
+    bool GetData(Array&lt;double&gt;&amp; data, Array&lt;double&gt;&amp; target, int count)
+    {
+        data.resize(count, 1, false);
+        target.resize(count, 1, false);
+        int i;
+        for (i=0; i&lt;count; i++)
+        {
+            double x = Rng::uni(0.0, 1.0);
+            double y = x * x + Rng::gauss(0.0, 0.01);
+            data(i, 0) = x;
+            target(i, 0) = y;
+        }
+        return true;
+    }
+};
+
+int main(int argc, char** argv)
+{
+    MyProblem problem;
+    Dataset dataset(problem, 100, 1000);
+<div class="newcode">
+    Array&lt;int&gt; con;
+    createConnectionMatrix(con, 1, 10, 1);
+    FFNet model(1, 1, con);
+    model.initWeights(-0.1, 0.1);
+</div>
+    MeanSquaredError    mse;
+    IRpropPlus optimizer;
+
+    int iter;
+    optimizer.init(model);
+    for (iter=0; iter&lt;100; iter++)
+    {
+        optimizer.optimize(model, mse, dataset.getTrainingData(),
+                                       dataset.getTrainingTarget());
+    }
+
+    double e = mse.error(model, dataset.getTestData(),
+                                dataset.getTestTarget());
+    std::cout &lt;&lt; &quot;test MSE: &quot; &lt;&lt; e &lt;&lt; std::endl;
+}
+</div></pre>
+
+<p>
+	The new code basically constructs and initializes the network model.
+	The rest of the code remains exactly as it was! Thus, we exchanged
+	only the model and kept the error function and the optimizer, and
+	the program still compiles. The fit achieves a test MSE of about
+	0.01 which is better than the linear fit, as the network has the
+	flexibility needed to model the underlying quadratic function quite
+	well.
+</p>
+
+<h2>Exchanging Other Components</h2>
+<p>
+	For example, we could (why not?) want to switch to evolutionary
+	training of the network weights. This is equally simple, as we just
+	pick the CMA evolution strategy and plug it in as an optimizer.
+	First we need to include the corresponding header
+</p>
+
+<pre><div class="code">#include &lt;ReClaM/CMAOptimizer.h&gt;
+</div></pre>
+
+<p>
+	and then we just replace the <tt>IRpropPlus</tt> class with the
+	<tt>CMAOptimizer</tt> class.
+</p>
+
+<pre><div class="code">    CMAOptimizer optimizer;
+</div></pre>
+
+<p>
+	The exchange of the error measure would be equally simple if we had
+	a better candidate than the mean squared error.
+</p>
+
+</body>
+
+</html>
