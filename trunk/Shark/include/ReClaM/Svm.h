@@ -918,21 +918,38 @@ class CrammerSingerMcSVM : public MetaSVM
 {
 public:
 	//! Constructor
-	//!
-	//! \par
-	//! The parameter \f$ \beta \f$ (roughly)
-	//! corresponds to 2/C in other machines.
-	CrammerSingerMcSVM(MultiClassSVM* pSVM, double beta);
+	CrammerSingerMcSVM(MultiClassSVM* pSVM, double C, bool unconstrained = false);
 
 	//! Destructor
 	~CrammerSingerMcSVM();
 
 
-	inline double get_beta() { return parameter(0); }
-	inline void set_beta(double beta) { setParameter(0, beta); }
+	//! get the regularization constant
+	inline double get_C()
+	{
+		if (exponential) return exp(parameter(0));
+		else return parameter(0);
+	}
 
-	//! ensure beta is positive
+	//! set the regularization constant
+	inline void set_C(double C)
+	{
+		if (exponential) setParameter(0, log(C));
+		else setParameter(0, C);
+	}
+
+	//! return true if the exponential function is used to parameterize C
+	inline bool isUnconstrained()
+	{
+		return exponential;
+	}
+
+	//! ensure C is positive
 	bool isFeasible();
+
+protected:
+	//! is C stored as log(C)?
+	bool exponential;
 };
 
 
@@ -1189,9 +1206,6 @@ protected:
 
 	//! gamma parameter of the regularization network
 	double gamma;
-
-	//! beta parameter of the crammer and singler SVM
-	double beta;
 
 	//! Fraction of outliers for One-Class SVM XXX
 	double fractionOfOutliers;

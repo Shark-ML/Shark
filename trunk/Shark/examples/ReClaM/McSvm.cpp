@@ -41,10 +41,10 @@
 
 
 // definition of a simple test problem
-class MultiClassTestProblem : public DataSource
+class TestProblem : public DataSource
 {
 public:
-	MultiClassTestProblem(unsigned int classes = 5, double variance = 1.0)
+	TestProblem(unsigned int classes = 5, double variance = 1.0)
 	{
 		this->classes = classes;
 		this->variance = variance;
@@ -53,7 +53,7 @@ public:
 		targetDim = 1;				// output is just a single number in {0, ..., classes-1}
 	}
 
-	~MultiClassTestProblem() { }
+	~TestProblem() { }
 
 
 	bool GetData(Array<double>& data, Array<double>& target, int count)
@@ -65,8 +65,8 @@ public:
 		for (i=0; i<count; i++)
 		{
 			c = Rng::discrete(0, classes - 1);
-			data(i, 0) = 2.0 * cos(c * M_2PI / classes) + Rng::gauss(0.0, variance);
-			data(i, 1) = 2.0 * sin(c * M_2PI / classes) + Rng::gauss(0.0, variance);
+			data(i, 0) = 2.0 * cos((c * M_2PI) / classes) + Rng::gauss(0.0, variance);
+			data(i, 1) = 2.0 * sin((c * M_2PI) / classes) + Rng::gauss(0.0, variance);
 			target(i, 0) = (double)c;
 		}
 
@@ -84,19 +84,19 @@ int main(int argc, char* argv[])
 	printf("\nMulti class support vector machine example program\n");
 
 	// define the test problem
-	unsigned int classes = 5;		// number of classes
-	double variance = 4.0;			// noise variance
-	MultiClassTestProblem source(classes, variance);
+	unsigned int classes = 6;		// number of classes
+	double variance = 1.0;			// noise variance
+	TestProblem source(classes, variance);
 
 	// sample training and test dataset
 	Dataset dataset(source, 500, 10000);
 
 	// setup the kernel and the classifiers
 	RBFKernel kernel(0.5);
-	MultiClassSVM aio_svm(&kernel, classes, true);
-	MultiClassSVM cs_svm(&kernel, classes, true);
-	MultiClassSVM ova_svm(&kernel, classes, true);
-	MultiClassSVM occ_svm(&kernel, classes, true);
+	MultiClassSVM aio_svm(&kernel, classes);
+	MultiClassSVM cs_svm(&kernel, classes);
+	MultiClassSVM ova_svm(&kernel, classes);
+	MultiClassSVM occ_svm(&kernel, classes);
 
 	// train the machines
 	printf("\nMACHINE TRAINING\n");
@@ -111,8 +111,8 @@ int main(int argc, char* argv[])
 	}
 	{
 		printf("training crammer & singer machine ..."); fflush(stdout);
-		double beta = 2.0 / 0.01;
-		CrammerSingerMcSVM meta(&cs_svm, beta);
+		double C = 0.01;
+		CrammerSingerMcSVM meta(&cs_svm, C);
 		SVM_Optimizer svmopt;
 		svmopt.init(meta);
 		svmopt.optimize(cs_svm, dataset.getTrainingData(), dataset.getTrainingTarget());

@@ -805,7 +805,7 @@ public:
 					const Array<double>& lower,
 					const Array<double>& upper,
 					Array<double>& solutionVector,
-					double eps);
+					double eps = 0.001);
 
 	//! Return the number of iterations used to solve the problem
 	inline SharkInt64 iterations()
@@ -842,11 +842,11 @@ protected:
 	{
 		unsigned int index = 0;
 		if (yi == yj) index += 1;
-		if (yi == vi) index += 2;
+		if (vi == vj) index += 2;
 		if (yi == vj) index += 4;
 		if (yj == vi) index += 8;
-		if (yj == vj) index += 16;
-		if (vi == vj) index += 32;
+		if (yi == vi) index += 16;
+		if (yj == vj) index += 32;
 		return m_modifier[index];
 	}
 
@@ -967,45 +967,46 @@ protected:
 
 
 //!
-//! \brief Quadratic program solver for the multi class
-//!        SVM proposed by Crammer and Singer
+//! \brief Quadratic program solver for multi class SVMs
+//!        with sum-to-zero constraint
 //!
 //! \par
-//! This algorithm solves the same quadratic program introduced in:
+//! The solver solves the same type of problem as QpMcDecomp,
+//! but with the additional constraint
+//! \f$ \alpha_{i,1} + \cots + \alpha_{i,d} = 0 \f$
+//! for the variables corresponding to each training example
+//! \f$ (x_i, y_i) \f$.
 //!
-//! K. Crammer, Y. Singer.
-//! <a href="http://www.jmlr.org/papers/volume2/crammer01a/crammer01a.pdf">
-//! On the Algorithmic Implementation of Multiclass Kernel-based
-//! Vector Machines.</a>
-//! In Journal of Machine Learning Research, pp. 265-292 (2001).
-//!
-//! This problem is special among mutli-class SVMs in that it has
-//! as many equality constraints as there are training examples.
-//! It is solved with a straight-forward variant of the SMO scheme
-//! (Platt, 1999).
-//!
-class QpCrammerSingerDecomp : public QPSolver
+class QpMcStzDecomp : public QPSolver
 {
 public:
 	//! Constructor
 	//! \param  kernel   kernel matrix cache
-	//! \param  y        classification targets
-	//! \param  classes  number of classes
-	QpCrammerSingerDecomp(CachedMatrix& kernel, const Array<double>& y, unsigned int classes);
+	QpMcStzDecomp(CachedMatrix& kernel);
 
 	//! Destructor
-	virtual ~QpCrammerSingerDecomp();
+	virtual ~QpMcStzDecomp();
 
 	//!
 	//! \brief solve the quadratic program
 	//!
+	//! \param  classes         number of classes
+	//! \param  modifiers       list of 64 kernel modifiers, see method QpMcDecomp::Modifier
+	//! \param  target          class label indices in {0, ..., classes-1}
+	//! \param  linearPart      linear part of the objective function
+	//! \param  lower           coordinate-wise lower bound
+	//! \param  upper           coordinate-wise upper bound
 	//! \param  solutionVector  input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
-	//! \param  beta            regularization constant (corresponding to 1/C in the C-SVM)
 	//! \param  eps             solution accuracy, in terms of the maximum KKT violation
 	//!
-	void Solve(Array<double>& solutionVector,
-				double beta,
-				double eps = 0.001);
+	void Solve(unsigned int classes,
+					const double* modifiers,
+					const Array<double>& target,
+					const Array<double>& linearPart,
+					const Array<double>& lower,
+					const Array<double>& upper,
+					Array<double>& solutionVector,
+					double eps = 0.001);
 
 	//! Return the number of iterations used to solve the problem
 	inline SharkInt64 iterations()
@@ -1028,6 +1029,20 @@ public:
 	}
 
 protected:
+	//! Return the "kernel modifier" which is used to
+	//! compute the Q-matrix form the kernel matrix.
+	inline double Modifier(unsigned int yi, unsigned int yj, unsigned int vi, unsigned int vj) const
+	{
+		unsigned int index = 0;
+		if (yi == yj) index += 1;
+		if (vi == vj) index += 2;
+		if (yi == vj) index += 4;
+		if (yj == vi) index += 8;
+		if (yi == vi) index += 16;
+		if (yj == vj) index += 32;
+		return m_modifier[index];
+	}
+
 	//! data structure describing one training example
 	struct tExample
 	{
@@ -1035,6 +1050,7 @@ protected:
 		unsigned int label;			// label of this example
 		unsigned int active;		// number of active variables
 		unsigned int* variables;	// list of variables, active ones first
+		double diagonal;			// diagonal entry of the K-matrix
 	};
 
 	//! data structure describing one variable of the problem
@@ -1043,6 +1059,7 @@ protected:
 		unsigned int example;		// index into the example list
 		unsigned int index;			// index into example->variables
 		unsigned int label;			// label corresponding to this variable
+		double diagonal;			// diagonal entry of the big Q-matrix
 	};
 
 	//! information about each training example
@@ -1054,8 +1071,13 @@ protected:
 	//! space for the example[i].variables pointers
 	std::vector<unsigned int> storage;
 
+	//! number of examples in the problem (size of the kernel matrix)
 	unsigned int examples;
+
+	//! number of classes in the problem
 	unsigned int classes;
+
+	//! number of variables in the problem = examples times classes
 	unsigned int variables;
 
 	//! kernel matrix cache
@@ -1076,10 +1098,6 @@ protected:
 	//! number of currently active variables
 	unsigned int activeVar;
 
-	//! diagonal matrix entries
-	//! The diagonal array is of fixed size and not subject to shrinking.
-	Array<double> diagonal;
-
 	//! gradient of the objective function
 	//! The gradient array is of fixed size and not subject to shrinking.
 	Array<double> gradient;
@@ -1090,7 +1108,8 @@ protected:
 	//! stopping condition - solution accuracy
 	double epsilon;
 
-	double SelectWorkingSet(unsigned int& i, unsigned int& j);
+	//! select  optimization directions i and j
+	virtual bool SelectWorkingSet(unsigned int& i, unsigned int& j);
 
 	//! Shrink the problem
 	void Shrink();
@@ -1100,9 +1119,6 @@ protected:
 
 	//! true if the problem has already been unshrinked
 	bool bUnshrinked;
-
-      	//! true if the the user wants to use shrinking mechanism (default = true)
-	bool shrinkCheck;
 
 	//! shrink a variable
 	void DeactivateVariable(unsigned int v);
@@ -1120,6 +1136,12 @@ protected:
 
 	//! maximum number of iterations
 	SharkInt64 maxIter;
+
+	//! number of variables in the working set
+	int WSS_Strategy;
+
+	//! kernel modifiers under six binary conditions
+	double m_modifier[64];
 };
 
 
