@@ -203,17 +203,24 @@ protected:
 // some handy macros for special types of checks,
 // throwing standard error messages
 #ifdef DEBUG
-#define RANGE_CHECK(cond) { if (!(cond)) throw SHARKEXCEPTION("range check error"); }
-#define SIZE_CHECK(cond) { if (!(cond)) throw SHARKEXCEPTION("size mismatch"); }
-#define TYPE_CHECK(cond) { if (!(cond)) throw SHARKEXCEPTION("type mismatch"); }
-#define IO_CHECK(cond) { if (!(cond)) throw SHARKEXCEPTION("I/O error"); }
-#define UNDEFINED { throw SHARKEXCEPTION("undefined operator"); }
+	#define RANGE_CHECK(cond) { if (!(cond)) throw SHARKEXCEPTION("range check error"); }
+	#define SIZE_CHECK(cond) { if (!(cond)) throw SHARKEXCEPTION("size mismatch"); }
+	#define TYPE_CHECK(cond) { if (!(cond)) throw SHARKEXCEPTION("type mismatch"); }
+	#define IO_CHECK(cond) { if (!(cond)) throw SHARKEXCEPTION("I/O error"); }
+	#define UNDEFINED { throw SHARKEXCEPTION("undefined operator"); }
+	#ifndef ASSERT
+		#define ASSERT(cond) { throw SHARKEXCEPTION("assertion failed"); }
+	#endif
 #else
-#define RANGE_CHECK(cond) { }
-#define SIZE_CHECK(cond) { }
-#define TYPE_CHECK(cond) { }
-#define IO_CHECK(cond) { }
-#define UNDEFINED { }
+	#define RANGE_CHECK(cond) { }
+	#define SIZE_CHECK(cond) { }
+	#define TYPE_CHECK(cond) { }
+	#define IO_CHECK(cond) { }
+	#define UNDEFINED { }
+	#ifdef ASSERT
+		#undef ASSERT
+	#endif
+	#define ASSERT(cond) { }
 #endif
 
 

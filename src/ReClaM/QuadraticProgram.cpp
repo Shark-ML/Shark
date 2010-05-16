@@ -554,9 +554,9 @@ double QpSvmDecomp::Solve(const Array<double>& linearPart,
 			qj = quadratic.Row(j, 0, active);
 
 			// update alpha, that is, solve the sub-problem defined by i and j
-			double nominator = gradient(i) - gradient(j);
+			double numerator = gradient(i) - gradient(j);
 			double denominator = diagonal(i) + diagonal(j) - 2.0 * qi[j];
-			double mu = nominator / denominator;
+			double mu = numerator / denominator;
 			if (ai + mu < Li) mu = Li - ai;
 			else if (ai + mu > Ui) mu = Ui - ai;
 			if (aj - mu < Lj) mu = aj - Lj;
@@ -1339,9 +1339,9 @@ void QpBoxDecomp::Loop()
 				double Ui = boxMax(i);
 
 				// update alpha, that is, solve the sub-problem defined by i
-				double nominator = gradient(i);
+				double numerator = gradient(i);
 				double denominator = diagonal(i);
-				double mu = nominator / denominator;
+				double mu = numerator / denominator;
 				if (ai + mu < Li) mu = Li - ai;
 				else if (ai + mu > Ui) mu = Ui - ai;
 				alpha(i) += mu;
@@ -1945,11 +1945,11 @@ void QpMcDecomp::Solve(unsigned int classes,
 		}
 	}
 
-	// initial shrinking (useful for dummy variables and warm starts)
-	Shrink();
-
 	bUnshrinked = false;
 	unsigned int shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+
+	// initial shrinking (useful for dummy variables and warm starts)
+	Shrink();
 
 	// decomposition loop
 	iter = 0;
@@ -1988,12 +1988,13 @@ void QpMcDecomp::Solve(unsigned int classes,
 				unsigned int yi = example[ei].label;
 
 				// update alpha, that is, solve the sub-problem defined by i
-				double nominator = gradient(i);
+				double numerator = gradient(i);
 				double denominator = variable[i].diagonal;
-				double mu = nominator / denominator;
-				if (ai + mu < Li) mu = Li - ai;
-				else if (ai + mu > Ui) mu = Ui - ai;
-				alpha(i) += mu;
+				double mu = numerator / denominator;
+
+				if (ai + mu < Li) { mu = Li - ai; alpha(i) = Li; }
+				else if (ai + mu > Ui) { mu = Ui - ai; alpha(i) = Ui; }
+				else alpha(i) += mu;
 
 				// get the matrix row corresponding to the working set
 				q = kernelMatrix.Row(ei, 0, activeEx);
@@ -2090,6 +2091,12 @@ void QpMcDecomp::Solve(unsigned int classes,
 				alpha(i) += mu_i;
 				alpha(j) += mu_j;
 
+				// repair numerical inaccuracies
+				if (alpha(i) - Li < 1e-12 * (Ui - Li)) alpha(i) = Li;
+				else if (Ui - alpha(i) < 1e-12 * (Ui - Li)) alpha(i) = Ui;
+				if (alpha(j) - Lj < 1e-12 * (Uj - Lj)) alpha(j) = Lj;
+				else if (Uj - alpha(j) < 1e-12 * (Uj - Lj)) alpha(j) = Uj;
+
 				// update the gradient
 				for (a = 0; a < activeEx; a++)
 				{
@@ -2165,6 +2172,8 @@ bool QpMcDecomp::SelectWorkingSet(unsigned int& i)
 
 bool QpMcDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
 {
+	i = 0; j = 1;
+
 	double maxGrad = 0.0;
 	unsigned int a;
 
@@ -2432,21 +2441,49 @@ void QpMcDecomp::DeactivateExample(unsigned int e)
 ////////////////////////////////////////////////////////////
 
 
-QpCrammerSingerDecomp::QpCrammerSingerDecomp(CachedMatrix& kernel, const Array<double>& y, unsigned int classes)
+QpMcStzDecomp::QpMcStzDecomp(CachedMatrix& kernel)
 : kernelMatrix(kernel)
 {
-	SIZE_CHECK(y.ndim() == 2);
-
 	examples = kernelMatrix.getMatrixSize();
+	maxIter = -1;
+}
+
+QpMcStzDecomp::~QpMcStzDecomp()
+{
+}
+
+
+void QpMcStzDecomp::Solve(unsigned int classes,
+						const double* modifiers,
+						const Array<double>& target,
+						const Array<double>& linearPart,
+						const Array<double>& lower,
+						const Array<double>& upper,
+						Array<double>& solutionVector,
+						double eps)
+{
+	SIZE_CHECK(target.ndim() == 2);
+	SIZE_CHECK(linearPart.ndim() == 1);
+	SIZE_CHECK(lower.ndim() == 1);
+	SIZE_CHECK(upper.ndim() == 1);
+	SIZE_CHECK(solutionVector.ndim() == 1);
+
 	this->classes = classes;
 	variables = examples * classes;
+	memcpy(m_modifier, modifiers, sizeof(m_modifier));
 
-	SIZE_CHECK(y.dim(0) == examples);
-	SIZE_CHECK(y.dim(1) == 1);
+	SIZE_CHECK(target.dim(0) == examples);
+	SIZE_CHECK(target.dim(1) == 1);
+	SIZE_CHECK(linearPart.dim(0) == variables);
+	SIZE_CHECK(lower.dim(0) == variables);
+	SIZE_CHECK(upper.dim(0) == variables);
+	SIZE_CHECK(solutionVector.dim(0) == variables);
+
+	unsigned int a, b, bc, i, j;
+	float* q = NULL;
 
 	// prepare lists
 	alpha.resize(variables, false);
-	diagonal.resize(examples, false);
 	gradient.resize(variables, false);
 	linear.resize(variables, false);
 	boxMin.resize(variables, false);
@@ -2455,118 +2492,86 @@ QpCrammerSingerDecomp::QpCrammerSingerDecomp(CachedMatrix& kernel, const Array<d
 	variable.resize(variables);
 	storage.resize(variables);
 
-	// prepare the lists
-	unsigned int i;
+	// prepare list contents
 	for (i = 0; i < examples; i++)
 	{
-		diagonal(i) = kernelMatrix.Entry(i, i);
 		example[i].index = i;
-		example[i].label = (unsigned int)y(i, 0);
+		example[i].label = (unsigned int)target(i, 0);
 		example[i].active = classes;
 		example[i].variables = &storage[classes * i];
+		example[i].diagonal = kernelMatrix.Entry(i, i);
 	}
 	for (i = 0; i < variables; i++)
 	{
-		variable[i].example = i / classes;
-		variable[i].index = i % classes;
-		variable[i].label = i % classes;
+		unsigned int e = i / classes;
+		unsigned int y = example[e].label;
+		unsigned int v = i % classes;
+		variable[i].example = e;
+		variable[i].index = v;
+		variable[i].label = v;
+		variable[i].diagonal = Modifier(y, y, v, v) * kernelMatrix.Entry(e, e);
 		storage[i] = i;
 	}
 
-	maxIter = -1;
-	
-	shrinkCheck = true;
-}
-
-QpCrammerSingerDecomp::~QpCrammerSingerDecomp()
-{
-}
-
-
-void QpCrammerSingerDecomp::Solve(Array<double>& solutionVector,
-									double beta,
-									double eps)
-{
-	unsigned int a, b, bc, i, j = 0;
-	float* q = NULL;
-
 	// prepare the solver internal variables
-	for (a = 0; a < examples; a++)
-	{
-		unsigned int y = example[a].label;
-		for (b = 0; b < classes; b++)
-		{
-			j = example[a].variables[b];
-			alpha(j) = solutionVector(j);
-			unsigned int v = variable[j].label;
-			if (y == v)
-			{
-				linear(j) = beta;
-				boxMin(j) = -1e100;
-				boxMax(j) = 1.0;
-			}
-			else
-			{
-				linear(j) = 0.0;
-				boxMin(j) = -1e100;
-				boxMax(j) = 0.0;
-			}
-		}
-	}
+	boxMin = lower;
+	boxMax = upper;
+	linear = linearPart;
+	gradient = linearPart;
+	alpha = solutionVector;
 
 	epsilon = eps;
 
 	activeEx = examples;
 	activeVar = variables;
 
-	// compute the initial gradient
-	gradient = linear;
 	unsigned int e = 0xffffffff;
-	for (a=0; a<activeEx; a++)
+	for (i = 0; i < variables; i++)
 	{
-		tExample* ex = &example[a];
-		bc = ex->active;
-		for (b = 0; b < bc; b++)
+		if (boxMax(i) < boxMin(i)) throw SHARKEXCEPTION("[QpMcStzDecomp::Solve] The feasible region is empty.");
+
+		double v = alpha(i);
+		if (v != 0.0)
 		{
-			j = ex->variables[b];
-			double v = alpha(j);
-			if (v != 0.0)
+			unsigned int ei = variable[i].example;
+			unsigned int vi = variable[i].label;
+			unsigned int yi = example[ei].label;
+			if (ei != e)
 			{
-				unsigned int h;
-				unsigned int vj = variable[j].label;
-				if (e != a)
+				q = kernelMatrix.Row(ei, 0, activeEx);
+				e = ei;
+			}
+
+			for (a = 0; a < activeEx; a++)
+			{
+				double k = q[a];
+				tExample* ex = &example[a];
+				unsigned int yj = ex->label;
+				bc = ex->active;
+				for (b = 0; b < bc; b++)
 				{
-					q = kernelMatrix.Row(a, 0, activeEx);
-					e = a;
-				}
-				for (h=0; h<activeVar; h++)
-				{
-					unsigned int vh = variable[h].label;
-					if (vh == vj)
-					{
-						unsigned int eh = variable[h].example;
-						gradient(h) -= v * q[eh];
-					}
+					j = ex->variables[b];
+					unsigned int vj = variable[j].label;
+					double km = Modifier(yi, yj, vi, vj);
+					gradient(j) -= v * km * k;
 				}
 			}
 		}
 	}
 
-	// initial shrinking
-	Shrink();
-
 	bUnshrinked = false;
 	unsigned int shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+
+	// initial shrinking (useful for dummy variables and warm starts)
+	Shrink();
 
 	// decomposition loop
 	iter = 0;
 	optimal = false;
 	while (iter != maxIter)
 	{
-	    if(shrinkCheck==true)
-	    {
 		// select a working set and check for optimality
-		if (SelectWorkingSet(i, j) <= epsilon)
+		if (SelectWorkingSet(i, j))
 		{
 			// seems to be optimal
 
@@ -2574,7 +2579,7 @@ void QpCrammerSingerDecomp::Solve(Array<double>& solutionVector,
 			Unshrink(true);
 
 			// check again on the whole problem
-			if (SelectWorkingSet(i, j) <= epsilon)
+			if (SelectWorkingSet(i, j))
 			{
 				optimal = true;
 				break;
@@ -2584,77 +2589,69 @@ void QpCrammerSingerDecomp::Solve(Array<double>& solutionVector,
 			Shrink();
 			shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
 		}
-	      }
-	      else 
-	      {
-		if (SelectWorkingSet(i, j) <= epsilon)
-			{
-				optimal = true;
-				break;
-			}
-	      }
-		// SMO update
+
+		// update
 		{
-			// there is only one example corresponding to both variables:
-			unsigned int e = variable[i].example;
-
 			double ai = alpha(i);
-			double Li = boxMin(i);
-			double Ui = boxMax(i);
 			double aj = alpha(j);
+			double Li = boxMin(i);
 			double Lj = boxMin(j);
+			double Ui = boxMax(i);
 			double Uj = boxMax(j);
+			unsigned int eij = variable[i].example;
+			ASSERT(variable[j].example == eij);
+			unsigned int vi = variable[i].label;
+			unsigned int vj = variable[j].label;
+			unsigned int yij = example[eij].label;
 
-			unsigned int vi = variable[i].label;		// these are
-			unsigned int vj = variable[j].label;		// different!
-
-			// get the matrix rows corresponding to the working set
-			q = kernelMatrix.Row(e, 0, activeEx);
+			// get the matrix row corresponding to the working set
+			q = kernelMatrix.Row(eij, 0, activeEx);
 
 			// update alpha, that is, solve the sub-problem defined by i and j
-			double nominator = gradient(i) - gradient(j);
-			double denominator = 2.0 * diagonal(e);
-			double mu = nominator / denominator;
-			if (ai + mu < Li) mu = Li - ai;
-			else if (ai + mu > Ui) mu = Ui - ai;
-			if (aj - mu < Lj) mu = aj - Lj;
-			else if (aj - mu > Uj) mu = aj - Uj;
-			alpha(i) += mu;
-			alpha(j) -= mu;
+			double numerator = gradient(i) - gradient(j);
+			double denominator = variable[i].diagonal + variable[j].diagonal
+					- 2.0 * Modifier(yij, yij, vi, vj) * q[eij];
+			double mu = numerator / denominator;
+
+			bool i_at_bound = false;
+			bool j_at_bound = false;
+			if (ai + mu > Ui) { i_at_bound = true; mu = Ui - ai; }
+			if (aj - mu < Lj) { j_at_bound = true; mu = aj - Lj; }
+			if (i_at_bound) alpha(i) = Ui; else alpha(i) += mu;
+			if (j_at_bound) alpha(j) = Lj; else alpha(j) -= mu;
 
 			// update the gradient
 			for (a = 0; a < activeEx; a++)
 			{
 				double k = q[a];
 				tExample* ex = &example[a];
-				unsigned int b, bc = ex->active;
+				unsigned int yc = ex->label;
+				bc = ex->active;
 				for (b = 0; b < bc; b++)
 				{
-					unsigned int h = ex->variables[b];
-					unsigned int vh = variable[h].label;
-					if (vh == vi) gradient(h) -= mu * k;
-					else if (vh == vj) gradient(h) += mu * k;
+					unsigned int c = ex->variables[b];
+
+					unsigned int vc = variable[c].label;
+					double km_i = Modifier(yij, yc, vi, vc);
+					double km_j = Modifier(yij, yc, vj, vc);
+					gradient(c) -= mu * (km_i - km_j) * k;
 				}
 			}
 		}
 
-		if(shrinkCheck)
+		shrinkCounter--;
+		if (shrinkCounter == 0)
 		{
-		    shrinkCounter--;
-		    if (shrinkCounter == 0)
-		    {
-			    // shrink the problem
-			    Shrink();
+			// shrink the problem
+			Shrink();
 
-			    shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
-		    }
+			shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
 		}
 
 		iter++;
 	}
+
 	if (iter == maxIter) optimal = false;
-	  
-// 	std::cout<<"iter = "<<iter<<std::endl;
 
 	// return alpha
 	for (i = 0; i < variables; i++)
@@ -2664,60 +2661,126 @@ void QpCrammerSingerDecomp::Solve(Array<double>& solutionVector,
 	}
 }
 
-// Select a working set (i, j) composed of an "up"-component i and
-// a "down"-component j. Return the corresponding KKT violation.
-double QpCrammerSingerDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
+bool QpMcStzDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
 {
-	double largest = 0.0;
+	unsigned int e;
+	double largest_up = -1e100;
+	double largest_down = 1e100;
+	double best_gain = 0.0;
 
-	unsigned int a, b, bc, w;
-	for (a=0; a<activeEx; a++)
+	// loop over the examples, defining groups of variables
+	// among which we do second-order working set selection
+	for (e=0; e<activeEx; e++)
 	{
-		tExample* ex = &example[a];
-		bc = ex->active;
-		double m = 1e100;
-		double M = -1e100;
-		unsigned int n = 0, N = 1;
+		tExample* ex = &example[e];
+		double k = ex->diagonal;
+		unsigned int y = ex->label;
+		unsigned int b, bc = ex->active;
+
+		// select first variable according to maximal gradient
+		unsigned int ii = 0;
+		double l_u = -1e100;
+		double l_d = 1e100;
 		for (b=0; b<bc; b++)
 		{
-			w = ex->variables[b];
-			double v = alpha(w);
-			double g = gradient(w);
-			if (v < boxMax(w))
+			unsigned int c = ex->variables[b];
+			double v = alpha(c);
+			double g = gradient(c);
+			if (v < boxMax(c))
 			{
-				if (g > M)
+				if (g > l_u)
 				{
-					M = g;
-					N = w;
+					l_u = g;
+					ii = c;
 				}
 			}
-			if (v > boxMin(w))
+			if (v > boxMin(c))
 			{
-				if (g < m)
+				if (g < l_d)
 				{
-					m = g;
-					n = w;
+					l_d = g;
+					ii = c;
 				}
 			}
 		}
-		if (M - m > largest)
+		if (l_u > largest_up) largest_up = l_u;
+		if (l_d < largest_down) largest_down = l_d;
+
+		// select second variable according to maximal unconstrained gain
+		unsigned int vi = variable[ii].label;
+		double aii = alpha(ii);
+		double gii = gradient(ii);
+		double mii = Modifier(y, y, vi, vi);
+		for (b=0; b<bc; b++)
 		{
-			largest = M - m;
-			i = N;
-			j = n;
+			unsigned int c = ex->variables[b];
+			if (c == ii) continue;
+			double v = alpha(c);
+			double g = gradient(c);
+			double numerator = gii - g;
+			if (numerator == 0.0) continue;
+			if (numerator > 0.0 && (aii == boxMax(ii) || v == boxMin(c))) continue;
+			if (numerator < 0.0 && (aii == boxMin(ii) || v == boxMax(c))) continue;
+
+			unsigned int vc = variable[c].label;
+			double denominator = (mii + Modifier(y, y, vc, vc) - 2.0 * Modifier(y, y, vi, vc)) * k;
+			double gain = numerator * numerator / denominator;
+			if (gain > best_gain)
+			{
+				i = ii;
+				j = c;
+				best_gain = gain;
+			}
 		}
 	}
 
-	return largest;
+	if (gradient(i) < gradient(j)) std::swap(i, j);
+
+	// return KKT stopping condition
+	return (largest_up - largest_down < epsilon);
 }
 
-void QpCrammerSingerDecomp::Shrink()
+void QpMcStzDecomp::Shrink()
 {
+	int a, e;
+	double v, g;
+	std::vector<double> largest_up(activeEx);
+	std::vector<double> largest_down(activeEx);
+	double l_up = -1e100;
+	double l_down = 1e100;
+	for (e=0; e<activeEx; e++)
+	{
+		largest_up[e] = -1e100;
+		largest_down[e] = 1e100;
+	}
+
+	for (a = 0; a < (int)activeVar; a++)
+	{
+		e = variable[a].example;
+		double v = alpha(a);
+		double g = gradient(a);
+
+		if (v < boxMax(a))
+		{
+			if (g > largest_up[e])
+			{
+				largest_up[e] = g;
+				if (g > l_up) l_up = g;
+			}
+		}
+		if (v > boxMin(a))
+		{
+			if (g < largest_down[e])
+			{
+				largest_down[e] = g;
+				if (g < l_down) l_down = g;
+			}
+		}
+	}
+
 	if (! bUnshrinked)
 	{
-		unsigned int i, j;
-		double violation = SelectWorkingSet(i, j);
-		if (violation < 10.0 * epsilon)
+		if (l_up - l_down < 10.0 * epsilon)
 		{
 			// unshrink the problem at this accuracy level
 			Unshrink(true);
@@ -2725,63 +2788,32 @@ void QpCrammerSingerDecomp::Shrink()
 		}
 	}
 
-	// loop through the examples
+	// shrink variables
 	bool se = false;
-	int a;
-	for (a = activeEx-1; a >= 0; a--)
+	for (a = activeVar - 1; a >= 0; a--)
 	{
-		// loop through the variables corresponding to the example
-		tExample* ex = &example[a];
-		unsigned int b, bc = ex->active;
-		double m = 1e100;
-		double M = -1e100;
-		for (b=0; b<bc; b++)
+		v = alpha(a);
+		g = gradient(a);
+		e = variable[a].example;
+
+		if ((v == boxMin(a) && g <= largest_down[e]) || (v == boxMax(a) && g >= largest_up[e]))
 		{
-			unsigned int w = ex->variables[b];
-			double v = alpha(w);
-			double g = gradient(w);
-			if (v < boxMax(w))
-			{
-				if (g > M)
-				{
-					M = g;
-				}
-			}
-			if (v > boxMin(w))
-			{
-				if (g < m)
-				{
-					m = g;
-				}
-			}
-		}
-		for (b=0; b<bc; b++)
-		{
-			unsigned int w = ex->variables[b];
-			double v = alpha(w);
-			double g = gradient(w);
-			if (v == boxMin(w) && g < m)
-			{
-				DeactivateVariable(w);
-				b--;
-				bc--;
-			}
-			else if (v == boxMax(w) && g > M)
-			{
-				DeactivateVariable(w);
-				b--;
-				bc--;
-			}
-		}
-		if (bc == 0)
-		{
-			DeactivateExample(a);
-			se = true;
+			// In this moment no feasible step including this variable
+			// can improve the objective. Thus deactivate the variable.
+			DeactivateVariable(a);
+			if (example[e].active == 0) se = true;
 		}
 	}
 
 	if (se)
 	{
+		// exchange examples such that shrinked examples
+		// are moved to the ends of the lists
+		for (a = activeEx - 1; a >= 0; a--)
+		{
+			if (example[a].active == 0) DeactivateExample(a);
+		}
+
 		// shrink the corresponding cache entries
 		for (a = 0; a < (int)activeEx; a++)
 		{
@@ -2790,7 +2822,7 @@ void QpCrammerSingerDecomp::Shrink()
 	}
 }
 
-void QpCrammerSingerDecomp::Unshrink(bool complete)
+void QpMcStzDecomp::Unshrink(bool complete)
 {
 	if (activeVar == variables) return;
 
@@ -2807,14 +2839,17 @@ void QpCrammerSingerDecomp::Unshrink(bool complete)
 
 		unsigned int ei = variable[i].example;
 		unsigned int vi = variable[i].label;
+		unsigned int yi = example[ei].label;
 		q = kernelMatrix.Row(ei, 0, examples, true);
 		for (a = activeVar; a < variables; a++)
 		{
-			if (variable[a].label == vi)
-			{
-				unsigned int ea = variable[a].example;
-				gradient(a) -= q[ea] * v;
-			}
+			unsigned int ea = variable[a].example;
+			unsigned int va = variable[a].label;
+			unsigned int ya = example[ea].label;
+
+			double km = Modifier(yi, ya, vi, va);
+			double k = q[ea];
+			gradient(a) -= km * k * v;
 		}
 	}
 
@@ -2825,7 +2860,7 @@ void QpCrammerSingerDecomp::Unshrink(bool complete)
 	if (! complete) Shrink();
 }
 
-void QpCrammerSingerDecomp::DeactivateVariable(unsigned int v)
+void QpMcStzDecomp::DeactivateVariable(unsigned int v)
 {
 	unsigned int ev = variable[v].example;
 	unsigned int iv = variable[v].index;
@@ -2856,17 +2891,16 @@ void QpCrammerSingerDecomp::DeactivateVariable(unsigned int v)
 	activeVar--;
 }
 
-void QpCrammerSingerDecomp::DeactivateExample(unsigned int e)
+void QpMcStzDecomp::DeactivateExample(unsigned int e)
 {
 	unsigned int j = activeEx - 1;
 
-	XCHG_A(double, diagonal, e, j);
 	XCHG_V(tExample, example, e, j);
 
 	unsigned int v;
 	unsigned int* pe = example[e].variables;
 	unsigned int* pj = example[j].variables;
-	for (v=0; v<classes; v++)
+	for (v = 0; v < classes; v++)
 	{
 		variable[pe[v]].example = e;
 		variable[pj[v]].example = j;

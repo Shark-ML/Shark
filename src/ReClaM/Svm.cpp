@@ -1562,10 +1562,11 @@ void AllInOneMcSVM::modelDerivative(const Array<double>& input, Array<double>& d
 ////////////////////////////////////////////////////////////////////////////////
 
 
-CrammerSingerMcSVM::CrammerSingerMcSVM(MultiClassSVM* pSVM, double beta)
+CrammerSingerMcSVM::CrammerSingerMcSVM(MultiClassSVM* pSVM, double C, bool unconstrained)
 : MetaSVM(pSVM, 1)
 {
-	parameter(0) = beta;
+	exponential = unconstrained;
+	set_C(C);
 }
 
 CrammerSingerMcSVM::~CrammerSingerMcSVM()
@@ -1575,7 +1576,8 @@ CrammerSingerMcSVM::~CrammerSingerMcSVM()
 
 bool CrammerSingerMcSVM::isFeasible()
 {
-	return (parameter(0) > 0.0 && MetaSVM::isFeasible());
+	if (! exponential && parameter(0) <= 0.0) return false;
+	return MetaSVM::isFeasible();
 }
 
 
@@ -1704,7 +1706,7 @@ void SVM_Optimizer::init(Model& model)
 	else if (cs != NULL)
 	{
 		mode = eCrammerSinger;
-		beta = cs->get_beta();
+		C = cs->get_C();
 	}
 	else if (ova != NULL)
 	{
@@ -2230,10 +2232,17 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 		}
 
 		double mod[64] = {
-			0.0, 0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.0, -0.5, 0.0, -0.5, 0.0, -1.0, -0.5, -1.0, -0.5,
-			0.0, 0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.0, -0.5, 0.0, -0.5, 0.0, -1.0, -0.5, -1.0, -0.5,
-			0.5, 1.0, 0.5, 1.0, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.0,
-			0.5, 1.0, 0.5, 1.0, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, 0.0, 0.5, -0.5, 0.0, -0.5, 0.0
+			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0,
+			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0,
+			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0,
+			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0
+// TODO: Above are the constants for the Weston&Watkins approach,
+//       below for Vapnik's original formulation.
+//       Change to the latter one for improved consistency of the code?
+// 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
+// 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
+// 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
+// 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
 		};
 
 		QpMcDecomp* solver = new QpMcDecomp(*cache);
@@ -2261,20 +2270,51 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 	else if (mode == eCrammerSinger)
 	{
 		Array<double> alpha(variables);
-		for (i=0; i < variables; i++) alpha(i) = model.getParameter(i);
+		Array<double> linear(variables);
+		Array<double> lower(variables);
+		Array<double> upper(variables);
 
 		matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
-		QpCrammerSingerDecomp* solver = new QpCrammerSingerDecomp(*cache, target, classes);
-		solver->setMaxIterations(maxIter);
-		this->solver = solver;
+		unsigned int e, c;
+		unsigned int index = 0;
+		for (e=0; e<examples; e++)
+		{
+			for (c=0; c<classes; c++)
+			{
+				alpha(index) = -model.getParameter(index);
+				unsigned int y = (unsigned int)target(e, 0);
+				if (y == c)
+				{
+					linear(index) = 0.0;
+					lower(index) = (1.0 - classes) * C;
+					upper(index) = 0.0;
+				}
+				else
+				{
+					linear(index) = 1.0;
+					lower(index) = 0.0;
+					upper(index) = C;
+				}
+				index++;
+			}
+		}
 
-		// The (beta/2 * accuracy) rule gives the standard accuracy in the binary case.
-		solver->Solve(alpha, beta, beta / 2.0 * accuracy);
+		double mod[64] = {
+			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+		};
+
+		QpMcStzDecomp* solver = new QpMcStzDecomp(*cache);
+		this->solver = solver;
+		solver->setMaxIterations(maxIter);
+		solver->Solve(classes, mod, target, linear, lower, upper, alpha, accuracy);
 		optimal = solver->isOptimal();
 
-		for (i=0; i < variables; i++) model.setParameter(i, alpha(i));
+		for (i=0; i < variables; i++) model.setParameter(i, -alpha(i));
 	}
 	else if (mode == eOVA)
 	{
