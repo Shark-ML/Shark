@@ -957,6 +957,104 @@ protected:
 //! \brief Meta Model for SVM training
 //!
 //! \author T. Glasmachers
+//! \date 2010
+//!
+//! \par
+//! Meta model for the multi class SVM proposed by
+//! Lee, Lin and Wahba
+//!
+class LLWMcSVM : public MetaSVM
+{
+public:
+	//! Constructor
+	LLWMcSVM(MultiClassSVM* pSVM, double C, bool unconstrained = false);
+
+	//! Destructor
+	~LLWMcSVM();
+
+
+	//! get the regularization constant
+	inline double get_C()
+	{
+		if (exponential) return exp(parameter(0));
+		else return parameter(0);
+	}
+
+	//! set the regularization constant
+	inline void set_C(double C)
+	{
+		if (exponential) setParameter(0, log(C));
+		else setParameter(0, C);
+	}
+
+	//! return true if the exponential function is used to parameterize C
+	inline bool isUnconstrained()
+	{
+		return exponential;
+	}
+
+	//! ensure C is positive
+	bool isFeasible();
+
+protected:
+	//! is C stored as log(C)?
+	bool exponential;
+};
+
+
+//!
+//! \brief Meta Model for SVM training
+//!
+//! \author T. Glasmachers
+//! \date 2010
+//!
+//! \par
+//! Meta model for the multi class SVM proposed by
+//! Dogan, Glasmachers and Igel
+//!
+class DGIMcSVM : public MetaSVM
+{
+public:
+	//! Constructor
+	DGIMcSVM(MultiClassSVM* pSVM, double C, bool unconstrained = false);
+
+	//! Destructor
+	~DGIMcSVM();
+
+
+	//! get the regularization constant
+	inline double get_C()
+	{
+		if (exponential) return exp(parameter(0));
+		else return parameter(0);
+	}
+
+	//! set the regularization constant
+	inline void set_C(double C)
+	{
+		if (exponential) setParameter(0, log(C));
+		else setParameter(0, C);
+	}
+
+	//! return true if the exponential function is used to parameterize C
+	inline bool isUnconstrained()
+	{
+		return exponential;
+	}
+
+	//! ensure C is positive
+	bool isFeasible();
+
+protected:
+	//! is C stored as log(C)?
+	bool exponential;
+};
+
+
+//!
+//! \brief Meta Model for SVM training
+//!
+//! \author T. Glasmachers
 //! \date 2008
 //!
 //! \par
@@ -1176,8 +1274,10 @@ protected:
 		e1Class,			// One-Class SVM for density estimation XXX
 		eAllInOne,			// standard multi class SVM
 		eCrammerSinger,		// MC-SVM by Crammer and Singer
+		eLLW,				// MC-SVM by Lee, Lin and Wahba
+		eDGI,				// MC-SVM by Dogan, Glasmachers and Igel
 		eOVA,				// one-versus-all multi class SVM
-		eOCC,		// binary-SVM-cost multi-class SVM
+		eOCC,				// one-class-cost multi-class SVM
 	};
 
 	//! mode of operation

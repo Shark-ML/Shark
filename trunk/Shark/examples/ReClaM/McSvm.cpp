@@ -5,9 +5,9 @@
  *  \brief Multi class SVM example
  *
  *  \author  T. Glasmachers
- *  \date    2008
+ *  \date    2008, 2010
  *
- *  \par Copyright (c) 1999-2008:
+ *  \par Copyright (c) 1999-2010:
  *      Institut f&uuml;r Neuroinformatik<BR>
  *      Ruhr-Universit&auml;t Bochum<BR>
  *      D-44780 Bochum, Germany<BR>
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 	printf("\nMulti class support vector machine example program\n");
 
 	// define the test problem
-	unsigned int classes = 6;		// number of classes
+	unsigned int classes = 5;		// number of classes
 	double variance = 1.0;			// noise variance
 	TestProblem source(classes, variance);
 
@@ -92,9 +92,12 @@ int main(int argc, char* argv[])
 	Dataset dataset(source, 500, 10000);
 
 	// setup the kernel and the classifiers
+	double C = 0.01;
 	RBFKernel kernel(0.5);
 	MultiClassSVM aio_svm(&kernel, classes);
 	MultiClassSVM cs_svm(&kernel, classes);
+	MultiClassSVM llw_svm(&kernel, classes);
+	MultiClassSVM dgi_svm(&kernel, classes);
 	MultiClassSVM ova_svm(&kernel, classes);
 	MultiClassSVM occ_svm(&kernel, classes);
 
@@ -102,7 +105,6 @@ int main(int argc, char* argv[])
 	printf("\nMACHINE TRAINING\n");
 	{
 		printf("training all-in-one machine ..."); fflush(stdout);
-		double C = 0.01;
 		AllInOneMcSVM meta(&aio_svm, C);
 		SVM_Optimizer svmopt;
 		svmopt.init(meta);
@@ -111,7 +113,6 @@ int main(int argc, char* argv[])
 	}
 	{
 		printf("training crammer & singer machine ..."); fflush(stdout);
-		double C = 0.01;
 		CrammerSingerMcSVM meta(&cs_svm, C);
 		SVM_Optimizer svmopt;
 		svmopt.init(meta);
@@ -119,8 +120,23 @@ int main(int argc, char* argv[])
 		printf(" done.\n");
 	}
 	{
+		printf("training lee, lin & wahba machine ..."); fflush(stdout);
+		LLWMcSVM meta(&cs_svm, C);
+		SVM_Optimizer svmopt;
+		svmopt.init(meta);
+		svmopt.optimize(llw_svm, dataset.getTrainingData(), dataset.getTrainingTarget());
+		printf(" done.\n");
+	}
+	{
+		printf("training dogan, glasmachers & igel machine ..."); fflush(stdout);
+		DGIMcSVM meta(&cs_svm, C);
+		SVM_Optimizer svmopt;
+		svmopt.init(meta);
+		svmopt.optimize(dgi_svm, dataset.getTrainingData(), dataset.getTrainingTarget());
+		printf(" done.\n");
+	}
+	{
 		printf("training one-versus-all machine ..."); fflush(stdout);
-		double C = 0.01;
 		OVAMcSVM meta(&ova_svm, C);
 		SVM_Optimizer svmopt;
 		svmopt.init(meta);
@@ -129,7 +145,6 @@ int main(int argc, char* argv[])
 	}
 	{
 		printf("training one-class-cost machine ..."); fflush(stdout);
-		double C = 0.01;
 		OCCMcSVM meta(&occ_svm, C);
 		SVM_Optimizer svmopt;
 		svmopt.init(meta);
@@ -142,13 +157,17 @@ int main(int argc, char* argv[])
 	ZeroOneLoss loss;
 	double aio_err = loss.error(aio_svm, dataset.getTestData(), dataset.getTestTarget());
 	double cs_err = loss.error(cs_svm, dataset.getTestData(), dataset.getTestTarget());
+	double llw_err = loss.error(llw_svm, dataset.getTestData(), dataset.getTestTarget());
+	double dgi_err = loss.error(dgi_svm, dataset.getTestData(), dataset.getTestTarget());
 	double ova_err = loss.error(ova_svm, dataset.getTestData(), dataset.getTestTarget());
 	double occ_err = loss.error(occ_svm, dataset.getTestData(), dataset.getTestTarget());
 
 	printf("\nEVALUATION\n");
-	printf("all-in-one machine:        %g%% error\n", 100.0 * aio_err);
-	printf("crammer & singer machine:  %g%% error\n", 100.0 * cs_err);
-	printf("one-versus-all machine:    %g%% error\n", 100.0 * ova_err);
-	printf("one-class-cost machine:    %g%% error\n", 100.0 * occ_err);
+	printf("all-in-one machine:                 %g%% error\n", 100.0 * aio_err);
+	printf("crammer & singer machine:           %g%% error\n", 100.0 * cs_err);
+	printf("lee, lin & wahba machine:           %g%% error\n", 100.0 * llw_err);
+	printf("dogan, glasmachers & igel machine:  %g%% error\n", 100.0 * dgi_err);
+	printf("one-versus-all machine:             %g%% error\n", 100.0 * ova_err);
+	printf("one-class-cost machine:             %g%% error\n", 100.0 * occ_err);
 	printf("\n");
 }

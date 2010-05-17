@@ -819,7 +819,7 @@ public:
 		return optimal;
 	}
 
-	//! set the maximal number of iterations
+	//! Set the maximal number of iterations
 	//! the solver is allowed to perform
 	//! \param  maxiter  maximal number of iterations, -1 for infinity
 	inline void setMaxIterations(SharkInt64 maxiter = -1)
@@ -828,25 +828,39 @@ public:
 	}
 
 	//! Set number of variables in the working set,
-	//! accepted values are one or two.
-	inline void Set_WSS_Strategy (int i = 1)
+	//! acceptable values are one or two.
+	inline void Set_WSS_Strategy(unsigned int i = 1)
 	{
 		RANGE_CHECK(i == 1 || i == 2);
 		WSS_Strategy = i;
 	}
 
 protected:
-	//! Return the "kernel modifier" which is used to
+	//! Return the 'kernel modifier' which is used to
 	//! compute the Q-matrix form the kernel matrix.
+	//! Let (i, m) and (j, n) denote the variables to
+	//! compare, then the Q-matrix entry takes the form
+	//! \f$ Q_{(i,m),(j,n)} = M(y_i, y_j, m, n) \cdot k(x_i, x_j) \f$,
+	//! where M denotes the so-called modifier. In
+	//! general, it depends on four label-valued terms.
+	//! However, due to symmetry it depends only on
+	//! the six possible binary equality relations
+	//! among these, resulting in \f$ 2^6 = 64 \f$
+	//! different values.
+	//!
+	//! \param  yi  label of the example corresponding to the first variable (i,m)
+	//! \param  yj  label of the example corresponding to the second variable (j,n)
+	//! \param  vi  label 'm' of the first variable
+	//! \param  vj  label 'n' of the second variable
 	inline double Modifier(unsigned int yi, unsigned int yj, unsigned int vi, unsigned int vj) const
 	{
 		unsigned int index = 0;
-		if (yi == yj) index += 1;
-		if (vi == vj) index += 2;
-		if (yi == vj) index += 4;
-		if (yj == vi) index += 8;
-		if (yi == vi) index += 16;
-		if (yj == vj) index += 32;
+		if (yi == yj) index += 1;			// bit 0 indicates y_i = y_j
+		if (vi == vj) index += 2;			// bit 1 indicates m = n
+		if (yi == vj) index += 4;			// bit 2 indicates y_i = n
+		if (yj == vi) index += 8;			// bit 3 indicates y_j = m
+		if (yi == vi) index += 16;			// bit 4 indicates y_i = m
+		if (yj == vj) index += 32;			// bit 5 indicates y_j = n
 		return m_modifier[index];
 	}
 
@@ -1029,17 +1043,31 @@ public:
 	}
 
 protected:
-	//! Return the "kernel modifier" which is used to
+	//! Return the 'kernel modifier' which is used to
 	//! compute the Q-matrix form the kernel matrix.
+	//! Let (i, m) and (j, n) denote the variables to
+	//! compare, then the Q-matrix entry takes the form
+	//! \f$ Q_{(i,m),(j,n)} = M(y_i, y_j, m, n) \cdot k(x_i, x_j) \f$,
+	//! where M denotes the so-called modifier. In
+	//! general, it depends on four label-valued terms.
+	//! However, due to symmetry it depends only on
+	//! the six possible binary equality relations
+	//! among these, resulting in \f$ 2^6 = 64 \f$
+	//! different values.
+	//!
+	//! \param  yi  label of the example corresponding to the first variable (i,m)
+	//! \param  yj  label of the example corresponding to the second variable (j,n)
+	//! \param  vi  label 'm' of the first variable
+	//! \param  vj  label 'n' of the second variable
 	inline double Modifier(unsigned int yi, unsigned int yj, unsigned int vi, unsigned int vj) const
 	{
 		unsigned int index = 0;
-		if (yi == yj) index += 1;
-		if (vi == vj) index += 2;
-		if (yi == vj) index += 4;
-		if (yj == vi) index += 8;
-		if (yi == vi) index += 16;
-		if (yj == vj) index += 32;
+		if (yi == yj) index += 1;			// bit 0 indicates y_i = y_j
+		if (vi == vj) index += 2;			// bit 1 indicates m = n
+		if (yi == vj) index += 4;			// bit 2 indicates y_i = n
+		if (yj == vi) index += 8;			// bit 3 indicates y_j = m
+		if (yi == vi) index += 16;			// bit 4 indicates y_i = m
+		if (yj == vj) index += 32;			// bit 5 indicates y_j = n
 		return m_modifier[index];
 	}
 

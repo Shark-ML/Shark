@@ -1584,6 +1584,50 @@ bool CrammerSingerMcSVM::isFeasible()
 ////////////////////////////////////////////////////////////////////////////////
 
 
+LLWMcSVM::LLWMcSVM(MultiClassSVM* pSVM, double C, bool unconstrained)
+: MetaSVM(pSVM, 1)
+{
+	exponential = unconstrained;
+	set_C(C);
+}
+
+LLWMcSVM::~LLWMcSVM()
+{
+}
+
+
+bool LLWMcSVM::isFeasible()
+{
+	if (! exponential && parameter(0) <= 0.0) return false;
+	return MetaSVM::isFeasible();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+DGIMcSVM::DGIMcSVM(MultiClassSVM* pSVM, double C, bool unconstrained)
+: MetaSVM(pSVM, 1)
+{
+	exponential = unconstrained;
+	set_C(C);
+}
+
+DGIMcSVM::~DGIMcSVM()
+{
+}
+
+
+bool DGIMcSVM::isFeasible()
+{
+	if (! exponential && parameter(0) <= 0.0) return false;
+	return MetaSVM::isFeasible();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 OVAMcSVM::OVAMcSVM(MultiClassSVM* pSVM, double C)
 : MetaSVM(pSVM, 1)
 {
@@ -1632,7 +1676,7 @@ SVM_Optimizer::SVM_Optimizer()
 
 	printInfo = false;
 	accuracy = 0.001;
-	cacheMB = 100;
+	cacheMB = 256;
 	maxIter = -1;
 	maxSeconds = -1;
 
@@ -1668,6 +1712,8 @@ void SVM_Optimizer::init(Model& model)
 	GaussianProcess* gaussproc = dynamic_cast<GaussianProcess*>(&model);
 	AllInOneMcSVM* aio = dynamic_cast<AllInOneMcSVM*>(&model);
 	CrammerSingerMcSVM* cs = dynamic_cast<CrammerSingerMcSVM*>(&model);
+	LLWMcSVM* llw = dynamic_cast<LLWMcSVM*>(&model);
+	DGIMcSVM* dgi = dynamic_cast<DGIMcSVM*>(&model);
 	OVAMcSVM* ova = dynamic_cast<OVAMcSVM*>(&model);
 	OCCMcSVM* bc = dynamic_cast<OCCMcSVM*>(&model);
 
@@ -1707,6 +1753,16 @@ void SVM_Optimizer::init(Model& model)
 	{
 		mode = eCrammerSinger;
 		C = cs->get_C();
+	}
+	else if (llw != NULL)
+	{
+		mode = eLLW;
+		C = llw->get_C();
+	}
+	else if (dgi != NULL)
+	{
+		mode = eDGI;
+		C = dgi->get_C();
 	}
 	else if (ova != NULL)
 	{
@@ -1768,6 +1824,8 @@ double SVM_Optimizer::optimize(Model& model, ErrorFunction& error, const Array<d
 
 		case eAllInOne:
 		case eCrammerSinger:
+		case eLLW:
+		case eDGI:
 		case eOVA:
 		case eOCC:
 		{
@@ -2237,7 +2295,8 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0,
 			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0
 // TODO: Above are the constants for the Weston&Watkins approach,
-//       below for Vapnik's original formulation.
+//       below for Vapnik's original formulation. They differ only
+//       by a factor of two.
 //       Change to the latter one for improved consistency of the code?
 // 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
 // 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
@@ -2288,7 +2347,7 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 				if (y == c)
 				{
 					linear(index) = 0.0;
-					lower(index) = (1.0 - classes) * C;
+					lower(index) = -C;
 					upper(index) = 0.0;
 				}
 				else
@@ -2307,6 +2366,118 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 			0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 		};
+
+		QpMcStzDecomp* solver = new QpMcStzDecomp(*cache);
+		this->solver = solver;
+		solver->setMaxIterations(maxIter);
+		solver->Solve(classes, mod, target, linear, lower, upper, alpha, accuracy);
+		optimal = solver->isOptimal();
+
+		for (i=0; i < variables; i++) model.setParameter(i, -alpha(i));
+	}
+	else if (mode == eLLW)
+	{
+		Array<double> alpha(variables);
+		Array<double> linear(variables);
+		Array<double> lower(variables);
+		Array<double> upper(variables);
+
+		matrix = new KernelMatrix(kernel, input);
+		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
+
+		double cm1bc = (classes - 1.0) / classes;
+		double m1bc = -1.0 / classes;
+
+		unsigned int e, c;
+		unsigned int index = 0;
+		for (e=0; e<examples; e++)
+		{
+			for (c=0; c<classes; c++)
+			{
+				alpha(index) = model.getParameter(index);
+				unsigned int y = (unsigned int)target(e, 0);
+				if (y == c)
+				{
+					linear(index) = cm1bc;
+					lower(index) = 0.0;
+				}
+				else
+				{
+					linear(index) = m1bc;
+					lower(index) = -C;
+				}
+				upper(index) = 0.0;
+				index++;
+			}
+		}
+
+		double mod[64];
+		for (c=0; c<64; c++) mod[c] = (c & 2) ? cm1bc : m1bc;
+
+		QpMcDecomp* solver = new QpMcDecomp(*cache);
+		this->solver = solver;
+		solver->setMaxIterations(maxIter);
+		solver->Set_WSS_Strategy(2);
+		solver->Solve(classes, mod, target, linear, lower, upper, alpha, accuracy);
+		optimal = solver->isOptimal();
+
+		// Wahba's (unnecessary) sum-to-zero constraint:
+		// subtract the example-wise mean. However, this
+		// reduces sparsity in some cases.
+		// The following lines can be commented-out without
+		// changing any results.
+// 		index = 0;
+// 		for (e=0; e<examples; e++)
+// 		{
+// 			double sum = 0.0;
+// 			for (c=0; c<classes; c++) sum += alpha(index + c);
+// 			double mean = sum / (double)classes;
+// 			for (c=0; c<classes; c++) alpha(index + c) -= mean;
+// 			index += classes;
+// 		}
+
+		for (i=0; i < variables; i++) model.setParameter(i, alpha(i));
+	}
+	else if (mode == eDGI)
+	{
+		Array<double> alpha(variables);
+		Array<double> linear(variables);
+		Array<double> lower(variables);
+		Array<double> upper(variables);
+
+		double cm1bc = (classes - 1.0) / classes;
+		double m1bc = -1.0 / classes;
+
+		matrix = new KernelMatrix(kernel, input);
+		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
+
+		unsigned int e, c;
+		unsigned int index = 0;
+		for (e=0; e<examples; e++)
+		{
+			for (c=0; c<classes; c++)
+			{
+				alpha(index) = -model.getParameter(index);
+				unsigned int y = (unsigned int)target(e, 0);
+				if (y == c)
+				{
+					linear(index) = 0.0;
+					lower(index) = -C;
+					upper(index) = 0.0;
+				}
+				else
+				{
+					linear(index) = 1.0;
+					lower(index) = 0.0;
+					upper(index) = C;
+				}
+				index++;
+			}
+		}
+
+		double mod[64];
+		for (c=0; c<16; c++) mod[c] = (c & 2) ? cm1bc : m1bc;
+		for (c=16; c<64; c++) mod[c] = 0.0;
 
 		QpMcStzDecomp* solver = new QpMcStzDecomp(*cache);
 		this->solver = solver;
