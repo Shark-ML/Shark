@@ -2630,7 +2630,6 @@ void QpMcStzDecomp::Solve(unsigned int classes,
 				for (b = 0; b < bc; b++)
 				{
 					unsigned int c = ex->variables[b];
-
 					unsigned int vc = variable[c].label;
 					double km_i = Modifier(yij, yc, vi, vc);
 					double km_j = Modifier(yij, yc, vj, vc);
@@ -2664,8 +2663,7 @@ void QpMcStzDecomp::Solve(unsigned int classes,
 bool QpMcStzDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
 {
 	unsigned int e;
-	double largest_up = -1e100;
-	double largest_down = 1e100;
+	double worst_gap = 0.0;
 	double best_gain = 0.0;
 
 	// loop over the examples, defining groups of variables
@@ -2699,12 +2697,11 @@ bool QpMcStzDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
 				if (g < l_d)
 				{
 					l_d = g;
-					ii = c;
 				}
 			}
 		}
-		if (l_u > largest_up) largest_up = l_u;
-		if (l_d < largest_down) largest_down = l_d;
+		double gap = l_u - l_d;
+		if (gap > worst_gap) worst_gap = gap;
 
 		// select second variable according to maximal unconstrained gain
 		unsigned int vi = variable[ii].label;
@@ -2737,7 +2734,7 @@ bool QpMcStzDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
 	if (gradient(i) < gradient(j)) std::swap(i, j);
 
 	// return KKT stopping condition
-	return (largest_up - largest_down < epsilon);
+	return (worst_gap < epsilon);
 }
 
 void QpMcStzDecomp::Shrink()
