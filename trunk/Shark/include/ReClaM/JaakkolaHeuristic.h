@@ -52,6 +52,14 @@ class JaakkolaHeuristic
 public:
 	//! Constructor
 	JaakkolaHeuristic(const Array<double>& input, const Array<double>& target);
+	
+	/*! Alternate constructor. Similar to regular JaakkolaHeuristic, but only using 
+	 * 	a specified sub-set of the input data columns.
+	 *  \param input same as in regular JaakkolaHeuristic
+	 *  \param target same as in regular JaakkolaHeuristic
+	 *  \param select an 1D-array containing indices of those columns the heuristic should operate on. */
+	JaakkolaHeuristic(const Array<double>& input, const Array<double>& target,
+							   const Array<unsigned>& select);
 
 	//! Destructor
 	~JaakkolaHeuristic();
