@@ -357,23 +357,22 @@ void ClassificationWidget::Draw()
 
 		// output the dataset
 		int i, ic = input.dim(0);
-		unsigned int color;
-
-		QPen pen;
-		pen.setWidth(5);
-		pen.setCapStyle(Qt::RoundCap);
+		QColor col;
 		
 		for (i = 0; i < ic; i++)
 		{
 			x = (int)(100.0 * input(i, 0));
 			y = (int)(100.0 * input(i, 1));
 
-			if (target(i, 0) > 0.0) color = 0xffffff80;
-			else color = 0xffff80ff;
+			if (target(i, 0) > 0.0) col = Qt::yellow; 
+			else col = Qt::darkGreen; 
 			
-			pen.setColor(QColor(color));
-			painter.setPen(pen);
-			painter.drawPoint(x, y);
+			painter.fillRect(x - 5, y - 5, 11, 11, QBrush(col));
+			painter.drawRect(x - 5, y - 5, 11, 11);
+			painter.drawLine(x - 1, y, x + 1, y);
+			painter.drawLine(x, y - 1, x, y + 1);
+
+
 		}
 	}
 
