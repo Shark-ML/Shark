@@ -209,7 +209,7 @@ protected:
 	#define IO_CHECK(cond) { if (!(cond)) throw SHARKEXCEPTION("I/O error"); }
 	#define UNDEFINED { throw SHARKEXCEPTION("undefined operator"); }
 	#ifndef ASSERT
-		#define ASSERT(cond) { throw SHARKEXCEPTION("assertion failed"); }
+		#define ASSERT(cond) { if (!(cond)) throw SHARKEXCEPTION("assertion failed"); }
 	#endif
 #else
 	#define RANGE_CHECK(cond) { }
