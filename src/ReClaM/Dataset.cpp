@@ -804,6 +804,34 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 {
 	std::ofstream f(filename);
 	if (! f.is_open()) return false;
+	
+	double min_class = 1e100;
+	double max_class = -1e100;
+	bool binary; //binary or multi-class problem?
+	// determine min/max class values
+	if (training)
+	{
+		int i, ic = trainingData.dim(0);
+		for (i=0; i<ic; i++)
+		{
+			double label = trainingTarget(i, 0);
+			if (label < min_class) min_class = label;
+			if (label > max_class) max_class = label;
+		}
+	}
+	if (test)
+	{
+		int i, ic = trainingData.dim(0);
+		for (i=0; i<ic; i++)
+		{
+			double label = trainingTarget(i, 0);
+			if (label < min_class) min_class = label;
+			if (label > max_class) max_class = label;
+		}
+	}
+	if ( (min_class == -1) && (max_class == +1) ) binary = true;
+	else if (min_class == 0) binary = false;
+	else throw SHARKEXCEPTION("[Dataset::SaveLIBSVM] Unknown class label format.");
 
 	if (training)
 	{
@@ -814,11 +842,14 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 		for (i=0; i<ic; i++)
 		{
 			double label = trainingTarget(i, 0);
-			f << label;
+			if (binary) 
+				f << label;
+			else 
+				f << label + 1; //convert from 0-based to 1-based class indices
 			for (d=0; d<dim; d++)
 			{
 				double value = trainingData(i, d);
-				if (value != 0.0) f << " " << d << ":" << value;
+				if (value != 0.0) f << " " << d+1 << ":" << value; //features are 1-based, too
 			}
 			f << "\n";
 		}
@@ -833,11 +864,14 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 		for (i=0; i<ic; i++)
 		{
 			double label = testTarget(i, 0);
-			f << label;
+			if (binary) 
+				f << label;
+			else 
+				f << label + 1; //convert from 0-based to 1-based class indices
 			for (d=0; d<dim; d++)
 			{
 				double value = testData(i, d);
-				if (value != 0.0) f << " " << d << ":" << value;
+				if (value != 0.0) f << " " << d+1 << ":" << value; //features are 1-based, too
 			}
 			f << "\n";
 		}
