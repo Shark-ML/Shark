@@ -814,7 +814,6 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 		for (i=0; i<ic; i++)
 		{
 			double label = trainingTarget(i, 0);
-			RANGE_CHECK (label == 1.0 || label == -1.0);
 			f << label;
 			for (d=0; d<dim; d++)
 			{
@@ -834,7 +833,6 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 		for (i=0; i<ic; i++)
 		{
 			double label = testTarget(i, 0);
-			RANGE_CHECK (label == 1.0 || label == -1.0);
 			f << label;
 			for (d=0; d<dim; d++)
 			{
