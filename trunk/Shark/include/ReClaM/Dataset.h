@@ -203,6 +203,13 @@ protected:
 class Dataset
 {
 public:
+
+	//! Generic #Dataset constructor which does nothing. Only use when wanting to load non-Shark file formats.
+	//! It must be followed by a LoadX command such as #LoadLIBSVM 
+	//! by which the actual non-Shark formatted data will be read and converted to Shark format.
+	//! To load from Shark-format files or other structures, use constructors below.
+	Dataset();
+
 	//! Construction of a #Dataset from another #Dataset
 	Dataset(const Dataset & dataset);
 
@@ -290,8 +297,27 @@ public:
 	//!
 	bool Save(const char* filename, bool training = true, bool test = true, const char* format = "ascii");
 
+
 	//!
-	//! \brief Save the current Dataset in LIBSVM format
+	//! \brief Generate a Dataset from a LIBSVM formatted file.
+	//!
+	//! \par
+	//! You might consider testing your LIBSVM files with the checkdata.py 
+	//! script provided within LIBSVM to ensure its correctness.
+	//! The following features of are not yet supported:
+	//! <ul>
+	//! 	<li>LIBSVM precomputed kernel format</li>
+	//! </ul>
+	//! 
+	//! \param  filename  name of the LIBSVM file to read
+	//! \param  train     how many training samples to get from the file
+	//! \param  test      how many training samples to get from the file. default: all remaining ones
+	//! \return The method returns true on success and false in case of failure.
+	//!
+	bool LoadLIBSVM(const char* filename, unsigned int train, unsigned int test = 0);
+
+	//!
+	//! \brief Save the current Dataset in LIBSVM format.
 	//!
 	//! \param  filename  name of the file, must not exist
 	//! \param  training  include the training data?

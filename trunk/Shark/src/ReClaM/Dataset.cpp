@@ -38,6 +38,9 @@
 
 
 #include <fstream>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
 #include <vector>
 #include <algorithm>
 #include <SharkDefs.h>
@@ -414,6 +417,14 @@ int DataFile::DiscardUntil(const char* separators)
 
 
 ////////////////////////////////////////////////////////////
+
+Dataset::Dataset()
+{
+	this->trainingData.resize(0);
+	this->trainingTarget.resize(0);
+	this->testData.resize(0);
+	this->testTarget.resize(0);
+}
 
 Dataset::Dataset(const Dataset& dataset)
 {
@@ -800,14 +811,195 @@ bool Dataset::Save(const char* filename, bool training, bool test, const char* f
 	return true;
 }
 
+bool Dataset::LoadLIBSVM(const char* filename, unsigned int train, unsigned int test)
+{
+	std::ifstream file( filename );
+	
+	if ( !file.is_open() ) 
+		throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot open file");
+	else 
+	{
+		// cardinalities:
+		unsigned int examples = 0;
+		unsigned int features = 0;
+		unsigned int classes = 0;
+		unsigned int cur_index = 0;
+		unsigned int last_index = 0;
+		
+		// other info vars:
+		double cur_target = 0.0;
+		double min_target = 1e100;
+		double max_target = -1e100;
+		double cur_value = 0.0;
+		bool binary; //binary or multi-class problem?
+		bool regression; //real-valued or integer target values?
+		
+		// i/o helpers:
+		std::string line; 
+		std::string cur_token; 
+		std::string cur_subtoken;
+		std::istringstream line_stream;
+		std::istringstream token_stream;
+		std::istringstream subtoken_stream;
+		char c;
+		
+		ws(file); //skip leading whitespace lines
+		// SCAN CARDINALITIES: only look through the file once. also some sanity checks.
+		while( std::getline(file, line) ) //one loop = one line
+		{
+			// prepare the line for further processing
+			line_stream.clear(); //reset..
+			line_stream.str( line ); //..and assign
+			std::ws( line_stream ); //skip leading whitespace in front of target
+			
+			// read and process target label
+			if ( !std::getline( line_stream, cur_token, ' ' ) )
+				throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot retrieve target token");
+			token_stream.clear(); //reset..
+			token_stream.str( cur_token ); //..and assign
+			if ( !(token_stream >> cur_target) || token_stream.get(c) ) //convert to double with safety checks
+				throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot read target token");
+			if (cur_target < min_target) min_target = cur_target;
+			if (cur_target > max_target) max_target = cur_target;
+			if (cur_target != (int)cur_target ) regression = true;
+			std::ws( line_stream ); //skip leading whitespace in front of next i-v-pair
+			
+			// read and process index-value-pairs
+			while ( std::getline( line_stream, cur_token, ' ' ) ) //one loop = one index-value-pair
+			{
+				// prepare index-value-pair for further processing
+				token_stream.clear(); //reset..
+				token_stream.str( cur_token ); //..and assign
+				
+				// extract feature index
+				if ( !getline(token_stream, cur_subtoken, ':') )
+					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot retrieve feature index");
+				subtoken_stream.clear(); //reset..
+				subtoken_stream.str( cur_subtoken ); //..and assign
+				if ( !(subtoken_stream >> cur_index) || subtoken_stream.get(c) ) //convert to unsigned int with safety checks
+					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot read feature index");
+				if ( cur_index != (int)cur_index ) 
+					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] expecting only integer feature indices");
+				if ( cur_index <= last_index ) 
+					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] expecting strictly increasing feature indices");
+				if ( cur_index == 0 )
+					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] expecting only 1-based feature indices");
+				if ( cur_index > features ) features = cur_index;
+				last_index = cur_index;
+				std::ws( line_stream ); //skip leading whitespace in front of next i-v-pair
+				// the remaining part in token_stream (i.e., the value) is ignored
+			}
+			last_index = 0; //reset
+			++examples; //count lines
+		}
+			
+		// set target format
+		if ( !regression )
+		{
+			if ( (min_target == -1) && (max_target == +1) ) binary = true;
+			else if (min_target == 0) 
+			{
+				binary = false;
+				classes = (unsigned int)max_target;
+			}
+			else throw SHARKEXCEPTION("[Dataset::SaveLIBSVM] inconsistent target values");
+		}
+		
+		// set train/test split
+		if (test == 0) test = examples-train;
+		if (train + test > examples || train == 0  )
+			throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] invalid split into training and test set");
+		else if ( train+test < examples ) 
+			examples = train+test; //adjust size if not all examples are used
+		
+		// resize internal arrays
+		trainingData.resize(train, features, false);
+		trainingTarget.resize(train, 1, false);
+		testData.resize(test, features, false);
+		testTarget.resize(test, 1, false);
+		
+		// set all features to zero (libsvm is a sparse file format)
+		trainingData = 0.0;
+		testData = 0.0;
+		
+		// ACTUAL READ-IN
+		// reset vars
+		file.clear(); //always clear first, then seek beginning
+		file.seekg(std::ios::beg); //go back to beginning
+		std::ws(file); //skip leading whitespace lines
+		for (unsigned i=0; i<examples; i++) //one loop = one line
+		{
+			// prepare next line for further processing
+			if ( !std::getline(file, line) )
+				throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot re-read all examples");
+			line_stream.clear(); //reset..
+			line_stream.str( line ); //..and assign
+			std::ws( line_stream ); //skip leading whitespace in front of target
+			
+			// read and assign target label
+			if ( !std::getline( line_stream, cur_token, ' ' ) )
+				throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot re-retrieve target token");
+			token_stream.clear(); //reset..
+			token_stream.str( cur_token ); //..and assign
+			if ( !(token_stream >> cur_target) || token_stream.get(c) ) //convert to double with safety checks
+				throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot re-read target token");
+			if ( !regression && !binary )
+				cur_target -= 1; //multi-class dataset: convert from 1-based to 0-based class indices
+			if ( i < train ) 
+				trainingTarget(i, 0) = cur_target;
+			else 
+				testTarget(i-train, 0) = cur_target;
+			std::ws( line_stream ); //skip leading whitespace in front of next i-v-pair
+			
+			// read and assign feature values
+			while ( getline( line_stream, cur_token, ' ' ) ) //one loop = one index-value-pair
+			{
+				// prepare index-value-pair for further processing
+				token_stream.clear(); //reset..
+				token_stream.str( cur_token ); //..and assign
+				
+				// extract feature index
+				if ( !std::getline(token_stream, cur_subtoken, ':') )
+					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot re-retrieve feature index");
+				subtoken_stream.clear(); //reset..
+				subtoken_stream.str( cur_subtoken ); //..and assign
+				if ( !(subtoken_stream >> cur_index) || subtoken_stream.get(c) ) //convert to unsigned int with safety checks
+					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot re-read feature index");
+				--cur_index; //convert from 1-based to 0-based feature indices
+				
+				// extract corresponding feature value
+				if ( !std::getline(token_stream, cur_subtoken) )
+					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot retrieve feature value");
+				subtoken_stream.clear(); //reset..
+				subtoken_stream.str( cur_subtoken ); //..and assign
+				if ( !(subtoken_stream >> cur_value) || subtoken_stream.get(c) ) //convert to double with safety checks
+					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot read feature value");
+				
+				// assign feature value to data
+				if ( i < train ) 
+					trainingData(i, cur_index) = cur_value;
+				else 
+					testData(i-train, cur_index) = cur_value;
+					
+				std::ws( line_stream ); //skip leading whitespace in front of next i-v-pair
+			}
+		}
+		
+		file.close();
+		return true;
+	}
+}
+
 bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 {
 	std::ofstream f(filename);
 	if (! f.is_open()) return false;
 	
-	double min_class = 1e100;
-	double max_class = -1e100;
+	double min_target = 1e100;
+	double max_target = -1e100;
 	bool binary; //binary or multi-class problem?
+	bool regression; //regression task?
+	
 	// determine min/max class values
 	if (training)
 	{
@@ -815,23 +1007,30 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 		for (i=0; i<ic; i++)
 		{
 			double label = trainingTarget(i, 0);
-			if (label < min_class) min_class = label;
-			if (label > max_class) max_class = label;
+			if ( label != (int)label ) regression = true;
+			if (label < min_target) min_target = label;
+			if (label > max_target) max_target = label;
 		}
 	}
 	if (test)
 	{
-		int i, ic = trainingData.dim(0);
+		int i, ic = testData.dim(0);
 		for (i=0; i<ic; i++)
 		{
-			double label = trainingTarget(i, 0);
-			if (label < min_class) min_class = label;
-			if (label > max_class) max_class = label;
+			double label = testTarget(i, 0);
+			if ( label != (int)label ) regression = true;
+			if (label < min_target) min_target = label;
+			if (label > max_target) max_target = label;
 		}
 	}
-	if ( (min_class == -1) && (max_class == +1) ) binary = true;
-	else if (min_class == 0) binary = false;
-	else throw SHARKEXCEPTION("[Dataset::SaveLIBSVM] Unknown class label format.");
+	
+	// set target format
+	if ( !regression )
+	{
+		if ( (min_target == -1) && (max_target == +1) ) binary = true;
+		else if (min_target == 0) binary = false;
+		else throw SHARKEXCEPTION("[Dataset::SaveLIBSVM] inconsistent target values");
+	}
 
 	if (training)
 	{
@@ -842,10 +1041,17 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 		for (i=0; i<ic; i++)
 		{
 			double label = trainingTarget(i, 0);
-			if (binary) 
+			if ( regression )
 				f << label;
+			else if ( binary )
+			{
+				if ( label > 0 )
+					f << "+1";
+				else 
+					f << label;
+			}
 			else 
-				f << label + 1; //convert from 0-based to 1-based class indices
+				f << label+1; //convert from 0-based to 1-based class indices
 			for (d=0; d<dim; d++)
 			{
 				double value = trainingData(i, d);
@@ -864,8 +1070,15 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 		for (i=0; i<ic; i++)
 		{
 			double label = testTarget(i, 0);
-			if (binary) 
+			if ( regression )
 				f << label;
+			else if ( binary )
+			{
+				if ( label > 0 )
+					f << "+1";
+				else 
+					f << label;
+			}
 			else 
 				f << label + 1; //convert from 0-based to 1-based class indices
 			for (d=0; d<dim; d++)
