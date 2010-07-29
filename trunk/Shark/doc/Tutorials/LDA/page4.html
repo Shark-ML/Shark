@@ -53,7 +53,8 @@ public:
 int main(int argc, char** argv)
 {
     MultiClassProblem problem;
-    Dataset dataset(problem, 100, 1000);
+    Dataset dataset;
+    dataset.CreateFromSource(problem, 100, 1000);
 
     LinearClassifier model(2, 3);
     LDA optimizer;
