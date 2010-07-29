@@ -237,6 +237,18 @@ public:
 	void CreateFromArrays(const Array<double>& trainingData, const Array<double>& trainingTarget);
 	void CreateFromArrays(const Array<double>& trainingData, const Array<double>& trainingTarget, const Array<double>& testData, const Array<double>& testTarget);
 
+	//! \brief Generate a Dataset from a LIBSVM formatted file.
+	//!
+	//! \par
+	//! You might consider testing your LIBSVM files with the checkdata.py 
+	//! script provided within LIBSVM to ensure its correctness.
+	//! LIBSVM precomputed kernel format is not yet supported.
+	//! 
+	//! \param  filename  name of the LIBSVM file to read
+	//! \param  train     how many training samples to get from the file
+	//! \param  test      how many training samples to get from the file. default: all remaining ones
+	void CreateFromLibsvmFile(const char* filename, unsigned int train, unsigned int test = 0);
+	
 
 	//! shuffles the training examples
 	void ShuffleTraining();
@@ -298,25 +310,6 @@ public:
 	//!
 	bool Save(const char* filename, bool training = true, bool test = true, const char* format = "ascii");
 
-
-	//!
-	//! \brief Generate a Dataset from a LIBSVM formatted file.
-	//!
-	//! \par
-	//! You might consider testing your LIBSVM files with the checkdata.py 
-	//! script provided within LIBSVM to ensure its correctness.
-	//! The following features of are not yet supported:
-	//! <ul>
-	//! 	<li>LIBSVM precomputed kernel format</li>
-	//! </ul>
-	//! 
-	//! \param  filename  name of the LIBSVM file to read
-	//! \param  train     how many training samples to get from the file
-	//! \param  test      how many training samples to get from the file. default: all remaining ones
-	//! \return The method returns true on success and false in case of failure.
-	//!
-	bool LoadLIBSVM(const char* filename, unsigned int train, unsigned int test = 0);
-
 	//!
 	//! \brief Save the current Dataset in LIBSVM format.
 	//!
@@ -347,6 +340,14 @@ public:
 	//! component has zero mean and unit variance.
 	//!
 	void NormalizeComponent( int d );
+	
+	//! convert labels of -1 and +1 to 0 and 1, respectively
+	void BinaryToMulticlass();
+	
+	//! convert labels of 0 and 1 to -1 and +1, respectively
+	void MulticlassToBinary();
+	
+	
 
 protected:
 	bool ReadSplitFile(const char* filename, std::vector<unsigned int>& train, std::vector<unsigned int>& test);
