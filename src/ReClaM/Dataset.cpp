@@ -434,48 +434,52 @@ Dataset::Dataset(const Dataset& dataset)
 	this->testTarget     = dataset.getTestTarget();
 }
 
-Dataset::Dataset(DataSource& source, int train, int test)
+Dataset::~Dataset()
+{
+}
+
+
+void Dataset::CreateFromSource(DataSource& source, int train, int test)
 {
 	if (! source.GetData(trainingData, trainingTarget, train))
-		throw SHARKEXCEPTION("[Dataset::Dataset] error generating the dataset");
+		throw SHARKEXCEPTION("[Dataset::CreateFromSource] error generating the dataset");
 	if (! source.GetData(testData, testTarget, test))
-		throw SHARKEXCEPTION("[Dataset::Dataset] error generating the dataset");
+		throw SHARKEXCEPTION("[Dataset::CreateFromSource] error generating the dataset");
 }
 
-Dataset::Dataset(const char* filename, int train, int test)
+void Dataset::CreateFromFile(const char* filename, int train, int test)
 {
 	DataFile file(filename);
-	if (test == 0) test = file.getNumberOfExamples() - train;
+	if (test < 0) test = file.getNumberOfExamples() - train;
 	if (train + test > file.getNumberOfExamples() || train <= 0 || test < 0)
-		throw SHARKEXCEPTION("[Dataset::Dataset] invalid split into training and test set");
+		throw SHARKEXCEPTION("[Dataset::CreateFromFile] invalid split into training and test set");
 	if (! file.GetData(trainingData, trainingTarget, train))
-		throw SHARKEXCEPTION("[Dataset::Dataset] error loading the dataset)");
+		throw SHARKEXCEPTION("[Dataset::CreateFromFile] error loading the dataset)");
 	if (! file.GetData(testData, testTarget, test))
-		throw SHARKEXCEPTION("[Dataset::Dataset] error loading the dataset)");
+		throw SHARKEXCEPTION("[Dataset::CreateFromFile] error loading the dataset)");
 }
 
-Dataset::Dataset(const char* filename, double train)
+void Dataset::CreateFromFile(const char* filename, double train, double test)
 {
 	DataFile file(filename);
 	int n_train = (int)(file.getNumberOfExamples() * train);
-	int n_test = (int)(file.getNumberOfExamples() * (1.0 - train));
-	if (! file.GetData(trainingData, trainingTarget, n_train))
-		throw SHARKEXCEPTION("[Dataset::Dataset] error loading the dataset");
-	if (! file.GetData(testData, testTarget, n_test))
-		throw SHARKEXCEPTION("[Dataset::Dataset] error loading the dataset");
+	int n_test;
+	if (test < 0.0) n_test = file.getNumberOfExamples() - n_train;
+	else n_test = (int)(file.getNumberOfExamples() * test);
+	CreateFromFile(filename, n_train, n_test);
 }
 
-Dataset::Dataset(const char* trainfile, const char* testfile)
+void Dataset::CreateFromPairOfFiles(const char* trainfile, const char* testfile)
 {
 	DataFile file1(trainfile);
 	DataFile file2(testfile);
 	if (! file1.GetData(trainingData, trainingTarget, file1.getNumberOfExamples()))
-		throw SHARKEXCEPTION("[Dataset::Dataset] error loading the dataset");
+		throw SHARKEXCEPTION("[Dataset::CreateFromPairOfFiles] error loading the dataset");
 	if (! file2.GetData(testData, testTarget, file2.getNumberOfExamples()))
-		throw SHARKEXCEPTION("[Dataset::Dataset] error loading the dataset");
+		throw SHARKEXCEPTION("[Dataset::CreateFromPairOfFiles] error loading the dataset");
 }
 
-Dataset::Dataset(const char* trainfile, const char* testfile, int train)
+void Dataset::CreateFromPairOfFiles(const char* trainfile, const char* testfile, int train)
 {
 	Array<double> dataTrain;
 	Array<double> targetTrain;
@@ -484,16 +488,16 @@ Dataset::Dataset(const char* trainfile, const char* testfile, int train)
 	DataFile file1(trainfile);
 	DataFile file2(testfile);
 	if (! file1.GetData(dataTrain, targetTrain, file1.getNumberOfExamples()))
-		throw SHARKEXCEPTION("[Dataset::Dataset] error loading the dataset");
+		throw SHARKEXCEPTION("[Dataset::CreateFromPairOfFiles] error loading the dataset");
 	if (! file2.GetData(dataTest, targetTest, file2.getNumberOfExamples()))
-		throw SHARKEXCEPTION("[Dataset::Dataset] error loading the dataset");
+		throw SHARKEXCEPTION("[Dataset::CreateFromPairOfFiles] error loading the dataset");
 
 	int tfs = dataTrain.dim(0);
 	int all = tfs + dataTest.dim(0);
 	int test = all - train;
 	int dim = dataTrain.dim(1);
 	int i, j, k;
-	if (train <= 0 || test <= 0) throw SHARKEXCEPTION("[Dataset::Dataset] invalid split into training and test set");
+	if (train <= 0 || test <= 0) throw SHARKEXCEPTION("[Dataset::CreateFromPairOfFiles] invalid split into training and test set");
 
 	trainingData.resize(train, dim, false);
 	trainingTarget.resize(train, 1, false);
@@ -537,17 +541,17 @@ Dataset::Dataset(const char* trainfile, const char* testfile, int train)
 	}
 }
 
-Dataset::Dataset(const char* datafile, const char* splitfile, double disambiguation)
+void Dataset::CreateFromSplitFile(const char* datafile, const char* splitfile)
 {
 	DataFile data(datafile);
 
 	std::vector<unsigned int> train;
 	std::vector<unsigned int> test;
-	if (! ReadSplitFile(splitfile, train, test)) throw SHARKEXCEPTION("[Dataset::Dataset] error reading the split file");
+	if (! ReadSplitFile(splitfile, train, test)) throw SHARKEXCEPTION("[Dataset::CreateFromSplitFile] error reading the split file");
 
 	int n_train = train.size();
 	int n_test = test.size();
-	if (data.getNumberOfExamples() != n_train + n_test) throw SHARKEXCEPTION("[Dataset::Dataset] data file and split file do not match");
+	if (data.getNumberOfExamples() != n_train + n_test) throw SHARKEXCEPTION("[Dataset::CreateFromSplitFile] data file and split file do not match");
 	int dim_data = data.getDataDimension();
 	int dim_target = data.getTargetDimension();
 
@@ -579,18 +583,25 @@ Dataset::Dataset(const char* datafile, const char* splitfile, double disambiguat
 			testTarget[te] = tmp_target[0];
 			te++;
 		}
-		else throw SHARKEXCEPTION("[Dataset::Dataset] split file is inconsistent");
+		else throw SHARKEXCEPTION("[Dataset::CreateFromSplitFile] split file is inconsistent");
 	}
 }
 
-Dataset::Dataset(const Array<double>& trainingData, const Array<double>& trainingTarget, const Array<double>& testData, const Array<double>& testTarget)
+void Dataset::CreateFromArrays(const Array<double>& trainingData, const Array<double>& trainingTarget)
+{
+	this->trainingData = trainingData;
+	this->trainingTarget = trainingTarget;
+	this->testData = Array<double>();
+	this->testTarget = Array<double>();
+}
+
+void Dataset::CreateFromArrays(const Array<double>& trainingData, const Array<double>& trainingTarget, const Array<double>& testData, const Array<double>& testTarget)
 {
 	this->trainingData = trainingData;
 	this->trainingTarget = trainingTarget;
 	this->testData = testData;
 	this->testTarget = testTarget;
 }
-
 
 void Dataset::ShuffleTraining()
 {
@@ -831,9 +842,9 @@ bool Dataset::LoadLIBSVM(const char* filename, unsigned int train, unsigned int 
 		double min_target = 1e100;
 		double max_target = -1e100;
 		double cur_value = 0.0;
-		bool binary; //binary or multi-class problem?
-		bool regression; //real-valued or integer target values?
-		
+		bool binary = true; //binary or multi-class problem?
+		bool regression = false; //real-valued or integer target values?
+
 		// i/o helpers:
 		std::string line; 
 		std::string cur_token; 
@@ -878,7 +889,7 @@ bool Dataset::LoadLIBSVM(const char* filename, unsigned int train, unsigned int 
 				subtoken_stream.str( cur_subtoken ); //..and assign
 				if ( !(subtoken_stream >> cur_index) || subtoken_stream.get(c) ) //convert to unsigned int with safety checks
 					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] cannot read feature index");
-				if ( cur_index != (int)cur_index ) 
+				if ( cur_index != cur_index ) 
 					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] expecting only integer feature indices");
 				if ( cur_index <= last_index ) 
 					throw SHARKEXCEPTION("[Dataset::LoadLIBSVM] expecting strictly increasing feature indices");
@@ -997,9 +1008,9 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 	
 	double min_target = 1e100;
 	double max_target = -1e100;
-	bool binary; //binary or multi-class problem?
-	bool regression; //regression task?
-	
+	bool binary = true; //binary or multi-class problem?
+	bool regression = false; //regression task?
+
 	// determine min/max class values
 	if (training)
 	{
@@ -1023,7 +1034,7 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 			if (label > max_target) max_target = label;
 		}
 	}
-	
+
 	// set target format
 	if ( !regression )
 	{

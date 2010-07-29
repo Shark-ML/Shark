@@ -13,12 +13,6 @@
 *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
 *      <BR> 
 *
-*  \par Project:
-*      ReClaM
-*
-*
-*  <BR>
-*
 *
 *  <BR><HR>
 *  This file is part of ReClaM. This library is free software;
@@ -94,7 +88,8 @@ int main()
 	// create the xor problem with uniformly distributed examples
 	cout << "Generating " << examples << " examples from the XOR distribution ..." << flush;
 	Chessboard chess(2, 2);
-	Dataset dataset(chess, examples, 10000);
+	Dataset dataset;
+	dataset.CreateFromSource(chess, examples, 10000);
 	const Array<double>& x = dataset.getTrainingData();
 	const Array<double>& y = dataset.getTrainingTarget();
 	int l_plus = 0;

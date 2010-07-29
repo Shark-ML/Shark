@@ -203,38 +203,39 @@ protected:
 class Dataset
 {
 public:
-
-	//! Generic #Dataset constructor which does nothing. Only use when wanting to load non-Shark file formats.
-	//! It must be followed by a LoadX command such as #LoadLIBSVM 
-	//! by which the actual non-Shark formatted data will be read and converted to Shark format.
-	//! To load from Shark-format files or other structures, use constructors below.
+	//! Default constructor
 	Dataset();
 
 	//! Construction of a #Dataset from another #Dataset
 	Dataset(const Dataset & dataset);
 
-	//! Construction of a #Dataset from a generic #DataSource
-	Dataset(DataSource& source, int train, int test);
+	virtual ~Dataset();
 
-	//! Construction of a #Dataset from a single file
-	Dataset(const char* filename, int train, int test = 0);
+	//! Create a Dataset from a generic DataSource
+	void CreateFromSource(DataSource& source, int train, int test);
 
-	//! Construction of a #Dataset from a single file
-	Dataset(const char* filename, double train);
+	//! Load a Dataset from a single file,
+	//! with a given absolute number of training and test patterns
+	void CreateFromFile(const char* filename, int train, int test = -1);
 
-	//! Construction of a #Dataset from a pair of files
-	Dataset(const char* trainfile, const char* testfile);
+	//! Load a Dataset from a single file,
+	//! with a given fraction of training and test patterns
+	void CreateFromFile(const char* filename, double train, double test = -1.0);
 
-	//! Construction of a #Dataset from a pair of files,
+	//! Load a Dataset from a pair of files
+	void CreateFromPairOfFiles(const char* trainfile, const char* testfile);
+
+	//! Load a Dataset from a pair of files,
 	//! but using a different data separation into training
 	//! and test set.
-	Dataset(const char* trainfile, const char* testfile, int train);
+	void CreateFromPairOfFiles(const char* trainfile, const char* testfile, int train);
 
-	//! Construction of a Dataset from a data file and a split file.
-	Dataset(const char* datafile, const char* splitfile, double disambiguation);
+	//! Load a Dataset from a data file and a split file.
+	void CreateFromSplitFile(const char* datafile, const char* splitfile);
 
-	//! Construction of a #Dataset object from given arrays
-	Dataset(const Array<double>& trainingData, const Array<double>& trainingTarget, const Array<double>& testData, const Array<double>& testTarget);
+	//! Create a Dataset object from arrays
+	void CreateFromArrays(const Array<double>& trainingData, const Array<double>& trainingTarget);
+	void CreateFromArrays(const Array<double>& trainingData, const Array<double>& trainingTarget, const Array<double>& testData, const Array<double>& testTarget);
 
 
 	//! shuffles the training examples

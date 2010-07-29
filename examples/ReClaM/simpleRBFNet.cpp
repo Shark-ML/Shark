@@ -13,15 +13,9 @@
  *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *      <BR>
  *
- *  \par Project:
- *      ReClaM
- *
- *
- *  <BR>
- *
  *
  *  <BR><HR>
- *  This file is part of ReClaM. This library is free software;
+ *  This file is part of Shark. This library is free software;
  *  you can redistribute it and/or modify it under the terms of the
  *  GNU General Public License as published by the Free Software
  *  Foundation; either version 2, or (at your option) any later version.
@@ -159,5 +153,3 @@ int main()
 	if (msError.error(rbfn, inTrain, outTrain) < 2.40628) exit(EXIT_SUCCESS);
 	else exit(EXIT_FAILURE);
 }
-
-

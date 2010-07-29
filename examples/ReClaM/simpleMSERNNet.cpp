@@ -155,4 +155,3 @@ int main(int argc, char *argv[])
 	if (net.error(net, evalIn, evalTarget) < 0.00135) exit(EXIT_SUCCESS);
 	else exit(EXIT_FAILURE);
 }
-

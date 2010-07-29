@@ -81,7 +81,8 @@ int main(int argc, char** argv)
 {
 	// generate multi class dataset with 100 training and 1000 test examples
 	MultiClassProblem problem;
-	Dataset dataset(problem, 100, 1000);
+	Dataset dataset;
+	dataset.CreateFromSource(problem, 100, 1000);
 
 	// construct model and optimizer for LDA with 2 dimensions and 3 classes
 	LinearClassifier model(2, 3);

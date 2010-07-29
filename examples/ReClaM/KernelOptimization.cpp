@@ -59,7 +59,8 @@ int main()
 	double gamma = 1.0;
 
 	Chessboard chess;
-	Dataset ds(chess, examples, 0);
+	Dataset ds;
+	ds.CreateFromSource(chess, examples, 0);
 	const Array<double>& x = ds.getTrainingData();
 	const Array<double>& y = ds.getTrainingTarget();
 

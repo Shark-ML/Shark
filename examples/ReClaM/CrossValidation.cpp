@@ -78,7 +78,8 @@ int main(int argc, char** argv)
 	// from the chessboard distribution
 	printf("\ngenerating 500 training and 10000 test chess board examples ..."); fflush(stdout);
 	Chessboard chess;
-	Dataset dataset(chess, 500, 10000);
+	Dataset dataset;
+	dataset.CreateFromSource(chess, 500, 10000);
 	printf(" done.\n");
 
 	// kernel function

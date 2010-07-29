@@ -14,7 +14,6 @@
 *      <BR> 
 *
 *
-*
 *  <BR><HR>
 *  This file is part of Shark. This library is free software;
 *  you can redistribute it and/or modify it under the terms of the
@@ -56,7 +55,8 @@ int main()
 	// create the xor problem with uniformly distributed examples
 	cout << "Generating 100 training and 10000 test examples ..." << flush;
 	Chessboard chess(2, 2);
-	Dataset dataset(chess, 100, 10000);
+	Dataset dataset;
+	dataset.CreateFromSource(chess, 100, 10000);
 	const Array<double>& x = dataset.getTrainingData();
 	const Array<double>& y = dataset.getTrainingTarget();
 	cout << " done." << endl;
