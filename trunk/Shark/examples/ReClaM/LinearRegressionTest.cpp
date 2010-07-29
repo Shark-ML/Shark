@@ -75,7 +75,8 @@ int main(int argc, char** argv)
 {
 	// generate multi class dataset with 100 training and 1000 test examples
 	RegressionProblem problem;
-	Dataset dataset(problem, 100, 1000);
+	Dataset dataset;
+	dataset.CreateFromSource(problem, 100, 1000);
 
 	// construct model and optimizer
 	AffineLinearFunction model(1);

@@ -56,9 +56,10 @@ NegativeLogLikelihood::~NegativeLogLikelihood()
 
 double NegativeLogLikelihood::error(Model& model, const Array<double>& input, const Array<double>& target)
 {
+	double ret = 0.0;
+
 	if (m_LabelType == elBinary)
 	{
-		double ret = 0.0;
 		if (input.ndim() == 1)
 		{
 			Array<double> output(1);
@@ -78,11 +79,9 @@ double NegativeLogLikelihood::error(Model& model, const Array<double>& input, co
 			}
 		}
 		else throw SHARKEXCEPTION("[NegativeLogLikelihood::error] invalid dimension");
-		return ret;
 	}
 	else if (m_LabelType == elNumber)
 	{
-		double ret = 0.0;
 		if (input.ndim() == 1)
 		{
 			Array<double> output(1);
@@ -104,11 +103,9 @@ double NegativeLogLikelihood::error(Model& model, const Array<double>& input, co
 			}
 		}
 		else throw SHARKEXCEPTION("[NegativeLogLikelihood::error] invalid dimension");
-		return ret;
 	}
 	else if (m_LabelType == elVector)
 	{
-		double ret = 0.0;
 		if (input.ndim() == 1)
 		{
 			Array<double> output(m_classes);
@@ -126,15 +123,17 @@ double NegativeLogLikelihood::error(Model& model, const Array<double>& input, co
 			}
 		}
 		else throw SHARKEXCEPTION("[NegativeLogLikelihood::error] invalid dimension");
-		return ret;
 	}
+
+	return ret;
 }
 
 double NegativeLogLikelihood::errorDerivative(Model& model, const Array<double>& input, const Array<double>& target, Array<double>& derivative)
 {
+	double ret = 0.0;
+
 	if (m_LabelType == elBinary)
 	{
-		double ret = 0.0;
 		int p, pc = model.getParameterDimension();
 		derivative.resize(pc, false);
 		derivative = 0.0;
@@ -178,11 +177,9 @@ double NegativeLogLikelihood::errorDerivative(Model& model, const Array<double>&
 			}
 		}
 		else throw SHARKEXCEPTION("[NegativeLogLikelihood::errorDerivative] invalid dimension");
-		return ret;
 	}
 	else if (m_LabelType == elNumber)
 	{
-		double ret = 0.0;
 		int p, pc = model.getParameterDimension();
 		derivative.resize(pc, false);
 		derivative = 0.0;
@@ -216,11 +213,9 @@ double NegativeLogLikelihood::errorDerivative(Model& model, const Array<double>&
 			}
 		}
 		else throw SHARKEXCEPTION("[NegativeLogLikelihood::errorDerivative] invalid dimension");
-		return ret;
 	}
 	else if (m_LabelType == elVector)
 	{
-		double ret = 0.0;
 		int p, pc = model.getParameterDimension();
 		derivative.resize(pc, false);
 		derivative = 0.0;
@@ -256,6 +251,7 @@ double NegativeLogLikelihood::errorDerivative(Model& model, const Array<double>&
 			}
 		}
 		else throw SHARKEXCEPTION("[NegativeLogLikelihood::errorDerivative] invalid dimension");
-		return ret;
 	}
+
+	return ret;
 }

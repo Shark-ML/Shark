@@ -13,12 +13,6 @@
 *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
 *      <BR> 
 *
-*  \par Project:
-*      ReClaM
-*
-*
-*  <BR>
-*
 *
 *  <BR><HR>
 *  This file is part of ReClaM. This library is free software;

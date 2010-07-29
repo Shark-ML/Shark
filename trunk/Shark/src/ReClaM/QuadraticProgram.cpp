@@ -1095,6 +1095,7 @@ QpBoxDecomp::QpBoxDecomp(CachedMatrix& quadraticPart)
 	}
 
 	maxIter = -1;
+	WSS_Strategy = 1;
 }
 
 QpBoxDecomp::~QpBoxDecomp()
@@ -1166,13 +1167,20 @@ double QpBoxDecomp::StepEdge(double alpha, double g, double Q, double L, double 
 	// compute the optimal unconstrained step
 	double muHat = g / Q;
 
+	// check for numerical problems
+	if (! finite(muHat))
+	{
+		if (g > 0.0) mu = U - alpha;
+		else mu = L - alpha;
+		return 1e100;
+	}
+
 	// compute the optimal constrained step
 	if (muHat < L - alpha) mu = L - alpha;
 	else if (muHat > U - alpha) mu = U - alpha;
 	else mu = muHat;
 
 	// compute (twice) the gain
-	if (! finite(muHat)) return 1e100;
 	double deltaMu = muHat - mu;
 	return (muHat * muHat - deltaMu * deltaMu) * Q;
 }
@@ -2594,10 +2602,10 @@ void QpMcStzDecomp::Solve(unsigned int classes,
 		{
 			double ai = alpha(i);
 			double aj = alpha(j);
-			double Li = boxMin(i);
+// 			double Li = boxMin(i);
 			double Lj = boxMin(j);
 			double Ui = boxMax(i);
-			double Uj = boxMax(j);
+// 			double Uj = boxMax(j);
 			unsigned int eij = variable[i].example;
 			ASSERT(variable[j].example == eij);
 			unsigned int vi = variable[i].label;
@@ -2676,7 +2684,7 @@ bool QpMcStzDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
 		unsigned int b, bc = ex->active;
 
 		// select first variable according to maximal gradient
-		unsigned int ii = 0;
+		unsigned int ii = 0x7fffffff;
 		double l_u = -1e100;
 		double l_d = 1e100;
 		for (b=0; b<bc; b++)
@@ -2697,9 +2705,11 @@ bool QpMcStzDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
 				if (g < l_d)
 				{
 					l_d = g;
+					ii = c;
 				}
 			}
 		}
+		if (ii == 0x7fffffff) continue;
 		double gap = l_u - l_d;
 		if (gap > worst_gap) worst_gap = gap;
 
@@ -2745,7 +2755,7 @@ void QpMcStzDecomp::Shrink()
 	std::vector<double> largest_down(activeEx);
 	double l_up = -1e100;
 	double l_down = 1e100;
-	for (e=0; e<activeEx; e++)
+	for (e=0; e<(int)activeEx; e++)
 	{
 		largest_up[e] = -1e100;
 		largest_down[e] = 1e100;

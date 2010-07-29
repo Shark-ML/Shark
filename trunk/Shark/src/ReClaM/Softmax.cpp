@@ -41,6 +41,7 @@
 #include <SharkDefs.h>
 #include <ReClaM/Softmax.h>
 #include <Array/ArrayOp.h>
+#include <Array/ArrayIo.h>
 
 
 Softmax::Softmax(unsigned int dim)
@@ -52,7 +53,7 @@ Softmax::Softmax(unsigned int dim)
 	parameter.resize(2 * dim, false);
 	for (i=0; i<dim; i++)
 	{
-		parameter(2*i) = 1.0;
+		parameter(2*i) = -1.0;
 		parameter(2*i+1) = 0.0;
 	}
 }
@@ -115,14 +116,13 @@ void Softmax::modelDerivative(const Array<double>& input, Array<double>& derivat
 		}
 		for (j=0; j<inputDimension; j++)
 		{
+			double o = Z(j) / N;
 			for (i=0; i<inputDimension; i++)
 			{
-				double zi = Z(i);
-				double zj = Z(j);
-				double f = zi / N;
-				double s = -f * zj / N;
-				double t = (i == j) ? f - s : -s;
-				derivative(j, 2*i) = input(i) * t;
+				double t = -Z(i) / N;
+				if (i == j) t += 1.0;
+				t *= o;
+				derivative(j, 2*i) = input(j) * t;
 				derivative(j, 2*i+1) = t;
 			}
 		}
@@ -148,17 +148,16 @@ void Softmax::modelDerivative(const Array<double>& input, Array<double>& output,
 		}
 		for (j=0; j<inputDimension; j++)
 		{
+			double o = Z(j) / N;
 			for (i=0; i<inputDimension; i++)
 			{
-				double zi = Z(i);
-				double zj = Z(j);
-				double f = zi / N;
-				double s = -f * zj / N;
-				double t = (i == j) ? f - s : -s;
-				derivative(j, 2*i) = input(i) * t;
+				double t = -Z(i) / N;
+				if (i == j) t += 1.0;
+				t *= o;
+				derivative(j, 2*i) = input(j) * t;
 				derivative(j, 2*i+1) = t;
 			}
-			output(j) = Z(j) / N;
+			output(j) = o;
 		}
 	}
 	else throw SHARKEXCEPTION("[Softmax::modelDerivative] invalid number of dimensions.");

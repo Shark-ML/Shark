@@ -89,7 +89,8 @@ int main(int argc, char* argv[])
 	TestProblem source(classes, variance);
 
 	// sample training and test dataset
-	Dataset dataset(source, 500, 10000);
+	Dataset dataset;
+	dataset.CreateFromSource(source, 500, 10000);
 
 	// setup the kernel and the classifiers
 	double C = 0.01;

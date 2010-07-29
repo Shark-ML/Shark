@@ -16,12 +16,6 @@
  *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
  *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *
- *  \par Project:
- *      ReClaM
- *
- *
- *  <BR>
- *
  *
  *  <BR><HR>
  *  This file is part of ReClaM. This library is free software;
@@ -74,11 +68,12 @@ int main(int argc, char** argv)
 	// generate feature vectors
 	//
 	Chessboard chess;
-	Dataset* dataset = new Dataset(chess, 500, 10000);
-	const Array<double>& trainData       = dataset->getTrainingData();
-	const Array<double>& trainDataLabels = dataset->getTrainingTarget();
-	const Array<double>& testData        = dataset->getTestData();
-	const Array<double>& testDataLabels  = dataset->getTestTarget();
+	Dataset dataset;
+	dataset.CreateFromSource(chess, 500, 10000);
+	const Array<double>& trainData       = dataset.getTrainingData();
+	const Array<double>& trainDataLabels = dataset.getTrainingTarget();
+	const Array<double>& testData        = dataset.getTestData();
+	const Array<double>& testDataLabels  = dataset.getTestTarget();
 
 	cout << "SVM training\n";
 	SVMopt.optimize(svm, trainData, trainDataLabels);

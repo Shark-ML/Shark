@@ -59,8 +59,8 @@
 //! as the probability of an example being positive.
 //!
 //! \par
-//! With data \f$ x_i, y_i \f$ and a model f the error function is
-//! \f$ -\sum_{y_i = +1} \log(f(x_i)) - \sum_{y_i = -1} \log(1 - f(x_i)) \f$.
+//! With data \f$ x_i, y_i \f$, a model f the error function is
+//! \f$ -\sum_{y \in Y} \sum_{y_i = j} \log(f_j(x_i)) \f$.
 //!
 class NegativeLogLikelihood : public ErrorFunction
 {
