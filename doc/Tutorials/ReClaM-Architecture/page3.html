@@ -59,7 +59,8 @@ public:
 int main(int argc, char** argv)
 {
     MyProblem problem;
-    Dataset dataset(problem, 100, 1000);
+    Dataset dataset;
+    dataset.CreateFromSource(problem, 100, 1000);
 <div class="newcode">
     AffineLinearMap     model(1, 1);      // 1-dim. input and output
     MeanSquaredError    mse;

@@ -72,7 +72,8 @@ pp. 139-148, LNCS 4668, Springer-Verlag, 2007
 int main(int argc, char** argv)
 {
     Chessboard chess;
-    Dataset dataset(chess, 5000, 10000);
+    Dataset dataset;
+    dataset.CreateFromSource(chess, 5000, 10000);
 
     double C = 100.0;
     double gamma = 1.0;
