@@ -1606,8 +1606,9 @@ void QpBoxDecomp::Shrink()
 		if (largest < 10.0 * epsilon)
 		{
 			// unshrink the problem at this accuracy level
-			Unshrink(true);
+			Unshrink(false);
 			bUnshrinked = true;
+			return;
 		}
 	}
 
@@ -2312,8 +2313,9 @@ void QpMcDecomp::Shrink()
 		if (largest < 10.0 * epsilon)
 		{
 			// unshrink the problem at this accuracy level
-			Unshrink(true);
+			Unshrink(false);
 			bUnshrinked = true;
+			return;
 		}
 	}
 
@@ -2790,8 +2792,9 @@ void QpMcStzDecomp::Shrink()
 		if (l_up - l_down < 10.0 * epsilon)
 		{
 			// unshrink the problem at this accuracy level
-			Unshrink(true);
+			Unshrink(false);
 			bUnshrinked = true;
+			return;
 		}
 	}
 
@@ -2816,15 +2819,15 @@ void QpMcStzDecomp::Shrink()
 	{
 		// exchange examples such that shrinked examples
 		// are moved to the ends of the lists
-		for (a = activeEx - 1; a >= 0; a--)
+		for (e = activeEx - 1; e >= 0; e--)
 		{
-			if (example[a].active == 0) DeactivateExample(a);
+			if (example[e].active == 0) DeactivateExample(e);
 		}
 
 		// shrink the corresponding cache entries
-		for (a = 0; a < (int)activeEx; a++)
+		for (e = 0; e < (int)activeEx; e++)
 		{
-			if (kernelMatrix.getCacheRowSize(a) > activeEx) kernelMatrix.CacheRowResize(a, activeEx);
+			if (kernelMatrix.getCacheRowSize(e) > activeEx) kernelMatrix.CacheRowResize(e, activeEx);
 		}
 	}
 }
@@ -2914,8 +2917,8 @@ void QpMcStzDecomp::DeactivateExample(unsigned int e)
 	}
 
 	// notify the matrix cache
-	kernelMatrix.CacheRowRelease(e);
 	kernelMatrix.FlipColumnsAndRows(e, j);
+	kernelMatrix.CacheRowRelease(e);
 
 	activeEx--;
 }
