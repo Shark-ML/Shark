@@ -1257,10 +1257,19 @@ public:
 		cacheMB = cacheSize;
 	}
 
-	inline bool isOptimal( )
+	//! Enable the use of a precomputed kernel matrix.
+	inline void usePrecomputedMatrix(bool precomputed = true)
+	{
+		precomputedMatrix = precomputed;
+	}
+
+	//! Return true if the accuracy stopping condition was met
+	//! during training, and false if the solver ran out of
+	//! iterations or time.
+	inline bool isOptimal() const
 	{
 	    return optimal;
-	}	
+	}
 
 protected:
 	enum eMode
@@ -1312,6 +1321,9 @@ protected:
 
 	//! upper bound for all One Class SVM Lagrange multipliers XXX
 	double OneClassBoxUpper;
+
+	//! should the solver use a precomputed kernel matrix?
+	bool precomputedMatrix;
 
 	//! should the quadratic program solver output its progress?
 	bool printInfo;

@@ -5,9 +5,9 @@
  *  \brief Support Vector Machine implementation
  *
  *  \author  T. Glasmachers
- *  \date    2005
+ *  \date    2005-2010
  *
- *  \par Copyright (c) 1999-2007:
+ *  \par Copyright (c) 1999-2010:
  *      Institut f&uuml;r Neuroinformatik<BR>
  *      Ruhr-Universit&auml;t Bochum<BR>
  *      D-44780 Bochum, Germany<BR>
@@ -15,9 +15,6 @@
  *      Fax:   +49-234-32-14209<BR>
  *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
  *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *
- *
- *  <BR>
  *
  *
  *  <BR><HR>
@@ -1673,6 +1670,7 @@ SVM_Optimizer::SVM_Optimizer()
 	solver = NULL;
 	matrix = NULL;
 	cache = NULL;
+	precomputedMatrix = false;
 
 	printInfo = false;
 	accuracy = 0.001;
@@ -1898,7 +1896,8 @@ double SVM_Optimizer::optimize(SVM& model, const Array<double>& input, const Arr
 			}
 		}
 
-		matrix = new KernelMatrix(kernel, input);
+		if (precomputedMatrix) matrix = new PrecomputedKernelMatrix(kernel, input);
+		else matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
 		QpSvmDecomp* solver = new QpSvmDecomp(*cache);
@@ -2035,8 +2034,8 @@ double SVM_Optimizer::optimize(SVM& model, const Array<double>& input, const Arr
 			upper(e + examples) = 0.0;
 		}
 
-		KernelMatrix* kernelmatrix = new KernelMatrix(kernel, input);
-		matrix = new QPMatrix2(kernelmatrix);
+		if (precomputedMatrix) matrix = new PrecomputedKernelMatrix(kernel, input);
+		else matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
 		QpSvmDecomp* solver = new QpSvmDecomp(*cache);
@@ -2163,7 +2162,8 @@ double SVM_Optimizer::optimize(SVM& model, const Array<double>& input, const Arr
 			}
 		}
 
-		matrix = new KernelMatrix(kernel, input);
+		if (precomputedMatrix) matrix = new PrecomputedKernelMatrix(kernel, input);
+		else matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
 		QpSvmDecomp* solver = new QpSvmDecomp(*cache);
@@ -2270,7 +2270,8 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 		Array<double> lower(variables);
 		Array<double> upper(variables);
 
-		matrix = new KernelMatrix(kernel, input);
+		if (precomputedMatrix) matrix = new PrecomputedKernelMatrix(kernel, input);
+		else matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
 		unsigned int e, c;
@@ -2294,9 +2295,8 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0,
 			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0,
 			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0
-// TODO: Above are the constants for the Weston&Watkins approach,
-//       below for Vapnik's original formulation. They differ only
-//       by a factor of two.
+// TODO: Above are the constants for the Weston&Watkins approach, below
+//       for Vapnik's formulation. They differ only by a factor of two.
 //       Change to the latter one for improved consistency of the code?
 // 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
 // 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
@@ -2333,7 +2333,8 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 		Array<double> lower(variables);
 		Array<double> upper(variables);
 
-		matrix = new KernelMatrix(kernel, input);
+		if (precomputedMatrix) matrix = new PrecomputedKernelMatrix(kernel, input);
+		else matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
 		unsigned int e, c;
@@ -2382,7 +2383,8 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 		Array<double> lower(variables);
 		Array<double> upper(variables);
 
-		matrix = new KernelMatrix(kernel, input);
+		if (precomputedMatrix) matrix = new PrecomputedKernelMatrix(kernel, input);
+		else matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
 		double cm1bc = (classes - 1.0) / classes;
@@ -2448,7 +2450,8 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 		double cm1bc = (classes - 1.0) / classes;
 		double m1bc = -1.0 / classes;
 
-		matrix = new KernelMatrix(kernel, input);
+		if (precomputedMatrix) matrix = new PrecomputedKernelMatrix(kernel, input);
+		else matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
 		unsigned int e, c;
@@ -2496,7 +2499,8 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 
 		// train a set of binary classifiers
 		unsigned int c, e;
-		matrix = new KernelMatrix(kernel, input);
+		if (precomputedMatrix) matrix = new PrecomputedKernelMatrix(kernel, input);
+		else matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
 		QpBoxDecomp* solver = new QpBoxDecomp(*cache);
@@ -2538,7 +2542,8 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 		Array<double> lower(examples);
 		Array<double> upper(examples);
 
-		matrix = new KernelMatrix(kernel, input);
+		if (precomputedMatrix) matrix = new PrecomputedKernelMatrix(kernel, input);
+		else matrix = new KernelMatrix(kernel, input);
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
 		unsigned int e, c;

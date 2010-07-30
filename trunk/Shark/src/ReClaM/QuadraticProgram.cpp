@@ -122,6 +122,43 @@ void KernelMatrix::FlipColumnsAndRows(unsigned int i, unsigned int j)
 ////////////////////////////////////////////////////////////////////////////////
 
 
+PrecomputedKernelMatrix::PrecomputedKernelMatrix(KernelFunction* kernelfunction,
+				const Array<double>& data)
+: KernelMatrix(kernelfunction, data)
+{
+	unsigned int i, j, N = data.dim(0);
+	permutation.resize(N);
+	matrix.resize(N, N, false);
+	for (i=0; i<N; i++)
+	{
+		permutation[i] = i;
+		for (j=0; j<=i; j++)
+		{
+			float k = kernelfunction->eval(data[i], data[j]);
+			matrix(i, j) = matrix(j, i) = k;
+		}
+	}
+}
+
+PrecomputedKernelMatrix::~PrecomputedKernelMatrix()
+{
+}
+
+
+float PrecomputedKernelMatrix::Entry(unsigned int i, unsigned int j)
+{
+	return matrix(permutation[i], permutation[j]);
+}
+
+void PrecomputedKernelMatrix::FlipColumnsAndRows(unsigned int i, unsigned int j)
+{
+	std::swap(permutation[i], permutation[j]);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 RegularizedKernelMatrix::RegularizedKernelMatrix(KernelFunction* kernel,
 		const Array<double>& data,
 		const Array<double>& diagModification)
