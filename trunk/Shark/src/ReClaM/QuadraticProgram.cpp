@@ -2917,8 +2917,8 @@ void QpMcStzDecomp::DeactivateExample(unsigned int e)
 	}
 
 	// notify the matrix cache
-	kernelMatrix.FlipColumnsAndRows(e, j);
 	kernelMatrix.CacheRowRelease(e);
+	kernelMatrix.FlipColumnsAndRows(e, j);
 
 	activeEx--;
 }
