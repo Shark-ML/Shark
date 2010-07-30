@@ -161,6 +161,48 @@ protected:
 };
 
 
+//! \brief Precomputed Kernel Gram matrix
+//!
+//! \par
+//! The #PrecomputedKernelMatrix class may be beneficial
+//! for certain model selection strategies, in particular
+//! if the kernel is fixed and the regularization parameter
+//! is varied.
+//!
+//! \par
+//! This class is a memory intensive alternative to the
+//! plain KernelMatrix. It should be used only for problem
+//! sizes of up to a few thousand examples. This class is
+//! not yet well integrated with the CachedMatrix class,
+//! such that data is redundantly.
+//!
+//! \par
+//! The SVM_Optimizer class does not support this option
+//! yet.
+class PrecomputedKernelMatrix : public KernelMatrix
+{
+public:
+	//! Constructor
+	//! \param kernelfunction   kernel function defining the Gram matrix
+	//! \param data             data to evaluate the kernel function
+	PrecomputedKernelMatrix(KernelFunction* kernelfunction,
+				 const Array<double>& data);
+
+	//! Destructor
+	~PrecomputedKernelMatrix();
+
+	//! overriden virtual function, see #QPMatrix
+	float Entry(unsigned int i, unsigned int j);
+
+	//! overriden virtual function, see #QPMatrix
+	void FlipColumnsAndRows(unsigned int i, unsigned int j);
+
+protected:
+	Array<float> matrix;
+	std::vector<unsigned int> permutation;
+};
+
+
 //! \brief Kernel Gram matrix
 //!
 //! \par
