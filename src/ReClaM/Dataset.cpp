@@ -603,7 +603,7 @@ void Dataset::CreateFromArrays(const Array<double>& trainingData, const Array<do
 	this->testTarget = testTarget;
 }
 
-void Dataset::CreateFromLibsvmFile(const char* filename, unsigned int train, unsigned int test)
+void Dataset::CreateFromLibsvmFile(const char* filename, int train, int test)
 {
 	std::ifstream file( filename );
 	
@@ -612,7 +612,7 @@ void Dataset::CreateFromLibsvmFile(const char* filename, unsigned int train, uns
 	else 
 	{
 		// cardinalities:
-		unsigned int examples = 0;
+		int examples = 0;
 		unsigned int features = 0;
 		unsigned int classes = 0;
 		unsigned int cur_index = 0;
@@ -696,8 +696,8 @@ void Dataset::CreateFromLibsvmFile(const char* filename, unsigned int train, uns
 		}
 		
 		// set train/test split
-		if (test == 0) test = examples-train;
-		if (train + test > examples || train == 0  )
+		if (test < 0) test = examples-train;
+		if (train + test > examples || train <= 0 || test < 0 )
 			throw SHARKEXCEPTION("[Dataset::CreateFromLibsvmFile] invalid split into training and test set");
 		else if ( train+test < examples ) 
 			examples = train+test; //adjust size if not all examples are used
@@ -717,7 +717,7 @@ void Dataset::CreateFromLibsvmFile(const char* filename, unsigned int train, uns
 		file.clear(); //always clear first, then seek beginning
 		file.seekg(std::ios::beg); //go back to beginning
 		std::ws(file); //skip leading whitespace lines
-		for (unsigned i=0; i<examples; i++) //one loop = one line
+		for (int i=0; i<examples; i++) //one loop = one line
 		{
 			// prepare next line for further processing
 			if ( !std::getline(file, line) )
@@ -1005,7 +1005,7 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 	
 	double min_target = 1e100;
 	double max_target = -1e100;
-	bool binary = true; //binary or multi-class problem?
+	bool binary = true; //do we have a binary problem, that additionally is labeled in the -1/+1 style, rather than 0/1?
 	bool regression = false; //regression task?
 
 	// determine min/max class values
@@ -1036,7 +1036,6 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 	if ( !regression )
 	{
 		if ( (min_target == -1) && (max_target == +1) ) binary = true;
-		else if ( (min_target == 0) && (max_target == 1) ) binary = true;
 		else if ( min_target == 0 ) binary = false;
 		else throw SHARKEXCEPTION("[Dataset::SaveLIBSVM] inconsistent target values");
 	}
@@ -1089,7 +1088,7 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 					f << "-1";
 			}
 			else 
-				f << label + 1; //convert from 0-based to 1-based class indices
+				f << label+1; //convert from 0-based to 1-based class indices
 			for (d=0; d<dim; d++)
 			{
 				double value = testData(i, d);

@@ -247,7 +247,7 @@ public:
 	//! \param  filename  name of the LIBSVM file to read
 	//! \param  train     how many training samples to get from the file
 	//! \param  test      how many training samples to get from the file. default: all remaining ones
-	void CreateFromLibsvmFile(const char* filename, unsigned int train, unsigned int test = 0);
+	void CreateFromLibsvmFile(const char* filename, int train, int test = -1);
 	
 
 	//! shuffles the training examples
