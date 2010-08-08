@@ -145,10 +145,9 @@ void CMACMap::model(Array<double> const& input, Array<double>& output)
         output.resize(input.dim(0), outputDimension,false);
         output = 0;
 
-        Array<size_t> indizes = getIndizes(input);
-
         for(size_t i = 0;i != input.dim(0); ++i)
         {
+			Array<size_t> indizes = getIndizes(input[i]);
             for(size_t o=0;o!=outputDimension;++o)
             {
                 for(size_t j = 0;j != m_tilings; ++j)
