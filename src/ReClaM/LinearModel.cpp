@@ -18,7 +18,7 @@
 *
 *  \par Project:
 *      ReClaM
-* 
+*
 *
 *  <BR>
 *
@@ -198,10 +198,11 @@ void AffineLinearMap::modelDerivative(const Array<double>& input, Array<double>&
 		derivative.resize(outputDimension, pc, false);
 		for (o = 0; o < outputDimension; o++)
 		{
-			for (p = 0; p < pc; p++)
+			for (p = 0; p < pc-1; p++)
 			{
 				derivative(o, p) = input(p);
 			}
+			derivative(o,pc-1)=1;
 		}
 	}
 	else throw SHARKEXCEPTION("[AffineLinearMap::modelDerivative] invalid number of dimensions.");
