@@ -2,10 +2,10 @@
 /*!
  *  \file classification.cpp
  *
- *  \author  T. Glasmachers
- *  \date    2007
+ *  \author  T. Glasmachers, C. Igel
+ *  \date    2007, 2010
  *
- *  \par Copyright (c) 1999-2007:
+ *  \par Copyright (c) 1999-2010:
  *      Institut f&uuml;r Neuroinformatik<BR>
  *      Ruhr-Universit&auml;t Bochum<BR>
  *      D-44780 Bochum, Germany<BR>
@@ -284,7 +284,7 @@ ClassificationWidget::ClassificationWidget(Doc* doc, FrameWidget* parent)
 }
 
 
-void ClassificationWidget::Draw()
+void ClassificationWidget::Draw(bool drawSoft, bool drawBound)
 {
 	Model* model = doc->predictiveModel;
 	Dataset* dataset = doc->dataset;
@@ -343,14 +343,19 @@ void ClassificationWidget::Draw()
 						}
 					}
 
-					if (b0) image.setPixel(x, y, 0xffffffff);
-					else if (b1) image.setPixel(x, y, 0xff008000);
-					else
-					{
-						double red = 127.0 * tanh(0.5 * value(x, y)) + 128.0;
-						double blue = 255.0 - red;
-						image.setPixel(x, y, 0xff000000 + (((int) red) << 16) + (int) blue);
+					if(drawSoft) {
+						if(!drawBound) b0 = b1 = 0;
+						if(b0) painter.setPen(Qt::white);
+						else if(b1) painter.setPen(Qt::yellow);
+						else painter.setPen(QColor(127 + tanh(value(x,y))*128, 127 - tanh(value(x,y))*128, 0));
+					} else {
+						if(!drawBound) b0 = b1 = 0;
+						if(b0) painter.setPen(Qt::white);
+						else if(b1) painter.setPen(Qt::yellow);
+						else if(value(x, y) > 0) painter.setPen(QColor(255, 0, 0));
+						else painter.setPen(QColor(0, 255, 0));
 					}
+					painter.drawPoint(x, y);
 				}
 			}
 		}
@@ -360,24 +365,38 @@ void ClassificationWidget::Draw()
 		}
 
 		// output the dataset
-		int i, ic = input.dim(0);
+		unsigned i, ic = input.dim(0);
 		QColor col;
+		
+		// circles around support vectors
+		if (drawBound && (svm != NULL)) {
+			Array<double> ex = svm->getPoints();
+			for(i = 0; i < ex.dim(0); i++) {
+				x = (int)(100.0 * ex(i, 0));
+				y = (int)(100.0 * ex(i, 1));
+				
+				painter.setPen(Qt::yellow);
+				painter.setBrush(Qt::yellow);
+				painter.drawEllipse(x-11, y-11, 22, 22);
+			}
+		}
+		
 		
 		for (i = 0; i < ic; i++)
 		{
 			x = (int)(100.0 * input(i, 0));
 			y = (int)(100.0 * input(i, 1));
-
-			if (target(i, 0) > 0.0) col = Qt::yellow; 
+			
+				
+			if (target(i, 0) > 0.0) col = Qt::darkRed; 
 			else col = Qt::darkGreen; 
 			
-			painter.fillRect(x - 5, y - 5, 11, 11, QBrush(col));
-			painter.drawRect(x - 5, y - 5, 11, 11);
-			painter.drawLine(x - 1, y, x + 1, y);
-			painter.drawLine(x, y - 1, x, y + 1);
-
-
+			painter.setBrush(col);
+			painter.setPen(col);
+			painter.drawEllipse(x-9, y-9, 18, 18);
 		}
+
+	
 	}
 
 	// inform QT that the widget needs to be redrawn
@@ -576,7 +595,10 @@ FrameWidget::FrameWidget(QWidget* parent)
 		, wLabelMethod("method", this)
 		, wMethod(this)
 		, wBarMethod(this)
-		, wButtonCompute("compute solution !", this)
+		, wButtonCompute("compute solution", this)
+		, wButtonSave("save", this)
+		, wCheckBound("boundaries", this)
+		, wCheckSoft("soft", this)
 {
 	setWindowTitle("ReClaM classification example");
 	setFixedSize(700, 400);
@@ -590,8 +612,11 @@ FrameWidget::FrameWidget(QWidget* parent)
 	wLabelMethod.setGeometry(10, 220, 280, 20);
 	wMethod.setGeometry(10, 240, 280, 20);
 	wBarMethod.setGeometry(10, 260, 280, 100);
-	wButtonCompute.setGeometry(10, 370, 280, 20);
-
+	wButtonCompute.setGeometry(10, 370, 120, 20);
+	wButtonSave.setGeometry(135, 370, 40, 20);
+	wCheckBound.setGeometry(180, 365, 60, 20);
+	wCheckSoft.setGeometry(180, 380, 60, 20);
+	
 	wKernel.addItem("linear kernel");
 	wKernel.addItem("polynomial kernel");
 	wKernel.addItem("Gaussian kernel");
@@ -606,7 +631,10 @@ FrameWidget::FrameWidget(QWidget* parent)
 	QObject::connect(&wKernel, SIGNAL(currentIndexChanged(int)), this, SLOT(OnChange(int)));
 	QObject::connect(&wMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(OnChange(int)));
 	QObject::connect(&wButtonCompute, SIGNAL(clicked()), this, SLOT(OnCompute()));
-
+	QObject::connect(&wButtonSave, SIGNAL(clicked()), this, SLOT(OnSave()));
+	QObject::connect(&wCheckBound, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
+	QObject::connect(&wCheckSoft, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
+	
 	wKernel.setCurrentIndex(0);
 	wMethod.setCurrentIndex(1);
 }
@@ -670,8 +698,16 @@ void FrameWidget::OnCompute()
 {
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 	doc.Train();
-	wOutput.Draw();
+	wOutput.Draw(wCheckSoft.isChecked(), wCheckBound.isChecked());
 	QApplication::restoreOverrideCursor();
+}
+
+void FrameWidget::OnSave()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+													"untitled.png",
+													tr("Images (*.png *.xpm *.jpg)"));
+	wOutput.Save(fileName.toStdString().c_str());
 }
 
 

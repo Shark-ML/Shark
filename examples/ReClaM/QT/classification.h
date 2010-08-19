@@ -63,6 +63,8 @@
 #include <QSlider>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QFileDialog>
+#include <QCheckBox>
 
 #include <ReClaM/Dataset.h>
 #include <ReClaM/KernelFunction.h>
@@ -140,7 +142,8 @@ class ClassificationWidget : public QWidget
 public:
 	ClassificationWidget(Doc* doc, FrameWidget* parent);
 
-	void Draw();
+	void Draw(bool, bool);
+	void Save(const char *filename) { image.save(filename); }
 
 protected:
 	void paintEvent(QPaintEvent* event);
@@ -218,7 +221,9 @@ public slots:
 	void OnGenerateDataset();
 	void OnChange(int value);
 	void OnCompute();
-
+	void OnSave();
+	void OnToggle() { wOutput.Draw(wCheckSoft.isChecked(), wCheckBound.isChecked()); };
+	
 protected:
 	Doc doc;
 
@@ -233,6 +238,9 @@ protected:
 	QComboBox wMethod;
 	PropertiesBar wBarMethod;
 	QPushButton wButtonCompute;
+	QPushButton wButtonSave;
+	QCheckBox wCheckBound;
+	QCheckBox wCheckSoft;
 };
 
 
