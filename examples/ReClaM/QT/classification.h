@@ -142,7 +142,7 @@ class ClassificationWidget : public QWidget
 public:
 	ClassificationWidget(Doc* doc, FrameWidget* parent);
 
-	void Draw(bool, bool);
+	void Draw(bool, bool, bool, bool);
 	void Save(const char *filename) { image.save(filename); }
 
 protected:
@@ -222,7 +222,7 @@ public slots:
 	void OnChange(int value);
 	void OnCompute();
 	void OnSave();
-	void OnToggle() { wOutput.Draw(wCheckSoft.isChecked(), wCheckBound.isChecked()); };
+	void OnToggle() { wOutput.Draw(wCheckSoft.isChecked(), wCheckBound.isChecked(), wCheckCross.isChecked(), wCheckShade.isChecked());};
 	
 protected:
 	Doc doc;
@@ -241,6 +241,8 @@ protected:
 	QPushButton wButtonSave;
 	QCheckBox wCheckBound;
 	QCheckBox wCheckSoft;
+	QCheckBox wCheckShade;
+	QCheckBox wCheckCross;
 };
 
 

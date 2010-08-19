@@ -284,7 +284,7 @@ ClassificationWidget::ClassificationWidget(Doc* doc, FrameWidget* parent)
 }
 
 
-void ClassificationWidget::Draw(bool drawSoft, bool drawBound)
+void ClassificationWidget::Draw(bool drawSoft, bool drawBound, bool drawCross, bool drawShade)
 {
 	Model* model = doc->predictiveModel;
 	Dataset* dataset = doc->dataset;
@@ -343,17 +343,24 @@ void ClassificationWidget::Draw(bool drawSoft, bool drawBound)
 						}
 					}
 
+					painter.setPen(Qt::white);
 					if(drawSoft) {
 						if(!drawBound) b0 = b1 = 0;
-						if(b0) painter.setPen(Qt::white);
-						else if(b1) painter.setPen(Qt::yellow);
-						else painter.setPen(QColor(127 + tanh(value(x,y))*128, 127 - tanh(value(x,y))*128, 0));
+						if(b0) {
+							if(drawShade) painter.setPen(Qt::white);
+							else painter.setPen(Qt::black);
+						} else if(b1) painter.setPen(Qt::yellow);
+						else if(drawShade) painter.setPen(QColor(127 + tanh(value(x,y))*128, 127 - tanh(value(x,y))*128, 0));
 					} else {
 						if(!drawBound) b0 = b1 = 0;
-						if(b0) painter.setPen(Qt::white);
-						else if(b1) painter.setPen(Qt::yellow);
-						else if(value(x, y) > 0) painter.setPen(QColor(255, 0, 0));
-						else painter.setPen(QColor(0, 255, 0));
+						if(b0) {
+							if(drawShade) painter.setPen(Qt::white);
+							else painter.setPen(Qt::black);
+						} else if(b1) painter.setPen(Qt::yellow);
+						else if(drawShade) {
+							if(value(x, y) > 0) painter.setPen(QColor(255, 0, 0));
+							else painter.setPen(QColor(0, 255, 0));
+						}
 					}
 					painter.drawPoint(x, y);
 				}
@@ -364,7 +371,12 @@ void ClassificationWidget::Draw(bool drawSoft, bool drawBound)
 			image.fill(0xffc0c0c0);
 		}
 
+		
+		
 		// output the dataset
+		int HalfBaseSize = 15;
+		int BaseSize = 2 * HalfBaseSize;
+		
 		unsigned i, ic = input.dim(0);
 		QColor col;
 		
@@ -377,7 +389,7 @@ void ClassificationWidget::Draw(bool drawSoft, bool drawBound)
 				
 				painter.setPen(Qt::yellow);
 				painter.setBrush(Qt::yellow);
-				painter.drawEllipse(x-11, y-11, 22, 22);
+				painter.drawEllipse(x-HalfBaseSize-1, y-HalfBaseSize-1, BaseSize+2, BaseSize+2);
 			}
 		}
 		
@@ -393,7 +405,13 @@ void ClassificationWidget::Draw(bool drawSoft, bool drawBound)
 			
 			painter.setBrush(col);
 			painter.setPen(col);
-			painter.drawEllipse(x-9, y-9, 18, 18);
+			painter.drawEllipse(x-HalfBaseSize, y-HalfBaseSize, BaseSize, BaseSize);
+			painter.setBrush(Qt::white);
+			painter.setPen(Qt::white);
+			if(drawCross) {
+				painter.drawRect(x-HalfBaseSize + 4, y-3, BaseSize - 8, 6);
+				if(target(i, 0) <- 0.) painter.drawRect(x-3, y-HalfBaseSize+4, 6, BaseSize-8);
+			}
 		}
 
 	
@@ -597,8 +615,10 @@ FrameWidget::FrameWidget(QWidget* parent)
 		, wBarMethod(this)
 		, wButtonCompute("compute solution", this)
 		, wButtonSave("save", this)
-		, wCheckBound("boundaries", this)
+		, wCheckBound("bound", this)
 		, wCheckSoft("soft", this)
+		, wCheckShade("shade", this)
+		, wCheckCross("cross", this)
 {
 	setWindowTitle("ReClaM classification example");
 	setFixedSize(700, 400);
@@ -614,8 +634,11 @@ FrameWidget::FrameWidget(QWidget* parent)
 	wBarMethod.setGeometry(10, 260, 280, 100);
 	wButtonCompute.setGeometry(10, 370, 120, 20);
 	wButtonSave.setGeometry(135, 370, 40, 20);
-	wCheckBound.setGeometry(180, 365, 60, 20);
-	wCheckSoft.setGeometry(180, 380, 60, 20);
+	wCheckBound.setGeometry(175, 365, 60, 20);
+	wCheckSoft.setGeometry(175, 380, 60, 20);
+	wCheckCross.setGeometry(236, 365, 60, 20);
+	wCheckShade.setChecked(true);
+	wCheckShade.setGeometry(236, 380, 60, 20);
 	
 	wKernel.addItem("linear kernel");
 	wKernel.addItem("polynomial kernel");
@@ -634,6 +657,8 @@ FrameWidget::FrameWidget(QWidget* parent)
 	QObject::connect(&wButtonSave, SIGNAL(clicked()), this, SLOT(OnSave()));
 	QObject::connect(&wCheckBound, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
 	QObject::connect(&wCheckSoft, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
+	QObject::connect(&wCheckCross, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
+	QObject::connect(&wCheckShade, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
 	
 	wKernel.setCurrentIndex(0);
 	wMethod.setCurrentIndex(1);
@@ -698,7 +723,7 @@ void FrameWidget::OnCompute()
 {
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 	doc.Train();
-	wOutput.Draw(wCheckSoft.isChecked(), wCheckBound.isChecked());
+	wOutput.Draw(wCheckSoft.isChecked(), wCheckBound.isChecked(), wCheckCross.isChecked(), wCheckShade.isChecked());
 	QApplication::restoreOverrideCursor();
 }
 
