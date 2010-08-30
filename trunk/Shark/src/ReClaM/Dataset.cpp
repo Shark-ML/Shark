@@ -5,16 +5,16 @@
 *  \brief Functions for loading ReClaM datasets
 *
 *  \author  T. Glasmachers
-*  \date    2006
+*  \date	2006
 *
 *  \par Copyright (c) 1999-2006:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-25558<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+*	  Institut f&uuml;r Neuroinformatik<BR>
+*	  Ruhr-Universit&auml;t Bochum<BR>
+*	  D-44780 Bochum, Germany<BR>
+*	  Phone: +49-234-32-25558<BR>
+*	  Fax:   +49-234-32-14209<BR>
+*	  eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+*	  www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
 *
 *
 *  <BR>
@@ -428,10 +428,10 @@ Dataset::Dataset()
 
 Dataset::Dataset(const Dataset& dataset)
 {
-	this->trainingData   = dataset.getTrainingData();
+	this->trainingData = dataset.getTrainingData();
 	this->trainingTarget = dataset.getTrainingTarget();
-	this->testData       = dataset.getTestData();
-	this->testTarget     = dataset.getTestTarget();
+	this->testData = dataset.getTestData();
+	this->testTarget = dataset.getTestTarget();
 }
 
 Dataset::~Dataset()
@@ -687,7 +687,7 @@ void Dataset::CreateFromLibsvmFile(const char* filename, int train, int test)
 		if ( !regression )
 		{
 			if ( (min_target == -1) && (max_target == +1) ) binary = true;
-			else if (min_target == 0) 
+			else if (min_target == 1) 
 			{
 				binary = false;
 				classes = (unsigned int)max_target;
