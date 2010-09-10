@@ -1375,6 +1375,8 @@ void QpBoxDecomp::Loop()
 				// shrink again
 				Shrink();
 				shrinkCounter = (active < 1000) ? active : 1000;
+
+				SelectWorkingSet(i);
 			}
 
 			// update
@@ -1428,6 +1430,8 @@ void QpBoxDecomp::Loop()
 				// shrink again
 				Shrink();
 				shrinkCounter = (active < 1000) ? active : 1000;
+
+				SelectWorkingSet(i, j);
 			}
 
 			// update
@@ -2022,6 +2026,8 @@ void QpMcDecomp::Solve(unsigned int classes,
 				// shrink again
 				Shrink();
 				shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+
+				SelectWorkingSet(i);
 			}
 
 			// update
@@ -2084,7 +2090,7 @@ void QpMcDecomp::Solve(unsigned int classes,
 				Unshrink(true);
 
 				// check again on the whole problem
-				if (SelectWorkingSet(i,j))
+				if (SelectWorkingSet(i, j))
 				{
 					optimal = true;
 					break;
@@ -2093,6 +2099,8 @@ void QpMcDecomp::Solve(unsigned int classes,
 				// shrink again
 				Shrink();
 				shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+
+				SelectWorkingSet(i, j);
 			}
 
 			// update
@@ -2635,6 +2643,8 @@ void QpMcStzDecomp::Solve(unsigned int classes,
 			// shrink again
 			Shrink();
 			shrinkCounter = (activeVar < 1000) ? activeVar : 1000;
+
+			SelectWorkingSet(i, j);
 		}
 
 		// update

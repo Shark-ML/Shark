@@ -1,7 +1,7 @@
 /*!
 *  \file SVMregression.cpp
 *
-*  \author C. Igel
+*  \author T. Glasmachers
 *
 *  \par
 *      Institut f&uuml;r Neuroinformatik<BR>
@@ -15,7 +15,7 @@
 *
 *
 *  <BR><HR>
-*  This file is part of ReClaM. This library is free software;
+*  This file is part of Shark. This library is free software;
 *  you can redistribute it and/or modify it under the terms of the
 *  GNU General Public License as published by the Free Software
 *  Foundation; either version 2, or (at your option) any later version.
