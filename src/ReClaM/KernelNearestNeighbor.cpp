@@ -72,7 +72,7 @@ KernelNearestNeighbor::~KernelNearestNeighbor()
 void KernelNearestNeighbor::SetPoints(const Array<double>& input, const Array<double>& target)
 {
 	inputDimension = input.dim(1);
-	outputDimension = 1;
+	outputDimension = target.dim(1);
 	training_input = input;
 	training_target = target;
 	bMustRecalc = true;
