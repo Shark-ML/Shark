@@ -114,13 +114,13 @@ void LinearMap::modelDerivative(const Array<double>& input, Array<double>& deriv
 {
 	if (input.ndim() == 1)
 	{
-		unsigned int o, p, pc = getParameterDimension();
-		derivative.resize(outputDimension, pc, false);
-		for (o = 0; o < outputDimension; o++)
+		derivative.resize(outputDimension, getParameterDimension(), false);
+		derivative=0.0;
+		for (size_t o = 0; o < outputDimension; o++)
 		{
-			for (p = 0; p < pc; p++)
+			for (size_t i = 0; i < inputDimension; i++)
 			{
-				derivative(o, p) = input(p);
+				derivative(o, i+o*inputDimension) = input(i);
 			}
 		}
 	}
@@ -194,15 +194,16 @@ void AffineLinearMap::modelDerivative(const Array<double>& input, Array<double>&
 {
 	if (input.ndim() == 1)
 	{
-		unsigned int o, p, pc = getParameterDimension();
-		derivative.resize(outputDimension, pc, false);
-		for (o = 0; o < outputDimension; o++)
+		size_t parameterPerOutput=inputDimension+1;
+		derivative.resize(outputDimension, getParameterDimension(), false);
+		derivative=0.0;
+		for (size_t o = 0; o < outputDimension; o++)
 		{
-			for (p = 0; p < pc-1; p++)
+			for (size_t i = 0; i < inputDimension; i++)
 			{
-				derivative(o, p) = input(p);
+				derivative(o, i+o*parameterPerOutput) = input(i);
 			}
-			derivative(o,pc-1)=1;
+			derivative(o, o*parameterPerOutput+inputDimension) = 1;
 		}
 	}
 	else throw SHARKEXCEPTION("[AffineLinearMap::modelDerivative] invalid number of dimensions.");
