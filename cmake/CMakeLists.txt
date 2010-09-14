@@ -265,6 +265,7 @@ SET( RECLAM_HEADERS
 ../include/ReClaM/KernelKMeans.h
 ../include/ReClaM/KernelMeanClassifier.h
 ../include/ReClaM/KernelNearestNeighbor.h
+../include/ReClaM/KernelNearestNeighborRegression.h
 ../include/ReClaM/LDA.h
 ../include/ReClaM/LMSEFFNet.h
 ../include/ReClaM/LOO.h
