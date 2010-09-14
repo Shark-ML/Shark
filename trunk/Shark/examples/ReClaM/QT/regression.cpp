@@ -113,7 +113,8 @@ Doc::Doc()
 	esvm = NULL;
 
 	Array<double> a;
-	dataset = new Dataset(a, a, a, a);
+	dataset = new Dataset();
+	dataset->CreateFromArrays(a, a, a, a);
 
 	Set(2, 0);
 }
@@ -186,14 +187,16 @@ void Doc::GenerateDataset()
 {
 	NoisySinc dist;
 	delete dataset;
-	dataset = new Dataset(dist, 20, 0);
+	dataset = new Dataset();
+	dataset->CreateFromSource(dist, 20, 0);
 }
 
 void Doc::ClearDataset()
 {
 	delete dataset;
 	Array<double> a;
-	dataset = new Dataset(a, a, a, a);
+	dataset = new Dataset();
+	dataset->CreateFromArrays(a, a, a, a);
 }
 
 void Doc::AddDataPoint(double point, double label)
@@ -209,7 +212,8 @@ void Doc::AddDataPoint(double point, double label)
 	tt(size, 0) = label;
 
 	delete dataset;
-	dataset = new Dataset(td, tt, a, a);
+	dataset = new Dataset();
+	dataset->CreateFromArrays(td, tt, a, a);
 }
 
 
