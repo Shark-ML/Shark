@@ -1,6 +1,6 @@
 /*! ======================================================================
  *
- *  \file SelectionMOO.h
+ *  \file Hypervolume.h
  *
  *  \brief Implementation of several algorithms for calculating 
  *	the hypervolume of a set of points.
@@ -59,28 +59,6 @@
  */
  
 double overmars_yap( double * points, double * referencePoint, unsigned noObjectives, unsigned noPoints );
-
-/*!
- *
- * \brief Algorithm for the special case of d = 3 objectives.
- *
- * Applicable to points of dimension d = 3.
- *
- * Relevant literature:
- *
- * [1]  C. M. Fonseca, L. Paquete, and M. Lopez-Ibanez. An
- *     improved dimension-sweep algorithm for the hypervolume
- *     indicator. In IEEE Congress on Evolutionary Computation,
- *     pages 1157-1163, Vancouver, Canada, July 2006.
- *
- * [2]  L. Paquete, C. M. Fonseca and M. Lopez-Ibanez. An optimal
- *     algorithm for a special case of Klee's measure problem in three
- *     dimensions. Technical Report CSI-RT-I-01/2006, CSI, Universidade
- *     do Algarve, 2006.
- */
- 
-double fonseca( double * points, double * referencePoint, unsigned noObjectives, unsigned noPoints );
-
 
 //!
 //! \brief computation of the hypervolume

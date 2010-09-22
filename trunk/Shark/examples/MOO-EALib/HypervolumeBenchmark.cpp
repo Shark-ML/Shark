@@ -126,12 +126,6 @@ int main( int argc, char ** argv ) {
 	
 	clock_t clockStart, clockEnd;
 	clockStart = clock();
-	volume = fonseca( points, regUp, dimension, noPoints );	
-	clockEnd = clock();
-	std::cout << "Fonseca: " << volume << std::endl;
-	std::cout << "\t " << ((double)(clockEnd - clockStart))/CLOCKS_PER_SEC << std::endl;
-	
-	clockStart = clock();
 	volume = overmars_yap( points, regUp, dimension, noPoints );
 	clockEnd = clock();														
 	std::cout << "Overmars / Yap Shark: " << volume << std::endl;
