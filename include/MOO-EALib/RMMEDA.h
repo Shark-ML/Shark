@@ -1,24 +1,39 @@
-/*! \file	GenMod.h
+/*! \file	GenModRM.cpp
 	
-	\brief	Model based generators for MOEA
+ * \brief	Evolutionary Aglorithm Generator with Local PCA (RM-MEDA)
+ * \brief  "RM-MEDA: A Regularity Model-Based Multiobjective Estimation of Distribution Algorithm". IEEE Transaction on Evolutionary Computation
 	
-	\author Aimin ZHOU
-	\author Department of Computer Science,
-	\author University of Essex, 
-	\author Colchester, CO4 3SQ, U.K
-	\author azhou@essex.ac.uk
-	
-	\date	Aug.16 2005 create
-	\date	Sep.25 2005 rewrite & reorganize structure
-	\date	Nov.25 2005 add ROUND() and PERTUBATION() to ModelBase
-	\date	Apr.07 2006 add class ModelPCA
-	\date	Nov.12 2006 add class ModelLocalPCAU
-	\date	Nov.27 2006 add class MixGauss
-	\date	Jan.28 2007	add class ModelAL
-	\date	May.10 2007 rewrite class ModelAL
-	\date	Jun.25 2007 add class HybridRM
-	\date	Jun.26 2007 rename ModelLocalPCAU -> RM
-						rename ModelAL -> EnhancedRM
+ * \author Aimin ZHOU
+ * \author Department of Computer Science,
+ * \author University of Essex, 
+ * \author Colchester, CO4 3SQ, U.K
+ * \author azhou@essex.ac.uk
+
+ * \date	Nov.29 2005 make great changes: noise, border checking
+ * \date	Apr.10 2006 redesign
+ * \date	Jul.18 2006 add quadratic models
+ * \date	Nov.12 2006 modify to uniform version
+ * \date	Jun.26 2006 rename and change Generate()
+ * \date	Sep.03 2007 modify the boundary checking procedure, it plays an important role in the algorithm
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * On Debian systems, the full text of the GNU General Public
+ * License version 2 can be found in the file
+ * `/usr/share/common-licenses/GPL-2'.
+ *
 */
 
 

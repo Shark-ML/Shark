@@ -355,9 +355,12 @@ double HypervolumeIndicator::operator()(const std::vector<std::vector<double> > 
 
 	// m_noSqrtPoints = (unsigned) sqrt((double)b.size());
 	double volB = 0;
-	if( m_noObjectives == 3 ) {
+	/*if( m_noObjectives == 3 ) {
 		volB = fonseca( pop, regUp, m_noObjectives, b.size() );
 	} else if( m_noObjectives > 3 ) {
+		volB = overmars_yap( pop, regUp, m_noObjectives, b.size() );
+	}*/
+	if( m_noObjectives >= 3 ) {
 		volB = overmars_yap( pop, regUp, m_noObjectives, b.size() );
 	}
 	
@@ -377,9 +380,12 @@ double HypervolumeIndicator::operator()(const std::vector<std::vector<double> > 
 	
 	double volA = 0;
 	
-	if( m_noObjectives == 3 ) {
+	/*if( m_noObjectives == 3 ) {
 		volA = fonseca( pop, regUp, m_noObjectives, a.size() );
 	} else if( m_noObjectives > 3 ) {							
+		volA = overmars_yap( pop, regUp, m_noObjectives, a.size() );
+	}*/
+	if( m_noObjectives >= 3 ) {							
 		volA = overmars_yap( pop, regUp, m_noObjectives, a.size() );
 	}
 
