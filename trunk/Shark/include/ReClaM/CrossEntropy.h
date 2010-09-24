@@ -84,7 +84,7 @@
 #ifndef CROSS_ENTROPY_H
 #define CROSS_ENTROPY_H
 
-
+#include <climits>
 #include <cmath>
 #include <SharkDefs.h>
 #include <ReClaM/ErrorFunction.h>
@@ -148,9 +148,9 @@ class CrossEntropy : public ErrorFunction
 {
 	// This value is used instead of log of a small number to avoid numerical instabilities.
 	// This value is chosen, as minLog = log(0) on a unix system.
-	const static double minLog = -730;
-	const static double maxDeriv = 1e300;
-	const static double maxexp = 1e300;
+	const static long minLog = -730;
+	const static unsigned long maxDeriv = ULONG_MAX;
+	const static unsigned long maxexp = ULONG_MAX;
 public:
 
 //===========================================================================
