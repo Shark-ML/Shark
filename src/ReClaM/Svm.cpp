@@ -5,16 +5,16 @@
  *  \brief Support Vector Machine implementation
  *
  *  \author  T. Glasmachers
- *  \date    2005-2010
+ *  \date	2005-2010
  *
  *  \par Copyright (c) 1999-2010:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *	  Institut f&uuml;r Neuroinformatik<BR>
+ *	  Ruhr-Universit&auml;t Bochum<BR>
+ *	  D-44780 Bochum, Germany<BR>
+ *	  Phone: +49-234-32-25558<BR>
+ *	  Fax:   +49-234-32-14209<BR>
+ *	  eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ *	  www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *
  *
  *  <BR><HR>
@@ -1665,6 +1665,30 @@ bool OCCMcSVM::isFeasible()
 ////////////////////////////////////////////////////////////////////////////////
 
 
+EpochBasedCsMcSvm::EpochBasedCsMcSvm(MultiClassSVM* pSVM, double C, bool unconst, unsigned int wss,
+									 bool countKernels, int epochs, double dual)
+: MetaSVM(pSVM, 1)
+{
+	exponential = unconst;
+	set_C(C);
+	wssMode = wss;
+	count = countKernels;
+	epochLim = epochs;
+	dualAim = dual;
+}
+
+EpochBasedCsMcSvm::~EpochBasedCsMcSvm()
+{ }
+
+bool EpochBasedCsMcSvm::isFeasible()
+{
+	if ( !exponential && parameter(0) <= 0.0) return false;
+	return MetaSVM::isFeasible();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
 SVM_Optimizer::SVM_Optimizer()
 {
 	solver = NULL;
@@ -1714,6 +1738,7 @@ void SVM_Optimizer::init(Model& model)
 	DGIMcSVM* dgi = dynamic_cast<DGIMcSVM*>(&model);
 	OVAMcSVM* ova = dynamic_cast<OVAMcSVM*>(&model);
 	OCCMcSVM* bc = dynamic_cast<OCCMcSVM*>(&model);
+	EpochBasedCsMcSvm* ebcs = dynamic_cast<EpochBasedCsMcSvm*>(&model);
 
 	if (csvm != NULL)
 	{
@@ -1772,6 +1797,15 @@ void SVM_Optimizer::init(Model& model)
 		mode = eOCC;
 		C = bc->get_C();
 	}
+	else if (ebcs != NULL)
+	{
+		mode = eEBCS;
+		C = ebcs->get_C();
+		countKernels = ebcs->get_countPreference();
+		epochLimit = ebcs->get_epochLim();
+		dualLimit = ebcs->get_dualAim();
+		wssPref = ebcs->get_wssMode();
+	}
 	else throw SHARKEXCEPTION("[SVM_Optimizer::init] The model is not a valid support vector machine meta model.");
 
 	if (solver != NULL)
@@ -1826,6 +1860,7 @@ double SVM_Optimizer::optimize(Model& model, ErrorFunction& error, const Array<d
 		case eDGI:
 		case eOVA:
 		case eOCC:
+		case eEBCS:
 		{
 			MultiClassSVM* svm = dynamic_cast<MultiClassSVM*>(&model);
 			if (svm == NULL)
@@ -2296,8 +2331,8 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0,
 			0.0, 0.5, 0.5, 1.0, -0.5, 0.0, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, -1.0, -0.5, -0.5, 0.0
 // TODO: Above are the constants for the Weston&Watkins approach, below
-//       for Vapnik's formulation. They differ only by a factor of two.
-//       Change to the latter one for improved consistency of the code?
+//	   for Vapnik's formulation. They differ only by a factor of two.
+//	   Change to the latter one for improved consistency of the code?
 // 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
 // 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
 // 			0.0, 1.0, 1.0, 2.0, -1.0, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, -2.0, -1.0, -1.0, 0.0,
@@ -2581,6 +2616,20 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 				index++;
 			}
 		}
+	}
+	else if (mode == eEBCS)
+	{
+		Array<double> alpha(variables);
+		alpha = 0; //redundant, but make extra clear that we won't accept custom inital values
+		matrix = new KernelMatrix(kernel, input, countKernels);
+		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
+		
+		QpEbCsDecomp* solver = new QpEbCsDecomp(*cache, target, classes, wssPref);
+		this->solver = solver;
+		solver->setVerbose(printInfo);
+		solver->setStoppingConditions(0.0001, epochLimit, dualLimit); //0.0001 is default in original paper
+		solver->Solve(alpha, C);
+		for (i=0; i < variables; i++) model.setParameter(i, alpha(i));
 	}
 
 	// set the bias term to zero

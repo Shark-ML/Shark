@@ -5,16 +5,16 @@
  *  \brief Quadratic programming for Support Vector Machines
  *
  *  \author  T. Glasmachers
- *  \date    2007
+ *  \date	2007
  *
  *  \par Copyright (c) 1999-2007:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *	  Institut f&uuml;r Neuroinformatik<BR>
+ *	  Ruhr-Universit&auml;t Bochum<BR>
+ *	  D-44780 Bochum, Germany<BR>
+ *	  Phone: +49-234-32-25558<BR>
+ *	  Fax:   +49-234-32-14209<BR>
+ *	  eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ *	  www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *
  *
  *  <BR><HR>
@@ -75,6 +75,7 @@ QPSolver::~QPSolver()
 QPMatrix::QPMatrix(unsigned int size)
 {
 	matrixsize = size;
+	accessCount = 0;
 }
 
 QPMatrix::~QPMatrix()
@@ -86,7 +87,8 @@ QPMatrix::~QPMatrix()
 
 
 KernelMatrix::KernelMatrix(KernelFunction* kernelfunction,
-						   const Array<double>& data)
+						   const Array<double>& data,
+						   bool count)
 : QPMatrix(data.dim(0))
 , kernel(kernelfunction)
 {
@@ -96,6 +98,7 @@ KernelMatrix::KernelMatrix(KernelFunction* kernelfunction,
 	{
 		x(i) = new ArrayReference<double>(data[i]);
 	}
+	countAccess = count;
 }
 
 KernelMatrix::~KernelMatrix()
@@ -110,6 +113,7 @@ KernelMatrix::~KernelMatrix()
 
 float KernelMatrix::Entry(unsigned int i, unsigned int j)
 {
+	if (countAccess) accessCount++;
 	return (float)kernel->eval(*x(i), *x(j));
 }
 
@@ -2968,4 +2972,814 @@ void QpMcStzDecomp::DeactivateExample(unsigned int e)
 	kernelMatrix.FlipColumnsAndRows(e, j);
 
 	activeEx--;
+}
+
+////////////////////////////////////////////////////////////
+
+QpEbCsDecomp::QpEbCsDecomp(CachedMatrix& kernel, const Array<double>& y, 
+							unsigned int classes, unsigned int w)
+: kernelMatrix(kernel)
+{
+	unsigned int e, i; //used for examples and misc. (as a convention throughout the solver)
+	
+	// init cardinalities (seenEx is done in init)
+	cardi.examples = kernelMatrix.getMatrixSize();
+	cardi.classes = classes;
+	cardi.variables = cardi.examples * cardi.classes;
+	cardi.sPatterns = 0;
+	cardi.epochs = 0;
+	for (i = 0; i < nMAX; i++) cardi.actual_steps[i] = 0;
+	for (i = 0; i < nMAX; i++) cardi.planned_steps[i] = 0;
+	cardi.planned_steps[0] = 1;	 //account for pre-defined first procNew step
+	cardi.sum_actual_steps = 1;  //make equal
+	cardi.sum_planned_steps = 1; //count from 1 to skip the first (modulo rowResizeEvery) cache cleanup
+	
+	SIZE_CHECK(y.ndim() == 2);
+	SIZE_CHECK(y.dim(0) == cardi.examples);
+	SIZE_CHECK(y.dim(1) == 1);
+	RANGE_CHECK( classes > 1 );
+	RANGE_CHECK( w < wMVP_MAX );
+	
+	// size lists; alpha, boxMax, and gradient have length of number of variables, rest of number of examples
+	alpha.resize(cardi.variables, false);
+	boxMax.resize(cardi.variables, false);
+	label.resize(cardi.examples, false);
+	diagonal.resize(cardi.examples, false);
+	gradient.resize(cardi.variables, false);
+	origIndex.resize(cardi.examples, false);
+	curIndex.resize(cardi.examples, false);
+	lottery.resize(cardi.examples, false);
+	sClasses.resize(cardi.examples, false);
+	globalSupClasses.resize(cardi.classes, false);
+	
+	double peek; //tmp helper
+	// fill lists, part 1. Rest done later, because boxMax depends on C, etc.
+	for (e = 0; e < cardi.examples; e++) 
+	{
+		// fill in label
+		peek = y(e,0);
+		ASSERT ( peek == (int)peek ) //no regression-type datasets
+		ASSERT ( peek >= 0 ) // no +-1 encoded binary datasets
+		RANGE_CHECK( peek < cardi.classes );
+		label(e) = peek;
+		// fill in rest
+		diagonal(e) = kernelMatrix.Entry(e, e);
+		origIndex(e) = e;
+		curIndex(e) = e;
+		lottery(e) = e;
+	}
+	
+	// first init the strategy parameters that are fixed during the entire run:
+	strat.reRu = rOrig;
+	switch ( strat.reRu )
+	{
+		case rOrig:
+		{
+			strat.multipl[0] = 1;
+			strat.multipl[1] = 10; //with procOld, try 10 times to find KKT-violating pair that improves the solution
+			strat.multipl[2] = 10; //treat 10 procOptimize as atomic operation to facilitate timing
+			strat.probAdaptationRate = 0.05;
+			strat.guaranteeFraction = 1.0 / 20.0;
+			break;
+		}
+		case rFixed:
+		{
+			strat.multipl[0] = 1; //you most probably always want this to be one
+			strat.multipl[1] = 1; //choose to your liking
+			strat.multipl[2] = 1; //dto.
+			break;
+		}
+		case rGapTarget:
+		{
+			//TODO: not yet fully implemented/formalized
+			strat.multipl[0] = 1; //you most probably always want this to be one
+			strat.multipl[1] = 1; //
+			strat.multipl[2] = 1; //
+			break;
+		}
+		default: throw SHARKEXCEPTION("[QpEbCsDecomp::QpEbCsDecomp] Invalid reprocRules designator" );
+	}
+	strat.rowResizeEvery = 100;
+	strat.wss = static_cast < eWsVariants >( w );
+	wocl.init( strat.wss, cardi.classes );
+	for (unsigned k=0; k<cardi.classes; k++) //initially fill all with zero-gradient and first sample
+		wocl.push(0, 0.0, k);
+
+	// init strategy vars: variable parameters (rest initialized in course of program)
+	strat.proc = nNew; //first move must be to draw a new sample
+	if ( strat.reRu == rOrig )
+	{
+		for (i = 0; i < nMAX; i++) 
+			strat.probability[i] = 1.0;
+		strat.probSum = 3.0;
+	}
+	
+	// init introspection and temporary-results vars 
+	introsp.dualGap = 1e100;
+	introsp.curGainRate = 0.0;
+	temp.q = NULL;
+
+	// init default stopping conditions. overriden by setStoppingConditions.
+	stopCrit.accuracy = 0.0001; //default is 1e-4 in original paper
+	stopCrit.maxEpochs = 1;
+	stopCrit.dualAim = 0.0;
+
+}
+
+QpEbCsDecomp::~QpEbCsDecomp()
+{ }
+
+void QpEbCsDecomp::init()
+{
+	cardi.seenEx = 0;
+	for (unsigned int i = 0; i < nMAX; i++) 
+	{
+		cardi.actual_steps[i] = 0;
+		cardi.planned_steps[i] = 0;
+	}
+	cardi.planned_steps[0] = 1;	 //account for pre-defined first procNew step
+	stopCrit.stop = sNone; //this can only reset any former break-to-next-epoch
+	resetKernelEvals();
+}
+
+void QpEbCsDecomp::setStoppingConditions(double a, int e, double d)
+{
+	RANGE_CHECK( a > 0 );
+	stopCrit.accuracy = a;
+	
+	if ( d > 0 ) 
+	{
+		stopCrit.maxEpochs = 30000; //should be high enough
+		stopCrit.dualAim = d;
+	}
+	else if ( e > 0 ) 
+	{
+		stopCrit.maxEpochs = e;
+		stopCrit.dualAim = 0.0;
+	}
+	else throw SHARKEXCEPTION("[EpochBasedCsMcSvm::setStoppingConditions]" 
+							  "Invalid stopping criterion.");
+}
+
+void QpEbCsDecomp::Solve(Array<double>& solutionVector, double regC)
+{
+	SIZE_CHECK( solutionVector.ndim() == 1 );
+	SIZE_CHECK( solutionVector.dim(0) == cardi.variables );
+	RANGE_CHECK( regC > 0 );
+	double curGain = 0.0; //tmp helper
+	unsigned int e, c, i = 0; //used for examples, classes, misc.
+	if ( introsp.verbosity == 1 ) cout << endl;
+	
+	//fill lists, part 2
+	solutionVector = 0; //to be clear: in contrast to other solvers, no custom init allowed here
+	alpha = 0; 			//dito
+	for (e = 0; e < cardi.examples; e++)
+		for (c = 0; c < cardi.classes; c++)
+			boxMax(e*cardi.classes+c) = ( c == label(e) )*regC;
+	
+	sTimer overall_timer;
+	overall_timer.tic();
+	// ONE LOOP = ONE EPOCH  ( Stop condition handling ugly here, but allows for flexible, extendable structure. )
+	while( stopCrit.stop < sQUIT_MARKER ) //only first stopping condition indicates immediate end-of-epoch
+	{
+		init();  //reset all vars that are valid for one epoch only
+		while ( stopCrit.stop < sEND_MARKER ) //cycle through samples, with intermittant reprocess/optimize steps
+		{
+			introsp.curGainRate = 0.0;
+			introsp.rolex.tic(); //start timer
+			for (i = 0; i < strat.multipl[strat.proc]; i++)
+			{
+				if ( selectNextPattern() ) break; //end epoch if seen all non-SPs
+				if ( selectWorkingSet() > stopCrit.accuracy)
+				{ 
+					curGain = performSmoStep();
+					introsp.curGainRate += curGain;
+					if ( (strat.reRu == rOrig) && (strat.proc == nOld) && (curGain > 0) ) //original mode and procOld only: search strat.multipl times for a good pattern
+						break;
+				}
+				else if ( strat.proc == nNew ) //we'll never see that sample again
+				{
+					kernelMatrix.CacheRowRelease( strat.nextPat ); //then delete the corresponding row
+					if ( stopCrit.stop == sEndEpochSoon ) //ATM unneeded, b/c multipl[nNew] almost always will be 1
+						break;
+				}
+			}
+			introsp.curGainRate /= ( introsp.rolex.toc() + 0.00001 ); //stop timer
+			selectNextProcessingStep(); //update probabilities and select next step based on timing and dual
+		}
+		
+		++cardi.epochs;
+		if ( cardi.epochs >= stopCrit.maxEpochs ) stopCrit.stop = sEpochs;
+		if ( calcDualityGap() <= stopCrit.dualAim ) stopCrit.stop = sDualAim;
+		if ( introsp.verbosity == 1 )
+		{
+			cout << "\t\t[ " << introsp.dual << ", " << introsp.dualGap << ", " << getKernelEvals()
+				 << ", " << cardi.sPatterns << ", " << overall_timer.tocReset() << ", "
+				 << cardi.planned_steps[0] << ", " << cardi.planned_steps[1] << ", " << cardi.planned_steps[2] << ", " 
+				 << cardi.actual_steps[0] << ", " << cardi.actual_steps[1] << ", " << cardi.actual_steps[2] << " ]" << endl;
+			if ( stopCrit.stop < sQUIT_MARKER )
+				cout << "\t\t, "<< endl;
+		}
+	}
+	
+	// return alpha
+	for (e = 0; e < cardi.examples; e++)
+		for (c = 0; c < cardi.classes; c++)
+			solutionVector( origIndex(e)*cardi.classes + c ) = alpha( e*cardi.classes + c );
+	
+}
+
+void QpEbCsDecomp::selectNextProcessingStep()
+{
+	unsigned int i;
+	if ( stopCrit.stop == sEndEpochNow ) 
+		return; //if the last procNew in this epoch was aborted, leave everything as is
+	if ( cardi.sPatterns == 0 ) 
+	{
+		strat.proc = nNew; //if currently there are no SPs, procOld and procOpt don't make sense
+		return;
+	}
+	
+	switch ( strat.reRu )
+	{
+		case rOrig:
+		{
+			// update probabilities
+			strat.probability[strat.proc] = strat.probAdaptationRate * introsp.curGainRate +
+											(1.0 - strat.probAdaptationRate) * strat.probability[strat.proc];
+			strat.probSum = 0.0; 
+			for (i = 0; i < nMAX; i++) strat.probSum += strat.probability[i]; //update the sum
+			for (i = 0; i < nMAX; i++) //raise other probabilities if necessary
+				if ( strat.probability[i] < strat.guaranteeFraction*strat.probSum )
+					strat.probability[i] = strat.guaranteeFraction*strat.probSum;
+			strat.probSum = 0.0; 
+			for (i = 0; i < nMAX; i++) 
+				strat.probSum += strat.probability[i]; //and update the sum again
+			double draw = Rng::uni(0, strat.probSum);
+			for (i = 0; i < nMAX; i++) 
+			{
+				if ( draw <= strat.probability[i] ) 
+				{
+					strat.proc = static_cast < eNextProc >( i );
+					break;
+				}
+				else 
+				{
+					draw -= strat.probability[i];
+					ASSERT( i != nMAX-1 )
+				}
+			}
+			break;
+		}
+		
+		case rFixed:
+		{
+			if ( strat.proc == nNew ) 
+				strat.proc = nOld;
+			else if ( strat.proc == nOld ) 
+				strat.proc = nOpt;
+			else 
+				strat.proc = nNew;
+			break;
+		}
+		
+		case rGapTarget:
+		{
+			throw SHARKEXCEPTION("not implemented yet.");
+			break;
+		}
+		
+		default: throw SHARKEXCEPTION("[QpEbCsDecomp::selectNextProcessingStep] unkown reprocess rule");
+		
+	}
+	
+	if ( (stopCrit.stop == sEndEpochSoon) && (strat.proc == nNew) )
+		stopCrit.stop = sEndEpochNow; //after endSoon, only allow continuation for nOld,nOpt, not for nNew
+	else
+	{
+		++cardi.planned_steps[strat.proc];
+		++cardi.sum_planned_steps;
+	}
+}
+
+bool QpEbCsDecomp::selectNextPattern()
+{
+	switch ( strat.proc )
+	{
+		case nNew:
+		{
+			do //iterate through the lottery until a non-supportPattern is reached
+			{
+				strat.nextPat = curIndex( lottery(cardi.seenEx) );
+				++cardi.seenEx;
+				if ( cardi.seenEx >= cardi.examples ) //picked this epoch's last pattern
+				{
+					if ( strat.nextPat < cardi.sPatterns ) //bummer, there were only SPs left, so bail out.
+					{
+						stopCrit.stop = sEndEpochNow; 
+						return true;
+					}
+					else //found one SP, but that's the last one, so one more SMO
+					{
+						stopCrit.stop = sEndEpochSoon; 
+						return false;
+					}
+				}
+			} while ( strat.nextPat < cardi.sPatterns ); //ensure that not an SP (only necessary if epochs > 1)
+			break;
+		}
+		case nOld:
+		{
+			strat.nextPat = Rng::discrete(0, cardi.sPatterns-1);
+			break;
+		}
+		case nOpt:
+		{
+			strat.nextPat = Rng::discrete(0, cardi.sPatterns-1);
+			break;
+		}
+		default: throw SHARKEXCEPTION("[QpEbCsDecomp::selectNextPattern] Not a valid processing mode.");
+	}
+	return false;
+}
+
+double QpEbCsDecomp::selectWorkingSet()
+{
+	temp.q = NULL;
+	double g_cur;
+	unsigned int e, c, i, j, p;
+	
+	// prepare helper vars according to SO-WSS variant used (only needed for nOld, nOpt)
+	switch ( strat.wss )
+	{
+		case wMVPone:
+		{
+			wocl.push( strat.nextPat ); //only consider one supportPattern (the one chosen by SNP)
+			break;
+		}
+		case wMVPset:
+		{
+			//nothing to do: the corresponding list was filled during the last gradient update.
+			break;
+		}
+		case wMVPall:
+		{
+			wocl.push( cardi.sPatterns ); //consider all supportPatterns
+			break;
+		}
+		default: throw SHARKEXCEPTION("[QpEbCsDecomp::selectWorkingSet] Not a valid SO-WSS mode.");
+	}
+			
+	switch ( strat.proc ) //the processing steps differ in their SO-WSS scheme as well
+	{
+		case nNew: 
+		{
+			p = strat.nextPat;
+			if (cardi.sPatterns)
+				temp.q = kernelMatrix.Row(p, 0, cardi.sPatterns);
+				
+			// prepare variables, set first variable
+			temp.gPlus = 1.0;
+			temp.gMinus = 1e100;
+			strat.nextI = label(p); //all others are at upper bound. now get gradient:
+			for (tActiveClasses::iterator it = globalSupClasses(strat.nextI).begin(); 
+								  it != globalSupClasses(strat.nextI).end(); ++it)
+				temp.gPlus -= temp.q[*it/cardi.classes] * alpha(*it);
+					
+			// calc gradient for every but actual class and get minimum
+			for (c = 0; c < cardi.classes; c++) 
+			{
+				if ( c == strat.nextI ) continue; //i should not equal j
+				g_cur = 0; //get gradient:
+				for (tActiveClasses::iterator it = globalSupClasses(c).begin(); 
+								  it != globalSupClasses(c).end(); ++it)
+					g_cur -= temp.q[*it/cardi.classes] * alpha(*it);
+					
+				if ( g_cur < temp.gMinus )
+				{
+					strat.nextJ = c;
+					temp.gMinus = g_cur;
+				}
+			}
+			break;
+		}
+		case nOld: 
+		{
+			unsigned int y;
+			int tmpI, tmpJ;
+			double tmpUp, tmpDown;
+			double max_kkt = -1e100;
+			while ( !wocl.end() )
+			{
+				temp.q = NULL;
+				p = wocl.pop();
+				y = label(p);
+				tmpUp = -1e100;
+				tmpDown = 1e100;
+				// get or calc this sample's gradients and associate extremal with first variable
+				for (c = 0; c < cardi.classes; c++) //nOld looks at all classes...
+				{
+					i = p*cardi.classes + c;
+					if ( !isSC(i) ) //calc gradient
+					{
+						if ( temp.q == NULL && cardi.sPatterns ) 
+							temp.q = kernelMatrix.Row(p, 0, cardi.sPatterns);
+						g_cur = ( c == y );
+						for (e=0,j=c; e<cardi.sPatterns; e++,j+=cardi.classes) //two-var loop
+							if ( isSC(j) ) 
+								g_cur -= temp.q[e] * alpha(j); //is skipping test for 0 faster?
+						gradient(i) = g_cur; //store for second half
+					}
+					else //retrieve stored gradient
+						g_cur = gradient(i);
+					// now that we have the gradient, test for extremal one:
+					if ( canIncrease(i) && g_cur > tmpUp )
+					{
+						tmpI = c;
+						tmpUp = g_cur;
+					}
+					if ( g_cur < tmpDown )
+					{
+						tmpJ = c;
+						tmpDown = g_cur;
+					}
+				}
+				// keep the sample with the biggest kkt violation
+				if ( (tmpUp-tmpDown) > max_kkt )
+				{
+					strat.nextI = tmpI;
+					strat.nextJ = tmpJ;
+					strat.nextPat = p;
+					temp.gPlus = tmpUp;
+					temp.gMinus = tmpDown;
+					max_kkt = tmpUp-tmpDown;
+				}
+			}
+			break;
+		}
+		case nOpt: 
+		{
+			unsigned int y;
+			int tmpI, tmpJ;
+			double tmpUp, tmpDown;
+			double max_kkt = -1e100;
+			while ( !wocl.end() )
+			{
+				temp.q = NULL;
+				p = wocl.pop();
+				y = label(p);
+				tmpUp = -1e100;
+				tmpDown = 1e100;
+				// iterate through all support classes of this sample and get extremal gradient
+				for (tActiveClasses::iterator it = sClasses(p).begin(); 
+										  it != sClasses(p).end(); ++it) 
+				{
+					i = p*cardi.classes + (*it);
+					g_cur = gradient(i);
+					// test for extremal gradient
+					if ( canIncrease(i) && g_cur > tmpUp )
+					{
+						tmpI = *it;
+						tmpUp = g_cur;
+					}
+					if ( g_cur < tmpDown )
+					{
+						tmpJ = *it;
+						tmpDown = g_cur;
+					}
+				}
+				// keep the sample with the biggest kkt violation
+				if ( (tmpUp-tmpDown) > max_kkt )
+				{
+					strat.nextI = tmpI;
+					strat.nextJ = tmpJ;
+					strat.nextPat = p;
+					temp.gPlus = tmpUp;
+					temp.gMinus = tmpDown;
+					max_kkt = tmpUp-tmpDown;
+				}
+			}
+			break;
+		}
+		default: throw SHARKEXCEPTION("[QpEbCsDecomp::selectWorkingSet] Not a valid wss mode.");
+	}
+	return (temp.gPlus - temp.gMinus);
+}
+
+void QpEbCsDecomp::wssCandidateList::init( eWsVariants w, unsigned int c )
+{
+	m_wss = w;
+	m_candidates.resize(c, false);
+	clear( -1 );
+}
+
+void QpEbCsDecomp::wssCandidateList::clear( int c ) //only needed for mSOmt. for others, make sure to use c<0
+{
+	m_pos = 0; //move iterator to beginning
+	if ( c < 0 ) //clear all
+	{
+		m_length = 0; //reset list
+		for (unsigned k=0; k<m_candidates.dim(0); k++)
+			m_candidates(k).clear();
+	}
+	else //only clear candidates for class c
+	{
+		ASSERT( c < (int)m_candidates.dim(0) )
+		m_length -= m_candidates(c).size();
+		m_candidates(c).clear();
+	}
+	m_uniqueCandidates.clear();
+}
+
+bool QpEbCsDecomp::wssCandidateList::end()
+{
+	return ( m_pos >= m_length );
+}
+
+void QpEbCsDecomp::wssCandidateList::push( unsigned int k, double g, unsigned int c )
+{
+	switch ( m_wss )
+	{
+		case wMVPone: //each push resets content.
+		{
+			m_pos = 0; 
+			m_length = 1;
+			m_candidates(0).clear();
+			m_candidates(0)[ 0.0 ] = k; //insert an element into first set, with arbitrary key value 0.0
+			break;
+		}
+		case wMVPset: //add the pair (g,k) or possibly replace a smaller-gradient pair
+		{
+			ASSERT( c < m_candidates.dim(0) )
+			ASSERT( m_pos == 0 ) //no push into partially read candidate list
+			if ( m_candidates(c).size() == m_max_cardinality ) //if this classes set is full
+			{
+				m_el = m_candidates(c).begin()->first; //get smallest gradient
+				if ( g <= m_el )
+					return; //new gradient is smaller: ignore
+				else
+					m_candidates(c).erase(m_el); //new gradient is bigger: yield
+			}
+			else
+				++m_length; //max-estimate of noof non-unique candidates only, makes end() false before 1st pop
+			m_candidates(c).insert( pair<double,unsigned int>(g,k) );
+			break;
+		}
+		case wMVPall: //each push resets content.
+		{
+			m_pos = 0;
+			m_length = k;
+			break;
+		}
+		default: throw SHARKEXCEPTION("[soWssCandidateList::push] Not a valid SO-WSS mode.");
+	}
+}
+
+unsigned int QpEbCsDecomp::wssCandidateList::pop()
+{
+	ASSERT( !end() )
+	switch ( m_wss )
+	{
+		case wMVPone:
+		{
+			++m_pos;
+			return m_candidates(0).begin()->second; //returns the first, i.e. here, the only element
+			break;
+		}
+		case wMVPset:
+		{
+			if ( m_pos == 0 ) //merge all accumlated candidates into unique set
+			{
+				for (unsigned k=0; k<m_candidates.dim(0); k++)
+					for ( m_it_map = m_candidates(k).begin(); m_it_map != m_candidates(k).end(); ++m_it_map) 
+						m_uniqueCandidates.insert( m_it_map->second );
+				m_length = m_uniqueCandidates.size();
+				m_it_set = m_uniqueCandidates.begin();
+			}
+			++m_pos; //advance counter
+			return *m_it_set++;
+			break;
+		}
+		case wMVPall:
+		{
+			return m_pos++;
+			break;
+		}
+		default: throw SHARKEXCEPTION("[soWssCandidateList::pop] Not a valid SO-WSS mode.");
+	}
+}
+
+double QpEbCsDecomp::performSmoStep()
+{
+	ASSERT ( strat.nextI != strat.nextJ ) 
+	unsigned int e, p = strat.nextPat;
+	unsigned int nI = p*cardi.classes + strat.nextI; //index into arrays of length cardi.variables
+	unsigned int nJ = p*cardi.classes + strat.nextJ;
+	
+	bool wasSCi = isSC( nI );
+	bool wasSCj = isSC( nJ );
+	double mu = (temp.gPlus - temp.gMinus) / ( 2*diagonal(p) );
+	// clip to upper constraint and update alpha
+	if ( !canIncrease( nI, mu) )  
+		mu = boxMax( nI ) - alpha( nI ); 
+	ASSERT ( mu > 0 ) //there shouldn't be a way to still get worse here
+	alpha( nI ) += mu;
+	alpha( nJ ) -= mu;
+	
+	bool isSCi = isSC( nI );
+	bool isSCj = isSC( nJ );
+	
+	// update gradients (relies on temp.q being unchanged since selectWorkingSet), also fill soWss-mt list
+	if ( strat.wss == wMVPset )
+	{
+		wocl.clear(strat.nextI);
+		wocl.clear(strat.nextJ);
+	}
+	if ( temp.q == NULL && cardi.sPatterns ) 
+		temp.q = kernelMatrix.Row(p, 0, cardi.sPatterns);
+		
+	for (tActiveClasses::iterator it = globalSupClasses(strat.nextI).begin(); 
+								  it != globalSupClasses(strat.nextI).end(); ++it)
+	{
+		e = *it/cardi.classes;
+		gradient(*it) -= mu * temp.q[e];
+		if ( strat.wss == wMVPset )
+			wocl.push( e, fabs(gradient(*it)), strat.nextI );
+	}
+	for (tActiveClasses::iterator it = globalSupClasses(strat.nextJ).begin(); 
+								  it != globalSupClasses(strat.nextJ).end(); ++it)
+	{
+		e = *it/cardi.classes;
+		gradient(*it) += mu * temp.q[e];
+		if ( strat.wss == wMVPset )
+			wocl.push( e, fabs(gradient(*it)), strat.nextJ );
+	}
+	
+	// insert both i and j as new SC (if) or clean up non-SC (else if)
+	if ( !wasSCi && isSCi ) 
+	{
+		sClasses(p).insert( strat.nextI );
+		globalSupClasses(strat.nextI).insert( nI ); //update global list
+		gradient( nI ) = temp.gPlus - mu*diagonal(p); //if not SC, no need to assign. if formerly SC, already correct
+	}
+	else if ( wasSCi && !isSCi ) 
+	{
+		sClasses(p).erase( strat.nextI );
+		globalSupClasses(strat.nextI).erase( nI ); //update global list
+	}
+	
+	if ( !wasSCj && isSCj ) 
+	{
+		sClasses(p).insert( strat.nextJ );
+		globalSupClasses(strat.nextJ).insert( nJ ); //update global list
+		gradient( nJ ) = temp.gMinus + mu*diagonal(p); //if not SC, no need to assign. if formerly SC, already correct
+	}
+	else if ( wasSCj && !isSCj )
+	{
+		sClasses(p).erase( strat.nextJ );
+		globalSupClasses(strat.nextJ).erase( nJ ); //update global list
+	}
+	
+	// insert as new SP (if) or remove from SP-section (else)
+	if ( !sClasses(p).empty() )
+	{
+		if ( p >= cardi.sPatterns ) //move it to SP section
+		{
+			flipAll( cardi.sPatterns, p ); //careful here: flipAll inherits 1stArg < 2ndArg from cachedMatrix.flip
+			// keep vars intact
+			p = cardi.sPatterns; 
+			strat.nextPat = p;	 
+			nI = p*cardi.classes + strat.nextI;
+			nJ = p*cardi.classes + strat.nextJ;
+			++cardi.sPatterns;
+		}
+	}
+	else if ( p < cardi.sPatterns ) //remove from SP section
+	{
+		ASSERT (strat.proc != nNew )
+		kernelMatrix.CacheRowRelease(p);
+		flipAll(p, cardi.sPatterns-1); //careful here: flipAll inherits 1stArg < 2ndArg from cachedMatrix.flip
+		--cardi.sPatterns;
+		// keep vars intact
+		p = cardi.sPatterns; 
+		strat.nextPat = p;	 
+		nI = p*cardi.classes + strat.nextI;
+		nJ = p*cardi.classes + strat.nextJ;
+	}
+
+	// also truncate cache rows once in a while //(cleanup)
+	if ( (strat.proc == nNew) && (cardi.seenEx % strat.rowResizeEvery == 0) )
+	{
+		for (e = 0; e < cardi.sPatterns; e++) 
+		{
+			if (kernelMatrix.getCacheRowSize(e) > cardi.sPatterns) 
+				kernelMatrix.CacheRowResize(e, cardi.sPatterns);
+		}
+	}
+	
+	// increment counters
+	++cardi.actual_steps[strat.proc];
+	++cardi.sum_actual_steps;
+	return mu * ((temp.gPlus - temp.gMinus) - mu*diagonal(p)); //copied from original paper
+}
+
+void QpEbCsDecomp::shuffleSamples()
+{
+	unsigned int i, j, ic = cardi.examples;
+	for (i=1; i<ic; i++)
+	{
+		j = Rng::discrete(0, i);
+		if (i != j) XCHG_A(unsigned int, lottery, i, j);
+	}
+}
+
+// requires i < j
+void QpEbCsDecomp::flipAll(unsigned int i, unsigned int j)
+{
+	if ( i == j ) return;
+	if ( i > j ) throw SHARKEXCEPTION("[QpEbCsDecomp::flipAll] Invalid arguments.");
+	
+	// vars of cardinality cardi.examples
+	curIndex( origIndex(i) ) = j; //flip curIndex
+	curIndex( origIndex(j) ) = i;
+	XCHG_A(unsigned int, origIndex, i, j); //flip OrigIndex
+	XCHG_A(unsigned int, label, i, j);
+	XCHG_A(double, diagonal, i, j);
+	
+	// update all unordered_sets holding the current SCs:
+	// delete global SCs corresponding to old sample-wise sets
+	for (tActiveClasses::iterator it = sClasses(i).begin(); it != sClasses(i).end(); ++it) 
+		globalSupClasses(*it).erase( i*cardi.classes + (*it) );
+	for (tActiveClasses::iterator it = sClasses(j).begin(); it != sClasses(j).end(); ++it) 
+		globalSupClasses(*it).erase( j*cardi.classes + (*it) );
+	XCHG_A(tActiveClasses, sClasses, i, j); //swap sample-wise sets
+	// and fill global SCs from now updated sample-wise sets:
+	for (tActiveClasses::iterator it = sClasses(i).begin(); it != sClasses(i).end(); ++it) 
+		globalSupClasses(*it).insert( i*cardi.classes + (*it) );
+	for (tActiveClasses::iterator it = sClasses(j).begin(); it != sClasses(j).end(); ++it) 
+		globalSupClasses(*it).insert( j*cardi.classes + (*it) );
+	
+	// vars of cardinality cardi.variables: classes always maintain original order
+	unsigned int bi = i * cardi.classes;
+	unsigned int bj = j * cardi.classes;
+	unsigned int b = (i+1) * cardi.classes;
+	unsigned int bic, bjc;
+	for (bic=bi,bjc=bj; bic<b; bic++,bjc++) //two-var loop
+	{
+		XCHG_A(double, alpha, bic, bjc);
+		XCHG_A(double, boxMax, bic, bjc);
+		XCHG_A(double, gradient, bic, bjc);
+	}
+	// notify cache
+	kernelMatrix.FlipColumnsAndRows(i, j);
+}
+
+// costly, only used in original paper for comparison
+double QpEbCsDecomp::calcDualityGap()
+{ 
+	float* q; //kernel row
+	double s = 0.0; //sum over slack variables
+	double g_cur;   //current score
+	double g_min;   //current max score
+	double true_g; //helper
+	double t = 0.0; //sum over alphas corresponding to true labels
+	double w = 0.0; //norm of weight vector
+	unsigned int e, c, i; //helper
+	
+	//store sum over true-label-alphas in t
+	for (e=0; e<cardi.sPatterns; e++)
+		t += alpha( e*cardi.classes + label(e) );
+	
+	//store norm of weight vector in w
+	for (e=0; e<cardi.sPatterns; e++)
+	{
+		q = kernelMatrix.Row(e, 0 , cardi.sPatterns);
+		for (c=0; c<cardi.classes; c++)
+			for (i=0; i<cardi.sPatterns; i++)
+				w += alpha(e*cardi.classes+c) * alpha(i*cardi.classes+c) * q[i];
+	}
+	
+	//store sum over slack variables in s
+	for (unsigned e=0; e<cardi.sPatterns; e++)
+	{
+		true_g = gradient(e*cardi.classes + label(e) );
+		g_min = +1e100;
+		for (unsigned c=0; c<cardi.classes; c++)
+		{
+			if ( c == label(e) ) continue;
+			if ( !isSC(e*cardi.classes + c) ) continue;
+			g_cur = gradient(e*cardi.classes + c);
+			if ( g_cur < g_min )
+				g_min = g_cur;
+		}
+		g_cur = true_g - g_min; //recycle: actual value of slack variable
+		if ( g_cur > 0 ) 
+			s += g_cur;
+	}
+	
+	introsp.dualGap = w - t + s*boxMax( label(0) );
+	if ( introsp.dualGap < 0 )
+		introsp.dualGap = 0;
+	introsp.dual = t - 0.5*w;
+	return introsp.dualGap;
 }

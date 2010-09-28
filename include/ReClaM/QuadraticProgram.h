@@ -8,10 +8,10 @@
  *  \par
  *  This file provides the following interfaces:
  *  <ul>
- *    <li>A quadratic matrix interface</li>
- *    <li>Several special matrices based on kernels and other matrices</li>
- *    <li>A quadtaric matrix cache</li>
- *    <li>A quadratic program solver for a special #SVM related family of problems</li>
+ *	<li>A quadratic matrix interface</li>
+ *	<li>Several special matrices based on kernels and other matrices</li>
+ *	<li>A quadtaric matrix cache</li>
+ *	<li>A quadratic program solver for a special #SVM related family of problems</li>
  *  </ul>
  *  All methods are specifically tuned toward the solution of
  *  quadratic programs occuring in support vector machines and
@@ -21,16 +21,16 @@
  *
  *
  *  \author  T. Glasmachers
- *  \date    2007
+ *  \date	2007
  *
  *  \par Copyright (c) 1999-2007:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *	  Institut f&uuml;r Neuroinformatik<BR>
+ *	  Ruhr-Universit&auml;t Bochum<BR>
+ *	  D-44780 Bochum, Germany<BR>
+ *	  Phone: +49-234-32-25558<BR>
+ *	  Fax:   +49-234-32-14209<BR>
+ *	  eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ *	  www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *
  *
  *  <BR>
@@ -64,7 +64,11 @@
 #include <Array/Array2D.h>
 #include <vector>
 #include <cmath>
-#include<time.h>
+#include <map>
+#include <sys/time.h>
+
+// for TR1 unordered set
+#include <tr1/unordered_set>
 
 
 //! \brief Abstract base class of all quadratic program solvers
@@ -121,10 +125,26 @@ public:
 	{
 		return matrixsize;
 	}
-
+		
+	//! get number of times #Entry was called
+	inline SharkInt64 getAccessCount() const
+	{
+		return accessCount;
+	}
+	
+	//! set #accessCount to zero
+	inline void resetAccessCount()
+	{
+		accessCount = 0;
+	}
+	
 protected:
 	//! length of each edge of the quadratic matrix
 	unsigned int matrixsize;
+	
+	//! entry access counter
+	SharkInt64 accessCount;
+	
 };
 
 
@@ -139,9 +159,11 @@ class KernelMatrix : public QPMatrix
 public:
 	//! Constructor
 	//! \param kernelfunction   kernel function defining the Gram matrix
-	//! \param data             data to evaluate the kernel function
+	//! \param data			 data to evaluate the kernel function
+	//! \param count			should the number of kernel evaluations be counted?
 	KernelMatrix(KernelFunction* kernelfunction,
-				 const Array<double>& data);
+				 const Array<double>& data,
+				 bool count = false);
 
 	//! Destructor
 	~KernelMatrix();
@@ -158,6 +180,10 @@ protected:
 
 	//! Array of data vectors for kernel evaluations
 	Array<ArrayReference<double>* > x;
+	
+	//! should the number of accesses to #Entry be counted?
+	bool countAccess;
+
 };
 
 
@@ -184,7 +210,7 @@ class PrecomputedKernelMatrix : public KernelMatrix
 public:
 	//! Constructor
 	//! \param kernelfunction   kernel function defining the Gram matrix
-	//! \param data             data to evaluate the kernel function
+	//! \param data			 data to evaluate the kernel function
 	PrecomputedKernelMatrix(KernelFunction* kernelfunction,
 				 const Array<double>& data);
 
@@ -214,8 +240,8 @@ class RegularizedKernelMatrix : public KernelMatrix
 {
 public:
 	//! Constructor
-	//! \param kernel          kernel function
-	//! \param data             data to evaluate the kernel function
+	//! \param kernel		  kernel function
+	//! \param data			 data to evaluate the kernel function
 	//! \param diagModification vector d of diagonal modifiers
 	RegularizedKernelMatrix(KernelFunction* kernel,
 							const Array<double>& data,
@@ -290,7 +316,7 @@ class CachedMatrix : public QPMatrix
 {
 public:
 	//! Constructor
-	//! \param base       Matrix to cache
+	//! \param base	   Matrix to cache
 	//! \param cachesize  Main memory to use as a kernel cache, in floats. Default is 256MB
 	CachedMatrix(QPMatrix* base, unsigned int cachesize = 0x4000000);
 
@@ -305,9 +331,9 @@ public:
 	//! If #temp is set to true, the computed values are not
 	//! stored in the cache.
 	//!
-	//! \param k      matrix row
+	//! \param k	  matrix row
 	//! \param begin  first column to be filled in
-	//! \param end    last column to be filled in +1
+	//! \param end	last column to be filled in +1
 	//! \param temp   are the return values temporary or should they be cached?
 	float* Row(unsigned int k, unsigned int begin, unsigned int end, bool temp = false);
 
@@ -347,6 +373,18 @@ public:
 
 	void CacheRowResize(unsigned int k, unsigned int newsize);
 	void CacheRowRelease(unsigned int k);
+	
+	//! get number of kernel evaluations
+	inline SharkInt64 getBaseMatrixKernelEvals()
+	{
+		return baseMatrix->getAccessCount();
+	}
+	
+	//! set kernel evaluation counter to zero
+	inline void resetBaseMatrixKernelEvals()
+	{
+		baseMatrix->resetAccessCount();
+	}
 
 protected:
 	//! matrix to be cached
@@ -462,13 +500,13 @@ public:
 	//! the matrix cache, but with arbirtrary linear part, box
 	//! constraints and stopping conditions.
 	//!
-	//! \param linearPart       linear part v of the target function
-	//! \param boxLower         vector l of lower bounds
-	//! \param boxUpper         vector u of upper bounds
+	//! \param linearPart	   linear part v of the target function
+	//! \param boxLower		 vector l of lower bounds
+	//! \param boxUpper		 vector u of upper bounds
 	//! \param solutionVector   input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
-	//! \param eps              solution accuracy, in terms of the maximum KKT violation
-	//! \param threshold        threshold to use for the objective value stopping criterion
-	//! \return                 objective value at the optimum
+	//! \param eps			  solution accuracy, in terms of the maximum KKT violation
+	//! \param threshold		threshold to use for the objective value stopping criterion
+	//! \return				 objective value at the optimum
 	//!
 	double Solve(const Array<double>& linearPart,
 				 const Array<double>& boxLower,
@@ -489,7 +527,7 @@ public:
 	//!
 	//! \param  index  index of the training example
 	//! \param  coeff  list of coefficients of the training examples
-	//! \return        result of the inner product
+	//! \return		result of the inner product
 	//!
 	double ComputeInnerProduct(unsigned int index, const Array<double>& coeff);
 
@@ -685,11 +723,11 @@ public:
 	//!
 	//! \brief solve the quadratic program
 	//!
-	//! \param linearPart       linear part v of the target function
-	//! \param boxLower         vector l of lower bounds
-	//! \param boxUpper         vector u of upper bounds
+	//! \param linearPart	   linear part v of the target function
+	//! \param boxLower		 vector l of lower bounds
+	//! \param boxUpper		 vector u of upper bounds
 	//! \param solutionVector   input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
-	//! \param eps              solution accuracy, in terms of the maximum KKT violation
+	//! \param eps			  solution accuracy, in terms of the maximum KKT violation
 	//!
 	void Solve(const Array<double>& linearPart,
 				 const Array<double>& boxLower,
@@ -831,14 +869,14 @@ public:
 	//!
 	//! \brief solve the quadratic program
 	//!
-	//! \param  classes         number of classes
-	//! \param  modifiers       list of 64 kernel modifiers, see method QpMcDecomp::Modifier
-	//! \param  target          class label indices in {0, ..., classes-1}
-	//! \param  linearPart      linear part of the objective function
-	//! \param  lower           coordinate-wise lower bound
-	//! \param  upper           coordinate-wise upper bound
+	//! \param  classes		 number of classes
+	//! \param  modifiers	   list of 64 kernel modifiers, see method QpMcDecomp::Modifier
+	//! \param  target		  class label indices in {0, ..., classes-1}
+	//! \param  linearPart	  linear part of the objective function
+	//! \param  lower		   coordinate-wise lower bound
+	//! \param  upper		   coordinate-wise upper bound
 	//! \param  solutionVector  input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
-	//! \param  eps             solution accuracy, in terms of the maximum KKT violation
+	//! \param  eps			 solution accuracy, in terms of the maximum KKT violation
 	//!
 	void Solve(unsigned int classes,
 					const double* modifiers,
@@ -879,7 +917,7 @@ public:
 
 protected:
 	//! Return the 'kernel modifier' which is used to
-	//! compute the Q-matrix form the kernel matrix.
+	//! compute the Q-matrix from the kernel matrix.
 	//! Let (i, m) and (j, n) denote the variables to
 	//! compare, then the Q-matrix entry takes the form
 	//! \f$ Q_{(i,m),(j,n)} = M(y_i, y_j, m, n) \cdot k(x_i, x_j) \f$,
@@ -1024,7 +1062,7 @@ protected:
 
 //!
 //! \brief Quadratic program solver for multi class SVMs
-//!        with sum-to-zero constraint
+//!		with sum-to-zero constraint
 //!
 //! \par
 //! The solver solves the same type of problem as QpMcDecomp,
@@ -1046,14 +1084,14 @@ public:
 	//!
 	//! \brief solve the quadratic program
 	//!
-	//! \param  classes         number of classes
-	//! \param  modifiers       list of 64 kernel modifiers, see method QpMcDecomp::Modifier
-	//! \param  target          class label indices in {0, ..., classes-1}
-	//! \param  linearPart      linear part of the objective function
-	//! \param  lower           coordinate-wise lower bound
-	//! \param  upper           coordinate-wise upper bound
+	//! \param  classes		 number of classes
+	//! \param  modifiers	   list of 64 kernel modifiers, see method QpMcDecomp::Modifier
+	//! \param  target		  class label indices in {0, ..., classes-1}
+	//! \param  linearPart	  linear part of the objective function
+	//! \param  lower		   coordinate-wise lower bound
+	//! \param  upper		   coordinate-wise upper bound
 	//! \param  solutionVector  input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
-	//! \param  eps             solution accuracy, in terms of the maximum KKT violation
+	//! \param  eps			 solution accuracy, in terms of the maximum KKT violation
 	//!
 	void Solve(unsigned int classes,
 					const double* modifiers,
@@ -1086,7 +1124,7 @@ public:
 
 protected:
 	//! Return the 'kernel modifier' which is used to
-	//! compute the Q-matrix form the kernel matrix.
+	//! compute the Q-matrix from the kernel matrix.
 	//! Let (i, m) and (j, n) denote the variables to
 	//! compare, then the Q-matrix entry takes the form
 	//! \f$ Q_{(i,m),(j,n)} = M(y_i, y_j, m, n) \cdot k(x_i, x_j) \f$,
@@ -1214,5 +1252,375 @@ protected:
 	double m_modifier[64];
 };
 
+//! 
+//! \brief Epoch-based quadratic program approximator for Crammer-Singer type multi-class machines 
+//! 
+//! \par
+//! This algorithm implements an epoch-based approach 
+//! to solving the optimization problem occuring in a
+//! Crammer-Singer multi-class machine.
+//! 
+//! \par
+//! One epoch is understood as the solver in a perceptron-like
+//! manner looking at all training examples once, possibly  
+//! carrying out intermediate optimization steps on variables
+//! corresponding to known examples in-between. 
+//! 
+//! \par
+//! Note the following conventions that are used in the documentation and underlie the code: 
+//! A destinction is made between support vectors (SVs), support classes (SCs), and support patterns (SPs).
+//! An SV is a combined pair of input pattern i and potential class label c \f$ (x_i, c) \f$ 
+//! for which the corresponding coefficient \f$ \alpha^c_i \f$  is non-zero.
+//! An SC is any label c that makes an input pattern \f$ x_i \f$ an SV.
+//! An SP is any pattern \f$ x_i \f$ that has at least one SC.
+//! 
+class QpEbCsDecomp : public QPSolver
+{
+public:
+	
+	//! Constructor
+	//! \param  kernel   kernel matrix cache
+	//! \param  y		 classification targets
+	//! \param  classes  number of classes
+	//! \param  w  		 working set selection preference. 0=mvpOnOneSample 1=mvpAmongLargestGrad-Samples 2=mvpAmongAllSamples. see documentation below
+	QpEbCsDecomp(CachedMatrix& kernel, const Array<double>& y, unsigned int classes, unsigned int w = 1);
+	
+	//! Destructor
+	~QpEbCsDecomp();
+	
+	//! set the stopping conditions for the solver. The last one greater zero is considered active in addition to accuracy.
+	//! \param 	a  accuracy, this is always active (as in exact solvers)
+	//! \param  e  maximal number of epochs, negative to set inactive
+	//! \param  d  desired duality gap, negative to set inactive
+	void setStoppingConditions(double a, int e = 1, double d = -1.0);
+	
+	//! solve the quadratic program. 
+	//! unlike the solve method of other solvers, we here do not accept a custom initialization
+	//! for the soluction vector, instead set it to zero no matter what is passed in
+	//! (being an online algorithm, we rely on the concept of "unseen" samples
+	//!  for which the coefficents are supposed do be zero, i.e. wich are non-SPs)
+	//! \param  solutionVector  input: initial feasible vector \f$ \alpha \f$; output: solution \f$ \alpha^* \f$
+	//! \param  regC	  		regularization constant C
+	void Solve(Array<double>& solutionVector, double regC);
+	
+	//! get number of kernel evaluations
+	inline SharkInt64 getKernelEvals()
+	{
+		return kernelMatrix.getBaseMatrixKernelEvals();
+	}
+	
+	//! set kernel evaluation counter to zero
+	inline void resetKernelEvals()
+	{
+		kernelMatrix.resetBaseMatrixKernelEvals();
+	}
+	
+	//! set verbosity mode. 0=quiet, 1=python-compatible arrays (one row per epoch)
+	inline void setVerbose(bool verbose = false)
+	{
+		introsp.verbosity = verbose;
+	}
+	
+protected:
+	
+// PARTIES TO THE QP EQUATION
+
+	//! solution candidate
+	Array<double> alpha;
+	
+	//! box constraint upper bound, that is, maximal variable value.
+	Array<double> boxMax;
+	
+	//! quadratic part, kernel matrix cache
+	CachedMatrix& kernelMatrix;
+	
+	
+// ADDITIONAL ARRAYS
+	
+	//! for each example, store the class label (between 0 and classes-1)
+	Array<unsigned int> label;
+	
+	//! diagonal matrix entries
+	Array<double> diagonal;
+	
+	//! gradient
+	Array<double> gradient;
+	
+	//! i-th element gives the original index of the current i-th sample
+	Array<unsigned int> origIndex;
+	
+	//! i-th element gives the current index of the originally i-th sample
+	Array<unsigned int> curIndex; //introduced b/c shuffling would be cumbersome otherwise
+	
+	//! In each epoch, pre-define how to traverse through the samples 
+	Array<unsigned int> lottery;
+
+	//! Typedef for convenience
+	typedef std::tr1::unordered_set<unsigned int> tActiveClasses;
+
+	//! For each pattern, maintain a set of the corresponding support vectors. 
+	//! An element of the set of value i corresponds to the i-th class
+	Array<tActiveClasses> sClasses;
+	
+	//! For each class, maintain a set of the corresponding support patterns.
+	//! value i in the j-th set denotes that alpha(i) is an SC for class j 
+	//! (not that class j is an SC for the i-th sample).
+	// in practice this means that the standard access pattern will be redundant,
+	// like this: globalSupClasses(j).doSomething(someSampleIndex*cardi.classes + j)
+	Array<tActiveClasses> globalSupClasses;
+	
+//ENVELOPES FOR STATE/STRATEGY/TMP VARIABLES, ETC
+
+	//! List of variants of the WSS algorithm, i.e., among which set of samples is MVP-WSS carried out
+	enum eWsVariants
+	{
+		wMVPone,		//wss only within the selected (random old) sample
+		wMVPset,		//wss within a specified number of old samples with large absolute gradient
+		wMVPall,		//wss within all SPs
+		wMaxGap,		//not yet implemented
+		wMaxPrimal,		//not yet implemented
+		wMVP_MAX		//counter
+	};
+	
+	//! List of possible actions for the next processing step
+	enum eNextProc
+	{
+		nNew,	//process a new (non-support pattern) example
+		nOld,	//process a known support pattern, consider all classes for WSS
+		nOpt,	//process a known support pattern, only consider SCs for WSS
+		nMAX	//counter
+	};
+
+	//! List of possible rules how many and which reprocess steps (nOld or nOpt) to be done after one nNew
+	enum eReprocessRules
+	{
+		rOrig,	  //(nNew,nOld,nOpt) = (1,b,10*c), b and c evolving on-line and according to last gain rate
+		rFixed,	 //(nNew,nOld,nOpt) = (1,b,c), b and c fixed and predefined by user
+		rGapTarget, //(nNew,nOld,nOpt) = (1,b,c), with some ratio b/c, and b+c determined by gap target (see ertekin et al.)
+		rMAX		//counter
+	};
+	
+	//! envelope for current overall strategy
+	struct tStrategy
+	{	
+		//FIXED throughout entire optimization run:
+		eWsVariants wss;			//specifies the variant of the WSS strategy
+		eReprocessRules reRu;		//how many and which reprocess steps to do after having processed a new sample
+		unsigned int multipl[nMAX]; //treat how many iterations of each processing step as an atomic operation
+		double probAdaptationRate;  //adaptation rate for probabilites of processing steps (mu in original paper).
+		double guaranteeFraction; 	//probability[i] won't sink below this fraction of probSum (eta in original paper)
+		unsigned int rowResizeEvery;//update row length every ?-th smo-step.
+		//VARIABLE:
+		eNextProc proc;				//next processing step
+		double probability[nMAX]; 	//relative probabilities for next processing step
+		double probSum;			 	//for convenience: sum over tStrategy.probability
+		unsigned int nextPat;		//next pattern to work on
+		unsigned int nextI;			//next variable to work on, to increase
+		unsigned int nextJ;			//next variable to work on, to decrease
+	};
+	
+	//! envelope for convenience cardinalities of important sets
+	struct tCardinalities
+	{
+		unsigned int examples;		//number of examples in the problem (size of the kernel matrix)
+		unsigned int classes;		//number of classes in the problem
+		unsigned int variables;		//number of variables in the problem = examples times classes
+		unsigned int sPatterns;		//current number of support patterns
+		unsigned int seenEx;		//index into lottery (how many samples seen in this epoch)
+		unsigned int epochs;		//number of epochs undertaken
+		SharkInt64 planned_steps[nMAX]; //number of processing steps planned for each processing type
+		unsigned int sum_planned_steps;	//for convenience, number of all planned steps (sum over steps)
+		SharkInt64 actual_steps[nMAX];  //number of processing steps really undertaken for each processing type
+		unsigned int sum_actual_steps;	//for convenience, number of all smo steps really undertaken (sum over smoSteps)
+	};
+	
+	//! Convenience structure for time keeping
+	struct sTimer
+	{
+		timeval tv;
+		double seconds;
+		void tic()
+		{
+			gettimeofday(&tv, NULL);
+			seconds = tv.tv_sec+(tv.tv_usec/1000000.0);
+		}
+		//return time difference in microseconds (but w/ precision of only 0.01 s)
+		double toc()
+		{
+			gettimeofday(&tv, NULL);
+			return ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );
+		}
+		//return time difference and reset tic-time
+		double tocReset()
+		{
+			gettimeofday(&tv, NULL);
+			double tmp = ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );
+			seconds = tv.tv_sec+(tv.tv_usec/1000000.0);
+			return tmp;
+		}
+	};
+	
+	//! envelope for variables about the current state of the solver
+	struct tIntrospection
+	{	
+		double dualGap;			//current value of duality gap
+		double dual;			//current value of the dual
+		double curGain;			//how useful the last processing step was
+		double curGainRate;		//dito, but normalized to the time elapsed
+		sTimer rolex;			//for keeping track of dual gain per processing time unit
+		unsigned int verbosity; //0=quiet, 1=output results in python-compatible arrays
+	};
+		
+	//! envelope for caching intermediate results
+	struct tTmpData
+	{
+		double gPlus;   //upward gradient
+		double gMinus;  //downward gradient
+		float* q;		//kernel row for current example. needed in WSS (sometimes) and SMO
+	};
+	
+	//! helper enum: list of possible stopping conditions
+	enum eStopReason
+	{
+		sNone,				//keep running
+		sEndEpochSoon,		//keep running, but start new epoch before next procNew
+		sEND_MARKER,		//marks the border between keep-running-non-new-steps and end-epoch
+		sEndEpochNow,		//keep running, but start new epoch immediately
+		sQUIT_MARKER,		//marks border between epoch and overall stopping conditions
+		sEpochs,			//number of epochs has reached stopCrit.maxEpochs
+		sDualAim			//dual gap has fallen below stopCrit.dualAim
+	};
+	
+	//! envelope for stopping criterion.
+	struct tStopCrit		
+	{
+		double accuracy;		//Not a stopping crit., but for choosing samples for SMO by their KKT violation
+		unsigned int maxEpochs;	//number of epochs: how many iterations through the training set to complete
+		double dualAim;			//desired duality gap as stopping criterion. Alternative to #maxEpochs
+		eStopReason stop;   	//flag that summarizes the status of the different stopping conditions
+	};
+	
+	//! envelope for overall strategy
+	tStrategy strat;
+	
+	//! envelope for convenience cardinalities of important sets
+	tCardinalities cardi;
+	
+	//! envelope for variables about the current state of the solver
+	tIntrospection introsp;
+	
+	//! envelope for caching intermediate results
+	tTmpData temp;
+	
+	//! Stopping criterion. The last one greater zero is considered active in addition to accuracy.
+	tStopCrit stopCrit;
+	
+	
+// WORKING SET AND PROCESSING STEP SELECTION
+	
+	//! select next processing step
+	void selectNextProcessingStep();
+	
+	//! process the next sample
+	void processNext();
+	
+	//! find the next pattern to work on. return true if there are now unseen samples left.
+	bool selectNextPattern();
+	
+	//! Choose working set according to current strategy. return corresponding KKT violation.
+	double selectWorkingSet();
+
+
+	//! Allround class managing the candidate samples among which to conduct wss.
+	//! It provides an container-like interface: fill the candidate list via
+	//! possibly iterative calls to the push method, and retrieve the candidates
+	//! via iterative calls to pop() and check for end() of the list.
+	//! For the established variants of candidate lists (only look at one specific sample
+	//! or iterate through all support samples), a straight-forward approach is taken.
+	//! For the set_extension, a std::map is, for each class, used to store the indices into
+	//! the samples corresponding to the highest #m_max_cardinality gradients. In other words,
+	//! the gradients serve as keys, the number of which is limited by #m_max_cardinality,
+	//! and the mapped values are indices into the set of support patterns.
+	class wssCandidateList
+	{
+		public:
+			void init( eWsVariants w, unsigned int c);
+			void clear( int c = -1 ); //negative value clears candidates for all classes (MVPset only)
+			bool end();
+			void push( unsigned int k, double g = 0, unsigned int c = 0 ); //sample index, class index, gradient
+			unsigned int pop();
+		
+		protected:
+			eWsVariants m_wss;  //wss mode
+			unsigned int m_pos; //iterator (next element)
+			unsigned int m_length; //number of elements in list
+			static const unsigned int m_max_cardinality = 2; //max number of elements in the MVPset method
+			// each element of the array holds, for one class, up to m_max_cardinality candidates:
+			Array< std::map<double, unsigned int> > m_candidates; //up to m_max_cardinality candidates per class
+			tActiveClasses m_uniqueCandidates; //before first pop, construct unique candidate list for read-out
+			std::map<double, unsigned int>::iterator m_it_map;   //three helpers
+			tActiveClasses::iterator m_it_set;
+			double m_el;
+	};
+	
+	wssCandidateList wocl;
+	
+	//! do the actual update on the working set, return the gain achieved
+	double performSmoStep();
+	
+	
+// STOPPING CRITERION / INTROSPECTION
+	
+	//! used with the dualAim stopping criterion. expensive.
+	double calcDualityGap();
+	
+	
+// MISC
+
+	//! reset all variables that are valid for one epoch only 
+	void init();
+
+	//! randomly reorder the lottery vector defining the iteration through the dataset
+	void shuffleSamples();
+	
+	//! exchange all data corresponding to two samples, both in internal arrays and in the cachedMatrix
+	//! Important note: flipAll inherits the assumption that i < j, i.e. firstArgument < secondArgument,
+	//! from #CachedMatrix::FlipColumnsAndRows
+	void flipAll(unsigned int i, unsigned int j);
+
+	//! one central place to account for numerical inaccuracies when determining upper-boundedness
+	//! this defines the parameter kappa of the original paper
+	//! param index which component of alpha should be tested for boundedness via corresponding component of boxMax
+	//! param extra for determining whether \f$ #alpha(i) + \f$ extra is bounded
+	inline bool canIncrease( unsigned int index, double extra = 0.0 )
+	{
+		return ( (alpha(index) + extra + 1e-12) <= boxMax(index) );
+	}
+	
+	//! With respect to a fixed pattern, determine whether a class is a support class
+	//! This should be identical to #inSCs, unless in the middle of insertion, etc.
+	//! Accounts for numerical inaccuracies in one fixed location
+	//! Attention: for convenience, i is index directly into alpha, i.e. sample*cardi.classes + (relative class number)
+	//! param i index directly into alpha
+	inline bool isSC( unsigned int i )
+	{
+		return ( ( alpha(i) < -1e-12 ) || ( alpha(i) > 1e-12 )  );
+	}
+	
+	//! Return the 'kernel modifier'. See implementation at #QpMcStzDecomp  for details
+	// y = true labels, v = var-correspondant labels
+	//! \param  yi  label of the example corresponding to the first variable (i,m)
+	//! \param  yj  label of the example corresponding to the second variable (j,n)
+	//! \param  vi  label 'm' of the first variable
+	//! \param  vj  label 'n' of the second variable
+	inline double Modifier(unsigned int yi, unsigned int yj, unsigned int vi, unsigned int vj) const
+	{
+		if ( vi == vj )
+			return 1.0;
+		else
+			return 0.0;
+	}
+
+};
 
 #endif

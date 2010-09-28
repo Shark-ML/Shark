@@ -5,16 +5,16 @@
  *  \brief Support Vector Machine interface
  *
  *  \author  T. Glasmachers
- *  \date    2005
+ *  \date	2005
  *
  *  \par Copyright (c) 1999-2007:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *	  Institut f&uuml;r Neuroinformatik<BR>
+ *	  Ruhr-Universit&auml;t Bochum<BR>
+ *	  D-44780 Bochum, Germany<BR>
+ *	  Phone: +49-234-32-25558<BR>
+ *	  Fax:   +49-234-32-14209<BR>
+ *	  eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ *	  www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *
  *
  *
@@ -92,14 +92,14 @@ class SVM : public Model
 public:
 	//! Constructor
 	//!
-	//! \param  pKernel      kernel function to use for training and prediction
+	//! \param  pKernel	  kernel function to use for training and prediction
 	//! \param  bSignOutput  true if the SVM should output binary labels, false if it should output real valued function evaluations
 	SVM(KernelFunction* pKernel, bool bSignOutput = false);
 
 	//! Constructor
 	//!
-	//! \param  pKernel      kernel function to use for training and prediction
-	//! \param  input        training data points
+	//! \param  pKernel	  kernel function to use for training and prediction
+	//! \param  input		training data points
 	//! \param  bSignOutput  true if the SVM should output binary labels, false if it should output real valued function evaluations
 	SVM(KernelFunction* pKernel, const Array<double>& input, bool bSignOutput = false);
 
@@ -132,21 +132,21 @@ public:
 	//! are overwritten.
 	//!
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
-	//! \param  input        training data points
-	//! \param  copy         maintain a copy of the input data
+	//! \param  input		training data points
+	//! \param  copy		 maintain a copy of the input data
 	void SetTrainingData(const Array<double>& input, bool copy = false);
 
 	//! compute the SVM prediction on data
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
 	void model(const Array<double>& input, Array<double>& output);
 
 	//! compute the SVM prediction on data
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
 	double model(const Array<double>& input);
 
@@ -162,7 +162,7 @@ public:
 	//! SVM output.
 	//!
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
 	void modelDerivative(const Array<double>& input, Array<double>& derivative);
 
@@ -178,7 +178,7 @@ public:
 	//! SVM output.
 	//!
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
 	void modelDerivative(const Array<double>& input, Array<double>& output, Array<double>& derivative);
 
@@ -187,7 +187,7 @@ public:
 	//! vector usually referred to as \f$ \alpha \f$
 	//!
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
 	inline double getAlpha(int index)
 	{
@@ -199,7 +199,7 @@ public:
 	//! as \f$ b \f$
 	//!
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
 	inline double getOffset()
 	{
@@ -245,7 +245,7 @@ public:
 	//! support vectors.
 	//!
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
 	bool LoadSVMModel(std::istream& is);
 
@@ -255,7 +255,7 @@ public:
 	//! support vectors.
 	//!
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
 	bool SaveSVMModel(std::ostream& os);
 
@@ -263,10 +263,10 @@ public:
 	//! Import a libsvm 2.81 model file.
 	//!
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
 	//! \return  On success a SVM model is returned.
-	//!          A return value of NULL indicates an error.
+	//!		  A return value of NULL indicates an error.
 	//!
 	static SVM* ImportLibsvmModel(std::istream& is);
 
@@ -274,10 +274,10 @@ public:
 	//! Import an SVM-light model file.
 	//!
 	//! \author  T. Glasmachers
-	//! \date    2006
+	//! \date	2006
 	//!
 	//! \return  On success a SVM model is returned.
-	//!          A return value of NULL indicates an error.
+	//!		  A return value of NULL indicates an error.
 	//!
 	static SVM* ImportSvmlightModel(std::istream& is);
 
@@ -292,8 +292,8 @@ protected:
 	//! If the first character read is already a separator
 	//! the function returns an empty token.
 	//!
-	//! \param  is          stream to read from
-	//! \param  buffer      buffer to store the token
+	//! \param  is		  stream to read from
+	//! \param  buffer	  buffer to store the token
 	//! \param  maxlength   size of the buffer
 	//! \param  separators  characters terminating the token
 	//!
@@ -312,7 +312,7 @@ protected:
 	//! The function reads characters from a stream until
 	//! one of the terminating characters is found.
 	//!
-	//! \param  is          stream to read from
+	//! \param  is		  stream to read from
 	//! \param  separators  termination characters
 	//!
 	//! \return A status code is returned:
@@ -374,9 +374,9 @@ class MultiClassSVM : public Model
 {
 public:
 	//! Constructor
-	//! \param  pKernel             input space kernel
-	//! \param  numberOfClasses     number of classes with indices starting from 0
-	//! \param  bNumberOutput       true: output class index; false: output vector
+	//! \param  pKernel			 input space kernel
+	//! \param  numberOfClasses	 number of classes with indices starting from 0
+	//! \param  bNumberOutput	   true: output class index; false: output vector
 	MultiClassSVM(KernelFunction* pKernel, unsigned int numberOfClasses, bool bNumberOutput = true);
 
 	//! Destructor
@@ -400,9 +400,9 @@ public:
 	//! parameter vector stores only coefficients
 	//! relative to these data.
 	//!
-	//! \param  input        training data points
-	//! \param  target       training data labels
-	//! \param  copy         maintain a copy of the input data
+	//! \param  input		training data points
+	//! \param  target	   training data labels
+	//! \param  copy		 maintain a copy of the input data
 	void SetTrainingData(const Array<double>& input, const Array<double>& target, bool copy = false);
 
 	//! compute the SVM prediction on data
@@ -431,7 +431,7 @@ public:
 
 	//! return the coefficient of a given example and label
 	//! \param  index  index of the corresponding training example
-	//! \param  c      zero-based class index (0, ..., classes-1)
+	//! \param  c	  zero-based class index (0, ..., classes-1)
 	inline double getAlpha(unsigned int index, unsigned int c) const
 	{
 		return parameter(classes * index + c);
@@ -513,13 +513,13 @@ class MetaSVM : public Model
 public:
 	//! Constructor
 	//!
-	//! \param  pSVM                     Pointer to the SVM to be optimized.
+	//! \param  pSVM					 Pointer to the SVM to be optimized.
 	//! \param  numberOfHyperParameters  number of hyperparameters additional to the kernel parameters
 	MetaSVM(SVM* pSVM, unsigned int numberOfHyperParameters);
 
 	//! Constructor
 	//!
-	//! \param  pSVM                     Pointer to the MultiClassSVM to be optimized.
+	//! \param  pSVM					 Pointer to the MultiClassSVM to be optimized.
 	//! \param  numberOfHyperParameters  number of hyperparameters additional to the kernel parameters
 	MetaSVM(MultiClassSVM* pSVM, unsigned int numberOfHyperParameters);
 
@@ -616,10 +616,10 @@ class C_SVM : public MetaSVM
 public:
 	//! Constructor
 	//!
-	//! \param  pSVM     Pointer to the SVM to be optimized.
-	//! \param  Cplus    initial value of \f$ C_+ \f$
+	//! \param  pSVM	 Pointer to the SVM to be optimized.
+	//! \param  Cplus	initial value of \f$ C_+ \f$
 	//! \param  Cminus   initial value of \f$ C_- \f$
-	//! \param  norm2    true if 2-norm slack penalty is to be used
+	//! \param  norm2	true if 2-norm slack penalty is to be used
 	//! \param  unconst  true if the parameters are to be represented as \f$ \log(C) \f$. This allows for unconstrained optimization.
 	C_SVM(SVM* pSVM, double Cplus, double Cminus, bool norm2 = false, bool unconst = false);
 
@@ -729,8 +729,8 @@ class Epsilon_SVM : public MetaSVM
 public:
 	//! Constructor
 	//!
-	//! \param  pSVM     Pointer to the SVM to be optimized.
-	//! \param  Cplus    initial value of \f$ C_+ \f$
+	//! \param  pSVM	 Pointer to the SVM to be optimized.
+	//! \param  Cplus	initial value of \f$ C_+ \f$
 	//! \param  Cminus   initial value of \f$ C_- \f$
 	//! \param  epsilon  initial value of \f$ \varepsilon \f$
 	//! \param  unconst  true if the parameters are to be represented as \f$ \log(C) \f$ and \f$ \log(\varepsilon) \f$. This allows for unconstrained optimization.
@@ -786,7 +786,7 @@ class OneClassSVM : public MetaSVM
 {
 public:
 
-	//! \param pSVM     Pointer to the SVM to be optimized.
+	//! \param pSVM	 Pointer to the SVM to be optimized.
 	//! \param  nu		fraction of the training data that can be misclassified
 	OneClassSVM(SVM* pSVM, double fractionNu);
 
@@ -1111,6 +1111,106 @@ public:
 };
 
 
+//! 
+//! \brief Meta model (training scheme) for on-line Crammer-Singer multiclass learning
+//! 
+//! \author M. Tuma
+//! \date 2010
+//! 
+//! \par
+//! This algorithm implements an epoch-based approach 
+//! to solving the optimization problem occuring in a
+//! Crammer-Singer multi-class machine.
+//! 
+//! \par
+//! One epoch is understood as the solver in a perceptron-like
+//! manner looking at all training examples once, possibly  
+//! carrying out intermediate optimization steps on variables
+//! corresponding to known examples in-between.
+//! 
+class EpochBasedCsMcSvm : public MetaSVM
+{
+public:
+	//! Constructor
+	//! \param pSVM		Pointer to the SVM to be optimized.
+	//! \param C		Value for the regularization parameter C
+	//! \param unconst	True if C is represented as \f$ \log(C) \f$, allowing for unconstrained optimization.
+	//! \param wss		working set selection strategy used by solver.  0=mvpOnOneSample 1=mvpAmongLargestGrad-Samples 2=mvpAmongAllSamples.
+	//! \param count	should the number of kernel evals be counted
+	//! \param epochs	Number of runs through the training set. Often, 1 is used.
+	//! \param dual  	Desired duality gap. When greater than 0, used instead of #epochLim. 
+	EpochBasedCsMcSvm(MultiClassSVM* pSVM, double C, bool unconst = false, unsigned int wss = 0,
+					   bool countKernels = false, int epochs = 1, double dual = -1.0);
+
+	//! Destructor
+	~EpochBasedCsMcSvm();
+
+
+	//! get the regularization constant
+	inline double get_C()
+	{
+		if (exponential) return exp(parameter(0));
+		else return parameter(0);
+	}
+
+	//! set the regularization constant
+	inline void set_C(double C)
+	{
+		if (exponential) setParameter(0, log(C));
+		else setParameter(0, C);
+	}
+
+	//! return true if the exponential function is used to parameterize C
+	inline bool isUnconstrained()
+	{
+		return exponential;
+	}
+	
+	//! return if number of kernel evals is being counted
+	inline bool get_countPreference()
+	{
+		return count;
+	}
+	
+	//! return working set selection preference.
+	inline unsigned int get_wssMode()
+	{
+		return wssMode;
+	}
+	
+	//! get the maximum number of epochs. negative for inactive
+	inline int get_epochLim()
+	{
+		return epochLim;
+	}
+	
+	//! get the desired duality gap. negative for inactive
+	inline double get_dualAim()
+	{
+		return dualAim;
+	}
+
+	//! is C positive, and the underlying MetaSVM feasible?
+	bool isFeasible();
+
+protected:
+	//! is C stored as log(C)?
+	bool exponential;
+	
+	//! count number of kernel evals?
+	bool count;
+	
+	//! working set selection preference. 0=mvpOnOneSample 1=mvpAmongLargestGrad-Samples 2=mvpAmongAllSamples.
+	unsigned int wssMode; 
+	
+	//! number of epochs: how many iterations through the training set?
+	int epochLim;		
+	
+	//! Desired duality gap as stopping criterion. Alternative to #epochLim.
+	double dualAim;		
+};
+
+
 //!
 //! \brief Optimizer for SVM training by quadratic programming
 //!
@@ -1122,12 +1222,12 @@ public:
 //! for three reasons:
 //! <ul>
 //!   <li>It does not depend on the error function object
-//!     provided as a parameter to #optimize.</li>
+//!	 provided as a parameter to #optimize.</li>
 //!   <li>It does not return a useful error value.
-//!     The quadratic program optimum is returned,
-//!     which is not suitable for model selection.</li>
+//!	 The quadratic program optimum is returned,
+//!	 which is not suitable for model selection.</li>
 //!   <li>It is not an iterative optimizer. The first call to
-//!     #optimize already finds the optimal solution.</li>
+//!	 #optimize already finds the optimal solution.</li>
 //! </ul>
 //! Nevertheless, the SVM_Optimizer is one of the most important
 //! classes in the SVM context, as it calls the #QuadraticProgram
@@ -1151,7 +1251,7 @@ public:
 	//! If the model parameter is not a valid #MetaSVM
 	//! model, the method will throw an exception.
 	//!
-	//! \param  model    Meta model containing complexity constant and kernel
+	//! \param  model	Meta model containing complexity constant and kernel
 	void init(Model& model);
 
 	//! \brief Default #Optimizer interface
@@ -1173,7 +1273,7 @@ public:
 	//! \param   input   Training input used for the optimization
 	//! \param   target  Training labels used for the optimization
 	//! \return  As there is no error evaluation, the function returns
-	//!          the dual target function value.
+	//!		  the dual target function value.
 	double optimize(Model& model, ErrorFunction& error, const Array<double>& input, const Array<double>& target);
 
 	//! \brief Trains the #SVM with the given dataset.
@@ -1187,9 +1287,9 @@ public:
 	//! \param  model   The #SVM model to optimize
 	//! \param  input   Training input used for the optimization
 	//! \param  target  Training labels used for the optimization
-	//! \param  copy    Maintain a copy of the input data in the SVM object
+	//! \param  copy	Maintain a copy of the input data in the SVM object
 	//! \return  As there is no error evaluation, the function returns
-	//!          the dual target function value.
+	//!		  the dual target function value.
 	double optimize(SVM& model, const Array<double>& input, const Array<double>& target, bool copy = false);
 
 	//! \brief Trains the #MultiClassSVM with the given dataset.
@@ -1204,7 +1304,7 @@ public:
 	//! \param  model   The #MultiClassSVM model to optimize
 	//! \param  input   Training input used for the optimization
 	//! \param  target  Training labels used for the optimization
-	//! \param  copy    Maintain a copy of the input data in the MultiClassSVM object
+	//! \param  copy	Maintain a copy of the input data in the MultiClassSVM object
 	//! \return  As there is no error evaluation, the function returns zero.
 	void optimize(MultiClassSVM& model, const Array<double>& input, const Array<double>& target, bool copy = false);
 
@@ -1268,7 +1368,7 @@ public:
 	//! iterations or time.
 	inline bool isOptimal() const
 	{
-	    return optimal;
+		return optimal;
 	}
 
 protected:
@@ -1287,6 +1387,7 @@ protected:
 		eDGI,				// MC-SVM by Dogan, Glasmachers and Igel
 		eOVA,				// one-versus-all multi class SVM
 		eOCC,				// one-class-cost multi-class SVM
+		eEBCS				// epoch-based Crammer-Singer
 	};
 
 	//! mode of operation
@@ -1321,7 +1422,19 @@ protected:
 
 	//! upper bound for all One Class SVM Lagrange multipliers XXX
 	double OneClassBoxUpper;
-
+	
+	//! maximum number of epochs for all epoch-based (on-line) algorithms
+	unsigned int epochLimit;
+	
+	//! desired duality gap for epoch-based (on-line) algorithms. this is weaker than the accuracy-limit.
+	double dualLimit;
+	
+	//! working set selection preference. so far used for epoch-based algorithms.
+	unsigned int wssPref;
+	
+	//! preference for counting kernel evaluations. so far used for epoch-based algorithms.
+	bool countKernels;
+	
 	//! should the solver use a precomputed kernel matrix?
 	bool precomputedMatrix;
 
