@@ -20,10 +20,6 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * On Debian systems, the full text of the GNU General Public
- * License version 2 can be found in the file
- * `/usr/share/common-licenses/GPL-2'.
- *
  */
 
 /* $log$ */
@@ -42,12 +38,12 @@
 #include <Fuzzy/TriangularLT.h>
 #include <Fuzzy/TrapezoidLT.h>
 
-#include <Fuzzy/xmlParser.h>
+// #include <Fuzzy/xmlParser.h>
 
 #include <sstream>
 #include <string>
 
-template<typename T>
+/*template<typename T>
 static T convert( const std::string & s ) {
 	std::stringstream ss( s );
 	T t; ss >> t;
@@ -239,7 +235,7 @@ static std::string linguistic_variable_to_xml( const RCPtr<LinguisticVariable> &
 static std::string rule_to_xml( const RCPtr<Rule> & rule ) {
 	return( std::string( "(EE) rule_to_xml(...) not yet implemented." ) );
 }
-
+*/
 //RuleBase build_rule_base_from_fcl(const std::string & uri) {
 //	std::cout << "(EE) Parser for fcl not implemented yet." << std::endl;
 //	return( RuleBase() );
