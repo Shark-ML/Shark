@@ -481,7 +481,7 @@ SET( FUZZY_HEADERS
 ../include/Fuzzy/TrapezoidLT.h
 ../include/Fuzzy/TriangularFS.h
 ../include/Fuzzy/TriangularLT.h
-../include/Fuzzy/xmlParser.h
+# ../include/Fuzzy/xmlParser.h
 )
 
 SET( FUZZY_SRCS 
@@ -521,7 +521,7 @@ SET( FUZZY_SRCS
 	../src/Fuzzy/TrapezoidLT.cpp
 	../src/Fuzzy/TriangularFS.cpp
 	../src/Fuzzy/TriangularLT.cpp
-	../src/Fuzzy/xmlParser.cpp
+#	../src/Fuzzy/xmlParser.cpp
 )
 
 SOURCE_GROUP( Fuzzy\\include FILES ${FUZZY_HEADERS} )
