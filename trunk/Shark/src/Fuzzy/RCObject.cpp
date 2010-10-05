@@ -4,7 +4,7 @@
  *
  * \brief Base class for Reference Counted Objects
  * 
- * \authors Marc Nunkesser (taken from More Effective C++ by Scott Meyers)
+ * \authors Marc Nunkesser, Copyright (c) 2008, Marc Nunkesser (taken from More Effective C++ by Scott Meyers)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

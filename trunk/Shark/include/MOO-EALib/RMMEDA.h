@@ -8,7 +8,9 @@
  * \author University of Essex, 
  * \author Colchester, CO4 3SQ, U.K
  * \author azhou@essex.ac.uk
-
+ *
+ * Copyright (c) 2005, 2006, 2007, Aimin ZHOU
+ *
  * \date	Nov.29 2005 make great changes: noise, border checking
  * \date	Apr.10 2006 redesign
  * \date	Jul.18 2006 add quadratic models
