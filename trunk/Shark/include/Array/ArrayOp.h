@@ -607,8 +607,8 @@ inline Array< T > innerProduct(const Array< T >& v, const Array< T >& w)
 
 	std::vector< unsigned > dim(zd);
 
-	for (i = j = 0; j < vd - 1; dim[ i++ ] = v.dim(j++));
-	for (j = 1; j < wd  ; dim[ i++ ] = w.dim(j++));
+	for (i = j = 0; j < vd - 1; dim[ i++ ] = v.dim(j++)) ;
+	for (j = 1; j < wd  ; dim[ i++ ] = w.dim(j++)) ;
 
 	z.resize(dim);
 
@@ -618,15 +618,15 @@ inline Array< T > innerProduct(const Array< T >& v, const Array< T >& w)
 	std::vector< unsigned > zdim(zd, 0U);
 
 	do {
-		for (i = j = 0; j < vd - 1; vdim[ j++ ] = zdim[ i++ ]);
-		for (j = 1; j < wd  ; wdim[ j++ ] = zdim[ i++ ]);
+		for (i = j = 0; j < vd - 1; vdim[ j++ ] = zdim[ i++ ]) ;
+		for (j = 1; j < wd  ; wdim[ j++ ] = zdim[ i++ ]) ;
 		for (t = T(0), k = 0; k < w.dim(0); k++) {
 			vdim[ vd-1 ] = wdim[ 0 ] = k;
 			t += v(vdim) * w(wdim);
 		}
 		z(zdim) = t;
 
-		for (i = 0; i < zd && ++zdim[ i ] >= z.dim(i); zdim[ i++ ] = 0);
+		for (i = 0; i < zd && ++zdim[ i ] >= z.dim(i); zdim[ i++ ] = 0) ;
 	}
 	while (i < zd);
 

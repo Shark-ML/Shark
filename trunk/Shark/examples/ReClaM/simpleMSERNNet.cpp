@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 	// some parameters
 
 	unsigned iterations = 1000;
-	char* datafile = "timeseries";
+	const char* datafile = "timeseries";
 	if(argc >1) datafile = argv[1];
 	
 	unsigned episode = 1000;

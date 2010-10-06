@@ -119,21 +119,21 @@ int main(int argn, char *argv[])
 
 	// PVM constants and variables
 	//
-	char*       PVM_groupname      = "PVM-Test";
-	const int   PVM_groupsize      = 4         ;
-	const int   PVM_sendExitTag    = 3         ;
-	const int   PVM_sendFitnessTag = 2         ;
-	const int   PVM_sendEvalTag    = 1         ;
-	const int   PVM_MasterID       = 0         ;
+	char*       PVM_groupname      = strdup("PVM-Test");
+	const int   PVM_groupsize      = 4;
+	const int   PVM_sendExitTag    = 3;
+	const int   PVM_sendFitnessTag = 2;
+	const int   PVM_sendEvalTag    = 1;
+	const int   PVM_MasterID       = 0;
 	int inum, tid;
 
 	// EALib constants and variables
 	//
-	const unsigned PopSize     = 50 ;
-	const unsigned Dimension   = 20 ;
+	const unsigned PopSize     = 50;
+	const unsigned Dimension   = 20;
 	const unsigned NumOfBits   = 10;
 	const unsigned Iterations  = 2000;
-	const unsigned DspInterval = 10 ;
+	const unsigned DspInterval = 10;
 	const unsigned NElitists   = 1;
 	const unsigned Omega       = 5;
 	const unsigned CrossPoints = 2;
