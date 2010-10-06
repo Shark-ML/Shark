@@ -137,7 +137,7 @@ PlotWidget::PlotWidget(const char *title)
 	setTitle(title);
 
 	insertLegend(new QwtLegend(), QwtPlot::RightLegend);
-	legend()->setDisplayPolicy(QwtLegend::AutoIdentifier, 7);
+//	legend()->setDisplayPolicy(QwtLegend::AutoIdentifier, 7);
 // 	legend()->setDisplayPolicy(QwtLegend::Auto, 7);
 
 	sym = 1;
@@ -190,8 +190,9 @@ QwtPlotCurve* PlotWidget::addDots(const char *title, const double *x, const doub
 								  const QPen &pen)
 {
 	QwtPlotCurve *c = new QwtPlotCurve(title);
+	QwtSymbol *symbol = new QwtSymbol(QwtSymbol::Style(sym), QBrush(pen.color(), Qt::SolidPattern), pen, QSize(ps, ps));
 	c->setStyle(QwtPlotCurve::Dots);
-	c->setSymbol(QwtSymbol(QwtSymbol::Style(sym), QBrush(pen.color(), Qt::SolidPattern), pen, QSize(ps, ps)));
+	c->setSymbol(symbol);
 	sym++;
 	add(c, x, y, n, pen);
 	return c;
@@ -210,7 +211,7 @@ void PlotWidget::showItems()
 QwtPlotCurve* PlotWidget::add(QwtPlotCurve *c, const double *x, const double *y, unsigned n,
 								  const QPen &pen)
 {
-	c->setRawData(x, y, n);
+	c->setRawSamples(x, y, n);
 	c->setPen(pen);
 	c->setRenderHint(QwtPlotItem::RenderAntialiased);
 	c->attach(this);
@@ -262,19 +263,19 @@ GPWidget::GPWidget()
         stepOnEvidence->setGeometry(62, 40, 75, 30);
 	connect(stepOnEvidence, SIGNAL(clicked()), this, SLOT(gradientStep()));
 
-	CISlider *ciSlideN = new CISlider("number of training samples", N, 1, 51, 1.);
+	CISlider *ciSlideN = new CISlider(strdup("number of training samples"), N, 1, 51, 1.);
 	QwtSlider *sliderN = ciSlideN->slide();
 	sliderN->setScale(1, 51, 10);
 	connect(sliderN, SIGNAL(valueChanged(double)), this, SLOT(setN(double)));
 	connect(sliderN, SIGNAL(sliderPressed()), this, SLOT(setN()));
 
-	ciSlideBI = new CILogSlider("negative precision", betaInv, 1.e-14, 1.e2);
+	ciSlideBI = new CILogSlider(strdup("negative precision"), betaInv, 1.e-14, 1.e2);
 	connect(ciSlideBI, SIGNAL(valueChanged(double)), this, SLOT(setBI(double)));
 
-	ciSlideS = new CILogSlider("kernel width", sigma, 1.e-3, 1.e2);
+	ciSlideS = new CILogSlider(strdup("kernel width"), sigma, 1.e-3, 1.e2);
 	connect(ciSlideS, SIGNAL(valueChanged(double)), this, SLOT(setS(double)));
 
-	CILogSlider *ciSlideE = new CILogSlider("noise", noise, 1.e-8, 1e+2);
+	CILogSlider *ciSlideE = new CILogSlider(strdup("noise"), noise, 1.e-8, 1e+2);
 	connect(ciSlideE, SIGNAL(valueChanged(double)), this, SLOT(setE(double)));
 
 	QVBoxLayout * sliderlayout = new QVBoxLayout;
@@ -353,7 +354,7 @@ void GPWidget::setN(double l)
 void GPWidget::setN()
 {
 	generateTrainingData();
-	trainingCurve->setRawData(inTrain.begin(), targetTrain.begin(), N);
+	trainingCurve->setRawSamples(inTrain.begin(), targetTrain.begin(), N);
 	train();
 	computePlot();
 	plot->replot();
@@ -364,7 +365,7 @@ void GPWidget::setE(double e)
 	noise = e; // pow(10., e);
 	generateTrainingData();
 
-	trainingCurve->setRawData(inTrain.begin(), targetTrain.begin(), N);
+	trainingCurve->setRawSamples(inTrain.begin(), targetTrain.begin(), N);
 
 	train();
 	computePlot();
