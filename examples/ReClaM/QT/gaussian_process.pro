@@ -18,8 +18,8 @@ win32{
 }
 
 !win32{
-   QWTHOME = /usr/
-   INCLUDEPATH += $${QWTHOME}/include/qwt/
+   QWTHOME = /usr/local/qwt-6.0.0-rc1
+   INCLUDEPATH += $${QWTHOME}/include/
    LIBS = -L$${SHARKHOME}/lib -L$${QWTHOME}/lib/ -lShark -lqwt
 }
 
