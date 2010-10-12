@@ -81,7 +81,7 @@ int main()
 	eigensymm_intermediate(A, h, x, lambda);// A is corrupted after the call
 
 	// Calculating the rank of the matrix:
-	r = rank(A, x, lambda);
+	r = sym_rank(A, x, lambda);
 
 	// Output of rank:
 	cout << "rank of matrix is " << r << endl;

@@ -84,7 +84,7 @@
  *      stable
  *
  */
-unsigned rank
+unsigned sym_rank
 (
 	const Array2D< double >& amatA,
 	const Array2D< double >& vmatA,
