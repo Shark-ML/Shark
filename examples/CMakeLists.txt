@@ -195,6 +195,9 @@ SET( LinearClassifierTest_SRC
 SET( PCAtest_SRC
 	../examples/ReClaM/PCAtest.cpp
 )
+SET( FisherLDA_SRC
+	../examples/ReClaM/FisherLDA.cpp
+)
 SET( LinearRegressionTest_SRC
 	../examples/ReClaM/LinearRegressionTest.cpp
 )
@@ -527,6 +530,11 @@ RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 ADD_EXECUTABLE( .././examples/ReClaM/PCAtest ${PCAtest_SRC} )
 TARGET_LINK_LIBRARIES( .././examples/ReClaM/PCAtest shark )
 INSTALL( TARGETS .././examples/ReClaM/PCAtest
+RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
+
+ADD_EXECUTABLE( .././examples/ReClaM/FisherLDA ${FisherLDA_SRC} )
+TARGET_LINK_LIBRARIES( .././examples/ReClaM/FisherLDA shark )
+INSTALL( TARGETS .././examples/ReClaM/FisherLDA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
 ADD_EXECUTABLE( .././examples/ReClaM/LinearRegressionTest ${LinearRegressionTest_SRC} )
