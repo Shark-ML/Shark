@@ -94,7 +94,7 @@ public:
 	~FisherLDA();
 
 	void init(Model& model);
-	void init(bool whitening);
+	void init(bool whitening=false);
 
 	double optimize(Model& model, ErrorFunction& error, const Array<double>& input, const Array<double>& target);
 	double optimize(AffineLinearMap& model, const Array<double>& input, const Array<double>& target);

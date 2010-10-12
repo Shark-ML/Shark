@@ -626,6 +626,7 @@ ADD_TEST( fonSteadyStateMO-CMA ../examples/MOO-EALib/fonSteadyStateMO-CMA )
 ADD_TEST( realcoded-NSGA2 ../examples/MOO-EALib/realcoded-NSGA2 )
 
 ADD_TEST( CrossValidation ../examples/ReClaM/CrossValidation )
+ADD_TEST( FisherLDA ../examples/ReClaM/FisherLDA )
 ADD_TEST( KM ../examples/ReClaM/KM )
 ADD_TEST( KNN ../examples/ReClaM/KNN )
 ADD_TEST( KalmanFilterTest ../examples/ReClaM/KalmanFilterTest )
