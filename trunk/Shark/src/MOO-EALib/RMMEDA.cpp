@@ -228,7 +228,7 @@ void RM::Generate(	unsigned int			latent,
 	for(i=0; i<mMaxCluster; i++) { c = (unsigned int)(ns*vc[i]/vt); nc[i] += c; nt += c;}
 	while(nt<noNew)
 	{
-	  i = Rng::discrete(0, mMaxCluster);
+	  i = Rng::discrete(0, mMaxCluster-1);
 		if(lpca.mvNo[i]>1) {nc[i]++; nt++;}
 	}
 #ifdef AZ_MODEL_OUT

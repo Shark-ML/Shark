@@ -124,7 +124,7 @@ unsigned rankDecomp
 	/*
 	 * determine numercial rank
 	 */
-	r = rank(hmatA, vmatA, dvecA);
+	r = sym_rank(hmatA, vmatA, dvecA);
 
 	/*
 	 * set eigenvalues of arbitrary constant 0
