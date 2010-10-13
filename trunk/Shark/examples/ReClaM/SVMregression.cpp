@@ -51,7 +51,7 @@ int main()
 {
 	cout << "*** Support Vector Machine example program ***" << endl << endl;
 	cout << "The regression training data are sampled from a sinc function" << endl;
-	cout << "with additive Gaussian white noise." << endl;
+	cout << "with additive noise." << endl;
 	cout << endl;
 
 	unsigned int e;
@@ -70,7 +70,7 @@ int main()
 	{
 		x(e, 0) = Rng::uni(-12.0, 12.0);				// point
 		t(e, 0) = sinc(x(e, 0));						// target
-		y(e, 0) = t(e, 0) + Rng::gauss(0.0, 0.01);		// label
+		y(e, 0) = t(e, 0) + Rng::uni(-0.01, 0.01);		// label = target + noise
 	}
 
 	// create the SVM for prediction
@@ -94,6 +94,6 @@ int main()
 	cout << "mean squared error on the training data: " << err << endl << endl;
 
 	// lines below are for self-testing this example, please ignore
-	if (err <= 0.0015) exit(EXIT_SUCCESS);
+	if (err <= 0.01) exit(EXIT_SUCCESS);
 	else exit(EXIT_FAILURE);
 }
