@@ -34,6 +34,7 @@
 #include <Rng/GlobalRng.h>
 #include <ReClaM/Svm.h>
 #include <ReClaM/MeanSquaredError.h>
+#include <Array/ArrayIo.h>
 #include <iostream>
 
 
@@ -57,8 +58,8 @@ int main()
 	unsigned int e;
 	Rng::seed(42);
 
-	double C = 100.0;
-	double epsilon = 0.1;
+	double C = 1e10;
+	double epsilon = 0.01;
 	double sigma = 2.0;
 	unsigned int examples = 100;
 
@@ -68,9 +69,8 @@ int main()
 	Array<double> y(examples, 1);
 	for (e = 0; e < examples; e++)
 	{
-		x(e, 0) = Rng::uni(-12.0, 12.0);				// point
-		t(e, 0) = sinc(x(e, 0));						// target
-		y(e, 0) = t(e, 0) + Rng::uni(-0.01, 0.01);		// label = target + noise
+		x(e, 0) = Rng::uni(-12.0, 12.0);						// point
+		y(e, 0) = sinc(x(e, 0)) + Rng::uni(-epsilon, epsilon);	// target
 	}
 
 	// create the SVM for prediction
@@ -90,10 +90,10 @@ int main()
 
 	// compute the mean squared error on the training data:
 	MeanSquaredError mse;
-	double err = mse.error(svm, x, t);
+	double err = mse.error(svm, x, y);
 	cout << "mean squared error on the training data: " << err << endl << endl;
 
 	// lines below are for self-testing this example, please ignore
-	if (err <= 0.01) exit(EXIT_SUCCESS);
+	if (err <= epsilon*epsilon) exit(EXIT_SUCCESS);
 	else exit(EXIT_FAILURE);
 }
