@@ -65,10 +65,10 @@
 #include <vector>
 #include <cmath>
 #include <map>
-#include <sys/time.h>
+#include <set>
 
 // for TR1 unordered set
-#include <tr1/unordered_set>
+// #include <tr1/unordered_set>
 
 
 //! \brief Abstract base class of all quadratic program solvers
@@ -1356,7 +1356,8 @@ protected:
 	Array<unsigned int> lottery;
 
 	//! Typedef for convenience
-	typedef std::tr1::unordered_set<unsigned int> tActiveClasses;
+	// typedef std::tr1::unordered_set<unsigned int> tActiveClasses;
+	typedef std::set<unsigned int> tActiveClasses;
 
 	//! For each pattern, maintain a set of the corresponding support vectors. 
 	//! An element of the set of value i corresponds to the i-th class
@@ -1437,26 +1438,28 @@ protected:
 	//! Convenience structure for time keeping
 	struct sTimer
 	{
-		timeval tv;
-		double seconds;
+		/*timeval tv;
+		double seconds;*/
 		void tic()
 		{
-			gettimeofday(&tv, NULL);
-			seconds = tv.tv_sec+(tv.tv_usec/1000000.0);
+			/*gettimeofday(&tv, NULL);
+			seconds = tv.tv_sec+(tv.tv_usec/1000000.0);*/
 		}
 		//return time difference in microseconds (but w/ precision of only 0.01 s)
 		double toc()
 		{
-			gettimeofday(&tv, NULL);
-			return ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );
+			/*gettimeofday(&tv, NULL);
+			return ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );*/
+			return( 0 );
 		}
 		//return time difference and reset tic-time
 		double tocReset()
 		{
-			gettimeofday(&tv, NULL);
+			/*gettimeofday(&tv, NULL);
 			double tmp = ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );
 			seconds = tv.tv_sec+(tv.tv_usec/1000000.0);
-			return tmp;
+			return tmp;*/
+			return( 0 );
 		}
 	};
 	
