@@ -62,8 +62,8 @@ int main()
 	double v;
 	Rng::seed(42);
 
-	double C = 100.0;
-	double epsilon = 0.1;
+	double C = 1e10;
+	double epsilon = 0.01;
 	double sigma = 2.0;
 	unsigned int examples = 100;
 
@@ -73,7 +73,7 @@ int main()
 	for (e = 0; e < examples; e++)
 	{
 		x(e, 0) = Rng::uni(-12.0, 12.0);
-		y(e, 0) = sinc(x(e, 0)) + Rng::gauss(0.0, 0.01);
+		y(e, 0) = sinc(x(e, 0)) + Rng::uni(-epsilon, epsilon);
 	}
 
 	// create the SVM for prediction
@@ -199,6 +199,6 @@ int main()
 		cout << "*** unable to call gnuplot ***" << endl;
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 

@@ -1842,7 +1842,7 @@ double SVM_Optimizer::optimize(Model& model, ErrorFunction& error, const Array<d
 				MetaSVM* meta = dynamic_cast<MetaSVM*>(&model);;
 				if (meta != NULL) svm = meta->getSVM();
 			}
-			if (svm == NULL) throw SHARKEXCEPTION("[SVM_Optimizer::optimize] The model is not a valid SVM or SVM meta model.");
+			if (svm == NULL) throw SHARKEXCEPTION("[SVM_Optimizer::optimize] The model is not a valid SVM model or SVM meta model.");
 
 			return optimize(*svm, input, target);
 		}
@@ -1868,7 +1868,7 @@ double SVM_Optimizer::optimize(Model& model, ErrorFunction& error, const Array<d
 				MetaSVM* meta = dynamic_cast<MetaSVM*>(&model);;
 				if (meta != NULL) svm = meta->getMultiClassSVM();
 			}
-			if (svm == NULL) throw SHARKEXCEPTION("[SVM_Optimizer::optimize] The model is not a valid MultiClassSVM or SVM meta model.");
+			if (svm == NULL) throw SHARKEXCEPTION("[SVM_Optimizer::optimize] The model is not a valid MultiClassSVM model or SVM meta model.");
 
 			optimize(*svm, input, target);
 			return 0.0;
@@ -2069,8 +2069,8 @@ double SVM_Optimizer::optimize(SVM& model, const Array<double>& input, const Arr
 			upper(e + examples) = 0.0;
 		}
 
-		if (precomputedMatrix) matrix = new PrecomputedKernelMatrix(kernel, input);
-		else matrix = new KernelMatrix(kernel, input);
+		if (precomputedMatrix) matrix = new QPMatrix2(new PrecomputedKernelMatrix(kernel, input));
+		else matrix = new QPMatrix2(new KernelMatrix(kernel, input));
 		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 
 		QpSvmDecomp* solver = new QpSvmDecomp(*cache);
