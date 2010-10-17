@@ -154,7 +154,7 @@ void Softmax::modelDerivative(const Array<double>& input, Array<double>& output,
 				double t = -Z(i) / N;
 				if (i == j) t += 1.0;
 				t *= o;
-				derivative(j, 2*i) = input(j) * t;
+				derivative(j, 2*i) = input(i) * t;
 				derivative(j, 2*i+1) = t;
 			}
 			output(j) = o;
