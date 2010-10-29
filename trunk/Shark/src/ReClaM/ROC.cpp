@@ -21,7 +21,7 @@
  *
  *
  *  <BR>
- * 
+ *
  *
  *  <BR><HR>
  *  This file is part of ReClaM. This library is free software;
@@ -108,7 +108,7 @@ double ROC::Value(double falseAcceptanceRate)
 
 	// "verification rate" = 1.0 - "false rejection rate"
 	// TODO: build binary search!
-	for (i = 0; score_positive[i] < threshold && i < score_positive.size(); i++);
+	for (i = 0; i < score_positive.size() && score_positive[i] < threshold; i++);
 	if (i == 0) return 1.0;
 	else if (i == score_positive.size()) return 0.0;
 
@@ -133,7 +133,7 @@ double ROC::EqualErrorRate()
 	for (i = 0; i < (int)score_negative.size(); i++)
 	{
 		threshold = score_negative[i];
-		for (; score_positive[c] < threshold && c < (int)score_positive.size(); c++);
+		for ( ;c < (int)score_positive.size() && score_positive[c] < threshold; c++);
 
 		e1 = i / di;			// type 1 error
 		e2 = 1.0 - c / dc;		// type 2 error
