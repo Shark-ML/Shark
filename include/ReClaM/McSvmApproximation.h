@@ -107,7 +107,7 @@ protected:
 	//! determine classification rate of approx. SVM on SVs of original SVM
 	float getClassificationRateOnSVsCorrectlyClassifiedByOrigSVM();
 
-	//void determineNoOfVectorsPerClassForApproximation();
+	void determineNoOfVectorsPerClassForApproximation();
 
 	//! choose vector from original SVs
 	bool chooseVectorForNextIteration(Array<double> &vec);
@@ -120,12 +120,17 @@ protected:
 
 	Array<double> approximatedVectors;
 
-	unsigned	mNoExamplesOfOrigSVM, mDimension, mNoSVs, mNoClasses;
-	unsigned*   mpNoExamplesOfApproximatedSVM;
+	//! Number of examples used as SV somewhere (in one of the machines)
+	unsigned	mNoUniqueSVs;
+	//! Number of SVs taken together all the different machines
+	unsigned	mNoNonUniqueSVs;
+	unsigned	mNoExamplesOfOrigSVM, mDimension, mNoClasses;
+	unsigned    *mpNoExamplesOfApproximatedSVM;
 	double		mOffsetOfApproximatedSVM;
 
 	// parameters of the approximation algorithm
-	unsigned mTargetNoVecsForApproximatedSVM, mTargetNoPositiveVectors, mTargetNoNegativeVectors ;
+	unsigned 	mTargetNoVecsForApproximatedSVM;
+	unsigned 	*mpTargetNoVecsPerClass;
 
 	KernelFunction* mpKernel;
 	double          mGamma;
@@ -134,8 +139,8 @@ protected:
 	bool			mbPerformedGradientDescent;
 
 	unsigned        mNoGradientDescentIterations;
-	unsigned int  	*mNoSVsOrigSVM;
-	unsigned int  	*mNoVecsDrawn;
+	unsigned int  	*mpNoSVsOrigSVM;
+	unsigned int  	*mpNoVecsDrawn;
 
 
 	const char* mOutputDir;

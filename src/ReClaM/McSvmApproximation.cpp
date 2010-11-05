@@ -86,10 +86,11 @@ McSvmApproximation::McSvmApproximation(MultiClassSVM *pSVM, bool verbose)
 	labels = new double[mNoExamplesOfOrigSVM];
 
 	// determine number of SVs of original SVM
-	mNoSVs = 0;
-	mNoSVsOrigSVM = new unsigned int[mNoClasses];
+	mNoUniqueSVs = 0;
+	mNoNonUniqueSVs = 0;
+	mpNoSVsOrigSVM = new unsigned int[mNoClasses];
 	for (c = 0; c < mNoClasses; c++)
-		mNoSVsOrigSVM[c] = 0;
+		mpNoSVsOrigSVM[c] = 0;
 
 	for (t = 0; t < mNoExamplesOfOrigSVM; t++)
 	{
@@ -97,30 +98,31 @@ McSvmApproximation::McSvmApproximation(MultiClassSVM *pSVM, bool verbose)
 		for (c = 0; c < mNoClasses; c++)
 		{
 			labels[t] = c;
-			if (mpSVM->getAlpha(t,c) > 0)
+			if (mpSVM->getAlpha(t,c) != 0)
 			{
-				++mNoSVsOrigSVM[c];
+				++mNoNonUniqueSVs;
+				++mpNoSVsOrigSVM[c];
 				if (!allreadyCountedSV)
 				{
-					this->mNoSVs++;
+					this->mNoUniqueSVs++;
 					allreadyCountedSV = true;
 				}
-				// TODO also initialize targets?
 			}
 		}
 	}
 
 	if (verbose)
 	{
-		cout << "noVectors: " << 	this->mNoSVs << endl;
+		cout << "Number of unique SVs: " << this->mNoUniqueSVs << endl;
+		cout << "Number of non-unique SVs: " << this->mNoNonUniqueSVs << endl;
 		cout << "SVs per class: ";
-		for  (c = 0; c < mNoClasses-1; c++){ cout << mNoSVsOrigSVM[c] << ", "; }
-		cout << mNoSVsOrigSVM[mNoClasses-1] << endl;
+		for  (c = 0; c < mNoClasses-1; c++){ cout << mpNoSVsOrigSVM[c] << ", "; }
+		cout << mpNoSVsOrigSVM[mNoClasses-1] << endl;
 	}
 
 	// default initialization of approximation algorithm
 	// can be overwritten using the respective function
-	mTargetNoVecsForApproximatedSVM             = unsigned(0.1 * mNoSVs);
+	mTargetNoVecsForApproximatedSVM             = unsigned(0.1 * mNoNonUniqueSVs);
 	mNoGradientDescentIterations                = 100;
 
 	// create SVM for holding the approximation
@@ -136,9 +138,12 @@ McSvmApproximation::McSvmApproximation(MultiClassSVM *pSVM, bool verbose)
 	mbIsApproximatedModelValid = true;
 
 	// auxiliary variable for choosing initial vectors
-	mNoVecsDrawn = new unsigned int[mNoClasses];
-	for (c = 0; c < mNoClasses; c++)
-		mNoVecsDrawn[c] = 0;
+	mpNoVecsDrawn = new unsigned[mNoClasses];
+	mpTargetNoVecsPerClass = new unsigned[mNoClasses];
+	for (c = 0; c < mNoClasses; c++) {
+		mpNoVecsDrawn[c] = 0;
+		mpTargetNoVecsPerClass[c] = 0;
+	}
 
 	mbPerformedGradientDescent	=	false;
 	mpIndexListOfVecsForSelection = NULL;
@@ -149,4 +154,56 @@ McSvmApproximation::~McSvmApproximation()
 {
 	delete mpApproximatedSVM;
 	delete[] labels;
+	delete[] mpNoSVsOrigSVM;
+	delete[] mpNoVecsDrawn;
+	delete[] mpTargetNoVecsPerClass;
+}
+
+// approximate SVM
+float McSvmApproximation::approximate()
+{
+	// TODO
+	// calculate number of vectors per class to be chosen
+	determineNoOfVectorsPerClassForApproximation();
+
+	bool bApproximationTargetFulfilled = false;
+
+/*	while (!bApproximationTargetFulfilled)
+	{
+		this->addVecRprop();
+
+		// determine optimal coefficients
+		if (!this->calcOptimalAlphaOfApproximatedSVM())
+			return -1;
+
+		// calc new offset
+		this->calcOffsetForReducedModel();
+
+		if (*mpNoExamplesOfApproximatedSVM == mTargetNoVecsForApproximatedSVM)
+			bApproximationTargetFulfilled = true;
+
+		if (verbose) cout << *mpNoExamplesOfApproximatedSVM << "," << flush;
+	}
+*/
+	return 1;
+}
+
+void McSvmApproximation::determineNoOfVectorsPerClassForApproximation()
+{
+	// there should be at least one SV per class
+	for( unsigned c = 0; c < mNoClasses; c++ )
+		mpTargetNoVecsPerClass[c] = 1;
+
+	// this only approximately leads to the wished number of vectors. but close enough!
+	for( unsigned c = 0; c < mNoClasses; c++ )
+		mpTargetNoVecsPerClass[c] += (unsigned)( (float) mTargetNoVecsForApproximatedSVM * fmax( 0.0, (float) mpNoSVsOrigSVM[c]-1 ) / fmax(1.0, (float) mNoNonUniqueSVs - mNoClasses ) );
+
+	if( verbose ) {
+		cout << "Target number of vectors per class: ";
+		for( unsigned c = 0; c < mNoClasses-1; c++ )
+			cout << mpTargetNoVecsPerClass[c] << ", ";
+		cout << mpTargetNoVecsPerClass[mNoClasses-1] << endl;
+	}
+
+	return;
 }
