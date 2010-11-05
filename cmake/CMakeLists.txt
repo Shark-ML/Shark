@@ -277,6 +277,7 @@ SET( RECLAM_HEADERS
 ../include/ReClaM/MSEFFNet.h
 ../include/ReClaM/MSERBFNet.h
 ../include/ReClaM/MSERNNet.h
+../include/ReClaM/McSvmApproximation.h
 ../include/ReClaM/MeanSquaredError.h
 ../include/ReClaM/Model.h
 ../include/ReClaM/ModelInterface.h
@@ -353,6 +354,7 @@ SET( RECLAM_SRCS
 	../src/ReClaM/LinearRegression.cpp
 	../src/ReClaM/MSEFFNet.cpp
 	../src/ReClaM/MSERNNet.cpp
+	../src/ReClaM/McSvmApproximation.cpp
 	../src/ReClaM/Model.cpp
 	../src/ReClaM/NegativeLogLikelihood.cpp
 	../src/ReClaM/NegativePolarization.cpp

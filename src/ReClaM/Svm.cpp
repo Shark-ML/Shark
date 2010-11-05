@@ -743,6 +743,29 @@ void MultiClassSVM::SetTrainingData(const Array<double>& input, const Array<doub
 	}
 }
 
+void MultiClassSVM::SetTrainingData(const Array<double>& input, bool copy)
+{
+	SIZE_CHECK(input.ndim() == 2);
+	if (bOwnMemory) { delete x; }
+
+	examples = input.dim(0);
+	inputDimension = input.dim(1);
+
+	parameter.resize(examples * classes + classes, false);
+	parameter = 0.0;
+
+	if (copy)
+	{
+		x = new Array<double>(input);
+		bOwnMemory = true;
+	}
+	else
+	{
+		x = &input;
+		bOwnMemory = false;
+	}
+}
+
 void MultiClassSVM::model(const Array<double>& input, Array<double>& output)
 {
 	if (numberOutput)
