@@ -405,6 +405,17 @@ public:
 	//! \param  copy		 maintain a copy of the input data
 	void SetTrainingData(const Array<double>& input, const Array<double>& target, bool copy = false);
 
+	//! \brief Make the training data known to the SVM.
+	//!
+	//! The training data are needed in order to
+	//! represent the SVM model because the
+	//! parameter vector stores only coefficients
+	//! relative to these data.
+	//!
+	//! \param  input		training data points
+	//! \param  copy		 maintain a copy of the input data
+	void SetTrainingData(const Array<double>& input, bool copy = false);
+
 	//! compute the SVM prediction on data
 	void model(const Array<double>& input, Array<double>& output);
 
@@ -456,6 +467,12 @@ public:
 		return x->dim(0);
 	}
 
+	//! return the input space dimension
+	inline unsigned int getDimension()
+	{
+		return inputDimension;
+	}
+
 	//! convert a label vector into a class index
 	unsigned int VectorToClass(const Array<double>& v);
 
@@ -467,6 +484,8 @@ public:
 	//! it can make itself sparse after training.
 	//!
 	void MakeSparse();
+
+	friend class McSvmApproximation;
 
 protected:
 	void Predict(const Array<double>& input, Array<double>& output);
