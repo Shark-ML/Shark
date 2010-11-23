@@ -145,8 +145,6 @@ protected:
 
 	const char* mOutputDir;
 
-	unsigned mIndexOfChosenVec;
-
 	std::vector<int>* mpIndexListOfVecsForSelection;
 
 	friend class McSvmApproximationErrorFunction;

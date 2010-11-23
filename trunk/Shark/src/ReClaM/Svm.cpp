@@ -819,6 +819,17 @@ unsigned int MultiClassSVM::model(const Array<double>& input)
 	return VectorToClass(tmp);
 }
 
+
+bool MultiClassSVM::isSupportVector( unsigned exampleIndex ) {
+
+	for( unsigned c = 0; c < classes; c++ )
+		if( getAlpha( exampleIndex, c ) != 0 )
+			return true;
+
+	return false;
+}
+
+
 unsigned int MultiClassSVM::VectorToClass(const Array<double>& v)
 {
 	SIZE_CHECK(v.ndim() == 1);
