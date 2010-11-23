@@ -334,6 +334,7 @@ double SvmApproximationErrorFunctionGlobal::errorDerivative(Model& model, const 
 		{
 			for (i = 0; i < mNoExamplesOfOrigSVM; ++i)
 			{
+				// TODO eliminate kernel evaluations by changing order of loops?
 				kernelEval = mpKernel->eval(xxOriginalSVM[i], xxApproximatedSVM[k]);
 				derivative(k*mDimension + m) -= 4 * mpSVM->getAlpha(i) * mpApproximatedSVM->getAlpha(k) * (mGamma * kernelEval * (xxOriginalSVM(i, m) - xxApproximatedSVM(k, m)));
 			}

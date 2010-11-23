@@ -422,6 +422,9 @@ public:
 	//! compute the SVM prediction on data
 	unsigned int model(const Array<double>& input);
 
+	//! returns true if alpha != 0 in one of the machines
+	bool isSupportVector( unsigned exampleIndex );
+
 	//! return the kernel function object
 	inline KernelFunction* getKernel()
 	{

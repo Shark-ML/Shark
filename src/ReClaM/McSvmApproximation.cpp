@@ -159,6 +159,81 @@ McSvmApproximation::~McSvmApproximation()
 	delete[] mpTargetNoVecsPerClass;
 }
 
+
+McSvmApproximationErrorFunction::McSvmApproximationErrorFunction(McSvmApproximation* svmApprox)
+{
+	mpApproxSVM = svmApprox;
+}
+
+
+double McSvmApproximationErrorFunction::error(Model& model, const Array<double>& input, const Array<double>& target)
+{
+	return 0.0;
+}
+
+// determine gradient and actual function value
+double McSvmApproximationErrorFunction::errorDerivative(Model& model, const Array<double>& input, const Array<double>& target, Array<double>& derivative)
+{
+	// TODO verify derivative numerically
+	unsigned int i, j;
+
+	MultiClassSVM  *mpSVM             = mpApproxSVM->mpSVM;
+	MultiClassSVM  *mpApproximatedSVM = mpApproxSVM->mpApproximatedSVM;
+
+	const Array<double>& xxOriginalSVM     = mpSVM->getPoints();
+	const Array<double>& xxApproximatedSVM = mpApproximatedSVM->getPoints();
+
+	KernelFunction *mpKernel               = mpSVM->getKernel();
+	double mGamma                          = mpKernel->getParameter(0);
+	unsigned mDimension                    = mpSVM->getDimension();
+	unsigned mNoExamplesOfOrigSVM          = mpSVM->getExamples();
+	unsigned mNoExamplesOfApproximatedSVM  = mpApproximatedSVM->getExamples();
+
+	double functionValue = 0.0;
+
+	for( unsigned c = 0; c < mpSVM->getClasses(); c++ ) {
+
+		Array< double > additionalVector;
+		additionalVector.resize(mDimension, false);
+		for (i = 0; i < mDimension ; ++i)
+			additionalVector(i) = model.getParameter(i);
+
+		double value, tmpFunctionValue = 0;
+
+		Array< double > tmpDerivative;
+		tmpDerivative.resize(mDimension, false);
+		tmpDerivative = 0;
+
+		for (i = 0; i < mNoExamplesOfOrigSVM; ++i)
+		{
+			value = mpSVM->getAlpha(i,c) * mpKernel->eval(xxOriginalSVM[i], additionalVector);
+			tmpFunctionValue += value;
+
+			for (j = 0; j < mDimension; ++j)
+				tmpDerivative(j) +=  4 * value * mGamma * (xxOriginalSVM(i, j) - additionalVector(j));
+		}
+
+		for (i = 0; i < mNoExamplesOfApproximatedSVM; ++i)
+		{
+			value = mpApproximatedSVM->getAlpha(i,c) * mpKernel->eval(xxApproximatedSVM[i], additionalVector);
+			tmpFunctionValue -= value ;
+
+			for (j = 0; j < mDimension; ++j)
+				tmpDerivative(j) -=  4 * value * mGamma * (xxApproximatedSVM(i, j) - additionalVector(j));
+		}
+
+		tmpDerivative *= tmpFunctionValue;
+		derivative    += tmpDerivative;
+		functionValue += tmpFunctionValue;
+	}
+
+	// make minimization problem and return actual function value
+	derivative *= -1.;
+	return -(functionValue * functionValue);
+}
+
+
+
 // approximate SVM
 float McSvmApproximation::approximate()
 {
@@ -196,7 +271,7 @@ void McSvmApproximation::determineNoOfVectorsPerClassForApproximation()
 
 	// this only approximately leads to the wished number of vectors. but close enough!
 	for( unsigned c = 0; c < mNoClasses; c++ )
-		mpTargetNoVecsPerClass[c] += (unsigned)( (float) mTargetNoVecsForApproximatedSVM * fmax( 0.0, (float) mpNoSVsOrigSVM[c]-1 ) / fmax(1.0, (float) mNoNonUniqueSVs - mNoClasses ) );
+		mpTargetNoVecsPerClass[c] += (unsigned)( (double)( mTargetNoVecsForApproximatedSVM * std::max<unsigned>( 0, mpNoSVsOrigSVM[c]-1 ) ) / (double) std::max<unsigned>(1, mNoNonUniqueSVs - mNoClasses ) );
 
 	if( verbose ) {
 		cout << "Target number of vectors per class: ";
@@ -206,4 +281,80 @@ void McSvmApproximation::determineNoOfVectorsPerClassForApproximation()
 	}
 
 	return;
+}
+
+
+// add single vector to SVM approximation
+// using iRpropPlus as optimization method
+void McSvmApproximation::addVecRprop()
+{
+	unsigned int j;
+
+	Array<double> z;
+	double error = 1e5;;
+	double errorLastIteration = 1e7;
+	unsigned counterNoSuccessiveImprovement = 0;
+
+	mbIsApproximatedModelValid = false;
+
+	// choose initial vector
+	this->chooseVectorForNextIteration(z);
+
+	McSvmApproximationModel model(z);
+	McSvmApproximationErrorFunction errFunc(this);
+
+	IRpropPlus iRpropFunctionMinimizer;
+	// TODO check theses parameters! consider number of classes?
+	iRpropFunctionMinimizer.initUserDefined(model, 1.2, 0.5, 50, 1e-6, 1e-4*sqrt(1. / (2.*mGamma)) / sqrt((double)mDimension));
+
+
+	while (counterNoSuccessiveImprovement < 5)
+	{
+		// do one rProp minimization step
+		Array<double> dummy;
+		error = iRpropFunctionMinimizer.optimize(model, errFunc, dummy, dummy);
+
+		if (fabs((errorLastIteration - error)) < 1e-7)
+			++counterNoSuccessiveImprovement;
+		else
+			counterNoSuccessiveImprovement = 0;
+
+		errorLastIteration = error;
+	}
+
+
+	// add vector to existing approximation of SVM
+	(*mpNoExamplesOfApproximatedSVM)++;
+	approximatedVectors.resize(*mpNoExamplesOfApproximatedSVM, mDimension, true);
+	for (j = 0; j < mDimension; ++j)
+		approximatedVectors(*mpNoExamplesOfApproximatedSVM - 1, j) = model.getParameter(j);
+}
+
+
+// choose SV from original SVM
+bool McSvmApproximation::chooseVectorForNextIteration(Array<double> &vec)
+{
+	unsigned indexSV;
+	bool bRepeatDraw = false;
+
+	vec.resize(mDimension, false);
+
+	do
+	{
+		indexSV = Rng::discrete(0, mNoExamplesOfOrigSVM - 1);
+
+		bRepeatDraw = false;
+		unsigned label = labels[indexSV];
+
+		if( mpNoVecsDrawn[label] >= mpTargetNoVecsPerClass[label] )
+			bRepeatDraw = true;
+	}
+	while (mpSVM->isSupportVector(indexSV) == false || bRepeatDraw == true);
+
+	vec = mpSVM->getPoints()[indexSV];
+
+	unsigned label = labels[indexSV];
+	mpNoVecsDrawn[label] += 1;
+
+	return true;
 }
