@@ -221,7 +221,7 @@ void CMAElitistSearch::run()
 
 void CMAElitistSearch::bestSolutions(std::vector<double*>& points)
 {
-	points.resize(1, false);
+	points.resize(1);
 	points[0] = &(*m_parents)[0][0][0];
 }
 
