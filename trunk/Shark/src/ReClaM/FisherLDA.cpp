@@ -167,7 +167,7 @@ void FisherLDA::MeanAndScatter(AffineLinearMap& model, const Array<double>& inpu
     
     
     //
-    // calculate mean and scatter for every classthe model for FisherLDA must be an AffineLinearMap
+    // calculate mean and scatter for every class
     //
     
     // for every example in set ...
@@ -176,7 +176,7 @@ void FisherLDA::MeanAndScatter(AffineLinearMap& model, const Array<double>& inpu
         // class label
         unsigned int k = target(i,0);
 
-        // allocate memory if neccessary
+        // allocate memory if necessary
         if( M.size() <= k ) {
             M.resize( k+1 );
             S.resize( k+1 );
@@ -277,18 +277,36 @@ void FisherLDA::MeanAndScatter(AffineLinearMap& model, const Array<double>& inpu
     //scatter.resize( nd, nd, false );
     scatter = SwInv * Sb;
     
+//    ofstream filestream;
+//    filestream.open("M.csv");
 //    cout << endl << "*** M ***" << endl;
-//    writeArray( mean, std::cout );
+//    writeArray( mean, filestream );
+//    filestream.close();
+//
+//    filestream.open("Sb.csv");
 //    cout << endl << "*** Sb ***" << endl;
-//    writeArray( Sb, std::cout );
+//    writeArray( Sb, filestream );
+//    filestream.close();
+//
+//    filestream.open("Sw.csv");
 //    cout << endl << "*** Sw ***" << endl;
-//    writeArray( Sw, std::cout );
+//    writeArray( Sw, filestream );
+//    filestream.close();
+//
+//    filestream.open("SwInv.csv");
 //    cout << endl << "*** SwInv ***" << endl;
-//    writeArray( SwInv, std::cout );
+//    writeArray( SwInv, filestream );
+//    filestream.close();
+//
+//    filestream.open("SwInvSw.csv");
 //    cout << endl << "*** SwInv * Sw ***" << endl;
-//    writeArray( SwInv * Sw, std::cout );
+//    writeArray( SwInv * Sw, filestream );
+//    filestream.close();
+//
+//    filestream.open("scatter.csv");
 //    cout << endl << "*** scatter ***" << endl;
-//    writeArray( scatter, std::cout );
+//    writeArray( scatter, filestream );
+//    filestream.close();
     
     // free allocated memory
     for( unsigned int k = 0; k < nk; k++ ) {
