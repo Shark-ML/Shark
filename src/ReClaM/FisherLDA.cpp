@@ -223,22 +223,13 @@ void FisherLDA::MeanAndScatter(AffineLinearMap& model, const Array<double>& inpu
         
         // make scatter mean free
         *S[k] -= (double)( counter[k] ) * ( *M[k] % *M[k] );
+
+        cout << endl << "*** M" << k << " ***" << endl;
+        writeArray( *M[k], std::cout );
+        cout << endl << "*** S" << k << "0 ***" << endl;
+        writeArray( *S[k], std::cout );
     }
     
-//    cout << endl << "*** Mx ***" << endl;
-//    writeArray( *M[0], std::cout );
-//    cout << endl << "*** My ***" << endl;
-//    writeArray( *M[1], std::cout );
-//    cout << endl << "*** Mz ***" << endl;
-//    writeArray( *M[2], std::cout );
-//
-//    cout << endl << "*** Sx0 ***" << endl;
-//    writeArray( *S[0], std::cout );
-//    cout << endl << "*** Sy0 ***" << endl;
-//    writeArray( *S[1], std::cout );
-//    cout << endl << "*** Sz0 ***" << endl;
-//    writeArray( *S[2], std::cout );
-
     //
     // calculate global mean and final scatter
     //
@@ -277,36 +268,36 @@ void FisherLDA::MeanAndScatter(AffineLinearMap& model, const Array<double>& inpu
     //scatter.resize( nd, nd, false );
     scatter = SwInv * Sb;
     
-//    ofstream filestream;
-//    filestream.open("M.csv");
-//    cout << endl << "*** M ***" << endl;
-//    writeArray( mean, filestream );
-//    filestream.close();
-//
-//    filestream.open("Sb.csv");
-//    cout << endl << "*** Sb ***" << endl;
-//    writeArray( Sb, filestream );
-//    filestream.close();
-//
-//    filestream.open("Sw.csv");
-//    cout << endl << "*** Sw ***" << endl;
-//    writeArray( Sw, filestream );
-//    filestream.close();
-//
-//    filestream.open("SwInv.csv");
-//    cout << endl << "*** SwInv ***" << endl;
-//    writeArray( SwInv, filestream );
-//    filestream.close();
-//
-//    filestream.open("SwInvSw.csv");
-//    cout << endl << "*** SwInv * Sw ***" << endl;
-//    writeArray( SwInv * Sw, filestream );
-//    filestream.close();
-//
-//    filestream.open("scatter.csv");
-//    cout << endl << "*** scatter ***" << endl;
-//    writeArray( scatter, filestream );
-//    filestream.close();
+    ofstream filestream;
+    filestream.open("M.csv");
+    cout << endl << "*** M ***" << endl;
+    writeArray( mean, filestream );
+    filestream.close();
+
+    filestream.open("Sb.csv");
+    cout << endl << "*** Sb ***" << endl;
+    writeArray( Sb, filestream );
+    filestream.close();
+
+    filestream.open("Sw.csv");
+    cout << endl << "*** Sw ***" << endl;
+    writeArray( Sw, filestream );
+    filestream.close();
+
+    filestream.open("SwInv.csv");
+    cout << endl << "*** SwInv ***" << endl;
+    writeArray( SwInv, filestream );
+    filestream.close();
+
+    filestream.open("SwInvSw.csv");
+    cout << endl << "*** SwInv * Sw ***" << endl;
+    writeArray( SwInv * Sw, filestream );
+    filestream.close();
+
+    filestream.open("scatter.csv");
+    cout << endl << "*** scatter ***" << endl;
+    writeArray( scatter, filestream );
+    filestream.close();
     
     // free allocated memory
     for( unsigned int k = 0; k < nk; k++ ) {

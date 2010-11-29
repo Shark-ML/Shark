@@ -830,6 +830,15 @@ bool MultiClassSVM::isSupportVector( unsigned exampleIndex ) {
 }
 
 
+unsigned MultiClassSVM::getNumberOfSupportVectors() {
+	unsigned numberOfSVs = 0;
+	for(unsigned i = 0; i < examples; i++)
+		if (isSupportVector(i))
+			numberOfSVs++;
+	return numberOfSVs;
+}
+
+
 unsigned int MultiClassSVM::VectorToClass(const Array<double>& v)
 {
 	SIZE_CHECK(v.ndim() == 1);

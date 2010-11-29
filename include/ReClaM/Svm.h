@@ -425,6 +425,9 @@ public:
 	//! returns true if alpha != 0 in one of the machines
 	bool isSupportVector( unsigned exampleIndex );
 
+	//! returns the number of example that have an alpha != 0 in one of the machines
+	unsigned getNumberOfSupportVectors();
+
 	//! return the kernel function object
 	inline KernelFunction* getKernel()
 	{
@@ -515,6 +518,23 @@ protected:
 
 	//! number of classes
 	unsigned int classes;
+
+	//! sets the coefficient of a given example and label
+	//! \param  index  index of the corresponding training example
+	//! \param  c	  zero-based class index (0, ..., classes-1)
+	inline void setAlpha(unsigned int index, unsigned int c, double value)
+	{
+		parameter(classes * index + c) = value;
+	}
+
+	//! sets the solution offset vector
+	//! \param  c  zero-based class index (0, ..., classes-1)
+	inline double getOffset(unsigned int c, double value) const
+	{
+		return parameter(classes * examples + c);
+	}
+
+
 };
 
 

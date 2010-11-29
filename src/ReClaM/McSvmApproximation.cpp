@@ -331,6 +331,118 @@ void McSvmApproximation::addVecRprop()
 }
 
 
+// determine optimal coefficients for SVM approximation
+bool McSvmApproximation::calcOptimalAlphaOfApproximatedSVM()
+{
+	unsigned int i, j, k;
+
+	MultiClassSVM &originalSVM     = *mpSVM ;
+	MultiClassSVM &approximatedSVM = *mpApproximatedSVM;
+
+	const Array<double>& xxOriginalSVM     = originalSVM.getPoints();
+	const Array<double>& xxApproximatedSVM = approximatedSVM.getPoints();
+
+	for( unsigned c = 0; c < mNoClasses; c++ ) {
+
+		Array2D<double> Kz, KzInv;
+		Array2D<double> Kzx;
+
+		double tmp;
+
+		// calculate Kz
+		Kz.resize(*mpNoExamplesOfApproximatedSVM, *mpNoExamplesOfApproximatedSVM, false);
+		KzInv.resize(*mpNoExamplesOfApproximatedSVM, *mpNoExamplesOfApproximatedSVM, false);
+
+		for (i = 0; i < *mpNoExamplesOfApproximatedSVM; ++i)
+		{
+			//($Kz = Kz^T$)
+			for (j = i; j < *mpNoExamplesOfApproximatedSVM; ++j)
+			{
+				tmp = mpKernel->eval(xxApproximatedSVM[i], xxApproximatedSVM[j]);
+				Kz(i, j) = tmp;
+				Kz(j, i) = tmp;
+			}
+		}
+
+
+		try
+		{
+			g_inverse(Kz, KzInv);
+		}
+		catch (unsigned int e)
+		{
+			if (verbose) cout << "EXCEPTION: " << e << endl;
+			return false;
+		}
+
+
+		// calc Kzx
+		unsigned numberOfSVs = mpSVM->getNumberOfSupportVectors();
+		Kzx.resize(*mpNoExamplesOfApproximatedSVM, numberOfSVs, false);
+
+		unsigned SVcounterForOrigSVM;
+
+		for (i = 0; i < *mpNoExamplesOfApproximatedSVM; ++i)
+		{
+			SVcounterForOrigSVM = 0;
+			for (j = 0; j < mNoExamplesOfOrigSVM; ++j)
+			{
+				if (mpSVM->getAlpha(j,c) == 0)
+					continue;
+
+				Kzx(i, SVcounterForOrigSVM++) =  mpKernel->eval(xxApproximatedSVM[i], xxOriginalSVM[j]);
+			}
+		}
+
+		Array<double> KzInvDotKzx;
+		KzInvDotKzx = innerProduct(KzInv, Kzx);
+
+		Array<double> AlphaY;
+		AlphaY.resize(numberOfSVs, false);
+
+		SVcounterForOrigSVM = 0;
+
+		for (i = 0; i < mNoExamplesOfOrigSVM; ++i)
+		{
+			double alphaTmp =  mpSVM->getAlpha(i,c);
+			if (alphaTmp == 0)
+				continue;
+			else
+				AlphaY(SVcounterForOrigSVM++) =  alphaTmp;
+		}
+
+		// calculate beta
+		Array<double> Beta;
+		Beta.resize(*mpNoExamplesOfApproximatedSVM, false);
+
+		for (i = 0; i < *mpNoExamplesOfApproximatedSVM; ++i)
+		{
+			Beta(i) = 0;
+			for (k = 0; k < numberOfSVs; ++k)
+				Beta(i) += KzInvDotKzx(i, k) * AlphaY(k);
+		}
+
+		// the additional one is for the threshold
+		mpApproximatedSVM->parameter.resize(*mpNoExamplesOfApproximatedSVM + 1, false);
+
+
+		for (i = 0; i < *mpNoExamplesOfApproximatedSVM; ++i)
+		{
+			if (isnan(Beta(i)))
+			{
+				if (verbose) cout << " ... numerical problem; maybe kernel not appropriate for dataset !!!" << endl;
+				return false;
+			}
+			else
+				mpApproximatedSVM->setAlpha(i, c, Beta(i));
+		}
+
+	}
+
+	return true;
+}
+
+
 // choose SV from original SVM
 bool McSvmApproximation::chooseVectorForNextIteration(Array<double> &vec)
 {
