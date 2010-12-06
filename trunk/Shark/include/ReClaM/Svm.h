@@ -425,8 +425,11 @@ public:
 	//! returns true if alpha != 0 in one of the machines
 	bool isSupportVector( unsigned exampleIndex );
 
-	//! returns the number of example that have an alpha != 0 in one of the machines
+	//! returns the number of examples that have an alpha != 0 in one of the machines
 	unsigned getNumberOfSupportVectors();
+
+  //! returns the number of examples that have an alpha != 0 in a certain machine
+  unsigned getNumberOfSupportVectors(unsigned c);
 
 	//! return the kernel function object
 	inline KernelFunction* getKernel()

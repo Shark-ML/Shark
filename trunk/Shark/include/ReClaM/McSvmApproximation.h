@@ -125,7 +125,7 @@ protected:
 	//! Number of SVs taken together all the different machines
 	unsigned	mNoNonUniqueSVs;
 	unsigned	mNoExamplesOfOrigSVM, mDimension, mNoClasses;
-	unsigned    *mpNoExamplesOfApproximatedSVM;
+	unsigned *mpNoExamplesOfApproximatedSVM;
 	double		mOffsetOfApproximatedSVM;
 
 	// parameters of the approximation algorithm

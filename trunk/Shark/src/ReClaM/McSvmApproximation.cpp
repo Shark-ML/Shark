@@ -243,7 +243,7 @@ float McSvmApproximation::approximate()
 
 	bool bApproximationTargetFulfilled = false;
 
-/*	while (!bApproximationTargetFulfilled)
+	while (!bApproximationTargetFulfilled)
 	{
 		this->addVecRprop();
 
@@ -259,28 +259,8 @@ float McSvmApproximation::approximate()
 
 		if (verbose) cout << *mpNoExamplesOfApproximatedSVM << "," << flush;
 	}
-*/
+
 	return 1;
-}
-
-void McSvmApproximation::determineNoOfVectorsPerClassForApproximation()
-{
-	// there should be at least one SV per class
-	for( unsigned c = 0; c < mNoClasses; c++ )
-		mpTargetNoVecsPerClass[c] = 1;
-
-	// this only approximately leads to the wished number of vectors. but close enough!
-	for( unsigned c = 0; c < mNoClasses; c++ )
-		mpTargetNoVecsPerClass[c] += (unsigned)( (double)( mTargetNoVecsForApproximatedSVM * std::max<unsigned>( 0, mpNoSVsOrigSVM[c]-1 ) ) / (double) std::max<unsigned>(1, mNoNonUniqueSVs - mNoClasses ) );
-
-	if( verbose ) {
-		cout << "Target number of vectors per class: ";
-		for( unsigned c = 0; c < mNoClasses-1; c++ )
-			cout << mpTargetNoVecsPerClass[c] << ", ";
-		cout << mpTargetNoVecsPerClass[mNoClasses-1] << endl;
-	}
-
-	return;
 }
 
 
@@ -443,6 +423,48 @@ bool McSvmApproximation::calcOptimalAlphaOfApproximatedSVM()
 }
 
 
+// determine "optimal" offset for SVM approximation
+bool McSvmApproximation::calcOffsetForReducedModel()
+{
+	unsigned int i, j;
+
+	MultiClassSVM &originalSVM     = *mpSVM ;
+	MultiClassSVM &approximatedSVM = *mpApproximatedSVM;
+
+	const Array<double>& xxOriginalSVM = originalSVM.getPoints();
+	const Array<double>& xxApproximatedSVM = approximatedSVM.getPoints();
+
+	for(unsigned c = 0; c < mNoClasses; c++) {
+
+    double sum = 0;
+    double b = mpSVM->getOffset(c);
+
+    // calculate the mean over all differences between the original and the reduced SVM
+    for (i = 0; i < mNoExamplesOfOrigSVM; ++i)
+    {
+      if (mpSVM->getAlpha(i,c) == 0)
+        continue;
+
+      // TODO some kernel evaluations could be dropped
+      for (j = 0; j < mNoExamplesOfOrigSVM; ++j)
+        sum += mpSVM->getAlpha(j,c) * mpKernel->eval(xxOriginalSVM[j], xxOriginalSVM[i]);
+
+      sum += b;
+
+      for (j = 0; j < *mpNoExamplesOfApproximatedSVM; ++j)
+        sum -= mpApproximatedSVM->getAlpha(j,c) * mpKernel->eval(xxApproximatedSVM[j],  xxOriginalSVM[i]);
+    }
+
+    mOffsetOfApproximatedSVM = (double)sum / (double)mpSVM->getNumberOfSupportVectors(c);
+
+    // set offset of approximated SVM
+    mpApproximatedSVM->parameter(mNoClasses * *mpNoExamplesOfApproximatedSVM + c) = mOffsetOfApproximatedSVM ;
+	}
+
+	return true;
+}
+
+
 // choose SV from original SVM
 bool McSvmApproximation::chooseVectorForNextIteration(Array<double> &vec)
 {
@@ -469,4 +491,25 @@ bool McSvmApproximation::chooseVectorForNextIteration(Array<double> &vec)
 	mpNoVecsDrawn[label] += 1;
 
 	return true;
+}
+
+
+void McSvmApproximation::determineNoOfVectorsPerClassForApproximation()
+{
+	// there should be at least one SV per class
+	for( unsigned c = 0; c < mNoClasses; c++ )
+		mpTargetNoVecsPerClass[c] = 1;
+
+	// this only approximately leads to the wished number of vectors. but close enough!
+	for( unsigned c = 0; c < mNoClasses; c++ )
+		mpTargetNoVecsPerClass[c] += (unsigned)( (double)( mTargetNoVecsForApproximatedSVM * std::max<unsigned>( 0, mpNoSVsOrigSVM[c]-1 ) ) / (double) std::max<unsigned>(1, mNoNonUniqueSVs - mNoClasses ) );
+
+	if( verbose ) {
+		cout << "Target number of vectors per class: ";
+		for( unsigned c = 0; c < mNoClasses-1; c++ )
+			cout << mpTargetNoVecsPerClass[c] << ", ";
+		cout << mpTargetNoVecsPerClass[mNoClasses-1] << endl;
+	}
+
+	return;
 }
