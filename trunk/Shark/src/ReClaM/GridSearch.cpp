@@ -217,6 +217,7 @@ double GridSearch::optimize(Model& model, ErrorFunction& errorfunction, const Ar
 				printf("params = (");
 				for (i = 0; i < params; i++) printf(" %g", model.getParameter(i));
 				printf(" ) error = %g\n", e);
+				fflush(stdout);
 			}
 		}
 
@@ -350,6 +351,7 @@ double NestedGridSearch::optimize(Model& model, ErrorFunction& errorfunction, co
 					printf("params = (");
 					for (unsigned int i = 0; i < model.getParameterDimension(); i++) printf(" %g", model.getParameter(i));
 					printf(" ) error = %g\n", e);
+					fflush(stdout);
 				}
 			}
 		}
@@ -472,6 +474,7 @@ double PointSearch::optimize(Model& model, ErrorFunction& errorfunction, const A
 				printf("params = (");
 				for (unsigned int i = 0; i < model.getParameterDimension(); i++) printf(" %g", model.getParameter(i));
 				printf(" ) error = %g\n", e);
+				fflush(stdout);
 			}
 		}
 	}
