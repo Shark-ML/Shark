@@ -89,7 +89,7 @@ void KernelNearestNeighbor::setParameter(unsigned int index, double value)
 	else
 	{
 		parameter(index) = value;
-		kernel->setParameter(index, value);
+		kernel->setParameter(index-1, value);
 	}
 	bMustRecalc = true;
 }
@@ -133,7 +133,7 @@ double KernelNearestNeighbor::classify(Array<double> pattern)
 	std::vector<int> used;		// sorted list of neighbors
 	for (i = 0; i < numberOfNeighbors; i++)
 	{
-		// find the nearest neightbound not already in the list
+		// find the nearest neighbor not already in the list
 		best = 1e100;
 		m = 0;
 		for (j = 0; j < i; j++)
