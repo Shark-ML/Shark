@@ -598,12 +598,34 @@ double QpSvmDecomp::Solve(const Array<double>& linearPart,
 			double numerator = gradient(i) - gradient(j);
 			double denominator = diagonal(i) + diagonal(j) - 2.0 * qi[j];
 			double mu = numerator / denominator;
-			if (ai + mu < Li) mu = Li - ai;
-			else if (ai + mu > Ui) mu = Ui - ai;
-			if (aj - mu < Lj) mu = aj - Lj;
-			else if (aj - mu > Uj) mu = aj - Uj;
-			alpha(i) += mu;
-			alpha(j) -= mu;
+
+			// do the update carefully - avoid numerical problems
+			if (mu >= std::min(Ui - ai, aj - Lj))
+			{
+				if (Ui - ai > aj - Lj)
+				{
+					mu = aj - Lj;
+					alpha(i) += mu;
+					alpha(j) = Lj;
+				}
+				else if (Ui - ai < aj - Lj)
+				{
+					mu = Ui - ai;
+					alpha(i) = Ui;
+					alpha(j) -= mu;
+				}
+				else
+				{
+					mu = Ui - ai;
+					alpha(i) = Ui;
+					alpha(j) = Lj;
+				}
+			}
+			else
+			{
+				alpha(i) += mu;
+				alpha(j) -= mu;
+			}
 
 			// update the gradient
 			for (a = 0; a < active; a++) gradient(a) -= mu * (qi[a] - qj[a]);
@@ -897,6 +919,7 @@ bool QpSvmDecomp::SelectWorkingSet(unsigned int& i, unsigned int& j)
 {
 	// dynamic working set selection call
 	bool ret = (this->*(this->currentWSS))(i, j);
+	if (gradient(i) < gradient(j)) std::swap(i, j);
 
 	old_i = i;
 	old_j = j;
