@@ -104,13 +104,12 @@ public:
 	//! of the last error evaluation
 	inline double truePositiveRate()
 	{
-		return tpr;
+		return 1. - fnr;
 	}
 
 
 protected:
 	double threshold;
-	double tpr;
 	double fpr;
 	double fnr;
 };
