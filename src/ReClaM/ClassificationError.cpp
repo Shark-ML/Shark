@@ -84,7 +84,6 @@ double ClassificationError::error(Model& model, const Array<double>& input, cons
 	if (target.ndim() != 2) throw SHARKEXCEPTION("[ClassificationError::error] invalid number of target dimensions.");
 	unsigned int fp = 0;
 	unsigned int fn = 0;
-	unsigned int tp = 0;
 	unsigned int pos = 0;
 	unsigned int neg = 0;
 	unsigned int i, ic = input.dim(0);
@@ -99,7 +98,6 @@ double ClassificationError::error(Model& model, const Array<double>& input, cons
 		if (target(i, 0) > threshold)
 		{
 			if (output(i, 0) <= threshold) fn++;
-			else tp++;
 			pos++;
 		}
 		else
@@ -113,7 +111,6 @@ double ClassificationError::error(Model& model, const Array<double>& input, cons
 	// for later reference
 	fpr = (double)fp / (double)neg;
 	fnr = (double)fn / (double)pos;
-	tpr = (double)tp / (double)pos;
 
 	return ((double)(fp + fn)) / ic;
 }
