@@ -100,8 +100,17 @@ public:
 		return fnr;
 	}
 
+	//! return the true positive rate
+	//! of the last error evaluation
+	inline double truePositiveRate()
+	{
+		return tpr;
+	}
+
+
 protected:
 	double threshold;
+	double tpr;
 	double fpr;
 	double fnr;
 };
