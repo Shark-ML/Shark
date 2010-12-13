@@ -585,10 +585,8 @@ double QpSvmDecomp::Solve(const Array<double>& linearPart,
 		{
 			double ai = alpha(i);
 			double aj = alpha(j);
-			double Li = boxMin(i);
 			double Ui = boxMax(i);
 			double Lj = boxMin(j);
-			double Uj = boxMax(j);
 
 			// get the matrix rows corresponding to the working set
 			qi = quadratic.Row(i, 0, active);
@@ -910,6 +908,8 @@ bool QpSvmDecomp::Libsvm28(unsigned int& i, unsigned int& j)
 			}
 		}
 	}
+
+	if (best == 0.0) return true;		// numerical accuracy reached :(
 
 	// MVP stopping condition
 	return (largestUp - smallestDown < epsilon);
