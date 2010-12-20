@@ -96,6 +96,242 @@ void KernelFunction::modelDerivative(const Array<double>& input, Array<double> &
 	output(0) = evalDerivative(input[0], input[1], derivative);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+SparseKernelFunction::SparseKernelFunction()
+{ }
+
+SparseKernelFunction::~SparseKernelFunction()
+{ 
+	for (unsigned int i=0; i<noof_rows; i++)
+		delete [] sparseData[i];
+	delete [] sparseData;
+}
+
+double SparseKernelFunction::eval(const Array<double>& x1, const Array<double>& x2) const
+{
+	throw SHARKEXCEPTION("[SparseKernelFunction::eval] Not applicable. Must be called on inheriting sparse kernel classes.");
+}
+double SparseKernelFunction::evalDerivative(const Array<double>& x1, const Array<double>& x2, Array<double>& derivative) const
+{
+	throw SHARKEXCEPTION("[SparseKernelFunction::evalDerivative] Not applicable. Must be called on inheriting sparse kernel classes.");
+}
+
+void SparseKernelFunction::constructSparseFromLibSVM( const char* filename, long train, long test )
+{
+	std::ifstream file( filename );
+	if ( !file.is_open() ) 
+		throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot open file");
+	else 
+	{
+		// cardinalities:
+		long examples = 0;
+		long features = 0;
+		long nonzeros_train = 0;
+		long nonzeros_test = 0;
+		long elements_train = 0;
+		long elements_test = 0;
+		unsigned int classes = 0;
+		unsigned int cur_index = 0;
+		unsigned int last_index = 0;
+		unsigned int cur_noof_unsparse_features;
+		std::vector< long > row_lengths;
+		
+		// other info vars:
+		double cur_target = 0.0;
+		double min_target = 1e100;
+		double max_target = -1e100;
+		double cur_value = 0.0;
+		bool binary = true; //binary or multi-class problem?
+		bool regression = false; //real-valued or integer target values?
+
+		// i/o helpers:
+		std::string line; 
+		std::string cur_token; 
+		std::string cur_subtoken;
+		std::istringstream line_stream;
+		std::istringstream token_stream;
+		std::istringstream subtoken_stream;
+		char c;
+		
+		ws(file); //skip leading whitespace lines
+		// SCAN CARDINALITIES: only look through the file once. also some sanity checks.
+		while( std::getline(file, line) ) //one loop = one line
+		{
+			// prepare the line for further processing
+			line_stream.clear(); //reset..
+			line_stream.str( line ); //..and assign
+			std::ws( line_stream ); //skip leading whitespace in front of target
+			
+			// read and process target label
+			if ( !std::getline( line_stream, cur_token, ' ' ) )
+				throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot retrieve target token");
+			token_stream.clear(); //reset..
+			token_stream.str( cur_token ); //..and assign
+			if ( !(token_stream >> cur_target) || token_stream.get(c) ) //convert to double with safety checks
+				throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot read target token");
+			if (cur_target < min_target) min_target = cur_target;
+			if (cur_target > max_target) max_target = cur_target;
+			if (cur_target != (int)cur_target ) regression = true;
+			std::ws( line_stream ); //skip leading whitespace in front of next i-v-pair
+			
+			// read and process index-value-pairs
+			cur_noof_unsparse_features = 0;
+			while ( std::getline( line_stream, cur_token, ' ' ) ) //one loop = one index-value-pair
+			{
+				// prepare index-value-pair for further processing
+				token_stream.clear(); //reset..
+				token_stream.str( cur_token ); //..and assign
+				
+				// extract feature index
+				if ( !std::getline(token_stream, cur_subtoken, ':') )
+					throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot retrieve feature index");
+				subtoken_stream.clear(); //reset..
+				subtoken_stream.str( cur_subtoken ); //..and assign
+				if ( !(subtoken_stream >> cur_index) || subtoken_stream.get(c) ) //convert to unsigned int with safety checks
+					throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot read feature index");
+				if ( cur_index <= last_index ) 
+					throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] expecting strictly increasing feature indices");
+				if ( cur_index == 0 )
+					throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] expecting only 1-based feature indices");
+				if ( cur_index > features ) features = cur_index;
+				last_index = cur_index;
+				
+				// ensure corresponding feature value is non-zero
+				if ( !std::getline(token_stream, cur_subtoken) )
+					throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot retrieve feature value");
+				subtoken_stream.clear(); //reset..
+				subtoken_stream.str( cur_subtoken ); //..and assign
+				if ( !(subtoken_stream >> cur_value) || subtoken_stream.get(c) ) //convert to double with safety checks
+					throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot read feature value");
+				if ( cur_value != 0 ) //don't count explicit zero features
+					++cur_noof_unsparse_features;
+				std::ws( line_stream ); //skip leading whitespace in front of next i-v-pair
+				
+				// the remaining part in token_stream (i.e., the value) is ignored
+			}
+			last_index = 0; //reset
+			++examples; //count lines
+			row_lengths.push_back(cur_noof_unsparse_features);
+		}
+		
+		// set target format
+		if ( !regression )
+		{
+			if ( (min_target == -1) && (max_target == +1) ) binary = true;
+			else if (min_target == 1) 
+			{
+				binary = false;
+				classes = (unsigned int)max_target;
+			}
+			else throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] inconsistent target values");
+		}
+		
+		// set train/test split
+		if (test < 0) test = examples-train;
+		if (train + test > examples || train <= 0 || test < 0 )
+			throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] invalid split into training and test set");
+		else if ( train+test < examples ) 
+			examples = train+test; //adjust size if not all examples are used
+		
+		// create/resize internal storage
+		long elems; //helper
+		sparseData = new tIndexValuePair* [train+test];
+		noof_rows = train+test; //memorize number of rows
+		for ( long i=0; i<train; i++ )
+		{
+			elems = row_lengths.at(i);
+			nonzeros_train += elems;
+			sparseData[i] = new tIndexValuePair[ elems+1 ];
+			for (unsigned int j=0; j<elems; j++)
+				sparseData[i][j].sparseIndex = 1;  //mark active
+			sparseData[i][elems].sparseIndex = -1; //mark end
+		}
+		for ( long i=train; i<train+test; i++ )
+		{
+			elems = row_lengths.at(i);
+			nonzeros_test += elems;
+			sparseData[i] = new tIndexValuePair[ elems+1 ];
+			for (unsigned int j=0; j<elems; j++)
+				sparseData[i][j].sparseIndex = 1;  //mark active
+			sparseData[i][elems].sparseIndex = -1; //mark end
+		}
+		trainingTarget.resize(train, 1, false);
+		testTarget.resize(test, 1, false);
+		elements_train = train*features;
+		elements_test = test*features;
+		
+		// ACTUAL READ-IN
+		// reset vars
+		file.clear(); //always clear first, then seek beginning
+		file.seekg(std::ios::beg); //go back to beginning
+		std::ws(file); //skip leading whitespace lines
+		for ( long i=0; i<examples; i++ ) //one loop = one line
+		{
+			// prepare next line for further processing
+			if ( !std::getline(file, line) )
+				throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot re-read all examples");
+			line_stream.clear(); //reset..
+			line_stream.str( line ); //..and assign
+			std::ws( line_stream ); //skip leading whitespace in front of target
+			
+			// read and assign target label
+			if ( !std::getline( line_stream, cur_token, ' ' ) )
+				throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot re-retrieve target token");
+			token_stream.clear(); //reset..
+			token_stream.str( cur_token ); //..and assign
+			if ( !(token_stream >> cur_target) || token_stream.get(c) ) //convert to double with safety checks
+				throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot re-read target token");
+			if ( !regression && !binary )
+				cur_target -= 1; //multi-class dataset: convert from 1-based to 0-based class indices
+			if ( i < train ) 
+				trainingTarget(i, 0) = cur_target;
+			else 
+				testTarget(i-train, 0) = cur_target;
+			std::ws( line_stream ); //skip leading whitespace in front of next index-value-pair
+			
+			// read and assign feature values
+			tIndexValuePair * it = sparseData[i];
+			while ( std::getline( line_stream, cur_token, ' ' ) ) //one loop = one index-value-pair
+			{
+				// prepare index-value-pair for further processing
+				token_stream.clear(); //reset..
+				token_stream.str( cur_token ); //..and assign
+				
+				// extract feature index
+				if ( !std::getline(token_stream, cur_subtoken, ':') )
+					throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot re-retrieve feature index");
+				subtoken_stream.clear(); //reset..
+				subtoken_stream.str( cur_subtoken ); //..and assign
+				if ( !(subtoken_stream >> cur_index) || subtoken_stream.get(c) ) //convert to unsigned int with safety checks
+					throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot re-read feature index");
+				--cur_index; //convert from 1-based to 0-based feature indices
+				
+				// extract corresponding feature value
+				if ( !std::getline(token_stream, cur_subtoken) )
+					throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot re-retrieve feature value");
+				subtoken_stream.clear(); //reset..
+				subtoken_stream.str( cur_subtoken ); //..and assign
+				if ( !(subtoken_stream >> cur_value) || subtoken_stream.get(c) ) //convert to double with safety checks
+					throw SHARKEXCEPTION("[SparseKernelFunction::constructSparseFromLibSVM] cannot re-read feature value");
+				
+				// assign index-value-pair to storage
+				if ( cur_value != 0 ) //but only non-zero features
+				{
+					it->sparseIndex = cur_index;
+					it->sparseValue = cur_value;
+					++it;
+				}
+				std::ws( line_stream ); //skip leading whitespace in front of next i-v-pair
+			}
+		}
+		
+		file.close();
+		wasInitialized = true;
+		sparsenessRatioTrain = nonzeros_train/((double)elements_train);
+		sparsenessRatioTest = nonzeros_test/((double)elements_test);
+	}
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -126,6 +362,63 @@ double LinearKernel::evalDerivative(const Array<double>& x1, const Array<double>
 {
 	derivative.resize(0, false);
 	return eval(x1, x2);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+SparseLinearKernel::SparseLinearKernel()
+{
+	parameter.resize(0, false);
+	wasInitialized = false;
+}
+
+SparseLinearKernel::~SparseLinearKernel()
+{ }
+
+double SparseLinearKernel::eval(const Array<double>& x1, const Array<double>& x2) const
+{
+	ASSERT( wasInitialized );
+	SIZE_CHECK(x1.ndim() == 1);
+	SIZE_CHECK(x2.ndim() == 1);
+	SIZE_CHECK( x1.nelem() == 1 );
+	SIZE_CHECK( x2.nelem() == 1 );
+	long i = (long) x1(0);
+	long j = (long) x2(0);
+	
+	double ret = 0.0;
+	tIndexValuePair * it = sparseData[i];
+	tIndexValuePair * jt = sparseData[j];
+	long ii = it->sparseIndex; 
+	long jj = jt->sparseIndex;
+	while ( ii >= 0 && jj >= 0 )
+	{
+		if ( ii < jj )
+		{
+			++it;
+			ii = it->sparseIndex; 
+		}
+		else if ( ii > jj )
+		{
+			++jt;
+			jj = jt->sparseIndex;
+		}
+		else
+		{
+			ret += it->sparseValue * jt->sparseValue;
+			++it;
+			++jt;
+			ii = it->sparseIndex;
+			jj = jt->sparseIndex;
+		}
+	}
+	return ret;
+}
+
+double SparseLinearKernel::evalDerivative(const Array<double>& x1, const Array<double>& x2, Array<double>& derivative) const
+{
+	derivative.resize( 0, false );
+	return eval( x1, x2 );
 }
 
 
@@ -240,6 +533,152 @@ void RBFKernel::setSigma(double sigma)
 	setParameter(0, .5 / (sigma * sigma));
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+SparseRBFKernel::SparseRBFKernel(double gamma)
+{
+	parameter.resize(1, false);
+	parameter(0) = gamma;
+	this->wasInitialized = false;
+}
+
+SparseRBFKernel::~SparseRBFKernel()
+{
+}
+
+double SparseRBFKernel::eval(const Array<double>& x1, const Array<double>& x2) const
+{
+	ASSERT( wasInitialized );
+	SIZE_CHECK(x1.ndim() == 1);
+	SIZE_CHECK(x2.ndim() == 1);
+	SIZE_CHECK( x1.nelem() == 1 );
+	SIZE_CHECK( x2.nelem() == 1 );
+	long i = (long) x1(0);
+	long j = (long) x2(0);
+
+	double tmp, dist2 = 0.0;
+	tIndexValuePair * it = sparseData[i];
+	tIndexValuePair * jt = sparseData[j];
+	long ii = it->sparseIndex; 
+	long jj = jt->sparseIndex;
+	while ( ii >= 0 && jj >= 0 )
+	{
+		if ( ii < jj )
+		{
+			tmp = it->sparseValue;
+			dist2 += tmp * tmp;
+			++it;
+			ii = it->sparseIndex; 
+		}
+		else if ( ii > jj )
+		{
+			tmp = jt->sparseValue;
+			dist2 += tmp * tmp;
+			++jt;
+			jj = jt->sparseIndex;
+		}
+		else
+		{
+			tmp = it->sparseValue - jt->sparseValue;
+			dist2 += tmp * tmp;
+			++it;
+			++jt;
+			ii = it->sparseIndex;
+			jj = jt->sparseIndex;
+		}
+	}
+	while ( ii >= 0 )
+	{
+		tmp = it->sparseValue;
+		dist2 += tmp * tmp;
+		++it;
+		ii = it->sparseIndex;
+	}
+	while ( jj >= 0 )
+	{
+		tmp = jt->sparseValue;
+		dist2 += tmp * tmp;
+		++jt;
+		jj = jt->sparseIndex;
+	}
+	return exp(-parameter(0) * dist2);
+}
+
+double SparseRBFKernel::evalDerivative(const Array<double>& x1, const Array<double>& x2, Array<double>& derivative) const
+{
+	ASSERT( wasInitialized );
+	SIZE_CHECK(x1.ndim() == 1);
+	SIZE_CHECK(x2.ndim() == 1);
+	SIZE_CHECK( x1.nelem() == 1 );
+	SIZE_CHECK( x2.nelem() == 1 );
+	long i = (long) x1(0);
+	long j = (long) x2(0);
+	derivative.resize(1, false);
+
+	double tmp, dist2 = 0.0;
+	tIndexValuePair * it = sparseData[i];
+	tIndexValuePair * jt = sparseData[j];
+	long ii = it->sparseIndex; 
+	long jj = jt->sparseIndex;
+	while ( ii >= 0 && jj >= 0 )
+	{
+		if ( ii < jj )
+		{
+			tmp = it->sparseValue;
+			dist2 += tmp * tmp;
+			++it;
+			ii = it->sparseIndex; 
+		}
+		else if ( ii > jj )
+		{
+			tmp = jt->sparseValue;
+			dist2 += tmp * tmp;
+			++jt;
+			jj = jt->sparseIndex;
+		}
+		else
+		{
+			tmp = it->sparseValue - jt->sparseValue;
+			dist2 += tmp * tmp;
+			++it;
+			++jt;
+			ii = it->sparseIndex;
+			jj = jt->sparseIndex;
+		}
+	}
+	while ( ii >= 0 )
+	{
+		tmp = it->sparseValue;
+		dist2 += tmp * tmp;
+		++it;
+		ii = it->sparseIndex;
+	}
+	while ( jj >= 0 )
+	{
+		tmp = jt->sparseValue;
+		dist2 += tmp * tmp;
+		++jt;
+		jj = jt->sparseIndex;
+	}
+	double ret = exp(-parameter(0) * dist2);
+	derivative(0) = -dist2 * ret;
+	return ret;
+}
+
+bool SparseRBFKernel::isFeasible()
+{
+	return (parameter(0) > 0.0);
+}
+
+double SparseRBFKernel::getSigma()
+{
+	return sqrt(.5 / getParameter(0));
+};
+
+void SparseRBFKernel::setSigma(double sigma)
+{
+	setParameter(0, .5 / (sigma * sigma));
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

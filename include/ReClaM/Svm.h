@@ -43,6 +43,7 @@
 #include <SharkDefs.h>
 #include <ReClaM/Model.h>
 #include <ReClaM/Optimizer.h>
+#include <ReClaM/Utilities.h>
 #include <ReClaM/KernelFunction.h>
 #include <ReClaM/QuadraticProgram.h>
 #include <Rng/GlobalRng.h>
@@ -425,11 +426,11 @@ public:
 	//! returns true if alpha != 0 in one of the machines
 	bool isSupportVector( unsigned exampleIndex );
 
-	//! returns the number of examples that have an alpha != 0 in one of the machines
+	//! returns the number of examples that have an alpha != 0 in one of the classes
 	unsigned getNumberOfSupportVectors();
 
-  //! returns the number of examples that have an alpha != 0 in a certain machine
-  unsigned getNumberOfSupportVectors(unsigned c);
+	//! returns the number of examples that have an alpha != 0 in a certain class
+	unsigned getNumberOfSupportVectors(unsigned c);
 
 	//! return the kernel function object
 	inline KernelFunction* getKernel()
@@ -1156,23 +1157,23 @@ public:
 };
 
 
-//! 
+//!
 //! \brief Meta model (training scheme) for on-line Crammer-Singer multiclass learning
-//! 
+//!
 //! \author M. Tuma
 //! \date 2010
-//! 
+//!
 //! \par
-//! This algorithm implements an epoch-based approach 
+//! This algorithm implements an epoch-based approach
 //! to solving the optimization problem occuring in a
 //! Crammer-Singer multi-class machine.
-//! 
+//!
 //! \par
 //! One epoch is understood as the solver in a perceptron-like
-//! manner looking at all training examples once, possibly  
+//! manner looking at all training examples once, possibly
 //! carrying out intermediate optimization steps on variables
 //! corresponding to known examples in-between.
-//! 
+//!
 class EpochBasedCsMcSvm : public MetaSVM
 {
 public:
@@ -1181,11 +1182,13 @@ public:
 	//! \param C		Value for the regularization parameter C
 	//! \param unconst	True if C is represented as \f$ \log(C) \f$, allowing for unconstrained optimization.
 	//! \param wss		working set selection strategy used by solver.  0=mvpOnOneSample 1=mvpAmongLargestGrad-Samples 2=mvpAmongAllSamples.
+	//! \param reru		reprocess alternation rule preference. see #eReprocessRules in QuadraticProgram.h for documentation
 	//! \param count	should the number of kernel evals be counted
 	//! \param epochs	Number of runs through the training set. Often, 1 is used.
-	//! \param dual  	Desired duality gap. When greater than 0, used instead of #epochLim. 
-	EpochBasedCsMcSvm(MultiClassSVM* pSVM, double C, bool unconst = false, unsigned int wss = 0,
-					   bool countKernels = false, int epochs = 1, double dual = -1.0);
+	//! \param dual  	Desired duality gap. When greater than 0, used instead of #epochLim.
+	EpochBasedCsMcSvm(MultiClassSVM* pSVM, double C, bool unconst = false, bool countKernels = false,
+					  unsigned int wss = 0, unsigned int reru = 0, SvmStatesCollection * states = NULL,
+					  int epochs = 1, double dual = -1.0);
 
 	//! Destructor
 	~EpochBasedCsMcSvm();
@@ -1210,29 +1213,41 @@ public:
 	{
 		return exponential;
 	}
-	
+
 	//! return if number of kernel evals is being counted
 	inline bool get_countPreference()
 	{
 		return count;
 	}
-	
-	//! return working set selection preference.
+
+	//! return working set selection preference
 	inline unsigned int get_wssMode()
 	{
 		return wssMode;
 	}
-	
+
+	//! return reprocess alternation rule preference
+	inline unsigned int get_reruMode()
+	{
+		return reruMode;
+	}
+
 	//! get the maximum number of epochs. negative for inactive
 	inline int get_epochLim()
 	{
 		return epochLim;
 	}
-	
+
 	//! get the desired duality gap. negative for inactive
 	inline double get_dualAim()
 	{
 		return dualAim;
+	}
+
+	//! get the desired duality gap. negative for inactive
+	inline SvmStatesCollection * get_historian()
+	{
+		return mep_historian;
 	}
 
 	//! is C positive, and the underlying MetaSVM feasible?
@@ -1241,18 +1256,24 @@ public:
 protected:
 	//! is C stored as log(C)?
 	bool exponential;
-	
+
 	//! count number of kernel evals?
 	bool count;
-	
+
 	//! working set selection preference. 0=mvpOnOneSample 1=mvpAmongLargestGrad-Samples 2=mvpAmongAllSamples.
-	unsigned int wssMode; 
-	
+	unsigned int wssMode;
+
+	//! reprocess alternation rule preference. see #eReprocessRules in QuadraticProgram.h for documentation.
+	unsigned int reruMode;
+
 	//! number of epochs: how many iterations through the training set?
-	int epochLim;		
-	
+	int epochLim;
+
 	//! Desired duality gap as stopping criterion. Alternative to #epochLim.
-	double dualAim;		
+	double dualAim;
+
+	//! pointer to statesCollection class. use to take snapshots of your svm during training.
+	SvmStatesCollection * mep_historian;
 };
 
 
@@ -1417,26 +1438,9 @@ public:
 	}
 
 protected:
-	enum eMode
-	{
-		eC1,				// C-SVM with 1-norm penalty for binary classification
-		eC2,				// C-SVM with 2-norm penalty for binary classification
-		eEpsilon,			// \varepsilon-SVM for regression
-		eNu,				// \nu-SVM, not implemented yet
-		eRegularizationNetwork,
-		eGaussianProcess,	// Gaussian Process
-		e1Class,			// One-Class SVM for density estimation XXX
-		eAllInOne,			// standard multi class SVM
-		eCrammerSinger,		// MC-SVM by Crammer and Singer
-		eLLW,				// MC-SVM by Lee, Lin and Wahba
-		eDGI,				// MC-SVM by Dogan, Glasmachers and Igel
-		eOVA,				// one-versus-all multi class SVM
-		eOCC,				// one-class-cost multi-class SVM
-		eEBCS				// epoch-based Crammer-Singer
-	};
 
 	//! mode of operation
-	eMode mode;
+	eSvmMode mode;
 
 	//! kernel matrix
 	QPMatrix* matrix;
@@ -1467,19 +1471,25 @@ protected:
 
 	//! upper bound for all One Class SVM Lagrange multipliers XXX
 	double OneClassBoxUpper;
-	
+
 	//! maximum number of epochs for all epoch-based (on-line) algorithms
 	unsigned int epochLimit;
-	
+
 	//! desired duality gap for epoch-based (on-line) algorithms. this is weaker than the accuracy-limit.
 	double dualLimit;
-	
-	//! working set selection preference. so far used for epoch-based algorithms.
+
+	//! working set selection preference. so far used in ebcs.
 	unsigned int wssPref;
-	
-	//! preference for counting kernel evaluations. so far used for epoch-based algorithms.
+
+	//! reprocess alternation rule preference. so far used in ebcs.
+	unsigned int reruPref;
+
+	//! preference for counting kernel evaluations. so far used in ebcs.
 	bool countKernels;
-	
+
+	//! pointer to statesCollection class. use to take snapshots of your svm during training. so far used in ebcs.
+	SvmStatesCollection * mep_historian;
+
 	//! should the solver use a precomputed kernel matrix?
 	bool precomputedMatrix;
 

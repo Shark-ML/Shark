@@ -820,31 +820,32 @@ unsigned int MultiClassSVM::model(const Array<double>& input)
 }
 
 
-bool MultiClassSVM::isSupportVector( unsigned exampleIndex ) {
-
-	for( unsigned c = 0; c < classes; c++ )
+bool MultiClassSVM::isSupportVector( unsigned exampleIndex ) 
+{
+	for ( unsigned c = 0; c < classes; c++ )
 		if( getAlpha( exampleIndex, c ) != 0 )
 			return true;
-
 	return false;
 }
 
 
-unsigned MultiClassSVM::getNumberOfSupportVectors() {
+unsigned MultiClassSVM::getNumberOfSupportVectors() 
+{
 	unsigned numberOfSVs = 0;
-	for(unsigned i = 0; i < examples; i++)
+	for (unsigned i = 0; i < examples; i++)
 		if (isSupportVector(i))
 			numberOfSVs++;
 	return numberOfSVs;
 }
 
 
-unsigned MultiClassSVM::getNumberOfSupportVectors(unsigned c) {
-  unsigned numberOfSVs = 0;
-  for(unsigned i = 0; i < examples; i++)
-    if(getAlpha(i,c) != 0.0)
-      numberOfSVs++;
-  return numberOfSVs;
+unsigned MultiClassSVM::getNumberOfSupportVectors(unsigned c) 
+{
+	unsigned numberOfSVs = 0;
+	for (unsigned i = 0; i < examples; i++)
+		if(getAlpha(i,c) != 0.0)
+			numberOfSVs++;
+	return numberOfSVs;
 }
 
 
@@ -1717,16 +1718,19 @@ bool OCCMcSVM::isFeasible()
 ////////////////////////////////////////////////////////////////////////////////
 
 
-EpochBasedCsMcSvm::EpochBasedCsMcSvm(MultiClassSVM* pSVM, double C, bool unconst, unsigned int wss,
-									 bool countKernels, int epochs, double dual)
+EpochBasedCsMcSvm::EpochBasedCsMcSvm(MultiClassSVM* pSVM, double C, bool unconst, bool countKernels,
+									 unsigned int wss, unsigned int reru, SvmStatesCollection * states,
+									 int epochs, double dual)
 : MetaSVM(pSVM, 1)
 {
 	exponential = unconst;
 	set_C(C);
 	wssMode = wss;
+	reruMode = reru;
 	count = countKernels;
 	epochLim = epochs;
 	dualAim = dual;
+	mep_historian = states;
 }
 
 EpochBasedCsMcSvm::~EpochBasedCsMcSvm()
@@ -1857,6 +1861,8 @@ void SVM_Optimizer::init(Model& model)
 		epochLimit = ebcs->get_epochLim();
 		dualLimit = ebcs->get_dualAim();
 		wssPref = ebcs->get_wssMode();
+		reruPref = ebcs->get_reruMode();
+		mep_historian = ebcs->get_historian();
 	}
 	else throw SHARKEXCEPTION("[SVM_Optimizer::init] The model is not a valid support vector machine meta model.");
 
@@ -2673,10 +2679,14 @@ void SVM_Optimizer::optimize(MultiClassSVM& model, const Array<double>& input, c
 	{
 		Array<double> alpha(variables);
 		alpha = 0; //redundant, but make extra clear that we won't accept custom inital values
-		matrix = new KernelMatrix(kernel, input, countKernels);
-		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
 		
-		QpEbCsDecomp* solver = new QpEbCsDecomp(*cache, target, classes, wssPref);
+		if (precomputedMatrix) 
+			matrix = new PrecomputedKernelMatrix( kernel, input );
+		else
+			matrix = new KernelMatrix(kernel, input, countKernels);
+			
+		cache = new CachedMatrix(matrix, 1048576 * cacheMB / sizeof(float));
+		QpEbCsDecomp* solver = new QpEbCsDecomp( *cache, target, classes, wssPref, reruPref, mep_historian );
 		this->solver = solver;
 		solver->setVerbose(printInfo);
 		solver->setStoppingConditions(0.0001, epochLimit, dualLimit); //0.0001 is default in original paper
