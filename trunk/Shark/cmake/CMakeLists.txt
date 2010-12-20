@@ -296,6 +296,13 @@ SET( RECLAM_HEADERS
 ../include/ReClaM/ProbenBNet.h
 ../include/ReClaM/ProbenNet.h
 ../include/ReClaM/QuadraticProgram.h
+../include/ReClaM/KernelMatrices.h
+../include/ReClaM/Utilities.h
+../include/ReClaM/QpSvmDecomp.h
+../include/ReClaM/QpBoxDecomp.h
+../include/ReClaM/QpMcDecomp.h
+../include/ReClaM/QpMcStzDecomp.h
+../include/ReClaM/QpEbCsDecomp.h
 ../include/ReClaM/Quickprop.h
 ../include/ReClaM/RBFNet.h
 ../include/ReClaM/ROC.h
@@ -365,7 +372,13 @@ SET( RECLAM_SRCS
 	../src/ReClaM/PCA.cpp
 	../src/ReClaM/FisherLDA.cpp
 	../src/ReClaM/Perceptron.cpp
-	../src/ReClaM/QuadraticProgram.cpp
+	../src/ReClaM/KernelMatrices.cpp
+	../src/ReClaM/Utilities.cpp
+	../src/ReClaM/QpSvmDecomp.cpp
+	../src/ReClaM/QpBoxDecomp.cpp
+	../src/ReClaM/QpMcDecomp.cpp
+	../src/ReClaM/QpMcStzDecomp.cpp
+	../src/ReClaM/QpEbCsDecomp.cpp
 	../src/ReClaM/ROC.cpp
 	../src/ReClaM/RadiusMargin.cpp
 	../src/ReClaM/SigmoidFit.cpp

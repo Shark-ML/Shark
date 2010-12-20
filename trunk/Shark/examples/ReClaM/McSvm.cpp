@@ -101,6 +101,7 @@ int main(int argc, char* argv[])
 	MultiClassSVM dgi_svm(&kernel, classes);
 	MultiClassSVM ova_svm(&kernel, classes);
 	MultiClassSVM occ_svm(&kernel, classes);
+	MultiClassSVM ebcs_svm(&kernel, classes);
 
 	// train the machines
 	printf("\nMACHINE TRAINING\n");
@@ -152,6 +153,14 @@ int main(int argc, char* argv[])
 		svmopt.optimize(occ_svm, dataset.getTrainingData(), dataset.getTrainingTarget());
 		printf(" done.\n");
 	}
+	{
+		printf("training epoch-based crammer-and-singer machine ..."); fflush(stdout);
+		EpochBasedCsMcSvm meta(&ebcs_svm, C);
+		SVM_Optimizer svmopt;
+		svmopt.init(meta);
+		svmopt.optimize(ebcs_svm, dataset.getTrainingData(), dataset.getTrainingTarget());
+		printf(" done.\n");
+	}
 
 	// evaluate all machines on the test dataset
 	printf("\nPREDICTION\n");
@@ -162,6 +171,7 @@ int main(int argc, char* argv[])
 	double dgi_err = loss.error(dgi_svm, dataset.getTestData(), dataset.getTestTarget());
 	double ova_err = loss.error(ova_svm, dataset.getTestData(), dataset.getTestTarget());
 	double occ_err = loss.error(occ_svm, dataset.getTestData(), dataset.getTestTarget());
+	double ebcs_err = loss.error(ebcs_svm, dataset.getTestData(), dataset.getTestTarget());
 
 	printf("\nEVALUATION\n");
 	printf("all-in-one machine:                 %g%% error\n", 100.0 * aio_err);
@@ -170,5 +180,6 @@ int main(int argc, char* argv[])
 	printf("dogan, glasmachers & igel machine:  %g%% error\n", 100.0 * dgi_err);
 	printf("one-versus-all machine:             %g%% error\n", 100.0 * ova_err);
 	printf("one-class-cost machine:             %g%% error\n", 100.0 * occ_err);
+	printf("epoch-based c & s machine:          %g%% error\n", 100.0 * ebcs_err);
 	printf("\n");
 }

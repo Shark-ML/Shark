@@ -115,6 +115,57 @@ public:
 	friend class C_SVM;
 };
 
+class SparseKernelFunction : public KernelFunction
+{
+public: 
+	SparseKernelFunction();
+	virtual ~SparseKernelFunction();
+	
+	virtual void constructSparseFromLibSVM( const char* filename, long train, long test = -1 );
+	
+	double eval(const Array<double>& x1, const Array<double>& x2) const; //will throw an exeption for this base class
+	double evalDerivative(const Array<double>& x1, const Array<double>& x2, Array<double>& derivative) const; //will throw an exeption for this base class
+	
+	//! access to the training targets as a constant array
+	inline const Array<double> & getTrainingTarget() const
+	{
+		return trainingTarget;
+	}
+
+	//! access to the test targets as a constant array
+	inline const Array<double> & getTestTarget() const
+	{
+		return testTarget;
+	}
+
+	inline const long getNoofRows() const
+	{
+		return noof_rows;
+	}
+
+	inline void printSparsenessRatios() const
+	{
+		std::cout << "sparsenessRatioTrain = " << sparsenessRatioTrain 
+				  << ", sparsenessRatioTest = " << sparsenessRatioTest << std::endl;
+	}
+	
+protected:
+	
+	struct tIndexValuePair
+	{
+		long sparseIndex;
+		double sparseValue;
+	};
+	
+	long noof_rows;
+	bool wasInitialized;
+	tIndexValuePair ** sparseData;
+	Array<double> trainingTarget;
+	Array<double> testTarget;
+	
+	double sparsenessRatioTrain, sparsenessRatioTest;
+};
+
 
 //! \brief Linear Kernel, parameter free
 class LinearKernel : public KernelFunction
@@ -123,6 +174,17 @@ public:
 	LinearKernel();
 	~LinearKernel();
 
+
+	double eval(const Array<double>& x1, const Array<double>& x2) const;
+	double evalDerivative(const Array<double>& x1, const Array<double>& x2, Array<double>& derivative) const;
+};
+
+//! \brief linear kernel optimized for sparse data. parameter free
+class SparseLinearKernel : public SparseKernelFunction
+{
+public:
+	SparseLinearKernel();
+	~SparseLinearKernel();
 
 	double eval(const Array<double>& x1, const Array<double>& x2) const;
 	double evalDerivative(const Array<double>& x1, const Array<double>& x2, Array<double>& derivative) const;
@@ -173,6 +235,21 @@ public:
 
 	bool isFeasible();
 
+	double getSigma();
+	void setSigma(double sigma);
+};
+
+
+class SparseRBFKernel : public SparseKernelFunction
+{
+public:
+	SparseRBFKernel(double gamma);
+	~SparseRBFKernel();
+
+	double eval(const Array<double>& x1, const Array<double>& x2) const;
+	double evalDerivative(const Array<double>& x1, const Array<double>& x2, Array<double>& derivative) const;
+	
+	bool isFeasible();
 	double getSigma();
 	void setSigma(double sigma);
 };
