@@ -61,7 +61,6 @@ QpEbCsDecomp::QpEbCsDecomp(CachedMatrix& kernel, const Array<double>& y,
 : kernelMatrix(kernel)
 {
 	unsigned int e, i; //examples and misc.
-	// experimental vars
 	strat.shrinkMode = static_cast < eShrinkingModes > ( 0 );
 	if ( w == 1 ) //combine cliv with clipped-gain
 		strat.useClippedInReproc = true;
@@ -82,7 +81,6 @@ QpEbCsDecomp::QpEbCsDecomp(CachedMatrix& kernel, const Array<double>& y,
 	cardi.seenEx = 0;
 	for (i = 0; i < nMAX; i++) cardi.planned_steps[i] = 0;
 	cardi.planned_steps[0] = 1;	 //account for pre-defined first procNew step
-	cardi.sum_planned_steps = 1; //dto.
 	
 	SIZE_CHECK(y.ndim() == 2);
 	SIZE_CHECK(y.dim(0) == cardi.examples);
@@ -122,6 +120,7 @@ QpEbCsDecomp::QpEbCsDecomp(CachedMatrix& kernel, const Array<double>& y,
 		for (unsigned c=0; c<cardi.classes; c++)
 			ninaClasses(e).insert(c);
 	}
+	log.kernel_lookups = 0;
 	MT_COUNT_KERNEL_LOOKUPS( log.kernel_lookups = cardi.examples; )
 	
 	// first init the strategy parameters that are fixed during the entire run:
@@ -431,10 +430,7 @@ void QpEbCsDecomp::selectNextProcessingStep()
 	if ( stopCrit.stop == sEndEpochSoon && strat.proc == nNew )
 		stopCrit.stop = sEndEpochNow; //after endSoon, only allow continuation for nOld,nOpt, not for nNew
 	else
-	{
 		++cardi.planned_steps[strat.proc];
-		++cardi.sum_planned_steps;
-	}
 }
 
 bool QpEbCsDecomp::selectNextPattern()

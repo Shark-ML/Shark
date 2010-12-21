@@ -45,7 +45,8 @@
 //////#include <tr1/unordered_set>
 #include <set>
 
-#define MAX_EPOCHS_HARD_BOUNDARY 5
+// even if the stopping criterion is the duality gap, terminate after how many epochs?
+#define MAX_EPOCHS_HARD_BOUNDARY 5 
 
 #if false //mt_count_kernel_lookups
 	#define MT_COUNT_KERNEL_LOOKUPS( mt_token ) { mt_token }
@@ -98,7 +99,7 @@ public:
 	//! \param  d  desired duality gap, negative to set inactive
 	void setStoppingConditions(double a, int e = 1, double d = -1.0);
 	
-	//! solve the quadratic program. 
+	//! \brief solve the quadratic program. 
 	//! unlike the solve method of other solvers, we here do not accept a custom initialization
 	//! for the soluction vector, instead set it to zero no matter what is passed in
 	//! (being an online algorithm, we rely on the concept of "unseen" samples
@@ -208,6 +209,7 @@ protected:
 		rMAX		//counter
 	};
 	
+	//! List of possible shrinking modes.
 	enum eShrinkingModes
 	{
 		sNever,	 //do not use shrinking
@@ -250,12 +252,8 @@ protected:
 		unsigned int activePatterns; //current number of active (i.e., unshrinked) patterns
 		unsigned int sPatterns;		//current number of support patterns
 		unsigned int seenEx;		//index into lottery (how many samples seen in this epoch)
-		unsigned int cumulativeSeenEx; //how many samples seen overall (cardi.examples*cardi.epochs+cardi.seenEx)
 		unsigned int epochs;		//number of epochs undertaken
 		long planned_steps[nMAX]; //number of processing steps planned for each processing type
-		unsigned int sum_planned_steps;	//for convenience, number of all planned steps (sum over steps)
-		long actual_steps[nMAX];  //number of processing steps really undertaken for each processing type
-		unsigned int sum_actual_steps;	//for convenience, number of all smo steps really undertaken (sum over smoSteps)
 	};
 	
 	//! envelope for variables about the current state of the solver
