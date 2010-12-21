@@ -123,7 +123,6 @@ void SvmStatesCollection::makeHistorySparse( unsigned int svm_variant )
 void SvmStatesCollection::storePrimal( unsigned int svm_variant, unsigned int target_index, 
 									   const Array<double>& train_targets, double regC )
 {
-//    std::cout << "\tstoring primal " << std::endl;
 	ASSERT( m_wasInitialized );
 	ASSERT( m_wasMadeSparse );
 	eSvmMode emode = static_cast< eSvmMode > (svm_variant);
@@ -147,12 +146,10 @@ void SvmStatesCollection::storePrimal( unsigned int svm_variant, unsigned int ta
 			double beta_is [m_noofClasses];
 			for (unsigned int i=0; i<m_noofShots; i++) //loop over all stored snapshots
 			{
-//                std::cout << "looking at shot " << i << std::endl;
 				w2 = 0.0;
 				sum_slacks = 0.0;
 				for (unsigned int j=0; j<m_noofTrainExamples; j++) //loop over ALL training examples
 				{
-//                    std::cout << "  looking at sample " << j << std::endl;
                     max_label = -1;
 					for (unsigned int k=0; k<m_noofClasses; k++) //initialize to zero
 						{ scores[k] = 0.0; beta_is[k] = 0.0; }
@@ -181,14 +178,7 @@ void SvmStatesCollection::storePrimal( unsigned int svm_variant, unsigned int ta
 					}
                     // now that we have all scores, compute contribution to primal and slack vars
 					max_other_scores = -1e100;
-//                    std::cout << " train_targets.ndim() " << train_targets.ndim() << std::endl;
-//                    std::cout << " train_targets.nelem() " << train_targets.nelem() << std::endl;
-//                    std::cout << " train_targets.dim(0) " << train_targets.dim(0) << std::endl;
-//                    std::cout << " train_targets.dim(1) " << train_targets.dim(1) << std::endl;
-//                    std::cout << " train_targets.dim(2) " << train_targets.dim(2) << std::endl;
-//                    std::cout << "    now looking at target " << std::endl;
 					true_label = train_targets(j, 0);
-//                    std::cout << "    done. " << std::endl;
 					true_score = scores[ true_label ];
 					for (unsigned int k=0; k<m_noofClasses; k++)
 					{
@@ -212,7 +202,6 @@ void SvmStatesCollection::storePrimal( unsigned int svm_variant, unsigned int ta
 		}
 		default: throw SHARKEXCEPTION("[SvmStatesCollection::makeHistorySparseEbCs]. Not yet supported (please define for your SVM).");
 	}
-//    std::cout << "\tdone storing primal " << std::endl;
 }
 
 void SvmStatesCollection::storeTestErr( unsigned int svm_variant, unsigned int target_index, 
@@ -292,7 +281,6 @@ double SvmStatesCollection::accessDirectly( unsigned int target_index, unsigned 
 
 void SvmStatesCollection::printPerformanceMeasureAsNumPyArray( unsigned int target_index )
 {
-//    std::cout << "\tstarting print " << std::endl;
 	ASSERT( m_wasInitialized );
 	std::cout << "[ ";
 	for (unsigned int i=0; i<m_noofShots; i++)
@@ -302,7 +290,6 @@ void SvmStatesCollection::printPerformanceMeasureAsNumPyArray( unsigned int targ
 			std::cout << ", ";
 	}
 	std::cout << " ]" << std::endl;
-//    std::cout << "\tdone printing " << std::endl;
 }
 
 
