@@ -60,6 +60,7 @@ QpEbCsDecomp::QpEbCsDecomp(CachedMatrix& kernel, const Array<double>& y,
 							SvmStatesCollection * states)
 : kernelMatrix(kernel)
 {
+	//experimental/recently added vars
 	unsigned int e, i; //examples and misc.
 	strat.shrinkMode = static_cast < eShrinkingModes > ( 0 );
 	if ( w == 1 ) //combine cliv with clipped-gain
@@ -164,7 +165,6 @@ QpEbCsDecomp::QpEbCsDecomp(CachedMatrix& kernel, const Array<double>& y,
 		cicl.i = 0;
 		cicl.j = 1;
 		cicl.fallback_mode = true;
-		cicl.look_at_how_many = 0;
 	}
 
 	// init strategy vars: variable parameters (rest initialized in course of program)
@@ -738,42 +738,22 @@ double QpEbCsDecomp::performSmoStep()
 		gradient(*jt) += mu * temp.q[*jt/cardi.classes]; // e = *jt/cardi.classes
 	}
 	//DO CICL-WSS
-	if ( strat.wss == wClassInversion)
+	if ( strat.wss == wClassInversion )
 	{
 		cicl.max_priority = 0;
 		cicl.max_witness = 0.0;
 		cicl.fallback_mode = true;
 		
 		cicl.asc_size_current = activeGlobalSCs( strat.nextJ ).size();
-		if ( cicl.desired_noof_hits ) //only consider a subset of all updated gradients.
-		{
-			cicl.asc_size_third = activeGlobalSCs( strat.thirdClass ).size();
-			if ( !cicl.asc_size_third || !cicl.asc_size_current ) //safety check
-				cicl.look_at_how_many = 0;
-			else // how many samples do we approx. have to look at to get enough feasible SC-SC pairs?
-				cicl.look_at_how_many = cicl.desired_noof_hits*cardi.activePatterns / cicl.asc_size_third;
-			// select continuous segment in activeGlobalSCs in which to do pair ID
-			if ( cicl.look_at_how_many >= cicl.asc_size_current ) //fewer/equal than needed: look at all
-			{
-				cicl.loop_index_low = 0;
-				cicl.loop_index_high = cicl.asc_size_current;
-			}
-			else //there are more than needed: pick a random sub-segment fitting inside (0,asc_sice_cur]
-			{
-				cicl.loop_index_low = rand() % ( cicl.asc_size_current - cicl.look_at_how_many + 1 );
-				cicl.loop_index_high = cicl.loop_index_low + cicl.look_at_how_many;
-			}
-		}
-		else //look at all gradients
-		{
-			cicl.loop_index_low = 0;
-			cicl.loop_index_high = cicl.asc_size_current;
-			cicl.look_at_how_many = cicl.asc_size_current;
-		}
+		cicl.asc_size_third = activeGlobalSCs( strat.thirdClass ).size();
 //////		// LOOP THROUGH SUBSET: a bit tricky because tr1::unordered set is not a random access iterator.
 //////		// (cf. http://stackoverflow.com/questions/124671/picking-a-random-element-from-a-set)
-		if ( cicl.look_at_how_many )
+		if ( cicl.asc_size_third )
 		{
+			cicl.hits_so_far = 0;
+			cicl.counter_index = 0;
+			cicl.start_index = safe_discrete( cicl.asc_size_current, 1 ); //random index into ascs(strat.nextJ)
+////// snip
 //////			// first, find the bucket the loop_index_low-th element is in, then its index in that bucket:
 //////			cicl.x = cicl.loop_index_low;
 //////			cicl.bucket_count = activeGlobalSCs(strat.nextJ).bucket_count();
@@ -801,83 +781,81 @@ double QpEbCsDecomp::performSmoStep()
 //////					++cicl.b;
 //////					cicl.lit = activeGlobalSCs(strat.nextJ).begin(cicl.b);
 //////				}
-////// snip
-			cicl.lit = activeGlobalSCs(strat.nextJ).begin();
-			for ( unsigned int i=0; i<cicl.loop_index_low; i++ )
-				++cicl.lit;
-			cicl.cur_index = cicl.loop_index_low;
-			while ( cicl.cur_index < cicl.loop_index_high )
-			{
 ////// snap
+			cicl.lit = activeGlobalSCs(strat.nextJ).begin();
+			for ( unsigned int i=0; i<cicl.start_index; i++ )
+				++cicl.lit;
+			while ( cicl.hits_so_far < cicl.desired_noof_hits && cicl.counter_index < cicl.asc_size_current )
+			{
+////// snup
+				++cicl.counter_index;
 				cicl.e = *cicl.lit/cardi.classes; //current example
 				cicl.t = cicl.e*cardi.classes+strat.thirdClass;
-				if ( isSC(cicl.t) && 
-					 ( strat.shrinkMode == sNever
-					   || asClasses(cicl.e).find( strat.thirdClass ) != asClasses(cicl.e).end() ) 
+				if ( !isSC(cicl.t) || 
+					 ( strat.shrinkMode != sNever
+					   && asClasses(cicl.e).find( strat.thirdClass ) == asClasses(cicl.e).end() ) 
 				   ) //only look at samples for which both classes are active SPs
 				{
-					//actual stuff:
-					cicl.g = gradient(*cicl.lit);
-					cicl.cur_priority = 0;
-					if ( !strat.useClippedAsWitness )
+					++cicl.lit;
+					if ( cicl.lit == activeGlobalSCs(strat.nextJ).end() ) //continue from beginning
+					    cicl.lit = activeGlobalSCs(strat.nextJ).begin();
+					continue;
+				}
+				++cicl.hits_so_far;
+				//actual stuff:
+				cicl.g = gradient(*cicl.lit);
+				cicl.cur_priority = 0;
+				if ( !strat.useClippedAsWitness )
+				{
+					cicl.mu_test = (cicl.g-gradient(cicl.t)) / (2*diagonal(cicl.e)); //this is used for up-down-swap
+					cicl.cur_witness = fabs(cicl.mu_test); //and this as criterion
+				}
+				else
+				{
+					cicl.delta_g = cicl.g - gradient(cicl.t);
+					cicl.mu_test = cicl.delta_g / ( 2*diagonal(cicl.e) );
+					if ( cicl.mu_test > 0 )
 					{
-						cicl.mu_test = (cicl.g-gradient(cicl.t)) / (2*diagonal(cicl.e)); //this is used for up-down-swap
-						cicl.cur_witness = fabs(cicl.mu_test); //and this as criterion
+						if ( !canIncrease(*cicl.lit, cicl.mu_test) ) // j would hit its bound
+						{
+							cicl.mu_test = boxMax(*cicl.lit) - alpha(*cicl.lit);
+							if ( strat.nextJ != label(cicl.e) ) // j would be deactivated
+								cicl.cur_priority = 1;
+						}
 					}
 					else
 					{
-						cicl.delta_g = cicl.g - gradient(cicl.t);
-						cicl.mu_test = cicl.delta_g / ( 2*diagonal(cicl.e) );
-						if ( cicl.mu_test > 0 )
+						if ( !canIncrease(cicl.t, -cicl.mu_test) ) // t would hit its bound
 						{
-							if ( !canIncrease(*cicl.lit, cicl.mu_test) ) // j would hit its bound
-							{
-								cicl.mu_test = boxMax(*cicl.lit) - alpha(*cicl.lit);
-								if ( strat.nextJ != label(cicl.e) ) // j would be deactivated
-								{
-									cicl.cur_priority = 1;
-	//								if ( asClasses(e).size() == 2 ) //whole example would be deactivated
-	//									cur_priority = 2;
-								}
-							}
+							cicl.mu_test = -(boxMax(cicl.t)-alpha(cicl.t));
+							if ( strat.thirdClass != label(cicl.e) ) // t would be deactivated
+								cicl.cur_priority = 1;
 						}
-						else
-						{
-							if ( !canIncrease(cicl.t, -cicl.mu_test) ) // t would hit its bound
-							{
-								cicl.mu_test = -(boxMax(cicl.t)-alpha(cicl.t));
-								if ( strat.thirdClass != label(cicl.e) ) // t would be deactivated
-								{
-									cicl.cur_priority = 1;
-	//								if ( asClasses(e).size() == 2 ) //whole example would be deactivated
-	//									cur_priority = 2;
-								}
-							}
-						}
-						cicl.cur_witness = cicl.mu_test*( cicl.delta_g - cicl.mu_test*diagonal(cicl.e) ); //minus sign factors out
 					}
-					if (      cicl.cur_priority > cicl.max_priority 
-						 || ( cicl.cur_witness > cicl.max_witness && cicl.cur_priority == cicl.max_priority ) 
-					   )
+					cicl.cur_witness = cicl.mu_test*( cicl.delta_g - cicl.mu_test*diagonal(cicl.e) ); //minus sign factors out
+				}
+				if (      cicl.cur_priority > cicl.max_priority 
+					 || ( cicl.cur_witness > cicl.max_witness && cicl.cur_priority == cicl.max_priority ) 
+				   )
+				{
+					cicl.candidate = cicl.e;
+					cicl.max_witness = cicl.cur_witness;
+					cicl.max_priority = cicl.cur_priority;
+					if ( cicl.mu_test > 0 )
 					{
-						cicl.candidate = cicl.e;
-						cicl.max_witness = cicl.cur_witness;
-						cicl.max_priority = cicl.cur_priority;
-						if ( cicl.mu_test > 0 )
-						{
-							cicl.i = strat.nextJ;
-							cicl.j = strat.thirdClass;
-						}
-						else
-						{
-							cicl.i = strat.thirdClass;
-							cicl.j = strat.nextJ;
-						}
+						cicl.i = strat.nextJ;
+						cicl.j = strat.thirdClass;
+					}
+					else
+					{
+						cicl.i = strat.thirdClass;
+						cicl.j = strat.nextJ;
 					}
 				}
 				// finished -- set iterator to next element
 				++cicl.lit;
-				++cicl.cur_index;
+				if ( cicl.lit == activeGlobalSCs(strat.nextJ).end() ) //continue from beginning
+				    cicl.lit = activeGlobalSCs(strat.nextJ).begin();
 			}
 		}
 	}
@@ -892,35 +870,14 @@ double QpEbCsDecomp::performSmoStep()
 	if ( strat.wss == wClassInversion )
 	{
 		cicl.asc_size_current = activeGlobalSCs( strat.nextI ).size();
-		if ( cicl.desired_noof_hits ) //only consider a subset of all updated gradients.
-		{
-			cicl.asc_size_third = activeGlobalSCs( strat.thirdClass ).size();
-			if ( !cicl.asc_size_third || !cicl.asc_size_current ) //safety check
-				cicl.look_at_how_many = 0;
-			else // how many samples do we approx. have to look at to get enough feasible SC-SC pairs?
-				cicl.look_at_how_many = cicl.desired_noof_hits*cardi.activePatterns / cicl.asc_size_third;
-			// select continuous segment in activeGlobalSCs in which to do pair ID
-			if ( cicl.look_at_how_many >= cicl.asc_size_current ) //fewer/equal than needed: look at all
-			{
-				cicl.loop_index_low = 0;
-				cicl.loop_index_high = cicl.asc_size_current;
-			}
-			else //there are more than needed: pick a random sub-segment fitting inside (0,asc_sice_cur]
-			{
-				cicl.loop_index_low = rand() % ( cicl.asc_size_current - cicl.look_at_how_many + 1 );
-				cicl.loop_index_high = cicl.loop_index_low + cicl.look_at_how_many;
-			}
-		}
-		else //look at all gradients
-		{
-			cicl.loop_index_low = 0;
-			cicl.loop_index_high = cicl.asc_size_current;
-			cicl.look_at_how_many = cicl.asc_size_current;
-		}
 //////		// LOOP THROUGH SUBSET: a bit tricky because tr1::unordered set is not a random access iterator.
 //////		// (cf. http://stackoverflow.com/questions/124671/picking-a-random-element-from-a-set)
-		if ( cicl.look_at_how_many )
+		if ( cicl.asc_size_third )
 		{
+			cicl.hits_so_far = 0;
+			cicl.counter_index = 0;
+			cicl.start_index = safe_discrete( cicl.asc_size_current, 1 ); //random index into ascs(strat.nextI)
+////// snip
 //////			// first, find the bucket the loop_index_low-th element is in, then its index in that bucket:
 //////			cicl.x = cicl.loop_index_low;
 //////			cicl.bucket_count = activeGlobalSCs(strat.nextI).bucket_count();
@@ -939,6 +896,7 @@ double QpEbCsDecomp::performSmoStep()
 //////				--cicl.x; 
 //////			}
 //////			cicl.cur_index = cicl.loop_index_low;
+//////			// lit points to the loop_index_low-th element -- begin actual loop through subset:
 //////			while ( cicl.cur_index < cicl.loop_index_high ) //look at desired noof elements
 //////			{
 //////				// if at end of bucket, point lit to beginning of next non-empty one
@@ -947,83 +905,81 @@ double QpEbCsDecomp::performSmoStep()
 //////					++cicl.b;
 //////					cicl.lit = activeGlobalSCs(strat.nextI).begin(cicl.b);
 //////				}
-////// snip
-			cicl.lit = activeGlobalSCs(strat.nextI).begin();
-			for ( unsigned int i=0; i<cicl.loop_index_low; i++ )
-				++cicl.lit;
-			cicl.cur_index = cicl.loop_index_low;
-			while ( cicl.cur_index < cicl.loop_index_high )
-			{
 ////// snap
+			cicl.lit = activeGlobalSCs(strat.nextI).begin();
+			for ( unsigned int i=0; i<cicl.start_index; i++ )
+				++cicl.lit;
+			while ( cicl.hits_so_far < cicl.desired_noof_hits && cicl.counter_index < cicl.asc_size_current )
+			{
+////// snup
+				++cicl.counter_index;
 				cicl.e = *cicl.lit/cardi.classes; //current example
 				cicl.t = cicl.e*cardi.classes+strat.thirdClass;
-				if ( isSC(cicl.t) && 
-					 ( strat.shrinkMode == sNever
-					   || asClasses(cicl.e).find( strat.thirdClass ) != asClasses(cicl.e).end() ) 
+				if ( !isSC(cicl.t) || 
+					 ( strat.shrinkMode != sNever
+					   && asClasses(cicl.e).find( strat.thirdClass ) == asClasses(cicl.e).end() ) 
 				   ) //only look at samples for which both classes are active SPs
 				{
-					//actual stuff:
-					cicl.g = gradient(*cicl.lit);
-					cicl.cur_priority = 0;
-					if ( !strat.useClippedAsWitness )
+					++cicl.lit;
+					if ( cicl.lit == activeGlobalSCs(strat.nextI).end() ) //continue from beginning
+					    cicl.lit = activeGlobalSCs(strat.nextI).begin();
+					continue;
+				}
+				++cicl.hits_so_far;
+				//actual stuff:
+				cicl.g = gradient(*cicl.lit);
+				cicl.cur_priority = 0;
+				if ( !strat.useClippedAsWitness )
+				{
+					cicl.mu_test = (cicl.g-gradient(cicl.t)) / (2*diagonal(cicl.e)); //this is used for up-down-swap
+					cicl.cur_witness = fabs(cicl.mu_test); //and this as criterion
+				}
+				else
+				{
+					cicl.delta_g = cicl.g - gradient(cicl.t);
+					cicl.mu_test = cicl.delta_g / ( 2*diagonal(cicl.e) );
+					if ( cicl.mu_test > 0 )
 					{
-						cicl.mu_test = (cicl.g-gradient(cicl.t)) / (2*diagonal(cicl.e)); //this is used for up-down-swap
-						cicl.cur_witness = fabs(cicl.mu_test); //and this as criterion
+						if ( !canIncrease(*cicl.lit, cicl.mu_test) ) // j would hit its bound
+						{
+							cicl.mu_test = boxMax(*cicl.lit) - alpha(*cicl.lit);
+							if ( strat.nextI != label(cicl.e) ) // j would be deactivated
+								cicl.cur_priority = 1;
+						}
 					}
 					else
 					{
-						cicl.delta_g = cicl.g - gradient(cicl.t);
-						cicl.mu_test = cicl.delta_g / ( 2*diagonal(cicl.e) );
-						if ( cicl.mu_test > 0 )
+						if ( !canIncrease(cicl.t, -cicl.mu_test) ) // t would hit its bound
 						{
-							if ( !canIncrease(*cicl.lit, cicl.mu_test) ) // j would hit its bound
-							{
-								cicl.mu_test = boxMax(*cicl.lit) - alpha(*cicl.lit);
-								if ( strat.nextI != label(cicl.e) ) // j would be deactivated
-								{
-									cicl.cur_priority = 1;
-	//								if ( asClasses(e).size() == 2 ) //whole example would be deactivated
-	//									cur_priority = 2;
-								}
-							}
+							cicl.mu_test = -(boxMax(cicl.t)-alpha(cicl.t));
+							if ( strat.thirdClass != label(cicl.e) ) // t would be deactivated
+								cicl.cur_priority = 1;
 						}
-						else
-						{
-							if ( !canIncrease(cicl.t, -cicl.mu_test) ) // t would hit its bound
-							{
-								cicl.mu_test = -(boxMax(cicl.t)-alpha(cicl.t));
-								if ( strat.thirdClass != label(cicl.e) ) // t would be deactivated
-								{
-									cicl.cur_priority = 1;
-	//								if ( asClasses(e).size() == 2 ) //whole example would be deactivated
-	//									cur_priority = 2;
-								}
-							}
-						}
-						cicl.cur_witness = cicl.mu_test*( cicl.delta_g - cicl.mu_test*diagonal(cicl.e) ); //minus sign factors out
 					}
-					if (      cicl.cur_priority > cicl.max_priority 
-						 || ( cicl.cur_witness > cicl.max_witness && cicl.cur_priority == cicl.max_priority ) 
-					   )
+					cicl.cur_witness = cicl.mu_test*( cicl.delta_g - cicl.mu_test*diagonal(cicl.e) ); //minus sign factors out
+				}
+				if (      cicl.cur_priority > cicl.max_priority 
+					 || ( cicl.cur_witness > cicl.max_witness && cicl.cur_priority == cicl.max_priority ) 
+				   )
+				{
+					cicl.candidate = cicl.e;
+					cicl.max_witness = cicl.cur_witness;
+					cicl.max_priority = cicl.cur_priority;
+					if ( cicl.mu_test > 0 )
 					{
-						cicl.candidate = cicl.e;
-						cicl.max_witness = cicl.cur_witness;
-						cicl.max_priority = cicl.cur_priority;
-						if ( cicl.mu_test > 0 )
-						{
-							cicl.i = strat.nextI;
-							cicl.j = strat.thirdClass;
-						}
-						else
-						{
-							cicl.i = strat.thirdClass;
-							cicl.j = strat.nextI;
-						}
+						cicl.i = strat.nextI;
+						cicl.j = strat.thirdClass;
+					}
+					else
+					{
+						cicl.i = strat.thirdClass;
+						cicl.j = strat.nextI;
 					}
 				}
 				// finished -- set iterator to next element
 				++cicl.lit;
-				++cicl.cur_index;
+				if ( cicl.lit == activeGlobalSCs(strat.nextJ).end() ) //continue from beginning
+				    cicl.lit = activeGlobalSCs(strat.nextJ).begin();
 			}
 		}
 		if ( cicl.max_witness > 0 )
