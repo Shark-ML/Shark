@@ -185,6 +185,16 @@ protected:
 	
 //ENVELOPES FOR STATE/STRATEGY/TMP VARIABLES, ETC
 
+	//! List of possible configurations that can occur when flipping two examples
+	enum eFlipVariants
+	{
+		fDeactivate,
+		fRemove_first,
+		fRemove_second,
+		fInsert_first,
+		fInsert_second
+	};
+
 	//! List of variants of the WSS algorithm, i.e., among which set of samples is MVP-WSS carried out
 	enum eWsVariants
 	{
@@ -300,7 +310,7 @@ protected:
 	struct sLogVars
 	{
 		long kernel_lookups;
-		sWallTimer overall_timer;
+		sCpuTimer overall_timer;
 		unsigned int writeDualEvery;
 		unsigned int writeDualModuland;
 		unsigned int measurements_per_epoch;
@@ -330,9 +340,6 @@ protected:
 	//! select next processing step
 	void selectNextProcessingStep();
 	
-	//! process the next sample
-	void processNext();
-	
 	//! find the next pattern to work on. return true if there are now unseen samples left.
 	bool selectNextPattern();
 	
@@ -356,16 +363,16 @@ protected:
 		
 		//helper variables
 		double g, mu_test, delta_g;
-		unsigned int e, t, cur_index;
-		unsigned int look_at_how_many;  //guessing from the noof third-class SCs, at how many SC-? pairs do we have to look?
+		unsigned int e, t;
 		unsigned int asc_size_third;    //two tmp helpers
 		unsigned int asc_size_current;
-		unsigned int loop_index_low;    //start the loop where
-		unsigned int loop_index_high;   //end the loop where
-//		tActiveClasses::size_type b;
-//		tActiveClasses::size_type x;
-//		tActiveClasses::size_type bucket_count;
-//		tActiveClasses::const_local_iterator lit;
+		unsigned int start_index;    	  //current index
+		unsigned int counter_index;   //how many have we looked at?
+		unsigned int hits_so_far;   //how many have we looked at?
+//////		tActiveClasses::size_type b;
+//////		tActiveClasses::size_type x;
+//////		tActiveClasses::size_type bucket_count;
+//////		tActiveClasses::const_local_iterator lit;
 		tActiveClasses::iterator lit;
 	};
 	
@@ -400,15 +407,6 @@ protected:
 	// returns the new location of the deactivated sample, so vars can be kept consistent
 	// *first* delete all variables, then call this!
 	unsigned int deactivateExample( unsigned int e );
-	
-	enum eFlipVariants
-	{
-		fDeactivate,
-		fRemove_first,
-		fRemove_second,
-		fInsert_first,
-		fInsert_second
-	};
 	
 	//! exchange all data corresponding to two samples, both in internal arrays and in the cachedMatrix
 	//! Important note: flipAll inherits the assumption that i < j, i.e. firstArgument < secondArgument,
