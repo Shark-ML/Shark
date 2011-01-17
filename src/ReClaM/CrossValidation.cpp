@@ -282,6 +282,84 @@ void Partitioning::CreateIndexed(int numberOfPartitions, const Array<double>& in
 	}
 }
 
+void Partitioning::CreateSameSizeMultiClassBalanced(int numberOfPartitions, const Array<double>& input, const Array<double>& target) {
+	Clear();
+	
+	partitions = numberOfPartitions;
+	
+	unsigned int n = input.dim(0);
+	unsigned int dimension = input.dim(1);
+	unsigned int targetdim = target.dim(1);
+	
+	SIZE_CHECK(input.ndim() == 2);
+	SIZE_CHECK(target.ndim() == 2);
+	SIZE_CHECK(target.dim(0) == n);
+	
+	part_index.resize(n, false);
+	inverse_part_index.resize(partitions);
+	part_train_input.resize(partitions);
+	part_train_target.resize(partitions);
+	part_validation_input.resize(partitions);
+	part_validation_target.resize(partitions);
+	
+	
+	Array<int> t(partitions); // training samples in partition i
+	Array<int> v(partitions); // validation samples in partition i
+	int nn = n / partitions;
+	int c = n - nn * partitions;
+	for (int i = 0; i < partitions; i++)
+	{
+		v(i) = nn;
+		if (i < c) v(i)++;
+		t(i) = n - v(i);
+		part_train_input[i] = new Array<double>(t(i), dimension);
+		part_train_target[i] = new Array<double>(t(i), targetdim);
+		part_validation_input[i] = new Array<double>(v(i), dimension);
+		part_validation_target[i] = new Array<double>(v(i), targetdim);
+		inverse_part_index[i] = new Array<int>(v(i));
+	}
+	
+	std::vector< std::vector<unsigned> > vv;
+	
+	int nc = 0;
+	for(unsigned i=0; i<n; i++) {
+		if(target(i,0)>nc - 1)
+			nc = target(i,0) + 1;
+	}
+	
+	vv.resize(nc);
+	for(unsigned i=0; i<n; i++) {
+		vv[target(i,0)].push_back(i);
+	}
+	
+	unsigned d;
+	int vf = 0; // the training fold
+	for(int i=0; i<nc; i++) {
+		for(unsigned j=0; j<vv[i].size(); j++) {
+			unsigned e = vv[i][j];
+			
+			v(vf)--;
+			part_index(e) = vf;
+			
+			for (d = 0; d < dimension; d++) part_validation_input[vf]->operator()(v(vf), d) = input(e, d);
+			for (d = 0; d < targetdim; d++) part_validation_target[vf]->operator()(v(vf), d) = target(e, d);
+			
+			
+			for (int k = 0; k < partitions; k++)
+			{
+				if (k == vf) continue;
+				t(k)--;
+				for (d = 0; d < dimension; d++) part_train_input[k]->operator()(t(k), d) = input(e, d);
+				for (d = 0; d < targetdim; d++) part_train_target[k]->operator()(t(k), d) = target(e, d);
+			}
+			
+			inverse_part_index[vf]->operator()(v(vf)) = e;
+			vf = (vf + 1) % partitions;
+		}
+	}
+}
+
+
 void Partitioning::Clear()
 {
 	int i;
@@ -295,7 +373,6 @@ void Partitioning::Clear()
 	}
 	partitions = 0;
 }
-
 
 ////////////////////////////////////////////////////////////
 
