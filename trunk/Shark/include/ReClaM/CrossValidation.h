@@ -124,6 +124,25 @@ public:
 	void CreateSameSizeBalanced(int numberOfPartitions, const Array<double>& input, const Array<double>& target);
 
 	//!
+	//! \brief Create a partition for multi-class problems in a stratified way
+	//!
+	//! Every subset contains (approximately) the same
+	//! number of elements. For every partition, all
+	//! but one subset form the training set, while the
+	//! remaining one is used for validation.
+	//! The targets are assumed to intergers and the
+	//! subsets contain approximately the same fraction
+	//! of examples from each class as the whole
+	//! training set. The function is deterministic, so 
+	//! consider calling ShuffleTraining() before.
+	//!
+	//! \param numberOfPartitions  number of partitions to create
+	//! \param input               input data to split into subsets
+	//! \param target              labels corresponding to the input data
+	//!
+	void CreateSameSizeMultiClassBalanced(int numberOfPartitions, const Array<double>& input, const Array<double>& target);
+
+	//!
 	//! \brief Create a partition
 	//!
 	//! Every subset contains (approximately) the same
