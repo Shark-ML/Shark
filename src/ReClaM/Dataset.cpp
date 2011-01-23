@@ -623,7 +623,7 @@ void Dataset::CreateFromLibsvmFile(const char* filename, int train, int test)
 		double min_target = 1e100;
 		double max_target = -1e100;
 		double cur_value = 0.0;
-		bool binary = true; //binary or multi-class problem?
+		bool binary; //binary or multi-class problem?
 		bool regression = false; //real-valued or integer target values?
 
 		// i/o helpers:
@@ -1005,7 +1005,7 @@ bool Dataset::SaveLIBSVM(const char* filename, bool training, bool test)
 	
 	double min_target = 1e100;
 	double max_target = -1e100;
-	bool binary = true; //do we have a binary problem, that additionally is labeled in the -1/+1 style, rather than 0/1?
+	bool binary; //do we have a binary problem, that additionally is labeled in the -1/+1 style, rather than 0/1?
 	bool regression = false; //regression task?
 
 	// determine min/max class values

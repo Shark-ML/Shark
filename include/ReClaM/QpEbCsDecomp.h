@@ -41,8 +41,7 @@
 #define _QpEbCsDecomp_H_
 
 #include <ReClaM/Utilities.h>
-//////// for TR1 unordered set
-//////#include <tr1/unordered_set>
+//#include <tr1/unordered_set>
 #include <set>
 
 // even if the stopping criterion is the duality gap, terminate after how many epochs?
@@ -163,7 +162,7 @@ protected:
 	// WHEN DOING BOOST CONVERSION: CONVERT ALL CALLS TO .erase() TO quick_erase()
 	// OR erase_return_void() BECAUSE OF POTENTIAL WORST-CASE COMPLEXITY BUG AT
 	// https://svn.boost.org/trac/boost/ticket/3966
-//////	typedef std::tr1::unordered_set<unsigned int> tActiveClasses;
+//	typedef std::tr1::unordered_set<unsigned int> tActiveClasses;
 	typedef std::set<unsigned int> tActiveClasses;
 
 	//! For each pattern, maintain a set of the corresponding support vectors. 
@@ -273,7 +272,7 @@ protected:
 		double primal;			//value of the primal, needs a call to calcPrimal()
 		double curGain;			//how useful the last processing step was
 		double curGainRate;		//dito, but normalized to the time elapsed
-		sWallTimer rolex;			//for keeping track of dual gain per processing time unit
+		sCpuTimer rolex;			//for keeping track of dual gain per processing time unit
 		unsigned int verbosity; //0=quiet, 1=output results in python-compatible arrays
 	};
 	
@@ -369,10 +368,10 @@ protected:
 		unsigned int start_index;    	  //current index
 		unsigned int counter_index;   //how many have we looked at?
 		unsigned int hits_so_far;   //how many have we looked at?
-//////		tActiveClasses::size_type b;
-//////		tActiveClasses::size_type x;
-//////		tActiveClasses::size_type bucket_count;
-//////		tActiveClasses::const_local_iterator lit;
+//		tActiveClasses::size_type b; //these four for tr1::unordered_set variant only
+//		tActiveClasses::size_type x;
+//		tActiveClasses::size_type bucket_count;
+//		tActiveClasses::const_local_iterator lit;
 		tActiveClasses::iterator lit;
 	};
 	
