@@ -746,47 +746,48 @@ double QpEbCsDecomp::performSmoStep()
 		
 		cicl.asc_size_current = activeGlobalSCs( strat.nextJ ).size();
 		cicl.asc_size_third = activeGlobalSCs( strat.thirdClass ).size();
-//////		// LOOP THROUGH SUBSET: a bit tricky because tr1::unordered set is not a random access iterator.
-//////		// (cf. http://stackoverflow.com/questions/124671/picking-a-random-element-from-a-set)
 		if ( cicl.asc_size_third )
 		{
 			cicl.hits_so_far = 0;
 			cicl.counter_index = 0;
 			cicl.start_index = safe_discrete( cicl.asc_size_current, 1 ); //random index into ascs(strat.nextJ)
 ////// snip
-//////			// first, find the bucket the loop_index_low-th element is in, then its index in that bucket:
-//////			cicl.x = cicl.loop_index_low;
-//////			cicl.bucket_count = activeGlobalSCs(strat.nextJ).bucket_count();
-//////			for ( cicl.b=0; cicl.b < cicl.bucket_count; cicl.b++ ) 
-//////			{
-//////				if ( cicl.x < activeGlobalSCs(strat.nextJ).bucket_size(cicl.b) )
-//////			        break;
-//////				else
-//////					cicl.x -= activeGlobalSCs(strat.nextJ).bucket_size(cicl.b);
-//////		    }
-//////		    cicl.lit = activeGlobalSCs(strat.nextJ).begin(cicl.b);
-//////			while ( cicl.x > 0 )
-//////			{
-//////				++cicl.lit; 
-//////				ASSERT( cicl.lit != activeGlobalSCs(strat.nextJ).end(cicl.b) );
-//////				--cicl.x;
-//////			}
-//////			cicl.cur_index = cicl.loop_index_low;
-//////			// lit points to the loop_index_low-th element -- begin actual loop through subset:
-//////			while ( cicl.cur_index < cicl.loop_index_high ) //look at desired noof elements
-//////			{
-//////				// if at end of bucket, point lit to beginning of next non-empty one
-//////				while ( cicl.lit == activeGlobalSCs(strat.nextJ).end(cicl.b) )
-//////				{
-//////					++cicl.b;
-//////					cicl.lit = activeGlobalSCs(strat.nextJ).begin(cicl.b);
-//////				}
+//			// LOOP THROUGH SUBSET: a bit tricky because tr1::unordered set is not a random access iterator.
+//			// (cf. http://stackoverflow.com/questions/124671/picking-a-random-element-from-a-set)
+//			// first, find the bucket the start_index-th element is in, then its index in that bucket:
+//			cicl.x = cicl.start_index;
+//			cicl.bucket_count = activeGlobalSCs(strat.nextJ).bucket_count();
+//			for ( cicl.b=0; cicl.b < cicl.bucket_count; cicl.b++ ) 
+//			{
+//				if ( cicl.x < activeGlobalSCs(strat.nextJ).bucket_size(cicl.b) )
+//			        break;
+//				else
+//					cicl.x -= activeGlobalSCs(strat.nextJ).bucket_size(cicl.b);
+//		    }
+//		    cicl.lit = activeGlobalSCs(strat.nextJ).begin(cicl.b);
+//			while ( cicl.x > 0 )
+//			{
+//				++cicl.lit;
+//				ASSERT( cicl.lit != activeGlobalSCs(strat.nextJ).end(cicl.b) );
+//				--cicl.x;
+//			}
+//			while ( cicl.hits_so_far < cicl.desired_noof_hits && cicl.counter_index < cicl.asc_size_current )
+//			{
+//				while ( cicl.lit == activeGlobalSCs(strat.nextJ).end(cicl.b) ) //overflow to next bucket
+//				{
+//					++cicl.b;
+//					if ( cicl.b == cicl.bucket_count ) //overflow within the entire set
+//						cicl.b = 0;
+//					cicl.lit = activeGlobalSCs(strat.nextJ).begin(cicl.b);
+//				}
 ////// snap
 			cicl.lit = activeGlobalSCs(strat.nextJ).begin();
 			for ( unsigned int i=0; i<cicl.start_index; i++ )
 				++cicl.lit;
 			while ( cicl.hits_so_far < cicl.desired_noof_hits && cicl.counter_index < cicl.asc_size_current )
 			{
+				if ( cicl.lit == activeGlobalSCs(strat.nextJ).end() ) //continue from beginning
+				    cicl.lit = activeGlobalSCs(strat.nextJ).begin();
 ////// snup
 				++cicl.counter_index;
 				cicl.e = *cicl.lit/cardi.classes; //current example
@@ -797,8 +798,6 @@ double QpEbCsDecomp::performSmoStep()
 				   ) //only look at samples for which both classes are active SPs
 				{
 					++cicl.lit;
-					if ( cicl.lit == activeGlobalSCs(strat.nextJ).end() ) //continue from beginning
-					    cicl.lit = activeGlobalSCs(strat.nextJ).begin();
 					continue;
 				}
 				++cicl.hits_so_far;
@@ -854,8 +853,6 @@ double QpEbCsDecomp::performSmoStep()
 				}
 				// finished -- set iterator to next element
 				++cicl.lit;
-				if ( cicl.lit == activeGlobalSCs(strat.nextJ).end() ) //continue from beginning
-				    cicl.lit = activeGlobalSCs(strat.nextJ).begin();
 			}
 		}
 	}
@@ -870,47 +867,48 @@ double QpEbCsDecomp::performSmoStep()
 	if ( strat.wss == wClassInversion )
 	{
 		cicl.asc_size_current = activeGlobalSCs( strat.nextI ).size();
-//////		// LOOP THROUGH SUBSET: a bit tricky because tr1::unordered set is not a random access iterator.
-//////		// (cf. http://stackoverflow.com/questions/124671/picking-a-random-element-from-a-set)
 		if ( cicl.asc_size_third )
 		{
 			cicl.hits_so_far = 0;
 			cicl.counter_index = 0;
 			cicl.start_index = safe_discrete( cicl.asc_size_current, 1 ); //random index into ascs(strat.nextI)
 ////// snip
-//////			// first, find the bucket the loop_index_low-th element is in, then its index in that bucket:
-//////			cicl.x = cicl.loop_index_low;
-//////			cicl.bucket_count = activeGlobalSCs(strat.nextI).bucket_count();
-//////			for ( cicl.b=0; cicl.b < cicl.bucket_count; cicl.b++ ) 
-//////			{
-//////				if ( cicl.x < activeGlobalSCs(strat.nextI).bucket_size(cicl.b) )
-//////			        break;
-//////				else
-//////					cicl.x -= activeGlobalSCs(strat.nextI).bucket_size(cicl.b);
-//////		    }
-//////		    cicl.lit = activeGlobalSCs(strat.nextI).begin(cicl.b);
-//////			while ( cicl.x > 0 )
-//////			{
-//////				++cicl.lit;
-//////				ASSERT( cicl.lit != activeGlobalSCs(strat.nextJ).end(cicl.b) );
-//////				--cicl.x; 
-//////			}
-//////			cicl.cur_index = cicl.loop_index_low;
-//////			// lit points to the loop_index_low-th element -- begin actual loop through subset:
-//////			while ( cicl.cur_index < cicl.loop_index_high ) //look at desired noof elements
-//////			{
-//////				// if at end of bucket, point lit to beginning of next non-empty one
-//////				while ( cicl.lit == activeGlobalSCs(strat.nextI).end(cicl.b) )
-//////				{
-//////					++cicl.b;
-//////					cicl.lit = activeGlobalSCs(strat.nextI).begin(cicl.b);
-//////				}
+//			// LOOP THROUGH SUBSET: a bit tricky because tr1::unordered set is not a random access iterator.
+//			// (cf. http://stackoverflow.com/questions/124671/picking-a-random-element-from-a-set)
+//			// first, find the bucket the start_index-th element is in, then its index in that bucket:
+//			cicl.x = cicl.start_index;
+//			cicl.bucket_count = activeGlobalSCs(strat.nextI).bucket_count();
+//			for ( cicl.b=0; cicl.b < cicl.bucket_count; cicl.b++ ) 
+//			{
+//				if ( cicl.x < activeGlobalSCs(strat.nextI).bucket_size(cicl.b) )
+//			        break;
+//				else
+//					cicl.x -= activeGlobalSCs(strat.nextI).bucket_size(cicl.b);
+//		    }
+//		    cicl.lit = activeGlobalSCs(strat.nextI).begin(cicl.b);
+//			while ( cicl.x > 0 )
+//			{
+//				++cicl.lit;
+//				ASSERT( cicl.lit != activeGlobalSCs(strat.nextI).end(cicl.b) );
+//				--cicl.x;
+//			}
+//			while ( cicl.hits_so_far < cicl.desired_noof_hits && cicl.counter_index < cicl.asc_size_current )
+//			{
+//				while ( cicl.lit == activeGlobalSCs(strat.nextI).end(cicl.b) ) //overflow to next bucket
+//				{
+//					++cicl.b;
+//					if ( cicl.b == cicl.bucket_count ) //overflow within the entire set
+//						cicl.b = 0;
+//					cicl.lit = activeGlobalSCs(strat.nextI).begin(cicl.b);
+//				}
 ////// snap
 			cicl.lit = activeGlobalSCs(strat.nextI).begin();
 			for ( unsigned int i=0; i<cicl.start_index; i++ )
 				++cicl.lit;
 			while ( cicl.hits_so_far < cicl.desired_noof_hits && cicl.counter_index < cicl.asc_size_current )
 			{
+				if ( cicl.lit == activeGlobalSCs(strat.nextI).end() ) //continue from beginning
+				    cicl.lit = activeGlobalSCs(strat.nextI).begin();
 ////// snup
 				++cicl.counter_index;
 				cicl.e = *cicl.lit/cardi.classes; //current example
@@ -921,8 +919,6 @@ double QpEbCsDecomp::performSmoStep()
 				   ) //only look at samples for which both classes are active SPs
 				{
 					++cicl.lit;
-					if ( cicl.lit == activeGlobalSCs(strat.nextI).end() ) //continue from beginning
-					    cicl.lit = activeGlobalSCs(strat.nextI).begin();
 					continue;
 				}
 				++cicl.hits_so_far;
@@ -978,8 +974,6 @@ double QpEbCsDecomp::performSmoStep()
 				}
 				// finished -- set iterator to next element
 				++cicl.lit;
-				if ( cicl.lit == activeGlobalSCs(strat.nextJ).end() ) //continue from beginning
-				    cicl.lit = activeGlobalSCs(strat.nextJ).begin();
 			}
 		}
 		if ( cicl.max_witness > 0 )
@@ -1090,7 +1084,7 @@ double QpEbCsDecomp::performSmoStep()
 				}
 				if ( deactivate )
 				{
-//////					cout << " DEACTIVATE " << endl;
+////					cout << " DEACTIVATE " << endl;
 					deactivateExample(p);
 				}
 			}

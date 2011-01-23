@@ -45,12 +45,45 @@
 #include <ReClaM/KernelFunction.h>
 #include <Array/Array.h>
 #include <sys/time.h>
+//#include <sys/resource.h>
 #include <vector>
 #include <ctime>
 
 ////////////////////////////////////////////////////////////////////////////////
+//! Convenience structure for utime keeping based on rusage
 
+//struct sRusageTimer
+//{
+//    double start_seconds;
+//    struct rusage helper_rusage;
+
+//    void tic()
+//    {
+//		getrusage( RUSAGE_SELF, &helper_rusage );
+//		start_seconds = (double)helper_rusage.ru_utime.tv_sec + (double)helper_rusage.ru_utime.tv_usec / 1000000.0;
+//    }
+
+//    double toc()
+//    {
+//		getrusage( RUSAGE_SELF, &helper_rusage );
+//        return ((double)helper_rusage.ru_utime.tv_sec + (double)helper_rusage.ru_utime.tv_usec / 1000000.0) 
+//			   - start_seconds;
+//    }
+
+//    double tocAndTic()
+//    {
+//		getrusage( RUSAGE_SELF, &helper_rusage );
+//        double tmp = ((double)helper_rusage.ru_utime.tv_sec + (double)helper_rusage.ru_utime.tv_usec / 1000000.0) 
+//					 - start_seconds;
+//        start_seconds = (double)helper_rusage.ru_utime.tv_sec + (double)helper_rusage.ru_utime.tv_usec / 1000000.0;
+//        return tmp;
+//    }
+    
+//};
+
+////////////////////////////////////////////////////////////////////////////////
 //! Convenience structure for cpu-time keeping
+
 struct sCpuTimer 
 {
 	std::clock_t start_time;
@@ -74,33 +107,35 @@ struct sCpuTimer
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-
 //! Convenience structure for wall-time keeping
-struct sWallTimer
-{
-	timeval tv;
-	double seconds;
-	//start the timer
-	void tic()
-	{
-		gettimeofday(&tv, NULL);
-		seconds = tv.tv_sec+(tv.tv_usec/1000000.0);
-	}
-	//return time difference in seconds (but w/ precision of only 0.01 s)
-	double toc()
-	{
-		gettimeofday(&tv, NULL);
-		return ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );
-	}
-	//return time difference and restart the timer
-	double tocAndTic()
-	{
-		gettimeofday(&tv, NULL);
-		double tmp = ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );
-		seconds = tv.tv_sec+(tv.tv_usec/1000000.0);
-		return tmp;
-	}
-};
+
+//not supported under windows
+
+//struct sWallTimer
+//{
+//	timeval tv;
+//	double seconds;
+//	//start the timer
+//	void tic()
+//	{
+//		gettimeofday(&tv, NULL);
+//		seconds = tv.tv_sec+(tv.tv_usec/1000000.0);
+//	}
+//	//return time difference in seconds (but w/ precision of only 0.01 s)
+//	double toc()
+//	{
+//		gettimeofday(&tv, NULL);
+//		return ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );
+//	}
+//	//return time difference and restart the timer
+//	double tocAndTic()
+//	{
+//		gettimeofday(&tv, NULL);
+//		double tmp = ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );
+//		seconds = tv.tv_sec+(tv.tv_usec/1000000.0);
+//		return tmp;
+//	}
+//};
 
 ////////////////////////////////////////////////////////////////////////////////
 

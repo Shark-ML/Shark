@@ -142,8 +142,8 @@ void SvmStatesCollection::storePrimal( unsigned int svm_variant, unsigned int ta
 			double true_score;
 			double cur_kernel_entry;
 			double max_other_scores;
-			double scores [m_noofClasses];
-			double beta_is [m_noofClasses];
+			double * scores = new double [m_noofClasses];
+			double * beta_is = new double [m_noofClasses];
 			for (unsigned int i=0; i<m_noofShots; i++) //loop over all stored snapshots
 			{
 				w2 = 0.0;
@@ -198,6 +198,10 @@ void SvmStatesCollection::storePrimal( unsigned int svm_variant, unsigned int ta
 				}
 				m_performanceMeasures( target_index, i) = 0.5 * w2 + regC * sum_slacks;
 			}
+			delete [] scores;
+			scores = NULL;
+			delete [] beta_is;
+			beta_is = NULL;
 			break;
 		}
 		default: throw SHARKEXCEPTION("[SvmStatesCollection::makeHistorySparseEbCs]. Not yet supported (please define for your SVM).");
@@ -224,7 +228,7 @@ void SvmStatesCollection::storeTestErr( unsigned int svm_variant, unsigned int t
 			double cur_kernel_entry;
 			double cur_val;
 			double max_score;
-			double scores [m_noofClasses];
+			double * scores = new double [m_noofClasses];
 			
 			for (unsigned int i=0; i<m_noofShots; i++)
 			{
@@ -261,6 +265,8 @@ void SvmStatesCollection::storeTestErr( unsigned int svm_variant, unsigned int t
 				}
 				m_performanceMeasures( target_index, i) = mistakes / (double) noof_test_ex;
 			}
+			delete [] scores;
+			scores = NULL;
 			break;
 		}
 		default: throw SHARKEXCEPTION("[SvmStatesCollection::makeHistorySparseEbCs]. Not yet supported (please define for your SVM).");
