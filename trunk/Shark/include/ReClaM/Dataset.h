@@ -347,6 +347,10 @@ public:
 	//! convert labels of 0 and 1 to -1 and +1, respectively
 	void MulticlassToBinary();
 	
+	//! convert labels of multiclass problem to one-hot (one-of-N) encoding
+	void MulticlassToOneHot();
+	
+	
 	
 
 protected:
