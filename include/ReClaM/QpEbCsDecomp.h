@@ -415,7 +415,7 @@ protected:
 	//! one central place to account for numerical inaccuracies when determining upper-boundedness
 	//! this defines the parameter kappa of the original paper
 	//! param index which component of alpha should be tested for boundedness via corresponding component of boxMax
-	//! param extra for determining whether \f$ #alpha(i) + \f$ extra is bounded
+	//! param extra for determining whether \f$ \alpha(i) + \f$ extra is bounded
 	inline bool canIncrease( unsigned int index, double extra = 0.0 )
 	{
 		return ( (alpha(index) + extra + 1e-12) <= boxMax(index) );
