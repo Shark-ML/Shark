@@ -1255,7 +1255,7 @@ void Dataset::MulticlassToOneHot()
 	{
 		if ( (testTarget(j, 0) < 0) ) 
 			throw SHARKEXCEPTION("[Dataset::MulticlassToOneHot] Not an integer labeled dataset.");
-		if ( testTarget(i, 0) > c) c = trainingTarget(i, 0);
+		if ( testTarget(j, 0) > c) c = testTarget(j, 0);
 	}
 	
 	c++;
@@ -1276,10 +1276,10 @@ void Dataset::MulticlassToOneHot()
 	for (j=0; j<jc; j++)
 	{
 		for(unsigned k=0; k<c; k++) {
-		if ( tmpTestTarget(i, 0) == k )
-			testTarget(i, k) = 1;
+		if ( tmpTestTarget(j, 0) == k )
+			testTarget(j, k) = 1;
 		else
-			testTarget(i, k) = 0;
+			testTarget(j, k) = 0;
 		}
 	}
 }
