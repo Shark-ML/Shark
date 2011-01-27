@@ -48,7 +48,7 @@
 //! \par
 //! The solver solves the same type of problem as QpMcDecomp,
 //! but with the additional constraint
-//! \f$ \alpha_{i,1} + \cots + \alpha_{i,d} = 0 \f$
+//! \f$ \alpha_{i,1} + \cdots + \alpha_{i,d} = 0 \f$
 //! for the variables corresponding to each training example
 //! \f$ (x_i, y_i) \f$.
 //!
