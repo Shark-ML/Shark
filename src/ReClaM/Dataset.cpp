@@ -1233,6 +1233,59 @@ void Dataset::MulticlassToBinary()
 	}
 }
 
+
+void Dataset::MulticlassToOneHot()
+{
+	int i, ic = trainingTarget.dim(0);
+	int j, jc = testTarget.dim(0);
+	
+	Array<double> tmpTrainTarget = trainingTarget;
+	Array<double> tmpTestTarget  = testTarget;
+	
+	int c = 0; // counter for number of classes
+	
+	// first, scan and assert multiclass style (0/1) labels
+	for (i=0; i<ic; i++)
+	{
+		if ( (trainingTarget(i, 0) < 0) ) 
+			throw SHARKEXCEPTION("[Dataset::MulticlassToOneHot] Not an interger labeled dataset.");
+		if ( trainingTarget(i, 0) > c) c = trainingTarget(i, 0);
+	}
+	for (j=0; j<jc; j++)
+	{
+		if ( (testTarget(j, 0) < 0) ) 
+			throw SHARKEXCEPTION("[Dataset::MulticlassToOneHot] Not an integer labeled dataset.");
+		if ( testTarget(i, 0) > c) c = trainingTarget(i, 0);
+	}
+	
+	c++;
+	
+	trainingTarget.resize(ic, c, false);
+	testTarget.resize(jc, c, false);
+	
+	// now convert
+	for (i=0; i<ic; i++)
+	{
+		for(unsigned k=0; k<c; k++) {
+		if ( tmpTrainTarget(i, 0) == k )
+			trainingTarget(i, k) = 1;
+		else
+			trainingTarget(i, k) = 0;
+		}
+	}
+	for (j=0; j<jc; j++)
+	{
+		for(unsigned k=0; k<c; k++) {
+		if ( tmpTestTarget(i, 0) == k )
+			testTarget(i, k) = 1;
+		else
+			testTarget(i, k) = 0;
+		}
+	}
+}
+
+
+
 bool Dataset::ReadLine(FILE* file, char* buffer, int bufferlength)
 {
 	int pos = 0;
