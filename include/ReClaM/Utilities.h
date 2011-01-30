@@ -44,8 +44,6 @@
 #include <SharkDefs.h>
 #include <ReClaM/KernelFunction.h>
 #include <Array/Array.h>
-#include <sys/time.h>
-//#include <sys/resource.h>
 #include <vector>
 #include <ctime>
 
