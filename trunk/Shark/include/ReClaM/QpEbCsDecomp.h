@@ -47,7 +47,7 @@
 // even if the stopping criterion is the duality gap, terminate after how many epochs?
 #define MAX_EPOCHS_HARD_BOUNDARY 5 
 
-#if false //mt_count_kernel_lookups
+#if 0 //mt_count_kernel_lookups
 	#define MT_COUNT_KERNEL_LOOKUPS( mt_token ) { mt_token }
 #else
 	#define MT_COUNT_KERNEL_LOOKUPS( mt_token ) {  }
