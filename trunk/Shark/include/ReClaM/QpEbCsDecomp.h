@@ -272,7 +272,7 @@ protected:
 		double primal;			//value of the primal, needs a call to calcPrimal()
 		double curGain;			//how useful the last processing step was
 		double curGainRate;		//dito, but normalized to the time elapsed
-		sCpuTimer rolex;			//for keeping track of dual gain per processing time unit
+		sWallTimer rolex;			//for keeping track of dual gain per processing time unit
 		unsigned int verbosity; //0=quiet, 1=output results in python-compatible arrays
 	};
 	
@@ -309,7 +309,7 @@ protected:
 	struct sLogVars
 	{
 		long kernel_lookups;
-		sCpuTimer overall_timer;
+		sWallTimer overall_timer;
 		unsigned int writeDualEvery;
 		unsigned int writeDualModuland;
 		unsigned int measurements_per_epoch;

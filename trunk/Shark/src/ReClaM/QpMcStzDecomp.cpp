@@ -43,7 +43,6 @@
 #include <ReClaM/QuadraticProgram.h>
 
 #include <math.h>
-#include <time.h>
 #include <iostream>
 #include <iomanip>
 

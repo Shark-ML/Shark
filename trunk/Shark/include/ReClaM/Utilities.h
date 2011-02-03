@@ -45,95 +45,89 @@
 #include <ReClaM/KernelFunction.h>
 #include <Array/Array.h>
 #include <vector>
+
 #include <ctime>
+//cross-platform wall-clock timing:
+#ifdef WIN32
+	#include <windows.h>
+#else
+	#include <time.h>
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
-//! Convenience structure for utime keeping based on rusage
+//! Convenience structure for cpu-time keeping, cross-platform
 
-//struct sRusageTimer
-//{
-//    double start_seconds;
-//    struct rusage helper_rusage;
-
-//    void tic()
-//    {
-//		getrusage( RUSAGE_SELF, &helper_rusage );
-//		start_seconds = (double)helper_rusage.ru_utime.tv_sec + (double)helper_rusage.ru_utime.tv_usec / 1000000.0;
-//    }
-
-//    double toc()
-//    {
-//		getrusage( RUSAGE_SELF, &helper_rusage );
-//        return ((double)helper_rusage.ru_utime.tv_sec + (double)helper_rusage.ru_utime.tv_usec / 1000000.0) 
-//			   - start_seconds;
-//    }
-
-//    double tocAndTic()
-//    {
-//		getrusage( RUSAGE_SELF, &helper_rusage );
-//        double tmp = ((double)helper_rusage.ru_utime.tv_sec + (double)helper_rusage.ru_utime.tv_usec / 1000000.0) 
-//					 - start_seconds;
-//        start_seconds = (double)helper_rusage.ru_utime.tv_sec + (double)helper_rusage.ru_utime.tv_usec / 1000000.0;
-//        return tmp;
-//    }
-    
-//};
-
-////////////////////////////////////////////////////////////////////////////////
-//! Convenience structure for cpu-time keeping
-
-struct sCpuTimer 
+class sCpuTimer 
 {
-	std::clock_t start_time;
+public:
 	//start the timer
 	void tic()
 	{
-		start_time = std::clock();
+		m_start_time = std::clock();
 	}
 	//return time difference in seconds
 	double toc() 
 	{
-		return ( std::clock() - start_time ) / (double)CLOCKS_PER_SEC;
+		return ( std::clock() - m_start_time ) / (double)CLOCKS_PER_SEC;
 	}
 	//return time difference and restart the timer
 	double tocAndTic() 
 	{
-		double tmp = ( std::clock() - start_time ) / (double)CLOCKS_PER_SEC;
-		start_time = std::clock();
+		double tmp = ( std::clock() - m_start_time ) / (double)CLOCKS_PER_SEC;
+		m_start_time = std::clock();
 		return tmp;
 	}
+	
+private:
+	std::clock_t m_start_time;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//! Convenience structure for wall-time keeping
+//! Convenience structure for wall-clock time keeping, platform-specific
 
-//not supported under windows
+class sWallTimer
+{
+public:
+	//start the timer (i.e., set m_start_time)
+	void tic()
+	{
+		m_start_time = getCurTimeInSecs();
+	}
+	//return time difference in seconds
+	double toc() 
+	{
+		return getCurTimeInSecs() - m_start_time;
+	}
+	//return time difference and restart the timer
+	double tocAndTic() 
+	{
+		m_temp = getCurTimeInSecs() - m_start_time;
+		m_start_time = getCurTimeInSecs();
+		return m_temp;
+	}
+	
+protected:
+	double m_temp;
+	double m_start_time;
+	#ifdef WIN32
+		LARGE_INTEGER li1;
+		LARGE_INTEGER li2;
+	#else
+		timespec m_tv;
+	#endif
 
-//struct sWallTimer
-//{
-//	timeval tv;
-//	double seconds;
-//	//start the timer
-//	void tic()
-//	{
-//		gettimeofday(&tv, NULL);
-//		seconds = tv.tv_sec+(tv.tv_usec/1000000.0);
-//	}
-//	//return time difference in seconds (but w/ precision of only 0.01 s)
-//	double toc()
-//	{
-//		gettimeofday(&tv, NULL);
-//		return ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );
-//	}
-//	//return time difference and restart the timer
-//	double tocAndTic()
-//	{
-//		gettimeofday(&tv, NULL);
-//		double tmp = ( tv.tv_sec+(tv.tv_usec/1000000.0) - seconds );
-//		seconds = tv.tv_sec+(tv.tv_usec/1000000.0);
-//		return tmp;
-//	}
-//};
+	double getCurTimeInSecs()
+	{
+		#ifdef WIN32
+			QueryPerformanceCounter( &li1 );
+			QueryPerformanceFrequency( &li2 );
+			return li1.QuadPart / li2.QuadPart;
+		#else
+			clock_gettime( CLOCK_REALTIME, &m_tv );
+			return m_tv.tv_sec + (m_tv.tv_nsec/1E9);
+		#endif
+	}
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
