@@ -190,7 +190,7 @@ QwtPlotCurve* PlotWidget::addDots(const char *title, const double *x, const doub
 								  const QPen &pen)
 {
 	QwtPlotCurve *c = new QwtPlotCurve(title);
-	QwtSymbol *symbol = new QwtSymbol(QwtSymbol::Style(sym), QBrush(pen.color(), Qt::SolidPattern), pen, QSize(ps, ps));
+	QwtSymbol symbol (QwtSymbol::Style(sym), QBrush(pen.color(), Qt::SolidPattern), pen, QSize(ps, ps));
 	c->setStyle(QwtPlotCurve::Dots);
 	c->setSymbol(symbol);
 	sym++;
@@ -211,7 +211,7 @@ void PlotWidget::showItems()
 QwtPlotCurve* PlotWidget::add(QwtPlotCurve *c, const double *x, const double *y, unsigned n,
 								  const QPen &pen)
 {
-	c->setRawSamples(x, y, n);
+	c->setRawData(x, y, n);
 	c->setPen(pen);
 	c->setRenderHint(QwtPlotItem::RenderAntialiased);
 	c->attach(this);
@@ -354,7 +354,7 @@ void GPWidget::setN(double l)
 void GPWidget::setN()
 {
 	generateTrainingData();
-	trainingCurve->setRawSamples(inTrain.begin(), targetTrain.begin(), N);
+	trainingCurve->setRawData(inTrain.begin(), targetTrain.begin(), N);
 	train();
 	computePlot();
 	plot->replot();
@@ -365,7 +365,7 @@ void GPWidget::setE(double e)
 	noise = e; // pow(10., e);
 	generateTrainingData();
 
-	trainingCurve->setRawSamples(inTrain.begin(), targetTrain.begin(), N);
+	trainingCurve->setRawData(inTrain.begin(), targetTrain.begin(), N);
 
 	train();
 	computePlot();
