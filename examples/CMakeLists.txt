@@ -2,15 +2,18 @@ PROJECT( shark )
 
 
 
-CMAKE_MINIMUM_REQUIRED( VERSION 2.4 )
+CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 
 OPTION( SHARK_OPT_ENABLE_QT_EXAMPLES "" OFF )
 
-CMAKE_POLICY( SET CMP0003 OLD )
+#CMAKE_POLICY( SET CMP0003 OLD )
 
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/../include )
 
-LINK_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/../lib )
+# LINK_DIRECTORIES( ${CMAKE_BINARY_DIR}/lib )
+
+MESSAGE( ${CMAKE_BINARY_DIR} )
+MESSAGE( ${CMAKE_CURRENT_BINARY_DIR} )
 
 SET( meanvar_SRC
 	Array/mean-var.cpp
@@ -232,353 +235,353 @@ SET( lorenz84_SRC
 #INSTALL( TARGETS Array/mean-var
 #RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Array )
 
-ADD_EXECUTABLE( EALib/ackleyES ${ackleyES_SRC} )
-TARGET_LINK_LIBRARIES( EALib/ackleyES shark )
-INSTALL( TARGETS EALib/ackleyES
+ADD_EXECUTABLE( ackleyES ${ackleyES_SRC} )
+TARGET_LINK_LIBRARIES( ackleyES shark )
+INSTALL( TARGETS ackleyES
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib )
 
-ADD_EXECUTABLE( EALib/paraboloidCMA ${paraboloidCMA_SRC} )
-TARGET_LINK_LIBRARIES( EALib/paraboloidCMA shark )
-INSTALL( TARGETS EALib/paraboloidCMA
+ADD_EXECUTABLE( paraboloidCMA ${paraboloidCMA_SRC} )
+TARGET_LINK_LIBRARIES( paraboloidCMA shark )
+INSTALL( TARGETS paraboloidCMA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib )
 
-ADD_EXECUTABLE( EALib/paraboloidElitistCMA ${paraboloidElitistCMA_SRC} )
-TARGET_LINK_LIBRARIES( EALib/paraboloidElitistCMA shark )
-INSTALL( TARGETS EALib/paraboloidElitistCMA
+ADD_EXECUTABLE( paraboloidElitistCMA ${paraboloidElitistCMA_SRC} )
+TARGET_LINK_LIBRARIES( paraboloidElitistCMA shark )
+INSTALL( TARGETS paraboloidElitistCMA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib )
 
-ADD_EXECUTABLE( EALib/countingOnes ${countingOnes_SRC} )
-TARGET_LINK_LIBRARIES( EALib/countingOnes shark )
-INSTALL( TARGETS EALib/countingOnes
+ADD_EXECUTABLE( countingOnes ${countingOnes_SRC} )
+TARGET_LINK_LIBRARIES( countingOnes shark )
+INSTALL( TARGETS countingOnes
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib )
 
-ADD_EXECUTABLE( EALib/integerES ${integerES_SRC} )
-TARGET_LINK_LIBRARIES( EALib/integerES shark )
-INSTALL( TARGETS EALib/integerES
+ADD_EXECUTABLE( integerES ${integerES_SRC} )
+TARGET_LINK_LIBRARIES( integerES shark )
+INSTALL( TARGETS integerES
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib )
 
-ADD_EXECUTABLE( EALib/sphereGA ${sphereGA_SRC} )
-TARGET_LINK_LIBRARIES( EALib/sphereGA shark )
-INSTALL( TARGETS EALib/sphereGA
+ADD_EXECUTABLE( sphereGA ${sphereGA_SRC} )
+TARGET_LINK_LIBRARIES( sphereGA shark )
+INSTALL( TARGETS sphereGA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib )
 
-ADD_EXECUTABLE( EALib/steadyState ${steadyState_SRC} )
-TARGET_LINK_LIBRARIES( EALib/steadyState shark )
-INSTALL( TARGETS EALib/steadyState
+ADD_EXECUTABLE( steadyState ${steadyState_SRC} )
+TARGET_LINK_LIBRARIES( steadyState shark )
+INSTALL( TARGETS steadyState
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib )
 
-ADD_EXECUTABLE( EALib/pvmSphereGA ${pvmSphereGA_SRC} )
-TARGET_LINK_LIBRARIES( EALib/pvmSphereGA shark )
-INSTALL( TARGETS EALib/pvmSphereGA
+ADD_EXECUTABLE( pvmSphereGA ${pvmSphereGA_SRC} )
+TARGET_LINK_LIBRARIES( pvmSphereGA shark )
+INSTALL( TARGETS pvmSphereGA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib )
 
-ADD_EXECUTABLE( EALib/TSP_GA ${TSPGA_SRC} )
-TARGET_LINK_LIBRARIES( EALib/TSP_GA shark )
-INSTALL( TARGETS EALib/TSP_GA
+ADD_EXECUTABLE( TSP_GA ${TSPGA_SRC} )
+TARGET_LINK_LIBRARIES( TSP_GA shark )
+INSTALL( TARGETS TSP_GA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib )
 
-ADD_EXECUTABLE( EALib/SchwefelEllipsoidCMSA ${SchwefelEllipsoidCMSA_SRC} )
-TARGET_LINK_LIBRARIES( EALib/SchwefelEllipsoidCMSA shark )
-INSTALL( TARGETS EALib/SchwefelEllipsoidCMSA
+ADD_EXECUTABLE( SchwefelEllipsoidCMSA ${SchwefelEllipsoidCMSA_SRC} )
+TARGET_LINK_LIBRARIES( SchwefelEllipsoidCMSA shark )
+INSTALL( TARGETS SchwefelEllipsoidCMSA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib )
 
-ADD_EXECUTABLE( FileUtil/FileUtilSimple ${FileUtilSimple_SRC} )
-TARGET_LINK_LIBRARIES( FileUtil/FileUtilSimple shark )
-INSTALL( TARGETS FileUtil/FileUtilSimple
+ADD_EXECUTABLE( FileUtilSimple ${FileUtilSimple_SRC} )
+TARGET_LINK_LIBRARIES( FileUtilSimple shark )
+INSTALL( TARGETS FileUtilSimple
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/FileUtil )
 
-ADD_EXECUTABLE( FileUtil/FileUtilClass ${FileUtilClass_SRC} )
-TARGET_LINK_LIBRARIES( FileUtil/FileUtilClass shark )
-INSTALL( TARGETS FileUtil/FileUtilClass
+ADD_EXECUTABLE( FileUtilClass ${FileUtilClass_SRC} )
+TARGET_LINK_LIBRARIES( FileUtilClass shark )
+INSTALL( TARGETS FileUtilClass
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/FileUtil )
 
-ADD_EXECUTABLE( Fuzzy/sugeno ${sugeno_SRC} )
-TARGET_LINK_LIBRARIES( Fuzzy/sugeno shark )
-INSTALL( TARGETS Fuzzy/sugeno
+ADD_EXECUTABLE( sugeno ${sugeno_SRC} )
+TARGET_LINK_LIBRARIES( sugeno shark )
+INSTALL( TARGETS sugeno
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Fuzzy )
 
-ADD_EXECUTABLE( LinAlg/rank_test ${ranktest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/rank_test shark )
-INSTALL( TARGETS LinAlg/rank_test
+ADD_EXECUTABLE( rank_test ${ranktest_SRC} )
+TARGET_LINK_LIBRARIES( rank_test shark )
+INSTALL( TARGETS rank_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/rank_decomp_test ${rankdecomptest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/rank_decomp_test shark )
-INSTALL( TARGETS LinAlg/rank_decomp_test
+ADD_EXECUTABLE( rank_decomp_test ${rankdecomptest_SRC} )
+TARGET_LINK_LIBRARIES( rank_decomp_test shark )
+INSTALL( TARGETS rank_decomp_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/svd_test ${svdtest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/svd_test shark )
-INSTALL( TARGETS LinAlg/svd_test
+ADD_EXECUTABLE( svd_test ${svdtest_SRC} )
+TARGET_LINK_LIBRARIES( svd_test shark )
+INSTALL( TARGETS svd_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/svdrank_test ${svdranktest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/svdrank_test shark )
-INSTALL( TARGETS LinAlg/svdrank_test
+ADD_EXECUTABLE( svdrank_test ${svdranktest_SRC} )
+TARGET_LINK_LIBRARIES( svdrank_test shark )
+INSTALL( TARGETS svdrank_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/svdsort_test ${svdsorttest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/svdsort_test shark )
-INSTALL( TARGETS LinAlg/svdsort_test
+ADD_EXECUTABLE( svdsort_test ${svdsorttest_SRC} )
+TARGET_LINK_LIBRARIES( svdsort_test shark )
+INSTALL( TARGETS svdsort_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/eigensymm_test ${eigensymmtest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/eigensymm_test shark )
-INSTALL( TARGETS LinAlg/eigensymm_test
+ADD_EXECUTABLE( eigensymm_test ${eigensymmtest_SRC} )
+TARGET_LINK_LIBRARIES( eigensymm_test shark )
+INSTALL( TARGETS eigensymm_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/eigensymmJacobi_test ${eigensymmJacobitest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/eigensymmJacobi_test shark )
-INSTALL( TARGETS LinAlg/eigensymmJacobi_test
+ADD_EXECUTABLE( eigensymmJacobi_test ${eigensymmJacobitest_SRC} )
+TARGET_LINK_LIBRARIES( eigensymmJacobi_test shark )
+INSTALL( TARGETS eigensymmJacobi_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/eigensymmJacobi2_test ${eigensymmJacobi2test_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/eigensymmJacobi2_test shark )
-INSTALL( TARGETS LinAlg/eigensymmJacobi2_test
+ADD_EXECUTABLE( eigensymmJacobi2_test ${eigensymmJacobi2test_SRC} )
+TARGET_LINK_LIBRARIES( eigensymmJacobi2_test shark )
+INSTALL( TARGETS eigensymmJacobi2_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/eigensort_test ${eigensorttest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/eigensort_test shark )
-INSTALL( TARGETS LinAlg/eigensort_test
+ADD_EXECUTABLE( eigensort_test ${eigensorttest_SRC} )
+TARGET_LINK_LIBRARIES( eigensort_test shark )
+INSTALL( TARGETS eigensort_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/eigenerr_test ${eigenerrtest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/eigenerr_test shark )
-INSTALL( TARGETS LinAlg/eigenerr_test
+ADD_EXECUTABLE( eigenerr_test ${eigenerrtest_SRC} )
+TARGET_LINK_LIBRARIES( eigenerr_test shark )
+INSTALL( TARGETS eigenerr_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/g_inverse_matrix ${ginversematrix_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/g_inverse_matrix shark )
-INSTALL( TARGETS LinAlg/g_inverse_matrix
+ADD_EXECUTABLE( g_inverse_matrix ${ginversematrix_SRC} )
+TARGET_LINK_LIBRARIES( g_inverse_matrix shark )
+INSTALL( TARGETS g_inverse_matrix
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/detsymm_test ${detsymmtest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/detsymm_test shark )
-INSTALL( TARGETS LinAlg/detsymm_test
+ADD_EXECUTABLE( detsymm_test ${detsymmtest_SRC} )
+TARGET_LINK_LIBRARIES( detsymm_test shark )
+INSTALL( TARGETS detsymm_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/lnsrch_test ${lnsrchtest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/lnsrch_test shark )
-INSTALL( TARGETS LinAlg/lnsrch_test
+ADD_EXECUTABLE( lnsrch_test ${lnsrchtest_SRC} )
+TARGET_LINK_LIBRARIES( lnsrch_test shark )
+INSTALL( TARGETS lnsrch_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/cblnsrch_test ${cblnsrchtest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/cblnsrch_test shark )
-INSTALL( TARGETS LinAlg/cblnsrch_test
+ADD_EXECUTABLE( cblnsrch_test ${cblnsrchtest_SRC} )
+TARGET_LINK_LIBRARIES( cblnsrch_test shark )
+INSTALL( TARGETS cblnsrch_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/linmin_test ${linmintest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/linmin_test shark )
-INSTALL( TARGETS LinAlg/linmin_test
+ADD_EXECUTABLE( linmin_test ${linmintest_SRC} )
+TARGET_LINK_LIBRARIES( linmin_test shark )
+INSTALL( TARGETS linmin_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/dlinmin_test ${dlinmintest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/dlinmin_test shark )
-INSTALL( TARGETS LinAlg/dlinmin_test
+ADD_EXECUTABLE( dlinmin_test ${dlinmintest_SRC} )
+TARGET_LINK_LIBRARIES( dlinmin_test shark )
+INSTALL( TARGETS dlinmin_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/linalg_simple_test ${linalgsimpletest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/linalg_simple_test shark )
-INSTALL( TARGETS LinAlg/linalg_simple_test
+ADD_EXECUTABLE( linalg_simple_test ${linalgsimpletest_SRC} )
+TARGET_LINK_LIBRARIES( linalg_simple_test shark )
+INSTALL( TARGETS linalg_simple_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/covar_corrcoef_test ${covarcorrcoeftest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/covar_corrcoef_test shark )
-INSTALL( TARGETS LinAlg/covar_corrcoef_test
+ADD_EXECUTABLE( covar_corrcoef_test ${covarcorrcoeftest_SRC} )
+TARGET_LINK_LIBRARIES( covar_corrcoef_test shark )
+INSTALL( TARGETS covar_corrcoef_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( LinAlg/fft_test ${ffttest_SRC} )
-TARGET_LINK_LIBRARIES( LinAlg/fft_test shark )
-INSTALL( TARGETS LinAlg/fft_test
+ADD_EXECUTABLE( fft_test ${ffttest_SRC} )
+TARGET_LINK_LIBRARIES( fft_test shark )
+INSTALL( TARGETS fft_test
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/LinAlg )
 
-ADD_EXECUTABLE( MOO-EALib/MOGA ${MOGA_SRC} )
-TARGET_LINK_LIBRARIES( MOO-EALib/MOGA shark )
-INSTALL( TARGETS MOO-EALib/MOGA
+ADD_EXECUTABLE( MOGA ${MOGA_SRC} )
+TARGET_LINK_LIBRARIES( MOGA shark )
+INSTALL( TARGETS MOGA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/MOO-EALib )
 
-ADD_EXECUTABLE( MOO-EALib/NSGA2 ${NSGA2_SRC} )
-TARGET_LINK_LIBRARIES( MOO-EALib/NSGA2 shark )
-INSTALL( TARGETS MOO-EALib/NSGA2
+ADD_EXECUTABLE( NSGA2 ${NSGA2_SRC} )
+TARGET_LINK_LIBRARIES( NSGA2 shark )
+INSTALL( TARGETS NSGA2
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/MOO-EALib )
 
-ADD_EXECUTABLE( MOO-EALib/PAES ${PAES_SRC} )
-TARGET_LINK_LIBRARIES( MOO-EALib/PAES shark )
-INSTALL( TARGETS MOO-EALib/PAES
+ADD_EXECUTABLE( PAES ${PAES_SRC} )
+TARGET_LINK_LIBRARIES( PAES shark )
+INSTALL( TARGETS PAES
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/MOO-EALib )
 
-ADD_EXECUTABLE( MOO-EALib/VEGA ${VEGA_SRC} )
-TARGET_LINK_LIBRARIES( MOO-EALib/VEGA shark )
-INSTALL( TARGETS MOO-EALib/VEGA
+ADD_EXECUTABLE( VEGA ${VEGA_SRC} )
+TARGET_LINK_LIBRARIES( VEGA shark )
+INSTALL( TARGETS VEGA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/MOO-EALib )
 
-ADD_EXECUTABLE( MOO-EALib/NSGA2example ${NSGA2example_SRC} )
-TARGET_LINK_LIBRARIES( MOO-EALib/NSGA2example shark )
-INSTALL( TARGETS MOO-EALib/NSGA2example
+ADD_EXECUTABLE( NSGA2example ${NSGA2example_SRC} )
+TARGET_LINK_LIBRARIES( NSGA2example shark )
+INSTALL( TARGETS NSGA2example
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/MOO-EALib )
 
-ADD_EXECUTABLE( MOO-EALib/RMMEDAtest ${RMMEDAtest_SRC} )
-TARGET_LINK_LIBRARIES( MOO-EALib/RMMEDAtest shark )
-INSTALL( TARGETS MOO-EALib/RMMEDAtest
+ADD_EXECUTABLE( RMMEDAtest ${RMMEDAtest_SRC} )
+TARGET_LINK_LIBRARIES( RMMEDAtest shark )
+INSTALL( TARGETS RMMEDAtest
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/MOO-EALib )
 
-ADD_EXECUTABLE( MOO-EALib/realcoded-NSGA2 ${realcodedNSGA2_SRC} )
-TARGET_LINK_LIBRARIES( MOO-EALib/realcoded-NSGA2 shark )
-INSTALL( TARGETS MOO-EALib/realcoded-NSGA2
+ADD_EXECUTABLE( realcoded-NSGA2 ${realcodedNSGA2_SRC} )
+TARGET_LINK_LIBRARIES( realcoded-NSGA2 shark )
+INSTALL( TARGETS realcoded-NSGA2
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/MOO-EALib )
 
-ADD_EXECUTABLE( MOO-EALib/fonMO-CMA ${fonMOCMA_SRC} )
-TARGET_LINK_LIBRARIES( MOO-EALib/fonMO-CMA shark )
-INSTALL( TARGETS MOO-EALib/fonMO-CMA
+ADD_EXECUTABLE( fonMO-CMA ${fonMOCMA_SRC} )
+TARGET_LINK_LIBRARIES( fonMO-CMA shark )
+INSTALL( TARGETS fonMO-CMA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/MOO-EALib )
 
-ADD_EXECUTABLE( MOO-EALib/fonSteadyStateMO-CMA ${fonSteadyStateMOCMA_SRC} )
-TARGET_LINK_LIBRARIES( MOO-EALib/fonSteadyStateMO-CMA shark )
-INSTALL( TARGETS MOO-EALib/fonSteadyStateMO-CMA
+ADD_EXECUTABLE( fonSteadyStateMO-CMA ${fonSteadyStateMOCMA_SRC} )
+TARGET_LINK_LIBRARIES( fonSteadyStateMO-CMA shark )
+INSTALL( TARGETS fonSteadyStateMO-CMA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/MOO-EALib )
 
-ADD_EXECUTABLE( MOO-EALib/HypervolumeBenchmark ${HypervolumeBenchmark_SRC} )
-TARGET_LINK_LIBRARIES( MOO-EALib/HypervolumeBenchmark shark )
-INSTALL( TARGETS MOO-EALib/HypervolumeBenchmark
+ADD_EXECUTABLE( HypervolumeBenchmark ${HypervolumeBenchmark_SRC} )
+TARGET_LINK_LIBRARIES( HypervolumeBenchmark shark )
+INSTALL( TARGETS HypervolumeBenchmark
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/MOO-EALib )
 
-ADD_EXECUTABLE( Mixture/mg-example ${mgexample_SRC} )
-TARGET_LINK_LIBRARIES( Mixture/mg-example shark )
-INSTALL( TARGETS Mixture/mg-example
+ADD_EXECUTABLE( mg-example ${mgexample_SRC} )
+TARGET_LINK_LIBRARIES( mg-example shark )
+INSTALL( TARGETS mg-example
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Mixture )
 
-ADD_EXECUTABLE( Mixture/rbfn-example ${rbfnexample_SRC} )
-TARGET_LINK_LIBRARIES( Mixture/rbfn-example shark )
-INSTALL( TARGETS Mixture/rbfn-example
+ADD_EXECUTABLE( rbfn-example ${rbfnexample_SRC} )
+TARGET_LINK_LIBRARIES( rbfn-example shark )
+INSTALL( TARGETS rbfn-example
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Mixture )
 
-ADD_EXECUTABLE( ReClaM/simpleRBFNet ${simpleRBFNet_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/simpleRBFNet shark )
-INSTALL( TARGETS ReClaM/simpleRBFNet
+ADD_EXECUTABLE( simpleRBFNet ${simpleRBFNet_SRC} )
+TARGET_LINK_LIBRARIES( simpleRBFNet shark )
+INSTALL( TARGETS simpleRBFNet
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/simpleFFNet ${simpleFFNet_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/simpleFFNet shark )
-INSTALL( TARGETS ReClaM/simpleFFNet
+ADD_EXECUTABLE( simpleFFNet ${simpleFFNet_SRC} )
+TARGET_LINK_LIBRARIES( simpleFFNet shark )
+INSTALL( TARGETS simpleFFNet
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/simpleRNNet ${simpleRNNet_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/simpleRNNet shark )
-INSTALL( TARGETS ReClaM/simpleRNNet
+ADD_EXECUTABLE( simpleRNNet ${simpleRNNet_SRC} )
+TARGET_LINK_LIBRARIES( simpleRNNet shark )
+INSTALL( TARGETS simpleRNNet
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/simpleFFNetSource ${simpleFFNetSource_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/simpleFFNetSource shark )
-INSTALL( TARGETS ReClaM/simpleFFNetSource
+ADD_EXECUTABLE( simpleFFNetSource ${simpleFFNetSource_SRC} )
+TARGET_LINK_LIBRARIES( simpleFFNetSource shark )
+INSTALL( TARGETS simpleFFNetSource
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/simpleMSERNNet ${simpleMSERNNet_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/simpleMSERNNet shark )
-INSTALL( TARGETS ReClaM/simpleMSERNNet
+ADD_EXECUTABLE( simpleMSERNNet ${simpleMSERNNet_SRC} )
+TARGET_LINK_LIBRARIES( simpleMSERNNet shark )
+INSTALL( TARGETS simpleMSERNNet
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/SVMclassification ${SVMclassification_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/SVMclassification shark )
-INSTALL( TARGETS ReClaM/SVMclassification
+ADD_EXECUTABLE( SVMclassification ${SVMclassification_SRC} )
+TARGET_LINK_LIBRARIES( SVMclassification shark )
+INSTALL( TARGETS SVMclassification
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
 IF( LINUX )
-ADD_EXECUTABLE( ReClaM/SVMclassification-gnuplot ${SVMclassificationgnuplot_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/SVMclassification-gnuplot shark )
-INSTALL( TARGETS ReClaM/SVMclassification-gnuplot
+ADD_EXECUTABLE( SVMclassification-gnuplot ${SVMclassificationgnuplot_SRC} )
+TARGET_LINK_LIBRARIES( SVMclassification-gnuplot shark )
+INSTALL( TARGETS SVMclassification-gnuplot
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 ENDIF( LINUX )
 
-ADD_EXECUTABLE( ReClaM/SVMregression ${SVMregression_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/SVMregression shark )
-INSTALL( TARGETS ReClaM/SVMregression
+ADD_EXECUTABLE( SVMregression ${SVMregression_SRC} )
+TARGET_LINK_LIBRARIES( SVMregression shark )
+INSTALL( TARGETS SVMregression
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
 IF( LINUX )
-ADD_EXECUTABLE( ReClaM/SVMregression-gnuplot ${SVMregressiongnuplot_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/SVMregression-gnuplot shark )
-INSTALL( TARGETS ReClaM/SVMregression-gnuplot
+ADD_EXECUTABLE( SVMregression-gnuplot ${SVMregressiongnuplot_SRC} )
+TARGET_LINK_LIBRARIES( SVMregression-gnuplot shark )
+INSTALL( TARGETS SVMregression-gnuplot
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 ENDIF( LINUX )
 
-ADD_EXECUTABLE( ReClaM/KNN ${KNN_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/KNN shark )
-INSTALL( TARGETS ReClaM/KNN
+ADD_EXECUTABLE( KNN ${KNN_SRC} )
+TARGET_LINK_LIBRARIES( KNN shark )
+INSTALL( TARGETS KNN
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/KM ${KM_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/KM shark )
-INSTALL( TARGETS ReClaM/KM
+ADD_EXECUTABLE( KM ${KM_SRC} )
+TARGET_LINK_LIBRARIES( KM shark )
+INSTALL( TARGETS KM
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/CrossValidation ${CrossValidation_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/CrossValidation shark )
-INSTALL( TARGETS ReClaM/CrossValidation
+ADD_EXECUTABLE( CrossValidation ${CrossValidation_SRC} )
+TARGET_LINK_LIBRARIES( CrossValidation shark )
+INSTALL( TARGETS CrossValidation
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/KernelOptimization ${KernelOptimization_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/KernelOptimization shark )
-INSTALL( TARGETS ReClaM/KernelOptimization
+ADD_EXECUTABLE( KernelOptimization ${KernelOptimization_SRC} )
+TARGET_LINK_LIBRARIES( KernelOptimization shark )
+INSTALL( TARGETS KernelOptimization
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/SvmApproximationExample ${SvmApproximationExample_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/SvmApproximationExample shark )
-INSTALL( TARGETS ReClaM/SvmApproximationExample
+ADD_EXECUTABLE( SvmApproximationExample ${SvmApproximationExample_SRC} )
+TARGET_LINK_LIBRARIES( SvmApproximationExample shark )
+INSTALL( TARGETS SvmApproximationExample
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/LinearClassifierTest ${LinearClassifierTest_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/LinearClassifierTest shark )
-INSTALL( TARGETS ReClaM/LinearClassifierTest
+ADD_EXECUTABLE( LinearClassifierTest ${LinearClassifierTest_SRC} )
+TARGET_LINK_LIBRARIES( LinearClassifierTest shark )
+INSTALL( TARGETS LinearClassifierTest
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/PCAtest ${PCAtest_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/PCAtest shark )
-INSTALL( TARGETS ReClaM/PCAtest
+ADD_EXECUTABLE( PCAtest ${PCAtest_SRC} )
+TARGET_LINK_LIBRARIES( PCAtest shark )
+INSTALL( TARGETS PCAtest
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/FisherLDA ${FisherLDA_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/FisherLDA shark )
-INSTALL( TARGETS ReClaM/FisherLDA
+ADD_EXECUTABLE( FisherLDA ${FisherLDA_SRC} )
+TARGET_LINK_LIBRARIES( FisherLDA shark )
+INSTALL( TARGETS FisherLDA
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/LinearRegressionTest ${LinearRegressionTest_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/LinearRegressionTest shark )
-INSTALL( TARGETS ReClaM/LinearRegressionTest
+ADD_EXECUTABLE( LinearRegressionTest ${LinearRegressionTest_SRC} )
+TARGET_LINK_LIBRARIES( LinearRegressionTest shark )
+INSTALL( TARGETS LinearRegressionTest
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/KalmanFilterTest ${KalmanFilterTest_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/KalmanFilterTest shark )
-INSTALL( TARGETS ReClaM/KalmanFilterTest
+ADD_EXECUTABLE( KalmanFilterTest ${KalmanFilterTest_SRC} )
+TARGET_LINK_LIBRARIES( KalmanFilterTest shark )
+INSTALL( TARGETS KalmanFilterTest
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( ReClaM/McSvm ${McSvm_SRC} )
-TARGET_LINK_LIBRARIES( ReClaM/McSvm shark )
-INSTALL( TARGETS ReClaM/McSvm
+ADD_EXECUTABLE( McSvm ${McSvm_SRC} )
+TARGET_LINK_LIBRARIES( McSvm shark )
+INSTALL( TARGETS McSvm
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
-ADD_EXECUTABLE( Rng/RngTest ${RngTest_SRC} )
-TARGET_LINK_LIBRARIES( Rng/RngTest shark )
-INSTALL( TARGETS Rng/RngTest
+ADD_EXECUTABLE( RngTest ${RngTest_SRC} )
+TARGET_LINK_LIBRARIES( RngTest shark )
+INSTALL( TARGETS RngTest
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Rng )
 
-ADD_EXECUTABLE( Rng/RngTest2 ${RngTest2_SRC} )
-TARGET_LINK_LIBRARIES( Rng/RngTest2 shark )
-INSTALL( TARGETS Rng/RngTest2
+ADD_EXECUTABLE( RngTest2 ${RngTest2_SRC} )
+TARGET_LINK_LIBRARIES( RngTest2 shark )
+INSTALL( TARGETS RngTest2
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Rng )
 
-ADD_EXECUTABLE( Rng/RngTestSimple ${RngTestSimple_SRC} )
-TARGET_LINK_LIBRARIES( Rng/RngTestSimple shark )
-INSTALL( TARGETS Rng/RngTestSimple
+ADD_EXECUTABLE( RngTestSimple ${RngTestSimple_SRC} )
+TARGET_LINK_LIBRARIES( RngTestSimple shark )
+INSTALL( TARGETS RngTestSimple
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Rng )
 
-ADD_EXECUTABLE( TimeSeries/embeddingTest ${embeddingTest_SRC} )
-TARGET_LINK_LIBRARIES( TimeSeries/embeddingTest shark )
-INSTALL( TARGETS TimeSeries/embeddingTest
+ADD_EXECUTABLE( embeddingTest ${embeddingTest_SRC} )
+TARGET_LINK_LIBRARIES( embeddingTest shark )
+INSTALL( TARGETS embeddingTest
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/TimeSeries )
 
-ADD_EXECUTABLE( TimeSeries/lorenz84 ${lorenz84_SRC} )
-TARGET_LINK_LIBRARIES( TimeSeries/lorenz84 shark )
-INSTALL( TARGETS TimeSeries/lorenz84
+ADD_EXECUTABLE( lorenz84 ${lorenz84_SRC} )
+TARGET_LINK_LIBRARIES( lorenz84 shark )
+INSTALL( TARGETS lorenz84
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/TimeSeries )
 
 IF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.6)
@@ -653,6 +656,78 @@ PATTERN "*CMake*" EXCLUDE
 )
 ENDIF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.6)
 
+ ADD_TEST( SchwefelEllipsoidCMSA SchwefelEllipsoidCMSA )
+  ADD_TEST( TSP_GA TSP_GA )
+  ADD_TEST( ackleyES ackleyES )
+  ADD_TEST( countingOnes countingOnes )
+  ADD_TEST( integerES integerES )
+  ADD_TEST( paraboloidCMA paraboloidCMA )
+  ADD_TEST( paraboloidElitistCMA paraboloidElitistCMA )
+  ADD_TEST( sphereGA sphereGA )
+  ADD_TEST( steadyState steadyState )
+
+  #	ADD_TEST( sugeno examples/Fuzzy/sugeno )
+
+  ADD_TEST( cblnsrch_test cblnsrch_test )
+  ADD_TEST( covar_corrcoef_test covar_corrcoef_test )
+  ADD_TEST( detsymm_test detsymm_test )
+  ADD_TEST( dlinmin_test dlinmin_test )
+  ADD_TEST( eigenerr_test eigenerr_test )
+  ADD_TEST( eigensort_test eigensort_test )
+  ADD_TEST( eigensymmJacobi2_test eigensymmJacobi2_test )
+  ADD_TEST( eigensymmJacobi_test eigensymmJacobi_test )
+  ADD_TEST( eigensymm_test eigensymm_test )
+  ADD_TEST( fft_test fft_test )
+  ADD_TEST( g_inverse_matrix g_inverse_matrix )
+  ADD_TEST( linalg_simple_test linalg_simple_test )
+  ADD_TEST( linmin_test linmin_test )
+  ADD_TEST( lnsrch_test lnsrch_test )
+  ADD_TEST( rank_decomp_test rank_decomp_test )
+  ADD_TEST( rank_test rank_test )
+  ADD_TEST( svd_test svd_test )
+  ADD_TEST( svdrank_test svdrank_test )
+  ADD_TEST( svdsort_test svdsort_test )
+
+  ADD_TEST( mg-example mg-example )
+  ADD_TEST( rbfn-example rbfn-example )
+
+  ADD_TEST( HypervolumeBenchmark HypervolumeBenchmark ${CMAKE_CURRENT_SOURCE_DIR}/MOO-EALib/ran.40000pts.3d.1 )
+  # ADD_TEST( MOGA MOGA )
+  #ADD_TEST( NSGA2 NSGA2 )
+  #ADD_TEST( NSGA2example NSGA2example )
+  # ADD_TEST( PAES PAES )
+  ADD_TEST( RMMEDAtest RMMEDAtest )
+  #ADD_TEST( VEGA VEGA )
+  ADD_TEST( fonMO-CMA fonMO-CMA )
+  ADD_TEST( fonSteadyStateMO-CMA fonSteadyStateMO-CMA )
+  ADD_TEST( realcoded-NSGA2 realcoded-NSGA2 )
+
+  ADD_TEST( CrossValidation CrossValidation )
+  ADD_TEST( FisherLDA FisherLDA )
+  ADD_TEST( KM KM )
+  ADD_TEST( KNN KNN )
+  ADD_TEST( KalmanFilterTest KalmanFilterTest )
+  ADD_TEST( KernelOptimization KernelOptimization )
+  ADD_TEST( LinearClassifierTest LinearClassifierTest )
+  ADD_TEST( LinearRegressionTest LinearRegressionTest )
+  ADD_TEST( McSvm McSvm )
+  ADD_TEST( PCAtest PCAtest )
+  ADD_TEST( SVMclassification SVMclassification )
+  ADD_TEST( SVMregression SVMregression )
+  ADD_TEST( SvmApproximationExample SvmApproximationExample )
+  ADD_TEST( simpleFFNet simpleFFNet )
+  ADD_TEST( simpleFFNetSource simpleFFNetSource )
+  ADD_TEST( simpleMSERNNet simpleMSERNNet ${CMAKE_CURRENT_SOURCE_DIR}/ReClaM/timeseries )
+  ADD_TEST( simpleRBFNet simpleRBFNet )
+  ADD_TEST( simpleRNNet simpleRNNet )
+
+  ADD_TEST( RngTest RngTest )
+  ADD_TEST( RngTest2 RngTest2 )
+  ADD_TEST( RngTestSimple RngTestSimple )
+
+  ADD_TEST( embeddingTest embeddingTest )
+  ADD_TEST( lorenz84 lorenz84 )
+
 IF( SHARK_OPT_ENABLE_QT_EXAMPLES )
 
 	FIND_PACKAGE( Qt4 REQUIRED )
@@ -686,24 +761,24 @@ IF( SHARK_OPT_ENABLE_QT_EXAMPLES )
 
 	qt4_wrap_cpp( Regression_MOCS ReClaM/QT/regression.h )
 	SET( Regression_SRCS ReClaM/QT/regression.cpp ${Regression_MOCS} )
-	ADD_EXECUTABLE( ReClaM/QT/Regression ${Regression_SRCS} )
-	TARGET_LINK_LIBRARIES( ReClaM/QT/Regression shark ${shark_QT_LIBS})
-	INSTALL( TARGETS ReClaM/QT/Regression
+	ADD_EXECUTABLE( Regression ${Regression_SRCS} )
+	TARGET_LINK_LIBRARIES( Regression shark ${shark_QT_LIBS})
+	INSTALL( TARGETS Regression
 	RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM/QT )
 
 	qt4_wrap_cpp( Classification_MOCS ReClaM/QT/classification.h )
 	SET( Classification_SRCS ReClaM/QT/classification.cpp ${Classification_MOCS} )
-	ADD_EXECUTABLE( ReClaM/QT/Classification ${Classification_SRCS} )
-	TARGET_LINK_LIBRARIES( ReClaM/QT/Classification shark ${shark_QT_LIBS})
-	INSTALL( TARGETS ReClaM/QT/Classification
+	ADD_EXECUTABLE( Classification ${Classification_SRCS} )
+	TARGET_LINK_LIBRARIES( Classification shark ${shark_QT_LIBS})
+	INSTALL( TARGETS Classification
 	RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM/QT )
 
 	IF( Qwt_LIBRARY )
 	qt4_wrap_cpp( GaussianProcess_MOCS ReClaM/QT/gaussian_process.h )
 	SET( GaussianProcess_SRCS ReClaM/QT/gaussian_process.cpp ${GaussianProcess_MOCS} )
-	ADD_EXECUTABLE( ReClaM/QT/GaussianProcess ${GaussianProcess_SRCS} )
-	TARGET_LINK_LIBRARIES( ReClaM/QT/GaussianProcess shark ${shark_QT_LIBS} ${Qwt_LIBRARY} )
-	INSTALL( TARGETS ReClaM/QT/GaussianProcess
+	ADD_EXECUTABLE( GaussianProcess ${GaussianProcess_SRCS} )
+	TARGET_LINK_LIBRARIES( GaussianProcess shark ${shark_QT_LIBS} ${Qwt_LIBRARY} )
+	INSTALL( TARGETS GaussianProcess
 	RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM/QT )
 	ENDIF( Qwt_LIBRARY )
 
@@ -745,9 +820,8 @@ IF( SHARK_OPT_ENABLE_QT_EXAMPLES )
 		EALib/QT/View.cpp
 		EALib/QT/Wizard.cpp
 	)
-	ADD_EXECUTABLE( EALib/QT/EA ${EA_SRCS} )
-	TARGET_LINK_LIBRARIES( EALib/QT/EA shark ${shark_QT_LIBS} )
-	INSTALL( TARGETS EALib/QT/EA
-	RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib/QT )
+	ADD_EXECUTABLE( EA ${EA_SRCS} )
+	TARGET_LINK_LIBRARIES( EA shark ${shark_QT_LIBS} )
+	INSTALL( TARGETS EA RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/EALib/QT )
 
 ENDIF( SHARK_OPT_ENABLE_QT_EXAMPLES )

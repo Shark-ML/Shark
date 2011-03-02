@@ -31,14 +31,14 @@ Unix/Linux/Mac/compatible:
 ####### Compilation #######
 
 The Shark library uses the cmake tool (http://www.cmake.org) to create
-a top-level Makefile. Run "cmake ." in the cmake directory;
+a top-level Makefile. Run "cmake ." in the toplevel directory;
 
 Run "make" to compile the library and "make test" to run the
-accompanying unit tests of the library.
+accompanying unit tests of the library. If you would like to generate 
+the documentation, simply run "make doc".
 
 To sum up, the whole procedure should be as easy as:
 
-> cd cmake
 > cmake .
 > make
 
@@ -53,7 +53,7 @@ Windows:
 --------
 
 On the Microsoft Windows platform, you need to run the cmake (either
-the command-line program or the GUI program) on the directory
-cmake. This procedure generates project files suitable for the
+the command-line program or the GUI program) on the top-level
+directory of the shark library. This procedure generates project files suitable for the
 compiler/IDE that is installed on your system. Thereafter, open the
 project files in your IDE or invoke your build system.
