@@ -39,6 +39,8 @@
  */
 //===========================================================================
 
+#define NOMINMAX
+
 #ifndef SHARK_DEFS_H
 #define SHARK_DEFS_H
 

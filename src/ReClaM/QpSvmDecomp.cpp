@@ -34,6 +34,7 @@
  */
 //===========================================================================
 
+#define NOMINMAX
 
 #include <SharkDefs.h>
 #include <Rng/GlobalRng.h>
