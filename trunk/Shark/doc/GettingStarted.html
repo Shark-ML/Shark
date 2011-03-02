@@ -86,10 +86,10 @@ http://creativecommons.org/licenses/GPL/2.0/
   <p>Next, the usage of CMake to generate Makefiles suitable for Posix platforms is explained. For the remainder of this page, it is assumed that the Shark sources are situated in the directory ${SHARK_SRCS}</p>
 
   <h4>Compiling & Installing the Library</h4>
-  After having obtained the Shark library sources, open a terminal and change to the directory ${SHARK_SRCS}/cmake.
+  After having obtained the Shark library sources, open a terminal and change to the directory ${SHARK_SRCS}.
 
   <div class="terminal">
-    > cd ${SHARK_SRCS}/cmake
+    > cd ${SHARK_SRCS}/
   </div>
 
   Next, invoke cmake in the current directory to generate a Makefile for compiling the library.
@@ -128,10 +128,10 @@ http://creativecommons.org/licenses/GPL/2.0/
     </ul>
   </ul>
 
-  To adjust the base installation directory ${CMAKE_INSTALL_PREFIX}, invoke ccmake in the directory ${SHARK_SRCS}/cmake.
+  To adjust the base installation directory ${CMAKE_INSTALL_PREFIX}, invoke ccmake in the directory ${SHARK_SRCS}/.
 
   <div class="terminal">
-    <p> > cd ${SHARK_SRCS}/cmake</p>
+    <p> > cd ${SHARK_SRCS}/</p>
     <p> > ccmake .</p>
   </div>
   
@@ -150,7 +150,7 @@ http://creativecommons.org/licenses/GPL/2.0/
   need to be enabled by invoking ccmake in the directory ${SHARK_SRCS}/cmake.
 
   <div class="terminal">
-    <p> > cd ${SHARK_SRCS}/cmake</p>
+    <p> > cd ${SHARK_SRCS}/</p>
     <p> > ccmake .</p>
   </div>
 
@@ -176,9 +176,9 @@ http://creativecommons.org/licenses/GPL/2.0/
   <ul>
     <li>"OPT_COMPILE_EXAMPLES"</li>
   </ul>
-  needs to be enabled by invoking ccmake in the directory ${SHARK_SRCS}/cmake.
+  needs to be enabled by invoking ccmake in the directory ${SHARK_SRCS}/.
   <div class="terminal">
-    <p> > cd ${SHARK_SRCS}/cmake</p>
+    <p> > cd ${SHARK_SRCS}/</p>
     <p> > ccmake .</p>
   </div>
   The examples are built and installed by invoking make in the current directory.

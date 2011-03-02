@@ -1,10 +1,10 @@
 PROJECT( shark )
 
-CMAKE_MINIMUM_REQUIRED( VERSION 2.4 )
+CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 
 FIND_PACKAGE( OpenMP QUIET )
 
-CMAKE_POLICY( SET CMP0003 OLD )
+#CMAKE_POLICY( SET CMP0003 OLD )
 
 ENABLE_TESTING()
 
@@ -37,9 +37,6 @@ ELSE( UNIX )
 ENDIF( UNIX )
 
 INCLUDE( CPack )
-
-#SET( LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib )
-#SET( EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin )
 
 ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 
@@ -584,8 +581,8 @@ SET( PUBLIC_HEADERS
 
 IF( WIN32 )
   ADD_LIBRARY( shark ${SRCS} )
-  SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_PREFIX  )
-  SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_POSTFIX _debug )
+  #SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_PREFIX  )
+  #SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_POSTFIX _debug )
   SET( LINK_LIBRARIES )
 ELSE( WIN32 )
   ADD_LIBRARY( shark SHARED ${SRCS} )
@@ -600,77 +597,7 @@ OPTION( SHARK_OPT_COMPILE_EXAMPLES "Compile example programs." ON )
 IF( SHARK_OPT_COMPILE_EXAMPLES )
   ADD_SUBDIRECTORY( examples )
 
-  ADD_TEST( SchwefelEllipsoidCMSA examples/EALib/SchwefelEllipsoidCMSA )
-  ADD_TEST( TSP_GA examples/EALib/TSP_GA )
-  ADD_TEST( ackleyES examples/EALib/ackleyES )
-  ADD_TEST( countingOnes examples/EALib/countingOnes )
-  ADD_TEST( integerES examples/EALib/integerES )
-  ADD_TEST( paraboloidCMA examples/EALib/paraboloidCMA )
-  ADD_TEST( paraboloidElitistCMA examples/EALib/paraboloidElitistCMA )
-  ADD_TEST( sphereGA examples/EALib/sphereGA )
-  ADD_TEST( steadyState examples/EALib/steadyState )
-
-  #	ADD_TEST( sugeno examples/Fuzzy/sugeno )
-
-  ADD_TEST( cblnsrch_test examples/LinAlg/cblnsrch_test )
-  ADD_TEST( covar_corrcoef_test examples/LinAlg/covar_corrcoef_test )
-  ADD_TEST( detsymm_test examples/LinAlg/detsymm_test )
-  ADD_TEST( dlinmin_test examples/LinAlg/dlinmin_test )
-  ADD_TEST( eigenerr_test examples/LinAlg/eigenerr_test )
-  ADD_TEST( eigensort_test examples/LinAlg/eigensort_test )
-  ADD_TEST( eigensymmJacobi2_test examples/LinAlg/eigensymmJacobi2_test )
-  ADD_TEST( eigensymmJacobi_test examples/LinAlg/eigensymmJacobi_test )
-  ADD_TEST( eigensymm_test examples/LinAlg/eigensymm_test )
-  ADD_TEST( fft_test examples/LinAlg/fft_test )
-  ADD_TEST( g_inverse_matrix examples/LinAlg/g_inverse_matrix )
-  ADD_TEST( linalg_simple_test examples/LinAlg/linalg_simple_test )
-  ADD_TEST( linmin_test examples/LinAlg/linmin_test )
-  ADD_TEST( lnsrch_test examples/LinAlg/lnsrch_test )
-  ADD_TEST( rank_decomp_test examples/LinAlg/rank_decomp_test )
-  ADD_TEST( rank_test examples/LinAlg/rank_test )
-  ADD_TEST( svd_test examples/LinAlg/svd_test )
-  ADD_TEST( svdrank_test examples/LinAlg/svdrank_test )
-  ADD_TEST( svdsort_test examples/LinAlg/svdsort_test )
-
-  ADD_TEST( mg-example examples/Mixture/mg-example )
-  ADD_TEST( rbfn-example examples/Mixture/rbfn-example )
-
-  ADD_TEST( HypervolumeBenchmark examples/MOO-EALib/HypervolumeBenchmark examples/MOO-EALib/ran.40000pts.3d.1 )
-  # ADD_TEST( MOGA examples/MOO-EALib/MOGA )
-  #ADD_TEST( NSGA2 examples/MOO-EALib/NSGA2 )
-  #ADD_TEST( NSGA2example examples/MOO-EALib/NSGA2example )
-  # ADD_TEST( PAES examples/MOO-EALib/PAES )
-  ADD_TEST( RMMEDAtest examples/MOO-EALib/RMMEDAtest )
-  #ADD_TEST( VEGA examples/MOO-EALib/VEGA )
-  ADD_TEST( fonMO-CMA examples/MOO-EALib/fonMO-CMA )
-  ADD_TEST( fonSteadyStateMO-CMA examples/MOO-EALib/fonSteadyStateMO-CMA )
-  ADD_TEST( realcoded-NSGA2 examples/MOO-EALib/realcoded-NSGA2 )
-
-  ADD_TEST( CrossValidation examples/ReClaM/CrossValidation )
-  ADD_TEST( FisherLDA examples/ReClaM/FisherLDA )
-  ADD_TEST( KM examples/ReClaM/KM )
-  ADD_TEST( KNN examples/ReClaM/KNN )
-  ADD_TEST( KalmanFilterTest examples/ReClaM/KalmanFilterTest )
-  ADD_TEST( KernelOptimization examples/ReClaM/KernelOptimization )
-  ADD_TEST( LinearClassifierTest examples/ReClaM/LinearClassifierTest )
-  ADD_TEST( LinearRegressionTest examples/ReClaM/LinearRegressionTest )
-  ADD_TEST( McSvm examples/ReClaM/McSvm )
-  ADD_TEST( PCAtest examples/ReClaM/PCAtest )
-  ADD_TEST( SVMclassification examples/ReClaM/SVMclassification )
-  ADD_TEST( SVMregression examples/ReClaM/SVMregression )
-  ADD_TEST( SvmApproximationExample examples/ReClaM/SvmApproximationExample )
-  ADD_TEST( simpleFFNet examples/ReClaM/simpleFFNet )
-  ADD_TEST( simpleFFNetSource examples/ReClaM/simpleFFNetSource )
-  ADD_TEST( simpleMSERNNet examples/ReClaM/simpleMSERNNet examples/ReClaM/timeseries )
-  ADD_TEST( simpleRBFNet examples/ReClaM/simpleRBFNet )
-  ADD_TEST( simpleRNNet examples/ReClaM/simpleRNNet )
-
-  ADD_TEST( RngTest examples/Rng/RngTest )
-  ADD_TEST( RngTest2 examples/Rng/RngTest2 )
-  ADD_TEST( RngTestSimple examples/Rng/RngTestSimple )
-
-  ADD_TEST( embeddingTest examples/TimeSeries/embeddingTest )
-  ADD_TEST( lorenz84 examples/TimeSeries/lorenz84 )
+ 
 
 ENDIF( SHARK_OPT_COMPILE_EXAMPLES )
 

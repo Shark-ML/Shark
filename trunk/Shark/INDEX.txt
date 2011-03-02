@@ -16,21 +16,6 @@ COPYING.txt         GNU general public license.
 INSTALL.txt         Installation information and notes.
 INDEX.txt           This file.
 
-Makefile.in         A template to produce the main makefile.
-configure.in        Template for the 'autoconf' program, 
-                    cf. INSTALL.txt for details.
-configure           configure shell script
-
-makerights          Sets the UNIX file rights to allow for general
-                    read and group wide write access to all files.
-
-Shark_Libs.dsw      Microsoft Visual Studio workspace file containing
-                    the Shark libraries only.
-Shark_All.dsw       Microsoft Visual Studio workspace file containing
-                    all Shark projects including example programs.
-
-
-
 PACKAGE STRUCTURE
 -----------------
 
