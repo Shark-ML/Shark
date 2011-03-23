@@ -135,7 +135,7 @@ void SvmStatesCollection::storePrimal( unsigned int svm_variant, unsigned int ta
 			unsigned int cur_ex;
 			unsigned int cur_class;
 			unsigned int true_label;
-            int max_label;
+			int max_label;
 			double w2;
 			double cur_val;
 			double sum_slacks;
@@ -150,10 +150,10 @@ void SvmStatesCollection::storePrimal( unsigned int svm_variant, unsigned int ta
 				sum_slacks = 0.0;
 				for (unsigned int j=0; j<m_noofTrainExamples; j++) //loop over ALL training examples
 				{
-                    max_label = -1;
+					max_label = -1;
 					for (unsigned int k=0; k<m_noofClasses; k++) //initialize to zero
 						{ scores[k] = 0.0; beta_is[k] = 0.0; }
-                        
+						
 					// compute scores: loop over support patterns of snapshot i
 					for ( tSupPatCollection::iterator it = m_snapshots[i].begin(); it != m_snapshots[i].end(); it++)
 					{
@@ -176,7 +176,7 @@ void SvmStatesCollection::storePrimal( unsigned int svm_variant, unsigned int ta
 							}
 						}
 					}
-                    // now that we have all scores, compute contribution to primal and slack vars
+					// now that we have all scores, compute contribution to primal and slack vars
 					max_other_scores = -1e100;
 					true_label = train_targets(j, 0);
 					true_score = scores[ true_label ];
@@ -186,15 +186,15 @@ void SvmStatesCollection::storePrimal( unsigned int svm_variant, unsigned int ta
 						if ( k == true_label )
 							continue;
 						if ( scores[k] > max_other_scores )
-                        {
+						{
 							max_other_scores = scores[k];
-                            max_label = k;
-                        }
+							max_label = k;
+						}
 					}
 					if ( true_score-1 < max_other_scores ) //slack var is > 0
-                    {
+					{
 						sum_slacks += max_other_scores - true_score + 1;
-                    }
+					}
 				}
 				m_performanceMeasures( target_index, i) = 0.5 * w2 + regC * sum_slacks;
 			}
