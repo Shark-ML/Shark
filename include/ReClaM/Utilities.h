@@ -50,8 +50,11 @@
 //cross-platform wall-clock timing:
 #ifdef WIN32
 	#include <windows.h>
-#else
+#else if linux
 	#include <time.h>
+#else if __MACH__
+	#include <cstdint>
+	#include <mach/mach_time.h>
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,9 +125,15 @@ protected:
 			QueryPerformanceCounter( &li1 );
 			QueryPerformanceFrequency( &li2 );
 			return li1.QuadPart / li2.QuadPart;
-		#else
+		#else if __linux
 			clock_gettime( CLOCK_REALTIME, &m_tv );
 			return m_tv.tv_sec + (m_tv.tv_nsec/1E9);
+		#else if __MACH__
+			static mach_timebase_info_data_t info = {0,0};
+			mach_timebase_info(&info);
+			uint64_t now = mach_absolute_time();
+			m_tv.tv_sec = now * 1E-9;  
+			m_tv.tv_nsec = now - (m_tv.tv_sec * 1E9);
 		#endif
 	}
 };
