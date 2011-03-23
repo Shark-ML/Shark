@@ -265,7 +265,7 @@ namespace alg
 		//!\param	row row size
 		//!\param	col column size
 		//!\return	void
-		Matrix(unsigned int row = 0, int unsigned col = 0);
+		Matrix(unsigned int row = 0, unsigned int col = 0);
 
 		//!\brief	constructor
 		//!\brief	mat reference matrix
