@@ -651,7 +651,7 @@ namespace alg
 {
 
 //constructor
-Matrix::Matrix(unsigned int row, int unsigned col)
+Matrix::Matrix(unsigned int row, unsigned int col)
 	:mRow(row), mCol(col)
 {
 	if(mRow* mCol > 0)
