@@ -245,9 +245,10 @@ public:
 	//! LIBSVM precomputed kernel format is not yet supported.
 	//! 
 	//! \param  filename  name of the LIBSVM file to read
-	//! \param  train     how many training samples to get from the file
+	//! \param  train     how many training samples to get from the file. default: all samples.
 	//! \param  test      how many training samples to get from the file. default: all remaining ones
-	void CreateFromLibsvmFile(const char* filename, int train, int test = -1);
+	//! \param  zero_based_features 	ugly workaround allowance for faulty libSVM files such as LaSVM datasets.
+	void CreateFromLibsvmFile(const char* filename, int train = -1, int test = -1, bool zero_based_features = false);
 	
 
 	//! shuffles the training examples

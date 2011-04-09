@@ -603,7 +603,7 @@ void Dataset::CreateFromArrays(const Array<double>& trainingData, const Array<do
 	this->testTarget = testTarget;
 }
 
-void Dataset::CreateFromLibsvmFile(const char* filename, int train, int test)
+void Dataset::CreateFromLibsvmFile(const char* filename, int train, int test, bool zero_based_features)
 {
 	std::ifstream file( filename );
 	
@@ -670,10 +670,11 @@ void Dataset::CreateFromLibsvmFile(const char* filename, int train, int test)
 				subtoken_stream.str( cur_subtoken ); //..and assign
 				if ( !(subtoken_stream >> cur_index) || subtoken_stream.get(c) ) //convert to unsigned int with safety checks
 					throw SHARKEXCEPTION("[Dataset::CreateFromLibsvmFile] cannot read feature index");
-				if ( cur_index <= last_index ) 
-					throw SHARKEXCEPTION("[Dataset::CreateFromLibsvmFile] expecting strictly increasing feature indices");
-				if ( cur_index == 0 )
-					throw SHARKEXCEPTION("[Dataset::CreateFromLibsvmFile] expecting only 1-based feature indices");
+				if ( cur_index <= last_index ) //potential violation of increasing-convention
+				{
+					if ( !zero_based_features || cur_index != 0 )
+						throw SHARKEXCEPTION("[Dataset::CreateFromLibsvmFile] expecting strictly increasing feature indices");
+				}
 				if ( cur_index > features ) features = cur_index;
 				last_index = cur_index;
 				std::ws( line_stream ); //skip leading whitespace in front of next i-v-pair
@@ -682,6 +683,9 @@ void Dataset::CreateFromLibsvmFile(const char* filename, int train, int test)
 			last_index = 0; //reset
 			++examples; //count lines
 		}
+		
+		if ( zero_based_features )
+			++features;
 			
 		// set target format
 		if ( !regression )
@@ -696,7 +700,15 @@ void Dataset::CreateFromLibsvmFile(const char* filename, int train, int test)
 		}
 		
 		// set train/test split
-		if (test < 0) test = examples-train;
+		if (train < 0) 
+		{
+			train = examples;
+			test = 0;
+		}
+		else if (test < 0) 
+		{
+			test = examples-train;
+		}
 		if (train + test > examples || train <= 0 || test < 0 )
 			throw SHARKEXCEPTION("[Dataset::CreateFromLibsvmFile] invalid split into training and test set");
 		else if ( train+test < examples ) 
@@ -755,7 +767,8 @@ void Dataset::CreateFromLibsvmFile(const char* filename, int train, int test)
 				subtoken_stream.str( cur_subtoken ); //..and assign
 				if ( !(subtoken_stream >> cur_index) || subtoken_stream.get(c) ) //convert to unsigned int with safety checks
 					throw SHARKEXCEPTION("[Dataset::CreateFromLibsvmFile] cannot re-read feature index");
-				--cur_index; //convert from 1-based to 0-based feature indices
+				if ( !zero_based_features )
+					--cur_index; //convert from 1-based to 0-based feature indices
 				
 				// extract corresponding feature value
 				if ( !std::getline(token_stream, cur_subtoken) )

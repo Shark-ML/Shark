@@ -65,6 +65,7 @@
 #include <QScrollArea>
 #include <QFileDialog>
 #include <QCheckBox>
+#include <QtSvg>
 
 #include <ReClaM/Dataset.h>
 #include <ReClaM/KernelFunction.h>
@@ -142,8 +143,8 @@ class ClassificationWidget : public QWidget
 public:
 	ClassificationWidget(Doc* doc, FrameWidget* parent);
 
-	void Draw(bool, bool, bool, bool);
-	void Save(const char *filename) { image.save(filename); }
+	void Draw(bool, bool, bool, bool, bool, bool, int, bool);
+	void SavePNG(const char *filename) { image.save(filename); }
 
 protected:
 	void paintEvent(QPaintEvent* event);
@@ -221,8 +222,18 @@ public slots:
 	void OnGenerateDataset();
 	void OnChange(int value);
 	void OnCompute();
-	void OnSave();
-	void OnToggle() { wOutput.Draw(wCheckSoft.isChecked(), wCheckBound.isChecked(), wCheckCross.isChecked(), wCheckShade.isChecked());};
+	void OnSavePNG();
+	void OnSaveSVG();
+	void OnToggle() 
+	{ 
+		wOutput.Draw( wCheckSoft.isChecked(), wCheckBound.isChecked(), wCheckCross.isChecked(), 
+					  wCheckShade.isChecked(), wCheckLean.isChecked(), false, wMarkerSizeSlider.value(), false ); 
+	};
+	void OnSlide() 
+	{ 
+		wOutput.Draw( wCheckSoft.isChecked(), wCheckBound.isChecked(), wCheckCross.isChecked(), 
+					  wCheckShade.isChecked(), wCheckLean.isChecked(), false, wMarkerSizeSlider.value(), false ); 
+	};
 	
 protected:
 	Doc doc;
@@ -238,11 +249,15 @@ protected:
 	QComboBox wMethod;
 	PropertiesBar wBarMethod;
 	QPushButton wButtonCompute;
-	QPushButton wButtonSave;
+	QPushButton wButtonSavePNG;
+	QPushButton wButtonSaveSVG;
 	QCheckBox wCheckBound;
 	QCheckBox wCheckSoft;
 	QCheckBox wCheckShade;
 	QCheckBox wCheckCross;
+	QCheckBox wCheckLean;
+	QLabel wMarkerSizeLabel;
+	QSlider wMarkerSizeSlider;
 };
 
 

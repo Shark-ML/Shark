@@ -284,7 +284,8 @@ ClassificationWidget::ClassificationWidget(Doc* doc, FrameWidget* parent)
 }
 
 
-void ClassificationWidget::Draw(bool drawSoft, bool drawBound, bool drawCross, bool drawShade)
+void ClassificationWidget::Draw(bool drawSoft, bool drawBound, bool drawCross, 
+								bool drawShade, bool drawLean, bool useSvgPainter, int markerSize, bool drawToSVG )
 {
 	Model* model = doc->predictiveModel;
 	Dataset* dataset = doc->dataset;
@@ -292,13 +293,28 @@ void ClassificationWidget::Draw(bool drawSoft, bool drawBound, bool drawCross, b
 	const Array<double>& input = dataset->getTrainingData();
 	const Array<double>& target = dataset->getTrainingTarget();
 
-	QPainter painter(&image);
+	QPainter * painter = new QPainter( );
+	QSvgGenerator generator;
+	
+	if (!drawToSVG)
+		painter->begin( &image );
+	else
+	{
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+													"untitled.svg",
+													tr("Images (*.svg)"));
+		generator.setFileName(fileName);
+		generator.setSize(QSize(400,400));
+		generator.setResolution(72);
+		generator.setViewBox(QRect(QPoint(0,0), generator.size()));
+		painter->begin(&generator);
+	}
 
 	if (input.ndim() == 0)
 	{
 		image.fill(0xffc0c0c0);
-		painter.drawText(100, 180, "Click left to insert a positive example");
-		painter.drawText(100, 220, "Click right to insert a negative example");
+		painter->drawText(100, 180, "Click left to insert a positive example");
+		painter->drawText(100, 220, "Click right to insert a negative example");
 	}
 	else
 	{
@@ -322,7 +338,7 @@ void ClassificationWidget::Draw(bool drawSoft, bool drawBound, bool drawCross, b
 				}
 			}
 
-			// output the solution
+			// output the solution, i.e. shade the area if wished, draw the border if wished
 			for (y = 0; y < 400; y++)
 			{
 				for (x = 0; x < 400; x++)
@@ -333,36 +349,57 @@ void ClassificationWidget::Draw(bool drawSoft, bool drawBound, bool drawCross, b
 					if (x > 0 && x < 399 && y > 0 && y < 399)
 					{
 						double v = value(x, y);
-						if (v * value(x - 1, y) <= 0.0 || v * value(x + 1, y) <= 0.0 || v * value(x, y - 1) <= 0.0 || v * value(x, y + 1) <= 0.0) b0 = true;
-						if (svm != NULL)
+						if (!drawLean) {
+							if (v * value(x - 1, y) <= 0.0 || v * value(x + 1, y) <= 0.0 || v * value(x, y - 1) <= 0.0 || v * value(x, y + 1) <= 0.0) b0 = true;
+						} else {
+							if ( v * value(x + 1, y) <= 0.0 || v * value(x, y + 1) <= 0.0) b0 = true;
+						}
+						if (svm != NULL && !drawLean)
 						{
 							v = value(x, y) - 1.0;
 							if (v *(value(x - 1, y) - 1.0) <= 0.0 || v *(value(x + 1, y) - 1.0) <= 0.0 || v *(value(x, y - 1) - 1.0) <= 0.0 || v *(value(x, y + 1) - 1.0) <= 0.0) b1 = true;
 							v = value(x, y) + 1.0;
 							if (v *(value(x - 1, y) + 1.0) <= 0.0 || v *(value(x + 1, y) + 1.0) <= 0.0 || v *(value(x, y - 1) + 1.0) <= 0.0 || v *(value(x, y + 1) + 1.0) <= 0.0) b1 = true;
+						} else if (svm != NULL && drawLean) {
+							v = value(x, y) - 1.0;
+							if (v *(value(x + 1, y) - 1.0) <= 0.0 || v *(value(x, y + 1) - 1.0) <= 0.0) b1 = true;
+							v = value(x, y) + 1.0;
+							if (v *(value(x + 1, y) + 1.0) <= 0.0 || v *(value(x, y + 1) + 1.0) <= 0.0) b1 = true;
+//							//crude option for dotted output
+//							if (b1) {
+//								if ( rand()/((double)RAND_MAX) > 0.33 )
+//									b1 = false;
+//							}
 						}
 					}
 
-					painter.setPen(Qt::white);
-					if(drawSoft) {
-						if(!drawBound) b0 = b1 = 0;
-						if(b0) {
-							if(drawShade) painter.setPen(Qt::white);
-							else painter.setPen(Qt::black);
-						} else if(b1) painter.setPen(Qt::yellow);
-						else if(drawShade) painter.setPen(QColor(127 + tanh(value(x,y))*128, 127 - tanh(value(x,y))*128, 0));
-					} else {
-						if(!drawBound) b0 = b1 = 0;
-						if(b0) {
-							if(drawShade) painter.setPen(Qt::white);
-							else painter.setPen(Qt::black);
-						} else if(b1) painter.setPen(Qt::yellow);
-						else if(drawShade) {
-							if(value(x, y) > 0) painter.setPen(QColor(255, 0, 0));
-							else painter.setPen(QColor(0, 255, 0));
+					painter->setPen(Qt::white);
+					if(!drawLean) {
+						if(drawSoft) {
+							if(!drawBound) b0 = b1 = 0;
+							if(b0) {
+								if(drawShade) painter->setPen(Qt::white);
+								else painter->setPen(Qt::black);
+							} else if(b1) painter->setPen(Qt::yellow);
+							else if(drawShade) painter->setPen(QColor(127 + tanh(value(x,y))*128, 127 - tanh(value(x,y))*128, 0));
+						} else {
+							if(!drawBound) b0 = b1 = 0;
+							if(b0) {
+								if(drawShade) painter->setPen(Qt::white);
+								else painter->setPen(Qt::black);
+							} else if(b1) painter->setPen(Qt::yellow);
+							else if(drawShade) {
+								if(value(x, y) > 0) painter->setPen(QColor(255, 0, 0));
+								else painter->setPen(QColor(0, 255, 0));
+							}
 						}
+					} else {
+						painter->setPen(Qt::white);
+						if(b0||b1) painter->setPen(Qt::black);
+//						if(b1) painter->setPen(Qt::gray); //makes svg bitmap trace harder
 					}
-					painter.drawPoint(x, y);
+					if (!drawToSVG || b0 || b1)
+						painter->drawPoint(x, y);
 				}
 			}
 		}
@@ -374,22 +411,22 @@ void ClassificationWidget::Draw(bool drawSoft, bool drawBound, bool drawCross, b
 		
 		
 		// output the dataset
-		int HalfBaseSize = 15;
+		int HalfBaseSize = markerSize;
 		int BaseSize = 2 * HalfBaseSize;
 		
 		unsigned i, ic = input.dim(0);
 		QColor col;
 		
 		// circles around support vectors
-		if (drawBound && (svm != NULL)) {
+		if (!drawLean && drawBound && (svm != NULL)) {
 			Array<double> ex = svm->getPoints();
 			for(i = 0; i < ex.dim(0); i++) {
 				x = (int)(100.0 * ex(i, 0));
 				y = (int)(100.0 * ex(i, 1));
 				
-				painter.setPen(Qt::yellow);
-				painter.setBrush(Qt::yellow);
-				painter.drawEllipse(x-HalfBaseSize-1, y-HalfBaseSize-1, BaseSize+2, BaseSize+2);
+				painter->setPen(Qt::yellow);
+				painter->setBrush(Qt::yellow);
+				painter->drawEllipse(x-HalfBaseSize-1, y-HalfBaseSize-1, BaseSize+2, BaseSize+2);
 			}
 		}
 		
@@ -399,23 +436,32 @@ void ClassificationWidget::Draw(bool drawSoft, bool drawBound, bool drawCross, b
 			x = (int)(100.0 * input(i, 0));
 			y = (int)(100.0 * input(i, 1));
 			
-				
-			if (target(i, 0) > 0.0) col = Qt::darkRed; 
-			else col = Qt::darkGreen; 
-			
-			painter.setBrush(col);
-			painter.setPen(col);
-			painter.drawEllipse(x-HalfBaseSize, y-HalfBaseSize, BaseSize, BaseSize);
-			painter.setBrush(Qt::white);
-			painter.setPen(Qt::white);
-			if(drawCross) {
-				painter.drawRect(x-HalfBaseSize + 4, y-3, BaseSize - 8, 6);
-				if(target(i, 0) <- 0.) painter.drawRect(x-3, y-HalfBaseSize+4, 6, BaseSize-8);
+			if (!drawLean) {
+				if (target(i, 0) > 0.0) col = Qt::darkRed; 
+				else col = Qt::darkGreen; 
+				painter->setBrush(col);
+				painter->setPen(col);
+				painter->drawEllipse(x-HalfBaseSize, y-HalfBaseSize, BaseSize, BaseSize);
+				painter->setBrush(Qt::white);
+				painter->setPen(Qt::white);
+				if(drawCross) {
+					painter->drawRect(x-3*HalfBaseSize/4, y-HalfBaseSize/5, 3*HalfBaseSize/2, HalfBaseSize/3);
+					if(target(i, 0) <- 0.)
+						painter->drawRect(x-HalfBaseSize/5, y-3*HalfBaseSize/4, HalfBaseSize/3, 3*HalfBaseSize/2);
+				}
+			} else {
+				painter->setPen(Qt::black);
+				if (target(i, 0) > 0.0)
+					painter->drawEllipse(x-HalfBaseSize/2, y-HalfBaseSize/2, BaseSize, BaseSize);
+				else
+					painter->drawRect(x-HalfBaseSize/2, y-HalfBaseSize/2, BaseSize, BaseSize);
 			}
 		}
 
 	
 	}
+
+	painter->end();
 
 	// inform QT that the widget needs to be redrawn
 	update();
@@ -614,11 +660,15 @@ FrameWidget::FrameWidget(QWidget* parent)
 		, wMethod(this)
 		, wBarMethod(this)
 		, wButtonCompute("compute solution", this)
-		, wButtonSave("save", this)
+		, wButtonSavePNG("savePNG", this)
+		, wButtonSaveSVG("saveSVG", this)
 		, wCheckBound("bound", this)
 		, wCheckSoft("soft", this)
 		, wCheckShade("shade", this)
 		, wCheckCross("cross", this)
+		, wCheckLean("lean (override all)", this)
+		, wMarkerSizeLabel("marker size", this)
+		, wMarkerSizeSlider(Qt::Horizontal, this)
 {
 	setWindowTitle("ReClaM classification example");
 	setFixedSize(700, 400);
@@ -631,14 +681,23 @@ FrameWidget::FrameWidget(QWidget* parent)
 	wBarKernel.setGeometry(10, 110, 280, 100);
 	wLabelMethod.setGeometry(10, 220, 280, 20);
 	wMethod.setGeometry(10, 240, 280, 20);
-	wBarMethod.setGeometry(10, 260, 280, 100);
-	wButtonCompute.setGeometry(10, 370, 120, 20);
-	wButtonSave.setGeometry(135, 370, 40, 20);
-	wCheckBound.setGeometry(175, 365, 60, 20);
-	wCheckSoft.setGeometry(175, 380, 60, 20);
-	wCheckCross.setGeometry(236, 365, 60, 20);
+	wBarMethod.setGeometry(10, 260, 280, 50);
+	wButtonCompute.setGeometry(10, 325, 130, 20);
+	wButtonSavePNG.setGeometry(10, 350, 62, 20);
+	wButtonSaveSVG.setGeometry(78, 350, 62, 20);
+	wCheckBound.setGeometry(160, 325, 60, 20);
+	wCheckShade.setGeometry(160, 340, 60, 20);
 	wCheckShade.setChecked(true);
-	wCheckShade.setGeometry(236, 380, 60, 20);
+	wCheckCross.setGeometry(235, 325, 60, 20);
+	wCheckSoft.setGeometry( 235, 340, 60, 20);
+	wCheckLean.setGeometry( 160, 355, 130, 20);
+	wMarkerSizeLabel.setGeometry( 10, 375, 130, 20);
+	wMarkerSizeLabel.setAlignment(Qt::AlignRight);
+	wMarkerSizeSlider.setGeometry( 160, 375, 130, 20);
+	wMarkerSizeSlider.setRange(1, 20);
+	wMarkerSizeSlider.setTickPosition(QSlider::TicksBelow);
+	wMarkerSizeSlider.setTickInterval(1);
+	wMarkerSizeSlider.setValue(7);
 	
 	wKernel.addItem("linear kernel");
 	wKernel.addItem("polynomial kernel");
@@ -654,11 +713,14 @@ FrameWidget::FrameWidget(QWidget* parent)
 	QObject::connect(&wKernel, SIGNAL(currentIndexChanged(int)), this, SLOT(OnChange(int)));
 	QObject::connect(&wMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(OnChange(int)));
 	QObject::connect(&wButtonCompute, SIGNAL(clicked()), this, SLOT(OnCompute()));
-	QObject::connect(&wButtonSave, SIGNAL(clicked()), this, SLOT(OnSave()));
+	QObject::connect(&wButtonSavePNG, SIGNAL(clicked()), this, SLOT(OnSavePNG()));
+	QObject::connect(&wButtonSaveSVG, SIGNAL(clicked()), this, SLOT(OnSaveSVG()));
 	QObject::connect(&wCheckBound, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
 	QObject::connect(&wCheckSoft, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
 	QObject::connect(&wCheckCross, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
 	QObject::connect(&wCheckShade, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
+	QObject::connect(&wCheckLean, SIGNAL(stateChanged(int)), this, SLOT(OnToggle()));
+	QObject::connect(&wMarkerSizeSlider, SIGNAL(sliderReleased()), this, SLOT(OnSlide()));
 	
 	wKernel.setCurrentIndex(0);
 	wMethod.setCurrentIndex(1);
@@ -723,16 +785,25 @@ void FrameWidget::OnCompute()
 {
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 	doc.Train();
-	wOutput.Draw(wCheckSoft.isChecked(), wCheckBound.isChecked(), wCheckCross.isChecked(), wCheckShade.isChecked());
+	wOutput.Draw(
+		wCheckSoft.isChecked(), wCheckBound.isChecked(), wCheckCross.isChecked(),
+		wCheckShade.isChecked(), wCheckLean.isChecked(), false, wMarkerSizeSlider.value(), false );
 	QApplication::restoreOverrideCursor();
 }
 
-void FrameWidget::OnSave()
+void FrameWidget::OnSavePNG()
 {
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
 													"untitled.png",
 													tr("Images (*.png *.xpm *.jpg)"));
-	wOutput.Save(fileName.toStdString().c_str());
+	wOutput.SavePNG(fileName.toStdString().c_str());
+}
+
+void FrameWidget::OnSaveSVG()
+{
+	wOutput.Draw(
+		wCheckSoft.isChecked(), wCheckBound.isChecked(), wCheckCross.isChecked(),
+		wCheckShade.isChecked(), wCheckLean.isChecked(), false, wMarkerSizeSlider.value(), true );
 }
 
 
