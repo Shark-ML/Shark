@@ -710,11 +710,46 @@ MultiClassSVM::MultiClassSVM(KernelFunction* pKernel, unsigned int numberOfClass
 	y = NULL;
 }
 
+MultiClassSVM::MultiClassSVM( const MultiClassSVM & rhs )
+{
+    bOwnMemory = false;
+    x = 0;
+    y = 0;
+    *this  = rhs;
+}
+
 MultiClassSVM::~MultiClassSVM()
 {
 	if (bOwnMemory) { delete x; delete y; }
 }
 
+MultiClassSVM & MultiClassSVM::operator=( const MultiClassSVM & rhs )
+{
+    if ( this != &rhs )
+    {
+        if (bOwnMemory)
+        {
+            delete x;
+            x = 0;
+            delete y;
+            y = 0;
+        }
+        this->kernel = rhs.kernel;        
+        this->classes = rhs.classes;
+        this->examples = rhs.examples;
+        this->bOwnMemory = rhs.bOwnMemory;
+        if ( bOwnMemory )
+        {
+            x = new Array<double>( *(rhs.x) );
+            y = new Array<double>( *(rhs.y) );
+        }
+        this->numberOutput = rhs.numberOutput;
+        this->inputDimension = rhs.inputDimension;
+        this->outputDimension = rhs.outputDimension;
+        this->parameter = rhs.parameter;
+    }
+    return *this;
+}
 
 void MultiClassSVM::SetTrainingData(const Array<double>& input, const Array<double>& target, bool copy)
 {

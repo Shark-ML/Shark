@@ -379,11 +379,18 @@ public:
 	//! \param  numberOfClasses	 number of classes with indices starting from 0
 	//! \param  bNumberOutput	   true: output class index; false: output vector
 	MultiClassSVM(KernelFunction* pKernel, unsigned int numberOfClasses, bool bNumberOutput = true);
+	
+	//! Copy constructor
+	//! \param  rhs			 the MC-SVM to be constructed from
+	MultiClassSVM( const MultiClassSVM & rhs );
 
 	//! Destructor
 	~MultiClassSVM();
-
-
+	
+	//! assign operater
+	//! \param  rhs		the MC-SVM to be set equal to
+	MultiClassSVM & operator=( const MultiClassSVM & rhs );
+	
 	//! Set the output mode to integer or vector mode.
 	//! In number mode (bNumberOutput = true), the machine
 	//! predicts the class encoded as a single number in
