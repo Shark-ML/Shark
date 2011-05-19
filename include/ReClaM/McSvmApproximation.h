@@ -71,7 +71,7 @@ public:
 
 
 	//!  approximate SVM
-	float approximate(const Array<double> &data, const Array<double> &labels);
+	float approximate();
 
 	//! perform gradient descent on overall model of approximated SVM  (SVs and coefficients)
 	float gradientDescent();
@@ -96,7 +96,7 @@ protected:
 	double error();
 
 	//! optimize vector using iRpropPlus
-	void addVecRprop(const Array<double> &data, const Array<double> &labels);
+	void addVecRprop();
 
 	//! calculate optimal coefficients for approx. SVM
 	bool calcOptimalAlphaOfApproximatedSVM();
@@ -165,16 +165,9 @@ public:
 class McSvmApproximationErrorFunction : public ErrorFunction
 {
 public:
-	McSvmApproximationErrorFunction(McSvmApproximation* svmApprox, unsigned int classLabel);
-
+	McSvmApproximationErrorFunction(McSvmApproximation* svmApprox);
 	double error(Model& model, const Array<double>& input, const Array<double>& target);
-	//double errorDerivative(Model& model, const Array<double>& input, const Array<double>& target, Array<double>& derivative);
-
 	McSvmApproximation* mpApproxSVM;
-
-private:
-	// TODO entfernen?
-	unsigned int mClassLabel;
 };
 
 
@@ -183,10 +176,7 @@ class McSvmApproximationErrorFunctionGlobal : public ErrorFunction
 {
 public:
 	McSvmApproximationErrorFunctionGlobal(McSvmApproximation* svmApprox);
-
 	double error(Model& model, const Array<double>& input, const Array<double>& target);
-	//double errorDerivative(Model& model, const Array<double>& input, const Array<double>& target, Array<double>& derivative);
-
 	McSvmApproximation *mpApproxSVM;
 };
 

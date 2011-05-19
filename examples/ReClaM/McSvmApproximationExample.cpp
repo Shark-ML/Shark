@@ -153,7 +153,7 @@ int main(int argc, char** argv)
 	// approximate
   McSvmApproximation* approximateSVM = new McSvmApproximation(&mc_svm, true);
   approximateSVM->setTargetNoVecsForApproximatedSVM(50);
-	approximateSVM->approximate(testData, testDataLabels);
+	approximateSVM->approximate();
 
 	// evaluate
   MultiClassSVM* approxSvm = approximateSVM->getApproximatedSVM();
