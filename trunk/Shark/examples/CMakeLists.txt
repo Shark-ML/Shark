@@ -196,6 +196,9 @@ SET( KernelOptimization_SRC
 SET( SvmApproximationExample_SRC
 	ReClaM/SvmApproximationExample.cpp
 )
+SET( McSvmApproximationExample_SRC
+	ReClaM/McSvmApproximationExample.cpp
+)
 SET( LinearClassifierTest_SRC
 	ReClaM/LinearClassifierTest.cpp
 )
@@ -527,6 +530,11 @@ RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 ADD_EXECUTABLE( SvmApproximationExample ${SvmApproximationExample_SRC} )
 TARGET_LINK_LIBRARIES( SvmApproximationExample shark )
 INSTALL( TARGETS SvmApproximationExample
+RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
+
+ADD_EXECUTABLE( McSvmApproximationExample ${McSvmApproximationExample_SRC} )
+TARGET_LINK_LIBRARIES( McSvmApproximationExample shark )
+INSTALL( TARGETS McSvmApproximationExample
 RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ReClaM )
 
 ADD_EXECUTABLE( LinearClassifierTest ${LinearClassifierTest_SRC} )
