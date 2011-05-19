@@ -71,7 +71,7 @@ public:
 
 
 	//!  approximate SVM
-	float approximate();
+	float approximate(const Array<double> &data, const Array<double> &labels);
 
 	//! perform gradient descent on overall model of approximated SVM  (SVs and coefficients)
 	float gradientDescent();
@@ -96,7 +96,7 @@ protected:
 	double error();
 
 	//! optimize vector using iRpropPlus
-	void addVecRprop();
+	void addVecRprop(const Array<double> &data, const Array<double> &labels);
 
 	//! calculate optimal coefficients for approx. SVM
 	bool calcOptimalAlphaOfApproximatedSVM();
@@ -110,7 +110,7 @@ protected:
 	void determineNoOfVectorsPerClassForApproximation();
 
 	//! choose vector from original SVs
-	bool chooseVectorForNextIteration(Array<double> &vec);
+	unsigned int chooseVectorForNextIteration(Array<double> &vec);
 
 
 	MultiClassSVM* mpSVM;              //< pointer to original SVM
@@ -165,12 +165,16 @@ public:
 class McSvmApproximationErrorFunction : public ErrorFunction
 {
 public:
-	McSvmApproximationErrorFunction(McSvmApproximation* svmApprox);
+	McSvmApproximationErrorFunction(McSvmApproximation* svmApprox, unsigned int classLabel);
 
 	double error(Model& model, const Array<double>& input, const Array<double>& target);
-	double errorDerivative(Model& model, const Array<double>& input, const Array<double>& target, Array<double>& derivative);
+	//double errorDerivative(Model& model, const Array<double>& input, const Array<double>& target, Array<double>& derivative);
 
 	McSvmApproximation* mpApproxSVM;
+
+private:
+	// TODO entfernen?
+	unsigned int mClassLabel;
 };
 
 
@@ -181,7 +185,7 @@ public:
 	McSvmApproximationErrorFunctionGlobal(McSvmApproximation* svmApprox);
 
 	double error(Model& model, const Array<double>& input, const Array<double>& target);
-	double errorDerivative(Model& model, const Array<double>& input, const Array<double>& target, Array<double>& derivative);
+	//double errorDerivative(Model& model, const Array<double>& input, const Array<double>& target, Array<double>& derivative);
 
 	McSvmApproximation *mpApproxSVM;
 };
