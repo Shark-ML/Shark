@@ -734,7 +734,10 @@ MultiClassSVM & MultiClassSVM::operator=( const MultiClassSVM & rhs )
             delete y;
             y = 0;
         }
-        this->kernel = rhs.kernel;        
+        KernelFunction* probe = dynamic_cast<KernelFunction*>( rhs.kernel );
+        if ( rhs.kernel == NULL || probe == NULL )
+            throw SHARKEXCEPTION("[MultiClassSVM::operator=] not a valid pointer to a valid kernelFunction object");
+        *this->kernel = *rhs.kernel;        
         this->classes = rhs.classes;
         this->examples = rhs.examples;
         this->bOwnMemory = rhs.bOwnMemory;
