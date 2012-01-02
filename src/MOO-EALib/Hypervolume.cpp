@@ -201,7 +201,7 @@ void intToBinary(int i, int * result)
 double computeTrellis(double * regLow, double * regUp, double * trellis)
 {
 	unsigned i, j;
-	int * bs = (int*)malloc((NO_OBJECTIVES - 1) * sizeof(int));
+	int * bs = (int*)malloc((NO_OBJECTIVES) * sizeof(int));
 	for (i = 0; i < NO_OBJECTIVES - 1; i++) bs[i] = 1;
 
 	double result = 0;
@@ -262,7 +262,7 @@ double getMedian(double * bounds, int length)
 
 	qsort(bounds, length, sizeof(double), double_compare);
 
-	return(length % 2 == 1 ? bounds[length / 2] : (bounds[length / 2] + bounds[length / 2 + 1]) / 2);
+	return(length % 2 == 1 ? bounds[length / 2] : (bounds[length / 2 - 1] + bounds[length / 2]) / 2);
 }
 
 double stream(double * regionLow,
@@ -271,9 +271,11 @@ double stream(double * regionLow,
 			  unsigned noPoints,
 			  int split,
 			  double cover ) {
+			  
 	double coverOld;
 	coverOld = cover;
 	int coverIndex = 0;
+	int coverIndexOld = -1;
 	int c;
 
 	double result = 0;
@@ -281,6 +283,11 @@ double stream(double * regionLow,
 	double dMeasure = getMeasure(regionLow, regionUp);
 	while (cover == coverOld && coverIndex < (double)noPoints)
 	{
+		if( coverIndexOld == coverIndex )
+			break;
+
+		coverIndexOld = coverIndex;
+		
 		if (covers(points + (coverIndex * NO_OBJECTIVES), regionLow))
 		{
 			cover = points[coverIndex * NO_OBJECTIVES + NO_OBJECTIVES - 1];
