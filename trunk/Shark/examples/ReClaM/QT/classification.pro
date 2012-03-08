@@ -1,5 +1,7 @@
 SHARKHOME = ../../../
 
+QT += svg 
+
 CONFIG  = qt console warn_on
 
 INCLUDEPATH = . $${SHARKHOME}/include
