@@ -72,7 +72,7 @@ public:
 		double l = 0;
 
 		for (unsigned k = x.dim(0); k--;) {
-			l += log(Shark::max(p(x[ k ]), 1e-100));        // !!!
+			l += log(Shark::max(this->p(x[ k ]), 1e-100));        // !!!
 		}
 
 		return l;
