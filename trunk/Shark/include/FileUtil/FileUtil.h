@@ -359,69 +359,6 @@ inline void io(std::istream& is, std::ostream& os, const std::string& token,
 	}
 }
 
-
-
-//===========================================================================
-/*!
- *  \brief An easy to use interface to perform the three actions needed
- *         for a token. A very strict version, used for a special format.
- *
- *  You can use this function to specify all information for a token
- *  once and then initialize it with a default value or read a new
- *  value for it from an input stream or write the token and its
- *  already given value to an output stream. This can be done by using
- *  different values for the action indicator \em type.  <br>
- *  This function here is used to prevent
- *  a disadvantage of #io, when reading a token value from an input
- *  stream. There a string read from the input stream is
- *  identified as the searched token when this searched token is a prefix of
- *  this string, e.g.
- *  if you are searching for a token "a" and one line
- *  of the input stream begins with "ab".  <br>
- *  This is especially dangerous when using short token names.
- *
- *      \param  is     The input stream used, when reading a token value.
- *      \param  os     The output stream used, when writing the token and
- *                     its value.
- *      \param  token  The token used for initializing/reading/writing.
- *      \param  val    Used to store the current value of the token.
- *      \param  defval The default value that is used for initialization.
- *      \param  type   The action indicator. See #iotype definition
- *                     for the different values and their meanings.
- *      \return None.
- *
- *  \author  R. Alberts
- *  \date    1999
- *
- *  \par Changes
- *      2002-01-03, ra <br>
- *      Renamed to from "io2" to "io_strict" for unification,
- *      new function "printTo_strict" added.
- *
- *  \par Status
- *      stable
- *
- */
-template < class T >
-inline void io_strict(std::istream& is, std::ostream& os,
-					  const std::string& token,
-					  T& val, const T& defval, iotype type)
-{
-	switch (type)
-	{
-	case SetDefault :
-		val = defval;
-		break;
-	case ScanFrom :
-		scanFrom_strict(is, token, val, true);
-		break;
-	case PrintTo :
-		printTo_strict(os, token, val);
-		break;
-	}
-}
-
-
 //===========================================================================
 /*!
  *  \brief Reads the single value of a token from input stream "is".
@@ -656,6 +593,67 @@ inline bool printTo_strict(std::ostream& os,
 	return os.good();
 }
 
+
+
+//===========================================================================
+/*!
+ *  \brief An easy to use interface to perform the three actions needed
+ *         for a token. A very strict version, used for a special format.
+ *
+ *  You can use this function to specify all information for a token
+ *  once and then initialize it with a default value or read a new
+ *  value for it from an input stream or write the token and its
+ *  already given value to an output stream. This can be done by using
+ *  different values for the action indicator \em type.  <br>
+ *  This function here is used to prevent
+ *  a disadvantage of #io, when reading a token value from an input
+ *  stream. There a string read from the input stream is
+ *  identified as the searched token when this searched token is a prefix of
+ *  this string, e.g.
+ *  if you are searching for a token "a" and one line
+ *  of the input stream begins with "ab".  <br>
+ *  This is especially dangerous when using short token names.
+ *
+ *      \param  is     The input stream used, when reading a token value.
+ *      \param  os     The output stream used, when writing the token and
+ *                     its value.
+ *      \param  token  The token used for initializing/reading/writing.
+ *      \param  val    Used to store the current value of the token.
+ *      \param  defval The default value that is used for initialization.
+ *      \param  type   The action indicator. See #iotype definition
+ *                     for the different values and their meanings.
+ *      \return None.
+ *
+ *  \author  R. Alberts
+ *  \date    1999
+ *
+ *  \par Changes
+ *      2002-01-03, ra <br>
+ *      Renamed to from "io2" to "io_strict" for unification,
+ *      new function "printTo_strict" added.
+ *
+ *  \par Status
+ *      stable
+ *
+ */
+template < class T >
+inline void io_strict(std::istream& is, std::ostream& os,
+					  const std::string& token,
+					  T& val, const T& defval, iotype type)
+{
+	switch (type)
+	{
+	case SetDefault :
+		val = defval;
+		break;
+	case ScanFrom :
+		scanFrom_strict(is, token, val, true);
+		break;
+	case PrintTo :
+		printTo_strict(os, token, val);
+		break;
+	}
+}
 
 }
 

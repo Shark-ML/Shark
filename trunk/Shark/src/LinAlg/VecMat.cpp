@@ -175,7 +175,7 @@ Matrix Matrix::diagonal(const Array<double>& diag)
 	unsigned int dim = diag.dim(0);
 	Matrix ret(dim, dim, true);
 	unsigned int i;
-	for (i=0; i<dim; i++) ret(i, i) = 1.0;
+	for (i=0; i<dim; i++) ret(i, i) = diag(i);
 	return ret;
 }
 
