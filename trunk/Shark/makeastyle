@@ -1,0 +1,8 @@
+#!/bin/sh
+echo "applying astyle to all source and header files"
+liste=`find \! -type d -a \! -iwholename "*CVS*" -a \! -iname "moc_*" -a \( -iname "*.c" -o -iname "*.cc" -o -iname "*.cpp" -o -iname "*.h" -o -iname "*.hpp" \)`
+for i in $liste; do
+	echo "formatting file $i"
+	astyle --options=none --style=ansi -T -b -p -U -o -O $i 1>/dev/null 2>/dev/null
+done
+rm -f */*.cpp.orig */*.h.orig */*/*.cpp.orig */*/*.h.orig */*/*/*.cpp.orig */*/*/*.h.orig

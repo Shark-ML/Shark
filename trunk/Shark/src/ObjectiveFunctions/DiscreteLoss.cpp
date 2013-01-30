@@ -1,0 +1,87 @@
+//===========================================================================
+/*!
+ *  \file DiscreteLoss.cpp
+ *
+ *  \brief Flexible error measure for classication tasks
+ *
+ *  \author T. Glasmachers
+ *  \date 2011
+ *
+ *  \par Copyright (c) 2011:
+ *      Institut f&uuml;r Neuroinformatik<BR>
+ *      Ruhr-Universit&auml;t Bochum<BR>
+ *      D-44780 Bochum, Germany<BR>
+ *      Phone: +49-234-32-25558<BR>
+ *      Fax:   +49-234-32-14209<BR>
+ *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *
+ *  <BR><HR>
+ *  This file is part of Shark. This library is free software;
+ *  you can redistribute it and/or modify it under the terms of the
+ *  GNU General Public License as published by the Free Software
+ *  Foundation; either version 3, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this library; if not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#include <shark/ObjectiveFunctions/Loss/DiscreteLoss.h>
+#include <boost/lambda/lambda.hpp>
+using namespace shark;
+
+
+DiscreteLoss::DiscreteLoss(RealMatrix const& cost){
+	this->m_name = "DiscreteLoss";
+	this->m_cost = cost;
+	defineCostMatrix(cost);
+}
+
+
+double DiscreteLoss::eval(BatchLabelType const& target, BatchOutputType const& prediction) const{
+	SIZE_CHECK(target.size() == prediction.size());
+	
+//	return accumulateError(target,prediction,boost::bind<double>(boost::ref(m_cost),boost::lambda::_1,boost::lambda::_2));
+	double error = 0;
+	for(std::size_t i = 0; i != prediction.size(); ++i){
+		error += m_cost(target(i), prediction(i));
+	}
+	return error;
+}
+
+void DiscreteLoss::defineCostMatrix(RealMatrix const& cost){
+	// check validity
+	std::size_t size = cost.size1();
+	SHARK_ASSERT(cost.size2() == size);
+	for (std::size_t i = 0; i != size; i++){
+		for (std::size_t j = 0; j != size; j++){
+			SHARK_ASSERT(cost(i, j) >= 0.0);
+		}
+		SHARK_ASSERT(cost(i, i) == 0.0);
+	}
+	m_cost = cost;
+}
+
+void DiscreteLoss::defineBalancedCost(UnlabeledData<unsigned int> const& labels){
+	std::size_t classes = numberOfClasses(labels);
+	std::size_t ic = labels.numberOfElements();
+	
+	std::vector<unsigned int> freq(classes);
+	BOOST_FOREACH(unsigned int label, labels.elements()){
+		freq[label]++;
+	}
+
+	m_cost.resize(classes, classes);
+	for (std::size_t i = 0; i!= classes; i++){
+		double c = (freq[i] == 0) ? 1.0 : ic / (double)(classes * freq[i]);
+		for ( std::size_t j = 0; j != classes; j++) 
+			m_cost(i, j) = c;
+		m_cost(i, i) = 0.0;
+	}
+}

@@ -1,0 +1,248 @@
+====================================
+Support Vector Machines: First Steps
+====================================
+
+
+Kernel-based learning algorithms such as support vector machine (SVM,
+[CortesVapnik1995]_) classifiers mark the state-of-the art in pattern
+recognition . They employ (Mercer) kernel functions to implicitly
+define a metric feature space for processing the input data, that is,
+the kernel defines the similarity between observations.  Kernel
+methods are well understood theoretically and give excellent results
+in practice. This tutorial explains how to train a standard
+C-SVM.
+
+Theoretical background
+----------------------
+
+The general supervised learning problem can be stated as follows.
+Given sample data :math:`S=\{(x_i,y_i)\,|\,1 \leq i \leq \ell\}` drawn from an
+unknown distribution :math:`p` over :math:`X \times Y`, the goal of binary
+classification is to infer a hypothesis :math:`h:X \to Y` that minimizes the
+expected risk
+
+.. math::
+  R_p(h)= \int\limits_{X \times Y} L_{0-1}(y,h(x)) \, \text{d}
+  p(x,y) ,
+
+
+where :math:`L_{0-1}(y,z)` is 0
+if :math:`y=z` and 1 otherwise.
+
+Support vector machines (SVMs, [CortesVapnik1995]_) transfer the input
+data to a feature space and perform linear classification in that space.
+For a positive semi-definite kernel function :math:`k:X \times X \to\mathbb{R}`, consider the feature space
+:math:`\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}` and
+function class :math:`\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}`. The decision boundary induced by the sign of a
+function :math:`f \in \mathcal H_k^b` is a hyperplane in :math:`\mathcal H_k`.
+1-Norm Soft Margin SVMs find a solution to
+
+.. math::
+       \underset{f \in\mathcal H_k^b}{\text{minimize}} \frac{1}{\ell} \sum_{i=1}^\ell L_{\text{hinge}}(y_i, f(x_i)) +\frac{\gamma_\ell}{2} \|f\|^2
+
+with loss function
+:math:`L_{\text{hinge}}(y,f(x))=\max\{0, 1-(2y-1)f(x)\}` for
+:math:`Y=\{0,1\}`.
+The parameter :math:`\gamma_\ell >0`
+controls the trade-off between reducing the empirical loss
+:math:`L_{\text{hinge}}` and the complexity of the hypothesis :math:`\|.\|_k`
+measure by its norm (neglecting the bias parameter :math:`b`).
+
+Here we have adopted the Shark library convention of choosing
+:math:`Y=\{0,1\}` instead of :math:`Y=\{-1,1\}`. The latter is the
+common choice in the SVM literature. This explains the :math:`2y-1`
+instead of a simple :math:`y` in the hinge loss definition.
+
+
+
+
+Support Vector Machines in Shark
+--------------------------------
+
+Toy problem
+^^^^^^^^^^^
+
+In this tutorial, we consider an artificial binary benchmark classification
+problem shipped with the Shark library::
+
+   #include <shark/Data/DataDistribution.h>
+   ...
+   unsigned int ell = 500;     // number of training data point
+   unsigned int tests = 10000; // number of test data points
+
+   Chessboard prob; // artificial benchmark data
+   ClassificationDataset training(prob, ell);
+   ClassificationDataset test(prob, tests);
+
+
+
+Model and learning algorithm
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To build an SVM, we need a :doxy:`KernelExpansion` and an
+:doxy:`CSvmTrainer`.
+
+To define our model, we have to choose a kernel function.  Here we
+consider the standard Gaussian/RBF kernel
+
+.. math::
+
+  k(x,z) = \exp(\gamma\|x-z\|^2)
+
+by writing::
+
+  #include <shark/Models/Kernels/GaussianRbfKernel.h>
+
+  double gamma = 0.5;         // kernel bandwidth parameter
+  GaussianRbfKernel<> kernel(gamma); // Gaussian kernel
+
+All kernels such as the :doxy:`GaussianRbfKernel` are derived from the
+base class :doxy:`AbstractKernelFunction`.
+
+Our model is now a kernel expansion.
+Given the previously defined kernel, the definition ::
+
+  KernelExpansion<RealVector> ke(&kernel, bias); // (affine) linear function in kernel-induced feature space
+
+specifies a model from
+:math:`\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}` or
+:math:`\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}`
+depending on whether the Boolean flag ``bias`` is false or true.
+
+Training the machine is done by::
+
+   #include <shark/Algorithms/Trainers/SvmTrainer.h>
+   ...
+   CSvmTrainer<RealVector> trainer(&kernel, C);
+   trainer.train(ke, training);
+
+Here ``C`` denotes the regularization parameter (the SVM uses the 1-norm
+penalty for target margin violations by default).
+The Shark SVM training is inspired by [ChangLin2011]_
+but uses unique features [GlasmachersIgel2006]_.
+
+.. admonition:: Configuring the trainer further:
+
+    The above lines construct a default SVM trainer with default
+    settings for the underlying quadratic programming optimization
+    task. In certain cases, the user may want more fine-grained
+    control over the behaviour of the optimizer. For example,
+    the memory cache size of the kernel matrix cache and the
+    stopping criterion for the solver might be varied. Consider
+    the following lines of code::
+
+        CSvmTrainer<RealVector, double> trainer(&kernel, C);
+        trainer.sparsify() = false;
+        trainer.stoppingCondition().minAccuracy = 1e-6;
+        trainer.setCacheSize( 0x1000000 );
+        trainer.train(ke, training);
+        std::cout << "Needed " << trainer.solutionProperties().seconds() << " seconds to reach a dual of " << trainer.solutionProperties().value() << std::endl;
+
+    The first line uses one more template parameter in this alternative
+    trainer declaration, requesting it to use ``double`` for the matrix
+    cache internally (instead of the default ``float``). Note that this
+    is only needed in very rare, mathematically sensitive cases.
+    The second line sets the trainer to *not* discard non-support
+    vectors from the solution kernel expansion after training
+    (they are discarded by default). The third line sets the desired
+    accuracy to a lower value (i.e., more strict value, implying longer
+    optimization times) than the default of 1e-3. The fourth
+    line reduces the cache size (counted in numbers of stored
+    variables of the matrix cache type) from 512MB to 128MB (had we
+    not passed the second template argument in the first line of this
+    snippet, it would be a reduction from 256MB to 64MB). The fifth
+    line is again identical to the above example. The last line
+    illustrates the use of the :doxy:`solutionProperties()` method
+    to access information about the optimization run after training.
+    For more information on available options, see the documentation
+    of :doxy:`AbstractSvmTrainer`, :doxy:`QpStoppingCondition`,
+    and :doxy:`QpSolutionProperties` (as well as potentially of
+    the particular SVM solver you are using, i.e., binary, multi-class,
+    one-class, etc.).
+
+
+Evaluating the model
+^^^^^^^^^^^^^^^^^^^^
+
+After training the model, we can evaluate it.  As a performance
+measure, we consider the standard 0-1 loss :math:`L_{0-1}(y,z)`::
+
+  #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+  ...
+  ZeroOneLoss<unsigned int, RealVector> loss; // 0-1 loss
+  Data<RealVector> output;  // real-valued output of the machine
+
+Note the slight differences compared to the :doc:`nearestNeighbor` and
+:doc:`lda` tutorials. We consider the real-valued output of the SVM
+and not the binary decision (see discussion below). Therefore, we
+write ``ZeroOneLoss<unsigned int, RealVector>`` indicating that
+real-valued output is compared to ``unsigned int`` labels.
+
+Now we apply the classifier to the training and the test data::
+
+    ke.eval(training.inputs(), output); // evaluate on training set
+    double train_error = loss.eval(training.labels(), output);
+    cout << "training error:\t" <<  train_error << endl;
+    ke.eval(test.inputs(), output); // evaluate on test set
+    double test_error = loss.eval(test.labels(), output);
+    cout << "test error:\t" << test_error << endl;
+
+
+From decision function to hypothesis
+------------------------------------
+
+In the our example, we have directly used the decision function
+:math:`f:X\to\mathbb{R}` learnt by the SVM instead of the
+corresponding hypothesis mapping to :math:`Y`.
+Alternatively, we can consider a combined model of the SVM kernel
+expansion and a converter mapping the SVM output to :math:`Y=\{0,1\}`.
+After including ::
+
+  #include <shark/Models/Converter.h>
+  #include <shark/Models/ConcatenatedModel.h>
+
+we can define this concatenated model by::
+
+  ThresholdConverter conv;
+  ConcatenatedModel<RealVector, unsigned int> svm(&ke, &conv);
+
+Because the concatenated model now outputs proper labels,
+we have to change the loss function and the output container in our
+example to ::
+
+    ZeroOneLoss<unsigned int, unsigned int> loss;
+    Data<unsigned int> output;
+
+as in  the :doc:`nearestNeighbor` and
+:doc:`lda` tutorials.
+We still use ``trainer.train(ke, training);``
+but evaluate the model now using::
+
+    svm.eval(training.inputs(), output);
+    double train_error = loss.eval(training.labels(), output);
+    svm.eval(test.inputs(), output);
+    double test_error = loss.eval(test.labels(), output);
+
+
+
+Full example program
+--------------------
+
+The full example program considered in this tutorial is :doxy:`CSvmTutorial.cpp`.
+There are further SVM examples in the ``examples`` subdirectory: one for SVM
+model selection (see the next tutorial on :doc:`svmModelSelection`); and also
+the file :doxy:`CSvmWithThresholdConverter.cpp`, which is a variant of this present
+tutorial illustrating the concatenated model with ``unsigned int``-output.
+
+
+
+
+References
+----------
+
+.. [ChangLin2011] C.C. Chang and C.-J. Lin. LIBSVM: a library for support vector machines. ACM Transactions on Intelligent Systems and Technology, 2:27:1--27:27, 2011.
+
+.. [CortesVapnik1995] C. Cortes and V. Vapnik. Support-Vector
+   Networks. Machine Learning, 20, 1995.
+
+.. [GlasmachersIgel2006] T. Glasmachers and C. Igel. Maximum-Gain Working Set Selection for SVMs. Journal of Machine Learning Research 7, 1437-1466, 2006.

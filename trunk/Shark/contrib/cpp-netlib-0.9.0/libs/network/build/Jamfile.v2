@@ -1,0 +1,30 @@
+
+#          Copyright Dean Michael Berris 2007.
+# Distributed under the Boost Software License, Version 1.0.
+#    (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
+
+import os ;
+
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+
+project cpp-netlib :
+    requirements
+        <include>../../../
+        <include>$(BOOST_ROOT)
+        <c++-template-depth>256
+    : source-location ../../../
+;
+
+cpp-pch client : boost/network/include/http/client.hpp ;
+cpp-pch server : boost/network/include/http/server.hpp ;
+lib cppnetlib-uri-parsers : libs/network/src/parse_uri_impl.cpp ;
+lib cppnetlib-server-parsers : libs/network/src/server_request_parsers_impl.cpp ;
+
+install headers : client server
+   : <location>../../../boost/network/include/http ;
+
+install libraries : cppnetlib-uri-parsers cppnetlib-server-parsers ;
+
+alias all : headers ; 
+

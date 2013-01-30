@@ -1,0 +1,22 @@
+#
+#          Copyright Marshall Clow 2010
+# Distributed under the Boost Software License, Version 1.0.
+#    (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
+
+import os ;
+
+project mime_test :
+    requirements
+        <include>../../../
+        <source>/boost//unit_test_framework
+        <toolset>msvc:<define>WIN32_LEAN_AND_MEAN
+        <toolset>msvc:<define>_SCL_SECURE_NO_WARNINGS
+        <c++-template-depth>256
+        <link>static
+        ;
+
+unit-test mime_round_trip : mime-roundtrip.cpp ;
+
+exe mime-structure : mime-structure.cpp ;
+

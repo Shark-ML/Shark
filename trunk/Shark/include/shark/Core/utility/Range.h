@@ -1,0 +1,70 @@
+/*!
+ *  \brief Helper Methods to use with boost range.
+ *
+ *
+ *  \author  Oswin Krause
+ *  \date    2012
+ *  \par Copyright (c) 2010-2011:
+ *      Institut f&uuml;r Neuroinformatik<BR>
+ *      Ruhr-Universit&auml;t Bochum<BR>
+ *      D-44780 Bochum, Germany<BR>
+ *      Phone: +49-234-32-25558<BR>
+ *      Fax:   +49-234-32-14209<BR>
+ *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *
+ *
+ *  <BR><HR>
+ *  This file is part of Shark. This library is free software;
+ *  you can redistribute it and/or modify it under the terms of the
+ *  GNU General Public License as published by the Free Software
+ *  Foundation; either version 3, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this library; if not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+#ifndef SHARK_CORE_RANGE_H
+#define SHARK_CORE_RANGE_H
+#include <boost/range.hpp>
+#include <utility>
+#include <shark/Core/Exception.h>
+
+namespace shark{
+///\brief returns the size of a range
+///
+/// This is just a fix to a bug of boost::size which produces a lot of useless warnings
+template<class Range>
+std::size_t size(Range const& range){
+	return (std::size_t)boost::size(range); 
+}
+///\brief returns the i-th element of a range
+template<class Range>
+typename boost::iterator_reference<
+	typename boost::range_iterator<Range>::type
+>::type
+get( Range& range, std::size_t i){
+	SIZE_CHECK(i < shark::size(range));
+	typename boost::range_iterator<Range>::type pos=boost::begin(range);
+	std::advance(pos,i);
+	return *pos;
+}
+template<class Range>
+typename boost::iterator_reference<
+	typename boost::range_iterator<Range const>::type
+>::type
+get( Range const& range, std::size_t i){
+	SIZE_CHECK(i < shark::size(range));
+	typename boost::range_iterator<Range const>::type pos=boost::begin(range);
+	std::advance(pos,i);
+	return *pos;
+}
+
+
+}
+#endif

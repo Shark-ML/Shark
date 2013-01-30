@@ -1,0 +1,148 @@
+//===========================================================================
+/*!
+*
+*  \brief Clusters defined by centroids.
+*
+*  \author  T. Glasmachers
+*  \date    2011
+*
+*  \par Copyright (c) 1999-2011:
+*      Institut f&uuml;r Neuroinformatik<BR>
+*      Ruhr-Universit&auml;t Bochum<BR>
+*      D-44780 Bochum, Germany<BR>
+*      Phone: +49-234-32-27974<BR>
+*      Fax:   +49-234-32-14209<BR>
+*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+*
+*
+*
+*  <BR><HR>
+*  This file is part of Shark. This library is free software;
+*  you can redistribute it and/or modify it under the terms of the
+*  GNU General Public License as published by the Free Software
+*  Foundation; either version 3, or (at your option) any later version.
+*
+*  This library is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this library; if not, see <http://www.gnu.org/licenses/>.
+*  
+*/
+//===========================================================================
+
+#ifndef SHARK_MODELS_CLUSTERING_CENTROIDS_H
+#define SHARK_MODELS_CLUSTERING_CENTROIDS_H
+
+#include <shark/Models/Clustering/AbstractClustering.h>
+#include <shark/Data/Dataset.h>
+
+
+namespace shark {
+
+
+/// \brief Clusters defined by centroids.
+///
+/// \par
+/// Centroids are an elementary way to define clusters by means
+/// of the one-nearest-neighbor rule. This rule defines a hard
+/// clustering decision.
+///
+/// \par
+/// The Centroids class uses inverse distances to compute soft
+/// clustering memberships. This is arbitrary and can be changed
+/// by overriding the membershipKernel function.
+///
+class Centroids : public AbstractClustering<RealVector>
+{
+	typedef AbstractClustering<RealVector> base_type;
+
+public:
+	/// Default constructor
+	Centroids();
+
+	/// Constructor
+	///
+	/// \param  centroids  number of centroids in the model (initially zero)
+	/// \param  dimension  dimension of the input space, and thus of the centroids
+	Centroids(std::size_t centroids, std::size_t dimension);
+
+	/// Constructor
+	///
+	/// \param  centroids  centroid vectors
+	Centroids(Data<RealVector> const& centroids);
+
+
+	/// from IParameterizable
+	RealVector parameterVector() const;
+
+	/// from IParameterizable
+	void setParameterVector(RealVector const& newParameters);
+
+	/// from IParameterizable
+	std::size_t numberOfParameters() const;
+
+	/// return the dimension of the inputs
+	std::size_t dimension() const
+	{
+		SHARK_ASSERT(m_centroids.size() > 0);
+		return dataDimension(m_centroids);
+	}
+
+	/// return the number of centroids in the model
+	std::size_t numberOfClusters() const;
+
+	/// read access to the centroid vectors
+	Data<RealVector> const& centroids() const{
+		return m_centroids;
+	}
+
+	/// overwrite the centroid vectors
+	void setCentroids(Data<RealVector> const& newCentroids){
+		m_centroids = newCentroids;
+	}
+
+	/// from ISerializable
+	void read(InArchive& archive);
+
+	/// from ISerializable
+	void write(OutArchive& archive) const;
+
+	/// from AbstractClustering: Compute cluster memberships.
+	RealVector softMembership(RealVector const& pattern) const;
+	/// From AbstractClustering: Compute cluster memberships for a batch of patterns.
+	RealMatrix softMembership(BatchInputType const& patterns) const;
+
+
+	/// initialize centroids from labeled data: take the first
+	/// data points with different labels; if there are more
+	/// centroids than classes, the remaining centroids are filled
+	/// with the first elements in the data set
+	///
+	/// \param  data  dataset from which to take the centroids
+	/// \param  noClusters  number of centroids in the model, default 0 is mapped to the number of classes in the data set
+	/// \param  noClasses  number of clases in the dataset, default 0 means that the number is computed 
+	void initFromData(ClassificationDataset const& data, unsigned noClusters = 0, unsigned noClasses = 0);
+
+	/// initialize centroids from unlabeled data: 
+	/// take a random subset of data points
+	///
+	/// \param  data dataset from which to take the centroids
+	/// \param  noClusters  number of centroids in the model
+	void initFromData(Data<RealVector> const& dataset, unsigned noClusters);
+
+protected:
+	/// Compute unnormalized membership from distance.
+	/// The default implementation is to return the inverse distance.
+	virtual double membershipKernel(double dist) const;
+
+	/// centroid vectors
+	Data<RealVector> m_centroids;
+};
+
+
+}
+#endif

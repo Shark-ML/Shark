@@ -1,0 +1,224 @@
+//===========================================================================
+/*!
+ *  \brief Trainer for One-Class Support Vector Machines
+ *
+ *
+ *  \author  T. Glasmachers
+ *  \date    2007-2012
+ *
+ *
+ *  <BR><HR>
+ *  This file is part of Shark. This library is free software;
+ *  you can redistribute it and/or modify it under the terms of the
+ *  GNU General Public License as published by the Free Software
+ *  Foundation; either version 3, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this library; if not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+//===========================================================================
+
+
+#ifndef SHARK_ALGORITHMS_ONECLASSSVMTRAINER_H
+#define SHARK_ALGORITHMS_ONECLASSSVMTRAINER_H
+
+
+#include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
+
+
+namespace shark {
+
+
+///
+/// \brief Training of one-class SVMs.
+///
+/// The one-class support vector machine is an unsupervised
+/// method for learning the high probability region of a
+/// distribution. Given are data points \f$ x_i, i \in \{1, \dots, m\} \f$,
+/// a kernel function k(x, x') and a regularization
+/// constant C > 0. Let H denote the kernel induced
+/// reproducing kernel Hilbert space of k, and let \f$ \phi \f$
+/// denote the corresponding feature map.
+/// Then an estimate of a high probability region of the
+/// distribution generating the sample points is described
+/// by the set where the following function takes positive
+/// values:
+/// \f[
+///     f(x) = \langle w, \phi(x) \rangle + b
+/// \f]
+/// with coefficients w and b given by the (primal)
+/// optimization problem
+/// \f[
+///     \min \frac{1}{2} \|w\|^2 + \frac{1}{\nu m} \sum_{i=1}^m \xi_i - \rho
+/// \f]
+/// \f[
+///     \text{s.t. } \langle w, \phi(x_i) \rangle + b \geq \rho - \xi_i; \xi_i \geq 0
+/// \f]
+/// \f$ 0 \leq \nu, \rho \leq 1 \f$ are parameters of the
+/// method for controlling the smoothness of the solution
+/// and the amount of probability mass covered.
+///
+/// For more details refer to the paper:<br/>
+/// <p>Estimating the support of a high-dimensional distribution. B. Sch&ouml;lkopf, J. C. Platt, J. Shawe-Taylor, A. Smola, and R. C. Williamson, 1999.</p>
+///
+template <class InputType, class CacheType = float>
+class OneClassSvmTrainer : public AbstractUnsupervisedTrainer<KernelExpansion<InputType> >, public QpConfig, public IParameterizable
+{
+public:
+
+	/// \brief Convenience typedefs:
+	/// this and many of the below typedefs build on the class template type CacheType.
+	/// Simply changing that one template parameter CacheType thus allows to flexibly
+	/// switch between using float or double as type for caching the kernel values.
+	/// The default is float, offering sufficient accuracy in the vast majority
+	/// of cases, at a memory cost of only four bytes. However, the template
+	/// parameter makes it easy to use double instead, (e.g., in case high
+	/// accuracy training is needed).
+	typedef CacheType QpFloatType;
+	typedef blas::matrix<QpFloatType> QpMatrixType;
+	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
+	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
+
+	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
+	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
+	typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
+
+	typedef AbstractModel<InputType, RealVector> ModelType;
+	typedef AbstractKernelFunction<InputType> KernelType;
+	typedef QpConfig base_type;
+
+	OneClassSvmTrainer(KernelType* kernel, double nu)
+	: m_kernel(kernel)
+	, m_nu(nu)
+	, m_cacheSize(0x4000000)
+	{
+		this->m_name = "OneClassSvmTrainer";
+	}
+
+	double nu() const
+	{ return m_nu; }
+	void setNu(double nu)
+	{ m_nu = nu; }
+	KernelType* kernel()
+	{ return m_kernel; }
+	const KernelType* kernel() const
+	{ return m_kernel; }
+	void setKernel(KernelType* kernel)
+	{ m_kernel = kernel; }
+
+	double CacheSize() const
+	{ return m_cacheSize; }
+	void setCacheSize( std::size_t size )
+	{ m_cacheSize = size; }
+
+	/// get the hyper-parameter vector
+	RealVector parameterVector() const
+	{
+		size_t kp = m_kernel->numberOfParameters();
+		RealVector ret(kp + 1);
+		RealVectorRange(ret, Range(0, kp)) = m_kernel->parameterVector();
+		ret(kp) = m_nu;
+		return ret;
+	}
+
+	/// set the vector of hyper-parameters
+	void setParameterVector(RealVector const& newParameters)
+	{
+		size_t kp = m_kernel->numberOfParameters();
+		SHARK_ASSERT(newParameters.size() == kp + 1);
+		m_kernel->setParameterVector(ConstRealVectorRange(newParameters, Range(0, kp)));
+		setNu(newParameters(kp));
+	}
+
+	/// return the number of hyper-parameters
+	size_t numberOfParameters() const
+	{ return (m_kernel->numberOfParameters() + 1); }
+
+	void train(KernelExpansion<InputType>& svm, const UnlabeledData<InputType>& inputset)
+	{
+		// Setup the cached kernel matrix
+		KernelMatrixType km(*m_kernel, inputset);
+
+		SHARK_CHECK(svm.hasOffset(), "[OneClassSvmTrainer::train] training of models without offset is not supported");
+		SHARK_CHECK(svm.outputSize() == 1, "[OneClassSvmTrainer::train] wrong number of outputs in the kernel expansion");
+
+		// prepare the quadratic program description
+		std::size_t i, ic = inputset.size();
+		RealVector linear = RealZeroVector(ic);
+		RealVector lower = RealZeroVector(ic);
+		RealVector upper = RealScalarVector(ic, 1.0 / (m_nu * ic));
+		RealVector alpha = RealScalarVector(ic, 1.0 / ic);
+		RealVector param(ic + 1);
+
+		svm.setKernel(m_kernel);
+		svm.setBasis(inputset);
+
+		// solve the quadratic program
+		RealVector gradient;
+		if (base_type::precomputeKernel())
+		{
+			PrecomputedMatrixType matrix(&km);
+			QpSvmDecomp< PrecomputedMatrixType > solver(matrix);
+			QpSolutionProperties& prop = base_type::m_solutionproperties;
+			solver.setShrinking(base_type::m_shrinking);
+			solver.solve(linear, lower, upper, alpha, base_type::m_stoppingcondition, &prop);
+			gradient = solver.getGradient();
+		}
+		else
+		{
+			CachedMatrixType matrix(&km, m_cacheSize );
+			QpSvmDecomp< CachedMatrixType > solver(matrix);
+			QpSolutionProperties& prop = base_type::m_solutionproperties;
+			solver.setShrinking(base_type::m_shrinking);
+			solver.solve(linear, lower, upper, alpha, base_type::m_stoppingcondition, &prop);
+			gradient = solver.getGradient();
+		}
+		RealVectorRange(param, Range(0, ic)) = alpha;
+
+		// compute the offset from the KKT conditions
+		double lowerBound = -1e100;
+		double upperBound = 1e100;
+		double sum = 0.0;
+		std::size_t freeVars = 0;
+		for (i=0; i<ic; i++)
+		{
+			double value = gradient(i);
+			if (alpha(i) == 0.0)
+			{
+				if (value > lowerBound) lowerBound = value;
+			}
+			else if (alpha(i) == upper(i))
+			{
+				if (value < upperBound) upperBound = value;
+			}
+			else
+			{
+				sum += value;
+				freeVars++;
+			}
+		}
+		if (freeVars > 0) param(ic) = sum / freeVars;		// stabilized (averaged) exact value
+		else param(ic) = 0.5 * (lowerBound + upperBound);	// best estimate
+
+		// write the solution into the model
+		svm.setParameterVector(param);
+
+		base_type::m_accessCount = km.getAccessCount();
+		if (base_type::sparsify()) svm.sparsify();
+	}
+
+protected:
+	KernelType* m_kernel;
+	double m_nu;
+	std::size_t m_cacheSize;
+};
+
+
+}
+#endif

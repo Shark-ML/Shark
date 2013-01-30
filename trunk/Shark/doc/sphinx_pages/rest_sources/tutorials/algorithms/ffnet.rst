@@ -1,0 +1,257 @@
+Training Feed-Forward Networks
+=================================
+This tutorial serves as a primer for using the Shark implementation of feed-forward
+multi-layer perceptron neural networks [Bishop1995]_. The whole functionality can be discovered
+in the doxygen pages of the :doxy:`FFNet` class. It is recommended to read the
+getting started section, especially the introduction about :doc:`../first_steps/general_optimization_tasks`.
+
+Defining the Learning Problem
+------------------------------
+In this tutorial, we want to solve the infamous xor problem using a feed-forward network.
+First, we define the problem by generating the training data. We consider two binary inputs
+that are to be mapped to one if they have the same value and to zero otherwise.
+Input patterns and corresponding target patterns are stored in a container for labeled data
+after generation.
+
+For this part, we need to include the Dataset and define the problem in a function, which
+we will use shortly::
+
+  #include<shark/Data/Dataset.h>
+  using namespace shark;
+
+  LabeledData<RealVector,unsigned int> xorProblem(){
+    //the 2D xor Problem has 4 patterns, (0,0), (0,1), (1,0), (1,1)
+    std::vector<RealVector> inputs(4,RealVector(2));
+    //the result is 1 if both inputs have a different value, and 0 otherwise
+    std::vector<unsigned int> labels(4);
+
+    unsigned k = 0;
+    for(unsigned i=0; i < 2; i++){
+      for(unsigned j=0; j < 2; j++){
+        inputs[k](0) = i;
+	inputs[k](1) = j;
+        label[k] = (i+j) % 2;
+        k++;
+      }
+    }
+    LabeledData<RealVector,unsigned int> dataset(inputs,labels);
+    return dataset;
+  }
+
+Defining the Network topology
+------------------------------
+
+After we have defined our Problem, we can define our feed forward
+network. For this, we have to decide on the network topology. We have
+to choose activation functions, how many hidden layers and
+neurons we want, and how the layers are connected. This is quite a lot
+of stuff, but Shark makes this task straight-forward.
+
+The easiest part are the neurons. Shark offers several different types
+of neurons named after their activation function  [ReedMarks1998]_:
+
+* :doxy:`LogisticNeuron`: is a sigmoid (S-shaped)
+  function with outputs in the range [0,1] and the following definition
+
+.. math::
+  f(x) = \frac 1 {1+e^{-x}}.
+
+* :doxy:`TanhNeuron`: the hyperbolic tangens, can be viewed as a rescaled
+  version of the Logistic function with outputs ranging from [-1,1]. It
+  has the formula
+
+.. math::
+  f(x) = \tanh(x) = \frac 2 {1+e^{-2x}}-1.
+
+* :doxy:`FastSigmoidNeuron`: a sigmoidal function which is faster to
+  evaluate than the previous two activation functions. It has also "bigger
+  tails" (i.e., the gradient does not vanish as quickly). This
+  activation function is highly recommended and defined in Shark as
+
+.. math::
+  f(x) = \frac x {1+|x|}.
+
+* :doxy:`LinearNeuron`: not a good choice for hidden neurons, but
+  for output neurons when the output  is not bounded. This activation
+  function :math:`f(x)=x` is the typical choice for regression tasks.
+
+For our example, we will use the Logistic-Activation since it fits the labels
+nicely. We choose the neuron types using two template parameters, one
+for the hidden neurons, one for the visible. For the topology, we will
+choose a network with 2 hidden neurons. The neurons are fully
+connected (while obeying the layer structure). That is, we also allow
+direct connections from the input to the output. We also want a bias
+neuron (i.e., bias or offset parameters).
+All this can be achieved with :doxy:`FFNet::setStructure`::
+
+  #include<shark/Models/FFNet.h>
+
+  //skipping previous code part
+
+  int main(){
+    //feed-forward network with Logistic neurons for hidden and output
+    FFNet<LogisticNeuron,LogisticNeuron> network;
+
+    unsigned numInput=2;
+    unsigned numHidden=2;
+    unsigned numOutput=1;
+    network.setStructure(numInput, numHidden, numOutput);
+  }
+
+The method  :doxy:`FFNet::setStructure` is versatile. If we wanted a second hidden layer with 3 neurons, we could simply write::
+
+  unsigned numInput=2;
+  unsigned numHidden1=2;
+  unsigned numHidden2=3;
+  unsigned numOutput=1;
+  network.setStructure(numInput, numHidden1, numHidden2, numOutput);
+
+But the method can do even more. It has four Boolean parameters specifying the connectivity, which are set to true by default. The example with one hidden layer could also be written as::
+
+  unsigned numInput=2;
+  unsigned numHidden=2;
+  unsigned numOutput=1;
+
+  bool connectConsecutiveLayers = true;
+  bool connectInputsOutputs     = true;
+  bool connectAll               = true;
+  bool useBiasNeuron            = true;
+
+  network.setStructure(numInput, numHidden, numOutput,
+                       connectConsecutiveLayers, connectInputsOutputs,
+		       connectAll, useBiasNeuron);
+
+The first parameter describes whether all neurons in each layer should
+be connected to all neurons in the subsequent layer. You will usually
+want to set this to true. The second flag describes whether there
+should be shortcuts between inputs and output neurons. If you want to
+train autoencoder networks, this is better set to false. The third
+flag now is only useful for networks with more than one hidden
+layer. It connects a layer of the network with all previous
+layers. The last flag switches the bias neuron on, which adds a bias
+or offset to the activation of the neurons. It is usually good to have
+a bias neuron, especially if your data is not mean-free.  There exists
+another version of :doxy:`FFNet::setStructure` which allows for
+arbitrary connections between neurons as long as the network stays
+feed-forward. Our first call to :doxy:`FFNet::setStructure` can be
+translated into this version as::
+
+  int connectionMatrix[5][6]={
+      {0,0,0,0,0,0},
+      {0,0,0,0,0,0},
+      {1,1,0,0,0,1},
+      {1,1,0,0,0,1},
+      {1,1,1,1,0,1},
+  };
+  IntMatrix mat(5,6);
+  //copy the connectionMatrix somehow into mat...
+
+  //first two parameters are number of inputs and output neurons
+  network.setStructure(2,1,mat);
+
+The connection matrix *C* is a *n* x *n+1* matrix, where *n* is the
+total number of neurons (input+hidden+output) of the network. The
+entry *C(i,j)* is set to 1 if neuron *i* receives input of neuron
+*j*. So input Neurons have all empty rows. But for example neuron 3
+gets input from neuron 1 and 2. To ensure that the network is feed
+forward, only the lower diagonal matrix can be set. The upper diagonal
+and the diagonal itself should be set to zero (and are ignored by the
+network). This does not hold for row *n+1*, which encodes the bias neuron.
+
+Training the Network
+----------------------
+
+After we have defined problem and topology, we can now finally train
+the network. The most frequently used error function for
+training neural networks is arguably the :doxy:`SquaredLoss`, but
+Shark offers also alternatives.
+Since the xor Problem is a classification task, we can
+use the :doxy:`NegativeClassificationLogLikelihood` error to maximize
+the class probability  [Bishop1995]_. For optimizing this function the improved
+resilient backpropagation algorithm ([IgelHüsken2003]_, a faster,
+more robust variant of the seminal Rprop algorithm [Riedmiller1994]_) is used: ::
+
+  #include<shark/Algorithms/GradientDescent/Rprop.h>
+  #include<shark/ObjectiveFunctions/ErrorFunction.h>
+  #include<shark/ObjectiveFunctions/Loss/NegativeClassificationLogLikelihood.h>
+  #include<shark/Models/FFNet.h>
+  using namespace shark;
+  //skipping code of problem definition
+  ...
+  int main(){
+    //create network and initialize weights random uniform
+    FFNet<LogisticNeuron,LogisticNeuron> network;
+    network.setStructure(2,2,1);
+    initRandomUniform(network,-0.1,0.1);
+
+    //get problem data
+    LabeledData<RealVector,unsigned int> dataset = xorProblem();
+
+    //create error function
+    NegativeClassificationLogLikelihood loss;
+    ErrorFunction<RealVector,unsigned int> error(&network,&loss);
+    error.setDataset(dataset);
+
+    //initialize Rprop
+    IRpropPlus optimizer;
+    optimizer.init(error);
+    unsigned numberOfSteps = 10000;
+    for(unsigned step = 0; step != numberOfSteps; ++step){
+        optimizer.step(error);
+    }
+
+  }
+
+If you don't know how to use and evaluate the trained model you will find the information in the getting started section.
+
+
+Multiclass Training
+----------------------
+When training networks with more than two classes it is
+not advisable anymore to use the ``NegativeClassificationLogLikelihood`` loss. It assumes
+that every neuron (aside from the binary case) encodes one class, that all neurons
+can only take values greater than zero and that the activation of all output neurons sums
+to one, thus they need to form a proper probability :math:`p(c_i|x)` where :math:`c_i`
+is the ith class and :math:`x` the current input.
+A neural network typically does not perform normalisation in any sense. Thus in this
+case the output must either be normalised, or the ``CrossEntropy`` is to be used instead.
+The cross entropy uses an exponential normalisation under the assumption that the output
+neurons of the network are linear and applies the maximum log likelihood principle on
+the normalised values. This can also be achieved by using a proper normalisation model.
+
+
+Other network types
+---------------------
+
+Shark offers many different types of neural other neural networks,
+including radial basis function networks (:doxy:`RBFNet`)
+and recurrent neural networks (:doxy:`RNNet`)
+as well as support vector and regularization networks.
+
+Full example program
+----------------------
+
+The full example program is  :doxy:`FFNNBasicTutorial.cpp`.
+Th same example using a connection matrix to define the network
+can be found at :doxy:`FFNNSetStructureTutorial.cpp`.
+The following two files explain multi class classification with cross entropy:
+
+Example with Cross Entropy :doxy:`FFNNMultiClassCrossEntropy.cpp`.
+Normalised output  :doxy:`FFNNMultiClassNormalizedTraining.cpp`.
+
+Both ways lead to the exact same results. Thus the second example explains the principle
+of cross entropy learning.
+
+References
+^^^^^^^^^^
+
+.. [Bishop1995] C.M. Bishop. Neural networks for pattern recognition. Oxford University Press, 1995.
+
+.. [IgelHüsken2003] C. Igel and M. Hüsken.
+   Empirical Evaluation of the Improved Rprop Learning Algorithm. Neurocomputing 50(C), pp. 105-123, 2003
+
+.. [ReedMarks1998] R.D. Redd and R.J. Marks. Neural smithing:
+   supervised learning in feedforward artificial neural networks. MIT  Press, 1998
+
+.. [Riedmiller1994] M. Riedmiller.
+   Advanced supervised learning in multilayer perceptrons-from backpropagation to adaptive learning techniques. International Journal of Computer Standards and Interfaces 16(3), pp. 265-278, 1994.

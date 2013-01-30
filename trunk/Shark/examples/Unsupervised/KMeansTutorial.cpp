@@ -1,0 +1,78 @@
+//===========================================================================
+/*!
+ *  \brief k-means Clustering Tutorial Sample Code, requires the data
+ *  set faithful.csv
+ *
+ *  \author C. Igel
+ *  \date 2011
+ *
+ *  <BR><HR>
+ *  This file is part of Shark. This library is free software;
+ *  you can redistribute it and/or modify it under the terms of the
+ *  GNU General Public License as published by the Free Software
+ *  Foundation; either version 3, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this library; if not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+//===========================================================================
+
+#include <shark/Data/Csv.h>
+#include <shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h>
+
+#include <shark/Algorithms/KMeans.h>
+#include <shark/Models/Clustering/HardClusteringModel.h>
+
+#include <iostream>
+
+using namespace shark;
+using namespace std;
+
+int main() {
+	// read data
+	UnlabeledData<RealVector> data;
+	import_csv(data, "data/faithful.csv", " ");
+
+	// write statistics of input data
+	cout << "number of data points: " << data.size() << " dimensions: " << dataDimension(data) << endl;
+
+	// normalize data
+	Normalizer<> normalizer;
+	NormalizeComponentsUnitVariance<> normalizingTrainer;
+	normalizingTrainer.train(normalizer, data);
+	data = normalizer(data);
+
+	// compute centroids using k-means clustering
+	Centroids centroids;
+	size_t iterations = kMeans(data, 2, centroids);
+
+	// report number of iterations by the clustering algorithm
+	cout << "iterations: " << iterations << endl;
+
+	// write cluster centers/centroids
+	Data<RealVector> const& c = centroids.centroids();
+	cout<<c<<std::endl;
+
+	// cluster data
+	HardClusteringModel<RealVector> model(&centroids);
+	Data<unsigned> clusters = model(data);
+
+	// write results to files
+	ofstream c1("cl1.csv");
+	ofstream c2("cl2.csv");
+	ofstream cc("clc.csv");
+	for(std::size_t i=0; i != data.size(); i++) {
+		if(clusters(i)) 
+			c1 << data(i)(0) << " " << data(i)(1) << endl;
+		else 
+			c2 << data(i)(0) << " " << data(i)(1) << endl;
+	}
+	cc << c(0)(0) << " " << c(0)(1) << endl;
+	cc << c(1)(0) << " " << c(1)(1) << endl;
+}

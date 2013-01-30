@@ -1,0 +1,69 @@
+Multi-Objective Covariance Matrix Adaptation Evolution Strategy
+===============================================================
+
+The multi-objective covariance matrix adaptation evolution strategy
+(MO-CMA-ES) is one of the most powerful evolutionary algorithms for
+multi-objective real-valued optimization. In Shark, we provide a
+reference implementation of the algorithm (see :doxy:`MOCMA.h`) that is
+integrated with the optimizer class hierarchy.
+
+This tutorial illustrates applying the MO-CMA-ES to the :doxy:`DTLZ2`
+benchmark function. Please note that the methods presented here apply
+to all multi-objective optimizers available in the Shark
+library. That is, applying an optimizer to an objective function
+requires the following steps:
+
+* Instantiate and configure the objective function.
+* Instantiate the optimizer.
+* Configure the optimizer instance for the objective function instance.
+* Execute the optimizer until a termination criterion is fulfilled.
+
+First of all, the following header files are required: ::
+
+ // Implementation of the MO-CMA-ES
+ #include <shark/Algorithms/DirectSearch/MOCMA.h>
+ // Access to benchmark functions
+ #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
+
+Next, an instance of the objective function is created and configured
+for a two-dimensional objective space and a three-dimensional search
+space, respectively: ::
+
+    shark::DTLZ2 dtlz2;
+    dtlz2.setNoVariables( 3 );
+    dtlz2.setNoObjectives( 2 );
+
+Thereafter, the optimizer is instantiated and initialized for the objective function instance: ::
+
+    shark::detail::MOCMA mocma;
+    mocma.init( dtlz2 );
+
+Subsequently, we declare a variable for storing the current
+approximation of the Pareto-optimal front: ::
+
+    std::vector<
+	shark::TypedSolution<
+	    shark::DTLZ2::SearchPointType,
+	    shark::DTLZ2::ResultType
+	>
+    > currentSolution;
+
+In general, the result of an iteration of a multi-objective optimizer
+is a set of tuples consisting of the best known search point and its
+associated vector-valued fitness valuess.
+
+Finally, we iterate the optimizer until the objective function
+instance has been evaluated 25000 times: ::
+
+    while( dtlz2.evaluationCounter() < 25000 ) {
+	currentSolution = mocma.step( dtlz2 );
+    }
+
+Running the example and visualizing the resulting Pareto-front approximation with the help of gnuplot will give you the following graphics: 
+
+.. image:: ../images/mocma_dtlz2.svg
+   :width: 700px
+   :height: 500px
+   :align: center
+
+Please see the file :doxy:`MOCMASimple.cpp` for the complete source code of this tutorial.
