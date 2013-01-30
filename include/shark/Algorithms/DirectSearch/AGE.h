@@ -1,0 +1,475 @@
+/**
+ *
+ *  \brief AGE.h
+ *
+ *  \author T.Voss
+ *  \date 2011
+ *
+ *  \par Copyright (c) 1998-2007:
+ *      Institut f&uuml;r Neuroinformatik<BR>
+ *      Ruhr-Universit&auml;t Bochum<BR>
+ *      D-44780 Bochum, Germany<BR>
+ *      Phone: +49-234-32-25558<BR>
+ *      Fax:   +49-234-32-14209<BR>
+ *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *      <BR>
+ *
+ *
+ *  <BR><HR>
+ *  This file is part of Shark. This library is free software;
+ *  you can redistribute it and/or modify it under the terms of the
+ *  GNU General Public License as published by the Free Software
+ *  Foundation; either version 3, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this library; if not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+#pragma once
+
+#include <shark/Algorithms/AbstractOptimizer.h>
+#include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
+#include <shark/Core/SearchSpaces/VectorSpace.h>
+#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
+
+#include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
+#include <shark/Algorithms/DirectSearch/TypedIndividual.h>
+#include <shark/Core/Traits/OptimizerTraits.h>
+// MOO specific stuff
+#include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
+#include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
+#include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
+#include <shark/Algorithms/DirectSearch/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
+#include <shark/Algorithms/DirectSearch/RankShareComparator.h>
+
+// AGE specific stuff
+#include <shark/Algorithms/DirectSearch/Operators/Selection/BinaryTournamentSelection.h>
+#include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
+#include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
+#include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
+
+namespace shark {
+
+namespace detail {
+
+namespace age {
+/**
+ * \namespace Internal namespace of the AGE.
+ */
+
+/**
+ * \brief The individual type of the AGE.
+ */
+typedef TypedIndividual<RealVector> Individual;
+
+/**
+ * \brief The population type of the AGE.
+ */
+typedef std::vector<Individual> Population;
+}
+
+/**
+ * \brief Implements the AGE.
+ *
+ * Please see the following papers for further reference:
+ *	- Bringmann, Friedrich, Neumann, Wagner. Approximation-Guided Evolutionary Multi-Objective Optimization. IJCAI '11.
+ */
+class AGE {
+ protected:
+  /** \cond */
+  struct AdditiveEpsilonIndicator {
+    static double calc( const age::Individual & a, const age::Individual & b ) {
+      double result = 0;//-std::numeric_limits<double>::max();
+      for( unsigned int i = 0; i < a.fitness( tag::PenalizedFitness() ).size(); i++ ) {
+        result = std::max( result, a.fitness( tag::PenalizedFitness() )[ i ] - b.fitness( tag::PenalizedFitness() )[i] );
+      }
+      return( result );
+    }
+  };
+
+  struct CacheElement {
+    // age::Population::const_iterator m_p1;
+    std::size_t m_p1;
+    double m_a1;
+    // age::Population::const_iterator m_p2;
+    std::size_t m_p2;
+    double m_a2;
+  };
+
+  struct MinElement {
+
+    MinElement( const age::Individual & a ) : m_a( a ) {
+    }
+
+    bool operator()( const age::Individual & x, const age::Individual & y ) const {
+      return( AdditiveEpsilonIndicator::calc( x, m_a ) < AdditiveEpsilonIndicator::calc( y, m_a ) );
+    }
+
+    const age::Individual & m_a;
+
+  };
+
+  std::vector< CacheElement > preProcess( const age::Population & archive, const age::Population & pop ) const {
+    std::vector< CacheElement > result( archive.size() );
+
+    for( std::size_t i = 0; i < archive.size(); i++ ) {
+      result[ i ].m_a1 = result[ i ].m_a2 = std::numeric_limits<double>::max();
+      // MinElement me( archive[i] );
+      //result[i].m_p1 = result[i].m_p2 = pop.end();
+      // for( age::Population::const_iterator it = pop.begin(); it != pop.end(); ++it ) {
+      for( std::size_t j = 0; j < pop.size(); j++ ) {
+
+        /*if( result[i].m_p1 == pop.end() ) {
+          result[i].m_p1 = it;
+          continue;
+          }*/
+
+        //if( me( *result[i].m_p1, *it ) ) {
+        if( AdditiveEpsilonIndicator::calc( pop[j], archive[i] ) < result[ i ].m_a1 ) {
+          result[i].m_p1 = j;
+          result[i].m_a1 = AdditiveEpsilonIndicator::calc( pop[j], archive[i] );
+        }
+      }
+
+      for( std::size_t j = 0; j < pop.size(); j++ ) {
+        if( result[ i ].m_p1 == j )
+          continue;
+        /*if( result[i].m_p1 == pop.end() ) {
+          result[i].m_p1 = it;
+          continue;
+          }*/
+
+        //if( me( *result[i].m_p1, *it ) ) {
+        if( AdditiveEpsilonIndicator::calc( pop[j], archive[i] ) < result[ i ].m_a2 ) {
+          result[i].m_p2 = j;
+          result[i].m_a2 = AdditiveEpsilonIndicator::calc( pop[j], archive[i] );
+        }
+      }
+
+      /*for( age::Population::const_iterator it = pop.begin(); it != pop.end(); ++it ) {
+        if( it == result[i].m_p1 )
+        continue;
+
+        if( result[i].m_p2 == pop.end() ) {
+        result[i].m_p2 = it;
+        continue;
+        }
+
+        if( me( *result[i].m_p2, *it ) ) {
+        result[i].m_p2 = it;
+        result[i].m_a2 = AdditiveEpsilonIndicator::calc( *it, archive[i] );
+        }
+        }*/
+      // result[ i ] = preProcess( archive[ i ], pop );
+
+
+    }
+    return( result );
+  }
+
+  double beta( std::size_t p ) const {
+    double result = -std::numeric_limits<double>::max();
+    for( std::vector< CacheElement >::const_iterator itt = m_cache.begin(); itt != m_cache.end(); ++itt ) {
+      if( itt->m_p1 == p )
+        result = std::max( result, itt->m_a2 );
+    }
+
+    return( result );
+  }
+
+  /** \endcond */
+
+  std::vector< CacheElement > m_cache;
+
+  age::Population m_archive; ///< Population of size \f$\mu + 1\f$.
+  age::Population m_pop; ///< Population of size \f$\mu + 1\f$.
+  unsigned int m_mu; ///< Population size \f$\mu\f$.
+  unsigned int m_lambda; ///< Offspring population size \f$\lambda\f$.
+
+  ParetoDominanceComparator< shark::tag::PenalizedFitness > m_pdc; /// Pareto dominance comparator.
+  shark::moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
+  RankShareComparator rsc; ///< Comparator for individuals based on their multi-objective rank and share.
+  FastNonDominatedSort m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort. 
+  IndicatorBasedSelection<HypervolumeIndicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
+  BinaryTournamentSelection< ParetoDominanceComparator<shark::tag::PenalizedFitness> > m_binaryTournamentSelection; ///< Mating selection operator.
+  SimulatedBinaryCrossover< RealVector > m_sbx; ///< Crossover operator.
+  PolynomialMutator m_mutator; ///< Mutation operator.
+
+  double m_crossoverProbability; ///< Crossover probability.
+
+ public:
+  /**
+   * \brief The result type of the optimizer, a vector of tuples \f$( \vec x, \vec{f}( \vec{x} )\f$.
+   */
+  typedef std::vector< ResultSet< RealVector, RealVector > > SolutionSetType;
+
+  /**
+   * \brief Default c'tor.
+   */
+  AGE() : m_binaryTournamentSelection( m_pdc ) {
+    init();
+  }
+
+  /**
+   * \brief Returns the name of the algorithm.
+   */
+  std::string name() const {
+    return( "AGE1" );
+  }
+
+  /**
+   * \brief Stores/loads the algorithm's state.
+   * \tparam Archive The type of the archive.
+   * \param [in,out] archive The archive to use for loading/storing.
+   * \param [in] version Currently unused.
+   */
+  template<typename Archive>
+  void serialize( Archive & archive, const unsigned int version ) {
+    archive & m_pop; ///< Population of size \f$\mu + 1\f$.
+    archive & m_mu; /// Population size \f$\mu\f$.
+
+    archive & m_evaluator; ///< Evaluation operator.
+    archive & rsc; ///< Comparator for individuals based on their multi-objective rank and share.
+    archive & m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort. 
+    archive & m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
+    archive & m_sbx; ///< Crossover operator.
+    archive & m_mutator; ///< Mutation operator.
+
+    archive & m_crossoverProbability; ///< Crossover probability.
+  }
+
+  /**
+   * \brief Initializes the algorithm from a configuration-tree node.
+   *
+   * The following sub keys are recognized:
+   *	- Mu, type: unsigned int, default value: 100.
+   *	- Lambda, type: unsigned int, default value: 100.
+   *	- CrossoverProbability, type: double, default value: 0.8.
+   *	- NC, type: double, default value: 10.
+   *	- NM, type: double; default value: 20.
+   *
+   * \param [in] node The configuration tree node.
+   */
+  void configure( const PropertyTree & node ) {
+    init( 
+        node.get( "Mu", 100 ),
+        node.get( "Lambda", 100 ),
+        node.get( "CrossoverProbability", 0.9 ),
+        node.get( "NC", 20.0 ),
+        node.get( "NM", 20.0 )
+          );
+  }
+
+  /**
+   * \brief Initializes the algorithm.
+   * \param [in] mu The population size. 
+   * \param [in] lambda The offspring population size. 
+   * \param [in] pc Crossover probability, default value: 0.8.
+   * \param [in] nc Parameter of the simulated binary crossover operator, default value: 10.0.
+   * \param [in] nm Parameter of the mutation operator, default value: 20.0.
+   */
+  void init( unsigned int mu = 100,
+             unsigned int lambda = 1,
+             double pc = 0.9,
+             double nc = 20.0,
+             double nm = 20.0 ) {
+    m_mu = mu;
+    m_lambda = lambda;
+    m_crossoverProbability = pc;
+    m_sbx.m_nc = nc;
+    m_mutator.m_nm = nm;
+
+    m_selection.setMu( m_mu );
+  }
+
+  /**
+   * \brief Initializes the algorithm for the supplied objective function.
+   * \tparam ObjectiveFunction The type of the objective function, 
+   * needs to adhere to the concept of an AbstractObjectiveFunction.
+   * \param [in] f The objective function.
+   * \param [in] sp An initial search point.
+   */
+  template<typename Function>
+  void init( const Function & f, const RealVector & sp ) {
+
+    (void) sp;
+
+    m_pop.resize( m_mu + 1 );
+
+    std::size_t noObjectives = 0;
+
+    for( age::Population::iterator it = m_pop.begin(); it != m_pop.end(); ++it ) {
+      it->age()=0;
+
+      f.proposeStartingPoint( **it );
+      boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator( f, **it );
+      it->fitness( shark::tag::PenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
+      it->fitness( shark::tag::UnpenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
+
+      noObjectives = std::max( noObjectives, it->fitness( shark::tag::PenalizedFitness() ).size() );
+      it->setNoObjectives( noObjectives );
+    }
+
+    m_selection.setNoObjectives( noObjectives );
+
+    m_sbx.m_prob = 0.5;
+    try {
+      m_sbx.m_lower = ObjectiveFunctionTraits<Function>::lowerBounds( f.numberOfVariables() );
+    } catch( shark::Exception & /*e*/ ) {
+      m_sbx.m_lower = RealVector( f.numberOfVariables(), -1E20 );
+    }
+
+    try {
+      m_sbx.m_upper = ObjectiveFunctionTraits<Function>::upperBounds( f.numberOfVariables() );
+    } catch( shark::Exception & /*e*/ ) {
+      m_sbx.m_upper = RealVector( f.numberOfVariables(), 1E20 );
+    }
+
+    m_mutator.m_prob = 1.0 / f.numberOfVariables();
+    m_mutator.m_lower = m_sbx.m_lower;
+    m_mutator.m_upper = m_sbx.m_upper;
+
+    m_fastNonDominatedSort( m_pop );
+    m_archive.clear();
+    for( age::Population::iterator it = m_pop.begin(); it != m_pop.end(); ++it ) {
+      if( it->rank() > 1 )
+        continue;
+      m_archive.push_back( *it );
+    }
+
+    m_cache = preProcess( m_archive, m_pop );
+  }
+
+  /**
+   * \brief Executes one iteration of the algorithm.
+   * \tparam The type of the objective to iterate upon.
+   * \param [in] f The function to iterate upon.
+   * \returns The Pareto-set/-front approximation after the iteration.
+   */
+  template<typename Function>
+  SolutionSetType step( const Function & f ) {
+
+    age::Individual mate1( *m_binaryTournamentSelection( m_pop.begin(), m_pop.begin() + m_mu ) );
+    age::Individual mate2( *m_binaryTournamentSelection( m_pop.begin(), m_pop.begin() + m_mu ) );
+
+    if( Rng::coinToss( m_crossoverProbability ) ) {
+      m_sbx( mate1, mate2 );
+    }
+
+    if( Rng::coinToss() ) {
+      m_mutator( mate2 );
+      m_pop.back() = mate2;
+    } else  {
+      m_mutator( mate1 );
+      m_pop.back() = mate1;
+    }
+
+    boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator( f, *m_pop.back() );
+    m_pop.back().fitness( shark::tag::PenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
+    m_pop.back().fitness( shark::tag::UnpenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
+
+
+    // Iterate the archive.
+    ParetoDominanceComparator< shark::tag::PenalizedFitness > pdc;
+    bool dominated = false;
+    age::Population::iterator it = m_archive.begin();
+    while( it != m_archive.end() ) {
+      switch( pdc( m_pop.back(), *it ) ) {
+        case ParetoDominanceComparator< shark::tag::PenalizedFitness >::A_STRICTLY_DOMINATES_B:
+        case ParetoDominanceComparator< shark::tag::PenalizedFitness >::A_WEAKLY_DOMINATES_B:
+          it = m_archive.erase( it );
+          break;
+        case ParetoDominanceComparator< shark::tag::PenalizedFitness >::B_STRICTLY_DOMINATES_A:
+        case ParetoDominanceComparator< shark::tag::PenalizedFitness >::B_WEAKLY_DOMINATES_A:
+          dominated = true;
+          break;
+        case ParetoDominanceComparator< shark::tag::PenalizedFitness >::A_EQUALS_B:
+        case ParetoDominanceComparator< shark::tag::PenalizedFitness >::TRADE_OFF:
+          ++it;
+          break;
+      }
+
+      if( dominated )
+        break;
+    }
+
+    if( !dominated ) 
+      m_archive.push_back( m_pop.back() );
+
+    m_cache = preProcess( m_archive, m_pop );
+    std::vector<double> b( m_pop.size(), -std::numeric_limits< double >::max() );
+
+    for( std::size_t i = 0; i < m_archive.size(); i++ ) {
+      b[ m_cache[ i ].m_p1 ] = std::max( m_cache[ i ].m_a2, b[ m_cache[ i ].m_p1 ] );
+    }
+
+    std::vector<double>::iterator maxBeta = std::min_element( b.begin(), b.end() );
+    m_pop[ std::distance( b.begin(), maxBeta ) ] = m_pop.back();
+
+
+    m_fastNonDominatedSort( m_pop );					
+
+    SolutionSetType solutionSet;
+    for( age::Population::iterator it = m_pop.begin(); it != m_pop.begin() + m_mu; ++it ) {
+      solutionSet.push_back( shark::makeResultSet( *(*it), it->fitness( shark::tag::UnpenalizedFitness() ) ) ) ;
+    }
+
+    return( solutionSet );
+  }
+};
+}
+
+/**
+ * \brief AGE specialization of optimizer traits.
+ */
+template<>
+struct OptimizerTraits<detail::AGE> {
+  /**
+   * \brief Prints out the configuration options and usage remarks of the algorithm to the supplied stream.
+   * \tparam Stream The type of the stream to output to.
+   * \param [in,out] s The stream to print usage information to.
+   */
+  template<typename Stream>
+  static void usage( Stream & s ) {
+    s << "AGE usage information:" << std::endl;
+    s << "\t Mu, size of the population, default value: \t\t 100" << std::endl;
+    s << "\t Lambda, size of the offspring population, default value: \t\t 100" << std::endl;
+    s << "\t CrossoverProbability, type: double, default value: \t\t 0.8." << std::endl;
+    s << "\t NC, type: double, default value: \t\t 10." << std::endl;
+    s << "\t NM, type: double; default value: \t\t 20." << std::endl;
+  }
+
+  template<typename Tree>
+  static void defaultConfig( Tree & node ) {
+    node.template add<unsigned int>( 
+        "Mu", 
+        100);
+    node.template add<unsigned int>( 
+        "Lambda", 
+        1);
+    node.template add<double>( 
+        "CrossoverProbability", 
+        0.9);
+    node.template add<double>(
+        "NC", 
+        20);
+    node.template add<double>( 
+        "NM", 
+        20);
+    
+  }
+};
+
+/** \brief Injects the AGE into the inheritance hierarchy. */
+typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::AGE > AGE;
+
+ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER( AGE, shark::moo::RealValuedMultiObjectiveOptimizerFactory );
+}
+

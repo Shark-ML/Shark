@@ -1,0 +1,158 @@
+/*
+*  \par Copyright (c) 1998-2007:
+*      Institut f&uuml;r Neuroinformatik<BR>
+*      Ruhr-Universit&auml;t Bochum<BR>
+*      D-44780 Bochum, Germany<BR>
+*      Phone: +49-234-32-25558<BR>
+*      Fax:   +49-234-32-14209<BR>
+*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+*      <BR>
+*
+*
+*  <BR><HR>
+*  This file is part of Shark. This library is free software;
+*  you can redistribute it and/or modify it under the terms of the
+*  GNU General Public License as published by the Free Software
+*  Foundation; either version 3, or (at your option) any later version.
+*
+*  This library is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this library; if not, see <http://www.gnu.org/licenses/>.
+*/
+#ifndef SHARK_UNSUPERVISED_RBM_SINGLECHAINAPPROXIMATOR_H
+#define SHARK_UNSUPERVISED_RBM_SINGLECHAINAPPROXIMATOR_H
+
+#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include "Impl/DataEvaluator.h"
+
+namespace shark{
+	
+///\brief Approximates the gradient by taking samples from a single Markov chain.
+///
+///Taking samples only from a single chain leads to a high mixing rate but the correlation of the samples is higher than using
+///several chains. This approximator should be used with a sampling scheme which also achieves a faster decorrelation of samples like
+///tempering.
+template<class MarkovChainType>	
+class SingleChainApproximator: public UnsupervisedObjectiveFunction<typename MarkovChainType::VectorType>{
+public:
+	typedef UnsupervisedObjectiveFunction<typename MarkovChainType::VectorType> base_type;
+	typedef typename MarkovChainType::RBM RBM;
+	typedef typename RBM::Energy Energy;
+	typedef GibbsOperator<RBM> Gibbs;
+	typedef typename base_type::SearchPointType SearchPointType;
+	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
+	
+	
+	SingleChainApproximator(RBM* rbm): mpe_rbm(rbm),m_chain(rbm),m_k(1),m_samples(0),m_batchSize(500){
+		SHARK_ASSERT(rbm != NULL);
+
+		base_type::m_features.reset(base_type::HAS_VALUE);
+		base_type::m_features |= base_type::HAS_FIRST_DERIVATIVE;
+		base_type::m_features |= base_type::CAN_PROPOSE_STARTING_POINT;
+		
+		m_chain.setBatchSize(1);
+	};
+	
+	void setK(unsigned int k){
+		m_k = k;
+	}
+	void setNumberOfSamples(std::size_t samples){
+		m_samples = samples;
+	}
+	void setBatchSize(std::size_t batchSize){
+		m_batchSize = batchSize;
+	}
+	
+	MarkovChainType& chain(){
+		return m_chain;
+	}
+	MarkovChainType const& chain() const{
+		return m_chain;
+	}
+	
+	void configure(PropertyTree const& node){
+		PropertyTree::const_assoc_iterator it = node.find("rbm");
+		if(it!=node.not_found())
+		{
+			mpe_rbm->configure(it->second);
+		}
+		setK(node.get<unsigned int>("k",1));
+		setNumberOfSamples(node.get<unsigned int>("samples",0));
+	}
+	
+	void setData(UnlabeledData<typename RBM::VectorType> const& data){
+		m_data = data;
+		
+		//construct a gradient object to get the information about which values of the samples are needed
+		typename Energy::AverageEnergyGradient grad(&mpe_rbm->structure());
+		m_chain.flags() = grad.flagsVH();
+		m_chain.initializeChain(m_data);
+		
+	}
+
+	void proposeStartingPoint(SearchPointType& startingPoint) const{
+		startingPoint = mpe_rbm->parameterVector();
+	}
+	
+	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
+		mpe_rbm->setParameterVector(parameter);
+		m_chain.update();
+		
+		typename Energy::AverageEnergyGradient empiricalAverage(&mpe_rbm->structure());
+		typename Energy::AverageEnergyGradient modelAverage(&mpe_rbm->structure());
+		
+		detail::evaluateData(empiricalAverage,m_data,*mpe_rbm);
+		
+		//approximate the expectation of the energy gradient with respect to the model distribution
+		//using samples from the Markov chain
+		
+		//calculate number of samples to draw and size of batches used in the gradient update
+		std::size_t samplesToDraw = m_samples > 0 ? m_samples: m_data.numberOfElements();
+		
+		std::size_t batches = samplesToDraw / m_batchSize; 
+		if(samplesToDraw - batches*m_batchSize != 0){
+			++batches;
+		}
+		
+		//calculate the gradient. we do this by normal k-step sampling for exactly as many
+		//samples as calculated in samplesToDraw but saving the result in an intermediate
+		//batch variable gradientbatch. When this batch is full, we do an update step of the gradient.
+		//this is an a bit more efficient grouping and preserves us from using batches of size1 as the argument 
+		//of addVH which might be inefficient.
+		for(std::size_t batch = 0; batch != batches; ++batch){
+			//calculate the size of the next batch which is batchSize as long as there are enough samples left to draw
+			std::size_t currentBatchSize = std::min(samplesToDraw-batch*m_batchSize, m_batchSize);
+			typename MarkovChainType::SampleBatch gradientBatch(currentBatchSize, mpe_rbm->numberOfVN(),mpe_rbm->numberOfHN());
+			//fill the batch with fresh samples
+			for(std::size_t i = 0; i != currentBatchSize; ++i){
+				m_chain.step(m_k);
+				get(gradientBatch,i) = m_chain.sample();
+			}
+			//do the gradient update
+			modelAverage.addVH(gradientBatch.hidden, gradientBatch.visible);
+		}
+		
+		derivative.m_gradient.resize(mpe_rbm->numberOfParameters());
+		noalias(derivative.m_gradient) = modelAverage.result() - empiricalAverage.result();
+	
+		return std::numeric_limits<double>::quiet_NaN();
+	}
+
+private:
+	RBM* mpe_rbm;
+	mutable MarkovChainType m_chain; 
+	UnlabeledData<typename RBM::VectorType> m_data;
+
+	unsigned int m_k;
+	unsigned int m_samples;
+	std::size_t m_batchSize;
+};	
+	
+}
+
+#endif

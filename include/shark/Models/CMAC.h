@@ -1,0 +1,146 @@
+/**
+*  \author  O. Krause
+*  \date    2010-01-01
+*  \par Copyright (c) 1998-2007:
+*      Institut f&uuml;r Neuroinformatik<BR>
+*      Ruhr-Universit&auml;t Bochum<BR>
+*      D-44780 Bochum, Germany<BR>
+*      Phone: +49-234-32-25558<BR>
+*      Fax:   +49-234-32-14209<BR>
+*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+*      <BR>
+*
+*
+*  <BR><HR>
+*  This file is part of Shark. This library is free software;
+*  you can redistribute it and/or modify it under the terms of the
+*  GNU General Public License as published by the Free Software
+*  Foundation; either version 3, or (at your option) any later version.
+*
+*  This library is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this library; if not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef SHARK_ML_MODEL_CMAC_H
+#define SHARK_ML_MODEL_CMAC_H
+
+#include <shark/Models/AbstractModel.h>
+#include <shark/Rng/GlobalRng.h>
+#include <vector>
+
+namespace shark{
+
+//!
+//! \brief The CMACMap class represents a linear combination of piecewise constant functions
+//!
+//! when a point is fed into the CMAC, it is first mapped into a vector of binary features.
+//! For this purpose the inputspace is divided into several tilings. Every tiling produces a bitstring where an element
+//! is 1 if the point lies inside the tile, 0 otherwise. The concatenation of all tilings forms the feature vector which is then fed
+//! into a linear function.
+//! Usually the CMAC is only good for low dimensional input data since the size of the featurevector grows exponentially with the
+//! number of dimensions.
+//!
+class CMACMap :public AbstractModel<RealVector,RealVector>{
+protected:
+	///offset of the position of every tiling
+	RealMatrix m_offset;
+
+	///coordinate offset for every dimension in the Array
+	std::vector<size_t> m_dimOffset;
+
+	///lower bound and tileWidth for every Dimension
+	RealMatrix m_tileBounds;
+
+	///number of tilings
+	size_t m_tilings;
+	size_t m_parametersPerTiling;
+
+	size_t m_inputSize;
+	size_t m_outputSize;
+
+	///The parameters of the model
+	RealVector m_parameters;
+
+	///calculates the index in the parameter vector for the activated feature in the tiling
+	size_t getArrayIndexForTiling(size_t indexOfTiling,RealVector const& point)const;
+	///returns an index in the parameter array for each activated feature
+	std::vector<size_t> getIndizes(ConstRealMatrixRow const& point)const;
+public:
+	///\brief construct the CMAC
+	CMACMap();
+
+	///\brief initializes the structure of the cmac. it uses the same lower and upper bound for every input dimension. default is [0,1]
+	///
+	///\param inputs number of input dimensions
+	///\param outputs number of output dimensions
+	///\param numberOfTilings number of Tilings to be created
+	///\param numberOfTiles amount of tiles per dimension
+	///\param lower lower bound of input values
+	///\param upper upper bound of input values
+	///\param randomTiles flag specifying whether distance between tiles is regular or randomized
+	void setStructure(size_t inputs, size_t outputs, size_t numberOfTilings, size_t numberOfTiles, double lower = 0., double upper = 1.,bool randomTiles = false);
+
+	///\brief initializes the structure of the cmac
+	///
+	///\param inputs number of input dimensions
+	///\param outputs number of output dimensions
+	///\param numberOfTilings number of Tilings to be created
+	///\param numberOfTiles amount of tiles per dimension
+	///\param bounds lower and upper bounts for every input dimension. every row consists of (lower,upper)
+	///\param randomTiles flag specifying whether distance between tiles is regular or randomized
+	void setStructure(size_t inputs, size_t outputs, size_t numberOfTilings, size_t numberOfTiles, RealMatrix const& bounds,bool randomTiles = false);
+
+	virtual size_t inputSize()const
+	{
+		return m_inputSize;
+	}
+	virtual size_t outputSize()const
+	{
+		return m_outputSize;
+	}
+
+	virtual RealVector parameterVector()const
+	{
+		return m_parameters;
+	}
+	virtual void setParameterVector(RealVector const& newParameters)
+	{
+		SIZE_CHECK(numberOfParameters() == newParameters.size());
+		m_parameters=newParameters;
+	}
+	virtual size_t numberOfParameters()const
+	{
+		return m_parameters.size();
+	}
+
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new EmptyState());
+	}
+	
+	using AbstractModel<RealVector,RealVector>::eval;
+	void eval(const RealMatrix& patterns,RealMatrix& outputs)const;
+	void eval(const RealMatrix& patterns,RealMatrix& outputs, State& state)const{
+		eval(patterns,outputs);
+	}
+	void weightedParameterDerivative(
+		RealMatrix const& pattern, 
+		RealMatrix const& coefficients,  
+		State const& state,
+		RealVector& gradient)const;
+
+	/// From ISerializable, reads a model from an archive
+	void read( InArchive & archive );
+
+	/// From ISerializable, writes a model to an archive
+	void write( OutArchive & archive ) const;
+};
+
+}
+#endif
+

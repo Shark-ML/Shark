@@ -1,0 +1,15 @@
+{#
+    basic/sourcelink.html
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    Sphinx sidebar template: "show source" link.
+
+    :copyright: Copyright 2007-2011 by the Sphinx team, see AUTHORS.
+    :license: BSD, see LICENSE for details.
+#}
+{%- if show_source and has_source and sourcename %}
+<p class="mtshowsource">
+  <a href="{{ pathto('_sources/' + sourcename, true)|e }}"
+           rel="nofollow"><img class="sourceicon" src="{{ pathto('_static/icon_eject.png', 1) }}" alt="prev"/> {{ _('Show page source') }}</a>
+</p>
+{%- endif %}

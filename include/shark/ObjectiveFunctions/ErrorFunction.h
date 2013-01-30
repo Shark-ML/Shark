@@ -1,0 +1,99 @@
+/*!
+ *  \brief error function for supervised learning
+ *
+ *  \author T.Voss, T. Glasmachers, O.Krause
+ *  \date 2010-2011
+ *
+ *  \par Copyright (c) 1998-2011:
+ *      Institut f&uuml;r Neuroinformatik<BR>
+ *      Ruhr-Universit&auml;t Bochum<BR>
+ *      D-44780 Bochum, Germany<BR>
+ *      Phone: +49-234-32-25558<BR>
+ *      Fax:   +49-234-32-14209<BR>
+ *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *      <BR>
+ *
+ *
+ *  <BR><HR>
+ *  This file is part of Shark. This library is free software;
+ *  you can redistribute it and/or modify it under the terms of the
+ *  GNU General Public License as published by the Free Software
+ *  Foundation; either version 3, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this library; if not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+#ifndef SHARK_OBJECTIVEFUNCTIONS_ERRORFUNCTION_H
+#define SHARK_OBJECTIVEFUNCTIONS_ERRORFUNCTION_H
+
+
+#include <shark/Models/AbstractModel.h>
+#include <shark/ObjectiveFunctions/AbstractCost.h>
+#include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
+#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include "Impl/FunctionWrapperBase.h"
+
+#include <boost/scoped_ptr.hpp>
+
+namespace shark{
+
+///
+/// \brief Objective function for supervised learning
+///
+/// \par
+/// An ErrorFunction object is an objective function for
+/// learning the parameters of a model from data by means
+/// of minimization of a cost function. The value of the
+/// objective function is the cost of the model predictions
+/// on the training data, given the targets.
+///
+/// \par
+/// The class detects automatically when an AbstractLoss is used 
+/// as Costfunction. In this case, it uses faster algorithms 
+/// for empirical risk minimization
+
+template<class InputType = RealVector, class LabelType = RealVector>
+class ErrorFunction : public SupervisedObjectiveFunction<InputType, LabelType>
+{
+public:
+	typedef SupervisedObjectiveFunction<InputType,LabelType> base_type;
+	typedef typename base_type::SearchPointType SearchPointType;
+	typedef typename base_type::ResultType ResultType;
+	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
+	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
+
+	template<class OutputType>
+	ErrorFunction(AbstractModel<InputType,OutputType>* model, AbstractCost<LabelType, OutputType>* cost);
+	template<class OutputType>
+	ErrorFunction(AbstractModel<InputType,OutputType>* model, AbstractCost<LabelType, OutputType>* cost, LabeledData<InputType, LabelType> const& dataset);
+	ErrorFunction(const ErrorFunction& op);
+	ErrorFunction<InputType,LabelType>& operator=(const ErrorFunction<InputType,LabelType>& op);
+
+	void updateFeatures();
+
+	void configure(const PropertyTree & node);
+	void setDataset(LabeledData<InputType, LabelType> const& dataset);
+
+	void proposeStartingPoint(SearchPointType& startingPoint) const;
+
+	double eval(RealVector const& input) const;
+	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;
+	ResultType evalDerivative( const SearchPointType & input, SecondOrderDerivative & derivative ) const;
+	
+	template<class I,class L>
+	friend void swap(const ErrorFunction<I,L>& op1, const ErrorFunction<I,L>& op2);
+
+private:
+	boost::scoped_ptr<detail::FunctionWrapperBase<InputType,LabelType> > m_wrapper;
+};
+
+}
+#include "Impl/ErrorFunction.inl"
+#endif

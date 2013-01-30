@@ -1,0 +1,131 @@
+/*!
+ *
+ *  \author  O.Krause
+ *  \date    2012
+ *
+ *  \par Copyright (c) 1998-2001:
+ *      Institut f&uuml;r Neuroinformatik<BR>
+ *      Ruhr-Universit&auml;t Bochum<BR>
+ *      D-44780 Bochum, Germany<BR>
+ *      Phone: +49-234-32-25558<BR>
+ *      Fax:   +49-234-32-14209<BR>
+ *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *      <BR>
+ *
+ *
+ *
+ *  <BR><HR>
+ *  This file is part of Shark. This library is free software;
+ *  you can redistribute it and/or modify it under the terms of the
+ *  GNU General Public License as published by the Free Software
+ *  Foundation; either version 3, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this library; if not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#ifndef SHARK_LINALG_IMPL_SOLVE_TRIANGULAR_INL
+#define SHARK_LINALG_IMPL_SOLVE_TRIANGULAR_INL
+
+#include <shark/LinAlg/BLAS/Impl/numeric_bindings/trsm.h>
+#include <shark/LinAlg/BLAS/Impl/numeric_bindings/trsv.h>
+
+
+namespace shark{namespace detail{
+
+////////////////SOLVE MATRIX_VECTOR///////////////////
+template<class MatT,class VecT, class MatrixTag>
+void solveTriangularSystemInPlace(
+	const blas::matrix_expression<MatT>& A, 
+	blas::vector_expression<VecT>& b,
+	SolveAXB,
+	MatrixTag
+){
+	bindings::trsv<MatrixTag::upper,MatrixTag::unit>(A,b);
+}
+///solving xA=b is equal to transposing A
+template<class MatT,class VecT,class MatrixTag>
+void solveTriangularSystemInPlace(
+	const blas::matrix_expression<MatT>& A, 
+	blas::vector_expression<VecT>& b,
+	SolveXAB,
+	MatrixTag
+){
+	bindings::trsv<!MatrixTag::upper,MatrixTag::unit>(trans(A),b);
+}
+
+//////////////////SOLVE CHOLESKY////////////////////////////////
+template<class MatL,class Arg>
+void solveTriangularCholeskyInPlace(
+	blas::matrix_expression<MatL> const& L, 
+	Arg& b,
+	SolveAXB
+){
+	shark::solveTriangularSystemInPlace<SolveAXB,Lower>(L,b);
+	shark::solveTriangularSystemInPlace<SolveAXB,Upper>(trans(L),b);
+}
+template<class MatL,class Arg>
+void solveTriangularCholeskyInPlace(
+	blas::matrix_expression<MatL> const& L, 
+	Arg& b,
+	SolveXAB
+){
+	shark::solveTriangularSystemInPlace<SolveXAB,Upper>(trans(L),b);
+	shark::solveTriangularSystemInPlace<SolveXAB,Lower>(L,b);
+}
+
+}}
+
+template<class System,class DiagType,class MatT,class VecT>
+void shark::solveTriangularSystemInPlace(
+	blas::matrix_expression<MatT> const& A, 
+	blas::vector_expression<VecT>& b
+){
+	SIZE_CHECK(A().size1() == A().size2());
+	SIZE_CHECK(A().size2() == b().size());
+
+	//dispatcher
+	detail::solveTriangularSystemInPlace(A,b,System(),DiagType());
+
+}
+
+template<class System, class DiagType,class MatA,class MatB>
+void shark::solveTriangularSystemInPlace(
+	blas::matrix_expression<MatA> const& matA, 
+	blas::matrix_expression<MatB>& matB
+){
+	SIZE_CHECK(matA().size1() == matA().size2());
+	//SIZE_CHECK(matA().size2() == matB().size1());
+	
+	detail::bindings::trsm<DiagType::upper,System::left,DiagType::unit>(matA,matB);
+}
+
+template<class System,class MatL,class MatB>
+void shark::solveTriangularCholeskyInPlace(
+	blas::matrix_expression<MatL> const& L, 
+	blas::matrix_expression<MatB>& B
+){
+	SIZE_CHECK(L().size1() == L().size2());
+//	SIZE_CHECK(L().size2() == B().size1());
+	
+	detail::solveTriangularCholeskyInPlace(L,B(),System());
+}
+template<class System,class MatL,class VecB>
+void shark::solveTriangularCholeskyInPlace(
+	const blas::matrix_expression<MatL>& L, 
+	blas::vector_expression<VecB>& b
+){
+	SIZE_CHECK(L().size1() == L().size2());
+	SIZE_CHECK(L().size2() == b().size());
+	
+	detail::solveTriangularCholeskyInPlace(L,b(),System());
+}
+
+#endif
