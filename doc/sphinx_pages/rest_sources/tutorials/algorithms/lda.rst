@@ -50,7 +50,7 @@ can read, inspect and split the data as described in the
        << "input dimension: " << inputDimension(data) << endl;
 
    // split testing data from the set
-   ClassificationDataset dataTest = splitAfterElement(data,311);
+   ClassificationDataset dataTest = splitAtElement(data,311);
 
 Model and learning algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -46,7 +46,7 @@ int main() {
 
 
 	//Split the dataset into a training and a test dataset
-	ClassificationDataset dataTest = splitAfterElement(data,311);
+	ClassificationDataset dataTest = splitAtElement(data,311);
 
 	cout << "Training set - number of data points: " << data.size()
 		 << " number of classes: " << numberOfClasses(data)

@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_Test )
 	
 	//split in the middle of a batch
 	UnlabeledData<int> set(inputs,10);
-	splitAfterElement(set,55);
+	splitAtElement(set,55);
 	UnlabeledData<int> train = trainingSet(set);
 	UnlabeledData<int> test = testSet(set);
 	
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_UnevenBatches_Test )
 	
 	//split in the middle of a batch
 	
-	splitAfterElement(set,53);
+	splitAtElement(set,53);
 	UnlabeledData<int> train = trainingSet(set);
 	UnlabeledData<int> test = testSet(set);
 	
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_Boundary_Test )
 	
 	//split between batches
 	UnlabeledData<int> set(inputs,10);
-	splitAfterElement(set,40);
+	splitAtElement(set,40);
 	UnlabeledData<int> train = trainingSet(set);
 	UnlabeledData<int> test = testSet(set);
 	
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_UnevenBatches_Boundary_Test )
 	
 	//split in the middle of a batch
 	
-	splitAfterElement(set,55);
+	splitAtElement(set,55);
 	UnlabeledData<int> train = trainingSet(set);
 	UnlabeledData<int> test = testSet(set);
 	

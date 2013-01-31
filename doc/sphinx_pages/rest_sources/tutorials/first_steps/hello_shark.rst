@@ -48,7 +48,7 @@ and set aside another part for testing. Splitting a data set can be done from wi
 Shark: the next line splits (i.e., removes) a test set from our loaded data and stores
 it inside a new dataset. We choose the training set to be 80% of the available data::
 
-    ClassificationDataset test = splitAfterElement(data,0.8*data.numberOfElements());
+    ClassificationDataset test = splitAtElement(data,0.8*data.numberOfElements());
 
 After this operation, ``data`` is only 80% of its former size, and ``test`` holds the
 remaining 20%. See the :ref:`data tutorials <label_for_data_tutorials>` for similar

@@ -97,7 +97,7 @@ by calling ::
 
 .. todo::
 
-    also mention splitAfterElement - this is right now only
+    also mention splitAtElement - this is right now only
     done in the hello-world tutorial and clearly also belongs here.
 
 

@@ -27,7 +27,7 @@ int main(){
 	RegressionDataset data = loadData("data/regressionInputs.csv","data/regressionLabels.csv");
 
 	//next we split a test set from the dataset. The first 80% of data points are training data.
-	RegressionDataset test = splitAfterElement(data,static_cast<std::size_t>(0.8*data.numberOfElements()));
+	RegressionDataset test = splitAtElement(data,static_cast<std::size_t>(0.8*data.numberOfElements()));
 
 	//a linear model with as many in and outputs as the data has
 	LinearModel<> model(inputDimension(data), labelDimension(data));

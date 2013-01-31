@@ -12,7 +12,7 @@ int main(){
 	import_csv(data, "data/quickstartData.csv", LAST_COLUMN, " ");
 	
 	//create a test and training partition of the data
-	ClassificationDataset test = splitAfterElement(data,static_cast<std::size_t>(0.8*data.numberOfElements()));
+	ClassificationDataset test = splitAtElement(data,static_cast<std::size_t>(0.8*data.numberOfElements()));
 
 	//create a classifier for the problem
 	LinearClassifier classifier;

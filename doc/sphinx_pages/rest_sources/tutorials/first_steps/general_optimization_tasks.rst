@@ -64,11 +64,11 @@ our ``RegressionDataset`` (which again is a simple typedef for ``LabeledData<Rea
 
 Now we can load the data using this function, and then create a training and test set
 from it. We will again use 80% for training and 20% for testing. As in the previous
-tutorial, we call  ``splitAfterElement``, which splits the last part from our dataset
+tutorial, we call  ``splitAtElement``, which splits the last part from our dataset
 into the test set. Our original data set from then on only contains the training data::
 
   RegressionDataset data = loadData( "data/regressionInputs.csv", "data/regressionLabels.csv" );
-  RegressionDataset test = splitAfterElement( data, 0.8*data.numberOfElements() );
+  RegressionDataset test = splitAtElement( data, 0.8*data.numberOfElements() );
 
 
 
