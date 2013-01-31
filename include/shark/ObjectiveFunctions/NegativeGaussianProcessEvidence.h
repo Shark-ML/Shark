@@ -70,6 +70,7 @@ public:
 	{
 		base_type::m_name = "NegativeGaussianProcessEvidence";
 		if (kernel->hasFirstParameterDerivative()) this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
+		setThreshold(0.);
 	}
 
 	/// \param dataset: training data for the Gaussian process
@@ -84,6 +85,7 @@ public:
 	{
 		base_type::m_name = "NegativeGaussianProcessEvidence";
 		if (kernel->hasFirstParameterDerivative()) this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
+		setThreshold(0.);
 	}
 
 	/// inherited from SupervisedObjectiveFunction
@@ -213,12 +215,29 @@ public:
 		shark::init(derivative.m_gradient)<<kernelGradient,betaInvDerivative;
 		derivative.m_gradient *= -1.0;
 
+		// truncate gradient vector 
+		for(std::size_t i=0; i<derivative.m_gradient.size(); i++) 
+			if(fabs(derivative.m_gradient(i)) < m_derivativeThresholds(i)) derivative.m_gradient(i) = 0;
+
+
 		// compute the evidence
 		//compute determinant of M (see eval for why this works)
 		double logDetM = 2* trace(log(choleskyFactor));
 		double e = 0.5 * (-logDetM - inner_prod(t, z) - N * std::log(2.0 * M_PI));
 		return -e;
 	}
+	
+	/// set threshold value for truncating partial derivatives
+	void setThreshold(double d) {
+		m_derivativeThresholds = RealVector(mep_kernel->numberOfParameters(), d);
+	}
+
+	/// set threshold values for truncating partial derivatives
+	void setThresholds(RealVector &c) {
+		SHARK_ASSERT(m_derivativeThresholds.size() == c.size());
+		m_derivativeThresholds = c;
+	}
+		
 
 private:
 	RealVector generateLabelVector()const{
@@ -235,6 +254,9 @@ private:
 	}
 	/// pointer to external data set
 	DatasetType m_dataset;
+
+	/// thresholds for setting derivatives to zero
+	RealVector  m_derivativeThresholds;
 
 	/// pointer to external kernel function
 	KernelType* mep_kernel;
