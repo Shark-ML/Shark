@@ -48,7 +48,7 @@ Download and unpack sources
 Either download and unpack the latest official Shark source-code release from :doc:`here
 <../downloads/downloads>`, or check out the current SVN version via (a ``Shark`` directory
 will be created as a subfolder -- if you want the tree contents directly in the current
-directory, add a apace and period `` .`` to the end of the command)::
+directory, add a space and period ``.`` to the end of the command)::
 
       svn co https://shark-project.svn.sourceforge.net/svnroot/shark-project/trunk/Shark/
 
@@ -132,7 +132,7 @@ Detailed instructions
      OPT_ENABLE_ATLAS:BOOL=ON -D OPT_MAKE_TESTS:BOOL=ON -DBOOST_ROOT:Path=/path/to/boost/
      -DATLAS_ROOT:Path=/path/to/atlas/ -DBoost_NO_SYSTEM_PATHS=TRUE
      -DBoost_INCLUDE_DIRS=/path/to/boost/include/ -DBoost_LIBRARY_DIRS=/path/to/boost/lib/ ..``.
-   
+
    There are several different build options (see bottom of page) you will
    encounter in the ccmake menu, and the (arguably) three most important ones are:
 
