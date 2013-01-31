@@ -101,7 +101,7 @@ Next, we split our data into a training and a test set used for
 identifying and evaluating the model, respectively.
 The command ::
 
-        ClassificationDataset dataTest = splitAfterElement(data, 311);
+        ClassificationDataset dataTest = splitAtElement(data, 311);
 
 splits the data after the 311th element into two parts. the left part stays in the dataset,
 the right part will now be our test set.

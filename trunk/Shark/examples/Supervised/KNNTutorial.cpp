@@ -46,7 +46,7 @@ int main() {
 	     << " input dimension: " << inputDimension(data) << endl;
 
 	// split data into training and test set
-	ClassificationDataset dataTest = splitAfterElement(data,311);
+	ClassificationDataset dataTest = splitAtElement(data,311);
 
 	//create a binary search tree and initialize the search algorithm - a fast tree search
 	KDTree<RealVector> tree(data.inputs());

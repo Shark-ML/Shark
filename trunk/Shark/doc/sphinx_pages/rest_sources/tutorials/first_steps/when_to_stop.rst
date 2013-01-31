@@ -168,8 +168,8 @@ We try out several different numbers of steps::
    ClassificationDataset data;
    import_csv(data, "data/diabetes.csv",LAST_COLUMN, ",");
    data.shuffle();
-   ClassificationDataset test = splitAfterElement( data, static_cast<std::size_t>( 0.75*data.numberOfElements() ) );
-   ClassificationDataset validation = splitAfterElement( data, static_cast<std::size_t>( 0.66*data.numberOfElements() ) );
+   ClassificationDataset test = splitAtElement( data, static_cast<std::size_t>( 0.75*data.numberOfElements() ) );
+   ClassificationDataset validation = splitAtElement( data, static_cast<std::size_t>( 0.66*data.numberOfElements() ) );
 
    MaxIterations<> maxIterations(10);
    double resultMaxIterations1 = experiment( maxIterations, data,test );

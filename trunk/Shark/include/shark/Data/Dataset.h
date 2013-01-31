@@ -1023,7 +1023,7 @@ DatasetT rangeSubset(DatasetT const& dataset, std::size_t size){
 /// \brief index the first element to be split
 /// \returns the  set which contains the splitd element (right part of the given set)
 template<class DatasetT>
-DatasetT splitAfterElement(DatasetT& data, std::size_t index){
+DatasetT splitAtElement(DatasetT& data, std::size_t index){
 	SIZE_CHECK(index<data.numberOfElements());
 	//create vector with batch sizes and split the batch in which the element trainSize is found
 	typename DatasetT::iterator batch = data.begin();
