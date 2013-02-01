@@ -4,7 +4,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/Algorithms/GridSearch.h>
+#include <shark/Algorithms/DirectSearch/GridSearch.h>
 
 using namespace shark;
 

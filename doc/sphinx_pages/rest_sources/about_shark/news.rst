@@ -21,7 +21,7 @@ about any feedback you have!
 
 You can download shark from our svn repository::
 
-    svn co https://shark-project.svn.sourceforge.net/svnroot/shark-project/trunk/trunk/Shark/
+    svn co https://shark-project.svn.sourceforge.net/svnroot/shark-project/trunk/Shark/
 
 And the old shark 2.0 is now in::
 

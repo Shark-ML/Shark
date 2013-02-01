@@ -548,7 +548,6 @@ SET( ALGORITHMS_HEADERS
 	include/shark/Algorithms/AbstractMultiObjectiveOptimizer.h
 	include/shark/Algorithms/AbstractSingleObjectiveOptimizer.h
  	include/shark/Algorithms/JaakkolaHeuristic.h
-	include/shark/Algorithms/GridSearch.h
 	include/shark/Algorithms/KMeans.h
 	include/shark/Algorithms/GradientDescent/CG.h
 	include/shark/Algorithms/GradientDescent/BFGS.h
@@ -613,6 +612,7 @@ SET( ALGORITHMS_HEADERS
 	include/shark/Algorithms/DirectSearch/FitnessComparator.h
 	include/shark/Algorithms/DirectSearch/FitnessExtractor.h
 	include/shark/Algorithms/DirectSearch/Grid.h
+	include/shark/Algorithms/DirectSearch/GridSearch.h
 	include/shark/Algorithms/DirectSearch/HypervolumeApproximator.h
 	include/shark/Algorithms/DirectSearch/HypervolumeCalculator.h
 	include/shark/Algorithms/DirectSearch/HypervolumeIndicator.h
