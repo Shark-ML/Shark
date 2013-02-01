@@ -2,7 +2,7 @@
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/ObjectiveFunctions/CrossValidationError.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
-#include <shark/Algorithms/GridSearch.h>
+#include <shark/Algorithms/DirectSearch/GridSearch.h>
 #include <shark/Algorithms/JaakkolaHeuristic.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataDistribution.h>

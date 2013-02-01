@@ -60,7 +60,7 @@ Get a current Shark repository snapshot (a ``Shark`` directory
 will be created as a subfolder -- if you want the tree contents directly in the current
 directory, add a space and period ``.`` to the end of the command)::
 
-      svn co https://shark-project.svn.sourceforge.net/svnroot/shark-project/trunk/trunk/Shark/
+      svn co https://shark-project.svn.sourceforge.net/svnroot/shark-project/trunk/Shark/
 
 
 

@@ -87,7 +87,7 @@ We consider the same toy problem and the same models as in the tutorial
 
  #include <shark/ObjectiveFunctions/CrossValidationError.h>
  #include <shark/ObjectiveFunctions/JaakkolaHeuristic.h>
- #include <shark/Algorithms/GridSearch.h>
+ #include <shark/Algorithms/DirectSearch/GridSearch.h>
 
 for computing the cross-validation error, for calculating Jaakkola's
 Heuristic, and for optimizing the parameters using grid-search,

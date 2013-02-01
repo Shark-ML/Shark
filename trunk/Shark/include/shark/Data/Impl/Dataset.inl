@@ -52,6 +52,7 @@ namespace detail{
 /// \param partitionSizes the sizes of the partitions
 /// \param index of the starting batch of the partition
 /// \param size of every batch
+/// \param batchSizes the sizes of the batches
 /// \param maximumBatchSize the maximum size a batch is allowed to have
 /// \return the total number of batches
 inline std::size_t batchPartitioning(
