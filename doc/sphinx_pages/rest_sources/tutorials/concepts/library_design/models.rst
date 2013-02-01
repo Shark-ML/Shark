@@ -5,20 +5,23 @@ Models
 
 
 Models in Shark can be seen as an abstract concept of a function,
-transforming an input into an output (or: producing an input given an output).
-In a machine learning context, models naturally also often take the role
-of a solution to a machine learning problem: in classification, we want to
-learn a model which assigns classes based on the input point. The process
-of learning thus often structurally corresponds to optimizing the parameters
-of a model. After learning, these best parameters are applied to the model,
-and from then on, the model represents the solution.
+transforming an input into an output (or: producing an input given an
+output).  In a machine learning context, models often correspond to
+hypotheses. Models represent the solutions to machine learning
+problems. For example, in classification we want to learn a model
+assigning classes to input points. The models are often parameterized,
+and then the process of learning corresponds to optimizing model
+parameters. After learning, the model with the optimized parameters
+represents the solution.
 
-However, note that models can be more general than parameterized families of
-functions, since they may be stateful. In models with a non-trivial state, the
-computation of the output depends on the input and the state, and the state may
-change based on the input. Stateful models are attractive for processing sequence
-information, in contrast to independent data instances. Refer to the
-:doxy:`RNNet` class for an example.
+However, models can be more general than parameterized families of
+functions, since they may have an internal state. In models with a
+non-trivial state, the computation of the output depends on the input
+and the state, and the state may change based on the input. Stateful
+models are attractive for processing sequence information, in contrast
+to independent data instances. Refer to the :doxy:`RNNet` class
+implementing recurrent multi-layer perceptrons (which are rather
+functionals than functions) for an example.
 
 .. todo::
 	OK:Above paragraph might not be correct.
@@ -26,26 +29,27 @@ information, in contrast to independent data instances. Refer to the
 .. todo::
 	perhaps a tutorial on states, both for kernels and models?
 
-But now back to simpler examples of models again: a simple model is the threshold
-classifier, which receives a real value as input. If the value is higher than the
-internal threshold (the model parameter), then the model assigns a class label of
-1, and of 0 otherwise. A second example is a linear model, which can for example
-map vectorial input to a lower dimensional subspace
+But back to simpler models for now. A simple model is
+the threshold classifier, which receives a real value as input. If the
+value is higher than the internal threshold (the model parameter),
+then the model assigns a class label of 1, and of 0 otherwise. A
+second example is a linear model, which can for example map vectorial
+input to a lower dimensional subspace:
 
 .. math::
   f(x) = Ax+b
 
-In this case, we can say that all entries of the matrix A and of the vector
-b form the parameters of the model f. Clearly, the linear model has more
-parameters than the threshold converter.
+In this case, we can say that all entries of the matrix *A* and of the
+vector *b* form the parameters of the model *f*. Clearly, the linear
+model has more parameters than the threshold converter.
 
-In general, the way a model's parameters should be optimized of course depends
-on the criterion, or objective function, according to which the model should be
-tuned. Whether or not the optimal parameters can be found analytically will thus
-in general depend on both the complexity of the model as well as of the objective
-function. Many algorithms in general and in Shark are gradient-based optimization
-methods. That is, they require the model to be differentiable with respect to its
-own parameters.
+The way a model's parameters should be optimized of course depends on
+the criterion, or objective function, according to which the model
+should be tuned. Whether or not the optimal parameters can be found
+analytically will thus depend on both the model as well as of the
+objective function. Many algorithms in Shark are gradient-based
+optimization methods, which require the model to be differentiable
+with respect to its own parameters.
 
 
 
@@ -54,21 +58,25 @@ The base class 'AbstractModel'
 
 
 The base class for models in Shark is the templated class
-``AbstractModel<InputTypeT,OutputTypeT>``. For an in-depth description of
-its methods, check the doxygen documentation of :doxy:`shark::AbstractModel`.
-Here, we describe how the concepts introduced above are represented by the
-interface, and how models can be used in Shark.
+``AbstractModel<InputTypeT,OutputTypeT>``. For an in-depth description
+of its methods, check the doxygen documentation of
+:doxy:`shark::AbstractModel`.  Here, we describe how the concepts
+introduced above are represented by the interface, and how models can
+be used in Shark.
 
-In general, most routines are optimized for batch computation (see the tutorial on
-:doc:`../data/batches`). For example, models support to be evaluated on a batch of inputs,
-and for their weighted derivatives to be computed for a batch of several inputs
-at once (also see :doc:`../optimization/conventions_derivatives`).
+In general, most routines are optimized for batch computation (see the
+tutorial on :doc:`../data/batches`), that is, for precessing many
+elements at one time. For example, models support to be evaluated on a
+batch of inputs and to compute their weighted derivatives for a batch
+of inputs at once (also see
+:doc:`../optimization/conventions_derivatives`).
 
-The AbstractModel class is templatized on the input type as well as the output
-type. For a classification model, the input type is likely to be a vector type
-like ``RealVector``, and the output type to be ``unsigned int`` for a class label.
-From these types, the model infers the rest of the types needed for the interface
-which are made public by the model:
+The AbstractModel class is templatized on the input type as well as
+the output type. For a classification model, the input type is likely
+to be a vector type like ``RealVector``, and the output type to be an
+``unsigned int`` for a class label.  From these types, the model
+infers the rest of the types needed for the interface and made public by
+the model:
 
 
 
@@ -84,23 +92,23 @@ Types                 Description
 
 
 The basic capabilities of a model are managed through a set of flags. If a model
-can for example calculate the first input derivative, it sets the flag
-``HAS_FIRST_INPUT_DERIVATIVE``. If the flag is not set and a function relying on
+can for example calculate the first input derivative, the flag
+``HAS_FIRST_INPUT_DERIVATIVE`` is set. If the flag is not set and a function relying on
 it is called, an exception is thrown. Flags can be queried using the somewhat
 lengthy expression
 ``model.features().flag()&AbstractModel<InputTypeT,OutputTypeT>::FLAG`` or via
-convenience functions as shown in the table below:
+convenience functions summarized in the table below:
 
 
 
 =======================================================================   ========================================================
 Flag and accessor function name                                           Description
 =======================================================================   ========================================================
-``HAS_FIRST_PARAMETER_DERIVATIVE``, ``hasFirstParameterDerivative()``     The first derivative w.r.t. the parameters is available
-``HAS_SECOND_PARAMETER_DERIVATIVE``, ``hasSecondParameterDerivative()``   The second derivative w.r.t. the parameters is available
-``HAS_FIRST_INPUT_DERIVATIVE``, ``hasFirstInputDerivative()``             The first derivative w.r.t. the inputs is available
-``HAS_SECOND_INPUT_DERIVATIVE``, ``hasSecondInputDerivative()``           The second derivative w.r.t. the inputs is available
-``IS_SEQUENTIAL``, ``isSequential()``                                     The model is sequential (see below)
+``HAS_FIRST_PARAMETER_DERIVATIVE``, ``hasFirstParameterDerivative()``     First derivative w.r.t. the parameters is available
+``HAS_SECOND_PARAMETER_DERIVATIVE``, ``hasSecondParameterDerivative()``   Second derivative w.r.t. the parameters is available
+``HAS_FIRST_INPUT_DERIVATIVE``, ``hasFirstInputDerivative()``             First derivative w.r.t. the inputs is available
+``HAS_SECOND_INPUT_DERIVATIVE``, ``hasSecondInputDerivative()``           Second derivative w.r.t. the inputs is available
+``IS_SEQUENTIAL``, ``isSequential()``                                     Model is sequential (see below)
 =======================================================================   ========================================================
 
 
@@ -130,29 +138,30 @@ The list of evaluation functions is:
 ====================================================================   ===============================================================================
 Method                                                                 Description
 ====================================================================   ===============================================================================
-``eval(InputType const&,OutputType&)``                                 evaluates the model's response to a single input and stores it in the output.
-``eval(BatchInputType const&, BatchOutputType&)``                      evaluates the model's response to a batch of inputs and stores them, in
-								       corresponding order, in the output batch type.
+``eval(InputType const&,OutputType&)``                                 Evaluates the model's response to a single input and stores it in the output
+``eval(BatchInputType const&, BatchOutputType&)``                      Evaluates the model's response to a batch of inputs and stores them, in
+								       corresponding order, in the output batch type
 ``eval(BatchInputType const&, BatchOutputType&, State& state)``        Same as the batch version of eval, but also stores intermediate results which
-                                                                       can be reused in computing the derivative.
-``OutputType operator()(InputType)``                                   calls eval(InputType, OutputType) and returns the result.
-``BatchOutputType operator()(BatchInputType)``                         calls eval(BatchInputType, BatchOutputType) and returns the result.
-``Data<OutputType> operator()(Data<InputType>)``                       evaluates the model's response for a whole dataset and returns the result.
+                                                                       can be reused in computing the derivative
+``OutputType operator()(InputType)``                                   Calls eval(InputType, OutputType) and returns the result
+``BatchOutputType operator()(BatchInputType)``                         Calls eval(BatchInputType, BatchOutputType) and returns the result
+``Data<OutputType> operator()(Data<InputType>)``                       Evaluates the model's response for a whole dataset and returns the result
 ====================================================================   ===============================================================================
 
 
 
-The only method required to be implemented in a model is the stateful batch input version
-of eval. All other evaluation methods are inferred from this routine. It can also
-make sense to implement the single-input version of eval, because the default
-implementation would otherwise copy the input into a batch of size 1 and then
-call the batch variant. However, the single-input variant will usually not be
-called when performance is important, so not implementing it should not have
-critical drawbacks from the point of view of the standard Shark code base. If a
-model indicates by its flags that it offers first or second derivatives, then
-the following methods also need to be implemented (which are overloaded once for
-the first derivative, and once for the first and second derivatives at the same
-time):
+The only method required to be implemented in a model is the stateful
+batch input version of eval. All other evaluation methods are inferred
+from this routine. It can also make sense to implement the
+single-input version of eval, because the default implementation would
+otherwise copy the input into a batch of size 1 and then call the
+batch variant. However, the single-input variant will usually not be
+called when performance is important, so not implementing it should
+not have critical drawbacks from the point of view of the standard
+Shark code base. If a model indicates by its flags that it offers
+first or second derivatives, then the following methods also need to
+be implemented (which are overloaded once for the first derivative,
+and once for the first and second derivatives at the same time):
 
 
 
@@ -160,17 +169,18 @@ time):
 Method                           Description
 ===============================  ==============================================================================
 ``weightedParameterDerivative``  Computes first or second drivative w.r.t the parameters for every output value
-                                 and input and weights these results together.
+                                 and input and weights these results together
 ``weightedInputDerivative``      Computes first or second drivative w.r.t the inputs for every output value
-                                 and input and weights these results together.
+                                 and input and weights these results together
 ``weightedDerivatives``          Computes first input and parameter derivative at the same time, making it
-                                 possible to share calculations of both derivatives.
+                                 possible to share calculations of both derivatives
 ===============================  ==============================================================================
 
-The parameter list of these methods is somewhat lengthy, and thus we recommend looking
-up their exact signature in the doxygen documentation. However note that all versions require the state computed during
-eval. Example code to evaluate the first derivative of a model with respect to it's parameters thus looks 
-like this::
+The parameter list of these methods is somewhat lengthy, and thus we
+recommend looking up their exact signature in the doxygen
+documentation. However, all versions require the state computed during
+eval. Example code to evaluate the first derivative of a model with
+respect to its parameters thus looks like this::
 
   BatchInputType inputs; //batch of inputs
   BatchOutputType outputs; //batch of model evaluations
@@ -196,12 +206,12 @@ serialized to store results:
 ======================   ==============================================================================
 Method                   Description
 ======================   ==============================================================================
-``numberOfParameters``   The number of parameters which can be optimized.
-``parameterVector``      Returns the current parameter vector of the model.
-``setParameterVector``   Sets the parameter vector to new values.
-``configure``            Configures the model. Options depend on the specific model.
-``read``, ``write``      Loads and saves a serializable object.
-``createState``          Returns a newly created State object holding the state to be stored in eval.
+``numberOfParameters``   Number of parameters which can be optimized
+``parameterVector``      Returns the current parameter vector of the model
+``setParameterVector``   Sets the parameter vector to new values
+``configure``            Configures the model. Options depend on the specific model
+``read``, ``write``      Loads and saves a serializable object
+``createState``          Returns a newly created State object holding the state to be stored in eval
 ======================   ==============================================================================
 
 
@@ -222,22 +232,22 @@ We start with general purpose models:
 ========================   ==================================================================================
 Model                      Description
 ========================   ==================================================================================
-:doxy:`LinearModel`        A simple linear model mapping an n-dimensional input to an m-dimensional output.
-:doxy:`FFNet`              The well-known feed-forward multilayer perceptron.
-                           It allows the usage of different types of neurons in the hidden and output layers.
-:doxy:`RBFNet`             Implements a radial basis function network using gaussian distributions.
-                           The output is a possibly multidimensional linear combination of inputs.
+:doxy:`LinearModel`        A simple linear model mapping an n-dimensional input to an m-dimensional output
+:doxy:`FFNet`              The well-known feed-forward multilayer perceptron
+                           It allows the usage of different types of neurons in the hidden and output layers
+:doxy:`RBFNet`             Implements a radial basis function network using gaussian distributions
+                           The output is a possibly multidimensional linear combination of inputs
 :doxy:`CMACMap`            Discretizes the space using several randomized tile maps and calculates a
-                           weighted sum of the discretized activation.
-:doxy:`RNNet`              Recurrent neural network for sequences.
-:doxy:`OnlineRNNet`        Recurrent neural network for online learning.
+                           weighted sum of the discretized activation
+:doxy:`RNNet`              Recurrent neural network for sequences
+:doxy:`OnlineRNNet`        Recurrent neural network for online learning
 :doxy:`KernelExpansion`    linear combination of outputs of :doxy:`AbstractKernelFunction <Kernel>`, given
-                           points of a dataset and the point to be evaluated (input point).
+                           points of a dataset and the point to be evaluated (input point)
 ========================   ==================================================================================
 
 
 
-Models for Classification or Regression:
+Some models for Classification or Regression:
 
 
 
@@ -245,17 +255,17 @@ Models for Classification or Regression:
 Model                                    Description
 =====================================    ========================================================================
 :doxy:`LinearClassifier`                 Given a metric represented by a scatter matrix and the class means,
-                                         assigns a new point to the class with the nearest mean.
+                                         assigns a new point to the class with the nearest mean
 :doxy:`NBClassifier`                     Standard, but flexible, naive Bayes classifier
 :doxy:`OneVersusOneClassifier`           Multi-class classifier which does majority voting using binary
-                                         classifiers for every class combination.
+                                         classifiers for every class combination
 :doxy:`NearestNeighborClassifier`        Nearest neighbor search for classification using a majority vote system.
-:doxy:`NearestNeighborRegression`        Nearest neighbor search for regression. The result is the mean of the
-                                         labels of the k nearest neighbors.
-:doxy:`SoftNearestNeighborClassifier`    Nearest neighbor search for classification. It returns the fraction
-                                         of votes for a class instead of the majority vote.
-:doxy:`CARTClassifier`                   Classification and regression tree.
-:doxy:`RFClassifier`                     Random Forest based on a collection of CART classifiers.
+:doxy:`NearestNeighborRegression`        Nearest neighbor search for regression; the result is the mean of the
+                                         labels of the k nearest neighbors
+:doxy:`SoftNearestNeighborClassifier`    Nearest neighbor search for classification; returns the fraction
+                                         of votes for a class instead of the majority vote
+:doxy:`CARTClassifier`                   Classification and regression tree
+:doxy:`RFClassifier`                     Random Forest based on a collection of CART classifiers
 =====================================    ========================================================================
 
 
