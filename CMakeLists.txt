@@ -169,6 +169,12 @@ IF(CMAKE_BUILD_TYPE MATCHES "Release")
 ENDIF (CMAKE_BUILD_TYPE MATCHES "Release")
 
 #####################################################################
+#           Report compilers	                                    #
+#####################################################################
+message(STATUS "C++ compiler: " ${CMAKE_CXX_COMPILER})
+message(STATUS "C compiler: " ${CMAKE_C_COMPILER})
+
+#####################################################################
 #           Boost configuration	                                    #
 #####################################################################
 SET(Boost_USE_MULTITHREADED ON)
