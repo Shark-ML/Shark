@@ -38,12 +38,12 @@ If you are interested in a high-level overview over the Shark design goals
 
 * :doc:`concepts/library_design/designgoals`
 * :doc:`concepts/library_design/models`
-* :doc:`concepts/library_design/kernels`
 * :doc:`concepts/library_design/losses`
 * :doc:`concepts/library_design/optimizers`
 * :doc:`concepts/library_design/objective_functions`
 * :doc:`concepts/library_design/stopping_criteria`
 * :doc:`concepts/library_design/trainers`
+* :doc:`concepts/library_design/kernels`
 
 .. _label_for_linalg_tutorials:
 
