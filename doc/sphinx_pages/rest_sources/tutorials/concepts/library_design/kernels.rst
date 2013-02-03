@@ -4,41 +4,31 @@ Kernels
 =======
 
 
-The term "kernel function" is much overloaded in mathematics and statistics.
-For most machine learning applications, and prominently so support vector machines
-(SVMs), the term "kernel function" -- or just "kernel" --  is used as a shorthand
-for "Mercer kernel"[Mercer1909]_  or "reproducing kernel". Another important term
-is that of the so-called "kernel trick". Below we will first issue a brief reminder
-of these terms and concepts. If you are well familiar with Mercer/reproducing kernels,
-feel free to jump to the next section on :ref:`label_for_kernels_in_shark`.
+The term *kernel function*, or kernel for short, is overloaded. Here,
+we refer to *positive semi-definite kernels*, that is, the functions inducing
+reproducing kernel Hilbert spaces [Aronszajn1950]_. They uderlie
+the ``kernel trick'', which is used, for instance, in non-linear
+support vector machines (SVMs).
+
 
 
 
 Background
 ----------
 
+Given some set :math:`\mathcal X`, a positive semi-definite kernel
+:math:`k:\mathcal X\times\mathcal X\to\mathbb R`
+is a symmetric functions for which
 
-Mathematical Background
-&&&&&&&&&&&&&&&&&&&&&&&
+.. math::
+  \sum_{i=1}^N\sum_{j=1}^N a_i a_j k(x_i, x_j) \ge 0
 
+for all :math:`N`, all 
+:math:`x_1,...,x_N\in\mathcal X` and
+:math:`a_1,...,a_N\in\mathbb R`.
 
-Given some set :math:`\mathcal X`, a reproducing kernel :math:`k(x,y)` for any
-:math:`x,y  \in \mathcal X` can formally be defined in two ways: either as
-the equivalent of a scalar product in a Hilbert space
-:math:`\mathcal H` of functions on :math:`\mathcal X`, or as a function of two
-arguments on :math:`\mathcal H` which is symmetric and positive definite. The
-two definitions give rise to the same notion of a kernel function. For more
-details, see [Aronszajn1950]_, [Mercer1909]_, and [Scholkopf2002]_, for example.
-In the following, we loosen mathematical precision and discuss the concepts
-of kernels in view of their implications for efficient computations in kernel-based
-learning algorithms.
-
-
-Algorithmic advantages
-&&&&&&&&&&&&&&&&&&&&&&
-
-Consider any Kernel :math:`k` on :math:`\mathcal X` to correspond to a scalar
-product in some other space :math:`\mathcal H`:
+A kernel :math:`k` on :math:`\mathcal X` corresponds to a scalar
+product in a dot product space :math:`\mathcal H`:
 
 .. math::
   k(x,y) = \langle \phi(x),\phi(y) \rangle_{\mathcal H}
@@ -46,7 +36,18 @@ product in some other space :math:`\mathcal H`:
 where :math:`x` and :math:`y` are elements of :math:`\mathcal X` ,
 :math:`\phi` is a map from :math:`\mathcal X` to :math:`\mathcal H`, and
 :math:`\langle \cdot, \cdot \rangle_{\mathcal H}` is the scalar product in
-:math:`\mathcal H`. Calculating the scalar product in the above expression
+:math:`\mathcal H`. 
+For details we refer to [Aronszajn1950]_, [Mercer1909]_, and
+[Scholkopf2002]_.
+
+
+.. todo::
+
+    further revision is necessary
+
+
+
+Calculating the scalar product in the above expression
 via the mapping :math:`\phi(x)` can be highly costly computationally, because
 :math:`\mathcal H` may be very high- or even infinite-dimensional. Plus, the
 cost of calculating the scalar product will still come on top of that.
@@ -73,21 +74,6 @@ the distance reduces to :math:`d(x,y) =\sqrt{2 - 2k(x,y)}`.
 
 
 
-Algorithmic disadvantages
-&&&&&&&&&&&&&&&&&&&&&&&&&
-
-
-While a powerful technique, using kernels has a downside as well. Often
-one wants to compute a linear combination of kernels, that is, expressions of
-the form :math:`\sum_i^N \alpha_i k(x_i,y)` for fixed :math:`\alpha` and
-:math:`x_i`. In particular, the :math:`x_i` may be the points of a training
-set, :math:`\alpha` the solution vector of an SVM, for example, and :math:`y`
-is some arbitrary and varying point for evaluation. If we were operating
-in the higher-dimensional feature space :math:`\mathcal H`, we could explicitly
-calculate this linear combination, store it, and much more quickly evaluate
-the scalar product with an input vector :math:`y`. Thus it can be seen as a
-downside of kernel methods that such linear combinations must be calculated
-summand by summand for each new evaluation point :math:`y`.
 
 
 .. _label_for_kernels_in_shark:
