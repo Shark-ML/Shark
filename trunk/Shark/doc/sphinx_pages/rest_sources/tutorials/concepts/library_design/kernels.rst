@@ -1,13 +1,12 @@
 
-
 Kernels
 =======
 
 
 The term *kernel function*, or kernel for short, is overloaded. Here,
 we refer to *positive semi-definite kernels*, that is, the functions inducing
-reproducing kernel Hilbert spaces [Aronszajn1950]_. They uderlie
-the ``kernel trick'', which is used, for instance, in non-linear
+reproducing kernel Hilbert spaces [Aronszajn1950]_. They underlie
+the "kernel trick" [Schölkopf2002]_, which is used, for instance, in non-linear
 support vector machines (SVMs).
 
 
@@ -28,7 +27,8 @@ for all :math:`N`, all
 :math:`a_1,...,a_N\in\mathbb R`.
 
 A kernel :math:`k` on :math:`\mathcal X` corresponds to a scalar
-product in a dot product space :math:`\mathcal H`:
+product in a dot product space :math:`\mathcal H`, the so called
+feature space:
 
 .. math::
   k(x,y) = \langle \phi(x),\phi(y) \rangle_{\mathcal H}
@@ -37,32 +37,32 @@ where :math:`x` and :math:`y` are elements of :math:`\mathcal X` ,
 :math:`\phi` is a map from :math:`\mathcal X` to :math:`\mathcal H`, and
 :math:`\langle \cdot, \cdot \rangle_{\mathcal H}` is the scalar product in
 :math:`\mathcal H`. 
-For details we refer to [Aronszajn1950]_, [Mercer1909]_, and
-[Scholkopf2002]_.
+For details we refer to [Aronszajn1950]_ and [Mercer1909]_.
 
+Many machine learning algorithms can be written in a way that the only
+operations involving input elements can be written in the form of
+scalar products between those elements.  A common strategy in machine
+learning is to map the input data into a feature space :math:`\mathcal
+H` and to do the learning in this feature space.  If the only
+operations in :math:`\mathcal H` are scalar product, all these scalar
+products can be replaced by a kernel function replacing the explicit
+computation of the mapping to feature space :math:`\phi`. This has
+some advantages:
 
-.. todo::
+- In the typical application the kernel can be computed more
+  efficiently than the scalar product itself. This allows for working
+  in very high-dimensional feature spaces.
 
-    further revision is necessary
+- The kernel provides a clean interface between general and
+  problem specific aspects of the learning machine.
 
+Thus, the "kernel trick" allows efficient formulation of nonlinear
+variants of any algorithm that can be expressed in terms of dot
+products.  The choice of the kernel function is crucial for the
+performance of the machine learning algorithm.
 
-
-Calculating the scalar product in the above expression
-via the mapping :math:`\phi(x)` can be highly costly computationally, because
-:math:`\mathcal H` may be very high- or even infinite-dimensional. Plus, the
-cost of calculating the scalar product will still come on top of that.
-But because :math:`k` is a kernel, we can use :math:`k` directly to compute
-the scalar product, only using :math:`x` and :math:`y` as input without
-applying the map :math:`\phi`. Now many prominent algorithms can be rewritten
-such that the only computations required in :math:`\mathcal H` are such scalar
-products. Once an algorithm has been formulated in this way, it can be sped
-up by efficiently calculating these scalar products via a corresponding
-kernel. This is called the "kernel trick". It also allows to enhance simple
-linear algorithms, like linear support vector machines, to naturally use
-nonlinear mappings. This can raise the generality of such an algorithm.
-
-Further, this generalisation capability does not only apply to algorithms
-which use scalar products, but also to ones using distances via the formula:
+The generic distance between to points mapped to a kernel-induced
+feature space is given by
 
 .. math::
   d(x,y) = \sqrt{\langle \phi(x)-\phi(y), \phi(x)-\phi(y) \rangle_{\mathcal H}}
@@ -73,28 +73,34 @@ a kernel normalized, if :math:`k(x,x)=1` for all :math:`x`. In this case calcula
 the distance reduces to :math:`d(x,y) =\sqrt{2 - 2k(x,y)}`.
 
 
-
-
-
 .. _label_for_kernels_in_shark:
 
 Kernels in Shark
 &&&&&&&&&&&&&&&&
 
-Coming back to Shark, several classes are relevant for kernels and the
-abovementioned upsides and downsides. All kernel functions' base class is
-the :doxy:`AbstractKernelFunction`. A linear combination of kernels as
-given above is represented in Shark as a :doxy:`KernelExpansion`. Many
-kernel-based algorithms also need to repeatedly evaluate kernels between
-different points of the training dataset :math:`x_i` and :math:`x_j`,
-:math:`k(x_i,x_j)`. Thus ideally, to save computation time, the overall
-matrix :math:`K` with entries :math:`K_{ij}` would be stored in memory.
-However, even training sets of sizes of a few hundred thousand make this
-prohibitive on common PCs. Therefore, only parts of it may be calculated
-at a time, most often matrix rows or blocks. In Shark, the classes
-:doxy:`KernelMatrix` and :doxy:`CachedMatrix` as well as some derived
-and sibling classes encapsulate kernel Gram matrices. The :doxy:`CachedMatrix`
-also automatically takes care of memory handling.
+Shark provides strong support for kernel-based algorithms.  All kernel
+functions' base class is the :doxy:`AbstractKernelFunction`. A linear
+combination of kernels is represented in Shark as a
+:doxy:`KernelExpansion`
+
+.. math::
+  \sum_{i=1}^N \alpha_i k(x_i, . ) + b
+
+with :math:`x_1,...,x_N\in\mathcal X`,
+:math:`\alpha_1,...,\alpha_N\in\mathbb R`, and optional bias/offset
+parameter :math:`b\in\mathbb R`.
+
+Many kernel-based algorithms need to repeatedly evaluate the kernel
+applied to different points of some training dataset
+:math:`x_1,\dots,x_N` or they operate on the kernel (Gram) matrix
+:math:`K` with entries :math:`K_{ij}=k(x_i,x_j)` directly. To save
+computation time, the matrix :math:`K` would be stored in memory.
+However, even training sets of sizes of a few hundred thousand make
+this prohibitive on common PCs. Therefore, only parts of it may be
+calculated at a time, most often matrix rows or blocks. In Shark, the
+classes :doxy:`KernelMatrix` and :doxy:`CachedMatrix` as well as some
+derived and sibling classes encapsulate kernel Gram matrices. The
+:doxy:`CachedMatrix` also automatically takes care of memory handling.
 
 
 
@@ -337,9 +343,9 @@ Model                             Description
 ================================  ========================================================================================================================
 
 
-Due to convenient mathematical properties, valid positive definite kernels can
-be formed by adding and multiplying kernels, among others. This leads to a range
-of what we call combined kernels listed below:
+Nalid positive semi-definite kernels can be formed by adding and
+multiplying kernels, among others. This leads to a range of what we
+call combined kernels listed below:
 
 =============================  ========================================================================================================================
 Model                          Description
@@ -348,9 +354,9 @@ Model                          Description
 :doxy:`ProductKernel`          For a given set of kernels computes :math:`k(x,y) = k_1(x,y) \dots k_n(x,y)`
 :doxy:`NormalizedKernel`       Normalizes a given Kernel.
 :doxy:`ScaledKernel`           Scales a kernel by a fixed constant
-:doxy:`SubrangeKernel`         Weighted sum kernel for vector spaces. Every kernel receives only a subrange of the input
-:doxy:`MklKernel`              Weighted sum kernel for heterogenous type input tupels.
-                               Every kernel recives one part of the input tuple.
+:doxy:`SubrangeKernel`         Weighted sum kernel for vector spaces; very kernel receives only a subrange of the input
+:doxy:`MklKernel`              Weighted sum kernel for heterogenous type input tuples;
+                               Every kernel receives one part of the input tuple
 :doxy:`GaussianTaskKernel`     Specialization of the DiscreteKernel for multi task learning
 :doxy:`MultiTaskKernel`        Framework kernel for multi task learning with kernels
 =============================  ========================================================================================================================
@@ -366,4 +372,4 @@ References
 .. [Mercer1909] Mercer, J. Functions of positive and negative type and their connection with the theory of integral equations.
     In Philosophical Transactions of the Royal Society of London, 1909.
 
-.. [Scholkopf2002] Schölkopf, B. and Smola, A. Learning with Kernels. MIT Press, 2002.
+.. [Schölkopf2002] Schölkopf, B. and Smola, A. Learning with Kernels. MIT Press, 2002.
