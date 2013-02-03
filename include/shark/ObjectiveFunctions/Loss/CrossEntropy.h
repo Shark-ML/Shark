@@ -44,7 +44,7 @@ namespace shark{
  *  'CrossEntropy' is the adequate error measure for model-training.
  *  For \em C>1 classes the loss function is defined as
  *  \f[
- *      E = - \left\{\cdot\ln \frac{\exp{x_c}} {\sum_{c^{\prime}=1}^C \exp{x_c^{\prime}}} \right\}
+ *      E = - \ln \frac{\exp{x_c}} {\sum_{c^{\prime}=1}^C \exp{x_c^{\prime}}} = \ln \sum_{c^{\prime}=1}^C \exp{x_c^{\prime}} - x_c
  *  \f]
  *  where \em x is the prediction vector of the model and \em c is the class label. In the case of only one
  *  model output and binary classification, another more numerically stable formulation is used:
