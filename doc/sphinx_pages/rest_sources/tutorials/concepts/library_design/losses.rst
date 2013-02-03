@@ -4,58 +4,68 @@ Loss and Cost Functions
 =======================
 
 
-Background
-----------
+Shark uses the notions of loss and cost functions to define machine
+learning tasks.
 
-Loss and cost functions are an integral part of machine learning.
-Assume a model :math:`f` and a data set formed by pairs
-of inputs and labels :math:`x_i` and :math:`t_i`, respectively.
-For every input :math:`x_i` the model produces the label predictions
-:math:`y_i=f(x_i)`. Then one important question is how far away the
-model predictions are from the actual labels. Different loss and cost
-functions propose different ways of calculating the "level of
-disagreement" between the :math:`t_i` and :math:`y_i`.
-Losses and costs can on the one hand be used for evaluating a trained
-model. On the other hand, they can also be an criterion under which
-learning and model optimization takes place. Further, these two roles
-need not be taken by the same loss or cost function.
+Loss functions
+--------------
 
+Consider a model (a hypothesis) :math:`f` mapping inputs :math:`x`
+to predictions :math:`y=f(x)\in Y`.  Let :math:`t` be the true
+label of input pattern :math:`x`.  Then a *loss function*
+:math:`L:Y\times Y\to\mathbb{R}^+_0` measures the quality of the
+prediction. If the prediction is perfectly accurate, the loss function
+is zero (:math:`t=y\Rightarrow L(t, y)=0`). If not, the loss
+function measures ``how bad'' the mistake is. The loss can be
+interpreted as a penalty or error measure.
 
-Costs and Losses in Shark
--------------------------
-
-The major difference between a loss and a cost in Shark is an
-assumption on how they can be calculated. In detail, a loss function
-:math:`L` is by convention understood to support sample-wise evaluation,
-for example to calculate the average error
-
-.. todo::
-
-    i think it is a bit confusing how the tutorial is about costs and
-    losses, and suddenly all important explanations rely on the term
-    "error". would it be possible to get completely rid of the word
-    "error" in this tutorial? if not, how close can we get?
-
-
-:math:`E` in the following way:
+For a classification tast, a fundamental loss function 
+is the 0-1-loss:
 
 .. math::
-  E = \frac 1 N \sum_{i=1}^N L(z_i,t_i)
+  L(y,t)=\begin{cases} 0 & \text{if $y=t$}\\1 & \text{otherwise}\end{cases}
 
-In other words, a loss only needs to know the prediction of the model
-for the i-th input and its target label at a time. One typical example
-may be the zero-one loss commonly used with classification tasks.
-
-In contrast, cost functions :math:`C` rely on all prediction-label pairs
-being available at once. An error measure directly based on a cost function
-will hence not be separable and directly have to compute:
+For regression, the squared loss is most popular:
 
 .. math::
-  E = C(z_1\dots z_N,t_1,\dots,t_N)
+  L(y,t)= (y-1)^2
 
-While such a structure or restriction makes any calculations less convenient,
-such cost functions arise naturally for example in clustering, since the
-quality of the clustering depends on all points at the same time.
+Using the concept of a loss function, the goal od supervised learning
+can be described as finding a model :math:`f` minimizing the *risk*:
+
+.. math::
+  \mathcal{R}(f) = \mathbb{E}\{   L(t, f(x)) \}
+
+Here the expectation :math:`\mathbb{E}` is over the joint distribution 
+underlying the observations of inputs and corresponding labels.
+
+Cost functions
+--------------
+
+Now let us consider a collection of observations
+:math:`S=\{(x_1,t_1),(x_2,t_2),\dots,(x_N,t_N)\}\in(X\times Y)^N` and
+corresponding predictions :math:`y_1.y_2,\dots,y_N`  by a model :math:`f`.
+A *cost function* :math:`C` is a mapping assigning 
+an overall cost value, which can be interpreted as an overall error,
+to :math:`\{(y_1,t_1),(y_2,t_2),\dots,(y_N,t_N)\}\in(Y\times Y)^N`.
+Every loss function induces a cost function, namely the *empirical
+risk*:
+
+.. math::
+  \mathcal{R}_S(f) = C(\{(y_1,t_1),(y_2,t_2),\dots,(y_N,t_N)\})  = \frac 1 N \sum_{i=1}^N L(y_i,t_i)
+
+Thus, the cost function induced by the 0-1-loss is the average
+misclassification error and the cost function induced by the squared
+loss the mean squared error (MSE).
+
+However, there are cost functions which cannot be decomposed using a loss
+function. For example, the *area under the curve* (AUC).
+Thus, all loss functions generate a cost function, but not all cost
+functions must be based on a loss function.
+
+
+
+
 
 .. todo::
 
@@ -69,16 +79,6 @@ quality of the clustering depends on all points at the same time.
     the eval-interfaces are explained, but i think it should be at a more
     prominent place actually.
 
-.. todo::
-
-    the above paragraph does not convince me at all. first, can we have
-    a clearer example than clustering? second, the overall quality of a
-    trained classification algorithm also depends on all points. i have
-    zero experience in evaluation of clustering algorithms, but i do
-    not see any reason why i could not propose a quality measure that
-    can evaluate one single point at a time and sum over all of them.
-    if this is a good/commonly-used criterion is another question, but
-    the above paragraph is extremely general in this regard.
 
 
 
@@ -87,14 +87,14 @@ Derivatives
 
 
 When both the loss function and the model are differentiable, it is possible
-to calculate the derivative of the above error with respect to the model
+to calculate the derivative of the empirical risk with respect to the model
 parameters :math:`w`:
 
 .. math::
-  \frac {\partial}{\partial w} E = \frac 1 N \sum_{i=1}^N \frac {\partial}{\partial f(x_i)}L(f(x_i),t_i)\frac {\partial}{\partial w}f(x_i)
+  \frac {\partial}{\partial w}\mathcal{R}_S(f)  = \frac 1 N \sum_{i=1}^N \frac {\partial}{\partial f(x_i)}L(f(x_i),t_i)\frac {\partial}{\partial w}f(x_i)
 
-Thus allowing efficient embarassingly parallelizable gradient descent on the
-error function.
+This allows embarrassingly parallelizable gradient descent on the cost
+function.
 
 
 
@@ -202,17 +202,20 @@ Loss Functions:
 ============================================  ==============================================================================
 Model                                         Description
 ============================================  ==============================================================================
-:doxy:`AbsoluteLoss`                          returns the :math:`L_1`-norm of the distance, :math:`|t-z|_1`
-:doxy:`SquaredLoss`                           returns the squared distance in two-norm
-                                              :math:`|t-z|_2^2`. Standard regression loss.
-:doxy:`ZeroOneLoss`                           returns 0 if :math:`t_i=z_i` otherwise 1. Standard classification loss.
-:doxy:`DiscreteLoss`                          uses a cost matrix to calculate errors in a discrete output and label
-                                              space (general classification loss).
-:doxy:`CrossEntropy`                          for maximization of class membership under some model assumptions.
-                                              Useful for training of neural networks with linear outputs.
-:doxy:`CrossEntropyIndependent`               maximization optimizes a model for simultaneously finding a set of attributes.
-:doxy:`NegativeClassificationLogLikelihood`   interprets a network with n output neurons with outputs summing to one as
-                                              conditional propability :math:`p(z_i|x_i)`. Used for classifier training.
+:doxy:`AbsoluteLoss`                          Returns the :math:`L_1`-norm of the distance, :math:`|t-z|_1`
+:doxy:`SquaredLoss`                           Returns the squared distance in two-norm
+                                              :math:`|t-z|_2^2`; standard regression loss
+:doxy:`ZeroOneLoss`                           Returns 0 if :math:`t_i=z_i` otherwise standard classification loss
+:doxy:`DiscreteLoss`                          Uses a cost matrix to calculate losses in a discrete output and label
+                                              space (general classification loss)
+:doxy:`CrossEntropy`                          Logarithmic likelihood function if the model outputs are 
+                                              interpreted as exponents of a softmax classifier;
+                                              useful for training of neural networks with linear outputs
+:doxy:`CrossEntropyIndependent`               Logarithmic likelihood function with
+                                              additional independence assumptions
+:doxy:`NegativeClassificationLogLikelihood`   Likelihood likelihood function interpreting a model with *C* outputs that sum to one as
+                                              computing the conditional probability
+					      :math:`p(z_i|x_i)`; used for classifier training
 ============================================  ==============================================================================
 
 
@@ -221,10 +224,7 @@ Model                                         Description
 
     i think the descriptions in the right table need some update.
     for example, the one for CrossEntropyIndependent does not make sense;
-    and NegativeClassificationLogLikelihood is independent of
-    NNs, and this may hold for crossentropy as well (the description
-    of which also does not say what it actually does, only what it's
-    for..)? Also, if I don't misinterpret the AbsoluteLoss code, then
-    it is not the 1-norm that is used to calculate the distance?? This
-    needs to be checked!!! If there is a misunderstanding about the 1-norm,
+    Also, if I don't misinterpret the AbsoluteLoss code, then
+    it is not the 1-norm that is used to calculate the distance? This
+    needs to be checked! If there is a misunderstanding about the 1-norm,
     then the other tutorials should be revisited again as well.
