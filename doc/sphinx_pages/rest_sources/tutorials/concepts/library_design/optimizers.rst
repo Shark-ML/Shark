@@ -24,7 +24,7 @@ Optimizers try to find this solution in a stepwise fashion.  Let us
 consider single-objective optimization for now.  Given a solution
 :math:`x(t)` at time step :math:`t` with objective value
 :math:`f(x(t))`, the optimizer looks for a new point :math:`x(t+1)`
-such that :math:`f(t+1)<f(t)`.  Two important types of Optimizers can
+such that :math:`f(t+1)<f(t)`.  Two important types of optimizers can
 be distinguished.  The first, gradient-based algorithms use the
 gradient of the objective function. The other approach is
 direct/derivative-free search, which traverses the search space
@@ -117,7 +117,7 @@ Method                                         Description
 
 
 
-Also, Optimizers offer several other helper functions
+Also, optimizers offer several other helper functions
 (and, in addition to the below, are serializable):
 
 
