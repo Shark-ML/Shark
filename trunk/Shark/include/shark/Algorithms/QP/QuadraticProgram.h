@@ -1264,7 +1264,7 @@ public:
 	/// formula: \f$ K\left(x_i, x_j\right)\frac{1}{s_i}\frac{1}{s_j} \f$
 	QpFloatType entry(std::size_t i, std::size_t j) const
 	{
-		typedef typename InputType::value_type InputValueType;
+		// typedef typename InputType::value_type InputValueType;
 		INCREMENT_KERNEL_COUNTER( m_accessCounter );
 		SIZE_CHECK(i < m_matrixsize);
 		SIZE_CHECK(j < m_matrixsize);
