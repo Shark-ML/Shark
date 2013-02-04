@@ -83,7 +83,7 @@ public:
 				CompressedRealVector x_i = shark::get(batch, i).input;
 				if (x_i.nnz() == 0) continue;
 
-				unsigned int y_i = dataset(i).label;
+				unsigned int y_i = shark::get(batch, i).label;
 				y[j] = y_i;
 				double d = 0.0;
 				for (CompressedRealVector::const_iterator it=x_i.begin(); it != x_i.end(); ++it)
