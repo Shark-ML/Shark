@@ -2,8 +2,8 @@ Optimizers
 ==========
 
 Each optimizer in Shark is an iterative algorithm which tries to find a local
-minimum of an error function. For single objective optimization, we would like
-to find the global optimum of the error function :math:`f` :
+minimum of an objective function. For single objective optimization, we would like
+to find the global optimum of the objective function :math:`f` :
 
 .. math::
   x^* = \arg \min_x f(x)
@@ -18,7 +18,7 @@ line or plane of optimal points, the Pareto front, which in turn is estimated by
 a number of example points found by the algorithm.
 
 Single-objective optimizers try to find this solution in a stepwise fashion. Given a solution
-:math:`x(t)` at time step :math:`t` with error value :math:`E(t)=f(x(t))`, the
+:math:`x(t)` at time step :math:`t` with objective value :math:`E(t)=f(x(t))`, the
 optimizer looks for a new point :math:`x(t+1)` such that :math:`E(t+1)<E(t)`.
 Two important types of Optimizers can be distinguished, both in Shark and in general.
 The first, gradient descent algorithms, use the gradient of the objective function. The
@@ -207,7 +207,7 @@ Model                             Description
                                   is the prefered method of choice for nonlinear optimization.
 :doxy:`IRLS`                      Iterated Reweightes Least Squares. Performs second order optimisation using
                                   Newton steps and line seach in the optimal direction to ensure convergence.
-:doxy:`Quickprop`                 Approximates the error function locally as a parabola with independent variables.
+:doxy:`Quickprop`                 Approximates the objective function locally as a parabola with independent variables.
 :doxy:`SteepestDescent`           Follows the gradient in the direction of steepest descent with fixed step size.
 ================================  =================================================================================
 
