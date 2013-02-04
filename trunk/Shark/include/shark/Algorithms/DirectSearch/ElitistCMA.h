@@ -4,12 +4,16 @@
 *
 *  \brief Implements the most recent version of the elitist CMA-ES.
 *
-*  The algorithm is described in
+*  The algorithm is based on
 *
-*  Hansen, N., S. Kern (2004). Evaluating the CMA Evolution Strategy
-*  on Multimodal Test Functions. In Proceedings of the Eighth
-*  International Conference on Parallel Problem Solving from Nature
-*  (PPSN VIII), pp. 282-291, LNCS, Springer-Verlag
+* C. Igel, T. Suttorp, and N. Hansen. A Computational Efficient
+* Covariance Matrix Update and a (1+1)-CMA for Evolution
+* Strategies. In Proceedings of the Genetic and Evolutionary
+* Computation Conference (GECCO 2006), pp. 453-460, ACM Press, 2006
+*
+* D. V. Arnold and N. Hansen: Active covariance matrix adaptation for
+* the (1+1)-CMA-ES. In Proceedings of the Genetic and Evolutionary
+* Computation Conference (GECCO 2010): pp 385-392, ACM Press 2010
 *
 *  \par Copyright (c) 1998-2008:
 *      Institut f&uuml;r Neuroinformatik<BR>
