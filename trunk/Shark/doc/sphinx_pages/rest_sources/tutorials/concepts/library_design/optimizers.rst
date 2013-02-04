@@ -9,27 +9,38 @@ to find the global optimum of the objective function :math:`f` :
   x^* = \arg \min_x f(x)
 
 However, if the function has more than one local optimum, we can usually only
-find one of them -- and hope that it is not much worse than the global optimum,
-or do several re-starts. In multi-objective optimiation, the goal is to find the
-optimum with respect to multiple objective functions at once. This usually does
-not lead to a single point solution, since there exist trade-offs between the
-different goals. In this case, the optimal solution can only be represented as a
-line or plane of optimal points, the Pareto front, which in turn is estimated by
-a number of example points found by the algorithm.
+find one of them. That is, re-starts may be required.
 
-Single-objective optimizers try to find this solution in a stepwise fashion. Given a solution
-:math:`x(t)` at time step :math:`t` with objective value :math:`E(t)=f(x(t))`, the
-optimizer looks for a new point :math:`x(t+1)` such that :math:`E(t+1)<E(t)`.
-Two important types of Optimizers can be distinguished, both in Shark and in general.
-The first, gradient descent algorithms, use the gradient of the objective function. The
-other approach is direct search, which traverses the search space without calculating
-derivative information. Direct search algorithms can be as simple as grid search, which
-simply probes a predefined grid of points, or more elaborate, like evolutionary algorithms,
-which try to infer or substitute for gradient information by comparing sets of function
-values. Shark supports both these kinds of optimizers, and the following tutorials
-introduces their basics. An overview over all implemented optimizers can be found
-at the bottom of this tutorial :ref:`here <label_for_list_of_so_optimizers>`.
+In multi-objective optimization (alos known as multi-criteria or
+vector optimization), the goal is to optimize with respect to multiple
+objective functions at once.  This usually does not lead to a single
+point solution, since there exist trade-offs between the different
+objectives.  Therefore, the typical goal of vector optimization is to
+approximate the set of Pareto optimal solutions as good as possible.
+A solution is Pareto optimal if it cannot be improved in one objective
+without getting worse in another one.
 
+Optimizers try to find this solution in a stepwise fashion.  Let us
+consider single-objective optimization for now.  Given a solution
+:math:`x(t)` at time step :math:`t` with objective value
+:math:`f(x(t))`, the optimizer looks for a new point :math:`x(t+1)`
+such that :math:`f(t+1)<f(t)`.  Two important types of Optimizers can
+be distinguished.  The first, gradient-based algorithms use the
+gradient of the objective function. The other approach is
+direct/derivative-free search, which traverses the search space
+without calculating derivative information explicitly. Direct search
+algorithms can be as simple as grid search, which simply probes a
+predefined grid of points, or more elaborate, like evolutionary
+algorithms, which try to infer or substitute for gradient information
+by comparing sets of function values. Shark supports both these kinds
+of optimizers, and the following tutorials introduces their basics. An
+overview over notable implemented optimizers can be found at the
+bottom of this tutorial :ref:`here <label_for_list_of_so_optimizers>`.
+
+.. note::
+
+    Shark always assumes minimization tasks. This is no restriction as
+    :math:`\arg \max_x f(x) = \arg \min_x -f(x)`.
 
 
 The base class 'AbstractOptimizer<SearchSpaceT, ResultT, SetT>'
@@ -53,7 +64,7 @@ Types                        Description
                              objective function. Most likely RealVector.
 ``ResultType``               Return type of the objective function. For single objective
                              functions, this is double.
-``SetType``                  Represents the current best solution of the optimizer. For single
+``SoluitonSetType``          Represents the current best solution of the optimizer. For single
                              objective functions, this is a point-value pair.
 ``ObjectiveFunctionType``    Type of objective function the algorithm can optimize. Alias for
                              ``AbstractObjectiveFunction<SearchSpaceType,ResultType>``.
@@ -101,7 +112,7 @@ Method                                         Description
 ``init(ObjectiveFunctionType)``                Initializes the algorithm. Internal data structures are initialized
                                                and the flags of the objective function checked.
 ``step(ObjectiveFunctionType)``                Performs one step of the learning algorithm on the objective function.
-``SetType solution()``                         Returns the current best solution found.
+``SolutionSetType solution()``                 Returns the current best solution found.
 ============================================   =========================================================================
 
 
@@ -132,12 +143,9 @@ Here is a short example on how this interface can be used::
       opt.step(f);
   }
   // get the optimal solution
-  MyOptimizer::Set solution = opt.solution();
+  MyOptimizer::SolutionSetType solution = opt.solution();
 
 
-.. todo::
-
-    is the type correct in the last line of the above code? (Set -> SetType?)
 
 
 The base class 'AbstractSingleObjectiveOptimizer<SearchSpaceT>'
@@ -155,7 +163,7 @@ Printing out the result of the last example would look like::
 
   std::cout << "value:" << opt.solution().value << " point:" << opt.solution().point;
 
-For initialisation, usually a starting point is needed. This can either be
+For initialization, usually a starting point is needed. This can either be
 generated by the function if it can propose a random starting point, or it
 can be provided as second argument to ``init``:
 
@@ -173,7 +181,7 @@ Method                                               Description
 
 
 For a new optimizer, only the second versions of ``init`` and ``step``
-need to be implemented. And the optimizer is allowed to evaluate the given 
+need to be implemented. The optimizer is allowed to evaluate the given 
 starting point during initialization.
 
 
@@ -213,11 +221,7 @@ Model                             Description
 
 
 
-Direct search methods:
-
-.. todo::
-
-    add 3 missing descriptions below
+Some examples of direct search methods:
 
 
 
@@ -227,11 +231,13 @@ Model                             Description
 :doxy:`GridSearch`                Evaluates all points defined in a grid and returns the best of this set.
 :doxy:`NestedGridSearch`          Performs several iterations of Grid Search centered around the optimal
                                   point of the last grid search.
-:doxy:`CMA`                       Evolutionary Algorithm using Covariance Matrix Adaptation.
-:doxy:`CMSA`                      ADD SHORT DESCRIPTION
-:doxy:`ElitistCMA`                CMA using the Elitist selection rule
-:doxy:`OnePlusOneES`              ADD SHORT DESCRIPTION
-:doxy:`XNES`                      ADD SHORT DESCRIPTION
+:doxy:`CMA`                       Covariance Matrix Adaptation
+                                  Evolution Strategy (CMA-ES)
+:doxy:`CMSA`                      Covariance Matrix Self-Adaptation
+                                  Evolution Strategy (CMSA_ES)
+:doxy:`OnePlusOneES`              Elitist CMA-ES
+:doxy:`ElitistCMA`                CMA-ES using the elitist selection rule
+:doxy:`XNES`                      Natural Evolution Strategy (xNES)
 ================================  ========================================================================
 
 
