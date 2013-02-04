@@ -23,7 +23,7 @@ is a symmetric functions for which
   \sum_{i=1}^N\sum_{j=1}^N a_i a_j k(x_i, x_j) \ge 0
 
 for all :math:`N`, all 
-:math:`x_1,...,x_N\in\mathcal X` and
+:math:`x_1,...,x_N\in\mathcal X`, and all
 :math:`a_1,...,a_N\in\mathbb R`.
 
 A kernel :math:`k` on :math:`\mathcal X` corresponds to a scalar
@@ -40,16 +40,15 @@ where :math:`x` and :math:`y` are elements of :math:`\mathcal X` ,
 For details we refer to [Aronszajn1950]_ and [Mercer1909]_.
 
 Many machine learning algorithms can be written in a way that the only
-operations involving input elements can be written in the form of
-scalar products between those elements.  A common strategy in machine
-learning is to map the input data into a feature space :math:`\mathcal
-H` and to do the learning in this feature space.  If the only
-operations in :math:`\mathcal H` are scalar product, all these scalar
-products can be replaced by a kernel function replacing the explicit
-computation of the mapping to feature space :math:`\phi`. This has
-some advantages:
+operations involving input elements are scalar products between those
+elements.  A common strategy in machine learning is to map the input
+data into a feature space :math:`\mathcal H` and to do the learning in
+this feature space.  If the only operations in :math:`\mathcal H` are
+scalar products, these can be replaced by kernel function evaluations
+rendering explicit computations of the mapping :math:`\phi` to feature
+space unnecessary. This has some advantages:
 
-- In the typical application the kernel can be computed more
+- Typically, the kernel can be computed more
   efficiently than the scalar product itself. This allows for working
   in very high-dimensional feature spaces.
 
@@ -90,17 +89,17 @@ with :math:`x_1,...,x_N\in\mathcal X`,
 :math:`\alpha_1,...,\alpha_N\in\mathbb R`, and optional bias/offset
 parameter :math:`b\in\mathbb R`.
 
-Many kernel-based algorithms need to repeatedly evaluate the kernel
-applied to different points of some training dataset
-:math:`x_1,\dots,x_N` or they operate on the kernel (Gram) matrix
-:math:`K` with entries :math:`K_{ij}=k(x_i,x_j)` directly. To save
-computation time, the matrix :math:`K` would be stored in memory.
-However, even training sets of sizes of a few hundred thousand make
-this prohibitive on common PCs. Therefore, only parts of it may be
-calculated at a time, most often matrix rows or blocks. In Shark, the
-classes :doxy:`KernelMatrix` and :doxy:`CachedMatrix` as well as some
-derived and sibling classes encapsulate kernel Gram matrices. The
-:doxy:`CachedMatrix` also automatically takes care of memory handling.
+Many kernel-based algorithms need to repeatedly evaluate the kernel on
+some training data points :math:`x_1,\dots,x_N` or they operate on the
+kernel (Gram) matrix :math:`K` with entries :math:`K_{ij}=k(x_i,x_j)`
+directly. To save computation time, the matrix :math:`K` would be
+stored in memory.  Depending on the hardware, even training sets with
+a few hundred thousand can make this prohibitive. Therefore, often only
+parts of :math:`K` are calculated at a time, most often matrix rows
+or blocks. In Shark, the classes :doxy:`KernelMatrix` and
+:doxy:`CachedMatrix` as well as some derived and sibling classes
+encapsulate kernel Gram matrices. The :doxy:`CachedMatrix` also
+automatically takes care of memory handling.
 
 
 
@@ -114,8 +113,8 @@ are derived from the abstract class :doxy:`AbstractKernelFunction`. Due to the
 demanding computations involving kernel evaluations, the interface is optimized
 for speed, and to allow parallelization of the evaluation of different parts of
 the kernel Gram matrix at a time. In the following, the basic design decisions
-are outlined and explained. Since kernels and models have much in common, also
-consider reading the :doc:`models` tutorial if you not already did.
+are outlined and explained. Since kernels and models have much in common, 
+consider reading the :doc:`models` tutorial first.
 
 Types
 &&&&&
@@ -130,9 +129,10 @@ In contrast to Models, we also introduce special reference types:
 Types                      Description
 ========================   =========================================================================================================================
 InputType                  Argument type of the kernel
-BatchInputType             Batch of arguments. Same as Batch<InputType>::type.
-ConstInputReference        Constant Reference to InputType as returned by ConstProxyReference<InputType>::type. By default this is InputType const&.
-ConstBatchInputReference   Constant Reference to BatchInputType as returned by ConstProxyReference<BatchInputType>::type.
+BatchInputType             Batch of arguments; same as Batch<InputType>::type
+ConstInputReference        Constant reference to InputType as returned
+                           by ConstProxyReference<InputType>::type; by default this is InputType const&
+ConstBatchInputReference   Constant reference to BatchInputType as returned by ConstProxyReference<BatchInputType>::type
 ========================   =========================================================================================================================
 
 The reason for the ConstBatchInputReference and ConstInputReference types
@@ -162,12 +162,15 @@ which indicate the traits and capabilities of the kernel:
 ===================================================================  ======================================================================================
 Flag and accessor function name                                      Description
 ===================================================================  ======================================================================================
-``HAS_FIRST_PARAMETER_DERIVATIVE``, ``hasFirstParameterDerivative``  If set, the kernel can evaluate the first derivative w.r.t its parameters.
-``HAS_FIRST_INPUT_DERIVATIVE``, ``hasFirstInputDerivative``          If set, the kernel can evaluate the first derivative w.r.t its left input parameters.
-                                                                     This is no restriction, since kernel functions are symmetric in their two arguments.
+``HAS_FIRST_PARAMETER_DERIVATIVE``, ``hasFirstParameterDerivative``  If set, the kernel can evaluate the first derivative w.r.t its parameters
+``HAS_FIRST_INPUT_DERIVATIVE``, ``hasFirstInputDerivative``          If set, the kernel can evaluate the first derivative w.r.t its left input parameters;
+                                                                     This is no restriction, since kernel functions are symmetric
 ``IS_NORMALIZED``, ``isNormalized``                                  For all :math:`x` it holds  :math:`k(x,x)=1`
 ``SUPPORTS_VARIABLE_INPUT_SIZE``, ``supportsVariableInputSize``      Between different calls to :math:`k(x,y)` the number of dimensions of the kernel is
-                                                                     allowed to vary. This is needed for kernel evaluation of inputs with missing features.
+                                                                     allowed
+								     to
+								     vary;
+								     this is needed for kernel evaluation of inputs with missing features
 ===================================================================  ======================================================================================
 
 
@@ -175,19 +178,21 @@ Evaluation
 &&&&&&&&&&
 
 
-Next, we introduce the functions to evaluate the kernels. Here we have three
-types of functions. The first version simply calculates the kernel value given
-two inputs. The second computes the kernel evaluation of two batches of inputs.
-Here, the inner product between all points of the first and second batch is calculated
-in Hilbert space.
-Thus, the resulting type is a matrix of inner products -- a block of the kernel Gram
-matrix. The third version takes two batches as well but also a state object. The
-state is a data structure which allows the kernel to store intermediate results
-of the evaluation of the kernel value. These can later be reused in the computation
-of the derivatives. Thus, when derivatives are to be computed, this latter version
-must be called beforehand to fill the state object with the correct values.
-There is no version of the derivative with two single inputs, because this is a rare
-use case. If still needed, batches of size one should be used.
+Next, we introduce the functions evaluating kernels. We have three
+types of functions. The first version simply calculates the kernel
+value given two inputs. The second computes the kernel evaluation of
+two batches of inputs.  Here, the inner product between all points of
+the first and second batch is calculated in Hilbert space.  Thus, the
+resulting type is a matrix of inner products -- a block of the kernel
+Gram matrix. The third version takes two batches as well but also a
+state object. The state is a data structure which allows the kernel to
+store intermediate results of the evaluation of the kernel
+values. These can later be reused in the computation of the
+derivatives. Thus, when derivatives are to be computed, this latter
+version must be called beforehand to fill the state object with the
+correct values.  There is no version of the derivative with two single
+inputs, because this is a rare use case. If still needed, batches of
+size one should be used.
 
 With this in mind, we now present the list of functions for ``eval``, including
 the convenience ``operator()``. Let in the following ``I`` be a ``ConstInputReference``
@@ -196,16 +201,16 @@ and ``B`` a ``ConstBatchInputReference``.
 ============================================   =======================================================
 Method                                         Description
 ============================================   =======================================================
-double eval(I x, I z)                          calculates :math:`k(x,z)`
-void eval(B X, B Z, RealMatrix& K)             calculates :math:`K_{ij}=k(x_i,z_j)` for all elements
+double eval(I x, I z)                          Calculates :math:`k(x,z)`
+void eval(B X, B Z, RealMatrix& K)             Calculates :math:`K_{ij}=k(x_i,z_j)` for all elements
                                                :math:`x_i` of X and :math:`z_j` of Z
-void eval(B X, B Z, RealMatrix& K, State& )    calls eval(X,Z,K) while storing intermediate results
+void eval(B X, B Z, RealMatrix& K, State& )    Calls eval(X,Z,K) while storing intermediate results
                                                needed for the derivative functions
-double operator()(I x, I z)                    calls eval(x,z)
-RealMatrix operator()(B X, B Z)                calls eval(X,Z,K) and returns K.
+double operator()(I x, I z)                    Calls eval(x,z)
+RealMatrix operator()(B X, B Z)                Calls eval(X,Z,K) and returns K.
 ============================================   =======================================================
 
-For a kernel, it is sufficient to implement the Batch version of eval that
+For a kernel, it is sufficient to implement the batch version of eval that
 stores the state, since all other functions can rely on it. However, if speed
 is relevant, all three eval functions should be implemented in order to avoid
 unnecessary copy operations.
@@ -219,9 +224,9 @@ As outlined before, kernels can also be used to compute distances between points
 ============================================   =======================================================
 Method                                         Description
 ============================================   =======================================================
-``double featureDistanceSqr(I x, I z)``        Returns the squared distance of x and z.
-``double featureDistance(I x, I z)``           Returns the distance of x and z.
-``RealMatrix featureDistanceSqr(B X, B Z)``    Returns the squared distance of all points in X to all
+``double featureDistanceSqr(I x, I z)``        Returns the squared distance between x and z
+``double featureDistance(I x, I z)``           Returns the distance between x and z.
+``RealMatrix featureDistanceSqr(B X, B Z)``    Returns the squared distances between all points in X to all
                                                points in Z.
 ============================================   =======================================================
 
@@ -290,17 +295,17 @@ Other
 &&&&&
 
 
-Kernels support several other concepts: they have parameters, can be
-configured, serialized and have an externalstate object.
+Kernels support several other concepts. They have parameters, can be
+configured, serialized and have an external state object.
 
 ===============================   ===============================================================================
 Method                            Description
 ===============================   ===============================================================================
-``numberOfParameters``            The number of parameters which can be optimized.
-``parameterVector``               Returns the current parameters of the model.
-``setParameterVector``            Sets the new parameter vector.
-``configure``                     Configures the model. Options depend on the specific model.
-``createState``                   Returns a newly created State object holding the state to be stored in eval.
+``numberOfParameters``            The number of parameters which can be optimized
+``parameterVector``               Returns the current parameters of the model
+``setParameterVector``            Sets the new parameter vector
+``configure``                     Configures the model. Options depend on the specific model
+``createState``                   Returns a newly created State object holding the state to be stored in eval
 ===============================   ===============================================================================
 
 
@@ -316,18 +321,18 @@ common tasks in kernel usage. Currently this file offers the following functions
 =============================================   ===============================================================================
 Method                                          Description
 =============================================   ===============================================================================
-``calculateRegularizedKernelMatrix``            Evaluates the whole kernel Gram matrix given a kernel and a dataset.
-                                                Optionally, a regularization value is added to the main diagonal.
+``calculateRegularizedKernelMatrix``            Evaluates the whole kernel Gram matrix given a kernel and a dataset;
+                                                optionally, a regularization value is added to the main diagonal
 ``calculateKernelMatrixParameterDerivative``    Computes the parameter derivative for a kernel Gram matrix defined by a
-                                                kernel, dataset, and a weight matrix.
+                                                kernel, dataset, and a weight matrix
 =============================================   ===============================================================================
 
 
 List of Kernels
 ----------------------------------------------------------------
 
-We end this tutorial with a convenience list of kernels currently implemented
-in Shark, together with a small description.
+We end this tutorial with a list of some of the kernels implemented
+in Shark, together with a brief description.
 
 We start with general purpose kernels:
 
@@ -339,24 +344,24 @@ Model                             Description
 :doxy:`PolynomialKernel`          For a given exponent n and offset b, computes :math:`k(x,y) = \left(\langle x,y \rangle+b\right)^n`
 :doxy:`DiscreteKernel`            Uses a symmetric weight matrix to compute the kernel value for a finite, discrete space
 :doxy:`GaussianRbfKernel`         Gaussian isotropic ("radial basis function") kernel :math:`k(x,y) = e^{-\gamma ||x-y||^2}`
-:doxy:`ARDKernelUnconstrained`    Gaussian Kernel :math:`k(x,y) = e^{-(x-y)^T C(x-y)}` with diagonal parameter matrix C
+:doxy:`ARDKernelUnconstrained`    Gaussian kernel :math:`k(x,y) = e^{-(x-y)^T C(x-y)}` with diagonal parameter matrix C
 ================================  ========================================================================================================================
 
 
-Nalid positive semi-definite kernels can be formed by adding and
-multiplying kernels, among others. This leads to a range of what we
-call combined kernels listed below:
+Valid positive semi-definite kernels can be formed, among others, by
+adding and multiplying kernels. This leads to a range of what we call
+combined kernels listed below:
 
 =============================  ========================================================================================================================
 Model                          Description
 =============================  ========================================================================================================================
 :doxy:`WeightedSumKernel`      For a given set of kernels computes :math:`k(x,y) = k_1(x,y)+\dots + k_n(x,y)`
 :doxy:`ProductKernel`          For a given set of kernels computes :math:`k(x,y) = k_1(x,y) \dots k_n(x,y)`
-:doxy:`NormalizedKernel`       Normalizes a given Kernel.
+:doxy:`NormalizedKernel`       Normalizes a given kernel
 :doxy:`ScaledKernel`           Scales a kernel by a fixed constant
-:doxy:`SubrangeKernel`         Weighted sum kernel for vector spaces; very kernel receives only a subrange of the input
+:doxy:`SubrangeKernel`         Weighted sum kernel for vector spaces; every kernel receives only a subrange of the input
 :doxy:`MklKernel`              Weighted sum kernel for heterogenous type input tuples;
-                               Every kernel receives one part of the input tuple
+                               every kernel receives one part of the input tuple
 :doxy:`GaussianTaskKernel`     Specialization of the DiscreteKernel for multi task learning
 :doxy:`MultiTaskKernel`        Framework kernel for multi task learning with kernels
 =============================  ========================================================================================================================

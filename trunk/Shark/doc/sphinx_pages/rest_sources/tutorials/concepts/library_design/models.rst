@@ -222,8 +222,8 @@ List of Models
 --------------
 
 
-We end this tutorial with a convenience list of models currently implemented in Shark,
-together with a small description.
+We end this tutorial with a list of some  models currently implemented in Shark,
+together with a brief description.
 
 
 We start with general purpose models:
