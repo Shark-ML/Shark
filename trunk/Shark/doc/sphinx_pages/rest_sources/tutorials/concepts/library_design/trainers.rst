@@ -10,7 +10,7 @@ or data processing problem given a certain data set.
 
 Some trainers are very simple -- for example those training a linear
 model such that it normalizes the components of all examples in a data
-set to unit variance. Other traines are quite complex, for example for
+set to unit variance. Other trainers are quite complex, for example for
 some multi-class support vector machines. But in most cases, trainers
 are used to reach analytical solutions to relatively simple problems
 which are not stated as an iterative optimization problem underneath.
@@ -41,9 +41,9 @@ A trainer offers the following methods:
 =========================================================   =================================================
 Method                                                      Description
 =========================================================   =================================================
-``train(ModelType&, LabeledData<InputType, LabelType>)``    Solves the problem and sets the model parameters.
-``configure(PropertyTree)``                                 Configures the trainer.
-``std::string name()``                                      Returns the trainer's name.
+``train(ModelType&, LabeledData<InputType, LabelType>)``    Solves the problem and sets the model parameters
+``configure(PropertyTree)``                                 Configures the trainer
+``std::string name()``                                      Returns the trainer's name
 =========================================================   =================================================
 
 
@@ -69,8 +69,8 @@ and offers a typedef for the data format:
 ==========================   ==============================================
 Types                        Description
 ==========================   ==============================================
-``ModelType``                The type of model which the trainer optimizes.
-``InputType``                The type of inputs the model takes.
+``ModelType``                Type of model which the trainer optimizes
+``InputType``                Type of inputs the model takes
 ==========================   ==============================================
 
 
@@ -81,14 +81,14 @@ These trainers also offer the following methods:
 Method                                                  Description
 =====================================================   ================================================
 ``train(ModelType&, UnlabeledData<InputType>)``         Solves the problem and stores it in the model.
-``configure(PropertyTree)``                             Configures the trainer.
-``std::string name()``                                  Returns the name of the trainer.
+``configure(PropertyTree)``                             Configures the trainer
+``std::string name()``                                  Returns the name of the trainer
 =====================================================   ================================================
 
 
 
 
-List of Trainers
+List of trainers
 ----------------
 
 
@@ -117,7 +117,7 @@ Trainer                                     Model                     Descriptio
 
 
 
-List of supervised Trainers:
+List of supervised trainers:
 
 
 
