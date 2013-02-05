@@ -116,14 +116,15 @@ Trainer                                     Model                     Descriptio
 
 
 
-List of supervised trainers:
+List of some supervised trainers:
 
 
 
 ========================================  ========================================   ===================================================================
 Trainer                                     Model                                      Description
 ========================================  ========================================   ===================================================================
-:doxy:`CARTTrainer`                       :doxy:`CARTClassifier`                     Trains a CART (classification and regression) tree.
+:doxy:`CARTTrainer`                       :doxy:`CARTClassifier`                     Trains a CART (classification and regression) tree,
+                                                                                     see the :doc:`CART tutorial<../../algorithms/cart>` for details.
 :doxy:`FisherLDA`                         :doxy:`LinearModel`                        Performs Fisher Linear Discriminant.
 :doxy:`KernelMeanClassifier`              :doxy:`KernelExpansion`                    Computes the class means in the kernel induced feature
                                                                                      space and generates a classifier which assigns the points
@@ -135,14 +136,16 @@ Trainer                                     Model                               
                                                                                      model, error function and stopping criterion -- into a trainer.
 :doxy:`Perceptron`                        :doxy:`KernelExpansion`                    Kernelized perceptron -- tries to find a separating hyperplane of
                                                                                      the data in the feature space induced by the kernel.
-:doxy:`RFTrainer`                         :doxy:`RFClassifier`                       Implements a random forest of CART trees.
+:doxy:`RFTrainer`                         :doxy:`RFClassifier`                       Implements a random forest of CART trees,
+                                                                                     see the :doc:`random forest tutorial<../../algorithms/rf>`.
 :doxy:`SigmoidFitRpropNLL`                :doxy:`SigmoidModel`                       Optimizes the parameters of a sigmoid to fit a validation
                                                                                      dataset via backpropagation on the negative log-likelihood.
 :doxy:`SigmoidFitPlatt`                   :doxy:`SigmoidModel`                       Optimizes the parameters of a sigmoid to fit a validation
                                                                                      dataset with Platt's method.
 :doxy:`AbstractSvmTrainer`                :doxy:`KernelExpansion`                    Base class for all support vector machine trainers.
 :doxy:`MissingFeatureSvmTrainer`          :doxy:`MissingFeaturesKernelExpansion`     Trainer for binary SVMs supporting missing features.
-:doxy:`CSvmTrainer`                       :doxy:`KernelExpansion`                    Trainer for binary SVMs, with one-norm regularization.
+:doxy:`CSvmTrainer`                       :doxy:`KernelExpansion`                    Trainer for binary SVMs, with one-norm regularization,
+                                                                                     see the :doc:`SVM introduction<../../algorithms/svm>`.
 :doxy:`EpsilonSvmTrainer`                 :doxy:`KernelExpansion`                    Trains an epsilon-SVM for regression.
 :doxy:`RegularizationNetworkTrainer`      :doxy:`KernelExpansion`                    Trains a Gaussian Process model / regularization network.
 :doxy:`McSvmOVATrainer`                   :doxy:`KernelExpansion`                    Trains a one-vs-all multiclass SVM.

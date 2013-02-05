@@ -4,13 +4,13 @@ General optimization tasks
 ==========================
 
 
-Regression
-----------
+Introduction
+------------
 
 
 In the previous tutorial we employed the LDA trainer to solve the simple LDA
-optimization task in one shot. In Shark, trainers represent a solution
-or solver strategy for standard problems, often using an analytic solution.
+optimization task in one shot. In Shark, a trainer implements a solution
+strategy for a standard problems, often providing an analytic solution.
 In this sense, trainers are one-step optimizers. Given both data and a
 model, a trainer finds the solution for its particular task. However,
 many problems cannot be solved analytically, and in addition, it may not be
@@ -21,9 +21,13 @@ model. A model is parameterized by a set of real values which define its
 behavior. In many simple cases, a model represents a function, mapping inputs to
 outputs, chosen from a parametric family (e.g., the family of linear functions).
 
+
+Regression
+----------
+
 In this tutorial, we will focus on a simple regression task. In regression,
 the parameters of a model are chosen such that it fits the training data as well
-as possible, usually in a least-squares sense. When its parameters have been
+as possible, usually in a least-squares sense. After its parameters have been
 found, the model can be used to predict the output values of new input points.
 The Shark model also provides a way to calculate various derivatives. For more
 information on Shark models, optimization, and trainers, see the concept
@@ -87,16 +91,18 @@ the dataset for the correct values: ::
    LinearModel<> model( inputDimension(data), labelDimension(data) );
 
 The first argument is the dimensionality of the data points and the second parameter
-that of the outputs. A linear model is a model of the form
+that of the outputs. An affine linear model is a model of the form
 
 .. math::
    f(x) = Ax+b
 
-where x is the input, and the matrix A and vector b are constant. Thus, the
-parameters of the model are the entries of A and b. Since we only have one output
-dimension and one input dimension, this means that our model has 2 parameters in
-total. In the general case, it has :math:`n*m+m` paramters where :math:`n` is the
-input dimension and :math:`m` the output dimension of the model.
+where :math:`x` is the input, and the matrix :math:`A` and vector
+:math:`b` are constant. Thus, the parameters of the model are the
+entries of :math:`A` and :math:`b`. Since we only have one output
+dimension and one input dimension, this means that our model has two
+parameters in total. In the general case, it has :math:`n*m+m`
+parameters where :math:`n` is the input dimension and :math:`m` the
+output dimension of the model.
 
 
 
@@ -129,13 +135,13 @@ This loss function computes the squared difference
 .. math ::
    L(f(x), y) = (f(x) - y)^2
 
-between the model output f(x) and the training label y. The ErrorFunction itself
+between the model output :math:`f(x)` and the training label :math:`y`. The ErrorFunction itself
 computes the mean
 
 .. math ::
    \frac 1 n \sum_{i=1}^n L(f(x_i),y_i)
 
-of the loss L over the data set. There are many more objective functions available in
+of the loss :math:`L` over the data set. There are many more objective functions available in
 Shark, see the concept tutorial on :doc:`../concepts/library_design/objective_functions`.
 In addition, also see the concept tutorial on :doc:`../concepts/optimization/optimizationtrainer`.
 
@@ -143,6 +149,15 @@ In addition, also see the concept tutorial on :doc:`../concepts/optimization/opt
 
 Optimization
 %%%%%%%%%%%%
+
+
+Linear regression can be solved analytically. This is done by the
+trainer class ``LinearRegression`` and demonstrated in the tutorial on
+:doc:`../algorithms/linearRegression`.  However, the purpose
+of this tutorial is to introduce the general optimization framework
+for learning, which applies to more complex losses and models, where
+no analytic solution is available. So, let us optimize the model by a
+general-purpose gradient-based method.
 
 
 To optimize the above instantiated model under the above defined objective function
@@ -171,7 +186,7 @@ test set at once and ask the loss how big the error for this set of predictions 
 
    model.setParameterVector( optimizer.solution().point );
    Data<RealVector> predictions = model( test.inputs() );
-   double testError = loss.eval( test.labels(), predictions );
+   double testError = loss( test.labels(), predictions );
 
 or, the aforementioned alternative::
 
@@ -196,11 +211,7 @@ The result should read
     training error: 0.0525739
     test error: 0.151367
 
-Of course, linear regression can be solved analytically (instead of the iterative
-procedure demonstrated here). This is done by the trainer class ``LinearRegression``.
-However, the purpose of this tutorial is to introduce the general optimization
-framework for learning with a simple problem. The procedure demonstrated here applies
-to more complex losses and models, where no analytic solution is available.
+
 
 
 

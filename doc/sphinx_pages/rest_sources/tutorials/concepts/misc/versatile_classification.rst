@@ -2,13 +2,15 @@
 The Versatility of Learning
 ===========================
 
-The purpose of this tutorial is to demonstrate the versatility of Shark
-for various learning tasks, such as (binary) classification. Based on a
-simple learning setup similar to the :doc:`../../first_steps/hello_shark` tutorial
-we will cover five different learning methods in a single, consistent framework.
-The present tutorial assumes that the reader is already familiar with the
+The purpose of this tutorial is to demonstrate the versatility of
+Shark for various learning tasks. Drawing on a simple binary
+classification task similar to the one in the
+:doc:`../../first_steps/hello_shark` tutorial, we will cover five
+different learning methods in a single, consistent framework.  The
+present tutorial assumes that the reader is already familiar with the
 concepts of models and trainers that have been treated in more detail,
-e.g., in the :doc:`../../first_steps/general_optimization_tasks` tutorial.
+e.g., in the :doc:`../../first_steps/general_optimization_tasks`
+tutorial.
 
 We will start out with the (hopefully already familiar) structure of a
 supervised learning experiment: ::
@@ -28,21 +30,23 @@ supervised learning experiment: ::
 
 		trainer.train(model, traindata);
 
-		Data<unsigned int> prediction = model.eval(testdata.inputs());
+		Data<unsigned int> prediction = model(testdata.inputs());
 
 		ZeroOneLoss<unsigned int> loss;
-		double error_rate = loss.eval(testdata.labels(), prediction);
+		double error_rate = loss(testdata.labels(), prediction);
 
 		std::cout << "model: " << model.name() << std::endl
 			<< "trainer: " << trainer.name() << std::endl
 			<< "test error rate: " << error_rate << std::endl;
 	}
 
-The program assumes two comma-separated-value (csv) files with training
-and test data located in the sub-folder "/data". We assume that the file
-content describes a two-class (binary) problem, with labels 0 and 1. The
-program itself is still a stub, since the actual model and trainer
-declarations are missing.
+The program assumes two comma-separated-value (csv) files with
+training and test data located in the sub-folder ``/data``. We assume
+that the file content describes a two-class (binary) problem, with
+labels 0 and 1. The program itself is still a stub, since the actual
+model and trainer declarations are missing. The ``ZeroOneLoss``
+computed the classification error replacing the loop at the end of the
+:doc:`../../first_steps/hello_shark` tutorial.
 
 
 Many Ways of Classifying Data
@@ -66,16 +70,17 @@ and in the place of the "TODO" comment we insert ::
 	LinearClassifier model;
 	LDA trainer;
 
-That's it! The program is ready to go. For build instructions
-refer to the :doc:`../../first_steps/your_programs` tutorial.
+That's it! The program is ready to go. For build instructions refer to
+the :doc:`../../first_steps/your_programs` tutorial.  You can learn
+more on LDA in the :doc:`../../algorithms/lda` tutorial.
 
 
 Nearest Neighbor Classifier
 ---------------------------
 
-LDA is often a good baseline, but it is pretty limited due to the linearity
-of the underlying model. So let's try a more powerful, non-linear model.
-The arguably simplest such method is the nearest neighbor classifier.
+Let's move from the linear parametric LDA approach to a non-linear,
+non-parametric approach.
+The arguably simplest non-linear classifier is the nearest neighbor classifier.
 This classifier is special in that it does not require a trainer. Let's
 remove the LDA code and insert the following code in the appropriate
 places: ::
@@ -94,7 +99,11 @@ the line ::
 	<< "trainer: " << trainer.name() << std::endl
 
 since in this case we do not have a trainer object. Everything should
-work right away. You see, changing the learning method is really easy.
+work right away. For more information on nearest neighbor
+classification see the :doc:`../../algorithms/nearestNeighbor` tutorial.
+
+
+You see, changing the learning method is really easy.
 So let's try more.
 
 
@@ -126,11 +135,11 @@ holding the value(s) of the SVM decision function. For binary classification
 it contains a single entry whose sign indicates the prediction. Thus, we
 have to turn the line ::
 
-	Data<unsigned int> prediction = model.eval(testdata.inputs());
+	Data<unsigned int> prediction = model(testdata.inputs());
 
 into ::
 
-	Data<RealVector> prediction = model.eval(testdata.inputs());
+	Data<RealVector> prediction = model(testdata.inputs());
 
 Now predictions are stored as RealVectors. The next thing is that these
 predictions are fed into the ZeroOneLoss. We change its definition into ::
@@ -141,7 +150,9 @@ where the first template parameter identifies the ground truth label
 type (the type of test.label(n)) and the second template parameter is
 the data type of model predictions (it can be dropped if the types
 coincide). That's it; you are ready to enjoy the power of non-linear
-SVM classification.
+SVM classification. Much more on SVMs cane be found in the special
+SVM tutorials, starting with :doc:`../../algorithms/svm`.
+
 
 
 Random Forest
@@ -160,6 +171,8 @@ the first time you may actually have to look up the meaning of the
 template parameter, which in this case is the type used for representing
 the training labels. Like the KernelExpansion model, the RFClassifier
 outputs RealVector predictions, but now you know how to handle them.
+For an introduction to random forests see the
+:doc:`../../algorithms/rf` tutorial.
 
 
 Neural Network
@@ -217,7 +230,7 @@ in the end.
 What you learned
 ================
 
-You should have learned the following aspects in this Tutorial:
+You should have learned the following aspects in this tutorial:
 
 * Shark is a versatile tool for machine learning. Changing the learning method requires only exchanging a few classes. All objects still conform to the same top level interfaces, such as AbstractModel and AbstractTrainer.
 * Nearly everything in Shark is templated. It is not always easy to get all template parameters right in the first attempt. The probably best way of dealing with errors is to check the documentation of the template classes. The meaning of all template parameters should be documented. Often it will also become clear from the template parameter's name.

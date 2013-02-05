@@ -12,9 +12,9 @@ Neural-network training example
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-In the previous tutorial, we set up a general optimization task which was
+In some of the previous tutorial, we set up a general optimization tasks which were
 trained iteratively. This approach has two notable usage downsides compared
-to the convenience of the one-step LDA-trainer in the first example:
+to the convenience of the one-step LDA- or SVm-trainer:
 
 #. We have to decide when the accuracy achieved by the optimization steps
    is high enough.
@@ -62,10 +62,14 @@ Overview
 ++++++++
 
 
-This tutorial will introduce different stopping criteria. For sake of example,
-it also tackles an again slightly more complex learning task than those in
-the previous two tutorials, namely classification with a simple feed-forward
-neural network. We show how to create a trainer for this task which generalizes
+This tutorial will introduce different stopping criteria. As an example,
+we consider a slightly more complex learning task than in
+the previous tutorials, namely classification with a simple feed-forward
+neural network. You can learn more on neural networks in Shark in 
+the :doc:`../algorithms/ffnet` tutorial. 
+
+
+We show how to create a trainer for this task which generalizes
 important concepts and saves us manual work. Then, we construct and compare
 three different stopping criteria for that trainer. To this end, we introduce
 the ``AbstractStoppingCriterion``, another interface of Shark. In addition to
@@ -91,7 +95,7 @@ usage for each one::
    #include <shark/Algorithms/StoppingCriteria/GeneralizationQuotient.h> //Uses the validation error to track the progress
    #include <shark/Algorithms/StoppingCriteria/ValidatedStoppingCriterion.h> //Adds the validation error to the value of the point
 
-As before, ``Csv.h`` is included for data read-in. ``FFNet.h`` is needed
+As before, ``Csv.h`` is included for reading in data. The header ``FFNet.h`` is needed
 because we want to train a neural network to distinguish between two classes.
 ``Rprop`` is a fast and stable algorithm for gradient-based optimization of
 a differentiable objective function. Since the 0-1-loss is not differentiable,
@@ -108,13 +112,13 @@ criteria we will examine.
 Using an AbstractStoppingCriterion
 ++++++++++++++++++++++++++++++++++
 
-We want to use a feed-forward neural network with one hidden layer and 2 output
+We want to use a feed-forward neural network with one hidden layer and two output
 neurons for classification, and train it under three different stopping criteria:
 a fixed number of iterations, progress on the training error, and progress on a
 validation set. To facilitate our experiments, we create one single, local, auxiliary
 function that takes an ``AbstractStoppingCriterion`` -- the base class of all
-stopping criteria -- as an argument and creates as well
-as trains such a neural network under that abstract stopping criterion. In
+stopping criteria -- as an argument. This auxiliary function creates and
+trains a neural network using the abstract stopping criterion. In
 addition, instead of manually and explicitly coding an optimization loop as in
 the previous examples, we use a so-called ``OptimizationTrainer`` that encapsulates
 the entire training process given an ObjectiveFunction, Optimizer, and StoppingCriterion.
@@ -184,15 +188,16 @@ Progress on training error
 &&&&&&&&&&&&&&&&&&&&&&&&&&
 
 Next we employ a stopping criterion that monitors progress on the
-training error. The stopping criterion ``TrainingError`` takes in its
-constructor a window size (or number of time steps) :math:`T`  together
-with a threshold value :math:`\epsilon`. If the improvement over the
-last :math:`T` timesteps does not exceed :math:`\epsilon`, that is,
-:math:`E(t-T)-E(t) < \epsilon`, the stopping criterion becomes active
-and tells the optimizer to stop (because it assumes that progress over
-subsequent optimization steps will be negligible as well). Note that a
-danger when using this stopping criterion is that it may stop optimization
-even when the algorithm only traverses a locally isolated plateau or saddle
+training error :math:`E`. The stopping criterion ``TrainingError``
+takes in its constructor a window size (or number of time steps)
+:math:`T` together with a threshold value :math:`\epsilon`. If the
+improvement over the last :math:`T` timesteps does not exceed
+:math:`\epsilon`, that is, :math:`E(t-T)-E(t) < \epsilon`, the
+stopping criterion becomes active and tells the optimizer to stop
+(because it assumes that progress over subsequent optimization steps
+will be negligible as well). Note that a danger when using this
+stopping criterion is that it may stop optimization even when the
+algorithm only traverses a plateau or saddle
 point. However, the optimizer used here, ``IRpropPlus``, dynamically
 adapts it step size and and hence is somewhat less vulnerable to these
 problems. After all the groundwork has been done, we can test this
