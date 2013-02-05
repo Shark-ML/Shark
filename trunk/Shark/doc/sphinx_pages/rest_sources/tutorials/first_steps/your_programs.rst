@@ -1,4 +1,4 @@
-Your Shark programs
+Your Shark Programs
 ===================
 
 In order to use the Shark library's functionality, you will usually write your own (short or long)

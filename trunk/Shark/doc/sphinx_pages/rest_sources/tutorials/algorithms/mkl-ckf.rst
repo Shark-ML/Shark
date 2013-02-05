@@ -1,24 +1,20 @@
-=========================================================
-MKL kernels, or rather: Linear Kernel Combinations (LKCs)
-=========================================================
+==========================
+Linear Kernel Combinations
+==========================
 
-This tutorial first lists some medium-detailed background information on Multiple Kernel
+This tutorial first lists some background information on Multiple Kernel
 Learning (MKL) algorithms and Linear Kernel Combinations (LKCs). In the second part, we
 start with the actual, hands-on Shark-Library tutorial code introductions. This includes
 a tour of the different kernel functions which might be handy, as well as the MKL-typical
 kernel normalization techniques.
 
-.. note::
-
-	Before we start, note that Shark does currently not include a "canonical" MKL algorithm.
-	That is, Shark does not offer an SVM formulation for which the kernel weights are optimized
-	jointly	with the SVM solution vector. Rather, it offers a kernel function class which is
-	called :doxy:`MklKernel`, and which conforms to the general class of kernels used in MKL 
-	algorithms. However, the weights still have to be learned by some other method, which will
-	not be a "canonical" MKL algorithm, but rather one of those that Shark does indeed offer,
-	and which are identical to those Shark recommends for optimizing single-kernel parameters
-	in general. For this reason, we will also frequently talk of Linear Kernel Combinations,
-	a term which we find more appropriate for what is implemented in Shark.
+Shark does currently not include a "canonical" MKL algorithm that
+optimizes the kernel weights and the parameters of am SVM kernel
+expansion jointly. Rather, it offers a kernel function class which is
+called :doxy:`MklKernel` and conforms to the general class of kernels
+used in MKL algorithms. However, the weights still have to be learned
+by some method implemented in Shark for optimizing single-kernel
+parameters.
 	
 MKL and LKCs: Background
 ------------------------
@@ -57,8 +53,7 @@ school of MKL algorithms share the following characteristics:
   
 * The sub-kernels :math:`k_i` are usually regarded as (pseudo-)parameterless. In other
   words, if the sub-kernels do have parameters, these are fixed to one particular value
-  and not optimized over. This usually also applies to the SVM regularization
-  parameter :math:`C`.
+  and not optimized over. 
   
 Since the problem of learning the kernel weights is integrated into the main SVM problem
 such that it remains convex, proponents of MKL have argued that MKL offers a convincing
@@ -70,7 +65,7 @@ weights are optimized, for example, using the kernel-target alignment as a crite
 the second step, the full SVM is then trained as usual with fixed kernel weights.
 
 In practice and for many applications, the experimental results of a wide range of MKL
-algorithms have proven not very convincing ([Gonen2011]_). Regardless of the kernel weight
+algorithms have proven not very convincing [Gonen2011]_. Regardless of the kernel weight
 optimization strategy used and its respective success, it is still important to note the
 two main motivations for using LKCs in a learning task:
 
@@ -85,7 +80,7 @@ two main motivations for using LKCs in a learning task:
   optimization) setting, MKL algorithms can "choose" their favorite kernel, and thus
   the best sub-kernel parameter, themselves by increasing the weights :math:`\theta_i`
   for all sub-kernels :math:`k_i` which have a meaningful sub-kernel parameter. This
-  is sometimes seen by MKL proponents as eleminating or circumventing the SVM model
+  is sometimes seen by MKL proponents as eliminating or circumventing the SVM model
   selection problem. We will refer to this first scenario as the MKL kernel selection
   scenario.
   
@@ -148,8 +143,8 @@ behavior with respect to the integration of their sub-parameters into the overal
 	
 By default, the sub-kernels contribution to the overall parameter vector is turned **off**, that is,
 the only parameters initially visible are the :math:`N-1` last kernel weights (the first one being
-fixed to one). We can illustrate this and the three above methods' behavior to by continuing with our
-above example, simply examining and setting all possible adaptive-ness status::
+fixed to one). We can illustrate this and the three above methods' behaviors by continuing with our
+above example::
 
 	cout << endl << "kernel.isAdaptive(0): " << kernel.isAdaptive(0) << endl;
 	cout << "kernel.isAdaptive(1): " << kernel.isAdaptive(1) << endl;

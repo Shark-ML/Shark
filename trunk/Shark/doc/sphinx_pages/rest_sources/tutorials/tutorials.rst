@@ -126,7 +126,6 @@ Direct search methods -- the covariance matrix adaptation evolution strategy:
 
 
 
-
 For Shark developers
 ++++++++++++++++++++
 
