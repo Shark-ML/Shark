@@ -1,4 +1,4 @@
-Deciding when to stop
+Deciding When to Stop
 =====================
 
 .. todo::
