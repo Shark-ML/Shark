@@ -22,8 +22,9 @@ a simple regression task.
 * :doc:`first_steps/your_programs`
 * :doc:`first_steps/hello_shark`
 * :doc:`first_steps/general_optimization_tasks`
+* :doc:`concepts/misc/versatile_classification`
 * :doc:`first_steps/when_to_stop`
-* :doc:`first_steps/shark_layout`
+
 
 Overarching concepts
 ++++++++++++++++++++
@@ -102,6 +103,8 @@ Neural nets:
 
 * :doc:`algorithms/ffnet`
 * :doc:`algorithms/extreme_learning_machine`
+* :doc:`algorithms/rbm_module`
+* :doc:`algorithms/binary_rbm`
 
 Tree-based algorithms:
 
@@ -120,15 +123,9 @@ Direct search methods -- the covariance matrix adaptation evolution strategy:
 * :doc:`algorithms/cma`
 * :doc:`algorithms/mocma`
 
-Restricted Boltzmann machines:
 
-* :doc:`algorithms/rbm_module`
-* :doc:`algorithms/binary_rbm`
 
-Putting things together, this tutorial demonstrates how many of the
-above methods fit into a simple framework.
 
-* :doc:`concepts/misc/versatile_classification`
 
 For Shark developers
 ++++++++++++++++++++
