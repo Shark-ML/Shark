@@ -1,6 +1,6 @@
 The RBM Module
 ====================================================
-The following sections will briefly describe Restricted Boltzmann Machines(RBM).
+The following sections will briefly describe Restricted Boltzmann Machines (RBM).
 After that a short summary of the design goals and target audience is given and
 in the last part the different components of the library are presented.
 This documentation should only be seen as a birds eye view of the module.
