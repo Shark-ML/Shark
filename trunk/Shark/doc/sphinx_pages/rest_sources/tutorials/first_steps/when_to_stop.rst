@@ -1,20 +1,9 @@
 Deciding When to Stop
 =====================
 
-.. todo::
-
-    has this ever been tested and the corresp. code added as an example?
-    there were some indications that it might not compile due to missing
-    includes, so testing is required before removing this todo
-
-
-Neural-network training example
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-In some of the previous tutorial, we set up a general optimization tasks which were
+In the previous tutorial, we set up a general optimization tasks which were
 trained iteratively. This approach has two notable usage downsides compared
-to the convenience of the one-step LDA- or SVm-trainer:
+to the convenience of the one-step LDA- or SVM-trainer:
 
 #. We have to decide when the accuracy achieved by the optimization steps
    is high enough.
@@ -26,25 +15,15 @@ structural problem. In the LDA example, we did not have to bother
 whether the solution was sufficiently exact, as the LDA problem can be
 solved analytically.
 
-
-
 Motivation
 ++++++++++
-
 
 In general, choosing a good number of iterations
 for an iterative optimizer touches on two issues:
 
 * First, simply a computational point of view: we do not want to perform
-  more iterations than necessary to reach a "good" solution, but also not
-  perform less than required to reach a "good" solution. While in general,
-  the optimizers in Shark will stop when no more progress is being made,
-  there may still be a useful earlier point to stop -- for example when
-  only neglectable progress is being made.
-
-  .. todo::
-
-     is this correct? do all our optimizers stop when there is no more progress?
+  more iterations than necessary to reach a "good" solution. But we also
+  don't want to stop before we found a "good" solution. 
 
 * Second, stopping early also constitutes a way of regularizing the
   adaptation of a model to a training set. Hence, stopping even earlier
@@ -56,10 +35,11 @@ number of iterations is monitoring the performance on a validation
 split, which needs to be created from the dataset in addition to
 training and test split.
 
-
+Neural-network training example
++++++++++++++++++++++++++++++++++
 
 Overview
-++++++++
+&&&&&&&&&&&&
 
 
 This tutorial will introduce different stopping criteria. As an example,
@@ -68,18 +48,15 @@ the previous tutorials, namely classification with a simple feed-forward
 neural network. You can learn more on neural networks in Shark in 
 the :doc:`../algorithms/ffnet` tutorial. 
 
-
 We show how to create a trainer for this task which generalizes
 important concepts and saves us manual work. Then, we construct and compare
 three different stopping criteria for that trainer. To this end, we introduce
 the ``AbstractStoppingCriterion``, another interface of Shark. In addition to
-this "first-steps" tutorial, a concept tutorial on
-:doc:`../concepts/library_design/stopping_criteria` exists, complementing
-this one.
-
+this tutorial, a concept tutorial on :doc:`../concepts/library_design/stopping_criteria` exists, 
+which gives a more detaild explanation about how stopping criteria are implemented in shark.
 
 Building blocks & includes
-++++++++++++++++++++++++++
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 We first list all includes for this tutorial and then motivate their
 usage for each one::
@@ -102,15 +79,14 @@ a differentiable objective function. Since the 0-1-loss is not differentiable,
 and would thus not be compatible with any gradient descent method including
 Rprop, we instead use the ``CrossEntropy`` as surrogate loss. But for testing,
 we still want to use and hence include the ``ZeroOneLoss``. As in the last
-tutorial, the ``ErrorFunction`` evaluates a model under a certain loss and
-on a certain data set when provided with the model parameters for a current
-such evaluation. The remaining includes are needed for the different stopping
+tutorial, the ``ErrorFunction`` binds together the model, dataset and the loss function.
+For a given set of parameters, it returns the actual error of the model with this parameters
+measured by the loss function on the dataset.
+The remaining includes are needed for the different stopping
 criteria we will examine.
 
-
-
 Using an AbstractStoppingCriterion
-++++++++++++++++++++++++++++++++++
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 We want to use a feed-forward neural network with one hidden layer and two output
 neurons for classification, and train it under three different stopping criteria:
@@ -125,36 +101,33 @@ the entire training process given an ObjectiveFunction, Optimizer, and StoppingC
 Overall, we use the following function to create, train and evaluate our neural
 network under a given stopping criterion::
 
-
    template<class T>
    double experiment(AbstractStoppingCriterion<T> & stoppingCriterion, ClassificationDataset const& trainingset, ClassificationDataset const& testset){
-    //create a feed forward neural network with one layer of 10 hidden neurons and one output for every class
-    FFNet<LogisticNeuron,LinearNeuron> network;
-    network.setStructure(inputDimension(trainingset),10,numberOfClasses(trainingset));
-    initRandomUniform(network,-0.1,0.1);
+	//create a feed forward neural network with one layer of 10 hidden neurons and one output for every class
+	FFNet<LogisticNeuron,LinearNeuron> network;
+	network.setStructure(inputDimension(trainingset),10,numberOfClasses(trainingset));
+	initRandomUniform(network,-0.1,0.1);
 
-    //define loss and error function
-    CrossEntropy loss;
-    ErrorFunction<RealVector,unsigned int> errorFunction(&network,&loss);
+	//The Cross Entropy maximises the activation of the cth output neuron compared to all other outputs for a sample with class c.
+	CrossEntropy loss;
+	ErrorFunction<RealVector,unsigned int> errorFunction(&network,&loss);
 
-    //we use IRpropPlus for network optimization
-    IRpropPlus optimizer;
-
-    //create an optimization trainer and train the model
-    OptimizationTrainer<FFNet<LogisticNeuron,LinearNeuron>,unsigned int > trainer(&errorFunction, &optimizer, &stoppingCriterion);
-    trainer.train(network, trainingset);
-
-    // Evaluate the performance on the test set using the classification loss. We set the threshold to 0.5 for Logistic neurons.
-    ZeroOneLoss<unsigned int, RealVector> loss01(0.5);
-    Data<RealVector> predictions = network(testset.inputs());
-    return loss01(testset.labels(),predictions);
+	//we use IRpropPlus for network optimization
+	IRpropPlus optimizer;
+	
+	//create an optimization trainer and train the model
+	OptimizationTrainer<FFNet<LogisticNeuron,LinearNeuron>,unsigned int > trainer(&errorFunction, &optimizer, &stoppingCriterion);
+	trainer.train(network, trainingset);
+	
+	//evaluate the performance on the test set using the classification loss we choose 0.5 as threshold since Logistic neurons have values between 0 and 1.
+	
+	ZeroOneLoss<unsigned int, RealVector> loss01(0.5);
+	Data<RealVector> predictions = network(testset.inputs()); 
+	return loss01(testset.labels(),predictions);
    }
-
-
 
 Evaluation
 ++++++++++
-
 
 Now it is time to load some data and try out different stopping criteria.
 
@@ -181,7 +154,6 @@ We try out several different numbers of steps::
    double resultMaxIterations2 = experiment( maxIterations, data,test );
    maxIterations.setMaxIterations(500);
    double resultMaxIterations3 = experiment( maxIterations, data,test );
-
 
 
 Progress on training error
@@ -226,14 +198,6 @@ ratio of two other criteria to reach its decision, and hence we refer to the cla
 documentation for an exact description, as well as the scientific publication
 mentioned therein.
 
-.. todo::
-
-    the class documentations for most stopping criteria need serious cleanup,
-    and also a thourough check if they indeed implement their counterparts from
-    the Prechelt paper correctly (i have some serious doubts about the validation-based
-    criteria!)! If there are bugs in the code, this tutorial should be re-run and the
-    results code and description updated.
-
 In summary, this code uses the progress on a validation set to decide when to stop::
 
    //create the validation error function
@@ -260,11 +224,12 @@ Printing all variables of type ``double`` defined in the snippets above, we get
    RESULTS:
    ========
 
-   10 iterations   : 0.5
-   100 iterations : 0.375
-   500 iterations : 0.40625
-   training Error : 0.442708
-   generalization Quotient : 0.416667
+   10 iterations   : 0.432292
+   100 iterations : 0.276042
+   500 iterations : 0.307292
+   training Error : 0.354167
+   generalization Quotient : 0.338542
+
 
 
 So stopping after around 100 iterations yielded the lowest error on the test

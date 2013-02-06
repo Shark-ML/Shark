@@ -163,15 +163,10 @@ There is more to explore in Shark. Let's try a random forest instead: ::
 	#include <shark/Models/Trees/RFClassifier.h>
 	#include <shark/Algorithms/Trainers/RFTrainer.h>
 
-	RFClassifier<unsigned int> model;
+	RFClassifier model;
 	RFTrainer trainer;
 
-This one is really straightforward. However, writing these lines for
-the first time you may actually have to look up the meaning of the
-template parameter, which in this case is the type used for representing
-the training labels. Like the KernelExpansion model, the RFClassifier
-outputs RealVector predictions, but now you know how to handle them.
-For an introduction to random forests see the
+This one is really straightforward. For an introduction to random forests see the
 :doc:`../../algorithms/rf` tutorial.
 
 

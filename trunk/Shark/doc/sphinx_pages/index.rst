@@ -25,6 +25,7 @@
    rest_sources/tutorials/concepts/library_design/objective_functions
    rest_sources/tutorials/concepts/library_design/stopping_criteria
    rest_sources/tutorials/concepts/library_design/trainers
+   rest_sources/tutorials/concepts/library_design/batches
 
    rest_sources/tutorials/concepts/lin_alg/vector_matrix
    rest_sources/tutorials/concepts/lin_alg/lapack
@@ -34,7 +35,6 @@
    rest_sources/tutorials/concepts/data/import_data
    rest_sources/tutorials/concepts/data/dataset_subsets
    rest_sources/tutorials/concepts/data/normalization
-   rest_sources/tutorials/concepts/data/batches
 
    rest_sources/tutorials/concepts/optimization/optimizationtrainer
    rest_sources/tutorials/concepts/optimization/directsearch

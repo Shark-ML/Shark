@@ -108,7 +108,7 @@ The base class 'AbstractCost<LabelTypeT,OutputTypeT>'
 The base class :doxy:`AbstractCost` is templatized with respect to
 both the label and output type.  Using batches, that is, collections
 of input elements, is an important concept in Shark, see the tutorial
-:doc:`../data/batches`. The proper batch types are inferred from the
+:doc:`batches`. The proper batch types are inferred from the
 label and output types:
 
 
