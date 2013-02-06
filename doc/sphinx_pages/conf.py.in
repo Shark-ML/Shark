@@ -26,14 +26,25 @@ todo_include_todos = True
 abs_rel_dir = os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/../contrib/doxylink/build/lib/python')
 #mathjax_dir = os.path.abspath('../../contrib/mathjax_sphinxext')
 #sys.path.append( mathjax_dir )
-s3_local_modules = glob.glob( abs_rel_dir + '/*-py2.?.egg' )
-print 's3_local_modules =', s3_local_modules
-for local_module in s3_local_modules:
-	sys.path.append(local_module)
-	#because egg standards vary, also include all child directories :/
-	for local_module_subdir in os.walk(local_module).next()[1]:
-		sys.path.append( os.path.join(abs_rel_dir,local_module,local_module_subdir) )
-print 'sys.path is now ', sys.path[:], '\n'
+
+if sys.version_info < (3, 0):
+    s3_local_modules_p2 = glob.glob( abs_rel_dir + '/*-py2.?.egg' )
+    print 's3_local_modules_p2 =', s3_local_modules_p2
+    for local_module in s3_local_modules_p2:
+        sys.path.append(local_module)
+        #because egg standards vary, also include all child directories :/
+        for local_module_subdir in os.walk(local_module).next()[1]:
+            sys.path.append( os.path.join(abs_rel_dir,local_module,local_module_subdir) )
+    print 'sys.path is now ', sys.path[:], '\n'
+else:
+    s3_local_modules_p3 = glob.glob( abs_rel_dir + '/*-py3.?.egg' )
+    print 's3_local_modules_p3 =', s3_local_modules_p3
+    for local_module in s3_local_modules_p3:
+        sys.path.append(local_module)
+        #because egg standards vary, also include all child directories :/
+        for local_module_subdir in next(os.walk(local_module))[1]:
+            sys.path.append( os.path.join(abs_rel_dir,local_module,local_module_subdir) )
+    print 'sys.path is now ', sys.path[:], '\n'
 
 print 'current working directory', os.path.abspath(os.path.curdir)
 print 'setting relative tag file path to', '../../../doxygen_pages/tag_files/all.tag', '=', os.path.abspath('../../../doxygen_pages/tag_files/all.tag')
