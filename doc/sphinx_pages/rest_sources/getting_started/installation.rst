@@ -27,20 +27,23 @@ Shark relies on `Boost <http://www.boost.org>`_  Version 1.45 or higher. If you 
 want to compile Shark yourself, you will in addition need `CMake <http://www.cmake.org/>`_ (at least version 2.8).
 
 
-Installing pre-built Shark binary packages
-------------------------------------------
-
-We provide pre-built binaries of Shark to be directly installed, see the :doc:`Downloads page <../downloads/downloads>`.
-We offer installers for **MS Windows 64 bit Visual Studio 2010**, **MS Windows 32 bit Visual Studio 2010**, **MS Windows
-64 bit Visual Studio 2008**, **MS Windows 32 bit Visual Studio 2008**, a **MacOS X 64 bit diskimage**, as well as a
-**Linux 32 bit Debian/Ubuntu package** and a **Linux 64 bit Debian/Ubuntu package**.
+.. Installing pre-built Shark binary packages
+   ------------------------------------------
+   
+    We provide pre-built binaries of Shark to be directly installed, see the :doc:`Downloads page <../downloads/downloads>`.
+    We offer installers for **MS Windows 64 bit Visual Studio 2010**, **MS Windows 32 bit Visual Studio 2010**, **MS Windows
+    64 bit Visual Studio 2008**, **MS Windows 32 bit Visual Studio 2008**, a **MacOS X 64 bit diskimage**, as well as a
+    **Linux 32 bit Debian/Ubuntu package** and a **Linux 64 bit Debian/Ubuntu package**.
 
 
 Building Shark from source
 --------------------------
 
-If your platform is not supported by the binary packages, or if you want an up-to-date version
-from the SVN repositories, you have to build Shark from source.
+.. If your platform is not supported by the binary packages, or if you want an up-to-date version
+   from the SVN repositories, you have to build Shark from source.
+
+At the moment, the only way to install Shark is from the source.
+
 
 Download and unpack sources
 ***************************
@@ -50,8 +53,7 @@ Either download and unpack the latest official Shark source-code release from :d
 will be created as a subfolder -- if you want the tree contents directly in the current
 directory, add a space and period ``.`` to the end of the command)::
 
-      svn co https://shark-project.svn.sourceforge.net/svnroot/shark-project/trunk/Shark/
-
+      svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
 
 Building Shark with Linux, MacOS, and other Unix-based systems
 **************************************************************

@@ -1,8 +1,17 @@
 News
 ====
 
+Repository upgraded
+^^^^^^^^^^^^^^^^^^^ 
+
+We upgraded our sourceforge repository to the newest version as
+recommended by sourceforge. The new path to Shark is now:
+
+    svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
+
+
 Shark 3.0beta moved to svn trunk
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 We are happy to announce that the new version 3.0 of Shark has now moved to the trunk of our 
 svn repository, replacing the last stable version of Shark 2.0. 
 
@@ -21,11 +30,7 @@ about any feedback you have!
 
 You can download shark from our svn repository::
 
-    svn co https://shark-project.svn.sourceforge.net/svnroot/shark-project/trunk/Shark/
-
-And the old shark 2.0 is now in::
-
-    svn co https://shark-project.svn.sourceforge.net/svnroot/shark-project/tags/Shark2/
+    svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
     
 There is currently a known problem for MacOs users that they cannot compile using gcc 4.2.1. In this
 case you have to update to a newer version of the gcc or use clang as described in our faq.
