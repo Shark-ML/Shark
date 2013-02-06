@@ -63,10 +63,6 @@ function. For example, the *area under the curve* (AUC).
 In other words, all loss functions generate a cost function, but not all cost
 functions must be based on a loss function.
 
-
-
-
-
 .. todo::
 
     i think what is missing here is a comment on the normalization
@@ -78,8 +74,6 @@ functions must be based on a loss function.
     on always does it oneself? i am aware that this could also go down to where
     the eval-interfaces are explained, but i think it should be at a more
     prominent place actually.
-
-
 
 
 Derivatives
@@ -147,10 +141,14 @@ on a complete set of data. The following functions can be used for evaluation of
 ==============================================================================================   ===============================================================================
 Method                                                                                           Description
 ==============================================================================================   ===============================================================================
-``double eval(Data<L> const& label, Data<O> const& predictions)``                                Returns the cost of the predictions :math:`z_i` given the label :math:`t_i`
+``double eval(Data<L> const& label, Data<O> const& predictions)``                                Returns the cumulated cost of the predictions :math:`z_i` given the label 
+                                                                                                 :math:`t_i`. The loss is normalized by the number of points in the datasets, 
+												 thus the mean loss is returned.
 ``double operator()(Data<L> const& label, Data<O> const& predictions)``                          Convenience function Returning eval(label,predictions)
 ``double evalDerivative(Data<L> const&label, Data<O> const& predictions, Data<O>& gradient)``    Returns the error of the predictions :math:`z_i` given the label :math:`t_i`
-                                                                                                 and computes :math:`\frac {\partial}{\partial z_i}L(z_i,t_i)`
+                                                                                                 and computes :math:`\frac 1 N \frac {\partial}{\partial z_i}L(z_i,t_i)`, where
+												 :math:`N` is the number of data points. This function also returns the mean of
+												 the loss as its return value.
 ==============================================================================================   ===============================================================================
 
 
@@ -179,8 +177,6 @@ Method                                                                          
 ===========================================================================================================   =========================================================================================
 
 
-
-
 List of Cost and Loss functions
 -------------------------------
 
@@ -204,7 +200,7 @@ Loss Functions:
 ============================================  ==============================================================================
 Model                                         Description
 ============================================  ==============================================================================
-:doxy:`AbsoluteLoss`                          Returns the :math:`L_1`-norm of the distance, :math:`|t-z|_1`
+:doxy:`AbsoluteLoss`                          Returns the :math:`L_2`-norm of the distance, :math:`|t-z|_2`
 :doxy:`SquaredLoss`                           Returns the squared distance in two-norm
                                               :math:`|t-z|_2^2`; standard regression loss
 :doxy:`ZeroOneLoss`                           Returns 0 if :math:`t_i=z_i` otherwise standard classification loss
@@ -225,7 +221,3 @@ Model                                         Description
 
     i think the descriptions in the right table need some update.
     for example, the one for CrossEntropyIndependent does not make sense;
-    Also, if I don't misinterpret the AbsoluteLoss code, then
-    it is not the 1-norm that is used to calculate the distance? This
-    needs to be checked! If there is a misunderstanding about the 1-norm,
-    then the other tutorials should be revisited again as well.

@@ -23,12 +23,6 @@ to independent data instances. Refer to the :doxy:`RNNet` class
 implementing recurrent multi-layer perceptrons (which are rather
 functionals than functions) for an example.
 
-.. todo::
-	OK:Above paragraph might not be correct.
-
-.. todo::
-	perhaps a tutorial on states, both for kernels and models?
-
 But back to simpler models for now. A simple model is
 the threshold classifier, which receives a real value as input. If the
 value is higher than the internal threshold (the model parameter),

@@ -149,12 +149,14 @@ public:
 		SIZE_CHECK(predictions.numberOfElements() == targets.numberOfElements());
 
 		std::size_t numBatches = targets.numberOfBatches();
+		std::size_t elements = targets.numberOfElements();
 		gradient = Data<OutputType>(numBatches);
 		double sum = 0;
 		for(std::size_t i = 0; i != numBatches; ++i){
 			sum+=evalDerivative(targets.batch(i),predictions.batch(i),gradient.batch(i));
+			gradient.batch(i) /= elements;//we return the mean of the loss
 		}
-		sum /= targets.numberOfElements();
+		sum /= elements;//we return the mean of the loss
 		return sum;
 	}
 
