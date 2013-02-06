@@ -17,7 +17,7 @@ Background
 
 Given some set :math:`\mathcal X`, a positive semi-definite kernel
 :math:`k:\mathcal X\times\mathcal X\to\mathbb R`
-is a symmetric functions for which
+is a symmetric function for which
 
 .. math::
   \sum_{i=1}^N\sum_{j=1}^N a_i a_j k(x_i, x_j) \ge 0
