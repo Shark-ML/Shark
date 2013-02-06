@@ -33,20 +33,13 @@
  */
 //===========================================================================
 
-
 #ifndef SHARK_DATA_DATASET_H
 #define SHARK_DATA_DATASET_H
 
 #include <boost/foreach.hpp>
-#include <boost/ref.hpp>
-#include <boost/bind.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-#include <boost/format.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/range/iterator_range.hpp>
-
-#include <fstream>
+#include <boost/range/algorithm/random_shuffle.hpp>
+#include <boost/range/algorithm/sort.hpp>
 
 #include <shark/Core/Exception.h>
 #include <shark/Rng/GlobalRng.h>
@@ -72,9 +65,9 @@ namespace shark {
 /// give access to the batches but not to single elements. For this separate element_iterators and const_element_iterators
 /// can be used.
 ///\par
-/// There are a lot of these typedefs. The typical typedefs for containers like value_type or iterator are chosen
+/// There are a lot of these typedefs. The typical typedefs for containers like batch_type or iterator are chosen
 /// as types for the batch interface. For accessing single elements, a different set of typedefs is in place. Thus instead of iterator
-/// you must write element_iterator and instead of value_type write element_type. Usually you should not use element_type escept when
+/// you must write element_iterator and instead of batch_type write element_type. Usually you should not use element_type escept when
 /// you want to actually copy the data. Instead use element_reference or const_element_reference. Note, that these are proxy objects and not
 /// actual references to element_type!
 /// A short example for these typedefs:
@@ -151,101 +144,85 @@ public:
 	/// Zero means: unlimited
 	BOOST_STATIC_CONSTANT(std::size_t, DefaultBatchSize = 256);
 
-	typedef typename Container::BatchType value_type;
-	typedef value_type& reference;
-	typedef value_type const& const_reference;
+	typedef typename Container::BatchType batch_type;
+	typedef batch_type& batch_reference;
+	typedef batch_type const& const_batch_reference;
 
 	typedef Type element_type;
 	typedef typename Batch<element_type>::reference element_reference;
 	typedef typename Batch<element_type>::const_reference const_element_reference;
+
 	typedef std::vector<std::size_t> IndexSet;
 
 	template <class T> friend bool operator == (const Data<T>& op1, const Data<T>& op2);
 	template <class InputT, class LabelT> friend class LabeledData;
 
 
-	// ITERATORS
-	typedef typename Container::const_iterator const_iterator;
-	typedef typename Container::iterator iterator;
-	typedef typename Container::const_element_iterator const_element_iterator;
-	typedef typename Container::element_iterator element_iterator;
+	// RANGES
+	typedef boost::iterator_range<typename Container::element_iterator> element_range;
+	typedef boost::iterator_range<typename Container::const_element_iterator> const_element_range;
+	typedef boost::iterator_range<typename Container::iterator> batch_range;
+	typedef boost::iterator_range<typename Container::const_iterator> const_batch_range;
+	
 
-	// ITERATORS FOR BATCHES
-	///\brief Iterator to the beginning of the container.
-	const_iterator begin() const{
-		return m_data.begin();
-	}
-
-	///\brief Iterator to the end of the container.
-	const_iterator end() const{
-		return m_data.end();
-	}
-
-	///\brief Iterator to the beginning of the container.
-	iterator begin(){
-		return m_data.begin();
-	}
-
-	///\brief Iterator to the end of the container.
-	iterator end(){
-		return m_data.end();
-	}
-	// ITERATORS FOR ELEMENTS
-	///\brief Iterator to the beginning of the container.
-	const_element_iterator elemBegin() const{
-		return m_data.elemBegin();
-	}
-
-	///\brief Iterator to the end of the container.
-	const_element_iterator elemEnd() const{
-		return m_data.elemEnd();
-	}
-
-	///\brief Iterator to the beginning of the container.
-	element_iterator elemBegin(){
-		return m_data.elemBegin();
-	}
-
-	///\brief Iterator to the end of the container.
-	element_iterator elemEnd(){
-		return m_data.elemEnd();
-	}
-
-	// ELEMENT ACCESS
-
-	element_reference operator()(std::size_t i){
-		return *(elemBegin()+i);
-	}
-	const_element_reference operator()(std::size_t i) const{
-		return *(elemBegin()+i);
-	}
-
-	// BATCH ACCESS
-	reference batch(std::size_t i){
-		return *(begin()+i);
-	}
-	const_reference batch(std::size_t i) const{
-		return *(begin()+i);
-	}
-
-
-	// RANGE ACCESS FOR ELEMENTS
-	typedef boost::iterator_range<element_iterator> element_range;
-	typedef boost::iterator_range<const_element_iterator> const_element_range;
-
-	///\brief Returns the  half open range of elements [elemBegin(),elemEnd()).
+	///\brief Returns the range of elements.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_element_range elements()const{
-		return const_element_range(elemBegin(),elemEnd());
+		return const_element_range(m_data.elemBegin(),m_data.elemEnd());
 	}
-	///\brief Returns the  half open range of elements [elemBegin(),elemEnd()).
+	///\brief Returns therange of elements.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	element_range elements(){
-		return element_range(elemBegin(),elemEnd());
+		return element_range(m_data.elemBegin(),m_data.elemEnd());
+	}
+	
+	///\brief Returns the range of batches.
+	///
+	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
+	///element access via begin()/end() in which case data.elements() provides the correct interface
+	const_batch_range batches()const{
+		return const_batch_range(m_data.begin(),m_data.end());
+	}
+	///\brief Returns the range of batches.
+	///
+	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
+	///element access via begin()/end() in which case data.elements() provides the correct interface
+	batch_range batches(){
+		return batch_range(m_data.begin(),m_data.end());
+	}
+	
+	///\brief Returns the number of batches of the set.
+	std::size_t numberOfBatches() const{
+		return m_data.size();
+	}
+	///\brief Returns the total number of elements.
+	std::size_t numberOfElements() const{
+		return m_data.numberOfElements();
+	}
+	
+	///\brief Check whether the set is empty.
+	bool empty() const{
+		return m_data.empty();
+	}
+
+	// ELEMENT ACCESS
+	element_reference element(std::size_t i){
+		return *(m_data.elemBegin()+i);
+	}
+	const_element_reference element(std::size_t i) const{
+		return *(m_data.elemBegin()+i);
+	}
+
+	// BATCH ACCESS
+	batch_reference batch(std::size_t i){
+		return *(m_data.begin()+i);
+	}
+	const_batch_reference batch(std::size_t i) const{
+		return *(m_data.begin()+i);
 	}
 
 	// CONSTRUCTORS
@@ -280,39 +257,14 @@ public:
 	: m_data(points,batchSize)
 	{ }
 
-	//~ ///\brief Construction from a data container and an index container.
-	//~ ///
-	//~ /// This is used internally by the LabeledData class.
-	//~ /// IT IS RECOMMENDED NOT TO USE THIS FUNCTION DIRECTLY,
-	//~ /// since this interface may be subject to change.
-	//~ Data(Container const& container, const IndexSets& indexSets)
-	//~ : m_data(container)
-	//~ , m_indexSets(indexSets)
-	//~ { }
-
 	// MISC
-	///\brief Returns the number of batches of the set.
-	std::size_t size() const{
-		return m_data.size();
-	}
-	///\brief Returns the total number of elements.
-	std::size_t numberOfElements() const{
-		return m_data.numberOfElements();
-	}
-
-	///\brief Check whether the set is empty.
-	bool empty() const{
-		return m_data.empty();
-	}
 
 	void read(InArchive& archive){
 		archive >> m_data;
-		//~ archive >> m_indexSets;
 	}
 
 	void write(OutArchive& archive) const{
 		archive << m_data;
-		//~ archive << m_indexSets;
 	}
 	///\brief This method makes the vector independent of all siblings and parents.
 	virtual void makeIndependent(){
@@ -322,20 +274,19 @@ public:
 
 	// METHODS TO ALTER BATCH STRUCTURE
 
-	void splitBatch(iterator position, std::size_t elementIndex){
-		m_data.splitBatch(position,elementIndex);
+	void splitBatch(std::size_t batch, std::size_t elementIndex){
+		m_data.splitBatch(m_data.begin()+batch,elementIndex);
 	}
 
 	///\brief Splits the container in two independent parts. The left part remains in the container, the right is stored as return type
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
-	self_type splice(iterator position){
+	self_type splice(std::size_t batch){
 		self_type right;
-		right.m_data=m_data.splice(position);
+		right.m_data=m_data.splice(m_data.begin()+batch);
 		return right;
 	}
-
 
 	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
 	///
@@ -363,60 +314,6 @@ public:
 	friend void swap(Data& a, Data& b){
 		swap(a.m_data,b.m_data);
 	}
-
-	//~ /// \brief Fill in the named subset.
-	//~ ///
-	//~ ///If the subset does not exist the method throws an exception.
-	//~ void namedSubset(std::string const& name, self_type& subset) const{
-		//~ IndexSet const& indices = m_indexSets.findSubset(name);
-		//~ subset.m_data=Container(m_data, indices);
-	//~ }
-
-	//~ ///\brief Fill in the named subset and its complement.
-	//~ ///
-	//~ /// If the subset does not exist the method throws an exception.
-	//~ void namedSubset(std::string const& name, self_type& subset, self_type& complement) const{
-		//~ IndexSet const& indices = m_indexSets.findSubset(name);
-		//~ IndexSet comp(indices.size());
-		//~ detail::complement(indices,m_data.size(),comp);
-		//~ subset.m_data = Container(m_data, indices);
-		//~ complement.m_data = Container(m_data, comp);
-	//~ }
-
-	//~ ///\brief Create a new name, under which the given list of indices is stored as a named subset.
-	//~ void createNamedSubset(std::string const& name, IndexSet const& indices){
-		//~ m_indexSets.createNamedSubset(name, indices);
-	//~ }
-
-	//~ ///\brief Create a new name, under which a previously created subset is stored.
-	//~ ///
-	//~ ///of course the subset must be previously created by this instance or one of
-	//~ ///it's non-independent siblings.
-	//~ void createNamedSubset(std::string const& name, self_type const& subset){
-		//~ //unfortunately, we need to convert the batch vector of the set into an indexset...
-		//~ std::vector<std::size_t> indizes(subset.m_data.size());
-		//~ for(std::size_t i = 0; i != subset.m_data.size(); ++i){
-			//~ for(std::size_t j = 0; j != m_data.size(); ++j){
-				//~ if(m_data.pointer(j) == subset.m_data.pointer(i)){
-					//~ indizes[i]=j;
-					//~ break;
-				//~ }
-			//~ }
-		//~ }
-		//~ m_indexSets.createNamedSubset(name, indizes);
-	//~ }
-
-	//~ ///\brief Check whether a subset with the given name exists.
-	//~ bool hasNamedSubset(std::string const& name) const{
-		//~ return m_indexSets.hasNamedSubset(name);
-	//~ }
-
-	//~ ///\brief Returns the indices of a previously created subset.
-	//~ ///
-	//~ ///mostly used for saving the Dataset to a file
-	//~ void namedSubsetIndices(std::string const& name, IndexSet& indices){
-		//~ indices = m_indexSets.findSubset(name);
-	//~ }
 };
 
 /**
@@ -429,7 +326,8 @@ public:
 template<class T>
 std::ostream &operator << (std::ostream &stream, const Data<T>& d) {
 	typedef typename Data<T>::const_element_reference reference;
-	BOOST_FOREACH(reference elem,d.elements())
+	typename Data<T>::const_element_range elements = d.elements();
+	BOOST_FOREACH(reference elem,elements)
 		stream << elem << "\n";
 	return stream;
 }
@@ -491,14 +389,6 @@ public:
 	UnlabeledData(UnlabeledData const& container, std::vector<std::size_t> batchSizes)
 		:base_type(container,batchSizes){}
 
-	//~ ///\brief Construction from a data container and an index container.
-	//~ ///
-	//~ /// This is used internally by the LabeledData class.
-	//~ /// IT IS RECOMMENDED NOT TO USE THIS FUNCTION DIRECTLY,
-	//~ /// since this interface may be subject to change.
-	//~ UnlabeledData(InputContainer const& container, typename base_type::IndexSets const & indexSets)
-	//~ : base_type(container,indexSets){}
-
 	/// \brief we allow assignment from Data.
 	self_type operator=(Data<InputT> const& data){
 		static_cast<Data<InputT>& >(*this) = data;
@@ -523,9 +413,9 @@ public:
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
-	self_type splice(typename base_type::iterator position){
+	self_type splice(std::size_t batch){
 		self_type right;
-		right.m_data=m_data.splice(position);
+		right.m_data=m_data.splice(m_data.begin()+batch);
 		return right;
 	}
 
@@ -563,104 +453,87 @@ public:
 
 	BOOST_STATIC_CONSTANT(std::size_t, DefaultBatchSize = InputContainer::DefaultBatchSize);
 
-	// TYPEDEFS
+	// TYPEDEFS fOR PAIRS
 	typedef DataBatchPair<
 		typename Batch<InputType>::type,
 		typename Batch<LabelType>::type
-	> value_type;
+	> batch_type;
 
 	typedef DataPair<
 		InputType,
 		LabelType
 	> element_type;
 
-	// ITERATORS
-	typedef PairIterator<
-		value_type,
-		typename InputContainer::iterator,
-		typename LabelContainer::iterator
-	> iterator;
-	typedef PairIterator<
-		value_type,
-		typename InputContainer::const_iterator,typename LabelContainer::const_iterator
-	> const_iterator;
-
-	typedef PairIterator<
-		element_type,
-		typename InputContainer::element_iterator,
-		typename LabelContainer::element_iterator
-	> element_iterator;
-	typedef PairIterator<
-		element_type,
-		typename InputContainer::const_element_iterator,
-		typename LabelContainer::const_element_iterator
-	> const_element_iterator;
+	// TYPEDEFS FOR  RANGES
+	typedef typename PairRangeType<
+		element_type, 
+		typename InputContainer::element_range,
+		typename LabelContainer::element_range
+	>::type element_range;
+	typedef typename PairRangeType<
+		element_type, 
+		typename InputContainer::const_element_range,
+		typename LabelContainer::const_element_range
+	>::type const_element_range;
+	typedef typename PairRangeType<
+		batch_type, 
+		typename InputContainer::batch_range,
+		typename LabelContainer::batch_range
+	>::type batch_range;
+	typedef typename PairRangeType<
+		batch_type, 
+		typename InputContainer::const_batch_range,
+		typename LabelContainer::const_batch_range
+	>::type const_batch_range;
 
 	// TYPEDEFS FOR REFERENCES
-	typedef typename boost::iterator_reference<iterator>::type reference;
-	typedef typename boost::iterator_reference<const_iterator>::type const_reference;
-	typedef typename boost::iterator_reference<element_iterator>::type element_reference;
-	typedef typename boost::iterator_reference<const_element_iterator>::type const_element_reference;
+	typedef typename boost::range_reference<batch_range>::type batch_reference;
+	typedef typename boost::range_reference<const_batch_range>::type const_batch_reference;
+	typedef typename boost::range_reference<element_range>::type element_reference;
+	typedef typename boost::range_reference<const_element_range>::type const_element_reference;
 
-	// ITERATORS FOR BATCHES
-	///\brief Iterator to the beginning of the container with respect to the batches.
-	const_iterator begin() const{
-		return const_iterator(m_data.begin(), m_label.begin());
-	}
-
-	///\brief Iterator to the end of the container with respect to the batches.
-	const_iterator end() const{
-		return const_iterator(m_data.end(), m_label.end());
-	}
-
-	///\brief Iterator to the beginning of the container with respect to the batches.
-	iterator begin(){
-		return iterator(m_data.begin(), m_label.begin());
-	}
-
-	///\brief Iterator to the end of the container with respect to the batches.
-	iterator end(){
-		return iterator(m_data.end(), m_label.end());
-	}
-
-	// ITERATORS FOR ELEMENTS
-	///\brief Iterator to the beginning of the container with respect to the elements.
-	const_element_iterator elemBegin() const{
-		return const_element_iterator(m_data.elemBegin(), m_label.elemBegin());
-	}
-
-	///\brief Iterator to the end of the container with respect to the elements.
-	const_element_iterator elemEnd() const{
-		return const_element_iterator(m_data.elemEnd(), m_label.elemEnd());
-	}
-
-	///\brief Iterator to the beginning of the container with respect to the elements.
-	element_iterator elemBegin(){
-		return element_iterator(m_data.elemBegin(), m_label.elemBegin());
-	}
-
-	///\brief Iterator to the end of the container with respect to the elements
-	element_iterator elemEnd(){
-		return element_iterator(m_data.elemEnd(), m_label.elemEnd());
-	}
-
-	// RANGE ACCESS FOR ELEMENTS
-	typedef boost::iterator_range<element_iterator> element_range;
-	typedef boost::iterator_range<const_element_iterator> const_element_range;
-
-	///\brief Returns the  half open range of elements [elemBegin(),elemEnd()).
+	///\brief Returns the range of elements.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_element_range elements()const{
-		return const_element_range(elemBegin(),elemEnd());
+		return zipPairRange<element_type>(m_data.elements(),m_label.elements());
 	}
-	///\brief Returns the  half open range of elements [elemBegin(),elemEnd()).
+	///\brief Returns therange of elements.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	element_range elements(){
-		return element_range(elemBegin(),elemEnd());
+		return zipPairRange<element_type>(m_data.elements(),m_label.elements());
+	}
+	
+	///\brief Returns the range of batches.
+	///
+	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
+	///element access via begin()/end() in which case data.elements() provides the correct interface
+	const_batch_range batches()const{
+		return zipPairRange<batch_type>(m_data.batches(),m_label.batches());
+	}
+	///\brief Returns the range of batches.
+	///
+	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
+	///element access via begin()/end() in which case data.elements() provides the correct interface
+	batch_range batches(){
+		return zipPairRange<batch_type>(m_data.batches(),m_label.batches());
+	}
+	
+	///\brief Returns the number of batches of the set.
+	std::size_t numberOfBatches() const{
+		return m_data.numberOfBatches();
+	}
+	///\brief Returns the total number of elements.
+	std::size_t numberOfElements() const{
+		return m_data.numberOfElements();
+	}
+	
+	///\brief Check whether the set is empty.
+	bool empty() const{
+		return m_data.empty();
 	}
 
 	///\brief Access to inputs as a separate container.
@@ -722,44 +595,25 @@ public:
 	{
 		SHARK_CHECK(inputs.numberOfElements() == labels.numberOfElements(), "[LabeledData::LabeledData] number of inputs and number of labels must agree");
 #ifndef DNDEBUG
-		for(std::size_t i  = 0; i != inputs.size(); ++i){
+		for(std::size_t i  = 0; i != inputs.numberOfBatches(); ++i){
 			SIZE_CHECK(shark::size(inputs.batch(i))==shark::size(labels.batch(i)));
 		}
 #endif
 	}
-
-	// SIZE
-
-	///\brief Returns the number of batches of the set.
-	std::size_t size() const{
-		return m_data.size();
-	}
-	///\brief Returns the total number of elements.
-	std::size_t numberOfElements() const{
-		return m_data.numberOfElements();
-	}
-	///\brief Check whether the set is empty.
-	bool empty() const{
-		return m_data.empty();
-	}
-
 	// ELEMENT ACCESS
-
-	element_reference operator()(std::size_t i){
-		return *(elemBegin()+i);
+	element_reference element(std::size_t i){
+		return element_reference(m_data.element(i),m_label.element(i));
 	}
-	const_element_reference operator()(std::size_t i) const{
-		return *(elemBegin()+i);
+	const_element_reference element(std::size_t i) const{
+		return const_element_reference(m_data.element(i),m_label.element(i));
 	}
 
 	// BATCH ACCESS
-	reference batch(std::size_t i){
-		SIZE_CHECK(i < size());
-		return *(begin()+i);
+	batch_reference batch(std::size_t i){
+		return batch_reference(m_data.batch(i),m_label.batch(i));
 	}
-	const_reference batch(std::size_t i) const{
-		SIZE_CHECK(i < size());
-		return *(begin()+i);
+	const_batch_reference batch(std::size_t i) const{
+		return const_batch_reference(m_data.batch(i),m_label.batch(i));
 	}
 
 	// MISC
@@ -776,8 +630,6 @@ public:
 		archive & m_label;
 	}
 
-
-
 	///\brief This method makes the vector independent of all siblings and parents.
 	virtual void makeIndependent(){
 		m_label.makeIndependent();
@@ -787,22 +639,20 @@ public:
 	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
 	virtual void shuffle(){
 		DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
-		std::random_shuffle(elemBegin(),elemEnd(),uni);
+		boost::random_shuffle(elements(),uni);
 	}
 
-	void splitBatch(iterator position, std::size_t elementIndex){
-		m_data.splitBatch(position.iterators().first,elementIndex);
-		m_label.splitBatch(position.iterators().second,elementIndex);
+	void splitBatch(std::size_t batch, std::size_t elementIndex){
+		m_data.splitBatch(batch,elementIndex);
+		m_label.splitBatch(batch,elementIndex);
 	}
 
 	///\brief Splits the container into two independent parts. The left part remains in the container, the right is stored as return type
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
-	self_type splice(iterator position){
-		InputContainer dataRight = m_data.splice(position.iterators().first);
-		LabelContainer labelsRight = m_label.splice(position.iterators().second);
-		return self_type(dataRight,labelsRight);
+	self_type splice(std::size_t batch){
+		return self_type(m_data.splice(batch),m_label.splice(batch));
 	}
 
 	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
@@ -838,47 +688,6 @@ public:
 		m_data.indexedSubset(comp,complement.m_data);
 		m_label.indexedSubset(comp,complement.m_label);
 	}
-
-	//~ ///\brief  Fill in the named subset. If the subset does not exist the method throws an exception.
-	//~ void namedSubset(std::string const& name, self_type& subset) const{
-		//~ IndexSet const& indices = m_indexSets.findSubset(name);
-		//~ subset.m_data = InputContainer(m_data,indices);
-		//~ subset.m_label = LabelContainer(m_label,indices);
-	//~ }
-
-	//~ ///\brief Fill in the named subset and its complement. If the subset does not exist the method throws an exception.
-	//~ void namedSubset(std::string const& name, self_type& subset, self_type& complement) const{
-		//~ IndexSet const& indices = m_indexSets.findSubset(name);
-		//~ IndexSet comp;
-		//~ detail::complement(indices,this->size(),comp);
-		//~ subset.m_data = InputContainer(m_data,indices);
-		//~ subset.m_label = LabelContainer(m_label,indices);
-		//~ complement.m_data = InputContainer(m_data,comp);
-		//~ complement.m_label = LabelContainer(m_label,comp);
-	//~ }
-
-	//~ ///\brief  Create a new name, under which the given list of indices is stored as a named subset.
-	//~ void createNamedSubset(std::string const& name, IndexSet const& indices){
-		//~ m_indexSets.createNamedSubset(name, indices);
-	//~ }
-
-	//~ ///\brief Create a new name, under which a previously created subset is stored
-	//~ ///
-	//~ ///of course the subset must be previously created by this instance or one of
-	//~ ///it's non-independent siblings.
-	//~ void createNamedSubset(std::string const& name, self_type const& subset){
-		//~ //unfortunately, we need to convert the batch vector of the set into an indexset...
-		//~ std::vector<std::size_t> indizes(subset.m_data.size());
-		//~ for(std::size_t i = 0; i != subset.m_data.size(); ++i){
-			//~ for(std::size_t j = 0; j != m_data.size(); ++j){
-				//~ if(m_data.pointer(j) == subset.m_data.pointer(i)){
-					//~ indizes[i]=j;
-					//~ break;
-				//~ }
-			//~ }
-		//~ }
-		//~ m_indexSets.createNamedSubset(name, indizes);
-	//~ }
 protected:
 	InputContainer m_data;               /// point data
 	LabelContainer m_label;		/// label data
@@ -903,7 +712,8 @@ typedef LabeledData<CompressedRealVector, unsigned int> CompressedClassification
 template<class T, class U>
 std::ostream &operator << (std::ostream &stream, const LabeledData<T, U>& d) {
 	typedef typename LabeledData<T, U>::const_element_reference reference;
-	BOOST_FOREACH(reference elem,d.elements())
+	typename LabeledData<T, U>::const_element_range elements = d.elements();
+	BOOST_FOREACH(reference elem,elements)
 		stream << elem.input << " [" << elem.label <<"]"<< "\n";
 	return stream;
 }
@@ -915,8 +725,8 @@ std::ostream &operator << (std::ostream &stream, const LabeledData<T, U>& d) {
 ///\brief Return the number of classes of a set of class labels with unsigned int label encoding
 inline unsigned int numberOfClasses(Data<unsigned int> const& labels){
 	unsigned int classes = 0;
-	BOOST_FOREACH(Data<unsigned int>::const_reference labelBatch, labels){
-		classes = std::max(classes,*std::max_element(labelBatch.begin(),labelBatch.end()));
+	for(std::size_t i = 0; i != labels.numberOfBatches(); ++i){
+		classes = std::max(classes,*std::max_element(labels.batch(i).begin(),labels.batch(i).end()));
 	}
 	return classes+1;
 }
@@ -924,8 +734,9 @@ inline unsigned int numberOfClasses(Data<unsigned int> const& labels){
 ///\brief Returns the number of members of each class in the dataset.
 inline std::vector<std::size_t> classSizes(Data<unsigned int> const& labels){
 	std::vector<std::size_t> classCounts(numberOfClasses(labels),0u);
-	for(std::size_t i = 0; i != labels.size(); ++i){
-		for(std::size_t j = 0; j != size(labels.batch(i)); ++j){
+	for(std::size_t i = 0; i != labels.numberOfBatches(); ++i){
+		std::size_t batchSize = size(labels.batch(i));
+		for(std::size_t j = 0; j != batchSize; ++j){
 			classCounts[labels.batch(i)(j)]++;
 		}
 	}
@@ -936,21 +747,19 @@ inline std::vector<std::size_t> classSizes(Data<unsigned int> const& labels){
 template <class InputType>
 unsigned int dataDimension(Data<InputType> const& dataset){
 	SHARK_ASSERT(dataset.numberOfElements() > 0);
-	return dataset.elemBegin()->size();
+	return boost::size(dataset.element(0));
 }
 
 /// Return the input dimensionality of a labeled dataset.
 template <class InputType, class LabelType>
 unsigned int inputDimension(LabeledData<InputType, LabelType> const& dataset){
-	SHARK_ASSERT(dataset.numberOfElements() > 0);
-	return dataset.elemBegin()->input.size();
+	return dataDimension(dataset.inputs());
 }
 
 /// Return the label/output dimensionality of a labeled dataset.
 template <class InputType, class LabelType>
 unsigned int labelDimension(LabeledData<InputType, LabelType> const& dataset){
-	SHARK_ASSERT(dataset.numberOfElements() > 0);
-	return dataset.elemBegin()->label.size();
+	return dataDimension(dataset.labels());
 }
 ///\brief Return the number of classes (highest label value +1) of a classification dataset with unsigned int label encoding
 template <class InputType>
@@ -962,7 +771,7 @@ unsigned int numberOfClasses(LabeledData<InputType, unsigned int> const& dataset
 template <class InputType>
 unsigned int numberOfClasses(LabeledData<InputType, RealVector> const& dataset){
 	SHARK_ASSERT(dataset.numberOfElements() > 0);
-	return dataset.elemBegin()->label.size();
+	return dataset.element(0).label.size();
 }
 ///\brief Returns the number of members of each class in the dataset.
 template<class InputType, class LabelType>
@@ -970,16 +779,14 @@ inline std::vector<std::size_t> classSizes(LabeledData<InputType, LabelType> con
 	return classSizes(dataset.labels());
 }
 
-	// TRANSFORMATION
+// TRANSFORMATION
 ///\brief Transforms a dataset using a Function f and returns the transformed result.
 //TODO: implement more efficient
 template<class T,class Functor>
 Data<T> transform(Data<T> const& data, Functor f){
-	Data<T> result(data);
-	result.makeIndependent();
-	for(std::size_t i = 0; i != data.size(); ++i)
-		for(std::size_t j = 0; j != shark::size(data.batch(i)); ++j)
-			get(result.batch(i),j) = f(get(data.batch(i),j));
+	Data<T> result(data.numberOfBatches());
+	for(std::size_t i = 0; i != data.numberOfBatches(); ++i)
+		result.batch(i)= createBatch<T>(boost::adaptors::transform(data.batch(i), f));
 	return result;
 }
 
@@ -1023,21 +830,22 @@ DatasetT rangeSubset(DatasetT const& dataset, std::size_t size){
 /// \brief index the first element to be split
 /// \returns the  set which contains the splitd element (right part of the given set)
 template<class DatasetT>
-DatasetT splitAtElement(DatasetT& data, std::size_t index){
-	SIZE_CHECK(index<data.numberOfElements());
-	//create vector with batch sizes and split the batch in which the element trainSize is found
-	typename DatasetT::iterator batch = data.begin();
-	std::size_t batchEnd = size(*batch);
-	while(batchEnd <=index){
-		++batch;
-		std::size_t batchSize = size(*batch);
-		batchEnd+=batchSize;
-	}
-	std::size_t splitPoint = size(*batch) -(batchEnd-index);
-	std::size_t splitBatch = batch-data.begin();
-	data.splitBatch(batch,splitPoint);
-	++splitBatch;
-	return data.splice(data.begin()+splitBatch);
+DatasetT splitAtElement(DatasetT& data, std::size_t elementIndex){
+	SIZE_CHECK(elementIndex<data.numberOfElements());
+
+	std::size_t batchPos = 0;
+	std::size_t batchEnd = 0;
+	do{
+		batchEnd += boost::size(data.batch(batchPos));
+		++batchPos;
+	}while(batchEnd <= elementIndex);
+		
+	std::size_t splitPoint = boost::size(data.batch(batchPos)) -(batchEnd-elementIndex);
+	if(splitPoint != 0){//if we ar ein a middle of a batch, split it in two parts and move on
+		data.splitBatch(batchPos,splitPoint);
+		++batchPos;
+ 	}
+	return data.splice(batchPos);
 }
 
 
@@ -1053,7 +861,7 @@ void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize 
 	detail::batchPartitioning(classCounts, partitioning, classStart, batchSize);
 
 	data.repartition(partitioning);
-	std::sort(data.elemBegin(),data.elemEnd(),detail::ElementSort());//todo we are lying here, use bidirectional iterator sort.
+	boost::sort(data.elements(),detail::ElementSort());//todo we are lying here, use bidirectional iterator sort.
 }
 
 template<class I>
@@ -1069,21 +877,21 @@ LabeledData<I,unsigned int> binarySubProblem(
 	//find first class
 	std::size_t start= 0;
 	for(;get(data.batch(start),0).label != smaller;++start);
-	SHARK_CHECK(start != data.size(), "[shark::binarySubProblem] class does not exist");
+	SHARK_CHECK(start != data.numberOfBatches(), "[shark::binarySubProblem] class does not exist");
 
 	//copy batch indices of first class
-	for(;start != data.size() && get(data.batch(start),0).label == smaller; ++start)
+	for(;start != data.numberOfBatches() && get(data.batch(start),0).label == smaller; ++start)
 		indexSet.push_back(start);
 
 	//find second class
-	for(;start != data.size() && get(data.batch(start),0).label != bigger;++start);
-	SHARK_CHECK(start != data.size(), "[shark::binarySubProblem] class does not exist");
+	for(;start != data.numberOfBatches() && get(data.batch(start),0).label != bigger;++start);
+	SHARK_CHECK(start != data.numberOfBatches(), "[shark::binarySubProblem] class does not exist");
 
 	//copy batch indices of second class
 	for(;get(data.batch(start),0).label == bigger; ++start)
 		indexSet.push_back(start);
 
-	return transformLabels(indexedSubset(data,indexSet), detail::TransformBinaryLabels(zeroClass,oneClass));
+	return transformLabels(indexedSubset(data,indexSet), detail::TransformOneVersusRestLabels(oneClass));
 }
 
 /// \brief Construct a binary (two-class) one-versus-rest problem from a multi-class problem.

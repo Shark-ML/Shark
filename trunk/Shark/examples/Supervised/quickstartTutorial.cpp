@@ -24,10 +24,12 @@ int main(){
 
 	//now use the test data to evaluate the model
 	unsigned int correct = 0;
-	for (size_t i = 0; i != test.numberOfElements(); ++i ) {
-		//operator() returns the result from the classifier given the i-th datapoint of the testset
-		unsigned int result = classifier(test(i).input);
-		if (result == test(i).label){
+	//loop over all points of the test set
+	//be aware that a single point consists in this case of an input and a label
+	//this code here is just for illustration purposes
+	BOOST_FOREACH(ClassificationDataset::element_reference point, test.elements()){
+		unsigned int result = classifier(point.input);
+		if (result == point.label){
 			correct++;
 		}
 	}
@@ -35,7 +37,7 @@ int main(){
 	//print results
 	cout<<"RESULTS: "<<endl;
 	cout<<"======== "<<endl << endl;
-	cout<<"test data size: " << test.size() <<endl;
+	cout<<"test data size: " << test.numberOfElements() <<endl;
 	cout<<"correct classification: "<< correct<<endl;
 	cout<<"error rate: " << 1.0- double(correct)/test.numberOfElements()<<endl;
 }

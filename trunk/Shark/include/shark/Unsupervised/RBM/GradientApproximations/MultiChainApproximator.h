@@ -107,9 +107,9 @@ public:
 		typename Energy::AverageEnergyGradient grad(&mpe_rbm->structure());
 		m_chainOperator.flags() = grad.flagsVH();
 		
-		//if the number of samples is 0 = unset, st it to the number of points in the data set
+		//if the number of samples is 0 = unset, set it to the number of points in the data set
 		if(!m_samples){
-			setNumberOfSamples(m_data.size());
+			setNumberOfSamples(m_data.numberOfElements());
 		}
 		
 		//calculate the number of batches

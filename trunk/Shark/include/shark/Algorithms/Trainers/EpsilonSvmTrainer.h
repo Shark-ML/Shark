@@ -143,7 +143,7 @@ public:
 		RealVector linear(2*ic);
 		RealVector lower(2*ic);
 		RealVector upper(2*ic);
-		RealVector alpha = RealZeroVector(2*ic);
+		RealVector alpha(2*ic,0.0);
 		for (i=0; i<ic; i++)
 		{
 // 			double a = param(i);
@@ -157,10 +157,10 @@ public:
 // 				alpha(i) = 0.0;
 // 				alpha(i + ic) = -a;
 // 			}
-			linear(i) = dataset(i).label(0) - m_epsilon;
+			linear(i) = dataset.element(i).label(0) - m_epsilon;
 			lower(i) = 0.0;
 			upper(i) = base_type::m_C;
-			linear(i + ic) = dataset(i).label(0) + m_epsilon;
+			linear(i + ic) = dataset.element(i).label(0) + m_epsilon;
 			lower(i + ic) = -base_type::m_C;
 			upper(i + ic) = 0.0;
 		}

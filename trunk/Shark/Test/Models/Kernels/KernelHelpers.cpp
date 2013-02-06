@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( KernelHelpers_calculateRegularizedKernelMatrix ){
 	//now check the results
 	for(std::size_t i = 0; i != datasetSize; ++i){
 		for(std::size_t j = 0; j != datasetSize; ++j){
-			double result = kernel(data(i),data(j))+double(i==j);
+			double result = kernel(data.element(i),data.element(j))+double(i==j);
 			BOOST_CHECK_SMALL(kernelMatrix(i,j)-result,1.e-12);
 		}
 	}
@@ -91,10 +91,10 @@ BOOST_AUTO_TEST_CASE( KernelHelpers_calculateKernelMatrixParameterDerivative ){
 		RealMatrix block;
 		for(std::size_t i = 0; i != datasetSize; ++i){
 			RealMatrix x1(1,dimensions);
-			row(x1,0)=data(i);
+			row(x1,0)=data.element(i);
 			for(std::size_t j = 0; j != datasetSize; ++j){
 				RealMatrix x2(1,dimensions);
-				row(x2,0)=data(j);
+				row(x2,0)=data.element(j);
 				derivativeWeight(0,0) = weights(i,j);
 				kernel.eval(x1,x2,block,*state);
 				kernel.weightedParameterDerivative(x1,x2,derivativeWeight,*state,gradient);

@@ -122,8 +122,8 @@ public:
 	MatrixRowReference( Matrix& matrix, std::size_t i)
 	:base_type(matrix,i){}
 	template<class T>//special version allows for const-conversion
-	MatrixRowReference(T  const& matrixrow)
-	:base_type(matrixrow.data(),matrixrow.index()){}
+	MatrixRowReference(T const& matrixrow)
+	:base_type(matrixrow.data().expression(),matrixrow.index()){}
 	
 	template<class T> 
 	const MatrixRowReference& operator=(const T& argument){
@@ -159,6 +159,13 @@ struct Batch
 	detail::ArithmeticBatch<T>,
 	detail::DefaultBatch<T>
 >::type{};
+	
+	
+///\brief creates a batch from a range of inputs
+template<class T, class Range>
+typename Batch<T>::type createBatch(Range const& range){
+	return Batch<T>::createBatch(range);
+}
 
 /// \brief specialization for ublas vectors which should be matrices in batch mode!
 template<class T>

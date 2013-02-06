@@ -60,12 +60,13 @@ Centroids::Centroids(Data<RealVector> const& centroids)
 
 RealVector Centroids::parameterVector() const{
 	RealVector param(numberOfParameters());
-	init(param) << matrixSet(m_centroids);
+	init(param) << matrixSet(m_centroids.batches());
 	return param;
 }
 
 void Centroids::setParameterVector(RealVector const& newParameters){
-	init(newParameters) >> matrixSet(m_centroids);
+	Data<RealVector>::batch_range batches = m_centroids.batches();
+	init(newParameters) >> matrixSet(batches);
 }
 
 std::size_t Centroids::numberOfParameters() const{
@@ -90,7 +91,7 @@ RealVector Centroids::softMembership(RealVector const& pattern) const{
 	RealVector membership(numClusters);
 	//first evaluate distance to all centroids;
 	std::size_t batchBegin = 0;
-	for (std::size_t i=0; i != m_centroids.size(); i++){
+	for (std::size_t i=0; i != m_centroids.numberOfBatches(); i++){
 		std::size_t batchEnd = batchBegin +boost::size(m_centroids.batch(i));
 		subrange(membership,batchBegin,batchEnd) = sqrt(distanceSqr(pattern, m_centroids.batch(i)));
 		batchBegin = batchEnd;
@@ -109,7 +110,7 @@ RealMatrix Centroids::softMembership(BatchInputType const& patterns) const{
 	RealMatrix membership(numPatterns, numClusters);
 	//first evaluate distance to all centroids;
 	std::size_t batchBegin = 0;
-	for (std::size_t i=0; i != m_centroids.size(); i++){
+	for (std::size_t i=0; i != m_centroids.numberOfBatches(); i++){
 		std::size_t batchEnd = batchBegin +boost::size(m_centroids.batch(i));
 		columns(membership,batchBegin,batchEnd) = sqrt(distanceSqr(patterns, m_centroids.batch(i)));
 		batchBegin = batchEnd;
@@ -139,8 +140,9 @@ void Centroids::initFromData(const ClassificationDataset &data, unsigned noClust
 	unsigned elementCount = 0; // number of centroids found so far, equal to tmp.size()
 	unsigned classCount = 0; // number of different classes encountered so far
 
-	ClassificationDataset::const_element_iterator it = data.elemBegin();
-	for(; it != data.elemEnd(); ++it) {
+	typedef ClassificationDataset::const_element_range Elements;
+	Elements elements = data.elements();
+	for(Elements::iterator it = elements.begin(); it != elements.end(); ++it) {
 		// we take the element if it has a so far unseen class
 		// or if the current number of centroids plus one
 		// element from each class that has not been

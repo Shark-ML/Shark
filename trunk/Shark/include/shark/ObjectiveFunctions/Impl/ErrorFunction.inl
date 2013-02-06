@@ -166,7 +166,7 @@ public:
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
 	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
 
-	typedef typename LabeledData<InputType,LabelType>::const_reference const_reference;
+	typedef typename LabeledData<InputType,LabelType>::const_batch_reference const_reference;
 
 	LossBasedErrorFunctionWrapper(AbstractModel<InputType,OutputType>* model, AbstractLoss<LabelType, OutputType>* loss) {
 		SHARK_ASSERT(model!=NULL);
@@ -226,7 +226,7 @@ public:
 
 		typename Batch<OutputType>::type prediction;
 		double error = 0.0;
-		BOOST_FOREACH(const_reference batch,m_dataset){
+		BOOST_FOREACH(const_reference batch,m_dataset.batches()){
 			mep_model->eval(batch.input, prediction);
 			error += mep_loss->eval(batch.label, prediction);
 		}
@@ -249,7 +249,7 @@ public:
 
 		double error=0.0;
 		boost::shared_ptr<State> state = mep_model->createState();
-		BOOST_FOREACH(const_reference batch,m_dataset){
+		BOOST_FOREACH(const_reference batch,m_dataset.batches()){
 			// calculate model output for the batch as well as the derivative
 			mep_model->eval(batch.input, prediction,*state);
 

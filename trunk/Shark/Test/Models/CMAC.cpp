@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE( CMAC_SERIALIZE )
 	BOOST_REQUIRE_EQUAL(cmacDeserialized.outputSize(),cmac.outputSize());
 	for (size_t i=0; i<1000; i++)
 	{
-		RealVector output = cmacDeserialized(dataset(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset(i).label),1.e-50);
+		RealVector output = cmacDeserialized(dataset.element(i).input);
+		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }

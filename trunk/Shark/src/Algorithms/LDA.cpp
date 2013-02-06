@@ -42,7 +42,7 @@ void LDA::train(LinearClassifier& model, LabeledData<RealVector,unsigned int> co
 	if(dataset.empty()){
 		throw SHARKEXCEPTION("[LDA::train] the dataset must not be empty");
 	}
-	typedef LabeledData<RealVector,unsigned int>::const_reference BatchReference;
+	typedef LabeledData<RealVector,unsigned int>::const_batch_reference BatchReference;
 	
 	std::size_t inputs = dataset.numberOfElements();
 	std::size_t dim = inputDimension(dataset);
@@ -62,7 +62,7 @@ void LDA::train(LinearClassifier& model, LabeledData<RealVector,unsigned int> co
 	covariance.clear();
 	
 	//we compute the data batch wise
-	BOOST_FOREACH(BatchReference batch, dataset){
+	BOOST_FOREACH(BatchReference batch, dataset.batches()){
 		UIntVector const& labels = batch.label;
 		RealMatrix const& points = batch.input;
 		//load batch and update mean

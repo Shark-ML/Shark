@@ -131,7 +131,4 @@ int main(int argc, char** argv)
 
 	// output the error rate
 	std::cout << "test error rate: " << 100.0 * testerror << " %" << std::endl;
-	
-	
-	
 }

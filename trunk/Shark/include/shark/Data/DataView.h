@@ -67,7 +67,7 @@ public:
 	typedef typename boost::remove_const<DatasetType>::type dataset_type;//(non const) type of the underlying dataset
 	typedef typename dataset_type::element_type value_type;
 	typedef typename dataset_type::const_element_reference const_reference;
-	typedef typename dataset_type::value_type batch_type;
+	typedef typename dataset_type::batch_type batch_type;
 	//we want to support immutable as well as mutable datasets. So we query whether the dataset is mutable and 
 	//change the reference type to const if the dataset is immutable
 	typedef typename boost::mpl::if_<
@@ -77,6 +77,11 @@ public:
 	>::type reference;
 	
 private:
+	typedef typename boost::mpl::if_<
+		boost::is_const<DatasetType>,
+		typename dataset_type::const_batch_range,
+		typename dataset_type::batch_range
+	>::type batch_range;
 	template<class Reference, class View>
 	class IteratorBase: public boost::iterator_facade_fixed<
 		IteratorBase<Reference,View>,
@@ -141,7 +146,7 @@ public:
 	:m_dataset(dataset),m_indices(dataset.numberOfElements())
 	{
 		std::size_t index = 0;
-		for(std::size_t i = 0; i != dataset.size(); ++i){
+		for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
 			std::size_t batchSize = shark::size(dataset.batch(i));
 			for(std::size_t j = 0; j != batchSize; ++j,++index){
 				m_indices[index].batch = i;
@@ -163,14 +168,12 @@ public:
 	reference operator[](std::size_t position){
 		SIZE_CHECK(position < size());
 		Index const& index = m_indices[position];
-		typename boost::range_reference<DatasetType>::type batch = m_dataset.batch(index.batch);
-		return get(batch,index.positionInBatch);
+		return get(m_dataset.batch(index.batch),index.positionInBatch);
 	}
 	const_reference operator[](std::size_t position) const{
 		SIZE_CHECK(position < size());
 		Index const& index = m_indices[position];
-		typename dataset_type::const_reference batch = m_dataset.batch(index.batch);
-		return get(batch,index.positionInBatch);
+		return get(m_dataset.batch(index.batch),index.positionInBatch);
 	}
 	/// \brief returns the position of the element inside the dataset
 	///
@@ -287,7 +290,7 @@ toDataset(DataView<T> const& view, std::size_t batchSize = DataView<T>::dataset_
 	//O.K. todo: this is slow for sparse elements, use subBatch or something similar.
 	std::size_t elements = view.size();
 	typename DataView<T>::dataset_type dataset(elements,view[0],batchSize);
-	std::size_t batches = dataset.size();
+	std::size_t batches = dataset.numberOfBatches();
 	
 	std::size_t element = 0;
 	for(std::size_t i = 0; i != batches; ++i){

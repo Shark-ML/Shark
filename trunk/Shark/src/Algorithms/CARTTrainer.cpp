@@ -30,34 +30,34 @@ void CARTTrainer::train(ModelType& model, RegressionDataset const& dataset)
 	CARTClassifier<RealVector>::SplitMatrixType bestSplitMatrix;
 	
 	for (unsigned fold = 0; fold < numberOfFolds; ++fold){
-	//Run through all the cross validation sets
-	RegressionDataset dataTrain = folds.training(fold);
-	RegressionDataset dataTest = folds.validation(fold);
-        std::size_t numTrainElements = dataTrain.numberOfElements();
+		//Run through all the cross validation sets
+		RegressionDataset dataTrain = folds.training(fold);
+		RegressionDataset dataTest = folds.validation(fold);
+		std::size_t numTrainElements = dataTrain.numberOfElements();
 
-	AttributeTables tables = createAttributeTables(dataTrain.inputs());
+		AttributeTables tables = createAttributeTables(dataTrain.inputs());
 
-	std::vector < RealVector > labels(numTrainElements);
-	boost::copy(dataTrain.inputs().elements(),labels.begin());
-	//Build tree form this fold
-	CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, labels, 0, dataTrain.size());
-	//Add the tree to the model and prune
-	model.setSplitMatrix(splitMatrix);
-        while(splitMatrix.size()!=1){
-        	//evaluate the error of current tree
-    		SquaredLoss<> loss;
-            double error = loss.eval(dataTest.labels(), model(dataTest.inputs()));
+		std::vector < RealVector > labels(numTrainElements);
+		boost::copy(dataTrain.labels().elements(),labels.begin());
+		//Build tree form this fold
+		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, labels, 0, dataTrain.numberOfElements());
+		//Add the tree to the model and prune
+		model.setSplitMatrix(splitMatrix);
+		while(splitMatrix.size()!=1){
+			//evaluate the error of current tree
+			SquaredLoss<> loss;
+			double error = loss.eval(dataTest.labels(), model(dataTest.inputs()));
 
-            if(error < bestErrorRate){
-                //We have found a subtree that has a smaller error rate when tested!
-                bestErrorRate = error;
-                bestSplitMatrix = splitMatrix;
-            }
-            pruneMatrix(splitMatrix);
-            model.setSplitMatrix(splitMatrix);
-        }
-    }
-    model.setSplitMatrix(bestSplitMatrix);
+			if(error < bestErrorRate){
+				//We have found a subtree that has a smaller error rate when tested!
+				bestErrorRate = error;
+				bestSplitMatrix = splitMatrix;
+			}
+			pruneMatrix(splitMatrix);
+			model.setSplitMatrix(splitMatrix);
+		}
+	}
+	model.setSplitMatrix(bestSplitMatrix);
 }
 
 
@@ -226,7 +226,7 @@ CARTTrainer::SplitMatrixType CARTTrainer::buildTree(AttributeTables const& table
 			boost::unordered_map<size_t, size_t> cBelow;
 			for(size_t i=0; i<n-1; i++){//go through all possible splits
 				//Update the count classes of both splits after element i moved to the left split
-				unsigned int label = dataset(table[i].id).label;
+				unsigned int label = dataset.element(table[i].id).label;
 				cBelow[label]++;
 				cTmpAbove[label]--;
 
@@ -313,7 +313,7 @@ CARTTrainer::SplitMatrixType CARTTrainer::buildTree(const AttributeTables& table
 		labelSum += labels[0];
 	}
 
-	splitInfo.misclassProp = totalSumOfSquares(labels, 0, labels.size(), labelSum)*((double)dataset.size()/trainSize);
+	splitInfo.misclassProp = totalSumOfSquares(labels, 0, labels.size(), labelSum)*((double)dataset.numberOfElements()/trainSize);
 
 	SplitMatrixType splitMatrix, lSplitMatrix, rSplitMatrix;
 
@@ -346,8 +346,8 @@ CARTTrainer::SplitMatrixType CARTTrainer::buildTree(const AttributeTables& table
 			tmpLabels.clear();
 			//Create a labels table, that corresponds to the sorted attribute
 			for(size_t k=0; k<tables[attributeIndex].size(); k++){
-				tmpLabels.push_back(dataset(tables[attributeIndex][k].id).label);
-				labelSumBelow += dataset(tables[attributeIndex][k].id).label;
+				tmpLabels.push_back(dataset.element(tables[attributeIndex][k].id).label);
+				labelSumBelow += dataset.element(tables[attributeIndex][k].id).label;
 			}
 			labelSumAbove += tmpLabels[0];
 			labelSumBelow -= tmpLabels[0];
@@ -503,7 +503,7 @@ CARTTrainer::AttributeTables CARTTrainer::createAttributeTables(Data<RealVector>
 		//For each row
 		for(size_t i=0; i<numElements; i++){
 			//Store Attribute value, class and element id
-			tables[j][i].value = dataset(i)[j];
+			tables[j][i].value = dataset.element(i)[j];
 			tables[j][i].id = i;
 		}
 		std::sort(tables[j].begin(), tables[j].end());
@@ -513,8 +513,8 @@ CARTTrainer::AttributeTables CARTTrainer::createAttributeTables(Data<RealVector>
 
 boost::unordered_map<size_t, size_t> CARTTrainer::createCountMatrix(ClassificationDataset const& dataset){
 	boost::unordered_map<size_t, size_t> cAbove;
-	for(size_t i = 0 ; i < dataset.size(); i++){
-		cAbove[dataset(i).label]++;
+	for(size_t i = 0 ; i < dataset.numberOfElements(); i++){
+		cAbove[dataset.element(i).label]++;
 	}
 	return cAbove;
 }

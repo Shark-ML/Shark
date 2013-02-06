@@ -41,13 +41,13 @@ BOOST_AUTO_TEST_CASE( AUC_EVAL ) {
 	unsigned int labels[10] = {1, 1, 0, 1, 1, 1, 0, 0, 1, 0};
 	
 	for(std::size_t i=0; i<10; i++) {
-		prediction(i)(0)= values[i];
-		label(i) = labels[i];
+		prediction.element(i)(0)= values[i];
+		label.element(i) = labels[i];
 	}
 
 	//AUC<double, unsigned int> auc;
 	NegativeAUC<unsigned int, RealVector> auc;
-	const double value = -0.75; // negativ AUC
+	const double value = -0.75; // negative AUC
 	double valueResult = auc.eval(label, prediction);
         BOOST_CHECK_SMALL(value-valueResult, 1.e-13);
 

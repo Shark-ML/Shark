@@ -89,24 +89,25 @@ VectorType mean(UnlabeledData<VectorType> const& data){
 	return mean(static_cast<Data<VectorType> const&>(data));
 }
 
-//~ //! Calculates the mean vector of the input vectors.
-//~ template<class MatrixType>
-//~ boost::range_value<MatrixType>::type  mean(const blas::matrix_container<MatrixType>& data);
+//! Calculates the mean vector of the input vectors.
+template<class MatrixType>
+blas::vector<typename MatrixType::value_type>
+mean(const blas::matrix_container<MatrixType>& data);
 
-//this fails...or th above, but we ned both...hmm
-//! Calculates the mean of the values stored in a general range
-template<class Range>
-typename boost::range_value<Range>::type mean(Range const& data){
-	typedef typename boost::range_iterator<Range const>::type Iterator;
-	Iterator pos = boost::begin(data);
-	Iterator end = boost::end(data);
-	typename boost::range_value<Range>::type m = *pos;
-	++pos;
-	for(; pos != end; ++pos)
-		m+=*pos;
-	m /= boost::size(data);
-	return m;
-}
+//this fails...or the above, but we need both...hmm
+//~ //! Calculates the mean of the values stored in a general range
+//~ template<class Range>
+//~ typename boost::range_value<Range>::type mean(Range const& data){
+	//~ typedef typename boost::range_iterator<Range const>::type Iterator;
+	//~ Iterator pos = boost::begin(data);
+	//~ Iterator end = boost::end(data);
+	//~ typename boost::range_value<Range>::type m = *pos;
+	//~ ++pos;
+	//~ for(; pos != end; ++pos)
+		//~ m+=*pos;
+	//~ m /= boost::size(data);
+	//~ return m;
+//~ }
 
 //! Calculates the variance vector of the input vectors
 template<class VectorType>

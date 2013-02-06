@@ -33,6 +33,7 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_IMPL_NOISYERRORFUNCTION_H
 #define SHARK_OBJECTIVEFUNCTIONS_IMPL_NOISYERRORFUNCTION_H
 
+#include <shark/Data/DataView.h>
 #include <shark/Models/AbstractModel.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 #include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
@@ -54,12 +55,11 @@ public:
 protected:
 	AbstractModel<InputType, OutputType>* mep_model;
 	AbstractLoss<LabelType>* mep_loss;
-	LabeledData<InputType,LabelType> m_dataset;
+	DataView<LabeledData<InputType,LabelType> const> m_dataset;
 	unsigned int m_batchSize;
 	mutable DiscreteUniform<RngType> m_uni;
-	typedef typename AbstractModel<InputType, OutputType>::BatchInputType BatchInputType;
 	typedef typename AbstractModel<InputType, OutputType>::BatchOutputType BatchOutputType;
-	typedef typename AbstractLoss<LabelType>::BatchLabelType BatchLabelType;
+	typedef typename LabeledData<InputType,LabelType>::batch_type BatchDataType;
 
 public:
 	NoisyErrorFunctionWrapper(AbstractModel<InputType,LabelType>* model,AbstractLoss<LabelType>* loss,unsigned int batchSize=1)
@@ -110,7 +110,7 @@ public:
 
 	void setDataset(const LabeledData<InputType,LabelType>& dataset){
 		m_dataset = dataset;
-		m_uni.setRange(0,m_dataset.numberOfElements()-1);
+		m_uni.setRange(0,m_dataset.size()-1);
 	}
 
 	void proposeStartingPoint( SearchPointType & startingPoint)const {
@@ -121,24 +121,19 @@ public:
 	double eval(const RealVector & input)const {
 		this->m_evaluationCounter++;
 
-		std::size_t dataSize=m_dataset.numberOfElements();
 		mep_model->setParameterVector(input);
 		
-		BatchInputType inputBatch = Batch<InputType>::createBatch(m_dataset(0).input,m_batchSize);
-		BatchLabelType labelBatch = Batch<OutputType>::createBatch(m_dataset(0).label,m_batchSize);
-		
-		for (std::size_t i=0; i != m_batchSize; i++){
-			std::size_t  index = m_uni();
-			get(inputBatch,i)=m_dataset(index).input;
-			get(labelBatch,i)=m_dataset(index).label;
-		}
+		//prepare batch for the current iteration
+		std::vector<std::size_t> indices(m_batchSize);
+		std::generate(indices.begin(),indices.end(),m_uni);
+		BatchDataType  batch = subBatch(m_dataset,indices);
 		
 		BatchOutputType predictions;
-		mep_model->eval(inputBatch,predictions);
+		mep_model->eval(batch.input,predictions);
 
 		//calculate error derivative of the loss function
-		double error= mep_loss->eval(labelBatch, predictions);
-		error/=dataSize;
+		double error= mep_loss->eval(batch.label, predictions);
+		error /= m_batchSize;
 		return error;
 	}
 
@@ -151,27 +146,22 @@ public:
 		boost::shared_ptr<State> state = mep_model->createState();
 		
 		//prepare batch for the current iteration
-		BatchInputType inputBatch = Batch<InputType>::createBatch(m_dataset(0).input,m_batchSize);
-		BatchLabelType labelBatch = Batch<OutputType>::createBatch(m_dataset(0).label,m_batchSize);
+		std::vector<std::size_t> indices(m_batchSize);
+		std::generate(indices.begin(),indices.end(),m_uni);
+		BatchDataType  batch = subBatch(m_dataset,indices);
 		
-		for (std::size_t i=0; i != m_batchSize; i++){
-			std::size_t  index = m_uni();
-			get(inputBatch,i)=m_dataset(index).input;
-			get(labelBatch,i)=m_dataset(index).label;
-		}
-			
 		BatchOutputType predictions;
-		mep_model->eval(inputBatch,predictions,*state);
+		mep_model->eval(batch.input,predictions,*state);
 
 		//calculate error derivative of the loss function
 		BatchOutputType errorDerivative;
-		double error= mep_loss->evalDerivative(labelBatch, predictions,errorDerivative);
+		double error= mep_loss->evalDerivative(batch.label, predictions,errorDerivative);
 
 		//chain rule
-		mep_model->weightedParameterDerivative(inputBatch,errorDerivative,*state,derivative.m_gradient);
+		mep_model->weightedParameterDerivative(batch.input,errorDerivative,*state,derivative.m_gradient);
 	
 		error/=m_batchSize;
-		derivative.m_gradient/=m_batchSize;
+		derivative.m_gradient/= m_batchSize;
 		return error;
 	}
 };

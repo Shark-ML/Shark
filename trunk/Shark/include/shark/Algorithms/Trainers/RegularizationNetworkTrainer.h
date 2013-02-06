@@ -30,7 +30,8 @@
 
 
 #include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
-#include <shark/LinAlg/Inverse.h>
+#include <shark/Models/Kernels/KernelHelpers.h>
+#include <shark/LinAlg/solveSystem.h>
 
 
 namespace shark {
@@ -87,7 +88,7 @@ public:
 	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, RealVector>& dataset)
 	{
 		// Setup the kernel matrix
-		std::size_t ic = dataset.numberOfElements();
+		//~ std::size_t ic = dataset.numberOfElements();
 		double gamma = 1.0 / base_type::m_C;
 
 		svm.setKernel(base_type::m_kernel);
@@ -96,25 +97,34 @@ public:
 		SHARK_CHECK(! svm.hasOffset(), "[RegularizationNetworkTrainer::train] training of models with offset is not supported");
 		SHARK_CHECK(svm.outputSize() == 1, "[RegularizationNetworkTrainer::train] wrong number of outputs in the kernel expansion");
 
-		RealVector v(ic);
+		
+		
 // 		RealSymmetricMatrix M(ic, ic);
-		RealMatrix M(ic, ic);
-		for (std::size_t i=0; i<ic; i++)
-		{
-			for (std::size_t j=0; j<i; j++)
-			{
-				double k = base_type::m_kernel->eval(dataset(i).input, dataset(j).input);
-				M(i, j) = M(j, i) = k;
-			}
-			double k = base_type::m_kernel->eval(dataset(i).input, dataset(i).input);
-			M(i, i) = k + gamma;
-			v(i) = dataset(i).label(0);
-		}
-		RealMatrix invM;
-		invertSymmPositiveDefinite(invM, M);
+		//~ RealVector v(ic);
+		//~ RealMatrix M(ic, ic);
+		//~ for (std::size_t i=0; i<ic; i++)
+		//~ {
+			//~ for (std::size_t j=0; j<i; j++)
+			//~ {
+				//~ double k = base_type::m_kernel->eval(dataset(i).input, dataset(j).input);
+				//~ M(i, j) = M(j, i) = k;
+			//~ }
+			//~ double k = base_type::m_kernel->eval(dataset(i).input, dataset(i).input);
+			//~ M(i, i) = k + gamma;
+			//~ v(i) = dataset(i).label(0);
+		//~ }
+		//~ RealMatrix invM;
+		//~ invertSymmPositiveDefinite(invM, M);
 
-		RealVector param = prod(invM, v);
-		svm.setParameterVector(param);
+		//~ RealVector param = prod(invM, v);
+		//~ svm.setParameterVector(param);
+		
+		//O.K: I think this is what the code should look like
+		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), gamma);
+		RealVector v = column(createBatch<RealVector>(dataset.labels().elements()),0);
+		//~ approxSolveSymmSystemInPlace(M,v); //try this later instad the below
+		solveSymmSystemInPlace<SolveAXB>(M,v);
+		svm.setParameterVector(v);
 	}
 };
 

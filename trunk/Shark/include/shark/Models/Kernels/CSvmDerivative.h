@@ -166,7 +166,7 @@ public:
 			derivative(k) = m_d_alphab_d_theta( m_noofFreeSVs, k ); //without much thinking, we add db/d(\theta) to all derivatives
 		// first: go through free SVs and add their contributions (the actual ones, which use the matrix d_alphab_d_theta)
 		for ( unsigned int i=0; i<m_noofFreeSVs; i++ ) {
-			get(bof_xi, 0) = m_basis(m_freeAlphaIndices[i]);
+			get(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]);
 			mep_k->eval( bof_input, bof_xi, bof_results, *state );
 			ker = bof_results(0,0);
 			cur_alpha = m_freeAlphas(i);
@@ -178,7 +178,7 @@ public:
 		}
 		// second: go through all bounded SVs and add their "trivial" derivative contributions
 		for ( unsigned int i=0; i<m_noofBoundedSVs; i++ ) {
-			get(bof_xi, 0) = m_basis(m_boundedAlphaIndices[i]);
+			get(bof_xi, 0) = m_basis.element(m_boundedAlphaIndices[i]);
 			mep_k->eval( bof_input, bof_xi, bof_results, *state );
 			ker = bof_results(0,0);
 			cur_label = m_boundedLabels(i);
@@ -301,21 +301,21 @@ protected:
 		typename Batch<InputType>::type bof_xi;
 		typename Batch<InputType>::type bof_xj;
 		if ( m_noofFreeSVs != 0 ) {
-			bof_xi = Batch<InputType>::createBatch( m_basis(m_freeAlphaIndices[0]), 1 ); //any input works
-			bof_xj = Batch<InputType>::createBatch( m_basis(m_freeAlphaIndices[0]), 1 ); //any input works
+			bof_xi = Batch<InputType>::createBatch( m_basis.element(m_freeAlphaIndices[0]), 1 ); //any input works
+			bof_xj = Batch<InputType>::createBatch( m_basis.element(m_freeAlphaIndices[0]), 1 ); //any input works
 		} else if ( m_noofBoundedSVs != 0 ) {
-			bof_xi = Batch<InputType>::createBatch( m_basis(m_boundedAlphaIndices[0]), 1 ); //any input works
-			bof_xj = Batch<InputType>::createBatch( m_basis(m_boundedAlphaIndices[0]), 1 ); //any input works
+			bof_xi = Batch<InputType>::createBatch( m_basis.element(m_boundedAlphaIndices[0]), 1 ); //any input works
+			bof_xj = Batch<InputType>::createBatch( m_basis.element(m_boundedAlphaIndices[0]), 1 ); //any input works
 		} else {
 			throw SHARKEXCEPTION("[CSvmDerivative::prepareCSvmParameterDerivative] Something went very wrong.");
 		}
 
 		// initialize H and dH
 		for ( unsigned int i=0; i<m_noofFreeSVs; i++ ) {
-			get(bof_xi, 0) = m_basis(m_freeAlphaIndices[i]); //fixed over outer loop
+			get(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]); //fixed over outer loop
 			// fill the off-diagonal entries..
 			for ( unsigned int j=0; j<i; j++ ) {
-				get(bof_xj, 0) = m_basis(m_freeAlphaIndices[j]); //get second sample into a batch
+				get(bof_xj, 0) = m_basis.element(m_freeAlphaIndices[j]); //get second sample into a batch
 				mep_k->eval( bof_xi, bof_xj, bof_results, *state );
 				H( i,j ) = H( j,i ) = bof_results(0,0);
 				mep_k->weightedParameterDerivative( bof_xi, bof_xj, unit_weights, *state, der );
@@ -350,9 +350,9 @@ protected:
 
 		// initialize R and dR
 		for ( unsigned int i=0; i<m_noofBoundedSVs; i++ ) {
-			get(bof_xi, 0) = m_basis(m_boundedAlphaIndices[i]); //fixed over outer loop
+			get(bof_xi, 0) = m_basis.element(m_boundedAlphaIndices[i]); //fixed over outer loop
 			for ( unsigned int j=0; j<m_noofFreeSVs; j++ ) { //this time, we (have to) do it row by row
-				get(bof_xj, 0) = m_basis(m_freeAlphaIndices[j]); //get second sample into a batch
+				get(bof_xj, 0) = m_basis.element(m_freeAlphaIndices[j]); //get second sample into a batch
 				mep_k->eval( bof_xi, bof_xj, bof_results, *state );
 				R( j,i ) = bof_results(0,0);
 				mep_k->weightedParameterDerivative( bof_xi, bof_xj, unit_weights, *state, der );

@@ -109,7 +109,7 @@ double evalSkipMissingFeatures(
 	InputTypeT3 const& missingness)
 {
 	SIZE_CHECK(inputA.size() == inputB.size());
-	SIZE_CHECK(inputA.size() == missingness.size());
+	//SIZE_CHECK(inputA.size() == missingness.size());
 	// Do kernel type check
 	if (!kernelFunction.supportsVariableInputSize())
 		throw SHARKEXCEPTION("[evalSkipMissingFeatures] Kernel must support variable input size.");

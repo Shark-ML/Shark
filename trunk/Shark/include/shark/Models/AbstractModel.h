@@ -74,6 +74,7 @@ public:
 	typedef InputTypeT InputType;
 	/// \brief Defines the output type of the model.
 	typedef OutputTypeT OutputType;
+	typedef OutputType result_type;
 
 	/// \brief defines the batch type of the input type.
 	///
@@ -185,11 +186,10 @@ public:
 	/// \param patterns the input of the model
 	/// \returns the responses of the model
 	Data<OutputType> operator()(Data<InputType> const & patterns){
-		Data<OutputType> prediction(patterns.size());
-		for(std::size_t i = 0; i != patterns.size();++i){
+		Data<OutputType> prediction(patterns.numberOfBatches());
+		for(std::size_t i = 0; i != patterns.numberOfBatches();++i){
 			eval(patterns.batch(i),prediction.batch(i));
 		}
-		//std::transform(patterns.begin(),patterns.end(),prediction.begin(),boost::ref(*this));
 		return prediction;
 	}
 

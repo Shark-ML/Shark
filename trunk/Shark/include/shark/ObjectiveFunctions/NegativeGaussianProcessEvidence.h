@@ -115,7 +115,8 @@ public:
 		
 		//generate kernel matrix and label vector
 		RealMatrix M = calculateRegularizedKernelMatrix(*mep_kernel,m_dataset.inputs(),betaInv);
-		RealVector t = generateLabelVector();
+		//~ RealVector t = generateLabelVector();
+		RealVector t = column(createBatch<RealVector>(m_dataset.labels().elements()),0);
 
 		RealMatrix choleskyFactor(N,N);
 		choleskyDecomposition(M, choleskyFactor);
@@ -167,7 +168,8 @@ public:
 		
 		//generate kernel matrix and label vector
 		RealMatrix M = calculateRegularizedKernelMatrix(*mep_kernel,m_dataset.inputs(),betaInv);
-		RealVector t = generateLabelVector();
+		//~ RealVector t = generateLabelVector();
+		RealVector t = column(createBatch<RealVector>(m_dataset.labels().elements()),0);
 		
 		//new way to compute inverse and logDetM
 		RealMatrix choleskyFactor(N,N);
@@ -240,18 +242,18 @@ public:
 		
 
 private:
-	RealVector generateLabelVector()const{
-		std::size_t N  = m_dataset.numberOfElements(); 
-		RealVector t(N);
-		std::size_t startX = 0;//start of the current batch
-		for (std::size_t i=0; i<m_dataset.size(); i++){
-			std::size_t sizeX=size(m_dataset.batch(i));
-			for(std::size_t k =0; k != sizeX; ++k){
-				t(startX+k)=m_dataset.batch(i).label(k,0);
-			}
-		}
-		return t;
-	}
+	//~ RealVector generateLabelVector()const{
+		//~ std::size_t N  = m_dataset.numberOfElements(); 
+		//~ RealVector t(N);
+		//~ std::size_t startX = 0;//start of the current batch
+		//~ for (std::size_t i=0; i<m_dataset.numberOfBatches(); i++){
+			//~ std::size_t sizeX=size(m_dataset.batch(i));
+			//~ for(std::size_t k =0; k != sizeX; ++k){
+				//~ t(startX+k)=m_dataset.batch(i).label(k,0);
+			//~ }
+		//~ }
+		//~ return t;
+	//~ }
 	/// pointer to external data set
 	DatasetType m_dataset;
 

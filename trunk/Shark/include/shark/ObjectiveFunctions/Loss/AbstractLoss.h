@@ -129,9 +129,9 @@ public:
 	/// \param  targets      target values
 	/// \param  predictions  predictions, typically made by a model
 	double eval(Data<LabelType> const& targets, Data<OutputType> const& predictions) const{
-		SIZE_CHECK(predictions.size() == targets.size());
+		SIZE_CHECK(predictions.numberOfElements() == targets.numberOfElements());
 		double (AbstractLoss::*evalError)(BatchLabelType const&,BatchOutputType const&) const = &AbstractLoss::eval;
-		double error = accumulateError(targets,predictions,boost::bind<double>(evalError,this,_1,_2)); // see Core/utility/functional.h
+		double error = accumulateError(targets.batches(),predictions.batches(),boost::bind<double>(evalError,this,_1,_2)); // see Core/utility/functional.h
 		return error / targets.numberOfElements();
 	}
 
@@ -146,9 +146,9 @@ public:
 		Data<OutputType>& gradient
 	) const{
 		SHARK_FEATURE_EXCEPTION_DERIVED(HAS_FIRST_DERIVATIVE);
-		SIZE_CHECK(predictions.size() == targets.size());
+		SIZE_CHECK(predictions.numberOfElements() == targets.numberOfElements());
 
-		std::size_t numBatches = targets.size();
+		std::size_t numBatches = targets.numberOfBatches();
 		gradient = Data<OutputType>(numBatches);
 		double sum = 0;
 		for(std::size_t i = 0; i != numBatches; ++i){

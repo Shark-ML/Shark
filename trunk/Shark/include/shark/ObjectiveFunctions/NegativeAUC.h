@@ -66,13 +66,14 @@ class NegativeAUC : public AbstractCost<LabelType, OutputType>
 		std::vector<AUCPair> L(elements); // list of predictions and labels
 		
 		for(std::size_t i=0; i!= elements; i++) { // build list
+			LabelType t = target.element(i);
 			// negate predictions if m_invert is set
 			if(!m_invert)
-				L[i] = AUCPair(prediction(i)(column), target(i));
+				L[i] = AUCPair(prediction.element(i)(column), t);
 			else
-				L[i] = AUCPair(-prediction(i)(column), target(i));
+				L[i] = AUCPair(-prediction.element(i)(column), t);
 			// count positive and negative examples
-			if(target(i) > 0) 
+			if(t > 0) 
 				P++;
 			else 
 				N++;
@@ -114,11 +115,13 @@ class NegativeAUC : public AbstractCost<LabelType, OutputType>
 	/// \param target: class label, 0 or 1
 	/// \param prediction: prediction by classifier, OutputType-valued vector
 	double eval(Data<LabelType> const& target, Data<OutputType>  const& prediction) const {
-		size_t s = prediction.size();
-		SHARK_CHECK(s >= 1,"[NegativeAUC::eval] empty prediction set");
-
-		if(prediction(0).size() == 1) return eval(target, prediction, 0);
-		if(prediction(0).size() == 2) return eval(target, prediction, 1);
+		SHARK_CHECK(prediction.numberOfElements() >= 1,"[NegativeAUC::eval] empty prediction set");
+		
+		std::size_t dim = dataDimension(prediction);
+		if(dim == 1) 
+			return eval(target, prediction, 0);
+		else if(dim == 2) 
+			return eval(target, prediction, 1);
 		
 		throw SHARKEXCEPTION("[NegativeAUC::eval] no default value for column");
 		return 0.;
@@ -168,14 +171,14 @@ class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, Outp
 		for(std::size_t i=0; i<prediction.size(); i++) {
 			if(!m_invert){
 				if(target(i) > 0) 
-					pos.push_back(prediction(i)(column));
+					pos.push_back(prediction.element(i)(column));
 				else  
-					neg.push_back(prediction(i)(column));
+					neg.push_back(prediction.element(i)(column));
 			}else{
 				if(target(i) > 0)
-					pos.push_back(-prediction(i)(column));
+					pos.push_back(-prediction.element(i)(column));
 				else
-					neg.push_back(-prediction(i)(column));
+					neg.push_back(-prediction.element(i)(column));
 			}
 		}
 		std::size_t m = pos.size();
@@ -212,12 +215,12 @@ class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, Outp
 	}
 
 	double eval(Data<LabelType> const& target, Data<OutputType>  const& prediction) const {
-		std::size_t s = prediction.numberOfElements();
-		SHARK_CHECK(s >= 1,"[NegativeAUC::eval] empty prediction set");
-
-		if(prediction(0).size() == 1) 
+		SHARK_CHECK(prediction.numberOfElements() >= 1,"[NegativeAUC::eval] empty prediction set");
+		
+		std::size_t dim = dataDimension(prediction);
+		if(dim == 1) 
 			return eval(target, prediction, 0);
-		if(prediction(0).size() == 2) 
+		else if(dim == 2) 
 			return eval(target, prediction, 1);
 		
 		throw SHARKEXCEPTION("[NegativeAUC::eval] no default value for column");

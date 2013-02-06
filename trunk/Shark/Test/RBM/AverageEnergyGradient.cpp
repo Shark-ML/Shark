@@ -193,7 +193,7 @@ public:
 		Energy energy(&mpe_rbm->structure());
 		
 		double result=0;
-		for(std::size_t i =0; i != m_data.size();++i){
+		for(std::size_t i =0; i != m_data.numberOfBatches();++i){
 			RealScalarVector beta(m_data.batch(i).size1(),1);
 			result+=sum(energy.logUnnormalizedPropabilityVisible(m_data.batch(i),beta));
 		}
@@ -212,7 +212,7 @@ public:
 		typedef Energy::VisibleType::StateSpace VisibleStateSpace;
 		
 		//calculate the expectation of the energy gradient with respect to the data
-		for(std::size_t i=0; i != m_data.size(); i++){
+		for(std::size_t i=0; i != m_data.numberOfBatches(); i++){
 			std::size_t currentBatchSize=m_data.batch(i).size1();
 			GibbsOperator<BinaryRBM>::HiddenSampleBatch hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
 			GibbsOperator<BinaryRBM>::VisibleSampleBatch visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
@@ -272,7 +272,7 @@ public:
 		Energy energy(&mpe_rbm->structure());
 		
 		double result=0;
-		for(std::size_t i =0; i != m_data.size();++i){
+		for(std::size_t i =0; i != m_data.numberOfBatches();++i){
 			RealScalarVector beta(m_data.batch(i).size1(),1);
 			result+=sum(energy.logUnnormalizedPropabilityHidden(m_data.batch(i),beta));
 		}
@@ -291,7 +291,7 @@ public:
 		typedef Energy::VisibleType::StateSpace VisibleStateSpace;
 		
 		//calculate the expectation of the energy gradient with respect to the data
-		for(std::size_t i=0; i != m_data.size(); i++){
+		for(std::size_t i=0; i != m_data.numberOfBatches(); i++){
 			std::size_t currentBatchSize=m_data.batch(i).size1();
 			GibbsOperator<BinaryRBM>::HiddenSampleBatch hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
 			GibbsOperator<BinaryRBM>::VisibleSampleBatch visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());

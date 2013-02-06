@@ -18,7 +18,7 @@ void testEqualCollections(const T& set,const U& vec){
 	for(size_t i=0;i!=set.numberOfElements();++i){
 		bool found = false;
 		for(std::size_t j = 0; j != set.numberOfElements(); ++j)
-			if(set(j)==vec[i])
+			if(set.element(j)==vec[i])
 				found = true;
 		BOOST_CHECK_EQUAL( found,true );
 	}
@@ -118,8 +118,8 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSize )
 		BOOST_REQUIRE_EQUAL(partition.numberOfElements(),trainSize[i]);
 		BOOST_REQUIRE_EQUAL(validation.numberOfElements(),numExamples-trainSize[i]);
 		for(size_t j=0;j!=validation.numberOfElements();++j){
-			validationInputs.push_back(validation(j).input);
-			validationLabels.push_back(validation(j).label);
+			validationInputs.push_back(validation.element(j).input);
+			validationLabels.push_back(validation.element(j).label);
 		}
 	}
 	std::sort(validationInputs.begin(),validationInputs.end());
@@ -161,8 +161,8 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSizeBalancedUnsigned )
 		BOOST_REQUIRE_EQUAL(partition.numberOfElements(),trainSize[i]);
 		size_t zeroCount=0;
 		for(size_t j=0;j!=validation.numberOfElements();++j){
-			validationInputs.push_back(validation(j).input(0));
-			zeroCount+= !validation(j).label;
+			validationInputs.push_back(validation.element(j).input(0));
+			zeroCount+= !validation.element(j).label;
 		}
 		BOOST_CHECK_EQUAL(zeroCount,zeroSize[i]);
 	}
@@ -208,8 +208,8 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSizeBalancedOneHot )
 		BOOST_REQUIRE_EQUAL(partition.numberOfElements(),trainSize[i]);
 		size_t zeroCount=0;
 		for(size_t j=0;j!=validation.numberOfElements();++j){
-			validationInputs.push_back(validation(j).input(0));
-			zeroCount+= static_cast<size_t>(validation(j).label(0));
+			validationInputs.push_back(validation.element(j).input(0));
+			zeroCount+= static_cast<size_t>(validation.element(j).label(0));
 		}
 		BOOST_CHECK_EQUAL(zeroCount,zeroSize[i]);
 	}

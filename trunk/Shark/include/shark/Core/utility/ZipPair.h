@@ -138,19 +138,37 @@ zipPairRange(Iterator1 begin1, Iterator1 end1, Iterator2 begin2,Iterator2 end2){
 	typedef PairIterator<PairType,Iterator1,Iterator2> iterator;
 	return make_iterator_range(iterator(begin1,begin2),iterator(end1,end2));
 }
+
+template<class PairType, class Range1, class Range2>
+struct PairRangeType{
+	typedef boost::iterator_range<
+		PairIterator<
+			PairType,
+			typename boost::range_iterator<Range1>::type,
+			typename boost::range_iterator<Range2>::type
+		>
+	> type;
+};
+
 ///\brief returns a paired zip range using pair type Pair
 ///
 /// usage: zipPairRange<PairType>(range1,range2) leads to a range consisting
 /// where the i-th element is the Pair PairType(range1[i],range2[i]).
 template<class PairType, class Range1, class Range2>
-boost::iterator_range<
-	PairIterator<
-		PairType,
-		typename boost::range_iterator<Range1>::type,
-		typename boost::range_iterator<Range2>::type
-	>
->
+typename PairRangeType<PairType, Range1, Range2>::type
 zipPairRange(Range1 & range1, Range2& range2){
+	return zipPairRange<PairType>(boost::begin(range1), boost::end(range1), boost::begin(range2),boost::end(range2));
+}
+
+
+
+///\brief returns a paired zip range using pair type Pair
+///
+/// usage: zipPairRange<PairType>(range1,range2) leads to a range consisting
+/// where the i-th element is the Pair PairType(range1[i],range2[i]).
+template<class PairType, class Range1, class Range2>
+typename PairRangeType<PairType, Range1 const, Range2 const>::type
+zipPairRange(Range1 const& range1, Range2 const& range2){
 	return zipPairRange<PairType>(boost::begin(range1), boost::end(range1), boost::begin(range2),boost::end(range2));
 }
 

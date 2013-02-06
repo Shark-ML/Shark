@@ -235,29 +235,55 @@ template<class Matrix>
 class Blocking{
 public:
 	
-	Blocking(Matrix& matrix,std::size_t i, std::size_t j):m_matrix(matrix),m_i(i),m_j(j){}
+	Blocking(Matrix& matrix,std::size_t i, std::size_t j)
+	: m_upperLeft(subrange(matrix,0,i,0,j))
+	, m_upperRight(subrange(matrix,0,i,j,matrix.size2()))
+	, m_lowerLeft(subrange(matrix,i,matrix.size1(),0,j))
+	, m_lowerRight(subrange(matrix,i,matrix.size1(),j,matrix.size2()))
+	{}
 		
 	/// \brief Returns the lower left block of the matrix.
-	blas::matrix_range<Matrix> upperLeft()const{
-		return subrange(m_matrix,0,m_i,0,m_j);
+	blas::matrix_range<Matrix> const& upperLeft()const{
+		return m_upperLeft;
 	}
 	/// \brief Returns the upper right block of the matrix.
-	blas::matrix_range<Matrix> upperRight()const{
-		return subrange(m_matrix,0,m_i,m_j,m_matrix.size2());
+	blas::matrix_range<Matrix> const& upperRight()const{
+		return m_upperRight;
 	}
 	/// \brief Returns the lower left block of the matrix.
-	blas::matrix_range<Matrix> lowerLeft()const{
-		return subrange(m_matrix,m_i,m_matrix.size1(),0,m_j);
+	blas::matrix_range<Matrix> const& lowerLeft()const{
+		return m_lowerLeft;
 	}
 
 	/// \brief Returns the lower right block of the matrix.
-	blas::matrix_range<Matrix> lowerRight()const{
-		return subrange(m_matrix,m_i,m_matrix.size1(),m_j,m_matrix.size2());
+	blas::matrix_range<Matrix> const& lowerRight()const{
+		return m_lowerRight;
 	}
+	
+	/// \brief Returns the lower left block of the matrix.
+	blas::matrix_range<Matrix>& upperLeft(){
+		return m_upperLeft;
+	}
+	/// \brief Returns the upper right block of the matrix.
+	blas::matrix_range<Matrix>& upperRight(){
+		return m_upperRight;
+	}
+	/// \brief Returns the lower left block of the matrix.
+	blas::matrix_range<Matrix>& lowerLeft(){
+		return m_lowerLeft;
+	}
+
+	/// \brief Returns the lower right block of the matrix.
+	blas::matrix_range<Matrix>& lowerRight(){
+		return m_lowerRight;
+	}
+	
+	
 private:
-	Matrix& m_matrix;
-	std::size_t m_i;
-	std::size_t m_j;
+	blas::matrix_range<Matrix> m_upperLeft;
+	blas::matrix_range<Matrix> m_upperRight;
+	blas::matrix_range<Matrix> m_lowerLeft;
+	blas::matrix_range<Matrix> m_lowerRight;
 };
 
 

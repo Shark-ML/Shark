@@ -581,21 +581,6 @@ struct ElementSort{
 	}
 };
 
-struct TransformBinaryLabels{
-
-	TransformBinaryLabels(unsigned int zeroClass,unsigned int oneClass)
-	:m_zeroClass(zeroClass), m_oneClass(oneClass){}
-
-	typedef unsigned int result_type;
-	unsigned int operator() (unsigned int label) const{
-		SHARK_ASSERT(label == m_zeroClass || label == m_oneClass);
-		return label == m_zeroClass?0:1;
-	}
-private:
-	unsigned int m_zeroClass;
-	unsigned int m_oneClass;
-};
-
 struct TransformOneVersusRestLabels
 {
 	TransformOneVersusRestLabels(unsigned int oneClass)
@@ -808,13 +793,10 @@ public:
 			boost::remove_const<typename boost::remove_reference<
 				typename Range::const_reference
 			>::type>::type R;
+		using boost::adaptors::transform;
 		return type(
-			Batch<InputType>::createBatch( 
-				boost::adaptors::transform(range, GetElementInput<R>())
-			),
-			Batch<LabelType>::createBatch(
-				boost::adaptors::transform(range, GetElementLabel<R>())
-			)
+			Batch<InputType>::createBatch(transform(range, GetElementInput<R>())),
+			Batch<LabelType>::createBatch(transform(range, GetElementLabel<R>()))
 		);
 	}
 	

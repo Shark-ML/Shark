@@ -283,7 +283,7 @@ public:
 		activeVar = variables;
 		for (v=0, i=0; i<examples; i++)
 		{
-			unsigned int y = target(i);
+			unsigned int y = target.element(i);
 			example[i].index = i;
 			example[i].y = y;
 			example[i].active = cardP;
@@ -589,7 +589,7 @@ public:
 					QpSolutionProperties* prop = NULL,
 					RealVector* solutionBias = NULL)
 	{
-		SIZE_CHECK(target.size() == examples);
+		SIZE_CHECK(target.numberOfElements() == examples);
 		SIZE_CHECK(solutionAlpha.size() == variables);
 
 		std::size_t v, w, i, e;
@@ -616,7 +616,7 @@ public:
 		activeVar = variables;
 		for (v=0, i=0; i<examples; i++)
 		{
-			unsigned int y = target(i);
+			unsigned int y = target.element(i);
 			example[i].index = i;
 			example[i].y = y;
 			example[i].active = cardP;

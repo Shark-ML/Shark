@@ -87,15 +87,15 @@ public:
 		//calculate the expectation of the energy gradient with respect to the data
 		Energy energy(&mpe_rbm->structure());
 		double negLogLikelihood = 0;
-		for(std::size_t i=0; i != m_data.size(); i++){
-			std::size_t currentBatchSize=m_data.batch(i).size1();
+		BOOST_FOREACH(RealMatrix const& batch,m_data.batches()) {
+			std::size_t currentBatchSize = batch.size1();
 			typename Gibbs::HiddenSampleBatch hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
 			typename Gibbs::VisibleSampleBatch visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
 			RealScalarVector betaBatch(currentBatchSize,1);
 		
-			gibbsSampler.createSample(hiddenSamples,visibleSamples,m_data.batch(i));
+			gibbsSampler.createSample(hiddenSamples,visibleSamples,batch);
 			empiricalExpectation.addVH(hiddenSamples, visibleSamples);
-			negLogLikelihood -= sum(energy.logUnnormalizedPropabilityVisible(m_data.batch(i),hiddenSamples.input,betaBatch));
+			negLogLikelihood -= sum(energy.logUnnormalizedPropabilityVisible(batch,hiddenSamples.input,betaBatch));
 		}
 		
 		//calculate the expectation of the energy gradient with respect to the model distribution

@@ -139,7 +139,7 @@ public:
 		
 		m_columnMeanY.resize(m_elements);
 		for(std::size_t i = 0; i != m_elements; ++i){
-			m_columnMeanY(i) = classMean(dataset(i).label); 
+			m_columnMeanY(i) = classMean(dataset.element(i).label); 
 		}
 		m_meanY=sum(m_columnMeanY)/m_elements;
 	}
@@ -193,7 +193,7 @@ public:
 		RealMatrix blockK;//block of the KernelMatrix
 		RealMatrix blockW;//block of the WeightMatrix
 		std::size_t startX = 0;
-		for(std::size_t i = 0; i != m_data.size(); ++i){
+		for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
 			std::size_t startY = 0;
 			for(std::size_t j = 0; j <= i; ++j){
 				m_kernel->eval(m_data.batch(i).input,m_data.batch(j).input,blockK,*state);
@@ -315,7 +315,7 @@ private:
 		RealVector k(m_elements);//stores the row/column means of K
 		zero(k);
 		std::size_t startRow = 0; //starting row of the current block
-		for(std::size_t i = 0; i != m_data.size(); ++i){
+		for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
 			std::size_t rowSize = size(m_data.batch(i));
 			std::size_t startColumn = 0; //starting column of the current block
 			for(std::size_t j = 0; j <= i; ++j){
@@ -343,8 +343,7 @@ private:
 		double n2 = sqr(n);
 		double YKc = YK-2.0*n*inner_prod(k,m_columnMeanY)+n2*m_meanY*meanK;
 		double KcKc = KK - 2.0*n*inner_prod(k,k)+n2*sqr(meanK);
-		//std::cout<<YKc<<" "<<KcKc<<" "<<YKc/std::sqrt(KcKc)<<std::endl;
-		//std::cout<<n<<" "<<n2<<" "<<YK<<" "<<KK<<" "<<meanK<<std::endl;
+
 		KernelMatrixResults results;
 		results.k=k;
 		results.YKc = YKc;

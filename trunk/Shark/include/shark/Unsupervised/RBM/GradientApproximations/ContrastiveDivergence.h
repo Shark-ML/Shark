@@ -90,12 +90,12 @@ public:
 		typename Energy::AverageEnergyGradient empiricalAverage(&mpe_rbm->structure());
 		typename Energy::AverageEnergyGradient modelAverage(&mpe_rbm->structure());
 	
-		for(std::size_t i=0; i< m_data.size(); i++){
+		BOOST_FOREACH(RealMatrix const& batch,m_data.batches()) {
 			//create the batches for evaluation
-			typename Operator::HiddenSampleBatch hiddenBatch(m_data.batch(i).size1(),mpe_rbm->numberOfHN());
-			typename Operator::VisibleSampleBatch visibleBatch(m_data.batch(i).size1(),mpe_rbm->numberOfVN());
+			typename Operator::HiddenSampleBatch hiddenBatch(batch.size1(),mpe_rbm->numberOfHN());
+			typename Operator::VisibleSampleBatch visibleBatch(batch.size1(),mpe_rbm->numberOfVN());
 			
-			m_operator.createSample(hiddenBatch,visibleBatch,m_data.batch(i));
+			m_operator.createSample(hiddenBatch,visibleBatch,batch);
 			empiricalAverage.addVH(hiddenBatch,visibleBatch);
 			
 			for(std::size_t step = 0; step != m_k; ++step){

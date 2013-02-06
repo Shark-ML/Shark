@@ -113,74 +113,74 @@ BOOST_AUTO_TEST_CASE( Set_Libsvm )
 
 
     // a few reference datasets to raw values
-	BOOST_REQUIRE_EQUAL(0u, test_ds_c(0).label);
-	BOOST_REQUIRE_EQUAL(1u, test_ds_c(1).label);
-	BOOST_REQUIRE_EQUAL(1u, test_ds_c(2).label);
-	BOOST_REQUIRE_EQUAL(0u, test_ds_c(3).label);
-	BOOST_REQUIRE_EQUAL(1u, test_ds_c(4).label);
-	BOOST_REQUIRE_EQUAL(0u, test_ds_c(5).label);
-	BOOST_REQUIRE_EQUAL(3u, test_ds_mcc(0).label);
-	BOOST_REQUIRE_EQUAL(2u, test_ds_mcc(1).label);
-	BOOST_REQUIRE_EQUAL(1u, test_ds_mcc(2).label);
-	BOOST_REQUIRE_EQUAL(0u, test_ds_mcc(3).label);
-	BOOST_REQUIRE_EQUAL(2u, test_ds_mcc(4).label);
-	BOOST_REQUIRE_EQUAL(3u, test_ds_mcc(5).label);
-	BOOST_REQUIRE_EQUAL(3u, test_ds_cml(0).label);
-	BOOST_REQUIRE_EQUAL(2u, test_ds_cml(1).label);
-	BOOST_REQUIRE_EQUAL(1u, test_ds_cml(2).label);
-	BOOST_REQUIRE_EQUAL(0u, test_ds_cml(3).label);
-	BOOST_REQUIRE_EQUAL(2u, test_ds_cml(4).label);
-	BOOST_REQUIRE_EQUAL(18u, test_ds_cml(5).label);
-	BOOST_REQUIRE_EQUAL(7.1, test_ds_r(0).label);
-	BOOST_REQUIRE_EQUAL(9.99, test_ds_r(1).label);
-	BOOST_REQUIRE_EQUAL(-5, test_ds_r(2).label);
-	BOOST_REQUIRE_EQUAL(10000.7, test_ds_r(3).label);
-	BOOST_REQUIRE_EQUAL(500, test_ds_r(4).label);
-	BOOST_REQUIRE_EQUAL(4.002, test_ds_r(5).label);
-	BOOST_REQUIRE_EQUAL(-4, test_ds_mcc(0).input(3));
-	BOOST_REQUIRE_EQUAL(0, test_ds_c(0).input(4));
-	BOOST_REQUIRE_EQUAL(-2.24, test_ds_c(5).input(18));
+	BOOST_REQUIRE_EQUAL(0u, test_ds_c.element(0).label);
+	BOOST_REQUIRE_EQUAL(1u, test_ds_c.element(1).label);
+	BOOST_REQUIRE_EQUAL(1u, test_ds_c.element(2).label);
+	BOOST_REQUIRE_EQUAL(0u, test_ds_c.element(3).label);
+	BOOST_REQUIRE_EQUAL(1u, test_ds_c.element(4).label);
+	BOOST_REQUIRE_EQUAL(0u, test_ds_c.element(5).label);
+	BOOST_REQUIRE_EQUAL(3u, test_ds_mcc.element(0).label);
+	BOOST_REQUIRE_EQUAL(2u, test_ds_mcc.element(1).label);
+	BOOST_REQUIRE_EQUAL(1u, test_ds_mcc.element(2).label);
+	BOOST_REQUIRE_EQUAL(0u, test_ds_mcc.element(3).label);
+	BOOST_REQUIRE_EQUAL(2u, test_ds_mcc.element(4).label);
+	BOOST_REQUIRE_EQUAL(3u, test_ds_mcc.element(5).label);
+	BOOST_REQUIRE_EQUAL(3u, test_ds_cml.element(0).label);
+	BOOST_REQUIRE_EQUAL(2u, test_ds_cml.element(1).label);
+	BOOST_REQUIRE_EQUAL(1u, test_ds_cml.element(2).label);
+	BOOST_REQUIRE_EQUAL(0u, test_ds_cml.element(3).label);
+	BOOST_REQUIRE_EQUAL(2u, test_ds_cml.element(4).label);
+	BOOST_REQUIRE_EQUAL(18u, test_ds_cml.element(5).label);
+	BOOST_REQUIRE_EQUAL(7.1, test_ds_r.element(0).label);
+	BOOST_REQUIRE_EQUAL(9.99, test_ds_r.element(1).label);
+	BOOST_REQUIRE_EQUAL(-5, test_ds_r.element(2).label);
+	BOOST_REQUIRE_EQUAL(10000.7, test_ds_r.element(3).label);
+	BOOST_REQUIRE_EQUAL(500, test_ds_r.element(4).label);
+	BOOST_REQUIRE_EQUAL(4.002, test_ds_r.element(5).label);
+	BOOST_REQUIRE_EQUAL(-4, test_ds_mcc.element(0).input(3));
+	BOOST_REQUIRE_EQUAL(0, test_ds_c.element(0).input(4));
+	BOOST_REQUIRE_EQUAL(-2.24, test_ds_c.element(5).input(18));
 
 
     // inputs between datasets
 	for ( unsigned int i=0; i<6; i++ ) {
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ )
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), test_ds_c(i).input(j));
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ )
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), test_ds_mcc(i).input(j));
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ )
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), test_ds_sr(i).input(j));
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ )
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), test_ds_sc(i).input(j));
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ )
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), test_ds_smcc(i).input(j));
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ )
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), test_ds_mccm(i).input(j)); //with labelmap
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ )
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), test_ds_cml(i).input(j)); //with missing labels
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ )
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), test_ds_smcch(i).input(j)); //with highestIndex
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ ) {
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), test_ds_e(i).input(j)); //pre-check before export-check
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ )
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), test_ds_c.element(i).input(j));
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ )
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), test_ds_mcc.element(i).input(j));
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ )
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), test_ds_sr.element(i).input(j));
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ )
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), test_ds_sc.element(i).input(j));
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ )
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), test_ds_smcc.element(i).input(j));
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ )
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), test_ds_mccm.element(i).input(j)); //with labelmap
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ )
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), test_ds_cml.element(i).input(j)); //with missing labels
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ )
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), test_ds_smcch.element(i).input(j)); //with highestIndex
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ ) {
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), test_ds_e.element(i).input(j)); //pre-check before export-check
         }
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ ) {
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), import_of_export_1(i).input(j)); //export-check
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ ) {
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), import_of_export_1.element(i).input(j)); //export-check
         }
-		for ( unsigned int j=0; j<test_ds_r(i).input.size(); j++ ) {
-			BOOST_REQUIRE_EQUAL(test_ds_r(i).input(j), import_of_export_2(i).input(j)); //export-check
+		for ( unsigned int j=0; j<test_ds_r.element(i).input.size(); j++ ) {
+			BOOST_REQUIRE_EQUAL(test_ds_r.element(i).input(j), import_of_export_2.element(i).input(j)); //export-check
         }
 	}
 
     // labels between datasets
 	for ( unsigned int i=0; i<6; i++ ) {
-		BOOST_REQUIRE_EQUAL(test_ds_c(i).label, test_ds_sc(i).label);
-		BOOST_REQUIRE_EQUAL(test_ds_mcc(i).label, test_ds_smcc(i).label);
-		BOOST_REQUIRE_EQUAL(test_ds_mcc(i).label, test_ds_mccm(i).label);
-		BOOST_REQUIRE_EQUAL(test_ds_mcc(i).label, test_ds_smcch(i).label);
-		BOOST_REQUIRE_EQUAL(test_ds_r(i).label, test_ds_sr(i).label);
-        BOOST_REQUIRE_EQUAL(test_ds_c(i).label, test_ds_e(i).label); //pre-check before export-check
-		BOOST_REQUIRE_EQUAL(test_ds_c(i).label, import_of_export_1(i).label); //export-check
-		BOOST_REQUIRE_EQUAL(test_ds_c(i).label, import_of_export_2(i).label); //export-check
+		BOOST_REQUIRE_EQUAL(test_ds_c.element(i).label, test_ds_sc.element(i).label);
+		BOOST_REQUIRE_EQUAL(test_ds_mcc.element(i).label, test_ds_smcc.element(i).label);
+		BOOST_REQUIRE_EQUAL(test_ds_mcc.element(i).label, test_ds_mccm.element(i).label);
+		BOOST_REQUIRE_EQUAL(test_ds_mcc.element(i).label, test_ds_smcch.element(i).label);
+		BOOST_REQUIRE_EQUAL(test_ds_r.element(i).label, test_ds_sr.element(i).label);
+        BOOST_REQUIRE_EQUAL(test_ds_c.element(i).label, test_ds_e.element(i).label); //pre-check before export-check
+		BOOST_REQUIRE_EQUAL(test_ds_c.element(i).label, import_of_export_1.element(i).label); //export-check
+		BOOST_REQUIRE_EQUAL(test_ds_c.element(i).label, import_of_export_2.element(i).label); //export-check
     }
 
 }

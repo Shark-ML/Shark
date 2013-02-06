@@ -76,11 +76,11 @@ BOOST_AUTO_TEST_CASE(KMeans)
 	Data<RealVector> const& c = centroids.centroids();
 	std::cout<<c<<std::endl;
 	BOOST_CHECK_EQUAL(c.numberOfElements(), 3u);
-	BOOST_CHECK(c(0)(0) >  0.0);
-	BOOST_CHECK(c(0)(0) <  1.0);
-	BOOST_CHECK(c(1)(0) > 10.0);
-	BOOST_CHECK(c(1)(0) < 11.0);
-	BOOST_CHECK(c(2)(0) > 20.0);
-	BOOST_CHECK(c(2)(0) < 21.0);
+	BOOST_CHECK(c.element(0)(0) >  0.0);
+	BOOST_CHECK(c.element(0)(0) <  1.0);
+	BOOST_CHECK(c.element(1)(0) > 10.0);
+	BOOST_CHECK(c.element(1)(0) < 11.0);
+	BOOST_CHECK(c.element(2)(0) > 20.0);
+	BOOST_CHECK(c.element(2)(0) < 21.0);
 	BOOST_CHECK_LE(iterations, 3u);
 }

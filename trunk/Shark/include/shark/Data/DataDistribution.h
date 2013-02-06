@@ -84,6 +84,42 @@ public:
 	
 };
 
+///
+/// \brief A UnlabeledDataDistribution defines an unsupervised learning problem.
+///
+/// \par
+/// The unsupervised learning problem is defined by an explicit
+/// distribution (in contrast to a finite dataset). The only
+/// method we need is to draw a sample from the distribution.
+template <class InputType>
+class UnlabeledDataDistribution
+{
+public:
+	/// \brief generates a single pair of input and label
+	/// @param input the generated input
+	virtual void draw(InputType& input)const = 0;
+
+	//interface for std::generate
+	InputType operator() (){
+		InputType ret;
+		draw(ret);
+		return ret;
+	}
+	
+	virtual ~UnlabeledDataDistribution() { }
+	
+	/// \brief generates a dataset with samples from from the distribution
+	/// @param size the number of samples in the dataset
+	UnlabeledData<InputType> generateDataset(std::size_t size)const{
+		std::vector<InputType> inputs(size);
+		for(std::size_t i = 0; i != size; ++i){
+			draw(inputs[i]);
+		}
+		return UnlabeledData<InputType>(inputs);
+	}
+	
+};
+
 
 ///
 /// \brief "chess board" problem for binary classification

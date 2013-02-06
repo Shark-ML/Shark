@@ -76,7 +76,7 @@ double negativeLogLikelihoodFromLogPartition(
 	Energy energy(&rbm.structure());
 
 	double logP=0;
-	BOOST_FOREACH(RealMatrix const& batch,inputs) {
+	BOOST_FOREACH(RealMatrix const& batch,inputs.batches()) {
 		RealScalarVector betaBatch(batch.size1(),beta);
 		logP += sum(energy.logUnnormalizedPropabilityVisible(batch, betaBatch));
 		logP -= batch.size1()*logPartition;

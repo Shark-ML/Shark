@@ -116,7 +116,7 @@ public:
 		
 		double error = 0;
 		BatchType predictions;
-		for(std::size_t i = 0; i != m_data.size(); ++i){
+		for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
 			if(m_k == 0){
 				mep_model->eval(m_data.batch(i),predictions);
 				error+=mep_loss->eval(m_data.batch(i), predictions);
@@ -158,7 +158,7 @@ public:
 		BatchType predictions;
 		BatchType errorDerivative;
 		RealVector dataGradient;
-		for(std::size_t i = 0; i != m_data.size(); ++i){
+		for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
 			if(m_k == 0){
 				mep_model->eval(m_data.batch(i),predictions,*state);
 

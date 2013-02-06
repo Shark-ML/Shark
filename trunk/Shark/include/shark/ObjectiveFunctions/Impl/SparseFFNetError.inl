@@ -39,7 +39,7 @@ namespace detail{
 template<class HiddenNeuron,class OutputNeuron>
 class SparseFFNetErrorWrapper:public FunctionWrapperBase<RealVector,RealVector>{
 private:
-	typedef LabeledData<RealVector,RealVector>::const_reference const_reference;
+	typedef LabeledData<RealVector,RealVector>::const_batch_reference const_reference;
 	///\brief calculates KL error
 	double errorKL(RealVector const& meanActivation) const{
 		std::size_t hiddens = meanActivation.size();
@@ -102,7 +102,7 @@ private:
 
 		boost::shared_ptr<State> state = mep_model->createState();
 		double error = 0.0;
-		BOOST_FOREACH(const_reference batch,m_dataset){
+		BOOST_FOREACH(const_reference batch,m_dataset.batches()){
 			// calculate model output for the batch as well as the derivative
 			mep_model->eval(batch.input, prediction,*state);
 
@@ -198,7 +198,7 @@ private:
 		boost::shared_ptr<State> state = mep_model->createState();
 		//first calculate mean activation
 		//we need the mean to calculate the derivative. so we have to evaluate everything twice.
-		BOOST_FOREACH(const_reference batch,m_dataset){
+		BOOST_FOREACH(const_reference batch,m_dataset.batches()){
 			// calculate model output for the batch as well as the derivative
 			mep_model->eval(batch.input, prediction,*state);
 
@@ -219,7 +219,7 @@ private:
 
 		double error=0.0;
 		//now calculate the derivative and the erorr in a second pass
-		BOOST_FOREACH(const_reference batch,m_dataset){
+		BOOST_FOREACH(const_reference batch,m_dataset.batches()){
 			// calculate model output for the batch as well as the derivative
 			mep_model->eval(batch.input, prediction,*state);
 
@@ -294,7 +294,7 @@ public:
 
 		typename Batch<RealVector>::type prediction;
 		double error = 0.0;
-		BOOST_FOREACH(const_reference batch,m_dataset){
+		BOOST_FOREACH(const_reference batch,m_dataset.batches()){
 			mep_model->eval(batch.input, prediction,*state);
 			error += mep_loss->eval(batch.label, prediction);
 			//get the submatrix of activations of the hidden neurons and sum their activation to every pattern of the batch

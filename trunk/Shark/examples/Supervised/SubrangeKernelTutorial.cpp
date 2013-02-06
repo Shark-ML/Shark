@@ -4,9 +4,29 @@
 #include <shark/Models/Kernels/PolynomialKernel.h>
 #include <shark/Models/Kernels/LinearKernel.h>
 #include <shark/Models/Kernels/SubrangeKernel.h>
+#include <shark/Data/DataDistribution.h>
 #include <shark/Rng/GlobalRng.h>
 
 using namespace shark;
+
+//our problem
+class UniformPoints : public UnlabeledDataDistribution<RealVector>
+{
+public:
+	UniformPoints(std::size_t dimensions){
+		m_dimensions = dimensions;
+	}
+
+	void draw(RealVector& input)const{
+		input.resize(m_dimensions);
+		for ( std::size_t j=0; j<m_dimensions; j++ ) {
+			input(j) = Rng::uni(-1,1);
+		}
+	}
+
+protected:
+	std::size_t m_dimensions;
+};
 
 int main()
 {
@@ -14,15 +34,8 @@ int main()
 	
 	std::size_t num_dims = 9;
 	std::size_t num_points = 200;
-	std::vector<RealVector> input(num_points);
-	RealVector v(num_dims);
-	for ( std::size_t i=0; i<num_points; i++ ) {
-		for ( std::size_t j=0; j<num_dims; j++ ) {
-			v(j) = Rng::uni(-1,1);
-		}
-		input[i] = v;
-	}
-	UnlabeledData<RealVector> data(input);
+	UniformPoints problem(num_dims);
+	UnlabeledData<RealVector> data = problem.generateDataset(num_points);
 	
 	DenseRbfKernel   	  basekernel1(0.1);
 	DenseLinearKernel      basekernel2;
@@ -49,9 +62,9 @@ int main()
 	//check in feature space
 	double control = 0.0;
 	for ( std::size_t i=0; i<num_points; i++ ) {
-		control += scale.eval(input[i], input[i]);
+		control += scale.eval(data.element(i), data.element(i));
 		for ( std::size_t j=0; j<num_points; j++ ) {
-			control -= scale.eval(input[i],input[j]) / num_points;
+			control -= scale.eval(data.element(i), data.element(j)) / num_points;
 		}
 	}
 	control /= num_points;

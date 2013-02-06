@@ -67,7 +67,8 @@ void SigmoidFitRpropNLL::train(SigmoidModel& model, LabeledData<RealVector, unsi
 // optimize the sigmoid using platt's method
 void SigmoidFitPlatt::train(SigmoidModel& model, LabeledData<RealVector, unsigned int> const& dataset){
 	SIZE_CHECK( model.numberOfParameters() == 2 );
-	typedef IndexedIterator<LabeledData<RealVector, unsigned int>::const_element_iterator> iterator;
+	typedef LabeledData<RealVector, unsigned int>::const_element_range Elements;
+	typedef IndexedIterator<boost::range_iterator<Elements>::type> Iterator;
 	
 	
 	double a, b, c, d, e, d1, d2;
@@ -81,7 +82,7 @@ void SigmoidFitPlatt::train(SigmoidModel& model, LabeledData<RealVector, unsigne
 	std::size_t pos = classCount[1];
 	std::size_t neg = classCount[0];
 	std::size_t ic = pos+neg;
-	iterator end(dataset.elemEnd(),ic);
+	Iterator end(dataset.elements().end(),ic);
 
 	double A = 0.0;
 	double B = std::log((neg + 1.0) / (pos + 1.0));
@@ -93,7 +94,7 @@ void SigmoidFitPlatt::train(SigmoidModel& model, LabeledData<RealVector, unsigne
 	{
 		a = b = c = d = e = 0.0;
 		
-		for (iterator it(dataset.elemBegin(),0); it != end; ++it){
+		for (Iterator it(dataset.elements().begin(),0); it != end; ++it){
 			std::size_t i = it.index(); 
 			t = (it->label == 1) ? highTarget : lowTarget;
 			d1 = pp(i) - t;
@@ -120,7 +121,7 @@ void SigmoidFitPlatt::train(SigmoidModel& model, LabeledData<RealVector, unsigne
 			A = oldA + ((b + lambda) * d - c * e) / det;
 			B = oldB + ((a + lambda) * e - c * d) / det;
 			err = 0.0;
-			for (iterator it(dataset.elemBegin(),0); it != end; ++it){
+			for (Iterator it(dataset.elements().begin(),0); it != end; ++it){
 				std::size_t i = it.index();
 				p = 1.0 / (1.0 + std::exp(A * it->input(0) + B));
 				pp(i) = p;

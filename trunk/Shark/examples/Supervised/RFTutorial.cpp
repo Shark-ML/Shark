@@ -48,11 +48,11 @@ int main() {
 	//Split the dataset into a training and a test dataset
 	ClassificationDataset dataTest = splitAtElement(data,311);
 
-	cout << "Training set - number of data points: " << data.size()
+	cout << "Training set - number of data points: " << data.numberOfElements()
 		 << " number of classes: " << numberOfClasses(data)
 		 << " input dimension: " << inputDimension(data) << endl;
 
-	cout << "Test set - number of data points: " << dataTest.size()
+	cout << "Test set - number of data points: " << dataTest.numberOfElements()
 		 << " number of classes: " << numberOfClasses(dataTest)
 		 << " input dimension: " << inputDimension(dataTest) << endl;
 

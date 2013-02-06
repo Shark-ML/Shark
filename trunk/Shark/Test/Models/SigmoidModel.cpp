@@ -226,8 +226,8 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize )
 	BOOST_CHECK_SMALL(norm_2(modelDeserialized.parameterVector() - testParameters),1.e-50);
 	for (size_t i=0; i<1000; i++)
 	{
-		RealVector output = modelDeserialized(dataset(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset(i).label),1.e-50);
+		RealVector output = modelDeserialized(dataset.element(i).input);
+		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }
 BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_NoOffset )
@@ -275,8 +275,8 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_NoOffset )
 	BOOST_CHECK_SMALL(norm_2(modelDeserialized.parameterVector() - testParameters),1.e-50);
 	for (size_t i=0; i<1000; i++)
 	{
-		RealVector output = modelDeserialized(dataset(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset(i).label),1.e-50);
+		RealVector output = modelDeserialized(dataset.element(i).input);
+		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }
 BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_Unconstrained )
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_Unconstrained )
 	BOOST_CHECK_SMALL(norm_2(modelDeserialized.parameterVector() - testParameters),1.e-50);
 	for (size_t i=0; i<1000; i++)
 	{
-		RealVector output = modelDeserialized(dataset(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset(i).label),1.e-50);
+		RealVector output = modelDeserialized(dataset.element(i).input);
+		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }

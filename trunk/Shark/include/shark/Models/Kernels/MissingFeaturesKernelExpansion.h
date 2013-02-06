@@ -90,7 +90,8 @@ public:
 				zero(outputs);
 		
 		for(std::size_t p = 0; p != size(patterns); ++p){
-			//~ std::cout<<p<<std::endl;
+
+
 			// Calculate scaling coefficient for the 'pattern'
 			const double patternNorm = computeNorm(column(Base::m_alpha, 0), m_scalingCoefficients, get(patterns,p));
 			const double patternSc = patternNorm / m_classifierNorm;
@@ -98,9 +99,7 @@ public:
 			// Do normal classification except that we use kernel which supports inputs with Missing features
 			//TODO: evaluate k for all i and replace the += with a matrix-vector operation. 
 			//better: do this for all p and i and go matrix-matrix-multiplication
-			for (std::size_t i = 0; i != indexedBasis.size(); ++i)
-			{
-				//~ std::cout<<i<<" "<<p<<std::endl;
+			for (std::size_t i = 0; i != indexedBasis.size(); ++i){
 				const double k = evalSkipMissingFeatures(
 					*Base::mep_kernel,
 					indexedBasis[i],
@@ -133,17 +132,17 @@ public:
 		// Calculate ||w||^2
 		double normSqr = 0.0;
 		
-		//Todo: i am too lazy to us iterated loops in this function.
+		//Todo: i am too lazy to use iterated loops in this function.
 		//so i am using a DataView to have O(1) random access lookup. but this is not needed!
 		DataView<Data<InputType> const > indexedBasis(Base::m_basis);
-		
+
 		for (std::size_t i = 0; i < alpha.size(); ++i){
 			for (std::size_t j = 0; j < alpha.size(); ++j){
 				const double evalResult = evalSkipMissingFeatures(
 					*Base::mep_kernel,
 					indexedBasis[i],
 					indexedBasis[j],
-					missingness); // missingness
+					missingness);
 				// Note that in Shark solver, we do axis flip by substituting \alpha with y \times \alpha
 				normSqr += evalResult * alpha(i) * alpha(j) / scalingCoefficient(i) / scalingCoefficient(j);
 			}

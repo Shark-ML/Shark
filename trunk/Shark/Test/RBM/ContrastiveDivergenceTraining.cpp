@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		BinaryRBM::Energy::HiddenStatisticsBatch hstat(1,4);
 		
 		for(std::size_t i = 0; i != inputs; ++i){
-			row(v,0) = data(i);
+			row(v,0) = data.element(i);
 			energy.inputHidden(hInput,v);
 			rbm.hiddenNeurons().sufficientStatistics(hInput,hstat, repeat(1.0,1));
 			

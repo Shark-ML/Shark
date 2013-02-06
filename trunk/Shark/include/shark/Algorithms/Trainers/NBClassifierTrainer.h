@@ -68,7 +68,7 @@ public:
 	/// @see AbstractModel::train
 	void train(NBClassifierType& model, LabeledData<InputType, OutputType> const& dataset)
 	{
-		SIZE_CHECK(dataset.size() > 0u);
+		SIZE_CHECK(dataset.numberOfElements() > 0u);
 
 		// Get size of class/feature
 		std::size_t classSize;
@@ -79,7 +79,7 @@ public:
 
 		// Initialize trainer & buffer
 		std::vector<InputValueType> buffer;
-		buffer.reserve(dataset.size() / classSize);
+		buffer.reserve(dataset.numberOfElements() / double(classSize));
 
 		// Train individual feature distribution
 		for (std::size_t i = 0; i < classSize; ++i)

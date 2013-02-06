@@ -62,7 +62,7 @@ public:
 	///\brief returns the k nearest neighbors of the point
 	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const{
 		std::size_t numPatterns = size(patterns);
-		std::size_t maxThreads = std::min(SHARK_NUM_THREADS,m_dataset.size());
+		std::size_t maxThreads = std::min(SHARK_NUM_THREADS,m_dataset.numberOfBatches());
 		//heaps of key value pairs (distance,classlabel). One heap for every pattern and thread.
 		//For memory alignment reasons, all heaps are stored in one continuous array
 		//the heaps are stored such, that for every pattern the heaps for every thread
@@ -73,7 +73,7 @@ public:
 		typedef typename std::vector<DistancePair>::iterator iterator;
 		//iterate over all batches of the training set in parallel and let
 		//every thread do a KNN-Search on it's subset of data
-		SHARK_PARALLEL_FOR(std::size_t b = 0; b < m_dataset.size(); ++b){
+		SHARK_PARALLEL_FOR(std::size_t b = 0; b < m_dataset.numberOfBatches(); ++b){
 			//evaluate distances between the points of the patterns and the batch
 			RealMatrix distances=mep_kernel->featureDistanceSqr(patterns,m_dataset.batch(b).input);
 			

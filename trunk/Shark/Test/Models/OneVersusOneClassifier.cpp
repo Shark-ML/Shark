@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE( Models_OneVersusOneClassifier )
 	LabeledData<double, unsigned int> dataset(inputs, targets);
 
 	// check correctness of predictions
-	for (std::size_t i=0; i<dataset.size(); i++)
+	for (std::size_t i=0; i<dataset.numberOfElements(); i++)
 	{
-		BOOST_CHECK_EQUAL(ovo(dataset(i).input), dataset(i).label);
+		BOOST_CHECK_EQUAL(ovo(dataset.element(i).input), dataset.element(i).label);
 	}
 }

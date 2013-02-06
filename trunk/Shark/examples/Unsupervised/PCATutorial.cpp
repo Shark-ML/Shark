@@ -30,7 +30,7 @@
  *
  */
 //===========================================================================
-#include <iostream>
+#include <fstream>
 #include <shark/Algorithms/Trainers/PCA.h>
 #include <shark/Data/Pgm.h>
 
@@ -55,9 +55,9 @@ int main(){
 	}
 	cout << "done." << endl;
 
-	unsigned l = images.size();   // number of samples
-	unsigned x = imagesInfo(0).x; // width of images
-	unsigned y = imagesInfo(0).y; // height of images
+	unsigned l = images.numberOfElements();   // number of samples
+	unsigned x = imagesInfo.element(0).x; // width of images
+	unsigned y = imagesInfo.element(0).y; // height of images
 
 	cout << "Eigenvalue decomposition ... " << flush;
 	PCA pca(images);
@@ -81,9 +81,9 @@ int main(){
 	cout << "Reconstructing face " << sampleImage << " ... " << flush;
 	boost::format fmterTrue("face%d.pgm");
 	boost::format fmterRec("facesReconstruction%d-%d.pgm");
-	exportPGM((fmterTrue % sampleImage).str().c_str(), images(sampleImage), x, y);
+	exportPGM((fmterTrue % sampleImage).str().c_str(), images.element(sampleImage), x, y);
 	LinearModel<> dec;
 	pca.decoder(dec, m);
-	exportPGM((fmterRec % sampleImage % m).str().c_str(), dec(encodedImages(sampleImage)), x, y); 
+	exportPGM((fmterRec % sampleImage % m).str().c_str(), dec(encodedImages.element(sampleImage)), x, y); 
 	cout << "done." << endl;
 }

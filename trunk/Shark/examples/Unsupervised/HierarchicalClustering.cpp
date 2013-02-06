@@ -44,11 +44,13 @@ using namespace shark;
 int main(int argc, char** argv)
 {
 	// create artificial data
-	std::vector<RealVector> tr_d(20, RealVector(1, 0.0));
-	std::vector<RealVector> te_d(30, RealVector(1, 0.0));
-	for (std::size_t i=0; i<tr_d.size(); i++) 
-		tr_d[i](0) = 100.0 * (i + 0.5) / (double)tr_d.size();
-	for (std::size_t i=0; i<te_d.size(); i++) 
+	std::size_t trainingSize = 20;
+	std::size_t testSize = 30;
+	std::vector<RealVector> tr_d(trainingSize, RealVector(1, 0.0));
+	std::vector<RealVector> te_d(testSize, RealVector(1, 0.0));
+	for (std::size_t i=0; i<trainingSize; i++) 
+		tr_d[i](0) = 100.0 * (i + 0.5) / (double)trainingSize;
+	for (std::size_t i=0; i<testSize; i++) 
 		te_d[i](0) = Rng::uni(0.0, 100.0);
 		
 	UnlabeledData<RealVector> training(tr_d);
@@ -65,13 +67,13 @@ int main(int argc, char** argv)
 
 	// output cluster assignments
 	std::cout << "\ntraining data:\n";
-	for (std::size_t i = 0; i != training.size(); i++){
-		unsigned int cluster = model(training(i));
-		std::cout << "   point " << training(i)(0) << "  -->  cluster " << cluster << std::endl;
+	for (std::size_t i = 0; i != trainingSize; i++){
+		unsigned int cluster = model(training.element(i));
+		std::cout << "   point " << training.element(i)(0) << "  -->  cluster " << cluster << std::endl;
 	}
 	std::cout << "\ntest data:\n";
-	for (std::size_t i=0; i<test.size(); i++){
-		unsigned int cluster = model(test(i));
-		std::cout << "   point " << test(i)(0) << "  -->  cluster " << cluster << std::endl;
+	for (std::size_t i=0; i<testSize; i++){
+		unsigned int cluster = model(test.element(i));
+		std::cout << "   point " << test.element(i)(0) << "  -->  cluster " << cluster << std::endl;
 	}
 }
