@@ -16,11 +16,6 @@ CONFIGURE_FILE (
 set( SPHINX_EXECUTABLE sphinx-build )
 set( SPHINX_PARAMETERS -b html )
 
-add_custom_target( doxylink ALL
-		   COMMAND ${PYTHON_EXECUTABLE} setup.py install --user
-		   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../contrib/doxylink/sources
-)
-
 add_custom_target( doc ALL
 		   COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Shark.dox
 		   COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS} ${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages ${CMAKE_CURRENT_BINARY_DIR}/sphinx_pages/build/html
