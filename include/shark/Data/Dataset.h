@@ -839,7 +839,7 @@ DatasetT splitAtElement(DatasetT& data, std::size_t elementIndex){
 		batchEnd += boost::size(data.batch(batchPos));
 		++batchPos;
 	}while(batchEnd <= elementIndex);
-		
+	--batchPos;
 	std::size_t splitPoint = boost::size(data.batch(batchPos)) -(batchEnd-elementIndex);
 	if(splitPoint != 0){//if we ar ein a middle of a batch, split it in two parts and move on
 		data.splitBatch(batchPos,splitPoint);
