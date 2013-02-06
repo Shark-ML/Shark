@@ -8,50 +8,16 @@ import sys, os, glob
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-# extensions = ['sphinx.ext.pngmath', 'sphinx.ext.todo', 'sphinxcontrib.doxylink'] #old pngmath variant. now using mathjax
 extensions = ['sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinxcontrib.doxylink'] #using mathjax
-#extensions = ['sphinx.ext.todo', 'doxylink']
-#extensions.append('mathjax')
 mathjax_path = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
-##mathjax_file_path = os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/../contrib/mathjax/MathJax.js')
-##mathjax_path = mathjax_file_path + '?config=TeX-AMS-MML_HTMLorMML'
-##print "mathjax path is ", mathjax_path
 
 todo_include_todos = True
 
-## [obsolete breath stuff is at the bottom]
-
-#get all egg-subdirs and include them in path
-
-abs_rel_dir = os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/../contrib/doxylink/build/lib/python')
-#mathjax_dir = os.path.abspath('../../contrib/mathjax_sphinxext')
-#sys.path.append( mathjax_dir )
-
-if sys.version_info < (3, 0):
-    s3_local_modules_p2 = glob.glob( abs_rel_dir + '/*-py2.?.egg' )
-    print 's3_local_modules_p2 =', s3_local_modules_p2
-    for local_module in s3_local_modules_p2:
-        sys.path.append(local_module)
-        #because egg standards vary, also include all child directories :/
-        for local_module_subdir in os.walk(local_module).next()[1]:
-            sys.path.append( os.path.join(abs_rel_dir,local_module,local_module_subdir) )
-    print 'sys.path is now ', sys.path[:], '\n'
-else:
-    s3_local_modules_p3 = glob.glob( abs_rel_dir + '/*-py3.?.egg' )
-    print 's3_local_modules_p3 =', s3_local_modules_p3
-    for local_module in s3_local_modules_p3:
-        sys.path.append(local_module)
-        #because egg standards vary, also include all child directories :/
-        for local_module_subdir in next(os.walk(local_module))[1]:
-            sys.path.append( os.path.join(abs_rel_dir,local_module,local_module_subdir) )
-    print 'sys.path is now ', sys.path[:], '\n'
-
+#set up doxylink tag file
 print 'current working directory', os.path.abspath(os.path.curdir)
 print 'setting relative tag file path to', '../../../doxygen_pages/tag_files/all.tag', '=', os.path.abspath('../../../doxygen_pages/tag_files/all.tag')
 print 'setting relative doxygen output path to', '../../../doxygen_pages/html/', '=', os.path.abspath('../../../doxygen_pages/html/')
 doxylink = {
-        # 'doxy' : (os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/doxygen_pages/tag_files/all.tag'), os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/doxygen_pages/html/'))
-        # 'doxy' : ('../doxygen_pages/tag_files/all.tag', '../../../doxygen_pages/html/')
         'doxy' : (os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/doxygen_pages/tag_files/all.tag'), '../../../doxygen_pages/html/')
 }
 
