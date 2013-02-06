@@ -27,7 +27,7 @@
 
 
 
-
+#include <fstream> 
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataView.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
