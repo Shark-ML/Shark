@@ -193,6 +193,7 @@ public:
 	}
 
 
+    ß
 	///\brief Calculates the input of the visible neurons given the state of the hidden.
 	///
 	///@param input the vector the input of the visible neurons is stored in
