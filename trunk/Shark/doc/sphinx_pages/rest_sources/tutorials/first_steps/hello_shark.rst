@@ -80,15 +80,16 @@ Evaluation
 %%%%%%%%%%
 
 One way to evaluate our LDA-trained linear model is to count the number of
-correctly classified test samples::
+correctly classified test samples. We simply use ``BOOST_FOREACH`` to iterate
+over all key-value pairs of the dataset::
 
     unsigned int correct = 0;
-    for ( size_t i = 0; i != test.numberOfElements(); ++i ) {
-        unsigned int result = classifier( test(i).input );
-        if ( result == test(i).label){
-            correct++;
-        }
-    }
+    BOOST_FOREACH(ClassificationDataset::element_reference point, test.elements()){
+		unsigned int result = classifier(point.input);
+		if (result == point.label){
+			correct++;
+		}
+	}
 
 Easier, faster, and more flexible ways to evaluate models are facilitated by Shark
 losses and error functions, which will be introduced in the next tutorials.
