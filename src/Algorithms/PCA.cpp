@@ -53,10 +53,31 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 		//we want to avoid to form it directly but us it's batch represntation in the dataset
 		m_mean = shark::mean(inputs);
 		RealMatrix S(m_l,m_l,0.0);//S=X0 X0^T
-		for(std::size_t b = 0; b != inputs.numberOfBatches(); ++b){
-			std::size_t batchSize = inputs.batch(b).size1();
-			RealMatrix X = inputs.batch(b)-repeat(m_mean,batchSize);
-			symmRankKUpdate(X,S,true);
+		//as every batch is only  afraction of all samples, we have to loop through all
+		//combinations of the batches of first and second argument and calculate a block of S
+		//so if X0^T = (B0^T,B1^T)
+		//than S = B0 B0^T B0 B1^T
+		//               B1 B0^T  B1 B1^T
+		std::size_t start1 = 0;
+		for(std::size_t b1 = 0; b1 != inputs.numberOfBatches(); ++b1){
+			std::size_t batchSize1 = inputs.batch(b1).size1();
+			RealMatrix X1 = inputs.batch(b1)-repeat(m_mean,batchSize1);
+			std::size_t start2 = 0;
+			//calculate off-diagonal blocks
+			//and the block X2 X1^T is the transpose of X1X2^T and thus can bee calculated for free.
+			for(std::size_t b2 = 0; b2 != b1; ++b2){
+				std::size_t batchSize2 = inputs.batch(b2).size1();
+				RealMatrix X2 = inputs.batch(b2)-repeat(m_mean,batchSize2);
+				RealSubMatrix X1X2T= subrange(S,start1,start1+batchSize1,start2,start2+batchSize2);
+				RealSubMatrix X2X1T= subrange(S,start2,start2+batchSize2,start1,start1+batchSize1);
+				fast_prod(X1,trans(X2),X1X2T);// X1 X2^T
+				noalias(X2X1T) = trans(X1X2T);// X2 X1^T
+				start2+=batchSize2;
+			}
+			//diagonal block
+			RealSubMatrix X1X1T= subrange(S,start1,start1+batchSize1,start1,start1+batchSize1);
+			symmRankKUpdate(X1,X1X1T);
+			start1+=batchSize1;
 		}
 		S /= m_l;
 		m_eigenvalues.resize(m_l);
