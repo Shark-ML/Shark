@@ -8,10 +8,10 @@ The Shark documentation system
 
 
 Shark uses the well-established `Doxygen <http://www.doxygen.org>`_ documentation
-system in combination with `Sphinx <http://sphinx.pocoo.org/>`_, another documentation
-system originating from the Python world. Doxygen is used to extract documentation
-from the C++ sources, generate inheritance diagrams, etc. Sphinx is used to generate
-the entire surrounding documentation.
+system in combination with `Sphinx <http://sphinx.pocoo.org/>`_, another popular
+documentation system originating from the Python world. Doxygen is used to extract
+documentation from the C++ sources, generate inheritance diagrams, etc. To generate
+the entire surrounding documentation including these tutorials, Sphinx is used.
 
 
 Building the documentation
@@ -22,94 +22,60 @@ Setting up Sphinx and Doxylink
 ------------------------------
 
 This section will tell you how to **build the documentation on your computer**, and
-also how to first install the tools needed for it. We rely on a number of different
-Python modules, namely Sphinx and Doxylink, which in turn rely on other packages again,
-e.g., Docutils, Jinja2, Pygments, and Pyparsing. Since this tutorial page is created by
-Sphinx, you will most likely read it off a webserver or as part of a Shark package
-including the generated documentation pages.
+also how to first install the tools needed for it. Besides Doxygen, we rely on two
+relevant Python modules, namely Sphinx and Doxylink. These in turn rely on other packages
+again, e.g., Docutils, Jinja2, Pygments, and Pyparsing. Since this tutorial page is
+created by Sphinx, you will most likely read it off a webserver or as part of a Shark
+package including the generated documentation pages.
 
-.. note:: These instructions are currently tested only for Mac OS X and Linux users. Please
-    contact us to mutually find out how this will work on Windows, or share your successful
-    commands with us.
+.. note:: These instructions are currently only tested on Mac OS X and Linux. Please
+    contact us to mutually find out how this will work on Windows, or share your success
+    stories with us.
 
 #. We assume you have Doxygen installed. Note that in our current setup, Doxygen is also configured
-   to use the Graphviz (http://www.graphviz.org/) libraries for rendering inheritence graphs,
+   to use the `Graphviz <http://www.graphviz.org/>`_ libraries for rendering inheritence graphs,
    among others. This implies that we either assume Graphviz installed, or that you have to
    manually edit your Shark.dox file in the main documentation folder, setting ``HAVE_DOT = NO``.
 
 #. First, please get an overview for yourself over what Python versions you have installed on your system.
-   In an ideal world, you would have one single Python version (either 2 or 3). We have however witnessed
-   successful installation of all needed dependencies on systems where python-2.5, -2.6, -2.7, and -3.2
-   were installed alongside each other, but this can make things (much) harder, e.g., execute Sphinx with
-   a different Python version than for which its dependencies had been installed, etc.
+   In an ideal world, you would have one single Python version (either 2 or 3). In all other cases, keep
+   in the back of your head that you will want to install the necessary Python packages for the same
+   Python versions which you will later use to call Sphinx when building the tutorials.
 
-#. In the shark home directory, go to the sub-directory ``contrib/doxylink/sources``
+#. Get an instance of `Doxylink (a.k.a. sphinxcontrib-doxylink)
+   <http://pypi.python.org/pypi/sphinxcontrib-doxylink>`_ working on your system. Since
+   Doxylink depends on Sphinx, getting Doxylink will also pull in Sphinx and its dependencies.
+   So, for example when using ``pip``, a command like ``pip install sphinxcontrib-doxylink``
+   should get you good to go.
 
-#. There, try to issue the command ``PYTHONPATH=../build/lib/python python setup.py install
-   --home=../build --record list_of_installed_files.txt`` (where the last argument ``record``
-   could be omitted, but may provide useful debugging information and/or help during
-   uninstallation/cleanup).
-
-   .. note::
-
-      On a Mac, instead try ``PYTHONPATH=../build/lib/python: python setup.py install
-      --home=../build --record list_of_installed_files.txt`` (with an added colon after
-      the target Python path as the only difference).
-
-   .. note::
-
-      On some systems, the ``python`` command might invoke python 3, and python 2 be invoked
-      by python2. In such a case, replace the above command by the appropriate version, e.g.,
-      ``PYTHONPATH=../build/lib/python python2 setup.py install --home=../build --record
-      list_of_installed_files.txt`` .
-
-   This will on some platforms (especially those with not-too-often used Python installations)
-   result in an error ``Traceback (most recent call last): File "setup.py", line 3, in <module>
-   from setuptools import setup, find_packages ImportError: No module named setuptools`` . In
-   such a case, please obtain setuptools in the way suited for your distribution or platform
-   (e.g., apt-get, etc.). When you then successfully installed setuptools, again try to issue
-   ``PYTHONPATH=../build/lib/python python setup.py install --home=../build --record
-   list_of_installed_files.txt`` , or, on a Mac potentially ``PYTHONPATH=../build/lib/python:
-   python setup.py install --home=../build --record list_of_installed_files.txt`` .
-
-   Another problem that can occur is that your locally installed Python dependencies cannot
-   be resolved. In such a case, consider adding the respective directory to your PYTHONPATH
-   variable. This can for example be achieved by adding ``export
-   PYTHONPATH=$PYTHONPATH:/path/to/your/Shark3/contrib/doxylink/build/lib/python/``
-   to your .bashrc . Note that this setting of the PYTHONPATH would be for the everyday use
-   of Sphinx and others, whereas the note further above just refers to temporarily setting
-   the PYTHONPATH when installing the dependencies.
+#. As a precautionary measure, review your ``PYTHONPATH`` and ``PATH`` environment variables:
+   depending on how and where you installed Doxylink and the other dependencies, you may
+   have to add the locations of the corresponding python packages to your ``PYTHONPATH``
+   and the locations of the ``sphinx-build`` executable to your ``PATH``.
 
 #. See what happens when you issue ``make doc`` in the ``doc/`` subdirectory of the main Shark
    directory (you will possibly have to use ``ccmake .`` or ``cmake -i`` again to configure the
    installation first). If Doxygen is installed and working, the interesting part will now be
    whether all Python components needed by Sphinx and Doxylink are working. This should in
-   theory be the case. There have however cases been reported where the executable provided by
-   Sphinx (``sphinx-build``) was either not recognized, not included in the system path, or
-   itself did not find the underlying Python Sphinx module. In such a case, consider
+   theory be the case. If not, try one of the following:
 
-   * installing Sphinx through your distribution again.
-   * examining, relative to the $SHARKHOME directory, both ``contrib/doxylink/build/bin`` as
-     well as ``contrib/doxylink/build/lib/python/Sphinx-1.0.7-py2.7.egg/sphinx`` and maybe
-     adding a manual alias from ``sphinx-build`` to the correct executable
-     ``contrib/doxylink/build/bin/sphinx-build``, or including the former directory to your
-     Python and/or system path.
-   * it can also help to issue ``make doc`` with a user-controlled pythonpath, e.g. as in ::
+   * go back one step and examine your ``PYTHONPATH`` and ``PATH`` environment
+     variables again. For debugging purposes, it can also help to issue ``make doc``
+     with a user-controlled pythonpath, e.g. as in ::
 
-         PYTHONPATH=/usr/lib/python2.7/site-packages/:/path/to/your/Shark3/contrib/doxylink/build/lib/python make doc
+         PYTHONPATH=/path/where/pip/puts/your/python2.7/site-packages/ make doc
 
-   * in extremely lost causes, you might want to look into the `virtualenv <http://www.virtualenv.org>`_
+   * you can manually edit ``$SHARKHOME/doc/sphinx_pages/conf.py`` to print out information,
+     like the path that Sphinx is seeing, in case the problem is that only Doxylink is not
+     found, but Sphinx is found.
+
+   * in extremely lost causes with multiple python versions and dependencies, you might
+     want to look into the `virtualenv <http://www.virtualenv.org>`_
      tool for managing different Python installations.
 
 #. You know that you are done when ``make doc`` exits with ``build succeeded. Built target doc``,
    and when you can successfully view the page ``$SHARKHOME/doc/index.html``.
 
-In general, if you run into troubles, you should try to make sure all dependencies are installed
-and accessible. The most relevant dependencies are Sphinx and Doxylink, which in turn rely on a
-number of tools, e.g., Docutils, Jinja2, Pygments, and Pyparsing, which however should be taken
-care of automatically by setuptools. You can check upon the added installations by examining the
-directory tree under ``contrib/doxylink/`` with e.g. ``ls -R``. Then it usually boils down to
-either installing what's missing or making the path known in the correct manner. Good luck!
 
 
 MathJax
@@ -157,50 +123,13 @@ Below is useful information related to Python and Doxylink updates with respect
 to necessary user intervention.
 
 
-When your Python version is upgraded
-------------------------------------
-
-In case some of your Python dependencies for the Doxygen-Sphinx-Doxylink have
-been pulled in when installing Doxylink, you may need to re-issue the command
-``PYTHONPATH=../build/lib/python python setup.py install --home=../build --record
-list_of_installed_files.txt`` in ``contrib/doxylink/sources`` after every Python
-upgrade that took place through your distribution.
-
 Note for Python3.3 users
 ------------------------
 
 Unfortunately, at the time of this writing, docutils does not support Python3.3,
 see `this bug report and patch <http://sourceforge.net/tracker/?func=detail&aid=3541369&group_id=38414&atid=422030>`_ .
 Python 3.3 users should thus apply the patch from the link above to their docutils
-source tree. If installed by hand according to the above instructions, this will be
-located in ``contrib/doxylink/build/lib/python/docutils-0.9.1-py3.3.egg/docutils``.
-
-When a new Doxylink version comes out
--------------------------------------
-
-When a new Doxylink version is released, there are two aspects:
-
-#. First, the users' aspect: the new version may or may not add functionality
-   which is needed by the current SVN version of Shark. If it does (and also
-   in general), it is  advisable for anyone building the Shark docs to upgrade
-   their local Doxylink installation. This can simply be done by following the
-   above same instructions as for installing Doxylink in the first place. In
-   particular, in ``contrib/doxylink/sources`` issueing
-   ``PYTHONPATH=../build/lib/python python setup.py install
-   --home=../build --record list_of_installed_files.txt`` should be all you
-   need to do.
-
-#. Second, the shark developers' aspect: since Shark for convenience provides
-   the Doxylink sources, someone needs to update the files in
-   ``contrib/doxylink/sources/`` such that they reflect the update. However,
-   we do not include all files, for example omit the ``test/`` and ``doc/``
-   directories. Thus, only the important/present files/changes should be
-   propagated manually. Using meld on the shark ``contrib/doxylink`` folder
-   and a newly checked out birkendfeld repository in combination with svn
-   list commands will usually help do the trick quickly.
-
-
-
+source tree.
 
 
 
