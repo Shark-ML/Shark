@@ -201,7 +201,7 @@ public:
 	{
 		std::size_t elements = data.numberOfElements();
 		x.resize(elements);
-		boost::iota(x,data.elemBegin());//fill x with iterators begin...end of the range
+		boost::iota(x,data.elements().begin());//fill x with iterators begin...end of the range
 	}
 
 	/// return a single matrix entry
@@ -236,7 +236,7 @@ protected:
 	/// Kernel function defining the kernel Gram matrix
 	const AbstractKernelFunction<InputType>& kernel;
 
-	typedef typename Data<InputType>::const_element_iterator PointerType;
+	typedef typename Data<InputType>::const_element_range::iterator PointerType;
 	/// Array of data pointers for kernel evaluations
 	//todo: O.K. find better solution for this.
 	//std::vector<PointerType> x;
@@ -1236,7 +1236,7 @@ public:
 	{
 		std::size_t elements = data.numberOfElements();
 		x.resize(elements);
-		boost::iota(x,data.elemBegin());
+		boost::iota(x,data.elements().begin());
 	}
 
 	/// return a single matrix entry
@@ -1287,7 +1287,7 @@ protected:
 	/// Kernel function defining the kernel Gram matrix
 	AbstractKernelFunction<InputType> const& kernel;
 
-	typedef typename Data<InputType>::const_element_iterator PointerType;
+	typedef typename Data<InputType>::const_element_range::const_iterator PointerType;
 	/// Array of data pointers for kernel evaluations
 	std::vector<PointerType> x;
 

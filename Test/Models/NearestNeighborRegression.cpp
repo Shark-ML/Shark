@@ -68,21 +68,6 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighborRegression ) {
 	Data<RealVector> prediction = model(dataset.inputs());
 	for (int i = 0; i<6; ++i)
 	{
-		BOOST_CHECK_SMALL(prediction(i)(0) - 4.0 * (i/2 - 1), 1e-14);
+		BOOST_CHECK_SMALL(prediction.element(i)(0) - 4.0 * (i/2 - 1), 1e-14);
 	}
-
-	// check exceptions
-	//~ RealVector param;
-//~ #ifdef DEBUG
-	//~ BOOST_CHECK_THROW(model.setParameterVector(param), Exception);
-//~ #endif
-	//~ param.resize(1);
-	//~ param(0) = 3.0;
-	//~ BOOST_CHECK_NO_THROW(model.setParameterVector(param));
-//~ #ifdef DEBUG
-	//~ param(0) = 4.5;
-	//~ BOOST_CHECK_THROW(model.setParameterVector(param), Exception);
-	//~ param(0) = -1.0;
-	//~ BOOST_CHECK_THROW(model.setParameterVector(param), Exception);
-//~ #endif
 }

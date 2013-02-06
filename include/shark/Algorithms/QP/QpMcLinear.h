@@ -75,9 +75,9 @@ public:
 		// (yes, ublas is slow...), and compute the squared
 		// norms of the training examples
 		SparseVector sparse;
-		for (std::size_t b=0, j=0; b<dataset.size(); b++)
+		for (std::size_t b=0, j=0; b<dataset.numberOfBatches(); b++)
 		{
-			DatasetType::const_reference batch = dataset.batch(b);
+			DatasetType::const_batch_reference batch = dataset.batch(b);
 			for (std::size_t i=0; i<batch.size(); i++)
 			{
 				CompressedRealVector x_i = shark::get(batch, i).input;
@@ -102,7 +102,7 @@ public:
 		}
 		for (std::size_t i=0, j=0, k=0; i<x.size(); i++)
 		{
-			CompressedRealVector x_i = dataset(i).input;
+			CompressedRealVector x_i = dataset.element(i).input;
 			if (x_i.nnz() == 0) continue;
 
 			x[j] = &storage[k];

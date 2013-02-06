@@ -80,24 +80,10 @@ BOOST_AUTO_TEST_CASE( SOFT_NEAREST_NEIGHBOR_CLASSIFIER ) {
 	Data<RealVector> prediction=model(dataset.inputs());
 	for (size_t i = 0; i<6; ++i)
 	{
-		BOOST_CHECK_SMALL(prediction(i)(target[i]) - 2.0/3.0, 1e-12);
+		BOOST_CHECK_SMALL(prediction.element(i)(target[i]) - 2.0/3.0, 1e-12);
 	}
 
 	ZeroOneLoss<unsigned int, RealVector> loss;
 	double error = loss.eval(dataset.labels(), prediction);
 	BOOST_CHECK(error == 0.0);
-
-	//~ RealVector param;
-//~ #ifdef DEBUG
-	//~ BOOST_CHECK_THROW(model.setParameterVector(param), Exception);
-//~ #endif
-	//~ param.resize(1);
-	//~ param(0) = 3.0;
-	//~ BOOST_CHECK_NO_THROW(model.setParameterVector(param));
-//~ #ifdef DEBUG
-	//~ param(0) = 4.5;
-	//~ BOOST_CHECK_THROW(model.setParameterVector(param), Exception);
-	//~ param(0) = -1.0;
-	//~ BOOST_CHECK_THROW(model.setParameterVector(param), Exception);
-//~ #endif
 }

@@ -91,24 +91,6 @@ void shark::solveSystem(
 	solveTriangularSystemInPlace<SolveAXB,Upper>(LUDecomposition,X);
 }
 
-template<class System,class MatT,class Vec1T,class Vec2T>
-void shark::solveSymmSystem(
-	const blas::matrix_expression<MatT>& A, 
-	blas::vector_expression<Vec1T>& x,
-	const blas::vector_expression<Vec2T>& b
-){
-	SIZE_CHECK(A().size1() == b().size());
-	SIZE_CHECK(A().size1() == A().size2());
-	std::size_t n = A().size1();
-	
-	blas::matrix<typename MatT::value_type> cholesky;
-	choleskyDecomposition(A(),cholesky);
-	
-	ensureSize(x,n);
-	noalias(x()) = b();
-	solveTriangularCholeskyInPlace<System>(cholesky,x);
-}
-
 template<class System,class MatT,class Mat1T>
 void shark::solveSymmSystemInPlace(
 	blas::matrix_expression<MatT> const& A, 
@@ -125,6 +107,32 @@ void shark::solveSymmSystemInPlace(
 	choleskyDecomposition(A(),cholesky);
 
 	solveTriangularCholeskyInPlace<System>(cholesky,B);
+}
+
+template<class System,class MatT,class VecT>
+void shark::solveSymmSystemInPlace(
+	blas::matrix_expression<MatT> const& A, 
+	blas::vector_expression<VecT>& b
+){
+	SIZE_CHECK(A().size1() == b().size());
+	SIZE_CHECK(A().size1() == A().size2());
+	
+	blas::matrix<typename MatT::value_type> cholesky;
+	choleskyDecomposition(A(),cholesky);
+	solveTriangularCholeskyInPlace<System>(cholesky,b);
+}
+
+template<class System,class MatT,class Vec1T,class Vec2T>
+void shark::solveSymmSystem(
+	const blas::matrix_expression<MatT>& A, 
+	blas::vector_expression<Vec1T>& x,
+	const blas::vector_expression<Vec2T>& b
+){
+	SIZE_CHECK(A().size1() == b().size());
+	SIZE_CHECK(A().size1() == A().size2());
+	ensureSize(x,A().size1());
+	noalias(x()) = b();
+	solveSymmSystemInPlace<System>(A,x);
 }
 template<class System,class MatT,class Mat1T,class Mat2T>
 void shark::solveSymmSystem(

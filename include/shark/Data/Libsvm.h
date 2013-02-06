@@ -353,8 +353,7 @@ void import_libsvm(
 /// \param  sortLabels  Flag for sorting data points according to labels
 template<typename InputType>
 void export_libsvm(LabeledData<InputType, unsigned int>& dataset, const std::string &fn, bool dense=false, bool oneMinusOne = true, bool sortLabels = false) {
-	size_t i, ii, j;
-
+	std::size_t elements = dataset.numberOfElements();
 	std::ofstream ofs(fn.c_str());
 	if( !ofs ) {
 		throw( SHARKEXCEPTION( "[export_libsvm] file can not be opened for reading" ) );
@@ -365,25 +364,29 @@ void export_libsvm(LabeledData<InputType, unsigned int>& dataset, const std::str
 
 	std::vector<detail::LabelSortPair> L;
 	if(sortLabels) {
-		for(i = 0; i < dataset.numberOfElements(); i++) L.push_back(detail::LabelSortPair(dataset.labels()(i), i));
+		for(std::size_t i = 0; i < elements; i++) 
+			L.push_back(detail::LabelSortPair(dataset.element(i).label, i));
 		std::sort (L.begin(), L.end(), detail::cmpLabelSortPair);
 	}
 
-	for(ii = 0; ii < dataset.numberOfElements(); ii++) {
+	for(std::size_t ii = 0; ii < elements; ii++) {
 		// apply mapping to sorted indices
+		std::size_t i = 0;
 		if(sortLabels) i = L[ii].second;
 		else i = ii;
 		// apply transformation to label and write it to file
-		if(oneMinusOne) ofs << 2*int(dataset.labels()(i))-1 << " ";
-		else ofs << dataset.labels()(i)+1 << " "; //libsvm file format documentation is scarce, but by convention the first class seems to be 1..
+		if(oneMinusOne) ofs << 2*int(dataset.element(i).label)-1 << " ";
+		//libsvm file format documentation is scarce, but by convention the first class seems to be 1..
+		else ofs << dataset.element(i).label+1 << " ";
 		// write input data to file
-		for(j=0; j<dim; j++) {
-			if(dense) ofs << " " << j+1 << ":" << dataset.inputs()(i)(j);
-			else if(dataset.inputs()(i)(j) != 0) ofs << " " << j+1 << ":" << dataset.inputs()(i)(j);
+		for(std::size_t j=0; j<dim; j++) {
+			if(dense) 
+				ofs << " " << j+1 << ":" <<dataset.element(i).input(j);
+			else if(dataset.element(i).input(j) != 0) 
+				ofs << " " << j+1 << ":" << dataset.element(i).input(j);
 		}
 		ofs << std::endl;
 	}
-	ofs.close();
 }
 
 /** @}*/

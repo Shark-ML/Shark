@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE( FFNET_SERIALIZE )
 			BOOST_REQUIRE_EQUAL(netDeserialized.connections()(i,j),net.connections()(i,j));
 	for (size_t i=0; i<1000; i++)
 	{
-		RealVector output = netDeserialized(dataset(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset(i).label),1.e-2);
+		RealVector output = netDeserialized(dataset.element(i).input);
+		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-2);
 	}
 }

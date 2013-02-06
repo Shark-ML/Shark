@@ -16,7 +16,6 @@ BOOST_AUTO_TEST_CASE(TestMissingFeaturesKernelExpansion)
 
 	const unsigned int featureSize = 4u;
 	const unsigned int sampleSize = 5u;
-	const double tolerancePct = 0.001;
 	LinearKernel<> kernel;
 
 	// The class under test
@@ -34,16 +33,15 @@ BOOST_AUTO_TEST_CASE(TestMissingFeaturesKernelExpansion)
 	std::cout<<"a"<<std::endl;
 
 	// Dataset
-	std::vector<RealVector> input(sampleSize);
+	std::vector<RealVector> input(sampleSize,RealVector(featureSize));
 	std::vector<unsigned int> target(sampleSize);
-	for (std::size_t i = 0; i < 5; i++)
-		input[i].resize(featureSize);
 	input[0](0) =  0.0; input[0](1) =  0.0; input[0](2) =  1.0; input[0](3) =  5.0; target[0] = 0;
 	input[1](0) =  2.0; input[1](1) =  2.0; input[1](2) =  2.0; input[1](3) =  4.0; target[1] = 1;
 	input[2](0) = -1.0; input[2](1) = -8.0; input[2](2) =  3.0; input[2](3) =  3.0; target[2] = 0;
 	input[3](0) = -1.0; input[3](1) = -1.0; input[3](2) =  4.0; input[3](3) =  2.0; target[3] = 0;
 	input[4](0) =  3.0; input[4](1) =  3.0; input[4](2) =  5.0; input[4](3) =  1.0; target[4] = 1;
-	ke.setBasis(ClassificationDataset(input, target).inputs());
+	Data<RealVector> basis(input);
+	ke.setBasis(basis);
 	std::cout<<"b"<<std::endl;
 	// Alphas
 	RealVector alpha(sampleSize);

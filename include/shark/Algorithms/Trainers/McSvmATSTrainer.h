@@ -211,7 +211,7 @@ public:
 		// write the solution into the model
 		for (e=0, a=0, i=0; i<ic; i++)
 		{
-			unsigned int y = dataset(i).label;
+			unsigned int y = dataset.element(i).label;
 			for (c=0; c<classes; c++, e++)
 			{
 				double sum = 0.0;

@@ -194,7 +194,7 @@ std::size_t shark::pivotingCholeskyDecomposition(
 			//set block L12 to 0
 			zero(subrange(Lk,j,j+1,j+1,Lk.size2()));
 		}
-		Blocking<SubL> LkBlocked(Lk,blockSize,blockSize);
+		Blocking<SubL> LkBlocked(Lk,currentSize,currentSize);
 		//if we are not finished do the block update
 		if(k+currentSize < m){
 			symmRankKUpdate(

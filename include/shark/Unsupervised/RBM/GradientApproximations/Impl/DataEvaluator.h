@@ -41,11 +41,11 @@ void evaluateData( AverageEnergyGradient& averageGradient, Data<VectorType> cons
 	dataEvaluator.flags() = averageGradient.flagsVH();
 	
 	//calculate the expectation of the energy gradient with respect to the data
-	for(std::size_t i=0; i< data.size(); i++){
-		typename HiddenTraits::type hiddenSamples(data.batch(i).size1(),rbm.numberOfHN());
-		typename VisibleTraits::type visibleSamples(data.batch(i).size1(),rbm.numberOfVN());
+	BOOST_FOREACH(RealMatrix const& batch,data.batches()) {
+		typename HiddenTraits::type hiddenSamples(batch.size1(),rbm.numberOfHN());
+		typename VisibleTraits::type visibleSamples(batch.size1(),rbm.numberOfVN());
 		
-		dataEvaluator.createSample(hiddenSamples,visibleSamples,data.batch(i));
+		dataEvaluator.createSample(hiddenSamples,visibleSamples,batch);
 		averageGradient.addVH(hiddenSamples, visibleSamples);
 	}
 }

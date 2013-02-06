@@ -74,9 +74,49 @@ void solveSystem(
 	blas::matrix_expression<Vec1T>& x,
 	blas::matrix_expression<Vec2T> const& b
 );
+
+/// \brief System of symmetric linear equations solver. The result is stored in b
+///
+///Solves a system of linear equations
+///Ax=b 
+///for x, using Cholesky decomposition and
+///backward substitution. and stores the result in b.
+/// A must be symmetric.
+///This method is in no way optimized for sparse matrices.
+///Be aware, that the matrix must have full rank!
+template<class System, class MatT,class VecT>
+void solveSymmSystemInPlace(
+	blas::matrix_expression<MatT> const& A,
+	blas::vector_expression<VecT>& b
+);
+
 /// \brief System of symmetric linear equations solver.
 ///
-///Solves asystem of linear equations
+///Solves multiple systems of linear equations
+///Ax_1=b_1
+///Ax_1=b_2
+///...
+///=>AX=B
+///or XA=B
+///for X, using cholesky decomposition and
+///backward substitution. The first template parameter is used 
+///to decide which type of system is solved
+///Note, that B=(b_1,...,b_n), so the right hand sides are stored as columns.
+///A must be symmetric.
+///This Method is in no way optimized for sparse matrices.
+///Be aware, that the matrix must have full rank!
+///Also the result is stored in B directly so it"s contents are destroyed.
+///@param A the system matrix A
+///@param B the right hand side of the LGS, also stores the result
+template<class System, class MatT,class Mat1T>
+void solveSymmSystemInPlace(
+	blas::matrix_expression<MatT> const& A,
+	blas::matrix_expression<Mat1T>& B
+);
+
+/// \brief System of symmetric linear equations solver.
+///
+///Solves a system of linear equations
 ///Ax=b 
 ///for x, using Cholesky decomposition and
 ///backward substitution.  A must be symmetric.
@@ -112,41 +152,17 @@ void solveSymmSystem(
 	blas::matrix_expression<Mat1T>& X,
 	blas::matrix_expression<Mat2T> const& B
 );
-/// \brief System of symmetric linear equations solver.
-///
-///Solves multiple systems of linear equations
-///Ax_1=b_1
-///Ax_1=b_2
-///...
-///=>AX=B
-///or XA=B
-///for X, using cholesky decomposition and
-///backward substitution. The first template parameter is used 
-///to decide which type of system is solved
-///Note, that B=(b_1,...,b_n), so the right hand sides are stored as columns.
-///A must be symmetric.
-///This Method is in no way optimized for sparse matrices.
-///Be aware, that the matrix must have full rank!
-///Also the result is stored in B directly so it"s contents are destroyed.
-///@param A the system matrix A
-///@param B the right hand side of the LGS, also stores the result
-template<class System, class MatT,class Mat1T>
-void solveSymmSystemInPlace(
-	blas::matrix_expression<MatT> const& A,
-	blas::matrix_expression<Mat1T>& B
-);
-
 
 ///\brief Approximates the solution of a linear system of equation Ax=b.
 ///
-///Most often there is no nd for the exact solution of a system of linear
-///equations. Instad only a good approximation needs to be found.
-///In this case an iterative method can be used which stops until
-///a suitable solution is found. For a lot of systems this already happens
+///Most often there is no need for the exact solution of a system of linear
+///equations. Instead only a good approximation needs to be found.
+///In this case an iterative method can be used which stops when
+///a suitable exact solution is found. For a lot of systems this already happens
 ///after a very low number of iterations.
 ///Every iteration has complexity O(n^2) and after n iterations the
 ///exact solution is found. However if this solution is needed, the other
-///methods as solveSymmSystem are more suitable.
+///methods, as for xample solveSymmSystem are more suitable.
 ///
 ///This algorithm stops after the maximum number of iterations is
 /// exceeded or after the max-norm of the residual \f$ r_k= Ax_k-b\f$ is  
@@ -155,7 +171,8 @@ void solveSymmSystemInPlace(
 /// \param A the positive semi-definite n x n-Matrix
 /// \param x the solution vector
 /// \param b the right hand side
-/// \param epsilon the 
+/// \param epsilon stopping criterium for the residual
+/// \param maxIterations the maximum number of iterations
 template<class MatT, class VecT>
 void approxSolveSymmSystem(
 	blas::matrix_expression<MatT> const& A,
@@ -193,7 +210,39 @@ void approxSolveSymmSystem(
 		noalias(p) +=rnext;
 		swap(r,rnext);
 	}
-	
+}
+
+///\brief Approximates the solution of a linear system of equation Ax=b, storing the solution in b.
+///
+///Most often there is no need for the exact solution of a system of linear
+///equations. Instead only a good approximation needs to be found.
+///In this case an iterative method can be used which stops when
+///a suitable exact solution is found. For a lot of systems this already happens
+///after a very low number of iterations.
+///Every iteration has complexity O(n^2) and after n iterations the
+///exact solution is found. However if this solution is needed, the other
+///methods, as for xample solveSymmSystem are more suitable.
+///
+///This algorithm stops after the maximum number of iterations is
+/// exceeded or after the max-norm of the residual \f$ r_k= Ax_k-b\f$ is  
+/// smaller than epsilon. The reuslt is stored in b afterwars
+///
+/// \param A the positive semi-definite n x n-Matrix
+/// \param b the right hand side which also stores the final solution
+/// \param epsilon stopping criterium for the residual
+/// \param maxIterations the maximum number of iterations
+template<class MatT, class VecT>
+void approxSolveSymmSystemInPlace(
+	blas::matrix_expression<MatT> const& A,
+	blas::vector_expression<VecT>& b,
+	double epsilon = 1.e-10,
+	unsigned int maxIterations = 0
+){
+	SIZE_CHECK(A().size1()==A().size2());
+	SIZE_CHECK(A().size1()==b().size());
+	blas::vector<typename VecT::value_type> x(b.size(),0.0);
+	approxSolveSymmSystem(A,x,b);
+	swap(x,b);
 }
 
 }

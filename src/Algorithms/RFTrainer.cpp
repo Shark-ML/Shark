@@ -103,14 +103,16 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 		subsetIndices.erase(subsetIndices.begin()+subsetSize,subsetIndices.end());
 		//generate the dataset by copying (TODO: this is a quick fix!
 		RegressionDataset dataTrain = toDataset(subset(elements,subsetIndices));
+		
+		std::size_t elements = dataTrain.numberOfElements();
 
 		RealVector cAbove;
 		AttributeTables tables;
 		createAttributeTables(dataTrain.inputs(), tables);
 
 		std::vector < RealVector > labels;
-		for(std::size_t i=0; i<dataTrain.size(); i++){
-			labels.push_back(dataTrain(i).label);
+		for(std::size_t i=0; i<elements; i++){
+			labels.push_back(dataTrain.element(i).label);
 		}
 
 		RFClassifier::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, labels, 0);
@@ -226,8 +228,8 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(const AttributeTables& tables
 				prev = i-1;
 
 				//Update the count of the label
-				cBelow[dataset(tables[attributeIndex][prev][1]).label]++;
-				cTmpAbove[dataset(tables[attributeIndex][prev][1]).label]--;
+				cBelow[dataset.element(tables[attributeIndex][prev][1]).label]++;
+				cTmpAbove[dataset.element(tables[attributeIndex][prev][1]).label]--;
 
 				if(tables[attributeIndex][prev][0]!=tables[attributeIndex][i][0]){
 					n1=i;
@@ -356,8 +358,8 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(const AttributeTables& tables
 
 			//Create a labels table, that corresponds to the sorted attribute
 			for(std::size_t k=0; k<tables[attributeIndex].size(); k++){
-				tmpLabels.push_back(dataset(tables[attributeIndex][k][1]).label);
-				labelSumBelow += dataset(tables[attributeIndex][k][1]).label;
+				tmpLabels.push_back(dataset.element(tables[attributeIndex][k][1]).label);
+				labelSumBelow += dataset.element(tables[attributeIndex][k][1]).label;
 			}
 			labelSumAbove += tmpLabels[0];
 			labelSumBelow -= tmpLabels[0];
@@ -528,7 +530,7 @@ void RFTrainer::createAttributeTables(Data<RealVector> const& dataset, Attribute
 		//For each row
 		for(std::size_t i=0; i<elements; i++){
 			//Store Attribute value, class and rid
-			tmpRow[0] = dataset(i)[j];
+			tmpRow[0] = dataset.element(i)[j];
 			tmpRow[1] = i;
 			table.push_back(tmpRow);
 		}
@@ -542,7 +544,7 @@ void RFTrainer::createAttributeTables(Data<RealVector> const& dataset, Attribute
 void RFTrainer::createCountMatrix(const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove){
 	std::size_t elements = dataset.numberOfElements();
 	for(std::size_t i = 0 ; i < elements; i++){
-		cAbove[dataset(i).label]++;
+		cAbove[dataset.element(i).label]++;
 	}
 }
 

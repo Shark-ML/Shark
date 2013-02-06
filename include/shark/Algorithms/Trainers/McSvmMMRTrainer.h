@@ -117,43 +117,40 @@ public:
 
 	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
 	{
-		std::size_t i, ic = dataset.numberOfElements();
-		unsigned int c, classes = numberOfClasses(dataset);
+		std::size_t ic = dataset.numberOfElements();
+		unsigned int classes = numberOfClasses(dataset);
 		// the following test is "<=" rather than "=" to account for the rare case that one fold doesn't contain all classes due to sample scarcity
 		SHARK_CHECK(classes <= svm.outputSize(), "[McSvmMMRTrainer::train] invalid number of outputs in the kernel expansion");
 		svm.setKernel(base_type::m_kernel);
 		svm.setBasis(dataset.inputs());
 		classes = svm.outputSize();
-		std::size_t e;
+		
 		RealVector param = svm.parameterVector();
 
 		// prepare the problem description
-		RealVector alpha = RealZeroVector(ic);
-		RealVector bias = RealZeroVector(classes);
+		RealVector alpha(ic,0.0);
+		RealVector bias(classes,0.0);
 
 		// TODO: initialize alpha (and bias) from the parameters
 // 		if (svm.hasOffset()) bias = RealVectorRange(param, Range(classes * ic, classes * ic + classes));
 
 		RealMatrix gamma(classes, 1);
-		{
-			unsigned int y;
-			for (y=0; y<classes; y++) gamma(y, 0) = 1.0;
-		}
-		UIntVector rho(1);
-		rho(0) = 0;
+		for (unsigned int y=0; y<classes; y++) 
+			gamma(y, 0) = 1.0;
+
+		UIntVector rho(1,0.0);
 		QpSparseArray<QpFloatType> nu(classes, classes, classes);
-		{
-			unsigned int y;
-			for (y=0; y<classes; y++) nu.add(y, y, 1.0);
-		}
+
+		for (unsigned int y=0; y<classes; y++) 
+			nu.add(y, y, 1.0);
+
 		QpSparseArray<QpFloatType> M(classes * classes, 1, classes);
 		{
 			QpFloatType mood = (QpFloatType)(-1.0 / (double)classes);
 			QpFloatType val = (QpFloatType)1.0 + mood;
-			unsigned int yv, yw, r;
-			for (r=0, yv=0; yv<classes; yv++)
+			for (unsigned int r=0, yv=0; yv<classes; yv++)
 			{
-				for (yw=0; yw<classes; yw++, r++)
+				for (unsigned int yw=0; yw<classes; yw++, r++)
 				{
 					M.setDefaultValue(r, mood);
 					if (yv == yw) M.add(r, 0, val);
@@ -185,15 +182,17 @@ public:
 		}
 
 		// write the solution into the model
-		for (e=0, i=0; i<ic; i++)
+		std::size_t e = 0;
+		for (std::size_t i=0; i<ic; i++)
 		{
-			unsigned int y = dataset(i).label;
-			for (c=0; c<classes; c++, e++)
+			unsigned int y = dataset.element(i).label;
+			for (unsigned int c=0; c<classes; c++, e++)
 			{
 				param(e) = nu(y, c) * alpha(i);
 			}
 		}
-		if (svm.hasOffset()) RealVectorRange(param, Range(e, e + classes)) = bias;
+		if (svm.hasOffset()) 
+			subrange(param, e, e + classes) = bias;
 		svm.setParameterVector(param);
 
 		base_type::m_accessCount = km.getAccessCount();

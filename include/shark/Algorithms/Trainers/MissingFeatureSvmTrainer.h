@@ -126,7 +126,7 @@ public:
 				scalingCoefficients(i) = svm.computeNorm(
 					alpha,
 					scalingCoefficients,
-					dataset(i).input)
+					dataset.element(i).input)
 					/ classifierNorm;
 			}
 		}
@@ -191,7 +191,7 @@ private:
 		RealVector linear(datasetSize);
 		for (std::size_t i = 0; i < datasetSize; ++i)
 		{
-			if (0 == dataset(i).label)
+			if (0 == dataset.element(i).label)
 			{
 				linear(i) = -1.0;
 				lower(i) = -base_type::m_C;
@@ -199,7 +199,7 @@ private:
 			}
 			else
 			{
-				SHARK_ASSERT(1 == dataset(i).label);
+				SHARK_ASSERT(1 == dataset.element(i).label);
 				linear(i) = 1.0;
 				lower(i) = 0.0;
 				upper(i) = base_type::m_C;
@@ -262,8 +262,8 @@ private:
 		std::size_t freeVars = 0;
 
 		// No reason to init to 0, but avoid compiler warnings
-		std::size_t lower_i = 0;
-		std::size_t upper_i = 0;
+		//~ std::size_t lower_i = 0;
+		//~ std::size_t upper_i = 0;
 		for (std::size_t i = 0; i < gradient.size(); i++)
 		{
 			// In case of no free SVs, we are looking for the largest gradient of all alphas at the lower bound
@@ -274,14 +274,14 @@ private:
 
 				if (value > lowerBound) {
 					lowerBound = value;
-					lower_i = i;
+					//~ lower_i = i;
 				}
 			}
 			else if (alpha(i) == upper(i))
 			{
 				if (value < upperBound) {
 					upperBound = value;
-					upper_i = i;
+					//~ upper_i = i;
 				}
 			}
 			else

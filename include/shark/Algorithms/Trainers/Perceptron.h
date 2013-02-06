@@ -65,9 +65,9 @@ public:
 		do {
 			err = false;
 			for (std::size_t i = 0; i != patterns; i++){
-				double result = model(dataset(i).input)(0);
+				double result = model(dataset.element(i).input)(0);
 				//perceptron learning rule with modified target from -1;1
-				double label = dataset(i).label*2.0-1;
+				double label = dataset.element(i).label*2.0-1;
 				if ( result * label  <= 0.0){
 					model.alpha(i,0) += label;
 					err = true;

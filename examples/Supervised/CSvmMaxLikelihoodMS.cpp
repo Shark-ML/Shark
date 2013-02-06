@@ -34,8 +34,8 @@ void run_one_trial( bool verbose, RealMatrixRow final_params )
     Normalizer<> normalizer;
     NormalizeComponentsUnitVariance<> normalizationTrainer;
     normalizationTrainer.train( normalizer, train.inputs() );
-    transformInputs( train, normalizer );
-    transformInputs( test, normalizer );
+    train = transformInputs( train, normalizer );
+    test = transformInputs( test, normalizer );
 
     // set up the ArdKernel
     DenseARDKernel kernel( total_dim, 0.1 ); //for now with arbitrary value for gamma (gets properly initialized later)

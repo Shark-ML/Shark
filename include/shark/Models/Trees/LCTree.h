@@ -89,7 +89,7 @@ public:
 	/// unchanged.
 	LCTree(Data<RealVector> const& dataset, TreeConstruction tc = TreeConstruction())
 	: base_type(dataset.numberOfElements())
-	, m_normal(dataset(0).size()){
+	, m_normal(dataDimension(dataset)){
 		typedef DataView<Data<RealVector> const> PointSet;
 		PointSet points(dataset);
 		//create a list to the iterator elements as temporary storage

@@ -114,7 +114,7 @@ public:
 		RealVector alpha(ell, 0.0);
 		for (std::size_t i=0; i<ell; i++)
 		{
-			if ((*mep_dataset)(i) .label== 0)
+			if (mep_dataset->element(i) .label== 0)
 			{
 				linear(i) = -1.0;
 				lower(i) = -C;
@@ -122,7 +122,7 @@ public:
 			}
 			else
 			{
-				SHARK_CHECK((*mep_dataset)(i).label == 1, "[LooErrorCSvm] dataset is not a binary classification problem");
+				SHARK_CHECK(mep_dataset->element(i).label == 1, "[LooErrorCSvm] dataset is not a binary classification problem");
 				linear(i) = 1.0;
 				lower(i) = 0.0;
 				upper(i) = C;
@@ -204,7 +204,7 @@ public:
 				double b = computeB(lower, upper, loo_alpha, gradient);
 
 				// predict
-				unsigned int target = (*mep_dataset)(i).label;
+				unsigned int target = mep_dataset->element(i).label;
 				RealVector prediction(1, solver.computeInnerProduct(i, loo_alpha) + b);
 				double l = loss(target, prediction);
 				mistakes += (l >= 1);
@@ -242,7 +242,7 @@ public:
 				solver.warmStart(loo_alpha, stop);
 
 				// predict
-				unsigned int target = (*mep_dataset)(i).label;
+				unsigned int target = mep_dataset->element(i).label;
 				RealVector prediction(1, solver.computeInnerProduct(i, loo_alpha));
 				mistakes += loss(target, prediction);
 

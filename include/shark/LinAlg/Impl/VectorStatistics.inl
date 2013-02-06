@@ -19,7 +19,7 @@ void meanvar
 )
 {
 	SIZE_CHECK(!data.empty());
-	typedef typename Batch<Vec1T>::type BatchType;
+	typedef typename Data<Vec1T>::const_batch_reference BatchRef;
 	std::size_t const dataSize = data.numberOfElements();
 	std::size_t elementSize=dataDimension(data);
 
@@ -29,12 +29,9 @@ void meanvar
 	meanVec()= mean(data);
 	
 	//sum of variances of each column
-	BOOST_FOREACH(BatchType const& batch,data)
-	{
-		for(std::size_t i = 0; i != batch.size1();++i){
-			//sum of variances of each column
-			noalias(varianceVec()) += sqr(row(batch,i)-meanVec);
-		}
+	BOOST_FOREACH(BatchRef batch,data.batches()){
+		std::size_t batchSize = batch.size1();
+		noalias(varianceVec()) += sumRows(sqr(batch-repeat(meanVec,batchSize)));
 	}
 	varianceVec()/=dataSize;
 }
@@ -56,11 +53,8 @@ void meanvar
 	meanVec() = mean(data);
 	
 	varianceVec().resize(elementSize);
-	varianceVec().clear();
-	for(std::size_t i = 0; i != dataSize;++i){
-		//sum of variances of each column
-		noalias(varianceVec()) += sqr(row(data(),i)-meanVec);
-	}
+	noalias(varianceVec()) = sumRows(sqr(data-repeat(meanVec,dataSize)));
+
 	varianceVec()/=dataSize;
 }
 
@@ -93,12 +87,9 @@ void meanvar
 	
 	meanVec() = mean(data);
 	//sum of variances of each column
-	BOOST_FOREACH(BatchType batch,data)
-	{
-		//make the vatch mean-free
-		for(std::size_t i = 0; i != batch.size1();++i){
-			noalias(row(batch, i)) -= meanVec;
-		}
+	for(std::size_t b = 0; b != data.numberOfBatches(); ++b){
+		//make the batch mean-free
+		BatchType batch = data.batch(b)-repeat(meanVec,data.batch(b).size1());
 		symmRankKUpdate(trans(batch),covariance,1.0);
 	}
 	covariance()/=dataSize;
@@ -144,30 +135,29 @@ template<class VectorType>
 VectorType mean(Data<VectorType> const& data){
 	SIZE_CHECK(!data.empty());
 
-	VectorType mean(dataDimension(data));
-	mean.clear();
+	VectorType mean(dataDimension(data),0.0);
 	
-	typedef typename Batch<VectorType>::type BatchType; 
+	typedef typename Data<VectorType>::const_batch_reference BatchRef; 
 	 
-	BOOST_FOREACH(BatchType const& batch, data){
+	BOOST_FOREACH(BatchRef batch, data.batches()){
 		sumRows(batch,mean);
 	}
 	mean /= data.numberOfElements();
 	return mean;
 }
 
-//~ template<class MatrixType>
-//~ blas::vector<typename MatrixType::value_type> mean(blas::matrix_container<MatrixType> const& data){
-	//~ SIZE_CHECK(data().size2() > 0);
+template<class MatrixType>
+blas::vector<typename MatrixType::value_type> mean(blas::matrix_container<MatrixType> const& data){
+	SIZE_CHECK(data().size2() > 0);
 
-	//~ blas::vector<typename MatrixType::value_type> mean(data().size2());
-	//~ mean.clear();
+	blas::vector<typename MatrixType::value_type> mean(data().size2());
+	mean.clear();
 	 
-	//~ sumRows(data(),mean);
+	sumRows(data(),mean);
 
-	//~ mean /= data().size1();
-	//~ return mean;
-//~ }
+	mean /= data().size1();
+	return mean;
+}
 
 /*!
  *  \brief Calculates the variance vector of array "x".

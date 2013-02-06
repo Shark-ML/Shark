@@ -37,6 +37,7 @@
 #include <shark/Algorithms/Trainers/FisherLDA.h>
 #include <shark/LinAlg/eigenvalues.h>
 #include <shark/LinAlg/Inverse.h>
+#include <boost/foreach.hpp>
 using namespace shark;
 
 
@@ -77,40 +78,37 @@ void FisherLDA::meanAndScatter(
 	RealVector& mean,
 	RealMatrix& scatter)
 {
-	typedef LabeledData<RealVector,unsigned int>::const_element_iterator Iterator;
+	
 	std::size_t classes = numberOfClasses(dataset);
+	std::size_t inputs = dataset.numberOfElements();
 	std::size_t inputDim = inputDimension(dataset);
+	
 
 	// intermediate results
-	std::vector<RealVector> means(classes, RealVector(inputDim));
-	std::vector<RealMatrix> covariances(classes, RealMatrix(inputDim, inputDim));
+	std::vector<RealVector> means(classes, RealVector(inputDim,0.0));
+	std::vector<RealMatrix> covariances(classes, RealMatrix(inputDim, inputDim,0.0));
 	std::vector<std::size_t> counter(classes, 0);   // counter for examples per class
-
-	// initialize vectors
-	for (std::size_t i=0; i != classes; ++i) {
-		means[i].clear();
-		covariances[i].clear();
-	}
 
 	// calculate mean and scatter for every class.
 
 	// for every example in set ...
-	std::size_t inputs = dataset.numberOfElements();
-
-	Iterator end = dataset.elemEnd();
-	for(Iterator point = dataset.elemBegin(); point != end; ++point ) {
+	
+	typedef LabeledData<RealVector,unsigned int>::const_element_range Elements;
+	typedef boost::range_reference<Elements>::type Reference;
+	Elements elements = dataset.elements();
+	BOOST_FOREACH(Reference point, elements){
 		//find class
-		std::size_t c= point->label;
+		std::size_t c= point.label;
 
 		// count example
 		counter[c] += 1;
 
 		// add example to mean vector
-		noalias(means[c])+=point->input;
+		noalias(means[c])+=point.input;
 		// add example to scatter matrix
-		noalias(covariances[c]) += outer_prod( point->input, point->input );
+		noalias(covariances[c]) += outer_prod( point.input, point.input );
 	}
-	std::cout<<"end"<<std::endl;
+
 	// for every class ...
 	for( unsigned int c = 0; c != classes ; c++ ) {
 		// normalize mean vector
@@ -122,20 +120,17 @@ void FisherLDA::meanAndScatter(
 
 	// calculate global mean and final scatter
 
-	RealMatrix Sb( inputDim, inputDim ); // between-class scatter
-	RealMatrix Sw( inputDim, inputDim ); // within-class scatter
-
-	Sb.clear();
-	Sw.clear();
+	RealMatrix Sb( inputDim, inputDim,0.0 ); // between-class scatter
+	RealMatrix Sw( inputDim, inputDim,0.0 ); // within-class scatter
 
 	// calculate global mean
-	mean.clear();
-	for (unsigned int c = 0; c < classes; c++) 
-		mean += counter[c] * means[c]/inputs;
+	zero(mean);
+	for (std::size_t c = 0; c != classes; c++) 
+		noalias(mean) += counter[c] * means[c]/inputs;
 	mean /= inputs;
 
 	// calculate between- and within-class scatters
-	for (unsigned int c = 0; c < classes; c++) {
+	for (std::size_t c = 0; c != classes; c++) {
 		RealVector diff = means[c] - mean;
 		Sb += outer_prod(counter[c] * diff,diff);
 		Sw += covariances[c];

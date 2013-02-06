@@ -62,6 +62,20 @@ const char test_regression[] = ",6,148,72,35,0,33.6,0.627,50,1.1,,,\n\
 3,158,76,36,245,31.6,0.851,28,1e-2\n\
 3,88,58,11,54,24.8,0.267,22,33.3333\r";
 
+template<class T, class U, class V>
+void checkDataEquality(LabeledData<T, V> const& set, LabeledData<U, V> const& loaded){
+	BOOST_REQUIRE_EQUAL(set.numberOfElements(), loaded.numberOfElements());
+	for (size_t i=0; i != set.numberOfElements(); ++i)
+	{
+		BOOST_REQUIRE_EQUAL(set.element(i).input.size(), loaded.element(i).input.size());
+		for (size_t j=0; j != set.element(i).input.size(); ++j)
+		{
+			BOOST_CHECK_EQUAL(set.element(i).input(j), loaded.element(i).input(j));
+		}
+		BOOST_CHECK_EQUAL(set.element(i).label, loaded.element(i).label);
+	}
+}
+
 BOOST_AUTO_TEST_CASE( Set_Csv )
 {
 	// DENSE
@@ -76,16 +90,7 @@ BOOST_AUTO_TEST_CASE( Set_Csv )
 	LabeledData<RealVector, unsigned int> loaded;
 	import_csv(loaded, "test_output/check.csv", FIRST_COLUMN);
 
-	BOOST_REQUIRE_EQUAL(test_ds.size(), loaded.size());
-	for (size_t i=0; i != test_ds.size(); ++i)
-	{
-		BOOST_REQUIRE_EQUAL(test_ds(i).input.size(), loaded(i).input.size());
-		for (size_t j=0; j != test_ds(i).input.size(); ++j)
-		{
-			BOOST_CHECK_EQUAL(test_ds(i).input(j), loaded(i).input(j));
-		}
-		BOOST_CHECK_EQUAL(test_ds(i).label, loaded(i).label);
-	}
+	checkDataEquality(test_ds,loaded);
 
 	// SPARSE
 	std::stringstream sss(test);
@@ -99,30 +104,11 @@ BOOST_AUTO_TEST_CASE( Set_Csv )
 	LabeledData<CompressedRealVector, unsigned int> loaded_sparse;
 	import_csv(loaded_sparse, "test_output/check_sparse.csv", FIRST_COLUMN);
 
-	BOOST_REQUIRE_EQUAL(test_ds_sparse.numberOfElements(), loaded_sparse.numberOfElements());
-	BOOST_REQUIRE_EQUAL( test_ds_sparse(test_ds_sparse.numberOfElements()-1).label, 0u );
-	BOOST_REQUIRE_EQUAL( test_ds_sparse(test_ds_sparse.numberOfElements()-1).input(5), 24.8 );
-	for (size_t i=0; i != test_ds_sparse.numberOfElements(); ++i)
-	{
-		BOOST_REQUIRE_EQUAL(test_ds_sparse(i).input.size(), loaded_sparse(i).input.size());
-		for (size_t j=0; j != test_ds_sparse(i).input.size(); ++j)
-		{
-			BOOST_CHECK_EQUAL(test_ds_sparse(i).input(j), loaded_sparse(i).input(j));
-		}
-		BOOST_CHECK_EQUAL(test_ds_sparse(i).label, loaded_sparse(i).label);
-	}
-
-	// DENSE VS SPARSE
-	for (size_t i=0; i != test_ds_sparse.numberOfElements(); ++i)
-	{
-		BOOST_REQUIRE_EQUAL(test_ds_sparse(i).input.size(), loaded(i).input.size());
-		for (size_t j=0; j != test_ds_sparse(i).input.size(); ++j)
-		{
-			BOOST_CHECK_EQUAL(test_ds_sparse(i).input(j), loaded(i).input(j));
-		}
-		BOOST_CHECK_EQUAL(test_ds_sparse(i).label, loaded(i).label);
-	}
-
+	
+	BOOST_REQUIRE_EQUAL( test_ds_sparse.element(test_ds_sparse.numberOfElements()-1).label, 0u );
+	BOOST_REQUIRE_EQUAL( test_ds_sparse.element(test_ds_sparse.numberOfElements()-1).input(5), 24.8 );
+	checkDataEquality(test_ds_sparse,loaded_sparse);
+	checkDataEquality(test_ds_sparse,loaded);
 }
 
 
@@ -136,25 +122,15 @@ BOOST_AUTO_TEST_CASE( Set_Csv_Missing_Label )
 	LabeledData<RealVector, unsigned int> test_ds(x, y);
 	std::size_t test_ds_size = test_ds.numberOfElements();
 	BOOST_REQUIRE_EQUAL(test_ds_size, 6u);
-	BOOST_REQUIRE_EQUAL( test_ds(test_ds_size-1).label, 0u );
-	BOOST_REQUIRE_EQUAL( test_ds(2).label, 8u );
-	BOOST_REQUIRE_EQUAL( test_ds(test_ds_size-1).input(5), 24.8 );
+	BOOST_REQUIRE_EQUAL( test_ds.element(test_ds_size-1).label, 0u );
+	BOOST_REQUIRE_EQUAL( test_ds.element(2).label, 8u );
+	BOOST_REQUIRE_EQUAL( test_ds.element(test_ds_size-1).input(5), 24.8 );
 
 	export_csv(test_ds, "test_output/check.csv", FIRST_COLUMN);
 	LabeledData<RealVector, unsigned int> loaded;
 	import_csv(loaded, "test_output/check.csv", FIRST_COLUMN, ",", "#", true);
 
-	BOOST_REQUIRE_EQUAL(test_ds_size, loaded.numberOfElements());
-	for (size_t i=0; i != test_ds_size; ++i)
-	{
-		BOOST_REQUIRE_EQUAL(test_ds(i).input.size(), loaded(i).input.size());
-		for (size_t j=0; j != test_ds(i).input.size(); ++j)
-		{
-			BOOST_CHECK_EQUAL(test_ds(i).input(j), loaded(i).input(j));
-		}
-		BOOST_CHECK_EQUAL(test_ds(i).label, loaded(i).label);
-	}
-
+	checkDataEquality(test_ds,loaded);
 }
 
 BOOST_AUTO_TEST_CASE( Set_Csv_Regression )
@@ -167,23 +143,14 @@ BOOST_AUTO_TEST_CASE( Set_Csv_Regression )
 	LabeledData<RealVector, double> test_ds(x, y);
 	std::size_t test_ds_size = test_ds.numberOfElements();
 	BOOST_REQUIRE_EQUAL(test_ds_size, 6u);
-	BOOST_REQUIRE_EQUAL( test_ds(test_ds_size-1).label, 33.3333 );
-	BOOST_REQUIRE_EQUAL( test_ds(test_ds_size-1).input(5), 24.8 );
+	BOOST_REQUIRE_EQUAL( test_ds.element(test_ds_size-1).label, 33.3333 );
+	BOOST_REQUIRE_EQUAL( test_ds.element(test_ds_size-1).input(5), 24.8 );
 
 	export_csv(test_ds, "test_output/check.csv", FIRST_COLUMN);
 	LabeledData<RealVector, double> loaded;
 	import_csv(loaded, "test_output/check.csv", FIRST_COLUMN);
 
-	BOOST_REQUIRE_EQUAL(test_ds_size, loaded.numberOfElements());
-	for (size_t i=0; i != test_ds_size; ++i)
-	{
-		BOOST_REQUIRE_EQUAL(test_ds(i).input.size(), loaded(i).input.size());
-		for (size_t j=0; j != test_ds(i).input.size(); ++j)
-		{
-			BOOST_CHECK_EQUAL(test_ds(i).input(j), loaded(i).input(j));
-		}
-		BOOST_CHECK_EQUAL(test_ds(i).label, loaded(i).label);
-	}
+	checkDataEquality(test_ds,loaded);
 
 }
 

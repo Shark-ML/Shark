@@ -45,9 +45,7 @@ std::size_t size(Range const& range){
 }
 ///\brief returns the i-th element of a range
 template<class Range>
-typename boost::iterator_reference<
-	typename boost::range_iterator<Range>::type
->::type
+typename boost::range_reference<Range>::type
 get( Range& range, std::size_t i){
 	SIZE_CHECK(i < shark::size(range));
 	typename boost::range_iterator<Range>::type pos=boost::begin(range);
@@ -55,9 +53,7 @@ get( Range& range, std::size_t i){
 	return *pos;
 }
 template<class Range>
-typename boost::iterator_reference<
-	typename boost::range_iterator<Range const>::type
->::type
+typename boost::range_reference<Range const>::type
 get( Range const& range, std::size_t i){
 	SIZE_CHECK(i < shark::size(range));
 	typename boost::range_iterator<Range const>::type pos=boost::begin(range);

@@ -47,7 +47,7 @@ RealMatrix calculateRegularizedKernelMatrix(
 	std::size_t N  = dataset.numberOfElements();
 	RealMatrix M(N, N);   // kernel gram matrix
 	std::size_t startX = 0;//start of the current batch in x-direction
-	for (std::size_t i=0; i<dataset.size(); i++){
+	for (std::size_t i=0; i<dataset.numberOfBatches(); i++){
 		std::size_t sizeX=shark::size(dataset.batch(i));
 		std::size_t startY = 0;//start of the current batch in y-direction
 		for (std::size_t j=0; j <= i; j++){
@@ -92,7 +92,7 @@ RealVector calculateKernelMatrixParameterDerivative(
 	RealVector blockGradient(kp);//weighted gradient summed over the whole block
 	boost::shared_ptr<State> state = kernel.createState();
 	std::size_t startX = 0;
-	for (std::size_t i=0; i<dataset.size(); i++){
+	for (std::size_t i=0; i<dataset.numberOfBatches(); i++){
 		std::size_t sizeX=shark::size(dataset.batch(i));
 		std::size_t startY = 0;//start of the current batch in y-direction
 		for (std::size_t j=0; j <= i; j++){

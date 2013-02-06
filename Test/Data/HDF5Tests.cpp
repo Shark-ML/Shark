@@ -6,6 +6,7 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
+#include <boost/bind.hpp>
 
 namespace shark {
 
@@ -39,10 +40,11 @@ public:
 	}
 
 	/// Verify the @a actual matrix is the same as @a expected
-	template<typename MatrixType>
+	template<typename MatrixType, typename ExpectedType>
 	boost::test_tools::predicate_result verify(
 		const MatrixType& actual,
-		const std::vector<std::vector<typename MatrixType::value_type::value_type> >& expected);
+		const ExpectedType& expected
+	);
 
 	/// Validate @exp has @msg
 	bool validate(const std::string& msg, const shark::Exception& exp);
@@ -67,35 +69,35 @@ public:
 	const std::string m_dsNameIndPtr;
 };
 
-template<typename MatrixType>
+template<typename MatrixType, typename ExpectedType>
 boost::test_tools::predicate_result HDF5Fixture::verify(
 	const MatrixType& actual,
-	const std::vector<std::vector<typename MatrixType::value_type::value_type> >& expected)
+	const ExpectedType& expected)
 {
 	boost::test_tools::predicate_result res( true );
 	if (actual.numberOfElements() != expected.size()) {
 		res = false;
-		res.message() << boost::format("\nActual size: %1%, expected size: %2%") % actual.size() % expected.size();
+		res.message() << boost::format("\nActual size: %1%, expected size: %2%") % actual.numberOfElements() % expected.size();
 	}
 
 	for (size_t i = 0; i < actual.numberOfElements(); ++i) {
-		if (actual(i).size() != expected[i].size()) {
+		if (actual.element(i).size() != expected[i].size()) {
 			res = false;
 			res.message() <<
 				boost::format("\nIndex: %1%, actual size: %2%, expected size: %3%")
 					% i
-					% actual(i).size()
+					% actual.element(i).size()
 					% expected[i].size();
 		}
 
-		for (size_t j = 0; j < actual(i).size(); ++j) {
-			if (actual(i)(j) != expected[i][j]) { // floating point comparison here should also work in our case
+		for (size_t j = 0; j < actual.element(i).size(); ++j) {
+			if (actual.element(i)(j) != expected[i][j]) { // floating point comparison here should also work in our case
 				res = false;
 				res.message() <<
 					boost::format("\nElements not equal: actual[%1%][%2%]=%3%, expected[%1%][%2%]=%4%")
 						% i
 						% j
-						% actual(i)(j)
+						% actual.element(i)(j)
 						% expected[i][j];
 			}
 		}
@@ -125,7 +127,12 @@ BOOST_AUTO_TEST_CASE(BasicTests)
 		LabeledData<RealVector, boost::int32_t> data;
 		importHDF5<RealVector, boost::int32_t>(data, m_exampleFileName, m_datasetNameData1, m_labelNameLabel1);
 		BOOST_CHECK(verify(data.inputs(), m_expectedFromData1));
-		BOOST_CHECK_EQUAL_COLLECTIONS(data.labels().elemBegin(), data.labels().elemEnd(), m_expectedFromLabel1.begin(), m_expectedFromLabel1.end());
+		BOOST_CHECK_EQUAL_COLLECTIONS(
+			data.labels().elements().begin(), 
+			data.labels().elements().end(), 
+			m_expectedFromLabel1.begin(), 
+			m_expectedFromLabel1.end()
+		);
 	}
 
 	// Test same thing for compressed vector
@@ -140,7 +147,12 @@ BOOST_AUTO_TEST_CASE(BasicTests)
 		LabeledData<CompressedRealVector, boost::int32_t> data;
 		importHDF5<CompressedRealVector, boost::int32_t>(data, m_exampleFileName, m_datasetNameData1, m_labelNameLabel1);
 		BOOST_CHECK(verify(data.inputs(), m_expectedFromData1));
-		BOOST_CHECK_EQUAL_COLLECTIONS(data.labels().elemBegin(), data.labels().elemEnd(), m_expectedFromLabel1.begin(), m_expectedFromLabel1.end());
+		BOOST_CHECK_EQUAL_COLLECTIONS(
+			data.labels().elements().begin(), 
+			data.labels().elements().end(), 
+			m_expectedFromLabel1.begin(), 
+			m_expectedFromLabel1.end()
+		);
 	}
 }
 
@@ -197,7 +209,12 @@ BOOST_AUTO_TEST_CASE(CscTests)
 		expectedLabels += 100,200,300,400,500,600;
 
 		BOOST_CHECK(verify(data.inputs(), expectedInputs));
-		BOOST_CHECK_EQUAL_COLLECTIONS(data.labels().elemBegin(), data.labels().elemEnd(), expectedLabels.begin(), expectedLabels.end());
+		BOOST_CHECK_EQUAL_COLLECTIONS(
+			data.labels().elements().begin(), 
+			data.labels().elements().end(), 
+			expectedLabels.begin(), 
+			expectedLabels.end()
+		);
 	}
 }
 

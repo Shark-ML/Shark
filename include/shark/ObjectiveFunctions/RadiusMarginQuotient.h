@@ -137,9 +137,9 @@ public:
 			RealVector alpha(ell, 0.0);
 			for (std::size_t i=0; i<ell; i++)
 			{
-				linear(i) = (m_dataset(i).label == 0) ? +1.0 : -1.0;
-				lower(i) = (m_dataset(i).label == 0) ? 0.0 : -1e100;
-				upper(i) = (m_dataset(i).label == 0) ? +1e100 : 0.0;
+				linear(i) = (m_dataset.element(i).label == 0) ? +1.0 : -1.0;
+				lower(i) = (m_dataset.element(i).label == 0) ? 0.0 : -1e100;
+				upper(i) = (m_dataset.element(i).label == 0) ? +1e100 : 0.0;
 			}
 			QpSolutionProperties prop;
 			solver.solve(linear, lower, upper, alpha, stop, &prop);
@@ -191,9 +191,9 @@ public:
 			// create and solve a quadratic program with offset
 			for (std::size_t i=0; i<ell; i++)
 			{
-				linear(i) = (m_dataset(i).label == 0) ? +1.0 : -1.0;
-				lower(i) = (m_dataset(i).label == 0) ? 0.0 : -1e100;
-				upper(i) = (m_dataset(i).label == 0) ? +1e100 : 0.0;
+				linear(i) = (m_dataset.element(i).label == 0) ? +1.0 : -1.0;
+				lower(i) = (m_dataset.element(i).label == 0) ? 0.0 : -1e100;
+				upper(i) = (m_dataset.element(i).label == 0) ? +1e100 : 0.0;
 			}
 			QpSolutionProperties prop;
 			solver.solve(linear, lower, upper, alpha, stop, &prop);

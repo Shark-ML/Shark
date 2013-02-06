@@ -38,9 +38,10 @@ int main() {
 	// read data
 	UnlabeledData<RealVector> data;
 	import_csv(data, "data/faithful.csv", " ");
+	std::size_t elements = data.numberOfElements();
 
 	// write statistics of input data
-	cout << "number of data points: " << data.size() << " dimensions: " << dataDimension(data) << endl;
+	cout << "number of data points: " << elements << " dimensions: " << dataDimension(data) << endl;
 
 	// normalize data
 	Normalizer<> normalizer;
@@ -67,12 +68,12 @@ int main() {
 	ofstream c1("cl1.csv");
 	ofstream c2("cl2.csv");
 	ofstream cc("clc.csv");
-	for(std::size_t i=0; i != data.size(); i++) {
-		if(clusters(i)) 
-			c1 << data(i)(0) << " " << data(i)(1) << endl;
+	for(std::size_t i=0; i != elements; i++) {
+		if(clusters.element(i)) 
+			c1 << data.element(i)(0) << " " << data.element(i)(1) << endl;
 		else 
-			c2 << data(i)(0) << " " << data(i)(1) << endl;
+			c2 << data.element(i)(0) << " " << data.element(i)(1) << endl;
 	}
-	cc << c(0)(0) << " " << c(0)(1) << endl;
-	cc << c(1)(0) << " " << c(1)(1) << endl;
+	cc << c.element(0)(0) << " " << c.element(0)(1) << endl;
+	cc << c.element(1)(0) << " " << c.element(1)(1) << endl;
 }

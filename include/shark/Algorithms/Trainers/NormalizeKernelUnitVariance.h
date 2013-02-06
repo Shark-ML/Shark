@@ -77,65 +77,79 @@ public:
 	void train( ScaledKernel<InputType>& kernel, UnlabeledData<InputType> const& input )
 	{
 		SHARK_CHECK(input.numberOfElements() >= 2, "[NormalizeKernelUnitVariance::train] input needs to contain at least two points");
-		double mean = 0.0;
-		double trace = 0.0;
-		AbstractKernelFunction< InputType > const* main = kernel.base(); //get direct access to the kernel we want to use.		
+		AbstractKernelFunction< InputType > const& k = *kernel.base(); //get direct access to the kernel we want to use.		
 		
 		// Next compute the trace and mean of the kernel matrix. This means heavy lifting: 
 		// calculate each entry of one diagonal half of the kernel matrix exactly once.
 		// [MT] This part was taken from the PrecomputedMatrix constructor in QuadraticProgram.h
 		// Blockwise version, with order of computations optimized for better use of the processor
 		// cache. This can save around 10% computation time for fast kernel functions.
-		//TODO: O.K. use batched computation! Save up to factor X.
 		std::size_t N = input.numberOfElements();
-		std::size_t blocks = N / 64;
-		std::size_t rest = N - 64 * blocks;
-		//TODO: O.K: we are not programming C anymore!
-		std::size_t i, j, ci, cj, ii, jj;
-
+		//~ std::size_t blocks = N / 64;
+		//~ std::size_t rest = N - 64 * blocks;
+		
+		//O.K. tried to make it more efficient (and shorter)
+		m_mean = 0.0;
+		m_trace = 0.0;
+		for(std::size_t i = 0; i != input.numberOfBatches(); ++i){
+			typename UnlabeledData<InputType>::const_batch_reference batch = input.batch(i);
+			//off diagonal entries
+			for(std::size_t j = 0; j < i; ++j){
+				RealMatrix matrixBlock = k(batch, input.batch(j));
+				m_mean += 2*sumElements(matrixBlock);
+			}
+			RealMatrix matrixBlock = k(batch, batch);
+			m_mean += sumElements(matrixBlock);
+			m_trace += shark::trace(matrixBlock);
+		}
+		
+		//TODO: Check that the old version can go
+		//~ std::size_t i, j, ci, cj, ii, jj;
+		//~ double mean = 0;
+		//~ double trace = 0;
 		// loop through full blocks
-		for (ci=0; ci<blocks; ci++) {
-			{ // diagonal blocks:
-				for (i=0, ii=64*ci; i<64; i++, ii++) {
-					for (j=0, jj=64*ci; j<i; j++, jj++) {
-						mean += main->eval(input(ii), input(jj));
-					}
-					double d = main->eval(input(ii), input(ii));
-					mean += 0.5 * d;
-					trace += d;
-				}
-			} // off-diagonal blocks:
-			for (cj=0; cj<ci; cj++) { 
-				for (i=0, ii=64*ci; i<64; i++, ii++) {
-					for (j=0, jj=64*cj; j<64; j++, jj++) {
-						mean += main->eval(input(ii), input(jj));
-					}
-				}
-			}
-		}
-		if (rest > 0) {
-			// loop through the margins
-			for (cj=0; cj<blocks; cj++) {
-				for (j=0, jj=64*cj; j<64; j++, jj++) {
-					for (i=0, ii=64*blocks; i<rest; i++, ii++) {
-						mean += main->eval(input(ii), input(jj));
-					}
-				}
-			}
-			// lower right block
-			for (i=0, ii=64*blocks; i<rest; i++, ii++) {
-				for (j=0, jj=64*blocks; j<i; j++, jj++) {
-					mean += main->eval(input(ii), input(jj));
-				}
-				double d = main->eval(input(ii), input(ii));
-				mean += 0.5 * d;
-				trace += d;
-			}
-		}
-		mean *= 2.0; //correct for the fact that we only counted one diagonal half of the matrix
-		m_mean = mean;
-		m_trace = trace;
-		double tm = trace/N - mean/N/N;
+		//~ for (ci=0; ci<blocks; ci++) {
+			//~ { // diagonal blocks:
+				//~ for (i=0, ii=64*ci; i<64; i++, ii++) {
+					//~ for (j=0, jj=64*ci; j<i; j++, jj++) {
+						//~ mean += main->eval(input(ii), input(jj));
+					//~ }
+					//~ double d = main->eval(input(ii), input(ii));
+					//~ mean += 0.5 * d;
+					//~ trace += d;
+				//~ }
+			//~ } // off-diagonal blocks:
+			//~ for (cj=0; cj<ci; cj++) { 
+				//~ for (i=0, ii=64*ci; i<64; i++, ii++) {
+					//~ for (j=0, jj=64*cj; j<64; j++, jj++) {
+						//~ mean += main->eval(input(ii), input(jj));
+					//~ }
+				//~ }
+			//~ }
+		//~ }
+		//~ if (rest > 0) {
+			//~ // loop through the margins
+			//~ for (cj=0; cj<blocks; cj++) {
+				//~ for (j=0, jj=64*cj; j<64; j++, jj++) {
+					//~ for (i=0, ii=64*blocks; i<rest; i++, ii++) {
+						//~ mean += main->eval(input(ii), input(jj));
+					//~ }
+				//~ }
+			//~ }
+			//~ // lower right block
+			//~ for (i=0, ii=64*blocks; i<rest; i++, ii++) {
+				//~ for (j=0, jj=64*blocks; j<i; j++, jj++) {
+					//~ mean += main->eval(input(ii), input(jj));
+				//~ }
+				//~ double d = main->eval(input(ii), input(ii));
+				//~ mean += 0.5 * d;
+				//~ trace += d;
+			//~ }
+		//~ }
+		//~ mean *= 2.0; //correct for the fact that we only counted one diagonal half of the matrix
+		//~ m_mean = mean;
+		//~ m_trace = trace;
+		double tm = m_trace/N - m_mean/N/N;
 		SHARK_ASSERT( tm > 0 );
 		double scaling_factor = 1.0 / tm;
 		kernel.setFactor( scaling_factor );

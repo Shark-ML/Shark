@@ -22,6 +22,7 @@
  */
 //===========================================================================
 #include <shark/LinAlg/eigenvalues.h>
+#include <shark/LinAlg/VectorStatistics.h>
 #include <shark/Algorithms/Trainers/PCA.h>
 
 using namespace shark;
@@ -38,38 +39,44 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 		else algorithm = STANDARD;
 	}
 	
-	// compute mean
-	m_mean = inputs(0);
-	for(std::size_t i=1; i<m_l; i++) 
-		noalias(m_mean) += inputs(i);
-	m_mean /= m_l;
-		
-	// build design matrix
-	RealMatrix X0(m_l,m_n);           ///< design matrix, mean-free
-	for(std::size_t i=0; i< m_l; i++) 
-		noalias(row(X0, i)) = inputs(i) - m_mean;
-	
-	
 	// decompose covariance matrix
-	
 	if(algorithm == STANDARD) { // standard case
-		RealMatrix S(m_n,m_n);
-		symmRankKUpdate(trans(X0),S);
-		S /= m_l;
+		RealMatrix S(m_n,m_n);//covariance matrix
+		meanvar(inputs,m_mean,S);
+		//~ symmRankKUpdate(trans(X0),S);
+		//~ S /= m_l;
 		m_eigenvalues.resize(m_n);
 		m_eigenvectors.resize(m_n, m_n);
 		eigensymm(S, m_eigenvectors, m_eigenvalues);
 	} else {
-		RealMatrix S(m_l,m_l);
-		symmRankKUpdate(X0,S);
+		//let X0 be the design matrix having all inputs as rows
+		//we want to avoid to form it directly but us it's batch represntation in the dataset
+		m_mean = shark::mean(inputs);
+		RealMatrix S(m_l,m_l,0.0);//S=X0 X0^T
+		for(std::size_t b = 0; b != inputs.numberOfBatches(); ++b){
+			std::size_t batchSize = inputs.batch(b).size1();
+			RealMatrix X = inputs.batch(b)-repeat(m_mean,batchSize);
+			symmRankKUpdate(X,S,true);
+		}
 		S /= m_l;
 		m_eigenvalues.resize(m_l);
 		m_eigenvectors.resize(m_n, m_l);
+		zero(m_eigenvectors);
 		RealMatrix U(m_l, m_l);
 		eigensymm(S, U, m_eigenvalues);
 		// compute true eigenvectors
-		fast_prod(trans(X0),U,m_eigenvectors);
-		for(std::size_t i=0; i<m_l; i++)
+		//eigenv=X0^T U
+		std::size_t batchStart  = 0;
+		for(std::size_t b = 0; b != inputs.numberOfBatches(); ++b){
+			std::size_t batchSize = inputs.batch(b).size1();
+			std::size_t batchEnd = batchStart+batchSize;
+			fast_prod(trans(inputs.batch(b)),rows(U,batchStart,batchEnd),m_eigenvectors,true);
+			batchStart = batchEnd;
+		}
+		//fast_prod(trans(X0),U,m_eigenvectors);
+		
+		//normalize
+		for(std::size_t i=0; i != m_l; i++)
 			column(m_eigenvectors, i) /= norm_2(column(m_eigenvectors, i));
 	}
 }

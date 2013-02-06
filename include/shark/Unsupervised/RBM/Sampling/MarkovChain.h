@@ -97,12 +97,12 @@ public:
 	///
 	/// @param dataSet the data set
 	void initializeChain(Data<VectorType> const& dataSet){
-		DiscreteUniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,dataSet.size()-1);
+		DiscreteUniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,dataSet.numberOfElements()-1);
 		std::size_t visibles=m_operator.rbm()->numberOfVN();
 		MatrixType sampleData(m_samples.size(),visibles);
 		
 		for(std::size_t i = 0; i != m_samples.size(); ++i){
-			noalias(row(sampleData,i)) = dataSet(uni());
+			noalias(row(sampleData,i)) = dataSet.element(uni());
 		}
 		initializeChain(sampleData);
 	}

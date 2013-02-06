@@ -88,7 +88,6 @@ public:
 	/// return the dimension of the inputs
 	std::size_t dimension() const
 	{
-		SHARK_ASSERT(m_centroids.size() > 0);
 		return dataDimension(m_centroids);
 	}
 

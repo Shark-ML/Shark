@@ -78,11 +78,11 @@ public:
 		SHARK_CHECK(ic >= 2, "[NormalizeComponentsUnitInterval::train] input needs to consist of at least two points");
 		std::size_t dc = dataDimension(input);
 
-		RealVector min = input(0);
-		RealVector max = input(0);
+		RealVector min = input.element(0);
+		RealVector max = input.element(0);
 		for(std::size_t i=1; i != ic; i++){
 			for(std::size_t d = 0; d != dc; d++){
-				double x = input(i)(d);
+				double x = input.element(i)(d);
 				min(d) = std::min(min(d), x);
 				max(d) = std::max(max(d), x);
 			}

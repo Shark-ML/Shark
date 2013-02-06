@@ -49,43 +49,43 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	std::size_t inputDim = inputDimension(dataset);
 	std::size_t outputDim = labelDimension(dataset);
 	std::size_t numInputs = dataset.numberOfElements();
+	std::size_t numBatches = dataset.numberOfBatches();
 
-	// copy the input and target data into matrix format
-	RealMatrix X(numInputs, inputDim + 1);
-	RealMatrix targetMatrix(outputDim, numInputs);
-	targetMatrix.clear();
-	LabeledData<RealVector, RealVector>::const_element_iterator elem=dataset.elemBegin();
-	for (std::size_t e=0; e != numInputs; e++){
- 		for (std::size_t i=0; i != inputDim; i++){
- 			X(e, i) = elem->input(i);
- 		}
-		X(e, inputDim) = 1.0;
-		column(targetMatrix, e) = elem->label;
-		++elem;
-	}
-	
+	//Let P be the matrix of points with n rows and X=(P|1). the 1 rpresents the bias weight
 	//Let A = X^T X + lambda * I
-	//we solve the system A Beta = X^T T
-	//usually this is solved via the moore penrose inverse:
-	//Beta = A^-1 X^T T
-	//but it is faster und numerically more stable, if we solve it as a symmetric system
-
-	// calculation of (X^T X + lambda * I)^-1 * X^T
-	RealMatrix matA(inputDim+1,inputDim+1);
-	symmRankKUpdate(trans(X),matA);//A=X^T X 
-	//A+=lambda * I
-	if(m_regularization){
-		for (std::size_t i=0; i != inputDim; ++i) {
-			matA(i, i) += m_regularization;
-		}
+	//than whe have (for lambda = 0)
+	//A = ( P^T P  P^T 1)
+	//       ( 1^T P  1^T1)
+	RealMatrix matA(inputDim+1,inputDim+1,0.0);
+	Blocking<RealMatrix> Ablocks(matA,inputDim,inputDim);
+	//compute A and the label matrix batchwise
+	typedef LabeledData<RealVector, RealVector>::const_batch_reference BatchRef;
+	for (std::size_t b=0; b != numBatches; b++){
+		BatchRef batch = dataset.batch(b);
+		symmRankKUpdate(trans(batch.input),Ablocks.upperLeft(),true);
+		noalias(column(Ablocks.upperRight(),0))+=sumRows(batch.input);
 	}
-	//calculate X^T T
-	RealMatrix XTT(inputDim + 1,outputDim);
-	fast_prod(trans(X),trans(targetMatrix),XTT);
-	X.resize(0,0);//save memory, X not needed anymore
+	row(Ablocks.lowerLeft(),0) = column(Ablocks.upperRight(),0);
+	matA(inputDim,inputDim) = numInputs;
+	//X^TX+=lambda* I
+	diag(Ablocks.upperLeft())+= repeat(m_regularization,inputDim);
 	
+	
+	//we also need to compute X^T L= (P^TL, 1^T L) where L is the matrix of labels 
+	RealMatrix XTL(inputDim + 1,outputDim,0.0);
+	for (std::size_t b=0; b != numBatches; b++){
+		BatchRef batch = dataset.batch(b);
+		RealSubMatrix PTL = subrange(XTL,0,inputDim,0,outputDim);
+		fast_prod(trans(batch.input),batch.label,PTL,true);
+		noalias(row(XTL,inputDim))+=sumRows(batch.label);
+	}	
+	
+	//we solve the system A Beta = X^T L
+	//usually this is solved via the moore penrose inverse:
+	//Beta = A^-1 T
+	//but it is faster und numerically more stable, if we solve it as a symmetric system
 	RealMatrix beta(inputDim+1,outputDim);
-	solveSymmSystem<SolveAXB>(matA,beta,XTT);
+	solveSymmSystem<SolveAXB>(matA,beta,XTL);
 	
 	RealMatrix matrix = subrange(trans(beta), 0, outputDim, 0, inputDim);
 	RealVector offset = row(beta,inputDim);

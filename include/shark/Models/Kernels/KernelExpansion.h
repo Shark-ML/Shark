@@ -36,6 +36,7 @@
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/LinAlg/BLAS/Initialize.h>
 #include <shark/Data/Dataset.h>
+#include <shark/Data/DataView.h>
 
 
 namespace shark {
@@ -183,23 +184,41 @@ public:
 	/// its set of basis vectors and the coefficient matrix.
 	void sparsify(){
 		std::size_t ic = m_basis.numberOfElements();
-		std::size_t sv = 0;
-		for (std::size_t i=0; i != ic; i++) 
-			if (blas::norm_1(RealMatrixRow(m_alpha, i)) > 0.0) 
-				sv++;
-
-		RealMatrix a(sv, m_outputs);
-		Data<InputType> b(sv,m_basis(0));
-
-		for (std::size_t s=0, i=0; i!= ic; i++){
+		std::vector<std::size_t> svIndices;
+		for (std::size_t i=0; i != ic; ++i){
 			if (blas::norm_1(RealMatrixRow(m_alpha, i)) > 0.0){
-				RealMatrixRow(a, s) = RealMatrixRow(m_alpha, i);
-				noalias(b(s)) = m_basis(i);
-				s++;
+				svIndices.push_back(i);
 			}
 		}
-		m_alpha = a;
-		m_basis = b;
+		//project basis on the support vectors
+		m_basis = toDataset(subset(toView(m_basis),svIndices));
+		
+		//reduce alpha to it's support vector variables
+		RealMatrix a(svIndices.size(), m_outputs);
+		for (std::size_t i=0; i!= svIndices.size(); ++i){
+			noalias(row(a,i)) = row(m_alpha,svIndices[i]); 
+		}
+		swap(m_alpha,a);
+		
+		// old version
+		//~ std::size_t ic = m_basis.numberOfElements();
+		//~ std::size_t sv = 0;
+		//~ for (std::size_t i=0; i != ic; i++) 
+			//~ if (blas::norm_1(RealMatrixRow(m_alpha, i)) > 0.0) 
+				//~ sv++;
+
+		//~ RealMatrix a(sv, m_outputs);
+		//~ Data<InputType> b(sv,m_basis(0));
+
+		//~ for (std::size_t s=0, i=0; i!= ic; i++){
+			//~ if (blas::norm_1(RealMatrixRow(m_alpha, i)) > 0.0){
+				//~ RealMatrixRow(a, s) = RealMatrixRow(m_alpha, i);
+				//~ noalias(b(s)) = m_basis(i);
+				//~ s++;
+			//~ }
+		//~ }
+		//~ m_alpha = a;
+		//~ m_basis = b;
 	}
 
 	// //////////////////////////////////////////////////////////
@@ -253,7 +272,7 @@ public:
 			output.clear();
 
 		std::size_t batchStart = 0;
-		for (std::size_t i=0; i != m_basis.size(); i++){
+		for (std::size_t i=0; i != m_basis.numberOfBatches(); i++){
 			std::size_t batchEnd = batchStart+size(m_basis.batch(i));
 			//evaluate kernels
 			//results in a matrix of the form where a column consists of the kernel evaluation of 
