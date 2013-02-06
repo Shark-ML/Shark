@@ -65,7 +65,7 @@ introduced above are represented by the interface, and how models can
 be used in Shark.
 
 In general, most routines are optimized for batch computation (see the
-tutorial on :doc:`../data/batches`), that is, for precessing many
+tutorial on :doc:`batches`), that is, for precessing many
 elements at one time. For example, models support to be evaluated on a
 batch of inputs and to compute their weighted derivatives for a batch
 of inputs at once (also see

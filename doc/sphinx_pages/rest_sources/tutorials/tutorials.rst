@@ -22,22 +22,31 @@ a simple regression task.
 * :doc:`first_steps/your_programs`
 * :doc:`first_steps/hello_shark`
 * :doc:`first_steps/general_optimization_tasks`
-* :doc:`concepts/misc/versatile_classification`
 * :doc:`first_steps/when_to_stop`
-
+* :doc:`concepts/misc/versatile_classification`
 
 Overarching concepts
 ++++++++++++++++++++
 
 Many generic concepts that Shark implements span across the whole library or
 are relevant in many different application scenarios. We collect a number of
-such generic tutorials here and believe that these are useful if you want to
-thoroughly familiarize yourself with Shark. If you are looking for a quick
-introduction on how to set up a specific algorithm, look one section down.
-If you are interested in a high-level overview over the Shark design goals
-(speed, modularity, portability), you can use the following tutorials:
+such generic tutorials here which explain these concepts in detail.
+We believe that these are useful if you want to thoroughly familiarize yourself with Shark.
+If you are looking for a quick introduction on how to set up a specific algorithm, take a look at the 
+component specific tutorials further down the page.
+
+Before we can introduce the main interface classes of shark, we need to define more properly 
+a few basic terms as well as the design goals.
 
 * :doc:`concepts/library_design/designgoals`
+* :doc:`concepts/optimization/optimizationtrainer`
+* :doc:`concepts/optimization/conventions_derivatives`
+* :doc:`concepts/library_design/batches`
+
+The main interfaces, or concepts in shark are the base classes from which nearly 
+all components  are derived. These tutorials are meant as a specification of the interfaces
+as well as the behavior and are written in a more formal language.
+
 * :doc:`concepts/library_design/models`
 * :doc:`concepts/library_design/losses`
 * :doc:`concepts/library_design/optimizers`
@@ -46,14 +55,8 @@ If you are interested in a high-level overview over the Shark design goals
 * :doc:`concepts/library_design/trainers`
 * :doc:`concepts/library_design/kernels`
 
-.. _label_for_linalg_tutorials:
-
-We next give an introduction to Shark's usage of the
-`Boost uBLAS <http://www.boost.org/doc/libs/release/libs/numeric>`_
-library for "all things linear algebra":
-
-* :doc:`concepts/lin_alg/vector_matrix`
-* :doc:`concepts/lin_alg/lapack`
+Data Handling
+++++++++++++++++++
 
 .. _label_for_data_tutorials:
 
@@ -65,24 +68,6 @@ cover Shark's :doxy:`Data` class as well as common operations on them:
 * :doc:`concepts/data/import_data`
 * :doc:`concepts/data/dataset_subsets`
 * :doc:`concepts/data/normalization`
-* :doc:`concepts/data/batches`
-
-An important foundation of Shark's modular structure is an abstract design concept
-involving models, trainers, loss- and error-functions, which is covered by the first
-tutorial. The second gives an introduction to conventions used in direct search algorithms
-of Shark, and the third makes some important remarks on computation of derivatives in Shark:
-
-* :doc:`concepts/optimization/optimizationtrainer`
-* :doc:`concepts/optimization/directsearch`
-* :doc:`concepts/optimization/conventions_derivatives`
-
-For convenience, Shark provides a statistics class wrapper, as well as generic support
-for serialization, logging, and the well-known factory-method-pattern:
-
-* :doc:`concepts/misc/statistics`
-* :doc:`concepts/misc/logging`
-* :doc:`concepts/misc/factory`
-* :doc:`concepts/misc/serialization`
 
 Specific algorithms
 +++++++++++++++++++
@@ -120,11 +105,32 @@ Kernel methods -- support vector machine training and model selection:
 
 Direct search methods -- the covariance matrix adaptation evolution strategy:
 
+* :doc:`concepts/optimization/directsearch`
 * :doc:`algorithms/cma`
 * :doc:`algorithms/mocma`
 
+Tools
+++++++++++++++++++
 
+Finally, we present functionality which are not machine learning facilities themselves, but neecessary
+or helpfull tools.
 
+.. _label_for_linalg_tutorials:
+
+Wegive an introduction to Shark's usage of the
+`Boost uBLAS <http://www.boost.org/doc/libs/release/libs/numeric>`_
+library for "all things linear algebra":
+
+* :doc:`concepts/lin_alg/vector_matrix`
+* :doc:`concepts/lin_alg/lapack`
+
+For convenience, Shark provides a statistics class wrapper, as well as generic support
+for serialization, logging, and the well-known factory-method-pattern:
+
+* :doc:`concepts/misc/statistics`
+* :doc:`concepts/misc/logging`
+* :doc:`concepts/misc/factory`
+* :doc:`concepts/misc/serialization`
 
 For Shark developers
 ++++++++++++++++++++

@@ -40,7 +40,7 @@ of machine learning:
   allow for more efficient processing and thus faster implementations.
   For example, a batch of vectors is stored as a matrix with consecutive
   memory, instead of several vectors with memory locations all over
-  the heap. This is achieved through Shark's :doc:`batch mechanism <batches>`.
+  the heap. This is achieved through Shark's :doc:`batch mechanism <../library_design/batches>`.
 
 * A :doxy:`Data` object can be used to create subsets. This is useful,
   for example, for splitting data into training, validation, and test sets. 
