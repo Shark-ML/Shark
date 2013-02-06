@@ -18,18 +18,17 @@ As indicated by the missing edges between the variables inside one layer in the 
   :scale: 75 %
   :alt: the bipartite graphical model of a RBM
 
-As for any Markov Random field the joint probability distribution of a RBM is given by a
-Gibbs distribution
+As for any Markov Random field with a straitly positive distribution the joint probability distribution of a RBM is given by a Gibbs distribution
 
 .. math::
 	 p(\vec v,\vec h)={e^{- \frac{1}{T} E(\vec v, \vec h)}}/{Z},
 
 where :math:`\vec v` and :math:`\vec h` are the vectors of the visible and the hidden variables respectively,
-*T* is the temperature which is usually set to 1
+*T* is a constant called temperature which is usually set to 1
 and *Z* is a normalization constant called the partition function:
 
 .. math::
-	Z=\sum_{ \vec v, \vec h}e^{-E(\vec v,\vec h)}
+	Z=\sum_{ \vec v, \vec h}e^{- \frac{1}{T} E(\vec v,\vec h)}
 
 Following (but slightly simplifying from the formulas given by)
 Welling at al. [WellingEtAl2005]_, a generalized form of an RBM's
