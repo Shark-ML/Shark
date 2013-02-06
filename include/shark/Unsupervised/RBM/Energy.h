@@ -33,8 +33,9 @@ namespace shark{
 
 /// \brief The Energy function determining the Gibbs distribution of an RBM.
 ///
-///General Energy function which uses the informations given by the neurons to automatize the calculation of energy, derivative
-///and factorization of the probability.
+///General Energy function which uses the information given by the neurons to automatize
+///the calculation of the value of the energy for certain states, the derivative of the energy
+///and the factorization of the probability.
 ///
 /// Following (but slightly simplifying from the formulas given by) 
 /// Welling at al.  a general form of an RBM's Energy function is given by 
@@ -96,10 +97,11 @@ public:
 		return energyFromHiddenInput( input, hidden, visible);
 	}
 	
-	///\brief Computes the logarithm of the unnormalized probability of a state of the hidden neurons by using the precomputed input/activation of the visible neurons.
+	///\brief Computes the logarithm of the unnormalized probability of each state of the
+    /// hidden neurons in a batch by using the precomputed input/activation of the visible neurons.
 	///
-	///@param hiddenState the state of the hidden neurons
-	///@param visibleInput the current input for he visible units given hiddenState
+	///@param hiddenState the batch of states of the hidden neurons
+	///@param visibleInput the bacth of current inputs for he visible units given hiddenState
 	///@param beta the inverse temperature
 	///@return the unnormalized probability
 	template<class BetaVector>
@@ -125,10 +127,11 @@ public:
 	}
 
 
-	///\brief Computes the logarithm of the unnormalized probability of a state of the visible neurons by using the precomputed input/activation of the hidden neurons.
+	///\brief Computes the logarithm of the unnormalized probability of each state of the 
+    /// visible neurons in a batch by using the precomputed input/activation of the hidden neurons.
 	///
-	///@param visibleState the state of the hidden neurons
-	///@param hiddenInput the current input for he visible units given visibleState
+	///@param visibleState the batch of states of the hidden neurons
+	///@param hiddenInput the batch of current inputs for he visible units given visibleState
 	///@param beta the inverse temperature
 	///@return the unnormalized probability
 	template<class BetaVector>
@@ -154,9 +157,9 @@ public:
 	}
 
 	
-	///\brief Computes  the logarithm of  the unnormalized probability of a state of the visible neurons.
+	///\brief Computes the logarithm of the unnormalized probability for each state of the visible neurons from a batch.
 	///
-	///@param visibleState the state of the hidden neurons
+	///@param visibleState the batch of states of the hidden neurons
 	///@param beta the inverse temperature
 	template<class BetaVector>
 	RealVector logUnnormalizedPropabilityVisible(VisibleStateBatch const& visibleStates, BetaVector const& beta)const{
@@ -167,9 +170,9 @@ public:
 		return logUnnormalizedPropabilityVisible(visibleStates, hiddenInputs, beta);
 	}
 	
-	///\brief Computes  the logarithm of  the unnormalized probability of a state of the hidden neurons.
+	///\brief Computes the logarithm of the unnormalized probability of each state of the hidden neurons from a batch.
 	///
-	///@param hiddenStates the state of the hidden neurons
+	///@param hiddenStates a bacth of states of the hidden neurons
 	///@param beta the inverse temperature
 	template<class BetaVector>
 	RealVector logUnnormalizedPropabilityHidden(HiddenStateBatch const& hiddenStates, BetaVector const& beta)const{
@@ -179,15 +182,18 @@ public:
 		inputVisible(visibleInputs,hiddenStates);
 		return logUnnormalizedPropabilityHidden(hiddenStates, visibleInputs, beta);
 	}
-	///\brief Calculates the input of the hidden neurons given the state of the visible.
+    
+    
+	///\brief Calculates the input of the hidden neurons given the state of the visible in a batch-vise fassion.
 	///
-	///@param input the vector the input of the hidden neurons is stored in
-	///@param visibleState the state of the visible neurons
+	///@param input the batch of vectors the input of the hidden neurons is stored in
+	///@param visibleState the batch of states of the visible neurons
 	void inputHidden(HiddenInputBatch& input, VisibleStateBatch const& visibleState)const{
 		m_interaction.inputHidden(input, visibleState);
 	}
 
 
+    ß
 	///\brief Calculates the input of the visible neurons given the state of the hidden.
 	///
 	///@param input the vector the input of the visible neurons is stored in

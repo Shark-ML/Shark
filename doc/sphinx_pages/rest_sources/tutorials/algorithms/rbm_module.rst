@@ -9,13 +9,10 @@ Further tutorials will describe the components and the RBM in more detail.
 
 What is an RBM?
 +++++++++++++++++++++++++++++++++++++++++++++++++++
-RBMs are special kinds of undirected graphical models (Markov Random fields).
-The structure of the undirected graph of an RBM is bipartite as can be seen in the figure below
-RBMs hold two sets of variables (also called neurons): a layer of visible variables to
-represent observable data and one layer of hidden variables to capture dependencies between
-the visible variables. As indicated by the missing edges between the variables inside one
-layer in the graph the variables of one layer are independent of each other given the values
-of the variables of the other layer.
+RBMs blond to the class of undirected graphical models (Markov Random fields).
+The undirected graph of an RBM has an bipartite structure as shown in the figure below.
+RBMs hold two sets of random variables (also called neurons): now layer of visible variables to represent observable data and one layer of hidden variables to capture dependencies between the visible variables. 
+As indicated by the missing edges between the variables inside one layer in the graph the variables of one layer are independent of each other given the states of the variables of the other layer.
 
 .. figure:: ../images/rbm_graph.svg
   :scale: 75 %
