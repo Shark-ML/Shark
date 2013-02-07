@@ -1,7 +1,7 @@
 The RBM Module
 ====================================================
 The following sections will briefly describe Restricted Boltzmann Machines (RBM).
-After that a short summary of the design goals and target audience is given and
+After that a short summary of the design goals and the target audience is given and
 in the last part the different components of the library are presented.
 This documentation should only be seen as a birds eye view of the module.
 Further tutorials will describe the components and the RBM in more detail.
@@ -48,8 +48,8 @@ is the matrix of the connection weights between hidden and visible variables, so
 one single 'phi-function' for each layer that is the identity function.
 
 The parameterization of the RBM depends on the chosen energy function and thus can vary.
-Training a RBM corresponds to searching for the parameters that maximize the
-log-likelihood of the training data is. This does not require the data to have
+Training an RBM corresponds to searching for the parameters that maximize the
+log-likelihood of the training data. This does not require the data to have
 labels associated with them so that the RBM can be used as an unsupervised learning technique.
 Unfortunately the gradient of the log-likelihood can not be computed efficiently and
 thus the optimization problem is hard. Instead of computing the gradient directly,
@@ -75,7 +75,7 @@ probability distributions. This leads to names like "binary neurons" or "Gaussia
 Design goals
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
 As we have seen above, RBMs are quite complex. There are a lot of different types of RBMs
-and there a lot of aspects which can be changed. Typical software tools until now
+and there are a lot of aspects which can be changed. Typical software tools until now
 usually only supported a small range of RBMs. They are often implemented by hand for every
 type of conditional distribution of the hidden and visible neurons. Often, these implementations
 are very efficient but they are not useful when new ideas need to be implemented.
