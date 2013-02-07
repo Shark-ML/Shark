@@ -53,7 +53,7 @@ Either download and unpack the latest official Shark source-code release from :d
 will be created as a subfolder -- if you want the tree contents directly in the current
 directory, add a space and period ``.`` to the end of the command)::
 
-      svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
+      svn co svn://svn.code.sf.net/p/shark-project/code/trunk/Shark
 
 Building Shark with Linux, MacOS, and other Unix-based systems
 **************************************************************
