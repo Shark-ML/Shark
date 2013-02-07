@@ -80,22 +80,25 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 			start1+=batchSize1;
 		}
 		S /= m_l;
+		//~ std::cout<<S<<std::endl;
 		m_eigenvalues.resize(m_l);
 		m_eigenvectors.resize(m_n, m_l);
 		zero(m_eigenvectors);
 		RealMatrix U(m_l, m_l);
 		eigensymm(S, U, m_eigenvalues);
+		//~ std::cout<<"pca U:"<<U<<std::endl;
 		// compute true eigenvectors
 		//eigenv=X0^T U
 		std::size_t batchStart  = 0;
 		for(std::size_t b = 0; b != inputs.numberOfBatches(); ++b){
 			std::size_t batchSize = inputs.batch(b).size1();
 			std::size_t batchEnd = batchStart+batchSize;
-			fast_prod(trans(inputs.batch(b)),rows(U,batchStart,batchEnd),m_eigenvectors,true);
+			RealMatrix X = inputs.batch(b)-repeat(m_mean,batchSize);
+			fast_prod(trans(X),rows(U,batchStart,batchEnd),m_eigenvectors,true);
 			batchStart = batchEnd;
 		}
 		//fast_prod(trans(X0),U,m_eigenvectors);
-		
+		//~ std::cout<<"Eig:"<<m_eigenvectors<<std::endl;
 		//normalize
 		for(std::size_t i=0; i != m_l; i++)
 			column(m_eigenvectors, i) /= norm_2(column(m_eigenvectors, i));
@@ -105,68 +108,34 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 //! Returns a model mapping the original data to the
 //! m-dimensional PCA coordinate system.
 void PCA::encoder(LinearModel<>& model, std::size_t m) {
-	if(!m) m = m_n;
-	RealVector offset;
-	// in the hope to save some time, we split the simple
-	// computation in four very similar cases
-	if(m != m_n) { // dimensionality reduction
-		offset = -prod(trans( blas::subrange(m_eigenvectors,0, m_eigenvectors.size1(), 0, m) ), m_mean);
-		if(!m_whitening) // no whitening
-			model.setStructure(RealMatrix(trans(blas::subrange(m_eigenvectors, 0, m_eigenvectors.size1(), 0, m) )), offset);
-		else { // whitening
-			RealMatrix A = trans(blas::subrange(m_eigenvectors, 0, m_eigenvectors.size1(), 0, m) );
-			for(std::size_t i=0; i<A.size1(); i++) {
-				row(A, i) = row(A, i) / std::sqrt(m_eigenvalues(i));
-				offset(i) /= std::sqrt(m_eigenvalues(i));
-			}
-			model.setStructure(A, offset);
-		}
-	} else { // no dimensionality redunction 
-		offset = -prod(trans(m_eigenvectors), m_mean);
-		if(!m_whitening) // no whitening
-			model.setStructure(RealMatrix(trans(m_eigenvectors)), offset);
-		else { // whitening
-			RealMatrix A = 	trans(m_eigenvectors);
-			for(std::size_t i=0; i<A.size1(); i++) {
-				row(A, i) = row(A, i) / std::sqrt(m_eigenvalues(i));
-				offset(i) /= std::sqrt(m_eigenvalues(i));
-			}
-			model.setStructure(A, offset);
+	if(!m) m = std::min(m_n,m_l);
+	
+	RealMatrix A = trans(columns(m_eigenvectors, 0, m) );
+	RealVector offset(A.size1()); 
+	fast_prod(A, m_mean, offset, false, -1.0);
+	if(m_whitening){
+		for(std::size_t i=0; i<A.size1(); i++) {
+			row(A, i) = row(A, i) / std::sqrt(m_eigenvalues(i));
+			offset(i) /= std::sqrt(m_eigenvalues(i));
 		}
 	}
-	SHARK_CHECK(model.hasOffset(), "[PCA] model must have an offset");
+	model.setStructure(A, offset);
 }
 
 //! Returns a model mapping encoded data from the
 //! m-dimensional PCA coordinate system back to the
 //! n-dimensional original coordinate system.
 void PCA::decoder(LinearModel<>& model, std::size_t m) {
-	if(!m) m = m_n;
-	RealVector offset;
-	// in the hope to save some time, we split the simple
-	// computation in four very similar cases
-	if(m != m_n) { // reduced dimension
-		if(!m_whitening) // no whitening
-			model.setStructure(RealMatrix(blas::subrange(m_eigenvectors, 0, m_eigenvectors.size1(), 0, m) ), m_mean);
-		else { // whitening
-			RealVector offset = m_mean;
-			RealMatrix A = blas::subrange(m_eigenvectors, 0, m_eigenvectors.size1(), 0, m);
-			for(std::size_t i=0; i<A.size2(); i++) {
-				column(A, i) = column(A, i) * std::sqrt(m_eigenvalues(i));
-			}
-			model.setStructure(A, offset);
-		}
-	} else { // full dimension
-		if(!m_whitening) // no whitening
-			model.setStructure(m_eigenvectors, m_mean);
-		else { // whitening
-			RealVector offset = m_mean;
-			RealMatrix A =  m_eigenvectors;
-			for(std::size_t i=0; i<A.size2(); i++) {
-				column(A, i) = column(A, i) * std::sqrt(m_eigenvalues(i));
-			}
-			model.setStructure(A, offset);
+	if(!m) m = std::min(m_n,m_l);
+	if( m == m_n && !m_whitening){
+		model.setStructure(m_eigenvectors, m_mean);
+	}
+	RealMatrix A = columns(m_eigenvectors, 0, m);
+	if(m_whitening){
+		for(std::size_t i=0; i<A.size2(); i++) {
+			column(A, i) = column(A, i) * std::sqrt(m_eigenvalues(i));
 		}
 	}
-	SHARK_CHECK(model.hasOffset(), "[PCA] model must have an offset");
+
+	model.setStructure(A, m_mean);
 }
