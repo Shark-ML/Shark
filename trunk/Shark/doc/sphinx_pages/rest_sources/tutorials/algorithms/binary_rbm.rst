@@ -24,19 +24,20 @@ First, we need to include the following files ::
   #include <iostream>
 
 As an example problem, we consider one of the  predefined benchmark problems in ``RBM/Problems/``,
-the Bars and Stripes[MacKay2002]_ ::
+the Bars-and-Stripes data set[MacKay2002]_ ::
 
   BarsAndStripes problem;
   Set<RealVector> data = problem.data();
 
-Now we can create the RBM. We have to define how many inputs (visible
-units/observable variables) our RBM shall have. This information is given by the problem .
+Now we can create the RBM. We have to define how many input variables (visible
+units/observable variables) our RBM shall have. This depends on the data set, we want to learn,
+since the number of visible neurons has to correspond to the dimension of the training data.
 Further, we have to choose how many hidden neurons (latent variables) we want. Also to construct the RBM we need to choose
 a random number generator. Since RBM training is time consuming we might later want to start several trials in separate
 instances. In this setup, being able to choose a random number generator is crucial. But now, let's construct the beast::
 
-  size_t numberOfHidden = 32;
   size_t numberOfVisible = problem.inputDimension();
+  size_t numberOfHidden = 32;
 
   //create rbm with simple binary units and use the global random number generator of shark for simplicity
   BinaryRBM rbm(Rng::globalRng);
