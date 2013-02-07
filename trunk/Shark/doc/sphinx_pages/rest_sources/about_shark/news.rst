@@ -7,7 +7,7 @@ Repository upgraded
 We upgraded our Sourceforge repository to the newest version as
 recommended by Sourceforge. The new path to Shark is now:
 
-    svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
+    svn co svn://svn.code.sf.net/p/shark-project/code/trunk/Shark
 
 
 
@@ -31,7 +31,7 @@ Feel free to try and test Shark, we are happy about any feedback!
 
 You can download Shark from our svn repository::
 
-    svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
+    svn co svn://svn.code.sf.net/p/shark-project/code/trunk/Shark
 
 
 There is currently a known problem for MacOs users that they cannot compile using gcc 4.2.1. In this
