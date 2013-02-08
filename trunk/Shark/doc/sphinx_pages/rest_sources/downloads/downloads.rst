@@ -36,7 +36,7 @@ Get the latest snapshot from our svn repository!
 
    The following package just contains the Shark documentation:
 
-   `Documentation <https://nisys.dyndns.biz/shark/job/Shark_Documentation_Package/lastSuccessfulBuild/artifact/Build/libshark-3.0.0-doc.tar.bz2>`_
+   `Documentation <svn://nisys.dyndns.biz/shark/job/Shark_Documentation_Package/lastSuccessfulBuild/artifact/Build/libshark-3.0.0-doc.tar.bz2>`_
 
 
 
