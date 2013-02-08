@@ -71,7 +71,8 @@ private:
 		}
 	};
 	
-	void computeGaussianResponses(BatchInputType const& pattern, InternalState& state)const;
+	void computeGaussianResponses(BatchInputType const& patterns, InternalState& state)const;
+
 public:
 	///  \brief Creates an empty Radial Basis Function Network. A call to configure is required afterwards.
 	RBFNet();

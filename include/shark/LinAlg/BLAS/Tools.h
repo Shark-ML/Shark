@@ -79,12 +79,12 @@ namespace detail{
 	template<class Matrix>
 	void zero(blas::matrix_expression<Matrix>& mat,boost::mpl::false_){
 		typedef typename Matrix::value_type Value;
-		mat() = blas::zero_matrix<Value>(mat().size1(),mat().size2());
+		noalias(mat()) = blas::zero_matrix<Value>(mat().size1(),mat().size2());
 	}
 	template<class Vector>
 	void zero(blas::vector_expression<Vector>& vec,boost::mpl::false_){
 		typedef typename Vector::value_type Value;
-		vec() = blas::zero_vector<Value>(vec().size());
+		noalias(vec()) = blas::zero_vector<Value>(vec().size());
 	}
 	
 	template<class Matrix>
