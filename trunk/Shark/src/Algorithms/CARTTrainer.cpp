@@ -233,7 +233,7 @@ CARTTrainer::SplitMatrixType CARTTrainer::buildTree(AttributeTables const& table
 				if(table[i].value != table[i+1].value){
 					//n1 = Number of cases to the left child node
 					//n2 = number of cases to the right child node
-					std::size_t n1 = i;
+					std::size_t n1 = i+1;
 					std::size_t n2 = n-n1;
 
 					//Calculate the Gini impurity of the split

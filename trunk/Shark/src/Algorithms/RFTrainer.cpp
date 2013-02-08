@@ -232,7 +232,9 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(const AttributeTables& tables
 				cTmpAbove[dataset.element(tables[attributeIndex][prev][1]).label]--;
 
 				if(tables[attributeIndex][prev][0]!=tables[attributeIndex][i][0]){
-					n1=i;
+					//n1 = Number of cases to the left child node
+					//n2 = number of cases to the right child node
+					n1 = i;
 					n2 = n-n1;
 
 					//Calculate the Gini impurity of the split
