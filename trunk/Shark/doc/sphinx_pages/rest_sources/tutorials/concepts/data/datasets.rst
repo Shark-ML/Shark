@@ -18,158 +18,282 @@ complete list of :ref:`data tutorials <label_for_data_tutorials>`
 The containers presented in this tutorial can all be used by including::
 
   #include<shark/Data/Dataset.h>
-
-
-The Data<Input> container
--------------------------
-
-
+  
 Key properties
-&&&&&&&&&&&&&&
+---------------
+  
+The Data containers provided by shark can store all types of data, that 
+could also be  held in one of the standard template library containers. 
+In contrast to  a ``std::vector``,  the Data class has three abilities 
+that are important in the context of machine learning:
 
-The central container for data in Shark is simply called :doxy:`Data`.
-This template class can store any data that could also be held in one
-of the standard template library containers. In contrast to a ``std::vector``, 
-the Data class has three abilities that are important in the context 
-of machine learning:
-
-* Data is stored in groups or "batches". In detail, a number or group of
-  data points are regarded and treated as a grouped entity, on and with
-  which computations can be carried out block-wise -- in "batches". These
-  batches serve the purpose (and are sized such) that memory access patterns
-  allow for more efficient processing and thus faster implementations.
+* Elements of a dataset are stored in blocks called batches, such that 
+  computations can be carried out block by block, instead of element 
+  by element. These batches are optimized to allow for continuous memory access,
+  which allow for more efficient processing and thus faster implementations.
   For example, a batch of vectors is stored as a matrix with consecutive
-  memory, instead of several vectors with memory locations all over
-  the heap. This is achieved through Shark's :doc:`batch mechanism <../library_design/batches>`.
+  memory with every point occupying a matrix row, instead of using several vectors 
+  with memory locations scatetred all over the heap. This is achieved through Shark's 
+  :doc:`batch mechanism <../library_design/batches>`.
 
 * A :doxy:`Data` object can be used to create subsets. This is useful,
   for example, for splitting data into training, validation, and test sets. 
   Conceptually, each batch of data is here regarded as atomic and required to 
-  reside in one subset. Thus it is not possible to assign one half of a batch 
-  to one subset and the other half to another. If this is needed, the batch 
-  must first be split physically.
+  reside in one subset in full. Thus it is not possible to assign one half of 
+  a batch  to one subset and the other half to another. If this is needed, 
+  the batch  must first be split physically.
 
 * Data can be shared among different :doxy:`Data` instances. Thus creating
   subsets on the level of batches is quite cheap as it does not need a physical
-  copy of the contents of the set. 
+  copy of the contents of the set. On should not confuse this with the different
+  concept of lazy-copying which just delays the copy until an actual change is
+  done. Instad sets are shard by dfault and only copied, when actually required by
+  the algorithm.
 
 
-Creating datasets
-&&&&&&&&&&&&&&&&&
+Different types of Datasets
+--------------------------------
+
+The three dataset classes in shark differ not so much in their implementation, as
+thy all use the same underlying structure. However they provide important semantic
+differentiation as well as special functions tailored to this differentiation. Before
+we introduce the interface of the data object we want to clarify this distinction:
+
+* :doxy:`Data`, stores semanticless data, that means data without a special meaning.
+  Think about the prediction of a model, which is often not really a label, but some
+  vector which nedes further interpretation. The Data-class thus takes the general 
+  role of an ``std::vector`` only adapted to the special needs for fast computation in
+  a machine learning environment.
+
+* :doxy:`UnlabeledData` represents input data which is not labeled. 
+  This is the input format used for unsupervised learning methods. While the unlabeled
+  data class does not affer much new functionality, it provides an important difference.
+  Datasts as used in machine learning are inherently unordered constructs, thus it is
+  okay for an algorithm to shuffle or otherwise reorder the contents of a dataset.
+  This is reflected in the set, that shuffling is actively supported using the 
+  :doxy:`UnlabeledData::shuffle` method.
+
+* :doxy:`LabeledData` finally represents datapoints which are a pair of inputs 
+  and labels. An dataset of type ``LabeledData<I,L>`` can be roughly described 
+  as the known data object using a pair-type of inputs I and labels L, for example
+  ``UnlabeledData<std::pair<I,L> >``. There is however an important difference in how labels
+  and inputs are treated in machine learning. We often like, especially for unsupervised
+  methods, to only use the inputs, thus viewing the object as an ``UnlabeledData<I>``. 
+  For evaluation of the model, we also want to first get the set inputs, acquire the 
+  set of predicitons of the model and compare this set of predictions with the set of labels
+  using a loss function. Instead of seeing input-label pairs as a fixed grouping, we would
+  like to view them as two separate datasets which are conveniently bound together. And this is
+  how the LabeledData object is implemented.
+  
+  
+The class Data<T>
+------------------
+In this part of the tutorial, we introduce the interface of :doxy:`Data`. The following description
+also applies to the two other types of datasets.
+
+Creation and copying of datasets
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 Creating a dataset is quite easy and can be achived in several ways. The first and
-by far easiest way is by directly loading the dataset form a file or generate them
+by far easiest way is by directly loading the dataset from a file or generate them
 using an artificial distribution of data. Examples for this are given in the
 tutorial on :doc:` importing data <general_optimization_tasks>`. In some cases
-data is already in memory, in this case a dataset can be created using::
+data is already in memory and only needs to be imported into a dataset. 
+In this case a dataset can be created using::
 
   std::vector<RealVector> points;//vector of points
   Data<RealVector> data(points);
+  
+To create an dataset with space for n points, we need to define an example point which
+decribes the objects to be saved in the set::
 
+  Data<RealVector> data(1000, RealVector(5));
 
-More on views and splits
-&&&&&&&&&&&&&&&&&&&&&&&&
+In the above example, we create a dataset which can hold 1000 5-dimensional vectors.
+The provided Vector is not to be regarded as a blue-print which is now copied to all
+1000 elements, but merely as a hint on the structure of the objects to be stored. To
+understand this, remember that objects are not stored as single entities, but grouped
+in batches. In the case of the vector, the type of the batch is a matrix. But we can't
+store vectors with different sizes in the dataset, and thus we must provide the dataset
+with the information about how long a matrix-row needs to be. In essence this call does
+not create 1000 entities of vectors together with the same amount of memory allocations, 
+but only a few bigger matrices. By default a safe size is used for the number of elements 
+in a batc, but it can also be actively controlled by adding just the batchsize as a third
+parameter::
 
+  Data<RealVector> data(1000, RealVector(5),100);
+
+Datasets can be copied and assigned using the typical operations:
+
+  Data<RealVector> data2(data);
+  data = data2;
+  
+However be aware that these operations do not perform a deep-copy, but as mentioned in the
+key properties, data is shared between the different instances. To check whether the content
+of a set is shared, we can use::
+  
+  data.isIndependent();
+
+and to perform a deep copy of the elements, we can use::
+
+  data.makeIndependent();
+  
+data sharing is thread-safe, thus it is perfectly allowed to create shares of (parts of)
+the data object in several threads. However, we have to stress, and you have to be 
+aware off, that the dataset class does not guard one from xhangs to the individual 
+batches or single elemnts. changing an element in one instanc of the data object will
+change the respective elemnts in all other containers as well.
 
 Data as a collection of batches
 *******************************
 
-As seen above, the Data class provides for two different conceptual views of
-a data set. The first one is a collection of batches, which partition the data
-into chunks and thereby allowing for faster processing. These chunks can be
-reordered and shared between several Data instances, thus allowing several views 
-on the same data without the need for a copy of the points inside the batches. 
-Instead only references to the batches are shared between vies and a batch is 
-removed from memory when no dataset is referencing it anymore.
-As a consequence, copying and restrictions to subsets are operations linear in 
-space and time in the number of batches, but not in the number of training points.
+As outlined above, the Data class stores the points internally as batches and
+is therefore optimized for using these batchs directly instad of accessing the
+single points. Therefore this part of the tutorial will explain, how the dataset
+provides access to the batches as well as common usage patterns.
 
-A simple example of creating such a subset is by issuing
+The first thing to note is, that the dataset itself does not provide direct access
+using iterators or other stl-compatible means. This is done to prevent confusion
+with the element methods (e.g. a size() method could be either interpreted as 
+returning the number of batches or the number of elements). However an
+stl compatible interface can be acquired using the :doxy:`Data::batches`
+method::
 
-  Data<RealVector> dataset=...;
-  Data<RealVector> subset=rangedSubset(dataset,0,5);
-  
-this will create a subset of the dataset containing the first five batches of 
-the original dataset.
+    typedef Data<RealVector>::batch_range Batches;
+    Batches batches = data.batches();
+    
+    std:cout<<batches.size()<<std::endl;
+    for(Batches::iterator pos = batches.begin(); pos != batches.end(); ++pos){
+        std::cout<<*pos<<std::endl;
+    }
+    
+or similary when data is constant or a constant range is desired::
 
-One should not confuse this behaviour with *lazy copying*, as in that case a
-copy would be performed as soon as one of the views were to be changed. The Shark
-Data class instead assumes that the user would actually always want to change
-a data point for all views, and thus that there is no need to track changes.
+    Data<RealVector>::const_batch_range batches = data.batches();
 
-However, a subset can be made independent from its parents and other siblings
-using the :doxy:`Data::makeIndependent` method.
+However, the above loop still looks a bit inconvenient, we might as well use
+``BOOST_FOREACH`` for traversal::
 
-There are some operations in a subset which depend on the contens of the data
-set not being shared between several views. This holds for example for
-:doxy:`Data::splitBatch` which splits a single batch into two parts, thereby
-potentially invalidating other subsets.
+    typedef Data<RealVector>::const_batch_reference BatchRef;
+    BOOST_FOREACH(BatchRef batch,data.batches()){
+        std::cout<<batch<<std::endl;
+    }
 
-.. warning:
+or we can also just iteratore using an indexed access::
 
-    This part of the tutorial is outdated or needs to be rewritten.
+   for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
+      std::cout<<data.batches(i)<<std::endl;
+   }
+   
+we can also use this direct batch access, to get direct access to the single elements,
+using the methods for batch-handling and another loop::
 
-Data as a list of points
-************************
+   BOOST_FOREACH(BatchRef batch,data.batches()){
+        for(std::size_t i = 0; i != boost::size(batch); ++i){
+	    std::cout<<shark::get(batch,i);//prints element i of the batch
+	}
+   }
+   
 
-The other view of the dataset is the view as a list of points. This is mostly
-a compatibility feature for algorithms which are hard to transform into a form
-which uses the batch view.
+Data as a collection of elements
+*********************************
 
-.. todo::
+Whil the Data object is optimized for batch access, some algorithms can not be reformulated
+very well using batch algorithms, or the code is not critical to the performance and it
+would not be worth the effort to rewrite it completely.
+Thus we also provide an convenience interface for elements, however we can't give as good performance 
+guarantees and behaviour as for the batch access. While the interfaces look very similar, you must be 
+aware of the important differences.
 
-    ok, the entire tutorial needs a complete and very thorough re-reading with
-    respect to clear and unambiguous terminology: now here, view is used as
-    meaning the two aspects presented in the tutorial, and not as a data view
-    in later code. view, copy, instance, etc. should all be very clearly used.
+First of all, all elements stored in the dataset are only virtual for most input types. This means
+that querying the i-th element of the set does not return a reference to it, but instead returns 
+a proxy obect which behaves as the reference. So for example when storing vectors, instead of a vector
+a row of the matrix it is stored in is returned. This is no problem most of the time, however when 
+using the returned value as an argumeent to a function like for example::
 
-.. todo::
+   void function(Vector&);
 
-    I don't share this criticism. View is never used beforehand aside from
-    "conceptional view". So the terminology _is_ clear.
+the compiler will complain, that a matrix row is not a vector. In the case of::
+
+  void function(Vector const&);
+   
+the compiler is very helpfull, creating a temporary vector for you and copying the 
+matrix row into it. However, this is slow. Be aware of this performance pitfall and use
+template arguments or the correct reference type of the dataset if possible::
+
+   void function (Data<RealVector>::element_reference);
+
+The second pitfall is, that we can't give as strong performance guarantees for the methods called.
+As we allow batch resizing and all batches having a different size, it is not easy to keep track of the
+actual number of elements stored in the set, thus calling :doxy:`Data::numberOfElements` is linear time. 
+For the same reason, accessing the i-th element using :doxy:`Data::element` is linear in the number of batches, 
+as we first need to find the batch the element is located in, before we can actually access it. 
+Thus aside from only very small datasets or performance  uncritical code, you should never use 
+random-access to the dataset and use the following, more appropriate  ways to iterate over the elements::
+
+    typedef Data<RealVector>::element_range Elements;
+    typedef Data<RealVector>::const_element_reference ElementRef;
+    
+    //1: explicit iterator loop using the range over the elements
+    Elements elements = data.elements();
+    for(Elements::iterator pos = elements.begin(); pos != elements.end(); ++pos){
+        std::cout<<*pos<<std::endl;
+    }
+    //2: BOOST_FOREACH
+    BOOST_FOREACH(ElmentRef element,data.elements()){
+        std::cout<<batch<<std::endl;
+    }
 
 
-For example, decision trees cannot exploit or even work under the batch
-structure of data sets, because their nodes are defined using single points.
-
-More on the Data interface
+Summary of element access
 **************************
+We will now summarize the above description in a more formal tabular layout. For the shortnss of description,
+we  only present the non-const version of every method and typedef. The rest can be looked up in the doxygen reference.
 
-The class is a mostly standard compliant container with respect to the batches:
-it provides :doxy:`Data::size` and :doxy:`Data::empty` methods, returning the
-number of batches and whether the container is empty. It also provides
-iterators and standard compliant typdefs. It can therefore be used with
-standard algorithms. To access the i-th single batch, the method
-:doxy:`Data::batch`(i) should be called.
+typedefs of Data. For every reference and range there exists also an immutable version adding a ``const_`` to the
+bginning:
 
-To operate on single elements/points of the data set, the :doxy:`Data::numberOfElements`,
-:doxy:`Data::elemBegin` and :doxy:`Data::elemEnd` methods return the number of samples,
-as well as iterators over the range of elements. The iterators over the elements have
-typedefed names of ``element_iterator`` and "const_element_iterator". Accessing a single
-i-th element can be achieved using ``Data::operator()(i)``. The usual interface can be
+========================   ======================================================================
+Type                       Description
+========================   ======================================================================
+element_type               The type of elements stores in the object
+element_reference          Reference to a single element. This is a proxy reference, meaning
+                           that it can be something more complex than element_type&, for example
+			   an object describing the row of a matrix.
+element_range              Range over the elements..
+batch_type                 The batch type of the Dataset. Same as Batch<element_type>::type
+batch_reference            Reference to a batch of points. This is batch_type&.
+batch_range                Range over the batches.
+========================   ======================================================================
 
-.. todo::
+methods regarding batch access. ALl these methods are constant time complexity:
 
-    what is "usual" here? in the docs i see that it returns element_range, but
-    what does "usual" mean?
+==========================================   ======================================================================
+Method                                       Description
+==========================================   ======================================================================
+size_t numberOfBatches () const              Returns the number of batches in the set.
+batch_reference batch (size_t i)             Returns the i-th batch of the set
+batch_range batches ()                       Returns an stl-compliant random-access-container over the batches.
+==========================================   ======================================================================
 
-accessed using the :doxy:`Data::elements` function which returns a range over the elements.
-See the :doxy:`Data` reference documentation for details.
+methods regarding batch access. All these methods are linear time complexity:
 
-.. caution::
-
-  The range over the elements is not a standard compliant container, as the iterators
-  do not return references to the objects, but proxy objects instead, much like
-  ``std::vector<bool>``. This means that standard algorithms are not required
-  to work. Further note that while the iterators allow for random access,
-  this is not O(1), but has the run time behavior of a skip list, as it traverses the
-  list of batches during random access. This also holds for ``Data::operator()``,
-  which needs to traverse the container to find the correct batch. Thus it is better
-  to view the range over the elements as *list* instead of an array, and to
-  assume the same run time performance. Thus, ``Data::operator()`` should only be used
-  for datasets with a small number of batches or in code not critical w.r.t. performance.
+==========================================   ======================================================================
+Method                                       Description
+==========================================   ======================================================================
+size_t numberOfElements () const             Returns the number of elements in the set.
+element_reference element (size_t i)         Returns the i-th element of the set
+element_range elements ()                    Returns an bidirectional container over the elements. Random access
+                                             is also supported, but does not meet th time complexity. Also be aware
+					     that instead of references, proxy-objects are returned as elements are
+					     only virtual.
+==========================================   ======================================================================
 
 
+..todo :
+
+    rest of the tutorial is not changed
+    
 
 UnlabeledData<Input>
 ---------------------
