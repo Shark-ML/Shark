@@ -320,7 +320,7 @@ class FixedDenseMatrixProxy: public blas::matrix_expression<FixedDenseMatrixProx
 public:
 
 	//std::container types
-	typedef Orientation orientation_category;
+	typedef typename Orientation::orientation_category orientation_category;
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef typename boost::remove_const<ValueType>::type value_type;
@@ -329,7 +329,7 @@ public:
 	typedef ValueType* pointer;
 	typedef value_type const* const_pointer;
 	//ublas types
-	typedef FixedDenseMatrixProxy<value_type const,orientation_category> const_closure_type;
+	typedef FixedDenseMatrixProxy<value_type const,Orientation> const_closure_type;
 	typedef self_type closure_type;
 	typedef blas::dense_tag storage_category;
         
@@ -411,24 +411,32 @@ public:
         bool same_closure (FixedDenseMatrixProxy const& other) const{
 		return m_data == other.m_data;
         }
+	
+	void clear(){
+		for(std::size_t i = 0; i != size1(); ++i){
+			for(std::size_t j = 0; j != size2(); ++j){
+				at_element(i,j) = value_type();
+			}
+		}
+	}
 
 
 	// ------------------
 	// Element assignment
 	// ------------------
 	
-	/// \brief Set element \f$i\f$ to the value \c t
-	/// \param i index of the element
-	/// \param t reference to the value to be set
-	reference insert_element(size_type i, const_reference t) {
-		return(*this)[i] = t;
-	}
+	//~ /// \brief Set element \f$i\f$ to the value \c t
+	//~ /// \param i index of the element
+	//~ /// \param t reference to the value to be set
+	//~ reference insert_element(size_type i, const_reference t) {
+		//~ return(*this)[i] = t;
+	//~ }
 
-	/// \brief Set element \f$i\f$ to the \e zero value
-	/// \param i index of the element
-	void erase_element(size_type i) {
-		(*this)[i] = value_type/*zero*/();
-	}
+	//~ /// \brief Set element \f$i\f$ to the \e zero value
+	//~ /// \param i index of the element
+	//~ void erase_element(size_type i) {
+		//~ (*this)[i] = value_type/*zero*/();
+	//~ }
 	// -------
 	// ASSIGNING
 	// -------
@@ -490,10 +498,10 @@ public:
 	// --------------
 	
 	const_reference operator () (size_type i, size_type j) const {
-		return m_data[orientation_category::address (i, m_stride1, j, m_stride2)];
+		return m_data[Orientation::address (i, m_stride1, j, m_stride2)];
         }
 	reference at_element (size_type i, size_type j) {
-		return m_data[orientation_category::address (i, m_stride1, j, m_stride2)];
+		return m_data[Orientation::address (i, m_stride1, j, m_stride2)];
         }
         reference operator () (size_type i, size_type j) {
 		return at_element(i,j);

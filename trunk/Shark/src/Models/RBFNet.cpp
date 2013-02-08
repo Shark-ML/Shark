@@ -148,17 +148,17 @@ void RBFNet::computeGaussianResponses(BatchInputType const& patterns, InternalSt
 	//for us, the x are the centers of the matrix, so this norm can be precomputed by setCenters or setParameterVector!
 	
 	//add the precalculated norm of every center to every column of the matrix
-	noalias(s.norm2) = repeat(m_centerNormSquared,numPatterns);
+	noalias(state.norm2) = repeat(m_centerNormSquared,numPatterns);
 	//now evaluate normSqr(x) for every element of the batch
 	RealVector patternNorms = sumColumns(sqr(patterns));
 	//add the norm of pattern i to every row of the matrix
-	noalias(s.norm2) += trans(repeat(patternNorms,numNeurons));
+	noalias(state.norm2) += trans(repeat(patternNorms,numNeurons));
 	//now the matrix matrix product twice which results in-2 x_i y_j
-	fast_prod(patterns,trans(m_centers),s.norm2,true,-2.0);
+	fast_prod(patterns,trans(m_centers),state.norm2,true,-2.0);
 	
 	//every center has it's own value of gamma, so we need to multiply the i-th column 
 	//of the norm with m_gamma(i)
-	noalias(s.expNorm) = exp(-element_prod(repeat(m_gamma,numPatterns),s.norm2));
+	noalias(state.expNorm) = exp(-element_prod(repeat(m_gamma,numPatterns),state.norm2));
 }
 
 
@@ -168,15 +168,15 @@ void RBFNet::eval(BatchInputType const& patterns, BatchOutputType& output, State
 	output.resize(numPatterns, m_outputNeurons);
 	InternalState& s = state.toState<InternalState>();
 	
-	//evaluate kernel responses and store them in the intermediates
-	computeGaussianResponses(patterns,state);
+	//evaluate kernel expNorm and store them in the intermediates
+	computeGaussianResponses(patterns,s);
 	//evaluate the linear part of the network
 	noalias(output) = repeat(m_bias,numPatterns);
 	fast_prod(s.expNorm,trans(m_linearWeights),output,1.0);
 }
 
 void RBFNet::weightedParameterDerivative(
-	BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state  RealVector& gradient
+	BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state,  RealVector& gradient
 )const{
 	SIZE_CHECK(patterns.size1() == coefficients.size1());
 	SIZE_CHECK(coefficients.size2() == outputSize());
@@ -196,8 +196,8 @@ void RBFNet::weightedParameterDerivative(
 	//first evaluate the derivatives of the linear part if enabled
 	if(m_trainLinear){
 		//interpret the linear part of the parameter vector as matrix
-		RealMatrixAdaptor weightDerivative = makeMatrix(m_outputNeurons,numNeurons,&gradient(0));
-		fast_prod(trans(coefficients),s.responses,weightDerivative);
+		FixedDenseMatrixProxy<double> weightDerivative = makeMatrix(m_outputNeurons,numNeurons,&gradient(0));
+		fast_prod(trans(coefficients),s.expNorm,weightDerivative);
 		currentParameter += m_outputNeurons*numNeurons;
 		//bias
 		RealSubVector biasDerivative = subrange(gradient,currentParameter,currentParameter+outputSize());
@@ -222,7 +222,7 @@ void RBFNet::weightedParameterDerivative(
 	//It has the nice property, that the exponentials of exp(...) also have exp(...) in the
 	//result. so we can regard the exp function as an additional layer by itself and just do another step of backprop
 	//this saves us the multiplication later on 3 times!
-	noalias(delta) = element_prod(delta,s.responses);
+	noalias(delta) = element_prod(delta,s.expNorm);
 
 	if(m_trainCenters){
 		//compute the input derivative for every center
@@ -234,7 +234,7 @@ void RBFNet::weightedParameterDerivative(
 		//for all centers at the same time!
 		//the second part is than just a matrix-diagonal multiplication
 		
-		RealMatrixAdaptor centerDerivative = makeMatrix(numNeurons,inputSize(),&gradient(currentParameter));
+		FixedDenseMatrixProxy<double> centerDerivative = makeMatrix(numNeurons,inputSize(),&gradient(currentParameter));
 		//compute first part
 		fast_prod(trans(delta),patterns,centerDerivative);
 		//compute second part
