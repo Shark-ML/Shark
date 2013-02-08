@@ -5,15 +5,20 @@ Data Containers
 
     The Data class interface is subject to change in the near future and the recent
     past. Thus this tutorial might be in parts outdated or will turn out to be
-    outdated in the near future. However on a conceptionel level the contents are
+    outdated in the near future. However on a conceptional level the contents are
     correct.
 
 Data handling is an important aspect of a machine learning
 library. Shark ships with three container classes tailored
 to holding data for machine learning applications:
 :doxy:`Data`, :doxy:`UnlabeledData`, and :doxy:`LabeledData`.
-After familiarizing yourself with the basic concepts, also see the
+After familiarizing yourself with the basic concepts, have a look at the
 complete list of :ref:`data tutorials <label_for_data_tutorials>`
+
+A decisive difference between Shark 3.x and previous Shark version and
+other machine learning libraries is that the data is not stored in a
+generic container, but in objects tailored to efficient large-scale
+machine learning.
 
 The containers presented in this tutorial can all be used by including::
 
@@ -22,18 +27,18 @@ The containers presented in this tutorial can all be used by including::
 Key properties
 ---------------
   
-The Data containers provided by shark can store all types of data, that 
+The data containers provided by shark can store all types of data that 
 could also be  held in one of the standard template library containers. 
 In contrast to  a ``std::vector``,  the Data class has three abilities 
 that are important in the context of machine learning:
 
 * Elements of a dataset are stored in blocks called batches, such that 
   computations can be carried out block by block, instead of element 
-  by element. These batches are optimized to allow for continuous memory access,
+  by element. These batches are optimized to allows for continuous memory access,
   which allow for more efficient processing and thus faster implementations.
   For example, a batch of vectors is stored as a matrix with consecutive
   memory with every point occupying a matrix row, instead of using several vectors 
-  with memory locations scatetred all over the heap. This is achieved through Shark's 
+  with memory locations scattered all over the heap. This is achieved through Shark's 
   :doc:`batch mechanism <../library_design/batches>`.
 
 * A :doxy:`Data` object can be used to create subsets. This is useful,
@@ -46,29 +51,27 @@ that are important in the context of machine learning:
 * Data can be shared among different :doxy:`Data` instances. Thus creating
   subsets on the level of batches is quite cheap as it does not need a physical
   copy of the contents of the set. On should not confuse this with the different
-  concept of lazy-copying which just delays the copy until an actual change is
-  done. Instad sets are shard by dfault and only copied, when actually required by
+  concept of lazy-copying, which just delays the copy until an actual change is
+  done. Instad sets are shard by default and only copied, when actually required by
   the algorithm.
 
 
 Different types of Datasets
 --------------------------------
 
-The three dataset classes in shark differ not so much in their implementation, as
+The three dataset classes in shark differ not much in their implementation, as
 thy all use the same underlying structure. However they provide important semantic
 differentiation as well as special functions tailored to this differentiation. Before
 we introduce the interface of the data object we want to clarify this distinction:
 
-* :doxy:`Data`, stores semanticless data, that means data without a special meaning.
-  Think about the prediction of a model, which is often not really a label, but some
-  vector which nedes further interpretation. The Data-class thus takes the general 
-  role of an ``std::vector`` only adapted to the special needs for fast computation in
-  a machine learning environment.
+* :doxy:`Data` can store arbitrary data. The data class takes the
+  general role of an ``std::vector`` only adapted to the special needs
+  for fast computation in a machine learning environment.
 
 * :doxy:`UnlabeledData` represents input data which is not labeled. 
   This is the input format used for unsupervised learning methods. While the unlabeled
-  data class does not affer much new functionality, it provides an important difference.
-  Datasts as used in machine learning are inherently unordered constructs, thus it is
+  data class does not offer much new functionality, it provides an important difference.
+  Datasets as used in machine learning are inherently unordered constructs, thus it is
   okay for an algorithm to shuffle or otherwise reorder the contents of a dataset.
   This is reflected in the set, that shuffling is actively supported using the 
   :doxy:`UnlabeledData::shuffle` method.
@@ -80,7 +83,7 @@ we introduce the interface of the data object we want to clarify this distinctio
   and inputs are treated in machine learning. We often like, especially for unsupervised
   methods, to only use the inputs, thus viewing the object as an ``UnlabeledData<I>``. 
   For evaluation of the model, we also want to first get the set inputs, acquire the 
-  set of predicitons of the model and compare this set of predictions with the set of labels
+  set of predictions of the model and compare this set of predictions with the set of labels
   using a loss function. Instead of seeing input-label pairs as a fixed grouping, we would
   like to view them as two separate datasets which are conveniently bound together. And this is
   how the LabeledData object is implemented.
@@ -88,13 +91,13 @@ we introduce the interface of the data object we want to clarify this distinctio
   
 The class Data<T>
 ------------------
-In this part of the tutorial, we introduce the interface of :doxy:`Data`. The following description
+This part of the tutorial introduces the interface of :doxy:`Data`. The following description
 also applies to the two other types of datasets.
 
 Creation and copying of datasets
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-Creating a dataset is quite easy and can be achived in several ways. The first and
+Creating a dataset is quite easy and can be achieved in several ways. The first and
 by far easiest way is by directly loading the dataset from a file or generate them
 using an artificial distribution of data. Examples for this are given in the
 tutorial on :doc:` importing data <general_optimization_tasks>`. In some cases
@@ -104,31 +107,33 @@ In this case a dataset can be created using::
   std::vector<RealVector> points;//vector of points
   Data<RealVector> data(points);
   
-To create an dataset with space for n points, we need to define an example point which
-decribes the objects to be saved in the set::
+To create an dataset with space for *n* points, we need to define an example point which
+describes the objects to be saved in the set::
 
-  Data<RealVector> data(1000, RealVector(5));
+  Data<RealVector> data(1000, RalVector(5));
 
-In the above example, we create a dataset which can hold 1000 5-dimensional vectors.
-The provided Vector is not to be regarded as a blue-print which is now copied to all
-1000 elements, but merely as a hint on the structure of the objects to be stored. To
-understand this, remember that objects are not stored as single entities, but grouped
-in batches. In the case of the vector, the type of the batch is a matrix. But we can't
-store vectors with different sizes in the dataset, and thus we must provide the dataset
-with the information about how long a matrix-row needs to be. In essence this call does
-not create 1000 entities of vectors together with the same amount of memory allocations, 
-but only a few bigger matrices. By default a safe size is used for the number of elements 
-in a batc, but it can also be actively controlled by adding just the batchsize as a third
-parameter::
+In the above example, we create a dataset which can hold 1000
+5-dimensional vectors.  The provided Vector is not copied to all 1000
+elements, but it serves merely as a hint on the structure of the
+objects to be stored. To understand this, remember that objects are
+not stored as single entities, but grouped in batches. In the case of
+the vector, the type of the batch is a matrix. But we can't store
+vectors with different sizes in the dataset, and thus we must provide
+the dataset with the information about how long a matrix-row needs to
+be. In essence this call does not create 1000 entities of vectors
+together with the same amount of memory allocations, but only a few
+bigger matrices. By default a safe size is used for the number of
+elements in a batch, but it can also be actively controlled by adding
+the maximum size of batches as a third parameter::
 
   Data<RealVector> data(1000, RealVector(5),100);
 
-Datasets can be copied and assigned using the typical operations:
+Datasets can be copied and assigned using the typical operations::
 
   Data<RealVector> data2(data);
   data = data2;
   
-However be aware that these operations do not perform a deep-copy, but as mentioned in the
+However, note that these operations do not perform a deep-copy, but as mentioned in the
 key properties, data is shared between the different instances. To check whether the content
 of a set is shared, we can use::
   
@@ -138,21 +143,22 @@ and to perform a deep copy of the elements, we can use::
 
   data.makeIndependent();
   
-data sharing is thread-safe, thus it is perfectly allowed to create shares of (parts of)
-the data object in several threads. However, we have to stress, and you have to be 
-aware off, that the dataset class does not guard one from xhangs to the individual 
-batches or single elemnts. changing an element in one instanc of the data object will
-change the respective elemnts in all other containers as well.
+Data sharing is thread-safe, thus it is perfectly fine to create
+shares of (parts of) the data object in several threads. However, it
+has to be stressed that the dataset class does not guard one from
+changes to the individual batches or single elements. Changing an
+element in one instance of the data object will change the respective
+elements in all other containers as well.
 
 Data as a collection of batches
 *******************************
 
 As outlined above, the Data class stores the points internally as batches and
-is therefore optimized for using these batchs directly instad of accessing the
-single points. Therefore this part of the tutorial will explain, how the dataset
+is therefore optimized for using these batches directly instad of accessing the
+single points. Therefore this part of the tutorial will explain how the dataset
 provides access to the batches as well as common usage patterns.
 
-The first thing to note is, that the dataset itself does not provide direct access
+The first thing to note is that the dataset itself does not provide direct access
 using iterators or other stl-compatible means. This is done to prevent confusion
 with the element methods (e.g. a size() method could be either interpreted as 
 returning the number of batches or the number of elements). However an
@@ -167,7 +173,7 @@ method::
         std::cout<<*pos<<std::endl;
     }
     
-or similary when data is constant or a constant range is desired::
+or similarly when data is constant or a constant range is desired::
 
     Data<RealVector>::const_batch_range batches = data.batches();
 
@@ -179,13 +185,13 @@ However, the above loop still looks a bit inconvenient, we might as well use
         std::cout<<batch<<std::endl;
     }
 
-or we can also just iteratore using an indexed access::
+Or we can also just iterate using an indexed access::
 
    for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
       std::cout<<data.batches(i)<<std::endl;
    }
    
-we can also use this direct batch access, to get direct access to the single elements,
+We can also use this direct batch access to get direct access to the single elements,
 using the methods for batch-handling and another loop::
 
    BOOST_FOREACH(BatchRef batch,data.batches()){
@@ -448,3 +454,5 @@ We close with two summarizing remarks:
   or loss functions the :doxy:`Data` container should be used wherever
   possible for data exchange, since it results in the most
   versatile interfaces.
+
+..  LocalWords:  semanticless
