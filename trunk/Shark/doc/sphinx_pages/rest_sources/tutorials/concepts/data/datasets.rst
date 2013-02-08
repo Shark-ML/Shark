@@ -100,7 +100,7 @@ Creation and copying of datasets
 Creating a dataset is quite easy and can be achieved in several ways. The first and
 by far easiest way is by directly loading the dataset from a file or generate them
 using an artificial distribution of data. Examples for this are given in the
-tutorial on :doc:` importing data <general_optimization_tasks>`. In some cases
+tutorial on :doc:`importing data <general_optimization_tasks>`. In some cases
 data is already in memory and only needs to be imported into a dataset. 
 In this case a dataset can be created using::
 
@@ -204,18 +204,17 @@ using the methods for batch-handling and another loop::
 Data as a collection of elements
 *********************************
 
-Whil the Data object is optimized for batch access, some algorithms can not be reformulated
-very well using batch algorithms, or the code is not critical to the performance and it
-would not be worth the effort to rewrite it completely.
-Thus we also provide an convenience interface for elements, however we can't give as good performance 
-guarantees and behaviour as for the batch access. While the interfaces look very similar, you must be 
-aware of the important differences.
+While the data object is optimized for batch access, sometimes direct
+access to elements is desired.  Thus we also provide an convenience
+interface for elements, however, we can't give as good performance
+guarantees as for the batch access. While the interfaces look very
+similar, you must be aware of the important differences.
 
 First of all, all elements stored in the dataset are only virtual for most input types. This means
 that querying the i-th element of the set does not return a reference to it, but instead returns 
-a proxy obect which behaves as the reference. So for example when storing vectors, instead of a vector
+a proxy object which behaves as the reference. So for example when storing vectors, instead of a vector
 a row of the matrix it is stored in is returned. This is no problem most of the time, however when 
-using the returned value as an argumeent to a function like for example::
+using the returned value as an argument to a function like for example::
 
    void function(Vector&);
 
@@ -223,15 +222,16 @@ the compiler will complain, that a matrix row is not a vector. In the case of::
 
   void function(Vector const&);
    
-the compiler is very helpfull, creating a temporary vector for you and copying the 
+the compiler is very helpful, creating a temporary vector for you and copying the 
 matrix row into it. However, this is slow. Be aware of this performance pitfall and use
 template arguments or the correct reference type of the dataset if possible::
 
    void function (Data<RealVector>::element_reference);
 
-The second pitfall is, that we can't give as strong performance guarantees for the methods called.
+The second pitfall is  that we can't give as strong performance guarantees for the methods called.
 As we allow batch resizing and all batches having a different size, it is not easy to keep track of the
-actual number of elements stored in the set, thus calling :doxy:`Data::numberOfElements` is linear time. 
+actual number of elements stored in the set, thus calling
+:doxy:`Data::numberOfElements` takes time linear in the number of batches. 
 For the same reason, accessing the i-th element using :doxy:`Data::element` is linear in the number of batches, 
 as we first need to find the batch the element is located in, before we can actually access it. 
 Thus aside from only very small datasets or performance  uncritical code, you should never use 
@@ -253,11 +253,11 @@ random-access to the dataset and use the following, more appropriate  ways to it
 
 Summary of element access
 **************************
-We will now summarize the above description in a more formal tabular layout. For the shortnss of description,
+We will now summarize the above description in a more formal tabular layout. For the shortness of description,
 we  only present the non-const version of every method and typedef. The rest can be looked up in the doxygen reference.
 
-typedefs of Data. For every reference and range there exists also an immutable version adding a ``const_`` to the
-bginning:
+Typedefs of Data. For every reference and range there exists also an immutable version adding a ``const_`` to the
+beginning:
 
 ========================   ======================================================================
 Type                       Description
@@ -272,7 +272,7 @@ batch_reference            Reference to a batch of points. This is batch_type&.
 batch_range                Range over the batches.
 ========================   ======================================================================
 
-methods regarding batch access. ALl these methods are constant time complexity:
+Methods regarding batch access. All these methods have constant time complexity:
 
 ==========================================   ======================================================================
 Method                                       Description
@@ -282,7 +282,8 @@ batch_reference batch (size_t i)             Returns the i-th batch of the set
 batch_range batches ()                       Returns an stl-compliant random-access-container over the batches.
 ==========================================   ======================================================================
 
-methods regarding batch access. All these methods are linear time complexity:
+Methods regarding batch access. All these methods have time complexity
+linear in the number of batches:
 
 ==========================================   ======================================================================
 Method                                       Description
@@ -290,7 +291,7 @@ Method                                       Description
 size_t numberOfElements () const             Returns the number of elements in the set.
 element_reference element (size_t i)         Returns the i-th element of the set
 element_range elements ()                    Returns an bidirectional container over the elements. Random access
-                                             is also supported, but does not meet th time complexity. Also be aware
+                                             is also supported, but does not meet the time complexity. Also be aware
 					     that instead of references, proxy-objects are returned as elements are
 					     only virtual.
 ==========================================   ======================================================================
