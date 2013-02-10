@@ -100,7 +100,7 @@ Creation and copying of datasets
 Creating a dataset is quite easy and can be achieved in several ways. The first and
 by far easiest way is by directly loading the dataset from a file or generate them
 using an artificial distribution of data. Examples for this are given in the
-tutorial on :doc:`importing data <general_optimization_tasks>`. In some cases
+tutorial on :doc:`importing data <../../first_steps/general_optimization_tasks>`. In some cases
 data is already in memory and only needs to be imported into a dataset. 
 In this case a dataset can be created using::
 
