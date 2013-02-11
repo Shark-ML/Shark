@@ -10,7 +10,7 @@
 using namespace shark;
 
 //our problem
-class UniformPoints : public UnlabeledDataDistribution<RealVector>
+class UniformPoints : public DataDistribution<RealVector>
 {
 public:
 	UniformPoints(std::size_t dimensions){

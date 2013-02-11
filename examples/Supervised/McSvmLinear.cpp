@@ -21,7 +21,7 @@ typedef CompressedRealMatrixRow RowType;
 // data generating distribution for our toy
 // multi-category classification problem
 /// @cond EXAMPLE_SYMBOLS
-class Problem : public DataDistribution<VectorType, unsigned int>
+class Problem : public LabeledDataDistribution<VectorType, unsigned int>
 {
 public:
 	void draw(VectorType& input, unsigned int& label)const
