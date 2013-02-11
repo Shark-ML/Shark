@@ -199,8 +199,8 @@ public:
 				++next_label;
 			}
 		}
-		Data< unsigned int > all_validation_labels(tmp_helper_labels);
-		Data< RealVector > all_validation_predictions(tmp_helper_preds);
+		Data< unsigned int > all_validation_labels = createDataFromRange(tmp_helper_labels);
+		Data< RealVector > all_validation_predictions = createDataFromRange(tmp_helper_preds);
 
 		// now we got it all: the predictions across the validation folds, plus the correct corresponding
 		// labels. so we go ahead and fit a sigmoid to be as good as possible a model between the two:
@@ -266,8 +266,8 @@ public:
 				++next_label;
 			}
 		}
-		Data< unsigned int > all_validation_labels(tmp_helper_labels);
-		Data< RealVector > all_validation_predictions(tmp_helper_preds);
+		Data< unsigned int > all_validation_labels = createDataFromRange(tmp_helper_labels);
+		Data< RealVector > all_validation_predictions = createDataFromRange(tmp_helper_preds);
 
 		// now we got it all: the predictions across the validation folds, plus the correct corresponding
 		// labels. so we go ahead and fit a sigmoid to be as good as possible a model between the two:

@@ -24,6 +24,9 @@
 #include <shark/Core/ISerializable.h>
 #include <shark/Core/utility/ZipPair.h>
 #include <shark/Core/Exception.h>
+#include <shark/Core/utility/CanBeCalled.h>
+
+#include <boost/mpl/eval_if.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
@@ -82,7 +85,6 @@ inline std::size_t batchPartitioning(
 	return sumOfBatches;
 }
 
-///
 /// \brief Shared memory container class with slicing
 template <class Type>
 class SharedContainer : public ISerializable
@@ -446,97 +448,6 @@ private:
 	}
 };
 
-//~ template<class T>
-//~ bool operator == (const SharedContainer<T>& op1, const SharedContainer<T>& op2){
-	//~ if(op1.m_data.size() != op2.m_data.size())
-		//~ return false;
-	//~ for(std::size_t i  = 0; i !=op1.m_data.size(); ++i){
-		//~ if(op1.m_data[i] != op2.m_data[i])
-			//~ return false;
-	//~ }
-	//~ return true;
-//~ }
-//~ template<class T>
-//~ bool operator != (const SharedContainer<T>& op1, const SharedContainer<T>& op2){
-	//~ return !(op1==op2);
-//~ }
-//~ ///
-//~ /// \brief collection of index sets
-//~ ///
-//~ /// \par
-//~ /// This class holds a list of named index sets.
-//~ /// It is able to report a pointer to an index set,
-//~ /// and alternatively it is able to compute the
-//~ /// complement of an index set.
-//~ ///
-//~ /// \par
-//~ /// The subsets are stored as index lists, not as data
-//~ /// containers, such that modifications to the original
-//~ /// data (such as preprocessing, e.g. with transform)
-//~ /// also affect named subsets.
-//~ class IndexSetContainer : public ISerializable
-//~ {
-//~ public:
-	//~ typedef std::vector<std::size_t> Element;
-//~ private:
-	//~ typedef std::map<std::string, Element> SubsetMap;
-	//~ SubsetMap m_subset;
-//~ public:
-	//~ friend bool operator == (const IndexSetContainer& op1, const IndexSetContainer& op2);
-
-	//~ typedef SubsetMap::const_iterator const_iterator;
-	//~ typedef SubsetMap::iterator iterator;
-
-	//~ /// Constructor
-	//~ IndexSetContainer()
-	//~ { }
-
-	//~ /// check for the presence of a named subset
-	//~ bool hasNamedSubset(std::string const& name) const{
-		//~ return m_subset.find(name) != m_subset.end();
-	//~ }
-	//~ /// create (or overwrite) a named subset
-	//~ void createNamedSubset(std::string const& name, Element const& indices){
-		//~ m_subset.insert(std::make_pair(name,indices));
-	//~ }
-	//~ /// This function finds the position of a subset by name.
-	//~ /// It throws an exception if the element does not exist.
-	//~ Element findSubset(std::string const& name) const{
-		//~ const_iterator pos = m_subset.find(name);
-		//~ SHARK_CHECK(pos != m_subset.end(), "[IndexSetContainer::findIndex] unknown named subset");
-		//~ return pos->second;
-	//~ }
-
-	//~ /// from ISerializable
-	//~ void read(InArchive& archive){
-		//~ archive & m_subset;
-	//~ }
-
-	//~ /// from ISerializable
-	//~ void write(OutArchive& archive) const
-	//~ { archive & m_subset; }
-
-	//~ iterator begin(){
-		//~ return m_subset.begin();
-	//~ }
-	//~ iterator end(){
-		//~ return m_subset.end();
-	//~ }
-	//~ const_iterator begin()const{
-		//~ return m_subset.begin();
-	//~ }
-	//~ const_iterator end()const{
-		//~ return m_subset.end();
-	//~ }
-//~ };
-
-//~ inline bool operator == (const IndexSetContainer& op1, const IndexSetContainer& op2){
-	//~ return op1.m_subset == op2.m_subset;
-//~ }
-//~ inline bool operator != (const IndexSetContainer& op1, const IndexSetContainer& op2){
-	//~ return !(op1==op2);
-//~ }
-
 /// compute the complement of the indices with respect to the set [0,...n[
 template<class T,class T2>
 void complement(
@@ -598,6 +509,25 @@ private:
 	unsigned int m_oneClass;
 };
 
+
+template<class Functor, class B>
+struct TransformedDataElementTypeFromBatch{
+	typedef typename Batch<
+		typename boost::result_of<Functor(B)>::type 
+	>::value_type type;
+};
+/// \brief For Data<T> and functor F calculates the result of the resulting elements F(T).
+template<class Functor, class T>
+struct TransformedDataElement{
+	typedef typename boost::mpl::eval_if<
+		CanBeCalled<Functor,T>,
+		boost::result_of<Functor(T) >,
+		TransformedDataElementTypeFromBatch<
+			Functor,
+			typename Batch<T>::type 
+		>
+	>::type type;
+};
 }//end namespace detail
 
 ///\brief The type used to mimic a pair of data.

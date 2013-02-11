@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_SIMPLE_VALUE )
 	points[0](1) = 0.0;
 	points[1](0) = 6.0;
 	points[1](1) = 0.0;
-	Data<RealVector> basis(points);
+	Data<RealVector> basis = createDataFromRange(points);
 
 	// build a kernel expansion object
 	DenseRbfKernel kernel(0.02);                               // sigma = 5
@@ -94,9 +94,9 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_BATCH_VALUE )
 		data[i](2) = Rng::uni(-1,1);
 	}
 	//BatchSize 10 to check whether complex structured bases also work
-	Data<RealVector> basis(data,10);
+	Data<RealVector> basis = createDataFromRange(data,10);
 	//BatchSize 100 results in a simple structured base
-	Data<RealVector> simpleBasis(data,100);
+	Data<RealVector> simpleBasis = createDataFromRange(data,100);
 	
 	
 	RealMatrix inputBatch(100,3);
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_SERIALIZATION )
 		points[0](1) = 0.0;
 		points[1](0) = 6.0;
 		points[1](1) = 0.0;
-		Data<RealVector> basis(points);
+		Data<RealVector> basis = createDataFromRange(points);
 
 		// build a kernel expansion object
 		DenseRbfKernel kernel(0.02);                             // sigma = 5

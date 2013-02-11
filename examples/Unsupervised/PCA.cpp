@@ -56,7 +56,7 @@ UnlabeledData<RealVector> createData()
 		//first element is the sample, second is the underlying uniform gaussian
 		sample = mean + distribution().first;
 	}
-	return UnlabeledData<RealVector>(data);
+	return createDataFromRange(data);
 }
 
 

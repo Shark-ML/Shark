@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE( Normalize_Kernel_Unit_Variance_InFeatureSpace_Simple )
 	v(0) = 0.0; input[0] = v;
 	v(0) = 1.0; input[1] = v;
 	v(0) = 2.0; input[2] = v;
-	UnlabeledData<RealVector> data(input);
+	UnlabeledData<RealVector> data = createDataFromRange(input);
 	DenseLinearKernel lin;
 	DenseScaledKernel scale( &lin );
 	NormalizeKernelUnitVariance<> normalizer;
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( Normalize_Kernel_Unit_Variance_InFeatureSpace_LinearKernel
 		}
 		input[i] = v;
 	}
-	UnlabeledData<RealVector> data(input);
+	UnlabeledData<RealVector> data = createDataFromRange(input);
 	DenseLinearKernel lin;
 	DenseScaledKernel scale( &lin );
 	NormalizeKernelUnitVariance<> normalizer;
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE( Normalize_Kernel_Unit_Variance_InFeatureSpace_GaussianKern
 		}
 		input[i] = v;
 	}
-	UnlabeledData<RealVector> data(input);
+	UnlabeledData<RealVector> data = createDataFromRange(input);
 	DenseRbfKernel kernel(0.01);
 	DenseScaledKernel scale( &kernel );
 	NormalizeKernelUnitVariance<> normalizer;

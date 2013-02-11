@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE( FISHER_LDA_TEST ){
 	}
 	//statisticalBayesRisk/=trainExamples;
 
-	ClassificationDataset dataset(input,target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input,target);
 
 	trainer.train(model, dataset);
 

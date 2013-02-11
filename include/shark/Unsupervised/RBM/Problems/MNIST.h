@@ -71,7 +71,7 @@ private:
 			}
 		}
 		delete [] memblock;
-		m_data=UnlabeledData<RealVector>(data,m_batchSize);
+		m_data = createDataFromRange(data,m_batchSize);
 	}
 public:
 	

@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE( FFNET_SERIALIZE )
 		data.push_back(input);
 		target.push_back(net(input));
 	}
-	RegressionDataset dataset(data,target);
+	RegressionDataset dataset = createLabeledDataFromRange(data,target);
 
 	//now we serialize the FFNet
 	ostringstream outputStream;  

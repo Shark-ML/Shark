@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_covar_corrcoef )
 			dataVec[row](col) = init_values[ row ][ col ];
 		}
 	}
-	Data<RealVector> data(dataVec);
+	Data<RealVector> data  = createDataFromRange(dataVec);
 	RealMatrix covar_mat = covariance(data);
 
 	RealMatrix corrcoef_mat = corrcoef(data);

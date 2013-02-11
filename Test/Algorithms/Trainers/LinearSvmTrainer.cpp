@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 			input[i](2 * c     + d) = Rng::gauss() - 2.0;
 			target[i] = label;
 		}
-		LabeledData<CompressedRealVector, unsigned int> dataset(input, target);
+		LabeledData<CompressedRealVector, unsigned int> dataset = createLabeledDataFromRange(input, target);
 
 		for (size_t i=0; i<8; i++)
 		{

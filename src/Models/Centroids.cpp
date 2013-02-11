@@ -158,7 +158,7 @@ void Centroids::initFromData(const ClassificationDataset &data, unsigned noClust
                 }
                 if(elementCount == noClusters) break; 
 	}
-	setCentroids(centers);
+	setCentroids(createDataFromRange(centers));
 }
 
 void Centroids::initFromData(Data<RealVector> const& dataset, unsigned noClusters) {

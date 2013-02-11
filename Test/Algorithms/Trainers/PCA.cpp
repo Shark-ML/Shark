@@ -82,7 +82,7 @@ UnlabeledData<RealVector> createData3D()
 		//first element is the sample, second is the underlying uniform gaussian
 		sample = mean + distribution().first;
 	}
-	return UnlabeledData<RealVector>(data);
+	return  createDataFromRange(data);
 }
 
 ///The 2D test distribution is an even simpler Gaussian.
@@ -101,7 +101,7 @@ UnlabeledData<RealVector> createData2D()
 
 	std::vector<RealVector> v;
 	for(unsigned i=0; i<numberOfExamples; i++) v.push_back(mu + distribution().first);
-	return UnlabeledData<RealVector>(v);
+	return  createDataFromRange(v);
 }
 
 
@@ -143,7 +143,7 @@ UnlabeledData<RealVector> createDataNotFullRank()
 		//first element is the sample, second is the underlying uniform gaussian
 		sample = mean + distribution().first;
 	}
-	return UnlabeledData<RealVector>(data,2);//small batch size to get batching errors
+	return  createDataFromRange(data,2);//small batch size to get batching errors
 }
 
 BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){

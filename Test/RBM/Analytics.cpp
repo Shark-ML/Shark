@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( Energy_NegLogLikelihood )
 				dataVec[j](k)=Rng::coinToss(0.5);
 			}
 		}
-		UnlabeledData<RealVector> data(dataVec,25);
+		UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
 		RealScalarVector beta(1,1);
 		
 		//now claculate the test

@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE( CMAC_COPY )
 		target.push_back(cmac(input));
 	}
 
-	RegressionDataset dataset(data,target);
+	RegressionDataset dataset = createLabeledDataFromRange(data,target);
 
 	//the test cmac with the same tiling
 	CMACMap cmacTest=cmac;
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE( CMAC_SERIALIZE )
 		data.push_back(input);
 		target.push_back(cmac(input));
 	}
-	RegressionDataset dataset(data,target);
+	RegressionDataset dataset = createLabeledDataFromRange(data,target);
 
 	//now we serialize the CMAC
 	

@@ -340,7 +340,7 @@ void import_libsvm(
 	std::vector<InputType> x;
 	std::vector<LabelType> y;
 	detail::import_libsvm(x, y, ifs, highestIndex, allowMissingClasses, labelmap, verbose);
-	dataset = LabeledData<InputType, LabelType>(x, y);
+	dataset = createLabeledDataFromRange(x, y);
 }
 
 

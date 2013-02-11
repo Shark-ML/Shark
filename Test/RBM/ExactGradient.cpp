@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_MoreHidden )
 				dataVec[j](k)=Rng::coinToss(0.5);
 			}
 		}
-		UnlabeledData<RealVector> data(dataVec,25);
+		UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
 		RealScalarVector beta(4,1);
 		
 		//now calculate the test
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_LessHidden )
 				dataVec[j](k)=Rng::coinToss(0.5);
 			}
 		}
-		UnlabeledData<RealVector> data(dataVec,25);
+		UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
 		RealScalarVector beta(4,1);
 		
 		//now calculate the test
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_MoreHidden )
 			dataVec[j](k)=Rng::coinToss(0.5);
 		}
 	}
-	UnlabeledData<RealVector> data(dataVec,25);
+	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
 	
 	for(std::size_t i = 0; i != 10; ++i){
 		initRandomNormal(rbm,2);
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_LessHidden )
 			dataVec[j](k)=Rng::coinToss(0.5);
 		}
 	}
-	UnlabeledData<RealVector> data(dataVec,25);
+	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
 	
 	for(std::size_t i = 0; i != 10; ++i){
 		initRandomNormal(rbm,2);

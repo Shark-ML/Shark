@@ -26,7 +26,7 @@ public:
 					data[16+x](l*4 + i) = line(l);
 				}
 			}
-			m_data=UnlabeledData<RealVector>(data);
+			m_data = createDataFromRange(data);
 		}
 	}
 	///Returns all input pattern of the BarsAndStripes problem

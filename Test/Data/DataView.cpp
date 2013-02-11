@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Test )
 	for (size_t i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
-	UnlabeledData<int> set(inputs,10);
+	UnlabeledData<int> set =  createDataFromRange(inputs,10);
 	
 	//define subset
 	std::vector<std::size_t> subsetIndices1;
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Const_Test )
 	for (size_t i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
-	UnlabeledData<int> set0(inputs,10);
+	UnlabeledData<int> set0 = createDataFromRange(inputs,10);
 	UnlabeledData<int> const& set = set0;
 	
 	//define subset
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Test )
 	for (size_t i=0;i!=100;++i) {
 		labels.push_back(200+i);
 	}
-	LabeledData<int,unsigned int> set(inputs,labels,10);
+	LabeledData<int,unsigned int> set = createLabeledDataFromRange(inputs,labels,10);
 	
 	//define subset
 	std::vector<std::size_t> subsetIndices1;
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Const_Test )
 	for (size_t i=0;i!=100;++i) {
 		labels.push_back(200+i);
 	}
-	LabeledData<int,unsigned int> set0(inputs,labels,10);
+	LabeledData<int,unsigned int> set0 = createLabeledDataFromRange(inputs,labels,10);
 	LabeledData<int,unsigned int> const& set = set0;
 	//define subset
 	std::vector<std::size_t> subsetIndices1;

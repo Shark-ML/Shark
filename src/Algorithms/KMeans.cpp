@@ -90,7 +90,7 @@ std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centro
 				newCenters[j] /= (double)numPoints[j];
 			}
 		}
-		centroids.setCentroids(newCenters);
+		centroids.setCentroids(createDataFromRange(newCenters));
 	}
 
 	// return the number of iterations

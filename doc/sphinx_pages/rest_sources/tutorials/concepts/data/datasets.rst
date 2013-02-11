@@ -168,7 +168,7 @@ method::
     typedef Data<RealVector>::batch_range Batches;
     Batches batches = data.batches();
     
-    std:cout<<batches.size()<<std::endl;
+    std::cout<<batches.size()<<std::endl;
     for(Batches::iterator pos = batches.begin(); pos != batches.end(); ++pos){
         std::cout<<*pos<<std::endl;
     }
@@ -246,8 +246,8 @@ random-access to the dataset and use the following, more appropriate  ways to it
         std::cout<<*pos<<std::endl;
     }
     //2: BOOST_FOREACH
-    BOOST_FOREACH(ElmentRef element,data.elements()){
-        std::cout<<batch<<std::endl;
+    BOOST_FOREACH(ElementRef element,data.elements()){
+        std::cout<<element<<std::endl;
     }
 
 

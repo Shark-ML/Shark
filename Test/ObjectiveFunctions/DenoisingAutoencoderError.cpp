@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunction_DenoisedAutoencoderError_NoNoise )
 		data.push_back(input);
 	}
 
-	UnlabeledData<RealVector> dataset(data);
+	UnlabeledData<RealVector> dataset = createDataFromRange(data);
 	IRpropPlus optimizer;
 	SquaredLoss<> loss;
 	LinearModel<> model(3,3);
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunction_DenoisedAutoencoderError_Noise_CMA )
 		data.push_back(input);
 	}
 
-	UnlabeledData<RealVector> dataset(data);
+	UnlabeledData<RealVector> dataset = createDataFromRange(data);
 	CMA optimizer;
 	SquaredLoss<> loss;
 	LinearModel<> model(3,3);
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunction_DenoisedAutoencoderError_Noise_IRprop )
 		data.push_back(input);
 	}
 
-	UnlabeledData<RealVector> dataset(data);
+	UnlabeledData<RealVector> dataset = createDataFromRange(data);
 	IRpropPlus optimizer;
 	SquaredLoss<> loss;
 	LinearModel<> model(3,3);

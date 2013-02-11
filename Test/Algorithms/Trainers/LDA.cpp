@@ -50,12 +50,12 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 	}
 	statisticalBayesRisk/=trainExamples;
 
-	ClassificationDataset dataset(input,target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input,target);
 
 	trainer.train(model, dataset);
 
 	
-	Data<unsigned int> results = model(input);
+	Data<unsigned int> results = model(dataset.inputs());
 	
 	ZeroOneLoss<> loss;
 	double classificatorRisk = loss.eval(dataset.labels(),results);
@@ -111,12 +111,12 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	}
 	statisticalBayesRisk/=trainExamples;
 
-	ClassificationDataset dataset(input,target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input,target);
 
 	trainer.train(model, dataset);
 
 	
-	Data<unsigned int> results = model(input);
+	Data<unsigned int> results = model(dataset.inputs());
 	
 	ZeroOneLoss<> loss;
 	double classificatorRisk = loss.eval(dataset.labels(),results);
@@ -177,12 +177,12 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 	}
 	statisticalBayesRisk/=trainExamples;
 
-	ClassificationDataset dataset(input,target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input,target);
 
 	trainer.train(model, dataset);
 
 	//double classificatorRisk=0;
-	Data<unsigned int> results = model(input);
+	Data<unsigned int> results = model(dataset.inputs());
 	
 	ZeroOneLoss<> loss;
 	double classificatorRisk = loss.eval(dataset.labels(),results);

@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize )
 		data.push_back(input);
 		target.push_back(model(input));
 	}
-	RegressionDataset dataset(data,target);
+	RegressionDataset dataset = createLabeledDataFromRange(data,target);
 
 	//now we serialize the model
 	ostringstream outputStream;  
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_NoOffset )
 		data.push_back(input);
 		target.push_back(model(input));
 	}
-	RegressionDataset dataset(data,target);
+	RegressionDataset dataset = createLabeledDataFromRange(data,target);
 
 	//now we serialize the model
 	ostringstream outputStream;  
@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_Unconstrained )
 		data.push_back(input);
 		target.push_back(model(input));
 	}
-	RegressionDataset dataset(data,target);
+	RegressionDataset dataset = createLabeledDataFromRange(data,target);
 
 	//now we serialize the model
 	ostringstream outputStream;  

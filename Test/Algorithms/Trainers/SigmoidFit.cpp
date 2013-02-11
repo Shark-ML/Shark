@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_RPROP_NO_ENCODING_DETERMINISTIC ){
 			dataSampleLabels[ i*10+k] = 1; //set to positive class according to probability
 		}
 	}
-	ClassificationDataset dataset(dataSamplePoints, dataSampleLabels);
+	ClassificationDataset dataset = createLabeledDataFromRange(dataSamplePoints, dataSampleLabels);
 	
 	// now start testing phase: construct new model for safety, set to arbitrary state
 	SigmoidFitRpropNLL trainer(100);
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_RPROP_WITH_ENCODING_DETERMINISTIC ){
 			dataSampleLabels[ i*10+k] = 1; //set to positive class according to probability
 		}
 	}
-	ClassificationDataset dataset(dataSamplePoints, dataSampleLabels);
+	ClassificationDataset dataset = createLabeledDataFromRange(dataSamplePoints, dataSampleLabels);
 	
 	
 	// now start testing phase: construct new model for safety, set to arbitrary state
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_RPROP_NO_ENCODING_DETERMINISTIC_NOBIAS ){
 			dataSampleLabels[ i*10+k] = 1; //set to positive class according to probability
 		}
 	}
-	ClassificationDataset dataset(dataSamplePoints, dataSampleLabels);
+	ClassificationDataset dataset = createLabeledDataFromRange(dataSamplePoints, dataSampleLabels);
 	// now start testing phase: construct new model for safety, set to arbitrary state
 	SigmoidFitRpropNLL trainer(100);
 	SigmoidModel test_model( TRANSFORM_INPUTS );
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_RPROP_WITH_ENCODING_DETERMINISTIC_NOBIAS 
 			dataSampleLabels[ i*10+k] = 1; //set to positive class according to probability
 		}
 	}
-	ClassificationDataset dataset(dataSamplePoints, dataSampleLabels);
+	ClassificationDataset dataset = createLabeledDataFromRange(dataSamplePoints, dataSampleLabels);
 	// now start testing phase: construct new model for safety, set to arbitrary state
 
 	SigmoidFitRpropNLL trainer(100);
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_PLATT ){
 		input[i].resize(1);
 		input[i](0) = Rng::gauss() - 2.0 * target[i];
 	}
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 
 	// model and trainer
 	SigmoidModel sigmoid;

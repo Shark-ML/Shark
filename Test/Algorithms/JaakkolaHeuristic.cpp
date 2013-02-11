@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_JaakkolaHeuristic )
 	targets[3] = 1;
 	targets[4] = 1;
 	targets[5] = 1;
-	ClassificationDataset dataset(inputs, targets);
+	ClassificationDataset dataset = createLabeledDataFromRange(inputs, targets);
 
 	// obtain values of sigma for different quantiles, including the default
 	JaakkolaHeuristic jh(dataset);

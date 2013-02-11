@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(TestMissingFeaturesKernelExpansion)
 	input[2](0) = -1.0; input[2](1) = -8.0; input[2](2) =  3.0; input[2](3) =  3.0; target[2] = 0;
 	input[3](0) = -1.0; input[3](1) = -1.0; input[3](2) =  4.0; input[3](3) =  2.0; target[3] = 0;
 	input[4](0) =  3.0; input[4](1) =  3.0; input[4](2) =  5.0; input[4](3) =  1.0; target[4] = 1;
-	Data<RealVector> basis(input);
+	Data<RealVector> basis  = createDataFromRange(input);
 	ke.setBasis(basis);
 	std::cout<<"b"<<std::endl;
 	// Alphas

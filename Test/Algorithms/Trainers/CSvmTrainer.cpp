@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_TEST )
 	input[2](0) = -1.0; input[2](1) = -8.0; target[2] = 0;
 	input[3](0) = -1.0; input[3](1) = -1.0; target[3] = 0;
 	input[4](0) =  3.0; input[4](1) =  3.0; target[4] = 1;
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 
 	// hard-margin training with linear kernel
 	{

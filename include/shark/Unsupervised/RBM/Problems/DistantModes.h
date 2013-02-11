@@ -52,7 +52,7 @@ private:
 			modePrototype(element, mode);
 			perturbate(element, m_p);
 		}
-		m_data=UnlabeledData<RealVector>(data);
+		m_data = createDataFromRange(data);
 	}
 	
 public:

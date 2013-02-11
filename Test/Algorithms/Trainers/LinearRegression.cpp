@@ -54,11 +54,11 @@ BOOST_AUTO_TEST_CASE( LinearRegression_TEST ){
  	model.setStructure(matrix,offset);
 
 	// train the model, overwriting its parameters
-	RegressionDataset trainset(input, trainTarget);
+	RegressionDataset trainset = createLabeledDataFromRange(input, trainTarget);
 	trainer.train(model, trainset);
 
 	// evaluate using the ErrorFunction
-	RegressionDataset testset(input, testTarget);
+	RegressionDataset testset = createLabeledDataFromRange(input, testTarget);
 	SquaredLoss<> loss;
 	ErrorFunction<RealVector,RealVector> mse(&model, &loss);
 	mse.setDataset(testset);

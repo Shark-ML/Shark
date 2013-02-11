@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET )
 	input[3](0) =  5.0; input[3](1) =  0.0; target[3] = 1;
 	input[4](0) =  8.0; input[4](1) = -4.0; target[4] = 1;
 	input[5](0) = -6.0; input[5](1) = -1.0; target[5] = 0;
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset  = createLabeledDataFromRange(input, target);
 	// set up non-related quiz points
 	std::size_t NUM_QUIZ_POINTS = 13;
 	std::vector<RealVector> quiz(NUM_QUIZ_POINTS);
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET_UNCONSTRA
 	input[3](0) =  5.0; input[3](1) =  0.0; target[3] = 1;
 	input[4](0) =  8.0; input[4](1) = -4.0; target[4] = 1;
 	input[5](0) = -6.0; input[5](1) = -1.0; target[5] = 0;
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 	// set up non-related quiz points
 	std::size_t NUM_QUIZ_POINTS = 13;
 	std::vector<RealVector> quiz(NUM_QUIZ_POINTS);
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET_RBF )
 	input[3](0) =  5.0; input[3](1) =  0.0; target[3] = 1;
 	input[4](0) =  8.0; input[4](1) = -4.0; target[4] = 1;
 	input[5](0) = -6.0; input[5](1) = -1.0; target[5] = 0;
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 	// set up non-related quiz points
 	std::size_t NUM_QUIZ_POINTS = 13;
 	std::vector<RealVector> quiz(NUM_QUIZ_POINTS);
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_SECOND_DATASET )
 	input[2](0) = -1.0; input[2](1) = -8.0; target[2] = 0;
 	input[3](0) = -1.0; input[3](1) = -1.0; target[3] = 0;
 	input[4](0) =  3.0; input[4](1) =  3.0; target[4] = 1;
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 
 	// non-related quiz points
 	std::size_t NUM_QUIZ_POINTS = 50;
@@ -413,7 +413,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_KERNEL_PARAMS )
 	input[3](0) =  5.0; input[3](1) =  0.0; target[3] = 1;
 	input[4](0) =  8.0; input[4](1) = -4.0; target[4] = 1;
 	input[5](0) = -6.0; input[5](1) = -1.0; target[5] = 0;
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 	// set up non-related quiz points
 	std::size_t NUM_QUIZ_POINTS = 13;
 	std::vector<RealVector> quiz(NUM_QUIZ_POINTS);
@@ -525,8 +525,8 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 	std::vector<unsigned int> t1,t2;
 	detail::import_csv( i1, t1, ss1, LAST_COLUMN, " ", "");
 	detail::import_csv( i2, t2, ss2, LAST_COLUMN, " ", "");
-	ClassificationDataset d1(i1,t1);
-	ClassificationDataset d2(i2,t2);
+	ClassificationDataset d1 = createLabeledDataFromRange(i1,t1);
+	ClassificationDataset d2 = createLabeledDataFromRange(i2,t2);
 	std::size_t NUM_DATA_POINTS = 9;
 
 	// set up different values of C and gamma
@@ -616,8 +616,8 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 	std::vector<unsigned int> t1,t2;
 	detail::import_csv( i1, t1, ss1, LAST_COLUMN, " ", "");
 	detail::import_csv( i2, t2, ss2, LAST_COLUMN, " ", "");
-	ClassificationDataset d1(i1,t1);
-	ClassificationDataset d2(i2,t2);
+	ClassificationDataset d1 = createLabeledDataFromRange(i1,t1);
+	ClassificationDataset d2 = createLabeledDataFromRange(i2,t2);
 	std::size_t NUM_DATA_POINTS = 9;
 
 	// set up different values of C and gamma
@@ -693,7 +693,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_KERNEL_PARAMS_UNCONSTRAIN
 	input[3](0) =  5.0; input[3](1) =  0.0; target[3] = 1;
 	input[4](0) =  8.0; input[4](1) = -4.0; target[4] = 1;
 	input[5](0) = -6.0; input[5](1) = -1.0; target[5] = 0;
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 	// set up non-related quiz points
 	std::size_t NUM_QUIZ_POINTS = 13;
 	std::vector<RealVector> quiz(NUM_QUIZ_POINTS);
@@ -790,7 +790,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 	input[3](0) =  5.0; input[3](1) =  0.0; target[3] = 1;
 	input[4](0) =  8.0; input[4](1) = -4.0; target[4] = 1;
 	input[5](0) = -6.0; input[5](1) = -1.0; target[5] = 0;
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 	// set up non-related quiz points
 	std::size_t NUM_QUIZ_POINTS = 13;
 	std::vector<RealVector> quiz(NUM_QUIZ_POINTS);

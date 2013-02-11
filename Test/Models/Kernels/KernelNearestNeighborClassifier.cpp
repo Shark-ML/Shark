@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_NEAREST_NEIGHBOR_CLASSIFIER ) {
 	target[4]=0;
 	target[5]=1;
 
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 	DataView<Data<RealVector> > view(dataset.inputs());
 	DenseRbfKernel kernel(0.5);
 
@@ -116,13 +116,13 @@ BOOST_AUTO_TEST_CASE( SIMPLE_NEAREST_NEIGHBOR_CLASSIFIER ) {
 	target[4]=0;
 	target[5]=1;
 
-	ClassificationDataset dataset(input, target,2);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target,2);
 
 	DenseRbfKernel kernel(0.5);
 	SimpleNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &kernel);
 	NearestNeighborClassifier<RealVector> model(&algorithm, 3);
 
-	Data<unsigned int> labels = model(input);
+	Data<unsigned int> labels = model(dataset.inputs());
 	for (size_t i = 0; i<6; ++i)
 	{
 		unsigned int label = model(input[i]);
@@ -152,8 +152,8 @@ BOOST_AUTO_TEST_CASE( SIMPLE_NEAREST_NEIGHBOR_CLASSIFIER_BRUTE_FORCE ) {
 		}
 	}
 
-	ClassificationDataset dataset(input, target,10);
-	ClassificationDataset testDataset(testInput, testTarget,10);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target,10);
+	ClassificationDataset testDataset = createLabeledDataFromRange(testInput, testTarget,10);
 	
 	//test using the brute force algorithm, whether the test points
 	//are classified correctly in 1-NN
@@ -241,8 +241,8 @@ BOOST_AUTO_TEST_CASE( NEAREST_NEIGHBOR_CLASSIFIER_KDTREE_BRUTE_FORCE ) {
 		}
 	}
 
-	ClassificationDataset dataset(input, target,10);
-	ClassificationDataset testDataset(testInput, testTarget,10);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target,10);
+	ClassificationDataset testDataset = createLabeledDataFromRange(testInput, testTarget,10);
 	
 	{
 		KDTree<RealVector> tree(dataset.inputs());
