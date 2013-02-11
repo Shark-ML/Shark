@@ -817,7 +817,7 @@ void import_csv(
 	std::ifstream ifs(fn.c_str());
 	std::vector<Type> tmp;
 	detail::import_csv(tmp, ifs, separator, comment);
-	data = Data<Type>(tmp,batchSize);
+	data = createDataFromRange(tmp,batchSize);
 }
 
 
@@ -865,7 +865,7 @@ void import_csv(
 	std::vector<InputType> x;
 	std::vector<LabelType> y;
 	detail::import_csv(x, y, ifs, lp, separator, comment, false, allowMissingClasses, labelmap);
-	dataset = LabeledData<InputType, LabelType>(x, y,batchSize);
+	dataset = createLabeledDataFromRange(x, y,batchSize);
 }
 
 /// \brief Import regression data from a character-separated value file.
@@ -882,12 +882,12 @@ void import_csv(LabeledData<RealVector, RealVector> &dataset,
         std::string separator = ",",
         std::string comment = "",
         std::size_t numberOfOutputs = 1
-               ) {
+) {
 	std::ifstream ifs(fn.c_str());
 	std::vector<RealVector> x;
 	std::vector<RealVector> y;
 	detail::import_csv_regression(x, y, ifs, lp, separator, comment, numberOfOutputs, false);
-	dataset = LabeledData<RealVector, RealVector>(x, y);
+	dataset = createLabeledDataFromRange(x, y);
 }
 
 
@@ -925,7 +925,7 @@ void string2data(
 	std::stringstream ss(dataInString);
 	std::vector<InputType> tmp;
 	detail::import_csv(tmp, ss, ",", "");
-	data = Data<InputType>(tmp,batchSize);
+	data = createDataFromRange(tmp,batchSize);
 }
 
 /// \brief Construct Shark labeled data from a string
@@ -948,7 +948,7 @@ void string2data(
 	std::vector<InputType> x;
 	std::vector<LabelType> y;
 	detail::import_csv(x, y, ss, labelPosition, ",", "", allowMissingFeatures, allowMissingClasses, labelmap);
-	dataset = LabeledData<InputType, LabelType>(x, y,batchSize);
+	dataset = createLabeledDataFromRange(x, y,batchSize);
 }
 
 /** @}*/

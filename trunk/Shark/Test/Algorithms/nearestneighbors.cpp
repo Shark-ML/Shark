@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(IterativeNearestNeighborQueries)
 		//data[i][1] = Rng::gauss();
 	}
 
-	UnlabeledData<RealVector> dataset(data);
+	UnlabeledData<RealVector> dataset = createDataFromRange(data);
 
 	// test the KDTree
 	KDTree<RealVector> kdtree(dataset);

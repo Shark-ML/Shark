@@ -59,7 +59,7 @@ public:
 			for(std::size_t j = 0; j != dims; ++j)
 				inputs[i](j) = Rng::uni(j-1.0+3*labels[i],j+1.0+3*labels[i]);
 		}
-		data = ClassificationDataset(inputs,labels,10);
+		data  = createLabeledDataFromRange(inputs,labels,10);
 		//center data
 		RealVector mean(dims);
 		zero(mean);
@@ -69,7 +69,7 @@ public:
 		for(std::size_t i = 0; i != numInputs; ++i)
 			 inputs[i]-=mean;
 		
-		dataCentered = ClassificationDataset(inputs,labels,10);
+		dataCentered  = createLabeledDataFromRange(inputs,labels,10);
 		
 		//calculate Y
 		y.resize(numInputs);

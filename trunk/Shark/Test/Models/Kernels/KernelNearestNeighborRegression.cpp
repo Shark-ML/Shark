@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_NEAREST_NEIGHBOR_REGRESSION )
 	target[4](0)= -1.0;
 	target[5](0)= +1.0;
 
-	RegressionDataset dataset(input, target);
+	RegressionDataset dataset = createLabeledDataFromRange(input, target);
 
 	DenseRbfKernel kernel(0.5);
 	SimpleNearestNeighbors<RealVector,RealVector> algorithm(dataset, &kernel);
@@ -82,18 +82,4 @@ BOOST_AUTO_TEST_CASE( KERNEL_NEAREST_NEIGHBOR_REGRESSION )
 		RealVector prediction = model(input[i]);
 		BOOST_CHECK_SMALL(target[i](0) - 3.0 * prediction(0), 1e-12);
 	}
-
-	RealVector param;
-//~ #ifdef DEBUG
-	//~ BOOST_CHECK_THROW(model.setParameterVector(param), Exception);
-//~ #endif
-	//~ param.resize(1);
-	//~ param(0) = 3.0;
-	//~ BOOST_CHECK_NO_THROW(model.setParameterVector(param));
-//~ #ifdef DEBUG
-	//~ param(0) = 4.5;
-	//~ BOOST_CHECK_THROW(model.setParameterVector(param), Exception);
-	//~ param(0) = -1.0;
-	//~ BOOST_CHECK_THROW(model.setParameterVector(param), Exception);
-//~ #endif
 }

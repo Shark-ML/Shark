@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE( Set_Csv )
 	std::vector<RealVector> x;
 	std::vector<unsigned int> y;
 	detail::import_csv(x, y, ss, LAST_COLUMN, ",", "#" );
-	LabeledData<RealVector, unsigned int> test_ds(x, y);
+	LabeledData<RealVector, unsigned int> test_ds = createLabeledDataFromRange(x, y);
 	BOOST_REQUIRE_EQUAL(test_ds.numberOfElements(), 33u);
 
 	export_csv(test_ds, "test_output/check.csv", FIRST_COLUMN);
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE( Set_Csv )
 	std::vector<CompressedRealVector> sx;
 	std::vector<unsigned int> sy;
 	detail::import_csv(sx, sy, sss, LAST_COLUMN, ",", "#" );
-	LabeledData<CompressedRealVector, unsigned int> test_ds_sparse(sx, sy);
+	LabeledData<CompressedRealVector, unsigned int> test_ds_sparse = createLabeledDataFromRange(sx, sy);
 	BOOST_REQUIRE_EQUAL(test_ds_sparse.numberOfElements(), 33);
 
 	export_csv(test_ds_sparse, "test_output/check_sparse.csv", FIRST_COLUMN);
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE( Set_Csv_Missing_Label )
 	std::vector<RealVector> x;
 	std::vector<unsigned int> y;
 	detail::import_csv(x, y, ss, LAST_COLUMN, ",", "#", false, true );
-	LabeledData<RealVector, unsigned int> test_ds(x, y);
+	LabeledData<RealVector, unsigned int> test_ds = createLabeledDataFromRange(x, y);
 	std::size_t test_ds_size = test_ds.numberOfElements();
 	BOOST_REQUIRE_EQUAL(test_ds_size, 6u);
 	BOOST_REQUIRE_EQUAL( test_ds.element(test_ds_size-1).label, 0u );
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE( Set_Csv_Regression )
 	std::vector<RealVector> x;
 	std::vector<double> y;
 	detail::import_csv(x, y, ss, LAST_COLUMN, ",", "#");
-	LabeledData<RealVector, double> test_ds(x, y);
+	LabeledData<RealVector, double> test_ds = createLabeledDataFromRange(x, y);
 	std::size_t test_ds_size = test_ds.numberOfElements();
 	BOOST_REQUIRE_EQUAL(test_ds_size, 6u);
 	BOOST_REQUIRE_EQUAL( test_ds.element(test_ds_size-1).label, 33.3333 );

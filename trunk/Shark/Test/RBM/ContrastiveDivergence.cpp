@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_noHiddenSample )
 		vec[i].resize(1);
 		vec[i](0)=i;
 	}
-	UnlabeledData<IntVector> data(vec,1);
+	UnlabeledData<IntVector> data = createDataFromRange(vec,1);
 	cd.setData(data);
 	cd.setK(5);
 	rbm.structure().requireHiddenSample = false;
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_noHiddenSample_batch )
 		vec[i](0)=i/2;
 		vec[i+1](0)=i/2;
 	}
-	UnlabeledData<IntVector> data(vec,2);
+	UnlabeledData<IntVector> data = createDataFromRange(vec,2);
 	cd.setData(data);
 	cd.setK(5);
 	rbm.structure().requireHiddenSample = false;
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_WithHiddenSample )
 		vec[i](0)=i;
 	}
 	rbm.structure().requireHiddenSample = true;
-	UnlabeledData<IntVector> data(vec,1);
+	UnlabeledData<IntVector> data = createDataFromRange(vec,1);
 	cd.setData(data);
 	cd.setK(5);
 	RealVector point;

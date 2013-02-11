@@ -65,22 +65,22 @@ BOOST_AUTO_TEST_CASE( Set_Libsvm )
 	std::vector<double> yr, ysr;
 
 	detail::import_libsvm(xc, yc, ssc); //dense classif.
-	LabeledData<RealVector, unsigned int> test_ds_c(xc, yc);
+	LabeledData<RealVector, unsigned int> test_ds_c = createLabeledDataFromRange(xc, yc);
 	BOOST_REQUIRE_EQUAL(test_ds_c.numberOfElements(), 6u);
 	detail::import_libsvm(xmcc, ymcc, ssmcc); //dense mc-classif.
-	LabeledData<RealVector, unsigned int> test_ds_mcc(xmcc, ymcc);
+	LabeledData<RealVector, unsigned int> test_ds_mcc = createLabeledDataFromRange(xmcc, ymcc);
 	BOOST_REQUIRE_EQUAL(test_ds_mcc.numberOfElements(), 6u);
 	detail::import_libsvm(xr, yr, ssr); //dense regression
-	LabeledData<RealVector, double> test_ds_r(xr, yr);
+	LabeledData<RealVector, double> test_ds_r = createLabeledDataFromRange(xr, yr);
 	BOOST_REQUIRE_EQUAL(test_ds_r.numberOfElements(), 6u);
 	detail::import_libsvm(xsc, ysc, sssc); //sparse classif.
-	LabeledData<CompressedRealVector, unsigned int> test_ds_sc(xsc, ysc);
+	LabeledData<CompressedRealVector, unsigned int> test_ds_sc = createLabeledDataFromRange(xsc, ysc);
 	BOOST_REQUIRE_EQUAL(test_ds_sc.numberOfElements(), 6u);
 	detail::import_libsvm(xsmcc, ysmcc, sssmcc); //sparse mc-classif.
-	LabeledData<CompressedRealVector, unsigned int> test_ds_smcc(xsmcc, ysmcc);
+	LabeledData<CompressedRealVector, unsigned int> test_ds_smcc = createLabeledDataFromRange(xsmcc, ysmcc);
 	BOOST_REQUIRE_EQUAL(test_ds_smcc.numberOfElements(), 6u);
 	detail::import_libsvm(xsr, ysr, sssr); //sparse regression
-	LabeledData<CompressedRealVector, double> test_ds_sr(xsr, ysr);
+	LabeledData<CompressedRealVector, double> test_ds_sr = createLabeledDataFromRange(xsr, ysr);
 	BOOST_REQUIRE_EQUAL(test_ds_sr.numberOfElements(), 6u);
 	std::map<unsigned int, unsigned int> labelmap;
 	labelmap[19] = 0;
@@ -88,22 +88,22 @@ BOOST_AUTO_TEST_CASE( Set_Libsvm )
 	labelmap[4] = 2;
 	labelmap[8] = 3;
 	detail::import_libsvm(xmccm, ymccm, sscm, 0, false, &labelmap); //with label map
-	LabeledData<RealVector, unsigned int> test_ds_mccm(xmccm, ymccm);
+	LabeledData<RealVector, unsigned int> test_ds_mccm = createLabeledDataFromRange(xmccm, ymccm);
 	BOOST_REQUIRE_EQUAL(ymccm.size(), 6u);
 
 //	//this should fail:
 //	detail::import_libsvm(xsmcch, ysmcch, sssmcch, 2); //with highestIndex
 	detail::import_libsvm(xsmcch, ysmcch, sssmcch, 5000000); //with highestIndex
-	LabeledData<CompressedRealVector, unsigned int> test_ds_smcch(xsmcch, ysmcch);
+	LabeledData<CompressedRealVector, unsigned int> test_ds_smcch = createLabeledDataFromRange(xsmcch, ysmcch);
 	BOOST_REQUIRE_EQUAL(test_ds_smcch.numberOfElements(), 6u);
 
 	detail::import_libsvm(xcml, ycml, sscml, 0, true); //with missing label
-	LabeledData<RealVector, unsigned int> test_ds_cml(xcml, ycml);
+	LabeledData<RealVector, unsigned int> test_ds_cml = createLabeledDataFromRange(xcml, ycml);
 	BOOST_REQUIRE_EQUAL(test_ds_smcch.numberOfElements(), 6);
 
     // test export functionality
     detail::import_csv( xe, ye, sse, LAST_COLUMN, " ", "#" );
-    LabeledData<RealVector, unsigned int> test_ds_e( xe, ye );
+    LabeledData<RealVector, unsigned int> test_ds_e = createLabeledDataFromRange( xe, ye );
     BOOST_REQUIRE_EQUAL(test_ds_e.numberOfElements(), 6);
     export_libsvm( test_ds_e, "test_output/check1.libsvm" );
     export_libsvm( test_ds_c, "test_output/check2.libsvm" );

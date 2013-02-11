@@ -29,8 +29,8 @@ struct VectorStatisticsFixture
 				vec[row](col) = vals[row][col];
 			}
 		}
-		inputData=UnlabeledData<RealVector>(vec);
-		inputDataSmallBatch=UnlabeledData<RealVector>(vec,1);
+		inputData = createDataFromRange(vec);
+		inputDataSmallBatch = createDataFromRange(vec,1);
 	}
 };
 

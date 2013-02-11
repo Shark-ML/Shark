@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE( LinearModel_SERIALIZE )
 		target.push_back(model(input));
 	}
 	
-	RegressionDataset dataset(data,target);
+	RegressionDataset dataset  = createLabeledDataFromRange(data,target);
 
 	//now we serialize the FFmodel
 	

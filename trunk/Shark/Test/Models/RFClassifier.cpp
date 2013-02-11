@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 	target[8]=4;
 	target[9]=4;
 
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 
 	RFTrainer trainer;
 	RFClassifier model;

@@ -248,7 +248,7 @@ void constructLabeledData(
 		dataBuffer.size() != labelBuffer.front().size(),
 		boost::format("[importHDF5] Dimensions of data and label don't match.").str());
 
-	labeledData = LabeledData<VectorType, LabelType>(dataBuffer, labelBuffer.front());
+	labeledData = createLabeledDataFromRange(dataBuffer, labelBuffer.front());
 }
 
 } // namespace details
@@ -268,7 +268,7 @@ void importHDF5(
 {
 	std::vector<VectorType> readinBuffer;
 	detail::loadIntoMatrix(readinBuffer, fileName, datasetName);
-	data = Data<VectorType>(readinBuffer);
+	data = createDataFromRange(readinBuffer);
 }
 
 /// @brief Import data to a LabeledData object from a HDF5 file.
@@ -317,7 +317,7 @@ void importHDF5(
 {
 	std::vector<VectorType> readinBuffer;
 	detail::loadHDF5Csc(readinBuffer, fileName, cscDatasetName);
-	data = Data<VectorType>(readinBuffer);
+	data = createDataFromRange(readinBuffer);
 }
 
 /// @brief Import data from HDF5 dataset of compressed sparse column format.

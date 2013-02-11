@@ -250,12 +250,12 @@ public:
 	: m_data(size,element,batchSize)
 	{ }
 
-	/// Construction from data
-	///@param points the data from which to create the Container
-	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	Data(std::vector<element_type> const& points, std::size_t batchSize = DefaultBatchSize)
-	: m_data(points,batchSize)
-	{ }
+	//~ /// Construction from data
+	//~ ///@param points the data from which to create the Container
+	//~ ///@param batchSize the size of the batches. if this is 0, the size is unlimited
+	//~ Data(std::vector<element_type> const& points, std::size_t batchSize = DefaultBatchSize)
+	//~ : m_data(points,batchSize)
+	//~ { }
 
 	// MISC
 
@@ -357,10 +357,10 @@ public:
 	UnlabeledData()
 	{ }
 
-	///\brief Construction from data.
-	UnlabeledData(std::vector<InputT> const& points,std::size_t batchSize = base_type::DefaultBatchSize)
-	: base_type(points,batchSize)
-	{ }
+	//~ ///\brief Construction from data.
+	//~ UnlabeledData(std::vector<InputT> const& points,std::size_t batchSize = base_type::DefaultBatchSize)
+	//~ : base_type(points,batchSize)
+	//~ { }
 
 	///\brief Construction from data.
 	UnlabeledData(Data<InputT> const& points)
@@ -579,14 +579,6 @@ public:
 	{}
 
 	///\brief Construction from data.
-	LabeledData(std::vector<InputType> const& inputs, std::vector<LabelType> const& labels, std::size_t batchSize = DefaultBatchSize)
-	: m_data(inputs,batchSize),
-	  m_label(labels,batchSize)
-	{
-		SHARK_CHECK(inputs.size() == labels.size(), "[LabeledData::LabeledData] number of inputs and number of labels must agree");
-	}
-
-	///\brief Construction from data, subsets are defined by the inputs part.
 	///
 	///Beware that, when calling this constructors the organization of batches must be equal in both containers. This
 	///Constructor won't split the data!
@@ -702,11 +694,69 @@ typedef LabeledData<RealVector, RealVector> RegressionDataset;
 /// specialized template for classification with unsigned int labels and sparse data
 typedef LabeledData<CompressedRealVector, unsigned int> CompressedClassificationDataset;
 
+template<class Functor, class T>
+struct TransformedData{	
+	typedef Data<typename detail::TransformedDataElement<Functor,T>::type > type;
+};
+
+
 /**
  * \ingroup shark_globals
  *
  * @{
  */
+
+/// \brief creates a data object from a range of elements
+template<class Range>
+Data<typename boost::range_value<Range>::type> 
+createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
+	typedef typename boost::range_value<Range const>::type Input;
+	typedef typename boost::range_iterator<Range const>::type Iterator;
+	
+	if (maximumBatchSize == 0)
+		maximumBatchSize = Data<Input>::DefaultBatchSize;
+		
+	std::size_t numPoints = shark::size(inputs);
+	//first determine the optimal number of batches as well as batch size
+	std::size_t batches = numPoints / maximumBatchSize;
+	if(numPoints > batches*maximumBatchSize)
+		++batches;
+	std::size_t optimalBatchSize=numPoints/batches;
+	std::size_t remainder = numPoints-batches*optimalBatchSize;
+	Data<Input> data(batches);
+	
+	//now create the batches taking the remainder into account
+	Iterator start= boost::begin(inputs);
+	for(std::size_t i = 0; i != batches; ++i){
+		std::size_t size = (i<remainder)?optimalBatchSize+1:optimalBatchSize;
+		Iterator end = start+size;
+		data.batch(i) = createBatch<Input>(
+			boost::make_iterator_range(start,end)
+		);
+		start = end;
+	}	
+		
+	return data;
+}
+/// \brief creates a labeled data object from two ranges, representing inputs and labels
+template<class Range1, class Range2>
+LabeledData<
+	typename boost::range_value<Range1>::type,
+	typename boost::range_value<Range2>::type
+> createLabeledDataFromRange(Range1 const& inputs, Range2 const& labels, std::size_t batchSize = 0){
+	SHARK_CHECK(boost::size(inputs) == boost::size(labels), 
+	"[createDataFromRange] number of inputs and number of labels must agree");
+	typedef typename boost::range_value<Range1>::type Input;
+	typedef typename boost::range_value<Range2>::type Label;
+	
+	if (batchSize == 0)
+		batchSize = LabeledData<Input,Label>::DefaultBatchSize;
+	
+	return LabeledData<Input,Label>(
+		createDataFromRange(inputs,batchSize),
+		createDataFromRange(labels,batchSize)
+	);
+}
 
 ///brief  Outstream of elements for labeled data.
 template<class T, class U>
@@ -719,7 +769,7 @@ std::ostream &operator << (std::ostream &stream, const LabeledData<T, U>& d) {
 }
 
 
-	// FUNCTIONS FOR DIMENSIONALITY
+// FUNCTIONS FOR DIMENSIONALITY
 
 
 ///\brief Return the number of classes of a set of class labels with unsigned int label encoding
@@ -780,25 +830,51 @@ inline std::vector<std::size_t> classSizes(LabeledData<InputType, LabelType> con
 }
 
 // TRANSFORMATION
-///\brief Transforms a dataset using a Function f and returns the transformed result.
-//TODO: implement more efficient
+///\brief Transforms a dataset using a Functor f and returns the transformed result.
+///
+/// this version is used, when the Functor supports only element-by-element transformations
 template<class T,class Functor>
-Data<T> transform(Data<T> const& data, Functor f){
-	Data<T> result(data.numberOfBatches());
+typename boost::lazy_disable_if<
+	CanBeCalled<Functor,typename Data<T>::batch_type>,
+	TransformedData<Functor,T>
+>::type
+transform(Data<T> const& data, Functor f){
+	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
+	Data<ResultType> result(data.numberOfBatches());
 	for(std::size_t i = 0; i != data.numberOfBatches(); ++i)
 		result.batch(i)= createBatch<T>(boost::adaptors::transform(data.batch(i), f));
 	return result;
 }
 
+///\brief Transforms a dataset using a Functor f and returns the transformed result.
+///
+/// this version is used, when the Functor supports batch-by-batch transformations
+template<class T,class Functor>
+typename boost::lazy_enable_if<
+	CanBeCalled<Functor,typename Data<T>::batch_type>,
+	TransformedData<Functor,T>
+>::type
+transform(Data<T> const& data, Functor f){
+	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
+	Data<ResultType> result(data.numberOfBatches());
+	for(std::size_t i = 0; i != data.numberOfBatches(); ++i)
+		result.batch(i)= f(data.batch(i));
+	return result;
+}
+
 ///\brief Transforms the inputs of a dataset and return the transformed result.
 template<class I,class L, class Functor>
-LabeledData<I,L> transformInputs(LabeledData<I,L> const& data, Functor f){
-	return LabeledData<I,L>(transform(data.inputs(),f),data.labels());
+LabeledData<typename detail::TransformedDataElement<Functor,I>::type, L >
+transformInputs(LabeledData<I,L> const& data, Functor f){
+	typedef LabeledData<typename detail::TransformedDataElement<Functor,I>::type,L > DatasetType;
+	return DatasetType(transform(data.inputs(),f),data.labels());
 }
 ///\brief Transforms the labels of a dataset and returns the transformed result.
 template<class I,class L, class Functor>
-LabeledData<I,L> transformLabels(LabeledData<I,L> const& data, Functor f){
-	return LabeledData<I,L>(data.inputs(),transform(data.labels(),f));
+LabeledData<I,typename detail::TransformedDataElement<Functor,L >::type >
+transformLabels(LabeledData<I,L> const& data, Functor f){
+	typedef LabeledData<I,typename detail::TransformedDataElement<Functor,L>::type > DatasetType;
+	return DatasetType(data.inputs(),transform(data.labels(),f));
 }
 
 template<class DatasetT>

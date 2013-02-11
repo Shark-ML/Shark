@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	input[2](0) =  0.0; input[2](1) =  1.0; target[2] = 2;
 	input[3](0) =  0.0; input[3](1) =  2.0; target[3] = 2;
 	input[4](0) =  0.0; input[4](1) = 99.0; target[4] = 2;
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 
 	LinearKernel<> kernel;
 

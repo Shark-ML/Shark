@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( SOFT_NEAREST_NEIGHBOR_CLASSIFIER ) {
 	target[4]=2;
 	target[5]=2;
 
-	ClassificationDataset dataset(input, target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 
 	DenseRbfKernel kernel(0.5);
 	SimpleNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &kernel);

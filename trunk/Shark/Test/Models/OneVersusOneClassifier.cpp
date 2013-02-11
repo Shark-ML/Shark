@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE( Models_OneVersusOneClassifier )
 	targets[1] = 1;
 	targets[2] = 2;
 	targets[3] = 3;
-	LabeledData<double, unsigned int> dataset(inputs, targets);
+	LabeledData<double, unsigned int> dataset = createLabeledDataFromRange(inputs, targets);
 
 	// check correctness of predictions
 	for (std::size_t i=0; i<dataset.numberOfElements(); i++)

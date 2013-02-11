@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighborRegression ) {
 	target[3](0)=+1.0;
 	target[4](0)=+3.0;
 	target[5](0)=+5.0;
-	RegressionDataset dataset(input, target);
+	RegressionDataset dataset = createLabeledDataFromRange(input, target);
 
 	// model
 	DenseLinearKernel kernel;

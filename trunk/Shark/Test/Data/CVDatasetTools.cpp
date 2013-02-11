@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateIndexed ){
 			}
 		}
 	}
-	LabeledData<double,double> set(inputs,labels,8);
+	LabeledData<double,double> set=createLabeledDataFromRange(inputs,labels,8);
 	CVFolds<LabeledData<double,double> > folds= createCVIndexed(set, numPartitions, indizes);
 
 	BOOST_REQUIRE_EQUAL(folds.size(), numPartitions);
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSize )
 		inputs.push_back(i);
 		labels.push_back(numExamples+i);
 	}
-	LabeledData<double,double> set(inputs,labels,8);
+	LabeledData<double,double> set = createLabeledDataFromRange(inputs,labels,8);
 
 	CVFolds<LabeledData<double,double> > folds =  createCVSameSize(set,numPartitions);
 	BOOST_REQUIRE_EQUAL(folds.size(), numPartitions);
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSizeBalancedUnsigned )
 		inputs.push_back(vec);
 		labels.push_back(i%2);
 	}
-	ClassificationDataset set(inputs,labels,8);
+	ClassificationDataset set = createLabeledDataFromRange(inputs,labels,8);
 
 	CVFolds<ClassificationDataset > folds =  createCVSameSizeBalanced(set,2);
 	BOOST_REQUIRE_EQUAL(folds.size(), 2);
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSizeBalancedOneHot )
 		inputs.push_back(vec);
 		labels.push_back(label);
 	}
-	RegressionDataset set(inputs,labels,8);
+	RegressionDataset set = createLabeledDataFromRange(inputs,labels,8);
 
 	CVFolds<RegressionDataset> folds =  createCVSameSizeBalanced(set,2);
 	BOOST_REQUIRE_EQUAL(folds.size(), 2);

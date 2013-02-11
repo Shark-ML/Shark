@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_MEAN_CLASSIFIER ) {
 	target[4]=0;
 	target[5]=1;
 
-	ClassificationDataset dataset(input,target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input,target);
 
 	trainer.train(model, dataset);
 

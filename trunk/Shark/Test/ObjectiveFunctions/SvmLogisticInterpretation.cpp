@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	std::vector<unsigned int> y;
 	// create dataset
 	detail::import_csv( x, y, ss, LAST_COLUMN, " ", "");
-	ClassificationDataset training_dataset(x,y);
+	ClassificationDataset training_dataset = createLabeledDataFromRange(x,y);
 	unsigned int num_eles = training_dataset.numberOfElements();
 	unsigned int num_folds = 2;
 	std::vector< size_t > indices( num_eles );
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	std::vector<RealVector> x;
 	std::vector<unsigned int> y;
 	detail::import_csv( x, y, ss, LAST_COLUMN, " ", "");
-	ClassificationDataset training_dataset(x,y);
+	ClassificationDataset training_dataset = createLabeledDataFromRange(x,y);
 	unsigned int num_eles = training_dataset.numberOfElements();
 	unsigned int num_folds = 2;
 	std::vector< size_t > indices( num_eles );
@@ -263,8 +263,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Pami_Toy )
 	CSvmTrainer<RealVector> trainer( &kernel, exp(rprop.solution().point(0)) );
 	trainer.train( svm, train );
 	ZeroOneLoss<unsigned int, RealVector> loss; // 0-1 loss
-	Data<RealVector> output;  // real-valued output of the machine
-	output = svm( train.inputs() ); // evaluate on training set
+	Data<RealVector> output = svm( train.inputs() ); // evaluate on training set
 	double train_error = loss.eval(train.labels(), output);
 	std::cout << "train error " << train_error << std::endl;
 	output = svm( test.inputs() ); // evaluate on test set

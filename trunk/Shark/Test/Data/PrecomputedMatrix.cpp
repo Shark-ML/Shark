@@ -41,15 +41,15 @@ BOOST_AUTO_TEST_CASE( Set_PrecomputedMatrix )
 	std::vector<double> yr;
 	
 	detail::import_libsvm(xc, yc, ssc); //dense classif.
-	LabeledData<RealVector, unsigned int> test_ds_c(xc, yc);
+	LabeledData<RealVector, unsigned int> test_ds_c = createLabeledDataFromRange(xc, yc);
 	detail::import_libsvm(xmcc, ymcc, ssmcc); //dense mc-classif.
-	LabeledData<RealVector, unsigned int> test_ds_mcc(xmcc, ymcc);
+	LabeledData<RealVector, unsigned int> test_ds_mcc = createLabeledDataFromRange(xmcc, ymcc);
 	detail::import_libsvm(xr, yr, ssr); //dense regression
-	LabeledData<RealVector, double> test_ds_r(xr, yr);
+	LabeledData<RealVector, double> test_ds_r = createLabeledDataFromRange(xr, yr);
 	// also test one sparse format:
 	std::vector<CompressedRealVector> xsc;
 	detail::import_libsvm(xsc, ysc, sssc); //sparse classif.
-	LabeledData<CompressedRealVector, unsigned int> test_ds_sc(xsc, ysc);
+	LabeledData<CompressedRealVector, unsigned int> test_ds_sc = createLabeledDataFromRange(xsc, ysc);
 	
 	DenseLinearKernel kernel;
 	CompressedLinearKernel skernel; //sparse

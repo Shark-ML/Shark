@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
 			dataVec[j](k)=Rng::coinToss(0.5);
 		}
 	}
-	UnlabeledData<RealVector> data(dataVec,25);
+	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
 	
 	TestGradientVH gradient(&rbm);
 	gradient.setData(data);
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeHV )
 			dataVec[j](k)=Rng::coinToss(0.5);
 		}
 	}
-	UnlabeledData<RealVector> data(dataVec,25);
+	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
 	
 	TestGradientHV gradient(&rbm);
 	gradient.setData(data);

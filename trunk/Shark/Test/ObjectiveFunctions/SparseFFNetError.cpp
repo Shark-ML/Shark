@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Value ){
 			input[i](j) = Rng::uni(-1,1);;
 		}
 	}
-	RegressionDataset dataset(input,input,25);
+	RegressionDataset dataset = createLabeledDataFromRange(input,input,25);
 
 	FFNet<LogisticNeuron,LogisticNeuron> model;
 	model.setStructure(Dimensions,5,Dimensions);
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Loss_OneLayer ){
 			input[i](j) = Rng::uni(-1,1);
 		}
 	}
-	RegressionDataset dataset(input,input,5);
+	RegressionDataset dataset = createLabeledDataFromRange(input,input,5);
 
 	FFNet<LogisticNeuron,LogisticNeuron> model;
 	model.setStructure(Dimensions,2,Dimensions);
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Loss_TwoLayer ){
 			input[i](j) = Rng::uni(-1,1);
 		}
 	}
-	RegressionDataset dataset(input,input,5);
+	RegressionDataset dataset = createLabeledDataFromRange(input,input,5);
 
 	FFNet<LogisticNeuron,LogisticNeuron> model;
 	model.setStructure(Dimensions,2,2,Dimensions);
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_OneLayer ){
 			input[i](j) = Rng::uni(-1,1);
 		}
 	}
-	RegressionDataset dataset(input,input,25);
+	RegressionDataset dataset = createLabeledDataFromRange(input,input,25);
 
 	FFNet<LogisticNeuron,LogisticNeuron> model;
 	model.setStructure(Dimensions,2,Dimensions);
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_TwoLayer ){
 			input[i](j) = Rng::uni(-1,1);
 		}
 	}
-	RegressionDataset dataset(input,input,25);
+	RegressionDataset dataset = createLabeledDataFromRange(input,input,25);
 
 	FFNet<LogisticNeuron,LogisticNeuron> model;
 	model.setStructure(Dimensions,2,2,Dimensions);
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_GradDesc_OneLayer )
 			input[i](j) = Rng::uni(-1,1);;
 		}
 	}
-	RegressionDataset dataset(input,input);
+	RegressionDataset dataset = createLabeledDataFromRange(input,input);
 
 	FFNet<LogisticNeuron,LogisticNeuron> model;
 	model.setStructure(Dimensions,5,Dimensions);
@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_GradDesc_TwoLayer )
 			input[i](j) = Rng::uni(-1,1);;
 		}
 	}
-	RegressionDataset dataset(input,input);
+	RegressionDataset dataset = createLabeledDataFromRange(input,input);
 
 	FFNet<LogisticNeuron,LogisticNeuron> model;
 	model.setStructure(Dimensions,2,2,Dimensions);

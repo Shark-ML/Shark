@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_RadiusMarginQuotient )
 	targets[2] = 1;
 	targets[3] = 1;
 
-	ClassificationDataset dataset(inputs, targets);
+	ClassificationDataset dataset = createLabeledDataFromRange(inputs, targets);
 	RealVector parameters(1, 0.5);
 	GaussianRbfKernel<> kernel;
 	kernel.setParameterVector(parameters);

@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( Softmax_SERIALIZE )
 		data.push_back(input);
 		target.push_back(model(input));
 	}
-	RegressionDataset dataset(data,target);
+	RegressionDataset dataset = createLabeledDataFromRange(data,target);
 
 	//now we serialize the FFmodel
 	

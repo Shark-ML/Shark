@@ -78,8 +78,8 @@ public:
 		for(std::size_t i = 0; i != size; ++i){
 			draw(inputs[i],labels[i]);
 		}
-		LabeledData<InputType,LabelType> data(inputs,labels);
-		return data;
+		
+		return createLabeledDataFromRange(inputs,labels);
 	}
 	
 };
@@ -115,7 +115,7 @@ public:
 		for(std::size_t i = 0; i != size; ++i){
 			draw(inputs[i]);
 		}
-		return UnlabeledData<InputType>(inputs);
+		return  createDataFromRange(inputs);
 	}
 	
 };

@@ -229,8 +229,8 @@ void importPGMSet(const std::string &p, Data<T> &set, Data<ImageInformation> &se
 	std::vector<T> tmp;
 	std::vector<ImageInformation> tmpInfo;
 	importPGMDir(p, tmp, tmpInfo);
-	set = Data<T>(tmp);
-	setInfo = Data<ImageInformation>(tmpInfo);
+	set = createDataFromRange(tmp);
+	setInfo = createDataFromRange(tmpInfo);
 }
 
 /** @}*/

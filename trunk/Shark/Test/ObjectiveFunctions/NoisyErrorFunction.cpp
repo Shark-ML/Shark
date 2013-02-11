@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
 		target.push_back(output);
 	}
 
-	RegressionDataset dataset(data,target);
+	RegressionDataset dataset = createLabeledDataFromRange(data,target);
 
 	//startingPoint
 	RealVector point(3);

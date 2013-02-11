@@ -45,7 +45,7 @@ public:
 				data[x*3+label]=element;
 			}
 		}
-		m_data=UnlabeledData<RealVector>(data);
+		m_data = createDataFromRange(data);
 	}
 	
 	///returns the generated dataset

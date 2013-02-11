@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction )
 	zero.clear();
 	std::vector<RealVector> input(3,zero);//input just zeros
 	std::vector<RealVector> target=input;//target same as input
-	RegressionDataset dataset(input,target);
+	RegressionDataset dataset = createLabeledDataFromRange(input,target);
 	RealVector parameters(1);//parameters also zero
 	parameters.clear();
 

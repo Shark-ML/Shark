@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooError )
 	targets[3](0) = 0.0;
 	targets[4](0) = 1.0;
 
-	RegressionDataset dataset(inputs, targets);
+	RegressionDataset dataset = createLabeledDataFromRange(inputs, targets);
 	SquaredLoss<> loss;
 	LinearModel<> model(2, 1, true);
 	LinearRegression trainer;

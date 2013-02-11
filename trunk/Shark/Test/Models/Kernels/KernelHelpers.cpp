@@ -40,7 +40,7 @@ struct KernelHelpersFixture {
 				points[i](j)=Rng::uni(-1,1);
 			}
 		}
-		data = Data<RealVector>(points,batchSize);
+		data = createDataFromRange(points,batchSize);
 	}
 
 	std::size_t datasetSize;

@@ -30,9 +30,9 @@ BOOST_AUTO_TEST_CASE( DenseSubrangeKernel_Test)
 			dataV2[i](j)=data[i](j+dim1)=Rng::uni(-1,1);
 		}
 	}
-	Data<RealVector> dataset(data,10);
-	Data<RealVector> datasetV1(dataV1,10);
-	Data<RealVector> datasetV2(dataV2,10);
+	Data<RealVector> dataset = createDataFromRange(data,10);
+	Data<RealVector> datasetV1 = createDataFromRange(dataV1,10);
+	Data<RealVector> datasetV2 = createDataFromRange(dataV2,10);
 	
 	//create Subrange Kernel
 	std::vector<std::pair<std::size_t,std::size_t> > ranges(2);

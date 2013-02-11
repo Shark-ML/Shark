@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_CrossValidation )
 	data[0](0) = 0.0; target[0](0) = 0.0;	// regression of this point from the others gives 2 --> loss = 2
 	data[1](0) = 1.0; target[1](0) = 1.0;	// regression of this point from the others gives 0 --> loss = 1
 	data[2](0) = 2.0; target[2](0) = 0.0;	// regression of this point from the others gives 2 --> loss = 2
-	RegressionDataset dataset(data, target);
+	RegressionDataset dataset = createLabeledDataFromRange(data, target);
 	CVFolds<RegressionDataset> folds = createCVSameSize(dataset, 3);	// there is only one way to form three folds out of three points
 
 	// setup (regularized) linear regression for cross-validation
