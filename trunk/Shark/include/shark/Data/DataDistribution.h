@@ -1,19 +1,10 @@
 //===========================================================================
 /*!
- *  \brief Supervised learning problems given by distributions
+ *  \brief Learning problems given by analytic distributions.
  *
  *
  *  \author  T. Glasmachers
- *  \date    2006-2010
- *
- *  \par Copyright (c) 2010:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ *  \date    2006-2013
  *
  *
  *  <BR><HR>
@@ -45,7 +36,64 @@ namespace shark {
 
 
 ///
-/// \brief A DataDistribution defined a supervised learning problem.
+/// \brief A DataDistribution defines an unsupervised learning problem.
+///
+/// \par
+/// The unsupervised learning problem is defined by an explicit
+/// distribution (in contrast to a finite dataset). The only
+/// method we need is to draw a sample from the distribution.
+///
+template <class InputType>
+class DataDistribution
+{
+public:
+	/// \brief Virtual destructor.
+	virtual ~DataDistribution() { }
+
+	/// \brief Generates a single pair of input and label.
+	///
+	/// @param input the generated input
+	virtual void draw(InputType& input) const = 0;
+
+	// \brief Interface for std::generate.
+	InputType operator() () {
+		InputType ret;
+		draw(ret);
+		return ret;
+	}
+	
+	/// \brief Generates a data set with samples from from the distribution.
+	///
+	/// @param size the number of samples in the dataset
+	UnlabeledData<InputType> generateDataset(std::size_t size) const {
+		// first determine the optimal number of batches and their sizes
+		std::size_t maximumBatchSize = Data<InputType>::DefaultBatchSize;
+		std::size_t batches = (size + maximumBatchSize - 1) / maximumBatchSize;
+		std::size_t optimalBatchSize = size / batches;
+		std::size_t remainder = size - batches * optimalBatchSize;
+		UnlabeledData<InputType> dataset(batches);
+		InputType input;
+
+		// now create and fill the batches, taking the remainder into account
+		for (std::size_t i=0; i<batches; ++i)
+		{
+			std::size_t batchsize = (i<remainder) ? optimalBatchSize + 1 : optimalBatchSize;
+			typename UnlabeledData<InputType>::batch_reference b = dataset.batch(i);
+			draw(input);
+			b = Batch<InputType>::createBatch(input, batchsize);
+			for (std::size_t j=0; j<batchsize; j++)
+			{
+				if (j != 0) draw(input);
+				shark::get(b, j) = input;
+			}
+		}
+		return dataset;
+	}
+};
+
+
+///
+/// \brief A LabeledDataDistribution defines a supervised learning problem.
 ///
 /// \par
 /// The supervised learning problem is defined by an explicit
@@ -53,78 +101,62 @@ namespace shark {
 /// method we need is to draw a sample from the distribution.
 ///
 template <class InputType, class LabelType>
-class DataDistribution
+class LabeledDataDistribution
 {
 public:
-	/// \brief generates a single pair of input and label
+	/// \brief Virtual destructor.
+	virtual ~LabeledDataDistribution() { }
+
+	/// \brief Generates a single pair of input and label.
 	/// @param input the generated input
 	/// @param label the generated label
-	virtual void draw(InputType& input, LabelType& label)const = 0;
+	virtual void draw(InputType& input, LabelType& label) const = 0;
 
-	//interface for std::generate
-	std::pair<InputType,LabelType> operator() (){
+	// \Brief Interface for std::generate.
+	std::pair<InputType,LabelType> operator() () {
 		std::pair<InputType,LabelType> ret;
 		draw(ret.first,ret.second);
 		return ret;
 	}
 	
-	virtual ~DataDistribution() { }
-	
-	/// \brief generates a dataset with samples from from the distribution
+	/// \brief Generates a dataset with samples from from the distribution.
+	///
 	/// @param size the number of samples in the dataset
-	LabeledData<InputType,LabelType> generateDataset(std::size_t size)const{
-		std::vector<InputType> inputs(size);
-		std::vector<LabelType> labels(size); 
-		for(std::size_t i = 0; i != size; ++i){
-			draw(inputs[i],labels[i]);
-		}
-		
-		return createLabeledDataFromRange(inputs,labels);
-	}
-	
-};
+	LabeledData<InputType, LabelType> generateDataset(std::size_t size) const
+	{
+		// first determine the optimal number of batches and their sizes
+		std::size_t maximumBatchSize = LabeledData<InputType, LabelType>::DefaultBatchSize;
+		std::size_t batches = (size + maximumBatchSize - 1) / maximumBatchSize;
+		std::size_t optimalBatchSize = size / batches;
+		std::size_t remainder = size - batches * optimalBatchSize;
+		LabeledData<InputType, LabelType> dataset(batches);
+		InputType input;
+		LabelType label;
+		DataPair<InputType, LabelType> pair(input, label);
 
-///
-/// \brief A UnlabeledDataDistribution defines an unsupervised learning problem.
-///
-/// \par
-/// The unsupervised learning problem is defined by an explicit
-/// distribution (in contrast to a finite dataset). The only
-/// method we need is to draw a sample from the distribution.
-template <class InputType>
-class UnlabeledDataDistribution
-{
-public:
-	/// \brief generates a single pair of input and label
-	/// @param input the generated input
-	virtual void draw(InputType& input)const = 0;
-
-	//interface for std::generate
-	InputType operator() (){
-		InputType ret;
-		draw(ret);
-		return ret;
-	}
-	
-	virtual ~UnlabeledDataDistribution() { }
-	
-	/// \brief generates a dataset with samples from from the distribution
-	/// @param size the number of samples in the dataset
-	UnlabeledData<InputType> generateDataset(std::size_t size)const{
-		std::vector<InputType> inputs(size);
-		for(std::size_t i = 0; i != size; ++i){
-			draw(inputs[i]);
+		// now create and fill the batches, taking the remainder into account
+		for (std::size_t i=0; i<batches; ++i)
+		{
+			std::size_t batchsize = (i<remainder) ? optimalBatchSize + 1 : optimalBatchSize;
+			typename LabeledData<InputType, LabelType>::batch_reference b = dataset.batch(i);
+			draw(input, label); pair.input = input; pair.label = label;
+			b = Batch<DataPair<InputType, LabelType> >::createBatch(pair, batchsize);
+			for (std::size_t j=0; j<batchsize; j++)
+			{
+				if (j != 0) draw(input, label);
+				shark::get(b, j).input = input;
+				shark::get(b, j).label = label;
+			}
 		}
-		return  createDataFromRange(inputs);
+		return dataset;
 	}
-	
 };
 
 
 ///
 /// \brief "chess board" problem for binary classification
 ///
-class Chessboard : public DataDistribution<RealVector, unsigned int>
+class Chessboard : public LabeledDataDistribution<RealVector, unsigned int>
 {
 public:
 	Chessboard(unsigned int size = 4, double noiselevel = 0.0)
@@ -156,7 +188,7 @@ protected:
 ///
 /// \brief Noisy sinc function: y = sin(x) / x + noise
 ///
-class Wave : public DataDistribution<RealVector, RealVector>
+class Wave : public LabeledDataDistribution<RealVector, RealVector>
 {
 public:
 	Wave(double stddev = 0.1, double range = 5.0){
@@ -187,7 +219,7 @@ protected:
 /// Parameters. IEEE Transactions on Pattern Analysis and Machine Intelligence, 2010."
 /// In summary, the first M dimensions are correlated to the labels, the last N dimensions
 /// are not. 
-class PamiToy : public DataDistribution<RealVector, unsigned int>
+class PamiToy : public LabeledDataDistribution<RealVector, unsigned int>
 {
 public:
 	PamiToy(unsigned int size_useful = 5, unsigned int size_noise = 5, double noise_position = 0.0, double noise_variance = 1.0 )
@@ -223,7 +255,7 @@ protected:
 /// This class randomly fills a (hyper-)square with data points. Points which 
 /// happen to be within a (hyper-)circle centered in the square of a certain
 /// radius get a positive class label. Noise on the labels can be added.
-class CircleInSquare : public DataDistribution<RealVector, unsigned int>
+class CircleInSquare : public LabeledDataDistribution<RealVector, unsigned int>
 {
 public:
 	CircleInSquare( unsigned int dimensions = 2, double noiselevel = 0.0, bool class_prob_equal = false )
@@ -312,7 +344,7 @@ protected:
 // upper right diagonal half are positive. But additionally, all points
 // in a circle located in the lower right quadrant are positive, effectively
 // bulging the decision boundary inward. Noise on the labels can be added.
-class DiagonalWithCircle : public DataDistribution<RealVector, unsigned int>
+class DiagonalWithCircle : public LabeledDataDistribution<RealVector, unsigned int>
 {
 public:
 	DiagonalWithCircle( double radius = 1.0, double noise = 0.0 )

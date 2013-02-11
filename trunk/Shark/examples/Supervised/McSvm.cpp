@@ -23,7 +23,7 @@ using namespace shark;
 // data generating distribution for our toy
 // multi-category classification problem
 /// @cond EXAMPLE_SYMBOLS
-class Problem : public DataDistribution<RealVector, unsigned int>
+class Problem : public LabeledDataDistribution<RealVector, unsigned int>
 {
 public:
 	void draw(RealVector& input, unsigned int& label)const

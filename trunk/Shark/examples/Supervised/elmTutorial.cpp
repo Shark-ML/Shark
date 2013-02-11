@@ -28,7 +28,7 @@ using namespace shark;
 ///Our problem:
 ///z = sin(x)/x+y+noise
 /// @cond EXAMPLE_SYMBOLS
-class Problem:public DataDistribution<RealVector,RealVector>{
+class Problem:public LabeledDataDistribution<RealVector,RealVector>{
 public:
     void draw(RealVector& input, RealVector& label)const
 	{

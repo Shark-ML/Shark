@@ -149,7 +149,7 @@ public:
 		SHARK_CHECK(svm.outputSize() == 1, "[OneClassSvmTrainer::train] wrong number of outputs in the kernel expansion");
 
 		// prepare the quadratic program description
-		std::size_t i, ic = inputset.size();
+		std::size_t i, ic = inputset.numberOfElements();
 		RealVector linear = RealZeroVector(ic);
 		RealVector lower = RealZeroVector(ic);
 		RealVector upper = RealScalarVector(ic, 1.0 / (m_nu * ic));

@@ -237,6 +237,7 @@ public:
 
 private:
 	friend class boost::iterator_core_access_fixed;
+	template <class> friend class MultiSequenceIterator;
 
 	void increment() {
 		++m_positionInSequence;
