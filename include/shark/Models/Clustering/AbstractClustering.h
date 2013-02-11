@@ -122,7 +122,9 @@ public:
 	/// The (typically slow) default implementation is to
 	/// create a batch of size 1 and return the result of the batch call to hardMembership
 	virtual unsigned int hardMembership(InputType const& pattern) const{
-		return hardMembership(Batch<InputType>::createBatch(pattern))(0);
+		typename Batch<InputType>::type b = Batch<InputType>::createBatch(pattern);
+		get(b,0) = pattern;
+		return hardMembership(b)(0);
 	}
 	
 	/// \brief Compute best matching cluster for a batch of inputs.
