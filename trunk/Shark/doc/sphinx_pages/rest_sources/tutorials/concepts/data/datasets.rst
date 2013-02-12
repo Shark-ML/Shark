@@ -1,13 +1,5 @@
 Data Containers
 ===============
-
-.. warning::
-
-    The Data class interface is subject to change in the near future and the recent
-    past. Thus this tutorial might be in parts outdated or will turn out to be
-    outdated in the near future. However on a conceptional level the contents are
-    correct.
-
 Data handling is an important aspect of a machine learning
 library. Shark ships with three container classes tailored
 to holding data for machine learning applications:
@@ -69,17 +61,20 @@ we introduce the interface of the data object we want to clarify this distinctio
   for fast computation in a machine learning environment.
 
 * :doxy:`UnlabeledData` represents input data which is not labeled. 
-  This is the input format used for unsupervised learning methods. While the unlabeled
-  data class does not offer much new functionality, it provides an important difference.
-  Datasets as used in machine learning are inherently unordered constructs, thus it is
-  okay for an algorithm to shuffle or otherwise reorder the contents of a dataset.
-  This is reflected in the set, that shuffling is actively supported using the 
-  :doxy:`UnlabeledData::shuffle` method.
+  This is the input format used for unsupervised learning methods. The unlabeled
+  data class is a subclass of Data and does not offer much new functionality compared to ``Data``. 
+  ut it provides an important *semantic* difference, as these data
+  points are interpreted as input data without labels, compared to the above
+  mentioned Data class whose contents might store anything (for example model
+  outputs, labels or points) . Datasets as used in machine learning are 
+  inherently unordered constructs, thus it is okay for an algorithm to shuffle or otherwise 
+  reorder the contents of a dataset. This is reflected in the set, that shuffling 
+  is actively supported using the :doxy:`UnlabeledData::shuffle` method.
 
 * :doxy:`LabeledData` finally represents datapoints which are a pair of inputs 
   and labels. An dataset of type ``LabeledData<I,L>`` can be roughly described 
   as the known data object using a pair-type of inputs I and labels L, for example
-  ``UnlabeledData<std::pair<I,L> >``. There is however an important difference in how labels
+  ``Data<std::pair<I,L> >``. There is however an important difference in how labels
   and inputs are treated in machine learning. We often like, especially for unsupervised
   methods, to only use the inputs, thus viewing the object as an ``UnlabeledData<I>``. 
   For evaluation of the model, we also want to first get the set inputs, acquire the 
@@ -105,7 +100,7 @@ data is already in memory and only needs to be imported into a dataset.
 In this case a dataset can be created using::
 
   std::vector<RealVector> points;//vector of points
-  Data<RealVector> data(points);
+  Data<RealVector> data = createDataFromRange(points);
   
 To create an dataset with space for *n* points, we need to define an example point which
 describes the objects to be saved in the set::
@@ -296,48 +291,17 @@ element_range elements ()                    Returns an bidirectional container 
 					     only virtual.
 ==========================================   ======================================================================
 
+further, ``LabeledData`` supports direct access to the Containers rprsnting either elements or labels.
 
-..todo :
-
-    rest of the tutorial is not changed
-    
-
-UnlabeledData<Input>
----------------------
-
-The :doxy:`UnlabeledData` class can be used as a data container class for
-unsupervised learning. This is mostly a *semantic* difference, as these data
-points are interpreted as input data without labels, compared to the above
-mentioned Data class whose contents might store anything (for example model
-outputs, labels or points).
-:doxy:`UnlabeledData` is a sub-class of :doxy:`Data` with a few additional
-methods for accessing the elements of the container as *inputs*.
-For example, it allows shuffling the inputs using :doxy:`UnlabeledData::shuffle`.
-See the full class documentation for details.
-
-
-LabeledData<Input,Label>
--------------------------
-
-:doxy:`LabeledData` stores a data set as a collection of pairs input points and
-labels. It is internally implemented as a pair of Data containers: one holding
-the points and one the labels. It features the same interface as the UnlabeledData
-class, but always returns an object representing the pair of a batch of inputs
-and labels (or a pair of single input and single label respectively). Access to
-either the input or label container can be achieved using
-:doxy:`LabeledData::inputs()` and :doxy:`LabeledData::labels()`.
-
-.. caution::
-
-  LabeledData is not a valid, standard-compliant container, as the input-label
-  pairs are virtual. Thus, the same warning applies as to the element view of Data.
-
-
-
+==========================================   ======================================================================
+Method                                       Description
+==========================================   ======================================================================
+UnlabeledData<I>& inputs()                   Returns only the inputs of the LabeledData<I,L> object.
+Data<L>& labels()                            Returns only the labels of the LabeledData<I,L> object.
+==========================================   ======================================================================
 
 Querying information about a dataset
 ------------------------------------
-
 
 Sometimes we want to query basic informations about a data set like input
 dimension or the number of classes of a labeled data set. The data classes
@@ -363,21 +327,41 @@ For LabeledData we have a similar set of methods::
   LabeledData<RealVector, RealVector> dataVectorial;
   std::size_t dimLabel = labelDimension(data); //returns the dimensionality of the labels
   // number of classes assuming one-hot-encoding
-  // same as labelDimension
   std::size_t classesOneHot = numberOfClasses(data);
+  
+Transformation of datasets
+---------------------------------------------
 
+In a lot of use cases, one neds to preprocss the data, before it can be used for the problem.
+for example th man of a dataset is to be removed, or labels need to be changed in order to fit
+into the shark scheme which assumes the existance of all class labels. For this, shark provides
+a smart transformation mechanism. Lt's assume we have a function object f and g such that f(input)
+returns the tranformed input vector and g(label) the transformed label. Than we can transform
+data sets by::
 
-.. todo::
+   Data<RealVector> data;//initial dataset;
+   data = transform(data,f);//applies f to all elements of data
+   
+   LabeledData<RealVector,unsigned int> labeledData;//initial labeled dataset;
+   labeledData = transformInputs(labeledData,f);//applies f to the inputs only
+   labeledData = transformLabels(labeledData,g);//applies f to the labels only
 
-    is there a line of code missing between the two comment lines or do these
-    belong together? i'm not sure from the context...
+The transformation mechanism itself is smart! If f does not only provide a function
+f(input) but also f(Batch_of_input>) returning the same transformation for a whole batch,
+this is applied instead. As batch transformations are often more efficient than applying
+the same transformation to all elements one after another, this can be a real time saver. 
+An example for an Object satisfying this requirement are the Models provided by shark::
 
-
-
+    //a linear model, for example for whitening or making a dataset mean free
+    LinearModel<> model;
+    //applying the model
+    labeledData = transformInputs(labeledData,model);
+    //or an alternate shortcut for data:
+    data = model(data);
+    
 
 Element views: DataView<Dataset>
 ---------------------------------
-
 
 Sometimes one needs to perform intensive single-element, random access to data
 points, for example in decision tree training. In this case, the performance
@@ -406,12 +390,11 @@ can then be transformed back into datasets::
    //somehow choose a set of indices
    Data<unsigned int> subset = toDataset(subset(view,indices));
 
+After the operation, ``subset`` holds a copy of the points indexed by the subset operation.
+As in all other dataset operations, the subset is organized in several batches. To control the
+maximum size of the batches, ``toDataset`` also takes an optional second parameter, which controls this:
 
-.. todo::
-
-    i'd prefer a little more information here: what happens to the batches,
-    which batches does the new object have, is the data shared (i assume not)
-    or copied?
+Data<unsigned int> subset = toDataset(subset(view,indices),maximumBatchSize);
 
 And the usual methods for querying dataset informations also works for the view::
 
@@ -420,40 +403,3 @@ And the usual methods for querying dataset informations also works for the view:
   std::cout << numberOfClasses(view) << " " << inputDimension(view);
 
 See the doxygen documentation for more details!
-
-Typical Use Cases
------------------
-
-The :doxy:`UnlabeledData` and :doxy:`LabeledData` classes are intended
-to hold (e.g., training or test) data for learning. These containers are
-typically constructed early in a program, for example by loading data from
-files. See the :doc:`import_data` tutorial on how this is done. Then,
-depending on the learning task at hand, they are passed on to a
-:doxy:`SupervisedObjectiveFunction` or an :doxy:`UnsupervisedObjectiveFunction`
-(e.g., an :doxy:`ErrorFunction` computing the empirical risk of
-a model on data), or to a trainer derived from :doxy:`AbstractTrainer`.
-
-Within these classes, the data is propagated through one or more models,
-yielding (intermediate) results. These results will typically be
-stored in another :doxy:`Data` object. This container is then passed on
-to a loss function, encoded by a sub-class of :doxy:`AbstractLoss`, to
-compute the training or test error.
-
-Models may also be used for pre- or post-processing of results, which
-can lead to potentially long chains of models. The processing of such
-chains can be explicit in a program, with :doxy:`Data` objects holding
-intermediate results, or implicit by means of the
-:doxy:`ConcatenatedModel` class.
-
-We close with two summarizing remarks:
-
-* A typical main program loads data into :doxy:`UnlabeledData`
-  or :doxy:`LabeledData` containers. It may use a further :doxy:`Data`
-  object to store model outputs.
-
-* When writing new machine learning models, algorithms, and objective
-  or loss functions the :doxy:`Data` container should be used wherever
-  possible for data exchange, since it results in the most
-  versatile interfaces.
-
-..  LocalWords:  semanticless

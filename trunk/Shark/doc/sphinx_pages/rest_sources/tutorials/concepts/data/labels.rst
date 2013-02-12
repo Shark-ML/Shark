@@ -20,14 +20,14 @@ is mentioned on this page.
 Label Conventions
 -----------------
 
-Most algorithms in Shark 3 are fully templated. The kernel methods
+Most algorithms in Shark are fully templated. The kernel methods
 for example are designed to work with any input format, and this
 allows for easy employment of sparse vector formats. Templatization
 also applies to the labels in a :doxy:`LabeledData` dataset: they can either
 be simple integers for classification, or real values for regression, or
 arbitrarily complex structured types for more specialized applications.
 However, while the :doxy:`Data` class and its subclasses do not impose
-any restrictions on label formats, several *algorithms* within Shark 3
+any restrictions on label formats, several *algorithms* within Shark
 (i.e., some which *work on or with* datasets) in fact do: they may be tailored
 towards a standard classification or regression setting, and might expect
 integer or real-valued encoded labels in accordance with fixed conventions.
@@ -48,15 +48,8 @@ accordingly:
   + The default format for one label is a single unsigned integer (C++ type
     ``unsigned int``) in the range ``0,...,d-1``. For binary data, the wide-spread
     binary labels ``-1``/``+1`` are no longer supported; instead, ``0``/``1``
-    is used for the sake of consistency with the multi-class case.
-    
-    .. note::
-		Binary labels -1/+1 are converted to 0/1 as follows: 0 -> -1, and
-		1 -> +1. This is what most people find intuitive in most
-		situations. There is, however, one caveat:
-		The :doxy:`CSvmTrainer` returns the function indicating
-		class 1, not class 0, as one might expect in the context of
-		multi-class SVMs.
+    is used for the sake of consistency with the multi-class case. When required, 
+    Binary labels -1/+1  are converted to 0/1 by setting all -1 labels to 0.
     
   + Alternatively, a class label can be encoded by a d-dimensional
     RealVector. For example, the class :doxy:`CrossEntropy`
@@ -79,13 +72,6 @@ accordingly:
   loss functions, and trainers) already assume the ``RealVector``
   encoding.
 
-.. todo:: The release version of Shark will feature a list
-   of algorithms which work with, rely on, or expect data 
-   being passed to them to be formatted according to one or more of the 
-   above conventions. Please refer to their own Doxygen documentation for
-   details.
-
-
 Conversions
 -----------
 
@@ -93,17 +79,16 @@ Shark offers three different converters between label formats.
 These are found in the file :doxy:`Converter.h`.
 The available conversions are
 
-* :doxy:`ThresholdConverter`: The class assumes single-dimensional
-  ``RealVector`` inputs, and it outputs ``unsigned int`` labels 0 or 1,
-  depending on whether the value is above or below a given threshold,
-  **respectively** (see warnings above and below). The default threshold
-  value is zero. This is useful,
-  for example, for converting the output of a support vector machine of
-  neural network for binary classification into a discrete class label.
+* :doxy:`ThresholdConverter`: The class converts single dimensional
+  ``RealVector`` inputs to binary 0/1 class-labels by assigning the value 1 if the 
+  value of the input is higher than a certain threshold.
+  This is useful, for example, for converting the output of a support 
+  vector machine of neural network for binary classification into a 
+  discrete class label.
 
-* :doxy:`ArgMaxConverter`: The class assumes d-dimensional
-  ``RealVector`` inputs for classification. It converts the vector to
-  an ``unsigned int`` in the range 0,...,d-1 by finding the index of
+* :doxy:`ArgMaxConverter`:  Is a generalization of the ThresholdConverter.
+  It class assumes d-dimensional ``RealVector`` inputs for classification. 
+  It converts the vector to a discrete label in the range 0,...,d-1 by finding the index of
   the largest component (the arg max). This is useful for turning
   the output of a support vector machine or neural network for
   multi-category classification into a discrete class label.
@@ -113,11 +98,9 @@ The available conversions are
   ``RealVector`` of size d. This is useful for converting a discrete
   class label into a target value for neural network training.
 
-All three classes are implemented as models (with empty parameter
-vectors). This allows for conatenating the converters with actual
+All three classes are implemented as models. This allows for 
+concatenating the converters with actual
 predictive models, such as a :doxy:`KernelExpansion` and an
 :doxy:`ArgMaxConverter`, in order to obtain a multi-category
 support vector machine model with class labels as outputs. This
 concatenation is realized by the :doxy:`ConcatenatedModel` class.
-Please refer to the examples and tutorials on support vector
-machines for details and use-cases.
