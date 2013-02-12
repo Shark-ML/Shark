@@ -34,7 +34,7 @@ we will use shortly::
         k++;
       }
     }
-    LabeledData<RealVector,unsigned int> dataset(inputs,labels);
+    LabeledData<RealVector,unsigned int> dataset = createLabeledDataFromRange(inputs,labels);
     return dataset;
   }
 
