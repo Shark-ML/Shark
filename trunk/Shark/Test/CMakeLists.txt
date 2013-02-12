@@ -178,7 +178,7 @@ SHARK_ADD_TEST( Core/ScopedHandleTests.cpp ScopedHandleTests )
 #Data Tests
 SHARK_ADD_TEST( Data/Csv.cpp Data_Csv )
 SHARK_ADD_TEST( Data/CVDatasetTools.cpp Data_CVDatasetTools )
-#SHARK_ADD_TEST( Data/Dataset.cpp Data_Dataset )
+SHARK_ADD_TEST( Data/Dataset.cpp Data_Dataset )
 SHARK_ADD_TEST( Data/DataView.cpp Data_DataView )
 IF (HDF5_FOUND)
     SHARK_ADD_TEST( Data/HDF5Tests.cpp Data_HDF5 )

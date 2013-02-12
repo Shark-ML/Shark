@@ -440,7 +440,7 @@ public:
 ///this also holds true for single element access using operator(). Be aware, that direct access to element is
 ///a linear time operation. So it is not advisable to iterate over the elements, but instead iterate over the batches.
 template <class InputT, class LabelT>
-class LabeledData
+class LabeledData : public ISerializable
 {
 protected:
 	typedef LabeledData<InputT, LabelT> self_type;
@@ -907,20 +907,20 @@ DatasetT rangeSubset(DatasetT const& dataset, std::size_t size){
 /// \returns the  set which contains the splitd element (right part of the given set)
 template<class DatasetT>
 DatasetT splitAtElement(DatasetT& data, std::size_t elementIndex){
-	SIZE_CHECK(elementIndex<data.numberOfElements());
+	SIZE_CHECK(elementIndex<=data.numberOfElements());
 
 	std::size_t batchPos = 0;
-	std::size_t batchEnd = 0;
-	do{
-		batchEnd += boost::size(data.batch(batchPos));
+	std::size_t batchStart = 0;
+	while(batchStart +  boost::size(data.batch(batchPos)) < elementIndex){
+		batchStart += boost::size(data.batch(batchPos));
 		++batchPos;
-	}while(batchEnd <= elementIndex);
-	--batchPos;
-	std::size_t splitPoint = boost::size(data.batch(batchPos)) -(batchEnd-elementIndex);
-	if(splitPoint != 0){//if we ar ein a middle of a batch, split it in two parts and move on
+	};
+	std::size_t splitPoint = elementIndex-batchStart;
+	if(splitPoint != 0){
 		data.splitBatch(batchPos,splitPoint);
 		++batchPos;
- 	}
+	}
+	
 	return data.splice(batchPos);
 }
 

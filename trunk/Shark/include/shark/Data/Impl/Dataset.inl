@@ -308,12 +308,14 @@ public:
 	///this to work.
 	void splitBatch(iterator position, std::size_t elementIndex){
 		SHARK_CHECK(isIndependent(), "[SharedContainer::splitBlock] Container is not Independent");
-		SIZE_CHECK(elementIndex < shark::size(*position));
+		SIZE_CHECK(elementIndex <= shark::size(*position));
 
 		BatchType& source=*position;
 		std::size_t leftElements = elementIndex;
 		std::size_t rightElements = shark::size(source)-leftElements;
 
+		if(leftElements == 0 || rightElements == 0)
+			return;
 
 		boost::shared_ptr<BatchType> leftSplit(
 			new BatchType(BatchTraits::createBatch(get(source,0),leftElements))
