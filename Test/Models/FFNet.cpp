@@ -6,7 +6,6 @@
 #include "derivativeTestHelper.h"
 
 #include <shark/Models/FFNet.h>
-#include <cmath>
 #include <sstream>
 #include <boost/archive/polymorphic_text_iarchive.hpp>
 #include <boost/archive/polymorphic_text_oarchive.hpp>

@@ -4,12 +4,17 @@
 
 #include <shark/Data/Dataset.h>
 
+#include <sstream>
+#include <boost/archive/polymorphic_text_iarchive.hpp>
+#include <boost/archive/polymorphic_text_oarchive.hpp>
+
 using namespace shark;
 
-void testSetEquality(const UnlabeledData<int>& set1, const UnlabeledData<int>& set2){
-	BOOST_REQUIRE_EQUAL(set1.size(),set2.size());
+void testSetEquality(Data<int> const& set1, Data<int> const& set2){
+	BOOST_REQUIRE_EQUAL(set1.numberOfBatches(),set2.numberOfBatches());
+	BOOST_REQUIRE_EQUAL(set1.numberOfElements(),set2.numberOfElements());
 
-	for(size_t i=0;i!=set1.size();++i) {
+	for(size_t i=0;i!=set1.numberOfBatches();++i) {
 		IntVector vec1=set1.batch(i);
 		IntVector vec2=set2.batch(i);
 		BOOST_REQUIRE_EQUAL(vec1.size(),vec2.size());
@@ -17,17 +22,20 @@ void testSetEquality(const UnlabeledData<int>& set1, const UnlabeledData<int>& s
 	}
 }
 
-void testDatasetEquality(const LabeledData<int, int>& set1, const LabeledData<int, int>& set2){
-	BOOST_REQUIRE_EQUAL(set1.size(),set2.size());
-	
-	testSetEquality(set1,set2);
+void testDatasetEquality(LabeledData<int, int> const& set1, LabeledData<int, int> const& set2){
+	BOOST_REQUIRE_EQUAL(set1.numberOfBatches(),set2.numberOfBatches());
+	BOOST_REQUIRE_EQUAL(set1.numberOfElements(),set2.numberOfElements());
+	for(std::size_t i = 0; i != set1.numberOfBatches(); ++i){
+		BOOST_REQUIRE_EQUAL(set1.batch(i).input.size(),set1.batch(i).label.size());
+		BOOST_REQUIRE_EQUAL(set2.batch(i).input.size(),set2.batch(i).label.size());
+	}
+	testSetEquality(set1.inputs(),set2.inputs());
 	testSetEquality(set1.labels(),set2.labels());
 }
 
 
 BOOST_AUTO_TEST_CASE( Set_Test )
 {
-	std::cout << "testing Set...";
 	std::vector<int> inputs;
 
 	// the test results
@@ -37,66 +45,76 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	for (size_t i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
-	for(std::size_t i = 0; i != 10; ++i){
+	for(std::size_t i = 0; i != 20; ++i){
 		indizes[i%2].push_back(i);
 	}
-	UnlabeledData<int> set(inputs,10);
-	// 1.1 test element access and thus equality of sets
+	
+	// 1.1 test element access and thus createDataFromRange
+	UnlabeledData<int> set = createDataFromRange(inputs,5);//20 batches
 	BOOST_REQUIRE_EQUAL(set.numberOfElements(), 100u);
+	BOOST_REQUIRE_EQUAL(set.numberOfBatches(), 20u);
 	for (size_t i=0; i!=100; ++i) {
-		BOOST_CHECK_EQUAL(inputs[i], set(i));
+		BOOST_CHECK_EQUAL(inputs[i], set.element(i));
 	}
 	//also test iterator access
-	BOOST_CHECK_EQUAL_COLLECTIONS(set.elemBegin(),set.elemEnd(),inputs.begin(),inputs.end());
+	BOOST_CHECK_EQUAL_COLLECTIONS(
+		set.elements().begin(),set.elements().end(),
+		inputs.begin(),inputs.end()
+	);
 	
 	//1.2 test batch access
-	BOOST_REQUIRE_EQUAL(set.size(), 10);
 	for (size_t i=0; i!=10; ++i) {
 		IntVector batch=set.batch(i);
-		BOOST_REQUIRE_EQUAL(batch.size(),10u);
+		BOOST_REQUIRE_EQUAL(batch.size(),5u);
 		BOOST_CHECK_EQUAL_COLLECTIONS(
 			batch.begin(),batch.end(),
-			inputs.begin()+i*10,
-			inputs.begin()+i*10+10
+			inputs.begin()+i*5,
+			inputs.begin()+(i+1)*5
 		);
 	}
 	
 	// 2. create indexed partitions
-	std::cout << "indexed...";
-	UnlabeledData<int> subset;
-	set.indexedSubset(indizes[0], subset);
-	BOOST_REQUIRE_EQUAL(subset.size(), indizes[0].size());
+	{
+		UnlabeledData<int> subset = indexedSubset(set,indizes[0]);
+		UnlabeledData<int> subsetMethod;
+		set.indexedSubset(indizes[0],subsetMethod);
+		BOOST_REQUIRE_EQUAL(subset.numberOfBatches(), indizes[0].size());
 
-	for (size_t i=0; i!=subset.size(); ++i) {
-		IntVector batch=subset.batch(i);
-		BOOST_REQUIRE_EQUAL(batch.size(),10);
-		BOOST_CHECK_EQUAL_COLLECTIONS(
-			batch.begin(),batch.end(),
-			inputs.begin()+20*i,
-			inputs.begin()+20*i+10
-		);
+		for (size_t i=0; i!=subset.numberOfBatches(); ++i) {
+			IntVector batch=subsetMethod.batch(i);
+			BOOST_REQUIRE_EQUAL(batch.size(),5);
+			BOOST_CHECK_EQUAL_COLLECTIONS(
+				batch.begin(),batch.end(),
+				inputs.begin()+indizes[0][i]*5,
+				inputs.begin()+(indizes[0][i]+1)*5
+			);
+		}
+		testSetEquality(subset,subsetMethod);
 	}
 
 	// 2.1 now with complement
-	std::cout << "indexed complement...";
-	UnlabeledData<int> subset2;
-	UnlabeledData<int> complement;
-	set.indexedSubset(indizes[0], subset2, complement);
-	testSetEquality(subset, subset2);
+	{
+		UnlabeledData<int> subset = indexedSubset(set,indizes[0]);
+		UnlabeledData<int> subset2;
+		UnlabeledData<int> complement;
+		set.indexedSubset(indizes[0], subset2, complement);
+		testSetEquality(subset, subset2);
 
-	BOOST_REQUIRE_EQUAL(complement.size(), indizes[1].size());
+		BOOST_REQUIRE_EQUAL(complement.numberOfBatches(), indizes[1].size());
 
-	for (size_t i=0; i!=complement.size(); ++i) {
-		IntVector batch=complement.batch(i);
-		BOOST_REQUIRE_EQUAL(batch.size(),10);
-		BOOST_CHECK_EQUAL_COLLECTIONS(
-			batch.begin(),batch.end(),
-			inputs.begin()+20*i+10,
-			inputs.begin()+20*i+20
-		);
+		for (size_t i=0; i!=subset.numberOfBatches(); ++i) {
+			IntVector batch=complement.batch(i);
+			BOOST_REQUIRE_EQUAL(batch.size(),5);
+			BOOST_CHECK_EQUAL_COLLECTIONS(
+				batch.begin(),batch.end(),
+				inputs.begin()+indizes[1][i]*5,
+				inputs.begin()+(indizes[1][i]+1)*5
+			);
+		}
 	}
 }
-BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_Test )
+
+BOOST_AUTO_TEST_CASE( Set_Repartition )
 {
 	std::vector<int> inputs;
 
@@ -104,29 +122,31 @@ BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_Test )
 	for (size_t i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
+	//generate a set and than repartition it with unevenly sized batches
+	std::vector<std::size_t> batchSizes(8);
+	batchSizes[0]=8;
+	batchSizes[1]=24;
+	batchSizes[2]=8;
+	batchSizes[3]=7;
+	batchSizes[4]=8;
+	batchSizes[5]=12;
+	batchSizes[6]=25;
+	batchSizes[7]=8;
+	UnlabeledData<int> set = createDataFromRange(inputs,10);
+	set.repartition(batchSizes);
 	
-	//split in the middle of a batch
-	UnlabeledData<int> set(inputs,10);
-	splitAtElement(set,55);
-	UnlabeledData<int> train = trainingSet(set);
-	UnlabeledData<int> test = testSet(set);
-	
-	BOOST_CHECK_EQUAL(set.size(),11u);
-	BOOST_CHECK_EQUAL(train.size(),6u);
-	BOOST_CHECK_EQUAL(test.size(),5u);
-	BOOST_CHECK_EQUAL(train.numberOfElements(),55u);
-	BOOST_CHECK_EQUAL(test.numberOfElements(),45u);
-	
+	BOOST_REQUIRE_EQUAL(set.numberOfBatches(),8u);
+	BOOST_REQUIRE_EQUAL(set.numberOfElements(),100u);
+	for(std::size_t i = 0; i != 8; ++i){
+		BOOST_CHECK_EQUAL(set.batch(i).size(), batchSizes[i]);
+	}
 	BOOST_CHECK_EQUAL_COLLECTIONS(
-		train.elemBegin(),train.elemEnd(),
-		inputs.begin(),inputs.begin()+55
-	);
-	BOOST_CHECK_EQUAL_COLLECTIONS(
-		test.elemBegin(),test.elemEnd(),
-		inputs.begin()+55,inputs.end()
+		set.elements().begin(),set.elements().end(),
+		inputs.begin(),inputs.end()
 	);
 }
-BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_UnevenBatches_Test )
+
+BOOST_AUTO_TEST_CASE( Set_splitAtElement_Boundary_Test )
 {
 	std::vector<int> inputs;
 
@@ -144,100 +164,70 @@ BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_UnevenBatches_Test )
 	batchSizes[5]=12;
 	batchSizes[6]=25;
 	batchSizes[7]=8;
-	UnlabeledData<int> settemp(inputs,10);
-	UnlabeledData<int> set(settemp,batchSizes);
+	
+	
+	//split before and after every batch
+	std::size_t index = 0;
+	for(std::size_t i = 0; i <= batchSizes.size();++i){
+		UnlabeledData<int> set= createDataFromRange(inputs,10);
+		set.repartition(batchSizes);
+		UnlabeledData<int> split = splitAtElement(set,index);
+		
+		BOOST_REQUIRE_EQUAL(set.numberOfBatches(),i);
+		BOOST_REQUIRE_EQUAL(split.numberOfBatches(),8-i);
+		BOOST_REQUIRE_EQUAL(set.numberOfElements(),index);
+		BOOST_REQUIRE_EQUAL(split.numberOfElements(),100-index);
+		
+		BOOST_CHECK_EQUAL_COLLECTIONS(
+			set.elements().begin(),set.elements().end(),
+			inputs.begin(),inputs.begin()+index
+		);
+		BOOST_CHECK_EQUAL_COLLECTIONS(
+			split.elements().begin(),split.elements().end(),
+			inputs.begin()+index,inputs.end()
+		);
+		
+		if(i != batchSizes.size())
+			index+=batchSizes[i];
+	}
+}
+BOOST_AUTO_TEST_CASE( Set_splitAtElement_MiddleOfBatch_Test )
+{
+	std::vector<int> inputs;
+
+	// fill the vectors: inputs are the number [100, ..., 199]
+	for (size_t i=0;i!=100;++i) {
+		inputs.push_back(100+i);
+	}
+	//generate a set with unevenly sized batches
+	std::vector<std::size_t> batchSizes(8);
+	batchSizes[0]=8;
+	batchSizes[1]=24;
+	batchSizes[2]=8;
+	batchSizes[3]=7;
+	batchSizes[4]=8;
+	batchSizes[5]=12;
+	batchSizes[6]=25;
+	batchSizes[7]=8;
+	
 	
 	//split in the middle of a batch
+	UnlabeledData<int> set= createDataFromRange(inputs,10);
+	set.repartition(batchSizes);
+	UnlabeledData<int> split = splitAtElement(set,53);
 	
-	splitAtElement(set,53);
-	UnlabeledData<int> train = trainingSet(set);
-	UnlabeledData<int> test = testSet(set);
-	
-	BOOST_CHECK_EQUAL(set.size(),9u);
-	BOOST_CHECK_EQUAL(train.size(),5u);
-	BOOST_CHECK_EQUAL(test.size(),4u);
-	BOOST_CHECK_EQUAL(train.numberOfElements(),53u);
-	BOOST_CHECK_EQUAL(test.numberOfElements(),47u);
+	BOOST_REQUIRE_EQUAL(set.numberOfBatches(),5u);
+	BOOST_REQUIRE_EQUAL(split.numberOfBatches(),4u);
+	BOOST_REQUIRE_EQUAL(set.numberOfElements(),53u);
+	BOOST_REQUIRE_EQUAL(split.numberOfElements(),47u);
 	
 	BOOST_CHECK_EQUAL_COLLECTIONS(
-		train.elemBegin(),train.elemEnd(),
+		set.elements().begin(),set.elements().end(),
 		inputs.begin(),inputs.begin()+53
 	);
 	BOOST_CHECK_EQUAL_COLLECTIONS(
-		test.elemBegin(),test.elemEnd(),
+		split.elements().begin(),split.elements().end(),
 		inputs.begin()+53,inputs.end()
-	);
-}
-BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_Boundary_Test )
-{
-	std::vector<int> inputs;
-
-	// fill the vectors: inputs are the number [100, ..., 199]
-	for (size_t i=0;i!=100;++i) {
-		inputs.push_back(100+i);
-	}
-	
-	//split between batches
-	UnlabeledData<int> set(inputs,10);
-	splitAtElement(set,40);
-	UnlabeledData<int> train = trainingSet(set);
-	UnlabeledData<int> test = testSet(set);
-	
-	BOOST_CHECK_EQUAL(set.size(),10);
-	BOOST_CHECK_EQUAL(train.size(),4u);
-	BOOST_CHECK_EQUAL(test.size(),6u);
-	BOOST_CHECK_EQUAL(train.numberOfElements(),40u);
-	BOOST_CHECK_EQUAL(test.numberOfElements(),60u);
-	
-	BOOST_CHECK_EQUAL_COLLECTIONS(
-		train.elemBegin(),train.elemEnd(),
-		inputs.begin(),inputs.begin()+40
-	);
-	BOOST_CHECK_EQUAL_COLLECTIONS(
-		test.elemBegin(),test.elemEnd(),
-		inputs.begin()+40,inputs.end()
-	);
-}
-BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_UnevenBatches_Boundary_Test )
-{
-	std::vector<int> inputs;
-
-	// fill the vectors: inputs are the number [100, ..., 199]
-	for (size_t i=0;i!=100;++i) {
-		inputs.push_back(100+i);
-	}
-	//generate a set with unevenly sized batches
-	std::vector<std::size_t> batchSizes(8);
-	batchSizes[0]=8;
-	batchSizes[1]=24;
-	batchSizes[2]=8;
-	batchSizes[3]=7;
-	batchSizes[4]=8;
-	batchSizes[5]=12;
-	batchSizes[6]=25;
-	batchSizes[7]=8;
-	UnlabeledData<int> settemp(inputs,10);
-	UnlabeledData<int> set(settemp,batchSizes);
-	
-	//split in the middle of a batch
-	
-	splitAtElement(set,55);
-	UnlabeledData<int> train = trainingSet(set);
-	UnlabeledData<int> test = testSet(set);
-	
-	BOOST_CHECK_EQUAL(set.size(),8u);
-	BOOST_CHECK_EQUAL(train.size(),5u);
-	BOOST_CHECK_EQUAL(test.size(),3u);
-	BOOST_CHECK_EQUAL(train.numberOfElements(),55u);
-	BOOST_CHECK_EQUAL(test.numberOfElements(),45u);
-	
-	BOOST_CHECK_EQUAL_COLLECTIONS(
-		train.elemBegin(),train.elemEnd(),
-		inputs.begin(),inputs.begin()+55
-	);
-	BOOST_CHECK_EQUAL_COLLECTIONS(
-		test.elemBegin(),test.elemEnd(),
-		inputs.begin()+55,inputs.end()
 	);
 }
 
@@ -586,3 +576,50 @@ BOOST_AUTO_TEST_CASE( Set_TrainingTestSplit_UnevenBatches_Boundary_Test )
 
 	std::cout<<"Dataset tests done"<<std::endl;
 }*/
+
+BOOST_AUTO_TEST_CASE( DATA_SERIALIZE )
+{
+	std::vector<int> data(1000);
+	for (size_t i=0; i<1000; i++){
+		data[i]=3*i+5;
+	}
+	Data<int> dataSource = createDataFromRange(data,23);
+
+	//now we serialize the Dataset
+	std::ostringstream outputStream;  
+	boost::archive::polymorphic_text_oarchive oa(outputStream);  
+	oa << dataSource;
+
+	//and create a new set from the serialization
+	Data<int> dataDeserialized;
+	std::istringstream inputStream(outputStream.str());  
+	boost::archive::polymorphic_text_iarchive ia(inputStream);
+	ia >> dataDeserialized;
+	
+	testSetEquality(dataSource,dataDeserialized);
+}
+
+BOOST_AUTO_TEST_CASE( LABELED_DATA_SERIALIZE )
+{
+	std::vector<int> data(1000);
+	std::vector<int> labels(1000);
+	for (size_t i=0; i<1000; i++){
+		data[i]=3*i+5;
+		labels[i]=5*i+1001;
+	}
+	LabeledData<int,int> dataSource = createLabeledDataFromRange(data,labels,23);
+
+	//now we serialize the Dataset
+	std::ostringstream outputStream;  
+	boost::archive::polymorphic_text_oarchive oa(outputStream);  
+	oa << dataSource;
+
+	//and create a new set from the serialization
+	LabeledData<int,int> dataDeserialized;
+	std::istringstream inputStream(outputStream.str());  
+	boost::archive::polymorphic_text_iarchive ia(inputStream);
+	ia >> dataDeserialized;
+	
+	testDatasetEquality(dataSource,dataDeserialized);
+}
+
