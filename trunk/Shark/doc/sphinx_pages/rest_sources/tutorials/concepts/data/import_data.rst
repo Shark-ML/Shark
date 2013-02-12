@@ -18,20 +18,6 @@ with its own data set format any more in order to avoid further
 growth of the jungle of data set formats. However, data can be
 serialized, which practially amounts to a data file format.
 
-.. warning::
-	Note that for some combinations of different Boost versions,
-	serialized objects may not be portable across different
-	computers. That is, if you serialized something on computer
-	A with Boost number X, then you may not be able to open it
-	on on computer B with Boost number Y. In many cases, this 
-	works -- but, unfortunately, not always. However, full 
-	portability (and human readability) can be guaranteed by
-	using a text archive::
-	
-		std::ofstream file(resultFile);
-		boost::archive::polymorphic_text_oarchive oa(file);
-		oa<<your_model; 
-
 Most data formats in common use are restricted to (sparse)
 vectorial input data. Thus, when dealing with non-vectorial data
 the user needs to write specialized methods for loading/storing
@@ -39,22 +25,6 @@ these data. It is understood that shark can not implement any
 possible data format you can dream of. However, if the input
 type is serializable with boost::serialization, then the
 :doxy:`Data` container can be serialized.
-
-Some data formats support and/or require label formats different
-from the above conventions, such as labels -1/+1 for binary
-classification. Shark supports reading and writing these formats,
-and it automatically applies the necessary conversions to make
-sure that the above conventions on labels apply as soon as data
-are held in memory. In particular, heed the following note:
-
-.. note::
-	Labels -1/+1 are converted to 0/1 as follows: 0 -> -1, and
-	1 -> +1. This is what most people find intuitive in most
-	situations. There is, however, one caveat:
-	The :doxy:`CSvmTrainer` returns the function indicating
-	class 1, not class 0, as one might expect in the context of
-	multi-class SVMs.
-
 
 Generate from Artificial Distributions
 ++++++++++++++++++++++++++++++++++++++
@@ -94,7 +64,7 @@ Once the distribution is defined it is easy to generate a data set: ::
 CSV
 ++++++++++++++++++++++++++++++++++++++++
 
-Shark supports the simplistic but wisespread CSV (comma/character
+Shark supports the simplistic but widespread CSV (comma/character
 separated value) data format; however, support of this format is
 currently quite limited. Not all class label types are supported
 and the data must be dense.
@@ -117,7 +87,7 @@ Now you can call one of the import routines like this: ::
 
 If you want to import regression data then you have to load data and
 labels from different csv files and create a LabeledData object from
-both the two containers: ::
+both the two containers::
 
   Data<RealVector> inputs;
   Data<RealVector> labels;

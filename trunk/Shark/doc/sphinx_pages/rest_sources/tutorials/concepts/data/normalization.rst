@@ -24,7 +24,6 @@ normalization::
   {
     //load data from a file or generate it
     UnlabeledData<RealVector> trainingData = loadData();
-    std::size_t dataSize = dataDimension(trainingData); //size of a data vector
 
     Normalizer<> normalizer;
     NormalizeComponentsUnitVariance<> normalizingTrainer;
