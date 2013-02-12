@@ -25,7 +25,7 @@ To prevent that single inputs with high variance dominate the behaviour of the E
 have zero mean and unit variance. So we need a model which applies this transformation to the data. 
 This is a linear transformation which can be learned by an affine linear model using the proper trainer ::
 
-  Normalizer<> normalizer(true);
+  Normalizer<> normalizer;
   NormalizeComponentsUnitVariance<> normalizingTrainer;
   normalizingTrainer.train(normalizer,data.inputs());
   

@@ -15,15 +15,15 @@
 using namespace std;
 using namespace shark;
 
-///In this example an extreme learning machine is constructed and
-///trained.  An ELM is a neural net with one single hidden layer. The
-///weight of the hidden neurons are random and only the outputs are
-///trained.  This makes the learning problem much easier since the
-///remaining linear weights form a convex problem.  in principle, the
-///ELM can be constructed using a simple FFNet. But this would mean
-///that we had to calculate the weight vector for the FFNet - which is
-///not trivial. Instead we will construct the ELM out of one FFNet and
-///two linear networks. That's a bit slower but usually not a problem
+//In this example an extreme learning machine is constructed and
+//trained.  An ELM is a neural net with one single hidden layer. The
+//weight of the hidden neurons are random and only the outputs are
+//trained.  This makes the learning problem much easier since the
+//remaining linear weights form a convex problem.  in principle, the
+//ELM can be constructed using a simple FFNet. But this would mean
+//that we had to calculate the weight vector for the FFNet - which is
+//not trivial. Instead we will construct the ELM out of one FFNet and
+//two linear networks. That's a bit slower but usually not a problem
 
 ///Our problem:
 ///z = sin(x)/x+y+noise
@@ -46,18 +46,20 @@ public:
 
 int main(){
 	//change these constants for your own problem
-	size_t inputDim = 2;
-	size_t outputDim = 1;
 	size_t hiddenNeurons = 17;
-	size_t numSamples = 18;
+	size_t numSamples = 1000;
 	unsigned int randomSeed = 42;
-
+	
 	//configure random number generator
 	Rng::seed(randomSeed);
-
+	
 	//create the regression problem
 	Problem problem;
 	RegressionDataset data = problem.generateDataset(numSamples);
+	//input and label dimension of the data
+	size_t inputDim = inputDimension(data);
+	size_t outputDim = labelDimension(data);
+	
 	//usually an elm uses zero mean unit variance inputs. so we should
 	//normalize the data first
 	Normalizer<> normalizer;
@@ -80,7 +82,7 @@ int main(){
 	LinearRegression trainer;
 	//we must propagate the data first through the hidden layer, before
 	//we can use the trainer
-	RegressionDataset transformedData(elm(data.inputs()),data.labels());
+	RegressionDataset transformedData=transformInputs(data,elm);
 	trainer.train(elmOutput,transformedData);
 
 	//finally we can construct the complete elm which can than be used for evaluation
