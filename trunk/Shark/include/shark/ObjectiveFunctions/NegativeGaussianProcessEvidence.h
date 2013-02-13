@@ -219,8 +219,7 @@ public:
 
 		// truncate gradient vector 
 		for(std::size_t i=0; i<derivative.m_gradient.size(); i++) 
-			if(fabs(derivative.m_gradient(i)) < m_derivativeThresholds(i)) derivative.m_gradient(i) = 0;
-
+			if(std::abs(derivative.m_gradient(i)) < m_derivativeThresholds(i)) derivative.m_gradient(i) = 0;
 
 		// compute the evidence
 		//compute determinant of M (see eval for why this works)
@@ -231,7 +230,7 @@ public:
 	
 	/// set threshold value for truncating partial derivatives
 	void setThreshold(double d) {
-		m_derivativeThresholds = RealVector(mep_kernel->numberOfParameters(), d);
+		m_derivativeThresholds = RealVector(mep_kernel->numberOfParameters() + 1, d); // plus one parameter for the prior 
 	}
 
 	/// set threshold values for truncating partial derivatives
