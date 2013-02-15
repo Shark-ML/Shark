@@ -319,6 +319,21 @@ static bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortPair& ri
  * @{
  */
 
+template<typename InputType, typename LabelType>
+void import_libsvm(
+		LabeledData<InputType, LabelType>& dataset,
+		std::istream& stream,
+		int highestIndex = 0,
+		bool allowMissingClasses = false,
+		std::map<LabelType, LabelType> const* labelmap = NULL,
+		bool verbose = false)
+{
+	std::vector<InputType> x;
+	std::vector<LabelType> y;
+	detail::import_libsvm(x, y, stream, highestIndex, allowMissingClasses, labelmap, verbose);
+	dataset = createLabeledDataFromRange(x, y);
+}
+
 /// \brief Import data from a LIBSVM file.
 ///
 /// \param  dataset       container storing the loaded data
@@ -337,10 +352,7 @@ void import_libsvm(
 		bool verbose = false)
 {
 	std::ifstream ifs(fn.c_str());
-	std::vector<InputType> x;
-	std::vector<LabelType> y;
-	detail::import_libsvm(x, y, ifs, highestIndex, allowMissingClasses, labelmap, verbose);
-	dataset = createLabeledDataFromRange(x, y);
+	return import_libsvm(dataset,ifs,highestIndex,allowMissingClasses,labelmap,verbose);
 }
 
 
