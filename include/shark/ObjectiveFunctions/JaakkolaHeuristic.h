@@ -53,12 +53,14 @@ public:
 	template<class InputType>
 	JaakkolaHeuristic(LabeledData<InputType,unsigned int> const& dataset)
 	{
-		typedef typename LabeledData<InputType,unsigned int>::const_element_iterator iterator;
-
-		for (iterator it = dataset.elemBegin(); it != dataset.elemEnd(); it++) {
-			iterator itIn = it;
+		//typedef typename LabeledData<InputType,unsigned int>::const_element_reference iterator;
+		typedef typename LabeledData<InputType,unsigned int>::const_element_range Elements;
+		Elements elements = dataset.elements();
+		for(typename Elements::iterator it = elements.begin(); it != elements.end(); ++it){
+			//for (iterator it = dataset.elemBegin(); it != dataset.elemEnd(); it++) {
+			typename Elements::iterator itIn = it;
 			itIn++;
-			for (; itIn != dataset.elemEnd(); itIn++) {
+			for (; itIn != elements.end(); itIn++) {
 				if (itIn->label == it->label) continue;
 				double dist = shark::distance(it->input,itIn->input);
 				m_stat.push_back(dist);
