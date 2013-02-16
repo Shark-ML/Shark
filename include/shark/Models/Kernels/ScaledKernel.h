@@ -99,12 +99,12 @@ public:
 		return m_factor * m_base->eval(x1, x2);
 	}
 	
-	void eval(BatchInputType const& x1, BatchInputType const& x2, RealMatrix& result) const{
+	void eval(ConstBatchInputReference x1, ConstBatchInputReference x2, RealMatrix& result) const{
 		m_base->eval(x1, x2,result);
 		result *= m_factor;
 	}
 
-	void eval(BatchInputType const& x1, BatchInputType const& x2, RealMatrix& result, State& state) const{
+	void eval(ConstBatchInputReference x1, ConstBatchInputReference x2, RealMatrix& result, State& state) const{
 		m_base->eval(x1, x2,result,state);
 		result *= m_factor;
 	}
