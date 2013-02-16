@@ -160,17 +160,16 @@ SHARK_DENSETRAITSSPEC(blas::c_matrix<T BOOST_PP_COMMA() M BOOST_PP_COMMA() N>)
 	}
 };
 //compressed_matrix
-template<class T, std::size_t IB, class IA, class TA>
-struct ExpressionTraitsBase<blas::compressed_matrix<T,blas::row_major,IB,IA,TA> >{
+template<class T, class IA, class TA>
+struct ExpressionTraitsBase<blas::compressed_matrix<T,blas::row_major,0,IA,TA> >{
 	
-	typedef blas::compressed_matrix<T,blas::row_major,IB,IA,TA> type;
+	typedef blas::compressed_matrix<T,blas::row_major,0,IA,TA> type;
 	typedef typename IA::value_type index_type;
 	typedef typename TA::value_type value_type;
 	typedef typename IA::value_type const* index_pointer;
 	typedef typename TA::value_type const* value_pointer;
 	typedef blas::row_major_tag orientation;
 	
-	static const std::size_t k = IB;
 	typedef CompressedStorage StorageCategory;
 	static const bool transposed=false;
 	
@@ -188,59 +187,25 @@ struct ExpressionTraitsBase<blas::compressed_matrix<T,blas::row_major,IB,IA,TA> 
 		return v.filled2();
 	}
 };
-template<class T, std::size_t IB, class IA, class TA>
-struct ExpressionTraitsBase<const blas::compressed_matrix<T,blas::row_major,IB,IA,TA> >
-:public ExpressionTraitsBase<blas::compressed_matrix<T,blas::row_major,IB,IA,TA> >{};
+template<class T, class IA, class TA>
+struct ExpressionTraitsBase<const blas::compressed_matrix<T,blas::row_major,0,IA,TA> >
+:public ExpressionTraitsBase<blas::compressed_matrix<T,blas::row_major,0,IA,TA> >{};
 	
-//template<class T, std::size_t IB, class IA, class TA>
-//struct ExpressionTraits<blas::compressed_matrix<T,blas::column_major,IB,IA,TA> >{
-	
-	//typedef blas::compressed_matrix<T,blas::column_major,IB,IA,TA> type;
-	//typedef typename IA::value_type index_type;
-	//typedef typename TA::value_type value_type;
-	//typedef typename IA::value_type const* index_pointer;
-	//typedef typename TA::value_type const* value_pointer;
-	//typedef blas::column_major_tag orientation;
-	
-	//static const std::size_t k = IB;
-	//static const StorageCategory category=Compressed;
-	//static const bool transposed=false;
-	
-	//static std::size_t stride1(type const& m){
-		//return m.size2();
-	//}
-	//static std::size_t stride2(type const&){
-		//return 1;
-	//}
-	
-	//static std::size_t index1Size(type const& v){
-		//return v.filled1();
-	//}
-	//static std::size_t index2Size(type const& v){
-		//return v.filled2();
-	//}
-	
-	//static value_pointer storageBegin(type const& v){
-		//return &v.value_data().begin()[0];
-	//}
-	//static value_pointer storageEnd(type const& v){
-		//return &v.value_data().begin()[0];+v.nnz();
-	//}
-	//static index_pointer index1Begin(type const& v){
-		//return &v.index1_data().begin()[0];
-	//}
-	//static index_pointer index1End(type const& v){
-		//return &v.index1_data().begin()[0];+v.filled1();
-	//}
-	//static index_pointer index2Begin(type const& v){
-		//return &v.index2_data().begin()[0];
-	//}
-	//static index_pointer index2End(type const& v){
-		//return &v.index2_data().begin()[0];+v.filled2();
-	//}
-//};	
-//template<class T, std::size_t IB, class IA, class TA>
-//struct ExpressionTraits<const blas::compressed_matrix<T,blas::column_major,IB,IA,TA> >
-//:public ExpressionTraits<blas::compressed_matrix<T,blas::column_major,IB,IA,TA> >{};
+template<class T, class BaseExpression>
+SHARK_COMPRESSEDTRAITSSPEC(
+	blas::compressed_matrix<T>
+)
+public:
+	typedef CompressedMatrixStorage<T,std::size_t> storage;
+
+	static storage compressedStorage(type& m){
+		storage matrixStorage;
+		matrixStorage.data = &m.value_data()[0];
+		matrixStorage.indizesLine = &m.index2_data()[0];
+		matrixStorage.indizesLineBegin = &m.index1_data()[0];
+		return matrixStorage;
+	}
+};
+
 }}
 #endif

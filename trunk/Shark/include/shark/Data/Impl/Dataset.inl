@@ -727,8 +727,8 @@ public:
 			>::type>::type R;
 		using boost::adaptors::transform;
 		return type(
-			Batch<InputType>::createBatch(transform(range, GetElementInput<R>())),
-			Batch<LabelType>::createBatch(transform(range, GetElementLabel<R>()))
+			Batch<InputType>::createBatchFromRange(transform(range, GetElementInput<R>())),
+			Batch<LabelType>::createBatchFromRange(transform(range, GetElementLabel<R>()))
 		);
 	}
 	

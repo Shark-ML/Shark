@@ -41,21 +41,9 @@
 
 #ifndef SHARK_DATA_LIBSVM_H
 #define SHARK_DATA_LIBSVM_H
-
-#include <exception>
 #include <fstream>
-#include <string>
-#include <vector>
-#include <map>
 #include <limits>
-
-#include <boost/format.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/minmax_element.hpp>
-#include <boost/iostreams/filter/newline.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/copy.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 #include <shark/Data/Dataset.h>
 
@@ -63,249 +51,96 @@ namespace shark {
 
 namespace detail {
 
-
-template<typename T, typename U, typename Stream>
-void import_libsvm( T & input, // Container that holds the samples
-		    U & labels, // Container that holds the labels
-		    Stream & pre_in, // The file to be read from
-		    int highestIndex = 0, // highest feature index, or 0 for auto-detect
-		    bool allowMissingClasses = false, // if true, skip test if all classes occur
-		    std::map<typename U::value_type, typename U::value_type> const* labelmap = NULL, // explicit mapping from LIBSVM to Shark labels
-		    bool printSparsenessRatio = false
-		    ) {
-
-	typedef typename T::value_type SampleType;
-	typedef typename U::value_type LabelType;
-
-	if( !pre_in ) {
-		throw( SHARKEXCEPTION( "[import_libsvm] Stream cannot be opened for reading." ) );
-	}
-
-	// fix line ending encodings and final newline. see http://svn.boost.org/svn/boost/trunk/libs/iostreams/test/newline_test.cpp
-	boost::iostreams::filtering_istream fin;
-	#if defined( _WIN32 )
-		fin.push( boost::iostreams::newline_checker(boost::iostreams::newline::dos | boost::iostreams::newline::final_newline) );
-		fin.push( boost::iostreams::newline_filter(boost::iostreams::newline::dos) );
-		fin.push( pre_in );
-	#elif defined( __unix__ ) || defined ( __unix ) || defined ( __linux__ ) || defined ( __posix__ ) || defined ( __APPLE__ )
-		fin.push( boost::iostreams::newline_checker(boost::iostreams::newline::posix | boost::iostreams::newline::final_newline) );
-		fin.push( boost::iostreams::newline_filter(boost::iostreams::newline::posix) );
-		fin.push( pre_in );
-	#elif defined( macintosh ) || defined( Macintosh )
-		fin.push( boost::iostreams::newline_checker(boost::iostreams::newline::mac | boost::iostreams::newline::final_newline) );
-		fin.push( boost::iostreams::newline_filter(boost::iostreams::newline::mac) );
-		fin.push( pre_in );
-	#endif
-
-	// pipe data through line-ending-repair-stream into regular stream
-	std::stringstream in( std::stringstream::in | std::stringstream::out );
-	try {
-		boost::iostreams::copy( fin, in );
-	} catch (...) {
-		throw SHARKEXCEPTION("[import_libsvm] Failed to process input file. Most likely, your file is not terminated by a newline.");
-	}
-
-	// check for final newline
-	boost::iostreams::newline_checker* checker = 0;
-	checker = BOOST_IOSTREAMS_COMPONENT( fin, 0, boost::iostreams::newline_checker );
-	SHARK_ASSERT( checker->has_final_newline() );
-
-	// helper vars
-	LabelType storable_label;
-	double cur_label;
-	double min_label = std::numeric_limits<double>::max();
-	double max_label = -std::numeric_limits<double>::max();
-	int cur_index = 0;
-	int last_index = 0;
-	int max_index = 0;
-	typename SampleType::value_type cur_value;
-
-	// info vars
-	bool binary = true;        // labels +1/-1
-	bool regression = false;   // non-integer labels
-	double sparsenessRatio;
-	unsigned long noof_nonzeros = 0;
-
-	// i/o helpers
-	std::string line;
-	unsigned int lineCounter = 0;
-	std::vector<std::string> tokens, sub_tokens;
-
-	// SCAN CARDINALITIES: only look through the file once. also some sanity checks.
-	while( std::getline( in, line ) ) //one loop = one line
-	{
-		++lineCounter;
-		if( line.empty() ) continue;
-		boost::algorithm::split( tokens, line, boost::is_any_of( "\t " ) );
-		std::vector< std::string >::iterator it = tokens.begin();
-		while ( *it == "" ) //delete initial whitespace
-			it = tokens.erase(it);
-		try { //read and look at label
-			cur_label = boost::lexical_cast< double >( *it );
-		} catch( boost::bad_lexical_cast & blc ) {
-			throw( SHARKEXCEPTION( ( boost::format( "[import_libsvm] Problem casting label in line %d: %s" ) % lineCounter % blc.what() ).str() ) );
-		}
-		if ( cur_label > max_label ) max_label = cur_label;
-		if ( cur_label < min_label ) min_label = cur_label;
-
-		if (cur_label != (int)cur_label ) regression = true;
-		if (cur_label != +1.0 && cur_label != -1.0) binary = false;
-
-		// look for highest index in all index-value-pairs
-		it = tokens.begin() + 1;
-		for( ; it != tokens.end(); ++it ) {
-			//skip empty tokens (i.e., results of boosts convention that N separators must yield N+1 fields )
-			if ( *it == "" )
-				continue;
-			//std::cout<<*it<<std::endl;
-			boost::algorithm::split( sub_tokens, *it, boost::is_any_of( ":" ) );
-
-			if(sub_tokens.empty())
-				continue;
-			//std::cout << std::setw(2) << std::setfill('0') << std::hex << std::uppercase;
-			//std::copy(sub_tokens.front().begin(), sub_tokens.front().end(), std::ostream_iterator<unsigned int>(std::cout, "a b"));
-			//std::cout<<std::endl;
-			try {
-				cur_index = boost::lexical_cast< int >( sub_tokens.front() );
-			} catch( boost::bad_lexical_cast & blc ) {
-				throw( SHARKEXCEPTION( ( boost::format( "[import_libsvm] Problem casting data in line %d: %s" ) % lineCounter % blc.what() ).str() ) );
-			}
-			SHARK_CHECK( cur_index > last_index, "[import_libsvm] expecting strictly increasing feature indices");
-			SHARK_CHECK( cur_index > 0, "[import_libsvm] expecting only 1-based feature indices");
-			if ( cur_index > max_index ) max_index = cur_index;
-			last_index = cur_index;
-		}
-		last_index = 0;
-	}
-
-	// check for type consistency
-	if (boost::is_integral<LabelType>::value)
-		if ( regression )
-			throw SHARKEXCEPTION("[import_libsvm] Cannot load regression dataset into dataset for labels of integral type.");
-	// check for correct minimum label in multi-class classification case
-	if ( !binary )
-		if ( !regression )
-			if ( min_label != 1 ) {
-				if (labelmap == NULL) {
-					throw SHARKEXCEPTION("[import_libsvm] Detected multi-class classification dataset, but with lowest label different from 1.");
-				} else {
-					typename std::map<LabelType, LabelType>::const_iterator it = labelmap->find(static_cast<LabelType>(min_label));
-					if ( it == labelmap->end() ) throw SHARKEXCEPTION("[import_libsvm] min_label not found in explicitly given map");
-					if ( it->second != 1 )
-						throw SHARKEXCEPTION("[import_libsvm] Detected multi-class classification dataset, but with lowest label different from 1.");
-				}
-			}
-
-	// allow possibility to specify a higher index for the feature vectors
-	if (highestIndex) {
-		if ( highestIndex < max_index ) throw SHARKEXCEPTION("[import_libsvm] highestIndex must be higher than those found in the dataset.");
-		max_index = highestIndex;
-	}
-
-	// reset input stream
-	in.clear(); //always clear first, then seek beginning
-	in.seekg(std::ios::beg); //go back to beginning
-
-	// ACTUAL READ-IN
-	for (unsigned int i=0; i<lineCounter; i++) //one loop = one line
-	{
-		if ( !std::getline( in, line ) )
-			throw SHARKEXCEPTION("[import_libsvm] cannot re-read all examples");
-		if( line.empty() ) continue;
-		boost::algorithm::split( tokens, line, boost::is_any_of( "\t " ) );
-		std::vector< std::string >::iterator it = tokens.begin();
-		while ( *it == "" ) //delete initial whitespace
-			it = tokens.erase(it);
-		try { //read and look at label
-			cur_label = boost::lexical_cast< double >( *it );
-		} catch( boost::bad_lexical_cast & blc ) {
-			throw( SHARKEXCEPTION( ( boost::format( "[import_libsvm] Could not re-cast label in line %d: %s" ) % lineCounter % blc.what() ).str() ) );
-		}
-		if (labelmap != NULL)
-		{
-			typename std::map<LabelType, LabelType>::const_iterator it = labelmap->find(static_cast<LabelType>(cur_label));
-			if (it == labelmap->end()) throw SHARKEXCEPTION( ( boost::format( "[import_libsvm] label %d not found in explicitly given map") %cur_label ).str() );
-			storable_label = it->second;
-		}
-		else if (regression)
-		{
-			storable_label = static_cast<LabelType>(cur_label);   // todo: does this work on a RealVector? //mt_comment: why should it? do we expect anything else to do? (i don't see that it would..)
-		}
-		else if (binary)
-		{
-			storable_label = (cur_label <= 0.0) ? 0 : 1; //convert from pos/neg-encoding to 0/1-encoding
-		}
-		else
-		{
-			storable_label = (int)cur_label - 1; //libsvm by default labels the first class 1, shark uses 0 -> substract one.
-		}
-		labels.push_back(storable_label);
-
-		// read and assign feature values
-		SampleType sample( static_cast<std::size_t>(max_index), 0 ); //for dense, the 0 sets the default value. for sparse, the number of non-zeros.
-		it = tokens.begin() + 1;
-		for( ; it != tokens.end(); ++it ) {
-			//skip empty tokens (i.e., results of boosts convention that N separators must yield N+1 fields )
-			if ( *it == "" )
-				continue;
-			boost::algorithm::split( sub_tokens, *it, boost::is_any_of( ":" ) );
-			try {
-				cur_index = boost::lexical_cast< int >( sub_tokens.front() );
-				cur_value = boost::lexical_cast< typename SampleType::value_type >( sub_tokens.back() );
-			} catch( boost::bad_lexical_cast & blc ) {
-				throw( SHARKEXCEPTION( ( boost::format( "[import_libsvm] Could not re-cast data in line %d: %s" ) % lineCounter % blc.what() ).str() ) );
-			}
-			SHARK_CHECK( cur_index > last_index, "[import_libsvm] problem re-reading data: cur_index <= last_index");
-			SHARK_CHECK( cur_index > 0, "[import_libsvm] problem re-reading data: cur_index <= 0");
-			SHARK_CHECK( cur_index <= max_index, "[import_libsvm] problem re-reading data: cur_index > max_index");
-			if ( cur_value )
-			{
-				++ noof_nonzeros;
-				sample(cur_index-1) = cur_value;
-			}
-		}
-		input.push_back(sample);
-	}
-
-	// SCAN LABELS: if a classification dataset, look through the
-	//              newly-imported label vector once to ensure sanity.
-	//              For clarity: this check is triggered iff the user
-	//              declared an integral label type (e.g., via ClassificationDataset)
-	if (boost::is_integral<LabelType>::value)
-	{
-		if ( !allowMissingClasses ) { // only check if not turned off
-			std::pair<typename U::iterator,typename U::iterator> minmax = boost::minmax_element(labels.begin(),labels.end());
-			LabelType min_label = *minmax.first;
-			LabelType max_label = *minmax.second;
-			if ( min_label != 0 ) throw SHARKEXCEPTION("[import_libsvm] Label error: first label must occur in dataset.");
-
-			std::vector<std::size_t> label_histogram(static_cast<std::size_t>(max_label)+1,0);
-			// count
-			for (typename U::iterator it=labels.begin(); it != labels.end(); ++it) {
-				LabelType label = *it;
-				label_histogram[ (std::size_t) label ] ++;
-			}
-			// check that every label occured
-			for ( std::size_t i=0; i<max_label; i++ ) {
-				if ( label_histogram[i] == 0 )
-					throw SHARKEXCEPTION("[import_libsvm] Label error: every label in range must occur at least once.");
-			}
-
-		} //if (!allowMissingClasses)
-
-	} //if (is_integral)
-
-
-	// optional: sparseness-related computation/output
-	unsigned long noofElements = input.size() * max_index;
-	sparsenessRatio = noof_nonzeros / (double) noofElements;
-	if ( printSparsenessRatio )
-	{
-		std::cout << "overall sparseness ratio = " << sparsenessRatio << std::endl;
-	}
-
+typedef std::pair<int, std::vector<std::pair<std::size_t, double> > > LibSVMPoint;
+inline std::vector<LibSVMPoint> 
+import_libsvm_reader(
+	std::istream& stream
+) {
+	;
+	stream.unsetf(std::ios::skipws); // No white space skipping!
+	std::istream_iterator<char> streamBegin(stream);
+	std::string storage(// We will read the contents of the file here
+		streamBegin,
+		std::istream_iterator<char>()
+	);
+	
+	using namespace boost::spirit::qi;
+	std::string::const_iterator first = storage.begin();
+	std::string::const_iterator last = storage.end();
+	std::vector<LibSVMPoint>  fileContents;
+	bool r = phrase_parse(
+		first, last, 
+		*(
+			int_   >> *(uint_ >> ':' >> double_) >> eol
+		),
+		space-eol , fileContents
+	);
+	if(!r || first != last)
+		throw SHARKEXCEPTION("[import_libsvm_reader] problems parsing file");
+	return fileContents;
 }
 
+template<class T>//We assume T to be vectorial
+LabeledData<T, unsigned int> import_libsvm(
+	std::istream& stream,
+	unsigned int dimensions
+){
+	//read contents of stream
+	std::vector<LibSVMPoint> contents = import_libsvm_reader(stream);
+	std::size_t numPoints = contents.size();
+	
+	//find data dimension by getting the maximum index
+	std::size_t maxIndex = 0;
+	for(std::size_t i = 0; i != numPoints; ++i){
+		std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
+		if(!inputs.empty())
+			maxIndex = std::max(maxIndex, inputs.back().first);
+	}
+	if(dimensions == 0){
+		dimensions = maxIndex;
+	}
+	else if (maxIndex > dimensions)//LibSVM is one-indexed
+		throw SHARKEXCEPTION("number of dimensions supplied is smaller than actual index data");
+	
+	//check labels for conformity
+	bool binaryLabels = false;
+	{
+		int minPositiveLabel = std::numeric_limits<int>::max();
+		int maxPositiveLabel = -1;
+		for(std::size_t i = 0; i != numPoints; ++i){
+			int label = contents[i].first;
+			if(label < -1)
+				throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
+			else if(label == -1)
+				binaryLabels = true;
+			else if(label < minPositiveLabel)
+				minPositiveLabel = label;
+			else if(label > maxPositiveLabel)
+				maxPositiveLabel = label;
+		}
+		if(binaryLabels && (minPositiveLabel == 0||  maxPositiveLabel > 1))
+			throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
+	}
+	
+	//copy contents into a new dataset
+	typename LabeledData<T, unsigned int>::element_type blueprint(T(maxIndex),0);
+	LabeledData<T, unsigned int> data(numPoints,blueprint);//create dataset with the right structure
+	{
+		std::size_t i = 0;
+		typedef typename LabeledData<T, unsigned int>::element_reference ElemRef;
+		BOOST_FOREACH(ElemRef element, data.elements()){
+			shark::zero(element.input);
+			//todo: check label
+			element.label = binaryLabels? 1 + (contents[i].first-1)/2 : contents[i].first-1;
+			
+			std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
+			for(std::size_t j = 0; j != inputs.size(); ++j)
+				element.input(inputs[j].first-1) = inputs[j].second;//LibSVM is one-indexed
+			++i;
+		}
+	}
+	return data;
+}
 typedef std::pair< unsigned int, size_t > LabelSortPair;
 static bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortPair& right) {
 	return left.first > right.first; // for sorting in decreasing order
@@ -319,21 +154,6 @@ static bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortPair& ri
  * @{
  */
 
-template<typename InputType, typename LabelType>
-void import_libsvm(
-		LabeledData<InputType, LabelType>& dataset,
-		std::istream& stream,
-		int highestIndex = 0,
-		bool allowMissingClasses = false,
-		std::map<LabelType, LabelType> const* labelmap = NULL,
-		bool verbose = false)
-{
-	std::vector<InputType> x;
-	std::vector<LabelType> y;
-	detail::import_libsvm(x, y, stream, highestIndex, allowMissingClasses, labelmap, verbose);
-	dataset = createLabeledDataFromRange(x, y);
-}
-
 /// \brief Import data from a LIBSVM file.
 ///
 /// \param  dataset       container storing the loaded data
@@ -342,17 +162,23 @@ void import_libsvm(
 /// \param  allowMissingClasses set this flag to false if you accept datasets having classes without samples
 /// \param  labelmap      explicit mapping from LIBSVM to Shark labels
 /// \param  verbose       prints sparseness ratio for sparse data
-template<typename InputType, typename LabelType>
+template<typename InputType>
 void import_libsvm(
-		LabeledData<InputType, LabelType>& dataset,
-		std::string fn,
-		int highestIndex = 0,
-		bool allowMissingClasses = false,
-		std::map<LabelType, LabelType> const* labelmap = NULL,
-		bool verbose = false)
-{
+	LabeledData<InputType, unsigned int>& dataset,
+	std::string fn,
+	int highestIndex = 0
+){
 	std::ifstream ifs(fn.c_str());
-	return import_libsvm(dataset,ifs,highestIndex,allowMissingClasses,labelmap,verbose);
+	dataset =  detail::import_libsvm<InputType>(ifs, highestIndex);
+}
+
+template<typename InputType>
+void import_libsvm(
+	LabeledData<InputType, unsigned int>& dataset,
+	std::istream& stream,
+	int highestIndex = 0
+){
+	dataset =  detail::import_libsvm<InputType>(stream, highestIndex);
 }
 
 

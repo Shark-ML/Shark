@@ -43,6 +43,10 @@
 #include <shark/LinAlg/BLAS/ublas.h>
 #include <shark/LinAlg/BLAS/traits/vector_raw.hpp>
 #include <shark/LinAlg/BLAS/traits/matrix_raw.hpp>
+#include <shark/Core/utility/Iterators.h>
+
+#include <algorithm>
+
 namespace shark{
 
 template<class ValueType>
@@ -314,6 +318,35 @@ private:
 };
 
 
+///\brief Wrapper for a matrix row, which offers a conversion operator to
+/// to the Vector Type.
+template<class Matrix, class Vector>
+class MatrixRowReference:public blas::matrix_row<Matrix>{
+private:
+	typedef blas::matrix_row<Matrix> base_type;
+public:
+	MatrixRowReference( Matrix& matrix, std::size_t i)
+	:base_type(matrix,i){}
+	template<class T>//special version allows for const-conversion
+	MatrixRowReference(T const& matrixrow)
+	:base_type(matrixrow.data().expression(),matrixrow.index()){}
+	
+	template<class T> 
+	const MatrixRowReference& operator=(const T& argument){
+		static_cast<base_type&>(*this)=argument;
+		return *this;
+	}
+	
+	operator Vector(){
+		return Vector(*this);
+	}
+};
+
+template<class M, class V>
+void swap(MatrixRowReference<M,V> ref1, MatrixRowReference<M,V> ref2){
+	swap(static_cast<blas::matrix_row<M>& >(ref1),static_cast<blas::matrix_row<M>& >(ref2));
+}
+
 template<class ValueType,class Orientation=blas::row_major>
 class FixedDenseMatrixProxy: public blas::matrix_expression<FixedDenseMatrixProxy<ValueType,Orientation> > {
 	typedef FixedDenseMatrixProxy<ValueType,Orientation> self_type;
@@ -351,7 +384,7 @@ public:
 		BOOST_STATIC_ASSERT(traits::IsDense<E>::value);
 		BOOST_STATIC_ASSERT((//either same orientation or transposed, not both
 			boost::is_same<typename traits::Orientation<E>::type,orientation_category>::value
-			^ traits::ExpressionTraits<E>::isTransposed
+			^ traits::ExpressionTraits<E>::transposed
 		));
 	}
 	
@@ -370,7 +403,7 @@ public:
 		BOOST_STATIC_ASSERT(traits::IsDense<E>::value);
 		BOOST_STATIC_ASSERT((//either same orientation or transposed, not both
 			boost::is_same<typename traits::Orientation<E>::type,orientation_category>::value
-			^ traits::ExpressionTraits<E>::isTransposed
+			^ traits::ExpressionTraits<E>::transposed
 		));
 	}
 		
@@ -498,10 +531,10 @@ public:
 	// --------------
 	
 	const_reference operator () (size_type i, size_type j) const {
-		return m_data[Orientation::address (i, m_stride1, j, m_stride2)];
+		return m_data[i*m_stride1+j*m_stride2];
         }
 	reference at_element (size_type i, size_type j) {
-		return m_data[Orientation::address (i, m_stride1, j, m_stride2)];
+		return m_data[i*m_stride1+j*m_stride2];
         }
         reference operator () (size_type i, size_type j) {
 		return at_element(i,j);
@@ -534,19 +567,15 @@ public:
         typedef blas::indexed_const_iterator1<const_closure_type, blas::dense_random_access_iterator_tag> const_iterator1;
         typedef blas::indexed_const_iterator2<const_closure_type, blas::dense_random_access_iterator_tag> const_iterator2;
 	
-	BOOST_UBLAS_INLINE
         const_iterator1 find1 (int /* rank */, size_type i, size_type j) const {
 		return const_iterator1 (*this, i, j);
         }
-        BOOST_UBLAS_INLINE
         iterator1 find1 (int /* rank */, size_type i, size_type j) {
 		return iterator1 (*this, i, j);
         }
-        BOOST_UBLAS_INLINE
         const_iterator2 find2 (int /* rank */, size_type i, size_type j) const {
 		return const_iterator2 (*this, i, j);
         }
-        BOOST_UBLAS_INLINE
         iterator2 find2 (int /* rank */, size_type i, size_type j) {
 		return iterator2 (*this, i, j);
         }
@@ -623,6 +652,222 @@ private:
 };
 
 
+template<class ValueType,class IndexType>
+class FixedSparseVectorProxy: public blas::vector_expression<FixedSparseVectorProxy<ValueType,IndexType> > {
+	typedef FixedSparseVectorProxy<ValueType,IndexType> self_type;
+public:
+
+	//std::container types
+	typedef std::size_t size_type;
+	typedef std::ptrdiff_t difference_type;
+	typedef typename boost::remove_const<ValueType>::type value_type;
+	typedef value_type const& const_reference;
+	typedef ValueType&  reference;
+	typedef ValueType* pointer;
+	typedef IndexType* const_index_pointer;
+	typedef value_type const* const_pointer;
+	//ublas types
+	typedef FixedSparseVectorProxy<value_type const,IndexType const> const_closure_type;
+	typedef self_type closure_type;
+	typedef blas::dense_tag storage_category;
+
+	// Construction and destruction
+
+	/// \brief Constructor of a self_type proxy from a Dense VectorExpression
+	///
+	/// Be aware that the expression must live longer than the proxy!
+	/// \param espression The Expression from which to construct the Proxy
+ 	template<class E>
+	FixedSparseVectorProxy(blas::vector_expression<E> const& expression):
+		m_storage(traits::ExpressionTraits<E const>::compressedStorage(expression())),
+		m_size(expression().size())
+	{
+		BOOST_STATIC_ASSERT(traits::IsSparse<E>::value);
+	}
+		
+	/// \brief Constructor of a vector proxy from a block of memory
+	/// \param size the size of the vector represented by the memory
+	/// \param data the block of memory used to store the values
+	/// \param indizes the block of memory used to store the indizes
+	/// \param memoryLength length of the strip of memory
+	/// \param startIndex used when the index array does not start from 0, indicates the index of the first element having position 0 in the vector
+	FixedSparseVectorProxy(size_type size, const_pointer data, const_index_pointer indizes, size_type memoryLength, size_type startIndex = 0 )
+	:m_size(size){
+		m_storage.nonZeros=memoryLength;
+		m_storage.data = data;
+		m_storage.indizes = indizes;
+		m_storage.startIndex = startIndex;
+	}
+	
+	/// \brief Return the size of the self_type
+	size_type size() const {
+		return m_size;
+	}
+	
+	size_type nnz()const{
+		return m_storage.nonZeros;
+	}
+	
+	const_pointer data()const{
+		return m_storage.data;
+	}
+	
+	const_index_pointer indizes()const{
+		return m_storage.indizes;
+	}
+	
+	IndexType startIndex()const{
+		return m_storage.startIndex;
+	}
+	
+	traits::CompressedVectorStorage<ValueType,IndexType> const& storage()const {
+		return m_storage;
+	}
+	
+	// --------------
+	// Element access
+	// --------------
+
+	/// \brief Return a const pointer to the element \f$i\f$
+	/// \param i index of the element
+	value_type find_element(size_type i) const {
+		SIZE_CHECK(i < m_size);
+		i += startIndex();
+		const_index_pointer pos = std::lower_bound(indizes(),indizes()+nnz(), i);
+		difference_type diff = pos-indizes();
+		if(diff == nnz || *pos != i)
+			return value_type();
+		return data()[diff];
+	}
+
+	/// \brief Return a const reference to the element \f$i\f$
+	/// \param i index of the element
+	value_type operator()(size_type i) const {
+		return find_element(i);
+	}
+
+	/// \brief Return a const reference to the element \f$i\f$
+	/// \param i index of the element
+	value_type operator[](size_type i) const {
+		return find_element(i);
+	}
+
+	// --------------
+	// ITERATORS
+	// --------------
+	
+	 class const_iterator
+	: public blas::bidirectional_iterator_base<blas::sparse_bidirectional_iterator_tag,const_iterator, value_type> {
+	public:
+		typedef typename FixedSparseVectorProxy::value_type value_type;
+		typedef typename FixedSparseVectorProxy::difference_type difference_type;
+		typedef typename FixedSparseVectorProxy::const_reference reference;
+		typedef typename FixedSparseVectorProxy::const_pointer pointer;
+
+		// Construction and destruction
+
+		const_iterator (){}
+
+		const_iterator (const_pointer data, const_index_pointer index, size_type startIndex)
+		:m_data(data), m_index(index),m_startIndex(startIndex){}
+
+		// Arithmetic
+
+		const_iterator &operator ++ () {
+			++ m_data;
+			++ m_index;
+			return *this;
+		}
+
+		const_iterator &operator -- () {
+			-- m_data;
+			-- m_index;
+			return *this;
+		}
+
+		// Dereference
+
+		const_reference operator * () const {
+			return *m_data;
+		}
+
+		// Index
+
+		size_type index () const {
+			return *m_index - m_startIndex;
+		}
+
+		// Assignment
+		const_iterator &operator = (const const_iterator &it) {
+			m_data = it.m_data;
+			m_index = it.m_index;
+			m_startIndex = it.m_startIndex;
+			return *this;
+		}
+
+		// Comparison
+		bool operator == (const const_iterator &it) const {
+			return m_data == it.m_data;
+		}
+
+	private:
+		const_pointer m_data;
+		const_index_pointer m_index;
+		size_type m_startIndex;
+        };
+	
+	typedef const_iterator iterator;
+	
+	/// \brief Return a const iterator to the element \e i
+	/// \param i index of the element
+	const_iterator find(size_type i) const {
+		SIZE_CHECK(i < m_size);
+		i += startIndex();
+		const_index_pointer pos = std::lower_bound(indizes(),indizes()+nnz(), i);
+		difference_type diff = pos-indizes();
+		return const_iterator(data()+diff,indizes()+pos,m_storage.startIndex());
+	}
+
+
+	/// \brief return an iterator on the first element of the self_type
+	const_iterator begin() const {
+		return const_iterator(data(),indizes(),startIndex());
+	}
+
+	/// \brief return an iterator after the last element of the self_type
+	const_iterator end() const {
+		return const_iterator(data()+nnz(),indizes()+nnz(),startIndex());
+	}
+
+	// Reverse iterator
+	typedef blas::reverse_iterator_base<const_iterator> const_reverse_iterator;
+	typedef blas::reverse_iterator_base<iterator> reverse_iterator;
+
+	/// \brief Return a const reverse iterator before the first element of the reversed self_type(i.e. end() of normal self_type)
+	const_reverse_iterator rbegin() const {
+		return const_reverse_iterator(end());
+	}
+
+	/// \brief Return a const reverse iterator on the end of the reverse self_type(i.e. first element of the normal self_type) 
+	const_reverse_iterator rend() const {
+		return const_reverse_iterator(begin());
+	}
+
+	/// \brief Return a const reverse iterator before the first element of the reversed self_type(i.e. end() of normal self_type)
+	reverse_iterator rbegin() {
+		return reverse_iterator(end());
+	}
+
+	/// \brief Return a const reverse iterator on the end of the reverse self_type(i.e. first element of the normal self_type) 
+	reverse_iterator rend() {
+		return reverse_iterator(begin());
+	}
+private:
+	std::size_t m_size;
+	traits::CompressedVectorStorage<ValueType,IndexType> m_storage;
+};
+
+
 //support for our vector type traits
 namespace traits{
 
@@ -661,13 +906,47 @@ SHARK_DENSETRAITSSPEC(FixedDenseVectorProxy<T>)
 	}
 };
 
+template<class T,class I>
+struct ExpressionTraitsBase<FixedSparseVectorProxy<T,I> >{
+	typedef FixedSparseVectorProxy<T,I> type;
+	typedef type const const_type;
+	typedef typename FixedSparseVectorProxy<T,I>::pointer value_pointer;
+	
+	typedef CompressedStorage StorageCategory;
+	
+	static std::size_t stride(const_type& v){
+		return v.stride();
+	}
+};
+template<class T,class I>
+struct ExpressionTraitsBase<FixedSparseVectorProxy<T,I> const >{
+	typedef FixedSparseVectorProxy<T,I> const type;
+	typedef type const_type;
+	typedef typename FixedSparseVectorProxy<T,I>::pointer value_pointer;
+	
+	typedef CompressedStorage StorageCategory;
+	
+	static std::size_t stride(const_type& v){
+		return 1;
+	}
+};
+
+template<class T, class I, class BaseExpression>
+SHARK_COMPRESSEDTRAITSSPEC(FixedSparseVectorProxy<T BOOST_PP_COMMA() I>)
+	typedef CompressedVectorStorage<T,I >storage;
+
+	static storage compressedStorage(type& v){
+		return v.storage();
+	}
+};
+
 template<class T,class O>
 struct ExpressionTraitsBase<FixedDenseMatrixProxy<T,O> const>{
 	typedef FixedDenseMatrixProxy<T,O> const type;
 	typedef type const_type;
 	typedef typename FixedDenseMatrixProxy<T,O>::pointer value_pointer;
 	
-	typedef O orientation;
+	typedef typename O::orientation_category orientation;
 	typedef DenseStorage StorageCategory;
 	static const bool transposed=false;
 	
@@ -685,7 +964,7 @@ struct ExpressionTraitsBase<FixedDenseMatrixProxy<T,O> >{
 	typedef type const const_type;
 	typedef typename FixedDenseMatrixProxy<T,O>::pointer value_pointer;
 	
-	typedef O orientation;
+	typedef typename O::orientation_category orientation;
 	typedef DenseStorage StorageCategory;
 	static const bool transposed=false;
 	
@@ -708,6 +987,62 @@ SHARK_DENSETRAITSSPEC(FixedDenseMatrixProxy<T BOOST_PP_COMMA() O>)
 };
 
 }
+}
+
+namespace boost{
+//first the typedefs which tell boost::range which iterators to use. this needs to be done for all
+//supported matrix types separately as well as for the matrix_container/matrix_expression base type
+	
+//dense matrix
+template< class T >
+struct range_mutable_iterator< shark::FixedDenseMatrixProxy<T> >{
+	typedef boost::numeric::ublas::vector<typename boost::remove_const<T>::type> Vector;
+	typedef shark:: MatrixRowReference<shark::FixedDenseMatrixProxy<T>,Vector> reference;
+	typedef shark::ProxyIterator<shark::FixedDenseMatrixProxy<T>, Vector, reference > type;
+};
+
+template< class T >
+struct range_const_iterator< shark::FixedDenseMatrixProxy<T> >{
+	typedef boost::numeric::ublas::vector<typename boost::remove_const<T>::type> Vector;
+	typedef shark::MatrixRowReference<shark::FixedDenseMatrixProxy<T> const,Vector> reference;
+	typedef shark::ProxyIterator<shark::FixedDenseMatrixProxy<T> const, Vector, reference > type;
+};
+
+}
+
+namespace shark{
+
+//dense matrix
+template< class T >
+typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> const>::type
+range_begin( shark::FixedDenseMatrixProxy<T> const& m )
+{
+	typedef typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> const>::type Iter;
+	return Iter(m,0);
+}
+template< class T >
+typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> >::type
+range_begin( shark::FixedDenseMatrixProxy<T>& m )
+{
+	typedef typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> >::type Iter;
+	return Iter(m,0);
+}
+
+template< class T >
+typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> const>::type
+range_end( shark::FixedDenseMatrixProxy<T> const& m )
+{
+	typedef typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> const>::type Iter;
+	return Iter(m,m.size1());
+}
+template< class T >
+typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> >::type
+range_end( shark::FixedDenseMatrixProxy<T>& m )
+{
+	typedef typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> >::type Iter;
+	return Iter(m,m.size1());
+}
+
 }
 
 #endif

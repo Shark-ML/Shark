@@ -24,8 +24,8 @@
 #ifndef SHARK_DATA_BATCHINTERFACE_H
 #define SHARK_DATA_BATCHINTERFACE_H
 
-#include <shark/Core/utility/Iterators.h>
 #include <shark/LinAlg/Base.h>
+#include <shark/Core/utility/Iterators.h>
 
 #include <boost/preprocessor.hpp>
 
@@ -65,7 +65,7 @@ struct DefaultBatch{
 	
 	///\brief creates a batch storing the elements referenced by the provided range
 	template<class Range>
-	static type createBatch(Range const& range){
+	static type createBatchFromRange(Range const& range){
 		return type(range.begin(),range.end());
 	}
 	
@@ -99,48 +99,16 @@ struct ArithmeticBatch{
 	}
 	///\brief creates a batch storing the elements referenced by the provided range
 	template<class Range>
-	static type createBatch(Range const& range){
+	static type createBatchFromRange(Range const& range){
 		type batch(range.size());
 		std::copy(range.begin(),range.end(),batch.begin());
 		return batch;
 	}
 	
-	
 	static void resize(type& batch, std::size_t batchSize, std::size_t elements){
 		ensureSize(batch,batchSize);
 	}
 };
-
-
-///\brief Wrapper for a matrix row, which offers a conversion operator to
-/// to the Vector Type.
-template<class Matrix, class Vector>
-class MatrixRowReference:public blas::matrix_row<Matrix>{
-private:
-	typedef blas::matrix_row<Matrix> base_type;
-public:
-	MatrixRowReference( Matrix& matrix, std::size_t i)
-	:base_type(matrix,i){}
-	template<class T>//special version allows for const-conversion
-	MatrixRowReference(T const& matrixrow)
-	:base_type(matrixrow.data().expression(),matrixrow.index()){}
-	
-	template<class T> 
-	const MatrixRowReference& operator=(const T& argument){
-		static_cast<base_type&>(*this)=argument;
-		return *this;
-	}
-	
-	operator Vector(){
-		return Vector(*this);
-	}
-};
-
-//we provide our own version of swap for our reference proxy
-template<class M, class V>
-void swap(MatrixRowReference<M,V> ref1, MatrixRowReference<M,V> ref2){
-	swap(static_cast<blas::matrix_row<M>& >(ref1),static_cast<blas::matrix_row<M>& >(ref2));
-}
 
 }
 
@@ -164,7 +132,7 @@ struct Batch
 ///\brief creates a batch from a range of inputs
 template<class T, class Range>
 typename Batch<T>::type createBatch(Range const& range){
-	return Batch<T>::createBatch(range);
+	return Batch<T>::createBatchFromRange(range);
 }
 
 /// \brief specialization for ublas vectors which should be matrices in batch mode!
@@ -178,10 +146,10 @@ struct Batch<blas::vector<T> >{
 	
 	/// \brief Reference to a single element.
 	//typedef boost::numeric::ublas::matrix_row<type> reference;
-	typedef detail::MatrixRowReference<type,value_type> reference;
+	typedef MatrixRowReference<type,value_type> reference;
 	/// \brief Reference to a single immutable element.
 	//typedef boost::numeric::ublas::matrix_row<const type> const_reference;
-	typedef detail::MatrixRowReference<const type,value_type> const_reference;
+	typedef MatrixRowReference<const type,value_type> const_reference;
 	
 	
 	/// \brief the iterator type of the object
@@ -190,12 +158,13 @@ struct Batch<blas::vector<T> >{
 	typedef ProxyIterator<const type, value_type, const_reference > const_iterator;
 	
 	///\brief creates a batch with input as size blueprint
-	static type createBatch(boost::numeric::ublas::vector<T> const& input, std::size_t size = 1){
+	template<class Element>
+	static type createBatch(Element const& input, std::size_t size = 1){
 		return type(size,input.size());
 	}
 	///\brief creates a batch storing the elements referenced by the provided range
 	template<class Range>
-	static type createBatch(Range const& range){
+	static type createBatchFromRange(Range const& range){
 		type batch(range.size(),range.begin()->size());
 		std::copy(range.begin(),range.end(),boost::begin(batch));
 		return batch;
@@ -217,10 +186,10 @@ struct Batch<boost::numeric::ublas::compressed_vector<T> >{
 	
 	/// \brief Type of a single element.
 	//typedef boost::numeric::ublas::matrix_row<type> reference;
-	typedef detail::MatrixRowReference<type,value_type> reference;
+	typedef MatrixRowReference<type,value_type> reference;
 	/// \brief Type of a single immutable element.
 	//typedef boost::numeric::ublas::matrix_row<const type> const_reference;
-	typedef detail::MatrixRowReference<const type,value_type> const_reference;
+	typedef MatrixRowReference<const type,value_type> const_reference;
 	
 	
 	/// \brief the iterator type of the object
@@ -229,12 +198,13 @@ struct Batch<boost::numeric::ublas::compressed_vector<T> >{
 	typedef ProxyIterator<const type, value_type, const_reference > const_iterator;
 	
 	///\brief creates a batch with input as size blueprint
-	static type createBatch(boost::numeric::ublas::compressed_vector<T> const& input, std::size_t size = 1){
+	template<class Element>
+	static type createBatch(Element const& input, std::size_t size = 1){
 		return type(size,input.size());
 	}
 	///\brief creates a batch storing the elements referenced by the provided range
 	template<class Range>
-	static type createBatch(Range const& range){
+	static type createBatchFromRange(Range const& range){
 		//before creating the batch, we need the number of nonzero elements
 		std::size_t nnz = 0;
 		for(typename Range::const_iterator pos = range.begin(); pos != range.end(); ++pos){

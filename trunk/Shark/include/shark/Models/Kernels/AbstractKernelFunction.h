@@ -145,7 +145,11 @@ public:
 	/// \brief Evaluates the kernel function.
 	virtual double eval(ConstInputReference x1, ConstInputReference x2) const{
 		RealMatrix res;
-		eval(Traits::createBatch(x1), Traits::createBatch(x2), res);
+		BatchInputType b1 = Traits::createBatch(x1,1);
+		BatchInputType b2 = Traits::createBatch(x2,1);
+		get(b1,0) = x1;
+		get(b2,0) = x2;
+		eval(b1, b2, res);
 		return res(0, 0);
 	}
 

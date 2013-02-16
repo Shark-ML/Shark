@@ -57,6 +57,25 @@ namespace shark {namespace traits {
 struct UnknownStorage{};
 struct CompressedStorage{};
 struct DenseStorage{};
+
+template<class ValueType, class IndexType>
+struct CompressedVectorStorage{
+	typedef ValueType value_type;
+	typedef IndexType index_type;
+	ValueType const* data;
+	IndexType const* indizes;
+	std::size_t nonZeros;
+	std::size_t startIndex;
+};
+
+template<class ValueType, class IndexType>
+struct CompressedMatrixStorage{
+	typedef ValueType value_type;
+	typedef IndexType index_type;
+	ValueType const* data;
+	IndexType const* indizesLine;
+	IndexType const* indizesLineBegin;
+};
 	
 //explanations:
 //stride: distance in memory between two successive positions of the dimension
@@ -149,24 +168,12 @@ public:
 };
 template<class V,class BaseExpression>
 SHARK_COMPRESSEDTRAITSSPEC(blas::vector_expression<V>)
-	typedef CompressedTraits<V> Traits;
-	typedef typename Traits::index_pointer index_pointer;
+	typedef CompressedTraits<typename CopyConst<V,BaseExpression>::type> Traits;
+public:
+	typedef typename Traits::storage storage;
 
-	static std::size_t startingIndex(const_type& v){
-		return Traits::startingIndex(v);
-	}
-	static value_pointer storageBegin(const_type& v){
-		return Traits::storageBegin(v());
-	}
-	static value_pointer storageEnd(const_type& v){
-		return Traits::storageEnd(v());
-	}
-	
-	static index_pointer indexBegin(const_type& v){
-		return Traits::indexBegin(v());
-	}
-	static index_pointer indexEnd(const_type& v){
-		return Traits::indexEnd(v());
+	static storage compressedStorage(type& v){
+		return Traits::compressedStorage(v);
 	}
 
 };
@@ -220,25 +227,11 @@ SHARK_COMPRESSEDTRAITSSPEC(blas::vector_reference<V>)
 private:
 	typedef CompressedTraits<typename CopyConst<V,BaseExpression>::type> Traits;
 public:
-	typedef typename Traits::index_pointer index_pointer;
+	typedef typename Traits::storage storage;
 
-	static std::size_t startingIndex(const_type& v){
-		return Traits::startingIndex(v);
+	static storage compressedStorage(type& v){
+		return Traits::compressedStorage(v);
 	}
-	static value_pointer storageBegin(const_type& v){
-		return Traits::storageBegin(v.expression());
-	}
-	static value_pointer storageEnd(const_type& v){
-		return Traits::storageEnd(v.expression());
-	}
-	
-	static index_pointer indexBegin(const_type& v){
-		return Traits::indexBegin(v.expression());
-	}
-	static index_pointer indexEnd(const_type& v){
-		return Traits::indexEnd(v.expression());
-	}
-
 };
 
 //vector range
@@ -292,89 +285,37 @@ private:
 	typedef typename type::vector_closure_type Proxy;
 	typedef typename CopyConst<Proxy,BaseExpression>::type CProxy;
 	typedef CompressedTraits<CProxy> Traits;
-	
-	class GreaterEqualIndex{
-	public:
-		GreaterEqualIndex(std::size_t index):m_index(index){}
-		bool operator()(std::size_t index){
-			return index >= m_index;
-		}
-	private:
-		std::size_t m_index;
-	};
 public:
-	typedef typename Traits::index_pointer index_pointer;
-	typedef typename Traits::Storage Storage;
+	typedef typename Traits::storage storage;
 
-	//todo...
-	static std::size_t startingIndex(const_type& v){
-		return Traits::startingIndex(v)+v.start() * Traits::stride(v);
-	}
-	static Storage storage(const type& v){
-		SHARK_CHECK(Traits::stride(v) != 1, "[Compressed Vector Traits]:It is not possible to get pointers to the compressed storage for vectors with stride != 1");
+	static storage compressedStorage(type& v){
+		SHARK_CHECK(Traits::stride(v) != 1, 
+		"[Compressed Vector Traits]:can't adapt compressed storage for vectors with stride != 1");
 		
-		//calculate lower and upper index bounds
-		std::size_t startingIndex=startingIndex(v);
-		std::size_t endIndex = startingIndex+v.size();
+		storage rangeStorage = Traits::compressedStorage(v.data());
+		rangeStorage.startIndex += v.start();
+		std::size_t endIndex = rangeStorage.startIndex+v.size();
 		
-		//get storage of the parent vector
-		Storage storage=Traits::storage(v.data());
-		
-		//find the lower bound of the storage
-		index_pointer start=std::find_if(storage.startIndex,storage.endIndex, GreaterEqualIndex(startingIndex));
-		storage.valueStart+=start-storage.indexStart;
-		storage.indexStart=start;
-		
-		//find the upper bound
-		storage.indexEnd=std::find_if(storage.startIndex,storage.endIndex, GreaterEqualIndex(endIndex));
-		
-		return storage;
+		//find the first index of the array
+		while(rangeStorage.nonZeros && *rangeStorage.indizes < rangeStorage.startIndex){
+			--rangeStorage.nonZeros;
+			++rangeStorage.indizes;
+			++rangeStorage.values;
+		}
+		//check, whether the resulting range is empty
+		if(!rangeStorage.nonZeros
+		|| *rangeStorage.indizes >= endIndex //if the first element is already bigger than the last
+		){
+			rangeStorage.nonZeros = 0;
+			return rangeStorage;
+		}
+		//find end to get the correct number of nonzeros
+		while( rangeStorage.indizes[rangeStorage.nonZeros-1] >= endIndex)
+			--rangeStorage.nonZeros;
+		return rangeStorage;
 	}
 };
 
-//vector slice
-//~ template<class V>
-//~ struct ExpressionTraitsBase<blas::vector_slice<V> >{
-//~ private:
-	//~ typedef ExpressionTraitsBase<V> Traits;
-//~ public:
-	//~ typedef blas::vector_slice<V> type;
-	//~ typedef typename Traits::value_pointer value_pointer;
-	
-	//~ typedef typename Traits::StorageCategory StorageCategory;
-	
-	//~ static std::size_t stride(type& v){
-		//~ return Traits::stride(v.data())*v.stride();
-	//~ }
-	
-	//~ static value_pointer storageBegin(type& v){
-		//~ return Traits::storageBegin(v.data());
-	//~ }
-	//~ static value_pointer storageEnd(type& v){
-		//~ return Traits::storageEnd(v.data());
-	//~ }
-//~ };
-//~ template<class V>
-//~ struct ExpressionTraitsBase<blas::vector_slice<V> const>{
-//~ private:
-	//~ typedef ExpressionTraitsBase<V const> Traits;
-//~ public:
-	//~ typedef blas::vector_slice<V> type;
-	//~ typedef typename Traits::value_pointer value_pointer;
-	
-	//~ typedef typename Traits::StorageCategory StorageCategory;
-	
-	//~ static std::size_t stride(type const& v){
-		//~ return Traits::stride(v.data())*v.stride();
-	//~ }
-	
-	//~ static value_pointer storageBegin(type const& v){
-		//~ return Traits::storageBegin(v.data());
-	//~ }
-	//~ static value_pointer storageEnd(type const& v){
-		//~ return Traits::storageEnd(v.data());
-	//~ }
-//~ };
 //////////////MATRIX PROXY EXPRESSIONS///////////////////////
 
 //matrix row
@@ -417,10 +358,12 @@ private:
 	typedef DenseTraits<CProxy> Traits;
 public:
 	static value_pointer storageBegin(type& v){
-		return Traits::storageBegin(v.data())+v.index() * Traits::stride1(v.data());
+		CProxy proxy = v.data();
+		return Traits::storageBegin(proxy)+v.index() * Traits::stride1(proxy);
 	}
 	static value_pointer storageEnd(type& v){
-		return storageBegin(v)+v.size() * Traits::stride1(v.data());
+		CProxy proxy = v.data();
+		return storageBegin(v)+v.size() * Traits::stride1(proxy);
 	}
 };
 template<class M,class BaseExpression>
@@ -430,49 +373,29 @@ private:
 	typedef typename CopyConst<Proxy,BaseExpression>::type CProxy;
 	typedef CompressedTraits<CProxy> Traits;
 	static const bool MatIsRowMajor=boost::is_same<typename Traits::orientation,blas::row_major_tag>::value;
+	typedef typename Traits::storage matrix_storage;
 public:
-	typedef typename Traits::index_pointer index_pointer;
+	typedef CompressedVectorStorage<
+		typename matrix_storage::value_type,
+		typename matrix_storage::index_type
+	> storage;
 
-	//todo...
-	static std::size_t startingIndex(const_type& v){
-		return v.index();
-	}
-	static value_pointer storageBegin(const_type& v){
-		return Traits::storageBegin(v.data());
-	}
-	static value_pointer storageEnd(const_type& v){
-		return Traits::storageEnd(v);
-	}
-	static index_pointer indexBegin(const_type& v){
+	static storage compressedStorage(type& v){
 		SHARK_CHECK(!MatIsRowMajor, 
-		"[Compressed Vector Traits]:It is not possible to get pointers to the compressed storage of rows from column major matrices");
+		"[Compressed Vector Traits]:It is not possible to adapr compressed storage of rows from column major matrices");
 		
+		//get matriy storage
+		CProxy proxy = v.data();
+		matrix_storage matrixStorage = Traits::compressedStorage(proxy);
 		
-		std::size_t startingIndex=startingIndex(v);
-		
-		//get the starting index
-		index_pointer pos=Traits::indexBegin(v.data());
-		index_pointer end=Traits::indexEnd(v.data());
-		
-		std::size_t endIndex = startingIndex+v.size();
-		if(endIndex < startingIndex) 
-			return 0;
-		while(pos != end && *pos < startingIndex){
-			++pos;
-		}
-		return startingIndex;
-	}
-	static index_pointer indexEnd(const_type& v){
-		SHARK_CHECK(Traits::stride(v) != 1, "[Compressed Vector Traits]:It is not possible to get pointers to the compressed storage for vectors with stride != 1");
-		index_pointer pos=indexBegin(v.data());
-		index_pointer end=Traits::indexEnd(v.data());
-		std::size_t startingIndex=startingIndex(v);
-		std::size_t endIndex = startingIndex+v.size();
-		while (pos != end && *pos < endIndex){
-			++pos;
-		}
-		return pos;
-		
+		//get the row
+		std::size_t startIndex = *matrixStorage.indizesLineBegin[v.index()];
+		std::size_t endIndex = *matrixStorage.indizesLineBegin[v.index()+1];
+		storage vectorStorage;
+		vectorStorage.indizes = matrixStorage.indizesLine+startIndex;
+		vectorStorage.values = matrixStorage.values+startIndex;
+		vectorStorage.nonZeros = endIndex-startIndex;
+		return vectorStorage;
 	}
 };
 
@@ -577,6 +500,18 @@ public:
 		return Traits::storageEnd(m());
 	}
 };
+
+template<class M,class BaseExpression>
+SHARK_COMPRESSEDTRAITSSPEC(blas::matrix_expression<M>)
+private:
+	typedef DenseTraits<typename CopyConst<M,BaseExpression>::type> Traits;
+public:
+	typedef typename Traits::storage storage;
+
+	static storage compressedStorage(type& m){
+		return Traits::compressedStorage(m());
+	}
+};
 //matrix reference
 template<class M>
 struct ExpressionTraitsBase<blas::matrix_reference<M> >{
@@ -622,13 +557,27 @@ public:
 template<class M,class BaseExpression>
 SHARK_DENSETRAITSSPEC(blas::matrix_reference<M>)
 private:
-	typedef DenseTraits<typename CopyConst<M,BaseExpression>::type> Traits;
+	typedef typename CopyConst<M,BaseExpression>::type MatrixType;
+	typedef DenseTraits<MatrixType> Traits;
 public:
 	static value_pointer storageBegin(type& m){
-		return Traits::storageBegin(m.expression());
+		return Traits::storageBegin(const_cast<MatrixType&>(m.expression()));
 	}
 	static value_pointer storageEnd(type & m){
-		return Traits::storageEnd(m.expression());
+		return Traits::storageEnd(const_cast<MatrixType&>(m.expression()));
+	}
+};
+
+template<class M,class BaseExpression>
+SHARK_COMPRESSEDTRAITSSPEC(blas::matrix_reference<M>)
+private:
+	typedef typename CopyConst<M,BaseExpression>::type MatrixType;
+	typedef DenseTraits<MatrixType> Traits;
+public:
+	typedef typename Traits::storage storage;
+
+	static storage compressedStorage(type& m){
+		return Traits::compressedStorage(const_cast<MatrixType&>(m.expression()));
 	}
 };
 
