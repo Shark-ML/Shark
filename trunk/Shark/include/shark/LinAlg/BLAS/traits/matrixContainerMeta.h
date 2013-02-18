@@ -164,10 +164,11 @@ template<class T, class IA, class TA>
 struct ExpressionTraitsBase<blas::compressed_matrix<T,blas::row_major,0,IA,TA> >{
 	
 	typedef blas::compressed_matrix<T,blas::row_major,0,IA,TA> type;
+	typedef blas::compressed_matrix<T,blas::row_major,0,IA,TA> const const_type;
 	typedef typename IA::value_type index_type;
 	typedef typename TA::value_type value_type;
-	typedef typename IA::value_type const* index_pointer;
-	typedef typename TA::value_type const* value_pointer;
+	typedef index_type const* index_pointer;
+	typedef value_type const* value_pointer;
 	typedef blas::row_major_tag orientation;
 	
 	typedef CompressedStorage StorageCategory;
@@ -188,8 +189,33 @@ struct ExpressionTraitsBase<blas::compressed_matrix<T,blas::row_major,0,IA,TA> >
 	}
 };
 template<class T, class IA, class TA>
-struct ExpressionTraitsBase<const blas::compressed_matrix<T,blas::row_major,0,IA,TA> >
-:public ExpressionTraitsBase<blas::compressed_matrix<T,blas::row_major,0,IA,TA> >{};
+struct ExpressionTraitsBase<blas::compressed_matrix<T,blas::row_major,0,IA,TA> const >{
+	
+	typedef blas::compressed_matrix<T,blas::row_major,0,IA,TA> const type;
+	typedef type const_type;
+	typedef typename IA::value_type index_type;
+	typedef typename TA::value_type value_type;
+	typedef index_type const* index_pointer;
+	typedef value_type const* value_pointer;
+	typedef blas::row_major_tag orientation;
+	
+	typedef CompressedStorage StorageCategory;
+	static const bool transposed=false;
+	
+	static std::size_t stride1(type const&){
+		return 1;
+	}
+	static std::size_t stride2(type const& m){
+		return m.size1();
+	}
+	
+	static std::size_t index1Size(type const& v){
+		return v.filled1();
+	}
+	static std::size_t index2Size(type const& v){
+		return v.filled2();
+	}
+};
 	
 template<class T, class BaseExpression>
 SHARK_COMPRESSEDTRAITSSPEC(
@@ -199,6 +225,7 @@ public:
 	typedef CompressedMatrixStorage<T,std::size_t> storage;
 
 	static storage compressedStorage(type& m){
+		const_cast<blas::compressed_matrix<T>&>(m).complete_index1_data();
 		storage matrixStorage;
 		matrixStorage.data = &m.value_data()[0];
 		matrixStorage.indizesLine = &m.index2_data()[0];

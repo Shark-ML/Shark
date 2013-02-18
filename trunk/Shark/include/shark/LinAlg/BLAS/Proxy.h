@@ -664,10 +664,10 @@ public:
 	typedef value_type const& const_reference;
 	typedef ValueType&  reference;
 	typedef ValueType* pointer;
-	typedef IndexType* const_index_pointer;
+	typedef IndexType const* const_index_pointer;
 	typedef value_type const* const_pointer;
 	//ublas types
-	typedef FixedSparseVectorProxy<value_type const,IndexType const> const_closure_type;
+	typedef FixedSparseVectorProxy<ValueType,IndexType> const_closure_type;
 	typedef self_type closure_type;
 	typedef blas::dense_tag storage_category;
 
@@ -720,7 +720,7 @@ public:
 		return m_storage.startIndex;
 	}
 	
-	traits::CompressedVectorStorage<ValueType,IndexType> const& storage()const {
+	traits::CompressedVectorStorage<value_type,IndexType> const& storage()const {
 		return m_storage;
 	}
 	
@@ -735,7 +735,7 @@ public:
 		i += startIndex();
 		const_index_pointer pos = std::lower_bound(indizes(),indizes()+nnz(), i);
 		difference_type diff = pos-indizes();
-		if(diff == nnz || *pos != i)
+		if(diff == (difference_type) nnz() || *pos != i)
 			return value_type();
 		return data()[diff];
 	}
@@ -863,8 +863,8 @@ public:
 		return reverse_iterator(begin());
 	}
 private:
+	traits::CompressedVectorStorage<value_type,IndexType> m_storage;
 	std::size_t m_size;
-	traits::CompressedVectorStorage<ValueType,IndexType> m_storage;
 };
 
 
@@ -933,7 +933,7 @@ struct ExpressionTraitsBase<FixedSparseVectorProxy<T,I> const >{
 
 template<class T, class I, class BaseExpression>
 SHARK_COMPRESSEDTRAITSSPEC(FixedSparseVectorProxy<T BOOST_PP_COMMA() I>)
-	typedef CompressedVectorStorage<T,I >storage;
+	typedef CompressedVectorStorage<typename boost::remove_const<T>::type,I >storage;
 
 	static storage compressedStorage(type& v){
 		return v.storage();
@@ -1012,7 +1012,6 @@ struct range_const_iterator< shark::FixedDenseMatrixProxy<T> >{
 
 namespace shark{
 
-//dense matrix
 template< class T >
 typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> const>::type
 range_begin( shark::FixedDenseMatrixProxy<T> const& m )

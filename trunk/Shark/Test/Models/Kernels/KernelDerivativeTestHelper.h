@@ -174,9 +174,7 @@ void testEval(AbstractKernelFunction<T>& kernel, typename Batch<T>::type const& 
 	for(std::size_t i = 0; i != batchSize1; ++i){
 		T x1 = get(sampleBatch1,i);
 		for(std::size_t j = 0; j != batchSize2; ++j){
-			T x2 = get(sampleBatch2,j);
-
-			double result = kernel.eval(x1,x2);
+			double result = kernel.eval(x1,get(sampleBatch2,j));
 
 			BOOST_CHECK_SMALL(result-kernelResults(i,j), 1.e-13);
 			BOOST_CHECK_SMALL(result-kernelResultsIntermediate(i,j), 1.e-13);

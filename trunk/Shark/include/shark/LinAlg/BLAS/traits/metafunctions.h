@@ -1,7 +1,7 @@
 //===========================================================================
 /*!
  *  \author O. Krause
- *  \date 2010
+ *  \date 2013
  *
  *  \par Copyright (c) 1998-2011:
  *      Institut f&uuml;r Neuroinformatik<BR>
@@ -369,7 +369,7 @@ public:
 template<class M,class BaseExpression>
 SHARK_COMPRESSEDTRAITSSPEC(blas::matrix_row<M>)
 private:
-	typedef typename type::vector_closure_type Proxy;
+	typedef typename type::matrix_closure_type Proxy;
 	typedef typename CopyConst<Proxy,BaseExpression>::type CProxy;
 	typedef CompressedTraits<CProxy> Traits;
 	static const bool MatIsRowMajor=boost::is_same<typename Traits::orientation,blas::row_major_tag>::value;
@@ -381,20 +381,21 @@ public:
 	> storage;
 
 	static storage compressedStorage(type& v){
-		SHARK_CHECK(!MatIsRowMajor, 
-		"[Compressed Vector Traits]:It is not possible to adapr compressed storage of rows from column major matrices");
+		SHARK_CHECK(MatIsRowMajor, 
+		"[Compressed Vector Traits]:It is not possible to adapt compressed storage of rows from column major matrices");
 		
 		//get matriy storage
 		CProxy proxy = v.data();
 		matrix_storage matrixStorage = Traits::compressedStorage(proxy);
 		
 		//get the row
-		std::size_t startIndex = *matrixStorage.indizesLineBegin[v.index()];
-		std::size_t endIndex = *matrixStorage.indizesLineBegin[v.index()+1];
+		std::size_t startIndex = matrixStorage.indizesLineBegin[v.index()];
+		std::size_t endIndex = matrixStorage.indizesLineBegin[v.index()+1];
 		storage vectorStorage;
 		vectorStorage.indizes = matrixStorage.indizesLine+startIndex;
-		vectorStorage.values = matrixStorage.values+startIndex;
+		vectorStorage.data = matrixStorage.data+startIndex;
 		vectorStorage.nonZeros = endIndex-startIndex;
+		vectorStorage.startIndex= 0;//we ar at the beginning of the line
 		return vectorStorage;
 	}
 };
@@ -572,7 +573,7 @@ template<class M,class BaseExpression>
 SHARK_COMPRESSEDTRAITSSPEC(blas::matrix_reference<M>)
 private:
 	typedef typename CopyConst<M,BaseExpression>::type MatrixType;
-	typedef DenseTraits<MatrixType> Traits;
+	typedef CompressedTraits<MatrixType> Traits;
 public:
 	typedef typename Traits::storage storage;
 

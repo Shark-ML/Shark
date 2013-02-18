@@ -124,26 +124,6 @@ struct ExpressionTraitsBase<blas::compressed_vector<T,IB, IA, TA > >{
 	static std::size_t stride(type const&){
 		return 1;
 	}
-	
-	//~ static std::size_t nnz(type const& v){
-		//~ return v.nnz();
-	//~ }
-	
-	//~ static std::size_t startingIndex(type const&){
-		//~ return 0;
-	//~ }
-	//~ static value_pointer storageBegin(type const& v){
-		//~ return &v.value_data().begin()[0];
-	//~ }
-	//~ static value_pointer storageEnd(type const& v){
-		//~ return &v.value_data().begin()[0];+v.nnz();
-	//~ }
-	//~ static index_pointer indexBegin(type const& v){
-		//~ return &v.index_data().begin()[0];
-	//~ }
-	//~ static index_pointer indexEnd(type const& v){
-		//~ return &v.vindex_data().begin()[0];+v.nnz();
-	//~ }
 };
 template<class T, std::size_t IB, class IA, class TA>
 struct ExpressionTraitsBase<blas::compressed_vector<T,IB, IA, TA > const>{
@@ -159,6 +139,23 @@ struct ExpressionTraitsBase<blas::compressed_vector<T,IB, IA, TA > const>{
 	
 	static std::size_t stride(type const&){
 		return 1;
+	}
+};
+
+template<class T, class BaseExpression>
+SHARK_COMPRESSEDTRAITSSPEC(
+	blas::compressed_vector<T>
+)
+public:
+	typedef CompressedVectorStorage<T,std::size_t> storage;
+
+	static storage compressedStorage(type& v){
+		storage vectorStorage;
+		vectorStorage.data = &v.value_data()[0];
+		vectorStorage.indizes = &v.index_data()[0];
+		vectorStorage.nonZeros = v.nnz();
+		vectorStorage.startIndex = 0;
+		return vectorStorage;
 	}
 };
 
