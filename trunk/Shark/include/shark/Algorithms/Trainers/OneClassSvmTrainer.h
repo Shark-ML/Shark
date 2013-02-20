@@ -147,6 +147,7 @@ public:
 
 		SHARK_CHECK(svm.hasOffset(), "[OneClassSvmTrainer::train] training of models without offset is not supported");
 		SHARK_CHECK(svm.outputSize() == 1, "[OneClassSvmTrainer::train] wrong number of outputs in the kernel expansion");
+		SHARK_CHECK(m_nu > 0.0 && m_nu< 1.0, "[OneClassSvmTrainer::train] invalid setting of the parameter nu (must be 0 < nu < 1)");
 
 		// prepare the quadratic program description
 		std::size_t i, ic = inputset.numberOfElements();

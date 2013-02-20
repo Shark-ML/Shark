@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 {
 	// experiment settings
 	unsigned int ell = 100;     // number of training data point
-	double nu = 0.5;            // regularization parameter
+	double nu = 0.5;            // probability mass to be covered, must fulfill 0 < mu < 1
 	double gamma = 0.5;         // kernel bandwidth parameter
 	bool bias = true;           // use bias/offset parameter
 
