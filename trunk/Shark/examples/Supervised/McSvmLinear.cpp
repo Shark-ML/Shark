@@ -6,13 +6,11 @@
 #include <shark/Models/ConcatenatedModel.h>
 #include <shark/Models/LinearModel.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
-#include <iostream>
-
 
 using namespace shark;
 
 
-#define noise 1.0
+double const noise = 1.0;
 typedef CompressedRealVector VectorType;
 typedef CompressedRealMatrix MatrixType;
 typedef CompressedRealMatrixRow RowType;
@@ -50,9 +48,9 @@ int main(int argc, char** argv)
 	double lambda = std::atof(argv[2]);
 	double epsilon = std::atof(argv[3]);
 	unsigned int tests = 10000;
-	std::printf("ell=%d\n", ell);
-	std::printf("lambda=%g\n", lambda);
-	std::printf("epsilon=%g\n", epsilon);
+	std::cout <<"ell="<< ell<<std::endl;
+	std::cout <<"lambda="<<  lambda<<std::endl;
+	std::cout <<"epsilon="<< epsilon<<std::endl;
 
 	// generate a very simple dataset with a little noise
 	Problem problem;
@@ -77,8 +75,5 @@ int main(int argc, char** argv)
 	double train_error = loss.eval(training.labels(), output);
 	output = svm(test.inputs());
 	double test_error = loss.eval(test.labels(), output);
-
-	std::printf("training error=%9.4g    test error=%9.4g\n",
-			train_error,
-			test_error);
+	std::cout <<"training error= "<< train_error <<"    test error= "<<  test_error<<std::endl;
 }

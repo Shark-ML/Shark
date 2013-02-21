@@ -317,36 +317,6 @@ private:
 	std::ptrdiff_t m_stride;
 };
 
-
-///\brief Wrapper for a matrix row, which offers a conversion operator to
-/// to the Vector Type.
-template<class Matrix, class Vector>
-class MatrixRowReference:public blas::matrix_row<Matrix>{
-private:
-	typedef blas::matrix_row<Matrix> base_type;
-public:
-	MatrixRowReference( Matrix& matrix, std::size_t i)
-	:base_type(matrix,i){}
-	template<class T>//special version allows for const-conversion
-	MatrixRowReference(T const& matrixrow)
-	:base_type(matrixrow.data().expression(),matrixrow.index()){}
-	
-	template<class T> 
-	const MatrixRowReference& operator=(const T& argument){
-		static_cast<base_type&>(*this)=argument;
-		return *this;
-	}
-	
-	operator Vector(){
-		return Vector(*this);
-	}
-};
-
-template<class M, class V>
-void swap(MatrixRowReference<M,V> ref1, MatrixRowReference<M,V> ref2){
-	swap(static_cast<blas::matrix_row<M>& >(ref1),static_cast<blas::matrix_row<M>& >(ref2));
-}
-
 template<class ValueType,class Orientation=blas::row_major>
 class FixedDenseMatrixProxy: public blas::matrix_expression<FixedDenseMatrixProxy<ValueType,Orientation> > {
 	typedef FixedDenseMatrixProxy<ValueType,Orientation> self_type;
@@ -987,61 +957,6 @@ SHARK_DENSETRAITSSPEC(FixedDenseMatrixProxy<T BOOST_PP_COMMA() O>)
 };
 
 }
-}
-
-namespace boost{
-//first the typedefs which tell boost::range which iterators to use. this needs to be done for all
-//supported matrix types separately as well as for the matrix_container/matrix_expression base type
-	
-//dense matrix
-template< class T >
-struct range_mutable_iterator< shark::FixedDenseMatrixProxy<T> >{
-	typedef boost::numeric::ublas::vector<typename boost::remove_const<T>::type> Vector;
-	typedef shark:: MatrixRowReference<shark::FixedDenseMatrixProxy<T>,Vector> reference;
-	typedef shark::ProxyIterator<shark::FixedDenseMatrixProxy<T>, Vector, reference > type;
-};
-
-template< class T >
-struct range_const_iterator< shark::FixedDenseMatrixProxy<T> >{
-	typedef boost::numeric::ublas::vector<typename boost::remove_const<T>::type> Vector;
-	typedef shark::MatrixRowReference<shark::FixedDenseMatrixProxy<T> const,Vector> reference;
-	typedef shark::ProxyIterator<shark::FixedDenseMatrixProxy<T> const, Vector, reference > type;
-};
-
-}
-
-namespace shark{
-
-template< class T >
-typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> const>::type
-range_begin( shark::FixedDenseMatrixProxy<T> const& m )
-{
-	typedef typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> const>::type Iter;
-	return Iter(m,0);
-}
-template< class T >
-typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> >::type
-range_begin( shark::FixedDenseMatrixProxy<T>& m )
-{
-	typedef typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> >::type Iter;
-	return Iter(m,0);
-}
-
-template< class T >
-typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> const>::type
-range_end( shark::FixedDenseMatrixProxy<T> const& m )
-{
-	typedef typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> const>::type Iter;
-	return Iter(m,m.size1());
-}
-template< class T >
-typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> >::type
-range_end( shark::FixedDenseMatrixProxy<T>& m )
-{
-	typedef typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> >::type Iter;
-	return Iter(m,m.size1());
-}
-
 }
 
 #endif
