@@ -72,15 +72,6 @@ CONFIGURE_FILE (
   )
 
 #####################################################################
-#	Pull in cpp-netlib                                          #
-#####################################################################
-OPTION( OPT_ENABLE_NETWORKING "Make the shark library support http and RESTful APIs." OFF )
-IF( OPT_ENABLE_NETWORKING )
-    include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/contrib/cpp-netlib-0.9.0 )
-    ADD_DEFINITIONS( -DBOOST_NETWORK_NO_LIB )
-ENDIF( OPT_ENABLE_NETWORKING )
-
-#####################################################################
 #	Adjustments for cpack and deb package generation            #
 #####################################################################
 SET( CPACK_PACKAGE_NAME "libshark-i386" )
@@ -248,20 +239,6 @@ ADD_SUBDIRECTORY( include )
 ADD_SUBDIRECTORY( src )
 
 
-#####################################################################
-#           Network Module                                          #
-#####################################################################
-
-IF( OPT_ENABLE_NETWORKING )
-    SET( NETWORK_HEADERS
-    	 include/shark/Network/Handlers/AboutHandler.h
-	 include/shark/Network/Handlers/FileHandler.h
-	 include/shark/Network/Handlers/LoggerPoolRestHandler.h
-	 include/shark/Network/Handlers/RestHandler.h
-	 include/shark/Network/HttpServer.h
-    )
-ENDIF()
-
 #TARGET_LINK_LIBRARIES( Statistics shark ${LINK_LIBRARIES} )
 
 
@@ -315,20 +292,7 @@ ENDIF( OPT_COMPILE_DOCUMENTATION )
 #                  Adjust library version for debian                #
 #####################################################################
 
-IF( OPT_ENABLE_NETWORKING )
 
-INSTALL( DIRECTORY
-	 ${CMAKE_CURRENT_SOURCE_DIR}/include/shark/Network
-	 DESTINATION DESTINATION ${SHARK_INSTALL_INCLUDE_DIR}
-	 PATTERN ".*" EXCLUDE
-)
-
-INSTALL( DIRECTORY
-	 ${CMAKE_CURRENT_SOURCE_DIR}/contrib/cpp-netlib-0.9.0
-	 DESTINATION ${SHARK_INSTALL_CONTRIB_DIR}
-	 PATTERN ".*" EXCLUDE
-)
-ENDIF( OPT_ENABLE_NETWORKING )
 #####################################################################
 #                Adjust compiler flags and settings								#
 #####################################################################
