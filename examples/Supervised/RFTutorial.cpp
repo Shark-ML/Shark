@@ -38,36 +38,36 @@ using namespace shark;
 
 int main() {
 
-    //*****************LOAD AND PREPARE DATA***********************//
+	//*****************LOAD AND PREPARE DATA***********************//
 	// read data
 	ClassificationDataset data;
-        //Optical digits
-        import_csv(data, "data/C.csv", LAST_COLUMN, " ", "#");
+	//Optical digits
+	import_csv(data, "data/C.csv", LAST_COLUMN, " ", "#");
 
 
 	//Split the dataset into a training and a test dataset
 	ClassificationDataset dataTest = splitAtElement(data,311);
 
 	cout << "Training set - number of data points: " << data.numberOfElements()
-		 << " number of classes: " << numberOfClasses(data)
-		 << " input dimension: " << inputDimension(data) << endl;
+		<< " number of classes: " << numberOfClasses(data)
+		<< " input dimension: " << inputDimension(data) << endl;
 
 	cout << "Test set - number of data points: " << dataTest.numberOfElements()
-		 << " number of classes: " << numberOfClasses(dataTest)
-		 << " input dimension: " << inputDimension(dataTest) << endl;
+		<< " number of classes: " << numberOfClasses(dataTest)
+		<< " input dimension: " << inputDimension(dataTest) << endl;
 
-    RFTrainer trainer;
-    RFClassifier model;
-    
-    //Train the model
-    trainer.train(model, data);
+	RFTrainer trainer;
+	RFClassifier model;
 
-    // evaluate Random Forest classifier
-    ZeroOneLoss<unsigned int, RealVector> loss;
-    Data<RealVector> prediction = model(data.inputs());
-    cout << "Random Forest on training set accuracy: " << 1. - loss.eval(data.labels(), prediction) << endl;
+	//Train the model
+	trainer.train(model, data);
 
-    prediction = model(dataTest.inputs());
-    cout << "Random Forest on test set accuracy:     " << 1. - loss.eval(dataTest.labels(), prediction) << endl;
+	// evaluate Random Forest classifier
+	ZeroOneLoss<unsigned int, RealVector> loss;
+	Data<RealVector> prediction = model(data.inputs());
+	cout << "Random Forest on training set accuracy: " << 1. - loss.eval(data.labels(), prediction) << endl;
+
+	prediction = model(dataTest.inputs());
+	cout << "Random Forest on test set accuracy:     " << 1. - loss.eval(dataTest.labels(), prediction) << endl;
 
 }

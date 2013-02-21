@@ -19,9 +19,9 @@ int main(int argc, char** argv)
 	RealVector param(1);
 	double best_value = 1e100;
 	double best_gamma = 0.0;
-	int i;
-	printf("Grid search in the range [1, 10000] on log scale:\n");
-	for (i=0; i<=400; i++)
+	
+	std::cout<<"Grid search in the range [1, 10000] on log scale:"<<std::endl;
+	for (unsigned i=0; i<=400; i++)
 	{
 		double gamma = pow(10.0, i / 100.0);
 		param(0) = gamma;
@@ -32,14 +32,14 @@ int main(int argc, char** argv)
 			best_gamma = gamma;
 		}
 	}
-	printf("best gamma: %10.6g   radius margin quotient: %16.12g\n", best_gamma, best_value);
+	std::cout<<"best gamma: "<< best_gamma<< "  radius margin quotient: "<<best_value<<std::endl;
 
 	// gradient-based alternative
 	IRpropPlus rprop;
 	rprop.init(rm, RealVector(1, 100.0), 1.0);
-	printf("\nGradient-based optimization (IRprop+, 50 steps):\n");
-	for (i=0; i<50; i++) rprop.step(rm);
+	std::cout<<"\nGradient-based optimization (IRprop+, 50 steps):"<<std::endl;
+	for (unsigned i=0; i<50; i++) rprop.step(rm);
 	best_gamma = rprop.solution().point(0);
 	best_value = rm.eval(RealVector(1, best_gamma));
-	printf("best gamma: %10.6g   radius margin quotient: %16.12g\n", best_gamma, best_value);
+	std::cout<<"best gamma: "<< best_gamma<< "  radius margin quotient: "<<best_value<<std::endl;
 }

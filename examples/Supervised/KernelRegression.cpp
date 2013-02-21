@@ -1,4 +1,3 @@
-
 #include <shark/LinAlg/Base.h>
 #include <shark/Rng/GlobalRng.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
@@ -42,18 +41,17 @@ int main()
 
 	for (unsigned int i=0; i<2; i++)
 	{
-		printf("METHOD %d: %s\n", (i+1), trainer[i]->name().c_str());
-		printf("training ...\n");
+		std::cout<<"METHOD"<<(i+1) <<" "<< trainer[i]->name().c_str()<<std::endl;
+		std::cout<<"training ..."<<std::flush;
 		trainer[i]->train(svm[i], training);
-		printf("done.\n");
+		std::cout<<"done"<<std::endl;
 
 		Data<RealVector> output = svm[i](training.inputs());
 		double train_error = loss.eval(training.labels(), output);
-		printf("training error: %g\n", train_error);
+		std::cout<<"training error: "<<train_error<<std::endl;
 		output = svm[i](test.inputs());
 		double test_error = loss.eval(test.labels(), output);
-		printf("    test error: %g\n", test_error);
-		printf("\n");
+		std::cout<<"    test error: "<<test_error<<"\n\n";
 	}
 
 	delete trainer[0];

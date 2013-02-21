@@ -50,6 +50,7 @@
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/Data/Dataset.h>
 #include <shark/LinAlg/Base.h>
+#include <shark/Core/OpenMP.h>
 
 #include <boost/range/algorithm_ext/iota.hpp>
 #include <vector>
@@ -214,10 +215,26 @@ public:
 		INCREMENT_KERNEL_COUNTER( m_accessCounter );
 		return (QpFloatType)kernel.eval(*x[i], *x[j]);
 	}
+	
+	/// \brief Computes the i-th row of the kernel matrix.
+	///
+	///The entries start,...,end of the i-th row are computed and stored in storage.
+	///There must be enough room for this operation preallocated.
+	void q(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const
+	{
+		typename AbstractKernelFunction<InputType>::ConstInputReference xi = *x[i];
+		
+		SHARK_PARALLEL_FOR(std::size_t j = start; j < end; j++)
+		{
+			INCREMENT_KERNEL_COUNTER( m_accessCounter );
+			storage[j-start] = QpFloatType(kernel.eval(xi, *x[j]));
+		}
+	}
 
 	/// swap two variables
-	void flipColumnsAndRows(std::size_t i, std::size_t j){ 
-		std::swap(x[i],x[j]);
+	void flipColumnsAndRows(std::size_t i, std::size_t j){
+		using std::swap;
+		swap(x[i],x[j]);
 	}
 
 	/// return the size of the quadratic matrix
@@ -301,6 +318,24 @@ public:
 		QpFloatType ret = kernel.eval(*x[i], *x[j]);
 		if (i == j) ret += (QpFloatType)diagMod(i);
 		return ret;
+	}
+	
+	/// \brief Computes the i-th row of the kernel matrix.
+	///
+	///The entries start,...,end of the i-th row are computed and stored in storage.
+	///There must be enough room for this operation preallocated.
+	void q(std::size_t i, std::size_t start, std::size_t end, QpFloatType* storage) const
+	{
+		typename AbstractKernelFunction<InputType>::ConstInputReference xi = *x[i];
+		SHARK_PARALLEL_FOR(std::size_t j = start; j < end; j++)
+		{
+			INCREMENT_KERNEL_COUNTER( m_accessCounter );
+			storage[j-start] = QpFloatType(kernel.eval(xi, *x[j]));
+		}
+		//apply regularization
+		if(i > start && i < end){
+			storage[i-start] += (QpFloatType)diagMod(i);
+		}
 	}
 
 	/// swap two variables
@@ -393,6 +428,22 @@ public:
 		INCREMENT_KERNEL_COUNTER( m_accessCounter );
 		QpFloatType modifier = x[i]->label == x[j]->label ? m_modifierEq : m_modifierNe;
 		return modifier * (QpFloatType)kernel.eval(x[i]->input, x[j]->input);
+	}
+	
+	/// \brief Computes the i-th row of the kernel matrix.
+	///
+	///The entries start,...,end of the i-th row are computed and stored in storage.
+	///There must be enough room for this operation preallocated.
+	void q(std::size_t i, std::size_t start, std::size_t end, QpFloatType* storage) const
+	{
+		typename AbstractKernelFunction<InputType>::ConstInputReference xi = x[i]->input;
+		unsigned int labeli = x[i]->label;
+		SHARK_PARALLEL_FOR(std::size_t j = start; j < end; j++)
+		{
+			INCREMENT_KERNEL_COUNTER( m_accessCounter );
+			QpFloatType modifier = labeli == x[j]->label ? m_modifierEq : m_modifierNe;
+			storage[j-start] = QpFloatType(kernel.eval(xi, x[j]->input));
+		}
 	}
 
 	/// swap two variables

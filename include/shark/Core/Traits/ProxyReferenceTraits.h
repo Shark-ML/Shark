@@ -51,27 +51,27 @@ namespace shark {
 
 	template<class T>
 	struct ConstProxyReference<blas::vector<T> >{
-		typedef FixedDenseVectorProxy<T const> type;
+		typedef FixedDenseVectorProxy<T const> const& type;
 	};
 	template<class T>
 	struct ConstProxyReference<blas::vector<T> const>{
-		typedef FixedDenseVectorProxy<T const> type;
+		typedef FixedDenseVectorProxy<T const> const& type;
 	};
 	template<class T>
 	struct ConstProxyReference<blas::compressed_vector<T> >{
-		typedef FixedSparseVectorProxy<T const,std::size_t> type;
+		typedef FixedSparseVectorProxy<T const,std::size_t> const& type;
 	};
 		template<class T>
 	struct ConstProxyReference<blas::compressed_vector<T> const >{
-		typedef FixedSparseVectorProxy<T const,std::size_t> type;
+		typedef FixedSparseVectorProxy<T const,std::size_t> const& type;
 	};
 	template<class T>
 	struct ConstProxyReference<blas::matrix<T> >{
-		typedef FixedDenseMatrixProxy<T const,blas::row_major> type;
+		typedef FixedDenseMatrixProxy<T const,blas::row_major> const& type;
 	};
 	template<class T>
 	struct ConstProxyReference<blas::matrix<T> const >{
-		typedef FixedDenseMatrixProxy<T const,blas::row_major> type;
+		typedef FixedDenseMatrixProxy<T const,blas::row_major> const& type;
 	};
 }
 #endif
