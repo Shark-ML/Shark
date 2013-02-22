@@ -130,7 +130,7 @@ public:
 			return ReferedType(key,value);
 		}
 
-		friend void swap(type& a, type& b){
+		friend void swap(type a, type b){
 			using std::swap;
 			swap(a.key,b.key);
 			swap(a.value,b.value);
