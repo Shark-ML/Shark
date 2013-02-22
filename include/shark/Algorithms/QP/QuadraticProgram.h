@@ -49,6 +49,7 @@
 
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/Data/Dataset.h>
+#include <shark/Data/DataView.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/OpenMP.h>
 
@@ -73,7 +74,6 @@ enum QpStopType
 {
 	QpNone = 0,
 	QpAccuracyReached = 1,
-//	QpTargetValueReached = 2,
 	QpMaxIterationsReached = 4,
 	QpTimeout = 8,
 };
@@ -220,7 +220,7 @@ public:
 	///
 	///The entries start,...,end of the i-th row are computed and stored in storage.
 	///There must be enough room for this operation preallocated.
-	void q(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const
+	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const
 	{
 		typename AbstractKernelFunction<InputType>::ConstInputReference xi = *x[i];
 		
@@ -278,34 +278,25 @@ protected:
 template <class InputType, class CacheType>
 class RegularizedKernelMatrix
 {
+private:
+	typedef KernelMatrix<InputType,CacheType> Matrix;
 public:
-
-	// The types below define the type used for caching kernel values. The default is float,
-	// since this type offers sufficient accuracy in the vast majority of cases, at a memory
-	// cost of only four bytes. However, the type definition makes it easy to use double instead
-	// (e.g., in case high accuracy training is needed).
-	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
+	typedef typename Matrix::QpFloatType QpFloatType;
+	typedef typename Matrix::QpMatrixType QpMatrixType;
+	typedef typename Matrix::QpMatrixRowType QpMatrixRowType;
+	typedef typename Matrix::QpMatrixColumnType QpMatrixColumnType;
 
 	/// Constructor
 	/// \param kernelfunction          kernel function
 	/// \param data             data to evaluate the kernel function
 	/// \param diagModification vector d of diagonal modifiers
-	RegularizedKernelMatrix(AbstractKernelFunction<InputType>& kernelfunction,
-			Data<InputType> const& data,
-			const RealVector& diagModification)
-	: kernel(kernelfunction)
-	, m_accessCounter( 0 )
-	{
-		std::size_t elements = data.numberOfElements();
-		x.resize(elements, false);
-		for (std::size_t i=0; i<elements; i++) x[i] = &data(i);
-		SIZE_CHECK(elements == diagModification.size());
-		diagMod = diagModification;
+	RegularizedKernelMatrix(
+		AbstractKernelFunction<InputType>& kernelfunction,
+		Data<InputType> const& data,
+		const RealVector& diagModification
+	):m_matrix(kernelfunction,data), m_diagMod(diagModification){
+		SIZE_CHECK(size() == diagModification.size());
 	}
-
 
 	/// return a single matrix entry
 	QpFloatType operator () (std::size_t i, std::size_t j) const
@@ -314,9 +305,8 @@ public:
 	/// return a single matrix entry
 	QpFloatType entry(std::size_t i, std::size_t j) const
 	{
-		INCREMENT_KERNEL_COUNTER( m_accessCounter );
-		QpFloatType ret = kernel.eval(*x[i], *x[j]);
-		if (i == j) ret += (QpFloatType)diagMod(i);
+		QpFloatType ret = m_matrix(i,j);
+		if (i == j) ret += (QpFloatType)m_diagMod(i);
 		return ret;
 	}
 	
@@ -324,57 +314,35 @@ public:
 	///
 	///The entries start,...,end of the i-th row are computed and stored in storage.
 	///There must be enough room for this operation preallocated.
-	void q(std::size_t i, std::size_t start, std::size_t end, QpFloatType* storage) const
-	{
-		typename AbstractKernelFunction<InputType>::ConstInputReference xi = *x[i];
-		SHARK_PARALLEL_FOR(std::size_t j = start; j < end; j++)
-		{
-			INCREMENT_KERNEL_COUNTER( m_accessCounter );
-			storage[j-start] = QpFloatType(kernel.eval(xi, *x[j]));
-		}
+	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
+		m_matrix.row(i,start,end,storage);
 		//apply regularization
 		if(i > start && i < end){
-			storage[i-start] += (QpFloatType)diagMod(i);
+			storage[i-start] += (QpFloatType)m_diagMod(i);
 		}
 	}
 
 	/// swap two variables
-	void flipColumnsAndRows(std::size_t i, std::size_t j)
-	{
-		XCHG_A(PointerType, x, i, j);
-		XCHG_A(double, diagMod, i, j);
+	void flipColumnsAndRows(std::size_t i, std::size_t j){
+		m_matrix.flipColumnsAndRows(i,j);
 	}
 
 	/// return the size of the quadratic matrix
 	std::size_t size() const
-	{ return m_matrixsize; }
+	{ return m_matrix.size(); }
 
 	/// query the kernel access counter
 	unsigned long long getAccessCount() const
-	{ return m_accessCounter; }
+	{ return m_matrix.getAccessCount(); }
 
 	/// reset the kernel access counter
 	void resetAccessCount()
-	{ m_accessCounter = 0; }
+	{ m_matrix.resetAccessCount(); }
 
 protected:
-	/// Kernel function defining the kernel Gram matrix
-	AbstractKernelFunction<InputType> const& kernel;
-
-	typedef typename Data<InputType>::const_element_iterator PointerType;
-	/// Array of data pointers for kernel evaluations
-	std::vector<PointerType> x;
-
-	/// modification of the diagonal entries
-	RealVector diagMod;
-
-	/// size of the quadratic matrix
-	std::size_t m_matrixsize;
-
-	/// counter for the kernel accesses
-	mutable unsigned long long m_accessCounter;
+	Matrix m_matrix;
+	RealVector m_diagMod;
 };
-
 
 ///
 /// \brief Modified Kernel Gram matrix
@@ -387,92 +355,74 @@ protected:
 template <class InputType, class CacheType>
 class ModifiedKernelMatrix
 {
+private:
+	typedef KernelMatrix<InputType,CacheType> Matrix;
 public:
-
-	//////////////////////////////////////////////////////////////////
-	// The types below define the type used for caching kernel values. The default is float,
-	// since this type offers sufficient accuracy in the vast majority of cases, at a memory
-	// cost of only four bytes. However, the type definition makes it easy to use double instead
-	// (e.g., in case high accuracy training is needed).
-	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
+	typedef typename Matrix::QpFloatType QpFloatType;
+	typedef typename Matrix::QpMatrixType QpMatrixType;
+	typedef typename Matrix::QpMatrixRowType QpMatrixRowType;
+	typedef typename Matrix::QpMatrixColumnType QpMatrixColumnType;
 
 	/// Constructor
-	/// \param kernelfunction   kernel function defining the Gram matrix
+	/// \param kernelfunction          kernel function
 	/// \param data             data to evaluate the kernel function
+	/// \param diagModification vector d of diagonal modifiers
 	ModifiedKernelMatrix(
-		const AbstractKernelFunction<InputType>& kernelfunction,
-		const LabeledData<InputType, unsigned int>& data,
+		AbstractKernelFunction<InputType> const& kernelfunction,
+		LabeledData<InputType, unsigned int> const& data,
 		QpFloatType modifierEq,
 		QpFloatType modifierNe
-	): kernel(kernelfunction)
-	, m_matrixsize(data.numberOfElements())
+	): m_matrix(kernelfunction,data.inputs())
+	,  m_labels(data.labels())
 	, m_modifierEq(modifierEq)
-	, m_modifierNe(modifierNe)
-	, m_accessCounter( 0 )
-	{
-		std::size_t elements = data.numberOfElements();
-		x.resize(elements);
-		boost::iota(x,data.elemBegin());//fill x with iterators begin...end of the range
-	}
+	, m_modifierNe(modifierNe){}
 
 	/// return a single matrix entry
 	QpFloatType operator () (std::size_t i, std::size_t j) const
 	{ return entry(i, j); }
-	
-	/// compute a modified entry of the kernel Gram matrix
+
+	/// return a single matrix entry
 	QpFloatType entry(std::size_t i, std::size_t j) const
 	{
-		INCREMENT_KERNEL_COUNTER( m_accessCounter );
-		QpFloatType modifier = x[i]->label == x[j]->label ? m_modifierEq : m_modifierNe;
-		return modifier * (QpFloatType)kernel.eval(x[i]->input, x[j]->input);
+		QpFloatType ret = m_matrix(i,j);
+		QpFloatType modifier = m_labels[i] == m_labels[j] ? m_modifierEq : m_modifierNe;
+		return modifier*ret;
 	}
 	
 	/// \brief Computes the i-th row of the kernel matrix.
 	///
 	///The entries start,...,end of the i-th row are computed and stored in storage.
 	///There must be enough room for this operation preallocated.
-	void q(std::size_t i, std::size_t start, std::size_t end, QpFloatType* storage) const
-	{
-		typename AbstractKernelFunction<InputType>::ConstInputReference xi = x[i]->input;
-		unsigned int labeli = x[i]->label;
-		SHARK_PARALLEL_FOR(std::size_t j = start; j < end; j++)
-		{
-			INCREMENT_KERNEL_COUNTER( m_accessCounter );
-			QpFloatType modifier = labeli == x[j]->label ? m_modifierEq : m_modifierNe;
-			storage[j-start] = QpFloatType(kernel.eval(xi, x[j]->input));
+	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
+		m_matrix.row(i,start,end,storage);
+		//apply modifiers
+		unsigned int labeli = m_labels[i];
+		for(std::size_t j = start; j < end; j++){
+			QpFloatType modifier = labeli == m_labels[j] ? m_modifierEq : m_modifierNe;
+			storage[j-start] *= modifier;
 		}
 	}
 
 	/// swap two variables
-	void flipColumnsAndRows(std::size_t i, std::size_t j){ 
-		std::swap(x[i],x[j]);
+	void flipColumnsAndRows(std::size_t i, std::size_t j){
+		m_matrix.flipColumnsAndRows(i,j);
 	}
 
 	/// return the size of the quadratic matrix
 	std::size_t size() const
-	{ return m_matrixsize; }
+	{ return m_matrix.size(); }
 
 	/// query the kernel access counter
 	unsigned long long getAccessCount() const
-	{ return m_accessCounter; }
+	{ return m_matrix.getAccessCount(); }
 
 	/// reset the kernel access counter
 	void resetAccessCount()
-	{ m_accessCounter = 0; }
+	{ m_matrix.resetAccessCount(); }
 
 protected:
-	/// Kernel function defining the kernel Gram matrix
-	const AbstractKernelFunction<InputType>& kernel;
-
-	typedef typename LabeledData<InputType,unsigned int>::const_element_iterator PointerType;
-	/// Array of data pointers for kernel evaluations
-	//todo: O.K. find better solution for this.
-	std::vector<PointerType> x;
-	/// size of the quadratic matrix
-	std::size_t m_matrixsize;
+	/// Kernel matrix which computes the basic entries.
+	Matrix m_matrix;
 
 	/// modifier in case the labels are equal
 	QpFloatType m_modifierEq;
@@ -480,8 +430,7 @@ protected:
 	/// modifier in case the labels differ
 	QpFloatType m_modifierNe;
 
-	/// counter for the kernel accesses
-	mutable unsigned long long m_accessCounter;
+	DataView<Data<unsigned int> const> m_labels;
 };
 
 
@@ -504,9 +453,9 @@ public:
 	// cost of only four bytes. However, the type definition makes it easy to use double instead
 	// (e.g., in case high accuracy training is needed).
 	typedef typename Matrix::QpFloatType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
+	typedef typename Matrix::QpMatrixType QpMatrixType;
+	typedef typename Matrix::QpMatrixRowType QpMatrixRowType;
+	typedef typename Matrix::QpMatrixColumnType QpMatrixColumnType;
 
 	/// Constructor.
 	/// \param base  underlying matrix M, see class description of BlockMatrix2x2.
@@ -534,6 +483,16 @@ public:
 	QpFloatType entry(std::size_t i, std::size_t j) const
 	{
 		return m_base->entry(m_mapping[i], m_mapping[j]);
+	}
+	
+	/// \brief Computes the i-th row of the kernel matrix.
+	///
+	///The entries start,...,end of the i-th row are computed and stored in storage.
+	///There must be enough room for this operation preallocated.
+	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
+		for(std::size_t j = start; j < end; j++){
+			storage[j-start] = entry(i,j);
+		}
 	}
 
 	/// swap two variables
