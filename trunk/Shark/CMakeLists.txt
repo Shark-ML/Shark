@@ -349,7 +349,7 @@ ENDIF( UNIX )
 if(WIN32 AND NOT CYGWIN)
   set(INSTALL_CMAKE_DIR CMake)
 else()
-  set(INSTALL_CMAKE_DIR lib/CMake/FooBar)
+  set(INSTALL_CMAKE_DIR lib/CMake/Shark/)
 endif()
 
 # Add all targets to the build-tree export set
