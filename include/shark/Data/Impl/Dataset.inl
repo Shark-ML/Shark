@@ -596,6 +596,12 @@ struct PairReference<DataPair<I, L>, InputIterator, LabelIterator >{
 			label = pair.label;
 			return *this;
 		}
+		
+		friend void swap(type const& a, type const& b){
+			using std::swap;
+			swap(a.input,b.input);
+			swap(a.label,b.label);
+		}
 	};
 };
 
@@ -815,6 +821,12 @@ public:
 		}
 		const_reference operator[](std::size_t i)const{
 			return get(*this,i);
+		}
+		
+		friend void swap(type& a, type& b){
+			using std::swap;
+			swap(a.input,b.input);
+			swap(a.label,b.label);
 		}
 	};
 };
