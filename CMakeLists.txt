@@ -56,9 +56,11 @@ ENDIF( OPT_OFFICIAL_RELEASE )
 #####################################################################
 #		Marks the official version                          #
 #####################################################################
-SET( SHARK_VERSION_MAJOR 2 )
-SET( SHARK_VERSION_MINOR 9 )
+SET( SHARK_VERSION_MAJOR 3 )
+SET( SHARK_VERSION_MINOR 0 )
 SET( SHARK_VERSION_PATCH 0 )
+set(SHARK_VERSION
+  ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH})
 
 ADD_DEFINITIONS(
  -DSHARK_VERSION_MAJOR=${SHARK_VERSION_MAJOR}
@@ -288,12 +290,6 @@ IF( OPT_COMPILE_DOCUMENTATION )
 	ADD_SUBDIRECTORY( doc )
 ENDIF( OPT_COMPILE_DOCUMENTATION )
 
-
-#####################################################################
-#                  Adjust library version for debian                #
-#####################################################################
-
-
 #####################################################################
 #                Adjust compiler flags and settings								#
 #####################################################################
@@ -343,3 +339,43 @@ IF( UNIX )
 	  	SET(CMAKE_CXX_CREATE_STATIC_LIBRARY "libtool -static -o <TARGET> <LINK_FLAGS> <OBJECTS>" )
 	ENDIF( APPLE )
 ENDIF( UNIX )
+
+
+
+###################################################################
+# CMAKE PACKAGING                                                 #
+###################################################################
+
+if(WIN32 AND NOT CYGWIN)
+  set(INSTALL_CMAKE_DIR CMake)
+else()
+  set(INSTALL_CMAKE_DIR lib/CMake/FooBar)
+endif()
+
+# Add all targets to the build-tree export set
+export(TARGETS shark Version FILE "${PROJECT_BINARY_DIR}/SharkTargets.cmake")
+ 
+# Export the package for use from the build-tree
+# (this registers the build-tree with a global CMake-registry)
+export(PACKAGE Shark)
+
+message( STATUS ${Boost_LIBRARY_DIRS})
+# Create the SharkConfig.cmake and SharkConfigVersion files
+set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/" "${Boost_INCLUDE_DIRS}")
+set(CONF_TARGET_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+configure_file(SharkConfig.cmake.in "${PROJECT_BINARY_DIR}/SharkConfig.cmake")
+set(CONF_TARGET_DIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}")
+set(CONF_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include/" "${Boost_INCLUDE_DIRS}")
+configure_file(SharkConfig.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SharkConfig.cmake")
+configure_file(SharkConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/SharkConfigVersion.cmake")
+
+# Install the SharkConfig.cmake and SharkConfigVersion.cmake
+install(FILES
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SharkConfig.cmake"
+  "${PROJECT_BINARY_DIR}/SharkConfigVersion.cmake"
+  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+ 
+# Install the export set for use with the install-tree
+install(EXPORT SharkTargets DESTINATION
+  "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
