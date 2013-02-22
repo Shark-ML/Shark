@@ -63,7 +63,7 @@ public:
 	}
 	
 	double eval(ConstInputReference x1, ConstInputReference x2) const{
-		return m_kernel->eval(subrange(x1,m_start,m_end),subrange(x2,m_start,m_end));
+		return m_kernel->eval(blas::subrange(x1,m_start,m_end),blas::subrange(x2,m_start,m_end));
 	}
 	
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result, State& state) const{
