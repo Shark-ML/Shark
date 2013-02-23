@@ -357,7 +357,7 @@ export(TARGETS shark Version FILE "${PROJECT_BINARY_DIR}/SharkTargets.cmake")
  
 # Export the package for use from the build-tree
 # (this registers the build-tree with a global CMake-registry)
-export(PACKAGE Shark)
+#export(PACKAGE Shark)
 
 message( STATUS ${Boost_LIBRARY_DIRS})
 # Create the SharkConfig.cmake and SharkConfigVersion files

@@ -291,7 +291,7 @@ public:
 	/// \param data             data to evaluate the kernel function
 	/// \param diagModification vector d of diagonal modifiers
 	RegularizedKernelMatrix(
-		AbstractKernelFunction<InputType>& kernelfunction,
+		AbstractKernelFunction<InputType> const& kernelfunction,
 		Data<InputType> const& data,
 		const RealVector& diagModification
 	):m_matrix(kernelfunction,data), m_diagMod(diagModification){
@@ -317,7 +317,7 @@ public:
 	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
 		m_matrix.row(i,start,end,storage);
 		//apply regularization
-		if(i > start && i < end){
+		if(i >= start && i < end){
 			storage[i-start] += (QpFloatType)m_diagMod(i);
 		}
 	}
@@ -325,6 +325,7 @@ public:
 	/// swap two variables
 	void flipColumnsAndRows(std::size_t i, std::size_t j){
 		m_matrix.flipColumnsAndRows(i,j);
+		std::swap(m_diagMod(i),m_diagMod(j));
 	}
 
 	/// return the size of the quadratic matrix
@@ -373,9 +374,13 @@ public:
 		QpFloatType modifierEq,
 		QpFloatType modifierNe
 	): m_matrix(kernelfunction,data.inputs())
-	,  m_labels(data.labels())
+	,  m_labels(data.numberOfElements())
 	, m_modifierEq(modifierEq)
-	, m_modifierNe(modifierNe){}
+	, m_modifierNe(modifierNe){
+		for(std::size_t i = 0; i != m_labels.size(); ++i){
+			m_labels[i] = data.element(i).label;
+		}
+	}
 
 	/// return a single matrix entry
 	QpFloatType operator () (std::size_t i, std::size_t j) const
@@ -398,7 +403,7 @@ public:
 		//apply modifiers
 		unsigned int labeli = m_labels[i];
 		for(std::size_t j = start; j < end; j++){
-			QpFloatType modifier = labeli == m_labels[j] ? m_modifierEq : m_modifierNe;
+			QpFloatType modifier = (labeli == m_labels[j]) ? m_modifierEq : m_modifierNe;
 			storage[j-start] *= modifier;
 		}
 	}
@@ -406,6 +411,7 @@ public:
 	/// swap two variables
 	void flipColumnsAndRows(std::size_t i, std::size_t j){
 		m_matrix.flipColumnsAndRows(i,j);
+		std::swap(m_labels[i],m_labels[j]);
 	}
 
 	/// return the size of the quadratic matrix
@@ -423,6 +429,7 @@ public:
 protected:
 	/// Kernel matrix which computes the basic entries.
 	Matrix m_matrix;
+	std::vector<unsigned int> m_labels;
 
 	/// modifier in case the labels are equal
 	QpFloatType m_modifierEq;
@@ -430,7 +437,7 @@ protected:
 	/// modifier in case the labels differ
 	QpFloatType m_modifierNe;
 
-	DataView<Data<unsigned int> const> m_labels;
+	
 };
 
 

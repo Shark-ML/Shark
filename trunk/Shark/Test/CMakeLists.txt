@@ -96,6 +96,10 @@ SHARK_ADD_TEST( Algorithms/GradientDescent/Rprop.cpp GradDesc_Rprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/NoisyRprop.cpp GradDesc_NoisyRprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/Quickprop.cpp GradDesc_Quickprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_SteepestDescent )
+#LP - Linear Programs
+SHARK_ADD_TEST( Algorithms/LP/LinearProgram.cpp LP_LinearProgram )
+#QP - Quadratic Programs
+SHARK_ADD_TEST( Algorithms/QP/KernelMatrix.cpp QP_KernelMatrix )
 #Trainers
 SHARK_ADD_TEST( Algorithms/Trainers/CSvmTrainer.cpp Trainers_CSvmTrainer )
 SHARK_ADD_TEST( Algorithms/Trainers/FisherLDA.cpp Trainers_FisherLDA )
@@ -113,8 +117,6 @@ SHARK_ADD_TEST( Algorithms/Trainers/PCA.cpp Trainers_PCA )
 SHARK_ADD_TEST( Algorithms/Trainers/Perceptron.cpp Trainers_Perceptron )
 SHARK_ADD_TEST( Algorithms/Trainers/MissingFeatureSvmTrainerTests.cpp Trainers_MissingFeatureSvmTrainer )
 
-#LP - Linear Programs
-SHARK_ADD_TEST( Algorithms/LP/LinearProgram.cpp LP_LinearProgram )
 #misc algorithms
 SHARK_ADD_TEST( Algorithms/GridSearch.cpp Algorithms_GridSearch )
 SHARK_ADD_TEST( Algorithms/Hypervolume.cpp Algorithms_Hypervolume )
