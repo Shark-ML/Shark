@@ -65,9 +65,8 @@ public:
 	/// \brief Generates a data set with samples from from the distribution.
 	///
 	/// @param size the number of samples in the dataset
-	UnlabeledData<InputType> generateDataset(std::size_t size) const {
-		// first determine the optimal number of batches and their sizes
-		std::size_t maximumBatchSize = Data<InputType>::DefaultBatchSize;
+	/// @param maximumBatchSize the maximum size of a batch
+	UnlabeledData<InputType> generateDataset(std::size_t size,std::size_t maximumBatchSize) const {
 		std::size_t batches = (size + maximumBatchSize - 1) / maximumBatchSize;
 		std::size_t optimalBatchSize = size / batches;
 		std::size_t remainder = size - batches * optimalBatchSize;
@@ -88,6 +87,13 @@ public:
 			}
 		}
 		return dataset;
+	}
+	
+	/// \brief Generates a data set with samples from from the distribution.
+	///
+	/// @param size the number of samples in the dataset
+	UnlabeledData<InputType> generateDataset(std::size_t size) const {
+		return generateDataset(size,Data<InputType>::DefaultBatchSize );
 	}
 };
 
@@ -122,10 +128,10 @@ public:
 	/// \brief Generates a dataset with samples from from the distribution.
 	///
 	/// @param size the number of samples in the dataset
-	LabeledData<InputType, LabelType> generateDataset(std::size_t size) const
+	/// @param maximumBatchSize the maximum size of a batch
+	LabeledData<InputType, LabelType> generateDataset(std::size_t size,std::size_t maximumBatchSize) const
 	{
 		// first determine the optimal number of batches and their sizes
-		std::size_t maximumBatchSize = LabeledData<InputType, LabelType>::DefaultBatchSize;
 		std::size_t batches = (size + maximumBatchSize - 1) / maximumBatchSize;
 		std::size_t optimalBatchSize = size / batches;
 		std::size_t remainder = size - batches * optimalBatchSize;
@@ -149,6 +155,13 @@ public:
 			}
 		}
 		return dataset;
+	}
+	
+	/// \brief Generates a data set with samples from from the distribution.
+	///
+	/// @param size the number of samples in the dataset
+	LabeledData<InputType, LabelType> generateDataset(std::size_t size) const {
+		return generateDataset(size,LabeledData<InputType, LabelType>::DefaultBatchSize );
 	}
 };
 
