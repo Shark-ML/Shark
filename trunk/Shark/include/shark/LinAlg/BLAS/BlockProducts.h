@@ -580,6 +580,7 @@ void generalMatrixMatrixOperation(
 	typedef typename MatC::value_type value_type;
 	typedef blas::matrix<value_type,blas::column_major> StorageMatrix;
 	
+	const std::size_t maxBlockSize = 512;
 	std::size_t n = matA.size1();
 	std::size_t m = matB.size2();
 	std::size_t k = matA.size2();
@@ -597,7 +598,7 @@ void generalMatrixMatrixOperation(
 	
 	
 	//very simple choice at the moment, but should be sufficient for not too big matrices.
-	std::size_t const blockSize=std::min(k,512ul);
+	std::size_t const blockSize=std::min(k,maxBlockSize);
 	
 	for(std::size_t i = 0; i < k; i += blockSize){
 		//copy the Panel of A into temporary storage, than get all subpanels of B and then call gepp for every combination
