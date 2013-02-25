@@ -85,7 +85,7 @@ public:
 	/// \brief Constructor of a self_type proxy from a Dense VectorExpression
 	///
 	/// Be aware that the expression must live longer than the proxy!
-	/// \param espression The Expression from which to construct the Proxy
+	/// \param expression The Expression from which to construct the Proxy
  	template<class E>
 	FixedDenseVectorProxy(blas::vector_expression<E>& expression)
 	: m_data(traits::vector_storage(expression()))
@@ -342,7 +342,7 @@ public:
 	/// \brief Constructor of a self_type proxy from a Dense MatrixExpression
 	///
 	/// Be aware that the expression must live longer than the proxy!
-	/// \param espression The Expression from which to construct the Proxy
+	/// \param expression Expression from which to construct the Proxy
  	template<class E>
 	FixedDenseMatrixProxy(blas::matrix_expression<E> const& expression)
 	: m_data(traits::matrix_storage(expression()))
@@ -361,7 +361,7 @@ public:
 	/// \brief Constructor of a self_type proxy from a Dense MatrixExpression
 	///
 	/// Be aware that the expression must live longer than the proxy!
-	/// \param espression The Expression from which to construct the Proxy
+	/// \param expression Expression from which to construct the Proxy
  	template<class E>
 	FixedDenseMatrixProxy(blas::matrix_expression<E>& expression)
 	: m_data(traits::matrix_storage(expression()))
@@ -646,7 +646,7 @@ public:
 	/// \brief Constructor of a self_type proxy from a Dense VectorExpression
 	///
 	/// Be aware that the expression must live longer than the proxy!
-	/// \param espression The Expression from which to construct the Proxy
+	/// \param expression Expression from which to construct the Proxy
  	template<class E>
 	FixedSparseVectorProxy(blas::vector_expression<E> const& expression):
 		m_storage(traits::ExpressionTraits<E const>::compressedStorage(expression())),
