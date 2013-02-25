@@ -226,7 +226,7 @@ public:
 	//!         model and calculates the derivatives of the resulting network
 	//!         output with respect to the weights. A call of eval with the pattern is required first!
 	//!
-	//!  \param  pattern Input pattern for the model.
+	//!  \param  patterns Input pattern for the model.
 	//!  \param  output the prediction of the network
 	void eval(RealMatrix const& patterns,RealMatrix& output, State& state)const{
 		InternalState& s = state.toState<InternalState>();

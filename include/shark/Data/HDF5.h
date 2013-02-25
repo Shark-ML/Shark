@@ -115,7 +115,7 @@ bool isSupported(H5T_class_t typeClass, size_t typeSize)
 
 /// @brief Load a dataset in a HDF5 file into a matrix
 ///
-/// @param data[out]
+/// @param data
 ///     in vector of vector format which should support assignment operations
 /// @param fileName
 ///     The name of HDF5 file to be read from
@@ -186,7 +186,7 @@ void loadIntoMatrix(MatrixType& data, const std::string& fileName, const std::st
 
 /// @brief load a matrix from HDF5 file in compressed sparse column format
 ///
-/// @param data[out] the container which will hold the output matrix
+/// @param data the container which will hold the output matrix
 /// @param fileName the name of HDF5 file
 /// @param cscDatasetName dataset names for describing the CSC
 template<typename MatrixType>
@@ -229,11 +229,11 @@ void loadHDF5Csc(MatrixType& data, const std::string& fileName, const std::vecto
 
 /// @brief Construct labeled data from passed in data and label
 ///
-/// @param labeledData[out]
+/// @param labeledData
 ///     Container storing the loaded data
 /// @param dataBuffer
 ///     The data container will hold
-/// @param labeledBuffer
+/// @param labelBuffer
 ///     The label for data inside @a dataBuffer
 template<typename VectorType, typename LabelType>
 void constructLabeledData(
@@ -255,7 +255,7 @@ void constructLabeledData(
 
 /// @brief Import data from a HDF5 file.
 ///
-/// @param data[out]   Container storing the loaded data
+/// @param data        Container storing the loaded data
 /// @param fileName    The name of HDF5 file to be read from
 /// @param datasetName the HDF5 dataset name to access in the HDF5 file
 ///
@@ -273,7 +273,7 @@ void importHDF5(
 
 /// @brief Import data to a LabeledData object from a HDF5 file.
 ///
-/// @param labeledData[out]
+/// @param labeledData
 ///     Container storing the loaded data
 /// @param fileName
 ///     The name of HDF5 file to be read from
@@ -303,7 +303,7 @@ void importHDF5(
 
 /// @brief Import data from HDF5 dataset of compressed sparse column format.
 ///
-/// @param data[out]   Container storing the loaded data
+/// @param data        Container storing the loaded data
 /// @param fileName    The name of HDF5 file to be read from
 /// @param cscDatasetName
 ///     the CSC dataset names used to construct a matrix
@@ -322,7 +322,7 @@ void importHDF5(
 
 /// @brief Import data from HDF5 dataset of compressed sparse column format.
 ///
-/// @param data[out]
+/// @param data
 ///     Container storing the loaded data
 /// @param fileName
 ///     The name of HDF5 file to be read from
