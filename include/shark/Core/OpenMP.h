@@ -40,10 +40,14 @@
 #define SHARK_PARALLEL_FOR __pragma("omp parallel for")\
 for
 
+#define SHARK_CRITICAL_REGION __pragma(" #pragma omp critical")
+
 #else
 #define SHARK_PARALLEL_FOR \
 _Pragma ( "omp parallel for" )\
 for
+
+#define SHARK_CRITICAL_REGION _Pragma(" #pragma omp critical")
 #endif
 
 #define SHARK_NUM_THREADS (std::size_t)(omp_in_parallel()?omp_get_num_threads():omp_get_max_threads())
@@ -51,6 +55,7 @@ for
 
 #else
 #define SHARK_PARALLEL_FOR for
+#define SHARK_CRITICAL_REGION
 #define SHARK_NUM_THREADS (std::size_t)1
 #define SHARK_THREAD_NUM (std::size_t)0
 #endif

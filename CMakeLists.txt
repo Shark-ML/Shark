@@ -34,16 +34,6 @@ ELSE( OPT_DYNAMIC_LIBRARY )
     SET( LIBRARY_FLAGS STATIC )
 ENDIF( OPT_DYNAMIC_LIBRARY )
 
-
-#####################################################################
-#		Optionally enable OpenMP                            #
-#####################################################################
-OPTION( OPT_ENABLE_OPENMP "Enable OpenMP if available." OFF )
-
-IF( OPT_ENABLE_OPENMP )
-    FIND_PACKAGE( OpenMP QUIET )
-ENDIF( OPT_ENABLE_OPENMP )
-
 #####################################################################
 #		Official Releases are tagged.                       #
 #####################################################################
@@ -181,6 +171,25 @@ ELSE( WIN32 )
 ENDIF( WIN32 )
 
 #####################################################################
+#		Optionally enable OpenMP                            #
+#####################################################################
+OPTION( OPT_ENABLE_OPENMP "Enable OpenMP if available." OFF )
+
+IF( OPT_ENABLE_OPENMP )
+	FIND_PACKAGE( OpenMP QUIET )
+
+	IF( OPENMP_FOUND )
+		MESSAGE( STATUS "OpenMP...found" )
+		ADD_DEFINITIONS( -DSHARK_USE_OPENMP )
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+	ELSE( OPENMP_FOUND )
+		MESSAGE( WARNING "OpenMP...not found" )
+	ENDIF( OPENMP_FOUND )
+ENDIF( OPT_ENABLE_OPENMP )
+
+#####################################################################
 #           HDF5 configuration                                      #
 #####################################################################
 FIND_PACKAGE(HDF5 COMPONENTS C CXX HL QUIET)
@@ -301,11 +310,10 @@ IF( WIN32 )
 	#4308: Negative integral constant
 	SET( ADDITIONAL_COMPILER_FLAGS "${DISABLE_WARNINGS}" )
 
-	IF( OPENMP_FOUND )
-		MESSAGE( "OpenMP found" )
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /openmp" )
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp" )
-	ENDIF( OPENMP_FOUND )
+	#~ IF( OPENMP_FOUND )
+		#~ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /openmp" )
+		#~ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp" )
+	#~ ENDIF( OPENMP_FOUND )
 
 	#SET( ADDITIONAL_LINKER_FLAGS "/DEBUG /LARGEADDRESSAWARE" )
 

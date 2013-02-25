@@ -34,16 +34,16 @@
 #define SHARK_OBJECTIVEFUNCTIONS_IMPL_ERRORFUNCTION_INL
 
 #include <boost/cast.hpp>
+#include <shark/Core/OpenMP.h>
 
 namespace shark{
 namespace detail{
 
-
-///\brief Implementation of the Error Function using AbstractCost.
-template<class InputType, class LabelType,class OutputType>
+template<class InputType, class LabelType, class OutputType>
 class ErrorFunctionWrapper:public FunctionWrapperBase<InputType,LabelType>{
-public:
+private:
 	typedef SupervisedObjectiveFunction<InputType,LabelType> base_type;
+public:
 	typedef typename base_type::SearchPointType SearchPointType;
 	typedef typename base_type::ResultType ResultType;
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
@@ -55,10 +55,6 @@ public:
 		mep_model = model;
 		mep_cost = cost;
 		updateFeatures();
-	}
-
-	FunctionWrapperBase<InputType,LabelType>* clone()const{
-		return new ErrorFunctionWrapper<InputType,LabelType,OutputType>(*this);
 	}
 
 	void updateFeatures(){
@@ -98,6 +94,31 @@ public:
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint = mep_model->parameterVector();
 	}
+protected:
+	AbstractModel<InputType, OutputType>* mep_model;
+	AbstractCost<LabelType, OutputType>* mep_cost;
+	LabeledData<InputType, LabelType> m_dataset;
+};
+
+///\brief Implementation of the Error Function using AbstractCost.
+template<class InputType, class LabelType,class OutputType>
+class CostBasedErrorFunctionImpl: public ErrorFunctionWrapper<InputType,LabelType,OutputType>{
+public:
+	
+	typedef ErrorFunctionWrapper<InputType,LabelType,OutputType> base_type;
+	typedef typename base_type::SearchPointType SearchPointType;
+	typedef typename base_type::ResultType ResultType;
+	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
+	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
+
+	CostBasedErrorFunctionImpl(
+		AbstractModel<InputType,OutputType>* model, 
+		AbstractCost<LabelType, OutputType>* cost
+	):base_type(model,cost) {}
+
+	FunctionWrapperBase<InputType,LabelType>* clone()const{
+		return new CostBasedErrorFunctionImpl<InputType,LabelType,OutputType>(*this);
+	}
 
 	double eval(RealVector const& input) const {
 		mep_model->setParameterVector(input);
@@ -109,7 +130,7 @@ public:
 //~ 	ResultType evalDerivative( const SearchPointType & point, FirstOrderDerivative & derivative ) const {
 		//~ SHARK_FEATURE_CHECK(HAS_FIRST_DERIVATIVE);
 
-		//~ size_t dataSize = m_dataset.size();
+		//~ std::size_t dataSize = m_dataset.size();
 		//~ mep_model->setParameterVector(point);
 		//~ mep_model->resetInternalState();
 
@@ -126,7 +147,7 @@ public:
 		//~ Data<OutputType> predictions(dataSize);
 		//~ mep_model->eval(m_dataset.inputs(), predictions);
 		//~ double error = mep_cost->evalDerivative(m_dataset.labels(), predictions, costGradient);
-		//~ for (size_t i=0; i != dataSize; i++)
+		//~ for (std::size_t i=0; i != dataSize; i++)
 		//~ {
 			//~ const InputType& input = m_dataset.input(i);
 			//~ mep_model->eval(input);
@@ -151,16 +172,17 @@ private:
 		(void)weights;
 		(void)inputGradient;
 	}
-	AbstractModel<InputType, OutputType>* mep_model;
-	AbstractCost<LabelType, OutputType>* mep_cost;
-	LabeledData<InputType, LabelType> m_dataset;
+	using base_type::mep_model;
+	using base_type::mep_cost;
+	using base_type::m_dataset;
+	
 };
 
 ///\brief Implementation of the ErrorFunction using AbstractLoss.
 template<class InputType, class LabelType,class OutputType>
-class LossBasedErrorFunctionWrapper:public FunctionWrapperBase<InputType,LabelType>{
+class LossBasedErrorFunctionImpl:public ErrorFunctionWrapper<InputType,LabelType,OutputType>{
 public:
-	typedef SupervisedObjectiveFunction<InputType,LabelType> base_type;
+	typedef ErrorFunctionWrapper<InputType,LabelType,OutputType> base_type;
 	typedef typename base_type::SearchPointType SearchPointType;
 	typedef typename base_type::ResultType ResultType;
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
@@ -168,61 +190,23 @@ public:
 
 	typedef typename LabeledData<InputType,LabelType>::const_batch_reference const_reference;
 
-	LossBasedErrorFunctionWrapper(AbstractModel<InputType,OutputType>* model, AbstractLoss<LabelType, OutputType>* loss) {
-		SHARK_ASSERT(model!=NULL);
-		SHARK_ASSERT(loss!=NULL);
-		mep_model = model;
-		mep_loss = loss;
-		updateFeatures();
-	}
+	LossBasedErrorFunctionImpl(
+		AbstractModel<InputType,OutputType>* model, 
+		AbstractLoss<LabelType, OutputType>* loss
+	):base_type(model,loss), mep_loss(loss) {}
 
 	FunctionWrapperBase<InputType,LabelType>* clone()const{
-		return new LossBasedErrorFunctionWrapper<InputType,LabelType,OutputType>(*this);
-	}
-
-	void updateFeatures(){
-		mep_model->updateFeatures();
-		mep_loss->updateFeatures();
-		if(mep_model->hasFirstParameterDerivative() && mep_loss->hasFirstDerivative())
-			this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
-		//~ if(mep_model->hasSecondParameterDerivative() && mep_loss->hasSecondDerivative())
-			//~ this->m_features|=base_type::HAS_SECOND_DERIVATIVE;
-		this->m_features|=base_type::CAN_PROPOSE_STARTING_POINT;
-		//a hack to update changing names...
-		this->m_name="ErrorFunction<"+mep_model->name()+","+mep_loss->name()+">";
-	}
-
-	void configure( const PropertyTree & node ) {
-		PropertyTree::const_assoc_iterator it = node.find("model");
-		if(it!=node.not_found())
-		{
-			mep_model->configure(it->second);
-		}
-		// be flexible; allow for "cost" or "loss"
-		it = node.find("cost");
-		if(it!=node.not_found())
-		{
-			mep_loss->configure(it->second);
-		}
-		it = node.find("loss");
-		if(it!=node.not_found())
-		{
-			mep_loss->configure(it->second);
-		}
-		updateFeatures();
-	}
-
-	void setDataset(LabeledData<InputType, LabelType> const& dataset){
-		m_dataset = dataset;
-	}
-
-	void proposeStartingPoint(SearchPointType& startingPoint) const{
-		startingPoint = mep_model->parameterVector();
+		return new LossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(*this);
 	}
 
 	double eval(RealVector const& input) const {
-		size_t dataSize = m_dataset.numberOfElements();
 		mep_model->setParameterVector(input);
+
+		return evalPointSet();
+	}
+	
+	double evalPointSet() const {
+		std::size_t dataSize = m_dataset.numberOfElements();
 
 		typename Batch<OutputType>::type prediction;
 		double error = 0.0;
@@ -230,16 +214,19 @@ public:
 			mep_model->eval(batch.input, prediction);
 			error += mep_loss->eval(batch.label, prediction);
 		}
-		error /= (double)dataSize;
-		return error;
+		return error/dataSize;
 	}
 
 	ResultType evalDerivative( const SearchPointType & point, FirstOrderDerivative & derivative ) const {
 		SHARK_FEATURE_CHECK(HAS_FIRST_DERIVATIVE);
-
-		size_t dataSize = m_dataset.numberOfElements();
 		mep_model->setParameterVector(point);
+		return evalDerivativePointSet(derivative);
+	}
+	
+	ResultType evalDerivativePointSet( FirstOrderDerivative & derivative ) const {
+		SHARK_FEATURE_CHECK(HAS_FIRST_DERIVATIVE);
 
+		std::size_t dataSize = m_dataset.numberOfElements();
 		derivative.m_gradient.resize(mep_model->numberOfParameters());
 		derivative.m_gradient.clear();
 
@@ -265,53 +252,100 @@ public:
 		return error;
 	}
 
-//~ 	ResultType evalDerivative( const SearchPointType & point, SecondOrderDerivative & derivative)const {
-		//~ SHARK_FEATURE_CHECK(HAS_SECOND_DERIVATIVE);
-
-		//~ size_t dataSize = m_dataset.size();
-		//~ mep_model->setParameterVector(point);
-		//~ mep_model->resetInternalState();
-
-		//~ size_t parameters=mep_model->numberOfParameters();
-
-		//~ derivative.m_gradient.resize(parameters);
-		//~ derivative.m_hessian.resize(parameters,parameters);
-		//~ derivative.m_gradient.clear();
-		//~ derivative.m_hessian.clear();
-
-		//~ OutputType prediction;
-		//~ OutputType errorDerivative;
-		//~ RealMatrix errorHessian;
-
-		//~ RealVector dataGradient;
-		//~ RealMatrix dataHessian;
-
-		//~ double error=0;
-		//~ for (size_t i=0; i<dataSize; i++) {
-			//~ //calculate model output for one single input as well as the derivative
-			//~ const InputType& input = m_dataset.input(i);
-			//~ mep_model->eval(input, prediction);
-
-			//~ // calculate error derivative and Hessian of the loss function
-			//~ error += mep_loss->evalDerivative(m_dataset.label(i), prediction,errorDerivative,errorHessian);
-
-			//~ mep_model->weightedParameterDerivative(input,errorDerivative,errorHessian,dataGradient,dataHessian);
-
-			//~ derivative.m_gradient += dataGradient;
-			//~ derivative.m_hessian += dataHessian;
-		//~ }
-		//~ error /= dataSize;
-		//~ derivative.m_gradient/=dataSize;
-		//~ derivative.m_hessian/=dataSize;
-		//~ return error;
-//~ 	}
-
 protected:
-	AbstractModel<InputType, OutputType>* mep_model;
+	using base_type::mep_model;
+	using base_type::m_dataset;
 	AbstractLoss<LabelType, OutputType>* mep_loss;
-	LabeledData<InputType, LabelType> m_dataset;
 };
 
+
+///\brief Implementation of the ErrorFunction using AbstractLoss for parallelizable computations
+template<class InputType, class LabelType,class OutputType>
+class ParallelLossBasedErrorFunctionImpl:public ErrorFunctionWrapper<InputType,LabelType,OutputType>{
+public:
+	typedef ErrorFunctionWrapper<InputType,LabelType,OutputType> base_type;
+	typedef typename base_type::SearchPointType SearchPointType;
+	typedef typename base_type::ResultType ResultType;
+	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
+	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
+
+	typedef typename LabeledData<InputType,LabelType>::const_batch_reference const_reference;
+
+	ParallelLossBasedErrorFunctionImpl(
+		AbstractModel<InputType,OutputType>* model, 
+		AbstractLoss<LabelType, OutputType>* loss
+	):base_type(model,loss), mep_loss(loss) {}
+
+	FunctionWrapperBase<InputType,LabelType>* clone()const{
+		return new ParallelLossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(*this);
+	}
+
+	double eval(RealVector const& input) const {
+		SHARK_FEATURE_CHECK(HAS_FIRST_DERIVATIVE);
+		mep_model->setParameterVector(input);
+
+		std::size_t numBatches = m_dataset.numberOfBatches();
+		std::size_t numElements = m_dataset.numberOfElements();
+		std::size_t numThreads = std::min(SHARK_NUM_THREADS,numBatches);
+		//calculate optimal partitioning
+		std::size_t batchesPerThread = numBatches/numThreads;
+		std::size_t leftOver = numBatches - batchesPerThread*numThreads;
+		double error = 0;
+		SHARK_PARALLEL_FOR(std::size_t t = 0; t < numThreads; ++t){
+			LossBasedErrorFunctionImpl<InputType,LabelType,OutputType> errorFunc(mep_model,mep_loss);
+			//get start and end index of batch-range
+			std::size_t start = t*batchesPerThread+std::min(t,leftOver);
+			std::size_t end = (t+1)*batchesPerThread+std::min(t+1,leftOver);
+			LabeledData<InputType, LabelType> threadData = rangeSubset(m_dataset,start,end);//threadsafe!
+			errorFunc.setDataset(threadData);
+			errorFunc.setDataset(rangeSubset(m_dataset,start,end));//threadsafe!
+			double threadError = errorFunc.evalPointSet();//threadsafe!
+			//we need to weight the error and derivativs with the number of samples in the split.
+			double weightFactor = double(threadData.numberOfElements())/numElements;
+			SHARK_CRITICAL_REGION{
+				error += weightFactor * threadError;
+			}
+		}
+		return error;
+	}
+
+	ResultType evalDerivative( const SearchPointType & point, FirstOrderDerivative & derivative ) const {
+		SHARK_FEATURE_CHECK(HAS_FIRST_DERIVATIVE);
+		mep_model->setParameterVector(point);
+		derivative.m_gradient.resize(mep_model->numberOfParameters());
+		derivative.m_gradient.clear();
+		
+		std::size_t numBatches = m_dataset.numberOfBatches();
+		std::size_t numElements = m_dataset.numberOfElements();
+		std::size_t numThreads = std::min(SHARK_NUM_THREADS,numBatches);
+		//calculate optimal partitioning
+		std::size_t batchesPerThread = numBatches/numThreads;
+		std::size_t leftOver = numBatches - batchesPerThread*numThreads;
+		double error = 0;
+		SHARK_PARALLEL_FOR(std::size_t t = 0; t < numThreads; ++t){
+			FirstOrderDerivative threadDerivative;
+			LossBasedErrorFunctionImpl<InputType,LabelType,OutputType> errorFunc(mep_model,mep_loss);
+			//get start and end index of batch-range
+			std::size_t start = t*batchesPerThread+std::min(t,leftOver);
+			std::size_t end = (t+1)*batchesPerThread+std::min(t+1,leftOver);
+			LabeledData<InputType, LabelType> threadData = rangeSubset(m_dataset,start,end);//threadsafe!
+			errorFunc.setDataset(threadData);
+			double threadError = errorFunc.evalDerivativePointSet(threadDerivative);//threadsafe!
+			//we need to weight the error and derivativs with the number of samples in the split.
+			double weightFactor = double(threadData.numberOfElements())/numElements;
+			SHARK_CRITICAL_REGION{
+				error += weightFactor*threadError;
+				noalias(derivative.m_gradient) += weightFactor*threadDerivative.m_gradient;
+			}
+		}
+		return error;
+	}
+
+protected:
+	using base_type::mep_model;
+	using base_type::m_dataset;
+	AbstractLoss<LabelType, OutputType>* mep_loss;
+};
 
 } // namespace detail
 
@@ -326,14 +360,18 @@ void swap(const ErrorFunction<InputType,LabelType>& op1, const ErrorFunction<Inp
 template<class InputType,class LabelType>
 template<class OutputType>
 ErrorFunction<InputType,LabelType>::ErrorFunction(AbstractModel<InputType,OutputType>* model, AbstractCost<LabelType, OutputType>* cost){
-	//check, whether this is a Lossfunction
 	
+	//check, whether this is a Lossfunction
 	if(cost->isLossFunction()){
 		AbstractLoss<LabelType, OutputType>* loss = boost::polymorphic_downcast<AbstractLoss<LabelType, OutputType>*>(cost);
-		m_wrapper.reset(new detail::LossBasedErrorFunctionWrapper<InputType,LabelType,OutputType>(model,loss));
+		//non squential modls can be parallelized
+		if(model->isSequential() || SHARK_NUM_THREADS == 1)
+			m_wrapper.reset(new detail::LossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
+		else
+			m_wrapper.reset(new detail::ParallelLossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
 	}
 	else{
-		m_wrapper.reset(new detail::ErrorFunctionWrapper<InputType,LabelType,OutputType>(model,cost));
+		m_wrapper.reset(new detail::CostBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,cost));
 	}
 	this -> m_name = m_wrapper->name();
 	this -> m_features = m_wrapper -> features();
@@ -345,14 +383,17 @@ ErrorFunction<InputType,LabelType>::ErrorFunction(AbstractModel<InputType,Output
 	//check, whether this is a Lossfunction
 	if(cost->isLossFunction()){
 		AbstractLoss<LabelType, OutputType>* loss = boost::polymorphic_downcast<AbstractLoss<LabelType, OutputType>*>(cost);
-		m_wrapper.reset(new detail::LossBasedErrorFunctionWrapper<InputType,LabelType,OutputType>(model,loss));
+		//non squential modls can be parallelized
+		if(model->isSequential() || SHARK_NUM_THREADS == 1)
+			m_wrapper.reset(new detail::LossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
+		else
+			m_wrapper.reset(new detail::ParallelLossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
 	}
 	else{
-		m_wrapper.reset(new detail::ErrorFunctionWrapper<InputType,LabelType,OutputType>(model,cost));
+		m_wrapper.reset(new detail::CostBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,cost));
 	}
 	this -> m_name = m_wrapper->name();
 	this -> m_features = m_wrapper -> features();
-
 	this -> setDataset(dataset);
 }
 
