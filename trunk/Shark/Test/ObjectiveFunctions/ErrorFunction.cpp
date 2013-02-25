@@ -1,5 +1,9 @@
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
+#include <shark/Algorithms/Trainers/LinearRegression.h>
+#include <shark/Algorithms/GradientDescent/Rprop.h>
+#include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
+#include <shark/Rng/Uniform.h>
 
 #define BOOST_TEST_MODULE ML_ErrorFunction
 #include <boost/test/unit_test.hpp>
@@ -58,7 +62,7 @@ public:
 };
 
 
-BOOST_AUTO_TEST_CASE( ML_ErrorFunction )
+BOOST_AUTO_TEST_CASE( ML_ErrorFunction_BASE )
 {
 	RealVector zero(10);
 	zero.clear();
@@ -82,4 +86,134 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction )
 	ErrorFunction<RealVector,RealVector>::FirstOrderDerivative derivative;
 	mse.evalDerivative(parameters,derivative);
 	BOOST_CHECK_SMALL(derivative.m_gradient(0)-40,1.e-15);
+}
+
+//test whether we can get to the same result as linear regression
+//this is very similar to the linear regrssion test. first we create a model,
+//let it evaluate some responses + gaussian noise. then we lt it forget
+//and create an ErrorFunction which is supposed to have a minimum at the point.
+BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
+	const size_t trainExamples = 60000;
+	LinearRegression trainer;
+	LinearModel<> model;
+	RealMatrix matrix(2, 2);
+	RealVector offset(2);
+	matrix(0,0) = 3;
+	matrix(1,1) = -5;
+	matrix(0,1) = -2;
+	matrix(1,0) = 7;
+	offset(0) = 3;
+	offset(1) = -6;
+	model.setStructure(matrix, offset);
+	RealVector optimum=model.parameterVector();
+
+	// create datatset - the model output + gaussian noise
+	MultiVariateNormalDistribution noise(2);
+	RealMatrix covariance(2, 2);
+	covariance(0,0) = 1;
+	covariance(0,1) = 0;
+	covariance(1,0) = 0;
+	covariance(1,1) = 1;
+	noise.setCovarianceMatrix(covariance);
+
+	Uniform<> uniform(Rng::globalRng,-3.0, 3.0);
+
+	// create samples
+	std::vector<RealVector> input(trainExamples,RealVector(2));
+	std::vector<RealVector> trainTarget(trainExamples,RealVector(2));
+	std::vector<RealVector> testTarget(trainExamples,RealVector(2));
+	double optimalMSE = 0;
+	for (size_t i=0;i!=trainExamples;++i) {
+		input[i](0) = uniform();
+		input[i](1) = uniform();
+		testTarget[i] =  model(input[i]);
+		RealVector noiseVal = noise().first;
+		trainTarget[i] = noiseVal + testTarget[i];
+		optimalMSE+=normSqr(noiseVal);
+	}
+	optimalMSE/=trainExamples;
+	
+	//create loss function and internal implementations to check everything is working
+	RegressionDataset trainset = createLabeledDataFromRange(input, trainTarget);
+	SquaredLoss<> loss;
+	
+	{
+		ErrorFunction<RealVector,RealVector> mse(&model,&loss);
+		mse.setDataset(trainset);
+		double val = mse.eval(optimum);
+		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
+		
+		ErrorFunction<RealVector,RealVector>::FirstOrderDerivative d;
+		double valGrad = mse.evalDerivative(optimum,d);
+		double gradNorm = norm_2(d.m_gradient);
+		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
+		BOOST_CHECK_SMALL(gradNorm,1.-10);
+		
+		//let the model forget by reinitializing with random values
+		initRandomNormal(model,2);
+		//optimize with rprop
+		IRpropPlus rprop;
+		rprop.init(mse);
+		for(std::size_t i = 0; i != 1000; ++i){
+			rprop.step(mse);
+		}
+		double diff = normSqr(rprop.solution().point-optimum);
+		std::cout<<diff<<rprop.solution().point<<" "<<optimum<<std::endl;
+		
+		BOOST_CHECK_SMALL(diff, 1.e-3);
+	}
+	
+	{
+		detail::LossBasedErrorFunctionImpl<RealVector,RealVector,RealVector> mse(&model,&loss);
+		mse.setDataset(trainset);
+		double val = mse.eval(optimum);
+		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
+		
+		ErrorFunction<RealVector,RealVector>::FirstOrderDerivative d;
+		double valGrad = mse.evalDerivative(optimum,d);
+		double gradNorm = norm_2(d.m_gradient);
+		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
+		BOOST_CHECK_SMALL(gradNorm,1.-10);
+		
+		//let the model forget by reinitializing with random values
+		initRandomNormal(model,2);
+		//optimize with rprop
+		IRpropPlus rprop;
+		rprop.init(mse);
+		for(std::size_t i = 0; i != 1000; ++i){
+			rprop.step(mse);
+		}
+		double diff = normSqr(rprop.solution().point-optimum);
+		std::cout<<diff<<rprop.solution().point<<" "<<optimum<<std::endl;
+		
+		BOOST_CHECK_SMALL(diff, 1.e-3);
+	}
+	
+	{
+		detail::ParallelLossBasedErrorFunctionImpl<RealVector,RealVector,RealVector> mse(&model,&loss);
+		mse.setDataset(trainset);
+		double val = mse.eval(optimum);
+		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
+		
+		ErrorFunction<RealVector,RealVector>::FirstOrderDerivative d;
+		double valGrad = mse.evalDerivative(optimum,d);
+		double gradNorm = norm_2(d.m_gradient);
+		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
+		BOOST_CHECK_SMALL(gradNorm,1.-10);
+		
+		//let the model forget by reinitializing with random values
+		initRandomNormal(model,2);
+		//optimize with rprop
+		IRpropPlus rprop;
+		rprop.init(mse);
+		for(std::size_t i = 0; i != 100; ++i){ 
+			rprop.step(mse);
+		}
+		double diff = normSqr(rprop.solution().point-optimum);
+		std::cout<<diff<<rprop.solution().point<<" "<<optimum<<std::endl;
+		
+		BOOST_CHECK_SMALL(diff, 1.e-3);
+	}
+	
+	
 }
