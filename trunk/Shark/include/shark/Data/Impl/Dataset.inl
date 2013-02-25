@@ -52,11 +52,10 @@ namespace detail{
 
 ///\brief Given the sizes of the partition sets and the maximum batch size, computes a good partitioning
 ///
-/// \param partitionSizes the sizes of the partitions
-/// \param index of the starting batch of the partition
-/// \param size of every batch
-/// \param batchSizes the sizes of the batches
-/// \param maximumBatchSize the maximum size a batch is allowed to have
+/// \param partitionSizes Sizes of the partitions
+/// \param partitionStart Index of the starting batch of the partition
+/// \param batchSizes Sizes of the batches
+/// \param maximumBatchSize The maximum size a batch is allowed to have
 /// \return the total number of batches
 inline std::size_t batchPartitioning(
 	std::vector<std::size_t> const& partitionSizes,
@@ -126,7 +125,7 @@ public:
 	///Creates the SharedContainer and splits the incoming data into several batches
 	///
 	///@param data the data from which to create the Container
-	///@param batchSize the size of the batches. if this is 0, the size is unlimited
+	///@param maximumBatchSize The size of the batches. If set to 0, the size is unlimited
 	template<class Range>
 	SharedContainer(Range const& data, std::size_t maximumBatchSize){
 		SIZE_CHECK(shark::size(data) != 0 );

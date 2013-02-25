@@ -109,7 +109,7 @@ public:
 	
 	/// \brief Initializes with data points from a batch of points
 	///
-	/// @param dataSet the data set
+	/// @param sampleData Data set
 	void initializeChain(MatrixType const& sampleData){
 		m_operator.createSample(m_samples.hidden,m_samples.visible,sampleData);
 		
