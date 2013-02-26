@@ -191,7 +191,7 @@ namespace detail{
 ///without having to care about that the sequence itself is splitted.
 ///The Sequences both have to be random access containers.
 template<class SequenceContainer>
-struct MultiSequenceIterator: public detail::SequenceOfSequenceIteratorTraits<
+class MultiSequenceIterator: public detail::SequenceOfSequenceIteratorTraits<
 	MultiSequenceIterator<SequenceContainer>,
 	SequenceContainer
 >::base{

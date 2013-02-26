@@ -169,7 +169,7 @@ public:
 			{
 				for (unsigned int pv=0; pv<classes; pv++)
 				{
-					double sign = (yv == pv) ? -1.0 : +1.0;
+					QpFloatType sign = QpFloatType((yv == pv) ? -1 : 1);//cast to keep MSVC happy...
 					for (unsigned int yw=0; yw<classes; yw++, r++)
 					{
 						M.setDefaultValue(r, sign * c_ne);
