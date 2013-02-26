@@ -245,15 +245,6 @@ IF ( OPT_ENABLE_ATLAS )
 	ENDIF ( CBLAS_LIBRARY )
 ENDIF ( OPT_ENABLE_ATLAS )
 
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-INCLUDE_DIRECTORIES( include/ )
-ADD_SUBDIRECTORY( include )
-ADD_SUBDIRECTORY( src )
-
-
-#TARGET_LINK_LIBRARIES( Statistics shark ${LINK_LIBRARIES} )
-
-
 #####################################################################
 #                       Static Code Analysis                        #
 #####################################################################
@@ -267,6 +258,50 @@ IF( UNIX )
 	)
     ENDIF( CPP_CHECK )
 ENDIF( UNIX )
+
+#####################################################################
+#                Adjust compiler flags and settings for MSVC							#
+#####################################################################
+IF( MSVC )
+    message(STATUS "Win32")
+	SET( DISABLE_WARNINGS "/wd4250 /wd4251 /wd4275 /wd4800 /wd4308" )
+	#4250: inherit via dominance
+	#4251: needs to have dll-interface
+	#4275: non-dll interface used as base for dll-interface class
+	#4308: Negative integral constant
+	SET( ADDITIONAL_COMPILER_FLAGS "${DISABLE_WARNINGS}" )
+
+	STRING( REPLACE "/O2" "/Od" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" )
+
+	SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${ADDITIONAL_COMPILER_FLAGS}" )
+	SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${ADDITIONAL_COMPILER_FLAGS}" )
+	SET( CMAKE_CXX_FLAGS_MINSIZERELEASE "${CMAKE_CXX_FLAGS_MINSIZERELEASE} ${ADDITIONAL_COMPILER_FLAGS}" CACHE STRING "compiler-flags" FORCE )
+	SET( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${ADDITIONAL_COMPILER_FLAGS}" CACHE STRING "compiler-flags" FORCE )
+
+	SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE STRING "compiler-flags" FORCE )
+	SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "compiler-flags" FORCE )
+	SET( CMAKE_CXX_FLAGS_MINSIZERELEASE "${CMAKE_CXX_FLAGS_MINSIZERELEASE}" CACHE STRING "compiler-flags" FORCE )
+	SET( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING "compiler-flags" FORCE )
+
+	ADD_DEFINITIONS(-D_USE_MATH_DEFINES)
+	ADD_DEFINITIONS(-DNOMINMAX)
+	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
+	ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE) 
+	ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
+	ADD_DEFINITIONS(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1)
+ENDIF( MSVC )
+
+
+IF( UNIX )
+	IF( APPLE )
+	  	SET(CMAKE_CXX_CREATE_STATIC_LIBRARY "libtool -static -o <TARGET> <LINK_FLAGS> <OBJECTS>" )
+	ENDIF( APPLE )
+ENDIF( UNIX )
+
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+INCLUDE_DIRECTORIES( include/ )
+ADD_SUBDIRECTORY( include )
+ADD_SUBDIRECTORY( src )
 
 #####################################################################
 #                       Include Examples                            #
@@ -299,54 +334,8 @@ IF( OPT_COMPILE_DOCUMENTATION )
 	ADD_SUBDIRECTORY( doc )
 ENDIF( OPT_COMPILE_DOCUMENTATION )
 
-#####################################################################
-#                Adjust compiler flags and settings								#
-#####################################################################
-IF( WIN32 )
-	SET( DISABLE_WARNINGS "/wd4250 /wd4251 /wd4275 /wd4800 /wd4308" )
-	#4250: inherit via dominance
-	#4251: needs to have dll-interface
-	#4275: non-dll interface used as base for dll-interface class
-	#4308: Negative integral constant
-	SET( ADDITIONAL_COMPILER_FLAGS "${DISABLE_WARNINGS}" )
 
-	#~ IF( OPENMP_FOUND )
-		#~ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /openmp" )
-		#~ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp" )
-	#~ ENDIF( OPENMP_FOUND )
-
-	#SET( ADDITIONAL_LINKER_FLAGS "/DEBUG /LARGEADDRESSAWARE" )
-
-	#disable optimization for RelWithDebInfo target to allow debugging
-	STRING( REPLACE "/O2" "/Od" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" )
-
-	SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${ADDITIONAL_COMPILER_FLAGS}" )
-	SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${ADDITIONAL_COMPILER_FLAGS}" )
-	SET( CMAKE_CXX_FLAGS_MINSIZERELEASE "${CMAKE_CXX_FLAGS_MINSIZERELEASE} ${ADDITIONAL_COMPILER_FLAGS}" CACHE STRING "compiler-flags" FORCE )
-	SET( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${ADDITIONAL_COMPILER_FLAGS}" CACHE STRING "compiler-flags" FORCE )
-
-	SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE STRING "compiler-flags" FORCE )
-	SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "compiler-flags" FORCE )
-	SET( CMAKE_CXX_FLAGS_MINSIZERELEASE "${CMAKE_CXX_FLAGS_MINSIZERELEASE}" CACHE STRING "compiler-flags" FORCE )
-	SET( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING "compiler-flags" FORCE )
-
-	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1)
-ENDIF( WIN32 )
-#####################################################################
-# Enable math constants and prevent windows from generating	    #
-# min/max macros polluting the global namespace.		    #
-# Also disable VC++ Security warnings              #
-#####################################################################
-ADD_DEFINITIONS( -D_USE_MATH_DEFINES -DNOMINMAX )
-IF( MSVC )
-	ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
-ENDIF( MSVC )
-
-IF( UNIX )
-	IF( APPLE )
-	  	SET(CMAKE_CXX_CREATE_STATIC_LIBRARY "libtool -static -o <TARGET> <LINK_FLAGS> <OBJECTS>" )
-	ENDIF( APPLE )
-ENDIF( UNIX )
+#TARGET_LINK_LIBRARIES( Statistics shark ${LINK_LIBRARIES} )
 
 
 

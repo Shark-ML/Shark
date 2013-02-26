@@ -44,6 +44,7 @@
 #include <fstream>
 #include <limits>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/fusion/adapted/std_pair.hpp>
 
 #include <shark/Data/Dataset.h>
 

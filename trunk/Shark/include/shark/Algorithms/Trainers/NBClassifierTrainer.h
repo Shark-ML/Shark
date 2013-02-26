@@ -74,20 +74,17 @@ public:
 		std::size_t classSize;
 		std::size_t featureSize;
 		boost::tie(classSize, featureSize) = model.getDistSize();
-		THROW_IF(classSize != numberOfClasses(dataset), "Size of class in dataset and model should match.");
-		THROW_IF(featureSize != inputDimension(dataset), "Size of feature in dataset and model should match.");
+		SHARK_CHECK(classSize != numberOfClasses(dataset), "Size of class in dataset and model should match.");
+		SHARK_CHECK(featureSize != inputDimension(dataset), "Size of feature in dataset and model should match.");
 
 		// Initialize trainer & buffer
 		std::vector<InputValueType> buffer;
-		buffer.reserve(dataset.numberOfElements() / double(classSize));
-
 		// Train individual feature distribution
 		for (std::size_t i = 0; i < classSize; ++i)
 		{
 			for (std::size_t j = 0; j < featureSize; ++j)
 			{
 				AbstractDistribution& dist = model.getFeatureDist(i, j);
-				buffer.clear();
 				getFeatureSample(buffer, dataset, i, j);
 				m_distTrainer.train(dist, buffer);
 			}

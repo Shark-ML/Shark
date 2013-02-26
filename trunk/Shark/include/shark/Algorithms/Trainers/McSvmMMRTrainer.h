@@ -138,7 +138,7 @@ public:
 		for (unsigned int y=0; y<classes; y++) 
 			gamma(y, 0) = 1.0;
 
-		UIntVector rho(1,0.0);
+		UIntVector rho(1,0);
 		QpSparseArray<QpFloatType> nu(classes, classes, classes);
 
 		for (unsigned int y=0; y<classes; y++) 
