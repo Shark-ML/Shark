@@ -70,8 +70,12 @@ namespace shark {
  * executed consecutively to find the next optimal subspace-dimension
  * orthogonally to the others.
  *
+ *
  * \b Note: the max. dimensionality for the subspace is \#NumOfClasses-1.
  *
+ * It is possible to choose how many dimnsions are used by setting the appropriate value
+ * by calling setSubspaceDImension or in the constructor.
+ * Also optionally whitening can be applied.
  * For more detailed information about Fisher-LDA, see \e Bishop, \e Pattern
  * \e Recognition \e and \e Machine \e Learning.
  */
@@ -79,7 +83,15 @@ class FisherLDA : public AbstractTrainer<LinearModel<>, unsigned int>
 {
 public:
 	/// Constructor
-	FisherLDA(bool whitening = false);
+	FisherLDA(bool whitening = false, std::size_t subspaceDimension = 0);
+
+	void setSubspaceDimensions(std::size_t dimensions){
+		m_subspaceDimensions = dimensions;
+	}
+	
+	std::size_t subspaceDimensions()const{
+		return m_subspaceDimensions;
+	}
 
 	/// check whether whitening mode is on
 	bool whitening() const{ 
@@ -97,6 +109,7 @@ public:
 protected:
 	void meanAndScatter(LabeledData<RealVector, unsigned int> const& dataset, RealVector& mean, RealMatrix& scatter);
 	bool m_whitening;
+	std::size_t m_subspaceDimensions;
 };
 
 

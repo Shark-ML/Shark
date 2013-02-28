@@ -41,15 +41,16 @@
 using namespace shark;
 
 
-FisherLDA::FisherLDA(bool whitening){ 
+FisherLDA::FisherLDA(bool whitening, std::size_t dimensions){ 
 	m_whitening = whitening; 
+	m_subspaceDimensions = dimensions; 
 }
 
 void FisherLDA::train(LinearModel<>& model, LabeledData<RealVector, unsigned int> const& dataset){
 	SHARK_CHECK(! dataset.empty(), "[FisherLDA::train] dataset is empty");
 
-	std::size_t inputDim = model.inputSize();
-	std::size_t nComp = model.outputSize();		// for dimensionality reduction
+	std::size_t inputDim = inputDimension(dataset);
+	std::size_t nComp = m_subspaceDimensions? m_subspaceDimensions : numberOfClasses(dataset);
 
 	RealVector mean(inputDim);
 	RealMatrix scatter(inputDim, inputDim);
@@ -66,11 +67,13 @@ void FisherLDA::train(LinearModel<>& model, LabeledData<RealVector, unsigned int
 	}
 	//reduce the size of the covariance matrix the the needed
 	//subspace
-	eigenvectors = blas::subrange(eigenvectors,0,inputDim,0,nComp);
-	RealVector offset = -prod(trans(eigenvectors), mean);
+	RealMatrix subspaceDirections = trans(columns(eigenvectors,0,nComp));
+	RealVector offset(inputDim,0.0);
+	fast_prod(subspaceDirections, mean,offset);
+	offset*=-1;
 
 	// write the parameters into the model
-	model.setStructure(RealMatrix(trans(eigenvectors)), offset);
+	model.setStructure(subspaceDirections, offset);
 }
 
 void FisherLDA::meanAndScatter(
