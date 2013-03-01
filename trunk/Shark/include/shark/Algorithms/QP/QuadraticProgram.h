@@ -224,7 +224,7 @@ public:
 	{
 		typename AbstractKernelFunction<InputType>::ConstInputReference xi = *x[i];
 		
-		SHARK_PARALLEL_FOR(std::size_t j = start; j < end; j++)
+		SHARK_PARALLEL_FOR(int j = start; j < (int) end; j++)
 		{
 			INCREMENT_KERNEL_COUNTER( m_accessCounter );
 			storage[j-start] = QpFloatType(kernel.eval(xi, *x[j]));

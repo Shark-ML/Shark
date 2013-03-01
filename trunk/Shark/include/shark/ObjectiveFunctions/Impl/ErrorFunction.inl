@@ -291,7 +291,8 @@ public:
 		std::size_t batchesPerThread = numBatches/numThreads;
 		std::size_t leftOver = numBatches - batchesPerThread*numThreads;
 		double error = 0;
-		SHARK_PARALLEL_FOR(std::size_t t = 0; t < numThreads; ++t){
+		SHARK_PARALLEL_FOR(int ti = 0; ti < (int)numThreads; ++ti){//MSVC does not support unsigned integrals in paralll loops
+			std::size_t t = ti;
 			LossBasedErrorFunctionImpl<InputType,LabelType,OutputType> errorFunc(mep_model,mep_loss);
 			//get start and end index of batch-range
 			std::size_t start = t*batchesPerThread+std::min(t,leftOver);
@@ -322,7 +323,8 @@ public:
 		std::size_t batchesPerThread = numBatches/numThreads;
 		std::size_t leftOver = numBatches - batchesPerThread*numThreads;
 		double error = 0;
-		SHARK_PARALLEL_FOR(std::size_t t = 0; t < numThreads; ++t){
+		SHARK_PARALLEL_FOR(int ti = 0; ti < (int)numThreads; ++ti){//MSVC does not support unsigned integrals in paralll loops
+			std::size_t t = ti;
 			FirstOrderDerivative threadDerivative;
 			LossBasedErrorFunctionImpl<InputType,LabelType,OutputType> errorFunc(mep_model,mep_loss);
 			//get start and end index of batch-range

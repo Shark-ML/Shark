@@ -73,7 +73,7 @@ public:
 		typedef typename std::vector<DistancePair>::iterator iterator;
 		//iterate over all batches of the training set in parallel and let
 		//every thread do a KNN-Search on it's subset of data
-		SHARK_PARALLEL_FOR(std::size_t b = 0; b < m_dataset.numberOfBatches(); ++b){
+		SHARK_PARALLEL_FOR(int b = 0; b < (int)m_dataset.numberOfBatches(); ++b){
 			//evaluate distances between the points of the patterns and the batch
 			RealMatrix distances=mep_kernel->featureDistanceSqr(patterns,m_dataset.batch(b).input);
 			
@@ -105,7 +105,7 @@ public:
 		//finally, we merge all threads in one heap which has the inverse ordering
 		//and create a class histogram over the smallest k neighbors
 		//std::cout<<"info "<<numPatterns<<" "<<maxThreads<<" "<<k<<std::endl;
-		SHARK_PARALLEL_FOR(unsigned int p = 0; p < numPatterns; ++p){
+		SHARK_PARALLEL_FOR(int p = 0; p < (int)numPatterns; ++p){
 			//find range of the heaps for all threads
 			iterator heapStart=heaps.begin()+p*maxThreads*k;
 			iterator heapEnd=heapStart+maxThreads*k;
