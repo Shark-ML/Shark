@@ -26,9 +26,8 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_IHR3_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_IHR3_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 
 #include <shark/LinAlg/rotations.h>
@@ -36,108 +35,94 @@
 #include <vector>
 
 namespace shark{
-	/*! \brief Multi-objective optimization benchmark function IHR3.
-	*
-	*  The function is described in
-	*
-	*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
-	*  Covariance Matrix Adaptation for Multi-objective Optimization. 
-	*  Evolutionary Computation 15(1), pp. 1-28, 2007 
-	*/
-	struct IHR3 : public AbstractMultiObjectiveFunction< VectorSpace<double> >,
-		public TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, IHR3 > {
-			typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-			typedef TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, IHR3 > meta;
+/*! \brief Multi-objective optimization benchmark function IHR3.
+*
+*  The function is described in
+*
+*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
+*  Covariance Matrix Adaptation for Multi-objective Optimization. 
+*  Evolutionary Computation 15(1), pp. 1-28, 2007 
+*/
+struct IHR3 : public AbstractMultiObjectiveFunction< VectorSpace<double> >{
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	
+	IHR3(std::size_t numVariables = 0) 
+	: super( 2 ), m_a( 1000 )
+	, m_handler(SearchPointType(numVariables,-1),SearchPointType(numVariables,1) ){
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= IS_CONSTRAINED_FEATURE;
+		m_features |= HAS_CONSTRAINT_HANDLER;
+		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+		m_name="IHR3";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_handler.dimensions();
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-			typedef super::ResultType ResultType;
-			typedef super::SearchPointType SearchPointType;
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_handler.setBounds(
+			SearchPointType(numberOfVariables,-1),
+			SearchPointType(numberOfVariables,1)
+		);
+	}
+	
+	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
+		return m_handler;
+	}
 
-			
+	void init() {
+		m_rotationMatrix = randomRotationMatrix(numberOfVariables());
+	}
 
-			IHR3() : super( 2 ), m_a( 1000 ) {
-				m_name = "IHR3";
-				m_features |= CAN_PROPOSE_STARTING_POINT;
-				m_features |= IS_CONSTRAINED_FEATURE;
-				m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
-			}
+	ResultType eval( const SearchPointType & x )const {
+		m_evaluationCounter++;
 
-			void init() {
-				m_rotationMatrix = randomRotationMatrix(m_numberOfVariables);
-			}
+		ResultType value( 2 );
 
-			ResultType eval( const SearchPointType & x )const {
-				m_evaluationCounter++;
+		SearchPointType y = prod(m_rotationMatrix,x);
 
-				ResultType value( 2 );
+		value[0] = ::fabs( y( 0 ) );
 
-				SearchPointType y = prod(m_rotationMatrix,x);
+		double g = 0;
+		double ymax = ::fabs( m_rotationMatrix(0, 0) );
 
-				value[0] = ::fabs( y( 0 ) );
+		for( unsigned int i = 1; i < numberOfVariables(); i++ )
+			ymax = std::max( ::fabs( m_rotationMatrix(0, i) ), ymax );
+		ymax = 1. / ymax;
 
-				double g = 0;
-				double ymax = ::fabs( m_rotationMatrix(0, 0) );
+		for (unsigned i = 1; i < numberOfVariables(); i++)
+			g += hg( y( i ) );
+		g = 9 * g / (numberOfVariables() - 1.) + 1.;
 
-				for( unsigned int i = 1; i < numberOfVariables(); i++ )
-					ymax = std::max( ::fabs( m_rotationMatrix(0, i) ), ymax );
-				ymax = 1. / ymax;
+		value[1] = g * hf(1. - ::sqrt(h(y( 0 ), numberOfVariables()) / g) - h(y( 0 ), numberOfVariables()) / g * ::sin(10 * M_PI * y( 0 ) ), y( 0 ), ymax);
 
-				for (unsigned i = 1; i < numberOfVariables(); i++)
-					g += hg( y( i ) );
-				g = 9 * g / (numberOfVariables() - 1.) + 1.;
+		return value;
+	}
 
-				value[1] = g * hf(1. - ::sqrt(h(y( 0 ), numberOfVariables()) / g) - h(y( 0 ), numberOfVariables()) / g * ::sin(10 * M_PI * y( 0 ) ), y( 0 ), ymax);
+	double h( double x, double n ) const{
+		return 1 / ( 1 + ::exp( -x / ::sqrt( n ) ) );
+	}
 
-				return value;
-			}
+	double hf(double x, double y0, double ymax)const {
+		if( ::fabs(y0) <= ymax )
+			return x;
+		return ::fabs( y0 ) + 1.;
+	}
 
-			void proposeStartingPoint( SearchPointType & x ) const {
-				meta::proposeStartingPoint( x, m_numberOfVariables );
-			}
+	double hg(double x)const {
+		return (x*x) / ( ::fabs(x) + 0.1 );
+	}
+private:
+	double m_a;
+	BoxConstraintHandler<SearchPointType> m_handler;
+	RealMatrix m_rotationMatrix;
+};
 
-			bool isFeasible( const SearchPointType & v ) const {
-				return( meta::isFeasible( v ) );
-			}
-
-			void closestFeasible( SearchPointType & v ) const {
-				meta::closestFeasible( v );
-			}
-
-			double h( double x, double n ) const{
-				return 1 / ( 1 + ::exp( -x / ::sqrt( n ) ) );
-			}
-
-			double hf(double x, double y0, double ymax)const {
-				if( ::fabs(y0) <= ymax )
-					return x;
-				return ::fabs( y0 ) + 1.;
-			}
-
-			double hg(double x)const {
-				return (x*x) / ( ::fabs(x) + 0.1 );
-			}
-	private:
-		double m_a;
-		RealMatrix m_rotationMatrix;
-	};
-
-	/**
-	* \brief Specializes objective function traits for the function IHR3.
-	*/
-	template<> 
-	struct ObjectiveFunctionTraits<IHR3> {
-
-		static IHR3::SearchPointType lowerBounds( unsigned int n ) {
-			IHR3::SearchPointType result( n, -1 );
-			return( result );
-		}
-
-		static IHR3::SearchPointType upperBounds( unsigned int n ) {
-			IHR3::SearchPointType result( n, 1 );
-			return( result );
-		}
-
-	};
-
-	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( IHR3, shark::moo::RealValuedObjectiveFunctionFactory );
+ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( IHR3, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

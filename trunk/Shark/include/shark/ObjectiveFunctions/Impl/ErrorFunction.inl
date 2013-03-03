@@ -94,6 +94,10 @@ public:
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint = mep_model->parameterVector();
 	}
+	
+	std::size_t numberOfVariables() const{
+		return mep_model->numberOfParameters();
+	}
 protected:
 	AbstractModel<InputType, OutputType>* mep_model;
 	AbstractCost<LabelType, OutputType>* mep_cost;
@@ -354,7 +358,7 @@ protected:
 
 template<class InputType,class LabelType>
 void swap(const ErrorFunction<InputType,LabelType>& op1, const ErrorFunction<InputType,LabelType>& op2){
-	swap(op1.m_wrapper,op2.m_wrapper);
+	swap(op1.mp_wrapper,op2.mp_wrapper);
 	swap(op1.m_name,op2.m_name);
 	swap(op1.m_features,op2.m_features);
 }
@@ -368,15 +372,15 @@ ErrorFunction<InputType,LabelType>::ErrorFunction(AbstractModel<InputType,Output
 		AbstractLoss<LabelType, OutputType>* loss = boost::polymorphic_downcast<AbstractLoss<LabelType, OutputType>*>(cost);
 		//non squential modls can be parallelized
 		if(model->isSequential() || SHARK_NUM_THREADS == 1)
-			m_wrapper.reset(new detail::LossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
+			mp_wrapper.reset(new detail::LossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
 		else
-			m_wrapper.reset(new detail::ParallelLossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
+			mp_wrapper.reset(new detail::ParallelLossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
 	}
 	else{
-		m_wrapper.reset(new detail::CostBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,cost));
+		mp_wrapper.reset(new detail::CostBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,cost));
 	}
-	this -> m_name = m_wrapper->name();
-	this -> m_features = m_wrapper -> features();
+	this -> m_name = mp_wrapper->name();
+	this -> m_features = mp_wrapper -> features();
 }
 
 template<class InputType,class LabelType>
@@ -387,70 +391,75 @@ ErrorFunction<InputType,LabelType>::ErrorFunction(AbstractModel<InputType,Output
 		AbstractLoss<LabelType, OutputType>* loss = boost::polymorphic_downcast<AbstractLoss<LabelType, OutputType>*>(cost);
 		//non squential modls can be parallelized
 		if(model->isSequential() || SHARK_NUM_THREADS == 1)
-			m_wrapper.reset(new detail::LossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
+			mp_wrapper.reset(new detail::LossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
 		else
-			m_wrapper.reset(new detail::ParallelLossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
+			mp_wrapper.reset(new detail::ParallelLossBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,loss));
 	}
 	else{
-		m_wrapper.reset(new detail::CostBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,cost));
+		mp_wrapper.reset(new detail::CostBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,cost));
 	}
-	this -> m_name = m_wrapper->name();
-	this -> m_features = m_wrapper -> features();
+	this -> m_name = mp_wrapper->name();
+	this -> m_features = mp_wrapper -> features();
 	this -> setDataset(dataset);
 }
 
 template<class InputType,class LabelType>
 ErrorFunction<InputType,LabelType>::ErrorFunction(const ErrorFunction& op)
-:m_wrapper(op.m_wrapper->clone()){
-	this -> m_name = m_wrapper -> name();
-	this -> m_features = m_wrapper -> features();
+:mp_wrapper(op.mp_wrapper->clone()){
+	this -> m_name = mp_wrapper -> name();
+	this -> m_features = mp_wrapper -> features();
 }
 
 template<class InputType,class LabelType>
 ErrorFunction<InputType,LabelType>& ErrorFunction<InputType,LabelType>::operator = (const ErrorFunction<InputType,LabelType>& op){
 	ErrorFunction<InputType,LabelType> copy(op);
-	swap(copy.m_wrapper,*this);
+	swap(copy.mp_wrapper,*this);
 	return *this;
 }
 
 template<class InputType,class LabelType>
 void ErrorFunction<InputType,LabelType>::updateFeatures(){
-	m_wrapper -> updateFeatures();
-	this -> m_name = m_wrapper -> name();
-	this -> m_features = m_wrapper -> features();
+	mp_wrapper -> updateFeatures();
+	this -> m_name = mp_wrapper -> name();
+	this -> m_features = mp_wrapper -> features();
 }
 
 template<class InputType,class LabelType>
 void ErrorFunction<InputType,LabelType>::configure( const PropertyTree & node ){
-	m_wrapper -> configure(node);
+	mp_wrapper -> configure(node);
 }
 
 template<class InputType,class LabelType>
 void ErrorFunction<InputType,LabelType>::setDataset(LabeledData<InputType, LabelType> const& dataset){
-	m_wrapper -> setDataset(dataset);
+	mp_wrapper -> setDataset(dataset);
 }
 
 template<class InputType,class LabelType>
 void ErrorFunction<InputType,LabelType>::proposeStartingPoint(SearchPointType& startingPoint) const{
-	m_wrapper -> proposeStartingPoint(startingPoint);
+	mp_wrapper -> proposeStartingPoint(startingPoint);
+}
+
+template<class InputType,class LabelType>
+std::size_t ErrorFunction<InputType,LabelType>::numberOfVariables() const{
+	return mp_wrapper -> numberOfVariables();
 }
 
 template<class InputType,class LabelType>
 double ErrorFunction<InputType,LabelType>::eval(RealVector const& input) const{
 	++(this->m_evaluationCounter);
-	return m_wrapper -> eval(input);
+	return mp_wrapper -> eval(input);
 }
 
 template<class InputType,class LabelType>
 typename ErrorFunction<InputType,LabelType>::ResultType ErrorFunction<InputType,LabelType>::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
 	++(this->m_evaluationCounter);
-	return m_wrapper -> evalDerivative(input,derivative);
+	return mp_wrapper -> evalDerivative(input,derivative);
 }
 
 template<class InputType,class LabelType>
 typename ErrorFunction<InputType,LabelType>::ResultType ErrorFunction<InputType,LabelType>::evalDerivative( const SearchPointType & input, SecondOrderDerivative & derivative ) const{
 	++(this->m_evaluationCounter);
-	return m_wrapper -> evalDerivative(input,derivative);
+	return mp_wrapper -> evalDerivative(input,derivative);
 }
 }
 #endif

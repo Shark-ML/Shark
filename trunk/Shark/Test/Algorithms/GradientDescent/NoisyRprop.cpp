@@ -24,6 +24,10 @@ struct TestFunction : public AbstractObjectiveFunction<VectorSpace<double>,doubl
 		m_features|=Base::HAS_FIRST_DERIVATIVE;
 		m_name="Quadratic Function";
 	}
+	
+	std::size_t numberOfVariables()const{
+		return 3;
+	}
 	virtual double eval(RealVector const& pattern)const
 	{
 		return inner_prod(prod(A,pattern),pattern);

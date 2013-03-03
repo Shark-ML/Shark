@@ -92,6 +92,7 @@ public:
 	void setDataset(const LabeledData<InputType,LabelType>& dataset);
 
 	void proposeStartingPoint( SearchPointType & startingPoint)const;
+	std::size_t numberOfVariables()const;
 
 	double eval(const RealVector & input)const;
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative )const;

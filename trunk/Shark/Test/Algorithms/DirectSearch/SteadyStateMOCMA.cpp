@@ -94,8 +94,8 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypSteadyStateMOCMA ) {
 	BOOST_CHECK_NO_THROW( shark::OptimizerTraits< shark::detail::SteadyStateMOCMA<> >::defaultConfig( node ) );
 	BOOST_CHECK_NO_THROW( ssMocma.configure( node ) );
 
-	shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > function;
-	BOOST_CHECK_THROW( ssMocma.init( function ), shark::Exception );
+	//~ shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > function;
+	//~ BOOST_CHECK_THROW( ssMocma.init( function ), shark::Exception );
 	shark::DTLZ1 dtlz1;
 	dtlz1.setNoObjectives( 3 );
 	dtlz1.setNumberOfVariables( 10 );
@@ -209,8 +209,8 @@ BOOST_AUTO_TEST_CASE( ExactHypSteadyStateMOCMA ) {
 	BOOST_CHECK_NO_THROW( shark::OptimizerTraits< shark::detail::SteadyStateMOCMA<> >::defaultConfig( node ) );
 	BOOST_CHECK_NO_THROW( ssMocma.configure( node ) );
 
-	shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > function;
-	BOOST_CHECK_THROW( ssMocma.init( function ), shark::Exception );
+	//~ shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > function;
+	//~ BOOST_CHECK_THROW( ssMocma.init( function ), shark::Exception );
 	ssMocma.m_useApproximatedHypervolume = false;
 	shark::DTLZ1 dtlz1;
 	dtlz1.setNoObjectives( 3 );
@@ -325,8 +325,8 @@ BOOST_AUTO_TEST_CASE( AdditiveEpsSteadyStateMOCMA ) {
 	BOOST_CHECK_NO_THROW( shark::OptimizerTraits< shark::detail::SteadyStateMOCMA<shark::AdditiveEpsilonIndicator> >::defaultConfig( node ) );
 	BOOST_CHECK_NO_THROW( ssMocma.configure( node ) );
 
-	shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > function;
-	BOOST_CHECK_THROW( ssMocma.init( function ), shark::Exception );
+	//~ shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > function;
+	//~ BOOST_CHECK_THROW( ssMocma.init( function ), shark::Exception );
 	ssMocma.m_useApproximatedHypervolume = false;
 	shark::DTLZ1 dtlz1;
 	dtlz1.setNoObjectives( 3 );

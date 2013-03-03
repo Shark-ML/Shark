@@ -40,7 +40,6 @@
 
 #include <shark/Algorithms/DirectSearch/Traits/QualityIndicatorTraits.h>
 #include <shark/Core/OpenMP.h>
-
 #include <iterator>
 #include <limits>
 #include <map>
@@ -299,9 +298,7 @@ namespace shark {
 				PopulationType copy( pop );
 				copy.erase( copy.begin() + i );	
 
-				double indicator;
-
-				indicator = ind( extractor, copy, m_noObjectives );
+				double indicator = ind( extractor, copy, m_noObjectives );
 				indicatorValues[i] = total - indicator;
 			}
 

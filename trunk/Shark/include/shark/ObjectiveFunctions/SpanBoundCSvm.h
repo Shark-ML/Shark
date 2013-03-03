@@ -154,6 +154,10 @@ public:
 		for (std::size_t i=0; i<free_sv; i++) sum += alpha[i] * S2(i);
 		return (sum / examples);
 	}
+	
+	std::size_t numberOfVariables()const{
+		return mep_trainer->numberOfParameters();
+	}
 
 	/// Evaluate the span bound approximation for the given
 	/// parameters, passed to the trainer object. These

@@ -20,7 +20,7 @@
  *  
  */
 #include <shark/Algorithms/DirectSearch/ElitistCMA.h>
-#include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
+#include <shark/ObjectiveFunctions/Benchmarks/Sphere.h>
 
 int main( int argc, char ** argv ) {
 

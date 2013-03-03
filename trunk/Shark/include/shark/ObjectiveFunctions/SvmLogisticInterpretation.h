@@ -152,6 +152,10 @@ public:
 		} //else: leave everything as is
 		throw SHARKEXCEPTION("[SvmLogisticInterpretation::closestFeasible] Please first clarify how the kernel parameter feasibility should be dealt with. Afterwards, please write a test for this method. Thanks.");
 	}
+	
+	std::size_t numberOfVariables()const{
+		return m_nhp;
+	}
 
 	//! train a number of SVMs in a cross-validation setting using the hyperparameters passed to this method.
 	//! the output scores from all validations sets are then concatenated. together with the true labels, these

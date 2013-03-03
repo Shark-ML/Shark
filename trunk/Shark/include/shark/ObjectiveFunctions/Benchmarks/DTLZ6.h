@@ -35,127 +35,107 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ6_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ6_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
-#include <shark/Core/Traits/MultiObjectiveFunctionTraits.h>
-
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
-#include <shark/Rng/GlobalRng.h>
-
-#include <boost/math/special_functions.hpp>
 
 namespace shark {
-	/**
-	* \brief Implements the benchmark function DTLZ6.
-	*
-	* See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.18.7531&rep=rep1&type=pdf
-	* The benchmark function exposes the following features:
-	*	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
-	*	- Highly multi-modal.
-	*/
-	struct DTLZ6 : public AbstractMultiObjectiveFunction< VectorSpace<double> >,
-		public TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, DTLZ6 > {
-			typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-			typedef TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, DTLZ6 > meta;
+/**
+* \brief Implements the benchmark function DTLZ6.
+*
+* See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.18.7531&rep=rep1&type=pdf
+* The benchmark function exposes the following features:
+*	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
+*	- Highly multi-modal.
+*/
+struct DTLZ6 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+{
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	
+	DTLZ6(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= IS_CONSTRAINED_FEATURE;
+		m_features |= HAS_CONSTRAINT_HANDLER;
+		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+		m_name="DTLZ6";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_handler.dimensions();
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-			typedef super::ResultType ResultType;
-			typedef super::SearchPointType SearchPointType;
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_handler.setBounds(
+			SearchPointType(numberOfVariables,0),
+			SearchPointType(numberOfVariables,1)
+		);
+	}
+	
+	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
+		return m_handler;
+	}
 
+	ResultType eval( const SearchPointType & x ) const {
+		m_evaluationCounter++;
 
+		ResultType value( noObjectives() );
 
-			DTLZ6() : super( 2 ) {
-				m_features |= CAN_PROPOSE_STARTING_POINT;
-				m_features |= IS_CONSTRAINED_FEATURE;
-				m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
-				m_name = "DTLZ6";
-			}
+		std::vector<double> phi(noObjectives());
 
-			void init() {
-			}
+		int k = numberOfVariables() - noObjectives() + 1 ;
+		double g = 0.0 ;
 
-			ResultType eval( const SearchPointType & x ) const {
-				m_evaluationCounter++;
+		for (unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++)
+			g += std::pow(x(i-1), 0.1);
 
-				ResultType value( noObjectives() );
+		double t = M_PI  / (4 * (1 + g));
 
-				int    k ;
-				double g ;
+		phi[0] = x(0) * M_PI / 2;
+		for (unsigned int i = 2; i <= noObjectives() - 1; i++)
+			phi[i-1] = t * (1 + 2 * g * x(i-1) );
 
-				std::vector<double> phi(noObjectives());
+		for (unsigned int i = 1; i <= noObjectives(); i++)
+		{
+			double f = (1 + g);
 
-				k = numberOfVariables() - noObjectives() + 1 ;
-				g = 0.0 ;
+			for (int j = noObjectives() - i; j >= 1; j--)
+				f *= std::cos(phi[j-1]);
 
-				for (unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++)
-					g += std::pow(x(i-1), 0.1);
+			if (i > 1)
+				f *= std::sin(phi[(noObjectives() - i + 1) - 1]);
 
-				double t = M_PI  / (4 * (1 + g));
-
-				phi[0] = x(0) * M_PI / 2;
-				for (unsigned int i = 2; i <= noObjectives() - 1; i++)
-					phi[i-1] = t * (1 + 2 * g * x(i-1) );
-
-				for (unsigned int i = 1; i <= noObjectives(); i++)
-				{
-					double f = (1 + g);
-
-					for (int j = noObjectives() - i; j >= 1; j--)
-						f *= ::cos(phi[j-1]);
-
-					if (i > 1)
-						f *= ::sin(phi[(noObjectives() - i + 1) - 1]);
-
-					value[i-1] = f ;
-				}
-
-				return( value );
-			}
-
-			void proposeStartingPoint( SearchPointType & x ) const {
-				meta::proposeStartingPoint( x, m_numberOfVariables );
-			}
-
-			bool isFeasible( const SearchPointType & v ) const {
-				return( meta::isFeasible( v ) );
-			}
-
-			void closestFeasible( SearchPointType & v ) const {
-				meta::closestFeasible( v );
-			}
-	};
-
-	/**
-	 * \brief Specializes ObjectiveFunctionTraits for DTLZ6.
-	 */
-	template<> struct ObjectiveFunctionTraits<DTLZ6> {
-
-		static DTLZ6::SearchPointType lowerBounds( unsigned int n ) {
-			return( DTLZ6::SearchPointType( n, 0. ) );
+			value[i-1] = f ;
 		}
 
-		static DTLZ6::SearchPointType upperBounds( unsigned int n ) {
-			return( DTLZ6::SearchPointType( n, 1. ) );
-		}
+		return( value );
+	}
 
-	};
+private:
+	BoxConstraintHandler<SearchPointType> m_handler;
+};
 
-	/**
-	 * \brief Specializes MultiObjectiveFunctionTraits for DTLZ6.
-	 */
-	template<> struct MultiObjectiveFunctionTraits<DTLZ6> {
+//~ /**
+ //~ * \brief Specializes MultiObjectiveFunctionTraits for DTLZ6.
+ //~ */
+//~ template<> struct MultiObjectiveFunctionTraits<DTLZ6> {
 
-		/**
-		* \brief Models the reference Pareto-front type.
-		*/
-		typedef std::vector< DTLZ6::ResultType > ParetoFrontType;
+	//~ /**
+	//~ * \brief Models the reference Pareto-front type.
+	//~ */
+	//~ typedef std::vector< DTLZ6::ResultType > ParetoFrontType;
 
-		/**
-		* \brief Models the reference Pareto-set type.
-		*/
-		typedef std::vector< DTLZ6::SearchPointType > ParetoSetType;
+	//~ /**
+	//~ * \brief Models the reference Pareto-set type.
+	//~ */
+	//~ typedef std::vector< DTLZ6::SearchPointType > ParetoSetType;
 
-	};
+//~ };
 
 	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ6, shark::moo::RealValuedObjectiveFunctionFactory );
 }

@@ -34,29 +34,19 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_MUTATION_BITFLIP_MUTATION_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_MUTATION_BITFLIP_MUTATION_H
 
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
 #include <shark/Rng/GlobalRng.h>
-
-#include <boost/serialization/serialization.hpp>
-
-#include <vector>
 
 namespace shark {
 
-    /**
-     * \brief Bitflip mutation operator.
-     */
-    struct BitflipMutator {
-
-	/**
-	 * \brief Typedef for this type.
-	 */
-	typedef BitflipMutator this_type;
+/**
+ * \brief Bitflip mutation operator.
+ */
+struct BitflipMutator {
 
 	/**
 	 * \brief Default c'tor.
 	 */
-    BitflipMutator( double mutationStrength ) : m_mutationStrength( mutationStrength ) {}
+	BitflipMutator(double mutationStrength) : m_mutationStrength(mutationStrength) {}
 
 	/**
 	 * \brief Initializes the operator for the supplied fitness function.
@@ -64,8 +54,8 @@ namespace shark {
 	 * \param [in] f Instance of the objective function to initialize the operator for.
 	 */
 	template<typename Function>
-	void init( const Function & f ) {
-	    m_mutationStrength = 1./f.numberOfVariables();
+	void init(const Function &f) {
+		m_mutationStrength = 1./f.numberOfVariables();
 	}
 
 	/**
@@ -75,13 +65,13 @@ namespace shark {
 	 * \param [in,out] ind Individual to be mutated.
 	 */
 	template<typename IndividualType>
-	void operator()( IndividualType & ind ) {
+	void operator()(IndividualType &ind) {
 
-	    for( unsigned int i = 0; i < (*ind).size(); i++ ) {
-			if( Rng::coinToss( m_mutationStrength ) ) {
+		for (unsigned int i = 0; i < (*ind).size(); i++) {
+			if (Rng::coinToss(m_mutationStrength)) {
 				(*ind)[ i ] = !(*ind)[ i ];
 			}
-	    }
+		}
 	}
 
 	/**
@@ -91,12 +81,12 @@ namespace shark {
 	 * \param [in] version Version information (optional and not used here).
 	 */
 	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {
-	    archive & m_mutationStrength;
+	void serialize(Archive &archive, const unsigned int version) {
+		archive &m_mutationStrength;
 	}
 
 	double m_mutationStrength;
-    };
+};
 }
 
 #endif

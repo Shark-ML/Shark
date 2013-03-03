@@ -35,99 +35,83 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ1_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ1_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
-#include <shark/Rng/GlobalRng.h>
 
 namespace shark {
 
-	/**
-	* \brief Implements the benchmark function DTLZ1.
-	*
-	* See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.18.7531&rep=rep1&type=pdf
-	* The benchmark function exposes the following features:
-	*	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
-	*	- Highly multi-modal.
-	*/
-	struct DTLZ1 : 
-		public AbstractMultiObjectiveFunction< VectorSpace<double> >,
-		public TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, DTLZ1 > {
-			typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-			typedef TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, DTLZ1 > meta;
+/**
+* \brief Implements the benchmark function DTLZ1.
+*
+* See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.18.7531&rep=rep1&type=pdf
+* The benchmark function exposes the following features:
+*	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
+*	- Highly multi-modal.
+*/
+struct DTLZ1 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+{
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	
+	DTLZ1(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= IS_CONSTRAINED_FEATURE;
+		m_features |= HAS_CONSTRAINT_HANDLER;
+		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+		m_name="DTLZ1";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_handler.dimensions();
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-			typedef super::ResultType ResultType;
-			typedef super::SearchPointType SearchPointType;
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_handler.setBounds(
+			SearchPointType(numberOfVariables,0),
+			SearchPointType(numberOfVariables,1)
+		);
+	}
+	
+	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
+		return m_handler;
+	}
 
-			DTLZ1() : super( 2 ) {
-				m_features |= CAN_PROPOSE_STARTING_POINT;
-				m_features |= IS_CONSTRAINED_FEATURE;
-				m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
-				m_name="DTLZ1";
-			}
+	ResultType eval( const SearchPointType & x ) const {
+		m_evaluationCounter++;
 
-			void init() {
-			}
+		ResultType value( noObjectives() );
 
-			ResultType eval( const SearchPointType & x ) const {
-				m_evaluationCounter++;
+		int k = numberOfVariables() - noObjectives() + 1 ;
+		// TODO: Check k
+		double g = 0.0;
 
-				ResultType value( noObjectives() );
+		for( unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++ )
+		    g += sqr( x( i-1 ) - 0.5 ) - std::cos( 20 * M_PI * ( x( i-1 ) - 0.5) );
 
-				int k = numberOfVariables() - noObjectives() + 1 ;
-				// TODO: Check k
-				double g = 0.0;
+		g = 100 * (k + g);
 
-				for( unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++ )
-				    g += sqr( x( i-1 ) - 0.5 ) - std::cos( 20 * M_PI * ( x( i-1 ) - 0.5) );
+		for (unsigned int i = 1; i <= noObjectives(); i++) {
+			double f = 0.5 * (1 + g);
+			for( unsigned int j = noObjectives() - i; j >= 1; j--)
+				f *= x( j-1 );
 
-				g = 100 * (k + g);
+			if (i > 1)
+				f *= 1 - x( (noObjectives() - i + 1) - 1);
 
-				for (unsigned int i = 1; i <= noObjectives(); i++) {
-					double f = 0.5 * (1 + g);
-					for( unsigned int j = noObjectives() - i; j >= 1; j--)
-						f *= x( j-1 );
-
-					if (i > 1)
-						f *= 1 - x( (noObjectives() - i + 1) - 1);
-
-					value[i-1] = f;
-				}
-
-				return value;
-			}
-
-			void proposeStartingPoint( SearchPointType & x ) const {
-				meta::proposeStartingPoint( x, m_numberOfVariables );
-			}
-
-			bool isFeasible( const SearchPointType & v ) const {
-				return( meta::isFeasible( v ) );
-			}
-
-			void closestFeasible( SearchPointType & v ) const {
-				meta::closestFeasible( v );
-			}
-	};
-
-	/**
-	* \brief Specializes objective function traits for the function DTLZ1.
-	*/
-	template<> 
-	struct ObjectiveFunctionTraits<DTLZ1> {
-
-		static DTLZ1::SearchPointType lowerBounds( unsigned int n ) {
-                        return DTLZ1::SearchPointType( n, 0. );
+			value[i-1] = f;
 		}
 
-		static DTLZ1::SearchPointType upperBounds( unsigned int n ) {
-			return DTLZ1::SearchPointType( n, 1. );
-		}
+		return value;
+	}
+private:
+	BoxConstraintHandler<SearchPointType> m_handler;
+};
 
-	};
-
-	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ1, shark::moo::RealValuedObjectiveFunctionFactory );
+ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ1, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 
 #endif

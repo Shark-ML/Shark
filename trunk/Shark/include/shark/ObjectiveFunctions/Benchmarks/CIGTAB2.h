@@ -26,9 +26,8 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_CIGTAB2_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_CIGTAB2_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 
 #include <shark/LinAlg/rotations.h>
@@ -36,69 +35,83 @@
 #include <vector>
 
 namespace shark {
-	/*! \brief Multi-objective optimization benchmark function CIGTAB 2.
-	*
-	*  The function is described in
-	*
-	*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
-	*  Covariance Matrix Adaptation for Multi-objective Optimization. 
-	*  Evolutionary Computation 15(1), pp. 1-28, 2007 
-	*/
-	struct CIGTAB2 : public AbstractMultiObjectiveFunction< VectorSpace<double> > {
+/*! \brief Multi-objective optimization benchmark function CIGTAB 2.
+*
+*  The function is described in
+*
+*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
+*  Covariance Matrix Adaptation for Multi-objective Optimization. 
+*  Evolutionary Computation 15(1), pp. 1-28, 2007 
+*/
+struct CIGTAB2 : public AbstractMultiObjectiveFunction< VectorSpace<double> > {
 
-		typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
 
-		typedef super::ResultType ResultType;
-		typedef super::SearchPointType SearchPointType;
+	typedef super::ResultType ResultType;
+	typedef super::SearchPointType SearchPointType;
 
-		
+	CIGTAB2(std::size_t numberOfVariables = 5) : super( 2 ), m_a( 1E-6 ) {
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_name = "CIGTAB2";
+		m_numberOfVariables = numberOfVariables;
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_numberOfVariables;
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
+	
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_numberOfVariables = numberOfVariables;
+	}
 
-		CIGTAB2() : super( 2 ), m_a( 1E-6 ) {
-			m_features |= CAN_PROPOSE_STARTING_POINT;
-			m_name = "CIGTAB2";
+	void configure( const PropertyTree & node ) {
+		m_a = node.get( "a", 1E6);
+	}
+
+	void init() {
+		m_rotationMatrixX = randomRotationMatrix(m_numberOfVariables);
+		m_rotationMatrixY = randomRotationMatrix(m_numberOfVariables);
+	}
+
+	ResultType eval( const SearchPointType & x ) const {
+		m_evaluationCounter++;
+
+		ResultType value( 2 );
+
+		SearchPointType y = blas::prod( m_rotationMatrixX, x );
+		SearchPointType z = blas::prod( m_rotationMatrixY, x );
+		double result_1 = y(0) * y(0) + m_a * m_a * y(numberOfVariables()-1) * y(numberOfVariables()-1);
+		double result_2 = z(0) * z(0) + m_a * m_a * z(numberOfVariables()-1) * z(numberOfVariables()-1);
+
+		for (unsigned i = 1; i < numberOfVariables() - 1; i++) {
+			result_1 += m_a * y( i ) * y( i );
+			result_2 += m_a * (z( i ) - 2) * (z( i ) - 2);
 		}
 
-		void configure( const PropertyTree & node ) {
-			m_a = node.get( "a", 1E6);
-		}
+		value[0] = result_1 / (m_a * m_a * numberOfVariables());
+		value[1] = result_2 / (m_a * m_a * numberOfVariables());
 
-		void init() {
-			m_rotationMatrixX = randomRotationMatrix(m_numberOfVariables);
-			m_rotationMatrixY = randomRotationMatrix(m_numberOfVariables);
-		}
+		return value;
+	}
 
-		ResultType eval( const SearchPointType & x ) const {
-			m_evaluationCounter++;
+	void proposeStartingPoint( SearchPointType & x ) const {
+		x.resize( m_numberOfVariables );
+		for( unsigned int i = 0; i < m_numberOfVariables; i++ )
+			x( i ) = Rng::gauss( -10., 10. );
+	}
+private:
+	double m_a;
+	std::size_t m_numberOfVariables;
+	RealMatrix m_rotationMatrixX;
+	RealMatrix m_rotationMatrixY;
+};
 
-			ResultType value( 2 );
-
-			SearchPointType y = blas::prod( m_rotationMatrixX, x );
-			SearchPointType z = blas::prod( m_rotationMatrixY, x );
-			double result_1 = y(0) * y(0) + m_a * m_a * y(numberOfVariables()-1) * y(numberOfVariables()-1);
-			double result_2 = z(0) * z(0) + m_a * m_a * z(numberOfVariables()-1) * z(numberOfVariables()-1);
-
-			for (unsigned i = 1; i < numberOfVariables() - 1; i++) {
-				result_1 += m_a * y( i ) * y( i );
-				result_2 += m_a * (z( i ) - 2) * (z( i ) - 2);
-			}
-
-			value[0] = result_1 / (m_a * m_a * numberOfVariables());
-			value[1] = result_2 / (m_a * m_a * numberOfVariables());
-
-			return value;
-		}
-
-		void proposeStartingPoint( SearchPointType & x ) const {
-			x.resize( m_numberOfVariables );
-			for( unsigned int i = 0; i < m_numberOfVariables; i++ )
-				x( i ) = Rng::gauss( -10., 10. );
-		}
-	private:
-		double m_a;
-		RealMatrix m_rotationMatrixX;
-		RealMatrix m_rotationMatrixY;
-	};
-
-	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( CIGTAB2, shark::moo::RealValuedObjectiveFunctionFactory );
+ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( CIGTAB2, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

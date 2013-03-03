@@ -279,6 +279,10 @@ public:
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint = mep_model->parameterVector();
 	}
+	
+	std::size_t numberOfVariables()const{
+		return mep_model->numberOfParameters();
+	}
 
 	double eval(RealVector const& input) const {
 		size_t dataSize = m_dataset.numberOfElements();
@@ -339,7 +343,7 @@ SparseFFNetError::SparseFFNetError(FFNet<HiddenNeuron, OutputNeuron>* model, Abs
 	m_features |= HAS_FIRST_DERIVATIVE;
 	m_features |= CAN_PROPOSE_STARTING_POINT;
 
-	m_wrapper.reset(new detail::SparseFFNetErrorWrapper<HiddenNeuron, OutputNeuron>(model,loss,rho,beta));
+	mp_wrapper.reset(new detail::SparseFFNetErrorWrapper<HiddenNeuron, OutputNeuron>(model,loss,rho,beta));
 }
 }
 #endif

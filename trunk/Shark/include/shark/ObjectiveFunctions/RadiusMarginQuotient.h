@@ -108,6 +108,10 @@ public:
 	/// \brief Make labeled data known to the radius margin objective function.
 	void setDataset(DatasetType const& dataset)
 	{ m_dataset = dataset; }
+	
+	std::size_t numberOfVariables()const{
+		return mep_kernel->numberOfParameters();
+	}
 
 	/// \brief Evaluate the radius margin quotient.
 	///

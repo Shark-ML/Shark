@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( MultiObjective_Benchmark_Functions ) {
 		it != shark::moo::RealValuedObjectiveFunctionFactory::instance().end();
 		++it
 		) {
-			BOOST_MESSAGE( "Considering function: " << it->first );
+			std::cout<< "Considering function: " << it->first <<std::endl;
 
 			function_type * function = NULL;
 			BOOST_CHECK( it->second != NULL );
@@ -59,12 +59,12 @@ BOOST_AUTO_TEST_CASE( MultiObjective_Benchmark_Functions ) {
 				BOOST_CHECK( function->isFeasible( sp ) );
 				BOOST_CHECK( sp.size() == function->numberOfVariables() );
 
-				function_type::SearchPointType sp2( sp );
-				if( function->features() & function_type::CAN_PROVIDE_CLOSEST_FEASIBLE ) {
-					BOOST_CHECK_NO_THROW( function->closestFeasible( sp2 ) );
-					//BOOST_CHECK( sp == sp2 );
-				} else
-					BOOST_CHECK_THROW( function->closestFeasible( sp2 ), shark::Exception );
+				//~ function_type::SearchPointType sp2( sp );
+				//~ if( function->features() & function_type::CAN_PROVIDE_CLOSEST_FEASIBLE ) {
+					//~ BOOST_CHECK_NO_THROW( function->closestFeasible( sp2 ) );
+					//~ //BOOST_CHECK( sp == sp2 );
+				//~ } else
+					//~ BOOST_CHECK_THROW( function->closestFeasible( sp2 ), shark::Exception );
 
 				if( function->features() & function_type::HAS_VALUE ) {
 					BOOST_CHECK_NO_THROW( function->eval( sp ) );
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( SingleObjective_Benchmark_Functions ) {
 		it != shark::soo::RealValuedObjectiveFunctionFactory::instance().end();
 		++it
 		) {
-			BOOST_MESSAGE( "Considering function: " << it->first );
+			std::cout<< "Considering function: " << it->first <<std::endl;
 
 			function_type * function = NULL;
 			BOOST_CHECK( it->second != NULL );
@@ -109,7 +109,11 @@ BOOST_AUTO_TEST_CASE( SingleObjective_Benchmark_Functions ) {
 
 			BOOST_CHECK( function != NULL );
 			BOOST_CHECK( function->name() == it->first );
-			BOOST_CHECK_NO_THROW( function->setNumberOfVariables( 10 ) );
+			if(function->hasScalableDimensionality()){
+				BOOST_CHECK_NO_THROW( function->setNumberOfVariables( 10 ) );
+			}else{
+				BOOST_CHECK_THROW( function->setNumberOfVariables( 10 ), shark::Exception );
+			}
 			BOOST_CHECK_NO_THROW( function->init() );
 
 			function_type::SearchPointType sp;
@@ -120,12 +124,12 @@ BOOST_AUTO_TEST_CASE( SingleObjective_Benchmark_Functions ) {
 				BOOST_CHECK( function->isFeasible( sp ) );
 				BOOST_CHECK( sp.size() == function->numberOfVariables() );
 
-				function_type::SearchPointType sp2( sp );
-				if( function->features() & function_type::CAN_PROVIDE_CLOSEST_FEASIBLE ) {
-					BOOST_CHECK_NO_THROW( function->closestFeasible( sp2 ) );
-					//BOOST_CHECK( sp == sp2 );
-				} else
-					BOOST_CHECK_THROW( function->closestFeasible( sp2 ), shark::Exception );
+				//~ function_type::SearchPointType sp2( sp );
+				//~ if( function->features() & function_type::CAN_PROVIDE_CLOSEST_FEASIBLE ) {
+					//~ BOOST_CHECK_NO_THROW( function->closestFeasible( sp2 ) );
+					//~ //BOOST_CHECK( sp == sp2 );
+				//~ } else
+					//~ BOOST_CHECK_THROW( function->closestFeasible( sp2 ), shark::Exception );
 
 				if( function->features() & function_type::HAS_VALUE ) {
 					BOOST_CHECK_NO_THROW( function->eval( sp ) );

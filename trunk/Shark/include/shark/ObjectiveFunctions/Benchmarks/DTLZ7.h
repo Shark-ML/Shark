@@ -35,98 +35,81 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ7_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ7_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
-#include <shark/Rng/GlobalRng.h>
 
 namespace shark {
-	/**
-	* \brief Implements the benchmark function DTLZ7.
-	*
-	* See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.18.7531&rep=rep1&type=pdf
-	* The benchmark function exposes the following features:
-	*	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
-	*	- Disconnected Pareto front.
-	*/
-	struct DTLZ7 : public AbstractMultiObjectiveFunction< VectorSpace<double> >,
-		public TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, DTLZ7 > {
-			typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-			typedef TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, DTLZ7 > meta;
+/**
+* \brief Implements the benchmark function DTLZ7.
+*
+* See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.18.7531&rep=rep1&type=pdf
+* The benchmark function exposes the following features:
+*	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
+*	- Disconnected Pareto front.
+*/
+struct DTLZ7 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+{
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	
+	DTLZ7(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= IS_CONSTRAINED_FEATURE;
+		m_features |= HAS_CONSTRAINT_HANDLER;
+		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+		m_name="DTLZ7";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_handler.dimensions();
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-			typedef super::ResultType ResultType;
-			typedef super::SearchPointType SearchPointType;
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_handler.setBounds(
+			SearchPointType(numberOfVariables,0),
+			SearchPointType(numberOfVariables,1)
+		);
+	}
+	
+	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
+		return m_handler;
+	}
 
+	ResultType eval( const SearchPointType & x ) const {
+		m_evaluationCounter++;
 
+		RealVector value( noObjectives() );
 
-			DTLZ7() : super( 2 ) {
-				m_features |= CAN_PROPOSE_STARTING_POINT;
-				m_features |= IS_CONSTRAINED_FEATURE;
-				m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
-				m_name = "DTLZ7";
-			}
+		int k = numberOfVariables() - noObjectives() + 1 ;
+		double g = 0.0 ;
+		for (unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++)
+			g += x(i-1);
 
-			void init() {
-			}
+		g = 1 + 9 * g / k;
 
-			ResultType eval( const SearchPointType & x ) const {
-				m_evaluationCounter++;
+		for (unsigned int i = 1; i <= noObjectives() - 1; i++)
+			value[i-1] = x(i-1);
 
-				RealVector value( noObjectives() );
+		double h = 0.0 ;
+		for (unsigned int j = 1; j <= noObjectives() - 1; j++)
+			h += x(j-1) / (1 + g) * ( 1 + std::sin( 3 * M_PI * x(j-1) ) );
 
-				int    k;
-				double g;
-				double h;
+		h = noObjectives() - h ;
 
-				k = numberOfVariables() - noObjectives() + 1 ;
-				g = 0.0 ;
-				for (unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++)
-					g += x(i-1);
+		value[noObjectives()-1] = (1 + g) * h;
 
-				g = 1 + 9 * g / k;
+		return value;
+	}
 
-				for (unsigned int i = 1; i <= noObjectives() - 1; i++)
-					value[i-1] = x(i-1);
-
-				h = 0.0 ;
-				for (unsigned int j = 1; j <= noObjectives() - 1; j++)
-					h += x(j-1) / (1 + g) * ( 1 + ::sin( 3 * M_PI * x(j-1) ) );
-
-				h = noObjectives() - h ;
-
-				value[noObjectives()-1] = (1 + g) * h;
-
-				return value;
-			}
-
-			void proposeStartingPoint( SearchPointType & x ) const {
-				meta::proposeStartingPoint( x, m_numberOfVariables );
-			}
-
-			bool isFeasible( const SearchPointType & v ) const {
-				return( meta::isFeasible( v ) );
-			}
-
-			void closestFeasible( SearchPointType & v ) const {
-				meta::closestFeasible( v );
-			}
-	};
-
-	/**
-	 * \brief Specializes MultiObjectiveFunctionTraits for DTLZ7.
-	 */
-	template<> struct ObjectiveFunctionTraits<DTLZ7> {
-
-		static DTLZ7::SearchPointType lowerBounds( unsigned int n ) {
-			return DTLZ7::SearchPointType( n, 0. );
-		}
-
-		static DTLZ7::SearchPointType upperBounds( unsigned int n ) {
-			return DTLZ7::SearchPointType( n, 1. );
-		}
-
-	};
+private:
+	BoxConstraintHandler<SearchPointType> m_handler;
+};
 
 	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ7, shark::moo::RealValuedObjectiveFunctionFactory );
 }

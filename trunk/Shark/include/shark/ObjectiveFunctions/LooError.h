@@ -136,6 +136,10 @@ public:
 	void setDataset(DatasetType const& dataset) {
 		m_dataset = dataset;
 	}
+	
+	std::size_t numberOfVariables()const{
+		return mep_meta->numberOfParameters();
+	}
 
 	/// Evaluate the leave-one-out error:
 	/// train sub-models, evaluate objective,

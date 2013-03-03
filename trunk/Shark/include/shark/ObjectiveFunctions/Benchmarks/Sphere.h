@@ -35,40 +35,49 @@
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
-    /**
-     * \brief Convex quadratic benchmark function.
-     */
-    struct Sphere : public AbstractObjectiveFunction< VectorSpace<double>,double > {
+/**
+ * \brief Convex quadratic benchmark function.
+ */
+struct Sphere : public AbstractObjectiveFunction< VectorSpace<double>,double > {
 	typedef AbstractObjectiveFunction<VectorSpace<double>,double> super;
 
-	Sphere(unsigned int numberOfVariables = 5) {
-	    m_features |= CAN_PROPOSE_STARTING_POINT;
-	    m_name = "Sphere";
+	Sphere(unsigned int numberOfVariables = 5):m_numberOfVariables(numberOfVariables) {
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_name = "Sphere";
+	}
+	std::size_t numberOfVariables()const{
+		return m_numberOfVariables;
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
 	}
 
-	void configure( const PropertyTree & node ) {
-	    m_numberOfVariables = node.get( "numberOfVariables", 5l );
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_numberOfVariables = numberOfVariables;
 	}
 
-	void proposeStartingPoint( super::SearchPointType & x ) const {
-	    x.resize( m_numberOfVariables );
-
-	    for( unsigned int i = 0; i < x.size(); i++ ) {
-		x( i ) = Rng::uni( 0, 1 );
-	    }
+	void configure(const PropertyTree &node) {
+		m_numberOfVariables = node.get("numberOfVariables", 5l);
 	}
 
-	double eval( const super::SearchPointType & p ) const {
-	    m_evaluationCounter++;
-	    double sum = 0;
-	    for( unsigned int i = 0; i < p.size(); i++ )
-		sum += sqr( p( i ) );
+	void proposeStartingPoint(super::SearchPointType &x) const {
+		x.resize(numberOfVariables());
 
-	    return sum;
+		for (unsigned int i = 0; i < x.size(); i++) {
+			x(i) = Rng::uni(0, 1);
+		}
 	}
-    };
 
-    ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( Sphere, shark::soo::RealValuedObjectiveFunctionFactory );
+	double eval(const super::SearchPointType &p) const {
+		m_evaluationCounter++;
+		return normSqr(p);
+	}
+private:
+	std::size_t m_numberOfVariables;
+};
+
+ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION(Sphere, shark::soo::RealValuedObjectiveFunctionFactory);
 }
 
 #endif

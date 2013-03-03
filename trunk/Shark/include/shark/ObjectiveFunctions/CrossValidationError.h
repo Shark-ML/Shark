@@ -111,8 +111,10 @@ public:
 	}
 
 	/// configure the cross validation
-	void configure( const PropertyTree & node ) {
-		//m_folds = node.get("folds", 1);
+	void configure( const PropertyTree & node ) {}
+		
+	std::size_t numberOfVariables()const{
+		return mep_meta->numberOfParameters();
 	}
 
 	/// Evaluate the cross-validation error:

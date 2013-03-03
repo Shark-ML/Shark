@@ -33,17 +33,6 @@
  */
 #include <shark/Core/Shark.h>
 
-#define BOOST_TEST_MODULE ObjectiveFunctions_Benchmarks
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
-#include <iostream>
-
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/progress.hpp>
-#include <boost/serialization/vector.hpp>
-
 #include <shark/Algorithms/DirectSearch/Experiments/Experiment.h>
 #include <shark/Algorithms/DirectSearch/InterruptibleAlgorithmRunner.h>
 #include <shark/Algorithms/DirectSearch/Experiments/FrontStore.h>
@@ -54,67 +43,17 @@
 #include <shark/Algorithms/DirectSearch/SMS-EMOA.h>
 #include <shark/Algorithms/DirectSearch/RealCodedNSGAII.h>
 
-
 #include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
 #include <shark/Algorithms/DirectSearch/HypervolumeApproximator.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 
-#include <shark/Core/Chart.h>
-#include <shark/Core/Renderers/HighchartRenderer.h>
-
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
 
-#include <shark/Statistics/Statistics.h>
-
-#include <boost/bind.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
-#include <boost/optional.hpp>
-#include <boost/progress.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
-#include <fstream>
-
-namespace shark {
-
-	template<
-		typename IndicatorType,
-		typename FunctionType,
-		typename ResultType,
-		typename MetaDataType
-	> struct PerformanceIndicatorStore {
-	public:
-		typedef IndicatorType indicator_type;
-		typedef FunctionType function_type;
-		typedef MultiObjectiveFunctionTraits< function_type > function_traits;
-		typedef typename function_traits::ParetoFrontType front_type;
-		typedef ResultType result_type;
-		typedef MetaDataType result_meta_data_type;
-
-		indicator_type m_indicator;
-		front_type m_referenceFront;
-
-		//std::map< 
-
-		PerformanceIndicatorStore( 
-			std::size_t searchSpaceDimension, 
-			std::size_t objectiveSpaceDimension ) : m_referenceFront( function_traits::referenceFront( 100, searchSpaceDimension, objectiveSpaceDimension ) ) {
-		}
-
-		void onNewResult ( 
-			SHARK_ARGUMENT( const result_type & front, "Actual result announced to the outside world" ),
-			SHARK_ARGUMENT( const result_meta_data_type & meta, "Meta data describing the results" )
-			) {
-				static shark::IdentityFitnessExtractor ife;
-				std::cout << "Indicator: " << m_indicator( front, m_referenceFront, ife ) << std::endl;
-		}
-	};
-
-}
+#define BOOST_TEST_MODULE ObjectiveFunctions_Benchmarks
+#include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 
 BOOST_AUTO_TEST_CASE( MultiObjective_DirectSearch_Algorithms ) {
-
 	shark::Shark::init( 
 		boost::unit_test::framework::master_test_suite().argc,
 		boost::unit_test::framework::master_test_suite().argv 
@@ -124,31 +63,30 @@ BOOST_AUTO_TEST_CASE( MultiObjective_DirectSearch_Algorithms ) {
 	shark::moo::Experiment::Options options;
 	options.addDefaultOptions();
 	options.parse( shark::Shark::argc(), shark::Shark::argv() );
+	
+	typedef shark::moo::RealValuedMultiObjectiveOptimizerFactory OptimizerFactory;
+	typedef OptimizerFactory::class_type OptimizerType;
+	typedef OptimizerFactory::const_iterator FactoryIterator;
 
-	shark::moo::RealValuedMultiObjectiveOptimizerFactory::instance().print( std::cout );
+	OptimizerFactory::instance().print( std::cout );
 
-	typedef shark::moo::RealValuedMultiObjectiveOptimizerFactory::class_type optimizer_type;
+	
 
 	shark::moo::RealValuedMultiObjectiveOptimizerFactory::const_iterator it;
-	for( it = shark::moo::RealValuedMultiObjectiveOptimizerFactory::instance().begin();
-		it != shark::moo::RealValuedMultiObjectiveOptimizerFactory::instance().end();
-		++it 
-	) {
+	for(FactoryIterator it = OptimizerFactory::instance().begin();it != OptimizerFactory::instance().end();++it ) {
 		BOOST_TEST_MESSAGE( "Considering function: " << it->first );
 		BOOST_CHECK( it->second != NULL );
-		boost::shared_ptr< optimizer_type > optimizer( it->second->create() );
+		boost::shared_ptr< OptimizerType > optimizer( it->second->create() );
 
 		BOOST_CHECK( optimizer );
 
 		typedef shark::moo::InterruptibleAlgorithmRunner<
-			optimizer_type,
-			shark::ELLI1
+			OptimizerType,shark::ELLI1
 		> runner_type;
+		
 		runner_type runner (
 			optimizer,
-			boost::shared_ptr<
-				shark::ELLI1
-			>( new shark::ELLI1() )
+			boost::shared_ptr<shark::ELLI1>( new shark::ELLI1() )
 		);
 
 		typedef shark::FrontStore< 

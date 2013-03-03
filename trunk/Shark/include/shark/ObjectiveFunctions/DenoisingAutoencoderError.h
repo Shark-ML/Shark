@@ -104,6 +104,10 @@ public:
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint=mep_model->parameterVector();
 	}
+	
+	std::size_t numberOfVariables()const{
+		return mep_model->numberOfParameters();
+	}
 
 	double eval(RealVector const& input) const{
 		this->m_evaluationCounter++;

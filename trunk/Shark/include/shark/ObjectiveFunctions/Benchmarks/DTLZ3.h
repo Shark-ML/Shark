@@ -35,130 +35,110 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ3_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ3_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
-#include <shark/Core/Traits/MultiObjectiveFunctionTraits.h>
-
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
-#include <shark/Rng/GlobalRng.h>
-
-#include <boost/math/special_functions.hpp>
-
 
 namespace shark {
-	/**
-	* \brief Implements the benchmark function DTLZ3.
-	*
-	* See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.18.7531&rep=rep1&type=pdf
-	* The benchmark function exposes the following features:
-	*	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
-	*/
-	struct DTLZ3 : public AbstractMultiObjectiveFunction< VectorSpace<double> >,
-		public TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, DTLZ3 > {
+/**
+* \brief Implements the benchmark function DTLZ3.
+*
+* See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.18.7531&rep=rep1&type=pdf
+* The benchmark function exposes the following features:
+*	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
+*/
+struct DTLZ3 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+{
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	
+	DTLZ3(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= IS_CONSTRAINED_FEATURE;
+		m_features |= HAS_CONSTRAINT_HANDLER;
+		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+		m_name="DTLZ3";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_handler.dimensions();
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-			typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-			typedef TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, DTLZ3 > meta;
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_handler.setBounds(
+			SearchPointType(numberOfVariables,0),
+			SearchPointType(numberOfVariables,1)
+		);
+	}
+	
+	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
+		return m_handler;
+	}
 
-			typedef super::ResultType ResultType;
-			typedef super::SearchPointType SearchPointType;
+	ResultType eval( const SearchPointType & x ) const {
+		m_evaluationCounter++;
 
-			DTLZ3() : super( 2 ) {
-				m_features |= CAN_PROPOSE_STARTING_POINT;
-				m_features |= IS_CONSTRAINED_FEATURE;
-				m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
-				m_name="DTLZ3";
-			}
+		ResultType value( noObjectives() );
 
-			void init() {
-			}
+		int k = numberOfVariables() - noObjectives() + 1 ;
+		double g = 0.0 ;
 
-		ResultType eval( const SearchPointType & x ) const {
-			m_evaluationCounter++;
+		for( unsigned int i = numberOfVariables() - k; i < numberOfVariables(); i++ )
+			g += sqr( x( i ) - 0.5 ) - std::cos( 20. * M_PI * ( x(i) - 0.5 ) );
 
-			ResultType value( noObjectives() );
+		g = 100 * (k + g);
 
-			int    k ;
-			double g ;
+		 for( unsigned int i = 0; i < noObjectives(); i++ ) {
+		     double f = (1 + g);
+		     for( unsigned int j = 0; j < noObjectives() - (i + 1); j++)            
+			 f *= std::cos( x[j] * 0.5 * M_PI );                
+		     if (i != 0){
+			 unsigned int aux = noObjectives() - (i + 1);
+			 f *=std ::sin(x[aux] * 0.5 * M_PI);
+		     }
+		     value( i ) = f;
+		 }
 
-			k = numberOfVariables() - noObjectives() + 1 ;
-			g = 0.0 ;
+		return value;
+	}
+private:
+	BoxConstraintHandler<SearchPointType> m_handler;
+};
 
-			for( unsigned int i = numberOfVariables() - k; i < numberOfVariables(); i++ )
-				g += boost::math::pow<2>( x( i ) - 0.5 ) - ::cos( 20. * M_PI * ( x(i) - 0.5 ) );
 
-			g = 100 * (k + g);
+//~ /**
+ //~ * \brief Specializes MultiObjectiveFunctionTraits for DTLZ3.
+ //~ */
+//~ template<> struct MultiObjectiveFunctionTraits<DTLZ3> {
 
-			 for( unsigned int i = 0; i < noObjectives(); i++ ) {
-			     double f = (1 + g);
-			     for( unsigned int j = 0; j < noObjectives() - (i + 1); j++)            
-				 f *= ::cos( x[j] * 0.5 * M_PI );                
-			     if (i != 0){
-				 unsigned int aux = noObjectives() - (i + 1);
-				 f *= ::sin(x[aux] * 0.5 * M_PI);
-			     }
-			     value( i ) = f;
-			 }
+	//~ /**
+	//~ * \brief Models the reference Pareto-front type.
+	//~ */
+	//~ typedef std::vector< DTLZ3::ResultType > ParetoFrontType;
 
-			return value;
-		}
+	//~ /**
+	//~ * \brief Models the reference Pareto-set type.
+	//~ */
+	//~ typedef std::vector< DTLZ3::SearchPointType > ParetoSetType;
 
-		void proposeStartingPoint( SearchPointType & x ) const {
-			meta::proposeStartingPoint( x, m_numberOfVariables );
-		}
+	//~ static std::vector< DTLZ3::ResultType > referenceFront( std::size_t noPoints, std::size_t n, std::size_t m ) {
+		//~ if( m != 2 )
+			//~ throw( shark::Exception( "DTLZ3: No reference front for no. of objectives other than 2 available." ) );
+		//~ std::vector< DTLZ3::ResultType > result( noPoints, DTLZ3::ResultType( m ) );
+		//~ for( std::size_t i = 0; i < result.size(); i++ ) {
+			//~ result[ i ][ 0 ] = static_cast< double >( i ) / static_cast< double >( result.size() - 1 );
+			//~ result[ i ][ 1 ] = ::sqrt( 1 - boost::math::pow<2>( result[ i ][ 0 ] ) );
+		//~ }
 
-		bool isFeasible( const SearchPointType & v ) const {
-			return( meta::isFeasible( v ) );
-		}
+		//~ return( result );
+	//~ }
+//~ };
 
-		void closestFeasible( SearchPointType & v ) const {
-			meta::closestFeasible( v );
-		}
-	};
-
-	/**
-	 * \brief Specializes ObjectiveFunctionTraits for DTLZ3.
-	 */
-	template<> struct ObjectiveFunctionTraits<DTLZ3> {
-
-		static DTLZ3::SearchPointType lowerBounds( unsigned int n ) {
-			return( DTLZ3::SearchPointType( n, 0. ) );
-		}
-
-		static DTLZ3::SearchPointType upperBounds( unsigned int n ) {
-			return( DTLZ3::SearchPointType( n, 1. ) );
-		}
-
-	};
-
-	/**
-	 * \brief Specializes MultiObjectiveFunctionTraits for DTLZ3.
-	 */
-	template<> struct MultiObjectiveFunctionTraits<DTLZ3> {
-
-		/**
-		* \brief Models the reference Pareto-front type.
-		*/
-		typedef std::vector< DTLZ3::ResultType > ParetoFrontType;
-
-		/**
-		* \brief Models the reference Pareto-set type.
-		*/
-		typedef std::vector< DTLZ3::SearchPointType > ParetoSetType;
-
-		static std::vector< DTLZ3::ResultType > referenceFront( std::size_t noPoints, std::size_t n, std::size_t m ) {
-			if( m != 2 )
-				throw( shark::Exception( "DTLZ3: No reference front for no. of objectives other than 2 available." ) );
-			std::vector< DTLZ3::ResultType > result( noPoints, DTLZ3::ResultType( m ) );
-			for( std::size_t i = 0; i < result.size(); i++ ) {
-				result[ i ][ 0 ] = static_cast< double >( i ) / static_cast< double >( result.size() - 1 );
-				result[ i ][ 1 ] = ::sqrt( 1 - boost::math::pow<2>( result[ i ][ 0 ] ) );
-			}
-
-			return( result );
-		}
-	};
-
-	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ3, shark::moo::RealValuedObjectiveFunctionFactory );
+ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ3, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

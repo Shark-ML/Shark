@@ -34,88 +34,91 @@
 #ifndef SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_INITIALIZERS_COVARIANCEMATRIX_INITIALIZER_H
 #define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_INITIALIZERS_COVARIANCEMATRIX_INITIALIZER_H
 
-#include <boost/math/special_functions.hpp>
-
 namespace shark {
-    namespace cma {
+namespace cma {
+/**
+ *  \brief Initializer for chromosomes/individuals of the CMA-ES.
+ */
+struct Initializer {
+
 	/**
 	 *  \brief Initializer for chromosomes/individuals of the CMA-ES.
 	 */
-	struct Initializer {
-
-	    /**
-	     *  \brief Initializer for chromosomes/individuals of the CMA-ES.
-	     */
-	    template<typename Individual>
-	    void operator()( Individual & individual,
-			     unsigned int numberOfVariables,
-			     unsigned int lambda,
-			     unsigned int mu,
-			     double sigma,
-			     const boost::optional< RealVector > & variances = boost::optional<RealVector>()
-			     ) {
+	template<typename Individual>
+	void operator()(Individual &individual,
+	        unsigned int numberOfVariables,
+	        unsigned int lambda,
+	        unsigned int mu,
+	        double sigma,
+	        const boost::optional< RealVector > &variances = boost::optional<RealVector>()
+	               ) {
 
 
 		individual.m_sigma = sigma;
 
-		individual.setDimension( numberOfVariables );
-		individual.m_weights.resize( mu );
-		switch( individual.m_recombinationType ) {
+		individual.setDimension(numberOfVariables);
+		individual.m_weights.resize(mu);
+		switch (individual.m_recombinationType) {
 		case 0: {
-		    for( unsigned int i = 0; i < mu; i++ )
-			individual.m_weights( i ) = 1;
-		    break;
-		}
+				for (unsigned int i = 0; i < mu; i++)
+					individual.m_weights(i) = 1;
+				break;
+			}
 		case 1/*shark::cma::LINEAR*/: {
-		    for( unsigned int i = 0; i < mu; i++ )
-			individual.m_weights( i ) = mu-i;
-		    break;
-		}
+				for (unsigned int i = 0; i < mu; i++)
+					individual.m_weights(i) = mu-i;
+				break;
+			}
 		case 2/*shark::cma::SUPERLINEAR*/: {
-		    for( unsigned int i = 0; i < mu; i++ )
-			individual.m_weights( i ) = ::log( mu + 1. ) - ::log( 1. + i );
-		    break;
-		}
+				for (unsigned int i = 0; i < mu; i++)
+					individual.m_weights(i) = ::log(mu + 1.) - ::log(1. + i);
+				break;
+			}
 		}
 
 		double sumOfWeights = 0;
 		double sumOfSquaredWeights = 0;
-		for( unsigned int i = 0; i < individual.m_weights.size(); i++ ) {
-		    sumOfWeights += individual.m_weights( i );
-		    sumOfSquaredWeights += boost::math::pow<2>( individual.m_weights( i ) );
+		for (unsigned int i = 0; i < individual.m_weights.size(); i++) {
+			sumOfWeights += individual.m_weights(i);
+			sumOfSquaredWeights += sqr(individual.m_weights(i));
 		}
 		individual.m_weights /= sumOfWeights;
-		sumOfSquaredWeights /= boost::math::pow<2>( sumOfWeights );
+		sumOfSquaredWeights /= sqr(sumOfWeights);
 		individual.m_muEff = 1. / sumOfSquaredWeights;
 
 		// Step size control
 		individual.m_cSigma = (individual.m_muEff + 2.)/(numberOfVariables + individual.m_muEff + 3.);
-		individual.m_dSigma = 1. + 2. * std::max(0., ::sqrt( (individual.m_muEff-1.)/(numberOfVariables+1) ) - 1.) + individual.m_cSigma;
+		individual.m_dSigma = 1. + 2. * std::max(0., ::sqrt((individual.m_muEff-1.)/(numberOfVariables+1)) - 1.) + individual.m_cSigma;
 
 		// Covariance matrix adaptation
 		individual.m_muCov = individual.m_muEff;
-		switch( individual.m_updateType ) {
-		case 0/*shark::cma::RANK_ONE*/: individual.m_muCov = 1; break;
-		case 1/*shark::cma::RANK_MU*/: individual.m_muCov = individual.m_muEff; break;
-		case 2/*shark::cma::RANK_ONE_AND_MU*/: break;
+		switch (individual.m_updateType) {
+		case 0/*shark::cma::RANK_ONE*/:
+			individual.m_muCov = 1;
+			break;
+		case 1/*shark::cma::RANK_MU*/:
+			individual.m_muCov = individual.m_muEff;
+			break;
+		case 2/*shark::cma::RANK_ONE_AND_MU*/:
+			break;
 		}
 
 		individual.m_cC = 4. / (4. + numberOfVariables);
-		individual.m_cCov = 1. / individual.m_muCov * 2. / boost::math::pow<2>( numberOfVariables + ::sqrt(2.) ) +
-		    (1 - 1. / individual.m_muCov) * std::min(1., (2 * individual.m_muEff - 1) / (boost::math::pow<2>(numberOfVariables + 2) + individual.m_muEff));
+		individual.m_cCov = 1. / individual.m_muCov * 2. / sqr(numberOfVariables + ::sqrt(2.)) +
+		        (1 - 1. / individual.m_muCov) * std::min(1., (2 * individual.m_muEff - 1) / (sqr(numberOfVariables + 2) + individual.m_muEff));
 
-		individual.m_cCU = ::sqrt( (2 - individual.m_cC) * individual.m_cC );
-		individual.m_cSigmaU = ::sqrt( (2 - individual.m_cSigma) * individual.m_cSigma );
+		individual.m_cCU = ::sqrt((2 - individual.m_cC) * individual.m_cC);
+		individual.m_cSigmaU = ::sqrt((2 - individual.m_cSigma) * individual.m_cSigma);
 
-		if( variances ) {
-		    /*for( unsigned int i = 0; i < numberOfVariables; i++ )
-		      covarianceMatrix( i, i ) = (*variances)( i );*/
+		if (variances) {
+			/*for( unsigned int i = 0; i < numberOfVariables; i++ )
+			  covarianceMatrix( i, i ) = (*variances)( i );*/
 
-		    // TODO: individual.m_mutationDistribution.setCovarianceMatrix( covarianceMatrix );
+			// TODO: individual.m_mutationDistribution.setCovarianceMatrix( covarianceMatrix );
 		}
-	    }
-	};
-    }
+	}
+};
+}
 }
 
 #endif // SHARK_EA_COVARIANCEMATRIX_INITIALIZER_H

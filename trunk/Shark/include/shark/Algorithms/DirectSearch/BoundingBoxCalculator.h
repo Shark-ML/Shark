@@ -38,29 +38,28 @@
 
 namespace shark {
 
-    /**
-     * \brief Calculates the bounding of a d-dimensional point set.
-     */
-    template<typename ExtractorType,typename VectorType = shark::RealVector>
-	struct BoundingBoxCalculator {
-	    
-	    
-	BoundingBoxCalculator( ExtractorType & extractor, VectorType & lowerBound, VectorType & upperBound ) : m_extractor( extractor ),
-	    m_lowerBound( lowerBound ),
-	    m_upperBound( upperBound ) {
+/**
+ * \brief Calculates the bounding of a d-dimensional point set.
+ */
+template<typename ExtractorType,typename VectorType = shark::RealVector>
+struct BoundingBoxCalculator {
+
+	BoundingBoxCalculator(ExtractorType &extractor, VectorType &lowerBound, VectorType &upperBound) : m_extractor(extractor),
+		m_lowerBound(lowerBound),
+		m_upperBound(upperBound) {
 	}
-	
-	    template<typename Member>
-	    void operator()( const Member & m ) {
-		for( unsigned int i = 0; i < m_upperBound.size(); i++ ) {
-		    m_lowerBound[i] = std::min( m_lowerBound[i], m_extractor( m )[i] );
-		    m_upperBound[i] = std::max( m_upperBound[i], m_extractor( m )[i] );
+
+	template<typename Member>
+	void operator()(const Member &m) {
+		for (unsigned int i = 0; i < m_upperBound.size(); i++) {
+			m_lowerBound[i] = std::min(m_lowerBound[i], m_extractor(m)[i]);
+			m_upperBound[i] = std::max(m_upperBound[i], m_extractor(m)[i]);
 		}
-	    }
-	
-	    ExtractorType m_extractor;
-	    VectorType & m_lowerBound;
-	    VectorType & m_upperBound;
-	};
+	}
+
+	ExtractorType m_extractor;
+	VectorType &m_lowerBound;
+	VectorType &m_upperBound;
+};
 }
 #endif // SHARK_ALGORITHMS_DIRECTSEARCH_BOUNDING_BOX_CALCULATOR_H

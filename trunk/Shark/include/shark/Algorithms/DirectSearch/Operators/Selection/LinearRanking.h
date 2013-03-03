@@ -82,12 +82,13 @@ namespace shark {
             typename InIterator,  
             typename OutIterator
         > void operator()( InIterator parents, 
-                          InIterator parentsE,
-                          InIterator offspring, 
-                          InIterator offspringE,
-                          OutIterator out, 
-                          OutIterator outE, 
-                          double etaMax ) const {
+		InIterator parentsE,
+		InIterator offspring, 
+		InIterator offspringE,
+		OutIterator out, 
+		OutIterator outE, 
+		double etaMax 
+	) const {
             
             std::size_t noParents = std::distance( parents, parentsE );
             std::size_t noOffspring = std::distance( offspring, offspringE );

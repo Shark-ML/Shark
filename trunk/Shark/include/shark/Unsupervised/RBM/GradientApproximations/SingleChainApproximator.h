@@ -99,6 +99,10 @@ public:
 		startingPoint = mpe_rbm->parameterVector();
 	}
 	
+	std::size_t numberOfVariables()const{
+		return mpe_rbm->numberOfParameters();
+	}
+	
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
 		mpe_rbm->setParameterVector(parameter);
 		m_chain.update();

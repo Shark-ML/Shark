@@ -26,134 +26,72 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ9_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ9_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
-	/*! \brief Multi-objective optimization benchmark function LZ9.
-	*
-	*  The function is described in
-	*
-	*  H. Li and Q. Zhang. 
-	*  Multiobjective Optimization Problems with Complicated Pareto Sets, MOEA/D and NSGA-II, 
-	*  IEEE Trans on Evolutionary Computation, 2(12):284-302, April 2009. 
-	*/
-	struct LZ9 : 
-		public AbstractMultiObjectiveFunction< VectorSpace<double> >,
-		public TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, LZ9 > {
-			typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-			typedef TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, LZ9 > meta;
+struct LZ9 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+{
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
 
-			typedef super::ResultType ResultType;
-			typedef super::SearchPointType SearchPointType;
+	LZ9(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= IS_CONSTRAINED_FEATURE;
+		m_features |= HAS_CONSTRAINT_HANDLER;
+		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+		m_name="LZ9";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_handler.dimensions();
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-			LZ9() : super( 2 ) {
-				m_features |= CAN_PROPOSE_STARTING_POINT;
-				m_features |= IS_CONSTRAINED_FEATURE;
-				m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
-				m_name="LZ9";
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_handler.setBounds(
+			SearchPointType(numberOfVariables,0),
+			SearchPointType(numberOfVariables,1)
+		);
+	}
+		
+	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
+		return m_handler;
+	}
+
+	ResultType eval( const SearchPointType & x ) const {
+		m_evaluationCounter++;
+
+		ResultType value( noObjectives() );
+
+		unsigned int counter1 = 0, counter2 = 0;
+		for( unsigned int i = 1; i < x.size(); i++ ) {
+			if( i % 2 == 0 ) {
+				counter2++;
+				value[1] += sqr( x(i) - ::sin( 6 * M_PI * x( 0 ) + i*M_PI/x.size() ) );
+			} else {
+				counter1++;
+				value[0] += sqr( x(i) - ::sin( 6 * M_PI * x( 0 ) + i*M_PI/x.size() ) );
 			}
-
-			void init() {
-			}
-
-			ResultType eval( const SearchPointType & x ) const {
-				m_evaluationCounter++;
-
-				ResultType value( noObjectives() );
-
-				unsigned int counter1 = 0, counter2 = 0;
-				for( unsigned int i = 1; i < x.size(); i++ ) {
-					if( i % 2 == 0 ) {
-						counter2++;
-						value[1] += sqr( x(i) - ::sin( 6 * M_PI * x( 0 ) + i*M_PI/x.size() ) );
-					} else {
-						counter1++;
-						value[0] += sqr( x(i) - ::sin( 6 * M_PI * x( 0 ) + i*M_PI/x.size() ) );
-					}
-				}
-
-				value[0] *= 2./counter1;
-				value[0] += x( 0 );
-
-				value[1] *= 2./counter2;
-				value[1] += 1 - x( 0 ) * x( 0 );
-
-				return( value );
-			}
-
-			void proposeStartingPoint( SearchPointType & x ) const {
-				meta::proposeStartingPoint( x, m_numberOfVariables );
-			}
-
-			bool isFeasible( const SearchPointType & v ) const {
-				return( meta::isFeasible( v ) );
-			}
-
-			void closestFeasible( SearchPointType & v ) const {
-				meta::closestFeasible( v );
-			}
-	};
-
-	/**
-	* \brief Specializes objective function traits for the function LZ9.
-	*/
-	template<> 
-	struct ObjectiveFunctionTraits<LZ9> {
-
-		static LZ9::SearchPointType lowerBounds( unsigned int n ) {
-			return LZ9::SearchPointType( n, 0. );
 		}
 
-		static LZ9::SearchPointType upperBounds( unsigned int n ) {
-			return LZ9::SearchPointType( n, 1. );
-		}
+		value[0] *= 2./counter1;
+		value[0] += x( 0 );
 
-	};
+		value[1] *= 2./counter2;
+		value[1] += 1 - x( 0 ) * x( 0 );
 
-	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( LZ9, shark::moo::RealValuedObjectiveFunctionFactory );
-	//template<> struct ObjectiveFunctionTraits<LZ9> {
-	//	static LZ9::SolutionSetType referenceSet( std::size_t maxSize,
-	//		unsigned int numberOfVariables,
-	//		unsigned int noObjectives ) {
-	//		shark::IntervalIterator< tag::LinearTag > it( 0., 1., maxSize );
-	//
-	//		LZ9 lz9;
-	//		lz9.numberOfVariables() = numberOfVariables;
-	//
-	//		LZ9::SolutionSetType solutionSet;
-	//		while( it ) {
-	//
-	//			LZ9::SolutionType solution;
-	//
-	//			RealVector v( numberOfVariables );
-	//			v( 0 ) = *it;
-	//			for( unsigned int i = 1; i < numberOfVariables; i++ )
-	//				v( i ) = ::sin( 6 * M_PI * v( 0 ) + i*M_PI/v.size() );
-	//
-	//
-	//			solution.searchPoint() = v;
-	//			solution.objectiveFunctionValue() = lz9.eval( v );
-	//			solutionSet.push_back( solution );
-	//			++it;
-	//		}
-	//		return( solutionSet );
-	//	}
-	//
-	//
-	//	static LZ9::SearchPointType lowerBounds( unsigned int n ) {
-	//		LZ9::SearchPointType sp( n, -1. );
-	//		sp( 0 ) = 0;
-	//
-	//		return( sp );
-	//	}
-	//
-	//	static LZ9::SearchPointType upperBounds( unsigned int n ) {
-	//		return( LZ9::SearchPointType( n, 1. ) );
-	//	}
-	//
-	//};
+		return( value );
+	}
+private:
+	BoxConstraintHandler<SearchPointType> m_handler;
+};
+
+ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( LZ9, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

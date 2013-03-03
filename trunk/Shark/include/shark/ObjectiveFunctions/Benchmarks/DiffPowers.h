@@ -21,35 +21,52 @@
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
-	struct DiffPowers : public AbstractObjectiveFunction< VectorSpace<double>,double > {
+struct DiffPowers : public AbstractObjectiveFunction< VectorSpace<double>,double > {
 
-		DiffPowers(unsigned int numberOfVariables = 5) {
-			m_name="DiffPowers";
-			m_features |= CAN_PROPOSE_STARTING_POINT;
+	DiffPowers(unsigned int numberOfVariables = 5) {
+		m_name="DiffPowers";
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_numberOfVariables = numberOfVariables;
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_numberOfVariables;
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
+	
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_numberOfVariables = numberOfVariables;
+	}
+
+	void configure( const PropertyTree & node ) {
+	}
+
+	void proposeStartingPoint( SearchPointType & x ) const {
+		x.resize( m_numberOfVariables );
+
+		for( unsigned int i = 0; i < x.size(); i++ ) {
+			x( i ) = Rng::uni( 0, 1 );
 		}
+	}
 
-		void configure( const PropertyTree & node ) {
+	double eval( const SearchPointType & p ) const {
+		m_evaluationCounter++;
+		double sum = 0;
+		for( unsigned int i = 0; i < p.size(); i++ ){
+			sum += std::pow( std::abs( p( i ) ), 2. + (10.*i) / (p.size() - 1.) );
 		}
+		return sum;
+	}
+private:
+	std::size_t m_numberOfVariables;
+};
 
-		void proposeStartingPoint( SearchPointType & x ) const {
-			x.resize( m_numberOfVariables );
-
-			for( unsigned int i = 0; i < x.size(); i++ ) {
-				x( i ) = Rng::uni( 0, 1 );
-			}
-		}
-
-		double eval( const SearchPointType & p ) const {
-			m_evaluationCounter++;
-			double sum = 0;
-			for( unsigned int i = 0; i < p.size(); i++ ){
-				sum += ::pow( ::fabs( p( i ) ), 2. + (10.*i) / (p.size() - 1.) );
-			}
-			return sum;
-		}
-	};
-
-	ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( DiffPowers, shark::soo::RealValuedObjectiveFunctionFactory );
+ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( DiffPowers, shark::soo::RealValuedObjectiveFunctionFactory );
 }
 
 #endif // SHARK_EA_SPHERE_H

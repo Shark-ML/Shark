@@ -117,6 +117,10 @@ public:
 		SHARK_FEATURE_CHECK(CAN_PROPOSE_STARTING_POINT);
 		startingPoint=mep_model->parameterVector();
 	}
+	
+	std::size_t numberOfVariables()const{
+		return mep_model->numberOfParameters();
+	}
 
 	double eval(const RealVector & input)const {
 		this->m_evaluationCounter++;
@@ -225,6 +229,11 @@ void NoisyErrorFunction<InputType,LabelType,RngType>::setDataset(LabeledData<Inp
 template<class InputType,class LabelType,class RngType>
 void NoisyErrorFunction<InputType,LabelType,RngType>::proposeStartingPoint(SearchPointType& startingPoint) const{
 	mp_wrapper -> proposeStartingPoint(startingPoint);
+}
+
+template<class InputType,class LabelType,class RngType>
+std::size_t NoisyErrorFunction<InputType,LabelType,RngType>::numberOfVariables() const{
+	return mp_wrapper -> numberOfVariables();
 }
 
 template<class InputType,class LabelType,class RngType>
