@@ -27,69 +27,61 @@
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
-	/** 
-	* \brief Multi-modal two-dimensional continuous Himmelblau benchmark function.
-	*
-	* Implements Himmelblau's real-valued, multi-modal benchmark function. The
-	* function is limited to two dimensions. Please see:
-	*   http://en.wikipedia.org/wiki/Himmelblau%27s_function
-	* for further information.
-	*/
-	struct Himmelblau : public AbstractObjectiveFunction< VectorSpace<double>,double > {
-		typedef AbstractObjectiveFunction<VectorSpace<double>,double> super;
-
-		/**
-		* \brief Constructs an instance of the function. Ignores the supplied dimension.
-		*/
-		Himmelblau( unsigned int dimension = 2 ) {
-			m_numberOfVariables = 2;
-
-			m_features|=CAN_PROPOSE_STARTING_POINT;
-
-			m_name = "Himmelblau";
-		}
-
-		void configure( const PropertyTree & node ) {
-			(void) node;
-		}
-
-		void proposeStartingPoint( super::SearchPointType & x ) const {
-			x.resize( 2 );
-
-			for( unsigned int i = 0; i < x.size(); i++ ) {
-				x( i ) = Rng::uni( -3, 3 );
-			}
-		}
-
-		/**
-		* \brief Evaluates the function for the supplied search point.
-		* \throws shark::Exception if the size of p does not equal 2.
-		*/
-		double eval( const super::SearchPointType & p ) const {
-
-			if( p.size() != 2 )
-				throw SHARKEXCEPTION( "Himmelblau::eval: Dimension of input needs to equal 2." );
-
-			m_evaluationCounter++;
-
-			return( 
-				boost::math::pow<2>( boost::math::pow< 2 >( p( 0 ) ) + p( 1 ) - 11 ) +
-				boost::math::pow<2>( p( 0 ) + boost::math::pow< 2 >( p( 1 ) ) - 7 )
-			);
-		}
-
-		/**
-		* \brief Accesses the dimension of the search space, fixed to 2.
-		*/
-		std::size_t numberOfVariables() const {
-			return( 2 );
-		}
-	};
+/** 
+* \brief Multi-modal two-dimensional continuous Himmelblau benchmark function.
+*
+* Implements Himmelblau's real-valued, multi-modal benchmark function. The
+* function is limited to two dimensions. Please see:
+*   http://en.wikipedia.org/wiki/Himmelblau%27s_function
+* for further information.
+*/
+struct Himmelblau : public AbstractObjectiveFunction< VectorSpace<double>,double > {
+	typedef AbstractObjectiveFunction<VectorSpace<double>,double> super;
 
 	/**
-	* \brief Makes Himmelblau's function known to the factory.
+	* \brief Constructs an instance of the function.
 	*/
-	ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( Himmelblau, shark::soo::RealValuedObjectiveFunctionFactory );
+	Himmelblau() {
+		m_features|=CAN_PROPOSE_STARTING_POINT;
+		m_name = "Himmelblau";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return 2;
+	}
+
+	void configure( const PropertyTree & node ) {
+		(void) node;
+	}
+
+	void proposeStartingPoint( super::SearchPointType & x ) const {
+		x.resize( 2 );
+
+		for( unsigned int i = 0; i < x.size(); i++ ) {
+			x( i ) = Rng::uni( -3, 3 );
+		}
+	}
+
+	/**
+	* \brief Evaluates the function for the supplied search point.
+	* \throws shark::Exception if the size of p does not equal 2.
+	*/
+	double eval( const super::SearchPointType & p ) const {
+		SIZE_CHECK(p.size() == 2);
+
+		m_evaluationCounter++;
+
+		return( 
+			sqr( sqr( p( 0 ) ) + p( 1 ) - 11 ) +
+			sqr( p( 0 ) + sqr( p( 1 ) ) - 7 )
+		);
+	}
+};
+
+/**
+* \brief Makes Himmelblau's function known to the factory.
+*/
+ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( Himmelblau, shark::soo::RealValuedObjectiveFunctionFactory );
 }
 
 #endif

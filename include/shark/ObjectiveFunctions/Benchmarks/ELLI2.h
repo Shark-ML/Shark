@@ -28,71 +28,78 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ELLI2_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ELLI2_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
+#include <shark/Rng/GlobalRng.h>
 
 #include <shark/LinAlg/rotations.h>
 
 namespace shark {
-	/*! \brief Multi-objective optimization benchmark function ELLI2.
-	*
-	*  The function is described in
-	*
-	*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
-	*  Covariance Matrix Adaptation for Multi-objective Optimization. 
-	*  Evolutionary Computation 15(1), pp. 1-28, 2007 
-	*/
-	struct ELLI2 : public AbstractMultiObjectiveFunction< VectorSpace<double> > {
+/*! \brief Multi-objective optimization benchmark function ELLI2.
+*
+*  The function is described in
+*
+*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
+*  Covariance Matrix Adaptation for Multi-objective Optimization. 
+*  Evolutionary Computation 15(1), pp. 1-28, 2007 
+*/
+struct ELLI2 : public AbstractMultiObjectiveFunction< VectorSpace<double> >{
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	ELLI2() : super(2), m_a( 1E6 ) {
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_name = "ELLI2";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_numberOfVariables;
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-		typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_numberOfVariables = numberOfVariables;
+	}
 
-		typedef super::ResultType ResultType;
-		typedef super::SearchPointType SearchPointType;
+	void init() {
+		m_rotationMatrixX = randomRotationMatrix( m_numberOfVariables );
+		m_rotationMatrixY = randomRotationMatrix( m_numberOfVariables );
+	}
 
-		ELLI2() : super( 2 ), m_a( 1E6 ) {
-			m_features |= CAN_PROPOSE_STARTING_POINT;
-			m_name = "ELLI2";
+	ResultType eval( const SearchPointType & x ) const {
+		m_evaluationCounter++;
+
+		ResultType value( 2 );
+
+		double sum_1 = 0, sum_2 = 0;
+
+		SearchPointType y = blas::prod( m_rotationMatrixX, x );
+		SearchPointType z = blas::prod( m_rotationMatrixY, x );
+
+		for (unsigned i = 0; i < numberOfVariables(); i++) {
+			sum_1 += std::pow(m_a, 2.0 * (i / (numberOfVariables() - 1.0))) * y(i) * y(i);
+			sum_2 += std::pow(m_a, 2.0 * (i / (numberOfVariables() - 1.0))) * (z(i) - 2.0) * (z(i) - 2.0);
 		}
 
-		void init() {
-			m_rotationMatrixX = randomRotationMatrix( m_numberOfVariables );
-			m_rotationMatrixY = randomRotationMatrix( m_numberOfVariables );
-		}
+		value[0] = sum_1 / (m_a * m_a * numberOfVariables());
+		value[1] = sum_2 / (m_a * m_a * numberOfVariables());
 
-		ResultType eval( const SearchPointType & x ) const {
-			m_evaluationCounter++;
+		return value;
+	}
 
-			ResultType value( 2 );
+	void proposeStartingPoint( SearchPointType & x ) const {
+		x.resize( m_numberOfVariables );
+		for( unsigned int i = 0; i < m_numberOfVariables; i++ )
+			x( i ) = Rng::gauss( -10., 10. );
+	}
+private:
+	double m_a;
+	RealMatrix m_rotationMatrixX;
+	RealMatrix m_rotationMatrixY;
+	std::size_t m_numberOfVariables;
+};
 
-			double sum_1 = 0, sum_2 = 0;
-
-			SearchPointType y = blas::prod( m_rotationMatrixX, x );
-			SearchPointType z = blas::prod( m_rotationMatrixY, x );
-
-			for (unsigned i = 0; i < numberOfVariables(); i++) {
-				sum_1 += std::pow(m_a, 2.0 * (i / (numberOfVariables() - 1.0))) * y(i) * y(i);
-				sum_2 += std::pow(m_a, 2.0 * (i / (numberOfVariables() - 1.0))) * (z(i) - 2.0) * (z(i) - 2.0);
-			}
-
-			value[0] = sum_1 / (m_a * m_a * numberOfVariables());
-			value[1] = sum_2 / (m_a * m_a * numberOfVariables());
-
-			return value;
-		}
-
-		void proposeStartingPoint( SearchPointType & x ) const {
-			x.resize( m_numberOfVariables );
-			for( unsigned int i = 0; i < m_numberOfVariables; i++ )
-				x( i ) = Rng::gauss( -10., 10. );
-		}
-	private:
-		double m_a;
-		RealMatrix m_rotationMatrixX;
-		RealMatrix m_rotationMatrixY;
-	};
-
-	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( ELLI2, shark::moo::RealValuedObjectiveFunctionFactory );
+ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( ELLI2, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

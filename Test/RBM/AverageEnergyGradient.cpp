@@ -187,6 +187,9 @@ public:
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint = mpe_rbm->parameterVector();
 	}
+	std::size_t numberOfVariables()const{
+		return mpe_rbm->numberOfParameters();
+	}
 	
 	double eval( SearchPointType const & parameter) const {
 		mpe_rbm->setParameterVector(parameter);
@@ -265,6 +268,10 @@ public:
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint = mpe_rbm->parameterVector();
+	}
+	
+	std::size_t numberOfVariables()const{
+		return mpe_rbm->numberOfParameters();
 	}
 	
 	double eval( SearchPointType const & parameter) const {

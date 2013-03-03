@@ -104,20 +104,20 @@ public:
 	KernelTargetAlignment(AbstractKernelFunction<InputType>* kernel){
 		SHARK_CHECK(kernel != NULL, "[KernelTargetAlignment] kernel is not allowed to be NULL");
 		
-		m_kernel = kernel;
+		mep_kernel = kernel;
 		
 		this->m_name = "KernelTargetAlignment";
 		this->m_features|=base_type::HAS_VALUE;
 		this->m_features|=base_type::CAN_PROPOSE_STARTING_POINT;
 		
-		if(m_kernel -> hasFirstParameterDerivative())
+		if(mep_kernel -> hasFirstParameterDerivative())
 			this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
 	}
 
 	void configure( const PropertyTree & node ){
 		PropertyTree::const_assoc_iterator it = node.find("kernel");
 		if(it != node.not_found()){
-			m_kernel->configure(it->second);
+			mep_kernel->configure(it->second);
 		}
 	}
 
@@ -146,14 +146,18 @@ public:
 
 	/// Return the current kernel parameters as a starting point for an optimization run.
 	void proposeStartingPoint(SearchPointType& startingPoint) const {
-		startingPoint =  m_kernel -> parameterVector();
+		startingPoint =  mep_kernel -> parameterVector();
+	}
+	
+	std::size_t numberOfVariables()const{
+		return mep_kernel->numberOfParameters();
 	}
 
 	/// \brief Evaluate the (centered, negative) Kernel Target Alignment (KTA).
 	///
 	/// See the class description for more details on this computation.
 	double eval(RealVector const& input) const{
-		m_kernel->setParameterVector(input);
+		mep_kernel->setParameterVector(input);
 
 		return -evaluateKernelMatrix().error;
 	}
@@ -179,25 +183,25 @@ public:
 	///     +   (\langle K^c,K^c \rangle my - \langle Y, K^c \rangle mk) u u^T \f]
 	/// where \f$ K' \f$ is the derivative of K with respct of the kernel parameters.
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const {
-		m_kernel->setParameterVector(input);
+		mep_kernel->setParameterVector(input);
 		// the drivative is calculated in two sweeps of the data. first the required statistics
 		// \langle K^c,K^c \rangle , mk and k are evaluated exactly as in eval
 
 		KernelMatrixResults results = evaluateKernelMatrix();
 				
-		std::size_t parameters = m_kernel->numberOfParameters();
+		std::size_t parameters = mep_kernel->numberOfParameters();
 		derivative.m_gradient.resize(parameters);
 		RealVector blockDerivative;
 		zero(derivative.m_gradient);
-		boost::shared_ptr<State> state = m_kernel->createState();
+		boost::shared_ptr<State> state = mep_kernel->createState();
 		RealMatrix blockK;//block of the KernelMatrix
 		RealMatrix blockW;//block of the WeightMatrix
 		std::size_t startX = 0;
 		for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
 			std::size_t startY = 0;
 			for(std::size_t j = 0; j <= i; ++j){
-				m_kernel->eval(m_data.batch(i).input,m_data.batch(j).input,blockK,*state);
-				m_kernel->weightedParameterDerivative(
+				mep_kernel->eval(m_data.batch(i).input,m_data.batch(j).input,blockK,*state);
+				mep_kernel->weightedParameterDerivative(
 					m_data.batch(i).input,m_data.batch(j).input,
 					generateDerivativeWeightBlock(i,j,startX,startY,blockK,results),//takes symmetry into account
 					*state,
@@ -214,7 +218,7 @@ public:
 	}
 
 private:
-	AbstractKernelFunction<InputType>* m_kernel;     ///< kernel function
+	AbstractKernelFunction<InputType>* mep_kernel;     ///< kernel function
 	LabeledData<InputType,unsigned int> m_data;      ///< data points
 	RealVector m_columnMeanY;                        ///< mean label vector
 	double m_meanY;                                  ///< mean label element
@@ -320,7 +324,7 @@ private:
 			std::size_t startColumn = 0; //starting column of the current block
 			for(std::size_t j = 0; j <= i; ++j){
 				std::size_t columnSize = size(m_data.batch(j));
-				RealMatrix blockK = (*m_kernel)(m_data.batch(i).input,m_data.batch(j).input);
+				RealMatrix blockK = (*mep_kernel)(m_data.batch(i).input,m_data.batch(j).input);
 				if(i == j){
 					KK+=sumElements(element_prod(blockK,blockK));
 					subrange(k,startColumn,startColumn+columnSize)+=sumRows(blockK);//update sumRows(K)

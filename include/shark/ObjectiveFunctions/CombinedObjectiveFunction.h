@@ -80,7 +80,7 @@ public:
 		SHARK_CHECK(weight >= 0.0, "[CombinedObjectiveFunction::add] weight must be non-negative");
 
 		m_weight.push_back(weight);
-		m_element.push_back(&e);
+		m_elements.push_back(&e);
 
 		this->m_name[this->m_name.size() - 1] = ',';
 		this->m_name += e.name() + ">";
@@ -93,17 +93,22 @@ public:
 	/// Tests whether a point in SearchSpace is feasible,
 	/// e.g., whether the constraints are fulfilled.
 	bool isFeasible( const typename super::SearchPointType & input) const {
-		unsigned int i, ic = m_element.size();
-		for (i=0; i<ic; i++) if (! m_element[i]->isFeasible(input)) return false;
+		unsigned int i, ic = m_elements.size();
+		for (i=0; i<ic; i++) if (! m_elements[i]->isFeasible(input)) return false;
 		return true;
+	}
+	
+	std::size_t numberOfVariables()const{
+		//todo sthis will fail if SarchPointType != Vectorspace
+		return m_elements.size() == 0? 0: m_elements[0]->numberOfVariables();
 	}
 
 	/// Evaluates the objective function.
 	typename super::ResultType eval( const typename super::SearchPointType & input ) const
 	{
-		unsigned int i, ic = m_element.size();
-		typename super::ResultType ret = m_weight[0] * m_element[0]->eval(input);
-		for (i=1; i<ic; i++) ret += m_weight[i] * m_element[i]->eval(input);
+		unsigned int i, ic = m_elements.size();
+		typename super::ResultType ret = m_weight[0] * m_elements[0]->eval(input);
+		for (i=1; i<ic; i++) ret += m_weight[i] * m_elements[i]->eval(input);
 		return ret;
 	}
 
@@ -112,12 +117,12 @@ public:
 	typename super::ResultType evalDerivative( const typename super::SearchPointType & input, typename super::FirstOrderDerivative & derivative ) const {
 		SHARK_CHECK(this->m_features.test(super::HAS_FIRST_DERIVATIVE), "[CombinedObjectiveFunction::evalDerivative] At least one of the objective functions combined is not differentiable");
 		typename super::FirstOrderDerivative der;
-		unsigned int i, ic = m_element.size();
-		typename super::ResultType ret = m_weight[0] * m_element[0]->evalDerivative(input, der);
+		unsigned int i, ic = m_elements.size();
+		typename super::ResultType ret = m_weight[0] * m_elements[0]->evalDerivative(input, der);
 		derivative.m_gradient = m_weight[0] * der.m_gradient;
 		for (i=1; i<ic; i++)
 		{
-			ret += m_weight[i] * m_element[i]->evalDerivative(input, der);
+			ret += m_weight[i] * m_elements[i]->evalDerivative(input, der);
 			derivative.m_gradient += m_weight[i] * der.m_gradient;
 		}
 		return ret;
@@ -129,13 +134,13 @@ public:
 	typename super::ResultType evalDerivative( const typename super::SearchPointType & input, typename super::SecondOrderDerivative & derivative )const {
 		SHARK_CHECK(this->m_features.test(super::HAS_SECOND_DERIVATIVE), "[CombinedObjectiveFunction::evalDerivative] At least one of the objective functions combined is not twice differentiable");
 		typename super::SecondOrderDerivative der;
-		unsigned int i, ic = m_element.size();
-		typename super::ResultType ret = m_weight[0] * m_element[0]->evalDerivative(input, der);
+		unsigned int i, ic = m_elements.size();
+		typename super::ResultType ret = m_weight[0] * m_elements[0]->evalDerivative(input, der);
 		derivative.m_gradient = m_weight[0] * der.m_gradient;
 		derivative.m_hessian = m_weight[0] * der.m_hessian;
 		for (i=1; i<ic; i++)
 		{
-			ret += m_weight[i] * m_element[i]->evalDerivative(input, der);
+			ret += m_weight[i] * m_elements[i]->evalDerivative(input, der);
 			derivative.m_gradient += m_weight[i] * der.m_gradient;
 			derivative.m_hessian += m_weight[i] * der.m_hessian;
 		}
@@ -147,7 +152,7 @@ protected:
 	std::vector<double> m_weight;
 
 	/// list of "base" objective functions
-	std::vector<const element*> m_element;
+	std::vector<const element*> m_elements;
 };
 
 

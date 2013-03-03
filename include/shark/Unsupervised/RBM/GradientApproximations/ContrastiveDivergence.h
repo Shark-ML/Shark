@@ -78,10 +78,13 @@ public:
 	void setK(unsigned int k){
 		m_k = k;
 	}
-	
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint = mpe_rbm->structure().parameterVector();
+	}
+	
+	std::size_t numberOfVariables()const{
+		return mpe_rbm->numberOfParameters();
 	}
 	
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const{

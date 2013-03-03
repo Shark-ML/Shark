@@ -96,6 +96,10 @@ public:
 	void setDataset(DatasetType const& dataset) {
 		mep_dataset = &dataset;
 	}
+	
+	std::size_t numberOfVariables()const{
+		return mep_trainer->numberOfParameters();
+	}
 
 	/// Evaluate the leave-one-out error.
 	double eval() const {

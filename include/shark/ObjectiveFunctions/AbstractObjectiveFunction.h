@@ -40,138 +40,102 @@
 
 #include <shark/Core/IConfigurable.h>
 #include <shark/Core/INameable.h>
-
-//#include <shark/Core/AbstractVectorSpaceObjectiveFunction.h>
 #include <shark/Core/Derivative.h>
 #include <shark/Core/Exception.h>
 #include <shark/Core/Factory.h>
 #include <shark/Core/Flags.h>
-#include <shark/Core/ResultSets.h>
-
 #include <shark/LinAlg/Base.h>
+#include <shark/ObjectiveFunctions/AbstractConstraintHandler.h>
 
 namespace shark {
 	
-	enum IsDimensionScalable {
-		DIMENSION_IS_SCALABLE,
-		DIMENSION_IS_NOT_SCALABLE
-	};
-	
-	/**
-	* \brief Models a vector space objective function storing the number of variables.
-	*
-	*  AbstractObjectiveFunction derives itself from this interface, when the search space type
-	* is a vector space and thus the notion of a number of variabls makes sense. This class is 
-	* otherwise not intended for direct use.
-	*/
+	/// \brief Models a vector space objective function storing the number of variables.
+	/// 
+	/// AbstractObjectiveFunction derives itself from this interface, when the search space type
+	/// is a vector space and thus the notion of a number of variabls makes sense. This class is 
+	/// otherwise not intended for direct use.
 	class AbstractVectorSpaceObjectiveFunction {
-	protected:
-		IsDimensionScalable m_isDimensionScalable; ///< Stores the scalability
-		std::size_t m_numberOfVariables; ///< Stores the dimension of the vector space.
 	public:
-
-		/**
-		* \brief Default c'tor.
-		* \param [in] isDimensionScalable Models if the objective is scalable.
-		* \param [in] numberOfVariables Initial dimension of the search space.
-		*/
-		AbstractVectorSpaceObjectiveFunction( IsDimensionScalable isDimensionScalable = DIMENSION_IS_SCALABLE, std::size_t numberOfVariables = 0 ) : m_isDimensionScalable( isDimensionScalable ),
-			m_numberOfVariables( numberOfVariables ) {
-		}
-
-		/**
-		* \brief Virtual d'tor.
-		*/
+		/// \brief Virtual d'tor.
 		virtual ~AbstractVectorSpaceObjectiveFunction() {}
 
-		/**
-		* \brief Accesses the number of variables
-		*/
-		virtual std::size_t numberOfVariables() const {
-			return m_numberOfVariables;
+		/// \brief Accesses the number of variables
+		virtual std::size_t numberOfVariables() const=0;
+			
+		virtual bool hasScalableDimensionality()const{
+			return false;
 		}
 
-		/**
-		* \brief Adjusts the number of variables if the function is scalable.
-		* \param [in] numberOfVariables The new dimension.
-		*/
-		virtual void setNumberOfVariables( std::size_t numberOfVariables ) {
-			if( m_isDimensionScalable == DIMENSION_IS_SCALABLE )
-				m_numberOfVariables = numberOfVariables;
+		/// \brief Adjusts the number of variables if the function is scalable.
+		/// \param [in] numberOfVariables The new dimension.
+		virtual void setNumberOfVariables( std::size_t numberOfVariables ){
+			throw SHARKEXCEPTION("dimnsionality of function is not scalable");
 		}
 	};
 
 
-    /**
-       \brief Super class of all objective functions for optimization and learning.
+/// \brief Super class of all objective functions for optimization and learning.
 
-       \par
-       The AbstractObjectiveFunction template class is the most general
-       interface for a function to be minimized or maximized by an
-       optimizer. It subsumes many more specialized classes,
-       ranging from classical test problems in evolutionary algorithms to
-       data-dependent objective functions in supervised learning. This
-       interface allows all general purpose optimization procedures to be
-       used as model training algorithms in a learning task, with
-       applications ranging from training of neural networks to direct
-       policy search in reinforcement learning.
+/// \par
+/// The AbstractObjectiveFunction template class is the most general
+/// interface for a function to be minimized or maximized by an
+/// optimizer. It subsumes many more specialized classes,
+/// ranging from classical test problems in evolutionary algorithms to
+/// data-dependent objective functions in supervised learning. This
+/// interface allows all general purpose optimization procedures to be
+/// used as model training algorithms in a learning task, with
+/// applications ranging from training of neural networks to direct
+/// policy search in reinforcement learning.
 
-       AbstractObjectiveFunction offers a rich interface to support
-       different types of optimizers. Since not every objective function meets
-       every requirement, a flagsystem exists which tells the optimizer
-       which Features are available. These are:
-       HAS_VALUE: The function can be evaluated. If not set, evalDerivative returns a meaningless
-       value (for example std::numeric_limits<double>::quiet_nan());
-       HAS_FIRST_DERIVATIVE: evalDerivative can be called for the FirstOrderDerivative.
-       The Derivative is defined and as exact as possible;
-       HAS_SECOND_DERIVATIVE: evalDerivative can be called for the second derivative.
-       It is defined and non-zero;
-       IS_CONSTRAINED_FEATURE: The function has constraints and isFeasible might return false;
-       CAN_PROPOSE_STARTING_POINT: the function can return a possibly randomized starting point;
-       CAN_PROVIDE_CLOSEST_FEASIBLE: if the function is constrained, closest feasible can be
-       called to construct a feasible point.
+/// AbstractObjectiveFunction offers a rich interface to support
+/// different types of optimizers. Since not every objective function meets
+/// every requirement, a flagsystem exists which tells the optimizer
+/// which Features are available. These are:
+/// HAS_VALUE: The function can be evaluated. If not set, evalDerivative returns a meaningless
+/// value (for example std::numeric_limits<double>::quiet_nan());
+/// HAS_FIRST_DERIVATIVE: evalDerivative can be called for the FirstOrderDerivative.
+/// The Derivative is defined and as exact as possible;
+/// HAS_SECOND_DERIVATIVE: evalDerivative can be called for the second derivative.
+/// It is defined and non-zero;
+/// IS_CONSTRAINED_FEATURE: The function has constraints and isFeasible might return false;
+/// CAN_PROPOSE_STARTING_POINT: the function can return a possibly randomized starting point;
+/// CAN_PROVIDE_CLOSEST_FEASIBLE: if the function is constrained, closest feasible can be
+/// called to construct a feasible point.
 
-       Calling the derivatives, proposeStartingPoint or closestFeasible when the flags are not set
-       will throw an exception.
-       The features can be queried using the method features() as in
-       if(!(f.features()&Function::HAS_VALUE))
+/// Calling the derivatives, proposeStartingPoint or closestFeasible when the flags are not set
+/// will throw an exception.
+/// The features can be queried using the method features() as in
+/// if(!(f.features()&Function::HAS_VALUE))
 
-       \tparam SearchSpaceType The search space the function is defined upon.
-       \tparam ResultT The objective space the function is defined upon.
-    */
-    template <typename SearchSpaceType, typename ResultT>
-	class AbstractObjectiveFunction : public IConfigurable, 
+/// \tparam SearchSpaceType The search space the function is defined upon.
+/// \tparam ResultT The objective space the function is defined upon.
+template <typename SearchSpaceType, typename ResultT>
+class AbstractObjectiveFunction : public IConfigurable, 
 	public INameable, 
 	/** \cond */
 	public boost::mpl::if_c< SearchSpaceType::IS_VECTOR_SPACE, AbstractVectorSpaceObjectiveFunction, boost::mpl::void_ >::type
 	/** \endcond */{
-    public:
+public:
 	typedef typename SearchSpaceType::PointType SearchPointType;
 	typedef ResultT ResultType;
 
 	typedef TypedFirstOrderDerivative<SearchPointType> FirstOrderDerivative;
 	typedef TypedSecondOrderDerivative<SearchPointType,RealMatrix> SecondOrderDerivative;
 
-	/** 
-	 *  \brief List of features that are supported by an implementation.
-	 */
+	/// \brief List of features that are supported by an implementation.
 	enum Feature {
-	    IS_CONSTRAINED_FEATURE           =  1, ///< The objective function is constrained.
-	    HAS_VALUE						 =  2, ///< The function can be evaluated and evalDerivative returns a meaningless value (for example std::numeric_limits<double>::quiet_nan()).
-	    HAS_FIRST_DERIVATIVE             =  4, ///< The method evalDerivative is implemented for the first derivative and returns a sensible value.
-	    HAS_SECOND_DERIVATIVE            =  8, ///< The method evalDerivative is implemented for the second derivative and returns a sensible value.
-	    CAN_PROPOSE_STARTING_POINT       = 16, ///< The function can propose a sensible starting point to search algorithms.
-	    CAN_PROVIDE_CLOSEST_FEASIBLE     = 32,	///< If the function is constrained, the method closestFeasible is implemented and returns a "repaired" solution.
-	    IS_THREAD_SAFE     = 64	///< can eval or evalDerivative be called in parallel?
+		HAS_VALUE						 =  1, ///< The function can be evaluated and evalDerivative returns a meaningless value (for example std::numeric_limits<double>::quiet_nan()).
+		HAS_FIRST_DERIVATIVE             =  2, ///< The method evalDerivative is implemented for the first derivative and returns a sensible value.
+		HAS_SECOND_DERIVATIVE            =  4, ///< The method evalDerivative is implemented for the second derivative and returns a sensible value.
+		CAN_PROPOSE_STARTING_POINT       = 8, ///< The function can propose a sensible starting point to search algorithms.
+		IS_CONSTRAINED_FEATURE           =  16, ///< The objective function is constrained.
+		HAS_CONSTRAINT_HANDLER           =  32, ///< The constraints are governed by a constraint handler which can be queried by getConstraintHandler()
+		CAN_PROVIDE_CLOSEST_FEASIBLE     = 64,	///< If the function is constrained, the method closestFeasible is implemented and returns a "repaired" solution.
+		IS_THREAD_SAFE     = 128	///< can eval or evalDerivative be called in parallel?
 	};
 
 	/// This statement declares the member m_features. See Core/Flags.h for details.
 	SHARK_FEATURE_INTERFACE;
-	
-	/// \brief returns whether this function can return 
-	bool isConstrained()const{
-		return m_features & IS_CONSTRAINED_FEATURE;
-	}
 	
 	/// \brief returns whether this function can calculate it's function value
 	bool hasValue()const{
@@ -188,123 +152,130 @@ namespace shark {
 		return m_features & HAS_SECOND_DERIVATIVE;
 	}
 	
-	/// \brief returns whether this function can calculate the second derivative
+	/// \brief returns whether this function can propose a starting point.
 	bool canProposeStartingPoint()const{
 		return m_features & CAN_PROPOSE_STARTING_POINT;
 	}
 	
-	/// \brief returns whether this function can calculate the second derivative
+	/// \brief returns whether this function can return 
+	bool isConstrained()const{
+		return m_features & IS_CONSTRAINED_FEATURE;
+	}
+	
+	/// \brief returns whether this function can return 
+	bool hasConstraintHandler()const{
+		return m_features & HAS_CONSTRAINT_HANDLER;
+	}
+	
+	/// \brief Returns whether this function can calculate thee closest feasible to an infeasible point.
 	bool canProvideClosestFeasible()const{
 		return m_features & CAN_PROVIDE_CLOSEST_FEASIBLE;
 	}
 	
+	/// \brief Returns true, when the function can be usd in parallel threads.
 	bool isThreadSafe()const{
 		return m_features & IS_THREAD_SAFE;
 	}
 
-	/**
-	 * \brief Accesses the evaluation counter of the function.
-	 */
-	std::size_t evaluationCounter() const {
-	    return m_evaluationCounter;
-	}
-
-	/**
-	 * brief Default c'tor.
-	 */
+	/// \brief Default ctor.
 	AbstractObjectiveFunction():m_evaluationCounter(0) {
 	    m_features |=HAS_VALUE;
 	}
-	/**
-	 * \brief Virtual destructor
-	 */
+	/// \brief Virtual destructor
 	virtual ~AbstractObjectiveFunction() {}
 
 	virtual void configure( const PropertyTree & node ) {
-	    (void) node;
+		(void) node;
 	}
 
 	virtual const std::string & name() const {
-	    return m_name;
+		return m_name;
 	}
 
-	virtual void init() {
+	virtual void init() {}
+		
+	/// \brief Accesses the evaluation counter of the function.
+	std::size_t evaluationCounter() const {
+		return m_evaluationCounter;
+	}
+	
+	/// \brief Returns the constraint handler of the function if it has one.
+	///
+	/// If the function does not offer a constraint handler, an exception is thrown.
+	/// \throws FeatureNotAvailableException in the default implementation.
+	virtual AbstractConstraintHandler<SearchPointType> const& getConstraintHandler()const{
+		SHARK_FEATURE_EXCEPTION(HAS_CONSTRAINT_HANDLER);
 	}
 
-	/**
-	 * \brief Tests whether a point in SearchSpace is feasible, e.g., whether the constraints are fulfilled.
-	 * \param [in] input The point to be tested for feasibility.
-	 * \returns true if the point is feasible, false otherwise.
-	 */
+	/// \brief Tests whether a point in SearchSpace is feasible, e.g., whether the constraints are fulfilled.
+	/// \param [in] input The point to be tested for feasibility.
+	/// \return true if the point is feasible, false otherwise.
 	virtual bool isFeasible( const SearchPointType & input) const {
-	    return true;
+		if(hasConstraintHandler()) return getConstraintHandler().isFeasible(input);
+		if(isConstrained())
+			throw SHARKEXCEPTION("[AbstractObjectiveFunction::isFasible] not overwritten, even though function is constrained");
+		return true;
 	}
 
-	/**
-	 * If supported, the supplied point is repaired such that it satisfies all of the function's constraints.
-	 *
-	 * \param [in,out] input The point to be repaired.
-	 *
-	 * \throws FeatureNotAvailableException in the default implementation.
-	 */
+	/// \brief If supported, the supplied point is repaired such that it satisfies all of the function's constraints.
+	/// 
+	/// \param [in,out] input The point to be repaired.
+	/// 
+	/// \throws FeatureNotAvailableException in the default implementation.
 	virtual void closestFeasible( SearchPointType & input ) const {
-	    SHARK_FEATURE_EXCEPTION(CAN_PROVIDE_CLOSEST_FEASIBLE);
+		if(!isConstrained()) return;
+		if(hasConstraintHandler()) return getConstraintHandler().closestFeasible(input);
+		SHARK_FEATURE_EXCEPTION(CAN_PROVIDE_CLOSEST_FEASIBLE);
 	}
 
-	/**
-	 * \brief Proposes a starting point in the feasible search space of the function.
-	 *
-	 * \param [out] startingPoint The starting point is placed here.
-	 * \throws FeatureNotAvailableException in the default implementation
-	 * and if a function does not support this feature.
-	 */
+	///  \brief Proposes a starting point in the feasible search space of the function.
+	/// 
+	///  \param [out] startingPoint The starting point is placed here.
+	///  \throws FeatureNotAvailableException in the default implementation
+	///  and if a function does not support this feature.
 	virtual void proposeStartingPoint( SearchPointType & startingPoint )const {
-	    SHARK_FEATURE_EXCEPTION(CAN_PROPOSE_STARTING_POINT);
+		if(hasConstraintHandler()&& getConstraintHandler().canGenerateRandomPoint())
+			getConstraintHandler().generateRandomPoint(startingPoint);
+		else{
+			SHARK_FEATURE_EXCEPTION(CAN_PROPOSE_STARTING_POINT);
+		}
 	}
 
-	/**
-	 * \brief Evaluates the objective function for the supplied argument.
-	 * \param [in] input The argument for which the function shall be evaluated.
-	 * \returns The result of evaluating the function for the supplied argument.
-	 * \throws FeatureNotAvailableException in the default implementation
-	 * and if a function does not support this feature.
-	 */
+	///  \brief Evaluates the objective function for the supplied argument.
+	///  \param [in] input The argument for which the function shall be evaluated.
+	///  \return The result of evaluating the function for the supplied argument.
+	///  \throws FeatureNotAvailableException in the default implementation
+	///  and if a function does not support this feature.
 	virtual ResultType eval( const SearchPointType & input )const {
-	    SHARK_FEATURE_EXCEPTION(HAS_VALUE);
+		SHARK_FEATURE_EXCEPTION(HAS_VALUE);
 	}
 
-	/**
-	 * \brief Evaluates the function. Useful together with STL-Algorithms like std::transform.
-	 **/
+	/// \brief Evaluates the function. Useful together with STL-Algorithms like std::transform.
 	ResultType operator()( const SearchPointType & input ) const {
-	    return eval(input);
+		return eval(input);
 	}
 
-	/**
-	 * \brief Evaluates the objective function and calculates its gradient.
-	 * \param [in] input The argument to eval the function for.
-	 * \param [out] derivative The derivate is placed here.
-	 * \returns The result of evaluating the function for the supplied argument.
-	 * \throws FeatureNotAvailableException in the default implementation
-	 * and if a function does not support this feature.
-	 */
+	/// \brief Evaluates the objective function and calculates its gradient.
+	/// \param [in] input The argument to eval the function for.
+	/// \param [out] derivative The derivate is placed here.
+	/// \return The result of evaluating the function for the supplied argument.
+	/// \throws FeatureNotAvailableException in the default implementation
+	/// and if a function does not support this feature.
 	virtual ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative )const {
 		SHARK_FEATURE_EXCEPTION(HAS_FIRST_DERIVATIVE);
 	}
 
-	/**
-	 * \brief Evaluates the objective function and calculates its gradient.
-	 * \param [in] input The argument to eval the function for.
-	 * \param [out] derivative The derivate and the Hessian are placed here.
-	 * \returns The result of evaluating the function for the supplied argument.
-	 * \throws FeatureNotAvailableException in the default implementation
-	 * and if a function does not support this feature.
-	 */
+	/// \brief Evaluates the objective function and calculates its gradient.
+	/// \param [in] input The argument to eval the function for.
+	/// \param [out] derivative The derivate and the Hessian are placed here.
+	/// \return The result of evaluating the function for the supplied argument.
+	/// \throws FeatureNotAvailableException in the default implementation
+	/// and if a function does not support this feature.
 	virtual ResultType evalDerivative( const SearchPointType & input, SecondOrderDerivative & derivative )const {
-	    SHARK_FEATURE_EXCEPTION(HAS_SECOND_DERIVATIVE);
+		SHARK_FEATURE_EXCEPTION(HAS_SECOND_DERIVATIVE);
 	}
 
-    protected:
+protected:
 	std::string m_name;///< Name of the objective function, default value: empty string.
 	mutable std::size_t m_evaluationCounter; ///< Evaluation counter, default value: 0.
 };
@@ -315,14 +286,12 @@ namespace shark {
 
 namespace shark {
     namespace soo {
-	/** \brief Defines the default factory type for real-valued single-objective optimization problems. */
+	///  \brief Defines the default factory type for real-valued single-objective optimization problems.
 	typedef Factory< AbstractObjectiveFunction< VectorSpace< double >, double >, std::string > RealValuedObjectiveFunctionFactory;
     }
 }
 
-/**
- * \brief Convenience macro for registering single-objective functions with a factory at compile-time.
- */
+///  \brief Convenience macro for registering single-objective functions with a factory at compile-time.
 #define ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( Function, Factory )		\
     namespace Function ## _detail {					\
 	typedef TypeErasedAbstractFactory< Function, Factory > abstract_factory_type; \

@@ -28,109 +28,91 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ5_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ5_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
-	/*! \brief Multi-objective optimization benchmark function LZ5.
-	*
-	*  The function is described in
-	*
-	*  H. Li and Q. Zhang. 
-	*  Multiobjective Optimization Problems with Complicated Pareto Sets, MOEA/D and NSGA-II, 
-	*  IEEE Trans on Evolutionary Computation, 2(12):284-302, April 2009. 
-	*/
-	struct LZ5 : 
-		public AbstractMultiObjectiveFunction< VectorSpace<double> >,
-		public TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, LZ5 > {
-			typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-			typedef TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, LZ5 > meta;
+/*! \brief Multi-objective optimization benchmark function LZ5.
+*
+*  The function is described in
+*
+*  H. Li and Q. Zhang. 
+*  Multiobjective Optimization Problems with Complicated Pareto Sets, MOEA/D and NSGA-II, 
+*  IEEE Trans on Evolutionary Computation, 2(12):284-302, April 2009. 
+*/
+struct LZ5 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+{
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	
+	LZ5(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,-1),SearchPointType(numVariables,1) ){
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= IS_CONSTRAINED_FEATURE;
+		m_features |= HAS_CONSTRAINT_HANDLER;
+		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+		m_name="LZ5";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_handler.dimensions();
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-			typedef super::ResultType ResultType;
-			typedef super::SearchPointType SearchPointType;
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_handler.setBounds(
+			SearchPointType(numberOfVariables,-1),
+			SearchPointType(numberOfVariables,1)
+		);
+	}
+	
+	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
+		return m_handler;
+	}
 
-			
+	ResultType eval( const SearchPointType & x ) const {
+		m_evaluationCounter++;
 
-			LZ5() : super( 2 ) {
-				m_features |= CAN_PROPOSE_STARTING_POINT;
-				m_features |= IS_CONSTRAINED_FEATURE;
-				m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
-				m_name="LZ5";
+		ResultType value( 2, 0 );
+
+		unsigned int counter1 = 0, counter2 = 0;
+		for( unsigned int i = 1; i < x.size(); i++ ) {
+			if( i % 2 == 0 ) {
+				counter2++;
+				value[1] += sqr(
+					x(i) - (
+					(0.3*x(0)*x(0)*::cos(24*M_PI*x(0)+4*i*M_PI/x.size()) + 0.6*x(0))*
+					::cos( 6 * M_PI * x( 0 ) + i*M_PI/x.size()  )
+					)
+					);
+			} else {
+				counter1++;
+				value[0] += sqr(
+					x(i) - (
+					(0.3*x(0)*x(0)*::cos(24*M_PI*x(0)+4*i*M_PI/x.size()) + 0.6*x(0))*
+					::sin( 6 * M_PI * x( 0 ) + i*M_PI/x.size()  )
+					)
+					);
 			}
-
-			void init() {
-			}
-
-			ResultType eval( const SearchPointType & x ) const {
-				m_evaluationCounter++;
-
-				ResultType value( 2, 0 );
-
-				unsigned int counter1 = 0, counter2 = 0;
-				for( unsigned int i = 1; i < x.size(); i++ ) {
-					if( i % 2 == 0 ) {
-						counter2++;
-						value[1] += sqr(
-							x(i) - (
-							(0.3*x(0)*x(0)*::cos(24*M_PI*x(0)+4*i*M_PI/x.size()) + 0.6*x(0))*
-							::cos( 6 * M_PI * x( 0 ) + i*M_PI/x.size()  )
-							)
-							);
-					} else {
-						counter1++;
-						value[0] += sqr(
-							x(i) - (
-							(0.3*x(0)*x(0)*::cos(24*M_PI*x(0)+4*i*M_PI/x.size()) + 0.6*x(0))*
-							::sin( 6 * M_PI * x( 0 ) + i*M_PI/x.size()  )
-							)
-							);
-					}
-				}
-
-				value[0] *= 2./counter1;
-				value[0] += x( 0 );
-
-				value[1] *= 2./counter2;
-				value[1] += 1 - ::sqrt( x( 0 ) );
-
-				return value;
-			}
-
-			void proposeStartingPoint( SearchPointType & x ) const {
-				meta::proposeStartingPoint( x, m_numberOfVariables );
-			}
-
-			bool isFeasible( const SearchPointType & v ) const {
-				return( meta::isFeasible( v ) );
-			}
-
-			void closestFeasible( SearchPointType & v ) const {
-				meta::closestFeasible( v );
-			}
-	};
-
-	/**
-	* \brief Specializes objective function traits for the function LZ5.
-	*/
-	template<> 
-	struct ObjectiveFunctionTraits<LZ5> {
-
-		static LZ5::SearchPointType lowerBounds( unsigned int n ) {
-			LZ5::SearchPointType result( n, -1 );
-			result( 0 ) = 0;
-			return( result );
 		}
 
-		static LZ5::SearchPointType upperBounds( unsigned int n ) {
-			LZ5::SearchPointType result( n, 1 );
-			return( result );
-		}
+		value[0] *= 2./counter1;
+		value[0] += x( 0 );
 
-	};
+		value[1] *= 2./counter2;
+		value[1] += 1 - ::sqrt( x( 0 ) );
 
-	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( LZ5, shark::moo::RealValuedObjectiveFunctionFactory );
+		return value;
+	}
+private:
+	BoxConstraintHandler<SearchPointType> m_handler;
+};
+
+ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( LZ5, shark::moo::RealValuedObjectiveFunctionFactory );
 
 	//template<> struct ObjectiveFunctionTraits<LZ5> {
 	//	static LZ5::SolutionSetType referenceSet( std::size_t maxSize,

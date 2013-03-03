@@ -23,6 +23,9 @@ struct TestFunction : public AbstractObjectiveFunction<VectorSpace<double>,doubl
 		weights(1)=2;
 		weights(2)=-1;
 	}
+	std::size_t numberOfVariables()const{
+		return 3;
+	}
 	// adds just a value c on the input
 	virtual double eval(RealVector const& pattern)const
 	{

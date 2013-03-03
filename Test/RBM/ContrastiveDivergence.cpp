@@ -86,6 +86,10 @@ public:
 	std::size_t numberOfVN()const{
 		return 0;
 	}
+	
+	std::size_t numberOfParameters()const{
+		return 0;
+	}
 };
 
 //specialization for Gibbs Sampling

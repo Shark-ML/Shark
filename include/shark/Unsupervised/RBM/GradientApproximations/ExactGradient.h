@@ -69,6 +69,10 @@ public:
 		startingPoint = mpe_rbm->parameterVector();
 	}
 	
+	std::size_t numberOfVariables()const{
+		return mpe_rbm->numberOfParameters();
+	}
+	
 	double eval( SearchPointType const & parameter) const {
 		mpe_rbm->setParameterVector(parameter);
 		return negativeLogLikelihood(*mpe_rbm,m_data)/m_data.numberOfElements();

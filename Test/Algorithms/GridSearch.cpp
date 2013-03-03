@@ -23,6 +23,10 @@ struct TestFunction : public AbstractObjectiveFunction<VectorSpace<double>,doubl
 		m_features|=Base::CAN_PROPOSE_STARTING_POINT;
 		m_name="Quadratic Function";
 	}
+	
+	std::size_t numberOfVariables()const{
+		return 2;
+	}
 	// adds just a value c on the input
 	virtual double eval(RealVector const& pattern)const
 	{

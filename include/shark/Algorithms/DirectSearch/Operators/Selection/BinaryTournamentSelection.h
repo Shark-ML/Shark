@@ -59,21 +59,22 @@ namespace shark {
 		void operator()( IteratorType1 inIt, 
 			IteratorType1 inItE, 
 			IteratorType2 outIt,
-			IteratorType2 outItE ) {
-				std::size_t inSize = std::distance( inIt, inItE );
-				std::size_t i1, i2;
-				while( outIt != outItE ) {
+			IteratorType2 outItE 
+		) {
+			std::size_t inSize = std::distance( inIt, inItE );
+			std::size_t i1, i2;
+			while( outIt != outItE ) {
 
-					i1 = Rng::discrete( 0, inSize - 1);
-					i2 = Rng::discrete( 0, inSize - 1);
+				i1 = Rng::discrete( 0, inSize - 1);
+				i2 = Rng::discrete( 0, inSize - 1);
 
-					if( m_predicate( *(inIt + i2), *(inIt + i1) ) )
-						*outIt = *(inIt + i2);
-					else
-						*outIt = *(inIt + i1);
+				if( m_predicate( *(inIt + i2), *(inIt + i1) ) )
+					*outIt = *(inIt + i2);
+				else
+					*outIt = *(inIt + i1);
 
-					++outIt;
-				}
+				++outIt;
+			}
 		}
 
 		/**

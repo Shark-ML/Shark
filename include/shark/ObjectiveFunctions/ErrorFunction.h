@@ -82,6 +82,7 @@ public:
 	void setDataset(LabeledData<InputType, LabelType> const& dataset);
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const;
+	std::size_t numberOfVariables()const;
 
 	double eval(RealVector const& input) const;
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;
@@ -91,7 +92,7 @@ public:
 	friend void swap(const ErrorFunction<I,L>& op1, const ErrorFunction<I,L>& op2);
 
 private:
-	boost::scoped_ptr<detail::FunctionWrapperBase<InputType,LabelType> > m_wrapper;
+	boost::scoped_ptr<detail::FunctionWrapperBase<InputType,LabelType> > mp_wrapper;
 };
 
 }

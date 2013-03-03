@@ -28,95 +28,81 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ7_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ7_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
-	/*! \brief Multi-objective optimization benchmark function LZ7.
-	*
-	*  The function is described in
-	*
-	*  H. Li and Q. Zhang. 
-	*  Multiobjective Optimization Problems with Complicated Pareto Sets, MOEA/D and NSGA-II, 
-	*  IEEE Trans on Evolutionary Computation, 2(12):284-302, April 2009. 
-	*/
-	struct LZ7 : 
-		public AbstractMultiObjectiveFunction< VectorSpace<double> >,
-		public TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, LZ7 > {
-			typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-			typedef TraitsBoxConstraintsProvider< VectorSpace<double>::PointType, LZ7 > meta;
+/*! \brief Multi-objective optimization benchmark function LZ7.
+*
+*  The function is described in
+*
+*  H. Li and Q. Zhang. 
+*  Multiobjective Optimization Problems with Complicated Pareto Sets, MOEA/D and NSGA-II, 
+*  IEEE Trans on Evolutionary Computation, 2(12):284-302, April 2009. 
+*/
+struct LZ7 :  public AbstractMultiObjectiveFunction< VectorSpace<double> >
+{
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
 
-			typedef super::ResultType ResultType;
-			typedef super::SearchPointType SearchPointType;
+	LZ7(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= IS_CONSTRAINED_FEATURE;
+		m_features |= HAS_CONSTRAINT_HANDLER;
+		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+		m_name="LZ7";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_handler.dimensions();
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-			
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_handler.setBounds(
+			SearchPointType(numberOfVariables,0),
+			SearchPointType(numberOfVariables,1)
+		);
+	}
+		
+	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
+		return m_handler;
+	}
 
-			LZ7() : super( 2 ) {
-				m_features |= CAN_PROPOSE_STARTING_POINT;
-				m_features |= IS_CONSTRAINED_FEATURE;
-				m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
-				m_name="LZ7";
+	ResultType eval( const SearchPointType & x ) const {
+		m_evaluationCounter++;
+
+		ResultType value( 2, 0 );
+
+		unsigned int counter1 = 0, counter2 = 0;
+		for( unsigned int i = 1; i < x.size(); i++ ) {
+			double y = x(i) - ::pow( x(0), 0.5*(1.0 + 3*(i-1)/(x.size()-1) ) );
+			if( i % 2 == 0 ) {
+				counter2++;
+				value[1] += 4*sqr( y ) - ::cos( 8*y*M_PI) + 1.;
+			} else {
+				counter1++;
+				value[0] += 4*sqr( y ) - ::cos( 8*y*M_PI) + 1.;
 			}
-
-			void init() {
-			}
-
-			ResultType eval( const SearchPointType & x ) const {
-				m_evaluationCounter++;
-
-				ResultType value( 2, 0 );
-
-				unsigned int counter1 = 0, counter2 = 0;
-				for( unsigned int i = 1; i < x.size(); i++ ) {
-					double y = x(i) - ::pow( x(0), 0.5*(1.0 + 3*(i-1)/(x.size()-1) ) );
-					if( i % 2 == 0 ) {
-						counter2++;
-						value[1] += 4*sqr( y ) - ::cos( 8*y*M_PI) + 1.;
-					} else {
-						counter1++;
-						value[0] += 4*sqr( y ) - ::cos( 8*y*M_PI) + 1.;
-					}
-				}
-
-				value[0] *= 2./counter1;
-				value[0] += x( 0 );
-
-				value[1] *= 2./counter2;
-				value[1] += 1 - std::sqrt( x( 0 ) );
-
-				return value;
-			}
-
-			void proposeStartingPoint( SearchPointType & x ) const {
-				meta::proposeStartingPoint( x, m_numberOfVariables );
-			}
-
-			bool isFeasible( const SearchPointType & v ) const {
-				return( meta::isFeasible( v ) );
-			}
-
-			void closestFeasible( SearchPointType & v ) const {
-				meta::closestFeasible( v );
-			}
-	};
-
-	/**
-	* \brief Specializes objective function traits for the function LZ7.
-	*/
-	template<> 
-	struct ObjectiveFunctionTraits<LZ7> {
-
-		static LZ7::SearchPointType lowerBounds( unsigned int n ) {
-			return LZ7::SearchPointType( n, 0. );
 		}
 
-		static LZ7::SearchPointType upperBounds( unsigned int n ) {
-			return LZ7::SearchPointType( n, 1. );
-		}
+		value[0] *= 2./counter1;
+		value[0] += x( 0 );
 
-	};
+		value[1] *= 2./counter2;
+		value[1] += 1 - std::sqrt( x( 0 ) );
+
+		return value;
+	}
+private:
+	BoxConstraintHandler<SearchPointType> m_handler;
+};
+
 
 	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( LZ7, shark::moo::RealValuedObjectiveFunctionFactory );
 	//template<> struct ObjectiveFunctionTraits<LZ7> {

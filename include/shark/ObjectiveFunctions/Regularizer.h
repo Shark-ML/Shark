@@ -62,11 +62,23 @@ public:
  	typedef TypedSecondOrderDerivative<RealVector,RealMatrix> SecondOrderDerivative;
 
 	/// Constructor
-	OneNormRegularizer()
+	OneNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables)
 	{
 		m_name = "OneNormRegularizer";
 		m_features|=HAS_FIRST_DERIVATIVE;
 		m_features|=HAS_SECOND_DERIVATIVE;
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_numberOfVariables;
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
+
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_numberOfVariables = numberOfVariables;
 	}
 
 	void setMask(const RealVector& mask){
@@ -126,6 +138,7 @@ public:
 	}
 private:
 	RealVector m_mask;
+	std::size_t m_numberOfVariables;
 };
 
 
@@ -149,16 +162,24 @@ public:
 	typedef AbstractObjectiveFunction<VectorSpace<double>, double> super;
 
 	/// Constructor
-	TwoNormRegularizer()
+	TwoNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables)
 	{
 		m_name = "TwoNormRegularizer";
 		m_features|=HAS_FIRST_DERIVATIVE;
 		m_features|=HAS_SECOND_DERIVATIVE;
 	}
+	
+	std::size_t numberOfVariables()const{
+		return m_numberOfVariables;
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-	/// Destructor
-	virtual ~TwoNormRegularizer() {}
-
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_numberOfVariables = numberOfVariables;
+	}
 
 	/// Evaluates the objective function.
 	virtual double eval( RealVector const& input ) const
@@ -179,6 +200,8 @@ public:
 		derivative.m_hessian = RealIdentityMatrix(input.size(),input.size());
 		return 0.5 * normSqr(input);
 	}
+private:
+	std::size_t m_numberOfVariables;
 };
 
 

@@ -79,7 +79,7 @@ SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/Selection.cpp Direct
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Recombination/Recombination.cpp DirectSearch_Recombination )
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Mutation/BitflipMutation.cpp DirectSearch_BitflipMutation )
 
-#Algorithms tests
+#Algorithms tests 
 #Direct Search
 SHARK_ADD_TEST( Algorithms/DirectSearch/CMA.cpp DirectSearch_CMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/CMSA.cpp DirectSearch_CMSA )
@@ -99,7 +99,9 @@ SHARK_ADD_TEST( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_Steepest
 #LP - Linear Programs
 SHARK_ADD_TEST( Algorithms/LP/LinearProgram.cpp LP_LinearProgram )
 #QP - Quadratic Programs
+SHARK_ADD_TEST( Algorithms/QP/LRUCache.cpp QP_LRUCache )
 SHARK_ADD_TEST( Algorithms/QP/KernelMatrix.cpp QP_KernelMatrix )
+
 #Trainers
 SHARK_ADD_TEST( Algorithms/Trainers/CSvmTrainer.cpp Trainers_CSvmTrainer )
 SHARK_ADD_TEST( Algorithms/Trainers/FisherLDA.cpp Trainers_FisherLDA )

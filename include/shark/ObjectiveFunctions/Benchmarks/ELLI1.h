@@ -28,72 +28,77 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ELLI1_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ELLI1_H
 
-#include <shark/Core/AbstractBoxConstraintsProvider.h>
 #include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
+#include <shark/Rng/GlobalRng.h>
 
 #include <shark/LinAlg/rotations.h>
 
 namespace shark {
-	/*! \brief Multi-objective optimization benchmark function ELLI1.
-	*
-	*  The function is described in
-	*
-	*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
-	*  Covariance Matrix Adaptation for Multi-objective Optimization. 
-	*  Evolutionary Computation 15(1), pp. 1-28, 2007 
-	*/
-	struct ELLI1 : public AbstractMultiObjectiveFunction< VectorSpace<double> > {
+/*! \brief Multi-objective optimization benchmark function ELLI1.
+*
+*  The function is described in
+*
+*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
+*  Covariance Matrix Adaptation for Multi-objective Optimization. 
+*  Evolutionary Computation 15(1), pp. 1-28, 2007 
+*/
+struct ELLI1 : public AbstractMultiObjectiveFunction< VectorSpace<double> >{
+	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	ELLI1(std::size_t numVariables = 0) : super(2), m_a( 1E6 ),m_numberOfVariables(numVariables) {
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_name = "ELLI1";
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_numberOfVariables;
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
 
-		typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_numberOfVariables = numberOfVariables;
+	}
 
-		typedef super::ResultType ResultType;
-		typedef super::SearchPointType SearchPointType;
+	void init() {
+		m_rotationMatrix = randomRotationMatrix( m_numberOfVariables );
+	}
 
-		
+	ResultType eval( const SearchPointType & x ) const {
+		m_evaluationCounter++;
 
-		ELLI1() : m_a( 1E6 ) {
-			m_features |= CAN_PROPOSE_STARTING_POINT;
-			m_name = "ELLI1";
+		ResultType value( 2 );
+
+		//point_type point = m_rotationMatrix * x;
+		SearchPointType y = blas::prod( m_rotationMatrix, x );
+
+		double sum1 = 0.0, sum2 = 0.0;
+
+		for (unsigned i = 0; i < numberOfVariables(); i++) {
+			sum1 += std::pow(m_a, 2.0 * (i / (numberOfVariables() - 1.0))) * y( i ) * y( i );
+			sum2 += std::pow(m_a, 2 * (i / (numberOfVariables() - 1.0))) * (y( i ) - 2.0) * (y( i ) - 2.0);
 		}
 
-		void init() {
-			m_rotationMatrix = randomRotationMatrix( m_numberOfVariables );
-		}
+		value[0] = 2 + sum1 / ( m_a * m_a * numberOfVariables() );
+		value[1] = 2 + sum2 / ( m_a * m_a * numberOfVariables() );
 
-		ResultType eval( const SearchPointType & x ) const {
-			m_evaluationCounter++;
+		return( value );
+	}
 
-			ResultType value( 2 );
+	void proposeStartingPoint( SearchPointType & x ) const {
+		x.resize( m_numberOfVariables );
+		for( unsigned int i = 0; i < m_numberOfVariables; i++ )
+			x( i ) = Rng::gauss( -10., 10. );
+	}
 
-			//point_type point = m_rotationMatrix * x;
-			SearchPointType y = blas::prod( m_rotationMatrix, x );
+private:
+	double m_a;
+	RealMatrix m_rotationMatrix;
+	std::size_t m_numberOfVariables;
+};
 
-			double sum1 = 0.0, sum2 = 0.0;
-
-			for (unsigned i = 0; i < numberOfVariables(); i++) {
-				sum1 += std::pow(m_a, 2.0 * (i / (numberOfVariables() - 1.0))) * y( i ) * y( i );
-				sum2 += std::pow(m_a, 2 * (i / (numberOfVariables() - 1.0))) * (y( i ) - 2.0) * (y( i ) - 2.0);
-			}
-
-			value[0] = 2 + sum1 / ( m_a * m_a * numberOfVariables() );
-			value[1] = 2 + sum2 / ( m_a * m_a * numberOfVariables() );
-
-			return( value );
-		}
-
-		void proposeStartingPoint( SearchPointType & x ) const {
-			x.resize( m_numberOfVariables );
-			for( unsigned int i = 0; i < m_numberOfVariables; i++ )
-				x( i ) = Rng::gauss( -10., 10. );
-		}
-
-	private:
-		double m_a;
-		RealMatrix m_rotationMatrix;
-	};
-
-	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( ELLI1, shark::moo::RealValuedObjectiveFunctionFactory );
+ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( ELLI1, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

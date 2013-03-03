@@ -92,6 +92,10 @@ public:
 	void setDataset(DatasetType const& dataset) {
 		m_dataset = dataset;
 	}
+	
+	std::size_t numberOfVariables()const{
+		return 1+ mep_kernel->numberOfParameters();
+	}
 
 	/// Let \f$M\f$ denote the (kernel Gram) covariance matrix and
 	/// \f$t\f$ the label vector.  For the evidence we have: \f[ E= 1/2 \cdot [ -\log(\det(M)) - t^T M^{-1} t - N \log(2 \pi) ] \f]
@@ -186,7 +190,7 @@ public:
 		//           =  sum_i sum_j (-IM_ij+z_i * z_j) * dM_ij/da
 		// with W = -IM + zz^T we get
 		// dE/da = sum_i sum_j W dM_ij/da
-		//this can be calculated as blockwise drivative.
+		//this can be calculated as blockwise derivative.
 		
 		//compute inverse matrix from the cholesky dcomposition 
 		//using forward-backward substitution,

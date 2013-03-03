@@ -25,53 +25,69 @@
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
-    /**
-     * \brief Convex quadratic benchmark function.
-     */
-    class CigarDiscus : public AbstractObjectiveFunction< VectorSpace<double>,double > {
-    public:
+/**
+ * \brief Convex quadratic benchmark function.
+ */
+class CigarDiscus : public AbstractObjectiveFunction< VectorSpace<double>,double > {
+public:
 
-    CigarDiscus(unsigned int numberOfVariables = 5,double alpha=1E-3) : m_alpha(alpha) {
-	    m_features |= CAN_PROPOSE_STARTING_POINT;
-	    m_name="CigarDiscus";
+	CigarDiscus(unsigned int numberOfVariables = 5,double alpha=1E-3) : m_alpha(alpha) {
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_name="CigarDiscus";
+		m_numberOfVariables = numberOfVariables;
+	}
+	
+	std::size_t numberOfVariables()const{
+		return m_numberOfVariables;
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
+	
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_numberOfVariables = numberOfVariables;
 	}
 
-	void configure( const PropertyTree & node ) {
-	    m_alpha = node.get( "alpha", 1E-3 );
+	void configure(const PropertyTree &node) {
+		m_alpha = node.get("alpha", 1E-3);
 	}
 
-	void proposeStartingPoint( SearchPointType & x ) const {
-	    x.resize( m_numberOfVariables );
+	void proposeStartingPoint(SearchPointType &x) const {
+		x.resize(m_numberOfVariables);
 
-	    for( unsigned int i = 0; i < x.size(); i++ ) {
-		x( i ) = Rng::uni( 0, 1 );
-	    }
+		for (unsigned int i = 0; i < x.size(); i++) {
+			x(i) = Rng::uni(0, 1);
+		}
 	}
 
-	double eval( const SearchPointType & p ) const {
-	    m_evaluationCounter++;
+	double eval(const SearchPointType &p) const {
+		m_evaluationCounter++;
 
-	    double sum = m_alpha * sqr( p( 0 ) ) + sqr( p( p.size() - 1 ) );
-	    double alpha = ::sqrt( m_alpha );
-	    for( unsigned int i = 1; i < p.size()-1; i++ )
-		sum += alpha * sqr( p( i ) );
+		double sum = m_alpha * sqr(p(0)) + sqr(p(p.size() - 1));
+		double alpha = ::sqrt(m_alpha);
+		for (unsigned int i = 1; i < p.size()-1; i++)
+			sum += alpha * sqr(p(i));
 
-	    return sum;
+		return sum;
 	}
 
-	double alpha() const{
-	    return m_alpha;
+	double alpha() const {
+		return m_alpha;
 	}
 
-	void setAlpha(double alpha){
-	    m_alpha = alpha;
+	void setAlpha(double alpha) {
+		m_alpha = alpha;
 	}
 
-    private:
+private:
 	double m_alpha;
-    };
+	std::size_t m_numberOfVariables;
+};
 
-    ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( CigarDiscus, shark::soo::RealValuedObjectiveFunctionFactory );
+ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION(CigarDiscus, shark::soo::RealValuedObjectiveFunctionFactory);
 }
 
 #endif

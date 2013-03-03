@@ -68,411 +68,411 @@
 #include <numeric>
 
 namespace shark {
-    namespace detail {
-	namespace steady_state_mocma {
+namespace detail {
+namespace steady_state_mocma {
 
-	    /**
-	     * \namespace Internal namespace of the \f$(\mu+1)\f$-MO-CMA-ES.
-	     */
+/**
+ * \namespace Internal namespace of the \f$(\mu+1)\f$-MO-CMA-ES.
+ */
 
-	    typedef shark::elitist_cma::Chromosome Chromosome;	
+typedef shark::elitist_cma::Chromosome Chromosome;
 
-	    /**
-	     * \brief The individual type of the \f$(\mu+1)\f$-MO-CMA-ES.
-	     */
-	    typedef TypedIndividual<RealVector,Chromosome> Individual;
+/**
+ * \brief The individual type of the \f$(\mu+1)\f$-MO-CMA-ES.
+ */
+typedef TypedIndividual<RealVector,Chromosome> Individual;
 
-	    /**
-	     * \brief The population type of the \f$(\mu+1)\f$-MO-CMA-ES.
-	     */
-	    typedef std::vector< Individual > Population;
+/**
+ * \brief The population type of the \f$(\mu+1)\f$-MO-CMA-ES.
+ */
+typedef std::vector< Individual > Population;
 
-	    /**
-	     * \brief Individual and chromosome initializer type.
-	     */
-	    typedef shark::elitist_cma::Initializer<
-		Individual,
-		Chromosome,
-		shark::ChromosomeIndex< 0 >::INDEX
-		> Initializer;
+/**
+ * \brief Individual and chromosome initializer type.
+ */
+typedef shark::elitist_cma::Initializer<
+	Individual,
+	Chromosome,
+	shark::ChromosomeIndex< 0 >::INDEX
+> Initializer;
 
-	    /**
-	     * \brief Strategy parameter updater.
-	     */ 
-	    typedef shark::elitist_cma::Updater<
-		Individual,
-		Chromosome,
-		shark::ChromosomeIndex< 0 >::INDEX
-		> Updater;
+/**
+ * \brief Strategy parameter updater.
+ */
+typedef shark::elitist_cma::Updater<
+	Individual,
+	Chromosome,
+	shark::ChromosomeIndex< 0 >::INDEX
+> Updater;
 
-	    /**
-	     * \brief Mutation operator.
-	     */
-	    typedef shark::cma::Variator<
-		Individual,
-		Chromosome,
-		shark::ChromosomeIndex< 0 >::INDEX
-		> Variator;
+/**
+ * \brief Mutation operator.
+ */
+typedef shark::cma::Variator<
+	Individual,
+	Chromosome,
+	shark::ChromosomeIndex< 0 >::INDEX
+> Variator;
 
-	    /** \cond */
-	    struct IndexComparator {
-	    IndexComparator( steady_state_mocma::Population & pop ) : m_pop( pop ) {}
+/** \cond */
+struct IndexComparator {
+	IndexComparator(steady_state_mocma::Population &pop) : m_pop(pop) {}
 
-		bool operator()( unsigned int i, unsigned int j ) {
-		    return( m_comp( m_pop[i], m_pop[j] ) );
-		}
+	bool operator()(unsigned int i, unsigned int j) {
+		return(m_comp(m_pop[i], m_pop[j]));
+	}
 
-		RankShareComparator m_comp;
-		steady_state_mocma::Population & m_pop;
-	    };
-	    /** \endcond */
+	RankShareComparator m_comp;
+	steady_state_mocma::Population &m_pop;
+};
+/** \endcond */
+}
+
+/**
+ * \brief Implements the \f$(\mu+1)\f$-MO-CMA-ES.
+ *
+ * Please see the following papers for further reference:
+ *	- Igel, Suttorp and Hansen. Steady-state Selection and Efficient Covariance Matrix Update in the Multi-Objective CMA-ES.
+ *	- Voﬂ, Hansen and Igel. Improved Step Size Adaptation for the MO-CMA-ES.
+ */
+template<typename Indicator=HypervolumeIndicator>
+struct SteadyStateMOCMA {
+
+	/**
+	 * \brief Typedef of the algorithm's own type.
+	 */
+	typedef SteadyStateMOCMA<Indicator> this_type;
+
+	/**
+	 * \brief Default parent population size.
+	 */
+	static std::size_t DEFAULT_MU()	{
+		return(100);
 	}
 
 	/**
-	 * \brief Implements the \f$(\mu+1)\f$-MO-CMA-ES.
-	 *
-	 * Please see the following papers for further reference:
-	 *	- Igel, Suttorp and Hansen. Steady-state Selection and Efficient Covariance Matrix Update in the Multi-Objective CMA-ES.
-	 *	- Voﬂ, Hansen and Igel. Improved Step Size Adaptation for the MO-CMA-ES.
+	 * \brief Default penalty factor for penalizing infeasible solutions.
 	 */
-	template<typename Indicator=HypervolumeIndicator>
-	    struct SteadyStateMOCMA {
+	static double DEFAULT_PENALTY_FACTOR() {
+		return(1E-6);
+	}
 
-		/**
-		 * \brief Typedef of the algorithm's own type.
-		 */
-		typedef SteadyStateMOCMA<Indicator> this_type;
+	/**
+	 * \brief Default success threshold for step-size adaptation.
+	 */
+	static double DEFAULT_SUCCESS_THRESHOLD() {
+		return(0.44);
+	}
 
-		/**
-		 * \brief Default parent population size.
-		 */
-		static std::size_t DEFAULT_MU()	{ 
-		    return( 100 );				
-		}
+	/**
+	 * \brief Default notion of success.
+	 */
+	static const char *DEFAULT_NOTION_OF_SUCCESS()	{
+		return("IndividualBased");
+	}
 
-		/**
-		 * \brief Default penalty factor for penalizing infeasible solutions.
-		 */
-		static double DEFAULT_PENALTY_FACTOR() { 
-		    return( 1E-6 );				
-		}
+	/**
+	 * \brief Default decision whether to rely on rescaled axis for hypervolume calculation.
+	 */
+	static bool DEFAULT_USE_LOG_HYP() {
+		return(false);
+	}
 
-		/**
-		 * \brief Default success threshold for step-size adaptation.
-		 */
-		static double DEFAULT_SUCCESS_THRESHOLD() { 
-		    return( 0.44 );				
-		}
+	/**
+	 * \brief Default choice whether to rely on the approximated hypervolume indicator.
+	 */
+	static bool DEFAULT_USE_APPROXIMATED_HYPERVOLUME() {
+		return(true);
+	}
 
-		/**
-		 * \brief Default notion of success.
-		 */
-		static const char * DEFAULT_NOTION_OF_SUCCESS()	{ 
-		    return( "IndividualBased" );	
-		}
+	/**
+	 * \brief Default error bound for the approximated hypervolume indicator.
+	 */
+	static double DEFAULT_ERROR_BOUND()	{
+		return(1E-2);
+	}
 
-		/**
-		 * \brief Default decision whether to rely on rescaled axis for hypervolume calculation.
-		 */
-		static bool DEFAULT_USE_LOG_HYP() { 
-		    return( false );				
-		}
+	/**
+	 * \brief Default error probability for the approximated hypervolume indicator.
+	 */
+	static double DEFAULT_ERROR_PROBABILITY() {
+		return(1E-2);
+	}
 
-		/**
-		 * \brief Default choice whether to rely on the approximated hypervolume indicator.
-		 */
-		static bool DEFAULT_USE_APPROXIMATED_HYPERVOLUME() { 
-		    return( true );				
-		}
+	/**
+	 * \brief The result type of the optimizer, a vector of tuples \f$( \vec x, \vec{f}( \vec{x} )\f$.
+	 */
+	typedef std::vector< ResultSet< RealVector, RealVector > > SolutionSetType;
 
-		/**
-		 * \brief Default error bound for the approximated hypervolume indicator.
-		 */
-		static double DEFAULT_ERROR_BOUND()	{ 
-		    return( 1E-2 );				
-		}
+	steady_state_mocma::Population m_pop; ///< Population of size \f$\mu+1\f$.
+	steady_state_mocma::Initializer m_initializer; ///< Initialization operator.
+	steady_state_mocma::Variator m_variator; ///< Mutation operator.
+	steady_state_mocma::Updater m_updater; ///< Strategy parameter update operator.
 
-		/**
-		 * \brief Default error probability for the approximated hypervolume indicator.
-		 */
-		static double DEFAULT_ERROR_PROBABILITY() { 
-		    return( 1E-2 );				
-		}
+	shark::moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
 
-		/**
-		 * \brief The result type of the optimizer, a vector of tuples \f$( \vec x, \vec{f}( \vec{x} )\f$.
-		 */
-		typedef std::vector< ResultSet< RealVector, RealVector > > SolutionSetType;
+	RankShareComparator m_rsc; ///< Comparator for individuals based on their multi-objective rank and share.
+	FastNonDominatedSort m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort.
+	SteadyStateIndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
+	ApproximatedHypervolumeSelection m_approximatedSelection; ///< Selection operator relying on the approximated (contributing) hypervolume indicator.
 
-		steady_state_mocma::Population m_pop; ///< Population of size \f$\mu+1\f$.
-		steady_state_mocma::Initializer m_initializer; ///< Initialization operator.
-		steady_state_mocma::Variator m_variator; ///< Mutation operator.
-		steady_state_mocma::Updater m_updater; ///< Strategy parameter update operator.
+	unsigned int m_mu; ///< Population size \f$\mu\f$.
+	bool m_useNewUpdate; ///< Flag for deciding whether the improved step-size adaptation shall be used.
+	bool m_useApproximatedHypervolume;///< Flag for deciding whether to use the approximated hypervolume.
+	bool m_useLogScaling; ///< Flag for deciding whether to use the logarithmic hypervolume indicator.
 
-		shark::moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
+	/**
+	 * \brief Default c'tor.
+	 */
+	SteadyStateMOCMA() {
+		init();
+	}
 
-		RankShareComparator m_rsc; ///< Comparator for individuals based on their multi-objective rank and share.
-		FastNonDominatedSort m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort. 
-		SteadyStateIndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
-		ApproximatedHypervolumeSelection m_approximatedSelection; ///< Selection operator relying on the approximated (contributing) hypervolume indicator.
+	/**
+	 * \brief Returns the name of the algorithm.
+	 */
+	std::string name() const {
+		return("SteadyStateMOCMA");
+	}
 
-		unsigned int m_mu; ///< Population size \f$\mu\f$.
-		bool m_useNewUpdate; ///< Flag for deciding whether the improved step-size adaptation shall be used.
-		bool m_useApproximatedHypervolume;///< Flag for deciding whether to use the approximated hypervolume.
-		bool m_useLogScaling; ///< Flag for deciding whether to use the logarithmic hypervolume indicator.
+	/**
+	 * \brief Stores/loads the algorithm's state.
+	 * \tparam Archive The type of the archive.
+	 * \param [in,out] archive The archive to use for loading/storing.
+	 * \param [in] version Currently unused.
+	 */
+	template<typename Archive>
+	void serialize(Archive &archive, const unsigned int version) {
+		archive &BOOST_SERIALIZATION_NVP(m_pop);
+		archive &BOOST_SERIALIZATION_NVP(m_initializer);
+		archive &BOOST_SERIALIZATION_NVP(m_variator);
+		archive &BOOST_SERIALIZATION_NVP(m_updater);
 
-		/**
-		 * \brief Default c'tor.
-		 */
-		SteadyStateMOCMA() {
-		    init();
-		}
+		archive &BOOST_SERIALIZATION_NVP(m_evaluator);
+		archive &BOOST_SERIALIZATION_NVP(m_selection);
+		archive &BOOST_SERIALIZATION_NVP(m_approximatedSelection);
 
-		/**
-		 * \brief Returns the name of the algorithm.
-		 */
-		std::string name() const {
-		    return( "SteadyStateMOCMA" );
-		}
+		archive &BOOST_SERIALIZATION_NVP(m_mu);
+		archive &BOOST_SERIALIZATION_NVP(m_useNewUpdate);
+		archive &BOOST_SERIALIZATION_NVP(m_useApproximatedHypervolume);
+		archive &BOOST_SERIALIZATION_NVP(m_useLogScaling);
+	}
 
-		/**
-		 * \brief Stores/loads the algorithm's state.
-		 * \tparam Archive The type of the archive.
-		 * \param [in,out] archive The archive to use for loading/storing.
-		 * \param [in] version Currently unused.
-		 */
-		template<typename Archive>
-		void serialize( Archive & archive, const unsigned int version ) {
-		    archive & BOOST_SERIALIZATION_NVP( m_pop );
-		    archive & BOOST_SERIALIZATION_NVP( m_initializer );
-		    archive & BOOST_SERIALIZATION_NVP( m_variator );
-		    archive & BOOST_SERIALIZATION_NVP( m_updater );
+	/**
+	 * \brief Initializes the algorithm.
+	 * \param [in] mu The population size.
+	 * \param [in] penaltyFactor The penalty factor for penalizing infeasible solutions.
+	 * \param [in] successThreshold The success threshold \f$p_{\text{thresh}}\f$ for cutting off evolution path updates.
+	 * \param [in] notionOfSuccess The notion of success.
+	 * \param [in] useLogHyp Flag to determine whether to use the logarithmic hypervolume or not.
+	 * \param [in] useApproximatedHypervolume Flag to determine whether to use the approximated hypervolume.
+	 * \param [in] errorBound The error bound \f$ \epsilon \f$ for the approximated hypervolume selection.
+	 * \param [in] errorProbability The error prob. \f$ \delta \f$ for the approximated hypervolume selection.
+	 */
+	void init(unsigned int mu = this_type::DEFAULT_MU(),
+	        double penaltyFactor = this_type::DEFAULT_PENALTY_FACTOR(),
+	        double successThreshold = this_type::DEFAULT_SUCCESS_THRESHOLD(),
+	        const std::string &notionOfSuccess = this_type::DEFAULT_NOTION_OF_SUCCESS(),
+	        bool useLogHyp = this_type::DEFAULT_USE_LOG_HYP(),
+	        bool useApproximatedHypervolume = this_type::DEFAULT_USE_APPROXIMATED_HYPERVOLUME(),
+	        double errorBound = this_type::DEFAULT_ERROR_BOUND(),
+	        double errorProbability = this_type::DEFAULT_ERROR_PROBABILITY()) {
+		m_mu = mu;
 
-		    archive & BOOST_SERIALIZATION_NVP( m_evaluator );
-		    archive & BOOST_SERIALIZATION_NVP( m_selection );
-		    archive & BOOST_SERIALIZATION_NVP( m_approximatedSelection );
+		m_selection.setMu(mu);
+		m_approximatedSelection.setMu(mu);
 
-		    archive & BOOST_SERIALIZATION_NVP( m_mu );
-		    archive & BOOST_SERIALIZATION_NVP( m_useNewUpdate );
-		    archive & BOOST_SERIALIZATION_NVP( m_useApproximatedHypervolume );
-		    archive & BOOST_SERIALIZATION_NVP( m_useLogScaling );
-		}
+		m_evaluator.m_penaltyFactor = penaltyFactor;
+		m_updater.m_successThreshold = successThreshold;
 
-		/**
-		 * \brief Initializes the algorithm.
-		 * \param [in] mu The population size. 
-		 * \param [in] penaltyFactor The penalty factor for penalizing infeasible solutions.
-		 * \param [in] successThreshold The success threshold \f$p_{\text{thresh}}\f$ for cutting off evolution path updates.
-		 * \param [in] notionOfSuccess The notion of success.
-		 * \param [in] useLogHyp Flag to determine whether to use the logarithmic hypervolume or not.
-		 * \param [in] useApproximatedHypervolume Flag to determine whether to use the approximated hypervolume.
-		 * \param [in] errorBound The error bound \f$ \epsilon \f$ for the approximated hypervolume selection.
-		 * \param [in] errorProbability The error prob. \f$ \delta \f$ for the approximated hypervolume selection.
-		 */
-		void init( unsigned int mu = this_type::DEFAULT_MU(), 
-			   double penaltyFactor = this_type::DEFAULT_PENALTY_FACTOR(),
-			   double successThreshold = this_type::DEFAULT_SUCCESS_THRESHOLD(),
-			   const std::string & notionOfSuccess = this_type::DEFAULT_NOTION_OF_SUCCESS(),
-			   bool useLogHyp = this_type::DEFAULT_USE_LOG_HYP(),
-			   bool useApproximatedHypervolume = this_type::DEFAULT_USE_APPROXIMATED_HYPERVOLUME(),
-			   double errorBound = this_type::DEFAULT_ERROR_BOUND(),
-			   double errorProbability = this_type::DEFAULT_ERROR_PROBABILITY() ) {
-		    m_mu = mu;
-
-		    m_selection.setMu( mu );
-		    m_approximatedSelection.setMu( mu );	
-
-		    m_evaluator.m_penaltyFactor = penaltyFactor;
-		    m_updater.m_successThreshold = successThreshold;
-
-		    if( notionOfSuccess == "IndividualBased" ) {
+		if (notionOfSuccess == "IndividualBased") {
 			m_useNewUpdate = false;
-		    } else if( notionOfSuccess == "PopulationBased" ) {
+		} else if (notionOfSuccess == "PopulationBased") {
 			m_useNewUpdate = true;
-		    }
-
-		    m_selection.m_useLogHyp = useLogHyp;
-		    // m_selection.m_indicator.m_hv.m_useLogHyp = m_selection.m_useLogHyp;
-
-		    m_useApproximatedHypervolume = useApproximatedHypervolume;
-		    m_approximatedSelection.m_errorBound = errorBound;
-		    m_approximatedSelection.m_errorProbability = errorProbability;
 		}
 
-		/**
-		 * \brief Initializes the algorithm from a configuration-tree node.
-		 *
-		 * The following sub keys are recognized:
-		 *	- Mu, type: unsigned int, default value: 100.
-		 *	- PenaltyFactor, type: double, default value: \f$10^{-6}\f$.
-		 *	- SuccessThreshold, type: double, default value: 0.44.
-		 *	- NotionOfSuccess, type: string, default value: IndividualBased.
-		 *	- UseLogHyp, type: bool, default value: false.
-		 *	- UseApproximatedHypervolume, type: bool, default value: false.
-		 *	- ErrorBound, type: double, default value: \f$10^{-6}\f$.
-		 *	- ErrorProbability, type: double, default value: \f$10^{-6}\f$.
-		 *
-		 * \param [in] node The configuration tree node.
-		 */
-		template<typename PropTree>
-		void configure( const PropTree & node ) {
-		    init( 
-			 node.template get<unsigned int>( "Mu", this_type::DEFAULT_MU() ),
-			 node.template get<double>( "PenaltyFactor", this_type::DEFAULT_PENALTY_FACTOR() ),
-			 node.template get<double>( "SuccessThreshold", this_type::DEFAULT_SUCCESS_THRESHOLD() ),
-			 node.template get<std::string>( "NotionOfSuccess", this_type::DEFAULT_NOTION_OF_SUCCESS() ),
-			 node.template get<bool>( "UseLogHyp", this_type::DEFAULT_USE_LOG_HYP() ),
-			 node.template get<bool>( "UseApproximatedHypervolume", this_type::DEFAULT_USE_APPROXIMATED_HYPERVOLUME() ),
-			 node.template get<double>( "ErrorBound", this_type::DEFAULT_ERROR_BOUND() ),
-			 node.template get<double>( "ErrorProbability", this_type::DEFAULT_ERROR_PROBABILITY() )
-			  );
+		m_selection.m_useLogHyp = useLogHyp;
+		// m_selection.m_indicator.m_hv.m_useLogHyp = m_selection.m_useLogHyp;
 
-		    try {
-			m_approximatedSelection.configure( node.get_child( "ApproximatedHypervolumeSelection" ) );
-		    } catch( ... ) {
-			
-		    }
+		m_useApproximatedHypervolume = useApproximatedHypervolume;
+		m_approximatedSelection.m_errorBound = errorBound;
+		m_approximatedSelection.m_errorProbability = errorProbability;
+	}
 
-                    try {
-                        m_initializer.m_initialSigma = node.template get<double>( "InitialSigma" );
-                        m_initializer.m_isInitialSigmaProvidedByUser = true;
-                    } catch( ... ) {
-                    }
+	/**
+	 * \brief Initializes the algorithm from a configuration-tree node.
+	 *
+	 * The following sub keys are recognized:
+	 *	- Mu, type: unsigned int, default value: 100.
+	 *	- PenaltyFactor, type: double, default value: \f$10^{-6}\f$.
+	 *	- SuccessThreshold, type: double, default value: 0.44.
+	 *	- NotionOfSuccess, type: string, default value: IndividualBased.
+	 *	- UseLogHyp, type: bool, default value: false.
+	 *	- UseApproximatedHypervolume, type: bool, default value: false.
+	 *	- ErrorBound, type: double, default value: \f$10^{-6}\f$.
+	 *	- ErrorProbability, type: double, default value: \f$10^{-6}\f$.
+	 *
+	 * \param [in] node The configuration tree node.
+	 */
+	template<typename PropTree>
+	void configure(const PropTree &node) {
+		init(
+		    node.template get<unsigned int>("Mu", this_type::DEFAULT_MU()),
+		    node.template get<double>("PenaltyFactor", this_type::DEFAULT_PENALTY_FACTOR()),
+		    node.template get<double>("SuccessThreshold", this_type::DEFAULT_SUCCESS_THRESHOLD()),
+		    node.template get<std::string>("NotionOfSuccess", this_type::DEFAULT_NOTION_OF_SUCCESS()),
+		    node.template get<bool>("UseLogHyp", this_type::DEFAULT_USE_LOG_HYP()),
+		    node.template get<bool>("UseApproximatedHypervolume", this_type::DEFAULT_USE_APPROXIMATED_HYPERVOLUME()),
+		    node.template get<double>("ErrorBound", this_type::DEFAULT_ERROR_BOUND()),
+		    node.template get<double>("ErrorProbability", this_type::DEFAULT_ERROR_PROBABILITY())
+		);
+
+		try {
+			m_approximatedSelection.configure(node.get_child("ApproximatedHypervolumeSelection"));
+		} catch (...) {
+
 		}
 
-		/**
-		 * \brief Initializes the algorithm for the supplied objective function.
-		 * \tparam ObjectiveFunction The type of the objective function, 
-		 * needs to adhere to the concept of an AbstractObjectiveFunction.
-		 * \param [in] f The objective function.
-		 * \param [in] sp An initial search point.
-		 */
-		template<typename ObjectiveFunction>
-		void init( const ObjectiveFunction & f, const RealVector & sp = RealVector() ) {
-                    
-                    RealVector ips[3];
-                    f.proposeStartingPoint( ips[0] );
-                    f.proposeStartingPoint( ips[1] );
-                    f.proposeStartingPoint( ips[2] );
-                    double d[3];
-                    d[0] = blas::norm_2( ips[1] - ips[0] );
-                    d[1] = blas::norm_2( ips[2] - ips[0] );
-                    d[2] = blas::norm_2( ips[2] - ips[1] );
-                    std::sort( d, d+3 );
-                        
-                    if( !m_initializer.m_isInitialSigmaProvidedByUser ) {
-                        m_initializer.m_initialSigma = d[1];
-                    }
+		try {
+			m_initializer.m_initialSigma = node.template get<double>("InitialSigma");
+			m_initializer.m_isInitialSigmaProvidedByUser = true;
+		} catch (...) {
+		}
+	}
 
-		    m_pop.resize( m_mu + 1 );
+	/**
+	 * \brief Initializes the algorithm for the supplied objective function.
+	 * \tparam ObjectiveFunction The type of the objective function,
+	 * needs to adhere to the concept of an AbstractObjectiveFunction.
+	 * \param [in] f The objective function.
+	 * \param [in] sp An initial search point.
+	 */
+	template<typename ObjectiveFunction>
+	void init(const ObjectiveFunction &f, const RealVector &sp = RealVector()) {
 
-		    std::size_t noObjectives = 0;
+		RealVector ips[3];
+		f.proposeStartingPoint(ips[0]);
+		f.proposeStartingPoint(ips[1]);
+		f.proposeStartingPoint(ips[2]);
+		double d[3];
+		d[0] = blas::norm_2(ips[1] - ips[0]);
+		d[1] = blas::norm_2(ips[2] - ips[0]);
+		d[2] = blas::norm_2(ips[2] - ips[1]);
+		std::sort(d, d+3);
 
-		    shark::moo::PenalizingEvaluator evaluator;
-		    BOOST_FOREACH( steady_state_mocma::Individual & ind, m_pop ) {
-			f.proposeStartingPoint( *ind );
-			boost::tuple< typename ObjectiveFunction::ResultType, typename ObjectiveFunction::ResultType > 	result = evaluator( f, *ind );
-			ind.fitness( shark::tag::PenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
-			ind.fitness( shark::tag::UnpenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
-
-			noObjectives = std::max( noObjectives, ind.fitness( shark::tag::PenalizedFitness() ).size() );
-		    }
-
-		    m_initializer.m_useNewUpdate = m_useNewUpdate;
-		    m_initializer.m_searchSpaceDimension = ips[0].size();
-		    m_initializer.m_noObjectives = noObjectives;
-
-		    BOOST_FOREACH( steady_state_mocma::Individual & ind, m_pop ) {
-			m_initializer( ind );
-		    }
-
-		    m_selection.setNoObjectives( noObjectives );
-		    m_approximatedSelection.m_noObjectives = noObjectives;
-
-		    m_fastNonDominatedSort( m_pop );
+		if (!m_initializer.m_isInitialSigmaProvidedByUser) {
+			m_initializer.m_initialSigma = d[1];
 		}
 
-		/**
-		 * \brief Executes one iteration of the algorithm.
-		 * \tparam The type of the objective to iterate upon.
-		 * \param [in] f The function to iterate upon.
-		 * \returns The Pareto-set/-front approximation after the iteration.
-		 */
-		template<typename Function>
-		SolutionSetType step( const Function & f ) {
-		    int maxIdx = 0;
-		    for( unsigned int i = 0; i < m_pop.size(); i++ ) {
-			if( m_pop[i].rank() != 1 )
-			    break;
+		m_pop.resize(m_mu + 1);
+
+		std::size_t noObjectives = 0;
+
+		shark::moo::PenalizingEvaluator evaluator;
+		BOOST_FOREACH(steady_state_mocma::Individual & ind, m_pop) {
+			f.proposeStartingPoint(*ind);
+			boost::tuple< typename ObjectiveFunction::ResultType, typename ObjectiveFunction::ResultType > 	result = evaluator(f, *ind);
+			ind.fitness(shark::tag::PenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >(result);
+			ind.fitness(shark::tag::UnpenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >(result);
+
+			noObjectives = std::max(noObjectives, ind.fitness(shark::tag::PenalizedFitness()).size());
+		}
+
+		m_initializer.m_useNewUpdate = m_useNewUpdate;
+		m_initializer.m_searchSpaceDimension = ips[0].size();
+		m_initializer.m_noObjectives = noObjectives;
+
+		BOOST_FOREACH(steady_state_mocma::Individual & ind, m_pop) {
+			m_initializer(ind);
+		}
+
+		m_selection.setNoObjectives(noObjectives);
+		m_approximatedSelection.m_noObjectives = noObjectives;
+
+		m_fastNonDominatedSort(m_pop);
+	}
+
+	/**
+	 * \brief Executes one iteration of the algorithm.
+	 * \tparam The type of the objective to iterate upon.
+	 * \param [in] f The function to iterate upon.
+	 * \returns The Pareto-set/-front approximation after the iteration.
+	 */
+	template<typename Function>
+	SolutionSetType step(const Function &f) {
+		int maxIdx = 0;
+		for (unsigned int i = 0; i < m_pop.size(); i++) {
+			if (m_pop[i].rank() != 1)
+				break;
 			maxIdx = i;
-		    }
-
-		    steady_state_mocma::Population::iterator parent, offspring;
-		    unsigned int idx = Rng::discrete( 0, std::max( 0, maxIdx-1 ) );
-		    parent = m_pop.begin() + idx;
-		    offspring = m_pop.begin() + m_mu;
-		    *offspring = *parent;
-		    offspring->age() = 0;
-		    m_variator( *offspring );
-
-		    shark::moo::PenalizingEvaluator evaluator;
-		    boost::tuple< typename Function::ResultType, typename Function::ResultType > result = evaluator( f, **offspring/**m_pop.back()*/ );
-		    offspring->fitness( shark::tag::PenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
-		    offspring->fitness( shark::tag::UnpenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
-
-		    parent->get<0>().mep_parent = NULL;
-		    offspring->get<0>().mep_parent = &parent->get<0>();
-
-		    m_fastNonDominatedSort( m_pop );
-
-		    if( m_useApproximatedHypervolume ) 
-			m_approximatedSelection( m_pop );
-		    else
-			m_selection( m_pop );
-
-		    if( m_useNewUpdate ) {
-			std::vector<unsigned int> indices( m_mu + 1 );
-			for( unsigned int i = 0; i < indices.size(); i++ ) {
-			    indices[i] = i;
-			}
-
-			std::sort( indices.begin(), indices.end(), steady_state_mocma::IndexComparator( m_pop ) );
-
-			if( indices.back() != m_mu ) {
-			    offspring->get<0>().m_noSuccessfulOffspring += 1.0;
-			    parent->get<0>().m_noSuccessfulOffspring += 1.0;
-			}
-		    } else {
-			RankShareComparator rsc;
-			if( rsc( *offspring, *parent ) ) {
-			    offspring->get<0>().m_noSuccessfulOffspring += 1.0;
-			    parent->get<0>().m_noSuccessfulOffspring += 1.0;
-			}	    
-		    }
-
-		    m_updater( *offspring );
-		    m_updater( *parent );
-
-		    std::sort( m_pop.begin(), m_pop.end(), RankShareComparator() );
-		    for( unsigned int i = 0; i < m_mu; i++ ) {
-			m_pop[i].age()++;
-		    }
-
-		    SolutionSetType solutionSet;
-		    for( steady_state_mocma::Population::iterator it = m_pop.begin(); it != m_pop.begin() + m_mu; ++it ) {
-			solutionSet.push_back( shark::makeResultSet( *(*it), it->fitness( shark::tag::UnpenalizedFitness() ) ) ) ;
-		    }
-
-		    return( solutionSet );
 		}
-	    };
-    }
 
-    /**
-     * \brief \f$(\mu+1)\f$-MO-CMA-ES specialization of optimizer traits.
-     */
-    template< typename Indicator >
-	struct OptimizerTraits<detail::SteadyStateMOCMA< Indicator > > {
+		steady_state_mocma::Population::iterator parent, offspring;
+		unsigned int idx = Rng::discrete(0, std::max(0, maxIdx-1));
+		parent = m_pop.begin() + idx;
+		offspring = m_pop.begin() + m_mu;
+		*offspring = *parent;
+		offspring->age() = 0;
+		m_variator(*offspring);
+
+		shark::moo::PenalizingEvaluator evaluator;
+		boost::tuple< typename Function::ResultType, typename Function::ResultType > result = evaluator(f, **offspring/**m_pop.back()*/);
+		offspring->fitness(shark::tag::PenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >(result);
+		offspring->fitness(shark::tag::UnpenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >(result);
+
+		parent->get<0>().mep_parent = NULL;
+		offspring->get<0>().mep_parent = &parent->get<0>();
+
+		m_fastNonDominatedSort(m_pop);
+
+		if (m_useApproximatedHypervolume)
+			m_approximatedSelection(m_pop);
+		else
+			m_selection(m_pop);
+
+		if (m_useNewUpdate) {
+			std::vector<unsigned int> indices(m_mu + 1);
+			for (unsigned int i = 0; i < indices.size(); i++) {
+				indices[i] = i;
+			}
+
+			std::sort(indices.begin(), indices.end(), steady_state_mocma::IndexComparator(m_pop));
+
+			if (indices.back() != m_mu) {
+				offspring->get<0>().m_noSuccessfulOffspring += 1.0;
+				parent->get<0>().m_noSuccessfulOffspring += 1.0;
+			}
+		} else {
+			RankShareComparator rsc;
+			if (rsc(*offspring, *parent)) {
+				offspring->get<0>().m_noSuccessfulOffspring += 1.0;
+				parent->get<0>().m_noSuccessfulOffspring += 1.0;
+			}
+		}
+
+		m_updater(*offspring);
+		m_updater(*parent);
+
+		std::sort(m_pop.begin(), m_pop.end(), RankShareComparator());
+		for (unsigned int i = 0; i < m_mu; i++) {
+			m_pop[i].age()++;
+		}
+
+		SolutionSetType solutionSet;
+		for (steady_state_mocma::Population::iterator it = m_pop.begin(); it != m_pop.begin() + m_mu; ++it) {
+			solutionSet.push_back(shark::makeResultSet(*(*it), it->fitness(shark::tag::UnpenalizedFitness()))) ;
+		}
+
+		return(solutionSet);
+	}
+};
+}
+
+/**
+ * \brief \f$(\mu+1)\f$-MO-CMA-ES specialization of optimizer traits.
+ */
+template< typename Indicator >
+struct OptimizerTraits<detail::SteadyStateMOCMA< Indicator > > {
 
 	/** \brief Typedef for this type. */
 	typedef detail::SteadyStateMOCMA< Indicator > algorithm_type;
@@ -483,16 +483,16 @@ namespace shark {
 	 * \param [in,out] s The stream to print usage information to.
 	 */
 	template<typename Stream>
-	    static void usage( Stream & s ) {
-	    s << "MOCMA usage information:" << std::endl;
-	    s << "\t Mu, size of the population, default value: " << algorithm_type::DEFAULT_MU() << std::endl;
-	    s << "\t PenaltyFactor, factor for penalizing infeasible solutions, default value: " << algorithm_type::DEFAULT_PENALTY_FACTOR() << std::endl;
-	    s << "\t SuccessThreshold, success threshold for stalling strategy parameter updates, default value: " << algorithm_type::DEFAULT_SUCCESS_THRESHOLD << std::endl;
-	    s << "\t NotionOfSuccess, whether to carry out success estimation on a per-individual or on a population basis, default value: " << algorithm_type::DEFAULT_NOTION_OF_SUCCESS() << std::endl;
-	    s << "\t UseLogHyp, whether to rescale axis of the objective space logarithmically for hypervolume calculation, default value: " << algorithm_type::DEFAULT_USE_LOG_HYP() << std::endl;
-	    s << "\t UseApproximatedHypervolume, whether to use the exact or the approximated hypervolume, default value: " << algorithm_type::DEFAULT_USE_APPROXIMATED_HYPERVOLUME << std::endl;
-	    s << "\t ErrorBound, parameter epsilon of the hypervolume approximation scheme, default value: " << algorithm_type::DEFAULT_ERROR_BOUND() << std::endl;
-	    s << "\t ErrorProbability, parameter delta of the hypervolume approximation scheme, default value: " << algorithm_type::DEFAULT_ERROR_PROBABILITY() << std::endl;
+	static void usage(Stream &s) {
+		s << "MOCMA usage information:" << std::endl;
+		s << "\t Mu, size of the population, default value: " << algorithm_type::DEFAULT_MU() << std::endl;
+		s << "\t PenaltyFactor, factor for penalizing infeasible solutions, default value: " << algorithm_type::DEFAULT_PENALTY_FACTOR() << std::endl;
+		s << "\t SuccessThreshold, success threshold for stalling strategy parameter updates, default value: " << algorithm_type::DEFAULT_SUCCESS_THRESHOLD << std::endl;
+		s << "\t NotionOfSuccess, whether to carry out success estimation on a per-individual or on a population basis, default value: " << algorithm_type::DEFAULT_NOTION_OF_SUCCESS() << std::endl;
+		s << "\t UseLogHyp, whether to rescale axis of the objective space logarithmically for hypervolume calculation, default value: " << algorithm_type::DEFAULT_USE_LOG_HYP() << std::endl;
+		s << "\t UseApproximatedHypervolume, whether to use the exact or the approximated hypervolume, default value: " << algorithm_type::DEFAULT_USE_APPROXIMATED_HYPERVOLUME << std::endl;
+		s << "\t ErrorBound, parameter epsilon of the hypervolume approximation scheme, default value: " << algorithm_type::DEFAULT_ERROR_BOUND() << std::endl;
+		s << "\t ErrorProbability, parameter delta of the hypervolume approximation scheme, default value: " << algorithm_type::DEFAULT_ERROR_PROBABILITY() << std::endl;
 	}
 
 	/**
@@ -501,56 +501,56 @@ namespace shark {
 	 * \param [in,out] node The tree to be filled with default key-value pairs.
 	 */
 	template<typename Tree>
-	    static void defaultConfig( Tree & node ) {
-	    node.template add<unsigned int>( 
-					    "Mu", 
-					    algorithm_type::DEFAULT_MU() 
-					     );
-	    node.template add<double>( 
-				      "PenaltyFactor", 
-				      algorithm_type::DEFAULT_PENALTY_FACTOR() 
-				       );
-	    node.template add<double>(
-				      "SuccessThreshold", 
-				      algorithm_type::DEFAULT_SUCCESS_THRESHOLD() 
-				      );
-	    node.template add<std::string>( 
-					   "NotionOfSuccess", 
-					   algorithm_type::DEFAULT_NOTION_OF_SUCCESS() 
-					    );
-	    node.template add<bool>(	
-				    "UseLogHyp", 
-				    algorithm_type::DEFAULT_USE_LOG_HYP() 
-					);
-	    node.template add<bool>(	
-				    "UseApproximatedHypervolume", 
-				    algorithm_type::DEFAULT_USE_APPROXIMATED_HYPERVOLUME() 
-					);
-	    node.template add<double>(
-				      "ErrorBound", 
-				      algorithm_type::DEFAULT_ERROR_BOUND() 
-				      );
-	    node.template add<double>( 
-				      "ErrorProbability", 
-				      algorithm_type::DEFAULT_ERROR_PROBABILITY() 
-				       );
+	static void defaultConfig(Tree &node) {
+		node.template add<unsigned int>(
+		    "Mu",
+		    algorithm_type::DEFAULT_MU()
+		);
+		node.template add<double>(
+		    "PenaltyFactor",
+		    algorithm_type::DEFAULT_PENALTY_FACTOR()
+		);
+		node.template add<double>(
+		    "SuccessThreshold",
+		    algorithm_type::DEFAULT_SUCCESS_THRESHOLD()
+		);
+		node.template add<std::string>(
+		    "NotionOfSuccess",
+		    algorithm_type::DEFAULT_NOTION_OF_SUCCESS()
+		);
+		node.template add<bool>(
+		    "UseLogHyp",
+		    algorithm_type::DEFAULT_USE_LOG_HYP()
+		);
+		node.template add<bool>(
+		    "UseApproximatedHypervolume",
+		    algorithm_type::DEFAULT_USE_APPROXIMATED_HYPERVOLUME()
+		);
+		node.template add<double>(
+		    "ErrorBound",
+		    algorithm_type::DEFAULT_ERROR_BOUND()
+		);
+		node.template add<double>(
+		    "ErrorProbability",
+		    algorithm_type::DEFAULT_ERROR_PROBABILITY()
+		);
 	}
-    };
+};
 
-    /** \brief Injects the Steady-State MOCMA relying on the hypervolume indicator into the inheritance hierarchy. */
-    typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::SteadyStateMOCMA< HypervolumeIndicator > > SteadyStateMOCMA;
+/** \brief Injects the Steady-State MOCMA relying on the hypervolume indicator into the inheritance hierarchy. */
+typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::SteadyStateMOCMA< HypervolumeIndicator > > SteadyStateMOCMA;
 
-    /** \brief Injects the Steady-State MOCMA relying on the additive epsilon indicator into the inheritance hierarchy. */
-    typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::SteadyStateMOCMA< AdditiveEpsilonIndicator > > EpsilonSteadyStateMOCMA;
+/** \brief Injects the Steady-State MOCMA relying on the additive epsilon indicator into the inheritance hierarchy. */
+typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::SteadyStateMOCMA< AdditiveEpsilonIndicator > > EpsilonSteadyStateMOCMA;
 
-    /** \brief Injects the Steady-State MOCMA relying on the locality sensitive additive epsilon indicator into the inheritance hierarchy. */
-    // typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::SteadyStateMOCMA< LocalitySensitiveAdditiveEpsilonIndicator<tag::PenalizedFitness> > > LocalitySensitiveEpsilonSteadyStateMOCMA;
+/** \brief Injects the Steady-State MOCMA relying on the locality sensitive additive epsilon indicator into the inheritance hierarchy. */
+// typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::SteadyStateMOCMA< LocalitySensitiveAdditiveEpsilonIndicator<tag::PenalizedFitness> > > LocalitySensitiveEpsilonSteadyStateMOCMA;
 
-    /** \brief Registers the Steady-State MOCMA relying on the hypervolume indicator with the factory. */
-    ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER( SteadyStateMOCMA, moo::RealValuedMultiObjectiveOptimizerFactory );
-	
-    /** \brief Registers the Steady-State MOCMA relying on the additive epsilon indicator with the factory. */
-    ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER( EpsilonSteadyStateMOCMA, moo::RealValuedMultiObjectiveOptimizerFactory );
+/** \brief Registers the Steady-State MOCMA relying on the hypervolume indicator with the factory. */
+ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER(SteadyStateMOCMA, moo::RealValuedMultiObjectiveOptimizerFactory);
+
+/** \brief Registers the Steady-State MOCMA relying on the additive epsilon indicator with the factory. */
+ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER(EpsilonSteadyStateMOCMA, moo::RealValuedMultiObjectiveOptimizerFactory);
 }
 
 #endif

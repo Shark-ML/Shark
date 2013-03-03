@@ -34,8 +34,8 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_CROSSOVER_SBX_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_CROSSOVER_SBX_H
 
-#include <shark/Core/Traits/ObjectiveFunctionTraits.h>
 #include <shark/Rng/GlobalRng.h>
+#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 
 namespace shark {
 
@@ -80,8 +80,20 @@ namespace shark {
 		template<typename Function>
 		void init( const Function & f ) {
 			m_prob = 0.5;
-			m_lower = shark::ObjectiveFunctionTraits<Function>::lowerBounds( f.numberOfVariables() );
-			m_upper = shark::ObjectiveFunctionTraits<Function>::upperBounds( f.numberOfVariables() );
+			if(!f.isConstrained()){
+				m_lower = repeat(-1E20,f.numberOfVariables());
+				m_upper = repeat(1E20,f.numberOfVariables());
+			}
+			else if (f.hasConstraintHandler() &&! f.getConstraintHandler().isBoxConstrained()) {
+				typedef BoxConstraintHandler<PointType> ConstraintHandler;
+				ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(f.getConstraintHandler());
+				
+				m_lower = handler.lower();
+				m_upper = handler.upper();
+
+			} else{
+				throw SHARKEXCEPTION("[SimulatedBinaryCrossover::init] Algorithm does only allow box constraints");
+			}
 		}
 
 		/**
