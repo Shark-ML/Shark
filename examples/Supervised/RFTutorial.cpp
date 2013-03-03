@@ -39,9 +39,9 @@ using namespace shark;
 int main() {
 
 	//*****************LOAD AND PREPARE DATA***********************//
-	// read data
+	//Read data
 	ClassificationDataset data;
-	//Optical digits
+	//Sample data set C.csv
 	import_csv(data, "data/C.csv", LAST_COLUMN, " ", "#");
 
 
