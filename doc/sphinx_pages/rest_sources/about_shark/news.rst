@@ -5,7 +5,7 @@ Repository upgraded
 ^^^^^^^^^^^^^^^^^^^
 
 We upgraded our Sourceforge repository to the newest version as
-recommended by Sourceforge. The new path to Shark is now:
+recommended by Sourceforge. The new path to Shark is now::
 
     svn co svn://svn.code.sf.net/p/shark-project/code/trunk/Shark
 
