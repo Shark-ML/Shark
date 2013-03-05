@@ -143,3 +143,41 @@ void LinearClassifier::write( OutArchive & archive ) const{
 	archive << m_inverseCholesky;
 	archive << m_means;
 }
+
+
+Data<RealVector> LinearClassifier::softMembership(Data<InputType> const & patterns){
+		Data<RealVector> prediction(patterns.numberOfBatches());
+		for(std::size_t i = 0; i != patterns.numberOfBatches();++i){
+			softMembership(patterns.batch(i),prediction.batch(i));
+		}
+		return prediction;
+}
+
+void LinearClassifier::softMembership(BatchInputType const& patterns, Batch<RealVector>::type& output)const{
+	//we calculate the class means using the formula (<,> is inner prod)
+	//< a-c,C(a-c) >
+	//where c is the class mean, "a" a single pattern and C the inverse covariance
+	//using cholesky decomposition C=AA^T and a'=A^Ta c'=A^Tc we can write this also as:
+	//< a-c,C(a-c) > = < a-c,AA^T(a-c) > =  < A^T(a-c),A^T(a-c) > = <a'-c',a'-c'>= <a',a'>-2<c',a'>+<c',c'>
+	//we have allready precomputed c' and <c',c'>(the class bias). so we need to compute only a'
+	RealMatrix transA(patterns.size1(),inputSize());
+	fast_prod(patterns,m_inverseCholesky,transA);
+		
+	output.resize(patterns.size1(), numberOfClasses());
+	
+	for(std::size_t i = 0; i != patterns.size1();++i){
+		RealMatrixRow a=row(transA,i);
+		double aSquared=normSqr(a);
+		double sum = 0;
+		
+		for (std::size_t c=0; c != numberOfClasses(); c++) {
+			double d = aSquared-2*inner_prod(row(m_transformedMeans,c),a) + m_classBias(c);
+			d = std::exp(-d);
+			sum += d;
+			output(i, c) = d;
+		}
+		for (std::size_t c=0; c != numberOfClasses(); c++) {
+			output(i, c) = output(i, c) / sum;
+		}
+	}
+} 
