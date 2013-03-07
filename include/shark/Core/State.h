@@ -42,18 +42,17 @@
 namespace shark{
 
 
-///\brief Represents the State of an Object.
+/// \brief Represents the State of an Object.
 ///
-///Often the State of an object is changed during usage. 
-///This, however, makes it impossible to use the obejct in a
-///multithreaded environment in parallel. The solution is to externbalize
-///the state such, that every thread can have it's own storage.
-///This Interface 
+/// Often the State of an object is changed during usage. 
+/// This, however, makes it impossible to use the object in a
+/// multithreaded environment in parallel. The solution is to externalize
+/// the state, so that every thread can have it's own storage.
 struct State{
 
 	///\brief prevents that this class can be instantiated
 	virtual ~State(){};
-	
+
 	///\brief Safely downcast State to it's derived type.
 	///
 	///Tries to do a safe cast from State to it's derived type.
@@ -63,7 +62,7 @@ struct State{
 	DerivedStateType const& toState()const{
 		return *boost::polymorphic_downcast<DerivedStateType const*>(this);
 	}
-	
+
 	template<class DerivedStateType>
 	DerivedStateType & toState(){
 		return *boost::polymorphic_downcast<DerivedStateType*>(this);
