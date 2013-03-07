@@ -54,6 +54,7 @@ as well as the behavior and are written in a more formal language.
 * :doc:`concepts/library_design/stopping_criteria`
 * :doc:`concepts/library_design/trainers`
 * :doc:`concepts/library_design/kernels`
+* :doc:`concepts/library_design/writing_kernels`
 
 Data Handling
 ++++++++++++++++++

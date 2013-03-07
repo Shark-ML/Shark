@@ -9,6 +9,12 @@ reproducing kernel Hilbert spaces [Aronszajn1950]_. They underlie
 the "kernel trick" [Schölkopf2002]_, which is used, for instance, in non-linear
 support vector machines (SVMs).
 
+This tutorial covers all knowledge required for using existing and
+writing you own kernel based predictors and learning algorithms.
+That is, this tutorial explains the kernel interface from a user
+perspective. Writing a specialized kernel function is explained in
+the tutorial :doc:`writing_kernels`.
+
 
 
 
@@ -190,9 +196,12 @@ store intermediate results of the evaluation of the kernel
 values. These can later be reused in the computation of the
 derivatives. Thus, when derivatives are to be computed, this latter
 version must be called beforehand to fill the state object with the
-correct values.  There is no version of the derivative with two single
+correct values. There is no version of the derivative with two single
 inputs, because this is a rare use case. If still needed, batches of
-size one should be used.
+size one should be used. The reason for the state object being external
+to the kernel class is that this design allows for concurrent evaluation
+of the kernel from different threads, with each thread holding its own
+state object.
 
 With this in mind, we now present the list of functions for ``eval``, including
 the convenience ``operator()``. Let in the following ``I`` be a ``ConstInputReference``
@@ -241,7 +250,7 @@ to a computationally efficient way of finding a suitable space :math:`\mathcal H
 to solve a given learning problem. Further, if the input space is differentiable as well,
 even the derivative with respect to the inputs can be computed. This is currently
 not often used within Shark aside from certain approximation schemes as for
-example the :doxy:`SvmApproximation``.
+example the :doxy:`SvmApproximation`.
 
 The derivatives are weighted as outlined in :doc:`../optimization/conventions_derivatives`.
 The parameter derivative is a weighted sum of the derivatives of all elements of the block
@@ -302,9 +311,9 @@ configured, serialized and have an external state object.
 Method                            Description
 ===============================   ===============================================================================
 ``numberOfParameters``            The number of parameters which can be optimized
-``parameterVector``               Returns the current parameters of the model
+``parameterVector``               Returns the current parameters of the kernel object
 ``setParameterVector``            Sets the new parameter vector
-``configure``                     Configures the model. Options depend on the specific model
+``configure``                     Configures the kernel. Options depend on the specific kernel class
 ``createState``                   Returns a newly created State object holding the state to be stored in eval
 ===============================   ===============================================================================
 
@@ -331,10 +340,7 @@ Method                                          Description
 List of Kernels
 ----------------------------------------------------------------
 
-We end this tutorial with a list of some of the kernels implemented
-in Shark, together with a brief description.
-
-We start with general purpose kernels:
+Shark implements a number of general purpose kernels:
 
 ================================  ========================================================================================================================
 Model                             Description
@@ -342,7 +348,7 @@ Model                             Description
 :doxy:`LinearKernel`              Standard Euclidean inner product :math:`k(x,y) = \langle x,y \rangle`
 :doxy:`MonomialKernel`            For a given exponent n, computes :math:`k(x,y) = \langle x,y \rangle^n`
 :doxy:`PolynomialKernel`          For a given exponent n and offset b, computes :math:`k(x,y) = \left(\langle x,y \rangle+b\right)^n`
-:doxy:`DiscreteKernel`            Uses a symmetric weight matrix to compute the kernel value for a finite, discrete space
+:doxy:`DiscreteKernel`            This kernel on a discrete space is explicitly defined by a symmetric, positive semi definite Gram matrix
 :doxy:`GaussianRbfKernel`         Gaussian isotropic ("radial basis function") kernel :math:`k(x,y) = e^{-\gamma ||x-y||^2}`
 :doxy:`ARDKernelUnconstrained`    Gaussian kernel :math:`k(x,y) = e^{-(x-y)^T C(x-y)}` with diagonal parameter matrix C
 ================================  ========================================================================================================================
@@ -357,7 +363,7 @@ Model                          Description
 =============================  ========================================================================================================================
 :doxy:`WeightedSumKernel`      For a given set of kernels computes :math:`k(x,y) = k_1(x,y)+\dots + k_n(x,y)`
 :doxy:`ProductKernel`          For a given set of kernels computes :math:`k(x,y) = k_1(x,y) \dots k_n(x,y)`
-:doxy:`NormalizedKernel`       Normalizes a given kernel
+:doxy:`NormalizedKernel`       Normalizes a given kernel; computes: :math:`k(x,y) = k_1(x,y) / \sqrt{k_1(x,x) k_1(y,y)}`
 :doxy:`ScaledKernel`           Scales a kernel by a fixed constant
 :doxy:`SubrangeKernel`         Weighted sum kernel for vector spaces; every kernel receives only a subrange of the input
 :doxy:`MklKernel`              Weighted sum kernel for heterogenous type input tuples;
@@ -365,7 +371,6 @@ Model                          Description
 :doxy:`GaussianTaskKernel`     Specialization of the DiscreteKernel for multi task learning
 :doxy:`MultiTaskKernel`        Framework kernel for multi task learning with kernels
 =============================  ========================================================================================================================
-
 
 
 References
