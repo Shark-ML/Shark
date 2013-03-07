@@ -1,5 +1,27 @@
-#ifndef SHARK_EA_POPULATION_H
-#define SHARK_EA_POPULATION_H
+//===========================================================================
+/*!
+*  \brief Population on an Evolutionary Algorithm
+*
+*
+*  <BR><HR>
+*  This file is part of Shark. This library is free software;
+*  you can redistribute it and/or modify it under the terms of the
+*  GNU General Public License as published by the Free Software
+*  Foundation; either version 3, or (at your option) any later version.
+*
+*  This library is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this library; if not, see <http://www.gnu.org/licenses/>.
+*
+*/
+//===========================================================================
+
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_POPULATION_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_POPULATION_H
 
 #include <shark/Algorithms/DirectSearch/EA.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
@@ -10,23 +32,24 @@
 
 namespace shark {
 
-    typedef std::vector< Individual > Population;
 
-    template<typename Population>
-    void shuffle( Population & p ) {
-        std::random_shuffle( p.begin(), p.end() );
-    }
+typedef std::vector< Individual > Population;
 
-    template<typename FitnessTag>
-    Population::const_iterator best_individual( const Population & p ) {
-        return( std::min_element( p.begin(), p.end(), FitnessComparator<FitnessTag>() ) );
-    }
-
-    template<typename FitnessTag>
-    Population::const_iterator worst_individual( const Population & p ) {
-        return( std::max_element( p.begin(), p.end(), FitnessComparator<FitnessTag>() ) );
-    }
-
+template<typename Population>
+void shuffle( Population & p ) {
+	std::random_shuffle( p.begin(), p.end() );
 }
 
-#endif // SHARK_EA_POPULATION_H
+template<typename FitnessTag>
+Population::const_iterator best_individual( const Population & p ) {
+	return( std::min_element( p.begin(), p.end(), FitnessComparator<FitnessTag>() ) );
+}
+
+template<typename FitnessTag>
+Population::const_iterator worst_individual( const Population & p ) {
+	return( std::max_element( p.begin(), p.end(), FitnessComparator<FitnessTag>() ) );
+}
+
+
+}
+#endif
