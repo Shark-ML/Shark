@@ -86,10 +86,10 @@ public:
 	void write( OutArchive & archive ) const;
 
 	/// Return  memberships to the different classes, the memberships sum to unity
-	Data<RealVector> softMembership(Data<InputType> const & patterns);
+	Data<RealVector> softMembership(Data<InputType> const & patterns) const;
 
 	/// Compute memberships to the different classes, the memberships sum to unity
-	void softMembership(BatchInputType const& patterns, Batch<RealVector>::type& output)const;
+	void softMembership(BatchInputType const& patterns, Batch<RealVector>::type& output) const;
 };
 }
 #endif

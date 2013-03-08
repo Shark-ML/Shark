@@ -145,7 +145,7 @@ void LinearClassifier::write( OutArchive & archive ) const{
 }
 
 
-Data<RealVector> LinearClassifier::softMembership(Data<InputType> const & patterns){
+Data<RealVector> LinearClassifier::softMembership(Data<InputType> const & patterns) const {
 		Data<RealVector> prediction(patterns.numberOfBatches());
 		for(std::size_t i = 0; i != patterns.numberOfBatches();++i){
 			softMembership(patterns.batch(i),prediction.batch(i));
