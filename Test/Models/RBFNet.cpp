@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE( RBFNet_SERIALIZE )
 		data.push_back(input);
 		target.push_back(model(input));
 	}
-	RegressionDataset dataset(data,target);
+	RegressionDataset dataset = createLabeledDataFromRange(data,target);
 
 	//now we serialize the FFmodel
 	
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE( RBFNet_SERIALIZE )
 	BOOST_REQUIRE_EQUAL(modelDeserialized.outputSize(),model.outputSize());
 	for (size_t i=0; i < 1000; i++)
 	{
-		RealVector output = modelDeserialized(dataset(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset(i).label),1.e-50);
+		RealVector output = modelDeserialized(dataset.element(i).input); // slow access to element
+		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }
