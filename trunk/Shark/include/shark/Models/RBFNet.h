@@ -38,26 +38,26 @@
 #include <shark/Core/SharedVector.h>
 namespace shark {
 
-
-///  \brief Offers the functions to create and to work with radial basis function network.
+///  \brief Offers the functions to create and to work with radial basis function networks
 /// 
-///  Radial Basis Function networks are especially used for 
-///  classification tasks. A Radial basis function network as modeled in shark is a linear 
-/// combination of unnormalized gaussian distributions \f$ p_j(x) \f$.
+/// A Radial basis function network as modeled in shark is a linear 
+/// combination of unnormalized Gaussian distributions \f$ p_j(x) \f$.
 /// \f[
-///   p_j(x) = e^{\gamma_j*|x-c_j|^2}
+///   p_j(x) = e^{\gamma_j*\|x-c_\j|^2}
 /// \f]
-///  The \f$\gamma_j\f$ govern the width of the gaussian, while the vectors $c_j$ set the centers of every gaussian neuron.
-///  After calculating the reponses of the neurons to the input, the result \f$y\f$ is then calculated using an affine linear 
-/// function using the weightmatrix $W$ as well as an bias Term \f$b\f$
+///  The \f$\gamma_j\f$ govern the width of the Gaussian, while the
+///  vectors $c_j$ set the centers of every Gaussian neuron.  After
+///  calculating the reponses of the neurons to the input, the result
+///  \f$y\f$ is then calculated using an affine linear function using
+///  the weightmatrix \f$W\f$ as well as an bias term \f$b\f$
 /// \f[
 ///   y(x) = b + Wp(x)
-///
 /// \f]
 ///
-/// RBF-Networks profit much from good guesses on the centers or kernel functions
-/// In case of a gaussian kernel a call to k-Means or the EM-Algorithm
-/// can be used to have a good initialisation for this network.
+/// RBF networks profit much from good guesses on the centers and
+/// kernel function parameters.  In case of a Gaussian kernel a call
+/// to k-Means or the EM-algorithm can be used to get a good
+/// initialisation for the network.
 class RBFNet : public AbstractModel<RealVector,RealVector>
 {
 private:
@@ -208,7 +208,7 @@ public:
 		m_bias = bias;
 	}
 	
-	///\brief Returns the width parameter of the gaussian functions 
+	///\brief Returns the width parameter of the Gaussian functions 
 	RealVector const& gamma()const{
 		return m_gamma;
 	}
@@ -239,7 +239,7 @@ protected:
 	///\brief Bias values of the output layer. m_bias(i) is the bias of output neuron i
 	RealVector m_bias;
 	
-	///\brief stores the width parameters of the gaussian function
+	///\brief stores the width parameters of the Gaussian functions
 	RealVector m_gamma;
 
 	//====temporary variables
