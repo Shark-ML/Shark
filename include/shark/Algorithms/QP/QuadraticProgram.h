@@ -202,7 +202,11 @@ public:
 	{
 		std::size_t elements = data.numberOfElements();
 		x.resize(elements);
-		boost::iota(x,data.elements().begin());//fill x with iterators begin...end of the range
+		typename Data<InputType>::const_element_range::iterator iter=data.elements().begin();
+		for(std::size_t i = 0; i != elements; ++i,++iter){
+			x[i]=iter.getInnerIterator();
+		}
+		//boost::iota(x,data.elements().begin());//fill x with iterators begin...end of the range
 	}
 
 	/// return a single matrix entry
@@ -253,7 +257,7 @@ protected:
 	/// Kernel function defining the kernel Gram matrix
 	const AbstractKernelFunction<InputType>& kernel;
 
-	typedef typename Data<InputType>::const_element_range::iterator PointerType;
+	typedef typename Batch<InputType>::const_iterator PointerType;
 	/// Array of data pointers for kernel evaluations
 	//todo: O.K. find better solution for this.
 	//std::vector<PointerType> x;
