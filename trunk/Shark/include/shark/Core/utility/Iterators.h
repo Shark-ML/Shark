@@ -200,8 +200,8 @@ private:
 		MultiSequenceIterator<SequenceContainer>,SequenceContainer
 	> Traits;
 	typedef typename Traits::outer_iterator outer_iterator;
-	typedef typename Traits::inner_iterator inner_iterator;
 public:
+	typedef typename Traits::inner_iterator inner_iterator;
 	MultiSequenceIterator()
 	:m_positionInSequence(0){}
 
@@ -233,6 +233,10 @@ public:
 		
 	std::size_t index()const{
 		return m_positionInSequence;
+	}
+	
+	inner_iterator getInnerIterator()const{
+		return m_innerPosition;
 	}
 
 private:
