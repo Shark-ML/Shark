@@ -189,7 +189,6 @@ public:
 	///\brief Sets the center values of the neurons.
 	void setCenter(std::size_t i, RealVector const& center){
 		noalias(row(m_centers,i)) = center;
-		m_centerNormSquared(i) = normSqr(center);
 	}
 	///\brief Returns the linear weights of the output neurons.
 	RealMatrix const& linearWeights()const{
@@ -232,8 +231,6 @@ protected:
 
 	///\brief The center points. The i-th element corresponds to the center of neuron number i
 	RealMatrix m_centers;
-	///\brief the squared length of the vectors.
-	RealVector m_centerNormSquared; 
 	///\brief Weights of the linear part of the network. m_linearWeights(i,j) connects output neuron i with hidden neuron j
 	RealMatrix m_linearWeights;
 	///\brief Bias values of the output layer. m_bias(i) is the bias of output neuron i
@@ -241,13 +238,6 @@ protected:
 	
 	///\brief stores the width parameters of the Gaussian functions
 	RealVector m_gamma;
-
-	//====temporary variables
-	///\brief Stores the intermediate values computed during eval
-	///
-	///intermediates for models will be externalized later
-	///stores the computes squared distance as well as its exponential
-	Intermediate m_intermediates;
 
 	//=====training parameters
 	///enables learning of linear Weights and the bias Neurons
