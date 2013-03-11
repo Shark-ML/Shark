@@ -158,8 +158,8 @@ BOOST_AUTO_TEST_CASE( SingleObjective_Benchmark_Functions ) {
 BOOST_AUTO_TEST_CASE( Himmelblau ) {
 	shark::Himmelblau hb;
 
-	BOOST_CHECK_THROW( hb( shark::RealVector( 1 ) ), shark::Exception );
-	BOOST_CHECK_THROW( hb( shark::RealVector( 3 ) ), shark::Exception );
+	//~ BOOST_CHECK_THROW( hb( shark::RealVector( 1 ) ), shark::Exception );
+	//~ BOOST_CHECK_THROW( hb( shark::RealVector( 3 ) ), shark::Exception );
 
 	shark::RealVector v( 2 );
 	

@@ -384,11 +384,19 @@ public:
 	FixedDenseMatrixProxy(
 		pointer data, 
 		size_type size1, size_type size2,
-		difference_type stride1 = 1,difference_type stride2 = 1 
+		difference_type stride1 = 0,difference_type stride2 = 0 
 	)
 	: m_data(data)
-	, m_size1(size1),m_size2(size2)
-	, m_stride1(stride1),m_stride2(stride2){}
+	, m_size1(size1)
+	, m_size2(size2)
+	, m_stride1(stride1)
+	, m_stride2(stride2)
+	{
+		if(!m_stride1)
+			m_stride1= Orientation::fast_i()?1:m_size2;
+		if(!m_stride2)
+			m_stride2= Orientation::fast_j()?1:m_size1;
+	}
 		
 	/// \brief Return the number of rows of the matrix
 	size_type size1() const {

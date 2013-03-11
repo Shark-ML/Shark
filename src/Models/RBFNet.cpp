@@ -68,7 +68,6 @@ void RBFNet::setStructure( std::size_t numInput, std::size_t numHidden, std::siz
 	m_inputNeurons = numInput;
 	m_outputNeurons = numOutput;
 	m_centers.resize(numHidden,numInput);
-	m_centerNormSquared.resize(numHidden);
 	m_linearWeights.resize(numOutput,numHidden);
 	m_bias.resize(numOutput);
 	m_gamma.resize(numHidden);
@@ -108,7 +107,6 @@ void RBFNet::setParameterVector(RealVector const& newParameters){
 	if(m_trainCenters){
 		end = start+m_inputNeurons*numHiddens();
 		init(subrange(newParameters,start,end)) >> toVector(m_centers);
-		noalias(m_centerNormSquared) = sumColumns(sqr(m_centers));
 		start=end;
 	}
 	if(m_trainWidth)
@@ -138,23 +136,8 @@ void RBFNet::computeGaussianResponses(BatchInputType const& patterns, InternalSt
 	std::size_t numNeurons = m_gamma.size();
 	state.resize(numPatterns,numNeurons);
 
-	//copied with small modifications from gaussianRBFKernel
 	//we need to add separate gamma parameters for every evaluation
-	
-	//batch computation works by splitting the evaluation in three parts
-	//when looking at the formula for the distance of two elements x_i,y_j, we get:
-	//|x_i-y_j|^2=x_i^2-2 x_i y_j + y_j^2
-	//so we can first compute the squared norms of x and y and perform the last step as matrix-matrix multiplication!
-	//for us, the x are the centers of the matrix, so this norm can be precomputed by setCenters or setParameterVector!
-	
-	//add the precalculated norm of every center to every column of the matrix
-	noalias(state.norm2) = repeat(m_centerNormSquared,numPatterns);
-	//now evaluate normSqr(x) for every element of the batch
-	RealVector patternNorms = sumColumns(sqr(patterns));
-	//add the norm of pattern i to every row of the matrix
-	noalias(state.norm2) += trans(repeat(patternNorms,numNeurons));
-	//now the matrix matrix product twice which results in-2 x_i y_j
-	fast_prod(patterns,trans(m_centers),state.norm2,true,-2.0);
+	noalias(state.norm2) = distanceSqr(patterns,m_centers);
 	
 	//every center has it's own value of gamma, so we need to multiply the i-th column 
 	//of the norm with m_gamma(i)
@@ -172,7 +155,7 @@ void RBFNet::eval(BatchInputType const& patterns, BatchOutputType& output, State
 	computeGaussianResponses(patterns,s);
 	//evaluate the linear part of the network
 	noalias(output) = repeat(m_bias,numPatterns);
-	fast_prod(s.expNorm,trans(m_linearWeights),output,1.0);
+	fast_prod(s.expNorm,trans(m_linearWeights),output,true);
 }
 
 void RBFNet::weightedParameterDerivative(
@@ -275,7 +258,6 @@ void RBFNet::read( InArchive & archive ){
 	archive >> m_inputNeurons;
 	archive >> m_outputNeurons;
 	archive >> m_centers;
-	archive >> m_centerNormSquared;
 	archive >> m_linearWeights;
 	archive >> m_bias;
 	archive >> m_gamma;
@@ -290,7 +272,6 @@ void RBFNet::write( OutArchive & archive ) const{
 	archive << m_inputNeurons;
 	archive << m_outputNeurons;
 	archive << m_centers;
-	archive << m_centerNormSquared;
 	archive << m_linearWeights;
 	archive << m_bias;
 	archive << m_gamma;
