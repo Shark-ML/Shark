@@ -7,13 +7,15 @@ that the speed of modern CPUs improves much faster than the memory access latenc
 of the RAM. To achieve the highest performance for numerical data processing, data
 points need to be grouped into smaller subsets which we call batches. A batch can be
 described as a two dimensional structure. The first dimension, which we call "row",
-represents the different data points, and the second dimension, the columns, each
-represent one component of the data space or structure.
+represents the different data points, and the second dimension, which we refer to as "column", 
+represents the components of the data space or structure.
 
 Ideally, after creation of the batches, data should be placed dense in the RAM such that
 the CPU can evaluate the whole batch at once. A typical example of such a structure is a
 matrix when each single data point is a vector. These single vectors are copied into rows
-of the matrix to form a batch. A typical example for an algorithm which hugely benefits
+of the matrix to form a batch. 
+
+A typical example for an algorithm which hugely benefits
 from this new grouping is a linear model without offset. For single vectors x, the
 evaluation of such a linear model would simply be written as
 
@@ -24,7 +26,7 @@ evaluation of such a linear model would simply be written as
 Here, the computation is a matrix-vector product. Let now X be the matrix holding a
 batch of n vectors, for all of which we want to compute the response of the linear
 model. Then, when the data are stored in batches and our model can operate directly
-on batches, the batch algorithm can be written as performing
+on batches, the batch algorithm can be written as 
 
 .. math::
 
@@ -74,7 +76,7 @@ type a user may need.
 
 As you can see, the choice of batches is quite convenient for most cases. Single values
 are stored in vectors and vectors in matrices. When you write your own programs you can
-be assured that the batch type is exactly this and do not need to bother about these types.
+be assured that the batch types are exactly these and do not need to bother about these types.
 
 
 
@@ -87,7 +89,7 @@ When you want to access the i-th element of the matrix, you can write ``row(batc
 to query the size use ``batch.size1()``. For vectors you can use ``batch(i)`` and ``batch.size()``.
 But what  happens when a more general algorithm, like for example the error function, is to be
 implemented? In this case you do not know which functions or methods to use, since the types
-shown above have totally different interfaces. Shark circumenvents this problem by adapting
+shown above have totally different interfaces. Shark circumvents this problem by adapting
 and extending the interface of boost.range:
 
 
@@ -155,7 +157,7 @@ This is easy using ``Batch<T>::type``::
 	row(batchOfPoints, 0) = point;
 	std::cout << batchOfPoints.size1();
 
-Not bad. Still, we explicitely use that batch is a Matrix by calling
+Not bad. Still, we explicitly use that batch is a Matrix by calling
 its size1 member. That's fine, as long as we know that T can only be a vector. But sometimes
 we do not even know that, typically in generic code. Let's begin improving it, by changing the
 element access as well as the size query. For the first, we use ``get``, and for the second,
@@ -195,7 +197,7 @@ strings of varying lengths, or even graphs. We often have routines that produce 
 features and then spend a lot of time writing code that creates data vectors out of
 the points. Sometimes this is exactly what we want (for example when the model is a
 neural net which does not have a sense of data structure at all). But for more
-specialized methods we might want to represent this structure explicitely. At the
+specialized methods we might want to represent this structure explicitly. At the
 same time, we want the efficiency of a good data representation in batches. So how do
 we solve it? By creating a batch type and specializing ``Batch<T>`` on it!
 
@@ -228,7 +230,7 @@ This also works when Point is templatized, for example like this::
    TG: should it be Type1 feature1; Type2 feature2; ???
    mt: i second this question
 
-In this case, we have to add the template parameters to the Batch specialization::
+In this case, we have to add the template parameters to the Batch specialisation::
 
 	#define PointVars (feature1)(feature2)
 	#define PointTypes (Type1)(Type2)
