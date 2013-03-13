@@ -2,8 +2,8 @@
 /*!
  *  \brief LASSO Regression
  *
- *  This program is the LASSO counter part of the linear regression
- *  tutorial example program.
+ *  This program demonstrates LASSO regression for the identification
+ *  of sparse coefficient vectors.
  *
  *  \author T. Glasmachers
  *  \date 2013
@@ -30,25 +30,89 @@
 #include <shark/Algorithms/Trainers/LassoRegression.h>
 
 #include <iostream>
+#include <fstream>
 
 using namespace shark;
 using namespace std;
 
-int main() {
-	Wave prob;
-	RegressionDataset data = prob.generateDataset(200);
 
-	// regularization parameter
+class TestProblem : public LabeledDataDistribution<RealVector, RealVector>
+{
+public:
+	TestProblem(size_t informative, size_t nnz, size_t dim)
+	: m_informative(informative)
+	, m_nnz(nnz)
+	, m_dim(dim)
+	{ }
+
+
+	void draw(RealVector& input, RealVector& label) const
+	{
+		input = RealZeroVector(m_dim);
+		label.resize(1);
+
+		// we have one informative component per example
+		double g = Rng::gauss();;
+		size_t i = Rng::discrete(0, m_informative-1);
+		input(i) = g;
+		label(0) = g;
+
+		// the rest is non-informative
+		for (size_t n=1; n<m_nnz; n++)
+		{
+			size_t i = Rng::discrete(m_informative, m_dim-1);
+			input(i) = Rng::gauss();
+		}
+	}
+
+protected:
+	size_t m_informative;
+	size_t m_nnz;
+	size_t m_dim;
+};
+
+
+int main(int argc, char** argv)
+{
+	// Define a test problem with 10 out of 1000 informative
+	// components. Each instance contains one informative and
+	// 49 noise components. 10000 instances are drawn.
+	TestProblem prob(10, 50, 1000);
+	cout << "generating 100000 points ..." << flush;
+	RegressionDataset data = prob.generateDataset(100000);
+	cout << " done." << endl;
+
+	// Set the regularization parameter.
+	// For this problem the LASSO method identifies the correct
+	// subset of 10 informative coefficients for a large range
+	// of parameter values.
 	double lambda = 1.0;
 
 	// trainer and model
 	LassoRegression<> trainer(lambda);
 	LinearModel<> model;
 
-	// train model
+	// train the model
+	cout << "LASSO training ..." << flush;
 	trainer.train(model, data);
+	cout << " done." << endl;
 
-	// find non-zero coefficients
+	// check non-zero coefficients
 	RealMatrix m = model.matrix();
-	// TODO...
+	size_t nnz = 0;
+	size_t correct = 0;
+	size_t wrong = 0;
+	for (size_t j=0; j<m.size2(); j++)
+	{
+		if (m(0, j) != 0.0)
+		{
+			nnz++;
+			if (j < 10) correct++;
+			else wrong++;
+		}
+	}
+	cout << "solution statistics:" << endl;
+	cout << "  number of non-zero coefficients: " << nnz << endl;
+	cout << "  correctly identified coefficients: " << correct << endl;
+	cout << "  wrongly identified coefficients: " << wrong << endl;
 }
