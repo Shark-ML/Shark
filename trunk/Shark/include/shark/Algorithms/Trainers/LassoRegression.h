@@ -40,14 +40,17 @@ namespace shark {
 /*!
  *  \brief LASSO Regression
  *
- *  Linear Regression extracts a sparse vector of regression
+ *  LASSO Regression extracts a sparse vector of regression
  *  coefficients. The original method amounts to L1-constrained
  *  least squares regression, while this implementation uses an
  *  L1 penalty instead of a constraint (which is equivalent).
  *
  *  For data vectors \f$ x_i \f$ with real-valued labels \f$ y_i \f$
  *  the trainer solves the problem
- *  \f$ \min_w \quad \sum_i (w^T x_i - y_i)^2 + \lambda \|w\|_1 \f$.
+ *  \f$ \min_w \quad \frac{1}{2} \sum_i (w^T x_i - y_i)^2 + \lambda \|w\|_1 \f$.
+ *  The target accuracy of the solution is measured in terms of the
+ *  smallest component (L1 norm) of the gradient of the objective
+ *  function.
  *
  *  The trainer has one template parameter, namely the type of
  *  the input vectors \f$ x_i \f$. These need to be vector valued,
@@ -63,6 +66,10 @@ public:
 	typedef LinearModel<InputVectorType, RealVector> ModelType;
 	typedef LabeledData<InputVectorType, RealVector> DataType;
 
+	/// \brief Constructor.
+	///
+	/// \param  _lambda    value of the regularization parameter (see class description)
+	/// \param  _accuracy  stopping criterion for the iterative solver, maximal gradient component of the objective function (see class description)
 	LassoRegression(double _lambda, double _accuracy = 0.01)
 	: m_lambda(_lambda)
 	, m_accuracy(_accuracy)
@@ -72,33 +79,39 @@ public:
 	}
 
 
+	/// \brief Return the current setting of the regularization parameter.
 	double lambda() const
 	{ 
 		return m_lambda; 
 	}
 
+	/// \brief Set the regularization parameter.
 	void setLambda(double lambda)
 	{
 		RANGE_CHECK(lambda >= 0.0);
 		m_lambda = lambda;
 	}
 
+	/// \brief Return the current setting of the accuracy (maximal gradient component of the optimization problem).
 	double accuracy() const
 	{
 		return m_accuracy;
 	}
 
+	/// \brief Set the accuracy (maximal gradient component of the optimization problem).
 	void setAccuracy(double _accuracy)
 	{
 		RANGE_CHECK(_accuracy > 0.0);
 		m_accuracy = _accuracy;
 	}
 
+	/// \brief Get the regularization parameter lambda through the IParameterizable interface.
 	RealVector parameterVector() const
 	{
 		return RealVector(1, m_lambda);
 	}
 
+	/// \brief Set the regularization parameter lambda through the IParameterizable interface.
 	void setParameterVector(const RealVector& param)
 	{
 		SIZE_CHECK(param.size() == 1);
@@ -106,14 +119,18 @@ public:
 		m_lambda = param(0);
 	}
 
+	/// \brief Return the number of parameters (one in this case).
 	size_t numberOfParameters() const
 	{
 		return 1;
 	}
 
+	/// \brief Train a linear model with LASSO regression.
 	void train(ModelType& model, DataType const& dataset)
 	{
-		dim = shark::get(dataset.inputs().batch(0), 0).size();
+		SIZE_CHECK(model.outputSize() == 1);
+
+		dim = inputDimension(dataset);
 		RealVector alpha(dim, 0.0);
 		trainInternal(alpha, dataset);
 
@@ -137,7 +154,7 @@ public:
 	}
 
 protected:
-	/// create internal data representation for fast processing
+	/// \brief Create internal data representation for fast processing.
 	void fillData(DataType const& dataset)
 	{
 		// pass 1: find number of points and number of entries
@@ -247,6 +264,7 @@ protected:
 		}
 	}
 
+	/// \brief Actual training procedure.
 	void trainInternal(RealVector& alpha, DataType const& dataset)
 	{
 		// strategy constants
@@ -457,7 +475,7 @@ protected:
 */
 	}
 
-	/// sparse vector entry
+	/// \brief Sparse vector entry.
 	struct Entry
 	{
 		std::size_t index;
