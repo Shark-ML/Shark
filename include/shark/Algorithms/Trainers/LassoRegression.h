@@ -143,7 +143,7 @@ protected:
 		// pass 1: find number of points and number of entries
 		ell = 0;
 		size_t num_entries = 0;
-		for (std::size_t i=0; i<dataset.batches(); i++)
+		for (std::size_t i=0; i<dataset.numberOfBatches(); i++)
 		{
 			typename Batch<InputVectorType>::type const& b = dataset.inputs().batch(i);
 			std::size_t bsz = boost::size(b);
@@ -173,7 +173,7 @@ protected:
 		UIntVector feature(dim, 0u);
 
 		// pass 2: count entries per feature
-		for (std::size_t i=0; i<dataset.batches(); i++)
+		for (std::size_t i=0; i<dataset.numberOfBatches(); i++)
 		{
 			typename Batch<InputVectorType>::type const& b = dataset.inputs().batch(i);
 			std::size_t bsz = boost::size(b);
@@ -203,7 +203,7 @@ protected:
 		}
 
 		// pass 3: copy entries and labels
-		for (std::size_t i=0, m=0; i<dataset.batches(); i++)
+		for (std::size_t i=0, m=0; i<dataset.numberOfBatches(); i++)
 		{
 			typename Batch<InputVectorType>::type const& b = dataset.inputs().batch(i);
 			std::size_t bsz = boost::size(b);
@@ -236,7 +236,7 @@ protected:
 				}
 			}
 		}
-		for (std::size_t i=0, m=0; i<dataset.batches(); i++)
+		for (std::size_t i=0, m=0; i<dataset.numberOfBatches(); i++)
 		{
 			Batch<RealVector>::type const& b = dataset.labels().batch(i);
 			std::size_t bsz = boost::size(b);

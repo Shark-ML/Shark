@@ -96,6 +96,7 @@ SHARK_ADD_EXAMPLE( Supervised/CVFolds.cpp CVFolds "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/CSvmWithThresholdConverter.cpp CSvmWithThresholdConverter "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/McSvm.cpp McSvm "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/McSvmLinear.cpp McSvmLinear "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/LassoRegression.cpp LassoRegression "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/KernelRegression.cpp KernelRegression "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/KernelSelection.cpp KernelSelection "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/OneVersusOne.cpp OneVersusOne "Supervised" ) #partially working. Dataset issue
