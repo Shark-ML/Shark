@@ -72,7 +72,8 @@ import_libsvm_reader(
 	bool r = phrase_parse(
 		first, last, 
 		*(
-			int_   >> *(uint_ >> ':' >> double_) >> eol
+			int_   >> -(lit('.')>>+lit('0'))//we also want to be able to parse 1.00000 as label 1
+			>> *(uint_ >> ':' >> double_) >> eol
 		),
 		space-eol , fileContents
 	);
