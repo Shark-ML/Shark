@@ -192,12 +192,12 @@ public:
 	///
 	/// @param dataSet the data set
 	void initializeChain(Data<VectorType> const& dataSet){
-		DiscreteUniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,dataSet.size()-1);
+		DiscreteUniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,dataSet.numberOfElements()-1);
 		std::size_t visibles = m_operator.rbm()->numberOfVN();
 		MatrixType sampleData(m_temperedChains.size(),visibles);
 		
 		for(std::size_t i = 0; i != m_temperedChains.size(); ++i){
-			noalias(row(sampleData,i)) = dataSet(uni());
+			noalias(row(sampleData,i)) = dataSet.element(uni());
 		}
 		initializeChain(sampleData);
 	}
@@ -206,6 +206,9 @@ public:
 	///
 	/// @param sampleData the data set
 	void initializeChain(MatrixType const& sampleData){
+ 		if(m_temperedChains.size()==0) 
+    	throw SHARKEXCEPTION("you did not initialize the number of temperatures bevor initializing the chain!");
+
 		m_operator.createSample(m_temperedChains.hidden,m_temperedChains.visible,sampleData,m_betas);
 		
 		m_temperedChains.energy = m_operator.calculateEnergy(
