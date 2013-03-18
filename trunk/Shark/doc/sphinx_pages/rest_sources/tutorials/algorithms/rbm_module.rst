@@ -46,7 +46,7 @@ associated to either only the hidden or the visible neurons and
 the third term models the interaction between visible and hidden variables.
 Note that the energy function given here differs from the one 
 given by Welling at al. [WellingEtAl2005]_ in an important fact:
-Out of practical design reasons we define one function f_h (or f_v) for all hidden (or all visible) neurons jointly
+out of practical design reasons we define one function f_h (or f_v) for all hidden (or all visible) neurons jointly
 instead of having one for each singe hidden (or visible) neuron. This would 
 allow to introduce dependancies between the variables of one layer - and thus to define 
 a model that does not correspond to an RBM.
@@ -71,8 +71,8 @@ it is approximated using Markov Chain Monte Carlo (MCMC) techniques.
 
 Usually the MCMC techniques are based on Gibbs Sampling because the independence of the 
 variables of one layer given the state of the other makes this sampling scheme 
-especially easy: sampling a new state of the hidden layer in the first step and
-sampling a new state of the visible layer in the second. 
+especially easy: sampling a new state for all hidden variables in the first step and
+sampling a new state for all visible variables in the second. 
 
 The concrete form of the conditional distribution depends on the energy function.
 Choosing a suitable energy function leads to conditional distributions which are
