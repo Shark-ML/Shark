@@ -9,7 +9,7 @@ Further tutorials will describe the components and the RBM in more detail.
 
 What is an RBM?
 +++++++++++++++++++++++++++++++++++++++++++++++++++
-RBMs belong to the class of undirected graphical models (Markov Random fields).
+RBMs belong to the class of undirected graphical models (Markov random fields).
 The undirected graph of an RBM has an bipartite structure as shown in the figure below.
 RBMs hold two sets of random variables (also called neurons): one layer of visible variables 
 to represent observable data and one layer of hidden variables to capture dependencies between the visible variables. 
@@ -20,29 +20,40 @@ variables of one layer are independent of each other given the states of the var
   :scale: 75 %
   :alt: the bipartite graphical model of an RBM
 
-As for any Markov Random field with a strictly positive probability distribution 
+As for any Markov random field with a strictly positive probability distribution 
 the joint distribution of an RBM is given by a Gibbs distribution
 
 .. math::
 	 p(\vec v,\vec h)={e^{- \frac{1}{T} E(\vec v, \vec h)}}/{Z},
 
-where :math:`\vec v` and :math:`\vec h` are the vectors of the visible and the hidden variables respectively,
-*T* is a constant called temperature which is usually set to 1
+where :math:`\vec v` and :math:`\vec h` are the vectors of the states of the  
+visible and the hidden variables respectively,
+*T* is a constant called temperature (it is usually set to 1)
 and *Z* is a normalization constant called the partition function:
 
 .. math::
 	Z=\sum_{ \vec v, \vec h}e^{- \frac{1}{T} E(\vec v,\vec h)}
 
-Following (but slightly simplifying from the formulas given by)
-Welling at al. [WellingEtAl2005]_, a generalized form of an RBM's
-energy function can be defined as
+Based on
+Welling at al. [WellingEtAl2005]_, we define a generalized form of the
+energy function as
 
 .. math::
 	E(\vec v,\vec h)=  f_h(\vec h) + f_v(\vec v) + \sum_{k,l} \phi_{hk}(\vec h) W_{k,l} \phi_{vl}(\vec v).
 
-Note that the terms :math:`f_h(\vec h)` and  :math:`f_v(\vec v)` are
-associated to either only the hidden or the visible neurons.
-The third term models the interaction between visible and hidden variables.
+The terms :math:`f_h(\vec h)` and  :math:`f_v(\vec v)` are
+associated to either only the hidden or the visible neurons and
+the third term models the interaction between visible and hidden variables.
+Note that the energy function given here differs from the one 
+given by Welling at al. [WellingEtAl2005]_ in an important fact:
+Out of practical design reasons we define one function f_h (or f_v) for all hidden (or all visible) neurons jointly
+instead of having one for each singe hidden (or visible) neuron. This would 
+allow to introduce dependancies between the variables of one layer - and thus to define 
+a model that does not correspond to an RBM.
+If f_h (or analogously f_v) however is a sum of terms each depending only on the value
+of one neuron we obtain the energy function of an RBM.   
+
+
 In the standard case of an binary RBM [Smolensky1986]_ [Hinton2007]_ we have :math:`f_h(\vec h) = \vec h^T  \vec c`
 and :math:`f_v(\vec v) = \vec v^T \vec b`, where :math:`\vec c` and :math:`\vec b`
 are the vectors of the bias parameters for the hidden and the visible neurons respectively.
@@ -58,9 +69,10 @@ Unfortunately the gradient of the log-likelihood can not be computed efficiently
 thus the optimization problem is hard. Instead of computing the gradient directly,
 it is approximated using Markov Chain Monte Carlo (MCMC) techniques.
 
-Often sampling procedures used in MCMC exploit the bipartite structure of the graph
-such that the conditional probability distribution of one layer given the other is calculated.
-This allows for an efficient Gibbs Sampling scheme.
+Usually the MCMC techniques are based on Gibbs Sampling because the independence of the 
+variables of one layer given the state of the other makes this sampling scheme 
+especially easy: sampling a new state of the hidden layer in the first step and
+sampling a new state of the visible layer in the second. 
 
 The concrete form of the conditional distribution depends on the energy function.
 Choosing a suitable energy function leads to conditional distributions which are
