@@ -25,8 +25,9 @@
 #ifndef SHARK_ALGORITHMS_QP_LRUCACHE_H
 #define SHARK_ALGORITHMS_QP_LRUCACHE_H
 
-#include <shark/Algorithms/QP/QuadraticProgram.h>
+#include <shark/Core/Exception.h>
 #include <boost/intrusive/list.hpp>
+#include <vector>
 
 
 namespace shark{
@@ -95,7 +96,7 @@ public:
 	///\brief Marks a cache line for deletion.
 	void removeCacheLine(std::size_t i){
 		if(isCached(i))
-			cacheRemoveRow(i);
+			cacheRemoveRow(m_cacheEntry[i]);
 	}
 	
 	///\brief Just returns the pointer to the i-th line without affcting cache at all.
