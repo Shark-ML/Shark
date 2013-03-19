@@ -17,11 +17,10 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DIFFPOWERS_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
-struct DiffPowers : public AbstractObjectiveFunction< VectorSpace<double>,double > {
+struct DiffPowers : public SingleObjectiveFunction {
 
 	DiffPowers(unsigned int numberOfVariables = 5) {
 		m_name="DiffPowers";

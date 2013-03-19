@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_BASE )
 	//calculate derivative - it should also be 40
 	ErrorFunction<RealVector,RealVector>::FirstOrderDerivative derivative;
 	mse.evalDerivative(parameters,derivative);
-	BOOST_CHECK_SMALL(derivative.m_gradient(0)-40,1.e-15);
+	BOOST_CHECK_SMALL(derivative(0)-40,1.e-15);
 }
 
 //test whether we can get to the same result as linear regression
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
 		
 		ErrorFunction<RealVector,RealVector>::FirstOrderDerivative d;
 		double valGrad = mse.evalDerivative(optimum,d);
-		double gradNorm = norm_2(d.m_gradient);
+		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
 		BOOST_CHECK_SMALL(gradNorm,1.-10);
 		
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
 		
 		ErrorFunction<RealVector,RealVector>::FirstOrderDerivative d;
 		double valGrad = mse.evalDerivative(optimum,d);
-		double gradNorm = norm_2(d.m_gradient);
+		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
 		BOOST_CHECK_SMALL(gradNorm,1.-10);
 		
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
 		
 		ErrorFunction<RealVector,RealVector>::FirstOrderDerivative d;
 		double valGrad = mse.evalDerivative(optimum,d);
-		double gradNorm = norm_2(d.m_gradient);
+		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
 		BOOST_CHECK_SMALL(gradNorm,1.-10);
 		

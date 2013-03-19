@@ -30,7 +30,6 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ROSENBROCK_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
@@ -44,8 +43,7 @@ namespace shark {
 *  least value of a function. The Computer Journal 3: 175–184,
 *  1960  
 */
-struct Rosenbrock : public AbstractObjectiveFunction< VectorSpace<double>,double > {
-	typedef AbstractObjectiveFunction<VectorSpace<double>,double> super;
+struct Rosenbrock : public SingleObjectiveFunction {
 
 	Rosenbrock(unsigned int dimensions=23):m_numberOfVariables(dimensions) {
 		m_features|=CAN_PROPOSE_STARTING_POINT;
@@ -68,7 +66,7 @@ struct Rosenbrock : public AbstractObjectiveFunction< VectorSpace<double>,double
 
 	void configure( const PropertyTree &) {}
 
-	void proposeStartingPoint( super::SearchPointType & x ) const {
+	void proposeStartingPoint( SearchPointType & x ) const {
 		x.resize( m_numberOfVariables );
 
 		for( unsigned int i = 0; i < x.size(); i++ ) {
@@ -76,7 +74,7 @@ struct Rosenbrock : public AbstractObjectiveFunction< VectorSpace<double>,double
 		}
 	}
 
-	double eval( const super::SearchPointType & p ) const {
+	double eval( const SearchPointType & p ) const {
 		m_evaluationCounter++;
 
 		double sum = 0;
@@ -88,20 +86,20 @@ struct Rosenbrock : public AbstractObjectiveFunction< VectorSpace<double>,double
 		return( sum );
 	}
 
-	virtual ResultType evalDerivative( const super::SearchPointType & p, FirstOrderDerivative & derivative )const {
+	virtual ResultType evalDerivative( const SearchPointType & p, FirstOrderDerivative & derivative )const {
 		double result = eval(p);
 		size_t size = p.size();
-		derivative.m_gradient.resize(size);
-		derivative.m_gradient(0) = 2*( p(0) - 1 ) - 400 * ( p(1) - sqr( p(0) ) ) * p(0);
-		derivative.m_gradient(size-1) = 200 * ( p(size - 1) - sqr( p( size - 2 ) ) ) ;
+		derivative.resize(size);
+		derivative(0) = 2*( p(0) - 1 ) - 400 * ( p(1) - sqr( p(0) ) ) * p(0);
+		derivative(size-1) = 200 * ( p(size - 1) - sqr( p( size - 2 ) ) ) ;
 		for(size_t i=1; i != size-1; ++i){
-			derivative.m_gradient( i ) = 2 * ( p(i) - 1 ) - 400 * (p(i+1) - sqr( p(i) ) ) * p( i )+200 * ( p( i )- sqr( p(i-1) ) );
+			derivative( i ) = 2 * ( p(i) - 1 ) - 400 * (p(i+1) - sqr( p(i) ) ) * p( i )+200 * ( p( i )- sqr( p(i-1) ) );
 		}
 		return result;
 
 	}
 
-	virtual ResultType evalDerivative( const super::SearchPointType & p, SecondOrderDerivative & derivative )const {
+	virtual ResultType evalDerivative( const SearchPointType & p, SecondOrderDerivative & derivative )const {
 		double result = eval(p);
 		size_t size = p.size();
 		derivative.m_gradient.resize(size);

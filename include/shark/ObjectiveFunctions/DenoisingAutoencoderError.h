@@ -149,8 +149,8 @@ public:
 		mep_model->setParameterVector(input);
 		boost::shared_ptr<State> state = mep_model->createState();
 		
-		ensureSize(derivative.m_gradient,mep_model->numberOfParameters());
-		zero(derivative.m_gradient);
+		ensureSize(derivative,mep_model->numberOfParameters());
+		zero(derivative);
 		
 		typedef typename AbstractModel<InputType, InputType>::BatchInputType BatchType;
 		
@@ -171,7 +171,7 @@ public:
 
 				//calculate the gradient using the chain rule
 				mep_model->weightedParameterDerivative(m_data.batch(i),errorDerivative,*state,dataGradient);
-				derivative.m_gradient+=dataGradient;
+				derivative+=dataGradient;
 			}else{
 				BatchType noisyBatch = m_data.batch(i);
 				
@@ -190,12 +190,12 @@ public:
 
 				//calculate the gradient using the chain rule
 				mep_model->weightedParameterDerivative(noisyBatch,errorDerivative,*state,dataGradient);
-				derivative.m_gradient+=dataGradient;
+				derivative+=dataGradient;
 			}
 		}
 		std::size_t dataSize=m_data.numberOfElements();
 		error/=dataSize;
-		derivative.m_gradient/=dataSize;
+		derivative/=dataSize;
 		return error;
 	}
 

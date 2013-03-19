@@ -116,21 +116,6 @@ public:
 		return m_features & SUPPORTS_VARIABLE_INPUT_SIZE;
 	}
 
-//O.K. produces boost generated warnings which annoy me.
-//according to the boost documentation, this is unsafe! also it is a bad default for most kernels.
-//	/// \brief The default serialisation just reads and writes the parameters of the archive.
-//	void read(InArchive& ar){
-//		RealVector params(numberOfParameters());
-//		ar >> params;
-//		setParameterVector(params);
-//	}
-
-//	/// \brief The default serialisation just reads and writes the parameters of the archive.
-//	void write(OutArchive& ar) const{
-//		RealVector params = parameterVector();
-//		ar << params;
-//	}
-	
 	///\brief Creates an internal state of the kernel.
 	///
 	///The state is needed when the derivatives are to be

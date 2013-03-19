@@ -62,9 +62,9 @@ void BFGS::init(const ObjectiveFunctionType & objectiveFunction, const SearchPoi
 	}
 	
 	//evaluate starting point
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_firstOrderDerivative);
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 	//swap instead of copy
-	swap(m_lastDerivative,m_firstOrderDerivative.m_gradient);
+	swap(m_lastDerivative,m_derivative);
 }
 
 void BFGS::step(const ObjectiveFunctionType& objectiveFunction) {
@@ -74,9 +74,9 @@ void BFGS::step(const ObjectiveFunctionType& objectiveFunction) {
 	RealVector newPoint = m_best.point;
 	m_linesearch(newPoint,m_best.value,s,m_lastDerivative);
 
-	objectiveFunction.evalDerivative(newPoint,m_firstOrderDerivative);
+	objectiveFunction.evalDerivative(newPoint,m_derivative);
 
-	RealVector gamma=m_firstOrderDerivative.m_gradient-m_lastDerivative;
+	RealVector gamma=m_derivative-m_lastDerivative;
 	RealVector delta=newPoint-m_best.point;
 	double d = inner_prod(gamma,delta);
 
@@ -96,7 +96,7 @@ void BFGS::step(const ObjectiveFunctionType& objectiveFunction) {
 		scale = (scale / d + 1) / d;
 
 		//swap instead of copy
-		swap(m_lastDerivative,m_firstOrderDerivative.m_gradient);
+		swap(m_lastDerivative,m_derivative);
 
 		for (size_t i = 0; i < m_parameters; ++i)
 		{

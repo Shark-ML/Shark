@@ -126,7 +126,7 @@ public:
 	*/
 	void step(const ObjectiveFunctionType& objectiveFunction);
 protected:
-	ObjectiveFunctionType::FirstOrderDerivative m_firstOrderDerivative;
+	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
 
 	//! The update values for all weights.
 	RealVector m_deltaw;
@@ -216,7 +216,7 @@ public:
 	*/
 	void step(const ObjectiveFunctionType& objectiveFunction);
 protected:
-	ObjectiveFunctionType::FirstOrderDerivative m_firstOrderDerivative;
+	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
 
 	//! The update values for all weights.
 	RealVector m_deltaw;

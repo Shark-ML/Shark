@@ -190,9 +190,9 @@ public:
 		KernelMatrixResults results = evaluateKernelMatrix();
 				
 		std::size_t parameters = mep_kernel->numberOfParameters();
-		derivative.m_gradient.resize(parameters);
+		derivative.resize(parameters);
 		RealVector blockDerivative;
-		zero(derivative.m_gradient);
+		zero(derivative);
 		boost::shared_ptr<State> state = mep_kernel->createState();
 		RealMatrix blockK;//block of the KernelMatrix
 		RealMatrix blockW;//block of the WeightMatrix
@@ -207,13 +207,13 @@ public:
 					*state,
 					blockDerivative
 				);
-				noalias(derivative.m_gradient) += blockDerivative;
+				noalias(derivative) += blockDerivative;
 				startY += size(m_data.batch(j));
 			}
 			startX+= size(m_data.batch(i));
 		}
-		//derivative.m_gradient /= -results.KcKc*std::sqrt(results.KcKc);
-		derivative.m_gradient *= -1;
+		//derivative /= -results.KcKc*std::sqrt(results.KcKc);
+		derivative *= -1;
 		return -results.error;
 	}
 

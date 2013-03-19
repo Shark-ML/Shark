@@ -28,9 +28,8 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ZDT1_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ZDT1_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
 /*! \brief Multi-objective optimization benchmark function ZDT1
@@ -41,16 +40,16 @@ namespace shark {
 *  Multiobjective Evolutionary Algorithms: Empirical
 *  Results. Evolutionary Computation 8(2):173-195, 2000
 */
-struct ZDT1  : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+struct ZDT1  : public MultiObjectiveFunction
 {
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
 	
-	ZDT1(std::size_t numVariables = 0) : super( 2 ) , m_handler(numVariables,0,1) {
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
-		m_features |= HAS_CONSTRAINT_HANDLER;
+	ZDT1(std::size_t numVariables = 0) :  m_handler(numVariables,0,1) {
+		announceConstraintHandler(&m_handler);
 		m_name="ZDT1";
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -65,10 +64,6 @@ struct ZDT1  : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 	/// \param [in] numberOfVariables The new dimension.
 	void setNumberOfVariables( std::size_t numberOfVariables ){
 		m_handler.setBounds(numberOfVariables,0,1);
-	}
-	
-	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		return m_handler;
 	}
 
 	ResultType eval( const SearchPointType & x ) const {

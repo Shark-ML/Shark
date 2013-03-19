@@ -76,7 +76,7 @@ public:
 		return m_linesearch;
 	}
 protected:
-	ObjectiveFunctionType::FirstOrderDerivative m_firstOrderDerivative;
+	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
 	LineSearch m_linesearch;
 
 	size_t     m_parameters;

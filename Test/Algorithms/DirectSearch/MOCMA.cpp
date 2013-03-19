@@ -45,7 +45,7 @@
 #include <shark/Algorithms/DirectSearch/MOCMA.h>
 #include <shark/Algorithms/DirectSearch/InterruptibleAlgorithmRunner.h>
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
 
 // #include <shark/Core/Probe.h>
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypMOCMA_Serialization ) {
 	//~ shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > function;
 	//~ BOOST_CHECK_THROW( mocma.init( function ), shark::Exception );
 	shark::DTLZ1 dtlz1;
-	dtlz1.setNoObjectives( 3 );
+	dtlz1.setNumberOfObjectives( 3 );
 	dtlz1.setNumberOfVariables( 10 );
 	BOOST_CHECK_NO_THROW( mocma.init( dtlz1 ) );
 	BOOST_CHECK_NO_THROW( mocma.step( dtlz1 ) );
@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE( ExactHypMOCMA_Serialization ) {
 	//~ BOOST_CHECK_THROW( mocma.init( function ), shark::Exception );
 	mocma.m_useApproximatedHypervolume = false;
 	shark::DTLZ1 dtlz1;
-	dtlz1.setNoObjectives( 3 );
+	dtlz1.setNumberOfObjectives( 3 );
 	dtlz1.setNumberOfVariables( 10 );
 	BOOST_CHECK_NO_THROW( mocma.init( dtlz1 ) );
 	BOOST_CHECK_NO_THROW( mocma.step( dtlz1 ) );
@@ -397,7 +397,7 @@ BOOST_AUTO_TEST_CASE( AdditiveEpsMOCMA_Serialization ) {
 	//~ BOOST_CHECK_THROW( mocma.init( function ), shark::Exception );
 	mocma.m_useApproximatedHypervolume = false;
 	shark::DTLZ1 dtlz1;
-	dtlz1.setNoObjectives( 3 );
+	dtlz1.setNumberOfObjectives( 3 );
 	dtlz1.setNumberOfVariables( 10 );
 	BOOST_CHECK_NO_THROW( mocma.init( dtlz1 ) );
 	BOOST_CHECK_NO_THROW( mocma.step( dtlz1 ) );

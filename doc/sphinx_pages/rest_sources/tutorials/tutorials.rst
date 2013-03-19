@@ -55,6 +55,7 @@ as well as the behavior and are written in a more formal language.
 * :doc:`concepts/library_design/trainers`
 * :doc:`concepts/library_design/kernels`
 * :doc:`concepts/library_design/writing_kernels`
+* :doc:`concepts/library_design/writing_objective_functions`
 
 Data Handling
 ++++++++++++++++++

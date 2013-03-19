@@ -35,7 +35,7 @@ struct TestFunction : public AbstractObjectiveFunction<VectorSpace<double>,doubl
 	}
 	virtual double evalDerivative(RealVector const& pattern, FirstOrderDerivative& derivative)const
 	{
-		derivative.m_gradient = 2*prod(A,pattern);
+		derivative = 2*prod(A,pattern);
 		return eval(pattern);
 	}
 };

@@ -83,7 +83,7 @@ public:
 protected:
 
 	LineSearch m_linesearch;
-	ObjectiveFunctionType::FirstOrderDerivative m_pointDerivative;
+	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
 	RealVector m_g;
 	RealVector m_h;
 	RealVector m_xi;

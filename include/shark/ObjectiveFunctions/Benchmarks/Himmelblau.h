@@ -23,7 +23,6 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_HIMMELBLAU_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
@@ -35,9 +34,7 @@ namespace shark {
 *   http://en.wikipedia.org/wiki/Himmelblau%27s_function
 * for further information.
 */
-struct Himmelblau : public AbstractObjectiveFunction< VectorSpace<double>,double > {
-	typedef AbstractObjectiveFunction<VectorSpace<double>,double> super;
-
+struct Himmelblau : public SingleObjectiveFunction {
 	/**
 	* \brief Constructs an instance of the function.
 	*/
@@ -54,7 +51,7 @@ struct Himmelblau : public AbstractObjectiveFunction< VectorSpace<double>,double
 		(void) node;
 	}
 
-	void proposeStartingPoint( super::SearchPointType & x ) const {
+	void proposeStartingPoint( SearchPointType & x ) const {
 		x.resize( 2 );
 
 		for( unsigned int i = 0; i < x.size(); i++ ) {
@@ -66,7 +63,7 @@ struct Himmelblau : public AbstractObjectiveFunction< VectorSpace<double>,double
 	* \brief Evaluates the function for the supplied search point.
 	* \throws shark::Exception if the size of p does not equal 2.
 	*/
-	double eval( const super::SearchPointType & p ) const {
+	double eval( const SearchPointType & p ) const {
 		SIZE_CHECK(p.size() == 2);
 
 		m_evaluationCounter++;

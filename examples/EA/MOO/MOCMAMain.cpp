@@ -18,7 +18,7 @@ int main( int argc, char ** argv ) {
 	return( 
 		shark::moo::InterruptibleAlgorithmRunner< 
 			shark::MOCMA, 
-			shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > 
+			shark::MultiObjectiveFunction 
 		>::main( argc, argv )
 	);
 }

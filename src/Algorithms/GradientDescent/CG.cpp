@@ -56,21 +56,21 @@ void CG::init(const ObjectiveFunctionType & objectiveFunction, const SearchPoint
 	m_count = 0;
 	
 	//evaluate starting point and initialize cg iterations
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_pointDerivative);
-	m_xi= m_h= m_g =-m_pointDerivative.m_gradient;
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
+	m_xi= m_h= m_g =-m_derivative;
 }
 void CG::step(const ObjectiveFunctionType& objectiveFunction) {
 	//search in the direction of the current conjugate gradient xi
-	m_linesearch(m_best.point,m_best.value,m_xi,m_pointDerivative.m_gradient);
+	m_linesearch(m_best.point,m_best.value,m_xi,m_derivative);
 
 	//reevaluate the derivative at the new point
-	m_best.value = objectiveFunction.evalDerivative(m_best.point, m_pointDerivative);
+	m_best.value = objectiveFunction.evalDerivative(m_best.point, m_derivative);
 
 
 
 	//OK: what happens in the next 10 lines is a mystery to me
 	//nevertheless i transfered all loops and calculations to ublas. I hope everything is correct
-	m_xi = m_pointDerivative.m_gradient;
+	m_xi = m_derivative;
 	double gg=normSqr(m_g);
 	double dgg=inner_prod(m_xi+m_g,m_xi);
 
@@ -84,17 +84,17 @@ void CG::step(const ObjectiveFunctionType& objectiveFunction) {
 
 	//when the search direction differs more than 90 degrees from the gradient
 	//we are heading into the wrong direction and so we better reset
-	gg = inner_prod(m_xi,-m_pointDerivative.m_gradient);
+	gg = inner_prod(m_xi,-m_derivative);
 	if (gg <= 0.)
 	{
-		m_xi = m_h = m_g = -m_pointDerivative.m_gradient;
+		m_xi = m_h = m_g = -m_derivative;
 	}
 	//after numReset conjugent gradient steps, we reset automatically to the original gradient.
 	m_count++;
 	if (m_count == m_numReset)
 	{
 		m_count = 0;
-		m_xi= m_h = m_g = -m_pointDerivative.m_gradient;
+		m_xi= m_h = m_g = -m_derivative;
 	}
 
 }
@@ -112,7 +112,7 @@ void CG::configure( const PropertyTree & node )
 void CG::read( InArchive & archive )
 {
 	archive>>m_linesearch;
-	archive>>m_pointDerivative.m_gradient;
+	archive>>m_derivative;
 	archive>>m_g;
 	archive>>m_h;
 	archive>>m_xi;
@@ -126,7 +126,7 @@ void CG::read( InArchive & archive )
 void CG::write( OutArchive & archive ) const
 {
 	archive<<m_linesearch;
-	archive<<m_pointDerivative.m_gradient;
+	archive<<m_derivative;
 	archive<<m_g;
 	archive<<m_h;
 	archive<<m_xi;

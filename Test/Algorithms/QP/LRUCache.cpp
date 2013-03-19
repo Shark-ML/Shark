@@ -3,6 +3,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/QP/LRUCache.h>
+#include <shark/Rng/GlobalRng.h>
 #include <algorithm>
 
 using namespace shark;

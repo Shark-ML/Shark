@@ -31,16 +31,14 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_SPHERE_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
 /**
  * \brief Convex quadratic benchmark function.
  */
-struct Sphere : public AbstractObjectiveFunction< VectorSpace<double>,double > {
-	typedef AbstractObjectiveFunction<VectorSpace<double>,double> super;
-
+struct Sphere : public SingleObjectiveFunction {
+	
 	Sphere(unsigned int numberOfVariables = 5):m_numberOfVariables(numberOfVariables) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_name = "Sphere";
@@ -61,7 +59,7 @@ struct Sphere : public AbstractObjectiveFunction< VectorSpace<double>,double > {
 		m_numberOfVariables = node.get("numberOfVariables", 5l);
 	}
 
-	void proposeStartingPoint(super::SearchPointType &x) const {
+	void proposeStartingPoint(SearchPointType &x) const {
 		x.resize(numberOfVariables());
 
 		for (unsigned int i = 0; i < x.size(); i++) {
@@ -69,7 +67,7 @@ struct Sphere : public AbstractObjectiveFunction< VectorSpace<double>,double > {
 		}
 	}
 
-	double eval(const super::SearchPointType &p) const {
+	double eval(const SearchPointType &p) const {
 		m_evaluationCounter++;
 		return normSqr(p);
 	}

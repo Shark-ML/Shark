@@ -26,13 +26,10 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_CIGTAB1_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_CIGTAB1_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
-
 #include <shark/LinAlg/rotations.h>
 
-#include <vector>
 
 namespace shark {
 /*! \brief Multi-objective optimization benchmark function CIGTAB 1.
@@ -43,19 +40,16 @@ namespace shark {
 *  Covariance Matrix Adaptation for Multi-objective Optimization. 
 *  Evolutionary Computation 15(1), pp. 1-28, 2007 
 */
-struct CIGTAB1 : public AbstractMultiObjectiveFunction< VectorSpace<double> > {
+struct CIGTAB1 : public MultiObjectiveFunction {
 
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-
-	typedef super::ResultType ResultType;
-	typedef super::SearchPointType SearchPointType;
-
-	
-
-	CIGTAB1(std::size_t numberOfVariables = 5) : super( 2 ), m_a( 1E6 ) {
+	CIGTAB1(std::size_t numberOfVariables = 5) : m_a( 1E6 ) {
 		m_name = "CIGTAB1";
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
 	}
 	
 	std::size_t numberOfVariables()const{

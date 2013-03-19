@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Loss_OneLayer ){
 		RealVector estimatedDerivative = estimateDerivative(error,point,1.e-10);
 		error.evalDerivative(point,derivative);
 		
-		double errorDer= norm_inf(estimatedDerivative - derivative.m_gradient);
+		double errorDer= norm_inf(estimatedDerivative - derivative);
 		BOOST_CHECK_SMALL(errorDer, 1.e-4);
 	}
 
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Loss_TwoLayer ){
 		RealVector estimatedDerivative = estimateDerivative(error,point,1.e-10);
 		error.evalDerivative(point,derivative);
 		
-		double errorDer= norm_inf(estimatedDerivative - derivative.m_gradient);
+		double errorDer= norm_inf(estimatedDerivative - derivative);
 		BOOST_CHECK_SMALL(errorDer, 1.e-4);
 	}
 
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_OneLayer ){
 		RealVector estimatedDerivative = estimateDerivative(error,point,1.e-10);
 		error.evalDerivative(point,derivative);
 		
-		double errorm= norm_inf(estimatedDerivative - derivative.m_gradient);
+		double errorm= norm_inf(estimatedDerivative - derivative);
 		BOOST_CHECK_SMALL(errorm, 1.e-4);
 	}
 
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_TwoLayer ){
 		RealVector estimatedDerivative = estimateDerivative(error,point,1.e-10);
 		error.evalDerivative(point,derivative);
 		
-		double errorm= norm_inf(estimatedDerivative - derivative.m_gradient);
+		double errorm= norm_inf(estimatedDerivative - derivative);
 		BOOST_CHECK_SMALL(errorm, 1.e-4);
 	}
 

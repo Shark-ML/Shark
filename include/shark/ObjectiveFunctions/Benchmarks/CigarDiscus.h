@@ -21,14 +21,13 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_CIGARDISCUS_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
 /**
  * \brief Convex quadratic benchmark function.
  */
-class CigarDiscus : public AbstractObjectiveFunction< VectorSpace<double>,double > {
+class CigarDiscus : public SingleObjectiveFunction {
 public:
 
 	CigarDiscus(unsigned int numberOfVariables = 5,double alpha=1E-3) : m_alpha(alpha) {

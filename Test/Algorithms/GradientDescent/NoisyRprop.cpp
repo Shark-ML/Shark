@@ -35,11 +35,11 @@ struct TestFunction : public AbstractObjectiveFunction<VectorSpace<double>,doubl
 	//noise is only applied on the gradient
 	virtual double evalDerivative(RealVector const& pattern, FirstOrderDerivative& derivative)const
 	{
-		derivative.m_gradient = 2*prod(A,pattern);
+		derivative = 2*prod(A,pattern);
 		if(m_noisy){
-			derivative.m_gradient(0)+=Rng::gauss(0,0.001);
-			derivative.m_gradient(1)+=Rng::gauss(0,0.001);
-			derivative.m_gradient(2)+=Rng::gauss(0,0.001);
+			derivative(0)+=Rng::gauss(0,0.001);
+			derivative(1)+=Rng::gauss(0,0.001);
+			derivative(2)+=Rng::gauss(0,0.001);
 		}
 		return eval(pattern);
 	}

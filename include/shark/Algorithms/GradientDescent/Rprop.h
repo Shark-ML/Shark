@@ -161,7 +161,7 @@ public:
 		return *std::max_element(m_delta.begin(),m_delta.end());
 	}
 protected:
-	ObjectiveFunctionType::FirstOrderDerivative m_firstOrderDerivative;
+	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
 
 	//! The increase factor \f$ \eta^+ \f$, set to 1.2 by default.
 	double m_increaseFactor;

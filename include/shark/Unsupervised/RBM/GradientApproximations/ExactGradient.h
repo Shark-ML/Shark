@@ -110,8 +110,8 @@ public:
 			integrateOverHidden(modelExpectation);
 		}
 		
-		derivative.m_gradient.resize(mpe_rbm->numberOfParameters());
-		noalias(derivative.m_gradient) = modelExpectation.result() - empiricalExpectation.result();
+		derivative.resize(mpe_rbm->numberOfParameters());
+		noalias(derivative) = modelExpectation.result() - empiricalExpectation.result();
 	
 		m_logPartition = modelExpectation.logWeightSum();
 		negLogLikelihood/=m_data.numberOfElements();

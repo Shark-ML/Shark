@@ -26,6 +26,9 @@
    rest_sources/tutorials/concepts/library_design/stopping_criteria
    rest_sources/tutorials/concepts/library_design/trainers
    rest_sources/tutorials/concepts/library_design/batches
+   
+   rest_sources/tutorials/concepts/library_design/writing_kernels
+   rest_sources/tutorials/concepts/library_design/writing_objective_functions
 
    rest_sources/tutorials/concepts/lin_alg/vector_matrix
    rest_sources/tutorials/concepts/lin_alg/lapack
