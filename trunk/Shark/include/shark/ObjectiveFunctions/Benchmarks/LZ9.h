@@ -26,21 +26,19 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ9_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ9_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
-struct LZ9 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
-{
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-
-	LZ9(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= HAS_CONSTRAINT_HANDLER;
-		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+struct LZ9 : public MultiObjectiveFunction
+{	
+	LZ9(std::size_t numVariables = 0) : m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+		announceConstraintHandler(&m_handler);
 		m_name="LZ9";
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -59,15 +57,11 @@ struct LZ9 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 			SearchPointType(numberOfVariables,1)
 		);
 	}
-		
-	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		return m_handler;
-	}
 
 	ResultType eval( const SearchPointType & x ) const {
 		m_evaluationCounter++;
 
-		ResultType value( noObjectives() );
+		ResultType value( numberOfObjectives() );
 
 		unsigned int counter1 = 0, counter2 = 0;
 		for( unsigned int i = 1; i < x.size(); i++ ) {

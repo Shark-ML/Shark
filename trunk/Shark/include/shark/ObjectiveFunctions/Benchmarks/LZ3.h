@@ -28,9 +28,8 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ3_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ3_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
 /*! \brief Multi-objective optimization benchmark function LZ3.
@@ -41,16 +40,15 @@ namespace shark {
 *  Multiobjective Optimization Problems with Complicated Pareto Sets, MOEA/D and NSGA-II, 
 *  IEEE Trans on Evolutionary Computation, 2(12):284-302, April 2009. 
 */
-struct LZ3 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+struct LZ3 : public MultiObjectiveFunction
 {
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-
-	LZ3(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,-1),SearchPointType(numVariables,1) ){
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= HAS_CONSTRAINT_HANDLER;
-		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+	LZ3(std::size_t numVariables = 0) :m_handler(SearchPointType(numVariables,-1),SearchPointType(numVariables,1) ){
+		announceConstraintHandler(&m_handler);
 		m_name="LZ3";
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -68,10 +66,6 @@ struct LZ3 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 			SearchPointType(numberOfVariables,-1),
 			SearchPointType(numberOfVariables,1)
 		);
-	}
-
-	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		return m_handler;
 	}
 
 	ResultType eval( const SearchPointType & x ) const {
@@ -106,7 +100,7 @@ ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( LZ3, shark::moo::RealValuedObjectiveFunctionF
 	//template<> struct ObjectiveFunctionTraits<LZ3> {
 	//	static LZ3::SolutionSetType referenceSet( std::size_t maxSize,
 	//		unsigned int numberOfVariables,
-	//		unsigned int noObjectives ) {
+	//		unsigned int numberOfObjectives ) {
 	//		shark::IntervalIterator< tag::LinearTag > it( 0., 1., maxSize );
 	//
 	//		LZ3 lz3;

@@ -223,7 +223,7 @@ public:
 			sampler.createSample(hiddenSamples,visibleSamples,m_data.batch(i));
 			gradient.addVH(hiddenSamples, visibleSamples);
 		}
-		derivative.m_gradient = gradient.result();
+		derivative = gradient.result();
 		return eval(parameter);
 	}
 private:
@@ -307,7 +307,7 @@ public:
 			sampler.precomputeVisible(hiddenSamples,visibleSamples);
 			gradient.addHV(hiddenSamples, visibleSamples);
 		}
-		derivative.m_gradient = gradient.result();
+		derivative = gradient.result();
 		return eval(parameter);
 	}
 private:

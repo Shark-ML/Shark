@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		for(std::size_t i = 0; i != 1000; ++i){
 			BinaryCD::FirstOrderDerivative der;
 			cd.evalDerivative(params,der);
-			approxCDGrad+=der.m_gradient;
+			approxCDGrad+=der;
 		}
 		approxCDGrad /=1000;
 		init(approxCDGrad) >> toVector(testWeightGrad),testHiddenGrad,testVisibleGrad;

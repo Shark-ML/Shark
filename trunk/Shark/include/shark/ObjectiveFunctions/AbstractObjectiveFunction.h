@@ -46,9 +46,10 @@
 #include <shark/Core/Flags.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/ObjectiveFunctions/AbstractConstraintHandler.h>
+#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
-	
+/** \cond */
 	/// \brief Models a vector space objective function storing the number of variables.
 	/// 
 	/// AbstractObjectiveFunction derives itself from this interface, when the search space type
@@ -69,10 +70,10 @@ namespace shark {
 		/// \brief Adjusts the number of variables if the function is scalable.
 		/// \param [in] numberOfVariables The new dimension.
 		virtual void setNumberOfVariables( std::size_t numberOfVariables ){
-			throw SHARKEXCEPTION("dimnsionality of function is not scalable");
+			throw SHARKEXCEPTION("dimensionality of function is not scalable");
 		}
 	};
-
+/** \endcond */
 
 /// \brief Super class of all objective functions for optimization and learning.
 
@@ -119,7 +120,7 @@ public:
 	typedef typename SearchSpaceType::PointType SearchPointType;
 	typedef ResultT ResultType;
 
-	typedef TypedFirstOrderDerivative<SearchPointType> FirstOrderDerivative;
+	typedef SearchPointType FirstOrderDerivative;
 	typedef TypedSecondOrderDerivative<SearchPointType,RealMatrix> SecondOrderDerivative;
 
 	/// \brief List of features that are supported by an implementation.
@@ -194,6 +195,20 @@ public:
 
 	virtual void init() {}
 		
+	virtual std::size_t numberOfObjectives() const{
+		return 1;
+	}
+	virtual bool hasScalableObjectives()const{
+		return false;
+	}
+
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	virtual void setNumberOfObjectives( std::size_t numberOfObjectives ){
+		throw SHARKEXCEPTION("dimensionality of function is not scaleable");
+	}
+	
+		
 	/// \brief Accesses the evaluation counter of the function.
 	std::size_t evaluationCounter() const {
 		return m_evaluationCounter;
@@ -202,9 +217,10 @@ public:
 	/// \brief Returns the constraint handler of the function if it has one.
 	///
 	/// If the function does not offer a constraint handler, an exception is thrown.
-	/// \throws FeatureNotAvailableException in the default implementation.
-	virtual AbstractConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		SHARK_FEATURE_EXCEPTION(HAS_CONSTRAINT_HANDLER);
+	AbstractConstraintHandler<SearchPointType> const& getConstraintHandler()const{
+		if(m_constraintHandler == NULL)
+			throw SHARKEXCEPTION("Objective Function does not have an constraint handler!");
+		return *m_constraintHandler;
 	}
 
 	/// \brief Tests whether a point in SearchSpace is feasible, e.g., whether the constraints are fulfilled.
@@ -278,18 +294,52 @@ public:
 protected:
 	std::string m_name;///< Name of the objective function, default value: empty string.
 	mutable std::size_t m_evaluationCounter; ///< Evaluation counter, default value: 0.
+	AbstractConstraintHandler<SearchPointType> const* m_constraintHandler;
+	
+	/// \brief helper function which is called to announce the presence of an constraint handler.
+	///
+	/// This function quries the propabilities of the handler and sts up the flags accordingly
+	void announceConstraintHandler(AbstractConstraintHandler<SearchPointType> const* handler){
+		SHARK_CHECK(handler != NULL, "[AbstractObjectiveFunction::AnnounceConstraintHandler] Handler is not allowed to be NULL");
+		m_constraintHandler = handler;
+		m_features |= IS_CONSTRAINED_FEATURE;
+		m_features |= HAS_CONSTRAINT_HANDLER;
+		if(handler->canGenerateRandomPoint())
+			m_features |=CAN_PROPOSE_STARTING_POINT;
+		if(handler->canProvideClosestFeasible())
+			m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+	}
 };
+
+typedef AbstractObjectiveFunction< VectorSpace< double >, double > SingleObjectiveFunction;
+typedef AbstractObjectiveFunction< VectorSpace< double >, RealVector > MultiObjectiveFunction;
 
 }
 
-#include <shark/Core/SearchSpaces/VectorSpace.h>
-
+/** \cond */
 namespace shark {
     namespace soo {
 	///  \brief Defines the default factory type for real-valued single-objective optimization problems.
-	typedef Factory< AbstractObjectiveFunction< VectorSpace< double >, double >, std::string > RealValuedObjectiveFunctionFactory;
+	typedef Factory< SingleObjectiveFunction, std::string > RealValuedObjectiveFunctionFactory;
     }
 }
+
+namespace shark {
+	namespace moo {
+		/** \brief Defines the default factory type for real-valued multi-objective optimization problems. */
+		typedef Factory< MultiObjectiveFunction, std::string > RealValuedObjectiveFunctionFactory;
+	}
+} 
+/** \endcond */
+/**
+* \brief Convenience macro for registering multi-objective functions with a factory at compile-time.
+*/
+#define ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( Function, Factory ) \
+	namespace Function ## _detail {\
+		typedef TypeErasedAbstractFactory< Function, Factory > abstract_factory_type;\
+		typedef FactoryRegisterer< Factory > factory_registerer_type;\
+		static factory_registerer_type FACTORY_REGISTERER = factory_registerer_type( #Function, new abstract_factory_type() );\
+	}\
 
 ///  \brief Convenience macro for registering single-objective functions with a factory at compile-time.
 #define ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( Function, Factory )		\

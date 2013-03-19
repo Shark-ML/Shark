@@ -1,21 +1,21 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_GSP_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_GSP_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
 /// \brief Real-valued benchmark function with two objectives.
-struct GSP : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+struct GSP : public MultiObjectiveFunction
 {
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-	GSP(std::size_t numVariables=5) : super(2), m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,10000))  {
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= HAS_CONSTRAINT_HANDLER;
-		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+	GSP(std::size_t numVariables=5) : m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,10000))  {
+		announceConstraintHandler(&m_handler);
 		m_name = "GSP";
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -31,10 +31,6 @@ struct GSP : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 			SearchPointType(numberOfVariables,0),
 			SearchPointType(numberOfVariables,10000)
 		);
-	}
-	
-	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		return m_handler;
 	}
 
 	void configure( PropertyTree const& node ) {

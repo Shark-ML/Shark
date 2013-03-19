@@ -4,7 +4,7 @@ Writing Kernel Functions
 
 This tutorial explains in detail how to write your own kernel function.
 Be sure to read the general tutorial on :doc:`kernels` first. You should
-also be familiar with data :doc:`batches`, and for the advanced topics
+also be familiar with :doc:`batches`, and for the advanced topics
 with :doc:`../optimization/conventions_derivatives`.
 
 Existing kernel functions in Shark are a good starting point for writing

@@ -28,7 +28,7 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ELLI1_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ELLI1_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Rng/GlobalRng.h>
 
@@ -43,11 +43,15 @@ namespace shark {
 *  Covariance Matrix Adaptation for Multi-objective Optimization. 
 *  Evolutionary Computation 15(1), pp. 1-28, 2007 
 */
-struct ELLI1 : public AbstractMultiObjectiveFunction< VectorSpace<double> >{
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-	ELLI1(std::size_t numVariables = 0) : super(2), m_a( 1E6 ),m_numberOfVariables(numVariables) {
+struct ELLI1 : public MultiObjectiveFunction{
+	
+	ELLI1(std::size_t numVariables = 0) : m_a( 1E6 ),m_numberOfVariables(numVariables) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_name = "ELLI1";
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
 	}
 	
 	std::size_t numberOfVariables()const{

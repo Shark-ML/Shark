@@ -35,9 +35,8 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ7_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ7_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
 /**
@@ -48,16 +47,21 @@ namespace shark {
 *	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
 *	- Disconnected Pareto front.
 */
-struct DTLZ7 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+struct DTLZ7 : public MultiObjectiveFunction
 {
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-	
-	DTLZ7(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= HAS_CONSTRAINT_HANDLER;
-		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+	DTLZ7(std::size_t numVariables = 0) : m_objectives(2), m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+		announceConstraintHandler(&m_handler);
 		m_name="DTLZ7";
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return m_objectives;
+	}
+	bool hasScalableObjectives()const{
+		return true;
+	}
+	void setNumberOfObjectives( std::size_t numberOfObjectives ){
+		m_objectives = numberOfObjectives;
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -76,39 +80,37 @@ struct DTLZ7 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 			SearchPointType(numberOfVariables,1)
 		);
 	}
-	
-	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		return m_handler;
-	}
 
 	ResultType eval( const SearchPointType & x ) const {
 		m_evaluationCounter++;
 
-		RealVector value( noObjectives() );
+		RealVector value( numberOfObjectives() );
 
-		int k = numberOfVariables() - noObjectives() + 1 ;
+		int k = numberOfVariables() - numberOfObjectives() + 1 ;
 		double g = 0.0 ;
 		for (unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++)
 			g += x(i-1);
 
 		g = 1 + 9 * g / k;
 
-		for (unsigned int i = 1; i <= noObjectives() - 1; i++)
+		for (unsigned int i = 1; i <= numberOfObjectives() - 1; i++)
 			value[i-1] = x(i-1);
 
 		double h = 0.0 ;
-		for (unsigned int j = 1; j <= noObjectives() - 1; j++)
+		for (unsigned int j = 1; j <= numberOfObjectives() - 1; j++)
 			h += x(j-1) / (1 + g) * ( 1 + std::sin( 3 * M_PI * x(j-1) ) );
 
-		h = noObjectives() - h ;
+		h = numberOfObjectives() - h ;
 
-		value[noObjectives()-1] = (1 + g) * h;
+		value[numberOfObjectives()-1] = (1 + g) * h;
 
 		return value;
 	}
 
 private:
+	std::size_t m_objectives;
 	BoxConstraintHandler<SearchPointType> m_handler;
+	
 };
 
 	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ7, shark::moo::RealValuedObjectiveFunctionFactory );

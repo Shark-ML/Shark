@@ -100,7 +100,7 @@ public:
 	 *  \brief updates searchdirection and then does simple gradient descent
 	 */
 	void step(const ObjectiveFunctionType& objectiveFunction) {
-		m_path = -m_learningRate * m_derivative.m_gradient + m_momentum * m_path;
+		m_path = -m_learningRate * m_derivative + m_momentum * m_path;
 		m_best.point+=m_path;
 		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 	}

@@ -47,7 +47,7 @@ inline RealMatrix estimateSecondDerivative(
 		testPoint2(dim) -= epsilon;
 		Derivative result2;
 		function.evalDerivative(testPoint2,result2);
-		row(hessian,dim) = (result1.m_gradient-result2.m_gradient)/(2*epsilon);
+		row(hessian,dim) = (result1-result2)/(2*epsilon);
 	}
 	return hessian;
 }
@@ -69,12 +69,12 @@ void testDerivative(
 	BOOST_CHECK_CLOSE(resultEvalDerivative,resultEval, 1.e-5);
 	
 	//calculate error between both
-	BOOST_REQUIRE_EQUAL(estimatedDerivative.size(),derivative.m_gradient.size());
+	BOOST_REQUIRE_EQUAL(estimatedDerivative.size(),derivative.size());
 	//std::cout<<estimatedDerivative<<std::endl;
-	//std::cout<<derivative.m_gradient<<std::endl;
+	//std::cout<<derivative<<std::endl;
 	for(std::size_t i=0;i != estimatedDerivative.size(); ++i){
-		BOOST_CHECK_CLOSE(estimatedDerivative(i),derivative.m_gradient(i),0.001);
-		//BOOST_CHECK_SMALL(estimatedDerivative(i) -derivative.m_gradient(i),maxError);
+		BOOST_CHECK_CLOSE(estimatedDerivative(i),derivative(i),0.001);
+		//BOOST_CHECK_SMALL(estimatedDerivative(i) -derivative(i),maxError);
 	}
 	
 	//if possible, calculate second derivative
@@ -89,7 +89,7 @@ void testDerivative(
 		//check first derivative again...
 		BOOST_REQUIRE_EQUAL(estimatedDerivative.size(),secondDerivative.m_gradient.size());
 		for(std::size_t i=0;i != estimatedDerivative.size(); ++i){
-			BOOST_CHECK_CLOSE(estimatedDerivative(i),derivative.m_gradient(i),0.001);
+			BOOST_CHECK_CLOSE(estimatedDerivative(i),derivative(i),0.001);
 			//BOOST_CHECK_SMALL(estimatedDerivative(i) - secondDerivative.m_gradient(i),maxError);
 			//std::cout<<i<<" "<<estimatedDerivative(i)<<" "<<secondDerivative.m_gradient(i)<<std::endl;
 		}

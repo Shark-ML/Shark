@@ -75,7 +75,7 @@ void RpropMinus::init(
 	m_oldDerivative.clear();
 	m_best.point = startingPoint;
 	//evaluate initial point
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_firstOrderDerivative);
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }
 void RpropMinus::init(
 	const ObjectiveFunctionType & objectiveFunction, 
@@ -92,23 +92,22 @@ void RpropMinus::init(
 	m_oldDerivative.clear();
 	m_best.point=startingPoint;
 	//evaluate initial point
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_firstOrderDerivative);
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }
 
 void RpropMinus::step(const ObjectiveFunctionType& objectiveFunction) {
-	RealVector& derivative = m_firstOrderDerivative.m_gradient;
 	for (size_t i = 0; i < m_parameterSize; i++)
 	{
 		double p = m_best.point(i);
-		if (derivative(i) * m_oldDerivative(i) > 0)
+		if (m_derivative(i) * m_oldDerivative(i) > 0)
 		{
 			m_delta(i) = std::min(m_maxDelta, m_increaseFactor * m_delta(i));
 		}
-		else if (derivative(i) * m_oldDerivative(i) < 0)
+		else if (m_derivative(i) * m_oldDerivative(i) < 0)
 		{
 			m_delta(i) = std::max(m_minDelta, m_decreaseFactor * m_delta(i));
 		}
-		m_best.point(i) -= m_delta(i) * boost::math::sign(derivative(i));
+		m_best.point(i) -= m_delta(i) * boost::math::sign(m_derivative(i));
 		if (! objectiveFunction.isFeasible(m_best.point))
 		{
 			m_best.point(i) = p;
@@ -117,11 +116,11 @@ void RpropMinus::step(const ObjectiveFunctionType& objectiveFunction) {
 		}
 		else
 		{
-			m_oldDerivative(i) = derivative(i);
+			m_oldDerivative(i) = m_derivative(i);
 		}
 	}
 	//evaluate the new point
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_firstOrderDerivative);
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }
 
 void RpropMinus::configure( const PropertyTree & node ) {
@@ -183,20 +182,18 @@ void RpropPlus::init(
 	m_deltaw.clear();
 }
 void RpropPlus::step(const ObjectiveFunctionType& objectiveFunction) {
-	RealVector& derivative= m_firstOrderDerivative.m_gradient;
-
 	for (size_t i = 0; i < m_parameterSize; i++)
 	{
 		//save the current value to ensure, that it can be restored
 		double p = m_best.point(i);
-		if (derivative(i) * m_oldDerivative(i) > 0)
+		if (m_derivative(i) * m_oldDerivative(i) > 0)
 		{
 			m_delta(i) = std::min(m_maxDelta, m_increaseFactor * m_delta(i));
-			m_deltaw(i) = m_delta(i) * -boost::math::sign(derivative(i));
+			m_deltaw(i) = m_delta(i) * -boost::math::sign(m_derivative(i));
 			m_best.point(i)+=m_deltaw(i);
-			m_oldDerivative(i) = derivative(i);
+			m_oldDerivative(i) = m_derivative(i);
 		}
-		else if (derivative(i) * m_oldDerivative(i) < 0)
+		else if (m_derivative(i) * m_oldDerivative(i) < 0)
 		{
 			m_delta(i) = std::max(m_minDelta, m_decreaseFactor * m_delta(i));
 			m_best.point(i)-=m_deltaw(i);
@@ -204,9 +201,9 @@ void RpropPlus::step(const ObjectiveFunctionType& objectiveFunction) {
 		}
 		else
 		{
-			m_deltaw(i) = m_delta(i) * -boost::math::sign(derivative(i));
+			m_deltaw(i) = m_delta(i) * -boost::math::sign(m_derivative(i));
 			m_best.point(i)+=m_deltaw(i);
-			m_oldDerivative(i) = derivative(i);
+			m_oldDerivative(i) = m_derivative(i);
 		}
 		if (! objectiveFunction.isFeasible(m_best.point))
 		{
@@ -215,7 +212,7 @@ void RpropPlus::step(const ObjectiveFunctionType& objectiveFunction) {
 			m_oldDerivative(i) = 0.0;
 		}
 	}
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_firstOrderDerivative);
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }
 void RpropPlus::read( InArchive & archive )
 {
@@ -255,19 +252,17 @@ void IRpropPlus::init(const ObjectiveFunctionType & objectiveFunction, const Sea
 }
 
 void IRpropPlus::step(const ObjectiveFunctionType& objectiveFunction) {
-	RealVector& derivative = m_firstOrderDerivative.m_gradient;
-
 	for (size_t i = 0; i < m_parameterSize; i++)
 	{
-		if(fabs(derivative(i)) < m_derivativeThreshold) derivative(i) = 0.;
+		if(std::abs(m_derivative(i)) < m_derivativeThreshold) m_derivative(i) = 0.;
 		double p = m_best.point(i);
-		double direction = derivative(i) * m_oldDerivative(i);
+		double direction = m_derivative(i) * m_oldDerivative(i);
 		if ( direction > 0)
 		{
 			m_delta(i) = std::min(m_maxDelta, m_increaseFactor * m_delta(i));
-			m_deltaw(i) = m_delta(i) * -boost::math::sign(derivative(i));
+			m_deltaw(i) = m_delta(i) * -boost::math::sign(m_derivative(i));
 			m_best.point(i) += m_deltaw(i);
-			m_oldDerivative(i) = derivative(i);
+			m_oldDerivative(i) = m_derivative(i);
 		}
 		else if (direction < 0)
 		{
@@ -280,9 +275,9 @@ void IRpropPlus::step(const ObjectiveFunctionType& objectiveFunction) {
 		}
 		else
 		{
-			m_deltaw(i) = m_delta(i) * -boost::math::sign(derivative(i));
+			m_deltaw(i) = m_delta(i) * -boost::math::sign(m_derivative(i));
 			m_best.point(i) += m_deltaw(i);
-			m_oldDerivative(i) = derivative(i);
+			m_oldDerivative(i) = m_derivative(i);
 		}
 		if (! objectiveFunction.isFeasible(m_best.point))
 		{
@@ -292,7 +287,7 @@ void IRpropPlus::step(const ObjectiveFunctionType& objectiveFunction) {
 		}
 	}
 	m_oldError = m_best.value;
-	m_best.value = objectiveFunction.evalDerivative( m_best.point, m_firstOrderDerivative );
+	m_best.value = objectiveFunction.evalDerivative( m_best.point, m_derivative );
 }
 
 void IRpropPlus::read( InArchive & archive ) {
@@ -302,6 +297,10 @@ void IRpropPlus::read( InArchive & archive ) {
 void IRpropPlus::write( OutArchive & archive ) const {
 	archive<<boost::serialization::base_object<RpropPlus>(*this);
 	archive<<m_oldError;
+}
+
+void IRpropPlus::setDerivativeThreshold(double derivativeThreshold)  {
+	m_derivativeThreshold = derivativeThreshold;		
 }
 
 
@@ -314,15 +313,14 @@ IRpropMinus::IRpropMinus()
 }
 
 void IRpropMinus::step(const ObjectiveFunctionType& objectiveFunction) {
-	RealVector& derivative = m_firstOrderDerivative.m_gradient;
 	for (size_t i = 0; i < m_parameterSize; i++)
 	{
 		double p = m_best.point(i);
-		double direction = derivative(i) * m_oldDerivative(i);
+		double direction = m_derivative(i) * m_oldDerivative(i);
 		if (direction > 0)
 		{
 			m_delta(i) = std::min(m_maxDelta, m_increaseFactor * m_delta(i));
-			m_oldDerivative(i) = derivative(i);
+			m_oldDerivative(i) = m_derivative(i);
 		}
 		else if (direction < 0)
 		{
@@ -331,9 +329,9 @@ void IRpropMinus::step(const ObjectiveFunctionType& objectiveFunction) {
 		}
 		else
 		{
-			m_oldDerivative(i) = derivative(i);
+			m_oldDerivative(i) = m_derivative(i);
 		}
-		m_best.point(i)-=m_delta(i) * boost::math::sign(derivative(i));
+		m_best.point(i)-=m_delta(i) * boost::math::sign(m_derivative(i));
 		if (! objectiveFunction.isFeasible(m_best.point))
 		{
 			m_best.point(i)=p;
@@ -341,9 +339,5 @@ void IRpropMinus::step(const ObjectiveFunctionType& objectiveFunction) {
 			m_oldDerivative(i) = 0.0;
 		}
 	}
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_firstOrderDerivative);
-}
-
-void IRpropPlus::setDerivativeThreshold(double derivativeThreshold)  {
-	m_derivativeThreshold = derivativeThreshold;		
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }

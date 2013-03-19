@@ -17,7 +17,7 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARKS_SYMPART_H
 
 #include <shark/Core/AbstractBoxConstraintsProvider.h>
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Traits/ObjectiveFunctionTraits.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/LinAlg/rotations.h>
@@ -26,7 +26,7 @@ namespace shark {
 
 /// \brief Real-valued benchmark function with two objectives
 //todo: fix this
-/*struct Sympart : public AbstractMultiObjectiveFunction< VectorSpace<double> > {
+/*struct Sympart : public MultiObjectiveFunction {
 	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
 	typedef ResultTypeType ResultType;
 	typedef super::SearchPointType SearchPointType;
@@ -36,8 +36,8 @@ namespace shark {
 		rNoObjectives() = 2;
 	}
 
-	void setNoObjectives(unsigned int noObjectives) {
-		(void) noObjectives;
+	void setNoObjectives(unsigned int numberOfObjectives) {
+		(void) numberOfObjectives;
 	}
 
 	void setNumberOfVariables(unsigned int n) {

@@ -162,10 +162,10 @@ public:
 		double error= mep_loss->evalDerivative(batch.label, predictions,errorDerivative);
 
 		//chain rule
-		mep_model->weightedParameterDerivative(batch.input,errorDerivative,*state,derivative.m_gradient);
+		mep_model->weightedParameterDerivative(batch.input,errorDerivative,*state,derivative);
 	
 		error/=m_batchSize;
-		derivative.m_gradient/= m_batchSize;
+		derivative/= m_batchSize;
 		return error;
 	}
 };

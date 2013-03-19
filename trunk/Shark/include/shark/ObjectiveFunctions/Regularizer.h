@@ -58,9 +58,6 @@ public:
  	typedef RealVector SearchPointType;
  	typedef double ResultType;
 
- 	typedef TypedFirstOrderDerivative<RealVector> FirstOrderDerivative;
- 	typedef TypedSecondOrderDerivative<RealVector,RealMatrix> SecondOrderDerivative;
-
 	/// Constructor
 	OneNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables)
 	{
@@ -102,17 +99,17 @@ public:
 	/// and calculates its gradient.
 	double evalDerivative( RealVector const& input, FirstOrderDerivative & derivative ) const {
 		unsigned int i, ic = input.size();
-		derivative.m_gradient.resize(ic);
+		derivative.resize(ic);
 		if(m_mask.empty()){
 			for (i=0; i<ic; i++){
-				derivative.m_gradient(i) = boost::math::sign(input(i));
+				derivative(i) = boost::math::sign(input(i));
 			}
 		}
 		else
 		{
 			SIZE_CHECK(m_mask.size() == input.size());
 			for (i=0; i<ic; i++){
-				derivative.m_gradient(i) = m_mask(i)*boost::math::sign(input(i));
+				derivative(i) = m_mask(i)*boost::math::sign(input(i));
 			}
 		}
 		return eval(input);
@@ -156,9 +153,6 @@ public:
 	typedef RealVector SearchPointType;
  	typedef double ResultType;
 
- 	typedef TypedFirstOrderDerivative<RealVector> FirstOrderDerivative;
- 	typedef TypedSecondOrderDerivative<RealVector,RealMatrix> SecondOrderDerivative;
-
 	typedef AbstractObjectiveFunction<VectorSpace<double>, double> super;
 
 	/// Constructor
@@ -188,7 +182,7 @@ public:
 	/// Evaluates the objective function
 	/// and calculates its gradient.
 	virtual double evalDerivative( RealVector const& input, FirstOrderDerivative & derivative ) const {
-		derivative.m_gradient = input;
+		derivative = input;
 		return 0.5 * normSqr(input);
 	}
 

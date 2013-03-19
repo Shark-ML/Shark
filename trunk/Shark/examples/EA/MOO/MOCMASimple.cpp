@@ -31,7 +31,6 @@ int main( int argc, char ** argv ) {
     // Instantiate both the problem and the optimizer.
     shark::DTLZ2 dtlz2;
     dtlz2.setNumberOfVariables( 3 );
-    dtlz2.setNoObjectives( 2 );
 
     shark::detail::MOCMA<> mocma;
 

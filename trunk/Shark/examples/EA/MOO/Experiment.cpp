@@ -110,12 +110,12 @@ int main( int argc, char ** argv ) {
 	> optimizer( shark::moo::RealValuedMultiObjectiveOptimizerFactory::instance()[ optimizerName ] );
 
 	boost::shared_ptr<
-		shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > >
+		shark::MultiObjectiveFunction
 	> objectiveFunction( shark::moo::RealValuedObjectiveFunctionFactory::instance()[ objectiveFunctionName ] );
 
 	typedef shark::moo::InterruptibleAlgorithmRunner< 
 		shark::AbstractMultiObjectiveOptimizer< shark::VectorSpace< double > >, 
-		shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > 
+		shark::MultiObjectiveFunction 
 	> runner_type;
 	runner_type abstractRunner( 
 		optimizer,

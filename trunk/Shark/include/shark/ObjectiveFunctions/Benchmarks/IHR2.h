@@ -26,9 +26,8 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_IHR2_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_IHR2_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 #include <shark/LinAlg/rotations.h>
 
@@ -41,18 +40,17 @@ namespace shark{
 *  Covariance Matrix Adaptation for Multi-objective Optimization. 
 *  Evolutionary Computation 15(1), pp. 1-28, 2007 
 */
-struct IHR2 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+struct IHR2 : public MultiObjectiveFunction
 {
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-		
 	IHR2(std::size_t numVariables = 0) 
-	: super( 2 ), m_a( 1000 )
+	: m_a( 1000 )
 	, m_handler(SearchPointType(numVariables,-1),SearchPointType(numVariables,1) ){
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= HAS_CONSTRAINT_HANDLER;
-		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+		announceConstraintHandler(&m_handler);
 		m_name="IHR2";
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -68,10 +66,6 @@ struct IHR2 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 			SearchPointType(numberOfVariables,-1),
 			SearchPointType(numberOfVariables,1)
 		);
-	}
-	
-	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		return m_handler;
 	}
 	
 	void init() {

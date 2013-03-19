@@ -33,7 +33,6 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARKS_ELLIPSOID_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
@@ -43,13 +42,11 @@ namespace shark {
 *  The eigenvalues of the Hessian of this convex quadratic benchmark
 *  function are equally distributed on logarithmic scale.
 */
-struct Ellipsoid : public AbstractObjectiveFunction< VectorSpace<double>,double > {
-	typedef AbstractObjectiveFunction<VectorSpace<double>,double> super;
-
+struct Ellipsoid : public SingleObjectiveFunction {
 	Ellipsoid(size_t numberOfVariables = 5, double alpha=1E-3) : m_alpha(alpha) {
-		m_features |= super::CAN_PROPOSE_STARTING_POINT;
-		m_features |= super::HAS_FIRST_DERIVATIVE;
-		m_features |= super::HAS_SECOND_DERIVATIVE;
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= HAS_FIRST_DERIVATIVE;
+		m_features |= HAS_SECOND_DERIVATIVE;
 		m_name="Ellipsoid";
 		m_numberOfVariables = numberOfVariables;
 	}
@@ -70,7 +67,7 @@ struct Ellipsoid : public AbstractObjectiveFunction< VectorSpace<double>,double 
 		m_alpha = node.get( "alpha", 1E-3 );
 	}
 
-	void proposeStartingPoint( super::SearchPointType & x ) const {
+	void proposeStartingPoint( SearchPointType & x ) const {
 		x.resize( m_numberOfVariables );
 
 		for( unsigned int i = 0; i < x.size(); i++ ) {
@@ -78,7 +75,7 @@ struct Ellipsoid : public AbstractObjectiveFunction< VectorSpace<double>,double 
 		}
 	}
 
-	double eval( const super::SearchPointType & p ) const {
+	double eval( const SearchPointType & p ) const {
 		m_evaluationCounter++;
 		double sum = 0;
 		double size = p.size();
@@ -89,15 +86,15 @@ struct Ellipsoid : public AbstractObjectiveFunction< VectorSpace<double>,double 
 		return sum;
 	}
 
-	double evalDerivative( const super::SearchPointType & p, super::FirstOrderDerivative & derivative ) const {
+	double evalDerivative( const SearchPointType & p, FirstOrderDerivative & derivative ) const {
 		double size=p.size();
-		derivative.m_gradient.resize(p.size());
+		derivative.resize(p.size());
 		for (unsigned int i = 0; i < p.size(); i++) {
-			derivative.m_gradient(i) = 2 * ::pow(m_alpha, i / size) * p(i);
+			derivative(i) = 2 * ::pow(m_alpha, i / size) * p(i);
 		}
 		return eval(p);
 	}
-	double evalDerivative(const super::SearchPointType &p, super::SecondOrderDerivative &derivative)const {
+	double evalDerivative(const SearchPointType &p, SecondOrderDerivative &derivative)const {
 		std::size_t size=p.size();
 		derivative.m_gradient.resize(size);
 		derivative.m_hessian.resize(size,size);

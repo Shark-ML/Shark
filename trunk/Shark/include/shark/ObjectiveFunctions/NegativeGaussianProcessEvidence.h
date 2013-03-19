@@ -156,7 +156,7 @@ public:
 
 		// check whether argument has right dimensionality
 		SHARK_ASSERT(1 + kp == parameters.size());
-		derivative.m_gradient.resize(1 + kp);
+		derivative.resize(1 + kp);
 		
 		// keep track of how often the objective function is called
 		this->m_evaluationCounter++;
@@ -218,12 +218,12 @@ public:
 			betaInvDerivative *= betaInv;
 		
 		//merge both derivatives and since we return the negative evidence, multiply with -1
-		shark::init(derivative.m_gradient)<<kernelGradient,betaInvDerivative;
-		derivative.m_gradient *= -1.0;
+		shark::init(derivative)<<kernelGradient,betaInvDerivative;
+		derivative *= -1.0;
 
 		// truncate gradient vector 
-		for(std::size_t i=0; i<derivative.m_gradient.size(); i++) 
-			if(std::abs(derivative.m_gradient(i)) < m_derivativeThresholds(i)) derivative.m_gradient(i) = 0;
+		for(std::size_t i=0; i<derivative.size(); i++) 
+			if(std::abs(derivative(i)) < m_derivativeThresholds(i)) derivative(i) = 0;
 
 		// compute the evidence
 		//compute determinant of M (see eval for why this works)

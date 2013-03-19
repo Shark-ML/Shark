@@ -38,6 +38,7 @@
 #include <shark/LinAlg/BLAS/VectorTransformations.h>
 #include <shark/LinAlg/BLAS/MatrixVectorOperation.h>
 #include <shark/LinAlg/BLAS/Tools.h>
+#include <shark/LinAlg/BLAS/Proxy.h>
 namespace shark{
 	
 ///////////////////////////////////////NORMS////////////////////////////////////////
@@ -106,41 +107,34 @@ namespace detail{
 		typename VectorU::const_iterator iter2=op2.begin();
 		typename VectorT::const_iterator end1=op1.end();
 		typename VectorU::const_iterator end2=op2.end();
-		size_t index1=iter1.index();
-		size_t index2=iter2.index();
-		while(true)
+		//be aware of empty vectors!
+		while(iter1 != end1 && iter2 != end2)
 		{
-			if(index1<index2){
-				sum += weights(index1) * sqr(*iter1);
-				++iter1;
-				if(iter1==end1) break;
-				index1=iter1.index();
-			}
-			else if(index1==index2){
+			std::size_t index1=iter1.index();
+			std::size_t index2=iter2.index();
+			if(index1==index2){
 				sum += weights(index1) * sqr(*iter1-*iter2);
 				++iter1;
 				++iter2;
-				if(iter1==end1) break;
-				if(iter2==end2) break;
-				index1=iter1.index();
-				index2=iter2.index();
+			}
+			else if(index1<index2){
+				sum += weights(index1) * sqr(*iter1);
+				++iter1;
 			}
 			else {
 				sum += weights(index2) * sqr(*iter2);
 				++iter2;
-				if(iter2==end2) break;
-				index2=iter2.index();
 			}
 		}
 		while(iter1 != end1)
 		{
-			index1=iter1.index();
+			std::size_t index1=iter1.index();
 			sum += weights(index1) * sqr(*iter1);
 			++iter1;
 		}
 		while(iter2 != end2)
 		{
-			index2=iter2.index();
+			std::size_t index2=iter2.index();
 			sum += weights(index2) * sqr(*iter2);
 			++iter2;
 		}
@@ -159,27 +153,22 @@ namespace detail{
 		boost::mpl::true_, //first argument compressed 
 		boost::mpl::false_ //second argument not compressed, we assume dense
 	){
-		typename VectorT::value_type sum=0;
-		
 		typename VectorT::const_iterator iter=op1.begin();
 		typename VectorT::const_iterator end=op1.end();
 		
-		std::size_t index = iter.index();
+		std::size_t index = 0;
 		std::size_t pos = 0;
-		while(pos != op2.size()){
-			if(pos == index){
-				sum += weights(index) * sqr(*iter-op2(pos));
-				++pos;
-				++iter;
-				if(iter == end)
-					index = op2.size();
-				else
-					index = iter.index();
-			}
-			else while(pos != index){
+		typename VectorT::value_type sum=0;
+		
+		for(;iter != end;++iter,++pos){
+			index = iter.index();
+			for(;pos != index;++pos){
 				sum += weights(pos) * sqr(op2(pos));
-				++pos;
 			}
+			sum += weights(index) * sqr(*iter-op2(pos));
+		}
+		for(;pos != op2.size();++pos){
+			sum += weights(pos) * sqr(op2(pos));
 		}
 		return sum;
 	}
@@ -225,31 +214,50 @@ namespace detail{
 		shark::zero(result);
 		shark::generalMatrixVectorOperation(operands,op2,result,SquaredScalarDistance());
 	}
-	
-	//default implementation used, when one of the arguments is not dense
-	template<class MatrixT,class VectorU, class Result, class Flag>
-	void distanceSqrBlockVector(
-		MatrixT const& operands,
-		VectorU const& op2,
-		Result& result,
-		boost::mpl::true_,
-		Flag
-	){
-		for(std::size_t i = 0; i != operands.size1(); ++i){
-			result(i) = sum(sqr(row(operands,i)-op2));
-		}
-	}
-	//default implementation used, when none of the arguments are dense
 	template<class MatrixT,class VectorU, class Result>
 	void distanceSqrBlockVector(
 		MatrixT const& operands,
 		VectorU const& op2,
 		Result& result,
-		boost::mpl::false_,
-		boost::mpl::true_
+		boost::mpl::false_ flagT,
+		boost::mpl::true_ flagU
 	){
+		typedef typename Result::value_type value_type;
+		blas::scalar_vector< value_type > one(op2.size(),static_cast<value_type>(1.0));
 		for(std::size_t i = 0; i != operands.size1(); ++i){
-			result(i) = sum(sqr(row(operands,i)-op2));
+			result(i) = diagonalMahalanobisDistanceSqr(row(operands,i),op2,one, flagT,flagU );
+		}
+	}
+	template<class MatrixT,class VectorU, class Result>
+	void distanceSqrBlockVector(
+		MatrixT const& operands,
+		VectorU const& op2,
+		Result& result,
+		boost::mpl::true_ flagT,
+		boost::mpl::false_ flagU
+	){
+		typedef typename Result::value_type value_type;
+		blas::scalar_vector< value_type > one(op2.size(),static_cast<value_type>(1.0));
+		for(std::size_t i = 0; i != operands.size1(); ++i){
+			result(i) = diagonalMahalanobisDistanceSqr(row(operands,i),op2,one, flagT,flagU );
+		}
+	}
+	
+	//default implementation used, when at least one of the arguments is not dense
+	template<class MatrixT,class VectorU, class Result>
+	void distanceSqrBlockVector(
+		MatrixT const& operands,
+		VectorU const& op2,
+		Result& result,
+		boost::mpl::true_ const&,
+		boost::mpl::true_  const& flag
+	){
+		typedef typename MatrixT::value_type value_type;
+		blas::scalar_vector< value_type> one(op2.size(),static_cast<value_type>(1.0));
+		FixedSparseVectorProxy<value_type, std::size_t> vectorProxy = op2;
+		for(std::size_t i = 0; i != operands.size1(); ++i){
+			FixedSparseVectorProxy<value_type, std::size_t> rowProxy=row(operands,i);
+			result(i) = diagonalMahalanobisDistanceSqr(rowProxy,vectorProxy,one, flag,flag );
 		}
 	}
 	
@@ -371,6 +379,27 @@ typename VectorT::value_type distanceSqr(
 }
 
 /**
+* \brief Squared distance between a vector and a set of vectors and stores the result in the vector of distances
+*
+* The squared distance between the vector and every row-vector of the matrix is calculated.
+* This can be implemented much more efficiently.
+*/
+template<class MatrixT,class VectorU, class VectorR>
+void distanceSqr(
+	blas::matrix_expression<MatrixT> const& operands,
+	blas::vector_expression<VectorU> const& op2,
+	blas::vector_expression<VectorR>& distances
+){
+	SIZE_CHECK(operands().size2()==op2().size());
+	ensureSize(distances,operands().size1());
+	detail::distanceSqrBlockVector(
+		operands(),op2(),distances(),
+		typename traits::IsCompressed<MatrixT>::type(),
+		typename traits::IsCompressed<VectorU>::type()
+	);
+}
+
+/**
 * \brief Squared distance between a vector and a set of vectors
 *
 * The squared distance between the vector and every row-vector of the matrix is calculated.
@@ -383,11 +412,7 @@ blas::vector<typename MatrixT::value_type> distanceSqr(
 ){
 	SIZE_CHECK(operands().size2()==op2().size());
 	blas::vector<typename MatrixT::value_type> distances(operands().size1());
-	detail::distanceSqrBlockVector(
-		operands(),op2(),distances,
-		typename traits::IsCompressed<MatrixT>::type(),
-		typename traits::IsCompressed<VectorU>::type()
-	);
+	distanceSqr(operands,op2,distances);
 	return distances;
 }
 
@@ -404,11 +429,7 @@ blas::vector<typename MatrixT::value_type> distanceSqr(
 ){
 	SIZE_CHECK(operands().size2()==op1().size());
 	blas::vector<typename MatrixT::value_type> distances(operands().size1());
-	detail::distanceSqrBlockVector(
-		operands(),op1(),distances,
-		typename traits::IsCompressed<MatrixT>::type(),
-		typename traits::IsCompressed<VectorU>::type()
-	);
+	distanceSqr(operands,op1,distances);
 	return distances;
 }
 

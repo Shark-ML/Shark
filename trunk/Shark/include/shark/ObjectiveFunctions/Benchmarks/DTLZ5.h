@@ -35,9 +35,8 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ5_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DTLZ5_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
 /**
@@ -48,16 +47,21 @@ namespace shark {
 *	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
 *	- Highly multi-modal.
 */
-struct DTLZ5 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+struct DTLZ5 : public MultiObjectiveFunction
 {
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-	
-	DTLZ5(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= HAS_CONSTRAINT_HANDLER;
-		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+	DTLZ5(std::size_t numVariables = 0) : m_objectives(2), m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+		announceConstraintHandler(&m_handler);
 		m_name="DTLZ5";
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return m_objectives;
+	}
+	bool hasScalableObjectives()const{
+		return true;
+	}
+	void setNumberOfObjectives( std::size_t numberOfObjectives ){
+		m_objectives = numberOfObjectives;
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -76,19 +80,15 @@ struct DTLZ5 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 			SearchPointType(numberOfVariables,1)
 		);
 	}
-	
-	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		return m_handler;
-	}
 
 	ResultType eval( const SearchPointType & x ) const {
 		m_evaluationCounter++;
 
-		ResultType value( noObjectives() );
+		ResultType value( numberOfObjectives() );
 
-		std::vector<double> phi(noObjectives());
+		std::vector<double> phi(numberOfObjectives());
 
-		int k = numberOfVariables() - noObjectives() + 1 ;
+		int k = numberOfVariables() - numberOfObjectives() + 1 ;
 		double g = 0.0 ;
 
 		for (unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++)
@@ -97,17 +97,17 @@ struct DTLZ5 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 		double t = M_PI  / (4 * (1 + g));
 
 		phi[0] = x( 0 ) * M_PI / 2;
-		for (unsigned int i = 2; i <= (noObjectives() - 1); i++)
+		for (unsigned int i = 2; i <= (numberOfObjectives() - 1); i++)
 			phi[i-1] = t * (1 + 2 * g * x( i-1 ) );
 
-		for (unsigned int i = 1; i <= noObjectives(); i++) {
+		for (unsigned int i = 1; i <= numberOfObjectives(); i++) {
 			double f = (1 + g);
 
-			for (unsigned int j = noObjectives() - i; j >= 1; j--)
+			for (unsigned int j = numberOfObjectives() - i; j >= 1; j--)
 				f *= std::cos(phi[j-1]);
 
 			if (i > 1)
-				f *= std::sin(phi[( noObjectives() - i + 1 ) - 1]);
+				f *= std::sin(phi[( numberOfObjectives() - i + 1 ) - 1]);
 
 			value[i-1] = f ;
 		}
@@ -116,6 +116,7 @@ struct DTLZ5 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 	}
 
 private:
+	std::size_t m_objectives;
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
 

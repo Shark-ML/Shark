@@ -71,6 +71,7 @@ public:
 	}
 	
 	bool isFeasible(Vector const& point)const{
+		SIZE_CHECK(point.size() == dimensions());
 		for(std::size_t i = 0; i != dimensions();++i){
 			if(point(i) < m_lower(i)||point(i) > m_upper(i)) 
 				return false;

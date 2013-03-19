@@ -21,14 +21,13 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARKS_CIGAR_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
 /**
  * \brief Convex quadratic benchmark function with single dominant axis
  */
-struct Cigar : public AbstractObjectiveFunction< VectorSpace<double>,double > {
+struct Cigar : public SingleObjectiveFunction {
 
 	Cigar(unsigned int numberOfVariables = 5) : m_alpha(1E-3) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;

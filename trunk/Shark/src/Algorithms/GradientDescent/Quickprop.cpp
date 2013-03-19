@@ -82,39 +82,38 @@ void Quickprop::init(const ObjectiveFunctionType & objectiveFunction, const Sear
 	m_oldDerivative.clear();
 	m_deltaw.clear();
 	m_best.point=startingPoint;
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_firstOrderDerivative);
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }
 
 void Quickprop::step(const ObjectiveFunctionType& objectiveFunction) {
-	RealVector& derivative = m_firstOrderDerivative.m_gradient;
 	for (size_t i = 0; i < m_parameterSize; i++)
 	{
 		// avoid division by zero
-		if (m_oldDerivative(i) == derivative(i)) break;
+		if (m_oldDerivative(i) == m_derivative(i)) break;
 
 		// quadratic part
-		double delta = derivative(i) / (m_oldDerivative(i) - derivative(i)) * m_deltaw(i);
+		double delta = m_derivative(i) / (m_oldDerivative(i) - m_derivative(i)) * m_deltaw(i);
 
 		// add gradient term "unless the current slope is opposite in sign from
 		// the previous slope"
 		// initial step is steepest descent
-		if (derivative(i) * m_oldDerivative(i) >= 0)
+		if (m_derivative(i) * m_oldDerivative(i) >= 0)
 		{
-			delta -= m_learningRate * derivative(i);
+			delta -= m_learningRate * m_derivative(i);
 		}
 
 		// limit growth factor if slopes have the same sign
-		if ((derivative(i) * m_oldDerivative(i) > 0) && (fabs(delta) > fabs(m_maxIncrease * m_deltaw(i))))
+		if ((m_derivative(i) * m_oldDerivative(i) > 0) && (std::abs(delta) > std::abs(m_maxIncrease * m_deltaw(i))))
 		{
-			delta = boost::math::sign(delta) * fabs(m_maxIncrease * m_deltaw(i));
+			delta = boost::math::sign(delta) * std::abs(m_maxIncrease * m_deltaw(i));
 		}
 
 		m_deltaw(i) = delta;
 		m_best.point(i) += m_deltaw(i);
 	}
-	m_oldDerivative = derivative;
+	m_oldDerivative = m_derivative;
 	//evaluate new point
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_firstOrderDerivative);
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }
 
 QuickpropOriginal::QuickpropOriginal()
@@ -163,55 +162,53 @@ void QuickpropOriginal::init(const ObjectiveFunctionType & objectiveFunction, co
 	m_deltaw.clear();
 	m_best.point=startingPoint;
 	//evaluate starting point
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_firstOrderDerivative);
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }
 
 void QuickpropOriginal::step(const ObjectiveFunctionType& objectiveFunction) {
-	
-	RealVector& derivative = m_firstOrderDerivative.m_gradient;
 
 	double shrinkFactor = m_maxIncrease / (1 + m_maxIncrease);
 
 	for (size_t i = 0; i < m_parameterSize; i++)
 	{
 		// avoid division by zero
-		if (m_oldDerivative(i) == derivative(i)) break;
+		if (m_oldDerivative(i) == m_derivative(i)) break;
 
 		double delta = 0.;
 
 		if (m_deltaw(i) < 0.)
 		{
-			if (derivative(i) > 0.)
+			if (m_derivative(i) > 0.)
 				// add negative gradient
-				delta -= m_learningRate * derivative(i);
-			if (derivative(i) > shrinkFactor * m_oldDerivative(i))
+				delta -= m_learningRate * m_derivative(i);
+			if (m_derivative(i) > shrinkFactor * m_oldDerivative(i))
 				delta += m_maxIncrease * m_deltaw(i);
 			else
 				// quadratic part
-				delta += derivative(i) / (m_oldDerivative(i) - derivative(i)) * m_deltaw(i);
+				delta += m_derivative(i) / (m_oldDerivative(i) - m_derivative(i)) * m_deltaw(i);
 		}
 		else if (m_deltaw(i) > 0.)
 		{
-			if (derivative(i) < 0.)
+			if (m_derivative(i) < 0.)
 				// add negative gradient
-				delta -= m_learningRate * derivative(i);
-			if (derivative(i) < shrinkFactor * m_oldDerivative(i))
+				delta -= m_learningRate * m_derivative(i);
+			if (m_derivative(i) < shrinkFactor * m_oldDerivative(i))
 				delta += m_maxIncrease * m_deltaw(i);
 			else
 				// quadratic part
-				delta += derivative(i) / (m_oldDerivative(i) - derivative(i)) * m_deltaw(i);
+				delta += m_derivative(i) / (m_oldDerivative(i) - m_derivative(i)) * m_deltaw(i);
 		}
 		else
 		{
-			delta -= m_learningRate * derivative(i);
+			delta -= m_learningRate * m_derivative(i);
 		}
 
 		m_deltaw(i) = delta;
 		m_best.point(i) += m_deltaw(i);
 	}
 
-	m_oldDerivative = derivative;
+	m_oldDerivative = m_derivative;
 	
 	//evaluate new point
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_firstOrderDerivative);
+	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }

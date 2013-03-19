@@ -28,9 +28,8 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ6_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_LZ6_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
 /*! \brief Multi-objective optimization benchmark function LZ6.
@@ -41,16 +40,15 @@ namespace shark {
 *  Multiobjective Optimization Problems with Complicated Pareto Sets, MOEA/D and NSGA-II, 
 *  IEEE Trans on Evolutionary Computation, 2(12):284-302, April 2009. 
 */
-struct LZ6 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+struct LZ6 : public MultiObjectiveFunction
 {
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
-
-	LZ6(std::size_t numVariables = 0) : super( 2 ),m_handler(SearchPointType(numVariables,-2),SearchPointType(numVariables,2) ){
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= HAS_CONSTRAINT_HANDLER;
-		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+	LZ6(std::size_t numVariables = 0) : m_handler(SearchPointType(numVariables,-2),SearchPointType(numVariables,2) ){
+		announceConstraintHandler(&m_handler);
 		m_name="LZ6";
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -69,10 +67,7 @@ struct LZ6 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 			SearchPointType(numberOfVariables,2)
 		);
 	}
-		
-	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		return m_handler;
-	}
+	
 	ResultType eval( const SearchPointType & x ) const {
 		m_evaluationCounter++;
 

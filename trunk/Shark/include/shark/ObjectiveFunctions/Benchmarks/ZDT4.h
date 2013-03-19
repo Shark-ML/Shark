@@ -28,9 +28,8 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ZDT4_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ZDT4_H
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
 /*! \brief Multi-objective optimization benchmark function ZDT4
@@ -41,17 +40,17 @@ namespace shark {
 *  Multiobjective Evolutionary Algorithms: Empirical
 *  Results. Evolutionary Computation 8(2):173-195, 2000
 */
-struct ZDT4 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
+struct ZDT4 : public MultiObjectiveFunction
 {
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
 
-	ZDT4(std::size_t numVariables = 1) : super( 2 ){
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
-		m_features |= HAS_CONSTRAINT_HANDLER;
+	ZDT4(std::size_t numVariables = 1) {
+		announceConstraintHandler(&m_handler);
 		m_name="ZDT4";
 		setNumberOfVariables(numVariables);
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -70,10 +69,6 @@ struct ZDT4 : public AbstractMultiObjectiveFunction< VectorSpace<double> >
 		lower(0) = 0;
 		upper(0) = 1;
 		m_handler.setBounds(lower,upper);
-	}
-	
-	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		return m_handler;
 	}
 
 	ResultType eval( const SearchPointType & x ) const {

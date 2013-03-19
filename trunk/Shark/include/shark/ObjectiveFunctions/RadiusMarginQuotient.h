@@ -240,15 +240,15 @@ public:
 			//~ }
 		//~ }
 
-		//~ derivative.m_gradient.resize(kc);
+		//~ derivative.resize(kc);
 		//~ for (std::size_t k=0; k<kc; k++) 
-			//~ derivative.m_gradient(k) = R2 * dw2(k) + w2 * dR2(k);
+			//~ derivative(k) = R2 * dw2(k) + w2 * dR2(k);
 		
 		RealDiagonalMatrix diagBeta(ell);
 		for(std::size_t i = 0; i != ell; ++i){
 			diagBeta(i,i) = beta(i);
 		}
-		derivative.m_gradient = calculateKernelMatrixParameterDerivative(
+		derivative = calculateKernelMatrixParameterDerivative(
 			*mep_kernel,
 			m_dataset.inputs(),
 			w2*(diagBeta-outer_prod(beta,beta))-R2*outer_prod(alpha,alpha)

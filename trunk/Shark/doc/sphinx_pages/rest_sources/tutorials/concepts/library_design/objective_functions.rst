@@ -65,7 +65,8 @@ Flag, accessor function                                          If set to true 
 ``HAS_FIRST_DERIVATIVE``, ``hasFirstDerivative``                 The first derivative can be computed.
 ``HAS_SECOND_DERIVATIVE``, ``hasSecondDerivative``               The second derivative can be computed.
 ``IS_CONSTRAINED_FEATURE``, ``isConstrained``                    The input space is constrained, and the function must offer a method
-                                                                 ``isFeasible`` for checking whether a point is feasible,
+                                                                 ``isFeasible`` for checking whether a point is feasible.
+``HAS_CONSTRAINT_HANDLER``, ``hasConstraintHandler``		 Indicates that the constraints are governed by a handler.						 
 ``CAN_PROPOSE_STARTING_POINT``, ``canProposeStartingPoint``      The objective function can propose a feasible starting
                                                                  point from which the optimizer can start the optimization.
 ``CAN_PROVIDE_CLOSEST_FEASIBLE``, ``canProvideClosestFeasible``  A constrained function can provide a function
@@ -82,6 +83,9 @@ objective function without a corresponding function itself.  For some
 optimizers, the gradient information is enough to find a better
 point. If the flag is not set, calling ``eval`` is not allowed, and
 other functions return meaningless values like ``qnan``.
+The flag ``HAS_CONSTRAINT_HANDLER`` indicates that cosntraints are represented by a secondary object. This object can be quried
+and might offer more spcial information about the constraints. for example it might indicate that it reprsents box constraints - 
+in this case the exact shape of the box can be queried and an algorithm might choose a specific strategy based on this information.
 
 
 Interface
@@ -92,11 +96,15 @@ Using an objective function is easy, as can be seen in the following
 short list of functions:
 
 
-======================================================================  ==========================================================
+======================================================================  ===================================================================
 Method                                                                  Description
-======================================================================  ==========================================================
+======================================================================  ===================================================================
 ``init()``                                                              Must be called before starting optimization and allows the
                                                                         function to generate internal data after configuration
+``getConstraintHandler()``                                              Returns the constraint handler of the function, if it has one.
+``announceConstraintHandler(ConstraintHandler*)``                       Protected function which is called from a derived class to indicate 
+									the presence of the handler. Sets up all flags of the objective 
+									function automatically.
 ``bool isFeasible(SearchPointType)``                                    Returns true if a search point is feasible
 ``closestFeasible(SearchPointType&)``                                   Selects the feasible point closest to an infeasible one
 ``proposeStartingPoint(SearchPointType &)``                             Returns an initial (possibly random) guess for a solution.
@@ -105,7 +113,7 @@ Method                                                                  Descript
 ``ResultType evalDerivative(SearchPointType, FirstOrderDerivative)``    Evaluates the function as well as the first derivative
 ``ResultType evalDerivative(SearchPointType, SecondOrderDerivative)``   Evaluates the function as well as the first and second
                                                                         derivative
-======================================================================  ==========================================================
+======================================================================  ===================================================================
 
 The function ``init`` allows objective functions to have random
 components in their setup. For example, certain benchmark functions
@@ -115,14 +123,28 @@ allows the objective function to update its internal data structures
 before optimization.  This function is automatically called by the
 optimizer in its ``init`` function.
 
-If the search space is a vector space, an additional function is added which
-returns the dimensionality of the function:
+If the search space is a vector space, additional functions are added which
+return or set the dimensionality of the objective function:
 
 
 ==============================================================================   ===============================================================================
 Method                                                                           Description
 ==============================================================================   ===============================================================================
-``std::size_t numberOfVariables()``                                              Dimensionality of the input point
+``std::size_t numberOfVariables()``                                              Returns the required dimensionality of the input point
+``bool hasScalableDimensionality()``                                             Returns true when the input space of the function can be scaled. 
+										 This is useful for Benchmarking
+``setNumberOfVariables( std::size_t )``						 Sets the dimensionality of the input points if the function is scaleable.
+==============================================================================   ===============================================================================
+
+MultiObjectiveFunctions offer the same mechanism for the number of objectives
+
+==============================================================================   ===============================================================================
+Method                                                                           Description
+==============================================================================   ===============================================================================
+``std::size_t numberOfObjectivees()``                                            Returns the dimensionality of a result vector
+``bool hasScalableObjectives()``          					 Returns true if the number of objectives can be changed, 
+										 for example for Benchmarking.                               
+``setNumberOfVariables( std::size_t )``						 Sets the number of objectives if it is scalable.
 ==============================================================================   ===============================================================================
 
 
@@ -147,13 +169,22 @@ cycle. First, it is created and configured. After that, ``init`` is
 called. Then the function can be evaluated using the different forms
 of ``eval`` or ``evalDerivative``.
 
+Finally Shark introduces two typedefs for ``AbstractObectiveFunction`` which represents the default choice for Single and Multiobjeective optimization throughout the library:
+
+==============================================================================   ===============================================================================
+Typedef                                                                          Description
+==============================================================================   ===============================================================================
+``SingleObjectiveFunction``                                                      ``SearchPointType`` is ``RealVector``, ``ResultType`` is ``double``
+``MultiObjectiveFunction``                                                       ``SearchPointType`` is ``RealVector``, ``ResultType`` is ``RealVector``
+==============================================================================   ===============================================================================
+
 
 
 Objective functions depending on data
 -------------------------------------
 
 
-All objective functions are derived from AbstractObjectiveFunction. However,
+All objective functions are derived from ``AbstractObjectiveFunction``. However,
 aside from the benchmark functions used for standard testing of optimizers,
 most objective functions are derived from more refined interfaces which add
 additional methods.
@@ -176,18 +207,6 @@ Interfaces                                             Description
 ====================================================   ==============================================
 
 
-Multi-objective tasks
----------------------
-
-For the multi-objective case, a multi-objective specialization is defined.
-This only adds a method that will return the number of objectives:
-
-===============================================  ======================================
-Interfaces                                       Description
-===============================================  ======================================
-``MultiObjectiveFunction<InputType,LabelType>``  Adds a method numberOfObjectives()
-===============================================  ======================================
-
 
 
 
@@ -196,7 +215,7 @@ List of Objective functions
 
 There are various single- and multi-objective benchmark functions
 implemented in Shark, which can be found in
-``include/shark/ObjectiveFunctions/Benchmarks``.
+``shark/ObjectiveFunctions/Benchmarks``.
 
 Furthermore, Shark offers a variety of single-objective functions:
 

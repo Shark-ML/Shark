@@ -112,8 +112,8 @@ public:
 			modelAverage.addVH(hiddenBatch,visibleBatch);
 		}
 		
-		derivative.m_gradient.resize(mpe_rbm->structure().numberOfParameters());
-		noalias(derivative.m_gradient) = modelAverage.result() - empiricalAverage.result();
+		derivative.resize(mpe_rbm->structure().numberOfParameters());
+		noalias(derivative) = modelAverage.result() - empiricalAverage.result();
 	
 		return std::numeric_limits<double>::quiet_NaN();
 	}

@@ -138,8 +138,8 @@ public:
 		//~ mep_model->setParameterVector(point);
 		//~ mep_model->resetInternalState();
 
-		//~ derivative.m_gradient.resize(mep_model->numberOfParameters());
-		//~ derivative.m_gradient.clear();
+		//~ derivative.resize(mep_model->numberOfParameters());
+		//~ derivative.clear();
 
 		//~ // General computation for non-separable cost functions.
 		//~ // This is not optimally efficient, because the model
@@ -156,9 +156,9 @@ public:
 			//~ const InputType& input = m_dataset.input(i);
 			//~ mep_model->eval(input);
 			//~ calcWeightedDerivative(input,costGradient[i],dataGradient);
-			//~ derivative.m_gradient += dataGradient;
+			//~ derivative += dataGradient;
 		//~ }
-		//~ derivative.m_gradient /= dataSize;
+		//~ derivative /= dataSize;
 		//~ return error;
 //~ 		return 0;
 //~ 	}
@@ -231,8 +231,8 @@ public:
 		SHARK_FEATURE_CHECK(HAS_FIRST_DERIVATIVE);
 
 		std::size_t dataSize = m_dataset.numberOfElements();
-		derivative.m_gradient.resize(mep_model->numberOfParameters());
-		derivative.m_gradient.clear();
+		derivative.resize(mep_model->numberOfParameters());
+		derivative.clear();
 
 		typename Batch<OutputType>::type prediction;
 		RealVector dataGradient(mep_model->numberOfParameters());
@@ -249,10 +249,10 @@ public:
 
 			//calculate the gradient using the chain rule
 			mep_model->weightedParameterDerivative(batch.input,errorDerivative,*state,dataGradient);
-			derivative.m_gradient+=dataGradient;
+			derivative+=dataGradient;
 		}
 		error /= dataSize;
-		derivative.m_gradient /= dataSize;
+		derivative /= dataSize;
 		return error;
 	}
 
@@ -317,8 +317,8 @@ public:
 	ResultType evalDerivative( const SearchPointType & point, FirstOrderDerivative & derivative ) const {
 		SHARK_FEATURE_CHECK(HAS_FIRST_DERIVATIVE);
 		mep_model->setParameterVector(point);
-		derivative.m_gradient.resize(mep_model->numberOfParameters());
-		derivative.m_gradient.clear();
+		derivative.resize(mep_model->numberOfParameters());
+		derivative.clear();
 		
 		std::size_t numBatches = m_dataset.numberOfBatches();
 		std::size_t numElements = m_dataset.numberOfElements();
@@ -341,7 +341,7 @@ public:
 			double weightFactor = double(threadData.numberOfElements())/numElements;
 			SHARK_CRITICAL_REGION{
 				error += weightFactor*threadError;
-				noalias(derivative.m_gradient) += weightFactor*threadDerivative.m_gradient;
+				noalias(derivative) += weightFactor*threadDerivative;
 			}
 		}
 		return error;

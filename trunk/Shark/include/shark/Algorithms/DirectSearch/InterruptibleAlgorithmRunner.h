@@ -29,7 +29,7 @@
 
 #include <shark/Core/Traits/OptimizerTraits.h>
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 #include <shark/Core/Exception.h>
 #include <shark/Core/SignalTrap.h>
@@ -162,13 +162,9 @@ public:
 		m_algoName = mep_algorithm->name();
 		m_functionName = mep_function->name();
 
-		// ObjectiveFunctionTraits::setNumberOfVariables( *(mep_function.get()), n )
-		boost::shared_ptr< AbstractVectorSpaceObjectiveFunction > p =
-				boost::dynamic_pointer_cast< AbstractVectorSpaceObjectiveFunction >( mep_function );
-
-		if( p )
-			p->setNumberOfVariables( n );
-		mep_function->setNoObjectives( m );	
+		
+		mep_function->setNumberOfVariables( n );
+		//mep_function->setNoObjectives( m );	
 		mep_function->init();
 
 		if( configNode ) {
@@ -514,9 +510,7 @@ class InterruptibleAlgorithmRunner {
     m_functionName = mep_function->name();
 
     //ObjectiveFunctionTraits::setNumberOfVariables( *(mep_function.get()), n )
-    boost::shared_ptr< AbstractVectorSpaceObjectiveFunction > p = boost::dynamic_pointer_cast< AbstractVectorSpaceObjectiveFunction >( mep_function );
-    if( p )
-      p->setNumberOfVariables( n );
+    mep_function->setNumberOfVariables( n );
     mep_function->init();
 
     if( configNode ) {

@@ -26,7 +26,7 @@
 */
 //===========================================================================
 
-#include <shark/ObjectiveFunctions/AbstractMultiObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Rng/GlobalRng.h>
 
@@ -43,16 +43,16 @@ namespace shark {
 /// The default search space dimension is 3, but the function can
 /// handle more dimensions.
 
-struct Fonseca : public AbstractMultiObjectiveFunction< VectorSpace<double> > {
+struct Fonseca : public MultiObjectiveFunction {
 
-	typedef AbstractMultiObjectiveFunction< VectorSpace<double> > super;
 	Fonseca(std::size_t numVariables)
-	:super(2),m_handler(SearchPointType(numVariables,-4),SearchPointType(numVariables,4) ){
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= HAS_CONSTRAINT_HANDLER;
-		m_features |= CAN_PROVIDE_CLOSEST_FEASIBLE;
+	:m_handler(SearchPointType(numVariables,-4),SearchPointType(numVariables,4) ){
+		announceConstraintHandler(&m_handler);
 		m_name = "Fonseca";
+	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -68,10 +68,6 @@ struct Fonseca : public AbstractMultiObjectiveFunction< VectorSpace<double> > {
 			SearchPointType(numberOfVariables,-4),
 			SearchPointType(numberOfVariables,4)
 		);
-	}
-	
-	BoxConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		return m_handler;
 	}
 
 	ResultType eval( const SearchPointType & x ) const {

@@ -100,7 +100,7 @@ void NoisyRprop::step(const ObjectiveFunctionType& objectiveFunction)
 	m_best.value = objectiveFunction.evalDerivative(m_best.point,dedw);
 
 	// loop over all coordinates
-	m_gradient += dedw.m_gradient;
+	m_gradient += dedw;
 	for (size_t p=0; p<pc; p++)
 	{
 		m_current[p]++;

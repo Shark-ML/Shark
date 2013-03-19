@@ -287,8 +287,8 @@ public:
 		// (we're here a bit un-shark-ish in that we do some of the derivative calculations by hand where they
 		//  would also and more consistently be offered by their respective classes. one reason we're doing it
 		//  like this might be the missing batch processing for the evalDerivatives)
-		derivative.m_gradient.resize(m_nhp);
-		zero(derivative.m_gradient);
+		derivative.resize(m_nhp);
+		zero(derivative);
 
 		double ss = (m_sigmoidSlopeIsUnconstrained ? std::exp(sigmoid_model.parameterVector()(0)) : sigmoid_model.parameterVector()(0));
 		for (unsigned int i=0; i<m_numSamples; i++) {
@@ -303,12 +303,12 @@ public:
 			// derivative of sigmoid predictions wrt svm predictions
 			double dsp_dsvmp = ss * p * (1.0-p); //severe sign confusion potential: p(1-p) is deriv. w.r.t. t in 1/(1+e**(-t))!
 			for (unsigned int j=0; j<m_nhp; j++) {
-				derivative.m_gradient(j) += dL_dsp * dsp_dsvmp * all_validation_predict_derivs(i,j);
+				derivative(j) += dL_dsp * dsp_dsvmp * all_validation_predict_derivs(i,j);
 			}
 		}
 		// correct for the fact that AbstractLoss devides the NCLL eval scores 
 		// by the number of examples when evaluated in batch mode
-		derivative.m_gradient /= m_numSamples;
+		derivative /= m_numSamples;
 		return ncll.eval(all_validation_labels, sigmoid_predictions);
 	}
 };

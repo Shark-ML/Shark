@@ -58,10 +58,7 @@ public:
 			return m_function;
 		}
 		double operator()(const RealVector& parameter,RealVector& derivative)const {
-			Derivative tempDerivative;
-			double value=m_function->evalDerivative(parameter,tempDerivative);
-			derivative=tempDerivative.m_gradient;
-			return value;
+			return m_function->evalDerivative(parameter,derivative);
 		}
 		double operator()(const RealVector& parameter)const {
 			return m_function->eval(parameter);

@@ -30,14 +30,13 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARKS_DISCUS_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
 /**
  * \brief Convex quadratic benchmark function.
  */
-struct Discus : public AbstractObjectiveFunction< VectorSpace<double>,double > {
+struct Discus : public SingleObjectiveFunction {
 
 	Discus(unsigned int numberOfVariables = 5,double alpha = 1.E-3) : m_alpha(alpha) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;

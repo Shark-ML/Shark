@@ -156,8 +156,8 @@ public:
 			swap(m_chains[i],m_chainOperator.samples());//save the GibbsChain.
 		}
 		
-		derivative.m_gradient.resize(mpe_rbm->structure().numberOfParameters());
-		noalias(derivative.m_gradient) = modelAverage.result() - empiricalAverage.result();
+		derivative.resize(mpe_rbm->structure().numberOfParameters());
+		noalias(derivative) = modelAverage.result() - empiricalAverage.result();
 		
 		return std::numeric_limits<double>::quiet_NaN();
 	}

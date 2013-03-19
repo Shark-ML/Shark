@@ -317,14 +317,14 @@ public:
 	ResultType evalDerivative( SearchPointType const& point, FirstOrderDerivative & derivative ) const {
 		mep_model->setParameterVector(point);
 
-		derivative.m_gradient.resize(mep_model->numberOfParameters());
-		derivative.m_gradient.clear();
+		derivative.resize(mep_model->numberOfParameters());
+		derivative.clear();
 
 		//check the number of hidden layers
 		if(mep_model->layerMatrices().size() == 2)
-			return evalDerivativeSingle(point, derivative.m_gradient);
+			return evalDerivativeSingle(point, derivative);
 		else
-			return evalDerivativeMultiple(point, derivative.m_gradient);
+			return evalDerivativeMultiple(point, derivative);
 	}
 
 private:
