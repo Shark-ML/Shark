@@ -1,3 +1,4 @@
+#include <cstdio>
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Rng/GlobalRng.h>
