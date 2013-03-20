@@ -50,7 +50,7 @@ void importPGM( const char * fileName, unsigned char ** ppData, int & sx, int & 
 {
 	FILE * fp = fopen(fileName, "rb");
 	
-	if ( 0 == fp ) throw( std::invalid_argument( "[importPGM] cannot open file" ) );
+	if ( 0 == fp ) throw( SHARKEXCEPTION( "[importPGM] cannot open file" ) );
 
 	char format[16];
 	const int nParamRead0 = fscanf(fp, "%s\n", (char *) &format);
@@ -61,9 +61,8 @@ void importPGM( const char * fileName, unsigned char ** ppData, int & sx, int & 
 	fpos_t position;
 	fgetpos (fp, &position);
 	while ( true ) {
-		//O.K.: not sure why s is needed. but it produces warnings, so i comment it out
-		//char * s = fgets( tmpCharBuf, 255, fp );
-		fgets( tmpCharBuf, 255, fp );
+		char *s = fgets( tmpCharBuf, 255, fp );
+		if (!s)  throw( SHARKEXCEPTION( "[importPGM] error reading file" ) );
 		const int cnt = strncmp( tmpCharBuf, "#", 1 );
 		if (0 != cnt) {
 			fsetpos(fp, &position);
