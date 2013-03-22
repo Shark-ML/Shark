@@ -3,6 +3,7 @@ FILE( GLOB SRCS
 	Models/*.cpp
 	ObjectiveFunctions/*.cpp
 	ObjectiveFunctions/Loss/*.cpp
+	Data/*.cpp
 	Algorithms/*.cpp
 	Algorithms/DirectSearch/*.cpp
 	Algorithms/GradientDescent/*.cpp
