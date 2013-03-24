@@ -55,7 +55,7 @@ using namespace shark;
 using namespace std;
 
 
-#define RELATIVE_ACCURACY 0.05
+#define RELATIVE_ACCURACY 0.01
 #define MAX_KKT_VIOLATION 1e-5
 
 
@@ -75,8 +75,10 @@ void ZeroSum(RealMatrix& mat)
 BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 {
 	size_t classes = 5;
-	size_t dim = 10;
+	size_t dim = 5;
 	size_t ell = 100;
+
+	const size_t var_per_class = dim / classes;
 
 	double C = 1.0;
 	LinearKernel<CompressedRealVector> kernel;
@@ -100,17 +102,25 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	for (size_t run=0; run<10; run++)
 	{
 		// generate random training set
+		Rng::seed(run);
 		cout << endl << "generating test problem " << (run+1) << " out of 10" << endl;
 		vector<CompressedRealVector> input(ell, CompressedRealVector(dim));
 		vector<unsigned int> target(ell);
 		for (size_t i=0; i<ell; i++)
 		{
 			unsigned int label = Rng::discrete(0, classes - 1);
+			for (unsigned int d=0; d<dim; d++)
+			{
+				if ((d / var_per_class) == label) input[i](d) = 0.3 * Rng::gauss() + 1.0;
+				else input[i](d) = 0.3 * Rng::gauss() - 1.0;
+			}
+/*
 			unsigned int c = Rng::discrete(0, classes - 2);
 			if (c >= label) c++;
-			unsigned int d = Rng::discrete(0, dim / classes - 1);
-			input[i](2 * label + d) = Rng::gauss() + 2.0;
-			input[i](2 * c     + d) = Rng::gauss() - 2.0;
+			unsigned int d = Rng::discrete(0, var_per_class - 1);
+			input[i](var_per_class * label + d) = Rng::gauss() + 2.0;
+			input[i](var_per_class * c     + d) = Rng::gauss() - 2.0;
+*/
 			target[i] = label;
 		}
 		LabeledData<CompressedRealVector, unsigned int> dataset = createLabeledDataFromRange(input, target);

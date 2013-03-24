@@ -202,7 +202,6 @@ public:
 			solver.setShrinking(base_type::m_shrinking);
 			solver.solve(dataset.labels(), base_type::m_C, alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
 		}
-
 		// write the solution into the model
 		for (e=0, a=0, i=0; i<ic; i++)
 		{
