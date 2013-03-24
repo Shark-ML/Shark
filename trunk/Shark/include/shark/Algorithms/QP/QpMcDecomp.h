@@ -552,11 +552,13 @@ public:
 		}
 
 		// fill in the solution and compute the objective value
+RealVector solutionGradient(variables);
 		double objective = 0.0;
 		for (v=0; v<variables; v++)
 		{
 			unsigned int w = cardP * example[variable[v].i].index + variable[v].p;
 			solutionAlpha(w) = alpha(v);
+solutionGradient(w) = gradient(v);
 			objective += (gradient(v) + linear(v)) * alpha(v);
 		}
 		objective *= 0.5;
@@ -570,6 +572,18 @@ public:
 			prop->iterations = iter;
 			prop->seconds = finish_time - start_time;
 		}
+/*{
+	// dump alphas
+	for (std::size_t i=0, e=0; i<examples; i++)
+	{
+		printf("target(%lu) = %u\n", i, target.element(i));
+		for (std::size_t c=0; c<classes; c++, e++)
+		{
+			printf("(%lu, %lu)     alpha: %g   \tgradient: %g\n", i, c, solutionAlpha(e), solutionGradient(e));
+		}
+	}
+}*/
+
 	}
 
 	//!

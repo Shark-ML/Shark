@@ -268,6 +268,18 @@ public:
 		}
 		timer.stop();
 
+		// calculate dual objective value
+		objective = 0.0;
+		for (std::size_t j=0; j<m_classes; j++)
+		{
+			for (std::size_t d=0; d<m_dim; d++) objective -= w(j, d) * w(j, d);
+		}
+		objective *= 0.5;
+		for (std::size_t i=0; i<ell; i++)
+		{
+			for (std::size_t j=0; j<m_classes; j++) objective += alpha(i, j);
+		}
+
 		// return solution statistics
 		if (prop != NULL)
 		{
@@ -278,7 +290,7 @@ public:
 		}
 
 		// output solution statistics
-		if (verbose)
+//		if (verbose)
 		{
 			std::cout << std::endl;
 			std::cout << "training time (seconds): " << timer.lastLap() << std::endl;
@@ -288,6 +300,30 @@ public:
 			std::cout << "dual accuracy: " << max_violation << std::endl;
 			std::cout << "dual objective value: " << objective << std::endl;
 		}
+
+/*{
+	// dump alphas
+	for (std::size_t i=0; i<ell; i++)
+	{
+		const SparseVector* x_i = x[i];
+		const unsigned int y_i = y[i];
+		const double q = x_squared(i);
+		RealMatrixRow a = row(alpha, i);
+		RealVector wx(m_classes, 0.0);
+		for (const SparseVector* p=x_i; p->index != (std::size_t)-1; p++)
+		{
+			const std::size_t idx = p->index;
+			const double v = p->value;
+			for (size_t c=0; c<m_classes; c++) wx(c) += w(c, idx) * v;
+		}
+		RealVector g(m_classes);
+		double kkt = calcGradient(g, wx, a, C, y_i);
+		for (std::size_t c=0; c<m_classes; c++)
+		{
+			printf("(%lu, %lu)     alpha: %g   \tgradient: %g\n", i, c, alpha(i, c), g(c));
+		}
+	}
+}*/
 
 		// return the solution
 		return w;
