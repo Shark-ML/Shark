@@ -63,10 +63,11 @@ struct LZ2 : public MultiObjectiveFunction
 	/// \brief Adjusts the number of variables if the function is scalable.
 	/// \param [in] numberOfVariables The new dimension.
 	void setNumberOfVariables( std::size_t numberOfVariables ){
-		m_handler.setBounds(
-			SearchPointType(numberOfVariables,-1),
-			SearchPointType(numberOfVariables,1)
-		);
+		SearchPointType lb(numberOfVariables,-1);
+		SearchPointType ub(numberOfVariables, 1);
+		lb(0) = 0;
+		ub(0) = 1;
+		m_handler.setBounds(lb, ub);
 	}
 
 	ResultType eval( const SearchPointType & x ) const {
