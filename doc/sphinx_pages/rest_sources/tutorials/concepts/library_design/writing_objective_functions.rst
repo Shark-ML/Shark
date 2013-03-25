@@ -9,7 +9,7 @@ It is advisable to take a look at existing objective functions while working thr
 Especially the benchmark functions which can be found in `shark/ObjectiveFunctions/Benchmarks/` 
 offer clean implementations of the different aspects of the interface.
 
-Example Single Objective function 
+Example Single Objective Function 
 -----------------------------------
 
 We will introduce a simple single objective benchmark function, which we will implement in several steps 
@@ -21,7 +21,7 @@ describees the curvature change of the function.
 
 Let's start writing the objective function. Single objective functions are directly derived from
 the abstract interface ``SingleObjectiveFunction``. This is a typedef for ``AstractObjectiveFunction`` using the template parameters
-chosen throughout shark for single objective optimizations, namely using
+chosen throughout Shark for single objective optimizations, namely using
 ``RealVector`` as the ``SearchPointType`` of the objective function and double as the ``ResultType``::
 	
 	#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
@@ -110,13 +110,13 @@ Taking everything into account, we arrive at the following intermediate code fra
 	    std::size_t m_dimensions;
 	};
 
-The function ``hasScalableDimensionality()`` just announces, that it is allowed to change the number of dimensions using 
+The function ``hasScalableDimensionality()`` just announces that it is allowed to change the number of dimensions using 
 ``setNumberOfVariables``.
 
-Evaluating the derivative
+Evaluating the Derivative
 ------------------------------------
 
-While this function can now be optimized by the direct-search algorithms of shark like the CMA-ES, most algorithms require the 
+While this function can now be optimized by the direct-search algorithms of Shark like the CMA-ES, most algorithms require the 
 derivative of the function to be present. Therefore it is very usefull to take the time to implement it. First of all, we have
 to announce that this function also provides the first derivative, for this we set the flag ``HAS_FIRST_DERIVATIVE`` in the
 constructor::
@@ -132,8 +132,8 @@ Afterwards we implement the function. The formula is:
 .. math::
   \frac{\partial f(x)}{\partial x} = 2a(x^Tx)^{a-1} x
 
-We implement the derivative in ``evalDerivative`` taking the ``FirstOrderDerivative`` as argument, which for now is just the same as the SearchPointType.
-We just calculate the function value as before and return it as well as th computed derivative::
+We implement the derivative in ``evalDerivative`` taking the ``FirstOrderDerivative`` as argument, which for now is just the same as the ``SearchPointType``.
+We just calculate the function value as before and return it as well as the computed derivative::
 
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative )const {
 		SIZE_CHECK(input.size() == m_dimensions );
@@ -145,7 +145,7 @@ We just calculate the function value as before and return it as well as th compu
 That's it! Now we can use gradient based optimization algorithms to optimize this function, but for now we have to provide our 
 own starting points, else the optimizer will complain.
 
-Generating Starting points
+Generating Starting Points
 ----------------------------------------
 
 Optimizers need proper starting points to start the optimization loop. There are basically two ways to deal with it: first of all
@@ -190,12 +190,12 @@ For our benchmark function there is no problem in evaluating in paralll, so we s
 	    m_features |= IS_THREAD_SAFE;
 	}
 
-Handling Constraints using Constraint Handlers
+Handling Constraints Using Constraint Handlers
 ---------------------------------------------------
 
 Shark provides two ways to handle constraints via objective functions. The first one is using a constraint handler. 
 Constraint handlers serve two purposes: first they offer an reusable interface for often used types of constraints
-and second they offer specific information for some kinds of constraints. Right now shark does only offer a handler and optimizers
+and second they offer specific information for some kinds of constraints. Right now Shark does only offer a handler and optimizers
 for simple box constraints, i.e. for every input dimension :math:`x_i` holds :math:`l_i \leq x_i \leq u_i`. An optimizer might
 now query the function whether it is constrained, has an constraint handler and whether the handler itself represents box constraints.
 In this case it might use a different optimization setting, or refuse to optimize as it does not work for this type of constraints.
@@ -236,24 +236,24 @@ Let's constrain our function above to the box of :math:`[0,1]^n`::
 	    BoxConstraintHandler<SearchPointType> m_handler;
 	};
 	
-So what did happen? first of all we removed th variable storing the dimensionality as this is now governed by the handler. 
+So what did happen? First of all, we removed the variable storing the dimensionality as this is now governed by the handler. 
 In the constructor, we initialize it with the right dimensionality and the uniform lower and upper bound - this could also be
 vectors of the correct size, if the bounds happen to be differently for every variable.
 When the functions' dimensionality is changed, we have to update the handler to have the right dimensionality again.
-And in eval we finally check, whether the point is feasible. In the constructor there is another magic function, called 
+And in eval we finally check whether the point is feasible. In the constructor there is another magic function, called 
 ``announceConstraintHandler``. This tells the base class that a constraint handler is available and it will set up the proper flags depending on the
 capabilities of the handler.
 After this call, all the virtual functions used for constraint handling can be called and are calling the handlers function. Another
-nice feature in this case is, that we get the starting points for free, as the handler can generate points uniformly inside the 
+nice feature in this case is that we get the starting points for free, as the handler can generate points uniformly inside the 
 feasible region. But of course this behavior can still be overwritten if a different scheme is needed.
 Now, that was rather simple!
 
-Handling Constraints without Constraint Handlers
+Handling Constraints Without Constraint Handlers
 ---------------------------------------------------
 We will now try to implement the above handler directly in the objective function. Please take into account that other constraints aside from the box constraints
 are not well supported and that in the general interface there is no way to get more specific information about the particular constraints.
 
-For Box-Constraints we can support the full range of possible functions, but the minimum requirement of a constraint objective function is that it can check whether
+For box constraints we can support the full range of possible functions, but the minimum requirement of a constraint objective function is that it can check whether
 a point is feasible or not. In our case we only hav to check whether every value of a point is between 0 and 1::
 
 	bool isFeasible( const SearchPointType & input) const {
@@ -265,7 +265,7 @@ a point is feasible or not. In our case we only hav to check whether every value
 		return true;
 	}
 
-secondly some algorithms might profit from the ability of the function to find the closest feasible point to an infeasible point, this might not be 
+Secondly, some algorithms might profit from the ability of the function to find the closest feasible point to an infeasible point, this might not be 
 possible for all types of constraints, so this is an optional feature::
 
 	void closestFeasible( SearchPointType & input ) const {
