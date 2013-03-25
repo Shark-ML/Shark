@@ -4,8 +4,8 @@
  *
  *  \brief LineSearch
  *
- *  \author O. Krause
- *  \date 2010
+ *  \author O. Krause, S. Dahlgaard
+ *  \date 2010-2013
  *
  *  \par Copyright (c) 1998-2007:
  *      Institut f&uuml;r Neuroinformatik<BR>
@@ -43,66 +43,58 @@
 #include <shark/Core/IConfigurable.h>
 #include <shark/Core/ISerializable.h>
 #include "Impl/ObjectiveFunctionWrapper.h"
+#include "Impl/wolfecubic.inl"
 #include <shark/Algorithms/GradientDescent/LineSearch.h>
 
-namespace shark{
+namespace shark {
 ///\brief Wrapper for the linesearch class of functions in the linear algebra library.
 ///
 ///This class is a wrapper for the linesearch class of functions of the linear algebra library.
 ///The class is used for example in CG or BFGS for their internal linesearch learning steps.
 ///It is NOT an Optimizer on its own, since it needs the Newton direction to be specified.
-class LineSearch:public IConfigurable, public ISerializable
-{
+class LineSearch:public IConfigurable, public ISerializable {
 public:
-	enum LineSearchType
-	{
-		Dlinmin,
-		Linmin,
+	enum LineSearchType {
+	    Dlinmin,
+	    Linmin,
+	    WolfeCubic
 	};
 	typedef AbstractObjectiveFunction<VectorSpace<double>,double> ObjectiveFunction;
 	typedef AbstractObjectiveFunction<VectorSpace<double>,double>::FirstOrderDerivative Derivative;
 
 	///Initializes the internal variables of the class to useful default values.
 	///Dlinmin is used as default
-	LineSearch()
-	{
+	LineSearch() {
 		m_minInterval=0;
 		m_maxInterval=1;
 		m_lineSearchType=Dlinmin;
 	}
 
-	LineSearchType lineSearchType()const
-	{
+	LineSearchType lineSearchType()const {
 		return m_lineSearchType;
 	}
-	LineSearchType& lineSearchType()
-	{
+	LineSearchType &lineSearchType() {
 		return m_lineSearchType;
 	}
 	///minInterval sets the minimum initial bracket
-	double minInterval()const
-	{
+	double minInterval()const {
 		return m_minInterval;
 	}
 	///minInterval sets the minimum initial bracket
-	double& minInterval()
-	{
+	double &minInterval() {
 		return m_minInterval;
 	}
 	///maxInterval sets the maximum initial bracket
-	double maxInterval()const
-	{
+	double maxInterval()const {
 		return m_maxInterval;
 	}
 	///maxInterval sets the maximum initial bracket
-	double& maxInterval()
-	{
+	double &maxInterval() {
 		return m_maxInterval;
 	}
 
 	///initializes the internal state of the LineSearch class and sets the function on which the lineSearch is to be evaluated
-	void init(const ObjectiveFunction& objectiveFunction)
-	{
+	void init(const ObjectiveFunction &objectiveFunction) {
 		m_function.function()=&objectiveFunction;
 	}
 
@@ -111,15 +103,16 @@ public:
 	///@param pointValue the value of the function at searchPoint
 	///@param newtonDirection the search direction of the line search
 	///@param derivative the derivative of the funktion at searchPoint
-	virtual void operator()(RealVector& searchPoint,double& pointValue,const RealVector& newtonDirection,const RealVector& derivative)const
-	{
-		switch (m_lineSearchType)
-		{
+	virtual void operator()(RealVector &searchPoint,double &pointValue,const RealVector &newtonDirection,const RealVector &derivative)const {
+		switch (m_lineSearchType) {
 		case Dlinmin:
-			dlinmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval );
+			dlinmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);
 			break;
 		case Linmin:
 			linmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);
+			break;
+		case WolfeCubic:
+			wolfecubic(searchPoint, newtonDirection, pointValue, m_function, derivative);
 			break;
 		}
 	}
@@ -129,37 +122,34 @@ public:
 	///@param searchPoint the point where the linesearch start
 	///@param pointValue the value of the function at searchPoint
 	///@param newtonDirection the search direction of the line search
-	virtual void operator()(RealVector& searchPoint,double& pointValue,const RealVector& newtonDirection)const
-	{
-		switch (m_lineSearchType)
-		{
+	virtual void operator()(RealVector &searchPoint,double &pointValue,const RealVector &newtonDirection)const {
+		switch (m_lineSearchType) {
 		case Dlinmin:
-			dlinmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval );
+			dlinmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);
 			break;
 		case Linmin:
 			linmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);
 			break;
+		case WolfeCubic:
+			throw SHARKEXCEPTION("[LineSearch] WolfeCubic requires derivative");
 		}
 	}
 
 	//IConfigurable
-	void configure( const PropertyTree & node )
-	{
+	void configure(const PropertyTree &node) {
 		m_lineSearchType=static_cast<LineSearchType>(node.get("searchtype",(unsigned int)Dlinmin));
 		m_minInterval=node.get("minInterval",0.0);
 		m_maxInterval=node.get("maxInterval",1.0);
 	}
 
 	//ISerializable
-	virtual void read( InArchive & archive )
-	{
+	virtual void read(InArchive &archive) {
 		archive>>m_minInterval;
 		archive>>m_maxInterval;
 		archive>>m_lineSearchType;
 	}
 
-	virtual void write( OutArchive & archive ) const
-	{
+	virtual void write(OutArchive &archive) const {
 		archive<<m_minInterval;
 		archive<<m_maxInterval;
 		archive<<m_lineSearchType;
@@ -178,7 +168,5 @@ protected:
 	ObjectiveFunctionDerivativeWrapper m_function;
 };
 }
-
-
 
 #endif
