@@ -49,9 +49,27 @@
 
 namespace shark {
 
-double wlsCubicInterp(double t1, double t2,
+// Cubic interpolation from Numerical Optimization p. 59.
+inline double wlsCubicInterp(double t1, double t2,
         double f1, double f2,
-        double gtd1, double gtd2);
+        double gtd1, double gtd2) {
+	if (t1 == t2)
+		return t1;
+	if (t2 < t1) {
+		std::swap(t1, t2);
+		std::swap(f1, f2);
+		std::swap(gtd1, gtd2);
+	}
+
+	double d1 = gtd1 + gtd2 - 3 * (f1 - f2)/(t1 - t2);
+	if (d1 * d1 - gtd1 * gtd2 < 0)
+		return (t1 + t2) / 2.0;
+	double d2 = std::sqrt(d1 * d1 - gtd1 * gtd2);
+	double t = t2 - (t2 - t1) * ((gtd2 + d2 - d1)/(gtd2 - gtd1 + 2 * d2));
+
+	// New step length should be in intervel [t1, t2]
+	return std::min(std::max(t, t1), t2);
+}
 //! \brief Line search, using cubic interpolation, satisfying the strong Wolfe conditions
 template <class VectorT, class Function>
 void wolfecubic
@@ -199,28 +217,6 @@ void wolfecubic
 	// Adjust the return values.
 	point += t_ans * searchDirection;
 	fret = f_ans;
-}
-
-// Cubic interpolation from Numerical Optimization p. 59.
-double wlsCubicInterp(double t1, double t2,
-        double f1, double f2,
-        double gtd1, double gtd2) {
-	if (t1 == t2)
-		return t1;
-	if (t2 < t1) {
-		std::swap(t1, t2);
-		std::swap(f1, f2);
-		std::swap(gtd1, gtd2);
-	}
-
-	double d1 = gtd1 + gtd2 - 3 * (f1 - f2)/(t1 - t2);
-	if (d1 * d1 - gtd1 * gtd2 < 0)
-		return (t1 + t2) / 2.0;
-	double d2 = std::sqrt(d1 * d1 - gtd1 * gtd2);
-	double t = t2 - (t2 - t1) * ((gtd2 + d2 - d1)/(gtd2 - gtd1 + 2 * d2));
-
-	// New step length should be in intervel [t1, t2]
-	return std::min(std::max(t, t1), t2);
 }
 
 }
