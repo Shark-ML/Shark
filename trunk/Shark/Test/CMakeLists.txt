@@ -90,6 +90,7 @@ SHARK_ADD_TEST( Algorithms/DirectSearch/SteadyStateMOCMA.cpp DirectSearch_Steady
 SHARK_ADD_TEST( Algorithms/DirectSearch/Algorithms.cpp Algorithms_DirectSearch )
 #GradientDescent
 SHARK_ADD_TEST( Algorithms/GradientDescent/BFGS.cpp GradDesc_BFGS )
+SHARK_ADD_TEST( Algorithms/GradientDescent/LBFGS.cpp GradDesc_LBFGS )
 SHARK_ADD_TEST( Algorithms/GradientDescent/CG.cpp GradDesc_CG )
 SHARK_ADD_TEST( Algorithms/GradientDescent/IRLS.cpp GradDesc_IRLS )
 SHARK_ADD_TEST( Algorithms/GradientDescent/Rprop.cpp GradDesc_Rprop )
