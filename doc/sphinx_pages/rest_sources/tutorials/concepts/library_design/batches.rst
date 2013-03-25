@@ -168,7 +168,6 @@ element access as well as the size query. For the first, we use ``get``, and for
 	get(batchOfPoints, 0) = point;
 	std::cout << size(batchOfPoints);
 
-
 Now the last thing missing is the creation of the batch. We always need an element to create
 a batch from it. It serves as blueprint ensuring that the batch can store the elements. For
 example in the case of RealVector, it ensures that the matrix has the same amount of columns

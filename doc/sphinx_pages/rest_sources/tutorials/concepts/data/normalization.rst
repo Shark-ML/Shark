@@ -11,7 +11,8 @@ available. The trainers are :doxy:`NormalizeComponentsUnitInterval` and
 :doxy:`NormalizeComponentsUnitVariance`. The first one normalizes
 every input dimension to the range [0,1], the other adjusts the variance
 of each component to one, and it can optionally remove the mean. This is
-no whitening since correlations remain unchanged.
+no whitening, because correlations remain unchanged.
+For whitening, use the :doxy:`PCA`.
 
 In the following we will normalize data to unit variance. First we
 have to train our linear model so that it can perform the
