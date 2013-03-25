@@ -1,37 +1,39 @@
 Creating and Using Subsets of Data
 ==================================
 
-On of the most common operations with datasets as represented by the :doxy:`Data`
+On of the most common operations with datasets, represented by the :doxy:`Data`
 or :doxy:`LabeledData` classes,  are the creation of different types of datasets. 
-There are different types of subsets and thus shark offers a wide variety
-of functions and objects which help setting up the subsets.
+There are different types of subsets, and thus shark offers a wide variety
+of functions and objects for handling subsets.
 
 Basics of Subset Generation
 -----------------------------------
 
-The most important thing about subsets is, that the data class can only generate subsets
-of the batches, and not of single points as outlined in the :doc:`Data tutorial <datasets>`.
-Thus for most types of subsets, the points inside the set need to be reordered across the batch structure.
+**The data classes are designed to generate subsets
+at the level of batches** and not at the level of single points as outlined in the :doc:`Data tutorial <datasets>`.
+Thus for most types of subsets the points inside the set need to be reordered across the batch structure.
 
 After that, acquiring subsets is easy and inexpensive in terms of memory and runtime, as only references
 to the batches are shared across the datasets. To acquire a subset, the following basic functions can be used::
 
-    LabeledData<I,L> dataset;//our dataset;
-    std::vector<std::size_t> indices;//indices for the batches which shall be contained in the subset
+    LabeledData<I,L> dataset;//our dataset
+    //create an indexed subset of batches
+    std::vector<std::size_t> indices;//indices of the batches to be contained in the subset
     LabeledData<I,L> subset = indexedSubset(dataset,indices);
-    //when also the complement of the set is needed, the call is:
+    //if also the complement of the set is needed, the call is:
     LabeledData<I,L> complement;
     dataset.indexedSubset(indices,subset,complement);
+    //create subsets by considering ranges of batches
     LabeledData<I,L> range1 = rangeSubset(dataset,start,end);//contains batches with indices start,...,end
     LabeledData<I,L> range2 = rangeSubset(dataset,end);//contains batches with indices 0,...,end
 
-The functions of course also work for Data and UnlabeledData objects. 
+The functions of course also work for :doxy:`Data` and :doxy:`UnlabeledData` objects. 
 
 Splitting
 ----------------------------
 Splitting is a special type of subset generation where one part of the dataset is removed from the dataset 
 and returned as a new one. We use this most often in the generation of training and test sets.
-There are two types of splits: The first one is splitting on the level of batches, we call this operation splicing::
+There are two types of splits: The first one is splitting at the level of batches, we call this operation splicing::
 
   LabeledData<I,L> right = dataset.splice(k);
   
@@ -61,11 +63,11 @@ This file provides a bunch of functions for the creation of folds. When the fold
 are created, the dataset is reorganized, which needs an intermediate copy of the 
 dataset. This has to be taken into account when big datasets are to be used.
 Afterwards, aside from reorganizing the dataset, a new object is returned,
-:doxy:`CVFolds`. It stores for the dataset, which batches belong to which 
+:doxy:`CVFolds`. For the dataset, it stores which batches belong to which 
 training and validation set and how many folds were created. Before we describe 
 the functions to create the  cross validation dataset, we present a small usage example
 which tries to find a good regularization parameter for a given problem. We assume here 
-the existance of some function `trainProblem` which takes training and validation set as 
+the existence of some function `trainProblem` which takes training and validation set as 
 well as the regularization parameter and returns the validation error::
 
     RegressionDataset dataset;
@@ -108,15 +110,19 @@ Now we present the basic splitting functions provided by shark. they are::
 
 For the special case of classification there also exists a function
 that ensures that all partitions have approximately the same fraction
-of examples of each class. The function supports vector labels with
+of examples of each class (i.e., for stratified sampling). The function supports vector labels with
 one-hot encoding and integer class labels (see also :doc:`labels`)::
 
     createCVSameSizeBalanced(data, numberOfPartitions);
+
+
+Nested Cross-Validation
+----------------------------
     
-Somtimes we want to use a nested Cross-Validation scheme. That is after we chose
+Sometimes we want to use a nested Cross-Validation scheme. That is, after we chose
 one training and validation set, we want to repeat this scheme, applying another
 level of cross-validation. Unfortunately, this is not directly supported in an
-efficient manner right now, but we can create it using an explicit copy of
+efficient manner right now, but we can handle it using an explicit copy of
 the training set::
 
     //as created in the above example
@@ -127,29 +133,30 @@ the training set::
     //creating a new fold
     CVFolds<RegressionDataset> innerFolds = createCVSameSize(training, numberOfFolds);
 
-Binary Problem partitioning
+One-vs-One Partitioning
 ------------------------------------------------
 
-This is a special subset creation mchanism used in One-vs-One schemes for multiclass problems.
-In this case, we often want to look on the binary classification problem created by only two classes.
-For this we first reorganize the dataset such, that all elements of one class are grouped together and
+This is a special subset creation mechanism used in One-vs-One schemes for multiclass problems.
+In this case, we often want to look at the binary classification
+problems created by all pairs of classes.
+For doing so,  we first reorganize the dataset such that all elements of one class are grouped together and
 every batch contains only elements of one class::
 
     repartitionByClass(data);
 
-afterwards we can create binary subproblems of this set by issuing::
+Afterwards, we can create binary subproblems of this set by issuing::
 
     RegressionDataset subproblem = binarySubProblem(data,class0,class1);
     
 The labels in the returned dataset are not the original class labels, but are created by
-setting the label of all elements of class0 to 0 and class1 to 1.
+setting the label of all elements of ``class0`` to 0 and ``class1`` to 1.
     
-Elementwise subsets using DataView
+Elementwise Subsets Using DataView
 --------------------------------------
 
-Sometimes it is not usefull to reorganize the dataset for a subset. This for example happens if
-a set of random subst needs to be generated. In this case, we can us the :doxy:`DataView` class,
-which wraps a dataset and gives a fast random access to the elements, as well as efficient subsetting::
+Sometimes it is not useful to reorganize the dataset for a subset. This for example happens if
+a set of random subsets needs to be generated. In this case, we can us the :doxy:`DataView` class,
+which wraps a dataset and provide fast random access to the elements as well as efficient subsetting::
 
     DataView<RegressionDataset> view(data);
     
