@@ -10,7 +10,7 @@ with :doc:`../optimization/conventions_derivatives`.
 Existing kernel functions in Shark are a good starting point for writing
 a specialized kernel function. It is always a good idea to look for a
 related kernel before reinventing the wheel. However, for the purpose of
-this tutorial and for completeness sake we will now start from scratch.
+this tutorial we will start from scratch.
 
 
 Example Kernel
@@ -18,7 +18,7 @@ Example Kernel
 
 We'll work with two examples in the following. Our main example will be
 a kernel on strings. This will allow us to introduce most concepts. For
-the relatively specific topic of input derivatives we will then switch
+the rather specific topic of input derivatives we will then switch
 to the isotropic Gaussian kernel (as implemented in the class
 :doxy:`GaussianRbfKernel`), since strings do not have a differentiable
 structure.
@@ -26,19 +26,19 @@ structure.
 For the time being, assume that our input data takes the form of
 character strings over a fixed alphabet. Instances could be words, but
 they could equally well be gene sequences. An obvious data structure for
-representing such objects in C++ is std::string. One could easily
-consider a more general container here, such as std::basic_string<T>, so
+representing such objects in C++ is ``std::string``. One could easily
+consider a more general container here, such as ``std::basic_string<T>``, so
 alphabets can have more than 256 characters. The kernel class could be
 templatized either for the character type or even for the whole
-container type. Here we stick to a simple std::string, since the
+container type. Here we stick to a simple ``std::string``, since the
 generalization to templates is rather straightforward.
 
 For simplicity, our example kernel will work on strings of fixed length
-N. In particular we will assume that both input strings have the same
+*N*. In particular we will assume that both input strings have the same
 length. Our kernel class will represent a whole family of kernel
 functions with an adjustable parameter. For a string :math:`s`, let
-:math:`s_i` denote the i-th character, and let :math:`\delta(a,b)`
-denote the Kronecker symbol, which is one if a and b match (are equal)
+:math:`s_i` denote the *i*-th character, and let :math:`\delta(a,b)`
+denote the Kronecker symbol, which is one if :math:`a` and :math:`b` match (are equal)
 and zero otherwise. Then our kernel reads as follows:
 
 .. math::
@@ -48,10 +48,10 @@ This kernel is a double sum over all pairs of symbols in the two
 sequences. Matching entries have a positive contribution that decays
 with the distance in position. The parameter :math:`\gamma > 0` controls
 how quickly the value decays. In bioinformatics this kernel is known as
-the *oligo* *kernel* [Meinicke2004]_ for k-mers of length k=1. This
+the *oligo* *kernel* [Meinicke2004]_ for *k*-mers of length *k*=1. This
 kernel is probably not very good for processing real sequences, since it
 treats all matches independently and without taking sequence information
-into account. Larger values of k should be considered in practice, but
+into account. Larger values of *k* should be considered in practice, but
 we will nevertheless use this kernel for illustration purposes.
 
 
@@ -59,7 +59,7 @@ A Brand New Kernel Class
 ------------------------
 
 Now we will cast the above formula into a piece of C++ code. We will
-call the new kernel class MySequenceKernel. In Shark, all kernel
+call the new kernel class ``MySequenceKernel``. In Shark, all kernel
 functions are derived from the ``AbstractKernelFunction`` interface.
 This interface is a template::
 
@@ -101,7 +101,7 @@ Evaluating the Kernel
 ---------------------
 
 The above code compiles, but instantiating an object of type
-MySequenceKernel will fail, since a number of interface functions are
+``MySequenceKernel`` will fail, since a number of interface functions are
 pure virtual and need to be overridden. The most important of these is
 the ``AbstractKernelFunction::eval`` function. This is the central
 location where the actual evaluation of the kernel function takes
@@ -115,7 +115,7 @@ place::
 	    ) const = 0;
 
 This function takes four arguments: two batches of inputs (refer to the
-tutorials on data batches if you have not yet done so), a matrix-valued
+tutorials on :doc:`batches` if you have not yet done so), a matrix-valued
 result parameter, and an intermediate state object for the computation
 of derivatives. For the time being we will ignore kernel derivatives and
 thus the state object and focus on our core task, namely the computation
@@ -124,8 +124,9 @@ of the results from the inputs.
 The eval function is supposed to fill the result matrix with the results
 of the kernel function applied to all pairs of inputs found in the two
 batches. In other words, ``result(i, j)`` has to be filled in with
-:math:`k(x_i, y_j)`, where :math:`x_i` is the i-th element of the first
-batch and :math:`y_j` is the j-th element of the second batch. In other
+:math:`k(x_i, y_j)`, where :math:`x_i` is the *i*-th element of the first
+batch and :math:`y_j` is the 
+*j*-th element of the second batch. In other
 words, the ``eval`` function computes the kernel Gram matrix of the two
 batches. For the special case of batches of size one it computes a
 single kernel value. The reason for computing whole Gram matrices
@@ -196,8 +197,8 @@ implementation::
 The core algorithmic work is already done!
 
 It is actually possible to speed up the computation quite a bit: the
-exponential function is only evaluated at finiely many points, one for
-each possible distance between p and q. These values can be precomputed
+exponential function is only evaluated at finitely many points, one for
+each possible distance between ``p`` and ``q``. These values can be precomputed
 (e.g., in the function ``setParameterVector`` below). We will not do
 this here since the focus of this tutorial is not on specific
 algorithmic improvements.
@@ -221,7 +222,7 @@ Therefore one may wish to overload this function as follows::
 	    return sum;
 	}
 
-Overloading this function is not a must, but it will speed up algorithms
+Overloading this function is not required, but it will speed up algorithms
 that need single kernel evaluations. This is rarely the case in Shark,
 but it often happens is rapid prototyping code.
 
@@ -285,7 +286,7 @@ and a setter for the parameter vector::
 
 Recall the comment above on precomputing the exponential function values
 to speed up evaluation. The ``setParameterVector`` function is the best
-place for this compuation.
+place for this computation.
 
 Now we have all mandatory interfaces in place. This allows us to
 create an instance of our new kernel class::
@@ -364,7 +365,8 @@ computation the function is required to perform. The gradient vector is
 to be filled in with the partial derivatives of the weighted sum of all
 kernel values w.r.t. the parameters. In pseudo code the computation reads:
 
-``gradient(p) = \sum_{i,j} coefficient(i, j)`` :math:`\frac{\partial}{\partial parameter(p)}` ``k(batchX1(i), batchX2(j))``
+``gradient(p) = \sum_{i,j} coefficient(i, j)``
+:math:`\frac{\partial}{\partial \text{parameter}(p)}` ``k(batchX1(i), batchX2(j))``
 
 Precomputing a matrix of entry-wise kernel derivatives (little
 computational overhead during evaluation, rather small storage) seems
@@ -490,13 +492,13 @@ now switch to an example with differentiable inputs, for which we pick
 .. math::
 	k(x, x') = \exp \Big( -\gamma \|x-x'\|^2 \Big)
 
-with x and x' represented by RealVector objects. Then we can ask how the
-kernel value varies with x:
+with :math:`x` and :math:`x'` represented by ``RealVector`` objects. Then we can ask how the
+kernel value varies with :math:`x`:
 
 .. math::
 	\frac{\partial k(x, x')}{\partial x} = -2 \|x-x'\|^2 k(x, x') (x-x')
 
-There is no special function for the derivative w.r.t. x' because kernel
+There is no special function for the derivative w.r.t. :math:`x'` because kernel
 are symmetric functions and the roles of the arguments can be switched.
 
 The ``AbstractKernelFunction`` super class provides the following
@@ -524,9 +526,9 @@ is supposed to compute the following vector:
 
 .. math::
 	\begin{pmatrix}
-		c_{1,1} \frac{\partial k(x_1, x'_1)}{x_1} + \dots + c_{1,m} \frac{\partial k(x_1, x'_m)}{x_1} \\
+		c_{1,1} \frac{\partial k(x_1, x'_1)}{\partial x_1} + \dots + c_{1,m} \frac{\partial k(x_1, x'_m)}{\partial x_1} \\
 		\vdots \\
-		c_{n,1} \frac{\partial k(x_n, x'_1)}{x_n} + \dots + c_{n,m} \frac{\partial k(x_n, x'_m)}{x_n} \\
+		c_{n,1} \frac{\partial k(x_n, x'_1)}{\partial x_n} + \dots + c_{n,m} \frac{\partial k(x_n, x'_m)}{\partial x_n} \\
 	\end{pmatrix}
 
 The ``InternalState`` structure of the ``GaussianRbfKernel`` class
@@ -593,7 +595,7 @@ References
 ----------
 
 
-.. [Meinicke2004] Meinicke, P., Tech, M., Morgenstern, B., Merkl, R.: Oligo kernels for datamining on biolog- ical sequences: A case study on prokaryotic translation initiation sites. BMC Bioinformatics 5, 2004.
+.. [Meinicke2004] Meinicke, P., Tech, M., Morgenstern, B., Merkl, R.: Oligo kernels for datamining on biological sequences: A case study on prokaryotic translation initiation sites. BMC Bioinformatics 5, 2004.
 
 .. [Cristianini2002] Nello Cristianini, Jaz Kandola, Andre Elisseeff, John Shawe-Taylor: On kernel-target alignment. Advances in Neural Information Processing Systems 14, 2002.
 
