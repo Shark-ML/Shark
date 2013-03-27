@@ -75,6 +75,10 @@ public:
 	///\brief construct the CMAC
 	CMACMap();
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CMACMap"; }
+
 	///\brief initializes the structure of the cmac. it uses the same lower and upper bound for every input dimension. default is [0,1]
 	///
 	///\param inputs number of input dimensions
@@ -141,6 +145,6 @@ public:
 	void write( OutArchive & archive ) const;
 };
 
+
 }
 #endif
-

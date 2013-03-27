@@ -88,6 +88,11 @@ class Quickprop : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
 {
 public:
 	Quickprop();
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Quickprop"; }
+
 	void configure( const PropertyTree & node );
 
 	void read( InArchive & archive );
@@ -178,6 +183,11 @@ protected:
 {
 public:
 	QuickpropOriginal();
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Quickprop"; }
+
 	void configure( const PropertyTree & node );
 
 	void read( InArchive & archive );

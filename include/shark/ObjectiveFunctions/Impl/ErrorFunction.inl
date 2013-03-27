@@ -4,16 +4,6 @@
  *  \author T.Voss, T. Glasmachers, O.Krause
  *  \date 2010-2011
  *
- *  \par Copyright (c) 1998-2011:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
- *
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -63,9 +53,11 @@ public:
 		if(mep_model->hasFirstParameterDerivative() && mep_cost->hasFirstDerivative())
 			this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
 		this->m_features|=base_type::CAN_PROPOSE_STARTING_POINT;
-		//a hack to update changing names...
-		this->m_name="ErrorFunction<"+mep_model->name()+","+mep_cost->name()+">";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ErrorFunctionWrapper"; }
 
 	void configure( const PropertyTree & node ) {
 		PropertyTree::const_assoc_iterator it = node.find("model");
@@ -359,7 +351,6 @@ protected:
 template<class InputType,class LabelType>
 void swap(const ErrorFunction<InputType,LabelType>& op1, const ErrorFunction<InputType,LabelType>& op2){
 	swap(op1.mp_wrapper,op2.mp_wrapper);
-	swap(op1.m_name,op2.m_name);
 	swap(op1.m_features,op2.m_features);
 }
 
@@ -379,7 +370,6 @@ ErrorFunction<InputType,LabelType>::ErrorFunction(AbstractModel<InputType,Output
 	else{
 		mp_wrapper.reset(new detail::CostBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,cost));
 	}
-	this -> m_name = mp_wrapper->name();
 	this -> m_features = mp_wrapper -> features();
 }
 
@@ -398,7 +388,6 @@ ErrorFunction<InputType,LabelType>::ErrorFunction(AbstractModel<InputType,Output
 	else{
 		mp_wrapper.reset(new detail::CostBasedErrorFunctionImpl<InputType,LabelType,OutputType>(model,cost));
 	}
-	this -> m_name = mp_wrapper->name();
 	this -> m_features = mp_wrapper -> features();
 	this -> setDataset(dataset);
 }
@@ -406,7 +395,6 @@ ErrorFunction<InputType,LabelType>::ErrorFunction(AbstractModel<InputType,Output
 template<class InputType,class LabelType>
 ErrorFunction<InputType,LabelType>::ErrorFunction(const ErrorFunction& op)
 :mp_wrapper(op.mp_wrapper->clone()){
-	this -> m_name = mp_wrapper -> name();
 	this -> m_features = mp_wrapper -> features();
 }
 
@@ -420,7 +408,6 @@ ErrorFunction<InputType,LabelType>& ErrorFunction<InputType,LabelType>::operator
 template<class InputType,class LabelType>
 void ErrorFunction<InputType,LabelType>::updateFeatures(){
 	mp_wrapper -> updateFeatures();
-	this -> m_name = mp_wrapper -> name();
 	this -> m_features = mp_wrapper -> features();
 }
 

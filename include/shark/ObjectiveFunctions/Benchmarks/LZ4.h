@@ -44,8 +44,11 @@ struct LZ4 : public MultiObjectiveFunction{
 
 	LZ4(std::size_t numVariables = 0) : m_handler(SearchPointType(numVariables,-1),SearchPointType(numVariables,1) ){
 		announceConstraintHandler(&m_handler);
-		m_name="LZ4";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LZ4"; }
 	
 	std::size_t numberOfObjectives()const{
 		return 2;

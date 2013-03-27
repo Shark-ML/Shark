@@ -52,9 +52,12 @@ struct DTLZ1 : public MultiObjectiveFunction
 {
 	DTLZ1(std::size_t numVariables = 0) : m_objectives(2), m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
 		announceConstraintHandler(&m_handler);
-		m_name="DTLZ1";
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "DTLZ1"; }
+
 	std::size_t numberOfObjectives()const{
 		return m_objectives;
 	}

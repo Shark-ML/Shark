@@ -60,6 +60,10 @@ public:
 		this->m_features|= base_type::SUPPORTS_VARIABLE_INPUT_SIZE;
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LinearKernel"; }
+
 	RealVector parameterVector() const{ 
 		return RealVector(); 
 	}

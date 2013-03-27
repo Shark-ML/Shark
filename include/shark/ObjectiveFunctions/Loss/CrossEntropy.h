@@ -103,11 +103,14 @@ private:
 public:
 	CrossEntropy()
 	{
-		this->m_name = "CrossEntropy";
 		m_features |= HAS_FIRST_DERIVATIVE;
 		//~ m_features |= HAS_SECOND_DERIVATIVE;
 	}
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CrossEntropy"; }
 
 	// annoyingness of C++ templates
 	using base_type::eval;

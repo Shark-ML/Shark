@@ -44,10 +44,13 @@ struct CIGTAB2 : public MultiObjectiveFunction {
 
 	CIGTAB2(std::size_t numberOfVariables = 5) : m_a( 1E-6 ) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_name = "CIGTAB2";
 		m_numberOfVariables = numberOfVariables;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CIGTAB2"; }
+
 	std::size_t numberOfObjectives()const{
 		return 2;
 	}

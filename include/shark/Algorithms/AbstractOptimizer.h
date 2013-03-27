@@ -115,22 +115,6 @@ public:
 	*/
 	virtual ~AbstractOptimizer() {}
 
-	virtual void configure( const PropertyTree & node ) {
-		(void) node;
-	}
-
-	virtual const std::string & name() const {
-		return m_name;
-	}
-
-	virtual void read( InArchive & archive ) {
-		(void) archive;
-	}
-
-	virtual void write( OutArchive & archive ) const {
-		(void) archive;
-	}
-
 	/**
 	* \brief Initialize the optimizer for the supplied objective function.
 	* \param [in] function The objective function to initialize for.
@@ -159,30 +143,28 @@ protected:
 		//test first derivative
 		if( (m_features & REQUIRES_FIRST_DERIVATIVE) &
 			!(objectiveFunction.features() & ObjectiveFunctionType::HAS_FIRST_DERIVATIVE)
-		)throw SHARKEXCEPTION("[ "+m_name+" ] requires first derivative");
+		)throw SHARKEXCEPTION("[ "+name()+" ] requires first derivative");
 		//test second derivative
 		if( (m_features & REQUIRES_SECOND_DERIVATIVE) &
 			!(objectiveFunction.features() & ObjectiveFunctionType::HAS_SECOND_DERIVATIVE)
-		)throw SHARKEXCEPTION("[ "+m_name+" ] requires second derivative");
+		)throw SHARKEXCEPTION("[ "+name()+" ] requires second derivative");
 
 		//test whether the function can be evaluated
 		if( (m_features & REQUIRES_VALUE) &
 			!(objectiveFunction.features() & ObjectiveFunctionType::HAS_VALUE)
-		)throw SHARKEXCEPTION("[ "+m_name+" ] requires the value of the function");
+		)throw SHARKEXCEPTION("[ "+name()+" ] requires the value of the function");
 
 		//test for constrains
 		if( !(m_features & CAN_SOLVE_CONSTRAINED) &
 			(objectiveFunction.features() & ObjectiveFunctionType::IS_CONSTRAINED_FEATURE)
-		)throw SHARKEXCEPTION("[ "+m_name+" ] can not solve constrained functions");
+		)throw SHARKEXCEPTION("[ "+name()+" ] can not solve constrained functions");
 
 		//test for closest feasible in constrained functions
 		if( (objectiveFunction.features() & ObjectiveFunctionType::IS_CONSTRAINED_FEATURE) &
 			!(objectiveFunction.features() & ObjectiveFunctionType::CAN_PROVIDE_CLOSEST_FEASIBLE) &
 			(m_features & REQUIRES_CLOSEST_FEASIBLE)
-		)throw SHARKEXCEPTION("[ "+m_name+" ] requires closest feasible for constrained functions");
+		)throw SHARKEXCEPTION("[ "+name()+" ] requires closest feasible for constrained functions");
 	}
-
-	std::string m_name; ///< The name of the optimizer, default value: Empty string.
 };
 
 }

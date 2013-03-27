@@ -78,6 +78,10 @@ public:
 		RANGE_CHECK(m_accuracy > 0.0);
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LASSO regression"; }
+
 
 	/// \brief Return the current setting of the regularization parameter.
 	double lambda() const

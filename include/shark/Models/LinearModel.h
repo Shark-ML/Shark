@@ -70,14 +70,16 @@ public:
 	LinearModel(){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		base_type::m_name = "LinearModel";
 	}
 	///copy constructor
 	LinearModel(const self_type& model):mp_wrapper(model.mp_wrapper->clone()){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		base_type::m_name = "LinearModel";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LinearModel"; }
 
 	///swap
 	friend void swap(const LinearModel& model1,const LinearModel& model2){
@@ -94,7 +96,6 @@ public:
 	LinearModel(unsigned int inputs, unsigned int outputs = 1, bool offset = false, bool sparse = false){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		base_type::m_name = "LinearModel";
 
 		if (sparse) 
 			mp_wrapper.reset(new detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType>(inputs, outputs, offset));
@@ -106,7 +107,6 @@ public:
 	LinearModel(RealMatrix const& matrix){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		base_type::m_name = "LinearModel";
 		mp_wrapper.reset(new detail::LinearModelWrapper<RealMatrix, InputType, OutputType>(matrix));
 	}
 
@@ -114,7 +114,6 @@ public:
 	LinearModel(RealMatrix const& matrix, OutputType offset){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		base_type::m_name = "LinearModel";
 		mp_wrapper.reset(detail::LinearModelWrapper<RealMatrix, InputType, OutputType>(matrix, offset));
 	}
 
@@ -122,7 +121,6 @@ public:
 	LinearModel(CompressedRealMatrix const& matrix){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		base_type::m_name = "LinearModel";
 		mp_wrapper.reset(new detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType>(matrix));
 	}
 
@@ -130,10 +128,8 @@ public:
 	LinearModel(CompressedRealMatrix const& matrix, RealVector offset){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		base_type::m_name = "LinearModel";
 		mp_wrapper.reset(new detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType>(matrix, offset));
 	}
-
 
 	/// check for the presence of an offset term
 	bool hasOffset() const{

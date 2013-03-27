@@ -1,21 +1,10 @@
 //===========================================================================
 /*!
- *  \file CombinedObjectiveFunction.h
  *
  *  \brief CombinedObjectiveFunction
  *
  *  \author T.Voss, T. Glasmachers, O.Krause
  *  \date 2010-2011
- *
- *  \par Copyright (c) 1998-2007:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
  *
  *
  *  <BR><HR>
@@ -61,10 +50,13 @@ public:
 
 	/// Constructor
 	CombinedObjectiveFunction(){
-		this->m_name = "CombinedObjectiveFunction<>";
 		this->m_features|=super::HAS_FIRST_DERIVATIVE;
 		this->m_features|=super::HAS_SECOND_DERIVATIVE;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CombinedObjectiveFunction"; }
 
 
 	/// Adds a new objective function with a
@@ -81,9 +73,6 @@ public:
 
 		m_weight.push_back(weight);
 		m_elements.push_back(&e);
-
-		this->m_name[this->m_name.size() - 1] = ',';
-		this->m_name += e.name() + ">";
 
 		if (e.features().test(element::IS_CONSTRAINED_FEATURE)) this->m_features.set(super::IS_CONSTRAINED_FEATURE);
 		if (! e.features().test(element::HAS_FIRST_DERIVATIVE)) this->m_features.reset(super::HAS_FIRST_DERIVATIVE);

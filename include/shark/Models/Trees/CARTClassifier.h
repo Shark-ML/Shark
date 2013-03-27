@@ -84,14 +84,19 @@ public:
 	typedef std::vector<SplitInfo> SplitMatrixType;
 
 	/// Constructor
-	CARTClassifier():base_type("CARTClassifier"){}
+	CARTClassifier()
+	{}
 
 	/// Constructor taking the splitMatrix as argument
 	CARTClassifier(SplitMatrixType const& splitMatrix)
-	:base_type("CARTClassifier"){
+	{
 		setSplitMatrix(splitMatrix);
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CARTClassifier"; }
+
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}

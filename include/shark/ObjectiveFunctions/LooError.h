@@ -96,10 +96,6 @@ public:
 	, mep_trainer(trainer)
 	, mep_loss(loss)
 	{
-		base_type::m_name = "LooError<"
-				+ mep_model->name() + ","
-				+ mep_trainer->name() + ","
-				+ mep_loss->name() + ">";
 		base_type::m_features |= base_type::HAS_VALUE;
 	}
 
@@ -124,13 +120,18 @@ public:
 	, mep_trainer(trainer)
 	, mep_loss(loss)
 	{
-		base_type::m_name = "LooError<"
-				+ mep_model->name() + ","
-				+ mep_trainer->name() + ","
-				+ mep_loss->name() + ">";
 		base_type::m_features |= base_type::HAS_VALUE;
 	}
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{
+		return "LooError<"
+				+ mep_model->name() + ","
+				+ mep_trainer->name() + ","
+				+ mep_loss->name() + ">";
+	}
 
 	/// inherited from SupervisedObjectiveFunction
 	void setDataset(DatasetType const& dataset) {

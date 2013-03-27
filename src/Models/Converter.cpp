@@ -41,9 +41,8 @@ using namespace shark;
 
 
 ThresholdConverter::ThresholdConverter(double threshold)
-: m_threshold(threshold){
-	this->m_name = "ThresholdConverter";
-}
+: m_threshold(threshold)
+{ }
 
 
 RealVector ThresholdConverter::parameterVector() const{ 
@@ -68,9 +67,8 @@ void ThresholdConverter::eval(BatchInputType const& pattern, BatchOutputType& ou
 ////////////////////////////////////////////////////////////
 
 ThresholdVectorConverter::ThresholdVectorConverter(double threshold)
-: m_threshold(threshold){
-	this->m_name = "ThresholdVectorConverter";
-}
+: m_threshold(threshold)
+{ }
 
 
 RealVector ThresholdVectorConverter::parameterVector() const{
@@ -98,9 +96,9 @@ void ThresholdVectorConverter::eval(BatchInputType const& patterns, BatchOutputT
 ////////////////////////////////////////////////////////////
 
 
-ArgMaxConverter::ArgMaxConverter(){ 
-	this->m_name = "ArgMaxConverter"; 
-}
+ArgMaxConverter::ArgMaxConverter()
+{ }
+
 
 RealVector ArgMaxConverter::parameterVector() const{ 
 	return RealVector(); 
@@ -133,9 +131,8 @@ void ArgMaxConverter::eval(BatchInputType const& patterns, BatchOutputType& outp
 
 
 OneHotConverter::OneHotConverter(unsigned int classes)
-: m_classes(classes){ 
-	this->m_name = "OneHotConverter"; 
-}
+: m_classes(classes)
+{ }
 
 
 RealVector OneHotConverter::parameterVector() const{ 

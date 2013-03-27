@@ -42,7 +42,6 @@ using namespace shark;
 
 LinearRegression::LinearRegression(double regularization){
 	setRegularization(regularization);
-	m_name = "Linear Regression";
 }
 
 void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealVector> const& dataset){

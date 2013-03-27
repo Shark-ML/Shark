@@ -48,7 +48,6 @@ SigmoidModel::SigmoidModel( bool transform_for_unconstrained )
  m_useOffset(true),
  m_transformForUnconstrained(transform_for_unconstrained),
  m_minLogValue(-230) {
-	m_name = "SigmoidModel";
 	m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
 	m_features |= HAS_FIRST_INPUT_DERIVATIVE;
 	m_parameters(0) = 1.0; //slope
@@ -176,9 +175,9 @@ void SigmoidModel::setMinLogValue( double logvalue ) {
 ////////////////////////////////////////////////////////////
 
 
-SimpleSigmoidModel::SimpleSigmoidModel( bool transform_for_unconstrained ) : SigmoidModel( transform_for_unconstrained ) {
-	m_name="SimpleSigmoidModel";
-}
+SimpleSigmoidModel::SimpleSigmoidModel( bool transform_for_unconstrained ) : SigmoidModel( transform_for_unconstrained )
+{ }
+
 double SimpleSigmoidModel::sigmoid(double x)const{
 	return 0.5 * x / (1.0 + std::abs(x)) + 0.5;
 }
@@ -190,9 +189,9 @@ double SimpleSigmoidModel::sigmoidDerivative(double gx)const{
 ////////////////////////////////////////////////////////////
 
 
-TanhSigmoidModel::TanhSigmoidModel( bool transform_for_unconstrained ) : SigmoidModel( transform_for_unconstrained ) {
-	m_name="TanhSigmoidModel";
-}
+TanhSigmoidModel::TanhSigmoidModel( bool transform_for_unconstrained ) : SigmoidModel( transform_for_unconstrained )
+{ }
+
 double TanhSigmoidModel::sigmoid(double x)const{
 	return 0.5*std::tanh(x)+0.5;
 }

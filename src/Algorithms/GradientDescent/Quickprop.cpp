@@ -41,7 +41,6 @@ Quickprop::Quickprop()
 {
 	m_learningRate = 1.5;
 	m_maxIncrease = 1.75;
-	m_name = "Quickprop";
 	m_features |= REQUIRES_VALUE;
 	m_features |= REQUIRES_FIRST_DERIVATIVE;
 }
@@ -120,7 +119,6 @@ QuickpropOriginal::QuickpropOriginal()
 {
 	m_learningRate=1.5;
 	m_maxIncrease=1.75;
-	m_name = "QuickpropOriginal";
 	m_features |= REQUIRES_VALUE;
 	m_features |= REQUIRES_FIRST_DERIVATIVE;
 }

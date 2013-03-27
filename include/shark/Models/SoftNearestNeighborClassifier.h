@@ -59,6 +59,10 @@ public:
 	SoftNearestNeighborClassifier(NearestNeighbors const* algorithm, unsigned int neighbors = 3)
 	: m_algorithm(algorithm),m_classes(numberOfClasses(algorithm->dataset())), m_neighbors(neighbors){}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SoftNearestNeighborClassifier"; }
+
 
 	/// return the number of neighbors
 	unsigned int neighbors() const{

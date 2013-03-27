@@ -23,11 +23,14 @@ namespace shark {
 struct DiffPowers : public SingleObjectiveFunction {
 
 	DiffPowers(unsigned int numberOfVariables = 5) {
-		m_name="DiffPowers";
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "DiffPowers"; }
+
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;
 	}

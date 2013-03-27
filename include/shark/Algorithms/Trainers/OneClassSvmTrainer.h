@@ -97,9 +97,11 @@ public:
 	: m_kernel(kernel)
 	, m_nu(nu)
 	, m_cacheSize(0x4000000)
-	{
-		this->m_name = "OneClassSvmTrainer";
-	}
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "OneClassSvmTrainer"; }
 
 	double nu() const
 	{ return m_nu; }

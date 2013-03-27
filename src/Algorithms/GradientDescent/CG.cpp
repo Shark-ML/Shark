@@ -40,7 +40,6 @@ using namespace shark;
 
 CG::CG()
 {
-	m_name="CG";
 	m_features |= REQUIRES_VALUE;
 	m_features |= REQUIRES_FIRST_DERIVATIVE;
 }

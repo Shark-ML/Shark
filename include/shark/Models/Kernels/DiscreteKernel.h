@@ -66,6 +66,9 @@ public:
 #endif
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "DiscreteKernel"; }
 
 	RealVector parameterVector() const
 	{

@@ -67,7 +67,6 @@ std::vector<std::size_t> CMACMap::getIndizes(ConstRealMatrixRow const &point)con
 
 CMACMap::CMACMap():m_tilings(0) {
 	m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
-	m_name="CMAC";
 }
 void CMACMap::setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, double lower, double upper,bool randomTiles){
 	RealMatrix bounds(inputs,2);

@@ -53,6 +53,11 @@ class BFGS : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
 {
 public:
 	BFGS();
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "BFGS"; }
+
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
 

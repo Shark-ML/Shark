@@ -39,13 +39,11 @@ using namespace shark;
 
 LinearNorm::LinearNorm():m_inputSize(0)
 {
-	m_name="Linear Norm";
 	m_features|=HAS_FIRST_INPUT_DERIVATIVE;
 	m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 }
 LinearNorm::LinearNorm(std::size_t inputSize):m_inputSize(inputSize)
 {
-	m_name="Linear Norm";
 	m_features|=HAS_FIRST_INPUT_DERIVATIVE;
 	m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 }

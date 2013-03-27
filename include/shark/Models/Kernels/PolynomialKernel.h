@@ -6,16 +6,6 @@
 *  \author  T.Glasmachers
 *  \date    2011
 *
-*  \par Copyright (c) 1999-2011:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-27974<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*
-*
 *
 *  <BR><HR>
 *  This file is part of Shark. This library is free software;
@@ -88,6 +78,10 @@ public:
 		  if ( !m_degreeIsParam )
 			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "PolynomialKernel"; }
 
 	void configure(PropertyTree const& node){
 		m_degree = node.get("degree", 2);

@@ -71,9 +71,12 @@ public:
 	//!                  online version of this net.
 	RNNet(RecurrentStructure* structure):mpe_structure(structure){
 		SHARK_CHECK(mpe_structure,"[RNNet] structure is not allowed to be empty");
-		m_name = "RNNet";
 		m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "RNNet"; }
 
 	//!  \brief Sets the warm up sequence
 	//!

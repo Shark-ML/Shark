@@ -38,13 +38,11 @@ using namespace shark;
 using namespace std;
 
 Softmax::Softmax(size_t dim){
-	m_name="Softmax";
 	m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 	m_features|=HAS_FIRST_INPUT_DERIVATIVE;
 	setStructure(dim);
 }
 Softmax::Softmax(){
-	m_name="Softmax";
 	m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 	m_features|=HAS_FIRST_INPUT_DERIVATIVE;
 }

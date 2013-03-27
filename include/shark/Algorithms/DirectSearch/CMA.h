@@ -185,6 +185,10 @@ namespace shark {
 		*/
 		CMA();
 
+		/// \brief From INameable: return the class name.
+		std::string name() const
+		{ return "CMA-ES"; }
+
 		/**
 		* \brief Calculates the center of gravity of the given population \f$ \in \mathbb{R}^d\f$.
 		*

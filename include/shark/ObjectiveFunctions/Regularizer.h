@@ -1,21 +1,9 @@
 //===========================================================================
 /*!
- *  \file Regularizer.h
- *
  *  \brief Regularizer
  *
  *  \author T. Glasmachers
  *  \date 2010-2011
- *
- *  \par Copyright (c) 1998-2007:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
  *
  *
  *  <BR><HR>
@@ -61,11 +49,14 @@ public:
 	/// Constructor
 	OneNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables)
 	{
-		m_name = "OneNormRegularizer";
 		m_features|=HAS_FIRST_DERIVATIVE;
 		m_features|=HAS_SECOND_DERIVATIVE;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "OneNormRegularizer"; }
+
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;
 	}
@@ -158,11 +149,14 @@ public:
 	/// Constructor
 	TwoNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables)
 	{
-		m_name = "TwoNormRegularizer";
 		m_features|=HAS_FIRST_DERIVATIVE;
 		m_features|=HAS_SECOND_DERIVATIVE;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "TwoNormRegularizer"; }
+
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;
 	}

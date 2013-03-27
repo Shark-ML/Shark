@@ -1,14 +1,4 @@
 /*
-*  \par Copyright (c) 1998-2007:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-25558<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*      <BR>
-*
 *
 *  <BR><HR>
 *  This file is part of Shark. This library is free software;
@@ -55,7 +45,11 @@ public:
 		base_type::m_features |= base_type::CAN_PROPOSE_STARTING_POINT;
 	};
 
-        void setData(UnlabeledData<typename RBM::VectorType> const& data){
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ContrastiveDivergence"; }
+
+	void setData(UnlabeledData<typename RBM::VectorType> const& data){
 		m_data = data;
 		typename Energy::AverageEnergyGradient flagHelper(&mpe_rbm->structure());
 		m_operator.flags() = flagHelper.flagsVH();

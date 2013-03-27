@@ -43,11 +43,14 @@ namespace shark {
 struct CIGTAB1 : public MultiObjectiveFunction {
 
 	CIGTAB1(std::size_t numberOfVariables = 5) : m_a( 1E6 ) {
-		m_name = "CIGTAB1";
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CIGTAB1"; }
+
 	std::size_t numberOfObjectives()const{
 		return 2;
 	}

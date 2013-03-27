@@ -19,8 +19,11 @@ private:
 public:
 		TestModel(int dim,double c):m_c(c),m_dim(dim){
 			m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
-			m_name="TestModel";
 		}
+
+		std::string name() const
+		{ return "TestModel"; }
+
 		//this model doesn't use any parameters...it just pretends!
 		virtual RealVector parameterVector()const{return RealVector(10);}
 		virtual void setParameterVector(RealVector const& newParameters){}

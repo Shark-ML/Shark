@@ -57,6 +57,10 @@ class SigmoidFitRpropNLL: public AbstractTrainer<SigmoidModel, unsigned int>
 public:
 	SigmoidFitRpropNLL( unsigned int iters = 100 );
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SigmoidFitRpropNLL"; }
+
 	void train(SigmoidModel& model, LabeledData<RealVector, unsigned int> const& dataset);
 	
 private:
@@ -83,6 +87,10 @@ class SigmoidFitPlatt: public AbstractTrainer<SigmoidModel, unsigned int>
 {
 public:
 	void train(SigmoidModel& model, LabeledData<RealVector, unsigned int> const& dataset);
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SigmoidFitPlatt"; }
 };
 
 

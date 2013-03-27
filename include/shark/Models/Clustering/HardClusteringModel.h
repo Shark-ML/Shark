@@ -68,8 +68,11 @@ public:
 	/// Constructor
 	HardClusteringModel(ClusteringType* clustering)
 	: base_type(clustering){
-		this->m_name = "HardClusteringModel";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "HardClusteringModel"; }
 	
 	/// \brief Compute best matching cluster.
 	///

@@ -72,7 +72,6 @@ public:
 	/// whiten the data.
 	PCA(bool whitening = false) 
 	: m_whitening(whitening){
-		base_type::m_name = "PCA";
 		m_algorithm = AUTO;
 	};
 	/// Constructor.
@@ -81,10 +80,13 @@ public:
 	/// The eigendecomposition of the data is stored inthe PCA object.
 	PCA(UnlabeledData<RealVector> const& inputs, bool whitening = false) 
 	: m_whitening(whitening){
-		base_type::m_name = "PCA";
 		m_algorithm = AUTO;
 		setData(inputs);
 	};
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "PCA"; }
 
 	/// If set to true, the encoded data has unit variance along
 	/// the new coordinates.

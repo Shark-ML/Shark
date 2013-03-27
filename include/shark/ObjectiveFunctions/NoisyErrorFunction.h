@@ -1,20 +1,9 @@
 /*!
- *  \file NoisyErrorFunction.h
  *
  *  \brief implements an error fucntion which only uses a random portion of the data for training
  *
  *  \author T.Voss, T. Glasmachers, O.Krause
  *  \date 2010-2011
- *
- *  \par Copyright (c) 1998-2007:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
  *
  *
  *  <BR><HR>
@@ -83,6 +72,10 @@ public:
 	NoisyErrorFunction(AbstractModel<InputType,OutputType>* model,AbstractLoss<LabelType,OutputType>* loss,RngType& rng,unsigned int batchSize=1);
 	NoisyErrorFunction(const NoisyErrorFunction<InputType,LabelType,RngType>& op1);
 	NoisyErrorFunction<InputType,LabelType,RngType>& operator = (const NoisyErrorFunction<InputType,LabelType>& op1);
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NoisyErrorFunction"; }
 
 	void setBatchSize(unsigned int batchSize);
 	unsigned int batchSize() const;

@@ -112,6 +112,11 @@ class RpropMinus : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
 {
 public:
 	RpropMinus();
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "RpropMinus"; }
+
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 	virtual void init(
 		ObjectiveFunctionType const& objectiveFunction, 
@@ -265,6 +270,11 @@ class RpropPlus : public RpropMinus
 {
 public:
 	RpropPlus();
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "RpropPlus"; }
+
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
@@ -387,6 +397,11 @@ class IRpropPlus : public RpropPlus
 {
 public:
 	IRpropPlus();
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "IRpropPlus"; }
+
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
@@ -484,6 +499,11 @@ protected:
 class IRpropMinus : public RpropMinus {
 public:
 	IRpropMinus();
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "IRpropMinus"; }
+
 	void step(const ObjectiveFunctionType& objectiveFunction);
 };
 

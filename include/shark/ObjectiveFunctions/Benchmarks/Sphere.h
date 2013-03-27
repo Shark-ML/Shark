@@ -4,15 +4,6 @@
  * \author T. Voss
  * \date 2010-2011
  *
- * \par Copyright (c):
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
  * <BR><HR>
  * This file is part of Shark. This library is free software;
  * you can redistribute it and/or modify it under the terms of the
@@ -41,8 +32,12 @@ struct Sphere : public SingleObjectiveFunction {
 	
 	Sphere(unsigned int numberOfVariables = 5):m_numberOfVariables(numberOfVariables) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_name = "Sphere";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Sphere"; }
+
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;
 	}

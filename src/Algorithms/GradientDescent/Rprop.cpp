@@ -47,7 +47,6 @@
 
 
 RpropMinus::RpropMinus(){
-	m_name="RpropMinus";
 	m_features |= REQUIRES_FIRST_DERIVATIVE;
 	m_features |= CAN_SOLVE_CONSTRAINED;
 
@@ -161,8 +160,8 @@ void RpropMinus::write( OutArchive & archive ) const
 
 RpropPlus::RpropPlus()
 {
-	m_name="RpropPlus";
 }
+
 void RpropPlus::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
 	init(objectiveFunction,startingPoint,0.01);
 }
@@ -231,10 +230,10 @@ void RpropPlus::write( OutArchive & archive ) const
 
 IRpropPlus::IRpropPlus()
 {
-	m_name="IRpropPlus";
 	m_features |= REQUIRES_VALUE;
 	m_derivativeThreshold = 0.;
 }
+
 void IRpropPlus::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
 	init(objectiveFunction,startingPoint,0.01);
 }
@@ -309,7 +308,6 @@ void IRpropPlus::setDerivativeThreshold(double derivativeThreshold)  {
 
 IRpropMinus::IRpropMinus()
 {
-	m_name="IRpropMinus";
 }
 
 void IRpropMinus::step(const ObjectiveFunctionType& objectiveFunction) {

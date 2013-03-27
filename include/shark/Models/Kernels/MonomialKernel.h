@@ -78,6 +78,11 @@ public:
 		this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 		this->m_features |= base_type::SUPPORTS_VARIABLE_INPUT_SIZE;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "MonomialKernel"; }
+
 	void configure( PropertyTree const& node ){
 		m_exponent = node.get("exponent",1);
 	}

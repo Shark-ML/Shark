@@ -136,6 +136,10 @@ public:
 				this, _1 ) );
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "InterruptibleAlgorithmRunner<" + mep_algorithm->name() + "," + mep_function->name() + ">"; }
+
 	/**
 	 * \brief Triggered when new results are available.
 	 */

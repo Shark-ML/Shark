@@ -72,22 +72,6 @@ public:
 	typedef LabelTypeT LabelType;
 	/// Core of the Trainer interface
 	virtual void train(ModelType& model, const LabeledData<InputType, LabelType>& dataset) = 0;
-
-	/// From IConfigurable, configures a Model
-	virtual void configure( const PropertyTree & node ) {}
-
-	/// From INameable, returns the models name
-	virtual const std::string & name() const {
-		return m_name;
-	}
-
-	/// From ISerializable, reads a network from an archive
-	virtual void read( InArchive & archive ) {}
-	/// From ISerializable, writes a network to an archive
-	virtual void write( OutArchive & archive ) const {}
-
-protected:
-	std::string m_name;
 };
 
 
@@ -117,22 +101,6 @@ public:
 	typedef typename Model::InputType InputType;
 	/// Core of the Trainer interface
 	virtual void train(ModelType& model, const UnlabeledData<InputType>& inputset) = 0;
-
-	/// From IConfigurable, configures a Model
-	virtual void configure( const PropertyTree & node ) {}
-
-	/// From INameable, returns the models name
-	virtual const std::string & name() const {
-		return m_name;
-	}
-
-	/// From ISerializable, reads a network from an archive
-	virtual void read( InArchive & archive ) {}
-	/// From ISerializable, writes a network to an archive
-	virtual void write( OutArchive & archive ) const {}
-
-protected:
-	std::string m_name;
 };
 
 

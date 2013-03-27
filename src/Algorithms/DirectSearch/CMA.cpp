@@ -159,7 +159,6 @@ CMA::CMA() : ProbeProvider< CMA >( "CMA" ) {
 
 	mp_mutationDistributionProbe = registerProbe( "CovarianceMatrix", "Reports the current covariance matrix" );
 	
-	m_name="CMA";
 	m_features |= REQUIRES_VALUE;
 }
 

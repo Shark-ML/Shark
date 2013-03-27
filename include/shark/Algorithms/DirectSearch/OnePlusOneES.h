@@ -75,9 +75,12 @@ public:
 	* \brief Default c'tor.
 	*/
 	OnePlusOneES() : m_updateStrategy( one_plus_one_es::ONE_FIFTH_UPDATE ) {
-		m_name = "OnePlusOneES";
 		m_features |= REQUIRES_VALUE;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "OnePlusOneES"; }
 	
 	void configure( const PropertyTree & node ) {
 	}

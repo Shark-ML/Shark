@@ -47,12 +47,15 @@ class SteepestDescent : public AbstractSingleObjectiveOptimizer<VectorSpace<doub
 {
 public:
 	SteepestDescent() {
-		m_name = "Steepest Descent";
 		m_features |= REQUIRES_FIRST_DERIVATIVE;
 
 		m_learningRate = 0.1;
 		m_momentum = 0.3;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SteepestDescent"; }
 
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
 		checkFeatures(objectiveFunction);

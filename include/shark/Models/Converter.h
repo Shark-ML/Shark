@@ -84,6 +84,10 @@ class ThresholdConverter : public AbstractModel<RealVector, unsigned int>
 public:
 	ThresholdConverter(double threshold = 0.0);
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ThresholdConverter"; }
+
 	RealVector parameterVector() const;
 	void setParameterVector(RealVector const& newParameters);
 	std::size_t numberOfParameters() const;
@@ -117,6 +121,10 @@ class ThresholdVectorConverter : public AbstractModel<RealVector, RealVector>
 {
 public:
 	ThresholdVectorConverter(double threshold = 0.0);
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ThresholdVectorConverter"; }
 
 	RealVector parameterVector() const;
 	void setParameterVector(RealVector const& newParameters);
@@ -153,6 +161,10 @@ class ArgMaxConverter : public AbstractModel<RealVector, unsigned int>
 public:
 	ArgMaxConverter();
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ArgMaxConverter"; }
+
 	RealVector parameterVector() const;
 	void setParameterVector(RealVector const& newParameters);
 	std::size_t numberOfParameters() const;
@@ -183,6 +195,10 @@ class OneHotConverter : public AbstractModel<unsigned int, RealVector>
 {
 public:
 	OneHotConverter(unsigned int classes);
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "OneHotConverter"; }
 
 	RealVector parameterVector() const;
 	void setParameterVector(RealVector const& newParameters);

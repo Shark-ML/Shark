@@ -65,7 +65,11 @@ private:
 
 public:
 
-	/// @see AbstractModel::train
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NBClassifierTrainer"; }
+
+	/// @see AbstractTrainer::train
 	void train(NBClassifierType& model, LabeledData<InputType, OutputType> const& dataset)
 	{
 		SIZE_CHECK(dataset.numberOfElements() > 0u);

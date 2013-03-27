@@ -63,13 +63,16 @@ public:
 	SparseFFNetError(SparseFFNetError const& op):mp_wrapper(op.mp_wrapper->clone()){
 		m_features |= HAS_FIRST_DERIVATIVE;
 		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_name = "SparseFFNetError";
 	}
 	SparseFFNetError& operator=(SparseFFNetError const& op){
 		mp_wrapper.reset(op.mp_wrapper->clone());
 		return *this;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SparseFFNetError"; }
+
 	std::size_t numberOfVariables()const{
 		return mp_wrapper->numberOfVariables();
 	}

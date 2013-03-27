@@ -83,9 +83,11 @@ public:
 	:
 		base_type(kernel, C, unconstrained),
 		m_maxIterations(4u)
-	{
-		base_type::m_name = "MissingFeatureSvmTrainer";
-	}
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "MissingFeatureSvmTrainer"; }
 
 	void train(MissingFeaturesKernelExpansion<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
 	{

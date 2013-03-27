@@ -58,7 +58,8 @@ public:
 	 * \brief Configures the component given a property tree.
 	 * \param [in] node The root of the property tree.
 	 */
-	virtual void configure( const PropertyTree & node ) = 0;
+	virtual void configure( const PropertyTree & node )
+	{ }
 };
 
 }

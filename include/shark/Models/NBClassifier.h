@@ -102,12 +102,14 @@ public:
 	/// The distributions for each feature in each class are given by @a featureDists
 	/// @param featureDists the distribution of features
 	explicit NBClassifier(FeatureDistributionsType const& featureDists)
-	:
-		base_type("NBClassifier"),
-		m_featureDistributions(featureDists)
+	: m_featureDistributions(featureDists)
 	{
 		SIZE_CHECK(m_featureDistributions.size() > 0u);
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NBClassifier"; }
 
 	/// Get a feature distribution for feature @a featureIndex given class @a classIndex
 	/// @param classIndex index of class

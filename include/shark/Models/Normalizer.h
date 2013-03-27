@@ -57,45 +57,39 @@ public:
 
 	/// Constructor of an invalid model; use setStructure later
 	Normalizer()
-	{
-		base_type::m_name = "Normalizer";
-	}
+	{ }
 
 	/// copy constructor
 	Normalizer(const self_type& model)
 	: m_A(model.m_A)
 	, m_b(model.m_b)
 	, m_hasOffset(model.m_hasOffset)
-	{
-		base_type::m_name = "Normalizer";
-	}
+	{ }
 
 	/// Construction from dimension
 	Normalizer(std::size_t dimension, bool hasOffset = false)
 	: m_A(dimension, dimension)
 	, m_b(dimension)
 	, m_hasOffset(hasOffset)
-	{
-		base_type::m_name = "Normalizer";
-	}
+	{ }
 
 	/// Construction from matrix
 	Normalizer(RealDiagonalMatrix matrix)
 	: m_A(matrix)
 	, m_hasOffset(false)
-	{
-		base_type::m_name = "Normalizer";
-	}
+	{ }
 
 	/// Construction from matrix and vector
 	Normalizer(RealDiagonalMatrix matrix, RealVector vector)
 	: m_A(matrix)
 	, m_b(vector)
 	, m_hasOffset(true)
-	{
-		base_type::m_name = "Normalizer";
-	}
+	{ }
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Normalizer"; }
 
 	/// swap
 	friend void swap(const Normalizer& model1, const Normalizer& model2)

@@ -102,17 +102,20 @@ public:
 	/// Don't forget to provide a data set with the setDataset method
 	/// before using the object.
 	KernelTargetAlignment(AbstractKernelFunction<InputType>* kernel){
-		SHARK_CHECK(kernel != NULL, "[KernelTargetAlignment] kernel is not allowed to be NULL");
+		SHARK_CHECK(kernel != NULL, "[KernelTargetAlignment] kernel must not be NULL");
 		
 		mep_kernel = kernel;
 		
-		this->m_name = "KernelTargetAlignment";
 		this->m_features|=base_type::HAS_VALUE;
 		this->m_features|=base_type::CAN_PROPOSE_STARTING_POINT;
 		
 		if(mep_kernel -> hasFirstParameterDerivative())
 			this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "KernelTargetAlignment"; }
 
 	void configure( const PropertyTree & node ){
 		PropertyTree::const_assoc_iterator it = node.find("kernel");

@@ -68,7 +68,6 @@ public:
 	NegativeGaussianProcessEvidence(KernelType* kernel, bool unconstrained = false)
 	:mep_kernel(kernel), m_unconstrained(unconstrained)
 	{
-		base_type::m_name = "NegativeGaussianProcessEvidence";
 		if (kernel->hasFirstParameterDerivative()) this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
 		setThreshold(0.);
 	}
@@ -83,10 +82,13 @@ public:
 		, mep_kernel(kernel)
 		, m_unconstrained(unconstrained)
 	{
-		base_type::m_name = "NegativeGaussianProcessEvidence";
 		if (kernel->hasFirstParameterDerivative()) this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
 		setThreshold(0.);
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NegativeGaussianProcessEvidence"; }
 
 	/// inherited from SupervisedObjectiveFunction
 	void setDataset(DatasetType const& dataset) {

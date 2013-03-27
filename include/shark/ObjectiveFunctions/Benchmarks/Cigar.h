@@ -31,10 +31,13 @@ struct Cigar : public SingleObjectiveFunction {
 
 	Cigar(unsigned int numberOfVariables = 5) : m_alpha(1E-3) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_name="Cigar";
 		m_numberOfVariables = numberOfVariables;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Cigar"; }
+
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;
 	}

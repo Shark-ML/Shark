@@ -66,6 +66,10 @@ class LinearRegression : public AbstractTrainer<LinearModel<> >, public IParamet
 public:
 	LinearRegression(double regularization = 0.0);
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LinearRegression"; }
+
 	double regularization() const{ 
 		return m_regularization; 
 	}

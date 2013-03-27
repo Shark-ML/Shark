@@ -31,10 +31,13 @@ namespace shark {
 struct Ackley : public AbstractObjectiveFunction< VectorSpace<double>,double > {
 	Ackley(unsigned int numberOfVariables = 5) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_name="Ackley";
 		m_numberOfVariables = numberOfVariables;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Ackley"; }
+
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;
 	}

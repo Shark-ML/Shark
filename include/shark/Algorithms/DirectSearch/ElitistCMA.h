@@ -228,9 +228,12 @@ namespace shark {
 		* \brief Default c'tor.
 		*/
 		ElitistCMA() : m_lambda( 1 ),m_activeUpdate(false) {
-			m_name = "ElitistCMA";
 			m_features |= REQUIRES_VALUE;
 		}
+
+		/// \brief From INameable: return the class name.
+		std::string name() const
+		{ return "ElitistCMA"; }
 
 		/**
 		* \brief Calculates the expected length of a vector of length n.

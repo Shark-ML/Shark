@@ -61,6 +61,10 @@ public:
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
 	
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "IRLS"; }
+
 	void hessianIsPositiveDefinite(bool isPositive){
 		m_isPositive= true;
 	}

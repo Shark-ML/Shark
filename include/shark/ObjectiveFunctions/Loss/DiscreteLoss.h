@@ -61,6 +61,11 @@ public:
 	/// \param  cost     cost matrix in the format (target, prediction).
 	DiscreteLoss(RealMatrix const& cost);
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "DiscreteLoss"; }
+
 	/// inherited from AbstractLoss, evaluation of the loss function
 	double eval(BatchLabelType const& target, BatchOutputType const& prediction) const;
 

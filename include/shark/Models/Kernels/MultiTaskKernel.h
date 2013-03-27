@@ -141,6 +141,10 @@ public:
 		computeMatrix();
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "GaussianTaskKernel"; }
+
 	RealVector parameterVector() const
 	{
 		const std::size_t n = m_inputkernel.numberOfParameters();
@@ -303,6 +307,10 @@ public:
 	:base_type1(boost::fusion::make_vector(inputkernel,taskkernel))
 	,base_type2(base_type1::makeKernelVector())
 	{}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "MultiTaskKernel"; }
 };
 
 } // namespace shark {

@@ -56,11 +56,14 @@ namespace shark {
 class LBFGS : public AbstractSingleObjectiveOptimizer< VectorSpace<double> > {
 public:
 	LBFGS() {
-		m_name="LBFGS";
 		m_features |= REQUIRES_VALUE;
 		m_features |= REQUIRES_FIRST_DERIVATIVE;
 		m_numHist = 100;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LBFGS"; }
 
 	void init(const ObjectiveFunctionType &objectiveFunction, const SearchPointType &startingPoint) {
 		checkFeatures(objectiveFunction);

@@ -44,6 +44,10 @@ public:
 
 	SubrangeKernelWrapper(AbstractKernelFunction<InputType>* kernel,std::size_t start, std::size_t end)
 	:m_kernel(kernel),m_start(start),m_end(end){}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SubrangeKernelWrapper"; }
 	
 	RealVector parameterVector() const {
 		return m_kernel->parameterVector();
@@ -177,6 +181,10 @@ private:
 	typedef detail::SubrangeKernelBase<InputType> base_type1;
 	typedef WeightedSumKernel<InputType> base_type2;
 public:
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SubrangeKernel"; }
 
 	template<class Kernels,class Ranges>
 	SubrangeKernel(Kernels const& kernels, Ranges const& ranges)

@@ -67,6 +67,10 @@ public:
 		this->m_features|=base_type::IS_NORMALIZED;
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "GaussianRbfKernel"; }
+
 	RealVector parameterVector() const{
 		RealVector ret(1);
 		if (m_unconstrained){

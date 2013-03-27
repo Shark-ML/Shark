@@ -69,7 +69,11 @@ public:
 	: Base(kernel, basis, offset, 1u)
 	{}
 	///@}
-		
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "MissingFeaturesKernelExpansion"; }
+
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}

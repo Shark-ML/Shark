@@ -77,6 +77,14 @@ public:
 	: mep_objective(objective), mep_optimizer(optimizer), mep_stoppingCriterion(stoppingCriterion)
 	{ }
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{
+		return "OptimizationTrainer<"
+			+ mep_objective->name() + ","
+			+ mep_optimizer->name() + ">";
+	}
+
 	void train(ModelType& model, LabeledData<InputType, LabelType> const& dataset) {
 		mep_objective->setDataset(dataset);
 		mep_optimizer->init(*mep_objective);

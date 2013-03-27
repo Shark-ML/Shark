@@ -44,6 +44,8 @@ public:
 	: m_threshold(threshold)
 	{ }
 
+	std::string name() const
+	{ return "ThresholdClassifier"; }
 
 	RealVector parameterVector() const
 	{

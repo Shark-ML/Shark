@@ -77,9 +77,11 @@ public:
 	FFNet()
 	:m_numberOfNeurons(0),m_numberOfParameters(0),m_inputNeurons(0),m_outputNeurons(0),m_biasNeuron(0),m_firstOutputNeuron(0){
 		m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
-		m_name="FFNet";
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "FFNet"; }
 
 	std::size_t inputSize()const{
 		return m_inputNeurons;

@@ -1,14 +1,4 @@
 /*
-*  \par Copyright (c) 1998-2007:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-25558<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*      <BR>
-*
 *
 *  <BR><HR>
 *  This file is part of Shark. This library is free software;
@@ -56,7 +46,11 @@ public:
 		base_type::m_features |= base_type::HAS_FIRST_DERIVATIVE;
 		base_type::m_features |= base_type::CAN_PROPOSE_STARTING_POINT;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "MultiChainApproximator"; }
+
 	void configure(PropertyTree const& node){
 		PropertyTree::const_assoc_iterator it = node.find("rbm");
 		if(it!=node.not_found())

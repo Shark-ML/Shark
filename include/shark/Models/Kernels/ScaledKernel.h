@@ -66,6 +66,10 @@ public:
 			this->m_features|=base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ScaledKernel"; }
+
 	RealVector parameterVector() const {
 		return m_base->parameterVector();
 	}

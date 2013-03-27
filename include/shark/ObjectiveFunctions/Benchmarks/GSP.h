@@ -11,9 +11,12 @@ struct GSP : public MultiObjectiveFunction
 {
 	GSP(std::size_t numVariables=5) : m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,10000))  {
 		announceConstraintHandler(&m_handler);
-		m_name = "GSP";
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "GSP"; }
+
 	std::size_t numberOfObjectives()const{
 		return 2;
 	}

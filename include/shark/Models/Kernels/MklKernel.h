@@ -79,6 +79,10 @@ public:
 
 	template<class KernelTuple>
 	MklKernel(KernelTuple const& kernels):base_type1(kernels),base_type2(base_type1::makeKernelVector()){}	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "MklKernel"; }
 };
 
 }

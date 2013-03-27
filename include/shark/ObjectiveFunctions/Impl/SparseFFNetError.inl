@@ -4,16 +4,6 @@
  *  \author O.Krause
  *  \date 2012
  *
- *  \par Copyright (c) 1998-2011:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
- *
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -257,6 +247,10 @@ public:
 		mep_model = model;
 		mep_loss = loss;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SparseFFNetErrorWrapper"; }
 
 	FunctionWrapperBase<RealVector,RealVector>* clone()const{
 		return new SparseFFNetErrorWrapper<HiddenNeuron, OutputNeuron>(*this);

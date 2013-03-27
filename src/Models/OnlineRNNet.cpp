@@ -37,7 +37,6 @@ using namespace shark;
 
 OnlineRNNet::OnlineRNNet(RecurrentStructure* structure):mpe_structure(structure),m_unitGradient(0,0){
 	SHARK_CHECK(mpe_structure,"[OnlineRNNet] structure pointer is not allowed to be NULL");
-	m_name = "OnlineRNNet";
 	m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 }
 

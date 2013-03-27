@@ -5,15 +5,6 @@
 *  \author  O. Krause
 *  \date    2010
 *
-*  \par Copyright (c) 1999-2001:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-27974<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*
 *
 *
 *  <BR><HR>
@@ -89,6 +80,10 @@ public:
 	///                    output space.
 	///  \param  numHidden Number of hidden neurons.
 	RBFNet(std::size_t numInput, std::size_t numHidden, std::size_t numOutput);
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "RBFNet"; }
 
 	///\brief Returns the current parameter vector. The amount and order of weights depend on the training parameters.
 	///

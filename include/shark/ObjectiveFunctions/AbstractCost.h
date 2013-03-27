@@ -99,11 +99,6 @@ public:
 		return m_features & IS_LOSS_FUNCTION; 
 	}
 
-	/// from INameable, return the name of the cost function
-	const std::string& name() const{ 
-		return m_name; 
-	}
-
 	/// \brief configures the loss using informations in the property tree
 	///
 	/// \par
@@ -139,10 +134,6 @@ public:
 	
 	double operator () (Data<LabelType> const& targets, Data<OutputType> const& predictions) const
 	{ return eval(targets, predictions); }
-
-protected:
-	/// name of the cost function
-	std::string m_name;
 };
 
 
