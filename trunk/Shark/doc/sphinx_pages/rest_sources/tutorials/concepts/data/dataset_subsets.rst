@@ -3,7 +3,7 @@ Creating and Using Subsets of Data
 
 On of the most common operations with datasets, represented by the :doxy:`Data`
 or :doxy:`LabeledData` classes,  are the creation of different types of datasets. 
-There are different types of subsets, and thus shark offers a wide variety
+There are different types of subsets, and thus Shark offers a wide variety
 of functions and objects for handling subsets.
 
 Basics of Subset Generation
@@ -95,7 +95,7 @@ well as the regularization parameter and returns the validation error::
     }
 
 A slightly more complex example program can be found at :doxy:`CVFolds.cpp`.
-Now we present the basic splitting functions provided by shark. they are::
+Now we present the basic splitting functions provided by Shark. they are::
 
     // Creates partitions of approximately the same size.
     createCVSameSize(data, numberOfPartitions);
