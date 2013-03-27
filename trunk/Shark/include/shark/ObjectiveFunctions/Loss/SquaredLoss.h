@@ -52,10 +52,14 @@ public:
 	/// Constructor.
 	SquaredLoss()
 	{
-		this->m_name = "SquaredLoss";
 		this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
 		//~ this->m_features|=base_type::HAS_SECOND_DERIVATIVE;
 	}
+
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SquaredLoss"; }
 
 	using base_type::eval;
 

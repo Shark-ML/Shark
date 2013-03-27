@@ -40,6 +40,7 @@
 
 #include <shark/Data/BatchInterface.h>
 #include <shark/Core/Flags.h>
+#include <shark/Core/INameable.h>
 #include <shark/Core/IParameterizable.h>
 #include <shark/Core/IConfigurable.h>
 #include <shark/Core/ISerializable.h>
@@ -91,7 +92,7 @@ namespace shark {
 /// SoftClusteringModel.
 ///
 template <class InputT>
-class AbstractClustering : public IParameterizable, public ISerializable, public IConfigurable
+class AbstractClustering : public INameable, public IParameterizable, public ISerializable, public IConfigurable
 {
 public:
 	typedef InputT InputType;

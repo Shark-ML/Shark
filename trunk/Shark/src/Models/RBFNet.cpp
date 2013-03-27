@@ -40,14 +40,12 @@ using namespace shark;
 
 RBFNet::RBFNet():m_inputNeurons(0),m_outputNeurons(0),
 m_trainLinear(true),m_trainCenters(true),m_trainWidth(true){
-	m_name="RBFNet";
 	m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
 }
 
 RBFNet::RBFNet(std::size_t numInput, std::size_t numHidden, std::size_t numOutput)
 :m_trainLinear(true),m_trainCenters(true),m_trainWidth(true){
 	setStructure(numInput,numHidden,numOutput);
-	m_name="RBFNet";
 	m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
 }
 

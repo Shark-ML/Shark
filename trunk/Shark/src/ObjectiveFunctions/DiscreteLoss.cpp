@@ -38,7 +38,6 @@ using namespace shark;
 
 
 DiscreteLoss::DiscreteLoss(RealMatrix const& cost){
-	this->m_name = "DiscreteLoss";
 	this->m_cost = cost;
 	defineCostMatrix(cost);
 }

@@ -63,6 +63,11 @@ public:
 	//! Constructor
 	Softmax(size_t dim);
 	Softmax();
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Softmax"; }
+
 	RealVector parameterVector()const{
 		return RealVector();
 	}

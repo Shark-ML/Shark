@@ -54,6 +54,10 @@ public:
 	Perceptron(std::size_t maxTimesPattern = 10000)
 	:m_maxTimesPattern(maxTimesPattern){}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Perceptron"; }
+
 	void train(KernelExpansion<InputType>& model, LabeledData<InputType, unsigned int> const& dataset){
 		std::size_t patterns = dataset.numberOfElements();
 

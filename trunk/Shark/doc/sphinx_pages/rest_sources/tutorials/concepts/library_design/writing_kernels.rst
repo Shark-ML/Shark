@@ -83,7 +83,7 @@ parameter, as well as a member variable holding its value::
 	    MySequenceKernel(double gamma)
 	    : m_gamma(gamma)
 	    {
-	        SHARK_ASSERT(m_gamma > 0.0);
+	        SHARK_ASSERT(m_gamma > 0.0);     // debug mode check
 	    }
 
 	protected:
@@ -92,9 +92,27 @@ parameter, as well as a member variable holding its value::
 
 The super class ``AbstractKernelFunction<std::string>`` introduces an
 interface for the evaluations of the kernel. The super class itself
-inherits the interfaces ``IParameterizable``, ``ISerializable``, and
-``IConfigurable``, each of which introduces further parts of the
-interface. We will go through all of these step by step.
+inherits the interfaces ``INameable``, ``IParameterizable``,
+``ISerializable``, and ``IConfigurable``, each of which introduces
+further parts of the interface. We will go through all of these step by
+step.
+
+
+Giving the Kernel a Name
+------------------------
+
+Most things in Shark have a name, i.e., most top level interface classes
+inherit ``INameable``. This interface requires that we identify ourselves
+by name at runtime as follows::
+
+	std::string name() const
+	{
+	    return "MySequenceKernel";
+	}
+
+The standard convention employed by more than 90% of Shark's classes
+is to return the class name. We recommend to stick to this convention
+unless there are reasons to deviate.
 
 
 Evaluating the Kernel
@@ -226,20 +244,23 @@ Overloading this function is not required, but it will speed up algorithms
 that need single kernel evaluations. This is rarely the case in Shark,
 but it often happens is rapid prototyping code.
 
+Now our first version of the ``MySequenceKernel`` class is operational.
+It can be instanciated like this::
 
-The State Interface
--------------------
-
-There are a few more interfaces to care for before we have a fully
-operational kernel function class. One of them is the state object for
-storing intermediate values for derivative computations. Every subclass
-of ``AbstractKernelFunction`` needs the ability to create its own custom
-state object. Since we do not need derivatives right now, we provide a
-dummy implementation based on Shark's ``EmptyState`` class::
-
-	boost::shared_ptr<State> createState() const {
-	    return boost::shared_ptr<State>(new EmptyState());
+	int main(int argc, char** argv)
+	{
+	    double gamma = strtod(argv[1], NULL);
+	    MySequenceKernel kernel(gamma);
 	}
+
+Most of Shark's kernel-based learning algorithms are directly ready for
+use with the new kernel, such as various flavors of support vector
+machines and Gaussian processes. For most tasks we are done at this
+point. If this is all you need then you can stop here. Enjoy!
+
+However, in some situations the ability to evaluate the kernel function
+alone is not enough. Additional functionality is provided by a number of
+interfaces, discussed in the following.
 
 
 Serialization
@@ -264,11 +285,15 @@ The Parameter Interface
 Recall that the parameter :math:`\gamma` controls how fast the contribution
 of a symbol match decays with the distance of the symbols. This parameter
 will most probably need problem specific tuning to achieve optimal
-performance of any kernel-based learning method. Therefore it needs to
-be accessible by optimization algorithms in a unified way. This is
-achieved by the ``IParameterizable`` interface. The interface allows to
-query the number of (real-valued) parameters, and it defines a getter
-and a setter for the parameter vector::
+performance of any kernel-based learning method. That is, this parameter
+should be set by a data driven procedure, which is nothing but machine
+learning this parameter from data.
+
+For this purpose its value needs to be accessible by optimization
+algorithms in a unified way. This is achieved by the ``IParameterizable``
+interface. This is the core learning-related interface of the Shark
+library. It allows to query the number of (real-valued) parameters, and
+it defines a getter and a setter for the parameter vector::
 
 	std::size_t numberOfParameters() const {
 	    return 1;
@@ -288,20 +313,6 @@ Recall the comment above on precomputing the exponential function values
 to speed up evaluation. The ``setParameterVector`` function is the best
 place for this computation.
 
-Now we have all mandatory interfaces in place. This allows us to
-create an instance of our new kernel class::
-
-	int main(int argc, char** argv)
-	{
-	    double gamma = strtod(argv[1], NULL);
-	    MySequenceKernel kernel(gamma);
-	}
-
-Most of Shark's kernel-based learning algorithms are directly ready for
-use with the new kernel, such as various flavors of support vector
-machines and Gaussian processes. For most tasks we are done at this
-point. Enjoy!
-
 
 Parameter Derivatives
 ---------------------
@@ -313,7 +324,7 @@ more efficient parameter optimization (in particular when there is more
 than one parameter), e.g., gradient-based optimization [Igel2007]_ of
 the kernel target alignment [Cristianini2002]_. This requires the
 kernel function to be differentiable w.r.t. its parameters. Note that we
-no not need a differentiable structure on inputs (strings, which there
+do not need a differentiable structure on inputs (strings, which there
 isn't), but only on parameter values (positive numbers for :math:`\gamma`),
 as well as a smooth dependency of the kernel on the parameters.
 
@@ -348,19 +359,28 @@ This function takes five arguments. The first two are the already
 familiar data batches, and the fourth is a state object that has been
 passed earlier to the ``eval`` function **with the exact same batches**.
 Thus, this object can store intermediate values and thus speed up the
-computation of the derivative. Looking at the above formula, it is easy
-to see that the derivative is a cheap by-product of the evaluation of
-the exponential, at the cost of an additional multiplication.
+computation of the derivative.
+
+If you are completely unfamiliar with the role of a state object in
+derivative computations then please read
+:doc:`../optimization/conventions_derivatives` before continuing here.
+
+Looking at the above formula, it is easy to see that the derivative is a
+cheap by-product of the evaluation of the exponential, at the cost of an
+additional multiplication. This hints at the possibility to make
+efficient use of the state object. Although this may seem like a very
+lucky coincidence it is not; such synergies between computation of the
+value and its derivatives are extremely common.
 
 In principle there are different possibilities for implementing this
 derivative. The simplest is to ignore possible synergy effects and the
 state object completely and to compute the derivative from scratch. This
-is very inefficient, since it is usually possible to reuse some
+is very inefficient, since it is obviously possible to reuse some
 intermediate values. On the other hand one should avoid using massive
 storage for intermediates, since then the runtime could become dominated
-by limited memory throughput. 
+by limited memory throughput.
 
-Before deciding what the store in the state let's look at the
+Before deciding what to store in the state object let's look at the
 computation the function is required to perform. The gradient vector is
 to be filled in with the partial derivatives of the weighted sum of all
 kernel values w.r.t. the parameters. In pseudo code the computation reads:
@@ -373,7 +393,7 @@ computational overhead during evaluation, rather small storage) seems
 like a reasonable compromise between computing everything from scratch
 (no storage, highly redundant computations for derivatives) and storing
 all exponential function evaluations (no additional computation time
-during evaluation but huge storage). A good rule of thumb is that
+during evaluation, but huge storage). A good rule of thumb is that
 storing at most a hand full of values per pair of inputs is okay.
 Extremely costly to compute kernels may of course prefer to store more
 intermediate information. In doubt, there is no way around benchmarking
@@ -382,7 +402,7 @@ different versions of the code.
 Putting everything together our implementation looks like this::
 
 	struct InternalState : public State {
-	    RealMatrix dk_dgamma;   // derivative of k w.r.t. gamma
+	    RealMatrix dk_dgamma;   // derivative of kernel k w.r.t. gamma
 	};
 
 	boost::shared_ptr<State> createState() const {
@@ -485,20 +505,20 @@ strings we can see that not all of these input spaces are equipped with
 a differentiable structure. However, vector spaces are an important
 special case. Therefore, the ``AbstractKernelFunction`` interface
 provides an optional interface for computing the derivative of the
-kernel value with respect to (vector values) inputs. Therefore we will
+kernel value with respect to (vector valued) inputs. Therefore we will
 now switch to an example with differentiable inputs, for which we pick
 ``GaussianRbfKernel<RealVector>``. This class computes the kernel
 
 .. math::
 	k(x, x') = \exp \Big( -\gamma \|x-x'\|^2 \Big)
 
-with :math:`x` and :math:`x'` represented by ``RealVector`` objects. Then we can ask how the
-kernel value varies with :math:`x`:
+with :math:`x` and :math:`x'` represented by ``RealVector`` objects.
+Then we can ask how the kernel value varies with :math:`x`:
 
 .. math::
 	\frac{\partial k(x, x')}{\partial x} = -2 \|x-x'\|^2 k(x, x') (x-x')
 
-There is no special function for the derivative w.r.t. :math:`x'` because kernel
+There is no special function for the derivative w.r.t. :math:`x'` because kernels
 are symmetric functions and the roles of the arguments can be switched.
 
 The ``AbstractKernelFunction`` super class provides the following
@@ -513,7 +533,7 @@ interface::
 	    );
 
 Again, batches of inputs are evaluated, a matrix of coefficients and a
-state object is involved. The gradient is represented by a
+state object are involved. The gradient is represented by a
 ``BatchInputType``: technically, the tangent space of the vector space
 is identified with the vector space itself (by means of the standard
 inner product), and the same data type can be used. If you have no idea

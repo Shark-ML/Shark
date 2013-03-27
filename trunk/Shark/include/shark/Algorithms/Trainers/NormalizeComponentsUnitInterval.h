@@ -67,9 +67,11 @@ public:
 	typedef AbstractUnsupervisedTrainer< Normalizer<DataType> > base_type;
 
 	NormalizeComponentsUnitInterval()
-	{
-		base_type::m_name = "NormalizeComponentsUnitInterval";
-	}
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NormalizeComponentsUnitInterval"; }
 
 	void train(Normalizer<DataType>& model, UnlabeledData<DataType> const& input)
 	{

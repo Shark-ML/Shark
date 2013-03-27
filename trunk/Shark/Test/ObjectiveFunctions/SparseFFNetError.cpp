@@ -13,6 +13,9 @@ using namespace shark;
 class NullLoss : public AbstractLoss<RealVector, RealVector>
 {
 public:
+	std::string name() const
+	{ return "NullLoss"; }
+
 	double eval(BatchLabelType const&, BatchOutputType const&) const{
 		return 0;
 	}

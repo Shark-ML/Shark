@@ -64,6 +64,10 @@ class NoisyRprop : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
 public:
 	NoisyRprop();
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Noisy Rprop"; }
+
 	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
 	//! initialization with default values
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);

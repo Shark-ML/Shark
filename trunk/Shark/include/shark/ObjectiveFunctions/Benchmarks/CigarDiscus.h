@@ -32,10 +32,13 @@ public:
 
 	CigarDiscus(unsigned int numberOfVariables = 5,double alpha=1E-3) : m_alpha(alpha) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_name="CigarDiscus";
 		m_numberOfVariables = numberOfVariables;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CigarDiscus"; }
+
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;
 	}

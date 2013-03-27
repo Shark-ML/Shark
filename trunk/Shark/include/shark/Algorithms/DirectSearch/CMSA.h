@@ -152,9 +152,12 @@ namespace shark {
 		* \brief Default c'tor.
 		*/
 		CMSA() : m_mu( 100 ), m_lambda( 200 ) {
-			m_name = "CMSA";
 			m_features |= REQUIRES_VALUE;
 		}
+
+		/// \brief From INameable: return the class name.
+		std::string name() const
+		{ return "CMSA"; }
 
 		/**
 		* \brief Calculates the center of gravity of the given population \f$ \in \mathbb{R}^d\f$.

@@ -65,6 +65,10 @@ public:
 	: m_classes(1)
 	{ }
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "OneVersusOneClassifier"; }
+
 
 	/// get internal parameters of the model
 	virtual RealVector parameterVector() const

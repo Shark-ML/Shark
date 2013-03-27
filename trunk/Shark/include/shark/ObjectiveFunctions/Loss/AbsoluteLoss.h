@@ -62,10 +62,13 @@ public:
 	typedef typename base_type::BatchOutputType BatchOutputType;
 
 	/// constructor
-	AbsoluteLoss(){
-		this->m_name = "AbsoluteLoss";
-	}
+	AbsoluteLoss()
+	{ }
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "AbsoluteLoss"; }
 
 	// annoyingness of C++ templates
 	using base_type::eval;

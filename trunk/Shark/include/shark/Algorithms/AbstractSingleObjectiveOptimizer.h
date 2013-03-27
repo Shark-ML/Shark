@@ -1,21 +1,9 @@
 //===========================================================================
 /*!
-*  \file AbstractSingleObjectiveOptimizer.h
-*
 *  \brief AbstractSingleObjectiveOptimizer
 *
 *  \author T.Voss, T. Glasmachers, O.Krause
 *  \date 2010-2011
-*
-*  \par Copyright (c) 1998-2007:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-25558<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*      <BR>
 *
 *
 *  <BR><HR>
@@ -83,16 +71,24 @@ namespace shark {
 	};
 
 	namespace soo {
+
 		/** \brief Defines the default factory type for real-valued singl-objective optimizers. */
+
 		typedef Factory< AbstractSingleObjectiveOptimizer< VectorSpace< double > >, std::string > RealValuedSingleObjectiveOptimizerFactory;
 	}
 
 	//~ /**
+
 	//~ * \brief Type erasure to integrate Optimizer adhering to the concept of a 
+
 	//~ * single-objective optimizer with the inheritance hierarchy of AbstractOptimizer.
+
 	//~ *
+
 	//~ * \tparam SearchSpace The search space.
+
 	//~ * \tparam Optimizer The optimizer adhering to the concept of a single-objective optimizer.
+
 	//~ */
 	//~ template<typename SearchSpace, typename Optimizer>
 	//~ class TypeErasedSingleObjectiveOptimizer : public AbstractSingleObjectiveOptimizer<SearchSpace>,
@@ -102,34 +98,48 @@ namespace shark {
 		//~ typedef Optimizer OptimizerBase;
 
 		//~ /**
+
 		//~ * \brief Default c'tor, initializes the name of the optimizer.
+
 		//~ */
 		//~ TypeErasedSingleObjectiveOptimizer() {
-			//~ base_type::m_name = OptimizerBase::name();
 		//~ }
 
 		//~ /**
+
 		//~ * \brief Configures the optimizer with the supplied property tree.
+
 		//~ * \param [in] node The root of the property tree.
+
 		//~ */
+
 		//~ void configure( const PropertyTree & node ) {
+
 			//~ OptimizerBase::configure( node );
+
 		//~ }
 
 		//~ using base_type::init;
 
 		//~ /**
+
 		//~ * \brief Optimizer-specific init-function. Dispatched to the optimizer provided as template argument to this class.
+
 		//~ * \param [in] function The function to initialize the optimizer for.
+
 		//~ * \param [in] sp An initial point sampled from the function.
+
 		//~ */
 		//~ void init( const typename base_type::ObjectiveFunctionType & function, const typename base_type::SearchPointType & sp ) {
 			//~ OptimizerBase::init( function, sp );
 		//~ }
 
 		//~ /**
+
 		//~ * \brief Optimizer-specific init-function. Dispatched to the optimizer provided as template argument to this class.
+
 		//~ * \param [in] function The function to initialize the optimizer for.
+
 		//~ */
 		//~ void step( const typename base_type::ObjectiveFunctionType & function ) {
 			//~ //typename base_type::ObjectiveFunctionType::ResultType solution = OptimizerBase::step( function );

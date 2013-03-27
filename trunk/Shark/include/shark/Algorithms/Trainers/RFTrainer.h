@@ -71,6 +71,10 @@ public:
 	/// Constructor
 	RFTrainer();
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "RFTrainer"; }
+
 	/// Train a random forest for classification.
 	void train(RFClassifier& model, const ClassificationDataset& dataset);
 

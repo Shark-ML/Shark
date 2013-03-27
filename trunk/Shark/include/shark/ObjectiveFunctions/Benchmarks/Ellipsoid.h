@@ -47,9 +47,12 @@ struct Ellipsoid : public SingleObjectiveFunction {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_features |= HAS_FIRST_DERIVATIVE;
 		m_features |= HAS_SECOND_DERIVATIVE;
-		m_name="Ellipsoid";
 		m_numberOfVariables = numberOfVariables;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Ellipsoid"; }
 	
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;

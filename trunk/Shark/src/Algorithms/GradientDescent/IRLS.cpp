@@ -41,7 +41,6 @@ using namespace shark;
 
 IRLS::IRLS()
 {
-	m_name="IRLS";
 	m_features |= REQUIRES_VALUE;
 	m_features |= REQUIRES_FIRST_DERIVATIVE;
 	m_features |= REQUIRES_SECOND_DERIVATIVE;

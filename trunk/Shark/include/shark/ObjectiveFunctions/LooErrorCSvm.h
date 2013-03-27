@@ -78,7 +78,6 @@ public:
 	, m_withOffset(withOffset)
 	{
 		base_type::m_features |= base_type::HAS_VALUE;
-		base_type::m_name = "LooErrorCSvm";
 	}
 
 	/// \brief Constructor.
@@ -88,9 +87,12 @@ public:
 	, m_withOffset(withOffset)
 	{
 		base_type::m_features |= base_type::HAS_VALUE;
-		base_type::m_name = "LooErrorCSvm";
 	}
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LooErrorCSvm"; }
 
 	/// inherited from SupervisedObjectiveFunction
 	void setDataset(DatasetType const& dataset) {

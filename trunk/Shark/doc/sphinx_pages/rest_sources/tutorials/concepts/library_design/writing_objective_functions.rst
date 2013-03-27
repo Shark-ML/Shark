@@ -33,16 +33,20 @@ chosen throughout Shark for single objective optimizations, namely using
 	{
 	public:
 	    PowerNorm(double a = 1):m_a(a){
-		m_name= "PowerNorm";
 	    }
+	
+	    std::string name() {
+	        return "PowerNorm";
+	    }
+	
 	    //more to come here...
 	private:
 	  double m_a; 
 	};
 
-We already announced the name of our objective function in the above code. This is not mandatory but can be used to print usefull 
-output,  for example when an algorithm is to be applied to a set of different functions to keep track which function is 
-evaluated right now. We also chose a suitable default value for :math:`a`, so that it is by default a quadratic function. 
+We already announced the name of our objective function in the above code. This can be used to print usefull
+output, for example when an algorithm is to be applied to a set of different functions to keep track which function is
+evaluated right now. We also chose a suitable default value for :math:`a`, so that it is by default a quadratic function.
 
 
 Evaluating the Objective Function
@@ -89,7 +93,9 @@ Taking everything into account, we arrive at the following intermediate code fra
 	public:
 	    PowerNorm(double a = 2, std::size_t dimensions = 3)
 	    :m_a(a),m_dimensions(dimensions){
-		m_name= "PowerNorm";
+	    }
+	    std::string name() {
+	        return "PowerNorm";
 	    }
 	    std::size_t numberOfVariables()const{
 		return m_dimensions;
@@ -123,7 +129,6 @@ constructor::
 
 	PowerNorm(double a = 2, std::size_t dimensions = 3)
 	:m_a(a),m_dimensions(dimensions){
-	    m_name= "PowerNorm";
 	    m_features |= HAS_FIRST_DERIVATIVE;
 	}
 	
@@ -165,7 +170,6 @@ And we should not forget to announce that the function can generate a starting p
 
 	PowerNorm(double a = 2, std::size_t dimensions = 3)
 	:m_a(a),m_dimensions(dimensions){
-	    m_name= "PowerNorm";
 	    m_features |= HAS_FIRST_DERIVATIVE;
 	    m_features |= CAN_PROPOSE_STARTING_POINT;
 	}
@@ -184,7 +188,6 @@ For our benchmark function there is no problem in evaluating in paralll, so we s
 
 	PowerNorm(double a = 2, std::size_t dimensions = 3)
 	:m_a(a),m_dimensions(dimensions){
-	    m_name= "PowerNorm";
 	    m_features |= HAS_FIRST_DERIVATIVE;
 	    m_features |= CAN_PROPOSE_STARTING_POINT;
 	    m_features |= IS_THREAD_SAFE;
@@ -213,8 +216,10 @@ Let's constrain our function above to the box of :math:`[0,1]^n`::
 	public:
 	    PowerNorm(double a = 2, std::size_t dimensions = 3)
 	    :m_a(a),m_handler(dimensions,0,1){
-		m_name= "PowerNorm";
 		announceConstraintHandler(&m_handler);
+	    }
+	    std::string name() {
+	        return "PowerNorm";
 	    }
 	    std::size_t numberOfVariables()const{
 		return m_handler.dimensions();
@@ -288,7 +293,6 @@ Having all this in place, we have to set the proper flags announcing the capabil
 
 	PowerNorm(double a = 2, std::size_t dimensions = 3)
 	:m_a(a),m_dimensions(dimensions){
-	    m_name= "PowerNorm";
 	    m_features |= HAS_FIRST_DERIVATIVE;
 	    m_features |= CAN_PROPOSE_STARTING_POINT;
 	    m_features |= IS_CONSTRAINED_FEATURE;
@@ -308,7 +312,9 @@ going to represent with it and whether the number of objectives might be changed
 	public:
 	    PowerNorm(double a = 2, std::size_t dimensions = 3, std::size_t objectives = 2)
 	    :m_a(a),m_dimensions(dimensions), m_objectives(objectives){
-		m_name= "PowerNorm";
+	    }
+	    std::string name() {
+	        return "PowerNorm";
 	    }
 	    std::size_t numberOfVariables()const{
 		return m_dimensions;

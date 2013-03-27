@@ -92,6 +92,10 @@ public:
 			this->m_features|=base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NormalizedKernel<" + m_base->name() + ">"; }
+
 	RealVector parameterVector() const{
 		return m_base->parameterVector();
 	}

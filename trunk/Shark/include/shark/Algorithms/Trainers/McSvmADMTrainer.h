@@ -112,9 +112,11 @@ public:
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	McSvmADMTrainer(KernelType* kernel, double C, bool unconstrained = false)
 	: base_type(kernel, C, unconstrained)
-	{
-		base_type::m_name = "McSvmADMTrainer";
-	}
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "McSvmADMTrainer"; }
 
 	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
 	{
@@ -227,9 +229,11 @@ class LinearMcSvmADMTrainer : public AbstractLinearSvmTrainer
 {
 public:
 	LinearMcSvmADMTrainer(double C, double accuracy = 0.001) : AbstractLinearSvmTrainer(C, accuracy)
-	{
-		base_type::m_name = "LinearMcSvmADMTrainer";
-	}
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LinearMcSvmADMTrainer"; }
 
 	void train(LinearModel<CompressedRealVector, RealVector>& model, const LabeledData<CompressedRealVector, unsigned int>& dataset)
 	{

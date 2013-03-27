@@ -21,8 +21,10 @@ struct TestFunction : public AbstractObjectiveFunction<VectorSpace<double>,doubl
 
 		m_features|=Base::HAS_FIRST_DERIVATIVE;
 		m_features|=Base::CAN_PROPOSE_STARTING_POINT;
-		m_name="Quadratic Function";
 	}
+
+	std::string name() const
+	{ return "TestFunction"; }
 	
 	std::size_t numberOfVariables()const{
 		return 2;

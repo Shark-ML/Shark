@@ -76,6 +76,10 @@ public:
 	ErrorFunction(const ErrorFunction& op);
 	ErrorFunction<InputType,LabelType>& operator=(const ErrorFunction<InputType,LabelType>& op);
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ErrorFunction"; }
+
 	void updateFeatures();
 
 	void configure(const PropertyTree & node);

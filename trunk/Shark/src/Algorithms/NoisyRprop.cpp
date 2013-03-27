@@ -40,9 +40,9 @@
 using namespace shark;
 
 NoisyRprop::NoisyRprop(){
-	m_name="Noisy Rprop";
 	m_features |= REQUIRES_FIRST_DERIVATIVE;
 }
+
 void NoisyRprop::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint){
 	init(objectiveFunction,startingPoint,0.01);
 }

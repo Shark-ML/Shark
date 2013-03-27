@@ -84,8 +84,7 @@ public:
 	typedef typename Batch<OutputType>::type BatchOutputType;
 
 
-	// TODO: (B. Li) Should not provide default value if every subclass are required to provide their own names
-	AbstractModel(const std::string& name = "unnamed") : m_name(name) { }
+	AbstractModel() { }
 
 	virtual ~AbstractModel() { }
 
@@ -117,16 +116,6 @@ public:
 	bool isSequential()const{
 		return m_features & IS_SEQUENTIAL;
 	}
-
-	/// \brief configures a Model
-	///
-	///see documentation of your Model to find out, how configure works
-	virtual void configure( PropertyTree const & node ) {}
-
-	/// \brief From INameable, returns the models name.
-	virtual std::string const & name() const {
-		return m_name;
-	}
 	
 	///\brief Creates an internal state of the model.
 	///
@@ -134,8 +123,17 @@ public:
 	///calculated. Eval can store a state which is then reused to speed up
 	///the calculations of the derivatives. This also allows eval to be
 	///evaluated in parallel!
-	virtual boost::shared_ptr<State> createState()const =0;
-	
+	virtual boost::shared_ptr<State> createState() const
+	{
+		if (hasFirstParameterDerivative()
+				|| hasFirstInputDerivative()
+				|| hasSecondParameterDerivative()
+				|| hasSecondInputDerivative())
+		{
+			throw SHARKEXCEPTION("[AbstractModel::createState] createState must be overridden by models with derivatives");
+		}
+		return boost::shared_ptr<State>(new EmptyState());
+	}
 
 	/// \brief From ISerializable, reads a model from an archive.
 	virtual void read( InArchive & archive ){
@@ -300,12 +298,8 @@ public:
 		weightedParameterDerivative(patterns,coefficients,state,parameterDerivative);
 		weightedInputDerivative(patterns,coefficients,state,inputDerivative);
 	}
-protected:
-	/// name of the model
-	std::string m_name;
 };
 
-//OK: I removed the DerivativeModel completely.
 
 /**
  * \ingroup shark_globals

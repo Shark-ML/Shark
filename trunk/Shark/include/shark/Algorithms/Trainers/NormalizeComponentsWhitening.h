@@ -58,9 +58,12 @@ public:
 	
 	double m_targetVariance;
 	NormalizeComponentsWhitening(double targetVariance = 1.0){ 
-		base_type::m_name = "NormalizeComponentsWhitening"; 
 		m_targetVariance = targetVariance;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NormalizeComponentsWhitening"; }
 
 	void train(LinearModel<VectorType, VectorType>& model, UnlabeledData<VectorType> const& input){
 		SHARK_CHECK(input.numberOfElements() >= 2, "[NormalizeComponentsWhitening::train] input needs to contain at least two points");

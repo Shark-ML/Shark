@@ -71,14 +71,12 @@ public:
 
 	KernelExpansion(bool offset, unsigned int outputs = 1)
 	: mep_kernel(NULL), m_offset(offset), m_outputs(outputs){
-		base_type::m_name = "KernelExpansion";
 		m_alpha.resize(0, outputs);
 		if (m_offset) m_b = RealZeroVector(outputs);
 	}
 
 	KernelExpansion(Data<InputType> const& basis, bool offset, unsigned int outputs = 1)
 	: mep_kernel(NULL), m_basis(basis), m_offset(offset), m_outputs(outputs){
-		base_type::m_name = "KernelExpansion";
 		m_alpha = RealZeroMatrix(basis.size(), outputs);
 		if (m_offset) m_b = RealZeroVector(outputs);
 	}
@@ -86,17 +84,19 @@ public:
 	KernelExpansion(KernelType* kernel, bool offset, unsigned int outputs = 1)
 	: mep_kernel(kernel), m_offset(offset), m_outputs(outputs),m_alpha(0,outputs), m_basisSize(0){
 		SHARK_ASSERT(mep_kernel != NULL);
-		base_type::m_name = "KernelExpansion";
 		if (m_offset) m_b = RealZeroVector(outputs);
 	}
 
 	KernelExpansion(KernelType* kernel, Data<InputType> const& basis, bool offset, unsigned int outputs = 1)
 	: mep_kernel(kernel), m_offset(offset), m_outputs(outputs){
 		SHARK_ASSERT(mep_kernel != NULL);
-		base_type::m_name = "KernelExpansion";
 		setBasis(basis);
 		if (m_offset) m_b = RealZeroVector(outputs);
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "KernelExpansion"; }
 
 	/// dimensionality of the output RealVector
 	size_t outputSize() const{

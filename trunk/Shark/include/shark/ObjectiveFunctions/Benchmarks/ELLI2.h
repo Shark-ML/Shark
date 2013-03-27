@@ -47,9 +47,12 @@ struct ELLI2 : public MultiObjectiveFunction{
 
 	ELLI2() : m_a( 1E6 ) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_name = "ELLI2";
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ELLI2"; }
+
 	std::size_t numberOfObjectives()const{
 		return 2;
 	}

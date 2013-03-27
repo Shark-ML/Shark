@@ -81,11 +81,14 @@ class CrossEntropyIndependent : public AbstractLoss<unsigned int,RealVector>
 public:
 	CrossEntropyIndependent()
 	{
-		this->m_name = "CrossEntropyIndependent";
 		m_features |= HAS_FIRST_DERIVATIVE;
 		m_features |= HAS_SECOND_DERIVATIVE;
 	}
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CrossEntropyIndependent"; }
 
 	// annoyingness of C++ templates
 	using base_type::eval;

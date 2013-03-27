@@ -45,10 +45,13 @@ struct ZDT4 : public MultiObjectiveFunction
 
 	ZDT4(std::size_t numVariables = 1) {
 		announceConstraintHandler(&m_handler);
-		m_name="ZDT4";
 		setNumberOfVariables(numVariables);
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ZDT4"; }
+
 	std::size_t numberOfObjectives()const{
 		return 2;
 	}

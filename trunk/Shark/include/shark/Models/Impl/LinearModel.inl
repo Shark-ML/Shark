@@ -53,6 +53,10 @@ protected:
 	{ }
 
 public:
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LinearModelWrapperBase"; }
+
 	bool hasOffset() const
 	{ return (m_offset.size() > 0); }
 
@@ -99,7 +103,6 @@ public:
 			base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 			//base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
 		}
-		base_type::m_name = "LinearModelWrapper";
 	}
 
 	LinearModelWrapper(Matrix const& matrix)
@@ -108,7 +111,6 @@ public:
 			base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 			//base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
 		}
-		base_type::m_name = "LinearModelWrapper";
 	}
 
 	LinearModelWrapper(Matrix const& matrix, OutputType offset)
@@ -118,8 +120,11 @@ public:
 			base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 			//base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
 		}
-		base_type::m_name = "LinearModelWrapper";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LinearModelWrapper"; }
 
 	std::size_t inputSize() const{ 
 		return m_matrix.size2(); 

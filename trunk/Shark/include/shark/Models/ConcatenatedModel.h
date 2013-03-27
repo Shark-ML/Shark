@@ -105,9 +105,11 @@ public:
 		&& secondModel->hasSecondInputDerivative()){
 			m_features|=HAS_SECOND_INPUT_DERIVATIVE;
 		}*/
-		
-		this->m_name = "Concatenation<" + firstModel->name() + "," + secondModel->name() + ">";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Concatenation<" + m_firstModel->name() + "," + m_secondModel->name() + ">"; }
 
 	ConcatenatedModelWrapperBase<InputType, OutputType>* clone()const{
 		return new ConcatenatedModelWrapper<InputType, IntermediateType, OutputType>(*this);
@@ -267,14 +269,16 @@ public:
 		&& secondModel->hasSecondInputDerivative()){
 			m_features|=HAS_SECOND_INPUT_DERIVATIVE;
 		}*/
-		
-		this->m_name = "Concatenation<" + base_type::m_firstModel->name() + "," + secondModel->name() + ">";
 	}
-		
+
 	~ConcatenatedModelList(){
 		delete base_type::m_firstModel;
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Concatenation<" + base_type::m_firstModel->name() + "," + base_type::m_secondModel->name() + ">"; }
+
 	ConcatenatedModelWrapperBase<InputType, OutputType>* clone()const{
 		return new ConcatenatedModelList<InputType, IntermediateType, OutputType>(
 			*static_cast<FirstModelType*>(base_type::m_firstModel),//get the type information back
@@ -339,8 +343,6 @@ public:
 		if (m_wrapper->hasFirstInputDerivative()){ 
 			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE; 
 		}
-
-		this->m_name = m_wrapper->name();
 	}
 	///copy constructor to allow ConcatenatedModel concModel = model1 >> model2 >> model3;
 	ConcatenatedModel(const detail::ConcatenatedModelWrapperBase<InputType,OutputType>& wrapper) {
@@ -352,8 +354,6 @@ public:
 		if (m_wrapper->hasFirstInputDerivative()){ 
 			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE; 
 		}
-
-		this->m_name = m_wrapper->name();
 	}
 	///operator =  to allow concModel = model1 >> model2 >> model3; for a previously declared concatenadel model
 	ConcatenatedModel<InputType,OutputType>& operator = ( detail::ConcatenatedModelWrapperBase<InputType,OutputType>& wrapper ){
@@ -366,20 +366,21 @@ public:
 			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE; 
 		}
 
-		this->m_name = m_wrapper->name();
 		return *this;
 	}
 
 	ConcatenatedModel(const ConcatenatedModel<InputType, OutputType>& src)
 	:m_wrapper(src.m_wrapper->clone()) {
-		this->m_name = src.m_name;
 		this->m_features = src.m_features;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return m_wrapper->name(); }
 
 	const ConcatenatedModel<InputType,OutputType>& operator = (const ConcatenatedModel<InputType, OutputType>& src) {
 		ConcatenatedModel<InputType,OutputType> copy(src);
 		swap(m_wrapper,copy.m_wrapper);
-		swap(base_type::m_name,copy.m_name);
 		std::swap(base_type::m_features,copy.m_features);
 		return *this;
 	}

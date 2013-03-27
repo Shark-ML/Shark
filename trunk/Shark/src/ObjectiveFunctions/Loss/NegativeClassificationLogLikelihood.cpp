@@ -42,7 +42,6 @@ using namespace std;
 
 NegativeClassificationLogLikelihood::NegativeClassificationLogLikelihood()
 {
-	this->m_name = "NegativeClassificationLogLikelihood";
 	this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
 	m_minArgToLog = 1e-100;
 	m_minLogReturnVal = std::log( m_minArgToLog );

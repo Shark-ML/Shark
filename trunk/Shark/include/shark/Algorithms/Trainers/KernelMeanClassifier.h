@@ -41,6 +41,9 @@ template<class InputType>
 class KernelMeanClassifier : public AbstractTrainer<KernelExpansion<InputType>, unsigned int>
 {
 public:
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "KernelMeanClassifier"; }
 
 	void train(KernelExpansion<InputType>& model, LabeledData<InputType, unsigned int> const& dataset){
 		SHARK_CHECK(model.outputSize() == 1     , "[KernelMeanClassifier::train] wrong number of outputs in the kernel expansion");

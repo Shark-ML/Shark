@@ -40,9 +40,12 @@ struct Himmelblau : public SingleObjectiveFunction {
 	*/
 	Himmelblau() {
 		m_features|=CAN_PROPOSE_STARTING_POINT;
-		m_name = "Himmelblau";
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Himmelblau"; }
+
 	std::size_t numberOfVariables()const{
 		return 2;
 	}

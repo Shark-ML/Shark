@@ -20,6 +20,10 @@ public:
 	LinearNorm();
 	LinearNorm(std::size_t inputSize);
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Linear Norm"; }
+
 	void configure( const PropertyTree & node );
 
 	RealVector parameterVector()const{

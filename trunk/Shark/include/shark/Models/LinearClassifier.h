@@ -34,8 +34,12 @@ protected:
 	bool m_changed;
 public:
 	LinearClassifier():m_changed(false){
-		m_name="LinearClassifier";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "LinearClassifier"; }
+
 	void setStructure(std::size_t inputSize,std::size_t classes);
 
 	void configure( PropertyTree const& node );

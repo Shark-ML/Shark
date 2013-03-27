@@ -94,8 +94,12 @@ public:
 	, mep_model(model)
 	, mep_trainer(trainer)
 	, mep_cost(cost)
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
 	{
-		base_type::m_name = "CrossValidationError<"
+		return "CrossValidationError<"
 				+ mep_model->name() + ","
 				+ mep_trainer->name() + ","
 				+ mep_cost->name() + ">";

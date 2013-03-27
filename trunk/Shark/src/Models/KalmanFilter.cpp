@@ -41,7 +41,6 @@ using namespace shark;
 
 KalmanFilter::KalmanFilter(size_t modelSize){
 	m_inputSize=modelSize;
-	m_name="KalmanFilter";
 }
 
 void KalmanFilter::eval(const RealVector& pattern,RealVector& output){

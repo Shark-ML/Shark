@@ -48,8 +48,12 @@ public:
 
 	/// constructor
 	ZeroOneLoss()
-	{ this->m_name = "ZeroOneLoss"; }
+	{ }
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ZeroOneLoss"; }
 
 	// annoyingness of C++ templates
 	using base_type::eval;
@@ -84,8 +88,11 @@ public:
 	ZeroOneLoss(double threshold = 0.0)
 	{
 		m_threshold = threshold;
-		this->m_name = "ZeroOneLoss";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ZeroOneLoss"; }
 
 
 	// annoyingness of C++ templates

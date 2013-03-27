@@ -142,15 +142,13 @@ public:
 
 	/// \brief Default c'tor, initializes the name of the optimizer.
 	TypeErasedMultiObjectiveOptimizer() {
-		super::m_name = OptimizerBase::name();
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return Optimizer::name(); }
 
 	using super::init;
-
-	///\brief Accesses the name of the optimizer.
-	const std::string & name() {
-		return( super::m_name );
-	}
 
 	/// \brief Configures the optimizer with the supplied property tree.
 	/// \param [in] node The root of the property tree.

@@ -17,6 +17,9 @@ struct TestFunction : public AbstractObjectiveFunction<VectorSpace<double>,doubl
 {
 	typedef AbstractObjectiveFunction<VectorSpace<double>,double> Base;
 
+	std::string name() const
+	{ return "TestFunction"; }
+
 	RealVector weights;
 	TestFunction():weights(3){
 		weights(0)=1;

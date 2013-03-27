@@ -60,7 +60,7 @@ public:
 	/// Constructor.
 	ClusteringModel(ClusteringType* clustering)
 	: mep_clustering(clustering)
-	{ SHARK_CHECK(clustering, "[SoftClusteringModel] Clustering is not allowed to be Null"); }
+	{ SHARK_CHECK(clustering, "[ClusteringModel] Clustering must not be NULL"); }
 
 
 	/// Redirect parameter access to the clustering object
@@ -82,11 +82,7 @@ public:
 	/// From ISerializable, writes a model to an archive.
 	void write(OutArchive& archive) const
 	{ archive & *mep_clustering; }
-	
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
-	}
-	
+
 	using base_type::eval;
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs,  State& state)const{
 		eval(patterns,outputs);

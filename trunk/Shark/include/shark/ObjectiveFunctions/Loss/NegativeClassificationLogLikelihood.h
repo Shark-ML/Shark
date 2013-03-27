@@ -78,6 +78,11 @@ private:
 public:
 	NegativeClassificationLogLikelihood();
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NegativeClassificationLogLikelihood"; }
+
 	//! evaluates the loss, see class description
 	//! \param target the true label of the example for which the prediction or prediction vector is passed
 	//! \param prediction either a single value corresponding to the probability of the example being positive class (label 0) in a binary problem, or a vector with a class membership probability for each class in a multi-class problem

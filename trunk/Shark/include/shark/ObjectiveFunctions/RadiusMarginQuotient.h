@@ -86,7 +86,6 @@ public:
 	RadiusMarginQuotient(KernelType* kernel)
 	: mep_kernel(kernel)
 	{
-		this->m_name = "RadiusMarginQuotient";
 		this->m_features |= base_type::HAS_VALUE;
 		if (mep_kernel->hasFirstParameterDerivative())
 			this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
@@ -98,12 +97,15 @@ public:
 	{
 		setDataset(dataset);
 
-		this->m_name = "RadiusMarginQuotient";
 		this->m_features |= base_type::HAS_VALUE;
 		if (mep_kernel->hasFirstParameterDerivative())
 			this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
 	}
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "RadiusMarginQuotient"; }
 
 	/// \brief Make labeled data known to the radius margin objective function.
 	void setDataset(DatasetType const& dataset)

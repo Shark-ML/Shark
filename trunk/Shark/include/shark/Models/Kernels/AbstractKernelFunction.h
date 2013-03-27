@@ -44,6 +44,7 @@
 #include <shark/Core/IParameterizable.h>
 #include <shark/Core/ISerializable.h>
 #include <shark/Core/IConfigurable.h>
+#include <shark/Core/INameable.h>
 #include <shark/Core/Flags.h>
 #include <shark/Core/State.h>
 #include <shark/Core/Traits/ProxyReferenceTraits.h>
@@ -70,7 +71,7 @@ namespace shark {
 /// interface inherits the IParameterizable interface.
 ///
 template<class InputTypeT>
-class AbstractKernelFunction : public IParameterizable, public ISerializable, public IConfigurable
+class AbstractKernelFunction : public INameable, public IParameterizable, public ISerializable, public IConfigurable
 {
 private:
 	/// \brief Meta type describing properties of batches.
@@ -116,13 +117,37 @@ public:
 		return m_features & SUPPORTS_VARIABLE_INPUT_SIZE;
 	}
 
+	/// \brief From ISerializable, reads a kernel from an archive.
+	virtual void read( InArchive & archive ){
+		m_features.read(archive);
+		RealVector p;
+		archive & p;
+		setParameterVector(p);
+	}
+
+	/// \brief From ISerializable, writes a kernel to an archive.
+	///
+	/// The default implementation just saves the parameters.
+	virtual void write( OutArchive & archive ) const{
+		m_features.write(archive);
+		RealVector p = parameterVector();
+		archive & p;
+	}
+
 	///\brief Creates an internal state of the kernel.
 	///
 	///The state is needed when the derivatives are to be
 	///calculated. Eval can store a state which is then reused to speed up
 	///the calculations of the derivatives. This also allows eval to be
 	///evaluated in parallel!
-	virtual boost::shared_ptr<State> createState()const =0;
+	virtual boost::shared_ptr<State> createState()const
+	{
+		if (hasFirstParameterDerivative() || hasFirstInputDerivative())
+		{
+			throw SHARKEXCEPTION("[AbstractKernelFunction::createState] createState must be overridden by kernels with derivatives");
+		}
+		return boost::shared_ptr<State>(new EmptyState());
+	}
 
 	///////////////////////////////////////////SINGLE ELEMENT INTERFACE///////////////////////////////////////////
 	// By default, this is mapped to the batch case.

@@ -71,13 +71,15 @@ namespace shark {
 	 * \brief Read the component from the supplied archive.
 	 * \param [in,out] archive The archive to read from.
 	 */
-	virtual void read( InArchive & archive ) = 0;
+	virtual void read( InArchive & archive )
+	{ }
 
 	/**
 	 * \brief Write the component to the supplied archive.
 	 * \param [in,out] archive The archive to write to.
 	 */
-	virtual void write( OutArchive & archive ) const = 0;
+	virtual void write( OutArchive & archive ) const
+	{ }
 
 	/**
 	 * \brief Versioned loading of components, calls read(...).

@@ -49,8 +49,11 @@ class NegativeAUC : public AbstractCost<LabelType, OutputType>
 	/// \param invert: if set to true, the role of positive and negative class are switched
 	NegativeAUC(bool invert = false) {
 		m_invert = invert;
-		this->m_name = "NegativeAUC";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NegativeAUC"; }
 
 	/// \brief Computes area under the curve.
   	/// \param target: class label, 0 or 1
@@ -157,9 +160,11 @@ class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, Outp
 	/// \param invert: if set to true, the role of positive and negative class are switched
 	NegativeWilcoxonMannWhitneyStatistic(bool invert = false) {
 		m_invert = invert;
-		this->m_name = "NegativeWilcoxonMannWhitneyStatistic";
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NegativeWilcoxonMannWhitneyStatistic"; }
 
 	/// \brief Computes Wilcoxon-Mann-Whitney statistic.
 	/// \param target: interpreted as binary class label

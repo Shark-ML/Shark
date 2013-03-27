@@ -69,9 +69,11 @@ public:
 
 	NormalizeComponentsUnitVariance(bool zeroMean = false)
 	: m_zeroMean(zeroMean)
-	{
-		base_type::m_name = "NormalizeComponentsUnitVariance"; 
-	}
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NormalizeComponentsUnitVariance"; }
 
 	void train(Normalizer<DataType>& model, UnlabeledData<DataType> const& input)
 	{

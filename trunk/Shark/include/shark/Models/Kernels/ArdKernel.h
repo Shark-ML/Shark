@@ -100,6 +100,10 @@ public:
 		}
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ARDKernelUnconstrained"; }
+
 	RealVector parameterVector() const{
 		return m_params;
 	}

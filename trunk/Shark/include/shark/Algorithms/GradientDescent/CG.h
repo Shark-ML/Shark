@@ -50,7 +50,11 @@ class CG : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
 {
 public:
 	CG();
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CG"; }
+
 	using AbstractSingleObjectiveOptimizer<VectorSpace<double > >::init;
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 	void step(const ObjectiveFunctionType& objectiveFunction);

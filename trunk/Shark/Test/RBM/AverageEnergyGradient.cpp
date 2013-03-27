@@ -180,6 +180,9 @@ public:
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 	};
 
+	std::string name() const
+	{ return "TestGradientVH"; }
+
 	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;	
 	}
@@ -261,6 +264,9 @@ public:
 		m_features |= HAS_FIRST_DERIVATIVE;
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 	};
+
+	std::string name() const
+	{ return "TestGradientHV"; }
 
 	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;	

@@ -1,22 +1,11 @@
 //===========================================================================
 /*!
- *  \file NormalizeKernelUnitVariance.h
- *
  *  \brief Determine the scaling factor of a ScaledKernel so that it has unit variance in feature space one on a given dataset.
  *
  *
  *  \author M. Tuma
  *  \date 2012
  *
- *  \par Copyright (c) 1998-2012:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -65,8 +54,12 @@ class NormalizeKernelUnitVariance : public AbstractUnsupervisedTrainer<ScaledKer
 public:
 
 	NormalizeKernelUnitVariance()
-	{ this->m_name = "NormalizeKernelUnitVariance"; }
-	
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NormalizeKernelUnitVariance"; }
+
 	double trace() const {
 		return m_trace;
 	}
@@ -155,17 +148,9 @@ public:
 		kernel.setFactor( scaling_factor );
 	}
 
-	/// From INameable, returns the models name
-	virtual const std::string & name() const {
-		return m_name;
-	}
-	
 protected:
 	double m_mean; //store for other uses, external queries, etc.
 	double m_trace;
-
-	std::string m_name;
-	
 };
 
 

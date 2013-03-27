@@ -46,8 +46,11 @@ struct IHR4 : public MultiObjectiveFunction
 	: m_a( 1000 )
 	, m_handler(SearchPointType(numVariables,-5),SearchPointType(numVariables,5) ){
 		announceConstraintHandler(&m_handler);
-		m_name="IHR4";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "IHR4"; }
 	
 	std::size_t numberOfObjectives()const{
 		return 2;

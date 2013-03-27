@@ -109,7 +109,6 @@ public:
 	{
 		SHARK_CHECK(kernel != NULL, "[SvmLogisticInterpretation::SvmLogisticInterpretation] kernel is not allowed to be NULL");  //mtq: necessary despite indirect check via call in initialization list?
 		SHARK_CHECK(m_numFolds > 1, "[SvmLogisticInterpretation::SvmLogisticInterpretation] please provide a meaningful number of folds for cross validation");
-		this->m_name = "SvmLogisticInterpretation";
 		if (!m_svmCIsUnconstrained)   //mtq: important: we additionally need to deal with kernel feasibility indicators! important!
 			this->m_features|=base_type::IS_CONSTRAINED_FEATURE;
 		this->m_features|=base_type::HAS_VALUE;
@@ -119,6 +118,10 @@ public:
 		this->m_features|=base_type::CAN_PROVIDE_CLOSEST_FEASIBLE;
 		m_folds = folds;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SvmLogisticInterpretation"; }
 
 	//! checks whether the search point provided is feasible
 	//! \param input the point to test for feasibility

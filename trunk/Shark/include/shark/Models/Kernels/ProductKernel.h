@@ -86,10 +86,10 @@ public:
 		for(std::size_t i = 0; i != kernels.size(); ++i)
 			addKernel(kernels[i]);
 	}
-	
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
-	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ProductKernel"; }
 
 	/// \brief Add one more kernel to the expansion.
 	///

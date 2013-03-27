@@ -40,6 +40,11 @@ class KalmanFilter : public AbstractModel<RealVector,RealVector>
 public:
 	//! Constructor
 	KalmanFilter(size_t modelSize);
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "KalmanFilter"; }
+
 	RealVector parameterVector()const{
 		return RealVector();
 	}

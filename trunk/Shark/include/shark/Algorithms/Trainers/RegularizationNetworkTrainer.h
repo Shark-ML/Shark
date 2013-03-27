@@ -76,9 +76,11 @@ public:
 
 	RegularizationNetworkTrainer(KernelType* kernel, double gamma, bool unconstrained = false)
 	: base_type(kernel, 1.0 / gamma, unconstrained)
-	{
-		base_type::m_name = "RegularizationNetworkTrainer";
-	}
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "RegularizationNetworkTrainer"; }
 
 	double gamma() const
 	{ return 1.0 / base_type::m_C; }

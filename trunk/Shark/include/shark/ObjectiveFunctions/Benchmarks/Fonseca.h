@@ -48,9 +48,12 @@ struct Fonseca : public MultiObjectiveFunction {
 	Fonseca(std::size_t numVariables)
 	:m_handler(SearchPointType(numVariables,-4),SearchPointType(numVariables,4) ){
 		announceConstraintHandler(&m_handler);
-		m_name = "Fonseca";
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Fonseca"; }
+
 	std::size_t numberOfObjectives()const{
 		return 2;
 	}

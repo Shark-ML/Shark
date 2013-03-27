@@ -111,8 +111,6 @@ protected:
 	/// columns are w.r.t. the kernel parameters.
 	RealMatrix m_d_alphab_d_theta;
 
-	std::string m_name; ///< from INameable
-
 public:
 
 	/// Constructor. Only sets up the main pointers and references to the external instances and data, and
@@ -135,9 +133,12 @@ public:
 		SHARK_CHECK( ke != NULL, "[CSvmDerivative::CSvmDerivative] KernelExpansion cannot be NULL.");
 		SHARK_CHECK( ke->outputSize() == 1, "[CSvmDerivative::CSvmDerivative] only defined for binary SVMs.");
 		SHARK_CHECK( m_alpha.size2() == 1, "[CSvmDerivative::CSvmDerivative] this class is only defined for binary SVMs.");
-		m_name = "CSvmDerivative";
 		prepareCSvmParameterDerivative(); //main
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CSvmDerivative"; }
 
 	inline const KeType* ke() { return mep_ke; }
 	inline const TrainerType* trainer() { return mep_tr; }
@@ -224,11 +225,6 @@ public:
 	/// From ISerializable, writes a network to an archive
 	virtual void write( OutArchive & archive ) const {
 		throw SHARKEXCEPTION("[CSvmDerivative::write] Not implemented yet.");
-	}
-
-	/// From INameable, returns the models name
-	virtual const std::string & name() const {
-		return m_name;
 	}
 
 protected:

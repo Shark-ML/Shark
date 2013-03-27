@@ -50,10 +50,13 @@ namespace shark {
 struct DTLZ4 : public MultiObjectiveFunction
 {
 	DTLZ4(std::size_t numVariables = 0) : m_objectives(2), m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
-		m_name="DTLZ4";
 		announceConstraintHandler(&m_handler);
 	}
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "DTLZ4"; }
+
 	std::size_t numberOfObjectives()const{
 		return m_objectives;
 	}

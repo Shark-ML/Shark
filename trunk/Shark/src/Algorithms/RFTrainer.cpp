@@ -41,9 +41,6 @@ RFTrainer::RFTrainer(){
 	m_nodeSize = 0;
 	m_OOBratio = 0;
 	m_regressionLearner = false;
-
-	AbstractTrainer<RFClassifier, unsigned int>::m_name = "RFTrainer";
-	AbstractTrainer<RFClassifier>::m_name = "RFTrainer";
 }
 
 //Set trainer parameters to sensible defaults

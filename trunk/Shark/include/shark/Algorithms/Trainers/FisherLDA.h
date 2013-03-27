@@ -34,8 +34,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_ML_TRAINER_FISHERLDA_H
-#define SHARK_ML_TRAINER_FISHERLDA_H
+#ifndef SHARK_ALGORITHMS_TRAINERS_FISHERLDA_H
+#define SHARK_ALGORITHMS_TRAINERS_FISHERLDA_H
 
 
 #include <shark/Models/LinearModel.h>
@@ -84,6 +84,10 @@ class FisherLDA : public AbstractTrainer<LinearModel<>, unsigned int>
 public:
 	/// Constructor
 	FisherLDA(bool whitening = false, std::size_t subspaceDimension = 0);
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Fisher-LDA"; }
 
 	void setSubspaceDimensions(std::size_t dimensions){
 		m_subspaceDimensions = dimensions;

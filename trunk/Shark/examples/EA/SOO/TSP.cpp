@@ -108,10 +108,11 @@ namespace shark {
 	/**
 	 * \brief Default c'tor, initializes the cost matrix.
 	 */
-	TspTourLength( const shark::RealMatrix & costMatrix = shark::RealMatrix() ) : m_costMatrix( costMatrix ) {  
+	TspTourLength( const shark::RealMatrix & costMatrix = shark::RealMatrix() ) : m_costMatrix( costMatrix )
+	{ }
 
-	    m_name = "TspTourLength";
-	}
+	std::string name() const
+	{ return "TspTourLength"; }
 
 	/**
 	 * \brief Calculates the costs of the supplied tour.

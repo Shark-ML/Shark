@@ -68,12 +68,13 @@ namespace shark {
     {
     public:
 	GridSearch(){
-		m_name="GridSearch";
 		m_configured=false;
 	}
-	
-	void configure(PropertyTree const&){}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "GridSearch"; }
+	
 	//! uniform initialization for all parameters
 	//! \param  params  number of model parameters to optimize
 	//! \param  min     smallest parameter value
@@ -353,9 +354,12 @@ namespace shark {
 	//! Constructor
 	NestedGridSearch()
 	{
-		m_name="Nested Gridsearch";
 		m_configured=false;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NestedGridSearch"; }
 
 	void configure(PropertyTree const&){}
 	//!
@@ -539,9 +543,13 @@ namespace shark {
     public:
 	//! Constructor
 	PointSearch() {
-	    m_name="PointSearch";
 	    m_configured=false;
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "PointSearch"; }
+
 	//! Initialization of the search points.
 	//! \param  points  array of points to evaluate
 	void configure(const std::vector<RealVector>& points) {

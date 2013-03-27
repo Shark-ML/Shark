@@ -61,8 +61,11 @@ public:
 	
 	/// Constructor
 	RFClassifier(){
-		m_name = "Random Forest Classifier";
 	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "RFClassifier"; }
 	
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new EmptyState());

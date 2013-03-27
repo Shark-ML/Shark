@@ -189,10 +189,6 @@ public:
 		(void) node;
 	}
 
-	virtual const std::string & name() const {
-		return m_name;
-	}
-
 	virtual void init() {}
 		
 	virtual std::size_t numberOfObjectives() const{
@@ -292,7 +288,6 @@ public:
 	}
 
 protected:
-	std::string m_name;///< Name of the objective function, default value: empty string.
 	mutable std::size_t m_evaluationCounter; ///< Evaluation counter, default value: 0.
 	AbstractConstraintHandler<SearchPointType> const* m_constraintHandler;
 	

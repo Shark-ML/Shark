@@ -41,7 +41,6 @@ using namespace shark;
 
 BFGS::BFGS()
 {
-	m_name="BFGS";
 	m_features |= REQUIRES_VALUE;
 	m_features |= REQUIRES_FIRST_DERIVATIVE;
 

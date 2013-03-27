@@ -55,6 +55,10 @@ public:
 	//! creates a configured neural network
 	OnlineRNNet(RecurrentStructure* structure);
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "OnlineRNNet"; }
+
 	//!  \brief Feeds a timestep of a time series to the model and
 	//!         calculates it's output.
 	//!

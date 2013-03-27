@@ -4,16 +4,6 @@
  *  \author T.Voss, T. Glasmachers, O.Krause
  *  \date 2010-2011
  *
- *  \par Copyright (c) 1998-2007:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
- *
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -79,6 +69,10 @@ public:
 		updateFeatures();
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NoisyErrorFunctionWrapper"; }
+
 	FunctionWrapperBase<InputType,LabelType>* clone()const{
 		return new NoisyErrorFunctionWrapper<InputType,LabelType,OutputType,RngType>(*this);
 	}
@@ -88,7 +82,6 @@ public:
 			this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
 		this->m_features|=base_type::CAN_PROPOSE_STARTING_POINT;
 		//a hack to update changing names...
-		this->m_name="NoisyErrorFunction<"+mep_model->name()+","+mep_loss->name()+">";
 	}
 
 	void configure( const PropertyTree & node ) {
@@ -173,7 +166,6 @@ public:
 template<class InputType,class LabelType>
 void swap(const NoisyErrorFunction<InputType,LabelType>& op1, const NoisyErrorFunction<InputType,LabelType>& op2){
 	swap(op1.mp_wrapper,op2.mp_wrapper);
-	swap(op1.m_name,op2.m_name);
 	swap(op1.m_features,op2.m_features);
 }
 
@@ -181,7 +173,6 @@ template<class InputType,class LabelType,class RngType>
 template<class OutputType>
 NoisyErrorFunction<InputType,LabelType,RngType>::NoisyErrorFunction(AbstractModel<InputType,OutputType>* model, AbstractLoss<LabelType, OutputType>* loss,unsigned int batchSize)
 :mp_wrapper(new detail::NoisyErrorFunctionWrapper<InputType,LabelType,OutputType,RngType>(model,loss,batchSize)){
-	this -> m_name = mp_wrapper->name();
 	this -> m_features = mp_wrapper -> features();
 }
 template<class InputType,class LabelType,class RngType>
@@ -192,13 +183,11 @@ NoisyErrorFunction<InputType,LabelType,RngType>::NoisyErrorFunction(
 	RngType& rng,
 	unsigned int batchSize)
 :mp_wrapper(new detail::NoisyErrorFunctionWrapper<InputType,LabelType,OutputType,RngType>(model,loss,batchSize)){
-	this -> m_name = mp_wrapper -> name();
 	this -> m_features = mp_wrapper -> features();
 }
 template<class InputType,class LabelType,class RngType>
 NoisyErrorFunction<InputType,LabelType,RngType>::NoisyErrorFunction(const NoisyErrorFunction<InputType,LabelType,RngType>& op){
 	mp_wrapper = op.mp_wrapper->clone();
-	this -> m_name = mp_wrapper->name();
 	this -> m_features = mp_wrapper -> features();
 }
 
@@ -213,7 +202,6 @@ NoisyErrorFunction<InputType,LabelType,RngType>::operator = (const NoisyErrorFun
 template<class InputType,class LabelType,class RngType>
 void NoisyErrorFunction<InputType,LabelType,RngType>::updateFeatures(){
 	mp_wrapper -> updateFeatures();
-	this -> m_name = mp_wrapper -> name();
 	this -> m_features = mp_wrapper -> features();
 }
 

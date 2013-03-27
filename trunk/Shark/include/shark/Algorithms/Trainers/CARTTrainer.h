@@ -72,6 +72,10 @@ public:
 		m_nodeSize = 1;
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CARTTrainer"; }
+
 	///Train classification
 	void train(ModelType& model, const ClassificationDataset& dataset);
 	

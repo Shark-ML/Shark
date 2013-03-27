@@ -58,9 +58,11 @@ public:
 	/// constructor
 	LDA(double regularization = 0.0){
 		setRegularization(regularization);
-		m_name = "Linear Discriminant Analysis";
 	}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Linear Discriminant Analysis (LDA)"; }
 
 	/// return the regularization constant
 	double regularization()const{

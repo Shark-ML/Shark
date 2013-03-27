@@ -54,9 +54,17 @@ public:
 	virtual ~IParameterizable () { }
 
 	/// Return the parameter vector.
-	virtual RealVector parameterVector() const = 0;
+	virtual RealVector parameterVector() const
+	{
+		return RealVector();
+	}
+
 	/// Set the parameter vector.
-	virtual void setParameterVector(RealVector const& newParameters) = 0;
+	virtual void setParameterVector(RealVector const& newParameters)
+	{
+		SHARK_ASSERT(newParameters.size() == 0);
+	}
+
 	/// Return the number of parameters.
 	virtual std::size_t numberOfParameters() const {
 		return parameterVector().size();

@@ -97,9 +97,11 @@ public:
 	EpsilonSvmTrainer(KernelType* kernel, double C, double epsilon, bool unconstrained = false)
 	: base_type(kernel, C, unconstrained)
 	, m_epsilon(epsilon)
-	{
-		base_type::m_name = "EpsilonSvmTrainer";
-	}
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "EpsilonSvmTrainer"; }
 
 	double epsilon() const
 	{ return m_epsilon; }

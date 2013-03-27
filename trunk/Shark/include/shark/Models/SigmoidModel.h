@@ -35,7 +35,11 @@ public:
 	//! default ctor
 	//! \param transform_for_unconstrained when a new paramVector is set, should the exponent of the first parameter be used as the sigmoid's slope?
 	SigmoidModel( bool transform_for_unconstrained = true );
-	
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SigmoidModel"; }
+
 	RealVector parameterVector() const;
 	
 	//! note that the parameters are not expected to incorporate the minus sign in the sigmoid's equation
@@ -113,6 +117,9 @@ public:
 	double sigmoid(double a)const;
 	double sigmoidDerivative(double ga)const;
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SimpleSigmoidModel"; }
 };
 
 //! \brief scaled Tanh sigmoid function
@@ -126,6 +133,10 @@ public:
 	TanhSigmoidModel( bool transform_for_unconstrained = true );
 	double sigmoid(double a)const;
 	double sigmoidDerivative(double ga)const;
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "TanhSigmoidModel"; }
 };
 }
 #endif

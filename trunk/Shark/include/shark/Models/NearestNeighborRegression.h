@@ -70,6 +70,10 @@ public:
 	NearestNeighborRegression(NearestNeighbors const* algorithm,  unsigned int neighbors = 3)
 	: m_algorithm(algorithm), m_neighbors(neighbors){}
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "NearestNeighborRegression"; }
+
 
 	/// return the number of neighbors
 	unsigned int neighbors() const{

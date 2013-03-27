@@ -68,7 +68,6 @@ public:
 	, mep_trainer(trainer)
 	, m_withOffset(withOffset)
 	{
-		base_type::m_name = "SpanBoundCSvm";
 		base_type::m_features |= base_type::HAS_VALUE;
 		base_type::m_features |= base_type::HAS_FIRST_DERIVATIVE;
 	}
@@ -79,11 +78,14 @@ public:
 	, mep_trainer(trainer)
 	, m_withOffset(withOffset)
 	{
-		base_type::m_name = "SpanBoundCSvm";
 		base_type::m_features |= base_type::HAS_VALUE;
 		base_type::m_features |= base_type::HAS_FIRST_DERIVATIVE;
 	}
 
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SpanBoundCSvm"; }
 
 	/// inherited from SupervisedObjectiveFunction
 	void setDataset(DatasetType const& dataset)
