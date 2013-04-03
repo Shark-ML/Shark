@@ -50,10 +50,10 @@ private:
 			str<<"magic number for mnist wrong: " << readInt(memblock) << " != 2051";
 			throw SHARKEXCEPTION(str.str());
 		}
-		int numImages = readInt(memblock + 4);
-		int numRows = readInt(memblock + 8);
-		int numColumns = readInt(memblock + 12);
-		int sizeOfVis = numRows * numColumns;
+		std::size_t numImages = readInt(memblock + 4);
+		std::size_t numRows = readInt(memblock + 8);
+		std::size_t numColumns = readInt(memblock + 12);
+		std::size_t sizeOfVis = numRows * numColumns;
 		
 		std::vector<RealVector> data(numImages,RealVector(sizeOfVis));
 		for (std::size_t i = 0; i != numImages; ++i){
@@ -80,7 +80,7 @@ public:
 	//@param threshhold the threshold for turning gray values into ones
 	//@param batchSize the size of the batch 
 	MNIST(std::string filename, char threshold = 127, std::size_t batchSize = 256)
-	        : m_threshold(threshold), m_filename(filename),m_batchSize(batchSize){
+	        :  m_filename(filename), m_threshold(threshold), m_batchSize(batchSize){
 		init();
 	}
 	//Default constructor. If this is used you have to call configure() for MNIST to work.
@@ -99,8 +99,8 @@ public:
 	//@param threshhold the threshold for turning gray values into ones
 	//@param batchSize the size of the batch 
 	void configure(std::string filename, double threshold = 127, std::size_t batchSize = 256) {
-		m_threshold = threshold;
 		m_filename = filename;
+		m_threshold = threshold;
 		m_batchSize = batchSize;
 		init();
 	}
