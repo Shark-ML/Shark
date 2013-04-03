@@ -71,6 +71,7 @@ BOOST_AUTO_TEST_CASE(KMeans)
 
 	// invoke k-means
 	std::size_t iterations = kMeans(dataset, 3, centroids);
+	std::cout<<iterations<<std::endl;
 
 	// check result
 	Data<RealVector> const& c = centroids.centroids();
