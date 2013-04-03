@@ -24,8 +24,8 @@ to the batches are shared across the datasets. To acquire a subset, the followin
     LabeledData<I,L> complement;
     dataset.indexedSubset(indices,subset,complement);
     //create subsets by considering ranges of batches
-    LabeledData<I,L> range1 = rangeSubset(dataset,start,end);//contains batches with indices start,...,end
-    LabeledData<I,L> range2 = rangeSubset(dataset,end);//contains batches with indices 0,...,end
+    LabeledData<I,L> range1 = rangeSubset(dataset,start,end);//contains batches with indices start,...,end-1
+    LabeledData<I,L> range2 = rangeSubset(dataset,end);//contains batches with indices 0,...,end-1
 
 The functions of course also work for :doxy:`Data` and :doxy:`UnlabeledData` objects. 
 
