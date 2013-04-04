@@ -1807,12 +1807,13 @@ printf(")\n");
 			}
 
 			// shrink the corresponding cache entries
-			for (a = 0; a < (int)activeEx; a++)
-			{
-				if (kernelMatrix.getCacheRowSize(a) > activeEx) kernelMatrix.cacheRowResize(a, activeEx);
-			}
+			//~ for (a = 0; a < (int)activeEx; a++)
+			//~ {
+				//~ if (kernelMatrix.getCacheRowSize(a) > activeEx) kernelMatrix.cacheRowResize(a, activeEx);
+			//~ }
 			//todo: mt: new shrinking action -> test & verify, remove above 3 lines
 			//kernelMatrix.setTruncationIndex( activeEx );
+			kernelMatrix.setMaxCachedIndex(activeEx);
 		}
 	}
 
@@ -1840,7 +1841,8 @@ printf(")\n");
 			unsigned int pv = variable[v].p;
 			unsigned int yv = example[iv].y;
 			unsigned int r = cardP * yv + pv;
-			q = kernelMatrix.row(iv, 0, examples, true);
+			std::vector<QpFloatType> q(examples);
+			kernelMatrix.row(iv, 0, examples, &q[0]);
 
 			std::size_t a, b, f;
 			for (a=0; a<examples; a++)
@@ -1945,7 +1947,7 @@ printf(")\n");
 		}
 
 		// notify the matrix cache
-		kernelMatrix.cacheRowRelease(e);
+		//kernelMatrix.cacheRowRelease(e);
 		//todo: mt: new shrinking action. test & verify, then delete line above
 		//kernelMatrix.cacheRedeclareOldest(e);
 		kernelMatrix.flipColumnsAndRows(e, j);

@@ -36,7 +36,7 @@
 
 
 #include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
-#include <shark/Algorithms/QP/QpSvmDecomp.h>
+#include <shark/Algorithms/QP/SvmProblems.h>
 #include <shark/Models/Kernels/KernelHelpers.h>
 
 namespace shark {
@@ -129,43 +129,9 @@ public:
 		
 		mep_kernel->setParameterVector(parameters);
 
-		std::size_t ell = m_dataset.numberOfElements();
-		KernelMatrixType km(*mep_kernel, m_dataset.inputs());
-		CachedMatrixType cache(&km);
-		QpSvmDecomp< CachedMatrixType > solver(cache);
-		QpStoppingCondition stop;
-		RealVector linear(ell);
-		RealVector lower(ell);
-		RealVector upper(ell);
-		double w2, R2;
-		{
-			// create and solve a quadratic program with offset
-			RealVector alpha(ell, 0.0);
-			for (std::size_t i=0; i<ell; i++)
-			{
-				linear(i) = (m_dataset.element(i).label == 0) ? +1.0 : -1.0;
-				lower(i) = (m_dataset.element(i).label == 0) ? 0.0 : -1e100;
-				upper(i) = (m_dataset.element(i).label == 0) ? +1e100 : 0.0;
-			}
-			QpSolutionProperties prop;
-			solver.solve(linear, lower, upper, alpha, stop, &prop);
-			w2 = 2.0 * prop.value;
-		}
-		{
-			// create and solve the radius problem (also a quadratic program)
-			RealVector beta(ell, 1.0 / (double)ell);
-			for (std::size_t i=0; i<ell; i++)
-			{
-				linear(i) = 0.5 * km(i, i);
-				lower(i) = 0.0;
-				upper(i) = 1.0;
-			}
-			QpSolutionProperties prop;
-			solver.solve(linear, lower, upper, beta, stop, &prop);
-			R2 = 2.0 * prop.value;
-		}
+		Result result = computeRadiusMargin();
 
-		return (w2 * R2);
+		return result.w2 * result.R2;
 	}
 
 	/// \brief Evaluate the radius margin quotient and its first derivative.
@@ -178,89 +144,78 @@ public:
 		SHARK_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::evalDerivative] call setDataset first");
 		SIZE_CHECK(parameters.size() == mep_kernel->numberOfParameters());
 		this->m_evaluationCounter++;
-
-		//~ std::size_t kc = mep_kernel->numberOfParameters();
+		
 		mep_kernel->setParameterVector(parameters);
 
-		std::size_t ell = m_dataset.numberOfElements();
-		KernelMatrixType km(*mep_kernel, m_dataset.inputs());
-		CachedMatrixType cache(&km);
-		QpSvmDecomp< CachedMatrixType > solver(cache);
-		QpStoppingCondition stop;
-		RealVector linear(ell);
-		RealVector lower(ell);
-		RealVector upper(ell);
-		RealVector alpha(ell, 0.0);
-		RealVector beta(ell, 1.0 / (double)ell);
-		double w2, R2;
-		{
-			// create and solve a quadratic program with offset
-			for (std::size_t i=0; i<ell; i++)
-			{
-				linear(i) = (m_dataset.element(i).label == 0) ? +1.0 : -1.0;
-				lower(i) = (m_dataset.element(i).label == 0) ? 0.0 : -1e100;
-				upper(i) = (m_dataset.element(i).label == 0) ? +1e100 : 0.0;
-			}
-			QpSolutionProperties prop;
-			solver.solve(linear, lower, upper, alpha, stop, &prop);
-			w2 = 2.0 * prop.value;
-		}
-		{
-			// create and solve the radius problem (also a quadratic program)
-			for (std::size_t i=0; i<ell; i++){
-				linear(i) = 0.5 * km(i, i);
-				lower(i) = 0.0;
-				upper(i) = 1.0;
-			}
-			QpSolutionProperties prop;
-			solver.solve(linear, lower, upper, beta, stop, &prop);
-			R2 = 2.0 * prop.value;
-		}
-
-		//~ RealVector dw2(kc, 0.0);
-		//~ RealVector dR2(kc, 0.0);
-		//~ RealVector dkv(kc, 0.0);
-		//~ boost shared_ptr<State> state = mep_kernel->createState();
-		//~ for (std::size_t i=0; i<ell; i++){
-			//~ double ai = alpha(i);
-			//~ double bi = beta(i);
-			//~ for (std::size_t j=0; j<ell; j++){
-				//~ double aj = alpha(j);
-				//~ double bj = beta(j);
-			
-				//~ mep_kernel->eval(m_dataset(i).input, m_dataset(j).input,*state);
-				//~ mep_kernel->parameterDerivative(m_dataset(i).input, m_dataset(j).input,*state,dkv);
-				//~ if (i == j){
-					//~ for (std::size_t k=0; k<kc; k++) 
-						//~ dR2(k) += bi * dkv(k);
-				//~ }
-				//~ for (std::size_t k=0; k<kc; k++)
-				//~ {
-					//~ dw2(k) -= ai * aj * dkv(k);
-					//~ dR2(k) -= bi * bj * dkv(k);
-				//~ }
-			//~ }
-		//~ }
-
-		//~ derivative.resize(kc);
-		//~ for (std::size_t k=0; k<kc; k++) 
-			//~ derivative(k) = R2 * dw2(k) + w2 * dR2(k);
+		Result result = computeRadiusMargin();
 		
+		std::size_t ell = result.beta.size();
 		RealDiagonalMatrix diagBeta(ell);
 		for(std::size_t i = 0; i != ell; ++i){
-			diagBeta(i,i) = beta(i);
+			diagBeta(i,i) = result.beta(i);
 		}
 		derivative = calculateKernelMatrixParameterDerivative(
 			*mep_kernel,
 			m_dataset.inputs(),
-			w2*(diagBeta-outer_prod(beta,beta))-R2*outer_prod(alpha,alpha)
+			result.w2*(diagBeta-outer_prod(result.beta,result.beta))
+			-result.R2*outer_prod(result.alpha,result.alpha)
 		);
 		
 		
-		return (w2 * R2);
+		return result.w2 * result.R2;
 	}
 
 protected:
+	struct Result{
+		RealVector alpha;
+		RealVector beta;
+		double w2;
+		double R2;
+	};
+	
+	Result computeRadiusMargin()const{
+		std::size_t ell = m_dataset.numberOfElements();
+		KernelMatrixType km(*mep_kernel, m_dataset.inputs());
+		CachedMatrixType cache(&km);
+		
+		QpStoppingCondition stop;
+		Result result;
+		{
+			typedef CSVMProblem<CachedMatrixType> SVMProblemType;
+			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
+			
+			SVMProblemType svmProblem(cache,m_dataset.labels(),1e100);
+			ProblemType problem(svmProblem);
+			
+			QpSolver< ProblemType> solver(problem);
+			QpSolutionProperties prop;
+			solver.solve(stop, &prop);
+			result.w2 = 2.0 * prop.value;
+			result.alpha = problem.getUnpermutedAlpha();
+		}
+		{
+			// create and solve the radius problem (also a quadratic program)
+			typedef BoxedSVMProblem<CachedMatrixType> SVMProblemType;
+			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
+			
+			// Setup the problem
+			RealVector linear(ell);
+			for (std::size_t i=0; i<ell; i++){
+				linear(i) = 0.5 * km(i, i);
+			}
+			SVMProblemType svmProblem(cache,linear,0.0,1.0);
+			ProblemType problem(svmProblem);
+			
+			//solve it
+			QpSolver< ProblemType> solver(problem);
+			QpSolutionProperties prop;
+			solver.solve(stop, &prop);
+			result.R2 = 2.0 * prop.value;
+			result.beta = problem.getUnpermutedAlpha();
+		}
+		return result;
+	}
+	
 	DatasetType m_dataset;                  ///< labeled data for radius and (hard) margin computation
 	KernelType* mep_kernel;            ///< underlying parameterized kernel object
 };

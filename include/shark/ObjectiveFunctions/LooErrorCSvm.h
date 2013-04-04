@@ -27,10 +27,9 @@
 
 #include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
-#include <shark/Algorithms/Trainers/CSvmTrainer.h>
-#include <shark/Algorithms/QP/QpSvmDecomp.h>
-#include <shark/Algorithms/QP/QpBoxDecomp.h>
-
+#include <shark/Algorithms/QP/BoxConstrainedProblems.h>
+#include <shark/Algorithms/QP/SvmProblems.h>
+#include <shark/Models/Kernels/KernelExpansion.h>
 
 namespace shark {
 
@@ -42,50 +41,24 @@ class LooErrorCSvm : public SupervisedObjectiveFunction<InputType, unsigned int>
 {
 public:
 
-	//////////////////////////////////////////////////////////////////
-	// The types below define the type used for caching kernel values. The default is float,
-	// since this type offers sufficient accuracy in the vast majority of cases, at a memory
-	// cost of only four bytes. However, the type definition makes it easy to use double instead
-	// (e.g., in case high accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
-
-protected:
-
-	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
-	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
-
-	typedef SupervisedObjectiveFunction<InputType, unsigned int> base_type;
-	typedef LabeledData<InputType, unsigned int> DatasetType;
-	typedef CSvmTrainer<InputType, QpFloatType> TrainerType;
 	typedef AbstractKernelFunction<InputType> KernelType;
+	typedef LabeledData<InputType, unsigned int> DatasetType;
+private:
+	typedef SupervisedObjectiveFunction<InputType, unsigned int> base_type;
 
 	const DatasetType* mep_dataset;
-	IParameterizable* mep_meta;
-	TrainerType* mep_trainer;
+	KernelType* mep_kernel;
 	bool m_withOffset;
 
 public:
 	/// \brief Constructor.
-	///
-	/// \par
-	/// Don't forget to call setDataset before using the object.
-	LooErrorCSvm(TrainerType* trainer, bool withOffset)
-	: mep_dataset(NULL)
-	, mep_trainer(trainer)
-	, m_withOffset(withOffset)
-	{
-		base_type::m_features |= base_type::HAS_VALUE;
-	}
-
-	/// \brief Constructor.
-	LooErrorCSvm(DatasetType const& dataset, TrainerType* trainer, bool withOffset)
+	LooErrorCSvm(DatasetType const& dataset, KernelType* kernel, bool withOffset)
 	: mep_dataset(&dataset)
-	, mep_trainer(trainer)
+	, mep_kernel(kernel)
 	, m_withOffset(withOffset)
 	{
+		SHARK_CHECK(kernel != NULL, "kernel is not allowed to be Null");
 		base_type::m_features |= base_type::HAS_VALUE;
 	}
 
@@ -100,84 +73,70 @@ public:
 	}
 	
 	std::size_t numberOfVariables()const{
-		return mep_trainer->numberOfParameters();
+		return mep_kernel->numberOfParameters()+1;
 	}
 
-	/// Evaluate the leave-one-out error.
-	double eval() const {
-		SHARK_ASSERT(mep_dataset != NULL);
+	/// Evaluate the leave-one-out error for the given parameters. 
+	/// Thse parameters describe the regularization 
+	/// constant and the kernel parameters.
+	double eval(const RealVector& params){
 		this->m_evaluationCounter++;
 
-		double const C = mep_trainer->C();
-		KernelType* const kernel = mep_trainer->kernel();
+		double C;
+		shark::init(params)>>parameters(*mep_kernel),C;
+		
 		ZeroOneLoss<unsigned int, RealVector> loss;
 
 		// prepare the quadratic program
-		std::size_t ell = mep_dataset->numberOfElements();
-		RealVector linear(ell, 0.0);
-		RealVector lower(ell, 0.0);
-		RealVector upper(ell, 0.0);
-		RealVector alpha(ell, 0.0);
-		for (std::size_t i=0; i<ell; i++)
-		{
-			if (mep_dataset->element(i) .label== 0)
-			{
-				linear(i) = -1.0;
-				lower(i) = -C;
-				upper(i) = 0.0;
-			}
-			else
-			{
-				SHARK_CHECK(mep_dataset->element(i).label == 1, "[LooErrorCSvm] dataset is not a binary classification problem");
-				linear(i) = 1.0;
-				lower(i) = 0.0;
-				upper(i) = C;
-			}
-		}
-
-		KernelMatrixType km(*kernel, mep_dataset->inputs());
+		typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
+		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
+		typedef GeneralQuadraticProblem<CachedMatrixType> SVMProblemType;
+		KernelMatrixType km(*mep_kernel, mep_dataset->inputs());
 		CachedMatrixType matrix(&km);
+		SVMProblemType svmProblem(matrix,mep_dataset->labels(),C);
+		std::size_t ell = km.size();
+		
 		QpStoppingCondition stop;
 
 		if (m_withOffset)
 		{
-			// solve the problem with equality constraint
-			QpSvmDecomp< CachedMatrixType > solver(matrix);
-			solver.solve(linear, lower, upper, alpha, stop);
+			// solve the full problem with equality constraint and activated shrinking
+			typedef SvmProblem<SVMProblemType> ProblemType;
+			ProblemType problem(svmProblem);
+			QpSolver< ProblemType > solver(problem);
+			solver.solve(stop);
+			RealVector alphaFull = svmProblem.alpha;
+			KernelExpansion<InputType> svm(mep_kernel,mep_dataset->inputs(),true);
 
 			// leave-one-out
-			solver.setShrinking(false);
+			//problem.setShrinking(false);
 			double mistakes = 0;
-			RealVector loo_alpha = alpha;
 			for (std::size_t i=0; i<ell; i++)
 			{
 				// use sparseness of the solution:
-				if (alpha(i) == 0.0) continue;
+				if (alphaFull(i) == 0.0) continue;
 
 				// remove the i-th example
-				double diff = -loo_alpha(i);
-				double loo_lower = lower(i);
-				double loo_upper = upper(i);
-				lower(i) = 0.0;
-				upper(i) = 0.0;
+				double diff = -problem.alpha(i);
+				double loo_lower = problem.boxMin(i);
+				double loo_upper = problem.boxMax(i);
+				//now we need to correct for the equality constraint
 				if (diff > 0.0)
 				{
 					for (std::size_t j=0; j<ell; j++)
 					{
 						if (j == i) continue;
-						double space = loo_alpha(j) - lower(j);
-						if (space > 0.0)
+						double space = problem.alpha(j) - problem.boxMin(j);
+						if (space <= 0.0) continue;
+						if (space >= diff)
 						{
-							if (space >= diff)
-							{
-								solver.modifyStep(i, j, diff);
-								break;
-							}
-							else
-							{
-								diff -= space;
-								solver.modifyStep(i, j, space);
-							}
+							problem.modifyStep(i,j, diff);
+							break;
+						}
+						else
+						{
+							problem.modifyStep(i,j,space);
+							diff -= space;
 						}
 					}
 				}
@@ -186,109 +145,107 @@ public:
 					for (std::size_t j=0; j<ell; j++)
 					{
 						if (j == i) continue;
-						double space = upper(j) - loo_alpha(j);
-						if (space > 0.0)
+						double space = problem.boxMax(j) - problem.alpha(j);
+						if (space <= 0.0) continue;
+						if (space >= -diff)
 						{
-							if (space >= -diff)
-							{
-								solver.modifyStep(i, j, diff);
-								break;
-							}
-							else
-							{
-								diff += space;
-								solver.modifyStep(i, j, -space);
-							}
+							problem.modifyStep(i,j, diff);
+							break;
+						}
+						else
+						{
+							problem.modifyStep(i,j, -space);
+							diff += space;
 						}
 					}
 				}
-				solver.modifyBoxConstraints(lower, upper);
-
+				svmProblem.boxMin(i) = 0.0;
+				svmProblem.boxMax(i) = 0.0;
+				
 				// solve the reduced problem
-				solver.warmStart(loo_alpha, stop);
-				RealVector gradient = solver.getGradient();
-				double b = computeB(lower, upper, loo_alpha, gradient);
+				solver.solve(stop);
 
-				// predict
-				unsigned int target = mep_dataset->element(i).label;
-				RealVector prediction(1, solver.computeInnerProduct(i, loo_alpha) + b);
-				double l = loss(target, prediction);
-				mistakes += (l >= 1);
+				// predict using the previously removed example.
+				// we need to take into account that the initial problem is solved
+				// with shrinking and we thus need to get the initial permutation 
+				// for the element index and the unpermuted alpha for the svm
+				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
+				svm.offset(0) = computeBias(problem);
+				std::size_t elementIndex = i;//svmProblem.permutation[i];
+				unsigned int target = mep_dataset->element(elementIndex).label;
+				mistakes += loss(target, svm(mep_dataset->element(elementIndex).input));
 
-				// revive the i-th example
-				lower(i) = loo_lower;
-				upper(i) = loo_upper;
+				// add the i-th example again to the problem
+				svmProblem.boxMin(i) = loo_lower;
+				svmProblem.boxMax(i) = loo_upper;
 			}
 			return mistakes / (double)ell;
 		}
 		else
 		{
-			// solve the problem without equality constraint
-			QpBoxDecomp< CachedMatrixType > solver(matrix);
-			solver.solve(linear, lower, upper, alpha, stop);
-
+			// solve the full problem without equality constraint and activated shrinking
+			typedef BoxConstrainedProblem<SVMProblemType> ProblemType;
+			ProblemType problem(svmProblem);
+			QpSolver< ProblemType > solver(problem);
+			solver.solve(stop);
+			RealVector alphaFull = svmProblem.alpha;
+			KernelExpansion<InputType> svm(mep_kernel,mep_dataset->inputs(),false);
+			
 			// leave-one-out
-			solver.setShrinking(false);
+			//problem.setShrinking(false);
 			double mistakes = 0;
-			RealVector loo_alpha = alpha;
 			for (std::size_t i=0; i<ell; i++)
 			{
 				// use sparseness of the solution:
-				if (alpha(i) == 0.0) continue;
+				if (alphaFull(i) == 0.0) continue;
 
 				// remove the i-th example
-				double loo_lower = lower(i);
-				double loo_upper = upper(i);
-				lower(i) = 0.0;
-				upper(i) = 0.0;
-				solver.modifyStepTo(i, 0.0);
-				solver.modifyBoxConstraints(lower, upper);
+				double loo_lower = problem.boxMin(i);
+				double loo_upper = problem.boxMax(i);
+				problem.modifyStep(i,i, -problem.alpha(i));
+				svmProblem.boxMin(i) = 0.0;
+				svmProblem.boxMax(i) = 0.0;
+				
 
 				// solve the reduced problem
-				solver.warmStart(loo_alpha, stop);
+				solver.solve(stop);
 
-				// predict
-				unsigned int target = mep_dataset->element(i).label;
-				RealVector prediction(1, solver.computeInnerProduct(i, loo_alpha));
-				mistakes += loss(target, prediction);
+				// predict using the previously removed example.
+				// we need to take into account that the initial problem is solved
+				// with shrinking and we thus need to get the initial permutation 
+				// for the element index and the unpermuted alpha for the svm
+				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
+				std::size_t elementIndex = i;//svmProblem.permutation[i];
+				unsigned int target = mep_dataset->element(elementIndex).label;
+				mistakes += loss(target, svm(mep_dataset->element(elementIndex).input));
 
-				// undo the changes
-				lower(i) = loo_lower;
-				upper(i) = loo_upper;
+				// add the i-th example again to the problem
+				svmProblem.boxMin(i) = loo_lower;
+				svmProblem.boxMax(i) = loo_upper;
 			}
 			return mistakes / (double)ell;
 		}
 	}
 
-	/// Evaluate the leave-one-out error for the given
-	/// parameters, passed to the trainer object. These
-	/// parameters describe the regularization constant
-	/// and the kernel parameters.
-	double eval(const RealVector& parameters) const {
-		SHARK_ASSERT(mep_meta != NULL);
-		mep_trainer->setParameterVector(parameters);
-		return eval();
-	}
-
 protected:
 	/// Compute the SVM offset term (b).
-	static double computeB(RealVector const& lower, RealVector const& upper, RealVector const& alpha, RealVector const& gradient)
-	{
+	template<class Problem>
+	double computeBias(Problem const& problem){
 		double lowerBound = -1e100;
 		double upperBound = 1e100;
 		double sum = 0.0;
 		std::size_t freeVars = 0;
-		std::size_t ell = alpha.size();
+		std::size_t ell = problem.dimensions();
 		for (std::size_t i=0; i<ell; i++)
 		{
-			double value = gradient(i);
-			if (alpha(i) == lower(i))
+			double value = problem.gradient(i);
+			if (problem.alpha(i) == problem.boxMin(i))
 			{
-				if (value > lowerBound) lowerBound = value;
+				lowerBound = std::max(value,lowerBound);
 			}
-			else if (alpha(i) == upper(i))
+			else if (problem.alpha(i) == problem.boxMax(i))
 			{
-				if (value < upperBound) upperBound = value;
+				upperBound = std::min(value,upperBound);
 			}
 			else
 			{
@@ -296,8 +253,10 @@ protected:
 				freeVars++;
 			}
 		}
-		if (freeVars > 0) return sum / freeVars;
-		else return 0.5 * (lowerBound + upperBound);
+		if (freeVars > 0) 
+			return sum / freeVars;
+		else 
+			return 0.5 * (lowerBound + upperBound);
 	}
 };
 

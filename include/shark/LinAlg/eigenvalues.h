@@ -115,12 +115,6 @@ void eigensymm
 	VectorT& odvecA
 );
 
-//! eigen computes the eigenvalues of an arbitrary (non-symmetric)
-//! matrix A and stores the unsorted eigenvalues in vr and vi (vr real
-//! parts, vi complex parts)
-template<class MatrixT,class VectorT>
-void eigen(const MatrixT& A, VectorT& vr, VectorT& vi);
-
 //! Calculates the relative error of eigenvalue  no. "c".
 template<class MatrixT,class MatrixU,class VectorT>
 double eigenerr
@@ -176,7 +170,6 @@ unsigned rankDecomp
 #include "Impl/eigensymmJacobi.inl"
 #include "Impl/eigensymmJacobi2.inl"
 #include "Impl/eigensymm.inl"
-#include "Impl/eigen.inl"
 #include "Impl/eigenerr.inl"
 #include "Impl/rank.inl"
 #include "Impl/detsymm.inl"

@@ -35,8 +35,6 @@
  *
  */
 //===========================================================================
-#include <iostream>
-#include <boost/numeric/ublas/io.hpp>
 #define BOOST_TEST_MODULE ALGORITHMS_TRAINERS_CSVMTRAINER
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
@@ -75,6 +73,37 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_TEST )
 		KernelExpansion<RealVector> svm(true);
 		CSvmTrainer<RealVector> trainer(&kernel, 1e100);
 		trainer.sparsify() = false;
+		trainer.shrinking() = false;
+		trainer.stoppingCondition().minAccuracy = 1e-8;
+		trainer.train(svm, dataset);
+		RealVector param = svm.parameterVector();
+		BOOST_REQUIRE_EQUAL(param.size(), 6u);
+		std::cout << "alpha: "
+			<< param(0) << " "
+			<< param(1) << " "
+			<< param(2) << " "
+			<< param(3) << " "
+			<< param(4) << std::endl;
+		std::cout << "    b: " << param(5) << std::endl;
+		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
+		
+		// test against analytically known solution
+		BOOST_CHECK_SMALL(param(0) + 0.25, 1e-6);
+		BOOST_CHECK_SMALL(param(1) - 0.25, 1e-6);
+		BOOST_CHECK_SMALL(param(2), 1e-6);
+		BOOST_CHECK_SMALL(param(3), 1e-6);
+		BOOST_CHECK_SMALL(param(4), 1e-6);
+		BOOST_CHECK_SMALL(param(5) + 1.0, 1e-6);
+	}
+	
+	// hard-margin training with linear kernel
+	{
+		std::cout << "C-SVM hard margin with shrinking" << std::endl;
+		LinearKernel<> kernel;
+		KernelExpansion<RealVector> svm(true);
+		CSvmTrainer<RealVector> trainer(&kernel, 1e100);
+		trainer.sparsify() = false;
+		trainer.shrinking() = true;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
 		RealVector param = svm.parameterVector();
