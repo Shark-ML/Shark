@@ -133,6 +133,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 			LinearModel<CompressedRealVector, RealVector> linear(dim, classes, false, true);
 			linearTrainer[i]->stoppingCondition().minAccuracy = MAX_KKT_VIOLATION;
 			linearTrainer[i]->train(linear, dataset);
+			std::cout<<"done"<<std::endl;
 			KernelExpansion<CompressedRealVector> nonlinear(&kernel, false, classes);
 			nonlinearTrainer[i]->stoppingCondition().minAccuracy = MAX_KKT_VIOLATION;
 			nonlinearTrainer[i]->train(nonlinear, dataset);

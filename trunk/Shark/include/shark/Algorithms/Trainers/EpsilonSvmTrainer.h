@@ -30,7 +30,7 @@
 
 
 #include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
-
+#include <shark/Algorithms/QP/SvmProblems.h>
 
 namespace shark {
 
@@ -131,114 +131,92 @@ public:
 	size_t numberOfParameters() const
 	{ return (base_type::numberOfParameters() + 1); }
 
-	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, RealVector>& dataset)
-	{
-		// Setup the cached kernel matrix
-		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
-		BlockMatrixType km2(&km);
+	void train(KernelExpansion<InputType>& svm, LabeledData<InputType, RealVector> const& dataset){
 
 		SHARK_CHECK(svm.hasOffset(), "[EpsilonSvmTrainer::train] training of models without offset is not supported");
 		SHARK_CHECK(svm.outputSize() == 1, "[EpsilonSvmTrainer::train] wrong number of outputs in the kernel expansion");
 
-		// prepare the quadratic program description
-		std::size_t i, ic = dataset.numberOfElements();
-		RealVector linear(2*ic);
-		RealVector lower(2*ic);
-		RealVector upper(2*ic);
-		RealVector alpha(2*ic,0.0);
-		for (i=0; i<ic; i++)
-		{
-// 			double a = param(i);
-// 			if (a > 0.0)
-// 			{
-// 				alpha(i) = a;
-// 				alpha(i + ic) = 0.0;
-// 			}
-// 			else
-// 			{
-// 				alpha(i) = 0.0;
-// 				alpha(i + ic) = -a;
-// 			}
-			linear(i) = dataset.element(i).label(0) - m_epsilon;
-			lower(i) = 0.0;
-			upper(i) = base_type::m_C;
-			linear(i + ic) = dataset.element(i).label(0) + m_epsilon;
-			lower(i + ic) = -base_type::m_C;
-			upper(i + ic) = 0.0;
-		}
-
-		// solve the quadratic program
-		RealVector gradient;
-		if (base_type::precomputeKernel())
-		{
-			PrecomputedBlockMatrixType matrix(&km2);
-			QpSvmDecomp< PrecomputedBlockMatrixType > solver(matrix);
-			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			solver.setShrinking(base_type::m_shrinking);
-			solver.solve(linear, lower, upper, alpha, base_type::m_stoppingcondition, &prop);
-			gradient = solver.getGradient();
-		}
-		else
-		{
-			CachedBlockMatrixType matrix(&km2, base_type::m_cacheSize );
-			QpSvmDecomp< CachedBlockMatrixType > solver(matrix);
-			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			solver.setShrinking(base_type::m_shrinking);
-			solver.solve(linear, lower, upper, alpha, base_type::m_stoppingcondition, &prop);
-			gradient = solver.getGradient();
-		}
-
 		svm.setKernel(base_type::m_kernel);
 		svm.setBasis(dataset.inputs());
+		
+		if (QpConfig::precomputeKernel())
+			trainSVM<PrecomputedBlockMatrixType>(svm,dataset);
+		else
+			trainSVM<CachedBlockMatrixType>(svm,dataset);
+		
+		if (base_type::sparsify()) svm.sparsify();
+	}
 
-		RealVector param(ic + 1);
-		for (i=0; i<ic; i++) param(i) = alpha(i) + alpha(i + ic);
-
+private:
+	template<class MatrixType>
+	void trainSVM(KernelExpansion<InputType>& svm, LabeledData<InputType, RealVector> const& dataset){
+		typedef GeneralQuadraticProblem<MatrixType> SVMProblemType;
+		typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
+		
+		//Set up the problem
+		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
+		std::size_t ic = km.size();
+		BlockMatrixType blockkm(&km);
+		MatrixType matrix(&blockkm);
+		SVMProblemType svmProblem(matrix);
+		for(std::size_t i = 0; i != ic; ++i){
+			svmProblem.linear(i) = dataset.element(i).label(0) - m_epsilon;
+			svmProblem.linear(i+ic) = dataset.element(i).label(0) + m_epsilon;
+			svmProblem.boxMin(i) = 0;
+			svmProblem.boxMax(i) = base_type::m_C;
+			svmProblem.boxMin(i+ic) = -base_type::m_C;
+			svmProblem.boxMax(i+ic) = 0;
+		}
+		ProblemType problem(svmProblem,base_type::m_shrinking);
+		
+		//solve it
+		QpSolver< ProblemType> solver(problem);
+		solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+		RealVector alpha = problem.getUnpermutedAlpha();
+		column(svm.alpha(),0)= subrange(alpha,0,ic)+subrange(alpha,ic,2*ic);
+		
 		// compute the offset from the KKT conditions
 		double lowerBound = -1e100;
 		double upperBound = 1e100;
 		double sum = 0.0;
+		
 		std::size_t freeVars = 0;
-		for (i=0; i<ic; i++)
+		for (std::size_t i=0; i< ic; i++)
 		{
-			if (alpha(i) > 0.0)
+			if (problem.alpha(i) > 0.0)
 			{
-				double value = gradient(i);
-				if (alpha(i) < base_type::m_C)
+				double value = problem.gradient(i);
+				if (problem.alpha(i) < base_type::m_C)
 				{
 					sum += value;
 					freeVars++;
 				}
 				else
 				{
-					if (value > lowerBound) lowerBound = value;
+					lowerBound = std::max(value,lowerBound);
 				}
 			}
-			if (alpha(i + ic) < 0.0)
+			if (problem.alpha(i + ic) < 0.0)
 			{
-				double value = gradient(i + ic);
-				if (alpha(i + ic) > -base_type::m_C)
+				double value = problem.gradient(i + ic);
+				if (problem.alpha(i + ic) > -base_type::m_C)
 				{
 					sum += value;
 					freeVars++;
 				}
 				else
 				{
-					if (value < upperBound) upperBound = value;
+					upperBound = std::min(value,upperBound);
 				}
 			}
 		}
-		if (freeVars > 0) param(ic) = sum / freeVars;		// stabilized (averaged) exact value
-		else param(ic) = 0.5 * (lowerBound + upperBound);	// best estimate
-
-		// write the solution into the model
-		svm.setParameterVector(param);
-
+		if (freeVars > 0) 
+			svm.offset(0) = sum / freeVars;		// stabilized (averaged) exact value
+		else 
+			svm.offset(0) = 0.5 * (lowerBound + upperBound);	// best estimate
+		
 		base_type::m_accessCount = km.getAccessCount();
-		if (base_type::sparsify()) svm.sparsify();
 	}
-
-protected:
 	double m_epsilon;
 };
 

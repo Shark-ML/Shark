@@ -36,8 +36,9 @@
 
 
 #include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
+#include <shark/Algorithms/QP/BoxConstrainedProblems.h>
+#include <shark/Algorithms/QP/SvmProblems.h>
 #include <shark/Algorithms/QP/QpBoxLinear.h>
-
 
 namespace shark {
 
@@ -89,9 +90,6 @@ public:
 	/// parameter makes it easy to use double instead, (e.g., in case high
 	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 
 	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
 	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
@@ -105,8 +103,9 @@ public:
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	CSvmTrainer(KernelType* kernel, double C, bool unconstrained = false)
-	: base_type(kernel, C, unconstrained)
+	//! \param  computeDerivative  should the derivative of b with respect to C be computed?
+	CSvmTrainer(KernelType* kernel, double C, bool unconstrained = false, bool computeDerivative = true)
+	: base_type(kernel, C, unconstrained), m_computeDerivative(computeDerivative)
 	{ }
 
 	/// \brief From INameable: return the class name.
@@ -116,175 +115,71 @@ public:
 
 	/// \brief Train the C-SVM.
 	/// \note This code is almost verbatim present in the MissingFeatureSvmTrainer. If you change here, please also change there.
-	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
+	void train(KernelExpansion<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
 	{
 		SHARK_CHECK(svm.outputSize() == 1, "[CSvmTrainer::train] wrong number of outputs in the kernel expansion");
-		std::size_t nkp = base_type::m_kernel->numberOfParameters();
-		m_db_dParams = RealZeroVector( nkp+1 ); //in the rare case that there are only bounded SVs and no free SVs, we provide the derivative of b w.r.t. hyperparameters for external use
-
-		// prepare the quadratic program description
-		std::size_t i, ic = dataset.numberOfElements();
-		RealVector linear(ic);
-		RealVector lower(ic);
-		RealVector upper(ic);
-		RealVector alpha = RealZeroVector(ic);
-		for (i=0; i<ic; i++)
-		{
-			if (dataset.element(i).label == 0)
-			{
-				linear(i) = -1.0;
-				lower(i) = -base_type::m_C;
-				upper(i) = 0.0;
-			}
-			else
-			{
-				SHARK_CHECK(dataset.element(i).label == 1, "C-SVMs are for binary classification");
-				linear(i) = 1.0;
-				lower(i) = 0.0;
-				upper(i) = base_type::m_C;
-			}
-		}
-
+		
 		svm.setKernel(base_type::m_kernel);
 		svm.setBasis(dataset.inputs());
-
+		
 		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
 		if (svm.hasOffset())
 		{
-			RealVector gradient;
-
 			// solve the problem with equality constraint
 			if (QpConfig::precomputeKernel())
 			{
+				typedef CSVMProblem<PrecomputedMatrixType> SVMProblemType;
+				typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
+				
 				PrecomputedMatrixType matrix(&km);
-				QpSvmDecomp< PrecomputedMatrixType > solver(matrix);
-				QpSolutionProperties& prop = base_type::m_solutionproperties;
-				solver.setShrinking(base_type::m_shrinking);
-				solver.solve(linear, lower, upper, alpha, base_type::m_stoppingcondition, &prop);
-				gradient = solver.getGradient();
+				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_C);
+				ProblemType problem(svmProblem,base_type::m_shrinking);
+				QpSolver< ProblemType > solver(problem);
+				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
+				svm.offset(0) = computeBias(problem,dataset);
+				
 			}
 			else
 			{
-				CachedMatrixType matrix(&km, base_type::m_cacheSize );
-				QpSvmDecomp< CachedMatrixType > solver(matrix);
-				QpSolutionProperties& prop = base_type::m_solutionproperties;
-				solver.setShrinking(base_type::m_shrinking);
-				solver.solve(linear, lower, upper, alpha, base_type::m_stoppingcondition, &prop);
-				gradient = solver.getGradient();
+				typedef CSVMProblem<CachedMatrixType> SVMProblemType;
+				typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
+				
+				CachedMatrixType matrix(&km);
+				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_C);
+				ProblemType problem(svmProblem,base_type::m_shrinking);
+				QpSolver< ProblemType > solver(problem);
+				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
+				svm.offset(0) = computeBias(problem,dataset);
 			}
-
-			RealVector param(ic + 1);
-			RealVectorRange(param, Range(0, ic)) = alpha;
-
-			// compute the offset from the KKT conditions
-			double lowerBound = -1e100;
-			double upperBound = 1e100;
-			double sum = 0.0;
-			std::size_t freeVars = 0;
-			std::size_t lower_i = 0; //no reason to init to 0, but avoid compiler warnings
-			std::size_t upper_i = 0; //no reason to init to 0, but avoid compiler warnings
-			for (i=0; i<ic; i++)
-			{
-				double value = gradient(i);
-				if (alpha(i) == lower(i))
-				{
-					if (value > lowerBound) { //in case of no free SVs, we are looking for the largest gradient of all alphas at the lower bound
-						lowerBound = value;
-						lower_i = i;
-					}
-				}
-				else if (alpha(i) == upper(i))
-				{
-					if (value < upperBound) { //in case of no free SVs, we are looking for the smallest gradient of all alphas at the upper bound
-						upperBound = value;
-						upper_i = i;
-					}
-				}
-				else
-				{
-					sum += value;
-					freeVars++;
-				}
-			}
-			if (freeVars > 0) {
-				param(ic) = sum / freeVars;		//stabilized (averaged) exact value
-			} else {
-				param(ic) = 0.5 * (lowerBound + upperBound);	//best estimate
-				// We next compute the derivative of lowerBound and upperBound wrt C, in order to then get that of b wrt C.
-				// The equation at the foundation of this simply is g_i = y_i - \sum_j \alpha_j K_{ij} .
-				double dlower_dC = 0.0;
-				double dupper_dC = 0.0;
-				// At the same time, we also compute the derivative of lowerBound and upperBound wrt the kernel parameters.
-				// The equation at the foundation of this simply is g_i = y_i - \sum_j \alpha_j K_{ij} .
-				RealVector dupper_dkernel = RealZeroVector( nkp );
-				RealVector dlower_dkernel = RealZeroVector( nkp );
-				//state for eval and evalDerivative of the kernel
-				boost::shared_ptr<State> kernelState = base_type::m_kernel->createState();
-				RealVector der(nkp ); //derivative storage helper
-				//todo: O.K.: here kernel single input derivative would be usefull
-				//also it can be usefull to use here real batch processing and use batches of size 1 for lower /upper
-				//and instead of singleInput whole batches.
-				//what we do is, that we use the batched input versions with batches of size one.
-				typename Batch<InputType>::type singleInput = Batch<InputType>::createBatch( dataset.element(0).input, 1 );
-				typename Batch<InputType>::type lowerInput = Batch<InputType>::createBatch( dataset.element(lower_i).input, 1 );
-				typename Batch<InputType>::type upperInput = Batch<InputType>::createBatch( dataset.element(upper_i).input, 1 );
-				get( lowerInput, 0 ) = dataset.element(lower_i).input; //copy the current input into the batch
-				get( upperInput, 0 ) = dataset.element(upper_i).input; //copy the current input into the batch
-				RealMatrix one(1,1); one(0,0) = 1; //weight of input
-				RealMatrix result(1,1); //stores the result of the call
-
-				for (std::size_t i=0; i<ic; i++) {
-					double cur_alpha = alpha(i);
-					if ( cur_alpha != 0 ) {
-						int cur_label = ( cur_alpha>0.0 ? 1 : -1 );
-						get( singleInput, 0 ) = dataset.element(i).input; //copy the current input into the batch
-						// treat contributions of largest gradient at lower bound
-						base_type::m_kernel->eval( lowerInput, singleInput, result, *kernelState );
-						dlower_dC += cur_label * result(0,0);
-						base_type::m_kernel->weightedParameterDerivative( lowerInput, singleInput,one, *kernelState, der );
-						for ( std::size_t k=0; k<nkp; k++ ) {
-							dlower_dkernel(k) += cur_label * der(k);
-						}
-						// treat contributions of smallest gradient at upper bound
-						base_type::m_kernel->eval( upperInput, singleInput,result, *kernelState );
-						dupper_dC += cur_label * result(0,0);
-						base_type::m_kernel->weightedParameterDerivative( upperInput, singleInput, one, *kernelState, der );
-						for ( std::size_t k=0; k<nkp; k++ ) {
-							dupper_dkernel(k) += cur_label * der(k);
-						}
-					}
-				}
-				// assign final values to derivative of b wrt hyperparameters
-				m_db_dParams( nkp ) = -0.5 * ( dlower_dC + dupper_dC );
-				for ( std::size_t k=0; k<nkp; k++ ) {
-					m_db_dParams(k) = -0.5 * base_type::m_C * ( dlower_dkernel(k) + dupper_dkernel(k) );
-				}
-				if ( base_type::m_unconstrained ) {
-					m_db_dParams( nkp ) *= base_type::m_C;
-				}
-			}
-			svm.setParameterVector(param);
 		}
 		else
 		{
-			if (base_type::precomputeKernel())
+			if (QpConfig::precomputeKernel())
 			{
+				typedef CSVMProblem<PrecomputedMatrixType> SVMProblemType;
+				typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
+				
 				PrecomputedMatrixType matrix(&km);
-				QpSolutionProperties& prop = base_type::m_solutionproperties;
-				QpBoxDecomp< PrecomputedMatrixType > solver(matrix);
-				solver.setShrinking(base_type::m_shrinking);
-				solver.solve(linear, lower, upper, alpha, base_type::m_stoppingcondition, &prop);
+				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_C);
+				ProblemType problem(svmProblem,base_type::m_shrinking);
+				QpSolver< ProblemType > solver(problem);
+				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
 			}
 			else
 			{
-				CachedMatrixType matrix(&km, base_type::m_cacheSize );
-				QpSolutionProperties& prop = base_type::m_solutionproperties;
-				QpBoxDecomp< CachedMatrixType > solver(matrix);
-				solver.setShrinking(base_type::m_shrinking);
-				solver.solve(linear, lower, upper, alpha, base_type::m_stoppingcondition, &prop);
+				typedef CSVMProblem<CachedMatrixType> SVMProblemType;
+				typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
+				
+				CachedMatrixType matrix(&km);
+				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_C);
+				ProblemType problem(svmProblem,base_type::m_shrinking);
+				QpSolver< ProblemType > solver(problem);
+				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
 			}
-
-			svm.setParameterVector(alpha);
 		}
 
 		base_type::m_accessCount = km.getAccessCount();
@@ -293,12 +188,113 @@ public:
 	}
 
 	/// for the rare case that there are only bounded SVs and no free SVs, this gives access to the derivative of b w.r.t. C for external use. Derivative w.r.t. C is last.
-	const RealVector& get_db_dParams() {
+	RealVector const& get_db_dParams() {
 		return m_db_dParams;
 	}
 
 protected:
 	RealVector m_db_dParams; ///< in the rare case that there are only bounded SVs and no free SVs, this will hold the derivative of b w.r.t. the hyperparameters. Derivative w.r.t. C is last.
+
+	bool m_computeDerivative;
+
+	template<class Problem>
+	double computeBias(Problem const& problem, LabeledData<InputType, unsigned int> const& dataset){
+		std::size_t nkp = base_type::m_kernel->numberOfParameters();
+		m_db_dParams=RealZeroVector( nkp+1); //in the rare case that there are only bounded SVs and no free SVs, we provide the derivative of b w.r.t. hyperparameters for external use
+
+		std::size_t ic = problem.dimensions();
+
+		// compute the offset from the KKT conditions
+		double lowerBound = -1e100;
+		double upperBound = 1e100;
+		double sum = 0.0;
+		std::size_t freeVars = 0;
+		std::size_t lower_i = 0;
+		std::size_t upper_i = 0;
+		for (std::size_t i=0; i<ic; i++)
+		{
+			double value = problem.gradient(i);
+			if (problem.alpha(i) == problem.boxMin(i))
+			{
+				if (value > lowerBound) { //in case of no free SVs, we are looking for the largest gradient of all alphas at the lower bound
+					lowerBound = value;
+					lower_i = i;
+				}
+			}
+			else if (problem.alpha(i) == problem.boxMax(i))
+			{
+				if (value < upperBound) { //in case of no free SVs, we are looking for the smallest gradient of all alphas at the upper bound
+					upperBound = value;
+					upper_i = i;
+				}
+			}
+			else
+			{
+				sum += value;
+				freeVars++;
+			}
+		}
+		if (freeVars > 0)
+			return sum / freeVars;		//stabilized (averaged) exact value
+
+		if(!m_computeDerivative)
+			return 0.5 * (lowerBound + upperBound);	//best estimate
+		
+		// We next compute the derivative of lowerBound and upperBound wrt C, in order to then get that of b wrt C.
+		// The equation at the foundation of this simply is g_i = y_i - \sum_j \alpha_j K_{ij} .
+		double dlower_dC = 0.0;
+		double dupper_dC = 0.0;
+		// At the same time, we also compute the derivative of lowerBound and upperBound wrt the kernel parameters.
+		// The equation at the foundation of this simply is g_i = y_i - \sum_j \alpha_j K_{ij} .
+		RealVector dupper_dkernel( nkp,0 );
+		RealVector dlower_dkernel( nkp,0 );
+		//state for eval and evalDerivative of the kernel
+		boost::shared_ptr<State> kernelState = base_type::m_kernel->createState();
+		RealVector der(nkp ); //derivative storage helper
+		//todo: O.K.: here kernel single input derivative would be usefull
+		//also it can be usefull to use here real batch processing and use batches of size 1 for lower /upper
+		//and instead of singleInput whole batches.
+		//what we do is, that we use the batched input versions with batches of size one.
+		typename Batch<InputType>::type singleInput = Batch<InputType>::createBatch( dataset.element(0).input, 1 );
+		typename Batch<InputType>::type lowerInput = Batch<InputType>::createBatch( dataset.element(lower_i).input, 1 );
+		typename Batch<InputType>::type upperInput = Batch<InputType>::createBatch( dataset.element(upper_i).input, 1 );
+		get( lowerInput, 0 ) = dataset.element(lower_i).input; //copy the current input into the batch
+		get( upperInput, 0 ) = dataset.element(upper_i).input; //copy the current input into the batch
+		RealMatrix one(1,1,1); //weight of input
+		RealMatrix result(1,1); //stores the result of the call
+
+		for (std::size_t i=0; i<ic; i++) {
+			double cur_alpha = problem.alpha(i);
+			if ( cur_alpha != 0 ) {
+				int cur_label = ( cur_alpha>0.0 ? 1 : -1 );
+				get( singleInput, 0 ) = dataset.element(i).input; //copy the current input into the batch
+				// treat contributions of largest gradient at lower bound
+				base_type::m_kernel->eval( lowerInput, singleInput, result, *kernelState );
+				dlower_dC += cur_label * result(0,0);
+				base_type::m_kernel->weightedParameterDerivative( lowerInput, singleInput,one, *kernelState, der );
+				for ( std::size_t k=0; k<nkp; k++ ) {
+					dlower_dkernel(k) += cur_label * der(k);
+				}
+				// treat contributions of smallest gradient at upper bound
+				base_type::m_kernel->eval( upperInput, singleInput,result, *kernelState );
+				dupper_dC += cur_label * result(0,0);
+				base_type::m_kernel->weightedParameterDerivative( upperInput, singleInput, one, *kernelState, der );
+				for ( std::size_t k=0; k<nkp; k++ ) {
+					dupper_dkernel(k) += cur_label * der(k);
+				}
+			}
+		}
+		// assign final values to derivative of b wrt hyperparameters
+		m_db_dParams( nkp ) = -0.5 * ( dlower_dC + dupper_dC );
+		for ( std::size_t k=0; k<nkp; k++ ) {
+			m_db_dParams(k) = -0.5 * base_type::m_C * ( dlower_dkernel(k) + dupper_dkernel(k) );
+		}
+		if ( base_type::m_unconstrained ) {
+			m_db_dParams( nkp ) *= base_type::m_C;
+		}
+		
+		return 0.5 * (lowerBound + upperBound);	//best estimate
+	}
 };
 
 
@@ -321,7 +317,7 @@ public:
 		SHARK_CHECK(! model.hasOffset(), "[LinearCSvmTrainer::train] models with offset are not supported (yet).");
 		QpBoxLinear solver(dataset, dim);
 		RealMatrix w(1, dim, 0.0);
-		row(w, 0) = solver.solve(C(), m_stoppingcondition, &m_solutionproperties, m_verbosity > 0);
+		column(w, 0) = solver.solve(C(), m_stoppingcondition, &m_solutionproperties, m_verbosity > 0);
 		model.setStructure(w);
 	}
 };

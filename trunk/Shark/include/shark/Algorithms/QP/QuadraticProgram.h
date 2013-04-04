@@ -46,7 +46,7 @@
 #ifndef SHARK_ALGORITHMS_QP_QUADRATICPROGRAM_H
 #define SHARK_ALGORITHMS_QP_QUADRATICPROGRAM_H
 
-
+#include <shark/Algorithms/QP/LRUCache.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataView.h>
@@ -206,7 +206,6 @@ public:
 		for(std::size_t i = 0; i != elements; ++i,++iter){
 			x[i]=iter.getInnerIterator();
 		}
-		//boost::iota(x,data.elements().begin());//fill x with iterators begin...end of the range
 	}
 
 	/// return a single matrix entry
@@ -259,8 +258,6 @@ protected:
 
 	typedef typename Batch<InputType>::const_iterator PointerType;
 	/// Array of data pointers for kernel evaluations
-	//todo: O.K. find better solution for this.
-	//std::vector<PointerType> x;
 	std::vector<PointerType> x;
 	/// size of the quadratic matrix
 	std::size_t m_matrixsize;
@@ -318,11 +315,11 @@ public:
 	///
 	///The entries start,...,end of the i-th row are computed and stored in storage.
 	///There must be enough room for this operation preallocated.
-	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
-		m_matrix.row(i,start,end,storage);
+	void row(std::size_t k, std::size_t start,std::size_t end, QpFloatType* storage) const{
+		m_matrix.row(k,start,end,storage);
 		//apply regularization
-		if(i >= start && i < end){
-			storage[i-start] += (QpFloatType)m_diagMod(i);
+		if(k >= start && k < end){
+			storage[k-start] += (QpFloatType)m_diagMod(k);
 		}
 	}
 
@@ -502,7 +499,7 @@ public:
 	///There must be enough room for this operation preallocated.
 	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
 		for(std::size_t j = start; j < end; j++){
-			storage[j-start] = entry(i,j);
+			storage[j-start] = m_base->entry(m_mapping[i], m_mapping[j]);
 		}
 	}
 
@@ -644,147 +641,61 @@ template <class Matrix>
 class CachedMatrix
 {
 public:
-	// The statements below define the type used for caching kernel values. The default is float,
-	// since this type offers sufficient accuracy in the vast majority of cases, at a memory
-	// cost of only four bytes. However, the type definition makes it easy to use double instead
-	// (e.g., in case high accuracy training is needed).
 	typedef typename Matrix::QpFloatType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 
 	/// Constructor
 	/// \param base       Matrix to cache
 	/// \param cachesize  Main memory to use as a kernel cache, in QpFloatTypes. Default is 256MB if QpFloatType is float, 512 if double.
 	CachedMatrix(Matrix* base, std::size_t cachesize = 0x4000000)
-	: m_matrixsize( base->size() )
-	, m_cacheSize( 0 )
-	, m_cacheMaxSize( cachesize )
-	, m_truncationColumnIndex( base->size() )
-	, m_truncationRowIndex( 0 )
-	{
-		if (cachesize < 2 * m_matrixsize) throw SHARKEXCEPTION("[CachedMatrix::CachedMatrix] invalid cache size");
-
-		mep_baseMatrix = base;
-		m_cacheEntry.resize(m_matrixsize);
-		m_cacheNewest = SHARK_CACHEDMATRIX_NOT_CACHED;
-		m_cacheOldest = SHARK_CACHEDMATRIX_NOT_CACHED;
-
-		for (std::size_t i = 0; i < m_matrixsize; i++)
+	: mep_baseMatrix(base), m_cache( base->size(),cachesize ){}
+		
+	/// \brief Copies the range [start,end) of the k-th row of the matrix in external storage
+	///
+	/// This call regards the access to the line as out-of-order, thus the cache is not influenced.
+	/// \param k the index of the row
+	/// \param start the index of the first element in the range
+	/// \param end the index of the last element in the range
+	/// \param storage the external storage. must be big enough capable to hold the range
+	void row(std::size_t k, std::size_t start,std::size_t end, QpFloatType* storage) const{
+		SIZE_CHECK(start <= end);
+		SIZE_CHECK(end <= size());
+		std::size_t cached= m_cache.lineLength(k);
+		if ( start < cached)//copy already available data into the temporary storage
 		{
-			m_cacheEntry[i].data = NULL;
-			m_cacheEntry[i].length = 0;
-			m_cacheEntry[i].older = SHARK_CACHEDMATRIX_NULL_REFERENCE;
-			m_cacheEntry[i].newer = SHARK_CACHEDMATRIX_NULL_REFERENCE;
+			QpFloatType const* line = m_cache.getLinePointer(k);
+			std::copy(line + start, line+cached, storage);
 		}
+		//evaluate the remaining entries
+		mep_baseMatrix->row(k,cached,end,storage+(cached-start));
 	}
-
-	/// Destructor
-	~CachedMatrix()
-	{
-		cacheClear();
-	}
-
 
 	/// \brief Return a subset of a matrix row
 	///
 	/// \par
 	/// This method returns an array of QpFloatType with at least
 	/// the entries in the interval [begin, end[ filled in.
-	/// If temp is set to true, the computed values are not
-	/// stored in the cache.
 	///
 	/// \param k      matrix row
 	/// \param begin  first column to be filled in
 	/// \param end    last column to be filled in +1
-	/// \param temp   are the return values temporary or should they be cached?
-	QpFloatType* row(std::size_t k, std::size_t begin, std::size_t end, bool temp = false)
-	{
-		// check if the request can be fulfilled from the cache
-		if (end <= (std::size_t)m_cacheEntry[k].length)
-		{
-			cacheRedeclareNewest(k);
-			return m_cacheEntry[k].data;
-		}
-
-		if (temp)
-		{
-			// return temporary data
-			m_cacheTemp.resize(end);
-			if (m_cacheEntry[k].length > begin)
-			{
-				memcpy(&m_cacheTemp[0] + begin, m_cacheEntry[k].data + begin, sizeof(QpFloatType) * (m_cacheEntry[k].length - begin));
-				begin = m_cacheEntry[k].length;
-			}
-			for (std::size_t col=begin; col<end; col++) m_cacheTemp[col] = mep_baseMatrix->entry(k, col);
-			return &m_cacheTemp[0];
-		}
-		else
-		{
-			// free memory (if necessary)
-			const std::size_t l = m_cacheEntry[k].length;
-			////// todo: mt: new cache strategy: test & verify, then comment in.
-			//// first, try to truncate rows (i.e., throw away kernel values with unneeded examples)
-			//if ( m_cacheSize + end > m_cacheMaxSize + l ) {
-				//if ( m_truncationColumnIndex < m_matrixsize ) {
-					//for ( std::size_t e=m_truncationRowIndex; e<m_matrixsize; e++ ) {
-						//if ( getCacheRowSize(e) > m_truncationColumnIndex ) {
-							//cacheResize( e, m_truncationColumnIndex );
-						//}
-						//if ( m_cacheSize + end <= m_cacheMaxSize + l ) { //if enough space again
-							//m_truncationRowIndex = e+1;
-							//break;
-						//}
-					//}
-				//}
-			//}
-			// if still necessary, throw away as many oldest kernel rows as needed
-			while (m_cacheSize + end > m_cacheMaxSize + l)
-			{
-				if (m_cacheOldest == k)
-				{
-					cacheRedeclareNewest(k);
-				}
-				cacheDelete(m_cacheOldest);
-			}
-
-			// add a new cache row, or extend the existing one
-			if (l == 0)
-			{
-				cacheAdd(k, end);
-			}
-			else
-			{
-				cacheResize(k, end);
-				if (k != m_cacheNewest)
-				{
-					cacheRedeclareNewest(k);
-				}
-			}
-
-			// compute remaining entries
-			if (l < end)
-			{
-				QpFloatType* p = m_cacheEntry[k].data + l;
-				std::size_t col;
-				for (col = l; col < end; col++)
-				{
-					*p = mep_baseMatrix->entry(k, col);
-					p++;
-				}
-			}
-
-			return m_cacheEntry[k].data;
-		}
+	QpFloatType* row(std::size_t k, std::size_t start, std::size_t end){
+		(void)start;//unused
+		//Save amount of entries already cached
+		std::size_t cached= m_cache.lineLength(k);
+		//create or extend cache line
+		QpFloatType* line = m_cache.getCacheLine(k,end);
+		if (end > cached)//compute entries not already cached
+			mep_baseMatrix->row(k,cached,end,line+cached);
+		return line;
 	}
 
 	/// return a single matrix entry
-	QpFloatType operator () (std::size_t i, std::size_t j) const
-	{ return entry(i, j); }
+	QpFloatType operator () (std::size_t i, std::size_t j) const{ 
+		return entry(i, j);
+	}
 
 	/// return a single matrix entry
-	QpFloatType entry(std::size_t i, std::size_t j) const
-	{
+	QpFloatType entry(std::size_t i, std::size_t j) const{
 		return mep_baseMatrix->entry(i, j);
 	}
 
@@ -792,7 +703,6 @@ public:
 	/// \brief Swap the rows i and j and the columns i and j
 	///
 	/// \par
-	/// W.l.o.g. it is assumed that \f$ i \leq j \f$.
 	/// It may be advantageous for caching to reorganize
 	/// the column order. In order to keep symmetric matrices
 	/// symmetric the rows are swapped, too. This corresponds
@@ -803,231 +713,69 @@ public:
 	///
 	void flipColumnsAndRows(std::size_t i, std::size_t j)
 	{
-		SHARK_ASSERT( i <= j );
-		std::size_t t;
+		if(i == j)
+			return;
+		if (i > j)
+			std::swap(i,j);
 
-		mep_baseMatrix->flipColumnsAndRows(i, j);
-
-		// update the ordered cache list predecessors and successors
-		t = m_cacheEntry[i].older;
-		if (t != SHARK_CACHEDMATRIX_NULL_REFERENCE)
-		{
-			if (t == SHARK_CACHEDMATRIX_NOT_CACHED) m_cacheOldest = j;
-			else m_cacheEntry[t].newer = j;
-			t = m_cacheEntry[i].newer;
-			if (t == SHARK_CACHEDMATRIX_NOT_CACHED) m_cacheNewest = j;
-			else m_cacheEntry[t].older = j;
-		}
-		t = m_cacheEntry[j].older;
-		if (m_cacheEntry[j].older != SHARK_CACHEDMATRIX_NULL_REFERENCE)
-		{
-			if (t == SHARK_CACHEDMATRIX_NOT_CACHED) m_cacheOldest = i;
-			else m_cacheEntry[t].newer = i;
-			t = m_cacheEntry[j].newer;
-			if (t == SHARK_CACHEDMATRIX_NOT_CACHED) m_cacheNewest = i;
-			else m_cacheEntry[t].older = i;
-		}
-
-		// exchange the cache entries
-		XCHG_V(tCacheEntry, m_cacheEntry, i, j);
-
+		m_cache.swapLineIndices(i,j);
 		// exchange all cache row entries
-		std::size_t k, l;
-		for (k = 0; k < m_matrixsize; k++)
+		for (std::size_t  k = 0; k < size(); k++)
 		{
-			l = m_cacheEntry[k].length;
-			if (j < l)
-			{
-				XCHG_V(QpFloatType, m_cacheEntry[k].data, i, j);
-			}
-			else if (i < l)
-			{
-				// only one element is available from the cache
-				m_cacheEntry[k].data[i] = mep_baseMatrix->entry(k, i);
-			}
+			std::size_t length = m_cache.lineLength(k);
+			if(length <= i) continue;
+			QpFloatType* line = m_cache.getLinePointer(k);//do not affect caching
+			if (j < length)
+				std::swap(line[i], line[j]);
+			else // only one element is available from the cache
+				line[i] = mep_baseMatrix->entry(k, j);
 		}
+		
+		mep_baseMatrix->flipColumnsAndRows(i, j);
 	}
 
 	/// return the size of the quadratic matrix
 	std::size_t size() const
-	{ return m_matrixsize; }
+	{ return mep_baseMatrix->size(); }
 
 	/// return the size of the kernel cache (in "number of QpFloatType-s")
 	std::size_t getMaxCacheSize() const
-	{ return m_cacheMaxSize; }
+	{ return m_cache.maxSize(); }
 
 	/// get currently used size of kernel cache (in "number of QpFloatType-s")
 	std::size_t getCacheSize() const
-	{ return m_cacheSize; }
+	{ return m_cache.size(); }
 
 	/// get length of one specific currently cached row
 	std::size_t getCacheRowSize(std::size_t k) const
-	{ return m_cacheEntry[k].length; }
-
-	/// allow the cache to discard old row information after index i when making space for new rows
-	void setTruncationIndex( std::size_t i ) {
-		SHARK_ASSERT( i <= m_matrixsize );
-		m_truncationColumnIndex = i;
-		m_truncationRowIndex = 0; //also reset the row marker (which row to start truncating next)
+	{ return m_cache.lineLength(k); }
+	
+	bool isCached(std::size_t k) const
+	{ return m_cache.isCached(k); }
+	
+	///\brief Restrict the cached part of the matrix to the upper left nxn sub-matrix
+	void setMaxCachedIndex(std::size_t n){
+		SIZE_CHECK(n <=size());
+		
+		//truncate lines which are too long
+		//~ m_cache.restrictLineSize(n);//todo: we can do that better, only resize if the memory is actually needed
+		//~ for(std::size_t i = 0; i != n; ++i){
+			//~ if(m_cache.lineLength(i) > n)
+				//~ m_cache.resizeLine(i,n);
+		//~ }
+		for(std::size_t i = n; i != size(); ++i){//mark the lines for deletion which are not needed anymore
+			m_cache.markLineForDeletion(i);
+		}
 	}
 
 	/// completely clear/purge the kernel cache
 	void clear()
-	{ cacheClear(); }
-
-	/// enlarge or reduce the length of the k-th kernel cache row
-	void cacheRowResize(std::size_t k, std::size_t newsize)
-	{
-		if (m_cacheEntry[k].data == NULL) cacheAdd(k, newsize);
-		else cacheResize(k, newsize);
-	}
-
-	/// discard all cached values for row k
-	void cacheRowRelease(std::size_t k)
-	{
-		if (m_cacheEntry[k].data != NULL) cacheDelete(k);
-	}
-
-	/// Move the k-th cache entry to the end of the ordered list (i.e., to be deleted next).
-	/// This expresses the lowest possible preference for keeping an entry without deleting it.
-	void cacheRedeclareOldest( std::size_t k )
-	{
-		SHARK_ASSERT( m_cacheOldest != SHARK_CACHEDMATRIX_NOT_CACHED ); //assert that cache not empty
-		SHARK_ASSERT( m_cacheEntry[k].older != SHARK_CACHEDMATRIX_NULL_REFERENCE ); //assert that currently cached
-		SHARK_ASSERT( m_cacheEntry[k].newer != SHARK_CACHEDMATRIX_NULL_REFERENCE );
-
-		cacheRemove(k);
-
-		m_cacheEntry[m_cacheOldest].older = k;
-		m_cacheEntry[k].newer = m_cacheOldest;
-		m_cacheEntry[k].older = SHARK_CACHEDMATRIX_NOT_CACHED;
-		m_cacheOldest = k;
-	}
-
-	/// Counterpart to CacheRedeclareOldest, expresses highest possible preference for keeping an entry.
-	void cacheRedeclareNewest( std::size_t k )
-	{
-		cacheRemove(k);
-		cacheAppend(k);
-	}
+	{ m_cache.clear(); }
 
 protected:
 	Matrix* mep_baseMatrix; ///< matrix to be cached
 
-	std::size_t m_matrixsize; ///< size of the quadratic matrix
-
-	// matrix cache
-	std::size_t m_cacheSize;               ///< current cache size in QpFloatType
-	const std::size_t m_cacheMaxSize;      ///< maximum cache size in QpFloatType
-	std::size_t m_truncationColumnIndex;   ///< allow truncation from this column on if cache is full (corresponds to activeEx in SVM solvers). Defaults to m_matrixsize (no truncation allowed).
-	std::size_t m_truncationRowIndex;      ///< remember which row to truncate next.
-
-	/// cache data held for every example
-	struct tCacheEntry
-	{
-		QpFloatType* data;                 ///< array containing a matrix row
-		std::size_t length;                ///< length of this matrix row
-		std::size_t older;                 ///< next older entry
-		std::size_t newer;                 ///< next newer entry
-	};
-	std::vector<tCacheEntry> m_cacheEntry; ///< cache entry description
-	std::vector<QpFloatType> m_cacheTemp;  ///< single kernel row
-	std::size_t m_cacheNewest;             ///< index of the newest entry
-	std::size_t m_cacheOldest;             ///< index of the oldest entry
-
-	/// append the entry to the ordered list
-	void cacheAppend(std::size_t var)
-	{
-		SHARK_ASSERT( m_cacheEntry[var].older == SHARK_CACHEDMATRIX_NULL_REFERENCE ); //assert that not already cached
-		SHARK_ASSERT( m_cacheEntry[var].newer == SHARK_CACHEDMATRIX_NULL_REFERENCE );
-
-		if (m_cacheNewest == SHARK_CACHEDMATRIX_NOT_CACHED)
-		{
-			m_cacheNewest = var;
-			m_cacheOldest = var;
-			m_cacheEntry[var].older = SHARK_CACHEDMATRIX_NOT_CACHED;
-			m_cacheEntry[var].newer = SHARK_CACHEDMATRIX_NOT_CACHED;
-		}
-		else
-		{
-			m_cacheEntry[m_cacheNewest].newer = var;
-			m_cacheEntry[var].older = m_cacheNewest;
-			m_cacheEntry[var].newer = SHARK_CACHEDMATRIX_NOT_CACHED;
-			m_cacheNewest = var;
-		}
-	}
-
-	/// remove the entry from the ordered list
-	void cacheRemove(std::size_t var)
-	{
-		SHARK_ASSERT( m_cacheEntry[var].older != SHARK_CACHEDMATRIX_NULL_REFERENCE ); //assert that currently cached
-		SHARK_ASSERT( m_cacheEntry[var].newer != SHARK_CACHEDMATRIX_NULL_REFERENCE );
-
-		if (m_cacheEntry[var].older == SHARK_CACHEDMATRIX_NOT_CACHED)
-			m_cacheOldest = m_cacheEntry[var].newer;
-		else
-			m_cacheEntry[m_cacheEntry[var].older].newer = m_cacheEntry[var].newer;
-
-		if (m_cacheEntry[var].newer == SHARK_CACHEDMATRIX_NOT_CACHED)
-			m_cacheNewest = m_cacheEntry[var].older;
-		else
-			m_cacheEntry[m_cacheEntry[var].newer].older = m_cacheEntry[var].older;
-
-		m_cacheEntry[var].older = SHARK_CACHEDMATRIX_NULL_REFERENCE;
-		m_cacheEntry[var].newer = SHARK_CACHEDMATRIX_NULL_REFERENCE;
-	}
-
-	/// add an entry to the cache and append
-	/// it to the ordered list
-	void cacheAdd(std::size_t var, std::size_t length)
-	{
-		m_cacheEntry[var].length = length;
-		m_cacheEntry[var].data = (QpFloatType*)(void*)malloc(length * sizeof(QpFloatType));
-		if (m_cacheEntry[var].data == NULL) throw SHARKEXCEPTION("[CachedMatrix::cacheAppend] out of memory error");
-		m_cacheSize += length;
-
-		cacheAppend(var);
-	}
-
-	/// remove an entry from the cache and the ordered list
-	void cacheDelete(std::size_t var)
-	{
-		free(m_cacheEntry[var].data);
-		m_cacheSize -= m_cacheEntry[var].length;
-
-		m_cacheEntry[var].data = NULL;
-		m_cacheEntry[var].length = 0;
-
-		cacheRemove(var);
-	}
-
-	/// resize a cache entry
-	void cacheResize(std::size_t var, std::size_t newlength)
-	{
-		std::size_t diff = newlength - m_cacheEntry[var].length;
-		if (diff == 0) return;
-		m_cacheSize += diff;
-		m_cacheEntry[var].length = newlength;
-		m_cacheEntry[var].data = (QpFloatType*)(void*)realloc((void*)m_cacheEntry[var].data, newlength * sizeof(QpFloatType));
-		if (m_cacheEntry[var].data == NULL) throw SHARKEXCEPTION("[CachedMatrix::cacheResize] out of memory error");
-	}
-
-	/// completely clear the cache
-	void cacheClear()
-	{
-		std::size_t e, ec = m_cacheEntry.size();
-		for (e = 0; e < ec; e++)
-		{
-			if (m_cacheEntry[e].data != NULL) free(m_cacheEntry[e].data);
-			m_cacheEntry[e].data = NULL;
-			m_cacheEntry[e].length = 0;
-			m_cacheEntry[e].older = SHARK_CACHEDMATRIX_NULL_REFERENCE;
-			m_cacheEntry[e].newer = SHARK_CACHEDMATRIX_NULL_REFERENCE;
-		}
-		m_cacheOldest = SHARK_CACHEDMATRIX_NOT_CACHED;
-		m_cacheNewest = SHARK_CACHEDMATRIX_NOT_CACHED;
-		m_cacheSize = 0;
-	}
+	LRUCache<QpFloatType> m_cache; ///< cache of the matrix lines
 };
 
 
@@ -1146,6 +894,16 @@ public:
 			}
 		}
 	}
+	
+	/// \brief Computes the i-th row of the kernel matrix.
+	///
+	///The entries start,...,end of the i-th row are computed and stored in storage.
+	///There must be enough room for this operation preallocated.
+	void row(std::size_t k, std::size_t start,std::size_t end, QpFloatType* storage) const{
+		for(std::size_t j = start; j < end; j++){
+			storage[j-start] = matrix(k, j);
+		}
+	}
 
 
 	/// \brief Return a subset of a matrix row
@@ -1157,8 +915,7 @@ public:
 	/// \param k      matrix row
 	/// \param begin  first column to be filled in
 	/// \param end    last column to be filled in +1
-	/// \param temp   ignored - this flag is for CachedMatrix
-	QpFloatType* row(std::size_t k, std::size_t begin, std::size_t end, bool temp = false)
+	QpFloatType* row(std::size_t k, std::size_t begin, std::size_t end)
 	{
 		return &matrix(k, begin);
 	}
@@ -1194,34 +951,21 @@ public:
 
 	/// for compatibility with CachedMatrix
 	std::size_t getCacheSize() const
-	{ return matrix.size1() * matrix.size2(); }
+	{ return getMaxCacheSize(); }
 
 	/// for compatibility with CachedMatrix
 	std::size_t getCacheRowSize(std::size_t k) const
 	{ return matrix.size2(); }
-
+	
+	/// for compatibility with CachedMatrix
+	bool isCached(std::size_t){
+		return true;
+	}
+	/// for compatibility with CachedMatrix
+	void setMaxCachedIndex(std::size_t n){}
+		
 	/// for compatibility with CachedMatrix
 	void clear()
-	{ }
-
-	/// for compatibility with CachedMatrix
-	void cacheRowResize(std::size_t k, std::size_t newsize)
-	{ }
-
-	/// for compatibility with CachedMatrix
-	void cacheRowRelease(std::size_t k)
-	{ }
-
-	/// for compatibility with CachedMatrix
-	void cacheRedeclareOldest( std::size_t k )
-	{ }
-
-	/// for compatibility with CachedMatrix
-	void cacheRedeclareNewest( std::size_t k )
-	{ }
-
-	/// for compatibility with CachedMatrix
-	void setTruncationIndex( std::size_t i )
 	{ }
 
 protected:
@@ -1294,6 +1038,16 @@ public:
 			kernel,
 			*x[i],
 			*x[j]) * (1.0 / m_scalingCoefficients[i]) * (1.0 / m_scalingCoefficients[j]);
+	}
+	
+	/// \brief Computes the i-th row of the kernel matrix.
+	///
+	///The entries start,...,end of the i-th row are computed and stored in storage.
+	///There must be enough room for this operation preallocated.
+	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
+		for(std::size_t j = start; j < end; j++){
+			storage[j-start] = entry(i,j);
+		}
 	}
 
 	void setScalingCoefficients(const RealVector& scalingCoefficients)

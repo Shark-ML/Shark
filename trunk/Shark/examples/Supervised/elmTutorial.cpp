@@ -56,9 +56,7 @@ int main(){
 	//create the regression problem
 	Problem problem;
 	RegressionDataset data = problem.generateDataset(numSamples);
-	//input and label dimension of the data
 	size_t inputDim = inputDimension(data);
-	size_t outputDim = labelDimension(data);
 	
 	//usually an elm uses zero mean unit variance inputs. so we should
 	//normalize the data first

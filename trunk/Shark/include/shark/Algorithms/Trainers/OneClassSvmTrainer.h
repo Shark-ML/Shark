@@ -30,7 +30,7 @@
 
 
 #include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
-
+#include <shark/Algorithms/QP/SvmProblems.h>
 
 namespace shark {
 
@@ -142,77 +142,21 @@ public:
 	size_t numberOfParameters() const
 	{ return (m_kernel->numberOfParameters() + 1); }
 
-	void train(KernelExpansion<InputType>& svm, const UnlabeledData<InputType>& inputset)
+	void train(KernelExpansion<InputType>& svm, UnlabeledData<InputType> const& inputset)
 	{
-		// Setup the cached kernel matrix
-		KernelMatrixType km(*m_kernel, inputset);
-
 		SHARK_CHECK(svm.hasOffset(), "[OneClassSvmTrainer::train] training of models without offset is not supported");
 		SHARK_CHECK(svm.outputSize() == 1, "[OneClassSvmTrainer::train] wrong number of outputs in the kernel expansion");
 		SHARK_CHECK(m_nu > 0.0 && m_nu< 1.0, "[OneClassSvmTrainer::train] invalid setting of the parameter nu (must be 0 < nu < 1)");
-
-		// prepare the quadratic program description
-		std::size_t i, ic = inputset.numberOfElements();
-		RealVector linear = RealZeroVector(ic);
-		RealVector lower = RealZeroVector(ic);
-		RealVector upper = RealScalarVector(ic, 1.0 / (m_nu * ic));
-		RealVector alpha = RealScalarVector(ic, 1.0 / ic);
-		RealVector param(ic + 1);
 
 		svm.setKernel(m_kernel);
 		svm.setBasis(inputset);
 
 		// solve the quadratic program
-		RealVector gradient;
-		if (base_type::precomputeKernel())
-		{
-			PrecomputedMatrixType matrix(&km);
-			QpSvmDecomp< PrecomputedMatrixType > solver(matrix);
-			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			solver.setShrinking(base_type::m_shrinking);
-			solver.solve(linear, lower, upper, alpha, base_type::m_stoppingcondition, &prop);
-			gradient = solver.getGradient();
-		}
+		if (QpConfig::precomputeKernel())
+			trainSVM<PrecomputedMatrixType>(svm,inputset);
 		else
-		{
-			CachedMatrixType matrix(&km, m_cacheSize );
-			QpSvmDecomp< CachedMatrixType > solver(matrix);
-			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			solver.setShrinking(base_type::m_shrinking);
-			solver.solve(linear, lower, upper, alpha, base_type::m_stoppingcondition, &prop);
-			gradient = solver.getGradient();
-		}
-		RealVectorRange(param, Range(0, ic)) = alpha;
+			trainSVM<CachedMatrixType>(svm,inputset);
 
-		// compute the offset from the KKT conditions
-		double lowerBound = -1e100;
-		double upperBound = 1e100;
-		double sum = 0.0;
-		std::size_t freeVars = 0;
-		for (i=0; i<ic; i++)
-		{
-			double value = gradient(i);
-			if (alpha(i) == 0.0)
-			{
-				if (value > lowerBound) lowerBound = value;
-			}
-			else if (alpha(i) == upper(i))
-			{
-				if (value < upperBound) upperBound = value;
-			}
-			else
-			{
-				sum += value;
-				freeVars++;
-			}
-		}
-		if (freeVars > 0) param(ic) = sum / freeVars;		// stabilized (averaged) exact value
-		else param(ic) = 0.5 * (lowerBound + upperBound);	// best estimate
-
-		// write the solution into the model
-		svm.setParameterVector(param);
-
-		base_type::m_accessCount = km.getAccessCount();
 		if (base_type::sparsify()) svm.sparsify();
 	}
 
@@ -220,6 +164,51 @@ protected:
 	KernelType* m_kernel;
 	double m_nu;
 	std::size_t m_cacheSize;
+
+	template<class MatrixType>
+	void trainSVM(KernelExpansion<InputType>& svm, UnlabeledData<InputType> const& inputset){
+		typedef BoxedSVMProblem<MatrixType> SVMProblemType;
+		typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
+		
+		// Setup the problem
+		
+		KernelMatrixType km(*m_kernel, inputset);
+		MatrixType matrix(&km);
+		std::size_t ic = matrix.size();
+		double upper = 1.0/(m_nu*ic);
+		SVMProblemType svmProblem(matrix,RealZeroVector(ic),0.0,upper);
+		ProblemType problem(svmProblem,base_type::m_shrinking);
+		
+		//solve it
+		QpSolver< ProblemType > solver(problem);
+		solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+		column(svm.alpha(),0)= problem.getUnpermutedAlpha();
+		
+		// compute the offset from the KKT conditions
+		double lowerBound = -1e100;
+		double upperBound = 1e100;
+		double sum = 0.0;
+		std::size_t freeVars = 0;
+		for (std::size_t i=0; i != problem.dimensions(); i++)
+		{
+			double value = problem.gradient(i);
+			if (problem.alpha(i) == 0.0)
+				lowerBound = std::max(value,lowerBound);
+			else if (problem.alpha(i) == upper)
+				upperBound = std::min(value,upperBound);
+			else
+			{
+				sum += value;
+				freeVars++;
+			}
+		}
+		if (freeVars > 0)
+			svm.offset(0) = sum / freeVars;		// stabilized (averaged) exact value
+		else 
+			svm.offset(0) = 0.5 * (lowerBound + upperBound);	// best estimate
+		
+		base_type::m_accessCount = km.getAccessCount();
+	}
 };
 
 

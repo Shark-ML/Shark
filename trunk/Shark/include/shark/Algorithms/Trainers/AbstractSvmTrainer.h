@@ -44,10 +44,6 @@
 #include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Algorithms/QP/QuadraticProgram.h>
-#include <shark/Algorithms/QP/QpSvmDecomp.h>
-#include <shark/Algorithms/QP/QpBoxDecomp.h>
-#include <shark/Algorithms/QP/QpMcDecomp.h>
-#include <shark/Algorithms/Pegasos.h>
 
 
 namespace shark {
@@ -84,8 +80,8 @@ public:
 	QpStoppingCondition const& stoppingCondition() const
 	{ return m_stoppingcondition; }
 
-	/// Read access to the solution properties
-	QpSolutionProperties const& solutionProperties() const
+	/// Access to the solution properties
+	QpSolutionProperties& solutionProperties()
 	{ return m_solutionproperties; }
 
 	/// Flag for using a precomputed kernel matrix

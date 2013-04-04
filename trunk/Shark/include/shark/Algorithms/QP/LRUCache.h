@@ -87,16 +87,12 @@ public:
 		if(!isCached(i))
 			cacheCreateRow(entry,size);
 		else{
-			cacheRedeclareNewest(entry);
-			resizeRow(entry,size);
+			if(entry.length >= size)
+				cacheRedeclareNewest(entry);
+			else
+				resizeLine(entry,size);
 		}
 		return entry.data;
-	}
-	
-	///\brief Marks a cache line for deletion.
-	void removeCacheLine(std::size_t i){
-		if(isCached(i))
-			cacheRemoveRow(m_cacheEntry[i]);
 	}
 	
 	///\brief Just returns the pointer to the i-th line without affcting cache at all.
@@ -173,6 +169,21 @@ public:
 		return m_maxSize;
 	}
 	
+	/// \brief Resizes a line while retaining the data stored inside it.
+	///
+	/// if the new size is smaller than the old, only the first size entries are saved.
+	void resizeLine(std::size_t i ,std::size_t size){
+		resizeLine(m_cacheEntry[i],size);
+	}
+	
+	///\brief Marks cache line i for deletion, that is the next time memory is needed, this line will be freed.
+	void markLineForDeletion(std::size_t i){
+		if(!isCached(i)) return;
+		CacheEntry& block = m_cacheEntry[i];
+		m_lruList.erase(m_lruList.iterator_to(block));
+		m_lruList.push_back(block);
+	}
+	
 	///\brief empty cache
 	void clear(){
 		ensureFreeMemory(m_maxSize);
@@ -201,13 +212,11 @@ private:
 		block.length = 0;
 	}
 	/// \brief Resizes a line and copies all old values into it.
-	void resizeRow(CacheEntry& block,std::size_t size){
-		if(block.length >= size)
-			return;
+	void resizeLine(CacheEntry& block,std::size_t size){
 		
 		//salvage block data
 		T* newLine  = new T[size];
-		std::copy(block.data,block.data+block.length,newLine);
+		std::copy(block.data,block.data+std::min(size,block.length),newLine);
 		
 		//remove old data
 		cacheRemoveRow(block);
