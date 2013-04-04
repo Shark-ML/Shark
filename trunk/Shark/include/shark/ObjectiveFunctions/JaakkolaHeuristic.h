@@ -62,7 +62,7 @@ public:
 			itIn++;
 			for (; itIn != elements.end(); itIn++) {
 				if (itIn->label == it->label) continue;
-				double dist = shark::distance(it->input,itIn->input);
+				double dist = shark::distanceSqr(it->input,itIn->input);
 				m_stat.push_back(dist);
 			}
 		}
