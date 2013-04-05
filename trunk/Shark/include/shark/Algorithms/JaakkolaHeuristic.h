@@ -45,7 +45,7 @@
 namespace shark{
 
 
-//! \brief Jaakkola's heuristic and related quantities for Gaussian kernel selection
+/// \brief Jaakkola's heuristic and related quantities for Gaussian kernel selection
 ///
 /// \par
 /// Jaakkola's heuristic method for setting the width parameter of the
@@ -56,16 +56,22 @@ namespace shark{
 ///    \f[ \gamma = \frac{1}{2 \sigma^2} \f]
 /// based on the median or on any other quantile of the empirical
 /// distribution.
+///
+/// In the original paper, only the distance to the closest point with
+/// different label is considered. This behavior can be turned on by
+/// an option of the constructor.
 class JaakkolaHeuristic
 {
 public:
-	//! Constructor
+	/// Constructor
+	/// \param data           vector-valued input data
+	/// \param nearestFalseNeighbor  if true, only the nearest neighboring point with different label is considered (default false)
 	template<class InputType>
-	JaakkolaHeuristic(LabeledData<InputType,unsigned int> const& dataset, bool nn = false)
+	JaakkolaHeuristic(LabeledData<InputType,unsigned int> const& dataset, bool nearestFalseNeighbor = false)
 	{
 		typedef typename LabeledData<InputType,unsigned int>::const_element_range Elements;
 		Elements elements = dataset.elements();
-		if(!nn) {
+		if(!nearestFalseNeighbor) {
 			for(typename Elements::iterator it = elements.begin(); it != elements.end(); ++it){
 				typename Elements::iterator itIn = it;
 				itIn++;
@@ -89,9 +95,9 @@ public:
 		std::sort(m_stat.begin(), m_stat.end());
 	}
 		
-	//! Compute the given quantile (usually the 0.5-quantile)
-	//! of the empirical distribution of euklidean distances
-	//! of data pairs with different labels.
+	/// Compute the given quantile (usually median)
+	/// of the empirical distribution of Euclidean distances
+	/// of data pairs with different labels.
 	double sigma(double quantile = 0.5)
 	{
 		std::size_t ic = m_stat.size();
@@ -119,10 +125,10 @@ public:
 		}
 	}
 
-	//! Compute the given quantile (usually the median)
-	//! of the empirical distribution of euklidean distances
-	//! of data pairs with different labels converted into
-	//! a value usable as the gamma parameter of the GaussianRbfKernel.
+	/// Compute the given quantile (usually the median)
+	/// of the empirical distribution of Euclidean distances
+	/// of data pairs with different labels converted into
+	/// a value usable as the gamma parameter of the GaussianRbfKernel.
 	double gamma(double quantile = 0.5)
 	{
 		double s = sigma(quantile);
