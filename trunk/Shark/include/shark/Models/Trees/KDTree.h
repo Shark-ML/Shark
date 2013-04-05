@@ -81,7 +81,7 @@ public:
 		boost::iota(elements,boost::begin(points));
 
 		buildTree(tc,elements);
-		
+
 		//after the creation of the trees, the iterators in the array are sorted in the order, 
 		//they are referenced by the nodes.so we can create the indexList using the indizes of the iterators
 		for(std::size_t i = 0; i != m_size; ++i){
@@ -95,8 +95,8 @@ public:
 	double lower(std::size_t dim) const{
 		self_type* parent = static_cast<self_type*>(mep_parent);
 		if (parent == NULL) return -1e100;
-		
-		if (parent->m_cutDim == dim && parent->mp_right == this) 
+
+		if (parent->m_cutDim == dim && parent->mp_right == this)
 			return parent->threshold();
 		else
 			return parent->lower(dim);
@@ -107,7 +107,7 @@ public:
 	double upper(std::size_t dim) const{
 		self_type* parent = static_cast<self_type*>(mep_parent);
 		if (parent == NULL) return +1e100;
-		
+
 		if (parent->m_cutDim == dim && parent->mp_left == this) 
 			return parent->threshold();
 		else 
@@ -189,23 +189,24 @@ protected:
 	template<class Range>
 	void buildTree(TreeConstruction tc, Range& points){
 		typedef typename boost::range_iterator<Range>::type iterator;
-		
+
 		iterator begin = boost::begin(points);
 		iterator end = boost::end(points);
-		
+
 		if (tc.maxDepth() == 0 || m_size <= tc.maxBucketSize()){
 			m_nodes = 1; 
 			return; 
 		}
 
-		m_cutDim=calculateCuttingDimension(points);
-		
-		//calculate the distance of the boundary for every point in the list
+		m_cutDim = calculateCuttingDimension(points);
+
+		// calculate the distance of the boundary for every point in the list
 		std::vector<double> distance(m_size);
 		iterator point = begin;
 		for(std::size_t i = 0; i != m_size; ++i,++point){
 			distance[i] = get(**point,m_cutDim);
 		}
+
 		// split the list into sub-cells
 		iterator split = this->splitList(distance,points);
 		if (split == end){
@@ -213,7 +214,7 @@ protected:
 			return; 
 		}
 		std::size_t leftSize = split-begin;
-		
+
 		// create sub-nodes
 		mp_left = new KDTree(this, mp_indexList, leftSize);
 		mp_right = new KDTree(this, mp_indexList + leftSize, m_size - leftSize);
@@ -221,11 +222,11 @@ protected:
 		// recurse
 		boost::iterator_range<iterator> left(begin,split);
 		boost::iterator_range<iterator> right(split,end);
-		((KDTree*)mp_left)->buildTree(tc.nextDepthLevel(),left);
-		((KDTree*)mp_right)->buildTree(tc.nextDepthLevel(),right);
+		((KDTree*)mp_left)->buildTree(tc.nextDepthLevel(), left);
+		((KDTree*)mp_right)->buildTree(tc.nextDepthLevel(), right);
 		m_nodes = 1 + mp_left->nodes() + mp_right->nodes();
 	}
-	
+
 	///\brief Calculate the dimension which should be cut by this node
 	///
 	///The KD-Tree calculates the Axis-Aligned-Bounding-Box surrounding the points
@@ -233,14 +234,16 @@ protected:
 	template<class Range>
 	std::size_t calculateCuttingDimension(Range const& points)const{
 		typedef typename boost::range_iterator<Range const>::type iterator;
-		
+
 		iterator begin = boost::begin(points);
 		iterator end = boost::end(points);
+
 		// calculate bounding box of the data
 		InputT L = **begin;
 		InputT U = **begin;
 		std::size_t dim = L.size();
 		iterator point = begin;
+		++point;
 		for (std::size_t i=1; i != m_size; ++i,++point){
 			for (std::size_t d = 0; d != dim; d++){
 				double v = (**point)[d];

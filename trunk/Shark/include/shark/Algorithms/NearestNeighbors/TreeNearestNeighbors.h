@@ -6,15 +6,6 @@
 *  \author  T. Glasmachers
 *  \date    2011
 *
-*  \par Copyright (c) 2011:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-27974<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*
 *
 *  <BR><HR>
 *  This file is part of Shark. This library is free software;
@@ -33,8 +24,8 @@
 */
 //===========================================================================
 
-#ifndef SHARK_ALGORITHMS_NEARESTNEIGHBORS_NEARESTNEIGHBORS_H
-#define SHARK_ALGORITHMS_NEARESTNEIGHBORS_NEARESTNEIGHBORS_H
+#ifndef SHARK_ALGORITHMS_NEARESTNEIGHBORS_TREENEARESTNEIGHBORS_H
+#define SHARK_ALGORITHMS_NEARESTNEIGHBORS_TREENEARESTNEIGHBORS_H
 
 
 #include <boost/intrusive/rbtree.hpp>
@@ -76,9 +67,9 @@ namespace shark {
 /// This means that the space partitioning must be carried
 /// out to the finest possible scale.
 ///
-///The Data must be sotred in a random access container which means, that elements 
-///have O(1) access time. This is crucial for the performance of the tree lookup. 
-///When data is stored in a Data<T> a View should be chosen as template parameter.
+/// The Data must be sotred in a random access container. This means that elements
+/// have O(1) access time. This is crucial for the performance of the tree lookup.
+/// When data is stored in a Data<T>, a View should be chosen as template parameter.
 template <class DataContainer>
 class IterativeNNQuery
 {
@@ -86,13 +77,14 @@ public:
 	typedef typename DataContainer::value_type value_type;
 	typedef BinaryTree<value_type> tree_type;
 	typedef AbstractKernelFunction<value_type> kernel_type;
-	typedef std::pair<double,std::size_t> result_type;
+	typedef std::pair<double, std::size_t> result_type;
+
 	/// create a new query
 	/// \param  tree    Underlying space-partitioning tree (this is assumed to persist for the lifetime of the query object).
 	/// \param  data    Container holding the stored data which is referenced by the tree
 	/// \param  point   Point whose nearest neighbors are to be found.
-	IterativeNNQuery(tree_type const* tree,DataContainer const& data, value_type const& point)
-	:m_data(data)
+	IterativeNNQuery(tree_type const* tree, DataContainer const& data, value_type const& point)
+	: m_data(data)
 	, m_reference(point)
 	, m_nextIndex(0)
 	, mp_trace(NULL)
@@ -119,19 +111,19 @@ public:
 	}
 
 	/// destroy the query object and its internal data structures
-	~IterativeNNQuery(){
+	~IterativeNNQuery() {
 		m_queue.clear();
 		delete mp_trace;
 	}
 
 
 	/// return the number of neighbors already found
-	std::size_t neighbors() const{
+	std::size_t neighbors() const {
 		return m_neighbors;
 	}
 
 	/// find and return the next nearest neighbor
-	result_type next(){
+	result_type next() {
 		if (m_neighbors >= mp_trace->m_tree->size()) 
 			throw SHARKEXCEPTION("[IterativeNNQuery::next] no more neighbors available");
 
@@ -206,13 +198,13 @@ private:
 			if (mep_right != NULL) delete mep_right;
 		}
 		
-		void createLeftNode(tree_type const* tree,DataContainer const& data, value_type const& reference){
+		void createLeftNode(tree_type const* tree, DataContainer const& data, value_type const& reference){
 			if (tree->left()->hasChildren())
 				mep_left = new TraceNode(tree->left(), this, reference);
 			else
 				mep_left = new TraceLeaf(tree->left(), this, data, reference);
 		}
-		void createRightNode(tree_type const* tree,DataContainer const& data,value_type const& reference){
+		void createRightNode(tree_type const* tree, DataContainer const& data, value_type const& reference){
 			if (tree->right()->hasChildren())
 				mep_right = new TraceNode(tree->right(), this, reference);
 			else
@@ -258,12 +250,12 @@ private:
 	/// hook type for intrusive container
 	typedef boost::intrusive::set_base_hook<> HookType;
 
-	/// Leaves of the three have three functions:
+	/// Leaves of the three have three roles:
 	/// (1) they are tree nodes holding exactly one point
 	///     (possibly multiple copies of this point),
 	/// (2) they know the distance of their point to the
 	///     reference point,
-	/// (3) they can be added to the candidate queued.
+	/// (3) they can be added to the candidates queue.
 	class TraceLeaf : public TraceNode, public HookType
 	{
 	public:
@@ -286,7 +278,8 @@ private:
 		inline bool operator < (TraceLeaf const& rhs) const{
 			if (m_squaredPtDistance == rhs.m_squaredPtDistance) 
 				return (this->m_tree < rhs.m_tree);
-			return (m_squaredPtDistance < rhs.m_squaredPtDistance);
+			else
+				return (m_squaredPtDistance < rhs.m_squaredPtDistance);
 		}
 
 		/// Squared distance of the single point in the leaf to the reference point.
@@ -320,7 +313,7 @@ private:
 			tn = par;
 		}
 	}
-	
+
 	result_type getNextPoint(TraceLeaf const& leaf){
 		double dist = std::sqrt(leaf.m_squaredPtDistance);
 		std::size_t index = leaf.m_tree->index(m_nextIndex);
@@ -373,7 +366,7 @@ private:
 
 	///\brief Datastorage to lookup the points referenced by the space partitioning tree.
 	DataContainer const& m_data;
-	
+
 	/// reference point for this query
 	value_type m_reference;
 
@@ -400,13 +393,16 @@ private:
 	std::size_t m_neighbors;
 };
 
+
 ///\brief Nearest Neighbors implementation using binary trees
 ///
-///Returns the labels and distances of the k nearest neighbors of a point 
+/// Returns the labels and distances of the k nearest neighbors of a point.
 template<class InputType, class LabelType>
-class TreeNearestNeighbors:public AbstractNearestNeighbors<InputType,LabelType>{
+class TreeNearestNeighbors:public AbstractNearestNeighbors<InputType,LabelType>
+{
 private:
 	typedef AbstractNearestNeighbors<InputType,LabelType> base_type;
+
 public:
 	typedef LabeledData<InputType, LabelType> Dataset;
 	typedef BinaryTree<InputType> Tree;
@@ -414,14 +410,15 @@ public:
 	typedef typename Batch<InputType>::type BatchInputType;
 
 	TreeNearestNeighbors(Dataset const& dataset, Tree const* tree)
-	:m_dataset(dataset), m_inputs(dataset.inputs()), m_labels(dataset.labels()),mep_tree(tree){}
-		
+	: m_dataset(dataset), m_inputs(dataset.inputs()), m_labels(dataset.labels()),mep_tree(tree)
+	{ }
+
 	///\brief returns the k nearest neighbors of the point
 	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const{
 		std::size_t numPoints = shark::size(patterns);
 		std::vector<DistancePair> results(k*numPoints);
 		for(std::size_t p = 0; p != numPoints; ++p){
-			IterativeNNQuery<DataView<Data<InputType> const> > query(mep_tree, m_inputs,get(patterns,p));
+			IterativeNNQuery<DataView<Data<InputType> const> > query(mep_tree, m_inputs, get(patterns, p));
 			//find the neighbors using the queries
 			for(std::size_t i = 0; i != k; ++i){
 				typename IterativeNNQuery<DataView<Data<InputType> const> >::result_type result = query.next();
@@ -431,10 +428,11 @@ public:
 		}
 		return results;
 	}
-	
+
 	LabeledData<InputType,LabelType>const& dataset()const {
 		return m_dataset;
 	}
+
 private:
 	Dataset const& m_dataset;
 	DataView<Data<InputType> const> m_inputs;
