@@ -6,15 +6,6 @@
 *  \author  T. Glasmachers, O. Krause
 *  \date    2012
 *
-*  \par Copyright (c) 2011:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-27974<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*
 *
 *
 *  <BR><HR>
@@ -119,10 +110,10 @@ public:
 	void eval(BatchInputType const& patterns, BatchOutputType& output, State& state)const{
 		std::size_t numPatterns = shark::size(patterns);
 		std::vector<typename NearestNeighbors::DistancePair> neighbors = m_algorithm->getNeighbors(patterns,m_neighbors);
-		
+
 		output.resize(numPatterns);
 		zero(output);
-		
+
 		for(std::size_t p = 0; p != numPatterns;++p){
 			std::vector<std::size_t> histogram(m_classes,0);
 			for ( std::size_t k = 0; k != m_neighbors; ++k){
@@ -130,7 +121,7 @@ public:
 			}
 			output(p) = std::max_element(histogram.begin(),histogram.end()) - histogram.begin();
 		}
-	}	
+	}
 
 	/// from ISerializable, reads a model from an archive
 	void read(InArchive& archive){
