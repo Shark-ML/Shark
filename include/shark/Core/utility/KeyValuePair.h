@@ -1,17 +1,9 @@
 /*!
- *  \brief Represents a pair of Key and Values as wlel as functions working with them
+ *  \brief Provides a pair of Key and Value, as well as functions working with them.
  *
  *
  *  \author  Oswin Krause
  *  \date    2012
- *  \par Copyright (c) 2010-2011:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *
  *
  *  <BR><HR>
