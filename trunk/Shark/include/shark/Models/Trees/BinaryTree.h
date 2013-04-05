@@ -6,15 +6,6 @@
 *  \author  T. Glasmachers
 *  \date    2011
 *
-*  \par Copyright (c) 2011:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-27974<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*
 *
 *  <BR><HR>
 *  This file is part of Shark. This library is free software;
@@ -133,52 +124,8 @@ public:
 
 	/// \brief Root node constructor: build the tree from data.
 	///
-	/// \par
-	/// The constructor prepares a list of index/pointer
-	/// pairs representing the data, independent of the
-	/// underlying container. It is assumed that the
-	/// lifetime of the container exceeds the lifetime
-	/// of the tree, and that point_iterators to the elements
-	/// stay valid throught the entire lifetime of the tree
-	///
-	/// \par
-	/// Sub-classes need to invoke a recursive construction
-	/// method to build up a tree from the data found in
-	/// mp_indexList. For this purpose the entries in mp_indexList
-	/// are split into contiguous sub-lists at every split.
-	/// This recursive construction mechanism is supported
-	/// by this super class by means of the splitList method.
-	///
-	/// \par
-	/// The constructor of a sub-class will probably call a
-	/// recursive member function like this for building the
-	/// tree:
-	///
-	/// \code
-	/// void buildTree(TreeConstruction tc)
-	/// {
-	///   // check stopping criterion:
-	///   if (tc.maxDepth() == 0 || size() <= tc.maxBucketSize()) { m_nodes = 1; return; }
-	///
-	///   // TODO: Define the "funct" member function,
-	///   //       which is hereafter assumed to return
-	///   //       useful values. This is the sub-class
-	///   //       specific part of tree construction.
-	///
-	///   // split the list in-place into sub-lists:
-	///   std::size_t leftsize = splitList();
-	///   if (leftsize == size()) { m_nodes = 1; return; }
-	///
-	///   // create sub-nodes:
-	///   mp_left = new TreeSubclass(this, mp_indexList, leftsize);
-	///   mp_right = new TreeSubclass(this, mp_indexList + leftsize, m_size - leftsize);
-	///
-	///   // recurse:
-	///   mp_left->buildTree(tc.nextDepthLevel());
-	///   mp_right->buildTree(tc.nextDepthLevel());
-	///   m_nodes = 1 + mep_left->nodes() + mep_right->nodes();
-	/// }
-	/// \endcode
+	/// Please refer the specific sub-classes such as KDTree
+	/// for examples of how the binary tree is built.
 	///
 	BinaryTree(std::size_t size)
 	: mep_parent(NULL)
@@ -256,7 +203,7 @@ public:
 	/// \brief Function describing the separation of space.
 	///
 	/// \par
-	/// This function is translated by subtracting the
+	/// This function is shifted by subtracting the
 	/// threshold from the virtual function "funct" (which
 	/// acts as a "decision" function to split space into
 	/// sub-cells).
@@ -265,7 +212,7 @@ public:
 	/// cells are thresholded at zero. We obtain the two
 	/// cells:<br/>
 	/// left ("negative") cell: {x | distance(x) < 0}<br/>
-	/// right ("positive") call {x | distance(x) >= 0}
+	/// right ("positive") cell {x | distance(x) >= 0}
 	double distanceFromPlane(value_type const& point) const{
 		return funct(point) - m_threshold;
 	}
@@ -350,8 +297,8 @@ protected:
 	///
 	/// \par
 	/// This function splits the space represented by the
-	/// node by thresholding at zero. The "negative" cell,
-	/// represented in the "left" sub-node, represents
+	/// node by thresholding at m_threshold. The "negative"
+	/// cell, represented in the "left" sub-node, represents
 	/// the space {x | funct(x) < threshold}. The
 	/// "positive" cell, represented by the "right"
 	/// sub-node, represents {x | funct(x) >= threshold}.
@@ -381,37 +328,21 @@ protected:
 
 		//KeyValueRange<iterator1,iterator2> kvrange = ;
 		std::pair<iterator1, iterator2> splitpoint = partitionEqually(zipKeyValuePairs(values,points)).iterators();
-		iterator1 valueSplitpoint = splitpoint.first;
+		iterator1 valuesSplitpoint = splitpoint.first;
 		iterator2 pointsSplitpoint = splitpoint.second;
-		if(valueSplitpoint == valuesEnd){//partitioning failed, all values are equal :(
-			m_threshold=*valuesBegin;
+		if (valuesSplitpoint == valuesEnd) {
+			// partitioning failed, all values are equal :(
+			m_threshold = *valuesBegin;
 			return splitpoint.second;
 		}
 
-//TODO: do balancing in the case that one half of the range consists only of the same values.
-//
-		////if the right
-		//double maxValue = *(--valuesEnd);
-		//double minValue = *valuesBegin;
-		//if(*valueSplitpoint == maxValue){
-		//	--valueSplitpoint;
-		//	--pointsSplitpoint;
-		//}
-		//if(*valueSplitpoint == minValue){
-		//	++valueSplitpoint;
-		//	++pointsSplitpoint;
-		//}
-		//else while(*(valueSplitpoint-1) == *valueSplitpoint){
-		//	--valueSplitpoint;
-		//	--pointsSplitpoint;
-		//}
+		// We don't want the threshold to be the value of an element but always in between two of them.
+		// This ensures that no point of the training set lies on the boundary. This leeds to more stable
+		// results. So we use the mean of the found splitpoint and the nearest point on the other side
+		// of the boundary.
+		double maximum = *std::max_element(valuesBegin, valuesSplitpoint);
+		m_threshold = 0.5*(maximum + *valuesSplitpoint);
 
-		//we don't want the threshold to be the value of an element but always inbetween two of them.
-		//this ensures that no point of the training set lies on the boundary and leeds to more stable
-		//results. So we use the found splitpoint and the nearest point on the other side of the boundary
-		//to calculate their mean.
-		double maximum = *std::max_element(valuesBegin,valueSplitpoint);
-		m_threshold = 0.5*(maximum + *valueSplitpoint);
 		return pointsSplitpoint;
 	}
 

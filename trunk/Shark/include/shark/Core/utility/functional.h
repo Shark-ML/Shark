@@ -82,15 +82,15 @@ typename boost::range_iterator<Range>::type median_element(Range const& rangeAda
 	Range adaptorCopy(rangeAdaptor);
 	return median_element(adaptorCopy);
 }
-///\brief Partitions a range in two parts as equal in size as possible.
+/// \brief Partitions a range in two parts as equal in size as possible.
 ///
-///The Algorithm partitions the range and returns the splitpoint. The elements in the range
-///are ordered such, that at the end all elements in [begin,splitpoint)< [splitpoint,end]
-///this partition is done such, that the ranges are as equally sized as possible.
-///It is guaranteed, that the left range is not empty. However, if the range consists only
-///of equal elements, the return value will be the end iterator indicating that there is no
-///split possible.
-///The whole algorithm runs in linear time by iterating 2 times over the sequence.
+/// The Algorithm partitions the range and returns the splitpoint. The elements in the range
+/// are ordered such that all elements in [begin,splitpoint) < [splitpoint,end).
+/// This partition is done such that the ranges are as equally sized as possible.
+/// It is guaranteed that the left range is not empty. However, if the range consists only
+/// of equal elements, the return value will be the end iterator indicating that there is no
+/// split possible.
+/// The whole algorithm runs in linear time by iterating 2 times over the sequence.
 template<class Range>
 typename boost::range_iterator<Range>::type partitionEqually(Range& range){
 	typedef typename boost::range_iterator<Range>::type iterator;
@@ -100,17 +100,19 @@ typename boost::range_iterator<Range>::type partitionEqually(Range& range){
 	iterator end = boost::end(range);
 	iterator medianIter = median_element(range);
 
-	//in 99% of the cases we would be done right now. in the remaining 1% the median element is
-	//not unique so we partition the left and the right such that all copies are ordered in the middle
-	iterator left = std::partition(begin,medianIter,boost::bind(std::less<value_type>(),_1,*medianIter));
-	iterator right = std::partition(medianIter,end,boost::bind(std::equal_to<value_type>(),_1,*medianIter));
+	// in 99% of the cases we would be done right now. in the remaining 1% the median element is
+	// not unique so we partition the left and the right such that all copies are ordered in the middle
+	value_type median = *medianIter;
+	iterator left = std::partition(begin,medianIter,boost::bind(std::less<value_type>(),_1,median));
+	iterator right = std::partition(medianIter,end,boost::bind(std::equal_to<value_type>(),_1,median));
 
-	//we guarantee, that the left range is not empty
+	// we guarantee that the left range is not empty
 	if(left == begin){
 		return right;
 	}
-	//now we return left or right depending on which is nearer to the median
-	if(medianIter-left <= right - medianIter)
+
+	// now we return left or right, maximizing size balance
+	if (left - begin >= end - right)
 		return left;
 	else
 		return right;
