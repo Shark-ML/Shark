@@ -1,20 +1,9 @@
 //===========================================================================
 /*!
-*  \file kNN.cpp
-*
 *  \brief K-nearest-neighbor (k-NN) example program.
 *
 *  \author  T. Glasmachers
 *  \date    2011
-*
-*  \par Copyright (c) 2011:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-27974<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
 *
 *
 *  <BR><HR>
