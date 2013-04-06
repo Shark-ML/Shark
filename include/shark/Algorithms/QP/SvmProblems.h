@@ -226,7 +226,7 @@ private:
 	MGStep selectMGVariable(Problem& problem,std::size_t i) const{
 		
 		//best variable pair found so far
-		std::size_t bestIndex;//index of variable
+		std::size_t bestIndex = 0;//index of variable
 		double bestGain = 0;
 		
 		double largestUp = -1e100;
