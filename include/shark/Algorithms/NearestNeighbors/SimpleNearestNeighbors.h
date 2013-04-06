@@ -33,8 +33,8 @@
 */
 //===========================================================================
 
-#ifndef SHARK_ALGORITHMS_NEARESTNEIGHBORS_TREENEARESTNEIGHBORS_H
-#define SHARK_ALGORITHMS_NEARESTNEIGHBORS_TREENEARESTNEIGHBORS_H
+#ifndef SHARK_ALGORITHMS_NEARESTNEIGHBORS_SIMPLENEARESTNEIGHBORS_H
+#define SHARK_ALGORITHMS_NEARESTNEIGHBORS_SIMPLENEARESTNEIGHBORS_H
 
 #include <shark/Algorithms/NearestNeighbors/AbstractNearestNeighbors.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
