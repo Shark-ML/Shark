@@ -101,7 +101,6 @@ public:
 		base_type::m_offset = RealZeroVector(offset ? outputs : 0);
 		if(!traits::IsSparse<Matrix>::value){
 			base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-			//base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
 		}
 	}
 
@@ -109,7 +108,6 @@ public:
 	: m_matrix(matrix){
 		if(!traits::IsSparse<Matrix>::value){
 			base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-			//base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
 		}
 	}
 
@@ -118,7 +116,6 @@ public:
 	, m_matrix(matrix){
 		if(!traits::IsSparse<Matrix>::value){
 			base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-			//base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
 		}
 	}
 
@@ -221,63 +218,6 @@ public:
 				noalias(subrange(gradient, first, first + outputs))+= row(coefficients,i);
 			}
 		}
-	}
-	void weightedParameterDerivative(
-		BatchInputType const & pattern,
-		BatchOutputType const & coefficients,
-		Batch<RealMatrix>::type const & errorHessian,//maybe a batch of matrices is bad?,
-		State const& state,
-		RealVector& derivative,
-		RealMatrix& hessian
-	)const{
-		//~ //todo: doesn't work for sparse.
-		//~ SIZE_CHECK(coefficients.size()==outputSize());
-		//~ SIZE_CHECK(errorHessian.size1()==outputSize() && errorHessian.size2()==outputSize());
-		//~ derivative.resize(numberOfParameters());
-		//~ hessian.resize(numberOfParameters(),numberOfParameters());
-		//~ hessian.clear();
-		//~ std::size_t inputs = inputSize();
-		//~ std::size_t outputs = outputSize();
-		//~ std::size_t offsetStart = inputs*outputs;
-		//~ std::size_t offsetEnd = offsetStart+outputs;
-
-		//~ for (std::size_t i = 0; i < outputs; i++) {
-			//~ std::size_t startI = i*inputs;
-			//~ std::size_t endI = startI + inputs;
-			//~ subrange(derivative, startI, endI) = coefficients(i) * pattern;
-
-			//~ //The creation of the 2nd derivative matrix is a bit complicated. what it does is the following:
-			//~ //it calculates sum_ij  HE_ij*dF_i^T*dF_j
-			//~ //where HE is the hessian of the loss function and dF_i is the the derivative of the ith output of the Model
-			//~ //Because we don't save the weights for one output continuously, the derivative looks like this:
-			//~ //dF_1 = [x_1,x_2,0,0,b_1,0]
-			//~ //dF_2 = [0,0,x_1,x_2,0,b_2]
-			//~ //where x is a pattern and b the bias weight. this is the deriavtive of a 2x2 model
-			//~ //the outer product of these two than has entries in this form:
-			//~ //[0,0,0,0,0,0]
-			//~ //[0,0,0,0,0,0]
-			//~ //[1,1,0,0,1,0]
-			//~ //[1,1,0,0,1,0]
-			//~ //[0,0,0,0,0,0]
-			//~ //[1,1,0,0,1,0]
-			//~ //and this is what the code below computes
-			//~ for (std::size_t j = 0; j < outputs; j++) {
-				//~ std::size_t startJ = j*inputs;
-				//~ std::size_t endJ = startJ + inputs;
-
-				//~ subrange(hessian, startI, endI,startJ,endJ)  += errorHessian(i,j) * outer_prod(pattern,pattern);
-				//~ if (base_type::hasOffset()) {
-					//~ for(std::size_t k =0; k != inputs; ++k){
-						//~ hessian(offsetStart+i,startJ+k)=hessian(startI+k,offsetStart+j) = errorHessian(i,j) *pattern(k);
-					//~ }
-					//~ hessian(offsetStart+i,offsetStart+j) = errorHessian(i,j);
-
-				//~ }
-			//~ }
-		//~ }
-		//~ if (base_type::hasOffset()) {
-			//~ subrange(derivative, offsetStart, offsetEnd) = coefficients;
-		//~ }
 	}
 
 	void read(InArchive& archive){

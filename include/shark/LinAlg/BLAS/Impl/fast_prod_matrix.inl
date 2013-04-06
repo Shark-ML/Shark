@@ -93,9 +93,16 @@ void fast_prod_detail(
 	if ( !beta ){
 		shark::zero(matC);
 	}
-	axpy_prod(matA(),matB(),matC(),false);
-	//sparse_prod(matA(),matB(),matC(),false);
+	else if(alpha != 1.0){
+		matC()/=alpha;
+	}
 	
+	if(traits::isRowMajor(matA) && traits::isColumnMajor(matB)){
+		matC()+=prod(matA,matB);
+	}
+	else
+		axpy_prod(matA(),matB(),matC(),false);
+
 	if(alpha != 1.0){
 		matC() *= alpha;
 	}
