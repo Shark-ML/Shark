@@ -40,12 +40,12 @@
 #include <algorithm>
 
 #include <shark/Algorithms/KMeans.h>
-
+#include <shark/Models/Clustering/HardClusteringModel.h>
 
 using namespace shark;
 
 
-BOOST_AUTO_TEST_CASE(KMeans)
+BOOST_AUTO_TEST_CASE(KMeans_simple)
 {
 	RealVector v(1);
 
@@ -84,4 +84,60 @@ BOOST_AUTO_TEST_CASE(KMeans)
 	BOOST_CHECK(c.element(2)(0) > 20.0);
 	BOOST_CHECK(c.element(2)(0) < 21.0);
 	BOOST_CHECK_LE(iterations, 3u);
+}
+
+// tests whether the algorithm leads to clusters which are constant (i.e. the algorithm converged to
+// a stationary solution).
+BOOST_AUTO_TEST_CASE(KMeans_multiple_gauss)
+{
+	const unsigned int numTrials = 100;
+	const unsigned int numPoints = 300;
+	const unsigned int numMeans = 3;
+	const unsigned int numDimensions = 5;
+	for(unsigned int trial = 0; trial != numTrials; ++trial){
+		//prepare means
+		std::vector<RealVector> means(numMeans,RealVector(numDimensions));
+		for (unsigned int i=0; i<numMeans; i++){
+			for (unsigned int j=0; j <numDimensions; j++){
+				means[i](j) = Rng::uni(0,5);
+			}
+		}
+		// prepare data set
+		std::vector<RealVector> data(numPoints);
+		for (std::size_t i=0; i<numPoints; i++)
+		{
+			data[i]=means[i%numMeans];
+			for (unsigned int j=0; j <numDimensions; j++){
+				data[i](j) += Rng::uni(0,1);
+			}
+		}
+		Data<RealVector> dataset = createDataFromRange(data);
+
+		// invoke k-means with random centroids and no upper limit for iterations
+		Centroids centroids;
+		std::size_t iterations = kMeans(dataset, numMeans, centroids);
+
+		// check result
+		BOOST_REQUIRE_EQUAL( centroids.centroids().numberOfElements(), numMeans);
+		BOOST_REQUIRE_EQUAL( dataDimension(centroids.centroids()), numDimensions);
+		HardClusteringModel<RealVector> model(&centroids);
+		
+		//assign centers
+		Data<unsigned int> clusters = model(dataset);
+		
+		//create cluster means (they should be the same as the previous ones)
+		std::vector<RealVector> clusterMeans(numMeans,RealVector(numDimensions,0));
+		std::vector<std::size_t> members = classSizes(clusters);
+		for (std::size_t i=0; i<numPoints; i++)
+		{
+			unsigned int id = clusters.element(i);
+			clusterMeans[id]+=data[i]/members[id];
+		}
+		
+		//check that the means are the same
+		for (unsigned int i=0; i<numMeans; i++){
+			double distance = distanceSqr(clusterMeans[i],centroids.centroids().element(i));
+			BOOST_CHECK_SMALL(distance, 1.e-10);
+		}
+	}
 }

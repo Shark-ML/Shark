@@ -39,11 +39,14 @@
 #include <shark/Data/DataView.h>
 
 #include <boost/range/algorithm/equal.hpp>
+#include <limits>
 using namespace shark;
 
 
 std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centroids& centroids, std::size_t maxIterations){
 	SIZE_CHECK(k <= dataset.numberOfElements());
+	if(!maxIterations)
+		maxIterations = std::numeric_limits<std::size_t>::max();
 	
 	// initialization
 	std::size_t ell = dataset.numberOfElements();
@@ -54,43 +57,42 @@ std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centro
 		centroids.initFromData(dataset,k);
 	}
 	HardClusteringModel<RealVector> model(&centroids);
-	ClassificationDataset clustersAssignmentSet(dataset,model(dataset));
-	DataView<ClassificationDataset> clusters(clustersAssignmentSet);
-	
+	ClassificationDataset clusterMembership(dataset,model(dataset));
+	typedef ClassificationDataset::const_element_reference ConstReference;
+
 	// k-means loop
 	std::size_t iter = 0;
-	for(; !maxIterations || iter != maxIterations; ++iter) {
-		//we don't need to evaluate in the first iteration
-		if(iter != 0){
-			Data<unsigned int> newClusterAssignment = model(dataset);
-			//if the new clustering is the same, stop 
-			bool equal = boost::equal(
-				newClusterAssignment.elements(),
-				clustersAssignmentSet.labels().elements()
-			);
-			if(equal)
-				break;
-			swap(newClusterAssignment,clustersAssignmentSet.labels());
-		}
+	bool equal = false;
+	for(; iter != maxIterations && !equal; ++iter) {
 		// compute new centers
 		std::vector<std::size_t> numPoints(k,0); // number of points in each cluster
 		std::vector<RealVector> newCenters(k,RealVector(dimension,0.0));
 			
-		for(std::size_t i = 0; i != ell; ++i) {
-			std::size_t j = clusters[i].label;
-			noalias(newCenters[j]) += clusters[i].input;
+		BOOST_FOREACH(ConstReference element,clusterMembership.elements()){
+			std::size_t j = element.label;
+			noalias(newCenters[j]) += element.input;
 			numPoints[j]++;
 		}
 		for (std::size_t j=0; j<k; j++) {
 			if (numPoints[j] == 0) {
 				// empty cluster - assign random training point
-				newCenters[j] = clusters[Rng::discrete(0, ell-1)].input;
+				std::size_t index = Rng::discrete(0, ell-1);
+				newCenters[j] = dataset.element(index);
 			}
 			else {
 				newCenters[j] /= (double)numPoints[j];
 			}
 		}
 		centroids.setCentroids(createDataFromRange(newCenters));
+		
+		//compute new cluster memberships and check whether they are 
+		// equal to the old one, in that case we stop after this iteration
+		Data<unsigned int> newClusterMembership = model(dataset);
+		equal = boost::equal(
+			newClusterMembership.elements(),
+			clusterMembership.labels().elements()
+		);
+		clusterMembership.labels() = newClusterMembership;
 	}
 
 	// return the number of iterations
