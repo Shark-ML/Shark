@@ -105,6 +105,21 @@ public:
 		return m_cacheEntry[i].data;
 	}
 	
+	/// \brief Resizes a line while retaining the data stored inside it.
+	///
+	/// if the new size is smaller than the old, only the first size entries are saved.
+	void resizeLine(std::size_t i ,std::size_t size){
+		resizeLine(m_cacheEntry[i],size);
+	}
+	
+	///\brief Marks cache line i for deletion, that is the next time memory is needed, this line will be freed.
+	void markLineForDeletion(std::size_t i){
+		if(!isCached(i)) return;
+		CacheEntry& block = m_cacheEntry[i];
+		m_lruList.erase(m_lruList.iterator_to(block));
+		m_lruList.push_back(block);
+	}
+	
 	///\brief swaps index of lines i and j.
 	void swapLineIndices(std::size_t i, std::size_t j){
 		typedef typename boost::intrusive::list<CacheEntry>::iterator Iterator;
@@ -167,21 +182,6 @@ public:
 	}
 	std::size_t maxSize()const{
 		return m_maxSize;
-	}
-	
-	/// \brief Resizes a line while retaining the data stored inside it.
-	///
-	/// if the new size is smaller than the old, only the first size entries are saved.
-	void resizeLine(std::size_t i ,std::size_t size){
-		resizeLine(m_cacheEntry[i],size);
-	}
-	
-	///\brief Marks cache line i for deletion, that is the next time memory is needed, this line will be freed.
-	void markLineForDeletion(std::size_t i){
-		if(!isCached(i)) return;
-		CacheEntry& block = m_cacheEntry[i];
-		m_lruList.erase(m_lruList.iterator_to(block));
-		m_lruList.push_back(block);
 	}
 	
 	///\brief empty cache

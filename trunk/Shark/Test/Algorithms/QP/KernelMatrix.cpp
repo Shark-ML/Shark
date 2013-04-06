@@ -133,5 +133,66 @@ BOOST_AUTO_TEST_CASE( QP_BlockMatrix ) {
 	testMatrix(km,matrix);
 }
 
+BOOST_AUTO_TEST_CASE( QP_CachedMatrix_Simple ) {
+	std::size_t numRowsToStore = 10;
+	std::size_t cacheSize = numRowsToStore*size;
+	
+	KernelMatrix<RealVector,double> km(kernel,data.inputs());
+	CachedMatrix<KernelMatrix<RealVector,double> > cache(&km,cacheSize);
+	BOOST_REQUIRE_EQUAL(cache.getMaxCacheSize(),cacheSize);
+	BOOST_REQUIRE_EQUAL(cache.getCacheSize(),0);
+	
+	testMatrix(cache,kernelMatrix);
+	//this last call should not have cached anything
+	BOOST_REQUIRE_EQUAL(cache.getCacheSize(),0);
+	for(std::size_t i = 0; i != size; ++i){
+		BOOST_CHECK_EQUAL(cache.isCached(i), 0);
+		BOOST_CHECK_EQUAL(cache.getCacheRowSize(i), 0);
+	}
+}
+BOOST_AUTO_TEST_CASE( QP_CachedMatrix_Flipping ) {
+	std::size_t numRowsToStore = 10;
+	std::size_t cacheSize = numRowsToStore*size;
+	std::size_t simulationSteps = 1000;
+	
+	KernelMatrix<RealVector,double> km(kernel,data.inputs());
+	KernelMatrix<RealVector,double> groundTruthMatrix(kernel,data.inputs());
+	CachedMatrix<KernelMatrix<RealVector,double> > cache(&km,cacheSize);
+	BOOST_REQUIRE_EQUAL(cache.getMaxCacheSize(),cacheSize);
+	BOOST_REQUIRE_EQUAL(cache.getCacheSize(),0);
+
+	//next do a running check that the cache works with flipping of rows and random accesses
+	for(std::size_t t = 0; t != simulationSteps; ++t){
+		std::size_t index = Rng::discrete(0,size-1);
+		std::size_t accessSize = Rng::discrete(0.5*size,size-1);
+		std::size_t flipi = Rng::discrete(0,size-1);
+		std::size_t flipj = Rng::discrete(0,size-1);
+		
+		//access matrix cache and check whether the right values are returned
+		double* line = cache.row(index,0,accessSize);
+		for(std::size_t i = 0; i != accessSize; ++i){
+			BOOST_CHECK_CLOSE(line[i],groundTruthMatrix(index,i), 1.e-10);
+		}
+		//flip
+		cache.flipColumnsAndRows(flipi,flipj);
+		groundTruthMatrix.flipColumnsAndRows(flipi,flipj);
+	}
+	
+	//truncate the cache
+	cache.setMaxCachedIndex(10);
+	for(std::size_t i = 0; i != 10; ++i){
+		BOOST_CHECK(!cache.isCached(i) || cache.getCacheRowSize(i) <= 10 );
+	}
+	
+	//finally clear the cache, afterwards it should be empty
+	cache.clear();
+	BOOST_REQUIRE_EQUAL(cache.getCacheSize(),0);
+	for(std::size_t i = 0; i != size; ++i){
+		BOOST_CHECK_EQUAL(cache.isCached(i), false);
+		BOOST_CHECK_EQUAL(cache.getCacheRowSize(i), 0);
+	}
+	
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

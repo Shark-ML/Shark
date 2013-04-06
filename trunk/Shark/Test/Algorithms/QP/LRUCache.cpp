@@ -25,7 +25,6 @@ void simulateCache(
 	for(std::size_t t = 0; t != simulationSteps; ++t){
 		std::size_t index = accessIndices[t];
 		std::size_t size = accessSizes[t];
-		std::cout<<index<<" "<<size<<"\n";
 		//in the simulated cache we can just throw queried elements away if they would
 		//ned to be resized and add them later on
 		if(size > elemSizes[index] && elemSizes[index] != 0){
@@ -56,20 +55,11 @@ void simulateCache(
 			line[i] = i+1;
 		}
 		
-		std::cout<<"list:  ";
-		for(std::list<std::size_t>::iterator i = lruList.begin(); i != lruList.end(); ++i){
-			std::cout<<*i<<":"<<elemSizes[*i]<<" ";
-		}
-		std::cout<<std::endl;
-		std::cout<<"cache: ";
-		for(std::size_t i = 0; i != cache.cachedLines(); ++i){
-			std::size_t index = cache.listIndex(i);
-			std::cout<<index<<":"<<cache.lineLength(index)<<" ";
-		}
-		std::cout<<std::endl;
 		//check whether the caching is correct
 		for(std::size_t i = 0; i != maxIndex; ++i){
 			BOOST_REQUIRE_EQUAL(cache.lineLength(i), elemSizes[i]);
+			BOOST_CHECK(cache.cachedLines()<= cacheSize);
+			BOOST_CHECK_EQUAL(cache.size(), currentCacheSize);
 			//check that elements are the same
 			for(std::size_t j = 0; j != elemSizes[i]; ++j){
 				BOOST_CHECK_EQUAL(cache.getLinePointer(i)[j], j+1);
@@ -78,7 +68,6 @@ void simulateCache(
 		
 		//apply flipping
 		std::pair<std::size_t,std::size_t > flip = flips[t];
-		std::cout<<"swap: "<<flip.first<<" "<<flip.second<<std::endl;
 		if(flip.first == flip.second)
 			continue;
 		
@@ -94,67 +83,52 @@ void simulateCache(
 			*iter1 = flip.second;
 		else
 			std::iter_swap(iter1,iter2);
-		//print
-		std::cout<<"list:  ";
-		for(std::list<std::size_t>::iterator i = lruList.begin(); i != lruList.end(); ++i){
-			std::cout<<*i<<":"<<elemSizes[*i]<<" ";
-		}
-		std::cout<<std::endl;
 		
 		//flip in real cache
 		cache.swapLineIndices(flip.first,flip.second);
 		
-		
-		std::cout<<"cache: ";
-		for(std::size_t i = 0; i != cache.cachedLines(); ++i){
-			std::size_t index = cache.listIndex(i);
-			std::cout<<index<<":"<<cache.lineLength(index)<<" ";
-		}
-		std::cout<<std::endl;
-		
 	}
 }
 
-//~ ///\brief tests whether simple same length access-schemes work
-//~ BOOST_AUTO_TEST_CASE( QP_LRUCache_Simple_Access ) {
-	//~ std::size_t cacheSize = 10;
-	//~ std::size_t maxIndex = 20;
-	//~ std::size_t simulationSteps = 1000;
+///\brief tests whether simple same length access-schemes work
+BOOST_AUTO_TEST_CASE( QP_LRUCache_Simple_Access ) {
+	std::size_t cacheSize = 10;
+	std::size_t maxIndex = 20;
+	std::size_t simulationSteps = 10000;
 	
-	//~ std::vector<std::size_t> accessIndices(simulationSteps);
-	//~ std::vector<std::size_t> accessSizes(simulationSteps,1);
-	//~ std::vector<std::pair<std::size_t,std::size_t > > flips(simulationSteps,std::pair<std::size_t,std::size_t >(0,0));
-	//~ for(std::size_t i = 0; i != simulationSteps; ++i){
-		//~ accessIndices[i] = Rng::discrete(0,maxIndex-1);
-		//~ //std::cout<<accessIndices[i]<<" ";
-	//~ }
-	//~ simulateCache(maxIndex, cacheSize,accessIndices,accessSizes,flips);
-//~ }
-//~ ///\brief tests whether simple same length access-schemes work
-//~ BOOST_AUTO_TEST_CASE( QP_LRUCache_DifferentLength_Access ) {
-	//~ std::size_t cacheSize = 10;
-	//~ std::size_t maxIndex = 20;
-	//~ std::size_t simulationSteps = 1000;
+	std::vector<std::size_t> accessIndices(simulationSteps);
+	std::vector<std::size_t> accessSizes(simulationSteps,1);
+	std::vector<std::pair<std::size_t,std::size_t > > flips(simulationSteps,std::pair<std::size_t,std::size_t >(0,0));
+	for(std::size_t i = 0; i != simulationSteps; ++i){
+		accessIndices[i] = Rng::discrete(0,maxIndex-1);
+	}
+	simulateCache(maxIndex, cacheSize,accessIndices,accessSizes,flips);
+}
+///\brief tests whether simple different  length access-schemes work
+BOOST_AUTO_TEST_CASE( QP_LRUCache_DifferentLength_Access ) {
+	std::size_t cacheSize = 10;
+	std::size_t maxIndex = 20;
+	std::size_t simulationSteps = 10000;
 	
-	//~ std::vector<std::size_t> accessIndices(simulationSteps);
-	//~ std::vector<std::size_t> accessSizes(simulationSteps);
-	//~ std::vector<std::pair<std::size_t,std::size_t > > flips(simulationSteps,std::pair<std::size_t,std::size_t >(0,0));
-	//~ for(std::size_t i = 0; i != simulationSteps; ++i){
-		//~ accessIndices[i] = Rng::discrete(0,maxIndex-1);
-		//~ accessSizes[i] = Rng::discrete(1,3);
-	//~ }
-	//~ simulateCache(maxIndex, cacheSize,accessIndices,accessSizes,flips);
-//~ }
+	std::vector<std::size_t> accessIndices(simulationSteps);
+	std::vector<std::size_t> accessSizes(simulationSteps);
+	std::vector<std::pair<std::size_t,std::size_t > > flips(simulationSteps,std::pair<std::size_t,std::size_t >(0,0));
+	for(std::size_t i = 0; i != simulationSteps; ++i){
+		accessIndices[i] = Rng::discrete(0,maxIndex-1);
+		accessSizes[i] = Rng::discrete(1,3);
+	}
+	simulateCache(maxIndex, cacheSize,accessIndices,accessSizes,flips);
+}
 
 ///\brief tests whether simple same length access-schemes work
 BOOST_AUTO_TEST_CASE( QP_LRUCache_DifferentLength_Access_fliped ) {
 	std::size_t cacheSize = 10;
 	std::size_t maxIndex = 20;
-	std::size_t simulationSteps = 1000;
+	std::size_t simulationSteps = 10000;
 	
 	std::vector<std::size_t> accessIndices(simulationSteps);
 	std::vector<std::size_t> accessSizes(simulationSteps);
-		std::vector<std::pair<std::size_t,std::size_t > > flips(simulationSteps);
+	std::vector<std::pair<std::size_t,std::size_t > > flips(simulationSteps);
 
 	for(std::size_t i = 0; i != simulationSteps; ++i){
 		accessIndices[i] = Rng::discrete(0,maxIndex-1);

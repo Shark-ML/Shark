@@ -718,7 +718,6 @@ public:
 		if (i > j)
 			std::swap(i,j);
 
-		m_cache.swapLineIndices(i,j);
 		// exchange all cache row entries
 		for (std::size_t  k = 0; k < size(); k++)
 		{
@@ -730,7 +729,7 @@ public:
 			else // only one element is available from the cache
 				line[i] = mep_baseMatrix->entry(k, j);
 		}
-		
+		m_cache.swapLineIndices(i,j);
 		mep_baseMatrix->flipColumnsAndRows(i, j);
 	}
 
@@ -759,10 +758,10 @@ public:
 		
 		//truncate lines which are too long
 		//~ m_cache.restrictLineSize(n);//todo: we can do that better, only resize if the memory is actually needed
-		//~ for(std::size_t i = 0; i != n; ++i){
-			//~ if(m_cache.lineLength(i) > n)
-				//~ m_cache.resizeLine(i,n);
-		//~ }
+		for(std::size_t i = 0; i != n; ++i){
+			if(m_cache.lineLength(i) > n)
+				m_cache.resizeLine(i,n);
+		}
 		for(std::size_t i = n; i != size(); ++i){//mark the lines for deletion which are not needed anymore
 			m_cache.markLineForDeletion(i);
 		}
