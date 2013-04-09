@@ -105,7 +105,7 @@ In this case a dataset can be created using::
 To create an dataset with space for *n* points, we need to define an example point which
 describes the objects to be saved in the set::
 
-  Data<RealVector> data(1000, RalVector(5));
+  Data<RealVector> data(1000, RealVector(5));
 
 In the above example, we create a dataset which can hold 1000
 5-dimensional vectors.  The provided Vector is not copied to all 1000
