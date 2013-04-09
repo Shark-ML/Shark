@@ -26,7 +26,7 @@ private:
 	
 	//Genererates a basic pattern representing the "center" of a mode.
 	void modePrototype(RealVector& pattern, unsigned mode) const {
-		for (std:: i = 0; i != pattern.size(); ++i){
+		for (std::size_t i = 0; i != pattern.size(); ++i){
 			pattern(i) = (mode % 2) ^ (i * (mode / 2 + 1) / pattern.size()) % 2;
 		}
 	}
@@ -44,7 +44,6 @@ private:
 	}
 	
 	void init() {
-		m_data.resize();
 		std::vector<RealVector> data(m_modes * m_copies,RealVector(m_dim));
 		for (std::size_t i = 0; i != data.size(); ++i) {
 			RealVector& element=data[i];
