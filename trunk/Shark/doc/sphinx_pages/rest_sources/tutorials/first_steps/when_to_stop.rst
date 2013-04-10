@@ -67,6 +67,7 @@ usage for each one::
    #include <shark/ObjectiveFunctions/Loss/CrossEntropy.h> //Loss used for training
    #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //The real loss for testing.
    #include <shark/ObjectiveFunctions/ErrorFunction.h> //The usual error function
+   #include <shark/Algorithms/Trainers/OptimizationTrainer.h> // Trainer wrapping iterative optimization
    #include <shark/Algorithms/StoppingCriteria/MaxIterations.h> //A simple stopping criterion that stops after a fixed number of iterations
    #include <shark/Algorithms/StoppingCriteria/TrainingError.h> //Stops when the algorithm seems to converge
    #include <shark/Algorithms/StoppingCriteria/GeneralizationQuotient.h> //Uses the validation error to track the progress
