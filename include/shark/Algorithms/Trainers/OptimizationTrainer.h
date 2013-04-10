@@ -1,22 +1,9 @@
 //===========================================================================
 /*!
- *  \file OptimizationTrainer.h
- *
- *  \brief Model training by means of general purpose optimization procedure.
- *
+ *  \brief Model training by means of a general purpose optimization procedure.
  *
  *  \author T. Glasmachers
  *  \date 2011-2012
- *
- *  \par Copyright (c) 1998-2011:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
  *
  *
  *  <BR><HR>
@@ -50,22 +37,24 @@ namespace shark {
 
 
 ///
-/// \brief Wrapper for training schemes based on (iterative) optimization
+/// \brief Wrapper for training schemes based on (iterative) optimization.
 ///
 /// \par
 /// The OptimizationTrainer class is designed to allow for
-/// model training via iterative minimization or a (regularized)
-/// risk or error function, such as in neural network training.
+/// model training via iterative minimization of a (regularized)
+/// risk or error function, such as in neural network
+/// "backpropagation" training.
 ///
 template <class Model, class LabelTypeT = typename Model::OutputType>
 class OptimizationTrainer : public AbstractTrainer<Model,LabelTypeT>
 {
 	typedef AbstractTrainer<Model,LabelTypeT> base_type;
+
 public:
 	typedef typename base_type::InputType InputType;
 	typedef typename base_type::LabelType LabelType;
 	typedef typename base_type::ModelType ModelType;
-	
+
 	typedef AbstractSingleObjectiveOptimizer< VectorSpace<double> > OptimizerType;
 	typedef SupervisedObjectiveFunction<InputType, LabelType> SupervisedObjectiveFunctionType;
 	typedef AbstractStoppingCriterion<SingleObjectiveResultSet<OptimizerType::SearchPointType> > StoppingCriterionType;
@@ -103,10 +92,14 @@ public:
 			mep_optimizer->configure(it->second);
 		}
 	}
-	void read( InArchive & archive ) {
+
+	void read( InArchive & archive )
+	{
 		archive >> mep_optimizer;
 	}
-	void write( OutArchive & archive ) const {
+
+	void write( OutArchive & archive ) const
+	{
 		archive << mep_optimizer;
 	}
 
