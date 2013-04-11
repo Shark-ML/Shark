@@ -1,16 +1,9 @@
 //===========================================================================
 /*!
+ *  \brief General and specialized quadratic program classes and a generic solver.
+ *
  *  \author  T. Glasmachers, O.Krause
  *  \date    2007-2013
- *
- *  \par Copyright (c) 1999-2011:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *
  *
  *  <BR><HR>
@@ -61,7 +54,7 @@ public:
 			diagonal(i) = quadratic.entry(i, i);
 		}
 	}
-	
+
 	/// \brief constructor which initializes a C-SVM problem
 	GeneralQuadraticProblem(MatrixType& quadratic, Data<unsigned int> const& labels, double C)
 	: quadratic(quadratic)
@@ -75,7 +68,7 @@ public:
 		SIZE_CHECK(dimensions() == linear.size());
 		SIZE_CHECK(dimensions() == quadratic.size());
 		SIZE_CHECK(dimensions() == labels.numberOfElements());
-		
+
 		for(std::size_t i = 0; i!= dimensions(); ++i){
 			unsigned int label = labels.element(i);
 			permutation[i] = i;
@@ -85,16 +78,16 @@ public:
 			boxMax(i) = label? C : 0.0;
 		}
 	}
-	
+
 	std::size_t dimensions()const{
 		return quadratic.size();
 	}
-	
+
 	/// exchange two variables via the permutation
 	void flipCoordinates(std::size_t i, std::size_t j)
 	{
 		if (i == j) return;
-		
+
 		// notify the matrix cache
 		quadratic.flipColumnsAndRows(i, j);
 		std::swap( alpha[i], alpha[j]);
@@ -104,26 +97,26 @@ public:
 		std::swap( boxMax[i], boxMax[j]);
 		std::swap( permutation[i], permutation[j]);
 	}
-	
-	
+
+
 	/// representation of the quadratic part of the objective function
 	MatrixType& quadratic;
 
 	///\brief Linear part of the problem
 	RealVector linear;
-	
+
 	/// Solution candidate
 	RealVector alpha;
-	
+
 	/// diagonal matrix entries
 	/// The diagonal array is of fixed size and not subject to shrinking.
 	RealVector diagonal;
-	
+
 	/// permutation of the variables alpha, gradient, etc.
 	std::vector<std::size_t> permutation;
-	
+
 	RealVector boxMin;
-	
+
 	RealVector boxMax;
 };
 
@@ -154,31 +147,31 @@ public:
 			diagonal(i) = quadratic.entry(i, i);
 		}
 	}
-	
+
 	std::size_t dimensions()const{
 		return quadratic.size();
 	}
-	
+
 	double boxMin(std::size_t i)const{
 		return m_lower;
 	}
 	double boxMax(std::size_t i)const{
 		return m_upper;
 	}
-	
+
 	/// representation of the quadratic part of the objective function
 	MatrixType& quadratic;
 
 	///\brief Linear part of the problem
 	RealVector linear;
-	
+
 	/// Solution candidate
 	RealVector alpha;
-	
+
 	/// diagonal matrix entries
 	/// The diagonal array is of fixed size and not subject to shrinking.
 	RealVector diagonal;
-	
+
 	/// exchange two variables via the permutation
 	void flipCoordinates(std::size_t i, std::size_t j)
 	{
@@ -191,7 +184,7 @@ public:
 		std::swap( diagonal[i], diagonal[j]);
 		std::swap( permutation[i], permutation[j]);
 	}
-	
+
 	/// permutation of the variables alpha, gradient, etc.
 	std::vector<std::size_t> permutation;
 private:
@@ -220,7 +213,7 @@ public:
 		SIZE_CHECK(dimensions() == linear.size());
 		SIZE_CHECK(dimensions() == quadratic.size());
 		SIZE_CHECK(dimensions() == labels.numberOfElements());
-		
+
 		for(std::size_t i = 0; i!= dimensions(); ++i){
 			permutation[i] = i;
 			diagonal(i) = quadratic.entry(i, i);
@@ -228,7 +221,7 @@ public:
 			positive[i] = linear(i) > 0;
 		}
 	}
-	
+
 	//Setup with changed linear part
 	CSVMProblem(MatrixType& quadratic, RealVector linear, Data<unsigned int> const& labels, double C)
 	: quadratic(quadratic)
@@ -249,8 +242,8 @@ public:
 			positive[i] = labels.element(i) ? 1: 0;
 		}
 	}
-	
-	
+
+
 	//Setup with changed linear part and different alpha starting point
 	CSVMProblem(MatrixType& quadratic, RealVector linear, Data<unsigned int> const& labels, RealVector const& alpha, double C)
 	: quadratic(quadratic)
@@ -260,7 +253,6 @@ public:
 	, permutation(quadratic.size())
 	, positive(quadratic.size())
 	, C(C)
-
 	{
 		SIZE_CHECK(dimensions() == quadratic.size());
 		SIZE_CHECK(dimensions() == this->linear.size());
@@ -272,31 +264,31 @@ public:
 			positive[i] = labels.element(i) ? 1: 0;
 		}
 	}
-	
+
 	std::size_t dimensions()const{
 		return quadratic.size();
 	}
-	
+
 	double boxMin(std::size_t i)const{
 		return positive[i] ? 0.0 : -C;
 	}
 	double boxMax(std::size_t i)const{
 		return positive[i] ? C : 0.0;
 	}
-	
+
 	/// representation of the quadratic part of the objective function
 	MatrixType& quadratic;
 
 	///\brief Linear part of the problem
 	RealVector linear;
-	
+
 	/// Solution candidate
 	RealVector alpha;
-	
+
 	/// diagonal matrix entries
 	/// The diagonal array is of fixed size and not subject to shrinking.
 	RealVector diagonal;
-	
+
 	/// exchange two variables via the permutation
 	void flipCoordinates(std::size_t i, std::size_t j)
 	{
@@ -310,7 +302,7 @@ public:
 		std::swap( permutation[i], permutation[j]);
 		std::swap( positive[i], positive[j]);
 	}
-	
+
 	/// permutation of the variables alpha, gradient, etc.
 	std::vector<std::size_t> permutation;
 private:
@@ -359,7 +351,7 @@ public:
 	using Problem::gradient;
 	using Problem::functionValue;
 	using Problem::getUnpermutedAlpha;
-	
+
 	///\brief Does an update of SMO given a working set with indices i and j.
 	void updateSMO(std::size_t i, std::size_t j){
 		double ai = alpha(i);
@@ -374,7 +366,7 @@ public:
 		if(i != j && aj != alpha(j))//take care that we are not in a working-set-size=1 case 
 			updateGradientEdge(j, aj, alpha(j));
 	}
-	
+
 	bool shrink(double epsilon){
 		bool shrinked = false;
 		if(m_shrink){
@@ -389,11 +381,11 @@ public:
 			doReshrink();
 		quadratic().setMaxCachedIndex(active());
 	}
-	
+
 	///\brief Unshrink the problem
 	void unshrink(){
 		if (active() == dimensions()) return;
-		
+
 		// recompute the gradient of the whole problem.
 		// we assume here that all shrinked variables are on the border of the problem.
 		// the gradient of the active components is already correct and
@@ -403,7 +395,7 @@ public:
 		// based on variables in the active set which are not on the border.
 		for (std::size_t a = active(); a < dimensions(); a++) 
 			Problem::m_gradient(a) = m_gradientEdge(a);
-		
+
 		for (std::size_t i = 0; i < active(); i++)
 		{
 			bool isOnBorder = (alpha(i) == boxMin(i)) || (alpha(i) == boxMax(i));
@@ -413,16 +405,17 @@ public:
 			for (std::size_t a = active(); a < dimensions(); a++) 
 				Problem::m_gradient(a) -= alpha(i) * q[a] ;
 		}
-		
+
 		this->m_active = dimensions();
 		quadratic().setMaxCachedIndex(dimensions());
 	}
+
 	void setShrinking(bool shrinking){
 		m_shrink = shrinking;
 		if(!shrinking)
 			unshrink();
 	}
-	
+
 	void modifyStep(std::size_t i, std::size_t j, double diff){
 		SIZE_CHECK(i < dimensions());
 		double ai = alpha(i);
@@ -436,6 +429,7 @@ public:
 		if(i != j && aj != alpha(j))//take care that we are not in a working-set-size=1 case 
 			updateGradientEdge(j, aj, alpha(j));
 	}
+
 protected:
 	///\brief Shrink the variable from the problem.
 	void shrinkVariable(std::size_t i){
@@ -447,6 +441,7 @@ protected:
 	
 	virtual void doShrink(double epsilon)=0;
 	virtual void doReshrink()=0;
+
 private:
 	///\brief Update the edge-part of the gradient
 	void updateGradientEdge(std::size_t i, double oldAlpha, double newAlpha){
@@ -456,7 +451,7 @@ private:
 		//or old alpha is 0 and new alpha inside
 		if( (oldAlpha == 0 || isInsideOld) && isInsideNew  )
 			return;
-		
+
 		//compute change to the gradient
 		double diff = 0;
 		if(!isInsideOld)//the value was on a border, so remove it's old influeence to the gradient
@@ -464,7 +459,7 @@ private:
 		if(!isInsideNew){//variable entered boundary or changed from one boundary to another
 			diff  += newAlpha;
 		}
-		
+
 		quadratic().row(i, 0, dimensions(), &q[0]);
 		for(std::size_t a = 0; a != dimensions(); ++a){
 			m_gradientEdge(a) -= diff*q[a];
@@ -473,10 +468,10 @@ private:
 
 	///\brief Stores the gradient of the alpha dimeensions which are either 0 or C
 	RealVector m_gradientEdge;
-	
+
 	///\brief true if shrinking is to be used.
 	bool m_shrink;
-	
+
 	///\brief Temporal storage for matrix rows.
 	std::vector<QpFloatType> q;
 };
@@ -499,9 +494,9 @@ public:
 	){
 		double start_time = Timer::now();
 		unsigned long long iter = 0;
-		
+
 		SelectionStrategy workingSet;
-		
+
 		// decomposition loop
 		for(;;){
 			//stop if iterations exceed
@@ -534,7 +529,7 @@ public:
 				workingSet.reset();
 			iter++;
 		}
-		
+
 		if (prop != NULL)
 		{
 			double finish_time = Timer::now();

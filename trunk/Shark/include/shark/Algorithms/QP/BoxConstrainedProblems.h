@@ -1,16 +1,8 @@
 /*!
+ *  \brief Quadratic program definitions.
  *
  *  \author  T. Glasmachers, O.Krause
  *  \date    2013
- *
- *  \par Copyright (c) 1999-2012:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *
  *
  *  <BR><HR>
@@ -28,14 +20,18 @@
  *  along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  */
- #ifndef SHARK_ALGORITHMS_QP_BOXCONSTRAINEDPROBLEMS_H
+#ifndef SHARK_ALGORITHMS_QP_BOXCONSTRAINEDPROBLEMS_H
 #define SHARK_ALGORITHMS_QP_BOXCONSTRAINEDPROBLEMS_H
  
 #include <shark/Algorithms/QP/QpSolver.h>
  
- namespace shark{
- 
-struct MaximumGradientCriterium{
+
+namespace shark {
+
+/// \brief Working set selection by maximization of the projected gradient.
+///
+/// This selection operator picks a single variable index.
+struct MaximumGradientCriterion{
 	template<class Problem>
 	double operator()(Problem& problem, std::size_t& i, std::size_t& j){
 		double largestGradient = 0;
@@ -56,20 +52,20 @@ struct MaximumGradientCriterium{
 				}
 			}
 		}
-		j=i;//we choose only a i-d working set
+		j = i;  // working set consists of a single variable
 
 		return largestGradient;
 	}
-	
+
 	void reset(){}
 };
 
-
-struct MaximumGainCriterium{
+/// \brief Working set selection by maximization of the dual objective gain.
+struct MaximumGainCriterion{
 	template<class Problem>
 	double operator()(Problem& problem, std::size_t& i, std::size_t& j){
-		//choose first variable by first order criterium
-		MaximumGradientCriterium firstOrder;
+		//choose first variable by first order criterion
+		MaximumGradientCriterion firstOrder;
 		double maxGrad = firstOrder(problem,i,j);
 		if (maxGrad == 0.0) return maxGrad;
 
@@ -137,16 +133,22 @@ struct MaximumGainCriterium{
 
 		return maxGrad;		// solution is not optimal
 	}
-	
+
 	void reset(){}
 };
 
+/// \brief Quadratic program with box constraints.
+///
+/// \par
+/// An instance of this class represents a quadratic program of the type
+/// TODO: write documentation!
+///
 template<class SVMProblem>
 class BoxConstrainedProblem{
 public:
 	typedef typename SVMProblem::QpFloatType QpFloatType;
 	typedef typename SVMProblem::MatrixType MatrixType;
-	typedef MaximumGainCriterium PreferedSelectionStrategy;
+	typedef MaximumGainCriterion PreferedSelectionStrategy;
 
 	BoxConstrainedProblem(SVMProblem& problem)
 	: m_problem(problem)
@@ -165,18 +167,18 @@ public:
 	std::size_t dimensions()const{
 		return m_problem.dimensions();
 	}
-	
+
 	std::size_t active()const{
 		return m_active;
 	}
-	
+
 	double boxMin(std::size_t i)const{
 		return m_problem.boxMin(i);
 	}
 	double boxMax(std::size_t i)const{
 		return m_problem.boxMax(i);
 	}
-	
+
 	/// representation of the quadratic part of the objective function
 	MatrixType& quadratic(){
 		return m_problem.quadratic;
@@ -185,26 +187,26 @@ public:
 	double linear(std::size_t i)const{
 		return m_problem.linear(i);
 	}
-	
+
 	double alpha(std::size_t i)const{
 		return m_problem.alpha(i);
 	}
-	
+
 	double diagonal(std::size_t i)const{
 		return m_problem.diagonal(i);
 	}
-	
+
 	double gradient(std::size_t i)const{
 		return m_gradient(i);
 	}
-	
+
 	RealVector getUnpermutedAlpha()const{
 		RealVector alpha(dimensions());
 		for (std::size_t i=0; i<dimensions(); i++) 
 			alpha(m_problem.permutation[i]) = m_problem.alpha(i);
 		return alpha;
 	}
-	
+
 	///\brief Does an update of SMO given a working set with indices i and j.
 	void updateSMO(std::size_t i, std::size_t j){
 		
@@ -253,16 +255,16 @@ public:
 		for (std::size_t a = 0; a < active(); a++) 
 			m_gradient(a) -= mu_i * qi[a] + mu_j * qj[a];
 	}
-	
+
 	///\brief Returns the current function value of the problem.
 	double functionValue()const{
 		return 0.5*inner_prod(m_gradient+m_problem.linear,m_problem.alpha);
 	}
-	
+
 	bool shrink(double){return false;}
 	void reshrink(){}
 	void unshrink(){}
-		
+
 	void modifyStep(std::size_t i, std::size_t j, double diff){
 		SIZE_CHECK(i < dimensions());
 		SIZE_CHECK(i == j );
@@ -276,7 +278,7 @@ public:
 		for (std::size_t a = 0; a < active(); a++) 
 			m_gradient(a) -=diff * q[a];
 	}
-	
+
 protected:
 	SVMProblem& m_problem;
 
@@ -446,24 +448,25 @@ protected:
 	}
 };
 
+/// \brief Same as BoxConstrainedProblem, but including a shrinking heuristic.
 template<class SVMProblem>
 struct BoxConstrainedShrinkingProblem
 : public BaseShrinkingProblem<BoxConstrainedProblem<SVMProblem> >{
 	typedef BaseShrinkingProblem<BoxConstrainedProblem<SVMProblem> > base_type;
 	static const std::size_t IterationsBetweenShrinking;
-	
+
 	BoxConstrainedShrinkingProblem(SVMProblem& problem, bool shrink = true)
 	: base_type(problem,shrink)
 	, m_isUnshrinked(false)
 	, m_shrinkCounter(std::min(this->dimensions(),IterationsBetweenShrinking)){}
-	
+
 protected:
 	void doShrink(double epsilon){
 		//check if shrinking is necessary
 		--m_shrinkCounter;
 		if(m_shrinkCounter != 0) return;
 		m_shrinkCounter = std::min(this->active(),IterationsBetweenShrinking);
-		
+
 		double largestUp;
 		double smallestDown;
 		getMaxKKTViolations(largestUp,smallestDown,this->active());
@@ -483,15 +486,15 @@ protected:
 	/// \brief Unshrink the problem and immdiately reshrink it.
 	void doReshrink(){
 		if (this->active() == this->dimensions()) return;
-		
+
 		this->unshrink();
-		
+
 		// shrink directly again
 		double largestUp;
 		double smallestDown;
 		getMaxKKTViolations(largestUp,smallestDown,this->dimensions());
 		doShrink(largestUp,smallestDown);
-		
+
 		m_shrinkCounter = std::min(this->active(),IterationsBetweenShrinking);
 	}
 
@@ -517,7 +520,7 @@ private:
 		}
 		return false;
 	}
-	
+
 	void getMaxKKTViolations(double& largestUp, double& smallestDown, std::size_t maxIndex){
 		largestUp = -1e100;
 		smallestDown = 1e100;
@@ -531,12 +534,14 @@ private:
 				largestUp = std::max(largestUp,g);
 		}
 	}
-	
+
 	/// true if the problem has already been unshrinked
 	bool m_isUnshrinked;
 
 	std::size_t m_shrinkCounter;
 };
+
+
 template<class SVMProblem>
 const std::size_t BoxConstrainedShrinkingProblem<SVMProblem>::IterationsBetweenShrinking = 1000;
 
