@@ -39,7 +39,7 @@ namespace shark{
 ///Working-Set-Selection-Kriteria anwendung:
 ///Kriterium krit;
 /// value=krit(problem,i,j);
-struct MVPSelectionCriterium{
+struct MVPSelectionCriterion{
 	/// \brief Select the most violatig pair (MVP)
 	///
 	/// \return maximal KKT vioation
@@ -82,7 +82,7 @@ struct MVPSelectionCriterium{
 };
 
 
-struct LibSVMSelectionCriterium{
+struct LibSVMSelectionCriterion{
 	
 	/// \brief Select a working set according to the second order algorithm of LIBSVM 2.8
 	///
@@ -149,9 +149,9 @@ struct LibSVMSelectionCriterium{
 	void reset(){}
 };
 
-class HMGSelectionCriterium{
+class HMGSelectionCriterion{
 public:
-	HMGSelectionCriterium():useLibSVM(true),smallProblem(false){}
+	HMGSelectionCriterion():useLibSVM(true),smallProblem(false){}
 
 	/// \brief Select a working set according to the hybrid maximum gain (HMG) algorithm
 	///
@@ -169,7 +169,7 @@ public:
 			useLibSVM = false;
 			if(!smallProblem && sqr(problem.active()) < problem.quadratic().getMaxCacheSize())
 				smallProblem = true;
-			LibSVMSelectionCriterium libSVMSelection;
+			LibSVMSelectionCriterion libSVMSelection;
 			double value = libSVMSelection(problem,i, j);
 			last_i = i;
 			last_j = j;
@@ -292,9 +292,9 @@ class SvmProblem{
 public:
 	typedef typename Problem::QpFloatType QpFloatType;
 	typedef typename Problem::MatrixType MatrixType;
-	//typedef LibSVMSelectionCriterium PreferedSelectionStrategy;
-	typedef HMGSelectionCriterium PreferedSelectionStrategy;
-	
+	//typedef LibSVMSelectionCriterion PreferedSelectionStrategy;
+	typedef HMGSelectionCriterion PreferedSelectionStrategy;
+
 	SvmProblem(Problem& problem)
 	: m_problem(problem)
 	, m_gradient(problem.linear)
@@ -312,18 +312,18 @@ public:
 	std::size_t dimensions()const{
 		return m_problem.dimensions();
 	}
-	
+
 	std::size_t active()const{
 		return m_active;
 	}
-	
+
 	double boxMin(std::size_t i)const{
 		return m_problem.boxMin(i);
 	}
 	double boxMax(std::size_t i)const{
 		return m_problem.boxMax(i);
 	}
-	
+
 	/// representation of the quadratic part of the objective function
 	MatrixType& quadratic(){
 		return m_problem.quadratic;
@@ -332,33 +332,33 @@ public:
 	double linear(std::size_t i)const{
 		return m_problem.linear(i);
 	}
-	
+
 	double alpha(std::size_t i)const{
 		return m_problem.alpha(i);
 	}
-	
+
 	double diagonal(std::size_t i)const{
 		return m_problem.diagonal(i);
 	}
-	
+
 	double gradient(std::size_t i)const{
 		return m_gradient(i);
 	}
-	
+
 	RealVector getUnpermutedAlpha()const{
 		RealVector alpha(dimensions());
 		for (std::size_t i=0; i<dimensions(); i++) 
 			alpha(m_problem.permutation[i]) = m_problem.alpha(i);
 		return alpha;
 	}
-	
+
 	///\brief Does an update of SMO given a working set with indices i and j.
 	void updateSMO(std::size_t i, std::size_t j){
 		double ai = alpha(i);
 		double aj = alpha(j);
 		double Ui = boxMax(i);
 		double Lj = boxMin(j);
-		
+
 		// get the matrix rows corresponding to the working set
 		QpFloatType* qi = quadratic().row(i, 0, active());
 		QpFloatType* qj = quadratic().row(j, 0, active());
@@ -400,17 +400,17 @@ public:
 		for (std::size_t a = 0; a < active(); a++) 
 			m_gradient(a) -= mu * (qi[a] - qj[a]);
 	}
-	
+
 	///\brief Returns the current function value of the problem.
 	double functionValue()const{
 		//std::cout<<m_gradient<<std::endl;
 		return 0.5*inner_prod(m_gradient+m_problem.linear,m_problem.alpha);
 	}
-	
+
 	bool shrink(double){return false;}
 	void reshrink(){}
 	void unshrink(){}
-		
+
 	void modifyStep(std::size_t i, std::size_t j, double diff){
 		SIZE_CHECK(i < dimensions());
 		RANGE_CHECK(alpha(i)+diff >= boxMin(i)-1.e-14*(boxMax(i)-boxMin(i)));
@@ -419,10 +419,10 @@ public:
 
 		RANGE_CHECK(alpha(j)-diff >= boxMin(j)-1.e-14*(boxMax(i)-boxMin(i)));
 		RANGE_CHECK(alpha(j)-diff <= boxMax(j)+1.e-14*(boxMax(i)-boxMin(i)));
-		
+
 		boundedUpdate(m_problem.alpha(i),diff,boxMin(i),boxMax(i));
 		boundedUpdate(m_problem.alpha(j),-diff,boxMin(j),boxMax(j));
-		
+
 		QpFloatType* qi = quadratic().row(i, 0, active());
 		QpFloatType* qj = quadratic().row(j, 0, active());
 
@@ -430,13 +430,13 @@ public:
 		for (std::size_t a = 0; a < active(); a++) 
 			m_gradient(a) -= diff * qi[a] - diff * qj[a];
 	}
-	
+
 protected:
 	Problem& m_problem;
 
 	/// gradient of the objective function at the current alpha
 	RealVector m_gradient;	
-	
+
 	std::size_t m_active; 
 };
 
@@ -445,19 +445,19 @@ struct SvmShrinkingProblem
 : public BaseShrinkingProblem<SvmProblem<Problem> >{
 	typedef BaseShrinkingProblem<SvmProblem<Problem> > base_type;
 	static const std::size_t IterationsBetweenShrinking;
-	
+
 	SvmShrinkingProblem(Problem& problem, bool shrink = true)
 	: base_type(problem,shrink)
 	, m_isUnshrinked(false)
 	, m_shrinkCounter(std::min(this->dimensions(),IterationsBetweenShrinking)){}
-	
+
 protected:
 	void doShrink(double epsilon){
 		//check if shrinking is necessary
 		--m_shrinkCounter;
 		if(m_shrinkCounter != 0) return;
 		m_shrinkCounter = std::min(this->active(),IterationsBetweenShrinking);
-		
+
 		double largestUp;
 		double smallestDown;
 		getMaxKKTViolations(largestUp,smallestDown,this->active());
@@ -472,22 +472,22 @@ protected:
 			return;
 		}
 		doShrink(largestUp,smallestDown);
-		
+
 		//std::cout<<m_problem.active()<<" "<<std::flush;
 	}
 
 	/// \brief Unshrink the problem and immdiately reshrink it.
 	void doReshrink(){
 		if (this->active() == this->dimensions()) return;
-		
+
 		this->unshrink();
-		
+
 		// shrink directly again
 		double largestUp;
 		double smallestDown;
 		getMaxKKTViolations(largestUp,smallestDown,this->dimensions());
 		doShrink(largestUp,smallestDown);
-		
+
 		m_shrinkCounter = std::min(this->active(),IterationsBetweenShrinking);
 	}
 
@@ -513,7 +513,7 @@ private:
 		}
 		return false;
 	}
-	
+
 	void getMaxKKTViolations(double& largestUp, double& smallestDown, std::size_t maxIndex){
 		largestUp = -1e100;
 		smallestDown = 1e100;
@@ -527,7 +527,7 @@ private:
 				largestUp = std::max(largestUp,g);
 		}
 	}
-	
+
 	/// true if the problem has already been unshrinked
 	bool m_isUnshrinked;
 

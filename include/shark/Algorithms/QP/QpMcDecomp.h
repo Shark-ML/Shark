@@ -1,7 +1,5 @@
 //===========================================================================
 /*!
- *  \file QpMcDecomp.h
- *
  *  \brief Quadratic programming solver for multi-class SVMs
  *
  *
@@ -1356,7 +1354,17 @@ printf(")\n");
 			else if (alphaj > (1.0 - 1e-12) * C) { alphai = 0.0; alphaj = C; }
 		}
 	}
+/*
+	//! return the largest KKT violation
+	double kktViolationActive(unsigned int example)
+	{
+	}
 
+	//! return the largest KKT violation
+	double kktViolationAll(unsigned int example)
+	{
+	}
+*/
 	//! return the largest KKT violation
 	double checkKKT()
 	{
