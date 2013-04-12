@@ -31,7 +31,7 @@ using namespace shark::blas;
 
 // Matrix resizing algorithm
 template <class L, class M>
-BOOST_UBLAS_INLINE
+
 void matrix_resize_preserve(M &m, M &temporary) {
 	typedef L layout_type;
 	typedef typename M::size_type size_type;
@@ -103,7 +103,7 @@ public:
 	// Construction and destruction
 
 	/// Default dense matrix constructor. Make a dense matrix of size (0,0)
-	BOOST_UBLAS_INLINE
+	
 	matrix():
 		matrix_container<self_type> (),
 		size1_(0), size2_(0), data_() {}
@@ -112,7 +112,7 @@ public:
 	 * \param size1 number of rows
 	 * \param size2 number of columns
 	 */
-	BOOST_UBLAS_INLINE
+	
 	matrix(size_type size1, size_type size2):
 		matrix_container<self_type> (),
 		size1_(size1), size2_(size2), data_(layout_type::storage_size(size1, size2)) {
@@ -133,7 +133,7 @@ public:
 	 * \param size2 number of columns
 	 * \param data array to copy into the matrix. Must have the same dimension as the matrix
 	 */
-	BOOST_UBLAS_INLINE
+	
 	matrix(size_type size1, size_type size2, const array_type &data):
 		matrix_container<self_type> (),
 		size1_(size1), size2_(size2), data_(data) {}
@@ -141,7 +141,7 @@ public:
 	/** Copy-constructor of a dense matrix
 	 * \param m is a dense matrix
 	 */
-	BOOST_UBLAS_INLINE
+	
 	matrix(const matrix &m):
 		matrix_container<self_type> (),
 		size1_(m.size1_), size2_(m.size2_), data_(m.data_) {}
@@ -150,7 +150,7 @@ public:
 	 * \param ae is a matrix expression
 	 */
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	matrix(const matrix_expression<AE> &ae):
 		matrix_container<self_type> (),
 		size1_(ae().size1()), size2_(ae().size2()), data_(layout_type::storage_size(size1_, size2_)) {
@@ -161,7 +161,7 @@ public:
 	/** Return the number of rows of the matrix
 	 * You can also use the free size<>() function in operation/size.hpp as size<1>(m) where m is a matrix
 	 */
-	BOOST_UBLAS_INLINE
+	
 	size_type size1() const {
 		return size1_;
 	}
@@ -169,7 +169,7 @@ public:
 	/** Return the number of colums of the matrix
 	 * You can also use the free size<>() function in operation/size.hpp as size<2>(m) where m is a matrix
 	 */
-	BOOST_UBLAS_INLINE
+	
 	size_type size2() const {
 		return size2_;
 	}
@@ -178,14 +178,14 @@ public:
 	/** Return a constant reference to the internal storage of a dense matrix, i.e. the raw data
 	 * It's type depends on the type used by the matrix to store its data
 	 */
-	BOOST_UBLAS_INLINE
+	
 	const array_type &data() const {
 		return data_;
 	}
 	/** Return a reference to the internal storage of a dense matrix, i.e. the raw data
 	 * It's type depends on the type used by the matrix to store its data
 	 */
-	BOOST_UBLAS_INLINE
+	
 	array_type &data() {
 		return data_;
 	}
@@ -198,7 +198,7 @@ public:
 	 * \param size2 the new number of colums
 	 * \param preserve a boolean to say if one wants the data to be preserved during the resizing. Default is true.
 	 */
-	BOOST_UBLAS_INLINE
+	
 	void resize(size_type size1, size_type size2, bool preserve = true) {
 		if (preserve) {
 			self_type temporary(size1, size2);
@@ -211,21 +211,21 @@ public:
 	}
 
 	// Element access
-	BOOST_UBLAS_INLINE
+	
 	const_reference operator()(size_type i, size_type j) const {
 		return data() [layout_type::element(i, size1_, j, size2_)];
 	}
-	BOOST_UBLAS_INLINE
+	
 	reference at_element(size_type i, size_type j) {
 		return data() [layout_type::element(i, size1_, j, size2_)];
 	}
-	BOOST_UBLAS_INLINE
+	
 	reference operator()(size_type i, size_type j) {
 		return at_element(i, j);
 	}
 
 	// Element assignment
-	BOOST_UBLAS_INLINE
+	
 	reference insert_element(size_type i, size_type j, const_reference t) {
 		return (at_element(i, j) = t);
 	}
@@ -234,7 +234,7 @@ public:
 	}
 
 	// Zeroing
-	BOOST_UBLAS_INLINE
+	
 	void clear() {
 		std::fill(data().begin(), data().end(), value_type/*zero*/());
 	}
@@ -243,13 +243,13 @@ public:
 #ifdef BOOST_UBLAS_MOVE_SEMANTICS
 
 	/*! @note "pass by value" the key idea to enable move semantics */
-	BOOST_UBLAS_INLINE
+	
 	matrix &operator = (matrix m) {
 		assign_temporary(m);
 		return *this;
 	}
 #else
-	BOOST_UBLAS_INLINE
+	
 	matrix &operator = (const matrix &m) {
 		size1_ = m.size1_;
 		size2_ = m.size2_;
@@ -258,80 +258,80 @@ public:
 	}
 #endif
 	template<class C>          // Container assignment without temporary
-	BOOST_UBLAS_INLINE
+	
 	matrix &operator = (const matrix_container<C> &m) {
 		resize(m().size1(), m().size2(), false);
 		assign(m);
 		return *this;
 	}
-	BOOST_UBLAS_INLINE
+	
 	matrix &assign_temporary(matrix &m) {
 		swap(m);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	matrix &operator = (const matrix_expression<AE> &ae) {
 		self_type temporary(ae);
 		return assign_temporary(temporary);
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	matrix &assign(const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_assign> (*this, ae);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	matrix &operator += (const matrix_expression<AE> &ae) {
 		self_type temporary(*this + ae);
 		return assign_temporary(temporary);
 	}
 	template<class C>          // Container assignment without temporary
-	BOOST_UBLAS_INLINE
+	
 	matrix &operator += (const matrix_container<C> &m) {
 		plus_assign(m);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	matrix &plus_assign(const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_plus_assign> (*this, ae);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	matrix &operator -= (const matrix_expression<AE> &ae) {
 		self_type temporary(*this - ae);
 		return assign_temporary(temporary);
 	}
 	template<class C>          // Container assignment without temporary
-	BOOST_UBLAS_INLINE
+	
 	matrix &operator -= (const matrix_container<C> &m) {
 		minus_assign(m);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	matrix &minus_assign(const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_minus_assign> (*this, ae);
 		return *this;
 	}
 	template<class AT>
-	BOOST_UBLAS_INLINE
+	
 	matrix &operator *= (const AT &at) {
 		matrix_assign_scalar<scalar_multiplies_assign> (*this, at);
 		return *this;
 	}
 	template<class AT>
-	BOOST_UBLAS_INLINE
+	
 	matrix &operator /= (const AT &at) {
 		matrix_assign_scalar<scalar_divides_assign> (*this, at);
 		return *this;
 	}
 
 	// Swapping
-	BOOST_UBLAS_INLINE
+	
 	void swap(matrix &m) {
 		if (this != &m) {
 			std::swap(size1_, m.size1_);
@@ -339,7 +339,7 @@ public:
 			data().swap(m.data());
 		}
 	}
-	BOOST_UBLAS_INLINE
+	
 	friend void swap(matrix &m1, matrix &m2) {
 		m1.swap(m2);
 	}
@@ -368,7 +368,7 @@ public:
 	typedef reverse_iterator_base2<iterator2> reverse_iterator2;
 
 	// Element lookup
-	BOOST_UBLAS_INLINE
+	
 	const_iterator1 find1(int /* rank */, size_type i, size_type j) const {
 #ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
 		return const_iterator1(*this, i, j);
@@ -376,7 +376,7 @@ public:
 		return const_iterator1(*this, data().begin() + layout_type::address(i, size1_, j, size2_));
 #endif
 	}
-	BOOST_UBLAS_INLINE
+	
 	iterator1 find1(int /* rank */, size_type i, size_type j) {
 #ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
 		return iterator1(*this, i, j);
@@ -384,7 +384,7 @@ public:
 		return iterator1(*this, data().begin() + layout_type::address(i, size1_, j, size2_));
 #endif
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_iterator2 find2(int /* rank */, size_type i, size_type j) const {
 #ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
 		return const_iterator2(*this, i, j);
@@ -392,7 +392,7 @@ public:
 		return const_iterator2(*this, data().begin() + layout_type::address(i, size1_, j, size2_));
 #endif
 	}
-	BOOST_UBLAS_INLINE
+	
 	iterator2 find2(int /* rank */, size_type i, size_type j) {
 #ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
 		return iterator2(*this, i, j);
@@ -417,57 +417,57 @@ public:
 		typedef const_reverse_iterator2 dual_reverse_iterator_type;
 
 		// Construction and destruction
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1():
 			container_const_reference<self_type> (), it_() {}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1(const self_type &m, const const_subiterator_type &it):
 			container_const_reference<self_type> (m), it_(it) {}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1(const iterator1 &it):
 			container_const_reference<self_type> (it()), it_(it.it_) {}
 
 		// Arithmetic
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator ++ () {
 			layout_type::increment_i(it_, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator -- () {
 			layout_type::decrement_i(it_, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator += (difference_type n) {
 			layout_type::increment_i(it_, n, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator -= (difference_type n) {
 			layout_type::decrement_i(it_, n, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		difference_type operator - (const const_iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return layout_type::distance_i(it_ - it.it_, (*this)().size1(), (*this)().size2());
 		}
 
 		// Dereference
-		BOOST_UBLAS_INLINE
+		
 		const_reference operator * () const {
 			BOOST_UBLAS_CHECK(index1() < (*this)().size1(), bad_index());
 			BOOST_UBLAS_CHECK(index2() < (*this)().size2(), bad_index());
 			return *it_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_reference operator [](difference_type n) const {
 			return *(*this + n);
 		}
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -475,7 +475,7 @@ public:
 			const self_type &m = (*this)();
 			return m.find2(1, index1(), 0);
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -483,14 +483,14 @@ public:
 			const self_type &m = (*this)();
 			return m.find2(1, index1(), m.size2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_reverse_iterator2 rbegin() const {
 			return const_reverse_iterator2(end());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -500,19 +500,19 @@ public:
 #endif
 
 		// Indices
-		BOOST_UBLAS_INLINE
+		
 		size_type index1() const {
 			const self_type &m = (*this)();
 			return layout_type::index_i(it_ - m.begin1().it_, m.size1(), m.size2());
 		}
-		BOOST_UBLAS_INLINE
+		
 		size_type index2() const {
 			const self_type &m = (*this)();
 			return layout_type::index_j(it_ - m.begin1().it_, m.size1(), m.size2());
 		}
 
 		// Assignment
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator = (const const_iterator1 &it) {
 			container_const_reference<self_type>::assign(&it());
 			it_ = it.it_;
@@ -520,12 +520,12 @@ public:
 		}
 
 		// Comparison
-		BOOST_UBLAS_INLINE
+		
 		bool operator == (const const_iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ == it.it_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		bool operator < (const const_iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ < it.it_;
@@ -538,11 +538,11 @@ public:
 	};
 #endif
 
-	BOOST_UBLAS_INLINE
+	
 	const_iterator1 begin1() const {
 		return find1(0, 0, 0);
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_iterator1 end1() const {
 		return find1(0, size1_, 0);
 	}
@@ -562,54 +562,54 @@ public:
 		typedef reverse_iterator2 dual_reverse_iterator_type;
 
 		// Construction and destruction
-		BOOST_UBLAS_INLINE
+		
 		iterator1():
 			container_reference<self_type> (), it_() {}
-		BOOST_UBLAS_INLINE
+		
 		iterator1(self_type &m, const subiterator_type &it):
 			container_reference<self_type> (m), it_(it) {}
 
 		// Arithmetic
-		BOOST_UBLAS_INLINE
+		
 		iterator1 &operator ++ () {
 			layout_type::increment_i(it_, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator1 &operator -- () {
 			layout_type::decrement_i(it_, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator1 &operator += (difference_type n) {
 			layout_type::increment_i(it_, n, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator1 &operator -= (difference_type n) {
 			layout_type::decrement_i(it_, n, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		difference_type operator - (const iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return layout_type::distance_i(it_ - it.it_, (*this)().size1(), (*this)().size2());
 		}
 
 		// Dereference
-		BOOST_UBLAS_INLINE
+		
 		reference operator * () const {
 			BOOST_UBLAS_CHECK(index1() < (*this)().size1(), bad_index());
 			BOOST_UBLAS_CHECK(index2() < (*this)().size2(), bad_index());
 			return *it_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		reference operator [](difference_type n) const {
 			return *(*this + n);
 		}
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -617,7 +617,7 @@ public:
 			self_type &m = (*this)();
 			return m.find2(1, index1(), 0);
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -625,14 +625,14 @@ public:
 			self_type &m = (*this)();
 			return m.find2(1, index1(), m.size2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		reverse_iterator2 rbegin() const {
 			return reverse_iterator2(end());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -642,19 +642,19 @@ public:
 #endif
 
 		// Indices
-		BOOST_UBLAS_INLINE
+		
 		size_type index1() const {
 			self_type &m = (*this)();
 			return layout_type::index_i(it_ - m.begin1().it_, m.size1(), m.size2());
 		}
-		BOOST_UBLAS_INLINE
+		
 		size_type index2() const {
 			self_type &m = (*this)();
 			return layout_type::index_j(it_ - m.begin1().it_, m.size1(), m.size2());
 		}
 
 		// Assignment
-		BOOST_UBLAS_INLINE
+		
 		iterator1 &operator = (const iterator1 &it) {
 			container_reference<self_type>::assign(&it());
 			it_ = it.it_;
@@ -662,12 +662,12 @@ public:
 		}
 
 		// Comparison
-		BOOST_UBLAS_INLINE
+		
 		bool operator == (const iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ == it.it_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		bool operator < (const iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ < it.it_;
@@ -680,11 +680,11 @@ public:
 	};
 #endif
 
-	BOOST_UBLAS_INLINE
+	
 	iterator1 begin1() {
 		return find1(0, 0, 0);
 	}
-	BOOST_UBLAS_INLINE
+	
 	iterator1 end1() {
 		return find1(0, size1_, 0);
 	}
@@ -704,57 +704,57 @@ public:
 		typedef const_reverse_iterator1 dual_reverse_iterator_type;
 
 		// Construction and destruction
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2():
 			container_const_reference<self_type> (), it_() {}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2(const self_type &m, const const_subiterator_type &it):
 			container_const_reference<self_type> (m), it_(it) {}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2(const iterator2 &it):
 			container_const_reference<self_type> (it()), it_(it.it_) {}
 
 		// Arithmetic
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator ++ () {
 			layout_type::increment_j(it_, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator -- () {
 			layout_type::decrement_j(it_, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator += (difference_type n) {
 			layout_type::increment_j(it_, n, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator -= (difference_type n) {
 			layout_type::decrement_j(it_, n, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		difference_type operator - (const const_iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return layout_type::distance_j(it_ - it.it_, (*this)().size1(), (*this)().size2());
 		}
 
 		// Dereference
-		BOOST_UBLAS_INLINE
+		
 		const_reference operator * () const {
 			BOOST_UBLAS_CHECK(index1() < (*this)().size1(), bad_index());
 			BOOST_UBLAS_CHECK(index2() < (*this)().size2(), bad_index());
 			return *it_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_reference operator [](difference_type n) const {
 			return *(*this + n);
 		}
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -762,7 +762,7 @@ public:
 			const self_type &m = (*this)();
 			return m.find1(1, 0, index2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -770,14 +770,14 @@ public:
 			const self_type &m = (*this)();
 			return m.find1(1, m.size1(), index2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_reverse_iterator1 rbegin() const {
 			return const_reverse_iterator1(end());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -787,19 +787,19 @@ public:
 #endif
 
 		// Indices
-		BOOST_UBLAS_INLINE
+		
 		size_type index1() const {
 			const self_type &m = (*this)();
 			return layout_type::index_i(it_ - m.begin2().it_, m.size1(), m.size2());
 		}
-		BOOST_UBLAS_INLINE
+		
 		size_type index2() const {
 			const self_type &m = (*this)();
 			return layout_type::index_j(it_ - m.begin2().it_, m.size1(), m.size2());
 		}
 
 		// Assignment
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator = (const const_iterator2 &it) {
 			container_const_reference<self_type>::assign(&it());
 			it_ = it.it_;
@@ -807,12 +807,12 @@ public:
 		}
 
 		// Comparison
-		BOOST_UBLAS_INLINE
+		
 		bool operator == (const const_iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ == it.it_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		bool operator < (const const_iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ < it.it_;
@@ -825,11 +825,11 @@ public:
 	};
 #endif
 
-	BOOST_UBLAS_INLINE
+	
 	const_iterator2 begin2() const {
 		return find2(0, 0, 0);
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_iterator2 end2() const {
 		return find2(0, 0, size2_);
 	}
@@ -849,54 +849,54 @@ public:
 		typedef reverse_iterator1 dual_reverse_iterator_type;
 
 		// Construction and destruction
-		BOOST_UBLAS_INLINE
+		
 		iterator2():
 			container_reference<self_type> (), it_() {}
-		BOOST_UBLAS_INLINE
+		
 		iterator2(self_type &m, const subiterator_type &it):
 			container_reference<self_type> (m), it_(it) {}
 
 		// Arithmetic
-		BOOST_UBLAS_INLINE
+		
 		iterator2 &operator ++ () {
 			layout_type::increment_j(it_, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator2 &operator -- () {
 			layout_type::decrement_j(it_, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator2 &operator += (difference_type n) {
 			layout_type::increment_j(it_, n, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator2 &operator -= (difference_type n) {
 			layout_type::decrement_j(it_, n, (*this)().size1(), (*this)().size2());
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		difference_type operator - (const iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return layout_type::distance_j(it_ - it.it_, (*this)().size1(), (*this)().size2());
 		}
 
 		// Dereference
-		BOOST_UBLAS_INLINE
+		
 		reference operator * () const {
 			BOOST_UBLAS_CHECK(index1() < (*this)().size1(), bad_index());
 			BOOST_UBLAS_CHECK(index2() < (*this)().size2(), bad_index());
 			return *it_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		reference operator [](difference_type n) const {
 			return *(*this + n);
 		}
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -904,7 +904,7 @@ public:
 			self_type &m = (*this)();
 			return m.find1(1, 0, index2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -912,14 +912,14 @@ public:
 			self_type &m = (*this)();
 			return m.find1(1, m.size1(), index2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		reverse_iterator1 rbegin() const {
 			return reverse_iterator1(end());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -929,19 +929,19 @@ public:
 #endif
 
 		// Indices
-		BOOST_UBLAS_INLINE
+		
 		size_type index1() const {
 			self_type &m = (*this)();
 			return layout_type::index_i(it_ - m.begin2().it_, m.size1(), m.size2());
 		}
-		BOOST_UBLAS_INLINE
+		
 		size_type index2() const {
 			self_type &m = (*this)();
 			return layout_type::index_j(it_ - m.begin2().it_, m.size1(), m.size2());
 		}
 
 		// Assignment
-		BOOST_UBLAS_INLINE
+		
 		iterator2 &operator = (const iterator2 &it) {
 			container_reference<self_type>::assign(&it());
 			it_ = it.it_;
@@ -949,12 +949,12 @@ public:
 		}
 
 		// Comparison
-		BOOST_UBLAS_INLINE
+		
 		bool operator == (const iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ == it.it_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		bool operator < (const iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ < it.it_;
@@ -967,49 +967,49 @@ public:
 	};
 #endif
 
-	BOOST_UBLAS_INLINE
+	
 	iterator2 begin2() {
 		return find2(0, 0, 0);
 	}
-	BOOST_UBLAS_INLINE
+	
 	iterator2 end2() {
 		return find2(0, 0, size2_);
 	}
 
 	// Reverse iterators
 
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator1 rbegin1() const {
 		return const_reverse_iterator1(end1());
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator1 rend1() const {
 		return const_reverse_iterator1(begin1());
 	}
 
-	BOOST_UBLAS_INLINE
+	
 	reverse_iterator1 rbegin1() {
 		return reverse_iterator1(end1());
 	}
-	BOOST_UBLAS_INLINE
+	
 	reverse_iterator1 rend1() {
 		return reverse_iterator1(begin1());
 	}
 
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator2 rbegin2() const {
 		return const_reverse_iterator2(end2());
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator2 rend2() const {
 		return const_reverse_iterator2(begin2());
 	}
 
-	BOOST_UBLAS_INLINE
+	
 	reverse_iterator2 rbegin2() {
 		return reverse_iterator2(end2());
 	}
-	BOOST_UBLAS_INLINE
+	
 	reverse_iterator2 rend2() {
 		return reverse_iterator2(begin2());
 	}
@@ -1067,41 +1067,41 @@ public:
 	typedef unknown_orientation_tag orientation_category;
 
 	// Construction and destruction
-	BOOST_UBLAS_INLINE
+	
 	identity_matrix():
 		matrix_container<self_type> (),
 		size1_(0), size2_(0), size_common_(0) {}
-	BOOST_UBLAS_INLINE
+	
 	identity_matrix(size_type size):
 		matrix_container<self_type> (),
 		size1_(size), size2_(size), size_common_((std::min)(size1_, size2_)) {}
-	BOOST_UBLAS_INLINE
+	
 	identity_matrix(size_type size1, size_type size2):
 		matrix_container<self_type> (),
 		size1_(size1), size2_(size2), size_common_((std::min)(size1_, size2_)) {}
-	BOOST_UBLAS_INLINE
+	
 	identity_matrix(const identity_matrix &m):
 		matrix_container<self_type> (),
 		size1_(m.size1_), size2_(m.size2_), size_common_((std::min)(size1_, size2_)) {}
 
 	// Accessors
-	BOOST_UBLAS_INLINE
+	
 	size_type size1() const {
 		return size1_;
 	}
-	BOOST_UBLAS_INLINE
+	
 	size_type size2() const {
 		return size2_;
 	}
 
 	// Resizing
-	BOOST_UBLAS_INLINE
+	
 	void resize(size_type size, bool preserve = true) {
 		size1_ = size;
 		size2_ = size;
 		size_common_ = ((std::min)(size1_, size2_));
 	}
-	BOOST_UBLAS_INLINE
+	
 	void resize(size_type size1, size_type size2, bool /*preserve*/ = true) {
 		size1_ = size1;
 		size2_ = size2;
@@ -1109,7 +1109,7 @@ public:
 	}
 
 	// Element access
-	BOOST_UBLAS_INLINE
+	
 	const_reference operator()(size_type i, size_type j) const {
 		if (i == j)
 			return one_;
@@ -1118,21 +1118,21 @@ public:
 	}
 
 	// Assignment
-	BOOST_UBLAS_INLINE
+	
 	identity_matrix &operator = (const identity_matrix &m) {
 		size1_ = m.size1_;
 		size2_ = m.size2_;
 		size_common_ = m.size_common_;
 		return *this;
 	}
-	BOOST_UBLAS_INLINE
+	
 	identity_matrix &assign_temporary(identity_matrix &m) {
 		swap(m);
 		return *this;
 	}
 
 	// Swapping
-	BOOST_UBLAS_INLINE
+	
 	void swap(identity_matrix &m) {
 		if (this != &m) {
 			std::swap(size1_, m.size1_);
@@ -1140,7 +1140,7 @@ public:
 			std::swap(size_common_, m.size_common_);
 		}
 	}
-	BOOST_UBLAS_INLINE
+	
 	friend void swap(identity_matrix &m1, identity_matrix &m2) {
 		m1.swap(m2);
 	}
@@ -1157,7 +1157,7 @@ public:
 	typedef reverse_iterator_base2<const_iterator2> const_reverse_iterator2;
 
 	// Element lookup
-	BOOST_UBLAS_INLINE
+	
 	const_iterator1 find1(int rank, size_type i, size_type j) const {
 		if (rank == 1) {
 			i = (std::max)(i, j);
@@ -1165,7 +1165,7 @@ public:
 		}
 		return const_iterator1(*this, i);
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_iterator2 find2(int rank, size_type i, size_type j) const {
 		if (rank == 1) {
 			j = (std::max)(j, i);
@@ -1189,21 +1189,21 @@ public:
 		typedef const_reverse_iterator2 dual_reverse_iterator_type;
 
 		// Construction and destruction
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1():
 			container_const_reference<self_type> (), it_() {}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1(const self_type &m, const const_subiterator_type &it):
 			container_const_reference<self_type> (m), it_(it) {}
 
 		// Arithmetic
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator ++ () {
 			BOOST_UBLAS_CHECK(it_ < (*this)().size1(), bad_index());
 			++it_;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator -- () {
 			BOOST_UBLAS_CHECK(it_ > 0, bad_index());
 			--it_;
@@ -1211,34 +1211,34 @@ public:
 		}
 
 		// Dereference
-		BOOST_UBLAS_INLINE
+		
 		const_reference operator * () const {
 			return one_;
 		}
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_iterator2 begin() const {
 			return const_iterator2((*this)(), it_);
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_iterator2 end() const {
 			return const_iterator2((*this)(), it_ + 1);
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_reverse_iterator2 rbegin() const {
 			return const_reverse_iterator2(end());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -1248,17 +1248,17 @@ public:
 #endif
 
 		// Indices
-		BOOST_UBLAS_INLINE
+		
 		size_type index1() const {
 			return it_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		size_type index2() const {
 			return it_;
 		}
 
 		// Assignment
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator = (const const_iterator1 &it) {
 			container_const_reference<self_type>::assign(&it());
 			it_ = it.it_;
@@ -1266,7 +1266,7 @@ public:
 		}
 
 		// Comparison
-		BOOST_UBLAS_INLINE
+		
 		bool operator == (const const_iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ == it.it_;
@@ -1278,11 +1278,11 @@ public:
 
 	typedef const_iterator1 iterator1;
 
-	BOOST_UBLAS_INLINE
+	
 	const_iterator1 begin1() const {
 		return const_iterator1(*this, 0);
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_iterator1 end1() const {
 		return const_iterator1(*this, size_common_);
 	}
@@ -1301,21 +1301,21 @@ public:
 		typedef const_reverse_iterator1 dual_reverse_iterator_type;
 
 		// Construction and destruction
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2():
 			container_const_reference<self_type> (), it_() {}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2(const self_type &m, const const_subiterator_type &it):
 			container_const_reference<self_type> (m), it_(it) {}
 
 		// Arithmetic
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator ++ () {
 			BOOST_UBLAS_CHECK(it_ < (*this)().size_common_, bad_index());
 			++it_;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator -- () {
 			BOOST_UBLAS_CHECK(it_ > 0, bad_index());
 			--it_;
@@ -1323,34 +1323,34 @@ public:
 		}
 
 		// Dereference
-		BOOST_UBLAS_INLINE
+		
 		const_reference operator * () const {
 			return one_;
 		}
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_iterator1 begin() const {
 			return const_iterator1((*this)(), it_);
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_iterator1 end() const {
 			return const_iterator1((*this)(), it_ + 1);
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_reverse_iterator1 rbegin() const {
 			return const_reverse_iterator1(end());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -1360,17 +1360,17 @@ public:
 #endif
 
 		// Indices
-		BOOST_UBLAS_INLINE
+		
 		size_type index1() const {
 			return it_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		size_type index2() const {
 			return it_;
 		}
 
 		// Assignment
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator = (const const_iterator2 &it) {
 			container_const_reference<self_type>::assign(&it());
 			it_ = it.it_;
@@ -1378,7 +1378,7 @@ public:
 		}
 
 		// Comparison
-		BOOST_UBLAS_INLINE
+		
 		bool operator == (const const_iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ == it.it_;
@@ -1390,31 +1390,31 @@ public:
 
 	typedef const_iterator2 iterator2;
 
-	BOOST_UBLAS_INLINE
+	
 	const_iterator2 begin2() const {
 		return const_iterator2(*this, 0);
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_iterator2 end2() const {
 		return const_iterator2(*this, size_common_);
 	}
 
 	// Reverse iterators
 
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator1 rbegin1() const {
 		return const_reverse_iterator1(end1());
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator1 rend1() const {
 		return const_reverse_iterator1(begin1());
 	}
 
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator2 rbegin2() const {
 		return const_reverse_iterator2(end2());
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator2 rend2() const {
 		return const_reverse_iterator2(begin2());
 	}
@@ -1505,7 +1505,7 @@ public:
 	}
 
 	// Element access
-	BOOST_UBLAS_INLINE
+	
 	const_reference operator()(size_type /*i*/, size_type /*j*/) const {
 		return value_;
 	}

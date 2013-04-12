@@ -21,7 +21,7 @@
 namespace shark{ namespace blas{
 
     template<class M, class E1, class E2, class TRI>
-    BOOST_UBLAS_INLINE
+    
     M &
     sparse_prod (const matrix_expression<E1> &e1,
                  const matrix_expression<E2> &e2,
@@ -80,7 +80,7 @@ namespace shark{ namespace blas{
     }
 
     template<class M, class E1, class E2, class TRI>
-    BOOST_UBLAS_INLINE
+    
     M &
     sparse_prod (const matrix_expression<E1> &e1,
                  const matrix_expression<E2> &e2,
@@ -140,7 +140,7 @@ namespace shark{ namespace blas{
 
     // Dispatcher
     template<class M, class E1, class E2, class TRI>
-    BOOST_UBLAS_INLINE
+    
     M &
     sparse_prod (const matrix_expression<E1> &e1,
                  const matrix_expression<E2> &e2,
@@ -154,7 +154,7 @@ namespace shark{ namespace blas{
         return sparse_prod (e1, e2, m, triangular_restriction (), orientation_category ());
     }
     template<class M, class E1, class E2, class TRI>
-    BOOST_UBLAS_INLINE
+    
     M
     sparse_prod (const matrix_expression<E1> &e1,
                  const matrix_expression<E2> &e2,
@@ -168,7 +168,7 @@ namespace shark{ namespace blas{
         return sparse_prod (e1, e2, m, triangular_restriction (), true);
     }
     template<class M, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     M &
     sparse_prod (const matrix_expression<E1> &e1,
                  const matrix_expression<E2> &e2,
@@ -181,7 +181,7 @@ namespace shark{ namespace blas{
         return sparse_prod (e1, e2, m, full (), orientation_category ());
     }
     template<class M, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     M
     sparse_prod (const matrix_expression<E1> &e1,
                  const matrix_expression<E2> &e2) {

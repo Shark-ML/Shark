@@ -48,29 +48,29 @@ namespace shark{ namespace blas{
     public:
         typedef typename C::closure_type closure_type;
 
-        BOOST_UBLAS_INLINE
+        
         noalias_proxy (C& lval):
             nonassignable (), lval_ (lval) {}
-        BOOST_UBLAS_INLINE
+        
         noalias_proxy (const noalias_proxy& p):
             nonassignable (), lval_ (p.lval_) {}
 
         template <class E>
-        BOOST_UBLAS_INLINE
+        
         closure_type &operator= (const E& e) {
             lval_.assign (e);
             return lval_;
         }
 
         template <class E>
-        BOOST_UBLAS_INLINE
+        
         closure_type &operator+= (const E& e) {
             lval_.plus_assign (e);
             return lval_;
         }
 
         template <class E>
-        BOOST_UBLAS_INLINE
+        
         closure_type &operator-= (const E& e) {
             lval_.minus_assign (e);
             return lval_;
@@ -83,12 +83,12 @@ namespace shark{ namespace blas{
     // Improve syntax of efficient assignment where no aliases of LHS appear on the RHS
     //  noalias(lhs) = rhs_expression
     template <class C>
-    BOOST_UBLAS_INLINE
+    
     noalias_proxy<C> noalias (C& lvalue) {
         return noalias_proxy<C> (lvalue);
     }
     template <class C>
-    BOOST_UBLAS_INLINE
+    
     noalias_proxy<const C> noalias (const C& lvalue) {
         return noalias_proxy<const C> (lvalue);
     }
@@ -96,12 +96,12 @@ namespace shark{ namespace blas{
     // Possible future compatible syntax where lvalue possible has an unsafe alias on the RHS
     //  safe(lhs) = rhs_expression
     template <class C>
-    BOOST_UBLAS_INLINE
+    
     C& safe (C& lvalue) {
         return lvalue;
     }
     template <class C>
-    BOOST_UBLAS_INLINE
+    
     const C& safe (const C& lvalue) {
         return lvalue;
     }
@@ -117,28 +117,28 @@ namespace shark{ namespace blas{
         template<>
         struct dimension_properties<1> {
             template <class E>
-            BOOST_UBLAS_INLINE static
+             static
             typename E::size_type size (const vector_expression<E> &e) {
                 return e ().size ();
             }
             template <class E>
-            BOOST_UBLAS_INLINE static
+             static
             typename E::size_type size (const matrix_expression<E> &e) {
                 return e ().size1 ();
             }
             // Note: Index functions cannot deduce dependant template parameter V or M from i
             template <class V>
-            BOOST_UBLAS_INLINE static
+             static
             typename V::size_type index (const typename V::iterator &i) {
                 return i.index ();
             }
             template <class M>
-            BOOST_UBLAS_INLINE static
+             static
             typename M::size_type index (const typename M::iterator1 &i) {
                 return i.index1 ();
             }
             template <class M>
-            BOOST_UBLAS_INLINE static
+             static
             typename M::size_type index (const typename M::iterator2 &i) {
                 return i.index1 ();
             }
@@ -146,40 +146,40 @@ namespace shark{ namespace blas{
         template<>
         struct dimension_properties<2> {
             template <class E>
-            BOOST_UBLAS_INLINE static
+             static
             typename E::size_type size (const vector_expression<E> &) {
                 return 1;
             }
             template <class E>
-            BOOST_UBLAS_INLINE static
+             static
             typename E::size_type size (const matrix_expression<E> &e) {
                 return e ().size2 ();
             }
             template <class V>
-            BOOST_UBLAS_INLINE static
+             static
             typename V::size_type index (const typename V::iterator &) {
                 return 1;
             }
             template <class M>
-            BOOST_UBLAS_INLINE static
+             static
             typename M::size_type index (const typename M::iterator1 &i) {
                 return i.index2 ();
             }
             template <class M>
-            BOOST_UBLAS_INLINE static
+             static
             typename M::size_type index (const typename M::iterator2 &i) {
                 return i.index2 ();
             }
         };
 
         template<unsigned dimension, class E>
-        BOOST_UBLAS_INLINE
+        
         typename E::size_type size (const E& e) {
             return dimension_properties<dimension>::size (e);
         }
 
         template<unsigned dimension, class I>
-        BOOST_UBLAS_INLINE
+        
         typename I::container_type::size_type
         index (const I& i) {
             typedef typename I::container_type container_type;

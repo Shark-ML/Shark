@@ -23,7 +23,7 @@ namespace shark{ namespace blas{
 namespace detail {
 
     template<class M, class E, class R>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void make_conformant (M &m, const matrix_expression<E> &e, row_major_tag, R) {
         BOOST_UBLAS_CHECK (m.size1 () == e ().size1 (), bad_size ());
         BOOST_UBLAS_CHECK (m.size2 () == e ().size2 (), bad_size ());
@@ -127,7 +127,7 @@ namespace detail {
             m (index [k].first, index [k].second) = value_type/*zero*/();
     }
     template<class M, class E, class R>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void make_conformant (M &m, const matrix_expression<E> &e, column_major_tag, R) {
         BOOST_UBLAS_CHECK (m.size1 () == e ().size1 (), bad_size ());
         BOOST_UBLAS_CHECK (m.size2 () == e ().size2 (), bad_size ());
@@ -235,7 +235,7 @@ namespace detail {
 
     // Explicitly iterating row major
     template<template <class T1, class T2> class F, class M, class T>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void iterating_matrix_assign_scalar (M &m, const T &t, row_major_tag) {
         typedef F<typename M::iterator2::reference, T> functor_type;
         typedef typename M::difference_type difference_type;
@@ -262,7 +262,7 @@ namespace detail {
     }
     // Explicitly iterating column major
     template<template <class T1, class T2> class F, class M, class T>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void iterating_matrix_assign_scalar (M &m, const T &t, column_major_tag) {
         typedef F<typename M::iterator1::reference, T> functor_type;
         typedef typename M::difference_type difference_type;
@@ -289,7 +289,7 @@ namespace detail {
     }
     // Explicitly indexing row major
     template<template <class T1, class T2> class F, class M, class T>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void indexing_matrix_assign_scalar (M &m, const T &t, row_major_tag) {
         typedef F<typename M::reference, T> functor_type;
         typedef typename M::size_type size_type;
@@ -307,7 +307,7 @@ namespace detail {
     }
     // Explicitly indexing column major
     template<template <class T1, class T2> class F, class M, class T>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void indexing_matrix_assign_scalar (M &m, const T &t, column_major_tag) {
         typedef F<typename M::reference, T> functor_type;
         typedef typename M::size_type size_type;
@@ -326,7 +326,7 @@ namespace detail {
 
     // Dense (proxy) case
     template<template <class T1, class T2> class F, class M, class T, class C>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign_scalar (M &m, const T &t, dense_proxy_tag, C) {
         typedef C orientation_category;
 #ifdef BOOST_UBLAS_USE_INDEXING
@@ -346,7 +346,7 @@ namespace detail {
     }
     // Packed (proxy) row major case
     template<template <class T1, class T2> class F, class M, class T>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign_scalar (M &m, const T &t, packed_proxy_tag, row_major_tag) {
         typedef F<typename M::iterator2::reference, T> functor_type;
         typedef typename M::difference_type difference_type;
@@ -367,7 +367,7 @@ namespace detail {
     }
     // Packed (proxy) column major case
     template<template <class T1, class T2> class F, class M, class T>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign_scalar (M &m, const T &t, packed_proxy_tag, column_major_tag) {
         typedef F<typename M::iterator1::reference, T> functor_type;
         typedef typename M::difference_type difference_type;
@@ -388,7 +388,7 @@ namespace detail {
     }
     // Sparse (proxy) row major case
     template<template <class T1, class T2> class F, class M, class T>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign_scalar (M &m, const T &t, sparse_proxy_tag, row_major_tag) {
         typedef F<typename M::iterator2::reference, T> functor_type;
         typename M::iterator1 it1 (m.begin1 ());
@@ -408,7 +408,7 @@ namespace detail {
     }
     // Sparse (proxy) column major case
     template<template <class T1, class T2> class F, class M, class T>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign_scalar (M &m, const T &t, sparse_proxy_tag, column_major_tag) {
         typedef F<typename M::iterator1::reference, T> functor_type;
         typename M::iterator2 it2 (m.begin2 ());
@@ -429,7 +429,7 @@ namespace detail {
 
     // Dispatcher
     template<template <class T1, class T2> class F, class M, class T>
-    BOOST_UBLAS_INLINE
+    
     void matrix_assign_scalar (M &m, const T &t) {
         typedef typename M::storage_category storage_category;
         typedef typename M::orientation_category orientation_category;
@@ -492,7 +492,7 @@ namespace detail {
 
     // Explicitly iterating row major
     template<template <class T1, class T2> class F, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void iterating_matrix_assign (M &m, const matrix_expression<E> &e, row_major_tag) {
         typedef F<typename M::iterator2::reference, typename E::value_type> functor_type;
         typedef typename M::difference_type difference_type;
@@ -524,7 +524,7 @@ namespace detail {
     }
     // Explicitly iterating column major
     template<template <class T1, class T2> class F, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void iterating_matrix_assign (M &m, const matrix_expression<E> &e, column_major_tag) {
         typedef F<typename M::iterator1::reference, typename E::value_type> functor_type;
         typedef typename M::difference_type difference_type;
@@ -556,7 +556,7 @@ namespace detail {
     }
     // Explicitly indexing row major
     template<template <class T1, class T2> class F, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void indexing_matrix_assign (M &m, const matrix_expression<E> &e, row_major_tag) {
         typedef F<typename M::reference, typename E::value_type> functor_type;
         typedef typename M::size_type size_type;
@@ -574,7 +574,7 @@ namespace detail {
     }
     // Explicitly indexing column major
     template<template <class T1, class T2> class F, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void indexing_matrix_assign (M &m, const matrix_expression<E> &e, column_major_tag) {
         typedef F<typename M::reference, typename E::value_type> functor_type;
         typedef typename M::size_type size_type;
@@ -593,7 +593,7 @@ namespace detail {
 
     // Dense (proxy) case
     template<template <class T1, class T2> class F, class R, class M, class E, class C>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign (M &m, const matrix_expression<E> &e, dense_proxy_tag, C) {
         // R unnecessary, make_conformant not required
         typedef C orientation_category;
@@ -614,7 +614,7 @@ namespace detail {
     }
     // Packed (proxy) row major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign (M &m, const matrix_expression<E> &e, packed_proxy_tag, row_major_tag) {
         typedef typename E::value_type expr_value_type;
         typedef F<typename M::iterator2::reference, expr_value_type> functor_type;
@@ -719,7 +719,7 @@ namespace detail {
     }
     // Packed (proxy) column major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign (M &m, const matrix_expression<E> &e, packed_proxy_tag, column_major_tag) {
         typedef typename E::value_type expr_value_type;
         typedef F<typename M::iterator1::reference, expr_value_type> functor_type;
@@ -823,7 +823,7 @@ namespace detail {
     }
     // Sparse row major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign (M &m, const matrix_expression<E> &e, sparse_tag, row_major_tag) {
         typedef F<typename M::iterator2::reference, typename E::value_type> functor_type;
         // R unnecessary, make_conformant not required
@@ -850,7 +850,7 @@ namespace detail {
     }
     // Sparse column major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign (M &m, const matrix_expression<E> &e, sparse_tag, column_major_tag) {
         typedef F<typename M::iterator1::reference, typename E::value_type> functor_type;
         // R unnecessary, make_conformant not required
@@ -877,7 +877,7 @@ namespace detail {
     }
     // Sparse proxy or functional row major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign (M &m, const matrix_expression<E> &e, sparse_proxy_tag, row_major_tag) {
         typedef typename E::value_type expr_value_type;
         typedef F<typename M::iterator2::reference, expr_value_type> functor_type;
@@ -972,7 +972,7 @@ namespace detail {
     }
     // Sparse proxy or functional column major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_assign (M &m, const matrix_expression<E> &e, sparse_proxy_tag, column_major_tag) {
         typedef typename E::value_type expr_value_type;
         typedef F<typename M::iterator1::reference, expr_value_type> functor_type;
@@ -1068,7 +1068,7 @@ namespace detail {
 
     // Dispatcher
     template<template <class T1, class T2> class F, class M, class E>
-    BOOST_UBLAS_INLINE
+    
     void matrix_assign (M &m, const matrix_expression<E> &e) {
         typedef typename matrix_assign_traits<typename M::storage_category,
                                               F<typename M::reference, typename E::value_type>::computed,
@@ -1082,7 +1082,7 @@ namespace detail {
         matrix_assign<F, unrestricted> (m, e, storage_category (), orientation_category ());
     }
     template<template <class T1, class T2> class F, class R, class M, class E>
-    BOOST_UBLAS_INLINE
+    
     void matrix_assign (M &m, const matrix_expression<E> &e) {
         typedef R conformant_restrict_type;
         typedef typename matrix_assign_traits<typename M::storage_category,
@@ -1113,7 +1113,7 @@ namespace detail {
 
     // Dense (proxy) row major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_swap (M &m, matrix_expression<E> &e, dense_proxy_tag, row_major_tag) {
         typedef F<typename M::iterator2::reference, typename E::reference> functor_type;
         // R unnecessary, make_conformant not required
@@ -1133,7 +1133,7 @@ namespace detail {
     }
     // Dense (proxy) column major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_swap (M &m, matrix_expression<E> &e, dense_proxy_tag, column_major_tag) {
         typedef F<typename M::iterator1::reference, typename E::reference> functor_type;
         // R unnecessary, make_conformant not required
@@ -1153,7 +1153,7 @@ namespace detail {
     }
     // Packed (proxy) row major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_swap (M &m, matrix_expression<E> &e, packed_proxy_tag, row_major_tag) {
         typedef F<typename M::iterator2::reference, typename E::reference> functor_type;
         // R unnecessary, make_conformant not required
@@ -1173,7 +1173,7 @@ namespace detail {
     }
     // Packed (proxy) column major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_swap (M &m, matrix_expression<E> &e, packed_proxy_tag, column_major_tag) {
         typedef F<typename M::iterator1::reference, typename E::reference> functor_type;
         // R unnecessary, make_conformant not required
@@ -1193,7 +1193,7 @@ namespace detail {
     }
     // Sparse (proxy) row major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_swap (M &m, matrix_expression<E> &e, sparse_proxy_tag, row_major_tag) {
         typedef F<typename M::iterator2::reference, typename E::reference> functor_type;
         typedef R conformant_restrict_type;
@@ -1256,7 +1256,7 @@ namespace detail {
     }
     // Sparse (proxy) column major case
     template<template <class T1, class T2> class F, class R, class M, class E>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     void matrix_swap (M &m, matrix_expression<E> &e, sparse_proxy_tag, column_major_tag) {
         typedef F<typename M::iterator1::reference, typename E::reference> functor_type;
         typedef R conformant_restrict_type;
@@ -1319,7 +1319,7 @@ namespace detail {
 
     // Dispatcher
     template<template <class T1, class T2> class F, class M, class E>
-    BOOST_UBLAS_INLINE
+    
     void matrix_swap (M &m, matrix_expression<E> &e) {
         typedef typename matrix_swap_traits<typename M::storage_category,
                                             typename E::const_iterator1::iterator_category,
@@ -1332,7 +1332,7 @@ namespace detail {
         matrix_swap<F, unrestricted> (m, e, storage_category (), orientation_category ());
     }
     template<template <class T1, class T2> class F, class R, class M, class E>
-    BOOST_UBLAS_INLINE
+    
     void matrix_swap (M &m, matrix_expression<E> &e) {
         typedef R conformant_restrict_type;
         typedef typename matrix_swap_traits<typename M::storage_category,

@@ -44,7 +44,7 @@ namespace shark{ namespace blas{
      * \return a reference to the resulting output stream
      */
     template<class E, class T, class VE>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os,
                                            const vector_expression<VE> &v) {
         typedef typename VE::size_type size_type;
@@ -85,7 +85,7 @@ namespace shark{ namespace blas{
      * \return a reference to the resulting input stream
      */
     template<class E, class T, class VT, class VA>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_istream<E, T> &operator >> (std::basic_istream<E, T> &is,
                                            vector<VT, VA> &v) {
         typedef typename vector<VT, VA>::size_type size_type;
@@ -146,7 +146,7 @@ namespace shark{ namespace blas{
      * \return a reference to the resulting output stream
      */
     template<class E, class T, class ME>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os,
                                            const matrix_expression<ME> &m) {
         typedef typename ME::size_type size_type;
@@ -197,7 +197,7 @@ namespace shark{ namespace blas{
      * \return a reference to the resulting input stream
      */
     template<class E, class T, class MT, class MF, class MA>
-    // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.
+    //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_istream<E, T> &operator >> (std::basic_istream<E, T> &is,
                                            matrix<MT, MF, MA> &m) {
         typedef typename matrix<MT, MF, MA>::size_type size_type;

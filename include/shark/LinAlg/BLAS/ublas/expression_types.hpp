@@ -63,11 +63,11 @@ namespace shark{ namespace blas{
         typedef E expression_type;
         typedef scalar_tag type_category;
 
-        BOOST_UBLAS_INLINE
+        
         const expression_type &operator () () const {
             return *static_cast<const expression_type *> (this);
         }
-        BOOST_UBLAS_INLINE
+        
         expression_type &operator () () {
             return *static_cast<expression_type *> (this);
         }
@@ -88,31 +88,31 @@ namespace shark{ namespace blas{
         typedef const_closure_type closure_type;
 
         // Construction and destruction
-        BOOST_UBLAS_INLINE
+        
         explicit scalar_reference (reference t):
             t_ (t) {}
 
         // Conversion
-        BOOST_UBLAS_INLINE
+        
         operator value_type () const {
             return t_;
         }
 
         // Assignment
-        BOOST_UBLAS_INLINE
+        
         scalar_reference &operator = (const scalar_reference &s) {
             t_ = s.t_;
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         scalar_reference &operator = (const scalar_expression<AE> &ae) {
             t_ = ae;
             return *this;
         }
 
         // Closure comparison
-        BOOST_UBLAS_INLINE
+        
         bool same_closure (const scalar_reference &sr) const {
             return &t_ == &sr.t_;
         }
@@ -136,33 +136,33 @@ namespace shark{ namespace blas{
         typedef scalar_reference<self_type> closure_type;
 
         // Construction and destruction
-        BOOST_UBLAS_INLINE
+        
         scalar_value ():
             t_ () {}
-        BOOST_UBLAS_INLINE
+        
         scalar_value (const value_type &t):
             t_ (t) {}
 
-        BOOST_UBLAS_INLINE
+        
         operator value_type () const {
             return t_;
         }
 
         // Assignment
-        BOOST_UBLAS_INLINE
+        
         scalar_value &operator = (const scalar_value &s) {
             t_ = s.t_;
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         scalar_value &operator = (const scalar_expression<AE> &ae) {
             t_ = ae;
             return *this;
         }
 
         // Closure comparison
-        BOOST_UBLAS_INLINE
+        
         bool same_closure (const scalar_value &sv) const {
             return this == &sv;    // self closing on instances value
         }
@@ -190,11 +190,11 @@ namespace shark{ namespace blas{
         typedef typename E::size_type size_type;
         */
  
-        BOOST_UBLAS_INLINE
+        
         const expression_type &operator () () const {
             return *static_cast<const expression_type *> (this);
         }
-        BOOST_UBLAS_INLINE
+        
         expression_type &operator () () {
             return *static_cast<expression_type *> (this);
         }
@@ -210,56 +210,56 @@ namespace shark{ namespace blas{
         typedef basic_range<> default_range;    // required to avoid range/slice name confusion
         typedef basic_slice<> default_slice;
    public:
-        BOOST_UBLAS_INLINE
+        
         const_vector_range_type operator () (const default_range &r) const {
             return const_vector_range_type (operator () (), r);
         }
-        BOOST_UBLAS_INLINE
+        
         vector_range_type operator () (const default_range &r) {
             return vector_range_type (operator () (), r);
         }
-        BOOST_UBLAS_INLINE
+        
         const_vector_slice_type operator () (const default_slice &s) const {
             return const_vector_slice_type (operator () (), s);
         }
-        BOOST_UBLAS_INLINE
+        
         vector_slice_type operator () (const default_slice &s) {
             return vector_slice_type (operator () (), s);
         }
         template<class A>
-        BOOST_UBLAS_INLINE
+        
         const vector_indirect<const E, indirect_array<A> > operator () (const indirect_array<A> &ia) const {
             return vector_indirect<const E, indirect_array<A> >  (operator () (), ia);
         }
         template<class A>
-        BOOST_UBLAS_INLINE
+        
         vector_indirect<E, indirect_array<A> > operator () (const indirect_array<A> &ia) {
             return vector_indirect<E, indirect_array<A> > (operator () (), ia);
         }
 
-        BOOST_UBLAS_INLINE
+        
         const_vector_range_type project (const default_range &r) const {
             return const_vector_range_type (operator () (), r);
         }
-        BOOST_UBLAS_INLINE
+        
         vector_range_type project (const default_range &r) {
             return vector_range_type (operator () (), r);
         }
-        BOOST_UBLAS_INLINE
+        
         const_vector_slice_type project (const default_slice &s) const {
             return const_vector_slice_type (operator () (), s);
         }
-        BOOST_UBLAS_INLINE
+        
         vector_slice_type project (const default_slice &s) {
             return vector_slice_type (operator () (), s);
         }
         template<class A>
-        BOOST_UBLAS_INLINE
+        
         const vector_indirect<const E, indirect_array<A> > project (const indirect_array<A> &ia) const {
             return vector_indirect<const E, indirect_array<A> > (operator () (), ia);
         }
         template<class A>
-        BOOST_UBLAS_INLINE
+        
         vector_indirect<E, indirect_array<A> > project (const indirect_array<A> &ia) {
             return vector_indirect<E, indirect_array<A> > (operator () (), ia);
         }
@@ -281,11 +281,11 @@ namespace shark{ namespace blas{
         typedef C container_type;
         typedef vector_tag type_category;
  
-        BOOST_UBLAS_INLINE
+        
         const container_type &operator () () const {
             return *static_cast<const container_type *> (this);
         }
-        BOOST_UBLAS_INLINE
+        
         container_type &operator () () {
             return *static_cast<container_type *> (this);
         }
@@ -316,11 +316,11 @@ namespace shark{ namespace blas{
         typedef typename E::size_type size_type;
         */
 
-        BOOST_UBLAS_INLINE
+        
         const expression_type &operator () () const {
             return *static_cast<const expression_type *> (this);
         }
-        BOOST_UBLAS_INLINE
+        
         expression_type &operator () () {
             return *static_cast<expression_type *> (this);
         }
@@ -345,81 +345,81 @@ namespace shark{ namespace blas{
         typedef basic_slice<> default_slice;
 
     public:
-        BOOST_UBLAS_INLINE
+        
         const_matrix_row_type operator [] (std::size_t i) const {
             return const_matrix_row_type (operator () (), i);
         }
-        BOOST_UBLAS_INLINE
+        
         matrix_row_type operator [] (std::size_t i) {
             return matrix_row_type (operator () (), i);
         }
-        BOOST_UBLAS_INLINE
+        
         const_matrix_row_type row (std::size_t i) const {
             return const_matrix_row_type (operator () (), i);
         }
-        BOOST_UBLAS_INLINE
+        
         matrix_row_type row (std::size_t i) {
             return matrix_row_type (operator () (), i);
         }
-        BOOST_UBLAS_INLINE
+        
         const_matrix_column_type column (std::size_t j) const {
             return const_matrix_column_type (operator () (), j);
         }
-        BOOST_UBLAS_INLINE
+        
         matrix_column_type column (std::size_t j) {
             return matrix_column_type (operator () (), j);
         }
 
-        BOOST_UBLAS_INLINE
+        
         const_matrix_range_type operator () (const default_range &r1, const default_range &r2) const {
             return const_matrix_range_type (operator () (), r1, r2);
         }
-        BOOST_UBLAS_INLINE
+        
         matrix_range_type operator () (const default_range &r1, const default_range &r2) {
             return matrix_range_type (operator () (), r1, r2);
         }
-        BOOST_UBLAS_INLINE
+        
         const_matrix_slice_type operator () (const default_slice &s1, const default_slice &s2) const {
             return const_matrix_slice_type (operator () (), s1, s2);
         }
-        BOOST_UBLAS_INLINE
+        
         matrix_slice_type operator () (const default_slice &s1, const default_slice &s2) {
             return matrix_slice_type (operator () (), s1, s2);
         }
         template<class A>
-        BOOST_UBLAS_INLINE
+        
         const matrix_indirect<const E, indirect_array<A> > operator () (const indirect_array<A> &ia1, const indirect_array<A> &ia2) const {
             return matrix_indirect<const E, indirect_array<A> > (operator () (), ia1, ia2);
         }
         template<class A>
-        BOOST_UBLAS_INLINE
+        
         matrix_indirect<E, indirect_array<A> > operator () (const indirect_array<A> &ia1, const indirect_array<A> &ia2) {
             return matrix_indirect<E, indirect_array<A> > (operator () (), ia1, ia2);
         }
 
-        BOOST_UBLAS_INLINE
+        
         const_matrix_range_type project (const default_range &r1, const default_range &r2) const {
             return const_matrix_range_type (operator () (), r1, r2);
         }
-        BOOST_UBLAS_INLINE
+        
         matrix_range_type project (const default_range &r1, const default_range &r2) {
             return matrix_range_type (operator () (), r1, r2);
         }
-        BOOST_UBLAS_INLINE
+        
         const_matrix_slice_type project (const default_slice &s1, const default_slice &s2) const {
             return const_matrix_slice_type (operator () (), s1, s2);
         }
-        BOOST_UBLAS_INLINE
+        
         matrix_slice_type project (const default_slice &s1, const default_slice &s2) {
             return matrix_slice_type (operator () (), s1, s2);
         }
         template<class A>
-        BOOST_UBLAS_INLINE
+        
         const matrix_indirect<const E, indirect_array<A> > project (const indirect_array<A> &ia1, const indirect_array<A> &ia2) const {
             return matrix_indirect<const E, indirect_array<A> > (operator () (), ia1, ia2);
         }
         template<class A>
-        BOOST_UBLAS_INLINE
+        
         matrix_indirect<E, indirect_array<A> > project (const indirect_array<A> &ia1, const indirect_array<A> &ia2) {
             return matrix_indirect<E, indirect_array<A> > (operator () (), ia1, ia2);
         }
@@ -431,43 +431,43 @@ namespace shark{ namespace blas{
     struct iterator2_tag {};
 
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     typename I::dual_iterator_type begin (const I &it, iterator1_tag) {
         return it ().find2 (1, it.index1 (), 0);
     }
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     typename I::dual_iterator_type end (const I &it, iterator1_tag) {
         return it ().find2 (1, it.index1 (), it ().size2 ());
     }
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     typename I::dual_reverse_iterator_type rbegin (const I &it, iterator1_tag) {
         return typename I::dual_reverse_iterator_type (end (it, iterator1_tag ()));
     }
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     typename I::dual_reverse_iterator_type rend (const I &it, iterator1_tag) {
         return typename I::dual_reverse_iterator_type (begin (it, iterator1_tag ()));
     }
 
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     typename I::dual_iterator_type begin (const I &it, iterator2_tag) {
         return it ().find1 (1, 0, it.index2 ());
     }
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     typename I::dual_iterator_type end (const I &it, iterator2_tag) {
         return it ().find1 (1, it ().size1 (), it.index2 ());
     }
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     typename I::dual_reverse_iterator_type rbegin (const I &it, iterator2_tag) {
         return typename I::dual_reverse_iterator_type (end (it, iterator2_tag ()));
     }
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     typename I::dual_reverse_iterator_type rend (const I &it, iterator2_tag) {
         return typename I::dual_reverse_iterator_type (begin (it, iterator2_tag ()));
     }
@@ -488,11 +488,11 @@ namespace shark{ namespace blas{
         typedef C container_type;
         typedef matrix_tag type_category;
 
-        BOOST_UBLAS_INLINE
+        
         const container_type &operator () () const {
             return *static_cast<const container_type *> (this);
         }
-        BOOST_UBLAS_INLINE
+        
         container_type &operator () () {
             return *static_cast<container_type *> (this);
         }

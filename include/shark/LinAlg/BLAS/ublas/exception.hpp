@@ -207,13 +207,13 @@ namespace shark{ namespace blas {
 #if BOOST_UBLAS_CHECK_ENABLE
 // Macros are equivilent to 
 //    template<class E>
-//    BOOST_UBLAS_INLINE
+//    
 //    void check (bool expression, const E &e) {
 //        if (! expression)
 //            e.raise ();
 //    }
 //    template<class E>
-//    BOOST_UBLAS_INLINE
+//    
 //    void check_ex (bool expression, const char *file, int line, const E &e) {
 //        if (! expression)
 //            e.raise ();
@@ -249,10 +249,10 @@ namespace shark{ namespace blas {
 #else
 // Macros are equivilent to 
 //    template<class E>
-//    BOOST_UBLAS_INLINE
+//    
 //    void check (bool expression, const E &e) {}
 //    template<class E>
-//    BOOST_UBLAS_INLINE
+//    
 //    void check_ex (bool expression, const char *file, int line, const E &e) {}
 #define BOOST_UBLAS_CHECK_FALSE(e)
 #define BOOST_UBLAS_CHECK(expression, e)
@@ -263,7 +263,7 @@ namespace shark{ namespace blas {
 #if BOOST_UBLAS_CHECK_ENABLE
 // Macro is equivilent to 
 //    template<class T>
-//    BOOST_UBLAS_INLINE
+//    
 //    const T &same_impl (const T &size1, const T &size2) {
 //        BOOST_UBLAS_CHECK (size1 == size2, bad_argument ());
 //        return (std::min) (size1, size2);
@@ -285,7 +285,7 @@ namespace shark{ namespace blas {
 #else
 // Macros are equivilent to 
 //    template<class T>
-//    BOOST_UBLAS_INLINE
+//    
 //    const T &same_impl (const T &size1, const T &size2) {
 //        return size1;
 //    }

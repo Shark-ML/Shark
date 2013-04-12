@@ -479,7 +479,7 @@ public:
 	self_type& operator=(blas::matrix_expression<M> const& other) {
 		return assign(typename blas::matrix_temporary_traits<M>::type(other));
 	}
-	 BOOST_UBLAS_INLINE
+	 
         self_type &operator = (self_type const&m) {
             return assign(m);
         }

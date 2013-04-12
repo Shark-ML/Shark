@@ -174,45 +174,45 @@ namespace shark{ namespace blas{
         static const unsigned multiplies_complexity = 1;
 
         static
-        BOOST_UBLAS_INLINE
+        
         real_type real (const_reference t) {
                 return t;
         }
         static
-        BOOST_UBLAS_INLINE
+        
         real_type imag (const_reference /*t*/) {
                 return 0;
         }
         static
-        BOOST_UBLAS_INLINE
+        
         value_type conj (const_reference t) {
                 return t;
         }
 
         static
-        BOOST_UBLAS_INLINE
+        
         real_type type_abs (const_reference t) {
             return boost_numeric_ublas_abs (t);
         }
         static
-        BOOST_UBLAS_INLINE
+        
         value_type type_sqrt (const_reference t) {
             // force a type conversion back to value_type for intgral types
             return value_type (boost_numeric_ublas_sqrt (t));
         }
 
         static
-        BOOST_UBLAS_INLINE
+        
         real_type norm_1 (const_reference t) {
             return self_type::type_abs (t);
         }
         static
-        BOOST_UBLAS_INLINE
+        
         real_type norm_2 (const_reference t) {
             return self_type::type_abs (t);
         }
         static
-        BOOST_UBLAS_INLINE
+        
         real_type norm_inf (const_reference t) {
             return self_type::type_abs (t);
         }
@@ -276,34 +276,34 @@ namespace shark{ namespace blas{
         static const unsigned multiplies_complexity = 6;
 
         static
-        BOOST_UBLAS_INLINE
+        
         real_type real (const_reference t) {
                 return std::real (t);
         }
         static
-        BOOST_UBLAS_INLINE
+        
         real_type imag (const_reference t) {
                 return std::imag (t);
         }
         static
-        BOOST_UBLAS_INLINE
+        
         value_type conj (const_reference t) {
                 return std::conj (t);
         }
 
         static
-        BOOST_UBLAS_INLINE
+        
         real_type type_abs (const_reference t) {
                 return abs (t);
         }
         static
-        BOOST_UBLAS_INLINE
+        
         value_type type_sqrt (const_reference t) {
                 return sqrt (t);
         }
 
         static
-        BOOST_UBLAS_INLINE
+        
         real_type norm_1 (const_reference t) {
             return self_type::type_abs (t);
             // original computation has been replaced because a complex number should behave like a scalar type
@@ -311,12 +311,12 @@ namespace shark{ namespace blas{
             //       type_traits<real_type>::type_abs (self_type::imag (t));
         }
         static
-        BOOST_UBLAS_INLINE
+        
         real_type norm_2 (const_reference t) {
             return self_type::type_abs (t);
         }
         static
-        BOOST_UBLAS_INLINE
+        
         real_type norm_inf (const_reference t) {
             return self_type::type_abs (t);
             // original computation has been replaced because a complex number should behave like a scalar type
@@ -545,23 +545,23 @@ namespace shark{ namespace blas{
     };
 
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     void increment (I &it, const I &it_end, typename I::difference_type compare, packed_random_access_iterator_tag) {
         it += (std::min) (compare, it_end - it);
     }
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     void increment (I &it, const I &/* it_end */, typename I::difference_type /* compare */, sparse_bidirectional_iterator_tag) {
         ++ it;
     }
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     void increment (I &it, const I &it_end, typename I::difference_type compare) {
         increment (it, it_end, compare, typename I::iterator_category ());
     }
 
     template<class I>
-    BOOST_UBLAS_INLINE
+    
     void increment (I &it, const I &it_end) {
         it = it_end;
     }

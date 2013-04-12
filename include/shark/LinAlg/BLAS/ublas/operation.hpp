@@ -26,7 +26,7 @@
 namespace shark{ namespace blas{
 
     template<class V, class T1, class L1, class IA1, class TA1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const compressed_matrix<T1, L1, 0, IA1, TA1> &e1,
                const vector_expression<E2> &e2,
@@ -46,7 +46,7 @@ namespace shark{ namespace blas{
     }
 
     template<class V, class T1, class L1, class IA1, class TA1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const compressed_matrix<T1, L1, 0, IA1, TA1> &e1,
                const vector_expression<E2> &e2,
@@ -64,7 +64,7 @@ namespace shark{ namespace blas{
 
     // Dispatcher
     template<class V, class T1, class L1, class IA1, class TA1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const compressed_matrix<T1, L1, 0, IA1, TA1> &e1,
                const vector_expression<E2> &e2,
@@ -78,7 +78,7 @@ namespace shark{ namespace blas{
         return v;
     }
     template<class V, class T1, class L1, class IA1, class TA1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V
     axpy_prod (const compressed_matrix<T1, L1, 0, IA1, TA1> &e1,
                const vector_expression<E2> &e2) {
@@ -89,7 +89,7 @@ namespace shark{ namespace blas{
     }
 
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const matrix_expression<E1> &e1,
                const vector_expression<E2> &e2,
@@ -115,7 +115,7 @@ namespace shark{ namespace blas{
     }
 
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const matrix_expression<E1> &e1,
                const vector_expression<E2> &e2,
@@ -142,7 +142,7 @@ namespace shark{ namespace blas{
     }
 
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const matrix_expression<E1> &e1,
                const vector_expression<E2> &e2,
@@ -162,7 +162,7 @@ namespace shark{ namespace blas{
 
     // Dispatcher
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const matrix_expression<E1> &e1,
                const vector_expression<E2> &e2,
@@ -198,7 +198,7 @@ namespace shark{ namespace blas{
           \param E2 type of a vector expression \c x
   */
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const matrix_expression<E1> &e1,
                const vector_expression<E2> &e2,
@@ -213,7 +213,7 @@ namespace shark{ namespace blas{
         return v;
     }
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V
     axpy_prod (const matrix_expression<E1> &e1,
                const vector_expression<E2> &e2) {
@@ -224,7 +224,7 @@ namespace shark{ namespace blas{
     }
 
     template<class V, class E1, class T2, class IA2, class TA2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const vector_expression<E1> &e1,
                const compressed_matrix<T2, column_major, 0, IA2, TA2> &e2,
@@ -244,7 +244,7 @@ namespace shark{ namespace blas{
     }
 
     template<class V, class E1, class T2, class IA2, class TA2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const vector_expression<E1> &e1,
                const compressed_matrix<T2, row_major, 0, IA2, TA2> &e2,
@@ -262,7 +262,7 @@ namespace shark{ namespace blas{
 
     // Dispatcher
     template<class V, class E1, class T2, class L2, class IA2, class TA2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const vector_expression<E1> &e1,
                const compressed_matrix<T2, L2, 0, IA2, TA2> &e2,
@@ -277,7 +277,7 @@ namespace shark{ namespace blas{
         return v;
     }
     template<class V, class E1, class T2, class L2, class IA2, class TA2>
-    BOOST_UBLAS_INLINE
+    
     V
     axpy_prod (const vector_expression<E1> &e1,
                const compressed_matrix<T2, L2, 0, IA2, TA2> &e2) {
@@ -288,7 +288,7 @@ namespace shark{ namespace blas{
     }
 
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const vector_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -313,7 +313,7 @@ namespace shark{ namespace blas{
     }
 
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const vector_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -338,7 +338,7 @@ namespace shark{ namespace blas{
     }
 
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const vector_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -358,7 +358,7 @@ namespace shark{ namespace blas{
 
     // Dispatcher
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const vector_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -394,7 +394,7 @@ namespace shark{ namespace blas{
           \param E2 type of a matrix expression \c A
   */
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V &
     axpy_prod (const vector_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -408,7 +408,7 @@ namespace shark{ namespace blas{
         return v;
     }
     template<class V, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     V
     axpy_prod (const vector_expression<E1> &e1,
                const matrix_expression<E2> &e2) {
@@ -419,7 +419,7 @@ namespace shark{ namespace blas{
     }
 
     template<class M, class E1, class E2, class TRI>
-    BOOST_UBLAS_INLINE
+    
     M &
     axpy_prod (const matrix_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -439,7 +439,7 @@ namespace shark{ namespace blas{
         return m;
     }
     template<class M, class E1, class E2, class TRI>
-    BOOST_UBLAS_INLINE
+    
     M &
     axpy_prod (const matrix_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -475,7 +475,7 @@ namespace shark{ namespace blas{
     }
 
     template<class M, class E1, class E2, class TRI>
-    BOOST_UBLAS_INLINE
+    
     M &
     axpy_prod (const matrix_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -495,7 +495,7 @@ namespace shark{ namespace blas{
         return m;
     }
     template<class M, class E1, class E2, class TRI>
-    BOOST_UBLAS_INLINE
+    
     M &
     axpy_prod (const matrix_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -532,7 +532,7 @@ namespace shark{ namespace blas{
 
     // Dispatcher
     template<class M, class E1, class E2, class TRI>
-    BOOST_UBLAS_INLINE
+    
     M &
     axpy_prod (const matrix_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -547,7 +547,7 @@ namespace shark{ namespace blas{
         return axpy_prod (e1, e2, m, triangular_restriction (), storage_category (), orientation_category ());
     }
     template<class M, class E1, class E2, class TRI>
-    BOOST_UBLAS_INLINE
+    
     M
     axpy_prod (const matrix_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -584,7 +584,7 @@ namespace shark{ namespace blas{
           \param E2 type of a matrix expression \c X
   */
     template<class M, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     M &
     axpy_prod (const matrix_expression<E1> &e1,
                const matrix_expression<E2> &e2,
@@ -598,7 +598,7 @@ namespace shark{ namespace blas{
         return axpy_prod (e1, e2, m, full (), storage_category (), orientation_category ());
     }
     template<class M, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     M
     axpy_prod (const matrix_expression<E1> &e1,
                const matrix_expression<E2> &e2) {
@@ -610,7 +610,7 @@ namespace shark{ namespace blas{
 
 
     template<class M, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     M &
     opb_prod (const matrix_expression<E1> &e1,
               const matrix_expression<E2> &e2,
@@ -632,7 +632,7 @@ namespace shark{ namespace blas{
     }
 
     template<class M, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     M &
     opb_prod (const matrix_expression<E1> &e1,
               const matrix_expression<E2> &e2,
@@ -682,7 +682,7 @@ namespace shark{ namespace blas{
           \param E2 type of a matrix expression \c X
   */
     template<class M, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     M &
     opb_prod (const matrix_expression<E1> &e1,
               const matrix_expression<E2> &e2,
@@ -696,7 +696,7 @@ namespace shark{ namespace blas{
         return opb_prod (e1, e2, m, storage_category (), orientation_category ());
     }
     template<class M, class E1, class E2>
-    BOOST_UBLAS_INLINE
+    
     M
     opb_prod (const matrix_expression<E1> &e1,
               const matrix_expression<E2> &e2) {
