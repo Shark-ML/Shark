@@ -58,14 +58,14 @@ namespace shark{ namespace blas{
                                                  dense_proxy_tag>::storage_category storage_category;
 
         // Construction and destruction
-        BOOST_UBLAS_INLINE
+        
         vector_range (vector_type &data, const range_type &r):
             data_ (data), r_ (r.preprocess (data.size ())) {
             // Early checking of preconditions here.
             // BOOST_UBLAS_CHECK (r_.start () <= data_.size () &&
             //                   r_.start () + r_.size () <= data_.size (), bad_index ());
         }
-        BOOST_UBLAS_INLINE
+        
         vector_range (const vector_closure_type &data, const range_type &r, bool):
             data_ (data), r_ (r.preprocess (data.size ())) {
             // Early checking of preconditions here.
@@ -74,51 +74,51 @@ namespace shark{ namespace blas{
         }
 
         // Accessors
-        BOOST_UBLAS_INLINE
+        
         size_type start () const {
             return r_.start ();
         }
-        BOOST_UBLAS_INLINE
+        
         size_type size () const {
             return r_.size ();
         }
 
         // Storage accessors
-        BOOST_UBLAS_INLINE
+        
         const vector_closure_type &data () const {
             return data_;
         }
-        BOOST_UBLAS_INLINE
+        
         vector_closure_type &data () {
             return data_;
         }
 
         // Element access
 #ifndef BOOST_UBLAS_PROXY_CONST_MEMBER
-        BOOST_UBLAS_INLINE
+        
         const_reference operator () (size_type i) const {
             return data_ (r_ (i));
         }
-        BOOST_UBLAS_INLINE
+        
         reference operator () (size_type i) {
             return data_ (r_ (i));
         }
 
-        BOOST_UBLAS_INLINE
+        
         const_reference operator [] (size_type i) const {
             return (*this) (i);
         }
-        BOOST_UBLAS_INLINE
+        
         reference operator [] (size_type i) {
             return (*this) (i);
         }
 #else
-        BOOST_UBLAS_INLINE
+        
         reference operator () (size_type i) const {
             return data_ (r_ (i));
         }
 
-        BOOST_UBLAS_INLINE
+        
         reference operator [] (size_type i) const {
             return (*this) (i);
         }
@@ -127,87 +127,87 @@ namespace shark{ namespace blas{
         // ISSUE can this be done in free project function?
         // Although a const function can create a non-const proxy to a non-const object
         // Critical is that vector_type and data_ (vector_closure_type) are const correct
-        BOOST_UBLAS_INLINE
+        
         vector_range<vector_type> project (const range_type &r) const {
             return vector_range<vector_type> (data_, r_.compose (r.preprocess (data_.size ())), false);
         }
 
         // Assignment
-        BOOST_UBLAS_INLINE
+        
         vector_range &operator = (const vector_range &vr) {
             // ISSUE need a temporary, proxy can be overlaping alias
             vector_assign<scalar_assign> (*this, typename vector_temporary_traits<V>::type (vr));
             return *this;
         }
-        BOOST_UBLAS_INLINE
+        
         vector_range &assign_temporary (vector_range &vr) {
             // assign elements, proxied container remains the same
             vector_assign<scalar_assign> (*this, vr);
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         vector_range &operator = (const vector_expression<AE> &ae) {
             vector_assign<scalar_assign> (*this, typename vector_temporary_traits<V>::type (ae));
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         vector_range &assign (const vector_expression<AE> &ae) {
             vector_assign<scalar_assign> (*this, ae);
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         vector_range &operator += (const vector_expression<AE> &ae) {
             vector_assign<scalar_assign> (*this, typename vector_temporary_traits<V>::type (*this + ae));
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         vector_range &plus_assign (const vector_expression<AE> &ae) {
             vector_assign<scalar_plus_assign> (*this, ae);
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         vector_range &operator -= (const vector_expression<AE> &ae) {
             vector_assign<scalar_assign> (*this, typename vector_temporary_traits<V>::type (*this - ae));
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         vector_range &minus_assign (const vector_expression<AE> &ae) {
             vector_assign<scalar_minus_assign> (*this, ae);
             return *this;
         }
         template<class AT>
-        BOOST_UBLAS_INLINE
+        
         vector_range &operator *= (const AT &at) {
             vector_assign_scalar<scalar_multiplies_assign> (*this, at);
             return *this;
         }
         template<class AT>
-        BOOST_UBLAS_INLINE
+        
         vector_range &operator /= (const AT &at) {
             vector_assign_scalar<scalar_divides_assign> (*this, at);
             return *this;
         }
 
         // Closure comparison
-        BOOST_UBLAS_INLINE
+        
         bool same_closure (const vector_range &vr) const {
             return (*this).data_.same_closure (vr.data_);
         }
 
         // Comparison
-        BOOST_UBLAS_INLINE
+        
         bool operator == (const vector_range &vr) const {
             return (*this).data_ == vr.data_ && r_ == vr.r_;
         }
 
         // Swapping
-        BOOST_UBLAS_INLINE
+        
         void swap (vector_range vr) {
             if (this != &vr) {
                 BOOST_UBLAS_CHECK (size () == vr.size (), bad_size ());
@@ -216,7 +216,7 @@ namespace shark{ namespace blas{
                 vector_swap<scalar_swap> (*this, vr);
             }
         }
-        BOOST_UBLAS_INLINE
+        
         friend void swap (vector_range vr1, vector_range vr2) {
             vr1.swap (vr2);
         }
@@ -240,7 +240,7 @@ namespace shark{ namespace blas{
 #endif
 
         // Element lookup
-        BOOST_UBLAS_INLINE
+        
         const_iterator find (size_type i) const {
             const_subiterator_type it (data_.find (start () + i));
 #ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
@@ -249,7 +249,7 @@ namespace shark{ namespace blas{
             return const_iterator (*this, it);
 #endif
         }
-        BOOST_UBLAS_INLINE
+        
         iterator find (size_type i) {
             subiterator_type it (data_.find (start () + i));
 #ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
@@ -271,62 +271,62 @@ namespace shark{ namespace blas{
             typedef typename const_subiterator_type::pointer pointer;
 
             // Construction and destruction
-            BOOST_UBLAS_INLINE
+            
             const_iterator ():
                 container_const_reference<self_type> (), it_ () {}
-            BOOST_UBLAS_INLINE
+            
             const_iterator (const self_type &vr, const const_subiterator_type &it):
                 container_const_reference<self_type> (vr), it_ (it) {}
-            BOOST_UBLAS_INLINE
+            
             const_iterator (const typename self_type::iterator &it):  // ISSUE self_type:: stops VC8 using std::iterator here
                 container_const_reference<self_type> (it ()), it_ (it.it_) {}
 
             // Arithmetic
-            BOOST_UBLAS_INLINE
+            
             const_iterator &operator ++ () {
                 ++ it_;
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             const_iterator &operator -- () {
                 -- it_;
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             const_iterator &operator += (difference_type n) {
                 it_ += n;
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             const_iterator &operator -= (difference_type n) {
                 it_ -= n;
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             difference_type operator - (const const_iterator &it) const {
                 BOOST_UBLAS_CHECK ((*this) ().same_closure (it ()), external_logic ());
                 return it_ - it.it_;
             }
 
             // Dereference
-            BOOST_UBLAS_INLINE
+            
             const_reference operator * () const {
                 BOOST_UBLAS_CHECK (index () < (*this) ().size (), bad_index ());
                 return *it_;
             }
-            BOOST_UBLAS_INLINE
+            
             const_reference operator [] (difference_type n) const {
                 return *(*this + n);
             }
 
             // Index
-            BOOST_UBLAS_INLINE
+            
             size_type index () const {
                 return it_.index () - (*this) ().start ();
             }
 
             // Assignment
-            BOOST_UBLAS_INLINE
+            
             const_iterator &operator = (const const_iterator &it) {
                 container_const_reference<self_type>::assign (&it ());
                 it_ = it.it_;
@@ -334,12 +334,12 @@ namespace shark{ namespace blas{
             }
 
             // Comparison
-            BOOST_UBLAS_INLINE
+            
             bool operator == (const const_iterator &it) const {
                 BOOST_UBLAS_CHECK ((*this) ().same_closure (it ()), external_logic ());
                 return it_ == it.it_;
             }
-            BOOST_UBLAS_INLINE
+            
             bool operator < (const const_iterator &it) const {
                 BOOST_UBLAS_CHECK ((*this) ().same_closure (it ()), external_logic ());
                 return it_ < it.it_;
@@ -350,11 +350,11 @@ namespace shark{ namespace blas{
         };
 #endif
 
-        BOOST_UBLAS_INLINE
+        
         const_iterator begin () const {
             return find (0);
         }
-        BOOST_UBLAS_INLINE
+        
         const_iterator end () const {
             return find (size ());
         }
@@ -371,59 +371,59 @@ namespace shark{ namespace blas{
             typedef typename subiterator_type::pointer pointer;
 
             // Construction and destruction
-            BOOST_UBLAS_INLINE
+            
             iterator ():
                 container_reference<self_type> (), it_ () {}
-            BOOST_UBLAS_INLINE
+            
             iterator (self_type &vr, const subiterator_type &it):
                 container_reference<self_type> (vr), it_ (it) {}
 
             // Arithmetic
-            BOOST_UBLAS_INLINE
+            
             iterator &operator ++ () {
                 ++ it_;
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             iterator &operator -- () {
                 -- it_;
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             iterator &operator += (difference_type n) {
                 it_ += n;
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             iterator &operator -= (difference_type n) {
                 it_ -= n;
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             difference_type operator - (const iterator &it) const {
                 BOOST_UBLAS_CHECK ((*this) ().same_closure (it ()), external_logic ());
                 return it_ - it.it_;
             }
 
             // Dereference
-            BOOST_UBLAS_INLINE
+            
             reference operator * () const {
                 BOOST_UBLAS_CHECK (index () < (*this) ().size (), bad_index ());
                 return *it_;
             }
-            BOOST_UBLAS_INLINE
+            
             reference operator [] (difference_type n) const {
                 return *(*this + n);
             }
 
             // Index
-            BOOST_UBLAS_INLINE
+            
             size_type index () const {
                 return it_.index () - (*this) ().start ();
             }
 
             // Assignment
-            BOOST_UBLAS_INLINE
+            
             iterator &operator = (const iterator &it) {
                 container_reference<self_type>::assign (&it ());
                 it_ = it.it_;
@@ -431,12 +431,12 @@ namespace shark{ namespace blas{
             }
 
             // Comparison
-            BOOST_UBLAS_INLINE
+            
             bool operator == (const iterator &it) const {
                 BOOST_UBLAS_CHECK ((*this) ().same_closure (it ()), external_logic ());
                 return it_ == it.it_;
             }
-            BOOST_UBLAS_INLINE
+            
             bool operator < (const iterator &it) const {
                 BOOST_UBLAS_CHECK ((*this) ().same_closure (it ()), external_logic ());
                 return it_ < it.it_;
@@ -449,11 +449,11 @@ namespace shark{ namespace blas{
         };
 #endif
 
-        BOOST_UBLAS_INLINE
+        
         iterator begin () {
             return find (0);
         }
-        BOOST_UBLAS_INLINE
+        
         iterator end () {
             return find (size ());
         }
@@ -462,19 +462,19 @@ namespace shark{ namespace blas{
         typedef reverse_iterator_base<const_iterator> const_reverse_iterator;
         typedef reverse_iterator_base<iterator> reverse_iterator;
 
-        BOOST_UBLAS_INLINE
+        
         const_reverse_iterator rbegin () const {
             return const_reverse_iterator (end ());
         }
-        BOOST_UBLAS_INLINE
+        
         const_reverse_iterator rend () const {
             return const_reverse_iterator (begin ());
         }
-        BOOST_UBLAS_INLINE
+        
         reverse_iterator rbegin () {
             return reverse_iterator (end ());
         }
-        BOOST_UBLAS_INLINE
+        
         reverse_iterator rend () {
             return reverse_iterator (begin ());
         }
@@ -494,7 +494,7 @@ namespace shark{ namespace blas{
      * Vector Expression and access to an element outside of index range of the vector is \b undefined.
      */
     template<class V>
-    BOOST_UBLAS_INLINE
+    
     vector_range<V> subrange (V &data, typename V::size_type start, typename V::size_type stop) {
         typedef basic_range<typename V::size_type, typename V::difference_type> range_type;
         return vector_range<V> (data, range_type (start, stop));
@@ -502,7 +502,7 @@ namespace shark{ namespace blas{
 
     
     template<class V>
-    BOOST_UBLAS_INLINE
+    
     vector_range<V> subrange (V &data, basic_range<typename V::size_type, typename V::difference_type> range) {
         return vector_range<V> (data, range);
     }
@@ -512,14 +512,14 @@ namespace shark{ namespace blas{
      * Vector Expression and access to an element outside of index range of the vector is \b undefined.
      */
     template<class V>
-    BOOST_UBLAS_INLINE
+    
     vector_range<const V> subrange (const V &data, typename V::size_type start, typename V::size_type stop) {
         typedef basic_range<typename V::size_type, typename V::difference_type> range_type;
         return vector_range<const V> (data, range_type (start, stop));
     }
     
     template<class V>
-    BOOST_UBLAS_INLINE
+    
     vector_range<const V> subrange (const V &data, basic_range<typename V::size_type, typename V::difference_type> range) {
         return vector_range<const V> (data, range);
     }
@@ -534,7 +534,7 @@ namespace shark{ namespace blas{
      * Vector Expression and access to an element outside of index range of the vector is \b undefined.
      */
     template<class V>
-    BOOST_UBLAS_INLINE
+    
     vector_range<V> project (V &data, typename vector_range<V>::range_type const &r) {
         return vector_range<V> (data, r);
     }
@@ -545,7 +545,7 @@ namespace shark{ namespace blas{
      * Vector Expression and access to an element outside of index range of the vector is \b undefined.
      */
     template<class V>
-    BOOST_UBLAS_INLINE
+    
     const vector_range<const V> project (const V &data, typename vector_range<V>::range_type const &r) {
         // ISSUE was: return vector_range<V> (const_cast<V &> (data), r);
         return vector_range<const V> (data, r);

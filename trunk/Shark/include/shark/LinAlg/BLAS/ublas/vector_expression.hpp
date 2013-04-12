@@ -43,97 +43,97 @@ public:
 	typedef typename E::storage_category storage_category;
 
 	// Construction and destruction
-	BOOST_UBLAS_INLINE
+	
 	explicit vector_reference(referred_type &e):
 		e_(e) {}
 
 	// Accessors
-	BOOST_UBLAS_INLINE
+	
 	size_type size() const {
 		return expression().size();
 	}
 
 public:
 	// Expression accessors - const correct
-	BOOST_UBLAS_INLINE
+	
 	const referred_type &expression() const {
 		return e_;
 	}
-	BOOST_UBLAS_INLINE
+	
 	referred_type &expression() {
 		return e_;
 	}
 
 public:
 	// Element access
-	BOOST_UBLAS_INLINE
+	
 	const_reference operator()(size_type i) const {
 		return expression()(i);
 	}
-	BOOST_UBLAS_INLINE
+	
 	reference operator()(size_type i) {
 		return expression()(i);
 	}
 
-	BOOST_UBLAS_INLINE
+	
 	const_reference operator [](size_type i) const {
 		return expression() [i];
 	}
-	BOOST_UBLAS_INLINE
+	
 	reference operator [](size_type i) {
 		return expression() [i];
 	}
 
 	// Assignment
-	BOOST_UBLAS_INLINE
+	
 	vector_reference &operator = (const vector_reference &v) {
 		expression().operator = (v);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	vector_reference &operator = (const vector_expression<AE> &ae) {
 		expression().operator = (ae);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	vector_reference &assign(const vector_expression<AE> &ae) {
 		expression().assign(ae);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	vector_reference &operator += (const vector_expression<AE> &ae) {
 		expression().operator += (ae);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	vector_reference &plus_assign(const vector_expression<AE> &ae) {
 		expression().plus_assign(ae);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	vector_reference &operator -= (const vector_expression<AE> &ae) {
 		expression().operator -= (ae);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	vector_reference &minus_assign(const vector_expression<AE> &ae) {
 		expression().minus_assign(ae);
 		return *this;
 	}
 	template<class AT>
-	BOOST_UBLAS_INLINE
+	
 	vector_reference &operator *= (const AT &at) {
 		expression().operator *= (at);
 		return *this;
 	}
 	template<class AT>
-	BOOST_UBLAS_INLINE
+	
 	vector_reference &operator /= (const AT &at) {
 		expression().operator /= (at);
 		return *this;
@@ -156,31 +156,31 @@ public:
 	        typename E::iterator>::type iterator;
 
 	// Element lookup
-	BOOST_UBLAS_INLINE
+	
 	const_iterator find(size_type i) const {
 		return expression().find(i);
 	}
-	BOOST_UBLAS_INLINE
+	
 	iterator find(size_type i) {
 		return expression().find(i);
 	}
 
 	// Iterator is the iterator of the referenced expression.
 
-	BOOST_UBLAS_INLINE
+	
 	const_iterator begin() const {
 		return expression().begin();
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_iterator end() const {
 		return expression().end();
 	}
 
-	BOOST_UBLAS_INLINE
+	
 	iterator begin() {
 		return expression().begin();
 	}
-	BOOST_UBLAS_INLINE
+	
 	iterator end() {
 		return expression().end();
 	}
@@ -189,19 +189,19 @@ public:
 	typedef reverse_iterator_base<const_iterator> const_reverse_iterator;
 	typedef reverse_iterator_base<iterator> reverse_iterator;
 
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator rbegin() const {
 		return const_reverse_iterator(end());
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator rend() const {
 		return const_reverse_iterator(begin());
 	}
-	BOOST_UBLAS_INLINE
+	
 	reverse_iterator rbegin() {
 		return reverse_iterator(end());
 	}
-	BOOST_UBLAS_INLINE
+	
 	reverse_iterator rend() {
 		return reverse_iterator(begin());
 	}
@@ -866,26 +866,26 @@ public:
 	typedef unknown_storage_tag storage_category;
 
 	// Construction and destruction
-	BOOST_UBLAS_INLINE
+	
 	explicit vector_scalar_unary(const expression_type &e):
 		e_(e) {}
 
 private:
 	// Expression accessors
-	BOOST_UBLAS_INLINE
+	
 	const expression_closure_type &expression() const {
 		return e_;
 	}
 
 public:
-	BOOST_UBLAS_INLINE
+	
 	operator value_type() const {
 		return evaluate(iterator_category());
 	}
 
 private:
 	// Dense random access specialization
-	BOOST_UBLAS_INLINE
+	
 	value_type evaluate(dense_random_access_iterator_tag) const {
 #ifdef BOOST_UBLAS_USE_INDEXING
 		return functor_type::apply(e_);
@@ -902,13 +902,13 @@ private:
 	}
 
 	// Packed bidirectional specialization
-	BOOST_UBLAS_INLINE
+	
 	value_type evaluate(packed_random_access_iterator_tag) const {
 		return functor_type::apply(e_.begin(), e_.end());
 	}
 
 	// Sparse bidirectional specialization
-	BOOST_UBLAS_INLINE
+	
 	value_type evaluate(sparse_bidirectional_iterator_tag) const {
 		return functor_type::apply(e_.begin(), e_.end());
 	}
@@ -931,7 +931,7 @@ struct vector_scalar_unary_traits {
 
 // sum v = sum (v [i])
 template<class E>
-BOOST_UBLAS_INLINE
+
 typename vector_scalar_unary_traits<E, vector_sum<E> >::result_type
 sum(const vector_expression<E> &e) {
 	typedef typename vector_scalar_unary_traits<E, vector_sum<E> >::expression_type expression_type;
@@ -941,7 +941,7 @@ sum(const vector_expression<E> &e) {
 // real: norm_1 v = sum (abs (v [i]))
 // complex: norm_1 v = sum (abs (real (v [i])) + abs (imag (v [i])))
 template<class E>
-BOOST_UBLAS_INLINE
+
 typename vector_scalar_unary_traits<E, vector_norm_1<E> >::result_type
 norm_1(const vector_expression<E> &e) {
 	typedef typename vector_scalar_unary_traits<E, vector_norm_1<E> >::expression_type expression_type;
@@ -951,7 +951,7 @@ norm_1(const vector_expression<E> &e) {
 // real: norm_2 v = sqrt (sum (v [i] * v [i]))
 // complex: norm_2 v = sqrt (sum (v [i] * conj (v [i])))
 template<class E>
-BOOST_UBLAS_INLINE
+
 typename vector_scalar_unary_traits<E, vector_norm_2<E> >::result_type
 norm_2(const vector_expression<E> &e) {
 	typedef typename vector_scalar_unary_traits<E, vector_norm_2<E> >::expression_type expression_type;
@@ -961,7 +961,7 @@ norm_2(const vector_expression<E> &e) {
 // real: norm_inf v = maximum (abs (v [i]))
 // complex: norm_inf v = maximum (maximum (abs (real (v [i])), abs (imag (v [i]))))
 template<class E>
-BOOST_UBLAS_INLINE
+
 typename vector_scalar_unary_traits<E, vector_norm_inf<E> >::result_type
 norm_inf(const vector_expression<E> &e) {
 	typedef typename vector_scalar_unary_traits<E, vector_norm_inf<E> >::expression_type expression_type;
@@ -970,7 +970,7 @@ norm_inf(const vector_expression<E> &e) {
 
 // real: index_norm_inf v = minimum (i: abs (v [i]) == maximum (abs (v [i])))
 template<class E>
-BOOST_UBLAS_INLINE
+
 typename vector_scalar_unary_traits<E, vector_index_norm_inf<E> >::result_type
 index_norm_inf(const vector_expression<E> &e) {
 	typedef typename vector_scalar_unary_traits<E, vector_index_norm_inf<E> >::expression_type expression_type;
@@ -998,30 +998,30 @@ public:
 	typedef unknown_storage_tag storage_category;
 
 	// Construction and destruction
-	BOOST_UBLAS_INLINE
+	
 	vector_scalar_binary(const expression1_type &e1, const expression2_type  &e2):
 		e1_(e1), e2_(e2) {}
 
 private:
 	// Accessors
-	BOOST_UBLAS_INLINE
+	
 	const expression1_closure_type &expression1() const {
 		return e1_;
 	}
-	BOOST_UBLAS_INLINE
+	
 	const expression2_closure_type &expression2() const {
 		return e2_;
 	}
 
 public:
-	BOOST_UBLAS_INLINE
+	
 	operator value_type() const {
 		return evaluate(iterator_category());
 	}
 
 private:
 	// Dense random access specialization
-	BOOST_UBLAS_INLINE
+	
 	value_type evaluate(dense_random_access_iterator_tag) const {
 		BOOST_UBLAS_CHECK(e1_.size() == e2_.size(), external_logic());
 #ifdef BOOST_UBLAS_USE_INDEXING
@@ -1039,14 +1039,14 @@ private:
 	}
 
 	// Packed bidirectional specialization
-	BOOST_UBLAS_INLINE
+	
 	value_type evaluate(packed_random_access_iterator_tag) const {
 		BOOST_UBLAS_CHECK(e1_.size() == e2_.size(), external_logic());
 		return functor_type::apply(e1_.begin(), e1_.end(), e2_.begin(), e2_.end());
 	}
 
 	// Sparse bidirectional specialization
-	BOOST_UBLAS_INLINE
+	
 	value_type evaluate(sparse_bidirectional_iterator_tag) const {
 		BOOST_UBLAS_CHECK(e1_.size() == e2_.size(), external_logic());
 		return functor_type::apply(e1_.begin(), e1_.end(), e2_.begin(), e2_.end(), sparse_bidirectional_iterator_tag());
@@ -1071,7 +1071,7 @@ struct vector_scalar_binary_traits {
 
 // inner_prod (v1, v2) = sum (v1 [i] * v2 [i])
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 typename vector_scalar_binary_traits<E1, E2, vector_inner_prod<E1, E2,
          typename promote_traits<typename E1::value_type,
          typename E2::value_type>::promote_type> >::result_type
@@ -1084,7 +1084,7 @@ const vector_expression<E2> &e2) {
 }
 
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 typename vector_scalar_binary_traits<E1, E2, vector_inner_prod<E1, E2,
          typename type_traits<typename promote_traits<typename E1::value_type,
          typename E2::value_type>::promote_type>::precision_type> >::result_type

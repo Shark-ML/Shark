@@ -26,7 +26,6 @@
 #include <boost/type_traits/is_const.hpp>
 #include <boost/type_traits/remove_reference.hpp>
 
-
 // Comeau compiler - thanks to Kresimir Fresl
 #if defined (__COMO__) && ! defined (BOOST_STRICT_CONFIG)
 
@@ -60,8 +59,6 @@
 
 // Disable performance options in DEBUG mode
 #else
-
-#define BOOST_UBLAS_INLINE
 
 
 // Enable runtime error checks with BOOST_UBLAS_CHECK macro. Check bounds etc

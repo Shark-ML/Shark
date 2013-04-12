@@ -51,7 +51,7 @@ namespace shark{ namespace blas{
         typedef typename L::orientation_category orientation_category;
 
         // Construction and destruction
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix ():
             matrix_container<self_type> (),
             size1_ (0), size2_ (0), capacity_ (restrict_capacity (0)),
@@ -60,7 +60,7 @@ namespace shark{ namespace blas{
             index1_data_ [filled1_ - 1] = k_based (filled2_);
             storage_invariants ();
         }
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix (size_type size1, size_type size2, size_type non_zeros = 0):
             matrix_container<self_type> (),
             size1_ (size1), size2_ (size2), capacity_ (restrict_capacity (non_zeros)),
@@ -69,7 +69,7 @@ namespace shark{ namespace blas{
             index1_data_ [filled1_ - 1] = k_based (filled2_);
             storage_invariants ();
         }
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix (const compressed_matrix &m):
             matrix_container<self_type> (),
             size1_ (m.size1_), size2_ (m.size2_), capacity_ (m.capacity_),
@@ -79,7 +79,7 @@ namespace shark{ namespace blas{
         }
 
        template<class AE>
-       BOOST_UBLAS_INLINE
+       
        compressed_matrix (const matrix_expression<AE> &ae, size_type non_zeros = 0):
             matrix_container<self_type> (),
             size1_ (ae ().size1 ()), size2_ (ae ().size2 ()), capacity_ (restrict_capacity (non_zeros)),
@@ -92,67 +92,67 @@ namespace shark{ namespace blas{
         }
 
         // Accessors
-        BOOST_UBLAS_INLINE
+        
         size_type size1 () const {
             return size1_;
         }
-        BOOST_UBLAS_INLINE
+        
         size_type size2 () const {
             return size2_;
         }
-        BOOST_UBLAS_INLINE
+        
         size_type nnz_capacity () const {
             return capacity_;
         }
-        BOOST_UBLAS_INLINE
+        
         size_type nnz () const {
             return filled2_;
         }
         
         // Storage accessors
-        BOOST_UBLAS_INLINE
+        
         static size_type index_base () {
             return IB;
         }
-        BOOST_UBLAS_INLINE
+        
         array_size_type filled1 () const {
             return filled1_;
         }
-        BOOST_UBLAS_INLINE
+        
         array_size_type filled2 () const {
             return filled2_;
         }
-        BOOST_UBLAS_INLINE
+        
         const index_array_type &index1_data () const {
             return index1_data_;
         }
-        BOOST_UBLAS_INLINE
+        
         const index_array_type &index2_data () const {
             return index2_data_;
         }
-        BOOST_UBLAS_INLINE
+        
         const value_array_type &value_data () const {
             return value_data_;
         }
-        BOOST_UBLAS_INLINE
+        
         void set_filled (const array_size_type& filled1, const array_size_type& filled2) {
             filled1_ = filled1;
             filled2_ = filled2;
             storage_invariants ();
         }
-        BOOST_UBLAS_INLINE
+        
         index_array_type &index1_data () {
             return index1_data_;
         }
-        BOOST_UBLAS_INLINE
+        
         index_array_type &index2_data () {
             return index2_data_;
         }
-        BOOST_UBLAS_INLINE
+        
         value_array_type &value_data () {
             return value_data_;
         }
-        BOOST_UBLAS_INLINE
+        
         void complete_index1_data () {
             while (filled1_ <= layout_type::size_M (size1_, size2_)) {
                 this->index1_data_ [filled1_] = k_based (filled2_);
@@ -162,7 +162,7 @@ namespace shark{ namespace blas{
 
         // Resizing
     private:
-        BOOST_UBLAS_INLINE
+        
         size_type restrict_capacity (size_type non_zeros) const {
             non_zeros = (std::max) (non_zeros, (std::min) (size1_, size2_));
             // Guarding against overflow - Thanks to Alexei Novakov for the hint.
@@ -172,7 +172,7 @@ namespace shark{ namespace blas{
             return non_zeros;
         }
     public:
-        BOOST_UBLAS_INLINE
+        
         void resize (size_type size1, size_type size2, bool preserve = true) {
             // FIXME preserve uniboost::mplemented
             BOOST_UBLAS_CHECK (!preserve, internal_logic ());
@@ -189,7 +189,7 @@ namespace shark{ namespace blas{
         }
 
         // Reserving
-        BOOST_UBLAS_INLINE
+        
         void reserve (size_type non_zeros, bool preserve = true) {
             capacity_ = restrict_capacity (non_zeros);
             if (preserve) {
@@ -208,11 +208,11 @@ namespace shark{ namespace blas{
        }
 
         // Element support
-        BOOST_UBLAS_INLINE
+        
         pointer find_element (size_type i, size_type j) {
             return const_cast<pointer> (const_cast<const self_type&>(*this).find_element (i, j));
         }
-        BOOST_UBLAS_INLINE
+        
         const_pointer find_element (size_type i, size_type j) const {
             size_type element1 (layout_type::index_M (i, j));
             size_type element2 (layout_type::index_m (i, j));
@@ -228,7 +228,7 @@ namespace shark{ namespace blas{
         }
 
         // Element access
-        BOOST_UBLAS_INLINE
+        
         const_reference operator () (size_type i, size_type j) const {
             const_pointer p = find_element (i, j);
             if (p)
@@ -236,7 +236,7 @@ namespace shark{ namespace blas{
             else
                 return zero_;
         }
-        BOOST_UBLAS_INLINE
+        
         reference operator () (size_type i, size_type j) {
             size_type element1 (layout_type::index_M (i, j));
             size_type element2 (layout_type::index_m (i, j));
@@ -250,7 +250,7 @@ namespace shark{ namespace blas{
         }
 
         // Element assignment
-        BOOST_UBLAS_INLINE
+        
         true_reference insert_element (size_type i, size_type j, const_reference t) {
             BOOST_UBLAS_CHECK (!find_element (i, j), bad_index ());        // duplicate element
             if (filled2_ >= capacity_)
@@ -282,7 +282,7 @@ namespace shark{ namespace blas{
             storage_invariants ();
             return *itt;
         }
-        BOOST_UBLAS_INLINE
+        
         void erase_element (size_type i, size_type j) {
             size_type element1 = layout_type::index_M (i, j);
             size_type element2 = layout_type::index_m (i, j);
@@ -311,7 +311,7 @@ namespace shark{ namespace blas{
         }
         
         // Zeroing
-        BOOST_UBLAS_INLINE
+        
         void clear () {
             filled1_ = 1;
             filled2_ = 0;
@@ -320,7 +320,7 @@ namespace shark{ namespace blas{
         }
 
         // Assignment
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix &operator = (const compressed_matrix &m) {
             if (this != &m) {
                 size1_ = m.size1_;
@@ -336,80 +336,80 @@ namespace shark{ namespace blas{
             return *this;
         }
         template<class C>          // Container assignment without temporary
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix &operator = (const matrix_container<C> &m) {
             resize (m ().size1 (), m ().size2 (), false);
             assign (m);
             return *this;
         }
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix &assign_temporary (compressed_matrix &m) {
             swap (m);
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix &operator = (const matrix_expression<AE> &ae) {
             self_type temporary (ae, capacity_);
             return assign_temporary (temporary);
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix &assign (const matrix_expression<AE> &ae) {
             matrix_assign<scalar_assign> (*this, ae);
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix& operator += (const matrix_expression<AE> &ae) {
             self_type temporary (*this + ae, capacity_);
             return assign_temporary (temporary);
         }
         template<class C>          // Container assignment without temporary
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix &operator += (const matrix_container<C> &m) {
             plus_assign (m);
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix &plus_assign (const matrix_expression<AE> &ae) {
             matrix_assign<scalar_plus_assign> (*this, ae);
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix& operator -= (const matrix_expression<AE> &ae) {
             self_type temporary (*this - ae, capacity_);
             return assign_temporary (temporary);
         }
         template<class C>          // Container assignment without temporary
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix &operator -= (const matrix_container<C> &m) {
             minus_assign (m);
             return *this;
         }
         template<class AE>
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix &minus_assign (const matrix_expression<AE> &ae) {
             matrix_assign<scalar_minus_assign> (*this, ae);
             return *this;
         }
         template<class AT>
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix& operator *= (const AT &at) {
             matrix_assign_scalar<scalar_multiplies_assign> (*this, at);
             return *this;
         }
         template<class AT>
-        BOOST_UBLAS_INLINE
+        
         compressed_matrix& operator /= (const AT &at) {
             matrix_assign_scalar<scalar_divides_assign> (*this, at);
             return *this;
         }
 
         // Swapping
-        BOOST_UBLAS_INLINE
+        
         void swap (compressed_matrix &m) {
             if (this != &m) {
                 std::swap (size1_, m.size1_);
@@ -423,13 +423,13 @@ namespace shark{ namespace blas{
             }
             storage_invariants ();
         }
-        BOOST_UBLAS_INLINE
+        
         friend void swap (compressed_matrix &m1, compressed_matrix &m2) {
             m1.swap (m2);
         }
 
         // Back element insertion and erasure
-        BOOST_UBLAS_INLINE
+        
         void push_back (size_type i, size_type j, const_reference t) {
             if (filled2_ >= capacity_)
                 reserve (2 * filled2_, true);
@@ -450,7 +450,7 @@ namespace shark{ namespace blas{
             value_data_ [filled2_ - 1] = t;
             storage_invariants ();
         }
-        BOOST_UBLAS_INLINE
+        
         void pop_back () {
             BOOST_UBLAS_CHECK (filled1_ > 0 && filled2_ > 0, external_logic ());
             -- filled2_;
@@ -470,7 +470,7 @@ namespace shark{ namespace blas{
         typedef typename IA::const_iterator const_subiterator_type;
         typedef typename IA::iterator subiterator_type;
 
-        BOOST_UBLAS_INLINE
+        
         true_reference at_element (size_type i, size_type j) {
             pointer p = find_element (i, j);
             BOOST_UBLAS_CHECK (p, bad_index ());
@@ -488,7 +488,7 @@ namespace shark{ namespace blas{
         typedef reverse_iterator_base2<iterator2> reverse_iterator2;
 
         // Element lookup
-        // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.    
+        //  This function seems to be big. So we do not let the compiler inline it.    
         const_iterator1 find1 (int rank, size_type i, size_type j, int direction = 1) const {
             for (;;) {
                 array_size_type address1 (layout_type::index_M (i, j));
@@ -528,7 +528,7 @@ namespace shark{ namespace blas{
                 }
             }
         }
-        // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.    
+        //  This function seems to be big. So we do not let the compiler inline it.    
         iterator1 find1 (int rank, size_type i, size_type j, int direction = 1) {
             for (;;) {
                 array_size_type address1 (layout_type::index_M (i, j));
@@ -568,7 +568,7 @@ namespace shark{ namespace blas{
                 }
             }
         }
-        // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.    
+        //  This function seems to be big. So we do not let the compiler inline it.    
         const_iterator2 find2 (int rank, size_type i, size_type j, int direction = 1) const {
             for (;;) {
                 array_size_type address1 (layout_type::index_M (i, j));
@@ -608,7 +608,7 @@ namespace shark{ namespace blas{
                 }
             }
         }
-        // BOOST_UBLAS_INLINE This function seems to be big. So we do not let the compiler inline it.    
+        //  This function seems to be big. So we do not let the compiler inline it.    
         iterator2 find2 (int rank, size_type i, size_type j, int direction = 1) {
             for (;;) {
                 array_size_type address1 (layout_type::index_M (i, j));
@@ -664,18 +664,18 @@ namespace shark{ namespace blas{
             typedef const_reverse_iterator2 dual_reverse_iterator_type;
 
             // Construction and destruction
-            BOOST_UBLAS_INLINE
+            
             const_iterator1 ():
                 container_const_reference<self_type> (), rank_ (), i_ (), j_ (), itv_ (), it_ () {}
-            BOOST_UBLAS_INLINE
+            
             const_iterator1 (const self_type &m, int rank, size_type i, size_type j, const vector_const_subiterator_type &itv, const const_subiterator_type &it):
                 container_const_reference<self_type> (m), rank_ (rank), i_ (i), j_ (j), itv_ (itv), it_ (it) {}
-            BOOST_UBLAS_INLINE
+            
             const_iterator1 (const iterator1 &it):
                 container_const_reference<self_type> (it ()), rank_ (it.rank_), i_ (it.i_), j_ (it.j_), itv_ (it.itv_), it_ (it.it_) {}
 
             // Arithmetic
-            BOOST_UBLAS_INLINE
+            
             const_iterator1 &operator ++ () {
                 if (rank_ == 1 && layout_type::fast_i ())
                     ++ it_;
@@ -686,7 +686,7 @@ namespace shark{ namespace blas{
                 }
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             const_iterator1 &operator -- () {
                 if (rank_ == 1 && layout_type::fast_i ())
                     -- it_;
@@ -699,7 +699,7 @@ namespace shark{ namespace blas{
             }
 
             // Dereference
-            BOOST_UBLAS_INLINE
+            
             const_reference operator * () const {
                 BOOST_UBLAS_CHECK (index1 () < (*this) ().size1 (), bad_index ());
                 BOOST_UBLAS_CHECK (index2 () < (*this) ().size2 (), bad_index ());
@@ -711,7 +711,7 @@ namespace shark{ namespace blas{
             }
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -719,7 +719,7 @@ namespace shark{ namespace blas{
                 const self_type &m = (*this) ();
                 return m.find2 (1, index1 (), 0);
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -727,14 +727,14 @@ namespace shark{ namespace blas{
                 const self_type &m = (*this) ();
                 return m.find2 (1, index1 (), m.size2 ());
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
             const_reverse_iterator2 rbegin () const {
                 return const_reverse_iterator2 (end ());
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -744,7 +744,7 @@ namespace shark{ namespace blas{
 #endif
 
             // Indices
-            BOOST_UBLAS_INLINE
+            
             size_type index1 () const {
                 BOOST_UBLAS_CHECK (*this != (*this) ().find1 (0, (*this) ().size1 (), j_), bad_index ());
                 if (rank_ == 1) {
@@ -754,7 +754,7 @@ namespace shark{ namespace blas{
                     return i_;
                 }
             }
-            BOOST_UBLAS_INLINE
+            
             size_type index2 () const {
                 if (rank_ == 1) {
                     BOOST_UBLAS_CHECK (layout_type::index_m (itv_ - (*this) ().index1_data_.begin (), (*this) ().zero_based (*it_)) < (*this) ().size2 (), bad_index ());
@@ -765,7 +765,7 @@ namespace shark{ namespace blas{
             }
 
             // Assignment
-            BOOST_UBLAS_INLINE
+            
             const_iterator1 &operator = (const const_iterator1 &it) {
                 container_const_reference<self_type>::assign (&it ());
                 rank_ = it.rank_;
@@ -777,7 +777,7 @@ namespace shark{ namespace blas{
             }
 
             // Comparison
-            BOOST_UBLAS_INLINE
+            
             bool operator == (const const_iterator1 &it) const {
                 BOOST_UBLAS_CHECK (&(*this) () == &it (), external_logic ());
                 // BOOST_UBLAS_CHECK (rank_ == it.rank_, internal_logic ());
@@ -796,11 +796,11 @@ namespace shark{ namespace blas{
             const_subiterator_type it_;
         };
 
-        BOOST_UBLAS_INLINE
+        
         const_iterator1 begin1 () const {
             return find1 (0, 0, 0);
         }
-        BOOST_UBLAS_INLINE
+        
         const_iterator1 end1 () const {
             return find1 (0, size1_, 0);
         }
@@ -819,15 +819,15 @@ namespace shark{ namespace blas{
             typedef reverse_iterator2 dual_reverse_iterator_type;
 
             // Construction and destruction
-            BOOST_UBLAS_INLINE
+            
             iterator1 ():
                 container_reference<self_type> (), rank_ (), i_ (), j_ (), itv_ (), it_ () {}
-            BOOST_UBLAS_INLINE
+            
             iterator1 (self_type &m, int rank, size_type i, size_type j, const vector_subiterator_type &itv, const subiterator_type &it):
                 container_reference<self_type> (m), rank_ (rank), i_ (i), j_ (j), itv_ (itv), it_ (it) {}
 
             // Arithmetic
-            BOOST_UBLAS_INLINE
+            
             iterator1 &operator ++ () {
                 if (rank_ == 1 && layout_type::fast_i ())
                     ++ it_;
@@ -838,7 +838,7 @@ namespace shark{ namespace blas{
                 }
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             iterator1 &operator -- () {
                 if (rank_ == 1 && layout_type::fast_i ())
                     -- it_;
@@ -851,7 +851,7 @@ namespace shark{ namespace blas{
             }
 
             // Dereference
-            BOOST_UBLAS_INLINE
+            
             reference operator * () const {
                 BOOST_UBLAS_CHECK (index1 () < (*this) ().size1 (), bad_index ());
                 BOOST_UBLAS_CHECK (index2 () < (*this) ().size2 (), bad_index ());
@@ -863,7 +863,7 @@ namespace shark{ namespace blas{
             }
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -871,7 +871,7 @@ namespace shark{ namespace blas{
                 self_type &m = (*this) ();
                 return m.find2 (1, index1 (), 0);
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -879,14 +879,14 @@ namespace shark{ namespace blas{
                 self_type &m = (*this) ();
                 return m.find2 (1, index1 (), m.size2 ());
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
             reverse_iterator2 rbegin () const {
                 return reverse_iterator2 (end ());
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -896,7 +896,7 @@ namespace shark{ namespace blas{
 #endif
 
             // Indices
-            BOOST_UBLAS_INLINE
+            
             size_type index1 () const {
                 BOOST_UBLAS_CHECK (*this != (*this) ().find1 (0, (*this) ().size1 (), j_), bad_index ());
                 if (rank_ == 1) {
@@ -906,7 +906,7 @@ namespace shark{ namespace blas{
                     return i_;
                 }
             }
-            BOOST_UBLAS_INLINE
+            
             size_type index2 () const {
                 if (rank_ == 1) {
                     BOOST_UBLAS_CHECK (layout_type::index_m (itv_ - (*this) ().index1_data_.begin (), (*this) ().zero_based (*it_)) < (*this) ().size2 (), bad_index ());
@@ -917,7 +917,7 @@ namespace shark{ namespace blas{
             }
 
             // Assignment
-            BOOST_UBLAS_INLINE
+            
             iterator1 &operator = (const iterator1 &it) {
                 container_reference<self_type>::assign (&it ());
                 rank_ = it.rank_;
@@ -929,7 +929,7 @@ namespace shark{ namespace blas{
             }
 
             // Comparison
-            BOOST_UBLAS_INLINE
+            
             bool operator == (const iterator1 &it) const {
                 BOOST_UBLAS_CHECK (&(*this) () == &it (), external_logic ());
                 // BOOST_UBLAS_CHECK (rank_ == it.rank_, internal_logic ());
@@ -950,11 +950,11 @@ namespace shark{ namespace blas{
             friend class const_iterator1;
         };
 
-        BOOST_UBLAS_INLINE
+        
         iterator1 begin1 () {
             return find1 (0, 0, 0);
         }
-        BOOST_UBLAS_INLINE
+        
         iterator1 end1 () {
             return find1 (0, size1_, 0);
         }
@@ -973,18 +973,18 @@ namespace shark{ namespace blas{
             typedef const_reverse_iterator1 dual_reverse_iterator_type;
 
             // Construction and destruction
-            BOOST_UBLAS_INLINE
+            
             const_iterator2 ():
                 container_const_reference<self_type> (), rank_ (), i_ (), j_ (), itv_ (), it_ () {}
-            BOOST_UBLAS_INLINE
+            
             const_iterator2 (const self_type &m, int rank, size_type i, size_type j, const vector_const_subiterator_type itv, const const_subiterator_type &it):
                 container_const_reference<self_type> (m), rank_ (rank), i_ (i), j_ (j), itv_ (itv), it_ (it) {}
-            BOOST_UBLAS_INLINE
+            
             const_iterator2 (const iterator2 &it):
                 container_const_reference<self_type> (it ()), rank_ (it.rank_), i_ (it.i_), j_ (it.j_), itv_ (it.itv_), it_ (it.it_) {}
 
             // Arithmetic
-            BOOST_UBLAS_INLINE
+            
             const_iterator2 &operator ++ () {
                 if (rank_ == 1 && layout_type::fast_j ())
                     ++ it_;
@@ -995,7 +995,7 @@ namespace shark{ namespace blas{
                 }
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             const_iterator2 &operator -- () {
                 if (rank_ == 1 && layout_type::fast_j ())
                     -- it_;
@@ -1008,7 +1008,7 @@ namespace shark{ namespace blas{
             }
 
             // Dereference
-            BOOST_UBLAS_INLINE
+            
             const_reference operator * () const {
                 BOOST_UBLAS_CHECK (index1 () < (*this) ().size1 (), bad_index ());
                 BOOST_UBLAS_CHECK (index2 () < (*this) ().size2 (), bad_index ());
@@ -1020,7 +1020,7 @@ namespace shark{ namespace blas{
             }
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -1028,7 +1028,7 @@ namespace shark{ namespace blas{
                 const self_type &m = (*this) ();
                 return m.find1 (1, 0, index2 ());
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -1036,14 +1036,14 @@ namespace shark{ namespace blas{
                 const self_type &m = (*this) ();
                 return m.find1 (1, m.size1 (), index2 ());
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
             const_reverse_iterator1 rbegin () const {
                 return const_reverse_iterator1 (end ());
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -1053,7 +1053,7 @@ namespace shark{ namespace blas{
 #endif
 
             // Indices
-            BOOST_UBLAS_INLINE
+            
             size_type index1 () const {
                 if (rank_ == 1) {
                     BOOST_UBLAS_CHECK (layout_type::index_M (itv_ - (*this) ().index1_data_.begin (), (*this) ().zero_based (*it_)) < (*this) ().size1 (), bad_index ());
@@ -1062,7 +1062,7 @@ namespace shark{ namespace blas{
                     return i_;
                 }
             }
-            BOOST_UBLAS_INLINE
+            
             size_type index2 () const {
                 BOOST_UBLAS_CHECK (*this != (*this) ().find2 (0, i_, (*this) ().size2 ()), bad_index ());
                 if (rank_ == 1) {
@@ -1074,7 +1074,7 @@ namespace shark{ namespace blas{
             }
 
             // Assignment
-            BOOST_UBLAS_INLINE
+            
             const_iterator2 &operator = (const const_iterator2 &it) {
                 container_const_reference<self_type>::assign (&it ());
                 rank_ = it.rank_;
@@ -1086,7 +1086,7 @@ namespace shark{ namespace blas{
             }
 
             // Comparison
-            BOOST_UBLAS_INLINE
+            
             bool operator == (const const_iterator2 &it) const {
                 BOOST_UBLAS_CHECK (&(*this) () == &it (), external_logic ());
                 // BOOST_UBLAS_CHECK (rank_ == it.rank_, internal_logic ());
@@ -1105,11 +1105,11 @@ namespace shark{ namespace blas{
             const_subiterator_type it_;
         };
 
-        BOOST_UBLAS_INLINE
+        
         const_iterator2 begin2 () const {
             return find2 (0, 0, 0);
         }
-        BOOST_UBLAS_INLINE
+        
         const_iterator2 end2 () const {
             return find2 (0, 0, size2_);
         }
@@ -1128,15 +1128,15 @@ namespace shark{ namespace blas{
             typedef reverse_iterator1 dual_reverse_iterator_type;
 
             // Construction and destruction
-            BOOST_UBLAS_INLINE
+            
             iterator2 ():
                 container_reference<self_type> (), rank_ (), i_ (), j_ (), itv_ (), it_ () {}
-            BOOST_UBLAS_INLINE
+            
             iterator2 (self_type &m, int rank, size_type i, size_type j, const vector_subiterator_type &itv, const subiterator_type &it):
                 container_reference<self_type> (m), rank_ (rank), i_ (i), j_ (j), itv_ (itv), it_ (it) {}
 
             // Arithmetic
-            BOOST_UBLAS_INLINE
+            
             iterator2 &operator ++ () {
                 if (rank_ == 1 && layout_type::fast_j ())
                     ++ it_;
@@ -1147,7 +1147,7 @@ namespace shark{ namespace blas{
                 }
                 return *this;
             }
-            BOOST_UBLAS_INLINE
+            
             iterator2 &operator -- () {
                 if (rank_ == 1 && layout_type::fast_j ())
                     -- it_;
@@ -1160,7 +1160,7 @@ namespace shark{ namespace blas{
             }
 
             // Dereference
-            BOOST_UBLAS_INLINE
+            
             reference operator * () const {
                 BOOST_UBLAS_CHECK (index1 () < (*this) ().size1 (), bad_index ());
                 BOOST_UBLAS_CHECK (index2 () < (*this) ().size2 (), bad_index ());
@@ -1172,7 +1172,7 @@ namespace shark{ namespace blas{
             }
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -1180,7 +1180,7 @@ namespace shark{ namespace blas{
                 self_type &m = (*this) ();
                 return m.find1 (1, 0, index2 ());
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -1188,14 +1188,14 @@ namespace shark{ namespace blas{
                 self_type &m = (*this) ();
                 return m.find1 (1, m.size1 (), index2 ());
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
             reverse_iterator1 rbegin () const {
                 return reverse_iterator1 (end ());
             }
-            BOOST_UBLAS_INLINE
+            
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
             typename self_type::
 #endif
@@ -1205,7 +1205,7 @@ namespace shark{ namespace blas{
 #endif
 
             // Indices
-            BOOST_UBLAS_INLINE
+            
             size_type index1 () const {
                 if (rank_ == 1) {
                     BOOST_UBLAS_CHECK (layout_type::index_M (itv_ - (*this) ().index1_data_.begin (), (*this) ().zero_based (*it_)) < (*this) ().size1 (), bad_index ());
@@ -1214,7 +1214,7 @@ namespace shark{ namespace blas{
                     return i_;
                 }
             }
-            BOOST_UBLAS_INLINE
+            
             size_type index2 () const {
                 BOOST_UBLAS_CHECK (*this != (*this) ().find2 (0, i_, (*this) ().size2 ()), bad_index ());
                 if (rank_ == 1) {
@@ -1226,7 +1226,7 @@ namespace shark{ namespace blas{
             }
 
             // Assignment
-            BOOST_UBLAS_INLINE
+            
             iterator2 &operator = (const iterator2 &it) {
                 container_reference<self_type>::assign (&it ());
                 rank_ = it.rank_;
@@ -1238,7 +1238,7 @@ namespace shark{ namespace blas{
             }
 
             // Comparison
-            BOOST_UBLAS_INLINE
+            
             bool operator == (const iterator2 &it) const {
                 BOOST_UBLAS_CHECK (&(*this) () == &it (), external_logic ());
                 // BOOST_UBLAS_CHECK (rank_ == it.rank_, internal_logic ());
@@ -1259,49 +1259,49 @@ namespace shark{ namespace blas{
             friend class const_iterator2;
         };
 
-        BOOST_UBLAS_INLINE
+        
         iterator2 begin2 () {
             return find2 (0, 0, 0);
         }
-        BOOST_UBLAS_INLINE
+        
         iterator2 end2 () {
             return find2 (0, 0, size2_);
         }
 
         // Reverse iterators
 
-        BOOST_UBLAS_INLINE
+        
         const_reverse_iterator1 rbegin1 () const {
             return const_reverse_iterator1 (end1 ());
         }
-        BOOST_UBLAS_INLINE
+        
         const_reverse_iterator1 rend1 () const {
             return const_reverse_iterator1 (begin1 ());
         }
 
-        BOOST_UBLAS_INLINE
+        
         reverse_iterator1 rbegin1 () {
             return reverse_iterator1 (end1 ());
         }
-        BOOST_UBLAS_INLINE
+        
         reverse_iterator1 rend1 () {
             return reverse_iterator1 (begin1 ());
         }
 
-        BOOST_UBLAS_INLINE
+        
         const_reverse_iterator2 rbegin2 () const {
             return const_reverse_iterator2 (end2 ());
         }
-        BOOST_UBLAS_INLINE
+        
         const_reverse_iterator2 rend2 () const {
             return const_reverse_iterator2 (begin2 ());
         }
 
-        BOOST_UBLAS_INLINE
+        
         reverse_iterator2 rbegin2 () {
             return reverse_iterator2 (end2 ());
         }
-        BOOST_UBLAS_INLINE
+        
         reverse_iterator2 rend2 () {
             return reverse_iterator2 (begin2 ());
         }
@@ -1346,11 +1346,11 @@ namespace shark{ namespace blas{
         value_array_type value_data_;
         static const value_type zero_;
 
-        BOOST_UBLAS_INLINE
+        
         static size_type zero_based (size_type k_based_index) {
             return k_based_index - IB;
         }
-        BOOST_UBLAS_INLINE
+        
         static size_type k_based (size_type zero_based_index) {
             return zero_based_index + IB;
         }

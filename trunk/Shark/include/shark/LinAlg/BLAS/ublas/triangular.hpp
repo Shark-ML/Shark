@@ -55,38 +55,38 @@ public:
 	typedef typename M::orientation_category orientation_category;
 
 	// Construction and destruction
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor(matrix_type &data):
 		matrix_expression<self_type> (),
 		data_(data) {}
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor(const triangular_adaptor &m):
 		matrix_expression<self_type> (),
 		data_(m.data_) {}
 
 	// Accessors
-	BOOST_UBLAS_INLINE
+	
 	size_type size1() const {
 		return data_.size1();
 	}
-	BOOST_UBLAS_INLINE
+	
 	size_type size2() const {
 		return data_.size2();
 	}
 
 	// Storage accessors
-	BOOST_UBLAS_INLINE
+	
 	const matrix_closure_type &data() const {
 		return data_;
 	}
-	BOOST_UBLAS_INLINE
+	
 	matrix_closure_type &data() {
 		return data_;
 	}
 
 	// Element access
 #ifndef BOOST_UBLAS_PROXY_CONST_MEMBER
-	BOOST_UBLAS_INLINE
+	
 	const_reference operator()(size_type i, size_type j) const {
 		BOOST_UBLAS_CHECK(i < size1(), bad_index());
 		BOOST_UBLAS_CHECK(j < size2(), bad_index());
@@ -97,7 +97,7 @@ public:
 		else
 			return zero_;
 	}
-	BOOST_UBLAS_INLINE
+	
 	reference operator()(size_type i, size_type j) {
 		BOOST_UBLAS_CHECK(i < size1(), bad_index());
 		BOOST_UBLAS_CHECK(j < size2(), bad_index());
@@ -108,7 +108,7 @@ public:
 		return data()(i, j);
 	}
 #else
-	BOOST_UBLAS_INLINE
+	
 	reference operator()(size_type i, size_type j) const {
 		BOOST_UBLAS_CHECK(i < size1(), bad_index());
 		BOOST_UBLAS_CHECK(j < size2(), bad_index());
@@ -121,78 +121,78 @@ public:
 #endif
 
 	// Assignment
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor &operator = (const triangular_adaptor &m) {
 		matrix_assign<scalar_assign> (*this, m);
 		return *this;
 	}
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor &assign_temporary(triangular_adaptor &m) {
 		*this = m;
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor &operator = (const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_assign> (*this, matrix<value_type> (ae));
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor &assign(const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_assign> (*this, ae);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor &operator += (const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_assign> (*this, matrix<value_type> (*this + ae));
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor &plus_assign(const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_plus_assign> (*this, ae);
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor &operator -= (const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_assign> (*this, matrix<value_type> (*this - ae));
 		return *this;
 	}
 	template<class AE>
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor &minus_assign(const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_minus_assign> (*this, ae);
 		return *this;
 	}
 	template<class AT>
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor &operator *= (const AT &at) {
 		matrix_assign_scalar<scalar_multiplies_assign> (*this, at);
 		return *this;
 	}
 	template<class AT>
-	BOOST_UBLAS_INLINE
+	
 	triangular_adaptor &operator /= (const AT &at) {
 		matrix_assign_scalar<scalar_divides_assign> (*this, at);
 		return *this;
 	}
 
 	// Closure comparison
-	BOOST_UBLAS_INLINE
+	
 	bool same_closure(const triangular_adaptor &ta) const {
 		return (*this).data().same_closure(ta.data());
 	}
 
 	// Swapping
-	BOOST_UBLAS_INLINE
+	
 	void swap(triangular_adaptor &m) {
 		if (this != &m)
 			matrix_swap<scalar_swap> (*this, m);
 	}
-	BOOST_UBLAS_INLINE
+	
 	friend void swap(triangular_adaptor &m1, triangular_adaptor &m2) {
 		m1.swap(m2);
 	}
@@ -226,7 +226,7 @@ public:
 	typedef reverse_iterator_base2<iterator2> reverse_iterator2;
 
 	// Element lookup
-	BOOST_UBLAS_INLINE
+	
 	const_iterator1 find1(int rank, size_type i, size_type j) const {
 		if (rank == 1)
 			i = triangular_type::restrict1(i, j, size1(), size2());
@@ -234,7 +234,7 @@ public:
 			i = triangular_type::global_restrict1(i, size1(), j, size2());
 		return const_iterator1(*this, data().find1(rank, i, j));
 	}
-	BOOST_UBLAS_INLINE
+	
 	iterator1 find1(int rank, size_type i, size_type j) {
 		if (rank == 1)
 			i = triangular_type::mutable_restrict1(i, j, size1(), size2());
@@ -242,7 +242,7 @@ public:
 			i = triangular_type::global_mutable_restrict1(i, size1(), j, size2());
 		return iterator1(*this, data().find1(rank, i, j));
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_iterator2 find2(int rank, size_type i, size_type j) const {
 		if (rank == 1)
 			j = triangular_type::restrict2(i, j, size1(), size2());
@@ -250,7 +250,7 @@ public:
 			j = triangular_type::global_restrict2(i, size1(), j, size2());
 		return const_iterator2(*this, data().find2(rank, i, j));
 	}
-	BOOST_UBLAS_INLINE
+	
 	iterator2 find2(int rank, size_type i, size_type j) {
 		if (rank == 1)
 			j = triangular_type::mutable_restrict2(i, j, size1(), size2());
@@ -277,45 +277,45 @@ public:
 		typedef const_reverse_iterator2 dual_reverse_iterator_type;
 
 		// Construction and destruction
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1():
 			container_const_reference<self_type> (), it1_() {}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1(const self_type &m, const const_subiterator1_type &it1):
 			container_const_reference<self_type> (m), it1_(it1) {}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1(const iterator1 &it):
 			container_const_reference<self_type> (it()), it1_(it.it1_) {}
 
 		// Arithmetic
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator ++ () {
 			++ it1_;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator -- () {
 			-- it1_;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator += (difference_type n) {
 			it1_ += n;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator -= (difference_type n) {
 			it1_ -= n;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		difference_type operator - (const const_iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it1_ - it.it1_;
 		}
 
 		// Dereference
-		BOOST_UBLAS_INLINE
+		
 		const_reference operator * () const {
 			size_type i = index1();
 			size_type j = index2();
@@ -326,34 +326,34 @@ public:
 			else
 				return (*this)()(i, j);
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_reference operator [](difference_type n) const {
 			return *(*this + n);
 		}
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_iterator2 begin() const {
 			return (*this)().find2(1, index1(), 0);
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_iterator2 end() const {
 			return (*this)().find2(1, index1(), (*this)().size2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_reverse_iterator2 rbegin() const {
 			return const_reverse_iterator2(end());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -363,17 +363,17 @@ public:
 #endif
 
 		// Indices
-		BOOST_UBLAS_INLINE
+		
 		size_type index1() const {
 			return it1_.index1();
 		}
-		BOOST_UBLAS_INLINE
+		
 		size_type index2() const {
 			return it1_.index2();
 		}
 
 		// Assignment
-		BOOST_UBLAS_INLINE
+		
 		const_iterator1 &operator = (const const_iterator1 &it) {
 			container_const_reference<self_type>::assign(&it());
 			it1_ = it.it1_;
@@ -381,12 +381,12 @@ public:
 		}
 
 		// Comparison
-		BOOST_UBLAS_INLINE
+		
 		bool operator == (const const_iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it1_ == it.it1_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		bool operator < (const const_iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it1_ < it.it1_;
@@ -397,11 +397,11 @@ public:
 	};
 #endif
 
-	BOOST_UBLAS_INLINE
+	
 	const_iterator1 begin1() const {
 		return find1(0, 0, 0);
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_iterator1 end1() const {
 		return find1(0, size1(), 0);
 	}
@@ -422,42 +422,42 @@ public:
 		typedef reverse_iterator2 dual_reverse_iterator_type;
 
 		// Construction and destruction
-		BOOST_UBLAS_INLINE
+		
 		iterator1():
 			container_reference<self_type> (), it1_() {}
-		BOOST_UBLAS_INLINE
+		
 		iterator1(self_type &m, const subiterator1_type &it1):
 			container_reference<self_type> (m), it1_(it1) {}
 
 		// Arithmetic
-		BOOST_UBLAS_INLINE
+		
 		iterator1 &operator ++ () {
 			++ it1_;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator1 &operator -- () {
 			-- it1_;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator1 &operator += (difference_type n) {
 			it1_ += n;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator1 &operator -= (difference_type n) {
 			it1_ -= n;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		difference_type operator - (const iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it1_ - it.it1_;
 		}
 
 		// Dereference
-		BOOST_UBLAS_INLINE
+		
 		reference operator * () const {
 			size_type i = index1();
 			size_type j = index2();
@@ -468,34 +468,34 @@ public:
 			else
 				return (*this)()(i, j);
 		}
-		BOOST_UBLAS_INLINE
+		
 		reference operator [](difference_type n) const {
 			return *(*this + n);
 		}
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		iterator2 begin() const {
 			return (*this)().find2(1, index1(), 0);
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		iterator2 end() const {
 			return (*this)().find2(1, index1(), (*this)().size2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		reverse_iterator2 rbegin() const {
 			return reverse_iterator2(end());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -505,17 +505,17 @@ public:
 #endif
 
 		// Indices
-		BOOST_UBLAS_INLINE
+		
 		size_type index1() const {
 			return it1_.index1();
 		}
-		BOOST_UBLAS_INLINE
+		
 		size_type index2() const {
 			return it1_.index2();
 		}
 
 		// Assignment
-		BOOST_UBLAS_INLINE
+		
 		iterator1 &operator = (const iterator1 &it) {
 			container_reference<self_type>::assign(&it());
 			it1_ = it.it1_;
@@ -523,12 +523,12 @@ public:
 		}
 
 		// Comparison
-		BOOST_UBLAS_INLINE
+		
 		bool operator == (const iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it1_ == it.it1_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		bool operator < (const iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it1_ < it.it1_;
@@ -541,11 +541,11 @@ public:
 	};
 #endif
 
-	BOOST_UBLAS_INLINE
+	
 	iterator1 begin1() {
 		return find1(0, 0, 0);
 	}
-	BOOST_UBLAS_INLINE
+	
 	iterator1 end1() {
 		return find1(0, size1(), 0);
 	}
@@ -566,45 +566,45 @@ public:
 		typedef const_reverse_iterator1 dual_reverse_iterator_type;
 
 		// Construction and destruction
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2():
 			container_const_reference<self_type> (), it2_() {}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2(const self_type &m, const const_subiterator2_type &it2):
 			container_const_reference<self_type> (m), it2_(it2) {}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2(const iterator2 &it):
 			container_const_reference<self_type> (it()), it2_(it.it2_) {}
 
 		// Arithmetic
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator ++ () {
 			++ it2_;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator -- () {
 			-- it2_;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator += (difference_type n) {
 			it2_ += n;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator -= (difference_type n) {
 			it2_ -= n;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		difference_type operator - (const const_iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it2_ - it.it2_;
 		}
 
 		// Dereference
-		BOOST_UBLAS_INLINE
+		
 		const_reference operator * () const {
 			size_type i = index1();
 			size_type j = index2();
@@ -615,34 +615,34 @@ public:
 			else
 				return (*this)()(i, j);
 		}
-		BOOST_UBLAS_INLINE
+		
 		const_reference operator [](difference_type n) const {
 			return *(*this + n);
 		}
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_iterator1 begin() const {
 			return (*this)().find1(1, 0, index2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_iterator1 end() const {
 			return (*this)().find1(1, (*this)().size1(), index2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		const_reverse_iterator1 rbegin() const {
 			return const_reverse_iterator1(end());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -652,17 +652,17 @@ public:
 #endif
 
 		// Indices
-		BOOST_UBLAS_INLINE
+		
 		size_type index1() const {
 			return it2_.index1();
 		}
-		BOOST_UBLAS_INLINE
+		
 		size_type index2() const {
 			return it2_.index2();
 		}
 
 		// Assignment
-		BOOST_UBLAS_INLINE
+		
 		const_iterator2 &operator = (const const_iterator2 &it) {
 			container_const_reference<self_type>::assign(&it());
 			it2_ = it.it2_;
@@ -670,12 +670,12 @@ public:
 		}
 
 		// Comparison
-		BOOST_UBLAS_INLINE
+		
 		bool operator == (const const_iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it2_ == it.it2_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		bool operator < (const const_iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it2_ < it.it2_;
@@ -686,11 +686,11 @@ public:
 	};
 #endif
 
-	BOOST_UBLAS_INLINE
+	
 	const_iterator2 begin2() const {
 		return find2(0, 0, 0);
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_iterator2 end2() const {
 		return find2(0, 0, size2());
 	}
@@ -711,42 +711,42 @@ public:
 		typedef reverse_iterator1 dual_reverse_iterator_type;
 
 		// Construction and destruction
-		BOOST_UBLAS_INLINE
+		
 		iterator2():
 			container_reference<self_type> (), it2_() {}
-		BOOST_UBLAS_INLINE
+		
 		iterator2(self_type &m, const subiterator2_type &it2):
 			container_reference<self_type> (m), it2_(it2) {}
 
 		// Arithmetic
-		BOOST_UBLAS_INLINE
+		
 		iterator2 &operator ++ () {
 			++ it2_;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator2 &operator -- () {
 			-- it2_;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator2 &operator += (difference_type n) {
 			it2_ += n;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		iterator2 &operator -= (difference_type n) {
 			it2_ -= n;
 			return *this;
 		}
-		BOOST_UBLAS_INLINE
+		
 		difference_type operator - (const iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it2_ - it.it2_;
 		}
 
 		// Dereference
-		BOOST_UBLAS_INLINE
+		
 		reference operator * () const {
 			size_type i = index1();
 			size_type j = index2();
@@ -757,34 +757,34 @@ public:
 			else
 				return (*this)()(i, j);
 		}
-		BOOST_UBLAS_INLINE
+		
 		reference operator [](difference_type n) const {
 			return *(*this + n);
 		}
 
 #ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		iterator1 begin() const {
 			return (*this)().find1(1, 0, index2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		iterator1 end() const {
 			return (*this)().find1(1, (*this)().size1(), index2());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
 		reverse_iterator1 rbegin() const {
 			return reverse_iterator1(end());
 		}
-		BOOST_UBLAS_INLINE
+		
 #ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
 		typename self_type::
 #endif
@@ -794,17 +794,17 @@ public:
 #endif
 
 		// Indices
-		BOOST_UBLAS_INLINE
+		
 		size_type index1() const {
 			return it2_.index1();
 		}
-		BOOST_UBLAS_INLINE
+		
 		size_type index2() const {
 			return it2_.index2();
 		}
 
 		// Assignment
-		BOOST_UBLAS_INLINE
+		
 		iterator2 &operator = (const iterator2 &it) {
 			container_reference<self_type>::assign(&it());
 			it2_ = it.it2_;
@@ -812,12 +812,12 @@ public:
 		}
 
 		// Comparison
-		BOOST_UBLAS_INLINE
+		
 		bool operator == (const iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it2_ == it.it2_;
 		}
-		BOOST_UBLAS_INLINE
+		
 		bool operator < (const iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it2_ < it.it2_;
@@ -830,49 +830,49 @@ public:
 	};
 #endif
 
-	BOOST_UBLAS_INLINE
+	
 	iterator2 begin2() {
 		return find2(0, 0, 0);
 	}
-	BOOST_UBLAS_INLINE
+	
 	iterator2 end2() {
 		return find2(0, 0, size2());
 	}
 
 	// Reverse iterators
 
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator1 rbegin1() const {
 		return const_reverse_iterator1(end1());
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator1 rend1() const {
 		return const_reverse_iterator1(begin1());
 	}
 
-	BOOST_UBLAS_INLINE
+	
 	reverse_iterator1 rbegin1() {
 		return reverse_iterator1(end1());
 	}
-	BOOST_UBLAS_INLINE
+	
 	reverse_iterator1 rend1() {
 		return reverse_iterator1(begin1());
 	}
 
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator2 rbegin2() const {
 		return const_reverse_iterator2(end2());
 	}
-	BOOST_UBLAS_INLINE
+	
 	const_reverse_iterator2 rend2() const {
 		return const_reverse_iterator2(begin2());
 	}
 
-	BOOST_UBLAS_INLINE
+	
 	reverse_iterator2 rbegin2() {
 		return reverse_iterator2(end2());
 	}
-	BOOST_UBLAS_INLINE
+	
 	reverse_iterator2 rend2() {
 		return reverse_iterator2(begin2());
 	}
@@ -911,7 +911,7 @@ struct matrix_temporary_traits< const triangular_adaptor<M, TRI> >
 
 // Dense (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         lower_tag, column_major_tag, dense_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -937,7 +937,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 }
 // Packed (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         lower_tag, column_major_tag, packed_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -966,7 +966,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 }
 // Sparse (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         lower_tag, column_major_tag, unknown_storage_tag) {
 	typedef typename E2::size_type size_type;
@@ -995,7 +995,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 
 // Dense (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         lower_tag, row_major_tag, dense_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -1021,7 +1021,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 }
 // Packed (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         lower_tag, row_major_tag, packed_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -1050,7 +1050,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 }
 // Sparse (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         lower_tag, row_major_tag, unknown_storage_tag) {
 	typedef typename E2::size_type size_type;
@@ -1080,7 +1080,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 
 // Redirectors :-)
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         lower_tag, column_major_tag) {
 	typedef typename E1::storage_category storage_category;
@@ -1088,7 +1088,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 	        lower_tag(), column_major_tag(), storage_category());
 }
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         lower_tag, row_major_tag) {
 	typedef typename E1::storage_category storage_category;
@@ -1097,7 +1097,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 }
 // Dispatcher
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         lower_tag) {
 	typedef typename E1::orientation_category orientation_category;
@@ -1105,7 +1105,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 	        lower_tag(), orientation_category());
 }
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         unit_lower_tag) {
 	typedef typename E1::orientation_category orientation_category;
@@ -1115,7 +1115,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 
 // Dense (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         upper_tag, column_major_tag, dense_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -1141,7 +1141,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 }
 // Packed (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         upper_tag, column_major_tag, packed_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -1170,7 +1170,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 }
 // Sparse (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         upper_tag, column_major_tag, unknown_storage_tag) {
 	typedef typename E2::size_type size_type;
@@ -1200,7 +1200,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 
 // Dense (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         upper_tag, row_major_tag, dense_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -1226,7 +1226,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 }
 // Packed (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         upper_tag, row_major_tag, packed_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -1256,7 +1256,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 }
 // Sparse (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         upper_tag, row_major_tag, unknown_storage_tag) {
 	typedef typename E2::size_type size_type;
@@ -1287,7 +1287,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 
 // Redirectors :-)
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         upper_tag, column_major_tag) {
 	typedef typename E1::storage_category storage_category;
@@ -1295,7 +1295,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 	        upper_tag(), column_major_tag(), storage_category());
 }
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         upper_tag, row_major_tag) {
 	typedef typename E1::storage_category storage_category;
@@ -1304,7 +1304,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 }
 // Dispatcher
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         upper_tag) {
 	typedef typename E1::orientation_category orientation_category;
@@ -1312,7 +1312,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 	        upper_tag(), orientation_category());
 }
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
         unit_upper_tag) {
 	typedef typename E1::orientation_category orientation_category;
@@ -1324,7 +1324,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 
 // Redirectors :-)
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
         lower_tag, row_major_tag) {
 	typedef typename E2::storage_category storage_category;
@@ -1332,7 +1332,7 @@ void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
 	        upper_tag(), column_major_tag(), storage_category());
 }
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
         lower_tag, column_major_tag) {
 	typedef typename E2::storage_category storage_category;
@@ -1341,7 +1341,7 @@ void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
 }
 // Dispatcher
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
         lower_tag) {
 	typedef typename E2::orientation_category orientation_category;
@@ -1349,7 +1349,7 @@ void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
 	        lower_tag(), orientation_category());
 }
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
         unit_lower_tag) {
 	typedef typename E2::orientation_category orientation_category;
@@ -1360,7 +1360,7 @@ void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
 
 // Redirectors :-)
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
         upper_tag, row_major_tag) {
 	typedef typename E2::storage_category storage_category;
@@ -1368,7 +1368,7 @@ void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
 	        lower_tag(), column_major_tag(), storage_category());
 }
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
         upper_tag, column_major_tag) {
 	typedef typename E2::storage_category storage_category;
@@ -1377,7 +1377,7 @@ void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
 }
 // Dispatcher
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
         upper_tag) {
 	typedef typename E2::orientation_category orientation_category;
@@ -1385,7 +1385,7 @@ void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
 	        upper_tag(), orientation_category());
 }
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
         unit_upper_tag) {
 	typedef typename E2::orientation_category orientation_category;
@@ -1399,7 +1399,7 @@ void inplace_solve(vector_expression<E1> &e1, const matrix_expression<E2> &e2,
 
 // Dense (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
         lower_tag, dense_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -1428,7 +1428,7 @@ void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
 }
 // Packed (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
         lower_tag, packed_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -1460,7 +1460,7 @@ void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
 }
 // Sparse (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
         lower_tag, unknown_storage_tag) {
 	typedef typename E2::size_type size_type;
@@ -1491,7 +1491,7 @@ void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
 }
 // Dispatcher
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
         lower_tag) {
 	typedef typename E1::storage_category dispatch_category;
@@ -1499,7 +1499,7 @@ void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
 	        lower_tag(), dispatch_category());
 }
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
         unit_lower_tag) {
 	typedef typename E1::storage_category dispatch_category;
@@ -1509,7 +1509,7 @@ void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
 
 // Dense (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
         upper_tag, dense_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -1538,7 +1538,7 @@ void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
 }
 // Packed (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
         upper_tag, packed_proxy_tag) {
 	typedef typename E2::size_type size_type;
@@ -1570,7 +1570,7 @@ void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
 }
 // Sparse (proxy) case
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
         upper_tag, unknown_storage_tag) {
 	typedef typename E2::size_type size_type;
@@ -1601,7 +1601,7 @@ void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
 }
 // Dispatcher
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
         upper_tag) {
 	typedef typename E1::storage_category dispatch_category;
@@ -1609,7 +1609,7 @@ void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
 	        upper_tag(), dispatch_category());
 }
 template<class E1, class E2>
-BOOST_UBLAS_INLINE
+
 void inplace_solve(const matrix_expression<E1> &e1, matrix_expression<E2> &e2,
         unit_upper_tag) {
 	typedef typename E1::storage_category dispatch_category;

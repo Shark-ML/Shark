@@ -36,23 +36,23 @@ namespace shark{ namespace blas{
         typedef typename vector_type::size_type size_type;
 
         // Construction and destruction
-        BOOST_UBLAS_INLINE
+        
         explicit
         permutation_matrix (size_type size):
             vector<T, A> (size) {
             for (size_type i = 0; i < size; ++ i)
                 (*this) (i) = i;
         }
-        BOOST_UBLAS_INLINE
+        
         explicit
         permutation_matrix (const vector_type & init) 
             : vector_type(init)
         { }
-        BOOST_UBLAS_INLINE
+        
         ~permutation_matrix () {}
 
         // Assignment
-        BOOST_UBLAS_INLINE
+        
         permutation_matrix &operator = (const permutation_matrix &m) {
             vector_type::operator = (m);
             return *this;
@@ -60,7 +60,7 @@ namespace shark{ namespace blas{
     };
 
     template<class PM, class MV>
-    BOOST_UBLAS_INLINE
+    
     void swap_rows (const PM &pm, MV &mv, vector_tag) {
         typedef typename PM::size_type size_type;
         typedef typename MV::value_type value_type;
@@ -72,7 +72,7 @@ namespace shark{ namespace blas{
         }
     }
     template<class PM, class MV>
-    BOOST_UBLAS_INLINE
+    
     void swap_rows (const PM &pm, MV &mv, matrix_tag) {
         typedef typename PM::size_type size_type;
         typedef typename MV::value_type value_type;
@@ -85,7 +85,7 @@ namespace shark{ namespace blas{
     }
     // Dispatcher
     template<class PM, class MV>
-    BOOST_UBLAS_INLINE
+    
     void swap_rows (const PM &pm, MV &mv) {
         swap_rows (pm, mv, typename MV::type_category ());
     }
