@@ -279,8 +279,8 @@ namespace shark {
 
 			m_chromosome.m_generationCounter = 0;
 
-			m_chromosome.m_evolutionPathC = boost::numeric::ublas::zero_vector< double >( m_numberOfVariables );
-			m_chromosome.m_mean = boost::numeric::ublas::zero_vector< double >( m_numberOfVariables );
+			m_chromosome.m_evolutionPathC = shark::blas::zero_vector< double >( m_numberOfVariables );
+			m_chromosome.m_mean = shark::blas::zero_vector< double >( m_numberOfVariables );
 			m_chromosome.m_mutationDistribution.resize( m_numberOfVariables );
 
 			

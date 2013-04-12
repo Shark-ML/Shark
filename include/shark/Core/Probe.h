@@ -33,7 +33,6 @@
 #include <boost/serialization/extended_type_info.hpp>
 #include <boost/signals.hpp>
 #include <boost/thread.hpp>
-#include <boost/numeric/ublas/io.hpp>
 #include <boost/units/make_scaled_unit.hpp>
 #include <boost/units/systems/si.hpp>
 #include <boost/units/io.hpp>
@@ -91,8 +90,8 @@ class Probe /** \cond */ : public boost::noncopyable /** \endcond */ {
     float,
     double,
     std::complex< double >,
-    boost::numeric::ublas::vector< double >,
-    boost::numeric::ublas::matrix< double >,
+    shark::blas::vector< double >,
+    shark::blas::matrix< double >,
     std::string
     > variant_type;
 

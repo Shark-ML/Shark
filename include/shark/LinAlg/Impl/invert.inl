@@ -37,8 +37,8 @@
 //===========================================================================
 #ifndef SHARK_LINALG_IMPL_INVERT_INL
 #define SHARK_LINALG_IMPL_INVERT_INL
-#include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/lu.hpp>
+#include <shark/LinAlg/BLAS/ublas/triangular.hpp>
+#include <shark/LinAlg/BLAS/ublas/lu.hpp>
 
 #ifdef SHARK_USE_ATLAS
 #include <shark/LinAlg/BLAS/Impl/numeric_bindings/atlas/potri.h>

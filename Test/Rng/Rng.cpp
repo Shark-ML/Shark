@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <shark/Rng/Weibull.h>
 #include <shark/Rng/Bernoulli.h>
 #include <shark/Rng/Binomial.h>

@@ -286,7 +286,7 @@ public:
 		// compute solution statistics
 		std::size_t free_SV = 0;
 		std::size_t bounded_SV = 0;
-		double objective = -0.5 * boost::numeric::ublas::inner_prod(w, w);
+		double objective = -0.5 * shark::blas::inner_prod(w, w);
 		for (std::size_t i=0; i<ell; i++)
 		{
 			double a = alpha(i);

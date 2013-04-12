@@ -35,10 +35,11 @@
 #define SHARK_LINALG_BLAS_METRICS_H
 
 #include <shark/LinAlg/BLAS/fastOperations.h>
-#include <shark/LinAlg/BLAS/VectorTransformations.h>
+//#include <shark/LinAlg/BLAS/VectorTransformations.h>
 #include <shark/LinAlg/BLAS/MatrixVectorOperation.h>
 #include <shark/LinAlg/BLAS/Tools.h>
 #include <shark/LinAlg/BLAS/Proxy.h>
+#include <shark/Core/Math.h>
 namespace shark{
 	
 ///////////////////////////////////////NORMS////////////////////////////////////////

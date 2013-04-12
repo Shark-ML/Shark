@@ -149,8 +149,8 @@ namespace shark {
 				return( 
 					m_searchSpaceDimension == rhs.m_searchSpaceDimension &&
 					m_noObjectives == rhs.m_noObjectives &&
-					boost::numeric::ublas::norm_2( m_lowerBound - rhs.m_lowerBound ) < 1E-10 &&
-					boost::numeric::ublas::norm_2( m_upperBound - rhs.m_upperBound ) < 1E-10 &&
+					shark::blas::norm_2( m_lowerBound - rhs.m_lowerBound ) < 1E-10 &&
+					shark::blas::norm_2( m_upperBound - rhs.m_upperBound ) < 1E-10 &&
 					m_initialSigma == rhs.m_initialSigma &&
 					m_useNewUpdate == rhs.m_useNewUpdate &&
 					m_constrainedFitnessFunction == rhs.m_constrainedFitnessFunction

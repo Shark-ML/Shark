@@ -1,5 +1,3 @@
-#include <iostream>
-#include <boost/numeric/ublas/io.hpp>
 #include <shark/Models/LinearModel.h>
 #define BOOST_TEST_MODULE Models_LinearModel
 #include <boost/test/unit_test.hpp>

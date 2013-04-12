@@ -74,14 +74,14 @@ public:
 	{ }
 
 	/// Construction from matrix
-	Normalizer(RealDiagonalMatrix matrix)
-	: m_A(matrix)
+	Normalizer(RealVector diagonal)
+	: m_A(diagonal)
 	, m_hasOffset(false)
 	{ }
 
 	/// Construction from matrix and vector
-	Normalizer(RealDiagonalMatrix matrix, RealVector vector)
-	: m_A(matrix)
+	Normalizer(RealVector diagonal, RealVector vector)
+	: m_A(diagonal)
 	, m_b(vector)
 	, m_hasOffset(true)
 	{ }
@@ -117,7 +117,7 @@ public:
 	/// check if the model is properly initialized
 	bool isValid() const
 	{
-		return (m_A.size1() != 0);
+		return (m_A.size() != 0);
 	}
 
 	/// check for the presence of an offset term
@@ -126,15 +126,15 @@ public:
 		return m_hasOffset;
 	}
 
-	/// return a copy of the matrix
-	RealDiagonalMatrix const& matrix() const
+	/// return the diagonal of the matrix
+	RealVector const& diagonal() const
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::matrix] model is not initialized");
 		return m_A;
 	}
 
 	/// return the offset vector
-	RealMatrix const& vector() const
+	RealVector const& vector() const
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::vector] model is not initialized");
 		return m_b;
@@ -144,38 +144,31 @@ public:
 	std::size_t inputSize() const
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::inputSize] model is not initialized");
-		return m_A.size1();
+		return m_A.size();
 	}
 
 	/// obtain the output dimension
 	std::size_t outputSize() const
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::outputSize] model is not initialized");
-		return m_A.size1();
+		return m_A.size();
 	}
 
 	/// obtain the parameter vector
 	RealVector parameterVector() const
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::parameterVector] model is not initialized");
-		std::size_t dim = m_A.size1();
+		std::size_t dim = m_A.size();
 		if (hasOffset())
 		{
 			RealVector param(2 * dim);
-			for (std::size_t i=0; i<dim; i++)
-			{
-				param(i) = m_A(i, i);
-				param(dim + i) = m_b(i);
-			}
+			init(param)<<m_A,m_b;
 			return param;
 		}
 		else
 		{
 			RealVector param(dim);
-			for (std::size_t i=0; i<dim; i++)
-			{
-				param(i) = m_A(i, i);
-			}
+			init(param)<<m_A;
 			return param;
 		}
 	}
@@ -184,23 +177,16 @@ public:
 	void setParameterVector(RealVector const& newParameters)
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::setParameterVector] model is not initialized");
-		std::size_t dim = m_A.size1();
+		std::size_t dim = m_A.size();
 		if (hasOffset())
 		{
 			SIZE_CHECK(newParameters.size() == 2 * dim);
-			for (std::size_t i=0; i<dim; i++)
-			{
-				m_A(i, i) = newParameters(i);
-				m_b(i) = newParameters(dim + i);
-			}
+			init(newParameters)>>m_A,m_b;
 		}
 		else
 		{
 			SIZE_CHECK(newParameters.size() == dim);
-			for (std::size_t i=0; i<dim; i++)
-			{
-				m_A(i, i) = newParameters(i);
-			}
+			init(newParameters)>>m_A;
 		}
 	}
 
@@ -208,13 +194,13 @@ public:
 	std::size_t numberOfParameters() const
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::numberOfParameters] model is not initialized");
-		return (m_hasOffset) ? m_A.size1() + m_b.size() : m_A.size1();
+		return (m_hasOffset) ? m_A.size() + m_b.size() : m_A.size();
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(RealDiagonalMatrix matrix)
+	void setStructure(RealVector const& diagonal)
 	{
-		m_A = matrix;
+		m_A = diagonal;
 		m_hasOffset = false;
 	}
 
@@ -227,10 +213,10 @@ public:
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(RealDiagonalMatrix matrix, RealVector offset)
+	void setStructure(RealVector const& diagonal, RealVector const& offset)
 	{
-		SHARK_CHECK(matrix.size1() == matrix.size2() && matrix.size1() == offset.size(), "[Normalizer::setStructure] dimension conflict");
-		m_A = matrix;
+		SHARK_CHECK(diagonal.size() == offset.size(), "[Normalizer::setStructure] dimension conflict");
+		m_A = diagonal;
 		m_b = offset;
 		m_hasOffset = true;
 	}
@@ -242,11 +228,10 @@ public:
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::eval] model is not initialized");
 		output.resize(input.size1(), input.size2(), false);
-		noalias(output) = prod(input, m_A);
-		// fast_prod(input, m_A, output);    // not defined for dense+sparse mixtures
+		noalias(output) = element_prod(input, repeat(m_A,input.size1()));
 		if (hasOffset())
 		{
-			for (std::size_t i=0; i<input.size1(); i++) row(output, i) += m_b;
+			noalias(output) += repeat(m_b,input.size1());
 		}
 	}
 
@@ -259,14 +244,7 @@ public:
 	/// from ISerializable
 	void read(InArchive& archive)
 	{
-		// believe it or not: ublas diagonal matrix cannot be serialized... REALLY???
-		// archive & m_A;
-
-		RealVector a;
-		archive & a;
-		m_A.resize(a.size(), a.size(), false);
-		for (std::size_t i=0; i<a.size(); i++) m_A(i, i) = a(i);
-
+		archive & m_A;
 		archive & m_b;
 		archive & m_hasOffset;
 	}
@@ -274,19 +252,13 @@ public:
 	/// from ISerializable
 	void write(OutArchive& archive) const
 	{
-		// believe it or not: ublas diagonal matrix cannot be serialized... REALLY???
-		// archive & m_A;
-
-		RealVector a(m_A.size1());
-		for (std::size_t i=0; i<a.size(); i++) a(i) = m_A(i, i);
-		archive & a;
-
+		archive & m_A;
 		archive & m_b;
 		archive & m_hasOffset;
 	}
 
 protected:
-	RealDiagonalMatrix m_A;                ///< matrix A (see class documentation)
+	RealVector m_A;                ///< matrix A (see class documentation)
 	RealVector m_b;                        ///< vector b (see class documentation)
 	bool m_hasOffset;                      ///< if true: add offset therm b; if false: don't.
 };

@@ -34,8 +34,6 @@
 #define BOOST_TEST_MODULE ALGORITHM_PCA
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-#include <boost/numeric/ublas/io.hpp>
-
 using namespace std;
 using namespace shark;
 

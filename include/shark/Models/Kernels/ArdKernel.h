@@ -110,7 +110,7 @@ public:
 	void setParameterVector(RealVector const& newParameters){
 		SIZE_CHECK(newParameters.size() == m_inputDimensions);
 		m_params = newParameters;
-		noalias(m_gammas) = shark::sqr(m_params);
+		noalias(m_gammas) = sqr(m_params);
 	}
 	std::size_t numberOfParameters() const{
 		return m_inputDimensions;
@@ -133,7 +133,7 @@ public:
 		}
 #endif
 		m_gammas = newGammas;
-		noalias(m_params) = shark::sqrt(m_gammas);
+		noalias(m_params) = sqrt(m_gammas);
 	}
 
 	/// \brief evaluates \f$ k(x,z)\f$

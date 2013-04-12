@@ -32,7 +32,7 @@ int main( int argc, char ** argv ) {
 	
 	// Initialize the mutation distribution
 	shark::MultiVariateNormalDistribution mutationDistribution( Dimension );
-	mutationDistribution.setCovarianceMatrix( boost::numeric::ublas::identity_matrix< double >( Dimension ) );
+	mutationDistribution.setCovarianceMatrix( shark::blas::identity_matrix< double >( Dimension ) );
 	
 	shark::example::Individual prototypeIndividual;
 	prototypeIndividual.get<0>() = InitialSigma;

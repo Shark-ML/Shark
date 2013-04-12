@@ -32,6 +32,7 @@
 
 
 #include <shark/Models/RecurrentStructure.h>
+#include <shark/Core/Math.h>
 #include <boost/math/special_functions/sign.hpp>
 
 #include <map>

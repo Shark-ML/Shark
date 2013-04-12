@@ -36,6 +36,7 @@
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_LEASTCONTRIBUTORAPPROXIMATOR_HPP
 
 #include <shark/Core/Exception.h>
+#include <shark/Core/Math.h>
 
 #include <boost/assign.hpp>
 #include <boost/bimap.hpp>

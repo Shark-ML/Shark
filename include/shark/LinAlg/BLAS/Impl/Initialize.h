@@ -36,9 +36,7 @@
 
 #include <shark/Core/Exception.h>
 #include <shark/Core/IParameterizable.h>
-#include <boost/numeric/ublas/expression_types.hpp>
-#include <boost/numeric/ublas/vector_proxy.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <shark/LinAlg/BLAS/ublas.h>
 #include <iterator>
 #include <boost/type_traits/remove_reference.hpp>
 namespace shark{
@@ -389,7 +387,7 @@ VectorInitializer<Sink,InitializerNode<InitializerEnd, Type> > operator<<(const 
 	return VectorInitializer<Sink, Init>(sink.vector,Init(InitializerEnd(),source()));\
 }
 ///\brief Begins the initialization argument with a vector as first right hand side argument.
-SHARK_INIT_INIT(VectorExpression<const Source&>,boost::numeric::ublas::vector_expression<Source>)
+SHARK_INIT_INIT(VectorExpression<const Source&>,shark::blas::vector_expression<Source>)
 ///\brief Begins the initialization argument with a arbitrary source as first right hand side argument.
 SHARK_INIT_INIT(Source,InitializerBase<Source>)
 #undef SHARK_INIT_INIT
@@ -418,7 +416,7 @@ VectorInitializer<Sink,InitializerNode<Init,Type > > operator,(const VectorIniti
 	return VectorInitializer<Sink, newExpression>(init.m_vector,newExpression(init.expression(),vec()));\
 }
 ///\brief Appends a single vector expression c to the expression vec<<a,b -> vec<<a,b,c.
-SHARK_INIT_COMMA(VectorExpression<const Source&>,boost::numeric::ublas::vector_expression<Source>)
+SHARK_INIT_COMMA(VectorExpression<const Source&>,shark::blas::vector_expression<Source>)
 ///\brief Appends a initialization expression c to the expression vec<<a,b -> vec<<a,b,c.
 SHARK_INIT_COMMA(Source,InitializerBase<Source>)
 #undef SHARK_INIT_COMMA
@@ -488,7 +486,7 @@ operator>>(const ADLVector<Source>& source,Argument& sink){\
 	return VectorSplitter<Source, Init>(source.vector,Init(InitializerEnd(),sink()));\
 }
 ///\brief Appends a single mutable vector expression.
-SHARK_SPLIT_INIT(VectorExpression<Sink&>,boost::numeric::ublas::vector_expression<Sink>)
+SHARK_SPLIT_INIT(VectorExpression<Sink&>,shark::blas::vector_expression<Sink>)
 ///\brief Appends an arbitrary source.
 SHARK_SPLIT_INIT(Sink,const InitializerBase<Sink>)
 #undef SHARK_SPLIT_INIT
@@ -515,11 +513,11 @@ operator>>(const ADLVector<Source>& source,Argument sink){\
 	return VectorSplitter<Source, Init>(source.vector,Init(InitializerEnd(),sink));\
 }
 ///\brief Appends a single mutable vector expression.
-SHARK_SPLIT_PROXY_INIT(boost::numeric::ublas::vector_range<Sink>)
+SHARK_SPLIT_PROXY_INIT(shark::blas::vector_range<Sink>)
 ///\brief Appends a matrix row.
-SHARK_SPLIT_PROXY_INIT(boost::numeric::ublas::matrix_row<Sink>)
+SHARK_SPLIT_PROXY_INIT(shark::blas::matrix_row<Sink>)
 ///\brief Appends a matrix column.
-SHARK_SPLIT_PROXY_INIT(boost::numeric::ublas::matrix_column<Sink>)
+SHARK_SPLIT_PROXY_INIT(shark::blas::matrix_column<Sink>)
 #undef SHARK_SPLIT_PROXY_INIT
 
 
@@ -527,7 +525,7 @@ SHARK_SPLIT_PROXY_INIT(boost::numeric::ublas::matrix_column<Sink>)
 ///\brief Appends a single vector expression.
 template<class Source,class Init,class Sink>
 VectorSplitter<Source,InitializerNode<Init,VectorExpression<Sink&> > >
-operator,(const VectorSplitter<Source,Init >& source, boost::numeric::ublas::vector_expression<Sink>& vec){
+operator,(const VectorSplitter<Source,Init >& source, shark::blas::vector_expression<Sink>& vec){
 	source.disable();
 	typedef InitializerNode<Init,VectorExpression<Sink&> > newExpression;
 	return VectorSplitter<Source, newExpression>(source.m_vector,newExpression(source.expression(),vec()));
@@ -564,9 +562,9 @@ operator,(const VectorSplitter<Source,Init >& source, Argument vec){\
 	typedef InitializerNode<Init,VectorExpression<Argument> > newExpression;\
 	return VectorSplitter<Source, newExpression>(source.m_vector,newExpression(source.expression(),vec));\
 }
-SHARK_SPLIT_PROXY_COMMA(boost::numeric::ublas::vector_range<Sink>)
-SHARK_SPLIT_PROXY_COMMA(boost::numeric::ublas::matrix_row<Sink>)
-SHARK_SPLIT_PROXY_COMMA(boost::numeric::ublas::matrix_column<Sink>)
+SHARK_SPLIT_PROXY_COMMA(shark::blas::vector_range<Sink>)
+SHARK_SPLIT_PROXY_COMMA(shark::blas::matrix_row<Sink>)
+SHARK_SPLIT_PROXY_COMMA(shark::blas::matrix_column<Sink>)
 #undef SHARK_SPLIT_PROXY_COMMA
 
 }}

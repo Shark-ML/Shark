@@ -33,20 +33,14 @@
 #ifndef SHARK_LINALG_BLAS_UBLAS_H
 #define SHARK_LINALG_BLAS_UBLAS_H
 
-#define BOOST_UBLAS_SHALLOW_ARRAY_ADAPTOR 1
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/vector_sparse.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/vector_proxy.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/banded.hpp>
-#include <boost/numeric/ublas/operation.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/lu.hpp>
-
-namespace shark{
-namespace blas=boost::numeric::ublas;
-}
+#include <shark/LinAlg/BLAS/ublas/vector.hpp>
+#include <shark/LinAlg/BLAS/ublas/vector_sparse.hpp>
+#include <shark/LinAlg/BLAS/ublas/matrix.hpp>
+#include <shark/LinAlg/BLAS/ublas/matrix_sparse.hpp>
+#include <shark/LinAlg/BLAS/ublas/vector_proxy.hpp>
+#include <shark/LinAlg/BLAS/ublas/matrix_proxy.hpp>
+#include <shark/LinAlg/BLAS/ublas/operation.hpp>
+#include <shark/LinAlg/BLAS/ublas/io.hpp>
+#include <shark/LinAlg/BLAS/ublas/lu.hpp>
 
 #endif

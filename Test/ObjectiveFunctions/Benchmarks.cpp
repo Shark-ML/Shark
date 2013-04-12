@@ -1,9 +1,7 @@
 #define BOOST_TEST_MODULE ObjectiveFunctions_Benchmarks
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-#include <iostream>
 
-#include <boost/numeric/ublas/io.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/progress.hpp>

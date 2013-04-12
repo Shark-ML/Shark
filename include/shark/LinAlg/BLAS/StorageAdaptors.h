@@ -20,8 +20,7 @@
 #include <algorithm>
 
 #include <shark/LinAlg/BLAS/Proxy.h>
-#include <boost/numeric/ublas/detail/iterator.hpp>
-
+#include <shark/LinAlg/BLAS/ublas.h>
 
 namespace shark{
 

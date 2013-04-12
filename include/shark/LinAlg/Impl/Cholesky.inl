@@ -40,6 +40,8 @@
 #include <shark/LinAlg/BLAS/Impl/numeric_bindings/atlas/potrf.h>
 #endif
 
+#include <shark/Core/Math.h>
+
 template<class MatrixT,class MatrixL>
 void shark::choleskyDecomposition(
 	blas::matrix_expression<MatrixT> const& A, 

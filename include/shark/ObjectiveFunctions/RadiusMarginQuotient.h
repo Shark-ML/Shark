@@ -150,15 +150,11 @@ public:
 		Result result = computeRadiusMargin();
 		
 		std::size_t ell = result.beta.size();
-		RealDiagonalMatrix diagBeta(ell);
-		for(std::size_t i = 0; i != ell; ++i){
-			diagBeta(i,i) = result.beta(i);
-		}
+		RealMatrix w = -result.w2*outer_prod(result.beta,result.beta)
+		-result.R2*outer_prod(result.alpha,result.alpha);
+		diag(w) += result.w2*result.beta;
 		derivative = calculateKernelMatrixParameterDerivative(
-			*mep_kernel,
-			m_dataset.inputs(),
-			result.w2*(diagBeta-outer_prod(result.beta,result.beta))
-			-result.R2*outer_prod(result.alpha,result.alpha)
+			*mep_kernel, m_dataset.inputs(),w
 		);
 		
 		
