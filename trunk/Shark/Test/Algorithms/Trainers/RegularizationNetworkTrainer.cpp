@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( REGULARIZATION_NETWORK_TEST )
 	RegressionDataset training = prob.generateDataset(ell);
 
 	GaussianRbfKernel<> kernel(0.1);
-	KernelExpansion<RealVector> svm(true);
+	KernelExpansion<RealVector> svm(false);
 	RegularizationNetworkTrainer<RealVector> trainer(&kernel, lambda);
 	trainer.train(svm, training);
 

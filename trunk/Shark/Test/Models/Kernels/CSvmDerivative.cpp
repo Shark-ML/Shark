@@ -33,9 +33,6 @@
  */
 //===========================================================================
 
-
-#include <iostream>
-#include <boost/numeric/ublas/io.hpp>
 #define BOOST_TEST_MODULE MODELS_C_SVM_DERIVATIVE
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>

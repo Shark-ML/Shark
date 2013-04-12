@@ -68,8 +68,7 @@ public:
 	typedef AbstractUnsupervisedTrainer< Normalizer<DataType> > base_type;
 
 	NormalizeComponentsUnitVariance(bool zeroMean = false)
-	: m_zeroMean(zeroMean)
-	{ }
+	: m_zeroMean(zeroMean){ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -84,26 +83,27 @@ public:
 		RealVector variance;
 		meanvar(input, mean, variance);
 
-		RealDiagonalMatrix matrix(dc, dc);
+		RealVector diagonal(dc);
 		RealVector vector(dc);
 
-		for (std::size_t d=0; d != dc; d++)
-		{
+		for (std::size_t d=0; d != dc; d++){
 			double stddev = std::sqrt(variance(d));
 			if (stddev == 0.0)
 			{
-				matrix(d, d) = 0.0;
+				diagonal(d) = 0.0;
 				vector(d) = 0.0;
 			}
 			else
 			{
-				matrix(d, d) = 1.0 / stddev;
+				diagonal(d) = 1.0 / stddev;
 				vector(d) = -mean(d) / stddev;
 			}
 		}
 
-		if (m_zeroMean) model.setStructure(matrix, vector);
-		else model.setStructure(matrix);
+		if (m_zeroMean) 
+			model.setStructure(diagonal, vector);
+		else 
+			model.setStructure(diagonal);
 	}
 
 protected:

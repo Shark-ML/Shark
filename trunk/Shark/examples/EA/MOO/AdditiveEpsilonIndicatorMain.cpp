@@ -5,7 +5,6 @@
 
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/numeric/ublas/io.hpp>
 
 #include <fstream>
 #include <string>

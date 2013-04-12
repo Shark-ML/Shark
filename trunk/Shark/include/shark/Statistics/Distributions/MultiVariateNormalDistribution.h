@@ -209,9 +209,9 @@ namespace shark {
 			*/
 			bool operator==( const this_type & rhs ) const {
 				return( 
-					boost::numeric::ublas::norm_1( m_covarianceMatrix - rhs.m_covarianceMatrix ) == 0 &&
-					boost::numeric::ublas::norm_1( m_eigenVectors - rhs.m_eigenVectors ) == 0 &&
-					boost::numeric::ublas::norm_2( m_eigenValues - rhs.m_eigenValues ) == 0
+					shark::blas::norm_1( m_covarianceMatrix - rhs.m_covarianceMatrix ) == 0 &&
+					shark::blas::norm_1( m_eigenVectors - rhs.m_eigenVectors ) == 0 &&
+					shark::blas::norm_2( m_eigenValues - rhs.m_eigenValues ) == 0
 				);
 			}
 			// protected:

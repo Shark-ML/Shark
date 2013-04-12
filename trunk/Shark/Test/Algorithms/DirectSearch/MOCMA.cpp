@@ -1,6 +1,6 @@
 /**
  *
- *  \brief Unit tests for class shark::(detail::)MOCMA.
+ *  \brief Unit tests for class (detail::)MOCMA.
  *
  *  \author T.Voss, T. Glasmachers, O.Krause
  *  \date 2010-2011
@@ -31,8 +31,6 @@
  *  along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <iostream>
-#include <boost/numeric/ublas/io.hpp>
 #define BOOST_TEST_MODULE DirectSearch_CMA
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
@@ -53,12 +51,12 @@
 
 /*
 BOOST_AUTO_TEST_CASE( ProbeFramework ) {
-	shark::ProbeProvider< shark::detail::MOCMA<> > probeProvider;
-	shark::ProbeProvider< shark::detail::MOCMA< shark::AdditiveEpsilonIndicator > > probeProvider1;
+	ProbeProvider< detail::MOCMA<> > probeProvider;
+	ProbeProvider< detail::MOCMA< AdditiveEpsilonIndicator > > probeProvider1;
 
 	std::vector<
 		boost::shared_ptr<
-			shark::Probe
+			Probe
 		>
 	> probes( 30 );
 
@@ -71,21 +69,23 @@ BOOST_AUTO_TEST_CASE( ProbeFramework ) {
 	}
 
 	std::list< 
-		boost::shared_ptr< shark::Probe > 
-	> mocmaProbesForInstance = shark::ProbeManager::instance().find( boost::regex( "/" + probeProvider.context() + "/.*" ) );
+		boost::shared_ptr< Probe > 
+	> mocmaProbesForInstance = ProbeManager::instance().find( boost::regex( "/" + probeProvider.context() + "/.*" ) );
 
 	for( std::list< 
-		boost::shared_ptr< shark::Probe > 
+		boost::shared_ptr< Probe > 
 	>::iterator it = mocmaProbesForInstance.begin(); it != mocmaProbesForInstance.end(); ++it )
 		std::clog << (*it)->name() << std::endl;
 
-	shark::ProbeManager::instance().print( std::cout );
+	ProbeManager::instance().print( std::cout );
 }*/
+
+using namespace shark;
 
 
 BOOST_AUTO_TEST_CASE( ApproximatedHypMOCMA_Serialization ) {
 
-	shark::mocma::Chromosome chromosome1, chromosome2;
+	mocma::Chromosome chromosome1, chromosome2;
 	BOOST_CHECK(			chromosome1.m_mutationDistribution.covarianceMatrix().size1() == 0 );
 	BOOST_CHECK(			chromosome1.m_mutationDistribution.covarianceMatrix().size2() == 0 );
 	BOOST_CHECK(			chromosome1.m_mutationDistribution.eigenValues().size() == 0 );
@@ -106,8 +106,8 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypMOCMA_Serialization ) {
 	BOOST_CHECK(			chromosome1.mep_parent == NULL );
 
 	chromosome1.m_mutationDistribution.resize( 10 );
-	chromosome1.m_evolutionPath = boost::numeric::ublas::zero_vector<double>( 10 );
-	chromosome1.m_lastStep = boost::numeric::ublas::zero_vector<double>( 10 );
+	chromosome1.m_evolutionPath = repeat(0.0,10);
+	chromosome1.m_lastStep = repeat(0.0,10);
 	chromosome1.m_lambda = 5;
 	chromosome1.m_noSuccessfulOffspring = 5.;
 	chromosome1.m_stepSize = 5.;
@@ -130,16 +130,16 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypMOCMA_Serialization ) {
 		BOOST_CHECK( chromosome1 == chromosome2 );
 	}
 
-	shark::mocma::Initializer initializer1, initializer2;
+	mocma::Initializer initializer1, initializer2;
 	BOOST_CHECK_EQUAL( initializer1.m_searchSpaceDimension, 0 );
 	BOOST_CHECK_EQUAL( initializer1.m_noObjectives, 0 );
 	BOOST_CHECK_CLOSE( initializer1.m_initialSigma, 0., 1E-10 );
 	BOOST_CHECK_EQUAL( initializer1.m_useNewUpdate, false );
 	BOOST_CHECK_EQUAL( initializer1.m_constrainedFitnessFunction, false );
 
-	BOOST_CHECK_THROW( initializer1( chromosome1 ), shark::Exception );
+	BOOST_CHECK_THROW( initializer1( chromosome1 ), Exception );
 	initializer1.m_searchSpaceDimension = 5;
-	BOOST_CHECK_THROW( initializer1( chromosome1 ), shark::Exception );
+	BOOST_CHECK_THROW( initializer1( chromosome1 ), Exception );
 	initializer1.m_noObjectives = 5;
 	BOOST_CHECK_NO_THROW( initializer1( chromosome1 ) );
 	initializer1.m_initialSigma = 5;
@@ -156,15 +156,15 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypMOCMA_Serialization ) {
 		BOOST_CHECK( initializer1 == initializer2 );
 	}
 
-	shark::PropertyTree node;
-	shark::detail::MOCMA<> mocma;
+	PropertyTree node;
+	detail::MOCMA<> mocma;
 	BOOST_CHECK_NO_THROW( mocma.init() );
-	BOOST_CHECK_NO_THROW( shark::OptimizerTraits< shark::detail::MOCMA<> >::defaultConfig( node ) );
+	BOOST_CHECK_NO_THROW( OptimizerTraits< detail::MOCMA<> >::defaultConfig( node ) );
 	BOOST_CHECK_NO_THROW( mocma.configure( node ) );
 
-	//~ shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > function;
-	//~ BOOST_CHECK_THROW( mocma.init( function ), shark::Exception );
-	shark::DTLZ1 dtlz1;
+	//~ AbstractMultiObjectiveFunction< VectorSpace< double > > function;
+	//~ BOOST_CHECK_THROW( mocma.init( function ), Exception );
+	DTLZ1 dtlz1;
 	dtlz1.setNumberOfObjectives( 3 );
 	dtlz1.setNumberOfVariables( 10 );
 	BOOST_CHECK_NO_THROW( mocma.init( dtlz1 ) );
@@ -176,21 +176,21 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypMOCMA_Serialization ) {
 
 		BOOST_CHECK_NO_THROW( (oa << mocma) );
 
-		shark::detail::MOCMA<> mocma2;
+		detail::MOCMA<> mocma2;
 
 		boost::archive::text_iarchive ia( ss );
 		BOOST_CHECK_NO_THROW( (ia >> mocma2) );
 
-		shark::Rng::seed( 1 );
-		shark::FastRng::seed( 1 );
-		shark::detail::MOCMA<>::SolutionSetType set1 = mocma.step( dtlz1 );
-		shark::Rng::seed( 1 );
-		shark::FastRng::seed( 1 );
-		shark::detail::MOCMA<>::SolutionSetType set2 = mocma2.step( dtlz1 );
+		Rng::seed( 1 );
+		FastRng::seed( 1 );
+		detail::MOCMA<>::SolutionSetType set1 = mocma.step( dtlz1 );
+		Rng::seed( 1 );
+		FastRng::seed( 1 );
+		detail::MOCMA<>::SolutionSetType set2 = mocma2.step( dtlz1 );
 
 		for( unsigned int i = 0; i < set1.size(); i++ ) {
-			BOOST_CHECK_SMALL( boost::numeric::ublas::norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
-			BOOST_CHECK_SMALL( boost::numeric::ublas::norm_2( set1.at( i ).point- set2.at( i ).point), 1E-20 );
+			BOOST_CHECK_SMALL( norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
+			BOOST_CHECK_SMALL( norm_2( set1.at( i ).point- set2.at( i ).point), 1E-20 );
 		}
 
 	}
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypMOCMA_Serialization ) {
 
 BOOST_AUTO_TEST_CASE( ExactHypMOCMA_Serialization ) {
 
-	shark::mocma::Chromosome chromosome1, chromosome2;
+	mocma::Chromosome chromosome1, chromosome2;
 	BOOST_CHECK(			chromosome1.m_mutationDistribution.covarianceMatrix().size1() == 0 );
 	BOOST_CHECK(			chromosome1.m_mutationDistribution.covarianceMatrix().size2() == 0 );
 	BOOST_CHECK(			chromosome1.m_mutationDistribution.eigenValues().size() == 0 );
@@ -221,8 +221,8 @@ BOOST_AUTO_TEST_CASE( ExactHypMOCMA_Serialization ) {
 	BOOST_CHECK(			chromosome1.mep_parent == NULL );
 
 	chromosome1.m_mutationDistribution.resize( 10 );
-	chromosome1.m_evolutionPath = boost::numeric::ublas::zero_vector<double>( 10 );
-	chromosome1.m_lastStep = boost::numeric::ublas::zero_vector<double>( 10 );
+	chromosome1.m_evolutionPath = repeat(0.0,10);
+	chromosome1.m_lastStep = repeat(0.0,10);
 	chromosome1.m_lambda = 5;
 	chromosome1.m_noSuccessfulOffspring = 5.;
 	chromosome1.m_stepSize = 5.;
@@ -245,16 +245,16 @@ BOOST_AUTO_TEST_CASE( ExactHypMOCMA_Serialization ) {
 		BOOST_CHECK( chromosome1 == chromosome2 );
 	}
 
-	shark::mocma::Initializer initializer1, initializer2;
+	mocma::Initializer initializer1, initializer2;
 	BOOST_CHECK_EQUAL( initializer1.m_searchSpaceDimension, 0 );
 	BOOST_CHECK_EQUAL( initializer1.m_noObjectives, 0 );
 	BOOST_CHECK_CLOSE( initializer1.m_initialSigma, 0., 1E-10 );
 	BOOST_CHECK_EQUAL( initializer1.m_useNewUpdate, false );
 	BOOST_CHECK_EQUAL( initializer1.m_constrainedFitnessFunction, false );
 
-	BOOST_CHECK_THROW( initializer1( chromosome1 ), shark::Exception );
+	BOOST_CHECK_THROW( initializer1( chromosome1 ), Exception );
 	initializer1.m_searchSpaceDimension = 5;
-	BOOST_CHECK_THROW( initializer1( chromosome1 ), shark::Exception );
+	BOOST_CHECK_THROW( initializer1( chromosome1 ), Exception );
 	initializer1.m_noObjectives = 5;
 	BOOST_CHECK_NO_THROW( initializer1( chromosome1 ) );
 	initializer1.m_initialSigma = 5;
@@ -271,16 +271,16 @@ BOOST_AUTO_TEST_CASE( ExactHypMOCMA_Serialization ) {
 		BOOST_CHECK( initializer1 == initializer2 );
 	}
 
-	shark::PropertyTree node;
-	shark::detail::MOCMA<> mocma;
+	PropertyTree node;
+	detail::MOCMA<> mocma;
 	BOOST_CHECK_NO_THROW( mocma.init() );
-	BOOST_CHECK_NO_THROW( shark::OptimizerTraits< shark::detail::MOCMA<> >::defaultConfig( node ) );
+	BOOST_CHECK_NO_THROW( OptimizerTraits< detail::MOCMA<> >::defaultConfig( node ) );
 	BOOST_CHECK_NO_THROW( mocma.configure( node ) );
 
-	//~ shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > function;
-	//~ BOOST_CHECK_THROW( mocma.init( function ), shark::Exception );
+	//~ AbstractMultiObjectiveFunction< VectorSpace< double > > function;
+	//~ BOOST_CHECK_THROW( mocma.init( function ), Exception );
 	mocma.m_useApproximatedHypervolume = false;
-	shark::DTLZ1 dtlz1;
+	DTLZ1 dtlz1;
 	dtlz1.setNumberOfObjectives( 3 );
 	dtlz1.setNumberOfVariables( 10 );
 	BOOST_CHECK_NO_THROW( mocma.init( dtlz1 ) );
@@ -292,21 +292,21 @@ BOOST_AUTO_TEST_CASE( ExactHypMOCMA_Serialization ) {
 
 		BOOST_CHECK_NO_THROW( (oa << mocma) );
 
-		shark::detail::MOCMA<> mocma2;
+		detail::MOCMA<> mocma2;
 
 		boost::archive::text_iarchive ia( ss );
 		BOOST_CHECK_NO_THROW( (ia >> mocma2) );
 
-		shark::Rng::seed( 1 );
-		shark::FastRng::seed( 1 );
-		shark::detail::MOCMA<>::SolutionSetType set1 = mocma.step( dtlz1 );
-		shark::Rng::seed( 1 );
-		shark::FastRng::seed( 1 );
-		shark::detail::MOCMA<>::SolutionSetType set2 = mocma2.step( dtlz1 );
+		Rng::seed( 1 );
+		FastRng::seed( 1 );
+		detail::MOCMA<>::SolutionSetType set1 = mocma.step( dtlz1 );
+		Rng::seed( 1 );
+		FastRng::seed( 1 );
+		detail::MOCMA<>::SolutionSetType set2 = mocma2.step( dtlz1 );
 
 		for( unsigned int i = 0; i < set1.size(); i++ ) {
-			BOOST_CHECK_SMALL( boost::numeric::ublas::norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
-			BOOST_CHECK_SMALL( boost::numeric::ublas::norm_2( set1.at( i ).point - set2.at( i ).point ), 1E-20 );
+			BOOST_CHECK_SMALL( norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
+			BOOST_CHECK_SMALL( norm_2( set1.at( i ).point - set2.at( i ).point ), 1E-20 );
 		}
 
 	}
@@ -316,7 +316,7 @@ BOOST_AUTO_TEST_CASE( ExactHypMOCMA_Serialization ) {
 
 BOOST_AUTO_TEST_CASE( AdditiveEpsMOCMA_Serialization ) {
 
-	shark::mocma::Chromosome chromosome1, chromosome2;
+	mocma::Chromosome chromosome1, chromosome2;
 	BOOST_CHECK(			chromosome1.m_mutationDistribution.covarianceMatrix().size1() == 0 );
 	BOOST_CHECK(			chromosome1.m_mutationDistribution.covarianceMatrix().size2() == 0 );
 	BOOST_CHECK(			chromosome1.m_mutationDistribution.eigenValues().size() == 0 );
@@ -337,8 +337,8 @@ BOOST_AUTO_TEST_CASE( AdditiveEpsMOCMA_Serialization ) {
 	BOOST_CHECK(			chromosome1.mep_parent == NULL );
 
 	chromosome1.m_mutationDistribution.resize( 10 );
-	chromosome1.m_evolutionPath = boost::numeric::ublas::zero_vector<double>( 10 );
-	chromosome1.m_lastStep = boost::numeric::ublas::zero_vector<double>( 10 );
+	chromosome1.m_evolutionPath = repeat(0.0,10);
+	chromosome1.m_lastStep = repeat(0.0,10);
 	chromosome1.m_lambda = 5;
 	chromosome1.m_noSuccessfulOffspring = 5.;
 	chromosome1.m_stepSize = 5.;
@@ -361,16 +361,16 @@ BOOST_AUTO_TEST_CASE( AdditiveEpsMOCMA_Serialization ) {
 		BOOST_CHECK( chromosome1 == chromosome2 );
 	}
 
-	shark::mocma::Initializer initializer1, initializer2;
+	mocma::Initializer initializer1, initializer2;
 	BOOST_CHECK_EQUAL( initializer1.m_searchSpaceDimension, 0 );
 	BOOST_CHECK_EQUAL( initializer1.m_noObjectives, 0 );
 	BOOST_CHECK_CLOSE( initializer1.m_initialSigma, 0., 1E-10 );
 	BOOST_CHECK_EQUAL( initializer1.m_useNewUpdate, false );
 	BOOST_CHECK_EQUAL( initializer1.m_constrainedFitnessFunction, false );
 
-	BOOST_CHECK_THROW( initializer1( chromosome1 ), shark::Exception );
+	BOOST_CHECK_THROW( initializer1( chromosome1 ), Exception );
 	initializer1.m_searchSpaceDimension = 5;
-	BOOST_CHECK_THROW( initializer1( chromosome1 ), shark::Exception );
+	BOOST_CHECK_THROW( initializer1( chromosome1 ), Exception );
 	initializer1.m_noObjectives = 5;
 	BOOST_CHECK_NO_THROW( initializer1( chromosome1 ) );
 	initializer1.m_initialSigma = 5;
@@ -387,16 +387,16 @@ BOOST_AUTO_TEST_CASE( AdditiveEpsMOCMA_Serialization ) {
 		BOOST_CHECK( initializer1 == initializer2 );
 	}
 
-	shark::PropertyTree node;
-	shark::detail::MOCMA< shark::AdditiveEpsilonIndicator > mocma;
+	PropertyTree node;
+	detail::MOCMA< AdditiveEpsilonIndicator > mocma;
 	BOOST_CHECK_NO_THROW( mocma.init() );
-	BOOST_CHECK_NO_THROW( shark::OptimizerTraits< shark::detail::MOCMA<shark::AdditiveEpsilonIndicator> >::defaultConfig( node ) );
+	BOOST_CHECK_NO_THROW( OptimizerTraits< detail::MOCMA<AdditiveEpsilonIndicator> >::defaultConfig( node ) );
 	BOOST_CHECK_NO_THROW( mocma.configure( node ) );
 
-	//~ shark::AbstractMultiObjectiveFunction< shark::VectorSpace< double > > function;
-	//~ BOOST_CHECK_THROW( mocma.init( function ), shark::Exception );
+	//~ AbstractMultiObjectiveFunction< VectorSpace< double > > function;
+	//~ BOOST_CHECK_THROW( mocma.init( function ), Exception );
 	mocma.m_useApproximatedHypervolume = false;
-	shark::DTLZ1 dtlz1;
+	DTLZ1 dtlz1;
 	dtlz1.setNumberOfObjectives( 3 );
 	dtlz1.setNumberOfVariables( 10 );
 	BOOST_CHECK_NO_THROW( mocma.init( dtlz1 ) );
@@ -408,21 +408,21 @@ BOOST_AUTO_TEST_CASE( AdditiveEpsMOCMA_Serialization ) {
 
 		BOOST_CHECK_NO_THROW( (oa << mocma) );
 
-		shark::detail::MOCMA<shark::AdditiveEpsilonIndicator> mocma2;
+		detail::MOCMA<AdditiveEpsilonIndicator> mocma2;
 
 		boost::archive::text_iarchive ia( ss );
 		BOOST_CHECK_NO_THROW( (ia >> mocma2) );
 
-		shark::Rng::seed( 1 );
-		shark::FastRng::seed( 1 );
-		shark::detail::MOCMA<shark::AdditiveEpsilonIndicator>::SolutionSetType set1 = mocma.step( dtlz1 );
-		shark::Rng::seed( 1 );
-		shark::FastRng::seed( 1 );
-		shark::detail::MOCMA<shark::AdditiveEpsilonIndicator>::SolutionSetType set2 = mocma2.step( dtlz1 );
+		Rng::seed( 1 );
+		FastRng::seed( 1 );
+		detail::MOCMA<AdditiveEpsilonIndicator>::SolutionSetType set1 = mocma.step( dtlz1 );
+		Rng::seed( 1 );
+		FastRng::seed( 1 );
+		detail::MOCMA<AdditiveEpsilonIndicator>::SolutionSetType set2 = mocma2.step( dtlz1 );
 
 		for( unsigned int i = 0; i < set1.size(); i++ ) {
-			BOOST_CHECK_SMALL( boost::numeric::ublas::norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
-			BOOST_CHECK_SMALL( boost::numeric::ublas::norm_2( set1.at( i ).point - set2.at( i ).point ), 1E-20 );
+			BOOST_CHECK_SMALL( norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
+			BOOST_CHECK_SMALL( norm_2( set1.at( i ).point - set2.at( i ).point ), 1E-20 );
 		}
 
 	}
@@ -432,17 +432,17 @@ BOOST_AUTO_TEST_CASE( AdditiveEpsMOCMA_Serialization ) {
 BOOST_AUTO_TEST_CASE( MOCMA_Performance ) {
 
 	boost::shared_ptr< 
-		shark::MOCMA
-	> mocma( new shark::MOCMA() );
+		MOCMA
+	> mocma( new MOCMA() );
 	
-	shark::moo::InterruptibleAlgorithmRunner<
-		shark::MOCMA,
-		shark::DTLZ7
+	moo::InterruptibleAlgorithmRunner<
+		MOCMA,
+		DTLZ7
 	> runner1 (
 	mocma,
 	boost::shared_ptr<
-	shark::DTLZ7
-	>( new shark::DTLZ7() )
+	DTLZ7
+	>( new DTLZ7() )
 	);
 	
 
@@ -456,16 +456,16 @@ BOOST_AUTO_TEST_CASE( MOCMA_Performance ) {
 		1000
 	);
 
-	shark::moo::InterruptibleAlgorithmRunner<
-		shark::EpsilonMOCMA,
-		shark::DTLZ7
+	moo::InterruptibleAlgorithmRunner<
+		EpsilonMOCMA,
+		DTLZ7
 	> runner2 (
 		boost::shared_ptr< 
-			shark::EpsilonMOCMA
-		>( new shark::EpsilonMOCMA() ),
+			EpsilonMOCMA
+		>( new EpsilonMOCMA() ),
 		boost::shared_ptr<
-			shark::DTLZ7
-		>( new shark::DTLZ7() )
+			DTLZ7
+		>( new DTLZ7() )
 	);
 
 	runner2.run( 

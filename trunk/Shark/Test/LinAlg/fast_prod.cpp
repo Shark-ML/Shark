@@ -164,8 +164,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_fast_prod_matrix_vector ){
 	testC.clear();
 	c.clear();
 	RealSubMatrix Asub=subrange(A,0,5,0,5);
-	RealSubVector bSub = subrange(b,0,5);
-	RealSubVector cSub = subrange(c,0,5);
+	RealVectorRange bSub = subrange(b,0,5);
+	RealVectorRange cSub = subrange(c,0,5);
 	RealMatrix Asubcopy = Asub;
 	axpy_prod(Asub,bSub,cSub,true);
 	fast_prod(Asubcopy,subrange(b,0,5),subrange(testC,0,5));
@@ -215,8 +215,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_fast_prod_matrix_vector_non_square ){
 	testC.clear();
 	c.clear();
 	RealSubMatrix Asub=subrange(A,1,4,1,3);
-	RealSubVector bSub = subrange(b,1,3);
-	RealSubVector cSub = subrange(c,1,4);
+	RealVectorRange bSub = subrange(b,1,3);
+	RealVectorRange cSub = subrange(c,1,4);
 	RealMatrix Asubcopy = Asub;
 	axpy_prod(Asub,bSub,cSub,true);
 	fast_prod(subrange(A,1,4,1,3),subrange(b,1,3),subrange(testC,1,4));

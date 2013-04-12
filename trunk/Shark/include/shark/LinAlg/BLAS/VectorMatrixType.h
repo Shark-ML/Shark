@@ -51,8 +51,6 @@
 	typedef blas::matrix< const basetype, blas::row_major > Const##prefix##Matrix; \
 	typedef blas::zero_vector< basetype > prefix##ZeroVector; \
 	typedef blas::zero_vector< const basetype > Const##prefix##ZeroVector; \
-	typedef blas::unit_vector< basetype > prefix##UnitVector; \
-	typedef blas::unit_vector< const basetype > Const##prefix##UnitVector; \
 	typedef blas::scalar_vector< basetype > prefix##ScalarVector; \
 	typedef blas::scalar_vector< const basetype > Const##prefix##ScalarVector; \
 	typedef blas::zero_matrix< basetype > prefix##ZeroMatrix; \
@@ -61,51 +59,22 @@
 	typedef blas::identity_matrix< basetype > prefix##IdentityMatrix; \
 	typedef blas::scalar_matrix< basetype > prefix##ScalarMatrix; \
 	typedef blas::scalar_matrix< const basetype > Const##prefix##ScalarMatrix; \
-	typedef blas::diagonal_matrix< basetype > prefix##DiagonalMatrix; \
-	typedef blas::diagonal_matrix< const basetype > Const##prefix##DiagonalMatrix; \
 	typedef blas::vector_range< prefix##Vector > prefix##VectorRange; \
 	typedef blas::vector_range< const prefix##Vector > Const##prefix##VectorRange; \
-	typedef blas::vector_range< prefix##Vector > prefix##SubVector; \
-	typedef blas::vector_range< const prefix##Vector > Const##prefix##SubVector; \
 	typedef blas::matrix_row< prefix##Matrix > prefix##MatrixRow; \
 	typedef blas::matrix_row< const prefix##Matrix > Const##prefix##MatrixRow; \
 	typedef blas::matrix_column< prefix##Matrix > prefix##MatrixColumn; \
 	typedef blas::matrix_column< const prefix##Matrix > Const##prefix##MatrixColumn; \
-	typedef blas::matrix_vector_range< prefix##Matrix > prefix##MatrixVectorRange; \
-	typedef blas::matrix_vector_range< const prefix##Matrix > Const##prefix##MatrixVectorRange; \
 	typedef blas::matrix_range< prefix##Matrix > prefix##SubMatrix; \
 	typedef blas::matrix_range< const prefix##Matrix > Const##prefix##SubMatrix; \
-	typedef blas::mapped_vector< basetype > Mapped##prefix##Vector; \
-	typedef blas::vector_range< Mapped##prefix##Vector > Mapped##prefix##VectorRange; \
-	typedef blas::vector_range< const Mapped##prefix##Vector > ConstMapped##prefix##VectorRange; \
-	typedef blas::vector_range< Mapped##prefix##Vector > Mapped##prefix##SubVector; \
-	typedef blas::vector_range< const Mapped##prefix##Vector > ConstMapped##prefix##SubVector; \
 	typedef blas::compressed_vector< basetype > Compressed##prefix##Vector; \
 	typedef blas::vector_range< Compressed##prefix##Vector > Compressed##prefix##VectorRange; \
 	typedef blas::vector_range< const Compressed##prefix##Vector > ConstCompressed##prefix##VectorRange; \
-	typedef blas::vector_range< Compressed##prefix##Vector > Compressed##prefix##SubVector; \
-	typedef blas::vector_range< const Compressed##prefix##Vector > ConstCompressed##prefix##SubVector; \
-	typedef blas::coordinate_vector< basetype > Coordinate##prefix##Vector; \
-	typedef blas::vector_range< Coordinate##prefix##Vector > Coordinate##prefix##VectorRange; \
-	typedef blas::vector_range< const Coordinate##prefix##Vector > ConstCoordinate##prefix##VectorRange; \
-	typedef blas::vector_range< Coordinate##prefix##Vector > Coordinate##prefix##SubVector; \
-	typedef blas::vector_range< const Coordinate##prefix##Vector > ConstCoordinate##prefix##SubVector; \
-	typedef blas::mapped_matrix< basetype > Mapped##prefix##Matrix; \
-	typedef blas::matrix_row< Mapped##prefix##Matrix > Mapped##prefix##MatrixRow; \
-	typedef blas::matrix_row< const Mapped##prefix##Matrix > ConstMapped##prefix##MatrixRow; \
-	typedef blas::matrix_column< Mapped##prefix##Matrix > Mapped##prefix##MatrixColumn; \
-	typedef blas::matrix_column< const Mapped##prefix##Matrix > ConstMapped##prefix##MatrixColumn; \
-	typedef blas::matrix_vector_range< Mapped##prefix##Matrix > Mapped##prefix##MatrixVectorRange; \
-	typedef blas::matrix_vector_range< const Mapped##prefix##Matrix > ConstMapped##prefix##MatrixVectorRange; \
-	typedef blas::matrix_range< Mapped##prefix##Matrix > Mapped##prefix##SubMatrix; \
-	typedef blas::matrix_range< const Mapped##prefix##Matrix > ConstMapped##prefix##SubMatrix; \
 	typedef blas::compressed_matrix< basetype > Compressed##prefix##Matrix; \
 	typedef blas::matrix_row< Compressed##prefix##Matrix > Compressed##prefix##MatrixRow; \
 	typedef blas::matrix_row< const Compressed##prefix##Matrix > ConstCompressed##prefix##MatrixRow; \
 	typedef blas::matrix_column< Compressed##prefix##Matrix > Compressed##prefix##MatrixColumn; \
 	typedef blas::matrix_column< const Compressed##prefix##Matrix > ConstCompressed##prefix##MatrixColumn; \
-	typedef blas::matrix_vector_range< Compressed##prefix##Matrix > Compressed##prefix##MatrixVectorRange; \
-	typedef blas::matrix_vector_range< const Compressed##prefix##Matrix > ConstCompressed##prefix##MatrixVectorRange; \
 	typedef blas::matrix_range< Compressed##prefix##Matrix > Compressed##prefix##SubMatrix; \
 	typedef blas::matrix_range< const Compressed##prefix##Matrix > ConstCompressed##prefix##SubMatrix;
 
@@ -120,8 +89,6 @@
 	typedef scope Const##prefix##Matrix Const##prefix##Matrix; \
 	typedef scope prefix##ZeroVector prefix##ZeroVector; \
 	typedef scope Const##prefix##ZeroVector Const##prefix##ZeroVector; \
-	typedef scope prefix##UnitVector prefix##UnitVector; \
-	typedef scope Const##prefix##UnitVector Const##prefix##UnitVector; \
 	typedef scope prefix##ScalarVector prefix##ScalarVector; \
 	typedef scope Const##prefix##ScalarVector Const##prefix##ScalarVector; \
 	typedef scope prefix##ZeroMatrix prefix##ZeroMatrix; \
@@ -130,51 +97,22 @@
 	typedef scope prefix##IdentityMatrix prefix##IdentityMatrix; \
 	typedef scope prefix##ScalarMatrix prefix##ScalarMatrix; \
 	typedef scope Const##prefix##ScalarMatrix Const##prefix##ScalarMatrix; \
-	typedef scope prefix##DiagonalMatrix prefix##DiagonalMatrix; \
-	typedef scope Const##prefix##DiagonalMatrix Const##prefix##DiagonalMatrix; \
 	typedef scope prefix##VectorRange prefix##VectorRange; \
 	typedef scope Const##prefix##VectorRange Const##prefix##VectorRange; \
-	typedef scope prefix##SubVector prefix##SubVector; \
-	typedef scope Const##prefix##SubVector Const##prefix##SubVector; \
 	typedef scope prefix##MatrixRow prefix##MatrixRow; \
 	typedef scope Const##prefix##MatrixRow Const##prefix##MatrixRow; \
 	typedef scope prefix##MatrixColumn prefix##MatrixColumn; \
 	typedef scope Const##prefix##MatrixColumn Const##prefix##MatrixColumn; \
-	typedef scope prefix##MatrixVectorRange prefix##MatrixVectorRange; \
-	typedef scope Const##prefix##MatrixVectorRange Const##prefix##MatrixVectorRange; \
 	typedef scope prefix##SubMatrix prefix##SubMatrix; \
 	typedef scope Const##prefix##SubMatrix Const##prefix##SubMatrix; \
-	typedef scope Mapped##prefix##Vector Mapped##prefix##Vector; \
-	typedef scope Mapped##prefix##VectorRange Mapped##prefix##VectorRange; \
-	typedef scope ConstMapped##prefix##VectorRange ConstMapped##prefix##VectorRange; \
-	typedef scope Mapped##prefix##SubVector Mapped##prefix##SubVector; \
-	typedef scope ConstMapped##prefix##SubVector ConstMapped##prefix##SubVector; \
 	typedef scope Compressed##prefix##Vector Compressed##prefix##Vector; \
 	typedef scope Compressed##prefix##VectorRange Compressed##prefix##VectorRange; \
 	typedef scope ConstCompressed##prefix##VectorRange ConstCompressed##prefix##VectorRange; \
-	typedef scope Compressed##prefix##SubVector Compressed##prefix##SubVector; \
-	typedef scope ConstCompressed##prefix##SubVector ConstCompressed##prefix##SubVector; \
-	typedef scope Coordinate##prefix##Vector Coordinate##prefix##Vector; \
-	typedef scope Coordinate##prefix##VectorRange Coordinate##prefix##VectorRange; \
-	typedef scope ConstCoordinate##prefix##VectorRange ConstCoordinate##prefix##VectorRange; \
-	typedef scope Coordinate##prefix##SubVector Coordinate##prefix##SubVector; \
-	typedef scope ConstCoordinate##prefix##SubVector ConstCoordinate##prefix##SubVector; \
-	typedef scope Mapped##prefix##Matrix Mapped##prefix##Matrix; \
-	typedef scope Mapped##prefix##MatrixRow Mapped##prefix##MatrixRow; \
-	typedef scope ConstMapped##prefix##MatrixRow ConstMapped##prefix##MatrixRow; \
-	typedef scope Mapped##prefix##MatrixColumn Mapped##prefix##MatrixColumn; \
-	typedef scope ConstMapped##prefix##MatrixColumn ConstMapped##prefix##MatrixColumn; \
-	typedef scope Mapped##prefix##MatrixVectorRange Mapped##prefix##MatrixVectorRange; \
-	typedef scope ConstMapped##prefix##MatrixVectorRange ConstMapped##prefix##MatrixVectorRange; \
-	typedef scope Mapped##prefix##SubMatrix Mapped##prefix##SubMatrix; \
-	typedef scope ConstMapped##prefix##SubMatrix ConstMapped##prefix##SubMatrix; \
 	typedef scope Compressed##prefix##Matrix Compressed##prefix##Matrix; \
 	typedef scope Compressed##prefix##MatrixRow Compressed##prefix##MatrixRow; \
 	typedef scope ConstCompressed##prefix##MatrixRow ConstCompressed##prefix##MatrixRow; \
 	typedef scope Compressed##prefix##MatrixColumn Compressed##prefix##MatrixColumn; \
 	typedef scope ConstCompressed##prefix##MatrixColumn ConstCompressed##prefix##MatrixColumn; \
-	typedef scope Compressed##prefix##MatrixVectorRange Compressed##prefix##MatrixVectorRange; \
-	typedef scope ConstCompressed##prefix##MatrixVectorRange ConstCompressed##prefix##MatrixVectorRange; \
 	typedef scope Compressed##prefix##SubMatrix Compressed##prefix##SubMatrix; \
 	typedef scope ConstCompressed##prefix##SubMatrix ConstCompressed##prefix##SubMatrix;
 
@@ -187,16 +125,6 @@
 		typedef prefix##VectorRange SubType;\
 		typedef prefix##VectorRange DenseSubType;\
 		typedef Const##prefix##VectorRange ConstSubType;\
-		typedef Const##prefix##VectorRange ConstDenseSubType;\
-	};\
-	template<> struct VectorMatrixTraits< Mapped##prefix##Vector >{ \
-		typedef Mapped##prefix##Matrix MatrixType;\
-		typedef prefix##Matrix DenseMatrixType;\
-		typedef Mapped##prefix##Vector VectorType;\
-		typedef prefix##Vector DenseVectorType;\
-		typedef Mapped##prefix##VectorRange SubType;\
-		typedef prefix##VectorRange DenseSubType;\
-		typedef ConstMapped##prefix##VectorRange ConstSubType;\
 		typedef Const##prefix##VectorRange ConstDenseSubType;\
 	};\
 	template<> struct VectorMatrixTraits< Compressed##prefix##Vector >{ \
@@ -217,16 +145,6 @@
 		typedef prefix##VectorRange SubType;\
 		typedef prefix##VectorRange DenseSubType;\
 		typedef Const##prefix##VectorRange ConstSubType;\
-		typedef Const##prefix##VectorRange ConstDenseSubType;\
-	};\
-	template<> struct VectorMatrixTraits< Mapped##prefix##VectorRange > { \
-		typedef Mapped##prefix##Matrix MatrixType;\
-		typedef prefix##Matrix DenseMatrixType;\
-		typedef Mapped##prefix##Vector VectorType;\
-		typedef prefix##Vector DenseVectorType;\
-		typedef Mapped##prefix##VectorRange SubType;\
-		typedef prefix##VectorRange DenseSubType;\
-		typedef ConstMapped##prefix##VectorRange ConstSubType;\
 		typedef Const##prefix##VectorRange ConstDenseSubType;\
 	};\
 	template<> struct VectorMatrixTraits< Compressed##prefix##VectorRange > { \

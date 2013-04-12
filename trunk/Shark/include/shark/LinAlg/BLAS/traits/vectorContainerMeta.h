@@ -71,42 +71,6 @@ SHARK_DENSETRAITSSPEC(blas::vector<T BOOST_PP_COMMA() A >)
 		return &v.data().begin()[0];
 	}
 };
-//c_vector
-template<class T,unsigned int N>
-struct ExpressionTraitsBase<blas::c_vector<T,N > >{
-	typedef blas::c_vector<T,N > type;
-	typedef type const const_type;
-	typedef T* value_pointer;
-	
-	typedef DenseStorage StorageCategory;
-	
-	static std::size_t stride(const_type& v){
-		return 1;
-	}
-};
-template<class T,unsigned int N>
-struct ExpressionTraitsBase<blas::c_vector<T,N > const>{
-	typedef blas::c_vector<T,N > const type;
-	typedef type const_type;
-	typedef T const* value_pointer;
-	
-	typedef DenseStorage StorageCategory;
-	
-	static std::size_t stride(const_type& v){
-		return 1;
-	}
-};
-
-template<class T,unsigned int N,class BaseExpression>
-SHARK_DENSETRAITSSPEC(blas::c_vector<T BOOST_PP_COMMA() N >)
-	static value_pointer storageBegin(type& v){
-		return &v.data().begin()[0];
-	}
-	static value_pointer storageEnd(type& v){
-		return &v.data().begin()[0];
-	}
-};
-
 //compressed_vector
 template<class T, std::size_t IB, class IA, class TA>
 struct ExpressionTraitsBase<blas::compressed_vector<T,IB, IA, TA > >{

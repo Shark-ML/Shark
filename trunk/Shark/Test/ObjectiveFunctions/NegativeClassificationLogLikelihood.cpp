@@ -38,17 +38,12 @@
 
 #include <shark/ObjectiveFunctions/Loss/NegativeClassificationLogLikelihood.h>
 #include <cmath>
-#include <iostream>
 
 #include "TestLoss.h"
-//#include <shark/ObjectiveFunctions/ErrorFunction.h>
-//#include <shark/Models/LinearModel.h>
-//#include <shark/Rng/GlobalRng.h>
 
 #define BOOST_TEST_MODULE OBJECTIVEFUNCTIONS_NEGATIVECLASSIFICATIONLOGLIKELIHOOD
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-#include <boost/numeric/ublas/io.hpp>
 
 using namespace shark;
 

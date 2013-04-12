@@ -23,8 +23,6 @@
 */
 //===========================================================================
 
-#include <iostream>
-#include <boost/numeric/ublas/io.hpp>
 #define BOOST_TEST_MODULE Algorithms_NearestNeighbors
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>

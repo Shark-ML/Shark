@@ -90,25 +90,25 @@ public:
 			}
 		}
 
-		RealDiagonalMatrix matrix(dc, dc);
+		RealVector diagonal(dc);
 		RealVector offset(dc);
 
 		for (std::size_t d=0; d != dc; d++)
 		{
 			if (min(d) == max(d))
 			{
-				matrix(d, d) = 0.0;
+				diagonal(d) = 0.0;
 				offset(d) = -min(d) + 0.5;
 			}
 			else
 			{
 				double n = 1.0 / (max(d) - min(d));
-				matrix(d, d) = n;
+				diagonal(d) = n;
 				offset(d) = -min(d) * n;
 			}
 		}
 
-		model.setStructure(matrix, offset);
+		model.setStructure(diagonal, offset);
 	}
 };
 

@@ -181,7 +181,7 @@ void RBFNet::weightedParameterDerivative(
 		fast_prod(trans(coefficients),s.expNorm,weightDerivative);
 		currentParameter += m_outputNeurons*numNeurons;
 		//bias
-		RealSubVector biasDerivative = subrange(gradient,currentParameter,currentParameter+outputSize());
+		RealVectorRange biasDerivative = subrange(gradient,currentParameter,currentParameter+outputSize());
 		noalias(biasDerivative) = sumRows(coefficients);
 		currentParameter += outputSize();
 	}

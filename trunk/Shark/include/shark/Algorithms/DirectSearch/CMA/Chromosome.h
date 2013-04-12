@@ -126,8 +126,8 @@ namespace shark {
 			bool operator==( const Chromosome & rhs ) const {
 				return( 
 					m_mutationDistribution == rhs.m_mutationDistribution &&
-					boost::numeric::ublas::norm_2( m_evolutionPath - rhs.m_evolutionPath ) == 0 &&
-					boost::numeric::ublas::norm_2( m_lastStep - rhs.m_lastStep ) == 0 &&
+					shark::blas::norm_2( m_evolutionPath - rhs.m_evolutionPath ) == 0 &&
+					shark::blas::norm_2( m_lastStep - rhs.m_lastStep ) == 0 &&
 					m_lambda == rhs.m_lambda &&
 					m_noSuccessfulOffspring == rhs.m_noSuccessfulOffspring &&
 					m_stepSize == rhs.m_stepSize &&

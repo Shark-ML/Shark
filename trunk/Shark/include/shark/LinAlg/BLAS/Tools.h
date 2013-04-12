@@ -34,7 +34,7 @@
 #ifndef SHARK_LINALG_BLAS_TOOLS_H
 #define SHARK_LINALG_BLAS_TOOLS_H
 
-#include <shark/LinAlg/BLAS/VectorTransformations.h>
+//#include <shark/LinAlg/BLAS/VectorTransformations.h>
 #include <shark/LinAlg/BLAS/Impl/repmat.h>
 #include <shark/LinAlg/BLAS/traits/metafunctions.h>
 namespace shark {

@@ -74,7 +74,7 @@ struct DefaultBatch{
 	}
 };
 
-/// \brief default implementation of the Batch for arithmetic types, which are mapped on boost::numeric::ublas::vector<T>
+/// \brief default implementation of the Batch for arithmetic types, which are mapped on shark::blas::vector<T>
 template<class T>
 struct ArithmeticBatch{
 	/// \brief Type of a single element.
@@ -82,7 +82,7 @@ struct ArithmeticBatch{
 	/// \brief Type of a single immutable element.
 	typedef T const& const_reference;
 	/// \brief Type of a batch of elements.
-	typedef boost::numeric::ublas::vector<T> type;
+	typedef shark::blas::vector<T> type;
 	
 	/// \brief The type of the elements stored in the batch 
 	typedef T value_type;
@@ -168,7 +168,7 @@ typename Batch<T>::type createBatch(Range const& range){
 template<class T>
 struct Batch<blas::vector<T> >{
 	/// \brief Type of a batch of elements.
-	typedef boost::numeric::ublas::matrix<T> type;
+	typedef shark::blas::matrix<T> type;
 	/// \brief The type of the elements stored in the batch 
 	typedef blas::vector<T> value_type;
 	
@@ -203,19 +203,19 @@ struct Batch<blas::vector<T> >{
 };
 /// \brief specialization for ublas compressed vectors which are compressed matrices in batch mode!
 template<class T>
-struct Batch<boost::numeric::ublas::compressed_vector<T> >{
+struct Batch<shark::blas::compressed_vector<T> >{
 	/// \brief Type of a batch of elements.
-	typedef boost::numeric::ublas::compressed_matrix<T> type;
+	typedef shark::blas::compressed_matrix<T> type;
 	
 	/// \brief The type of the elements stored in the batch 
-	typedef boost::numeric::ublas::compressed_vector<T> value_type;
+	typedef shark::blas::compressed_vector<T> value_type;
 	
 	
 	/// \brief Type of a single element.
-	//typedef boost::numeric::ublas::matrix_row<type> reference;
+	//typedef shark::blas::matrix_row<type> reference;
 	typedef detail::MatrixRowReference<type,value_type> reference;
 	/// \brief Type of a single immutable element.
-	//typedef boost::numeric::ublas::matrix_row<const type> const_reference;
+	//typedef shark::blas::matrix_row<const type> const_reference;
 	typedef detail::MatrixRowReference<const type,value_type> const_reference;
 	
 	
@@ -258,153 +258,153 @@ namespace boost{
 	
 //dense matrix
 template< class T >
-struct range_mutable_iterator< boost::numeric::ublas::matrix<T> >{
-	typedef boost::numeric::ublas::vector<T> Vector;
+struct range_mutable_iterator< shark::blas::matrix<T> >{
+	typedef shark::blas::vector<T> Vector;
 	typedef typename shark::Batch<Vector>::iterator type;
 };
 
 template< class T >
-struct range_const_iterator< boost::numeric::ublas::matrix<T> >{
-	typedef boost::numeric::ublas::vector<T> Vector;
+struct range_const_iterator< shark::blas::matrix<T> >{
+	typedef shark::blas::vector<T> Vector;
 	typedef typename shark::Batch<Vector>::const_iterator type;
 };
 //compressed matrix
 template< class T >
-struct range_mutable_iterator< boost::numeric::ublas::compressed_matrix<T> >{
-	typedef boost::numeric::ublas::compressed_vector<T> Vector;
+struct range_mutable_iterator< shark::blas::compressed_matrix<T> >{
+	typedef shark::blas::compressed_vector<T> Vector;
 	typedef typename shark::Batch<Vector>::iterator type;
 };
 
 template< class T >
-struct range_const_iterator< boost::numeric::ublas::compressed_matrix<T> >{
-	typedef boost::numeric::ublas::compressed_vector<T> Vector;
+struct range_const_iterator< shark::blas::compressed_matrix<T> >{
+	typedef shark::blas::compressed_vector<T> Vector;
 	typedef typename shark::Batch<Vector>::const_iterator type;
 };
 
 //matrix container
 template< class M >
-struct range_mutable_iterator< boost::numeric::ublas::matrix_container<M> >{
+struct range_mutable_iterator< shark::blas::matrix_container<M> >{
 	typedef typename range_mutable_iterator<M>::type type;
 };
 
 template< class M >
-struct range_const_iterator< boost::numeric::ublas::matrix_container<M> >{
+struct range_const_iterator< shark::blas::matrix_container<M> >{
 	typedef typename range_const_iterator<M>::type type;
 };
 
 //matrix expression
 template< class M >
-struct range_mutable_iterator< boost::numeric::ublas::matrix_expression<M> >{
+struct range_mutable_iterator< shark::blas::matrix_expression<M> >{
 	typedef typename range_mutable_iterator<M>::type type;
 };
 
 template< class M >
-struct range_const_iterator< boost::numeric::ublas::matrix_expression<M> >{
+struct range_const_iterator< shark::blas::matrix_expression<M> >{
 	typedef typename range_const_iterator<M>::type type;
 };
 
 //matrix proxy
 template< class T >
 struct range_mutable_iterator< shark::FixedDenseMatrixProxy<T> >{
-	typedef boost::numeric::ublas::vector<typename boost::remove_const<T>::type> Vector;
+	typedef shark::blas::vector<typename boost::remove_const<T>::type> Vector;
 	typedef shark::detail::MatrixRowReference<shark::FixedDenseMatrixProxy<T>,Vector> reference;
 	typedef shark::ProxyIterator<shark::FixedDenseMatrixProxy<T>, Vector, reference > type;
 };
 
 template< class T >
 struct range_const_iterator< shark::FixedDenseMatrixProxy<T> >{
-	typedef boost::numeric::ublas::vector<typename boost::remove_const<T>::type> Vector;
+	typedef shark::blas::vector<typename boost::remove_const<T>::type> Vector;
 	typedef shark::detail::MatrixRowReference<shark::FixedDenseMatrixProxy<T> const,Vector> reference;
 	typedef shark::ProxyIterator<shark::FixedDenseMatrixProxy<T> const, Vector, reference > type;
 };
+}
 
-namespace numeric{ namespace ublas{
+namespace shark{ namespace blas{ 
 
 //dense matrix
 template< class T >
-typename range_iterator<matrix<T> const>::type
+typename boost::range_iterator<matrix<T> const>::type
 range_begin( matrix<T> const& m )
 {
-	typedef typename range_iterator<matrix<T> const>::type Iter;
+	typedef typename boost::range_iterator<matrix<T> const>::type Iter;
 	return Iter(m,0);
 }
 template< class T >
-typename range_iterator<matrix<T> >::type
+typename boost::range_iterator<matrix<T> >::type
 range_begin( matrix<T>& m )
 {
-	typedef typename range_iterator<matrix<T> >::type Iter;
+	typedef typename boost::range_iterator<matrix<T> >::type Iter;
 	return Iter(m,0);
 }
 
 template< class T >
-typename range_iterator<matrix<T> const>::type
+typename boost::range_iterator<matrix<T> const>::type
 range_end( matrix<T> const& m )
 {
-	typedef typename range_iterator<matrix<T> const>::type Iter;
+	typedef typename boost::range_iterator<matrix<T> const>::type Iter;
 	return Iter(m,m.size1());
 }
 template< class T >
-typename range_iterator<matrix<T> >::type
+typename boost::range_iterator<matrix<T> >::type
 range_end( matrix<T>& m )
 {
-	typedef typename range_iterator<matrix<T> >::type Iter;
+	typedef typename boost::range_iterator<matrix<T> >::type Iter;
 	return Iter(m,m.size1());
 }
 
 //compressed matrix
 template< class T >
-typename range_iterator<compressed_matrix<T> const>::type
+typename boost::range_iterator<compressed_matrix<T> const>::type
 range_begin( compressed_matrix<T> const& m )
 {
-	typedef typename range_iterator<compressed_matrix<T> const>::type Iter;
+	typedef typename boost::range_iterator<compressed_matrix<T> const>::type Iter;
 	return Iter(m,0);
 }
 template< class T >
-typename range_iterator<compressed_matrix<T> >::type
+typename boost::range_iterator<compressed_matrix<T> >::type
 range_begin( compressed_matrix<T>& m )
 {
-	typedef typename range_iterator<compressed_matrix<T> >::type Iter;
+	typedef typename boost::range_iterator<compressed_matrix<T> >::type Iter;
 	return Iter(m,0);
 }
 
 template< class T >
-typename range_iterator<compressed_matrix<T> const>::type
+typename boost::range_iterator<compressed_matrix<T> const>::type
 range_end( compressed_matrix<T> const& m )
 {
-	typedef typename range_iterator<compressed_matrix<T> const>::type Iter;
+	typedef typename boost::range_iterator<compressed_matrix<T> const>::type Iter;
 	return Iter(m,m.size1());
 }
 template< class T >
-typename range_iterator<compressed_matrix<T> >::type
+typename boost::range_iterator<compressed_matrix<T> >::type
 range_end( compressed_matrix<T>& m )
 {
-	typedef typename range_iterator<compressed_matrix<T> >::type Iter;
+	typedef typename boost::range_iterator<compressed_matrix<T> >::type Iter;
 	return Iter(m,m.size1());
 }
-
 
 //matrix_container
 template< class M >
-typename range_iterator<M const>::type
+typename boost::range_iterator<M const>::type
 range_begin( matrix_container<M> const& m )
 {
 	return range_begin(m());
 }
 template< class M >
-typename range_iterator<M>::type
+typename boost::range_iterator<M>::type
 range_begin( matrix_container<M>& m )
 {
 	return range_begin(m());
 }
 
 template< class M >
-typename range_iterator<M const>::type
+typename boost::range_iterator<M const>::type
 range_end( matrix_container<M> const& m )
 {
 	return range_end(m());
 }
 template< class M >
-typename range_iterator<M>::type
+typename boost::range_iterator<M>::type
 range_end( matrix_container<M>& m )
 {
 	return range_end(m());
@@ -412,29 +412,30 @@ range_end( matrix_container<M>& m )
 
 //matrix_expression
 template< class M >
-typename range_iterator<M const>::type
+typename boost::range_iterator<M const>::type
 range_begin( matrix_expression<M> const& m )
 {
 	return range_begin(m());
 }
 template< class M >
-typename range_iterator<M>::type
+typename boost::range_iterator<M>::type
 range_begin( matrix_expression<M>& m )
 {
 	return range_begin(m());
 }
 
 template< class M >
-typename range_iterator<M const>::type
+typename boost::range_iterator<M const>::type
 range_end( matrix_expression<M> const& m )
 {
 	return range_end(m());
 }
 template< class M >
-typename range_iterator<M>::type
+typename boost::range_iterator<M>::type
 range_end( matrix_expression<M>& m )
 {
 	return range_end(m());
+}
 }
 
 //dense matrix proxy
@@ -467,7 +468,7 @@ range_end( shark::FixedDenseMatrixProxy<T>& m )
 	typedef typename boost::range_iterator<shark::FixedDenseMatrixProxy<T> >::type Iter;
 	return Iter(m,m.size1());
 }
-}}}
+}
 
 //#include "BatchInterfaceAdaptStruct.h"
 #endif

@@ -114,51 +114,7 @@ SHARK_DENSETRAITSSPEC(blas::matrix<T BOOST_PP_COMMA() O BOOST_PP_COMMA() A>)
 		return &m.data().begin()[0]+m.size1()*m.size2();
 	}
 };
-//c_matrix
-template<class T, std::size_t M, std::size_t N>
-struct ExpressionTraitsBase<blas::c_matrix<T, M, N> >{
-	typedef blas::c_matrix<T, M, N> type;
-	typedef type const const_type;
-	typedef T* value_pointer;
-	
-	typedef blas::row_major_tag orientation;
-	typedef DenseStorage StorageCategory;
-	static const bool transposed=false;
-	
-	static std::size_t stride1(const_type& m){
-		return M;
-	}
-	static std::size_t stride2(const_type&){
-		return 1;
-	}
-};
-template<class T, std::size_t M, std::size_t N>
-struct ExpressionTraitsBase<blas::c_matrix<T, M, N> const>{
-	typedef blas::c_matrix<T, M, N> const type;
-	typedef type const const_type;
-	typedef T const* value_pointer;
-	
-	typedef blas::row_major_tag orientation;
-	typedef DenseStorage StorageCategory;
-	static const bool transposed=false;
-	
-	static std::size_t stride1(const_type& m){
-		return M;
-	}
-	static std::size_t stride2(const_type&){
-		return 1;
-	}
-};
 
-template<class T, std::size_t M, std::size_t N,class BaseExpression>
-SHARK_DENSETRAITSSPEC(blas::c_matrix<T BOOST_PP_COMMA() M BOOST_PP_COMMA() N>)
-	static value_pointer storageBegin(type& m){
-		return &m.data().begin()[0];
-	}
-	static value_pointer storageEnd(type& m){
-		return &m.data().begin()[0]+m.size1()*m.size2();
-	}
-};
 //compressed_matrix
 template<class T, class IA, class TA>
 struct ExpressionTraitsBase<blas::compressed_matrix<T,blas::row_major,0,IA,TA> >{
