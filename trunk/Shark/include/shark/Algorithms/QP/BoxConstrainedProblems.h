@@ -153,7 +153,8 @@ public:
 	BoxConstrainedProblem(SVMProblem& problem)
 	: m_problem(problem)
 	, m_gradient(problem.linear)
-	, m_active (problem.dimensions()){
+	, m_active (problem.dimensions())
+	, m_alphaStatus(problem.dimensions(),AlphaFree){
 		//compute the gradient if alpha != 0
 		for (std::size_t i=0; i != dimensions(); i++){
 			double v = alpha(i);
@@ -162,6 +163,7 @@ public:
 				for (std::size_t a=0; a < dimensions(); a++) 
 					m_gradient(a) -= q[a] * v;
 			}
+			updateAlphaStatus(i);
 		}
 	}
 	std::size_t dimensions()const{
@@ -173,10 +175,16 @@ public:
 	}
 
 	double boxMin(std::size_t i)const{
-		return m_problem.boxMin(i);
+		return m_alphaStatus[i]==AlphaDeactivated? alpha(i): m_problem.boxMin(i);
 	}
 	double boxMax(std::size_t i)const{
-		return m_problem.boxMax(i);
+		return m_alphaStatus[i]==AlphaDeactivated? alpha(i): m_problem.boxMax(i);
+	}
+	bool isLowerBound(std::size_t i)const{
+		return m_alphaStatus[i] & AlphaLowerBound;
+	}
+	bool isUpperBound(std::size_t i)const{
+		return m_alphaStatus[i] & AlphaUpperBound;
 	}
 
 	/// representation of the quadratic part of the objective function
@@ -211,9 +219,6 @@ public:
 	void updateSMO(std::size_t i, std::size_t j){
 		
 		if(i == j){//both variables are identical, thus solve the 1-d problem.
-			double Li = boxMin(i);
-			double Ui = boxMax(i);
-
 			// get the matrix row corresponding to the working set
 			QpFloatType* q = quadratic().row(i, 0, active());
 
@@ -222,10 +227,12 @@ public:
 			double denominator = diagonal(i);
 			double mu = numerator / denominator;
 
-			mu = boundedUpdate(m_problem.alpha(i),mu,Li,Ui);
+			mu = boundedAlphaUpdate(i,mu);
 			// update the gradient
 			for (std::size_t a = 0; a < active(); a++) 
 				m_gradient(a) -= mu * q[a];
+			
+			updateAlphaStatus(i);
 			return;
 		}
 		
@@ -248,12 +255,30 @@ public:
 			mu_i, mu_j
 		);
 		
-		mu_i= boundedUpdate(m_problem.alpha(i),mu_i,Li,Ui);
-		mu_j= boundedUpdate(m_problem.alpha(j),mu_j,Lj,Uj);
+		mu_i= boundedAlphaUpdate(i,mu_i);
+		mu_j= boundedAlphaUpdate(j,mu_j);
 
-		// update the gradient
+		// update the internal state
 		for (std::size_t a = 0; a < active(); a++) 
 			m_gradient(a) -= mu_i * qi[a] + mu_j * qj[a];
+			
+		updateAlphaStatus(i);
+		updateAlphaStatus(j);
+	}
+	
+	/// \brief Bounds the given alpha value between lower and upper bound in a numerically stable way.
+	double boundedAlphaUpdate(std::size_t i, double step){
+		double& ai = m_problem.alpha(i);
+		if (ai+step < boxMin(i)){
+			step = -ai+boxMin(i);
+			ai = boxMin(i);
+		}
+		else if (ai+step > boxMax(i)){
+			step = -ai+boxMax(i);
+			ai = boxMax(i);
+		}
+		else ai +=step;
+		return step;
 	}
 
 	///\brief Returns the current function value of the problem.
@@ -265,18 +290,30 @@ public:
 	void reshrink(){}
 	void unshrink(){}
 
-	void modifyStep(std::size_t i, std::size_t j, double diff){
-		SIZE_CHECK(i < dimensions());
-		SIZE_CHECK(i == j );
-		RANGE_CHECK(alpha(i)+diff >= boxMin(i)-1.e-14*(boxMax(i)-boxMin(i)));//we allow a bit of numeric error
-		RANGE_CHECK(alpha(i)+diff <= boxMax(i)+1.e-14*(boxMax(i)-boxMin(i)));
-		if(diff == 0) return;
-
-		boundedUpdate(m_problem.alpha(i),diff,boxMin(i),boxMax(i));
-		//update gradient
-		QpFloatType* q = quadratic().row(i, 0, active());
+	///\brief Remove the i-th example from the problem.
+	void deactivateVariable(std::size_t i){
+		double alphai = alpha(i);
+		m_problem.alpha(i) = 0;
+		//update the internal state
+		QpFloatType* qi = quadratic().row(i, 0, active());
 		for (std::size_t a = 0; a < active(); a++) 
-			m_gradient(a) -=diff * q[a];
+			m_gradient(a) += alphai * qi[a];
+		m_alphaStatus[i] = AlphaDeactivated;
+	}
+	///\brief Reactivate an previously deactivated variable.
+	void activateVariable(std::size_t i){
+		m_alphaStatus[i] = AlphaFree;
+		updateAlphaStatus(i);
+	}
+	
+	/// exchange two variables via the permutation
+	void flipCoordinates(std::size_t i, std::size_t j)
+	{
+		if (i == j) return;
+
+		m_problem.flipCoordinates(i, j);
+		std::swap( m_gradient[i], m_gradient[j]);
+		std::swap( m_alphaStatus[i], m_alphaStatus[j]);
 	}
 
 protected:
@@ -286,6 +323,16 @@ protected:
 	RealVector m_gradient;	
 
 	std::size_t m_active;
+
+	std::vector<char> m_alphaStatus;
+
+	void updateAlphaStatus(std::size_t i){
+		m_alphaStatus[i] = AlphaFree;
+		if(m_problem.alpha(i) == boxMax(i))
+			m_alphaStatus[i] |= AlphaUpperBound;
+		if(m_problem.alpha(i) == boxMin(i))
+			m_alphaStatus[i] |= AlphaLowerBound;
+	}
 
 	/// Internally used by Solve2D;
 	/// computes the solution of a
@@ -460,12 +507,17 @@ struct BoxConstrainedShrinkingProblem
 	, m_isUnshrinked(false)
 	, m_shrinkCounter(std::min(this->dimensions(),IterationsBetweenShrinking)){}
 
+	using base_type::alpha;
+	using base_type::gradient;
+	using base_type::isLowerBound;
+	using base_type::isUpperBound;
+		
 protected:
-	void doShrink(double epsilon){
+	bool doShrink(double epsilon){
 		//check if shrinking is necessary
 		--m_shrinkCounter;
-		if(m_shrinkCounter != 0) return;
-		m_shrinkCounter = std::min(this->active(),IterationsBetweenShrinking);
+		if(m_shrinkCounter != 0) return false;
+		m_shrinkCounter = std::min(this->dimensions(),IterationsBetweenShrinking);
 
 		double largestUp;
 		double smallestDown;
@@ -478,15 +530,15 @@ protected:
 		{
 			m_isUnshrinked = true;
 			this->reshrink();
-			return;
+		}else{
+			doShrink(largestUp,smallestDown);
 		}
-		doShrink(largestUp,smallestDown);
+		return true;
 	}
 
 	/// \brief Unshrink the problem and immdiately reshrink it.
 	void doReshrink(){
 		if (this->active() == this->dimensions()) return;
-
 		this->unshrink();
 
 		// shrink directly again
@@ -495,7 +547,7 @@ protected:
 		getMaxKKTViolations(largestUp,smallestDown,this->dimensions());
 		doShrink(largestUp,smallestDown);
 
-		m_shrinkCounter = std::min(this->active(),IterationsBetweenShrinking);
+		m_shrinkCounter = std::min(this->dimensions(),IterationsBetweenShrinking);
 	}
 
 private:
@@ -507,12 +559,9 @@ private:
 	}
 
 	bool testShrinkVariable(std::size_t a, double largestUp, double smallestDown)const{
-		double v = this->alpha(a);
-		double g = this->gradient(a);
-
 		if (
-			( g <= smallestDown && v == this->boxMin(a))
-			|| ( g >=largestUp && v == this->boxMax(a))
+			( isLowerBound(a) && gradient(a) < smallestDown)
+			|| ( isUpperBound(a) && gradient(a) >largestUp)
 		){
 			// In this moment no feasible step including this variable
 			// can improve the objective. Thus deactivate the variable.
@@ -524,14 +573,11 @@ private:
 	void getMaxKKTViolations(double& largestUp, double& smallestDown, std::size_t maxIndex){
 		largestUp = -1e100;
 		smallestDown = 1e100;
-		for (std::size_t a = 0; a < maxIndex; a++)
-		{
-			double v = this->alpha(a);
-			double g = this->gradient(a);
-			if (v > this->boxMin(a))
-				smallestDown = std::min(smallestDown,g);
-			if (v < this->boxMax(a))
-				largestUp = std::max(largestUp,g);
+		for (std::size_t a = 0; a < maxIndex; a++){
+			if (!isLowerBound(a))
+				smallestDown = std::min(smallestDown,gradient(a));
+			if (!isUpperBound(a))
+				largestUp = std::max(largestUp,gradient(a));
 		}
 	}
 

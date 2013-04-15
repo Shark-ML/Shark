@@ -149,8 +149,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard_NoBias )
 	double standardLoo = loo.eval();
 
 	// compare to brute force computation
-	// and to geometric intuition (3 out of
-	// 5 are errors)
+	// and to geometric intuition
 	BOOST_CHECK_SMALL(value - standardLoo, 1e-10);
 }
 
@@ -178,7 +177,6 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard )
 	double value = loosvm.eval(parameters);
 
 	// compare to brute force computation
-	// and to geometric intuition (3 out of
-	// 5 are errors)
+	// and to geometric intuition
 	BOOST_CHECK_SMALL(value - standardLoo, 1e-10);
 }
