@@ -115,52 +115,7 @@ public:
 			{
 				// use sparseness of the solution:
 				if (alphaFull(i) == 0.0) continue;
-
-				// remove the i-th example
-				double diff = -problem.alpha(i);
-				double loo_lower = problem.boxMin(i);
-				double loo_upper = problem.boxMax(i);
-				//now we need to correct for the equality constraint
-				if (diff > 0.0)
-				{
-					for (std::size_t j=0; j<ell; j++)
-					{
-						if (j == i) continue;
-						double space = problem.alpha(j) - problem.boxMin(j);
-						if (space <= 0.0) continue;
-						if (space >= diff)
-						{
-							problem.modifyStep(i,j, diff);
-							break;
-						}
-						else
-						{
-							problem.modifyStep(i,j,space);
-							diff -= space;
-						}
-					}
-				}
-				else if (diff < 0.0)
-				{
-					for (std::size_t j=0; j<ell; j++)
-					{
-						if (j == i) continue;
-						double space = problem.boxMax(j) - problem.alpha(j);
-						if (space <= 0.0) continue;
-						if (space >= -diff)
-						{
-							problem.modifyStep(i,j, diff);
-							break;
-						}
-						else
-						{
-							problem.modifyStep(i,j, -space);
-							diff += space;
-						}
-					}
-				}
-				svmProblem.boxMin(i) = 0.0;
-				svmProblem.boxMax(i) = 0.0;
+				problem.deactivateVariable(i);
 				
 				// solve the reduced problem
 				solver.solve(stop);
@@ -174,10 +129,8 @@ public:
 				std::size_t elementIndex = i;//svmProblem.permutation[i];
 				unsigned int target = mep_dataset->element(elementIndex).label;
 				mistakes += loss(target, svm(mep_dataset->element(elementIndex).input));
-
-				// add the i-th example again to the problem
-				svmProblem.boxMin(i) = loo_lower;
-				svmProblem.boxMax(i) = loo_upper;
+				
+				problem.activateVariable(i);
 			}
 			return mistakes / (double)ell;
 		}
@@ -198,13 +151,7 @@ public:
 			{
 				// use sparseness of the solution:
 				if (alphaFull(i) == 0.0) continue;
-
-				// remove the i-th example
-				double loo_lower = problem.boxMin(i);
-				double loo_upper = problem.boxMax(i);
-				problem.modifyStep(i,i, -problem.alpha(i));
-				svmProblem.boxMin(i) = 0.0;
-				svmProblem.boxMax(i) = 0.0;
+				problem.deactivateVariable(i);
 				
 
 				// solve the reduced problem
@@ -219,9 +166,7 @@ public:
 				unsigned int target = mep_dataset->element(elementIndex).label;
 				mistakes += loss(target, svm(mep_dataset->element(elementIndex).input));
 
-				// add the i-th example again to the problem
-				svmProblem.boxMin(i) = loo_lower;
-				svmProblem.boxMax(i) = loo_upper;
+				problem.activateVariable(i);
 			}
 			return mistakes / (double)ell;
 		}

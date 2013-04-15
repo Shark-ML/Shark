@@ -179,10 +179,10 @@ BOOST_AUTO_TEST_CASE( QP_CachedMatrix_Flipping ) {
 	}
 	
 	//truncate the cache
-	cache.setMaxCachedIndex(10);
-	for(std::size_t i = 0; i != 10; ++i){
-		BOOST_CHECK(!cache.isCached(i) || cache.getCacheRowSize(i) <= 10 );
-	}
+	//~ cache.setMaxCachedIndex(10);
+	//~ for(std::size_t i = 0; i != 10; ++i){
+		//~ BOOST_CHECK(!cache.isCached(i) || cache.getCacheRowSize(i) <= 10 );
+	//~ }
 	
 	//finally clear the cache, afterwards it should be empty
 	cache.clear();

@@ -56,7 +56,7 @@ struct MVPSelectionCriterion{
 		{
 			double aa = problem.alpha(a);
 			double ga = problem.gradient(a);
-			if (aa < problem.boxMax(a))
+			if (!problem.isUpperBound(a))
 			{
 				if (ga > largestUp)
 				{
@@ -64,7 +64,7 @@ struct MVPSelectionCriterion{
 					i = a;
 				}
 			}
-			if (aa > problem.boxMin(a))
+			if (!problem.isLowerBound(a))
 			{
 				if (ga < smallestDown)
 				{
@@ -103,7 +103,8 @@ struct LibSVMSelectionCriterion{
 		{
 			double aa = problem.alpha(a);
 			double ga = problem.gradient(a);
-			if (aa < problem.boxMax(a))
+			//if (aa < problem.boxMax(a))
+			if (!problem.isUpperBound(a))
 			{
 				if (ga > largestUp)
 				{
@@ -120,7 +121,8 @@ struct LibSVMSelectionCriterion{
 		for (std::size_t a = 0; a < problem.active(); a++){
 			double aa = problem.alpha(a);
 			double ga = problem.gradient(a);
-			if (aa > problem.boxMin(a))
+			//if (aa > problem.boxMin(a))
+			if (!problem.isLowerBound(a))
 			{
 				smallestDown=std::min(smallestDown,ga);
 				
@@ -241,22 +243,27 @@ private:
 		double gb = problem.gradient(i);
 		for (std::size_t a = 0; a < problem.active(); a++)
 		{
-			double aa = problem.alpha(a);
-			double da = problem.diagonal(a);
 			double ga = problem.gradient(a);
-			double La = problem.boxMin(a);
-			double Ua = problem.boxMax(a);
-			if (aa < Ua)
+			
+			if (!problem.isUpperBound(a))
 				largestUp = std::max(largestUp,ga);
-			if (aa > La)
+			if (!problem.isLowerBound(a))
 				smallestDown = std::min(smallestDown,ga);
 			
 			if (a == i) continue;
-
-			double denominator = (da + db - 2.0 * q[a]);
+			//get maximum unconstrained step length
+			double denominator = (problem.diagonal(a) + db - 2.0 * q[a]);
 			double mu_max = (ga - gb) / denominator;
+			
+			//check whether a step > 0 is possible at all
+			//~ if( mu_max > 0 && ( problem.isUpperBound(a) || problem.isLowerBound(b)))continue;
+			//~ if( mu_max < 0 && ( problem.isLowerBound(a) || problem.isUpperBound(b)))continue;
+			
+			//constraint step to box
+			double aa = problem.alpha(a);
+			double La = problem.boxMin(a);
+			double Ua = problem.boxMax(a);
 			double mu_star = mu_max;
-
 			if (aa + mu_star < La) mu_star = La - aa;
 			else if (mu_star + aa > Ua) mu_star = Ua - aa;
 			if (ab - mu_star < Lb) mu_star = ab - Lb;
@@ -292,13 +299,14 @@ class SvmProblem{
 public:
 	typedef typename Problem::QpFloatType QpFloatType;
 	typedef typename Problem::MatrixType MatrixType;
-	//typedef LibSVMSelectionCriterion PreferedSelectionStrategy;
-	typedef HMGSelectionCriterion PreferedSelectionStrategy;
+	typedef LibSVMSelectionCriterion PreferedSelectionStrategy;
+	//typedef HMGSelectionCriterion PreferedSelectionStrategy;
 
 	SvmProblem(Problem& problem)
 	: m_problem(problem)
 	, m_gradient(problem.linear)
-	, m_active(problem.dimensions()){
+	, m_active(problem.dimensions())
+	, m_alphaStatus(problem.dimensions(),AlphaFree){
 		//compute the gradient if alpha != 0
 		for (std::size_t i=0; i != dimensions(); i++){
 			double v = alpha(i);
@@ -307,6 +315,7 @@ public:
 				for (std::size_t a=0; a < dimensions(); a++) 
 					m_gradient(a) -= q[a] * v;
 			}
+			updateAlphaStatus(i);
 		}
 	}
 	std::size_t dimensions()const{
@@ -318,10 +327,16 @@ public:
 	}
 
 	double boxMin(std::size_t i)const{
-		return m_problem.boxMin(i);
+		return m_alphaStatus[i]==AlphaDeactivated? alpha(i): m_problem.boxMin(i);
 	}
 	double boxMax(std::size_t i)const{
-		return m_problem.boxMax(i);
+		return m_alphaStatus[i]==AlphaDeactivated? alpha(i): m_problem.boxMax(i);
+	}
+	bool isLowerBound(std::size_t i)const{
+		return m_alphaStatus[i] & AlphaLowerBound;
+	}
+	bool isUpperBound(std::size_t i)const{
+		return m_alphaStatus[i] & AlphaUpperBound;
 	}
 
 	/// representation of the quadratic part of the objective function
@@ -354,81 +369,57 @@ public:
 
 	///\brief Does an update of SMO given a working set with indices i and j.
 	void updateSMO(std::size_t i, std::size_t j){
-		double ai = alpha(i);
-		double aj = alpha(j);
-		double Ui = boxMax(i);
-		double Lj = boxMin(j);
-
-		// get the matrix rows corresponding to the working set
+		// get the matrix row corresponding to the first variable of the working set
 		QpFloatType* qi = quadratic().row(i, 0, active());
-		QpFloatType* qj = quadratic().row(j, 0, active());
 
-		// update alpha, that is, solve the sub-problem defined by i and j
+		// solve the sub-problem defined by i and j
 		double numerator = gradient(i) - gradient(j);
 		double denominator = diagonal(i) + diagonal(j) - 2.0 * qi[j];
 		double mu = numerator / denominator;
-
-		// do the update carefully - avoid numerical problems
-		if (mu >= std::min(Ui - ai, aj - Lj))
-		{
-			if (Ui - ai > aj - Lj)
-			{
-				mu = aj - Lj;
-				m_problem.alpha(i) += mu;
-				m_problem.alpha(j) = Lj;
-			}
-			else if (Ui - ai < aj - Lj)
-			{
-				mu = Ui - ai;
-				m_problem.alpha(i) = Ui;
-				m_problem.alpha(j) -= mu;
-			}
-			else
-			{
-				mu = Ui - ai;
-				m_problem.alpha(i) = Ui;
-				m_problem.alpha(j) = Lj;
-			}
-		}
-		else
-		{
-			m_problem.alpha(i) += mu;
-			m_problem.alpha(j) -= mu;
-		}
-
-		// update the gradient
-		for (std::size_t a = 0; a < active(); a++) 
-			m_gradient(a) -= mu * (qi[a] - qj[a]);
+			
+		//update alpha in a numerically stable way
+		applyStep(i,j, mu);
 	}
 
 	///\brief Returns the current function value of the problem.
 	double functionValue()const{
-		//std::cout<<m_gradient<<std::endl;
 		return 0.5*inner_prod(m_gradient+m_problem.linear,m_problem.alpha);
 	}
 
 	bool shrink(double){return false;}
 	void reshrink(){}
 	void unshrink(){}
+		
+	///\brief Remove the i-th example from the problem while taking the equality constraint into account.
+	///
+	/// The i-th element is first set to zero and as well as an unspecified set corrected so
+	/// that the constraint is fulfilled.
+	/// after the call boxMin(i) and boxMax(i) are zero.
+	void deactivateVariable(std::size_t i){
+		//we need to correct for the equality constraint
+		//that means we have to move enough variables to satisfy the constraint again.
+		for (std::size_t j=0; j<dimensions(); j++){
+			if (j == i) continue;
+			//propose the maximum step possible and let applyStep cut it down.
+			applyStep(i,j, -alpha(i));
+			if(alpha(i) == 0.0) break;
+		}
+		m_alphaStatus[i] = AlphaDeactivated;
+	}
+	///\brief Reactivate an previously deactivated variable.
+	void activateVariable(std::size_t i){
+		m_alphaStatus[i] = AlphaFree;
+		updateAlphaStatus(i);
+	}
+	
+	/// exchange two variables via the permutation
+	void flipCoordinates(std::size_t i, std::size_t j)
+	{
+		if (i == j) return;
 
-	void modifyStep(std::size_t i, std::size_t j, double diff){
-		SIZE_CHECK(i < dimensions());
-		RANGE_CHECK(alpha(i)+diff >= boxMin(i)-1.e-14*(boxMax(i)-boxMin(i)));
-		RANGE_CHECK(alpha(i)+diff <= boxMax(i)+1.e-14*(boxMax(i)-boxMin(i)));
-		if(diff == 0) return;
-
-		RANGE_CHECK(alpha(j)-diff >= boxMin(j)-1.e-14*(boxMax(i)-boxMin(i)));
-		RANGE_CHECK(alpha(j)-diff <= boxMax(j)+1.e-14*(boxMax(i)-boxMin(i)));
-
-		boundedUpdate(m_problem.alpha(i),diff,boxMin(i),boxMax(i));
-		boundedUpdate(m_problem.alpha(j),-diff,boxMin(j),boxMax(j));
-
-		QpFloatType* qi = quadratic().row(i, 0, active());
-		QpFloatType* qj = quadratic().row(j, 0, active());
-
-		// update the gradient
-		for (std::size_t a = 0; a < active(); a++) 
-			m_gradient(a) -= diff * qi[a] - diff * qj[a];
+		m_problem.flipCoordinates(i, j);
+		std::swap( m_gradient[i], m_gradient[j]);
+		std::swap( m_alphaStatus[i], m_alphaStatus[j]);
 	}
 
 protected:
@@ -438,6 +429,69 @@ protected:
 	RealVector m_gradient;	
 
 	std::size_t m_active; 
+
+	/// \brief Stores the status, whther alpha is on the lower or upper bound, or whether it is free.
+	std::vector<char> m_alphaStatus;
+private:
+
+	///\brief Update the problem by a proposed step i taking the box constraints into account.
+	///
+	/// A step length 0<=lambda<=1 is found so that 
+	/// boxMin(i) <= alpha(i)+lambda*step <= boxMax(i) 
+	/// and
+	/// boxMin(j) <= alpha(j)-lambda*step <= boxMax(j)
+	/// the update is performed in a numerically stable way and the internal data structures
+	/// are also updated.
+	void applyStep(std::size_t i, std::size_t j, double step){
+		// do the update of the alpha values carefully - avoid numerical problems
+		double Ui = boxMax(i);
+		double Lj = boxMin(j);
+		double& ai = m_problem.alpha(i);
+		double& aj = m_problem.alpha(j);
+		if (step >= std::min(Ui - ai, aj - Lj))
+		{
+			if (Ui - ai > aj - Lj)
+			{
+				step = aj - Lj;
+				ai += step;
+				aj = Lj;
+			}
+			else if (Ui - ai < aj - Lj)
+			{
+				step = Ui - ai;
+				ai = Ui;
+				aj -= step;
+			}
+			else
+			{
+				step = Ui - ai;
+				ai = Ui;
+				aj = Lj;
+			}
+		}
+		else
+		{
+			ai += step;
+			aj -= step;
+		}
+		
+		//Update internal data structures (gradient and alpha status)
+		QpFloatType* qi = quadratic().row(i, 0, active());
+		QpFloatType* qj = quadratic().row(j, 0, active());
+		for (std::size_t a = 0; a < active(); a++) 
+			m_gradient(a) -= step * qi[a] - step * qj[a];
+		
+		updateAlphaStatus(i);
+		updateAlphaStatus(j);
+	}
+	
+	void updateAlphaStatus(std::size_t i){
+		m_alphaStatus[i] = AlphaFree;
+		if(m_problem.alpha(i) == boxMax(i))
+			m_alphaStatus[i] |= AlphaUpperBound;
+		if(m_problem.alpha(i) == boxMin(i))
+			m_alphaStatus[i] |= AlphaLowerBound;
+	}
 };
 
 template<class Problem>
@@ -445,6 +499,11 @@ struct SvmShrinkingProblem
 : public BaseShrinkingProblem<SvmProblem<Problem> >{
 	typedef BaseShrinkingProblem<SvmProblem<Problem> > base_type;
 	static const std::size_t IterationsBetweenShrinking;
+	
+	using base_type::alpha;
+	using base_type::gradient;
+	using base_type::isLowerBound;
+	using base_type::isUpperBound;
 
 	SvmShrinkingProblem(Problem& problem, bool shrink = true)
 	: base_type(problem,shrink)
@@ -452,11 +511,11 @@ struct SvmShrinkingProblem
 	, m_shrinkCounter(std::min(this->dimensions(),IterationsBetweenShrinking)){}
 
 protected:
-	void doShrink(double epsilon){
+	bool doShrink(double epsilon){
 		//check if shrinking is necessary
 		--m_shrinkCounter;
-		if(m_shrinkCounter != 0) return;
-		m_shrinkCounter = std::min(this->active(),IterationsBetweenShrinking);
+		if(m_shrinkCounter != 0) return false;
+		m_shrinkCounter = std::min(this->dimensions(),IterationsBetweenShrinking);
 
 		double largestUp;
 		double smallestDown;
@@ -469,17 +528,15 @@ protected:
 		{
 			m_isUnshrinked = true;
 			this->reshrink();
-			return;
+		}else{
+			doShrink(largestUp,smallestDown);
 		}
-		doShrink(largestUp,smallestDown);
-
-		//std::cout<<m_problem.active()<<" "<<std::flush;
+		return true;
 	}
 
 	/// \brief Unshrink the problem and immdiately reshrink it.
 	void doReshrink(){
 		if (this->active() == this->dimensions()) return;
-
 		this->unshrink();
 
 		// shrink directly again
@@ -488,7 +545,7 @@ protected:
 		getMaxKKTViolations(largestUp,smallestDown,this->dimensions());
 		doShrink(largestUp,smallestDown);
 
-		m_shrinkCounter = std::min(this->active(),IterationsBetweenShrinking);
+		m_shrinkCounter = std::min(this->dimensions(),IterationsBetweenShrinking);
 	}
 
 private:
@@ -500,12 +557,9 @@ private:
 	}
 
 	bool testShrinkVariable(std::size_t a, double largestUp, double smallestDown)const{
-		double v = this->alpha(a);
-		double g = this->gradient(a);
-
 		if (
-			( g <= smallestDown && v == this->boxMin(a))
-			|| ( g >=largestUp && v == this->boxMax(a))
+			( isLowerBound(a) && gradient(a) < smallestDown)
+			|| ( isUpperBound(a) && gradient(a) >largestUp)
 		){
 			// In this moment no feasible step including this variable
 			// can improve the objective. Thus deactivate the variable.
@@ -517,14 +571,11 @@ private:
 	void getMaxKKTViolations(double& largestUp, double& smallestDown, std::size_t maxIndex){
 		largestUp = -1e100;
 		smallestDown = 1e100;
-		for (std::size_t a = 0; a < maxIndex; a++)
-		{
-			double v = this->alpha(a);
-			double g = this->gradient(a);
-			if (v > this->boxMin(a))
-				smallestDown = std::min(smallestDown,g);
-			if (v < this->boxMax(a))
-				largestUp = std::max(largestUp,g);
+		for (std::size_t a = 0; a < maxIndex; a++){
+			if (!isLowerBound(a))
+				smallestDown = std::min(smallestDown,gradient(a));
+			if (!isUpperBound(a))
+				largestUp = std::max(largestUp,gradient(a));
 		}
 	}
 

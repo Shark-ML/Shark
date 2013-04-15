@@ -662,6 +662,8 @@ public:
 	{
 		BOOST_STATIC_ASSERT(traits::IsSparse<E>::value);
 	}
+	
+	FixedSparseVectorProxy():m_size(0){}
 		
 	/// \brief Constructor of a vector proxy from a block of memory
 	/// \param size the size of the vector represented by the memory
@@ -675,6 +677,11 @@ public:
 		m_storage.data = data;
 		m_storage.indizes = indizes;
 		m_storage.startIndex = startIndex;
+	}
+	
+	FixedSparseVectorProxy& operator=(FixedSparseVectorProxy const& other){
+		m_storage = other.m_storage;
+		m_size = other.m_size;
 	}
 	
 	/// \brief Return the size of the self_type

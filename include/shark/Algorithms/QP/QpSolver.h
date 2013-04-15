@@ -313,19 +313,12 @@ private:
 	double C;
 };
 
-/// \brief calculates alpha+mu such that the box constraints are satisfied and returns the actual change.
-inline double boundedUpdate(double& alpha, double mu, double lower, double upper){
-	if (alpha + mu < lower){
-		mu = lower - alpha;
-		alpha = lower;
-	}
-	else if (alpha + mu > upper){
-		mu = upper - alpha;
-		alpha = upper;
-	}
-	else alpha += mu;
-	return mu;
-}
+enum AlphaStatus{
+	AlphaFree = 0,
+	AlphaLowerBound = 1,
+	AlphaUpperBound = 2,
+	AlphaDeactivated = 3//also:  AlphaUpperBound and AlphaLowerBound
+};
 
 template<class Problem>
 class BaseShrinkingProblem : private Problem{
@@ -337,8 +330,7 @@ public:
 	BaseShrinkingProblem(SVMProblem& problem, bool shrink=true)
 	: Problem(problem)
 	, m_gradientEdge(problem.linear)
-	, m_shrink(shrink)
-	, q(problem.dimensions()){}
+	, m_shrink(shrink){}
 
 	using Problem::dimensions;
 	using Problem::active;
@@ -351,6 +343,10 @@ public:
 	using Problem::gradient;
 	using Problem::functionValue;
 	using Problem::getUnpermutedAlpha;
+	using Problem::isUpperBound;
+	using Problem::isLowerBound;
+	using Problem::deactivateVariable;
+	using Problem::activateVariable;
 
 	///\brief Does an update of SMO given a working set with indices i and j.
 	void updateSMO(std::size_t i, std::size_t j){
@@ -368,18 +364,15 @@ public:
 	}
 
 	bool shrink(double epsilon){
-		bool shrinked = false;
 		if(m_shrink){
-			doShrink(epsilon);
-			shrinked = true;
+			return doShrink(epsilon);
 		}
-		quadratic().setMaxCachedIndex(active());
-		return shrinked;
+		return false;
 	}
 	void reshrink(){
-		if(m_shrink)
+		if(m_shrink && active() != dimensions()){
 			doReshrink();
-		quadratic().setMaxCachedIndex(active());
+		}
 	}
 
 	///\brief Unshrink the problem
@@ -398,16 +391,14 @@ public:
 
 		for (std::size_t i = 0; i < active(); i++)
 		{
-			bool isOnBorder = (alpha(i) == boxMin(i)) || (alpha(i) == boxMax(i));
-			if (isOnBorder) continue;//alpha value is already stored in gradientEdge
+			if (isUpperBound(i) || isLowerBound(i)) continue;//alpha value is already stored in gradientEdge
 			
-			quadratic().row(i, active(), dimensions(), &q[active()]);
+			QpFloatType* q = quadratic().row(i, active(), dimensions());
 			for (std::size_t a = active(); a < dimensions(); a++) 
 				Problem::m_gradient(a) -= alpha(i) * q[a] ;
 		}
 
 		this->m_active = dimensions();
-		quadratic().setMaxCachedIndex(dimensions());
 	}
 
 	void setShrinking(bool shrinking){
@@ -433,13 +424,12 @@ public:
 protected:
 	///\brief Shrink the variable from the problem.
 	void shrinkVariable(std::size_t i){
-		Problem::m_problem.flipCoordinates(i,active()-1);
-		std::swap( Problem::m_gradient[i], Problem::m_gradient[active()-1]);
+		Problem::flipCoordinates(i,active()-1);
 		std::swap( m_gradientEdge[i], m_gradientEdge[active()-1]);
 		--this->m_active;
 	}
 	
-	virtual void doShrink(double epsilon)=0;
+	virtual bool doShrink(double epsilon)=0;
 	virtual void doReshrink()=0;
 
 private:
@@ -460,7 +450,7 @@ private:
 			diff  += newAlpha;
 		}
 
-		quadratic().row(i, 0, dimensions(), &q[0]);
+		QpFloatType* q = quadratic().row(i, 0, dimensions());
 		for(std::size_t a = 0; a != dimensions(); ++a){
 			m_gradientEdge(a) -= diff*q[a];
 		}
@@ -471,9 +461,6 @@ private:
 
 	///\brief true if shrinking is to be used.
 	bool m_shrink;
-
-	///\brief Temporal storage for matrix rows.
-	std::vector<QpFloatType> q;
 };
 
 ///
