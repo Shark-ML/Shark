@@ -214,7 +214,8 @@ public:
 			PrecomputedMatrixType matrix(&km);
 			QpMcDecomp< PrecomputedMatrixType > solver(matrix, gamma, rho, nu, M, true);
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			solver.setShrinking(base_type::m_shrinking);
+			// solver.setShrinking(base_type::m_shrinking);
+			solver.setShrinking(false);   // hack to avoid shrinking-related bug
 			solver.solve(dataset.labels(), base_type::m_C, alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
 		}
 		else
@@ -222,7 +223,8 @@ public:
 			CachedMatrixType matrix(&km, base_type::m_cacheSize);
 			QpMcDecomp< CachedMatrixType > solver(matrix, gamma, rho, nu, M, true);
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			solver.setShrinking(base_type::m_shrinking);
+			// solver.setShrinking(base_type::m_shrinking);
+			solver.setShrinking(false);   // hack to avoid shrinking-related bug
 			solver.solve(dataset.labels(), base_type::m_C, alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
 		}
 
