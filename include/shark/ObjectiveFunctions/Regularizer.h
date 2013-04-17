@@ -185,7 +185,7 @@ public:
 	/// its Hessian.
 	virtual ResultType evalDerivative( const SearchPointType & input, SecondOrderDerivative & derivative )const {
 		derivative.m_gradient = input;
-		derivative.m_hessian = RealIdentityMatrix(input.size(),input.size());
+		derivative.m_hessian = RealIdentityMatrix(input.size());
 		return 0.5 * normSqr(input);
 	}
 private:

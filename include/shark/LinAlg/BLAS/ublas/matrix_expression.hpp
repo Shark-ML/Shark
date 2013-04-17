@@ -29,9 +29,6 @@ class matrix_reference:
 
 	typedef matrix_reference<E> self_type;
 public:
-#ifdef BOOST_UBLAS_ENABLE_PROXY_SHORTCUTS
-	using matrix_expression<self_type>::operator();
-#endif
 	typedef typename E::size_type size_type;
 	typedef typename E::difference_type difference_type;
 	typedef typename E::value_type value_type;
@@ -282,9 +279,6 @@ public:
 private:
 	typedef vector_matrix_binary<E1, E2, F> self_type;
 public:
-#ifdef BOOST_UBLAS_ENABLE_PROXY_SHORTCUTS
-	using matrix_expression<self_type>::operator();
-#endif
 	typedef F functor_type;
 	typedef typename promote_traits<typename E1::size_type, typename E2::size_type>::promote_type size_type;
 	typedef typename promote_traits<typename E1::difference_type, typename E2::difference_type>::promote_type difference_type;

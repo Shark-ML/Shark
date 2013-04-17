@@ -150,7 +150,7 @@ public:
 	void modelCSvmParameterDerivative(const InputType& input, RealVector& derivative )
 	{
 		// create temporary batch helpers
-		RealIdentityMatrix unit_weights(1,1);
+		RealIdentityMatrix unit_weights(1);
 		RealMatrix bof_results(1,1);
 		typename Batch<InputType>::type bof_xi = Batch<InputType>::createBatch(input,1);
 		typename Batch<InputType>::type bof_input = Batch<InputType>::createBatch(input,1);
@@ -292,7 +292,7 @@ protected:
 		}
 
 		// create temporary batch helpers
-		RealIdentityMatrix unit_weights(1,1);
+		RealIdentityMatrix unit_weights(1);
 		RealMatrix bof_results(1,1);
 		typename Batch<InputType>::type bof_xi;
 		typename Batch<InputType>::type bof_xj;

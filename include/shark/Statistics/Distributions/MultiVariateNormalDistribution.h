@@ -110,7 +110,7 @@ namespace shark {
 			* \param [in] size The new size of the distribution
 			*/
 			void resize( unsigned int size ) {
-				m_covarianceMatrix = blas::identity_matrix<double>( size, size );
+				m_covarianceMatrix = blas::identity_matrix<double>( size );
 				update();
 			}
 

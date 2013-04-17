@@ -31,7 +31,6 @@ using namespace shark::blas;
 
 // Matrix resizing algorithm
 template <class L, class M>
-
 void matrix_resize_preserve(M &m, M &temporary) {
 	typedef L layout_type;
 	typedef typename M::size_type size_type;
@@ -81,9 +80,6 @@ class matrix:
 	typedef L layout_type;
 	typedef matrix<T, L, A> self_type;
 public:
-#ifdef BOOST_UBLAS_ENABLE_PROXY_SHORTCUTS
-	using matrix_container<self_type>::operator();
-#endif
 	typedef typename A::size_type size_type;
 	typedef typename A::difference_type difference_type;
 	typedef T value_type;
@@ -240,98 +236,75 @@ public:
 	}
 
 	// Assignment
-#ifdef BOOST_UBLAS_MOVE_SEMANTICS
 
 	/*! @note "pass by value" the key idea to enable move semantics */
-	
 	matrix &operator = (matrix m) {
 		assign_temporary(m);
 		return *this;
 	}
-#else
-	
-	matrix &operator = (const matrix &m) {
-		size1_ = m.size1_;
-		size2_ = m.size2_;
-		data() = m.data();
-		return *this;
-	}
-#endif
 	template<class C>          // Container assignment without temporary
-	
 	matrix &operator = (const matrix_container<C> &m) {
 		resize(m().size1(), m().size2(), false);
 		assign(m);
 		return *this;
 	}
-	
 	matrix &assign_temporary(matrix &m) {
 		swap(m);
 		return *this;
 	}
-	template<class AE>
 	
+	template<class AE>
 	matrix &operator = (const matrix_expression<AE> &ae) {
 		self_type temporary(ae);
 		return assign_temporary(temporary);
 	}
 	template<class AE>
-	
 	matrix &assign(const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_assign> (*this, ae);
 		return *this;
 	}
 	template<class AE>
-	
 	matrix &operator += (const matrix_expression<AE> &ae) {
 		self_type temporary(*this + ae);
 		return assign_temporary(temporary);
 	}
 	template<class C>          // Container assignment without temporary
-	
 	matrix &operator += (const matrix_container<C> &m) {
 		plus_assign(m);
 		return *this;
 	}
 	template<class AE>
-	
 	matrix &plus_assign(const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_plus_assign> (*this, ae);
 		return *this;
 	}
 	template<class AE>
-	
 	matrix &operator -= (const matrix_expression<AE> &ae) {
 		self_type temporary(*this - ae);
 		return assign_temporary(temporary);
 	}
 	template<class C>          // Container assignment without temporary
-	
 	matrix &operator -= (const matrix_container<C> &m) {
 		minus_assign(m);
 		return *this;
 	}
 	template<class AE>
-	
 	matrix &minus_assign(const matrix_expression<AE> &ae) {
 		matrix_assign<scalar_minus_assign> (*this, ae);
 		return *this;
 	}
 	template<class AT>
-	
 	matrix &operator *= (const AT &at) {
 		matrix_assign_scalar<scalar_multiplies_assign> (*this, at);
 		return *this;
 	}
 	template<class AT>
-	
 	matrix &operator /= (const AT &at) {
 		matrix_assign_scalar<scalar_divides_assign> (*this, at);
 		return *this;
 	}
 
 	// Swapping
-	
 	void swap(matrix &m) {
 		if (this != &m) {
 			std::swap(size1_, m.size1_);
@@ -339,29 +312,15 @@ public:
 			data().swap(m.data());
 		}
 	}
-	
 	friend void swap(matrix &m1, matrix &m2) {
 		m1.swap(m2);
 	}
 
-	// Iterator types
-private:
-	// Use the storage array iterator
-	typedef typename A::const_iterator const_subiterator_type;
-	typedef typename A::iterator subiterator_type;
-
-public:
-#ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
 	typedef indexed_iterator1<self_type, dense_random_access_iterator_tag> iterator1;
 	typedef indexed_iterator2<self_type, dense_random_access_iterator_tag> iterator2;
 	typedef indexed_const_iterator1<self_type, dense_random_access_iterator_tag> const_iterator1;
 	typedef indexed_const_iterator2<self_type, dense_random_access_iterator_tag> const_iterator2;
-#else
-	class const_iterator1;
-	class iterator1;
-	class const_iterator2;
-	class iterator2;
-#endif
+
 	typedef reverse_iterator_base1<const_iterator1> const_reverse_iterator1;
 	typedef reverse_iterator_base1<iterator1> reverse_iterator1;
 	typedef reverse_iterator_base2<const_iterator2> const_reverse_iterator2;
@@ -370,173 +329,20 @@ public:
 	// Element lookup
 	
 	const_iterator1 find1(int /* rank */, size_type i, size_type j) const {
-#ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
 		return const_iterator1(*this, i, j);
-#else
-		return const_iterator1(*this, data().begin() + layout_type::address(i, size1_, j, size2_));
-#endif
 	}
 	
 	iterator1 find1(int /* rank */, size_type i, size_type j) {
-#ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
 		return iterator1(*this, i, j);
-#else
-		return iterator1(*this, data().begin() + layout_type::address(i, size1_, j, size2_));
-#endif
 	}
 	
 	const_iterator2 find2(int /* rank */, size_type i, size_type j) const {
-#ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
 		return const_iterator2(*this, i, j);
-#else
-		return const_iterator2(*this, data().begin() + layout_type::address(i, size1_, j, size2_));
-#endif
 	}
 	
 	iterator2 find2(int /* rank */, size_type i, size_type j) {
-#ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
 		return iterator2(*this, i, j);
-#else
-		return iterator2(*this, data().begin() + layout_type::address(i, size1_, j, size2_));
-#endif
 	}
-
-
-#ifndef BOOST_UBLAS_USE_INDEXED_ITERATOR
-	class const_iterator1:
-		public container_const_reference<matrix>,
-		public random_access_iterator_base<dense_random_access_iterator_tag,
-			const_iterator1, value_type> {
-	public:
-		typedef typename matrix::value_type value_type;
-		typedef typename matrix::difference_type difference_type;
-		typedef typename matrix::const_reference reference;
-		typedef const typename matrix::pointer pointer;
-
-		typedef const_iterator2 dual_iterator_type;
-		typedef const_reverse_iterator2 dual_reverse_iterator_type;
-
-		// Construction and destruction
-		
-		const_iterator1():
-			container_const_reference<self_type> (), it_() {}
-		
-		const_iterator1(const self_type &m, const const_subiterator_type &it):
-			container_const_reference<self_type> (m), it_(it) {}
-		
-		const_iterator1(const iterator1 &it):
-			container_const_reference<self_type> (it()), it_(it.it_) {}
-
-		// Arithmetic
-		
-		const_iterator1 &operator ++ () {
-			layout_type::increment_i(it_, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		const_iterator1 &operator -- () {
-			layout_type::decrement_i(it_, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		const_iterator1 &operator += (difference_type n) {
-			layout_type::increment_i(it_, n, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		const_iterator1 &operator -= (difference_type n) {
-			layout_type::decrement_i(it_, n, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		difference_type operator - (const const_iterator1 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return layout_type::distance_i(it_ - it.it_, (*this)().size1(), (*this)().size2());
-		}
-
-		// Dereference
-		
-		const_reference operator * () const {
-			BOOST_UBLAS_CHECK(index1() < (*this)().size1(), bad_index());
-			BOOST_UBLAS_CHECK(index2() < (*this)().size2(), bad_index());
-			return *it_;
-		}
-		
-		const_reference operator [](difference_type n) const {
-			return *(*this + n);
-		}
-
-#ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		const_iterator2 begin() const {
-			const self_type &m = (*this)();
-			return m.find2(1, index1(), 0);
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		const_iterator2 end() const {
-			const self_type &m = (*this)();
-			return m.find2(1, index1(), m.size2());
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		const_reverse_iterator2 rbegin() const {
-			return const_reverse_iterator2(end());
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		const_reverse_iterator2 rend() const {
-			return const_reverse_iterator2(begin());
-		}
-#endif
-
-		// Indices
-		
-		size_type index1() const {
-			const self_type &m = (*this)();
-			return layout_type::index_i(it_ - m.begin1().it_, m.size1(), m.size2());
-		}
-		
-		size_type index2() const {
-			const self_type &m = (*this)();
-			return layout_type::index_j(it_ - m.begin1().it_, m.size1(), m.size2());
-		}
-
-		// Assignment
-		
-		const_iterator1 &operator = (const const_iterator1 &it) {
-			container_const_reference<self_type>::assign(&it());
-			it_ = it.it_;
-			return *this;
-		}
-
-		// Comparison
-		
-		bool operator == (const const_iterator1 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return it_ == it.it_;
-		}
-		
-		bool operator < (const const_iterator1 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return it_ < it.it_;
-		}
-
-	private:
-		const_subiterator_type it_;
-
-		friend class iterator1;
-	};
-#endif
 
 	
 	const_iterator1 begin1() const {
@@ -546,140 +352,6 @@ public:
 	const_iterator1 end1() const {
 		return find1(0, size1_, 0);
 	}
-
-#ifndef BOOST_UBLAS_USE_INDEXED_ITERATOR
-	class iterator1:
-		public container_reference<matrix>,
-		public random_access_iterator_base<dense_random_access_iterator_tag,
-			iterator1, value_type> {
-	public:
-		typedef typename matrix::value_type value_type;
-		typedef typename matrix::difference_type difference_type;
-		typedef typename matrix::reference reference;
-		typedef typename matrix::pointer pointer;
-
-		typedef iterator2 dual_iterator_type;
-		typedef reverse_iterator2 dual_reverse_iterator_type;
-
-		// Construction and destruction
-		
-		iterator1():
-			container_reference<self_type> (), it_() {}
-		
-		iterator1(self_type &m, const subiterator_type &it):
-			container_reference<self_type> (m), it_(it) {}
-
-		// Arithmetic
-		
-		iterator1 &operator ++ () {
-			layout_type::increment_i(it_, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		iterator1 &operator -- () {
-			layout_type::decrement_i(it_, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		iterator1 &operator += (difference_type n) {
-			layout_type::increment_i(it_, n, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		iterator1 &operator -= (difference_type n) {
-			layout_type::decrement_i(it_, n, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		difference_type operator - (const iterator1 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return layout_type::distance_i(it_ - it.it_, (*this)().size1(), (*this)().size2());
-		}
-
-		// Dereference
-		
-		reference operator * () const {
-			BOOST_UBLAS_CHECK(index1() < (*this)().size1(), bad_index());
-			BOOST_UBLAS_CHECK(index2() < (*this)().size2(), bad_index());
-			return *it_;
-		}
-		
-		reference operator [](difference_type n) const {
-			return *(*this + n);
-		}
-
-#ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		iterator2 begin() const {
-			self_type &m = (*this)();
-			return m.find2(1, index1(), 0);
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		iterator2 end() const {
-			self_type &m = (*this)();
-			return m.find2(1, index1(), m.size2());
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		reverse_iterator2 rbegin() const {
-			return reverse_iterator2(end());
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		reverse_iterator2 rend() const {
-			return reverse_iterator2(begin());
-		}
-#endif
-
-		// Indices
-		
-		size_type index1() const {
-			self_type &m = (*this)();
-			return layout_type::index_i(it_ - m.begin1().it_, m.size1(), m.size2());
-		}
-		
-		size_type index2() const {
-			self_type &m = (*this)();
-			return layout_type::index_j(it_ - m.begin1().it_, m.size1(), m.size2());
-		}
-
-		// Assignment
-		
-		iterator1 &operator = (const iterator1 &it) {
-			container_reference<self_type>::assign(&it());
-			it_ = it.it_;
-			return *this;
-		}
-
-		// Comparison
-		
-		bool operator == (const iterator1 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return it_ == it.it_;
-		}
-		
-		bool operator < (const iterator1 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return it_ < it.it_;
-		}
-
-	private:
-		subiterator_type it_;
-
-		friend class const_iterator1;
-	};
-#endif
-
 	
 	iterator1 begin1() {
 		return find1(0, 0, 0);
@@ -688,143 +360,6 @@ public:
 	iterator1 end1() {
 		return find1(0, size1_, 0);
 	}
-
-#ifndef BOOST_UBLAS_USE_INDEXED_ITERATOR
-	class const_iterator2:
-		public container_const_reference<matrix>,
-		public random_access_iterator_base<dense_random_access_iterator_tag,
-			const_iterator2, value_type> {
-	public:
-		typedef typename matrix::value_type value_type;
-		typedef typename matrix::difference_type difference_type;
-		typedef typename matrix::const_reference reference;
-		typedef const typename matrix::pointer pointer;
-
-		typedef const_iterator1 dual_iterator_type;
-		typedef const_reverse_iterator1 dual_reverse_iterator_type;
-
-		// Construction and destruction
-		
-		const_iterator2():
-			container_const_reference<self_type> (), it_() {}
-		
-		const_iterator2(const self_type &m, const const_subiterator_type &it):
-			container_const_reference<self_type> (m), it_(it) {}
-		
-		const_iterator2(const iterator2 &it):
-			container_const_reference<self_type> (it()), it_(it.it_) {}
-
-		// Arithmetic
-		
-		const_iterator2 &operator ++ () {
-			layout_type::increment_j(it_, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		const_iterator2 &operator -- () {
-			layout_type::decrement_j(it_, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		const_iterator2 &operator += (difference_type n) {
-			layout_type::increment_j(it_, n, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		const_iterator2 &operator -= (difference_type n) {
-			layout_type::decrement_j(it_, n, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		difference_type operator - (const const_iterator2 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return layout_type::distance_j(it_ - it.it_, (*this)().size1(), (*this)().size2());
-		}
-
-		// Dereference
-		
-		const_reference operator * () const {
-			BOOST_UBLAS_CHECK(index1() < (*this)().size1(), bad_index());
-			BOOST_UBLAS_CHECK(index2() < (*this)().size2(), bad_index());
-			return *it_;
-		}
-		
-		const_reference operator [](difference_type n) const {
-			return *(*this + n);
-		}
-
-#ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		const_iterator1 begin() const {
-			const self_type &m = (*this)();
-			return m.find1(1, 0, index2());
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		const_iterator1 end() const {
-			const self_type &m = (*this)();
-			return m.find1(1, m.size1(), index2());
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		const_reverse_iterator1 rbegin() const {
-			return const_reverse_iterator1(end());
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		const_reverse_iterator1 rend() const {
-			return const_reverse_iterator1(begin());
-		}
-#endif
-
-		// Indices
-		
-		size_type index1() const {
-			const self_type &m = (*this)();
-			return layout_type::index_i(it_ - m.begin2().it_, m.size1(), m.size2());
-		}
-		
-		size_type index2() const {
-			const self_type &m = (*this)();
-			return layout_type::index_j(it_ - m.begin2().it_, m.size1(), m.size2());
-		}
-
-		// Assignment
-		
-		const_iterator2 &operator = (const const_iterator2 &it) {
-			container_const_reference<self_type>::assign(&it());
-			it_ = it.it_;
-			return *this;
-		}
-
-		// Comparison
-		
-		bool operator == (const const_iterator2 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return it_ == it.it_;
-		}
-		
-		bool operator < (const const_iterator2 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return it_ < it.it_;
-		}
-
-	private:
-		const_subiterator_type it_;
-
-		friend class iterator2;
-	};
-#endif
-
 	
 	const_iterator2 begin2() const {
 		return find2(0, 0, 0);
@@ -833,140 +368,6 @@ public:
 	const_iterator2 end2() const {
 		return find2(0, 0, size2_);
 	}
-
-#ifndef BOOST_UBLAS_USE_INDEXED_ITERATOR
-	class iterator2:
-		public container_reference<matrix>,
-		public random_access_iterator_base<dense_random_access_iterator_tag,
-			iterator2, value_type> {
-	public:
-		typedef typename matrix::value_type value_type;
-		typedef typename matrix::difference_type difference_type;
-		typedef typename matrix::reference reference;
-		typedef typename matrix::pointer pointer;
-
-		typedef iterator1 dual_iterator_type;
-		typedef reverse_iterator1 dual_reverse_iterator_type;
-
-		// Construction and destruction
-		
-		iterator2():
-			container_reference<self_type> (), it_() {}
-		
-		iterator2(self_type &m, const subiterator_type &it):
-			container_reference<self_type> (m), it_(it) {}
-
-		// Arithmetic
-		
-		iterator2 &operator ++ () {
-			layout_type::increment_j(it_, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		iterator2 &operator -- () {
-			layout_type::decrement_j(it_, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		iterator2 &operator += (difference_type n) {
-			layout_type::increment_j(it_, n, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		iterator2 &operator -= (difference_type n) {
-			layout_type::decrement_j(it_, n, (*this)().size1(), (*this)().size2());
-			return *this;
-		}
-		
-		difference_type operator - (const iterator2 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return layout_type::distance_j(it_ - it.it_, (*this)().size1(), (*this)().size2());
-		}
-
-		// Dereference
-		
-		reference operator * () const {
-			BOOST_UBLAS_CHECK(index1() < (*this)().size1(), bad_index());
-			BOOST_UBLAS_CHECK(index2() < (*this)().size2(), bad_index());
-			return *it_;
-		}
-		
-		reference operator [](difference_type n) const {
-			return *(*this + n);
-		}
-
-#ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		iterator1 begin() const {
-			self_type &m = (*this)();
-			return m.find1(1, 0, index2());
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		iterator1 end() const {
-			self_type &m = (*this)();
-			return m.find1(1, m.size1(), index2());
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		reverse_iterator1 rbegin() const {
-			return reverse_iterator1(end());
-		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
-		reverse_iterator1 rend() const {
-			return reverse_iterator1(begin());
-		}
-#endif
-
-		// Indices
-		
-		size_type index1() const {
-			self_type &m = (*this)();
-			return layout_type::index_i(it_ - m.begin2().it_, m.size1(), m.size2());
-		}
-		
-		size_type index2() const {
-			self_type &m = (*this)();
-			return layout_type::index_j(it_ - m.begin2().it_, m.size1(), m.size2());
-		}
-
-		// Assignment
-		
-		iterator2 &operator = (const iterator2 &it) {
-			container_reference<self_type>::assign(&it());
-			it_ = it.it_;
-			return *this;
-		}
-
-		// Comparison
-		
-		bool operator == (const iterator2 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return it_ == it.it_;
-		}
-		
-		bool operator < (const iterator2 &it) const {
-			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
-			return it_ < it.it_;
-		}
-
-	private:
-		subiterator_type it_;
-
-		friend class const_iterator2;
-	};
-#endif
-
 	
 	iterator2 begin2() {
 		return find2(0, 0, 0);
@@ -977,12 +378,9 @@ public:
 	}
 
 	// Reverse iterators
-
-	
 	const_reverse_iterator1 rbegin1() const {
 		return const_reverse_iterator1(end1());
 	}
-	
 	const_reverse_iterator1 rend1() const {
 		return const_reverse_iterator1(begin1());
 	}
@@ -991,7 +389,6 @@ public:
 	reverse_iterator1 rbegin1() {
 		return reverse_iterator1(end1());
 	}
-	
 	reverse_iterator1 rend1() {
 		return reverse_iterator1(begin1());
 	}
@@ -1000,7 +397,6 @@ public:
 	const_reverse_iterator2 rbegin2() const {
 		return const_reverse_iterator2(end2());
 	}
-	
 	const_reverse_iterator2 rend2() const {
 		return const_reverse_iterator2(begin2());
 	}
@@ -1009,7 +405,6 @@ public:
 	reverse_iterator2 rbegin2() {
 		return reverse_iterator2(end2());
 	}
-	
 	reverse_iterator2 rend2() {
 		return reverse_iterator2(begin2());
 	}
@@ -1040,27 +435,20 @@ private:
 	size_type size2_;
 	array_type data_;
 };
-/** \brief An identity matrix with values of type \c T
- *
- * Elements or cordinates \f$(i,i)\f$ are equal to 1 (one) and all others to 0 (zero).
- * Changing values does not affect the matrix, however assigning it to a normal matrix will
- * make the matrix equal to an identity matrix. All accesses are constant du to the trivial values.
- *
- * \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
- * \tparam ALLOC an allocator for storing the zeros and one elements. By default, a standar allocator is used.
- */
-template<class T>
-class identity_matrix:
-	public matrix_container<identity_matrix<T> > {
 
-	typedef const T *const_pointer;
-	typedef identity_matrix<T> self_type;
+/** \brief An diagonal matrix with values stored inside a diagonal vector
+ *
+ * the matrix stores a Vector representing the diagonal.
+ */
+template<class VectorType>
+class diagonal_matrix: public matrix_container<diagonal_matrix< VectorType > > {
+	typedef diagonal_matrix< VectorType > self_type;
 public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
-	typedef T value_type;
-	typedef const T &const_reference;
-	typedef T &reference;
+	typedef typename VectorType::value_type value_type;
+	typedef value_type const_reference;
+	typedef value_type reference;
 	typedef const matrix_reference<const self_type> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
 	typedef sparse_tag storage_category;
@@ -1068,96 +456,44 @@ public:
 
 	// Construction and destruction
 	
-	identity_matrix():
-		matrix_container<self_type> (),
-		size1_(0), size2_(0), size_common_(0) {}
-	
-	identity_matrix(size_type size):
-		matrix_container<self_type> (),
-		size1_(size), size2_(size), size_common_((std::min)(size1_, size2_)) {}
-	
-	identity_matrix(size_type size1, size_type size2):
-		matrix_container<self_type> (),
-		size1_(size1), size2_(size2), size_common_((std::min)(size1_, size2_)) {}
-	
-	identity_matrix(const identity_matrix &m):
-		matrix_container<self_type> (),
-		size1_(m.size1_), size2_(m.size2_), size_common_((std::min)(size1_, size2_)) {}
+	diagonal_matrix():m_zero(){}
+	diagonal_matrix(VectorType const& diagonal):m_zero(),m_diagonal(diagonal){}
 
 	// Accessors
-	
 	size_type size1() const {
-		return size1_;
+		return m_diagonal.size();
 	}
 	
 	size_type size2() const {
-		return size2_;
+		return m_diagonal.size();
 	}
-
-	// Resizing
-	
-	void resize(size_type size, bool preserve = true) {
-		size1_ = size;
-		size2_ = size;
-		size_common_ = ((std::min)(size1_, size2_));
-	}
-	
-	void resize(size_type size1, size_type size2, bool /*preserve*/ = true) {
-		size1_ = size1;
-		size2_ = size2;
-		size_common_ = ((std::min)(size1_, size2_));
-	}
-
 	// Element access
-	
 	const_reference operator()(size_type i, size_type j) const {
 		if (i == j)
-			return one_;
+			return m_diagonal(i);
 		else
-			return zero_;
+			return m_zero;
 	}
 
 	// Assignment
-	
-	identity_matrix &operator = (const identity_matrix &m) {
-		size1_ = m.size1_;
-		size2_ = m.size2_;
-		size_common_ = m.size_common_;
-		return *this;
-	}
-	
-	identity_matrix &assign_temporary(identity_matrix &m) {
-		swap(m);
-		return *this;
+	diagonal_matrix &operator = (const diagonal_matrix &m) {
+		m_diagonal = m.m_diagonal;
 	}
 
 	// Swapping
-	
-	void swap(identity_matrix &m) {
-		if (this != &m) {
-			std::swap(size1_, m.size1_);
-			std::swap(size2_, m.size2_);
-			std::swap(size_common_, m.size_common_);
-		}
+	void swap(diagonal_matrix &m) {
+		swap(m_diagonal,m.m_diagonal);
 	}
-	
-	friend void swap(identity_matrix &m1, identity_matrix &m2) {
+	friend void swap(diagonal_matrix &m1, diagonal_matrix &m2) {
 		m1.swap(m2);
 	}
 
-	// Iterator types
-private:
-	// Use an index
-	typedef size_type const_subiterator_type;
-
-public:
 	class const_iterator1;
 	class const_iterator2;
 	typedef reverse_iterator_base1<const_iterator1> const_reverse_iterator1;
 	typedef reverse_iterator_base2<const_iterator2> const_reverse_iterator2;
 
 	// Element lookup
-	
 	const_iterator1 find1(int rank, size_type i, size_type j) const {
 		if (rank == 1) {
 			i = (std::max)(i, j);
@@ -1165,7 +501,6 @@ public:
 		}
 		return const_iterator1(*this, i);
 	}
-	
 	const_iterator2 find2(int rank, size_type i, size_type j) const {
 		if (rank == 1) {
 			j = (std::max)(j, i);
@@ -1173,17 +508,17 @@ public:
 		}
 		return const_iterator2(*this, j);
 	}
-
-
+	
+	
 	class const_iterator1:
-		public container_const_reference<identity_matrix>,
+		public container_const_reference<diagonal_matrix>,
 		public bidirectional_iterator_base<sparse_bidirectional_iterator_tag,
 			const_iterator1, value_type> {
 	public:
-		typedef typename identity_matrix::value_type value_type;
-		typedef typename identity_matrix::difference_type difference_type;
-		typedef typename identity_matrix::const_reference reference;
-		typedef typename identity_matrix::const_pointer pointer;
+		typedef typename diagonal_matrix::value_type value_type;
+		typedef typename diagonal_matrix::difference_type difference_type;
+		typedef typename diagonal_matrix::const_reference reference;
+		typedef value_type const* pointer;
 
 		typedef const_iterator2 dual_iterator_type;
 		typedef const_reverse_iterator2 dual_reverse_iterator_type;
@@ -1192,18 +527,15 @@ public:
 		
 		const_iterator1():
 			container_const_reference<self_type> (), it_() {}
-		
-		const_iterator1(const self_type &m, const const_subiterator_type &it):
+		const_iterator1(const self_type &m, const std::size_t &it):
 			container_const_reference<self_type> (m), it_(it) {}
 
 		// Arithmetic
-		
 		const_iterator1 &operator ++ () {
 			BOOST_UBLAS_CHECK(it_ < (*this)().size1(), bad_index());
 			++it_;
 			return *this;
 		}
-		
 		const_iterator1 &operator -- () {
 			BOOST_UBLAS_CHECK(it_ > 0, bad_index());
 			--it_;
@@ -1211,54 +543,32 @@ public:
 		}
 
 		// Dereference
-		
 		const_reference operator * () const {
-			return one_;
+			return (*this)()(index1(),index2());
 		}
-
-#ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
 		const_iterator2 begin() const {
 			return const_iterator2((*this)(), it_);
 		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
 		const_iterator2 end() const {
 			return const_iterator2((*this)(), it_ + 1);
 		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
 		const_reverse_iterator2 rbegin() const {
 			return const_reverse_iterator2(end());
 		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
 		const_reverse_iterator2 rend() const {
 			return const_reverse_iterator2(begin());
 		}
-#endif
+
 
 		// Indices
-		
 		size_type index1() const {
 			return it_;
 		}
-		
 		size_type index2() const {
 			return it_;
 		}
 
 		// Assignment
-		
 		const_iterator1 &operator = (const const_iterator1 &it) {
 			container_const_reference<self_type>::assign(&it());
 			it_ = it.it_;
@@ -1266,14 +576,13 @@ public:
 		}
 
 		// Comparison
-		
 		bool operator == (const const_iterator1 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ == it.it_;
 		}
 
 	private:
-		const_subiterator_type it_;
+		std::size_t it_;
 	};
 
 	typedef const_iterator1 iterator1;
@@ -1282,20 +591,19 @@ public:
 	const_iterator1 begin1() const {
 		return const_iterator1(*this, 0);
 	}
-	
 	const_iterator1 end1() const {
-		return const_iterator1(*this, size_common_);
+		return const_iterator1(*this, size1());
 	}
 
 	class const_iterator2:
-		public container_const_reference<identity_matrix>,
+		public container_const_reference<diagonal_matrix>,
 		public bidirectional_iterator_base<sparse_bidirectional_iterator_tag,
 			const_iterator2, value_type> {
 	public:
-		typedef typename identity_matrix::value_type value_type;
-		typedef typename identity_matrix::difference_type difference_type;
-		typedef typename identity_matrix::const_reference reference;
-		typedef typename identity_matrix::const_pointer pointer;
+		typedef typename diagonal_matrix::value_type value_type;
+		typedef typename diagonal_matrix::difference_type difference_type;
+		typedef typename diagonal_matrix::const_reference reference;
+		typedef value_type const* pointer;
 
 		typedef const_iterator1 dual_iterator_type;
 		typedef const_reverse_iterator1 dual_reverse_iterator_type;
@@ -1305,7 +613,7 @@ public:
 		const_iterator2():
 			container_const_reference<self_type> (), it_() {}
 		
-		const_iterator2(const self_type &m, const const_subiterator_type &it):
+		const_iterator2(const self_type &m, const std::size_t &it):
 			container_const_reference<self_type> (m), it_(it) {}
 
 		// Arithmetic
@@ -1315,7 +623,6 @@ public:
 			++it_;
 			return *this;
 		}
-		
 		const_iterator2 &operator -- () {
 			BOOST_UBLAS_CHECK(it_ > 0, bad_index());
 			--it_;
@@ -1323,54 +630,31 @@ public:
 		}
 
 		// Dereference
-		
 		const_reference operator * () const {
-			return one_;
+			return (*this)()(index1(),index2());
 		}
-
-#ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
 		const_iterator1 begin() const {
 			return const_iterator1((*this)(), it_);
 		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
 		const_iterator1 end() const {
 			return const_iterator1((*this)(), it_ + 1);
 		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
 		const_reverse_iterator1 rbegin() const {
 			return const_reverse_iterator1(end());
 		}
-		
-#ifdef BOOST_UBLAS_MSVC_NESTED_CLASS_RELATION
-		typename self_type::
-#endif
 		const_reverse_iterator1 rend() const {
 			return const_reverse_iterator1(begin());
 		}
-#endif
 
 		// Indices
-		
 		size_type index1() const {
 			return it_;
 		}
-		
 		size_type index2() const {
 			return it_;
 		}
 
 		// Assignment
-		
 		const_iterator2 &operator = (const const_iterator2 &it) {
 			container_const_reference<self_type>::assign(&it());
 			it_ = it.it_;
@@ -1378,14 +662,13 @@ public:
 		}
 
 		// Comparison
-		
 		bool operator == (const const_iterator2 &it) const {
 			BOOST_UBLAS_CHECK(&(*this)() == &it(), external_logic());
 			return it_ == it.it_;
 		}
 
 	private:
-		const_subiterator_type it_;
+		std::size_t it_;
 	};
 
 	typedef const_iterator2 iterator2;
@@ -1394,18 +677,14 @@ public:
 	const_iterator2 begin2() const {
 		return const_iterator2(*this, 0);
 	}
-	
 	const_iterator2 end2() const {
-		return const_iterator2(*this, size_common_);
+		return const_iterator2(*this, size1());
 	}
 
 	// Reverse iterators
-
-	
 	const_reverse_iterator1 rbegin1() const {
 		return const_reverse_iterator1(end1());
 	}
-	
 	const_reverse_iterator1 rend1() const {
 		return const_reverse_iterator1(begin1());
 	}
@@ -1414,7 +693,6 @@ public:
 	const_reverse_iterator2 rbegin2() const {
 		return const_reverse_iterator2(end2());
 	}
-	
 	const_reverse_iterator2 rend2() const {
 		return const_reverse_iterator2(begin2());
 	}
@@ -1422,36 +700,25 @@ public:
 	// Serialization
 	template<class Archive>
 	void serialize(Archive &ar, const unsigned int /* file_version */) {
-
-		// we need to copy to a collection_size_type to get a portable
-		// and efficient boost::serialization
-		boost::serialization::collection_size_type s1(size1_);
-		boost::serialization::collection_size_type s2(size2_);
-
-		// serialize the sizes
-		ar &boost::serialization::make_nvp("size1",s1)
-		& boost::serialization::make_nvp("size2",s2);
-
-		// copy the values back if loading
-		if (Archive::is_loading::value) {
-			size1_ = s1;
-			size2_ = s2;
-			size_common_ = ((std::min)(size1_, size2_));
-		}
+		ar &boost::serialization::make_nvp("diagonal",m_diagonal);
 	}
 
 private:
-	size_type size1_;
-	size_type size2_;
-	size_type size_common_;
-	static const value_type zero_;
-	static const value_type one_;
+	VectorType m_diagonal; 
+	value_type const m_zero;
 };
 
+/** \brief An identity matrix with values of type \c T
+ *
+ * Elements or cordinates \f$(i,i)\f$ are equal to 1 (one) and all others to 0 (zero).
+ */
 template<class T>
-const typename identity_matrix<T>::value_type identity_matrix<T>::zero_ = T(/*zero*/);
-template<class T>
-const typename identity_matrix<T>::value_type identity_matrix<T>::one_(1);  // ISSUE: need 'one'-traits here
+class identity_matrix: public diagonal_matrix<scalar_vector<T> > {
+	typedef diagonal_matrix<scalar_vector<T> > base_type;
+public:
+	identity_matrix(){}
+	identity_matrix(std::size_t size):base_type(scalar_vector<T>(size,T(1))){}
+};
 
 
 /** \brief A matrix with all values of type \c T equal to the same value
