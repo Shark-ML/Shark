@@ -83,15 +83,13 @@ public:
 	{ return "RegularizationNetworkTrainer"; }
 
 	double gamma() const
-	{ return 1.0 / base_type::m_C; }
+	{ return 1.0 / this->C(); }
 	void setGamma(double gamma)
-	{ base_type::m_C = 1.0 / gamma; }
+	{ this->C() = 1.0 / gamma; }
 
 	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, RealVector>& dataset)
 	{
 		// Setup the kernel matrix
-		//~ std::size_t ic = dataset.numberOfElements();
-		double gamma = 1.0 / base_type::m_C;
 
 		svm.setKernel(base_type::m_kernel);
 		svm.setBasis(dataset.inputs());
@@ -122,7 +120,7 @@ public:
 		//~ svm.setParameterVector(param);
 		
 		//O.K: I think this is what the code should look like
-		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), gamma);
+		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), gamma());
 		RealVector v = column(createBatch<RealVector>(dataset.labels().elements()),0);
 		//~ approxSolveSymmSystemInPlace(M,v); //try this later instad the below
 		solveSymmSystemInPlace<SolveAXB>(M,v);

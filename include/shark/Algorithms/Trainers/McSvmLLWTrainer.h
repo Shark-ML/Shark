@@ -192,8 +192,8 @@ public:
 			QpMcDecomp< PrecomputedMatrixType > solver(matrix, gamma, rho, nu, M, true);
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			solver.setShrinking(base_type::m_shrinking);
-			if (base_type::m_s2do) solver.solve(dataset.labels(), base_type::m_C, alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
-			else solver.solveSMO(dataset.labels(), base_type::m_C, alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
+			if (base_type::m_s2do) solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
+			else solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
 		}
 		else
 		{
@@ -201,8 +201,8 @@ public:
 			QpMcDecomp< CachedMatrixType > solver(matrix, gamma, rho, nu, M, true);
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			solver.setShrinking(base_type::m_shrinking);
-			if (base_type::m_s2do) solver.solve(dataset.labels(), base_type::m_C, alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
-			else solver.solveSMO(dataset.labels(), base_type::m_C, alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
+			if (base_type::m_s2do) solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
+			else solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
 		}
 
 		// write the solution into the model

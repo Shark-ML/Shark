@@ -71,6 +71,8 @@
 
    rest_sources/tutorials/algorithms/rbm_module
    rest_sources/tutorials/algorithms/binary_rbm
+   
+   rest_sources/tutorials/algorithms/quadratic_programs
 
    rest_sources/tutorials/concepts/misc/versatile_classification
 

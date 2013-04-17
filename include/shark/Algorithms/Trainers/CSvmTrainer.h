@@ -107,6 +107,15 @@ public:
 	CSvmTrainer(KernelType* kernel, double C, bool unconstrained = false, bool computeDerivative = true)
 	: base_type(kernel, C, unconstrained), m_computeDerivative(computeDerivative)
 	{ }
+	
+	//! Constructor
+	//! \param  kernel         kernel function to use for training and prediction
+	//! \param  positiveC    regularization parameter of the positive class (label 1)
+	//! \param  negativeC   regularization parameter of the negative class (label 0)
+	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
+	CSvmTrainer(KernelType* kernel, double positiveC, double negativeC, bool unconstrained = false)
+	: base_type(kernel, positiveC,negativeC, unconstrained), m_computeDerivative(false)
+	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -132,7 +141,7 @@ public:
 				typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 				
 				PrecomputedMatrixType matrix(&km);
-				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_C);
+				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
 				ProblemType problem(svmProblem,base_type::m_shrinking);
 				QpSolver< ProblemType > solver(problem);
 				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
@@ -146,7 +155,7 @@ public:
 				typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 				
 				CachedMatrixType matrix(&km);
-				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_C);
+				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
 				ProblemType problem(svmProblem,base_type::m_shrinking);
 				QpSolver< ProblemType > solver(problem);
 				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
@@ -162,7 +171,7 @@ public:
 				typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
 				
 				PrecomputedMatrixType matrix(&km);
-				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_C);
+				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
 				ProblemType problem(svmProblem,base_type::m_shrinking);
 				QpSolver< ProblemType > solver(problem);
 				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
@@ -174,7 +183,7 @@ public:
 				typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
 				
 				CachedMatrixType matrix(&km);
-				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_C);
+				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
 				ProblemType problem(svmProblem,base_type::m_shrinking);
 				QpSolver< ProblemType > solver(problem);
 				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
@@ -240,6 +249,8 @@ protected:
 		if(!m_computeDerivative)
 			return 0.5 * (lowerBound + upperBound);	//best estimate
 		
+		SHARK_CHECK(base_type::m_regularizers.size() == 1, "derivative only implemented for SVM with one C" );
+		
 		// We next compute the derivative of lowerBound and upperBound wrt C, in order to then get that of b wrt C.
 		// The equation at the foundation of this simply is g_i = y_i - \sum_j \alpha_j K_{ij} .
 		double dlower_dC = 0.0;
@@ -287,10 +298,10 @@ protected:
 		// assign final values to derivative of b wrt hyperparameters
 		m_db_dParams( nkp ) = -0.5 * ( dlower_dC + dupper_dC );
 		for ( std::size_t k=0; k<nkp; k++ ) {
-			m_db_dParams(k) = -0.5 * base_type::m_C * ( dlower_dkernel(k) + dupper_dkernel(k) );
+			m_db_dParams(k) = -0.5 * this->C() * ( dlower_dkernel(k) + dupper_dkernel(k) );
 		}
 		if ( base_type::m_unconstrained ) {
-			m_db_dParams( nkp ) *= base_type::m_C;
+			m_db_dParams( nkp ) *= this->C();
 		}
 		
 		return 0.5 * (lowerBound + upperBound);	//best estimate

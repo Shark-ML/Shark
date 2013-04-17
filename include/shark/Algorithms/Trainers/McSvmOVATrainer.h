@@ -124,7 +124,7 @@ public:
 //       in order to profit from cached and
 //       in particular from precomputed kernel
 //       entries!
-			CSvmTrainer<InputType, QpFloatType> bintrainer(base_type::m_kernel, base_type::m_C);
+			CSvmTrainer<InputType, QpFloatType> bintrainer(base_type::m_kernel, this->C());
 			bintrainer.setCacheSize( base_type::m_cacheSize );
 			bintrainer.sparsify() = false;
 			bintrainer.stoppingCondition() = base_type::stoppingCondition();

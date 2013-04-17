@@ -193,7 +193,7 @@ public:
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			// solver.setShrinking(base_type::m_shrinking);
 			solver.setShrinking(false);   // hack to avoid shrinking-related bug
-			solver.solve(dataset.labels(), base_type::m_C, alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
+			solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
 		}
 		else
 		{
@@ -202,7 +202,7 @@ public:
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			// solver.setShrinking(base_type::m_shrinking);
 			solver.setShrinking(false);   // hack to avoid shrinking-related bug
-			solver.solve(dataset.labels(), base_type::m_C, alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
+			solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
 		}
 
 		// write the solution into the model
