@@ -132,7 +132,7 @@ private:
 			MatrixType kernelMatrix(*base_type::m_kernel, dataset.inputs());
 			kernelMatrix.setScalingCoefficients(scalingCoefficients);
 			CachedMatrixType matrix(&kernelMatrix);
-			SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_C);
+			SVMProblemType svmProblem(matrix,dataset.labels(),this->C());
 			ProblemType problem(svmProblem,base_type::m_shrinking);
 			
 			//solve it
@@ -181,7 +181,7 @@ private:
 			MatrixType kernelMatrix(*base_type::m_kernel, dataset.inputs());
 			kernelMatrix.setScalingCoefficients(scalingCoefficients);
 			CachedMatrixType matrix(&kernelMatrix);
-			SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_C);
+			SVMProblemType svmProblem(matrix,dataset.labels(),this->C());
 			ProblemType problem(svmProblem,base_type::m_shrinking);
 			
 			//solve it

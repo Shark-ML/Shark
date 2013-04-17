@@ -527,35 +527,18 @@ protected:
 		if (! m_isUnshrinked && (largestUp - smallestDown < 10.0 * epsilon))
 		{
 			m_isUnshrinked = true;
-			this->reshrink();
-		}else{
-			doShrink(largestUp,smallestDown);
+			this->unshrink();
+			return doShrink(epsilon);
 		}
-		return true;
-	}
-
-	/// \brief Unshrink the problem and immdiately reshrink it.
-	void doReshrink(){
-		if (this->active() == this->dimensions()) return;
-		this->unshrink();
-
-		// shrink directly again
-		double largestUp;
-		double smallestDown;
-		getMaxKKTViolations(largestUp,smallestDown,this->dimensions());
-		doShrink(largestUp,smallestDown);
-
-		m_shrinkCounter = std::min(this->dimensions(),IterationsBetweenShrinking);
-	}
-
-private:
-	void doShrink(double largestUp, double smallestDown){
+		//shrink
 		for (int a = this->active()-1; a >= 0; --a){
 			if(testShrinkVariable(a,largestUp,smallestDown))
 				this->shrinkVariable(a);
 		}
+		return true;
 	}
 
+private:
 	bool testShrinkVariable(std::size_t a, double largestUp, double smallestDown)const{
 		if (
 			( isLowerBound(a) && gradient(a) < smallestDown)

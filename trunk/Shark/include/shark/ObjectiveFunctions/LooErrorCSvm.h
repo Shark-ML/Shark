@@ -90,7 +90,7 @@ public:
 		// prepare the quadratic program
 		typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
 		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
-		typedef GeneralQuadraticProblem<CachedMatrixType> SVMProblemType;
+		typedef CSVMProblem<CachedMatrixType> SVMProblemType;
 		KernelMatrixType km(*mep_kernel, mep_dataset->inputs());
 		CachedMatrixType matrix(&km);
 		SVMProblemType svmProblem(matrix,mep_dataset->labels(),C);

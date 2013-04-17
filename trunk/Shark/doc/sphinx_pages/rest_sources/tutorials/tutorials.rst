@@ -114,12 +114,16 @@ Direct search methods -- the covariance matrix adaptation evolution strategy:
 Tools
 ++++++++++++++++++
 
-Finally, we present functionality which are not machine learning facilities themselves, but neecessary
+Finally, we present functionality which are not machine learning facilities themselves, but necessary
 or helpfull tools.
+
+First of all there is Sharks own solver for Quadratic Programs:
+
+* :doc:`algorithms/quadratic_programs`
 
 .. _label_for_linalg_tutorials:
 
-Wegive an introduction to Shark's usage of the
+We give an introduction to Shark's usage of the
 `Boost uBLAS <http://www.boost.org/doc/libs/release/libs/numeric>`_
 library for "all things linear algebra":
 

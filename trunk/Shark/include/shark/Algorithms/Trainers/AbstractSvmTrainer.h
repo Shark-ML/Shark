@@ -173,17 +173,45 @@ public:
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	AbstractSvmTrainer(KernelType* kernel, double C, bool unconstrained = false)
 	: m_kernel(kernel)
-	, m_C(C)
+	, m_regularizers(1,C)
 	, m_unconstrained(unconstrained)
 	, m_cacheSize(0x4000000)
 	{ RANGE_CHECK( C > 0 ); }
-
-	double C() const
-	{ return m_C; }
-	void setC(double C) {
-		RANGE_CHECK( C > 0 );
-		m_C = C;
+	
+	//! Constructor featuring two regularization parameters
+	//! \param  kernel         kernel function to use for training and prediction
+	//! \param  positiveC    regularization parameter of the positive class (label 1)
+	//! \param  negativeC   regularization parameter of the negative class (label 0)
+	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
+	AbstractSvmTrainer(KernelType* kernel, double positiveC, double negativeC, bool unconstrained = false)
+	: m_kernel(kernel)
+	, m_regularizers(2)
+	, m_unconstrained(unconstrained)
+	, m_cacheSize(0x4000000)
+	{ 
+		RANGE_CHECK( positiveC > 0 ); 
+		RANGE_CHECK( negativeC > 0 ); 
+		m_regularizers[0] = positiveC;
+		m_regularizers[1] = negativeC;
 	}
+
+	/// \brief Return the value of the regularization parameter C.
+	double C() const
+	{
+		SIZE_CHECK(m_regularizers.size() == 1);
+		return m_regularizers[0];
+	}
+	
+	RealVector const& regularizationParameters() const
+	{
+		return m_regularizers;
+	}
+	
+	RealVector& regularizationParameters()
+	{
+		return m_regularizers;
+	}
+	
 	KernelType* kernel()
 	{ return m_kernel; }
 	const KernelType* kernel() const
@@ -203,9 +231,11 @@ public:
 	RealVector parameterVector() const
 	{
 		size_t kp = m_kernel->numberOfParameters();
-		RealVector ret(kp + 1);
-		RealVectorRange(ret, Range(0, kp)) = m_kernel->parameterVector();
-		ret(kp) = (m_unconstrained ? std::log(m_C) : m_C);
+		RealVector ret(kp + m_regularizers.size());
+		if(m_unconstrained)
+			init(ret) << parameters(m_kernel), log(m_regularizers);
+		else
+			init(ret) << parameters(m_kernel), m_regularizers;
 		return ret;
 	}
 
@@ -213,38 +243,28 @@ public:
 	void setParameterVector(RealVector const& newParameters)
 	{
 		size_t kp = m_kernel->numberOfParameters();
-		SHARK_ASSERT(newParameters.size() == kp + 1);
-		m_kernel->setParameterVector(ConstRealVectorRange(newParameters, Range(0, kp)));
-		setC(m_unconstrained ? std::exp(newParameters(kp)) : newParameters(kp));
+		SHARK_ASSERT(newParameters.size() == kp + m_regularizers.size());
+		init(newParameters) >> parameters(m_kernel), m_regularizers;
+		if(m_unconstrained)
+			m_regularizers = exp(m_regularizers);
 	}
 
 	/// return the number of hyper-parameters
-	size_t numberOfParameters() const
-	{ return (m_kernel->numberOfParameters() + 1); }
-
-	using QpConfig::stoppingCondition;
-	using QpConfig::solutionProperties;
-	using QpConfig::precomputeKernel;
-	using QpConfig::sparsify;
-	using QpConfig::shrinking;
-	using QpConfig::s2do;
-	using QpConfig::verbosity;
-	using QpConfig::accessCount;
+	size_t numberOfParameters() const{ 
+		return m_kernel->numberOfParameters() + m_regularizers.size();
+	}
 
 protected:
 	KernelType* m_kernel;               ///< Kernel object.
-	double m_C;                         ///< Regularization parameter. The exact meaning depends on the sub-class, but the value is always positive, and higher implies a less regular solution.
+	///\brief Vector of regularization parameters. 
+	///
+	/// If the size of the vector is 1 there is only one regularization parameter for all classes, else there must
+	/// be one for every class in the dataset.
+	/// The exact meaning depends on the sub-class, but the value is always positive, 
+	/// and higher implies a less regular solution.
+	RealVector m_regularizers;
 	bool m_unconstrained;               ///< Is log(C) stored internally as a parameter instead of C? If yes, then we get rid of the constraint C > 0 on the level of the parameter interface.
 	std::size_t m_cacheSize;            ///< Number of values in the kernel cache. The size of the cache in bytes is the size of one entry (4 for float, 8 for double) times this number.
-
-	using QpConfig::m_stoppingcondition;
-	using QpConfig::m_solutionproperties;
-	using QpConfig::m_precomputedKernelMatrix;
-	using QpConfig::m_sparsify;
-	using QpConfig::m_shrinking;
-	using QpConfig::m_s2do;
-	using QpConfig::m_verbosity;
-	using QpConfig::m_accessCount;
 };
 
 

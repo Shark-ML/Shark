@@ -200,7 +200,7 @@ public:
 	typedef MatrixT MatrixType;
 	typedef typename MatrixType::QpFloatType QpFloatType;
 
-	//Setup only using kernel matrix, labels and regularization parameter
+	/// \brief Setup only using kernel matrix, labels and regularization parameter
 	CSVMProblem(MatrixType& quadratic, Data<unsigned int> const& labels, double C)
 	: quadratic(quadratic)
 	, linear(quadratic.size())
@@ -208,12 +208,40 @@ public:
 	, diagonal(quadratic.size())
 	, permutation(quadratic.size())
 	, positive(quadratic.size())
-	, C(C) 
+	, m_Cp(C)
+	, m_Cn(C)
 	{
 		SIZE_CHECK(dimensions() == linear.size());
 		SIZE_CHECK(dimensions() == quadratic.size());
 		SIZE_CHECK(dimensions() == labels.numberOfElements());
 
+		for(std::size_t i = 0; i!= dimensions(); ++i){
+			permutation[i] = i;
+			diagonal(i) = quadratic.entry(i, i);
+			linear(i) = labels.element(i)? 1.0:-1.0;
+			positive[i] = linear(i) > 0;
+		}
+	}
+	///\brief  Setup using kernel matrix, labels and different regularization parameters for positive and negative classes
+	CSVMProblem(MatrixType& quadratic, Data<unsigned int> const& labels, RealVector const& regularizers)
+	: quadratic(quadratic)
+	, linear(quadratic.size())
+	, alpha(quadratic.size(),0)
+	, diagonal(quadratic.size())
+	, permutation(quadratic.size())
+	, positive(quadratic.size())
+	{
+		SIZE_CHECK(dimensions() == linear.size());
+		SIZE_CHECK(dimensions() == quadratic.size());
+		SIZE_CHECK(dimensions() == labels.numberOfElements());
+		
+		SIZE_CHECK(regularizers.size() > 0);
+		SIZE_CHECK(regularizers.size() <= 2);
+		m_Cp = m_Cn = regularizers[0];
+		if(regularizers.size() == 2)
+			m_Cp = regularizers[1];
+
+			
 		for(std::size_t i = 0; i!= dimensions(); ++i){
 			permutation[i] = i;
 			diagonal(i) = quadratic.entry(i, i);
@@ -230,29 +258,8 @@ public:
 	, diagonal(quadratic.size())
 	, permutation(quadratic.size())
 	, positive(quadratic.size())
-	, C(C)
-	{
-		SIZE_CHECK(dimensions() == quadratic.size());
-		SIZE_CHECK(dimensions() == this->linear.size());
-		SIZE_CHECK(dimensions() == labels.numberOfElements());
-		
-		for(std::size_t i = 0; i!= dimensions(); ++i){
-			permutation[i] = i;
-			diagonal(i) = quadratic.entry(i, i);
-			positive[i] = labels.element(i) ? 1: 0;
-		}
-	}
-
-
-	//Setup with changed linear part and different alpha starting point
-	CSVMProblem(MatrixType& quadratic, RealVector linear, Data<unsigned int> const& labels, RealVector const& alpha, double C)
-	: quadratic(quadratic)
-	, linear(linear)
-	, alpha(alpha)
-	, diagonal(quadratic.size())
-	, permutation(quadratic.size())
-	, positive(quadratic.size())
-	, C(C)
+	, m_Cp(C)
+	, m_Cn(C)
 	{
 		SIZE_CHECK(dimensions() == quadratic.size());
 		SIZE_CHECK(dimensions() == this->linear.size());
@@ -270,10 +277,10 @@ public:
 	}
 
 	double boxMin(std::size_t i)const{
-		return positive[i] ? 0.0 : -C;
+		return positive[i] ? 0.0 : -m_Cn;
 	}
 	double boxMax(std::size_t i)const{
-		return positive[i] ? C : 0.0;
+		return positive[i] ? m_Cp : 0.0;
 	}
 
 	/// representation of the quadratic part of the objective function
@@ -309,8 +316,10 @@ private:
 	///\brief whether the label of the point is positive
 	std::vector<char> positive;
 
-	///\brief Regularization constant.
-	double C;
+	///\brief Regularization constant of the positive class
+	double m_Cp;
+	///\brief Regularization constant of the negative class
+	double m_Cn;
 };
 
 enum AlphaStatus{
@@ -369,11 +378,6 @@ public:
 		}
 		return false;
 	}
-	void reshrink(){
-		if(m_shrink && active() != dimensions()){
-			doReshrink();
-		}
-	}
 
 	///\brief Unshrink the problem
 	void unshrink(){
@@ -430,7 +434,6 @@ protected:
 	}
 	
 	virtual bool doShrink(double epsilon)=0;
-	virtual void doReshrink()=0;
 
 private:
 	///\brief Update the edge-part of the gradient
@@ -502,11 +505,12 @@ public:
 			// select a working set and check for optimality
 			std::size_t i = 0, j = 0;
 			if (workingSet(m_problem,i, j) < stop.minAccuracy){
-				m_problem.reshrink();
+				m_problem.unshrink();
 				if(workingSet(m_problem,i,j) < stop.minAccuracy){
 					if (prop != NULL) prop->type = QpAccuracyReached;
 					break;
 				}
+				m_problem.shrink(stop.minAccuracy);
 				workingSet.reset();
 			}
 			

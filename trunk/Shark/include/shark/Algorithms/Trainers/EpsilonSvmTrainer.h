@@ -163,8 +163,8 @@ private:
 			svmProblem.linear(i) = dataset.element(i).label(0) - m_epsilon;
 			svmProblem.linear(i+ic) = dataset.element(i).label(0) + m_epsilon;
 			svmProblem.boxMin(i) = 0;
-			svmProblem.boxMax(i) = base_type::m_C;
-			svmProblem.boxMin(i+ic) = -base_type::m_C;
+			svmProblem.boxMax(i) = this->C();
+			svmProblem.boxMin(i+ic) = -this->C();
 			svmProblem.boxMax(i+ic) = 0;
 		}
 		ProblemType problem(svmProblem,base_type::m_shrinking);
@@ -186,7 +186,7 @@ private:
 			if (problem.alpha(i) > 0.0)
 			{
 				double value = problem.gradient(i);
-				if (problem.alpha(i) < base_type::m_C)
+				if (problem.alpha(i) < this->C())
 				{
 					sum += value;
 					freeVars++;
@@ -199,7 +199,7 @@ private:
 			if (problem.alpha(i + ic) < 0.0)
 			{
 				double value = problem.gradient(i + ic);
-				if (problem.alpha(i + ic) > -base_type::m_C)
+				if (problem.alpha(i + ic) > -this->C())
 				{
 					sum += value;
 					freeVars++;
