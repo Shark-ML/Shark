@@ -180,10 +180,10 @@ public:
 	
 	//! Constructor featuring two regularization parameters
 	//! \param  kernel         kernel function to use for training and prediction
-	//! \param  positiveC    regularization parameter of the positive class (label 1)
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
+	//! \param  positiveC    regularization parameter of the positive class (label 1)
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	AbstractSvmTrainer(KernelType* kernel, double positiveC, double negativeC, bool unconstrained = false)
+	AbstractSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool unconstrained = false)
 	: m_kernel(kernel)
 	, m_regularizers(2)
 	, m_unconstrained(unconstrained)
@@ -191,8 +191,9 @@ public:
 	{ 
 		RANGE_CHECK( positiveC > 0 ); 
 		RANGE_CHECK( negativeC > 0 ); 
-		m_regularizers[0] = positiveC;
-		m_regularizers[1] = negativeC;
+		m_regularizers[0] = negativeC;
+		m_regularizers[1] = positiveC;
+		
 	}
 
 	/// \brief Return the value of the regularization parameter C.

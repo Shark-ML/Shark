@@ -110,11 +110,11 @@ public:
 	
 	//! Constructor
 	//! \param  kernel         kernel function to use for training and prediction
-	//! \param  positiveC    regularization parameter of the positive class (label 1)
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
+	//! \param  positiveC    regularization parameter of the positive class (label 1)
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	CSvmTrainer(KernelType* kernel, double positiveC, double negativeC, bool unconstrained = false)
-	: base_type(kernel, positiveC,negativeC, unconstrained), m_computeDerivative(false)
+	CSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool unconstrained = false)
+	: base_type(kernel,negativeC, positiveC, unconstrained), m_computeDerivative(false)
 	{ }
 
 	/// \brief From INameable: return the class name.
