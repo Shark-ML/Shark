@@ -41,6 +41,7 @@ MACRO( SHARK_ADD_TEST SRC NAME)
 ENDMACRO()
 
 #LinAlg Tests
+SHARK_ADD_TEST( LinAlg/DiagonalMatrix.cpp LinAlg_DiagonalMatrix)
 SHARK_ADD_TEST( LinAlg/sumRows.cpp LinAlg_SumRows)
 SHARK_ADD_TEST( LinAlg/Proxy.cpp LinAlg_Proxy )
 SHARK_ADD_TEST( LinAlg/repeat.cpp LinAlg_Repeat)

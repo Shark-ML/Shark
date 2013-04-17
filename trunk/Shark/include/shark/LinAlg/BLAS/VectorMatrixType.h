@@ -40,6 +40,7 @@
 ///for complex vectors (currently not supported very well)
 #include <complex>
 
+namespace shark {
 /**
 * \brief Convenience macro for mass template specialization on the
 *  supplied type with the given prefix.
@@ -48,17 +49,12 @@
 	typedef blas::vector< basetype > prefix##Vector; \
 	typedef blas::vector< const basetype > Const##prefix##Vector; \
 	typedef blas::matrix< basetype, blas::row_major > prefix##Matrix; \
-	typedef blas::matrix< const basetype, blas::row_major > Const##prefix##Matrix; \
 	typedef blas::zero_vector< basetype > prefix##ZeroVector; \
-	typedef blas::zero_vector< const basetype > Const##prefix##ZeroVector; \
 	typedef blas::scalar_vector< basetype > prefix##ScalarVector; \
-	typedef blas::scalar_vector< const basetype > Const##prefix##ScalarVector; \
 	typedef blas::zero_matrix< basetype > prefix##ZeroMatrix; \
-	typedef blas::zero_matrix< const basetype > Const##prefix##ZeroMatrix; \
 	typedef blas::identity_matrix< basetype > prefix##Identity; \
 	typedef blas::identity_matrix< basetype > prefix##IdentityMatrix; \
 	typedef blas::scalar_matrix< basetype > prefix##ScalarMatrix; \
-	typedef blas::scalar_matrix< const basetype > Const##prefix##ScalarMatrix; \
 	typedef blas::vector_range< prefix##Vector > prefix##VectorRange; \
 	typedef blas::vector_range< const prefix##Vector > Const##prefix##VectorRange; \
 	typedef blas::matrix_row< prefix##Matrix > prefix##MatrixRow; \
@@ -76,45 +72,8 @@
 	typedef blas::matrix_column< Compressed##prefix##Matrix > Compressed##prefix##MatrixColumn; \
 	typedef blas::matrix_column< const Compressed##prefix##Matrix > ConstCompressed##prefix##MatrixColumn; \
 	typedef blas::matrix_range< Compressed##prefix##Matrix > Compressed##prefix##SubMatrix; \
-	typedef blas::matrix_range< const Compressed##prefix##Matrix > ConstCompressed##prefix##SubMatrix;
-
-/**
-	* \brief Convenience macro for pulling device-specific linear-algebra
-	* traits into arbitrary scopes/namespaces.
-	*/
-#define SELECT_DEFAULT_COMPUTING_DEVICE( scope, prefix) \
-	typedef scope prefix##Vector prefix##Vector; \
-	typedef scope Const##prefix##Vector Const##prefix##Vector; \
-	typedef scope prefix##Matrix prefix##Matrix; \
-	typedef scope Const##prefix##Matrix Const##prefix##Matrix; \
-	typedef scope prefix##ZeroVector prefix##ZeroVector; \
-	typedef scope Const##prefix##ZeroVector Const##prefix##ZeroVector; \
-	typedef scope prefix##ScalarVector prefix##ScalarVector; \
-	typedef scope Const##prefix##ScalarVector Const##prefix##ScalarVector; \
-	typedef scope prefix##ZeroMatrix prefix##ZeroMatrix; \
-	typedef scope Const##prefix##ZeroMatrix Const##prefix##ZeroMatrix; \
-	typedef scope prefix##Identity prefix##Identity; \
-	typedef scope prefix##IdentityMatrix prefix##IdentityMatrix; \
-	typedef scope prefix##ScalarMatrix prefix##ScalarMatrix; \
-	typedef scope Const##prefix##ScalarMatrix Const##prefix##ScalarMatrix; \
-	typedef scope prefix##VectorRange prefix##VectorRange; \
-	typedef scope Const##prefix##VectorRange Const##prefix##VectorRange; \
-	typedef scope prefix##MatrixRow prefix##MatrixRow; \
-	typedef scope Const##prefix##MatrixRow Const##prefix##MatrixRow; \
-	typedef scope prefix##MatrixColumn prefix##MatrixColumn; \
-	typedef scope Const##prefix##MatrixColumn Const##prefix##MatrixColumn; \
-	typedef scope prefix##SubMatrix prefix##SubMatrix; \
-	typedef scope Const##prefix##SubMatrix Const##prefix##SubMatrix; \
-	typedef scope Compressed##prefix##Vector Compressed##prefix##Vector; \
-	typedef scope Compressed##prefix##VectorRange Compressed##prefix##VectorRange; \
-	typedef scope ConstCompressed##prefix##VectorRange ConstCompressed##prefix##VectorRange; \
-	typedef scope Compressed##prefix##Matrix Compressed##prefix##Matrix; \
-	typedef scope Compressed##prefix##MatrixRow Compressed##prefix##MatrixRow; \
-	typedef scope ConstCompressed##prefix##MatrixRow ConstCompressed##prefix##MatrixRow; \
-	typedef scope Compressed##prefix##MatrixColumn Compressed##prefix##MatrixColumn; \
-	typedef scope ConstCompressed##prefix##MatrixColumn ConstCompressed##prefix##MatrixColumn; \
-	typedef scope Compressed##prefix##SubMatrix Compressed##prefix##SubMatrix; \
-	typedef scope ConstCompressed##prefix##SubMatrix ConstCompressed##prefix##SubMatrix;
+	typedef blas::matrix_range< const Compressed##prefix##Matrix > ConstCompressed##prefix##SubMatrix;\
+	typedef blas::diagonal_matrix<blas::vector< basetype > > prefix##DiagonalMatrix;
 
 #define SHARK_VECTOR_MATRIX_ASSIGNMENT(prefix) \
 	template<> struct VectorMatrixTraits< prefix##Vector >{ \
@@ -157,78 +116,13 @@
 		typedef ConstCompressed##prefix##VectorRange ConstSubType;\
 		typedef Const##prefix##VectorRange ConstDenseSubType;\
 	};
-	
-namespace shark {
 
-namespace detail {
-
-	/** 
-	* \brief Models a central processing unit. 
-	*/
-	struct Cpu {};
-
-	/** 
-	* \brief Models special purpose processing units, e.g., GPU or 
-	*  the DSP of a sound card (see OpenCL). 
-	*/
-	struct Spu {};
-
-	/**
-	* \brief Models linear algebra traits with respect to a computing device, e.g.,
-	* the CPU or the GPU.
-	*/
-	template<typename ProcessorTag>
-	struct LinearAlgebraTraits {
-	};
-
-	/**
-	* \brief Template specialization for handling CPU traits.
-	*/
-	template<>
-	struct LinearAlgebraTraits< Cpu > {
-		/** \brief quadruple precision floating point. */
-		SHARK_VECTOR_MATRIX_TYPEDEFS(long double, BigReal);
-		
-		/** \brief Double precision floating point. */
-		SHARK_VECTOR_MATRIX_TYPEDEFS(double, Real)
-
-		/** \brief Single precision floating point. */
-		SHARK_VECTOR_MATRIX_TYPEDEFS(float, Float)
-
-		/** \brief Double precision complex numbers. */
-		SHARK_VECTOR_MATRIX_TYPEDEFS(std::complex<double>, Complex)
-
-		/** \brief Signed integer type. */
-		SHARK_VECTOR_MATRIX_TYPEDEFS(int, Int)
-
-		/** \brief Unsigned integer type. */
-		SHARK_VECTOR_MATRIX_TYPEDEFS(unsigned int, UInt)
-	};
-
-}
-
-typedef blas::range Range;
-typedef blas::permutation_matrix<std::size_t> PermutationMatrix;
-
-/** \brief Injects RealVector, RealMatrix etc. into the shark namespace. */
-SELECT_DEFAULT_COMPUTING_DEVICE( detail::LinearAlgebraTraits< shark::detail::Cpu >::, BigReal );
-
-/** \brief Injects RealVector, RealMatrix etc. into the shark namespace. */
-SELECT_DEFAULT_COMPUTING_DEVICE( detail::LinearAlgebraTraits< shark::detail::Cpu >::, Real )
-
-/** \brief Injects FloatVector, FloatMatrix etc. into the shark namespace. */
-SELECT_DEFAULT_COMPUTING_DEVICE( detail::LinearAlgebraTraits< shark::detail::Cpu >::, Float )
-
-/** \brief Injects ComplexVector, ComplexMatrix etc. into the shark namespace. */
-SELECT_DEFAULT_COMPUTING_DEVICE( detail::LinearAlgebraTraits< shark::detail::Cpu >::, Complex )
-
-/** \brief Injects IntVector, IntMatrix etc. into the shark namespace. */
-SELECT_DEFAULT_COMPUTING_DEVICE( detail::LinearAlgebraTraits< shark::detail::Cpu >::, Int )
-
-/** \brief Injects UIntVector, UIntMatrix etc. into the shark namespace. */
-SELECT_DEFAULT_COMPUTING_DEVICE( detail::LinearAlgebraTraits< shark::detail::Cpu >::, UInt )
-
-
+	SHARK_VECTOR_MATRIX_TYPEDEFS(long double, BigReal);
+	SHARK_VECTOR_MATRIX_TYPEDEFS(double, Real)
+	SHARK_VECTOR_MATRIX_TYPEDEFS(float, Float)
+	SHARK_VECTOR_MATRIX_TYPEDEFS(std::complex<double>, Complex)
+	SHARK_VECTOR_MATRIX_TYPEDEFS(int, Int)
+	SHARK_VECTOR_MATRIX_TYPEDEFS(unsigned int, UInt)
 #undef SHARK_VECTOR_MATRIX_TYPEDEFS
 
 ///\brief Template which finds for every Vector type the best fitting Matrix.
@@ -245,6 +139,9 @@ struct VectorMatrixTraits {
 	typedef ConstRealVectorRange ConstSubType;
 	typedef ConstRealVectorRange ConstDenseSubType;
 };
+
+typedef blas::range Range;
+typedef blas::permutation_matrix<std::size_t> PermutationMatrix;
 
 SHARK_VECTOR_MATRIX_ASSIGNMENT(BigReal);
 SHARK_VECTOR_MATRIX_ASSIGNMENT(Real)
