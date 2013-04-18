@@ -619,7 +619,7 @@ public:
 		// Arithmetic
 		
 		const_iterator2 &operator ++ () {
-			BOOST_UBLAS_CHECK(it_ < (*this)().size_common_, bad_index());
+			BOOST_UBLAS_CHECK(it_ < (*this)().size1(), bad_index());
 			++it_;
 			return *this;
 		}
@@ -704,8 +704,8 @@ public:
 	}
 
 private:
-	VectorType m_diagonal; 
 	value_type const m_zero;
+	VectorType m_diagonal; 
 };
 
 /** \brief An identity matrix with values of type \c T
