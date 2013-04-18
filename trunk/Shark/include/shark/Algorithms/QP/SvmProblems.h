@@ -498,7 +498,6 @@ template<class Problem>
 struct SvmShrinkingProblem
 : public BaseShrinkingProblem<SvmProblem<Problem> >{
 	typedef BaseShrinkingProblem<SvmProblem<Problem> > base_type;
-	static const std::size_t IterationsBetweenShrinking;
 	
 	using base_type::alpha;
 	using base_type::gradient;
@@ -506,34 +505,25 @@ struct SvmShrinkingProblem
 	using base_type::isUpperBound;
 
 	SvmShrinkingProblem(Problem& problem, bool shrink = true)
-	: base_type(problem,shrink)
-	, m_isUnshrinked(false)
-	, m_shrinkCounter(std::min(this->dimensions(),IterationsBetweenShrinking)){}
+	: base_type(problem,shrink){}
 
 protected:
 	bool doShrink(double epsilon){
-		//check if shrinking is necessary
-		--m_shrinkCounter;
-		if(m_shrinkCounter != 0) return false;
-		m_shrinkCounter = std::min(this->dimensions(),IterationsBetweenShrinking);
-
 		double largestUp;
 		double smallestDown;
 		getMaxKKTViolations(largestUp,smallestDown,this->active());
 
 		// check whether unshrinking is necessary at this accuracy level
-		// to prevent that a shrinking error invalidates
-		// the fine grained late optimization steps
-		if (! m_isUnshrinked && (largestUp - smallestDown < 10.0 * epsilon))
+		if (!base_type::m_isUnshrinked  && (largestUp - smallestDown < 10.0 * epsilon))
 		{
-			m_isUnshrinked = true;
-			this->unshrink();
-			return doShrink(epsilon);
+			base_type::unshrink();
+			//recalculate maximum KKT violation for immeediate re-shrinking
+			getMaxKKTViolations(largestUp,smallestDown,this->dimensions());
 		}
 		//shrink
-		for (int a = this->active()-1; a >= 0; --a){
-			if(testShrinkVariable(a,largestUp,smallestDown))
-				this->shrinkVariable(a);
+		for (std::size_t a = this->active(); a > 0; --a){
+			if(testShrinkVariable(a-1,largestUp,smallestDown))
+				this->shrinkVariable(a-1);
 		}
 		return true;
 	}
@@ -561,14 +551,7 @@ private:
 				largestUp = std::max(largestUp,gradient(a));
 		}
 	}
-
-	/// true if the problem has already been unshrinked
-	bool m_isUnshrinked;
-
-	std::size_t m_shrinkCounter;
 };
-template<class Problem>
-const std::size_t SvmShrinkingProblem<Problem>::IterationsBetweenShrinking = 1000;
 
 }
 #endif
