@@ -339,7 +339,9 @@ public:
 	BaseShrinkingProblem(SVMProblem& problem, bool shrink=true)
 	: Problem(problem)
 	, m_gradientEdge(problem.linear)
-	, m_shrink(shrink){}
+	, m_shrink(shrink)
+	, m_isUnshrinked(false)
+	, m_shrinkCounter(std::min<std::size_t>(this->dimensions(),1000)){}
 
 	using Problem::dimensions;
 	using Problem::active;
@@ -374,6 +376,11 @@ public:
 
 	bool shrink(double epsilon){
 		if(m_shrink){
+			//check if shrinking is necessary
+			--m_shrinkCounter;
+			if(m_shrinkCounter != 0) return false;
+			m_shrinkCounter = std::min<std::size_t>(this->dimensions(),1000);
+			
 			return doShrink(epsilon);
 		}
 		return false;
@@ -382,7 +389,8 @@ public:
 	///\brief Unshrink the problem
 	void unshrink(){
 		if (active() == dimensions()) return;
-
+		m_isUnshrinked = true;
+		
 		// recompute the gradient of the whole problem.
 		// we assume here that all shrinked variables are on the border of the problem.
 		// the gradient of the active components is already correct and
@@ -397,7 +405,7 @@ public:
 		{
 			if (isUpperBound(i) || isLowerBound(i)) continue;//alpha value is already stored in gradientEdge
 			
-			QpFloatType* q = quadratic().row(i, active(), dimensions());
+			QpFloatType* q = quadratic().row(i, 0, dimensions());
 			for (std::size_t a = active(); a < dimensions(); a++) 
 				Problem::m_gradient(a) -= alpha(i) * q[a] ;
 		}
@@ -411,19 +419,19 @@ public:
 			unshrink();
 	}
 
-	void modifyStep(std::size_t i, std::size_t j, double diff){
-		SIZE_CHECK(i < dimensions());
-		double ai = alpha(i);
-		double aj = alpha(j);
-		Problem::modifyStep(i,j,diff);
+	//~ void modifyStep(std::size_t i, std::size_t j, double diff){
+		//~ SIZE_CHECK(i < dimensions());
+		//~ double ai = alpha(i);
+		//~ double aj = alpha(j);
+		//~ Problem::modifyStep(i,j,diff);
 		
-		if(!m_shrink) return;
+		//~ if(!m_shrink) return;
 		
-		if(ai != alpha(i))
-			updateGradientEdge(i, ai, alpha(i));
-		if(i != j && aj != alpha(j))//take care that we are not in a working-set-size=1 case 
-			updateGradientEdge(j, aj, alpha(j));
-	}
+		//~ if(ai != alpha(i))
+			//~ updateGradientEdge(i, ai, alpha(i));
+		//~ if(i != j && aj != alpha(j))//take care that we are not in a working-set-size=1 case 
+			//~ updateGradientEdge(j, aj, alpha(j));
+	//~ }
 
 protected:
 	///\brief Shrink the variable from the problem.
@@ -434,6 +442,9 @@ protected:
 	}
 	
 	virtual bool doShrink(double epsilon)=0;
+	
+	std::size_t m_shrinkCounter;
+	bool m_isUnshrinked;
 
 private:
 	///\brief Update the edge-part of the gradient
