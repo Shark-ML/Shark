@@ -101,7 +101,6 @@ struct LibSVMSelectionCriterion{
 
 		for (std::size_t a=0; a < problem.active(); a++)
 		{
-			double aa = problem.alpha(a);
 			double ga = problem.gradient(a);
 			//if (aa < problem.boxMax(a))
 			if (!problem.isUpperBound(a))
@@ -119,7 +118,6 @@ struct LibSVMSelectionCriterion{
 		typename Problem::QpFloatType* q = problem.quadratic().row(i, 0, problem.active());
 		double best = 0.0;
 		for (std::size_t a = 0; a < problem.active(); a++){
-			double aa = problem.alpha(a);
 			double ga = problem.gradient(a);
 			//if (aa > problem.boxMin(a))
 			if (!problem.isLowerBound(a))
@@ -369,6 +367,8 @@ public:
 
 	///\brief Does an update of SMO given a working set with indices i and j.
 	void updateSMO(std::size_t i, std::size_t j){
+		SIZE_CHECK(i < active());
+		SIZE_CHECK(j < active());
 		// get the matrix row corresponding to the first variable of the working set
 		QpFloatType* qi = quadratic().row(i, 0, active());
 
@@ -396,6 +396,7 @@ public:
 	/// that the constraint is fulfilled.
 	/// after the call boxMin(i) and boxMax(i) are zero.
 	void deactivateVariable(std::size_t i){
+		SIZE_CHECK(i < dimensions());
 		//we need to correct for the equality constraint
 		//that means we have to move enough variables to satisfy the constraint again.
 		for (std::size_t j=0; j<dimensions(); j++){
@@ -408,6 +409,7 @@ public:
 	}
 	///\brief Reactivate an previously deactivated variable.
 	void activateVariable(std::size_t i){
+		SIZE_CHECK(i < dimensions());
 		m_alphaStatus[i] = AlphaFree;
 		updateAlphaStatus(i);
 	}
@@ -415,6 +417,8 @@ public:
 	/// exchange two variables via the permutation
 	void flipCoordinates(std::size_t i, std::size_t j)
 	{
+		SIZE_CHECK(i < dimensions());
+		SIZE_CHECK(j < dimensions());
 		if (i == j) return;
 
 		m_problem.flipCoordinates(i, j);
@@ -443,6 +447,8 @@ private:
 	/// the update is performed in a numerically stable way and the internal data structures
 	/// are also updated.
 	void applyStep(std::size_t i, std::size_t j, double step){
+		SIZE_CHECK(i < active());
+		SIZE_CHECK(j < active());
 		// do the update of the alpha values carefully - avoid numerical problems
 		double Ui = boxMax(i);
 		double Lj = boxMin(j);
@@ -486,6 +492,7 @@ private:
 	}
 	
 	void updateAlphaStatus(std::size_t i){
+		SIZE_CHECK(i < dimensions());
 		m_alphaStatus[i] = AlphaFree;
 		if(m_problem.alpha(i) == boxMax(i))
 			m_alphaStatus[i] |= AlphaUpperBound;

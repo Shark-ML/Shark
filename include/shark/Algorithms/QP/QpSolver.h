@@ -338,10 +338,10 @@ public:
 	template<class SVMProblem>
 	BaseShrinkingProblem(SVMProblem& problem, bool shrink=true)
 	: Problem(problem)
-	, m_gradientEdge(problem.linear)
-	, m_shrink(shrink)
 	, m_isUnshrinked(false)
-	, m_shrinkCounter(std::min<std::size_t>(this->dimensions(),1000)){}
+	, m_shrink(shrink)
+	, m_shrinkCounter(std::min<std::size_t>(this->dimensions(),1000))
+	, m_gradientEdge(problem.linear){}
 
 	using Problem::dimensions;
 	using Problem::active;
@@ -361,6 +361,8 @@ public:
 
 	///\brief Does an update of SMO given a working set with indices i and j.
 	void updateSMO(std::size_t i, std::size_t j){
+		SIZE_CHECK(i < active());
+		SIZE_CHECK(j < active());
 		double ai = alpha(i);
 		double aj = alpha(j);
 		Problem::updateSMO(i,j);//call base class update of alpha values
@@ -436,6 +438,7 @@ public:
 protected:
 	///\brief Shrink the variable from the problem.
 	void shrinkVariable(std::size_t i){
+		SIZE_CHECK(i < active());
 		Problem::flipCoordinates(i,active()-1);
 		std::swap( m_gradientEdge[i], m_gradientEdge[active()-1]);
 		--this->m_active;
@@ -443,12 +446,12 @@ protected:
 	
 	virtual bool doShrink(double epsilon)=0;
 	
-	std::size_t m_shrinkCounter;
 	bool m_isUnshrinked;
 
 private:
 	///\brief Update the edge-part of the gradient
 	void updateGradientEdge(std::size_t i, double oldAlpha, double newAlpha){
+		SIZE_CHECK(i < active());
 		bool isInsideOld = oldAlpha > boxMin(i) && oldAlpha < boxMax(i);
 		bool isInsideNew = newAlpha > boxMin(i) && newAlpha < boxMax(i);
 		//check if variable is relevant at all, that means that old and new alpha value are inside
@@ -469,12 +472,15 @@ private:
 			m_gradientEdge(a) -= diff*q[a];
 		}
 	}
+	
+	///\brief true if shrinking is to be used.
+	bool m_shrink;
+	
+	///\brief Number of iterations until next shrinking.
+	std::size_t m_shrinkCounter;
 
 	///\brief Stores the gradient of the alpha dimeensions which are either 0 or C
 	RealVector m_gradientEdge;
-
-	///\brief true if shrinking is to be used.
-	bool m_shrink;
 };
 
 ///

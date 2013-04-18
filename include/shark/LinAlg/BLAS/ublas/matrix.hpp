@@ -478,6 +478,7 @@ public:
 	// Assignment
 	diagonal_matrix &operator = (const diagonal_matrix &m) {
 		m_diagonal = m.m_diagonal;
+		return *this;
 	}
 
 	// Swapping

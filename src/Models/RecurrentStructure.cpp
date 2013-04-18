@@ -135,7 +135,6 @@ void RecurrentStructure::write( OutArchive & archive ) const{
 	archive << m_numberOfParameters;
 }
 void RecurrentStructure::configure( const PropertyTree & node ){
-	typedef PropertyTree::const_assoc_iterator Iter;
 	try{
 		size_t inputNeurons = node.get<size_t>("inputs");
 		size_t hiddenNeurons = node.get<size_t>("hidden");

@@ -217,7 +217,8 @@ public:
 
 	///\brief Does an update of SMO given a working set with indices i and j.
 	void updateSMO(std::size_t i, std::size_t j){
-		
+		SIZE_CHECK(i < active());
+		SIZE_CHECK(j < active());
 		if(i == j){//both variables are identical, thus solve the 1-d problem.
 			// get the matrix row corresponding to the working set
 			QpFloatType* q = quadratic().row(i, 0, active());
@@ -265,21 +266,6 @@ public:
 		updateAlphaStatus(i);
 		updateAlphaStatus(j);
 	}
-	
-	/// \brief Bounds the given alpha value between lower and upper bound in a numerically stable way.
-	double boundedAlphaUpdate(std::size_t i, double step){
-		double& ai = m_problem.alpha(i);
-		if (ai+step < boxMin(i)){
-			step = -ai+boxMin(i);
-			ai = boxMin(i);
-		}
-		else if (ai+step > boxMax(i)){
-			step = -ai+boxMax(i);
-			ai = boxMax(i);
-		}
-		else ai +=step;
-		return step;
-	}
 
 	///\brief Returns the current function value of the problem.
 	double functionValue()const{
@@ -292,6 +278,7 @@ public:
 
 	///\brief Remove the i-th example from the problem.
 	void deactivateVariable(std::size_t i){
+		SIZE_CHECK(i < dimensions());
 		double alphai = alpha(i);
 		m_problem.alpha(i) = 0;
 		//update the internal state
@@ -302,6 +289,7 @@ public:
 	}
 	///\brief Reactivate an previously deactivated variable.
 	void activateVariable(std::size_t i){
+		SIZE_CHECK(i < dimensions());
 		m_alphaStatus[i] = AlphaFree;
 		updateAlphaStatus(i);
 	}
@@ -309,6 +297,8 @@ public:
 	/// exchange two variables via the permutation
 	void flipCoordinates(std::size_t i, std::size_t j)
 	{
+		SIZE_CHECK(i < dimensions());
+		SIZE_CHECK(j < dimensions());
 		if (i == j) return;
 
 		m_problem.flipCoordinates(i, j);
@@ -326,7 +316,24 @@ protected:
 
 	std::vector<char> m_alphaStatus;
 
+	/// \brief Bounds the given alpha value between lower and upper bound in a numerically stable way.
+	double boundedAlphaUpdate(std::size_t i, double step){
+		SIZE_CHECK(i < active());
+		double& ai = m_problem.alpha(i);
+		if (ai+step < boxMin(i)){
+			step = -ai+boxMin(i);
+			ai = boxMin(i);
+		}
+		else if (ai+step > boxMax(i)){
+			step = -ai+boxMax(i);
+			ai = boxMax(i);
+		}
+		else ai +=step;
+		return step;
+	}
+
 	void updateAlphaStatus(std::size_t i){
+		SIZE_CHECK(i < dimensions());
 		m_alphaStatus[i] = AlphaFree;
 		if(m_problem.alpha(i) == boxMax(i))
 			m_alphaStatus[i] |= AlphaUpperBound;

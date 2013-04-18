@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(KMeans_multiple_gauss)
 
 		// invoke k-means with random centroids and no upper limit for iterations
 		Centroids centroids;
-		std::size_t iterations = kMeans(dataset, numMeans, centroids);
+		kMeans(dataset, numMeans, centroids);
 
 		// check result
 		BOOST_REQUIRE_EQUAL( centroids.centroids().numberOfElements(), numMeans);

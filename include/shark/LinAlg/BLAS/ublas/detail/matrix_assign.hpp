@@ -620,7 +620,6 @@ namespace detail {
         typedef F<typename M::iterator2::reference, expr_value_type> functor_type;
         // R unnecessary, make_conformant not required
         typedef typename M::difference_type difference_type;
-        typedef typename M::value_type value_type;
         BOOST_UBLAS_CHECK (m.size1 () == e ().size1 (), bad_size ());
         BOOST_UBLAS_CHECK (m.size2 () == e ().size2 (), bad_size ());
 
@@ -725,7 +724,6 @@ namespace detail {
         typedef F<typename M::iterator1::reference, expr_value_type> functor_type;
         // R unnecessary, make_conformant not required
         typedef typename M::difference_type difference_type;
-        typedef typename M::value_type value_type;
         BOOST_UBLAS_CHECK (m.size2 () == e ().size2 (), bad_size ());
         BOOST_UBLAS_CHECK (m.size1 () == e ().size1 (), bad_size ());
         typename M::iterator2 it2 (m.begin2 ());
@@ -884,7 +882,7 @@ namespace detail {
         typedef R conformant_restrict_type;
         typedef typename M::size_type size_type;
         typedef typename M::difference_type difference_type;
-        typedef typename M::value_type value_type;
+
         BOOST_UBLAS_CHECK (m.size1 () == e ().size1 (), bad_size ());
         BOOST_UBLAS_CHECK (m.size2 () == e ().size2 (), bad_size ());
         detail::make_conformant (m, e, row_major_tag (), conformant_restrict_type ());
@@ -979,7 +977,7 @@ namespace detail {
         typedef R conformant_restrict_type;
         typedef typename M::size_type size_type;
         typedef typename M::difference_type difference_type;
-        typedef typename M::value_type value_type;
+
         BOOST_UBLAS_CHECK (m.size1 () == e ().size1 (), bad_size ());
         BOOST_UBLAS_CHECK (m.size2 () == e ().size2 (), bad_size ());
         detail::make_conformant (m, e, column_major_tag (), conformant_restrict_type ());
@@ -1157,7 +1155,7 @@ namespace detail {
     void matrix_swap (M &m, matrix_expression<E> &e, packed_proxy_tag, row_major_tag) {
         typedef F<typename M::iterator2::reference, typename E::reference> functor_type;
         // R unnecessary, make_conformant not required
-        typedef typename M::size_type size_type;
+
         typedef typename M::difference_type difference_type;
         typename M::iterator1 it1 (m.begin1 ());
         typename E::iterator1 it1e (e ().begin1 ());
@@ -1177,7 +1175,7 @@ namespace detail {
     void matrix_swap (M &m, matrix_expression<E> &e, packed_proxy_tag, column_major_tag) {
         typedef F<typename M::iterator1::reference, typename E::reference> functor_type;
         // R unnecessary, make_conformant not required
-        typedef typename M::size_type size_type;
+
         typedef typename M::difference_type difference_type;
         typename M::iterator2 it2 (m.begin2 ());
         typename E::iterator2 it2e (e ().begin2 ());
@@ -1199,7 +1197,7 @@ namespace detail {
         typedef R conformant_restrict_type;
         typedef typename M::size_type size_type;
         typedef typename M::difference_type difference_type;
-        typedef typename M::value_type value_type;
+
         BOOST_UBLAS_CHECK (m.size1 () == e ().size1 (), bad_size ());
         BOOST_UBLAS_CHECK (m.size2 () == e ().size2 (), bad_size ());
 
@@ -1262,7 +1260,7 @@ namespace detail {
         typedef R conformant_restrict_type;
         typedef typename M::size_type size_type;
         typedef typename M::difference_type difference_type;
-        typedef typename M::value_type value_type;
+
         BOOST_UBLAS_CHECK (m.size1 () == e ().size1 (), bad_size ());
         BOOST_UBLAS_CHECK (m.size2 () == e ().size2 (), bad_size ());
 

@@ -263,7 +263,6 @@ namespace detail {
         typedef typename V::size_type size_type;
         typedef typename V::difference_type difference_type;
         typedef typename V::value_type value_type;
-        typedef typename V::reference reference;
         detail::make_conformant (v, e);
 
         typename V::iterator it (v.begin ());
@@ -387,7 +386,6 @@ namespace detail {
         typedef F<typename V::iterator::reference, typename E::iterator::reference> functor_type;
         typedef typename V::size_type size_type;
         typedef typename V::difference_type difference_type;
-        typedef typename V::value_type value_type;
 
         detail::make_conformant (v, e);
         // FIXME should be a seperate restriction for E
