@@ -52,12 +52,10 @@ BOOST_AUTO_TEST_CASE( REGULARIZATION_NETWORK_TEST )
 	output = svm(training.inputs());
 
 	RealVector alpha = svm.parameterVector();
-	double m = 0.0;
 	for (std::size_t i=0; i<training.numberOfElements(); i++)
 	{
 		double y = training.labels().element(i)(0);
 		double f = output.element(i)(0);
-		double a = alpha(i);
 		double xi = (f - y) * (f - y);
 		BOOST_CHECK_SMALL(xi, threshold);
 	}

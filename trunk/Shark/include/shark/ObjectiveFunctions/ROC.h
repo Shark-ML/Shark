@@ -73,8 +73,7 @@ public:
 	//! \param  set     data set with inputs and corresponding binary outputs (0 or 1)
 	template<class InputType>
 	ROC(AbstractModel<InputType,RealVector>& model,LabeledData<InputType,unsigned int> const& set){
-		typedef typename LabeledData<InputType,unsigned int>::const_reference Element;
-		std::size_t inputs=set.size();
+		std::size_t inputs=set.numberOfElements();
 
 		//calculat the number of classes
 		std::vector<std::size_t> classes = classSizes(set);

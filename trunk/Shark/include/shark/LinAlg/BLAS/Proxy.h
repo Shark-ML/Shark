@@ -682,6 +682,7 @@ public:
 	FixedSparseVectorProxy& operator=(FixedSparseVectorProxy const& other){
 		m_storage = other.m_storage;
 		m_size = other.m_size;
+		return *this;
 	}
 	
 	/// \brief Return the size of the self_type
