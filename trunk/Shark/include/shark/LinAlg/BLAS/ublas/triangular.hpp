@@ -1218,7 +1218,7 @@ void inplace_solve(const matrix_expression<E1> &e1, vector_expression<E2> &e2,
 			singular().raise();
 #endif
 		value_type t = e2()(n);
-		for (difference_type m = n + 1; m < e1().size2(); ++ m) {
+		for (std::size_t m = n + 1; m < e1().size2(); ++ m) {
 			t -= e1()(n, m)  * e2()(m);
 		}
 		e2()(n) = t / e1()(n, n);

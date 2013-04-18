@@ -239,7 +239,6 @@ namespace shark{ namespace blas{
         
         reference operator () (size_type i, size_type j) {
             size_type element1 (layout_type::index_M (i, j));
-            size_type element2 (layout_type::index_m (i, j));
             if (filled1_ <= element1 + 1)
                 return insert_element (i, j, value_type/*zero*/());
             pointer p = find_element (i, j);
