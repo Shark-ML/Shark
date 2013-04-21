@@ -39,13 +39,10 @@ void RNNet::eval(BatchInputType const& patterns, BatchOutputType& outputs, State
 	InternalState& s = state.toState<InternalState>();
 	std::size_t warmUpLength=m_warmUpSequence.size();
 	std::size_t numUnits = mpe_structure->numberOfUnits();
-	std::size_t numNeurons = mpe_structure->numberOfNeurons();
 	s.timeActivation.resize(size(patterns));
 	outputs.resize(size(patterns));
 
 	//calculation of the sequences
-	ConstRealSubMatrix neuronWeights=columns(mpe_structure->weights(),mpe_structure->inputs()+1,numNeurons);
-	
 	for(std::size_t b = 0; b != size(patterns);++b){
 		std::size_t sequenceLength=size(get(patterns,b))+warmUpLength+1;
 		s.timeActivation[b].resize(sequenceLength,RealVector(numUnits));

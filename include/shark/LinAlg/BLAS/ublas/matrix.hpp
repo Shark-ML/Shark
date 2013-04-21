@@ -842,9 +842,6 @@ private:
 
 /** \brief A matrix with all values of type \c T equal to zero
  *
- * Changing values does not affect the matrix, however assigning it to a normal matrix will put zero
- * everywhere in the target matrix. All accesses are constant time, due to the trivial value.
- *
  * \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
  */
 template<class T>

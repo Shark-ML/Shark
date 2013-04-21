@@ -29,8 +29,6 @@ class basic_range;
 typedef basic_range<> range;
 
 // Expression types
-struct scalar_tag {};
-struct vector_tag {};
 
 template<class E>
 class vector_expression;
@@ -38,8 +36,6 @@ template<class C>
 class vector_container;
 template<class E>
 class vector_reference;
-
-struct matrix_tag {};
 
 template<class E>
 class matrix_expression;
@@ -97,34 +93,6 @@ struct strict_upper_tag : public upper_tag {};
 template <class Z = std::size_t>
 struct basic_full;
 typedef basic_full<> full;
-
-template <class Z = std::size_t>
-struct basic_lower;
-typedef basic_lower<> lower;
-
-template <class Z = std::size_t>
-struct basic_upper;
-typedef basic_upper<> upper;
-
-template <class Z = std::size_t>
-struct basic_unit_lower;
-typedef basic_unit_lower<> unit_lower;
-
-template <class Z = std::size_t>
-struct basic_unit_upper;
-typedef basic_unit_upper<> unit_upper;
-
-template <class Z = std::size_t>
-struct basic_strict_lower;
-typedef basic_strict_lower<> strict_lower;
-
-template <class Z = std::size_t>
-struct basic_strict_upper;
-typedef basic_strict_upper<> strict_upper;
-
-// Special matrices
-template<class M, class TRI = lower>
-class triangular_adaptor;
 
 // Sparse matrices
 template<class T, class L = row_major, std::size_t IB = 0, class IA = unbounded_array<std::size_t>, class TA = unbounded_array<T> >

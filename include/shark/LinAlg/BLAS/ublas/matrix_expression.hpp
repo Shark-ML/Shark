@@ -767,7 +767,6 @@ template<class E1, class E2>
 typename vector_matrix_binary_traits<E1, E2, scalar_binary_multiply<typename E1::value_type, typename E2::value_type> >::result_type
 outer_prod(const vector_expression<E1> &e1,
         const vector_expression<E2> &e2) {
-	BOOST_STATIC_ASSERT(E1::complexity == 0 && E2::complexity == 0);
 	typedef typename vector_matrix_binary_traits<E1, E2, scalar_binary_multiply<typename E1::value_type, typename E2::value_type> >::expression_type expression_type;
 	return expression_type(e1(), e2());
 }
@@ -2165,20 +2164,18 @@ class matrix_vector_binary1:
 public:
 	typedef E1 expression1_type;
 	typedef E2 expression2_type;
-private:
 	typedef F functor_type;
-public:
 	typedef typename E1::const_closure_type expression1_closure_type;
 	typedef typename E2::const_closure_type expression2_closure_type;
 private:
 	typedef matrix_vector_binary1<E1, E2, F> self_type;
 public:
-#ifdef BOOST_UBLAS_ENABLE_PROXY_SHORTCUTS
-	using vector_expression<self_type>::operator();
-#endif
-	static const unsigned complexity = 1;
-	typedef typename promote_traits<typename E1::size_type, typename E2::size_type>::promote_type size_type;
-	typedef typename promote_traits<typename E1::difference_type, typename E2::difference_type>::promote_type difference_type;
+	typedef typename promote_traits<
+		typename E1::size_type, typename E2::size_type
+	>::promote_type size_type;
+	typedef typename promote_traits<
+		typename E1::difference_type, typename E2::difference_type
+	>::promote_type difference_type;
 	typedef typename F::result_type value_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
@@ -2187,7 +2184,6 @@ public:
 	typedef unknown_storage_tag storage_category;
 
 	// Construction and destruction
-	
 	matrix_vector_binary1(const expression1_type &e1, const expression2_type &e2):
 		m_expression1(e1), m_expression2(e2) {}
 
@@ -2225,203 +2221,14 @@ public:
 	// Iterator types
 private:
 	typedef typename E1::const_iterator1 const_subiterator1_type;
-	typedef typename E2::const_iterator const_subiterator2_type;
-	typedef const value_type *const_pointer;
-
 public:
-#ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
 	typedef indexed_const_iterator<const_closure_type, typename const_subiterator1_type::iterator_category> const_iterator;
 	typedef const_iterator iterator;
-#else
-	class const_iterator;
-	typedef const_iterator iterator;
-#endif
 
 	// Element lookup
-	
 	const_iterator find(size_type i) const {
-#ifdef BOOST_UBLAS_USE_INDEXED_ITERATOR
-		const_subiterator1_type it1(m_expression1.find1(0, i, 0));
-		return const_iterator(*this, it1.index1());
-#else
-		return const_iterator(*this, m_expression1.find1(0, i, 0));
-#endif
+		return const_iterator(*this,i);
 	}
-
-
-#ifndef BOOST_UBLAS_USE_INDEXED_ITERATOR
-	class const_iterator:
-		public container_const_reference<matrix_vector_binary1>,
-		public iterator_base_traits<typename iterator_restrict_traits<typename E1::const_iterator1::iterator_category,
-		typename E2::const_iterator::iterator_category>::iterator_category>::template
-			iterator_base<const_iterator, value_type>::type {
-    public:
-	    typedef typename iterator_restrict_traits<typename E1::const_iterator1::iterator_category,
-	    typename E2::const_iterator::iterator_category>::iterator_category iterator_category;
-	    typedef typename matrix_vector_binary1::difference_type difference_type;
-	    typedef typename matrix_vector_binary1::value_type value_type;
-	    typedef typename matrix_vector_binary1::const_reference reference;
-	    typedef typename matrix_vector_binary1::const_pointer pointer;
-
-	    // Construction and destruction
-#ifdef BOOST_UBLAS_USE_INVARIANT_HOISTING
-	    
-	    const_iterator():
-		    container_const_reference<self_type> (), it1_(), e2_begin_(), e2_end_() {}
-	
-	const_iterator(const self_type &mvb, const const_subiterator1_type &it1):
-		container_const_reference<self_type> (mvb), it1_(it1), e2_begin_(mvb.expression2().begin()), e2_end_(mvb.expression2().end()) {}
-#else
-	    
-	    const_iterator():
-		    container_const_reference<self_type> (), it1_() {}
-	
-	const_iterator(const self_type &mvb, const const_subiterator1_type &it1):
-		container_const_reference<self_type> (mvb), it1_(it1) {}
-#endif
-
-private:
-	// Dense random access specialization
-	
-	value_type dereference(dense_random_access_iterator_tag) const {
-		const self_type &mvb = (*this)();
-#ifdef BOOST_UBLAS_USE_INDEXING
-		return mvb(index());
-#elif BOOST_UBLAS_USE_ITERATING
-		difference_type size = BOOST_UBLAS_SAME(mvb.expression1().size2(), mvb.expression2().size());
-#ifdef BOOST_UBLAS_USE_INVARIANT_HOISTING
-		return functor_type::apply(size, it1_.begin(), e2_begin_);
-#else
-		return functor_type::apply(size, it1_.begin(), mvb.expression2().begin());
-#endif
-#else
-		difference_type size = BOOST_UBLAS_SAME(mvb.expression1().size2(), mvb.expression2().size());
-		if (size >= BOOST_UBLAS_ITERATOR_THRESHOLD)
-#ifdef BOOST_UBLAS_USE_INVARIANT_HOISTING
-			return functor_type::apply(size, it1_.begin(), e2_begin_);
-#else
-			return functor_type::apply(size, it1_.begin(), mvb.expression2().begin());
-#endif
-		else
-			return mvb(index());
-#endif
-	}
-
-	// Packed bidirectional specialization
-	
-	value_type dereference(packed_random_access_iterator_tag) const {
-#ifdef BOOST_UBLAS_USE_INVARIANT_HOISTING
-		return functor_type::apply(it1_.begin(), it1_.end(), e2_begin_, e2_end_);
-#else
-		const self_type &mvb = (*this)();
-#ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		return functor_type::apply(it1_.begin(), it1_.end(),
-		        mvb.expression2().begin(), mvb.expression2().end());
-#else
-		return functor_type::apply(shark::blas::begin(it1_, iterator1_tag()),
-		        shark::blas::end(it1_, iterator1_tag()),
-		        mvb.expression2().begin(), mvb.expression2().end());
-#endif
-#endif
-	}
-
-	// Sparse bidirectional specialization
-	
-	value_type dereference(sparse_bidirectional_iterator_tag) const {
-#ifdef BOOST_UBLAS_USE_INVARIANT_HOISTING
-		return functor_type::apply(it1_.begin(), it1_.end(), e2_begin_, e2_end_, sparse_bidirectional_iterator_tag());
-#else
-		const self_type &mvb = (*this)();
-#ifndef BOOST_UBLAS_NO_NESTED_CLASS_RELATION
-		return functor_type::apply(it1_.begin(), it1_.end(),
-		        mvb.expression2().begin(), mvb.expression2().end(), sparse_bidirectional_iterator_tag());
-#else
-		return functor_type::apply(shark::blas::begin(it1_, iterator1_tag()),
-		        shark::blas::end(it1_, iterator1_tag()),
-		        mvb.expression2().begin(), mvb.expression2().end(), sparse_bidirectional_iterator_tag());
-#endif
-#endif
-	}
-
-public:
-	// Arithmetic
-	
-	const_iterator &operator ++ () {
-		++ it1_;
-		return *this;
-	}
-	
-	const_iterator &operator -- () {
-		-- it1_;
-		return *this;
-	}
-	
-	const_iterator &operator += (difference_type n) {
-		it1_ += n;
-		return *this;
-	}
-	
-	const_iterator &operator -= (difference_type n) {
-		it1_ -= n;
-		return *this;
-	}
-	
-	difference_type operator - (const const_iterator &it) const {
-		BOOST_UBLAS_CHECK((*this)().same_closure(it()), external_logic());
-		return it1_ - it.it1_;
-	}
-
-	// Dereference
-	
-	const_reference operator * () const {
-		return dereference(iterator_category());
-	}
-	
-	const_reference operator [](difference_type n) const {
-		return *(*this + n);
-	}
-
-	// Index
-	
-	size_type index() const {
-		return it1_.index1();
-	}
-
-	// Assignment
-	
-	const_iterator &operator = (const const_iterator &it) {
-		container_const_reference<self_type>::assign(&it());
-		it1_ = it.it1_;
-#ifdef BOOST_UBLAS_USE_INVARIANT_HOISTING
-		e2_begin_ = it.e2_begin_;
-		e2_end_ = it.e2_end_;
-#endif
-		return *this;
-	}
-
-	// Comparison
-	
-	bool operator == (const const_iterator &it) const {
-		BOOST_UBLAS_CHECK((*this)().same_closure(it()), external_logic());
-		return it1_ == it.it1_;
-	}
-	
-	bool operator < (const const_iterator &it) const {
-		BOOST_UBLAS_CHECK((*this)().same_closure(it()), external_logic());
-		return it1_ < it.it1_;
-	}
-
-private:
-	const_subiterator1_type it1_;
-#ifdef BOOST_UBLAS_USE_INVARIANT_HOISTING
-	// Mutable due to assignment
-	/* const */ const_subiterator2_type e2_begin_;
-	/* const */
-	const_subiterator2_type e2_end_;
-#endif
-	};
-#endif
-
 	
 	const_iterator begin() const {
 		return find(0);
@@ -2434,7 +2241,6 @@ private:
 	// Reverse iterator
 	typedef reverse_iterator_base<const_iterator> const_reverse_iterator;
 
-	
 	const_reverse_iterator rbegin() const {
 		return const_reverse_iterator(end());
 	}
@@ -2462,7 +2268,6 @@ struct matrix_vector_binary1_traits {
 };
 
 template<class E1, class E2>
-
 typename matrix_vector_binary1_traits<typename E1::value_type, E1,
          typename E2::value_type, E2>::result_type
          prod(const matrix_expression<E1> &e1,
@@ -2476,12 +2281,10 @@ row_major_tag) {
 
 // Dispatcher
 template<class E1, class E2>
-
 typename matrix_vector_binary1_traits<typename E1::value_type, E1,
          typename E2::value_type, E2>::result_type
          prod(const matrix_expression<E1> &e1,
 const vector_expression<E2> &e2) {
-	BOOST_STATIC_ASSERT(E2::complexity == 0);
 	typedef typename matrix_vector_binary1_traits<typename E1::value_type, E1,
 	        typename E2::value_type, E2>::storage_category storage_category;
 	typedef typename matrix_vector_binary1_traits<typename E1::value_type, E1,
@@ -2489,67 +2292,62 @@ const vector_expression<E2> &e2) {
 	return prod(e1, e2, storage_category(), orientation_category());
 }
 
-template<class E1, class E2>
+//~ template<class E1, class E2>
 
-typename matrix_vector_binary1_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-         typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
-         prec_prod(const matrix_expression<E1> &e1,
-                 const vector_expression<E2> &e2,
-                 unknown_storage_tag,
-row_major_tag) {
-	typedef typename matrix_vector_binary1_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-	        typename type_traits<typename E2::value_type>::precision_type, E2>::expression_type expression_type;
-	return expression_type(e1(), e2());
-}
+//~ typename matrix_vector_binary1_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+         //~ typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
+         //~ prec_prod(const matrix_expression<E1> &e1,
+                 //~ const vector_expression<E2> &e2,
+                 //~ unknown_storage_tag,
+//~ row_major_tag) {
+	//~ typedef typename matrix_vector_binary1_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+	        //~ typename type_traits<typename E2::value_type>::precision_type, E2>::expression_type expression_type;
+	//~ return expression_type(e1(), e2());
+//~ }
 
-// Dispatcher
-template<class E1, class E2>
+//~ // Dispatcher
+//~ template<class E1, class E2>
 
-typename matrix_vector_binary1_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-         typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
-         prec_prod(const matrix_expression<E1> &e1,
-const vector_expression<E2> &e2) {
-	BOOST_STATIC_ASSERT(E2::complexity == 0);
-	typedef typename matrix_vector_binary1_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-	        typename type_traits<typename E2::value_type>::precision_type, E2>::storage_category storage_category;
-	typedef typename matrix_vector_binary1_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-	        typename type_traits<typename E2::value_type>::precision_type, E2>::orientation_category orientation_category;
-	return prec_prod(e1, e2, storage_category(), orientation_category());
-}
+//~ typename matrix_vector_binary1_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+         //~ typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
+         //~ prec_prod(const matrix_expression<E1> &e1,
+//~ const vector_expression<E2> &e2) {
+	//~ typedef typename matrix_vector_binary1_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+	        //~ typename type_traits<typename E2::value_type>::precision_type, E2>::storage_category storage_category;
+	//~ typedef typename matrix_vector_binary1_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+	        //~ typename type_traits<typename E2::value_type>::precision_type, E2>::orientation_category orientation_category;
+	//~ return prec_prod(e1, e2, storage_category(), orientation_category());
+//~ }
 
 template<class V, class E1, class E2>
-
-V &
-prod(const matrix_expression<E1> &e1,
+V & prod(const matrix_expression<E1> &e1,
      const vector_expression<E2> &e2,
      V &v) {
 	return v.assign(prod(e1, e2));
 }
 
+//~ template<class V, class E1, class E2>
+
+//~ V &
+//~ prec_prod(const matrix_expression<E1> &e1,
+        //~ const vector_expression<E2> &e2,
+        //~ V &v) {
+	//~ return v.assign(prec_prod(e1, e2));
+//~ }
+
 template<class V, class E1, class E2>
-
-V &
-prec_prod(const matrix_expression<E1> &e1,
-        const vector_expression<E2> &e2,
-        V &v) {
-	return v.assign(prec_prod(e1, e2));
-}
-
-template<class V, class E1, class E2>
-
-V
-prod(const matrix_expression<E1> &e1,
+V prod(const matrix_expression<E1> &e1,
      const vector_expression<E2> &e2) {
 	return V(prod(e1, e2));
 }
 
-template<class V, class E1, class E2>
+//~ template<class V, class E1, class E2>
 
-V
-prec_prod(const matrix_expression<E1> &e1,
-        const vector_expression<E2> &e2) {
-	return V(prec_prod(e1, e2));
-}
+//~ V
+//~ prec_prod(const matrix_expression<E1> &e1,
+        //~ const vector_expression<E2> &e2) {
+	//~ return V(prec_prod(e1, e2));
+//~ }
 
 template<class E1, class E2, class F>
 class matrix_vector_binary2:
@@ -2567,7 +2365,6 @@ public:
 #ifdef BOOST_UBLAS_ENABLE_PROXY_SHORTCUTS
 	using vector_expression<self_type>::operator();
 #endif
-	static const unsigned complexity = 1;
 	typedef typename promote_traits<typename E1::size_type, typename E2::size_type>::promote_type size_type;
 	typedef typename promote_traits<typename E1::difference_type, typename E2::difference_type>::promote_type difference_type;
 	typedef typename F::result_type value_type;
@@ -2853,7 +2650,6 @@ struct matrix_vector_binary2_traits {
 };
 
 template<class E1, class E2>
-
 typename matrix_vector_binary2_traits<typename E1::value_type, E1,
          typename E2::value_type, E2>::result_type
          prod(const vector_expression<E1> &e1,
@@ -2867,12 +2663,10 @@ column_major_tag) {
 
 // Dispatcher
 template<class E1, class E2>
-
 typename matrix_vector_binary2_traits<typename E1::value_type, E1,
          typename E2::value_type, E2>::result_type
          prod(const vector_expression<E1> &e1,
 const matrix_expression<E2> &e2) {
-	BOOST_STATIC_ASSERT(E1::complexity == 0);
 	typedef typename matrix_vector_binary2_traits<typename E1::value_type, E1,
 	        typename E2::value_type, E2>::storage_category storage_category;
 	typedef typename matrix_vector_binary2_traits<typename E1::value_type, E1,
@@ -2880,67 +2674,60 @@ const matrix_expression<E2> &e2) {
 	return prod(e1, e2, storage_category(), orientation_category());
 }
 
-template<class E1, class E2>
+//~ template<class E1, class E2>
 
-typename matrix_vector_binary2_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-         typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
-         prec_prod(const vector_expression<E1> &e1,
-                 const matrix_expression<E2> &e2,
-                 unknown_storage_tag,
-column_major_tag) {
-	typedef typename matrix_vector_binary2_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-	        typename type_traits<typename E2::value_type>::precision_type, E2>::expression_type expression_type;
-	return expression_type(e1(), e2());
-}
+//~ typename matrix_vector_binary2_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+         //~ typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
+         //~ prec_prod(const vector_expression<E1> &e1,
+                 //~ const matrix_expression<E2> &e2,
+                 //~ unknown_storage_tag,
+//~ column_major_tag) {
+	//~ typedef typename matrix_vector_binary2_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+	        //~ typename type_traits<typename E2::value_type>::precision_type, E2>::expression_type expression_type;
+	//~ return expression_type(e1(), e2());
+//~ }
 
 // Dispatcher
-template<class E1, class E2>
+//~ template<class E1, class E2>
 
-typename matrix_vector_binary2_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-         typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
-         prec_prod(const vector_expression<E1> &e1,
-const matrix_expression<E2> &e2) {
-	BOOST_STATIC_ASSERT(E1::complexity == 0);
-	typedef typename matrix_vector_binary2_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-	        typename type_traits<typename E2::value_type>::precision_type, E2>::storage_category storage_category;
-	typedef typename matrix_vector_binary2_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-	        typename type_traits<typename E2::value_type>::precision_type, E2>::orientation_category orientation_category;
-	return prec_prod(e1, e2, storage_category(), orientation_category());
-}
+//~ typename matrix_vector_binary2_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+         //~ typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
+         //~ prec_prod(const vector_expression<E1> &e1,
+//~ const matrix_expression<E2> &e2) {
+	//~ typedef typename matrix_vector_binary2_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+	        //~ typename type_traits<typename E2::value_type>::precision_type, E2>::storage_category storage_category;
+	//~ typedef typename matrix_vector_binary2_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+	        //~ typename type_traits<typename E2::value_type>::precision_type, E2>::orientation_category orientation_category;
+	//~ return prec_prod(e1, e2, storage_category(), orientation_category());
+//~ }
 
 template<class V, class E1, class E2>
-
-V &
-prod(const vector_expression<E1> &e1,
+V & prod(const vector_expression<E1> &e1,
      const matrix_expression<E2> &e2,
      V &v) {
 	return v.assign(prod(e1, e2));
 }
 
+//~ template<class V, class E1, class E2>
+//~ V &
+//~ prec_prod(const vector_expression<E1> &e1,
+        //~ const matrix_expression<E2> &e2,
+        //~ V &v) {
+	//~ return v.assign(prec_prod(e1, e2));
+//~ }
+
 template<class V, class E1, class E2>
-
-V &
-prec_prod(const vector_expression<E1> &e1,
-        const matrix_expression<E2> &e2,
-        V &v) {
-	return v.assign(prec_prod(e1, e2));
-}
-
-template<class V, class E1, class E2>
-
-V
-prod(const vector_expression<E1> &e1,
+V prod(const vector_expression<E1> &e1,
      const matrix_expression<E2> &e2) {
 	return V(prod(e1, e2));
 }
 
-template<class V, class E1, class E2>
-
-V
-prec_prod(const vector_expression<E1> &e1,
-        const matrix_expression<E2> &e2) {
-	return V(prec_prod(e1, e2));
-}
+//~ template<class V, class E1, class E2>
+//~ V
+//~ prec_prod(const vector_expression<E1> &e1,
+        //~ const matrix_expression<E2> &e2) {
+	//~ return V(prec_prod(e1, e2));
+//~ }
 
 template<class E1, class E2, class F>
 class matrix_matrix_binary:
@@ -2960,7 +2747,6 @@ public:
 #ifdef BOOST_UBLAS_ENABLE_PROXY_SHORTCUTS
 	using matrix_expression<self_type>::operator();
 #endif
-	static const unsigned complexity = 1;
 	typedef typename promote_traits<typename E1::size_type, typename E2::size_type>::promote_type size_type;
 	typedef typename promote_traits<typename E1::difference_type, typename E2::difference_type>::promote_type difference_type;
 	typedef typename F::result_type value_type;
@@ -3562,7 +3348,6 @@ struct matrix_matrix_binary_traits {
 };
 
 template<class E1, class E2>
-
 typename matrix_matrix_binary_traits<typename E1::value_type, E1,
          typename E2::value_type, E2>::result_type
          prod(const matrix_expression<E1> &e1,
@@ -3576,12 +3361,10 @@ unknown_orientation_tag) {
 
 // Dispatcher
 template<class E1, class E2>
-
 typename matrix_matrix_binary_traits<typename E1::value_type, E1,
          typename E2::value_type, E2>::result_type
          prod(const matrix_expression<E1> &e1,
 const matrix_expression<E2> &e2) {
-	BOOST_STATIC_ASSERT(E1::complexity == 0 && E2::complexity == 0);
 	typedef typename matrix_matrix_binary_traits<typename E1::value_type, E1,
 	        typename E2::value_type, E2>::storage_category storage_category;
 	typedef typename matrix_matrix_binary_traits<typename E1::value_type, E1,
@@ -3589,131 +3372,75 @@ const matrix_expression<E2> &e2) {
 	return prod(e1, e2, storage_category(), orientation_category());
 }
 
-template<class E1, class E2>
-
-typename matrix_matrix_binary_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-         typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
-         prec_prod(const matrix_expression<E1> &e1,
-                 const matrix_expression<E2> &e2,
-                 unknown_storage_tag,
-unknown_orientation_tag) {
-	typedef typename matrix_matrix_binary_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-	        typename type_traits<typename E2::value_type>::precision_type, E2>::expression_type expression_type;
-	return expression_type(e1(), e2());
-}
+//~ template<class E1, class E2>
+//~ typename matrix_matrix_binary_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+         //~ typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
+         //~ prec_prod(const matrix_expression<E1> &e1,
+                 //~ const matrix_expression<E2> &e2,
+                 //~ unknown_storage_tag,
+//~ unknown_orientation_tag) {
+	//~ typedef typename matrix_matrix_binary_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+	        //~ typename type_traits<typename E2::value_type>::precision_type, E2>::expression_type expression_type;
+	//~ return expression_type(e1(), e2());
+//~ }
 
 // Dispatcher
-template<class E1, class E2>
+//~ template<class E1, class E2>
 
-typename matrix_matrix_binary_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-         typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
-         prec_prod(const matrix_expression<E1> &e1,
-const matrix_expression<E2> &e2) {
-	BOOST_STATIC_ASSERT(E1::complexity == 0 && E2::complexity == 0);
-	typedef typename matrix_matrix_binary_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-	        typename type_traits<typename E2::value_type>::precision_type, E2>::storage_category storage_category;
-	typedef typename matrix_matrix_binary_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
-	        typename type_traits<typename E2::value_type>::precision_type, E2>::orientation_category orientation_category;
-	return prec_prod(e1, e2, storage_category(), orientation_category());
-}
+//~ typename matrix_matrix_binary_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+         //~ typename type_traits<typename E2::value_type>::precision_type, E2>::result_type
+         //~ prec_prod(const matrix_expression<E1> &e1,
+//~ const matrix_expression<E2> &e2) {
+	//~ typedef typename matrix_matrix_binary_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+	        //~ typename type_traits<typename E2::value_type>::precision_type, E2>::storage_category storage_category;
+	//~ typedef typename matrix_matrix_binary_traits<typename type_traits<typename E1::value_type>::precision_type, E1,
+	        //~ typename type_traits<typename E2::value_type>::precision_type, E2>::orientation_category orientation_category;
+	//~ return prec_prod(e1, e2, storage_category(), orientation_category());
+//~ }
 
 template<class M, class E1, class E2>
-
-M &
-prod(const matrix_expression<E1> &e1,
+M & prod(const matrix_expression<E1> &e1,
      const matrix_expression<E2> &e2,
      M &m) {
 	return m.assign(prod(e1, e2));
 }
 
-template<class M, class E1, class E2>
-
-M &
-prec_prod(const matrix_expression<E1> &e1,
-        const matrix_expression<E2> &e2,
-        M &m) {
-	return m.assign(prec_prod(e1, e2));
-}
+//~ template<class M, class E1, class E2>
+//~ M & prec_prod(const matrix_expression<E1> &e1,
+        //~ const matrix_expression<E2> &e2,
+        //~ M &m) {
+	//~ return m.assign(prec_prod(e1, e2));
+//~ }
 
 template<class M, class E1, class E2>
-
-M
-prod(const matrix_expression<E1> &e1,
+M prod(const matrix_expression<E1> &e1,
      const matrix_expression<E2> &e2) {
 	return M(prod(e1, e2));
 }
 
-template<class M, class E1, class E2>
+//~ template<class M, class E1, class E2>
+//~ M prec_prod(const matrix_expression<E1> &e1,
+        //~ const matrix_expression<E2> &e2) {
+	//~ return M(prec_prod(e1, e2));
+//~ }
 
-M
-prec_prod(const matrix_expression<E1> &e1,
-        const matrix_expression<E2> &e2) {
-	return M(prec_prod(e1, e2));
-}
-
-template<class E, class F>
-class matrix_scalar_unary:
-	public scalar_expression<matrix_scalar_unary<E, F> > {
-public:
-	typedef E expression_type;
-	typedef F functor_type;
-	typedef typename F::result_type value_type;
-	typedef typename E::const_closure_type expression_closure_type;
-
-	// Construction and destruction
-	
-	explicit matrix_scalar_unary(const expression_type &e):
-		e_(e) {}
-
-private:
-	// Expression accessors
-	
-	const expression_closure_type &expression() const {
-		return e_;
-	}
-
-public:
-	
-	operator value_type() const {
-		return functor_type::apply(e_);
-	}
-
-private:
-	expression_closure_type e_;
-};
-
-template<class E, class F>
-struct matrix_scalar_unary_traits {
-	typedef matrix_scalar_unary<E, F> expression_type;
-#ifndef BOOST_UBLAS_SIMPLE_ET_DEBUG
-	typedef expression_type result_type;
-#else
-	typedef typename F::result_type result_type;
-#endif
-};
 
 template<class E>
-
-typename matrix_scalar_unary_traits<E, matrix_norm_1<E> >::result_type
+typename matrix_norm_1<E>::result_type
 norm_1(const matrix_expression<E> &e) {
-	typedef typename matrix_scalar_unary_traits<E, matrix_norm_1<E> >::expression_type expression_type;
-	return expression_type(e());
+	return matrix_norm_1<E>::apply(e());
 }
 
 template<class E>
-
-typename matrix_scalar_unary_traits<E, matrix_norm_frobenius<E> >::result_type
+typename matrix_norm_frobenius<E>::result_type
 norm_frobenius(const matrix_expression<E> &e) {
-	typedef typename matrix_scalar_unary_traits<E, matrix_norm_frobenius<E> >::expression_type expression_type;
-	return expression_type(e());
+	return matrix_norm_frobenius<E>::apply(e());
 }
 
 template<class E>
-
-typename matrix_scalar_unary_traits<E, matrix_norm_inf<E> >::result_type
+typename matrix_norm_inf<E>::result_type
 norm_inf(const matrix_expression<E> &e) {
-	typedef typename matrix_scalar_unary_traits<E, matrix_norm_inf<E> >::expression_type expression_type;
-	return expression_type(e());
+	return matrix_norm_inf<E>::apply(e());
 }
 
 }

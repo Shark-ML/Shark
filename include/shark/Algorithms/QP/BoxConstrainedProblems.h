@@ -531,6 +531,8 @@ protected:
 			getMaxKKTViolations(largestUp,smallestDown,this->dimensions());
 		}
 		//shrink
+		smallestDown = std::min(smallestDown,0.0);
+		largestUp = std::max(largestUp,0.0);
 		for (std::size_t a = this->active(); a > 0; --a){
 			if(testShrinkVariable(a-1,largestUp,smallestDown))
 				this->shrinkVariable(a-1);

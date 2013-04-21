@@ -39,24 +39,24 @@ namespace shark {namespace detail {namespace bindings {
 template<bool upper, bool unit, bool left = true>
 struct TriangularTag{
 	typedef blas::unit_upper_tag type;
-	typedef blas::unit_upper TraitsType;
+//	typedef blas::unit_upper TraitsType;
 };
 
 template<>
 struct TriangularTag<true,false,true>{
 	typedef blas::upper_tag type;
-	typedef blas::upper TraitsType;
+	//typedef blas::upper TraitsType;
 };
 
 template<>
 struct TriangularTag<false,true,true>{
 	typedef blas::unit_lower_tag type;
-	typedef blas::unit_lower TraitsType;
+	//typedef blas::unit_lower TraitsType;
 };
 template<>
 struct TriangularTag<false,false,true>{
 	typedef blas::lower_tag type;
-	typedef blas::lower TraitsType;
+	//Wtypedef blas::lower TraitsType;
 };
 
 template<bool upper, bool unit>

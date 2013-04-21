@@ -54,8 +54,10 @@ void trsm(
 	Tag type,
 	boost::mpl::false_
 ){
-	blas::matrix_unary2<MatB, blas::scalar_identity<typename MatB::value_type> > transB=trans(matB);
+	blas::matrix<typename MatB::value_type> transB = trans(matB);//hack!!!
+	//blas::matrix_unary2<MatB, blas::scalar_identity<typename MatB::value_type> > transB=trans(matB());
 	blas::inplace_solve (trans(matA), transB, type);
+	noalias(matB()) = trans(transB);
 }
 
 template <bool upper, bool left, bool unit,typename SymmA, typename MatB>
