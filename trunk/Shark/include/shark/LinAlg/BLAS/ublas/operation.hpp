@@ -14,6 +14,7 @@
 #define _BOOST_UBLAS_OPERATION_
 
 #include <shark/LinAlg/BLAS/ublas/matrix_proxy.hpp>
+#include <shark/LinAlg/BLAS/ublas/functional.hpp>
 
 /** \file operation.hpp
  *  \brief This file contains some specialized products.

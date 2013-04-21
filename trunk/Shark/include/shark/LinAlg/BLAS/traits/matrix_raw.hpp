@@ -103,11 +103,11 @@ bool isTransposed(blas::matrix_expression<Mat> const& mat){
 //returns the size of the leading dimension of the matrix in memory
 template <typename Mat>
 int leadingDimension(Mat const& m, blas::row_major_tag) {
-	return (int) (isTransposed(m)?matrix_stride2(m):matrix_stride1(m));
+	return (int) matrix_stride1(m);
 }
 template <typename Mat>
 int leadingDimension(Mat const& m, blas::column_major_tag) {
-	return (int) (isTransposed(m)?matrix_stride2(m):matrix_stride1(m));
+	return (int) matrix_stride2(m);
 }
 template <typename Mat>
 int leadingDimension(blas::matrix_expression<Mat> const& m) {

@@ -74,6 +74,24 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
+	std::cout<<"e"<<std::endl;//(check for column major lower arguments)
+	{
+		blas::matrix<double,blas::column_major > AcolMaj = A;
+		blas::matrix<double,blas::column_major > testResult = input;
+		solveTriangularSystemInPlace<SolveAXB,Lower>(AcolMaj,testResult);
+		RealMatrix result = prod(AInv,input);
+		double error = norm_inf(result-testResult);
+		BOOST_CHECK_SMALL(error, 1.e-12);
+	}
+	std::cout<<"f"<<std::endl;//(check for row major upper arguments)
+	{
+		RealMatrix Atrans = trans(A);
+		RealMatrix testResult = input;
+		solveTriangularSystemInPlace<SolveAXB,Upper>(Atrans,testResult);
+		RealMatrix result = prod(trans(AInv),input);
+		double error = norm_inf(result-testResult);
+		BOOST_CHECK_SMALL(error, 1.e-12);
+	}
 	
 	//now we test all combinations of transpositions
 	//for unit-matrices
@@ -106,6 +124,24 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 		RealMatrix testResult = subrange(input,0,1,0,2);
 		solveTriangularSystemInPlace<SolveXAB,UnitUpper>(trans(A),testResult);
 		RealMatrix result = prod(subrange(input,0,1,0,2),trans(UnitAInv));
+		double error = norm_inf(result-testResult);
+		BOOST_CHECK_SMALL(error, 1.e-12);
+	}
+	std::cout<<"e"<<std::endl;//(check for column major lower arguments)
+	{
+		blas::matrix<double,blas::column_major > AcolMaj = A;
+		blas::matrix<double,blas::column_major > testResult = input;
+		solveTriangularSystemInPlace<SolveAXB,UnitLower>(AcolMaj,testResult);
+		RealMatrix result = prod(UnitAInv,input);
+		double error = norm_inf(result-testResult);
+		BOOST_CHECK_SMALL(error, 1.e-12);
+	}
+	std::cout<<"f"<<std::endl;//(check for row major upper arguments)
+	{
+		RealMatrix Atrans = trans(A);
+		RealMatrix testResult = input;
+		solveTriangularSystemInPlace<SolveAXB,UnitUpper>(Atrans,testResult);
+		RealMatrix result = prod(trans(UnitAInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
@@ -172,6 +208,24 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
+	std::cout<<"e"<<std::endl;//(check for column major lower arguments)
+	{
+		blas::matrix<double,blas::column_major > AcolMaj = A;
+		RealVector testResult = input;
+		solveTriangularSystemInPlace<SolveAXB,Lower>(AcolMaj,testResult);
+		RealVector result = prod(AInv,input);
+		double error = norm_inf(result-testResult);
+		BOOST_CHECK_SMALL(error, 1.e-12);
+	}
+	std::cout<<"f"<<std::endl;//(check for row major upper arguments)
+	{
+		RealMatrix Atrans = trans(A);
+		RealVector testResult = input;
+		solveTriangularSystemInPlace<SolveAXB,Upper>(Atrans,testResult);
+		RealVector result = prod(trans(AInv),input);
+		double error = norm_inf(result-testResult);
+		BOOST_CHECK_SMALL(error, 1.e-12);
+	}
 	
 	//now we test all combinations of transpositions
 	//for unit-matrices
@@ -204,6 +258,24 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 		RealVector testResult = input;
 		solveTriangularSystemInPlace<SolveXAB,UnitUpper>(trans(A),testResult);
 		RealVector result = prod(input,trans(UnitAInv));
+		double error = norm_inf(result-testResult);
+		BOOST_CHECK_SMALL(error, 1.e-12);
+	}
+	std::cout<<"e"<<std::endl;//(check for column major lower arguments)
+	{
+		blas::matrix<double,blas::column_major > AcolMaj = A;
+		RealVector testResult = input;
+		solveTriangularSystemInPlace<SolveAXB,UnitLower>(AcolMaj,testResult);
+		RealVector result = prod(UnitAInv,input);
+		double error = norm_inf(result-testResult);
+		BOOST_CHECK_SMALL(error, 1.e-12);
+	}
+	std::cout<<"f"<<std::endl;//(check for row major upper arguments)
+	{
+		RealMatrix Atrans = trans(A);
+		RealVector testResult = input;
+		solveTriangularSystemInPlace<SolveAXB,UnitUpper>(Atrans,testResult);
+		RealVector result = prod(trans(UnitAInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}

@@ -63,8 +63,8 @@ public:
 	typedef ValueType* pointer;
 	typedef value_type const* const_pointer;
 	//ublas types
-	typedef FixedDenseVectorProxy<value_type const> const_closure_type;
-	typedef self_type closure_type;
+	typedef blas::vector_reference<self_type const> const const_closure_type;
+	typedef blas::vector_reference<self_type> closure_type;
 	typedef blas::dense_tag storage_category;
 
 	// Construction and destruction
@@ -121,6 +121,11 @@ public:
 	
 	pointer data()const{
 		return m_data;
+	}
+	
+	bool same_closure(self_type const& t) const {
+		//same closure if the data segments are overlapping
+		return (t.data()+t.size()) > data() && (t.data() < data()+size());
 	}
 	
 	// --------------
@@ -332,8 +337,8 @@ public:
 	typedef ValueType* pointer;
 	typedef value_type const* const_pointer;
 	//ublas types
-	typedef FixedDenseMatrixProxy<value_type const,Orientation> const_closure_type;
-	typedef self_type closure_type;
+	typedef blas::matrix_reference<self_type const> const const_closure_type;
+	typedef blas::matrix_reference<self_type> closure_type;
 	typedef blas::dense_tag storage_category;
         
 
@@ -417,11 +422,6 @@ public:
 	pointer data()const{
 		return m_data;
 	}
-	
-	// Closure comparison
-        bool same_closure (FixedDenseMatrixProxy const& other) const{
-		return m_data == other.m_data;
-        }
 	
 	void clear(){
 		for(std::size_t i = 0; i != size1(); ++i){
@@ -540,10 +540,10 @@ public:
 	// ITERATORS
 	// --------------
 
-	typedef blas::indexed_iterator1<closure_type, blas::dense_random_access_iterator_tag> iterator1;
-        typedef blas::indexed_iterator2<closure_type, blas::dense_random_access_iterator_tag> iterator2;
-        typedef blas::indexed_const_iterator1<const_closure_type, blas::dense_random_access_iterator_tag> const_iterator1;
-        typedef blas::indexed_const_iterator2<const_closure_type, blas::dense_random_access_iterator_tag> const_iterator2;
+	typedef blas::indexed_iterator1<self_type, blas::dense_random_access_iterator_tag> iterator1;
+        typedef blas::indexed_iterator2<self_type, blas::dense_random_access_iterator_tag> iterator2;
+        typedef blas::indexed_const_iterator1<self_type, blas::dense_random_access_iterator_tag> const_iterator1;
+        typedef blas::indexed_const_iterator2<self_type, blas::dense_random_access_iterator_tag> const_iterator2;
 	
         const_iterator1 find1 (int /* rank */, size_type i, size_type j) const {
 		return const_iterator1 (*this, i, j);
@@ -645,9 +645,9 @@ public:
 	typedef IndexType const* const_index_pointer;
 	typedef value_type const* const_pointer;
 	//ublas types
-	typedef FixedSparseVectorProxy<ValueType,IndexType> const_closure_type;
-	typedef self_type closure_type;
 	typedef blas::dense_tag storage_category;
+	typedef blas::vector_reference<self_type const> const const_closure_type;
+	typedef blas::vector_reference<self_type> closure_type;
 
 	// Construction and destruction
 
