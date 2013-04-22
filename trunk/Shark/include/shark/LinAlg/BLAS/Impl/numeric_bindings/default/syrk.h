@@ -51,7 +51,7 @@ inline void syrk (
 	else if ( beta != 1.0){
 		matC()*=beta;
 	}
-	blas::matrix_unary2<const MatA, blas::scalar_identity<typename MatA::value_type> > transA = trans(matA);
+	blas::matrix_transpose<const MatA> transA = trans(matA);
 //	blas::triangular_adaptor<TriangularC, typename TriangularTag<upper,false>::TraitsType > triangularC(matC());
 	axpy_prod(matA,transA,matC(),false);
 	if(alpha != 1.0){
