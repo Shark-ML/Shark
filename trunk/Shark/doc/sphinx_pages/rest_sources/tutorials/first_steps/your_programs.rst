@@ -66,6 +66,9 @@ That is, we now use the debug version of the Shark library
 ``shark_debug``, which must have been installed/built, and pass
 different options to the compiler (line 3).
 
+
+
+
 .. _label_for_cmake_example_project:
 
 Working with CMake
@@ -82,10 +85,13 @@ to the project and run cmake.
 
 
 Shark directory layout
-======================
+***********************
 
 The below diagram gives an overview over the Shark directory structure
 after *having extracted the source code package of shark*.
+
+.. todo::
+  is this still up to date?
 
 .. note::
    The locations and/or contents of the listed folders may

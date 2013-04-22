@@ -29,7 +29,7 @@ want to compile Shark yourself, you will in addition need `CMake <http://www.cma
 
 .. Installing pre-built Shark binary packages
    ------------------------------------------
-   
+
     We provide pre-built binaries of Shark to be directly installed, see the :doc:`Downloads page <../downloads/downloads>`.
     We offer installers for **MS Windows 64 bit Visual Studio 2010**, **MS Windows 32 bit Visual Studio 2010**, **MS Windows
     64 bit Visual Studio 2008**, **MS Windows 32 bit Visual Studio 2008**, a **MacOS X 64 bit diskimage**, as well as a
@@ -51,9 +51,11 @@ Download and unpack sources
 Either download and unpack the latest official Shark source-code release from :doc:`here
 <../downloads/downloads>`, or check out the current SVN version via (a ``Shark`` directory
 will be created as a subfolder -- if you want the tree contents directly in the current
-directory, add a space and period ``.`` to the end of the command)::
+directory, add a space and period ``.`` to the end of the command):
 
-      svn co svn://svn.code.sf.net/p/shark-project/code/trunk/Shark
+.. code-block:: none
+
+      svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
 
 Building Shark with Linux, MacOS, and other Unix-based systems
 **************************************************************
@@ -79,22 +81,42 @@ file as well as an ``include/`` and ``src/`` directory.
     building the release variant of Shark (but we still strongly encourage you to use the debug version with your newly
     written code).
 
+
+The first step is to configure the build. In all of the below we use the
+command ``ccmake`` for this.
+
+.. admonition:: Note on CMake command
+
+     If ``ccmake`` is not installed on your system, either consider
+     adding it (sometimes in a package called ``cmake-curses-gui`` or similar),
+     or fall back to the wizard mode of CMake: instead of the above command,
+     simply use the alternative ``cmake -i``, which will query you on the
+     command line. If you already know well the relevant configuration options,
+     you can also pass them directly to ``cmake`` (without the ``-i``), as in
+     for example ``cmake -D CMAKE_BUILD_TYPE=Debug -D OPT_COMPILE_DOCUMENTATION:BOOL=OFF
+     -DBoost_NO_SYSTEM_PATHS=TRUE ...``, etc.  Of course, you can also use the
+     QT GUI-version of CMake (``cmake-gui``); and of course, you
+     can also pass options directly to ``ccmake`` in the above way.
+
 Detailed instructions
 &&&&&&&&&&&&&&&&&&&&&&&&&
 
-#. **Starting note on in-place vs. out-of-source builds:** Shark supports both in-place
-   builds (where the generated files are put in the source directory) and out-of-source
+#. **Starting notes on in-place vs. out-of-source builds:** Shark supports both in-place
+   builds (where the generated files are put in the Shark directory) and out-of-source
    builds (where the generated files are put in a completely different directory and the
-   source tree remains unchanged). In fact, the choice is completely handled by the CMake
-   build system, see their documentation `here
-   <http://www.cmake.org/Wiki/CMake_FAQ#What_is_an_.22out-of-source.22_build.3F>`_.
+   source tree remains unchanged). This choice is handled by the CMake
+   build system (for full details, see their documentation `here
+   <http://www.cmake.org/Wiki/CMake_FAQ#What_is_an_.22out-of-source.22_build.3F>`_ ).
+
    In short, ``ccmake`` should be called *from the directory in which you want the build
    files to end up*. The argument to ``ccmake`` should be *the path to your Shark source
    directory* (``<SHARK_SRC_DIR>``), which contains the main CMakeLists.txt file for Shark.
-   When calling ccmake from an outside directory (i.e., when building out-of-source) after
-   previous in-place builds, you must first delete any leftover CMakeCache.txt file from
-   the Shark source directory. In general, out-of-source builds have the advantage that
-   you can have one folder for Debug and one for Release builds. In the following, the
+   When calling ccmake from an outside directory (i.e., when building out-of-source) *after
+   previous in-place builds*, you must first delete any leftover CMakeCache.txt file from
+   the Shark source directory.
+
+   In general, out-of-source builds have the advantage that you can have e.g. one folder
+   for Debug and one for Release builds. In the following, the
    generic placeholder ``<SHARK_SRC_DIR>`` can either be just the current directory
    (e.g., just the dot or period "``.``") in case of in-place builds, or the path to
    your Shark main directory in case of out-of-source builds. In-place builds will not
@@ -103,15 +125,22 @@ Detailed instructions
    also have the opportunity to specify an installation directory to which the library
    will be installed upon issueing ``make install`` after compilation (see below).
 
+   In our view, the most recommendable setup is to have two out-of-source build directories
+   for one debug and one release build, but configure both of these not to build the
+   documentation. The documentation can instead be conveniently built in-place
+   in ``<SHARK_SRC_DIR>/doc`` by issuing ``ccmake .`` there. See the :doc:`documentation
+   tutorial <../tutorials/for_developers/managing_the_documentation>` for more information.
+
 #. **Configuring the build using CMake:** Regardless if from a separate build directory
    or the main Shark folder, to enter the curses-based configuration menu of CMake, simply
    issue::
 
        ccmake <SHARK_SRC_DIR>
 
-   If you have a custom/manual Boost installation, please use instead::
+   If you have a custom/manual Boost installation, please identify your boost include and
+   library directories and use instead::
 
-       ccmake -DBOOST_ROOT:Path=/path/to/boost -DBoost_NO_SYSTEM_PATHS=TRUE <SHARK_SRC_DIR>
+       ccmake -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_INCLUDEDIR=/path/to/boost/include/ -DBOOST_LIBRARYDIR=/path/to/boost/lib/ <SHARK_SRC_DIR>
 
    If ccmake is installed, the above command will produce a console-style menu in
    which you can easily change those installation options you wish to alter.
@@ -120,20 +149,6 @@ Detailed instructions
    options you wish to, and then press ``c`` twice to configure the installation,
    followed by ``g`` to generate the according makefile, and ``q`` to quit ccmake.
 
-   .. note::
-
-     We have here used the convenient ``ccmake`` curses interface to configure
-     the CMake build system. If it is not installed on your system, either consider
-     adding it (sometimes in a package called ``cmake-curses-gui`` or similar),
-     or fall back to the wizard mode of CMake: instead of the above command,
-     simply use the alternative ``cmake -i``, which will query you on the
-     command line. If you already know well the relevant configuration options,
-     you can also pass them directly to ``cmake`` (without the ``-i``), as in
-     for example ``cmake -D CMAKE_BUILD_TYPE=Debug -D OPT_COMPILE_DOCUMENTATION:BOOL=OFF
-     -D OPT_COMPILE_EXAMPLES:BOOL=ON -D OPT_DYNAMIC_LIBRARY:BOOL=OFF -D
-     OPT_ENABLE_ATLAS:BOOL=ON -D OPT_MAKE_TESTS:BOOL=ON -DBOOST_ROOT:Path=/path/to/boost/
-     -DATLAS_ROOT:Path=/path/to/atlas/ -DBoost_NO_SYSTEM_PATHS=TRUE
-     -DBoost_INCLUDE_DIRS=/path/to/boost/include/ -DBoost_LIBRARY_DIRS=/path/to/boost/lib/ ..``.
 
    There are several different build options (see bottom of page) you will
    encounter in the ccmake menu, and the (arguably) three most important ones are:
@@ -143,10 +158,10 @@ Detailed instructions
    * the installation path (prefix) for Shark when later (and optionally)
      calling ``make install``. By default it is ``/usr/local/``.
 
-   If unsure, leave everything as is, and see
-   :doc:`the troubleshooting page <../getting_started/troubleshooting>` if
-   things go awry. But, even if no options are changed, the CMake configuration
-   system must still be called once.
+   **If unsure, leave everything as is (perhaps put the build type to ``Debug``), and
+   see** :doc:`the troubleshooting page <../getting_started/troubleshooting>` **if
+   things go awry.** But, even if no options are changed, the CMake configuration
+   system must still be configured in this way once.
 
 
    Besides the Boost installation path, the most important build option will
@@ -172,14 +187,17 @@ Detailed instructions
 #. Run ``make`` (or e.g. ``make -j4`` to distribute the build on 4 cores).
 
 #. That's it: you are done and have a working Shark installation at your disposal!
-   Now possibly enter ``make test`` (or ``ctest``) to verify that everything works fine.
+   Now preferably enter ``make test`` (or ``ctest``) to verify that everything works fine.
 
-#. When you are happy with the outcome, run ``make install`` to install Shark at the
-   previously chosen path. If you don't install Shark this way, the library files
-   will simply linger in the ``lib/`` subdirectory. Note however, that there might
-   be some additional commands carried out as part of ``make install`` (e.g., data
-   files needed for the example tutorials may not get copied to the proper location,
-   but this can also be done manually as needed).
+#. When you are happy with the outcome, you can run ``make install`` to install Shark at the
+   previously chosen prefix/path. If you don't install Shark this way, the library files
+   will simply linger in the ``lib/`` subdirectory, which is fine. Note however, that there
+   might be some additional commands carried out as part of ``make install`` (e.g., data
+   files needed for the example tutorials may not get copied to the proper location),
+   but this can also be done manually as needed. That is, you are fine using and
+   linking to files in the build directory for most tasks - just remember to manually
+   copy any data files that are reported as missing when running certain examples.
+   ``locate`` may be your friend here.
 
 
 Building Shark with Microsoft Windows
@@ -215,15 +233,13 @@ for big problems. Enabling ATLAS is simple. On most Unix systems, only the optio
 If ATLAS is not placed in a standard path, you will have to tell Shark where the libraries can be found. For this, the ccmake
 call above must be changed to::
 
-  ccmake -DBOOST_ROOT:Path=/path/to/boost -DATLAS_ROOT:Path=/path/to/ATLAS/ -DBoost_NO_SYSTEM_PATHS=TRUE -DOPT_ENABLE_ATLAS=ON <SHARK_SRC_DIR>
-
-For example, if Boost is placed in /opt/boost/ and the atlas libs are in /opt/atlas/lib/ the command looks like::
-
-  ccmake -DBOOST_ROOT:Path=/opt/boost -DATLAS_ROOT:Path=/opt/atlas/ -DBoost_NO_SYSTEM_PATHS=TRUE -DOPT_ENABLE_ATLAS=ON <SHARK_SRC_DIR>
+  ccmake -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_INCLUDEDIR=/path/to/boost/include/ -DBOOST_LIBRARYDIR=/path/to/boost/lib/ -DATLAS_ROOT:Path=/path/to/ATLAS/ -DOPT_ENABLE_ATLAS=ON <SHARK_SRC_DIR>
 
 Enabling ATLAS support will change the auto-generated :ref:`CMake files for projects using Shark
 <label_for_cmake_example_project>` to automatically use the ATLAS library as well.
 
+See :doc:`the troubleshooting page <../getting_started/troubleshooting>` for information on how
+to verify that Shark is using Atlas.
 
 
 More details on CMake
@@ -251,8 +267,10 @@ can add the corresponding keyword to the ``make`` command, e.g., ``make doc`` et
 To build a specific target, see your favorite IDE's documentation. In case of Makefiles, add the target name after the make command.
 
 Note that the documentation has its own CMake project in the ``doc/`` subfolder.
-It can be built by issuing ``make doc`` there. See the :doc:`documentation tutorial
-<../tutorials/for_developers/managing_the_documentation>` for more information.
+It can be built by issuing ``make doc`` there (in-place build of the documentation),
+and we recommend separating the
+library build process from the documentation build process. See the :doc:`documentation
+tutorial <../tutorials/for_developers/managing_the_documentation>` for more information.
 
 .. _label_for_cmake_options:
 
