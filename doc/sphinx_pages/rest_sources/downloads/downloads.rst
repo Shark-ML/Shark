@@ -58,9 +58,10 @@ Shark repository
 
 Get a current Shark repository snapshot (a ``Shark`` directory
 will be created as a subfolder -- if you want the tree contents directly in the current
-directory, add a space and period ``.`` to the end of the command)::
+directory, add a space and period ``.`` to the end of the command):
 
-      svn co`  svn://svn.code.sf.net/p/shark-project/code/trunk/Shark`
+.. code-block:: none
+
       svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
 
 

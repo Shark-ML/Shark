@@ -26,7 +26,7 @@
    rest_sources/tutorials/concepts/library_design/stopping_criteria
    rest_sources/tutorials/concepts/library_design/trainers
    rest_sources/tutorials/concepts/library_design/batches
-   
+
    rest_sources/tutorials/concepts/library_design/writing_kernels
    rest_sources/tutorials/concepts/library_design/writing_objective_functions
 
@@ -71,7 +71,7 @@
 
    rest_sources/tutorials/algorithms/rbm_module
    rest_sources/tutorials/algorithms/binary_rbm
-   
+
    rest_sources/tutorials/algorithms/quadratic_programs
 
    rest_sources/tutorials/concepts/misc/versatile_classification
@@ -139,8 +139,8 @@ Why Shark?
 
 **Speed and flexibility**
 
-Shark provides an excellent trade-off between flexibility as well
-as ease-of-use on the one hand and computational efficiency on the other.
+Shark provides an excellent trade-off between flexibility and
+ease-of-use on the one hand, and computational efficiency on the other.
 
 **One for all**
 
@@ -153,7 +153,7 @@ combined and extended.
 Shark comes with a lot of powerful algorithms that are to our best
 knowledge not implemented in any other library, for example in the
 domains of model selection and training of binary and multi-class SVMs,
-evolutionary single- and multi-objective optimization.
+or evolutionary single- and multi-objective optimization.
 
 
 .. _label_for_feature_list:

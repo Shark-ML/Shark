@@ -27,20 +27,20 @@ outline: 0px;
 body {
     line-height: 150%;
     text-align: center;
-	background-color: #BFD1D4;
+    background-color: #BFD1D4;
     color: black;
     padding: 0;
     border: 1px #aaa;
     border-style:none solid solid solid;
     margin: 0px 80px 0px 80px;
-	/* dont influence injected header fontspecs... */
+    /* dont influence injected header fontspecs... */
 }
 
 div.document {
-	/* ...but rather paste the same stuff here for encapsulation */
-	font-family: {{ theme_mainfont }};
-	letter-spacing: {{theme_letterspace }};
-	/* original document-specific rules below */
+    /* ...but rather paste the same stuff here for encapsulation */
+    font-family: {{ theme_mainfont }};
+    letter-spacing: {{theme_letterspace }};
+    /* original document-specific rules below */
     background-color: white;
     text-align: left;
     background-image: url(contents.png);
@@ -94,16 +94,16 @@ div.sphinxsidebar {
     font-size: 1em;
     text-align: left;
     /*
-		this is taken from default theme
-	*/
+        this is taken from default theme
+    */
      {%- if theme_stickysidebar|tobool %}
-	    top: 110px;
-	    bottom: 0;
-	    margin: 0;
-	    position: fixed;
-	    overflow: auto;
-	    height: auto;
-	    right: 81px;
+        top: 110px;
+        bottom: 0;
+        margin: 0;
+        position: fixed;
+        overflow: auto;
+        height: auto;
+        right: 81px;
     {%- endif %}
 }
 
@@ -163,7 +163,7 @@ Dual licensed under MIT and GNU GPLv2 Nicolas Gallagher
     left:0;
 }
 .mt_ltocwrapper a:before {
-	margin:-8px 0 0;
+    margin:-8px 0 0;
     background: {{ theme_linkcolor }};
     left:0px;
     width:4px;
@@ -172,7 +172,7 @@ Dual licensed under MIT and GNU GPLv2 Nicolas Gallagher
     background:transparent;
 }
 .mt_ltocwrapper a:after {
-	margin:-8px 0 0;
+    margin:-8px 0 0;
     background: {{ theme_linkcolor }};
     left:0px;
     border-width:2px;
@@ -185,7 +185,7 @@ Dual licensed under MIT and GNU GPLv2 Nicolas Gallagher
 /* --- END FILE ICON BY NICOLAS GALLGHER --- */
 
 div.sphinxsidebar ul {
-	list-style-type: none!important;
+    list-style-type: none!important;
     padding-left: 1.5em;
     border-top: 0px!important;
     margin-bottom: 15px!important;
@@ -205,48 +205,48 @@ div.sphinxsidebar .logo {
 }
 
 div.sphinxsidebar .search {
-	margin-top: 15px;
+    margin-top: 15px;
 }
 
 input
 {
-	color: {{ theme_linkcolor }};
-	background: #fff;
-	border: 1px solid #D8D8D8!important;
+    color: {{ theme_linkcolor }};
+    background: #fff;
+    border: 1px solid #D8D8D8!important;
 }
 
 div.sphinxsidebar .mtsubmitbutton {
     width: 40px;
-	border: 3px double #B9B9B9!important;
-	border-top-color: #D7D5D5!important;
-	border-left-color: #D7D5D5!important;
-	padding: 0.25em 0 0;
-	background-color: #FFFFFF;
-	color: #333333;
-	font-size: 75%;
+    border: 3px double #B9B9B9!important;
+    border-top-color: #D7D5D5!important;
+    border-left-color: #D7D5D5!important;
+    padding: 0.25em 0 0;
+    background-color: #FFFFFF;
+    color: #333333;
+    font-size: 75%;
 }
 
 div.sphinxsidebar .topless {
-	line-height: 120%;
-	margin-bottom: 5px;
-	display: block;
+    line-height: 120%;
+    margin-bottom: 5px;
+    display: block;
 }
 
 div.sphinxsidebar p.mtshowsource {
-	margin-left: 0px;
-	text-align: left
+    margin-left: 0px;
+    text-align: left
 }
 
 img.sourceicon {
-	height: 9px;
-	display: inline;
-	margin-right: -1px;
+    height: 9px;
+    display: inline;
+    margin-right: -1px;
 }
 
 img.navicon {
-	height: 9px;
-	display: inline;
-	margin-right: 2px;
+    height: 9px;
+    display: inline;
+    margin-right: 2px;
 }
 
 /* this is the actual sidebarstuff!!! (eventually move fixed-style here...)*/
@@ -260,7 +260,7 @@ div.sphinxsidebarwrapper {
 }
 
 div.footer {
-	font-family: "DejaVu Sans", Arial, Helvetica, sans-serif;
+    font-family: "DejaVu Sans", Arial, Helvetica, sans-serif;
     background-color: #E3EFF1;
     color: #86989B;
     padding: 3px 8px 3px 0;
@@ -275,7 +275,7 @@ div.footer a {
 }
 
 div.footerlogos {
-	display: inline;
+    display: inline;
     padding: 0 5px 0;
     vertical-align: -0.21em;
 }
@@ -304,22 +304,27 @@ p {
 }
 
 a:link, a:visited {
-	text-decoration: none;
+    text-decoration: none;
     color: {{ theme_linkcolor }};
 }
 
 a:hover, a:active {
-	text-decoration: none;
+    text-decoration: none;
     color: {{ theme_active_linkcolor }};
 }
 
 /*  More layout and styles */
 h1 {
-    font-size: 1.6em;
+    font-size: 1.8em;
     font-weight: bold;
     color: {{ theme_main_headingcolor }};
-    margin-top: 45px;
-    margin-bottom: 35px;
+    /* line-height: 200%; */
+
+    background-color: #F9FAFC;
+    border-bottom: 1px solid #C4CFE5;
+    padding: 32px 0px 10px 15px;
+    margin: 8px 0px 40px 0px;
+
 }
 
 h2 {
@@ -364,7 +369,7 @@ div.contents p.topic-title {
     color: #707070;
 }
 div.contents a.reference.internal, div.contents a.reference.internal:hover {
-	color: #606060;
+    color: #606060;
 }
 
 h1 a.anchor, h2 a.anchor, h3 a.anchor, h4 a.anchor, h5 a.anchor, h6 a.anchor {
@@ -466,8 +471,8 @@ table td, table th {
 
 /* mt: put some more space below and above docutil tables */
 table.docutils {
-	margin-top: 35px;
-	margin-bottom: 40px;
+    margin-top: 35px;
+    margin-bottom: 40px;
 }
 
 div.admonition, div.warning {
@@ -545,12 +550,12 @@ div.cibox {
 
 /* miscellaneous:
 img.math{
-	vertical-align: text-bottom;
+    vertical-align: text-bottom;
 } */
 
 /* mt: override italization of internal doc-role references */
 a.reference.internal em {
-	font-style: normal
+    font-style: normal
 }
 
 /* mt: avoid file download links being styled like the main heading */
@@ -561,7 +566,7 @@ tt.xref.download {
 
 /* mt: */
 div.highlight {
-	margin-bottom: 20px;
-	margin-top: 20px;
+    margin-bottom: 20px;
+    margin-top: 20px;
 }
 

@@ -7,7 +7,7 @@ The Shark documentation system
 .. contents:: Contents:
 
 
-Shark uses the well-established `Doxygen <http://www.doxygen.org>`_ documentation
+Shark uses the well-established `Doxygen <http://www.doxygen.org>`_ C++ documentation
 system in combination with `Sphinx <http://sphinx.pocoo.org/>`_, another popular
 documentation system originating from the Python world. Doxygen is used to extract
 documentation from the C++ sources, generate inheritance diagrams, etc. To generate
@@ -26,7 +26,8 @@ also how to first install the tools needed for it. Besides Doxygen, we rely on t
 relevant Python modules, namely Sphinx and Doxylink. These in turn rely on other packages
 again, e.g., Docutils, Jinja2, Pygments, and Pyparsing. Since this tutorial page is
 created by Sphinx, you will most likely read it off a webserver or as part of a Shark
-package including the generated documentation pages.
+package including the generated documentation pages. After building the documentation
+yourself, you will be able to read it from your local folder, too.
 
 .. note:: These instructions are currently only tested on Mac OS X and Linux. Please
     contact us to mutually find out how this will work on Windows, or share your success
@@ -35,26 +36,37 @@ package including the generated documentation pages.
 #. We assume you have Doxygen installed. Note that in our current setup, Doxygen is also configured
    to use the `Graphviz <http://www.graphviz.org/>`_ libraries for rendering inheritence graphs,
    among others. This implies that we either assume Graphviz installed, or that you have to
-   manually edit your Shark.dox file in the main documentation folder, setting ``HAVE_DOT = NO``.
+   manually edit your Shark.dox(.in) file in the main documentation folder, setting ``HAVE_DOT = NO``.
 
-#. First, please get an overview for yourself over what Python versions you have installed on your system.
-   In an ideal world, you would have one single Python version (either 2 or 3). In all other cases, keep
-   in the back of your head that you will want to install the necessary Python packages for the same
-   Python versions which you will later use to call Sphinx when building the tutorials.
+#. First, please get an overview for yourself over what Python versions you have installed
+   on your system. In the simplest of worlds, you would have one single Python version (either
+   2 or 3). In all other cases, keep in the back of your head that you will want to install
+   the necessary Python packages for the same Python versions which you will later use to call
+   Sphinx when building the tutorials.
 
 #. Get an instance of `Doxylink (a.k.a. sphinxcontrib-doxylink)
    <http://pypi.python.org/pypi/sphinxcontrib-doxylink>`_ working on your system. Since
    Doxylink depends on Sphinx, getting Doxylink will also pull in Sphinx and its dependencies.
    So, for example when using ``pip``, a command like ``pip install sphinxcontrib-doxylink``
-   should get you good to go.
+   should get you good to go. You can specify a custom target directory via e.g.
+   ``pip install --install-option="--prefix=/home/user/path/to/your/pip_python_packages"
+   sphinxcontrib_doxylink``.
 
 #. As a precautionary measure, review your ``PYTHONPATH`` and ``PATH`` environment variables:
    depending on how and where you installed Doxylink and the other dependencies, you may
-   have to add the locations of the corresponding python packages to your ``PYTHONPATH``
+   have to add the locations of the corresponding python packages (e.g. for the example above,
+   ``/home/user/path/to/your/pip_python_packages/lib/python3.3/site-packages``)
+   to your ``PYTHONPATH``
    and the locations of the ``sphinx-build`` executable to your ``PATH``.
+   
+#. Next decide where you want to build your documentation to. The same comments
+   on in- and out-of-source builds apply as in the :doc:`installation instructions
+   <../../getting_started/installation>`. As stated there, we recommend to not build
+   the documentation with any debug or release builds of the library, but to build
+   it independently either in- or out-of-source.
 
 #. See what happens when you issue ``make doc`` in the ``doc/`` subdirectory of the main Shark
-   directory (you will possibly have to use ``ccmake .`` or ``cmake -i`` again to configure the
+   directory (you will probably have to use ``ccmake .`` or ``cmake -i`` again to configure the
    installation first). If Doxygen is installed and working, the interesting part will now be
    whether all Python components needed by Sphinx and Doxylink are working. This should in
    theory be the case. If not, try one of the following:
@@ -64,17 +76,25 @@ package including the generated documentation pages.
      with a user-controlled pythonpath, e.g. as in ::
 
          PYTHONPATH=/path/where/pip/puts/your/python2.7/site-packages/ make doc
+        
+     In extreme cases, you could add an alias from "sphinx-build" to the correct location
+     of your sphinx-build executable on your system.
 
    * you can manually edit ``$SHARKHOME/doc/sphinx_pages/conf.py`` to print out information,
-     like the path that Sphinx is seeing, in case the problem is that only Doxylink is not
-     found, but Sphinx is found.
+     like the path that Sphinx is seeing, etc.
 
-   * in extremely lost causes with multiple python versions and dependencies, you might
+   * in very lost causes with multiple python versions and dependencies, you might
      want to look into the `virtualenv <http://www.virtualenv.org>`_
      tool for managing different Python installations.
 
 #. You know that you are done when ``make doc`` exits with ``build succeeded. Built target doc``,
    and when you can successfully view the page ``$SHARKHOME/doc/index.html``.
+   
+.. admonition:: Note on just building the Sphinx part of the documentation
+
+   The subfolder ``doc/sphinx_pages`` consists of an additional Makefile steering
+   the Sphinx document generation process only. Here, you can issue ``make clean``
+   and ``make html`` 
 
 
 
@@ -88,20 +108,22 @@ To make a user's browser MathJax-capable, we follow a two-fold approach: first,
 as a default location for the ``MathJax.js`` file, we use an URL to the MathJax
 content delivery network -- that is, all users simply load the default online
 version of MathJax. However, users with a local installation of the documentation
-should also be able to read the docs when working offline. Thus, both the Doxygen
+may also want to read the docs when working offline. Thus, both the Doxygen
 ``header.html`` template and the Sphinx ``layout.html`` template include a JS
-snippet that tells the docs to fallback to a local MathJax installation. This
+snippet that tells the docs to fallback to a local MathJax installation. **However**,
+this local MathJax installation is not provided together with Shark and must be 
+inserted by the user to a specific location. MathJax
 _must_ be located in ``$Sharkhome/contrib/mathjax`` (to be precise, MathJax must
 be installed such that ``MathJax.js`` lives in that folder). The reason we do
-not distribute MathJax with Shark is that notably the Firefox browser does not
-support the MathJax web fonts (because of a strict same-origin policy even for
+not distribute MathJax with Shark is that notably the popular Firefox browser does
+not support the MathJax web fonts (because of a strict same-origin policy even for
 local sites), thus needs to fallback to image fonts, and these image fonts are
 140MB in size. Since we did not want to distribute these along with Shark, any
 users that want offline equation support for the docs are advised to install
-MathJax themselves to the abovementioned location. Thanks.
+MathJax themselves to the abovementioned location.
 
 ..
-   comment in once the firefox same-origin thing is fixed:
+   old, from when we distributed mathjax as well / for documentation of how to get a small MJ inst.
    A local version of MathJax was chosen because otherwise, seeing equations in the
    docs would rely on an internet connection. Since a standard MathJax
    installation is huge (150MB or so), we crop some of its functionality:
@@ -119,8 +141,7 @@ MathJax themselves to the abovementioned location. Thanks.
 Maintenance and update issues
 +++++++++++++++++++++++++++++
 
-Below is useful information related to Python and Doxylink updates with respect
-to necessary user intervention.
+Below comes information related to Python, Doxylink, and their updates.
 
 
 Note for Python3.3 users
@@ -152,13 +173,12 @@ point out notable caveats when working with Sphinx and rst-files:
 * Do not use the main heading type, that is, the underline type
   for the h1-heading twice, because this will look ugly in the
   document. In other words, whichever symbol you chose to underline
-  the main page heading should not get used a second time from then
-  on.
+  the main page heading with should not get used a second time from
+  then on.
 
-  To promote homogeneity, we advise that the following conventions are
-  being followed for heading levels, almost aligning with that for the
-  official Python documentation (except skipping the ``=`` to avoid
-  confusion with tables):
+  To promote homogeneity, we advise the following heading levels,
+  almost aligning with that for the official Python documentation
+  (except skipping the ``=`` to avoid confusion with tables):
 
   * ``h1`` headings use ``#``
   * ``h2`` headings use ``*``
@@ -231,7 +251,7 @@ to be able to automatically reference pages in the doxygen documentation from wi
 the Sphinx tutorial pages, we use the excellent and highly recommended Sphinx-Doxygen
 bridge "Doxylink" by Matt Williams. You can find the documentation for Doxylink
 `here <http://packages.python.org/sphinxcontrib-doxylink/>`_ and its PyPI package
-page `here <http://pypi.python.org/pypi/sphinxcontrib-doxylink>`__ .
+page `there <http://pypi.python.org/pypi/sphinxcontrib-doxylink>`__ .
 
 
 In ``${SHARKHOME}/doc/sphinx_pages/conf.py`` the variable ``doxylink`` defines additional

@@ -168,8 +168,7 @@ growing. We are continuously extending and improving the algorithms in
 various domains of machine learning and computational intelligence.
 
 Flexibility and speed are the main design criteria. We think that its
-flexibility and extensibility makes Shark stand out from other
-libraries.
+flexibility and extensibility make Shark stand out from other libraries.
 
 It is mostly self-contained and offers computational intelligence
 techniques such as single- and multi-objective evolutionary algorithms
