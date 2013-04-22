@@ -583,14 +583,14 @@ public:
 };
 
 //matrix transpose
-template<class M, class TA>
-struct ExpressionTraitsBase<blas::matrix_unary2<M, blas::scalar_identity<TA> > >{
+template<class M>
+struct ExpressionTraitsBase<blas::matrix_transpose<M> >{
 private:
 	typedef ExpressionTraitsBase<
-		typename blas::matrix_unary2<M, blas::scalar_identity<TA> >::expression_closure_type const
+		typename blas::matrix_transpose<M>::expression_closure_type const
 	> Traits;
 public:
-	typedef blas::matrix_unary2<M, blas::scalar_identity<TA> > type;
+	typedef blas::matrix_transpose<M> type;
 	typedef type const const_type;
 	typedef typename ExpressionTraitsBase<M>::value_pointer value_pointer;
 	typedef typename Traits::orientation orientation;
@@ -605,14 +605,14 @@ public:
 		return Traits::stride1(m.expression());
 	}
 };
-template<class M, class TA>
-struct ExpressionTraitsBase<blas::matrix_unary2<M, blas::scalar_identity<TA> > const>{
+template<class M>
+struct ExpressionTraitsBase<blas::matrix_transpose<M> const>{
 private:
 	typedef ExpressionTraitsBase<
-		typename blas::matrix_unary2<M, blas::scalar_identity<TA> >::expression_closure_type const
+		typename blas::matrix_transpose<M>::expression_closure_type const
 	> Traits;
 public:
-	typedef blas::matrix_unary2<M, blas::scalar_identity<TA> > const type;
+	typedef blas::matrix_transpose<M> const type;
 	typedef type const_type;
 	typedef typename Traits::value_pointer value_pointer;
 	typedef typename Traits::orientation orientation;
@@ -628,11 +628,11 @@ public:
 	}
 };
 
-template<class M, class TA,class BaseExpression>
-SHARK_DENSETRAITSSPEC(blas::matrix_unary2<M BOOST_PP_COMMA() blas::scalar_identity<TA> >)
+template<class M,class BaseExpression>
+SHARK_DENSETRAITSSPEC(blas::matrix_transpose<M>)
 private:
 	typedef DenseTraits<
-		typename blas::matrix_unary2<M, blas::scalar_identity<TA> >::expression_closure_type const
+		typename blas::matrix_transpose<M>::expression_closure_type const
 	> Traits;
 public:
 	static value_pointer storageBegin(type& m){

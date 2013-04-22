@@ -1127,14 +1127,14 @@ operator / (matrix_expression<E> const &e, typename E::value_type scalar) {
 }
 
 template<class E, class F>
-class matrix_unary2:
-	public matrix_expression<matrix_unary2<E, F> > {
+class matrix_unary2:public matrix_expression<matrix_unary2<E, F> > {
+public:
 
 	typedef typename boost::mpl::if_<boost::is_same<F, scalar_identity<typename E::value_type> >,
 	        E,
 	        const E>::type expression_type;
 	typedef F functor_type;
-public:
+
 	typedef typename boost::mpl::if_<boost::is_const<expression_type>,
 	        typename E::const_closure_type,
 	        typename E::closure_type>::type expression_closure_type;
@@ -1553,20 +1553,102 @@ struct matrix_unary2_traits {
 #endif
 };
 
+template<class E>
+struct matrix_transpose: public matrix_expression<matrix_transpose<E> >{
+private:
+	typedef matrix_unary2<E, scalar_identity<typename E::value_type> > Transpose;
+	typedef typename Transpose::closure_type TransposeClosure;
+public:
+
+	typedef typename Transpose::size_type size_type;
+	typedef typename Transpose::difference_type difference_type;
+	typedef typename Transpose::value_type value_type;
+	typedef typename Transpose::const_reference const_reference;
+	typedef typename Transpose::reference reference;
+
+	typedef matrix_transpose<E> const const_closure_type;
+	typedef matrix_transpose<E> closure_type;
+	typedef typename Transpose::orientation_category orientation_category;
+	typedef typename Transpose::storage_category storage_category;
+
+	typedef typename Transpose::expression_type expression_type;
+	typedef typename Transpose::expression_closure_type expression_closure_type;
+
+	matrix_transpose(expression_type& expression):m_expression(expression){}
+		
+	// Accessors
+	size_type size1() const {
+		return m_expression.size1();
+	}
+	size_type size2() const {
+		return m_expression.size2();
+	}
+
+	// Expression accessors
+	expression_closure_type const& expression() const {
+		return m_expression.expression();
+	}
+	//~ expression_closure_type& expression(){
+		//~ return m_expression.expression();
+	//~ }
+	
+	// Element access
+	const_reference operator()(size_type i, size_type j) const{
+		return m_expression(i, j);
+	}
+	reference operator()(size_type i, size_type j) {
+		return m_expression(i, j);
+	}
+
+	// Closure comparison
+	bool same_closure(matrix_transpose const& mu2) const {
+		return (*this).expression().same_closure(mu2.expression());
+	}
+
+	// Iterator types
+	typedef typename Transpose::const_iterator1 const_iterator1;
+	typedef typename Transpose::const_iterator1 iterator1;
+	typedef typename Transpose::const_iterator2 const_iterator2;
+	typedef typename Transpose::const_iterator2 iterator2;
+	
+	// Element lookup
+	const_iterator1 find1(int rank, size_type i, size_type j) const {
+		SIZE_CHECK(i <= size1());
+		SIZE_CHECK(j <= size2());
+		return m_expression.find1(rank, i, j);
+	}
+	
+	const_iterator2 find2(int rank, size_type i, size_type j) const {
+		SIZE_CHECK(i <= size1());
+		SIZE_CHECK(j <= size2());
+		return m_expression.find2(rank, i, j);
+	}
+	
+	//Iterators
+	const_iterator1 begin1() const {
+		return find1(0, 0, 0);
+	}
+	const_iterator1 end1() const {
+		return find1(0, size1(), 0);
+	}
+	const_iterator2 begin2() const {
+		return find2(0, 0, 0);
+	}
+	const_iterator2 end2() const {
+		return find2(0, 0, size2());
+	}
+private:
+	TransposeClosure m_expression;
+};
+
 // (trans m) [i] [j] = m [j] [i]
 template<class E>
-
-typename matrix_unary2_traits<const E, scalar_identity<typename E::value_type> >::result_type
-trans(const matrix_expression<E> &e) {
-	typedef typename matrix_unary2_traits<const E, scalar_identity<typename E::value_type> >::expression_type expression_type;
-	return expression_type(e());
+matrix_transpose<const E> trans(const matrix_expression<E> &e) {
+	return matrix_transpose<const E>(e());
 }
 template<class E>
-
-typename matrix_unary2_traits<E, scalar_identity<typename E::value_type> >::result_type
-trans(matrix_expression<E> &e) {
-	typedef typename matrix_unary2_traits<E, scalar_identity<typename E::value_type> >::expression_type expression_type;
-	return expression_type(e());
+matrix_transpose<E> trans(matrix_expression<E> &e) {
+	return matrix_transpose<E>(e());
 }
 
 // (herm m) [i] [j] = conj (m [j] [i])

@@ -21,6 +21,148 @@
 // Iterators based on ideas of Jeremy Siek
 
 namespace shark{ namespace blas{
+	
+	/// \brief matrox transpose			
+//~ template<class E>
+//~ class matrix_transpose: public matrix_expression<matrix_transpose<E> > {
+//~ public:
+	//~ typedef typename boost::mpl::if_<boost::is_const<E>,
+	        //~ typename E::const_closure_type,
+	        //~ typename E::closure_type
+	//~ >::type expression_closure_type;
+
+	//~ typedef typename E::size_type size_type;
+	//~ typedef typename E::difference_type difference_type;
+	//~ typedef typename E::value_type value_type;
+	//~ typedef typename E::const_reference const_reference;
+	//~ typedef typename boost::mpl::if_<
+		//~ boost::is_const<E>,
+	        //~ typename E::const_reference,
+	        //~ typename E::reference
+	//~ >::type reference;
+
+	//~ typedef const matrix_transpose<E> const_closure_type;
+	//~ typedef matrix_transpose<E> closure_type;
+	//~ typedef typename boost::mpl::if_<
+		//~ boost::is_same<typename E::orientation_category,row_major_tag>,
+	        //~ column_major_tag,
+	        //~ typename boost::mpl::if_<
+			//~ boost::is_same<typename E::orientation_category,column_major_tag>,
+			//~ row_major_tag,
+			//~ typename E::orientation_category
+		//~ >::type
+	//~ >::type orientation_category;
+	//~ typedef typename E::storage_category storage_category;
+
+	//~ // Construction and destruction
+	//~ template<class AE>
+	//~ explicit matrix_transpose(matrix_expression<AE>& e):
+		//~ m_expression(e()) {}
+	
+	//~ template<class AE>
+	//~ explicit matrix_transpose(matrix_expression<AE> const& e):
+		//~ m_expression(e()) {}
+
+	//~ // Accessors
+	//~ size_type size1() const {
+		//~ return m_expression.size2();
+	//~ }
+	//~ size_type size2() const {
+		//~ return m_expression.size1();
+	//~ }
+
+	//~ // Expression accessors
+	//~ expression_closure_type const& expression() const {
+		//~ return m_expression;
+	//~ }
+	//~ expression_closure_type& expression(){
+		//~ return m_expression;
+	//~ }
+	
+	//~ // Element access
+	//~ const_reference operator()(size_type i, size_type j) const{
+		//~ return m_expression(j,i);
+	//~ }
+	//~ reference operator()(size_type i, size_type j) {
+		//~ return m_expression(j, i);
+	//~ }
+
+	//~ // Closure comparison
+	//~ bool same_closure(matrix_transpose const& mu2) const {
+		//~ return (*this).expression().same_closure(mu2.expression());
+	//~ }
+
+	//~ // Iterator types
+	//~ typedef typename expression_closure_type::const_iterator2 const_iterator1;
+	//~ typedef typename expression_closure_type::iterator2 iterator1;
+	//~ typedef typename expression_closure_type::const_iterator1 const_iterator2;
+	//~ typedef typename expression_closure_type::iterator1 iterator2;
+
+	//~ // Element lookup
+	//~ const_iterator1 find1(int rank, size_type i, size_type j) const {
+		//~ SIZE_CHECK(i <= size1());
+		//~ SIZE_CHECK(j <= size2());
+		//~ return m_expression.find2(rank, j, i);
+	//~ }
+	
+	//~ const_iterator2 find2(int rank, size_type i, size_type j) const {
+		//~ SIZE_CHECK(i <= size1());
+		//~ SIZE_CHECK(j <= size2());
+		//~ return m_expression.find1(rank, j, i);
+	//~ }
+	
+	//~ iterator1 find1(int rank, size_type i, size_type j){
+		//~ SIZE_CHECK(i <= size1());
+		//~ SIZE_CHECK(j <= size2());
+		//~ return m_expression.find2(rank, j, i);
+	//~ }
+	
+	//~ iterator2 find2(int rank, size_type i, size_type j){
+		//~ SIZE_CHECK(i <= size1());
+		//~ SIZE_CHECK(j <= size2());
+		//~ return m_expression.find1(rank, j, i);
+	//~ }
+	
+	
+	//~ //Iterators
+	//~ const_iterator1 begin1() const {
+		//~ return find1(0, 0, 0);
+	//~ }
+	//~ const_iterator1 end1() const {
+		//~ return find1(0, size1(), 0);
+	//~ }
+	//~ const_iterator2 begin2() const {
+		//~ return find2(0, 0, 0);
+	//~ }
+	//~ const_iterator2 end2() const {
+		//~ return find2(0, 0, size2());
+	//~ }
+	
+	//~ iterator1 begin1(){
+		//~ return find1(0, 0, 0);
+	//~ }
+	//~ iterator1 end1(){
+		//~ return find1(0, size1(), 0);
+	//~ }
+	//~ iterator2 begin2(){
+		//~ return find2(0, 0, 0);
+	//~ }
+	//~ iterator2 end2(){
+		//~ return find2(0, 0, size2());
+	//~ }
+//~ private:
+	//~ expression_closure_type m_expression;
+//~ };
+
+// (trans m) [i] [j] = m [j] [i]
+//~ template<class E>
+//~ matrix_transpose<E const> trans(matrix_expression<E> const& e){
+	//~ return matrix_transpose<E const>(e);
+//~ }
+//~ template<class E>
+//~ matrix_transpose<E> trans(matrix_expression<E>& e){
+	//~ return matrix_transpose<E>(e);
+//~ }
 
     /** \brief 
      */
