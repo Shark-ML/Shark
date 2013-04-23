@@ -797,7 +797,7 @@ inline std::vector<std::size_t> classSizes(Data<unsigned int> const& labels){
 template <class InputType>
 unsigned int dataDimension(Data<InputType> const& dataset){
 	SHARK_ASSERT(dataset.numberOfElements() > 0);
-	return boost::size(dataset.element(0));
+	return dataset.element(0).size();
 }
 
 /// Return the input dimensionality of a labeled dataset.
