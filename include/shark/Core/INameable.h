@@ -48,7 +48,7 @@ public:
 	virtual ~INameable() { }
 
 	///returns the name of the object
-	virtual std::string name() const = 0;
+	virtual std::string name() const { return "unnamed"; }
 };
 
 }
