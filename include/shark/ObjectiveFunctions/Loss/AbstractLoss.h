@@ -130,8 +130,15 @@ public:
 	/// \param  predictions  predictions, typically made by a model
 	double eval(Data<LabelType> const& targets, Data<OutputType> const& predictions) const{
 		SIZE_CHECK(predictions.numberOfElements() == targets.numberOfElements());
-		double (AbstractLoss::*evalError)(BatchLabelType const&,BatchOutputType const&) const = &AbstractLoss::eval;
-		double error = accumulateError(targets.batches(),predictions.batches(),boost::bind<double>(evalError,this,_1,_2)); // see Core/utility/functional.h
+		SIZE_CHECK(predictions.numberOfBatches() == targets.numberOfBatches());
+		int numBatches = (int) targets.numberOfBatches();
+		double error = 0;
+		SHARK_PARALLEL_FOR(int i = 0; i < numBatches; ++i){
+			double batchError= eval(targets.batch(i),predictions.batch(i));
+			SHARK_CRITICAL_REGION{
+				error+=batchError;
+			}
+		}
 		return error / targets.numberOfElements();
 	}
 
@@ -148,16 +155,19 @@ public:
 		SHARK_FEATURE_EXCEPTION_DERIVED(HAS_FIRST_DERIVATIVE);
 		SIZE_CHECK(predictions.numberOfElements() == targets.numberOfElements());
 
-		std::size_t numBatches = targets.numberOfBatches();
+		int numBatches = (int) targets.numberOfBatches();
 		std::size_t elements = targets.numberOfElements();
 		gradient = Data<OutputType>(numBatches);
-		double sum = 0;
-		for(std::size_t i = 0; i != numBatches; ++i){
-			sum+=evalDerivative(targets.batch(i),predictions.batch(i),gradient.batch(i));
+		
+		double error = 0;
+		SHARK_PARALLEL_FOR(int i = 0; i < numBatches; ++i){
+			double batchError= evalDerivative(targets.batch(i),predictions.batch(i),gradient.batch(i));
 			gradient.batch(i) /= elements;//we return the mean of the loss
+			SHARK_CRITICAL_REGION{
+				error+=batchError;
+			}
 		}
-		sum /= elements;//we return the mean of the loss
-		return sum;
+		return error/elements;
 	}
 
 	/// \brief evaluate the loss for a target and a prediction

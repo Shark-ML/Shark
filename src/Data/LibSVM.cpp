@@ -93,8 +93,8 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 	
 	//check labels for conformity
 	bool binaryLabels = false;
+	int minPositiveLabel = std::numeric_limits<int>::max();
 	{
-		int minPositiveLabel = std::numeric_limits<int>::max();
 		int maxPositiveLabel = -1;
 		for(std::size_t i = 0; i != numPoints; ++i){
 			int label = contents[i].first;
@@ -120,7 +120,8 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 		BOOST_FOREACH(ElemRef element, data.elements()){
 			shark::zero(element.input);
 			//todo: check label
-			element.label = binaryLabels? 1 + (contents[i].first-1)/2 : contents[i].first-1;
+			//we subtract minPositiveLabel to ensore that class indices starting from 0 and 1 are supported
+			element.label = binaryLabels? 1 + (contents[i].first-1)/2 : contents[i].first-minPositiveLabel;
 			
 			std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
 			for(std::size_t j = 0; j != inputs.size(); ++j)
