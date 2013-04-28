@@ -507,7 +507,6 @@ template<class SVMProblem>
 struct BoxConstrainedShrinkingProblem
 : public BaseShrinkingProblem<BoxConstrainedProblem<SVMProblem> >{
 	typedef BaseShrinkingProblem<BoxConstrainedProblem<SVMProblem> > base_type;
-	static const std::size_t IterationsBetweenShrinking;
 
 	BoxConstrainedShrinkingProblem(SVMProblem& problem, bool shrink = true)
 	: base_type(problem,shrink){}
@@ -564,10 +563,6 @@ private:
 		}
 	}
 };
-
-template<class SVMProblem>
-const std::size_t BoxConstrainedShrinkingProblem<SVMProblem>::IterationsBetweenShrinking = 1000;
-
 
 }
 #endif

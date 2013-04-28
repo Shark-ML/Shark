@@ -183,12 +183,8 @@ public:
 	///
 	/// \param patterns the input of the model
 	/// \returns the responses of the model
-	Data<OutputType> operator()(Data<InputType> const & patterns){
-		Data<OutputType> prediction(patterns.numberOfBatches());
-		for(std::size_t i = 0; i != patterns.numberOfBatches();++i){
-			eval(patterns.batch(i),prediction.batch(i));
-		}
-		return prediction;
+	Data<OutputType> operator()(Data<InputType> const& patterns)const{
+		return transform(patterns,*this);
 	}
 
 	/// \brief Model evaluation as an operator for a single pattern. This is a convenience function

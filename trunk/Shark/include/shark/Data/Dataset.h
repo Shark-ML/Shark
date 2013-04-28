@@ -42,6 +42,7 @@
 #include <boost/range/algorithm/sort.hpp>
 
 #include <shark/Core/Exception.h>
+#include <shark/Core/OpenMP.h>
 #include <shark/Rng/GlobalRng.h>
 #include "Impl/Dataset.inl"
 
@@ -840,8 +841,9 @@ typename boost::lazy_disable_if<
 >::type
 transform(Data<T> const& data, Functor f){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
-	Data<ResultType> result(data.numberOfBatches());
-	for(std::size_t i = 0; i != data.numberOfBatches(); ++i)
+	int batches = (int) data.numberOfBatches();
+	Data<ResultType> result(batches);
+	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
 		result.batch(i)= createBatch<T>(boost::adaptors::transform(data.batch(i), f));
 	return result;
 }
@@ -854,10 +856,11 @@ typename boost::lazy_enable_if<
 	CanBeCalled<Functor,typename Data<T>::batch_type>,
 	TransformedData<Functor,T>
 >::type
-transform(Data<T> const& data, Functor f){
+transform(Data<T> const& data, Functor const& f){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
-	Data<ResultType> result(data.numberOfBatches());
-	for(std::size_t i = 0; i != data.numberOfBatches(); ++i)
+	int batches = (int) data.numberOfBatches();
+	Data<ResultType> result(batches);
+	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
 		result.batch(i)= f(data.batch(i));
 	return result;
 }
@@ -865,14 +868,14 @@ transform(Data<T> const& data, Functor f){
 ///\brief Transforms the inputs of a dataset and return the transformed result.
 template<class I,class L, class Functor>
 LabeledData<typename detail::TransformedDataElement<Functor,I>::type, L >
-transformInputs(LabeledData<I,L> const& data, Functor f){
+transformInputs(LabeledData<I,L> const& data, Functor const& f){
 	typedef LabeledData<typename detail::TransformedDataElement<Functor,I>::type,L > DatasetType;
 	return DatasetType(transform(data.inputs(),f),data.labels());
 }
 ///\brief Transforms the labels of a dataset and returns the transformed result.
 template<class I,class L, class Functor>
 LabeledData<I,typename detail::TransformedDataElement<Functor,L >::type >
-transformLabels(LabeledData<I,L> const& data, Functor f){
+transformLabels(LabeledData<I,L> const& data, Functor const& f){
 	typedef LabeledData<I,typename detail::TransformedDataElement<Functor,L>::type > DatasetType;
 	return DatasetType(data.inputs(),transform(data.labels(),f));
 }
@@ -911,7 +914,7 @@ DatasetT splitAtElement(DatasetT& data, std::size_t elementIndex){
 
 	std::size_t batchPos = 0;
 	std::size_t batchStart = 0;
-	while(batchStart +  boost::size(data.batch(batchPos)) < elementIndex){
+	while(batchStart + boost::size(data.batch(batchPos)) < elementIndex){
 		batchStart += boost::size(data.batch(batchPos));
 		++batchPos;
 	};
