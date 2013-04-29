@@ -4,6 +4,7 @@
 #include  <shark/Data/Dataset.h>
 #include  <shark/LinAlg/Base.h>
 #include <shark/Rng/GlobalRng.h>
+#include <shark/Models/AbstractModel.h>
 
 namespace shark{
 
