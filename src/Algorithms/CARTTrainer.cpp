@@ -441,7 +441,7 @@ double CARTTrainer::totalSumOfSquares(const std::vector<RealVector>& labels, siz
 	double sumOfSquares = 0;
 
 	for(size_t i = 0; i < length; i++){
-		sumOfSquares += normSqr(labels[start+i]-labelAvg);
+		sumOfSquares += norm_sqr(labels[start+i]-labelAvg);
 	}
 	return sumOfSquares;
 }

@@ -174,13 +174,13 @@ public:
 	RealVector energyTerm(Matrix const& state)const{
 		SIZE_CHECK(state.size2() == size());
 		//the following code does for batches the equivalent thing to:
-		//return inner_prod(m_bias,state) - normSqr(state)/2.0;
+		//return inner_prod(m_bias,state) - norm_sqr(state)/2.0;
 		
 		std::size_t batchSize = state.size1();
 		RealVector energies(batchSize);
 		fast_prod(state,m_bias,energies);
 		for(std::size_t i = 0; i != batchSize; ++i){
-			energies(i) -= normSqr(row(state,i))/2.0;
+			energies(i) -= norm_sqr(row(state,i))/2.0;
 		}
 		return energies;
 		

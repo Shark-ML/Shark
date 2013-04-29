@@ -61,8 +61,8 @@ BOOST_AUTO_TEST_CASE( Energy_Input){
 	energy.inputHidden(hiddenInputResult,visibleState);
 	energy.inputVisible(visibleInputResult,hiddenState);
 	
-	BOOST_CHECK_SMALL(normSqr(row(visibleInputResult-visibleInput,0)), 1.e-15);
-	BOOST_CHECK_SMALL(normSqr(row(hiddenInputResult-hiddenInput,0)), 1.e-15);
+	BOOST_CHECK_SMALL(norm_sqr(row(visibleInputResult-visibleInput,0)), 1.e-15);
+	BOOST_CHECK_SMALL(norm_sqr(row(hiddenInputResult-hiddenInput,0)), 1.e-15);
 }
 BOOST_AUTO_TEST_CASE( Energy_Input_WithFeatures){
 	Energy<BinaryLayer,BinaryLayer> energy(&rbm.structure());
@@ -75,10 +75,10 @@ BOOST_AUTO_TEST_CASE( Energy_Input_WithFeatures){
 	energy.inputHidden(hiddenInputResult,visibleState,visibleFeatures);
 	energy.inputVisible(visibleInputResult,hiddenState,hiddenFeatures);
 	
-	BOOST_CHECK_SMALL(normSqr(row(visibleInputResult-visibleInput,0)), 1.e-15);
-	BOOST_CHECK_SMALL(normSqr(row(hiddenInputResult-hiddenInput,0)), 1.e-15);
-	BOOST_CHECK_SMALL(normSqr(row(visibleFeatures-visibleState,0)), 1.e-15);
-	BOOST_CHECK_SMALL(normSqr(row(hiddenFeatures-hiddenState,0)), 1.e-15);
+	BOOST_CHECK_SMALL(norm_sqr(row(visibleInputResult-visibleInput,0)), 1.e-15);
+	BOOST_CHECK_SMALL(norm_sqr(row(hiddenInputResult-hiddenInput,0)), 1.e-15);
+	BOOST_CHECK_SMALL(norm_sqr(row(visibleFeatures-visibleState,0)), 1.e-15);
+	BOOST_CHECK_SMALL(norm_sqr(row(hiddenFeatures-hiddenState,0)), 1.e-15);
 	
 }
 BOOST_AUTO_TEST_CASE( Energy_EnergyFromInput )

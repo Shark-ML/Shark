@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
 	//~ //now test whether the parametervector is created correctly
 	//~ kernel.setParameterVector(testParams);
 	//~ RealVector parameter=kernel.parameterVector();
-	//~ BOOST_CHECK_SMALL(normSqr(parameter-testParams), 1.e-15);
+	//~ BOOST_CHECK_SMALL(norm_sqr(parameter-testParams), 1.e-15);
 	//~ //and check whether all gamma values are correct
 	//~ BOOST_CHECK_SMALL(baseKernelV1.gamma() - gamma1, 1e-13);
 	//~ BOOST_CHECK_SMALL(baseKernel2.gamma() - gamma2, 1e-13);
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
 			//~ for ( unsigned int k=0; k<kernel.numberOfParameters(); k++ )
 				//~ cur_params(k) = Rng::discrete(1,10);
 			//~ kernel.setParameterVector(cur_params);
-			//~ BOOST_CHECK_SMALL(normSqr(kernel.parameterVector()-cur_params), 1.e-15);
+			//~ BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-15);
 		//~ }
 	//~ }
 	//~ kernel.setAdaptiveAll(true);
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
 			//~ cur_params(k) = Rng::uni(1.0,3.0);
 		//~ cur_params(7) = (unsigned int)cur_params(7);
 		//~ kernel.setParameterVector(cur_params);
-		//~ BOOST_CHECK_SMALL(normSqr(kernel.parameterVector()-cur_params), 1.e-15);
+		//~ BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-15);
 		//~ BOOST_CHECK_SMALL( baseKernelV1.parameterVector()(0)-cur_params(5) , 1.e-15);
 		//~ BOOST_CHECK_SMALL( baseKernelV1.gamma()-cur_params(5) , 1.e-15);
 		//~ BOOST_CHECK_SMALL( basekernel2.parameterVector()(0)-cur_params(6) , 1.e-15);
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
 			//~ for ( unsigned int k=0; k<kernel.numberOfParameters(); k++ )
 				//~ cur_params(k) = Rng::discrete(1,10);
 			//~ kernel.setParameterVector(cur_params);
-			//~ BOOST_CHECK_SMALL(normSqr(kernel.parameterVector()-cur_params), 1.e-15);
+			//~ BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-15);
 		//~ }
 	//~ }
 	//~ kernel.setAdaptiveAll(true);
@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
 			//~ cur_params(k) = Rng::uni(1.0,3.0);
 		//~ cur_params(7) = (unsigned int)cur_params(7);
 		//~ kernel.setParameterVector(cur_params);
-		//~ BOOST_CHECK_SMALL(normSqr(kernel.parameterVector()-cur_params), 1.e-15);
+		//~ BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-15);
 		//~ BOOST_CHECK_SMALL( baseKernelV1.parameterVector()(0)-cur_params(5) , 1.e-15);
 		//~ BOOST_CHECK_SMALL( baseKernelV1.gamma()-cur_params(5) , 1.e-15);
 		//~ BOOST_CHECK_SMALL( basekernel2.parameterVector()(0)-cur_params(6) , 1.e-15);
@@ -446,7 +446,7 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
 			//~ for ( unsigned int k=0; k<kernel.numberOfParameters(); k++ )
 				//~ cur_params(k) = Rng::discrete(1,10);
 			//~ kernel.setParameterVector(cur_params);
-			//~ BOOST_CHECK_SMALL(normSqr(kernel.parameterVector()-cur_params), 1.e-15);
+			//~ BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-15);
 		//~ }
 	//~ }
 	//~ kernel.setAdaptiveAll(true);
@@ -456,7 +456,7 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
 		//~ for ( unsigned int k=0; k<kernel.numberOfParameters(); k++ )
 			//~ cur_params(k) = Rng::uni(1.0,3.0);
 		//~ kernel.setParameterVector(cur_params);
-		//~ BOOST_CHECK_SMALL(normSqr(kernel.parameterVector()-cur_params), 1.e-14);
+		//~ BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-14);
 		//~ BOOST_CHECK_SMALL( baseKernelV1.parameterVector()(0)-cur_params(5) , 1.e-14);
 		//~ BOOST_CHECK_SMALL( baseKernelV1.gamma()-cur_params(5) , 1.e-14);
 		//~ BOOST_CHECK_SMALL( basekernel2.parameterVector()(0)-cur_params(6) , 1.e-14);
@@ -560,7 +560,7 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
 			//~ for ( unsigned int k=0; k<kernel.numberOfParameters(); k++ )
 				//~ cur_params(k) = Rng::discrete(1,10);
 			//~ kernel.setParameterVector(cur_params);
-			//~ BOOST_CHECK_SMALL(normSqr(kernel.parameterVector()-cur_params), 1.e-15);
+			//~ BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-15);
 		//~ }
 	//~ }
 	//~ kernel.setAdaptiveAll(true);
@@ -570,7 +570,7 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
 		//~ for ( unsigned int k=0; k<kernel.numberOfParameters(); k++ )
 			//~ cur_params(k) = Rng::uni(1.0,3.0);
 		//~ kernel.setParameterVector(cur_params);
-		//~ BOOST_CHECK_SMALL(normSqr(kernel.parameterVector()-cur_params), 1.e-14);
+		//~ BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-14);
 		//~ BOOST_CHECK_SMALL( baseKernelV1.parameterVector()(0)-cur_params(5) , 1.e-14);
 		//~ BOOST_CHECK_SMALL( baseKernelV1.gamma()-cur_params(5) , 1.e-14);
 		//~ BOOST_CHECK_SMALL( basekernel2.parameterVector()(0)-cur_params(6) , 1.e-14);

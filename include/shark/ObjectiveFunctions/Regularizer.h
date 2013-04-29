@@ -171,13 +171,13 @@ public:
 
 	/// Evaluates the objective function.
 	virtual double eval( RealVector const& input ) const
-	{ return 0.5 * normSqr(input); }
+	{ return 0.5 * norm_sqr(input); }
 
 	/// Evaluates the objective function
 	/// and calculates its gradient.
 	virtual double evalDerivative( RealVector const& input, FirstOrderDerivative & derivative ) const {
 		derivative = input;
-		return 0.5 * normSqr(input);
+		return 0.5 * norm_sqr(input);
 	}
 
 	/// Evaluates the objective function
@@ -186,7 +186,7 @@ public:
 	virtual ResultType evalDerivative( const SearchPointType & input, SecondOrderDerivative & derivative )const {
 		derivative.m_gradient = input;
 		derivative.m_hessian = RealIdentityMatrix(input.size());
-		return 0.5 * normSqr(input);
+		return 0.5 * norm_sqr(input);
 	}
 private:
 	std::size_t m_numberOfVariables;

@@ -70,7 +70,7 @@ void CG::step(const ObjectiveFunctionType& objectiveFunction) {
 	//OK: what happens in the next 10 lines is a mystery to me
 	//nevertheless i transfered all loops and calculations to ublas. I hope everything is correct
 	m_xi = m_derivative;
-	double gg=normSqr(m_g);
+	double gg=norm_sqr(m_g);
 	double dgg=inner_prod(m_xi+m_g,m_xi);
 
 	if (gg == 0.0) return;		// new 10/2008: converged

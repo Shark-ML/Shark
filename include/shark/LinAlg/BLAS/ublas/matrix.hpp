@@ -27,8 +27,6 @@ namespace blas {
 
 
 namespace detail {
-using namespace shark::blas;
-
 // Matrix resizing algorithm
 template <class L, class M>
 void matrix_resize_preserve(M &m, M &temporary) {

@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_init_test_parameters ){
 	RealVector result(network.numberOfParameters());
 	init(result)<<parameters(network);
 
-	BOOST_CHECK_SMALL(normSqr(result-network.parameterVector()),1.e-10);
+	BOOST_CHECK_SMALL(norm_sqr(result-network.parameterVector()),1.e-10);
 }
 
 BOOST_AUTO_TEST_CASE( LinAlg_init_test_parameterSet ){
@@ -472,7 +472,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_split_test_parameters ){
 	initRandomNormal(network,1u);
 	init(input) >> parameters(network);
 
-	BOOST_CHECK_SMALL(normSqr(input-network.parameterVector()),1.e-10);
+	BOOST_CHECK_SMALL(norm_sqr(input-network.parameterVector()),1.e-10);
 }
 
 BOOST_AUTO_TEST_CASE( LinAlg_split_test_parameterSet ){

@@ -140,7 +140,7 @@ public:
 
 		// equation (6.69) on page 311 in the book C.M. Bishop, Pattern Recognition and Machine Learning, Springer, 2006
 		// e = 1/2 \cdot [ -log(det(M)) - t^T M^{-1} t - N log(2 \pi) ]
-		double e = 0.5 * (-logDet - normSqr(t) - N * std::log(2.0 * M_PI));
+		double e = 0.5 * (-logDet - norm_sqr(t) - N * std::log(2.0 * M_PI));
 
 		// return the *negative* evidence
 		return -e;

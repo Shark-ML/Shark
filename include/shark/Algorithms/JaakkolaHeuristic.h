@@ -77,7 +77,7 @@ public:
 				itIn++;
 				for (; itIn != elements.end(); itIn++) {
 					if (itIn->label == it->label) continue;
-					double dist = shark::distanceSqr(it->input,itIn->input);
+					double dist = distanceSqr(it->input,itIn->input);
 					m_stat.push_back(dist);
 				}
 			}
@@ -86,7 +86,7 @@ public:
 				double minDistSqr = 0;
 				for (typename Elements::iterator itIn = elements.begin(); itIn != elements.end(); itIn++) {
 					if (itIn->label == it->label) continue;
-					double dist = shark::distanceSqr(it->input,itIn->input);
+					double dist = distanceSqr(it->input,itIn->input);
 					if( (minDistSqr == 0) || (dist < minDistSqr))  minDistSqr = dist;
 				}
 				m_stat.push_back(minDistSqr);

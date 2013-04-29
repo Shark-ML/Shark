@@ -52,8 +52,8 @@ public:
 
 	bool operator () (std::size_t index1, std::size_t index2) const
 	{
-		double d1 = distanceSqr<RealVector>(m_data[index1], m_test);
-		double d2 = distanceSqr<RealVector>(m_data[index2], m_test);
+		double d1 = distanceSqr(m_data[index1], m_test);
+		double d2 = distanceSqr(m_data[index2], m_test);
 		return (d1 < d2);
 	}
 
@@ -91,7 +91,7 @@ void testTree(
 		if (i >= 5) { 
 			boost_check_equal(&data[index[i]], neighbor[i]);
 		}
-		boost_check_small(shark::distance(*neighbor[i], test) - dist[i], 1e-12);
+		boost_check_small(distance(*neighbor[i], test) - dist[i], 1e-12);
 	}
 
 	 check consistency of ranking

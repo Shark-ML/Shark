@@ -65,7 +65,7 @@ void LinearClassifier::setParameterVector(RealVector const& parameters){
 	fast_prod(m_means,m_inverseCholesky,m_transformedMeans);
 	for(std::size_t classID = 0; classID != numberOfClasses(); ++classID){
 		RealMatrixRow mean=row(m_transformedMeans,classID);
-		m_classBias(classID)=normSqr(mean);
+		m_classBias(classID)=norm_sqr(mean);
 	}
 }
 
@@ -73,7 +73,7 @@ void LinearClassifier::setClassMean(std::size_t classID, RealVector const& mean)
 	SIZE_CHECK(classID<numberOfClasses());
 	noalias(row(m_means,classID)) = mean;
 	fast_prod(trans(m_inverseCholesky),row(m_means,classID),row(m_transformedMeans,classID));
-	m_classBias(classID)=normSqr(row(m_transformedMeans,classID));
+	m_classBias(classID)=norm_sqr(row(m_transformedMeans,classID));
 }
 
 std::size_t LinearClassifier::numberOfParameters()const{
@@ -98,7 +98,7 @@ void LinearClassifier::importCovarianceMatrix(RealMatrix const& covariance){
 	fast_prod(m_means,m_inverseCholesky,m_transformedMeans);
 	for(std::size_t classID = 0; classID != numberOfClasses(); ++classID){
 		RealMatrixRow mean=row(m_transformedMeans,classID);
-		m_classBias(classID)=normSqr(mean);
+		m_classBias(classID)=norm_sqr(mean);
 	}
 }
 
@@ -119,7 +119,7 @@ void LinearClassifier::eval(RealMatrix const& patterns,UIntVector& output)const{
 
 	for(std::size_t i = 0; i != patterns.size1();++i){
 		RealMatrixRow a=row(transA,i);
-		double aSquared=normSqr(a);
+		double aSquared=norm_sqr(a);
 		double bestDistance = std::numeric_limits<double>::max();
 		for (std::size_t c=0; c != numberOfClasses(); c++){
 			double distance = aSquared-2*inner_prod(row(m_transformedMeans,c),a);
@@ -167,7 +167,7 @@ void LinearClassifier::softMembership(BatchInputType const& patterns, Batch<Real
 	
 	for(std::size_t i = 0; i != patterns.size1();++i){
 		RealMatrixRow a=row(transA,i);
-		double aSquared=normSqr(a);
+		double aSquared=norm_sqr(a);
 		double sum = 0;
 		
 		for (std::size_t c=0; c != numberOfClasses(); c++) {

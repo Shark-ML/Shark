@@ -35,8 +35,6 @@
 
 #include <shark/ObjectiveFunctions/AbstractCost.h>
 #include <shark/LinAlg/Base.h>
-#include <shark/Core/utility/functional.h>
-#include <boost/bind.hpp>
 namespace shark {
 
 

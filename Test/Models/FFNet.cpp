@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( FFNET_setStructure )
 		}
 		net.setParameterVector(params);
 		RealVector paramResult = net.parameterVector();
-		BOOST_CHECK_SMALL(normSqr(params-paramResult),1.e-25);
+		BOOST_CHECK_SMALL(norm_sqr(params-paramResult),1.e-25);
 		
 		//now also test, whether the weights are at the correct positions of the layer matrices
 		BOOST_CHECK_SMALL(net.layerMatrices()[0](0,0)-params(0), 1.e-25);
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE( FFNET_Structure_customMatrix )
 		}
 		net.setParameterVector(params);
 		RealVector paramResult = net.parameterVector();
-		BOOST_CHECK_SMALL(normSqr(params-paramResult),1.e-25);
+		BOOST_CHECK_SMALL(norm_sqr(params-paramResult),1.e-25);
 		
 		BOOST_CHECK_SMALL(net.layerMatrices()[0](0,0)-params(0), 1.e-25);
 		BOOST_CHECK_SMALL(net.layerMatrices()[0](0,1)-params(1), 1.e-25);

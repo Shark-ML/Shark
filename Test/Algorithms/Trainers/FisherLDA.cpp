@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE( FISHER_LDA_TEST ){
 	for(size_t i = 0; i != 2; ++i){
 		RealVector curRow = row(model.matrix(), i);
 		std::cout << curRow << std::endl;
-		double error = std::min(normSqr(curRow - result[i]), normSqr(curRow + result[i]));
+		double error = std::min(norm_sqr(curRow - result[i]), norm_sqr(curRow + result[i]));
 		BOOST_CHECK_SMALL(error, 1e-4);		// [TG] 10e-4 ???
 	}
 }

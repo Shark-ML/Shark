@@ -134,7 +134,7 @@ public:
 		SIZE_CHECK(Base::m_basis.numberOfElements() == alpha.size());
 
 		// Calculate ||w||^2
-		double normSqr = 0.0;
+		double norm_sqr = 0.0;
 		
 		//Todo: i am too lazy to use iterated loops in this function.
 		//so i am using a DataView to have O(1) random access lookup. but this is not needed!
@@ -148,12 +148,12 @@ public:
 					indexedBasis[j],
 					missingness);
 				// Note that in Shark solver, we do axis flip by substituting \alpha with y \times \alpha
-				normSqr += evalResult * alpha(i) * alpha(j) / scalingCoefficient(i) / scalingCoefficient(j);
+				norm_sqr += evalResult * alpha(i) * alpha(j) / scalingCoefficient(i) / scalingCoefficient(j);
 			}
 		}
 
 		// Return ||w||
-		return std::sqrt(normSqr);
+		return std::sqrt(norm_sqr);
 	}
 	
 	double computeNorm(
@@ -169,7 +169,7 @@ public:
 		DataView<Data<InputType> const > indexedBasis(Base::m_basis);
 
 		// Calculate ||w||^2
-		double normSqr = 0.0;
+		double norm_sqr = 0.0;
 		
 		for (std::size_t i = 0; i < alpha.size(); ++i){
 			for (std::size_t j = 0; j < alpha.size(); ++j){
@@ -178,12 +178,12 @@ public:
 					indexedBasis[i],
 					indexedBasis[j]);
 				// Note that in Shark solver, we do axis flip by substituting \alpha with y \times \alpha
-				normSqr += evalResult * alpha(i) * alpha(j) / scalingCoefficient(i) / scalingCoefficient(j);
+				norm_sqr += evalResult * alpha(i) * alpha(j) / scalingCoefficient(i) / scalingCoefficient(j);
 			}
 		}
 
 		// Return ||w||
-		return std::sqrt(normSqr);
+		return std::sqrt(norm_sqr);
 	}
 
 	void setScalingCoefficients(const RealVector& scalingCoefficients)

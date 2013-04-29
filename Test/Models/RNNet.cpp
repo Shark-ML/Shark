@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( RNNET_SET_PARAMETER_TEST)
 	net.setParameterVector(testParameters);
 	//test wether parameterVector works
 	RealVector resultParameters = net.parameterVector();
-	BOOST_CHECK_SMALL(normSqr(testParameters-resultParameters),1.e-30);
+	BOOST_CHECK_SMALL(norm_sqr(testParameters-resultParameters),1.e-30);
 
 	//test wether the weight matrices are correct
 	for (size_t i = 0; i < 6; i++){
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE( RNNET_WEIGHTED_PARAMETER_DERIVATIVE ){
 	}
 
 	//check wether the derivatives are identical
-	BOOST_CHECK_SMALL(::shark::distance(derivative,testDerivative),epsilon);
+	BOOST_CHECK_SMALL(blas::distance(derivative,testDerivative),epsilon);
 	//~ for(size_t w=0; w != numberOfParameters; ++w){
 		//~ std::cout<<derivative(w)<<" "<<testDerivative(w)<<std::endl;
 	//~ }
