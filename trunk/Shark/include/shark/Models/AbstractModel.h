@@ -184,7 +184,12 @@ public:
 	/// \param patterns the input of the model
 	/// \returns the responses of the model
 	Data<OutputType> operator()(Data<InputType> const& patterns)const{
-		return transform(patterns,*this);
+		int batches = (int) patterns.numberOfBatches();
+		Data<OutputType> result(batches);
+		SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
+			result.batch(i)= (*this)(patterns.batch(i));
+		return result;
+		//return transform(patterns,*this);//todo this leads to compiler errors.
 	}
 
 	/// \brief Model evaluation as an operator for a single pattern. This is a convenience function
