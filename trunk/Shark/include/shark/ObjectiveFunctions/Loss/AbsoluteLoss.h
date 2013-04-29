@@ -49,13 +49,6 @@ namespace shark{
 template<class VectorType = RealVector>
 class AbsoluteLoss : public AbstractLoss<VectorType, VectorType>
 {
-private:
-	struct Distance{
-		template<class V1, class V2>
-	    double operator()(V1 const& v1, V2 const& v2){
-	    	return norm_2(v1-v2);
-	    }
-	};
 public:
 	typedef AbstractLoss<VectorType, VectorType> base_type;
 	typedef typename base_type::BatchLabelType BatchLabelType;
@@ -79,12 +72,11 @@ public:
 		SIZE_CHECK(labels.size1() == predictions.size1());
 		SIZE_CHECK(labels.size2() == predictions.size2());
 
-		return accumulateError(labels,predictions,Distance()); // see Core/utility/functional.h
-//		double error = 0;
-//		for(std::size_t i = 0; i != labels.size1(); ++i){
-//			error+=norm_2(row(predictions,i) - row(labels,i));
-//		}
-//		return error;
+		double error = 0;
+		for(std::size_t i = 0; i != labels.size1(); ++i){
+			error+=blas::distance(row(predictions,i),row(labels,i));
+		}
+		return error;
 	}
 };
 

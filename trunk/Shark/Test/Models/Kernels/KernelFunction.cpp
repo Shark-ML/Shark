@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE( DenseRbfKernel_Test )
 
 	//now test whether the parametervector is created correctly
 	RealVector parameter=kernel.parameterVector();
-	BOOST_CHECK_SMALL(normSqr(parameter-testParameter),1.e-15);
+	BOOST_CHECK_SMALL(norm_sqr(parameter-testParameter),1.e-15);
 
 	//test derivatives
 	testKernelDerivative(kernel,2);
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE( DenseRbfKernel_Unconstrained_Test )
 
 	//now test whether the parametervector is created correctly
 	RealVector parameter=kernel.parameterVector();
-	BOOST_CHECK_SMALL(normSqr(parameter-testParameter),1.e-15);
+	BOOST_CHECK_SMALL(norm_sqr(parameter-testParameter),1.e-15);
 
 	//test derivatives
 	testKernelDerivative(kernel,2);
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE( CompressedRbfKernel_Test )
 
 	//now test whether the parametervector is created correctly
 	RealVector parameter=kernel.parameterVector();
-	BOOST_CHECK_SMALL(normSqr(parameter-testParameter),1.e-15);
+	BOOST_CHECK_SMALL(norm_sqr(parameter-testParameter),1.e-15);
 
 	//test first derivative
 	testKernelDerivative(kernel,2);
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE( CompressedRbfKernel_Unconstrained_Test )
 
 	//now test whether the parametervector is created correctly
 	RealVector parameter=kernel.parameterVector();
-	BOOST_CHECK_SMALL(normSqr(parameter-testParameter),1.e-15);
+	BOOST_CHECK_SMALL(norm_sqr(parameter-testParameter),1.e-15);
 
 	//test first derivative
 	testKernelDerivative(kernel,2);

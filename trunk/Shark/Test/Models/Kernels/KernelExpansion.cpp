@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_BATCH_VALUE )
 	//if this is the case, there is again something really wrong
 	RealVector simpleOutput = simpleExpansion(row(inputBatch,0));
 	RealVector output = expansion(row(inputBatch,0));
-	double error = normSqr(simpleOutput-output);
+	double error = norm_sqr(simpleOutput-output);
 	BOOST_REQUIRE_SMALL(error, 1.e-10);
 	
 	//if that worked, the next test checks, whether batch evaluation works at all

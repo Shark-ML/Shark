@@ -104,7 +104,7 @@ namespace shark {
 
 				typename Function::ResultType fitness = f.eval( t );
 				typename Function::ResultType penalizedFitness( fitness );
-				penalizedFitness += m_penaltyFactor * normSqr( t - s ); // TODO: Check
+				penalizedFitness += m_penaltyFactor * norm_sqr( t - s ); // TODO: Check
 
 				return( boost::make_tuple( fitness, penalizedFitness ) );
 			}
@@ -191,7 +191,7 @@ namespace shark {
 
 				typename Function::ResultType fitness = f.eval( t );
 				typename Function::ResultType penalizedFitness( fitness );
-				double penalty = normSqr( t - s );
+				double penalty = norm_sqr( t - s );
 				for( unsigned int i = 0; i < penalizedFitness.size(); i++ )
 					penalizedFitness[i] += m_penaltyFactor * penalty; // TODO: Check
 

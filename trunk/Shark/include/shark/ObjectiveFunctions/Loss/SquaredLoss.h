@@ -37,23 +37,15 @@ namespace shark{
 template<class VectorType = RealVector>
 class SquaredLoss : public AbstractLoss<VectorType, VectorType>
 {
-private:
+public:
 	typedef AbstractLoss<VectorType, VectorType> base_type;
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	typedef typename base_type::BatchLabelType BatchLabelType;
 
-	struct DistanceSqr{
-		template<class V1, class V2>
-	    double operator()(V1 const& v1, V2 const& v2){
-	    	return distanceSqr(v1,v2);
-	    }
-	};
-public:
 	/// Constructor.
 	SquaredLoss()
 	{
 		this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
-		//~ this->m_features|=base_type::HAS_SECOND_DERIVATIVE;
 	}
 
 
@@ -68,7 +60,11 @@ public:
 		SIZE_CHECK(labels.size1()==predictions.size1());
 		SIZE_CHECK(labels.size2()==predictions.size2());
 
-		return accumulateError(labels,predictions,DistanceSqr()); // see Core/utility/functional.h
+		double error = 0;
+		for(std::size_t i = 0; i != labels.size1(); ++i){
+			error+=distanceSqr(row(predictions,i),row(labels,i));
+		}
+		return error;
 	}
 
 	/// Evaluate the squared loss \f$ (label - prediction)^2 \f$

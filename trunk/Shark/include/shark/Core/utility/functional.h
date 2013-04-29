@@ -52,13 +52,6 @@ void partial_shuffle(RandomAccessIterator begin, RandomAccessIterator middle, Ra
 	partial_shuffle(begin,middle,end,uni);
 }
 
-///\brief Given two Ranges of labels and predictions and an ErrorMeasure, calculates the accumulated error.
-template<class Range1, class Range2, class ErrorMeasure>
-double accumulateError(Range1 const& labels, Range2 const& predictions, ErrorMeasure error){
-	return boost::inner_product(labels,predictions,0.0,std::plus<double>(),error);
-}
-
-
 ///\brief Returns the iterator to the median element. after this call, the range is partially ordered.
 ///
 ///After the call, all elements left of the median element are

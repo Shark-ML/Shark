@@ -456,7 +456,7 @@ double RFTrainer::totalSumOfSquares(std::vector<RealVector>& labels, std::size_t
 	double sumOfSquares = 0;
 
 	for(std::size_t i = 0; i < length; i++){
-		sumOfSquares += normSqr(labels[start+i]-labelAvg);
+		sumOfSquares += norm_sqr(labels[start+i]-labelAvg);
 	}
 	return sumOfSquares;
 }

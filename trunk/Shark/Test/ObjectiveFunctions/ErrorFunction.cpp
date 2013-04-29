@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
 		testTarget[i] =  model(input[i]);
 		RealVector noiseVal = noise().first;
 		trainTarget[i] = noiseVal + testTarget[i];
-		optimalMSE+=normSqr(noiseVal);
+		optimalMSE+=norm_sqr(noiseVal);
 	}
 	optimalMSE/=trainExamples;
 	
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
 		for(std::size_t i = 0; i != 1000; ++i){
 			rprop.step(mse);
 		}
-		double diff = normSqr(rprop.solution().point-optimum);
+		double diff = norm_sqr(rprop.solution().point-optimum);
 		std::cout<<diff<<rprop.solution().point<<" "<<optimum<<std::endl;
 		
 		BOOST_CHECK_SMALL(diff, 1.e-3);
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
 		for(std::size_t i = 0; i != 1000; ++i){
 			rprop.step(mse);
 		}
-		double diff = normSqr(rprop.solution().point-optimum);
+		double diff = norm_sqr(rprop.solution().point-optimum);
 		std::cout<<diff<<rprop.solution().point<<" "<<optimum<<std::endl;
 		
 		BOOST_CHECK_SMALL(diff, 1.e-3);
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
 		for(std::size_t i = 0; i != 100; ++i){ 
 			rprop.step(mse);
 		}
-		double diff = normSqr(rprop.solution().point-optimum);
+		double diff = norm_sqr(rprop.solution().point-optimum);
 		std::cout<<diff<<rprop.solution().point<<" "<<optimum<<std::endl;
 		
 		BOOST_CHECK_SMALL(diff, 1.e-3);

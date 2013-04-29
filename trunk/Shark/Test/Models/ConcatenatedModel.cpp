@@ -43,9 +43,9 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_Value )
 	}
 	//check whether parameter copying is working
 	model.setParameterVector(modelParams);
-	double error1=normSqr(net1Params-net1.parameterVector());
-	double error2=normSqr(net2Params-net2.parameterVector());
-	double error3=normSqr(modelParams-model.parameterVector());
+	double error1=norm_sqr(net1Params-net1.parameterVector());
+	double error2=norm_sqr(net2Params-net2.parameterVector());
+	double error3=norm_sqr(modelParams-model.parameterVector());
 	BOOST_CHECK_EQUAL(error1,0.0);
 	BOOST_CHECK_EQUAL(error2,0.0);
 	BOOST_CHECK_EQUAL(error3,0.0);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_Value )
 
 	//evaluate point
 	RealVector modelResult = model(input);
-	double modelError = normSqr(modelResult-endResult);
+	double modelError = norm_sqr(modelResult-endResult);
 	BOOST_CHECK_SMALL(modelError,1.e-35);
 }
 BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
@@ -214,9 +214,9 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_OPERATOR )
 	
 	//two models
 	model2.setParameterVector(modelParams2);
-	double error1=normSqr(net1Params-net1.parameterVector());
-	double error2=normSqr(net2Params-net2.parameterVector());
-	double errorComplete=normSqr(modelParams2-model2.parameterVector());
+	double error1=norm_sqr(net1Params-net1.parameterVector());
+	double error2=norm_sqr(net2Params-net2.parameterVector());
+	double errorComplete=norm_sqr(modelParams2-model2.parameterVector());
 	
 	BOOST_CHECK_EQUAL(error1,0.0);
 	BOOST_CHECK_EQUAL(error2,0.0);
@@ -230,10 +230,10 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_OPERATOR )
 	
 	//three models
 	model3.setParameterVector(modelParams3);
-	error1=normSqr(net1Params-net1.parameterVector());
-	error2=normSqr(net2Params-net2.parameterVector());
-	double error3=normSqr(net3Params-net3.parameterVector());
-	errorComplete=normSqr(modelParams3-model3.parameterVector());
+	error1=norm_sqr(net1Params-net1.parameterVector());
+	error2=norm_sqr(net2Params-net2.parameterVector());
+	double error3=norm_sqr(net3Params-net3.parameterVector());
+	errorComplete=norm_sqr(modelParams3-model3.parameterVector());
 	
 	BOOST_CHECK_EQUAL(error1,0.0);
 	BOOST_CHECK_EQUAL(error2,0.0);
@@ -252,8 +252,8 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_OPERATOR )
 		//evaluate point
 		RealVector modelResult2 = model2(input);
 		RealVector modelResult3 = model3(input);
-		double modelError2 = normSqr(modelResult2-intermediateResult2);
-		double modelError3 = normSqr(modelResult3-endResult);
+		double modelError2 = norm_sqr(modelResult2-intermediateResult2);
+		double modelError3 = norm_sqr(modelResult3-endResult);
 		BOOST_CHECK_SMALL(modelError2,1.e-35);
 		BOOST_CHECK_SMALL(modelError3,1.e-35);
 	}

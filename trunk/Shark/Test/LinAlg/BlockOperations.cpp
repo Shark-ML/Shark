@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_MatrixVectorOperations_row_major_BENCHMARK ){
 	std::cout<<"gemv_prod: "<<end1-start1<<" fast_prod: "<<end2-start2<<std::endl;
 	
 	double output= 0;
-	output += normSqr(result);
+	output += norm_sqr(result);
 	std::cout<<"anti optimization output: "<<output<<std::endl;
 }
 BOOST_AUTO_TEST_CASE( LinAlg_detail_PanelBlockOperationBenchmark_row_major_BENCHMARK){

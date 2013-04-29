@@ -64,7 +64,7 @@ struct Sphere : public SingleObjectiveFunction {
 
 	double eval(const SearchPointType &p) const {
 		m_evaluationCounter++;
-		return normSqr(p);
+		return norm_sqr(p);
 	}
 private:
 	std::size_t m_numberOfVariables;

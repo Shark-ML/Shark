@@ -98,7 +98,7 @@ std::size_t shark::pivotingRQHouseholder
 		std::size_t pivot = std::max_element(norms.begin()+i,norms.end())-norms.begin();
 		//the values in the array are not numerically stable, so we have to recompute the pivot
 		//before we can tell, whether we are done or not
-		double pivotValue = normSqr(row(subR,pivot-i));
+		double pivotValue = norm_sqr(row(subR,pivot-i));
 		//step1.1: rank analysis
 		//test, whether we are done. there is no need in swapping if the remainder of the matrix is empty
 		//todo: make numerically more sound
@@ -205,7 +205,7 @@ std::size_t shark::pivotingRQ
 //		
 //		double tau = 0;
 //		if(reflection.size() != 1){
-//			tau = 2/normSqr(reflection);
+//			tau = 2/norm_sqr(reflection);
 //		}
 //		blas::matrix_range<Mat> subQ = rows(matrixQ(),i,n);
 //		applyHouseholderOnTheLeft(subQ,reflection,tau);

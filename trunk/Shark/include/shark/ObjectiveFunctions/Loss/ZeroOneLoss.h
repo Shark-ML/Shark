@@ -55,7 +55,6 @@ public:
 	std::string name() const
 	{ return "ZeroOneLoss"; }
 
-	// annoyingness of C++ templates
 	using base_type::eval;
 
 	///\brief Return zero if labels == predictions and one otherwise.
@@ -63,12 +62,11 @@ public:
 		std::size_t numInputs = size(labels);
 		SIZE_CHECK(numInputs == size(predictions));
 
-		return accumulateError(labels,predictions,std::not_equal_to<LabelType>()); // see Core/utility/functional.h
-//		double error = 0;
-//		for(std::size_t i = 0; i != numInputs; ++i){
-//			error += (predictions(i) != labels(i))?1.0:0.0;
-//		}
-//		return error;
+		double error = 0;
+		for(std::size_t i = 0; i != numInputs; ++i){
+			error += (predictions(i) != labels(i))?1.0:0.0;
+		}
+		return error;
 	}
 };
 

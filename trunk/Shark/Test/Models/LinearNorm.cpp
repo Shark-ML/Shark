@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE( LinearNorm_Value )
 
 	//evaluate point
 	RealVector result=model(point);
-	double difference=normSqr(testResult-result);
+	double difference=norm_sqr(testResult-result);
 	BOOST_CHECK_SMALL(difference,1.e-15);
 }
 BOOST_AUTO_TEST_CASE( LinearNorm_weightedInputDerivative )
