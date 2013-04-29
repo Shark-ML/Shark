@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE( QP_CachedMatrix_Simple ) {
 	//this last call should not have cached anything
 	BOOST_REQUIRE_EQUAL(cache.getCacheSize(),0);
 	for(std::size_t i = 0; i != size; ++i){
-		BOOST_CHECK_EQUAL(cache.isCached(i), 0);
+		BOOST_CHECK_EQUAL(cache.isCached(i), false);
 		BOOST_CHECK_EQUAL(cache.getCacheRowSize(i), 0);
 	}
 }

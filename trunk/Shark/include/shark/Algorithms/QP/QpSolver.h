@@ -340,7 +340,7 @@ public:
 	: Problem(problem)
 	, m_isUnshrinked(false)
 	, m_shrink(shrink)
-	, m_shrinkCounter(std::min<std::size_t>(this->dimensions(),1000))
+	, m_shrinkCounter(std::min<std::size_t>(problem.dimensions(),1000))
 	, m_gradientEdge(problem.linear){}
 
 	using Problem::dimensions;

@@ -174,8 +174,8 @@ public:
 		visible.calledSample = 0;
 		hidden.calledPrecompute = 0;
 		hidden.calledSample = 0;
-		hidden.id = state(0,0);
-		visible.id = state(0,0);
+		hidden.id = (int) state(0,0);
+		visible.id = (int) state(0,0);
 	}
 };
 }

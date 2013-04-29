@@ -31,16 +31,16 @@ typedef basic_range<> range;
 // Expression types
 
 template<class E>
-class vector_expression;
+struct vector_expression;
 template<class C>
-class vector_container;
+struct vector_container;
 template<class E>
 class vector_reference;
 
 template<class E>
-class matrix_expression;
+struct matrix_expression;
 template<class C>
-class matrix_container;
+struct matrix_container;
 template<class E>
 class matrix_reference;
 

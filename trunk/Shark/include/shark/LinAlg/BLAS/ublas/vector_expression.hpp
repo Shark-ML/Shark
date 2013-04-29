@@ -900,8 +900,7 @@ norm_inf(vector_expression<E> const &e){
 
 /// \brief index_norm_inf v = arg max_i |v_i|
 template<class E>
-typename real_traits<typename E::value_type >::type
-index_norm_inf(vector_expression<E> const &e){
+std::size_t index_norm_inf(vector_expression<E> const &e){
 	return arg_max(abs(e));
 }
 

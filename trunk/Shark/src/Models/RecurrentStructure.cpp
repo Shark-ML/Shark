@@ -156,7 +156,7 @@ void RecurrentStructure::configure( const PropertyTree & node ){
 
 
 	}
-	catch(boost::property_tree::ptree_error& error){
+	catch(boost::property_tree::ptree_error&){
 		SHARKEXCEPTION("[RecurrentStructure::configure] wrong data format or missing data");
 	}
 }

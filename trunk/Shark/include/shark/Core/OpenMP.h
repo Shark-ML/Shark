@@ -37,17 +37,17 @@
 #include <boost/config.hpp>
 
 #ifdef BOOST_MSVC
-#define SHARK_PARALLEL_FOR __pragma("omp parallel for")\
+#define SHARK_PARALLEL_FOR __pragma(omp parallel for)\
 for
 
-#define SHARK_CRITICAL_REGION __pragma(" omp critical")
+#define SHARK_CRITICAL_REGION __pragma(omp critical)
 
 #else
 #define SHARK_PARALLEL_FOR \
 _Pragma ( "omp parallel for" )\
 for
 
-#define SHARK_CRITICAL_REGION _Pragma(" omp critical")
+#define SHARK_CRITICAL_REGION _Pragma("omp critical")
 #endif
 
 #define SHARK_NUM_THREADS (std::size_t)(omp_in_parallel()?omp_get_num_threads():omp_get_max_threads())
