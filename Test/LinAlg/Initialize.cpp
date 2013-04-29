@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_init_test_base ){
 	}
 }
 BOOST_AUTO_TEST_CASE( LinAlg_init_test_vectorSet ){
-	std::vector<UIntVector> vectors(3,RealVector(3));
+	std::vector<UIntVector> vectors(3,UIntVector(3));
 	for(std::size_t i = 0; i != 3; ++i){
 		for(std::size_t j = 0; j != 3; ++j){
 			vectors[i](j)=1+i*3+j;

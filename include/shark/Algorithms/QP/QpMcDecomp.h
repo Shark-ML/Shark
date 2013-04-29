@@ -1831,7 +1831,6 @@ printf(")\n");
 		if (activeVar == variables) return;
 
 		std::size_t v, i;
-		QpFloatType* q;
 		double mu;
 
 		// compute the inactive gradient components (quadratic time complexity)
