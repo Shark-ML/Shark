@@ -67,15 +67,6 @@ private:
 public:
 	///the state space of this neuron is real valued, so it can't be enumerated
 	typedef RealSpace StateSpace;
-	
-	///\brief The type of the State of the Layer.
-	typedef RealVector State;
-
-	///tells the outside world, that the calculation of the  is not expensive enough to be stored
-	static const bool expensiveEvaluationOfPhi = false; ///here the feature-function is the identity
-	
-	///this neuron has only one interaction term 
-	static const int activationTerms = 1;
 
 	///\brief Stores lambda, the defining parameter of the statistics and also exp(-lambda) since it is used regularly.
 	typedef detail::TruncatedExponentialSufficientStatistics<RealVector> SufficientStatistics;

@@ -16,7 +16,7 @@ using namespace shark;
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Visible )
 {
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(4,4);
+	rbm.setStructure(4,4);
 	initRandomNormal(rbm,2);
 	
 	RealMatrix batch(10,4);
@@ -30,9 +30,8 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Visible )
 	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
-	BinaryRBM::Energy::AverageEnergyGradient grad(&rbm.structure());
-	BinaryRBM::Energy::AverageEnergyGradient gradTest(&rbm.structure());
-	gibbs.flags() = grad.flagsVH();
+	AverageEnergyGradient<BinaryRBM> grad(&rbm);
+	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
 	RealScalarVector zero(10,0);
 	gibbs.createSample(hiddenBatch,visibleBatch,batch);
@@ -49,7 +48,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Visible )
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Hidden )
 {
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(4,4);
+	rbm.setStructure(4,4);
 	initRandomNormal(rbm,2);
 	
 	RealMatrix batch(10,4);
@@ -63,9 +62,8 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Hidden )
 	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
-	BinaryRBM::Energy::AverageEnergyGradient grad(&rbm.structure());
-	BinaryRBM::Energy::AverageEnergyGradient gradTest(&rbm.structure());
-	gibbs.flags() = grad.flagsHV();
+	AverageEnergyGradient<BinaryRBM> grad(&rbm);
+	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
 	RealScalarVector zero(10,0);
 	hiddenBatch.state = batch;
@@ -84,7 +82,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Hidden )
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Visible )
 {
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(4,4);
+	rbm.setStructure(4,4);
 	initRandomNormal(rbm,2);
 	
 	RealMatrix batch(10,4);
@@ -101,25 +99,27 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Visible )
 	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
-	BinaryRBM::Energy::AverageEnergyGradient grad(&rbm.structure());
-	BinaryRBM::Energy::AverageEnergyGradient gradTest(&rbm.structure());
-	gibbs.flags() = grad.flagsVH();
+	AverageEnergyGradient<BinaryRBM> grad(&rbm);
+	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
 	gibbs.createSample(hiddenBatch,visibleBatch,batch);
 	
-	gradTest.addVH(hiddenBatch,visibleBatch,log(weights));
-	BOOST_CHECK_CLOSE(logWeightSum,gradTest.logWeightSum(),1.e-5);
+	grad.addVH(hiddenBatch,visibleBatch,log(weights));
+	BOOST_CHECK_CLOSE(logWeightSum,grad.logWeightSum(),1.e-5);
 	
-	//calculate ground truth data
+	//calculate ground truth data by incorporating the weights into 
+	//the state. we have to correct the probability part of the gradient afterwards
+	//as this is not changed.
 	RealVector newWeights=weights/std::exp(logWeightSum)*10;
 	for(std::size_t i = 0; i != 10; ++i){
 		row(visibleBatch.state,i)*=newWeights(i);
-		row(hiddenBatch.statistics.probability,i)*=newWeights(i);
 	}
-	grad.addVH(hiddenBatch,visibleBatch);
+	gradTest.addVH(hiddenBatch,visibleBatch);
+	RealVector gradTestResult= gradTest.result();
+	noalias(subrange(gradTestResult,16,20))= 
+		prod(weights,hiddenBatch.statistics.probability)/std::exp(logWeightSum);
 	
-	
-	RealVector diff = grad.result()-gradTest.result();
+	RealVector diff = grad.result()-gradTestResult;
 	
 	BOOST_CHECK_SMALL(norm_1(diff),1.e-5);
 }
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Visible )
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 {
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(4,4);
+	rbm.setStructure(4,4);
 	initRandomNormal(rbm,2);
 	
 	RealMatrix batch(10,4);
@@ -146,26 +146,26 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
-	BinaryRBM::Energy::AverageEnergyGradient grad(&rbm.structure());
-	BinaryRBM::Energy::AverageEnergyGradient gradTest(&rbm.structure());
-	gibbs.flags() = grad.flagsHV();
+	AverageEnergyGradient<BinaryRBM> grad(&rbm);
+	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
 	hiddenBatch.state = batch;
 	gibbs.precomputeVisible(hiddenBatch,visibleBatch);
 	
-	gradTest.addHV(hiddenBatch,visibleBatch,log(weights));
-	BOOST_CHECK_CLOSE(logWeightSum,gradTest.logWeightSum(),1.e-5);
+	grad.addHV(hiddenBatch,visibleBatch,log(weights));
+	BOOST_CHECK_CLOSE(logWeightSum,grad.logWeightSum(),1.e-5);
 	
 	//calculate ground truth data
 	RealVector newWeights=weights/std::exp(logWeightSum)*10;
 	for(std::size_t i = 0; i != 10; ++i){
 		row(hiddenBatch.state,i)*=newWeights(i);
-		row(visibleBatch.statistics.probability,i)*=newWeights(i);
 	}
-	grad.addHV(hiddenBatch,visibleBatch);
+	gradTest.addHV(hiddenBatch,visibleBatch);
+	RealVector gradTestResult= gradTest.result();
+	noalias(subrange(gradTestResult,20,24))= 
+		prod(weights,visibleBatch.statistics.probability)/std::exp(logWeightSum);
 	
-	
-	RealVector diff = grad.result()-gradTest.result();
+	RealVector diff = grad.result()-gradTestResult;
 	
 	BOOST_CHECK_SMALL(norm_1(diff),1.e-5);
 }
@@ -173,8 +173,6 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 //that the unweighted version works, by calculating the numerical gradient
 class TestGradientVH : public UnsupervisedObjectiveFunction<RealVector>{
 public:
-	typedef BinaryRBM::Energy Energy;
-
 	TestGradientVH(BinaryRBM* rbm): mpe_rbm(rbm){
 		m_features |= HAS_FIRST_DERIVATIVE;
 		m_features |= CAN_PROPOSE_STARTING_POINT;
@@ -196,12 +194,10 @@ public:
 	
 	double eval( SearchPointType const & parameter) const {
 		mpe_rbm->setParameterVector(parameter);
-		Energy energy(&mpe_rbm->structure());
-		
 		double result=0;
 		for(std::size_t i =0; i != m_data.numberOfBatches();++i){
 			RealScalarVector beta(m_data.batch(i).size1(),1);
-			result+=sum(energy.logUnnormalizedPropabilityVisible(m_data.batch(i),beta));
+			result+=sum(mpe_rbm->energy().logUnnormalizedPropabilityVisible(m_data.batch(i),beta));
 		}
 		result/=m_data.numberOfElements();
 		return result;
@@ -209,13 +205,10 @@ public:
 
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
 		mpe_rbm->setParameterVector(parameter);
-		Energy::AverageEnergyGradient gradient(&mpe_rbm->structure());
+		AverageEnergyGradient<BinaryRBM> gradient(mpe_rbm);
 		GibbsOperator<BinaryRBM> sampler(mpe_rbm);
-		sampler.flags() = gradient.flagsVH();
 		
 		//create Energy from RBM
-		Energy energy(&mpe_rbm->structure());
-		typedef Energy::VisibleType::StateSpace VisibleStateSpace;
 		
 		//calculate the expectation of the energy gradient with respect to the data
 		for(std::size_t i=0; i != m_data.numberOfBatches(); i++){
@@ -237,7 +230,7 @@ private:
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
 {
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(10,16);
+	rbm.setStructure(10,16);
 	initRandomNormal(rbm,2);
 	RealVector parameters = rbm.parameterVector();
 	initRandomNormal(rbm,2);
@@ -258,8 +251,6 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
 
 class TestGradientHV : public UnsupervisedObjectiveFunction<RealVector>{
 public:
-	typedef BinaryRBM::Energy Energy;
-
 	TestGradientHV(BinaryRBM* rbm): mpe_rbm(rbm){
 		m_features |= HAS_FIRST_DERIVATIVE;
 		m_features |= CAN_PROPOSE_STARTING_POINT;
@@ -282,12 +273,11 @@ public:
 	
 	double eval( SearchPointType const & parameter) const {
 		mpe_rbm->setParameterVector(parameter);
-		Energy energy(&mpe_rbm->structure());
 		
 		double result=0;
 		for(std::size_t i =0; i != m_data.numberOfBatches();++i){
 			RealScalarVector beta(m_data.batch(i).size1(),1);
-			result+=sum(energy.logUnnormalizedPropabilityHidden(m_data.batch(i),beta));
+			result+=sum(mpe_rbm->energy().logUnnormalizedPropabilityHidden(m_data.batch(i),beta));
 		}
 		result/=m_data.numberOfElements();
 		return result;
@@ -295,14 +285,11 @@ public:
 
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
 		mpe_rbm->setParameterVector(parameter);
-		Energy::AverageEnergyGradient gradient(&mpe_rbm->structure());
+		AverageEnergyGradient<BinaryRBM> gradient(mpe_rbm);
 		GibbsOperator<BinaryRBM> sampler(mpe_rbm);
-		sampler.flags() = gradient.flagsHV();
 		
 		//create Energy from RBM
-		Energy energy(&mpe_rbm->structure());
-		typedef Energy::VisibleType::StateSpace VisibleStateSpace;
-		
+
 		//calculate the expectation of the energy gradient with respect to the data
 		for(std::size_t i=0; i != m_data.numberOfBatches(); i++){
 			std::size_t currentBatchSize=m_data.batch(i).size1();
@@ -324,7 +311,7 @@ private:
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeHV )
 {
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(16,10);
+	rbm.setStructure(16,10);
 	initRandomNormal(rbm,2);
 	RealVector parameters = rbm.parameterVector();
 	initRandomNormal(rbm,2);

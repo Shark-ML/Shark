@@ -41,8 +41,6 @@
 #include <shark/Unsupervised/RBM/GradientApproximations/SingleChainApproximator.h>
 #include <shark/Rng/GlobalRng.h>
 namespace shark{
-
-typedef Energy<TruncatedExponentialLayer,BinaryLayer> TruncExpBinaryEnergy;
 typedef RBM<TruncExpBinaryEnergy, Rng::rng_type> TruncExpBinaryRBM;
 typedef GibbsOperator<TruncExpBinaryRBM> TruncExpBinaryGibbsOperator;
 typedef MarkovChain<TruncExpBinaryGibbsOperator> TruncExpBinaryGibbsChain;

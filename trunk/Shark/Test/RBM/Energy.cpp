@@ -11,21 +11,21 @@ using namespace shark;
 //structure of values which is used for the tests
 struct RBMFixture {
     RBMFixture():rbm(Rng::globalRng){
-		rbm.structure().setStructure(5,5);
-		rbm.structure().weightMatrix(0,0).clear();
+		rbm.setStructure(5,5);
+		rbm.weightMatrix().clear();
 		hiddenState.resize(1,5);
 		visibleState.resize(1,5);
 		
 		for(std::size_t i = 0; i != 5; ++i){
-			rbm.structure().weightMatrix(0,0)(i,i) = i;
+			rbm.weightMatrix()(i,i) = i;
 			rbm.hiddenNeurons().bias()(i) = i;
 			rbm.visibleNeurons().bias()(i) = 5+i;
 			visibleState(0,i) = 10+i;
 			hiddenState(0,i) = 15+i;
 		}
 		
-		visibleInput = prod(hiddenState,rbm.structure().weightMatrix(0,0));
-		hiddenInput = prod(visibleState,trans(rbm.structure().weightMatrix(0,0)));
+		visibleInput = prod(hiddenState,rbm.weightMatrix());
+		hiddenInput = prod(visibleState,trans(rbm.weightMatrix()));
 		
 		visibleStateVec = row(visibleState,0);
 		hiddenStateVec = row(hiddenState,0);
@@ -34,7 +34,7 @@ struct RBMFixture {
 		
 		energyResult = - inner_prod(rbm.hiddenNeurons().bias(),hiddenStateVec);
 		energyResult-= inner_prod(rbm.visibleNeurons().bias(),visibleStateVec);
-		energyResult-= inner_prod(hiddenStateVec,prod(rbm.structure().weightMatrix(0,0),visibleStateVec));
+		energyResult-= inner_prod(hiddenStateVec,prod(rbm.weightMatrix(),visibleStateVec));
     }
 	BinaryRBM rbm;
 	RealMatrix visibleState;
@@ -53,7 +53,7 @@ struct RBMFixture {
 BOOST_FIXTURE_TEST_SUITE( rbm, RBMFixture )
 
 BOOST_AUTO_TEST_CASE( Energy_Input){
-	Energy<BinaryLayer,BinaryLayer> energy(&rbm.structure());
+	Energy<BinaryRBM> energy(rbm.energy());
 	
 	RealMatrix visibleInputResult(1,5);
 	RealMatrix hiddenInputResult(1,5);
@@ -64,26 +64,10 @@ BOOST_AUTO_TEST_CASE( Energy_Input){
 	BOOST_CHECK_SMALL(norm_sqr(row(visibleInputResult-visibleInput,0)), 1.e-15);
 	BOOST_CHECK_SMALL(norm_sqr(row(hiddenInputResult-hiddenInput,0)), 1.e-15);
 }
-BOOST_AUTO_TEST_CASE( Energy_Input_WithFeatures){
-	Energy<BinaryLayer,BinaryLayer> energy(&rbm.structure());
-	
-	RealMatrix visibleInputResult(1,5);
-	RealMatrix hiddenInputResult(1,5);
-	RealMatrix visibleFeatures(1,5);
-	RealMatrix hiddenFeatures(1,5);
-	
-	energy.inputHidden(hiddenInputResult,visibleState,visibleFeatures);
-	energy.inputVisible(visibleInputResult,hiddenState,hiddenFeatures);
-	
-	BOOST_CHECK_SMALL(norm_sqr(row(visibleInputResult-visibleInput,0)), 1.e-15);
-	BOOST_CHECK_SMALL(norm_sqr(row(hiddenInputResult-hiddenInput,0)), 1.e-15);
-	BOOST_CHECK_SMALL(norm_sqr(row(visibleFeatures-visibleState,0)), 1.e-15);
-	BOOST_CHECK_SMALL(norm_sqr(row(hiddenFeatures-hiddenState,0)), 1.e-15);
-	
-}
+
 BOOST_AUTO_TEST_CASE( Energy_EnergyFromInput )
 {
-	Energy<BinaryLayer,BinaryLayer> energy(&rbm.structure());
+	Energy<BinaryRBM> energy(rbm.energy());
 	
 	RealVector energyVisible1 = energy.energyFromVisibleInput(visibleInput,hiddenState,visibleState,visibleState);
 	RealVector energyVisible2 = energy.energyFromVisibleInput(visibleInput,hiddenState,visibleState);
@@ -97,7 +81,7 @@ BOOST_AUTO_TEST_CASE( Energy_EnergyFromInput )
 }
 BOOST_AUTO_TEST_CASE( Energy_SimpleEnergy )
 {
-	Energy<BinaryLayer,BinaryLayer> energy(&rbm.structure());
+	Energy<BinaryRBM> energy(rbm.energy());
 	
 	RealVector simpleEnergy = energy.energy(hiddenState,visibleState);
 	
@@ -121,9 +105,9 @@ BOOST_AUTO_TEST_CASE( Energy_SimpleEnergy )
 			}
 			energies(j) = - inner_prod(bigRBM.hiddenNeurons().bias(),row(hiddenBatch,j));
 			energies(j)-= inner_prod(bigRBM.visibleNeurons().bias(),row(inputBatch,j));
-			energies(j)-= inner_prod(row(hiddenBatch,j),prod(bigRBM.structure().weightMatrix(0,0),row(inputBatch,j)));
+			energies(j)-= inner_prod(row(hiddenBatch,j),prod(bigRBM.weightMatrix(),row(inputBatch,j)));
 		}
-		Energy<BinaryLayer,BinaryLayer> bigEnergy(&bigRBM.structure());
+		Energy<BinaryRBM> bigEnergy(bigRBM.energy());
 		RealVector testEnergies=bigEnergy.energy(hiddenBatch,inputBatch);
 		
 		for(std::size_t i = 0; i != 10; ++i){
@@ -146,15 +130,15 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityHidden )
 	visibleStateSpace(3,1)=1;
 	
 	//create RBM with 2 visible and 4 hidden units and initialize it randomly
-	RBM<Energy<BinaryLayer,BinaryLayer>,Rng::rng_type > rbm(Rng::globalRng);
-	rbm.structure().setStructure(2,4);
+	BinaryRBM rbm(Rng::globalRng);
+	rbm.setStructure(2,4);
 	initRandomNormal(rbm,2);
 	
 	//the hiddenstate to test is the most complex (1,1,1,1) case
 	RealMatrix hiddenState = RealScalarMatrix(4,4,1.0);	
 	
 	//calculate energies for the state space, we now from the previous tests, that this result is correct
-	Energy<BinaryLayer,BinaryLayer> energy(&rbm.structure());
+	Energy<BinaryRBM> energy(rbm.energy());
 	RealVector energies = energy.energy(hiddenState,visibleStateSpace);
 	
 	//now test for several choices of beta
@@ -183,15 +167,15 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityVisible )
 	hiddenStateSpace(3,1)=1;
 	
 	//create RBM with 4 visible and 2 hidden units and initialize it randomly
-	RBM<Energy<BinaryLayer,BinaryLayer>,Rng::rng_type > rbm(Rng::globalRng);
-	rbm.structure().setStructure(4,2);
+	BinaryRBM rbm(Rng::globalRng);
+	rbm.setStructure(4,2);
 	initRandomNormal(rbm,2);
 	
 	//the hiddenstate to test is the most complex (1,1,1,1) case
 	RealMatrix visibleState = RealScalarMatrix(4,4,1.0);	
 	
 	//calculate energies for the state space, we now from the previous tests, that this result is correct
-	Energy<BinaryLayer,BinaryLayer> energy(&rbm.structure());
+	Energy<BinaryRBM> energy(rbm.energy());
 	RealVector energies = energy.energy(hiddenStateSpace,visibleState);
 	
 	//now test for several choices of beta

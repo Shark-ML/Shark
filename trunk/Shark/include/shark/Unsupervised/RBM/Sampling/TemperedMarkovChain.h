@@ -54,8 +54,6 @@ public:
 
 	///\brief The type of the RBM the operator is working with.
 	typedef typename Operator::RBM RBM;
-	typedef typename RBM::VectorType VectorType; 
-	typedef typename Batch<VectorType>::type MatrixType;
 	
 	///\brief A batch of samples containing hidden and visible samples as well as the energies.
 	typedef typename Batch<detail::MarkovChainSample<HiddenSample,VisibleSample> >::type SampleBatch;
@@ -68,7 +66,7 @@ public:
 	
 private:
 	SampleBatch m_temperedChains;
-	VectorType m_betas;
+	RealVector m_betas;
 	Operator m_operator;
 	
 	void metropolisSwap(reference low, double betaLow, reference high, double betaHigh){
@@ -124,19 +122,11 @@ private:
 	
 public:
 	TemperedMarkovChain(RBM* rbm):m_operator(rbm){
-		m_operator.flags() |= StoreEnergyComponents;
 	}
 
 
 	void configure(PropertyTree const& node){
 		m_operator.configure(node);
-	}
-		
-	SamplingFlags& flags(){
-		return m_operator.flags();
-	}
-	const SamplingFlags& flags()const{
-		return m_operator.flags();
 	}
 	
 	const Operator& transitionOperator()const{
@@ -191,10 +181,10 @@ public:
 	///\brief Initializes the markov chain using samples drawn uniformly from the set.
 	///
 	/// @param dataSet the data set
-	void initializeChain(Data<VectorType> const& dataSet){
+	void initializeChain(Data<RealVector> const& dataSet){
 		DiscreteUniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,dataSet.numberOfElements()-1);
 		std::size_t visibles = m_operator.rbm()->numberOfVN();
-		MatrixType sampleData(m_temperedChains.size(),visibles);
+		RealMatrix sampleData(m_temperedChains.size(),visibles);
 		
 		for(std::size_t i = 0; i != m_temperedChains.size(); ++i){
 			noalias(row(sampleData,i)) = dataSet.element(uni());
@@ -205,9 +195,9 @@ public:
 	/// \brief Initializes with data points from a batch of points
 	///
 	/// @param sampleData the data set
-	void initializeChain(MatrixType const& sampleData){
+	void initializeChain(RealMatrix const& sampleData){
  		if(m_temperedChains.size()==0) 
-    	throw SHARKEXCEPTION("you did not initialize the number of temperatures bevor initializing the chain!");
+			throw SHARKEXCEPTION("you did not initialize the number of temperatures bevor initializing the chain!");
 
 		m_operator.createSample(m_temperedChains.hidden,m_temperedChains.visible,sampleData,m_betas);
 		

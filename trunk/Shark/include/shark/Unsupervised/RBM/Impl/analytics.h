@@ -74,15 +74,11 @@ namespace detail{
 	/// @return the partition function
 	template<class RBMType, class Enumeration>
 	double logPartitionFunctionImplFactHidden(const RBMType& rbm, Enumeration, double beta){
-		//create Energy from RBM
-		typedef typename RBMType::Energy Energy;
-		Energy energy(&rbm.structure());
-		
 		std::size_t values = Enumeration::numberOfStates(rbm.numberOfVN());
 		std::size_t batchSize = std::min(values, std::size_t(500));
 		
 		//over all possible values of the visible neurons
-		typename Batch<typename RBMType::VectorType>::type stateMatrix(batchSize,rbm.numberOfVN());
+		RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
 		
 		//double c = 0;
 		double logZ = -std::numeric_limits<double>::infinity();
@@ -98,7 +94,7 @@ namespace detail{
 	
 			//accumulate changes to the log partition
 			logZ = boost::accumulate(
-				-energy.logUnnormalizedPropabilityVisible(stateMatrix, betaBatch),
+				-rbm.energy().logUnnormalizedPropabilityVisible(stateMatrix, betaBatch),
 				logZ,updateLogPartition);
 		}
 		return logZ;
@@ -118,16 +114,12 @@ namespace detail{
 	/// @return the partition function
 	/// @return the partition function
 	template<class RBMType, class Enumeration>
-	double logPartitionFunctionImplFactVisible(const RBMType& rbm, Enumeration, double beta){
-		//create Energy from RBM
-		typedef typename RBMType::Energy Energy;
-		Energy energy(&rbm.structure());
-		
+	double logPartitionFunctionImplFactVisible(const RBMType& rbm, Enumeration, double beta){		
 		std::size_t values = Enumeration::numberOfStates(rbm.numberOfHN());
 		std::size_t batchSize=std::min(values,std::size_t(500));
 		
 		//over all possible values of the visible neurons
-		typename Batch<typename RBMType::VectorType>::type stateMatrix(batchSize,rbm.numberOfVN());
+		RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
 		
 		//double c = 0;
 		double logZ = -std::numeric_limits<double>::infinity();
@@ -143,7 +135,7 @@ namespace detail{
 			
 			//accumulate changes to the log partition
 			logZ = boost::accumulate(
-				-energy.logUnnormalizedPropabilityHidden(stateMatrix, betaBatch),
+				-rbm.energy().logUnnormalizedPropabilityHidden(stateMatrix, betaBatch),
 				logZ,updateLogPartition);
 		}
 		return logZ;
@@ -168,8 +160,7 @@ namespace detail{
 	){
 		// Since we want to factorize over the hidden neurons, we sum over the marginal distribution of
 		// the visible and thus have to acquire the visible enumeration type.
-		typedef typename RBMType::Energy Energy;
-		typedef typename Energy::VisibleType::StateSpace Enumeration;
+		typedef typename RBMType::VisibleType::StateSpace Enumeration;
 		
 		return logPartitionFunctionImplFactHidden(rbm,Enumeration(),beta);
 	}
@@ -183,8 +174,7 @@ namespace detail{
 	){
 		// Since we want to factorize over the visible neurons, we sum over the marginal distribution of
 		// the hidden and thus have to acquire the hidden enumeration type.
-		typedef typename RBMType::Energy Energy;
-		typedef typename Energy::HiddenType::StateSpace Enumeration;
+		typedef typename RBMType::HiddenType::StateSpace Enumeration;
 		
 		return logPartitionFunctionImplFactVisible(rbm,Enumeration(),beta);
 	}
@@ -197,9 +187,8 @@ namespace detail{
 		double beta
 	){
 		//get both enumeration types and check the number of states
-		typedef typename RBMType::Energy Energy;
-		typedef typename Energy::HiddenType::StateSpace EnumerationHidden;
-		typedef typename Energy::VisibleType::StateSpace EnumerationVisible;
+		typedef typename RBMType::HiddenType::StateSpace EnumerationHidden;
+		typedef typename RBMType::VisibleType::StateSpace EnumerationVisible;
 
 		if(rbm.numberOfHN() < rbm.numberOfVN()){
 			return logPartitionFunctionImplFactVisible(rbm,EnumerationHidden(),beta);

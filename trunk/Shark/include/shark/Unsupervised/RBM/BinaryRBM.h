@@ -41,8 +41,7 @@
 #include <shark/Rng/GlobalRng.h>
 namespace shark{
 
-typedef Energy<BinaryLayer,BinaryLayer> BinaryEnergy;
-typedef RBM<BinaryEnergy, Rng::rng_type> BinaryRBM;
+typedef RBM<BinaryLayer,BinaryLayer, Rng::rng_type> BinaryRBM;
 typedef GibbsOperator<BinaryRBM> BinaryGibbsOperator;
 typedef MarkovChain<BinaryGibbsOperator> BinaryGibbsChain;
 typedef TemperedMarkovChain<BinaryGibbsOperator> BinaryPTChain;

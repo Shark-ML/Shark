@@ -23,15 +23,14 @@ BOOST_AUTO_TEST_CASE( Energy_Partition_VisibleGreaterHidden )
 	hiddenStateSpace(3,1)=1;
 	
 	//create RBM with 4 visible and 2 hidden units and initialize it randomly
-	RBM<Energy<BinaryLayer,BinaryLayer>,Rng::rng_type > rbm(Rng::globalRng);
-	rbm.structure().setStructure(4,2);
+	RBM<BinaryLayer,BinaryLayer,Rng::rng_type > rbm(Rng::globalRng);
+	rbm.setStructure(4,2);
 	initRandomNormal(rbm,2);
 	
 	//now test for several choices of beta
 	for(std::size_t i = 0; i <= 10; ++i){
 		double beta=i*0.1;
 		//calculate the result by integrating over all states using the energies of every state
-		Energy<BinaryLayer,BinaryLayer> energy(&rbm.structure());
 		double partitionTest = 0;
 		for(std::size_t x = 0; x != 16; ++x){
 			RealMatrix visibleState(4,4);//we need it 4 times for easier batch processing
@@ -41,7 +40,7 @@ BOOST_AUTO_TEST_CASE( Energy_Partition_VisibleGreaterHidden )
 			BinarySpace::state(row(visibleState,3),x);
 			
 		
-			partitionTest+=sum(exp(-beta*energy.energy(hiddenStateSpace,visibleState)));
+			partitionTest+=sum(exp(-beta*rbm.energy().energy(hiddenStateSpace,visibleState)));
 		}
 		//now calculate the test
 		double logPartition = logPartitionFunction(rbm,beta);
@@ -64,15 +63,14 @@ BOOST_AUTO_TEST_CASE( Energy_Partition_HiddenGreaterVisible )
 	visibleStateSpace(3,1)=1;
 	
 	//create RBM with 2 visible and 4 hidden units and initialize it randomly
-	RBM<Energy<BinaryLayer,BinaryLayer>,Rng::rng_type > rbm(Rng::globalRng);
-	rbm.structure().setStructure(2,4);
+	RBM<BinaryLayer,BinaryLayer,Rng::rng_type > rbm(Rng::globalRng);
+	rbm.setStructure(2,4);
 	initRandomNormal(rbm,2);
 	
 	//now test for several choices of beta
 	for(std::size_t i = 0; i <= 10; ++i){
 		double beta=i*0.1;
 		//calculate the result by integrating over all states using the energies of every state
-		Energy<BinaryLayer,BinaryLayer> energy(&rbm.structure());
 		double partitionTest = 0;
 		for(std::size_t x = 0; x != 16; ++x){
 			RealMatrix hiddenState(4,4);//we need it 4 times for easier batch processing
@@ -82,7 +80,7 @@ BOOST_AUTO_TEST_CASE( Energy_Partition_HiddenGreaterVisible )
 			BinarySpace::state(row(hiddenState,3),x);
 			
 		
-			partitionTest+=sum(exp(-beta*energy.energy(hiddenState,visibleStateSpace)));
+			partitionTest+=sum(exp(-beta*rbm.energy().energy(hiddenState,visibleStateSpace)));
 		}
 		//now calculate the test
 		double logPartition = logPartitionFunction(rbm,beta);
@@ -95,8 +93,8 @@ BOOST_AUTO_TEST_CASE( Energy_NegLogLikelihood )
 {
 	
 	//create RBM with 8 visible and 16 hidden units
-	RBM<Energy<BinaryLayer,BinaryLayer>,Rng::rng_type > rbm(Rng::globalRng);
-	rbm.structure().setStructure(8,16);
+	RBM<BinaryLayer,BinaryLayer,Rng::rng_type > rbm(Rng::globalRng);
+	rbm.setStructure(8,16);
 	
 	
 	//now test for several random subsets of possible training data and random initializations of the rbm
@@ -111,14 +109,13 @@ BOOST_AUTO_TEST_CASE( Energy_NegLogLikelihood )
 		UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
 		RealScalarVector beta(1,1);
 		
-		//now claculate the test
-		Energy<BinaryLayer,BinaryLayer> energy(&rbm.structure());
+		//now calculate the test
 		long double logPartition = logPartitionFunction(rbm);
 		long double logProbTest = 0;
 		for(std::size_t j = 0; j != 50; ++j){
 			RealMatrix temp(1,8);
 			row(temp,0) = dataVec[j];
-			logProbTest -= energy.logUnnormalizedPropabilityVisible(temp,beta)(0)-logPartition;
+			logProbTest -= rbm.energy().logUnnormalizedPropabilityVisible(temp,beta)(0)-logPartition;
 		} 
 		long double logProb = negativeLogLikelihood(rbm,data);
 		BOOST_CHECK_CLOSE(logProbTest,logProb,1.e-5);

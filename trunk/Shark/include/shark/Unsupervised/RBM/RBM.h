@@ -18,43 +18,48 @@
 #define SHARK_UNSUPERVISED_RBM_RBM_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/LinAlg/Base.h>
+#include <shark/Unsupervised/RBM/Energy.h>
 
 #include <sstream>
 #include <boost/serialization/string.hpp>
 namespace shark{
 
 ///\brief stub for the RBM class. at the moment it is just a holder of the parameter set and the Energy.
-template<class EnergyType, class RngT>
-class RBM : public AbstractModel<typename EnergyType::VectorType,typename EnergyType::VectorType>{
+template<class VisibleLayerT,class HiddenLayerT, class RngT>
+class RBM : public AbstractModel<RealVector, RealVector>{
+private:
+	typedef AbstractModel<RealVector, RealVector> base_type;
 public:
-	typedef EnergyType Energy;
-	typedef typename Energy::Structure Structure;
+	typedef HiddenLayerT HiddenType; //< type of the hidden layer
+	typedef VisibleLayerT VisibleType; //< type of the visible layer
 	typedef RngT RngType;
-	typedef typename Energy::VectorType VectorType; 
-	typedef AbstractModel<VectorType,VectorType> base_type;
+	typedef Energy<RBM<VisibleType,HiddenType,RngT> > EnergyType;//< Type of the energy function
+	
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	
 private:
-	Structure m_structure;
+	/// \brief The weight matrix connecting hidden and visible layer.
+	RealMatrix m_weightMatrix;
+
+	///The layer of hidden Neurons
+	HiddenType m_hiddenNeurons;
+
+	///The Layer of visible Neurons
+	VisibleType m_visibleNeurons;
+
 	RngType* mpe_rng;
 	bool m_forward;
 	bool m_evalMean;
 
 	///\brief Evaluates the input by propagating the visible input to the hidden neurons.
 	void evalForward(BatchInputType const& state,BatchOutputType& output)const{
-		Energy energy(&m_structure);
-		typedef Batch<typename Energy::HiddenInput> InputTraits;
-		typedef Batch<typename Energy::HiddenStatistics> StatisticsTraits;
-		
 		std::size_t batchSize=state.size1();
-
-		typename StatisticsTraits::type statisticsBatch(batchSize,numberOfHN());
-		typename InputTraits::type inputBatch(batchSize,numberOfHN());
+		typename HiddenType::StatisticsBatch statisticsBatch(batchSize,numberOfHN());
+		RealMatrix inputBatch(batchSize,numberOfHN());
 		output.resize(state.size1(),numberOfHN());
 		
-		energy.inputHidden(inputBatch,state);
+		energy().inputHidden(inputBatch,state);
 		hiddenNeurons().sufficientStatistics(inputBatch,statisticsBatch,RealScalarVector(batchSize,1.0));
 
 		if(m_evalMean){
@@ -66,17 +71,12 @@ private:
 	}
 	///\brief Evaluates the input by propagating the hidden input to the visible neurons.
 	void evalBackward(BatchInputType const& state,BatchOutputType& output)const{
-		Energy energy(&m_structure);
-		typedef Batch<typename Energy::VisibleInput> InputTraits;
-		typedef Batch<typename Energy::VisibleStatistics> StatisticsTraits;
-		
 		std::size_t batchSize = state.size1();
-		
-		typename StatisticsTraits::type statisticsBatch(batchSize,numberOfVN());
-		typename InputTraits::type inputBatch(batchSize,numberOfVN());
+		typename VisibleType::StatisticsBatch statisticsBatch(batchSize,numberOfVN());
+		RealMatrix inputBatch(batchSize,numberOfVN());
 		output.resize(batchSize,numberOfVN());
 		
-		energy.inputVisible(inputBatch,state);
+		energy().inputVisible(inputBatch,state);
 		visibleNeurons().sufficientStatistics(inputBatch,statisticsBatch,RealScalarVector(batchSize,1.0));
 		
 		if(m_evalMean){
@@ -96,56 +96,72 @@ public:
 
 	///\brief Returns the total number of parameters of the model.
 	std::size_t numberOfParameters()const {
-		return m_structure.numberOfParameters();
+		std::size_t parameters = numberOfVN()*numberOfHN();
+		parameters += m_hiddenNeurons.numberOfParameters();
+		parameters += m_visibleNeurons.numberOfParameters();
+		return parameters;
 	}
 	
 	///\brief Returns the parameters of the Model as parameter vector.
 	RealVector parameterVector () const {
-		return m_structure.parameterVector();
+		RealVector ret(numberOfParameters());
+		init(ret) << toVector(m_weightMatrix),parameters(m_hiddenNeurons),parameters(m_visibleNeurons);
+		return ret;
 	};
 
 	///\brief Sets the parameters of the model.
  	void setParameterVector(const RealVector& newParameters) {
-		m_structure.setParameterVector(newParameters);
+		init(newParameters) >> toVector(m_weightMatrix),parameters(m_hiddenNeurons),parameters(m_visibleNeurons);
  	}
 	
 	///\brief Configures the structure.
 	void configure( const PropertyTree & node ){
-		m_structure.configure(node);
-	}
-
-	///\brief Returns the internal structure of the RBM parameters.
-	const Structure& structure()const{
-		return m_structure;
-	}
-	///\brief Returns the internal structure of the RBM parameters.
-	Structure& structure(){
-		return m_structure;
+		size_t numberOfHN = node.get<unsigned int>("numberOfHN");
+		size_t numberOfVN = node.get<unsigned int>("numberOfVN");
+		setStructure(numberOfVN,numberOfHN);
 	}
 	
 	///\brief Creates the structure of the RBM.
 	///
 	///@param hiddenNeurons number of hidden neurons.
 	///@param visibleNeurons number of visible neurons.
-	void setStructure(std::size_t hiddenNeurons,std::size_t visibleNeurons){
-		structure().setStructure(hiddenNeurons,visibleNeurons);
+	void setStructure(std::size_t visibleNeurons,std::size_t hiddenNeurons){
+		m_weightMatrix.resize(hiddenNeurons,visibleNeurons);
+		zero(m_weightMatrix);
+		
+		m_hiddenNeurons.resize(hiddenNeurons);
+		m_visibleNeurons.resize(visibleNeurons);
 	}
 	
 	///\brief Returns the layer of hidden neurons.
-	const typename Energy::HiddenType& hiddenNeurons()const{
-		return m_structure.hiddenNeurons();
+	HiddenType const& hiddenNeurons()const{
+		return m_hiddenNeurons;
 	}
 	///\brief Returns the layer of hidden neurons.
-	typename Energy::HiddenType& hiddenNeurons(){
-		return m_structure.hiddenNeurons();
+	HiddenType& hiddenNeurons(){
+		return m_hiddenNeurons;
 	}
 	///\brief Returns the layer of visible neurons.
-	typename Energy::VisibleType& visibleNeurons(){
-		return m_structure.visibleNeurons();
+	VisibleType& visibleNeurons(){
+		return m_visibleNeurons;
 	}
 	///\brief Returns the layer of visible neurons.
-	const typename Energy::VisibleType& visibleNeurons()const{
-		return m_structure.visibleNeurons();
+	VisibleType const& visibleNeurons()const{
+		return m_visibleNeurons;
+	}
+	
+	///\brief Returns the weight matrix connecting the layers.
+	RealMatrix& weightMatrix(){
+		return m_weightMatrix;
+	}
+	///\brief Returns the weight matrix connecting the layers.
+	RealMatrix const& weightMatrix()const{
+		return m_weightMatrix;
+	}
+	
+	///\brief Returns the energy function of the RBM.
+	EnergyType energy()const{
+		return EnergyType(m_visibleNeurons,m_hiddenNeurons,m_weightMatrix);
 	}
 	
 	///\brief Returns the random number generator associated with this RBM.
@@ -188,16 +204,18 @@ public:
 	
 	///\brief Returns the number of hidden Neurons.
 	std::size_t numberOfHN()const{
-		return m_structure.numberOfHN();
+		return m_hiddenNeurons.size();
 	}
 	///\brief Returns the number of visible Neurons.
 	std::size_t numberOfVN()const{
-		return m_structure.numberOfVN();
+		return m_visibleNeurons.size();
 	}
 	
 	/// \brief Reads the network from an archive.
 	void read(InArchive& archive){
-		archive >> m_structure;
+		archive >> m_weightMatrix;
+		archive >> m_hiddenNeurons;
+		archive >> m_visibleNeurons;
 		
 		//serialization of the rng is a bit...complex
 		//let's hope that we can remove this hack one time. But we really can't ignore the state of the rng.
@@ -209,7 +227,9 @@ public:
 
 	/// \brief Writes the network to an archive.
 	void write(OutArchive& archive) const{
-		archive << m_structure;
+		archive << m_weightMatrix;
+		archive << m_hiddenNeurons;
+		archive << m_visibleNeurons;
 		
 		std::stringstream stream;
 		stream <<*mpe_rng;

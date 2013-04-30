@@ -18,8 +18,7 @@
 #define SHARK_UNSUPERVISED_RBM_GRADIENTAPPROXIMATIONS_CONTRASTIVEDIVERGENCE_H
 
 #include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
-#include <shark/Unsupervised/RBM/Tags.h>
-#include <shark/Unsupervised/RBM/Tags.h>
+#include <shark/Unsupervised/RBM/Energy.h>
 
 namespace shark{
 
@@ -28,13 +27,13 @@ namespace shark{
 /// k-step Contrastive Divergence approximates the gradient by initializing a Markov
 /// chain with a training example and than samples one new sample based on this for the mean of the distribution
 template<class Operator>	
-class ContrastiveDivergence: public UnsupervisedObjectiveFunction<typename Operator::RBM::VectorType>{
+class ContrastiveDivergence: public UnsupervisedObjectiveFunction<RealVector>{
+private:
+	typedef UnsupervisedObjectiveFunction<RealVector> base_type;
 public:
 	typedef typename Operator::RBM RBM;
-	typedef UnsupervisedObjectiveFunction<typename RBM::VectorType> base_type;
 	typedef typename base_type::SearchPointType SearchPointType;
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
-	typedef typename RBM::Energy Energy;
 	
 	
 	ContrastiveDivergence(RBM* rbm):mpe_rbm(rbm),m_operator(rbm),m_k(1){
@@ -49,17 +48,15 @@ public:
 	std::string name() const
 	{ return "ContrastiveDivergence"; }
 
-	void setData(UnlabeledData<typename RBM::VectorType> const& data){
+	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;
-		typename Energy::AverageEnergyGradient flagHelper(&mpe_rbm->structure());
-		m_operator.flags() = flagHelper.flagsVH();
 	}
 
 	void configure(PropertyTree const& node){
 		PropertyTree::const_assoc_iterator it = node.find("rbm");
 		if(it!=node.not_found())
 		{
-			mpe_rbm->structure().configure(it->second);
+			mpe_rbm->configure(it->second);
 		}
 		it = node.find("sampling");
 		if(it!=node.not_found())
@@ -74,7 +71,7 @@ public:
 	}
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
-		startingPoint = mpe_rbm->structure().parameterVector();
+		startingPoint = mpe_rbm->parameterVector();
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -82,10 +79,10 @@ public:
 	}
 	
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const{
-		mpe_rbm->structure().setParameterVector(parameter);
+		mpe_rbm->setParameterVector(parameter);
 		
-		typename Energy::AverageEnergyGradient empiricalAverage(&mpe_rbm->structure());
-		typename Energy::AverageEnergyGradient modelAverage(&mpe_rbm->structure());
+		AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
+		AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
 	
 		BOOST_FOREACH(RealMatrix const& batch,m_data.batches()) {
 			//create the batches for evaluation
@@ -99,21 +96,21 @@ public:
 				m_operator.precomputeVisible(hiddenBatch, visibleBatch);
 				m_operator.sampleVisible(visibleBatch);
 				m_operator.precomputeHidden(hiddenBatch, visibleBatch);
-				if( step != m_k-1 || m_operator.flags() & StoreHiddenState){
+				if( step != m_k-1){
 					m_operator.sampleHidden(hiddenBatch);
 				}
 			}
 			modelAverage.addVH(hiddenBatch,visibleBatch);
 		}
 		
-		derivative.resize(mpe_rbm->structure().numberOfParameters());
+		derivative.resize(mpe_rbm->numberOfParameters());
 		noalias(derivative) = modelAverage.result() - empiricalAverage.result();
 	
 		return std::numeric_limits<double>::quiet_NaN();
 	}
 
 private:	
-	UnlabeledData<typename RBM::VectorType> m_data;
+	UnlabeledData<RealVector> m_data;
 	RBM* mpe_rbm;
 	Operator m_operator;
 	unsigned int m_k;

@@ -36,28 +36,26 @@ namespace detail{
 ///This class is not actually used by the GibbsOperator since it works only on a Batch of samples.
 ///Still you need this type to get Batch<GibbsSample<...> >::type. Therefore it is only useful for direct use,
 ///when an explicit copy of a sample is needed.
-template<class Input, class Statistics, class Features,class State>
+template<class Statistics>
 struct GibbsSample{
 public:
-	Input input;
+	RealVector input;
 	Statistics statistics;
-	Features features;
-	State state;
+	RealVector state;
 	
 	///\brief Constructs sample with size neurons
 	GibbsSample(){}
 	explicit GibbsSample(std::size_t numNeurons):
-	input(numNeurons),statistics(numNeurons),features(numNeurons),state(numNeurons)
+	input(numNeurons),statistics(numNeurons),state(numNeurons)
 	{}
-	GibbsSample(Input const& input, Statistics const& statistics, Features const& features, State const& state)
-	:input(input),statistics(statistics),features(features),state(state)
+	GibbsSample(RealVector const& input, Statistics const& statistics, RealVector const& state)
+	:input(input),statistics(statistics),state(state)
 	{}
 	
 	friend void swap(GibbsSample& sample1, GibbsSample& sample2){
 		using std::swap;
 		swap(sample1.input,sample2.input);
 		swap(sample1.statistics,sample2.statistics);
-		swap(sample1.features,sample2.features);
 		swap(sample1.state,sample2.state);
 	}
 };
@@ -85,23 +83,12 @@ struct MarkovChainSample{
 }
 //now create the batch specialisation for our new sample types
 
-#define GibbsSampleVars (Input, input)(Statistics, statistics)(Features, features)(State, state)
-#define GibbsName detail::GibbsSample<Input,Statistics,Features,State>
-template<class Input, class Statistics, class Features,class State>
-struct Batch< GibbsName >{
-	SHARK_CREATE_BATCH_INTERFACE( GibbsName,GibbsSampleVars)
+#define GibbsSampleVars (RealVector, input)(Statistics, statistics)(RealVector, state)
+template<class Statistics>
+struct Batch< detail::GibbsSample<Statistics> >{
+	SHARK_CREATE_BATCH_INTERFACE( detail::GibbsSample<Statistics>,GibbsSampleVars)
 };
-#undef GibbsName
 #undef GibbsSampleVars
-
-//~ #define MarkovChainSampleVars (Hidden, hidden)(Visible, visible)(double, energy)
-//~ #define MarkovChainSampleName detail::MarkovChainSample<Hidden,Visible>
-//~ template<class Hidden,class Visible>
-//~ struct Batch< MarkovChainSampleName >{
-	//~ SHARK_CREATE_BATCH_INTERFACE( MarkovChainSampleName,MarkovChainSampleVars)
-//~ };
-//~ #undef MarkovChainSampleName
-//~ #undef MarkovChainSampleVars
 
 template<class Hidden, class Visible>
 struct Batch< detail::MarkovChainSample<Hidden,Visible> >{
@@ -140,7 +127,7 @@ public:
 	typedef typename type::const_reference const_reference;
 	typedef typename type::iterator iterator;
 	typedef typename type::const_iterator const_iterator;
-	\
+
 	static type createBatch(value_type const& input, std::size_t size = 1){
 		return type(size,shark::size(FusionType::visible),shark::size(FusionType::hidden));
 	}
