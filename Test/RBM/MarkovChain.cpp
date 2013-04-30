@@ -60,11 +60,6 @@ public:
 		return result;
 	}
 	
-	SamplingFlags& flags(){
-		static SamplingFlags f;
-		return f;
-	}
-	
 	RBM* rbm()const{
 		return mpe_rbm;
 	}
@@ -74,7 +69,6 @@ BOOST_AUTO_TEST_CASE( MarkovChain_TestVH )
 {
 	Operator::RBM rbmMockup;
 	MarkovChain<Operator> chain(&rbmMockup);
-	chain.flags() |= StoreEnergyComponents;
 	//chain.setVHChain();
 	
 	//test the created sample for equality

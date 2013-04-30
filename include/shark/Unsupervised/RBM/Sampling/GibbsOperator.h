@@ -27,7 +27,6 @@
 #ifndef SHARK_UNSUPERVISED_RBM_SAMPLING_GIBBSOPERATOR_H
 #define SHARK_UNSUPERVISED_RBM_SAMPLING_GIBBSOPERATOR_H
 
-#include <shark/Unsupervised/RBM/Tags.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/IConfigurable.h>
 #include "Impl/SampleTypes.h"
@@ -43,8 +42,6 @@ template< class RBMType >
 class GibbsOperator:public IConfigurable{
 public:
 	typedef RBMType RBM;
-	typedef typename RBM::Energy Energy;
-	typedef typename Energy::Structure Structure;
 
 	///The operator holds a 'sample' of the visible and hidden neurons.
 	///Such a sample does not only contain the states of the neurons but all other information
@@ -52,17 +49,11 @@ public:
 
 	///\brief the type of a concrete sample.
 	typedef detail::GibbsSample<
-		typename Energy::HiddenInput,
-		typename Energy::HiddenStatistics, 
-		typename Energy::HiddenFeatures, 
-		typename Energy::HiddenState
+		typename RBMType::HiddenType::SufficientStatistics
 	> HiddenSample; 
 	///\brief the type of a concrete sample.
 	typedef detail::GibbsSample<
-		typename Energy::VisibleInput,
-		typename Energy::VisibleStatistics, 
-		typename Energy::VisibleFeatures, 
-		typename Energy::VisibleState
+		typename RBMType::VisibleType::SufficientStatistics
 	> VisibleSample; 
 
 	///\brief Represents the state of a batch of hidden samples and additional information required by the gradient.
@@ -80,40 +71,28 @@ public:
 	///\brief Constructs the Operator using an allready defined Distribution to sample from. 
 	GibbsOperator(RBM* rbm):mpe_rbm(rbm){}
 
-	void configure(PropertyTree const& node){
-	}
+	void configure(PropertyTree const& node){}
 		
 	///\brief Returns the internal RBM.
 	RBM* rbm()const{
 		return mpe_rbm;
-	}
-	
-	///\brief Returns the current settings of Flags, which describe which values are to be computed by the Operator.
-	SamplingFlags& flags(){
-		return m_flags;
-	}
-	///\brief Returns the current settings of Flags, which describe which values are to be computed by the Operator.
-	const SamplingFlags& flags()const{
-		return m_flags;
 	}
 
 
 	///\brief Calculates internal data needed for sampling the hidden units as well as requested information for the gradient.
 	///
 	///This function calculates the conditional propability distribution p(h|v) at temperature beta for the whole batch of samples
-	///Additionally, requested information set by flags() is calculated for the hidden part
 	///Be aware that a change of temperature may occur between sampleVisible and precomputeHidden.
 	template<class BetaVector>
 	void precomputeHidden(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch, BetaVector const& beta)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
-		calculateHiddenInput(hiddenBatch,visibleBatch);
+		mpe_rbm->energy().inputHidden(hiddenBatch.input, visibleBatch.state);
 		//calculate the sufficient statistics of the hidden units
 		mpe_rbm->hiddenNeurons().sufficientStatistics(hiddenBatch.input,hiddenBatch.statistics, beta);
 	}
 	///\brief Calculates internal data needed for sampling the hidden units as well as requested information for the gradient.
 	///
 	///This function calculates the conditional propability distribution p(h|v) at temperature 1 for the whole batch of samples
-	///Additionally, requested information set by flags() is calculated for the hidden part
 	///Be aware that a change of temperature may occur between sampleVisible and precomputeHidden.
 	void precomputeHidden(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
@@ -124,12 +103,11 @@ public:
 	///\brief calculates internal data needed for sampling the visible units as well as requested information for the gradient 
 	///
 	///This function calculates the conditional propability distribution p(v|h) at temperature beta for a whole batch of inputs.
-	///Additionally, requested information set by flags() is calculated for the visible part
 	///Be aware that a change of temperature may occur between sampleHidden and precomputeVisible.
 	template<class BetaVector>
 	void precomputeVisible(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch, BetaVector const& beta)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
-		calculateVisibleInput(hiddenBatch,visibleBatch);
+		mpe_rbm->energy().inputVisible(visibleBatch.input, hiddenBatch.state);
 		//calculate the sufficient statistics of the visible units for every element of the batch
 		mpe_rbm->visibleNeurons().sufficientStatistics(visibleBatch.input,visibleBatch.statistics, beta);
 		
@@ -138,7 +116,6 @@ public:
 	///\brief calculates internal data needed for sampling the visible units as well as requested information for the gradient 
 	///
 	///This function calculates the conditional propability distribution p(v|h) at temperature beta for a whole batch of inputs.
-	///Additionally, requested information set by flags() is calculated for the visible part
 	///Be aware that a change of temperature may occur between sampleHidden and precomputeVisible.
 	void precomputeVisible(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
@@ -161,26 +138,16 @@ public:
 	
 
 	///\brief Updates the sufficient statistics of the sample after a change of temeprature.
-	///
-	///After changing the temperature, requested information regarding the visible neurons might be outdated
-	///and must be computed again. 
 	template<class BetaVector>
 	void updateVisible(VisibleSampleBatch& visibleBatch, BetaVector const& newBeta)const{
-		if(m_flags & StoreVisibleStatistics){
-			mpe_rbm->visibleNeurons().sufficientStatistics(visibleBatch.input,visibleBatch.statistics, newBeta);
-		}
+		mpe_rbm->visibleNeurons().sufficientStatistics(visibleBatch.input,visibleBatch.statistics, newBeta);
 	}
 
 
 	///\brief Updates the value of the sufficient statistics of the sample after a change of temperature.
-	///
-	///After changing the temperature, requested information regarding the hidden neurons might be outdated
-	///and must be computed again. 
 	template<class BetaVector>
 	void updateHidden(HiddenSampleBatch& hiddenBatch, BetaVector const& newBeta)const{
-		if(m_flags & StoreHiddenStatistics){
-			mpe_rbm->visibleNeurons().sufficientStatistics(hiddenBatch.input,hiddenBatch.statistics, newBeta);
-		}
+		mpe_rbm->hiddenNeurons().sufficientStatistics(hiddenBatch.input,hiddenBatch.statistics, newBeta);
 	}
 
 
@@ -198,12 +165,6 @@ public:
 		
 		precomputeHidden(hiddenBatch,visibleBatch, beta);
 		sampleHidden(hiddenBatch);
-		//if one of the store visible flags (except state) is set, we also need to calculate the statistics of the visible given the hidden
-		//this is not 100% correct, but better than nothing.
-		// \todo @Oswin warum visible statistics und visible input speichern, wenn die fuers momentane sample sowieso nciht korrekt sind?
-		if((m_flags & StoreHiddenFeatures) || (m_flags & StoreVisibleStatistics) || (m_flags & StoreVisibleInput)){
-			precomputeVisible(hiddenBatch,visibleBatch, beta);
-		}
 	}
 	
 	///\brief Creates a hidden/visible sample pair from a state of the visible neurons. this can directly be used to calculate the gradient.
@@ -223,39 +184,14 @@ public:
 	///@param visibleBatch the batch of samples of the visible neurons (holding also the precomputed input of the visibles)
 	///@return the value of the energy function 
 	RealVector calculateEnergy(HiddenSampleBatch const& hiddenBatch, VisibleSampleBatch const& visibleBatch)const{
-		Energy energy(&mpe_rbm->structure());
-		return energy.energyFromVisibleInput(
+		return mpe_rbm->energy().energyFromVisibleInput(
 			visibleBatch.input, 
 			hiddenBatch.state, 
 			visibleBatch.state
 		);
 	}
-
-
 private:
 	RBM* mpe_rbm;
-	SamplingFlags m_flags;
-	
-	///\brief Calculates the input of the hidden units and stores the visible features if requested
-	void calculateHiddenInput(HiddenSampleBatch& hidden,VisibleSampleBatch& visible)const{
-		Energy energy(&mpe_rbm->structure());
-		if(m_flags & StoreVisibleFeatures){
-			energy.inputHidden(hidden.input, visible.state, visible.features);
-		}
-		else{
-			energy.inputHidden(hidden.input, visible.state);
-		}
-	}
-	///\brief Calculates the input of the visible units and stores the hidden features if requested
-	void calculateVisibleInput(HiddenSampleBatch& hidden, VisibleSampleBatch& visible)const{
-		Energy energy(&mpe_rbm->structure());
-		if(m_flags & StoreHiddenFeatures){
-			energy.inputVisible(visible.input, hidden.state, hidden.features);
-		}
-		else{
-			energy.inputVisible(visible.input, hidden.state);
-		}
-	}
 };
 
 	

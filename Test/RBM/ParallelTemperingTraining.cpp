@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE( ParallelTemperingTraining_Bars ){
 	
 	for(unsigned int trial = 0; trial != trials; ++trial){
 		BinaryRBM rbm(Rng::globalRng);
-		rbm.structure().setStructure(16,numHidden);
+		rbm.setStructure(16,numHidden);
 		
 		Rng::seed(42+trial);
 		RealVector params(rbm.numberOfParameters());

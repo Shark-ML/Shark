@@ -28,11 +28,10 @@ namespace shark{
 ///The disadvantage is however, that mixing is slower and a higher value of sampling steps between subsequent samples
 ///need to be chosen. 
 template<class MarkovChainType>	
-class MultiChainApproximator: public UnsupervisedObjectiveFunction<typename MarkovChainType::VectorType>{
+class MultiChainApproximator: public UnsupervisedObjectiveFunction<RealVector>{
 public:
-	typedef UnsupervisedObjectiveFunction<typename MarkovChainType::VectorType> base_type;
+	typedef UnsupervisedObjectiveFunction<RealVector> base_type;
 	typedef typename MarkovChainType::RBM RBM;
-	typedef typename RBM::Energy Energy;
 	typedef typename base_type::SearchPointType SearchPointType;
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
 	
@@ -94,12 +93,11 @@ public:
 		return m_chainOperator;
 	}
 	
-	void setData(UnlabeledData<typename RBM::VectorType> const& data){
+	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;
 		
 		//construct a gradient object to get the information about which values of the samples are needed
-		typename Energy::AverageEnergyGradient grad(&mpe_rbm->structure());
-		m_chainOperator.flags() = grad.flagsVH();
+		AverageEnergyGradient<RBM> grad(mpe_rbm);
 		
 		//if the number of samples is 0 = unset, set it to the number of points in the data set
 		if(!m_samples){
@@ -134,8 +132,8 @@ public:
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
 		mpe_rbm->setParameterVector(parameter);
 		
-		typename Energy::AverageEnergyGradient empiricalAverage(&mpe_rbm->structure());
-		typename Energy::AverageEnergyGradient modelAverage(&mpe_rbm->structure());
+		AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
+		AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
 		
 		//calculate the expectation of the energy gradient with respect to the data
 		detail::evaluateData(empiricalAverage,m_data,*mpe_rbm);
@@ -150,7 +148,7 @@ public:
 			swap(m_chains[i],m_chainOperator.samples());//save the GibbsChain.
 		}
 		
-		derivative.resize(mpe_rbm->structure().numberOfParameters());
+		derivative.resize(mpe_rbm->numberOfParameters());
 		noalias(derivative) = modelAverage.result() - empiricalAverage.result();
 		
 		return std::numeric_limits<double>::quiet_NaN();
@@ -159,7 +157,7 @@ private:
 	RBM* mpe_rbm;
 	mutable MarkovChainType m_chainOperator;
 	mutable std::vector<typename MarkovChainType::SampleBatch> m_chains;
-	UnlabeledData<typename RBM::VectorType> m_data;
+	UnlabeledData<RealVector> m_data;
 
 	unsigned int m_k;
 	unsigned int m_samples;

@@ -46,9 +46,8 @@ namespace shark {
 template<class RBMType>
 double logPartitionFunction(RBMType const& rbm, double beta = 1.0) {
 	//choose correct version based on the enumeration tags
-	typedef typename RBMType::Energy Energy;
-	typedef typename Energy::HiddenType::StateSpace::EnumerationTag HiddenTag;
-	typedef typename Energy::VisibleType::StateSpace::EnumerationTag VisibleTag;
+	typedef typename RBMType::HiddenType::StateSpace::EnumerationTag HiddenTag;
+	typedef typename RBMType::VisibleType::StateSpace::EnumerationTag VisibleTag;
 	
 	return detail::logPartitionFunction(rbm,VisibleTag(),HiddenTag(),beta);
 }
@@ -62,7 +61,6 @@ double logPartitionFunction(RBMType const& rbm, double beta = 1.0) {
 ///@param inputs the input vectors
 ///@param partition the value of the partition function of the RBM.
 ///@param beta the inverse temperature of the rbm. default is 1
-///@param constant a constant that can be added to the Energy function to gain nummerical stability
 ///@return the log-likelihood
 template<class RBMType>
 double negativeLogLikelihoodFromLogPartition(
@@ -71,14 +69,10 @@ double negativeLogLikelihoodFromLogPartition(
 	double logPartition, 
 	double beta = 1.0
 ) {
-	//create Energy from RBM
-	typedef typename RBMType::Energy Energy;
-	Energy energy(&rbm.structure());
-
 	double logP=0;
 	BOOST_FOREACH(RealMatrix const& batch,inputs.batches()) {
 		RealScalarVector betaBatch(batch.size1(),beta);
-		logP += sum(energy.logUnnormalizedPropabilityVisible(batch, betaBatch));
+		logP += sum(rbm.energy().logUnnormalizedPropabilityVisible(batch, betaBatch));
 		logP -= batch.size1()*logPartition;
 	}
 	return -logP;
@@ -91,7 +85,6 @@ double negativeLogLikelihoodFromLogPartition(
 ///@param rbm the Restricted Boltzman machine for which the negative log likelyhood of the data is to be calculated
 ///@param inputs the input vectors
 ///@param beta the inverse temperature of the rbm. default is 1
-///@param constant a constant that can be added to the Energy function to gain nummerical stability
 ///@return the log-likelihood
 template<class RBMType>
 double negativeLogLikelihood(

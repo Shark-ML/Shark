@@ -28,12 +28,10 @@ namespace shark{
 ///several chains. This approximator should be used with a sampling scheme which also achieves a faster decorrelation of samples like
 ///tempering.
 template<class MarkovChainType>	
-class SingleChainApproximator: public UnsupervisedObjectiveFunction<typename MarkovChainType::VectorType>{
+class SingleChainApproximator: public UnsupervisedObjectiveFunction<RealVector>{
 public:
-	typedef UnsupervisedObjectiveFunction<typename MarkovChainType::VectorType> base_type;
+	typedef UnsupervisedObjectiveFunction<RealVector> base_type;
 	typedef typename MarkovChainType::RBM RBM;
-	typedef typename RBM::Energy Energy;
-	typedef GibbsOperator<RBM> Gibbs;
 	typedef typename base_type::SearchPointType SearchPointType;
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
 	
@@ -79,14 +77,9 @@ public:
 		setNumberOfSamples(node.get<unsigned int>("samples",0));
 	}
 	
-	void setData(UnlabeledData<typename RBM::VectorType> const& data){
+	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;
-		
-		//construct a gradient object to get the information about which values of the samples are needed
-		typename Energy::AverageEnergyGradient grad(&mpe_rbm->structure());
-		m_chain.flags() = grad.flagsVH();
 		m_chain.initializeChain(m_data);
-		
 	}
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
@@ -101,8 +94,8 @@ public:
 		mpe_rbm->setParameterVector(parameter);
 		m_chain.update();
 		
-		typename Energy::AverageEnergyGradient empiricalAverage(&mpe_rbm->structure());
-		typename Energy::AverageEnergyGradient modelAverage(&mpe_rbm->structure());
+		AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
+		AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
 		
 		detail::evaluateData(empiricalAverage,m_data,*mpe_rbm);
 		
@@ -144,7 +137,7 @@ public:
 private:
 	RBM* mpe_rbm;
 	mutable MarkovChainType m_chain; 
-	UnlabeledData<typename RBM::VectorType> m_data;
+	UnlabeledData<RealVector> m_data;
 
 	unsigned int m_k;
 	unsigned int m_samples;

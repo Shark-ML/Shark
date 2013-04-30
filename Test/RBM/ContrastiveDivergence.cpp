@@ -57,14 +57,6 @@ public:
 				++id;
 			}
 			
-			SamplingFlags flagsVH(){
-				SamplingFlags flags;
-				if(m_structure->requireHiddenSample){
-					flags |= StoreHiddenState;
-				}
-				return flags;
-			}
-			
 			IntVector result()const{
 				return IntVector(1);
 			}

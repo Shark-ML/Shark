@@ -25,13 +25,12 @@
 namespace shark{
 
 template<class RBMType>
-class ExactGradient: public UnsupervisedObjectiveFunction<typename RBMType::VectorType>{
+class ExactGradient: public UnsupervisedObjectiveFunction<RealVector>{
+private:
+	typedef UnsupervisedObjectiveFunction<RealVector> base_type;
+	typedef GibbsOperator<RBMType> Gibbs;
 public:
-
 	typedef RBMType RBM;
-	typedef UnsupervisedObjectiveFunction<typename RBM::VectorType> base_type;
-	typedef typename RBM::Energy Energy;
-	typedef GibbsOperator<RBM> Gibbs;
 	typedef typename base_type::SearchPointType SearchPointType;
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
 
@@ -46,7 +45,7 @@ public:
 	std::string name() const
 	{ return "ExactGradient"; }
 
-	void setData(UnlabeledData<typename RBM::VectorType> const& data){
+	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;
 	}
 	
@@ -75,14 +74,12 @@ public:
 		mpe_rbm->setParameterVector(parameter);
 		
 		//the gradient approximation for the energy terms of the RBM		
-		typename Energy::AverageEnergyGradient empiricalExpectation(&mpe_rbm->structure());
-		typename Energy::AverageEnergyGradient modelExpectation(&mpe_rbm->structure());
+		AverageEnergyGradient<RBM> empiricalExpectation(mpe_rbm);
+		AverageEnergyGradient<RBM> modelExpectation(mpe_rbm);
 
 		Gibbs gibbsSampler(mpe_rbm);
-		gibbsSampler.flags() = empiricalExpectation.flagsVH();
 		
 		//calculate the expectation of the energy gradient with respect to the data
-		Energy energy(&mpe_rbm->structure());
 		double negLogLikelihood = 0;
 		BOOST_FOREACH(RealMatrix const& batch,m_data.batches()) {
 			std::size_t currentBatchSize = batch.size1();
@@ -92,7 +89,7 @@ public:
 		
 			gibbsSampler.createSample(hiddenSamples,visibleSamples,batch);
 			empiricalExpectation.addVH(hiddenSamples, visibleSamples);
-			negLogLikelihood -= sum(energy.logUnnormalizedPropabilityVisible(batch,hiddenSamples.input,betaBatch));
+			negLogLikelihood -= sum(mpe_rbm->energy().logUnnormalizedPropabilityVisible(batch,hiddenSamples.input,betaBatch));
 		}
 		
 		//calculate the expectation of the energy gradient with respect to the model distribution
@@ -124,17 +121,15 @@ private:
 	void integrateOverVisible(GradientApproximator & modelExpectation) const{
 		
 		Gibbs sampler(mpe_rbm);
-		sampler.flags() = modelExpectation.flagsVH();
 		
-		typedef typename Energy::VisibleType::StateSpace VisibleStateSpace;
+		typedef typename RBM::VisibleType::StateSpace VisibleStateSpace;
 		std::size_t values = VisibleStateSpace::numberOfStates(mpe_rbm->numberOfVN());
 		std::size_t batchSize = std::min(values, std::size_t(256));
 		
-		Energy energy(&mpe_rbm->structure());
 		for (std::size_t x = 0; x < values; x+=batchSize) {
 			//create batch of states
 			std::size_t currentBatchSize=std::min(batchSize,values-x);
-			typename Batch<typename RBMType::VectorType>::type stateBatch(currentBatchSize,mpe_rbm->numberOfVN());
+			typename Batch<RealVector>::type stateBatch(currentBatchSize,mpe_rbm->numberOfVN());
 			for(std::size_t elem = 0; elem != currentBatchSize;++elem){
 				//generation of the x+elem-th state vector
 				VisibleStateSpace::state(row(stateBatch,elem),x+elem);
@@ -147,10 +142,8 @@ private:
 			sampler.createSample(hiddenBatch,visibleBatch,stateBatch);
 			
 			//calculate probabilities and update 
-			RealVector logP = energy.logUnnormalizedPropabilityVisible(stateBatch,hiddenBatch.input,beta);
+			RealVector logP = mpe_rbm->energy().logUnnormalizedPropabilityVisible(stateBatch,hiddenBatch.input,beta);
 			modelExpectation.addVH(hiddenBatch, visibleBatch, logP);
-			//std::cout<<exp(logP)<<" "<<std::exp(modelExpectation.logWeightSum())<<std::endl;;
-			
 		}
 	}
 	
@@ -159,17 +152,15 @@ private:
 	void integrateOverHidden(GradientApproximator & modelExpectation) const{
 		
 		Gibbs sampler(mpe_rbm);
-		sampler.flags() = modelExpectation.flagsHV();
 		
-		typedef typename Energy::HiddenType::StateSpace HiddenStateSpace;
+		typedef typename RBM::HiddenType::StateSpace HiddenStateSpace;
 		std::size_t values = HiddenStateSpace::numberOfStates(mpe_rbm->numberOfHN());
 		std::size_t batchSize = std::min(values, std::size_t(256) );
 		
-		Energy energy(&mpe_rbm->structure());
 		for (std::size_t x = 0; x < values; x+=batchSize) {
 			//create batch of states
 			std::size_t currentBatchSize=std::min(batchSize,values-x);
-			typename Batch<typename RBMType::VectorType>::type stateBatch(currentBatchSize,mpe_rbm->numberOfHN());
+			typename Batch<RealVector>::type stateBatch(currentBatchSize,mpe_rbm->numberOfHN());
 			for(std::size_t elem = 0; elem != currentBatchSize;++elem){
 				//generation of the x+elem-th state vector
 				HiddenStateSpace::state(row(stateBatch,elem),x+elem);
@@ -183,12 +174,12 @@ private:
 			sampler.precomputeVisible(hiddenBatch,visibleBatch, beta);
 			
 			//calculate probabilities and update 
-			RealVector logP = energy.logUnnormalizedPropabilityHidden(stateBatch,visibleBatch.input,beta);
+			RealVector logP = mpe_rbm->energy().logUnnormalizedPropabilityHidden(stateBatch,visibleBatch.input,beta);
 			modelExpectation.addHV(hiddenBatch, visibleBatch, logP);
 		}
 	}
 
-	UnlabeledData<typename RBM::VectorType> m_data;
+	UnlabeledData<RealVector> m_data;
 
 	mutable double m_logPartition; //the partition function of the model distribution
 };	

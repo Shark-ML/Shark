@@ -28,7 +28,6 @@ void evaluateData( AverageEnergyGradient& averageGradient, Data<VectorType> cons
 	typedef Batch<typename Operator::VisibleSample> VisibleTraits;
 	
 	Operator dataEvaluator(&rbm);
-	dataEvaluator.flags() = averageGradient.flagsVH();
 	
 	//calculate the expectation of the energy gradient with respect to the data
 	BOOST_FOREACH(RealMatrix const& batch,data.batches()) {

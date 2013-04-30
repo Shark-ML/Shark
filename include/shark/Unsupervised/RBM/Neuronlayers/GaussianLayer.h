@@ -66,12 +66,6 @@ public:
 	///the state space of this neuron is binary
 	typedef RealSpace StateSpace;
 
-	///tells the outside world, that the calculation of the  is expensive enough to be stored
-	static const bool expensiveEvaluationOfPhi = false; ///here the feature-function is the identity
-	
-	///this neuron has only one interaction term 
-	static const int activationTerms = 1;
-
 	///\brief The sufficient statistics for the Guassian Layer stores the mean of the neuron and the inverse temperature
 	typedef detail::GaussianSufficientStatistics<RealVector> SufficientStatistics;
 	///\brief Sufficient statistics of a batch of data.

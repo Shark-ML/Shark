@@ -49,8 +49,6 @@ public:
 
 	///\brief The type of the RBM the operator is working with.
 	typedef typename Operator::RBM RBM;
-	typedef typename RBM::VectorType VectorType; 
-	typedef typename Batch<VectorType>::type MatrixType; 
 	///\brief A batch of samples containing hidden and visible samples as well as the energies.
 	typedef typename Batch<detail::MarkovChainSample<HiddenSample,VisibleSample> >::type SampleBatch;
 	
@@ -60,7 +58,7 @@ public:
 	///\brief Immutable reference to an element of the batch.
 	typedef typename SampleBatch::const_reference const_reference;
 private:
-	///\brief The batch of samples containing the state of the visible and the hidden units and additional information specified by flags. 
+	///\brief The batch of samples containing the state of the visible and the hidden units. 
 	SampleBatch m_samples;   
 	///\brief The transition operator.
 	Operator m_operator; 
@@ -82,24 +80,14 @@ public:
 	void configure(PropertyTree const& node){
 		m_operator.configure(node);
 	}
-
-	/// \brief Returns the sampling flags (information what is needed to be stored).
-	SamplingFlags& flags(){
-		return m_operator.flags();
-	}
-
-	/// \brief Returns the costant sampling flags (information what is needed to be stored).
-	const SamplingFlags& flags()const{
-		return m_operator.flags();
-	}
 	
 	/// \brief Initializes with data points drawn uniform from the set.
 	///
 	/// @param dataSet the data set
-	void initializeChain(Data<VectorType> const& dataSet){
+	void initializeChain(Data<RealVector> const& dataSet){
 		DiscreteUniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,dataSet.numberOfElements()-1);
 		std::size_t visibles=m_operator.rbm()->numberOfVN();
-		MatrixType sampleData(m_samples.size(),visibles);
+		RealMatrix sampleData(m_samples.size(),visibles);
 		
 		for(std::size_t i = 0; i != m_samples.size(); ++i){
 			noalias(row(sampleData,i)) = dataSet.element(uni());
@@ -110,15 +98,8 @@ public:
 	/// \brief Initializes with data points from a batch of points
 	///
 	/// @param sampleData Data set
-	void initializeChain(MatrixType const& sampleData){
+	void initializeChain(RealMatrix const& sampleData){
 		m_operator.createSample(m_samples.hidden,m_samples.visible,sampleData);
-		
-		if(flags() & StoreEnergyComponents){
-			m_samples.energy = m_operator.calculateEnergy(
-				m_samples.hidden,
-				m_samples.visible 
-			);
-		}
 	}
 	
 	/// \brief Runs the chain for a given number of steps.
@@ -131,13 +112,6 @@ public:
 			m_operator.sampleVisible(m_samples.visible);
 			m_operator.precomputeHidden(m_samples.hidden, m_samples.visible);
 		}
-		if(flags() & StoreEnergyComponents){
-			m_samples.energy = m_operator.calculateEnergy(
-				m_samples.hidden,
-				m_samples.visible 
-			);
-		}
-		
 	}
 	
 	/// \brief Returns the current sample of the Markov chain. 

@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE( PCDTraining_Bars ){
 	Rng::seed(0);
 	
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(16,8);
+	rbm.setStructure(16,8);
 	RealVector params(rbm.numberOfParameters());
 	for(std::size_t i = 0; i != params.size();++i){
 		params(i) = Rng::gauss(0,1);

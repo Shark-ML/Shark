@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_MoreHidden )
 	
 	//create RBM with 8 visible and 16 hidden units
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(8,16);
+	rbm.setStructure(8,16);
 	
 	
 	//now test for several random subsets of possible training data and random initializations of the rbm
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_LessHidden )
 	
 	//create RBM with 8 visible and 16 hidden units
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(8,4);
+	rbm.setStructure(8,4);
 	
 	
 	//now test for several random subsets of possible training data and random initializations of the rbm
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_MoreHidden )
 {
 
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(4,8);
+	rbm.setStructure(4,8);
 	
 	std::vector<RealVector> dataVec(50,RealVector(4));
 	for(std::size_t j = 0; j != 50; ++j){
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_LessHidden )
 {
 
 	BinaryRBM rbm(Rng::globalRng);
-	rbm.structure().setStructure(8,4);
+	rbm.setStructure(8,4);
 	
 	std::vector<RealVector> dataVec(50,RealVector(8));
 	for(std::size_t j = 0; j != 50; ++j){

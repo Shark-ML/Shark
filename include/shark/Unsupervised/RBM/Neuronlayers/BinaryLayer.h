@@ -54,15 +54,6 @@ public:
 	///\brief The state space of this neuron is binary.
 	typedef BinarySpace StateSpace;
 
-	///\brief The type of the State of the Layer.
-	typedef RealVector State;
-
-	///\brief Tells the outside world, that the calculation of the is not expensive enough to be stored
-	static const bool expensiveEvaluationOfPhi = false; ///here the feature-function is the identity
-	
-	///\brief This neuron has only one interaction term.
-	static const int activationTerms = 1;
-
 	///\brief The sufficient statistics for the Binary Layer store the probability for a neuron to be on
 	typedef detail::BinarySufficientStatistics<RealVector> SufficientStatistics;
 	///\brief Sufficient statistics of a batch of data.
