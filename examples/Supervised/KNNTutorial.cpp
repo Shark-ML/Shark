@@ -23,43 +23,61 @@
  */
 //===========================================================================
 
+//###begin<dataheader>
 #include <shark/Data/Csv.h>
+//###end<dataheader>
+//###begin<nnheader>
 #include <shark/Models/NearestNeighborClassifier.h>
 #include <shark/Algorithms/NearestNeighbors/TreeNearestNeighbors.h>
 #include <shark/Models/Trees/KDTree.h>
+//###end<nnheader>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/Data/DataView.h>
 #include <iostream>
 
+//###begin<dataheader>
 using namespace shark;
 using namespace std;
+//###end<dataheader>
 
 int main() {
 	const unsigned int K = 1; // number of neighbors for kNN
 
 	// read data
+//###begin<dataimport>
 	ClassificationDataset data;
 	import_csv(data, "data/C.csv", LAST_COLUMN, " ", "#");
+//###end<dataimport>
 
+//###begin<inspectdata>
 	cout << "number of data points: " << data.numberOfElements()
 	     << " number of classes: " << numberOfClasses(data)
 	     << " input dimension: " << inputDimension(data) << endl;
+//###end<inspectdata>
 
 	// split data into training and test set
+//###begin<splitdata>
 	ClassificationDataset dataTest = splitAtElement(data,311);
+//###end<splitdata>
 
 	//create a binary search tree and initialize the search algorithm - a fast tree search
+//###begin<kdtree>
 	KDTree<RealVector> tree(data.inputs());
+//###end<kdtree>
+//###begin<treeNN>
 	TreeNearestNeighbors<RealVector,unsigned int> algorithm(data,&tree);
+//###end<treeNN>
 	//instantiate the classifier
+//###begin<NNC>
 	NearestNeighborClassifier<RealVector> KNN(&algorithm,K);
+//###end<NNC>
 
 	// evaluate classifier
-	Data<unsigned int> prediction;
+//###begin<eval>
 	ZeroOneLoss<unsigned int> loss;
-
-	prediction = KNN(data.inputs());
+	Data<unsigned int> prediction = KNN(data.inputs());
 	cout << K << "-KNN on training set accuracy: " << 1. - loss.eval(data.labels(), prediction) << endl;
 	prediction = KNN(dataTest.inputs());
 	cout << K << "-KNN on test set accuracy:     " << 1. - loss.eval(data.labels(), prediction) << endl;
+//###end<eval>
 }
