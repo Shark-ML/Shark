@@ -1,21 +1,9 @@
 //===========================================================================
 /*!
- *  \file AbstractObjectiveFunction.h
- *
  *  \brief AbstractObjectiveFunction
  *
  *  \author T.Voss, T. Glasmachers, O.Krause
  *  \date 2010-2011
- *
- *  \par Copyright (c) 1998-2007:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
  *
  *
  *  <BR><HR>
@@ -108,16 +96,17 @@ namespace shark {
 /// The features can be queried using the method features() as in
 /// if(!(f.features()&Function::HAS_VALUE))
 
-/// \tparam SearchSpaceType The search space the function is defined upon.
+/// \tparam SearchSpaceT The search space the function is defined upon.
 /// \tparam ResultT The objective space the function is defined upon.
-template <typename SearchSpaceType, typename ResultT>
+template <typename SearchSpaceT, typename ResultT>
 class AbstractObjectiveFunction : public IConfigurable, 
 	public INameable, 
 	/** \cond */
-	public boost::mpl::if_c< SearchSpaceType::IS_VECTOR_SPACE, AbstractVectorSpaceObjectiveFunction, boost::mpl::void_ >::type
+	public boost::mpl::if_c< SearchSpaceT::IS_VECTOR_SPACE, AbstractVectorSpaceObjectiveFunction, boost::mpl::void_ >::type
 	/** \endcond */{
 public:
-	typedef typename SearchSpaceType::PointType SearchPointType;
+	typedef SearchSpaceT SearchSpaceType;
+	typedef typename SearchSpaceT::PointType SearchPointType;
 	typedef ResultT ResultType;
 
 	typedef SearchPointType FirstOrderDerivative;
