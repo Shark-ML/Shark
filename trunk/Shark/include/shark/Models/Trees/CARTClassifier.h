@@ -151,7 +151,7 @@ public:
 	}
 
 	/// from ISerializable, writes a model to an archive
-	void write(OutArchive& archive){
+	void write(OutArchive& archive) const {
 		archive << m_splitMatrix;
 	}
 
