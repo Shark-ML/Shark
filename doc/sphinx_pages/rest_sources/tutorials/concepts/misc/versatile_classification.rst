@@ -240,6 +240,6 @@ methods are expressed by means of adaptive models and corresponding
 trainers. Changing the learning method may involve changing the
 particular sub-class, but all relevant objects will still conform to
 the same top-level interfaces. Thus, only minimal changes to the
-surrounding code will be necessary, it any at all. This design offers
+surrounding code will be necessary, if any at all. This design offers
 a lot of flexibility, since changing the learning algorithm even late
 in a project is usually not a big deal.
