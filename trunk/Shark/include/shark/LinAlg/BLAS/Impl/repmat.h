@@ -260,7 +260,7 @@ public:
 			m_vectorIterator-= n;
 			return *this;
 		}
-		difference_type& operator- (const const_iterator2 &it) const {
+		difference_type operator- (const const_iterator2 &it) const {
 			return m_vectorIterator - it.m_vectorIterator;
 		}
 
