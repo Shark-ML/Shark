@@ -97,6 +97,13 @@ public:
 		std::swap( boxMax[i], boxMax[j]);
 		std::swap( permutation[i], permutation[j]);
 	}
+	
+	/// \brief Scales all box constraints by a constant factor and adapts the solution by scaling it by the same factor.
+	void scaleBoxConstraints(double factor){
+		alpha *= factor;
+		boxMin *=factor;
+		boxMax *=factor;
+	}
 
 
 	/// representation of the quadratic part of the objective function
@@ -184,6 +191,13 @@ public:
 		std::swap( diagonal[i], diagonal[j]);
 		std::swap( permutation[i], permutation[j]);
 	}
+	
+	/// \brief Scales all box constraints by a constant factor and adapts the solution by scaling it by the same factor.
+	void scaleBoxConstraints(double factor){
+		m_lower*=factor;
+		m_upper*=factor;
+		alpha *= factor;
+	}
 
 	/// permutation of the variables alpha, gradient, etc.
 	std::vector<std::size_t> permutation;
@@ -262,7 +276,7 @@ public:
 	, m_Cn(C)
 	{
 		SIZE_CHECK(dimensions() == quadratic.size());
-		SIZE_CHECK(dimensions() == this->linear.size());
+		SIZE_CHECK(dimensions() == linear.size());
 		SIZE_CHECK(dimensions() == labels.numberOfElements());
 		
 		for(std::size_t i = 0; i!= dimensions(); ++i){
@@ -309,6 +323,23 @@ public:
 		std::swap( permutation[i], permutation[j]);
 		std::swap( positive[i], positive[j]);
 	}
+	
+	/// \brief Scales all box constraints by a constant factor and adapts the solution by scaling it by the same factor.
+	void scaleBoxConstraints(double factor, double variableScalingFactor){
+		bool sameFactor = factor == variableScalingFactor;
+		double newCp = m_Cp*factor;
+		double newCn = m_Cn*factor;
+		for(std::size_t i = 0; i != dimensions();  ++i){
+			//~ if(sameFactor&& factor == variableScalingFactor && positive[i] && alpha(i)== m_Cp)
+				//~ alpha(i) = newCp;
+			//~ else if(sameFactor && !positive[i] && alpha(i) == -m_Cn)
+				//~ alpha(i) = -newCn;
+			//~ else
+			alpha(i) *= variableScalingFactor;
+		}
+		m_Cp = newCp;
+		m_Cn = newCn;
+	}
 
 	/// permutation of the variables alpha, gradient, etc.
 	std::vector<std::size_t> permutation;
@@ -327,160 +358,6 @@ enum AlphaStatus{
 	AlphaLowerBound = 1,
 	AlphaUpperBound = 2,
 	AlphaDeactivated = 3//also:  AlphaUpperBound and AlphaLowerBound
-};
-
-template<class Problem>
-class BaseShrinkingProblem : private Problem{
-public:
-	typedef typename Problem::QpFloatType QpFloatType;
-	typedef typename Problem::MatrixType MatrixType;
-	typedef typename Problem::PreferedSelectionStrategy PreferedSelectionStrategy;
-	template<class SVMProblem>
-	BaseShrinkingProblem(SVMProblem& problem, bool shrink=true)
-	: Problem(problem)
-	, m_isUnshrinked(false)
-	, m_shrink(shrink)
-	, m_shrinkCounter(std::min<std::size_t>(problem.dimensions(),1000))
-	, m_gradientEdge(problem.linear){}
-
-	using Problem::dimensions;
-	using Problem::active;
-	using Problem::linear;
-	using Problem::quadratic;
-	using Problem::boxMin;
-	using Problem::boxMax;
-	using Problem::alpha;
-	using Problem::diagonal;
-	using Problem::gradient;
-	using Problem::functionValue;
-	using Problem::getUnpermutedAlpha;
-	using Problem::isUpperBound;
-	using Problem::isLowerBound;
-	using Problem::deactivateVariable;
-	using Problem::activateVariable;
-
-	///\brief Does an update of SMO given a working set with indices i and j.
-	void updateSMO(std::size_t i, std::size_t j){
-		SIZE_CHECK(i < active());
-		SIZE_CHECK(j < active());
-		double ai = alpha(i);
-		double aj = alpha(j);
-		Problem::updateSMO(i,j);//call base class update of alpha values
-		
-		if(!m_shrink) return;
-		
-		//update the shrinked variables if they got changed
-		if(ai != alpha(i))
-			updateGradientEdge(i, ai, alpha(i));
-		if(i != j && aj != alpha(j))//take care that we are not in a working-set-size=1 case 
-			updateGradientEdge(j, aj, alpha(j));
-	}
-
-	bool shrink(double epsilon){
-		if(m_shrink){
-			//check if shrinking is necessary
-			--m_shrinkCounter;
-			if(m_shrinkCounter != 0) return false;
-			m_shrinkCounter = std::min<std::size_t>(this->dimensions(),1000);
-			
-			return doShrink(epsilon);
-		}
-		return false;
-	}
-
-	///\brief Unshrink the problem
-	void unshrink(){
-		if (active() == dimensions()) return;
-		m_isUnshrinked = true;
-		
-		// recompute the gradient of the whole problem.
-		// we assume here that all shrinked variables are on the border of the problem.
-		// the gradient of the active components is already correct and
-		// we store the gradient of the subset of variables which are on the
-		// borders of the box for the whole set.
-		// Thus we only have to recompute the part of the gradient which is
-		// based on variables in the active set which are not on the border.
-		for (std::size_t a = active(); a < dimensions(); a++) 
-			Problem::m_gradient(a) = m_gradientEdge(a);
-
-		for (std::size_t i = 0; i < active(); i++)
-		{
-			if (isUpperBound(i) || isLowerBound(i)) continue;//alpha value is already stored in gradientEdge
-			
-			QpFloatType* q = quadratic().row(i, 0, dimensions());
-			for (std::size_t a = active(); a < dimensions(); a++) 
-				Problem::m_gradient(a) -= alpha(i) * q[a] ;
-		}
-
-		this->m_active = dimensions();
-	}
-
-	void setShrinking(bool shrinking){
-		m_shrink = shrinking;
-		if(!shrinking)
-			unshrink();
-	}
-
-	//~ void modifyStep(std::size_t i, std::size_t j, double diff){
-		//~ SIZE_CHECK(i < dimensions());
-		//~ double ai = alpha(i);
-		//~ double aj = alpha(j);
-		//~ Problem::modifyStep(i,j,diff);
-		
-		//~ if(!m_shrink) return;
-		
-		//~ if(ai != alpha(i))
-			//~ updateGradientEdge(i, ai, alpha(i));
-		//~ if(i != j && aj != alpha(j))//take care that we are not in a working-set-size=1 case 
-			//~ updateGradientEdge(j, aj, alpha(j));
-	//~ }
-
-protected:
-	///\brief Shrink the variable from the problem.
-	void shrinkVariable(std::size_t i){
-		SIZE_CHECK(i < active());
-		Problem::flipCoordinates(i,active()-1);
-		std::swap( m_gradientEdge[i], m_gradientEdge[active()-1]);
-		--this->m_active;
-	}
-	
-	virtual bool doShrink(double epsilon)=0;
-	
-	bool m_isUnshrinked;
-
-private:
-	///\brief Update the edge-part of the gradient
-	void updateGradientEdge(std::size_t i, double oldAlpha, double newAlpha){
-		SIZE_CHECK(i < active());
-		bool isInsideOld = oldAlpha > boxMin(i) && oldAlpha < boxMax(i);
-		bool isInsideNew = newAlpha > boxMin(i) && newAlpha < boxMax(i);
-		//check if variable is relevant at all, that means that old and new alpha value are inside
-		//or old alpha is 0 and new alpha inside
-		if( (oldAlpha == 0 || isInsideOld) && isInsideNew  )
-			return;
-
-		//compute change to the gradient
-		double diff = 0;
-		if(!isInsideOld)//the value was on a border, so remove it's old influeence to the gradient
-			diff -=oldAlpha;
-		if(!isInsideNew){//variable entered boundary or changed from one boundary to another
-			diff  += newAlpha;
-		}
-
-		QpFloatType* q = quadratic().row(i, 0, dimensions());
-		for(std::size_t a = 0; a != dimensions(); ++a){
-			m_gradientEdge(a) -= diff*q[a];
-		}
-	}
-	
-	///\brief true if shrinking is to be used.
-	bool m_shrink;
-	
-	///\brief Number of iterations until next shrinking.
-	std::size_t m_shrinkCounter;
-
-	///\brief Stores the gradient of the alpha dimeensions which are either 0 or C
-	RealVector m_gradientEdge;
 };
 
 ///

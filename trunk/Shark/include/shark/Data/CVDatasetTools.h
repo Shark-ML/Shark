@@ -51,13 +51,17 @@ public:
 	    std::vector<std::size_t> const &partitionStart
 	) : m_dataset(set) {
 		std::size_t numberOfPartitions = partitionStart.size();
+		std::size_t foldElementStart = 0; //element index of the starting fold
 		for (std::size_t partition = 0; partition != numberOfPartitions; partition++) {
+			m_foldElementStart.push_back(foldElementStart);
 			std::size_t partitionSize = (partition+1 == numberOfPartitions) ? set.numberOfBatches() : partitionStart[partition+1];
 			partitionSize -= partitionStart[partition];
 			//create the set with the indices of the validation set of the current partition
+			//also update the starting element
 			IndexSet validationIndizes(partitionSize);
 			for (std::size_t batch = 0; batch != partitionSize; ++batch) {
 				validationIndizes[batch]=batch+partitionStart[partition];
+				foldElementStart += boost::size(set.batch(validationIndizes[batch]));
 			}
 			//we need the training part of the set for creation of subsets, but this is
 			//just the complement of the validation set.
@@ -67,6 +71,10 @@ public:
 			//now add the partition to the folds.
 			m_folds.push_back(partitionIndizes);
 		}
+		m_foldElementStart.push_back(foldElementStart);//this is now the total number of elements
+		
+		//internal sanity check
+		SIZE_CHECK(set.numberOfElements() == foldElementStart);
 	}
 
 	DatasetType training(std::size_t i) const {
@@ -95,9 +103,20 @@ public:
 		return m_folds.size();
 	}
 
-	/// Returns the overall number of elements in the partitioned dataset
+	/// \brief Returns the overall number of elements in the partitioned dataset
 	std::size_t numberOfElements() const {
-		return m_dataset.numberOfElements();
+		return m_foldElementStart[size()];
+	}
+	/// \brief Returns the overall number of elements in the fold
+	std::size_t numberOfElements(std::size_t i) const {
+		SIZE_CHECK(i < size());
+		return m_foldElementStart[i+1]-m_foldElementStart[i];
+	}
+	
+	/// \brief rturns the index of the first element of the i-th fold in the dataset.
+	std::size_t foldElementStart(std::size_t i) const {
+		SIZE_CHECK(i < size());
+		return m_foldElementStart[i];
 	}
 	
 	/// \brief Returns the dataset underying the folds
@@ -108,6 +127,7 @@ public:
 private:
 	DatasetType m_dataset;
 	std::vector<IndexSet> m_folds;
+	std::vector<std::size_t> m_foldElementStart;
 };
 
 namespace detail {
