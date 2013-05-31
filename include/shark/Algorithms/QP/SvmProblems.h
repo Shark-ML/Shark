@@ -298,7 +298,6 @@ public:
 	typedef typename Problem::QpFloatType QpFloatType;
 	typedef typename Problem::MatrixType MatrixType;
 	typedef LibSVMSelectionCriterion PreferedSelectionStrategy;
-	//typedef HMGSelectionCriterion PreferedSelectionStrategy;
 
 	SvmProblem(Problem& problem)
 	: m_problem(problem)
@@ -400,7 +399,7 @@ public:
 		//we need to correct for the equality constraint
 		//that means we have to move enough variables to satisfy the constraint again.
 		for (std::size_t j=0; j<dimensions(); j++){
-			if (j == i) continue;
+			if (j == i || m_alphaStatus[j] == AlphaDeactivated) continue;
 			//propose the maximum step possible and let applyStep cut it down.
 			applyStep(i,j, -alpha(i));
 			if(alpha(i) == 0.0) break;
@@ -425,6 +424,17 @@ public:
 		std::swap( m_gradient[i], m_gradient[j]);
 		std::swap( m_alphaStatus[i], m_alphaStatus[j]);
 	}
+	
+	/// \brief Scales all box constraints by a constant factor and adapts the solution using a separate scaling
+	void scaleBoxConstraints(double factor, double variableScalingFactor){
+		m_problem.scaleBoxConstraints(factor,variableScalingFactor);
+		for(std::size_t i = 0; i != this->dimensions(); ++i){
+			m_gradient(i) -= linear(i);
+			m_gradient(i) *= variableScalingFactor;
+			m_gradient(i) += linear(i);
+			updateAlphaStatus(i);
+		}
+	}
 
 protected:
 	Problem& m_problem;
@@ -436,7 +446,6 @@ protected:
 
 	/// \brief Stores the status, whther alpha is on the lower or upper bound, or whether it is free.
 	std::vector<char> m_alphaStatus;
-private:
 
 	///\brief Update the problem by a proposed step i taking the box constraints into account.
 	///
@@ -446,12 +455,14 @@ private:
 	/// boxMin(j) <= alpha(j)-lambda*step <= boxMax(j)
 	/// the update is performed in a numerically stable way and the internal data structures
 	/// are also updated.
-	void applyStep(std::size_t i, std::size_t j, double step){
+	virtual void applyStep(std::size_t i, std::size_t j, double step){
 		SIZE_CHECK(i < active());
 		SIZE_CHECK(j < active());
 		// do the update of the alpha values carefully - avoid numerical problems
 		double Ui = boxMax(i);
 		double Lj = boxMin(j);
+		double aiOld = m_problem.alpha(i);
+		double ajOld = m_problem.alpha(j);
 		double& ai = m_problem.alpha(i);
 		double& aj = m_problem.alpha(j);
 		if (step >= std::min(Ui - ai, aj - Lj))
@@ -481,12 +492,15 @@ private:
 			aj -= step;
 		}
 		
+		if(ai == aiOld && aj == ajOld)return;
+		
 		//Update internal data structures (gradient and alpha status)
 		QpFloatType* qi = quadratic().row(i, 0, active());
 		QpFloatType* qj = quadratic().row(j, 0, active());
 		for (std::size_t a = 0; a < active(); a++) 
 			m_gradient(a) -= step * qi[a] - step * qj[a];
 		
+		//update boundary status
 		updateAlphaStatus(i);
 		updateAlphaStatus(j);
 	}
@@ -502,30 +516,160 @@ private:
 };
 
 template<class Problem>
-struct SvmShrinkingProblem
-: public BaseShrinkingProblem<SvmProblem<Problem> >{
-	typedef BaseShrinkingProblem<SvmProblem<Problem> > base_type;
-	
+struct SvmShrinkingProblem : public SvmProblem<Problem>{
+private:
+	typedef SvmProblem<Problem> base_type;
+public:
+	typedef typename base_type::QpFloatType QpFloatType;
+	typedef typename base_type::MatrixType MatrixType;
+	typedef typename base_type::PreferedSelectionStrategy PreferedSelectionStrategy;
+
+	SvmShrinkingProblem(Problem& problem, bool shrink=true)
+	: base_type(problem)
+	, m_isUnshrinked(false)
+	, m_shrink(shrink)
+	, m_shrinkCounter(std::min<std::size_t>(problem.dimensions(),1000))
+	, m_gradientEdge(problem.linear){}
+		
 	using base_type::alpha;
 	using base_type::gradient;
+	using base_type::linear;
+	using base_type::active;
+	using base_type::dimensions;
+	using base_type::quadratic;
 	using base_type::isLowerBound;
 	using base_type::isUpperBound;
+	using base_type::boxMin;
+	using base_type::boxMax;
 
-	SvmShrinkingProblem(Problem& problem, bool shrink = true)
-	: base_type(problem,shrink){}
+	bool shrink(double epsilon){
+		if(!m_shrink) return false;
+		
+		//check if shrinking is necessary
+		--m_shrinkCounter;
+		if(m_shrinkCounter != 0) return false;
+		m_shrinkCounter = std::min<std::size_t>(dimensions(),1000);
+		
+		return doShrink(epsilon);
+	}
 
+	///\brief Unshrink the problem
+	void unshrink(){
+		if (active() == dimensions()) return;
+		m_isUnshrinked = true;
+		
+		// recompute the gradient of the whole problem.
+		// we assume here that all shrinked variables are on the border of the problem.
+		// the gradient of the active components is already correct and
+		// we store the gradient of the subset of variables which are on the
+		// borders of the box for the whole set.
+		// Thus we only have to recompute the part of the gradient which is
+		// based on variables in the active set which are not on the border.
+		for (std::size_t a = active(); a < dimensions(); a++) 
+			this->m_gradient(a) = m_gradientEdge(a);
+
+		for (std::size_t i = 0; i < active(); i++)
+		{
+			//check whether alpha value is already stored in gradientEdge
+			if (isUpperBound(i) || isLowerBound(i)) continue;
+			
+			QpFloatType* q = quadratic().row(i, 0, dimensions());
+			for (std::size_t a = active(); a < dimensions(); a++) 
+				this->m_gradient(a) -= alpha(i) * q[a] ;
+		}
+
+		this->m_active = dimensions();
+	}
+
+	void setShrinking(bool shrinking){
+		m_shrink = shrinking;
+		if(!shrinking)
+			unshrink();
+	}
+	
+	/// \brief Scales all box constraints by a constant factor and adapts the solution by scaling it by the same factor.
+	void scaleBoxConstraints(double factor, double variableScalingFactor){
+		base_type::scaleBoxConstraints(factor,variableScalingFactor);
+		if(factor != variableScalingFactor){
+			for(std::size_t i = 0; i != dimensions(); ++i){
+				m_gradientEdge(i) = linear(i);
+			}	
+		}
+		else{
+			for(std::size_t i = 0; i != dimensions(); ++i){
+				m_gradientEdge(i) -= linear(i);
+				m_gradientEdge(i) *= factor;
+				m_gradientEdge(i) += linear(i);
+			}
+		}
+	}
 protected:
+	///\brief Update the problem by a proposed step i taking the box constraints into account.
+	///
+	/// A step length 0<=lambda<=1 is found so that 
+	/// boxMin(i) <= alpha(i)+lambda*step <= boxMax(i) 
+	/// and
+	/// boxMin(j) <= alpha(j)-lambda*step <= boxMax(j)
+	/// the update is performed in a numerically stable way and the internal data structures
+	/// are also updated.
+	virtual void applyStep(std::size_t i, std::size_t j, double step){
+		SIZE_CHECK(i < active());
+		SIZE_CHECK(j < active());
+		double aiOld = alpha(i);
+		double ajOld = alpha(j);
+		//call base class to do the step
+		base_type::applyStep(i,j,step);
+		double ai = alpha(i);
+		double aj = alpha(j);
+		if(!m_shrink || ai == aiOld) return;
+		// there existed a feasible step and we are shrinking,
+		// so update the gradient edge data strcture to keep up with changes
+		updateGradientEdge(i,aiOld,ai);
+		updateGradientEdge(j,ajOld,aj);
+		
+	}
+private:
+	void updateGradientEdge(std::size_t i, double oldAlpha, double newAlpha){
+		SIZE_CHECK(i < active());
+		bool isInsideOld = oldAlpha > boxMin(i) && oldAlpha < boxMax(i);
+		bool isInsideNew = newAlpha > boxMin(i) && newAlpha < boxMax(i);
+		//check if variable is relevant at all, that means that old and new alpha value are inside
+		//or old alpha is 0 and new alpha inside
+		if( (oldAlpha == 0 || isInsideOld) && isInsideNew  )
+			return;
+
+		//compute change to the gradient
+		double diff = 0;
+		if(!isInsideOld)//the value was on a border, so remove it's old influeence to the gradient
+			diff -=oldAlpha;
+		if(!isInsideNew){//variable entered boundary or changed from one boundary to another
+			diff  += newAlpha;
+		}
+
+		QpFloatType* q = quadratic().row(i, 0, dimensions());
+		for(std::size_t a = 0; a != dimensions(); ++a){
+			m_gradientEdge(a) -= diff*q[a];
+		}
+	}
+	///\brief Shrink the variable from the Problem.
+	void shrinkVariable(std::size_t i){
+		SIZE_CHECK(i < active());
+		base_type::flipCoordinates(i,active()-1);
+		std::swap( m_gradientEdge[i], m_gradientEdge[active()-1]);
+		--this->m_active;
+	}
+	
 	bool doShrink(double epsilon){
 		double largestUp;
 		double smallestDown;
-		getMaxKKTViolations(largestUp,smallestDown,this->active());
+		getMaxKKTViolations(largestUp,smallestDown,active());
 
 		// check whether unshrinking is necessary at this accuracy level
-		if (!base_type::m_isUnshrinked  && (largestUp - smallestDown < 10.0 * epsilon))
+		if (!m_isUnshrinked  && (largestUp - smallestDown < 10.0 * epsilon))
 		{
-			base_type::unshrink();
+			unshrink();
 			//recalculate maximum KKT violation for immeediate re-shrinking
-			getMaxKKTViolations(largestUp,smallestDown,this->dimensions());
+			getMaxKKTViolations(largestUp,smallestDown,dimensions());
 		}
 		//shrink
 		for (std::size_t a = this->active(); a > 0; --a){
@@ -535,7 +679,7 @@ protected:
 		return true;
 	}
 
-private:
+
 	bool testShrinkVariable(std::size_t a, double largestUp, double smallestDown)const{
 		if (
 			( isLowerBound(a) && gradient(a) < smallestDown)
@@ -558,6 +702,17 @@ private:
 				largestUp = std::max(largestUp,gradient(a));
 		}
 	}
+	
+	bool m_isUnshrinked;
+	
+	///\brief true if shrinking is to be used.
+	bool m_shrink;
+	
+	///\brief Number of iterations until next shrinking.
+	std::size_t m_shrinkCounter;
+
+	///\brief Stores the gradient of the alpha dimeensions which are either 0 or C
+	RealVector m_gradientEdge;
 };
 
 }
