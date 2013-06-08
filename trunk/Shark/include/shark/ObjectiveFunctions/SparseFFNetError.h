@@ -89,9 +89,11 @@ public:
 	}
 
 	double eval(RealVector const& input) const{
+        m_evaluationCounter++;
 		return mp_wrapper->eval(input);
 	}
 	ResultType evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative ) const{
+        m_evaluationCounter++;
 		return mp_wrapper->evalDerivative(input,derivative);
 	}
 
