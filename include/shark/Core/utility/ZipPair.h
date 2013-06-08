@@ -91,7 +91,7 @@ public:
 	}
 	
 	std::pair<Iterator1,Iterator2> iterators()const{
-		return std::make_pair<Iterator1,Iterator2>(m_iterator1,m_iterator2);
+		return std::make_pair(m_iterator1,m_iterator2);
 	}
 
 private:

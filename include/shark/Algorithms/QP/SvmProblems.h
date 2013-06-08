@@ -356,6 +356,10 @@ public:
 	double gradient(std::size_t i)const{
 		return m_gradient(i);
 	}
+	
+	std::size_t permutation(std::size_t i)const{
+		return m_problem.permutation[i];
+	}
 
 	RealVector getUnpermutedAlpha()const{
 		RealVector alpha(dimensions());
@@ -435,9 +439,16 @@ public:
 			updateAlphaStatus(i);
 		}
 	}
+	
+	/// \brief adapts the linear part of the problem and updates the internal data structures accordingly.
+	virtual void setLinear(std::size_t i, double newValue){
+		m_gradient(i) -= linear(i);
+		m_gradient(i) += newValue;
+		m_problem.linear(i) = newValue;
+	}
 
 protected:
-	Problem& m_problem;
+	Problem m_problem;
 
 	/// gradient of the objective function at the current alpha
 	RealVector m_gradient;	
@@ -602,6 +613,13 @@ public:
 				m_gradientEdge(i) += linear(i);
 			}
 		}
+	}
+	
+	/// \brief adapts the linear part of the problem and updates the internal data structures accordingly.
+	virtual void setLinear(std::size_t i, double newValue){
+		m_gradientEdge(i) -= linear(i);
+		m_gradientEdge(i) += newValue;
+		base_type::setLinear(i,newValue);
 	}
 protected:
 	///\brief Update the problem by a proposed step i taking the box constraints into account.
