@@ -41,7 +41,7 @@
 
 #include <shark/Data/Dataset.h>
 #include <algorithm>
-
+#include <shark/Core/Traits/ProxyReferenceTraits.h>
 namespace shark{
 
 
@@ -70,23 +70,28 @@ public:
 	JaakkolaHeuristic(LabeledData<InputType,unsigned int> const& dataset, bool nearestFalseNeighbor = false)
 	{
 		typedef typename LabeledData<InputType,unsigned int>::const_element_range Elements;
+		typedef typename ConstProxyReference<InputType const>::type Element;
 		Elements elements = dataset.elements();
 		if(!nearestFalseNeighbor) {
 			for(typename Elements::iterator it = elements.begin(); it != elements.end(); ++it){
+				Element x = it->input;
 				typename Elements::iterator itIn = it;
 				itIn++;
 				for (; itIn != elements.end(); itIn++) {
 					if (itIn->label == it->label) continue;
-					double dist = distanceSqr(it->input,itIn->input);
+					Element y = itIn->input;
+					double dist = distanceSqr(x,y);
 					m_stat.push_back(dist);
 				}
 			}
 		} else {
 			for(typename Elements::iterator it = elements.begin(); it != elements.end(); ++it){
 				double minDistSqr = 0;
+				Element x = it->input;
 				for (typename Elements::iterator itIn = elements.begin(); itIn != elements.end(); itIn++) {
 					if (itIn->label == it->label) continue;
-					double dist = distanceSqr(it->input,itIn->input);
+					Element y = itIn->input;
+					double dist = distanceSqr(x,y);
 					if( (minDistSqr == 0) || (dist < minDistSqr))  minDistSqr = dist;
 				}
 				m_stat.push_back(minDistSqr);
