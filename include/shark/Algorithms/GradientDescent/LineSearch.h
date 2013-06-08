@@ -35,8 +35,8 @@
  */
 //===========================================================================
 
-#ifndef SHARK_ML_OPTIMIZER_LINESEARCH_H
-#define SHARK_ML_OPTIMIZER_LINESEARCH_H
+#ifndef SHARK_ALGORITHMS_GRADIENTDESCENT_LINESEARCH_H
+#define SHARK_ALGORITHMS_GRADIENTDESCENT_LINESEARCH_H
 
 #include <shark/LinAlg/Base.h>
 #include <shark/LinAlg/arrayoptimize.h>
@@ -103,16 +103,19 @@ public:
 	///@param pointValue the value of the function at searchPoint
 	///@param newtonDirection the search direction of the line search
 	///@param derivative the derivative of the funktion at searchPoint
-	virtual void operator()(RealVector &searchPoint,double &pointValue,const RealVector &newtonDirection,const RealVector &derivative)const {
+	///@param stepLength initial step length guess for guiding the line search
+	virtual void operator()(RealVector &searchPoint,double &pointValue,const RealVector &newtonDirection, RealVector &derivative, double stepLength = 1.0)const {
 		switch (m_lineSearchType) {
 		case Dlinmin:
 			dlinmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);
+			m_function(searchPoint, derivative);
 			break;
 		case Linmin:
 			linmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);
+			m_function(searchPoint, derivative);
 			break;
 		case WolfeCubic:
-			wolfecubic(searchPoint, newtonDirection, pointValue, m_function, derivative);
+			wolfecubic(searchPoint, newtonDirection, pointValue, m_function, derivative, stepLength);
 			break;
 		}
 	}
@@ -122,7 +125,8 @@ public:
 	///@param searchPoint the point where the linesearch start
 	///@param pointValue the value of the function at searchPoint
 	///@param newtonDirection the search direction of the line search
-	virtual void operator()(RealVector &searchPoint,double &pointValue,const RealVector &newtonDirection)const {
+	///@param stepLength initial step length guess for guiding the line search
+	virtual void operator()(RealVector &searchPoint,double &pointValue,const RealVector &newtonDirection, double stepLength = 1.0)const {
 		switch (m_lineSearchType) {
 		case Dlinmin:
 			dlinmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);

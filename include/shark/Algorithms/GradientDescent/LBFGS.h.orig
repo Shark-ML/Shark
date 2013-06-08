@@ -71,26 +71,17 @@ public:
 		m_linesearch.init(objectiveFunction);
 		m_dimension = startingPoint.size();
 		m_best.point = startingPoint;
+		m_firstIteration = true;
 		m_hdiag = 1.0;         // Start with the identity
 		m_updThres = 1e-10;       // Reasonable threshold
 
 		// Get space for the different vectors we store.
 		m_gradient.resize(m_dimension, false);
-		m_searchDirection.resize(m_dimension, false);
+		m_dir.resize(m_dimension, false);
 		m_oldPoint.resize(m_dimension, false);
-		m_searchDirections.clear();
+		m_dirs.clear();
 		m_steps.clear();
-		
-		//in th first step we don't have usefull hessian information so we use the gradient directly.
-		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_gradient);
-		m_searchDirection = -m_gradient;
-		m_initialStepLength = 0.0;//1.0 as step length might be very wrong.
-		for (size_t i = 0; i < m_gradient.size(); ++i)
-			m_initialStepLength += std::abs(m_gradient(i));
-		m_initialStepLength = std::min(1.0, 1.0 / m_initialStepLength);
 	}
-	
-	using AbstractSingleObjectiveOptimizer< VectorSpace<double> >::init;
 
 	/**
 	 * \brief Specify the amount of steps to be memorized and used to find the
@@ -102,20 +93,35 @@ public:
 		m_numHist = numhist;
 	}
 
+	using AbstractSingleObjectiveOptimizer< VectorSpace<double> >::init;
+
 	void step(const ObjectiveFunctionType &objectiveFunction) {
+		// If this is the first iteration m_gradient is invalid, so update it
+        double t = 1.0; // Initial guess for step length
+		if (m_firstIteration) {
+			m_best.value = objectiveFunction.evalDerivative(m_best.point,m_gradient);
+
+			m_dir = -m_gradient;
+            t = 0.0;
+            for (size_t i = 0; i < m_gradient.size(); ++i)
+                t += std::abs(m_gradient(i));
+            t = std::min(1.0, 1.0 / t);
+
+			m_firstIteration = false;
+		} else {
+			// Update the history if necessary
+			RealVector y = m_gradient - m_oldGrad;
+			RealVector s = m_best.point - m_oldPoint;
+			updateHist(y, s);
+
+			// Get the LBFGS direction
+			getDirection(m_dir);
+		}
+
 		// Perform line search
 		m_oldGrad = m_gradient;
 		m_oldPoint = m_best.point;
-		m_linesearch(m_best.point, m_best.value, m_searchDirection, m_gradient, m_initialStepLength);
-		
-		// Update the history if necessary
-		RealVector y = m_gradient - m_oldGrad;
-		RealVector s = m_best.point - m_oldPoint;
-		updateHist(y, s);
-
-		// Get the LBFGS direction
-		getDirection(m_searchDirection);
-		m_initialStepLength = 1.0;
+		m_linesearch(m_best.point, m_best.value, m_dir, m_gradient, t);
 	}
 
 	//from IConfigure
@@ -129,7 +135,7 @@ public:
 	//from ISerializable
 	virtual void read(InArchive &archive) {
 		archive>>m_linesearch;
-		archive>>m_initialStepLength;
+		archive>>m_firstIteration;
 		archive>>m_dimension;
 		archive>>m_numHist;
 		archive>>m_hdiag;
@@ -138,14 +144,14 @@ public:
 		archive>>m_gradient;
 		archive>>m_oldGrad;
 		archive>>m_oldPoint;
-		archive>>m_searchDirection;
-		archive>>m_searchDirections;
+		archive>>m_dir;
+		archive>>m_dirs;
 		archive>>m_steps;
 	}
 
 	virtual void write(OutArchive &archive) const {
 		archive<<m_linesearch;
-		archive<<m_initialStepLength;
+		archive<<m_firstIteration;
 		archive<<m_dimension;
 		archive<<m_numHist;
 		archive<<m_hdiag;
@@ -154,8 +160,8 @@ public:
 		archive<<m_gradient;
 		archive<<m_oldGrad;
 		archive<<m_oldPoint;
-		archive<<m_searchDirection;
-		archive<<m_searchDirections;
+		archive<<m_dir;
+		archive<<m_dirs;
 		archive<<m_steps;
 	}
 
@@ -170,44 +176,45 @@ public:
 
 protected: // Methods
 
-	void updateHist(RealVector& y, RealVector &step) {
+	void updateHist(RealVector &y, RealVector &s) {
 		//Only update if <y,s> is above some reasonable threshold.
-		double ys = inner_prod(y, step);
+		double ys = inner_prod(y, s);
 		if (ys > m_updThres) {
 			// Only store m_numHist steps, so possibly pop the oldest.
-			if (m_searchDirections.size() >= m_numHist) {
-				m_searchDirections.pop_front();
+			if (m_dirs.size() >= m_numHist) {
+				m_dirs.pop_front();
 				m_steps.pop_front();
 			}
-			m_searchDirections.push_back(step);
+			m_dirs.push_back(s);
 			m_steps.push_back(y);
 			// Update the hessian approximation.
 			m_hdiag = ys / inner_prod(y,y);
 		}
+        else
+            std::cout << "Update skipped" << std::endl;
 	}
-	/// \brief Get the LBFGS direction. 
-	///
-	/// This approximates the inverse hessian multiplied by the gradient.
-	/// This uses the rho, alpha and beta vectors. Description of these
-	/// can be seen in ie. the wiki page of LBFGS.
-	void getDirection(RealVector& searchDirection) {
-		
+
+	void getDirection(RealVector &r) {
+		// Get the LBFGS direction. This approximates the inverse hessian
+		// multiplied by the gradient.
+		// This uses the rho, alpha and beta vectors. Description of these
+		// can be seen in ie. the wiki page of LBFGS.
 		RealVector rho(m_numHist);
 		RealVector alpha(m_numHist);
 		RealVector beta(m_numHist);
 
-		for (size_t i = 0; i < m_searchDirections.size(); ++i)
-			rho(i) = 1.0 / inner_prod(m_steps[i], m_searchDirections[i]);
+		for (size_t i = 0; i < m_dirs.size(); ++i)
+			rho(i) = 1.0 / inner_prod(m_steps[i], m_dirs[i]);
 
-		searchDirection = -m_gradient;
-		for (int i = m_searchDirections.size() - 1; i >= 0; --i) {
-			alpha(i) = rho(i) * inner_prod(m_searchDirections[i], searchDirection);
-			searchDirection -= alpha(i) * m_steps[i];
+		r = -m_gradient;
+		for (int i = m_dirs.size() - 1; i >= 0; --i) {
+			alpha(i) = rho(i) * inner_prod(m_dirs[i], r);
+			r -= alpha(i) * m_steps[i];
 		}
-		searchDirection *= m_hdiag;
-		for (size_t i = 0; i < m_searchDirections.size(); ++i) {
-			beta(i) = rho(i) * inner_prod(m_steps[i], searchDirection);
-			searchDirection += m_searchDirections[i] * (alpha(i) - beta(i));
+		r *= m_hdiag;
+		for (size_t i = 0; i < m_dirs.size(); ++i) {
+			beta(i) = rho(i) * inner_prod(m_steps[i], r);
+			r += m_dirs[i] * (alpha(i) - beta(i));
 		}
 	}
 
@@ -216,25 +223,25 @@ protected: // Instance vars
 
 	LineSearch      m_linesearch;
 
+	bool m_firstIteration;
 	size_t m_dimension;
 	double m_updThres;         // Threshold for when to update history.
 	unsigned int m_numHist;          // Number of steps to use for LBFGS.
 	// Hessian approximation. We use a diagonal matrix, where each element is
 	// the same, so we only need to store one double.
 	double          m_hdiag;
-	double m_initialStepLength;
 
 	// Gradient, direction, etc.
 	RealVector      m_gradient;
 	RealVector      m_oldGrad;
-	RealVector      m_searchDirection;
+	RealVector      m_dir;
 	RealVector      m_oldPoint;
 
 	// Saved steps for creating the approximation.
 	// Use deque as it gives fast pop.front, push.back and access. Supposedly.
 	// dirs holds the values x_(k+1) - x_k
 	// steps holds the values g_(k+1) - g_k
-	std::deque<RealVector> m_searchDirections;
+	std::deque<RealVector> m_dirs;
 	std::deque<RealVector> m_steps;
 };
 
