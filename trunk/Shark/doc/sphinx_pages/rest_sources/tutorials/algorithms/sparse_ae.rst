@@ -5,11 +5,12 @@ Sparse Autoencoder
 Background
 ----------
 
-A sparse autoencoder is an unsupervised learning algorithm using a
-neural network, setting the target values equal to the input. In
-other words, the autoencoder tries to approximate the identity function.
-By imposing additional constraints we can make the network learn
-interesting features about the input.
+A sparse autoencoder is a model trained by unsupervised learning.  It
+refers to a neural network with a single hidden layer, where the
+target values are set equal to the inputs during training. In other
+words, the autoencoder tries to approximate the identity function.  By
+imposing additional constraints we can make the network learn
+interesting features characterizing the input.
 
 One such constraint is the number of hidden units in the network. If
 this is below the number of input variables the network is actually
@@ -21,7 +22,14 @@ This is done by using a regularization term using the KL-divergence:
    KL(\rho \| \rho_j) = \rho \log(\frac{\rho}{\rho_j}) +
    (1 - \rho) \log(\frac{1-\rho}{1-\rho_j})
 
-See the documentation of the :doxy:`SparseFFNetError` class for more info.
+See the documentation of the :doxy:`SparseFFNetError` class for more
+info.
+
+For a detailed introduction to autoencoders, we refer to the `Stanford
+UFLDL Tutorial
+<http://ufldl.stanford.edu/wiki/index.php/Exercise:Sparse_Autoencoder>`_.
+In the following, we show how to solve the autoencoder exercise from
+this recommended tutorial using Shark.
 
 
 Sparse Autoencoder in Shark
