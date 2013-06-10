@@ -56,6 +56,7 @@
    rest_sources/tutorials/algorithms/kmeans
 
    rest_sources/tutorials/algorithms/ffnet
+   rest_sources/tutorials/algorithms/sparse_ae
    rest_sources/tutorials/algorithms/extreme_learning_machine
 
    rest_sources/tutorials/algorithms/cart
@@ -71,6 +72,7 @@
 
    rest_sources/tutorials/algorithms/rbm_module
    rest_sources/tutorials/algorithms/binary_rbm
+
 
    rest_sources/tutorials/algorithms/quadratic_programs
 
