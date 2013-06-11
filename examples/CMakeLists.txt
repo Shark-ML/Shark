@@ -135,6 +135,7 @@ SHARK_ADD_EXAMPLE( Unsupervised/PCA.cpp PCA "Unsupervised"  )
 SHARK_ADD_EXAMPLE( Unsupervised/PCATutorial.cpp PCATutorial "Unsupervised"  )
 SHARK_ADD_EXAMPLE( Unsupervised/KMeansTutorial.cpp KMeansTutorial "Unsupervised"  )
 SHARK_ADD_EXAMPLE( Unsupervised/BinaryRBM.cpp BinaryRBM "Unsupervised"  )
+SHARK_ADD_EXAMPLE( Unsupervised/SparseAETutorial.cpp SparseAETutorial "Unsupervised"  )
 SHARK_ADD_EXAMPLE( Unsupervised/HierarchicalClustering.cpp HierarchicalClustering "Unsupervised"  )
 SHARK_ADD_EXAMPLE( Unsupervised/OneClassSvm.cpp OneClassSvm "Unsupervised"  )
 

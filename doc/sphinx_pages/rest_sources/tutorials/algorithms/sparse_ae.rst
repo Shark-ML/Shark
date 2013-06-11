@@ -16,14 +16,18 @@ One such constraint is the number of hidden units in the network. If
 this is below the number of input variables the network is actually
 learning a compressed representation of the input. Another constraint
 we will use is to have the average activation of the neurons being low.
-This is done by using a regularization term using the KL-divergence:
+This is done by using a regularization term summing the KL-divergence
 
 .. math ::
    KL(\rho \| \rho_j) = \rho \log(\frac{\rho}{\rho_j}) +
    (1 - \rho) \log(\frac{1-\rho}{1-\rho_j})
 
-See the documentation of the :doxy:`SparseFFNetError` class for more
-info.
+over all hidden neurons indexed by :math:`j`.  The regularization
+parameter :math:`\rho` defines a target mean activation and the mean
+activation :math:`\rho_j` of hidden neuron :math:`j` over the whole
+training datasetis interpreted as activation propability.  See the
+documentation of the :doxy:`SparseFFNetError` class for more
+information.
 
 For a detailed introduction to autoencoders, we refer to the `Stanford
 UFLDL Tutorial
@@ -132,7 +136,9 @@ layout: ::
   FFNet<LogisticNeuron, LogisticNeuron> model;
   model.setStructure(psize * psize, numhidden, psize * psize, true, false, false, true);
 
-We then need to add the sparsity constraint: ::
+The Boolean arguments specify that consecutive layers are fully
+connected and that a bias parameter is used, but that there are no shortcut connections.
+We then need to add the sparsity constraint ::
 
   SquaredLoss<RealVector> loss;
   SparseFFNetError error(&model, &loss, rho, beta);
@@ -213,7 +219,7 @@ of Shark, but first some normalization is done: ::
   }
 
 After scaling the features to *50x50* images an plotting them next to
-each other, we got the following result
+each other, we got the following result:
 
 .. figure:: ../images/features.*
   :scale: 100%
