@@ -30,7 +30,7 @@ const double lambda = 0.0002; // Weight decay paramater
 // Optimizer parameters
 const unsigned int maxIter = 400;
 
-void get_samples(UnlabeledData<RealVector>& samples)
+void getSamples(UnlabeledData<RealVector>& samples)
 {
     // Read images
 	UnlabeledData<RealVector> images;
@@ -61,8 +61,8 @@ void get_samples(UnlabeledData<RealVector>& samples)
             unsigned int ul = ulx * h + uly;
             RealVector sample(psize * psize);
             const RealVector& img = *it;
-            for (int j = 0; j < psize; ++j)
-                for (int k = 0; k < psize; ++k)
+            for (size_t j = 0; j < psize; ++j)
+                for (size_t k = 0; k < psize; ++k)
                     sample(j * psize + k) = img(ul + k + j * h);
             patches.push_back(sample);
         }
@@ -94,11 +94,11 @@ RealVector setStartingPoint(FFNet<LogisticNeuron, LogisticNeuron>& model)
     double r = sqrt(6) / sqrt(numhidden + psize * psize + 1);
     vector<RealMatrix>& layers = model.layerMatrices();
     for (int k = 0; k < 2; ++k)
-        for (int i = 0; i < layers[k].size1(); ++i)
-            for (int j = 0; j < layers[k].size2(); ++j)
+        for (size_t i = 0; i < layers[k].size1(); ++i)
+            for (size_t j = 0; j < layers[k].size2(); ++j)
                 layers[k](i,j) = ((double)rand()/(double)RAND_MAX) * 2 * r - r;
     RealVector& bias = model.bias();
-    for (int i = 0; i < bias.size(); ++i)
+    for (size_t i = 0; i < bias.size(); ++i)
         bias(i) = 0.0;
 
     // Return the starting point for use in the optimizer
@@ -112,24 +112,12 @@ void exportFeatureImages(const RealMatrix& W)
     // then it is transformed into a psize x psize image.
     boost::format filename("output/feature%d.pgm");
 
-    // Find the mean value for normalization
-    double m = 0.0;
-    for (size_t i = 0; i < W.size1(); ++i)
-        for (size_t j = 0; j < W.size2(); ++j)
-            m += W(i,j);
-    m /= W.size1() * W.size2();
-
     // Create feature images
     for (size_t i = 0; i < W.size1(); ++i)
     {
-        // Rescale with the mean. Then normalize.
-        double top = 0.0;
         RealVector img(W.size2());
-        for (size_t j = 0; j < W.size2(); ++j) {
-            img(j) = W(i,j); - m;
-            top = max(top, img(j));
-        }
-        img /= top;
+        for (size_t j = 0; j < W.size2(); ++j)
+            img(j) = W(i,j);
         exportPGM((filename % i).str().c_str(), img, psize, psize, true);
     }
 }
@@ -140,7 +128,7 @@ int main()
     srand(time(NULL));
     // Read the data
     UnlabeledData<RealVector> samples;
-    get_samples(samples);
+    getSamples(samples);
     cout << "Found : " << samples.numberOfElements() << " patches." << endl;
     RegressionDataset data(samples, samples);
 
