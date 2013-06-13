@@ -110,7 +110,7 @@ void exportFeatureImages(const RealMatrix& W)
     // Export the visualized features.
     // Each row of W corresponds to a feature. Some normalization is done and
     // then it is transformed into a psize x psize image.
-    boost::format filename("output/feature%d.pgm");
+    boost::format filename("feature%d.pgm");
 
     // Create feature images
     for (size_t i = 0; i < W.size1(); ++i)
