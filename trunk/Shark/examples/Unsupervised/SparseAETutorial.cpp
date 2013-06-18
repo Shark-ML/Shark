@@ -72,19 +72,12 @@ void getSamples(UnlabeledData<RealVector>& samples)
     samples = createDataFromRange(patches);
     // zero mean
     RealVector meanvec = mean(samples);
-    for (ElRef it = samples.elements().begin(); it != samples.elements().end(); ++it) {
-        *it -= meanvec;
-    }
+    samples = transform(samples, Shift(-meanvec));
+
     // Remove outliers outside of +/- 3 standard deviations
     // and normalize to [0.1, 0.9]
     RealVector pstd = 3 * sqrt(variance(samples));
-    for (ElRef it = samples.elements().begin(); it != samples.elements().end(); ++it)
-    {
-        for (size_t idx = 0; idx < it->size(); ++idx) {
-            double trunced = max(min(pstd(idx), (*it)(idx)), -pstd(idx)) / pstd(idx);
-            (*it)(idx) = (trunced + 1.0) * 0.4 + 0.1;
-        }
-    }
+    samples = transform(samples, TruncateAndRescale(-pstd, pstd, 0.1, 0.9));
 }
 
 RealVector setStartingPoint(FFNet<LogisticNeuron, LogisticNeuron>& model)
