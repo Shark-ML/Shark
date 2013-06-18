@@ -291,7 +291,7 @@ element_range elements ()                    Returns an bidirectional container 
 					     only virtual.
 ==========================================   ======================================================================
 
-further, ``LabeledData`` supports direct access to the Containers rprsnting either elements or labels.
+further, ``LabeledData`` supports direct access to the Containers representing either elements or labels.
 
 ==========================================   ======================================================================
 Method                                       Description
@@ -332,11 +332,11 @@ For LabeledData we have a similar set of methods::
 Transformation of datasets
 ---------------------------------------------
 
-In a lot of use cases, one neds to preprocss the data, before it can be used for the problem.
-for example th man of a dataset is to be removed, or labels need to be changed in order to fit
-into the shark scheme which assumes the existance of all class labels. For this, shark provides
+In a lot of use cases, one needs to preprocess the data, before it can be used for the problem.
+For example, the mean of a dataset is to be removed, or labels need to be changed in order to fit
+into the shark scheme which assumes the existence of all class labels. For this, shark provides
 a smart transformation mechanism. Lt's assume we have a function object f and g such that f(input)
-returns the tranformed input vector and g(label) the transformed label. Than we can transform
+returns the transformed input vector and g(label) the transformed label. Than we can transform
 data sets by::
 
    Data<RealVector> data;//initial dataset;
@@ -350,7 +350,7 @@ The transformation mechanism itself is smart! If f does not only provide a funct
 f(input) but also f(Batch_of_input>) returning the same transformation for a whole batch,
 this is applied instead. As batch transformations are often more efficient than applying
 the same transformation to all elements one after another, this can be a real time saver. 
-An example for an Object satisfying this requirement are the Models provided by shark::
+An example for an object satisfying this requirement are the Models provided by shark::
 
     //a linear model, for example for whitening or making a dataset mean free
     LinearModel<> model;
@@ -359,6 +359,31 @@ An example for an Object satisfying this requirement are the Models provided by 
     //or an alternate shortcut for data:
     data = model(data);
     
+It is easy to write your own transformation.
+A simple example just adding a scalar to all elements in a dataset
+could look like this: ::
+
+  class Add {
+  public:
+	Add(double offset) : m_offset(offset), m_scalar(true) {}
+
+	typedef RealVector result_type; // do not forget to specify  result type
+
+	RealVector operator()(RealVector input) const { // const is important
+		for(std::size_t i = 0; i != input.size(); ++i)
+				input(i) += m_offset;
+		return input;			
+	}
+  private:
+	double m_offset;
+  };
+
+
+It is then applied to dataset by calling something such as: ::
+
+  data = transform(data, Add(2.0));
+
+
 
 Element views: DataView<Dataset>
 ---------------------------------
@@ -371,7 +396,7 @@ class :doxy:`DataView`. It provides another type of view on a data set under the
 assumption that the data will not change during the lifetime of the DataView
 object. A dataview object consumes linear space, as it stores the exact position
 of every element in the container (i.e., the index of the batch and position
-inside the batch). Thus creating a DataView object might lead to a big inital
+inside the batch). Thus creating a DataView object might lead to a big initial
 overhead which only pays off if the object is then used a lot. The DataView class
 is made available via ``#include<shark/Data/DataView.h>``.
 

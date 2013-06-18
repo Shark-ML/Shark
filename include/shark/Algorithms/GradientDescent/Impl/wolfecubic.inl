@@ -95,10 +95,8 @@ void wolfecubic(
 	double t_prev = 0.0;
 	VectorT g_prev = gradient;
 	double gtd = inner_prod(gradient, searchDirection);
-	double gtd_prev = gtd;
 
 	// Initial step values
-	static int initt = 0;
 	VectorT g_new(point.size());
 	double f_new  = func(point + t * searchDirection, g_new);
 	double gtd_new = inner_prod(g_new, searchDirection);
@@ -151,7 +149,6 @@ void wolfecubic(
 		t *= 10; // Expand the bracket.
 
 		f_prev = f_new;
-		gtd_prev = gtd_new;
 		g_prev = g_new;
 		f_new = func(point + t * searchDirection, g_new);
 		gtd_new = inner_prod(g_new, searchDirection);
