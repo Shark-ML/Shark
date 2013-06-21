@@ -319,7 +319,6 @@ public:
 
 /**
  * \ingroup shark_globals
- *
  * @{
  */
 
@@ -702,8 +701,7 @@ struct TransformedData{
 
 
 /**
- * \ingroup shark_globals
- *
+ * \addtogroup shark_globals
  * @{
  */
 
@@ -1120,10 +1118,10 @@ public:
 	///@param minValue The imterval [minCutValue, maxCutValue] is mapped to [minValue, maxValue]
 	///@param maxValue The imterval [minCutValue, maxCutValue] is mapped to [minValue, maxValue]
 	TruncateAndRescale(double minCutValue, double maxCutValue, double minValue = 0., double maxValue = 1.) : m_minCut(minCutValue), m_maxCut(maxCutValue), m_range(maxValue - minValue), m_min(minValue), m_scalar(true) {}
-	///@param minCutValue Lower bound for element-wise truncation 
-	///@param maxCutValue Upper bound for element-wise truncation 
-	///@param minValue The imterval [minCutValue, maxCutValue] is mapped to [minValue, maxValue]
-	///@param maxValue The imterval [minCutValue, maxCutValue] is mapped to [minValue, maxValue]
+	///@param minv Lower bound for element-wise truncation 
+	///@param maxv Upper bound for element-wise truncation 
+	///@param minValue The imterval [minv, maxv is mapped to [minValue, maxValue]
+	///@param maxValue The imterval [minv, maxv] is mapped to [minValue, maxValue]
 	TruncateAndRescale(const RealVector minv, const RealVector maxv, double minValue = 0., double maxValue = 1.) : m_minCutv(minv), m_maxCutv(maxv), m_range(maxValue - minValue), m_min(minValue), m_scalar(false) { SIZE_CHECK(m_minCutv.size() == m_maxCutv.size()); }
 
 	typedef RealVector result_type;
@@ -1151,7 +1149,7 @@ private:
 	bool m_scalar;
 };
 
-
-}
 /** @*/
+}
+
 #endif
