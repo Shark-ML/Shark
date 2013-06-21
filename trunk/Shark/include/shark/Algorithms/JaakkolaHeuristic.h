@@ -64,7 +64,7 @@ class JaakkolaHeuristic
 {
 public:
 	/// Constructor
-	/// \param data           vector-valued input data
+	/// \param dataset           vector-valued input data
 	/// \param nearestFalseNeighbor  if true, only the nearest neighboring point with different label is considered (default false)
 	template<class InputType>
 	JaakkolaHeuristic(LabeledData<InputType,unsigned int> const& dataset, bool nearestFalseNeighbor = false)
