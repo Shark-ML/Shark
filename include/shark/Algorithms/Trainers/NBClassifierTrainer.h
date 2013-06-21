@@ -6,15 +6,6 @@
  *  \author  B. Li
  *  \date    2012
  *
- *  \par Copyright (c) 2012:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -78,8 +69,8 @@ public:
 		std::size_t classSize;
 		std::size_t featureSize;
 		boost::tie(classSize, featureSize) = model.getDistSize();
-		SHARK_CHECK(classSize != numberOfClasses(dataset), "Size of class in dataset and model should match.");
-		SHARK_CHECK(featureSize != inputDimension(dataset), "Size of feature in dataset and model should match.");
+		SHARK_CHECK(classSize == numberOfClasses(dataset), "Number of classes in dataset and model should match.");
+		SHARK_CHECK(featureSize == inputDimension(dataset), "Number of features in dataset and model should match.");
 
 		// Initialize trainer & buffer
 		std::vector<InputValueType> buffer;

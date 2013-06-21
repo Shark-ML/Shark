@@ -148,7 +148,7 @@ public:
 		outputs.resize(size(patterns));
 
 		for(std::size_t p = 0; p != size(patterns); ++p){
-			OutputType bestProbClass;
+			OutputType bestProbClass = 0; // just initialized to avoid warning 
 			double maxLogProb = - std::numeric_limits<double>::max(); // initialized as smallest negative value
 
 			// For each of possible output values, calculate its corresponding sum-up log prob and return the max one
