@@ -32,7 +32,7 @@
 #ifndef SHARK_ALGORITHMS_QP_SVMPROBLEMS_H
 #define SHARK_ALGORITHMS_QP_SVMPROBLEMS_H
 
-#include <shark/Algorithms/QP/QpSolver.h>
+#include <shark/Algorithms/QP/BoxConstrainedProblems.h>
 
 namespace shark{
  

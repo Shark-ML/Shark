@@ -132,65 +132,18 @@ public:
 		svm.setBasis(dataset.inputs());
 		
 		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
-		if (svm.hasOffset())
+		if (QpConfig::precomputeKernel())
 		{
-			// solve the problem with equality constraint
-			if (QpConfig::precomputeKernel())
-			{
-				typedef CSVMProblem<PrecomputedMatrixType> SVMProblemType;
-				typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
-				
-				PrecomputedMatrixType matrix(&km);
-				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
-				ProblemType problem(svmProblem,base_type::m_shrinking);
-				QpSolver< ProblemType > solver(problem);
-				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
-				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
-				svm.offset(0) = computeBias(problem,dataset);
-				
-			}
-			else
-			{
-				typedef CSVMProblem<CachedMatrixType> SVMProblemType;
-				typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
-				
-				CachedMatrixType matrix(&km);
-				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
-				ProblemType problem(svmProblem,base_type::m_shrinking);
-				QpSolver< ProblemType > solver(problem);
-				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
-				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
-				svm.offset(0) = computeBias(problem,dataset);
-			}
+			PrecomputedMatrixType matrix(&km);
+			CSVMProblem<PrecomputedMatrixType> svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
+			optimize(svm,svmProblem,dataset);
 		}
 		else
 		{
-			if (QpConfig::precomputeKernel())
-			{
-				typedef CSVMProblem<PrecomputedMatrixType> SVMProblemType;
-				typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
-				
-				PrecomputedMatrixType matrix(&km);
-				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
-				ProblemType problem(svmProblem,base_type::m_shrinking);
-				QpSolver< ProblemType > solver(problem);
-				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
-				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
-			}
-			else
-			{
-				typedef CSVMProblem<CachedMatrixType> SVMProblemType;
-				typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
-				
-				CachedMatrixType matrix(&km);
-				SVMProblemType svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
-				ProblemType problem(svmProblem,base_type::m_shrinking);
-				QpSolver< ProblemType > solver(problem);
-				solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
-				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
-			}
+			CachedMatrixType matrix(&km);
+			CSVMProblem<CachedMatrixType> svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
+			optimize(svm,svmProblem,dataset);
 		}
-
 		base_type::m_accessCount = km.getAccessCount();
 		if (base_type::sparsify()) svm.sparsify();
 
@@ -202,6 +155,96 @@ public:
 	}
 
 protected:
+	
+	template<class SvmProblemType>
+	void optimize(KernelExpansion<InputType>& svm, SvmProblemType const& svmProblem, LabeledData<InputType, unsigned int> const& dataset){
+		bool m_solveUsingEqualityConstraint = true;
+		if (svm.hasOffset() && m_solveUsingEqualityConstraint)
+		{
+			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
+			ProblemType problem(svmProblem,base_type::m_shrinking);
+			QpSolver< ProblemType > solver(problem);
+			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+			column(svm.alpha(),0)= problem.getUnpermutedAlpha();
+			svm.offset(0) = computeBias(problem,dataset);
+		}
+		else
+		{
+			typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
+			ProblemType problem(svmProblem,base_type::m_shrinking);
+			QpSolver< ProblemType > solver(problem);
+			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+			
+			//~ //iteratively solve for the bias if necessary
+			//~ if(svm.hasOffset()){
+				//~ double bias = 0;
+				//~ double deltaBias = 0;
+				//~ do{
+					//~ //add labels of misclassified points. this is cheap as this is stored in the gradient.
+					//~ int misclassifiedLabelSum = 0;
+					//~ for(std::size_t i = 0; i != problem.size(); ++i){
+						//~ std::size_t index = problem.permutation(i);
+						//~ double grad = problem.gradient(index);
+						//~ misclassifiedLabelSum += dataset.element(index).label == 0 ? -1:1;
+					//~ }
+					//~ if(misclassifiedLabelSum == 0) break;//everything is correctly classified.
+					
+					//~ // now fill the container with the gradient values of all variables that might reduce this
+					//~ // these are either the misclassified elements of the one class(which we want to reduce)
+					//~ // or the correctly classified of the others(which we want to decrease)
+					//~ std::vector<double> elements;
+					//~ for(std::size_t i = 0; i != problem.size(); ++i){
+						//~ std::size_t index = problem.permutation(i);
+						//~ double grad = problem.gradient(index);
+						//~ unsigned int label = dataset.element(index).label;
+						//~ if(label == 1){
+							//~ if(grad > 0 || misclassifiedLabelSum < 0) elements.push_back(grad);
+						//~ }
+						//~ if(label == 0){
+							//~ if(grad > 0 || misclassifiedLabelSum < 0) elements.push_back(grad);
+						//~ }
+							
+						//~ if(misclassifidLabelSum > 0 && )
+						//~ if(label > 0)
+							//~ elementsPos.push_back(problem.gradient(index));
+						//~ else
+							//~ elementsNeg.push_back(problem.gradient(index));
+						
+						//~ if(grad * label > 0)
+							//~ misclassifiedLabelSum += label;
+					//~ }
+					
+					//~ std::sort(elementsPos.begin(),elementsPos.end());
+					//~ std::sort(elementsNeg.begin(),elementsNeg.end());
+					//~ std::reverse(elementsNeg.begin(),elementsNeg.end());
+					
+					//~ if(misclassifiedLabelSum > 0){
+						//~ std::size_t positionPos = 0;
+						//~ std::size_t positionNeg = 0;
+						//~ while(misclassifiedLabelSum > 0){
+							//~ if(positionNeg < elementsNeg.size() && positionPos < elementsPos.size()){
+								
+							//~ }
+							//~ double difference= elementsPos[ positionPos] - deltaBias;
+							//~ deltaBias += difference;
+							//~ ++positionPos;
+							//~ --misclassifiedLabelSum;
+							//~ //check whether we might have misclassified negative labels...
+							//~ while(positionNeg < elementsNeg.size() && deltaBias - elementsNeg[positionNeg]  > 0){
+								//~ ++positionNeg;
+								//~ ++misclassifiedLabelSum;
+							//~ }
+							
+						//~ }
+					//~ }
+					
+				//~ }
+				//~ while(deltaBias != 0.0);
+				svm.offset(0) = bias;
+			}
+			column(svm.alpha(),0) = problem.getUnpermutedAlpha();
+		}
+	}
 	RealVector m_db_dParams; ///< in the rare case that there are only bounded SVs and no free SVs, this will hold the derivative of b w.r.t. the hyperparameters. Derivative w.r.t. C is last.
 
 	bool m_computeDerivative;
