@@ -105,7 +105,10 @@ public:
 			ProblemType problem(svmProblem);
 			QpSolver< ProblemType > solver(problem);
 			solver.solve(stop);
-			RealVector alphaFull = svmProblem.alpha;
+			RealVector alphaFull(problem.dimensions());
+			for(std::size_t i = 0; i != problem.dimensions(); ++i){
+				alphaFull(i) = problem.alpha(i);
+			}
 			KernelExpansion<InputType> svm(mep_kernel,mep_dataset->inputs(),true);
 
 			// leave-one-out
@@ -141,7 +144,10 @@ public:
 			ProblemType problem(svmProblem);
 			QpSolver< ProblemType > solver(problem);
 			solver.solve(stop);
-			RealVector alphaFull = svmProblem.alpha;
+			RealVector alphaFull(problem.dimensions());
+			for(std::size_t i = 0; i != problem.dimensions(); ++i){
+				alphaFull(i) = problem.alpha(i);
+			}
 			KernelExpansion<InputType> svm(mep_kernel,mep_dataset->inputs(),false);
 			
 			// leave-one-out
