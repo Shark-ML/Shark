@@ -305,6 +305,13 @@ public:
 		std::swap( m_gradient[i], m_gradient[j]);
 		std::swap( m_alphaStatus[i], m_alphaStatus[j]);
 	}
+	
+	/// \brief adapts the linear part of the problem and updates the internal data structures accordingly.
+	virtual void setLinear(std::size_t i, double newValue){
+		m_gradient(i) -= linear(i);
+		m_gradient(i) += newValue;
+		m_problem.linear(i) = newValue;
+	}
 
 protected:
 	SVMProblem& m_problem;
@@ -612,6 +619,13 @@ public:
 		base_type::deactivateVariable(i);
 		updateGradientEdge(i,alphai,0.0);
 	}
+	
+	/// \brief adapts the linear part of the problem and updates the internal data structures accordingly.
+	virtual void setLinear(std::size_t i, double newValue){
+		m_gradientEdge(i) -= linear(i);
+		m_gradientEdge(i) += newValue;
+		base_type::setLinear(i,newValue);
+	}
 protected:
 	///\brief Updates the edge-part of the gradient when an alpha valu was changed
 	///
@@ -658,7 +672,7 @@ private:
 		if (!m_isUnshrinked  && (largestUp - smallestDown < 10.0 * epsilon))
 		{
 			unshrink();
-			//recalculate maximum KKT violation for immeediate re-shrinking
+			//recalculate maximum KKT violation for immediate re-shrinking
 			getMaxKKTViolations(largestUp,smallestDown,dimensions());
 		}
 		//shrink
