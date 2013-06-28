@@ -71,9 +71,8 @@ void BFGS::step(const ObjectiveFunctionType& objectiveFunction) {
 	fast_prod(m_hessian,m_lastDerivative,s);
 	
 	RealVector newPoint = m_best.point;
-	m_linesearch(newPoint,m_best.value,s,m_lastDerivative);
-
-	objectiveFunction.evalDerivative(newPoint,m_derivative);
+	m_derivative = m_lastDerivative;
+	m_linesearch(newPoint,m_best.value,s,m_derivative);
 
 	RealVector gamma=m_derivative-m_lastDerivative;
 	RealVector delta=newPoint-m_best.point;
