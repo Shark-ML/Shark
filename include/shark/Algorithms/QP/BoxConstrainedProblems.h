@@ -207,6 +207,10 @@ public:
 	double gradient(std::size_t i)const{
 		return m_gradient(i);
 	}
+	
+	std::size_t permutation(std::size_t i)const{
+		return m_problem.permutation[i];
+	}
 
 	RealVector getUnpermutedAlpha()const{
 		RealVector alpha(dimensions());
