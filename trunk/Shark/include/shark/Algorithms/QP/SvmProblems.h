@@ -128,7 +128,7 @@ struct LibSVMSelectionCriterion{
 				if (grad_diff > 0.0)
 				{
 					double quad_coef = problem.diagonal(i) + problem.diagonal(a) - 2.0 * q[a];
-					if (quad_coef == 0.0) continue;
+					if (quad_coef == 0.0) quad_coef=1.e-12;
 					double obj_diff = (grad_diff * grad_diff) / quad_coef;
 
 					if (obj_diff > best)
