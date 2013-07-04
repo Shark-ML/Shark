@@ -74,23 +74,26 @@ public:
 
 		// Initialize trainer & buffer
 		std::vector<InputValueType> buffer;
+		buffer.reserve(dataset.numberOfElements() / classSize);
+
 		// Train individual feature distribution
 		for (std::size_t i = 0; i < classSize; ++i)
 		{
 			for (std::size_t j = 0; j < featureSize; ++j)
 			{
 				AbstractDistribution& dist = model.getFeatureDist(i, j);
+				buffer.clear();
 				getFeatureSample(buffer, dataset, i, j);
 				m_distTrainer.train(dist, buffer);
 			}
 		}
 
 		// Figure out class distribution and add it to the model
-		std::vector<std::size_t> occuranceCounter = classSizes(dataset);
+		const std::vector<std::size_t> occuranceCounter = classSizes(dataset);
 
-		double totalClassOccurances = dataset.numberOfElements();
+		const double totalClassOccurances = dataset.numberOfElements();
 		for (std::size_t i = 0; i < classSize; ++i) {
-			model.setClassPrior(i,occuranceCounter[i]/ totalClassOccurances);
+			model.setClassPrior(i, occuranceCounter[i] / totalClassOccurances);
 		}
 	}
 
@@ -112,8 +115,9 @@ private:
 		OutputType classIndex,
 		std::size_t featureIndex
 	) const{
+		SHARK_CHECK(samples.empty(), "The output buffer should be cleaned before usage usually.");
 		typedef typename  LabeledData<InputType, OutputType>::const_element_reference reference;
-		BOOST_FOREACH(reference elem,dataset.elements()){
+		BOOST_FOREACH(reference elem, dataset.elements()){
 			if (elem.label == classIndex)
 				samples.push_back(elem.input(featureIndex));
 		}
