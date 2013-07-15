@@ -39,6 +39,10 @@ namespace shark{
 //Beispiel: TemperedMarkovChain<GibbsOperator<RBM> > chain; ergibt parallel tempering
 //Die Tags beschreiben, wie die Kette interpretiert wird. entweder als
 //(v->h)->(v->h)->(v->h) oder v->(h->v)->(h->v)->(h->v) je nachdem, was gerade sinnvoller ist.
+
+//\brief models a set of tempered Markov chains given a TransitionOperator.
+// e.g.  TemperedMarkovChain<GibbsOperator<RBM> > chain, leads to the set of chains
+// used for parallel tempering. 
 template<class Operator>
 class TemperedMarkovChain{
 private:
@@ -83,13 +87,13 @@ private:
 
 	///\brief evaluate a single step
 	void step(){
-		//do one step for all temperatures at the same time
+		//do one step of the tempered the Markov chains at the same time
 		m_operator.precomputeHidden(m_temperedChains.hidden, m_temperedChains.visible,m_betas);
 		m_operator.sampleHidden(m_temperedChains.hidden);
 		m_operator.precomputeVisible(m_temperedChains.hidden, m_temperedChains.visible, m_betas);
 		m_operator.sampleVisible(m_temperedChains.visible);
 		
-		//calculate energy for sample
+		//calculate energy for samples at all temperatures
 		m_temperedChains.energy = m_operator.calculateEnergy(
 			m_temperedChains.hidden,
 			m_temperedChains.visible 
@@ -126,6 +130,13 @@ public:
 
 
 	void configure(PropertyTree const& node){
+		std::size_t temperatures = node.get("temperatures", 1);
+		setNumberOfTemperatures(temperatures);
+		for(std::size_t i = 0; i != temperatures; ++i){
+				double factor = temperatures - 1;
+				setBeta(i,1.0 - i/factor);
+			}		
+
 		m_operator.configure(node);
 	}
 	
@@ -136,12 +147,18 @@ public:
 		return m_operator;
 	}
 	
+
+    //\brief Sets the number of temperatures and initializes the tempered chains accordingly. 
+	//
+	// @param number of temperatures  
 	void setNumberOfTemperatures(std::size_t temperatures){
 		std::size_t visibles=m_operator.rbm()->numberOfVN();
 		std::size_t hiddens=m_operator.rbm()->numberOfHN();
 		m_temperedChains = SampleBatch(temperatures,visibles,hiddens);
 		m_betas.resize(temperatures);
 	}
+
+
 	/// \brief Returns the number Of temperatures.
 	std::size_t numberOfTemperatures()const{
 		return m_betas.size();

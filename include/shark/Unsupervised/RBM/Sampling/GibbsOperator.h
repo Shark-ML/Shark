@@ -81,7 +81,7 @@ public:
 
 	///\brief Calculates internal data needed for sampling the hidden units as well as requested information for the gradient.
 	///
-	///This function calculates the conditional propability distribution p(h|v) at temperature beta for the whole batch of samples
+	///This function calculates the conditional propability distribution p(h|v) with inverse temperature beta for the whole batch of samples
 	///Be aware that a change of temperature may occur between sampleVisible and precomputeHidden.
 	template<class BetaVector>
 	void precomputeHidden(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch, BetaVector const& beta)const{
@@ -92,7 +92,7 @@ public:
 	}
 	///\brief Calculates internal data needed for sampling the hidden units as well as requested information for the gradient.
 	///
-	///This function calculates the conditional propability distribution p(h|v) at temperature 1 for the whole batch of samples
+	///This function calculates the conditional propability distribution p(h|v) with inverse temperature 1 for the whole batch of samples
 	///Be aware that a change of temperature may occur between sampleVisible and precomputeHidden.
 	void precomputeHidden(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
@@ -102,7 +102,7 @@ public:
 
 	///\brief calculates internal data needed for sampling the visible units as well as requested information for the gradient 
 	///
-	///This function calculates the conditional propability distribution p(v|h) at temperature beta for a whole batch of inputs.
+	///This function calculates the conditional propability distribution p(v|h) with inverse temperature beta for a whole batch of inputs.
 	///Be aware that a change of temperature may occur between sampleHidden and precomputeVisible.
 	template<class BetaVector>
 	void precomputeVisible(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch, BetaVector const& beta)const{
@@ -115,7 +115,7 @@ public:
 	
 	///\brief calculates internal data needed for sampling the visible units as well as requested information for the gradient 
 	///
-	///This function calculates the conditional propability distribution p(v|h) at temperature beta for a whole batch of inputs.
+	///This function calculates the conditional propability distribution p(v|h) with inverse temperature beta for a whole batch of inputs.
 	///Be aware that a change of temperature may occur between sampleHidden and precomputeVisible.
 	void precomputeVisible(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
