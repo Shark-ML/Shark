@@ -52,7 +52,7 @@ private:
 			modePrototype(element, mode);
 			perturbate(element, m_p);
 		}
-		m_data = createDataFromRange(data);
+		m_data = createDataFromRange(data, m_batchSize);
 	}
 	
 public:
@@ -62,8 +62,8 @@ public:
 	///\param dim the dimensionality of the data.
 	///\param modes the number of modes, should be a multiple of 2
 	///\param copies the number of disturbed copies for each mode
-	DistantModes(double p = 0, unsigned dim = 16, unsigned modes=4, unsigned copies =2500)
-		:m_p(p), m_dim(dim), m_modes(modes), m_copies(copies) {
+	DistantModes(double p = 0, unsigned dim = 16, unsigned modes=4, unsigned copies =2500, size_t batchSize=0)
+		:m_p(p), m_dim(dim), m_modes(modes), m_copies(copies), m_batchSize(batchSize) {
 		init();
 	}
 	

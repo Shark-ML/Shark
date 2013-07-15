@@ -343,6 +343,7 @@ ENDIF( OPT_COMPILE_DOCUMENTATION )
 # CMAKE PACKAGING                                                 #
 ###################################################################
 
+
 if(WIN32 AND NOT CYGWIN)
   set(INSTALL_CMAKE_DIR CMake)
 else()

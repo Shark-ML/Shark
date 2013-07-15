@@ -53,6 +53,9 @@ private:
 	bool m_evalMean;
 
 	///\brief Evaluates the input by propagating the visible input to the hidden neurons.
+	///
+	///@param patterns batch of states of visible units
+	///@param outputs batch of (expected) states of hidden units
 	void evalForward(BatchInputType const& state,BatchOutputType& output)const{
 		std::size_t batchSize=state.size1();
 		typename HiddenType::StatisticsBatch statisticsBatch(batchSize,numberOfHN());
@@ -70,6 +73,9 @@ private:
 		}
 	}
 	///\brief Evaluates the input by propagating the hidden input to the visible neurons.
+	///
+	///@param patterns batch of states of hidden units
+	///@param outputs batch of (expected) states of visible units
 	void evalBackward(BatchInputType const& state,BatchOutputType& output)const{
 		std::size_t batchSize = state.size1();
 		typename VisibleType::StatisticsBatch statisticsBatch(batchSize,numberOfVN());
@@ -110,6 +116,8 @@ public:
 	};
 
 	///\brief Sets the parameters of the model.
+	///
+	/// @param newParameters vector of parameters  
  	void setParameterVector(const RealVector& newParameters) {
 		init(newParameters) >> toVector(m_weightMatrix),parameters(m_hiddenNeurons),parameters(m_visibleNeurons);
  	}
@@ -177,6 +185,7 @@ public:
 	///are sampled. 
 	///Instead of the state of the hidden/visible, one often wants the mean of the state \f$ E_{p(h|v)}\left(h\right)\f$. 
 	///By default, the RBM uses the forward evaluation and returns the mean of the state
+	///
 	///@param forward whether the forward view should be used false=backwards
 	///@param evalMean whether the mean state should be returned. false=a sample is returned
 	void evaluationType(bool forward,bool evalMean){
@@ -188,6 +197,18 @@ public:
 		return boost::shared_ptr<State>(new EmptyState());
 	}
 	
+	///\brief Passes information through/samples from an RBM in a forward or backward way. 
+	///
+	///Eval performs its operation based on the evaluation type setted.
+	///There are two ways to pass data through an rbm: either forward, setting the states of the
+	///visible neurons and sample the hidden states or backwards, where the state of the hidden is fixed and the visible
+	///are sampled. 
+	///Instead of the state of the hidden/visible, one often wants the mean of the state \f$ E_{p(h|v)}\left(h\right)\f$. 
+	///By default, the RBM uses the forward evaluation and returns the mean of the state,
+	///but other evaluation modes can be setted by evaluationType().
+	///
+	///@param patterns the batch of (visible or hidden) inputs
+	///@param outputs the batch of (visible or hidden) outputs 
 	void eval(BatchInputType const& patterns,BatchOutputType& outputs)const{
 		if(m_forward){
 			evalForward(patterns,outputs);
@@ -196,6 +217,8 @@ public:
 			evalBackward(patterns,outputs);
 		}
 	}
+
+
 	void eval(BatchInputType const& patterns,BatchOutputType& outputs, State& state)const{
 		eval(patterns,outputs);
 	}
