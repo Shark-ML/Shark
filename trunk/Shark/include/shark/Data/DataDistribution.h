@@ -295,7 +295,7 @@ public:
 		m_outer_radius2 = outer_radius*outer_radius;
 	}
 	
-	void draw(RealVector& input, unsigned int& label)
+	void draw(RealVector& input, unsigned int& label)const
 	{
 		input.resize( m_dimensions );
 		double v, dist;
@@ -365,7 +365,7 @@ public:
 	  m_noiselevel( noise )
 	{ }
 	
-	void draw(RealVector& input, unsigned int& label)
+	void draw(RealVector& input, unsigned int& label)const
 	{
 		input.resize( 2 );
 		double x,y;
