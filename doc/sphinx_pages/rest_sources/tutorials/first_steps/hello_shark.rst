@@ -20,6 +20,7 @@ namespace for convenience. We will also need the header for importing CSV files:
     #include <shark/Data/Csv.h>
     #include <shark/Algorithms/Trainers/LDA.h>
     using namespace shark;
+    using namespace std;   
 
 Data preparation
 %%%%%%%%%%%%%%%%
@@ -96,8 +97,8 @@ losses and error functions, which will be introduced in the next tutorials.
 In order to print the results (do not forget to include ``iostream``), issue::
 
     cout << "RESULTS: " << endl;
-    cout << "======== " << endl << endl;
-    cout << "test data size: " << test.size() << endl;
+    cout << "========\n" << endl;
+    cout << "test data size: " << test.numberOfElements()<< endl;
     cout << "correct classification: " << correct << endl;
     cout << "error rate: " << 1.0 - double(correct)/test.numberOfElements() << endl;
 
