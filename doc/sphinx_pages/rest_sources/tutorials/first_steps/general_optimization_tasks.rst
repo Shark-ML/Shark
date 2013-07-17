@@ -33,8 +33,8 @@ The Shark model also provides a way to calculate various derivatives. For more
 information on Shark models, optimization, and trainers, see the concept
 tutorial :doc:`../concepts/optimization/optimizationtrainer`. Other components
 relevant to task-specific optimization tasks are described in the following. The
-code for this example can be found at
-:download:`regressionTutorial.cpp <../../../../../examples/Supervised/regressionTutorial.cpp>`
+code for this example can be found in
+:download:`regressionTutorial.cpp <../../../../../examples/Supervised/regressionTutorial.cpp>`.
 
 
 
