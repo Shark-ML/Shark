@@ -125,22 +125,18 @@ cross-validation error by instantiating :doxy:`CrossValidationError` :
 
 	const unsigned int K = 5;
  
-	ZeroOneLoss<unsigned int, RealVector> loss;
-	createCVSameSizeBalanced(dataTrain, K);
-	CrossValidationError<RealVector, RealVector, unsigned int> cvError(dataTrain,
-									   &trainer,
-									   &svm,
-									   &trainer,
-									   &loss,
-									   K);
+        ZeroOneLoss<unsigned int, RealVector> loss;
+	CVFolds<ClassificationDataset> folds = createCVSameSizeBalanced(dataTrain, N);
+	CrossValidationError<KernelExpansion<RealVector>, unsigned int> cvError(
+               folds, &trainer, &svm, &trainer, &loss
+	);
 
-The first line sets defines the number of folds. Then we define the
+The first line sets the number of folds. Then we define the
 basic error measure underlying the cross-validation error, here the
 standard 0-1 loss. After that we split the available training data
 into K folds using the function :doxy:`createCVSameSizeBalanced` from
 ``Data/CVDatasetTools.h``.  The template arguments of
-:doxy:`CrossValidationError` specify that the input data points are
-real vectors, the output of the models are real vectors, and that the
+:doxy:`CrossValidationError` specify the model and that the
 given labels are unsigned integers (encoding classes).  The first and
 the last two parameters of the constructor are clear.  First we have
 to pass the training data to the :doxy:`CrossValidationError`.  The
