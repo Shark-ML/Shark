@@ -192,7 +192,7 @@ void CARTTrainer::measureStrenght(SplitMatrixType& splitMatrix, size_t nodeId, s
 }
 
 //Classification case
-CARTTrainer::SplitMatrixType CARTTrainer::buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<size_t, size_t>& cAbove, size_t nodeId ){
+CARTTrainer::SplitMatrixType CARTTrainer::buildTree(const AttributeTables& tables, ClassificationDataset const& dataset, boost::unordered_map<size_t, size_t>& cAbove, size_t nodeId ){
 	std::cout<<nodeId<<std::endl;
 	//Construct split matrix
 	ModelType::SplitInfo splitInfo;
