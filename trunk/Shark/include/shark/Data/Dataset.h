@@ -420,10 +420,18 @@ public:
 	}
 
 	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
+	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
 	virtual void shuffle(){
-		DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
-		std::random_shuffle(m_data.elemBegin(),m_data.elemEnd(),uni);
-	}
+	DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
+		//~ boost::random_shuffle(elements(),uni);
+		using namespace std;
+		typename base_type::element_range::iterator start = this->elements().begin();
+		typename base_type::element_range::iterator end = this->elements().end();
+		typename base_type::element_range::iterator next = start;
+		for (std::size_t index = 2; ++next != end; ++index){
+		    swap(*next, *(start + uni(index)));
+		}
+	} 
 };
 
 ///
@@ -631,8 +639,15 @@ public:
 	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
 	virtual void shuffle(){
 		DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
-		boost::random_shuffle(elements(),uni);
-	}
+		//~ boost::random_shuffle(elements(),uni);
+		using namespace std;
+		typename element_range::iterator start = elements().begin();
+		typename element_range::iterator end = elements().end();
+		typename element_range::iterator next = start;
+		for (std::size_t index = 2; ++next != end; ++index){
+		    swap(*next, *(start + uni(index)));
+		}
+	} 
 
 	void splitBatch(std::size_t batch, std::size_t elementIndex){
 		m_data.splitBatch(batch,elementIndex);
