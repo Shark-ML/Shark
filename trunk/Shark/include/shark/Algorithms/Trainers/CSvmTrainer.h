@@ -39,6 +39,7 @@
 #include <shark/Algorithms/QP/BoxConstrainedProblems.h>
 #include <shark/Algorithms/QP/SvmProblems.h>
 #include <shark/Algorithms/QP/QpBoxLinear.h>
+#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 
 namespace shark {
 
@@ -105,7 +106,7 @@ public:
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	//! \param  computeDerivative  should the derivative of b with respect to C be computed?
 	CSvmTrainer(KernelType* kernel, double C, bool unconstrained = false, bool computeDerivative = true)
-	: base_type(kernel, C, unconstrained), m_computeDerivative(computeDerivative)
+	: base_type(kernel, C, unconstrained), m_computeDerivative(computeDerivative), m_useIterativeBiasComputation(false)
 	{ }
 	
 	//! Constructor
@@ -114,12 +115,21 @@ public:
 	//! \param  positiveC    regularization parameter of the positive class (label 1)
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	CSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool unconstrained = false)
-	: base_type(kernel,negativeC, positiveC, unconstrained), m_computeDerivative(false)
+	: base_type(kernel,negativeC, positiveC, unconstrained), m_computeDerivative(false), m_useIterativeBiasComputation(false)
 	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "CSvmTrainer"; }
+	
+	void setUseIterativeBiasComputation(bool state){
+		m_useIterativeBiasComputation = state;
+	}
+	
+	/// for the rare case that there are only bounded SVs and no free SVs, this gives access to the derivative of b w.r.t. C for external use. Derivative w.r.t. C is last.
+	RealVector const& get_db_dParams() {
+		return m_db_dParams;
+	}
 
 
 	/// \brief Train the C-SVM.
@@ -149,16 +159,11 @@ public:
 
 	}
 
-	/// for the rare case that there are only bounded SVs and no free SVs, this gives access to the derivative of b w.r.t. C for external use. Derivative w.r.t. C is last.
-	RealVector const& get_db_dParams() {
-		return m_db_dParams;
-	}
-
-protected:
+private:
 	
 	template<class SVMProblemType>
 	void optimize(KernelExpansion<InputType>& svm, SVMProblemType& svmProblem, LabeledData<InputType, unsigned int> const& dataset){
-		if (svm.hasOffset())
+		if (svm.hasOffset() && !m_useIterativeBiasComputation)
 		{
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 			ProblemType problem(svmProblem,base_type::m_shrinking);
@@ -173,12 +178,108 @@ protected:
 			ProblemType problem(svmProblem,base_type::m_shrinking);
 			QpSolver< ProblemType > solver(problem);
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+			
+			
+			//iteratively solve for the bias if necessary
+			if(svm.hasOffset()){
+				double bias = 0;//current bias value
+				double stepMultiplier = 1;//current length of step
+				double alphaSum = 0;//gradient at current position
+				for(std::size_t i = 0; i != problem.dimensions(); ++i){
+					alphaSum+= problem.alpha(i);
+				}
+				
+				double epsilon = base_type::stoppingCondition().minAccuracy;
+				do{
+					//take step in gradient direction
+					double signAlphaSum = alphaSum > 0? 1:-1;
+					double deltaBias = signAlphaSum*stepMultiplier;
+					//~ double deltaBias = findOptimalBiasStep(bias,problem,dataset);
+					bias += deltaBias;
+					
+					//update problem using the new estimate for the bias and solve it
+					for(std::size_t i = 0; i != problem.dimensions(); ++i){
+						problem.setLinear(i,problem.linear(i)-deltaBias);
+					}
+					solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+					//check whether the step was beneficial
+					double newAlphaSum = 0;
+					for(std::size_t i = 0; i != problem.dimensions(); ++i){
+						newAlphaSum+= problem.alpha(i);
+					}
+					//prolong steps when they are in the same direction
+					if(newAlphaSum*alphaSum > 0){
+						stepMultiplier *= 1.2;
+						alphaSum = newAlphaSum;
+					}
+					//it is not as bad when we overstep the optimum but we reduce step size
+					else if(sqr(alphaSum) > sqr(newAlphaSum))
+					{
+						stepMultiplier *=0.5;
+						alphaSum = newAlphaSum;
+					}
+					else//backtrack when steps lead to worse performance
+					{
+						stepMultiplier *=0.5;
+						bias -= deltaBias;
+						for(std::size_t i = 0; i != problem.dimensions(); ++i){
+							problem.setLinear(i,problem.linear(i)+deltaBias);
+						}
+					}
+					
+					
+				}while(stepMultiplier > epsilon);
+				svm.offset(0) = bias; 
+			}
 			column(svm.alpha(),0) = problem.getUnpermutedAlpha();
+			
 		}
 	}
 	RealVector m_db_dParams; ///< in the rare case that there are only bounded SVs and no free SVs, this will hold the derivative of b w.r.t. the hyperparameters. Derivative w.r.t. C is last.
 
 	bool m_computeDerivative;
+	bool m_useIterativeBiasComputation;
+	
+	template<class SVMProblemType>
+	double findOptimalBiasStep(double bias, SVMProblemType const& problem, LabeledData<InputType, unsigned int> const& dataset){
+		double stepLength = 0.1;
+		double deltaBias = 0;
+		int violatingLabelSum = 0;
+		for(std::size_t i = 0; i != problem.dimensions(); ++i){
+			std::size_t index = problem.permutation(i);
+			double g_i = problem.gradient(i);
+			double y_i = dataset.element(index).label == 0 ? -1:1;
+			if( -y_i *g_i < 0)
+				violatingLabelSum += y_i;
+		}
+		while (stepLength > 1.e-4 && violatingLabelSum != 0){
+			int sign = violatingLabelSum < 0 ? -1:1;
+			deltaBias += sign*stepLength;
+			//compute gradient at next step
+			int newViolatingLabelSum = 0;
+			for(std::size_t i = 0; i != problem.dimensions(); ++i){
+				std::size_t index = problem.permutation(i);
+				double g_i = problem.gradient(i);
+				double y_i = dataset.element(index).label == 0 ? -1:1;
+				if( -y_i *(g_i - deltaBias) < 0)
+					newViolatingLabelSum += y_i;
+			}
+			//rprop: only take steps which are beneficial and adapt step size after good steps.
+			if(violatingLabelSum*newViolatingLabelSum > 0){
+				stepLength *= 1.2;
+			}
+			else if(std::abs(newViolatingLabelSum)< std::abs(violatingLabelSum)){
+				stepLength *= 0.8;
+				//violatingLabelSum = newViolatingLabelSum;
+			}
+			else{
+				//deltaBias -= sign*stepLength;
+				stepLength *= 0.5;
+			}
+			violatingLabelSum = newViolatingLabelSum;
+		}
+		return deltaBias;
+	}
 
 	template<class Problem>
 	double computeBias(Problem const& problem, LabeledData<InputType, unsigned int> const& dataset){
@@ -304,6 +405,114 @@ public:
 		RealMatrix w(1, dim, 0.0);
 		column(w, 0) = solver.solve(C(), m_stoppingcondition, &m_solutionproperties, m_verbosity > 0);
 		model.setStructure(w);
+	}
+};
+
+
+template <class InputType, class CacheType = float>
+class SquaredHingeCSvmTrainer : public AbstractSvmTrainer<InputType, unsigned int>
+{
+public:
+	typedef CacheType QpFloatType;
+
+	typedef RegularizedKernelMatrix<InputType, QpFloatType> KernelMatrixType;
+	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
+	typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
+
+	typedef AbstractModel<InputType, RealVector> ModelType;
+	typedef AbstractKernelFunction<InputType> KernelType;
+	typedef AbstractSvmTrainer<InputType, unsigned int> base_type;
+
+	//! Constructor
+	//! \param  kernel         kernel function to use for training and prediction
+	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
+	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver??
+	SquaredHingeCSvmTrainer(KernelType* kernel, double C, bool unconstrained = false)
+	: base_type(kernel, C, unconstrained)
+	{ }
+	
+	//! Constructor
+	//! \param  kernel         kernel function to use for training and prediction
+	//! \param  negativeC   regularization parameter of the negative class (label 0)
+	//! \param  positiveC    regularization parameter of the positive class (label 1)
+	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
+	SquaredHingeCSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool unconstrained = false)
+	: base_type(kernel,negativeC, positiveC, unconstrained)
+	{ }
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SquaredHingeCSvmTrainer"; }
+
+	/// \brief Train the C-SVM.
+	void train(KernelExpansion<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
+	{
+		SHARK_CHECK(svm.outputSize() == 1, "[CSvmTrainer::train] wrong number of outputs in the kernel expansion");
+		SHARK_CHECK(numberOfClasses(dataset) == 2, "[CSvmTrainer::train] trainer can only solve binary problems");
+		
+		svm.setKernel(base_type::m_kernel);
+		svm.setBasis(dataset.inputs());
+		
+		RealVector diagonalModifier(dataset.numberOfElements(),0.5/base_type::m_regularizers(0));
+		if(base_type::m_regularizers.size() != 1){
+			for(std::size_t i = 0; i != diagonalModifier.size();++i){
+				diagonalModifier(i) = 0.5/base_type::m_regularizers(dataset.element(i).label);
+			}
+		}
+		
+		KernelMatrixType km(*base_type::m_kernel, dataset.inputs(),diagonalModifier);
+		if (QpConfig::precomputeKernel())
+		{
+			PrecomputedMatrixType matrix(&km);
+			optimize(svm,matrix,diagonalModifier,dataset);
+		}
+		else
+		{
+			CachedMatrixType matrix(&km);
+			optimize(svm,matrix,diagonalModifier,dataset);
+		}
+		base_type::m_accessCount = km.getAccessCount();
+		if (base_type::sparsify()) svm.sparsify();
+
+	}
+
+private:
+	
+	template<class Matrix>
+	void optimize(KernelExpansion<InputType>& svm, Matrix& matrix,RealVector const& diagonalModifier, LabeledData<InputType, unsigned int> const& dataset){
+		typedef CSVMProblem<Matrix> SVMProblemType;
+		SVMProblemType svmProblem(matrix,dataset.labels(),1e100);
+		if (svm.hasOffset())
+		{
+			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
+			ProblemType problem(svmProblem,base_type::m_shrinking);
+			QpSolver< ProblemType > solver(problem);
+			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+			column(svm.alpha(),0)= problem.getUnpermutedAlpha();
+			//compute the bias
+			double sum = 0.0;
+			std::size_t freeVars = 0;
+			for (std::size_t i=0; i < problem.dimensions(); i++)
+			{
+				if(problem.alpha(i) > problem.boxMin(i) && problem.alpha(i) < problem.boxMax(i)){
+					sum += problem.gradient(i) - problem.alpha(i)*2*diagonalModifier(i);
+					freeVars++;
+				}
+			}
+			if (freeVars > 0)
+				svm.offset(0) =  sum / freeVars;		//stabilized (averaged) exact value
+			else
+				svm.offset(0) = 0;
+		}
+		else
+		{
+			typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
+			ProblemType problem(svmProblem,base_type::m_shrinking);
+			QpSolver< ProblemType > solver(problem);
+			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
+			column(svm.alpha(),0) = problem.getUnpermutedAlpha();
+			
+		}
 	}
 };
 

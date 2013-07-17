@@ -39,12 +39,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-
-#define SHARK_COUNT_KERNEL_LOOKUPS //in this example, we want to count the kernel lookups
-
-
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/Models/Kernels/LinearKernel.h>
+#include <shark/Models/Kernels/GaussianRbfKernel.h>
+#include <shark/Data/DataDistribution.h>
 
 
 using namespace shark;
@@ -52,7 +50,7 @@ using namespace shark;
 // This test case consists of training SVMs with
 // analytically computable solution. This known
 // solution is used to validate the trainer.
-BOOST_AUTO_TEST_CASE( CSVM_TRAINER_TEST )
+BOOST_AUTO_TEST_CASE( CSVM_TRAINER_SIMPLE_TEST )
 {
 	// simple 5-point dataset
 	std::vector<RealVector> input(5);
@@ -154,4 +152,95 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_TEST )
 		BOOST_CHECK_SMALL(param(4) - 0.0125, 1e-6);
 		BOOST_CHECK_SMALL(param(5) + 0.5, 1e-6);
 	}
+	
+	// hard-margin training with squared hinge loss
+	{
+		std::cout << "Squared Hinge Loss C-SVM hard margin with shrinking" << std::endl;
+		LinearKernel<> kernel;
+		KernelExpansion<RealVector> svm(true);
+		SquaredHingeCSvmTrainer<RealVector> trainer(&kernel, 1e100);
+		trainer.sparsify() = false;
+		trainer.shrinking() = true;
+		trainer.stoppingCondition().minAccuracy = 1e-8;
+		trainer.train(svm, dataset);
+		RealVector param = svm.parameterVector();
+		BOOST_REQUIRE_EQUAL(param.size(), 6u);
+		std::cout << "alpha: "
+			<< param(0) << " "
+			<< param(1) << " "
+			<< param(2) << " "
+			<< param(3) << " "
+			<< param(4) << std::endl;
+		std::cout << "    b: " << param(5) << std::endl;
+		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
+		
+		// test against analytically known solution
+		BOOST_CHECK_SMALL(param(0) + 0.25, 1e-6);
+		BOOST_CHECK_SMALL(param(1) - 0.25, 1e-6);
+		BOOST_CHECK_SMALL(param(2), 1e-6);
+		BOOST_CHECK_SMALL(param(3), 1e-6);
+		BOOST_CHECK_SMALL(param(4), 1e-6);
+		BOOST_CHECK_SMALL(param(5) + 1.0, 1e-6);
+	}
+	
+	// soft-margin training with squared hinge loss
+	{
+		std::cout << "Squared Hinge Loss C-SVM soft margin with shrinking" << std::endl;
+		LinearKernel<> kernel;
+		KernelExpansion<RealVector> svm(true);
+		SquaredHingeCSvmTrainer<RealVector> trainer(&kernel, 0.1);
+		trainer.sparsify() = false;
+		trainer.shrinking() = true;
+		trainer.stoppingCondition().minAccuracy = 1e-8;
+		trainer.train(svm, dataset);
+		RealVector param = svm.parameterVector();
+		BOOST_REQUIRE_EQUAL(param.size(), 6u);
+		std::cout << "alpha: "
+			<< param(0) << " "
+			<< param(1) << " "
+			<< param(2) << " "
+			<< param(3) << " "
+			<< param(4) << std::endl;
+		std::cout << "    b: " << param(5) << std::endl;
+		// test against analytically known solution
+		BOOST_CHECK_SMALL(param(0) + 0.104, 1e-6);
+		BOOST_CHECK_SMALL(param(1) - 0.104, 1e-6);
+		BOOST_CHECK_SMALL(param(2), 1e-6);
+		BOOST_CHECK_SMALL(param(3) + 0.008, 1e-6);
+		BOOST_CHECK_SMALL(param(4) - 0.008, 1e-6);
+		BOOST_CHECK_SMALL(param(5) + 0.48, 1e-6);
+		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
+	}
+}
+
+//compares solving the SVM problem with equality constraint to iteratively finding the optimal bias
+BOOST_AUTO_TEST_CASE( CSVM_TRAINER_ITERATIVE_BIAS_TEST )
+{
+	std::cout << "C-SVM soft margin with iterative bias" << std::endl;
+	CircleInSquare problem(5);
+	ClassificationDataset dataset = problem.generateDataset(1000);
+	
+
+	GaussianRbfKernel<> kernel(2);
+	//LinearKernel<> kernel;
+	CSvmTrainer<RealVector> trainer(&kernel, 10);
+	trainer.sparsify() = false;
+	trainer.shrinking() = true;
+	trainer.stoppingCondition().minAccuracy = 1e-4;
+	
+	//train using both algorithms
+	KernelExpansion<RealVector> svmTruth(true);
+	KernelExpansion<RealVector> svmTest(true);
+	trainer.setUseIterativeBiasComputation(true);
+	trainer.train(svmTest, dataset);
+	trainer.setUseIterativeBiasComputation(false);
+	trainer.train(svmTruth, dataset);
+	
+	//compare bias
+	BOOST_CHECK_CLOSE(svmTest.offset(0),svmTruth.offset(0),1.e-2);
+	ZeroOneLoss<unsigned int, RealVector> loss;
+	std::cout<<loss.eval(dataset.labels(),svmTruth(dataset.inputs()))<<std::endl;
+	std::cout<<loss.eval(dataset.labels(),svmTest(dataset.inputs()))<<std::endl;
+	//~ std::cout<<svmTest.alpha()<<std::endl;
+	//~ std::cout<<svmTruth.alpha()<<std::endl;
 }
