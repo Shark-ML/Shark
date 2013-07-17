@@ -153,7 +153,9 @@ public:
 		m_secondModel->eval(s.intermediateResult, outputs,*s.secondModelState);
 	}
 
+	/// \param patterns Batch of patterns over which derivative is computed
 	/// \param state Internal state (usually returned from eval()) holding the internal states of the concatenated models
+	/// \param gradient Weighted gradient
 	void weightedParameterDerivative(
 		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, RealVector& gradient
 	)const{

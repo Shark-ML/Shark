@@ -1,5 +1,5 @@
 /*!
-*  \file CMSA.cpp
+*  \file DirectSearch/CMSA.cpp
 *
 *  \brief Implements the CMSA.
 *

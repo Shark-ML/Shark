@@ -1,5 +1,5 @@
 /*!
-*  \file CMA.cpp
+*  \file DirectSearch/CMA.cpp
 *
 *  \brief Implements the most recent version of the non-elitist CMA-ES.
 *

@@ -52,7 +52,8 @@ namespace shark {
 /**
  * \brief Implements a probe for profiling and debugging purposes.
  */
-class Probe /** \cond */ : public boost::noncopyable /** \endcond */ {
+class Probe /** \cond */ : public boost::noncopyable 
+/** \endcond */ {
  public:
 
   /** \brief Make the mutex type known to the outside world. */

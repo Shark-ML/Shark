@@ -189,8 +189,8 @@ public:
 	}
 	
 	
-	/// \param state Batch of input patterns
-	/// \param state Outputs corresponding to input batch
+	/// \param inputs Batch of input patterns
+	/// \param outputs Outputs corresponding to input batch
 	/// \param state Internal state (e.g., for passing to derivative computation) of the model
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
 		eval(inputs,outputs);
