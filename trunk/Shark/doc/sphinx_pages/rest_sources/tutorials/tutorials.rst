@@ -89,6 +89,7 @@ Let's start with some classical methods:
 Neural nets:
 
 * :doc:`algorithms/ffnet`
+* :doc:`algorithms/sparse_ae`
 * :doc:`algorithms/extreme_learning_machine`
 * :doc:`algorithms/rbm_module`
 * :doc:`algorithms/binary_rbm`
