@@ -46,14 +46,16 @@ This tutorial will introduce different stopping criteria. As an example,
 we consider a slightly more complex learning task than in
 the previous tutorials, namely classification with a simple feed-forward
 neural network. You can learn more on neural networks in Shark in 
-the :doc:`../algorithms/ffnet` tutorial. 
+the :doc:`../algorithms/ffnet` tutorial. The code for this example can be found in
+:download:`StoppingCriteria.cpp <../../../../../examples/Supervised/StoppingCriteria.cpp>`.
+
 
 We show how to create a trainer for this task which generalizes
 important concepts and saves us manual work. Then, we construct and compare
 three different stopping criteria for that trainer. To this end, we introduce
 the ``AbstractStoppingCriterion``, another interface of Shark. In addition to
 this tutorial, a concept tutorial on :doc:`../concepts/library_design/stopping_criteria` exists, 
-which gives a more detaild explanation about how stopping criteria are implemented in shark.
+which gives a more detailed explanation about how stopping criteria are implemented in shark.
 
 Building blocks & includes
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -61,17 +63,7 @@ Building blocks & includes
 We first list all includes for this tutorial and then motivate their
 usage for each one::
 
-   #include <shark/Data/Csv.h>
-   #include <shark/Models/FFNet.h> //Feed forward neural network class
-   #include <shark/Algorithms/GradientDescent/Rprop.h> //Optimization algorithm
-   #include <shark/ObjectiveFunctions/Loss/CrossEntropy.h> //Loss used for training
-   #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //The real loss for testing.
-   #include <shark/ObjectiveFunctions/ErrorFunction.h> //The usual error function
-   #include <shark/Algorithms/Trainers/OptimizationTrainer.h> // Trainer wrapping iterative optimization
-   #include <shark/Algorithms/StoppingCriteria/MaxIterations.h> //A simple stopping criterion that stops after a fixed number of iterations
-   #include <shark/Algorithms/StoppingCriteria/TrainingError.h> //Stops when the algorithm seems to converge
-   #include <shark/Algorithms/StoppingCriteria/GeneralizationQuotient.h> //Uses the validation error to track the progress
-   #include <shark/Algorithms/StoppingCriteria/ValidatedStoppingCriterion.h> //Adds the validation error to the value of the point
+..sharkcode<Supervised/StoppingCriteria.cpp,includes>
 
 As before, ``Csv.h`` is included for reading in data. The header ``FFNet.h`` is needed
 because we want to train a neural network to distinguish between two classes.
@@ -102,35 +94,17 @@ the entire training process given an ObjectiveFunction, Optimizer, and StoppingC
 Overall, we use the following function to create, train and evaluate our neural
 network under a given stopping criterion::
 
-   template<class T>
-   double experiment(AbstractStoppingCriterion<T> & stoppingCriterion, ClassificationDataset const& trainingset, ClassificationDataset const& testset){
-	//create a feed forward neural network with one layer of 10 hidden neurons and one output for every class
-	FFNet<LogisticNeuron,LinearNeuron> network;
-	network.setStructure(inputDimension(trainingset),10,numberOfClasses(trainingset));
-	initRandomUniform(network,-0.1,0.1);
+..sharkcode<Supervised/StoppingCriteria.cpp,experiment>
 
-	//The Cross Entropy maximises the activation of the cth output neuron compared to all other outputs for a sample with class c.
-	CrossEntropy loss;
-	ErrorFunction<RealVector,unsigned int> errorFunction(&network,&loss);
+To run the experiment, we need to load a dataset and split it into training, validation and test set:
 
-	//we use IRpropPlus for network optimization
-	IRpropPlus optimizer;
-	
-	//create an optimization trainer and train the model
-	OptimizationTrainer<FFNet<LogisticNeuron,LinearNeuron>,unsigned int > trainer(&errorFunction, &optimizer, &stoppingCriterion);
-	trainer.train(network, trainingset);
-	
-	//evaluate the performance on the test set using the classification loss we choose 0.5 as threshold since Logistic neurons have values between 0 and 1.
-	
-	ZeroOneLoss<unsigned int, RealVector> loss01(0.5);
-	Data<RealVector> predictions = network(testset.inputs()); 
-	return loss01(testset.labels(),predictions);
-   }
+..sharkcode<Supervised/StoppingCriteria.cpp,load>
 
 Evaluation
 ++++++++++
 
 Now it is time to load some data and try out different stopping criteria.
+
 
 
 Fixed number of iterations
@@ -142,20 +116,7 @@ The simplest stopping heuristic is halting after a fixed number of iterations.
 trivial functionality for within the framework of an AbstractStoppingCriterion.
 We try out several different numbers of steps::
 
-   ///load the dataset and split into training, validation and test set.
-   ClassificationDataset data;
-   import_csv(data, "data/diabetes.csv",LAST_COLUMN, ",");
-   data.shuffle();
-   ClassificationDataset test = splitAtElement( data, static_cast<std::size_t>( 0.75*data.numberOfElements() ) );
-   ClassificationDataset validation = splitAtElement( data, static_cast<std::size_t>( 0.66*data.numberOfElements() ) );
-
-   MaxIterations<> maxIterations(10);
-   double resultMaxIterations1 = experiment( maxIterations, data,test );
-   maxIterations.setMaxIterations(100);
-   double resultMaxIterations2 = experiment( maxIterations, data,test );
-   maxIterations.setMaxIterations(500);
-   double resultMaxIterations3 = experiment( maxIterations, data,test );
-
+..sharkcode<Supervised/StoppingCriteria.cpp,max_iter>
 
 Progress on training error
 &&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -176,9 +137,7 @@ adapts it step size and and hence is somewhat less vulnerable to these
 problems. After all the groundwork has been done, we can test this
 stopping criterion with only two lines of code::
 
-  TrainingError<> trainingError( 10, 1.e-5 );
-  double resultTrainingError = experiment( trainingError, data, test );
-
+..sharkcode<Supervised/StoppingCriteria.cpp,train_error>
 
 
 Progress on a validation set
@@ -201,17 +160,7 @@ mentioned therein.
 
 In summary, this code uses the progress on a validation set to decide when to stop::
 
-   //create the validation error function
-   FFNet<LogisticNeuron,LogisticNeuron> network;
-   network.setStructure(inputDimension(data),10,numberOfClasses(data));
-   CrossEntropy loss;
-   ErrorFunction<RealVector,unsigned int> validationFunction(&network,&loss);
-   validationFunction.setDataset(validation);
-
-   //create the generalization quotient and use the vValdiatedStoppingCriterion to add validation information using the validation function
-   GeneralizationQuotient<> generalizationQuotient(10,0.1);
-   ValidatedStoppingCriterion validatedLoss(&validationFunction,&generalizationQuotient);
-   double resultGeneralizationQuotient = experiment(validatedLoss,data,test);
+..sharkcode<Supervised/StoppingCriteria.cpp,generalization_quotient>
 
 
 
@@ -220,16 +169,7 @@ Printing the results
 
 Printing all variables of type ``double`` defined in the snippets above, we get
 
-.. code-block:: none
-
-   RESULTS:
-   ========
-
-   10 iterations   : 0.432292
-   100 iterations : 0.276042
-   500 iterations : 0.307292
-   training Error : 0.354167
-   generalization Quotient : 0.338542
+..sharkcode<Supervised/StoppingCriteria.cpp,output>
 
 
 
