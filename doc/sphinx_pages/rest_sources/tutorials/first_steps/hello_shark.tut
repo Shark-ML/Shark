@@ -119,7 +119,7 @@ about these different aspects.
 What next?
 ----------
 
-In the next tutorial we will investigate how :doc:`general_optimization_tasks` are set up, which gives
+In the next tutorial we will investigate how :doc:`./general_optimization_tasks` are set up, which gives
 you a deeper understanding of the main building blocks of Shark.
 
 
