@@ -31,10 +31,21 @@
 using namespace shark;
 using namespace std;
 
-int main() {
+//###begin<load_data>
+int main(int argc, char **argv) {
+	if(argc < 2) {
+		cerr << "usage: " << argv[0] << " (filename)" << endl;
+		exit(EXIT_FAILURE);
+	}
 	// read data
 	ClassificationDataset data;
-	import_csv(data, "data/C.csv", LAST_COLUMN, " ", "#");
+	try {
+		import_csv(data, argv[1], LAST_COLUMN, " ", "#");
+	} 
+	catch (...) {
+		cerr << "unable to read data from file " <<  argv[1] << endl;
+		exit(EXIT_FAILURE);
+	}
 
 	cout << "number of data points: " << data.numberOfElements() << " "
 	     << "number of classes: " << numberOfClasses(data) << " "
@@ -42,6 +53,7 @@ int main() {
 
 	// split data into training and test set
 	ClassificationDataset dataTest = splitAtElement(data,311);
+///###end<load_data>
 
 	// define learning algorithm
 	LDA ldaTrainer;
