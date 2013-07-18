@@ -4,14 +4,27 @@
 using namespace shark;
 //###end<includes>
 
+
 #include <iostream>
 using namespace std;
 
-int main(){
+
+int main(int argc, char **argv){
 	//create a Dataset from the file "quickstartData"
 	//###begin<load_data>
+	if(argc < 2) {
+		cerr << "usage: " << argv[0] << " (filename)" << endl;
+		exit(EXIT_FAILURE);
+	}
+
 	ClassificationDataset data;
-	import_csv(data, "data/quickstartData.csv", LAST_COLUMN, " ");
+	try {
+		import_csv(data, argv[1], LAST_COLUMN, " ", "#");
+	} 
+	catch (...) {
+		cerr << "unable to read data from file " <<  argv[1] << endl;
+		exit(EXIT_FAILURE);
+	}
 	//###end<load_data>
 	
 	//create a test and training partition of the data
