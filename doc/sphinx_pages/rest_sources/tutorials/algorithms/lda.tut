@@ -34,23 +34,7 @@ protein.  After downloading the data :download:`C.csv <../../../../../examples/S
 can read, inspect and split the data as described in the
 :doc:`nearestNeighbor` tutorial: ::
 
-  #include <shark/Data/Csv.h>
-  #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
-
-  using namespace shark;
-  using namespace std;
-
-
-  // read data
-  ClassificationDataset data;
-  import_csv(data, "C.csv", LAST_COLUMN, " ", "#");
-
-  cout << "number of data points: " << data.size() << " " 
-       << "number of classes: " << numberOfClasses(data) << " " 
-       << "input dimension: " << inputDimension(data) << endl;
-
-   // split testing data from the set
-   ClassificationDataset dataTest = splitAtElement(data,311);
+..sharkcode<Supervised/LDATutorial.cpp,load_data>
 
 Model and learning algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

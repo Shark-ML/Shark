@@ -122,7 +122,7 @@ protected:
     RealVector hist(boost::unordered_map<std::size_t, std::size_t> countMatrix);
 
     ///Regression functions
-    SplitMatrixType buildTree(AttributeTables const& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId, std::size_t trainSize);
+    SplitMatrixType buildTree(const AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId, std::size_t trainSize);
     ///Calculates the total sum of squares
     double totalSumOfSquares(const std::vector<RealVector>& labels, std::size_t start, std::size_t length, const RealVector& sumLabel);
     ///Calculates the mean of a vector of labels

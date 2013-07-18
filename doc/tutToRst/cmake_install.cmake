@@ -1,4 +1,4 @@
-# Install script for directory: /home/ulfi/Shark/doc/tut2rst
+# Install script for directory: /Users/igel/Shark/doc/tutToRst
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -26,9 +26,4 @@ IF(NOT CMAKE_INSTALL_COMPONENT)
     SET(CMAKE_INSTALL_COMPONENT)
   ENDIF(COMPONENT)
 ENDIF(NOT CMAKE_INSTALL_COMPONENT)
-
-# Install shared libraries without execute permission?
-IF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
-  SET(CMAKE_INSTALL_SO_NO_EXE "0")
-ENDIF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 
