@@ -17,14 +17,7 @@ found in :download:`quickstartTutorial.cpp
 In order to access the LDA, we include its header file and import the Shark
 namespace for convenience. We will also need the header for importing CSV files::
 
-<<<<<<< HEAD:doc/sphinx_pages/rest_sources/tutorials/first_steps/hello_shark.rst
-    #include <shark/Data/Csv.h>
-    #include <shark/Algorithms/Trainers/LDA.h>
-    using namespace shark;
-    using namespace std;   
-=======
 ..sharkcode<Supervised/quickstartTutorial.cpp,includes>
->>>>>>> added automatic code snippet inclusion to documentation:doc/sphinx_pages/rest_sources/tutorials/first_steps/hello_shark.tut
 
 Data preparation
 %%%%%%%%%%%%%%%%
