@@ -20,6 +20,12 @@
 /SharkConfig
 /*.dsw
 /share
+SharkConfig.cmake
+SharkConfigVersion.cmake
+SharkTargets.cmake
+
+/Testing
+/build
 
 # /Test/
 /Test/test_output
@@ -209,6 +215,9 @@
 # /doc/sphinx_pages/
 /doc/sphinx_pages/conf.py
 /doc/sphinx_pages/build
+
+# /doc/sphinx_pages/rest_sources
+doc/sphinx_pages/rest_sources/tutorials/first_steps/hello_shark.rst
 
 # /examples/
 /examples/CMakeFiles
