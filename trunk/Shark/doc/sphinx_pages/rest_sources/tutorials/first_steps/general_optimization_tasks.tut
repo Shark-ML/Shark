@@ -44,11 +44,7 @@ Data preparation
 
 For this tutorial, we need the following include files::
 
-   #include <shark/Data/Csv.h>
-   #include <shark/Algorithms/GradientDescent/CG.h>
-   #include <shark/ObjectiveFunctions/ErrorFunction.h>
-   #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
-   #include <shark/Models/LinearModel.h>
+..sharkcode<Supervised/regressionTutorial.cpp,includes>
 
 We first write a short function which automates the data loading procedure.
 In contrast to the last tutorial, this time we load a supervised learning data
@@ -56,23 +52,14 @@ set from two files. The first one stores input points, the other the correspondi
 outputs. In the next step we bind the two loaded data items together to create
 our ``RegressionDataset`` (which again is a simple typedef for ``LabeledData<RealVector, RealVector>``)::
 
-  RegressionDataset loadData( const std::string& dataFile, const std::string& labelFile ) {
-    Data<RealVector> inputs;
-    Data<RealVector> labels;
-    import_csv( inputs, dataFile, " " );
-    import_csv( labels, labelFile, " " );
-    RegressionDataset data( inputs, labels );
-    return data;
-  }
-
+..sharkcode<Supervised/regressionTutorial.cpp,load>
 
 Now we can load the data using this function, and then create a training and test set
 from it. We will again use 80% for training and 20% for testing. As in the previous
 tutorial, we call  ``splitAtElement``, which splits the last part from our dataset
 into the test set. Our original data set from then on only contains the training data::
 
-  RegressionDataset data = loadData( "data/regressionInputs.csv", "data/regressionLabels.csv" );
-  RegressionDataset test = splitAtElement( data, 0.8*data.numberOfElements() );
+..sharkcode<Supervised/regressionTutorial.cpp,split>
 
 
 
@@ -88,7 +75,7 @@ it with the proper input and output sizes. In our example data set, both
 dimensions have size 1. But since this changes with every data set, we just ask
 the dataset for the correct values: ::
 
-   LinearModel<> model( inputDimension(data), labelDimension(data) );
+..sharkcode<Supervised/regressionTutorial.cpp,model>
 
 The first argument is the dimensionality of the data points and the second parameter
 that of the outputs. An affine linear model is a model of the form
@@ -115,9 +102,7 @@ data set. Note that the code below could with minor modifications also be used
 to circumvent the slightly longer manual for-loop we wrote in the previous
 tutorial to evaluate our function on the test set after training. ::
 
-   SquaredLoss<> loss;
-   ErrorFunction<RealVector, RealVector> errorFct( &model, &loss );
-   errorFct.setDataset( data );
+..sharkcode<Supervised/regressionTutorial.cpp,error_function>
 
 The ``ErrorFunction`` is an instance of ``AbstractObjectiveFunction`` -- see the
 concept tutorial on :doc:`../concepts/library_design/objective_functions` for details.
@@ -161,45 +146,32 @@ general-purpose gradient-based method.
 
 
 To optimize the above instantiated model under the above defined objective function
-``ErrorFct``, we need an optimizer. For our regression task, a conjugate gradient
+``ErrorFunction``, we need an optimizer. For our regression task, a conjugate gradient
 method is just fine. Also, training for 100 iterations should be more than sufficient,
 even for more complex data::
 
-   CG optimizer;
-   optimizer.init( errorFct );
-   for(int i = 0; i != 100; ++i)
-   {
-      optimizer.step( errorFct );
-   }
-   double trainingError = optimizer.solution().value;
-
-
+..sharkcode<Supervised/regressionTutorial.cpp,optimize>
 
 Evaluation
 %%%%%%%%%%
 
 
 Again, we want to evaluate the model on a test set and print all results. We could
-re-use ``errorFct`` for this by changing the dataset to the test set, but often
+re-use ``errorFunction`` for this by changing the dataset to the test set, but often
 it is more convenient to use the loss directly. We let the model evaluate the whole
 test set at once and ask the loss how big the error for this set of predictions is::
 
-   model.setParameterVector( optimizer.solution().point );
-   Data<RealVector> predictions = model( test.inputs() );
-   double testError = loss( test.labels(), predictions );
+..sharkcode<Supervised/regressionTutorial.cpp,test_error>
 
 or, the aforementioned alternative::
 
-  errorFct.setDataset(test);
-  double testError = errorFct.eval(optimizer.solution().point);
+  errorFunction.setDataset(test);
+  double testError = errorFunction.eval(optimizer.solution().point);
 
 Let us see the results (do not forget to include the ``iostream`` header
 for this and ``using namespace std;``) ::
 
-   cout << "RESULTS: " << endl;
-   cout << "======== \n" << endl;
-   cout << "training error " << trainingError << endl;
-   cout << "test error: " << testError << endl;
+..sharkcode<Supervised/regressionTutorial.cpp,output>
 
 The result should read
 
