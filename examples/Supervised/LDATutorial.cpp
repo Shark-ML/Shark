@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
 	ZeroOneLoss<unsigned int> loss;
 ///###end<output_and_loss>
 
-///###end<eval>
+///###begin<eval>
 	prediction = lda(data.inputs());
 	cout << "LDA on training set accuracy: " << 1. - loss(data.labels(), prediction) << endl;
 	prediction = lda(dataTest.inputs());
