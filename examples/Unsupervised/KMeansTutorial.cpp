@@ -34,10 +34,20 @@
 using namespace shark;
 using namespace std;
 
-int main() {
+int main(int argc, char **argv) {
+	if(argc < 2) {
+		cerr << "usage: " << argv[0] << " (filename)" << endl;
+		exit(EXIT_FAILURE);
+	}
 	// read data
 	UnlabeledData<RealVector> data;
-	import_csv(data, "data/faithful.csv", " ");
+	try {
+		import_csv(data, argv[1], " ");
+	} 
+	catch (...) {
+		cerr << "unable to read data from file " <<  argv[1] << endl;
+		exit(EXIT_FAILURE);
+	}
 	std::size_t elements = data.numberOfElements();
 
 	// write statistics of input data

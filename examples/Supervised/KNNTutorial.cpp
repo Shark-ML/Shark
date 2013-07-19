@@ -40,13 +40,21 @@ using namespace shark;
 using namespace std;
 //###end<dataheader>
 
-int main() {
-	const unsigned int K = 1; // number of neighbors for kNN
-
-	// read data
 //###begin<dataimport>
+int main(int argc, char **argv) {
+	if(argc < 2) {
+		cerr << "usage: " << argv[0] << " (filename)" << endl;
+		exit(EXIT_FAILURE);
+	}
+	// read data
 	ClassificationDataset data;
-	import_csv(data, "data/C.csv", LAST_COLUMN, " ", "#");
+	try {
+		import_csv(data, argv[1], LAST_COLUMN, " ", "#");
+	} 
+	catch (...) {
+		cerr << "unable to read data from file " <<  argv[1] << endl;
+		exit(EXIT_FAILURE);
+	}
 //###end<dataimport>
 
 //###begin<inspectdata>
@@ -57,7 +65,9 @@ int main() {
 
 	// split data into training and test set
 //###begin<splitdata>
-	ClassificationDataset dataTest = splitAtElement(data,311);
+	ClassificationDataset dataTest = splitAtElement(data, .5 * data.numberOfElements());
+	cout << "training data points: " << data.numberOfElements() << endl;
+	cout << "test data points: " << dataTest.numberOfElements() << endl;
 //###end<splitdata>
 
 	//create a binary search tree and initialize the search algorithm - a fast tree search
@@ -69,6 +79,7 @@ int main() {
 //###end<treeNN>
 	//instantiate the classifier
 //###begin<NNC>
+	const unsigned int K = 1; // number of neighbors for kNN
 	NearestNeighborClassifier<RealVector> KNN(&algorithm,K);
 //###end<NNC>
 
