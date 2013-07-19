@@ -20,15 +20,14 @@
  * along with this library; if not, see <http://www.gnu.org/licenses/>.
  *  
  */
-
+//###begin<includes>
 #include <shark/Core/Probe.h>
-
-#include <shark/Algorithms/DirectSearch/Experiments/Experiment.h>
-
-#include <shark/Algorithms/DirectSearch/InterruptibleAlgorithmRunner.h>
 #include <shark/Algorithms/DirectSearch/CMA.h>
-
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
+//###end<includes>
+
+using namespace shark;
+using namespace std;
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -63,8 +62,8 @@ namespace shark {
 
 	    try {
 		m_covarianceMatrix = boost::get< RealMatrix >( value );
-		shark::eigensymm( m_covarianceMatrix, m_eigenVectors, m_eigenValues );
-		m_condition = *std::max_element( m_eigenValues.begin(), m_eigenValues.end() ) / *std::min_element( m_eigenValues.begin(), m_eigenValues.end() );
+		eigensymm( m_covarianceMatrix, m_eigenVectors, m_eigenValues );
+		m_condition = *max_element( m_eigenValues.begin(), m_eigenValues.end() ) / *min_element( m_eigenValues.begin(), m_eigenValues.end() );
 
 		
 
@@ -84,46 +83,47 @@ namespace shark {
 
 int main( int argc, char ** argv ) {
 
-    // Results go here.
-    std::ofstream results( "results.txt" );
-    // Plotting commands (gnuplot) go here.
-    std::ofstream plot( "plot.txt" );
-    plot << "set key outside bottom center" << std::endl;
-    plot << "set zeroaxis" << std::endl;
-    plot << "set border 0" << std::endl;
-    plot << "set xrange [-4:4]" << std::endl;
-    plot << "set yrange [-4:4]" << std::endl;
-    // Adjust the floating-point format to scientific and increase output precision.
-    results.setf( std::ios_base::scientific );
-    results.precision( 10 );
-    plot.setf( std::ios_base::scientific );
-    plot.precision( 10 );
-	
-    // Instantiate both the problem and the optimizer.
-    shark::Himmelblau hb;
-    hb.setNumberOfVariables( 2 );
-    shark::CMA cma;
+	// Results go here.
+	ofstream results( "results.txt" );
+	// Plotting commands (gnuplot) go here.
+	ofstream plot( "plot.txt" );
+	plot << "set key outside bottom center" << endl;
+	plot << "set zeroaxis" << endl;
+	plot << "set border 0" << endl;
+	plot << "set xrange [-4:4]" << endl;
+	plot << "set yrange [-4:4]" << endl;
+	// Adjust the floating-point format to scientific and increase output precision.
+	results.setf( ios_base::scientific );
+	results.precision( 10 );
+	plot.setf( ios_base::scientific );
+	plot.precision( 10 );
 
-    // Instantiate the value store and get access to probes.
-    shark::Store valueStore;
-    shark::ProbeManager::ProbePtr populationMeanProbe = cma[ "PopulationMean" ];
-    if( populationMeanProbe )
-	populationMeanProbe->signalUpdated().connect( boost::bind( &shark::Store::operator(), boost::ref( valueStore ), _1, _2 ) );
-    shark::ProbeManager::ProbePtr sigmaProbe = cma[ "Sigma" ];
-    if( sigmaProbe )
-	sigmaProbe->signalUpdated().connect( boost::bind( &shark::Store::operator(), boost::ref( valueStore ), _1, _2 ) );
-    shark::ProbeManager::ProbePtr covarianceMatrixProbe = cma[ "CovarianceMatrix" ];
-    if( covarianceMatrixProbe )
-	covarianceMatrixProbe->signalUpdated().connect( boost::bind( &shark::Store::operator(), boost::ref( valueStore ), _1, _2 ) );
-
-    // Initialize the optimizer for the objective function instance.
-    cma.init( hb );
-	
-    // Iterate the optimizer until a solution of sufficient quality is found.
-    do{
+	// Instantiate both the problem and the optimizer.
+	//###begin<init>
+	Himmelblau hb;
+	hb.setNumberOfVariables( 2 );
+	CMA cma;
+	cma.init( hb );
+	//###end<init>
+	// Instantiate the value store and get access to probes.
+	//###begin<probes>
+	Store valueStore;
+	ProbeManager::ProbePtr populationMeanProbe = cma[ "PopulationMean" ];
+	if( populationMeanProbe )
+		populationMeanProbe->signalUpdated().connect( boost::bind( &Store::operator(), boost::ref( valueStore ), _1, _2 ) );
+	ProbeManager::ProbePtr sigmaProbe = cma[ "Sigma" ];
+	if( sigmaProbe )
+		sigmaProbe->signalUpdated().connect( boost::bind( &Store::operator(), boost::ref( valueStore ), _1, _2 ) );
+	ProbeManager::ProbePtr covarianceMatrixProbe = cma[ "CovarianceMatrix" ];
+	if( covarianceMatrixProbe )
+		covarianceMatrixProbe->signalUpdated().connect( boost::bind( &Store::operator(), boost::ref( valueStore ), _1, _2 ) );
+	//###end<probes>
+	// Iterate the optimizer until a solution of sufficient quality is found.
+	//###begin<train>
+	do{
 
 	cma.step( hb );
-	
+
 	double sigmaX = valueStore.m_eigenValues( 0 );
 	double sigmaY = valueStore.m_eigenValues( 1 );
 	// Print error ellipses for covariance matrices.
@@ -134,27 +134,28 @@ int main( int argc, char ** argv ) {
 	     << valueStore.m_currentPopulationMean( 1 ) << " size "
 	     << sigmaX << ","
 	     << sigmaY << " angle " 
-	     << 360 + 360 * ::atan( valueStore.m_eigenVectors( 0, 1 ) / valueStore.m_eigenVectors( 0, 0 ) ) * 1./(2*M_PI) << " front fillstyle empty border 2" << std::endl;
+	     << 360 + 360 * ::atan( valueStore.m_eigenVectors( 0, 1 ) / valueStore.m_eigenVectors( 0, 0 ) ) * 1./(2*M_PI) << " front fillstyle empty border 2" << endl;
 
 	// Report information on the optimizer state and the current solution to the console.
-	results << hb.evaluationCounter() << " "					// Column 1
-		<< valueStore.m_condition << " "					// Column 2
-		<< valueStore.m_sigma << " "						// Column 3
+	results << hb.evaluationCounter() << " "		// Column 1
+		<< valueStore.m_condition << " "			// Column 2
+		<< valueStore.m_sigma << " "				// Column 3
 		<< cma.solution().value << " ";		        // Column 4
-	std::copy(
-		  cma.solution().point.begin(),				
-		  cma.solution().point.end(),                          // Column 5 & 6
-		  std::ostream_iterator< double >( results, " " ) 
-		   );
-	std::copy( 
-		  valueStore.m_currentPopulationMean.begin(),				// Column 7 & 8
-		  valueStore.m_currentPopulationMean.end(), 
-		  std::ostream_iterator< double >( results, " " ) 
-		   );
-	results << std::endl;
-    }while( cma.solution().value> 1E-20 );
+	copy(
+		cma.solution().point.begin(),				
+		cma.solution().point.end(),                         	// Column 5 & 6
+		ostream_iterator< double >( results, " " ) 
+	);
+	copy( 
+		valueStore.m_currentPopulationMean.begin(),// Column 7 & 8
+		valueStore.m_currentPopulationMean.end(), 
+		ostream_iterator< double >( results, " " ) 
+	);
+	results << endl;
+	}while( cma.solution().value> 1E-20 );
+	//###end<train>
 
-    plot << "plot 'results.txt' every ::2 using 7:8 with lp title 'Population mean'" << std::endl;
-	
-    return( EXIT_SUCCESS );	
+	plot << "plot 'results.txt' every ::2 using 7:8 with lp title 'Population mean'" << endl;
+
+	return( EXIT_SUCCESS );	
 }

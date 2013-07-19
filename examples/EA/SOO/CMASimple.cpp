@@ -19,32 +19,44 @@
  * along with this library; if not, see <http://www.gnu.org/licenses/>.
  *  
  */
-#include <shark/Algorithms/DirectSearch/CMA.h>
-#include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
+ //###begin<includes>
+ // Implementation of the CMA-ES
+ #include <shark/Algorithms/DirectSearch/CMA.h>
+ // Access to benchmark functions
+ #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
+//###end<includes>
+
+using namespace shark;
+using namespace std;
 		
 int main( int argc, char ** argv ) {
 
 	// Adjust the floating-point format to scientific and increase output precision.
-	std::cout.setf( std::ios_base::scientific );
-	std::cout.precision( 10 );
+	cout.setf( ios_base::scientific );
+	cout.precision( 10 );
 
-	// Instantiate both the problem and the optimizer.
-	shark::Sphere sphere( 2 );
+	// Instantiate both the problem
+	//###begin<problem>
+	Sphere sphere( 2 );
 	sphere.setNumberOfVariables( 2 );
-	shark::CMA cma;
-
+	//###end<problem>
 	// Initialize the optimizer for the objective function instance.
+	//###begin<optimizer>
+	CMA cma;
 	cma.init( sphere );
+	//###end<optimizer>
 
 	// Iterate the optimizer until a solution of sufficient quality is found.
+	//###begin<train>
 	do {
 
 		cma.step( sphere );
 
 		// Report information on the optimizer state and the current solution to the console.
-		std::cout << sphere.evaluationCounter() << " "	
+		cout << sphere.evaluationCounter() << " "	
 			<< cma.solution().value << " "
 			<< cma.solution().point << " "
-			<< cma.sigma() << std::endl;
+			<< cma.sigma() << endl;
 	}while(cma.solution().value > 1E-20 );	
+	//###end<train>
 }
