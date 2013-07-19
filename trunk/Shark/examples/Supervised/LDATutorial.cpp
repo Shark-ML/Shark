@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 	     << "input dimension: " << inputDimension(data) << endl;
 
 	// split data into training and test set
-	ClassificationDataset dataTest = splitAtElement(data, .447 * data.numberOfElements() );
+	ClassificationDataset dataTest = splitAtElement(data, .5 * data.numberOfElements() );
 	cout << "training data points: " << data.numberOfElements() << endl;
 	cout << "test data points: " << dataTest.numberOfElements() << endl;
 ///###end<load_data>
