@@ -322,7 +322,7 @@ namespace shark {
 		 * \brief Returns a mutable reference to the size of the offspring population \f$\mu\f$.
 		 */
 		unsigned int & lambda(){
-			return m_mu;
+			return m_lambda;
 		}
 	protected:
 		/**
