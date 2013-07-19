@@ -317,6 +317,20 @@ namespace shark {
 		unsigned int mu() const {
 			return m_mu;
 		}
+		
+		/**
+		 * \brief Returns a mutabl rference to the size of the parent population \f$\mu\f$.
+		 */
+		unsigned int& mu(){
+			return m_mu;
+		}
+		
+		/**
+		 * \brief Returns a immutable reference to the size of the offspring population \f$\mu\f$.
+		 */
+		unsigned int lambda()const{
+			return m_lambda;
+		}
 
 		/**
 		 * \brief Returns a mutable reference to the size of the offspring population \f$\mu\f$.
