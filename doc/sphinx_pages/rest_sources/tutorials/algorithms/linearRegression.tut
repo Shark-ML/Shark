@@ -67,8 +67,7 @@ That  is, we invoke the example program by something like: ::
 
   ./linearRegressionTutorial data/regressionInputs.csv data/regressionLabels.csv
 
-The code for reading in the data may look like this: 
-Then code for reading the data may look like this: ::
+The code for reading the data may look like this: ::
 
 ..sharkcode<Supervised/linearRegressionTutorial.cpp,load_data>
 
