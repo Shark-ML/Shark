@@ -58,33 +58,33 @@ int main(int argc, char **argv) {
 	ClassificationDataset dataTest = splitAtElement(data, .5 * data.numberOfElements() );
 	cout << "training data points: " << data.numberOfElements() << endl;
 	cout << "test data points: " << dataTest.numberOfElements() << endl;
-///###end<load_data>
+//###end<load_data>
 
 	// define learning algorithm
-///###begin<lda>
+//###begin<lda>
 	LDA ldaTrainer;
-///###end<lda>
+//###end<lda>
 
 	// define linear model
-///###begin<model>
+//###begin<model>
 	LinearClassifier lda;
-///###end<model>
+//###end<model>
 
 	// train model
-///###begin<trainer>
+//###begin<trainer>
 	ldaTrainer.train(lda, data);
-///###end<trainer>
+//###end<trainer>
 
 	// evaluate classifier
-///###begin<output_and_loss>
+//###begin<output_and_loss>
 	Data<unsigned int> prediction;
 	ZeroOneLoss<unsigned int> loss;
-///###end<output_and_loss>
+//###end<output_and_loss>
 
-///###begin<eval>
+//###begin<eval>
 	prediction = lda(data.inputs());
 	cout << "LDA on training set accuracy: " << 1. - loss(data.labels(), prediction) << endl;
 	prediction = lda(dataTest.inputs());
 	cout << "LDA on test set accuracy:     " << 1. - loss(data.labels(), prediction) << endl;
-///###end<eval>
+//###end<eval>
 }

@@ -113,7 +113,7 @@ Now we can train the model ::
 
 ..sharkcode<Supervised/linearRegressionTutorial.cpp,train>
 
-and inspect the model parameters:
+and inspect the model parameters: ::
 
 ..sharkcode<Supervised/linearRegressionTutorial.cpp,inspect>
 
