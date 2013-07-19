@@ -24,7 +24,10 @@
 
 #include <shark/Data/Csv.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+
+//###begin<lda_include>
 #include <shark/Algorithms/Trainers/LDA.h>
+//###end<lda_include>
 
 #include <iostream>
 
@@ -47,28 +50,41 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	cout << "number of data points: " << data.numberOfElements() << " "
+	cout << "overall number of data points: " << data.numberOfElements() << " "
 	     << "number of classes: " << numberOfClasses(data) << " "
 	     << "input dimension: " << inputDimension(data) << endl;
 
 	// split data into training and test set
-	ClassificationDataset dataTest = splitAtElement(data,311);
+	ClassificationDataset dataTest = splitAtElement(data, .447 * data.numberOfElements() );
+	cout << "training data points: " << data.numberOfElements() << endl;
+	cout << "test data points: " << dataTest.numberOfElements() << endl;
 ///###end<load_data>
 
 	// define learning algorithm
+///###begin<lda>
 	LDA ldaTrainer;
+///###end<lda>
 
 	// define linear model
+///###begin<model>
 	LinearClassifier lda;
+///###end<model>
 
 	// train model
+///###begin<trainer>
 	ldaTrainer.train(lda, data);
+///###end<trainer>
 
 	// evaluate classifier
+///###begin<output_and_loss>
 	Data<unsigned int> prediction;
 	ZeroOneLoss<unsigned int> loss;
+///###end<output_and_loss>
+
+///###end<eval>
 	prediction = lda(data.inputs());
 	cout << "LDA on training set accuracy: " << 1. - loss(data.labels(), prediction) << endl;
 	prediction = lda(dataTest.inputs());
 	cout << "LDA on test set accuracy:     " << 1. - loss(data.labels(), prediction) << endl;
+///###end<eval>
 }

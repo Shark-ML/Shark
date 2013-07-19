@@ -51,19 +51,26 @@ points as shown in the following figure.
 Reading in the data
 ^^^^^^^^^^^^^^^^^^^
 
+Let us consider the
+example program 
+:download:`linearRegressionTutorial.cpp <../../../../../examples/Supervised/example program is
+:download:`linearRegressionTutorial.cpp <../../../../../examples/Supervised/linearRegressionTutorial.cpp>`..cpp>`.
 First, let us read in the data.
-Let the inputs and labels be stored
-in the files
+We assume that the inputs and the labels are stored
+in two separate  files, which are passed as command line arguments.
+The data considered in this tutorial is in the files
 :download:`regressionInputs.csv <../../../../../examples/Supervised/data/regressionInputs.csv>`
 and
-:download:`regressionLabels.csv <../../../../../examples/Supervised/data/regressionLabels.csv>`, respectively.
+:download:`regressionLabels.csv
+<../../../../../examples/Supervised/data/regressionLabels.csv>`.
+That  is, we invoke the example program by something like: ::
+
+  ./linearRegressionTutorial data/regressionInputs.csv data/regressionLabels.csv
+
+The code for reading in the data may look like this: 
 Then code for reading the data may look like this: ::
 
-        Data<RealVector> inputs;
-        Data<RealVector> labels;
-        import_csv(inputs, "regressionInputs.csv", " ");
-        import_csv(labels, "regressionLabels.csv", " ");
-        RegressionDataset data(inputs, labels);
+..sharkcode<Supervised/linearRegressionTutorial.cpp,load_data>
 
 We read in two ``Data`` objects holding the *l* samples and their
 labels.  Both the input data points and the labels are real vectors
@@ -75,42 +82,40 @@ to a regression data set, which is just another name for
 ``LabeledData<RealVector, RealVector>``.  For using ``import_csv``, we
 need: ::
 
-   #include <shark/Data/Csv.h>
+..sharkcode<Supervised/linearRegressionTutorial.cpp,csv_include>
 
 And, of course, we assume: ::
 
-   using namespace shark;
-   using namespace std;
+..sharkcode<Supervised/linearRegressionTutorial.cpp,namespaces>
 
 Model and learning algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Now we create the linear model: ::
 
-        LinearModel<> model;
+..sharkcode<Supervised/linearRegressionTutorial.cpp,model>
 
 We don't need to specify the input or output dimensions of the model as the trainer is capable to figure this out
 by itself. Thus we now only need to declare the algorithm itself to train the model::
 
-   LinearRegression trainer;
+..sharkcode<Supervised/linearRegressionTutorial.cpp,trainer>
 
 Given sample data, this trainer finds optimal model parameters of a
 linear model in the least squares sense as described above. For the
 model and the trainer we need: ::
 
-  #include <shark/Algorithms/Trainers/LinearRegression.h>
+..sharkcode<Supervised/linearRegressionTutorial.cpp,regression_include>
 
 The path reflects the Shark concepts. Of course, the trainer is a
 :doxy:`AbstractTrainer` and every trainer is a (machine learning) ``Algorithm``.
 
 Now we can train the model ::
 
-      trainer.train(model, data);
+..sharkcode<Supervised/linearRegressionTutorial.cpp,train>
 
-an inspect the model parameters:
+and inspect the model parameters:
 
-        cout << "intercept: " << model.offset() << endl;
-        cout << "matrix: " << model.matrix() << endl;
+..sharkcode<Supervised/linearRegressionTutorial.cpp,inspect>
 
 The output should look like this: ::
 
@@ -132,16 +137,19 @@ Evaluating the model
 After training the model, we can evaluate it. Let's apply it to the
 training data: ::
 
-        Data<RealVector> prediction = model(data.inputs());
+..sharkcode<Supervised/linearRegressionTutorial.cpp,apply>
 
 We can look at the predictions by ``cout << prediction<< endl;``.
 
 In order to assess the quality of the model, we want to compute
 the mean-squared error. To this end, we need the proper loss ::
 
-  #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
-  ...
-  SquaredLoss<> loss;
+..sharkcode<Supervised/linearRegressionTutorial.cpp,loss>
+
+from: ::
+
+..sharkcode<Supervised/linearRegressionTutorial.cpp,loss_include>
+
 
 The squared loss *L* is defined by *L(y,z)=(y-z)*\ :sup:`2`.  Applied
 to a set of data, it is averaged over this set and gives the mean
@@ -149,8 +157,7 @@ squared error as defined above.  The squared loss is something to be
 optimized and accordingly it can be found in the ``Loss`` subdirectory
 of the header directory ``ObjectiveFunctions``.
 
-The line ``cout << "squared loss: " << loss.eval(data.labels(),
-prediction) << endl;`` should write a value close to 0.044.
+The line ``cout << "squared loss: " << loss(data.labels(), prediction) << endl;`` should write a value close to 0.044.
 
 
 Full example program
