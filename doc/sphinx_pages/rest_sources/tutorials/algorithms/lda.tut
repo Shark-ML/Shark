@@ -19,41 +19,33 @@ underlying distribution. Details can be found, for instance, in
 Linear Discriminant Analysis in Shark
 ----------------------------------------
 
-Sample classification problem: Protein fold prediction
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Let us consider the same bioinformatics problem as in the
-:doc:`nearestNeighbor` tutorial, namely the prediction of the
-secondary structure of proteins. The goal is to assign a protein to
-one out of 27 SCOP fold types [DingDubchak2001a]_.  We again consider
-the descriptions of amino-acid sequences provided by
-[DamoulasGirolami2008a]_.  The data :download:`C.csv <../../../../../examples/Supervised/data/C.csv>`
-provide a description of the amino-acid compositions of 695 proteins
-together with the corresponding fold type. Each row corresponds to a
-protein.  After downloading the data :download:`C.csv <../../../../../examples/Supervised/data/C.csv>` we
-can read, inspect and split the data as described in the
+We assume that a data file in csv format is provided as a command line argument.
+As a first step, we inspect and split the data as described in the
 :doc:`nearestNeighbor` tutorial: ::
 
 ..sharkcode<Supervised/LDATutorial.cpp,load_data>
+
+
+
 
 Model and learning algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We include the :doxy:`LDA` class ::
 
-  #include <shark/Algorithms/Trainers/LDA.h>
+..sharkcode<Supervised/LDATutorial.cpp,lda_include>
 
-and define the LDA trainier :: 
+and define the LDA trainer :: 
 
-  LDA ldaTrainer;
+..sharkcode<Supervised/LDATutorial.cpp,lda>
 
-and the linear classifier to be trained by the LDA trainier: ::
+and the linear classifier to be trained by the LDA trainer: ::
 
-  LinearClassifier lda;
+..sharkcode<Supervised/LDATutorial.cpp,model>
 
 The model is trained by calling: ::
 
-    ldaTrainer.train(lda, dataTrain);
+..sharkcode<Supervised/LDATutorial.cpp,trainer>
 
 Evaluating the model
 ^^^^^^^^^^^^^^^^^^^^
@@ -66,16 +58,11 @@ simply computes the fraction of wrong predictions.
 We define the loss for ``unsigned integer`` labels and
 create a new data container for the predictions of our model: ::
 
-	Data<unsigned int> prediction;
-	ZeroOneLoss<unsigned int> loss; 
-
+..sharkcode<Supervised/LDATutorial.cpp,output_and_loss>
 	
 Let's apply the classifier to the training and the test data: ::
 
-	prediction = lda(dataTrain.inputs());
-	cout << "LDA on training set accuracy: " << 1. - loss(dataTrain.labels(), prediction) << endl;
-	prediction = lda(dataTest.inputs());
-	cout << "LDA on test set accuracy:     " << 1. - loss(dataTest.labels(), prediction) << endl;
+..sharkcode<Supervised/LDATutorial.cpp,eval>
 
 Of course, the accuracy is given by one minus the error.
 In this example, the (parametric) LDA performs worse than the
@@ -89,6 +76,21 @@ Full example program
 The full example program is 
 :doxy:`LDATutorial.cpp`.
 
+Sample classification problem: Protein fold prediction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Let us consider the same bioinformatics problem as in the
+:doc:`nearestNeighbor` tutorial, namely the prediction of the
+secondary structure of proteins. The goal is to assign a protein to
+one out of 27 SCOP fold types [DingDubchak2001a]_.  We again consider
+the descriptions of amino-acid sequences provided by
+[DamoulasGirolami2008a]_.  The data :download:`C.csv <../../../../../examples/Supervised/data/C.csv>`
+provide a description of the amino-acid compositions of 695 proteins
+together with the corresponding fold type. Each row corresponds to a
+protein.  After downloading the data :download:`C.csv <../../../../../examples/Supervised/data/C.csv>` we
+can envoke the example program: ::
+
+  ./LDATutorial C.csv
 
 
 References

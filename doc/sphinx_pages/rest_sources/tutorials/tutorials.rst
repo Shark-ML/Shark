@@ -81,9 +81,9 @@ machine learning algorithms and tools are provided by the library.
 Let's start with some classical methods:
 
 * :doc:`algorithms/pca`
+* :doc:`algorithms/nearestNeighbor`
 * :doc:`algorithms/lda`
 * :doc:`algorithms/linearRegression`
-* :doc:`algorithms/nearestNeighbor`
 * :doc:`algorithms/kmeans`
 
 Neural nets:

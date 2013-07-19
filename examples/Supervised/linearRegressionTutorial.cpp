@@ -25,34 +25,76 @@
  */
 //===========================================================================
 
+//###begin<csv_include>
 #include <shark/Data/Csv.h>
+//###end<csv_include>
+//###begin<loss_include>
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
+//###end<loss_include>
+//###begin<regression_include>
 #include <shark/Algorithms/Trainers/LinearRegression.h>
+//###end<regression_include>
 
 #include <iostream>
 
+//###begin<namespaces>
 using namespace shark;
 using namespace std;
+//###end<namespaces>
 
-int main() {
+//###begin<load_data>
+int main(int argc, char **argv) {
+	if(argc < 3) {
+		cerr << "usage: " << argv[0] << " (file with inputs/independent variables) (file with outputs/dependent variables)" << endl;
+		exit(EXIT_FAILURE);
+	}
 	Data<RealVector> inputs;
 	Data<RealVector> labels;
-	import_csv(inputs, "data/regressionInputs.csv", " ");
-	import_csv(labels, "data/regressionLabels.csv", " ");
+	try {
+		import_csv(inputs, argv[1], " ");
+	} 
+	catch (...) {
+		cerr << "unable to read input data from file " <<  argv[1] << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	try {
+		import_csv(labels, argv[2], " ");
+	}
+	catch (...) {
+		cerr << "unable to read labels from file " <<  argv[2] << endl;
+		exit(EXIT_FAILURE);
+	}
+
 	RegressionDataset data(inputs, labels);
+//###end<load_data>
+
+
 
 	// trainer and model
+//###begin<trainer>
 	LinearRegression trainer;
+//###end<trainer>
+//###begin<model>
 	LinearModel<> model;
+//###end<model>
 
 	// train model
+//###begin<train>
 	trainer.train(model, data);
+//###end<train>
 
 	// show model parameters
+//###begin<inspect>	
 	cout << "intercept: " << model.offset() << endl;
 	cout << "matrix: " << model.matrix() << endl;
+//###end<inspect>	
 
-	Data<RealVector> prediction = model(data.inputs()); 
+//###begin<loss>
 	SquaredLoss<> loss;
+//###end<loss>
+//###begin<apply>
+	Data<RealVector> prediction = model(data.inputs()); 
+//###end<apply>	
 	cout << "squared loss: " << loss(data.labels(), prediction) << endl;
 }
