@@ -228,9 +228,7 @@ IF ( OPT_ENABLE_ATLAS )
 	)
 
 	get_filename_component(ATLAS_PATH @CBLAS_LIBRARY@ PATH )
-#	message(${ATLAS_PATH})
 	SET (ATLAS_PATH ${ATLAS_PATH}/.. )
-#	message(${ATLAS_PATH})
 	mark_as_advanced(
 		CBLAS_LIBRARY
 		CLAPACK_LIBRARY
