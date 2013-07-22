@@ -169,6 +169,7 @@ ELSE( WIN32 )
 		${PTHREAD_LIBRARY}
 	)
 ENDIF( WIN32 )
+message( STATUS "Using boost from " ${Boost_LIBRARY_DIRS})
 
 #####################################################################
 #		Optionally enable OpenMP                            #
@@ -227,7 +228,9 @@ IF ( OPT_ENABLE_ATLAS )
 	)
 
 	get_filename_component(ATLAS_PATH @CBLAS_LIBRARY@ PATH )
+#	message(${ATLAS_PATH})
 	SET (ATLAS_PATH ${ATLAS_PATH}/.. )
+#	message(${ATLAS_PATH})
 	mark_as_advanced(
 		CBLAS_LIBRARY
 		CLAPACK_LIBRARY
@@ -239,7 +242,13 @@ IF ( OPT_ENABLE_ATLAS )
 		SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${CBLAS_LIBRARY} )
 		SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${ATLAS_LIBRARY} )
 		ADD_DEFINITIONS( -DSHARK_USE_ATLAS )
-		include_directories ( ${ATLAS_ROOT}/include/ ${ATLAS_ROOT}/include/atlas/ )
+		IF ( ATLAS_ROOT )
+				message(STATUS "ATLAS root: " ${ATLAS_ROOT})
+				include_directories ( ${ATLAS_ROOT}/include/ ${ATLAS_ROOT}/include/atlas/ )
+		ELSE( ATLAS_ROOT )
+				message(STATUS "ATLAS path: " ${ATLAS_PATH})
+				include_directories ( ${ATLAS_PATH}/include/ ${ATLAS_PATH}/include/atlas/ )
+		ENDIF(ATLAS_ROOT)
 	ELSE ( CBLAS_LIBRARY )
 		message(STATUS "ATLAS found....false")
 	ENDIF ( CBLAS_LIBRARY )
@@ -357,7 +366,6 @@ export(TARGETS shark Version FILE "${PROJECT_BINARY_DIR}/SharkTargets.cmake")
 # (this registers the build-tree with a global CMake-registry)
 #export(PACKAGE Shark)
 
-message( STATUS ${Boost_LIBRARY_DIRS})
 # Create the SharkConfig.cmake and SharkConfigVersion files
 set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/" "${Boost_INCLUDE_DIRS}")
 set(CONF_TARGET_DIR "${CMAKE_CURRENT_BINARY_DIR}")
