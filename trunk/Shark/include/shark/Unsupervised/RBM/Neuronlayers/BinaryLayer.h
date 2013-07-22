@@ -230,6 +230,7 @@ public:
 	///This function takes a batch of samples and calculates a weighted derivative
 	///@param derivative the derivative with respect to the parameters, the result is added on top of it to accumulate derivatives
 	///@param samples the sample from which the informations can be extracted
+	///@param weights the weights for the single sample derivatives
 	template<class Vector, class SampleBatch, class WeightVector>
 	void parameterDerivative(Vector& derivative, SampleBatch const& samples, WeightVector const& weights)const{
 		SIZE_CHECK(derivative.size() == size());

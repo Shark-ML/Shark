@@ -35,10 +35,6 @@
 #include "Impl/SampleTypes.h"
 namespace shark{
 	
-//entwurf: modelliert eine temperierte Markov Kette mittels eines TransitionsOperators
-//Beispiel: TemperedMarkovChain<GibbsOperator<RBM> > chain; ergibt parallel tempering
-//Die Tags beschreiben, wie die Kette interpretiert wird. entweder als
-//(v->h)->(v->h)->(v->h) oder v->(h->v)->(h->v)->(h->v) je nachdem, was gerade sinnvoller ist.
 
 //\brief models a set of tempered Markov chains given a TransitionOperator.
 // e.g.  TemperedMarkovChain<GibbsOperator<RBM> > chain, leads to the set of chains
@@ -85,7 +81,7 @@ private:
 	}
 
 
-	///\brief evaluate a single step
+	///\brief executes a single sampling step in each Markov chain followed by a swapping step between all even and all odd temperatures.
 	void step(){
 		//do one step of the tempered the Markov chains at the same time
 		m_operator.precomputeHidden(m_temperedChains.hidden, m_temperedChains.visible,m_betas);

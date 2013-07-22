@@ -62,6 +62,7 @@ public:
 	///\param dim the dimensionality of the data.
 	///\param modes the number of modes, should be a multiple of 2
 	///\param copies the number of disturbed copies for each mode
+	///\param barchSiz the size of the batches in which the genereated data set is organized
 	DistantModes(double p = 0, unsigned dim = 16, unsigned modes=4, unsigned copies =2500, size_t batchSize=0)
 		:m_p(p), m_dim(dim), m_modes(modes), m_copies(copies), m_batchSize(batchSize) {
 		init();

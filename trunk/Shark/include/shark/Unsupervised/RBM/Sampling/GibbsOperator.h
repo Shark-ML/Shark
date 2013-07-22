@@ -83,6 +83,9 @@ public:
 	///
 	///This function calculates the conditional propability distribution p(h|v) with inverse temperature beta for the whole batch of samples
 	///Be aware that a change of temperature may occur between sampleVisible and precomputeHidden.
+	/// @param hiddenBatch the batch of hidden samples to be created
+	/// @param visibleBatch the batch of visible samples to be created
+	/// @param beta the vector of inverse temperatures
 	template<class BetaVector>
 	void precomputeHidden(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch, BetaVector const& beta)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
@@ -151,12 +154,13 @@ public:
 	}
 
 
-	///\brief Creates a hidden/visible sample pair from a state of the visible neurons. this can directly be used to calculate the gradient.
+	///\brief Creates  hidden/visible sample pairs from the states of the visible neurons, i.e. sats the visible units to the given states and samples hidden states based on the states of the visible units. 
+	/// This can directly be used to calculate the gradient.
 	///
-	/// @param hidden the hidden sample to be created
-	/// @param visible the visible sample to be created
-	/// @param state the state of the visible neurons in the sample
-	/// @param beta the inverse temperature
+	/// @param hiddenBatch the batch of hidden samples to be created
+	/// @param visibleBatch the batch of visible samples to be created
+	/// @param states the states of the visible neurons in the sample
+	/// @param beta the vector of inverse temperatures
 	template<class States, class BetaVector>
 	void createSample(HiddenSampleBatch& hiddenBatch,VisibleSampleBatch& visibleBatch, States const& states, BetaVector const& beta)const{
 		SIZE_CHECK(size(states)==visibleBatch.size());
@@ -167,11 +171,12 @@ public:
 		sampleHidden(hiddenBatch);
 	}
 	
-	///\brief Creates a hidden/visible sample pair from a state of the visible neurons. this can directly be used to calculate the gradient.
+	///\brief Creates  hidden/visible sample pairs from the states of the visible neurons, i.e. sats the visible units to the given states and samples hidden states based on the states of the visible units. 
+	/// This can directly be used to calculate the gradient.
 	///
-	///In this version, the temperature defaults to 1.
-	/// @param hidden the hidden sample to be created
-	/// @param visible the visible sample to be created
+	/// @param hiddenBatch the batch of hidden samples to be created
+	/// @param visibleBatch the batch of visible samples to be created
+	/// @param states the states of the visible neurons in the sample
 	/// @param state the state of the visible neurons in the sample
 	template<class States>
 	void createSample(HiddenSampleBatch& hiddenBatch,VisibleSampleBatch& visibleBatch, States const& states)const{

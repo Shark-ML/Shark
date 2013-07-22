@@ -137,7 +137,7 @@ struct Energy{
 	
 	///\brief Computes the logarithm of the unnormalized probability for each state of the visible neurons from a batch.
 	///
-	///@param visibleState the batch of states of the hidden neurons
+	///@param visibleStates the batch of states of the hidden neurons
 	///@param beta the inverse temperature
 	template<class BetaVector>
 	RealVector logUnnormalizedPropabilityVisible(RealMatrix const& visibleStates, BetaVector const& beta)const{
