@@ -158,6 +158,10 @@ message(STATUS "C compiler: " ${CMAKE_C_COMPILER})
 SET(Boost_USE_MULTITHREADED ON)
 ADD_DEFINITIONS( -DBOOST_PARAMETER_MAX_ARITY=15 -DBOOST_FILESYSTEM_VERSION=3 )
 FIND_PACKAGE( Boost 1.45.0 COMPONENTS system date_time filesystem program_options regex signals serialization thread unit_test_framework REQUIRED )
+mark_as_advanced( 
+		  Boost_DIR 
+		  PTHREAD_LIBRARY
+)
 
 include_directories ( ${Boost_INCLUDE_DIRS} )
 IF( WIN32 )
@@ -194,6 +198,7 @@ ENDIF( OPT_ENABLE_OPENMP )
 #           HDF5 configuration                                      #
 #####################################################################
 FIND_PACKAGE(HDF5 COMPONENTS C CXX HL QUIET)
+mark_as_advanced( HDF5_DIR ) 
 IF( HDF5_FOUND )
     MESSAGE(STATUS "HDF5...found")
     INCLUDE_DIRECTORIES( ${HDF5_INCLUDE_DIRS} )
@@ -255,6 +260,7 @@ ENDIF ( OPT_ENABLE_ATLAS )
 #####################################################################
 #                       Static Code Analysis                        #
 #####################################################################
+mark_as_advanced( CPP_CHECK )
 IF( UNIX )
     FIND_PROGRAM( CPP_CHECK cppcheck )
     IF( CPP_CHECK )
