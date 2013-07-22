@@ -72,6 +72,7 @@ private:
 			hiddenNeurons().sample(statisticsBatch,output,*mpe_rng);
 		}
 	}
+
 	///\brief Evaluates the input by propagating the hidden input to the visible neurons.
 	///
 	///@param patterns batch of states of hidden units
@@ -219,7 +220,7 @@ public:
 	}
 
 
-	void eval(BatchInputType const& patterns,BatchOutputType& outputs, State& state)const{
+	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
 		eval(patterns,outputs);
 	}
 	using base_type::eval;
