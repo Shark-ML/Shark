@@ -27,6 +27,9 @@
  *  After all replacements have been made the new content is saved
  *  to a file with extension ".rst", which is ready for processing
  *  with sphinx.
+ *  The shorthand form
+ *     "..sharkcode<file>"
+ *  is recognized for including the whole source file.
  *
  *
  *  <BR><HR>
@@ -101,37 +104,56 @@ int main(int argc, char** argv)
 			// parse example filename and snippet name
 			pos += 12;
 			size_t comma = input.find(",", pos);
-			if (comma == string::npos) throw string("no comma in sharkcode tag");
-			string examplename = input.substr(pos, comma - pos);
-			size_t npos = comma + 1;
-			while (input[npos] == ' ') npos++;
-			size_t closing = input.find(">", npos);
-			if (closing == string::npos) throw string("sharkcode tag not closed (missing '>')");
-			string name = input.substr(npos, closing - npos);
-			start = closing + 1;
-			cout << "  placing snippet '" << name << "' from file '" << examplename << "'" << endl;
-
-			// insert snippet(s) from example file
-			string example = readFile(sharkpath + examplename);
-			size_t start = 0;
-			size_t num = 0;
-			while (true)
+			if (comma == string::npos)
 			{
-				size_t begin = example.find("//###begin<" + name + ">", start);
-				if (begin == string::npos) break;
-				size_t end = example.find("//###end<" + name + ">", begin);
-				if (end == string::npos) throw string("end marker for '" + name + "' not found in file '" + examplename + "'");
-				while (example[begin] != '\n') begin++;
-				for (size_t i=begin; i<end; i++)
+				// simple form for the inclusion of whole files
+				size_t closing = input.find(">", pos);
+				if (closing == string::npos) throw string("sharkcode tag not closed (missing '>')");
+				string examplename = input.substr(pos, closing - pos);
+				cout << "  placing file '" << examplename << "'" << endl;
+
+				// insert file contents; increase indentation level
+				string example = readFile(sharkpath + examplename);
+				for (std::size_t i=0; i<example.size(); i++)
 				{
-					char c = example[i];
-					if (c == '\n') output += "\n\t";    // make sure code is indented
-					else output += c;
+					if (example[i] == '\n') output += "\n\t";
+					else output += example[i];
 				}
-				start = end;
-				num++;
 			}
-			if (num == 0) throw string("begin marker for '" + name + "' not found in file '" + examplename + "'");
+			else
+			{
+				// complex form with name tag
+				string examplename = input.substr(pos, comma - pos);
+				size_t npos = comma + 1;
+				while (input[npos] == ' ') npos++;
+				size_t closing = input.find(">", npos);
+				if (closing == string::npos) throw string("sharkcode tag not closed (missing '>')");
+				string name = input.substr(npos, closing - npos);
+				start = closing + 1;
+				cout << "  placing snippet '" << name << "' from file '" << examplename << "'" << endl;
+
+				// insert snippet(s) from example file
+				string example = readFile(sharkpath + examplename);
+				size_t start = 0;
+				size_t num = 0;
+				while (true)
+				{
+					size_t begin = example.find("//###begin<" + name + ">", start);
+					if (begin == string::npos) break;
+					size_t end = example.find("//###end<" + name + ">", begin);
+					if (end == string::npos) throw string("end marker for '" + name + "' not found in file '" + examplename + "'");
+					while (example[begin] != '\n') begin++;
+					for (size_t i=begin; i<end; i++)
+					{
+						char c = example[i];
+						if (c == '\n') output += "\n\t";    // make sure code is indented
+						else output += c;
+					}
+					start = end;
+					num++;
+				}
+				if (num == 0) throw string("begin marker for '" + name + "' not found in file '" + examplename + "'");
+			}
 		}
 
 		// write output
