@@ -43,7 +43,7 @@ namespace shark{
 namespace detail{
 	
 //The  following looks a bit complicated and in fact, there ARE easier solutions.
-//However, i wanted to be able to check the sizes in debug. and this is only possible if you know
+//However, I wanted to be able to check the sizes in debug. and this is only possible if you know
 //1) how big the whole sequence a,b,c is
 //2) that c is the last element. 
 //also 3) i wanted to prevent init(vec),a,b,c as initialization abuse and instead force init(vec)<<a,b,c
