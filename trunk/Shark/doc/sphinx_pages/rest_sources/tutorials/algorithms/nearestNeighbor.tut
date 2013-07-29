@@ -141,7 +141,7 @@ the probability of error, the empirical risk is the average
 classification error.  When measured on set of sample patterns, it
 simply computes the fraction of wrong predictions.
 We define the :doxy:`ZeroOneLoss` for ``unsigned integer`` labels and
-apply the classifier to the training and the test data: ::: ::
+apply the classifier to the training and the test data::
 
 ..sharkcode<Supervised/KNNTutorial.cpp, eval>
 
@@ -165,16 +165,16 @@ kernel-induced metric is applied. The following lines should give the
 same results as the example above, because the :doxy:`LinearKernel`
 induces the Euclidean metric::
 
-	LinearKernel<RealVector> kernel;
-	KHCTree<RealVector> tree(data.inputs(), &kernel);
-	TreeNearestNeighbors<RealVector, unsigned int> algorithm(data, &tree);
-	NearestNeighborClassifier<RealVector> KNN(&algorithm, K);
+    LinearKernel<RealVector> kernel;
+    KHCTree<RealVector> tree(data.inputs(), &kernel);
+    TreeNearestNeighbors<RealVector, unsigned int> algorithm(data, &tree);
+    NearestNeighborClassifier<RealVector> KNN(&algorithm, K);
 
 For high dimensional data, as said before, a tree lookup may not be that efficient. In this case,
 we can just use the simple brute force algorithm instead, which is
 implemented by :doxy:`SimpleNearestNeighbors`. We need to define the
 metric to to measure the distance. This was previously handled
-implicitly  by the tree, now we specify a kernel function that induces 
+implicitly  by the tree, now we specify a kernel function that induces
 the metric. A  comparable setup to the example above is::
 
     LinearKernel<> kernel;

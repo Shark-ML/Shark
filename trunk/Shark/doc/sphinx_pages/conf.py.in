@@ -15,8 +15,8 @@ todo_include_todos = True
 
 #set up doxylink tag file
 print 'current working directory', os.path.abspath(os.path.curdir)
-print 'setting relative tag file path to', '../../../doxygen_pages/tag_files/all.tag', '=', os.path.abspath('../../../doxygen_pages/tag_files/all.tag')
-print 'setting relative doxygen output path to', '../../../doxygen_pages/html/', '=', os.path.abspath('../../../doxygen_pages/html/')
+###print 'setting relative tag file path to', '../../../doxygen_pages/tag_files/all.tag', '=', os.path.abspath('../../../doxygen_pages/tag_files/all.tag')
+###print 'setting relative doxygen output path to', '../../../doxygen_pages/html/', '=', os.path.abspath('../../../doxygen_pages/html/')
 doxylink = {
         'doxy' : (os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/doxygen_pages/tag_files/all.tag'), '../../../doxygen_pages/html/')
 }
@@ -107,7 +107,7 @@ highlight_language = 'c++'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = 'default' 		#nice
+#html_theme = 'default'         #nice
 #html_theme_options = {
     #"rightsidebar": "true",
     #"stickysidebar": "true",
@@ -116,16 +116,16 @@ highlight_language = 'c++'
     ##"sidebarbgcolor": "PeachPuff",
     ##"bodyfont": "Geneva 6pt"
 #}
-html_theme = 'mt_ini_gryphon'	#nice
-#html_theme = 'sphinxdoc'		#nice
+html_theme = 'mt_ini_gryphon'   #nice
+#html_theme = 'sphinxdoc'       #nice
 #html_theme_options = {
     ##"nosidebar": "true"
 #}
-#html_theme = 'haiku'			#very white and clean, nice symbols, no sidebar
-#html_theme = 'scrolls'			#very bad
-#html_theme = 'agogo'			#probably too simple
-#html_theme = 'traditional'		#too traditional
-#html_theme = 'nature'			#nice and clean, bit simplistic
+#html_theme = 'haiku'           #very white and clean, nice symbols, no sidebar
+#html_theme = 'scrolls'         #very bad
+#html_theme = 'agogo'           #probably too simple
+#html_theme = 'traditional'     #too traditional
+#html_theme = 'nature'          #nice and clean, bit simplistic
 
 
 # Theme options are theme-specific and customize the look and feel of a theme

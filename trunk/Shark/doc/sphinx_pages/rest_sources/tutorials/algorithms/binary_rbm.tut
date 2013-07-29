@@ -1,53 +1,75 @@
 Training Binary Restricted Boltzmann Machines
-==================================================================
-Shark has a module for training restricted Boltzmann machines
-(RBMs) [Hinton2007]_ [Welling2007]_. You can find all files in the subdirectory ``shark/Unsupervised/RBM/``. We will assume that
-you allready read the introduction to the RBM module :doc:`rbm_module`.
-In the following, we will train  and evaluate a Binary RBM using Contrastive Divergence (CD-1) learning on a toy example.
-We choose this example as a starting point of the Module because this setup is quite common and we provide a set of predefined
-types which make this as easy as possible! The code of this tutorial can be found in 
+=============================================
+
+
+
+Introduction
+++++++++++++
+
+
+Shark has a module for training restricted Boltzmann machines (RBMs) [Hinton2007]_
+[Welling2007]_. All corresponding header files are located in the subdirectory
+``<SHARK_SRC_DIR>/include/shark/Unsupervised/RBM/``. We will assume that you
+already read the introduction to the RBM module :doc:`rbm_module`.
+
+In the following, we will train and evaluate a Binary RBM using Contrastive Divergence
+(CD-1) learning on a toy example. We choose this example as a starting point because
+its setup is quite common, and we provide a set of predefined types for it for convenience.
+The code of this tutorial can be found in
 :download:`BinaryRBM.cpp <../../../../../examples/Unsupervised/BinaryRBM.cpp>`.
 
+
+
+Contrastive Divergence Learning -- Theory
++++++++++++++++++++++++++++++++++++++++++
+
+
 .. todo: this tutorial is a stub. Add further information and formulas about CD-k
+
+
+
+Contrastive Divergence Learning -- Code
++++++++++++++++++++++++++++++++++++++++
+
 
 First, we need to include the following files ::
 
 ..sharkcode<Unsupervised/BinaryRBM.cpp,includes>
 
-As an example problem, we consider one of the  predefined benchmark problems in ``RBM/Problems/``,
-the Bars-and-Stripes data set[MacKay2002]_ ::
+As an example problem, we consider one of the predefined benchmark problems in ``RBM/Problems/``,
+namely, the Bars-and-Stripes data set [MacKay2002]_ ::
 
 ..sharkcode<Unsupervised/BinaryRBM.cpp,problem>
 
-Now we can create the RBM. We have to define how many input variables (visible
-units/observable variables) our RBM shall have. This depends on the data set, we want to learn,
-since the number of visible neurons has to correspond to the dimension of the training data.
-Further, we have to choose how many hidden neurons (latent variables) we want. Also to construct the RBM we need to choose
-a random number generator. Since RBM training is time consuming we might later want to start several trials in separate
-instances. In this setup, being able to choose a random number generator is crucial. But now, let's construct the beast::
+Now we can create the RBM. We have to define how many input variables (visible units/observable
+variables) our RBM shall have. This depends on the data set from which we want to learn, since
+the number of visible neurons has to correspond to the dimensionality of the training data.
+Further, we have to choose how many hidden neurons (latent variables) we want. Also, to construct
+the RBM, we need to choose a random number generator. Since RBM training is time consuming, we
+might later want to start several trials in separate instances. In this setup, being able to
+choose a random number generator is crucial. But now, let's construct the beast::
 
 ..sharkcode<Unsupervised/BinaryRBM.cpp,RBM>
 
-Using the RBM, now we can construct the k-step Contrastive Divergence error
-function. Since we want to model Hintons famous algorithm we will set k to 1. Throughout the Library we use the
-convention that all kinds of initialization of the structure must be set before calling `setData`. This allows the gradients
-to adjust their internal structures. For CD-k this is not crucial, but you should get used to it before trying more elaborate
-gradient approximators::
+Using the RBM, we can now construct the k-step Contrastive Divergence error function. Since we
+want to model Hinton's famous algorithm we will set k to 1. Throughout the library we use the
+convention that all kinds of initialization of the structure must be set before calling `setData`.
+This allows the gradients to adjust their internal structures. For CD-k this is not crucial, but
+you should get used to it before trying more elaborate gradient approximators::
 
 ..sharkcode<Unsupervised/BinaryRBM.cpp,cd>
 
-The RBM optimization problem is very special in the sense that the
-error function can not be evaluated exactly for more complex problems
-than trivial toy problems and the gradient can only be estimated. This
-is reflected by the fact that all RBM derivatives have the Flag ``HAS_VALUE`` deactivated. So
-most optimizers won't be able to optimize it. One which is capable of
-optimizing it is the ``GradientDescent`` algorithm, which we will use
-in the following ::
+The RBM optimization problem is special in the sense that the error function can not be
+evaluated exactly for more complex problems than trivial toy problems, and the gradient can
+only be estimated. This is reflected by the fact that all RBM derivatives have the Flag
+``HAS_VALUE`` deactivated. Thus, most optimizers will not be able to optimize it. One which
+is capable of optimizing it is the ``GradientDescent`` algorithm, which we will use in the
+following ::
 
 ..sharkcode<Unsupervised/BinaryRBM.cpp,optimizer>
 
-Since our Problem is small, we actually can evaluate the negative log-likelihood. So we use it at the end to
-evaluate our training success after training several trials ::
+Since our problem is small, we can actually evaluate the negative log-likelihood. So we use
+it at the end to evaluate our training success after training several trials ::
 
 ..sharkcode<Unsupervised/BinaryRBM.cpp,train>
 
@@ -63,7 +85,7 @@ and the result will read something like
     ========
     mean log likelihood: 192.544
 
-the example file for this tutorial can be found in :doxy:`BinaryRBM.cpp`
+The example file for this tutorial can be found in :doxy:`BinaryRBM.cpp`
 
 
 
