@@ -52,9 +52,7 @@ Reading in the data
 ^^^^^^^^^^^^^^^^^^^
 
 Let us consider the
-example program 
-:download:`linearRegressionTutorial.cpp <../../../../../examples/Supervised/example program is
-:download:`linearRegressionTutorial.cpp <../../../../../examples/Supervised/linearRegressionTutorial.cpp>`..cpp>`.
+example program  :download:`linearRegressionTutorial.cpp <../../../../../examples/Supervised/linearRegressionTutorial.cpp>`..cpp>`.
 First, let us read in the data.
 We assume that the inputs and the labels are stored
 in two separate  files, which are passed as command line arguments.
