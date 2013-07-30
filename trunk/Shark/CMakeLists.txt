@@ -158,14 +158,10 @@ message(STATUS "C compiler: " ${CMAKE_C_COMPILER})
 SET(Boost_USE_MULTITHREADED ON)
 ADD_DEFINITIONS( -DBOOST_PARAMETER_MAX_ARITY=15 -DBOOST_FILESYSTEM_VERSION=3 )
 FIND_PACKAGE( Boost 1.45.0 COMPONENTS system date_time filesystem program_options regex signals serialization thread unit_test_framework REQUIRED )
-mark_as_advanced( 
-		  Boost_DIR 
-		  PTHREAD_LIBRARY
-)
 
-include_directories ( ${Boost_INCLUDE_DIRS} )
+include_directories ( ${Boost_INCLUDE_DIR} ) # CI: changed _DIRS to _DIR ... hope that this is always works
 IF( WIN32 )
-	link_directories( ${Boost_LIBRARY_DIRS} )
+	link_directories( ${Boost_LIBRARY_DIR} )
 ELSE( WIN32 )
 	FIND_LIBRARY( PTHREAD_LIBRARY pthread )
 	SET( LINK_LIBRARIES
@@ -173,7 +169,15 @@ ELSE( WIN32 )
 		${PTHREAD_LIBRARY}
 	)
 ENDIF( WIN32 )
-message( STATUS "Using boost from " ${Boost_LIBRARY_DIRS})
+mark_as_advanced( 
+		  Boost_DIR 
+		  PTHREAD_LIBRARY
+)
+mark_as_advanced( CLEAR
+                  Boost_INCLUDE_DIR
+                  Boost_LIBRARY_DIRS
+) 
+message( STATUS "Using boost from " ${Boost_LIBRARY_DIRS} )
 
 #####################################################################
 #		Optionally enable OpenMP                            #
@@ -199,6 +203,7 @@ ENDIF( OPT_ENABLE_OPENMP )
 #####################################################################
 FIND_PACKAGE(HDF5 COMPONENTS C CXX HL QUIET)
 mark_as_advanced( HDF5_DIR ) 
+# mark_as_advanced( CLEAR HDF5_LIBRARY_DIRS DF5_INCLUDE_DIRS ) 
 IF( HDF5_FOUND )
     MESSAGE(STATUS "HDF5...found")
     INCLUDE_DIRECTORIES( ${HDF5_INCLUDE_DIRS} )
