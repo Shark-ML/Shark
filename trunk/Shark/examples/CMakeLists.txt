@@ -20,8 +20,8 @@ CMAKE_POLICY(SET CMP0003 NEW)
 MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 	
 	FILE( READ ${TUT_SRC}.tpp  contents )
-	STRING( REGEX REPLACE "\t*//###[^\n]*\n" "" contents_cleared ${contents})
-	FILE( WRITE ${TUT_SRC}.cpp ${contents_cleared})
+	STRING( REGEX REPLACE "\t*//###[^\n]*\n" "" contents_cleared "${contents}")
+	FILE( WRITE ${TUT_SRC}.cpp "${contents_cleared}")
 	ADD_EXECUTABLE( ${NAME}
 		${TUT_SRC}.cpp
 	)
