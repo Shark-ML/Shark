@@ -31,7 +31,6 @@ foreach(tut ${TutFiles})
 endforeach()
 add_dependencies(doc_creation tut2rst)
 
-# message("${CMAKE_CURRENT_SOURCE_DIR}/doxygen_pages/css/besser.css")
 add_custom_target( doc ALL
 	COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Shark.dox
 	COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS} ${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages ${CMAKE_CURRENT_BINARY_DIR}/sphinx_pages/build/html
