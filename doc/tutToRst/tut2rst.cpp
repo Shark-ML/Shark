@@ -164,5 +164,6 @@ int main(int argc, char** argv)
 	catch (string const& ex)
 	{
 		cout << "  ERROR: " << ex << endl;
+		return 1;
 	}
 }
