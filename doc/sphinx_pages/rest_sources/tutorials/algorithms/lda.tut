@@ -23,7 +23,7 @@ We assume that a data file in csv format is provided as a command line argument.
 As a first step, we inspect and split the data as described in the
 :doc:`nearestNeighbor` tutorial: ::
 
-..sharkcode<Supervised/LDATutorial.cpp,load_data>
+..sharkcode<Supervised/LDATutorial.tpp,load_data>
 
 
 
@@ -33,19 +33,19 @@ Model and learning algorithm
 
 We include the :doxy:`LDA` class ::
 
-..sharkcode<Supervised/LDATutorial.cpp,lda_include>
+..sharkcode<Supervised/LDATutorial.tpp,lda_include>
 
 and define the LDA trainer :: 
 
-..sharkcode<Supervised/LDATutorial.cpp,lda>
+..sharkcode<Supervised/LDATutorial.tpp,lda>
 
 and the linear classifier to be trained by the LDA trainer: ::
 
-..sharkcode<Supervised/LDATutorial.cpp,model>
+..sharkcode<Supervised/LDATutorial.tpp,model>
 
 The model is trained by calling: ::
 
-..sharkcode<Supervised/LDATutorial.cpp,trainer>
+..sharkcode<Supervised/LDATutorial.tpp,trainer>
 
 Evaluating the model
 ^^^^^^^^^^^^^^^^^^^^
@@ -58,11 +58,11 @@ simply computes the fraction of wrong predictions.
 We define the loss for ``unsigned integer`` labels and
 create a new data container for the predictions of our model: ::
 
-..sharkcode<Supervised/LDATutorial.cpp,output_and_loss>
+..sharkcode<Supervised/LDATutorial.tpp,output_and_loss>
 	
 Let's apply the classifier to the training and the test data: ::
 
-..sharkcode<Supervised/LDATutorial.cpp,eval>
+..sharkcode<Supervised/LDATutorial.tpp,eval>
 
 Of course, the accuracy is given by one minus the error.
 In this example, the (parametric) LDA performs worse than the

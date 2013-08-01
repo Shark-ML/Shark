@@ -17,7 +17,7 @@ found in :download:`quickstartTutorial.cpp
 In order to access the LDA, we include its header file and import the Shark
 namespace for convenience. We will also need the header for importing CSV files::
 
-..sharkcode<Supervised/quickstartTutorial.cpp,includes>
+..sharkcode<Supervised/quickstartTutorial.tpp,includes>
 
 Data preparation
 %%%%%%%%%%%%%%%%
@@ -25,7 +25,7 @@ Data preparation
 Next we would like some data to classify. We can use the :doxy:`Dataset`
 class for holding the data, and load the data with ``import_csv``::
 
-..sharkcode<Supervised/quickstartTutorial.cpp,load_data>
+..sharkcode<Supervised/quickstartTutorial.tpp,load_data>
 
 The first line creates a dataset, the data structure used in Shark for holding
 data for supervised learning tasks. Such containers hold pairs
@@ -50,7 +50,7 @@ set aside another part for testing. The next line splits (i.e.,
 removes) a test set from our loaded data and stores it inside a new
 dataset. We choose the training set to be 80% of the available data::
 
-..sharkcode<Supervised/quickstartTutorial.cpp,split_data>
+..sharkcode<Supervised/quickstartTutorial.tpp,split_data>
 
 After this operation, ``data`` is only 80% of its former size, and ``test`` holds the
 remaining 20%. See the :ref:`data tutorials <label_for_data_tutorials>` for similar
@@ -68,11 +68,11 @@ the dimensionality of the input data or the number of classes of our problem, th
 will infer this from the training data itself. The LDA is a separate entity playing
 the role of a trainer. ::
 
-..sharkcode<Supervised/quickstartTutorial.cpp,objects>
+..sharkcode<Supervised/quickstartTutorial.tpp,objects>
 
 To optimize the model given the training data and using a specific trainer we write ::
 
-..sharkcode<Supervised/quickstartTutorial.cpp,train>
+..sharkcode<Supervised/quickstartTutorial.tpp,train>
 
 After this call, our classifier can directly be used to classify data. But we do not
 know how good our solution is, so let's evaluate it.
@@ -85,13 +85,13 @@ One way to evaluate our LDA-trained linear model is to count the number of
 correctly classified test samples. We simply use ``BOOST_FOREACH`` to iterate
 over all key-value pairs of the dataset::
 
-..sharkcode<Supervised/quickstartTutorial.cpp,eval>
+..sharkcode<Supervised/quickstartTutorial.tpp,eval>
 
 Easier, faster, and more flexible ways to evaluate models are facilitated by Shark
 losses and error functions, which will be introduced in the next tutorials.
 In order to print the results (do not forget to include ``iostream``), issue::
 
-..sharkcode<Supervised/quickstartTutorial.cpp,outputs>
+..sharkcode<Supervised/quickstartTutorial.tpp,outputs>
 
 The result should read:
 

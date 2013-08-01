@@ -67,7 +67,7 @@ That  is, we invoke the example program by something like: ::
 
 The code for reading the data may look like this: ::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,load_data>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,load_data>
 
 We read in two ``Data`` objects holding the *l* samples and their
 labels.  Both the input data points and the labels are real vectors
@@ -79,40 +79,40 @@ to a regression data set, which is just another name for
 ``LabeledData<RealVector, RealVector>``.  For using ``import_csv``, we
 need: ::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,csv_include>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,csv_include>
 
 And, of course, we assume: ::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,namespaces>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,namespaces>
 
 Model and learning algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Now we create the linear model: ::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,model>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,model>
 
 We don't need to specify the input or output dimensions of the model as the trainer is capable to figure this out
 by itself. Thus we now only need to declare the algorithm itself to train the model::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,trainer>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,trainer>
 
 Given sample data, this trainer finds optimal model parameters of a
 linear model in the least squares sense as described above. For the
 model and the trainer we need: ::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,regression_include>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,regression_include>
 
 The path reflects the Shark concepts. Of course, the trainer is a
 :doxy:`AbstractTrainer` and every trainer is a (machine learning) ``Algorithm``.
 
 Now we can train the model ::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,train>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,train>
 
 and inspect the model parameters: ::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,inspect>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,inspect>
 
 The output should look like this: ::
 
@@ -134,18 +134,18 @@ Evaluating the model
 After training the model, we can evaluate it. Let's apply it to the
 training data: ::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,apply>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,apply>
 
 We can look at the predictions by ``cout << prediction<< endl;``.
 
 In order to assess the quality of the model, we want to compute
 the mean-squared error. To this end, we need the proper loss ::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,loss>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,loss>
 
 from: ::
 
-..sharkcode<Supervised/linearRegressionTutorial.cpp,loss_include>
+..sharkcode<Supervised/linearRegressionTutorial.tpp,loss_include>
 
 
 The squared loss *L* is defined by *L(y,z)=(y-z)*\ :sup:`2`.  Applied

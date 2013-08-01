@@ -69,12 +69,12 @@ First, let us read in the data
 from the file :download:`C.csv <../../../../../examples/Supervised/data/C.csv>`.
 assuming ::
 
-..sharkcode<Supervised/KNNTutorial.cpp, dataheader>
+..sharkcode<Supervised/KNNTutorial.tpp, dataheader>
 
 
 Then code for reading the data may look like this: ::
 
-..sharkcode<Supervised/KNNTutorial.cpp, dataimport>
+..sharkcode<Supervised/KNNTutorial.tpp, dataimport>
 
 The function ``import_csv`` is used for loading the data from the
 files, as described in the :doc:`../concepts/data/import_data` tutorial.  In this
@@ -86,7 +86,7 @@ the data file (i.e., lines starting with # are ignored).
 
 Let's inspect the data: ::
 
-..sharkcode<Supervised/KNNTutorial.cpp, inspectdata>
+..sharkcode<Supervised/KNNTutorial.tpp, inspectdata>
 
 Now we know that we have 694 data points points. Every protein is
 described by 20 features/attributes and is assigned to one out of 20 classes.
@@ -95,7 +95,7 @@ Next, we split our data into a training and a test set used for
 identifying and evaluating the model, respectively.
 The command ::
 
-..sharkcode<Supervised/KNNTutorial.cpp, splitdata>
+..sharkcode<Supervised/KNNTutorial.tpp, splitdata>
 
 splits the data after the 311th element into two parts. the left part stays in the dataset,
 the right part will now be our test set.
@@ -114,21 +114,21 @@ neighor classifiers which allow to choose which algorithm to use.
 
 The header files for the different algorithms required in this tutorial are::
 
-..sharkcode<Supervised/KNNTutorial.cpp, nnheader>
+..sharkcode<Supervised/KNNTutorial.tpp, nnheader>
 
 Since our dataset has low dimensionality, we can use a tree lookup.
 The standard choice for a tree is a KD-tree [Bentley1975]_,
 which is initialized with the training input data as follows: ::
 
-..sharkcode<Supervised/KNNTutorial.cpp, kdtree>
+..sharkcode<Supervised/KNNTutorial.tpp, kdtree>
 
 Now we generate the KNN-Lookup algorithm for this tree::
 
-..sharkcode<Supervised/KNNTutorial.cpp, treeNN>
+..sharkcode<Supervised/KNNTutorial.tpp, treeNN>
 
 Now defining and training a *K* nearest neighbor classifier with the algorithm is just a single line ::
 
-..sharkcode<Supervised/KNNTutorial.cpp, NNC>
+..sharkcode<Supervised/KNNTutorial.tpp, NNC>
 
 instantiating a  :doxy:`NearestNeighborClassifier` object.
 
@@ -143,7 +143,7 @@ simply computes the fraction of wrong predictions.
 We define the :doxy:`ZeroOneLoss` for ``unsigned integer`` labels and
 apply the classifier to the training and the test data::
 
-..sharkcode<Supervised/KNNTutorial.cpp, eval>
+..sharkcode<Supervised/KNNTutorial.tpp, eval>
 
 Of course, the accuracy is given by one minus the error.
 The training accuracy for *K=1* is trivial, but it is interesting to
