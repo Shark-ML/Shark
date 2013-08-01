@@ -5,6 +5,10 @@ multi-layer perceptron neural networks [Bishop1995]_. The whole functionality ca
 in the doxygen pages of the :doxy:`FFNet` class. It is recommended to read the
 getting started section, especially the introduction about :doc:`../first_steps/general_optimization_tasks`.
 
+For this tutorial the following includes are needed::
+
+..sharkcode<Supervised/FFNNBasicTutorial.tpp,includes>
+
 Defining the Learning Problem
 ------------------------------
 In this tutorial, we want to solve the infamous xor problem using a feed-forward network.
@@ -16,27 +20,7 @@ after generation.
 For this part, we need to include the Dataset and define the problem in a function, which
 we will use shortly::
 
-  #include<shark/Data/Dataset.h>
-  using namespace shark;
-
-  LabeledData<RealVector,unsigned int> xorProblem(){
-    //the 2D xor Problem has 4 patterns, (0,0), (0,1), (1,0), (1,1)
-    std::vector<RealVector> inputs(4,RealVector(2));
-    //the result is 1 if both inputs have a different value, and 0 otherwise
-    std::vector<unsigned int> labels(4);
-
-    unsigned k = 0;
-    for(unsigned i=0; i < 2; i++){
-      for(unsigned j=0; j < 2; j++){
-        inputs[k](0) = i;
-	inputs[k](1) = j;
-        label[k] = (i+j) % 2;
-        k++;
-      }
-    }
-    LabeledData<RealVector,unsigned int> dataset = createLabeledDataFromRange(inputs,labels);
-    return dataset;
-  }
+..sharkcode<Supervised/FFNNBasicTutorial.tpp,problem>
 
 Defining the Network topology
 ------------------------------
@@ -84,19 +68,7 @@ direct connections from the input to the output. We also want a bias
 neuron (i.e., bias or offset parameters).
 All this can be achieved with :doxy:`FFNet::setStructure`::
 
-  #include<shark/Models/FFNet.h>
-
-  //skipping previous code part
-
-  int main(){
-    //feed-forward network with Logistic neurons for hidden and output
-    FFNet<LogisticNeuron,LogisticNeuron> network;
-
-    unsigned numInput=2;
-    unsigned numHidden=2;
-    unsigned numOutput=1;
-    network.setStructure(numInput, numHidden, numOutput);
-  }
+..sharkcode<Supervised/FFNNBasicTutorial.tpp,network_topology>
 
 The method  :doxy:`FFNet::setStructure` is versatile. If we wanted a second hidden layer with 3 neurons, we could simply write::
 
@@ -164,43 +136,14 @@ Training the Network
 After we have defined problem and topology, we can now finally train
 the network. The most frequently used error function for
 training neural networks is arguably the :doxy:`SquaredLoss`, but
-Shark offers also alternatives.
+Shark offers alternatives.
 Since the xor Problem is a classification task, we can
 use the :doxy:`NegativeClassificationLogLikelihood` error to maximize
 the class probability  [Bishop1995]_. For optimizing this function the improved
 resilient backpropagation algorithm ([IgelHüsken2003]_, a faster,
 more robust variant of the seminal Rprop algorithm [Riedmiller1994]_) is used: ::
 
-  #include<shark/Algorithms/GradientDescent/Rprop.h>
-  #include<shark/ObjectiveFunctions/ErrorFunction.h>
-  #include<shark/ObjectiveFunctions/Loss/NegativeClassificationLogLikelihood.h>
-  #include<shark/Models/FFNet.h>
-  using namespace shark;
-  //skipping code of problem definition
-  ...
-  int main(){
-    //create network and initialize weights random uniform
-    FFNet<LogisticNeuron,LogisticNeuron> network;
-    network.setStructure(2,2,1);
-    initRandomUniform(network,-0.1,0.1);
-
-    //get problem data
-    LabeledData<RealVector,unsigned int> dataset = xorProblem();
-
-    //create error function
-    NegativeClassificationLogLikelihood loss;
-    ErrorFunction<RealVector,unsigned int> error(&network,&loss);
-    error.setDataset(dataset);
-
-    //initialize Rprop
-    IRpropPlus optimizer;
-    optimizer.init(error);
-    unsigned numberOfSteps = 10000;
-    for(unsigned step = 0; step != numberOfSteps; ++step){
-        optimizer.step(error);
-    }
-
-  }
+..sharkcode<Supervised/FFNNBasicTutorial.tpp,train>
 
 If you don't know how to use and evaluate the trained model you will find the information in the getting started section.
 
