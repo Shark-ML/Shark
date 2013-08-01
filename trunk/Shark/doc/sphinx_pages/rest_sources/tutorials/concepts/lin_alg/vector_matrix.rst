@@ -12,6 +12,14 @@ So when multiplying a vector from the right side to a matrix, it is assumed to b
 and when multiplied from the left, it becomes a row-vector. Matrices have an orientation 
 that is a 1xn matrix has a different structure than a nx1 matrix.
 
+Furthermore the library differentiates between container, proxies to containers and 
+vector expressions. The typical vector or matrix objects are a container storing 
+the values of the matrix. Proxies reference parts of a container, for example a single row
+of a matrix or a subrange of a vector. And finally there are expressions which represent
+arbitrary computations, for example a matrix-vector product. All of these entities are objects.
+That means that just writing ``A+B`` does not compute the addition of two matrices but only
+an object which can only compute the result. the computations occur only when the expression is assigned
+to a container or proxy. 
 
 We use the following notation for vectors, arguments and scalars:
 
@@ -20,7 +28,8 @@ Symbol           	Meaning
 ======================= ====================================
 A,B			Matrix expression
 x,y			Vector expression
-C,z			Matrix or vector or proxy to a subset of the matrix or vector.
+C,z			Matrix or vector container or proxy to a 
+			subset of the matrix or vector.
 t			Scalar value with the same type as 
 			the elements stored inside the matrix
 i,jk,l,m,n		Integer values
@@ -31,7 +40,9 @@ b			Boolean value
 Matrices and Matrix-Proxies and basic operations
 ------------------------------------------------------
 
-todo: text:
+We first want to describe the fundamental operations that are needed to use the library.
+That is creating vectors and matrices and access their values. furthermore we describe the basic
+operations to create proxies to various parts of a matrix.
 
 ======================================= ==============================================
 Operation/Class           		Effect
@@ -44,7 +55,7 @@ Operation/Class           		Effect
 					By default t is 0.
 ``XMatrix A(m,n,t)``			Creates a mxn matrix with elements initialized to t. By default t is 0.
 ``x.size()``				Dimensionality of x.
-``x.size(), A.size1(),A.size2()``	Size of the first (number of rows) and second(number of columns) dimension of A.
+`` A.size1(),A.size2()``		Size of the first (number of rows) and second(number of columns) dimension of A.
 ``A(i,j)``				Returns the ij-th element of the matrix A.
 ``x(i)``				Returns the i-th element of the vector x.
 ``row(A,k)``				Returns the k-th row of A as a vector-proxy.
@@ -74,7 +85,7 @@ Operation           		Effect
 ``noalias(C) += E, ...``        Equivalent to ``C = C+E,...`` without creating a temporary value.
 =============================== ==============================================
 
-Arithmetic Operations
+Arithmetic Operations and Expressions
 --------------------------------------------------
 In the following we present a list of arithmetic operations of vectors and matrices.
 
@@ -88,30 +99,30 @@ It is checked in debug mode that both arguments have the same size.
 The operations are the same for vectors and matrices and 
 we only present the matrix version:
 
-======================= ====================================
-Operation           	Effect
-======================= ====================================
-``t*B, B*t``      	scalar multiplication: :math:`t \cdot A_{ij}` and :math:`A_{ij}\cdot t`.
-``B/t``      		scalar division: :math:`A_{ij}/t`.
-``A+B``      		Elementwise Addition: :math:`A_{ij}+B_{ij}`.
-``A-B``      		Elementwise Subtraction: :math:`A_{ij}-B_{ij}`.
-``A*B, element_prod``   Elementwise Multiplication or Hadamard-Product: 
-			:math:`A_{ij} \cdot B_{ij}`.
-``A/B, element_dif``	Elementwise division: :math:`A_{ij} \cdot B_{ij}`.
-``safe_div(A,B,x)``     Elementwise division with check for division for zero. 
-			If :math:`B_{ij} = 0` than the result is x.
-``-A``			Negates A: :math:`-A_{ij}`.
-``exp(A), log(A),...``  Math functions applied on every element of the matrix,
-			that is for example :math:`exp(A_{ij})`. Supported are:
-			exp,log,abs, tanh and sqrt.
-``pow(A,t)``		Applies the pow function on every element of A: :math:`pow(A_{ij},t)`
-``sqr(A)``		Squares every entry of A, equivalent to A*A.
-``sigmoid(A)``		Applies the sigmoid function :math:`f(x)=\frac{1}{1+e^{-x}}`
-			to every element of A.
-``softPlus(A)``		Applies the softplus function :math:`f(x)=log(1+e^{x})`
-			to every element of A.
-``trans(A)``		transposes the matrix A.
-======================= ====================================
+=============================== ====================================
+Operation           		Effect
+=============================== ====================================
+``t*B, B*t``      		scalar multiplication: :math:`t \cdot A_{ij}` and :math:`A_{ij}\cdot t`.
+``B/t``      			scalar division: :math:`A_{ij}/t`.
+``A+B``      			Elementwise Addition: :math:`A_{ij}+B_{ij}`.
+``A-B``      			Elementwise Subtraction: :math:`A_{ij}-B_{ij}`.
+``A*B, element_prod``   	Elementwise Multiplication or Hadamard-Product: 
+				:math:`A_{ij} \cdot B_{ij}`.
+``A/B, element_div(A,B)``	Elementwise division: :math:`A_{ij} \cdot B_{ij}`.
+``safe_div(A,B,x)``     	Elementwise division with check for division for zero. 
+				If :math:`B_{ij} = 0` than the result is x.
+``-A``				Negates A: :math:`-A_{ij}`.
+``exp(A), log(A),...``  	Math functions applied on every element of the matrix,
+				that is for example :math:`exp(A_{ij})`. Supported are:
+				exp,log,abs, tanh and sqrt.
+``pow(A,t)``			Applies the pow function on every element of A: :math:`pow(A_{ij},t)`
+``sqr(A)``			Squares every entry of A, equivalent to A*A.
+``sigmoid(A)``			Applies the sigmoid function :math:`f(x)=\frac{1}{1+e^{-x}}`
+				to every element of A.
+``softPlus(A)``			Applies the softplus function :math:`f(x)=log(1+e^{x})`
+				to every element of A.
+``trans(A)``			transposes the matrix A.
+=============================== ====================================
 
 Be aware that ``A*B`` is not the same as the typical matrix-product. For the typical 
 matrix-vector operations we use the following syntax:
@@ -140,7 +151,12 @@ like A+B or A*B it must be stored in a intermediate matrix first. Always try to
 use the fast variants if possible as they can improve the performance of the
 computations by an order of magnitude or more.
 
-Initialization framework for ublas vectors
+
+Examples
+-----------------------------------------------------
+todo
+
+Initialization framework for vectors
 ------------------------------------------------------
 
 Initializing vectors using the bracket notation ``vec(i)`` is cumbersome when you have to initialize bigger vectors.
