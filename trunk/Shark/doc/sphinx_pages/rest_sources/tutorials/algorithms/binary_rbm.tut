@@ -15,9 +15,8 @@ already read the introduction to the RBM module :doc:`rbm_module`.
 In the following, we will train and evaluate a Binary RBM using Contrastive Divergence
 (CD-1) learning on a toy example. We choose this example as a starting point because
 its setup is quite common, and we provide a set of predefined types for it for convenience.
-The code of this tutorial can be found in
-:download:`BinaryRBM.cpp <../../../../../examples/Unsupervised/BinaryRBM.cpp>`.
 
+The example file for this tutorial can be found in :doxy:`BinaryRBM.cpp`
 
 
 Contrastive Divergence Learning -- Theory
@@ -34,12 +33,12 @@ Contrastive Divergence Learning -- Code
 
 First, we need to include the following files ::
 
-..sharkcode<Unsupervised/BinaryRBM.cpp,includes>
+..sharkcode<Unsupervised/BinaryRBM.tpp,includes>
 
 As an example problem, we consider one of the predefined benchmark problems in ``RBM/Problems/``,
 namely, the Bars-and-Stripes data set [MacKay2002]_ ::
 
-..sharkcode<Unsupervised/BinaryRBM.cpp,problem>
+..sharkcode<Unsupervised/BinaryRBM.tpp,problem>
 
 Now we can create the RBM. We have to define how many input variables (visible units/observable
 variables) our RBM shall have. This depends on the data set from which we want to learn, since
@@ -49,7 +48,7 @@ the RBM, we need to choose a random number generator. Since RBM training is time
 might later want to start several trials in separate instances. In this setup, being able to
 choose a random number generator is crucial. But now, let's construct the beast::
 
-..sharkcode<Unsupervised/BinaryRBM.cpp,RBM>
+..sharkcode<Unsupervised/BinaryRBM.tpp,RBM>
 
 Using the RBM, we can now construct the k-step Contrastive Divergence error function. Since we
 want to model Hinton's famous algorithm we will set k to 1. Throughout the library we use the
@@ -57,7 +56,7 @@ convention that all kinds of initialization of the structure must be set before 
 This allows the gradients to adjust their internal structures. For CD-k this is not crucial, but
 you should get used to it before trying more elaborate gradient approximators::
 
-..sharkcode<Unsupervised/BinaryRBM.cpp,cd>
+..sharkcode<Unsupervised/BinaryRBM.tpp,cd>
 
 The RBM optimization problem is special in the sense that the error function can not be
 evaluated exactly for more complex problems than trivial toy problems, and the gradient can
@@ -66,16 +65,16 @@ only be estimated. This is reflected by the fact that all RBM derivatives have t
 is capable of optimizing it is the ``GradientDescent`` algorithm, which we will use in the
 following ::
 
-..sharkcode<Unsupervised/BinaryRBM.cpp,optimizer>
+..sharkcode<Unsupervised/BinaryRBM.tpp,optimizer>
 
 Since our problem is small, we can actually evaluate the negative log-likelihood. So we use
 it at the end to evaluate our training success after training several trials ::
 
-..sharkcode<Unsupervised/BinaryRBM.cpp,train>
+..sharkcode<Unsupervised/BinaryRBM.tpp,train>
 
 Now we can print the results as usual with ::
 
-..sharkcode<Unsupervised/BinaryRBM.cpp,output>
+..sharkcode<Unsupervised/BinaryRBM.tpp,output>
 
 and the result will read something like
 
@@ -84,9 +83,4 @@ and the result will read something like
     RESULTS:
     ========
     mean log likelihood: 192.544
-
-The example file for this tutorial can be found in :doxy:`BinaryRBM.cpp`
-
-
-
-
+    

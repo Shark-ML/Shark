@@ -63,7 +63,7 @@ Building blocks & includes
 We first list all includes for this tutorial and then motivate their
 usage for each one::
 
-..sharkcode<Supervised/StoppingCriteria.cpp,includes>
+..sharkcode<Supervised/StoppingCriteria.tpp,includes>
 
 As before, ``Csv.h`` is included for reading in data. The header ``FFNet.h`` is needed
 because we want to train a neural network to distinguish between two classes.
@@ -94,11 +94,11 @@ the entire training process given an ObjectiveFunction, Optimizer, and StoppingC
 Overall, we use the following function to create, train and evaluate our neural
 network under a given stopping criterion::
 
-..sharkcode<Supervised/StoppingCriteria.cpp,experiment>
+..sharkcode<Supervised/StoppingCriteria.tpp,experiment>
 
 To run the experiment, we need to load a dataset and split it into training, validation and test set:
 
-..sharkcode<Supervised/StoppingCriteria.cpp,load>
+..sharkcode<Supervised/StoppingCriteria.tpp,load>
 
 Evaluation
 ++++++++++
@@ -116,7 +116,7 @@ The simplest stopping heuristic is halting after a fixed number of iterations.
 trivial functionality for within the framework of an AbstractStoppingCriterion.
 We try out several different numbers of steps::
 
-..sharkcode<Supervised/StoppingCriteria.cpp,max_iter>
+..sharkcode<Supervised/StoppingCriteria.tpp,max_iter>
 
 Progress on training error
 &&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -137,7 +137,7 @@ adapts it step size and and hence is somewhat less vulnerable to these
 problems. After all the groundwork has been done, we can test this
 stopping criterion with only two lines of code::
 
-..sharkcode<Supervised/StoppingCriteria.cpp,train_error>
+..sharkcode<Supervised/StoppingCriteria.tpp,train_error>
 
 
 Progress on a validation set
@@ -160,7 +160,7 @@ mentioned therein.
 
 In summary, this code uses the progress on a validation set to decide when to stop::
 
-..sharkcode<Supervised/StoppingCriteria.cpp,generalization_quotient>
+..sharkcode<Supervised/StoppingCriteria.tpp,generalization_quotient>
 
 
 
@@ -169,7 +169,7 @@ Printing the results
 
 Printing all variables of type ``double`` defined in the snippets above, we get
 
-..sharkcode<Supervised/StoppingCriteria.cpp,output>
+..sharkcode<Supervised/StoppingCriteria.tpp,output>
 
 
 

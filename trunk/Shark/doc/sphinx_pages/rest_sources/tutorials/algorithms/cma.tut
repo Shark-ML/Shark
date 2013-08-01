@@ -29,16 +29,16 @@ Thee code for this tutorial can be found in
 :download:`CMASimple.cpp <../../../../../examples/EA/SOO/CMASimple.cpp>`.
 First of all, the following header files are required::
 
-..sharkcode<EA/SOO/CMASimple.cpp,includes>
+..sharkcode<EA/SOO/CMASimple.tpp,includes>
 
 Next, an instance of the objective function is created and configured
 for a two-dimensional search space::
 
-..sharkcode<EA/SOO/CMASimple.cpp,problem>
+..sharkcode<EA/SOO/CMASimple.tpp,problem>
 
 Thereafter, the optimizer is instantiated and initialized for the objective function instance::
 
-..sharkcode<EA/SOO/CMASimple.cpp,optimizer>
+..sharkcode<EA/SOO/CMASimple.tpp,optimizer>
 
 Here, we delegate the setup of constants and initialization of the
 algorithm's state completely to the implementation.  It tries to find a suitable estimate for the internal parameters,
@@ -47,7 +47,7 @@ class :doxy:`CMA` offers an additional init-method that allows for
 fine grained control over the initial algorithm configuration. 
 Afterwards we can use the CMA to find a solution which is good enough and print the optimization path::
 
-..sharkcode<EA/SOO/CMASimple.cpp,train>
+..sharkcode<EA/SOO/CMASimple.tpp,train>
 
 In general, the result of an iteration of a single-objective optimizer
 is a tuple consisting of the best known search point and its
