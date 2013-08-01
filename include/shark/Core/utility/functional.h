@@ -46,6 +46,17 @@ void partial_shuffle(RandomAccessIterator begin, RandomAccessIterator middle, Ra
 }
 
 ///\brief random_shuffle algorithm which stops after acquiring the random subsequence for [begin,middle)
+template<class Iterator, class Rng>
+void shuffle(Iterator begin, Iterator end, Rng& rng){
+	using std::swap;
+	Iterator next = begin;
+	for (std::size_t index = 2; ++next != end; ++index){
+	    swap(*next, *(begin + rng(index)));
+	}
+}
+
+
+///\brief random_shuffle algorithm which stops after acquiring the random subsequence for [begin,middle)
 template<class RandomAccessIterator>
 void partial_shuffle(RandomAccessIterator begin, RandomAccessIterator middle, RandomAccessIterator end){
 	DiscreteUniform<Rng::rng_type> uni(Rng::globalRng,0,1);
