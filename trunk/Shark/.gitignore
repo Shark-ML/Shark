@@ -217,7 +217,12 @@ SharkTargets.cmake
 /doc/sphinx_pages/build
 
 # /doc/sphinx_pages/rest_sources
+doc/sphinx_pages/rest_sources/tutorials/algorithms/*.rst
 doc/sphinx_pages/rest_sources/tutorials/first_steps/hello_shark.rst
+doc/sphinx_pages/rest_sources/tutorials/first_steps/general_optimization_tasks.rst
+doc/sphinx_pages/rest_sources/tutorials/first_steps/when_to_stop.rst
+
+
 
 # /examples/
 /examples/CMakeFiles
@@ -225,6 +230,13 @@ doc/sphinx_pages/rest_sources/tutorials/first_steps/hello_shark.rst
 /examples/Makefile
 /examples/CTestTestfile.cmake
 /examples/cmake_install.cmake
+examples/Core/*.cpp
+examples/EA/MOO/*.cpp
+examples/EA/SOO/*.cpp
+examples/Statistics/*.cpp
+examples/Statistics/
+examples/Supervised/*.cpp
+examples/Unsupervised/*.cpp
 
 # /examples/ExampleProject/
 /examples/ExampleProject/CMakeLists.txt
