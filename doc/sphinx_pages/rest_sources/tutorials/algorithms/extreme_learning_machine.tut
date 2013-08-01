@@ -14,48 +14,35 @@ ELM.
 
 For the ELM, we need the following include files: ::
 
-  #include <shark/Models/LinearModel.h>
-  #include <shark/Models/ConcatenatedModel.h>
-  #include <shark/Models/FFNet.h>
-  #include <shark/Rng/Normal.h>
-  #include <shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h>
-  #include <shark/Algorithms/Trainers/LinearRegression.h>
+..sharkcode<Supervised/elmTutorial.tpp,includes>
   
 To prevent that single inputs with high variance dominate the behaviour of the ELM, the inputs are required to 
 have zero mean and unit variance. So we need a model which applies this transformation to the data. 
-This is a linear transformation which can be learned by an affine linear model using the proper trainer ::
+This is a linear transformation which can be learned by an affine linear model using the proper trainer::
 
-  Normalizer<> normalizer;
-  NormalizeComponentsUnitVariance<> normalizingTrainer;
-  normalizingTrainer.train(normalizer,data.inputs());
+..sharkcode<Supervised/elmTutorial.tpp,normalization>
   
 Now we can create the hidden layer of the ELM. For this we abuse the :doxy:`FFNet`. We define it to have no hidden 
 neurons, so the weights between input and sigmoidal output neurons are the random weights of the ELM. 
 Next we call :doxy:`initRandomUniform` to initialize the ELM with uniform weights. You should never forget 
 to initialize the seed for the random number generator befor using it! ::
 
-  Rng::seed(42);
-  FFNet<LogisticNeuron,LogisticNeuron> elmHidden;
-  elmHidden.setStructure(inputDim,0,hiddenNeurons);
-  initRandomUniform(elmHidden,0,1);
+..sharkcode<Supervised/elmTutorial.tpp,FFNetStructure>
 
 Next we must concatenate the normalizer with the hidden units ::
 
-  ConcatenatedModel<RealVector,RealVector> elm = normalizer >> elmHidden;
+..sharkcode<Supervised/elmTutorial.tpp,normalizer_concatenate>
 
 Now that we have the hidden Layer of the ELM, we can train the output layer. Since the output weights of the ELM
 are linear, we can use linear regression to train them. The best way to do is, is to propagate the training data
 forward through the hidden layer and use the outputs as inputdata for the linear regression ::
 
-  RegressionDataset transformedData(elm(data.inputs()),data.labels());
-  LinearModel<> elmOutput;
-  LinearRegression trainer;
-  trainer.train(elmOutput, transformedData);
-  
+..sharkcode<Supervised/elmTutorial.tpp,train>
+
 After training is done, the last thing we have to do is concatenate the hidden units with the outputs and present
 our shiny new elm to the world! ::
   
-  elm = normalizer >> elmHidden >> elmOutput;
+..sharkcode<Supervised/elmTutorial.tpp,elm>
   
 The downside of this technique is, that in the end  4 objects are needed for a working ELM: the normalizer, 
 the hidden units, the output networks and the concatenated model which put the pieces together. So it
