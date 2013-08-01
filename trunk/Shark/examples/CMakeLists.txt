@@ -18,10 +18,18 @@ CMAKE_POLICY(SET CMP0003 NEW)
 #	to ${NAME_Log.xml} in ${SHARK}/Test/bin.
 #####################################################################
 MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
+
+	#generate cpp file if needed
+	if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.cpp" 
+		OR ("${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp" 
+		IS_NEWER_THAN  "${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.cpp")
+	)
+		message("generate ${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.cpp")
+		FILE( READ ${TUT_SRC}.tpp  contents )
+		STRING( REGEX REPLACE "\t*//###[^\n]*\n" "" contents_cleared "${contents}")
+		FILE( WRITE ${TUT_SRC}.cpp "${contents_cleared}")
+	ENDIF()
 	
-	FILE( READ ${TUT_SRC}.tpp  contents )
-	STRING( REGEX REPLACE "\t*//###[^\n]*\n" "" contents_cleared "${contents}")
-	FILE( WRITE ${TUT_SRC}.cpp "${contents_cleared}")
 	ADD_EXECUTABLE( ${NAME}
 		${TUT_SRC}.cpp
 	)
