@@ -27,15 +27,13 @@ the k-means algorithm.
 Sample clustering problem: Old Faithful
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-First, we load some sample data: ::
+For this tutorial we need to include the following files::
 
+..sharkcode<Unsupervised/KMeansTutorial.tpp,includes>
 
-  #include <shark/Data/Csv.h>
+First, we load some sample data::
 
-  ...
-
-  import_csv(data, "data/faithful.csv", " ");
-
+..sharkcode<Unsupervised/KMeansTutorial.tpp,import>
 
 Inspired by  [Bishop2006]_,
 we consider the Old Faithful data set
@@ -59,28 +57,16 @@ The data looks like this:
 
 
 It is advisable to normalize the data before clustering,
-see the :doc:`../concepts/data/normalization` tutorial: ::
+see the :doc:`../concepts/data/normalization` tutorial::
 
-  #include <shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h>
-
-  ...
-
-  Normalizer<> normalizer;
-  NormalizeComponentsUnitVariance<> normalizingTrainer;
-  normalizingTrainer.train(normalizer, data);
-  transform(data, normalizer);
+..sharkcode<Unsupervised/KMeansTutorial.tpp,normalization>
 
 Computing the cluster centers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Now k-means clustering works like this: ::
 
-  #include <shark/Algorithms/KMeans.h>
-
-  ...
-
-  Centroids centroids;
-  size_t iterations = kMeans(data, 2, centroids);
+..sharkcode<Unsupervised/KMeansTutorial.tpp,clustering>
 
 The cluster centers are stored in the :doxy:`Centroids` class.  The
 number ``2`` here specifies the number k of clusters.  The cluster
@@ -94,31 +80,21 @@ initial centroids in the first iteration of the algorithm.
 If the centroids are not initialized before they are passed to :doxy:`kMeans`, they are
 initialized with the first k data points.
 
-The class/cluster centers (centroids) can be assessed as follows: ::
+The class/cluster centers (centroids) can be assessed as follows::
 
-	vector<RealVector> const& c = centroids.centroids();
-	cout << c[0] << endl;
-	cout << c[1] << endl;
+..sharkcode<Unsupervised/KMeansTutorial.tpp,print_cluster_means>
 
 
 Clustering
 ^^^^^^^^^^
 The centroids can now be used to cluster the data.
-We do a hard clustering by: ::
+We do a hard clustering by::
 
+..sharkcode<Unsupervised/KMeansTutorial.tpp,assign_cluster>
 
-  #include <shark/Models/Clustering/HardClusteringModel.h>
+The points in the clusters can, for example, be assessed as follows::
 
-  ...
-
-  HardClusteringModel<RealVector> model(&centroids);
-  Data<unsigned> clusters;
-  model.eval(data, clusters);
-
-The points in the first cluster can, for example, be assessed as follows: ::
-
-	for(unsigned i=0; i<data.size(); i++)
-		if(clusters(i))cout <<  data(i) << endl;
+..sharkcode<Unsupervised/KMeansTutorial.tpp,print_cluster_assignment>
 
 The result of the clustering looks like this (the blue crosses
 indicate the class centers):

@@ -23,11 +23,13 @@
  */
 //===========================================================================
 
-#include <shark/Data/Csv.h>
-#include <shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h>
+//###begin<includes>
+#include <shark/Data/Csv.h> //load the csv file
+#include <shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h> //normalize
 
-#include <shark/Algorithms/KMeans.h>
-#include <shark/Models/Clustering/HardClusteringModel.h>
+#include <shark/Algorithms/KMeans.h> //k-means algorithm
+#include <shark/Models/Clustering/HardClusteringModel.h>//model performing hard clustering of points
+//###end<includes>
 
 #include <iostream>
 
@@ -42,7 +44,9 @@ int main(int argc, char **argv) {
 	// read data
 	UnlabeledData<RealVector> data;
 	try {
+	//###begin<import>
 		import_csv(data, argv[1], " ");
+	//###end<import>
 	} 
 	catch (...) {
 		cerr << "unable to read data from file " <<  argv[1] << endl;
@@ -54,36 +58,45 @@ int main(int argc, char **argv) {
 	cout << "number of data points: " << elements << " dimensions: " << dataDimension(data) << endl;
 
 	// normalize data
+	//###begin<normalization>
 	Normalizer<> normalizer;
 	NormalizeComponentsUnitVariance<> normalizingTrainer;
 	normalizingTrainer.train(normalizer, data);
 	data = normalizer(data);
+	//###end<normalization>
 
 	// compute centroids using k-means clustering
+	//###begin<clustering>
 	Centroids centroids;
 	size_t iterations = kMeans(data, 2, centroids);
-
+	//###end<clustering>
 	// report number of iterations by the clustering algorithm
 	cout << "iterations: " << iterations << endl;
 
 	// write cluster centers/centroids
+	//###begin<print_cluster_means>
 	Data<RealVector> const& c = centroids.centroids();
 	cout<<c<<std::endl;
+	//###end<print_cluster_means>
 
 	// cluster data
+	//###begin<assign_cluster>
 	HardClusteringModel<RealVector> model(&centroids);
 	Data<unsigned> clusters = model(data);
-
+	//###end<assign_cluster>
+	
 	// write results to files
 	ofstream c1("cl1.csv");
 	ofstream c2("cl2.csv");
 	ofstream cc("clc.csv");
+	//###begin<print_cluster_assignment>
 	for(std::size_t i=0; i != elements; i++) {
 		if(clusters.element(i)) 
 			c1 << data.element(i)(0) << " " << data.element(i)(1) << endl;
 		else 
 			c2 << data.element(i)(0) << " " << data.element(i)(1) << endl;
 	}
+	//###end<print_cluster_assignment>
 	cc << c.element(0)(0) << " " << c.element(0)(1) << endl;
 	cc << c.element(1)(0) << " " << c.element(1)(1) << endl;
 }
