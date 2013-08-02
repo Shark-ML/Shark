@@ -64,6 +64,6 @@ int main(){
 
 	// evaluate solution found by training
 	network.setParameterVector(optimizer.solution().point); // set weights to weights found by learning
-	prediction = network(dataset.inputs());
+	Data<RealVector> prediction = network(dataset.inputs());
 	cout << "classification error after learning:\t" << loss01.eval(dataset.labels(), prediction) << endl;
 }
