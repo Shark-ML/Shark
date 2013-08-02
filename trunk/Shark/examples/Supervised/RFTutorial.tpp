@@ -25,10 +25,11 @@
  */
 //===========================================================================
 
-#include <shark/Data/Csv.h>
-#include <shark/Algorithms/Trainers/RFTrainer.h>
-
-#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+//###begin<includes>
+#include <shark/Data/Csv.h> //importing the file
+#include <shark/Algorithms/Trainers/RFTrainer.h> //the random forest trainer
+#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //zero one loss for evaluation
+//###end<includes>
 
 #include <iostream> 
 
@@ -39,14 +40,15 @@ using namespace shark;
 int main() {
 
 	//*****************LOAD AND PREPARE DATA***********************//
-	//Read data
+	//Read Sample data set C.csv
+	
+	//###begin<import>
 	ClassificationDataset data;
-	//Sample data set C.csv
 	import_csv(data, "data/C.csv", LAST_COLUMN, " ", "#");
-
 
 	//Split the dataset into a training and a test dataset
 	ClassificationDataset dataTest = splitAtElement(data,311);
+	//###end<import>
 
 	cout << "Training set - number of data points: " << data.numberOfElements()
 		<< " number of classes: " << numberOfClasses(data)
@@ -56,18 +58,20 @@ int main() {
 		<< " number of classes: " << numberOfClasses(dataTest)
 		<< " input dimension: " << inputDimension(dataTest) << endl;
 
+	//Generate a random forest
+	//###begin<train>
 	RFTrainer trainer;
 	RFClassifier model;
-
-	//Train the model
 	trainer.train(model, data);
+	//###end<train>
 
 	// evaluate Random Forest classifier
+	//###begin<eval>
 	ZeroOneLoss<unsigned int, RealVector> loss;
 	Data<RealVector> prediction = model(data.inputs());
 	cout << "Random Forest on training set accuracy: " << 1. - loss.eval(data.labels(), prediction) << endl;
 
 	prediction = model(dataTest.inputs());
 	cout << "Random Forest on test set accuracy:     " << 1. - loss.eval(dataTest.labels(), prediction) << endl;
-
+	//###end<eval>
 }
