@@ -19,7 +19,9 @@ class MultiTaskProblem : public LabeledDataDistribution<InputType, unsigned int>
 public:
 	MultiTaskProblem()
 	{
-		m_task = { true, true, true };
+		m_task[0] = true;
+		m_task[1] = true;
+		m_task[2] = true;
 	}
 
 	void setTasks(bool task0, bool task1, bool task2)
@@ -32,14 +34,16 @@ public:
 	void draw(InputType& input, unsigned int& label) const
 	{
 		size_t taskindex = 0;
-		do { taskindex = Rng::uniform(0, 2); } while (! m_task[taskindex]);
+		do {
+			taskindex = Rng::uni(0, 2);
+		} while (! m_task[taskindex]);
 		double x1 = Rng::gauss();
 		double x2 = 3.0 * Rng::gauss();
 		unsigned int y = (x1 > 0.0) ? 1 : 0;
 		double alpha = 0.05 * M_PI * taskindex;
 		input.input.resize(2);
 		input.input(0) = cos(alpha) * x1 - sin(alpha) * x2;
-		input.input(1) = sin(alpha) * x1 + cos(alpha) * x2
+		input.input(1) = sin(alpha) * x1 + cos(alpha) * x2;
 		input.task = taskindex;
 		label = y;
 	}
@@ -52,10 +56,10 @@ protected:
 int main(int argc, char** argv)
 {
 	// experiment settings
-	unsigned int ell_train = 1000;    // number of training data point from tasks 0 and 1
-	unsigned int ell_test = 1000;     // number of test data points from task 2
-	double C = 1.0;                   // regularization parameter
-	double gamma = 0.5;               // kernel bandwidth parameter
+	unsigned int ell_train = 1000;    	// number of training data point from tasks 0 and 1
+	unsigned int ell_test = 1000;     	// number of test data points from task 2
+	double C = 1.0;                   		// regularization parameter
+	double gamma = 0.5;               	// kernel bandwidth parameter
 
 	// generate data
 	MultiTaskProblem problem;
@@ -66,15 +70,17 @@ int main(int argc, char** argv)
 
 	// merge all inputs into a single data object
 	Data<InputType> data(ell_train + ell_test);
-	for (size_t i=0; i<ell_train; i++) data.element(i) = training.inputs().element(i);
-	for (size_t i=0; i<ell_test; i++) data.element(ell_train + i) = test.inputs().element(i);
+	for (size_t i=0; i<ell_train; i++) 
+		data.element(i) = training.inputs().element(i);
+	for (size_t i=0; i<ell_test; i++) 
+		data.element(ell_train + i) = test.inputs().element(i);
 
 	// create kernel objects
 	GaussianRbfKernel<RealVector> inputKernel(gamma);   // Gaussian kernel on inputs
 	GaussianTaskKernel<RealVector> taskKernel(          // task similarity kernel
 			data,         // all inputs with task indices, no labels
 			3,            // total number of tasks
-			inputkernel,  // base kernel for input similarity
+			inputKernel,  // base kernel for input similarity
 			gamma);       // bandwidth for task similarity kernel
 	MultiTaskKernel<RealVector> multiTaskKernel(&inputKernel, &taskKernel);
 

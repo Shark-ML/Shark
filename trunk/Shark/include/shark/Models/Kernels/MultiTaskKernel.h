@@ -239,11 +239,11 @@ protected:
 			for (std::size_t j=0; j<i; j++)
 			{
 				const std::size_t task_j = m_data.element(j).task;
-				const double k = m_inputkernel.eval(m_data.inputs().element(i), m_data.inputs().element(j));
+				const double k = m_inputkernel.eval(m_data.element(i).input, m_data.element(j).input);
 				base_type::m_matrix(task_i, task_j) += k;
 				base_type::m_matrix(task_j, task_i) += k;
 			}
-			const double k = m_inputkernel.eval(m_data.inputs().element(i), m_data.inputs().element(i));
+			const double k = m_inputkernel.eval(m_data.element(i).input, m_data.element(i).input);
 			base_type::m_matrix(task_i, task_i) += k;
 		}
 		for (std::size_t i=0; i<tasks; i++)
