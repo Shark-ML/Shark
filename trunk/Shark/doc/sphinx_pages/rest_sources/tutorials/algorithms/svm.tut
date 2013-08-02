@@ -59,20 +59,17 @@ instead of a simple :math:`y` in the hinge loss definition.
 Support Vector Machines in Shark
 --------------------------------
 
+For this tutorial the following include files are needed::
+
+..sharkcode<Supervised/CSvmTutorial.tpp,includes>
+
 Toy problem
 ^^^^^^^^^^^
 
 In this tutorial, we consider an artificial binary benchmark classification
 problem shipped with the Shark library::
 
-   #include <shark/Data/DataDistribution.h>
-   ...
-   unsigned int ell = 500;     // number of training data point
-   unsigned int tests = 10000; // number of test data points
-
-   Chessboard prob; // artificial benchmark data
-   ClassificationDataset training(prob, ell);
-   ClassificationDataset test(prob, tests);
+..sharkcode<Supervised/CSvmTutorial.tpp,problem>
 
 
 
@@ -91,10 +88,7 @@ consider the standard Gaussian/RBF kernel
 
 by writing::
 
-  #include <shark/Models/Kernels/GaussianRbfKernel.h>
-
-  double gamma = 0.5;         // kernel bandwidth parameter
-  GaussianRbfKernel<> kernel(gamma); // Gaussian kernel
+..sharkcode<Supervised/CSvmTutorial.tpp,kernel>
 
 All kernels such as the :doxy:`GaussianRbfKernel` are derived from the
 base class :doxy:`AbstractKernelFunction`.
@@ -102,7 +96,7 @@ base class :doxy:`AbstractKernelFunction`.
 Our model is now a kernel expansion.
 Given the previously defined kernel, the definition ::
 
-  KernelExpansion<RealVector> ke(&kernel, bias); // (affine) linear function in kernel-induced feature space
+..sharkcode<Supervised/CSvmTutorial.tpp,model>
 
 specifies a model from
 :math:`\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}` or
@@ -111,10 +105,7 @@ depending on whether the Boolean flag ``bias`` is false or true.
 
 Training the machine is done by::
 
-   #include <shark/Algorithms/Trainers/SvmTrainer.h>
-   ...
-   CSvmTrainer<RealVector> trainer(&kernel, C);
-   trainer.train(ke, training);
+..sharkcode<Supervised/CSvmTutorial.tpp,trainer>
 
 Here ``C`` denotes the regularization parameter (the SVM uses the 1-norm
 penalty for target margin violations by default).
@@ -165,27 +156,16 @@ Evaluating the model
 ^^^^^^^^^^^^^^^^^^^^
 
 After training the model, we can evaluate it.  As a performance
-measure, we consider the standard 0-1 loss :math:`L_{0-1}(y,z)`::
+measure, we consider the standard 0-1 loss :math:`L_{0-1}(y,z)`
+which we apply to training and test data::
 
-  #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
-  ...
-  ZeroOneLoss<unsigned int, RealVector> loss; // 0-1 loss
-  Data<RealVector> output;  // real-valued output of the machine
+..sharkcode<Supervised/CSvmTutorial.tpp,eval>
 
 Note the slight differences compared to the :doc:`nearestNeighbor` and
 :doc:`lda` tutorials. We consider the real-valued output of the SVM
 and not the binary decision (see discussion below). Therefore, we
 write ``ZeroOneLoss<unsigned int, RealVector>`` indicating that
 real-valued output is compared to ``unsigned int`` labels.
-
-Now we apply the classifier to the training and the test data::
-
-    ke.eval(training.inputs(), output); // evaluate on training set
-    double train_error = loss.eval(training.labels(), output);
-    cout << "training error:\t" <<  train_error << endl;
-    ke.eval(test.inputs(), output); // evaluate on test set
-    double test_error = loss.eval(test.labels(), output);
-    cout << "test error:\t" << test_error << endl;
 
 
 From decision function to hypothesis
@@ -198,30 +178,17 @@ Alternatively, we can consider a combined model of the SVM kernel
 expansion and a converter mapping the SVM output to :math:`Y=\{0,1\}`.
 After including ::
 
-  #include <shark/Models/Converter.h>
-  #include <shark/Models/ConcatenatedModel.h>
+..sharkcode<Supervised/CSvmWithThresholdConverter.tpp,additional_includes>
 
 we can define this concatenated model by::
 
-  ThresholdConverter conv;
-  ConcatenatedModel<RealVector, unsigned int> svm(&ke, &conv);
+..sharkcode<Supervised/CSvmWithThresholdConverter.tpp,converter>
 
 Because the concatenated model now outputs proper labels,
 we have to change the loss function and the output container in our
-example to ::
+example for evaluation to ::
 
-    ZeroOneLoss<unsigned int, unsigned int> loss;
-    Data<unsigned int> output;
-
-as in  the :doc:`nearestNeighbor` and
-:doc:`lda` tutorials.
-We still use ``trainer.train(ke, training);``
-but evaluate the model now using::
-
-    svm.eval(training.inputs(), output);
-    double train_error = loss.eval(training.labels(), output);
-    svm.eval(test.inputs(), output);
-    double test_error = loss.eval(test.labels(), output);
+..sharkcode<Supervised/CSvmWithThresholdConverter.tpp,eval>
 
 
 

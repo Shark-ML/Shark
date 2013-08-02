@@ -1,10 +1,12 @@
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
-#include <shark/Models/Converter.h>
-#include <shark/Models/ConcatenatedModel.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
-#include <shark/Data/Dataset.h>
 #include <shark/Data/DataDistribution.h>
+
+//###begin<additional_includes>
+#include <shark/Models/Converter.h>
+#include <shark/Models/ConcatenatedModel.h>
+//###end<additional_includes>
 
 using namespace shark;
 using namespace std;
@@ -20,9 +22,11 @@ int main(int argc, char** argv)
 
 	GaussianRbfKernel<> kernel(gamma); // Gaussian kernel
 	KernelExpansion<RealVector> ke(&kernel, bias); // 
+	//###begin<converter>
 	ThresholdConverter conv;
 	ConcatenatedModel<RealVector, unsigned int> svm(&ke, &conv);
-
+	//###end<converter>
+	
 	// generate dataset
 	Chessboard problem; // artificial benchmark data
 	ClassificationDataset training = problem.generateDataset(ell);
@@ -38,6 +42,7 @@ int main(int argc, char** argv)
 	cout << "\n  training time: " << trainer.solutionProperties().seconds << " seconds\ndone." << endl;
 
 	// evaluate
+	//###begin<eval>
 	ZeroOneLoss<unsigned int, unsigned int> loss;
 	Data<unsigned int> output = svm(training.inputs());
 	double train_error = loss.eval(training.labels(), output);
@@ -45,4 +50,5 @@ int main(int argc, char** argv)
 	output = svm(test.inputs());
 	double test_error = loss.eval(test.labels(), output);
 	cout << "test error:\t" << test_error << endl;
+	//###end<eval>
 }

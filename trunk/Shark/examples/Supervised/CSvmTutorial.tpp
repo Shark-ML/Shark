@@ -1,7 +1,9 @@
-#include <shark/Algorithms/Trainers/CSvmTrainer.h>
-#include <shark/Models/Kernels/GaussianRbfKernel.h>
-#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
-#include <shark/Data/DataDistribution.h>
+//###begin<includes>
+#include <shark/Algorithms/Trainers/CSvmTrainer.h> // the C-SVM trainer
+#include <shark/Models/Kernels/GaussianRbfKernel.h> //the used kernel for the SVM
+#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //used for evaluation of the classifier
+#include <shark/Data/DataDistribution.h> //includes small toy distributions
+//###end<includes>
 
 using namespace shark;
 using namespace std;
@@ -9,25 +11,38 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	// experiment settings
+	//###begin<problem>
 	unsigned int ell = 500;     // number of training data point
 	unsigned int tests = 10000; // number of test data points
-	double C = 1000.0;          // regularization parameter
+	//###end<problem>
+	//###begin<kernel>
 	double gamma = 0.5;         // kernel bandwidth parameter
+	//###end<kernel>
+	//###begin<trainer>
+	double C = 1000.0;          // regularization parameter
+	//###end<trainer>
+	//###begin<model>
 	bool bias = true;           // use bias/offset parameter
-
+	//###end<model>
+	
+	//###begin<kernel>
 	GaussianRbfKernel<> kernel(gamma); // Gaussian kernel
+	//###end<kernel>
+	//###begin<model>
 	KernelExpansion<RealVector> ke(&kernel, bias); // (affine) linear function in kernel-induced feature space
-
-	ZeroOneLoss<unsigned int, RealVector> loss; // 0-1 loss
-
+	//###end<model>
+	
 	// generate dataset
+	//###begin<problem>
 	Chessboard problem; // artificial benchmark data
 	ClassificationDataset training = problem.generateDataset(ell);
 	ClassificationDataset test = problem.generateDataset(tests);
-
+	//###end<problem>
 	// define the machine
+	//###begin<trainer>
 	CSvmTrainer<RealVector> trainer(&kernel, C);
-
+	//###end<trainer>
+	
 //	// ADDITIONAL/ADVANCED SVM SOLVER OPTIONS:
 //	//to use "double" as kernel matrix cache type internally instead of float:
 //	CSvmTrainer<RealVector, double> trainer(&kernel, C);
@@ -47,11 +62,13 @@ int main(int argc, char** argv)
 	cout << "\n  training time: " << trainer.solutionProperties().seconds << " seconds\ndone." << endl;
 
 	// evaluate
-	Data<RealVector> output;  // real-valued output of the machine
-	output = ke(training.inputs()); // evaluate on training set
+	//###begin<eval>
+	ZeroOneLoss<unsigned int, RealVector> loss; // 0-1 loss
+	Data<RealVector> output = ke(training.inputs()); // evaluate on training set
 	double train_error = loss.eval(training.labels(), output);
 	cout << "training error:\t" <<  train_error << endl;
 	output = ke(test.inputs()); // evaluate on test set
 	double test_error = loss.eval(test.labels(), output);
 	cout << "test error:\t" << test_error << endl;
+	//###end<eval>
 }
