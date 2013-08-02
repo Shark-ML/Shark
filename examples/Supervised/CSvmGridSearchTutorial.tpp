@@ -1,12 +1,13 @@
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
-#include <shark/ObjectiveFunctions/CrossValidationError.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
-#include <shark/Algorithms/DirectSearch/GridSearch.h>
-#include <shark/Algorithms/JaakkolaHeuristic.h>
-#include <shark/Data/Dataset.h>
 #include <shark/Data/DataDistribution.h>
 
+//###begin<additional_includes>
+#include <shark/ObjectiveFunctions/CrossValidationError.h>
+#include <shark/Algorithms/DirectSearch/GridSearch.h>
+#include <shark/Algorithms/JaakkolaHeuristic.h>
+//###end<additional_includes>
 
 using namespace shark;
 using namespace std;
@@ -20,28 +21,33 @@ int main()
 	ClassificationDataset dataTest= prob.generateDataset(10000);
 
 	// SVM setup
+	//###begin<setup>
 	GaussianRbfKernel<> kernel(0.5, true); //unconstrained?
 	KernelExpansion<RealVector> svm(true); //use offset?
 	CSvmTrainer<RealVector> trainer(&kernel, 1.0, true); //unconstrained?
-
+	//###end<setup>
+	
 	// cross-validation error
+	//###begin<cv_error>
 	const unsigned int N= 5;  // number of folds
-
 	ZeroOneLoss<unsigned int, RealVector> loss;
 	CVFolds<ClassificationDataset> folds = createCVSameSizeBalanced(dataTrain, N);
 	CrossValidationError<KernelExpansion<RealVector>, unsigned int> cvError(
 		folds, &trainer, &svm, &trainer, &loss
 	);
-
+	//###end<cv_error>
+	
 
 	// find best parameters
 
 	// use Jaakkola's heuristic as a starting point for the grid-search
+	//###begin<jaakkola>
 	JaakkolaHeuristic ja(dataTrain);
 	double ljg = log(ja.gamma());
+	//###end<jaakkola>
 	cout << "Tommi Jaakkola says gamma = " << ja.gamma() << " and ln(gamma) = " << ljg << endl;
 
-
+	//###begin<grid_configure>
 	GridSearch grid;
 	vector<double> min(2);
 	vector<double> max(2);
@@ -49,11 +55,16 @@ int main()
 	min[0] = ljg-4.; max[0] = ljg+4; sections[0] = 17;  // kernel parameter gamma
 	min[1] = 0.0; max[1] = 10.0; sections[1] = 11;	   // regularization parameter C
 	grid.configure(min, max, sections);
+	//###end<grid_configure>
+	//###begin<grid_train>
 	grid.step(cvError);
-
+	//###end<grid_train>
+	
 	// train model on the full dataset
+	//###begin<train_optimal_params>
 	trainer.setParameterVector(grid.solution().point);
 	trainer.train(svm, dataTrain);
+	//###end<train_optimal_params>
 	cout << "C =\t" << trainer.C() << endl;
 	cout << "gamma =\t" << kernel.gamma() << endl;
 

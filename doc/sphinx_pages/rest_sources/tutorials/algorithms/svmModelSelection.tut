@@ -83,11 +83,9 @@ SVM Model Selection in Shark
 ----------------------------
 
 We consider the same toy problem and the same models as in the tutorial
-:doc:`svm`. We additionally include ::
+:doc:`svm`. We additionally include::
 
- #include <shark/ObjectiveFunctions/CrossValidationError.h>
- #include <shark/ObjectiveFunctions/JaakkolaHeuristic.h>
- #include <shark/Algorithms/DirectSearch/GridSearch.h>
+..sharkcode<Supervised/CSvmGridSearchTutorial.tpp,additional_includes>
 
 for computing the cross-validation error, for calculating Jaakkola's
 Heuristic, and for optimizing the parameters using grid-search,
@@ -97,11 +95,9 @@ respectively.
 Preparing the SVM for unconstraint optimization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Our model and trainier are now given by: ::
+Our model and trainer are now given by::
 
-	GaussianRbfKernel<> kernel(0.5, true);
-	KernelExpansion<RealVector> svm(true);
-	CSvmTrainer<RealVector> trainer(&kernel, 1.0, true);
+..sharkcode<Supervised/CSvmGridSearchTutorial.tpp,setup>
 
 The Boolean flags set to true in the constructors of
 :doxy:`GaussianRbfKernel` and :doxy:`CSvmTrainer` indicate that the
@@ -120,16 +116,9 @@ Cross-validation
 ^^^^^^^^^^^^^^^^
 
 Now we define the 
-cross-validation error by instantiating :doxy:`CrossValidationError` :
-:: 
+cross-validation error by instantiating :doxy:`CrossValidationError`:: 
 
-	const unsigned int K = 5;
- 
-        ZeroOneLoss<unsigned int, RealVector> loss;
-	CVFolds<ClassificationDataset> folds = createCVSameSizeBalanced(dataTrain, N);
-	CrossValidationError<KernelExpansion<RealVector>, unsigned int> cvError(
-               folds, &trainer, &svm, &trainer, &loss
-	);
+..sharkcode<Supervised/CSvmGridSearchTutorial.tpp,cv_error>
 
 The first line sets the number of folds. Then we define the
 basic error measure underlying the cross-validation error, here the
@@ -158,9 +147,7 @@ Jaakkola's heuristic
 
 To find a good starting point for :math:`\gamma`, we apply Jaakkola's heuristic ::
 
-	JaakkolaHeuristic ja(dataTrain);
-	double ljg = log(ja.gamma());
-
+..sharkcode<Supervised/CSvmGridSearchTutorial.tpp,jaakkola>
 
 as defined above.
 
@@ -184,25 +171,18 @@ and
 
 and define the grid accordingly: ::
 
-	GridSearch grid;
-	vector<double> min(2);
-	vector<double> max(2);
-	vector<size_t> sections(2);
-	min[0] = ljg-4.; max[0] = ljg+4; sections[0] = 17; // kernel parameter gamma
-	min[1] = 0.0; max[1] = 10.0; sections[1] = 11;	   // regularization parameter C
-	grid.configure(min, max, sections);
+..sharkcode<Supervised/CSvmGridSearchTutorial.tpp,grid_configure>
 
 The optimizer :doxy:`GridSearch` "sees" the parameter in the
 logarithmic encoding we activated in the model and trainier definition
 above. Therefore, we specify a linear grid while searching on
 logarithmic scale. Now we do the grid search by ::
 
-	grid.step(cvError);
+..sharkcode<Supervised/CSvmGridSearchTutorial.tpp,grid_train>
 
 and finally train the model using all data and the best parameters ::
 
-	trainer.setParameterVector(grid.solution().point);
-	trainer.train(&svm, dataTrain);
+..sharkcode<Supervised/CSvmGridSearchTutorial.tpp,train_optimal_params>
 
 and evaluate the model as described in :doc:`svm`.
 
