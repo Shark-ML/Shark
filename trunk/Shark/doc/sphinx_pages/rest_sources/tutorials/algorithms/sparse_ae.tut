@@ -1,0 +1,150 @@
+============================
+Sparse Autoencoder
+============================
+
+Background
+----------
+
+A sparse autoencoder is a model trained by unsupervised learning.
+It refers to a neural network with a single hidden layer, where the
+target values are set equal to the inputs during training. In other
+words, the autoencoder tries to approximate the identity function. 
+By imposing additional constraints we can make the network learn
+interesting features characterizing the input.
+
+One such constraint is the number of hidden units in the network. If
+this is below the number of input variables the network is actually
+learning a compressed representation of the input. Another constraint
+we will use is to have the average activation of the neurons being low.
+This is done by using a regularization term summing the KL-divergence
+
+.. math ::
+   KL(\rho \| \rho_j) = \rho \log(\frac{\rho}{\rho_j}) +
+   (1 - \rho) \log(\frac{1-\rho}{1-\rho_j})
+
+over all hidden neurons indexed by :math:`j`.  The regularization
+parameter :math:`\rho` defines a target mean activation and the mean
+activation :math:`\rho_j` of hidden neuron :math:`j` over the whole
+training datasetis interpreted as activation propability.  See the
+documentation of the :doxy:`SparseFFNetError` class for more
+information.
+
+For a detailed introduction to autoencoders, we refer to the `Stanford
+UFLDL Tutorial
+<http://ufldl.stanford.edu/wiki/index.php/Exercise:Sparse_Autoencoder>`_.
+In the following, we show how to solve the autoencoder exercise from
+this recommended tutorial using Shark.
+
+
+Sparse Autoencoder in Shark
+---------------------------
+
+For this tutorial, the following (lengthy) list of includes is needed::
+
+..sharkcode<Unsupervised/SparseAETutorial.tpp, includes>
+
+Edges in natural images
+^^^^^^^^^^^^^^^^^^^^^^^
+
+As an example of finding features with a sparse autoencoder, we will
+use natural images as input. We will then see how the autoencoder
+discovers edges as a good representation of natural images.
+
+The images we will use are the same as in the `Stanford Tutorial
+<http://ufldl.stanford.edu/wiki/index.php/Exercise:Sparse_Autoencoder>`_.
+
+
+Generating a training set
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In order to generate a training set, we will randomly select image patches
+of equal size (we use *8x8*) and use each patch as a data point::
+
+..sharkcode<Unsupervised/SparseAETutorial.tpp, data_generation>
+
+This creates a data set containing *10000* patches of size *8x8* transformed
+into a vector with *64* elements. Before we can use this data set we need
+to normalize the data points. We first truncate outliers to *+/- 3* standard
+deviations, and then normalize to the range :math:`[0.1, 0.9]`. We also need
+to make it a regression data set with same input and target values::
+
+..sharkcode<Unsupervised/SparseAETutorial.tpp, normalization>
+
+We encapsulate the above code in a function for brevity::
+
+..sharkcode<Unsupervised/SparseAETutorial.tpp, get_samples_function>
+
+
+Sparse autoencoder objective function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We first load our data and generate a dataset with labels equals to the points::
+
+..sharkcode<Unsupervised/SparseAETutorial.tpp, create_dataset>
+
+This does not create an additional copy of the samples but merely generates 
+another reference to every single point.
+In order to create the objective function for the sparse autoencoder,
+we first need to create a feed-forward neural network with the correct
+layout::
+
+..sharkcode<Unsupervised/SparseAETutorial.tpp, ffnet>
+
+The Boolean arguments specify that consecutive layers are fully
+connected and that a bias parameter is used, but that there are no shortcut connections.
+We then need to add the sparsity constraint to the regression loss::
+
+..sharkcode<Unsupervised/SparseAETutorial.tpp, sparsity_error>
+
+and weight regularization::
+
+..sharkcode<Unsupervised/SparseAETutorial.tpp, regularization>
+
+This creates the entire objective function for the sparse autoencoder,
+with sparsity constraint and weight regularization.
+
+
+Training the autoencoder
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+In order to train the autoencoder we use the limited memory BFGS (L-BFGS)
+algorithm with a line search satisfying the wolfe conditions. We also need
+to chose a starting point for the optimization. For this we use values
+uniformly taken from :math:`[-r, r]` for the weights and :math:`0` for the
+biases, with
+
+.. math ::
+    r = \frac{\sqrt{6}}{n_{in} + n_{out} + 1}
+
+where :math:`n_{in}` and :math:`n_{out}` is the number of input and output
+values per neuron.
+
+The training is then done as follows: ::
+
+..sharkcode<Unsupervised/SparseAETutorial.tpp, train>
+
+In our trials we got final error values around 0.8 to 0.9.
+
+
+Visualizing the autoencoder
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+After training, each row of the first weight matrix, :math:`W1`, will
+correspond to a feature learned by the autoencoder. To visualize these
+features, we export each row as an *8x8* PGM image using the PGM library
+of Shark::
+
+..sharkcode<Unsupervised/SparseAETutorial.tpp, export>
+
+After scaling the features to *50x50* images an plotting them next to
+each other, we got the following result:
+
+.. figure:: ../images/features.*
+  :scale: 100%
+  :alt: Plot of features learned by the autoencoder
+
+
+Full example program
+--------------------
+
+A complete program performing the above steps is :doxy:`SparseAETutorial.cpp`.
