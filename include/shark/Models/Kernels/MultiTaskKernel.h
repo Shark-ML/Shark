@@ -230,20 +230,20 @@ protected:
 		std::size_t elements = m_data.numberOfElements();
 		std::vector<std::size_t> ell(tasks, 0);
 		for (std::size_t i=0; i<elements; i++) 
-			ell[m_data(i).task]++;
+			ell[m_data.element(i).task]++;
 
 		// compute inner products between mean elements of empirical distributions
 		for (std::size_t i=0; i<elements; i++)
 		{
-			const std::size_t task_i = m_data(i).task;
+			const std::size_t task_i = m_data.element(i).task;
 			for (std::size_t j=0; j<i; j++)
 			{
-				const std::size_t task_j = m_data(j).task;
-				const double k = m_inputkernel.eval(m_data(i).input, m_data(j).input);
+				const std::size_t task_j = m_data.element(j).task;
+				const double k = m_inputkernel.eval(m_data.inputs().element(i), m_data.inputs().element(j));
 				base_type::m_matrix(task_i, task_j) += k;
 				base_type::m_matrix(task_j, task_i) += k;
 			}
-			const double k = m_inputkernel.eval(m_data(i).input, m_data(i).input);
+			const double k = m_inputkernel.eval(m_data.inputs().element(i), m_data.inputs().element(i));
 			base_type::m_matrix(task_i, task_i) += k;
 		}
 		for (std::size_t i=0; i<tasks; i++)
