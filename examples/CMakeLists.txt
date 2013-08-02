@@ -103,6 +103,8 @@ SHARK_ADD_EXAMPLE( EA/SOO/OnePlusOneES OnePlusOneES "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/TSP TSP "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/AckleyES AckleyES "EA/SOO" )
 
+SHARK_ADD_EXAMPLE( Supervised/MultiTaskSvm MultiTaskSvm "Supervised" )
+
 SHARK_ADD_EXAMPLE( Supervised/CVFolds CVFolds "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/CSvmWithThresholdConverter CSvmWithThresholdConverter "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/McSvm McSvm "Supervised" )
