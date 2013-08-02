@@ -25,11 +25,11 @@
  */
 //===========================================================================
 
-#include <shark/Data/Csv.h>
-#include <shark/Algorithms/Trainers/CARTTrainer.h>
-
-#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
-
+//###begin<includes>
+#include <shark/Data/Csv.h> //importing csv files
+#include <shark/Algorithms/Trainers/CARTTrainer.h> //the CART trainer
+#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //zero one loss for evaluation
+//###end<includes>
 #include <iostream> 
 
 using namespace std; 
@@ -38,11 +38,11 @@ using namespace shark;
 
 int main() {
 
-    //*****************LOAD AND PREPARE DATA***********************//
+	//*****************LOAD AND PREPARE DATA***********************//
+	
+	//###begin<load>
 	// read data
 	ClassificationDataset dataTrain;
-
-        //Optical digits
         import_csv(dataTrain, "data/C.csv", LAST_COLUMN, " ", "#");
 
 
@@ -57,21 +57,23 @@ int main() {
 		 << " number of classes: " << numberOfClasses(dataTest)
 		 << " input dimension: " << inputDimension(dataTest) << endl;
 
-    CARTTrainer trainer;
-    CARTClassifier<RealVector> model;
+	//###end<load>
+	
+	//Train the model
+	//###begin<train>
+	CARTTrainer trainer;
+	CARTClassifier<RealVector> model;
+	trainer.train(model, dataTrain);
+	//###end<train>
+	
+	// evaluate Random Forest classifier
+	//###begin<evaluation>
+	ZeroOneLoss<unsigned int, RealVector> loss;
+	Data<RealVector> prediction = model(dataTrain.inputs());
+	cout << "CART on training set accuracy: " << 1. - loss.eval(dataTrain.labels(), prediction) << endl;
 
-    
-
-    //Train the model
-    trainer.train(model, dataTrain);
-
-    // evaluate Random Forest classifier
-    ZeroOneLoss<unsigned int, RealVector> loss;
-    Data<RealVector> prediction = model(dataTrain.inputs());
-    cout << "CART on training set accuracy: " << 1. - loss.eval(dataTrain.labels(), prediction) << endl;
-
-    prediction = model(dataTest.inputs());
-    cout << "CART on test set accuracy:     " << 1. - loss.eval(dataTest.labels(), prediction) << endl;
-
+	prediction = model(dataTest.inputs());
+	cout << "CART on test set accuracy:     " << 1. - loss.eval(dataTest.labels(), prediction) << endl;
+	//###end<evaluation>
 
 }
