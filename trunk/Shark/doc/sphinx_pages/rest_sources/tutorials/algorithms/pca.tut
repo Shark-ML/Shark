@@ -7,7 +7,7 @@ Background
 
 Principal component analysis (PCA), also known as Karhunen-Loeve
 transform, is arguably the most fundamental technique in
-unsupervised learning. It is frequently used for (linear)
+unUnsupervised learning. It is frequently used for (linear)
 dimensionality reduction, (lossy) data compression, feature
 extraction, and data visualization.  Let us consider a set of *l* data
 points
@@ -45,6 +45,10 @@ for instance [DMLN5]_.
 PCA in Shark
 ------------
 
+The following includes are needed for this tutorial::
+
+..sharkcode<Unsupervised/PCATutorial.tpp,includes>
+
 Face recognition problem
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -72,23 +76,9 @@ Reading in the data
 ^^^^^^^^^^^^^^^^^^^
 
 First, let us read in the data.  There is a function for recursively
-scanning a directory for images in pgm format and reading them in: ::
+scanning a directory for images in pgm format and reading them in::
 
-   using namespace shark;
-   using namespace std;
-   ...
-   #include <shark/Data/Dataset.h>
-   #include <shark/Data/Pgm.h>
-   ...
-   UnlabeledData<RealVector> images;
-   Data<ImageInformation> imagesInfo;
-
-   importPGMSet("directory/containing/the/face/data", images,
-   imagesInfo);
-
-	unsigned l = images.size();   // number of samples
-	unsigned x = imagesInfo(0).x; // width of images
-	unsigned y = imagesInfo(0).y; // height of images
+..sharkcode<Unsupervised/PCATutorial.tpp,import>
 
 The ``imagesInfo`` struct contains sizes and names of the individual
 images.
@@ -98,16 +88,12 @@ Models and learning algorithm
  
 Doing a PCA is as simple as: ::
 
-        #include <shark/Algorithms/Trainers/PCA.h>
-	...
-	PCA pca(images);
+..sharkcode<Unsupervised/PCATutorial.tpp,pca>
  
 Karhunen-Loeve transformations are affine linear models.
 For encoding data to an *m*-dimensional subspace we use: ::
 
-	LinearModel<> enc;
-	pca.encoder(enc, m);
-	Data<RealVector> encodedImages = enc(images);
+..sharkcode<Unsupervised/PCATutorial.tpp,model_encoder>
 
 The last line encodes (i.e., represents in the PCA coordinate system)
 the whole image database.
@@ -116,8 +102,7 @@ We can easily map from the *m* dimensional space back to the original
 *n* dimensional space by the optimal linear reconstruction (the
 decoder): ::
 
-	LinearModel<> dec;
-	pca.decoder(dec, m);
+..sharkcode<Unsupervised/PCATutorial.tpp,model_decoder>
 
 For instance, let us reconstruct the following first image using just the 
 first *m=300* components.
@@ -129,7 +114,7 @@ first *m=300* components.
 
 Then we write ::
 
-        exportPGM("reconstruction0.pgm", dec(encodedImages(sampleImage)), x, y)
+..sharkcode<Unsupervised/PCATutorial.tpp,model_reconstruction>
 
 and get the following image.
 
@@ -149,7 +134,7 @@ these functions is min(*l*, *n*). The eigenvalue *i*  can also be
 retrieved by ``pca.eigenvalue(i)``.  Visualizing the mean face is done
 by ::
 
-   exportPGM("facesMean.pgm", pca.mean(), x, y);
+..sharkcode<Unsupervised/PCATutorial.tpp,export_mean>
 
 resulting in the following mean image.
 
