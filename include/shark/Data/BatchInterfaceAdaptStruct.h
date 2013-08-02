@@ -201,7 +201,11 @@ struct reference: public detail::FusionFacade<FusionRef>{\
 		fusionize(*this) = other;\
 		return *this;\
 	}\
-	friend void swap(reference& op1, reference& op2){\
+	reference& operator= (reference const& other ){\
+		fusionize(*this) = other;\
+		return *this;\
+	}\
+	friend void swap(reference op1, reference op2){\
 		boost::fusion::swap(op1,op2);\
 	}\
 	operator value_type()const{\
@@ -211,14 +215,12 @@ struct reference: public detail::FusionFacade<FusionRef>{\
 	}\
 };\
 struct const_reference: public detail::FusionFacade<FusionConstRef>{\
+private:\
+const_reference& operator= (const_reference const& other );\
+public:\
 	template<class Batch>\
 	const_reference(Batch& batch, std::size_t i)\
 	:detail::FusionFacade<FusionConstRef>(boost::fusion::transform(fusionize(batch),detail::MakeConstRef(i))){}\
-	template<class Other>\
-	const_reference& operator= (Other const& other ){\
-		fusionize(*this) = other;\
-		return *this;\
-	}\
 	operator value_type()const{\
 		value_type ret;\
 		boost::fusion::copy(fusionize(*this), ret);\

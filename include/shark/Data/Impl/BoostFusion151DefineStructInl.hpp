@@ -512,8 +512,12 @@ SHARK_FUSION_DEFINE_STRUCT_INLINE_MEMBERS_COMMON_IMPL(                          
     {                                                                           \
         boost::fusion::copy(rhs, *this);                                        \
         return *this;                                                           \
-    }                                                                           \
-                                                                                \
+    }																			\
+	NAME& operator=(const NAME& rhs)					                        \
+    {                                                                           \
+        boost::fusion::copy(rhs, *this);                                        \
+        return *this;                                                           \
+    }     							\
     template <typename boost_fusion_detail_Sq>                                  \
     struct begin                                                                \
     {                                                                           \

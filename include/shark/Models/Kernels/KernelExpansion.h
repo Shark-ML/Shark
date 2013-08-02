@@ -263,7 +263,7 @@ public:
 
 	using AbstractModel<InputType, RealVector>::eval;
 	void eval(BatchInputType const& patterns, BatchOutputType& output)const{
-		std::size_t numPatterns = size(patterns);
+		std::size_t numPatterns = boost::size(patterns);
 		SHARK_ASSERT(mep_kernel != NULL);
 
 		output.resize(numPatterns,outputSize());
@@ -274,7 +274,7 @@ public:
 
 		std::size_t batchStart = 0;
 		for (std::size_t i=0; i != m_basis.numberOfBatches(); i++){
-			std::size_t batchEnd = batchStart+size(m_basis.batch(i));
+			std::size_t batchEnd = batchStart+boost::size(m_basis.batch(i));
 			//evaluate kernels
 			//results in a matrix of the form where a column consists of the kernel evaluation of 
 			//pattern i with respect to the batch of the basis,this gives a good memory alignment
