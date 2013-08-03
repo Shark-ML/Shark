@@ -19,8 +19,10 @@
 #ifndef SHARK_CORE_SIGNALTRAP_H
 #define SHARK_CORE_SIGNALTRAP_H
 
-#include <shark/Core/Singleton.h>
+// we should move to Boost.Signals2
+#define BOOST_SIGNALS_NO_DEPRECATION_WARNING 1
 
+#include <shark/Core/Singleton.h>
 #include <boost/signal.hpp>
 
 #include <signal.h>

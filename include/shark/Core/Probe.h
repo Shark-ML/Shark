@@ -22,6 +22,9 @@
 #ifndef SHARK_CORE_PROBE_H
 #define SHARK_CORE_PROBE_H
 
+// we should move to Boost.Signals2
+#define BOOST_SIGNALS_NO_DEPRECATION_WARNING 1
+
 #include <shark/Core/Timer.h>
 #include <shark/LinAlg/BLAS/ublas.h>
 #include <boost/algorithm/string.hpp>
