@@ -223,7 +223,7 @@ public:
 	///The entries start,...,end of the i-th row are computed and stored in storage.
 	///There must be enough room for this operation preallocated.
 	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
-		m_accessCounter +=end-start;
+		m_accessCounter += end-start;
 		
 		typename AbstractKernelFunction<InputType>::ConstInputReference xi = *x[i];
 		SHARK_PARALLEL_FOR(int j = start; j < (int) end; j++)
@@ -287,6 +287,7 @@ public:
 		Data<InputType> const& data)
 	: kernel(kernelfunction)
 	, m_data(data)
+	, m_accessCounter( 0 )
 	{
 		m_data.makeIndependent();
 		std::size_t elements = m_data.numberOfElements();
