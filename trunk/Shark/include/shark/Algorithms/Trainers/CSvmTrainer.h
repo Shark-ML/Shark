@@ -176,7 +176,7 @@ private:
 		{
 			typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
 			ProblemType problem(svmProblem,base_type::m_shrinking);
-			QpSolver< ProblemType > solver(problem);
+			QpSolver< ProblemType> solver(problem);
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
 			
 			
@@ -189,18 +189,19 @@ private:
 					alphaSum+= problem.alpha(i);
 				}
 				
+				//take step in gradient direction
+				double signAlphaSum = alphaSum > 0? 1:-1;
+				double deltaBias = signAlphaSum*stepMultiplier;
+				bias += deltaBias;
+				//update problem using the new estimate for the bias and solve it
+				for(std::size_t i = 0; i != problem.dimensions(); ++i){
+					problem.setLinear(i,problem.linear(i)-deltaBias);
+				}
+				
 				double epsilon = base_type::stoppingCondition().minAccuracy;
 				do{
-					//take step in gradient direction
-					double signAlphaSum = alphaSum > 0? 1:-1;
-					double deltaBias = signAlphaSum*stepMultiplier;
-					//~ double deltaBias = findOptimalBiasStep(bias,problem,dataset);
-					bias += deltaBias;
 					
-					//update problem using the new estimate for the bias and solve it
-					for(std::size_t i = 0; i != problem.dimensions(); ++i){
-						problem.setLinear(i,problem.linear(i)-deltaBias);
-					}
+					
 					solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
 					//check whether the step was beneficial
 					double newAlphaSum = 0;
@@ -212,74 +213,30 @@ private:
 						stepMultiplier *= 1.2;
 						alphaSum = newAlphaSum;
 					}
-					//it is not as bad when we overstep the optimum but we reduce step size
-					else if(sqr(alphaSum) > sqr(newAlphaSum))
-					{
+					else{
 						stepMultiplier *=0.5;
 						alphaSum = newAlphaSum;
 					}
-					else//backtrack when steps lead to worse performance
-					{
-						stepMultiplier *=0.5;
-						bias -= deltaBias;
-						for(std::size_t i = 0; i != problem.dimensions(); ++i){
-							problem.setLinear(i,problem.linear(i)+deltaBias);
-						}
+					//~ std::cout<<newAlphaSum<<" "<<stepMultiplier<<" "<<bias<<std::endl;
+					
+					//take step in gradient direction
+					double signAlphaSum = alphaSum > 0? 1:-1;
+					double deltaBias = signAlphaSum*stepMultiplier;
+					bias += deltaBias;
+					//update problem using the new estimate for the bias and solve it
+					for(std::size_t i = 0; i != problem.dimensions(); ++i){
+						problem.setLinear(i,problem.linear(i)-deltaBias);
 					}
-					
-					
-				}while(stepMultiplier > epsilon);
+				}while(problem.checkKKT() > epsilon);
 				svm.offset(0) = bias; 
 			}
 			column(svm.alpha(),0) = problem.getUnpermutedAlpha();
-			
 		}
 	}
 	RealVector m_db_dParams; ///< in the rare case that there are only bounded SVs and no free SVs, this will hold the derivative of b w.r.t. the hyperparameters. Derivative w.r.t. C is last.
 
 	bool m_computeDerivative;
 	bool m_useIterativeBiasComputation;
-	
-	template<class SVMProblemType>
-	double findOptimalBiasStep(double bias, SVMProblemType const& problem, LabeledData<InputType, unsigned int> const& dataset){
-		double stepLength = 0.1;
-		double deltaBias = 0;
-		int violatingLabelSum = 0;
-		for(std::size_t i = 0; i != problem.dimensions(); ++i){
-			std::size_t index = problem.permutation(i);
-			double g_i = problem.gradient(i);
-			double y_i = dataset.element(index).label == 0 ? -1:1;
-			if( -y_i *g_i < 0)
-				violatingLabelSum += y_i;
-		}
-		while (stepLength > 1.e-4 && violatingLabelSum != 0){
-			int sign = violatingLabelSum < 0 ? -1:1;
-			deltaBias += sign*stepLength;
-			//compute gradient at next step
-			int newViolatingLabelSum = 0;
-			for(std::size_t i = 0; i != problem.dimensions(); ++i){
-				std::size_t index = problem.permutation(i);
-				double g_i = problem.gradient(i);
-				double y_i = dataset.element(index).label == 0 ? -1:1;
-				if( -y_i *(g_i - deltaBias) < 0)
-					newViolatingLabelSum += y_i;
-			}
-			//rprop: only take steps which are beneficial and adapt step size after good steps.
-			if(violatingLabelSum*newViolatingLabelSum > 0){
-				stepLength *= 1.2;
-			}
-			else if(std::abs(newViolatingLabelSum)< std::abs(violatingLabelSum)){
-				stepLength *= 0.8;
-				//violatingLabelSum = newViolatingLabelSum;
-			}
-			else{
-				//deltaBias -= sign*stepLength;
-				stepLength *= 0.5;
-			}
-			violatingLabelSum = newViolatingLabelSum;
-		}
-		return deltaBias;
-	}
 
 	template<class Problem>
 	double computeBias(Problem const& problem, LabeledData<InputType, unsigned int> const& dataset){
