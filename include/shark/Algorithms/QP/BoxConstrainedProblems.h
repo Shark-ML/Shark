@@ -60,6 +60,42 @@ struct MaximumGradientCriterion{
 	void reset(){}
 };
 
+/// \brief Working set selection by maximization of the projected gradient.
+///
+/// This selection operator picks the largest and second largest variable index if possible.
+struct WS2MaximumGradientCriterion{
+	template<class Problem>
+	double operator()(Problem& problem, std::size_t& i, std::size_t& j){
+		double largestGradient = 0;
+		double secondLargestGradient = 0;
+
+		for (std::size_t a = 0; a < problem.active(); a++){
+			double v = problem.alpha(a);
+			double g = problem.gradient(a);
+			if (v < problem.boxMax(a)){
+				if (g > secondLargestGradient){
+					secondLargestGradient = g;
+					j = a;
+				}
+			}
+			if (v > problem.boxMin(a)){
+				if (-g > secondLargestGradient){
+					secondLargestGradient = -g;
+					j = a;
+				}
+			}
+			if(secondLargestGradient > largestGradient){
+				std::swap(secondLargestGradient,largestGradient);
+				std::swap(i,j);
+			}
+		}
+
+		return largestGradient;
+	}
+
+	void reset(){}
+};
+
 /// \brief Working set selection by maximization of the dual objective gain.
 struct MaximumGainCriterion{
 	template<class Problem>
@@ -315,6 +351,19 @@ public:
 		m_gradient(i) -= linear(i);
 		m_gradient(i) += newValue;
 		m_problem.linear(i) = newValue;
+	}
+	
+	double checkKKT()const{
+		double maxViolation = 0.0;
+		for(std::size_t i = 0; i != dimensions(); ++i){
+			if(m_alphaStatus[i] != AlphaUpperBound && gradient(i) > 0){
+				maxViolation = std::max(maxViolation, gradient(i));
+			}
+			if(m_alphaStatus[i] != AlphaLowerBound && gradient(i) < 0){
+				maxViolation = std::max(maxViolation, -gradient(i));
+			}
+		}
+		return maxViolation;
 	}
 
 protected:

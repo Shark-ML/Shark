@@ -30,7 +30,7 @@ namespace shark{ namespace detail{
 //! The method returns the optimal alpha as well as
 //! the step mu leading to the update
 //! \f$ \alpha \leftarrow \alpha + \mu \f$.
-double solveBoxEdge(double alpha, double g, double Q, double L, double U, double& mu)
+double stepEdge(double alpha, double g, double Q, double L, double U, double& mu)
 {
 	// compute the optimal unconstrained step
 	double muHat = g / Q;
@@ -71,11 +71,11 @@ double solveBoxEdge(double alpha, double g, double Q, double L, double U, double
 /// corresponding mu-value is set to either +1e100
 /// or -1e100 as an indication.
 void solve2DBox(
-	double alphai, double alphaj,
-	double gi, double gj,
-	double Qii, double Qij, double Qjj,
-	double Li, double Ui, double Lj, double Uj,
-	double& mui, double& muj
+		double alphai, double alphaj,
+		double gi, double gj,
+		double Qii, double Qij, double Qjj,
+		double Li, double Ui, double Lj, double Uj,
+		double& mui, double& muj
 ){
 	double QD = Qii * Qjj;
 	double detQ = QD - Qij * Qij;
@@ -103,24 +103,24 @@ void solve2DBox(
 			if (Qij * gamma > 0.0)
 			{
 				edgei_mui = -1e100;
-				edgei_gain = solveBoxEdge(alphaj, gj - Qij * (Li - alphai), Qjj, Lj, Uj, edgei_muj);
+				edgei_gain = stepEdge(alphaj, gj - Qij * (Li - alphai), Qjj, Lj, Uj, edgei_muj);
 			}
 			else if (Qij * gamma < 0.0)
 			{
 				edgei_mui = 1e100;
-				edgei_gain = solveBoxEdge(alphaj, gj - Qij * (Ui - alphai), Qjj, Lj, Uj, edgei_muj);
+				edgei_gain = stepEdge(alphaj, gj - Qij * (Ui - alphai), Qjj, Lj, Uj, edgei_muj);
 			}
 
 			// edge with fixed mu_j
 			if (Qii * gamma < 0.0)
 			{
 				edgej_muj = -1e100;
-				edgej_gain = solveBoxEdge(alphai, gi - Qij * (Lj - alphaj), Qii, Li, Ui, edgej_mui);
+				edgej_gain = stepEdge(alphai, gi - Qij * (Lj - alphaj), Qii, Li, Ui, edgej_mui);
 			}
 			else if (Qii * gamma > 0.0)
 			{
 				edgej_muj = 1e100;
-				edgej_gain = solveBoxEdge(alphai, gi - Qij * (Uj - alphaj), Qii, Li, Ui, edgej_mui);
+				edgej_gain = stepEdge(alphai, gi - Qij * (Uj - alphaj), Qii, Li, Ui, edgej_mui);
 			}
 
 			// keep the better edge point
@@ -139,46 +139,42 @@ void solve2DBox(
 	else
 	{
 		// Q has full rank of two, thus it is invertible
-		mui = (Qjj * gi - Qij * gj) / detQ;
-		muj = (Qii * gj - Qij * gi) / detQ;
-		// if the unconstrained solution is feasible, we are done
-		if (mui > Li - alphai && muj > Lj - alphaj && mui < Ui - alphai && muj < Uj - alphaj)
-		{
-			alphai += mui;
-			alphaj += muj;
-			return;
-		}
-		
-		//as it is not feasible we have to check the edge solutions
+		double muiHat = (Qjj * gi - Qij * gj) / detQ;
+		double mujHat = (Qii * gj - Qij * gi) / detQ;
 		double edgei_mui = 0.0, edgei_muj = 0.0, edgei_gain = 0.0;
 		double edgej_mui = 0.0, edgej_muj = 0.0, edgej_gain = 0.0;
 
 		// edge with fixed mu_i
-		if (mui < Li - alphai)
+		if (muiHat < Li - alphai)
 		{
 			edgei_mui = -1e100;
-			edgei_gain = solveBoxEdge(alphaj, gj - Qij * (Li - alphai), Qjj, Lj, Uj, edgei_muj);
+			edgei_gain = stepEdge(alphaj, gj - Qij * (Li - alphai), Qjj, Lj, Uj, edgei_muj);
 		}
-		else if (mui > Ui - alphai)
+		else if (muiHat > Ui - alphai)
 		{
 			edgei_mui = 1e100;
-			edgei_gain = solveBoxEdge(alphaj, gj - Qij * (Ui - alphai), Qjj, Lj, Uj, edgei_muj);
+			edgei_gain = stepEdge(alphaj, gj - Qij * (Ui - alphai), Qjj, Lj, Uj, edgei_muj);
 		}
 
 		// edge with fixed mu_j
-		if (muj < Lj - alphaj)
+		if (mujHat < Lj - alphaj)
 		{
 			edgej_muj = -1e100;
-			edgej_gain = solveBoxEdge(alphai, gi - Qij * (Lj - alphaj), Qii, Li, Ui, edgej_mui);
+			edgej_gain = stepEdge(alphai, gi - Qij * (Lj - alphaj), Qii, Li, Ui, edgej_mui);
 		}
-		else if (muj > Uj - alphaj)
+		else if (mujHat > Uj - alphaj)
 		{
 			edgej_muj = 1e100;
-			edgej_gain = solveBoxEdge(alphai, gi - Qij * (Uj - alphaj), Qii, Li, Ui, edgej_mui);
+			edgej_gain = stepEdge(alphai, gi - Qij * (Uj - alphaj), Qii, Li, Ui, edgej_mui);
 		}
 
-		// keep the better edge point
-		if (edgei_gain > edgej_gain)
+		// keep the unconstrained optimum or the better edge point
+		if (edgei_gain == 0.0 && edgej_gain == 0.0)
+		{
+			mui = muiHat;
+			muj = mujHat;
+		}
+		else if (edgei_gain > edgej_gain)
 		{
 			mui = edgei_mui;
 			muj = edgei_muj;
