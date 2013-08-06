@@ -128,7 +128,7 @@ struct LibSVMSelectionCriterion{
 				if (grad_diff > 0.0)
 				{
 					double quad_coef = problem.diagonal(i) + problem.diagonal(a) - 2.0 * q[a];
-					if (quad_coef == 0.0) quad_coef=1.e-12;
+					if (quad_coef <= 1.e-12) quad_coef=1.e-12;
 					double obj_diff = (grad_diff * grad_diff) / quad_coef;
 
 					if (obj_diff > best)
@@ -378,7 +378,8 @@ public:
 		// solve the sub-problem defined by i and j
 		double numerator = gradient(i) - gradient(j);
 		double denominator = diagonal(i) + diagonal(j) - 2.0 * qi[j];
-		double mu = numerator / denominator;
+		denominator =  std::max(denominator,1.e-12);
+		double mu = numerator/denominator;
 			
 		//update alpha in a numerically stable way
 		applyStep(i,j, mu);
