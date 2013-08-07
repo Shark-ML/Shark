@@ -158,8 +158,7 @@ message(STATUS "C compiler: " ${CMAKE_C_COMPILER})
 SET(Boost_USE_MULTITHREADED ON)
 ADD_DEFINITIONS( -DBOOST_PARAMETER_MAX_ARITY=15 -DBOOST_FILESYSTEM_VERSION=3 )
 FIND_PACKAGE( Boost 1.45.0 COMPONENTS system date_time filesystem program_options regex signals serialization thread unit_test_framework REQUIRED )
-
-include_directories ( ${Boost_INCLUDE_DIR} ) # CI: changed _DIRS to _DIR ... hope that this is always works
+include_directories ( ${Boost_INCLUDE_DIR} ) # CI: changed Boost_INCLUDE_DIRS to Boost_INCLUDE_DIR ... hope that this is always works
 IF( WIN32 )
 	link_directories( ${Boost_LIBRARY_DIR} )
 ELSE( WIN32 )
@@ -224,17 +223,17 @@ IF ( OPT_ENABLE_ATLAS )
 	find_library(CBLAS_LIBRARY
 		cblas
 		HINTS
-		${ATLAS_ROOT}/lib
+		${ATLAS_ROOT}/lib /opt/local/lib
 	)
 	find_library(CLAPACK_LIBRARY
 		lapack
 		HINTS
-		${ATLAS_ROOT}/lib
+		${ATLAS_ROOT}/lib /opt/local/lib
 	)
 	find_library(ATLAS_LIBRARY
 		atlas
 		HINTS
-		${ATLAS_ROOT}/lib
+		${ATLAS_ROOT}/lib /opt/local/lib
 	)
 
 	get_filename_component(ATLAS_PATH @CBLAS_LIBRARY@ PATH )
