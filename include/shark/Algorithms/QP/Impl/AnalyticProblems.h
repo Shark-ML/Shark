@@ -25,166 +25,94 @@
 
 namespace shark{ namespace detail{
 //! Exact solver for the one-dimensional sub-problem<br>
-//! maximize \f$ g \alpha - Q/2 \mu^2 \f$<br>
+//! maximize \f$ g \alpha - Q/2 \alpha^2 \f$<br>
 //! such that \f$ 0 \leq \alpha \leq U \f$<br>
-//! The method returns the optimal alpha as well as
-//! the step mu leading to the update
-//! \f$ \alpha \leftarrow \alpha + \mu \f$.
-double stepEdge(double alpha, double g, double Q, double L, double U, double& mu)
+void solveQuadraticEdge(double& alpha, double g, double Q, double L, double U)
 {
-	// compute the optimal unconstrained step
-	double muHat = g / Q;
-
-	// check for numerical problems
-	if( !boost::math::isnormal( muHat ) )
+	if (Q < 1.e-12)
 	{
-		if (g > 0.0) mu = 1e100;
-		else mu = -1e100;
-		return 1e100;
+		if (g > 0.0)
+		{
+			alpha = U;
+		}
+		else
+		{
+			alpha = L;
+		}
+		return;
 	}
-
-	// compute the optimal constrained step
-	double mu_g;
-	if (muHat <= L - alpha)
-	{
-		mu_g = L - alpha;
-		mu = -1e100;
-	}
-	else if (muHat >= U - alpha)
-	{
-		mu_g = U - alpha;
-		mu = 1e100;
-	}
-	else
-	{
-		mu_g = muHat;
-		mu = muHat;
-	}
-
-	// compute (twice) the gain
-	double deltaMu = muHat - mu_g;
-	return (muHat * muHat - deltaMu * deltaMu) * Q;
+	
+	alpha = alpha + g / Q;
+	alpha = std::min(std::max(alpha,L),U);
 }
 
-/// Exact solver for a two-dimensional sub-problem.
-/// If the optimal solution is on the edge, then the
-/// corresponding mu-value is set to either +1e100
-/// or -1e100 as an indication.
-void solve2DBox(
-		double alphai, double alphaj,
-		double gi, double gj,
-		double Qii, double Qij, double Qjj,
-		double Li, double Ui, double Lj, double Uj,
-		double& mui, double& muj
+/// Exact solver for a two-dimensional quadratic sub-problem. with box constraints.
+/// The method finds the optimal alpha
+void solveQuadratic2DBox(
+	double& alphai, double& alphaj,
+	double gi, double gj,
+	double Qii, double Qij, double Qjj,
+	double Li, double Ui, 
+	double Lj, double Uj
 ){
-	double QD = Qii * Qjj;
-	double detQ = QD - Qij * Qij;
-	if (detQ < 1e-10 * QD)
-	{
-		if (Qii == 0.0 && Qjj == 0.0)
-		{
-			// Q has rank zero (is the zero matrix)
-			// just follow the gradient
-			if (gi > 0.0) mui = 1e100;
-			else if (gi < 0.0) mui = -1e100;
-			else mui = 0.0;
-			if (gj > 0.0) muj = 1e100;
-			else if (gj < 0.0) muj = -1e100;
-			else muj = 0.0;
-		}
-		else
-		{
-			// Q has rank one
-			double gamma = Qii * gj - Qij * gi;
-			double edgei_mui = 0.0, edgei_muj = 0.0, edgei_gain = 0.0;
-			double edgej_mui = 0.0, edgej_muj = 0.0, edgej_gain = 0.0;
-
-			// edge with fixed mu_i
-			if (Qij * gamma > 0.0)
-			{
-				edgei_mui = -1e100;
-				edgei_gain = stepEdge(alphaj, gj - Qij * (Li - alphai), Qjj, Lj, Uj, edgei_muj);
-			}
-			else if (Qij * gamma < 0.0)
-			{
-				edgei_mui = 1e100;
-				edgei_gain = stepEdge(alphaj, gj - Qij * (Ui - alphai), Qjj, Lj, Uj, edgei_muj);
-			}
-
-			// edge with fixed mu_j
-			if (Qii * gamma < 0.0)
-			{
-				edgej_muj = -1e100;
-				edgej_gain = stepEdge(alphai, gi - Qij * (Lj - alphaj), Qii, Li, Ui, edgej_mui);
-			}
-			else if (Qii * gamma > 0.0)
-			{
-				edgej_muj = 1e100;
-				edgej_gain = stepEdge(alphai, gi - Qij * (Uj - alphaj), Qii, Li, Ui, edgej_mui);
-			}
-
-			// keep the better edge point
-			if (edgei_gain > edgej_gain)
-			{
-				mui = edgei_mui;
-				muj = edgei_muj;
-			}
-			else
-			{
-				mui = edgej_mui;
-				muj = edgej_muj;
-			}
+	// try the free solution first if the matrix has full rank
+	double detQ = Qii * Qjj - Qij * Qij;
+	if(detQ > 1.e-12){
+		double mui = (Qjj * gi - Qij * gj) / detQ;
+		double muj = (Qii * gj - Qij * gi) / detQ;
+		double opti = alphai + mui;
+		double optj = alphaj + muj;
+		if (opti > Li && optj > Lj && opti < Ui && optj < Uj){
+			alphai = opti;
+			alphaj = optj;
+			return;
 		}
 	}
-	else
+
+	// compute the solution of all four edges
+	struct EdgeSolution
 	{
-		// Q has full rank of two, thus it is invertible
-		double muiHat = (Qjj * gi - Qij * gj) / detQ;
-		double mujHat = (Qii * gj - Qij * gi) / detQ;
-		double edgei_mui = 0.0, edgei_muj = 0.0, edgei_gain = 0.0;
-		double edgej_mui = 0.0, edgej_muj = 0.0, edgej_gain = 0.0;
-
-		// edge with fixed mu_i
-		if (muiHat < Li - alphai)
-		{
-			edgei_mui = -1e100;
-			edgei_gain = stepEdge(alphaj, gj - Qij * (Li - alphai), Qjj, Lj, Uj, edgei_muj);
-		}
-		else if (muiHat > Ui - alphai)
-		{
-			edgei_mui = 1e100;
-			edgei_gain = stepEdge(alphaj, gj - Qij * (Ui - alphai), Qjj, Lj, Uj, edgei_muj);
-		}
-
-		// edge with fixed mu_j
-		if (mujHat < Lj - alphaj)
-		{
-			edgej_muj = -1e100;
-			edgej_gain = stepEdge(alphai, gi - Qij * (Lj - alphaj), Qii, Li, Ui, edgej_mui);
-		}
-		else if (mujHat > Uj - alphaj)
-		{
-			edgej_muj = 1e100;
-			edgej_gain = stepEdge(alphai, gi - Qij * (Uj - alphaj), Qii, Li, Ui, edgej_mui);
-		}
-
-		// keep the unconstrained optimum or the better edge point
-		if (edgei_gain == 0.0 && edgej_gain == 0.0)
-		{
-			mui = muiHat;
-			muj = mujHat;
-		}
-		else if (edgei_gain > edgej_gain)
-		{
-			mui = edgei_mui;
-			muj = edgei_muj;
-		}
-		else
-		{
-			mui = edgej_mui;
-			muj = edgej_muj;
+		double alphai;
+		double alphaj;
+	};
+	EdgeSolution solution[4];
+	
+	// edge \alpha_1 = 0
+	solution[0].alphai = Li;
+	solution[0].alphaj = alphaj;
+	solveQuadraticEdge(solution[0].alphaj, gj - Qij * (Li-alphai), Qjj, Lj, Uj);
+	
+	// edge \alpha_2 = 0
+	solution[1].alphai = alphai;
+	solution[1].alphaj = Lj;
+	solveQuadraticEdge(solution[1].alphai, gi - Qij * (Lj-alphaj), Qii, Li, Ui);
+	
+	// edge \alpha_1 = U_1
+	solution[2].alphai = Ui;
+	solution[2].alphaj = alphaj;
+	solveQuadraticEdge(solution[2].alphaj, gj - Qij * (Ui-alphai), Qjj, Lj, Uj);
+	
+	// edge \alpha_2 = U_2
+	solution[3].alphai = alphai;
+	solution[3].alphaj = Uj;
+	solveQuadraticEdge(solution[3].alphai, gi - Qij * (Uj-alphaj), Qii, Li, Ui);
+	
+	//find the best edge solution
+	double maxGain = 0;
+	std::size_t maxIndex = 0;
+	for(std::size_t k = 0; k != 4; ++k){
+		double mui = solution[k].alphai - alphai;
+		double muj = solution[k].alphaj - alphaj;
+		double gain = mui * (gi - 0.5 * (Qii*mui + Qij*muj))+ muj * (gj - 0.5 * (Qij*mui + Qjj*muj));
+		if(gain > maxGain){
+			maxIndex = k;
+			maxGain = gain;
 		}
 	}
+	
+	alphai = solution[maxIndex].alphai;
+	alphaj = solution[maxIndex].alphaj;
+
 }
 }}
 

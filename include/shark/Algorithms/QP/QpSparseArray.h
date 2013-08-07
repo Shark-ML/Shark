@@ -43,21 +43,10 @@ namespace shark {
 /// entries of a matrix row that deviate from a row wise default value.
 /// This allows for efficient storage of the "kernel modifiers"
 /// used to encode dual multi-class support vector machine problems.
-template <class CacheType>
+template<class QpFloatType>
 class QpSparseArray
 {
 public:
-	//////////////////////////////////////////////////////////////////
-	// The types below define the type used for caching kernel values. The default is float,
-	// since this type offers sufficient accuracy in the vast majority of cases, at a memory 
-	// cost of only four bytes. However, the type definition makes it easy to use double instead
-	// (e.g., in case high accuracy training is needed).
-	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
-
-
 	/// \brief Non-default (non-zero) array entry.
 	///
 	/// \par

@@ -264,12 +264,12 @@ public:
 			QpFloatType* q = quadratic().row(i, 0, active());
 
 			// update alpha, that is, solve the sub-problem defined by i
-			double numerator = gradient(i);
-			double denominator = diagonal(i);
-			double mu = numerator / denominator;
-
-			mu = boundedAlphaUpdate(i,mu);
-			// update the gradient
+			// and compute the stepsize mu of the step
+			double mu = -alpha(i);
+			detail::solveQuadraticEdge(m_problem.alpha(i),gradient(i),diagonal(i),boxMin(i),boxMax(i));
+			mu+=alpha(i);
+			
+			// update the internal states
 			for (std::size_t a = 0; a < active(); a++) 
 				m_gradient(a) -= mu * q[a];
 			
@@ -287,21 +287,20 @@ public:
 		QpFloatType* qj = quadratic().row(j, 0, active());
 
 		// solve the 2D sub-problem imposed by the two chosen variables
-		double mu_i = 0.0;
-		double mu_j = 0.0;
-		detail::solve2DBox(alpha(i), alpha(j),
+		// and compute the stepsizes mu
+		double mui = -alpha(i);
+		double muj = -alpha(j);
+		detail::solveQuadratic2DBox(m_problem.alpha(i), m_problem.alpha(j),
 			m_gradient(i), m_gradient(j),
 			diagonal(i), qi[j], diagonal(j),
-			Li, Ui, Lj, Uj,
-			mu_i, mu_j
+			Li, Ui, Lj, Uj
 		);
-		
-		mu_i= boundedAlphaUpdate(i,mu_i);
-		mu_j= boundedAlphaUpdate(j,mu_j);
+		mui += alpha(i);
+		muj += alpha(j);
 
-		// update the internal state
+		// update the internal states
 		for (std::size_t a = 0; a < active(); a++) 
-			m_gradient(a) -= mu_i * qi[a] + mu_j * qj[a];
+			m_gradient(a) -= mui * qi[a] + muj * qj[a];
 			
 		updateAlphaStatus(i);
 		updateAlphaStatus(j);
@@ -375,22 +374,6 @@ protected:
 	std::size_t m_active;
 
 	std::vector<char> m_alphaStatus;
-
-	/// \brief Bounds the given alpha value between lower and upper bound in a numerically stable way.
-	double boundedAlphaUpdate(std::size_t i, double step){
-		SIZE_CHECK(i < active());
-		double& ai = m_problem.alpha(i);
-		if (ai+step < boxMin(i)){
-			step = -ai+boxMin(i);
-			ai = boxMin(i);
-		}
-		else if (ai+step > boxMax(i)){
-			step = -ai+boxMax(i);
-			ai = boxMax(i);
-		}
-		else ai +=step;
-		return step;
-	}
 
 	void updateAlphaStatus(std::size_t i){
 		SIZE_CHECK(i < dimensions());
