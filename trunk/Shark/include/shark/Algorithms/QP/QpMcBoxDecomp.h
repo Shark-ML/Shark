@@ -264,7 +264,7 @@ protected:
 		// update
 		if (v == w)
 		{
-			// Limit case of a single variables;
+			// Limit case of a single variable;
 			// this means that there is only one
 			// non-optimal variables left.
 			std::size_t i = variables[v].i;
@@ -273,25 +273,9 @@ protected:
 			unsigned int r = cardP * y + p;
 			QpFloatType* q = kernelMatrix.row(i, 0, activeEx);
 			double Qvv = variables[v].diagonal;
-			double mu = gradient(v) / Qvv;
-			if (mu < 0.0)
-			{
-				if (mu <= -alpha(v))
-				{
-					mu = -alpha(v);
-					alpha(v) = 0.0;
-				}
-				else alpha(v) += mu;
-			}
-			else
-			{
-				if (mu >= C - alpha(v))
-				{
-					mu = C - alpha(v);
-					alpha(v) = C;
-				}
-				else alpha(v) += mu;
-			}
+			double mu = -alpha(v);
+			detail::solveQuadraticEdge(alpha(v),gradient(v),Qvv,0,C);
+			mu+=alpha(v);
 			gradientUpdate(r, mu, q);
 		}
 		else
@@ -316,16 +300,17 @@ protected:
 			double Qww = variables[w].diagonal;
 			double Qvw = M(classes * rv + yw, pw) * qv[iw];
 
-			// solve the sub-problem and update the gradient using the step sizes mu
-			double mu_v = 0.0;
-			double mu_w = 0.0;
-			
-			solve2D_box(alpha(v), alpha(w),
+			// solve the sub-problem and update the gradient using the step sizes mu			
+			double mu_v = -alpha(v);
+			double mu_w = -alpha(w);
+			detail::solveQuadratic2DBox(alpha(v), alpha(w),
 				gradient(v), gradient(w),
 				Qvv, Qvw, Qww,
-				C, C,
-				mu_v, mu_w
+				0, C, 0, C
 			);
+			mu_v += alpha(v);
+			mu_w += alpha(w);
+			
 			gradientUpdate(rv, mu_v, qv);
 			gradientUpdate(rw, mu_w, qw);
 		}
@@ -522,7 +507,7 @@ protected:
 		{
 			// exchange examples such that shrinked examples
 			// are moved to the ends of the lists
-			for (std::size_t a = activeEx - 1; a >= 0; a--)
+			for (int a = activeEx - 1; a >= 0; a--)
 			{
 				if (examples[a].active == 0) deactivateExample(a);
 			}
@@ -727,127 +712,6 @@ protected:
 
 	//! should the solver use the shrinking heuristics?
 	bool useShrinking;
-	
-	void solveEdge(double& alpha, double g, double Q, double U, double& mu)
-	{
-		mu = g / Q;
-		if (! boost::math::isnormal(mu))
-		{
-			if (g > 0.0)
-			{
-				mu = U - alpha;
-				alpha = U;
-			}
-			else
-			{
-				mu = -alpha;
-				alpha = 0.0;
-			}
-		}
-		else
-		{
-			double a = alpha + mu;
-			if (a <= 0.0)
-			{
-				mu = -alpha;
-				alpha = 0.0;
-			}
-			else if (a >= U)
-			{
-				mu = U - alpha;
-				alpha = U;
-			}
-			else
-			{
-				alpha = a;
-			}
-		}
-	}
-
-	//! Exact solver for the S2DO problem for the case
-	//! that the sub-problem has box-constraints. The
-	//! method updates alpha and in addition returns
-	//! the step mu.
-	void solve2D_box(double& alphai, double& alphaj,
-					double gi, double gj,
-					double Qii, double Qij, double Qjj,
-					double Ui, double Uj,
-					double& mui, double& muj)
-	{
-		// try the free solution first
-		double detQ = Qii * Qjj - Qij * Qij;
-		mui = (Qjj * gi - Qij * gj) / detQ;
-		muj = (Qii * gj - Qij * gi) / detQ;
-		double opti = alphai + mui;
-		double optj = alphaj + muj;
-		if (boost::math::isnormal(opti) && boost::math::isnormal(optj) && opti > 0.0 && optj > 0.0 && opti < Ui && optj < Uj)
-		{
-			alphai = opti;
-			alphaj = optj;
-			return;
-		}
-
-		// otherwise process all edges
-		struct tEdgeSolution
-		{
-			double alphai;
-			double alphaj;
-			double mui;
-			double muj;
-		};
-		tEdgeSolution solution[4];
-		tEdgeSolution* sol = solution;
-		tEdgeSolution* best = solution;
-		double gain, bestgain = 0.0;
-		// edge \alpha_1 = 0
-		{
-			sol->alphai = 0.0;
-			sol->alphaj = alphaj;
-			sol->mui = -alphai;
-			solveEdge(sol->alphaj, gj + Qij * alphai, Qjj, Uj, sol->muj);
-			gain = sol->mui * (gi - 0.5 * (Qii*sol->mui + Qij*sol->muj))
-					+ sol->muj * (gj - 0.5 * (Qij*sol->mui + Qjj*sol->muj));
-			if (gain > bestgain) { bestgain = gain; best = sol; }
-			sol++;
-		}
-		// edge \alpha_2 = 0
-		{
-			sol->alphai = alphai;
-			sol->alphaj = 0.0;
-			sol->muj = -alphaj;
-			solveEdge(sol->alphai, gi + Qij * alphaj, Qii, Ui, sol->mui);
-			gain = sol->mui * (gi - 0.5 * (Qii*sol->mui + Qij*sol->muj))
-					+ sol->muj * (gj - 0.5 * (Qij*sol->mui + Qjj*sol->muj));
-			if (gain > bestgain) { bestgain = gain; best = sol; }
-			sol++;
-		}
-		// edge \alpha_1 = U_1
-		{
-			sol->alphai = Ui;
-			sol->alphaj = alphaj;
-			sol->mui = Ui - alphai;
-			solveEdge(sol->alphaj, gj - Qij * sol->mui, Qjj, Uj, sol->muj);
-			gain = sol->mui * (gi - 0.5 * (Qii*sol->mui + Qij*sol->muj))
-					+ sol->muj * (gj - 0.5 * (Qij*sol->mui + Qjj*sol->muj));
-			if (gain > bestgain) { bestgain = gain; best = sol; }
-			sol++;
-		}
-		// edge \alpha_2 = U_2
-		{
-			sol->alphai = alphai;
-			sol->alphaj = Uj;
-			sol->muj = Uj - alphaj;
-			solveEdge(sol->alphai, gi - Qij * sol->muj, Qii, Ui, sol->mui);
-			gain = sol->mui * (gi - 0.5 * (Qii*sol->mui + Qij*sol->muj))
-					+ sol->muj * (gj - 0.5 * (Qij*sol->mui + Qjj*sol->muj));
-			if (gain > bestgain) { bestgain = gain; best = sol; }
-			sol++;
-		}
-		alphai = best->alphai;
-		alphaj = best->alphaj;
-		mui = best->mui;
-		muj = best->muj;
-	}
 };
 #undef ITERATIONS_BETWEEN_SHRINKING
 
@@ -931,6 +795,7 @@ public:
 			
 				
 				// stopping criterion
+				//if (max(stepsize) < 0.01 * stop.minAccuracy) break;
 				if (max(stepsize) < 0.01 * stop.minAccuracy) break;
 			}
 		}while(solver->checkKKT()> stop.minAccuracy);

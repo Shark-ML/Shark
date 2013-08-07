@@ -210,58 +210,58 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
 		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+
 	}
 }
-
-//~ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_ITERATIVE_BIAS_TEST )
-//~ {
-	//~ //Chessboard problem;
-	//~ CircleInSquare problem(2,0.0,true);
-	//~ ClassificationDataset dataset = problem.generateDataset(1000);
+BOOST_AUTO_TEST_CASE( CSVM_TRAINER_ITERATIVE_BIAS_TEST )
+{
+	//Chessboard problem;
+	CircleInSquare problem(2,0.0,true);
+	ClassificationDataset dataset = problem.generateDataset(1000);
 	
 
-	//~ //GaussianRbfKernel<> kernel(0.5);
-	//~ LinearKernel<> kernel;
+	//GaussianRbfKernel<> kernel(0.5);
+	LinearKernel<> kernel;
 	
-	//~ KernelExpansion<RealVector> svmTruth(false);
-	//~ KernelExpansion<RealVector> svmTruth2(true);
-	//~ KernelExpansion<RealVector> svmTruth3(true);
-	//~ KernelExpansion<RealVector> svmTest1(false,2);
-	//~ KernelExpansion<RealVector> svmTest2(true,2);
+	KernelExpansion<RealVector> svmTruth(false);
+	KernelExpansion<RealVector> svmTruth2(true);
+	KernelExpansion<RealVector> svmTruth3(true);
+	KernelExpansion<RealVector> svmTest1(false,2);
+	KernelExpansion<RealVector> svmTest2(true,2);
 	
-	//~ double C = 3;
+	double C = 3;
 
-	//~ {//train as a binary svm problem
-		//~ CSvmTrainer<RealVector> trainerTruth(&kernel, C);
-		//~ trainerTruth.sparsify() = false;
-		//~ trainerTruth.shrinking() = false;
-		//~ trainerTruth.stoppingCondition().minAccuracy = 1e-4;
-		//~ trainerTruth.train(svmTruth, dataset);
-		//~ std::cout<<"a"<<std::endl;
-		//~ trainerTruth.train(svmTruth2, dataset);
-		//~ trainerTruth.setUseIterativeBiasComputation(true);
-		//~ trainerTruth.train(svmTruth3, dataset);
-		//~ std::cout<<"b"<<std::endl;
-	//~ }
+	{//train as a binary svm problem
+		CSvmTrainer<RealVector> trainerTruth(&kernel, C);
+		trainerTruth.sparsify() = false;
+		trainerTruth.shrinking() = false;
+		trainerTruth.stoppingCondition().minAccuracy = 1e-4;
+		trainerTruth.train(svmTruth, dataset);
+		std::cout<<"a"<<std::endl;
+		trainerTruth.train(svmTruth2, dataset);
+		trainerTruth.setUseIterativeBiasComputation(true);
+		trainerTruth.train(svmTruth3, dataset);
+		std::cout<<"b"<<std::endl;
+	}
 	
-	//~ //train as multiclass svm problem
-	//~ McSvmWWTrainer<RealVector> trainer(&kernel, 2*C);
-	//~ trainer.sparsify() = false;
-	//~ trainer.shrinking() = false;
-	//~ trainer.stoppingCondition().minAccuracy = 1e-4;
-	//~ trainer.train(svmTest1, dataset);
-	//~ std::cout<<"c"<<std::endl;
-	//~ trainer.train(svmTest2, dataset);
-	//~ std::cout<<"d"<<std::endl;
+	//train as multiclass svm problem
+	McSvmWWTrainer<RealVector> trainer(&kernel, 2*C);
+	trainer.sparsify() = false;
+	trainer.shrinking() = false;
+	trainer.stoppingCondition().minAccuracy = 1e-4;
+	trainer.train(svmTest1, dataset);
+	std::cout<<"c"<<std::endl;
+	trainer.train(svmTest2, dataset);
+	std::cout<<"d"<<std::endl;
 	
 	
-	//~ //compare bias
-	//~ //BOOST_CHECK_CLOSE(svmTest.offset(0),svmTruth.offset(0),1.e-2);
-	//~ ZeroOneLoss<unsigned int, RealVector> loss;
-	//~ std::cout<<"CSVM: "<<loss.eval(dataset.labels(),svmTruth(dataset.inputs()))<<std::endl;
-	//~ std::cout<<"CSVM with bias : "<<loss.eval(dataset.labels(),svmTruth2(dataset.inputs()))<<" "<<svmTruth2.offset()<<std::endl;
-	//~ std::cout<<"CSVM with bias iterative : "<<loss.eval(dataset.labels(),svmTruth3(dataset.inputs()))<<" "<<svmTruth3.offset()<<std::endl;
-	//~ std::cout<<"WW: "<<loss.eval(dataset.labels(),svmTest1(dataset.inputs()))<<std::endl;
-	//~ std::cout<<"WW with bias: "<<loss.eval(dataset.labels(),svmTest2(dataset.inputs()))<<" "<<svmTest2.offset()<<std::endl;
-//~ }
+	//compare bias
+	//BOOST_CHECK_CLOSE(svmTest.offset(0),svmTruth.offset(0),1.e-2);
+	ZeroOneLoss<unsigned int, RealVector> loss;
+	std::cout<<"CSVM: "<<loss.eval(dataset.labels(),svmTruth(dataset.inputs()))<<std::endl;
+	std::cout<<"CSVM with bias : "<<loss.eval(dataset.labels(),svmTruth2(dataset.inputs()))<<" "<<svmTruth2.offset()<<std::endl;
+	std::cout<<"CSVM with bias iterative : "<<loss.eval(dataset.labels(),svmTruth3(dataset.inputs()))<<" "<<svmTruth3.offset()<<std::endl;
+	std::cout<<"WW: "<<loss.eval(dataset.labels(),svmTest1(dataset.inputs()))<<std::endl;
+	std::cout<<"WW with bias: "<<loss.eval(dataset.labels(),svmTest2(dataset.inputs()))<<" "<<svmTest2.offset()<<std::endl;
+}
 

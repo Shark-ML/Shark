@@ -200,8 +200,6 @@ private:
 				
 				double epsilon = base_type::stoppingCondition().minAccuracy;
 				do{
-					
-					
 					solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
 					//check whether the step was beneficial
 					double newAlphaSum = 0;
