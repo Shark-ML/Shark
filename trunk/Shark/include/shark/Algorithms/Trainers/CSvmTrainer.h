@@ -176,7 +176,7 @@ private:
 		{
 			typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
 			ProblemType problem(svmProblem,base_type::m_shrinking);
-			QpSolver< ProblemType> solver(problem);
+			QpSolver< ProblemType, WS2MaximumGradientCriterion> solver(problem);
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
 			
 			
