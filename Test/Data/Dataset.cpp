@@ -231,6 +231,103 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_MiddleOfBatch_Test )
 	);
 }
 
+
+BOOST_AUTO_TEST_CASE( RepartitionByClass_Test )
+{
+	std::vector<UIntVector> inputs(101,UIntVector(3));
+	std::vector<unsigned int> labels(101);
+
+	// generate dataset
+	for (size_t i=0;i!=101;++i) {
+		inputs[i][0] = 100+i;
+		inputs[i][1] = 200+i;
+		inputs[i][2] = 300+i;
+		labels[i] = i%3;
+	}
+	LabeledData<UIntVector,unsigned int> data = createLabeledDataFromRange(inputs,labels,9);
+	
+	BOOST_REQUIRE_EQUAL(data.numberOfElements(),101);
+	BOOST_REQUIRE_EQUAL(data.numberOfBatches(),12);
+	
+	repartitionByClass(data,11);//different batch size to check other side effects
+	//check dataset integrity
+	BOOST_REQUIRE_EQUAL(data.numberOfElements(),101);
+	BOOST_REQUIRE_EQUAL(data.numberOfBatches(),11);
+	std::vector<std::size_t> classes = classSizes(data);
+	BOOST_REQUIRE_EQUAL(classes[0],34);
+	BOOST_REQUIRE_EQUAL(classes[1],34);
+	BOOST_REQUIRE_EQUAL(classes[2],33);
+	
+	//check that all labels match the elements and that all elements are still there
+	std::vector<unsigned int> resultInputs(101,0);
+	for(std::size_t i = 0; i != 101; ++i){
+		std::size_t k = data.element(i).input(0)-100;
+		BOOST_CHECK_EQUAL(data.element(i).input(1),k+200);
+		BOOST_CHECK_EQUAL(data.element(i).input(2),k+300);
+		BOOST_CHECK_EQUAL(data.element(i).label,k%3);
+		resultInputs[k] = k;
+	}
+	//in the end all elements should be set
+	for(std::size_t i = 0; i != 101; ++i){
+		BOOST_CHECK_EQUAL(resultInputs[i],i);
+	}
+	
+	//check the correct sizes of the batches
+	BOOST_CHECK_EQUAL(data.batch(0).size(),9);
+	BOOST_CHECK_EQUAL(data.batch(1).size(),9);
+	BOOST_CHECK_EQUAL(data.batch(2).size(),8);
+	BOOST_CHECK_EQUAL(data.batch(3).size(),8);
+	BOOST_CHECK_EQUAL(data.batch(4).size(),9);
+	BOOST_CHECK_EQUAL(data.batch(5).size(),9);
+	BOOST_CHECK_EQUAL(data.batch(6).size(),8);
+	BOOST_CHECK_EQUAL(data.batch(7).size(),8);
+	BOOST_CHECK_EQUAL(data.batch(8).size(),11);
+	BOOST_CHECK_EQUAL(data.batch(9).size(),11);
+	BOOST_CHECK_EQUAL(data.batch(10).size(),11);
+	
+	//check order of the labels of the elements
+	for(std::size_t i = 0; i != 34; ++i){
+		BOOST_CHECK_EQUAL(data.element(i).label, 0);
+	}
+	for(std::size_t i = 34; i != 68; ++i){
+		BOOST_CHECK_EQUAL(data.element(i).label, 1);
+	}
+	for(std::size_t i = 68; i != 101; ++i){
+		BOOST_CHECK_EQUAL(data.element(i).label, 2);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
+{
+	unsigned int labels[] ={0,0,1,1,1,2,2,3,4,4,4};
+	unsigned int sizes[] ={21,39,31,17,57};
+	LabeledData<UIntVector,unsigned int> data(11);
+	for(std::size_t i = 0; i != 11; ++i){
+		data.batch(i).input.resize(i+10,1);
+		data.batch(i).label.resize(i+10);
+		for(std::size_t j = 0; j != i+10; ++j){
+			data.batch(i).input(j,0) = j;
+			data.batch(i).label(j) = labels[i];
+		}
+	}
+	
+	//check all class combinations
+	for(std::size_t ci = 0; ci != 5; ++ci){
+		for(std::size_t cj = 0; cj != 5; ++cj){
+			if(ci == cj) continue;
+			LabeledData<UIntVector,unsigned int> testset = binarySubProblem(data,ci,cj);
+			BOOST_REQUIRE_EQUAL(numberOfClasses(testset),2);
+			std::vector<std::size_t> classes = classSizes(testset);
+			BOOST_CHECK_EQUAL(classes[0], sizes[ci]);
+			BOOST_CHECK_EQUAL(classes[1], sizes[cj]);
+		}
+	}
+	
+	
+}
+
+
+
 // 	// 2.2 range version
 // 	std::cout << "range...";
 // 	UnlabeledData<int> rangeSubset, rangeSubset2;
