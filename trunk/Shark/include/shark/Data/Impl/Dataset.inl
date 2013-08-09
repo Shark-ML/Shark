@@ -486,13 +486,6 @@ void range(size_t size,size_t start, T& indices){
 	for (size_t i=0; i<size; i++) indices[i] = start+i;
 }
 
-struct ElementSort{
-	template<class T, class U>
-	bool operator() (const T& x, const U& y) const{
-		return x.label > y.label;
-	}
-};
-
 struct TransformOneVersusRestLabels
 {
 	TransformOneVersusRestLabels(unsigned int oneClass)
@@ -510,21 +503,21 @@ private:
 	unsigned int m_oneClass;
 };
 
-
-template<class Functor, class B>
-struct TransformedDataElementTypeFromBatch{
-	typedef typename Batch<
-		typename boost::result_of<Functor(B)>::type 
-	>::value_type type;
-};
 /// \brief For Data<T> and functor F calculates the result of the resulting elements F(T).
 template<class Functor, class T>
 struct TransformedDataElement{
+private:
+	template<class B>
+	struct TransformedDataElementTypeFromBatch{
+		typedef typename Batch<
+			typename boost::result_of<Functor(B)>::type 
+		>::value_type type;
+	};
+public:
 	typedef typename boost::mpl::eval_if<
 		CanBeCalled<Functor,T>,
 		boost::result_of<Functor(T) >,
 		TransformedDataElementTypeFromBatch<
-			Functor,
 			typename Batch<T>::type 
 		>
 	>::type type;
@@ -562,6 +555,10 @@ struct DataPair{
 	DataPair(
 		T const& pair
 	):input(pair.input),label(pair.label){}
+		
+	friend bool operator<(DataPair const& op1, DataPair const& op2){
+		return op1.label < op2.label;
+	}
 };
 
 template<class I, class L,class InputIterator, class LabelIterator>
@@ -596,10 +593,19 @@ struct PairReference<DataPair<I, L>, InputIterator, LabelIterator >{
 			return *this;
 		}
 		
-		friend void swap(type const& a, type const& b){
+		friend void swap(type a, type b){
 			using std::swap;
 			swap(a.input,b.input);
 			swap(a.label,b.label);
+		}
+		friend bool operator<(type const& op1, type const& op2){
+			return op1.label < op2.label;
+		}
+		friend bool operator<(type const& op1, DataPair<I,L> const& op2){
+			return op1.label < op2.label;
+		}
+		friend bool operator<(DataPair<I,L> const&  op1, type const& op2){
+			return op1.label < op2.label;
 		}
 	};
 };

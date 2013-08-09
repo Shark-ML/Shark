@@ -935,10 +935,10 @@ void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize 
 	std::vector<std::size_t > classCounts = classSizes(data);
 	std::vector<std::size_t > partitioning;//new, optimal partitioning of the data according to the batch sizes
 	std::vector<std::size_t > classStart;//at which batch the elements of the class are starting
-	detail::batchPartitioning(classCounts, partitioning, classStart, batchSize);
+	detail::batchPartitioning(classCounts, classStart, partitioning, batchSize);
 
 	data.repartition(partitioning);
-	boost::sort(data.elements(),detail::ElementSort());//todo we are lying here, use bidirectional iterator sort.
+	boost::sort(data.elements());//todo we are lying here, use bidirectional iterator sort.
 }
 
 template<class I>
@@ -950,22 +950,23 @@ LabeledData<I,unsigned int> binarySubProblem(
 	std::vector<std::size_t> indexSet;
 	std::size_t smaller = std::min(zeroClass,oneClass);
 	std::size_t bigger = std::max(zeroClass,oneClass);
+	std::size_t numBatches = data.numberOfBatches();
 
 	//find first class
 	std::size_t start= 0;
-	for(;get(data.batch(start),0).label != smaller;++start);
-	SHARK_CHECK(start != data.numberOfBatches(), "[shark::binarySubProblem] class does not exist");
+	for(;start != numBatches && get(data.batch(start),0).label != smaller;++start);
+	SHARK_CHECK(start != numBatches, "[shark::binarySubProblem] class does not exist");
 
 	//copy batch indices of first class
-	for(;start != data.numberOfBatches() && get(data.batch(start),0).label == smaller; ++start)
+	for(;start != numBatches && get(data.batch(start),0).label == smaller; ++start)
 		indexSet.push_back(start);
 
 	//find second class
-	for(;start != data.numberOfBatches() && get(data.batch(start),0).label != bigger;++start);
-	SHARK_CHECK(start != data.numberOfBatches(), "[shark::binarySubProblem] class does not exist");
+	for(;start != numBatches && get(data.batch(start),0).label != bigger;++start);
+	SHARK_CHECK(start != numBatches, "[shark::binarySubProblem] class does not exist");
 
 	//copy batch indices of second class
-	for(;get(data.batch(start),0).label == bigger; ++start)
+	for(;start != numBatches && get(data.batch(start),0).label == bigger; ++start)
 		indexSet.push_back(start);
 
 	return transformLabels(indexedSubset(data,indexSet), detail::TransformOneVersusRestLabels(oneClass));

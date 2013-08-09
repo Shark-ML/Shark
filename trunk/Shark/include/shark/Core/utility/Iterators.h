@@ -284,7 +284,7 @@ private:
 	void advance(std::ptrdiff_t n){
 		m_positionInSequence += n;
 		std::ptrdiff_t diff = m_innerPosition - m_innerBegin;
-		n -= diff;//jump from the start of the current inner sequence
+		n += diff;//jump from the start of the current inner sequence
 		if(n== 0)
 			m_innerPosition = m_innerBegin;
 		if(n < 0){
