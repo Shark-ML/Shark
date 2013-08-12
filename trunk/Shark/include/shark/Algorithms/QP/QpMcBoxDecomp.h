@@ -1,6 +1,6 @@
 //===========================================================================
 /*!
- *  \brief Quadratic programming solver for multi-class SVMs
+ *  \brief Quadratic programming m_problem for multi-class SVMs
  *
  *
  *  \author  T. Glasmachers
@@ -28,7 +28,7 @@
 #ifndef SHARK_ALGORITHMS_QP_QPMCBOXDECOMP_H
 #define SHARK_ALGORITHMS_QP_QPMCBOXDECOMP_H
 
-#include <shark/Algorithms/QP/QuadraticProgram.h>
+#include <shark/Algorithms/QP/QpSolver.h>
 #include <shark/Algorithms/QP/QpSparseArray.h>
 #include <shark/Algorithms/QP/Impl/AnalyticProblems.h>
 #include <shark/Core/Timer.h>
@@ -36,15 +36,29 @@
 
 
 namespace shark {
+	
+	
+/// \brief Working set selection eturning th S2DO working set
+///
+/// This selection operator picks the first variable by maximum gradient, 
+/// the second by maximum unconstrained gain.
+struct BoxConstrainedS2DOSelection{
+	template<class Problem>
+	double operator()(Problem& problem, std::size_t& i, std::size_t& j){
+		//todo move implementation here
+		return problem.selectWorkingSet(i,j);
+	}
 
+	void reset(){}
+};
 
-#define ITERATIONS_BETWEEN_SHRINKING 1000
 
 template <class Matrix>
 class QpMcBoxDecomp
 {
 public:
 	typedef typename Matrix::QpFloatType QpFloatType;
+	typedef BoxConstrainedS2DOSelection PreferedSelectionStrategy;
 
 	//! Constructor
 	//! \param  kernel               kernel matrix - cache or pre-computed matrix
@@ -79,7 +93,7 @@ public:
 			"[QpMcDecomp::QpMcDecomp] dimension conflict"
 		);
 		
-		// prepare solver internal variables
+		// prepare m_problem internal variables
 		m_activeEx = m_numExamples;
 		m_activeVar = m_numVariables;
 		for (std::size_t v=0, i=0; i<m_numExamples; i++)
@@ -111,96 +125,13 @@ public:
 	{
 		m_useShrinking = shrinking; 
 	}
-
-	//!
-	//! \brief solve the quadratic program
-	//! \param  stop           stopping condition(s)
-	//! \param  prop           solution properties (may be NULL)
-	void solve(
-		QpStoppingCondition& stop,
-		QpSolutionProperties* prop = NULL
-	){
-		double start_time = Timer::now();
-
-		bUnshrinked = false;
-		std::size_t checkCounter = 0;//force initial shrinking in the first iteration
-
-		// decomposition loop
-		unsigned long long iter = 0;
-		double acc = 0;
-		while (iter != stop.maxIterations)
-		{
-			if (checkCounter == 0)
-			{
-				// shrink the problem
-				if (m_useShrinking) 
-					shrink(stop.minAccuracy);
-
-				checkCounter = (m_activeVar < ITERATIONS_BETWEEN_SHRINKING) ? m_activeVar : ITERATIONS_BETWEEN_SHRINKING;
-				
-				//check time as stopping criterion
-				if (stop.maxSeconds < 1e100)
-				{
-					double current_time = Timer::now();
-					if (current_time - start_time > stop.maxSeconds)
-					{
-						if (prop != NULL) prop->type = QpTimeout;
-						break;
-					}
-				}
-			}
-			// select a working set and check for optimality
-			std::size_t v=0, w=0;
-			acc = selectWorkingSet(v, w);
-			//unshrink the problem if optimal
-			//and select a new working set
-			//this is costly
-			if(m_activeVar != m_numVariables && acc < stop.minAccuracy){
-				unshrink(stop.minAccuracy);
-				acc = selectWorkingSet(v, w);
-				if(acc >= stop.minAccuracy){//shrink again if not optimal
-					shrink(stop.minAccuracy);
-					checkCounter = (m_activeVar < ITERATIONS_BETWEEN_SHRINKING) ? m_activeVar : ITERATIONS_BETWEEN_SHRINKING;
-				}
-			}
-			//if shrinking did not fail, this is the actual stopping condition
-			if(acc < stop.minAccuracy){
-				if (prop != NULL) prop->type = QpAccuracyReached;
-				break;
-			}
-			
-			//now do a simple SMO loop
-			updateSMO(v,w);
-
-			checkCounter--;
-			iter++;
-		}
-
-		if (iter == stop.maxIterations)
-		{
-			if (prop != NULL) prop->type = QpMaxIterationsReached;
-		}
-
-		//compute the objective value
-		double objective = 0.5*inner_prod(m_gradient+m_linear,m_alpha);
-		
-		double finish_time = Timer::now();
-
-		if (prop != NULL)
-		{
-			prop->accuracy = acc;
-			prop->value = objective;
-			prop->iterations = iter;
-			prop->seconds = finish_time - start_time;
-		}
-	}
 	
 	/// \brief Return the solution found.
 	RealMatrix solution() const{
 		RealMatrix solutionMatrix(m_numVariables,m_cardP,0);
 		for (std::size_t v=0; v<m_numVariables; v++)
 		{
-			solutionMatrix(m_variables[v].i,m_variables[v].p) = m_alpha(v);
+			solutionMatrix(originalIndex(v),m_variables[v].p) = m_alpha(v);
 		}
 		return solutionMatrix;
 	}
@@ -209,16 +140,24 @@ public:
 		RealMatrix solutionGradientMatrix(m_numVariables,m_cardP,0);
 		for (std::size_t v=0; v<m_numVariables; v++)
 		{
-			solutionGradientMatrix(m_variables[v].i,m_variables[v].p) = m_gradient(v);
+			solutionGradientMatrix(originalIndex(v),m_variables[v].p) = m_gradient(v);
 		}
 		return solutionGradientMatrix;
+	}
+	
+	/// \brief Compute the objective value of the current solution.
+	double functionValue()const{
+		return 0.5*inner_prod(m_gradient+m_linear,m_alpha);
 	}
 	
 	unsigned int label(std::size_t i){
 		return m_examples[i].y;
 	}
 	
-	std::size_t getCardP()const{
+	std::size_t dimensions()const{
+		return m_numVariables;
+	}
+	std::size_t cardP()const{
 		return m_cardP;
 	}
 	
@@ -252,15 +191,16 @@ public:
 		SIZE_CHECK(deltaLinear.size2() == m_cardP);
 		for (std::size_t v=0; v<m_numVariables; v++)
 		{
-			std::size_t i = m_variables[v].i;
+			
 			std::size_t p = m_variables[v].p;
-			m_gradient(v) += deltaLinear(i,p); 
-			m_linear(v) += deltaLinear(i,p);
+			m_gradient(v) += deltaLinear(originalIndex(v),p); 
+			m_linear(v) += deltaLinear(originalIndex(v),p);
 		}
 	}
 	
-protected:
 	void updateSMO(std::size_t v, std::size_t w){
+		SIZE_CHECK(v < m_activeVar);
+		SIZE_CHECK(w < m_activeVar);
 		// update
 		if (v == w)
 		{
@@ -268,6 +208,7 @@ protected:
 			// this means that there is only one
 			// non-optimal variables left.
 			std::size_t i = m_variables[v].i;
+			SHARK_ASSERT(i < m_activeEx);
 			unsigned int p = m_variables[v].p;
 			unsigned int y = m_examples[i].y;
 			unsigned int r = m_cardP * y + p;
@@ -282,10 +223,12 @@ protected:
 		{
 			// S2DO
 			std::size_t iv = m_variables[v].i;
+			SHARK_ASSERT(iv < m_activeEx);
 			unsigned int pv = m_variables[v].p;
 			unsigned int yv = m_examples[iv].y;
 
 			std::size_t iw = m_variables[w].i;
+			SHARK_ASSERT(iw < m_activeEx);
 			unsigned int pw = m_variables[w].p;
 			unsigned int yw = m_examples[iw].y;
 
@@ -316,37 +259,119 @@ protected:
 		}
 	}
 	
-	
-	void gradientUpdate(std::size_t r, double mu, float* q)
+	//! Shrink the problem
+	bool shrink(double epsilon)
 	{
-		for ( std::size_t a= 0; a< m_activeEx; a++)
+		if(! m_useShrinking)
+			return false;
+		if (! bUnshrinked)
 		{
-			double k = q[a];
-			Example& ex = m_examples[a];
-			typename QpSparseArray<QpFloatType>::Row const& row = m_M.row(m_classes * r + ex.y);
-			QpFloatType def = row.defaultvalue;
-			if (def == 0.0)
+			double largest = 0.0;
+			for (std::size_t a = 0; a < m_activeVar; a++)
 			{
-				for (std::size_t b=0; b<row.size; b++)
+				if (m_alpha(a) < m_C)
 				{
-					std::size_t p = row.entry[b].index;
-					m_gradient(ex.var[p]) -= mu * row.entry[b].value * k;
+					largest = std::max(largest,m_gradient(a));
+				}
+				if (m_alpha(a) > 0.0)
+				{
+					largest = std::max(largest,-m_gradient(a));
 				}
 			}
-			else
+			if (largest < 10.0 * epsilon)
 			{
-				for (std::size_t b=0; b<row.size; b++)
-				{
-					std::size_t p = row.entry[b].index;
-					m_gradient(ex.var[p]) -= mu * (row.entry[b].value - def) * k;
-				}
-				double upd = mu* def * k;
-				for (std::size_t b=0; b<ex.active; b++) 
-					m_gradient(ex.avar[b]) -= upd;
+				// unshrink the problem at this accuracy level
+				unshrink();
+				bUnshrinked = true;
 			}
 		}
+
+		// shrink variables
+		bool se = false;
+		for (int a= m_activeVar-1; a >= 0; a--)
+		{
+			double v = m_alpha(a);
+			double g = m_gradient(a);
+
+			if ((v == 0.0 && g <= 0.0) || (v == m_C && g >= 0.0))
+			{
+				// In this moment no feasible step including this variables
+				// can improve the objective. Thus deactivate the variables.
+				std::size_t e = m_variables[a].i;
+				deactivateVariable(a);
+				if (m_examples[e].active == 0)
+				{
+					se = true;
+				}
+			}
+		}
+
+		if (se)
+		{
+			// exchange examples such that shrinked examples
+			// are moved to the ends of the lists
+			for (int a = m_activeEx - 1; a >= 0; a--)
+			{
+				if (m_examples[a].active == 0) 
+					deactivateExample(a);
+			}
+			//~ m_kernelMatrix.setMaxCachedIndex(m_activeEx);
+		}
+		return true;
 	}
 
+	//! Activate all m_numVariables
+	void unshrink()
+	{
+		if (m_activeVar == m_numVariables) return;
+
+		// compute the inactive m_gradient components (quadratic time complexity)
+		subrange(m_gradient, m_activeVar, m_numVariables) = subrange(m_linear, m_activeVar, m_numVariables);
+		for (std::size_t v = 0; v != m_numVariables; v++)
+		{
+			double mu = m_alpha(v);
+			if (mu == 0.0) continue;
+
+			std::size_t iv = m_variables[v].i;
+			unsigned int pv = m_variables[v].p;
+			unsigned int yv = m_examples[iv].y;
+			unsigned int r = m_cardP * yv + pv;
+			std::vector<QpFloatType> q(m_numExamples);
+			m_kernelMatrix.row(iv, 0, m_numExamples, &q[0]);
+
+			for (std::size_t a = 0; a != m_numExamples; a++)
+			{
+				double k = q[a];
+				Example& ex = m_examples[a];
+				typename QpSparseArray<QpFloatType>::Row const& row = m_M.row(m_classes * r + ex.y);
+				QpFloatType def = row.defaultvalue;
+				for (std::size_t b=0; b<row.size; b++)
+				{
+					std::size_t f = ex.var[row.entry[b].index];
+					if (f >= m_activeVar) 
+						m_gradient(f) -= mu * (row.entry[b].value - def) * k;
+				}
+				if (def != 0.0)
+				{
+					double upd = mu * def * k;
+					for (std::size_t  b=ex.active; b<m_cardP; b++)
+					{
+						std::size_t f = ex.avar[b];
+						SHARK_ASSERT(f >= m_activeVar);
+						m_gradient(f) -= upd;
+					}
+				}
+			}
+		}
+
+		for (std::size_t  i=0; i<m_numExamples; i++) 
+			m_examples[i].active = m_cardP;
+		m_activeEx = m_numExamples;
+		m_activeVar = m_numVariables;
+		//todo: mt: activate line below (new unshrink action) -> verify & test
+		//m_kernelMatrix.setTruncationIndex( m_activeEx ); //disable cache truncation again
+	}
+	
 	//!
 	//! \brief select the working set
 	//!
@@ -382,6 +407,7 @@ protected:
 		// second order selection
 		Variable& vari = m_variables[i];
 		std::size_t ii = vari.i;
+		SHARK_ASSERT(ii < m_activeEx);
 		unsigned int pi = vari.p;
 		unsigned int yi = m_examples[ii].y;
 		double di = vari.diagonal;
@@ -400,6 +426,8 @@ protected:
 			for (std::size_t pf=0, b=0; pf < m_cardP; pf++)
 			{
 				std::size_t f = exa.var[pf];
+				if(f >= m_activeVar || f == i)
+					continue;
 				double qif = def * k[a];
 				//chck whether we are at an existing element of the sparse row
 				if( b != row.size && pf == row.entry[b].index){
@@ -417,6 +445,28 @@ protected:
 		}
 
 		return maxViolation;
+	}
+	
+protected:
+	
+	void gradientUpdate(std::size_t r, double mu, float* q)
+	{
+		for ( std::size_t a= 0; a< m_activeEx; a++)
+		{
+			double k = q[a];
+			Example& ex = m_examples[a];
+			typename QpSparseArray<QpFloatType>::Row const& row = m_M.row(m_classes * r + ex.y);
+			QpFloatType def = row.defaultvalue;
+			for (std::size_t b=0; b<row.size; b++){
+				std::size_t p = row.entry[b].index;
+				m_gradient(ex.var[p]) -= mu * (row.entry[b].value - def) * k;
+			}
+			if (def != 0.0){
+				double upd = mu* def * k;
+				for (std::size_t b=0; b<ex.active; b++) 
+					m_gradient(ex.avar[b]) -= upd;
+			}
+		}
 	}
 	
 	double calculateGain(std::size_t f,double qif, double di, double gi, double gain_i)const{
@@ -455,129 +505,10 @@ protected:
 		return 0;
 	}
 
-	//! Shrink the problem
-	void shrink(double epsilon)
-	{
-		if (! bUnshrinked)
-		{
-			double largest = 0.0;
-			for (std::size_t a = 0; a < m_activeVar; a++)
-			{
-				if (m_alpha(a) < m_C)
-				{
-					if (m_gradient(a) > largest)
-						largest = m_gradient(a);
-				}
-				if (m_alpha(a) > 0.0)
-				{
-					if (-m_gradient(a) > largest) 
-						largest = -m_gradient(a);
-				}
-			}
-			if (largest < 10.0 * epsilon)
-			{
-				// unshrink the problem at this accuracy level
-				unshrink(epsilon);
-				bUnshrinked = true;
-			}
-		}
-
-		// shrink m_numVariables
-		bool se = false;
-		for (std::size_t i = m_activeVar; i > 0; i--)
-		{
-			std::size_t a = i-1;
-			double v = m_alpha(a);
-			double g = m_gradient(a);
-
-			if ((v == 0.0 && g <= 0.0) || (v == m_C && g >= 0.0))
-			{
-				// In this moment no feasible step including this m_variables
-				// can improve the objective. Thus deactivate the m_variables.
-				std::size_t e = m_variables[a].i;
-				deactivateVariable(a);
-				if (m_examples[e].active == 0)
-				{
-					se = true;
-				}
-			}
-		}
-
-		if (se)
-		{
-			// exchange m_examples such that shrinked m_examples
-			// are moved to the ends of the lists
-			for (int a = m_activeEx - 1; a >= 0; a--)
-			{
-				if (m_examples[a].active == 0) deactivateExample(a);
-			}
-			m_kernelMatrix.setMaxCachedIndex(m_activeEx);
-		}
-	}
-
-	//! Activate all m_numVariables
-	void unshrink(double epsilon)
-	{
-		if (m_activeVar == m_numVariables) return;
-
-		// compute the inactive m_gradient components (quadratic time complexity)
-		subrange(m_gradient, m_activeVar, m_numVariables) = subrange(m_linear, m_activeVar, m_numVariables);
-		for (std::size_t v=0; v<m_numVariables; v++)
-		{
-			double mu = m_alpha(v);
-			if (mu == 0.0) continue;
-
-			std::size_t iv = m_variables[v].i;
-			unsigned int pv = m_variables[v].p;
-			unsigned int yv = m_examples[iv].y;
-			unsigned int r = m_cardP * yv + pv;
-			std::vector<QpFloatType> q(m_numExamples);
-			m_kernelMatrix.row(iv, 0, m_numExamples, &q[0]);
-
-			for (std::size_t a=0; a<m_numExamples; a++)
-			{
-				double k = (q)[a];
-				Example& ex = m_examples[a];
-				typename QpSparseArray<QpFloatType>::Row const& row = m_M.row(m_classes * r + ex.y);
-				QpFloatType def = row.defaultvalue;
-				if (def == 0.0)
-				{
-					for (std::size_t  b=0; b<row.size; b++)
-					{
-						std::size_t f = ex.var[row.entry[b].index];
-						if (f >= m_activeVar) m_gradient(f) -= mu * row.entry[b].value * k;
-					}
-				}
-				else
-				{
-					for (std::size_t b=0; b<row.size; b++)
-					{
-						std::size_t f = ex.var[row.entry[b].index];
-						if (f >= m_activeVar) m_gradient(f) -= mu * (row.entry[b].value - def) * k;
-					}
-					double upd = (mu) * def * (k);
-					for (std::size_t  b=ex.active; b<m_cardP; b++)
-					{
-						std::size_t f = ex.avar[b];
-						SHARK_ASSERT(f >= m_activeVar);
-						m_gradient(f) -= upd;
-					}
-				}
-			}
-		}
-
-		for (std::size_t  i=0; i<m_numExamples; i++) 
-			m_examples[i].active = m_cardP;
-		m_activeEx = m_numExamples;
-		m_activeVar = m_numVariables;
-		//todo: mt: activate line below (new unshrink action) -> verify & test
-		//m_kernelMatrix.setTruncationIndex( m_activeEx ); //disable cache truncation again
-	}
-
 	//! true if the problem has already been unshrinked
 	bool bUnshrinked;
-
-	//! shrink a m_variables
+	
+	//! shrink a variable
 	void deactivateVariable(std::size_t v)
 	{
 		std::size_t ev = m_variables[v].i;
@@ -620,13 +551,14 @@ protected:
 	{
 		SHARK_ASSERT(e < m_activeEx);
 		std::size_t j = m_activeEx - 1;
+		m_activeEx--;
+		if(e == j) return;
 
 		std::swap(m_examples[e], m_examples[j]);
 
-		std::size_t v;
 		std::size_t* pe = m_examples[e].var;
 		std::size_t* pj = m_examples[j].var;
-		for (v = 0; v < m_cardP; v++)
+		for (std::size_t v = 0; v < m_cardP; v++)
 		{
 			SHARK_ASSERT(pj[v] >= m_activeVar);
 			m_variables[pe[v]].i = e;
@@ -639,7 +571,15 @@ protected:
 		//m_kernelMatrix.cacheRedeclareOldest(e);
 		m_kernelMatrix.flipColumnsAndRows(e, j);
 
-		m_activeEx--;
+		
+	}
+	
+	/// \brief Returns the original index of the example of a variable in the dataset before optimization.
+	///
+	/// Shrinking is an internal detail so the communication with the outside world uses the original indizes.
+	std::size_t originalIndex(std::size_t v)const{
+		std::size_t i = m_variables[v].i;
+		return m_examples[i].index;//i before shrinking
 	}
 
 	//! data structure describing one m_variables of the problem
@@ -710,16 +650,16 @@ protected:
 	//! number of currently active variabless
 	std::size_t m_activeVar;
 
-	//! should the solver use the shrinking heuristics?
+	//! should the m_problem use the shrinking heuristics?
 	bool m_useShrinking;
 };
-#undef ITERATIONS_BETWEEN_SHRINKING
+
 
 template<class Matrix>
 class BiasSolver{
 public:
 	typedef typename Matrix::QpFloatType QpFloatType;
-	BiasSolver(QpMcBoxDecomp<Matrix>* solver) : solver(solver){}
+	BiasSolver(QpMcBoxDecomp<Matrix>* problem) : m_problem(problem){}
 		
 	void solve(
 		RealVector& bias,
@@ -728,19 +668,20 @@ public:
 		bool sumToZero = false
 	){
 		std::size_t classes = bias.size();
-		std::size_t numExamples = solver->getNumExamples();
-		std::size_t cardP = solver->getCardP();
+		std::size_t numExamples = m_problem->getNumExamples();
+		std::size_t cardP = m_problem->cardP();
 		RealVector stepsize(classes, 0.01);
 		RealVector prev(classes,0);
 		RealVector step(classes);
 		
 		do{
-			solver->solve(stop);
+			QpSolver<QpMcBoxDecomp<Matrix> > solver(*m_problem);
+			solver.solve(stop);
 
 			// Rprop loop to update the bias
 			while (true)
 			{
-				RealMatrix dualGradient = solver->solutionGradient();
+				RealMatrix dualGradient = m_problem->solutionGradient();
 				// compute the primal m_gradient w.r.t. bias
 				RealVector grad(classes,0);
 
@@ -749,7 +690,7 @@ public:
 						double g = dualGradient(i,p);
 						if (g > 0.0)
 						{
-							unsigned int y = solver->label(i);
+							unsigned int y = m_problem->label(i);
 							typename QpSparseArray<QpFloatType>::Row const& row = nu.row(y * cardP + p);
 							for (std::size_t b=0; b<row.size; b++) 
 								grad(row.entry[b].index) -= row.entry[b].value;
@@ -791,22 +732,22 @@ public:
 				// update the solution and the dual m_gradient
 				bias += step;
 				performBiasUpdate(step,nu);
-				//~ std::cout<<grad<<" "<<solver->checkKKT()<<" "<<stepsize<<" "<<bias<<std::endl;
+				//~ std::cout<<grad<<" "<<m_problem->checkKKT()<<" "<<stepsize<<" "<<bias<<std::endl;
 				
 				if (max(stepsize) < 0.01 * stop.minAccuracy) break;
 			}
-		}while(solver->checkKKT()> stop.minAccuracy);
+		}while(m_problem->checkKKT()> stop.minAccuracy);
 	}
 private:
 	void performBiasUpdate(
 		RealVector const& step, QpSparseArray<QpFloatType> const& nu
 	){
-		std::size_t numExamples = solver->getNumExamples();
-		std::size_t cardP = solver->getCardP();
+		std::size_t numExamples = m_problem->getNumExamples();
+		std::size_t cardP = m_problem->cardP();
 		RealMatrix deltaLinear(numExamples,cardP,0.0);
 		for (std::size_t i=0; i<numExamples; i++){
 			for (std::size_t p=0; p<cardP; p++){
-				unsigned int y = solver->label(i);
+				unsigned int y = m_problem->label(i);
 				// delta = \sum_m \nu_{m,p,y_i} \Delta b(m)
 				typename QpSparseArray<QpFloatType>::Row const& row = nu.row(y * cardP +p);
 				for (std::size_t b=0; b<row.size; b++)
@@ -815,10 +756,10 @@ private:
 				}
 			}
 		}
-		solver->addDeltaLinear(deltaLinear);
+		m_problem->addDeltaLinear(deltaLinear);
 		
 	}
-	QpMcBoxDecomp<Matrix>* solver;
+	QpMcBoxDecomp<Matrix>* m_problem;
 };
 
 

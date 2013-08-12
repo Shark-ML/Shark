@@ -132,21 +132,12 @@ public:
 		RealVector param = svm.parameterVector();
 
 		// prepare the problem description
-		RealMatrix linear(ic, classes-1);
-		{
-			for ( std::size_t i=0; i< ic; i++) 
-				for (std::size_t p=0; p<classes-1; p++) 
-					linear(i, p) = 1.0;
-		}
-		RealMatrix gamma(classes, classes-1);
-		{
-			unsigned int y, p;
-			for (y=0; y<classes; y++) for (p=0; p<classes-1; p++) gamma(y, p) = 1.0;
-		}
+		RealMatrix linear(ic, classes-1,1.0);
+		RealMatrix gamma(classes, classes-1,1.0);
 		UIntVector rho(classes-1);
 		{
-			unsigned int p;
-			for (p=0; p<classes-1; p++) rho(p) = p;
+			for (unsigned int p=0; p<classes-1; p++) 
+				rho(p) = p;
 		}
 		QpSparseArray<QpFloatType> nu(classes * (classes-1), classes, 2*classes*(classes-1));
 		{
@@ -218,36 +209,34 @@ public:
 		if (base_type::precomputeKernel())
 		{
 			PrecomputedMatrixType matrix(&km);
-			//~ QpMcDecomp< PrecomputedMatrixType> solver(matrix, gamma, rho, nu, M, true);
-			//~ QpSolutionProperties& prop = base_type::m_solutionproperties;
-			//~ solver.setShrinking(base_type::m_shrinking);
-			//~ if (base_type::m_s2do) solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
-			//~ QpMcBoxDecomp< PrecomputedMatrixType> solver(matrix, M, dataset.labels(), linear, this->C());
-			//~ QpSolutionProperties& prop = base_type::m_solutionproperties;
-			//~ solver.setShrinking(base_type::m_shrinking);
-			//~ if(svm.hasOffset())
-				//~ solver.solveWithBias(alpha,bias,base_type::m_stoppingcondition,nu);
-			//~ else
-				//~ solver.solve(alpha, base_type::m_stoppingcondition, &prop);
+			QpMcBoxDecomp< PrecomputedMatrixType > problem(matrix, M, dataset.labels(), linear, this->C());
+			QpSolutionProperties& prop = base_type::m_solutionproperties;
+			problem.setShrinking(base_type::m_shrinking);
+			if(svm.hasOffset()){
+				BiasSolver<  PrecomputedMatrixType > biasSolver(&problem);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
+			}
+			else{
+				QpSolver<QpMcBoxDecomp< PrecomputedMatrixType > > solver(problem);
+				solver.solve( base_type::m_stoppingcondition, &prop);
+			}
+			alpha = problem.solution();
 		}
 		else
 		{
 			CachedMatrixType matrix(&km, base_type::m_cacheSize);
-			//~ QpMcDecomp< CachedMatrixType > solver(matrix, gamma, rho, nu, M, true);
-			//~ QpSolutionProperties& prop = base_type::m_solutionproperties;
-			//~ solver.setShrinking(base_type::m_shrinking);
-			//~ if (base_type::m_s2do) solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
-			//~ else solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
-			QpMcBoxDecomp< CachedMatrixType> solver(matrix, M, dataset.labels(), linear, this->C());
+			QpMcBoxDecomp< CachedMatrixType> problem(matrix, M, dataset.labels(), linear, this->C());
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			solver.setShrinking(base_type::m_shrinking);
+			problem.setShrinking(base_type::m_shrinking);
 			if(svm.hasOffset()){
-				BiasSolver<CachedMatrixType> biasSolver(&solver);
+				BiasSolver<CachedMatrixType> biasSolver(&problem);
 				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
 			}
-			else
+			else{
+				QpSolver<QpMcBoxDecomp< CachedMatrixType> > solver(problem);
 				solver.solve( base_type::m_stoppingcondition, &prop);
-			alpha = solver.solution();
+			}
+			alpha = problem.solution();
 		}
 
 		// write the solution into the model
