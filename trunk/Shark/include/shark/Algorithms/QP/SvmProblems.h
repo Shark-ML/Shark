@@ -119,7 +119,6 @@ struct LibSVMSelectionCriterion{
 		double best = 0.0;
 		for (std::size_t a = 0; a < problem.active(); a++){
 			double ga = problem.gradient(a);
-			//if (aa > problem.boxMin(a))
 			if (!problem.isLowerBound(a))
 			{
 				smallestDown=std::min(smallestDown,ga);
@@ -447,6 +446,18 @@ public:
 		m_gradient(i) += newValue;
 		m_problem.linear(i) = newValue;
 	}
+	
+	double checkKKT()const{
+		double largestUp = -1e100;
+		double smallestDown = 1e100;
+		for (std::size_t a = 0; a < active(); a++){
+			if (!isLowerBound(a))
+				smallestDown = std::min(smallestDown,gradient(a));
+			if (!isUpperBound(a))
+				largestUp = std::max(largestUp,gradient(a));
+		}
+		return largestUp - smallestDown;
+	}
 
 protected:
 	Problem m_problem;
@@ -540,7 +551,6 @@ public:
 	: base_type(problem)
 	, m_isUnshrinked(false)
 	, m_shrink(shrink)
-	, m_shrinkCounter(std::min<std::size_t>(problem.dimensions(),1000))
 	, m_gradientEdge(problem.linear){}
 		
 	using base_type::alpha;
@@ -557,12 +567,23 @@ public:
 	bool shrink(double epsilon){
 		if(!m_shrink) return false;
 		
-		//check if shrinking is necessary
-		--m_shrinkCounter;
-		if(m_shrinkCounter != 0) return false;
-		m_shrinkCounter = std::min<std::size_t>(dimensions(),1000);
-		
-		return doShrink(epsilon);
+		double largestUp;
+		double smallestDown;
+		getMaxKKTViolations(largestUp,smallestDown,active());
+
+		// check whether unshrinking is necessary at this accuracy level
+		if (!m_isUnshrinked  && (largestUp - smallestDown < 10.0 * epsilon))
+		{
+			unshrink();
+			//recalculate maximum KKT violation for immeediate re-shrinking
+			getMaxKKTViolations(largestUp,smallestDown,dimensions());
+		}
+		//shrink
+		for (std::size_t a = this->active(); a > 0; --a){
+			if(testShrinkVariable(a-1,largestUp,smallestDown))
+				this->shrinkVariable(a-1);
+		}
+		return true;
 	}
 
 	///\brief Unshrink the problem
@@ -677,26 +698,6 @@ private:
 		std::swap( m_gradientEdge[i], m_gradientEdge[active()-1]);
 		--this->m_active;
 	}
-	
-	bool doShrink(double epsilon){
-		double largestUp;
-		double smallestDown;
-		getMaxKKTViolations(largestUp,smallestDown,active());
-
-		// check whether unshrinking is necessary at this accuracy level
-		if (!m_isUnshrinked  && (largestUp - smallestDown < 10.0 * epsilon))
-		{
-			unshrink();
-			//recalculate maximum KKT violation for immeediate re-shrinking
-			getMaxKKTViolations(largestUp,smallestDown,dimensions());
-		}
-		//shrink
-		for (std::size_t a = this->active(); a > 0; --a){
-			if(testShrinkVariable(a-1,largestUp,smallestDown))
-				this->shrinkVariable(a-1);
-		}
-		return true;
-	}
 
 
 	bool testShrinkVariable(std::size_t a, double largestUp, double smallestDown)const{
@@ -726,9 +727,6 @@ private:
 	
 	///\brief true if shrinking is to be used.
 	bool m_shrink;
-	
-	///\brief Number of iterations until next shrinking.
-	std::size_t m_shrinkCounter;
 
 	///\brief Stores the gradient of the alpha dimeensions which are either 0 or C
 	RealVector m_gradientEdge;
