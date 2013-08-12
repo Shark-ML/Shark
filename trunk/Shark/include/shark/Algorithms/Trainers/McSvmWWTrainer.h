@@ -95,10 +95,6 @@ public:
 	/// parameter makes it easy to use double instead, (e.g., in case high
 	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
-
 	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
 	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
 	typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
@@ -133,7 +129,6 @@ public:
 
 		// prepare the problem description
 		RealMatrix linear(ic, classes-1,1.0);
-		RealMatrix gamma(classes, classes-1,1.0);
 		UIntVector rho(classes-1);
 		{
 			for (unsigned int p=0; p<classes-1; p++) 
@@ -201,11 +196,12 @@ public:
 				}
 			}
 		}
-		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
+		
 
 		// solve the problem
 		RealMatrix alpha(ic,classes-1);
 		RealVector bias(classes,0);
+		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
 		if (base_type::precomputeKernel())
 		{
 			PrecomputedMatrixType matrix(&km);
