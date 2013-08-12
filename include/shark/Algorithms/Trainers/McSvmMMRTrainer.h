@@ -93,10 +93,6 @@ public:
 	/// parameter makes it easy to use double instead, (e.g., in case high
 	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
-
 	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
 	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
 	typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
@@ -132,14 +128,7 @@ public:
 		// prepare the problem description
 		RealVector alpha(ic,0.0);
 		RealVector bias(classes,0.0);
-
-		// TODO: initialize alpha (and bias) from the parameters
-// 		if (svm.hasOffset()) bias = RealVectorRange(param, Range(classes * ic, classes * ic + classes));
-
-		RealMatrix gamma(classes, 1);
-		for (unsigned int y=0; y<classes; y++) 
-			gamma(y, 0) = 1.0;
-
+		RealMatrix gamma(classes, 1,1.0);
 		UIntVector rho(1,0);
 		QpSparseArray<QpFloatType> nu(classes, classes, classes);
 
