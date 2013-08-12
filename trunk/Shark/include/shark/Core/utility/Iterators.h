@@ -299,8 +299,8 @@ private:
 			if(m_outerPosition != m_outerBegin){
 				m_innerBegin = boost::begin(*m_outerPosition);
 				m_innerEnd = boost::end(*m_outerPosition);
+				m_innerPosition = m_innerEnd-(n+1);
 			}
-			m_innerPosition = m_innerEnd-(n+1);
 		}
 		else{
 
