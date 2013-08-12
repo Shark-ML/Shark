@@ -30,30 +30,30 @@ namespace shark {
 
 /// \brief Working set selection by maximization of the projected gradient.
 ///
-/// This selection operator picks a single variable index.
-struct MaximumGradientCriterion{
+/// This selection operator picks the largest and second largest variable index if possible.
+struct WS2MaximumGradientCriterion{
 	template<class Problem>
 	double operator()(Problem& problem, std::size_t& i, std::size_t& j){
+		i = 0;
+		j = 0;
 		double largestGradient = 0;
+		double secondLargestGradient = 0;
 
 		for (std::size_t a = 0; a < problem.active(); a++){
-			double v = problem.alpha(a);
 			double g = problem.gradient(a);
-			if (v < problem.boxMax(a)){
-				if (g > largestGradient){
-					largestGradient = g;
-					i = a;
-				}
+			if (!problem.isUpperBound(a) && g > secondLargestGradient){
+				secondLargestGradient = g;
+				j = a;
 			}
-			if (v > problem.boxMin(a)){
-				if (-g > largestGradient){
-					largestGradient = -g;
-					i = a;
-				}
+			if (!problem.isLowerBound(a) && -g > secondLargestGradient){
+				secondLargestGradient = -g;
+				j = a;
+			}
+			if(secondLargestGradient > largestGradient){
+				std::swap(secondLargestGradient,largestGradient);
+				std::swap(i,j);
 			}
 		}
-		j = i;  // working set consists of a single variable
-
 		return largestGradient;
 	}
 
@@ -62,35 +62,14 @@ struct MaximumGradientCriterion{
 
 /// \brief Working set selection by maximization of the projected gradient.
 ///
-/// This selection operator picks the largest and second largest variable index if possible.
-struct WS2MaximumGradientCriterion{
+/// This selection operator picks a single variable index.
+struct MaximumGradientCriterion{
 	template<class Problem>
 	double operator()(Problem& problem, std::size_t& i, std::size_t& j){
-		double largestGradient = 0;
-		double secondLargestGradient = 0;
-
-		for (std::size_t a = 0; a < problem.active(); a++){
-			double v = problem.alpha(a);
-			double g = problem.gradient(a);
-			if (v < problem.boxMax(a)){
-				if (g > secondLargestGradient){
-					secondLargestGradient = g;
-					j = a;
-				}
-			}
-			if (v > problem.boxMin(a)){
-				if (-g > secondLargestGradient){
-					secondLargestGradient = -g;
-					j = a;
-				}
-			}
-			if(secondLargestGradient > largestGradient){
-				std::swap(secondLargestGradient,largestGradient);
-				std::swap(i,j);
-			}
-		}
-
-		return largestGradient;
+		WS2MaximumGradientCriterion criterium;
+		double value = criterium(problem, i,j);
+		j = i; //we just use one variable here
+		return value;
 	}
 
 	void reset(){}
@@ -400,7 +379,6 @@ public:
 	: base_type(problem)
 	, m_isUnshrinked(false)
 	, m_shrink(shrink)
-	, m_shrinkCounter(std::min<std::size_t>(problem.dimensions(),1000))
 	, m_gradientEdge(problem.linear){}
 		
 	using base_type::alpha;
@@ -430,12 +408,25 @@ public:
 	bool shrink(double epsilon){
 		if(!m_shrink) return false;
 		
-		//check if shrinking is necessary
-		--m_shrinkCounter;
-		if(m_shrinkCounter != 0) return false;
-		m_shrinkCounter = std::min<std::size_t>(dimensions(),1000);
-		
-		return doShrink(epsilon);
+		double largestUp;
+		double smallestDown;
+		getMaxKKTViolations(largestUp,smallestDown,active());
+
+		// check whether unshrinking is necessary at this accuracy level
+		if (!m_isUnshrinked  && (largestUp - smallestDown < 10.0 * epsilon))
+		{
+			unshrink();
+			//recalculate maximum KKT violation for immediate re-shrinking
+			getMaxKKTViolations(largestUp,smallestDown,dimensions());
+		}
+		//shrink
+		smallestDown = std::min(smallestDown,0.0);
+		largestUp = std::max(largestUp,0.0);
+		for (std::size_t a = this->active(); a > 0; --a){
+			if(testShrinkVariable(a-1,largestUp,smallestDown))
+				this->shrinkVariable(a-1);
+		}
+		return true;
 	}
 
 	///\brief Unshrink the problem
@@ -538,29 +529,6 @@ private:
 		std::swap( m_gradientEdge[i], m_gradientEdge[active()-1]);
 		--this->m_active;
 	}
-	
-	bool doShrink(double epsilon){
-		double largestUp;
-		double smallestDown;
-		getMaxKKTViolations(largestUp,smallestDown,active());
-
-		// check whether unshrinking is necessary at this accuracy level
-		if (!m_isUnshrinked  && (largestUp - smallestDown < 10.0 * epsilon))
-		{
-			unshrink();
-			//recalculate maximum KKT violation for immediate re-shrinking
-			getMaxKKTViolations(largestUp,smallestDown,dimensions());
-		}
-		//shrink
-		smallestDown = std::min(smallestDown,0.0);
-		largestUp = std::max(largestUp,0.0);
-		for (std::size_t a = this->active(); a > 0; --a){
-			if(testShrinkVariable(a-1,largestUp,smallestDown))
-				this->shrinkVariable(a-1);
-		}
-		return true;
-	}
-
 
 	bool testShrinkVariable(std::size_t a, double largestUp, double smallestDown)const{
 		if (
@@ -589,9 +557,6 @@ private:
 	
 	///\brief true if shrinking is to be used.
 	bool m_shrink;
-	
-	///\brief Number of iterations until next shrinking.
-	std::size_t m_shrinkCounter;
 
 	///\brief Stores the gradient of the alpha dimeensions which are either 0 or C
 	RealVector m_gradientEdge;

@@ -378,6 +378,7 @@ public:
 	){
 		double start_time = Timer::now();
 		unsigned long long iter = 0;
+		unsigned long long shrinkCounter = 0;
 
 		SelectionStrategy workingSet;
 
@@ -400,19 +401,26 @@ public:
 			std::size_t i = 0, j = 0;
 			if (workingSet(m_problem,i, j) < stop.minAccuracy){
 				m_problem.unshrink();
-				if(workingSet(m_problem,i,j) < stop.minAccuracy){
+				if(m_problem.checkKKT() < stop.minAccuracy){
 					if (prop != NULL) prop->type = QpAccuracyReached;
 					break;
 				}
 				m_problem.shrink(stop.minAccuracy);
+				workingSet(m_problem,i,j);
 				workingSet.reset();
 			}
 			
 			//update smo with the selected working set
 			m_problem.updateSMO(i,j);
-			if(m_problem.shrink(stop.minAccuracy))
+			
+			//do a shrinking every 1000 iterations. if variables got shrink
+			//notify working set selection
+			if(shrinkCounter == 0 && m_problem.shrink(stop.minAccuracy)){
+				shrinkCounter = std::max<std::size_t>(1000,m_problem.dimensions());
 				workingSet.reset();
+			}
 			iter++;
+			shrinkCounter--;
 		}
 
 		if (prop != NULL)
