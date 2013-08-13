@@ -15,8 +15,6 @@ todo_include_todos = True
 
 #set up doxylink tag file
 print 'current working directory', os.path.abspath(os.path.curdir)
-###print 'setting relative tag file path to', '../../../doxygen_pages/tag_files/all.tag', '=', os.path.abspath('../../../doxygen_pages/tag_files/all.tag')
-###print 'setting relative doxygen output path to', '../../../doxygen_pages/html/', '=', os.path.abspath('../../../doxygen_pages/html/')
 doxylink = {
         'doxy' : (os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/doxygen_pages/tag_files/all.tag'), '../../../doxygen_pages/html/')
 }

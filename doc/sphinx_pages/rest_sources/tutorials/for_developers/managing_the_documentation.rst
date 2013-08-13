@@ -23,11 +23,23 @@ Setting up Sphinx and Doxylink
 
 This section will tell you how to **build the documentation on your computer**, and
 also how to first install the tools needed for it. Besides Doxygen, we rely on two
-relevant Python modules, namely Sphinx and Doxylink. These in turn rely on other packages
-again, e.g., Docutils, Jinja2, Pygments, and Pyparsing. Since this tutorial page is
-created by Sphinx, you will most likely read it off a webserver or as part of a Shark
-package including the generated documentation pages. After building the documentation
-yourself, you will be able to read it from your local folder, too.
+relevant Python modules, namely Sphinx and Doxylink (aka sphinxcontrib-doxylink).
+Since this tutorial page is created by Sphinx, you will most likely read it off a
+webserver or as part of a Shark package including the generated documentation pages.
+After having built the documentation yourself, you will be able to read it from your
+local folder, too.
+
+.. admonition:: Quick-Start Installation Summary:
+
+    **Installation:** **1.** Make sure Doxygen, Graphviz, Python, Sphinx, and
+    Doxylink (aka sphinxcontrib-doxylink) are properly installed on your system,
+    with PATH properly set for ``sphinx-build`` and PYTHONPATH for Doxylink. **2.**
+    Call ``ccmake -DOPT_COMPILE_DOCUMENTATION=ON <SHARK_SRC_DIR>`` from where you
+    want the documentation to be built (e.g., in- or out-of-source).
+
+    or ``cmake .`` in ``<SHARK_SRC_DIR>/doc``, or call
+    ``ccmake -DOPT_COMPILE_DOCUMENTATION=ON .`` or ``cmake -DOPT_COMPILE_DOCUMENTATION=ON .``
+    in ``<SHARK_SRC_DIR>``
 
 .. note:: These instructions are currently only tested on Mac OS X and Linux. Please
     contact us to mutually find out how this will work on Windows, or share your success
@@ -58,17 +70,19 @@ yourself, you will be able to read it from your local folder, too.
    ``/home/user/path/to/your/pip_python_packages/lib/python3.3/site-packages``)
    to your ``PYTHONPATH``
    and the locations of the ``sphinx-build`` executable to your ``PATH``.
-   
-#. Next decide where you want to build your documentation to. The same comments
+
+#. Next decide where you want to build your documentation to, and issue
+   ``cmake -DOPT_COMPILE_DOCUMENTATION=ON <SHARK_SRC_DIR>`` or ``ccmake
+   -DOPT_COMPILE_DOCUMENTATION=ON <SHARK_SRC_DIR>`` from there. The same comments
    on in- and out-of-source builds apply as in the :doc:`installation instructions
-   <../../getting_started/installation>`. As stated there, we recommend to not build
+   <../../getting_started/installation>`. As stated there, we suggest to not build
    the documentation with any debug or release builds of the library, but to build
    it independently either in- or out-of-source.
 
-#. See what happens when you issue ``make doc`` in the ``doc/`` subdirectory of the main Shark
-   directory (you will probably have to use ``ccmake .`` or ``cmake -i`` again to configure the
-   installation first). If Doxygen is installed and working, the interesting part will now be
-   whether all Python components needed by Sphinx and Doxylink are working. This should in
+#. See what happens when you issue ``make doc`` in the directory you chose before
+   (i.e., from where you issued the cmake commands from the previous point). If
+   Doxygen is installed and working, the interesting part will now be whether all
+   Python components needed by Sphinx and Doxylink are working. This should in
    theory be the case. If not, try one of the following:
 
    * go back one step and examine your ``PYTHONPATH`` and ``PATH`` environment
@@ -76,11 +90,11 @@ yourself, you will be able to read it from your local folder, too.
      with a user-controlled pythonpath, e.g. as in ::
 
          PYTHONPATH=/path/where/pip/puts/your/python2.7/site-packages/ make doc
-        
+
      In extreme cases, you could add an alias from "sphinx-build" to the correct location
      of your sphinx-build executable on your system.
 
-   * you can manually edit ``$SHARKHOME/doc/sphinx_pages/conf.py`` to print out information,
+   * you can manually edit ``<SHARK_SRC_DIR>/doc/sphinx_pages/conf.py`` to print out information,
      like the path that Sphinx is seeing, etc.
 
    * in very lost causes with multiple python versions and dependencies, you might
@@ -88,13 +102,13 @@ yourself, you will be able to read it from your local folder, too.
      tool for managing different Python installations.
 
 #. You know that you are done when ``make doc`` exits with ``build succeeded. Built target doc``,
-   and when you can successfully view the page ``$SHARKHOME/doc/index.html``.
-   
+   and when you can successfully view the page ``<SHARK_SRC_DIR>/doc/index.html``.
+
 .. admonition:: Note on just building the Sphinx part of the documentation
 
    The subfolder ``doc/sphinx_pages`` consists of an additional Makefile steering
    the Sphinx document generation process only. Here, you can issue ``make clean``
-   and ``make html`` 
+   and ``make html``
 
 
 
@@ -111,9 +125,9 @@ version of MathJax. However, users with a local installation of the documentatio
 may also want to read the docs when working offline. Thus, both the Doxygen
 ``header.html`` template and the Sphinx ``layout.html`` template include a JS
 snippet that tells the docs to fallback to a local MathJax installation. **However**,
-this local MathJax installation is not provided together with Shark and must be 
+this local MathJax installation is not provided together with Shark and must be
 inserted by the user to a specific location. MathJax
-_must_ be located in ``$Sharkhome/contrib/mathjax`` (to be precise, MathJax must
+_must_ be located in ``<SHARK_SRC_DIR>/contrib/mathjax`` (to be precise, MathJax must
 be installed such that ``MathJax.js`` lives in that folder). The reason we do
 not distribute MathJax with Shark is that notably the popular Firefox browser does
 not support the MathJax web fonts (because of a strict same-origin policy even for
@@ -165,38 +179,7 @@ of the overall documentation system.
 Writing tutorials
 -----------------
 
-In general, simply see the documentation for Sphinx and reStructuredText-files
-to understand the syntax which tutorials have to adhere to. In general, it is
-easiest to start with an existing file and simply copy its style. Below we
-point out notable caveats when working with Sphinx and rst-files:
-
-* Do not use the main heading type, that is, the underline type
-  for the h1-heading twice, because this will look ugly in the
-  document. In other words, whichever symbol you chose to underline
-  the main page heading with should not get used a second time from
-  then on.
-
-  To promote homogeneity, we advise the following heading levels,
-  almost aligning with that for the official Python documentation
-  (except skipping the ``=`` to avoid confusion with tables):
-
-  * ``h1`` headings use ``#``
-  * ``h2`` headings use ``*``
-  * ``h3`` headings use ``-``
-  * ``h4`` headings use ``^``
-
-  Unfortunately, this convention is followed in close to none of the
-  current tutorials, but it cannot be wrong to have a convention, right?
-
-* Do not reference doxygen class names in headings (via the ``:doxy:`` role).
-  Also, do not include inline-code-markup (``like so`` -- source: ````like so```` )
-  within headings. Instead, use a single ``'`` (not a `````).
-
-* If you add new pages to the tutorials, first decide
-  what the correct new order should be. Then add the new
-  tutorial according to this same order both to the index.rst
-  as well as to the tutorials.rst page. In other words, all
-  tutorials should appear in the same order in both files.
+See the dedicated tutorial on :doc:`writing_tutorials`.
 
 
 Changing the documentation's appearance
@@ -235,9 +218,9 @@ The Shark homepage injects a css menu header (based on
 the documentation generated by both Sphinx and by Doxygen.
 If you change the menu layout, remember to change it
 **synchronously** in two locations:
-``${SHARKHOME}/doc/sphinx_pages/templates/layout.html``
+``<SHARK_SRC_DIR>/doc/sphinx_pages/templates/layout.html``
 for all Sphinx pages and
-``${SHARKHOME}/doc/doxygen_pages/templates/header.html``
+``<SHARK_SRC_DIR>/doc/doxygen_pages/templates/header.html``
 for all Doxygen pages.
 
 
@@ -254,7 +237,7 @@ bridge "Doxylink" by Matt Williams. You can find the documentation for Doxylink
 page `there <http://pypi.python.org/pypi/sphinxcontrib-doxylink>`__ .
 
 
-In ``${SHARKHOME}/doc/sphinx_pages/conf.py`` the variable ``doxylink`` defines additional
+In ``<SHARK_SRC_DIR>/doc/sphinx_pages/conf.py`` the variable ``doxylink`` defines additional
 Sphinx markup roles and links them to a Doxygen tag file. At the moment, the only role
 is ``:doxy:``, and it links to the global overall tag file for the entire Shark library.
 

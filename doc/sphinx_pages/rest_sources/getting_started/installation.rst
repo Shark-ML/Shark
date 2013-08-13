@@ -66,11 +66,12 @@ directory into which you checked out the SVN snapshot, or extracted
 the Shark source package. It should contain a ``CMakeLists.txt``
 file as well as an ``include/`` and ``src/`` directory.
 
-.. admonition:: Quick overview:
+.. admonition:: Quick-Start Installation Summary:
 
-    **Installation:** **1.** Configure the build using ``ccmake <SHARK_SRC_DIR>`` . **2.** Call
-    ``make`` **3.** Call ``make test`` to verify the build **4.** Optionally call ``make
-    install``.
+    **Installation:** **1.** Configure the build using ``ccmake <SHARK_SRC_DIR>``
+    (plus optional build configuration variables, see below). **2.** Call ``make``
+    **3.** Call ``make test`` to verify the build **4.** Optionally call ``make
+    install``. Done!
 
     **Time requirements:** Building plus testing can take between 15 and 120 minutes, depending on your architecture
     and build options. You can pass the ``-jN`` flag to both ``make`` and ``make test`` to use ``N`` cores and speed
