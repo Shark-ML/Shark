@@ -3,9 +3,9 @@ GUIs with the Shark Web Server
 ==============================
 
 .. note::
-	This tutorial is a stub. Its code does not compile yet; actually
-	it requires quite a few changes to the web server itself.
-	I just wanted this to be in the repository before I go on holidays.
+    This tutorial is a stub. Its code does not compile yet; actually
+    it requires quite a few changes to the web server itself.
+    I just wanted this to be in the repository before I go on holidays.
 
 
 This tutorial is on the web-server add-on component for the Shark
@@ -59,11 +59,11 @@ not a fully fledged http server for production web hosting. It is
 designed for ease of use and maintainability.
 
 .. warning::
-	The Shark web server is not intended for use on the world wide web.
-	It is not designed to be particularly secure against any types of
-	hacker attacks. Quite in contrast, any such security is missing! By
-	default it is therefore limited to connections from a local client.
-	This is exactly what is needed for a web-based GUI.
+    The Shark web server is not intended for use on the world wide web.
+    It is not designed to be particularly secure against any types of
+    hacker attacks. Quite in contrast, any such security is missing! By
+    default it is therefore limited to connections from a local client.
+    This is exactly what is needed for a web-based GUI.
 
 
 The web-server core code does not depend on Shark in any way. All it does
@@ -163,7 +163,7 @@ sub-class of `HttpServer::AbstractRequestHandler`. The class needs to do
 two things: set the mask (or pattern) for which requests to handle, and
 override the virtual function `handleRequest`. Here we see an example of
 a request handler that delivers a dynamic content html page, containing
-nothing but a random string:
+nothing but a random string::
 
 
   class RandomStringHandler : public HttpServer::AbstractRequestHandler
