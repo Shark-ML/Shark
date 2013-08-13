@@ -30,7 +30,7 @@
 
 
 #include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
-#include <shark/Algorithms/QP/QpMcDecomp.h>
+#include <shark/Algorithms/QP/QpMcBoxDecomp.h>
 #include <shark/Algorithms/QP/QpMcLinear.h>
 
 
