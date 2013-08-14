@@ -259,7 +259,8 @@ public:
 class LinearMcSvmWWTrainer : public AbstractLinearSvmTrainer
 {
 public:
-	LinearMcSvmWWTrainer(double C, double accuracy = 0.001) : AbstractLinearSvmTrainer(C, accuracy)
+	LinearMcSvmWWTrainer(double C, bool unconstrained = false) 
+	: AbstractLinearSvmTrainer(C, unconstrained)
 	{ }
 
 	/// \brief From INameable: return the class name.
