@@ -10,8 +10,11 @@ excellent starting points towards developing and evaluating machine learning
 software using Shark. Also see the guide to the different documentation pages
 available :doc:`here <../getting_started/using_the_documentation>`.
 
+
+
 Very first steps
 ++++++++++++++++
+
 
 We first show how to set up either a traditional Makefile or a CMake file
 for your application program. Then we move on to a simple Hello-World example
@@ -25,17 +28,20 @@ a simple regression task.
 * :doc:`first_steps/when_to_stop`
 * :doc:`concepts/misc/versatile_classification`
 
+
+
 Overarching concepts
 ++++++++++++++++++++
+
 
 Many generic concepts that Shark implements span across the whole library or
 are relevant in many different application scenarios. We collect a number of
 such generic tutorials here which explain these concepts in detail.
 We believe that these are useful if you want to thoroughly familiarize yourself with Shark.
-If you are looking for a quick introduction on how to set up a specific algorithm, take a look at the 
+If you are looking for a quick introduction on how to set up a specific algorithm, take a look at the
 component specific tutorials further down the page.
 
-Before we can introduce the main interface classes of shark, we need to define more properly 
+Before we can introduce the main interface classes of shark, we need to define more properly
 a few basic terms as well as the design goals.
 
 * :doc:`concepts/library_design/designgoals`
@@ -43,7 +49,7 @@ a few basic terms as well as the design goals.
 * :doc:`concepts/optimization/conventions_derivatives`
 * :doc:`concepts/library_design/batches`
 
-The main interfaces, or concepts in shark are the base classes from which nearly 
+The main interfaces, or concepts in shark are the base classes from which nearly
 all components  are derived. These tutorials are meant as a specification of the interfaces
 as well as the behavior and are written in a more formal language.
 
@@ -57,8 +63,11 @@ as well as the behavior and are written in a more formal language.
 * :doc:`concepts/library_design/writing_kernels`
 * :doc:`concepts/library_design/writing_objective_functions`
 
+
+
 Data Handling
-++++++++++++++++++
++++++++++++++
+
 
 .. _label_for_data_tutorials:
 
@@ -71,8 +80,11 @@ cover Shark's :doxy:`Data` class as well as common operations on them:
 * :doc:`concepts/data/dataset_subsets`
 * :doc:`concepts/data/normalization`
 
+
+
 Specific algorithms
 +++++++++++++++++++
+
 
 Here come tutorials for some selected algorithms implemented in Shark.
 It must be said that this is only the tip of the iceberg, *many* more
@@ -112,11 +124,14 @@ Direct search methods -- the covariance matrix adaptation evolution strategy:
 * :doc:`algorithms/cma`
 * :doc:`algorithms/mocma`
 
-Tools
-++++++++++++++++++
 
-Finally, we present functionality which are not machine learning facilities themselves, but necessary
-or helpfull tools.
+
+Tools
++++++
+
+
+Finally, we present functionality which are not machine learning facilities
+themselves, but necessary or helpful tools.
 
 First of all there is Sharks own solver for Quadratic Programs:
 
@@ -131,16 +146,28 @@ library for "all things linear algebra":
 * :doc:`concepts/lin_alg/vector_matrix`
 * :doc:`concepts/lin_alg/lapack`
 
-For convenience, Shark provides a statistics class wrapper, as well as generic support
-for serialization, logging, and the well-known factory-method-pattern:
+For convenience, Shark provides a statistics class wrapper, as well as generic
+support for serialization, logging, and the well-known factory-method-pattern:
 
 * :doc:`concepts/misc/statistics`
 * :doc:`concepts/misc/logging`
 * :doc:`concepts/misc/factory`
 * :doc:`concepts/misc/serialization`
 
+
+Finally, there is a self-written web server add-on available for Shark. It
+does not depend on Shark in any way, but can be helpful to achieve in-browser
+GUI visualization without further dependencies. The rationale for this, the
+web server's primary intended uses, and all technical specifics are
+described in the corresponding tutorial:
+
+* :doc:`addon/webserver`
+
+
+
 For Shark developers
 ++++++++++++++++++++
+
 
 Note that Shark follows a
 

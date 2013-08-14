@@ -14,6 +14,8 @@ After that, we give some hints for compiling Boost yourself if you need to. This
 by miscellaneous hints.
 
 
+
+
 .. _label_for_findboost:
 
 Getting Shark to find Boost
@@ -191,10 +193,13 @@ with the mailing list, or try one or two commits further up or down.
     add link to build server for people to check status of SVN HEAD
 
 
+
+
 .. _label_for_mingw:
 
 Notes on installing Shark under MinGW
 --------------------------------------
+
 
 While it is our goal that Shark should compile and run under MinGW, this
 happens to be a rarely encountered setup among our users, and also none of
@@ -236,8 +241,10 @@ We welcome any other reports on MinGW issues, solutions, and success stories.
 
 
 
+
 Notes on installing ATLAS manually
 ----------------------------------
+
 
 First note that Shark only uses the ATLAS routines itself, and no additional installation of
 LAPACK beyond the LAPACK-functionality that ATLAS itself supports is needed.
@@ -260,10 +267,10 @@ ATLAS installation guide. Overall, we thus recommend the same minimal install as
 `"Basic Steps of an ATLAS install" <http://math-atlas.sourceforge.net/atlas_install/atlas_install.html#SECTION00033000000000000000>`_.
 
 
-Also see the section on :ref:`LinAlg and ATLAS <label_for_linalg_atlas>` in the LinAlg vector and matrix tutorial.
 
 Verifying your ATLAS installation
 *********************************
+
 
 If you followed the instructions on the installation page for building Shark with ATLAS, that is, passed the correct ATLAS
 path to CMake, and also set the option "OPT_ENABLE_ATLAS" to "ON", you should then note a significant speed-up in the

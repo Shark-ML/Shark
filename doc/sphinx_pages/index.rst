@@ -17,6 +17,7 @@
    rest_sources/tutorials/first_steps/when_to_stop
    rest_sources/tutorials/first_steps/shark_layout
 
+
    rest_sources/tutorials/concepts/library_design/designgoals
    rest_sources/tutorials/concepts/library_design/models
    rest_sources/tutorials/concepts/library_design/kernels
@@ -73,20 +74,22 @@
    rest_sources/tutorials/algorithms/rbm_module
    rest_sources/tutorials/algorithms/binary_rbm
 
-
    rest_sources/tutorials/algorithms/quadratic_programs
+
 
    rest_sources/tutorials/concepts/misc/versatile_classification
 
 
    rest_sources/tutorials/for_developers/codingconvention
-
    rest_sources/tutorials/for_developers/the_build_system
    rest_sources/tutorials/for_developers/development_environment
    rest_sources/tutorials/for_developers/effective_ublas
    rest_sources/tutorials/for_developers/writing_tutorials
    rest_sources/tutorials/for_developers/managing_the_documentation
    rest_sources/tutorials/for_developers/issuing_a_release
+
+
+   rest_sources/tutorials/addon/webserver
 
 
    rest_sources/faq/faq
