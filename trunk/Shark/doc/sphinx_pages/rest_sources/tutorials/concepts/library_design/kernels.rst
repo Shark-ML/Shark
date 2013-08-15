@@ -28,7 +28,7 @@ is a symmetric function for which
 .. math::
   \sum_{i=1}^N\sum_{j=1}^N a_i a_j k(x_i, x_j) \ge 0
 
-for all :math:`N`, all 
+for all :math:`N`, all
 :math:`x_1,...,x_N\in\mathcal X`, and all
 :math:`a_1,...,a_N\in\mathbb R`.
 
@@ -42,7 +42,7 @@ feature space:
 where :math:`x` and :math:`y` are elements of :math:`\mathcal X` ,
 :math:`\phi` is a map from :math:`\mathcal X` to :math:`\mathcal H`, and
 :math:`\langle \cdot, \cdot \rangle_{\mathcal H}` is the scalar product in
-:math:`\mathcal H`. 
+:math:`\mathcal H`.
 For details we refer to [Aronszajn1950]_ and [Mercer1909]_.
 
 Many machine learning algorithms can be written in a way that the only
@@ -119,7 +119,7 @@ are derived from the abstract class :doxy:`AbstractKernelFunction`. Due to the
 demanding computations involving kernel evaluations, the interface is optimized
 for speed, and to allow parallelization of the evaluation of different parts of
 the kernel Gram matrix at a time. In the following, the basic design decisions
-are outlined and explained. Since kernels and models have much in common, 
+are outlined and explained. Since kernels and models have much in common,
 consider reading the :doc:`models` tutorial first.
 
 Types
@@ -173,10 +173,7 @@ Flag and accessor function name                                      Description
                                                                      This is no restriction, since kernel functions are symmetric
 ``IS_NORMALIZED``, ``isNormalized``                                  For all :math:`x` it holds  :math:`k(x,x)=1`
 ``SUPPORTS_VARIABLE_INPUT_SIZE``, ``supportsVariableInputSize``      Between different calls to :math:`k(x,y)` the number of dimensions of the kernel is
-                                                                     allowed
-								     to
-								     vary;
-								     this is needed for kernel evaluation of inputs with missing features
+                                                                     allowed to vary; this is needed for kernel evaluation of inputs with missing features
 ===================================================================  ======================================================================================
 
 
@@ -293,11 +290,11 @@ like this::
 
 .. todo::
 
-	i think we need some more explanation on the expected size of
-	weights, especially since we don't have type checks in the code
-	of weightedParameterDerivative (maybe these should be added, too).
-	in any case, the workings of weightedParameterDerivative should be
-	explained more, or link to some tutorial where this is done.
+    i think we need some more explanation on the expected size of
+    weights, especially since we don't have type checks in the code
+    of weightedParameterDerivative (maybe these should be added, too).
+    in any case, the workings of weightedParameterDerivative should be
+    explained more, or link to some tutorial where this is done.
 
 
 Other
