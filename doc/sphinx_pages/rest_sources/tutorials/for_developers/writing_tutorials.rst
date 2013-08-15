@@ -54,7 +54,7 @@ Ideally, the following formatting conventions apply to tutorial .rst sources:
 
 * Ideally, use the following symbols for the different heading levels
   (almost aligning with the official Python documentation except
-   skipping ``=`` to avoid confusion with tables):
+  skipping ``=`` to avoid confusion with tables):
 
   * ``h1`` headings use ``#``
   * ``h2`` headings use ``*``
