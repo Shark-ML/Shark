@@ -46,40 +46,6 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
 
-// #include <shark/Core/Probe.h>
-
-
-/*
-BOOST_AUTO_TEST_CASE( ProbeFramework ) {
-	ProbeProvider< detail::MOCMA<> > probeProvider;
-	ProbeProvider< detail::MOCMA< AdditiveEpsilonIndicator > > probeProvider1;
-
-	std::vector<
-		boost::shared_ptr<
-			Probe
-		>
-	> probes( 30 );
-
-	for( unsigned int i = 0; i < 15; i++ ) {
-		probes[ i ] = probeProvider.registerProbe( ( boost::format( "Probe_%1%" ) % i ).str(), "Description" );
-	}
-
-	for( unsigned int i = 15; i < 30; i++ ) {
-		probes[ i ] = probeProvider1.registerProbe( ( boost::format( "Probe_%1%" ) % i ).str(), "Description" );
-	}
-
-	std::list< 
-		boost::shared_ptr< Probe > 
-	> mocmaProbesForInstance = ProbeManager::instance().find( boost::regex( "/" + probeProvider.context() + "/.*" ) );
-
-	for( std::list< 
-		boost::shared_ptr< Probe > 
-	>::iterator it = mocmaProbesForInstance.begin(); it != mocmaProbesForInstance.end(); ++it )
-		std::clog << (*it)->name() << std::endl;
-
-	ProbeManager::instance().print( std::cout );
-}*/
-
 using namespace shark;
 
 

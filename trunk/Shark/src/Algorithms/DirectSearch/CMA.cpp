@@ -149,16 +149,7 @@ unsigned CMA::suggestMu( unsigned int lambda, shark::cma::RecombinationType reco
 	return( mu );
 }
 
-CMA::CMA() : ProbeProvider< CMA >( "CMA" ) {
-	mp_sigmaProbe = registerProbe( "Sigma", "Reports the step size sigma." );
-	mp_meanProbe = registerProbe( "PopulationMean", "Reports the current population mean." );
-	mp_weightsProbe = registerProbe( "WeightVector", "Reports the current weight vector." );
-
-	mp_evolutionPathCProbe = registerProbe( "EvolutionPathC", "Reports the evolution path for covariance matrix update." );
-	mp_evolutionPathSigmaProbe = registerProbe( "EvolutionPathSigma", "Reports the evolution path for step size update." );
-
-	mp_mutationDistributionProbe = registerProbe( "CovarianceMatrix", "Reports the current covariance matrix" );
-	
+CMA::CMA() {
 	m_features |= REQUIRES_VALUE;
 }
 
@@ -221,12 +212,7 @@ void CMA::init(
 	);
 
 	m_chromosome.m_mean = initialSearchPoint;
-
-	mp_meanProbe->setValue( m_chromosome.m_mean );
-	mp_weightsProbe->setValue( m_chromosome.m_weights );
-	mp_evolutionPathCProbe->setValue( m_chromosome.m_evolutionPathC );
-	mp_evolutionPathSigmaProbe->setValue( m_chromosome.m_evolutionPathSigma );
-	mp_mutationDistributionProbe->setValue( m_chromosome.m_mutationDistribution.covarianceMatrix() );
+	m_best.point = initialSearchPoint; // CI: you can argue about this, as the point is not evaluated
 }
 
 /**
@@ -307,15 +293,6 @@ void CMA::step(ObjectiveFunctionType const& function){
 	);
 	// Strategy parameter update
 	updateStrategyParameters( parents );
-
-	/**** Update probes ****/
-	mp_sigmaProbe->setValue( m_chromosome.m_sigma );
-	mp_meanProbe->setValue( m_chromosome.m_mean );
-	mp_weightsProbe->setValue( m_chromosome.m_weights );
-	mp_evolutionPathCProbe->setValue( m_chromosome.m_evolutionPathC );
-	mp_evolutionPathSigmaProbe->setValue( m_chromosome.m_evolutionPathSigma );
-	mp_mutationDistributionProbe->setValue( m_chromosome.m_mutationDistribution.covarianceMatrix() );
-	/**** Update probes ****/
 
 	m_best.point= *parents[ 0 ];
 	m_best.value= parents[ 0 ].fitness( shark::tag::UnpenalizedFitness() )[0];
