@@ -54,6 +54,8 @@ struct WS2MaximumGradientCriterion{
 				std::swap(i,j);
 			}
 		}
+		if(secondLargestGradient == 0)
+			j = i;
 		return largestGradient;
 	}
 
@@ -164,6 +166,7 @@ public:
 	typedef typename SVMProblem::QpFloatType QpFloatType;
 	typedef typename SVMProblem::MatrixType MatrixType;
 	typedef MaximumGainCriterion PreferedSelectionStrategy;
+	//~ typedef MaximumGradientCriterion PreferedSelectionStrategy;
 
 	BoxConstrainedProblem(SVMProblem& problem)
 	: m_problem(problem)
@@ -200,6 +203,9 @@ public:
 	}
 	bool isUpperBound(std::size_t i)const{
 		return m_alphaStatus[i] & AlphaUpperBound;
+	}
+	bool isDeactivated(std::size_t i)const{
+		return isUpperBound(i) && isLowerBound(i);
 	}
 
 	/// representation of the quadratic part of the objective function
@@ -308,7 +314,6 @@ public:
 	///\brief Reactivate an previously deactivated variable.
 	void activateVariable(std::size_t i){
 		SIZE_CHECK(i < dimensions());
-		m_alphaStatus[i] = AlphaFree;
 		updateAlphaStatus(i);
 	}
 	
@@ -334,10 +339,11 @@ public:
 	double checkKKT()const{
 		double maxViolation = 0.0;
 		for(std::size_t i = 0; i != dimensions(); ++i){
-			if(m_alphaStatus[i] != AlphaUpperBound && gradient(i) > 0){
+			if(isDeactivated(i)) continue;
+			if(!isUpperBound(i)){
 				maxViolation = std::max(maxViolation, gradient(i));
 			}
-			if(m_alphaStatus[i] != AlphaLowerBound && gradient(i) < 0){
+			if(!isLowerBound(i)){
 				maxViolation = std::max(maxViolation, -gradient(i));
 			}
 		}
