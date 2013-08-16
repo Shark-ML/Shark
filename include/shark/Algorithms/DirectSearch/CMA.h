@@ -43,7 +43,6 @@
 #ifndef SHARK_EA_CMA_H
 #define SHARK_EA_CMA_H
 
-#include <shark/Core/Probe.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 
@@ -123,7 +122,7 @@ namespace shark {
 			*/
 			template<typename Stream>
 			void print( Stream & s ) const {
-				s << "Sigma: " << m_sigma << std::endl;
+				s << "sigma: " << m_sigma << std::endl;
 				s << "cc: " << m_cC << std::endl;
 				s << "ccu: " << m_cCU << std::endl;
 				s << "ccov: " << m_cCov << std::endl;
@@ -174,9 +173,7 @@ namespace shark {
 	*  International Conference on Parallel Problem Solving from Nature
 	*  (PPSN VIII), pp. 282-291, LNCS, Springer-Verlag
 	*/
-	class CMA 
-	: public shark::ProbeProvider< CMA >
-	, public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+	class CMA : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
 	{
 	public:
 
@@ -338,6 +335,29 @@ namespace shark {
 		unsigned int & lambda(){
 			return m_lambda;
 		}
+
+		/**
+		 * \brief Returns eigenvectors of covariance matrix (not considering step size)
+		 */
+		RealMatrix const& eigenVectors() const {
+			return m_chromosome.m_mutationDistribution.eigenVectors();
+		}
+
+		/**
+		 * \brief Returns a eigenvectors of covariance matrix (not considering step size)
+		 */
+		RealVector const& eigenValues() const {
+			return m_chromosome.m_mutationDistribution.eigenValues();
+		}
+
+		/**
+		 * \brief Returns condition of covariance matrix
+		 */
+		double condition() const {
+			return *std::max_element( m_chromosome.m_mutationDistribution.eigenValues().begin(), m_chromosome.m_mutationDistribution.eigenValues().end() ) / *std::min_element( m_chromosome.m_mutationDistribution.eigenValues().begin(), m_chromosome.m_mutationDistribution.eigenValues().end() ); 
+		}
+
+
 	protected:
 		/**
 		* \brief Updates the strategy parameters based on the supplied offspring population.
@@ -349,17 +369,6 @@ namespace shark {
 		unsigned int m_lambda; ///< The size of the offspring population, needs to be larger than mu.
 
 		shark::cma::Chromosome m_chromosome; ///< Stores the strategy parameters of the algorithm.
-
-		/**** Probes ****/
-		boost::shared_ptr< shark::Probe > mp_sigmaProbe;
-		boost::shared_ptr< shark::Probe > mp_meanProbe;
-		boost::shared_ptr< shark::Probe > mp_weightsProbe;
-
-		boost::shared_ptr< shark::Probe > mp_evolutionPathCProbe;
-		boost::shared_ptr< shark::Probe > mp_evolutionPathSigmaProbe;
-
-		boost::shared_ptr< shark::Probe > mp_mutationDistributionProbe;
-
 	};
 
 	/** \brief Registers the CMA with the factory. */
