@@ -79,7 +79,10 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_RadiusMarginQuotient )
 	parameters(0) -= 2 * delta;
 	double left = rm.eval(parameters);
 	double estimate = (right - left) / (2 * delta);
+	
+	parameters(0) = 0.5;
 	RadiusMarginQuotient<RealVector>::FirstOrderDerivative derivative;
-	rm.evalDerivative(parameters, derivative);
+	double quotientDerivative = rm.evalDerivative(parameters, derivative);
+	BOOST_CHECK_SMALL(quotientDerivative - should, 0.01);
 	BOOST_CHECK_SMALL(derivative(0) - estimate, 0.01);
 }
