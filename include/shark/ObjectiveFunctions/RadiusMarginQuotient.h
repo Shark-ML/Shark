@@ -169,12 +169,12 @@ protected:
 	
 	Result computeRadiusMargin()const{
 		std::size_t ell = m_dataset.numberOfElements();
-		KernelMatrixType km(*mep_kernel, m_dataset.inputs());
-		CachedMatrixType cache(&km);
 		
 		QpStoppingCondition stop;
 		Result result;
 		{
+			KernelMatrixType km(*mep_kernel, m_dataset.inputs());
+			CachedMatrixType cache(&km);
 			typedef CSVMProblem<CachedMatrixType> SVMProblemType;
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 			
@@ -189,6 +189,8 @@ protected:
 		}
 		{
 			// create and solve the radius problem (also a quadratic program)
+			KernelMatrixType km(*mep_kernel, m_dataset.inputs());
+			CachedMatrixType cache(&km);
 			typedef BoxedSVMProblem<CachedMatrixType> SVMProblemType;
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 			
