@@ -20,11 +20,9 @@
  * along with this library; if not, see <http://www.gnu.org/licenses/>.
  *  
  */
-//###begin<includes>
-#include <shark/Core/Probe.h>
+
 #include <shark/Algorithms/DirectSearch/CMA.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
-//###end<includes>
 
 using namespace shark;
 using namespace std;
@@ -37,50 +35,6 @@ using namespace std;
 
 #include <limits>
 
-namespace shark {
-		
-    /**
-     * \brief Helper class for storing the most recent value reported from a probe.
-     */
-    struct Store {
-
-	/**
-	 * \brief Updates the stored values according to the type contained in the variant.
-	 */
-	void operator()( const Probe::time_type & time, const Probe::variant_type & value ) {
-	    try {
-		m_currentPopulationMean = boost::get< RealVector >( value );
-	    } catch( ... ) {
-		// Do nothing if access to probe value fails.
-	    }
-
-	    try {
-		m_sigma = boost::get< double >( value );
-	    } catch( ... ) {
-		// Do nothing if access to probe value fails.
-	    }
-
-	    try {
-		m_covarianceMatrix = boost::get< RealMatrix >( value );
-		eigensymm( m_covarianceMatrix, m_eigenVectors, m_eigenValues );
-		m_condition = *max_element( m_eigenValues.begin(), m_eigenValues.end() ) / *min_element( m_eigenValues.begin(), m_eigenValues.end() );
-
-		
-
-	    } catch( ... ) {
-		// Do nothing if access to probe value fails.
-	    }
-	}
-	double m_condition; ///< Condition of current covariance matrix.
-	RealMatrix m_covarianceMatrix; ///< Current covariance matrix.
-	RealMatrix m_eigenVectors; ///< Eigenvalues of the current covariance matrix.
-	RealVector m_eigenValues; ///< Eigenvalues of the current covariance matrix.
-	double m_sigma; ///< Current step size.
-	RealVector m_currentPopulationMean; ///< Current population mean
-		
-    };
-}
-
 int main( int argc, char ** argv ) {
 
 	// Results go here.
@@ -88,6 +42,7 @@ int main( int argc, char ** argv ) {
 	// Plotting commands (gnuplot) go here.
 	ofstream plot( "plot.txt" );
 	plot << "set key outside bottom center" << endl;
+	plot << "set size square" << endl;
 	plot << "set zeroaxis" << endl;
 	plot << "set border 0" << endl;
 	plot << "set xrange [-4:4]" << endl;
@@ -99,63 +54,75 @@ int main( int argc, char ** argv ) {
 	plot.precision( 10 );
 
 	// Instantiate both the problem and the optimizer.
-	//###begin<init>
 	Himmelblau hb;
-	hb.setNumberOfVariables( 2 );
 	CMA cma;
 	cma.init( hb );
-	//###end<init>
-	// Instantiate the value store and get access to probes.
-	//###begin<probes>
-	Store valueStore;
-	ProbeManager::ProbePtr populationMeanProbe = cma[ "PopulationMean" ];
-	if( populationMeanProbe )
-		populationMeanProbe->signalUpdated().connect( boost::bind( &Store::operator(), boost::ref( valueStore ), _1, _2 ) );
-	ProbeManager::ProbePtr sigmaProbe = cma[ "Sigma" ];
-	if( sigmaProbe )
-		sigmaProbe->signalUpdated().connect( boost::bind( &Store::operator(), boost::ref( valueStore ), _1, _2 ) );
-	ProbeManager::ProbePtr covarianceMatrixProbe = cma[ "CovarianceMatrix" ];
-	if( covarianceMatrixProbe )
-		covarianceMatrixProbe->signalUpdated().connect( boost::bind( &Store::operator(), boost::ref( valueStore ), _1, _2 ) );
-	//###end<probes>
+
 	// Iterate the optimizer until a solution of sufficient quality is found.
-	//###begin<train>
 	do{
+		// Print error ellipses for covariance matrices.
+		plot << "set object " 
+		     << hb.evaluationCounter() + 1
+		     << " ellipse center " 
+		     << cma.mean()( 0 ) << ","
+		     << cma.mean()( 1 ) << " size "
+		     << cma.eigenValues()(0) * cma.sigma() * 2. << "," // times 2 because gunplot takes diameters as arguments 
+		     << cma.eigenValues()(1) * cma.sigma() * 2. << " angle " 
+		     << 360 + 360 * ::atan( cma.eigenVectors()( 0, 1 ) / cma.eigenVectors()( 0, 0 ) ) * 1./(2*M_PI) << " front fillstyle empty border 2" << endl;
+		//<< 90 * ::atan( eigenVectors( 0, 1 ) / eigenVectors( 0, 0 ) ) * 2./M_PI << " front fillstyle empty border 2" << endl; // CI: Thomas original version, which may be correct, but I did not understand it directly
+		
+		// Report information on the optimizer state and the current solution to the console.
+		results << hb.evaluationCounter() << " "	// Column 1
+			<< cma.condition() << " "		// Column 2
+			<< cma.sigma() << " "			// Column 3
+			<< cma.solution().value << " ";		// Column 4
+		copy(
+		     cma.solution().point.begin(),				
+		     cma.solution().point.end(),                // Column 5 & 6
+		     ostream_iterator< double >( results, " " ) 
+		     );
+		copy( 
+		     cma.mean().begin(),                        // Column 7 & 8
+		     cma.mean().end(), 
+		     ostream_iterator< double >( results, " " ) 
+		      );
+		results << endl;
 
-	cma.step( hb );
+		// Do one CMA iteration/generation.
+		cma.step( hb );
 
-	double sigmaX = valueStore.m_eigenValues( 0 );
-	double sigmaY = valueStore.m_eigenValues( 1 );
+	} while( cma.solution().value> 1E-20 );
+
+	// Write final result.
 	// Print error ellipses for covariance matrices.
 	plot << "set object " 
-	     << hb.evaluationCounter() 
+	     << hb.evaluationCounter() + 1
 	     << " ellipse center " 
-	     << valueStore.m_currentPopulationMean( 0 ) << ","
-	     << valueStore.m_currentPopulationMean( 1 ) << " size "
-	     << sigmaX << ","
-	     << sigmaY << " angle " 
-	     << 360 + 360 * ::atan( valueStore.m_eigenVectors( 0, 1 ) / valueStore.m_eigenVectors( 0, 0 ) ) * 1./(2*M_PI) << " front fillstyle empty border 2" << endl;
-
+	     << cma.mean()( 0 ) << ","
+	     << cma.mean()( 1 ) << " size "
+	     << cma.eigenValues()(0) * cma.sigma() * 2. << "," // times 2 because gunplot takes diameters as arguments 
+	     << cma.eigenValues()(1) * cma.sigma() * 2. << " angle " 
+	     << 360 + 360 * ::atan( cma.eigenVectors()( 0, 1 ) / cma.eigenVectors()( 0, 0 ) ) * 1./(2*M_PI) << " front fillstyle empty border 2" << endl;
+	
 	// Report information on the optimizer state and the current solution to the console.
-	results << hb.evaluationCounter() << " "		// Column 1
-		<< valueStore.m_condition << " "			// Column 2
-		<< valueStore.m_sigma << " "				// Column 3
-		<< cma.solution().value << " ";		        // Column 4
+	results << hb.evaluationCounter() << " "	// Column 1
+		<< cma.condition() << " "		// Column 2
+		<< cma.sigma() << " "			// Column 3
+		<< cma.solution().value << " ";		// Column 4
 	copy(
-		cma.solution().point.begin(),				
-		cma.solution().point.end(),                         	// Column 5 & 6
-		ostream_iterator< double >( results, " " ) 
-	);
+	     cma.solution().point.begin(),				
+	     cma.solution().point.end(),                // Column 5 & 6
+	     ostream_iterator< double >( results, " " ) 
+	     );
 	copy( 
-		valueStore.m_currentPopulationMean.begin(),// Column 7 & 8
-		valueStore.m_currentPopulationMean.end(), 
-		ostream_iterator< double >( results, " " ) 
-	);
+	     cma.mean().begin(),                        // Column 7 & 8
+	     cma.mean().end(), 
+	     ostream_iterator< double >( results, " " ) 
+	      );
 	results << endl;
-	}while( cma.solution().value> 1E-20 );
-	//###end<train>
 
-	plot << "plot 'results.txt' every ::2 using 7:8 with lp title 'Population mean'" << endl;
+	//plot << "plot 'results.txt' every ::2 using 7:8 with lp title 'Population mean'" << endl;
+	plot << "plot 'results.txt' using 7:8 with lp title 'Population mean'" << endl;
 
 	return( EXIT_SUCCESS );	
 }
