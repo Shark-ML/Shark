@@ -45,6 +45,7 @@ using namespace shark;
 
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Simple )
 {
+	std::cout<<"testing simple Test"<<std::endl;
 	std::vector<RealVector> inputs(5, RealVector(2));
 	inputs[0](0) = 0.0;
 	inputs[0](1) = 0.0;
@@ -88,6 +89,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Simple )
 
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_NoBias_Simple )
 {
+	std::cout<<"testing simple Test without bias"<<std::endl;
 	std::vector<RealVector> inputs(5, RealVector(2));
 	inputs[0](0) = 0.0;
 	inputs[0](1) = 0.0;
@@ -126,36 +128,9 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_NoBias_Simple )
 	BOOST_CHECK_SMALL(value - standardLoo, 1e-10);
 }
 
-BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard_NoBias )
-{
-	Chessboard problem;
-	ClassificationDataset dataset = problem.generateDataset(100);
-
-	// SVM setup
-	GaussianRbfKernel<> kernel;
-	double C = 10;
-	CSvmTrainer<RealVector> trainer(&kernel, C);
-	
-	RealVector parameters = trainer.parameterVector();
-	
-	// efficiently computed loo error
-	LooErrorCSvm<RealVector> loosvm(dataset, &kernel, false);
-	double value = loosvm.eval(parameters);
-	
-	// brute force computation
-	ZeroOneLoss<unsigned int, RealVector> loss;
-	KernelExpansion<RealVector> ke(&kernel, false);
-	LooError<KernelExpansion<RealVector>,unsigned int> loo(dataset, &ke, &trainer, &loss);
-	double standardLoo = loo.eval();
-
-	// compare to brute force computation
-	// and to geometric intuition
-	BOOST_CHECK_SMALL(value - standardLoo, 1e-10);
-}
-
-
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard )
 {
+	std::cout<<"testing test on chessboard"<<std::endl;
 	Chessboard problem;
 	ClassificationDataset dataset = problem.generateDataset(100);
 
@@ -175,6 +150,36 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard )
 	// efficiently computed loo error
 	LooErrorCSvm<RealVector> loosvm(dataset, &kernel, true);
 	double value = loosvm.eval(parameters);
+
+	// compare to brute force computation
+	// and to geometric intuition
+	BOOST_CHECK_SMALL(value - standardLoo, 1e-10);
+}
+
+BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard_NoBias )
+{
+	std::cout<<"testing test on chessboard without bias"<<std::endl;
+	Chessboard problem;
+	ClassificationDataset dataset = problem.generateDataset(100);
+
+	// SVM setup
+	GaussianRbfKernel<> kernel;
+	double C = 10;
+	CSvmTrainer<RealVector> trainer(&kernel, C);
+	
+	RealVector parameters = trainer.parameterVector();
+	
+	// efficiently computed loo error
+	std::cout<<"efficient"<<std::endl;
+	LooErrorCSvm<RealVector> loosvm(dataset, &kernel, false);
+	double value = loosvm.eval(parameters);
+	
+	std::cout<<"\n\nbrute force"<<std::endl;
+	// brute force computation
+	ZeroOneLoss<unsigned int, RealVector> loss;
+	KernelExpansion<RealVector> ke(&kernel, false);
+	LooError<KernelExpansion<RealVector>,unsigned int> loo(dataset, &ke, &trainer, &loss);
+	double standardLoo = loo.eval();
 
 	// compare to brute force computation
 	// and to geometric intuition
