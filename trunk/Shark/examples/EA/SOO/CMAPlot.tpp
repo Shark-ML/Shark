@@ -54,9 +54,11 @@ int main( int argc, char ** argv ) {
 	plot.precision( 10 );
 
 	// Instantiate both the problem and the optimizer.
+//###begin<optimizer>
 	Himmelblau hb;
 	CMA cma;
 	cma.init( hb );
+//###end<optimizer>
 
 	// Iterate the optimizer until a solution of sufficient quality is found.
 	do{
@@ -72,6 +74,7 @@ int main( int argc, char ** argv ) {
 		//<< 90 * ::atan( eigenVectors( 0, 1 ) / eigenVectors( 0, 0 ) ) * 2./M_PI << " front fillstyle empty border 2" << endl; // CI: Thomas original version, which may be correct, but I did not understand it directly
 		
 		// Report information on the optimizer state and the current solution to the console.
+//###begin<results>
 		results << hb.evaluationCounter() << " "	// Column 1
 			<< cma.condition() << " "		// Column 2
 			<< cma.sigma() << " "			// Column 3
@@ -87,6 +90,7 @@ int main( int argc, char ** argv ) {
 		     ostream_iterator< double >( results, " " ) 
 		      );
 		results << endl;
+//###end<results>
 
 		// Do one CMA iteration/generation.
 		cma.step( hb );

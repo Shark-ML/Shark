@@ -63,33 +63,9 @@ detail. For the reaminder of the section, we assume the reader to be
 familiar with the first part of the tutorial. Moreover, we assume an
 audience that is familiar with the CMA-ES. 
 
-First, we introduce the Probe framework, a unique part of Shark's core
-architecture that allows for exporting values from within an algorithm
-without the need to adjust its interface. It features a close-to-zero
-overhead for reporting values to the outside world and an API that
-delegates bookkeeping and setup tasks to sophisticated background
-elements. In general, a probe is uniquely identified by its name and
-the context it is living in. In the default implementation, a context
-is assembled from a class-specific name (i.e., its type id) and a
-class-instance specific UUID. A probe instance is observable for value
-changes where the observer pattern is implemented in terms of
-boost::signals.
 
-The CMA implementation of the Shark library maintains five probes:
-
-  =====================  ===========================================================================
-    Probe name                    Probe description
-  =====================  ===========================================================================
-    Sigma                Reports the step size sigma.
-    PopulationMean       Reports the current population mean.
-    WeigthVector         Reports the current weight vector for weighted recombination.
-    EvolutionPathC       Reports the evolution path for covariance matrix update purposes.
-    EvolutionPathSigma	 Reports the evolution path for step size update purposes.
-    CovarianceMatrix     Reports the current covariance matrix.
-  =====================  ===========================================================================
-
-Please note that the weighting vector stays constant. It is
-initialized once for the selected recombination type according to the following formulas:
+The implementation supports different types of weighted recombination.
+The following table shows the recombination types and the corresponding formulars for the weights:
 
  =========================== ===============================================================================================================
   Recombination type                     Weigth calculation
@@ -103,37 +79,25 @@ Empirically Analyzing the CMA-ES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In this section, usage of the probe framework for empirical algorithm analysis is illustrated.
 The code for this part of the tutorial can be found in 
-:download:`CMAProbes.cpp <../../../../../examples/EA/SOO/CMAProbes.cpp>`.
-First of all, the following header files are required: ::
+:download:`CMAPlot.cpp <../../../../../examples/EA/SOO/CMAPlot.cpp>`.
 
-..sharkcode<EA/SOO/CMAProbes.tpp,includes>
 
 In this tutorial, results are written to two comma-separated values files, i.e.:
 
   * results.txt: Contains the numerical results of executing the CMA.
   * plot.txt: Contains gnuplot plotting commands for subsequent visualization purposes.
 
-Moreover, we consider the Himmelblau fitness function (see http://en.wikipedia.org/wiki/Himmelblau%27s_function ).
+We consider the Himmelblau fitness function (see http://en.wikipedia.org/wiki/Himmelblau%27s_function ).
 As before, we start over with instantiating und configuring both the optimizer and the fitness function: ::
 
-..sharkcode<EA/SOO/CMAProbes.tpp,init>
-
-Next, we look up the probes provided by the CMA instance and connect it to a value store: ::
-
-..sharkcode<EA/SOO/CMAProbes.tpp,probes>
-
-We only consider the probes reporting the population mean, the step
-size sigma and the current covariance matrix in this tutorial. The
-value store is a helper class that reacts to value changes, extracts
-the correct data type and stores it for later use. Please see the file
-:doxy:`CMAProbes.cpp` for further details.
+..sharkcode<EA/SOO/CMAPlot.tpp,optimizer>
 
 Next, we iterate the CMA instance until a solution of sufficient quality is found.
-After every iteration of the algorithm, we extract the values of
+After every iteration of the algorithm, we extract some values of
 interest from the value store and write them in an appropriate format
 to the result files: ::
 
-..sharkcode<EA/SOO/CMAProbes.tpp,train>
+..sharkcode<EA/SOO/CMAPlot.tpp,results>
 
 Please note that the current solution is not equal to the population
 mean reported by the CMA instance as the population mean is the result
