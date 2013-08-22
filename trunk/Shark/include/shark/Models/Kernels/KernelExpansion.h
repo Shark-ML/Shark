@@ -70,29 +70,23 @@ public:
 	// //////////////////////////////////////////////////////////
 
 	KernelExpansion(bool offset, unsigned int outputs = 1)
-	: mep_kernel(NULL), m_offset(offset), m_outputs(outputs){
-		m_alpha.resize(0, outputs);
-		if (m_offset) m_b = RealZeroVector(outputs);
-	}
+	: mep_kernel(NULL), m_offset(offset), m_outputs(outputs),
+	m_alpha(0,outputs),m_b(offset ? outputs : 0,0.0){}
 
 	KernelExpansion(Data<InputType> const& basis, bool offset, unsigned int outputs = 1)
-	: mep_kernel(NULL), m_basis(basis), m_offset(offset), m_outputs(outputs){
-		m_alpha = RealZeroMatrix(basis.numberOfElements(), outputs);
-		if (m_offset) m_b = RealZeroVector(outputs);
+	: mep_kernel(NULL), m_offset(offset), m_outputs(outputs),m_b(offset ? outputs : 0, 0.0){
+		setBasis(basis);
 	}
 
 	KernelExpansion(KernelType* kernel, bool offset, unsigned int outputs = 1)
-	: mep_kernel(kernel), m_offset(offset), m_outputs(outputs),m_alpha(0,outputs), m_basisSize(0){
+	: mep_kernel(kernel), m_offset(offset), m_outputs(outputs),m_alpha(0,outputs){
 		SHARK_ASSERT(mep_kernel != NULL);
-		if (m_offset) m_b = RealZeroVector(outputs);
 	}
 
 	KernelExpansion(KernelType* kernel, Data<InputType> const& basis, bool offset, unsigned int outputs = 1)
-	: mep_kernel(kernel), m_offset(offset), m_outputs(outputs){
-		m_alpha = RealZeroMatrix(basis.numberOfElements(), outputs);
+	: mep_kernel(kernel), m_offset(offset), m_outputs(outputs), m_b(offset ? outputs : 0, 0.0){
 		SHARK_ASSERT(mep_kernel != NULL);
 		setBasis(basis);
-		if (m_offset) m_b = RealZeroVector(outputs);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -174,11 +168,9 @@ public:
 	}
 
 	void setBasis(Data<InputType> const& basis){
-		m_basisSize = basis.numberOfElements();
 		m_basis = basis;
-		m_alpha = RealZeroMatrix(m_basisSize, m_outputs);
-		if (m_offset) 
-			m_b = RealZeroVector(m_outputs);
+		m_alpha.resize(basis.numberOfElements(), m_outputs);
+		zero(m_alpha);
 	}
 
 	/// The sparsify method removes non-support-vectors from
@@ -338,9 +330,6 @@ protected:
 
 	/// kernel coefficients
 	RealMatrix m_alpha;
-	
-	///number of elements in the basis
-	std::size_t m_basisSize;
 
 	/// offset or bias term
 	RealVector m_b;
