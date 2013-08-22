@@ -20,33 +20,22 @@ requires the following steps:
 
 First of all, the following header files are required: ::
 
- // Implementation of the MO-CMA-ES
- #include <shark/Algorithms/DirectSearch/MOCMA.h>
- // Access to benchmark functions
- #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
+..sharkcode<EA/MOO/MOCMASimple.tpp,includes>
 
 Next, an instance of the objective function is created and configured
 for a two-dimensional objective space and a three-dimensional search
 space, respectively: ::
 
-    shark::DTLZ2 dtlz2;
-    dtlz2.setNoVariables( 3 );
-    dtlz2.setNoObjectives( 2 );
+..sharkcode<EA/MOO/MOCMASimple.tpp,problem>
 
 Thereafter, the optimizer is instantiated and initialized for the objective function instance: ::
 
-    shark::detail::MOCMA mocma;
-    mocma.init( dtlz2 );
+..sharkcode<EA/MOO/MOCMASimple.tpp,optimizer>
 
 Subsequently, we declare a variable for storing the current
 approximation of the Pareto-optimal front: ::
 
-    std::vector<
-	shark::TypedSolution<
-	    shark::DTLZ2::SearchPointType,
-	    shark::DTLZ2::ResultType
-	>
-    > currentSolution;
+..sharkcode<EA/MOO/MOCMASimple.tpp,solutiontype>
 
 In general, the result of an iteration of a multi-objective optimizer
 is a set of tuples consisting of the best known search point and its
