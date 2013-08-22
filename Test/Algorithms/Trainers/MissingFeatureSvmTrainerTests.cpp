@@ -27,8 +27,10 @@ public:
 
 	SvmWafFixture()
 	{
-		string2data<RealVector, unsigned int>(m_labeledData, m_dataInString, LAST_COLUMN, true, false, NULL);
-		string2data<RealVector, unsigned int>(m_labeledData2, m_dataInString2, LAST_COLUMN, true, false, NULL);
+		//~ string2data<RealVector, unsigned int>(m_labeledData, m_dataInString, LAST_COLUMN, true, false, NULL);
+		//~ string2data<RealVector, unsigned int>(m_labeledData2, m_dataInString2, LAST_COLUMN, true, false, NULL);
+		csvStringToData(m_labeledData,m_dataInString,LAST_COLUMN);
+		csvStringToData(m_labeledData2,m_dataInString2,LAST_COLUMN);
 	}
 
 	static const std::string m_dataInString;

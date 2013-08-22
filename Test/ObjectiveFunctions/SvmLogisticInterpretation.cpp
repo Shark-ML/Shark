@@ -82,12 +82,15 @@ const char test[] = "3.2588947676e+00 5.4190801643e-01 1\n\
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessboard )
 {
 	double NUMERICAL_INCREASE_FACTOR = 1.00001;
-	std::stringstream ss(test);
-	std::vector<RealVector> x;
-	std::vector<unsigned int> y;
+	//~ std::stringstream ss(test);
+	//~ std::vector<RealVector> x;
+	//~ std::vector<unsigned int> y;
 	// create dataset
-	detail::import_csv( x, y, ss, LAST_COLUMN, " ", "");
-	ClassificationDataset training_dataset = createLabeledDataFromRange(x,y);
+	//~ detail::import_csv( x, y, ss, LAST_COLUMN, " ", "");
+	
+	ClassificationDataset training_dataset;
+	csvStringToData(training_dataset,test,LAST_COLUMN,0);
+	//~ ClassificationDataset training_dataset = createLabeledDataFromRange(x,y);
 	unsigned int num_eles = training_dataset.numberOfElements();
 	unsigned int num_folds = 2;
 	std::vector< size_t > indices( num_eles );
@@ -141,11 +144,13 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessboard_C_unconstrained )
 {
 	double NUMERICAL_INCREASE_FACTOR = 1.00001;
-	std::stringstream ss(test);
-	std::vector<RealVector> x;
-	std::vector<unsigned int> y;
-	detail::import_csv( x, y, ss, LAST_COLUMN, " ", "");
-	ClassificationDataset training_dataset = createLabeledDataFromRange(x,y);
+	//~ std::stringstream ss(test);
+	//~ std::vector<RealVector> x;
+	//~ std::vector<unsigned int> y;
+	//~ detail::import_csv( x, y, ss, LAST_COLUMN, " ", "");
+	//~ ClassificationDataset training_dataset = createLabeledDataFromRange(x,y);
+	ClassificationDataset training_dataset;
+	csvStringToData(training_dataset,test,LAST_COLUMN,0);
 	unsigned int num_eles = training_dataset.numberOfElements();
 	unsigned int num_folds = 2;
 	std::vector< size_t > indices( num_eles );
