@@ -19,7 +19,7 @@ int main(int argc, char **argv){
 
 	ClassificationDataset data;
 	try {
-		import_csv(data, argv[1], LAST_COLUMN, " ", "#");
+		import_csv(data, argv[1], LAST_COLUMN, 0);
 	} 
 	catch (...) {
 		cerr << "unable to read data from file " <<  argv[1] << endl;
