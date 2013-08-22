@@ -50,6 +50,30 @@ namespace detail{
  * @{
  */
 
+///\brief Computes a partitioning of a st of elements in batches.
+///	
+/// Given a number of elements and the maximum size of a batch, 
+/// computes the optimal number of batches and returns the size of every batch such that
+/// all batches have as equal a size as possible.
+///
+/// \param numElements number of elements to partition
+/// \param maximumBatchSize the maximum size of a batch
+/// \return a vector with th size of every batch
+inline std::vector<std::size_t> optimalBatchSizes(std::size_t numElements, std::size_t maximumBatchSize){
+	std::vector<std::size_t> batchSizes;
+	std::size_t batches = numElements / maximumBatchSize;
+	if(numElements-batches*maximumBatchSize > 0)
+		++batches;
+	std::size_t optimalBatchSize=numElements/batches;
+	std::size_t remainder = numElements-batches*optimalBatchSize;
+
+	for(std::size_t j = 0; j != batches; ++j){
+		std::size_t size = (j<remainder)?optimalBatchSize+1:optimalBatchSize;
+		batchSizes.push_back(size);
+	}
+	return batchSizes;
+}
+
 ///\brief Given the sizes of the partition sets and the maximum batch size, computes a good partitioning
 ///
 /// \param partitionSizes Sizes of the partitions
@@ -67,19 +91,9 @@ inline std::size_t batchPartitioning(
 	std::size_t numberOfPartitions=partitionSizes.size();
 	for (std::size_t i = 0; i != numberOfPartitions; i++){
 		partitionStart.push_back(sumOfBatches);
-		std::size_t batches = partitionSizes[i] / maximumBatchSize;
-		if(partitionSizes[i]-batches*maximumBatchSize > 0)
-			++batches;
-
-		//try to partition the data equally to the batches
-		std::size_t optimalBatchSize=partitionSizes[i]/batches;
-		std::size_t remainder = partitionSizes[i]-batches*optimalBatchSize;
-
-		for(std::size_t j = 0; j != batches; ++j){
-			std::size_t size = (j<remainder)?optimalBatchSize+1:optimalBatchSize;
-			batchSizes.push_back(size);
-		}
-		sumOfBatches+=batches;
+		std::vector<std::size_t> batchSizesOfPartition = optimalBatchSizes(partitionSizes[i],maximumBatchSize);
+		batchSizes.insert(batchSizes.end(),batchSizesOfPartition.begin(),batchSizesOfPartition.end());
+		sumOfBatches+=batchSizesOfPartition.size();
 	}
 	return sumOfBatches;
 }
