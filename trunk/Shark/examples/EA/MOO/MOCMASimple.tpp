@@ -19,8 +19,12 @@
  * along with this library; if not, see <http://www.gnu.org/licenses/>.
  *  
  */
+//###begin<includes>
+// Implementation of the MO-CMA-ES
 #include <shark/Algorithms/DirectSearch/MOCMA.h>
+// Access to benchmark functions
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
+//###end<includes>
 		
 int main( int argc, char ** argv ) {
 
@@ -29,25 +33,34 @@ int main( int argc, char ** argv ) {
     std::cout.precision( 10 );
 	
     // Instantiate both the problem and the optimizer.
+    //###begin<problem>
     shark::DTLZ2 dtlz2;
     dtlz2.setNumberOfVariables( 3 );
+    dtlz2.setNoObjectives( 2 );	  
+    //###end<problem>		  
 
+    //###begin<optimizer>
     shark::detail::MOCMA<> mocma;
 
     // Initialize the optimizer for the objective function instance.
     mocma.init( dtlz2 );
+    //###end<optimizer>
     
+    //###begin<solutiontype>	
     std::vector<
 	shark::ResultSet<
 	    shark::DTLZ2::SearchPointType,
 	    shark::DTLZ2::ResultType
 	    >
 	> currentSolution;
+    //###end<solutiontype>	
     
+    //###begin<loop>
     // Iterate the optimizer
     while( dtlz2.evaluationCounter() < 25000 ) {
 	currentSolution = mocma.step( dtlz2 );
     }
+    //###end<loop>
     
     // Report information on the optimizer state and the current
     // solution to the console.
