@@ -1094,6 +1094,23 @@ SHARK_UNARY_MATRIX_TRANSFORMATION(sigmoid, scalar_sigmoid)
 SHARK_UNARY_MATRIX_TRANSFORMATION(softPlus, scalar_soft_plus)
 #undef SHARK_UNARY_MATRIX_TRANSFORMATION
 
+#define SHARK_MATRIX_SCALAR_TRANSFORMATION(name, F)\
+template<class E> \
+matrix_unary1<E,F<typename E::value_type> > \
+name (matrix_expression<E> const& e, typename E::value_type scalar){ \
+	typedef F<typename E::value_type> functor_type; \
+	return matrix_unary1<E, functor_type>(e, functor_type(scalar)); \
+}
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator*, scalar_multiply2)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator/, scalar_divide)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<, scalar_less_than)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<=, scalar_less_equal_than)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator>, scalar_bigger_than)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator>=, scalar_bigger_equal_than)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator==, scalar_equal)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator!=, scalar_not_equal)
+#undef SHARK_MATRIX_SCALAR_TRANSFORMATION
+
 // (t * v) [i] = t * v [i]
 template<class T, class E>
 typename boost::enable_if<
@@ -1104,26 +1121,13 @@ operator * (T scalar, matrix_expression<E> const &e) {
 	typedef scalar_multiply1<typename E::value_type> functor_type;
 	return matrix_unary1<E, functor_type>(e, functor_type(scalar));
 }
-// (v * t) [i] = v [i] * t
-template<class E>
-matrix_unary1<E,scalar_multiply2<typename E::value_type> >
-operator * (matrix_expression<E> const &e, typename E::value_type scalar) {
-	typedef scalar_multiply2<typename E::value_type> functor_type;
-	return matrix_unary1<E, functor_type>(e, functor_type(scalar));
-}
+
 // pow(v,t)[i,j]= pow(v[i,j],t)
 template<class E, class U>
 matrix_unary1<E,scalar_pow<typename E::value_type, U> >
 pow (matrix_expression<E> const& e, U exponent){
 	typedef scalar_pow<typename E::value_type, U> functor_type;
 	return matrix_unary1<E, functor_type>(e, functor_type(exponent));
-}
-// (v / t) [i] = v [i] / t
-template<class E>
-matrix_unary1<E,scalar_divide<typename E::value_type> >
-operator / (matrix_expression<E> const &e, typename E::value_type scalar) {
-	typedef scalar_divide<typename E::value_type> functor_type;
-	return matrix_unary1<E, functor_type>(e, functor_type(scalar));
 }
 
 template<class E, class F>

@@ -465,6 +465,25 @@ SHARK_UNARY_VECTOR_TRANSFORMATION(sigmoid, scalar_sigmoid)
 SHARK_UNARY_VECTOR_TRANSFORMATION(softPlus, scalar_soft_plus)
 #undef SHARK_UNARY_VECTOR_TRANSFORMATION
 
+
+//operations of the form op(v,t)[i] = op(v[i],t)
+#define SHARK_VECTOR_SCALAR_TRANSFORMATION(name, F)\
+template<class E> \
+vector_unary<E,F<typename E::value_type> > \
+name (vector_expression<E> const& e, typename E::value_type scalar){ \
+	typedef F<typename E::value_type> functor_type; \
+	return vector_unary<E, functor_type>(e, functor_type(scalar)); \
+}
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator*, scalar_multiply2)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator/, scalar_divide)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<, scalar_less_than)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<=, scalar_less_equal_than)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator>, scalar_bigger_than)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator>=, scalar_bigger_equal_than)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator==, scalar_equal)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator!=, scalar_not_equal)
+#undef SHARK_VECTOR_SCALAR_TRANSFORMATION
+
 // (t * v) [i] = t * v [i]
 template<class T, class E>
 typename boost::enable_if< 
@@ -475,13 +494,6 @@ operator * (T scalar, vector_expression<E> const& e){
 	typedef scalar_multiply1<typename E::value_type> functor_type;
 	return vector_unary<E, functor_type>(e, functor_type(scalar));
 }
-// (v * t) [i] = v [i] * t
-template<class E>
-vector_unary<E,scalar_multiply2<typename E::value_type> >
-operator * (vector_expression<E> const& e, typename E::value_type scalar){
-	typedef scalar_multiply2<typename E::value_type> functor_type;
-	return vector_unary<E, functor_type>(e, functor_type(scalar));
-}
 
 // pow(v,t)[i]= pow(v[i],t)
 template<class E, class U>
@@ -489,13 +501,6 @@ vector_unary<E,scalar_pow<typename E::value_type, U> >
 pow (vector_expression<E> const& e, U exponent){
 	typedef scalar_pow<typename E::value_type, U> functor_type;
 	return vector_unary<E, functor_type>(e, functor_type(exponent));
-}
-// (v / t) [i] = v [i] / t
-template<class E>
-vector_unary<E,scalar_divide<typename E::value_type> >
-operator / (vector_expression<E> const& e, typename E::value_type scalar){
-	typedef scalar_divide<typename E::value_type> functor_type;
-	return vector_unary<E, functor_type>(e, functor_type(scalar));
 }
 
 
