@@ -18,8 +18,8 @@ RegressionDataset loadData(const std::string& dataFile,const std::string& labelF
 	//we first load two separate data files for the trianing inputs and the labels of the data point
 	Data<RealVector> inputs;
 	Data<RealVector> labels;
-	import_csv(inputs, dataFile, "\t");
-	import_csv(labels, labelFile, "\t");
+	import_csv(inputs, dataFile, 0);
+	import_csv(labels, labelFile, 0);
 	//now we create a complete dataset which represents pairs of inputs and labels.
 	RegressionDataset data(inputs, labels);
 	return data;
