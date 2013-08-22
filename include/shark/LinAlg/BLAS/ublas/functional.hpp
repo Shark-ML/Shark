@@ -262,7 +262,7 @@ struct scalar_pow{
 		return pow(x,m_exponent);
 	}
 private:
-	T m_exponent;
+	U m_exponent;
 };
 
 template<class T>
@@ -312,6 +312,90 @@ struct scalar_sigmoid {
 		}
 		return 1.0/(1.0+exp(-x));
 	}
+};
+
+template<class T>
+struct scalar_less_than{
+	typedef T argument_type;
+	typedef bool result_type;
+	static const bool zero_identity = false;
+
+	scalar_less_than(T comparator):m_comparator(comparator) {}
+	result_type operator()(argument_type x)const {
+		return x < m_comparator;
+	}
+private:
+	T m_comparator;
+};
+
+template<class T>
+struct scalar_less_equal_than{
+	typedef T argument_type;
+	typedef bool result_type;
+	static const bool zero_identity = false;
+
+	scalar_less_equal_than(T comparator):m_comparator(comparator) {}
+	result_type operator()(argument_type x)const {
+		return x <= m_comparator;
+	}
+private:
+	T m_comparator;
+};
+
+template<class T>
+struct scalar_bigger_than{
+	typedef T argument_type;
+	typedef bool result_type;
+	static const bool zero_identity = false;
+
+	scalar_bigger_than(T comparator):m_comparator(comparator) {}
+	result_type operator()(argument_type x)const {
+		return x > m_comparator;
+	}
+private:
+	T m_comparator;
+};
+
+template<class T>
+struct scalar_bigger_equal_than{
+	typedef T argument_type;
+	typedef bool result_type;
+	static const bool zero_identity = false;
+
+	scalar_bigger_equal_than(T comparator):m_comparator(comparator) {}
+	result_type operator()(argument_type x)const {
+		return x > m_comparator;
+	}
+private:
+	T m_comparator;
+};
+
+template<class T>
+struct scalar_equal{
+	typedef T argument_type;
+	typedef bool result_type;
+	static const bool zero_identity = false;
+
+	scalar_equal(T comparator):m_comparator(comparator) {}
+	result_type operator()(argument_type x)const {
+		return x == m_comparator;
+	}
+private:
+	T m_comparator;
+};
+
+template<class T>
+struct scalar_not_equal{
+	typedef T argument_type;
+	typedef bool result_type;
+	static const bool zero_identity = false;
+
+	scalar_not_equal(T comparator):m_comparator(comparator) {}
+	result_type operator()(argument_type x)const {
+		return x != m_comparator;
+	}
+private:
+	T m_comparator;
 };
 
 
