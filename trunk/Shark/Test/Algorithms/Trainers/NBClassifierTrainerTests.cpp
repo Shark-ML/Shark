@@ -85,7 +85,9 @@ public:
 
   typedef NBClassifier<>::AbstractDistPtr AbstractDistPtr;
 
-  NBClassifierTrainerFixture() : tolerancePercentage(0.01) { string2data(m_labeledData, m_dataInString); }
+  NBClassifierTrainerFixture() : tolerancePercentage(0.01) {
+	csvStringToData(m_labeledData,m_dataInString,LAST_COLUMN);
+  }
 
   void verifyNormalDistribution(const DummyNBClassifier& myNbClassifier)
   {

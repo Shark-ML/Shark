@@ -5,150 +5,186 @@
 #include <shark/Data/Csv.h>
 #include <shark/LinAlg/Base.h>
 
-#include <iostream>
-#include <sstream>
-
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace shark;
 
-
-const char test[] = ",6,148,72,35,0,33.6,0.627,50,1,,,\n\
-1,85,66,29,0,26.6,,,,0.351,31,0\r\
-8,183,64,0,0,23.3,0.672,32,1\r\n\
-1,89,66,23,94,28.1,0.167,21,0\n\
-0,137,40,35,168,43.1,2.288,33,1\n\
-5,116,74,0,0,25.6,0.201,30,0\n\
-3,78,50,32,88,31.0,0.248,26,1\n\
-10,115,0,0,0,35.3,0.134,29,0\n\
-2,197,70,45,543,30.5,0.158,53,1\n\
-8,125,96,0,0,0.0,0.232,54,1\n\
-4,110,92,0,0,37.6,0.191,30,0\n\
-10,168,74,0,0,38.0,0.537,34,1\n\
-10,139,80,0,0,27.1,1.441,57,0\n\
-1,189,60,23,846,30.1,0.398,59,1\n\
-5,166,72,19,175,25.8,0.587,51,1\n\
-7,100,0,0,0,30.0,0.484,32,1\n\
-0,118,84,47,230,45.8,0.551,31,1\n\
-7,107,74,0,0,29.6,0.254,31,1\n\
-1,103,30,38,83,43.3,0.183,33,0\n\
-1,115,70,30,96,34.6,0.529,32,1\n\
-3,126,88,41,235,39.3,0.704,27,0\n\
-8,99,84,0,0,35.4,0.388,50,0\n\
-7,196,90,0,0,39.8,0.451,41,1\n\
-9,119,80,35,0,29.0,0.263,29,1\n\
-11,143,94,33,146,36.6,0.254,51,1\n\
-10,125,70,26,115,31.1,0.205,41,1\n\
-7,147,76,0,0,39.4,0.257,43,1\n\
+const char test_separator[] = "\
+1.000,148.0,72,35,0,33.6,,?,0\n\
+1,66,29,0,26.6,,,?,0\r\
+1,183,64,0,0, 23.3,0.672,32,1\r\n\
+2.000,116,\t74\t,\t0 \t\t,0,25.6,0.201 , 30,0\n\
+1.,78,50,32,88 ,31.0, 0.248,26,1\n\
+2,196,90,0,0,39.8,0.451,41,1\n\
+1.0,119,80,35,0,29.0,0.263,29,1\n\
+2.,143,94,33,146,36.6,0.254,51,1\n\
+1,125,70,26,115,31.1,0.205,41,1\n\
+1,147,76,0,0,39.4,0.257,43,1\n\
 1,97,66,15,140,23.2,0.487,22,0\n\
-13,145,82,19,110,22.2,0.245,57,0\n\
-5,117,92,0,0,34.1,0.337,38,0\n\
-5,109,75,26,0,36.0,0.546,60,0\n\
-3,158,76,36,245,31.6,0.851,28,1\n\
-3,88,58,11,54,24.8,0.267,22,0\r";
+0,145,82,19,110,22.2,0.245,57,0\n\
+0,117,92,0,0,34.1,0.337,38,0\n\
+1,109,75,26,0,36.0,0.546,60,0\n\
+1,158,76,36,245,31.6,0.851,28,1\n\
+0,88,58,11,54,24.8,0.267,22,0\r";
 
-const char test_missing_label[] = ",6,148,72,35,0,33.6,0.627,50,1,,,\n\
-1,85,66,29,0,26.6,,,,0.351,31,0\r\
-8,183,64,0,0,23.3,0.672,32,8\r\n\
-1,89,66,23,94,28.1,0.167,21,0\n\
-3,158,76,36,245,31.6,0.851,28,1\n\
-3,88,58,11,54,24.8,0.267,22,0\r";
+const char test_no_separator[] = "\
+1.000 148.0 \t72 35\t0 33.6 ? ? 0\n\
+1 66 29 0 26.6 ? ? ? 0\r\
+1 183 64 0 0 23.3 0.672 32 1\r\n\
+2.000 116 74 0\t0 25.6 0.201 30 0\n\
+1. 78 50 32 88 31.0 0.248 26 1\n\
+2 196 90 0 0 39.8\t\t\t0.451 41 1\n\
+1.0 119 80 35 0 29.0 0.263 29 1\n\
+2. 143 94 33 146 36.6 0.254 51 1\n\
+1 125 70 26 115 31.1 0.205 41 1\n\
+1 147 76 0 0 39.4 0.257 43 1\n\
+1 97 66 15 140 23.2 0.487 22 0\n\
+0 145 82 19 110 22.2 0.245 57 0\n\
+0 117 92 0 0 34.1 0.337 38 0\n\
+1 109 75 26 0 36.0 0.546 60 0\n\
+1 158 76 36 245 31.6 0.851 28 1\n\
+0 88 58 11 54 24.8 0.267 22 0\r";
 
-const char test_regression[] = ",6,148,72,35,0,33.6,0.627,50,1.1,,,\n\
-1,85,66,29,0,26.6,,,,0.351,31,7.3\r\
-8,183,64,0,0,23.3,0.672,32,2.2\r\n\
-1,89,66,23,94,28.1,0.167,21,19.001\n\
-3,158,76,36,245,31.6,0.851,28,1e-2\n\
-3,88,58,11,54,24.8,0.267,22,33.3333\r";
+const double qnan = std::numeric_limits<double>::quiet_NaN();
+
+std::size_t const numDimensions = 8;
+std::size_t const numInputs = 16;
+double test_values_1[numInputs * numDimensions] ={
+	148.0,72,35,0,33.6,qnan,qnan,0,
+	66,29,0,26.6,qnan,qnan,qnan,0,
+	183,64,0,0,23.3,0.672,32,1,
+	116,74,0,0,25.6,0.201,30,0,
+	78,50,32,88,31.0,0.248,26,1,
+	196,90,0,0,39.8,0.451,41,1,
+	119,80,35,0,29.0,0.263,29,1,
+	143,94,33,146,36.6,0.254,51,1,
+	125,70,26,115,31.1,0.205,41,1,
+	147,76,0,0,39.4,0.257,43,1,
+	97,66,15,140,23.2,0.487,22,0,
+	145,82,19,110,22.2,0.245,57,0,
+	117,92,0,0,34.1,0.337,38,0,
+	109,75,26,0,36.0,0.546,60,0,
+	158,76,36,245,31.6,0.851,28,1,
+	88,58,11,54,24.8,0.267,22,0
+};
+
+double test_values_2[numInputs*numDimensions] ={
+	1.000,148.0,72,35,0,33.6,qnan,qnan,
+	1,66,29,0,26.6,qnan,qnan,qnan,
+	1,183,64,0,0,23.3,0.672,32,
+	2.000,116,74,0,0,25.6,0.201,30,
+	1.,78,50,32,88,31.0,0.248,26,
+	2,196,90,0,0,39.8,0.451,41,
+	1.0,119,80,35,0,29.0,0.263,29,
+	2.,143,94,33,146,36.6,0.254,51,
+	1,125,70,26,115,31.1,0.205,41,
+	1,147,76,0,0,39.4,0.257,43,
+	1,97,66,15,140,23.2,0.487,22,
+	0,145,82,19,110,22.2,0.245,57,
+	0,117,92,0,0,34.1,0.337,38,
+	1,109,75,26,0,36.0,0.546,60,
+	1,158,76,36,245,31.6,0.851,28,
+	0,88,58,11,54,24.8,0.267,22
+};
+
+unsigned int labels_1[numInputs] = {1,1,1,2,1,2,1,2,1,1,1,0,0,1,1,0};
+unsigned int labels_2[numInputs] = {0,0,1,0,1,1,1,1,1,1,0,0,0,0,1,0};
 
 template<class T, class U, class V>
-void checkDataEquality(LabeledData<T, V> const& set, LabeledData<U, V> const& loaded){
-	BOOST_REQUIRE_EQUAL(set.numberOfElements(), loaded.numberOfElements());
-	for (size_t i=0; i != set.numberOfElements(); ++i)
-	{
-		BOOST_REQUIRE_EQUAL(set.element(i).input.size(), loaded.element(i).input.size());
-		for (size_t j=0; j != set.element(i).input.size(); ++j)
+void checkDataEquality(T* values, unsigned int* labels, LabeledData<V,U> const& loaded){
+	BOOST_REQUIRE_EQUAL(loaded.numberOfElements(),numInputs);
+	BOOST_REQUIRE_EQUAL(inputDimension(loaded),numDimensions);
+	for (size_t i=0; i != numInputs; ++i){
+		for (size_t j=0; j != numDimensions; ++j)
 		{
-			BOOST_CHECK_EQUAL(set.element(i).input(j), loaded.element(i).input(j));
+			if( boost::math::isnan(values[i*numDimensions+j])){
+				BOOST_CHECK(boost::math::isnan(loaded.element(i).input(j)));
+			}
+			else
+			{
+				BOOST_CHECK_EQUAL(loaded.element(i).input(j), values[i*numDimensions+j]);
+			}
 		}
-		BOOST_CHECK_EQUAL(set.element(i).label, loaded.element(i).label);
+		BOOST_CHECK_EQUAL(loaded.element(i).label, labels[i]);
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Set_Csv )
+BOOST_AUTO_TEST_CASE( Data_Csv_Separator_First_Column )
 {
 	// DENSE
-	std::stringstream ss(test);
-	std::vector<RealVector> x;
-	std::vector<unsigned int> y;
-	detail::import_csv(x, y, ss, LAST_COLUMN, ",", "#" );
-	LabeledData<RealVector, unsigned int> test_ds = createLabeledDataFromRange(x, y);
-	BOOST_REQUIRE_EQUAL(test_ds.numberOfElements(), 33u);
+	LabeledData<RealVector, unsigned int> test_ds;
+	csvStringToData(test_ds, test_separator, FIRST_COLUMN, ',','#',3);
+	BOOST_CHECK_EQUAL(test_ds.numberOfElements(), 16u);
+	BOOST_CHECK_EQUAL(test_ds.numberOfBatches(), 6);
+	BOOST_CHECK_EQUAL(numberOfClasses(test_ds), 3);
+	std::cout << test_ds<<std::endl;
+	
+	checkDataEquality(test_values_1,labels_1,test_ds);
 
-	export_csv(test_ds, "test_output/check.csv", FIRST_COLUMN);
-	LabeledData<RealVector, unsigned int> loaded;
-	import_csv(loaded, "test_output/check.csv", FIRST_COLUMN);
+	//~ export_csv(test_ds, "test_output/check.csv", FIRST_COLUMN);
+	//~ LabeledData<RealVector, unsigned int> loaded;
+	//~ import_csv(loaded, "test_output/check.csv", FIRST_COLUMN);
 
-	checkDataEquality(test_ds,loaded);
+	//~ checkDataEquality(test_ds,loaded);
 
-	// SPARSE
-	std::stringstream sss(test);
-	std::vector<CompressedRealVector> sx;
-	std::vector<unsigned int> sy;
-	detail::import_csv(sx, sy, sss, LAST_COLUMN, ",", "#" );
-	LabeledData<CompressedRealVector, unsigned int> test_ds_sparse = createLabeledDataFromRange(sx, sy);
-	BOOST_REQUIRE_EQUAL(test_ds_sparse.numberOfElements(), 33);
+	//~ // SPARSE
+	//~ std::stringstream sss(test);
+	//~ std::vector<CompressedRealVector> sx;
+	//~ std::vector<unsigned int> sy;
+	//~ detail::import_csv(sx, sy, sss, LAST_COLUMN, ",", "#" );
+	//~ LabeledData<CompressedRealVector, unsigned int> test_ds_sparse = createLabeledDataFromRange(sx, sy);
+	//~ BOOST_REQUIRE_EQUAL(test_ds_sparse.numberOfElements(), 33);
 
-	export_csv(test_ds_sparse, "test_output/check_sparse.csv", FIRST_COLUMN);
-	LabeledData<CompressedRealVector, unsigned int> loaded_sparse;
-	import_csv(loaded_sparse, "test_output/check_sparse.csv", FIRST_COLUMN);
+	//~ export_csv(test_ds_sparse, "test_output/check_sparse.csv", FIRST_COLUMN);
+	//~ LabeledData<CompressedRealVector, unsigned int> loaded_sparse;
+	//~ import_csv(loaded_sparse, "test_output/check_sparse.csv", FIRST_COLUMN);
 
 	
-	BOOST_REQUIRE_EQUAL( test_ds_sparse.element(test_ds_sparse.numberOfElements()-1).label, 0u );
-	BOOST_REQUIRE_EQUAL( test_ds_sparse.element(test_ds_sparse.numberOfElements()-1).input(5), 24.8 );
-	checkDataEquality(test_ds_sparse,loaded_sparse);
-	checkDataEquality(test_ds_sparse,loaded);
+	//~ BOOST_REQUIRE_EQUAL( test_ds_sparse.element(test_ds_sparse.numberOfElements()-1).label, 0u );
+	//~ BOOST_REQUIRE_EQUAL( test_ds_sparse.element(test_ds_sparse.numberOfElements()-1).input(5), 24.8 );
+	//~ checkDataEquality(test_ds_sparse,loaded_sparse);
+	//~ checkDataEquality(test_ds_sparse,loaded);
 }
 
 
-BOOST_AUTO_TEST_CASE( Set_Csv_Missing_Label )
+BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_First_Column )
 {
 	// DENSE
-	std::stringstream ss(test_missing_label);
-	std::vector<RealVector> x;
-	std::vector<unsigned int> y;
-	detail::import_csv(x, y, ss, LAST_COLUMN, ",", "#", false, true );
-	LabeledData<RealVector, unsigned int> test_ds = createLabeledDataFromRange(x, y);
-	std::size_t test_ds_size = test_ds.numberOfElements();
-	BOOST_REQUIRE_EQUAL(test_ds_size, 6u);
-	BOOST_REQUIRE_EQUAL( test_ds.element(test_ds_size-1).label, 0u );
-	BOOST_REQUIRE_EQUAL( test_ds.element(2).label, 8u );
-	BOOST_REQUIRE_EQUAL( test_ds.element(test_ds_size-1).input(5), 24.8 );
-
-	export_csv(test_ds, "test_output/check.csv", FIRST_COLUMN);
-	LabeledData<RealVector, unsigned int> loaded;
-	import_csv(loaded, "test_output/check.csv", FIRST_COLUMN, ",", "#", true);
-
-	checkDataEquality(test_ds,loaded);
+	LabeledData<RealVector, unsigned int> test_ds;
+	csvStringToData(test_ds, test_no_separator, FIRST_COLUMN, 0,'#',3);
+	BOOST_CHECK_EQUAL(test_ds.numberOfElements(), 16u);
+	BOOST_CHECK_EQUAL(test_ds.numberOfBatches(), 6);
+	BOOST_CHECK_EQUAL(numberOfClasses(test_ds), 3);
+	
+	std::cout << test_ds<<std::endl;
+	
+	checkDataEquality(test_values_1,labels_1,test_ds);
 }
 
-BOOST_AUTO_TEST_CASE( Set_Csv_Regression )
+BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_Last_Column )
 {
 	// DENSE
-	std::stringstream ss(test_regression);
-	std::vector<RealVector> x;
-	std::vector<double> y;
-	detail::import_csv(x, y, ss, LAST_COLUMN, ",", "#");
-	LabeledData<RealVector, double> test_ds = createLabeledDataFromRange(x, y);
-	std::size_t test_ds_size = test_ds.numberOfElements();
-	BOOST_REQUIRE_EQUAL(test_ds_size, 6u);
-	BOOST_REQUIRE_EQUAL( test_ds.element(test_ds_size-1).label, 33.3333 );
-	BOOST_REQUIRE_EQUAL( test_ds.element(test_ds_size-1).input(5), 24.8 );
-
-	export_csv(test_ds, "test_output/check.csv", FIRST_COLUMN);
-	LabeledData<RealVector, double> loaded;
-	import_csv(loaded, "test_output/check.csv", FIRST_COLUMN);
-
-	checkDataEquality(test_ds,loaded);
-
+	LabeledData<RealVector, unsigned int> test_ds;
+	csvStringToData(test_ds, test_no_separator, LAST_COLUMN, 0,'#',3);
+	BOOST_CHECK_EQUAL(test_ds.numberOfElements(), 16u);
+	BOOST_CHECK_EQUAL(test_ds.numberOfBatches(), 6);
+	BOOST_CHECK_EQUAL(numberOfClasses(test_ds), 2);
+	
+	std::cout << test_ds<<std::endl;
+	
+	checkDataEquality(test_values_2,labels_2,test_ds);
 }
 
+BOOST_AUTO_TEST_CASE( Data_Csv_Separator_Last_Column )
+{
+	// DENSE
+	LabeledData<RealVector, unsigned int> test_ds;
+	csvStringToData(test_ds, test_separator, LAST_COLUMN, ',','#',3);
+	BOOST_CHECK_EQUAL(test_ds.numberOfElements(), 16u);
+	BOOST_CHECK_EQUAL(test_ds.numberOfBatches(), 6);
+	BOOST_CHECK_EQUAL(numberOfClasses(test_ds), 2);
+	
+	std::cout << test_ds<<std::endl;
+	
+	checkDataEquality(test_values_2,labels_2,test_ds);
+}

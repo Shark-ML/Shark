@@ -79,7 +79,7 @@ public:
 	}
 
 	KernelExpansion(KernelType* kernel, bool offset, unsigned int outputs = 1)
-	: mep_kernel(kernel), m_offset(offset), m_outputs(outputs),m_alpha(0,outputs){
+	: mep_kernel(kernel), m_offset(offset), m_outputs(outputs),m_alpha(0,outputs), m_b(offset ? outputs : 0, 0.0){
 		SHARK_ASSERT(mep_kernel != NULL);
 	}
 
