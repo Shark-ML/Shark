@@ -27,8 +27,6 @@
 #ifndef SHARK_ALGORITHMS_TRAINERS_LASSOREGRESSION_H
 #define SHARK_ALGORITHMS_TRAINERS_LASSOREGRESSION_H
 
-
-#include <shark/Core/Timer.h>
 #include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <cmath>
@@ -281,8 +279,6 @@ protected:
 
 		fillData(dataset);
 
-		Timer timer;
-
 		RealVector diag(dim);
 		RealVector w = label;
 		UIntVector index(dim);
@@ -454,8 +450,6 @@ protected:
 				if (verbose) std::cout << "." << std::flush;
 			}
 		}
-
-		double seconds = timer.stop();
 /*
 		// compute objective value and count non-zero features
 		size_t nnz = 0;
