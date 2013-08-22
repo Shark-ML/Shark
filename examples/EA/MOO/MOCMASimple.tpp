@@ -36,7 +36,6 @@ int main( int argc, char ** argv ) {
     //###begin<problem>
     shark::DTLZ2 dtlz2;
     dtlz2.setNumberOfVariables( 3 );
-    dtlz2.setNoObjectives( 2 );	  
     //###end<problem>		  
 
     //###begin<optimizer>
