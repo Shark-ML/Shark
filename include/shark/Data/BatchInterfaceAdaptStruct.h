@@ -65,13 +65,13 @@ struct CreateBatch{
 	struct result<CreateBatch(T const&)> {
 		typedef typename shark::Batch<T>::type type;
 	};
-	
+
 	template<class T>
 	typename result<CreateBatch(T const&)>::type operator()(T const& value)const{
 		return shark::Batch<T>::createBatch(value,m_size);
 	}
 private:
-	std::size_t m_size; 
+	std::size_t m_size;
 };
 struct resize{
 	resize(std::size_t size1, std::size_t size2):m_size1(size1),m_size2(size2){};
@@ -80,8 +80,8 @@ struct resize{
 		 shark::Batch<typename boost::range_value<T>::type>::resize(batch,m_size1,m_size2);
 	}
 private:
-	std::size_t m_size1; 
-	std::size_t m_size2; 
+	std::size_t m_size1;
+	std::size_t m_size2;
 };
 
 ///calls get(container,index) on a container. Used as boost fusion functor in the creation of references in the Batch Interface
@@ -91,15 +91,15 @@ struct MakeRef{
 	struct result<MakeRef(T const&)> {
 		typedef typename boost::range_reference<T>::type type;
 	};
-	
+
 	MakeRef(std::size_t index):m_index(index){}
-	
+
 	template<class T>
 	typename result<MakeRef(T const&) >::type operator()(T const& container)const{
 		return get(const_cast<T&>(container),m_index);//we need the const cast since the argument type must be a const ref.
 	}
 private:
-	std::size_t m_index; 
+	std::size_t m_index;
 };
 ///calls get(container,index) on a container. Used as boost fusion functor in the cration of references in the Batch Interface
 struct MakeConstRef{
@@ -108,15 +108,15 @@ struct MakeConstRef{
 	struct result<MakeConstRef(T const&)> {
 		typedef typename boost::range_reference<T const>::type type;
 	};
-	
+
 	MakeConstRef(std::size_t index):m_index(index){}
-	
+
 	template<class T>
 	typename result<MakeConstRef(T const&) >::type operator()(T const& container)const{
 		return get(container,m_index);
 	}
 private:
-	std::size_t m_index; 
+	std::size_t m_index;
 };
 
 template<class FusionSequence>
@@ -136,7 +136,7 @@ private:
 	static Big tester(FusionFacade<S> const*);
 	static char tester(...);
 	static Type* generator();
-	
+
 	BOOST_STATIC_CONSTANT(std::size_t, size = sizeof(tester(generator())));
 public:
 	BOOST_STATIC_CONSTANT(bool, value =  (size!= 1));
@@ -145,29 +145,29 @@ public:
 
 }
 
-template<class S> 
+template<class S>
 S& fusionize(detail::FusionFacade<S> & facade){
 	return static_cast<S&>(facade);
 }
-template<class S> 
+template<class S>
 S const& fusionize(detail::FusionFacade<S> const& facade){
 	return static_cast<S const&>(facade);
 }
 
-template<class S> 
-typename boost::disable_if<detail::isFusionFacade<S>,S&>::type 
+template<class S>
+typename boost::disable_if<detail::isFusionFacade<S>,S&>::type
 fusionize(S& facade){
 	return facade;
 }
-template<class S> 
-typename boost::disable_if<detail::isFusionFacade<S>,S const& >::type 
+template<class S>
+typename boost::disable_if<detail::isFusionFacade<S>,S const& >::type
 fusionize(S const& facade){
 	return facade;
 }
 }
 #define SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL_IMPL(s,TYPE,ELEM)\
 	( typename Batch<BOOST_PP_TUPLE_ELEM(2, 0, ELEM)>::TYPE,BOOST_PP_TUPLE_ELEM(2, 1, ELEM))
-	
+
 #define SHARK_TRANSFORM_TUPLELIST_IMPL(s, data,ELEM)\
 	BOOST_PP_TUPLE_ELEM(2, 0, ELEM),BOOST_PP_TUPLE_ELEM(2, 1, ELEM)
 #define SHARK_TRANSFORM_TUPLELIST(ELEMS)\
@@ -307,7 +307,7 @@ const_iterator end()const{\
 ///SHARK_CREATE_BATCH_INTERFACE( DataType,DataVars)
 ///};
 ///As any other batch model th result also offers iterators over the range of elements.
-///In this case also boost::fusion support is added to the sequence. e.g. it is 
+///In this case also boost::fusion support is added to the sequence. e.g. it is
 ///handled similar to any other tuple type (RealMatrix,RealVector). This is useful for MKL or Transfer
 ///kernels
 ///</code>
@@ -389,8 +389,8 @@ public:\
 ///
 ///SHARK_CREATE_BATCH_INTERFACE( DataType,DataVars)
 ///};
-///As any other batch model th result also offers iterators over the range of elements.
-///In this case also boost::fusion support is added to the sequence. e.g. it is 
+///As any other batch model the result also offers iterators over the range of elements.
+///In this case also boost::fusion support is added to the sequence. e.g. it is
 ///handled similar to any other tuple type (RealMatrix,RealVector). This is useful for MKL or Transfer
 ///kernels
 ///</code>
