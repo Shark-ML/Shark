@@ -190,7 +190,7 @@ fusionize(S const& facade){
 #define SHARK_CREATE_BATCH_REFERENCES_TPL(ATTRIBUTES)\
 private:\
 SHARK_FUSION_DEFINE_STRUCT_REF_INLINE(FusionRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(reference,ATTRIBUTES))\
-SHARK_FUSION_DEFINE_STRUCT_REF_INLINE(FusionConstRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(const_reference,ATTRIBUTES))\
+SHARK_FUSION_DEFINE_STRUCT_CONST_REF_INLINE(FusionConstRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(const_reference,ATTRIBUTES))\
 public:\
 struct reference: public detail::FusionFacade<FusionRef>{\
 	template<class Batch>\
@@ -231,7 +231,7 @@ public:\
 #define SHARK_CREATE_BATCH_REFERENCES(ATTRIBUTES)\
 private:\
 SHARK_FUSION_DEFINE_STRUCT_REF_INLINE(FusionRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES(reference,ATTRIBUTES))\
-SHARK_FUSION_DEFINE_STRUCT_REF_INLINE(FusionConstRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES(const_reference,ATTRIBUTES))\
+SHARK_FUSION_DEFINE_STRUCT_CONST_REF_INLINE(FusionConstRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES(const_reference,ATTRIBUTES))\
 public:\
 struct reference: public detail::FusionFacade<FusionRef>{\
 	template<class Batch>\
@@ -239,6 +239,10 @@ struct reference: public detail::FusionFacade<FusionRef>{\
 	:detail::FusionFacade<FusionRef>(boost::fusion::transform(fusionize(batch),detail::MakeRef(i))){}\
 	template<class Other>\
 	reference& operator= (Other const& other ){\
+		fusionize(*this) = other;\
+		return *this;\
+	}\
+	reference& operator= (reference const& other ){\
 		fusionize(*this) = other;\
 		return *this;\
 	}\
