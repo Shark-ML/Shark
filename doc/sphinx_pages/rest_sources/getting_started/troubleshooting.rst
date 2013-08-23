@@ -53,7 +53,7 @@ try the following:
     closely examine whether you configured CMake to use a static or dynamic build, and
     whether the according static or dynamic Boost libraries are actually present. In rare
     cases, there may be problems with the Boost file naming schemes, see
-    `here <http://www.boost.org/doc/libs/1_53_0/more/getting_started/unix-variants.html#library-naming>`_ .
+    `here <http://www.boost.org/doc/libs/release/more/getting_started/unix-variants.html#library-naming>`_ .
     Having built Boost with a complete, tagged-layout build type (see below) will usually resolve
     these issues.
 
