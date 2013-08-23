@@ -112,6 +112,12 @@ local folder, too.
 
 
 
+.. todo::
+
+    explain the new tut2rst and tpp to cpp workings. (iinm, the tpp to cpp happens
+    when doing ccmake . in the shark_source dir.)
+
+
 MathJax
 +++++++
 
@@ -209,6 +215,17 @@ icons, and sprites needed by the templates.
 For doxygen, the header and footer layout is goverened by the
 files in ``doc/doxygen_pages/templates``, and the CSS styling
 in ``doc/doxygen_pages/css``.
+
+
+Assorted hints
+&&&&&&&&&&&&&&
+
+Miscellanea:
+
+* When linking to boost documentation pages for which you have
+  copied the link from your browser, always replace the current
+  version number (e.g., 1_54_0) in the link with "release". This
+  will always redirect to the most recent version.
 
 Sphinx and Doxygen html header injection
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&

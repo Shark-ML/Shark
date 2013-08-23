@@ -31,8 +31,8 @@ following way:
 
 An individual consists of:
 
-* multiple chromosomes, 
-* the search point associated with the individual as well as 
+* multiple chromosomes,
+* the search point associated with the individual as well as
 * the fitness corresponding to the individual's search point.
 
 Two different types of fitness values are supported, namely the
@@ -82,7 +82,7 @@ Selection Operator
 A selection operator selects a certain individual from a set of
 individuals. Thus, a selection operator selecting individuals
 uniformly at random can be implemented in the following way::
-  
+
   struct UniformSelection{
     template<typename Iterator>
     Iterator operator()( Iterator it, Iterator itE ) const {
@@ -109,7 +109,7 @@ example, a bitflip mutation can be implemented as follows::
       typedef typename Individual::SearchPointType PointType;
       for( PointType::iterator it = ind.begin(); it != ind.end(); ++it )
         if( shark::Rng::coinToss( 1./ind.size() ) )
-	  *it ^= *it;
+      *it ^= *it;
     }
 
     // Const overload. Mutated individual is returned.
@@ -127,7 +127,7 @@ individuals by means of std::for_each::
   // Binary encoded individuals with no chromosomes.
   typedef TypedIndividual< std::vector< bool > > Individual;
   typedef std::list< Individual > Population;
-  
+
   Population pop( 100, shark::make_individual( std::vector< bool >( 10 ) ) );
   std::for_each( pop.begin(), pop.end(), BitFlipMutation() );
 
@@ -136,9 +136,9 @@ evolutionary algorithm::
 
   #include <shark/Algorithms/DirectSearch/TypedIndividual.h>
   #include <shark/ObjectiveFunctions/Benchmarks/OneMax.h>
-  
+
   #include <shark/Rng/GlobalRng.h>
-  
+
   namespace shark {
     struct BitFlipMutation {
       template<typename Individual>
@@ -160,20 +160,20 @@ evolutionary algorithm::
   // Implements a (1+1)-GA
   int main( int argc, char ** argv ) {
     // Instantiate and configure the objective function.
-    shark::OneMax oneMax;  
+    shark::OneMax oneMax;
     oneMax.setNoVariables( 10 );
 
     // Define types for individuals and populations.
     typedef shark::IndividualType< shark::BoolVector > Individual;
-    
+
 
     // Generate, initialize and evaluate a parent individual.
-    Individual parent( shark::BoolVector( 10, 0 ) );    
+    Individual parent( shark::BoolVector( 10, 0 ) );
     for( std::size_t i = 0; i < *(parent).size(); i++ )
       (*parent)( i ) = shark::Rng::coinToss( 0.5 );
 
-    parent.fitness( shark::PenalizedFitness() ) = 
-    parent.fitness( shark::UnpenalizedFitness() ) = 
+    parent.fitness( shark::PenalizedFitness() ) =
+    parent.fitness( shark::UnpenalizedFitness() ) =
     oneMax( *(*it) );
 
     Individual offspring( parent );
@@ -183,18 +183,18 @@ evolutionary algorithm::
     while( parent.fitness( shark::UnpenalizedFitness() ) > 0 ) {
       // Mating selection.
       offspring = parent;
-      
+
       // Mutation.
       bfm( offspring );
 
       // Evaluation.
-       offspring.fitness( shark::PenalizedFitness() ) = 
-       offspring.fitness( shark::UnpenalizedFitness() ) = 
+       offspring.fitness( shark::PenalizedFitness() ) =
+       offspring.fitness( shark::UnpenalizedFitness() ) =
        oneMax( *(*it) );
       // Environmental selection.
-      if( 
-        offspring.fitness( shark::UnpenalizedFitness() ) <= 
-        parent.fitness( shark::UnpenalizedFitness() ) ) 
+      if(
+        offspring.fitness( shark::UnpenalizedFitness() ) <=
+        parent.fitness( shark::UnpenalizedFitness() ) )
       )
         std::swap( parent, offspring );
     }
@@ -223,17 +223,17 @@ implemented in the following way::
 
   struct OnePointCrossover {
     template<typename Individual>
-    Individual operator()( 
-      const Individual & mom, 
-      const Individual & dad, 
+    Individual operator()(
+      const Individual & mom,
+      const Individual & dad,
       std::size_t point ) const {
-	    
+
       if( mom.size() != dad.size() )
         throw( SHARK_EXCEPTOIN( "Parents need to be of the same size." ) );
-	    
+
       Individual offspring( mom );
       std::copy( dad.begin() + point, dad.end(), offspring.begin() + point );
-	    
+
       return( offspring );
     }
   };
@@ -258,7 +258,8 @@ respectively. Please see the abstract base classes
 :doxy:`AbstractSingleObjectiveOptimizer`,
 :doxy:`AbstractMultiObjectiveOptimizer`,
 :doxy:`AbstractObjectiveFunction` and
-:doxy:`AbstractMultiObjectiveFunction`. In addition, Shark offers an
+the documentation in the file
+:doxy:`AbstractObjectiveFunction.h`. In addition, Shark offers an
 implementation of the factory pattern that can be populated both at
 compile- and at runtime. To this end, developers can rely on the
 following convenience macros to make optimizers and objective
@@ -268,4 +269,4 @@ functions known within Shark:
  * ANNOUNCE_MULTI_OBJECTIVE_FUNCTION
  * ANNOUNCE_SINGLE_OBJECTIVE_OPTIMIZER
  * ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER
- 
+

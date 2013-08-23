@@ -355,19 +355,20 @@ Valid positive semi-definite kernels can be formed, among others, by
 adding and multiplying kernels. This leads to a range of what we call
 combined kernels listed below:
 
-=============================  ========================================================================================================================
-Model                          Description
-=============================  ========================================================================================================================
-:doxy:`WeightedSumKernel`      For a given set of kernels computes :math:`k(x,y) = k_1(x,y)+\dots + k_n(x,y)`
-:doxy:`ProductKernel`          For a given set of kernels computes :math:`k(x,y) = k_1(x,y) \dots k_n(x,y)`
-:doxy:`NormalizedKernel`       Normalizes a given kernel; computes: :math:`k(x,y) = k_1(x,y) / \sqrt{k_1(x,x) k_1(y,y)}`
-:doxy:`ScaledKernel`           Scales a kernel by a fixed constant
-:doxy:`SubrangeKernel`         Weighted sum kernel for vector spaces; every kernel receives only a subrange of the input
-:doxy:`MklKernel`              Weighted sum kernel for heterogenous type input tuples;
-                               every kernel receives one part of the input tuple
-:doxy:`GaussianTaskKernel`     Specialization of the DiscreteKernel for multi task learning
-:doxy:`MultiTaskKernel`        Framework kernel for multi task learning with kernels
-=============================  ========================================================================================================================
+
+=================================================      ==========================================================================================
+Model                                                  Description
+=================================================      ==========================================================================================
+:doxy:`WeightedSumKernel`                              For a given set of kernels computes :math:`k(x,y) = k_1(x,y)+\dots + k_n(x,y)`
+:doxy:`ProductKernel`                                  For a given set of kernels computes :math:`k(x,y) = k_1(x,y) \dots k_n(x,y)`
+:doxy:`NormalizedKernel`                               Normalizes a given kernel; computes: :math:`k(x,y) = k_1(x,y) / \sqrt{k_1(x,x) k_1(y,y)}`
+:doxy:`ScaledKernel`                                   Scales a kernel by a fixed constant
+:doxy:`SubrangeKernel`                                 Weighted sum kernel for vector spaces; every kernel receives only a subrange of the input
+:doxy:`MklKernel`                                      Weighted sum kernel for heterogenous type input tuples;
+                                                       every kernel receives one part of the input tuple
+GaussianTaskKernel, see :doxy:`MultiTaskKernel.h`      Specialization of the DiscreteKernel for multi task learning
+MultiTaskKernel, see :doxy:`MultiTaskKernel.h`         Framework kernel for multi task learning with kernels
+=================================================      ==========================================================================================
 
 
 References
