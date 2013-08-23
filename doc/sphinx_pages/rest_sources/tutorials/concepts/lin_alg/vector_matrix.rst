@@ -6,20 +6,20 @@ LinAlg Module. LinAlg is based on an altered subset of the boost linear algebra 
 `uBLAS <http://www.boost.org/doc/libs/release/libs/numeric>`_ This tutorial
 will give a short introduction to the library and how it is used in Shark.
 
-The linear algebra library has a fundamental distinction between vectors and matrices: 
+The linear algebra library has a fundamental distinction between vectors and matrices:
 Matrix and vectors are different types. There is no distinction between row and column vectors.
-So when multiplying a vector from the right side to a matrix, it is assumed to be a column vector 
-and when multiplied from the left, it becomes a row-vector. Matrices have an orientation 
+So when multiplying a vector from the right side to a matrix, it is assumed to be a column vector
+and when multiplied from the left, it becomes a row-vector. Matrices have an orientation
 that is a 1xn matrix has a different structure than a nx1 matrix.
 
-Furthermore the library differentiates between container, proxies to containers and 
-vector expressions. The typical vector or matrix objects are a container storing 
+Furthermore the library differentiates between container, proxies to containers and
+vector expressions. The typical vector or matrix objects are a container storing
 the values of the matrix. Proxies reference parts of a container, for example a single row
 of a matrix or a subrange of a vector. And finally there are expressions which represent
 arbitrary computations, for example a matrix-vector product. All of these entities are objects.
 That means that just writing ``A+B`` does not compute the addition of two matrices but only
 an object which can only compute the result. the computations occur only when the expression is assigned
-to a container or proxy. 
+to a container or proxy.
 
 We use the following notation for vectors, arguments and scalars:
 
@@ -28,9 +28,9 @@ Symbol           	Meaning
 ======================= ====================================
 A,B			Matrix expression
 x,y			Vector expression
-C,z			Matrix or vector container or proxy to a 
+C,z			Matrix or vector container or proxy to a
 			subset of the matrix or vector.
-t			Scalar value with the same type as 
+t			Scalar value with the same type as
 			the elements stored inside the matrix
 i,jk,l,m,n		Integer values
 b			Boolean value
@@ -48,7 +48,7 @@ operations to create proxies to various parts of a matrix.
 Operation/Class           		Effect
 ======================================= ==============================================
 ``XVector, XMatrix``			Creates a dense Vector with elements the Type X where
-					X can be Real, Float, Int, UInt or Bool.XVector, XMatrix		
+					X can be Real, Float, Int, UInt or Bool.XVector, XMatrix
 ``SparseXVector, SparseXMatrix``	Creates a sparse Vector with elements the Type X where
 					X can be Real, Float, Int, UInt or Bool.
 ``XVector x(n,t)``			Creates a XVector x of size i with elements initialized to t.
@@ -60,8 +60,8 @@ Operation/Class           		Effect
 ``x(i)``				Returns the i-th element of the vector x.
 ``row(A,k)``				Returns the k-th row of A as a vector-proxy.
 ``column(A,k)``				Returns the k-th column of A as a vector-proxy.
-``rows(A,k,l)``				Returns the rows k,...,l of A as a matrix-proxy. 
-``columns(A,k,l)``			Returns the columns k,...,l of A as a matrix-proxy. 
+``rows(A,k,l)``				Returns the rows k,...,l of A as a matrix-proxy.
+``columns(A,k,l)``			Returns the columns k,...,l of A as a matrix-proxy.
 ``subrange(x,i,j)``			Returns a sub-vector of x with the elements :math:`x_i,\dots,x_{j-1}`.
 ``subrange(A,i,j,k,l)``			Returns a sub-matrix of A with element indicated by i,j and k,l.
 ======================================= ==============================================
@@ -90,13 +90,13 @@ Arithmetic Operations and Expressions
 In the following we present a list of arithmetic operations of vectors and matrices.
 
 
-Elementwise operations transform a matrix or a vector by applying 
-a function on every element of the matrix: f(A)_{i,j} = :math:`f(A_{i,j})`. 
-For binary elementwise functions, both arguments are assumed to have 
-the same dimensionality and the function is applied on every pair 
-with the same index, that is :math:`f(A,B)_{i,j} = f(A_{i,j},B_{i,j})`. 
+Elementwise operations transform a matrix or a vector by applying
+a function on every element of the matrix: f(A)_{i,j} = :math:`f(A_{i,j})`.
+For binary elementwise functions, both arguments are assumed to have
+the same dimensionality and the function is applied on every pair
+with the same index, that is :math:`f(A,B)_{i,j} = f(A_{i,j},B_{i,j})`.
 It is checked in debug mode that both arguments have the same size.
-The operations are the same for vectors and matrices and 
+The operations are the same for vectors and matrices and
 we only present the matrix version:
 
 =============================== ====================================
@@ -106,10 +106,10 @@ Operation           		Effect
 ``B/t``      			scalar division: :math:`A_{ij}/t`.
 ``A+B``      			Elementwise Addition: :math:`A_{ij}+B_{ij}`.
 ``A-B``      			Elementwise Subtraction: :math:`A_{ij}-B_{ij}`.
-``A*B, element_prod``   	Elementwise Multiplication or Hadamard-Product: 
+``A*B, element_prod``   	Elementwise Multiplication or Hadamard-Product:
 				:math:`A_{ij} \cdot B_{ij}`.
 ``A/B, element_div(A,B)``	Elementwise division: :math:`A_{ij} \cdot B_{ij}`.
-``safe_div(A,B,x)``     	Elementwise division with check for division for zero. 
+``safe_div(A,B,x)``     	Elementwise division with check for division for zero.
 				If :math:`B_{ij} = 0` than the result is x.
 ``-A``				Negates A: :math:`-A_{ij}`.
 ``exp(A), log(A),...``  	Math functions applied on every element of the matrix,
@@ -124,29 +124,29 @@ Operation           		Effect
 ``trans(A)``			transposes the matrix A.
 =============================== ====================================
 
-Be aware that ``A*B`` is not the same as the typical matrix-product. For the typical 
+Be aware that ``A*B`` is not the same as the typical matrix-product. For the typical
 matrix-vector operations we use the following syntax:
 
 =============================== ==================================================================
 Operation           		Effect
 =============================== ==================================================================
 ``prod(A,B)``			Matrix-Matrix product. Be aware that A is a mxk and B kxn matrix
-				so that the resulting matrix is a mxn matrix. 
+				so that the resulting matrix is a mxn matrix.
 ``prod(A,x), prod(x,A)``	Matrix-Vector product :math:`Ax` and :math:`xA`.
 ``inner_prod(x,y)``		vector product leading a scalar: :math:`\sum_i x_i y_i`.
 ``outer_prod(x,y)``		outer product leading a matrix C with :math:`C_{ij}=x_i y_j`.
 ``fast_prod(A,B,C,b,t)``	Efficient Matrix-Matrix product for dense storage matrices A, B and C.
 				Computes ``C+= t*prod(A,B)`` if b is true and ``C= t*prod(A,B)`` otherwise.
-				By default b = false and t = 1. 
+				By default b = false and t = 1.
 ``fast_prod(A,x,z,b,t)``	Same as above for matrix-vector products.
 ``fast_prod(x,A,z,b,t)``	Same as above for vector-matrix products.
 ``symmRankKUpdate(A,C,b,t)``	Computes ``fast_prod(A,trans(A), C,b,t)`` in an efficient manner.
 				It is assumed that C is symmetric.
 =============================== ==================================================================
 
-The fast variants of the functions above use ATLAS to speed up computation of 
-big dense matrices. The arguments need to have the right size and need to be at 
-least matrix or vector proxies. So if the argument is a more complex expression 
+The fast variants of the functions above use ATLAS to speed up computation of
+big dense matrices. The arguments need to have the right size and need to be at
+least matrix or vector proxies. So if the argument is a more complex expression
 like A+B or A*B it must be stored in a intermediate matrix first. Always try to
 use the fast variants if possible as they can improve the performance of the
 computations by an order of magnitude or more.
@@ -209,18 +209,24 @@ matrices and containers filled with vectors or matrices::
   init(parameters) << vectorSet(vectors);
   init(parameters) << matrixSet(matrices);
 
-The entire initialization framework presented here, including the above wrappers, can also be used for sparse vectors and
-matrices -- as long as these appear on the right side of the expression. The left hand side always needs to be a dense vector.
-In addition, the nonzero elements of a sparse matrix must already be initialized.
+The entire initialization framework presented here, including the above wrappers,
+can also be used for sparse vectors and matrices -- as long as these appear on
+the right side of the expression. The left hand side always needs to be a dense
+vector. In addition, the nonzero elements of a sparse matrix must already be
+initialized.
 
 
-The framework can also use more comples expressions, so in principle it is also possible to write::
+The framework can also use more comples expressions, so in principle it is also
+possible to write::
 
   init(parameters)<< vec1+vec2 , prod(Mat,vec3);
 
-However, this leads to unreadable code for longer expressions and thus is not very useful. You might want to use ``subrange()`` instead.
+However, this leads to unreadable code for longer expressions and thus is not
+very useful. You might want to use ``subrange()`` instead.
 
-In addition, there also exist operators to directly obtain a row or column from a matrix (e.g. ``row()`` or ``RealMatrixRow()``, which
-are equivalent when row is applied to a RealMatrix). See `this ublas page <http://www.boost.org/doc/libs/1_40_0/libs/numeric/ublas/doc/operations_overview.htm>_`
+In addition, there also exist operators to directly obtain a row or column from
+a matrix (e.g. ``row()`` or ``RealMatrixRow()``, which are equivalent when row
+is applied to a RealMatrix). See `this ublas page
+<http://www.boost.org/doc/libs/release/libs/numeric/ublas/doc/operations_overview.htm>_`
 for an overview.
 

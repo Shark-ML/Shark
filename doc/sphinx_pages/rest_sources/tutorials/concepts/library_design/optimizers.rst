@@ -181,7 +181,7 @@ Method                                               Description
 
 
 For a new optimizer, only the second versions of ``init`` and ``step``
-need to be implemented. The optimizer is allowed to evaluate the given 
+need to be implemented. The optimizer is allowed to evaluate the given
 starting point during initialization.
 
 
@@ -237,7 +237,8 @@ Model                             Description
                                   Evolution Strategy (CMSA_ES)
 :doxy:`OnePlusOneES`              Elitist CMA-ES
 :doxy:`ElitistCMA`                CMA-ES using the elitist selection rule
-:doxy:`XNES`                      Natural Evolution Strategy (xNES)
 ================================  ========================================================================
 
-
+..
+  mt: removed from above the following line:
+  :doxy:`XNES`                      Natural Evolution Strategy (xNES)
