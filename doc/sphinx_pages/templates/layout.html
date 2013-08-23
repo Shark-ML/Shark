@@ -3,12 +3,20 @@
 {% block extrahead %}
     <link rel="stylesheet" href="{{ pathto('_static/mt_sphinx_shark.css', 1) }}" type="text/css" />
     <script type="text/javascript">
-       window.MathJax || document.write('<script src="{{ pathto(master_doc, 1) }}/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS_HTML"><\/script>');
+       window.MathJax || document.write('<script src="{{ pathto(master_doc, 1) }}/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>');
     </script>
 {% endblock %}
 
 {% block header %}
 {% endblock %}
+
+{%- block htmltitle %}
+    {{ super() }}
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+{%- endblock %}
 
 {%- block sidebarlogo %}
     {%- if logo %}

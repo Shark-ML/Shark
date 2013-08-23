@@ -7,11 +7,15 @@
 <script type="text/javaScript" src="$relpath$search/search.js"></script>
 <script type="text/javascript" src="$relpath$jquery.js"></script>
 <script type="text/javascript" src="$relpath$dynsections.js"></script>
+<script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+</script>
 <script type="text/javascript"
    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 <script type="text/javascript">
-   window.MathJax || document.write('<script src="../../../contrib/mathjax/MathJax.js?config=TeX-AMS_HTML"><\/script>');
+   window.MathJax || document.write('<script src="../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>');
 </script>
 <link href="../css/besser.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -20,58 +24,58 @@
 <!--              and allows for page-specific CSS. this is client-side scripted, -->
 <!--              so the id will not yet show up in the served source code -->
 <script type="text/javascript">
-	jQuery(document).ready(function () {
-		var url = jQuery(location).attr('href');
-		var pname = url.substr(url.lastIndexOf("/")+1, url.lastIndexOf(".")-url.lastIndexOf("/")-1);
-		jQuery('#this_url').html('<strong>' + pname + '</strong>');
-		jQuery('body').attr('id', pname);
-	});
+    jQuery(document).ready(function () {
+        var url = jQuery(location).attr('href');
+        var pname = url.substr(url.lastIndexOf("/")+1, url.lastIndexOf(".")-url.lastIndexOf("/")-1);
+        jQuery('#this_url').html('<strong>' + pname + '</strong>');
+        jQuery('body').attr('id', pname);
+    });
 </script>
 
 <body>
-	<div id="shark_old">
-		<div id="wrap">
-			<div id="header">
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
 
-				<div id="site-name"><a href="../../sphinx_pages/build/html/index.html">Shark machine learning library</a></div>
-				<ul id="nav">
-					<li >
-						<a href="../../sphinx_pages/build/html/index.html">About Shark</a>
-						<ul>
-							<li class="first"><a href="../../sphinx_pages/build/html/rest_sources/about_shark/news.html">News!</a></li>
-							<li><a href="../../sphinx_pages/build/html/rest_sources/about_shark/todo.html">Contribute</a></li>
-							<li class="last"><a href="../../sphinx_pages/build/html/rest_sources/about_shark/copyright.html">Credits and copyright</a></li>
-						</ul>
-					</li>
-					<li >
-						<a href="../../sphinx_pages/build/html/rest_sources/downloads/downloads.html">Downloads</a>
-					</li>
-					<li >
-						<a href="../../sphinx_pages/build/html/rest_sources/getting_started/installation.html">Getting Started</a>
-						<ul>
-							<li class="first"><a href="../../sphinx_pages/build/html/rest_sources/getting_started/installation.html">Installation</a></li>
-							<li class="last"><a href="../../sphinx_pages/build/html/rest_sources/getting_started/using_the_documentation.html">Using the docs</a></li>
-						</ul>
-					</li>
-					<li class="active">
-						<a href="classes.html">Documentation</a>
-						<ul>
-							<li class="first"><a href="../../sphinx_pages/build/html/rest_sources/tutorials/tutorials.html">Tutorials</a></li>
-							<li><a href="classes.html">Class list</a></li>
-							<li class="last"><a href="group__shark__globals.html">Global functions</a></li>
-						</ul>
-					<li >
-						<a href="../../sphinx_pages/build/html/rest_sources/faq/faq.html">FAQ</a>
-					<li >
-						<a href="../../sphinx_pages/build/html/rest_sources/showroom/showroom.html">Showroom</a>
-					</li>
-				</ul>
+                <div id="site-name"><a href="../../sphinx_pages/build/html/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li >
+                        <a href="../../sphinx_pages/build/html/index.html">About Shark</a>
+                        <ul>
+                            <li class="first"><a href="../../sphinx_pages/build/html/rest_sources/about_shark/news.html">News!</a></li>
+                            <li><a href="../../sphinx_pages/build/html/rest_sources/about_shark/todo.html">Contribute</a></li>
+                            <li class="last"><a href="../../sphinx_pages/build/html/rest_sources/about_shark/copyright.html">Credits and copyright</a></li>
+                        </ul>
+                    </li>
+                    <li >
+                        <a href="../../sphinx_pages/build/html/rest_sources/downloads/downloads.html">Downloads</a>
+                    </li>
+                    <li >
+                        <a href="../../sphinx_pages/build/html/rest_sources/getting_started/installation.html">Getting Started</a>
+                        <ul>
+                            <li class="first"><a href="../../sphinx_pages/build/html/rest_sources/getting_started/installation.html">Installation</a></li>
+                            <li class="last"><a href="../../sphinx_pages/build/html/rest_sources/getting_started/using_the_documentation.html">Using the docs</a></li>
+                        </ul>
+                    </li>
+                    <li class="active">
+                        <a href="classes.html">Documentation</a>
+                        <ul>
+                            <li class="first"><a href="../../sphinx_pages/build/html/rest_sources/tutorials/tutorials.html">Tutorials</a></li>
+                            <li><a href="classes.html">Class list</a></li>
+                            <li class="last"><a href="group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    <li >
+                        <a href="../../sphinx_pages/build/html/rest_sources/faq/faq.html">FAQ</a>
+                    <li >
+                        <a href="../../sphinx_pages/build/html/rest_sources/showroom/showroom.html">Showroom</a>
+                    </li>
+                </ul>
 
-			</div>
-		</div>
-	</div>
+            </div>
+        </div>
+    </div>
 <div id="doxywrapper">
 <!--
-	<div id="global_doxytitle">Doxygen<br>Documentation:</div>
+    <div id="global_doxytitle">Doxygen<br>Documentation:</div>
 -->
-	<div id="navrow_wrapper">
+    <div id="navrow_wrapper">
