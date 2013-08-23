@@ -467,7 +467,7 @@ public:
 		typename Data<InputType>::const_element_range::iterator iter=data.elements().begin();
 		for(std::size_t i = 0; i != elements; ++i,++iter){
 			x[i]=*iter;
-			m_squaredNorms(i) = norm_sqr(x[i]);//prcompute the norms
+			m_squaredNorms(i) =inner_prod(x[i],x[i]);//prcompute the norms
 		}
 	}
 
