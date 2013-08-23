@@ -40,6 +40,7 @@
 #include <shark/Algorithms/QP/SvmProblems.h>
 #include <shark/Algorithms/QP/QpBoxLinear.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+#include <shark/Models/Kernels/GaussianRbfKernel.h>
 
 namespace shark {
 
@@ -92,10 +93,6 @@ public:
 	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
 
-	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
-	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
-	typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
-
 	typedef AbstractModel<InputType, RealVector> ModelType;
 	typedef AbstractKernelFunction<InputType> KernelType;
 	typedef AbstractSvmTrainer<InputType, unsigned int> base_type;
@@ -138,25 +135,57 @@ public:
 	{
 		SHARK_CHECK(svm.outputSize() == 1, "[CSvmTrainer::train] wrong number of outputs in the kernel expansion");
 		
+		//prepare model
 		svm.setKernel(base_type::m_kernel);
 		svm.setBasis(dataset.inputs());
 		
-		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
+		//dispatcher for the different types of kernel matrix that can be used
+		trainInternal(svm,dataset);
+		
+		if (base_type::sparsify())
+			svm.sparsify();
+
+	}
+
+private:
+	
+	//by default the normal unoptimized kernel matrix is used
+	template<class T>
+	void trainInternal(KernelExpansion<T>& svm, LabeledData<T, unsigned int> const& dataset){
+		KernelMatrix<T, QpFloatType> km(*base_type::m_kernel, dataset.inputs());
+		trainInternal(km,svm,dataset);
+	}
+	
+	//in the case of a gaussian kernel and sparse vectors, we can use an optimized approach
+	void trainInternal(KernelExpansion<CompressedRealVector>& svm, LabeledData<CompressedRealVector, unsigned int> const& dataset){
+		//check whether a gaussian kernel is used
+		typedef GaussianRbfKernel<CompressedRealVector> Gaussian;
+		Gaussian const* kernel = dynamic_cast<Gaussian const*> (base_type::m_kernel);
+		if(kernel != 0){//jep, use optimized kernel matrix
+			GaussianKernelMatrix<CompressedRealVector,QpFloatType> km(kernel->gamma(),dataset.inputs());
+			trainInternal(km,svm,dataset);
+		}
+		else{
+			KernelMatrix<CompressedRealVector, QpFloatType> km(*base_type::m_kernel, dataset.inputs());
+			trainInternal(km,svm,dataset);
+		}
+	}
+	
+	template<class Matrix, class T>
+	void trainInternal(Matrix& km, KernelExpansion<T>& svm, LabeledData<T, unsigned int> const& dataset){
 		if (QpConfig::precomputeKernel())
 		{
-			PrecomputedMatrixType matrix(&km);
-			CSVMProblem<PrecomputedMatrixType> svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
+			PrecomputedMatrix<Matrix> matrix(&km);
+			CSVMProblem<PrecomputedMatrix<Matrix> > svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
 			optimize(svm,svmProblem,dataset);
 		}
 		else
 		{
-			CachedMatrixType matrix(&km);
-			CSVMProblem<CachedMatrixType> svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
+			CachedMatrix<Matrix> matrix(&km);
+			CSVMProblem<CachedMatrix<Matrix> > svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
 			optimize(svm,svmProblem,dataset);
 		}
 		base_type::m_accessCount = km.getAccessCount();
-		if (base_type::sparsify()) svm.sparsify();
-
 	}
 
 private:

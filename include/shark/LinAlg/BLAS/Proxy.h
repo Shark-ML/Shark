@@ -811,7 +811,7 @@ public:
 		i += startIndex();
 		const_index_pointer pos = std::lower_bound(indizes(),indizes()+nnz(), i);
 		difference_type diff = pos-indizes();
-		return const_iterator(data()+diff,indizes()+pos,m_storage.startIndex());
+		return const_iterator(data()+diff,pos,startIndex());
 	}
 
 

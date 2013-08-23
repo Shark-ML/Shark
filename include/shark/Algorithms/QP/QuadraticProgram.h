@@ -180,16 +180,7 @@ template <class InputType, class CacheType>
 class KernelMatrix
 {
 public:
-
-	//////////////////////////////////////////////////////////////////
-	// The types below define the type used for caching kernel values. The default is float,
-	// since this type offers sufficient accuracy in the vast majority of cases, at a memory
-	// cost of only four bytes. However, the type definition makes it easy to use double instead
-	// (e.g., in case high accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 
 	/// Constructor
 	/// \param kernelfunction   kernel function defining the Gram matrix
@@ -381,16 +372,7 @@ template <class T, class CacheType>
 class KernelMatrix<blas::compressed_vector<T>, CacheType>
 {
 public:
-
-	//////////////////////////////////////////////////////////////////
-	// The types below define the type used for caching kernel values. The default is float,
-	// since this type offers sufficient accuracy in the vast majority of cases, at a memory
-	// cost of only four bytes. However, the type definition makes it easy to use double instead
-	// (e.g., in case high accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 	typedef blas::compressed_vector<T> InputType;
 	/// Constructor
 	/// \param kernelfunction   kernel function defining the Gram matrix
@@ -467,21 +449,17 @@ class GaussianKernelMatrix
 public:
 
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
-
-	typedef blas::compressed_vector<T> InputType;
+	typedef T InputType;
 
 	/// Constructor
 	/// \param kernelfunction   kernel function defining the Gram matrix
 	/// \param data             data to evaluate the kernel function
 	GaussianKernelMatrix(
-		AbstractKernelFunction<InputType> const& kernelfunction,
+		double gamma,
 		Data<InputType> const& data
 	)
-	: kernel(kernelfunction)
-	, m_squaredNorms(data.numberOfElements())
+	: m_squaredNorms(data.numberOfElements())
+	, m_gamma(gamma)
 	, m_accessCounter( 0 )
 	{
 		std::size_t elements = data.numberOfElements();
@@ -489,7 +467,7 @@ public:
 		typename Data<InputType>::const_element_range::iterator iter=data.elements().begin();
 		for(std::size_t i = 0; i != elements; ++i,++iter){
 			x[i]=*iter;
-			m_squaredNorms(i) = inner_prod(x[i],x[i]);
+			m_squaredNorms(i) = norm_sqr(x[i]);//prcompute the norms
 		}
 	}
 
@@ -502,8 +480,7 @@ public:
 	{
 		++m_accessCounter;
 		double distance = m_squaredNorms(i)-2*inner_prod(x[i], x[j])+m_squaredNorms(j);
-		return (QpFloatType)std::exp(-distance);
-		//return (QpFloatType)inner_prod(x[i], x[j]);
+		return (QpFloatType)std::exp(- m_gamma * distance);
 	}
 	
 	/// \brief Computes the i-th row of the kernel matrix.
@@ -516,7 +493,7 @@ public:
 		SHARK_PARALLEL_FOR(int j = start; j < (int) end; j++)
 		{
 			double distance = m_squaredNorms(i)-2*inner_prod(x[i], x[j])+m_squaredNorms(j);
-			storage[j-start] = std::exp(-distance);
+			storage[j-start] = std::exp(- m_gamma * distance);
 		}
 	}
 
@@ -540,15 +517,14 @@ public:
 	{ m_accessCounter = 0; }
 
 protected:
-	
-	/// Kernel function defining the kernel Gram matrix
-	const AbstractKernelFunction<InputType>& kernel;
 
-	typedef FixedSparseVectorProxy<double const,std::size_t> PointerType;
+	typedef FixedSparseVectorProxy<typename T::value_type const,std::size_t> PointerType;
 	/// Array of data pointers for kernel evaluations
 	std::vector<PointerType> x;
 	
 	RealVector m_squaredNorms;
+
+	double m_gamma;
 
 	/// counter for the kernel accesses
 	mutable unsigned long long m_accessCounter;
@@ -570,9 +546,6 @@ private:
 	typedef KernelMatrix<InputType,CacheType> Matrix;
 public:
 	typedef typename Matrix::QpFloatType QpFloatType;
-	typedef typename Matrix::QpMatrixType QpMatrixType;
-	typedef typename Matrix::QpMatrixRowType QpMatrixRowType;
-	typedef typename Matrix::QpMatrixColumnType QpMatrixColumnType;
 
 	/// Constructor
 	/// \param kernelfunction          kernel function
@@ -648,9 +621,6 @@ private:
 	typedef KernelMatrix<InputType,CacheType> Matrix;
 public:
 	typedef typename Matrix::QpFloatType QpFloatType;
-	typedef typename Matrix::QpMatrixType QpMatrixType;
-	typedef typename Matrix::QpMatrixRowType QpMatrixRowType;
-	typedef typename Matrix::QpMatrixColumnType QpMatrixColumnType;
 
 	/// Constructor
 	/// \param kernelfunction          kernel function
@@ -742,15 +712,7 @@ template <class Matrix>
 class BlockMatrix2x2
 {
 public:
-
-	// The types below define the type used for caching kernel values. The default is float,
-	// since this type offers sufficient accuracy in the vast majority of cases, at a memory
-	// cost of only four bytes. However, the type definition makes it easy to use double instead
-	// (e.g., in case high accuracy training is needed).
 	typedef typename Matrix::QpFloatType QpFloatType;
-	typedef typename Matrix::QpMatrixType QpMatrixType;
-	typedef typename Matrix::QpMatrixRowType QpMatrixRowType;
-	typedef typename Matrix::QpMatrixColumnType QpMatrixColumnType;
 
 	/// Constructor.
 	/// \param base  underlying matrix M, see class description of BlockMatrix2x2.
@@ -1081,15 +1043,7 @@ template <class Matrix>
 class PrecomputedMatrix
 {
 public:
-
-	// The types below define the type used for caching kernel values. The default is float,
-	// since this type offers sufficient accuracy in the vast majority of cases, at a memory
-	// cost of only four bytes. However, the type definition makes it easy to use double instead
-	// (e.g., in case high accuracy training is needed).
 	typedef typename Matrix::QpFloatType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 
 	/// Constructor
 	/// \param base  matrix to be precomputed
@@ -1178,7 +1132,7 @@ public:
 
 protected:
 	/// container for precomputed values
-	QpMatrixType matrix;
+	blas::matrix<QpFloatType> matrix;
 };
 
 /// Kernel matrix which supports kernel evaluations on data with missing features. At the same time, the entry of the
@@ -1191,11 +1145,7 @@ template <typename InputType, typename CacheType>
 class ExampleModifiedKernelMatrix
 {
 public:
-
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 
 	/// Constructor
 	/// \param kernelfunction   kernel function defining the Gram matrix
