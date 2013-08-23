@@ -20,7 +20,7 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this library; if not, see <http://www.gnu.org/licenses/>.
-*  
+*
 */
 //===========================================================================
 
@@ -31,7 +31,7 @@
 #include <shark/Models/Kernels/WeightedSumKernel.h>
 namespace shark {
 namespace detail{
-/// \brief given two vectors of input x = (x_1,...,x_n), y = (y_1,...,y_n), a subrange 1<=k<l<=n and a kernel k, computes the result of 
+/// \brief given two vectors of input x = (x_1,...,x_n), y = (y_1,...,y_n), a subrange 1<=k<l<=n and a kernel k, computes the result of
 ///   th subrange k((x_k,...x_l),(y_k,...,y_l))
 template<class InputType>
 class SubrangeKernelWrapper : public AbstractKernelFunction<InputType>{
@@ -48,11 +48,11 @@ public:
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "SubrangeKernelWrapper"; }
-	
+
 	RealVector parameterVector() const {
 		return m_kernel->parameterVector();
 	}
-	
+
 	void setParameterVector(RealVector const& newParameters) {
 		m_kernel->setParameterVector(newParameters);
 	}
@@ -65,24 +65,24 @@ public:
 	boost::shared_ptr<State> createState()const{
 		return m_kernel->createState();
 	}
-	
+
 	double eval(ConstInputReference x1, ConstInputReference x2) const{
 		return m_kernel->eval(blas::subrange(x1,m_start,m_end),blas::subrange(x2,m_start,m_end));
 	}
-	
+
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result, State& state) const{
 		m_kernel->eval(columns(batchX1,m_start,m_end),columns(batchX2,m_start,m_end),result,state);
 	}
-	
+
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result) const{
 		m_kernel->eval(columns(batchX1,m_start,m_end),columns(batchX2,m_start,m_end),result);
 	}
-	
+
 	void weightedParameterDerivative(
-		ConstBatchInputReference batchX1, 
-		ConstBatchInputReference batchX2, 
+		ConstBatchInputReference batchX1,
+		ConstBatchInputReference batchX2,
 		RealMatrix const& coefficients,
-		State const& state, 
+		State const& state,
 		RealVector& gradient
 	) const{
 		m_kernel->weightedParameterDerivative(
@@ -93,11 +93,11 @@ public:
 			gradient
 	);
 	}
-	void weightedInputDerivative( 
-		ConstBatchInputReference batchX1, 
-		ConstBatchInputReference batchX2, 
+	void weightedInputDerivative(
+		ConstBatchInputReference batchX1,
+		ConstBatchInputReference batchX2,
 		RealMatrix const& coefficientsX2,
-		State const& state, 
+		State const& state,
 		BatchInputType& gradient
 	) const{
 		BatchInputType temp(gradient.size1(),m_end-m_start);
@@ -112,13 +112,13 @@ public:
 		shark::zero(gradient);
 		noalias(columns(gradient,m_start,m_end)) = temp;
 	}
-	
+
 	//w don't need serializing here, this is done by the implementing Kernel
 	void read(InArchive& ar){
 	}
 	void write(OutArchive& ar) const{
 	}
-	
+
 private:
 	AbstractKernelFunction<InputType>* m_kernel;
 	std::size_t m_start;
@@ -129,7 +129,7 @@ template<class InputType>
 class SubrangeKernelBase
 {
 public:
-	
+
 	template<class Kernels,class Ranges>
 	SubrangeKernelBase(Kernels const& kernels, Ranges const& ranges){
 		SIZE_CHECK(shark::size(kernels) == shark::size(ranges));
@@ -139,18 +139,18 @@ public:
 			);
 		}
 	}
-	
+
 	std::vector<AbstractKernelFunction<InputType>* > makeKernelVector(){
 		std::vector<AbstractKernelFunction<InputType>* > kernels(m_kernelWrappers.size());
 		for(std::size_t i = 0; i != m_kernelWrappers.size(); ++i)
 			kernels[i] = & m_kernelWrappers[i];
 		return kernels;
 	}
-	
+
 	std::vector<SubrangeKernelWrapper <InputType> > m_kernelWrappers;
 };
 }
-	
+
 /// \brief Weighted sum of kernel functions
 ///
 /// For a set of positive definite kernels \f$ k_1, \dots, k_n \f$
@@ -168,10 +168,10 @@ public:
 ///
 /// Internally, the weights are represented as \f$ w_i = \exp(\xi_i) \f$
 /// to allow for unconstrained optimization.
-/// 
+///
 /// The result of the kernel evaluation is devided by the sum of the
 /// kernel weights, so that in total, this amounts to fixing the sum
-/// of the of the weights to one.
+/// of the weights to one.
 template<class InputType>
 class SubrangeKernel
 : private detail::SubrangeKernelBase<InputType>//order is important!
@@ -189,7 +189,7 @@ public:
 	template<class Kernels,class Ranges>
 	SubrangeKernel(Kernels const& kernels, Ranges const& ranges)
 	: base_type1(kernels,ranges)
-	, base_type2(base_type1::makeKernelVector()){}	
+	, base_type2(base_type1::makeKernelVector()){}
 };
 
 typedef SubrangeKernel<RealVector> DenseSubrangeKernel;
