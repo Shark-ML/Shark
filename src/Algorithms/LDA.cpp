@@ -35,10 +35,11 @@
  */
 //===========================================================================
 #include <shark/Algorithms/Trainers/LDA.h>
+#include <shark/LinAlg/Inverse.h>
 
 using namespace shark;
 
-void LDA::train(LinearClassifier& model, LabeledData<RealVector,unsigned int> const& dataset){
+void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> const& dataset){
 	if(dataset.empty()){
 		throw SHARKEXCEPTION("[LDA::train] the dataset must not be empty");
 	}
@@ -47,19 +48,11 @@ void LDA::train(LinearClassifier& model, LabeledData<RealVector,unsigned int> co
 	std::size_t inputs = dataset.numberOfElements();
 	std::size_t dim = inputDimension(dataset);
 	std::size_t classes = numberOfClasses(dataset);
-	
-	model.setStructure(dim,classes);
-	
+
 	//required statistics
 	std::vector<unsigned > num(classes,0);
-	std::vector<RealVector> mean(classes, RealVector(dim));
-	RealMatrix covariance(dim, dim);
-	
-	//set class means and covariance to 0
-	for(std::size_t c=0;c!=classes;++c){
-		mean[c].clear();
-	}
-	covariance.clear();
+	RealMatrix means(classes, dim,0.0);
+	RealMatrix covariance(dim, dim,0.0);
 	
 	//we compute the data batch wise
 	BOOST_FOREACH(BatchReference batch, dataset.batches()){
@@ -71,7 +64,7 @@ void LDA::train(LinearClassifier& model, LabeledData<RealVector,unsigned int> co
 			//update mean and class count for this sample
 			std::size_t c = labels(e);
 			++num[c];
-			noalias(mean[c])+=row(points,e);
+			noalias(row(means,c))+=row(points,e);
 		}
 		//update second moment matrix
 		//fast_prod(trans(batch),batch,covariance,1.0);
@@ -82,22 +75,40 @@ void LDA::train(LinearClassifier& model, LabeledData<RealVector,unsigned int> co
 	for (std::size_t c = 0; c != classes; c++){
 		if (num[c] == 0) 
 			throw SHARKEXCEPTION("[LDA::train] LDA can not handle a class without examples");
-		mean[c] /= num[c];
+		row(means,c) /= num[c];
 		double factor = num[c];
 		factor/=inputs-classes;
-		noalias(covariance)-= factor*outer_prod(mean[c],mean[c]);
+		noalias(covariance)-= factor*outer_prod(row(means,c),row(means,c));
 	}
 	
 
 	//add regularization
 	if(m_regularization>0){
 		for(std::size_t i=0;i!=dim;++i)
-		covariance(i,i)+=m_regularization;
+			covariance(i,i)+=m_regularization;
 	}
+	
+	//the formula for the linear classifier is
+	//arg max_i (x-m_i)^T C^-1 (x-m_i)
+	//which is equivalent to
+	//arg max_i m_i^T C^-1 m_i  -2* x^T C^-1 m_i
+	//so we compute first C^-1 m_i and than the first term
+	
+	//invert the matrix, take into account that it is not necessarily positive definite
+	RealMatrix CInverse;
+	decomposedGeneralInverse(covariance, CInverse);
+	
+	//multiply the mean with the inverse matrix
+	RealMatrix transformedMeans(classes,dim);
+	fast_prod(means,CInverse, transformedMeans);
+	
+	//compute bias terms m_i^T C^-1 m_i
+	RealVector bias(classes);
+	for(std::size_t i = 0; i != classes; ++i){
+		bias(i) = inner_prod(row(means,i),row(transformedMeans,i));
+	}
+	transformedMeans *= -2.0;
 
-	//slow operation - this does the matrix inversion
-	model.importCovarianceMatrix(covariance);
-	for (std::size_t c=0; c<classes; c++){
-		model.setClassMean(c,mean[c]);
-	}
+	//fill the model
+	model.linear().setStructure(transformedMeans,bias);
 }

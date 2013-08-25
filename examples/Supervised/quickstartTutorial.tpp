@@ -34,7 +34,7 @@ int main(int argc, char **argv){
 	
 	//###begin<objects>
 	//create a classifier for the problem
-	LinearClassifier classifier;
+	LinearClassifier<> classifier;
 	//create the lda trainer
 	LDA lda;
 	//###end<objects>

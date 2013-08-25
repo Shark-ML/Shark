@@ -11,7 +11,7 @@ using namespace shark;
 BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 	const size_t trainExamples = 10000;
 	LDA trainer;
-	LinearClassifier model;
+	LinearClassifier<> model;
 
 
 	//create datatsets - two overlapping normal distributions
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	const size_t trainExamples = 10000;
 	LDA trainer;
-	LinearClassifier model;
+	LinearClassifier<> model;
 
 
 	//create datatsets - two overlapping normal distributions
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 	const size_t trainExamples = 200000;
 	const unsigned int classes = 10;
 	LDA trainer;
-	LinearClassifier model;
+	LinearClassifier<> model;
 	Rng::seed(44);
 
 

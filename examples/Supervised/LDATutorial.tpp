@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 
 	// define linear model
 //###begin<model>
-	LinearClassifier lda;
+	LinearClassifier<> lda;
 //###end<model>
 
 	// train model

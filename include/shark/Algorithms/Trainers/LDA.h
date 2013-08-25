@@ -52,7 +52,7 @@ namespace shark {
 //! 2 Classes. It uses boolean class labels and returns a linear model. The other one is a multiclass
 //! LDA, which uses vectors as class labels.
 //!
-class LDA : public AbstractTrainer<LinearClassifier, unsigned int>, public IParameterizable
+class LDA : public AbstractTrainer<LinearClassifier<>, unsigned int>, public IParameterizable
 {
 public:
 	/// constructor
@@ -92,7 +92,7 @@ public:
 	}
 
 	//! Compute the LDA solution for a multi-class problem.
-	void train(LinearClassifier& model, LabeledData<RealVector, unsigned int> const& dataset);
+	void train(LinearClassifier<>& model, LabeledData<RealVector, unsigned int> const& dataset);
 
 protected:
 	//!The regularization parameter \f$ \lambda \f$ adds
