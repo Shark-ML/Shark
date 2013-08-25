@@ -284,6 +284,27 @@ void shark::csvStringToData(
 		return;
 	}
 	
+	//check labels for conformity
+	bool binaryLabels = false;
+	int minPositiveLabel = std::numeric_limits<int>::max();
+	{
+		
+		int maxPositiveLabel = -1;
+		for(std::size_t i = 0; i != rows.size(); ++i){
+			int label = rows[i].first;
+			if(label < -1)
+				throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
+			else if(label == -1)
+				binaryLabels = true;
+			else if(label < minPositiveLabel)
+				minPositiveLabel = label;
+			else if(label > maxPositiveLabel)
+				maxPositiveLabel = label;
+		}
+		if(binaryLabels && (minPositiveLabel == 0||  maxPositiveLabel > 1))
+			throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
+	}
+	
 	//copy rows of the file into the dataset
 	std::size_t dimensions = rows[0].second.size();
 	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
@@ -302,7 +323,8 @@ void shark::csvStringToData(
 			for(std::size_t j = 0; j != dimensions; ++j){
 				inputs(i,j) = rows[currentRow].second[j];
 			}
-			labels[i]=rows[currentRow].first;
+			int rawLabel = rows[currentRow].first;
+			labels[i] = binaryLabels? 1 + (rawLabel-1)/2 : rawLabel -minPositiveLabel;
 		}
 	}
 	SIZE_CHECK(currentRow == rows.size());
