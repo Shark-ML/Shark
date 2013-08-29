@@ -47,7 +47,7 @@ MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 	)
 
 	INSTALL( FILES
-		${TUT_SRC}
+		${TUT_SRC}.cpp
 	 	DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}
 	)
 
@@ -56,25 +56,6 @@ ENDMACRO()
 
 SHARK_ADD_EXAMPLE( Core/Oracle Oracle "Core" )
 SHARK_ADD_EXAMPLE( Core/Logger Logger "Logger" )
-
-IF( OPT_ENABLE_NETWORKING )
-    SHARK_ADD_EXAMPLE( Network/HttpServer HttpServer "Network")
-    INSTALL( DIRECTORY
-	     "${CMAKE_CURRENT_SOURCE_DIR}/Network/ext-4.0.2a"
-	     DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Network
-	     PATTERN ".*" EXCLUDE
-    )
-    INSTALL( DIRECTORY
-	     "${CMAKE_CURRENT_SOURCE_DIR}/Network/js"
-	     DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Network
-	     PATTERN ".*" EXCLUDE
-    )
-   INSTALL( FILES
-   	    "${CMAKE_CURRENT_SOURCE_DIR}/Network/groupgrid.html"
-	    DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Network
-	)
-
-ENDIF( OPT_ENABLE_NETWORKING )
 
 SHARK_ADD_EXAMPLE( EA/MOO/AdditiveEpsilonIndicatorMain AdditiveEpsilonIndicatorMain "EA/MOO" )
 SHARK_ADD_EXAMPLE( EA/MOO/ApproximatedHypervolumeMain ApproximatedHypervolumeMain "EA/MOO" )
