@@ -83,10 +83,10 @@ private:
 		RealMatrix W1Derivatives(hiddens,inputs); // hiddenDerivatives * input
 		RealVector hiddenDerivativeSum(hiddens);
 
-		shark::zero(gradient);
-		shark::zero(meanActivation);
-		shark::zero(W1Derivatives);
-		shark::zero(hiddenDerivativeSum);
+		zero(gradient);
+		zero(meanActivation);
+		zero(W1Derivatives);
+		zero(hiddenDerivativeSum);
 		//create an object of the type of the hidden neurons
 		HiddenNeuron hidden;
 

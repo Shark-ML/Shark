@@ -48,7 +48,7 @@
 #define SHARK_LINALG_IMPL_NUMERIC_BINDINGS_ATLAS_POTRI_H
 #include "cblas_inc.h"
 
-namespace shark {namespace detail{namespace bindings {
+namespace shark {namespace blas{namespace bindings {
 
 inline int potri (CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
                   int const N, float* A, int const lda) {
@@ -70,7 +70,7 @@ inline int potri (CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
     return clapack_zpotri (Order, Uplo, N, static_cast<void*> (A), lda);
 }
 template <typename SymmA>
-inline int potri (CBLAS_UPLO const uplo, blas::matrix_expression<SymmA>& a) {
+inline int potri (CBLAS_UPLO const uplo, matrix_expression<SymmA>& a) {
 	CBLAS_ORDER const stor_ord= (CBLAS_ORDER)storage_order<typename SymmA::orientation_category>::value;
 
     std::size_t n = a().size1();

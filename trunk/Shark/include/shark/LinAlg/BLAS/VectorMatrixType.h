@@ -49,8 +49,6 @@ namespace shark {
 	typedef blas::vector< basetype > prefix##Vector; \
 	typedef blas::vector< const basetype > Const##prefix##Vector; \
 	typedef blas::matrix< basetype, blas::row_major > prefix##Matrix; \
-	typedef blas::zero_vector< basetype > prefix##ZeroVector; \
-	typedef blas::scalar_vector< basetype > prefix##ScalarVector; \
 	typedef blas::zero_matrix< basetype > prefix##ZeroMatrix; \
 	typedef blas::identity_matrix< basetype > prefix##Identity; \
 	typedef blas::identity_matrix< basetype > prefix##IdentityMatrix; \

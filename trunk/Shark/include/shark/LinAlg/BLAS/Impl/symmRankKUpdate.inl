@@ -40,13 +40,13 @@
 #include "numeric_bindings/syrk.h"
 
 template<class MatA,class MatC>
-void shark::symmRankKUpdate(
-	blas::matrix_expression<MatA> const & matA,
-	blas::matrix_expression<MatC>& matC,
+void shark::blas::symmRankKUpdate(
+	matrix_expression<MatA> const & matA,
+	matrix_expression<MatC>& matC,
 bool beta,double alpha){
 	if(!beta)
-		shark::zero(matC);
-	detail::bindings::syrk<false>(alpha,matA,1.0,matC);
+		zero(matC);
+	bindings::syrk<false>(alpha,matA,1.0,matC);
 	
 	//reconstruct symmetric elements
 	for(std::size_t i = 0; i != matC().size1(); ++i){
@@ -57,13 +57,13 @@ bool beta,double alpha){
 }
 
 //undocumented versions to prevent ublas annoyingness
-namespace shark{
+namespace shark{ namespace blas{
 template<class MatA,class MatC>
 void symmRankKUpdate(
-	blas::matrix_expression<MatA> const & matA,
-	blas::matrix_range<MatC> matC,
+	matrix_expression<MatA> const & matA,
+	matrix_range<MatC> matC,
 bool beta = false,double alpha = 1.0){
-	symmRankKUpdate(matA,static_cast<blas::matrix_expression<blas::matrix_range<MatC> >& >(matC),beta,alpha);
+	symmRankKUpdate(matA,static_cast<matrix_expression<matrix_range<MatC> >& >(matC),beta,alpha);
 }
-}
+}}
 #endif

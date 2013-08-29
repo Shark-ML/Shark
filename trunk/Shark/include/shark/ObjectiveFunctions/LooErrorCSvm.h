@@ -83,7 +83,7 @@ public:
 		this->m_evaluationCounter++;
 
 		double C;
-		shark::init(params)>>parameters(*mep_kernel),C;
+		blas::init(params)>>parameters(*mep_kernel),C;
 		
 		ZeroOneLoss<unsigned int, RealVector> loss;
 

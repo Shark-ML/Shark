@@ -177,7 +177,7 @@ void RBFNet::weightedParameterDerivative(
 	//first evaluate the derivatives of the linear part if enabled
 	if(m_trainLinear){
 		//interpret the linear part of the parameter vector as matrix
-		FixedDenseMatrixProxy<double> weightDerivative = makeMatrix(m_outputNeurons,numNeurons,&gradient(0));
+		blas::FixedDenseMatrixProxy<double> weightDerivative = blas::makeMatrix(m_outputNeurons,numNeurons,&gradient(0));
 		fast_prod(trans(coefficients),s.expNorm,weightDerivative);
 		currentParameter += m_outputNeurons*numNeurons;
 		//bias
@@ -215,7 +215,7 @@ void RBFNet::weightedParameterDerivative(
 		//for all centers at the same time!
 		//the second part is than just a matrix-diagonal multiplication
 		
-		FixedDenseMatrixProxy<double> centerDerivative = makeMatrix(numNeurons,inputSize(),&gradient(currentParameter));
+		blas::FixedDenseMatrixProxy<double> centerDerivative = blas::makeMatrix(numNeurons,inputSize(),&gradient(currentParameter));
 		//compute first part
 		fast_prod(trans(delta),patterns,centerDerivative);
 		//compute second part

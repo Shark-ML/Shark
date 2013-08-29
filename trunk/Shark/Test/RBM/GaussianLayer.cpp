@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_SufficientStatistics){
 			row(testInput,i) = row(input,i) + layer.bias();
 			row(testInput,i) *= beta;
 		}
-		layer.sufficientStatistics(input,statistics,RealScalarVector(10,beta));
+		layer.sufficientStatistics(input,statistics,blas::repeat(beta,10));
 		
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 3; ++j){

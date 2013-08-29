@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_svd_big )
 {
 	for(std::size_t test = 0; test != 10; ++test){
 		//first generate a suitable eigenvalue problem matrix A
-		RealMatrix R = randomRotationMatrix(5);
+		RealMatrix R = blas::randomRotationMatrix(5);
 		RealMatrix lambda(5,5);
 		lambda.clear();
 		for(std::size_t i = 0; i != 3; ++i){

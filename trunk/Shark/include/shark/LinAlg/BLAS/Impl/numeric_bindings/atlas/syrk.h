@@ -34,7 +34,7 @@
 
 #include "cblas_inc.h"
 
-namespace shark {namespace detail {namespace bindings {
+namespace shark {namespace blas {namespace bindings {
 // C <- alpha * A * A^T + beta * C
 // C <- alpha * A^T * A + beta * C
 
@@ -89,8 +89,8 @@ inline void syrk(
 template <typename T, typename MatrA, typename SymmC>
 inline void syrk (
 	CBLAS_UPLO const uplo, CBLAS_TRANSPOSE trans, 
-	T const& alpha, blas::matrix_expression<MatrA> const& a, 
-	T const& beta, blas::matrix_expression<SymmC>& c
+	T const& alpha, matrix_expression<MatrA> const& a, 
+	T const& beta, matrix_expression<SymmC>& c
 ){
 
 	std::size_t const n = c().size1();
@@ -120,8 +120,8 @@ inline void syrk (
 }
 template <bool upper,typename T, typename MatrA, typename SymmC>
 inline void syrk (
-	T const& alpha, blas::matrix_expression<MatrA> const& matA, 
-	T const& beta, blas::matrix_expression<SymmC>& matC
+	T const& alpha, matrix_expression<MatrA> const& matA, 
+	T const& beta, matrix_expression<SymmC>& matC
 ){
 	if(traits::isTransposed(matA))
 		syrk(upper?CblasLower:CblasUpper,CblasTrans,alpha,trans(matA),beta,matC);

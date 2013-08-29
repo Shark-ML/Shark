@@ -170,7 +170,7 @@ protected:
 			for (std::size_t j=0; j<bsz; j++)
 			{
 				typename Batch<InputVectorType>::const_reference e = get(b, j);
-				if (traits::IsSparse<typename Batch<InputVectorType>::const_reference>::value)
+				if (blas::traits::IsSparse<typename Batch<InputVectorType>::const_reference>::value)
 				{
 					// num_entries += e.nnz() + 1;
 					typename Batch<InputVectorType>::const_reference::const_iterator begin = e.begin();
@@ -179,7 +179,9 @@ protected:
 				}
 				else
 				{
-					for (std::size_t q=0; q<dim; q++) if (e(q) != 0.0) num_entries++;
+					for (std::size_t q=0; q<dim; q++) 
+						if (e(q) != 0.0)
+							num_entries++;
 				}
 				num_entries++;
 			}
@@ -199,9 +201,10 @@ protected:
 			for (std::size_t j=0; j<bsz; j++)
 			{
 				typename Batch<InputVectorType>::const_reference e = get(b, j);
-				if (traits::IsSparse<typename Batch<InputVectorType>::const_reference>::value)
+				if (blas::traits::IsSparse<typename Batch<InputVectorType>::const_reference>::value)
 				{
-					for (typename Batch<InputVectorType>::const_reference::const_iterator it=e.begin(); it != e.end(); ++it) feature(it.index())++;
+					for (typename Batch<InputVectorType>::const_reference::const_iterator it=e.begin(); it != e.end(); ++it) 
+						feature(it.index())++;
 				}
 				else
 				{
@@ -229,7 +232,7 @@ protected:
 			for (std::size_t j=0; j<bsz; j++, m++)
 			{
 				typename Batch<InputVectorType>::const_reference e = get(b, j);
-				if (traits::IsSparse<typename Batch<InputVectorType>::const_reference>::value)
+				if (blas::traits::IsSparse<typename Batch<InputVectorType>::const_reference>::value)
 				{
 					for (typename Batch<InputVectorType>::const_reference::const_iterator it=e.begin(); it != e.end(); ++it)
 					{

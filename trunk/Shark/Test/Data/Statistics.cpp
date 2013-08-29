@@ -1,17 +1,17 @@
-#include "shark/LinAlg/VectorStatistics.h"
+#include "shark/Data/Statistics.h"
 
-#define BOOST_TEST_MODULE LinAlg_simple
+#define BOOST_TEST_MODULE Data_Statistics
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
 using namespace shark;
 
 const std::size_t Dimensions=4;
-struct VectorStatisticsFixture
+struct StatisticsFixture
 {
 	UnlabeledData<RealVector> inputData;
 	UnlabeledData<RealVector> inputDataSmallBatch;
-	VectorStatisticsFixture()
+	StatisticsFixture()
 	{
 		//values of the input matrix
 		double vals[Dimensions][Dimensions]=
@@ -44,9 +44,9 @@ double resultVariance[Dimensions][Dimensions]=
 	{-2.47468, 0.84187, 0.233125, 7.17188}
 };
 
-BOOST_FIXTURE_TEST_SUITE(data, VectorStatisticsFixture);
+BOOST_FIXTURE_TEST_SUITE(data, StatisticsFixture);
 
-BOOST_AUTO_TEST_CASE( LinAlg_VectorStatistics_mean )
+BOOST_AUTO_TEST_CASE( Data_Statistics_mean )
 {
 	// Calculate mean vector:
 	RealVector meanVec = mean(inputData);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_VectorStatistics_mean )
 }
 
 
-BOOST_AUTO_TEST_CASE( LinAlg_VectorStatistics_variance )
+BOOST_AUTO_TEST_CASE( Data_Statistics_variance )
 {
 	// Calculate variance vector:
 	RealVector varVec = variance(inputData);
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_VectorStatistics_variance )
 	}
 }
 
-BOOST_AUTO_TEST_CASE( LinAlg_VectorStatistics_meanvar )
+BOOST_AUTO_TEST_CASE( Data_Statistics_meanvar )
 {
 	RealVector meanVec;
 	RealVector varVec;
@@ -86,20 +86,16 @@ BOOST_AUTO_TEST_CASE( LinAlg_VectorStatistics_meanvar )
 
 	// Calculate mean and variance values:
 	meanvar(inputData, meanVec, varVec);
-	//version for matrix input
-	meanvar(inputData.batch(0), meanVecAlternative, varVecAlternative);
 	meanvar(inputDataSmallBatch, meanVecSmall, varVecSmall);
 	for(std::size_t i=0;i!=Dimensions;++i)
 	{
 		BOOST_CHECK_SMALL(meanVec(i)-resultMean[i],1.e-5);
 		BOOST_CHECK_SMALL(varVec(i)-resultVariance[i][i],1.e-5);
-		BOOST_CHECK_SMALL(meanVecAlternative(i)-resultMean[i],1.e-5);
-		BOOST_CHECK_SMALL(varVecAlternative(i)-resultVariance[i][i],1.e-5);
 		BOOST_CHECK_SMALL(meanVecSmall(i)-resultMean[i],1.e-5);
 		BOOST_CHECK_SMALL(varVecSmall(i)-resultVariance[i][i],1.e-5);
 	}
 }
-BOOST_AUTO_TEST_CASE( LinAlg_VectorStatistics_meanvar_covariance )
+BOOST_AUTO_TEST_CASE( Data_Statistics_meanvar_covariance )
 {
 	RealVector meanVec;
 	RealMatrix varMat;

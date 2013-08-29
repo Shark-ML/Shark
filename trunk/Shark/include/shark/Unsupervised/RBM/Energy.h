@@ -358,7 +358,7 @@ public:
 	///@param visibles a batch of samples of the visible layer
 	template<class HiddenSampleBatch, class VisibleSampleBatch>
 	void addVH(HiddenSampleBatch const& hiddens, VisibleSampleBatch const& visibles){
-		addVH(hiddens,visibles, RealScalarVector(shark::size(hiddens),0.0));
+		addVH(hiddens,visibles, blas::repeat(0.0,shark::size(hiddens)));
 	}
 
 	///\brief Calculates the weighted expectation of the energy gradient with respect to p(v|h) for a complete Batch.
@@ -370,7 +370,7 @@ public:
 	///@param visibles a batch of samples of the visible layer
 	template<class HiddenSampleBatch, class VisibleSampleBatch>
 	void addHV(HiddenSampleBatch const& hiddens, VisibleSampleBatch const& visibles){
-		addHV(hiddens,visibles, RealScalarVector(shark::size(hiddens),0.0));
+		addHV(hiddens,visibles, blas::repeat(0.0,shark::size(hiddens)));
 	}
 	
 	///Returns the log of the sum of the weights.

@@ -39,21 +39,8 @@
 #include <shark/LinAlg/solveSystem.h>
 #include <algorithm>
 
-/*!
- *  \brief Determines the RQ Decomposition of the matrix A using pivoting 
- *   returning the housholder transformation instead of Q.
- *
- * The pivoting RQ-Decomposition finds an orthonormal matrix Q and a lower Triangular matrix R
- * as well as a permuation matrix P such that PA = R*Q. 
- * Since Q is the multiplication of all householder transformations,
- * It is quite expensive to compute. Often, Q is only an intermediate step in computations which can be
- * carried out more efficiently using the Householder Transformations themselves.
- *
- * The Matrix format of the householder transform is that the transformations are stored as 
- * upper triangular matrix. The first transformation being in the first row and so on.
- */
 template<class MatrixT,class MatrixU>
-std::size_t shark::pivotingRQHouseholder
+std::size_t shark::blas::pivotingRQHouseholder
 (
 	blas::matrix_expression<MatrixT> const& matrixA,
 	blas::matrix_container<MatrixU>& matrixR,
@@ -132,21 +119,8 @@ std::size_t shark::pivotingRQHouseholder
 	return rank;
 }
 
-/*!
- *  \brief Determines the RQ Decomposition of the matrix A using pivoting
- *
- * The pivoting RQ-Decomposition finds an orthonormal matrix Q and a lower Triangular matrix R
- * as well as a permuation matrix P such that PA = R*Q. 
- * This function is better known as the QR-Decomposition
- * of a transposed matrix B^T = A and B = QR. We depart from the well known algorithm
- * because it is intended to be used with column major matrices. But since shark uses
- * row-major, a QR decomposition is a lot slower. 
- *
- * This Version of the algorithm is based on householder transformations. since it uses pivoting it can
- * be used to determine the rank of a matrix.
- */
 template<class MatrixT,class Mat>
-std::size_t shark::pivotingRQ
+std::size_t shark::blas::pivotingRQ
 (
 	blas::matrix_expression<MatrixT> const& matrixA,
 	blas::matrix_container<Mat>& matrixR,

@@ -37,7 +37,7 @@
 
 #include <shark/LinAlg/Base.h>
 
-namespace shark{
+namespace shark{ namespace blas{
 
 /**
  * \ingroup shark_globals
@@ -54,42 +54,7 @@ void eigensort
 	VectorT& dvecA
 );
 
-//! Calculates the eigenvalues and the normalized eigenvectors of the
-//! symmetric matrix "amatA" using the Jacobi method.
-template<class MatrixT,class MatrixU,class VectorT>
-void eigensymmJacobi
-(
-	MatrixT& amatA,
-	MatrixU& vmatA,
-	VectorT& dvecA
-);
-
-//! Calculates the eigenvalues and the normalized
-//! eigenvectors of the symmetric matrix "amatA" using a modified
-//! Jacobi method.
-template<class MatrixT,class MatrixU,class VectorT>
-void eigensymmJacobi2
-(
-	MatrixT& amatA,
-	MatrixU& vmatA,
-	VectorT& dvecA
-);
-
-
-
-//! Calculates the eigenvalues and the normalized
-//! eigenvectors of a symmetric matrix "amatA" using the Givens
-//! and Householder reduction, however, "hmatA" contains intermediate results after application.
-template<class MatrixT,class MatrixU,class MatrixV,class VectorT>
-void eigensymm_intermediate
-(
-	const MatrixT& amatA,
-	MatrixU& hmatA,
-	MatrixV& vmatA,
-	VectorT& dvecA
-);
-
-//! Used as frontend alculating
+//! Used as frontend calculating
 //! the eigenvalues and the normalized eigenvectors of a symmetric matrix "amatA" using the Givens
 //! and Householder reduction without corrupting "A" during application. Each time this frontend is
 //! called additional memory is allocated for intermediate results.
@@ -115,63 +80,9 @@ void eigensymm
 	VectorT& odvecA
 );
 
-//! Calculates the relative error of eigenvalue  no. "c".
-template<class MatrixT,class MatrixU,class VectorT>
-double eigenerr
-(
-	const MatrixT& amatA,
-	const MatrixU& vmatA,
-	const VectorT& dvecA,
-	unsigned c
-);
-
-//! Determines the rank of the symmetric matrix "amatA".
-template<class MatrixT,class MatrixU,class VectorT>
-unsigned rank
-(
-	const MatrixT& amatA,
-	const MatrixU& vmatA,
-	const VectorT& dvecA
-);
-
-//! Calculates the determinant of the symmetric matrix "amatA".
-template<class MatrixT,class MatrixU,class VectorT>
-double detsymm
-(
-	MatrixT& amatA,
-	MatrixU& vmatA,
-	VectorT& dvecA
-);
-
-//! Calculates the log of the determinant of the symmetric matrix "amatA".
-template<class MatrixT,class MatrixU,class VectorT>
-double logdetsymm
-(
-	MatrixT& amatA,
-	MatrixU& vmatA,
-	VectorT& dvecA
-);
-
-//! Calculates the rank of the symmetric matrix "amatA", its eigenvalues and
-//! eigenvectors.
-template<class MatrixT,class MatrixU,class MatrixV,class VectorT>
-unsigned rankDecomp
-(
-	MatrixT& amatA,
-	MatrixU& vmatA,
-	MatrixV& hmatA,
-	VectorT& dvecA
-);
-
 /** @}*/
-}
+}}
 
 #include "Impl/eigensort.inl"
-#include "Impl/eigensymmJacobi.inl"
-#include "Impl/eigensymmJacobi2.inl"
 #include "Impl/eigensymm.inl"
-#include "Impl/eigenerr.inl"
-#include "Impl/rank.inl"
-#include "Impl/detsymm.inl"
-#include "Impl/rankDecomp.inl"
 #endif

@@ -254,7 +254,7 @@ public:
 			}
 			for(std::size_t j = 0; j != sizeX1;++j){
 				double kx1=eval(get(batchX1,j),get(batchX1,j));
-				noalias(row(result,j))+=RealScalarVector(sizeX2,kx1)+kx2;
+				noalias(row(result,j))+= blas::repeat(kx1,sizeX2)+kx2;
 			}
 		}
 		return result;

@@ -36,7 +36,7 @@
 #include "metafunctions.h"
 
 
-namespace shark {namespace traits {
+namespace shark { namespace blas{ namespace traits {
 	
 template <typename V>
 int vector_stride(blas::vector_expression<V> const&v) { 
@@ -57,6 +57,6 @@ bool isSparse(blas::vector_expression<V> const& ) {
 	return IsSparse<V>::value;
 }
 
-}}
+}}}
 
 #endif

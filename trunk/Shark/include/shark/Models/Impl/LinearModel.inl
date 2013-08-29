@@ -51,8 +51,12 @@ protected:
 	LinearModelWrapperBase(OutputType const& offset)
 	: m_offset(offset)
 	{ }
+	
+	LinearModelWrapperBase(bool offset, std::size_t outputSize)
+	:m_offset(offset? outputSize:0,0.0){}
 
 public:
+	
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LinearModelWrapperBase"; }
@@ -96,25 +100,24 @@ class LinearModelWrapper : public LinearModelWrapperBase<InputType, OutputType>
 	typedef typename Batch<OutputType>::type BatchOutputType;
 public:
 	LinearModelWrapper(){}
-	LinearModelWrapper(unsigned int inputs, unsigned int outputs, bool offset){
-		m_matrix = RealZeroMatrix(outputs, inputs);
-		base_type::m_offset = RealZeroVector(offset ? outputs : 0);
-		if(!traits::IsSparse<Matrix>::value){
+	LinearModelWrapper(unsigned int inputs, unsigned int outputs, bool offset)
+	:base_type(offset,outputs),m_matrix(outputs,inputs,0.0){
+		if(!blas::traits::IsSparse<Matrix>::value){
 			base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		}
 	}
 
 	LinearModelWrapper(Matrix const& matrix)
 	: m_matrix(matrix){
-		if(!traits::IsSparse<Matrix>::value){
+		if(!blas::traits::IsSparse<Matrix>::value){
 			base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		}
 	}
 
-	LinearModelWrapper(Matrix const& matrix, OutputType offset)
+	LinearModelWrapper(Matrix const& matrix, OutputType const& offset)
 	: base_type(offset)
 	, m_matrix(matrix){
-		if(!traits::IsSparse<Matrix>::value){
+		if(!blas::traits::IsSparse<Matrix>::value){
 			base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		}
 	}
@@ -158,7 +161,7 @@ public:
 	}
 
 	std::size_t numberOfParameters() const{
-		if(traits::IsSparse<Matrix>::value){
+		if(blas::traits::IsSparse<Matrix>::value){
 			std::size_t elements = base_type::m_offset.size();
 			//works for sparse, but not very efficient for big dense matrices
 			for(typename Matrix::const_iterator1 pos = m_matrix.begin1(); pos != m_matrix.end1(); ++pos){
@@ -202,7 +205,7 @@ public:
 		//todo: doesn't work for sparse.
 		SIZE_CHECK(coefficients.size2()==outputSize());
 		SIZE_CHECK(coefficients.size1()==patterns.size1());
-		SHARK_CHECK(!traits::IsSparse<Matrix>::value,"Derivative for sparse matrices is not implemented.");
+		SHARK_CHECK(!blas::traits::IsSparse<Matrix>::value,"Derivative for sparse matrices is not implemented.");
 		gradient.resize(numberOfParameters());
 		std::size_t inputs = inputSize();
 		std::size_t outputs = outputSize();

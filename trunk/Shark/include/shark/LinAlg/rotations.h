@@ -38,7 +38,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Rng/GlobalRng.h>
-namespace shark{
+namespace shark{ namespace blas{
 /**
  * \ingroup shark_globals
  * 
@@ -197,5 +197,5 @@ void applyHouseholderOnTheLeft(
     noalias(matrix()) -= beta * outer_prod(reflection,temp);
 }
 /** @}*/
-}
+}}
 #endif

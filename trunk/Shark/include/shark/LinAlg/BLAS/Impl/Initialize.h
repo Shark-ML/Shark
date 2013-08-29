@@ -40,6 +40,7 @@
 #include <iterator>
 #include <boost/type_traits/remove_reference.hpp>
 namespace shark{
+namespace blas{
 namespace detail{
 	
 //The  following looks a bit complicated and in fact, there ARE easier solutions.
@@ -567,6 +568,6 @@ SHARK_SPLIT_PROXY_COMMA(shark::blas::matrix_row<Sink>)
 SHARK_SPLIT_PROXY_COMMA(shark::blas::matrix_column<Sink>)
 #undef SHARK_SPLIT_PROXY_COMMA
 
-}}
+}}}
 
 #endif

@@ -43,9 +43,9 @@
 #include <shark/Core/Math.h>
 
 template<class MatrixT,class MatrixL>
-void shark::choleskyDecomposition(
-	blas::matrix_expression<MatrixT> const& A, 
-	blas::matrix_expression<MatrixL>& L
+void shark::blas::choleskyDecomposition(
+	matrix_expression<MatrixT> const& A, 
+	matrix_expression<MatrixL>& L
 )
 {
 	size_t m = A().size1();
@@ -57,7 +57,7 @@ void shark::choleskyDecomposition(
 			L()(i,j) = A()(i,j);
 		}
 	}
-	if(detail::bindings::potrf(CblasLower,L()) != 0){
+	if(bindings::potrf(CblasLower,L()) != 0){
 		throw SHARKEXCEPTION("[Cholesky Decomposition] The Matrix is not positive definite");
 	}
 #else
@@ -85,10 +85,10 @@ void shark::choleskyDecomposition(
 }
 
 template<class MatrixT,class MatrixL>
-std::size_t shark::pivotingCholeskyDecomposition(
-	blas::matrix_expression<MatrixT> const& Aref,
+std::size_t shark::blas::pivotingCholeskyDecomposition(
+	matrix_expression<MatrixT> const& Aref,
 	PermutationMatrix& P,
-	blas::matrix_expression<MatrixL>& Lref
+	matrix_expression<MatrixL>& Lref
 ){
 	typedef typename MatrixT::value_type Value;
 	//we don't want to get annoyed by the expressions
@@ -133,15 +133,15 @@ std::size_t shark::pivotingCholeskyDecomposition(
 	RealVector pivotValues(m);
 	
 	//stopping criterion
-	double epsilon = sqr(m) * std::numeric_limits<Value>::epsilon() * norm_inf(diag(L));
+	double epsilon = shark::sqr(m) * std::numeric_limits<Value>::epsilon() * norm_inf(diag(L));
 	//double epsilon = 1.e-15;
-	typedef blas::matrix_range<MatrixL> SubL;
+	typedef matrix_range<MatrixL> SubL;
 	
 	for(std::size_t k = 0; k < m; k += blockSize){
 		std::size_t currentSize = std::min(m-k,blockSize);//last iteration is smaller
 		//partition of the matrix
 		SubL Lk = subrange(L,k,m,k,m);
-		blas::vector_range<RealVector> pivots = subrange(pivotValues,k,m);
+		vector_range<RealVector> pivots = subrange(pivotValues,k,m);
 		//we have to dynamically update the pivot values
 		//we start every block anew to prevent accumulation of rounding errors
 		noalias(pivots) = diag(Lk);

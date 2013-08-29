@@ -58,14 +58,13 @@ int main(int argc, char** argv)
 	LabeledData<VectorType, unsigned int> test = problem.generateDataset(tests);
 
 	// define the model
-	LinearModel<VectorType, RealVector> linear(dim, classes, false, true);
-	ArgMaxConverter conv;
-	ConcatenatedModel<VectorType, unsigned int> svm = linear >> conv;
+	ArgMaxConverter<LinearModel<VectorType, RealVector> >svm;
+	svm.decisionFunction().setStructure(dim,classes,false,true);
 
 	// train the machine
 	std::cout << "machine training ..." << std::endl;
 	LinearMcSvmLLWTrainer trainer(1.0 / (lambda * ell), epsilon);
-	trainer.train(linear, training);
+	trainer.train(svm.decisionFunction(), training);
 	std::cout << "done." << std::endl;
 
 	// loss measuring classification errors

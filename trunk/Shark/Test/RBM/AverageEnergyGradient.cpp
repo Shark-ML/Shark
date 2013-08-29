@@ -33,11 +33,10 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Visible )
 	AverageEnergyGradient<BinaryRBM> grad(&rbm);
 	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
-	RealScalarVector zero(10,0);
 	gibbs.createSample(hiddenBatch,visibleBatch,batch);
 	
 	grad.addVH(hiddenBatch,visibleBatch);
-	gradTest.addVH(hiddenBatch,visibleBatch,zero);
+	gradTest.addVH(hiddenBatch,visibleBatch,blas::repeat(0.0,10));
 	
 	RealVector diff = grad.result()-gradTest.result();
 	
@@ -65,12 +64,11 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Hidden )
 	AverageEnergyGradient<BinaryRBM> grad(&rbm);
 	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
-	RealScalarVector zero(10,0);
 	hiddenBatch.state = batch;
 	gibbs.precomputeVisible(hiddenBatch,visibleBatch);
 	
 	grad.addHV(hiddenBatch,visibleBatch);
-	gradTest.addHV(hiddenBatch,visibleBatch,zero);
+	gradTest.addHV(hiddenBatch,visibleBatch,blas::repeat(0.0,10));
 	
 	RealVector diff = grad.result()-gradTest.result();
 	
@@ -196,8 +194,9 @@ public:
 		mpe_rbm->setParameterVector(parameter);
 		double result=0;
 		for(std::size_t i =0; i != m_data.numberOfBatches();++i){
-			RealScalarVector beta(m_data.batch(i).size1(),1);
-			result+=sum(mpe_rbm->energy().logUnnormalizedPropabilityVisible(m_data.batch(i),beta));
+			result+=sum(mpe_rbm->energy().logUnnormalizedPropabilityVisible(
+				m_data.batch(i),blas::repeat(1.0,m_data.batch(i).size1())
+			));
 		}
 		result/=m_data.numberOfElements();
 		return result;
@@ -276,8 +275,9 @@ public:
 		
 		double result=0;
 		for(std::size_t i =0; i != m_data.numberOfBatches();++i){
-			RealScalarVector beta(m_data.batch(i).size1(),1);
-			result+=sum(mpe_rbm->energy().logUnnormalizedPropabilityHidden(m_data.batch(i),beta));
+			result+=sum(mpe_rbm->energy().logUnnormalizedPropabilityHidden(
+				m_data.batch(i),blas::repeat(1,m_data.batch(i).size1())
+			));
 		}
 		result/=m_data.numberOfElements();
 		return result;

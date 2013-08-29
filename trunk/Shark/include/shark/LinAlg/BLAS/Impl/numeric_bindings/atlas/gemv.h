@@ -48,7 +48,7 @@
 
 #include "cblas_inc.h"
 
-namespace shark {namespace detail {namespace bindings {
+namespace shark {namespace blas {namespace bindings {
 
 inline void gemv(CBLAS_ORDER const Order,
         CBLAS_TRANSPOSE const TransA, int const M, int const N,
@@ -112,8 +112,8 @@ inline void gemv(CBLAS_ORDER const Order,
 // op (A) == A || A^T || A^H
 template <typename Matr, typename VctX, typename VctY>
 inline void gemv(CBLAS_TRANSPOSE const TransA,
-        double alpha, blas::matrix_expression<Matr> const &a, blas::vector_expression<VctX> const &x,
-        double beta, blas::vector_expression<VctY> &y
+        double alpha, matrix_expression<Matr> const &a, vector_expression<VctX> const &x,
+        double beta, vector_expression<VctY> &y
 ) {
 	std::size_t m = a().size1();
 	std::size_t n = a().size2();
@@ -137,8 +137,8 @@ inline void gemv(CBLAS_TRANSPOSE const TransA,
 // y <- alpha * op (A) * x + beta * y
 // op (A) == A || A^T || A^H
 template <typename T, typename MatrA, typename VectorX, typename VectorY>
-void gemv(T alpha, blas::matrix_expression<MatrA> const &matA, blas::vector_expression<VectorX> const &vecX,
-        T beta, blas::vector_expression<VectorY> &vecY
+void gemv(T alpha, matrix_expression<MatrA> const &matA, vector_expression<VectorX> const &vecX,
+        T beta, vector_expression<VectorY> &vecY
 ){
 	if(traits::isTransposed(matA))
 		gemv(CblasTrans,alpha,trans(matA),vecX,beta,vecY);

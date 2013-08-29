@@ -40,7 +40,6 @@
 #include <shark/Algorithms/KMeans.h>
 #include <shark/Models/Clustering/HardClusteringModel.h>
 #include <shark/Models/Kernels/LinearKernel.h>
-#include <shark/Models/ConcatenatedModel.h>
 #include <shark/Models/Converter.h>
 
 using namespace shark;
@@ -207,15 +206,15 @@ BOOST_AUTO_TEST_CASE(Kernel_KMeans_multiple_gauss)
 			//(it does not matter for clustering)
 			for(std::size_t i = 0; i != batch.size1();++i){
 				double distSqri = norm_sqr(row(batch,i));
-				row(modelResult,i) -= repeat(distSqri,numMeans);
+				row(modelResult,i) -= blas::repeat(distSqri,numMeans);
 				BOOST_CHECK_SMALL(distanceSqr(row(modelResult,i),row(kernelResult,i)),1.e-5);
 			}
 		}
 		
 		//now check proper convergence of the algorithms, that means that cluster assignment
 		//is stable.
-		ArgMaxConverter converter;
-		ConcatenatedModel<RealVector,unsigned int> model = clusteringModel >> converter;
+		ArgMaxConverter<KernelExpansion<RealVector> > model;
+		model.decisionFunction() = clusteringModel;
 		//assign centers
 		Data<unsigned int> clusters = model(dataset);
 		

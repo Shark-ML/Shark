@@ -42,9 +42,9 @@
 #include <shark/LinAlg/solveSystem.h>
 
 template<class MatA, class MatU>
-void shark::decomposedGeneralInverse(
-	blas::matrix_expression<MatA> const& matA,
-	blas::matrix_expression<MatU>& matU
+void shark::blas::decomposedGeneralInverse(
+	matrix_expression<MatA> const& matA,
+	matrix_expression<MatU>& matU
 ){
 	SIZE_CHECK(matA().size1() == matA().size2());
 	
@@ -72,14 +72,14 @@ void shark::decomposedGeneralInverse(
 	RealMatrix CTC(rank,rank);
 	symmRankKUpdate(trans(columns(cholesky,0,rank)),CTC);
 	
-	blas::matrix_range<MatU> submat = columns(matU,0,rank);
+	matrix_range<MatU> submat = columns(matU,0,rank);
 	solveSymmSystem<SolveXAB>(CTC,submat,columns(cholesky,0,rank));
 	swapFullInverted(permutation,matU);
 }
 
 
 template<class MatrixT>
-shark::RealMatrix shark::g_inverse(blas::matrix_expression<MatrixT> const& matrixA){
+shark::RealMatrix shark::blas::g_inverse(matrix_expression<MatrixT> const& matrixA){
 	std::size_t m = matrixA().size1();
 	std::size_t n = matrixA().size2();
 	

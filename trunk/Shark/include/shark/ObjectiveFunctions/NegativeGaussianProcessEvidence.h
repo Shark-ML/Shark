@@ -113,7 +113,7 @@ public:
 		//set parameters
 		RealVector kernelParams(kp);
 		double betaInv = 0;
-		shark::init(parameters) >> kernelParams, betaInv;
+		blas::init(parameters) >> kernelParams, betaInv;
 		if(m_unconstrained)
 			betaInv = std::exp(betaInv); // for unconstraint optimization
 		mep_kernel->setParameterVector(kernelParams);
@@ -136,7 +136,7 @@ public:
 		//so we will first solve the triangular System Az=t
 		//and then compute ||z||^2
 		//since we don't need t anymore after that, we solve in-place and omit z
-		solveTriangularSystemInPlace<SolveAXB,Lower>(choleskyFactor,t);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Lower>(choleskyFactor,t);
 
 		// equation (6.69) on page 311 in the book C.M. Bishop, Pattern Recognition and Machine Learning, Springer, 2006
 		// e = 1/2 \cdot [ -log(det(M)) - t^T M^{-1} t - N log(2 \pi) ]
@@ -166,7 +166,7 @@ public:
 		//set parameters
 		RealVector kernelParams(kp);
 		double betaInv = 0;
-		shark::init(parameters) >> kernelParams, betaInv;
+		blas::init(parameters) >> kernelParams, betaInv;
 		if(m_unconstrained)
 			betaInv = std::exp(betaInv); // for unconstraint optimization
 		mep_kernel->setParameterVector(kernelParams);
@@ -197,7 +197,7 @@ public:
 		//compute inverse matrix from the cholesky dcomposition 
 		//using forward-backward substitution,
 		RealMatrix W=RealIdentityMatrix(N);
-		solveTriangularCholeskyInPlace<SolveAXB>(choleskyFactor,W);
+		blas::solveTriangularCholeskyInPlace<blas::SolveAXB>(choleskyFactor,W);
 		
 		//calculate z = Wt=M^-1 t
 		RealVector z(N);
@@ -220,7 +220,7 @@ public:
 			betaInvDerivative *= betaInv;
 		
 		//merge both derivatives and since we return the negative evidence, multiply with -1
-		shark::init(derivative)<<kernelGradient,betaInvDerivative;
+		blas::init(derivative)<<kernelGradient,betaInvDerivative;
 		derivative *= -1.0;
 
 		// truncate gradient vector 

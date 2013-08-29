@@ -85,11 +85,12 @@ public:
 			std::size_t currentBatchSize = batch.size1();
 			typename Gibbs::HiddenSampleBatch hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
 			typename Gibbs::VisibleSampleBatch visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
-			RealScalarVector betaBatch(currentBatchSize,1);
 		
 			gibbsSampler.createSample(hiddenSamples,visibleSamples,batch);
 			empiricalExpectation.addVH(hiddenSamples, visibleSamples);
-			negLogLikelihood -= sum(mpe_rbm->energy().logUnnormalizedPropabilityVisible(batch,hiddenSamples.input,betaBatch));
+			negLogLikelihood -= sum(mpe_rbm->energy().logUnnormalizedPropabilityVisible(
+				batch,hiddenSamples.input,blas::repeat(1,currentBatchSize)
+			));
 		}
 		
 		//calculate the expectation of the energy gradient with respect to the model distribution
@@ -135,14 +136,15 @@ private:
 				VisibleStateSpace::state(row(stateBatch,elem),x+elem);
 			}
 			
-			RealScalarVector beta(currentBatchSize,1);
 			//create sample from state batch
 			typename Gibbs::HiddenSampleBatch hiddenBatch(currentBatchSize,mpe_rbm->numberOfHN());
 			typename Gibbs::VisibleSampleBatch visibleBatch(currentBatchSize,mpe_rbm->numberOfVN());
 			sampler.createSample(hiddenBatch,visibleBatch,stateBatch);
 			
 			//calculate probabilities and update 
-			RealVector logP = mpe_rbm->energy().logUnnormalizedPropabilityVisible(stateBatch,hiddenBatch.input,beta);
+			RealVector logP = mpe_rbm->energy().logUnnormalizedPropabilityVisible(
+				stateBatch,hiddenBatch.input,blas::repeat(1,currentBatchSize)
+			);
 			modelExpectation.addVH(hiddenBatch, visibleBatch, logP);
 		}
 	}
@@ -166,15 +168,16 @@ private:
 				HiddenStateSpace::state(row(stateBatch,elem),x+elem);
 			}
 			
-			RealScalarVector beta(currentBatchSize,1);
 			//create sample from state batch
 			typename Gibbs::HiddenSampleBatch hiddenBatch(currentBatchSize,mpe_rbm->numberOfHN());
 			typename Gibbs::VisibleSampleBatch visibleBatch(currentBatchSize,mpe_rbm->numberOfVN());
 			hiddenBatch.state=stateBatch;
-			sampler.precomputeVisible(hiddenBatch,visibleBatch, beta);
+			sampler.precomputeVisible(hiddenBatch,visibleBatch, blas::repeat(1,currentBatchSize));
 			
 			//calculate probabilities and update 
-			RealVector logP = mpe_rbm->energy().logUnnormalizedPropabilityHidden(stateBatch,visibleBatch.input,beta);
+			RealVector logP = mpe_rbm->energy().logUnnormalizedPropabilityHidden(
+				stateBatch,visibleBatch.input,blas::repeat(1,currentBatchSize)
+			);
 			modelExpectation.addHV(hiddenBatch, visibleBatch, logP);
 		}
 	}

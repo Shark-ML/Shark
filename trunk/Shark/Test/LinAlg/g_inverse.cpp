@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_decomposedGeneralInverse_fullRank ){
 		for(std::size_t i = 0; i != Dimensions; ++i){
 			lambda(i) = 0.7*i+1;
 		}
-		RealMatrix R = randomRotationMatrix(Dimensions);
+		RealMatrix R = blas::randomRotationMatrix(Dimensions);
 		RealMatrix A = createSymmetricMatrix(lambda,R);
 		
 		RealMatrix U;
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_decomposedGeneralInverse_RankK ){
 		for(std::size_t i = 0; i != Rank; ++i){
 			lambda(i) = 0.1*i+1;
 		}
-		RealMatrix R = randomRotationMatrix(Dimensions);
+		RealMatrix R = blas::randomRotationMatrix(Dimensions);
 		RealMatrix A = createSymmetricMatrix(lambda,R);
 		
 		RealMatrix U;
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_g_inverse_Simple ){
 		for(std::size_t i = 0; i != Dimensions; ++i){
 			lambda(i) = 0.7*i+1;
 		}
-		RealMatrix R = randomRotationMatrix(Dimensions);
+		RealMatrix R = blas::randomRotationMatrix(Dimensions);
 		RealMatrix A = createSymmetricMatrix(lambda,R);
 		
 		//analytic inverse
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_g_inverse_RankM ){
 	std::size_t N = 50;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//generate test input
-		RealMatrix QTest = randomRotationMatrix(N);
+		RealMatrix QTest = blas::randomRotationMatrix(N);
 		RealMatrix RTest(M,N);
 		RTest.clear();
 		for(std::size_t i = 0; i != M; ++i){
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_g_inverse_QR_RankN ){
 	std::size_t N = 31;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//generate test input
-		RealMatrix QTest = randomRotationMatrix(N);
+		RealMatrix QTest = blas::randomRotationMatrix(N);
 		RealMatrix RTest(M,N);
 		RTest.clear();
 		for(std::size_t i = 0; i != N; ++i){

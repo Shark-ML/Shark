@@ -31,7 +31,7 @@
 
 #include <shark/Models/Normalizer.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
-#include <shark/LinAlg/VectorStatistics.h>
+#include <shark/Data/Statistics.h>
 
 namespace shark {
 

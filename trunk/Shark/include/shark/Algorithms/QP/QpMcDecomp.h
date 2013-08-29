@@ -948,15 +948,15 @@ protected:
 
 		std::size_t i, v, b;
 		unsigned int p, c;
-		RealVector stepsize = RealScalarVector(classes, epsilon);
-		RealVector prev = RealZeroVector(classes);
+		RealVector stepsize(epsilon,classes);
+		RealVector prev(classes,0.0);
 		RealVector step(classes);
 
 		// Rprop loop
 		while (true)
 		{
 			// compute the primal gradient w.r.t. bias
-			RealVector grad = RealZeroVector(classes);
+			RealVector grad(classes,0.0);
 			if (cardR < cardP)
 			{
 				// simplex case
@@ -1003,7 +1003,7 @@ protected:
 			{
 				// project the gradient
 				double mean = sum(grad) / (double)classes;
-				grad -= RealScalarVector(classes, mean);
+				grad -= blas::repeat(mean,classes);
 			}
 
 			// Rprop
@@ -1023,7 +1023,7 @@ protected:
 			{
 				// project the step
 				double mean = sum(step) / (double)classes;
-				step -= RealScalarVector(classes, mean);
+				step -= blas::repeat(mean,classes);
 			}
 
 			// update the solution and the dual gradient

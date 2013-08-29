@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_Base )
 }
 
 RealMatrix createRandomMatrix(RealMatrix const& lambda,std::size_t Dimensions){
-	RealMatrix R = randomRotationMatrix(Dimensions);
+	RealMatrix R = blas::randomRotationMatrix(Dimensions);
 	RealMatrix Atemp(Dimensions,Dimensions);
 	RealMatrix A(Dimensions,Dimensions);
 	fast_prod(R,lambda,Atemp);

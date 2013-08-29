@@ -43,7 +43,7 @@
 
 #include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
-#include <shark/LinAlg/VectorStatistics.h>
+#include <shark/Data/Statistics.h>
 #include <shark/LinAlg/Inverse.h>
 
 namespace shark {
@@ -73,22 +73,6 @@ public:
 		VectorType mean;
 		RealMatrix covariance;
 		meanvar(input, mean, covariance);
-		
-		//~ RealMatrix eigenvectors;
-		//~ RealVector eigenvalues;
-		//~ eigensymm(covariance,eigenvectors,eigenvalues);
-		//~ noalias(eigenvalues)=sqrt(eigenvalues);
-		
-		
-		//~ //compute C^{-1/2}
-		//~ RealMatrix temp=eigenvectors;
-		//~ for(std::size_t i = 0; i != dc; ++i){
-			//~ for(std::size_t j = 0; j != dc; ++j){
-				//~ if(eigenvalues(j) > 1.e-10)
-					//~ temp(i,j)*=m_targetVariance/eigenvalues(j);
-			//~ }
-		//~ }
-		//~ fast_prod(temp,trans(eigenvectors),covariance);
 		
 		//we use the inversed cholesky decomposition for whitening
 		//since we have to assume that covariance does not have full rank, we use

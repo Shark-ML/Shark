@@ -44,6 +44,7 @@ ARE NOT GUARANTEED TO WORK PROPERLY!
 #include <shark/LinAlg/BLAS/traits/matrix_raw.hpp>
 #include <shark/LinAlg/BLAS/traits/vector_raw.hpp>
 namespace shark {
+namespace blas{
 namespace detail{
 	
 //first the all-dense-version
@@ -61,9 +62,9 @@ void generalMatrixVectorOperation(
 	VecB const & vecB,
 	VecC& vecC,
 	ComputeKernel kernel,
-	blas::column_major_tag,
-	blas::dense_proxy_tag,
-	blas::dense_proxy_tag
+	column_major_tag,
+	dense_proxy_tag,
+	dense_proxy_tag
 ){
 	typedef typename traits::PointerType<MatA const>::type PointerA;
 	typedef typename VecB::value_type ValueB;
@@ -147,9 +148,9 @@ void generalMatrixVectorOperation(
 	VecB const & vecB,
 	VecC& vecC,
 	ComputeKernel kernel,
-	blas::row_major_tag,
-	blas::dense_proxy_tag,
-	blas::dense_proxy_tag
+	row_major_tag,
+	dense_proxy_tag,
+	dense_proxy_tag
 ){
 	typedef typename traits::PointerType<MatA const>::type PointerA;
 	typedef typename traits::PointerType<VecB const>::type PointerB;
@@ -232,28 +233,7 @@ void generalMatrixVectorOperation(
 		}
 	}
 }
-
-////the vector argument is sparse
-////up to now, this is only implemented for compressed vectors/matrices
-//template<class MatA,class VecB,class VecC,class ComputeKernel>
-//void generalMatrixVectorOperation(
-//	MatA const & matA,
-//	VecB const & vecB,
-//	VecC& vecC,
-//	ComputeKernel kernel,
-//	blas::column_major_tag,
-//	blas::dense_proxy_tag,
-//	blas::sparse_proxy_tag
-//){
-//	//unfortunately, this method is only implemented for Compressed Vectors right now. 
-//	//it might also be that your argument expression is not supported and so the method
-//	//can't deduce the correct type of the underlying container!
-//	//BOOST_STATIC_ASSERT(!IsCompressed<VecC>::value);
-//	
-//	
-//	
-//}
-
 }//end namespace detail
+}
 }
 #endif

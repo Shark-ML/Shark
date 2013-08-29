@@ -17,7 +17,7 @@ RealMatrix createRandomTriangularMatrix(RealMatrix const& lambda,std::size_t Dim
 }
 
 RealMatrix createRandomMatrix(RealMatrix const& lambda,std::size_t Dimensions){
-	RealMatrix R = randomRotationMatrix(Dimensions);
+	RealMatrix R = blas::randomRotationMatrix(Dimensions);
 	RealMatrix Atemp(Dimensions,Dimensions);
 	RealMatrix A(Dimensions,Dimensions);
 	fast_prod(R,lambda,Atemp);
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_Rotation_FullRank ){
 	std::size_t NumTests = 100;
 	std::size_t Dimensions = 51;
 	for(std::size_t test = 0; test != NumTests; ++test){
-		RealMatrix A = randomRotationMatrix(Dimensions);
+		RealMatrix A = blas::randomRotationMatrix(Dimensions);
 		//calculate RQ
 		RealMatrix R(Dimensions,Dimensions);
 		RealMatrix Q(Dimensions,Dimensions);
@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankN ){
 	std::size_t N = 31;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//generate test input
-		RealMatrix QTest = randomRotationMatrix(N);
+		RealMatrix QTest = blas::randomRotationMatrix(N);
 		RealMatrix RTest(M,N);
 		RTest.clear();
 		for(std::size_t i = 0; i != N; ++i){
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankM ){
 	std::size_t N = 47;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//generate test input
-		RealMatrix QTest = randomRotationMatrix(N);
+		RealMatrix QTest = blas::randomRotationMatrix(N);
 		RealMatrix RTest(M,N);
 		RTest.clear();
 		for(std::size_t i = 0; i != M; ++i){
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankLowerN ){
 	std::size_t Rank = 20;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//generate test input
-		RealMatrix QTest = randomRotationMatrix(N);
+		RealMatrix QTest = blas::randomRotationMatrix(N);
 		RealMatrix RTest(M,N);
 		RTest.clear();
 		for(std::size_t i = 0; i != Rank; ++i){
@@ -379,7 +379,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankLowerM ){
 	std::size_t Rank = 19;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//generate test input
-		RealMatrix QTest = randomRotationMatrix(N);
+		RealMatrix QTest = blas::randomRotationMatrix(N);
 		RealMatrix RTest(M,N);
 		RTest.clear();
 		for(std::size_t i = 0; i != Rank; ++i){

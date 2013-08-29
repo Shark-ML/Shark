@@ -702,7 +702,7 @@ public:
 				{
 					// project the m_gradient
 					double mean = sum(grad) / (double)classes;
-					grad -= RealScalarVector(classes, mean);
+					grad -= blas::repeat(mean,classes);
 				}
 
 				// Rprop
@@ -726,7 +726,7 @@ public:
 				{
 					// project the step
 					double mean = sum(step) / (double)classes;
-					step -= RealScalarVector(classes, mean);
+					step -= blas::repeat(mean,classes);
 				}
 
 				// update the solution and the dual m_gradient

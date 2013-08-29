@@ -34,6 +34,7 @@
 //this file is to included in metafunctions.h
 
 namespace shark{
+namespace blas{ 
 namespace traits{
 
 //vector
@@ -123,5 +124,5 @@ public:
 	}
 };
 
-}}
+}}}
 #endif

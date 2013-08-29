@@ -41,13 +41,13 @@ ARE NOT GUARANTEED TO WORK PROPERLY IN ALL CASES!
 #define SHARK_LINALG_BLAS_MATRIX_VECTOR_OPERATION_H
 
 #include "Impl/BlockMatrixVectorOperation.inl"
-namespace shark {
+namespace shark { namespace blas{
 ///\brief implements an operation of the Form \f$ c_i = c_i + \sum_{j=1}^n k(A_{ij},b_j)\f$ for arbitrary kernels k.
 template<class MatA,class VecB,class VecC,class ComputeKernel>
 void generalMatrixVectorOperation(
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecB> const & vecB,
-	blas::vector_expression<VecC>& vecC,
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecB> const & vecB,
+	vector_expression<VecC>& vecC,
 	ComputeKernel kernel
 ){
 	detail::generalMatrixVectorOperation(
@@ -59,33 +59,33 @@ void generalMatrixVectorOperation(
 }
 template<class MatA,class VecB,class VecC,class ComputeKernel>
 void generalMatrixVectorOperation(
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecB> const & vecB,
-	blas::matrix_row<VecC> vecC,
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecB> const & vecB,
+	matrix_row<VecC> vecC,
 	ComputeKernel kernel
 ){
-	typedef blas::vector_expression<blas::matrix_row<VecC> > super;
+	typedef vector_expression<matrix_row<VecC> > super;
 	generalMatrixVectorOperation(matA(),vecB(),static_cast<super&>(vecC),kernel);
 }
 template<class MatA,class VecB,class VecC,class ComputeKernel>
 void generalMatrixVectorOperation(
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecB> const & vecB,
-	blas::matrix_column<VecC> vecC,
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecB> const & vecB,
+	matrix_column<VecC> vecC,
 	ComputeKernel kernel
 ){
-	typedef blas::vector_expression<blas::matrix_column<VecC> > super;
+	typedef vector_expression<matrix_column<VecC> > super;
 	generalMatrixVectorOperation(matA(),vecB(),static_cast<super&>(vecC),kernel);
 }
 template<class MatA,class VecB,class VecC,class ComputeKernel>
 void generalMatrixVectorOperation(
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecB> const & vecB,
-	blas::vector_range<VecC> vecC,
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecB> const & vecB,
+	vector_range<VecC> vecC,
 	ComputeKernel kernel
 ){
-	typedef blas::vector_expression<blas::vector_range<VecC> > super;
+	typedef vector_expression<vector_range<VecC> > super;
 	generalMatrixVectorOperation(matA(),vecB(),static_cast<super&>(vecC),kernel);
 }
-}
+}}
 #endif

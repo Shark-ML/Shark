@@ -48,7 +48,8 @@ public:
 
 	void draw(RealVector& input, RealVector& label) const
 	{
-		input = RealZeroVector(m_dim);
+		input.resize(m_dim);
+		zero(input);
 		label.resize(1);
 
 		// we have one informative component per example

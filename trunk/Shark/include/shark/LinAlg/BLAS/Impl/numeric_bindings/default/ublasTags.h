@@ -34,29 +34,26 @@
 
 ///solves systems of triangular matrices
 
-namespace shark {namespace detail {namespace bindings {
+namespace shark {namespace blas {namespace bindings {
 
 template<bool upper, bool unit, bool left = true>
 struct TriangularTag{
-	typedef blas::unit_upper_tag type;
-//	typedef blas::unit_upper TraitsType;
+	typedef unit_upper_tag type;
+//	typedef unit_upper TraitsType;
 };
 
 template<>
 struct TriangularTag<true,false,true>{
-	typedef blas::upper_tag type;
-	//typedef blas::upper TraitsType;
+	typedef upper_tag type;
 };
 
 template<>
 struct TriangularTag<false,true,true>{
-	typedef blas::unit_lower_tag type;
-	//typedef blas::unit_lower TraitsType;
+	typedef unit_lower_tag type;
 };
 template<>
 struct TriangularTag<false,false,true>{
-	typedef blas::lower_tag type;
-	//Wtypedef blas::lower TraitsType;
+	typedef lower_tag type;
 };
 
 template<bool upper, bool unit>

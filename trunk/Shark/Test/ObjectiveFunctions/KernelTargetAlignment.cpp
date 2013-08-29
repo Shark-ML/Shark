@@ -104,9 +104,9 @@ RealMatrix calculateCenteredKernelMatrix(Kernel const& kernel, Data const& data)
 	RealMatrix K = calculateRegularizedKernelMatrix(kernel,data);
 	RealVector k = sumRows(K)/numInputs;
 	double meanK = sum(k)/numInputs;
-	K-=repeat(k,numInputs);
-	K-=trans(repeat(k,numInputs));
-	K+=repeat(meanK,numInputs,numInputs);
+	K-= repeat(k,numInputs);
+	K-= trans(repeat(k,numInputs));
+	K+= blas::repeat(meanK,numInputs,numInputs);
 	return K;
 }
 
@@ -210,9 +210,9 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_numerics){
 	double YKc=sumElements(element_prod(Kc,Y));
 	double KcKc = sumElements(element_prod(Kc,Kc));
 	//(<Kc,Kc>)'
-	RealMatrix WKcKc = 2*(K-repeat(k, numInputs) -trans(repeat(k, numInputs))+ repeat(meanK,numInputs,numInputs));
+	RealMatrix WKcKc = 2*(K-repeat(k, numInputs) -trans(repeat(k, numInputs))+ blas::repeat(meanK,numInputs,numInputs));
 	double derivativeKcKc = calculateKernelMatrixParameterDerivative(kernel,data.inputs(),WKcKc)(0);
-	RealMatrix WYKc = Y-repeat(y, numInputs) -trans(repeat(y, numInputs))+ repeat(meanY,numInputs,numInputs);
+	RealMatrix WYKc = Y-repeat(y, numInputs) -trans(repeat(y, numInputs))+ blas::repeat(meanY,numInputs,numInputs);
 	double derivativeYKc = calculateKernelMatrixParameterDerivative(kernel,data.inputs(),WYKc)(0);
 	BOOST_CHECK_CLOSE(derivativeKcKc,estimatedDerivativeKcKc,0.0001);
 	BOOST_CHECK_CLOSE(derivativeYKc,estimatedDerivativeYKc,0.0001);

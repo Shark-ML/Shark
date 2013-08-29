@@ -22,7 +22,7 @@
 #include <shark/LinAlg/BLAS/Proxy.h>
 #include <shark/LinAlg/BLAS/ublas.h>
 
-namespace shark{
+namespace shark{ namespace blas{
 
 	/** \brief converts a chunk of memory into a (readonly) usable ublas blas::vector.
 	*
@@ -64,6 +64,6 @@ namespace shark{
 		return FixedDenseMatrixProxy<T>(&(array[0][0]),M,N);
 	}
 
-}
+}}
 
 #endif

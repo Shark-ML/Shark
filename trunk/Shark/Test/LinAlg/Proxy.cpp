@@ -23,8 +23,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_FixedDenseVectorProxy )
 	}
 	
 	//create some proxies
-	FixedDenseVectorProxy<double> proxy(x);
-	FixedDenseVectorProxy<double> proxym(mem,4,2);
+	blas::FixedDenseVectorProxy<double> proxy(x);
+	blas::FixedDenseVectorProxy<double> proxym(mem,4,2);
 	
 	//check internal variables
 	BOOST_REQUIRE_EQUAL(proxy.size() ,3);
@@ -35,17 +35,17 @@ BOOST_AUTO_TEST_CASE( LinAlg_FixedDenseVectorProxy )
 	BOOST_REQUIRE_EQUAL(proxym.data() ,mem);
 	
 	//check traits
-	BOOST_REQUIRE_EQUAL(traits::vector_stride(proxy) ,1);
-	BOOST_REQUIRE_EQUAL(traits::vector_storage(proxy) ,&x(0));
-	BOOST_REQUIRE_EQUAL(traits::vector_stride(proxym) ,2);
-	BOOST_REQUIRE_EQUAL(traits::vector_storage(proxym) ,mem);
+	BOOST_REQUIRE_EQUAL(blas::traits::vector_stride(proxy) ,1);
+	BOOST_REQUIRE_EQUAL(blas::traits::vector_storage(proxy) ,&x(0));
+	BOOST_REQUIRE_EQUAL(blas::traits::vector_stride(proxym) ,2);
+	BOOST_REQUIRE_EQUAL(blas::traits::vector_storage(proxym) ,mem);
 	
 	//check values
 	for(std::size_t i = 0; i != 3; ++i){
 		BOOST_REQUIRE_EQUAL(x(i) ,proxy(i));
-		BOOST_REQUIRE_EQUAL(x(i) ,const_cast<FixedDenseVectorProxy<double> const&>(proxy)(i));
+		BOOST_REQUIRE_EQUAL(x(i) ,const_cast<blas::FixedDenseVectorProxy<double> const&>(proxy)(i));
 		BOOST_REQUIRE_EQUAL(x(i) ,proxy[i]);
-		BOOST_REQUIRE_EQUAL(x[i] ,const_cast<FixedDenseVectorProxy<double> const&>(proxy)[i]);
+		BOOST_REQUIRE_EQUAL(x[i] ,const_cast<blas::FixedDenseVectorProxy<double> const&>(proxy)[i]);
 	}
 	for(std::size_t i = 0; i != 4; ++i){
 		BOOST_REQUIRE_EQUAL(mem[2*i] ,proxym(i));
@@ -83,23 +83,23 @@ void checkProxyBase(Vector& vec, std::size_t nnz){
 }
 template<class Vector>
 void checkProxy(Vector const& vec, std::size_t nnz){
-	checkProxyBase<FixedSparseVectorProxy<double,std::size_t> >(vec,nnz);
-	checkProxyBase<FixedSparseVectorProxy<const double,std::size_t> >(vec,nnz);
-	checkProxyBase<const FixedSparseVectorProxy<const double,std::size_t> >(vec,nnz);
-	checkProxyBase<const FixedSparseVectorProxy<const double,std::size_t> >(vec,nnz);
+	checkProxyBase<blas::FixedSparseVectorProxy<double,std::size_t> >(vec,nnz);
+	checkProxyBase<blas::FixedSparseVectorProxy<const double,std::size_t> >(vec,nnz);
+	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(vec,nnz);
+	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(vec,nnz);
 	
 	//check proxy conversion
-	const FixedSparseVectorProxy<const double,std::size_t> proxy(vec);
-	checkProxyBase<FixedSparseVectorProxy<double,std::size_t> >(proxy,nnz);
-	checkProxyBase<FixedSparseVectorProxy<const double,std::size_t> >(proxy,nnz);
-	checkProxyBase<const FixedSparseVectorProxy<const double,std::size_t> >(proxy,nnz);
-	checkProxyBase<const FixedSparseVectorProxy<const double,std::size_t> >(proxy,nnz);
+	const blas::FixedSparseVectorProxy<const double,std::size_t> proxy(vec);
+	checkProxyBase<blas::FixedSparseVectorProxy<double,std::size_t> >(proxy,nnz);
+	checkProxyBase<blas::FixedSparseVectorProxy<const double,std::size_t> >(proxy,nnz);
+	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(proxy,nnz);
+	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(proxy,nnz);
 	
-	FixedSparseVectorProxy<const double,std::size_t> cproxy(vec);
-	checkProxyBase<FixedSparseVectorProxy<double,std::size_t> >(cproxy,nnz);
-	checkProxyBase<FixedSparseVectorProxy<const double,std::size_t> >(cproxy,nnz);
-	checkProxyBase<const FixedSparseVectorProxy<const double,std::size_t> >(cproxy,nnz);
-	checkProxyBase<const FixedSparseVectorProxy<const double,std::size_t> >(cproxy,nnz);
+	blas::FixedSparseVectorProxy<const double,std::size_t> cproxy(vec);
+	checkProxyBase<blas::FixedSparseVectorProxy<double,std::size_t> >(cproxy,nnz);
+	checkProxyBase<blas::FixedSparseVectorProxy<const double,std::size_t> >(cproxy,nnz);
+	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(cproxy,nnz);
+	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(cproxy,nnz);
 }
 
 

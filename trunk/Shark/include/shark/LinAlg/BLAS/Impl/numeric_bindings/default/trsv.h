@@ -35,14 +35,14 @@
 #include "ublasTags.h"
 ///solves systems of triangular matrices
 
-namespace shark {namespace detail {namespace bindings {
+namespace shark {namespace blas {namespace bindings {
 
 template <bool upper,bool unit,typename SymmA, typename VecB>
 void trsv(
-	blas::matrix_expression<SymmA> const &matA, 
-	blas::vector_expression<VecB> &vecB
+	matrix_expression<SymmA> const &matA, 
+	vector_expression<VecB> &vecB
 ){
-	blas::inplace_solve (matA(), vecB(), typename TriangularTag<upper,unit>::type());
+	inplace_solve (matA(), vecB(), typename TriangularTag<upper,unit>::type());
 }
 
 }}}

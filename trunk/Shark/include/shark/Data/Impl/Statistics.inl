@@ -1,4 +1,5 @@
-namespace shark{
+namespace shark{ 
+	
 /*!
  *  \brief Calculates the mean and variance values of a dataset
  *
@@ -35,29 +36,6 @@ void meanvar
 	}
 	varianceVec()/=dataSize;
 }
-
-template<class MatT, class Vec1T,class Vec2T>
-void meanvar
-(
-	blas::matrix_container<MatT>& data,
-	blas::vector_container<Vec1T>& meanVec,
-	blas::vector_container<Vec2T>& varianceVec
-)
-{
-	SIZE_CHECK(data().size1() > 0);
-	SIZE_CHECK(data().size2() > 0);
-	
-	const size_t dataSize = data().size1();
-	const size_t elementSize = data().size2();
-	
-	meanVec() = mean(data);
-	
-	varianceVec().resize(elementSize);
-	noalias(varianceVec()) = sumRows(sqr(data-repeat(meanVec,dataSize)));
-
-	varianceVec()/=dataSize;
-}
-
 
 /*!
  *  \brief Calculates the mean and covariance values of a set of data
@@ -140,22 +118,9 @@ VectorType mean(Data<VectorType> const& data){
 	typedef typename Data<VectorType>::const_batch_reference BatchRef; 
 	 
 	BOOST_FOREACH(BatchRef batch, data.batches()){
-		sumRows(batch,mean);
+		mean += sumRows(batch);
 	}
 	mean /= data.numberOfElements();
-	return mean;
-}
-
-template<class MatrixType>
-blas::vector<typename MatrixType::value_type> mean(blas::matrix_container<MatrixType> const& data){
-	SIZE_CHECK(data().size2() > 0);
-
-	blas::vector<typename MatrixType::value_type> mean(data().size2());
-	mean.clear();
-	 
-	sumRows(data(),mean);
-
-	mean /= data().size1();
 	return mean;
 }
 
@@ -207,44 +172,6 @@ typename VectorMatrixTraits<VectorType>::DenseMatrixType covariance(const Data<V
 	RealMatrix covariance;
 	meanvar(data,mean,covariance);
 	return covariance;
-}
-
-/*!
- *  \brief Calculates the coefficient of correlation matrix of the data
- *         vectors stored in data.
- *
- *  Given a matrix \f$X = (x_{ij})\f$ of \f$n\f$ vectors with length \f$N\f$,
- *  the function calculates the coefficient of correlation matrix given as
- *
- *  \f$
- *      r := (r_{kl}) \mbox{,\ } r_{kl} =
- *      \frac{c_{kl}}{\Delta x_k \Delta x_l}\mbox{,\ }
- *      k,l = 1, \dots, N
- *  \f$
- *
- *  where \f$c_{kl}\f$ is the entry of the covariance matrix of
- *  \f$x\f$ and \f$y\f$ and \f$\Delta x_k\f$ and \f$\Delta x_l\f$ are the 
- *  standard deviations of \f$x_k\f$ and \f$x_l\f$ respectively.
- *
- *  \param data The \f$n \times N\f$ input matrix.
- *  \return The \f$N \times N\f$ coefficient of correlation matrix.
- */
-template<class VectorType>
-typename VectorMatrixTraits<VectorType>::DenseMatrixType corrcoef(const Data<VectorType>& data)
-{
-	typename VectorMatrixTraits<VectorType>::DenseMatrixType C=covariance(data);
-
-	for (std::size_t i = 0; i < C.size1(); ++i)
-		for (std::size_t j = 0; j < i; ++j)
-			if (C(i, i) == 0 || C(j, j) == 0)
-				C(i, j) = C(j, i) = 0;
-			else
-				C(i, j) = C(j , i) = C(i, j) / std::sqrt(C(i, i) * C(j, j));
-
-	for (std::size_t i = 0; i < C.size1(); ++i)
-		C(i, i) = 1;
-
-	return C;
 }
 
 }

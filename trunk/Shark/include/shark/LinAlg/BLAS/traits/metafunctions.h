@@ -52,7 +52,7 @@
 #include <boost/mpl/or.hpp>
 #include <boost/mpl/inherit.hpp>
 #include <boost/preprocessor/punctuation/comma.hpp>
-namespace shark {namespace traits {
+namespace shark { namespace blas{ namespace traits {
 	
 struct UnknownStorage{};
 struct CompressedStorage{};
@@ -745,7 +745,7 @@ struct Orientation{
 
 
 
-}}
+}}}
 
 #include "vectorContainerMeta.h"
 #include "matrixContainerMeta.h"

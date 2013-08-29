@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_init_test_parameters ){
 	initRandomNormal(network,1);
 	
 	RealVector result(network.numberOfParameters());
-	init(result)<<parameters(network);
+	init(result)<<blas::parameters(network);
 
 	BOOST_CHECK_SMALL(norm_sqr(result-network.parameterVector()),1.e-10);
 }
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_init_test_parameterSet ){
 	
 	
 	RealVector result(3*n);
-	init(result)<<parameterSet(networks);
+	init(result)<<blas::parameterSet(networks);
 	
 	for(std::size_t i = 0; i != 3; ++i){
 		for(std::size_t j = 0; j != n;++j){
@@ -470,7 +470,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_split_test_parameters ){
 	
 	RealVector input = network.parameterVector();
 	initRandomNormal(network,1u);
-	init(input) >> parameters(network);
+	init(input) >> blas::parameters(network);
 
 	BOOST_CHECK_SMALL(norm_sqr(input-network.parameterVector()),1.e-10);
 }
@@ -488,7 +488,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_split_test_parameterSet ){
 		input(i) = Rng::uni(0,1);
 	}
 	
-	init(input) >> parameterSet(networks);
+	init(input) >> blas::parameterSet(networks);
 	
 	for(std::size_t i = 0; i != 3; ++i){
 		for(std::size_t j = 0; j != n;++j){

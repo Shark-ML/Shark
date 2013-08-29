@@ -282,27 +282,8 @@ public:
 		m_selection.setNoObjectives( noObjectives );
 		m_approximatedSelection.setNoObjectives( noObjectives );
 
-		m_sbx.m_prob = 0.5;
-		//constraint handling
-		if(!f.isConstrained()){
-			m_sbx.m_lower = repeat(-1E20,f.numberOfVariables());
-			m_sbx.m_upper = repeat(1E20,f.numberOfVariables());
-		}
-		else if (f.hasConstraintHandler() &&! f.getConstraintHandler().isBoxConstrained()) {
-			BoxConstraintHandler<RealVector> const& handler = 
-				static_cast<BoxConstraintHandler<RealVector> const&>(f.getConstraintHandler());
-			
-			m_sbx.m_lower = handler.lower();
-			m_sbx.m_upper = handler.upper();
-
-		} else{
-			throw SHARKEXCEPTION("[AGE2::init] Algorithm does only allow box constraints");
-		}
-
+		m_sbx.init(f);
 		m_mutator.init(f);
-		/*m_mutator.m_prob = 1.0 / f.numberOfVariables();
-		m_mutator.m_lower = m_sbx.m_lower;
-		m_mutator.m_upper = m_sbx.m_upper;*/
 
 		m_evaluator.m_penaltyFactor = 1E-6;
 	}

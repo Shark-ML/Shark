@@ -39,23 +39,23 @@ extern "C" {
 #include <complex>
 
 namespace shark {
-namespace detail {
+namespace blas {
 namespace bindings {
 
 template <typename Ord> struct storage_order {};
-template<> struct storage_order<blas::row_major_tag> {
+template<> struct storage_order<row_major_tag> {
 	enum ename { value = CblasRowMajor };
 };
-template<> struct storage_order<blas::column_major_tag> {
+template<> struct storage_order<column_major_tag> {
 	enum ename { value = CblasColMajor };
 };
 
 
 template <typename UpLo> struct uplo_triang {};
-template<> struct uplo_triang<blas::upper_tag> {
+template<> struct uplo_triang<upper_tag> {
 	enum ename { value = CblasUpper };
 };
-template<> struct uplo_triang<blas::lower_tag> {
+template<> struct uplo_triang<lower_tag> {
 	enum ename { value = CblasLower };
 };
 

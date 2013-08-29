@@ -40,7 +40,7 @@
 
 #include <shark/LinAlg/Base.h>
 
-namespace shark{
+namespace shark{ namespace blas{
 
 //a few flags governing which type of system is to be solved
 
@@ -86,8 +86,8 @@ struct UnitLower{
 ///lower unit, upper unit or non unit lower/upper.
 template<class System, class DiagType,class MatT,class VecT>
 void solveTriangularSystemInPlace(
-	const blas::matrix_expression<MatT>& A, 
-	blas::vector_expression<VecT>& b
+	const matrix_expression<MatT>& A, 
+	vector_expression<VecT>& b
 );
 /// \brief  In-place triangular linear equation solver.
 ///
@@ -106,8 +106,8 @@ void solveTriangularSystemInPlace(
 ///lower unit, upper unit or non unit lower/upper.
 template<class System, class DiagType,class MatA,class MatB>
 void solveTriangularSystemInPlace(
-	const blas::matrix_expression<MatA>& A, 
-	blas::matrix_expression<MatB>& B
+	const matrix_expression<MatA>& A, 
+	matrix_expression<MatB>& B
 );
 
 /// \brief In-Place solver if A was already cholesky decomposed
@@ -120,8 +120,8 @@ void solveTriangularSystemInPlace(
 ///A=LL^T where L is a lower triangular matrix.
 template<class System,class MatA,class MatB>
 void solveTriangularCholeskyInPlace(
-	const blas::matrix_expression<MatA>& A, 
-	blas::matrix_expression<MatB>& B
+	const matrix_expression<MatA>& A, 
+	matrix_expression<MatB>& B
 );
 
 /// \brief In-Place solver if A was already cholesky decomposed
@@ -131,10 +131,10 @@ void solveTriangularCholeskyInPlace(
 ///A=LL^T where L is a lower triangular matrix.
 template<class System,class MatA,class MatB>
 void solveTriangularCholeskyInPlace(
-	const blas::matrix_expression<MatA>& A, 
-	blas::vector_expression<MatB>& B
+	const matrix_expression<MatA>& A, 
+	vector_expression<MatB>& B
 );
 
-}
+}}
 #include "Impl/solveTriangular.inl"
 #endif

@@ -22,7 +22,7 @@
  */
 //===========================================================================
 #include <shark/LinAlg/eigenvalues.h>
-#include <shark/LinAlg/VectorStatistics.h>
+#include <shark/Data/Statistics.h>
 #include <shark/Algorithms/Trainers/PCA.h>
 
 using namespace shark;

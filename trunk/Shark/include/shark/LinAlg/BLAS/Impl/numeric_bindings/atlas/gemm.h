@@ -49,7 +49,7 @@
 
 #include "cblas_inc.h"
 
-namespace shark { namespace detail { namespace bindings {
+namespace shark { namespace blas { namespace bindings {
 
 inline void gemm(CBLAS_ORDER const Order,
 	CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
@@ -129,8 +129,8 @@ inline void gemm(CBLAS_ORDER const Order,
 // op (A) == A || A^T || A^H
 template <typename T, typename MatrA, typename MatrB, typename MatrC>
 void gemm(CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
-	T const &alpha, blas::matrix_expression<MatrA> const &a, blas::matrix_expression<MatrB> const &b,
-	T const &beta, blas::matrix_expression<MatrC>& c
+	T const &alpha, matrix_expression<MatrA> const &a, matrix_expression<MatrB> const &b,
+	T const &beta, matrix_expression<MatrC>& c
 ) {
 	std::size_t m,n,k;
 	if ((TransA == CblasNoTrans) != traits::isTransposed(a)) {
@@ -165,8 +165,8 @@ void gemm(CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
 // C <- alpha * op (A) * op (B) + beta * C
 // op (A) == A || A^T || A^H
 template <typename T, typename MatrA, typename MatrB, typename MatrC>
-void gemm(T const &alpha, blas::matrix_expression<MatrA> const &a, blas::matrix_expression<MatrB> const &b,
-	T const &beta, blas::matrix_expression<MatrC>& c
+void gemm(T const &alpha, matrix_expression<MatrA> const &a, matrix_expression<MatrB> const &b,
+	T const &beta, matrix_expression<MatrC>& c
 ) {
 	CBLAS_TRANSPOSE transposeA = traits::isTransposed(a)?CblasTrans:CblasNoTrans;
 	CBLAS_TRANSPOSE transposeB = traits::isTransposed(b)?CblasTrans:CblasNoTrans;

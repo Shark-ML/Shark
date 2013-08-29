@@ -42,8 +42,7 @@ int main(){
 		{1,1,0,0,0,1},
 		{1,1,1,1,0,1},
 	};
-	IntMatrix mat(5,6);
-	mat = makeMatrix(connectionMatrix);
+	IntMatrix mat = blas::makeMatrix(connectionMatrix);
 
 	//first two parameters are number of inputs and output neurons
 	network.setStructure(2, 1, mat);

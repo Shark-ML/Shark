@@ -99,7 +99,7 @@ public:
 	///Be aware that a change of temperature may occur between sampleVisible and precomputeHidden.
 	void precomputeHidden(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
-		precomputeHidden(hiddenBatch,visibleBatch,RealScalarVector(visibleBatch.size(),1.0));
+		precomputeHidden(hiddenBatch,visibleBatch,blas::repeat(1.0,visibleBatch.size()));
 	}
 
 
@@ -122,7 +122,7 @@ public:
 	///Be aware that a change of temperature may occur between sampleHidden and precomputeVisible.
 	void precomputeVisible(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
-		precomputeVisible(hiddenBatch,visibleBatch,RealScalarVector(visibleBatch.size(),1.0));
+		precomputeVisible(hiddenBatch,visibleBatch,blas::repeat(1.0,visibleBatch.size()));
 	}
 	
 
@@ -180,7 +180,7 @@ public:
 	/// @param state the state of the visible neurons in the sample
 	template<class States>
 	void createSample(HiddenSampleBatch& hiddenBatch,VisibleSampleBatch& visibleBatch, States const& states)const{
-		createSample(hiddenBatch,visibleBatch,states, RealScalarVector(states.size1(),1.0));
+		createSample(hiddenBatch,visibleBatch,states, blas::repeat(1.0,states.size1()));
 	}
 	
 	///\brief Calculates the Energy of a sample of the visible and hidden neurons created by this chain.

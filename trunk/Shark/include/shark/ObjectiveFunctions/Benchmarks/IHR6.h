@@ -74,7 +74,7 @@ struct IHR6 : public MultiObjectiveFunction{
 	}
 
 	void init() {
-		m_rotationMatrix = randomRotationMatrix(numberOfVariables());
+		m_rotationMatrix = blas::randomRotationMatrix(numberOfVariables());
 	}
 
 	ResultType eval( const SearchPointType & x )const {

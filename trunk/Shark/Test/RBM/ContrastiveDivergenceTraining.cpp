@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		
 		BinaryLayer::StatisticsBatch hiddenStatistics(inputs,4);
 		energy.inputHidden(hiddenInput,data.batch(0));
-		rbm.hiddenNeurons().sufficientStatistics(hiddenInput,hiddenStatistics, repeat(1.0,inputs));
+		rbm.hiddenNeurons().sufficientStatistics(hiddenInput,hiddenStatistics, blas::repeat(1.0,inputs));
 		
 		//calculate the propability for every hidden state given the visible state p(h|v)
 		RealMatrix phv(inputs,numHiddenStates,1.0);
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		RealMatrix visibleInput(numHiddenStates,16);
 		BinaryLayer::StatisticsBatch visibleStatistics(numHiddenStates,16);
 		energy.inputVisible(visibleInput,hiddenStates);
-		rbm.visibleNeurons().sufficientStatistics(visibleInput,visibleStatistics, repeat(1.0,numHiddenStates));
+		rbm.visibleNeurons().sufficientStatistics(visibleInput,visibleStatistics, blas::repeat(1.0,numHiddenStates));
 		
 		//now we calculate for all 2^16 states  sum_h p(v|h)p_s(h)-> p_s(v), this likely makes this test really really slow
 		RealVector pSv(numVisibleStates,0.0);
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		for(std::size_t i = 0; i != inputs; ++i){
 			row(v,0) = data.element(i);
 			energy.inputHidden(hInput,v);
-			rbm.hiddenNeurons().sufficientStatistics(hInput,hstat, repeat(1.0,1));
+			rbm.hiddenNeurons().sufficientStatistics(hInput,hstat, blas::repeat(1.0,1));
 			
 			noalias(visibleGrad) -=row(v,0);
 			noalias(hiddenGrad) -=row(hstat.probability,0);
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		for(std::size_t i = 0; i != numVisibleStates; ++i){
 			space.state(row(v,0),i);
 			energy.inputHidden(hInput,v);
-			rbm.hiddenNeurons().sufficientStatistics(hInput,hstat, repeat(1.0,1));
+			rbm.hiddenNeurons().sufficientStatistics(hInput,hstat, blas::repeat(1.0,1));
 			
 			noalias(visibleGrad) +=pSv(i)*row(v,0);
 			noalias(hiddenGrad) +=pSv(i)*row(hstat.probability,0);

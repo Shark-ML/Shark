@@ -108,13 +108,13 @@ public:
 	}
 	
 	void setStructure(KernelType* kernel,bool offset, unsigned int outputs = 1){
-		SHARK_ASSERT(mep_kernel != NULL);
+		SHARK_ASSERT(kernel != NULL);
 		mep_kernel= kernel;
 		setStructure(offset,outputs);
 	}
 	
 	void setStructure(KernelType* kernel, Data<InputType> const& basis,bool offset, unsigned int outputs = 1){
-		SHARK_ASSERT(mep_kernel != NULL);
+		SHARK_ASSERT(kernel != NULL);
 		mep_kernel = kernel;
 		setStructure(basis,offset,outputs);
 	}

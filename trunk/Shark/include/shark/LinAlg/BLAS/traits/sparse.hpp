@@ -37,7 +37,7 @@
 #include "matrix_raw.hpp"
 
 
-namespace shark { namespace traits {
+namespace shark { namespace blas{  namespace traits {
 
 //O.K. needs rework!
 //template<class ValueType, class IndexType>
@@ -192,6 +192,6 @@ namespace shark { namespace traits {
 //class IsCompressed<blas::matrix_unary2<M, F > >
 //:public IsCompressed<M>{};
 
-}}
+}}}
 
 #endif

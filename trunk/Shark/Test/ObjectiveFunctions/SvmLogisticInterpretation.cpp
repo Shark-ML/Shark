@@ -39,7 +39,7 @@
 #include <shark/Algorithms/GradientDescent/Rprop.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/Models/Kernels/ArdKernel.h>
-#include <shark/LinAlg/VectorStatistics.h>
+#include <shark/Data/Statistics.h>
 #include <shark/Data/Csv.h>
 #include <shark/Data/DataDistribution.h>
 

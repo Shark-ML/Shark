@@ -61,22 +61,22 @@ BOOST_AUTO_TEST_CASE( NCLL_EVAL_BINARY ) {
 	label(3)=0;
 	
 	// first, some manual tests for binary
-	BOOST_CHECK_SMALL( ncll.eval(UIntScalarVector(1,1),RealScalarMatrix(1,1, 0.8))-0.223143551 , 1e-7);
-	BOOST_CHECK_SMALL( ncll.eval(UIntScalarVector(1,1),RealScalarMatrix(1,1, 0.2))-1.609437912 , 1e-7);
-	BOOST_CHECK_SMALL( ncll.eval(UIntScalarVector(1,0),RealScalarMatrix(1,1, 0.9))-2.302585093 , 1e-7);
-	BOOST_CHECK_SMALL( ncll.eval(UIntScalarVector(1,0),RealScalarMatrix(1,1, 0.3))-0.356674944 , 1e-7);
-	BOOST_CHECK_SMALL( ncll.eval(UIntScalarVector(1,0),RealScalarMatrix(1,1, 0.5))-ncll.eval(UIntScalarVector(1,1),RealScalarMatrix(1,1,0.5)), 1e-12);
+	BOOST_CHECK_SMALL( ncll.eval(blas::repeat(1,1),blas::repeat(0.8,1,1))-0.223143551 , 1e-7);
+	BOOST_CHECK_SMALL( ncll.eval(blas::repeat(1,1),blas::repeat(0.2,1,1))-1.609437912 , 1e-7);
+	BOOST_CHECK_SMALL( ncll.eval(blas::repeat(0,1),blas::repeat(0.9,1,1))-2.302585093 , 1e-7);
+	BOOST_CHECK_SMALL( ncll.eval(blas::repeat(0,1),blas::repeat(0.3,1,1))-0.356674944 , 1e-7);
+	BOOST_CHECK_SMALL( ncll.eval(blas::repeat(0,1),blas::repeat(0.5,1,1))-ncll.eval(blas::repeat(1,1),blas::repeat(0.5,1,1)), 1e-12);
 	// second, same for binary derivatives
 	RealMatrix deriv, deriv2;
-	BOOST_CHECK_SMALL( ncll.evalDerivative(UIntScalarVector(1,1),RealScalarMatrix(1,1, 0.8), deriv)-0.223143551 , 1e-7);
+	BOOST_CHECK_SMALL( ncll.evalDerivative(blas::repeat(1,1),blas::repeat(0.8,1,1), deriv)-0.223143551 , 1e-7);
 	BOOST_CHECK_SMALL( deriv(0,0) + 1.25, 1e-7);
-	BOOST_CHECK_SMALL( ncll.evalDerivative(UIntScalarVector(1,1),RealScalarMatrix(1,1, 0.2), deriv)-1.609437912 , 1e-7);
+	BOOST_CHECK_SMALL( ncll.evalDerivative(blas::repeat(1,1),blas::repeat(0.2,1,1), deriv)-1.609437912 , 1e-7);
 	BOOST_CHECK_SMALL( deriv(0,0) + 5.0, 1e-7);
-	BOOST_CHECK_SMALL( ncll.evalDerivative(UIntScalarVector(1,0),RealScalarMatrix(1,1, 0.9), deriv)-2.302585093 , 1e-7);
+	BOOST_CHECK_SMALL( ncll.evalDerivative(blas::repeat(0,1),blas::repeat(0.9,1,1), deriv)-2.302585093 , 1e-7);
 	BOOST_CHECK_SMALL( deriv(0,0) - 10.0, 1e-7);
-	BOOST_CHECK_SMALL( ncll.evalDerivative(UIntScalarVector(1,0),RealScalarMatrix(1,1, 0.3), deriv)-0.356674944 , 1e-7);
+	BOOST_CHECK_SMALL( ncll.evalDerivative(blas::repeat(0,1),blas::repeat(0.3,1,1), deriv)-0.356674944 , 1e-7);
 	BOOST_CHECK_SMALL( deriv(0,0) - 1.4285714286, 1e-7);
-	BOOST_CHECK_SMALL( ncll.evalDerivative(UIntScalarVector(1,0),RealScalarMatrix(1,1, 0.5), deriv)-ncll.evalDerivative(UIntScalarVector(1,1),RealScalarMatrix(1,1,0.5),deriv2), 1e-12);
+	BOOST_CHECK_SMALL( ncll.evalDerivative(blas::repeat(0,1),blas::repeat(0.5,1,1), deriv)-ncll.evalDerivative(blas::repeat(1,1),blas::repeat(0.5,1,1),deriv2), 1e-12);
 	BOOST_CHECK_SMALL( deriv(0,0) - 2.0, 1e-7);
 	
 	//third, now for a whole batch

@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Repeat_Indexed ){
 	vector(1) = 2;
 	vector(2) = 3;
 	
-	VectorRepeater<IntVector> rep=repeat(vector,3);
+	blas::VectorRepeater<IntVector> rep=blas::repeat(vector,3);
 	
 	for(std::size_t i = 0; i != 3; ++i){
 		for(std::size_t j = 0; j != 3; ++j){
@@ -28,19 +28,19 @@ BOOST_AUTO_TEST_CASE( LinAlg_Repeat_Iterator ){
 	vector(1) = 2;
 	vector(2) = 3;
 	
-	VectorRepeater<IntVector> rep=repeat(vector,3);
+	blas::VectorRepeater<IntVector> rep=blas::repeat(vector,3);
 	 
 	//test both iterator orders
-	for(VectorRepeater<IntVector>::const_iterator1 i = rep.begin1(); i != rep.end1(); ++i){
+	for(blas::VectorRepeater<IntVector>::const_iterator1 i = rep.begin1(); i != rep.end1(); ++i){
 		std::size_t k = 0;
-		for(VectorRepeater<IntVector>::const_iterator2 j = i.begin(); j != i.end(); ++j,++k){
+		for(blas::VectorRepeater<IntVector>::const_iterator2 j = i.begin(); j != i.end(); ++j,++k){
 			BOOST_CHECK_EQUAL(*j, vector(k)); 
 		}
 	}
 	
 	std::size_t k = 0;
-	for(VectorRepeater<IntVector>::const_iterator2 i = rep.begin2(); i != rep.end2(); ++i,++k){
-		for(VectorRepeater<IntVector>::const_iterator1 j = i.begin(); j != i.end(); ++j){
+	for(blas::VectorRepeater<IntVector>::const_iterator2 i = rep.begin2(); i != rep.end2(); ++i,++k){
+		for(blas::VectorRepeater<IntVector>::const_iterator1 j = i.begin(); j != i.end(); ++j){
 			BOOST_CHECK_EQUAL(*j, vector(k)); 
 		}
 	}
@@ -53,10 +53,10 @@ BOOST_AUTO_TEST_CASE( LinAlg_Repeat_Expressions ){
 	vector(1) = 2;
 	vector(2) = 3;
 	
-	VectorRepeater<IntVector> rep=repeat(vector,3);
+	blas::VectorRepeater<IntVector> rep=blas::repeat(vector,3);
 	
 	RealMatrix result(rep);
-	result+=repeat(vector,3);
+	result+=blas::repeat(vector,3);
 	
 	for(std::size_t i = 0; i != 3; ++i){
 		for(std::size_t j = 0; j != 3; ++j){

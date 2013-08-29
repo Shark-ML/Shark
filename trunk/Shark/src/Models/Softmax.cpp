@@ -87,7 +87,7 @@ void Softmax::weightedInputDerivative(
 		double mass=inner_prod(row(coefficients,i),row(s.results,i));
 		//(c_k-m)*f_k
 		noalias(row(gradient,i))=element_prod(
-			row(coefficients,i)-repeat(mass,inputSize()),
+			row(coefficients,i)-blas::repeat(mass,inputSize()),
 			row(s.results,i)
 		);
 	}

@@ -44,7 +44,7 @@
 #define SHARK_LINALG_INITIALIZE_H
 
 #include "Impl/Initialize.h"
-namespace shark{
+namespace shark{ namespace blas{
 
 /**
  * \ingroup shark_globals
@@ -57,7 +57,7 @@ namespace shark{
 ///Usage: init(vector)<<a,b,c where vector is a ublas vector or sub-vector and a,b,c are either scalars or vectors.
 ///In debug mode, it is checked that size(vector) == size(a,b,c)
 template<class Source>
-detail::ADLVector<Source&> init(shark::blas::vector_container<Source>& source){
+detail::ADLVector<Source&> init(vector_container<Source>& source){
 	return detail::ADLVector<Source&>(source());
 }
 ///\brief Starting-point for the initialization sequence.
@@ -65,7 +65,7 @@ detail::ADLVector<Source&> init(shark::blas::vector_container<Source>& source){
 ///Usage: init(vector)<<a,b,c where vector is a ublas vector or sub-vector and a,b,c are either scalars or vectors.
 ///In debug mode, it is checked that size(vector) == size(a,b,c)
 template<class Source>
-detail::ADLVector<const Source&> init(const shark::blas::vector_container<Source>& source){
+detail::ADLVector<const Source&> init(const vector_container<Source>& source){
 	return detail::ADLVector<const Source&>(source());
 }
 ///\brief Starting-point for the initialization sequence when used for splitting the vector.
@@ -73,41 +73,41 @@ detail::ADLVector<const Source&> init(const shark::blas::vector_container<Source
 ///Usage: init(vector)>>a,b,c where vector is a ublas vector or sub-vector and a,b,c are mutable scalars or vectors.
 ///In debug mode, it is checked that size(vector) == size(a,b,c)
 //~ template<class Source>
-//~ detail::ADLVector<const Source&> init(const shark::blas::vector_expression<Source>& source){
+//~ detail::ADLVector<const Source&> init(const vector_expression<Source>& source){
 	//~ return detail::ADLVector<const Source&>(source());
 //~ }
 
 
 ///\brief Specialization for ublas vector_range. 
 template<class Source>
-detail::ADLVector<shark::blas::vector_range<Source> > 
-init(const shark::blas::vector_range<Source>& source){
-	return detail::ADLVector<shark::blas::vector_range<Source> >(source);
+detail::ADLVector<vector_range<Source> > 
+init(const vector_range<Source>& source){
+	return detail::ADLVector<vector_range<Source> >(source);
 }
 
 ///\brief Specialization for matrix rows.
 template<class Source>
-detail::ADLVector<shark::blas::matrix_row<Source> > 
-init(const shark::blas::matrix_row<Source>& source){
-	return detail::ADLVector<shark::blas::matrix_row<Source> >(source);
+detail::ADLVector<matrix_row<Source> > 
+init(const matrix_row<Source>& source){
+	return detail::ADLVector<matrix_row<Source> >(source);
 }
 ///\brief Specialization for matrix columns.
 template<class Source>
-detail::ADLVector<shark::blas::matrix_column<Source> > 
-init(const shark::blas::matrix_row<Source>& source){
-	return detail::ADLVector<shark::blas::matrix_column<Source> >(source);
+detail::ADLVector<matrix_column<Source> > 
+init(const matrix_row<Source>& source){
+	return detail::ADLVector<matrix_column<Source> >(source);
 }
 
 //matrices as arguments
 
 ///\brief Linearizes a matrix as a set of row vectors and treats them as a set of vectors for initialization.
 template<class Matrix>
-detail::MatrixExpression<const Matrix> toVector(const shark::blas::matrix_expression<Matrix>& matrix){
+detail::MatrixExpression<const Matrix> toVector(const matrix_expression<Matrix>& matrix){
 	return detail::MatrixExpression<const Matrix>(matrix());
 }
 ///\brief Linearizes a matrix as a set of row vectors and treats them as a set of vectors for initialization.
 template<class Matrix>
-detail::MatrixExpression<Matrix> toVector(shark::blas::matrix_expression<Matrix>& matrix){
+detail::MatrixExpression<Matrix> toVector(matrix_expression<Matrix>& matrix){
 	return detail::MatrixExpression<Matrix>(matrix());
 }
 
@@ -212,6 +212,6 @@ parameterSet(T& range){
 }
 
 /** @} */
-}
+}}
 
 #endif
