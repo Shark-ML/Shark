@@ -69,24 +69,54 @@ public:
 	// ////////////      CONSTRUCTORS       /////////////////////
 	// //////////////////////////////////////////////////////////
 
+	KernelExpansion(){}
+		
 	KernelExpansion(bool offset, unsigned int outputs = 1)
-	: mep_kernel(NULL), m_offset(offset), m_outputs(outputs),
-	m_alpha(0,outputs),m_b(offset ? outputs : 0,0.0){}
+	: mep_kernel(NULL){
+		setStructure(offset,outputs);
+	}
 
 	KernelExpansion(Data<InputType> const& basis, bool offset, unsigned int outputs = 1)
-	: mep_kernel(NULL), m_offset(offset), m_outputs(outputs),m_b(offset ? outputs : 0, 0.0){
-		setBasis(basis);
+	: mep_kernel(NULL){
+		setStructure(basis,offset,outputs);
 	}
 
-	KernelExpansion(KernelType* kernel, bool offset, unsigned int outputs = 1)
-	: mep_kernel(kernel), m_offset(offset), m_outputs(outputs),m_alpha(0,outputs), m_b(offset ? outputs : 0, 0.0){
-		SHARK_ASSERT(mep_kernel != NULL);
+	KernelExpansion(KernelType* kernel, bool offset, unsigned int outputs = 1){
+		setStructure(kernel,offset,outputs);
 	}
 
-	KernelExpansion(KernelType* kernel, Data<InputType> const& basis, bool offset, unsigned int outputs = 1)
-	: mep_kernel(kernel), m_offset(offset), m_outputs(outputs), m_b(offset ? outputs : 0, 0.0){
-		SHARK_ASSERT(mep_kernel != NULL);
+	KernelExpansion(KernelType* kernel, Data<InputType> const& basis, bool offset, unsigned int outputs = 1){
+		setStructure(kernel, basis, offset,outputs);
+	}
+	
+	
+	void setStructure(bool offset, unsigned int outputs = 1){
+		m_offset = offset;
+		m_outputs = outputs;
+		m_b.resize(offset ? outputs : 0);
+		zero(m_b);
+		m_alpha.resize(m_basis.numberOfElements(), m_outputs);
+		zero(m_alpha);
+	}
+	
+	void setStructure(Data<InputType> const& basis,bool offset, unsigned int outputs = 1){
+		m_offset = offset;
+		m_outputs = outputs;
+		m_b.resize(offset ? outputs : 0);
+		zero(m_b);
 		setBasis(basis);
+	}
+	
+	void setStructure(KernelType* kernel,bool offset, unsigned int outputs = 1){
+		SHARK_ASSERT(mep_kernel != NULL);
+		mep_kernel= kernel;
+		setStructure(offset,outputs);
+	}
+	
+	void setStructure(KernelType* kernel, Data<InputType> const& basis,bool offset, unsigned int outputs = 1){
+		SHARK_ASSERT(mep_kernel != NULL);
+		mep_kernel = kernel;
+		setStructure(basis,offset,outputs);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -192,26 +222,6 @@ public:
 			noalias(row(a,i)) = row(m_alpha,svIndices[i]); 
 		}
 		swap(m_alpha,a);
-		
-		// old version
-		//~ std::size_t ic = m_basis.numberOfElements();
-		//~ std::size_t sv = 0;
-		//~ for (std::size_t i=0; i != ic; i++) 
-			//~ if (blas::norm_1(RealMatrixRow(m_alpha, i)) > 0.0) 
-				//~ sv++;
-
-		//~ RealMatrix a(sv, m_outputs);
-		//~ Data<InputType> b(sv,m_basis(0));
-
-		//~ for (std::size_t s=0, i=0; i!= ic; i++){
-			//~ if (blas::norm_1(RealMatrixRow(m_alpha, i)) > 0.0){
-				//~ RealMatrixRow(a, s) = RealMatrixRow(m_alpha, i);
-				//~ noalias(b(s)) = m_basis(i);
-				//~ s++;
-			//~ }
-		//~ }
-		//~ m_alpha = a;
-		//~ m_basis = b;
 	}
 
 	// //////////////////////////////////////////////////////////
