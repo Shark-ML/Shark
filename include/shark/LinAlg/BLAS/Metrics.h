@@ -206,8 +206,8 @@ namespace detail{
 		boost::mpl::false_,
 		boost::mpl::false_
 	){
-		shark::zero(result);
-		shark::generalMatrixVectorOperation(operands,op2,result,SquaredScalarDistance());
+		blas::zero(result);
+		generalMatrixVectorOperation(operands,op2,result,SquaredScalarDistance());
 	}
 	template<class MatrixT,class VectorU, class Result>
 	void distanceSqrBlockVector(

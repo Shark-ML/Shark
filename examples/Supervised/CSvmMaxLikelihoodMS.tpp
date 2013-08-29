@@ -1,7 +1,7 @@
 #include <shark/Data/Dataset.h>
 #include <shark/Data/CVDatasetTools.h>
 #include <shark/Data/DataDistribution.h>
-#include <shark/LinAlg/VectorStatistics.h>
+#include <shark/Data/Statistics.h>
 #include <shark/Models/Kernels/ArdKernel.h>
 #include <shark/Algorithms/QP/QuadraticProgram.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
@@ -19,7 +19,7 @@ unsigned int useful_dim = 5;
 unsigned int noise_dim = 5;
 unsigned int total_dim = useful_dim + noise_dim;
 
-void run_one_trial( bool verbose, RealMatrixRow final_params )
+RealVector run_one_trial( bool verbose)
 {
     // set up the classification problem from a DataDistribution
     PamiToy problem( useful_dim, noise_dim );
@@ -155,25 +155,26 @@ void run_one_trial( bool verbose, RealMatrixRow final_params )
     }
 
     // copy the best parameters, as well as performance values into averaging vector:
+    RealVector final_params(total_dim+3);
     final_params(total_dim) = C_reg;
     for ( unsigned int i=0; i<total_dim; i++ )
         final_params(i) = rprop.solution().point(i)*rprop.solution().point(i);
     final_params(total_dim+1) = train_error;
     final_params(total_dim+2) = test_error;
+    return final_params;
 }
 
 int main(){
 
     // run one trial with output
-    RealMatrix single_result( 1, total_dim+3 );
-    run_one_trial( true, row(single_result, 0) );
-    std::cout << std::endl << "REPEAT WITH 100 TRIALS: now we do the exact same thing multiple times in a row, and note the average kernel weights. Please wait." << std::endl << std::endl;
+    run_one_trial( true);
+    std::cout << "\nREPEAT WITH 100 TRIALS: now we do the exact same thing multiple times in a row, and note the average kernel weights. Please wait." << std::endl << std::endl;
 
     // run several trials without output, and average the results
     unsigned int num_trials = 100;
-    RealMatrix many_results( num_trials, total_dim+3 ); //each row is one run of resulting hyperparameters
+    Data<RealVector> many_results(num_trials,RealVector(total_dim+3));//each row is one run of resulting hyperparameters
     for ( unsigned int i=0; i<num_trials; i++ ) {
-        run_one_trial( false, row(many_results, i) );
+        many_results.element(i) = run_one_trial(false);
         std::cout << "." << std::flush;
     }
     std::cout << "\n" << std::endl;

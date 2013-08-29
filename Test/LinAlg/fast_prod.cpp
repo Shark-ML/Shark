@@ -278,7 +278,93 @@ BOOST_AUTO_TEST_CASE( LinAlg_fast_prod_matrix_vector_sparse ){
 	BOOST_CHECK_SMALL(error,1.e-10);
 	
 }
+
+using namespace shark;
+
+struct Product{
+	template<class T>
+	inline T operator()(T x, T y)const{
+		return x*y;
+		//double diff=x-y;
+		//return diff*diff;
+	}
+};
+
+BOOST_AUTO_TEST_CASE( LinAlg_MatrixVectorOperations_row_major ){
+	std::size_t args = 211;
+	std::size_t results = 113;
+	
+	RealVector arguments(args);
+	RealVector result(results);
+	RealVector testResult(results);
+	
+	blas::matrix<double,blas::row_major> matA(results,args);
+	
+	for(std::size_t i = 0; i != results; ++i){
+		result(i)=testResult(i)=Rng::uni(-1,1);
+	}
+	for(std::size_t i = 0; i != args; ++i){
+		arguments(i)=Rng::uni(-1,1);
+	}
+	
+	for(std::size_t i = 0; i != results; ++i){
+		for(std::size_t j = 0; j != args; ++j){
+			matA(i,j)=Rng::uni(-1,1);
+		}
+	}
+	
+	testResult+=prod(matA,arguments);
+	generalMatrixVectorOperation(matA,arguments,result,Product());
+	
+	double error = distanceSqr(result,testResult);
+	BOOST_CHECK_SMALL(error,1.e-10);
+}
+
+
 #ifdef NDEBUG
+
+BOOST_AUTO_TEST_CASE( LinAlg_MatrixVectorOperations_row_major_BENCHMARK ){
+	std::size_t args = 1000;
+	std::size_t results = 1000;
+	std::size_t iterations=1000;
+	
+	RealVector arguments(args);
+	RealVector result(results);
+	
+	blas::matrix<double,blas::row_major> matA(results,args);
+	
+	for(std::size_t i = 0; i != results; ++i){
+		result(i)=Rng::uni(-1,1);
+	}
+	for(std::size_t i = 0; i != args; ++i){
+		arguments(i)=Rng::uni(-1,1);
+	}
+	
+	for(std::size_t i = 0; i != results; ++i){
+		for(std::size_t j = 0; j != args; ++j){
+			matA(i,j)=Rng::uni(-1,1);
+		}
+	}
+	
+	std::cout<<"starting benchmark: gemv_prod"<<std::endl;
+	
+	double start1=Timer::now();
+	for(std::size_t i = 0; i != iterations; ++i){
+		generalMatrixVectorOperation(matA,arguments,result,Product());
+	}
+	double end1=Timer::now();
+	double start2=Timer::now();
+	for(std::size_t i = 0; i != iterations; ++i){
+		fast_prod(matA,arguments,result,1.0);
+	}
+	double end2=Timer::now();
+	std::cout<<"gemv_prod: "<<end1-start1<<" fast_prod: "<<end2-start2<<std::endl;
+	
+	double output= 0;
+	output += norm_sqr(result);
+	std::cout<<"anti optimization output: "<<output<<std::endl;
+}
+
 #ifdef SHARK_USE_ATLAS
 BOOST_AUTO_TEST_CASE( LinAlg_fast_prod_vector_BENCHMARK ){
 	const std::size_t matRows=28*28;

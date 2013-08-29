@@ -38,7 +38,7 @@
 
 #include <shark/LinAlg/Base.h>
 
-namespace shark{
+namespace shark{ namespace blas{
 
 /**
  * \ingroup shark_globals
@@ -64,8 +64,8 @@ namespace shark{
  */
 template<class MatrixT,class MatrixL>
 void choleskyDecomposition(
-	blas::matrix_expression<MatrixT> const& A, 
-	blas::matrix_expression<MatrixL>& L
+	matrix_expression<MatrixT> const& A, 
+	matrix_expression<MatrixL>& L
 );
 
 /*!
@@ -92,13 +92,13 @@ void choleskyDecomposition(
  */
 template<class MatrixT,class MatrixL>
 std::size_t pivotingCholeskyDecomposition(
-	blas::matrix_expression<MatrixT> const& A,
+	matrix_expression<MatrixT> const& A,
 	PermutationMatrix& P,
-	blas::matrix_expression<MatrixL>& L
+	matrix_expression<MatrixL>& L
 );
 
 /** @}*/
-}
+}}
 
 //implementation of the template functions
 #include "Impl/Cholesky.inl"

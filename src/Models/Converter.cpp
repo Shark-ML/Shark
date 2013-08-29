@@ -92,41 +92,6 @@ void ThresholdVectorConverter::eval(BatchInputType const& patterns, BatchOutputT
 	}
 }
 
-
-////////////////////////////////////////////////////////////
-
-
-ArgMaxConverter::ArgMaxConverter()
-{ }
-
-
-RealVector ArgMaxConverter::parameterVector() const{ 
-	return RealVector(); 
-}
-
-void ArgMaxConverter::setParameterVector(RealVector const& newParameters){
-	SHARK_CHECK(newParameters.size() == 0, "[ArgMaxConverter::setParameterVector] invalid number of parameters");
-}
-
-size_t ArgMaxConverter::numberOfParameters() const{ 
-	return 0; 
-}
-
-void ArgMaxConverter::eval(BatchInputType const& patterns, BatchOutputType& outputs)const{
-	SHARK_CHECK(patterns.size2() > 0, "[ArgMaxConverter::eval] invalid size of base model outputs");
-	outputs.resize(patterns.size1(),1);
-	for(std::size_t pattern = 0; pattern != patterns.size1();++pattern){
-		double best = patterns(pattern,0);
-		for(std::size_t i=1; i != patterns.size2(); i++){
-			if (patterns(pattern,i) > best) { 
-				best = patterns(pattern,i); 
-				outputs(pattern) = i; 
-			}
-		}
-	}
-}
-
-
 ////////////////////////////////////////////////////////////
 
 

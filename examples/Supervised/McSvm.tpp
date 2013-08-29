@@ -5,7 +5,6 @@
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataDistribution.h>
 #include <shark/Models/Converter.h>
-#include <shark/Models/ConcatenatedModel.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Algorithms/Trainers/McSvmOVATrainer.h>
 #include <shark/Algorithms/Trainers/McSvmCSTrainer.h>
@@ -56,14 +55,11 @@ int main()
 	GaussianRbfKernel<> kernel(gamma);
 
 	// SVM kernel expansions with real vector-valued
-	// output, with and without bias
-	KernelExpansion<RealVector> ke_no_bias(false, classes);
-	KernelExpansion<RealVector> ke_with_bias(true, classes);
-
-	// SVM models with integer class-label output
-	ArgMaxConverter conv;
-	ConcatenatedModel<RealVector, unsigned int> svm_no_bias = ke_no_bias >> conv;
-	ConcatenatedModel<RealVector, unsigned int> svm_with_bias = ke_with_bias >> conv;
+	// output are converted to class labels
+	ArgMaxConverter<KernelExpansion<RealVector> >  svm_no_bias;
+	ArgMaxConverter<KernelExpansion<RealVector> >  svm_with_bias;
+	svm_no_bias.decisionFunction().setStructure(false,classes);
+	svm_with_bias.decisionFunction().setStructure(true,classes);
 
 	// loss measuring classification errors
 	ZeroOneLoss<unsigned int> loss;
@@ -82,7 +78,7 @@ int main()
 	std::printf("SHARK multi-class SVM example - training 16 machines:\n");
 	for (i=0; i<8; i++)
 	{
-		trainer[i]->train(ke_no_bias, training);
+		trainer[i]->train(svm_no_bias.decisionFunction(), training);
 		Data<unsigned int> output = svm_no_bias(training.inputs());
 		double train_error = loss.eval(training.labels(), output);
 		output = svm_no_bias(test.inputs());
@@ -97,7 +93,7 @@ int main()
 				train_error,
 				test_error);
 
-		trainer[i]->train(ke_with_bias, training);
+		trainer[i]->train(svm_with_bias.decisionFunction(), training);
 		output = svm_with_bias(training.inputs());
 		train_error = loss.eval(training.labels(), output);
 		output = svm_with_bias(test.inputs());

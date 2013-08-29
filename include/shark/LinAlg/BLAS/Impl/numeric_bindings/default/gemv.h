@@ -31,15 +31,15 @@
 #ifndef SHARK_LINALG_IMPL_NUMERIC_BINDINGS_DEFAULT_GEMV_H
 #define SHARK_LINALG_IMPL_NUMERIC_BINDINGS_DEFAULT_GEMV_H
 
-namespace shark {namespace detail {namespace bindings {
+namespace shark {namespace blas {namespace bindings {
 
 // y <- alpha * op (A) * x + beta * y
 // op (A) == A || A^T || A^H
 template <typename T, typename MatA, typename VectorB, typename VectorC>
 void gemv(
-T alpha, blas::matrix_expression<MatA> const &matA, 
-blas::vector_expression<VectorB> const &vecB,
-T beta, blas::vector_expression<VectorC> &vecC
+T alpha, matrix_expression<MatA> const &matA, 
+vector_expression<VectorB> const &vecB,
+T beta, vector_expression<VectorC> &vecC
 ) {
 	if(alpha != 1.0){
 		beta /= alpha;

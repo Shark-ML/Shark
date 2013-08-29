@@ -56,7 +56,7 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	//A = ( P^T P  P^T 1)
 	//       ( 1^T P  1^T1)
 	RealMatrix matA(inputDim+1,inputDim+1,0.0);
-	Blocking<RealMatrix> Ablocks(matA,inputDim,inputDim);
+	blas::Blocking<RealMatrix> Ablocks(matA,inputDim,inputDim);
 	//compute A and the label matrix batchwise
 	typedef LabeledData<RealVector, RealVector>::const_batch_reference BatchRef;
 	for (std::size_t b=0; b != numBatches; b++){
@@ -67,7 +67,7 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	row(Ablocks.lowerLeft(),0) = column(Ablocks.upperRight(),0);
 	matA(inputDim,inputDim) = numInputs;
 	//X^TX+=lambda* I
-	diag(Ablocks.upperLeft())+= repeat(m_regularization,inputDim);
+	diag(Ablocks.upperLeft())+= blas::repeat(m_regularization,inputDim);
 	
 	
 	//we also need to compute X^T L= (P^TL, 1^T L) where L is the matrix of labels 
@@ -84,7 +84,7 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	//Beta = A^-1 T
 	//but it is faster und numerically more stable, if we solve it as a symmetric system
 	RealMatrix beta(inputDim+1,outputDim);
-	solveSymmSystem<SolveAXB>(matA,beta,XTL);
+	blas::solveSymmSystem<blas::SolveAXB>(matA,beta,XTL);
 	
 	RealMatrix matrix = subrange(trans(beta), 0, outputDim, 0, inputDim);
 	RealVector offset = row(beta,inputDim);

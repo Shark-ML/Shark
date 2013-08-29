@@ -190,7 +190,7 @@ namespace shark {
 			* \brief Calculates the evd of the current covariance matrix.
 			*/
 			void update() {
-				shark::eigensymm( m_covarianceMatrix, m_eigenVectors, m_eigenValues );
+				eigensymm( m_covarianceMatrix, m_eigenVectors, m_eigenValues );
 			}			
 
 			/**

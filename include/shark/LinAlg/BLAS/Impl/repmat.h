@@ -34,7 +34,7 @@
 #ifndef SHARK_LINALG_REPMAT_INL
 #define SHARK_LINALG_REPMAT_INL
 
-namespace shark{
+namespace shark{ namespace blas{
 template<class V>
 class VectorRepeater:public blas::matrix_expression<VectorRepeater<V> > {
 private:
@@ -319,5 +319,5 @@ private:
 	expression_closure_type m_vector;
 	std::size_t m_rows;
 };
-}
+}}
 #endif

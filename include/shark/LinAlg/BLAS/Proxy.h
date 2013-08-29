@@ -47,10 +47,10 @@
 
 #include <algorithm>
 
-namespace shark{
+namespace shark{namespace blas{
 
 template<class ValueType>
-class FixedDenseVectorProxy: public blas::vector_expression<FixedDenseVectorProxy<ValueType> > {
+class FixedDenseVectorProxy: public vector_expression<FixedDenseVectorProxy<ValueType> > {
 	typedef FixedDenseVectorProxy<ValueType> self_type;
 public:
 
@@ -63,9 +63,9 @@ public:
 	typedef ValueType* pointer;
 	typedef value_type const* const_pointer;
 	//ublas types
-	typedef blas::vector_reference<self_type const> const const_closure_type;
-	typedef blas::vector_reference<self_type> closure_type;
-	typedef blas::dense_tag storage_category;
+	typedef vector_reference<self_type const> const const_closure_type;
+	typedef vector_reference<self_type> closure_type;
+	typedef dense_tag storage_category;
 
 	// Construction and destruction
 
@@ -74,7 +74,7 @@ public:
 	/// Be aware that the expression must live longer than the proxy!
 	/// \param expression The Expression from which to construct the Proxy
  	template<class E>
-	FixedDenseVectorProxy(blas::vector_expression<E> const& expression):
+	FixedDenseVectorProxy(vector_expression<E> const& expression):
 		m_data(traits::vector_storage(expression())),
 		m_size(expression().size()),
 		m_stride(traits::vector_stride(expression())){
@@ -87,7 +87,7 @@ public:
 	/// Be aware that the expression must live longer than the proxy!
 	/// \param expression The Expression from which to construct the Proxy
  	template<class E>
-	FixedDenseVectorProxy(blas::vector_expression<E>& expression)
+	FixedDenseVectorProxy(vector_expression<E>& expression)
 	: m_data(traits::vector_storage(expression()))
 	, m_size(expression().size())
 	, m_stride(traits::vector_stride(expression()))
@@ -191,7 +191,7 @@ public:
 
 	 // Assignment
 	template<class V>
-	self_type& assign(blas::vector_expression<V> const& other) {
+	self_type& assign(vector_expression<V> const& other) {
 		SIZE_CHECK(other().size() == size());
 		for(std::size_t i = 0; i != m_size; ++i){
 			(*this)(i) = other()(i);
@@ -199,7 +199,7 @@ public:
 		return *this;
 	}
 	template<class V>
-	self_type& plus_assign(blas::vector_expression<V> const& other) {
+	self_type& plus_assign(vector_expression<V> const& other) {
 		SIZE_CHECK(other().size() == size());
 		for(std::size_t i = 0; i != m_size; ++i){
 			(*this)(i) += other()(i);
@@ -207,7 +207,7 @@ public:
 		return *this;
 	}
 	template<class V>
-	self_type& minus_assign(blas::vector_expression<V> const& other) {
+	self_type& minus_assign(vector_expression<V> const& other) {
 		SIZE_CHECK(other().size() == size());
 		for(std::size_t i = 0; i != m_size; ++i){
 			(*this)(i) -= other()(i);
@@ -216,17 +216,17 @@ public:
 	}
 	
 	template<class V>
-	self_type& operator=(blas::vector_expression<V> const& other) {
-		return assign(blas::vector<value_type>(other));
+	self_type& operator=(vector_expression<V> const& other) {
+		return assign(vector<value_type>(other));
 	}
 	
 	template<class V>
-	self_type& operator+=(blas::vector_expression<V> const& other) {
-		return plus_assign(blas::vector<value_type>(other));
+	self_type& operator+=(vector_expression<V> const& other) {
+		return plus_assign(vector<value_type>(other));
 	}
 	template<class V>
-	self_type& operator-=(blas::vector_expression<V> const& other) {
-		return minus_assign(blas::vector<value_type>(other));
+	self_type& operator-=(vector_expression<V> const& other) {
+		return minus_assign(vector<value_type>(other));
 	}
 	
 	template<class T>
@@ -251,15 +251,15 @@ public:
 	/// \brief Swap the content of the self_type with another self_type
 	/// \param v is the self_type to be swapped with
 	void swap(self_type& v) {
-		blas::vector_swap<blas::scalar_swap> (*this, v);
+		vector_swap<scalar_swap> (*this, v);
 	}
 
 	// --------------
 	// ITERATORS
 	// --------------
 	
-	typedef blas::indexed_iterator<self_type, blas::dense_random_access_iterator_tag> iterator;
-	typedef blas::indexed_const_iterator<self_type, blas::dense_random_access_iterator_tag> const_iterator;
+	typedef indexed_iterator<self_type, dense_random_access_iterator_tag> iterator;
+	typedef indexed_const_iterator<self_type, dense_random_access_iterator_tag> const_iterator;
 	
 	/// \brief Return a const iterator to the element \e i
 	/// \param i index of the element
@@ -294,8 +294,8 @@ public:
 	}
 
 	// Reverse iterator
-	typedef blas::reverse_iterator_base<const_iterator> const_reverse_iterator;
-	typedef blas::reverse_iterator_base<iterator> reverse_iterator;
+	typedef reverse_iterator_base<const_iterator> const_reverse_iterator;
+	typedef reverse_iterator_base<iterator> reverse_iterator;
 
 	/// \brief Return a const reverse iterator before the first element of the reversed self_type(i.e. end() of normal self_type)
 	const_reverse_iterator rbegin() const {
@@ -322,8 +322,8 @@ private:
 	std::ptrdiff_t m_stride;
 };
 
-template<class ValueType,class Orientation=blas::row_major>
-class FixedDenseMatrixProxy: public blas::matrix_expression<FixedDenseMatrixProxy<ValueType,Orientation> > {
+template<class ValueType,class Orientation=row_major>
+class FixedDenseMatrixProxy: public matrix_expression<FixedDenseMatrixProxy<ValueType,Orientation> > {
 	typedef FixedDenseMatrixProxy<ValueType,Orientation> self_type;
 public:
 
@@ -337,9 +337,9 @@ public:
 	typedef ValueType* pointer;
 	typedef value_type const* const_pointer;
 	//ublas types
-	typedef blas::matrix_reference<self_type const> const const_closure_type;
-	typedef blas::matrix_reference<self_type> closure_type;
-	typedef blas::dense_tag storage_category;
+	typedef matrix_reference<self_type const> const const_closure_type;
+	typedef matrix_reference<self_type> closure_type;
+	typedef dense_tag storage_category;
         
 
 	// Construction and destruction
@@ -349,7 +349,7 @@ public:
 	/// Be aware that the expression must live longer than the proxy!
 	/// \param expression Expression from which to construct the Proxy
  	template<class E>
-	FixedDenseMatrixProxy(blas::matrix_expression<E> const& expression)
+	FixedDenseMatrixProxy(matrix_expression<E> const& expression)
 	: m_data(traits::matrix_storage(expression()))
 	, m_size1(expression().size1())
 	, m_size2(expression().size2())
@@ -368,7 +368,7 @@ public:
 	/// Be aware that the expression must live longer than the proxy!
 	/// \param expression Expression from which to construct the Proxy
  	template<class E>
-	FixedDenseMatrixProxy(blas::matrix_expression<E>& expression)
+	FixedDenseMatrixProxy(matrix_expression<E>& expression)
 	: m_data(traits::matrix_storage(expression()))
 	, m_size1(expression().size1())
 	, m_size2(expression().size2())
@@ -454,30 +454,30 @@ public:
 
 	 // Assignment
 	template<class M>
-	self_type& assign(blas::matrix_expression<M> const& other) {
+	self_type& assign(matrix_expression<M> const& other) {
 		SIZE_CHECK(other().size1() == size1());
 		SIZE_CHECK(other().size2() == size2());
-		blas::matrix_assign<blas::scalar_assign>(*this,other);
+		matrix_assign<scalar_assign>(*this,other);
 		return *this;
 	}
 	template<class M>
-	self_type& plus_assign(blas::matrix_expression<M> const& other) {
+	self_type& plus_assign(matrix_expression<M> const& other) {
 		SIZE_CHECK(other().size1() == size1());
 		SIZE_CHECK(other().size2() == size2());
-		blas::matrix_assign<blas::scalar_plus_assign>(*this,other);
+		matrix_assign<scalar_plus_assign>(*this,other);
 		return *this;
 	}
 	template<class M>
-	self_type& minus_assign(blas::matrix_expression<M> const& other) {
+	self_type& minus_assign(matrix_expression<M> const& other) {
 		SIZE_CHECK(other().size1() == size1());
 		SIZE_CHECK(other().size2() == size2());
-		blas::matrix_assign<blas::scalar_minus_assign>(*this,other);
+		matrix_assign<scalar_minus_assign>(*this,other);
 		return *this;
 	}
 	
 	template<class M>
-	self_type& operator=(blas::matrix_expression<M> const& other) {
-		return assign(typename blas::matrix_temporary_traits<M>::type(other));
+	self_type& operator=(matrix_expression<M> const& other) {
+		return assign(typename matrix_temporary_traits<M>::type(other));
 	}
 	 
         self_type &operator = (self_type const&m) {
@@ -485,22 +485,22 @@ public:
         }
 	
 	template<class M>
-	self_type& operator+=(blas::matrix_expression<M> const& other) {
-		return plus_assign(typename blas::matrix_temporary_traits<M>::type(other));
+	self_type& operator+=(matrix_expression<M> const& other) {
+		return plus_assign(typename matrix_temporary_traits<M>::type(other));
 	}
 	template<class M>
-	self_type& operator-=(blas::matrix_expression<M> const& other) {
-		return minus_assign(typename blas::matrix_temporary_traits<M>::type(other));
+	self_type& operator-=(matrix_expression<M> const& other) {
+		return minus_assign(typename matrix_temporary_traits<M>::type(other));
 	}
 	
 	template<class T>
 	self_type& operator*=(T const& t) {
-		blas::matrix_assign_scalar<blas::scalar_multiplies_assign> (*this, t);
+		matrix_assign_scalar<scalar_multiplies_assign> (*this, t);
 		return *this;
 	}
 	template<class T>
 	self_type& operator/=(T const&  t) {
-		blas::matrix_assign_scalar<blas::scalar_divides_assign> (*this, t);
+		matrix_assign_scalar<scalar_divides_assign> (*this, t);
 		return *this;
 	}
 	
@@ -533,17 +533,17 @@ public:
 	/// \brief Swap the content of the self_type with another self_type
 	/// \param v is the self_type to be swapped with
 	void swap(self_type& v) {
-		blas::matrix_swap<blas::scalar_swap> (*this, v);
+		matrix_swap<scalar_swap> (*this, v);
 	}
 
 	// --------------
 	// ITERATORS
 	// --------------
 
-	typedef blas::indexed_iterator1<self_type, blas::dense_random_access_iterator_tag> iterator1;
-        typedef blas::indexed_iterator2<self_type, blas::dense_random_access_iterator_tag> iterator2;
-        typedef blas::indexed_const_iterator1<self_type, blas::dense_random_access_iterator_tag> const_iterator1;
-        typedef blas::indexed_const_iterator2<self_type, blas::dense_random_access_iterator_tag> const_iterator2;
+	typedef indexed_iterator1<self_type, dense_random_access_iterator_tag> iterator1;
+        typedef indexed_iterator2<self_type, dense_random_access_iterator_tag> iterator2;
+        typedef indexed_const_iterator1<self_type, dense_random_access_iterator_tag> const_iterator1;
+        typedef indexed_const_iterator2<self_type, dense_random_access_iterator_tag> const_iterator2;
 	
         const_iterator1 find1 (int /* rank */, size_type i, size_type j) const {
 		return const_iterator1 (*this, i, j);
@@ -588,8 +588,8 @@ public:
         }
 
 	// Reverse iterators
-        typedef blas::reverse_iterator_base1<const_iterator1> const_reverse_iterator1;
-        typedef blas::reverse_iterator_base1<iterator1> reverse_iterator1;
+        typedef reverse_iterator_base1<const_iterator1> const_reverse_iterator1;
+        typedef reverse_iterator_base1<iterator1> reverse_iterator1;
 
         const_reverse_iterator1 rbegin1 () const {
             return const_reverse_iterator1 (end1 ());
@@ -605,8 +605,8 @@ public:
             return reverse_iterator1 (begin1 ());
         }
 
-        typedef blas::reverse_iterator_base2<const_iterator2> const_reverse_iterator2;
-        typedef blas::reverse_iterator_base2<iterator2> reverse_iterator2;
+        typedef reverse_iterator_base2<const_iterator2> const_reverse_iterator2;
+        typedef reverse_iterator_base2<iterator2> reverse_iterator2;
 
         const_reverse_iterator2 rbegin2 () const {
             return const_reverse_iterator2 (end2 ());
@@ -631,7 +631,7 @@ private:
 
 
 template<class ValueType,class IndexType>
-class FixedSparseVectorProxy: public blas::vector_expression<FixedSparseVectorProxy<ValueType,IndexType> > {
+class FixedSparseVectorProxy: public vector_expression<FixedSparseVectorProxy<ValueType,IndexType> > {
 	typedef FixedSparseVectorProxy<ValueType,IndexType> self_type;
 public:
 
@@ -645,9 +645,9 @@ public:
 	typedef IndexType const* const_index_pointer;
 	typedef value_type const* const_pointer;
 	//ublas types
-	typedef blas::dense_tag storage_category;
-	typedef blas::vector_reference<self_type const> const const_closure_type;
-	typedef blas::vector_reference<self_type> closure_type;
+	typedef dense_tag storage_category;
+	typedef vector_reference<self_type const> const const_closure_type;
+	typedef vector_reference<self_type> closure_type;
 
 	// Construction and destruction
 
@@ -656,7 +656,7 @@ public:
 	/// Be aware that the expression must live longer than the proxy!
 	/// \param expression Expression from which to construct the Proxy
  	template<class E>
-	FixedSparseVectorProxy(blas::vector_expression<E> const& expression):
+	FixedSparseVectorProxy(vector_expression<E> const& expression):
 		m_storage(traits::ExpressionTraits<E const>::compressedStorage(expression())),
 		m_size(expression().size())
 	{
@@ -743,7 +743,7 @@ public:
 	// --------------
 	
 	 class const_iterator
-	: public blas::bidirectional_iterator_base<blas::sparse_bidirectional_iterator_tag,const_iterator, value_type> {
+	: public bidirectional_iterator_base<sparse_bidirectional_iterator_tag,const_iterator, value_type> {
 	public:
 		typedef typename FixedSparseVectorProxy::value_type value_type;
 		typedef typename FixedSparseVectorProxy::difference_type difference_type;
@@ -826,8 +826,8 @@ public:
 	}
 
 	// Reverse iterator
-	typedef blas::reverse_iterator_base<const_iterator> const_reverse_iterator;
-	typedef blas::reverse_iterator_base<iterator> reverse_iterator;
+	typedef reverse_iterator_base<const_iterator> const_reverse_iterator;
+	typedef reverse_iterator_base<iterator> reverse_iterator;
 
 	/// \brief Return a const reverse iterator before the first element of the reversed self_type(i.e. end() of normal self_type)
 	const_reverse_iterator rbegin() const {
@@ -852,7 +852,6 @@ private:
 	traits::CompressedVectorStorage<value_type,IndexType> m_storage;
 	std::size_t m_size;
 };
-
 
 //support for our vector type traits
 namespace traits{
@@ -919,7 +918,7 @@ struct ExpressionTraitsBase<FixedSparseVectorProxy<T,I> const >{
 
 template<class T, class I, class BaseExpression>
 SHARK_COMPRESSEDTRAITSSPEC(FixedSparseVectorProxy<T BOOST_PP_COMMA() I>)
-	typedef CompressedVectorStorage<typename boost::remove_const<T>::type,I >storage;
+	typedef CompressedVectorStorage<typename boost::remove_const<T>::type,I > storage;
 
 	static storage compressedStorage(type& v){
 		return v.storage();
@@ -972,6 +971,7 @@ SHARK_DENSETRAITSSPEC(FixedDenseMatrixProxy<T BOOST_PP_COMMA() O>)
 	}
 };
 
+}
 }
 }
 

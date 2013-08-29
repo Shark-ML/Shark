@@ -88,7 +88,7 @@ void SigmoidFitPlatt::train(SigmoidModel& model, LabeledData<RealVector, unsigne
 	double B = std::log((neg + 1.0) / (pos + 1.0));
 	double lowTarget = 1.0 / (neg + 2.0);
 	double highTarget = (pos + 1.0) / (pos + 2.0);
-	RealVector pp = RealScalarVector(ic,(pos + 1.0) / (pos + neg + 2.0));
+	RealVector pp(ic,(pos + 1.0) / (pos + neg + 2.0));
 	int count = 0;
 	for (std::size_t it = 0; it < 100; it++)
 	{

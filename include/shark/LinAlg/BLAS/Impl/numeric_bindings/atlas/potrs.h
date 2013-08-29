@@ -48,7 +48,7 @@
 #define SHARK_LINALG_IMPL_NUMERIC_BINDINGS_ATLAS_POTRS_H
 #include "cblas_inc.h"
 
-namespace shark {namespace detail {namespace bindings {
+namespace shark {namespace blas {namespace bindings {
 
 inline int potrs(CBLAS_ORDER Order, CBLAS_UPLO Uplo,
 	int N, int NRHS,
@@ -89,7 +89,7 @@ inline int potrs(CBLAS_ORDER Order, CBLAS_UPLO Uplo,
 // potrs(): solves a system of linear equations A * X = B
 //          using the Cholesky factorization computed by potrf()
 template <typename SymmA, typename MatrB>
-int potrs(CBLAS_UPLO  uplo, blas::matrix_expression<SymmA> const &a, blas::matrix_expression<MatrB> &b) {
+int potrs(CBLAS_UPLO  uplo, matrix_expression<SymmA> const &a, matrix_expression<MatrB> &b) {
 	CBLAS_ORDER stor_ord= (CBLAS_ORDER)storage_order<typename SymmA::orientation_category>::value;
 
 	SIZE_CHECK(a().size1() == a().size2());

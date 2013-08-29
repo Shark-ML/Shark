@@ -2,12 +2,12 @@
 //###begin<includes>
 #include <shark/Data/Pgm.h>
 #include <shark/Data/Csv.h>//for reading in the images as csv
+#include <shark/Data/Statistics.h> //for normalization
 #include <shark/ObjectiveFunctions/SparseFFNetError.h>//the error function performing the regularisation of the hidden neurons
 #include <shark/Algorithms/GradientDescent/LBFGS.h>// the L-BFGS optimization algorithm
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h> // squard loss usd for regression
 #include <shark/ObjectiveFunctions/Regularizer.h> //L2 rgulariziation
 #include <shark/ObjectiveFunctions/CombinedObjectiveFunction.h> //binds together the regularizer with the Error
-#include <shark/LinAlg/VectorStatistics.h> //for normalization
 //###end<includes>
 
 #include <fstream>

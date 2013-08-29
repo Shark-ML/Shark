@@ -72,8 +72,8 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypMOCMA_Serialization ) {
 	BOOST_CHECK(			chromosome1.mep_parent == NULL );
 
 	chromosome1.m_mutationDistribution.resize( 10 );
-	chromosome1.m_evolutionPath = repeat(0.0,10);
-	chromosome1.m_lastStep = repeat(0.0,10);
+	chromosome1.m_evolutionPath = blas::repeat(0.0,10);
+	chromosome1.m_lastStep = blas::repeat(0.0,10);
 	chromosome1.m_lambda = 5;
 	chromosome1.m_noSuccessfulOffspring = 5.;
 	chromosome1.m_stepSize = 5.;
@@ -187,8 +187,8 @@ BOOST_AUTO_TEST_CASE( ExactHypMOCMA_Serialization ) {
 	BOOST_CHECK(			chromosome1.mep_parent == NULL );
 
 	chromosome1.m_mutationDistribution.resize( 10 );
-	chromosome1.m_evolutionPath = repeat(0.0,10);
-	chromosome1.m_lastStep = repeat(0.0,10);
+	chromosome1.m_evolutionPath = blas::repeat(0.0,10);
+	chromosome1.m_lastStep = blas::repeat(0.0,10);
 	chromosome1.m_lambda = 5;
 	chromosome1.m_noSuccessfulOffspring = 5.;
 	chromosome1.m_stepSize = 5.;
@@ -303,8 +303,8 @@ BOOST_AUTO_TEST_CASE( AdditiveEpsMOCMA_Serialization ) {
 	BOOST_CHECK(			chromosome1.mep_parent == NULL );
 
 	chromosome1.m_mutationDistribution.resize( 10 );
-	chromosome1.m_evolutionPath = repeat(0.0,10);
-	chromosome1.m_lastStep = repeat(0.0,10);
+	chromosome1.m_evolutionPath = blas::repeat(0.0,10);
+	chromosome1.m_lastStep = blas::repeat(0.0,10);
 	chromosome1.m_lambda = 5;
 	chromosome1.m_noSuccessfulOffspring = 5.;
 	chromosome1.m_stepSize = 5.;

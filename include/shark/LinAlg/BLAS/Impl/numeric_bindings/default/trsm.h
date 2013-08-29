@@ -35,35 +35,35 @@
 #include "ublasTags.h"
 ///solves systems of triangular matrices
 
-namespace shark {namespace detail {namespace bindings {
+namespace shark {namespace blas {namespace bindings {
 
 template <typename SymmA, typename MatB,typename Tag>
 void trsm(
-	blas::matrix_expression<SymmA> const &matA,
-	blas::matrix_expression<MatB> &matB,
+	matrix_expression<SymmA> const &matA,
+	matrix_expression<MatB> &matB,
 	Tag type,
 	boost::mpl::true_
 ){
-	blas::inplace_solve (matA(), matB(), type);
+	inplace_solve (matA(), matB(), type);
 }
 
 template <typename SymmA, typename MatB,typename Tag>
 void trsm(
-	blas::matrix_expression<SymmA> const &matA,
-	blas::matrix_expression<MatB> &matB,
+	matrix_expression<SymmA> const &matA,
+	matrix_expression<MatB> &matB,
 	Tag type,
 	boost::mpl::false_
 ){
-	blas::matrix<typename MatB::value_type> transB = trans(matB);//hack!!!
-	//blas::matrix_unary2<MatB, blas::scalar_identity<typename MatB::value_type> > transB=trans(matB());
-	blas::inplace_solve (trans(matA), transB, type);
+	matrix<typename MatB::value_type> transB = trans(matB);//hack!!!
+	//matrix_unary2<MatB, scalar_identity<typename MatB::value_type> > transB=trans(matB());
+	inplace_solve (trans(matA), transB, type);
 	noalias(matB()) = trans(transB);
 }
 
 template <bool upper, bool left, bool unit,typename SymmA, typename MatB>
 void trsm(
-	blas::matrix_expression<SymmA> const &matA,
-	blas::matrix_expression<MatB> &matB
+	matrix_expression<SymmA> const &matA,
+	matrix_expression<MatB> &matB
 ){
 	trsm(matA,matB,typename TriangularTag<upper,unit,left>::type(),boost::mpl::bool_<left>());
 }

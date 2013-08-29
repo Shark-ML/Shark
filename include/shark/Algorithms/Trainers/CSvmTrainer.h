@@ -268,8 +268,9 @@ private:
 	template<class Problem>
 	double computeBias(Problem const& problem, LabeledData<InputType, unsigned int> const& dataset){
 		std::size_t nkp = base_type::m_kernel->numberOfParameters();
-		m_db_dParams=RealZeroVector( nkp+1); //in the rare case that there are only bounded SVs and no free SVs, we provide the derivative of b w.r.t. hyperparameters for external use
-
+		m_db_dParams.resize(nkp+1);
+		zero(m_db_dParams);
+		
 		std::size_t ic = problem.dimensions();
 
 		// compute the offset from the KKT conditions
@@ -308,6 +309,9 @@ private:
 		if(!m_computeDerivative)
 			return 0.5 * (lowerBound + upperBound);	//best estimate
 		
+		lower_i = problem.permutation(lower_i);
+		upper_i = problem.permutation(upper_i);
+		
 		SHARK_CHECK(base_type::m_regularizers.size() == 1, "derivative only implemented for SVM with one C" );
 		
 		// We next compute the derivative of lowerBound and upperBound wrt C, in order to then get that of b wrt C.
@@ -334,7 +338,7 @@ private:
 		RealMatrix result(1,1); //stores the result of the call
 
 		for (std::size_t i=0; i<ic; i++) {
-			double cur_alpha = problem.alpha(i);
+			double cur_alpha = problem.alpha(problem.permutation(i));
 			if ( cur_alpha != 0 ) {
 				int cur_label = ( cur_alpha>0.0 ? 1 : -1 );
 				get( singleInput, 0 ) = dataset.element(i).input; //copy the current input into the batch

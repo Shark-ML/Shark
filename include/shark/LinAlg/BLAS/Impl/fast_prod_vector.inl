@@ -41,18 +41,18 @@
 #include <shark/LinAlg/BLAS/traits/matrix_raw.hpp>
 #include "numeric_bindings/gemv.h"
 
-namespace shark{ namespace detail{
+namespace shark{ namespace blas{ namespace detail{
 
 //is called based on the sparse/not sparse basis dispatcher when the arguments are sparse
 template<class MatA,class VecB,class VecC>
 void fast_prod_impl(
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecB> const & vecB,
-	blas::vector_expression<VecC>& vecC,
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecB> const & vecB,
+	vector_expression<VecC>& vecC,
 	bool beta,double alpha,boost::mpl::true_
 ){
 	if(!beta){
-		shark::zero(vecC);
+		shark::blas::zero(vecC);
 		axpy_prod(matA(),vecB(),vecC(),true);
 	}else{
 		axpy_prod(matA(),vecB(),vecC(),false);
@@ -64,26 +64,26 @@ void fast_prod_impl(
 //is called based on the sparse/not sparse basis dispatcher when the arguments are dense
 template<class MatA,class VecB,class VecC>
 void fast_prod_impl(
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecB> const & vecB,
-	blas::vector_expression<VecC>& vecC,
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecB> const & vecB,
+	vector_expression<VecC>& vecC,
 	bool beta,double alpha,boost::mpl::false_
 ){
 	if(!beta)
-		shark::zero(vecC);
+		shark::blas::zero(vecC);
 	
 	bindings::gemv(alpha, matA, vecB, 1.0, vecC);
 }
 
-}}
+}}}
 
 
 //dispatches sparse/non-sparse
 template<class MatA,class VecB,class VecC>
-void shark::fast_prod(
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecB> const & vecB,
-	blas::vector_expression<VecC>& vecC,
+void shark::blas::fast_prod(
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecB> const & vecB,
+	vector_expression<VecC>& vecC,
 	bool beta,double alpha)
 {
 	SIZE_CHECK(matA().size2()==vecB().size());
@@ -99,41 +99,41 @@ void shark::fast_prod(
 }
 //dispatcher for subranges
 template<class MatA,class VecB,class VecC>
-void shark::fast_prod(
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecB> const & vecB,
-	blas::vector_range<VecC> vecC,
+void shark::blas::fast_prod(
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecB> const & vecB,
+	vector_range<VecC> vecC,
 	bool beta,double alpha)
 {
 	//just call the other version, by explicitly converting to the vector_expression
 	fast_prod(matA(),vecB(),
-	static_cast<blas::vector_expression<blas::vector_range<VecC> >& >(vecC),
+	static_cast<vector_expression<vector_range<VecC> >& >(vecC),
 	beta,alpha);
 }
 //dispatcher for matrix_rows
 template<class MatA,class VecB,class MatC>
-void shark::fast_prod(
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecB> const & vecB,
-	blas::matrix_row<MatC> vecC,
+void shark::blas::fast_prod(
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecB> const & vecB,
+	matrix_row<MatC> vecC,
 	bool beta,double alpha)
 {
 	//just call the other version, by explicitly converting to the vector_expression
 	fast_prod(matA(),vecB(),
-	static_cast<blas::vector_expression<blas::matrix_row<MatC> >& >(vecC),
+	static_cast<vector_expression<matrix_row<MatC> >& >(vecC),
 	beta,alpha);
 }
 //dispatcher for matrix_columns
 template<class MatA,class VecB,class MatC>
-void shark::fast_prod(
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecB> const & vecB,
-	blas::matrix_column<MatC> vecC,
+void shark::blas::fast_prod(
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecB> const & vecB,
+	matrix_column<MatC> vecC,
 	bool beta,double alpha)
 {
 	//just call the other version, by explicitly converting to the vector_expression
 	fast_prod(matA(),vecB(),
-	static_cast<blas::vector_expression<blas::matrix_column<MatC> >& >(vecC),
+	static_cast<vector_expression<matrix_column<MatC> >& >(vecC),
 	beta,alpha);
 }
 
@@ -141,10 +141,10 @@ void shark::fast_prod(
 ///
 ///Computes c= alpha* b^TA +beta*c.
 template<class MatA,class VecB,class VecC>
-void shark::fast_prod(
-	blas::vector_expression<VecB> const & vecB,
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_expression<VecC>& vecC,
+void shark::blas::fast_prod(
+	vector_expression<VecB> const & vecB,
+	matrix_expression<MatA> const & matA,
+	vector_expression<VecC>& vecC,
 bool beta,double alpha){
 	fast_prod(trans(matA),vecB,vecC,beta,alpha);
 }
@@ -153,13 +153,13 @@ bool beta,double alpha){
 ///
 ///Computes c= alpha* b^TA +beta*c.
 template<class MatA,class VecB,class VecC>
-void shark::fast_prod(
-	blas::vector_expression<VecB> const & vecB,
-	blas::matrix_expression<MatA> const & matA,
-	blas::vector_range<VecC>& vecC,
+void shark::blas::fast_prod(
+	vector_expression<VecB> const & vecB,
+	matrix_expression<MatA> const & matA,
+	vector_range<VecC>& vecC,
 bool beta,double alpha){
 	fast_prod(vecB(),matA(),
-	static_cast<blas::vector_expression<blas::vector_range<VecC> >& >(vecC),
+	static_cast<vector_expression<vector_range<VecC> >& >(vecC),
 	beta,alpha);
 }
 
@@ -167,13 +167,13 @@ bool beta,double alpha){
 ///
 ///Computes c= alpha* b^TA +beta*c.
 template<class MatA,class VecB,class VecC>
-void shark::fast_prod(
-	blas::vector_expression<VecB> const & vecB,
-	blas::matrix_expression<MatA> const & matA,
-	blas::matrix_row<VecC>& vecC,
+void shark::blas::fast_prod(
+	vector_expression<VecB> const & vecB,
+	matrix_expression<MatA> const & matA,
+	matrix_row<VecC>& vecC,
 bool beta,double alpha){
 	fast_prod(vecB(),matA(),
-	static_cast<blas::vector_expression<blas::matrix_row<VecC> >& >(vecC),
+	static_cast<vector_expression<matrix_row<VecC> >& >(vecC),
 	beta,alpha);
 }
 
@@ -181,13 +181,13 @@ bool beta,double alpha){
 ///
 ///Computes c= alpha* b^TA +beta*c.
 template<class MatA,class VecB,class VecC>
-void shark::fast_prod(
-	blas::vector_expression<VecB> const & vecB,
-	blas::matrix_expression<MatA> const & matA,
-	blas::matrix_column<VecC>& vecC,
+void shark::blas::fast_prod(
+	vector_expression<VecB> const & vecB,
+	matrix_expression<MatA> const & matA,
+	matrix_column<VecC>& vecC,
 bool beta,double alpha){
 	fast_prod(vecB(),matA(),
-	static_cast<blas::vector_expression<blas::matrix_column<VecC> >& >(vecC),
+	static_cast<vector_expression<matrix_column<VecC> >& >(vecC),
 	beta,alpha);
 }
 

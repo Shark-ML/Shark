@@ -71,8 +71,8 @@ namespace shark {
 		void init( const Function & f ) {
                         m_prob = 1./f.numberOfVariables();
 			if(!f.isConstrained()){
-				m_lower = repeat(-1E20,f.numberOfVariables());
-				m_upper = repeat(1E20,f.numberOfVariables());
+				m_lower = blas::repeat(-1E20,f.numberOfVariables());
+				m_upper = blas::repeat(1E20,f.numberOfVariables());
 			}
 			else if (f.hasConstraintHandler() &&! f.getConstraintHandler().isBoxConstrained()) {
 				typedef BoxConstraintHandler<typename Function::SearchPointType> ConstraintHandler;

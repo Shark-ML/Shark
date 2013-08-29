@@ -85,7 +85,6 @@ namespace detail{
 		for (std::size_t x = 0; x < values; x+=batchSize) {
 			std::size_t currentBatchSize=std::min(batchSize,values-x);
 			stateMatrix.resize(currentBatchSize,rbm.numberOfVN());
-			RealScalarVector betaBatch(currentBatchSize,beta);
 			
 			for(std::size_t elem = 0; elem != currentBatchSize;++elem){
 				//generation of the x+elem-th state vector
@@ -94,8 +93,11 @@ namespace detail{
 	
 			//accumulate changes to the log partition
 			logZ = boost::accumulate(
-				-rbm.energy().logUnnormalizedPropabilityVisible(stateMatrix, betaBatch),
-				logZ,updateLogPartition);
+				-rbm.energy().logUnnormalizedPropabilityVisible(
+					stateMatrix, blas::repeat(beta,currentBatchSize)
+				),
+				logZ,updateLogPartition
+			);
 		}
 		return logZ;
 	}
@@ -126,7 +128,6 @@ namespace detail{
 		for (std::size_t x = 0; x < values; x+=batchSize) {
 			std::size_t currentBatchSize=std::min(batchSize,values-x);
 			stateMatrix.resize(currentBatchSize,rbm.numberOfHN());
-			RealScalarVector betaBatch(currentBatchSize,beta);
 			
 			for(std::size_t elem = 0; elem != currentBatchSize; ++elem){
 				//generation of the x-th state vector
@@ -135,8 +136,11 @@ namespace detail{
 			
 			//accumulate changes to the log partition
 			logZ = boost::accumulate(
-				-rbm.energy().logUnnormalizedPropabilityHidden(stateMatrix, betaBatch),
-				logZ,updateLogPartition);
+				-rbm.energy().logUnnormalizedPropabilityHidden(
+					stateMatrix, blas::repeat(beta,currentBatchSize)
+				),
+				logZ,updateLogPartition
+			);
 		}
 		return logZ;
 	}

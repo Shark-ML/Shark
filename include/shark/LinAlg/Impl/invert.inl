@@ -51,38 +51,38 @@
  *  \return   The inverse matrix.
  */
 template<class MatrixT>
-shark::RealMatrix shark::invert(const MatrixT& input)
+shark::RealMatrix shark::blas::invert(const MatrixT& input)
 {
 
 	MatrixT inverse(input.size2(), input.size1());
 
- 	typedef blas::permutation_matrix<std::size_t> pmatrix;
+ 	typedef permutation_matrix<std::size_t> pmatrix;
  	// create a working copy of the input
  	shark::RealMatrix A(input);
  	// create a permutation matrix for the LU-factorization
  	pmatrix pm(input.size1());
 
  	// perform LU-factorization
- 	int res = blas::lu_factorize(A,pm);
+ 	int res = lu_factorize(A,pm);
 	if( res != 0){
 		throw SHARKEXCEPTION("[invert] matrix not invertable");
 	}
  	// create identity matrix of "inverse"
- 	inverse.assign(blas::identity_matrix<double>(A.size1()));
+ 	inverse.assign(identity_matrix<double>(A.size1()));
 
  	// backsubstitute to get the inverse
- 	blas::lu_substitute(A, pm, inverse);
+ 	lu_substitute(A, pm, inverse);
 
  	return inverse;
 }
 template<class MatrixT,class MatrixU>
-void shark::invertSymmPositiveDefinite(MatrixT &I, const MatrixU& ArrSymm)
+void shark::blas::invertSymmPositiveDefinite(MatrixT &I, const MatrixU& ArrSymm)
 {
 
 #ifdef SHARK_USE_ATLAS
 	unsigned m = ArrSymm.size1();
 	choleskyDecomposition(ArrSymm, I);
-	detail::bindings::potri(CblasLower,I);
+	bindings::potri(CblasLower,I);
 	for(std::size_t i = 0; i != m; ++i){
 		for(std::size_t j = 0; j < i; ++j){
 			I(j,i) = I(i,j);

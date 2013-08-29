@@ -28,7 +28,7 @@
 #include <boost/foreach.hpp>
 
 #include <shark/Algorithms/Trainers/PCA.h>
-#include <shark/LinAlg/VectorStatistics.h>
+#include <shark/Data/Statistics.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 
 #define BOOST_TEST_MODULE ALGORITHM_PCA
@@ -120,7 +120,7 @@ UnlabeledData<RealVector> createDataNotFullRank()
 	// copy the principal components  in the matrix
 	// and than use an outer product
 	RealMatrix covariance(dimensions,dimensions,0.0);
-	diag(covariance)= repeat(0.001,dimensions);
+	diag(covariance) = blas::repeat(0.001,dimensions);
 	for(int i = 0; i != 3; ++i)
 	{
 		for(int j = 0; j != 3; ++j)

@@ -38,10 +38,11 @@
 #include <shark/LinAlg/BLAS/Impl/repmat.h>
 #include <shark/LinAlg/BLAS/traits/metafunctions.h>
 namespace shark {
+namespace blas{
 namespace detail{
 	//sparse expressions get just all non zero elements zeroed
 	template<class Matrix>
-	void zero(blas::matrix_expression<Matrix>& mat,boost::mpl::true_){
+	void zero(matrix_expression<Matrix>& mat,boost::mpl::true_){
 		typedef typename Matrix::value_type Value;
 		typedef typename Matrix::iterator1 Iter1;
 		typedef typename Matrix::iterator2 Iter2;
@@ -55,7 +56,7 @@ namespace detail{
 		}
 	}
 	template<class Vector>
-	void zero(blas::vector_expression<Vector>& vec,boost::mpl::true_){
+	void zero(vector_expression<Vector>& vec,boost::mpl::true_){
 		typedef typename Vector::value_type Value;
 		typedef typename Vector::iterator Iter;
 
@@ -67,41 +68,41 @@ namespace detail{
 	
 	//dense container can use clear() which tends to be a bit faster
 	template<class Matrix>
-	void zero(blas::matrix_container<Matrix>& mat,boost::mpl::false_){
+	void zero(matrix_container<Matrix>& mat,boost::mpl::false_){
 		mat().clear();
 	}
 	template<class Vector>
-	void zero(blas::vector_container<Vector>& vec,boost::mpl::false_){
+	void zero(vector_container<Vector>& vec,boost::mpl::false_){
 		vec().clear();
 	}
 	
 	//everything else gets explicitely zeroed
 	template<class Matrix>
-	void zero(blas::matrix_expression<Matrix>& mat,boost::mpl::false_){
+	void zero(matrix_expression<Matrix>& mat,boost::mpl::false_){
 		typedef typename Matrix::value_type Value;
-		noalias(mat()) = blas::zero_matrix<Value>(mat().size1(),mat().size2());
+		noalias(mat()) = zero_matrix<Value>(mat().size1(),mat().size2());
 	}
 	template<class Vector>
-	void zero(blas::vector_expression<Vector>& vec,boost::mpl::false_){
+	void zero(vector_expression<Vector>& vec,boost::mpl::false_){
 		typedef typename Vector::value_type Value;
-		noalias(vec()) = blas::zero_vector<Value>(vec().size());
+		noalias(vec()) = zero_vector<Value>(vec().size());
 	}
 	
 	template<class Matrix>
-	void ensureSize(blas::matrix_expression<Matrix>& mat,std::size_t rows, std::size_t columns){
+	void ensureSize(matrix_expression<Matrix>& mat,std::size_t rows, std::size_t columns){
 		SIZE_CHECK(mat().size1() == rows);
 		SIZE_CHECK(mat().size2() == columns);
 	}
 	template<class Matrix>
-	void ensureSize(blas::matrix_container<Matrix>& mat,std::size_t rows, std::size_t columns){
+	void ensureSize(matrix_container<Matrix>& mat,std::size_t rows, std::size_t columns){
 		mat().resize(rows,columns);
 	}
 	template<class Vector>
-	void ensureSize(blas::vector_expression<Vector>& vec,std::size_t size){
+	void ensureSize(vector_expression<Vector>& vec,std::size_t size){
 		SIZE_CHECK(vec().size() == size);
 	}
 	template<class Vector>
-	void ensureSize(blas::vector_container<Vector>& vec,std::size_t size){
+	void ensureSize(vector_container<Vector>& vec,std::size_t size){
 		vec().resize(size);
 	}
 }
@@ -123,9 +124,9 @@ namespace detail{
 ///
 ///diag(A) = (1,5,9)
 template<class Matrix>
-blas::matrix_vector_range<Matrix const> diag(blas::matrix_expression<Matrix> const& mat){
+matrix_vector_range<Matrix const> diag(matrix_expression<Matrix> const& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
-	blas::matrix_vector_range<Matrix const> diagonal(mat(),Range(0,mat().size1()),Range(0,mat().size1()));
+	matrix_vector_range<Matrix const> diagonal(mat(),Range(0,mat().size1()),Range(0,mat().size1()));
 	return diagonal;
 }
 
@@ -138,9 +139,9 @@ blas::matrix_vector_range<Matrix const> diag(blas::matrix_expression<Matrix> con
 ///
 ///diag(A) = (1,5,9)
 template<class Matrix>
-blas::matrix_vector_range<Matrix> diag(blas::matrix_expression<Matrix>& mat){
+matrix_vector_range<Matrix> diag(matrix_expression<Matrix>& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
-	blas::matrix_vector_range<Matrix> diagonal(mat(),Range(0,mat().size1()),Range(0,mat().size1()));
+	matrix_vector_range<Matrix> diagonal(mat(),Range(0,mat().size1()),Range(0,mat().size1()));
 	return diagonal;
 }
 	
@@ -148,33 +149,33 @@ blas::matrix_vector_range<Matrix> diag(blas::matrix_expression<Matrix>& mat){
 	
 ///\brief Zeros a matrix. If it is sparse, the structure is preserved
 template<class Matrix>
-void zero(blas::matrix_expression<Matrix>& mat){
+void zero(matrix_expression<Matrix>& mat){
 	detail::zero(mat(),typename traits::IsSparse<Matrix>::type());
 }
 ///\brief Zeros a matrix. If it is sparse, the structure is preserved
 template<class Vector>
-void zero(blas::vector_expression<Vector>& vec){
+void zero(vector_expression<Vector>& vec){
 	detail::zero(vec(),typename traits::IsSparse<Vector>::type());
 }
 
 ///\brief Zeros a subrange of a matrix. If it is sparse, the structure is preserved
 template<class Matrix>
-void zero(blas::matrix_range<Matrix> mat){
+void zero(matrix_range<Matrix> mat){
 	detail::zero(mat,typename traits::IsSparse<Matrix>::type());
 }
 ///\brief Zeros a subrange of a vector.  If it is sparse, the structure is preserved
 template<class Vector>
-void zero(blas::vector_range<Vector> vec){
+void zero(vector_range<Vector> vec){
 	detail::zero(vec,typename traits::IsSparse<Vector>::type());
 }
 ///\brief Zeros a row of a matrix. If it is sparse, the structure is preserved
 template<class Vector>
-void zero(blas::matrix_row<Vector> vec){
+void zero(matrix_row<Vector> vec){
 	detail::zero(vec,typename traits::IsSparse<Vector>::type());
 }
 ///\brief Zeros a column of a matrix. If it is sparse, the structure is preserved
 template<class Vector>
-void zero(blas::matrix_column<Vector> vec){
+void zero(matrix_column<Vector> vec){
 	detail::zero(vec,typename traits::IsSparse<Vector>::type());
 }
 	
@@ -182,7 +183,7 @@ void zero(blas::matrix_column<Vector> vec){
 //////////////////////////////////////NUMBER NONZEROS////////////////////////////////////
 
 template<class V>
-std::size_t nonzeroElements(blas::vector_expression<V> const& vec){
+std::size_t nonzeroElements(vector_expression<V> const& vec){
 	//~ return vec().nnz(); //does not work because proxies don't support nnz()
 	std::size_t nnz = 0;//count it by hand.
 	for(typename V::const_iterator pos = vec().begin(); pos != vec().end(); ++pos,++nnz);
@@ -190,7 +191,7 @@ std::size_t nonzeroElements(blas::vector_expression<V> const& vec){
 	
 }
 //~ template<class M>
-//~ std::size_t nonzeroElements(blas::matrix_expression<M> const& mat){
+//~ std::size_t nonzeroElements(matrix_expression<M> const& mat){
 	//~ return mat().nnz();
 //~ }
 
@@ -199,7 +200,7 @@ std::size_t nonzeroElements(blas::vector_expression<V> const& vec){
 
 ///\brief Initializes the square matrix A to be the identity matrix
 template<class Matrix>
-void identity(blas::matrix_expression<Matrix>& mat){
+void identity(matrix_expression<Matrix>& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
 	std::size_t m = mat().size1();
 	zero(mat);
@@ -214,14 +215,14 @@ void identity(blas::matrix_expression<Matrix>& mat){
 ///
 ///Tries to resize mat. If the matrix expression can't be resized a debug assertion is thrown.
 template<class Matrix>
-void ensureSize(blas::matrix_expression<Matrix>& mat,std::size_t rows, std::size_t columns){
+void ensureSize(matrix_expression<Matrix>& mat,std::size_t rows, std::size_t columns){
 	detail::ensureSize(mat(),rows,columns);
 }
 ///\brief Ensures that the vector has the right size.
 ///
 ///Tries to resize vec. If the vector expression can't be resized a debug assertion is thrown.
 template<class Vector>
-void ensureSize(blas::vector_expression<Vector>& vec,std::size_t size){
+void ensureSize(vector_expression<Vector>& vec,std::size_t size){
 	detail::ensureSize(vec(),size);
 }
 	
@@ -243,47 +244,47 @@ public:
 	{}
 		
 	/// \brief Returns the lower left block of the matrix.
-	blas::matrix_range<Matrix> const& upperLeft()const{
+	matrix_range<Matrix> const& upperLeft()const{
 		return m_upperLeft;
 	}
 	/// \brief Returns the upper right block of the matrix.
-	blas::matrix_range<Matrix> const& upperRight()const{
+	matrix_range<Matrix> const& upperRight()const{
 		return m_upperRight;
 	}
 	/// \brief Returns the lower left block of the matrix.
-	blas::matrix_range<Matrix> const& lowerLeft()const{
+	matrix_range<Matrix> const& lowerLeft()const{
 		return m_lowerLeft;
 	}
 
 	/// \brief Returns the lower right block of the matrix.
-	blas::matrix_range<Matrix> const& lowerRight()const{
+	matrix_range<Matrix> const& lowerRight()const{
 		return m_lowerRight;
 	}
 	
 	/// \brief Returns the lower left block of the matrix.
-	blas::matrix_range<Matrix>& upperLeft(){
+	matrix_range<Matrix>& upperLeft(){
 		return m_upperLeft;
 	}
 	/// \brief Returns the upper right block of the matrix.
-	blas::matrix_range<Matrix>& upperRight(){
+	matrix_range<Matrix>& upperRight(){
 		return m_upperRight;
 	}
 	/// \brief Returns the lower left block of the matrix.
-	blas::matrix_range<Matrix>& lowerLeft(){
+	matrix_range<Matrix>& lowerLeft(){
 		return m_lowerLeft;
 	}
 
 	/// \brief Returns the lower right block of the matrix.
-	blas::matrix_range<Matrix>& lowerRight(){
+	matrix_range<Matrix>& lowerRight(){
 		return m_lowerRight;
 	}
 	
 	
 private:
-	blas::matrix_range<Matrix> m_upperLeft;
-	blas::matrix_range<Matrix> m_upperRight;
-	blas::matrix_range<Matrix> m_lowerLeft;
-	blas::matrix_range<Matrix> m_lowerRight;
+	matrix_range<Matrix> m_upperLeft;
+	matrix_range<Matrix> m_upperRight;
+	matrix_range<Matrix> m_lowerLeft;
+	matrix_range<Matrix> m_lowerRight;
 };
 
 
@@ -291,38 +292,38 @@ private:
 
 /// \brief Returns the i-th row of an upper triangular matrix excluding the elements right of the diagonal
 template<class Matrix>
-blas::vector_range<blas::matrix_row<Matrix const> >triangularRow(
-	blas::matrix_expression<Matrix> const& mat,
+vector_range<matrix_row<Matrix const> >triangularRow(
+	matrix_expression<Matrix> const& mat,
 	std::size_t i
 ){
-	blas::matrix_row<Matrix const> matRow = row(mat(),i);
+	matrix_row<Matrix const> matRow = row(mat(),i);
 	return subrange(matRow,0,i);
 }
 /// \brief Returns the i-th row of an upper triangular matrix excluding the elements right of the diagonal
 template<class Matrix>
-blas::vector_range<blas::matrix_row<Matrix> > triangularRow(
-	blas::matrix_expression<Matrix>& mat,
+vector_range<matrix_row<Matrix> > triangularRow(
+	matrix_expression<Matrix>& mat,
 	std::size_t i
 ){
-	blas::matrix_row<Matrix> matRow = row(mat(),i);
+	matrix_row<Matrix> matRow = row(mat(),i);
 	return subrange(matRow,0,i);
 }
 /// \brief Returns the elements in the i-th row of a lower triangular matrix left of the diagonal 
 template<class Matrix>
-blas::vector_range<blas::matrix_row<Matrix const> > unitTriangularRow(
-	blas::matrix_expression<Matrix> const& mat,
+vector_range<matrix_row<Matrix const> > unitTriangularRow(
+	matrix_expression<Matrix> const& mat,
 	std::size_t i
 ){
-	blas::matrix_row<Matrix const> matRow = row(mat(),i);
+	matrix_row<Matrix const> matRow = row(mat(),i);
 	return subrange(matRow,0,i+1);
 }
 /// \brief Returns the elements in the i-th row of a lower triangular matrix left of the diagonal 
 template<class Matrix>
-blas::vector_range<blas::matrix_row<Matrix> > unitTriangularRow(
-	blas::matrix_expression<Matrix>& mat,
+vector_range<matrix_row<Matrix> > unitTriangularRow(
+	matrix_expression<Matrix>& mat,
 	std::size_t i
 ){
-	blas::matrix_row<Matrix> matRow = row(mat(),i);
+	matrix_row<Matrix> matRow = row(mat(),i);
 	return subrange(matRow,0,i+1);
 }
 
@@ -330,39 +331,39 @@ blas::vector_range<blas::matrix_row<Matrix> > unitTriangularRow(
 
 /// \brief Returns the elements in the i-th column of the matrix below the diagonal 
 template<class Matrix>
-blas::vector_range<blas::matrix_column<Matrix const> > unitTriangularColumn(
-	blas::matrix_expression<Matrix> const& mat,
+vector_range<matrix_column<Matrix const> > unitTriangularColumn(
+	matrix_expression<Matrix> const& mat,
 	std::size_t i
 ){
-	blas::matrix_column<Matrix const> col = column(mat(),i);
+	matrix_column<Matrix const> col = column(mat(),i);
 	return subrange(col,i+1,mat().size2());
 }
 /// \brief Returns the elements in the i-th column of the matrix below the diagonal 
 template<class Matrix>
-blas::vector_range<blas::matrix_column<Matrix> > unitTriangularColumn(
-	blas::matrix_expression<Matrix>& mat,
+vector_range<matrix_column<Matrix> > unitTriangularColumn(
+	matrix_expression<Matrix>& mat,
 	std::size_t i
 ){
-	blas::matrix_column<Matrix> col = column(mat(),i);
+	matrix_column<Matrix> col = column(mat(),i);
 	return subrange(col,i+1,mat().size2());
 }
 
 /// \brief Returns the elements in the i-th column of the matrix excluding the zero elements
 template<class Matrix>
-blas::vector_range<blas::matrix_column<Matrix const> > triangularColumn(
-	blas::matrix_expression<Matrix> const& mat,
+vector_range<matrix_column<Matrix const> > triangularColumn(
+	matrix_expression<Matrix> const& mat,
 	std::size_t i
 ){
-	blas::matrix_column<Matrix const> col = column(mat(),i);
+	matrix_column<Matrix const> col = column(mat(),i);
 	return subrange(col,i,mat().size2());
 }
 /// \brief Returns the elements in the i-th column of the matrix excluding the zero elements
 template<class Matrix>
-blas::vector_range<blas::matrix_column<Matrix> > triangularColumn(
-	blas::matrix_expression<Matrix>& mat,
+vector_range<matrix_column<Matrix> > triangularColumn(
+	matrix_expression<Matrix>& mat,
 	std::size_t i
 ){
-	blas::matrix_column<Matrix> col = column(mat(),i);
+	matrix_column<Matrix> col = column(mat(),i);
 	return subrange(col,i,mat().size2());
 }
 
@@ -377,7 +378,7 @@ blas::vector_range<blas::matrix_column<Matrix> > triangularColumn(
 ///@param vector the vector which is to be repeated as the rows of the resulting matrix
 ///@param rows the number of rows of the matrix
 template<class Vector>
-VectorRepeater<Vector> repeat(blas::vector_expression<Vector> const& vector, std::size_t rows){
+VectorRepeater<Vector> repeat(vector_expression<Vector> const& vector, std::size_t rows){
 	return VectorRepeater<Vector>(vector(),rows);
 }
 
@@ -386,9 +387,9 @@ VectorRepeater<Vector> repeat(blas::vector_expression<Vector> const& vector, std
 ///@param scalar the value which is repeated
 ///@param elements the size of the resulting vector
 template<class T>
-typename boost::enable_if<boost::is_arithmetic<T>, blas::scalar_vector<T> >::type
+typename boost::enable_if<boost::is_arithmetic<T>, scalar_vector<T> >::type
 repeat(T scalar, std::size_t elements){
-	return blas::scalar_vector<T>(elements,scalar);
+	return scalar_vector<T>(elements,scalar);
 }
 
 ///brief repeats a single element to form a matrix  of size rows x columns
@@ -397,31 +398,31 @@ repeat(T scalar, std::size_t elements){
 ///@param rows the number of rows of the resulting vector
 ///@param columns the number of columns of the resulting vector
 template<class T>
-typename boost::enable_if<boost::is_arithmetic<T>, blas::scalar_matrix<T> >::type
+typename boost::enable_if<boost::is_arithmetic<T>, scalar_matrix<T> >::type
 repeat(T scalar, std::size_t rows, std::size_t columns){
-	return blas::scalar_matrix<T>(rows, columns, scalar);
+	return scalar_matrix<T>(rows, columns, scalar);
 }
 
 ///brief picks a subrange of rows from a matrix. much easier to use than subrange
 template<class Matrix>
-blas::matrix_range<Matrix const> rows(blas::matrix_expression<Matrix> const& mat,std::size_t start, std::size_t end){
+matrix_range<Matrix const> rows(matrix_expression<Matrix> const& mat,std::size_t start, std::size_t end){
 	return subrange(mat(),start,end,0,mat().size2());
 }
 ///brief picks a subrange of rows from a matrix. much easier to use than subrange
 template<class Matrix>
-blas::matrix_range<Matrix> rows(blas::matrix_expression<Matrix>& mat,std::size_t start, std::size_t end){
+matrix_range<Matrix> rows(matrix_expression<Matrix>& mat,std::size_t start, std::size_t end){
 	return subrange(mat(),start,end,0,mat().size2());
 }
 
 ///brief picks a subrange of columns from a matrix. much easier to use than subrange
 template<class Matrix>
-blas::matrix_range<Matrix const> columns(blas::matrix_expression<Matrix> const& mat,std::size_t start, std::size_t end){
+matrix_range<Matrix const> columns(matrix_expression<Matrix> const& mat,std::size_t start, std::size_t end){
 	return subrange(mat(),0,mat().size1(),start,end);
 }
 
 ///brief picks a subrange of columns from a matrix. much easier to use than subrange
 template<class Matrix>
-blas::matrix_range<Matrix> columns(blas::matrix_expression<Matrix>& mat,std::size_t start, std::size_t end){
+matrix_range<Matrix> columns(matrix_expression<Matrix>& mat,std::size_t start, std::size_t end){
 	return subrange(mat(),0,mat().size1(),start,end);
 }
 
@@ -448,7 +449,7 @@ blas::matrix_range<Matrix> columns(blas::matrix_expression<Matrix>& mat,std::siz
  *      \return the sum of the values at the diagonal of \em v
  */
 template < class MatrixT >
-typename MatrixT::value_type trace(blas::matrix_expression<MatrixT> const& m)
+typename MatrixT::value_type trace(matrix_expression<MatrixT> const& m)
 {
 	SIZE_CHECK(m().size1() == m().size2());
 
@@ -458,5 +459,5 @@ typename MatrixT::value_type trace(blas::matrix_expression<MatrixT> const& m)
 	return t;
 }
 /** @}*/
-}
+}}
 #endif

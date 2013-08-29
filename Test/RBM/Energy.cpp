@@ -143,13 +143,11 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityHidden )
 	
 	//now test for several choices of beta
 	for(std::size_t i = 0; i <= 10; ++i){
-		RealScalarVector beta(4,i*0.1);
-		
 		//calculate unnormalized propability of the hiddenState by integrating over the visible state space
-		double pTest=sum(exp(-beta(0)*energies));
+		double pTest=sum(exp(-(i*0.1)*energies));
 		
 		//calculate now the test itself
-		double p=std::exp(energy.logUnnormalizedPropabilityHidden(hiddenState,beta)(0));
+		double p=std::exp(energy.logUnnormalizedPropabilityHidden(hiddenState,blas::repeat(i*0.1,4))(0));
 		BOOST_CHECK_CLOSE(pTest,p,1.e-5);
 	}
 }
@@ -179,14 +177,12 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityVisible )
 	RealVector energies = energy.energy(hiddenStateSpace,visibleState);
 	
 	//now test for several choices of beta
-	for(std::size_t i = 0; i <= 10; ++i){
-		RealScalarVector beta(4,i*0.1);
-		
+	for(std::size_t i = 0; i <= 10; ++i){		
 		//calculate unnormalized propability of the visible state by integrating over the hidden state space
-		double pTest=sum(exp(-beta(0)*energies));
+		double pTest=sum(exp(-(i*0.1)*energies));
 		
 		//calculate now the test itself
-		double p=std::exp(energy.logUnnormalizedPropabilityVisible(visibleState,beta)(0));
+		double p=std::exp(energy.logUnnormalizedPropabilityVisible(visibleState,blas::repeat(i*0.1,4))(0));
 		BOOST_CHECK_CLOSE(pTest,p,1.e-5);
 	}
 }

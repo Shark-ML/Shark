@@ -158,9 +158,9 @@ public:
 
 		// init helpers
 		double ker, cur_alpha, cur_label;
-		RealVector der = RealZeroVector( m_nhp );
+		RealVector der( m_nhp );
 		boost::shared_ptr<State> state = mep_k->createState(); //state from eval and for derivatives
-		derivative = RealZeroVector( m_nhp );
+		derivative.resize( m_nhp );
 
 		// start calculating derivative
 		for ( unsigned int k=0; k<m_nhp; k++ )
@@ -279,17 +279,8 @@ protected:
 		// 		See Tobias Glasmacher's dissertation, chapter 9.3, for a calculation of the derivatives as well as
 		// 		for a definition of these variables. -> It's very easy to follow this code with that chapter open.
 		//		The Keerthi-paper "Efficient method for gradient-based..." is also highly recommended for cross-reference.
-		RealVector der = RealZeroVector( m_nkp ); //derivative storage helper
+		RealVector der( m_nkp ); //derivative storage helper
 		boost::shared_ptr<State> state = mep_k->createState(); //state object for derivatives
-		RealMatrix H = RealZeroMatrix( m_noofFreeSVs+1, m_noofFreeSVs+1 );
-		RealMatrix H_inv = RealZeroMatrix( m_noofFreeSVs+1, m_noofFreeSVs+1 );
-		RealMatrix R = RealZeroMatrix( m_noofFreeSVs+1, m_noofBoundedSVs );
-		std::vector< RealMatrix > dH( m_nkp );
-		std::vector< RealMatrix > dR( m_nkp );
-		for ( unsigned int i=0; i<m_nkp; i++ ) {
-			dH[i] = RealZeroMatrix( m_noofFreeSVs+1, m_noofFreeSVs+1 );
-			dR[i] = RealZeroMatrix( m_noofFreeSVs+1, m_noofBoundedSVs );
-		}
 
 		// create temporary batch helpers
 		RealIdentityMatrix unit_weights(1);
@@ -306,7 +297,10 @@ protected:
 			throw SHARKEXCEPTION("[CSvmDerivative::prepareCSvmParameterDerivative] Something went very wrong.");
 		}
 
+		
 		// initialize H and dH
+		RealMatrix H( m_noofFreeSVs+1, m_noofFreeSVs+1,0.0 );
+		std::vector< RealMatrix > dH( m_nkp , RealMatrix(m_noofFreeSVs+1, m_noofFreeSVs+1));
 		for ( unsigned int i=0; i<m_noofFreeSVs; i++ ) {
 			get(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]); //fixed over outer loop
 			// fill the off-diagonal entries..
@@ -340,11 +334,14 @@ protected:
 
 		// MAJOR STEP: this is the achilles heel of the current implementation, cf. keerthi 2007
 		// TODO: mtq: explore ways for speed-up..
+		RealMatrix H_inv( m_noofFreeSVs+1, m_noofFreeSVs+1 );
 		if ( m_noofFreeSVs > 0 ) {
 			H_inv = g_inverse( H );
 		}
 
 		// initialize R and dR
+		RealMatrix R( m_noofFreeSVs+1, m_noofBoundedSVs );
+		std::vector< RealMatrix > dR( m_nkp, RealMatrix(m_noofFreeSVs+1, m_noofBoundedSVs));
 		for ( unsigned int i=0; i<m_noofBoundedSVs; i++ ) {
 			get(bof_xi, 0) = m_basis.element(m_boundedAlphaIndices[i]); //fixed over outer loop
 			for ( unsigned int j=0; j<m_noofFreeSVs; j++ ) { //this time, we (have to) do it row by row
@@ -361,9 +358,10 @@ protected:
 		}
 
 		// compute the derivative of (\alpha, b) w.r.t. C
-		der = RealZeroVector( m_noofFreeSVs+1 ); //re-using this helper variable
+		der.resize(m_noofFreeSVs+1);
 		if ( m_noofBoundedSVs > 0 ) {
-			RealVector Ry = RealZeroVector( m_noofFreeSVs+1 ); //tmp helper for calculations: intermediate vector
+			zero(der); //re-using this helper variable
+			RealVector Ry( m_noofFreeSVs+1,0.0 ); //tmp helper for calculations: intermediate vector
 			axpy_prod( R, m_boundedLabels, Ry, true );
 			axpy_prod( H_inv, Ry, der, true );
 			for ( unsigned int i=0; i<=m_noofFreeSVs; i++ ) {
@@ -372,10 +370,10 @@ protected:
 		}
 		// compute the derivative of (\alpha, b) w.r.t. the kernel parameters
 		for ( std::size_t k=0; k<m_nkp; k++ ) {
-			RealVector sum = RealZeroVector( m_noofFreeSVs+1 );
+			RealVector sum( m_noofFreeSVs+1,0.0 );
 			axpy_prod( dH[k], m_freeAlphas, sum, true ); //sum = dH * \alpha_f
 			axpy_prod( dR[k], m_boundedAlphas, sum, false ); // sum += dR * \alpha_r , i.e., the C*y_g is expressed as alpha_g
-			RealVector tmptmp = RealZeroVector( m_noofFreeSVs+1 );
+			RealVector tmptmp( m_noofFreeSVs+1,0.0 );
 			axpy_prod( dR[k], m_boundedAlphas, tmptmp, false ); // sum += dR * \alpha_r
 			axpy_prod( H_inv, sum, der, true ); //reuse again: der = H_inv * sum
 			for ( std::size_t i=0; i<=m_noofFreeSVs; i++ ) {

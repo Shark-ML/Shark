@@ -43,17 +43,17 @@
 
 #include "numeric_bindings/gemm.h"
 
-namespace shark{ namespace detail{
+namespace shark{ namespace blas{ namespace detail{
 
 template<class MatA,class MatB,class MatC>
 void fast_prod_dense(
-	blas::matrix_expression<MatA> const & matA,
-	blas::matrix_expression<MatB> const & matB,
-	blas::matrix_expression<MatC>& matC,
+	matrix_expression<MatA> const & matA,
+	matrix_expression<MatB> const & matB,
+	matrix_expression<MatC>& matC,
 	bool beta,double alpha
 ){
 	if(!beta)
-		shark::zero(matC);
+		shark::blas::zero(matC);
 	//at this point, c is not transposed(because we would have transposed it twice if it was)
 	//now we need to ensure that all matrices are either row or column major. We do this by using
 	//equivalent expressions. e.g. if a matrix is row major(and not transposed) transposing it is equivalent 
@@ -84,14 +84,14 @@ void fast_prod_dense(
 //if A or B are sparse, we choose the sparse prod
 template<class MatA,class MatB,class MatC>
 void fast_prod_detail(
-	blas::matrix_expression<MatA> const & matA,
-	blas::matrix_expression<MatB> const & matB,
-	blas::matrix_expression<MatC>& matC,
+	matrix_expression<MatA> const & matA,
+	matrix_expression<MatB> const & matB,
+	matrix_expression<MatC>& matC,
 	bool beta,double alpha,
 	boost::mpl::true_
 ){
 	if ( !beta ){
-		shark::zero(matC);
+		shark::blas::zero(matC);
 	}
 	else if(alpha != 1.0){
 		matC()/=alpha;
@@ -111,15 +111,15 @@ void fast_prod_detail(
 //nothing sparse here, use dense routines
 template<class MatA,class MatB,class MatC>
 void fast_prod_detail(
-	blas::matrix_expression<MatA> const & matA,
-	blas::matrix_expression<MatB> const & matB,
-	blas::matrix_expression<MatC>& matC,
+	matrix_expression<MatA> const & matA,
+	matrix_expression<MatB> const & matB,
+	matrix_expression<MatC>& matC,
 	bool beta,double alpha,
 	boost::mpl::false_
 ){
 //	//if c is transposed, we add another layer of template madness and transpose the whole expression.
 //	if(traits::isTransposed(matC)){
-//		blas::matrix_unary2<MatC, blas::scalar_identity<typename MatC::value_type> > transC=trans(matC);
+//		matrix_unary2<MatC, scalar_identity<typename MatC::value_type> > transC=trans(matC);
 //		fast_prod_dense(trans(matB),trans(matA),transC,beta,alpha);
 //	}
 //	else{
@@ -127,14 +127,14 @@ void fast_prod_detail(
 //	}
 }
 
-}}
+}}}
 
 //dispatcher
 template<class MatA,class MatB,class MatC>
-void shark::fast_prod(
-	blas::matrix_expression<MatA> const & matA,
-	blas::matrix_expression<MatB> const & matB,
-	blas::matrix_expression<MatC>& matC,
+void shark::blas::fast_prod(
+	matrix_expression<MatA> const & matA,
+	matrix_expression<MatB> const & matB,
+	matrix_expression<MatC>& matC,
 	bool beta,double alpha
 ){
 	SIZE_CHECK(matB().size2()==matC().size2());
@@ -157,12 +157,12 @@ void shark::fast_prod(
 	detail::fast_prod_detail(matA(),matB(),matC(),beta,alpha,IsSparse() );
 }
 template<class MatA,class MatB,class MatC>
-void shark::fast_prod(
-	blas::matrix_expression<MatA> const & matA,
-	blas::matrix_expression<MatB> const & matB,
-	blas::matrix_range<MatC> matC,
+void shark::blas::fast_prod(
+	matrix_expression<MatA> const & matA,
+	matrix_expression<MatB> const & matB,
+	matrix_range<MatC> matC,
 bool beta,double alpha){
-	typedef blas::matrix_expression<blas::matrix_range<MatC> > Base;
+	typedef matrix_expression<matrix_range<MatC> > Base;
 	fast_prod(matA,matB,static_cast< Base &>(matC),beta,alpha);
 }
 #endif

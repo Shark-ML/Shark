@@ -169,7 +169,7 @@ public:
 		
 		//calculate the inner product
 		fast_prod(batchX1,trans(batchX2),result);
-		result += repeat(m_offset,sizeX1,sizeX2);
+		result += blas::repeat(m_offset,sizeX1,sizeX2);
 		//now do exponentiation
 		if(m_degree != 1)
 			noalias(result) = pow(result,m_degree);
@@ -187,7 +187,7 @@ public:
 		
 		//calculate the inner product
 		fast_prod(batchX1,trans(batchX2),s.base);
-		s.base += repeat(m_offset,sizeX1,sizeX2);
+		s.base += blas::repeat(m_offset,sizeX1,sizeX2);
 		
 		//now do exponentiation
 		if(m_degree != 1)

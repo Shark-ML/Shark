@@ -36,7 +36,7 @@
 
 #include <shark/LinAlg/BLAS/ublas.h>
 
-namespace shark {
+namespace shark { namespace blas{
 
 	///\brief implements row pivoting at matrix A using permutation P
 	///
@@ -121,5 +121,5 @@ namespace shark {
 	}
 	
 /** @}*/
-}
+}}
 #endif

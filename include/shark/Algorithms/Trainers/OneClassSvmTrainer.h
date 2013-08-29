@@ -176,7 +176,7 @@ protected:
 		MatrixType matrix(&km);
 		std::size_t ic = matrix.size();
 		double upper = 1.0/(m_nu*ic);
-		SVMProblemType svmProblem(matrix,RealZeroVector(ic),0.0,upper);
+		SVMProblemType svmProblem(matrix,blas::repeat(0.0,ic),0.0,upper);
 		ProblemType problem(svmProblem,base_type::m_shrinking);
 		
 		//solve it

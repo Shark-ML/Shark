@@ -436,7 +436,7 @@ protected:
 	const AbstractKernelFunction<InputType>& kernel;
 
 	/// Array of data pointers for kernel evaluations
-	std::vector<FixedSparseVectorProxy<T const,std::size_t> > x;
+	std::vector<blas::FixedSparseVectorProxy<T const,std::size_t> > x;
 
 	/// counter for the kernel accesses
 	mutable unsigned long long m_accessCounter;
@@ -518,7 +518,7 @@ public:
 
 protected:
 
-	typedef FixedSparseVectorProxy<typename T::value_type const,std::size_t> PointerType;
+	typedef blas::FixedSparseVectorProxy<typename T::value_type const,std::size_t> PointerType;
 	/// Array of data pointers for kernel evaluations
 	std::vector<PointerType> x;
 	

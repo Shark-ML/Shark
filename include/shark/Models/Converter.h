@@ -149,35 +149,74 @@ protected:
 /// \brief Convertion of real-valued outputs to classes
 ///
 /// \par
-/// The ArgMaxConverter is a parameter-free model converting its
-/// real-valued vector output to a class label 0, ..., d-1 by means of
-/// an arg-max operation. The class returns the argument of the maximal
+/// The ArgMaxConverter is a model converting the
+/// real-valued vector output of an underlying decision function to a 
+/// class label 0, ..., d-1 by means of an arg-max operation.
+/// The class returns the argument of the maximal
 /// input component as its output. This convertion is adjusted to
 /// interpret the output of a neural network or a support vector
 /// machine for multi-category classification.
 ///
-class ArgMaxConverter : public AbstractModel<RealVector, unsigned int>
+/// The underlying decision function is an arbitrary model. It should
+/// be default constructable and it can be accessed using decisionFunction().
+///
+/// The parameters of the ArgMaxConverter are the ones of the decision function
+template<class Model>
+class ArgMaxConverter : public AbstractModel<typename Model::InputType, unsigned int>
 {
+private:
+	typedef typename Model::BatchOutputType ModelBatchOutputType;
 public:
-	ArgMaxConverter();
+	typedef typename Model::InputType InputType;
+	typedef unsigned int OutputType;
+	typedef typename Batch<InputType>::type BatchInputType;
+	typedef Batch<unsigned int>::type BatchOutputType;
 
-	/// \brief From INameable: return the class name.
+	ArgMaxConverter(){}
+
 	std::string name() const
-	{ return "ArgMaxConverter"; }
+	{ return "ArgMaxConverter<"+m_decisionFunction.name()+">"; }
+	
+	RealVector parameterVector() const{
+		return m_decisionFunction.parameterVector();
+	}
 
-	RealVector parameterVector() const;
-	void setParameterVector(RealVector const& newParameters);
-	std::size_t numberOfParameters() const;
+	void setParameterVector(RealVector const& newParameters){
+		m_decisionFunction.setParameterVector(newParameters);
+	}
 
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
+	std::size_t numberOfParameters() const{
+		return m_decisionFunction.numberOfParameters();
 	}
 	
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs)const;
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
-		eval(patterns,outputs);
+	/// \brief Return the decision function
+	Model const& decisionFunction()const{
+		return m_decisionFunction;
 	}
-	using AbstractModel<RealVector,unsigned int>::eval;
+	
+	/// \brief Return the decision function
+	Model& decisionFunction(){
+		return m_decisionFunction;
+	}
+	
+	void eval(BatchInputType const& input, BatchOutputType& output)const{
+		ModelBatchOutputType modelResult;
+		m_decisionFunction.eval(input,modelResult);
+		std::size_t batchSize = shark::size(modelResult);
+		output.resize(batchSize);
+		for(std::size_t i = 0; i != batchSize; ++i){
+			output(i) = arg_max(get(modelResult,i));
+		}
+	}
+	void eval(BatchInputType const& input, BatchOutputType& output, State& state)const{
+		eval(input,output);
+	}
+	
+	void eval(InputType const & pattern, OutputType& output)const{
+		output = arg_max(m_decisionFunction(pattern));
+	}
+private:
+	Model m_decisionFunction;
 };
 
 

@@ -61,7 +61,7 @@ public:
 	{ return "NormalizeKernelUnitVariance"; }
 
 	double trace() const {
-		return m_trace;
+		return m_matrixTrace;
 	}
 	double mean() const {
 		return m_mean;
@@ -78,12 +78,10 @@ public:
 		// Blockwise version, with order of computations optimized for better use of the processor
 		// cache. This can save around 10% computation time for fast kernel functions.
 		std::size_t N = input.numberOfElements();
-		//~ std::size_t blocks = N / 64;
-		//~ std::size_t rest = N - 64 * blocks;
 		
 		//O.K. tried to make it more efficient (and shorter)
 		m_mean = 0.0;
-		m_trace = 0.0;
+		m_matrixTrace = 0.0;
 		for(std::size_t i = 0; i != input.numberOfBatches(); ++i){
 			typename UnlabeledData<InputType>::const_batch_reference batch = input.batch(i);
 			//off diagonal entries
@@ -93,56 +91,9 @@ public:
 			}
 			RealMatrix matrixBlock = k(batch, batch);
 			m_mean += sumElements(matrixBlock);
-			m_trace += shark::trace(matrixBlock);
+			m_matrixTrace += blas::trace(matrixBlock);
 		}
-		
-		//TODO: Check that the old version can go
-		//~ std::size_t i, j, ci, cj, ii, jj;
-		//~ double mean = 0;
-		//~ double trace = 0;
-		// loop through full blocks
-		//~ for (ci=0; ci<blocks; ci++) {
-			//~ { // diagonal blocks:
-				//~ for (i=0, ii=64*ci; i<64; i++, ii++) {
-					//~ for (j=0, jj=64*ci; j<i; j++, jj++) {
-						//~ mean += main->eval(input(ii), input(jj));
-					//~ }
-					//~ double d = main->eval(input(ii), input(ii));
-					//~ mean += 0.5 * d;
-					//~ trace += d;
-				//~ }
-			//~ } // off-diagonal blocks:
-			//~ for (cj=0; cj<ci; cj++) { 
-				//~ for (i=0, ii=64*ci; i<64; i++, ii++) {
-					//~ for (j=0, jj=64*cj; j<64; j++, jj++) {
-						//~ mean += main->eval(input(ii), input(jj));
-					//~ }
-				//~ }
-			//~ }
-		//~ }
-		//~ if (rest > 0) {
-			//~ // loop through the margins
-			//~ for (cj=0; cj<blocks; cj++) {
-				//~ for (j=0, jj=64*cj; j<64; j++, jj++) {
-					//~ for (i=0, ii=64*blocks; i<rest; i++, ii++) {
-						//~ mean += main->eval(input(ii), input(jj));
-					//~ }
-				//~ }
-			//~ }
-			//~ // lower right block
-			//~ for (i=0, ii=64*blocks; i<rest; i++, ii++) {
-				//~ for (j=0, jj=64*blocks; j<i; j++, jj++) {
-					//~ mean += main->eval(input(ii), input(jj));
-				//~ }
-				//~ double d = main->eval(input(ii), input(ii));
-				//~ mean += 0.5 * d;
-				//~ trace += d;
-			//~ }
-		//~ }
-		//~ mean *= 2.0; //correct for the fact that we only counted one diagonal half of the matrix
-		//~ m_mean = mean;
-		//~ m_trace = trace;
-		double tm = m_trace/N - m_mean/N/N;
+		double tm = m_matrixTrace/N - m_mean/N/N;
 		SHARK_ASSERT( tm > 0 );
 		double scaling_factor = 1.0 / tm;
 		kernel.setFactor( scaling_factor );
@@ -150,7 +101,7 @@ public:
 
 protected:
 	double m_mean; //store for other uses, external queries, etc.
-	double m_trace;
+	double m_matrixTrace;
 };
 
 

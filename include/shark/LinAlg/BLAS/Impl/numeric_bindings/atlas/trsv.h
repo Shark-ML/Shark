@@ -36,7 +36,7 @@
 
 ///solves systems of triangular matrices
 
-namespace shark {namespace detail {namespace bindings {
+namespace shark {namespace blas{ namespace bindings {
 inline void trsv(
 	CBLAS_ORDER order, CBLAS_UPLO uplo,
 	CBLAS_TRANSPOSE transA, CBLAS_DIAG unit,
@@ -80,8 +80,8 @@ inline void trsv(
 template <typename SymmA, typename VecB>
 void trsv(
 	CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA, CBLAS_DIAG unit,
-	blas::matrix_expression<SymmA> const &matA, 
-	blas::vector_expression<VecB> &vecB
+	matrix_expression<SymmA> const &matA, 
+	vector_expression<VecB> &vecB
 ){
 	CBLAS_ORDER const storOrd= (CBLAS_ORDER)storage_order<typename SymmA::orientation_category>::value;
 
@@ -99,8 +99,8 @@ void trsv(
 
 template <bool upper,bool unit,typename SymmA, typename VecB>
 void trsv(
-	blas::matrix_expression<SymmA> const &matA, 
-	blas::vector_expression<VecB> &vecB
+	matrix_expression<SymmA> const &matA, 
+	vector_expression<VecB> &vecB
 ){
 	CBLAS_DIAG cblasUnit = unit?CblasUnit:CblasNonUnit;
 	if(traits::isTransposed(matA))

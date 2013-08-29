@@ -35,19 +35,19 @@
 #include "ublasTags.h"
 #include <shark/LinAlg/BLAS/Tools.h>
 
-namespace shark {namespace detail {namespace bindings {
+namespace shark {namespace blas {namespace bindings {
 
 template <bool upper,typename T, typename MatA, typename TriangularC>
 inline void syrk (
-	T alpha, blas::matrix_expression<MatA> const& matA, 
-	T beta, blas::matrix_expression<TriangularC>& matC
+	T alpha,matrix_expression<MatA> const& matA, 
+	T beta,matrix_expression<TriangularC>& matC
 ){
 
 	if(alpha != 1.0){
 		beta /= alpha;
 	}
 	if(beta == 0)
-		shark::zero(matC);
+		zero(matC);
 	else if ( beta != 1.0){
 		matC()*=beta;
 	}

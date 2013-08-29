@@ -109,7 +109,7 @@ public:
 			temp
 		);
 		ensureSize(gradient,batchX1.size1(),batchX2.size2());
-		shark::zero(gradient);
+		zero(gradient);
 		noalias(columns(gradient,m_start,m_end)) = temp;
 	}
 
@@ -132,7 +132,7 @@ public:
 
 	template<class Kernels,class Ranges>
 	SubrangeKernelBase(Kernels const& kernels, Ranges const& ranges){
-		SIZE_CHECK(shark::size(kernels) == shark::size(ranges));
+		SIZE_CHECK(size(kernels) == size(ranges));
 		for(std::size_t i = 0; i != kernels.size(); ++i){
 			m_kernelWrappers.push_back(
 				SubrangeKernelWrapper<InputType>(get(kernels,i),get(ranges,i).first,get(ranges,i).second)

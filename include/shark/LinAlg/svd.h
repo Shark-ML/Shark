@@ -37,26 +37,13 @@
 
 #include <shark/LinAlg/Base.h>
 
-namespace shark{
+namespace shark{ namespace blas{
 
 /**
  * \ingroup shark_globals
  * 
  * @{
  */
-
-
-//! Determines the numerical rank of a rectangular matrix "amatA",
-//! when a singular value decomposition for "amatA" has taken place
-//! before.
-template<class MatrixT,class MatrixU,class VectorT>
-unsigned svdrank
-(
-	const MatrixT& amatA,
-	MatrixU& umatA,
-	MatrixU& vmatA,
-	VectorT& wvecA
-);
 
 
 //! \par
@@ -75,20 +62,8 @@ void svd
 );
 
 
-
-//! Sorts the singular values in vector "wvecA" by descending order.
-template<class MatrixU,class VectorT>
-void svdsort
-(
-	MatrixU& umatA,
-	MatrixU& vmatA,
-	VectorT& wvecA
-);
-
 /** @}*/
-}
+}}
 
 #include "Impl/svd.inl"
-#include "Impl/svdsort.inl"
-#include "Impl/svdrank.inl"
 #endif

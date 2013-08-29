@@ -63,7 +63,7 @@ private:
 		output.resize(state.size1(),numberOfHN());
 		
 		energy().inputHidden(inputBatch,state);
-		hiddenNeurons().sufficientStatistics(inputBatch,statisticsBatch,RealScalarVector(batchSize,1.0));
+		hiddenNeurons().sufficientStatistics(inputBatch,statisticsBatch,blas::repeat(1.0,batchSize));
 
 		if(m_evalMean){
 			noalias(output) = hiddenNeurons().mean(statisticsBatch);
@@ -84,7 +84,7 @@ private:
 		output.resize(batchSize,numberOfVN());
 		
 		energy().inputVisible(inputBatch,state);
-		visibleNeurons().sufficientStatistics(inputBatch,statisticsBatch,RealScalarVector(batchSize,1.0));
+		visibleNeurons().sufficientStatistics(inputBatch,statisticsBatch,blas::repeat(1.0,batchSize));
 		
 		if(m_evalMean){
 			noalias(output) = visibleNeurons().mean(statisticsBatch);
@@ -112,7 +112,7 @@ public:
 	///\brief Returns the parameters of the Model as parameter vector.
 	RealVector parameterVector () const {
 		RealVector ret(numberOfParameters());
-		init(ret) << toVector(m_weightMatrix),parameters(m_hiddenNeurons),parameters(m_visibleNeurons);
+		init(ret) << toVector(m_weightMatrix),blas::parameters(m_hiddenNeurons),blas::parameters(m_visibleNeurons);
 		return ret;
 	};
 
@@ -120,7 +120,7 @@ public:
 	///
 	/// @param newParameters vector of parameters  
  	void setParameterVector(const RealVector& newParameters) {
-		init(newParameters) >> toVector(m_weightMatrix),parameters(m_hiddenNeurons),parameters(m_visibleNeurons);
+		init(newParameters) >> toVector(m_weightMatrix),blas::parameters(m_hiddenNeurons),blas::parameters(m_visibleNeurons);
  	}
 	
 	///\brief Configures the structure.

@@ -58,12 +58,12 @@ void FisherLDA::train(LinearModel<>& model, LabeledData<RealVector, unsigned int
 
 	RealMatrix eigenvectors(inputDim, inputDim);
 	RealVector eigenvalues(inputDim);
+	eigensymm(scatter, eigenvectors, eigenvalues);
 	if (m_whitening){
-		RealMatrix h(inputDim, inputDim);
-		rankDecomp(scatter, eigenvectors, h, eigenvalues);
-	}
-	else{
-		eigensymm(scatter, eigenvectors, eigenvalues);
+		for(std::size_t i = 0; i != inputDim; ++i){
+			if(eigenvalues(i) <= 0) continue;
+			column(eigenvectors,i) /= std::sqrt(eigenvalues(i));
+		}
 	}
 	//reduce the size of the covariance matrix the the needed
 	//subspace

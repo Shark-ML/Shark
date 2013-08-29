@@ -122,8 +122,8 @@ public:
 		//O.K: I think this is what the code should look like
 		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), gamma());
 		RealVector v = column(createBatch<RealVector>(dataset.labels().elements()),0);
-		//~ approxSolveSymmSystemInPlace(M,v); //try this later instad the below
-		solveSymmSystemInPlace<SolveAXB>(M,v);
+		//~ blas::approxSolveSymmSystemInPlace(M,v); //try this later instad the below
+		blas::solveSymmSystemInPlace<blas::SolveAXB>(M,v);
 		svm.setParameterVector(v);
 	}
 };

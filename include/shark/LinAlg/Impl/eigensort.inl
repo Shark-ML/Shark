@@ -88,7 +88,7 @@
  *
  */
 template<class MatrixT,class VectorT>
-void shark::eigensort
+void shark::blas::eigensort
 (
 	MatrixT& vmatA,
 	VectorT& dvecA

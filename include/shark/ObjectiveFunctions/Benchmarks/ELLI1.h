@@ -70,7 +70,7 @@ struct ELLI1 : public MultiObjectiveFunction{
 	}
 
 	void init() {
-		m_rotationMatrix = randomRotationMatrix( m_numberOfVariables );
+		m_rotationMatrix = blas::randomRotationMatrix( m_numberOfVariables );
 	}
 
 	ResultType eval( const SearchPointType & x ) const {

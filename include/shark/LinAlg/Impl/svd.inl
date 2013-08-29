@@ -95,7 +95,7 @@
  *
  */
 template<class MatrixT,class MatrixU,class VectorT>
-void shark::svd
+void shark::blas::svd
 (
 	MatrixT const& amatA,
 	MatrixU& umatA,

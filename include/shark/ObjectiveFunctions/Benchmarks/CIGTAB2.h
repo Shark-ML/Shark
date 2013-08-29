@@ -74,8 +74,8 @@ struct CIGTAB2 : public MultiObjectiveFunction {
 	}
 
 	void init() {
-		m_rotationMatrixX = randomRotationMatrix(m_numberOfVariables);
-		m_rotationMatrixY = randomRotationMatrix(m_numberOfVariables);
+		m_rotationMatrixX = blas::randomRotationMatrix(m_numberOfVariables);
+		m_rotationMatrixY = blas::randomRotationMatrix(m_numberOfVariables);
 	}
 
 	ResultType eval( const SearchPointType & x ) const {

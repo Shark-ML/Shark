@@ -44,7 +44,7 @@
 
 #include "metafunctions.h"
 
-namespace shark { namespace traits {
+namespace shark { namespace blas{ namespace traits {
 
 
 
@@ -147,6 +147,6 @@ matrix_storage(blas::matrix_expression<M> & m) {
 }
 
 }
-}
+}}
 
 #endif

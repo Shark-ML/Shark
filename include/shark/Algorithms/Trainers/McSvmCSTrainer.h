@@ -128,8 +128,8 @@ public:
 		RealVector param = svm.parameterVector();
 
 		// prepare the problem description
-		RealVector alpha = RealZeroVector((classes-1) * ic);
-		RealVector bias = RealZeroVector(classes);
+		RealVector alpha((classes-1) * ic,0.0);
+		RealVector bias(classes,0.0);
 
 		// TODO: initialize alpha (and bias) from the parameters
 // 		if (svm.hasOffset()) bias = RealVectorRange(param, Range(classes * ic, classes * ic + classes));

@@ -29,7 +29,6 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_MoreHidden )
 			}
 		}
 		UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
-		RealScalarVector beta(4,1);
 		
 		//now calculate the test
 		ExactGradient<BinaryRBM> gradient(&rbm);
@@ -61,7 +60,6 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_LessHidden )
 			}
 		}
 		UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
-		RealScalarVector beta(4,1);
 		
 		//now calculate the test
 		ExactGradient<BinaryRBM> gradient(&rbm);

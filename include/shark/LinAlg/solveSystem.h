@@ -40,7 +40,7 @@
 
 #include <shark/LinAlg/solveTriangular.h>
 
-namespace shark{
+namespace shark{ namespace blas{
 /// \brief System of linear equations solver.
 ///
 ///Solves asystem of linear equations
@@ -51,9 +51,9 @@ namespace shark{
 ///Be aware, that the matrix must have full rank!
 template<class MatT,class Vec1T,class Vec2T>
 void solveSystem(
-	blas::matrix_expression<MatT> const& A, 
-	blas::vector_expression<Vec1T>& x,
-	blas::vector_expression<Vec2T> const& b
+	matrix_expression<MatT> const& A, 
+	vector_expression<Vec1T>& x,
+	vector_expression<Vec2T> const& b
 );
 
 /// \brief System of linear equations solver.
@@ -70,9 +70,9 @@ void solveSystem(
 ///Be aware, that the matrix must have full rank!
 template<class MatT,class Vec1T,class Vec2T>
 void solveSystem(
-	blas::matrix_expression<MatT> const& A, 
-	blas::matrix_expression<Vec1T>& x,
-	blas::matrix_expression<Vec2T> const& b
+	matrix_expression<MatT> const& A, 
+	matrix_expression<Vec1T>& x,
+	matrix_expression<Vec2T> const& b
 );
 
 /// \brief System of symmetric linear equations solver. The result is stored in b
@@ -86,8 +86,8 @@ void solveSystem(
 ///Be aware, that the matrix must have full rank!
 template<class System, class MatT,class VecT>
 void solveSymmSystemInPlace(
-	blas::matrix_expression<MatT> const& A,
-	blas::vector_expression<VecT>& b
+	matrix_expression<MatT> const& A,
+	vector_expression<VecT>& b
 );
 
 /// \brief System of symmetric linear equations solver.
@@ -110,8 +110,8 @@ void solveSymmSystemInPlace(
 ///@param B the right hand side of the LGS, also stores the result
 template<class System, class MatT,class Mat1T>
 void solveSymmSystemInPlace(
-	blas::matrix_expression<MatT> const& A,
-	blas::matrix_expression<Mat1T>& B
+	matrix_expression<MatT> const& A,
+	matrix_expression<Mat1T>& B
 );
 
 /// \brief System of symmetric linear equations solver.
@@ -124,9 +124,9 @@ void solveSymmSystemInPlace(
 ///Be aware, that the matrix must have full rank!
 template<class System,class MatT,class Vec1T,class Vec2T>
 void solveSymmSystem(
-	blas::matrix_expression<MatT> const& A, 
-	blas::vector_expression<Vec1T>& x,
-	blas::vector_expression<Vec2T> const& b
+	matrix_expression<MatT> const& A, 
+	vector_expression<Vec1T>& x,
+	vector_expression<Vec2T> const& b
 );
 /// \brief System of symmetric linear equations solver.
 ///
@@ -148,9 +148,9 @@ void solveSymmSystem(
 ///@param B the right hand side of the LGS
 template<class System,class MatT,class Mat1T,class Mat2T>
 void solveSymmSystem(
-	blas::matrix_expression<MatT> const& A, 
-	blas::matrix_expression<Mat1T>& X,
-	blas::matrix_expression<Mat2T> const& B
+	matrix_expression<MatT> const& A, 
+	matrix_expression<Mat1T>& X,
+	matrix_expression<Mat2T> const& B
 );
 
 ///\brief Approximates the solution of a linear system of equation Ax=b.
@@ -175,9 +175,9 @@ void solveSymmSystem(
 /// \param maxIterations the maximum number of iterations
 template<class MatT, class VecT>
 void approxSolveSymmSystem(
-	blas::matrix_expression<MatT> const& A,
-	blas::vector_expression<VecT>& x,
-	blas::vector_expression<VecT> const& b,
+	matrix_expression<MatT> const& A,
+	vector_expression<VecT>& x,
+	vector_expression<VecT> const& b,
 	double epsilon = 1.e-10,
 	unsigned int maxIterations = 0
 ){
@@ -191,10 +191,10 @@ void approxSolveSymmSystem(
 	unsigned int maxIt = (maxIterations == 0)? dim: maxIterations;
 	
 	typedef typename VecT::value_type value_type;
-	blas::vector<value_type> r=b;
-	blas::vector<value_type> rnext(dim);
-	blas::vector<value_type> p=b;
-	blas::vector<value_type> Ap(dim);
+	vector<value_type> r=b;
+	vector<value_type> rnext(dim);
+	vector<value_type> p=b;
+	vector<value_type> Ap(dim);
 	
 	for(std::size_t i = 0; i != maxIt; ++i){
 		fast_prod(A,p,Ap);
@@ -202,7 +202,7 @@ void approxSolveSymmSystem(
 		double alpha = rsqr/inner_prod(p,Ap);
 		noalias(x())+=alpha*p;
 		noalias(rnext) = r - alpha * Ap; 
-		if(blas::norm_inf(rnext)<epsilon)
+		if(norm_inf(rnext)<epsilon)
 			break;
 		
 		double beta = inner_prod(rnext,rnext)/rsqr;
@@ -233,18 +233,18 @@ void approxSolveSymmSystem(
 /// \param maxIterations the maximum number of iterations
 template<class MatT, class VecT>
 void approxSolveSymmSystemInPlace(
-	blas::matrix_expression<MatT> const& A,
-	blas::vector_expression<VecT>& b,
+	matrix_expression<MatT> const& A,
+	vector_expression<VecT>& b,
 	double epsilon = 1.e-10,
 	unsigned int maxIterations = 0
 ){
 	SIZE_CHECK(A().size1()==A().size2());
 	SIZE_CHECK(A().size1()==b().size());
-	blas::vector<typename VecT::value_type> x(b.size(),0.0);
+	vector<typename VecT::value_type> x(b.size(),0.0);
 	approxSolveSymmSystem(A,x,b);
 	swap(x,b);
 }
 
-}
+}}
 #include "Impl/solveSystem.inl"
 #endif

@@ -45,19 +45,19 @@
 //todo implement this using ATLAS
 
 template<class MatT,class Vec1T,class Vec2T>
-void shark::solveSystem(
-	const blas::matrix_expression<MatT>& A, 
-	blas::vector_expression<Vec1T>& x,
-	const blas::vector_expression<Vec2T>& b
+void shark::blas::solveSystem(
+	const matrix_expression<MatT>& A, 
+	vector_expression<Vec1T>& x,
+	const vector_expression<Vec2T>& b
 ){
 	SIZE_CHECK(A().size1() == b().size());
 	SIZE_CHECK(A().size1() == A().size2());
 	std::size_t n = A().size1();
 	
-	blas::permutation_matrix<std::size_t> permutation(n);
+	permutation_matrix<std::size_t> permutation(n);
 	MatT LUDecomposition= A();
 	
-	blas::lu_factorize(LUDecomposition,permutation);
+	lu_factorize(LUDecomposition,permutation);
 	
 	ensureSize(x,n);
 	noalias(x()) = b();
@@ -69,19 +69,19 @@ void shark::solveSystem(
 }
 
 template<class MatT,class Mat1T,class Mat2T>
-void shark::solveSystem(
-	blas::matrix_expression<MatT> const& A, 
-	blas::matrix_expression<Mat1T>& X,
-	blas::matrix_expression<Mat2T> const& B
+void shark::blas::solveSystem(
+	matrix_expression<MatT> const& A, 
+	matrix_expression<Mat1T>& X,
+	matrix_expression<Mat2T> const& B
 ){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size1() == A().size2());
 	std::size_t n = A().size1();
 	
-	blas::permutation_matrix<std::size_t> permutation(n);
+	permutation_matrix<std::size_t> permutation(n);
 	MatT LUDecomposition = A;
 	
-	blas::lu_factorize(LUDecomposition,permutation);
+	lu_factorize(LUDecomposition,permutation);
 	
 	ensureSize(X,n,B().size2());
 	noalias(X()) = B();
@@ -92,9 +92,9 @@ void shark::solveSystem(
 }
 
 template<class System,class MatT,class Mat1T>
-void shark::solveSymmSystemInPlace(
-	blas::matrix_expression<MatT> const& A, 
-	blas::matrix_expression<Mat1T>& B
+void shark::blas::solveSymmSystemInPlace(
+	matrix_expression<MatT> const& A, 
+	matrix_expression<Mat1T>& B
 ){
 	if(System::left){
 		SIZE_CHECK(A().size1() == B().size1());
@@ -103,30 +103,30 @@ void shark::solveSymmSystemInPlace(
 	}
 	SIZE_CHECK(A().size1() == A().size2());
 	
-	blas::matrix<typename MatT::value_type> cholesky;
+	matrix<typename MatT::value_type> cholesky;
 	choleskyDecomposition(A(),cholesky);
 
 	solveTriangularCholeskyInPlace<System>(cholesky,B);
 }
 
 template<class System,class MatT,class VecT>
-void shark::solveSymmSystemInPlace(
-	blas::matrix_expression<MatT> const& A, 
-	blas::vector_expression<VecT>& b
+void shark::blas::solveSymmSystemInPlace(
+	matrix_expression<MatT> const& A, 
+	vector_expression<VecT>& b
 ){
 	SIZE_CHECK(A().size1() == b().size());
 	SIZE_CHECK(A().size1() == A().size2());
 	
-	blas::matrix<typename MatT::value_type> cholesky;
+	matrix<typename MatT::value_type> cholesky;
 	choleskyDecomposition(A(),cholesky);
 	solveTriangularCholeskyInPlace<System>(cholesky,b);
 }
 
 template<class System,class MatT,class Vec1T,class Vec2T>
-void shark::solveSymmSystem(
-	const blas::matrix_expression<MatT>& A, 
-	blas::vector_expression<Vec1T>& x,
-	const blas::vector_expression<Vec2T>& b
+void shark::blas::solveSymmSystem(
+	const matrix_expression<MatT>& A, 
+	vector_expression<Vec1T>& x,
+	const vector_expression<Vec2T>& b
 ){
 	SIZE_CHECK(A().size1() == b().size());
 	SIZE_CHECK(A().size1() == A().size2());
@@ -135,10 +135,10 @@ void shark::solveSymmSystem(
 	solveSymmSystemInPlace<System>(A,x);
 }
 template<class System,class MatT,class Mat1T,class Mat2T>
-void shark::solveSymmSystem(
-	const blas::matrix_expression<MatT>& A, 
-	blas::matrix_expression<Mat1T>& X,
-	const blas::matrix_expression<Mat2T>& B
+void shark::blas::solveSymmSystem(
+	const matrix_expression<MatT>& A, 
+	matrix_expression<Mat1T>& X,
+	const matrix_expression<Mat2T>& B
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	if(System::left){

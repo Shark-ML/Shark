@@ -103,7 +103,7 @@ void SigmoidModel::eval(BatchInputType const&patterns, BatchOutputType& outputs)
 	outputs.resize(patterns.size1(),1);
 	//note that because of the way the intermediate result is passed to the sigmoid member function
 	// (facilitating derivatives and sub-classes), we here have to substract the bias parameter.
-	noalias(column(outputs,0)) = column(patterns,0)*m_parameters(0) - repeat(m_parameters(1),patterns.size1());
+	noalias(column(outputs,0)) = column(patterns,0)*m_parameters(0) - blas::repeat(m_parameters(1),patterns.size1());
 	for(std::size_t i = 0; i != patterns.size1(); ++i)
 		outputs(i,0) = sigmoid(outputs(i,0));
 }

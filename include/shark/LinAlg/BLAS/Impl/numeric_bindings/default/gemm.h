@@ -32,16 +32,16 @@
 #ifndef SHARK_LINALG_IMPL_NUMERIC_BINDINGS_DEFAULT_GEMM_HPP
 #define SHARK_LINALG_IMPL_NUMERIC_BINDINGS_DEFAULT_GEMM_HPP
 
-namespace shark { namespace detail { namespace bindings {
+namespace shark { namespace blas { namespace bindings {
 
 // C <- alpha * op (A) * op (B) + beta * C
 // op (A) == A || A^T || A^H
 template <typename T, typename MatA, typename MatB, typename MatC>
 void gemm(
-T alpha, blas::matrix_expression<MatA> const &matA, 
-blas::matrix_expression<MatB> const &matB,
+T alpha, matrix_expression<MatA> const &matA, 
+matrix_expression<MatB> const &matB,
 T beta, 
-blas::matrix_expression<MatC>& matC
+matrix_expression<MatC>& matC
 ) {
 	if(alpha != 1.0){
 		beta /= alpha;
@@ -57,7 +57,7 @@ blas::matrix_expression<MatC>& matC
 			noalias(matC())+=prod(matA,matB);	
 		}else{
 			if(matA().size2()> 100){
-				blas::matrix<typename MatB::value_type, blas::row_major> temp=matA;
+				matrix<typename MatB::value_type, row_major> temp=matA;
 				noalias(matC())+=prod(temp,matB);	
 			}
 			else

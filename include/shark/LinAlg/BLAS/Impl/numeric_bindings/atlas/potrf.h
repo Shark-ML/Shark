@@ -49,7 +49,7 @@
 
 #include "cblas_inc.h"
 
-namespace shark {namespace detail {namespace bindings {
+namespace shark {namespace blas {namespace bindings {
 
 inline int potrf(CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
         int const N, float *A, int const lda
@@ -76,7 +76,7 @@ inline int potrf(CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
 }
 
 template <typename SymmA>
-inline int potrf(CBLAS_UPLO const uplo, blas::matrix_container<SymmA>& a) {
+inline int potrf(CBLAS_UPLO const uplo, matrix_container<SymmA>& a) {
 	CBLAS_ORDER const stor_ord= 
 		(CBLAS_ORDER)storage_order<typename SymmA::orientation_category>::value;
 

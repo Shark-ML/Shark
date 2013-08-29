@@ -37,7 +37,7 @@
 #define SHARK_LINALG_INVERSE_H
 
 #include <shark/LinAlg/Cholesky.h>
-namespace shark{
+namespace shark{ namespace blas{
 
 /**
  * \ingroup shark_globals
@@ -66,8 +66,8 @@ void invertSymmPositiveDefinite(MatrixT &I, const MatrixU& ArrSymm);
 /// other parts of shark
 template<class MatA, class MatU>
 void decomposedGeneralInverse(
-	blas::matrix_expression<MatA> const& matA,
-	blas::matrix_expression<MatU>& matU
+	matrix_expression<MatA> const& matA,
+	matrix_expression<MatU>& matU
 );
 
 /*!
@@ -86,10 +86,10 @@ void decomposedGeneralInverse(
  *      \returns The generalised inverse matrix of A.
  */
 template<class MatrixT>
-RealMatrix g_inverse(blas::matrix_expression<MatrixT> const& matrixA);
+RealMatrix g_inverse(matrix_expression<MatrixT> const& matrixA);
 
 /** @}*/
-}
+}}
 
 //implementation of the template functions
 #include "Impl/invert.inl"
