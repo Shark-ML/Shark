@@ -649,7 +649,7 @@ public:
 
 	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
 	///
-	///After the operation the container will contain batchSizes.size() batchs with the i-th batch having size batchSize[i].
+	///After the operation the container will contain batchSizes.size() batches with the i-th batch having size batchSize[i].
 	///However the sum of all batch sizes must be equal to the current number of elements
 	template<class Range>
 	void repartition(Range const& batchSizes){
