@@ -64,6 +64,7 @@ struct DTLZ1 : public MultiObjectiveFunction
 	bool hasScalableObjectives()const{
 		return true;
 	}
+	
 	void setNumberOfObjectives( std::size_t numberOfObjectives ){
 		m_objectives = numberOfObjectives;
 	}
