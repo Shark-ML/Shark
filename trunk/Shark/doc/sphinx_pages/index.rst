@@ -66,7 +66,7 @@
    rest_sources/tutorials/algorithms/svm
    rest_sources/tutorials/algorithms/svmModelSelection
    rest_sources/tutorials/algorithms/svmLikelihoodModelSelection
-   rest_sources/tutorials/algorithms/mkl-ckf
+   rest_sources/tutorials/algorithms/lkc-mkl
 
    rest_sources/tutorials/algorithms/cma
    rest_sources/tutorials/algorithms/mocma
