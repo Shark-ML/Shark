@@ -41,6 +41,32 @@ Simply do the following:
    open ``$SHARKHOME/doc/sphinx_pages/build/html/rest_sources/about_shark/new_text.html``
    in your browser -- done!
 
+.tut and .tpp files
+-------------------
+
+In order to synchronize tutorials and corresponding source code files,
+we introduced a simple, but effective mechanism.  Instead of a
+``.cpp`` source files and a ``.rst`` files referring to them, we
+maintain ``.tpp`` source files and a ``.tut`` files, respectively.
+A ``.tpp`` file is a source file with additional tags for source code
+blocks, for example in ``RFTutorial.tpp``: ::
+
+  //###begin<includes>
+  #include <shark/Data/Csv.h> //importing the file
+  #include <shark/Algorithms/Trainers/RFTrainer.h> //the random forest trainer
+  #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //zero one loss for evaluation
+  //###end<includes>
+
+A ``.tut`` file can refer to such blocks: ::
+
+  ..sharkcode<Supervised/RFTutorial.tpp,includes>
+
+The Shark build system automatically extracts these blocks and
+produces stripped  ``.cpp`` source files, where the tags are removed,
+and ``.rst`` files. In the latter, the references are replaced by the
+corresponding source code blocks.
+
+
 
 Formatting requirements and conventions
 ---------------------------------------

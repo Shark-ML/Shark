@@ -3,13 +3,6 @@ Nearest Neighbor Classification
 ===============================
 
 
-.. todo::
-
-    this has much too much beginner/background/unrelated information
-    and should be cleaned up. for example, too much on proteins, too
-    much on csv_import (we have a tutorial for that), and no need to
-    explain the 0-1-loss in detail, etc.
-
 Background
 ----------
 
