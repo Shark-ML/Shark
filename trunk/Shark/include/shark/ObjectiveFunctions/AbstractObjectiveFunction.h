@@ -187,8 +187,8 @@ public:
 		return false;
 	}
 
-	/// \brief Adjusts the number of variables if the function is scalable.
-	/// \param [in] numberOfVariables The new dimension.
+	/// \brief Adjusts the number of objectives if the function is scalable.
+	/// \param numberOfObjectives The new dimension.
 	virtual void setNumberOfObjectives( std::size_t numberOfObjectives ){
 		throw SHARKEXCEPTION("dimensionality of function is not scaleable");
 	}
