@@ -99,6 +99,7 @@ SHARK_ADD_EXAMPLE( Supervised/CSvmTutorial CSvmTutorial "Supervised" )
 
 ##SHARK_ADD_EXAMPLE( Supervised/OnlineSparseMcSvmExp OnlineSparseMcSvmExp "Supervised" )
 ##SHARK_ADD_EXAMPLE( Supervised/OnlineCSMcSvmExp OnlineCSMcSvmExp "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/MklKernelTutorial MklKernelTutorial "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/SubrangeKernelTutorial SubrangeKernelTutorial "Supervised" )
 
 SHARK_ADD_EXAMPLE( Supervised/KNNTutorial KNNTutorial "Supervised" )
