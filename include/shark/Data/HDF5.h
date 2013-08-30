@@ -322,7 +322,7 @@ void importHDF5(
 
 /// @brief Import data from HDF5 dataset of compressed sparse column format.
 ///
-/// @param data
+/// @param labeledData
 ///     Container storing the loaded data
 /// @param fileName
 ///     The name of HDF5 file to be read from
@@ -333,7 +333,7 @@ void importHDF5(
 ///
 /// @tparam VectorType
 ///     Type of object stored in Shark data container
-/// @tparam LableType
+/// @tparam LabelType
 ///     Type of label
 template<typename VectorType, typename LabelType>
 void importHDF5(

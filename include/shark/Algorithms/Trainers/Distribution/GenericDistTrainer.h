@@ -51,7 +51,7 @@ class GenericDistTrainer
 public:
 
 	/// Train an abstract distribution
-	/// @param abstractDist[in, out] the distribution we want to train
+	/// @param abstractDist the distribution we want to train
 	/// @param input the input data used for training the dist
 	/// @throw throw shark exception if training attempt for this distribution failed
 	void train(AbstractDistribution& abstractDist, const std::vector<double>& input) const
@@ -71,7 +71,7 @@ public:
 private:
 
 	/// Try to train an abstract distribution with given concrete distribution type
-	/// @param abstractDist[in, out] the abstract distribution
+	/// @param abstractDist the abstract distribution
 	/// @param trainer the trainer to be used for training the distribution
 	/// @param input the input data
 	/// @tparam DistType the type of concrete distribution
