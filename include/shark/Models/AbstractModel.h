@@ -163,8 +163,9 @@ public:
 	
 	/// \brief  Standard interface for evaluating the response of the model to a batch of patterns.
 	///
-	/// \param patterns the inputs of the model
-	/// \param outputs the predictions or response of the model to every pattern
+	/// \param patterns  inputs of the model
+	/// \param outputs   predictions or response of the model to every pattern
+	//  \param state     stores intermediate values during the computation of eval for later re-use, in particular for gradient computation
 	virtual void eval(BatchInputType const & patterns, BatchOutputType& outputs, State& state) const = 0;
 
 	/// \brief  Standard interface for evaluating the response of the model to a single pattern.
@@ -263,7 +264,7 @@ public:
 	///\brief calculates the weighted sum of derivatives w.r.t the inputs
 	///
 	/// \param pattern       the pattern to evaluate
-	/// \param coefficients  the oefficients which are used to calculate the weighted sum
+	/// \param coefficients  the coefficients which are used to calculate the weighted sum
 	/// \param  errorHessian  the second derivative of the error function for every pattern
 	/// \param state intermediate results stored by eval to sped up calculations of the derivatives
 	/// \param derivative      the calculated derivative for every pattern
@@ -285,7 +286,7 @@ public:
 	/// the feed-forward neural networks. However, there exists the obvious default implementation to just calculate
 	/// the derivatives one after another.
 	/// \param pattern       the pattern to evaluate
-	/// \param coefficients  the oefficients which are used to calculate the weighted sum
+	/// \param coefficients  the coefficients which are used to calculate the weighted sum
 	/// \param state intermediate results stored by eval to sped up calculations of the derivatives
 	/// \param parameterDerivative  the calculated parameter derivative as sum over all derivates of all patterns
 	/// \param inputDerivative    the calculated derivative for every pattern
