@@ -43,10 +43,10 @@ namespace shark {
 /// \par
 /// The Random Forest Classifier predicts a class label
 /// using the Random Forest algorithm as described in<br/>
-/// Random Forests. Leo Breiman. <it>Machine Learning</it>, 1(45), pages 5-32. Springer, 2001.<br/>
+/// Random Forests. Leo Breiman. Machine Learning, 1(45), pages 5-32. Springer, 2001.<br/>
 ///
 /// \par
-/// It is a ensemble learner that uses multiple decision trees build
+/// It is a ensemble learner that uses multiple decision trees built
 /// using the CART methodology.
 ///
 class RFClassifier : public AbstractModel<RealVector, RealVector>
