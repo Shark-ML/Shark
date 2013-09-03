@@ -80,7 +80,7 @@ struct Energy{
 	/// hidden neurons in a batch by using the precomputed input/activation of the visible neurons.
 	///
 	///@param hiddenState the batch of states of the hidden neurons
-	///@param visibleInput the bacth of current inputs for he visible units given hiddenState
+	///@param visibleInput the batch of current inputs for he visible units given hiddenState
 	///@param beta the inverse temperature
 	///@return the unnormalized probability
 	template<class BetaVector>
@@ -150,7 +150,7 @@ struct Energy{
 	
 	///\brief Computes the logarithm of the unnormalized probability of each state of the hidden neurons from a batch.
 	///
-	///@param hiddenStates a bacth of states of the hidden neurons
+	///@param hiddenStates a batch of states of the hidden neurons
 	///@param beta the inverse temperature
 	template<class BetaVector>
 	RealVector logUnnormalizedPropabilityHidden(RealMatrix const& hiddenStates, BetaVector const& beta)const{
@@ -294,7 +294,7 @@ public:
 	///
 	///for numerical stability, the logarithm of the weights is used
 	///
-	///This method weights the member sof the batch using the weights in the thirs parameter
+	///This method weights the members of the batch using the weights specified by the corresponding parameter
 	///@param hiddens a batch of samples for the hidden layer
 	///@param visibles a batch of samples of the visible layer
 	///@param logWeights the logarithm of the weights for every sample
@@ -323,7 +323,7 @@ public:
 	///
 	///for numerical stability, the logarithm of the weights is used
 	///
-	///This method weights the member sof the batch using the weights in the thirs parameter
+	///This method weights the members of the batch using the weights in the specified by the corresponding parameter
 	///@param hiddens a batch of samples for the hidden layer
 	///@param visibles a batch of samples of the visible layer
 	///@param logWeights the logarithm of the weights for every sample
@@ -353,7 +353,7 @@ public:
 	///
 	///for numerical stability, the logarithm of the weights is used
 	///
-	///This method weights the member sof the batch using the weights in the thirs parameter
+	///This method weights the memberas of the batch using the weights specified by the corresponding parameter
 	///@param hiddens a batch of samples for the hidden layer
 	///@param visibles a batch of samples of the visible layer
 	template<class HiddenSampleBatch, class VisibleSampleBatch>
@@ -365,7 +365,7 @@ public:
 	///
 	///for numerical stability, the logarithm of the weights is used
 	///
-	///This method weights the member sof the batch using the weights in the thirs parameter
+	///This method weights the members of the batch using the weights specified by the corresponding parameter
 	///@param hiddens a batch of samples for the hidden layer
 	///@param visibles a batch of samples of the visible layer
 	template<class HiddenSampleBatch, class VisibleSampleBatch>

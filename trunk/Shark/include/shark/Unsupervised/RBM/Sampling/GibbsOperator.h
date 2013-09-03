@@ -58,13 +58,13 @@ public:
 
 	///\brief Represents the state of a batch of hidden samples and additional information required by the gradient.
 	///
-	///Aside fromt the hidden state, this structure can also hold the actual values 
+	///Aside from the hidden state, this structure can also hold the actual values 
 	///of the input, the phi-function and the sufficient statistics
 	typedef typename Batch<HiddenSample>::type HiddenSampleBatch;
 
 	///\brief Represents the state of the visible units and additional information required by the gradient.
 	///
-	///Aside fromt the visible state, this structure can also hold the actual values 
+	///Aside from the visible state, this structure can also hold the actual values 
 	///of the hidden input, the phi-function and the sufficient statistics
 	typedef typename Batch<VisibleSample>::type VisibleSampleBatch;
 
@@ -81,7 +81,7 @@ public:
 
 	///\brief Calculates internal data needed for sampling the hidden units as well as requested information for the gradient.
 	///
-	///This function calculates the conditional propability distribution p(h|v) with inverse temperature beta for the whole batch of samples
+	///This function calculates the conditional probability distribution p(h|v) with inverse temperature beta for the whole batch of samples
 	///Be aware that a change of temperature may occur between sampleVisible and precomputeHidden.
 	/// @param hiddenBatch the batch of hidden samples to be created
 	/// @param visibleBatch the batch of visible samples to be created
@@ -95,7 +95,7 @@ public:
 	}
 	///\brief Calculates internal data needed for sampling the hidden units as well as requested information for the gradient.
 	///
-	///This function calculates the conditional propability distribution p(h|v) with inverse temperature 1 for the whole batch of samples
+	///This function calculates the conditional probability distribution p(h|v) with inverse temperature 1 for the whole batch of samples
 	///Be aware that a change of temperature may occur between sampleVisible and precomputeHidden.
 	void precomputeHidden(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
@@ -105,7 +105,7 @@ public:
 
 	///\brief calculates internal data needed for sampling the visible units as well as requested information for the gradient 
 	///
-	///This function calculates the conditional propability distribution p(v|h) with inverse temperature beta for a whole batch of inputs.
+	///This function calculates the conditional probability distribution p(v|h) with inverse temperature beta for a whole batch of inputs.
 	///Be aware that a change of temperature may occur between sampleHidden and precomputeVisible.
 	template<class BetaVector>
 	void precomputeVisible(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch, BetaVector const& beta)const{
@@ -154,7 +154,7 @@ public:
 	}
 
 
-	///\brief Creates  hidden/visible sample pairs from the states of the visible neurons, i.e. sats the visible units to the given states and samples hidden states based on the states of the visible units. 
+	///\brief Creates  hidden/visible sample pairs from the states of the visible neurons, i.e. sets the visible units to the given states and samples hidden states based on the states of the visible units. 
 	/// This can directly be used to calculate the gradient.
 	///
 	/// @param hiddenBatch the batch of hidden samples to be created
@@ -171,13 +171,12 @@ public:
 		sampleHidden(hiddenBatch);
 	}
 	
-	///\brief Creates  hidden/visible sample pairs from the states of the visible neurons, i.e. sats the visible units to the given states and samples hidden states based on the states of the visible units. 
+	///\brief Creates  hidden/visible sample pairs from the states of the visible neurons, i.e. sets the visible units to the given states and samples hidden states based on the states of the visible units. 
 	/// This can directly be used to calculate the gradient.
 	///
 	/// @param hiddenBatch the batch of hidden samples to be created
 	/// @param visibleBatch the batch of visible samples to be created
 	/// @param states the states of the visible neurons in the sample
-	/// @param state the state of the visible neurons in the sample
 	template<class States>
 	void createSample(HiddenSampleBatch& hiddenBatch,VisibleSampleBatch& visibleBatch, States const& states)const{
 		createSample(hiddenBatch,visibleBatch,states, blas::repeat(1.0,states.size1()));
