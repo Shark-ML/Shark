@@ -38,10 +38,10 @@
 namespace shark {
 ///\brief Calculates the value of the partition function $Z$.
 ///
-///Only useful for small input and theoritical analysis
+///Only useful for small input and theoretical analysis
 ///
-///@param rbm the rbm for which to calculate the function
-///@param beta the inverse temperature of the rbm. default is 1
+///@param rbm the RBM for which to calculate the function
+///@param beta the inverse temperature of the RBM. default is 1
 ///@return the value of the partition function $Z*e^(-constant)$
 template<class RBMType>
 double logPartitionFunction(RBMType const& rbm, double beta = 1.0) {
@@ -55,12 +55,12 @@ double logPartitionFunction(RBMType const& rbm, double beta = 1.0) {
 
 ///\brief Estimates the negative log-likelihood of a set of input vectors under the models distribution using the partition function
 ///
-///Only useful for small input and theoritical analysis
+///Only useful for small input and theoretical analysis
 ///
-///@param rbm the Restricted Boltzman machine for which the negative log likelyhood of the data is to be calculated
+///@param rbm the Restricted Boltzmann machine for which the negative log likelihood of the data is to be calculated
 ///@param inputs the input vectors
-///@param logPartition the value of the partition function of the RBM.
-///@param beta the inverse temperature of the rbm. default is 1
+///@param logPartition the logarithmic value of the partition function of the RBM.
+///@param beta the inverse temperature of the RBM. default is 1
 ///@return the log-likelihood
 template<class RBMType>
 double negativeLogLikelihoodFromLogPartition(
@@ -79,11 +79,11 @@ double negativeLogLikelihoodFromLogPartition(
 
 ///\brief Estimates the negative log-likelihood of a set of input vectors under the models distribution.
 ///
-///Only useful for small input and theoritical analysis
+///Only useful for small input and theoretical analysis
 ///
-///@param rbm the Restricted Boltzman machine for which the negative log likelyhood of the data is to be calculated
+///@param rbm the Restricted Boltzmann machine for which the negative log likelihood of the data is to be calculated
 ///@param inputs the input vectors
-///@param beta the inverse temperature of the rbm. default is 1
+///@param beta the inverse temperature of the RBM. default is 1
 ///@return the log-likelihood
 template<class RBMType>
 double negativeLogLikelihood(

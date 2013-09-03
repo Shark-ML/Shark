@@ -22,10 +22,11 @@
 
 namespace shark{
 
-/// \brief Implements k-step Contrastive Divergence described by Hinton et all. (2006).
+/// \brief Implements k-step Contrastive Divergence described by Hinton et al. (2006).
 ///
-/// k-step Contrastive Divergence approximates the gradient by initializing a Markov
-/// chain with a training example and than samples one new sample based on this for the mean of the distribution
+/// k-step Contrastive Divergence approximates the gradient by initializing a Gibbs
+/// chain with a training example and run it for k steps. 
+/// The sample gained after k steps than samples is than used to approximate the mean of the RBM distribution in the gradient.
 template<class Operator>	
 class ContrastiveDivergence: public UnsupervisedObjectiveFunction<RealVector>{
 private:
@@ -36,6 +37,9 @@ public:
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
 	
 	
+	/// \brief The constructor 
+	///
+	///@param rbm pointer to the RBM which shell be trained 
 	ContrastiveDivergence(RBM* rbm):mpe_rbm(rbm),m_operator(rbm),m_k(1){
 		SHARK_ASSERT(rbm != NULL);
 
@@ -48,6 +52,9 @@ public:
 	std::string name() const
 	{ return "ContrastiveDivergence"; }
 
+	/// \brief Sets the training batch.
+    ///
+	/// @param data the batch of training data
 	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;
 	}
@@ -66,6 +73,9 @@ public:
 		setK(node.get<unsigned int>("k",1));
 	}
 	
+	/// \brief Sets the value of k- the number of steps of the Gibbs Chain 
+    ///
+	/// @param k  the number of steps
 	void setK(unsigned int k){
 		m_k = k;
 	}
@@ -74,10 +84,17 @@ public:
 		startingPoint = mpe_rbm->parameterVector();
 	}
 	
+    /// \brief Returns the number of variables of the RBM.
+    ///
+	/// @retun the number of variables of the RBM
 	std::size_t numberOfVariables()const{
 		return mpe_rbm->numberOfParameters();
 	}
 	
+	/// \brief Gives the CD-k approximation of the log-likelihood gradient.
+    ///
+	/// @param parameter the actual parameters of the RBM
+    /// @param derivative holds later the CD-k approximation of the log-likelihood gradient
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const{
 		mpe_rbm->setParameterVector(parameter);
 		

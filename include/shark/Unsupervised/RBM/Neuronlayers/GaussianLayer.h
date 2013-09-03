@@ -98,7 +98,7 @@ public:
 	/// \brief Takes the input of the neuron and estimates the expectation of the response of the neuron.
 	///
  	/// @param input the batch of inputs of the neuron
-	/// @param statistics sufficient statistics containing the mean of the resulting gaussian distribution
+	/// @param statistics sufficient statistics containing the mean of the resulting Gaussian distribution
 	/// @param beta the inverse Temperature of the RBM (typically 1) for the whole batch
 	template<class Input, class BetaVector>
 	void sufficientStatistics(Input const& input, StatisticsBatch& statistics,BetaVector const& beta)const{ // \todo: auch hier noch mal namen ueberdenken
@@ -135,7 +135,7 @@ public:
 
 	/// \brief Transforms the current state of the neurons for the multiplication with the weight matrix of the RBM,
 	/// i.e. calculates the value of the phi-function used in the interaction term.
-	/// In the case of gaussian neurons the phi-function is just the identity.
+	/// In the case of Gaussian neurons the phi-function is just the identity.
 	///
 	/// @param state the state matrix of the neuron layer
 	/// @return the value of the phi-function
@@ -152,7 +152,7 @@ public:
 		SIZE_CHECK(statistics.mean.size2() == size());
 		return statistics.mean;	
 	}
-	/// \brief Returns the mean given the state of the connected layer, i.e. in this case the mean of the gaussian
+	/// \brief Returns the mean given the state of the connected layer, i.e. in this case the mean of the Gaussian
 	/// 
 	/// @param statistics the sufficient statistics of the layer for a whole batch
 	RealMatrix const& mean(StatisticsBatch const& statistics)const{ 

@@ -200,13 +200,13 @@ public:
 	
 	///\brief Passes information through/samples from an RBM in a forward or backward way. 
 	///
-	///Eval performs its operation based on the evaluation type setted.
-	///There are two ways to pass data through an rbm: either forward, setting the states of the
+	///Eval performs its operation based on the given evaluation type.
+	///There are two ways to pass data through an RBM: either forward, setting the states of the
 	///visible neurons and sample the hidden states or backwards, where the state of the hidden is fixed and the visible
 	///are sampled. 
 	///Instead of the state of the hidden/visible, one often wants the mean of the state \f$ E_{p(h|v)}\left(h\right)\f$. 
 	///By default, the RBM uses the forward evaluation and returns the mean of the state,
-	///but other evaluation modes can be setted by evaluationType().
+	///but other evaluation modes can be set by evaluationType().
 	///
 	///@param patterns the batch of (visible or hidden) inputs
 	///@param outputs the batch of (visible or hidden) outputs 

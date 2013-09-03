@@ -203,7 +203,7 @@ public:
 		double lnResult = 0;
 		for(std::size_t i = 0; i != size(); ++i){
 			double a = (inputs(i)+m_bias(i))*beta;
-			//calculates log( (exp(a)-1)/a ). the argument of the log is allways positive since for a > 0 is exp(a) > 1 and for a < 0 is exp(a)<1
+			//calculates log( (exp(a)-1)/a ). the argument of the log is always positive since for a > 0 is exp(a) > 1 and for a < 0 is exp(a)<1
 			//for a = 0 the result is 1 and log(1) = 0
 			//so we calculate log( (exp(a)-1)/a ) = log|exp(a)-1| -log|a|
 			//we use for a > 0 log|exp(a)-1|=log(exp(a)-1)=a+log(1-exp(-a)) which is numerically more stable if a is big
