@@ -43,7 +43,7 @@ struct MVPSelectionCriterion{
 	/// \brief Select the most violatig pair (MVP)
 	///
 	/// \return maximal KKT vioation
-	/// \param the svm problem to select the working set for
+	/// \param problem the svm problem to select the working set for
 	/// \param i  first working set component
 	/// \param j  second working set component
 	template<class Problem>
@@ -87,7 +87,7 @@ struct LibSVMSelectionCriterion{
 	/// \brief Select a working set according to the second order algorithm of LIBSVM 2.8
 	///
 	/// \return maximal KKT vioation
-	/// \param the svm problem to select the working set for
+	/// \param problem the svm problem to select the working set for
 	/// \param i  first working set component
 	/// \param j  second working set component
 	template<class Problem>
@@ -155,9 +155,7 @@ public:
 	/// \brief Select a working set according to the hybrid maximum gain (HMG) algorithm
 	///
 	/// \return maximal KKT vioation
-	///  \param i  first working set component
-	///  \param j  second working set component
-	/// \param the svm problem to select the working set for
+	/// \param problem the svm problem to select the working set for
 	/// \param i  first working set component
 	/// \param j  second working set component
 	template<class Problem>

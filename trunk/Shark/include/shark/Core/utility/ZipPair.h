@@ -58,7 +58,7 @@ struct PairReference<std::pair<T, U>, Iterator1, Iterator2 >{
 /// This implementation allows the return type to be an arbirtrary Pair which is then constructed using
 /// Reference(*iter1,*iter2) when the iterator is dereferenced. This allows for more expressive element access
 /// instead of iter->first or iter->second.
-/// \issue Both underlying Iterators must be random access iterators.
+/// \todo Both underlying Iterators must be random access iterators.
 //todo: implement as decorator for boost::zip_iterator
 template<class Value,class Iterator1,class Iterator2>
 class PairIterator: public boost::iterator_facade_fixed<

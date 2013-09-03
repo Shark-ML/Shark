@@ -59,7 +59,7 @@ double logPartitionFunction(RBMType const& rbm, double beta = 1.0) {
 ///
 ///@param rbm the Restricted Boltzman machine for which the negative log likelyhood of the data is to be calculated
 ///@param inputs the input vectors
-///@param partition the value of the partition function of the RBM.
+///@param logPartition the value of the partition function of the RBM.
 ///@param beta the inverse temperature of the rbm. default is 1
 ///@return the log-likelihood
 template<class RBMType>

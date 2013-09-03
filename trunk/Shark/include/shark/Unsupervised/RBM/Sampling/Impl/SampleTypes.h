@@ -34,8 +34,7 @@ namespace detail{
 ///\brief Represents a single sample of the GibbsOperator.
 ///
 ///This class is not actually used by the GibbsOperator since it works only on a Batch of samples.
-///Still you need this type to get Batch<GibbsSample<...> >::type. Therefore it is only useful for direct use,
-///when an explicit copy of a sample is needed.
+///Therefore it is only useful for direct use, when an explicit copy of a sample is needed.
 template<class Statistics>
 struct GibbsSample{
 public:

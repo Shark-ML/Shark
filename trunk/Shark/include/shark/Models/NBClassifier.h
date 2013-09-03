@@ -139,7 +139,7 @@ public:
 		return boost::shared_ptr<State>(new EmptyState());
 	}
 
-	/// see @class AbstractModel::eval
+	/// see AbstractModel::eval
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
 		SIZE_CHECK(m_featureDistributions.size() == m_classPriors.size());
 		SIZE_CHECK(m_classPriors.size() > 0u);

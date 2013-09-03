@@ -163,9 +163,9 @@ public:
 	
 	/// \brief  Standard interface for evaluating the response of the model to a batch of patterns.
 	///
-	/// \param patterns  inputs of the model
-	/// \param outputs   predictions or response of the model to every pattern
-	//  \param state     stores intermediate values during the computation of eval for later re-use, in particular for gradient computation
+	/// \param patterns the inputs of the model
+	/// \param outputs the predictions or response of the model to every pattern
+	/// \param state intermediate results stored by eval which can be reused for derivative computation.
 	virtual void eval(BatchInputType const & patterns, BatchOutputType& outputs, State& state) const = 0;
 
 	/// \brief  Standard interface for evaluating the response of the model to a single pattern.
@@ -217,6 +217,7 @@ public:
 	///
 	/// \param  pattern       the patterns to evaluate
 	/// \param  coefficients  the coefficients which are used to calculate the weighted sum for every pattern
+	/// \param  state intermediate results stored by eval to speed up calculations of the derivatives
 	/// \param  derivative    the calculated derivative as sum over all derivates of all patterns
 	virtual void weightedParameterDerivative(
 		BatchInputType const & pattern,
@@ -232,7 +233,7 @@ public:
 	/// \param  pattern       the patterns to evaluate
 	/// \param  coefficients  the coefficients which are used to calculate the weighted sum for every pattern
 	/// \param  errorHessian  the second derivative of the error function for every pattern
-	/// \param state intermediate results stored by eval to sped up calculations of the derivatives
+	/// \param  state intermediate results stored by eval to speed up calculations of the derivatives
 	/// \param  derivative    the calculated derivative as sum over all derivates of all patterns
 	/// \param  hessian       the calculated hessian as sum over all derivates of all patterns
 	virtual void weightedParameterDerivative(
@@ -285,7 +286,7 @@ public:
 	/// weighted parameter derivative, the input derivative can be calculated for free. This is for example true for
 	/// the feed-forward neural networks. However, there exists the obvious default implementation to just calculate
 	/// the derivatives one after another.
-	/// \param pattern       the pattern to evaluate
+	/// \param patterns       the patterns to evaluate
 	/// \param coefficients  the coefficients which are used to calculate the weighted sum
 	/// \param state intermediate results stored by eval to sped up calculations of the derivatives
 	/// \param parameterDerivative  the calculated parameter derivative as sum over all derivates of all patterns

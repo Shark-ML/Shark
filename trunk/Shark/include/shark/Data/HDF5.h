@@ -88,7 +88,7 @@ herr_t readHDF5Dataset( hid_t loc_id, const char *dset_name, double *buffer )
 }
 ///@}
 
-/// Check whether @typeClass and @typeSize are supported by current implementation
+/// Check whether typeClass and typeSize are supported by current implementation
 template<typename RawValueType>
 bool isSupported(H5T_class_t typeClass, size_t typeSize)
 {

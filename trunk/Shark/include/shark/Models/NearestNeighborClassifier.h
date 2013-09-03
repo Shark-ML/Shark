@@ -42,6 +42,9 @@ namespace shark {
 /// according to a local majority decision among its k
 /// nearest neighbors. It is not specified how ties are
 /// broken.
+///
+/// This model requires the use of one of sharks nearest neighhbor Algorithms.
+/// \see AbstractNearestNeighbors
 template <class InputType>
 class NearestNeighborClassifier : public AbstractModel<InputType, unsigned int>
 {
@@ -54,7 +57,6 @@ public:
 	///\brief Constructor
 	///
 	/// \param algorithm the used algorithm for nearst neighbor search
-	/// \param classes: number of classes
 	/// \param neighbors: number of neighbors
 	NearestNeighborClassifier(NearestNeighbors const* algorithm, unsigned int neighbors = 3)
 	: m_algorithm(algorithm),m_classes(numberOfClasses(algorithm->dataset())), m_neighbors(neighbors){}

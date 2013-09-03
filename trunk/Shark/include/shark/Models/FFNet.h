@@ -211,7 +211,7 @@ public:
 		}
 	}
 
-	//! \brief Returns the output of all nurons after the last call of eval
+	//! \brief Returns the output of all neurons after the last call of eval
 	//!
 	//!     \param  state last result of eval
 	//!     \return Output value of the neurons.
@@ -224,12 +224,6 @@ public:
 		return boost::shared_ptr<State>(new InternalState());
 	}
 
-	//!  \brief Reads in one input pattern for the Feed Forward Net
-	//!         model and calculates the derivatives of the resulting network
-	//!         output with respect to the weights. A call of eval with the pattern is required first!
-	//!
-	//!  \param  patterns Input pattern for the model.
-	//!  \param  output the prediction of the network
 	void eval(RealMatrix const& patterns,RealMatrix& output, State& state)const{
 		InternalState& s = state.toState<InternalState>();
 		std::size_t numPatterns=patterns.size1();
@@ -274,16 +268,6 @@ public:
 	}
 	using AbstractModel<RealVector,RealVector>::eval;
 
-	///\brief Calculates the weighted sum of gradients w.r.t the parameters. A preceding call of eval is required.
-	///
-	///Usually an Errorfunction will use the set of gradients returned by inputDerivative to calculate a weighted sum.
-	///for example the MSE will calculate the difference vector \f$c=2(output-target)\f$
-	///and then calculate \f$\sum_{k=1}^o c_k derivative_k\f$.
-	///In the case of FFNet this is roughly outputSize() times faster! So always use this method if you want to calculate the
-	///weighted sum of gradients later.
-	/// \param pattern the pattern to evaluate
-	/// \param coefficients the coefficients used to calculate the weighted sum
-	/// \param gradient the calculated gradient
 	void weightedParameterDerivative(
 		RealMatrix const& patterns, RealMatrix const& coefficients, State const& state, RealVector& gradient
 	)const{
@@ -304,7 +288,7 @@ public:
 	///\brief Calculates the derivtive for the special case, when error terms for all neurons of the network exist.
 	///
 	///This is usefull when the hidden neurons need to meet additional requirements.
-	///The Value of delta is changed during computation and holds the results of the backpropagation steps.
+	///The value of delta is changed during computation and holds the results of the backpropagation steps.
 	///The format is such that the rows of delta are the neurons and the columns the patterns.
 	void weightedParameterDerivativeFullDelta(
 		RealMatrix const& patterns, RealMatrix& delta, State const& state, RealVector& gradient

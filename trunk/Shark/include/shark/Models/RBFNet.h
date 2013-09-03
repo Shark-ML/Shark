@@ -152,20 +152,9 @@ public:
 	void setStructure(std::size_t numInput, std::size_t numHidden, std::size_t numOutput);
 
 
-	///  \brief Evaluates the RBF-Model and calculates the output values.
-	///
-	///  \param  patterns input patterns
-	///  \param  outputs resulting predictions
-	///  \param  state valus computed for the derivative
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const;
 	using AbstractModel<RealVector,RealVector>::eval;
 
-	///  \brief Calculates the derivative w.r.t the parameters for every output and calculates their weighted sum.
-	///         A call of eval() has to be taken place in order for this method to work!
-	///
-	///  \param  pattern Vector of input values.
-	///  \param  coefficients the weighting coefficients
-	///  \param  gradient the weighted sum of gradients for every output neuron
 	void weightedParameterDerivative(
 		BatchInputType const& pattern, BatchOutputType const& coefficients, State const& state, RealVector& gradient
 	)const;

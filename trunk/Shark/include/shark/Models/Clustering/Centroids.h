@@ -122,7 +122,7 @@ public:
 	/// initialize centroids from unlabeled data: 
 	/// take a random subset of data points
 	///
-	/// \param  data dataset from which to take the centroids
+	/// \param  dataset dataset from which to take the centroids
 	/// \param  noClusters  number of centroids in the model
 	void initFromData(Data<RealVector> const& dataset, unsigned noClusters);
 
