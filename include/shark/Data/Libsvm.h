@@ -66,7 +66,7 @@ static bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortPair& ri
 /// \brief Import data from a LIBSVM file.
 ///
 /// \param  dataset       container storing the loaded data
-/// \param  fn            the file to be read from
+/// \param  stream        stream to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 void import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
@@ -77,7 +77,7 @@ void import_libsvm(
 /// \brief Import data from a LIBSVM file.
 ///
 /// \param  dataset       container storing the loaded data
-/// \param  fn            the file to be read from
+/// \param  stream        stream to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 void import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,

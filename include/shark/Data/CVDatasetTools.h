@@ -134,9 +134,8 @@ namespace detail {
 
 ///\brief Version of createCVSameSizeBalanced which works regardless of the label type
 ///
-/// This function for every class requires one vector to store the indices of.. todo
-// todo: help: correct me:
-//This functions needs for every class a vector which stores the indices of the vectors  of "set" which are part of this class.
+/// Instead of a class label to interpret, this class uses a membership vector for every class which
+/// members[k][i] returns the positon of the i-th member of class k in the set.
 template<class I, class L>
 CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
     LabeledData<I,L> &set,
@@ -215,12 +214,12 @@ CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
 //! validation. The partitions can be accessed using
 //! getCVPartitionName
 //!
-//! \param set the input data where the new partitions are created
+//! \param set the input data for which the new partitions are created
 //! \param numberOfPartitions  number of partitions to create
-
+//! \param batchSize  maximum batch size
 template<class I,class L>
 CVFolds<LabeledData<I,L> > createCVIID(LabeledData<I,L> &set,
-        size_t numberOfPartitions,
+        std::size_t numberOfPartitions,
         std::size_t batchSize=Data<I>::DefaultBatchSize) {
 	std::vector<std::size_t> indices(set.numberOfElements());
 	for (std::size_t i=0; i != set.numberOfElements(); i++)
@@ -238,9 +237,7 @@ CVFolds<LabeledData<I,L> > createCVIID(LabeledData<I,L> &set,
 //!
 //! \param numberOfPartitions  number of partitions to create
 //! \param set the input data from which to draw the partitions
-//template<class I,class L>
-//CVFolds<LabeledData<I,L> > createCVSameSize(LabeledData<I,L>& set,std::size_t numberOfPartitions, std::size_t batchSize=LabeledData<I,L>::DefaultBatchSize);
-
+//! \param batchSize  maximum batch size
 template<class I,class L>
 CVFolds<LabeledData<I,L> > createCVSameSize(LabeledData<I,L> &set,std::size_t numberOfPartitions,std::size_t batchSize = LabeledData<I,L>::DefaultBatchSize) {
 	std::size_t numInputs = set.numberOfElements();
@@ -276,8 +273,12 @@ CVFolds<LabeledData<I,L> > createCVSameSize(LabeledData<I,L> &set,std::size_t nu
 //!
 //! \param numberOfPartitions  number of partitions to create
 //! \param set the input data from which to draw the partitions
+//! \param batchSize  maximum batch size
 template<class I>
-CVFolds<LabeledData<I,unsigned int> > createCVSameSizeBalanced(LabeledData<I,unsigned int> &set,size_t numberOfPartitions, std::size_t batchSize=Data<I>::DefaultBatchSize) {
+CVFolds<LabeledData<I,unsigned int> > createCVSameSizeBalanced(
+	LabeledData<I,unsigned int> &set,std::size_t numberOfPartitions,
+	std::size_t batchSize=Data<I>::DefaultBatchSize
+){
 	DataView<LabeledData<I,unsigned int> > setView(set);
 	std::size_t numInputs = setView.size();
 	std::size_t numClasses = numberOfClasses(set);
@@ -297,11 +298,17 @@ CVFolds<LabeledData<I,unsigned int> > createCVSameSizeBalanced(LabeledData<I,uns
 //! number of elements. For every partition, all
 //! but one subset form the training set, while the
 //! remaining one is used for validation.
+//! This function assumes one-hot encoding for the labels.
 //!
 //! \param set the input data from which to draw the partitions
 //! \param numberOfPartitions  number of partitions to create
+//! \param batchSize  maximum batch size
 template<class I>
-CVFolds<LabeledData<I,RealVector> > createCVSameSizeBalanced(LabeledData<I,RealVector> &set,size_t numberOfPartitions, std::size_t batchSize=Data<I>::DefaultBatchSize) {
+CVFolds<LabeledData<I,RealVector> > createCVSameSizeBalanced(
+	LabeledData<I,RealVector> &set,
+	std::size_t numberOfPartitions, 
+	std::size_t batchSize=Data<I>::DefaultBatchSize
+){
 	DataView<LabeledData<I,RealVector> > setView(set);
 	std::size_t numInputs = setView.size();
 
@@ -335,9 +342,13 @@ CVFolds<LabeledData<I,RealVector> > createCVSameSizeBalanced(LabeledData<I,RealV
 //! \param set partitions will be subsets of this set
 //! \param numberOfPartitions  number of partitions to create
 //! \param indices             partition indices of the examples in [0, ..., numberOfPartitions[.
-//!
+//! \param batchSize  maximum batch size
 template<class I,class L>
-CVFolds<LabeledData<I,L> > createCVIndexed(LabeledData<I,L> &set,size_t numberOfPartitions, std::vector<size_t> indices, std::size_t batchSize=Data<I>::DefaultBatchSize) {
+CVFolds<LabeledData<I,L> > createCVIndexed(
+	LabeledData<I,L> &set,std::size_t numberOfPartitions,
+	std::vector<std::size_t> indices,
+	std::size_t batchSize=Data<I>::DefaultBatchSize
+) {
 	std::size_t numInputs = set.numberOfElements();
 	SIZE_CHECK(indices.size() == numInputs);
 	SIZE_CHECK(numberOfPartitions == *std::max_element(indices.begin(),indices.end())+1);

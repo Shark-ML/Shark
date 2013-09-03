@@ -188,7 +188,7 @@ public:
 	}
 
 	/// \brief Adjusts the number of objectives if the function is scalable.
-	/// \param numberOfObjectives The new dimension.
+	/// \param numberOfObjectives The new number of objectives to optimize for.
 	virtual void setNumberOfObjectives( std::size_t numberOfObjectives ){
 		throw SHARKEXCEPTION("dimensionality of function is not scaleable");
 	}

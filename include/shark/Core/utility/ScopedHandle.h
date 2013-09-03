@@ -58,21 +58,21 @@ class ScopedHandle : private boost::noncopyable
 {
 public:
 
-	/// The typedef of deleter for type @a T
+	/// The typedef of deleter for type a T
 	typedef boost::function<void (const T&) > DeleterType;
 
 	/// Type of verifier which should return true for valid handle, and false otherwise
 	typedef boost::function<bool (const T&) > VerifierType;
 
 	/// Constructor
-	/// @handle
+	/// @param handle
 	///     The handle container will hold
-	/// @deleter
-	///     The deleter used for freeing @a handle which should return true for valid handles, false otherwise
-	/// @handleDescription[optional]
-	///     A description of @handle for easy debugging in case of validation failure
-	/// @verifier
-	///     Used for verifying passed in @a handle. The default value is boost::lambda::_1 >=0
+	/// @param deleter
+	///     The deleter used for freeing a handle which should return true for valid handles, false otherwise
+	/// @param handleDescription
+	///     A description of handle for easy debugging in case of validation failure
+	/// @param verifier
+	///     Used for verifying passed in a handle. The default value is boost::lambda::_1 >=0
 	ScopedHandle(
 		const T& handle,
 		const DeleterType& deleter,

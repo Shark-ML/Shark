@@ -625,7 +625,8 @@ public:
 	/// Constructor
 	/// \param kernelfunction          kernel function
 	/// \param data             data to evaluate the kernel function
-	/// \param diagModification vector d of diagonal modifiers
+	/// \param modifierEq multiplier for same-class labels
+	/// \param modifierNe multiplier for different-class kernels
 	ModifiedKernelMatrix(
 		AbstractKernelFunction<InputType> const& kernelfunction,
 		LabeledData<InputType, unsigned int> const& data,
@@ -912,7 +913,7 @@ public:
 	/// the entries in the interval [begin, end[ filled in.
 	///
 	/// \param k      matrix row
-	/// \param begin  first column to be filled in
+	/// \param start  first column to be filled in
 	/// \param end    last column to be filled in +1
 	QpFloatType* row(std::size_t k, std::size_t start, std::size_t end){
 		(void)start;//unused
@@ -1139,7 +1140,7 @@ protected:
 /// Gram matrix between examples i and j can be multiplied by two scaling factors corresponding to
 /// the examples i and j, respectively. To this end, this class holds a vector of as many scaling coefficients
 /// as there are examples in the dataset.
-/// @note: most of code in this class is borrowed from @class KernelMatrix by copy/paste, which is obviously terribly ugly.
+/// @note: most of code in this class is borrowed from KernelMatrix by copy/paste, which is obviously terribly ugly.
 /// We could/should refactor classes in this file as soon as possible.
 template <typename InputType, typename CacheType>
 class ExampleModifiedKernelMatrix

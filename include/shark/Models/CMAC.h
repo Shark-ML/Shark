@@ -52,25 +52,25 @@ protected:
 	RealMatrix m_offset;
 
 	///coordinate offset for every dimension in the Array
-	std::vector<size_t> m_dimOffset;
+	std::vector<std::size_t> m_dimOffset;
 
 	///lower bound and tileWidth for every Dimension
 	RealMatrix m_tileBounds;
 
 	///number of tilings
-	size_t m_tilings;
-	size_t m_parametersPerTiling;
+	std::size_t m_tilings;
+	std::size_t m_parametersPerTiling;
 
-	size_t m_inputSize;
-	size_t m_outputSize;
+	std::size_t m_inputSize;
+	std::size_t m_outputSize;
 
 	///The parameters of the model
 	RealVector m_parameters;
 
 	///calculates the index in the parameter vector for the activated feature in the tiling
-	size_t getArrayIndexForTiling(size_t indexOfTiling,RealVector const& point)const;
+	std::size_t getArrayIndexForTiling(std::size_t indexOfTiling,RealVector const& point)const;
 	///returns an index in the parameter array for each activated feature
-	std::vector<size_t> getIndizes(ConstRealMatrixRow const& point)const;
+	std::vector<std::size_t> getIndizes(ConstRealMatrixRow const& point)const;
 public:
 	///\brief construct the CMAC
 	CMACMap();
@@ -88,7 +88,7 @@ public:
 	///\param lower lower bound of input values
 	///\param upper upper bound of input values
 	///\param randomTiles flag specifying whether distance between tiles is regular or randomized
-	void setStructure(size_t inputs, size_t outputs, size_t numberOfTilings, size_t numberOfTiles, double lower = 0., double upper = 1.,bool randomTiles = false);
+	void setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, double lower = 0., double upper = 1.,bool randomTiles = false);
 
 	///\brief initializes the structure of the cmac
 	///
@@ -98,13 +98,13 @@ public:
 	///\param numberOfTiles amount of tiles per dimension
 	///\param bounds lower and upper bounts for every input dimension. every row consists of (lower,upper)
 	///\param randomTiles flag specifying whether distance between tiles is regular or randomized
-	void setStructure(size_t inputs, size_t outputs, size_t numberOfTilings, size_t numberOfTiles, RealMatrix const& bounds,bool randomTiles = false);
+	void setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, RealMatrix const& bounds,bool randomTiles = false);
 
-	virtual size_t inputSize()const
+	virtual std::size_t inputSize()const
 	{
 		return m_inputSize;
 	}
-	virtual size_t outputSize()const
+	virtual std::size_t outputSize()const
 	{
 		return m_outputSize;
 	}
@@ -118,7 +118,7 @@ public:
 		SIZE_CHECK(numberOfParameters() == newParameters.size());
 		m_parameters=newParameters;
 	}
-	virtual size_t numberOfParameters()const
+	virtual std::size_t numberOfParameters()const
 	{
 		return m_parameters.size();
 	}

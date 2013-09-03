@@ -109,8 +109,9 @@ public:
 	//!  series of activations of the output neurons) it copied into the
 	//!  output buffer.
 	//!
-	//!  \param  pattern  Input patterns for the network.
+	//!  \param  pattern  batch of timeseries for the network.
 	//!  \param  output Used to store the outputs of the network.
+	//!  \param  state stores additional information which can be reused for the computation of the derivative
 	void eval(BatchInputType const& pattern, BatchOutputType& output, State& state)const;
 	using AbstractModel<Sequence,Sequence>::eval;
 	

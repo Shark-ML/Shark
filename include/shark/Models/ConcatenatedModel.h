@@ -144,18 +144,12 @@ public:
 		);
 	}
 
-	/// \param patterns Batch of input patterns over which derivative is computed
-	/// \param outputs Outputs corresponding to input batch
-	/// \param state Internal state (e.g., for passing to derivative computation) holding the internal states of the concatenated models
 	void eval( BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
 		InternalState& s = state.toState<InternalState>();
 		m_firstModel->eval(patterns, s.intermediateResult,*s.firstModelState);
 		m_secondModel->eval(s.intermediateResult, outputs,*s.secondModelState);
 	}
 
-	/// \param patterns Batch of patterns over which derivative is computed
-	/// \param state Internal state (usually returned from eval()) holding the internal states of the concatenated models
-	/// \param gradient Weighted gradient
 	void weightedParameterDerivative(
 		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, RealVector& gradient
 	)const{
@@ -188,11 +182,6 @@ public:
 	}
 	
 	//special implementation, because we can reuse the input derivative of the second model for the calculation of both derivatives of the first
-	/// \param patterns Batch of input patterns over which derivative is computed
-	/// \param coefficients Weights for weighted derivative
-	/// \param state Internal state (e.g., for passing to derivative computation) holding the internal states of the concatenated models
-	/// \param parameterDerivative Return value holding the derivatives w.r.t. the model parameters
-	/// \param inputDerivative Return value holding the derivatives w.r.t. the input
 	virtual void weightedDerivatives(
 		BatchInputType const & patterns, 
 		BatchOutputType const & coefficients, 

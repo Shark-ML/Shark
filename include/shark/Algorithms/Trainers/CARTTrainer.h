@@ -75,10 +75,10 @@ public:
 	{ return "CARTTrainer"; }
 
 	///Train classification
-	void train(ModelType& model, const ClassificationDataset& dataset);
+	void train(ModelType& model, ClassificationDataset const& dataset);
 	
 	///Train regression
-    void train(ModelType& model, const RegressionDataset& dataset);
+    void train(ModelType& model, RegressionDataset const& dataset);
 
 protected:
 
@@ -112,7 +112,7 @@ protected:
     //Classification functions
     ///Builds a single decision tree from a classification dataset
     ///The method requires the attribute tables,
-    SplitMatrixType buildTree(const AttributeTables& tables, const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId );
+    SplitMatrixType buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId );
 
     ///Calculates the Gini impurity of a node. The impurity is defined as
     ///1-sum_j p(j|t)^2
@@ -122,11 +122,11 @@ protected:
     RealVector hist(boost::unordered_map<std::size_t, std::size_t> countMatrix);
 
     ///Regression functions
-    SplitMatrixType buildTree(const AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId, std::size_t trainSize);
+    SplitMatrixType buildTree(AttributeTables const& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, std::size_t trainSize);
     ///Calculates the total sum of squares
-    double totalSumOfSquares(const std::vector<RealVector>& labels, std::size_t start, std::size_t length, const RealVector& sumLabel);
+    double totalSumOfSquares(std::vector<RealVector> const& labels, std::size_t start, std::size_t length, const RealVector& sumLabel);
     ///Calculates the mean of a vector of labels
-    RealVector mean(const std::vector<RealVector>& labels);
+    RealVector mean(std::vector<RealVector> const& labels);
 
     ///Pruning
     ///Prunes decision tree, represented by a split matrix
@@ -143,7 +143,7 @@ protected:
     ///Create the attribute tables used by the SPRINT algorithm
     AttributeTables createAttributeTables(Data<RealVector> const& dataset);
     ///Splits the attribute tables by a attribute index and value. Returns a left and a right attribute table in the variables LAttributeTables and RAttributeTables
-    void splitAttributeTables(const AttributeTables& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
+    void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
     ///Crates count matrices from a classification dataset
     boost::unordered_map<std::size_t, std::size_t> createCountMatrix(ClassificationDataset const& dataset);
 

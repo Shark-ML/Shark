@@ -272,10 +272,11 @@ void csvStringToData(
 /// \brief Import labeled data from a character-separated value file.
 ///
 /// \param  dataset    Container storing the loaded data
-/// \param  fn         The file to be read from
+/// \param  contents the read-in file contents.
 /// \param  lp         Position of the label in the record, either first or last column
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
-/// \param  comment    Character for indicating a comment, by default "#"
+/// \param  comment    Character for indicating a comment, by default '#'
+/// \param  maximumBatchSize  maximum size of a batch in the dataset after import
 void csvStringToData(
     LabeledData<RealVector, unsigned int> &dataset,
     std::string const& contents,
@@ -294,6 +295,7 @@ void csvStringToData(
 /// \param  separator           Separator between entries, typically a comma or a space
 /// \param  comment             Character for indicating a comment, by default empty
 /// \param  numberOfOutputs     Dimensionality of label/output
+/// \param  maximumBatchSize  maximum size of a batch in the dataset after import
 void csvStringToData(
 	LabeledData<RealVector, RealVector> &dataset,
 	std::string const& contents,
@@ -353,6 +355,7 @@ void import_csv(
 /// \param  data       Container storing the loaded data
 /// \param  fn         The file to be read from
 /// \param  lp                  Position of the label in the record, either first or last column
+/// \param  numberOfOutputs dimensionality of the labels
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset

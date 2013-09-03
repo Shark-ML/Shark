@@ -62,7 +62,10 @@ public:
 
 	//! Constructor
 	//! \param  kernel               kernel matrix - cache or pre-computed matrix
-	//! \param  _M                   kernel modifiers in the format \f$ M_(y_i, p, y_j, q) = _M(classes*(y_i*|P|+p_i)+y_j, q) \f$
+	//! \param  M                   kernel modifiers in the format \f$ M_(y_i, p, y_j, q) = _M(classes*(y_i*|P|+p_i)+y_j, q) \f$
+	//! \param  target the target labels for the variables
+	//! \param linearMat the linear part of the problem
+	//! \param C upper bound for all box variables, lower bound is 0.
 	QpMcBoxDecomp(
 		Matrix& kernel,
 		QpSparseArray<QpFloatType> const& M,

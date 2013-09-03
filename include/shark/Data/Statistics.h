@@ -1,11 +1,9 @@
 //===========================================================================
 /*!
- *  \file VectorStatistics.h
- *
- *  some functions for vector valued statistics like mean, variance and covariance
+ *  \brief some functions for vector valued statistics like mean, variance and covariance
  *
  *  \author O.Krause, C. Igel
- *  \date 2010-2011
+ *  \date 2010-2013
  *
  *  \par Copyright (c) 1998-2007:
  *      Institut f&uuml;r Neuroinformatik<BR>

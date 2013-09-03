@@ -58,8 +58,8 @@ enum KernelMatrixNormalizationType {
 /// \param  kernel     pointer to kernel function to be used
 /// \param  out         The stream to be written to
 /// \param  normalizer what kind of normalization to apply. see enum declaration for details.
-/// \param  sci        should the output be in scientific notation?
-/// \param  width      field width for pretty printing
+/// \param  scientific        should the output be in scientific notation?
+/// \param  fieldwidth      field width for pretty printing
 template<typename InputType, typename LabelType>
 void export_kernel_matrix(
 	LabeledData<InputType, LabelType> const &dataset,

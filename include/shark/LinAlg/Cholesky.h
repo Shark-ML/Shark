@@ -85,7 +85,7 @@ void choleskyDecomposition(
  *
  *  \param  A \f$ m \times m \f$ matrix, which must be symmetric and positive definite
  *  \param  P The pivoting matrix
- *  \param  L \f$ m \times m \f$ matrix, which stores the Cholesky factor
+ *  \param	L \f$ m \times m \f$ matrix, which stores the Cholesky factor
  *  \return The rank of the matrix A
  *
  *
