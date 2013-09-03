@@ -33,7 +33,7 @@ void CARTTrainer::train(ModelType& model, RegressionDataset const& dataset)
 		//Run through all the cross validation sets
 		RegressionDataset dataTrain = folds.training(fold);
 		RegressionDataset dataTest = folds.validation(fold);
-		std::std::size_t numTrainElements = dataTrain.numberOfElements();
+		std::size_t numTrainElements = dataTrain.numberOfElements();
 
 		AttributeTables tables = createAttributeTables(dataTrain.inputs());
 
@@ -116,7 +116,7 @@ void CARTTrainer::pruneMatrix(SplitMatrixType& splitMatrix){
 
     //Find the lowest g of the internal nodes
     double g = std::numeric_limits<double>::max();
-    for(std::std::size_t i = 0; i != splitMatrix.size(); i++){
+    for(std::size_t i = 0; i != splitMatrix.size(); i++){
         if(splitMatrix[i].leftNodeId > 0 && splitMatrix[i].g < g){
             //Update g
             g = splitMatrix[i].g;
@@ -135,7 +135,7 @@ void CARTTrainer::pruneMatrix(SplitMatrixType& splitMatrix){
     }
 }
 
-std::std::size_t CARTTrainer::findNode(SplitMatrixType& splitMatrix, std::std::size_t nodeId){
+std::size_t CARTTrainer::findNode(SplitMatrixType& splitMatrix, std::size_t nodeId){
 	unsigned int i = 0;
 	//while(i<splitMatrix.size() && splitMatrix[i].nodeId!=nodeId){
     while(splitMatrix[i].nodeId!=nodeId){
@@ -162,7 +162,7 @@ void CARTTrainer::pruneNode(SplitMatrixType& splitMatrix, std::size_t nodeId){
 
 
 void CARTTrainer::measureStrenght(SplitMatrixType& splitMatrix, std::size_t nodeId, std::size_t parentNode){
-	std::std::size_t i = findNode(splitMatrix,nodeId);
+	std::size_t i = findNode(splitMatrix,nodeId);
 
     //Reset the entries
     splitMatrix[i].r = 0;
@@ -209,7 +209,7 @@ CARTTrainer::SplitMatrixType CARTTrainer::buildTree(AttributeTables const& table
 	//calculate leaves from the data
 	
 	//n = Total number of cases in the split
-	std::std::size_t n = tables[0].size();
+	std::size_t n = tables[0].size();
 
 	if(!(gini(cAbove,n)==0 || n <= m_nodeSize)){
 		//Count matrices
@@ -220,7 +220,7 @@ CARTTrainer::SplitMatrixType CARTTrainer::buildTree(AttributeTables const& table
 		std::size_t bestAttributeIndex, bestAttributeValIndex;//index of the best split
 		boost::unordered_map<std::size_t, std::size_t> cBestBelow, cBestAbove;//labels of best split
 
-		for (std:: std::size_t attributeIndex=0; attributeIndex < m_inputDimension; attributeIndex++){
+		for (std::size_t attributeIndex=0; attributeIndex < m_inputDimension; attributeIndex++){
 			AttributeTable const& table = tables[attributeIndex];
 			boost::unordered_map<std::size_t, std::size_t> cTmpAbove = cAbove;
 			boost::unordered_map<std::size_t, std::size_t> cBelow;
@@ -233,8 +233,8 @@ CARTTrainer::SplitMatrixType CARTTrainer::buildTree(AttributeTables const& table
 				if(table[i].value != table[i+1].value){
 					//n1 = Number of cases to the left child node
 					//n2 = number of cases to the right child node
-					std::std::size_t n1 = i+1;
-					std::std::size_t n2 = n-n1;
+					std::size_t n1 = i+1;
+					std::size_t n2 = n-n1;
 
 					//Calculate the Gini impurity of the split
 					double impurity = n1*gini(cBelow,n1)+n2*gini(cTmpAbove,n2);
@@ -494,8 +494,8 @@ double CARTTrainer::gini(boost::unordered_map<std::size_t, std::size_t>& countMa
  * [attribute | class/value | rid ]
  */
 CARTTrainer::AttributeTables CARTTrainer::createAttributeTables(Data<RealVector> const& dataset){
-	std::std::size_t numElements = dataset.numberOfElements();
-	std::std::size_t inputDimension = dataDimension(dataset);
+	std::size_t numElements = dataset.numberOfElements();
+	std::size_t inputDimension = dataDimension(dataset);
 	//for each input dimension an attribute table is created and stored in tables
 	AttributeTables tables(inputDimension, AttributeTable(numElements));
 	//For each column
