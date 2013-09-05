@@ -46,12 +46,12 @@ namespace shark {
 /// y-component denoting a real-valued label (see the tutorial on
 /// label conventions; the implementation uses RealVector),
 /// a kernel function k(x, x') and a regularization
-/// constant C > 0. Let H denote the kernel induced
+/// constant \f$ C  > 0\f$. Let H denote the kernel induced
 /// reproducing kernel Hilbert space of k, and let \f$ \phi \f$
 /// denote the corresponding feature map.
 /// Then the SVM regression function is of the form
 /// \f[
-///     (x) = \langle w, \phi(x) \rangle + b
+///     f(x) = \langle w, \phi(x) \rangle + b
 /// \f]
 /// with coefficients w and b given by the (primal)
 /// optimization problem
@@ -60,12 +60,20 @@ namespace shark {
 /// \f]
 /// where the simple quadratic loss is employed:
 /// \f[
-///     L(y, f(x)) = (y - f(x))^2 \}
+///     L(y, f(x)) = (y - f(x))^2
 /// \f]
 /// Regularization networks can be interpreted as a special
 /// type of support vector machine (for regression, with
 /// squared loss, and thus with non-sparse weights).
 ///
+/// Training a regularization network is identical to training a
+/// Gaussian process for regression. The parameter \f$ C \f$ then
+/// corresponds precision of the noise (denoted by \f$ \beta \f$ in
+/// Bishop's textbook). The precision is the inverse of the variance
+/// of the noise. The variance of the noise is denoted by \f$
+/// \sigma_n^2 \f$ in the textbook by Rasmussen and
+/// Williams. Accordingly, \f$ C = 1/\sigma_n^2 \f$.
+
 template <class InputType>
 class RegularizationNetworkTrainer : public AbstractSvmTrainer<InputType, RealVector>
 {
@@ -74,53 +82,48 @@ public:
 	typedef AbstractKernelFunction<InputType> KernelType;
 	typedef AbstractSvmTrainer<InputType, RealVector> base_type;
 
-	RegularizationNetworkTrainer(KernelType* kernel, double gamma, bool unconstrained = false)
-	: base_type(kernel, 1.0 / gamma, unconstrained)
+	/// \param kernel Kernel
+	/// \param betaInv Inverse precision, equal to assumed noise variance, equal to inverse regularization parameter C 
+	/// \param unconstrained Indicates exponential encoding of the regularization parameter 
+	RegularizationNetworkTrainer(KernelType* kernel, double betaInv, bool unconstrained = false)
+	: base_type(kernel, 1.0 / betaInv, unconstrained)
 	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "RegularizationNetworkTrainer"; }
 
-	double gamma() const
+	/// \brief Returns the assumed noise variance (i.e., 1/C) 
+	double noiseVariance() const
 	{ return 1.0 / this->C(); }
-	void setGamma(double gamma)
-	{ this->C() = 1.0 / gamma; }
+	/// \brief Sets the assumed noise variance (i.e., 1/C) 
+	void setNoiseVariance(double betaInv)
+	{ this->C() = 1.0 / betaInv; }
+
+	/// \brief Returns the precision (i.e., C), the inverse of the assumed noise variance 
+	double precision() const
+	{ return this->C(); }
+	/// \brief Sets the precision (i.e., C), the inverse of the assumed noise variance 
+	void setPrecision(double beta)
+	{ this->C() = beta; }
+
+	/// \brief Returns the precision (i.e., C), the inverse of the assumed noise variance 
+	double C() const
+	{ return this->C(); }
+	/// \brief Sets the precision (i.e., C), the inverse of the assumed noise variance 
+	void setC(double beta)
+	{ this->C() = beta; }
 
 	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, RealVector>& dataset)
 	{
 		// Setup the kernel matrix
-
 		svm.setKernel(base_type::m_kernel);
 		svm.setBasis(dataset.inputs());
 
 		SHARK_CHECK(! svm.hasOffset(), "[RegularizationNetworkTrainer::train] training of models with offset is not supported");
 		SHARK_CHECK(svm.outputSize() == 1, "[RegularizationNetworkTrainer::train] wrong number of outputs in the kernel expansion");
 
-		
-		
-// 		RealSymmetricMatrix M(ic, ic);
-		//~ RealVector v(ic);
-		//~ RealMatrix M(ic, ic);
-		//~ for (std::size_t i=0; i<ic; i++)
-		//~ {
-			//~ for (std::size_t j=0; j<i; j++)
-			//~ {
-				//~ double k = base_type::m_kernel->eval(dataset(i).input, dataset(j).input);
-				//~ M(i, j) = M(j, i) = k;
-			//~ }
-			//~ double k = base_type::m_kernel->eval(dataset(i).input, dataset(i).input);
-			//~ M(i, i) = k + gamma;
-			//~ v(i) = dataset(i).label(0);
-		//~ }
-		//~ RealMatrix invM;
-		//~ invertSymmPositiveDefinite(invM, M);
-
-		//~ RealVector param = prod(invM, v);
-		//~ svm.setParameterVector(param);
-		
-		//O.K: I think this is what the code should look like
-		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), gamma());
+		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), precision());
 		RealVector v = column(createBatch<RealVector>(dataset.labels().elements()),0);
 		//~ blas::approxSolveSymmSystemInPlace(M,v); //try this later instad the below
 		blas::solveSymmSystemInPlace<blas::SolveAXB>(M,v);
