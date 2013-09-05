@@ -15,29 +15,29 @@ machine learning.
 The containers presented in this tutorial can all be used by including::
 
   #include<shark/Data/Dataset.h>
-  
+
 Key properties
 ---------------
-  
-The data containers provided by shark can store all types of data that 
-could also be  held in one of the standard template library containers. 
-In contrast to  a ``std::vector``,  the Data class has three abilities 
+
+The data containers provided by shark can store all types of data that
+could also be  held in one of the standard template library containers.
+In contrast to  a ``std::vector``,  the Data class has three abilities
 that are important in the context of machine learning:
 
-* Elements of a dataset are stored in blocks called batches, such that 
-  computations can be carried out block by block, instead of element 
+* Elements of a dataset are stored in blocks called batches, such that
+  computations can be carried out block by block, instead of element
   by element. These batches are optimized to allows for continuous memory access,
   which allow for more efficient processing and thus faster implementations.
   For example, a batch of vectors is stored as a matrix with consecutive
-  memory with every point occupying a matrix row, instead of using several vectors 
-  with memory locations scattered all over the heap. This is achieved through Shark's 
+  memory with every point occupying a matrix row, instead of using several vectors
+  with memory locations scattered all over the heap. This is achieved through Shark's
   :doc:`batch mechanism <../library_design/batches>`.
 
 * A :doxy:`Data` object can be used to create subsets. This is useful,
-  for example, for splitting data into training, validation, and test sets. 
-  Conceptually, each batch of data is here regarded as atomic and required to 
-  reside in one subset in full. Thus it is not possible to assign one half of 
-  a batch  to one subset and the other half to another. If this is needed, 
+  for example, for splitting data into training, validation, and test sets.
+  Conceptually, each batch of data is here regarded as atomic and required to
+  reside in one subset in full. Thus it is not possible to assign one half of
+  a batch  to one subset and the other half to another. If this is needed,
   the batch  must first be split physically.
 
 * Data can be shared among different :doxy:`Data` instances. Thus creating
@@ -60,30 +60,30 @@ we introduce the interface of the data object we want to clarify this distinctio
   general role of an ``std::vector`` only adapted to the special needs
   for fast computation in a machine learning environment.
 
-* :doxy:`UnlabeledData` represents input data which is not labeled. 
+* :doxy:`UnlabeledData` represents input data which is not labeled.
   This is the input format used for unsupervised learning methods. The unlabeled
-  data class is a subclass of Data and does not offer much new functionality compared to ``Data``. 
+  data class is a subclass of Data and does not offer much new functionality compared to ``Data``.
   ut it provides an important *semantic* difference, as these data
   points are interpreted as input data without labels, compared to the above
   mentioned Data class whose contents might store anything (for example model
-  outputs, labels or points) . Datasets as used in machine learning are 
-  inherently unordered constructs, thus it is okay for an algorithm to shuffle or otherwise 
-  reorder the contents of a dataset. This is reflected in the set, that shuffling 
+  outputs, labels or points) . Datasets as used in machine learning are
+  inherently unordered constructs, thus it is okay for an algorithm to shuffle or otherwise
+  reorder the contents of a dataset. This is reflected in the set, that shuffling
   is actively supported using the :doxy:`UnlabeledData::shuffle` method.
 
-* :doxy:`LabeledData` finally represents datapoints which are a pair of inputs 
-  and labels. An dataset of type ``LabeledData<I,L>`` can be roughly described 
+* :doxy:`LabeledData` finally represents datapoints which are a pair of inputs
+  and labels. An dataset of type ``LabeledData<I,L>`` can be roughly described
   as the known data object using a pair-type of inputs I and labels L, for example
   ``Data<std::pair<I,L> >``. There is however an important difference in how labels
   and inputs are treated in machine learning. We often like, especially for unsupervised
-  methods, to only use the inputs, thus viewing the object as an ``UnlabeledData<I>``. 
-  For evaluation of the model, we also want to first get the set inputs, acquire the 
+  methods, to only use the inputs, thus viewing the object as an ``UnlabeledData<I>``.
+  For evaluation of the model, we also want to first get the set inputs, acquire the
   set of predictions of the model and compare this set of predictions with the set of labels
   using a loss function. Instead of seeing input-label pairs as a fixed grouping, we would
   like to view them as two separate datasets which are conveniently bound together. And this is
   how the LabeledData object is implemented.
-  
-  
+
+
 The class Data<T>
 ------------------
 This part of the tutorial introduces the interface of :doxy:`Data`. The following description
@@ -96,12 +96,12 @@ Creating a dataset is quite easy and can be achieved in several ways. The first 
 by far easiest way is by directly loading the dataset from a file or generate them
 using an artificial distribution of data. Examples for this are given in the
 tutorial on :doc:`importing data <../../first_steps/general_optimization_tasks>`. In some cases
-data is already in memory and only needs to be imported into a dataset. 
+data is already in memory and only needs to be imported into a dataset.
 In this case a dataset can be created using::
 
-  std::vector<RealVector> points;//vector of points
+  std::vector<RealVector> points; //vector of points
   Data<RealVector> data = createDataFromRange(points);
-  
+
 To create an dataset with space for *n* points, we need to define an example point which
 describes the objects to be saved in the set::
 
@@ -127,17 +127,17 @@ Datasets can be copied and assigned using the typical operations::
 
   Data<RealVector> data2(data);
   data = data2;
-  
+
 However, note that these operations do not perform a deep-copy, but as mentioned in the
 key properties, data is shared between the different instances. To check whether the content
 of a set is shared, we can use::
-  
+
   data.isIndependent();
 
 and to perform a deep copy of the elements, we can use::
 
   data.makeIndependent();
-  
+
 Data sharing is thread-safe, thus it is perfectly fine to create
 shares of (parts of) the data object in several threads. However, it
 has to be stressed that the dataset class does not guard one from
@@ -155,19 +155,19 @@ provides access to the batches as well as common usage patterns.
 
 The first thing to note is that the dataset itself does not provide direct access
 using iterators or other stl-compatible means. This is done to prevent confusion
-with the element methods (e.g. a size() method could be either interpreted as 
+with the element methods (e.g. a size() method could be either interpreted as
 returning the number of batches or the number of elements). However an
 stl compatible interface can be acquired using the :doxy:`Data::batches`
 method::
 
     typedef Data<RealVector>::batch_range Batches;
     Batches batches = data.batches();
-    
+
     std::cout<<batches.size()<<std::endl;
     for(Batches::iterator pos = batches.begin(); pos != batches.end(); ++pos){
         std::cout<<*pos<<std::endl;
     }
-    
+
 or similarly when data is constant or a constant range is desired::
 
     Data<RealVector>::const_batch_range batches = data.batches();
@@ -185,7 +185,7 @@ Or we can also just iterate using an indexed access::
    for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
       std::cout<<data.batches(i)<<std::endl;
    }
-   
+
 We can also use this direct batch access to get direct access to the single elements,
 using the methods for batch-handling and another loop::
 
@@ -194,7 +194,7 @@ using the methods for batch-handling and another loop::
 	    std::cout<<shark::get(batch,i);//prints element i of the batch
 	}
    }
-   
+
 
 Data as a collection of elements
 *********************************
@@ -206,9 +206,9 @@ guarantees as for the batch access. While the interfaces look very
 similar, you must be aware of the important differences.
 
 First of all, all elements stored in the dataset are only virtual for most input types. This means
-that querying the i-th element of the set does not return a reference to it, but instead returns 
+that querying the i-th element of the set does not return a reference to it, but instead returns
 a proxy object which behaves as the reference. So for example when storing vectors, instead of a vector
-a row of the matrix it is stored in is returned. This is no problem most of the time, however when 
+a row of the matrix it is stored in is returned. This is no problem most of the time, however when
 using the returned value as an argument to a function like for example::
 
    void function(Vector&);
@@ -216,8 +216,8 @@ using the returned value as an argument to a function like for example::
 the compiler will complain, that a matrix row is not a vector. In the case of::
 
   void function(Vector const&);
-   
-the compiler is very helpful, creating a temporary vector for you and copying the 
+
+the compiler is very helpful, creating a temporary vector for you and copying the
 matrix row into it. However, this is slow. Be aware of this performance pitfall and use
 template arguments or the correct reference type of the dataset if possible::
 
@@ -226,15 +226,15 @@ template arguments or the correct reference type of the dataset if possible::
 The second pitfall is  that we can't give as strong performance guarantees for the methods called.
 As we allow batch resizing and all batches having a different size, it is not easy to keep track of the
 actual number of elements stored in the set, thus calling
-:doxy:`Data::numberOfElements` takes time linear in the number of batches. 
-For the same reason, accessing the i-th element using :doxy:`Data::element` is linear in the number of batches, 
-as we first need to find the batch the element is located in, before we can actually access it. 
-Thus aside from only very small datasets or performance  uncritical code, you should never use 
+:doxy:`Data::numberOfElements` takes time linear in the number of batches.
+For the same reason, accessing the i-th element using :doxy:`Data::element` is linear in the number of batches,
+as we first need to find the batch the element is located in, before we can actually access it.
+Thus aside from only very small datasets or performance  uncritical code, you should never use
 random-access to the dataset and use the following, more appropriate  ways to iterate over the elements::
 
     typedef Data<RealVector>::element_range Elements;
     typedef Data<RealVector>::const_element_reference ElementRef;
-    
+
     //1: explicit iterator loop using the range over the elements
     Elements elements = data.elements();
     for(Elements::iterator pos = elements.begin(); pos != elements.end(); ++pos){
@@ -328,7 +328,7 @@ For LabeledData we have a similar set of methods::
   std::size_t dimLabel = labelDimension(data); //returns the dimensionality of the labels
   // number of classes assuming one-hot-encoding
   std::size_t classesOneHot = numberOfClasses(data);
-  
+
 Transformation of datasets
 ---------------------------------------------
 
@@ -341,7 +341,7 @@ data sets by::
 
    Data<RealVector> data;//initial dataset;
    data = transform(data,f);//applies f to all elements of data
-   
+
    LabeledData<RealVector,unsigned int> labeledData;//initial labeled dataset;
    labeledData = transformInputs(labeledData,f);//applies f to the inputs only
    labeledData = transformLabels(labeledData,g);//applies f to the labels only
@@ -349,7 +349,7 @@ data sets by::
 The transformation mechanism itself is smart! If f does not only provide a function
 f(input) but also f(Batch_of_input>) returning the same transformation for a whole batch,
 this is applied instead. As batch transformations are often more efficient than applying
-the same transformation to all elements one after another, this can be a real time saver. 
+the same transformation to all elements one after another, this can be a real time saver.
 An example for an object satisfying this requirement are the Models provided by shark::
 
     //a linear model, for example for whitening or making a dataset mean free
@@ -358,7 +358,7 @@ An example for an object satisfying this requirement are the Models provided by 
     labeledData = transformInputs(labeledData,model);
     //or an alternate shortcut for data:
     data = model(data);
-    
+
 It is easy to write your own transformation.
 A simple example just adding a scalar to all elements in a dataset
 could look like this: ::
@@ -372,7 +372,7 @@ could look like this: ::
 	RealVector operator()(RealVector input) const { // const is important
 		for(std::size_t i = 0; i != input.size(); ++i)
 				input(i) += m_offset;
-		return input;			
+		return input;
 	}
   private:
 	double m_offset;
