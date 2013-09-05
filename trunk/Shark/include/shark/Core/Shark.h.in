@@ -48,9 +48,6 @@
  * \brief Bails out the compiler if the boost version is < 1.44.
  */
 BOOST_STATIC_ASSERT( BOOST_VERSION >= 104400 );
-
-#include <shark/Core/Logger.h>
-
 #include <boost/assign.hpp>
 #include <boost/config.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -128,9 +125,6 @@ class Shark {
   Shark();
   Shark( const Shark & shark );
   Shark & operator=( const Shark & rhs );
-
-  static int m_argc; ///< Number of command line arguments.
-  static char ** mep_argv; ///< Pointer to command line arguments, might be NULL.
 	
   static std::map< BuildType, std::string > m_buildTypeMap; ///< Translates BuildType's to human readable form.
  public:
@@ -182,40 +176,6 @@ class Shark {
     > boost_version_type;
 
   /**
-   * \brief Initializes the library and stores command line arguments.
-   * \param [in] argc Number of command line arguments.
-   * \param [in] argv Array of command line arguments.
-   */
-  static void init( int argc, char **argv ) {
-    m_argc = argc;
-    mep_argv = argv;
-			
-    SHARK_LOG_DEBUG( logger(), "Shark library initialized.", "shark::Shark::init" );
-  }
-		
-  /**
-   * \brief Accesses the default logger of the shark library.
-   */
-  static const boost::shared_ptr< shark::Logger > & logger() {
-    static boost::shared_ptr< shark::Logger > defaultLogger = shark::LoggerPool::instance().registerLogger( "edu.rub.ini.shark.logger" );
-    return( defaultLogger );
-  }
-
-  /**
-   * \brief Accesses the count of command line arguments.
-   */
-  static int argc() {
-    return( m_argc );
-  }
-
-  /**
-   * \brief Accesses the array of command line arguments.
-   */
-  static char ** argv() {
-    return( mep_argv );
-  }
-
-  /**
    * \brief Accesses the build type of the library.
    */
   static BuildType buildType() {
@@ -262,16 +222,6 @@ class Shark {
   }
 		
 };
-
-/**
- * \brief Initializes the command line argument count to 0.
- */
-int Shark::m_argc = 0;
-
-/**
- * \brief Initializes the array of command line arguments to NULL.
- */
-char ** Shark::mep_argv = NULL;
 
 /**
  * \brief Fills in values to translate BuildTypes to human readable form.
