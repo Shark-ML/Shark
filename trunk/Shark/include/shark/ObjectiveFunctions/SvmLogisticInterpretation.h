@@ -56,7 +56,7 @@ namespace shark {
 /// Parameters. IEEE Transactions on Pattern Analysis and Machine Intelligence, 2010."
 /// At this point, only binary C-SVMs are supported.
 /// \par
-/// This class implements a #SupervisedObjectiveFunction. In detail, it provides
+/// This class implements an #AbstactObjectiveFunction. In detail, it provides
 /// a differentiable measure of how well a C-SVM with given hyperparameters fulfills
 /// the maximum-likelihood score presented in the paper. This error measure can then
 /// be optimized for externally via gradient-based optimizers. In other words, this
