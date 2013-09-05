@@ -95,6 +95,7 @@ public:
 	/// Evaluates the objective function.
 	typename super::ResultType eval( const typename super::SearchPointType & input ) const
 	{
+		++this->m_evaluationCounter;
 		unsigned int i, ic = m_elements.size();
 		typename super::ResultType ret = m_weight[0] * m_elements[0]->eval(input);
 		for (i=1; i<ic; i++) ret += m_weight[i] * m_elements[i]->eval(input);
@@ -104,6 +105,7 @@ public:
 	/// Evaluates the objective function
 	/// and calculates its gradient.
 	typename super::ResultType evalDerivative( const typename super::SearchPointType & input, typename super::FirstOrderDerivative & derivative ) const {
+		++this->m_evaluationCounter;
 		SHARK_CHECK(this->m_features.test(super::HAS_FIRST_DERIVATIVE), "[CombinedObjectiveFunction::evalDerivative] At least one of the objective functions combined is not differentiable");
 		typename super::FirstOrderDerivative der;
 		unsigned int i, ic = m_elements.size();

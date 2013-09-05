@@ -81,14 +81,14 @@ inline std::vector<std::vector<T> > importCSVReaderSingleValues(
 	if( separator == 0){
 		r = phrase_parse(
 			first, last, 
-			(*auto_) % (eol|eoi),
+			(*auto_) % (eol|eoi) >> -eol,
 			space-eol , fileContents
 		);
 	}
 	else{
 		r = phrase_parse(
 			first, last, 
-			(auto_ % separator) % (eol|eoi),
+			(auto_ % separator) % (eol|eoi) >> -eol,
 			space-eol , fileContents
 		);
 	}
