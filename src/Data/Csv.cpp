@@ -65,8 +65,7 @@ inline std::vector<T> importCSVReaderSingleValue(
 }
 
 //csv input for multiple homogenous values in a row
-template<class T>
-inline std::vector<std::vector<T> > importCSVReaderSingleValues(
+inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 	std::string const& contents,
 	char separator,
 	char comment = '#'
@@ -75,20 +74,20 @@ inline std::vector<std::vector<T> > importCSVReaderSingleValues(
 	std::string::const_iterator last = contents.end();
 	
 	using namespace boost::spirit::qi;
-	std::vector<std::vector<T> >  fileContents;
+	std::vector<std::vector<double> >  fileContents;
 	
 	bool r;
 	if( separator == 0){
 		r = phrase_parse(
 			first, last, 
-			(*auto_) % (eol|eoi) >> -eol,
+			((*double_) % eol) >> -eol,
 			space-eol , fileContents
 		);
 	}
 	else{
 		r = phrase_parse(
 			first, last, 
-			(auto_ % separator) % (eol|eoi) >> -eol,
+			((double_ % separator) % eol) >>-eol,
 			space-eol , fileContents
 		);
 	}
@@ -213,7 +212,7 @@ void shark::csvStringToData(
     char comment,
     std::size_t maximumBatchSize
 ){
-	std::vector<std::vector<double> > rows = importCSVReaderSingleValues<double>(contents, separator,comment);
+	std::vector<std::vector<double> > rows = importCSVReaderSingleValues(contents, separator,comment);
 	if(rows.empty()){//empty file leads to empty data object.
 		data = Data<RealVector>();
 		return;
@@ -339,7 +338,7 @@ void shark::csvStringToData(
 	char comment,
 	std::size_t maximumBatchSize
 ){
-	std::vector<std::vector<double> > rows = importCSVReaderSingleValues<double>(contents, separator,comment);
+	std::vector<std::vector<double> > rows = importCSVReaderSingleValues(contents, separator,comment);
 	if(rows.empty()){//empty file leads to empty data object.
 		dataset = LabeledData<RealVector, RealVector>();
 		return;
