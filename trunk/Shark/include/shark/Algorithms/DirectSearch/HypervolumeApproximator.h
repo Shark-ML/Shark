@@ -45,13 +45,7 @@ namespace shark {
 	* \brief Implements an FPRAS for approximating the volume of a set of high-dimensional objects.
 	*
 	* See Bringmann, Friedrich: Approximating the volume of unions and intersections of high-dimensional geometric objects, Computational Geometry, Volume 43, 2010, 601-610.
-	* and refer to the unit tests for further examples:
-	* \code
-	* shark::MultiObjectiveFunctionTraits<shark::DTLZ2>::ParetoFrontType front = shark::MultiObjectiveFunctionTraits<shark::DTLZ2>::referenceFront( 100, 2 );
-	* RealVector refPoint( 2, 1.1 );
-	* shark::HypervolumeApproximator< shark::Rng > ha;
-	* double vol = ha( front.begin(), front.end(), shark::IdentityFitnessExtractor(), refPoint );
-	* \endcode
+	* and refer to the unit tests for examples:
 	* \tparam Rng The type of the random number generator. Please note that the performance of the algorithm is determined by the speed of the RNG.
 	*
 	*/

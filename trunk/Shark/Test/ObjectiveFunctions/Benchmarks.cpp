@@ -15,9 +15,6 @@
 #include <shark/Algorithms/DirectSearch/HypervolumeApproximator.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 
-#include <shark/Core/Chart.h>
-#include <shark/Core/Renderers/HighchartRenderer.h>
-
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
 
 #include <shark/Statistics/Statistics.h>
