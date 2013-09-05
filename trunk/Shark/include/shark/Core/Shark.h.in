@@ -60,30 +60,6 @@ BOOST_STATIC_ASSERT( BOOST_VERSION >= 104400 );
 #include <map>
 #include <string>
 
-/**
- * \brief Convenience macro to specify arguments and corresponding description inline.
- *
- * See the following example for declaring a complex boost::signal:
- * \code
- *	typedef boost::signals2::signal< 
- *	void
- *	( 
- *		SHARK_ARGUMENT( const typename Algo::SolutionSetType & , "Actual result announced to the outside world" ),
- *		SHARK_ARGUMENT( const std::string &, "Result directory to place results into" ),
- *		SHARK_ARGUMENT( const std::string &, "Name of the optimizer" ),
- *		SHARK_ARGUMENT( const std::string &, "Name of the objective function" ),
- *		SHARK_ARGUMENT( std::size_t, "Seed of the experiment" ),
- *		SHARK_ARGUMENT( std::size_t, "Search space dimension" ),
- *		SHARK_ARGUMENT( std::size_t, "Objective space dimension" ),
- *		SHARK_ARGUMENT( std::size_t, "Current number of function evaluations" ),
- *		SHARK_ARGUMENT( double, "Timestamp of the results, in ms." ),
- *		SHARK_ARGUMENT( bool, "true if this is the final result" )
- *	)
- *	> event_type;
- * \endcode
- */
-#define SHARK_ARGUMENT( argument, description ) argument
-
 namespace shark {	
 
 /**

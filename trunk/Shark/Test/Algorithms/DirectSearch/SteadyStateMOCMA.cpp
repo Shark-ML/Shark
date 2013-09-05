@@ -1,14 +1,11 @@
 #define BOOST_TEST_MODULE DirectSearch_CMA
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/xml_iarchive.hpp>
-#include <boost/archive/xml_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/DirectSearch/SteadyStateMOCMA.h>
-#include <shark/Algorithms/DirectSearch/InterruptibleAlgorithmRunner.h>
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
@@ -360,54 +357,3 @@ BOOST_AUTO_TEST_CASE( AdditiveEpsSteadyStateMOCMA ) {
 	}
 
 }
-#ifdef NDEBUG
-BOOST_AUTO_TEST_CASE( SteadyStateMOCMA_Performance ) {
-
-	boost::shared_ptr< 
-		SteadyStateMOCMA
-	> ssMocma( new SteadyStateMOCMA() );
-	
-	moo::InterruptibleAlgorithmRunner<
-		SteadyStateMOCMA,
-		DTLZ7
-	> runner1 (
-	ssMocma,
-	boost::shared_ptr<
-	DTLZ7
-	>( new DTLZ7() )
-	);
-	
-
-	ssMocma->m_useApproximatedHypervolume = true;
-	runner1.run( 
-		1,
-		100,
-		10,
-		2,
-		10000,
-		1000
-	);
-
-	moo::InterruptibleAlgorithmRunner<
-		EpsilonSteadyStateMOCMA,
-		DTLZ7
-	> runner2 (
-		boost::shared_ptr< 
-			EpsilonSteadyStateMOCMA
-		>( new EpsilonSteadyStateMOCMA() ),
-		boost::shared_ptr<
-			DTLZ7
-		>( new DTLZ7() )
-	);
-
-	runner2.run( 
-		1,
-		100,
-		10,
-		2,
-		10000,
-		1000
-	);
-
-}
-#endif
