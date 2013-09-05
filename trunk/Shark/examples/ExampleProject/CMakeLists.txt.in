@@ -55,7 +55,7 @@ IF ( OPT_ENABLE_ATLAS )
 		@ATLAS_LIBRARY@
 	)
 	ADD_DEFINITIONS( -DSHARK_USE_ATLAS )
-	include_directories ( @ATLAS_PATH@/include/ )
+	include_directories ( @ATLAS_PATH@/include/ @ATLAS_PATH@/include/atlas/)
 ENDIF ( OPT_ENABLE_ATLAS )
 
 #handle GotoBLAS
