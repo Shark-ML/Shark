@@ -27,18 +27,18 @@
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 
 namespace shark{
-///
 /// \brief squared loss for regression and classification
 ///
 /// The SquaredLoss computes the squared distance
-/// between target and prediction. It is defined for the
-/// label type RealVector.
+/// between target and prediction. It is defined for both
+/// vectorial as well as integral labels. In the case of integral labels,
+/// the label c is interpreted as unit-vector having the c-th component activated.
 ///
-template<class VectorType = RealVector>
-class SquaredLoss : public AbstractLoss<VectorType, VectorType>
+template<class OutputType = RealVector, class LabelType = OutputType >
+class SquaredLoss : public AbstractLoss<LabelType,OutputType>
 {
 public:
-	typedef AbstractLoss<VectorType, VectorType> base_type;
+	typedef AbstractLoss<LabelType,OutputType> base_type;
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	typedef typename base_type::BatchLabelType BatchLabelType;
 
@@ -74,19 +74,56 @@ public:
 		noalias(gradient) = 2.0*(prediction - label);
 		return SquaredLoss::eval(label,prediction);
 	}
+};
 
-	//~ /// Evaluate the squared loss \f$ (target - prediction)^2 \f$
-	//~ /// and its deriatives
-	//~ /// \f$ \frac{\partial}{\partial prediction} (target - prediction)^2 = 2*(prediction - target) \f$
-	//~ /// and
-	//~ /// \f$ \frac{\partial^2}{\partial prediction^2} (target - prediction)^2 = 2I \f$
-	//~ /// (where I is the identity matrix).
-	//~ double evalDerivative(VectorType const& label, VectorType const& prediction, VectorType& gradient, typename base_type::MatrixType& hessian) const {
-		//~ gradient.resize(prediction.size());
-		//~ noalias(gradient) = 2.0*(prediction - label);
-		//~ hessian = 2.0*RealIdentity(gradient.size());
-		//~ return distanceSqr(prediction , label);
-	//~ }
+//specialisation for classification case.
+
+template<class OutputType>
+class SquaredLoss<OutputType,unsigned int> : public AbstractLoss<unsigned int,OutputType>
+{
+public:
+	typedef AbstractLoss<unsigned int,OutputType> base_type;
+	typedef typename base_type::BatchOutputType BatchOutputType;
+	typedef typename base_type::BatchLabelType BatchLabelType;
+
+	/// Constructor.
+	SquaredLoss()
+	{
+		this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
+	}
+
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SquaredLoss"; }
+
+	using base_type::eval;
+
+	/// Evaluate the squared loss \f$ (label - prediction)^2 \f$.
+	double eval(BatchLabelType const& labels, BatchOutputType const& predictions) const {
+		SIZE_CHECK(labels.size()==predictions.size1());
+
+		double error = 0;
+		for(std::size_t i = 0; i != labels.size(); ++i){
+			unsigned int c = labels(i);
+			SIZE_CHECK(c < predictions.size2());
+			error+=norm_sqr(row(predictions,i))+1.0-2.0*predictions(i,c);
+		}
+		return error;
+	}
+
+	/// Evaluate the squared loss \f$ (label - prediction)^2 \f$
+	/// and its deriative \f$ \frac{\partial}{\partial prediction} 1/2 (label - prediction)^2 = prediction - label \f$.
+	double evalDerivative(BatchLabelType const& labels, BatchOutputType const& predictions, BatchOutputType& gradient) const {
+		gradient.resize(predictions.size1(),predictions.size2());
+		noalias(gradient) = 2.0*predictions;
+		for(std::size_t i = 0; i != labels.size(); ++i){
+			unsigned int c = labels(i);
+			SIZE_CHECK(c < predictions.size2());
+			gradient(i,c)-=2.0;
+		}
+		return SquaredLoss::eval(labels,predictions);
+	}
 };
 
 }

@@ -90,6 +90,8 @@ protected:
 	// the approximated Hessian matrix
 	RealMatrix m_hessian;
 
+	double m_initialStepLength;
+
 };
 
 }

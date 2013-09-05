@@ -62,6 +62,12 @@ void BFGS::init(const ObjectiveFunctionType & objectiveFunction, const SearchPoi
 	
 	//evaluate starting point
 	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
+	
+	m_initialStepLength = 0.0;//1.0 as step length might be very wrong.
+	for (size_t i = 0; i < m_derivative.size(); ++i)
+		m_initialStepLength += std::abs(m_derivative(i));
+	m_initialStepLength = std::min(1.0, 1.0 / m_initialStepLength);
+	
 	//swap instead of copy
 	swap(m_lastDerivative,m_derivative);
 }
@@ -69,10 +75,12 @@ void BFGS::init(const ObjectiveFunctionType & objectiveFunction, const SearchPoi
 void BFGS::step(const ObjectiveFunctionType& objectiveFunction) {
 	RealVector s(m_lastDerivative.size());
 	fast_prod(m_hessian,m_lastDerivative,s);
+	s*=-1;
 	
 	RealVector newPoint = m_best.point;
 	m_derivative = m_lastDerivative;
-	m_linesearch(newPoint,m_best.value,s,m_derivative);
+	m_linesearch(newPoint,m_best.value,s,m_derivative,m_initialStepLength);
+	m_initialStepLength = 1.0; 
 
 	RealVector gamma=m_derivative-m_lastDerivative;
 	RealVector delta=newPoint-m_best.point;

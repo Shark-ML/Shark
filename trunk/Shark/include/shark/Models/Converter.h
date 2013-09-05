@@ -219,43 +219,5 @@ private:
 	Model m_decisionFunction;
 };
 
-
-///
-/// \brief Convertion of class indices to a one-hot encoding
-///
-/// \par
-/// The OneHotConverter is a parameter-free model converting its
-/// integer-valued input to a real-valued one-hot encoding. Class
-/// label c in the range 0, ..., d-1 is converted to the (c+1)-th
-/// unit vector, which can be interpreted as a (Dirac delta)
-/// probability distribution on class labels.
-///
-class OneHotConverter : public AbstractModel<unsigned int, RealVector>
-{
-public:
-	OneHotConverter(unsigned int classes);
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "OneHotConverter"; }
-
-	RealVector parameterVector() const;
-	void setParameterVector(RealVector const& newParameters);
-	std::size_t numberOfParameters() const;
-
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
-	}
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs)const;
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
-		eval(patterns,outputs);
-	}
-	using AbstractModel<unsigned int,RealVector>::eval;
-
-protected:
-	unsigned int m_classes;
-};
-
-
 };
 #endif
