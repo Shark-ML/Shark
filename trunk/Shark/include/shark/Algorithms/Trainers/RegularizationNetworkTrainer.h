@@ -123,7 +123,7 @@ public:
 		SHARK_CHECK(! svm.hasOffset(), "[RegularizationNetworkTrainer::train] training of models with offset is not supported");
 		SHARK_CHECK(svm.outputSize() == 1, "[RegularizationNetworkTrainer::train] wrong number of outputs in the kernel expansion");
 
-		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), precision());
+		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), noiseVariance());
 		RealVector v = column(createBatch<RealVector>(dataset.labels().elements()),0);
 		//~ blas::approxSolveSymmSystemInPlace(M,v); //try this later instad the below
 		blas::solveSymmSystemInPlace<blas::SolveAXB>(M,v);
@@ -132,7 +132,7 @@ public:
 };
 
 
-// A reguarization network can be interpreted as a Gaussian
+// A regularization network can be interpreted as a Gaussian
 // process, with the same trainer:
 #define GaussianProcessTrainer RegularizationNetworkTrainer
 
