@@ -34,50 +34,33 @@ integer or real-valued encoded labels in accordance with fixed conventions.
 In other words, using custom templates for the labels might make necessary
 writing one's own custom trainers, error functions, losses, etc.
 
-In detail, there exist **two** main conventions which are used by algorithms
-in typical classification settings, **plus** one additional convention for regression
-settings. We first list these three conventions, and after that provide a 
-list of classes or algorithms which rely on data having the labels formatted
-accordingly:
+In detail, there exist a convention used by algorithms
+in typical classification settings, and a convention for regression
+settings::
 
-* Labels for **classification** are stored in one of two formats, and it depends
-  on the algorithm whether it accepts both equally or just a specific one of the two,
-  although most often, the single integer coding will be supported.
-  Assume a d-class problem:
+* The format for a classification label is a single unsigned integer (C++ type
+   ``unsigned int``) in the range ``0,...,d-1``. For binary data, the wide-spread
+   binary labels ``-1``/``+1`` are no longer supported; instead, ``0``/``1``
+   is used for the sake of consistency with the multi-class case. When required, 
+   Binary labels -1/+1  are converted to 0/1 by setting all -1 labels to 0.
 
-  + The default format for one label is a single unsigned integer (C++ type
-    ``unsigned int``) in the range ``0,...,d-1``. For binary data, the wide-spread
-    binary labels ``-1``/``+1`` are no longer supported; instead, ``0``/``1``
-    is used for the sake of consistency with the multi-class case. When required, 
-    Binary labels -1/+1  are converted to 0/1 by setting all -1 labels to 0.
-    
-  + Alternatively, a class label can be encoded by a d-dimensional
-    RealVector. For example, the class :doxy:`CrossEntropy`
-    can then interpret the real value at position ``i`` as the
-    probability of the corresponding sample having class ``i`` as its
-    label. However, in general the values may not all be positive, and
-    they may not sum to one (for example, neural network outputs).
-    Note that the deterministic case then corresponds to a so-called
-    one-hot encoding of the labels, in which all entries are set to zero
-    and the denoted label's entry is set to one. All algorithms relying or
-    accepting a probabilistic encoding via a RealVector also accept
-    a RealVector of length one -- which is then understood to denote the
-    probability of the label being of the positive class ``0`` in a binary
-    classification dataset.
-
-* Labels for **regression** are always of type ``RealVector``, also for
+* Labels for regression are  of type ``RealVector``, also for
   single-dimensional regression problems. In this case the label
-  vectors are one-dimensional. The use of type double is
-  discouraged, since many classes in Shark (such as models,
-  loss functions, and trainers) already assume the ``RealVector``
-  encoding.
+  vectors are one-dimensional.
+
+Based on the Method, classification labels are interpreted differently. The most common interpretation
+is that of a simple index. But the label *c* can also be
+interpreted as a unit-vector for which the *c*-th component is one. Through this it is possible to use
+mean-squared error mesaures on the output of neural networks in classification.
+
 
 Conversions
 -----------
 
-Shark offers three different converters between label formats.
-These are found in the file :doxy:`Converter.h`.
-The available conversions are
+Often Models in Shark do not produce the correct output for classification. This is most often not a problem,
+as the loss function can interpret outputs accordingly and thus a neural network can be easily trained in a
+classification setting, even though the ntwork only returns vectors instead of labels. However, if the labels
+are indeed needed, the output of a Ntowkr needs to transformed for which the following converter exist:
 
 * :doxy:`ThresholdConverter`: The class converts single dimensional
   ``RealVector`` inputs to binary 0/1 class-labels by assigning the value 1 if the 
@@ -92,15 +75,3 @@ The available conversions are
   the largest component (the arg max). This is useful for turning
   the output of a support vector machine or neural network for
   multi-category classification into a discrete class label.
-
-* :doxy:`OneHotConverter`: This class takes a discrete label in
-  the range 0,...,d-1 and converts it into a one-hot-encoded
-  ``RealVector`` of size d. This is useful for converting a discrete
-  class label into a target value for neural network training.
-
-All three classes are implemented as models. This allows for 
-concatenating the converters with actual
-predictive models, such as a :doxy:`KernelExpansion` and an
-:doxy:`ArgMaxConverter`, in order to obtain a multi-category
-support vector machine model with class labels as outputs. This
-concatenation is realized by the :doxy:`ConcatenatedModel` class.

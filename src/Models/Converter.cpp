@@ -91,32 +91,3 @@ void ThresholdVectorConverter::eval(BatchInputType const& patterns, BatchOutputT
 		}
 	}
 }
-
-////////////////////////////////////////////////////////////
-
-
-OneHotConverter::OneHotConverter(unsigned int classes)
-: m_classes(classes)
-{ }
-
-
-RealVector OneHotConverter::parameterVector() const{ 
-	return RealVector(); 
-}
-
-void OneHotConverter::setParameterVector(RealVector const& newParameters){
-	SHARK_CHECK(newParameters.size() == 0, "[OneHotConverter::setParameterVector] invalid number of parameters");
-}
-
-std::size_t OneHotConverter::numberOfParameters() const{ 
-	return 0;
-}
-
-void OneHotConverter::eval(BatchInputType const& input, BatchOutputType& outputs)const{
-	outputs.resize(input.size(),m_classes);
-	outputs.clear();
-	for(std::size_t pattern = 0; pattern != input.size();++pattern){
-		SHARK_CHECK(input[pattern] >= m_classes, "[OneHotConverter::eval] invalid input dimension");
-		outputs(pattern,input[pattern] ) = 1;
-	}
-}

@@ -292,45 +292,6 @@ CVFolds<LabeledData<I,unsigned int> > createCVSameSizeBalanced(
 
 }
 
-//! \brief Create a partition for cross validation
-//!
-//! Every subset contains (approximately) the same
-//! number of elements. For every partition, all
-//! but one subset form the training set, while the
-//! remaining one is used for validation.
-//! This function assumes one-hot encoding for the labels.
-//!
-//! \param set the input data from which to draw the partitions
-//! \param numberOfPartitions  number of partitions to create
-//! \param batchSize  maximum batch size
-template<class I>
-CVFolds<LabeledData<I,RealVector> > createCVSameSizeBalanced(
-	LabeledData<I,RealVector> &set,
-	std::size_t numberOfPartitions, 
-	std::size_t batchSize=Data<I>::DefaultBatchSize
-){
-	DataView<LabeledData<I,RealVector> > setView(set);
-	std::size_t numInputs = setView.size();
-
-	//calculate number of classes
-	std::size_t numClasses = numberOfClasses(set);
-
-	//find members of each class
-	std::vector< std::vector<std::size_t> > members(numClasses);
-	for (std::size_t i = 0; i != numInputs; i++) {
-		//find class represented by label
-		//we first use max_element to get an iterator to the position of the maximum index
-		//then we calculate the distance between class 0 and the position which gives the classID
-		unsigned int classID = std::distance(
-		        setView[i].label.begin(),
-		        std::max_element(setView[i].label.begin(),setView[i].label.end())
-		        );
-		members[classID].push_back(i);
-	}
-	return detail::createCVSameSizeBalanced(set,numberOfPartitions,members,batchSize);
-
-}
-
 
 //! \brief Create a partition for cross validation from indices
 //!
