@@ -75,7 +75,6 @@ SHARK_ADD_TEST( Algorithms/DirectSearch/ElitistCMA.cpp DirectSearch_ElitistCMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/OnePlusOneES.cpp DirectSearch_OnePlusOneES )
 SHARK_ADD_TEST( Algorithms/DirectSearch/MOCMA.cpp DirectSearch_MOCMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/SteadyStateMOCMA.cpp DirectSearch_SteadyStateMOCMA )
-SHARK_ADD_TEST( Algorithms/DirectSearch/Algorithms.cpp Algorithms_DirectSearch )
 #GradientDescent
 SHARK_ADD_TEST( Algorithms/GradientDescent/BFGS.cpp GradDesc_BFGS )
 SHARK_ADD_TEST( Algorithms/GradientDescent/LBFGS.cpp GradDesc_LBFGS )
