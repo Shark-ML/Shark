@@ -123,24 +123,6 @@ private:
 	std::size_t m_objectives;
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
-
-//~ /**
- //~ * \brief Specializes MultiObjectiveFunctionTraits for DTLZ6.
- //~ */
-//~ template<> struct MultiObjectiveFunctionTraits<DTLZ6> {
-
-	//~ /**
-	//~ * \brief Models the reference Pareto-front type.
-	//~ */
-	//~ typedef std::vector< DTLZ6::ResultType > ParetoFrontType;
-
-	//~ /**
-	//~ * \brief Models the reference Pareto-set type.
-	//~ */
-	//~ typedef std::vector< DTLZ6::SearchPointType > ParetoSetType;
-
-//~ };
-
 	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ6, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

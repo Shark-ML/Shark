@@ -114,35 +114,6 @@ private:
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
 
-
-//~ /**
- //~ * \brief Specializes MultiObjectiveFunctionTraits for DTLZ3.
- //~ */
-//~ template<> struct MultiObjectiveFunctionTraits<DTLZ3> {
-
-	//~ /**
-	//~ * \brief Models the reference Pareto-front type.
-	//~ */
-	//~ typedef std::vector< DTLZ3::ResultType > ParetoFrontType;
-
-	//~ /**
-	//~ * \brief Models the reference Pareto-set type.
-	//~ */
-	//~ typedef std::vector< DTLZ3::SearchPointType > ParetoSetType;
-
-	//~ static std::vector< DTLZ3::ResultType > referenceFront( std::size_t noPoints, std::size_t n, std::size_t m ) {
-		//~ if( m != 2 )
-			//~ throw( shark::Exception( "DTLZ3: No reference front for no. of objectives other than 2 available." ) );
-		//~ std::vector< DTLZ3::ResultType > result( noPoints, DTLZ3::ResultType( m ) );
-		//~ for( std::size_t i = 0; i < result.size(); i++ ) {
-			//~ result[ i ][ 0 ] = static_cast< double >( i ) / static_cast< double >( result.size() - 1 );
-			//~ result[ i ][ 1 ] = ::sqrt( 1 - boost::math::pow<2>( result[ i ][ 0 ] ) );
-		//~ }
-
-		//~ return( result );
-	//~ }
-//~ };
-
 ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ3, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif
