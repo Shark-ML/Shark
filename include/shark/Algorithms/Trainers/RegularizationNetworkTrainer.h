@@ -107,13 +107,6 @@ public:
 	void setPrecision(double beta)
 	{ this->C() = beta; }
 
-	/// \brief Returns the precision (i.e., C), the inverse of the assumed noise variance 
-	double C() const
-	{ return this->C(); }
-	/// \brief Sets the precision (i.e., C), the inverse of the assumed noise variance 
-	void setC(double beta)
-	{ this->C() = beta; }
-
 	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, RealVector>& dataset)
 	{
 		// Setup the kernel matrix
