@@ -40,60 +40,35 @@
 #ifndef SHARK_ML_OPTIMIZER_CG_H
 #define SHARK_ML_OPTIMIZER_CG_H
 
-#include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
-#include <shark/Algorithms/GradientDescent/LineSearch.h>
+#include <shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h>
 
 namespace shark {
-//! \brief Conjugate-gradient method for unconstraint optimization
-class CG : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
-{
+/// \brief Conjugate-gradient method for unconstrained optimization
+///
+/// The next CG search Direction  p_{k+1} is computed using the current gradient g_k by
+/// p_{k+1} = \beta p_k - g_k
+/// where beta can be computed using different formulas
+/// well known is the Fletcher - Reeves method:
+/// \f$ \beta = ||g_k||2/ ||g_{k-1}||^2 \f$
+/// we use
+///  \f$ \beta = ||g_k||^2 /<p_k,g_k-g_{k-1}> \f$
+/// which is formula 5.49 in Nocedal, Wright - Numerical Optimization.
+/// This formula has better numerical properties than Fletcher-Reeves for non-quadratic functions
+/// while ensuring a descent direction.
+/// 
+/// We implement restarting to ensure quadratic convergence near the optimum as well as numerical stability
+class CG : public AbstractLineSearchOptimizer{
+protected:
+	void initModel();
+	void computeSearchDirection();
 public:
-	CG();
-
-	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "CG"; }
 
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double > >::init;
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	void step(const ObjectiveFunctionType& objectiveFunction);
-	void configure( const PropertyTree & node );
 	//from ISerializable
 	void read( InArchive & archive );
 	void write( OutArchive & archive ) const;
-
-	/// Access the type of line search (e.g., switch between zeroth and first order line search).
-	const LineSearch& lineSearch() const
-	{
-		return m_linesearch;
-	}
-	/// Returns type of line search.
-	LineSearch& lineSearch()
-	{
-		return m_linesearch;
-	}
-	/// Access the number of line searches (iterations) after which the search direction is reset to the gradient.
-	const unsigned& reset() const
-	{
-		return m_numReset;
-	}
-	/// Returns the number of line searches (iterations) after which the search direction is reset to the gradient.
-	unsigned& reset()
-	{
-		return m_numReset;
-	}
-
 protected:
-
-	LineSearch m_linesearch;
-	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
-	RealVector m_g;
-	RealVector m_h;
-	RealVector m_xi;
-
-	size_t   m_dimension;
-	unsigned m_numReset;
 	unsigned m_count;
 };
 
