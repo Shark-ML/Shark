@@ -29,6 +29,15 @@ BOOST_AUTO_TEST_CASE( CG_linmin )
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and linmin"<<std::endl;
 	testFunction(optimizer,function,100,100);
 }
+BOOST_AUTO_TEST_CASE( CG_WolfeCubic )
+{
+	Ellipsoid function(5);
+	CG optimizer;
+	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
+
+	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and WolfeCubic"<<std::endl;
+	testFunction(optimizer,function,1,500);
+}
 BOOST_AUTO_TEST_CASE( CG_Dlinmin_Rosenbrock )
 {
 	Rosenbrock function(3);
@@ -47,4 +56,12 @@ BOOST_AUTO_TEST_CASE( CG_linmin_Rosenbrock )
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and linmin"<<std::endl;
 	testFunction(optimizer,function,100,2000);
 }
+BOOST_AUTO_TEST_CASE( CG_WolfeCubic_Rosenbrock )
+{
+	Rosenbrock function(3);
+	CG optimizer;
+	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
 
+	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and WolfeCubic"<<std::endl;
+	testFunction(optimizer,function,100,2000);
+}

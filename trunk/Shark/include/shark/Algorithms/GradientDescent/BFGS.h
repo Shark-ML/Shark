@@ -39,59 +39,28 @@
 //===========================================================================
 
 
-#ifndef SHARK_ML_OPTIMIZER_BFGS_H
-#define SHARK_ML_OPTIMIZER_BFGS_H
+#ifndef SHARK_ALGORITHMS_GRADIENTDESCENT_BFGS_H
+#define SHARK_ALGORITHMS_GRADIENTDESCENT_BFGS_H
 
-#include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
-#include <shark/Algorithms/GradientDescent/LineSearch.h>
+#include <shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h>
 
 namespace shark {
 
 //! \brief Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstraint optimization
-class BFGS : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+class BFGS : public AbstractLineSearchOptimizer
 {
+protected:
+	void initModel();
+	void computeSearchDirection();
 public:
-	BFGS();
-
-	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "BFGS"; }
-
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
-
-	void step(const ObjectiveFunctionType& objectiveFunction);
-
-	//from IConfigure
-	void configure( const PropertyTree & node );
 
 	//from ISerializable
 	void read( InArchive & archive );
 	void write( OutArchive & archive ) const;
-
-
-	//linesearch handling
-	const LineSearch& lineSearch()const
-	{
-		return m_linesearch;
-	}
-	LineSearch& lineSearch()
-	{
-		return m_linesearch;
-	}
 protected:
-	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
-	LineSearch m_linesearch;
-
-	size_t     m_parameters;
-	/// \brief the derivative of the function of the last evaluated point
-	RealVector m_lastDerivative;
-	// the approximated Hessian matrix
 	RealMatrix m_hessian;
-
-	double m_initialStepLength;
-
 };
 
 }

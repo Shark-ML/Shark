@@ -1,6 +1,4 @@
 /*!
- *  \file BFGS.h
- *
  *  \brief BFGS
  *
  *  The Broyden, Fletcher, Goldfarb, Shannon (BFGS) algorithm is a
@@ -39,108 +37,51 @@
 
 using namespace shark;
 
-BFGS::BFGS()
-{
-	m_features |= REQUIRES_VALUE;
-	m_features |= REQUIRES_FIRST_DERIVATIVE;
-
-}
-void BFGS::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
-	checkFeatures(objectiveFunction);
-
-	m_linesearch.init(objectiveFunction);
-	m_parameters = startingPoint.size();
-	m_best.point=startingPoint;
-	m_lastDerivative.resize(m_parameters, false);
-
-	m_hessian.resize(m_parameters, m_parameters, false);
+void BFGS::initModel(){
+	m_hessian.resize(m_dimension, m_dimension);
 	m_hessian.clear();
-	for (size_t i = 0; i < m_parameters; ++i)
+	for (size_t i = 0; i < m_dimension; ++i)
 	{
 		m_hessian(i, i) = 1.;
 	}
-	
-	//evaluate starting point
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
-	
-	m_initialStepLength = 0.0;//1.0 as step length might be very wrong.
-	for (size_t i = 0; i < m_derivative.size(); ++i)
-		m_initialStepLength += std::abs(m_derivative(i));
-	m_initialStepLength = std::min(1.0, 1.0 / m_initialStepLength);
-	
-	//swap instead of copy
-	swap(m_lastDerivative,m_derivative);
 }
-
-void BFGS::step(const ObjectiveFunctionType& objectiveFunction) {
-	RealVector s(m_lastDerivative.size());
-	fast_prod(m_hessian,m_lastDerivative,s);
-	s*=-1;
-	
-	RealVector newPoint = m_best.point;
-	m_derivative = m_lastDerivative;
-	m_linesearch(newPoint,m_best.value,s,m_derivative,m_initialStepLength);
-	m_initialStepLength = 1.0; 
-
-	RealVector gamma=m_derivative-m_lastDerivative;
-	RealVector delta=newPoint-m_best.point;
+void BFGS::computeSearchDirection(){
+	RealVector gamma = m_derivative - m_lastDerivative;
+	RealVector delta = m_best.point - m_lastPoint;
 	double d = inner_prod(gamma,delta);
-
-	fast_prod(m_hessian,gamma,s);
-
+	
+	RealVector Hg(m_dimension,0.0);
+	fast_prod(m_hessian,gamma,Hg);
+	
+	//update hessian
 	if (d < 1e-20)
 	{
-		m_hessian.clear();
-		for (size_t i = 0; i < m_parameters; ++i)
-		{
-			m_hessian(i, i) = 1.;
-		}
+		initModel();
 	}
 	else
 	{
-		double scale=inner_prod(gamma,s);
+		double scale=inner_prod(gamma,Hg);
 		scale = (scale / d + 1) / d;
+		
+		m_hessian += scale * outer_prod(delta,delta) 
+			  - (outer_prod(Hg,delta)+outer_prod(delta,Hg))/d;
 
-		//swap instead of copy
-		swap(m_lastDerivative,m_derivative);
-
-		for (size_t i = 0; i < m_parameters; ++i)
-		{
-			for (size_t j = 0; j < m_parameters; ++j)
-				m_hessian(i, j) += scale * delta(i) * delta(j)
-						- (s(i) * delta(j) + s(j) * delta(i)) / d;
-		}
 	}
-	m_best.point = newPoint;
-}
-
-//from IConfigure
-void BFGS::configure( const PropertyTree & node )
-{
-	PropertyTree::const_assoc_iterator it = node.find("linesearch");
-	if(it!=node.not_found())
-	{
-		m_linesearch.configure(it->second);
-	}
+	
+	//compute search direction
+	fast_prod(m_hessian,m_derivative,m_searchDirection);
+	m_searchDirection *= -1;
 }
 
 //from ISerializable
 void BFGS::read( InArchive & archive )
 {
-	archive>>m_linesearch;
-	archive>>m_parameters;
-	archive>>m_lastDerivative;
+	AbstractLineSearchOptimizer::read(archive);
 	archive>>m_hessian;
-	archive>>m_best.point;
-	archive>>m_best.value;
 }
 
 void BFGS::write( OutArchive & archive ) const
 {
-	archive<<m_linesearch;
-	archive<<m_parameters;
-	archive<<m_lastDerivative;
+	AbstractLineSearchOptimizer::write(archive);
 	archive<<m_hessian;
-	archive<<m_best.point;
-	archive<<m_best.value;
 }

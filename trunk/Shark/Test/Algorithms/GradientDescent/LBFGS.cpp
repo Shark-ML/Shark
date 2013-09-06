@@ -20,6 +20,16 @@ BOOST_AUTO_TEST_CASE( LBFGS_dlinmin )
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
 	testFunction(optimizer,function,100,100);
 }
+BOOST_AUTO_TEST_CASE( LBFGS_linmin )
+{
+	Ellipsoid function(5);
+	LBFGS optimizer;
+	optimizer.setHistCount(3);
+	optimizer.lineSearch().lineSearchType()=LineSearch::Linmin;
+
+	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and linmin"<<std::endl;
+	testFunction(optimizer,function,100,100);
+}
 BOOST_AUTO_TEST_CASE( LBFGS_wolfe )
 {
 	Ellipsoid function(5);
@@ -30,6 +40,16 @@ BOOST_AUTO_TEST_CASE( LBFGS_wolfe )
 	testFunction(optimizer,function,100,100);
 }
 BOOST_AUTO_TEST_CASE( LBFGS_Dlinmin_Rosenbrock )
+{
+	Rosenbrock function(3);
+	LBFGS optimizer;
+	optimizer.setHistCount(3);
+	optimizer.lineSearch().lineSearchType()=LineSearch::Dlinmin;
+
+	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
+	testFunction(optimizer,function,100,100);
+}
+BOOST_AUTO_TEST_CASE( LBFGS_Linmin_Rosenbrock )
 {
 	Rosenbrock function(3);
 	LBFGS optimizer;
