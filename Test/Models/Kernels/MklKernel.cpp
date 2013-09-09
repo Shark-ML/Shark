@@ -80,10 +80,10 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
         }
     }
     //wouldn't it be nice if we could split these, too?
-    Data<TestStruct1> dataset(data,10);
-    Data<RealVector> datasetV1(dataV1,10);
-    Data<std::size_t> datasetV2(dataV2,10);
-    Data<RealVector> datasetV3(dataV3,10);
+    Data<TestStruct1>   dataset = createDataFromRange( data, 10 );
+    Data<RealVector>  datasetV1 = createDataFromRange( dataV1, 10 );
+    Data<std::size_t> datasetV2 = createDataFromRange( dataV2, 10 );
+    Data<RealVector>  datasetV3 = createDataFromRange( dataV3, 10 );
 
     //create MKL Kernel
     //create state matrix for the discrete kernel
