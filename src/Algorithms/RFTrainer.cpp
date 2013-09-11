@@ -176,7 +176,7 @@ void RFTrainer::setOOBratio(double ratio){
 
 
 
-RFClassifier::SplitMatrixType RFTrainer::buildTree(const AttributeTables& tables, const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
+RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
 
 	RFClassifier::SplitMatrixType lSplitMatrix, rSplitMatrix;
 
@@ -252,6 +252,7 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(const AttributeTables& tables
 		if(bestImpurity<n+1){
 			AttributeTables rTables, lTables;
 			splitAttributeTables(tables, bestAttributeIndex, bestAttributeValIndex, lTables, rTables);
+			tables.clear();
 			//Continue recursively
 
 			splitInfo.attributeIndex = bestAttributeIndex;
@@ -304,7 +305,7 @@ RealVector RFTrainer::hist(boost::unordered_map<std::size_t, std::size_t> countM
 	return normHist;
 }
 
-RFClassifier::SplitMatrixType RFTrainer::buildTree(const AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId ){
+RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId ){
 
 	//Construct split matrix
 	RFClassifier::SplitInfo splitInfo;
@@ -392,6 +393,7 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(const AttributeTables& tables
 			//Split the attribute tables
 			AttributeTables rTables, lTables;
 			splitAttributeTables(tables, bestAttributeIndex, bestAttributeValIndex, lTables, rTables);
+			tables.clear();//save memory
 
 			//Split the labels
 			std::vector<RealVector> lLabels, rLabels;

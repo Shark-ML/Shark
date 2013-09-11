@@ -113,10 +113,10 @@ protected:
 	void splitAttributeTables(const AttributeTables& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
 
 	/// Build a decision tree for classification
-	RFClassifier::SplitMatrixType buildTree(const AttributeTables& tables, const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId);
+	RFClassifier::SplitMatrixType buildTree(AttributeTables& tables, const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId);
 
 	/// Builds a decision tree for regression
-	RFClassifier::SplitMatrixType buildTree(const AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId);
+	RFClassifier::SplitMatrixType buildTree(AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId);
 
 	/// comparison function for sorting an attributeTable
 	static bool tableSort(const RealVector& inner1, const RealVector& inner2);
