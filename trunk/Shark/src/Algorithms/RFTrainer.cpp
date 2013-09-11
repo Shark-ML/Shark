@@ -28,7 +28,7 @@
 #include <boost/range/algorithm/random_shuffle.hpp>
 #include <shark/Data/DataView.h>
 #include <set>
-#include <iostream>
+#include <shark/Core/OpenMP.h>
 
 using namespace shark;
 using namespace std;
@@ -91,7 +91,7 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 
 
 	//Generate m_B trees
-	while(m_B){
+	SHARK_PARALLEL_FOR(int i = 0; i < (int)m_B; ++i){
 		//For each tree generate a subset of the dataset
 		//generate indices of the dataset (pick k out of n elements)
 		std::vector<std::size_t> subsetIndices(elements.size());
@@ -113,8 +113,9 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 		}
 
 		RFClassifier::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, labels, 0);
-		model.addTree(splitMatrix);
-		m_B--;
+		SHARK_CRITICAL_REGION{
+			model.addTree(splitMatrix);
+		}
 	}
 }
 
@@ -137,7 +138,7 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 	DataView<ClassificationDataset const> elements(dataset);
 
 	//Generate m_B trees
-	while(m_B){
+	SHARK_PARALLEL_FOR(int i = 0; i < (int)m_B; ++i){
 		//For each tree generate a subset of the dataset
 		//generate indices of the dataset (pick k out of n elements)
 		std::vector<std::size_t> subsetIndices(dataset.numberOfElements());
@@ -153,8 +154,9 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 		createCountMatrix(dataTrain, cAbove);
 
 		RFClassifier::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, cAbove, 0);
-		model.addTree(splitMatrix);
-		m_B--;
+		SHARK_CRITICAL_REGION{
+			model.addTree(splitMatrix);
+		}
 	}
 }
 
