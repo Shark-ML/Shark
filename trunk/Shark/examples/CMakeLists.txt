@@ -74,6 +74,7 @@ SHARK_ADD_EXAMPLE( Supervised/MultiTaskSvm MultiTaskSvm "Supervised" )
 
 SHARK_ADD_EXAMPLE( Supervised/CVFolds CVFolds "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/CSvmWithThresholdConverter CSvmWithThresholdConverter "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/CSvmLinear CSvmLinear "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/McSvm McSvm "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/McSvmLinear McSvmLinear "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/KernelRegression KernelRegression "Supervised" )
