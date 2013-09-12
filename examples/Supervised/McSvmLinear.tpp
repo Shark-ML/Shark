@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
 	// train the machine
 	std::cout << "machine training ..." << std::endl;
-	LinearMcSvmLLWTrainer trainer(1.0 / (lambda * ell), epsilon);
+	LinearMcSvmLLWTrainer<VectorType> trainer(1.0 / (lambda * ell), epsilon);
 	trainer.train(svm.decisionFunction(), training);
 	std::cout << "done." << std::endl;
 
