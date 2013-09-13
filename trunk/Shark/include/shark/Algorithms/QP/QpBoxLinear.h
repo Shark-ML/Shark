@@ -4,7 +4,6 @@
  *
  *
  *  \author  T. Glasmachers
- *  \date    2012
  *
  *
  *  <BR><HR>
@@ -31,6 +30,7 @@
 #include <shark/Core/Timer.h>
 #include <shark/Algorithms/QP/QuadraticProgram.h>
 #include <shark/Data/Dataset.h>
+#include <shark/Data/DataView.h>
 #include <shark/LinAlg/Base.h>
 #include <cmath>
 #include <iostream>
@@ -59,7 +59,249 @@ namespace shark {
 /// working set selection. At the same time, this method replaces
 /// the shrinking heuristic.
 ///
+template <class InputT>
 class QpBoxLinear
+{
+public:
+	typedef LabeledData<InputT, unsigned int> DatasetType;
+	typedef typename LabeledData<InputT, unsigned int>::const_element_reference ElementType;
+
+	///
+	/// \brief Constructor
+	///
+	/// \param  dataset  training data
+	/// \param  dim      problem dimension
+	///
+	QpBoxLinear(const DatasetType& dataset, std::size_t dim)
+	: m_data(dataset)
+	, m_xSquared(m_data.size())
+	, m_dim(dim)
+	{
+		SHARK_ASSERT(dim > 0);
+
+		// pre-compute squared norms
+		for (std::size_t i=0; i<m_data.size(); i++)
+		{
+			ElementType x_i = m_data[i];
+			m_xSquared(i) = inner_prod(x_i.input, x_i.input);
+		}
+	}
+
+	///
+	/// \brief Solve the SVM training problem.
+	///
+	/// \param  C        regularization constant of the SVM
+	/// \param  stop     stopping condition(s)
+	/// \param  prop     solution properties
+	/// \param  verbose  if true, the solver prints status information and solution statistics
+	///
+	RealVector solve(
+			double C,
+			QpStoppingCondition& stop,
+			QpSolutionProperties* prop = NULL,
+			bool verbose = false)
+	{
+		// sanity checks
+		SHARK_ASSERT(C > 0.0);
+
+		// measure training time
+		Timer timer;
+
+		// prepare dimensions and vectors
+		std::size_t ell = m_data.size();
+		RealVector alpha(ell, 0.0);
+		RealVector w(m_dim, 0.0);
+		RealVector pref(ell, 1.0);          // measure of success of individual steps
+		double prefsum = ell;               // normalization constant
+		std::vector<std::size_t> schedule(ell);
+
+		// prepare counters
+		std::size_t epoch = 0;
+		std::size_t steps = 0;
+
+		// prepare performance monitoring for self-adaptation
+		double max_violation = 0.0;
+		const double gain_learning_rate = 1.0 / ell;
+		double average_gain = 0.0;
+		bool canstop = true;
+
+		// outer optimization loop
+		while (true)
+		{
+			// define schedule
+			double psum = prefsum;
+			prefsum = 0.0;
+			std::size_t pos = 0;
+			for (std::size_t i=0; i<ell; i++)
+			{
+				double p = pref[i];
+				double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
+				std::size_t n = (std::size_t)std::floor(num);
+				double prob = num - n;
+				if (Rng::uni() < prob) n++;
+				for (std::size_t j=0; j<n; j++)
+				{
+					schedule[pos] = i;
+					pos++;
+				}
+				psum -= p;
+				prefsum += p;
+			}
+			SHARK_ASSERT(pos == ell);
+			for (std::size_t i=0; i<ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
+
+			// inner loop
+			max_violation = 0.0;
+			for (std::size_t j=0; j<ell; j++)
+			{
+				// active variable
+				std::size_t i = schedule[j];
+				ElementType e_i = m_data[i];
+				double y_i = (e_i.label > 0) ? +1.0 : -1.0;
+
+				// compute gradient and projected gradient
+				double a = alpha(i);
+				double wyx = y_i * inner_prod(w, e_i.input);
+				double g = 1.0 - wyx;
+				double pg = (a == 0.0 && g < 0.0) ? 0.0 : (a == C && g > 0.0 ? 0.0 : g);
+
+				// update maximal KKT violation over the epoch
+				max_violation = std::max(max_violation, std::abs(pg));
+				double gain = 0.0;
+
+				// perform the step
+				if (pg != 0.0)
+				{
+					// SMO-style coordinate descent step
+					double q = m_xSquared(i);
+					double mu = g / q;
+					double new_a = a + mu;
+
+					// numerically stable update
+					if (new_a <= 0.0)
+					{
+						mu = -a;
+						new_a = 0.0;
+					}
+					else if (new_a >= C)
+					{
+						mu = C - a;
+						new_a = C;
+					}
+
+					// update both representations of the weight vector: alpha and w
+					alpha(i) = new_a;
+					w += (mu * y_i) * e_i.input;
+					gain = mu * (g - 0.5 * q * mu);
+
+					steps++;
+				}
+
+				// update gain-based preferences
+				{
+					if (epoch == 0) average_gain += gain / (double)ell;
+					else
+					{
+						double change = CHANGE_RATE * (gain / average_gain - 1.0);
+						double newpref = std::min(PREF_MAX, std::max(PREF_MIN, pref(i) * std::exp(change)));
+						prefsum += newpref - pref(i);
+						pref[i] = newpref;
+						average_gain = (1.0 - gain_learning_rate) * average_gain + gain_learning_rate * gain;
+					}
+				}
+			}
+
+			epoch++;
+
+			// stopping criteria
+			if (stop.maxIterations > 0 && ell * epoch >= stop.maxIterations)
+			{
+				if (prop != NULL) prop->type = QpMaxIterationsReached;
+				break;
+			}
+
+			if (timer.stop() >= stop.maxSeconds)
+			{
+				if (prop != NULL) prop->type = QpTimeout;
+				break;
+			}
+
+			if (max_violation < stop.minAccuracy)
+			{
+				if (verbose) std::cout << "#" << std::flush;
+				if (canstop)
+				{
+					if (prop != NULL) prop->type = QpAccuracyReached;
+					break;
+				}
+				else
+				{
+					// prepare full sweep for a reliable checking of the stopping criterion
+					canstop = true;
+					for (std::size_t i=0; i<ell; i++) pref[i] = 1.0;
+					prefsum = ell;
+				}
+			}
+			else
+			{
+				if (verbose) std::cout << "." << std::flush;
+				canstop = false;
+			}
+		}
+
+		timer.stop();
+
+		// compute solution statistics
+		std::size_t free_SV = 0;
+		std::size_t bounded_SV = 0;
+		double objective = -0.5 * shark::blas::inner_prod(w, w);
+		for (std::size_t i=0; i<ell; i++)
+		{
+			double a = alpha(i);
+			objective += a;
+			if (a > 0.0)
+			{
+				if (a == C) bounded_SV++;
+				else free_SV++;
+			}
+		}
+
+		// return solution statistics
+		if (prop != NULL)
+		{
+			prop->accuracy = max_violation;       // this is approximate, but a good guess
+			prop->iterations = ell * epoch;
+			prop->value = objective;
+			prop->seconds = timer.lastLap();
+		}
+
+		// output solution statistics
+		if (verbose)
+		{
+			std::cout << std::endl;
+			std::cout << "training time (seconds): " << timer.lastLap() << std::endl;
+			std::cout << "number of epochs: " << epoch << std::endl;
+			std::cout << "number of iterations: " << (ell * epoch) << std::endl;
+			std::cout << "number of non-zero steps: " << steps << std::endl;
+			std::cout << "dual accuracy: " << max_violation << std::endl;
+			std::cout << "dual objective value: " << objective << std::endl;
+			std::cout << "number of free support vectors: " << free_SV << std::endl;
+			std::cout << "number of bounded support vectors: " << bounded_SV << std::endl;
+		}
+
+		// return the solution
+		return w;
+	}
+
+protected:
+	DataView<const DatasetType> m_data;               ///< view on training data
+	RealVector m_xSquared;                            ///< diagonal entries of the quadratic matrix
+	std::size_t m_dim;                                ///< input space dimension
+};
+
+
+template < >
+class QpBoxLinear<CompressedRealVector>
 {
 public:
 	typedef LabeledData<CompressedRealVector, unsigned int> DatasetType;

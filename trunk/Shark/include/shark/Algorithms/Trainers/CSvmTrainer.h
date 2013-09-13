@@ -10,7 +10,6 @@
  *
  *
  *  \author  T. Glasmachers
- *  \date    2007-2012
  *
  *
  *  <BR><HR>
@@ -372,26 +371,33 @@ private:
 };
 
 
-class LinearCSvmTrainer : public AbstractLinearSvmTrainer
+template <class InputType>
+class LinearCSvmTrainer : public AbstractLinearSvmTrainer<InputType>
 {
 public:
-	typedef AbstractLinearSvmTrainer base_type;
+	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
-	LinearCSvmTrainer(double C, double accuracy = 0.001) : AbstractLinearSvmTrainer(C, accuracy)
+	LinearCSvmTrainer(double C, double accuracy = 0.001)
+	: AbstractLinearSvmTrainer<InputType>(C, accuracy)
 	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LinearCSvmTrainer"; }
 
-	void train(LinearModel<CompressedRealVector, RealVector>& model, LabeledData<CompressedRealVector, unsigned int> const& dataset)
+	void train(LinearModel<InputType, RealVector>& model, LabeledData<InputType, unsigned int> const& dataset)
 	{
-		std::size_t dim = model.inputSize();
-		SHARK_CHECK(model.outputSize() == 1, "[LinearCSvmTrainer::train] wrong number of outputs in the linear model");
-		SHARK_CHECK(! model.hasOffset(), "[LinearCSvmTrainer::train] models with offset are not supported (yet).");
-		QpBoxLinear solver(dataset, dim);
+		std::size_t dim = dataset.inputs().element(0).size();
+//		std::size_t dim = model.inputSize();
+//		SHARK_CHECK(model.outputSize() == 1, "[LinearCSvmTrainer::train] wrong number of outputs in the linear model");
+//		SHARK_CHECK(! model.hasOffset(), "[LinearCSvmTrainer::train] models with offset are not supported (yet).");
+		QpBoxLinear<InputType> solver(dataset, dim);
 		RealMatrix w(1, dim, 0.0);
-		column(w, 0) = solver.solve(C(), m_stoppingcondition, &m_solutionproperties, m_verbosity > 0);
+		row(w, 0) = solver.solve(
+				base_type::C(),
+				QpConfig::stoppingCondition(),
+				&QpConfig::solutionProperties(),
+				QpConfig::verbosity() > 0);
 		model.setStructure(w);
 	}
 };

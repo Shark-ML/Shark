@@ -4,7 +4,6 @@
  *
  *
  *  \author  T. Glasmachers
- *  \date    2007-2012
  *
  *
  *  <BR><HR>
@@ -256,18 +255,21 @@ public:
 };
 
 
-class LinearMcSvmWWTrainer : public AbstractLinearSvmTrainer
+template <class InputType>
+class LinearMcSvmWWTrainer : public AbstractLinearSvmTrainer<InputType>
 {
 public:
+	typedef AbstractLinearSvmTrainer<InputType> base_type;
+
 	LinearMcSvmWWTrainer(double C, bool unconstrained = false) 
-	: AbstractLinearSvmTrainer(C, unconstrained)
+	: AbstractLinearSvmTrainer<InputType>(C, unconstrained)
 	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LinearMcSvmWWTrainer"; }
 
-	void train(LinearModel<CompressedRealVector, RealVector>& model, const LabeledData<CompressedRealVector, unsigned int>& dataset)
+	void train(LinearModel<InputType, RealVector>& model, const LabeledData<InputType, unsigned int>& dataset)
 	{
 		SHARK_CHECK(! model.hasOffset(), "[LinearMcSvmWWTrainer::train] models with offset are not supported (yet).");
 
@@ -288,8 +290,8 @@ public:
 				std::min((std::size_t)1000, dataset.numberOfElements()),
 				accuracy());
 */
-		QpMcLinearWW solver(dataset, dim, classes);
-		RealMatrix w = solver.solve(C(), m_stoppingcondition, &m_solutionproperties, m_verbosity > 0);
+		QpMcLinearWW<InputType> solver(dataset, dim, classes);
+		RealMatrix w = solver.solve(this->C(), this->stoppingCondition(), &this->solutionProperties(), this->verbosity() > 0);
 		model.setStructure(w);
 	}
 };

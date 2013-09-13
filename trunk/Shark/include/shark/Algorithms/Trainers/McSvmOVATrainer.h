@@ -4,7 +4,6 @@
  *
  *
  *  \author  T. Glasmachers
- *  \date    2007-2012
  *
  *
  *  <BR><HR>
@@ -146,19 +145,20 @@ public:
 };
 
 
-class LinearMcSvmOVATrainer : public AbstractLinearSvmTrainer
+template <class InputType>
+class LinearMcSvmOVATrainer : public AbstractLinearSvmTrainer<InputType>
 {
 public:
-	typedef AbstractLinearSvmTrainer base_type;
+	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
-	LinearMcSvmOVATrainer(double C, double accuracy = 0.001) : AbstractLinearSvmTrainer(C, accuracy)
+	LinearMcSvmOVATrainer(double C, double accuracy = 0.001) : AbstractLinearSvmTrainer<InputType>(C, accuracy)
 	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LinearMcSvmOVATrainer"; }
 
-	void train(LinearModel<CompressedRealVector, RealVector>& model, const LabeledData<CompressedRealVector, unsigned int>& dataset)
+	void train(LinearModel<InputType, RealVector>& model, const LabeledData<InputType, unsigned int>& dataset)
 	{
 		SHARK_CHECK(! model.hasOffset(), "[LinearMcSvmOVATrainer::train] models with offset are not supported (yet).");
 
@@ -174,9 +174,9 @@ public:
 		for (std::size_t c=0; c<classes; c++)
 		{
 			LabeledData<CompressedRealVector, unsigned int> bindata = oneVersusRestProblem(dataset, c);
-			QpBoxLinear solver(bindata, dim);
+			QpBoxLinear<InputType> solver(bindata, dim);
 			QpSolutionProperties prop;
-			row(w, c) = solver.solve(C(), m_stoppingcondition, &prop, m_verbosity > 0);
+			row(w, c) = solver.solve(this->C(), base_type::m_stoppingcondition, &prop, base_type::m_verbosity > 0);
 			base_type::m_solutionproperties.iterations += prop.iterations;
 			base_type::m_solutionproperties.seconds += prop.seconds;
 			base_type::m_solutionproperties.accuracy = std::max(base_type::solutionProperties().accuracy, prop.accuracy);
