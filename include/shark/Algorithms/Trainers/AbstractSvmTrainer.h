@@ -14,7 +14,6 @@
  *
  *
  *  \author  T. Glasmachers
- *  \date    2007-2012
  *
  *
  *  <BR><HR>
@@ -279,14 +278,15 @@ protected:
 /// meta-information of the training process, like the stopping
 /// criterion and information on the actual solution.
 ///
+template <class InputType>
 class AbstractLinearSvmTrainer
-: public AbstractTrainer<LinearModel<CompressedRealVector, RealVector>, unsigned int>
+: public AbstractTrainer<LinearModel<InputType, RealVector>, unsigned int>
 , public QpConfig
 , public IParameterizable
 {
 public:
-	typedef AbstractTrainer<LinearModel<CompressedRealVector, RealVector>, unsigned int> base_type;
-	typedef LinearModel<CompressedRealVector, RealVector> ModelType;
+	typedef AbstractTrainer<LinearModel<InputType, RealVector>, unsigned int> base_type;
+	typedef LinearModel<InputType, RealVector> ModelType;
 
 	//! Constructor
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set

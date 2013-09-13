@@ -11,7 +11,6 @@
  *  vectors indicates correctness of both types of trainers.
  *
  *  \author T. Glasmachers
- *  \date 2013
  *
  *
  *  <BR><HR>
@@ -81,11 +80,11 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	double C = 1.0;
 	LinearKernel<CompressedRealVector> kernel;
 
-	AbstractLinearSvmTrainer* linearTrainer[8];
+	AbstractLinearSvmTrainer<CompressedRealVector>* linearTrainer[8];
 	AbstractSvmTrainer<CompressedRealVector, unsigned int>* nonlinearTrainer[8];
 
 #define TRAINER(index, kind) \
-	linearTrainer[index] = new LinearMcSvm##kind##Trainer(C); \
+	linearTrainer[index] = new LinearMcSvm##kind##Trainer<CompressedRealVector>(C); \
 	nonlinearTrainer[index] = new McSvm##kind##Trainer<CompressedRealVector>(&kernel, C);
 
 	TRAINER(0, MMR);
@@ -131,7 +130,6 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 			LinearModel<CompressedRealVector, RealVector> linear(dim, classes, false, true);
 			linearTrainer[i]->stoppingCondition().minAccuracy = MAX_KKT_VIOLATION;
 			linearTrainer[i]->train(linear, dataset);
-			std::cout<<"done"<<std::endl;
 			KernelExpansion<CompressedRealVector> nonlinear(&kernel, false, classes);
 			nonlinearTrainer[i]->stoppingCondition().minAccuracy = MAX_KKT_VIOLATION;
 			nonlinearTrainer[i]->train(nonlinear, dataset);
