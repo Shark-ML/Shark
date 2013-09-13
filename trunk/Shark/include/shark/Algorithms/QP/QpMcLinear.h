@@ -158,7 +158,8 @@ public:
 				RealMatrixRow a = row(alpha, i);
 
 				// compute gradient and KKT violation
-				RealVector wx = w * x_i;
+				RealVector wx(m_classes);
+				fast_prod(w,x_i,wx);
 				RealVector g(m_classes);
 				double kkt = calcGradient(g, wx, a, C, y_i);
 
