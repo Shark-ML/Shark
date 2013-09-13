@@ -93,7 +93,7 @@ SHARK_ADD_EXAMPLE( Supervised/SubrangeKernelTutorial SubrangeKernelTutorial "Sup
 SHARK_ADD_EXAMPLE( Supervised/KNNTutorial KNNTutorial "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/LDATutorial LDATutorial "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/elmTutorial elmTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/kNN kNN "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/KNNCrossValidationTutorial KNNCrossValidationTutorial "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/linearRegressionTutorial linearRegressionTutorial "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/LassoRegression LassoRegression "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/FFNNBasicTutorial FFNNBasicTutorial "Supervised" )
