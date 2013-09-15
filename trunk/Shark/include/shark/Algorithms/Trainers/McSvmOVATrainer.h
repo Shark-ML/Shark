@@ -151,25 +151,23 @@ class LinearMcSvmOVATrainer : public AbstractLinearSvmTrainer<InputType>
 public:
 	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
-	LinearMcSvmOVATrainer(double C, double accuracy = 0.001) : AbstractLinearSvmTrainer<InputType>(C, accuracy)
-	{ }
+	LinearMcSvmOVATrainer(double C, bool unconstrained = false)
+	: AbstractLinearSvmTrainer<InputType>(C, unconstrained){ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LinearMcSvmOVATrainer"; }
 
-	void train(LinearModel<InputType, RealVector>& model, const LabeledData<InputType, unsigned int>& dataset)
+	void train(LinearClassifier<InputType>& model, const LabeledData<InputType, unsigned int>& dataset)
 	{
-		SHARK_CHECK(! model.hasOffset(), "[LinearMcSvmOVATrainer::train] models with offset are not supported (yet).");
-
 		base_type::m_solutionproperties.type = QpNone;
 		base_type::m_solutionproperties.accuracy = 0.0;
 		base_type::m_solutionproperties.iterations = 0;
 		base_type::m_solutionproperties.value = 0.0;
 		base_type::m_solutionproperties.seconds = 0.0;
 
-		std::size_t dim = model.inputSize();
-		std::size_t classes = model.outputSize();
+		std::size_t dim = inputDimension(dataset);
+		std::size_t classes = numberOfClasses(dataset);
 		RealMatrix w(classes, dim);
 		for (std::size_t c=0; c<classes; c++)
 		{
@@ -191,7 +189,7 @@ public:
 					accuracy());
 */
 		}
-		model.setStructure(w);
+		model.decisionFunction().setStructure(w);
 	}
 };
 

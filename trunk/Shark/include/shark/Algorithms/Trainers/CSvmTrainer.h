@@ -377,20 +377,16 @@ class LinearCSvmTrainer : public AbstractLinearSvmTrainer<InputType>
 public:
 	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
-	LinearCSvmTrainer(double C, double accuracy = 0.001)
-	: AbstractLinearSvmTrainer<InputType>(C, accuracy)
-	{ }
+	LinearCSvmTrainer(double C, bool unconstrained = false) 
+	: AbstractLinearSvmTrainer<InputType>(C, unconstrained){}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LinearCSvmTrainer"; }
 
-	void train(LinearModel<InputType, RealVector>& model, LabeledData<InputType, unsigned int> const& dataset)
+	void train(LinearClassifier<InputType>& model, LabeledData<InputType, unsigned int> const& dataset)
 	{
-		std::size_t dim = dataset.inputs().element(0).size();
-//		std::size_t dim = model.inputSize();
-//		SHARK_CHECK(model.outputSize() == 1, "[LinearCSvmTrainer::train] wrong number of outputs in the linear model");
-//		SHARK_CHECK(! model.hasOffset(), "[LinearCSvmTrainer::train] models with offset are not supported (yet).");
+		std::size_t dim = inputDimension(dataset);
 		QpBoxLinear<InputType> solver(dataset, dim);
 		RealMatrix w(1, dim, 0.0);
 		row(w, 0) = solver.solve(
@@ -398,7 +394,7 @@ public:
 				QpConfig::stoppingCondition(),
 				&QpConfig::solutionProperties(),
 				QpConfig::verbosity() > 0);
-		model.setStructure(w);
+		model.decisionFunction().setStructure(w);
 	}
 };
 

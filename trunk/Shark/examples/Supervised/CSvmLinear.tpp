@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 	LinearCSvmTrainer<RealVector> trainer(C);
 
 	// define the model
-	LinearModel<InputType, RealVector> model;
+	LinearClassifier<InputType> model;
 
 	// train the machine
 	cout << "Algorithm: " << trainer.name() << "\ntraining ..." << flush; // Shark algorithms know their names
@@ -37,8 +37,8 @@ int main(int argc, char** argv)
 	cout << "\n  training time: " << trainer.solutionProperties().seconds << " seconds\ndone." << endl;
 
 	// evaluate
-	ZeroOneLoss<unsigned int, RealVector> loss;
-	Data<RealVector> output = model(training.inputs());
+	ZeroOneLoss<unsigned int> loss;
+	Data<unsigned int> output = model(training.inputs());
 	double train_error = loss.eval(training.labels(), output);
 	cout << "training error:\t" <<  train_error << endl;
 	output = model(test.inputs());

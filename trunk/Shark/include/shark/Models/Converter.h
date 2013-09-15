@@ -157,10 +157,13 @@ protected:
 /// interpret the output of a neural network or a support vector
 /// machine for multi-category classification.
 ///
+/// In the special case that d is 1, it is assumed that the model can be represented as
+/// a 2 d vector with both components having the same value but opposite sign. 
+/// In this case the behavior is equivalent to the threshold converter with threshold 0.
+///
 /// The underlying decision function is an arbitrary model. It should
 /// be default constructable and it can be accessed using decisionFunction().
-///
-/// The parameters of the ArgMaxConverter are the ones of the decision function
+/// The parameters of the ArgMaxConverter are the ones of the decision function.
 template<class Model>
 class ArgMaxConverter : public AbstractModel<typename Model::InputType, unsigned int>
 {
@@ -200,12 +203,21 @@ public:
 	}
 	
 	void eval(BatchInputType const& input, BatchOutputType& output)const{
+		
 		ModelBatchOutputType modelResult;
 		m_decisionFunction.eval(input,modelResult);
 		std::size_t batchSize = shark::size(modelResult);
 		output.resize(batchSize);
-		for(std::size_t i = 0; i != batchSize; ++i){
-			output(i) = arg_max(get(modelResult,i));
+		if(modelResult.size2()== 1)
+		{
+			for(std::size_t i = 0; i != batchSize; ++i){
+				output(i) = modelResult(i,0) > 0.0;
+			}
+		}
+		else{
+			for(std::size_t i = 0; i != batchSize; ++i){
+				output(i) = arg_max(row(modelResult,i));
+			}
 		}
 	}
 	void eval(BatchInputType const& input, BatchOutputType& output, State& state)const{

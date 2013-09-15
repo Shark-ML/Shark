@@ -40,7 +40,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
-#include <shark/Models/LinearModel.h>
+#include <shark/Models/LinearClassifier.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Algorithms/QP/QuadraticProgram.h>
 
@@ -280,13 +280,13 @@ protected:
 ///
 template <class InputType>
 class AbstractLinearSvmTrainer
-: public AbstractTrainer<LinearModel<InputType, RealVector>, unsigned int>
+: public AbstractTrainer<LinearClassifier<InputType>, unsigned int>
 , public QpConfig
 , public IParameterizable
 {
 public:
-	typedef AbstractTrainer<LinearModel<InputType, RealVector>, unsigned int> base_type;
-	typedef LinearModel<InputType, RealVector> ModelType;
+	typedef AbstractTrainer<LinearClassifier<InputType>, unsigned int> base_type;
+	typedef LinearClassifier<InputType> ModelType;
 
 	//! Constructor
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
