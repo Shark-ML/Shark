@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 			cout << "  testing " << linearTrainer[i]->name() << " vs. " << nonlinearTrainer[i]->name() << endl;
 
 			// train machine with two trainers
-			LinearModel<CompressedRealVector, RealVector> linear(dim, classes, false, true);
+			LinearClassifier<CompressedRealVector> linear;
 			linearTrainer[i]->stoppingCondition().minAccuracy = MAX_KKT_VIOLATION;
 			linearTrainer[i]->train(linear, dataset);
 			KernelExpansion<CompressedRealVector> nonlinear(&kernel, false, classes);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 			nonlinearTrainer[i]->train(nonlinear, dataset);
 
 			// extract weight matrices
-			RealMatrix linear_w = linear.matrix();
+			RealMatrix linear_w = linear.decisionFunction().matrix();
 			RealMatrix nonlinear_w(classes, dim);
 			for (size_t j=0; j<dim; j++)
 			{
