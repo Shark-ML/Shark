@@ -42,8 +42,6 @@ int main(int argc, char** argv)
 	}
 
 	// experiment settings
-	unsigned int dim = 1000002;
-	unsigned int classes = 5;
 	unsigned int ell = std::atoi(argv[1]);
 	double lambda = std::atof(argv[2]);
 	double epsilon = std::atof(argv[3]);
@@ -58,13 +56,12 @@ int main(int argc, char** argv)
 	LabeledData<VectorType, unsigned int> test = problem.generateDataset(tests);
 
 	// define the model
-	ArgMaxConverter<LinearModel<VectorType, RealVector> >svm;
-	svm.decisionFunction().setStructure(dim,classes,false,true);
+	LinearClassifier<VectorType > svm;
 
 	// train the machine
 	std::cout << "machine training ..." << std::endl;
 	LinearMcSvmLLWTrainer<VectorType> trainer(1.0 / (lambda * ell), epsilon);
-	trainer.train(svm.decisionFunction(), training);
+	trainer.train(svm, training);
 	std::cout << "done." << std::endl;
 
 	// loss measuring classification errors

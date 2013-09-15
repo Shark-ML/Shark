@@ -89,9 +89,10 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	}
 	
 	//the formula for the linear classifier is
-	//arg max_i (x-m_i)^T C^-1 (x-m_i)
+	//arg min_i (x-m_i)^T C^-1 (x-m_i)
 	//which is equivalent to
-	//arg max_i m_i^T C^-1 m_i  -2* x^T C^-1 m_i
+	//arg min_i m_i^T C^-1 m_i  -2* x^T C^-1 m_i
+	//arg max_i -m_i^T C^-1 m_i  +2* x^T C^-1 m_i
 	//so we compute first C^-1 m_i and than the first term
 	
 	//invert the matrix, take into account that it is not necessarily positive definite
@@ -101,6 +102,7 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	//multiply the mean with the inverse matrix
 	RealMatrix transformedMeans(classes,dim);
 	fast_prod(means,CInverse, transformedMeans);
+	transformedMeans*=-1;//transform to maximisation problem
 	
 	//compute bias terms m_i^T C^-1 m_i
 	RealVector bias(classes);
@@ -110,5 +112,5 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	transformedMeans *= -2.0;
 
 	//fill the model
-	model.linear().setStructure(transformedMeans,bias);
+	model.decisionFunction().setStructure(transformedMeans,bias);
 }
