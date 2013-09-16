@@ -155,15 +155,6 @@ support for serialization, logging, and the well-known factory-method-pattern:
 * :doc:`concepts/misc/serialization`
 
 
-Finally, there is a self-written web server add-on available for Shark. It
-does not depend on Shark in any way, but can be helpful to achieve in-browser
-GUI visualization without further dependencies. The rationale for this, the
-web server's primary intended uses, and all technical specifics are
-described in the corresponding tutorial:
-
-* :doc:`addon/webserver`
-
-
 
 For Shark developers
 ++++++++++++++++++++

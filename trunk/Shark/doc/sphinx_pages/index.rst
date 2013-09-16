@@ -89,9 +89,6 @@
    rest_sources/tutorials/for_developers/issuing_a_release
 
 
-   rest_sources/tutorials/addon/webserver
-
-
    rest_sources/faq/faq
 
 
