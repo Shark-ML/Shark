@@ -171,7 +171,7 @@ public:
 		RealMatrix w(classes, dim);
 		for (std::size_t c=0; c<classes; c++)
 		{
-			LabeledData<CompressedRealVector, unsigned int> bindata = oneVersusRestProblem(dataset, c);
+			LabeledData<InputType, unsigned int> bindata = oneVersusRestProblem(dataset, c);
 			QpBoxLinear<InputType> solver(bindata, dim);
 			QpSolutionProperties prop;
 			row(w, c) = solver.solve(this->C(), base_type::m_stoppingcondition, &prop, base_type::m_verbosity > 0);
