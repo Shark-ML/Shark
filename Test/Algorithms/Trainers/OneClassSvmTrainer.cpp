@@ -53,11 +53,10 @@ BOOST_AUTO_TEST_CASE( ONE_CLASS_SVM_TEST )
 	const std::size_t ell = 2500;
 	const double nu = 0.7;
 	const double gamma = 0.5;
-	const bool bias = true;
 	const double threshold = 0.02;   // 1 / sqrt(ell)
 
 	GaussianRbfKernel<> kernel(gamma);
-	KernelExpansion<RealVector> ke(&kernel, bias);
+	KernelExpansion<RealVector> ke;
 
 	Gaussians problem;
 	UnlabeledData<RealVector> data = problem.generateDataset(ell);

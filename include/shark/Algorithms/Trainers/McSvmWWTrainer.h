@@ -85,19 +85,7 @@ class McSvmWWTrainer : public AbstractSvmTrainer<InputType, unsigned int>
 {
 public:
 
-	/// \brief Convenience typedefs:
-	/// this and many of the below typedefs build on the class template type CacheType.
-	/// Simply changing that one template parameter CacheType thus allows to flexibly
-	/// switch between using float or double as type for caching the kernel values.
-	/// The default is float, offering sufficient accuracy in the vast majority
-	/// of cases, at a memory cost of only four bytes. However, the template
-	/// parameter makes it easy to use double instead, (e.g., in case high
-	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
-	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
-	typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
-
 	typedef AbstractModel<InputType, RealVector> ModelType;
 	typedef AbstractKernelFunction<InputType> KernelType;
 	typedef AbstractSvmTrainer<InputType, unsigned int> base_type;
@@ -105,97 +93,84 @@ public:
 	//! Constructor
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
+	//! \param offset    whether to train with offset/bias parameter or not
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	McSvmWWTrainer(KernelType* kernel, double C, bool unconstrained = false)
-	: base_type(kernel, C, unconstrained),algorithm(false)
+	McSvmWWTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false)
+	: base_type(kernel, C, offset, unconstrained)
 	{ }
 
-	bool algorithm;
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "McSvmWWTrainer"; }
 
-	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
+	void train(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
 	{
 		std::size_t ic = dataset.numberOfElements();
 		unsigned int classes = numberOfClasses(dataset);
-		// the following test is "<=" rather than "=" to account for the rare case that one fold doesn't contain all classes due to sample scarcity
-		SHARK_CHECK(classes <= svm.outputSize(), "[McSvmWWTrainer::train] invalid number of outputs in the kernel expansion");
-		svm.setKernel(base_type::m_kernel);
-		svm.setBasis(dataset.inputs());
-		classes = svm.outputSize();
-		RealVector param = svm.parameterVector();
 
 		// prepare the problem description
 		RealMatrix linear(ic, classes-1,1.0);
-		UIntVector rho(classes-1);
-		{
-			for (unsigned int p=0; p<classes-1; p++) 
-				rho(p) = p;
-		}
+		UIntVector rho(classes-1,0);
+		
 		QpSparseArray<QpFloatType> nu(classes * (classes-1), classes, 2*classes*(classes-1));
+		for (unsigned int r=0, y=0; y<classes; y++)
 		{
-			unsigned int y, p, pp, r;
-			for (r=0, y=0; y<classes; y++)
+			for (unsigned int p=0, pp=0; p<classes-1; p++, pp++, r++)
 			{
-				for (p=0, pp=0; p<classes-1; p++, pp++, r++)
+				if (pp == y) pp++;
+				if (y < pp)
 				{
-					if (pp == y) pp++;
-					if (y < pp)
-					{
-						nu.add(r, y, 0.5);
-						nu.add(r, pp, -0.5);
-					}
-					else
-					{
-						nu.add(r, pp, -0.5);
-						nu.add(r, y, 0.5);
-					}
+					nu.add(r, y, 0.5);
+					nu.add(r, pp, -0.5);
+				}
+				else
+				{
+					nu.add(r, pp, -0.5);
+					nu.add(r, y, 0.5);
 				}
 			}
 		}
+		
 		QpSparseArray<QpFloatType> M(classes * (classes-1) * classes, classes-1, 2 * classes * (classes-1) * (classes-1));
+		for (unsigned int r=0, yv=0; yv<classes; yv++)
 		{
-			unsigned int r;
-			unsigned int yv, pv, ppv;
-			unsigned int yw, pw, pw2;
-			for (r=0, yv=0; yv<classes; yv++)
+			for (unsigned int pv=0, ppv=0; pv<classes-1; pv++, ppv++)
 			{
-				for (pv=0, ppv=0; pv<classes-1; pv++, ppv++)
+				if (ppv == yv) ppv++;
+				for (unsigned int yw=0; yw<classes; yw++, r++)
 				{
-					if (ppv == yv) ppv++;
-					for (yw=0; yw<classes; yw++, r++)
+					QpFloatType baseM = (yv == yw ? (QpFloatType)0.25 : (QpFloatType)0.0) - (ppv == yw ? (QpFloatType)0.25 : (QpFloatType)0.0);
+					M.setDefaultValue(r, baseM);
+					if (yv == yw)
 					{
-						QpFloatType baseM = (yv == yw ? (QpFloatType)0.25 : (QpFloatType)0.0) - (ppv == yw ? (QpFloatType)0.25 : (QpFloatType)0.0);
-						M.setDefaultValue(r, baseM);
-						if (yv == yw)
+						M.add(r, ppv - (ppv >= yw ? 1 : 0), baseM + (QpFloatType)0.25);
+					}
+					else if (ppv == yw)
+					{
+						M.add(r, yv - (yv >= yw ? 1 : 0), baseM - (QpFloatType)0.25);
+					}
+					else
+					{
+						unsigned int pw = ppv - (ppv >= yw ? 1 : 0);
+						unsigned int pw2 = yv - (yv >= yw ? 1 : 0);
+						if (pw < pw2)
 						{
-							M.add(r, ppv - (ppv >= yw ? 1 : 0), baseM + (QpFloatType)0.25);
-						}
-						else if (ppv == yw)
-						{
-							M.add(r, yv - (yv >= yw ? 1 : 0), baseM - (QpFloatType)0.25);
+							M.add(r, pw, baseM + (QpFloatType)0.25);
+							M.add(r, pw2, baseM - (QpFloatType)0.25);
 						}
 						else
 						{
-							pw = ppv - (ppv >= yw ? 1 : 0);
-							pw2 = yv - (yv >= yw ? 1 : 0);
-							if (pw < pw2)
-							{
-								M.add(r, pw, baseM + (QpFloatType)0.25);
-								M.add(r, pw2, baseM - (QpFloatType)0.25);
-							}
-							else
-							{
-								M.add(r, pw2, baseM - (QpFloatType)0.25);
-								M.add(r, pw, baseM + (QpFloatType)0.25);
-							}
+							M.add(r, pw2, baseM - (QpFloatType)0.25);
+							M.add(r, pw, baseM + (QpFloatType)0.25);
 						}
 					}
 				}
 			}
 		}
 		
+		typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
+		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
+		typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
 
 		// solve the problem
 		RealMatrix alpha(ic,classes-1);
@@ -207,7 +182,7 @@ public:
 			QpMcBoxDecomp< PrecomputedMatrixType > problem(matrix, M, dataset.labels(), linear, this->C());
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			problem.setShrinking(base_type::m_shrinking);
-			if(svm.hasOffset()){
+			if(this->m_trainOffset){
 				BiasSolver<  PrecomputedMatrixType > biasSolver(&problem);
 				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
 			}
@@ -223,7 +198,7 @@ public:
 			QpMcBoxDecomp< CachedMatrixType> problem(matrix, M, dataset.labels(), linear, this->C());
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			problem.setShrinking(base_type::m_shrinking);
-			if(svm.hasOffset()){
+			if(this->m_trainOffset){
 				BiasSolver<CachedMatrixType> biasSolver(&problem);
 				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
 			}
@@ -233,6 +208,8 @@ public:
 			}
 			alpha = problem.solution();
 		}
+		
+		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
 
 		// write the solution into the model
 		for (std::size_t i=0; i<ic; i++)
@@ -244,13 +221,15 @@ public:
 				unsigned int r = (classes-1) * y;
 				for (std::size_t p=0; p<classes-1; p++, r++) 
 					sum += nu(r, c) * alpha(i,p);
-				svm.alpha(i,c) = sum;
+				svm.decisionFunction().alpha(i,c) = sum;
 			}
 		}
-		if (svm.hasOffset()) svm.offset() = bias;
+		if (this->m_trainOffset) 
+			svm.decisionFunction().offset() = bias;
 
 		base_type::m_accessCount = km.getAccessCount();
-		if (base_type::sparsify()) svm.sparsify();
+		if (this->sparsify()) 
+			svm.decisionFunction().sparsify();
 	}
 };
 
@@ -273,21 +252,7 @@ public:
 	{
 		std::size_t dim = inputDimension(dataset);
 		std::size_t classes = numberOfClasses(dataset);
-/*
-		CompressedRealMatrix w(classes, dim);
-		std::vector<CompressedRealMatrixRow> w_s;
-		for (std::size_t c=0; c<classes; c++) w_s.push_back(CompressedRealMatrixRow(w, c));
-		typedef McPegasos<CompressedRealVector> PegasosType;
-		PegasosType::solve(
-				dataset,
-				PegasosType::emRelative,
-				PegasosType::elDiscriminativeSum,
-				false,
-				C(),
-				w_s,
-				std::min((std::size_t)1000, dataset.numberOfElements()),
-				accuracy());
-*/
+
 		QpMcLinearWW<InputType> solver(dataset, dim, classes);
 		RealMatrix w = solver.solve(this->C(), this->stoppingCondition(), &this->solutionProperties(), this->verbosity() > 0);
 		model.decisionFunction().setStructure(w);

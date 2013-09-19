@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( EPSILON_SVM_TEST )
 	RegressionDataset training = prob.generateDataset(ell);
 
 	GaussianRbfKernel<> kernel(0.1);
-	KernelExpansion<RealVector> svm(true);
+	KernelExpansion<RealVector> svm;
 	EpsilonSvmTrainer<RealVector> trainer(&kernel, C, epsilon);
 	trainer.stoppingCondition().minAccuracy = accuracy;
 	trainer.sparsify() = false;

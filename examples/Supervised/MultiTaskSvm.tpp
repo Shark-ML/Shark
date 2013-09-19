@@ -85,22 +85,20 @@ int main(int argc, char** argv)
 	MultiTaskKernel<RealVector> multiTaskKernel(&inputKernel, &taskKernel);
 
 	// train the SVM
-	KernelExpansion<InputType> ke(&multiTaskKernel, false);
-	CSvmTrainer<InputType> trainer(&multiTaskKernel, C);
+	KernelClassifier<InputType> ke;
+	CSvmTrainer<InputType> trainer(&multiTaskKernel, C,false);
 	cout << "training ..." << endl;
 	trainer.train(ke, training);
 	cout << "done." << endl;
 
-	ZeroOneLoss<unsigned int, RealVector> loss;
+	ZeroOneLoss<unsigned int> loss;
 	Data<RealVector> output;
 
 	// evaluate training performance
-	output = ke(training.inputs());
-	double trainError = loss.eval(training.labels(), output);
+	double trainError = loss.eval(training.labels(), ke(training.inputs()));
 	cout << "training error:\t" <<  trainError << endl;
 
 	// evaluate its transfer performance
-	output = ke(test.inputs());
-	double testError = loss.eval(test.labels(), output);
+	double testError = loss.eval(test.labels(), ke(test.inputs()));
 	cout << "test error:\t" << testError << endl;
 }

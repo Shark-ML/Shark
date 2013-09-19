@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_SERIALIZATION )
 	{
 		// recover from the stream
 		DenseRbfKernel kernel(1.0);
-		KernelExpansion<RealVector> ex2(&kernel, false);
+		KernelExpansion<RealVector> ex2(&kernel);
 		boost::archive::polymorphic_text_iarchive ia(ss);
 		ia >> ex2;
 

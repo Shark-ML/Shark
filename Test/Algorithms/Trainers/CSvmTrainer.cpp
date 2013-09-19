@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_SIMPLE_TEST )
 	{
 		std::cout << "C-SVM hard margin" << std::endl;
 		LinearKernel<> kernel;
-		KernelExpansion<RealVector> svm(true);
-		CSvmTrainer<RealVector> trainer(&kernel, 1e100);
+		KernelClassifier<RealVector> svm;
+		CSvmTrainer<RealVector> trainer(&kernel, 1e100,true);
 		trainer.sparsify() = false;
 		trainer.shrinking() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_SIMPLE_TEST )
 	{
 		std::cout << "C-SVM hard margin with shrinking" << std::endl;
 		LinearKernel<> kernel;
-		KernelExpansion<RealVector> svm(true);
-		CSvmTrainer<RealVector> trainer(&kernel, 1e100);
+		KernelClassifier<RealVector> svm;
+		CSvmTrainer<RealVector> trainer(&kernel, 1e100,true);
 		trainer.sparsify() = false;
 		trainer.shrinking() = true;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
@@ -117,8 +117,8 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_SIMPLE_TEST )
 	{
 		std::cout << "C-SVM soft margin" << std::endl;
 		LinearKernel<> kernel;
-		KernelExpansion<RealVector> svm(true);
-		CSvmTrainer<RealVector> trainer(&kernel, 0.1);
+		KernelClassifier<RealVector> svm;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.1, true);
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
@@ -146,8 +146,8 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_SIMPLE_TEST )
 	{
 		std::cout << "Squared Hinge Loss C-SVM hard margin with shrinking" << std::endl;
 		LinearKernel<> kernel;
-		KernelExpansion<RealVector> svm(true);
-		SquaredHingeCSvmTrainer<RealVector> trainer(&kernel, 1e100);
+		KernelClassifier<RealVector> svm;
+		SquaredHingeCSvmTrainer<RealVector> trainer(&kernel, 1e100, true);
 		trainer.sparsify() = false;
 		trainer.shrinking() = true;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
@@ -176,8 +176,8 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_SIMPLE_TEST )
 	{
 		std::cout << "Squared Hinge Loss C-SVM soft margin with shrinking" << std::endl;
 		LinearKernel<> kernel;
-		KernelExpansion<RealVector> svm(true);
-		SquaredHingeCSvmTrainer<RealVector> trainer(&kernel, 0.1);
+		KernelClassifier<RealVector> svm;
+		SquaredHingeCSvmTrainer<RealVector> trainer(&kernel, 0.1, true);
 		trainer.sparsify() = false;
 		trainer.shrinking() = true;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
@@ -212,22 +212,22 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_ITERATIVE_BIAS_TEST )
 
 	GaussianRbfKernel<> kernel(2);
 	//LinearKernel<> kernel;
-	CSvmTrainer<RealVector> trainer(&kernel, 10);
+	CSvmTrainer<RealVector> trainer(&kernel, 10,true);
 	trainer.sparsify() = false;
 	trainer.shrinking() = true;
 	trainer.stoppingCondition().minAccuracy = 1e-4;
 	
 	//train using both algorithms
-	KernelExpansion<RealVector> svmTruth(true);
-	KernelExpansion<RealVector> svmTest(true);
+	KernelClassifier<RealVector> svmTruth;
+	KernelClassifier<RealVector> svmTest;
 	trainer.setUseIterativeBiasComputation(true);
 	trainer.train(svmTest, dataset);
 	trainer.setUseIterativeBiasComputation(false);
 	trainer.train(svmTruth, dataset);
 	
 	//compare bias
-	BOOST_CHECK_CLOSE(svmTest.offset(0),svmTruth.offset(0),1.e-2);
-	ZeroOneLoss<unsigned int, RealVector> loss;
+	BOOST_CHECK_CLOSE(svmTest.decisionFunction().offset(0),svmTruth.decisionFunction().offset(0),1.e-2);
+	ZeroOneLoss<unsigned int> loss;
 	std::cout<<loss.eval(dataset.labels(),svmTruth(dataset.inputs()))<<std::endl;
 	std::cout<<loss.eval(dataset.labels(),svmTest(dataset.inputs()))<<std::endl;
 	//~ std::cout<<svmTest.alpha()<<std::endl;

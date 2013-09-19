@@ -63,22 +63,11 @@ namespace shark {
 /// is the \f$ \varepsilon \f$ insensitive absolute loss.
 ///
 template <class InputType, class CacheType = float>
-class EpsilonSvmTrainer : public AbstractSvmTrainer<InputType, RealVector>
+class EpsilonSvmTrainer : public AbstractSvmTrainer<InputType, RealVector, KernelExpansion<InputType> >
 {
 public:
 
-	/// \brief Convenience typedefs:
-	/// this and many of the below typedefs build on the class template type CacheType.
-	/// Simply changing that one template parameter CacheType thus allows to flexibly
-	/// switch between using float or double as type for caching the kernel values.
-	/// The default is float, offering sufficient accuracy in the vast majority
-	/// of cases, at a memory cost of only four bytes. However, the template
-	/// parameter makes it easy to use double instead, (e.g., in case high
-	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 
 	typedef KernelMatrix< InputType, QpFloatType > KernelMatrixType;
 	typedef BlockMatrix2x2< KernelMatrixType > BlockMatrixType;
@@ -87,7 +76,7 @@ public:
 
 	typedef AbstractModel<InputType, RealVector> ModelType;
 	typedef AbstractKernelFunction<InputType> KernelType;
-	typedef AbstractSvmTrainer<InputType, RealVector> base_type;
+	typedef AbstractSvmTrainer<InputType, RealVector, KernelExpansion<InputType> > base_type;
 
 	/// Constructor
 	/// \param  kernel         kernel function to use for training and prediction
@@ -95,7 +84,7 @@ public:
 	/// \param  epsilon        Loss insensitivity parameter.
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	EpsilonSvmTrainer(KernelType* kernel, double C, double epsilon, bool unconstrained = false)
-	: base_type(kernel, C, unconstrained)
+	: base_type(kernel, C, true, unconstrained)
 	, m_epsilon(epsilon)
 	{ }
 
@@ -113,8 +102,7 @@ public:
 	{
 		size_t sp = base_type::numberOfParameters();
 		RealVector ret(sp + 1);
-		RealVectorRange(ret, Range(0, sp)) = base_type::parameterVector();
-		ret(sp) = (base_type::m_unconstrained ? std::log(m_epsilon) : m_epsilon);
+		blas::init(ret)<< base_type::parameterVector(),(base_type::m_unconstrained ? std::log(m_epsilon) : m_epsilon);
 		return ret;
 	}
 
@@ -123,7 +111,7 @@ public:
 	{
 		size_t sp = base_type::numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == sp + 1);
-		base_type::setParameterVector(ConstRealVectorRange(newParameters, Range(0, sp)));
+		base_type::setParameterVector(subrange(newParameters, 0, sp));
 		setEpsilon(base_type::m_unconstrained ? std::exp(newParameters(sp)) : newParameters(sp));
 	}
 
@@ -132,13 +120,10 @@ public:
 	{ return (base_type::numberOfParameters() + 1); }
 
 	void train(KernelExpansion<InputType>& svm, LabeledData<InputType, RealVector> const& dataset){
-
-		SHARK_CHECK(svm.hasOffset(), "[EpsilonSvmTrainer::train] training of models without offset is not supported");
-		SHARK_CHECK(svm.outputSize() == 1, "[EpsilonSvmTrainer::train] wrong number of outputs in the kernel expansion");
-
-		svm.setKernel(base_type::m_kernel);
-		svm.setBasis(dataset.inputs());
+		svm.setStructure(base_type::m_kernel,dataset.inputs(),true,1);
 		
+		SHARK_CHECK(labelDimension(dataset) == 1, "[EpsilonSvmTrainer::train] can only train 1D labels");
+
 		if (QpConfig::precomputeKernel())
 			trainSVM<PrecomputedBlockMatrixType>(svm,dataset);
 		else

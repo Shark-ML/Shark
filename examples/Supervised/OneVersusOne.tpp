@@ -26,8 +26,6 @@
 #include <shark/Rng/GlobalRng.h>
 #include <shark/Data/DataDistribution.h>
 #include <shark/Models/OneVersusOneClassifier.h>
-#include <shark/Models/Converter.h>
-#include <shark/Models/ConcatenatedModel.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
@@ -73,34 +71,19 @@ int main()
 	// train the OVO machine
 	OneVersusOneClassifier<RealVector> ovo;
 	unsigned int pairs = classes * (classes - 1) / 2;
-	std::vector< KernelExpansion<RealVector>* > bin_ke(pairs);
-	ThresholdConverter conv;
-	std::vector< ConcatenatedModel<RealVector, unsigned int>* > bin_svm(pairs);
+	std::vector< KernelClassifier<RealVector> > bin_svm(pairs);
 	for (std::size_t n=0, c=1; c<classes; c++)
 	{
 		std::vector< OneVersusOneClassifier<RealVector>::binary_classifier_type* > vs_c;
 		for (std::size_t e=0; e<c; e++, n++)
 		{
-			//~ // create two-class sub-problem
-			//~ std::vector<std::size_t> indices;
-			//~ std::vector<unsigned int> binlabels;
-			//~ for (std::size_t i=0; i<training.size(); i++)
-			//~ {
-				//~ unsigned int y = training.label(i);
-				//~ if (y == e) { indices.push_back(i); binlabels.push_back(0); }
-				//~ if (y == c) { indices.push_back(i); binlabels.push_back(1); }
-			//~ }
-			//~ UnlabeledData<RealVector> bininputs;
-			//~ ((UnlabeledData<RealVector>)training).indexedSubset(indices, bininputs);
-			//~ ClassificationDataset bindata(bininputs, binlabels);
+			//get the binary subproblem
 			ClassificationDataset bindata = binarySubProblem(training,e,c);
 				
 			// train the binary machine
-			CSvmTrainer<RealVector> trainer(&kernel, C);
-			bin_ke[n] = new KernelExpansion<RealVector>(false);
-			trainer.train(*bin_ke[n], bindata);
-			bin_svm[n] = new ConcatenatedModel<RealVector, unsigned int>(bin_ke[n], &conv);
-			vs_c.push_back(bin_svm[n]);
+			CSvmTrainer<RealVector> trainer(&kernel, C,false);
+			trainer.train(bin_svm[n], bindata);
+			vs_c.push_back(&bin_svm[n]);
 		}
 		ovo.addClass(vs_c);
 	}
@@ -113,11 +96,4 @@ int main()
 	double test_error = loss.eval(test.labels(), output);
 	cout << "training error: " << 100.0 * train_error << "%" << endl;
 	cout << "    test error: " << 100.0 *  test_error << "%" << endl;
-
-//	// clean up
-//	for (std::size_t n=0; n<pairs; n++)
-//	{
-//		delete bin_ke[n];
-//		delete bin_svm[n];
-//	}
 }

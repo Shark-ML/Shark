@@ -45,23 +45,23 @@ namespace shark{
 
 //! \brief Perceptron online learning algorithm
 template<class InputType>
-class Perceptron : public AbstractTrainer<KernelExpansion<InputType>,unsigned int >
+class Perceptron : public AbstractTrainer<KernelClassifier<InputType>,unsigned int >
 {
 public:
 	/// \brief Constructor.
 	///
-    /// @param maxTimesPattern defines the maximum number of times the data is processed before the algorithms stopps.
-	Perceptron(std::size_t maxTimesPattern = 10000)
-	:m_maxTimesPattern(maxTimesPattern){}
+	/// @param maxTimesPattern defines the maximum number of times the data is processed before the algorithms stopps.
+	Perceptron(AbstractKernelFunction<InputType>* kernel, std::size_t maxTimesPattern = 10000)
+	:mpe_kernel(kernel),m_maxTimesPattern(maxTimesPattern){}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "Perceptron"; }
 
-	void train(KernelExpansion<InputType>& model, LabeledData<InputType, unsigned int> const& dataset){
+	void train(KernelClassifier<InputType>& classifier, LabeledData<InputType, unsigned int> const& dataset){
 		std::size_t patterns = dataset.numberOfElements();
-
-		model.setBasis(dataset.inputs());
+		KernelExpansion<InputType>& model= classifier.decisionFunction();
+		model.setStructure(mpe_kernel,dataset.inputs(),false,1);
 		model.alpha().clear();
 
 		bool err;
@@ -82,6 +82,7 @@ public:
 		} while (err);
 	}
 private:
+	AbstractKernelFunction<InputType>* mpe_kernel;
 	std::size_t m_maxTimesPattern; //< maximum number of times a training is processed
 };
 

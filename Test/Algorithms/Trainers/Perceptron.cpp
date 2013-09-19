@@ -8,9 +8,9 @@
 using namespace shark;
 
 BOOST_AUTO_TEST_CASE( PERCEPTRON ){
-	Perceptron<RealVector> trainer;
 	DenseLinearKernel kernel;
-	KernelExpansion<RealVector> model(&kernel,false);
+	KernelClassifier<RealVector> model;
+	Perceptron<RealVector> trainer(&kernel);
 
 	std::vector<RealVector> input(6,RealVector(2));
 	input[0](0)=1;
@@ -35,13 +35,11 @@ BOOST_AUTO_TEST_CASE( PERCEPTRON ){
 
 	ClassificationDataset dataset = createLabeledDataFromRange(input,target);
 
+	
 	trainer.train(model, dataset);
-
 	for(size_t i = 0; i != 6; ++i){
-		RealVector result = model(input[i]);
-		BOOST_CHECK_EQUAL(result.size(),1u);
-		unsigned int label = result(0)>0;
-		BOOST_CHECK_EQUAL(target[i],label);
+		std::cout<<input[i]<<" "<<target[i]<<" "<<model(dataset.element(i).input)<<std::endl;
+		BOOST_CHECK_EQUAL(target[i],model(input[i]));
 	}
 
 }

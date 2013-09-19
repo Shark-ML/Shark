@@ -68,16 +68,16 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Simple )
 	// SVM setup
 	LinearKernel<> kernel;
 	double C = 1e100;  // hard margin
-	CSvmTrainer<RealVector> trainer(&kernel, C);
+	CSvmTrainer<RealVector> trainer(&kernel, C,true);
 
 	// efficiently computed loo error
 	LooErrorCSvm<RealVector> loosvm(dataset, &kernel, true);
 	double value = loosvm.eval(trainer.parameterVector());
 
 	// brute force computation
-	ZeroOneLoss<unsigned int, RealVector> loss;
-	KernelExpansion<RealVector> ke(&kernel, true);
-	LooError<KernelExpansion<RealVector>,unsigned int> loo(dataset, &ke, &trainer, &loss);
+	ZeroOneLoss<unsigned int> loss;
+	KernelClassifier<RealVector> ke;
+	LooError<KernelClassifier<RealVector>,unsigned int> loo(dataset, &ke, &trainer, &loss);
 	double standardLoo = loo.eval();
 
 	// compare to brute force computation
@@ -112,16 +112,16 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_NoBias_Simple )
 	// SVM setup
 	LinearKernel<> kernel;
 	double C = 1e100;  // hard margin
-	CSvmTrainer<RealVector> trainer(&kernel, C);
+	CSvmTrainer<RealVector> trainer(&kernel, C,false);
 
 	// efficiently computed loo error
-	LooErrorCSvm<RealVector> loosvm(dataset, &kernel, true);
+	LooErrorCSvm<RealVector> loosvm(dataset, &kernel, false);
 	double value = loosvm.eval(trainer.parameterVector());
 
 	// brute force computation
-	ZeroOneLoss<unsigned int, RealVector> loss;
-	KernelExpansion<RealVector> ke(&kernel, true);
-	LooError<KernelExpansion<RealVector>,unsigned int> loo(dataset, &ke, &trainer, &loss);
+	ZeroOneLoss<unsigned int> loss;
+	KernelClassifier<RealVector> ke;
+	LooError<KernelClassifier<RealVector>,unsigned int> loo(dataset, &ke, &trainer, &loss);
 	double standardLoo = loo.eval();
 
 	// compare to brute force computation
@@ -137,14 +137,14 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard )
 	// SVM setup
 	GaussianRbfKernel<> kernel;
 	double C = 10;
-	CSvmTrainer<RealVector> trainer(&kernel, C);
+	CSvmTrainer<RealVector> trainer(&kernel, C,true);
 	
 	RealVector parameters = trainer.parameterVector();
 	
 	// brute force computation
-	ZeroOneLoss<unsigned int, RealVector> loss;
-	KernelExpansion<RealVector> ke(&kernel, true);
-	LooError<KernelExpansion<RealVector>,unsigned int> loo(dataset, &ke, &trainer, &loss);
+	ZeroOneLoss<unsigned int> loss;
+	KernelClassifier<RealVector> ke;
+	LooError<KernelClassifier<RealVector>,unsigned int> loo(dataset, &ke, &trainer, &loss);
 	double standardLoo = loo.eval();
 
 	// efficiently computed loo error
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard_NoBias )
 	// SVM setup
 	GaussianRbfKernel<> kernel;
 	double C = 10;
-	CSvmTrainer<RealVector> trainer(&kernel, C);
+	CSvmTrainer<RealVector> trainer(&kernel, C,false);
 	
 	RealVector parameters = trainer.parameterVector();
 	
@@ -176,9 +176,9 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard_NoBias )
 	
 	std::cout<<"\n\nbrute force"<<std::endl;
 	// brute force computation
-	ZeroOneLoss<unsigned int, RealVector> loss;
-	KernelExpansion<RealVector> ke(&kernel, false);
-	LooError<KernelExpansion<RealVector>,unsigned int> loo(dataset, &ke, &trainer, &loss);
+	ZeroOneLoss<unsigned int> loss;
+	KernelClassifier<RealVector> ke;
+	LooError<KernelClassifier<RealVector>,unsigned int> loo(dataset, &ke, &trainer, &loss);
 	double standardLoo = loo.eval();
 
 	// compare to brute force computation

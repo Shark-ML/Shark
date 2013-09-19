@@ -186,8 +186,8 @@ public:
 			Data< unsigned int > cur_vlabels = cur_valid_data.labels(); //validation labels of this fold
 			Data< RealVector > cur_vscores; //will hold SVM output scores for current validation partition
 			// init SVM
-			KernelExpansion<InputType> svm(mep_kernel);   //the SVM
-			CSvmTrainer<InputType, double> csvm_trainer(mep_kernel, C_reg, m_svmCIsUnconstrained);   //the trainer
+			KernelClassifier<InputType> svm;
+			CSvmTrainer<InputType, double> csvm_trainer(mep_kernel, C_reg, true, m_svmCIsUnconstrained);   //the trainer
 			csvm_trainer.sparsify() = false;
 			if (mep_svmStoppingCondition != NULL) {
 				csvm_trainer.stoppingCondition() = *mep_svmStoppingCondition;
@@ -198,7 +198,7 @@ public:
 
 			// train SVM on current fold
 			csvm_trainer.train(svm, cur_train_data);
-			cur_vscores = svm(cur_valid_data.inputs());   //will result in a dataset of RealVector as output
+			cur_vscores = svm.decisionFunction()(cur_valid_data.inputs());   //will result in a dataset of RealVector as output
 			// copy the scores and corresponding labels to the dataset-wide storage
 			for (unsigned int j=0; j<cur_vsize; j++) {
 				tmp_helper_labels[next_label] = cur_vlabels.element(j);
@@ -250,8 +250,8 @@ public:
 			Data< RealVector > cur_vinputs = cur_valid_data.inputs(); //validation inputs of this fold
 			Data< RealVector > cur_vscores; //will hold SVM output scores for current validation partition
 			// init SVM
-			KernelExpansion<InputType> svm(mep_kernel);   //the SVM
-			CSvmTrainer<InputType, double> csvm_trainer(mep_kernel, C_reg, m_svmCIsUnconstrained);   //the trainer
+			KernelClassifier<InputType> svm;   //the SVM
+			CSvmTrainer<InputType, double> csvm_trainer(mep_kernel, C_reg, true, m_svmCIsUnconstrained);   //the trainer
 			csvm_trainer.sparsify() = false;
 			if (mep_svmStoppingCondition != NULL) {
 				csvm_trainer.stoppingCondition() = *mep_svmStoppingCondition;
@@ -261,7 +261,7 @@ public:
 			// train SVM on current fold
 			csvm_trainer.train(svm, cur_train_data);
 			CSvmDerivative<InputType> svm_deriv(&svm, &csvm_trainer);
-			cur_vscores = svm(cur_valid_data.inputs());   //will result in a dataset of RealVector as output
+			cur_vscores = svm.decisionFunction()(cur_valid_data.inputs());   //will result in a dataset of RealVector as output
 			// copy the scores and corresponding labels to the dataset-wide storage
 			for (unsigned int j=0; j<cur_vsize; j++) {
 				// copy label and prediction score

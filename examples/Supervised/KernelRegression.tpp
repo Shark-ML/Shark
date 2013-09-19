@@ -54,8 +54,8 @@ int main()
 
 	// define the machines
 	KernelExpansion<RealVector> svm[2] = {
-		KernelExpansion<RealVector>(true),
-		KernelExpansion<RealVector>(false)
+		KernelExpansion<RealVector>(),
+		KernelExpansion<RealVector>()
 	};
 
 	// define the corresponding trainers

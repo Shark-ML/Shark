@@ -38,32 +38,22 @@ namespace shark {
  * mean.
  */
 template<class InputType>
-class KernelMeanClassifier : public AbstractTrainer<KernelExpansion<InputType>, unsigned int>
+class KernelMeanClassifier : public AbstractTrainer<KernelClassifier<InputType>, unsigned int>
 {
 public:
-	/// \brief From INameable: return the class name.
+	KernelMeanClassifier(AbstractKernelFunction<InputType>* kernel):mpe_kernel(kernel){}
+		
 	std::string name() const
 	{ return "KernelMeanClassifier"; }
 
-	void train(KernelExpansion<InputType>& model, LabeledData<InputType, unsigned int> const& dataset){
-		SHARK_CHECK(model.outputSize() == 1     , "[KernelMeanClassifier::train] wrong number of outputs in the kernel expansion");
-		SHARK_CHECK(model.hasOffset() == true   , "[KernelMeanClassifier::train] kernel expansion need bias parameter");
-		SHARK_CHECK(model.kernel() != NULL      , "[KernelMeanClassifier::train] kernel has to be specified for kernel expansion");
+	void train(KernelClassifier<InputType>& model, LabeledData<InputType, unsigned int> const& dataset){
 		SHARK_CHECK(numberOfClasses(dataset) ==2, "[KernelMeanClassifier::train] not a binary class problem");
-		model.setBasis(dataset.inputs());
+		
+		model.decisionFunction().setStructure(mpe_kernel,dataset.inputs(),true);
 
-		std::size_t patterns     = dataset.numberOfElements();
-		std::size_t numClasses[] = {0,0};
+		std::size_t patterns = dataset.numberOfElements();
+		std::vector<std::size_t> numClasses = classSizes(dataset);
 		double coeffs[]     = {0,0};
-
-		// compute the class magnitudes and the resulting coefficients
-//		for (std::size_t i = 0; i != patterns; i++){
-//			unsigned int y = dataset.label(i);
-//			numClasses[y]++;
-//		}
-		BOOST_FOREACH(unsigned int label, dataset.labels().elements()){
-			++ numClasses[label];
-		}
 		
 		SHARK_CHECK(numClasses[0] > 0, "[KernelMeanClassifier::train] class 0 has no class members" );
 		SHARK_CHECK(numClasses[1] > 0, "[KernelMeanClassifier::train] class 1 has no class members" );
@@ -77,7 +67,6 @@ public:
 		
 		//todo: slow implementation without batch processing!
 		typedef typename LabeledData<InputType, unsigned int>::const_element_reference ElementRef;
-//		for (std::size_t i = 0; i != patterns; i++){
 		std::size_t i  = 0; 
 		BOOST_FOREACH(ElementRef element,dataset.elements()){
 		
@@ -87,12 +76,11 @@ public:
 			params(i) = coeffs[y];
 			++i;
 			// compute values to calculate bias
-//			for (std::size_t j = 0; j != patterns; j++){
 			BOOST_FOREACH(ElementRef element2,dataset.elements()){
 				if (element2.label != y) 
 					continue;
 				//todo: fast implementation should create batches of same class elements and process them!
-				classBias[y] += model.kernel()->eval(element.input, element2.input);
+				classBias[y] += mpe_kernel->eval(element.input, element2.input);
 			}
 		}
 		// set bias
@@ -100,6 +88,8 @@ public:
 		// pass parameters to model, note the negation
 		model.setParameterVector(-params); 
 	}
+	
+	AbstractKernelFunction<InputType>* mpe_kernel;
 };
 
 

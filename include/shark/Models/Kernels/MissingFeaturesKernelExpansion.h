@@ -53,16 +53,11 @@ public:
 	typedef typename Base::BatchOutputType BatchOutputType;
 	/// Constructors from the base class
 	///@{
-	MissingFeaturesKernelExpansion(bool offset)
-	: Base(offset, 1u)
-	{}
+	MissingFeaturesKernelExpansion(){}
 
-	MissingFeaturesKernelExpansion(Data<InputType> const& basis, bool offset)
-	: Base(basis, offset, 1u)
-	{}
 
-	MissingFeaturesKernelExpansion(KernelType* kernel, bool offset)
-	: Base(kernel, offset, 1u)
+	MissingFeaturesKernelExpansion(KernelType* kernel)
+	: Base(kernel)
 	{}
 
 	MissingFeaturesKernelExpansion(KernelType* kernel, Data<InputType> const& basis, bool offset)
@@ -88,7 +83,7 @@ public:
 		DataView<Data<InputType> const > indexedBasis(Base::m_basis);
 		
 		ensureSize(outputs,size(patterns),Base::m_outputs);
-		if (Base::m_offset)
+		if (Base::hasOffset())
 				noalias(outputs) = repeat(Base::m_b,size(patterns));
 			else
 				zero(outputs);

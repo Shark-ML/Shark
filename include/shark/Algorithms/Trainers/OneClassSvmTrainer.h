@@ -72,26 +72,14 @@ class OneClassSvmTrainer : public AbstractUnsupervisedTrainer<KernelExpansion<In
 {
 public:
 
-	/// \brief Convenience typedefs:
-	/// this and many of the below typedefs build on the class template type CacheType.
-	/// Simply changing that one template parameter CacheType thus allows to flexibly
-	/// switch between using float or double as type for caching the kernel values.
-	/// The default is float, offering sufficient accuracy in the vast majority
-	/// of cases, at a memory cost of only four bytes. However, the template
-	/// parameter makes it easy to use double instead, (e.g., in case high
-	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
+	typedef AbstractModel<InputType, RealVector> ModelType;
+	typedef AbstractKernelFunction<InputType> KernelType;
+	typedef QpConfig base_type;
 
 	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
 	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
 	typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
-
-	typedef AbstractModel<InputType, RealVector> ModelType;
-	typedef AbstractKernelFunction<InputType> KernelType;
-	typedef QpConfig base_type;
 
 	OneClassSvmTrainer(KernelType* kernel, double nu)
 	: m_kernel(kernel)
@@ -144,12 +132,8 @@ public:
 
 	void train(KernelExpansion<InputType>& svm, UnlabeledData<InputType> const& inputset)
 	{
-		SHARK_CHECK(svm.hasOffset(), "[OneClassSvmTrainer::train] training of models without offset is not supported");
-		SHARK_CHECK(svm.outputSize() == 1, "[OneClassSvmTrainer::train] wrong number of outputs in the kernel expansion");
 		SHARK_CHECK(m_nu > 0.0 && m_nu< 1.0, "[OneClassSvmTrainer::train] invalid setting of the parameter nu (must be 0 < nu < 1)");
-
-		svm.setKernel(m_kernel);
-		svm.setBasis(inputset);
+		svm.setStructure(m_kernel,inputset,true);
 
 		// solve the quadratic program
 		if (QpConfig::precomputeKernel())
@@ -157,7 +141,8 @@ public:
 		else
 			trainSVM<CachedMatrixType>(svm,inputset);
 
-		if (base_type::sparsify()) svm.sparsify();
+		if (base_type::sparsify()) 
+			svm.sparsify();
 	}
 
 protected:

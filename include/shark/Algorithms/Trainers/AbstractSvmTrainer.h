@@ -158,7 +158,7 @@ protected:
 /// size of the kernel cache, the stopping criterion, as well
 /// as information on the actual solution.
 ///
-template <class InputType, class LabelType, class Model = KernelExpansion<InputType> >
+template <class InputType, class LabelType, class Model = KernelClassifier<InputType> >
 class AbstractSvmTrainer
 : public AbstractTrainer< Model,LabelType>,
   public QpConfig, public IParameterizable
@@ -169,10 +169,12 @@ public:
 	//! Constructor
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
+	//! \param offset train svm with offset - this is not supported for all SVM solvers.
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	AbstractSvmTrainer(KernelType* kernel, double C, bool unconstrained = false)
+	AbstractSvmTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false)
 	: m_kernel(kernel)
 	, m_regularizers(1,C)
+	, m_trainOffset(offset)
 	, m_unconstrained(unconstrained)
 	, m_cacheSize(0x4000000)
 	{ RANGE_CHECK( C > 0 ); }
@@ -181,10 +183,12 @@ public:
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
 	//! \param  positiveC    regularization parameter of the positive class (label 1)
+	//! \param offset train svm with offset - this is not supported for all SVM solvers.
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	AbstractSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool unconstrained = false)
+	AbstractSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool offset, bool unconstrained = false)
 	: m_kernel(kernel)
 	, m_regularizers(2)
+	, m_trainOffset(offset)
 	, m_unconstrained(unconstrained)
 	, m_cacheSize(0x4000000)
 	{ 
@@ -221,6 +225,9 @@ public:
 
 	bool isUnconstrained() const
 	{ return m_unconstrained; }
+	
+	bool trainOffset() const
+	{ return m_trainOffset; }
 
 	double CacheSize() const
 	{ return m_cacheSize; }
@@ -263,6 +270,7 @@ protected:
 	/// The exact meaning depends on the sub-class, but the value is always positive, 
 	/// and higher implies a less regular solution.
 	RealVector m_regularizers;
+	bool m_trainOffset;
 	bool m_unconstrained;               ///< Is log(C) stored internally as a parameter instead of C? If yes, then we get rid of the constraint C > 0 on the level of the parameter interface.
 	std::size_t m_cacheSize;            ///< Number of values in the kernel cache. The size of the cache in bytes is the size of one entry (4 for float, 8 for double) times this number.
 };

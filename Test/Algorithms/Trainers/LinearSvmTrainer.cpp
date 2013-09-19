@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 
 #define TRAINER(index, kind) \
 	linearTrainer[index] = new LinearMcSvm##kind##Trainer<CompressedRealVector>(C); \
-	nonlinearTrainer[index] = new McSvm##kind##Trainer<CompressedRealVector>(&kernel, C);
+	nonlinearTrainer[index] = new McSvm##kind##Trainer<CompressedRealVector>(&kernel, C,false);
 
 	TRAINER(0, MMR);
 	TRAINER(1, OVA);
@@ -111,13 +111,6 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 				if ((d / var_per_class) == label) input[i](d) = 0.3 * Rng::gauss() + 1.0;
 				else input[i](d) = 0.3 * Rng::gauss() - 1.0;
 			}
-/*
-			unsigned int c = Rng::discrete(0, classes - 2);
-			if (c >= label) c++;
-			unsigned int d = Rng::discrete(0, var_per_class - 1);
-			input[i](var_per_class * label + d) = Rng::gauss() + 2.0;
-			input[i](var_per_class * c     + d) = Rng::gauss() - 2.0;
-*/
 			target[i] = label;
 		}
 		LabeledData<CompressedRealVector, unsigned int> dataset = createLabeledDataFromRange(input, target);
@@ -130,7 +123,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 			LinearClassifier<CompressedRealVector> linear;
 			linearTrainer[i]->stoppingCondition().minAccuracy = MAX_KKT_VIOLATION;
 			linearTrainer[i]->train(linear, dataset);
-			KernelExpansion<CompressedRealVector> nonlinear(&kernel, false, classes);
+			KernelClassifier<CompressedRealVector> nonlinear;
 			nonlinearTrainer[i]->stoppingCondition().minAccuracy = MAX_KKT_VIOLATION;
 			nonlinearTrainer[i]->train(nonlinear, dataset);
 
@@ -141,7 +134,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 			{
 				CompressedRealVector v(dim);
 				v(j) = 1.0;
-				column(nonlinear_w, j) = nonlinear(v);
+				column(nonlinear_w, j) = nonlinear.decisionFunction()(v);
 			}
 			ZeroSum(linear_w);
 			ZeroSum(nonlinear_w);

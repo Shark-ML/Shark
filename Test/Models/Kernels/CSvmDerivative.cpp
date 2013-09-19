@@ -41,7 +41,6 @@
 #include <shark/Models/Kernels/LinearKernel.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Models/Kernels/ArdKernel.h>
-#include <shark/Models/Kernels/KernelExpansion.h>
 #include <shark/Models/Kernels/CSvmDerivative.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
@@ -94,13 +93,14 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET )
 		C_eps = Cs[i] * NUMERICAL_C_INCREASE_FACTOR;
 		// set up svm for current C
 		LinearKernel<> kernel;
-		KernelExpansion<RealVector> svm(true);
-		CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i] );
+		KernelClassifier<RealVector> kc;
+		KernelExpansion<RealVector>& svm = kc.decisionFunction();
+		CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-10;
-		trainer.train(svm, dataset);
+		trainer.train(kc, dataset);
 		RealVector param = svm.parameterVector();
-		CSvmDerivative<RealVector> svm_deriv( &svm, &trainer );
+		CSvmDerivative<RealVector> svm_deriv( &kc, &trainer );
 
 		// set up helper variables
 		double diff, deriv;
@@ -108,11 +108,12 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET )
 
 		// set up svm for numerical comparsion-C
 		LinearKernel<> cmp_kernel;
-		KernelExpansion<RealVector> cmp_svm(true);
-		CSvmTrainer<RealVector, double> cmp_trainer(&cmp_kernel, C_eps);
+		KernelClassifier<RealVector> cmp_kc;
+		KernelExpansion<RealVector>& cmp_svm =cmp_kc.decisionFunction();
+		CSvmTrainer<RealVector, double> cmp_trainer(&cmp_kernel, C_eps,true);
 		cmp_trainer.sparsify() = false;
 		cmp_trainer.stoppingCondition().minAccuracy = 1e-10;
-		cmp_trainer.train( cmp_svm, dataset );
+		cmp_trainer.train( cmp_kc, dataset );
 		RealVector cmp_param = cmp_svm.parameterVector();
 
 		// first test derivatives of dataset-points themselves
@@ -184,13 +185,14 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET_UNCONSTRA
 		C_eps = Cs[i] * NUMERICAL_C_INCREASE_FACTOR;
 		// set up svm for current C
 		LinearKernel<> kernel;
-		KernelExpansion<RealVector> svm(true);
-		CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i], UNCONSTRAINED );
+		KernelClassifier<RealVector> kc;
+		KernelExpansion<RealVector>& svm = kc.decisionFunction();
+		CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i], true,UNCONSTRAINED );
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-14;
-		trainer.train(svm, dataset);
+		trainer.train(kc, dataset);
 		RealVector param = svm.parameterVector();
-		CSvmDerivative<RealVector> svm_deriv( &svm, &trainer );
+		CSvmDerivative<RealVector> svm_deriv( &kc, &trainer );
 
 		// set up helper variables
 		double diff, deriv;
@@ -198,11 +200,12 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET_UNCONSTRA
 
 		// set up svm for numerical comparsion-C
 		LinearKernel<> cmp_kernel;
-		KernelExpansion<RealVector> cmp_svm(true);
-		CSvmTrainer<RealVector,double> cmp_trainer(&cmp_kernel, C_eps, UNCONSTRAINED );
+		KernelClassifier<RealVector> cmp_kc;
+		KernelExpansion<RealVector>& cmp_svm =cmp_kc.decisionFunction();
+		CSvmTrainer<RealVector,double> cmp_trainer(&cmp_kernel, C_eps, true, UNCONSTRAINED );
 		cmp_trainer.sparsify() = false;
 		cmp_trainer.stoppingCondition().minAccuracy = 1e-15;
-		cmp_trainer.train( cmp_svm, dataset );
+		cmp_trainer.train( cmp_kc, dataset );
 		RealVector cmp_param = cmp_svm.parameterVector();
 
 		// first test derivatives of dataset-points themselves
@@ -278,13 +281,14 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET_RBF )
 			C_eps = Cs[i] * NUMERICAL_C_INCREASE_FACTOR;
 			// set up svm for current C
 			DenseRbfKernel kernel( RbfParams[h] );
-			KernelExpansion<RealVector> svm(true);
-			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i] );
+			KernelClassifier<RealVector> kc;
+			KernelExpansion<RealVector>& svm = kc.decisionFunction();
+			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
 			trainer.stoppingCondition().minAccuracy = 1e-15;
-			trainer.train(svm, dataset);
+			trainer.train(kc, dataset);
 			RealVector param = svm.parameterVector();
-			CSvmDerivative<RealVector> svm_deriv( &svm, &trainer );
+			CSvmDerivative<RealVector> svm_deriv( &kc, &trainer );
 
 			// set up helper variables
 			double diff, deriv;
@@ -292,11 +296,12 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET_RBF )
 
 			// set up svm for numerical comparsion-C
 			DenseRbfKernel cmp_kernel( RbfParams[h] );
-			KernelExpansion<RealVector> cmp_svm(true);
-			CSvmTrainer<RealVector, double> cmp_trainer(&cmp_kernel, C_eps);
+			KernelClassifier<RealVector> cmp_kc;
+			KernelExpansion<RealVector>& cmp_svm =cmp_kc.decisionFunction();
+			CSvmTrainer<RealVector, double> cmp_trainer(&cmp_kernel, C_eps,true);
 			cmp_trainer.sparsify() = false;
 			cmp_trainer.stoppingCondition().minAccuracy = 1e-15;
-			cmp_trainer.train( cmp_svm, dataset );
+			cmp_trainer.train( cmp_kc, dataset );
 			RealVector cmp_param = cmp_svm.parameterVector();
 
 			// first test derivatives of dataset-points themselves
@@ -356,13 +361,14 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_SECOND_DATASET )
 		C_eps = Cs[i] * NUMERICAL_C_INCREASE_FACTOR;
 		// set up svm for current C
 		LinearKernel<> kernel;
-		KernelExpansion<RealVector> svm(true);
-		CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i] );
+		KernelClassifier<RealVector> kc;
+		KernelExpansion<RealVector>& svm = kc.decisionFunction();
+		CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-10;
-		trainer.train(svm, dataset);
+		trainer.train(kc, dataset);
 		RealVector param = svm.parameterVector();
-		CSvmDerivative<RealVector> svm_deriv( &svm, &trainer );
+		CSvmDerivative<RealVector> svm_deriv( &kc, &trainer );
 
 		// set up helper variables
 		double diff, deriv;
@@ -370,11 +376,12 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_SECOND_DATASET )
 
 		// set up svm for numerical comparsion-C
 		LinearKernel<> cmp_kernel;
-		KernelExpansion<RealVector> cmp_svm(true);
-		CSvmTrainer<RealVector, double> cmp_trainer(&cmp_kernel, C_eps);
+		KernelClassifier<RealVector> cmp_kc;
+		KernelExpansion<RealVector>& cmp_svm =cmp_kc.decisionFunction();
+		CSvmTrainer<RealVector, double> cmp_trainer(&cmp_kernel, C_eps,true);
 		cmp_trainer.sparsify() = false;
 		cmp_trainer.stoppingCondition().minAccuracy = 1e-10;
-		cmp_trainer.train( cmp_svm, dataset );
+		cmp_trainer.train( cmp_kc, dataset );
 		RealVector cmp_param = cmp_svm.parameterVector();
 
 		// first test derivatives of dataset-points themselves
@@ -449,13 +456,14 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_KERNEL_PARAMS )
 		for ( unsigned int i=0; i<Cs.size(); i++ ) {
 			// set up svm with current kernel parameters
 			DenseRbfKernel kernel( RbfParams[h] );
-			KernelExpansion<RealVector> svm(true);
-			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i] );
+			KernelClassifier<RealVector> kc;
+			KernelExpansion<RealVector>& svm = kc.decisionFunction();
+			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
 			trainer.stoppingCondition().minAccuracy = 1e-15;
-			trainer.train(svm, dataset);
+			trainer.train(kc, dataset);
 			RealVector param = svm.parameterVector();
-			CSvmDerivative<RealVector> svm_deriv( &svm, &trainer );
+			CSvmDerivative<RealVector> svm_deriv( &kc, &trainer );
 
 			// set up helper variables
 			double diff, deriv;
@@ -463,11 +471,12 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_KERNEL_PARAMS )
 
 			// set up svm with epsiloned-kernel-parameters for numerical comparsion
 			DenseRbfKernel cmp_kernel( RbfParam_eps );
-			KernelExpansion<RealVector> cmp_svm(true);
-			CSvmTrainer<RealVector, double> cmp_trainer( &cmp_kernel, Cs[i] );
+			KernelClassifier<RealVector> cmp_kc;
+			KernelExpansion<RealVector>& cmp_svm =cmp_kc.decisionFunction();
+			CSvmTrainer<RealVector, double> cmp_trainer( &cmp_kernel, Cs[i],true );
 			cmp_trainer.sparsify() = false;
 			cmp_trainer.stoppingCondition().minAccuracy = 1e-15;
-			cmp_trainer.train( cmp_svm, dataset );
+			cmp_trainer.train( cmp_kc, dataset );
 			RealVector cmp_param = cmp_svm.parameterVector();
 
 			// first test derivatives of dataset-points themselves
@@ -539,13 +548,14 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 		for ( unsigned int i=0; i<Cs.size(); i++ ) {
 			// set up svm with current kernel parameters
 			DenseRbfKernel kernel( RbfParams[h] );
-			KernelExpansion<RealVector> svm(true);
-			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i] );
+			KernelClassifier<RealVector> kc;
+			KernelExpansion<RealVector>& svm = kc.decisionFunction();
+			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
 			trainer.stoppingCondition().minAccuracy = 1e-15;
-			trainer.train(svm, d1);
+			trainer.train(kc, d1);
 			RealVector param = svm.parameterVector();
-			CSvmDerivative<RealVector> svm_deriv( &svm, &trainer );
+			CSvmDerivative<RealVector> svm_deriv( &kc, &trainer );
 
 			// set up helper variables
 			double diff, deriv;
@@ -553,11 +563,12 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 
 			// set up svm with epsiloned-kernel-parameters for numerical comparsion
 			DenseRbfKernel cmp_kernel( RbfParam_eps );
-			KernelExpansion<RealVector> cmp_svm(true);
-			CSvmTrainer<RealVector, double> cmp_trainer( &cmp_kernel, Cs[i] );
+			KernelClassifier<RealVector> cmp_kc;
+			KernelExpansion<RealVector>& cmp_svm =cmp_kc.decisionFunction();
+			CSvmTrainer<RealVector, double> cmp_trainer( &cmp_kernel, Cs[i], true );
 			cmp_trainer.sparsify() = false;
 			cmp_trainer.stoppingCondition().minAccuracy = 1e-15;
-			cmp_trainer.train( cmp_svm, d1 );
+			cmp_trainer.train( cmp_kc, d1 );
 			RealVector cmp_param = cmp_svm.parameterVector();
 
 			// first test derivatives of dataset-points themselves
@@ -626,13 +637,14 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 		for ( unsigned int i=0; i<Cs.size(); i++ ) {
 			// set up svm with current kernel parameters
 			DenseRbfKernel kernel( RbfParams[h] );
-			KernelExpansion<RealVector> svm(true);
-			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i] );
+			KernelClassifier<RealVector> kc;
+			KernelExpansion<RealVector>& svm = kc.decisionFunction();
+			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
 			trainer.stoppingCondition().minAccuracy = 1e-15;
-			trainer.train(svm, d2);
+			trainer.train(kc, d2);
 			RealVector param = svm.parameterVector();
-			CSvmDerivative<RealVector> svm_deriv( &svm, &trainer );
+			CSvmDerivative<RealVector> svm_deriv( &kc, &trainer );
 
 			// set up helper variables
 			double diff, deriv;
@@ -640,11 +652,12 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 
 			// set up svm with epsiloned-kernel-parameters for numerical comparsion
 			DenseRbfKernel cmp_kernel( RbfParam_eps );
-			KernelExpansion<RealVector> cmp_svm(true);
-			CSvmTrainer<RealVector, double> cmp_trainer( &cmp_kernel, Cs[i] );
+			KernelClassifier<RealVector> cmp_kc;
+			KernelExpansion<RealVector>& cmp_svm =cmp_kc.decisionFunction();
+			CSvmTrainer<RealVector, double> cmp_trainer( &cmp_kernel, Cs[i],true );
 			cmp_trainer.sparsify() = false;
 			cmp_trainer.stoppingCondition().minAccuracy = 1e-15;
-			cmp_trainer.train( cmp_svm, d2 );
+			cmp_trainer.train( cmp_kc, d2 );
 			RealVector cmp_param = cmp_svm.parameterVector();
 
 			// first test derivatives of dataset-points themselves
@@ -721,13 +734,14 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_KERNEL_PARAMS_UNCONSTRAIN
 		for ( unsigned int i=0; i<Cs.size(); i++ ) {
 			// set up svm with current kernel parameters
 			DenseRbfKernel kernel( RbfParams[h], true );
-			KernelExpansion<RealVector> svm(true);
-			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i] );
+			KernelClassifier<RealVector> kc;
+			KernelExpansion<RealVector>& svm = kc.decisionFunction();
+			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
 			trainer.stoppingCondition().minAccuracy = 1e-15;
-			trainer.train(svm, dataset);
+			trainer.train(kc, dataset);
 			RealVector param = svm.parameterVector();
-			CSvmDerivative<RealVector> svm_deriv( &svm, &trainer );
+			CSvmDerivative<RealVector> svm_deriv( &kc, &trainer );
 
 			// set up helper variables
 			double diff, deriv;
@@ -735,11 +749,12 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_KERNEL_PARAMS_UNCONSTRAIN
 
 			// set up svm with epsiloned-kernel-parameters for numerical comparsion
 			DenseRbfKernel cmp_kernel( RbfParam_eps, true );
-			KernelExpansion<RealVector> cmp_svm(true);
-			CSvmTrainer<RealVector, double> cmp_trainer( &cmp_kernel, Cs[i] );
+			KernelClassifier<RealVector> cmp_kc;
+			KernelExpansion<RealVector>& cmp_svm =cmp_kc.decisionFunction();
+			CSvmTrainer<RealVector, double> cmp_trainer( &cmp_kernel, Cs[i],true );
 			cmp_trainer.sparsify() = false;
 			cmp_trainer.stoppingCondition().minAccuracy = 1e-15;
-			cmp_trainer.train( cmp_svm, dataset );
+			cmp_trainer.train( cmp_kc, dataset );
 			RealVector cmp_param = cmp_svm.parameterVector();
 
 			// first test derivatives of dataset-points themselves
@@ -823,13 +838,14 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 			tmp_param_manipulator = kernel.parameterVector();
 			tmp_param_manipulator(1) *= 0.5;
 			kernel.setParameterVector( tmp_param_manipulator );
-			KernelExpansion<RealVector> svm(true);
-			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i] );
+			KernelClassifier<RealVector> kc;
+			KernelExpansion<RealVector>& svm = kc.decisionFunction();
+			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
 			trainer.stoppingCondition().minAccuracy = 1e-15;
-			trainer.train(svm, dataset);
+			trainer.train(kc, dataset);
 			RealVector param = svm.parameterVector();
-			CSvmDerivative<RealVector> svm_deriv( &svm, &trainer );
+			CSvmDerivative<RealVector> svm_deriv( &kc, &trainer );
 			// set up helper variables
 			double diff, deriv;
 			RealVector computed_derivative;
@@ -838,11 +854,12 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 			tmp_param_manipulator = c_cmp_kernel.parameterVector();
 			tmp_param_manipulator(1) *= 0.5;
 			c_cmp_kernel.setParameterVector( tmp_param_manipulator );
-			KernelExpansion<RealVector> c_cmp_svm(true);
-			CSvmTrainer<RealVector, double> c_cmp_trainer( &c_cmp_kernel, C_eps );
+			KernelClassifier<RealVector> c_cmp_kc;
+			KernelExpansion<RealVector>& c_cmp_svm = c_cmp_kc.decisionFunction();
+			CSvmTrainer<RealVector, double> c_cmp_trainer( &c_cmp_kernel, C_eps, true );
 			c_cmp_trainer.sparsify() = false;
 			c_cmp_trainer.stoppingCondition().minAccuracy = 1e-15;
-			c_cmp_trainer.train( c_cmp_svm, dataset );
+			c_cmp_trainer.train( c_cmp_kc, dataset );
 			RealVector c_cmp_param = c_cmp_svm.parameterVector();
 			// set up svm with epsiloned-kernel-parameters_1 for numerical comparsion
 			DenseARDKernel g1_cmp_kernel( 2, ArdParams[h]*ArdParams[h] );
@@ -850,23 +867,28 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 			tmp_param_manipulator(0) = ArdParam_eps;
 			tmp_param_manipulator(1) *= 0.5;
 			g1_cmp_kernel.setParameterVector( tmp_param_manipulator );
-			KernelExpansion<RealVector> g1_cmp_svm(true);
-			CSvmTrainer<RealVector, double> g1_cmp_trainer( &g1_cmp_kernel, Cs[i] );
+			
+			KernelClassifier<RealVector> g1_cmp_kc;
+			KernelExpansion<RealVector>& g1_cmp_svm = g1_cmp_kc.decisionFunction();
+			CSvmTrainer<RealVector, double> g1_cmp_trainer( &g1_cmp_kernel, Cs[i], true );
 			g1_cmp_trainer.sparsify() = false;
 			g1_cmp_trainer.stoppingCondition().minAccuracy = 1e-15;
-			g1_cmp_trainer.train( g1_cmp_svm, dataset );
+			g1_cmp_trainer.train( g1_cmp_kc, dataset );
 			RealVector g1_cmp_param = g1_cmp_svm.parameterVector();
+			
 			// set up svm with epsiloned-kernel-parameters_2 for numerical comparsion
 			DenseARDKernel g2_cmp_kernel( 2, ArdParams[h]*ArdParams[h] );
 			tmp_param_manipulator = g2_cmp_kernel.parameterVector();
 			tmp_param_manipulator(1) *= 0.5;
 			tmp_param_manipulator(1) *= NUMERICAL_PARAMETER_INCREASE_FACTOR;
 			g2_cmp_kernel.setParameterVector( tmp_param_manipulator );
-			KernelExpansion<RealVector> g2_cmp_svm(true);
-			CSvmTrainer<RealVector, double> g2_cmp_trainer( &g2_cmp_kernel, Cs[i] );
+			
+			KernelClassifier<RealVector> g2_cmp_kc;
+			KernelExpansion<RealVector>& g2_cmp_svm = g2_cmp_kc.decisionFunction();
+			CSvmTrainer<RealVector, double> g2_cmp_trainer( &g2_cmp_kernel, Cs[i], true );
 			g2_cmp_trainer.sparsify() = false;
 			g2_cmp_trainer.stoppingCondition().minAccuracy = 1e-15;
-			g2_cmp_trainer.train( g2_cmp_svm, dataset );
+			g2_cmp_trainer.train( g2_cmp_kc, dataset );
 			RealVector g2_cmp_param = g2_cmp_svm.parameterVector();
 
 			////////////////////////////////////////////////////////////////////////////////
