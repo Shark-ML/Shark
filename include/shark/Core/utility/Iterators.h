@@ -290,17 +290,16 @@ private:
 		if(n < 0){
 			n *= -1;
 			--m_outerPosition;
+			--n;
 			//jump over the outer position until we are in the correct range again
 			while ((unsigned int) n >= shark::size(*m_outerPosition) ){
 				n -= shark::size(*m_outerPosition);
 				--m_outerPosition;
 			}
 			//get the iterators to the current position if we are not before the beginning of the sequence
-			if(m_outerPosition != m_outerBegin){
-				m_innerBegin = boost::begin(*m_outerPosition);
-				m_innerEnd = boost::end(*m_outerPosition);
-				m_innerPosition = m_innerEnd-(n+1);
-			}
+			m_innerBegin = boost::begin(*m_outerPosition);
+			m_innerEnd = boost::end(*m_outerPosition);
+			m_innerPosition = m_innerEnd-(n+1);
 		}
 		else{
 

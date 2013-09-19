@@ -168,7 +168,8 @@ SHARK_ADD_TEST( Models/RFClassifier.cpp Models_RFClassifier )
 SHARK_ADD_TEST( Models/CARTClassifier.cpp Models_CARTClassifier )
 
 # Core tests
-SHARK_ADD_TEST( Core/ScopedHandleTests.cpp ScopedHandleTests )
+SHARK_ADD_TEST( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )
+SHARK_ADD_TEST( Core/Iterators.cpp Core_Iterators )
 
 #Data Tests
 SHARK_ADD_TEST( Data/Csv.cpp Data_Csv )
