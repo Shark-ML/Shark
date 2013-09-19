@@ -5,14 +5,6 @@
  *  \author T. Glasmachers
  *  \date 2010-2011
  *
- *  \par Copyright (c) 2010-2011:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -85,6 +77,22 @@ public:
 		BatchOutputType predictionBatch = Batch<OutputType>::createBatch(prediction,1);
 		get(predictionBatch,0)=prediction;
 		return eval(labelBatch,predictionBatch);
+	}
+
+	/// \brief evaluate the loss and its derivative for a target and a prediction
+	///
+	/// \param  target      target value
+	/// \param  prediction  prediction, typically made by a model
+	/// \param  gradient    the gradient of the loss function with respect to the prediction
+	virtual double evalDerivative(LabelType const& target, OutputType const& prediction, OutputType& gradient) const {
+		BatchLabelType labelBatch = Batch<LabelType>::createBatch(target,1);
+		get(labelBatch, 0) = target;
+		BatchOutputType predictionBatch = Batch<OutputType>::createBatch(prediction, 1);
+		get(predictionBatch, 0) = prediction;
+		BatchOutputType gradientBatch = Batch<OutputType>::createBatch(gradient, 1);
+		double ret = evalDerivative(labelBatch, predictionBatch, gradientBatch);
+		gradient = get(gradientBatch, 0);
+		return ret;
 	}
 
 	/// \brief evaluate the loss and the derivative w.r.t. the prediction

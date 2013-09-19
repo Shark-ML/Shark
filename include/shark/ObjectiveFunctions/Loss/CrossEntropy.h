@@ -1,16 +1,8 @@
 //===========================================================================
 /*!
- *  \brief Error measure for classication tasks that can be used
+ *  \brief Error measure for classification tasks that can be used
  *         as the objective function for training.
  *
- *  \par Copyright (c) 1999-2001:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
