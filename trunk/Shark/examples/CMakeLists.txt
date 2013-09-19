@@ -79,6 +79,7 @@ SHARK_ADD_EXAMPLE( Supervised/McSvmLinear McSvmLinear "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/KernelRegression KernelRegression "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/KernelSelection KernelSelection "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/OneVersusOne OneVersusOne "Supervised" ) #partially working. Dataset issue
+SHARK_ADD_EXAMPLE( Supervised/KernelLogisticRegression KernelLogisticRegression "Supervised" )
 
 SHARK_ADD_EXAMPLE( Supervised/CSvmMaxLikelihoodMS CSvmMaxLikelihoodMS "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/CSvmGridSearchTutorial CSvmGridSearchTutorial "Supervised" )
