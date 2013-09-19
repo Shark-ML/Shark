@@ -99,19 +99,21 @@ public:
 	//! Constructor
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
+	//! \param offset whether to train the svm with offset term
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	//! \param  computeDerivative  should the derivative of b with respect to C be computed?
-	CSvmTrainer(KernelType* kernel, double C, bool unconstrained = false, bool computeDerivative = true)
-	: base_type(kernel, C, unconstrained), m_computeDerivative(computeDerivative), m_useIterativeBiasComputation(false)
+	CSvmTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false, bool computeDerivative = true)
+	: base_type(kernel, C, offset, unconstrained), m_computeDerivative(computeDerivative), m_useIterativeBiasComputation(false)
 	{ }
 	
 	//! Constructor
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
 	//! \param  positiveC    regularization parameter of the positive class (label 1)
+	//! \param offset whether to train the svm with offset term
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	CSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool unconstrained = false)
-	: base_type(kernel,negativeC, positiveC, unconstrained), m_computeDerivative(false), m_useIterativeBiasComputation(false)
+	CSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool offset, bool unconstrained = false)
+	: base_type(kernel,negativeC, positiveC, offset, unconstrained), m_computeDerivative(false), m_useIterativeBiasComputation(false)
 	{ }
 
 	/// \brief From INameable: return the class name.
@@ -130,19 +132,17 @@ public:
 
 	/// \brief Train the C-SVM.
 	/// \note This code is almost verbatim present in the MissingFeatureSvmTrainer. If you change here, please also change there.
-	void train(KernelExpansion<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
+	void train(KernelClassifier<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
 	{
-		SHARK_CHECK(svm.outputSize() == 1, "[CSvmTrainer::train] wrong number of outputs in the kernel expansion");
-		
+
 		//prepare model
-		svm.setKernel(base_type::m_kernel);
-		svm.setBasis(dataset.inputs());
+		svm.decisionFunction().setStructure(base_type::m_kernel, dataset.inputs(),this->m_trainOffset);
 		
 		//dispatcher for the different types of kernel matrix that can be used
-		trainInternal(svm,dataset);
+		trainInternal(svm.decisionFunction(),dataset);
 		
 		if (base_type::sparsify())
-			svm.sparsify();
+			svm.decisionFunction().sparsify();
 
 	}
 
@@ -191,7 +191,7 @@ private:
 	
 	template<class SVMProblemType>
 	void optimize(KernelExpansion<InputType>& svm, SVMProblemType& svmProblem, LabeledData<InputType, unsigned int> const& dataset){
-		if (svm.hasOffset() && !m_useIterativeBiasComputation)
+		if (this->m_trainOffset && !m_useIterativeBiasComputation)
 		{
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 			ProblemType problem(svmProblem,base_type::m_shrinking);
@@ -435,13 +435,9 @@ public:
 	{ return "SquaredHingeCSvmTrainer"; }
 
 	/// \brief Train the C-SVM.
-	void train(KernelExpansion<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
-	{
-		SHARK_CHECK(svm.outputSize() == 1, "[CSvmTrainer::train] wrong number of outputs in the kernel expansion");
-		SHARK_CHECK(numberOfClasses(dataset) == 2, "[CSvmTrainer::train] trainer can only solve binary problems");
-		
-		svm.setKernel(base_type::m_kernel);
-		svm.setBasis(dataset.inputs());
+	void train(KernelClassifier<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
+	{		
+		svm.decisionFunction().setStructure(base_type::m_kernel,dataset.inputs(),this->m_trainOffset);
 		
 		RealVector diagonalModifier(dataset.numberOfElements(),0.5/base_type::m_regularizers(0));
 		if(base_type::m_regularizers.size() != 1){
@@ -454,15 +450,15 @@ public:
 		if (QpConfig::precomputeKernel())
 		{
 			PrecomputedMatrixType matrix(&km);
-			optimize(svm,matrix,diagonalModifier,dataset);
+			optimize(svm.decisionFunction(),matrix,diagonalModifier,dataset);
 		}
 		else
 		{
 			CachedMatrixType matrix(&km);
-			optimize(svm,matrix,diagonalModifier,dataset);
+			optimize(svm.decisionFunction(),matrix,diagonalModifier,dataset);
 		}
 		base_type::m_accessCount = km.getAccessCount();
-		if (base_type::sparsify()) svm.sparsify();
+		if (base_type::sparsify()) svm.decisionFunction().sparsify();
 
 	}
 
@@ -472,7 +468,7 @@ private:
 	void optimize(KernelExpansion<InputType>& svm, Matrix& matrix,RealVector const& diagonalModifier, LabeledData<InputType, unsigned int> const& dataset){
 		typedef CSVMProblem<Matrix> SVMProblemType;
 		SVMProblemType svmProblem(matrix,dataset.labels(),1e100);
-		if (svm.hasOffset())
+		if (this->m_trainOffset)
 		{
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 			ProblemType problem(svmProblem,base_type::m_shrinking);

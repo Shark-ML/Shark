@@ -151,8 +151,8 @@ RealVector run_one_trial( bool verbose) {
 
     //###begin<possib_one_final_training>
     // construct and train the final learner
-    KernelExpansion<RealVector> svm_v1( &kernel, true );
-    CSvmTrainer<RealVector> trainer_v1( &kernel, C_reg, log_enc_c ); //encoding does not really matter in this case b/c it does not affect the ctor
+    KernelClassifier<RealVector> svm_v1;
+    CSvmTrainer<RealVector> trainer_v1( &kernel, C_reg, true, log_enc_c ); //encoding does not really matter in this case b/c it does not affect the ctor
     if ( verbose ) {
         std::cout << std::endl << std::endl << "    Used mlms.eval(...) to copy kernel.parameterVector() " << kernel.parameterVector() << std::endl;
         std::cout << "    into trainer_v1.parameterVector() " << trainer_v1.parameterVector() << std::endl;
@@ -163,8 +163,8 @@ RealVector run_one_trial( bool verbose) {
 
     //###begin<possib_one_final_eval>
     // evaluate the final trained classifier on training and test set
-    ZeroOneLoss<unsigned int, RealVector> loss_v1;
-    Data<RealVector> output_v1; //real-valued output
+    ZeroOneLoss<unsigned int> loss_v1;
+    Data<unsigned int> output_v1; //real-valued output
     output_v1 = svm_v1( train.inputs() );
     train_error_v1 = loss_v1.eval( train.labels(), output_v1 );
     output_v1 = svm_v1( test.inputs() );
@@ -182,8 +182,8 @@ RealVector run_one_trial( bool verbose) {
     //###end<possib_two_verbose>
 
     //###begin<possib_two_copy_results>
-    KernelExpansion<RealVector> svm_v2( &kernel, true );
-    CSvmTrainer<RealVector> trainer_v2( &kernel, 0.1, log_enc_c ); //ATTENTION: must be constructed with same log-encoding preference
+    KernelClassifier<RealVector> svm_v2;
+    CSvmTrainer<RealVector> trainer_v2( &kernel, 0.1, true, log_enc_c ); //ATTENTION: must be constructed with same log-encoding preference
     trainer_v2.setParameterVector( rprop.solution().point ); //copy best hyperparameters to svm trainer
     //###end<possib_two_copy_results>
 
@@ -200,8 +200,8 @@ RealVector run_one_trial( bool verbose) {
 
     //###begin<possib_two_final_eval>
     // evaluate the final trained classifier on training and test set
-    ZeroOneLoss<unsigned int, RealVector> loss_v2;
-    Data<RealVector> output_v2; //real-valued output
+    ZeroOneLoss<unsigned int> loss_v2;
+    Data<unsigned int> output_v2; //real-valued output
     output_v2 = svm_v2( train.inputs() );
     train_error_v2 = loss_v2.eval( train.labels(), output_v2 );
     output_v2 = svm_v2( test.inputs() );

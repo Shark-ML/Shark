@@ -82,8 +82,8 @@ BOOST_AUTO_TEST_CASE(NoMissingFeatures)
 	RealVector seenParam1;
 	{
 		LinearKernel<> kernel;
-		MissingFeaturesKernelExpansion<RealVector> svm(true);
-		MissingFeatureSvmTrainer<RealVector, double> trainer(&kernel, 0.1);
+		MissingFeaturesKernelExpansion<RealVector> svm;
+		MissingFeatureSvmTrainer<RealVector, double> trainer(&kernel, 0.1, true);
 		trainer.setMaxIterations(1);
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
@@ -104,8 +104,8 @@ BOOST_AUTO_TEST_CASE(NoMissingFeatures)
 	// The result should also be the same as results trained by CSvmTrainer
 	{
 		LinearKernel<> kernel;
-		KernelExpansion<RealVector> svm(true);
-		CSvmTrainer<RealVector> trainer(&kernel, 0.1);
+		KernelClassifier<RealVector> svm;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.1, true);
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.sparsify() = false;
 		trainer.train(svm, dataset);
@@ -133,8 +133,8 @@ BOOST_AUTO_TEST_CASE(MissingFeatures)
 	RealVector output1;
 	{
 		LinearKernel<> kernel;
-		MissingFeaturesKernelExpansion<RealVector> svm1(true);
-		MissingFeatureSvmTrainer<RealVector, double> trainer(&kernel, 0.1);
+		MissingFeaturesKernelExpansion<RealVector> svm1;
+		MissingFeatureSvmTrainer<RealVector, double> trainer(&kernel, 0.1, true);
 		trainer.setMaxIterations(4);
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 
@@ -149,8 +149,8 @@ BOOST_AUTO_TEST_CASE(MissingFeatures)
 	{
 		// Train with data with missing features
 		LinearKernel<> kernel;
-		MissingFeaturesKernelExpansion<RealVector> svm2(true);
-		MissingFeatureSvmTrainer<RealVector, double> trainer(&kernel, 0.1);
+		MissingFeaturesKernelExpansion<RealVector> svm2;
+		MissingFeatureSvmTrainer<RealVector, double> trainer(&kernel, 0.1, true);
 		trainer.train(svm2, m_labeledData2);
 		trainer.setMaxIterations(4);
 		trainer.stoppingCondition().minAccuracy = 1e-8;

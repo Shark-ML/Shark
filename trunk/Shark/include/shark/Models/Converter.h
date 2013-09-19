@@ -225,7 +225,14 @@ public:
 	}
 	
 	void eval(InputType const & pattern, OutputType& output)const{
-		output = arg_max(m_decisionFunction(pattern));
+		typename Model::OutputType modelResult;
+		m_decisionFunction.eval(pattern,modelResult);
+		if(modelResult.size()== 1){
+			output = modelResult(0) > 0.0;
+		}
+		else{
+			output = arg_max(modelResult);
+		}
 	}
 private:
 	Model m_decisionFunction;

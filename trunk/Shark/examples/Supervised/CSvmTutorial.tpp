@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 	GaussianRbfKernel<> kernel(gamma); // Gaussian kernel
 	//###end<kernel>
 	//###begin<model>
-	KernelExpansion<RealVector> ke(&kernel, bias); // (affine) linear function in kernel-induced feature space
+	KernelClassifier<RealVector> ke; // (affine) linear function in kernel-induced feature space
 	//###end<model>
 	
 	// generate dataset
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	//###end<problem>
 	// define the machine
 	//###begin<trainer>
-	CSvmTrainer<RealVector> trainer(&kernel, C);
+	CSvmTrainer<RealVector> trainer(&kernel, C, bias);
 	//###end<trainer>
 	
 //	// ADDITIONAL/ADVANCED SVM SOLVER OPTIONS:
@@ -63,8 +63,8 @@ int main(int argc, char** argv)
 
 	// evaluate
 	//###begin<eval>
-	ZeroOneLoss<unsigned int, RealVector> loss; // 0-1 loss
-	Data<RealVector> output = ke(training.inputs()); // evaluate on training set
+	ZeroOneLoss<unsigned int> loss; // 0-1 loss
+	Data<unsigned int> output = ke(training.inputs()); // evaluate on training set
 	double train_error = loss.eval(training.labels(), output);
 	cout << "training error:\t" <<  train_error << endl;
 	output = ke(test.inputs()); // evaluate on test set

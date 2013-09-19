@@ -9,9 +9,10 @@ using namespace shark;
 using namespace std;
 
 BOOST_AUTO_TEST_CASE( KERNEL_MEAN_CLASSIFIER ) {
-	KernelMeanClassifier<RealVector> trainer;
+	
 	DenseLinearKernel kernel;
-	KernelExpansion<RealVector> model(&kernel,true);
+	KernelMeanClassifier<RealVector> trainer(&kernel);
+	KernelClassifier<RealVector> model;
 
 	std::vector<RealVector> input(6,RealVector(2));
 	input[0](0)=1;
@@ -39,7 +40,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_MEAN_CLASSIFIER ) {
 	trainer.train(model, dataset);
 
 	for(size_t i = 0; i != 6; ++i){
-		RealVector result = model(input[i]);
+		RealVector result = model.decisionFunction()(input[i]);
 		BOOST_CHECK_EQUAL(result.size(),1u);
 		unsigned int label = result(0)>0;
 		BOOST_CHECK_EQUAL(target[i],label);

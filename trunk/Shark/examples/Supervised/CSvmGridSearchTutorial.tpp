@@ -23,16 +23,18 @@ int main()
 	// SVM setup
 	//###begin<setup>
 	GaussianRbfKernel<> kernel(0.5, true); //unconstrained?
-	KernelExpansion<RealVector> svm(true); //use offset?
-	CSvmTrainer<RealVector> trainer(&kernel, 1.0, true); //unconstrained?
+	KernelClassifier<RealVector> svm;
+	bool offset = true;
+	bool unconstrained = true;
+	CSvmTrainer<RealVector> trainer(&kernel, 1.0, offset,unconstrained); 
 	//###end<setup>
 	
 	// cross-validation error
 	//###begin<cv_error>
 	const unsigned int N= 5;  // number of folds
-	ZeroOneLoss<unsigned int, RealVector> loss;
+	ZeroOneLoss<unsigned int> loss;
 	CVFolds<ClassificationDataset> folds = createCVSameSizeBalanced(dataTrain, N);
-	CrossValidationError<KernelExpansion<RealVector>, unsigned int> cvError(
+	CrossValidationError<KernelClassifier<RealVector>, unsigned int> cvError(
 		folds, &trainer, &svm, &trainer, &loss
 	);
 	//###end<cv_error>
@@ -69,7 +71,7 @@ int main()
 	cout << "gamma =\t" << kernel.gamma() << endl;
 
 	// evaluate
-	Data<RealVector> output = svm(dataTrain.inputs());
+	Data<unsigned int> output = svm(dataTrain.inputs());
 	double train_error = loss.eval(dataTrain.labels(), output);
 	cout << "training error:\t" << train_error << endl;
 	output = svm(dataTest.inputs());

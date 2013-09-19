@@ -75,18 +75,18 @@ namespace shark {
 /// Williams. Accordingly, \f$ C = 1/\sigma_n^2 \f$.
 
 template <class InputType>
-class RegularizationNetworkTrainer : public AbstractSvmTrainer<InputType, RealVector>
+class RegularizationNetworkTrainer : public AbstractSvmTrainer<InputType, RealVector,KernelExpansion<InputType> >
 {
 public:
 	typedef AbstractModel<InputType, RealVector> ModelType;
 	typedef AbstractKernelFunction<InputType> KernelType;
-	typedef AbstractSvmTrainer<InputType, RealVector> base_type;
+	typedef AbstractSvmTrainer<InputType, RealVector, KernelExpansion<InputType> > base_type;
 
 	/// \param kernel Kernel
 	/// \param betaInv Inverse precision, equal to assumed noise variance, equal to inverse regularization parameter C 
 	/// \param unconstrained Indicates exponential encoding of the regularization parameter 
 	RegularizationNetworkTrainer(KernelType* kernel, double betaInv, bool unconstrained = false)
-	: base_type(kernel, 1.0 / betaInv, unconstrained)
+	: base_type(kernel, 1.0 / betaInv, false, unconstrained)
 	{ }
 
 	/// \brief From INameable: return the class name.
@@ -109,18 +109,14 @@ public:
 
 	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, RealVector>& dataset)
 	{
+		svm.setStructure(base_type::m_kernel,dataset.inputs(),false);
+		
 		// Setup the kernel matrix
-		svm.setKernel(base_type::m_kernel);
-		svm.setBasis(dataset.inputs());
-
-		SHARK_CHECK(! svm.hasOffset(), "[RegularizationNetworkTrainer::train] training of models with offset is not supported");
-		SHARK_CHECK(svm.outputSize() == 1, "[RegularizationNetworkTrainer::train] wrong number of outputs in the kernel expansion");
-
 		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), noiseVariance());
 		RealVector v = column(createBatch<RealVector>(dataset.labels().elements()),0);
 		//~ blas::approxSolveSymmSystemInPlace(M,v); //try this later instad the below
 		blas::solveSymmSystemInPlace<blas::SolveAXB>(M,v);
-		svm.setParameterVector(v);
+		column(svm.alpha(),0) = v;
 	}
 };
 

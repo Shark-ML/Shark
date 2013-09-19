@@ -80,9 +80,9 @@ protected:
 public:
 
 	/// Constructor
-	MissingFeatureSvmTrainer(KernelType* kernel, double C, bool unconstrained = false)
+	MissingFeatureSvmTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false)
 	:
-		base_type(kernel, C, unconstrained),
+		base_type(kernel, C, offset, unconstrained),
 		m_maxIterations(4u)
 	{ }
 
@@ -93,11 +93,9 @@ public:
 	void train(MissingFeaturesKernelExpansion<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
 	{
 		// Check prerequisites
-		SHARK_CHECK(svm.outputSize() == 1, "[MissingFeatureSvmTrainer::train] wrong number of outputs in the kernel expansion");
+		SHARK_CHECK(numberOfClasses(dataset) == 2, "[MissingFeatureSvmTrainer::train] Not a binary problem");
 
-		// Set kernel & basis
-		svm.setKernel(base_type::m_kernel);
-		svm.setBasis(dataset.inputs());
+		svm.setStructure(base_type::m_kernel,dataset.inputs(), this->m_trainOffset);
 		
 		if(svm.hasOffset())
 			trainWithOffset(svm,dataset);

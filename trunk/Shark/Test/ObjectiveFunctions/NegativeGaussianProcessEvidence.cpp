@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE( GAUUSIAN_PROCESS_EVIDENCE )
 	RegressionDataset testData = prob.generateDataset(tests);
 
 	// define the machine
-	KernelExpansion<RealVector> model(false);
+	KernelExpansion<RealVector> model;
 
 	// define the corresponding trainer
 	RegularizationNetworkTrainer<RealVector> trainer(&kernel, beta, unconstrained);

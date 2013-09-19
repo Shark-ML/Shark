@@ -18,8 +18,18 @@ BOOST_AUTO_TEST_CASE(TestMissingFeaturesKernelExpansion)
 	const unsigned int sampleSize = 5u;
 	LinearKernel<> kernel;
 
+	// Dataset
+	std::vector<RealVector> input(sampleSize,RealVector(featureSize));
+	std::vector<unsigned int> target(sampleSize);
+	input[0](0) =  0.0; input[0](1) =  0.0; input[0](2) =  1.0; input[0](3) =  5.0; target[0] = 0;
+	input[1](0) =  2.0; input[1](1) =  2.0; input[1](2) =  2.0; input[1](3) =  4.0; target[1] = 1;
+	input[2](0) = -1.0; input[2](1) = -8.0; input[2](2) =  3.0; input[2](3) =  3.0; target[2] = 0;
+	input[3](0) = -1.0; input[3](1) = -1.0; input[3](2) =  4.0; input[3](3) =  2.0; target[3] = 0;
+	input[4](0) =  3.0; input[4](1) =  3.0; input[4](2) =  5.0; input[4](3) =  1.0; target[4] = 1;
+	Data<RealVector> basis  = createDataFromRange(input);
+	
 	// The class under test
-	MissingFeaturesKernelExpansion<RealVector> ke(&kernel, false);
+	MissingFeaturesKernelExpansion<RealVector> ke(&kernel, basis,false);
 
 	// Scaling coefficients
 	RealVector scalingCoefficients(sampleSize);
@@ -30,19 +40,6 @@ BOOST_AUTO_TEST_CASE(TestMissingFeaturesKernelExpansion)
 	scalingCoefficients(4) = 0.5;
 	ke.setScalingCoefficients(scalingCoefficients);
 	
-	std::cout<<"a"<<std::endl;
-
-	// Dataset
-	std::vector<RealVector> input(sampleSize,RealVector(featureSize));
-	std::vector<unsigned int> target(sampleSize);
-	input[0](0) =  0.0; input[0](1) =  0.0; input[0](2) =  1.0; input[0](3) =  5.0; target[0] = 0;
-	input[1](0) =  2.0; input[1](1) =  2.0; input[1](2) =  2.0; input[1](3) =  4.0; target[1] = 1;
-	input[2](0) = -1.0; input[2](1) = -8.0; input[2](2) =  3.0; input[2](3) =  3.0; target[2] = 0;
-	input[3](0) = -1.0; input[3](1) = -1.0; input[3](2) =  4.0; input[3](3) =  2.0; target[3] = 0;
-	input[4](0) =  3.0; input[4](1) =  3.0; input[4](2) =  5.0; input[4](3) =  1.0; target[4] = 1;
-	Data<RealVector> basis  = createDataFromRange(input);
-	ke.setBasis(basis);
-	std::cout<<"b"<<std::endl;
 	// Alphas
 	RealVector alpha(sampleSize);
 	alpha(0) = 1.0;
@@ -51,9 +48,8 @@ BOOST_AUTO_TEST_CASE(TestMissingFeaturesKernelExpansion)
 	alpha(3) = 0.4;
 	alpha(4) = 0.5;
 	ke.setParameterVector(alpha);
-
 	ke.setClassifierNorm(10.0);
-	std::cout<<"c"<<std::endl;
+	
 	// Do an evaluation and then verify
 	RealVector pattern(featureSize);
 	pattern(0) = 1.0;

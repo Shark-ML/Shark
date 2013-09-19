@@ -84,18 +84,7 @@ class McSvmLLWTrainer : public AbstractSvmTrainer<InputType, unsigned int>
 {
 public:
 
-	/// \brief Convenience typedefs:
-	/// this and many of the below typedefs build on the class template type CacheType.
-	/// Simply changing that one template parameter CacheType thus allows to flexibly
-	/// switch between using float or double as type for caching the kernel values.
-	/// The default is float, offering sufficient accuracy in the vast majority
-	/// of cases, at a memory cost of only four bytes. However, the template
-	/// parameter makes it easy to use double instead, (e.g., in case high
-	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
-	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
-	typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
 
 	typedef AbstractModel<InputType, RealVector> ModelType;
 	typedef AbstractKernelFunction<InputType> KernelType;
@@ -113,58 +102,49 @@ public:
 	std::string name() const
 	{ return "McSvmLLWTrainer"; }
 
-	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
+	void train(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
 	{
 		std::size_t ic = dataset.numberOfElements();
 		unsigned int classes = numberOfClasses(dataset);
-		// the following test is "<=" rather than "=" to account for the rare case that one fold doesn't contain all classes due to sample scarcity
-		SHARK_CHECK(classes <= svm.outputSize(), "[McSvmLLWTrainer::train] invalid number of outputs in the kernel expansion");
-		svm.setKernel(base_type::m_kernel);
-		svm.setBasis(dataset.inputs());
-		classes = svm.outputSize();
 
 		RealMatrix linear(ic, classes-1,1.0);
 		UIntVector rho(classes-1);
-		{
-			for (unsigned int p=0; p<classes-1; p++) 
-				rho(p) = p;
-		}
+		for (unsigned int p=0; p<classes-1; p++) 
+			rho(p) = p;
+		
 		QpSparseArray<QpFloatType> nu(classes * (classes-1), classes, classes*(classes-1));
+		for (unsigned int r=0, y=0; y<classes; y++)
 		{
-			unsigned int y, p, pp, r;
-			for (r=0, y=0; y<classes; y++)
+			for (unsigned int p=0, pp=0; p<classes-1; p++, pp++, r++)
 			{
-				for (p=0, pp=0; p<classes-1; p++, pp++, r++)
-				{
-					if (pp == y) pp++;
-					nu.add(r, pp, (QpFloatType)-1.0);
-				}
+				if (pp == y) pp++;
+				nu.add(r, pp, (QpFloatType)-1.0);
 			}
 		}
+		
 		QpSparseArray<QpFloatType> M(classes * (classes-1) * classes, classes-1, classes * (classes-1) * (classes-1));
+		QpFloatType mood = (QpFloatType)(-1.0 / (double)classes);
+		QpFloatType val = (QpFloatType)1.0 + mood;
+		for (unsigned int r=0, yv=0; yv<classes; yv++)
 		{
-			unsigned int r;
-			unsigned int yv, pv, ppv;
-			unsigned int yw, pw;
-			QpFloatType mood = (QpFloatType)(-1.0 / (double)classes);
-			QpFloatType val = (QpFloatType)1.0 + mood;
-			for (r=0, yv=0; yv<classes; yv++)
+			for (unsigned int pv=0, ppv=0; pv<classes-1; pv++, ppv++)
 			{
-				for (pv=0, ppv=0; pv<classes-1; pv++, ppv++)
+				if (ppv == yv) ppv++;
+				for (unsigned int yw=0; yw<classes; yw++, r++)
 				{
-					if (ppv == yv) ppv++;
-					for (yw=0; yw<classes; yw++, r++)
+					M.setDefaultValue(r, mood);
+					if (ppv != yw)
 					{
-						M.setDefaultValue(r, mood);
-						if (ppv != yw)
-						{
-							pw = ppv - (ppv > yw ? 1 : 0);
-							M.add(r, pw, val);
-						}
+						unsigned int pw = ppv - (ppv > yw ? 1 : 0);
+						M.add(r, pw, val);
 					}
 				}
 			}
 		}
+		
+		typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
+		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
+		typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
 		
 		// solve the problem
 		RealMatrix alpha(ic,classes-1);
@@ -176,7 +156,7 @@ public:
 			QpMcBoxDecomp< PrecomputedMatrixType > problem(matrix, M, dataset.labels(), linear, this->C());
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			problem.setShrinking(base_type::m_shrinking);
-			if(svm.hasOffset()){
+			if(this->m_trainOffset){
 				BiasSolver<  PrecomputedMatrixType > biasSolver(&problem);
 				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
 			}
@@ -192,7 +172,7 @@ public:
 			QpMcBoxDecomp< CachedMatrixType> problem(matrix, M, dataset.labels(), linear, this->C());
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			problem.setShrinking(base_type::m_shrinking);
-			if(svm.hasOffset()){
+			if(this->m_trainOffset){
 				BiasSolver<CachedMatrixType> biasSolver(&problem);
 				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
 			}
@@ -202,6 +182,8 @@ public:
 			}
 			alpha = problem.solution();
 		}
+		
+		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
 
 		// write the solution into the model
 		for (std::size_t i=0; i<ic; i++)
@@ -213,13 +195,15 @@ public:
 				unsigned int r = (classes-1) * y;
 				for (std::size_t p=0; p<classes-1; p++, r++) 
 					sum += nu(r, c) * alpha(i,p);
-				svm.alpha(i,c) = sum;
+				svm.decisionFunction().alpha(i,c) = sum;
 			}
 		}
-		if (svm.hasOffset()) svm.offset() = bias;
+		if (this->m_trainOffset) 
+			svm.decisionFunction().offset() = bias;
 
 		base_type::m_accessCount = km.getAccessCount();
-		if (base_type::sparsify()) svm.sparsify();
+		if (this->sparsify()) 
+			svm.decisionFunction().sparsify();
 	}
 };
 
@@ -241,21 +225,7 @@ public:
 	{
 		std::size_t dim = inputDimension(dataset);
 		std::size_t classes = numberOfClasses(dataset);
-/*
-		CompressedRealMatrix w(classes, dim);
-		std::vector<CompressedRealMatrixRow> w_s;
-		for (std::size_t c=0; c<classes; c++) w_s.push_back(CompressedRealMatrixRow(w, c));
-		typedef McPegasos<CompressedRealVector> PegasosType;
-		PegasosType::solve(
-				dataset,
-				PegasosType::emAbsolute,
-				PegasosType::elDiscriminativeSum,
-				true,
-				C(),
-				w_s,
-				std::min((std::size_t)1000, dataset.numberOfElements()),
-				accuracy());
-*/
+
 		QpMcLinearLLW<InputType> solver(dataset, dim, classes);
 		RealMatrix w = solver.solve(this->C(), this->stoppingCondition(), &this->solutionProperties(), this->verbosity() > 0);
 		model.decisionFunction().setStructure(w);

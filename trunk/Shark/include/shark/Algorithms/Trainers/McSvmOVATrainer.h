@@ -67,19 +67,7 @@ template <class InputType, class CacheType = float>
 class McSvmOVATrainer : public AbstractSvmTrainer<InputType, unsigned int>
 {
 public:
-
-	/// \brief Convenience typedefs:
-	/// this and many of the below typedefs build on the class template type CacheType.
-	/// Simply changing that one template parameter CacheType thus allows to flexibly
-	/// switch between using float or double as type for caching the kernel values.
-	/// The default is float, offering sufficient accuracy in the vast majority
-	/// of cases, at a memory cost of only four bytes. However, the template
-	/// parameter makes it easy to use double instead, (e.g., in case high
-	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 
 	typedef AbstractModel<InputType, RealVector> ModelType;
 	typedef AbstractKernelFunction<InputType> KernelType;
@@ -88,9 +76,10 @@ public:
 	//! Constructor
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
+	//! \param offset  whether to train offset/bias parameter
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	McSvmOVATrainer(KernelType* kernel, double C, bool unconstrained = false)
-	: base_type(kernel, C, unconstrained)
+	McSvmOVATrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false)
+	: base_type(kernel, C, offset, unconstrained)
 	{ }
 
 	/// \brief From INameable: return the class name.
@@ -98,32 +87,25 @@ public:
 	{ return "McSvmOVATrainer"; }
 
 	/// \brief Train a kernelized SVM.
-	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
+	void train(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
 	{
-		std::size_t c, cc = numberOfClasses(dataset);
-		// the following test is "<=" rather than "=" to account for the rare case that one fold doesn't contain all classes due to sample scarcity
-		SHARK_CHECK(cc <= svm.outputSize(), "[McSvmOVATrainer::train] invalid number of outputs in the kernel expansion");
-		cc = svm.outputSize();
-
-		svm.setKernel(base_type::m_kernel);
-		svm.setBasis(dataset.inputs());
-
+		std::size_t classes = numberOfClasses(dataset);
+		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
+		
 		base_type::m_solutionproperties.type = QpNone;
 		base_type::m_solutionproperties.accuracy = 0.0;
 		base_type::m_solutionproperties.iterations = 0;
 		base_type::m_solutionproperties.value = 0.0;
 		base_type::m_solutionproperties.seconds = 0.0;
-		for (c=0; c<cc; c++)
+		for (std::size_t c=0; c<classes; c++)
 		{
 			LabeledData<InputType, unsigned int> bindata = oneVersusRestProblem(dataset, c);
-
-			KernelExpansion<InputType> binsvm(svm.hasOffset(), 1);
-			binsvm.setBasis(dataset.inputs());
+			KernelClassifier<InputType> binsvm;
 // TODO: maybe build the quadratic programs directly,
 //       in order to profit from cached and
 //       in particular from precomputed kernel
 //       entries!
-			CSvmTrainer<InputType, QpFloatType> bintrainer(base_type::m_kernel, this->C());
+			CSvmTrainer<InputType, QpFloatType> bintrainer(base_type::m_kernel, this->C(),this->m_trainOffset);
 			bintrainer.setCacheSize( base_type::m_cacheSize );
 			bintrainer.sparsify() = false;
 			bintrainer.stoppingCondition() = base_type::stoppingCondition();
@@ -135,12 +117,14 @@ public:
 			base_type::m_solutionproperties.iterations += bintrainer.solutionProperties().iterations;
 			base_type::m_solutionproperties.seconds += bintrainer.solutionProperties().seconds;
 			base_type::m_solutionproperties.accuracy = std::max(base_type::solutionProperties().accuracy, bintrainer.solutionProperties().accuracy);
-			RealMatrixColumn(svm.alpha(), c) = RealMatrixColumn(binsvm.alpha(), 0);
-			if (svm.hasOffset()) svm.offset(c) = binsvm.offset(0);
+			column(svm.decisionFunction().alpha(), c) = column(binsvm.decisionFunction().alpha(), 0);
+			if (this->m_trainOffset)
+				svm.decisionFunction().offset(c) = binsvm.decisionFunction().offset(0);
 			base_type::m_accessCount += bintrainer.accessCount();
 		}
 
-		if (base_type::sparsify()) svm.sparsify();
+		if (base_type::sparsify()) 
+			svm.decisionFunction().sparsify();
 	}
 };
 
@@ -178,16 +162,6 @@ public:
 			base_type::m_solutionproperties.iterations += prop.iterations;
 			base_type::m_solutionproperties.seconds += prop.seconds;
 			base_type::m_solutionproperties.accuracy = std::max(base_type::solutionProperties().accuracy, prop.accuracy);
-/*
-			CompressedRealMatrix w(classes, dim);
-			CompressedRealMatrixRow row(w, c);
-			Pegasos<CompressedRealVector>::solve(
-					bindata,
-					C(),
-					row,
-					std::min((std::size_t)1000, ell),
-					accuracy());
-*/
 		}
 		model.decisionFunction().setStructure(w);
 	}

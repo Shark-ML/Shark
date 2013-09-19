@@ -56,10 +56,9 @@ int main(int argc, char** argv)
 	unsigned int ell = 100;     // number of training data point
 	double nu = 0.5;            // probability mass to be covered, must fulfill 0 < mu < 1
 	double gamma = 0.5;         // kernel bandwidth parameter
-	bool bias = true;           // use bias/offset parameter
 
 	GaussianRbfKernel<> kernel(gamma); // Gaussian kernel
-	KernelExpansion<RealVector> ke(&kernel, bias); // (affine) linear function in kernel-induced feature space
+	KernelExpansion<RealVector> ke; // (affine) linear function in kernel-induced feature space
 
 	// generate artificial benchmark data
 	Gaussians problem;

@@ -56,7 +56,7 @@ namespace shark {
 ///
 /// This class provides two main member functions for computing the
 /// derivative of a C-SVM hypothesis w.r.t. its hyperparameters.
-/// The constructor takes a pointer to a KernelExpansion and an SvmTrainer,
+/// The constructor takes a pointer to a KernelClassifier and an SvmTrainer,
 /// in the assumption that the former was trained by the latter. It heavily
 /// accesses their members to calculate the derivative of the alpha and offset
 /// values w.r.t. the SVM hyperparameters, that is, the regularization
@@ -74,14 +74,14 @@ class CSvmDerivative : public ISerializable, public INameable
 {
 public:
 	typedef CacheType QpFloatType;
-	typedef KernelExpansion<InputType> KeType;
+	typedef KernelClassifier<InputType> KeType;
 	typedef AbstractKernelFunction<InputType> KernelType;
 	typedef CSvmTrainer<InputType, QpFloatType> TrainerType;
 
 protected:
 
 	// key external members through which main information is obtained
-	KeType* mep_ke;  ///< pointer to the KernelExpansion which has to have been been trained by the below SvmTrainer
+	KernelExpansion<InputType>* mep_ke;  ///< pointer to the KernelExpansion which has to have been been trained by the below SvmTrainer
 	TrainerType* mep_tr; ///< pointer to the SvmTrainer with which the above KernelExpansion has to have been trained
 	KernelType* mep_k; ///< convenience pointer to the underlying kernel function
 	RealMatrix& m_alpha; ///< convenience reference to the alpha values of the KernelExpansion
@@ -118,20 +118,21 @@ public:
 	/// \param ke pointer to the KernelExpansion which has to have been been trained by the below SvmTrainer
 	/// \param trainer pointer to the SvmTrainer with which the above KernelExpansion has to have been trained
 	CSvmDerivative( KeType* ke, TrainerType* trainer )
-	: mep_ke( ke ),
+	: mep_ke( &ke->decisionFunction() ),
 	  mep_tr( trainer ),
 	  mep_k( trainer->kernel() ),
-	  m_alpha( ke->alpha() ),
-	  m_basis( ke->basis() ),
+	  m_alpha( mep_ke->alpha() ),
+	  m_basis( mep_ke->basis() ),
 	  m_db_dParams_from_solver( trainer->get_db_dParams() ),
 	  m_C ( trainer->C() ),
 	  m_unconstrained( trainer->isUnconstrained() ),
 	  m_nkp( trainer->kernel()->numberOfParameters() ),
 	  m_nhp( trainer->kernel()->numberOfParameters()+1 )
 	{
-		SHARK_CHECK( ke->kernel() == trainer->kernel(), "[CSvmDerivative::CSvmDerivative] KernelExpansion and SvmTrainer must use the same KernelFunction.");
-		SHARK_CHECK( ke != NULL, "[CSvmDerivative::CSvmDerivative] KernelExpansion cannot be NULL.");
-		SHARK_CHECK( ke->outputSize() == 1, "[CSvmDerivative::CSvmDerivative] only defined for binary SVMs.");
+		SHARK_CHECK( mep_ke->kernel() == trainer->kernel(), "[CSvmDerivative::CSvmDerivative] KernelExpansion and SvmTrainer must use the same KernelFunction.");
+		SHARK_CHECK( mep_ke != NULL, "[CSvmDerivative::CSvmDerivative] KernelExpansion cannot be NULL.");
+		SHARK_CHECK( mep_ke->outputSize() == 1, "[CSvmDerivative::CSvmDerivative] only defined for binary SVMs.");
+		SHARK_CHECK( mep_ke->hasOffset() == 1, "[CSvmDerivative::CSvmDerivative] only defined for SVMs with offset.");
 		SHARK_CHECK( m_alpha.size2() == 1, "[CSvmDerivative::CSvmDerivative] this class is only defined for binary SVMs.");
 		prepareCSvmParameterDerivative(); //main
 	}

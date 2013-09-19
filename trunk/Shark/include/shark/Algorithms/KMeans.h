@@ -153,7 +153,8 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 	}
 	
 	//copy result in the expansion
-	KernelExpansion<InputType> expansion(&kernel,dataset,true,k);
+	KernelExpansion<InputType> expansion;
+	expansion.setStructure(&kernel,dataset,true,k);
 	expansion.offset() = -ckck;
 	zero(expansion.alpha());
 	for(std::size_t i = 0; i != ell; ++i){

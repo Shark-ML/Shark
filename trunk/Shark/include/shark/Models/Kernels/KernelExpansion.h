@@ -32,7 +32,7 @@
 #ifndef SHARK_MODELS_KERNELEXPANSION_H
 #define SHARK_MODELS_KERNELEXPANSION_H
 
-#include <shark/Models/AbstractModel.h>
+#include <shark/Models/Converter.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/LinAlg/BLAS/Initialize.h>
 #include <shark/Data/Dataset.h>
@@ -69,54 +69,26 @@ public:
 	// ////////////      CONSTRUCTORS       /////////////////////
 	// //////////////////////////////////////////////////////////
 
-	KernelExpansion(){}
+	KernelExpansion():mep_kernel(NULL),m_outputs(0){}
 		
-	KernelExpansion(bool offset, unsigned int outputs = 1)
-	: mep_kernel(NULL){
-		setStructure(offset,outputs);
-	}
-
-	KernelExpansion(Data<InputType> const& basis, bool offset, unsigned int outputs = 1)
-	: mep_kernel(NULL){
-		setStructure(basis,offset,outputs);
-	}
-
-	KernelExpansion(KernelType* kernel, bool offset, unsigned int outputs = 1){
-		setStructure(kernel,offset,outputs);
-	}
-
-	KernelExpansion(KernelType* kernel, Data<InputType> const& basis, bool offset, unsigned int outputs = 1){
-		setStructure(kernel, basis, offset,outputs);
-	}
-	
-	
-	void setStructure(bool offset, unsigned int outputs = 1){
-		m_offset = offset;
-		m_outputs = outputs;
-		m_b.resize(offset ? outputs : 0);
-		zero(m_b);
-		m_alpha.resize(m_basis.numberOfElements(), m_outputs);
-		zero(m_alpha);
-	}
-	
-	void setStructure(Data<InputType> const& basis,bool offset, unsigned int outputs = 1){
-		m_offset = offset;
-		m_outputs = outputs;
-		m_b.resize(offset ? outputs : 0);
-		zero(m_b);
-		setBasis(basis);
-	}
-	
-	void setStructure(KernelType* kernel,bool offset, unsigned int outputs = 1){
+	KernelExpansion(KernelType* kernel):mep_kernel(kernel),m_outputs(0){
 		SHARK_ASSERT(kernel != NULL);
-		mep_kernel= kernel;
-		setStructure(offset,outputs);
+	}
+		
+	KernelExpansion(KernelType* kernel, Data<InputType> const& basis,bool offset, unsigned int outputs = 1){
+		SHARK_ASSERT(kernel != NULL);
+		setStructure(kernel, basis,offset,outputs);
 	}
 	
 	void setStructure(KernelType* kernel, Data<InputType> const& basis,bool offset, unsigned int outputs = 1){
 		SHARK_ASSERT(kernel != NULL);
 		mep_kernel = kernel;
-		setStructure(basis,offset,outputs);
+		if(offset)
+			m_b.resize(outputs);
+		m_outputs = outputs;
+		m_basis = basis;
+		m_alpha.resize(basis.numberOfElements(), m_outputs);
+		zero(m_alpha);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -147,7 +119,7 @@ public:
 	// //////////////////////////////////////////////////////////
 
 	bool hasOffset() const{
-		return m_offset;
+		return m_b.size() != 0;
 	}
 	RealMatrix& alpha(){
 		return m_alpha;
@@ -161,31 +133,21 @@ public:
 	double const& alpha(std::size_t example, std::size_t cls) const{
 		return m_alpha(example, cls);
 	}
-	void setAlpha(const RealMatrix& alpha) const{
-		SHARK_CHECK(alpha.size1() == m_alpha.size1() && alpha.size2() == m_alpha.size2(),
-				"[KernelExpansion::setAlpha] invalid matrix size");
-		m_alpha = alpha;
-	}
 	RealVector& offset(){
-		SHARK_CHECK(m_offset, "[KernelExpansion::offset] invalid call for object without offset term");
+		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b;
 	}
 	RealVector const& offset() const{
-		SHARK_CHECK(m_offset, "[KernelExpansion::offset] invalid call for object without offset term");
+		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b;
 	}
 	double& offset(unsigned int cls){
-		SHARK_CHECK(m_offset, "[KernelExpansion::offset] invalid call for object without offset term");
+		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b(cls);
 	}
 	double const& offset(unsigned int cls) const{
-		SHARK_CHECK(m_offset, "[KernelExpansion::offset] invalid call for object without offset term");
+		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b(cls);
-	}
-	void setOffset(const RealVector& b) const{
-		SHARK_CHECK(m_offset, "[KernelExpansion::setOffset] invalid call for object without offset term");
-		SHARK_CHECK(b.size() == m_b.size(), "[KernelExpansion::setOffset] invalid vector size");
-		m_b = b;
 	}
 
 	// //////////////////////////////////////////////////////////
@@ -195,12 +157,6 @@ public:
 
 	Data<InputType> const& basis() const {
 		return m_basis;
-	}
-
-	void setBasis(Data<InputType> const& basis){
-		m_basis = basis;
-		m_alpha.resize(basis.numberOfElements(), m_outputs);
-		zero(m_alpha);
 	}
 
 	/// The sparsify method removes non-support-vectors from
@@ -230,7 +186,7 @@ public:
 
 	RealVector parameterVector() const{
 		RealVector ret(numberOfParameters());
-		if (m_offset){
+		if (hasOffset()){
 			init(ret) << toVector(m_alpha), m_b;
 		}
 		else{
@@ -242,14 +198,14 @@ public:
 	void setParameterVector(RealVector const& newParameters){
 		SHARK_CHECK(newParameters.size() == numberOfParameters(), "[KernelExpansion::setParameterVector] invalid size of the parameter vector");
 
-		if (m_offset)
+		if (hasOffset())
 			init(newParameters) >> toVector(m_alpha), m_b;
 		else
 			init(newParameters) >> toVector(m_alpha);
 	}
 
 	std::size_t numberOfParameters() const{
-		if (m_offset) 
+		if (hasOffset()) 
 			return m_alpha.size1() * m_alpha.size2() + m_b.size();
 		else 
 			return m_alpha.size1() * m_alpha.size2();
@@ -269,7 +225,7 @@ public:
 		SHARK_ASSERT(mep_kernel != NULL);
 
 		output.resize(numPatterns,outputSize());
-		if (m_offset)
+		if (hasOffset())
 			output = repeat(m_b,numPatterns);
 		else
 			output.clear();
@@ -303,7 +259,6 @@ public:
 
 		archive >> m_alpha;
 		archive >> m_b;
-		archive >> m_offset;
 		archive >> m_outputs;
 		archive >> m_basis;
 		archive >> (*mep_kernel);
@@ -315,7 +270,6 @@ public:
 
 		archive << m_alpha;
 		archive << m_b;
-		archive << m_offset;
 		archive << m_outputs;
 		archive << m_basis;
 		archive << const_cast<KernelType const&>(*mep_kernel);//prevent compilation warning
@@ -332,9 +286,6 @@ protected:
 	/// "support" basis vectors
 	Data<InputType> m_basis;
 	
-	/// is the bias/offset adaptive?
-	bool m_offset;
-	
 	/// dimension of output
 	unsigned int m_outputs;
 
@@ -343,6 +294,20 @@ protected:
 
 	/// offset or bias term
 	RealVector m_b;
+};
+
+///
+/// \brief Linear classifier in a kernel feature space.
+///
+/// This model is a simple wrapper for the KernelExpansion calculating the arg max
+/// of the outputs of the model. This is the model used by kernel classifier models like SVMs.
+///
+template<class InputType>
+struct KernelClassifier: public ArgMaxConverter<KernelExpansion<InputType> >{
+	KernelClassifier(){}
+		
+	std::string name() const
+	{ return "KernelClassifier"; }
 };
 
 

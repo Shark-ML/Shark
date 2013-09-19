@@ -98,9 +98,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 		indices[i] = (i+num_folds-1) % num_folds;
 	}
 	CVFolds<ClassificationDataset> cv_folds = createCVIndexed( training_dataset, num_folds, indices );
-	bool bias = true;           // use bias/offset parameter
 	GaussianRbfKernel<> kernel(0.5);
-	KernelExpansion<RealVector> ke(&kernel, bias);
 	QpStoppingCondition stop(1e-10);
 	SvmLogisticInterpretation<> mlms_score( cv_folds, &kernel, false, &stop );
 
@@ -158,9 +156,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 		indices[i] = (i+num_folds-1) % num_folds;
 	}
 	CVFolds<ClassificationDataset> cv_folds = createCVIndexed( training_dataset, num_folds, indices );
-	bool bias = true;           // use bias/offset parameter
 	GaussianRbfKernel<> kernel(0.5);
-	KernelExpansion<RealVector> ke(&kernel, bias);
 	QpStoppingCondition stop(1e-10);
 	SvmLogisticInterpretation<> mlms_score( cv_folds, &kernel, false, &stop );
 
@@ -264,11 +260,11 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Pami_Toy )
 	}
 
 	//construct and evaluate the final machine
-	KernelExpansion<RealVector> svm( &kernel, true );
-	CSvmTrainer<RealVector> trainer( &kernel, exp(rprop.solution().point(0)) );
+	KernelClassifier<RealVector> svm;
+	CSvmTrainer<RealVector> trainer( &kernel, exp(rprop.solution().point(0)), true );
 	trainer.train( svm, train );
-	ZeroOneLoss<unsigned int, RealVector> loss; // 0-1 loss
-	Data<RealVector> output = svm( train.inputs() ); // evaluate on training set
+	ZeroOneLoss<unsigned int> loss; // 0-1 loss
+	Data<unsigned int> output = svm( train.inputs() ); // evaluate on training set
 	double train_error = loss.eval(train.labels(), output);
 	std::cout << "train error " << train_error << std::endl;
 	output = svm( test.inputs() ); // evaluate on test set

@@ -86,23 +86,7 @@ class McSvmATSTrainer : public AbstractSvmTrainer<InputType, unsigned int>
 {
 public:
 
-	/// \brief Convenience typedefs:
-	/// this and many of the below typedefs build on the class template type CacheType.
-	/// Simply changing that one template parameter CacheType thus allows to flexibly
-	/// switch between using float or double as type for caching the kernel values.
-	/// The default is float, offering sufficient accuracy in the vast majority
-	/// of cases, at a memory cost of only four bytes. However, the template
-	/// parameter makes it easy to use double instead, (e.g., in case high
-	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
-
-	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
-	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
-	typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
-
 	typedef AbstractModel<InputType, RealVector> ModelType;
 	typedef AbstractKernelFunction<InputType> KernelType;
 	typedef AbstractSvmTrainer<InputType, unsigned int> base_type;
@@ -119,74 +103,56 @@ public:
 	std::string name() const
 	{ return "McSvmATSTrainer"; }
 
-	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
+	void train(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
 	{
-		std::size_t i, ic = dataset.numberOfElements();
-		unsigned int c, classes = numberOfClasses(dataset);
-		// the following test is "<=" rather than "=" to account for the rare case that one fold doesn't contain all classes due to sample scarcity
-		SHARK_CHECK(classes <= svm.outputSize(), "[McSvmATSTrainer::train] invalid number of outputs in the kernel expansion");
-		svm.setKernel(base_type::m_kernel);
-		svm.setBasis(dataset.inputs());
-		classes = svm.outputSize();
-		std::size_t e, a, p;
-		RealVector param = svm.parameterVector();
+		std::size_t ic = dataset.numberOfElements();
+		unsigned int classes = numberOfClasses(dataset);
 
 		// prepare the problem description
 		RealVector alpha(classes * ic,0.0);
 		RealVector bias(classes,0.0);
 
-		// TODO: initialize alpha (and bias) from the parameters
-// 		if (svm.hasOffset()) bias = RealVectorRange(param, Range(classes * ic, classes * ic + classes));
-
-		RealMatrix gamma(classes, classes);
-		{
-			unsigned int y, p;
-			for (y=0; y<classes; y++)
-			{
-				for (p=0; p<classes; p++) gamma(y, p) = 1.0;
-			}
-		}
+		RealMatrix gamma(classes, classes,1.0);
 		UIntVector rho(classes);
-		{
-			unsigned int p;
-			for (p=0; p<classes; p++) rho(p) = p;
-		}
+		for (unsigned int p=0; p<classes; p++) 
+			rho(p) = p;
+		
 		QpSparseArray<QpFloatType> nu(classes*classes, classes, classes*classes);
+		for (unsigned int r=0, y=0; y<classes; y++)
 		{
-			unsigned int y, p, r;
-			for (r=0, y=0; y<classes; y++)
+			for (unsigned int p=0; p<classes; p++, r++)
 			{
-				for (p=0; p<classes; p++, r++)
-				{
-					nu.add(r, p, (QpFloatType)((p == y) ? 1.0 : -1.0));
-				}
+				nu.add(r, p, (QpFloatType)((p == y) ? 1.0 : -1.0));
 			}
 		}
+		
 		QpSparseArray<QpFloatType> M(classes * classes * classes, classes, 2 * classes * classes * classes);
+		QpFloatType c_ne = (QpFloatType)(-1.0 / (double)classes);
+		QpFloatType c_eq = (QpFloatType)1.0 + c_ne;
+		for (unsigned int r=0, yv=0; yv<classes; yv++)
 		{
-			QpFloatType c_ne = (QpFloatType)(-1.0 / (double)classes);
-			QpFloatType c_eq = (QpFloatType)1.0 + c_ne;
-			for (unsigned int r=0, yv=0; yv<classes; yv++)
+			for (unsigned int pv=0; pv<classes; pv++)
 			{
-				for (unsigned int pv=0; pv<classes; pv++)
+				QpFloatType sign = QpFloatType((yv == pv) ? -1 : 1);//cast to keep MSVC happy...
+				for (unsigned int yw=0; yw<classes; yw++, r++)
 				{
-					QpFloatType sign = QpFloatType((yv == pv) ? -1 : 1);//cast to keep MSVC happy...
-					for (unsigned int yw=0; yw<classes; yw++, r++)
+					M.setDefaultValue(r, sign * c_ne);
+					if (yw == pv)
 					{
-						M.setDefaultValue(r, sign * c_ne);
-						if (yw == pv)
-						{
-							M.add(r, pv, -sign * c_eq);
-						}
-						else
-						{
-							M.add(r, pv, sign * c_eq);
-							M.add(r, yw, -sign * c_ne);
-						}
+						M.add(r, pv, -sign * c_eq);
+					}
+					else
+					{
+						M.add(r, pv, sign * c_eq);
+						M.add(r, yw, -sign * c_ne);
 					}
 				}
 			}
 		}
+		
+		typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
+		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
+		typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
 		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
 
 		// solve the problem
@@ -196,8 +162,8 @@ public:
 			QpMcDecomp< PrecomputedMatrixType > solver(matrix, gamma, rho, nu, M, true);
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			solver.setShrinking(base_type::m_shrinking);
-			if (base_type::m_s2do) solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
-			else solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
+			if (base_type::m_s2do) solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
+			else solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
 		}
 		else
 		{
@@ -205,117 +171,32 @@ public:
 			QpMcDecomp< CachedMatrixType > solver(matrix, gamma, rho, nu, M, true);
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			solver.setShrinking(base_type::m_shrinking);
-			if (base_type::m_s2do) solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
-			else solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (svm.hasOffset() ? &bias : NULL));
+			if (base_type::m_s2do) solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
+			else solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
 		}
+		
+		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
 
 		// write the solution into the model
-		for (e=0, a=0, i=0; i<ic; i++)
+		for (unsigned int a=0, i=0; i<ic; i++)
 		{
 			unsigned int y = dataset.element(i).label;
-			for (c=0; c<classes; c++, e++)
+			for (unsigned int c=0; c<classes; c++)
 			{
 				double sum = 0.0;
 				unsigned int r = classes * y;
-				for (p=0; p<classes; p++, r++) sum += nu(r, c) * alpha(a + p);
-				param(e) = sum;
+				for (unsigned int p=0; p<classes; p++, r++)
+					sum += nu(r, c) * alpha(a + p);
+				svm.decisionFunction().alpha(i,c) = sum;
 			}
 			a += classes;
 		}
-		if (svm.hasOffset()) RealVectorRange(param, Range(e, e + classes)) = bias;
-		svm.setParameterVector(param);
+		if (this->m_trainOffset) 
+			svm.decisionFunction().offset() = bias;
 
 		base_type::m_accessCount = km.getAccessCount();
-
-/*
-		// DEBUG VERSION FOR VALIDATION:
-		// VERY SLOW, BUT SURELY CORRECT!
-		{
-			std::size_t variables = classes * ic;
-			RealVector linear(variables);
-			RealVector lower(variables);
-			RealVector upper(variables);
-			std::vector<typename LabeledData<InputType, unsigned int>::const_element_iterator> data(dataset.numberOfElements());
-			{
-				size_t i=0;
-				typename LabeledData<InputType, unsigned int>::const_element_iterator it=dataset.elemBegin();
-				for (; i < ic; i++, ++it) data[i] = it;
-			}
-
-			// prepare the problem
-			for (size_t i=0, v=0; i<ic; i++)
-			{
-				unsigned int y_i = data[i]->label;
-				for (unsigned int c=0; c<classes; c++, v++)
-				{
-					if (c == y_i)
-					{
-						linear(v) = 1.0;
-						lower(v) = 0.0;
-						upper(v) = this->C();
-					}
-					else
-					{
-						linear(v) = -1.0;
-						lower(v) = -this->C();
-						upper(v) = 0.0;
-					}
-				}
-			}
-
-			// SMO loop
-			RealVector g = linear;
-			double c_ne = -1.0 / classes;
-			double c_eq = 1.0 + c_ne;
-			while (true)
-			{
-				// select working set
-				double violation = 0.0;
-				size_t var = 0;
-				for (size_t v=0; v<variables; v++)
-				{
-					if (-g(v) > violation && alpha(v) > lower(v))
-					{
-						violation = -g(v);
-						var = v;
-					}
-					else if (g(v) > violation && alpha(v) < upper(v))
-					{
-						violation = g(v);
-						var = v;
-					}
-				}
-				size_t i = var / classes;
-				size_t c = var % classes;
-
-				// check stopping criterion
-				if (violation < base_type::m_stoppingcondition.minAccuracy) break;
-
-				// compute i-th kernel matrix row (= column)
-				RealVector k(ic);
-				for (size_t j=0; j<ic; j++) k(j) = base_type::m_kernel->eval(data[i]->input, data[j]->input);
-
-				// compute step
-				double new_alpha = alpha(var) + g(var) / (c_eq * k(i));
-				if (new_alpha <= lower(var)) new_alpha = lower(var);
-				else if (new_alpha >= upper(var)) new_alpha = upper(var);
-				double mu = new_alpha - alpha(var);
-				alpha(var) = new_alpha;
-
-				// gradient update
-				for (size_t j=0, v=0; j<ic; j++)
-				{
-					double k_j = k(j);
-					for (unsigned int e=0; e<classes; e++, v++)
-					{
-						g(v) -= mu * (e == c ? c_eq : c_ne) * k_j;
-					}
-				}
-			}
-			svm.setParameterVector(alpha);
-		}
-*/
-		if (base_type::sparsify()) svm.sparsify();
+		if (this->sparsify()) 
+			svm.decisionFunction().sparsify();
 	}
 };
 
@@ -337,21 +218,7 @@ public:
 	{
 		std::size_t dim = inputDimension(dataset);
 		std::size_t classes = numberOfClasses(dataset);
-/*
-		CompressedRealMatrix w(classes, dim);
-		std::vector<CompressedRealMatrixRow> w_s;
-		for (std::size_t c=0; c<classes; c++) w_s.push_back(CompressedRealMatrixRow(w, c));
-		typedef McPegasos<CompressedRealVector> PegasosType;
-		PegasosType::solve(
-				dataset,
-				PegasosType::emAbsolute,
-				PegasosType::elTotalSum,
-				true,
-				C(),
-				w_s,
-				std::min((std::size_t)1000, dataset.numberOfElements()),
-				accuracy());
-*/
+
 		QpMcLinearATS<InputType> solver(dataset, dim, classes);
 		RealMatrix w = solver.solve(this->C(), this->stoppingCondition(), &this->solutionProperties(), this->verbosity() > 0);
 		model.decisionFunction().setStructure(w);
