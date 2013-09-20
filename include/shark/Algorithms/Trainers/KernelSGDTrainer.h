@@ -89,10 +89,6 @@ public:
 
 		RealMatrix& alpha = model.alpha();
 		RealVector& bias = model.offset();
-		if (m_offset)
-		{
-			throw SHARKEXCEPTION("[KernelSGDTrainer::train] training with offset is not implemented yet");
-		}
 
 		// pre-compute the kernel matrix (may change in the future)
 		// and create linear array of labels
@@ -120,8 +116,10 @@ public:
 		}
 
 		// SGD loop
-		double factor = 1.0;
-		std::size_t iterations = std::max(10 * ell, std::size_t(std::ceil(m_C * ell)));
+		double alphaScale = 1.0;
+		std::size_t iterations;
+		if (m_epochs == 0) iterations = std::max(10 * ell, std::size_t(std::ceil(m_C * ell)));
+		else iterations = m_epochs * ell;
 		for (std::size_t iter = 0; iter < iterations; iter++)
 		{
 			// active variable
@@ -132,20 +130,25 @@ public:
 
 			// compute prediction
 			RealVector f_b(classes, 0.0);
-			fast_prod(trans(alpha), row(K, b), f_b, false, factor);
-//			if (m_offset) f_b += bias;
+			fast_prod(trans(alpha), row(K, b), f_b, false, alphaScale);
+			if (m_offset) f_b += bias;
 
 			// stochastic gradient descent (SGD) step
 			RealVector derivative(classes, 0.0);
 			m_loss->evalDerivative(y[b], f_b, derivative);
-//			factor *= (1.0 - eta);
-			factor = (1.0 - 1.0 / (iter + 3.0));   // should be numerically more stable
-			row(alpha, b) -= (eta * m_C / factor) * derivative;
+//			alphaScale *= (1.0 - eta);
+			alphaScale = (1.0 - 1.0 / (iter + 3.0));   // should be numerically more stable
+			row(alpha, b) -= (eta * m_C / alphaScale) * derivative;
+			if (m_offset) bias -= eta * derivative;
 		}
 
-		alpha *= factor;
-//		offset *= factor;
+		alpha *= alphaScale;
 	}
+
+	std::size_t epochs() const
+	{ return m_epochs; }
+	void setEpochs(std::size_t value)
+	{ m_epochs = value; }
 
 	KernelType* kernel()
 	{ return m_kernel; }
@@ -192,6 +195,7 @@ protected:
 	double m_C;                               ///< regularization parameter
 	bool m_offset;                            ///< should the resulting model have an offset term?
 	bool m_unconstrained;                     ///< should C be stored as log(C) as a parameter?
+	std::size_t m_epochs;                     ///< number of training epochs (sweeps over the data), or 0 for default = max(10, C)
 };
 
 
