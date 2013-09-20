@@ -48,6 +48,30 @@ namespace shark {
 /// where i runs over training data, j over classes, and C is the
 /// regularization parameter.
 ///
+/// \par
+/// This implementation is an adaptation of the PEGASOS algorithm, see the paper
+/// <i>Shalev-Shwartz et al. "Pegasos: Primal estimated sub-gradient solver for SVM." Mathematical Programming 127.1 (2011): 3-30.</i><br/><br/>
+/// However, the (non-essential) projection step is dropped, and the
+/// algorithm is applied to a kernelized model. The resulting
+/// optimization scheme amounts to plain standard stochastic gradient
+/// descent (SGD) with update steps of the form
+/// \f[
+///     w_j \leftarrow (1 - 1/t) w_j + \frac{C}{t} \frac{\partial L(y_i, f(x_i))}{\partial w_j}
+/// \f]
+/// for random index i. The only notable trick borrowed from that paper
+/// is the representation of the weight vectors in the form
+/// \f[
+///     w_j = s \cdot \sum_i \alpha_{i,j} k(x_i, \cdot)
+/// \f]
+/// with a scalar factor s (called alphaScale in the code). This enables
+/// scaling with factor (1 - 1/t) in constant time.
+///
+/// \par
+/// NOTE: Being an SGD-based solver, this algorithm is relatively fast for
+/// differentiable loss functions such as the logistic loss (class CrossEntropy).
+/// It suffers from significantly slower convergence for non-differentiable
+/// losses, e.g., the hinge loss used in SVM training.
+///
 template <class InputType>
 class KernelSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >
 {
@@ -145,21 +169,33 @@ public:
 		alpha *= alphaScale;
 	}
 
+	/// Return the number of training epochs.
+	/// A value of 0 indicates that the default of max(10, C) should be used.
 	std::size_t epochs() const
 	{ return m_epochs; }
+
+	/// Set the number of training epochs.
+	/// A value of 0 indicates that the default of max(10, C) should be used.
 	void setEpochs(std::size_t value)
 	{ m_epochs = value; }
 
+	/// get the kernel function
 	KernelType* kernel()
 	{ return m_kernel; }
+	/// get the kernel function
 	const KernelType* kernel() const
 	{ return m_kernel; }
+	/// set the kernel function
 	void setKernel(KernelType* kernel)
 	{ m_kernel = kernel; }
 
+	/// check whether the parameter C is represented as log(C), thus,
+	/// in a form suitable for unconstrained optimization, in the
+	/// parameter vector
 	bool isUnconstrained() const
 	{ return m_unconstrained; }
 
+	/// check whether the model to be trained should include an offset term
 	bool trainOffset() const
 	{ return m_offset; }
 
