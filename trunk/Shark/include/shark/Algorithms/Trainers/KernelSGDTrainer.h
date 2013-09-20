@@ -96,7 +96,9 @@ public:
 	, m_C(C)
 	, m_offset(offset)
 	, m_unconstrained(unconstrained)
+	, m_epochs(0)
 	{ }
+
 
 	/// \brief From INameable: return the class name.
 	std::string name() const

@@ -5,16 +5,6 @@
  *  \author O. Krause, T. Glasmachers
  *  \date 2010-2011
  *
- *  \par Copyright (c) 1998-2011:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
- *
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -41,27 +31,32 @@
 namespace shark {
 
 
-//!
-//! \brief Softmax function
-//!
-//! \par
-//! Squash an n-dimensional real vector space
-//! to the (n-1)-dimensional probability simplex.
-//! This also corresponds to the exponential norm of the input
-//!
+///
+/// \brief Softmax function
+///
+/// \par
+/// Squash an n-dimensional real vector space
+/// to the (n-1)-dimensional probability simplex:
+/// \f[
+///      f_i(x) = \frac{\exp(x_i)}{\sum_j \exp(x_j)}
+/// \f]
+/// This also corresponds to the exponential norm of the input.
+///
 class Softmax : public AbstractModel<RealVector,RealVector>
 {
 private:
 	struct InternalState : public State{
 		RealMatrix results;
-		
+
 		void resize(std::size_t numPatterns,std::size_t inputs){
 			results.resize(numPatterns,inputs);
 		}
 	};
+
 public:
-	//! Constructor
+	/// Constructor
 	Softmax(size_t dim);
+	/// Constructor
 	Softmax();
 
 	/// \brief From INameable: return the class name.
@@ -84,12 +79,11 @@ public:
 	size_t numberOfParameters()const{
 		return 0;
 	}
-	
+
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new InternalState());
 	}
 
-	
 	void eval(BatchInputType const& patterns,BatchOutputType& output)const;
 	void eval(BatchInputType const& patterns,BatchOutputType& output, State & state)const;
 	using AbstractModel<RealVector,RealVector>::eval;
