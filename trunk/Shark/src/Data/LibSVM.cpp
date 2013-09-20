@@ -6,16 +6,6 @@
  *  \author O.Krause
  *  \date 2013
  *
- *  \par Copyright (c) 1998-2007:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
- *
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -88,9 +78,9 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 	if(dimensions == 0){
 		dimensions = maxIndex;
 	}
-	else if (maxIndex > dimensions)//LibSVM is one-indexed
+	else if (maxIndex > dimensions)//LibSVM is one-indexed by default
 		throw SHARKEXCEPTION("number of dimensions supplied is smaller than actual index data");
-	
+
 	//check labels for conformity
 	bool binaryLabels = false;
 	int minPositiveLabel = std::numeric_limits<int>::max();
@@ -110,11 +100,25 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 		if(binaryLabels && (minPositiveLabel == 0||  maxPositiveLabel > 1))
 			throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
 	}
-	
+
+	// check for feature index zero (non-standard, but it happens)
+	bool haszero = false;
+	for (std::size_t i=0; i<numPoints; i++)
+	{
+		std::vector<std::pair<std::size_t, double> > const& input = contents[i].second;
+		if (input.empty()) continue;
+		if (input[0].first == 0)
+		{
+			haszero = true;
+			break;
+		}
+	}
+
 	//copy contents into a new dataset
-	typename shark::LabeledData<T, unsigned int>::element_type blueprint(T(maxIndex),0);
+	typename shark::LabeledData<T, unsigned int>::element_type blueprint(T(maxIndex + (haszero ? 1 : 0)),0);
 	shark::LabeledData<T, unsigned int> data(numPoints,blueprint);//create dataset with the right structure
 	{
+		size_t delta = (haszero ? 0 : 1);
 		std::size_t i = 0;
 		typedef typename shark::LabeledData<T, unsigned int>::element_reference ElemRef;
 		BOOST_FOREACH(ElemRef element, data.elements()){
@@ -122,10 +126,10 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 			//todo: check label
 			//we subtract minPositiveLabel to ensore that class indices starting from 0 and 1 are supported
 			element.label = binaryLabels? 1 + (contents[i].first-1)/2 : contents[i].first-minPositiveLabel;
-			
+
 			std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
 			for(std::size_t j = 0; j != inputs.size(); ++j)
-				element.input(inputs[j].first-1) = inputs[j].second;//LibSVM is one-indexed
+				element.input(inputs[j].first - delta) = inputs[j].second;//LibSVM is one-indexed
 			++i;
 		}
 	}
