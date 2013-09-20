@@ -5,16 +5,6 @@
  *  \author O. Krause, T. Glasmachers
  *  \date 2010-2011
  *
- *  \par Copyright (c) 1998-2011:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
- *
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -52,7 +42,7 @@ void Softmax::eval(BatchInputType const& patterns,BatchOutputType& outputs)const
 	SIZE_CHECK(patterns.size2() == inputSize());
 	outputs.resize(patterns.size1(),inputSize());
 	noalias(outputs) = exp(patterns);
-	
+
 	for(size_t i = 0; i != patterns.size1(); ++i){
 		row(outputs,i) /= sum(row(outputs,i));
 	}

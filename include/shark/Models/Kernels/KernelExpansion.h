@@ -69,9 +69,9 @@ public:
 	// ////////////      CONSTRUCTORS       /////////////////////
 	// //////////////////////////////////////////////////////////
 
-	KernelExpansion():mep_kernel(NULL),m_outputs(0){}
+	KernelExpansion():mep_kernel(NULL){}
 		
-	KernelExpansion(KernelType* kernel):mep_kernel(kernel),m_outputs(0){
+	KernelExpansion(KernelType* kernel):mep_kernel(kernel){
 		SHARK_ASSERT(kernel != NULL);
 	}
 		
@@ -85,9 +85,8 @@ public:
 		mep_kernel = kernel;
 		if(offset)
 			m_b.resize(outputs);
-		m_outputs = outputs;
 		m_basis = basis;
-		m_alpha.resize(basis.numberOfElements(), m_outputs);
+		m_alpha.resize(basis.numberOfElements(), outputs);
 		zero(m_alpha);
 	}
 
@@ -97,7 +96,7 @@ public:
 
 	/// dimensionality of the output RealVector
 	size_t outputSize() const{
-		return m_outputs;
+		return m_alpha.size2();
 	}
 
 	// //////////////////////////////////////////////////////////
@@ -173,7 +172,7 @@ public:
 		m_basis = toDataset(subset(toView(m_basis),svIndices));
 		
 		//reduce alpha to it's support vector variables
-		RealMatrix a(svIndices.size(), m_outputs);
+		RealMatrix a(svIndices.size(), outputSize());
 		for (std::size_t i=0; i!= svIndices.size(); ++i){
 			noalias(row(a,i)) = row(m_alpha,svIndices[i]); 
 		}
@@ -259,7 +258,6 @@ public:
 
 		archive >> m_alpha;
 		archive >> m_b;
-		archive >> m_outputs;
 		archive >> m_basis;
 		archive >> (*mep_kernel);
 	}
@@ -270,7 +268,6 @@ public:
 
 		archive << m_alpha;
 		archive << m_b;
-		archive << m_outputs;
 		archive << m_basis;
 		archive << const_cast<KernelType const&>(*mep_kernel);//prevent compilation warning
 	}
@@ -286,9 +283,6 @@ protected:
 	/// "support" basis vectors
 	Data<InputType> m_basis;
 	
-	/// dimension of output
-	unsigned int m_outputs;
-
 	/// kernel coefficients
 	RealMatrix m_alpha;
 

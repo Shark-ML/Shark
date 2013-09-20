@@ -5,15 +5,6 @@
  *  \author  B. Li
  *  \date    2012
  *
- *  \par Copyright (c) 2012:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -82,7 +73,7 @@ public:
 		//so i am using a DataView to have O(1) random access lookup. but this is not needed!
 		DataView<Data<InputType> const > indexedBasis(Base::m_basis);
 		
-		ensureSize(outputs,size(patterns),Base::m_outputs);
+		ensureSize(outputs,size(patterns),Base::outputSize());
 		if (Base::hasOffset())
 				noalias(outputs) = repeat(Base::m_b,size(patterns));
 			else
