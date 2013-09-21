@@ -30,6 +30,7 @@
 
 
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
+#include <shark/Core/IParameterizable.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 
@@ -45,7 +46,7 @@ namespace shark {
 /// \f[
 ///     \min \frac{1}{2} \sum_j \|w_j\|^2 + C \sum_i L(y_i, f(x_i)),
 /// \f]
-/// where i runs over training data, j over classes, and C is the
+/// where i runs over training data, j over classes, and C > 0 is the
 /// regularization parameter.
 ///
 /// \par
@@ -73,7 +74,7 @@ namespace shark {
 /// losses, e.g., the hinge loss used in SVM training.
 ///
 template <class InputType>
-class KernelSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >
+class KernelSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable
 {
 public:
 	typedef AbstractTrainer< KernelExpansion<InputType> > base_type;
@@ -196,6 +197,17 @@ public:
 	/// parameter vector
 	bool isUnconstrained() const
 	{ return m_unconstrained; }
+
+	/// return the value of the regularization parameter
+	double C() const
+	{ return m_C; }
+
+	/// set the value of the regularization parameter (must be positive)
+	void setC(double value)
+	{
+		RANGE_CHECK(value > 0.0);
+		m_C = value;
+	}
 
 	/// check whether the model to be trained should include an offset term
 	bool trainOffset() const
