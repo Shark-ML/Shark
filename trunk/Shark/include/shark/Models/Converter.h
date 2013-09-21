@@ -146,7 +146,7 @@ protected:
 
 
 ///
-/// \brief Convertion of real-valued outputs to classes
+/// \brief Conversion of real-valued outputs to classes
 ///
 /// \par
 /// The ArgMaxConverter is a model converting the
@@ -175,7 +175,11 @@ public:
 	typedef typename Batch<InputType>::type BatchInputType;
 	typedef Batch<unsigned int>::type BatchOutputType;
 
-	ArgMaxConverter(){}
+	ArgMaxConverter()
+	{ }
+	ArgMaxConverter(Model const& decisionFunction)
+	: m_decisionFunction(decisionFunction)
+	{ }
 
 	std::string name() const
 	{ return "ArgMaxConverter<"+m_decisionFunction.name()+">"; }
