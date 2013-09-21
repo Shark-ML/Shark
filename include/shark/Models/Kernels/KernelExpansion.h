@@ -298,8 +298,19 @@ protected:
 ///
 template<class InputType>
 struct KernelClassifier: public ArgMaxConverter<KernelExpansion<InputType> >{
-	KernelClassifier(){}
-		
+	typedef ArgMaxConverter<KernelExpansion<InputType> > base_type;
+	typedef AbstractKernelFunction<InputType> KernelType;
+	typedef KernelExpansion<InputType> KernelExpansionType;
+
+	KernelClassifier()
+	{ }
+	KernelClassifier(KernelType* kernel)
+	: base_type(KernelExpansionType(kernel))
+	{ }
+	KernelClassifier(KernelExpansionType const& decisionFunction)
+	: base_type(decisionFunction)
+	{ }
+
 	std::string name() const
 	{ return "KernelClassifier"; }
 };
