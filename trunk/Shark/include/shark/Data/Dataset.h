@@ -68,8 +68,8 @@ namespace shark {
 ///\par
 /// There are a lot of these typedefs. The typical typedefs for containers like batch_type or iterator are chosen
 /// as types for the batch interface. For accessing single elements, a different set of typedefs is in place. Thus instead of iterator
-/// you must write element_iterator and instead of batch_type write element_type. Usually you should not use element_type escept when
-/// you want to actually copy the data. Instead use element_reference or const_element_reference. Note, that these are proxy objects and not
+/// you must write element_iterator and instead of batch_type write element_type. Usually you should not use element_type except when
+/// you want to actually copy the data. Instead use element_reference or const_element_reference. Note that these are proxy objects and not
 /// actual references to element_type!
 /// A short example for these typedefs:
 ///\code
