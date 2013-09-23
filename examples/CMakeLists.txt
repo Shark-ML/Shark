@@ -69,6 +69,7 @@ SHARK_ADD_EXAMPLE( EA/SOO/CMAPlot CMAPlot "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/ElitistCMASimple ElitistCMASimpleMain "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/TSP TSP "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/AckleyES AckleyES "EA/SOO" )
+SHARK_ADD_EXAMPLE( EA/SOO/Archive Archive "EA/SOO" )
 
 SHARK_ADD_EXAMPLE( Supervised/MultiTaskSvm MultiTaskSvm "Supervised" )
 
