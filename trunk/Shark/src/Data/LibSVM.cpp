@@ -161,6 +161,7 @@ void shark::import_libsvm(
 	int highestIndex
 ){
 	std::ifstream ifs(fn.c_str());
+	if (! ifs.good()) throw SHARKEXCEPTION("[shark::import_libsvm] failed to open file for input");
 	dataset =  libsvm_importer<RealVector>(ifs, highestIndex);
 }
 
@@ -170,5 +171,6 @@ void shark::import_libsvm(
 	int highestIndex
 ){
 	std::ifstream ifs(fn.c_str());
+	if (! ifs.good()) throw SHARKEXCEPTION("[shark::import_libsvm] failed to open file for input");
 	dataset =  libsvm_importer<CompressedRealVector>(ifs, highestIndex);
 }
