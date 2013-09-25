@@ -5,16 +5,6 @@
 *  \author T.Voss
 *  \date 2010
 *
-*  \par Copyright (c) 1998-20011:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-25558<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*      <BR>
-*
 *
 *  <BR><HR>
 *  This file is part of Shark. This library is free software;
@@ -31,8 +21,8 @@
 *  along with this library; if not, see <http://www.gnu.org/licenses/>.
 *
 */
-#ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_MUTATION_POLYNOMIAL_MUTATION_H
-#define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_MUTATION_POLYNOMIAL_MUTATION_H
+#ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_MUTATION_POLYNOMIALMUTATION_H
+#define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_MUTATION_POLYNOMIALMUTATION_H
 
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/LinAlg/Base.h>
@@ -74,7 +64,7 @@ namespace shark {
 				m_lower = blas::repeat(-1E20,f.numberOfVariables());
 				m_upper = blas::repeat(1E20,f.numberOfVariables());
 			}
-			else if (f.hasConstraintHandler() &&! f.getConstraintHandler().isBoxConstrained()) {
+			else if (f.hasConstraintHandler() && f.getConstraintHandler().isBoxConstrained()) {
 				typedef BoxConstraintHandler<typename Function::SearchPointType> ConstraintHandler;
 				ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(f.getConstraintHandler());
 				
