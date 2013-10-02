@@ -164,6 +164,11 @@ typename Batch<T>::type createBatch(Range const& range){
 	return Batch<T>::createBatchFromRange(range);
 }
 
+template< class Range>
+typename Batch<typename Range::value_type>::type createBatch(Range const& range){
+	return Batch<typename Range::value_type>::createBatchFromRange(range);
+}
+
 /// \brief specialization for ublas vectors which should be matrices in batch mode!
 template<class T>
 struct Batch<blas::vector<T> >{
