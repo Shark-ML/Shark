@@ -84,7 +84,8 @@ struct MaximumGainCriterion{
 		//choose first variable by first order criterion
 		MaximumGradientCriterion firstOrder;
 		double maxGrad = firstOrder(problem,i,j);
-		if (maxGrad == 0.0) return maxGrad;
+		if (maxGrad == 0.0)
+			return maxGrad;
 
 		double gi = problem.gradient(i);
 		typename Problem::QpFloatType* q = problem.quadratic().row(i, 0, problem.active());
@@ -95,55 +96,18 @@ struct MaximumGainCriterion{
 		for (std::size_t a=0; a<problem.active(); a++)
 		{
 			if (a == i) continue;
-			double aa = problem.alpha(a);
 			double ga = problem.gradient(a);
-			if ((aa > problem.boxMin(a) && ga < 0.0) 
-			|| (aa < problem.boxMax(a) && ga > 0.0)){
+			if (
+				(!problem.isLowerBound(a) && ga < 0.0) 
+				|| (!problem.isUpperBound(a) && ga > 0.0)
+			){
 				double Qia = q[a];
 				double Qaa = problem.diagonal(a);
-
-				double QD = Qii * Qaa;
-				double detQ = QD - Qia * Qia;
-				if (detQ < 1e-10 * QD)
+				double gain = detail::maximumGainQuadratic2D(Qii,Qaa,Qia,gi,ga);
+				if (gain > maxGain)
 				{
-					if (Qii == 0.0 && Qaa == 0.0)
-					{
-						// Q has rank zero
-						if (gi != 0.0 || ga != 0.0)
-						{
-							j = a;
-							return maxGrad;		// infinite gain, return immediately
-						}
-					}
-					else
-					{
-						// Q has rank one
-						if (Qii * ga - Qia * gi != 0.0)
-						{
-							j = a;
-							return maxGrad;		// infinite gain, return immediately
-						}
-						else
-						{
-							double g2 = ga*ga + gi*gi;
-							double gain = (g2*g2) / (ga*ga*Qaa + 2.0*ga*gi*Qia + gi*gi*Qii);
-							if (gain > maxGain)
-							{
-								maxGain = gain;
-								j = a;
-							}
-						}
-					}
-				}
-				else
-				{
-					// Q has rank two
-					double gain = (ga*ga*Qii - 2.0*ga*gi*Qia + gi*gi*Qaa) / detQ;
-					if (gain > maxGain)
-					{
-						maxGain = gain;
-						j = a;
-					}
+					maxGain = gain;
+					j = a;
 				}
 			}
 		}

@@ -123,18 +123,16 @@ struct LibSVMSelectionCriterion{
 			{
 				smallestDown=std::min(smallestDown,ga);
 				
-				double grad_diff = largestUp - ga;
-				if (grad_diff > 0.0)
+				double gain = detail::maximumGainQuadratic2DOnLine(
+					problem.diagonal(i),
+					problem.diagonal(j),
+					q[a],
+					largestUp,ga
+				);
+				if (gain> best)
 				{
-					double quad_coef = problem.diagonal(i) + problem.diagonal(a) - 2.0 * q[a];
-					if (quad_coef <= 1.e-12) quad_coef=1.e-12;
-					double obj_diff = (grad_diff * grad_diff) / quad_coef;
-
-					if (obj_diff > best)
-					{
-						best = obj_diff;
-						j = a;
-					}
+					best = gain;
+					j = a;
 				}
 			}
 		}
@@ -172,7 +170,7 @@ public:
 			last_j = j;
 			return value;
 		}
-		//~ //old HMG
+		//old HMG
 		MGStep besti = selectMGVariable(problem,last_i);
 		if(besti.violation == 0.0)
 			return 0;

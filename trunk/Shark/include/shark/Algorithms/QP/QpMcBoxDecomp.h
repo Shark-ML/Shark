@@ -36,36 +36,32 @@
 
 
 namespace shark {
-	
-	
-/// \brief Working set selection eturning th S2DO working set
-///
-/// This selection operator picks the first variable by maximum gradient, 
-/// the second by maximum unconstrained gain.
-struct BoxConstrainedS2DOSelection{
-	template<class Problem>
-	double operator()(Problem& problem, std::size_t& i, std::size_t& j){
-		//todo move implementation here
-		return problem.selectWorkingSet(i,j);
-	}
-
-	void reset(){}
-};
-
 
 template <class Matrix>
 class QpMcBoxDecomp
 {
 public:
 	typedef typename Matrix::QpFloatType QpFloatType;
-	typedef BoxConstrainedS2DOSelection PreferedSelectionStrategy;
+	/// \brief Working set selection eturning th S2DO working set
+	///
+	/// This selection operator picks the first variable by maximum gradient, 
+	/// the second by maximum unconstrained gain.
+	struct PreferedSelectionStrategy{
+		template<class Problem>
+		double operator()(Problem& problem, std::size_t& i, std::size_t& j){
+			//todo move implementation here
+			return problem.selectWorkingSet(i,j);
+		}
 
-	//! Constructor
-	//! \param  kernel               kernel matrix - cache or pre-computed matrix
-	//! \param  M                   kernel modifiers in the format \f$ M_(y_i, p, y_j, q) = _M(classes*(y_i*|P|+p_i)+y_j, q) \f$
-	//! \param  target the target labels for the variables
-	//! \param linearMat the linear part of the problem
-	//! \param C upper bound for all box variables, lower bound is 0.
+		void reset(){}
+	};
+
+	///Constructor
+	///\param  kernel               kernel matrix - cache or pre-computed matrix
+	///\param  M                   kernel modifiers in the format \f$ M_(y_i, p, y_j, q) = _M(classes*(y_i*|P|+p_i)+y_j, q) \f$
+	///\param  target the target labels for the variables
+	///\param linearMat the linear part of the problem
+	///\param C upper bound for all box variables, lower bound is 0.
 	QpMcBoxDecomp(
 		Matrix& kernel,
 		QpSparseArray<QpFloatType> const& M,
@@ -123,7 +119,7 @@ public:
 		}
 	}
 	
-	//! enable/disable shrinking
+	///enable/disable shrinking
 	void setShrinking(bool shrinking = true)
 	{
 		m_useShrinking = shrinking; 
@@ -168,7 +164,7 @@ public:
 		return m_numExamples;
 	}
 	
-	//! return the largest KKT violation
+	///return the largest KKT violation
 	double checkKKT()const
 	{
 		double maxViolation = 0.0;
@@ -262,7 +258,7 @@ public:
 		}
 	}
 	
-	//! Shrink the problem
+	///Shrink the problem
 	bool shrink(double epsilon)
 	{
 		if(! m_useShrinking)
@@ -318,12 +314,11 @@ public:
 				if (m_examples[a].active == 0) 
 					deactivateExample(a);
 			}
-			//~ m_kernelMatrix.setMaxCachedIndex(m_activeEx);
 		}
 		return true;
 	}
 
-	//! Activate all m_numVariables
+	///Activate all m_numVariables
 	void unshrink()
 	{
 		if (m_activeVar == m_numVariables) return;
@@ -371,19 +366,17 @@ public:
 			m_examples[i].active = m_cardP;
 		m_activeEx = m_numExamples;
 		m_activeVar = m_numVariables;
-		//todo: mt: activate line below (new unshrink action) -> verify & test
-		//m_kernelMatrix.setTruncationIndex( m_activeEx ); //disable cache truncation again
 	}
 	
 	//!
-	//! \brief select the working set
+	///\brief select the working set
 	//!
-	//! Select one or two numVariables for the sub-problem
-	//! and return the maximal KKT violation. The method
-	//! MAY select the same index for i and j. In that
-	//! case the working set consists of a single variables.
-	//! The working set may be invalid if the method reports
-	//! a KKT violation of zero, indicating optimality.
+	///Select one or two numVariables for the sub-problem
+	///and return the maximal KKT violation. The method
+	///MAY select the same index for i and j. In that
+	///case the working set consists of a single variables.
+	///The working set may be invalid if the method reports
+	///a KKT violation of zero, indicating optimality.
 	double selectWorkingSet(std::size_t& i, std::size_t& j)
 	{
 		// box case
@@ -416,9 +409,10 @@ public:
 		double di = vari.diagonal;
 		double gi = m_gradient(i);
 		QpFloatType* k = m_kernelMatrix.row(ii, 0, m_activeEx);
+		
 		j = i;
-		double gain_i = gi * gi / di;
-		double bestgain = gain_i;
+		double bestgain = gi * gi / di;
+		
 		for (std::size_t a=0; a<m_activeEx; a++)
 		{
 			Example const& exa = m_examples[a];
@@ -429,20 +423,27 @@ public:
 			for (std::size_t pf=0, b=0; pf < m_cardP; pf++)
 			{
 				std::size_t f = exa.var[pf];
-				if(f >= m_activeVar || f == i)
-					continue;
 				double qif = def * k[a];
-				//chck whether we are at an existing element of the sparse row
+				//check whether we are at an existing element of the sparse row
 				if( b != row.size && pf == row.entry[b].index){
 					qif = row.entry[b].value * k[a];
 					++b;//move to next element
 				}
-				double gain = calculateGain(f,qif,di,gi, gain_i);
-				if( bestgain < gain){
+				if(f >= m_activeVar || f == i)
+					continue;
+				
+				double af = m_alpha(f);
+				double gf = m_gradient(f);
+				double df = m_variables[f].diagonal;
+				
+				//check whether a step is possible at all.
+				if (!(af > 0.0 && gf < 0.0) && !(af < m_C && gf > 0.0))
+					continue;
+				
+				double gain = detail::maximumGainQuadratic2D(di,df,qif,di,gi,gf);
+				if( gain > bestgain){
 					j = f;
 					bestgain = gain;
-					if(bestgain >= 1e100)
-						break;
 				}
 			}
 		}
@@ -471,47 +472,11 @@ protected:
 			}
 		}
 	}
-	
-	double calculateGain(std::size_t f,double qif, double di, double gi, double gain_i)const{
-		double af = m_alpha(f);
-		double gf = m_gradient(f);
-		double df = m_variables[f].diagonal;
-		if (qif == 0.0)
-		{
-			if ((af > 0.0 && gf < 0.0) || (af < m_C && gf > 0.0))
-			{
-				return gain_i + gf * gf / df;
-			}
-		}else{
-			if ((af > 0.0 && gf < 0.0) || (af < m_C && gf > 0.0))
-			{
-				double diag_q = di * df;
-				double det_q = diag_q - qif * qif;
-				if (det_q < 1e-12 * diag_q)
-				{
-					if ((di == 0.0 && df == 0.0) || di * gf - df * gi != 0.0)
-					{ 
-						return 1.e100;//infty
-					}
-					else
-					{
-						double g2 = gf*gf + gi*gi;
-						return (g2*g2) / (gf*gf*df + 2.0*gf*gi*qif + gi*gi*di);
-					}
-				}
-				else
-				{
-					return (gf*gf*di - 2.0*gf*gi*qif + gi*gi*df) / det_q;
-				}
-			}
-		}
-		return 0;
-	}
 
-	//! true if the problem has already been unshrinked
+	///true if the problem has already been unshrinked
 	bool bUnshrinked;
 	
-	//! shrink a variable
+	///shrink a variable
 	void deactivateVariable(std::size_t v)
 	{
 		std::size_t ev = m_variables[v].i;
@@ -549,7 +514,7 @@ protected:
 		m_activeVar--;
 	}
 
-	//! shrink an m_examples
+	///shrink an m_examples
 	void deactivateExample(std::size_t e)
 	{
 		SHARK_ASSERT(e < m_activeEx);
@@ -568,13 +533,7 @@ protected:
 			m_variables[pj[v]].i = j;
 		}
 
-		// notify the matrix cache
-		//m_kernelMatrix.cacheRowRelease(e);
-		//todo: mt: new shrinking action. test & verify, then delete line above
-		//m_kernelMatrix.cacheRedeclareOldest(e);
 		m_kernelMatrix.flipColumnsAndRows(e, j);
-
-		
 	}
 	
 	/// \brief Returns the original index of the example of a variable in the dataset before optimization.
@@ -585,75 +544,84 @@ protected:
 		return m_examples[i].index;//i before shrinking
 	}
 
-	//! data structure describing one m_variables of the problem
+	/// data structure describing one m_variables of the problem
 	struct Variable
 	{
-		std::size_t i;				// index into the example list
-		unsigned int p;			// constraint corresponding to this m_variables
-		unsigned int index;		// index into example->m_numVariables
-		double diagonal;			// diagonal entry of the big Q-matrix
+		///index into the example list
+		std::size_t i;
+		/// constraint corresponding to this m_variables
+		unsigned int p;
+		/// index into example->m_numVariables
+		unsigned int index;
+		/// diagonal entry of the big Q-matrix
+		double diagonal;
 	};
 
-	//! data structure describing one training example
+	/// data structure describing one training example
 	struct Example
 	{
-		std::size_t index;			// example index in the dataset, not the example vector!
-		unsigned int y;			// label of this example
-		unsigned int active;		// number of active m_numVariables
-		std::size_t* var;			// list of all m_cardP m_numVariables, in order of the p-index
-		std::size_t* avar;			// list of active m_numVariables
+		/// example index in the dataset, not the example vector!
+		std::size_t index;
+		/// label of this example
+		unsigned int y;
+		/// number of active m_numVariables
+		unsigned int active;
+		/// list of all m_cardP m_numVariables, in order of the p-index
+		std::size_t* var;
+		/// list of active m_numVariables
+		std::size_t* avar;            
 	};
 
-	//! kernel matrix (precomputed matrix or matrix cache)
+	///kernel matrix (precomputed matrix or matrix cache)
 	Matrix& m_kernelMatrix;
 
-	//! kernel modifiers
+	///kernel modifiers
 	QpSparseArray<QpFloatType> const& m_M;			// M(|P|*y_i+p, y_j, q)
 
-	//! complexity constant; upper bound on all variabless
+	///complexity constant; upper bound on all variabless
 	double m_C;
 	
-	//! number of m_classes in the problem
+	///number of m_classes in the problem
 	unsigned int m_classes;
 	
-	//! number of dual m_numVariables per example
+	///number of dual m_numVariables per example
 	unsigned int m_cardP;
 	
-	//! number of m_examples in the problem (size of the kernel matrix)
+	///number of m_examples in the problem (size of the kernel matrix)
 	std::size_t m_numExamples;
 
-	//! number of m_numVariables in the problem = m_examples times m_cardP
+	///number of m_numVariables in the problem = m_examples times m_cardP
 	std::size_t m_numVariables;
 	
-	//! m_linear part of the objective function
+	///m_linear part of the objective function
 	RealVector m_linear;
 	
-	//! solution candidate
+	///solution candidate
 	RealVector m_alpha;
 	
-	//! m_gradient of the objective function
-	//! The m_gradient array is of fixed size and not subject to shrinking.
+	///m_gradient of the objective function
+	///The m_gradient array is of fixed size and not subject to shrinking.
 	RealVector m_gradient;
 
-	//! information about each training example
+	///information about each training example
 	std::vector<Example> m_examples;
 
-	//! information about each m_variables of the problem
+	///information about each m_variables of the problem
 	std::vector<Variable> m_variables;
 
-	//! space for the example[i].var pointers
+	///space for the example[i].var pointers
 	std::vector<std::size_t> m_storage1;
 
-	//! space for the example[i].avar pointers
+	///space for the example[i].avar pointers
 	std::vector<std::size_t> m_storage2;
 
-	//! number of currently active m_examples
+	///number of currently active m_examples
 	std::size_t m_activeEx;
 
-	//! number of currently active variabless
+	///number of currently active variabless
 	std::size_t m_activeVar;
 
-	//! should the m_problem use the shrinking heuristics?
+	///should the m_problem use the shrinking heuristics?
 	bool m_useShrinking;
 };
 
