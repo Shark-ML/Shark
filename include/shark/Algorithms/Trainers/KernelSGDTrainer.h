@@ -32,6 +32,7 @@
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Core/IParameterizable.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
+#include <shark/Models/Kernels/KernelHelpers.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 
 
@@ -108,39 +109,17 @@ public:
 	void train(ClassifierType& classifier, const LabeledData<InputType, unsigned int>& dataset)
 	{
 		std::size_t ell = dataset.numberOfElements();
-		std::size_t batches = dataset.numberOfBatches();
 		unsigned int classes = numberOfClasses(dataset);
 		ModelType& model = classifier.decisionFunction();
 
 		model.setStructure(m_kernel, dataset.inputs(), m_offset, classes);
 
 		RealMatrix& alpha = model.alpha();
-		RealVector& bias = model.offset();
 
 		// pre-compute the kernel matrix (may change in the future)
 		// and create linear array of labels
-		std::vector<unsigned int> y(ell);
-		RealMatrix K(ell, ell);
-		for (std::size_t i=0, ii=0; i<batches; i++)
-		{
-			ConstBatchInputReference xi = dataset.inputs().batch(i);
-			for (std::size_t j=0, jj=j; j<i; j++)
-			{
-				ConstBatchInputReference xj = dataset.inputs().batch(j);
-				RealMatrix mat;
-				m_kernel->eval(xi, xj, mat);
-				subrange(K, ii, ii+boost::size(xi), jj, jj+boost::size(xj)) = mat;
-				subrange(K, jj, jj+boost::size(xj), ii, ii+boost::size(xi)) = trans(mat);
-				jj += boost::size(xj);
-			}
-			RealMatrix mat;
-			m_kernel->eval(xi, xi, mat);
-			subrange(K, ii, ii+boost::size(xi), ii, ii+boost::size(xi)) = mat;
-
-			Batch<unsigned int>::type const& yi = dataset.labels().batch(i);
-			for (std::size_t n=0; n<yi.size(); n++) y[ii+n] = get(yi, n);
-			ii += boost::size(xi);
-		}
+		RealMatrix K = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), 0);
+		UIntVector y = createBatch(dataset.labels().elements());
 
 		// SGD loop
 		double alphaScale = 1.0;
@@ -158,7 +137,7 @@ public:
 			// compute prediction
 			RealVector f_b(classes, 0.0);
 			fast_prod(trans(alpha), row(K, b), f_b, false, alphaScale);
-			if (m_offset) f_b += bias;
+			if (m_offset) f_b += model.offset();
 
 			// stochastic gradient descent (SGD) step
 			RealVector derivative(classes, 0.0);
@@ -166,7 +145,7 @@ public:
 //			alphaScale *= (1.0 - eta);
 			alphaScale = (1.0 - 1.0 / (iter + 3.0));   // should be numerically more stable
 			row(alpha, b) -= (eta * m_C / alphaScale) * derivative;
-			if (m_offset) bias -= eta * derivative;
+			if (m_offset) model.offset() -= eta * derivative;
 		}
 
 		alpha *= alphaScale;
@@ -213,7 +192,7 @@ public:
 	bool trainOffset() const
 	{ return m_offset; }
 
-	/// get the hyper-parameter vector
+	///\brief  Returns the vector of hyper-parameters.
 	RealVector parameterVector() const
 	{
 		size_t kp = m_kernel->numberOfParameters();
@@ -225,7 +204,7 @@ public:
 		return ret;
 	}
 
-	/// set the vector of hyper-parameters
+	///\brief  Sets the vector of hyper-parameters.
 	void setParameterVector(RealVector const& newParameters)
 	{
 		size_t kp = m_kernel->numberOfParameters();
@@ -234,7 +213,7 @@ public:
 		if (m_unconstrained) m_C = exp(m_C);
 	}
 
-	/// return the number of hyper-parameters
+	///\brief Returns the number of hyper-parameters.
 	size_t numberOfParameters() const{ 
 		return m_kernel->numberOfParameters() + 1;
 	}
