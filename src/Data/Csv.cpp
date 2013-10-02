@@ -1,7 +1,7 @@
 //===========================================================================
 /*!
 
- *  \brief implementation of the libsvm data import
+ *  \brief implementation of the csv data import
  *
  *  \author O.Krause
  *  \date 2013
@@ -59,7 +59,7 @@ inline std::vector<T> importCSVReaderSingleValue(
 	);
 
 	if(!r || first != last)
-		throw SHARKEXCEPTION("[import_libsvm_reader_value] problems parsing file");
+		throw SHARKEXCEPTION("[import_csv_reader_value] problems parsing file");
 	
 	return fileContents;
 }
@@ -76,25 +76,31 @@ inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 	using namespace boost::spirit::qi;
 	std::vector<std::vector<double> >  fileContents;
 	
+	double qnan = std::numeric_limits<double>::quiet_NaN();
+	
 	bool r;
 	if( separator == 0){
 		r = phrase_parse(
 			first, last, 
-			((*double_) % eol) >> -eol,
+			(
+				+(double_ | ('?' >>  attr(qnan) ))
+			) % eol >> -eol,
 			space-eol , fileContents
 		);
 	}
 	else{
 		r = phrase_parse(
 			first, last, 
-			((double_ % separator) % eol) >>-eol,
+			(	
+				(double_ | ((lit('?')| &lit(separator)) >>  attr(qnan))) % separator
+			) % eol >> -eol,
 			space-eol , fileContents
 		);
 	}
 
-	if(!r || first != last)
-		throw SHARKEXCEPTION("[import_libsvm_reader_values] problems parsing file");
-	
+	if(!r || first != last){
+		throw SHARKEXCEPTION("[import_csv_reader_values] problems parsing file");
+	}
 	return fileContents;
 }
 
@@ -164,7 +170,6 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 			fileContents.push_back(CsvPoint(reversed_point.second,reversed_point.first));
 		}while(r && first != last);
 	}
-	std::cout<<std::string(first,last)<<std::endl;
 	if(!r || first != last)
 		throw SHARKEXCEPTION("[import_csv_reader_points] problems parsing file");
 	
@@ -352,8 +357,8 @@ void shark::csvStringToData(
 	std::size_t numberOfInputs = dimensions-numberOfOutputs;
 	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
 	dataset = LabeledData<RealVector, RealVector>(batchSizes.size());
-	std::size_t inputStart = lp? numberOfOutputs : 0;
-	std::size_t outputStart = lp? 0: numberOfInputs;
+	std::size_t inputStart = (lp == FIRST_COLUMN)? numberOfOutputs : 0;
+	std::size_t outputStart = (lp == FIRST_COLUMN)? 0: numberOfInputs;
 	std::size_t currentRow = 0;
 	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
 		RealMatrix& inputs = dataset.batch(b).input;
