@@ -83,8 +83,9 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	//usually this is solved via the moore penrose inverse:
 	//Beta = A^-1 T
 	//but it is faster und numerically more stable, if we solve it as a symmetric system
-	RealMatrix beta(inputDim+1,outputDim);
-	blas::solveSymmSystem<blas::SolveAXB>(matA,beta,XTL);
+	//w can use in-place solve
+	RealMatrix&  beta = XTL;
+	blas::solveSymmSemiDefiniteSystemInPlace<blas::SolveAXB>(matA,beta);
 	
 	RealMatrix matrix = subrange(trans(beta), 0, outputDim, 0, inputDim);
 	RealVector offset = row(beta,inputDim);

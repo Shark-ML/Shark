@@ -84,23 +84,17 @@ void shark::blas::choleskyDecomposition(
 #endif
 }
 
-template<class MatrixT,class MatrixL>
-std::size_t shark::blas::pivotingCholeskyDecomposition(
-	matrix_expression<MatrixT> const& Aref,
-	PermutationMatrix& P,
-	matrix_expression<MatrixL>& Lref
+template<class MatrixL>
+std::size_t shark::blas::pivotingCholeskyDecompositionInPlace(
+	matrix_expression<MatrixL>& Lref,
+	PermutationMatrix& P
 ){
-	typedef typename MatrixT::value_type Value;
-	//we don't want to get annoyed by the expressions
-	MatrixT const& A = Aref();
-	MatrixL& L = Lref();
 	
-	//ensure sizes are correct
-	SIZE_CHECK(A.size1() == A.size2());
-	size_t m = A.size1();
+	typedef typename MatrixL::value_type Value;
+	MatrixL& L = Lref();
+	SIZE_CHECK(L.size1() == L.size2());
+	size_t m = L.size1();
 	ensureSize(P,m);
-	ensureSize(L,m,m);
-	noalias(L) = A;
 	
 	//The Algorithms works as follows
 	//we begin with the submatrix L^(0)= A

@@ -36,7 +36,7 @@
 #ifndef SHARK_LINALG_INVERSE_H
 #define SHARK_LINALG_INVERSE_H
 
-#include <shark/LinAlg/Cholesky.h>
+#include <shark/LinAlg/solveSystem.h>
 namespace shark{ namespace blas{
 
 /**
@@ -50,25 +50,9 @@ namespace shark{ namespace blas{
 template<class MatrixT>
 RealMatrix invert(const MatrixT& mat);
 
-// //! Inverts a symmetric matrix
-//template<class MatrixT,class MatrixU>
-//void invertSymm(MatrixT &I, const MatrixU& A);
-
 //! Inverts a symmetric positive definite matrix
 template<class MatrixT,class MatrixU>
 void invertSymmPositiveDefinite(MatrixT &I, const MatrixU& ArrSymm);
-
-/// \brief For a given square matrix A computes a matrix U where A'=LU^T
-///
-/// A' is the generalized inverse of A. If A has full rank, the resulting matrix
-/// is equivalent to the inverse cholesky decomposition. If it is not, it is not necessarily 
-/// triangular. This is mostly a helperfunction for g_inverse but also used in
-/// other parts of shark
-template<class MatA, class MatU>
-void decomposedGeneralInverse(
-	matrix_expression<MatA> const& matA,
-	matrix_expression<MatU>& matU
-);
 
 /*!
  *  \brief Calculates the generalized inverse matrix of input matrix "matrixA".
@@ -86,13 +70,22 @@ void decomposedGeneralInverse(
  *      \returns The generalised inverse matrix of A.
  */
 template<class MatrixT>
-RealMatrix g_inverse(matrix_expression<MatrixT> const& matrixA);
+RealMatrix g_inverse(matrix_expression<MatrixT> const& matrixA){
+	std::size_t m = matrixA().size1();
+	RealMatrix result = trans(matrixA);
+
+	//compute AA^T
+	RealMatrix AAT(m,m);
+	fast_prod(matrixA, trans(matrixA),AAT);
+	
+	solveSymmSemiDefiniteSystemInPlace<SolveXAB>(AAT,result);
+	return result;
+}
 
 /** @}*/
 }}
 
 //implementation of the template functions
 #include "Impl/invert.inl"
-#include "Impl/g_inverse.inl"
 
 #endif 

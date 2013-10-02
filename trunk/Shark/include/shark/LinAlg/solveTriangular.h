@@ -118,9 +118,9 @@ void solveTriangularSystemInPlace(
 ///=>AX=B or XA=B
 ///given an A which was already Cholesky-decomposed as
 ///A=LL^T where L is a lower triangular matrix.
-template<class System,class MatA,class MatB>
+template<class System,class MatL,class MatB>
 void solveTriangularCholeskyInPlace(
-	const matrix_expression<MatA>& A, 
+	const matrix_expression<MatL>&L, 
 	matrix_expression<MatB>& B
 );
 
@@ -129,10 +129,10 @@ void solveTriangularCholeskyInPlace(
 ///Ax=b
 ///given an A which was already Cholesky-decomposed as
 ///A=LL^T where L is a lower triangular matrix.
-template<class System,class MatA,class MatB>
+template<class System,class MatL,class VecB>
 void solveTriangularCholeskyInPlace(
-	const matrix_expression<MatA>& A, 
-	vector_expression<MatB>& B
+	const matrix_expression<MatL>& L, 
+	vector_expression<VecB>& b
 );
 
 }}
