@@ -287,6 +287,8 @@ DataView<DatasetType>  toView(DatasetType& set){
 template<class T>
 typename DataView<T>::dataset_type 
 toDataset(DataView<T> const& view, std::size_t batchSize = DataView<T>::dataset_type::DefaultBatchSize){
+	if(view.size() == 0)
+		return typename DataView<T>::dataset_type();
 	//O.K. todo: this is slow for sparse elements, use subBatch or something similar.
 	std::size_t elements = view.size();
 	typename DataView<T>::dataset_type dataset(elements,view[0],batchSize);

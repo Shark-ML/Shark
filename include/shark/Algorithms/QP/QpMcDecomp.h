@@ -948,7 +948,7 @@ protected:
 
 		std::size_t i, v, b;
 		unsigned int p, c;
-		RealVector stepsize(epsilon,classes);
+		RealVector stepsize(classes,epsilon);
 		RealVector prev(classes,0.0);
 		RealVector step(classes);
 

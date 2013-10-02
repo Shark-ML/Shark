@@ -29,7 +29,7 @@
 
 
 #include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
-#include <shark/Algorithms/QP/QpMcDecomp.h>
+#include <shark/Algorithms/QP/QpMcSimplexDecomp.h>
 #include <shark/Algorithms/QP/QpMcLinear.h>
 
 
@@ -105,11 +105,7 @@ public:
 		unsigned int classes = numberOfClasses(dataset);
 
 		// prepare the problem description
-		RealVector alpha((classes-1) * ic,0.0);
-		RealVector bias(classes,0.0);
-
-		RealMatrix gamma(classes, classes-1,1.0);
-		UIntVector rho(classes-1,0);
+		RealMatrix linear(ic, classes-1,1.0);
 		
 		QpSparseArray<QpFloatType> nu(classes * (classes-1), classes, 2*classes*(classes-1));
 		for (unsigned int r=0, y=0; y<classes; y++)
@@ -173,30 +169,47 @@ public:
 		
 		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
 
+		RealMatrix alpha(ic,classes-1,0.0);
+		RealVector bias(classes,0.0);
 		// solve the problem
 		if (base_type::precomputeKernel())
 		{
 			PrecomputedMatrixType matrix(&km);
-			QpMcDecomp< PrecomputedMatrixType > solver(matrix, gamma, rho, nu, M, true);
+			QpMcSimplexDecomp< PrecomputedMatrixType> problem(matrix, M, dataset.labels(), linear, this->C());
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			// solver.setShrinking(base_type::m_shrinking);
-			solver.setShrinking(false);   // hack to avoid shrinking-related bug
-			solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset? &bias : NULL));
+			problem.setShrinking(base_type::m_shrinking);
+			//problem.setShrinking(false);
+			if(this->m_trainOffset){
+				BiasSolverSimplex<PrecomputedMatrixType> biasSolver(&problem);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
+			}
+			else{
+				QpSolver<QpMcSimplexDecomp< PrecomputedMatrixType> > solver(problem);
+				solver.solve( base_type::m_stoppingcondition, &prop);
+			}
+			alpha = problem.solution();
 		}
 		else
 		{
 			CachedMatrixType matrix(&km, base_type::m_cacheSize);
-			QpMcDecomp< CachedMatrixType > solver(matrix, gamma, rho, nu, M, true);
+			QpMcSimplexDecomp< CachedMatrixType> problem(matrix, M, dataset.labels(), linear, this->C());
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			// solver.setShrinking(base_type::m_shrinking);
-			solver.setShrinking(false);   // hack to avoid shrinking-related bug
-			solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset? &bias : NULL));
+			problem.setShrinking(base_type::m_shrinking);
+			//problem.setShrinking(false);
+			if(this->m_trainOffset){
+				BiasSolverSimplex<CachedMatrixType> biasSolver(&problem);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
+			}
+			else{
+				QpSolver<QpMcSimplexDecomp< CachedMatrixType> > solver(problem);
+				solver.solve( base_type::m_stoppingcondition, &prop);
+			}
+			alpha = problem.solution();
 		}
 		
 		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
-
-		// write the solution into the model
-		for (std::size_t a=0, i=0; i<ic; i++)
+		
+		for (std::size_t i=0; i<ic; i++)
 		{
 			unsigned int y = dataset.element(i).label;
 			for (std::size_t c=0; c<classes; c++)
@@ -204,11 +217,11 @@ public:
 				double sum = 0.0;
 				unsigned int r = (classes-1) * y;
 				for (std::size_t p=0; p<classes-1; p++, r++)
-					sum += nu(r, c) * alpha(a + p);
+					sum += nu(r, c) * alpha(i, p);
 				svm.decisionFunction().alpha(i,c) = sum;
 			}
-			a += classes - 1;
 		}
+		
 		if (this->m_trainOffset) 
 			svm.decisionFunction().offset() = bias;
 
