@@ -45,6 +45,13 @@ The above Makefile builds your code in ``Release`` mode. (Also see
 :doc:`../../getting_started/installation` for configuring the build
 options of the main library [not your application programs].)
 
+Sometimes, the boost libraries have an additional suffix, in
+particular ``-mt`` for multi-threaded versions. You have to adapt your
+Makefile accordingly: ::
+
+   LDLIBS    += -lboost_serialization-mt -lboost_system-mt -lboost_filesystem-mt -lboost_program_options-mt
+
+
 .. warning::
    If you build your release version without the proper compiler options
    (``-O3 -DNDEBUG -DBOOST_UBLAS_NDEBUG``), your program will be slowed
