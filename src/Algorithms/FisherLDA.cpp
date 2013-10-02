@@ -36,7 +36,7 @@
 //===========================================================================
 #include <shark/Algorithms/Trainers/FisherLDA.h>
 #include <shark/LinAlg/eigenvalues.h>
-#include <shark/LinAlg/Inverse.h>
+#include <shark/LinAlg/solveSystem.h>
 #include <boost/foreach.hpp>
 using namespace shark;
 
@@ -140,6 +140,5 @@ void FisherLDA::meanAndScatter(
 	}
 
 	// invert Sw
-	RealMatrix SwInv = invert( Sw );
-	fast_prod(SwInv,Sb,scatter);
+	blas::solveSymmSystem<blas::SolveAXB>(Sw,scatter,Sb);
 }

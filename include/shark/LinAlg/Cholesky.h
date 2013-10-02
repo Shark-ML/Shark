@@ -69,6 +69,33 @@ void choleskyDecomposition(
 );
 
 /*!
+ *  \brief Lower triangular Cholesky decomposition with full pivoting performed in place.
+ *
+ *  Given an \f$ m \times m \f$ symmetric positive semi-definite matrix
+ *  \f$A\f$, compute the lower triangular matrix \f$L\f$ and permutation Matrix P such that
+ *  \f$P^TAP = LL^T \f$. If matrix A has rank(A) = k, the first k columns of A hold the full
+ *  decomposition, while the rest of the matrix is zero. 
+ *  This method is slower than the cholesky decomposition without pivoting but numerically more
+ *  stable. The diagonal elements are ordered such that i > j => L(i,i) >= L(j,j)
+ *
+ *  The implementation used here is described in the working paper 
+ *  "LAPACK-Style Codes for Level 2 and 3 Pivoted Cholesky Factorizations"
+ *  http://www.netlib.org/lapack/lawnspdf/lawn161.pdf
+ *
+ * The computation is carried out in place this means A is destroied and replaced by L.
+ *  
+ *
+ *  \param  A \f$ m \times m \f$ matrix, which must be symmetric and positive definite. It is replaced by L in the end.
+ *  \param  P The pivoting matrix
+ *  \return The rank of the matrix A
+ */
+template<class MatrixA>
+std::size_t pivotingCholeskyDecompositionInPlace(
+	matrix_expression<MatrixA>& A,
+	PermutationMatrix& P
+);
+
+/*!
  *  \brief Lower triangular Cholesky decomposition with full pivoting
  *
  *  Given an \f$ m \times m \f$ symmetric positive semi-definite matrix
@@ -85,17 +112,24 @@ void choleskyDecomposition(
  *
  *  \param  A \f$ m \times m \f$ matrix, which must be symmetric and positive definite
  *  \param  P The pivoting matrix
- *  \param	L \f$ m \times m \f$ matrix, which stores the Cholesky factor
+ *  \param  L \f$ m \times m \f$ matrix, which stores the Cholesky factor
  *  \return The rank of the matrix A
  *
  *
  */
-template<class MatrixT,class MatrixL>
+template<class MatrixA,class MatrixL>
 std::size_t pivotingCholeskyDecomposition(
-	matrix_expression<MatrixT> const& A,
+	matrix_expression<MatrixA> const& A,
 	PermutationMatrix& P,
 	matrix_expression<MatrixL>& L
-);
+){	
+	//ensure sizes are correct
+	SIZE_CHECK(A().size1() == A().size2());
+	size_t m = A().size1();
+	ensureSize(L,m,m);
+	noalias(L()) = A;
+	return pivotingCholeskyDecompositionInPlace(L,P);
+}
 
 /** @}*/
 }}

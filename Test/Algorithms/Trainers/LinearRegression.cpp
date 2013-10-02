@@ -6,7 +6,7 @@
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Rng/Uniform.h>
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
-#include <shark/ObjectiveFunctions/ErrorFunction.h>
+#include <shark/LinAlg/rotations.h>
 
 using namespace shark;
 
@@ -58,8 +58,6 @@ BOOST_AUTO_TEST_CASE( LinearRegression_TEST ){
 	// evaluate using the ErrorFunction
 	RegressionDataset testset = createLabeledDataFromRange(input, testTarget);
 	SquaredLoss<> loss;
-	ErrorFunction<RealVector,RealVector> mse(&model, &loss);
-	mse.setDataset(testset);
-	double error=mse.eval(model.parameterVector());
+	double error=loss(testset.labels(),model(testset.inputs()));
 	BOOST_CHECK_SMALL(error, 1e-4);
 }

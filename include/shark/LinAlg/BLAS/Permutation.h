@@ -46,7 +46,7 @@ namespace shark { namespace blas{
 		blas::swap_rows(P,A());
 	}
 	
-	///\brief implements column pivoting of vector A using permutation P
+	///\brief implements column pivoting of vector v using permutation P
 	///
 	///by convention it is not allowed that P(i) < i. 
 	template<class V, class Permutation>
@@ -54,14 +54,28 @@ namespace shark { namespace blas{
 		blas::swap_rows(P,v());
 	}
 	
+	///\brief implements the inverse row pivoting of vector v using permutation P
+	///
+	///This is the inverse operation to swapRows. 
+	template<class V, class Permutation>
+	void swapRowsInverted(Permutation const& P, blas::vector_expression<V>& v){
+		for(std::size_t i = P.size(); i != 0; --i){
+			std::size_t k = i-1;
+			if(k != P(k)){
+				using std::swap;
+				swap(v()(k),v()(P(k)));
+			}
+		}
+	}
+	
 	///\brief implements column pivoting at matrix A using permutation P
 	///
 	///by convention it is not allowed that P(i) < i. 
 	template<class M, class Permutation>
-	void swapColumns(Permutation const& P, M& A){
+	void swapColumns(Permutation const& P, blas::matrix_expression<M>& A){
 		for(std::size_t i = 0; i != P.size(); ++i){
 			if(i != P(i)){
-				column(A,i).swap(column(A,P(i)));
+				column(A(),i).swap(column(A(),P(i)));
 			}
 		}
 	}

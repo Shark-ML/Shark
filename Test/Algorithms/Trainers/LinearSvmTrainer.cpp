@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 {
 	size_t classes = 5;
 	size_t dim = 5;
-	size_t ell = 500;
+	size_t ell = 100;
 
 	const size_t var_per_class = dim / classes;
 

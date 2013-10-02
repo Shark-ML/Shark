@@ -74,20 +74,57 @@ public:
 		RealMatrix covariance;
 		meanvar(input, mean, covariance);
 		
-		//we use the inversed cholesky decomposition for whitening
-		//since we have to assume that covariance does not have full rank, we use
-		//the generalized decomposition
-		RealMatrix UInv;
-		decomposedGeneralInverse(covariance,UInv);
-		UInv*=std::sqrt(m_targetVariance);
-		//we need the transpose of UInv. for that we reuse the memory of covariance
-		noalias(covariance)=trans(UInv);
+		RealMatrix whiteningMatrix = createWhiteningMatrix(covariance);
+		whiteningMatrix*=std::sqrt(m_targetVariance);
 		
 		
 		VectorType offset(dc);
-		fast_prod(covariance,mean,offset,false, -1.0);
+		fast_prod(trans(whiteningMatrix),mean,offset);
+		offset*=-1;
 		
-		model.setStructure(covariance, offset);
+		model.setStructure(RealMatrix(trans(whiteningMatrix)), offset);
+	}
+	
+private:
+	RealMatrix createWhiteningMatrix(
+		RealMatrix& covariance
+	){
+		using namespace blas;
+		
+		SIZE_CHECK(covariance.size1() == covariance.size2());
+		std::size_t m = covariance.size1();
+		//we use the inversed cholesky decomposition for whitening
+		//since we have to assume that covariance does not have full rank, we use
+		//the generalized decomposition
+		RealMatrix whiteningMatrix(m,m,0.0);
+		
+		//do a pivoting cholesky decomposition
+		//this destroys the covariance matrix as it is not neeeded anymore afterwards.
+		PermutationMatrix permutation(m);
+		std::size_t rank = pivotingCholeskyDecompositionInPlace(covariance,permutation);
+		//only take the nonzero columns as C
+		matrix_range<RealMatrix> C = columns(covariance,0,rank);
+
+		//full rank, means that we can use the typical cholesky inverse with pivoting
+		//so U is P C^-1 P^T
+		if(rank == m){
+			identity(whiteningMatrix);
+			solveTriangularSystemInPlace<SolveXAB,Upper>(trans(C),whiteningMatrix);
+			swapFullInverted(permutation,whiteningMatrix);
+			return whiteningMatrix;
+		}
+		//complex case. 
+		//A' = P C(C^TC)^-1(C^TC)^-1 C^T P^T
+		//=> P^T U P = C(C^TC)^-1
+		//<=> P^T U P (C^TC) = C
+		RealMatrix CTC(rank,rank);
+		fast_prod(trans(C),C,CTC);
+		
+		matrix_range<RealMatrix> submat = columns(whiteningMatrix,0,rank);
+		solveSymmSystem<SolveXAB>(CTC,submat,C);
+		swapFullInverted(permutation,whiteningMatrix);
+		
+		return whiteningMatrix;
 	}
 };
 

@@ -98,13 +98,17 @@ void shark::blas::solveTriangularSystemInPlace(
 
 template<class System, class DiagType,class MatA,class MatB>
 void shark::blas::solveTriangularSystemInPlace(
-	matrix_expression<MatA> const& matA, 
-	matrix_expression<MatB>& matB
+	matrix_expression<MatA> const& A, 
+	matrix_expression<MatB>& B
 ){
-	SIZE_CHECK(matA().size1() == matA().size2());
-	//SIZE_CHECK(matA().size2() == matB().size1());
+	SIZE_CHECK(A().size1() == A().size2());
+	if(System::left){
+		SIZE_CHECK(A().size1() == B().size1());
+	}else{
+		SIZE_CHECK(A().size1() == B().size2());
+	}
 	
-	bindings::trsm<DiagType::upper,System::left,DiagType::unit>(matA,matB);
+	bindings::trsm<DiagType::upper,System::left,DiagType::unit>(A,B);
 }
 
 template<class System,class MatL,class MatB>
@@ -113,7 +117,11 @@ void shark::blas::solveTriangularCholeskyInPlace(
 	matrix_expression<MatB>& B
 ){
 	SIZE_CHECK(L().size1() == L().size2());
-//	SIZE_CHECK(L().size2() == B().size1());
+	if(System::left){
+		SIZE_CHECK(L().size1() == B().size1());
+	}else{
+		SIZE_CHECK(L().size1() == B().size2());
+	}
 	
 	detail::solveTriangularCholeskyInPlace(L,B(),System());
 }

@@ -35,7 +35,7 @@
  */
 //===========================================================================
 #include <shark/Algorithms/Trainers/LDA.h>
-#include <shark/LinAlg/Inverse.h>
+#include <shark/LinAlg/solveSystem.h>
 
 using namespace shark;
 
@@ -95,13 +95,9 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	//arg max_i -m_i^T C^-1 m_i  +2* x^T C^-1 m_i
 	//so we compute first C^-1 m_i and than the first term
 	
-	//invert the matrix, take into account that it is not necessarily positive definite
-	RealMatrix CInverse;
-	decomposedGeneralInverse(covariance, CInverse);
-	
-	//multiply the mean with the inverse matrix
-	RealMatrix transformedMeans(classes,dim);
-	fast_prod(means,CInverse, transformedMeans);
+	//compute m_i^T C^-1  <=>  x C = m_i 
+	RealMatrix transformedMeans = means;
+	blas::solveSymmSemiDefiniteSystemInPlace<blas::SolveXAB>(covariance,transformedMeans);
 	transformedMeans*=-1;//transform to maximisation problem
 	
 	//compute bias terms m_i^T C^-1 m_i
