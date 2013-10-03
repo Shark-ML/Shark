@@ -44,7 +44,6 @@ IRLS::IRLS()
 	m_features |= REQUIRES_VALUE;
 	m_features |= REQUIRES_FIRST_DERIVATIVE;
 	m_features |= REQUIRES_SECOND_DERIVATIVE;
-	m_linesearch.lineSearchType() = LineSearch::Linmin;
 	m_isPositive = false;
 }
 void IRLS::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {

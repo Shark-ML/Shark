@@ -4,7 +4,7 @@
 
 #include <shark/Algorithms/Trainers/LDA.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
-#include <shark/LinAlg/Inverse.h>
+#include <shark/LinAlg/solveSystem.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 using namespace shark;
 
@@ -22,7 +22,10 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 	covariance(0,1)=8;
 	covariance(1,0)=8;
 	covariance(1,1)=16;
-	RealMatrix inverse=invert(covariance);
+	RealMatrix inverse(2,2,0.0);
+	inverse(0,0) = inverse(1,1) = 1.0;
+	blas::solveSymmSystemInPlace<blas::SolveAXB>(covariance,inverse);
+
 
 	RealVector mean[]={RealVector(2),RealVector(2)};
 	mean[0](0)=0;
@@ -82,7 +85,10 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	covariance(0,1)=8;
 	covariance(1,0)=8;
 	covariance(1,1)=16;
-	RealMatrix inverse=invert(covariance);
+	RealMatrix inverse(2,2,0.0);
+	inverse(0,0) = inverse(1,1) = 1.0;
+	blas::solveSymmSystemInPlace<blas::SolveAXB>(covariance,inverse);
+
 
 	RealVector mean[]={RealVector(2),RealVector(2)};
 	mean[0](0)=0;
@@ -143,7 +149,9 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 	covariance(0,1)=8;
 	covariance(1,0)=8;
 	covariance(1,1)=16;
-	RealMatrix inverse=invert(covariance);
+	RealMatrix inverse(2,2,0.0);
+	inverse(0,0) = inverse(1,1) = 1.0;
+	blas::solveSymmSystemInPlace<blas::SolveAXB>(covariance,inverse);
 
 	std::vector<RealVector> mean(classes,RealVector(2));
 	for(unsigned int c = 0; c != classes; ++c){
