@@ -106,7 +106,7 @@ void export_csv(const T &data,   // Container that holds the samples
 // export function for labeled data
 
 template<typename T, typename U, typename Stream>
-void export_csv(const T &input,   // Container that holds the samples
+void export_csv_labeled(const T &input,   // Container that holds the samples
         const U &labels,  // Container that holds the labels
         Stream &out,  // The file to be read from
         LabelPosition lp,  // The position of the label
@@ -115,7 +115,7 @@ void export_csv(const T &input,   // Container that holds the samples
         unsigned int fieldwidth = 0, //column-align using this field width
 	typename boost::enable_if<
 		boost::is_arithmetic<typename boost::range_value<U>::type>
-	>::type* dummy = 0//nabl this only for arithmetic types
+	>::type* dummy = 0//enable this only for arithmetic types
 ) {
 
 	if (!out) {
@@ -398,7 +398,7 @@ void export_csv(
     unsigned int width = 0
 ) {
 	std::ofstream ofs(fn.c_str());
-	detail::export_csv(dataset.inputs().elements(), dataset.labels().elements(), ofs, lp, separator, sci, width);
+	detail::export_csv_labeled(dataset.inputs().elements(), dataset.labels().elements(), ofs, lp, separator, sci, width);
 }
 
 /** @}*/
