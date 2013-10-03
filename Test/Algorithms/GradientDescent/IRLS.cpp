@@ -21,16 +21,6 @@ BOOST_AUTO_TEST_CASE( IRLS_dlinmin )
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
 	testFunction(optimizer,function,100,1);
 }
-BOOST_AUTO_TEST_CASE( IRLS_linmin )
-{
-	Ellipsoid function(5);
-	IRLS optimizer;
-	optimizer.hessianIsPositiveDefinite(true);
-	optimizer.lineSearch().lineSearchType()=LineSearch::Linmin;
-
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and linmin"<<std::endl;
-	testFunction(optimizer,function,100,1);
-}
 BOOST_AUTO_TEST_CASE( IRLS_Dlinmin_Rosenbrock )
 {
 	Rosenbrock function(3);
@@ -39,14 +29,5 @@ BOOST_AUTO_TEST_CASE( IRLS_Dlinmin_Rosenbrock )
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
 	testFunction(optimizer,function,100,1000,1.e-14);
-}
-BOOST_AUTO_TEST_CASE( IRLS_linmin_Rosenbrock )
-{
-	Rosenbrock function(3);
-	IRLS optimizer;
-	optimizer.lineSearch().lineSearchType()=LineSearch::Linmin;
-
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and linmin"<<std::endl;
-	testFunction(optimizer,function,100,1000);
 }
 

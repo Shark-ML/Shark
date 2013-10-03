@@ -39,12 +39,11 @@
 #define SHARK_ALGORITHMS_GRADIENTDESCENT_LINESEARCH_H
 
 #include <shark/LinAlg/Base.h>
-#include <shark/LinAlg/arrayoptimize.h>
 #include <shark/Core/IConfigurable.h>
 #include <shark/Core/ISerializable.h>
-#include "Impl/ObjectiveFunctionWrapper.h"
 #include "Impl/wolfecubic.inl"
-#include <shark/Algorithms/GradientDescent/LineSearch.h>
+#include "Impl/dlinmin.inl"
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 namespace shark {
 ///\brief Wrapper for the linesearch class of functions in the linear algebra library.
@@ -56,11 +55,9 @@ class LineSearch:public IConfigurable, public ISerializable {
 public:
 	enum LineSearchType {
 	    Dlinmin,
-	    Linmin,
 	    WolfeCubic
 	};
 	typedef AbstractObjectiveFunction<VectorSpace<double>,double> ObjectiveFunction;
-	typedef AbstractObjectiveFunction<VectorSpace<double>,double>::FirstOrderDerivative Derivative;
 
 	///Initializes the internal variables of the class to useful default values.
 	///Dlinmin is used as default
@@ -94,8 +91,8 @@ public:
 	}
 
 	///initializes the internal state of the LineSearch class and sets the function on which the lineSearch is to be evaluated
-	void init(const ObjectiveFunction &objectiveFunction) {
-		m_function.function()=&objectiveFunction;
+	void init(ObjectiveFunction const& objectiveFunction) {
+		m_function = &objectiveFunction;
 	}
 
 	///performs a linesearch on the objectiveFunction given the starting point, its value the newton direction and optionally the derivative at the starting point
@@ -104,43 +101,20 @@ public:
 	///@param newtonDirection the search direction of the line search
 	///@param derivative the derivative of the funktion at searchPoint
 	///@param stepLength initial step length guess for guiding the line search
-	virtual void operator()(RealVector &searchPoint,double &pointValue,const RealVector &newtonDirection, RealVector &derivative, double stepLength = 1.0)const {
+	virtual void operator()(RealVector &searchPoint,double &pointValue,RealVector const& newtonDirection, RealVector &derivative, double stepLength = 1.0)const {
 		switch (m_lineSearchType) {
 		case Dlinmin:
-			dlinmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);
-			m_function(searchPoint, derivative);
-			break;
-		case Linmin:
-			linmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);
-			m_function(searchPoint, derivative);
+			detail::dlinmin(searchPoint, newtonDirection, pointValue, *m_function, m_minInterval, m_maxInterval);
+			m_function->evalDerivative(searchPoint, derivative);
 			break;
 		case WolfeCubic:
-			wolfecubic(searchPoint, newtonDirection, pointValue, m_function, derivative, stepLength);
+			detail::wolfecubic(searchPoint, newtonDirection, pointValue, *m_function, derivative, stepLength);
 			break;
-		}
-	}
-	///performs a linesearch on the objectiveFunction given the starting point, its value the newton direction
-	///when cubic line search is used, this method first evaluates the derivative at the initial searchPoint. So, if available, use allready available derivative information and call the
-	///other version!
-	///@param searchPoint the point where the linesearch start
-	///@param pointValue the value of the function at searchPoint
-	///@param newtonDirection the search direction of the line search
-	///@param stepLength initial step length guess for guiding the line search
-	virtual void operator()(RealVector &searchPoint,double &pointValue,const RealVector &newtonDirection, double stepLength = 1.0)const {
-		switch (m_lineSearchType) {
-		case Dlinmin:
-			dlinmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);
-			break;
-		case Linmin:
-			linmin(searchPoint, newtonDirection, pointValue, m_function, m_minInterval, m_maxInterval);
-			break;
-		case WolfeCubic:
-			throw SHARKEXCEPTION("[LineSearch] WolfeCubic requires derivative");
 		}
 	}
 
 	//IConfigurable
-	void configure(const PropertyTree &node) {
+	void configure(PropertyTree const& node) {
 		m_lineSearchType=static_cast<LineSearchType>(node.get("searchtype",(unsigned int)Dlinmin));
 		m_minInterval=node.get("minInterval",0.0);
 		m_maxInterval=node.get("maxInterval",1.0);
@@ -169,7 +143,7 @@ protected:
 	LineSearchType m_lineSearchType;
 
 	///function to optimize
-	ObjectiveFunctionDerivativeWrapper m_function;
+	ObjectiveFunction const* m_function;
 };
 }
 

@@ -47,10 +47,12 @@
 
 namespace shark {
 
-// Cubic interpolation from Numerical Optimization p. 59.
+namespace detail{
+///  \briefCubic interpolation from Numerical Optimization p. 59.
 inline double wlsCubicInterp(double t1, double t2,
         double f1, double f2,
-        double gtd1, double gtd2) {
+        double gtd1, double gtd2
+) {
 	if (t1 == t2)
 		return t1;
 	if (t2 < t1) {
@@ -68,13 +70,13 @@ inline double wlsCubicInterp(double t1, double t2,
 	// New step length should be in interval [t1, t2]
 	return std::min(std::max(t, t1), t2);
 }
-//! \brief Line search, using cubic interpolation, satisfying the strong Wolfe conditions
+/// \brief Line search, using cubic interpolation, satisfying the strong Wolfe conditions.
 template <class VectorT, class Function>
 void wolfecubic(
 	VectorT &point,
 	const VectorT &searchDirection,
-	double &fret,
-	Function func,
+	double &value,
+	Function const& func,
 	VectorT &gradient,
 	double t = 1.0
 ) {
@@ -91,14 +93,14 @@ void wolfecubic(
 		maxD = std::max(maxD, std::abs(searchDirection(i)));
 
 	// Previous step
-	double f_prev = fret;
+	double f_prev = value;
 	double t_prev = 0.0;
 	VectorT g_prev = gradient;
 	double gtd = inner_prod(gradient, searchDirection);
 
 	// Initial step values
 	VectorT g_new(point.size());
-	double f_new  = func(point + t * searchDirection, g_new);
+	double f_new  = func.evalDerivative(point + t * searchDirection, g_new);
 	double gtd_new = inner_prod(g_new, searchDirection);
 
 	// Bracket vars
@@ -116,7 +118,7 @@ void wolfecubic(
 	while(iter++ < maxIter) {
 		// If the new point doesn't decrease enough there must be one that
 		// does so before it.
-		if (f_new > fret + c1 * t * gtd || (iter > 1 && f_new >= f_prev)) {
+		if (f_new > value + c1 * t * gtd || (iter > 1 && f_new >= f_prev)) {
 			bracket[0] = t_prev;
 			bracket[1] = t;
 			bracketf[0] = f_prev;
@@ -150,7 +152,7 @@ void wolfecubic(
 
 		f_prev = f_new;
 		g_prev = g_new;
-		f_new = func(point + t * searchDirection, g_new);
+		f_new = func.evalDerivative(point + t * searchDirection, g_new);
 		gtd_new = inner_prod(g_new, searchDirection);
 	}
 
@@ -183,11 +185,11 @@ void wolfecubic(
 		} else
 			insuf = false;
 
-		f_new = func(point + t * searchDirection, g_new);
+		f_new = func.evalDerivative(point + t * searchDirection, g_new);
 		gtd_new = inner_prod(g_new, searchDirection);
 
 		// If the new point doesn't decrease enough, make it new t_hi
-		if (f_new > fret + c1 * t * gtd || f_new > bracketf[lo]) {
+		if (f_new > value + c1 * t * gtd || f_new > bracketf[lo]) {
 			bracket[hi] = t;
 			bracketf[hi] = f_new;
 			bracketg[hi] = g_new;
@@ -211,20 +213,20 @@ void wolfecubic(
 		}
 	}
 
-	if (iter < maxIter || fret > bracketf[0] || fret > bracketf[1]) {
+	if (iter < maxIter || value > bracketf[0] || value > bracketf[1]) {
 		if (bracketf[0] < bracketf[1] || single) {
 			point += bracket[0] * searchDirection;
-			fret = bracketf[0];
+			value = bracketf[0];
 			gradient = bracketg[0];
 		} else {
 			point += bracket[1] * searchDirection;
-			fret = bracketf[1];
+			value = bracketf[1];
 			gradient = bracketg[1];
 		}
 	}
 }
 
-}
+}}
 
 
 #endif

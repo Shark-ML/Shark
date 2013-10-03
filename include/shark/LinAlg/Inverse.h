@@ -45,15 +45,6 @@ namespace shark{ namespace blas{
  * @{
  */
 
-
-//! \brief Inverts a matrix with full rank.
-template<class MatrixT>
-RealMatrix invert(const MatrixT& mat);
-
-//! Inverts a symmetric positive definite matrix
-template<class MatrixT,class MatrixU>
-void invertSymmPositiveDefinite(MatrixT &I, const MatrixU& ArrSymm);
-
 /*!
  *  \brief Calculates the generalized inverse matrix of input matrix "matrixA".
  *
@@ -84,8 +75,5 @@ RealMatrix g_inverse(matrix_expression<MatrixT> const& matrixA){
 
 /** @}*/
 }}
-
-//implementation of the template functions
-#include "Impl/invert.inl"
 
 #endif 
