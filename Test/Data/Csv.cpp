@@ -341,6 +341,8 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Export)
 		export_csv(test, "test_output/check_regression.csv");
 		Data<RealVector> loaded;
 		import_csv(loaded, "test_output/check_regression.csv");
+		
+		checkDataEquality(test_values,loaded);
 	}
 }
 
