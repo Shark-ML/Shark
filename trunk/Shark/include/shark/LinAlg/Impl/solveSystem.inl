@@ -183,6 +183,9 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 	if(rank == m){
 		solveTriangularCholeskyInPlace<SolveAXB>(L,b);
 	}
+	else if (rank == 0){//A is 0
+		zero(b);
+	}
 	else
 	{
 		//complex case. 
@@ -239,6 +242,9 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 	//matrix has full rank, means that we can use the typical cholesky inverse
 	if(rank == m){
 		solveTriangularCholeskyInPlace<System>(L,B);
+	}
+	else if (rank == 0){//A is 0
+		zero(B);
 	}
 	else if(System::left)
 	{
@@ -340,14 +346,14 @@ void shark::blas::generalSolveSystemInPlace(
 	if( System::left){
 		SIZE_CHECK(A().size1() == B().size1());
 		//reduce to the case of quadratic A
-		//Ax=b => A^TAx=A'b => x= A'b = (A^TA)' Ab
-		// with z = Ab => (A^TA) x= z
+		//AX=B => A'AX=A'B => X= A'B = (A^TA)' A^TB
+		// with Z = A^TB => (A^TA) X= Z
 		//compute A^TA
 		RealMatrix ATA(n,n);
 		fast_prod(trans(A),A,ATA);
 		
 		//compute Z=AB
-		RealVector Z(n,B().size2());
+		RealMatrix Z(n,B().size2());
 		fast_prod(trans(A),B,Z);
 		
 		//call recursively for the quadratic case
@@ -356,16 +362,16 @@ void shark::blas::generalSolveSystemInPlace(
 	}
 	else{
 		SIZE_CHECK(A().size2() == B().size2());
-		//reduce to the case of quadratic A
-		//x^TA=b^T => x^TAA'=b^TA' => x^T= b^TA' = b^TA^T(AA^T)'
-		// with z = Ab => x^T(AA^T) = z^T
-		//compute AAT
+		//~ //reduce to the case of quadratic A
+		//~ //XA=B => XAA'=BA' => X = BA' = BA^T(AA^T)'
+		//~ // with Z = BA^T => X(AA^T) = Z
+		//~ //compute AAT
 		RealMatrix AAT(m,m);
 		fast_prod(A,trans(A),AAT);
 		
 		//compute z=Ab
-		RealVector Z(m,B().size1());
-		fast_prod(A,B,Z);
+		RealMatrix Z(B().size1(),m);
+		fast_prod(B,trans(A),Z);
 		
 		//call recursively for the quadratic case
 		solveSymmSemiDefiniteSystemInPlace<System>(AAT,Z);

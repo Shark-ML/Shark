@@ -51,7 +51,6 @@ SHARK_ADD_TEST( LinAlg/Metrics.cpp LinAlg_Metrics)
 SHARK_ADD_TEST( LinAlg/RQ.cpp LinAlg_RQ )
 SHARK_ADD_TEST( LinAlg/eigensort.cpp LinAlg_eigensort )
 SHARK_ADD_TEST( LinAlg/eigensymm.cpp LinAlg_eigensymm )
-SHARK_ADD_TEST( LinAlg/g_inverse.cpp LinAlg_g_inverse )#todo: more tests
 SHARK_ADD_TEST( LinAlg/svd.cpp LinAlg_svd )
 SHARK_ADD_TEST( LinAlg/choleskyDecomposition.cpp LinAlg_choleskyDecomposition)
 SHARK_ADD_TEST( LinAlg/solve.cpp LinAlg_solve)

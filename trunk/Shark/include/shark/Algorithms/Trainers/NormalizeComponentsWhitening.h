@@ -44,7 +44,7 @@
 #include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Data/Statistics.h>
-#include <shark/LinAlg/Inverse.h>
+#include <shark/LinAlg/solveSystem.h>
 
 namespace shark {
 
