@@ -45,7 +45,7 @@
 
 #include <shark/Core/INameable.h>
 #include <shark/Core/ISerializable.h>
-#include <shark/LinAlg/Inverse.h>
+#include <shark/LinAlg/solveSystem.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
 
@@ -158,37 +158,31 @@ public:
 		get(bof_input, 0) = input; //fixed over entire function scope
 
 		// init helpers
-		double ker, cur_alpha, cur_label;
 		RealVector der( m_nhp );
 		boost::shared_ptr<State> state = mep_k->createState(); //state from eval and for derivatives
 		derivative.resize( m_nhp );
 
 		// start calculating derivative
-		for ( unsigned int k=0; k<m_nhp; k++ )
-			derivative(k) = m_d_alphab_d_theta( m_noofFreeSVs, k ); //without much thinking, we add db/d(\theta) to all derivatives
+		noalias(derivative) = row(m_d_alphab_d_theta,m_noofFreeSVs); //without much thinking, we add db/d(\theta) to all derivatives
 		// first: go through free SVs and add their contributions (the actual ones, which use the matrix d_alphab_d_theta)
 		for ( unsigned int i=0; i<m_noofFreeSVs; i++ ) {
 			get(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]);
 			mep_k->eval( bof_input, bof_xi, bof_results, *state );
-			ker = bof_results(0,0);
-			cur_alpha = m_freeAlphas(i);
+			double ker = bof_results(0,0);
+			double cur_alpha = m_freeAlphas(i);
 			mep_k->weightedParameterDerivative( bof_input, bof_xi, unit_weights, *state, der );
-			derivative( m_nkp ) += ker * m_d_alphab_d_theta( i, m_nkp ); //for C, simply add up the individual contributions
-			for ( unsigned int k=0; k<m_nkp; k++ ) {
-				derivative(k) += cur_alpha*der(k) + ker*m_d_alphab_d_theta( i, k );
-			}
+			noalias(derivative) += ker * row(m_d_alphab_d_theta,i); //for C, simply add up the individual contributions
+			noalias(subrange(derivative,0,m_nkp))+= cur_alpha*der;
 		}
 		// second: go through all bounded SVs and add their "trivial" derivative contributions
 		for ( unsigned int i=0; i<m_noofBoundedSVs; i++ ) {
 			get(bof_xi, 0) = m_basis.element(m_boundedAlphaIndices[i]);
 			mep_k->eval( bof_input, bof_xi, bof_results, *state );
-			ker = bof_results(0,0);
-			cur_label = m_boundedLabels(i);
+			double ker = bof_results(0,0);
+			double cur_label = m_boundedLabels(i);
 			mep_k->weightedParameterDerivative( bof_input, bof_xi, unit_weights, *state, der );
 			derivative( m_nkp ) += ker * cur_label; //deriv of bounded alpha w.r.t. C is simply the label
-			for ( unsigned int k=0; k<m_nkp; k++ ) {
-				derivative(k) += cur_label * m_C * der(k);
-			}
+			noalias(subrange(derivative,0,m_nkp))+= cur_label * m_C * der;
 		}
 		if ( m_unconstrained )
 			derivative( m_nkp ) *= m_C; //compensate for log encoding via chain rule
@@ -197,9 +191,7 @@ public:
 
 		// in some rare cases, there are no free SVs and we have to manually correct the derivatives using a correcting term from the SvmTrainer.
 		if ( m_noofFreeSVs == 0 ) {
-			for ( std::size_t k=0; k<m_nhp; k++ ) {
-				derivative(k) += m_db_dParams_from_solver(k);
-			}
+			noalias(derivative) += m_db_dParams_from_solver;
 		}
 	}
 
@@ -228,7 +220,7 @@ public:
 		throw SHARKEXCEPTION("[CSvmDerivative::write] Not implemented yet.");
 	}
 
-protected:
+private:
 
 	///////////  DERIVATIVE OF BINARY (C-)SVM  ////////////////////
 
@@ -240,15 +232,11 @@ protected:
 	//!
 	void prepareCSvmParameterDerivative() {
 		// init convenience size indicators
-		unsigned int numberOfAlphas = m_alpha.size1(); //not counting b
-		// set up internal helper vars for this method:
-		m_freeAlphaIndices.clear();
-		m_boundedAlphaIndices.clear();
-		double cur_alpha; //tmp helper
+		unsigned int numberOfAlphas = m_alpha.size1();
 
 		// first round through alphas: count free and bounded SVs
 		for ( unsigned int i=0; i<numberOfAlphas; i++ ) {
-			cur_alpha = m_alpha(i,0); //we assume (and checked) that there is only one class
+			double cur_alpha = m_alpha(i,0); //we assume (and checked) that there is only one class
 			if ( cur_alpha != 0.0 ) {
 				if ( cur_alpha == m_C || cur_alpha == -m_C ) { //the svm formulation using reparametrized alphas is assumed
 					m_boundedAlphaIndices.push_back(i);
@@ -260,7 +248,8 @@ protected:
 		m_noofFreeSVs = m_freeAlphaIndices.size(); //don't forget to add b to the count where appropriate
 		m_noofBoundedSVs = m_boundedAlphaIndices.size();
 		// in contrast to the Shark2 implementation, we here don't store useless constants (i.e., 0, 1, -1), but only the derivs w.r.t. (\alpha_free, b)
-		m_d_alphab_d_theta = RealZeroMatrix( m_noofFreeSVs+1, m_nhp );
+		m_d_alphab_d_theta.resize(m_noofFreeSVs+1, m_nhp);
+		m_d_alphab_d_theta.clear();
 		m_freeAlphaIndices.push_back( numberOfAlphas ); //b is always free (but don't forget to add to count manually)
 
 		// 2nd round through alphas: build up the RealVector of free and bounded alphas (needed for matrix-vector-products later)
@@ -271,9 +260,14 @@ protected:
 			m_freeAlphas(i) = m_alpha( m_freeAlphaIndices[i], 0 );
 		m_freeAlphas( m_noofFreeSVs ) = mep_ke->offset(0);
 		for ( unsigned int i=0; i<m_noofBoundedSVs; i++ ) {
-			cur_alpha = m_alpha( m_boundedAlphaIndices[i], 0 );
+			double cur_alpha = m_alpha( m_boundedAlphaIndices[i], 0 );
 			m_boundedAlphas(i) = cur_alpha;
 			m_boundedLabels(i) = ( (cur_alpha > 0.0) ? 1.0 : -1.0 );
+		}
+		
+		//if there are no free support vectors, we are done.
+		if ( m_noofFreeSVs == 0 ) {
+			return;
 		}
 
 		// set up helper variables.
@@ -332,14 +326,7 @@ protected:
 		for ( unsigned int k=0; k<m_nkp; k++ ) {
 			dH[k]( m_noofFreeSVs, m_noofFreeSVs ) = 0.0;
 		}
-
-		// MAJOR STEP: this is the achilles heel of the current implementation, cf. keerthi 2007
-		// TODO: mtq: explore ways for speed-up..
-		RealMatrix H_inv( m_noofFreeSVs+1, m_noofFreeSVs+1 );
-		if ( m_noofFreeSVs > 0 ) {
-			H_inv = g_inverse( H );
-		}
-
+		
 		// initialize R and dR
 		RealMatrix R( m_noofFreeSVs+1, m_noofBoundedSVs );
 		std::vector< RealMatrix > dR( m_nkp, RealMatrix(m_noofFreeSVs+1, m_noofBoundedSVs));
@@ -357,30 +344,36 @@ protected:
 			for ( unsigned int k=0; k<m_nkp; k++ )
 				dR[k]( m_noofFreeSVs, i ) = 0.0;
 		}
+		
+		
+		//O.K.: A big step of the computation of the derivative m_d_alphab_d_theta is
+		// the multiplication with H^{-1} B. (where B are the other terms).
+		// However  instead of storing m_d_alphab_d_theta_i = -H^{-1}*b_i
+		//we store _i and compute the multiplication with the inverse
+		//afterwards by solving the system Hx_i = b_i 
+		//for i = 1....m_nkp+1
+		//this is a lot faster and numerically more stable.
 
 		// compute the derivative of (\alpha, b) w.r.t. C
-		der.resize(m_noofFreeSVs+1);
 		if ( m_noofBoundedSVs > 0 ) {
-			zero(der); //re-using this helper variable
-			RealVector Ry( m_noofFreeSVs+1,0.0 ); //tmp helper for calculations: intermediate vector
-			axpy_prod( R, m_boundedLabels, Ry, true );
-			axpy_prod( H_inv, Ry, der, true );
-			for ( unsigned int i=0; i<=m_noofFreeSVs; i++ ) {
-				m_d_alphab_d_theta( i, m_nkp ) = -der(i); //fill the last column of the derivative matrix (i.e., that which corresponds to C)
-			}
+			fast_prod( R, m_boundedLabels, column(m_d_alphab_d_theta,m_nkp));
 		}
 		// compute the derivative of (\alpha, b) w.r.t. the kernel parameters
 		for ( std::size_t k=0; k<m_nkp; k++ ) {
 			RealVector sum( m_noofFreeSVs+1,0.0 );
-			axpy_prod( dH[k], m_freeAlphas, sum, true ); //sum = dH * \alpha_f
-			axpy_prod( dR[k], m_boundedAlphas, sum, false ); // sum += dR * \alpha_r , i.e., the C*y_g is expressed as alpha_g
-			RealVector tmptmp( m_noofFreeSVs+1,0.0 );
-			axpy_prod( dR[k], m_boundedAlphas, tmptmp, false ); // sum += dR * \alpha_r
-			axpy_prod( H_inv, sum, der, true ); //reuse again: der = H_inv * sum
-			for ( std::size_t i=0; i<=m_noofFreeSVs; i++ ) {
-				m_d_alphab_d_theta( i, k ) = -der(i); //fill the remaining columns of the derivative matrix (except the last, which is for C)
-			}
+			fast_prod( dH[k], m_freeAlphas, sum, true ); //sum = dH * \alpha_f
+			if(m_noofBoundedSVs > 0)
+				fast_prod( dR[k], m_boundedAlphas, sum, true ); // sum += dR * \alpha_r , i.e., the C*y_g is expressed as alpha_g
+			//fill the remaining columns of the derivative matrix (except the last, which is for C)
+			noalias(column(m_d_alphab_d_theta,k)) = sum;
 		}
+		
+		//lastly solve the system Hx_i = b_i 
+		// MAJOR STEP: this is the achilles heel of the current implementation, cf. keerthi 2007
+		// TODO: mtq: explore ways for speed-up..
+		blas::generalSolveSystemInPlace<blas::SolveAXB>(H,m_d_alphab_d_theta);
+		m_d_alphab_d_theta*=-1;
+		
 		// that's all, folks; we're done.
 	}
 

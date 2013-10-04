@@ -31,7 +31,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/LinAlg/solveTriangular.h>
-#include <shark/LinAlg/Inverse.h>
+#include <shark/LinAlg/Cholesky.h>
 namespace shark {
 
 
