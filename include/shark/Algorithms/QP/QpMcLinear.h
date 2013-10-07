@@ -46,7 +46,7 @@ namespace shark {
 #define PREF_MAX 20.0
 
 // inner iteration limit
-#define MAXITER_MULTIPLIER
+#define MAXITER_MULTIPLIER 1000
 
 
 /// \brief Generic solver skeleton for linear multi-class SVM problems.
