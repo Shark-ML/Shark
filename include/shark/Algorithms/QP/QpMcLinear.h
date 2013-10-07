@@ -45,6 +45,9 @@ namespace shark {
 #define PREF_MIN 0.05
 #define PREF_MAX 20.0
 
+// inner iteration limit
+#define MAXITER_MULTIPLIER
+
 
 /// \brief Generic solver skeleton for linear multi-class SVM problems.
 template <class InputT>
@@ -686,7 +689,8 @@ protected:
 		double gain = 0.0;
 
 		// SMO loop
-		while (true)
+		size_t iter, maxiter = MAXITER_MULTIPLIER * m_classes;
+		for (iter=0; iter<maxiter; iter++)
 		{
 			// select working set
 			std::size_t idx = 0;
@@ -796,7 +800,8 @@ protected:
 		double gain = 0.0;
 
 		// SMO loop
-		while (true)
+		size_t iter, maxiter = MAXITER_MULTIPLIER * m_classes;
+		for (iter=0; iter<maxiter; iter++)
 		{
 			// select working set
 			std::size_t idx = 0;
@@ -901,7 +906,8 @@ protected:
 		double gain = 0.0;
 
 		// SMO loop
-		while (true)
+		size_t iter, maxiter = MAXITER_MULTIPLIER * m_classes;
+		for (iter=0; iter<maxiter; iter++)
 		{
 			// select working set
 			std::size_t idx = 0;
@@ -1129,7 +1135,8 @@ protected:
 		double gain = 0.0;
 
 		// SMO loop
-		while (true)
+		size_t iter, maxiter = MAXITER_MULTIPLIER * m_classes;
+		for (iter=0; iter<maxiter; iter++)
 		{
 			// select working set
 			std::size_t idx = 0;
@@ -1236,6 +1243,8 @@ protected:
 				gain += m * (grad - dg);
 			}
 		}
+
+		return gain;
 	}
 
 protected:
@@ -1323,7 +1332,8 @@ protected:
 		double gain = 0.0;
 
 		// SMO loop
-		while (true)
+		size_t iter, maxiter = MAXITER_MULTIPLIER * m_classes;
+		for (iter=0; iter<maxiter; iter++)
 		{
 			// select working set
 			std::size_t idx = 0;
@@ -1432,6 +1442,8 @@ protected:
 				gain += m * (grad - 0.5 * (dg - dgc));
 			}
 		}
+
+		return gain;
 	}
 
 protected:
@@ -1506,7 +1518,8 @@ protected:
 		double gain = 0.0;
 
 		// SMO loop
-		while (true)
+		size_t iter, maxiter = MAXITER_MULTIPLIER * m_classes;
+		for (iter=0; iter<maxiter; iter++)
 		{
 			// select working set
 			std::size_t idx = 0;
@@ -1633,6 +1646,8 @@ protected:
 				gain += m * (grad - 0.5 * (dg - dgc));
 			}
 		}
+
+		return gain;
 	}
 
 protected:
