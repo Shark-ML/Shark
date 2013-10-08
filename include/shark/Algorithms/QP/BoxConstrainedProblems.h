@@ -393,8 +393,10 @@ public:
 		smallestDown = std::min(smallestDown,0.0);
 		largestUp = std::max(largestUp,0.0);
 		for (std::size_t a = this->active(); a > 0; --a){
-			if(testShrinkVariable(a-1,largestUp,smallestDown))
-				this->shrinkVariable(a-1);
+			if(testShrinkVariable(a-1,largestUp,smallestDown)){
+				flipCoordinates(a-1,active()-1);
+				--this->m_active;
+			}
 		}
 		return true;
 	}
@@ -463,6 +465,12 @@ public:
 		m_gradientEdge(i) += newValue;
 		base_type::setLinear(i,newValue);
 	}
+	
+	///\brief swap indizes (i,j)
+	void flipCoordinates(std::size_t i,std::size_t j){
+		base_type::flipCoordinates(i,j);
+		std::swap( m_gradientEdge[i], m_gradientEdge[j]);
+	}
 protected:
 	///\brief Updates the edge-part of the gradient when an alpha valu was changed
 	///
@@ -492,13 +500,6 @@ protected:
 		}
 	}
 private:
-	///\brief Shrink the variable from the Problem.
-	void shrinkVariable(std::size_t i){
-		SIZE_CHECK(i < active());
-		base_type::flipCoordinates(i,active()-1);
-		std::swap( m_gradientEdge[i], m_gradientEdge[active()-1]);
-		--this->m_active;
-	}
 
 	bool testShrinkVariable(std::size_t a, double largestUp, double smallestDown)const{
 		if (
