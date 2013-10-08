@@ -150,7 +150,7 @@ void export_csv_labeled(const T &input,   // Container that holds the samples
 
 // export function for data with vector labels
 template<typename T, typename U, typename Stream>
-void export_csv(
+void export_csv_labeled(
 	const T &input,  // Container that holds the samples
 	const U &labels,  // Container that holds the labels
 	Stream &out,  // The file to be read from
