@@ -1,21 +1,9 @@
 //===========================================================================
 /*!
- *  \file Derivative.h
- *
  *  \brief wrapper for first and second derivative
  *
  *  \author T.Voss, T
  *  \date 2010-2011
- *
- *  \par Copyright (c) 1998-2007:
- *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;t Bochum<BR>
- *      D-44780 Bochum, Germany<BR>
- *      Phone: +49-234-32-25558<BR>
- *      Fax:   +49-234-32-14209<BR>
- *      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
- *      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
- *      <BR>
  *
  *
  *  <BR><HR>
