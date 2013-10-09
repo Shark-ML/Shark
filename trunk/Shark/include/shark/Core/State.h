@@ -1,20 +1,10 @@
 //===========================================================================
 /*!
 *
-*  \brief Class which externalises the state of an Object
+*  \brief Class which externalizes the state of an Object.
 *
 *  \author  O. Krause
 *  \date    2012
-*
-*  \par Copyright (c) 1999-2012:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-27974<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*
 *
 *
 *  <BR><HR>

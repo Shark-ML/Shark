@@ -1,23 +1,12 @@
 /**
 *
-*  \file Math.h
+*  \brief Very basic math abstraction layer.
 *
 *  \par
 *  This file serves as a minimal abstraction layer.
 *  Inclusion of this file makes some frequently used
 *  functions, constants, and header file inclusions
 *  OS-, compiler-, and version-independent.
-*
-*
-*  \par Copyright (c) 1998-2011:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-25558<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*      <BR>
 *
 *
 *  <BR><HR>
