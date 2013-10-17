@@ -62,7 +62,8 @@ import_libsvm_reader(
 template<class T>//We assume T to be vectorial
 shark::LabeledData<T, unsigned int> libsvm_importer(
 	std::istream& stream,
-	unsigned int dimensions
+	unsigned int dimensions,
+	std::size_t batchSize
 ){
 	//read contents of stream
 	std::vector<LibSVMPoint> contents = import_libsvm_reader(stream);
@@ -116,7 +117,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 
 	//copy contents into a new dataset
 	typename shark::LabeledData<T, unsigned int>::element_type blueprint(T(maxIndex + (haszero ? 1 : 0)),0);
-	shark::LabeledData<T, unsigned int> data(numPoints,blueprint);//create dataset with the right structure
+	shark::LabeledData<T, unsigned int> data(numPoints,blueprint, batchSize);//create dataset with the right structure
 	{
 		size_t delta = (haszero ? 0 : 1);
 		std::size_t i = 0;
@@ -141,36 +142,40 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 void shark::import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::istream& stream,
-	int highestIndex
+	unsigned int highestIndex,
+	std::size_t batchSize
 ){
-	dataset =  libsvm_importer<RealVector>(stream, highestIndex);
+	dataset =  libsvm_importer<RealVector>(stream, highestIndex,batchSize);
 }
 
 void shark::import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::istream& stream,
-	int highestIndex
+	unsigned int highestIndex,
+	std::size_t batchSize
 ){
-	dataset =  libsvm_importer<CompressedRealVector>(stream, highestIndex);
+	dataset =  libsvm_importer<CompressedRealVector>(stream, highestIndex,batchSize);
 }
 
 
 void shark::import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::string fn,
-	int highestIndex
+	unsigned int highestIndex,
+	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
 	if (! ifs.good()) throw SHARKEXCEPTION("[shark::import_libsvm] failed to open file for input");
-	dataset =  libsvm_importer<RealVector>(ifs, highestIndex);
+	dataset =  libsvm_importer<RealVector>(ifs, highestIndex,batchSize);
 }
 
 void shark::import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::string fn,
-	int highestIndex
+	unsigned int highestIndex,
+	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
 	if (! ifs.good()) throw SHARKEXCEPTION("[shark::import_libsvm] failed to open file for input");
-	dataset =  libsvm_importer<CompressedRealVector>(ifs, highestIndex);
+	dataset =  libsvm_importer<CompressedRealVector>(ifs, highestIndex,batchSize);
 }
