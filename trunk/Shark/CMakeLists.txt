@@ -1,10 +1,10 @@
 #####################################################################
-#       Shark Machine Learning Library                              #
-#       Top-Level CMake driver file                                 #
-#       Optionally included sub-probjects:                          #
-#         * Test/CMakeLists.txt                                     #
-#         * examples/CMakeLists.txt                                 #
-#         * doc/CMakeLists.txt                                      #
+#       Shark Machine Learning Library   
+#       Top-Level CMake driver file        
+#       Optionally included sub-probjects:
+#         * Test/CMakeLists.txt                
+#         * examples/CMakeLists.txt                                
+#         * doc/CMakeLists.txt                           
 #####################################################################
 PROJECT( shark CXX )
 
@@ -18,7 +18,7 @@ SET( LIBRARY_OUTPUT_PATH lib )
 ENABLE_LANGUAGE(C) # Fix small issue with OpenMP on some platforms/versions
 
 #####################################################################
-#                       Dynamic or static                           #
+#                       Dynamic or static 
 #####################################################################
 
 OPTION( OPT_DYNAMIC_LIBRARY
@@ -35,7 +35,7 @@ ELSE( OPT_DYNAMIC_LIBRARY )
 ENDIF( OPT_DYNAMIC_LIBRARY )
 
 #####################################################################
-#		Official Releases are tagged.                       #
+#		Official Releases are tagged
 #####################################################################
 OPTION( OPT_OFFICIAL_RELEASE "Is this an official Shark release." OFF )
 mark_as_advanced( OPT_OFFICIAL_RELEASE ) 
@@ -45,7 +45,7 @@ IF( OPT_OFFICIAL_RELEASE )
 ENDIF( OPT_OFFICIAL_RELEASE )
 
 #####################################################################
-#		Marks the official version                          #
+#		Marks the official version
 #####################################################################
 SET( SHARK_VERSION_MAJOR 3 )
 SET( SHARK_VERSION_MINOR 0 )
@@ -65,7 +65,7 @@ CONFIGURE_FILE (
   )
 
 #####################################################################
-#	Adjustments for cpack and deb package generation            #
+#	Adjustments for cpack and deb package generation
 #####################################################################
 SET( CPACK_PACKAGE_NAME "libshark-i386" )
 SET( CPACK_BUNDLE_NAME "libshark" )
@@ -97,7 +97,7 @@ SET( CPACK_DEBIAN_PACKAGE_DESCRIPTION
 SET( CPACK_DEBIAN_PACKAGE_MAINTAINER "Christian Igel <c.igel@ieee.org>" )
 
 #####################################################################
-#    Adjust include, lib, example and doc paths for installation    #
+#    Adjust include, lib, example and doc paths for installation
 #####################################################################
 IF( UNIX )
 	SET( SHARK_INSTALL_INCLUDE_DIR include/ )
@@ -114,12 +114,12 @@ ELSE( UNIX )
 ENDIF( UNIX )
 
 #####################################################################
-#           Enable installer and package generation	            #
+#           Enable installer and package generation
 #####################################################################
 INCLUDE( CPack )
 
 #####################################################################
-#           Explicit macro setup for debug configuration	    #
+#           Explicit macro setup for debug configuration
 #####################################################################
 # enable or disable debugging, default is Release
 IF(NOT CMAKE_BUILD_TYPE)
@@ -148,13 +148,13 @@ IF(CMAKE_BUILD_TYPE MATCHES "Release")
 ENDIF (CMAKE_BUILD_TYPE MATCHES "Release")
 
 #####################################################################
-#           Report compilers	                                    #
+#           Report compilers
 #####################################################################
 message(STATUS "C++ compiler: " ${CMAKE_CXX_COMPILER})
 message(STATUS "C compiler: " ${CMAKE_C_COMPILER})
 
 #####################################################################
-#           Boost configuration	                                    #
+#           Boost configuration
 #####################################################################
 SET(Boost_USE_MULTITHREADED ON)
 ADD_DEFINITIONS( -DBOOST_PARAMETER_MAX_ARITY=15 -DBOOST_FILESYSTEM_VERSION=3 )
@@ -180,7 +180,7 @@ mark_as_advanced( CLEAR
 message( STATUS "Using boost from " ${Boost_LIBRARY_DIRS} )
 
 #####################################################################
-#		Optionally enable OpenMP                            #
+#		Optionally enable OpenMP 
 #####################################################################
 OPTION( OPT_ENABLE_OPENMP "Enable OpenMP if available." OFF )
 
@@ -199,7 +199,7 @@ IF( OPT_ENABLE_OPENMP )
 ENDIF( OPT_ENABLE_OPENMP )
 
 #####################################################################
-#           HDF5 configuration                                      #
+#           HDF5 configuration 
 #####################################################################
 FIND_PACKAGE(HDF5 COMPONENTS C CXX HL QUIET)
 mark_as_advanced( HDF5_DIR ) 
@@ -217,7 +217,7 @@ ELSE( HDF5_FOUND )
 ENDIF( HDF5_FOUND )
 
 #####################################################################
-#           ATLAS configuration	                                    #
+#           ATLAS configuration
 #####################################################################
 OPTION( OPT_ENABLE_ATLAS "Use ATLAS as Linear Algebra Library" OFF )
 IF ( OPT_ENABLE_ATLAS )
@@ -263,7 +263,7 @@ IF ( OPT_ENABLE_ATLAS )
 ENDIF ( OPT_ENABLE_ATLAS )
 
 #####################################################################
-#                       Static Code Analysis                        #
+#                       Static Code Analysis
 #####################################################################
 mark_as_advanced( CPP_CHECK )
 IF( UNIX )
@@ -278,7 +278,7 @@ IF( UNIX )
 ENDIF( UNIX )
 
 #####################################################################
-#                Adjust compiler flags and settings for MSVC							#
+#                Adjust compiler flags and settings for MSVC
 #####################################################################
 IF( MSVC )
     message(STATUS "Win32")
@@ -322,7 +322,7 @@ ADD_SUBDIRECTORY( include )
 ADD_SUBDIRECTORY( src )
 
 #####################################################################
-#                       Include Examples                            #
+#                       Include Examples
 #####################################################################
 OPTION( OPT_COMPILE_EXAMPLES "Compile example programs." ON )
 
@@ -331,12 +331,9 @@ IF( OPT_COMPILE_EXAMPLES )
 ENDIF( OPT_COMPILE_EXAMPLES )
 
 #####################################################################
-#                       Include Unit Tests                          #
+#                       Include Unit Tests
 #####################################################################
-IF( OPT_DYNAMIC_LIBRARY )
-    OPTION( OPT_MAKE_TESTS "Test the library after Building." OFF )
-ELSE( OPT_DYNAMIC_LIBRARY )
-    OPTION( OPT_MAKE_TESTS "Test the library after Building." ON )
+OPTION( OPT_MAKE_TESTS "Compile unit tests." OFF )
 ENDIF( OPT_DYNAMIC_LIBRARY )
 
 IF( OPT_MAKE_TESTS)
@@ -344,7 +341,7 @@ IF( OPT_MAKE_TESTS)
 ENDIF( OPT_MAKE_TESTS )
 
 #####################################################################
-#                       Include Documentation                       #
+#                       Include Documentation
 #####################################################################
 OPTION( OPT_COMPILE_DOCUMENTATION "Compile documentation." OFF )
 
@@ -358,7 +355,7 @@ ENDIF( OPT_COMPILE_DOCUMENTATION )
 
 
 ###################################################################
-# CMAKE PACKAGING                                                 #
+#                       CMAKE PACKAGING
 ###################################################################
 
 
