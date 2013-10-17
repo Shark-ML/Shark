@@ -77,9 +77,17 @@ public:
 	}
 
 	/// Evaluate the leave-one-out error for the given parameters. 
-	/// Thse parameters describe the regularization 
+	/// These parameters describe the regularization 
 	/// constant and the kernel parameters.
 	double eval(const RealVector& params){
+		QpStoppingCondition stop;
+		return eval(params, stop);
+	}
+	/// Evaluate the leave-one-out error for the given parameters.
+	/// These parameters describe the regularization constant and
+	/// the kernel parameters.  Furthermore, the stopping
+	/// conditions for the solver are passed as an argument.
+	double eval(const RealVector& params, QpStoppingCondition &stop){
 		this->m_evaluationCounter++;
 
 		double C;
@@ -96,7 +104,7 @@ public:
 		SVMProblemType svmProblem(matrix,mep_dataset->labels(),C);
 		std::size_t ell = km.size();
 		
-		QpStoppingCondition stop;
+		//QpStoppingCondition stop;
 
 		if (m_withOffset)
 		{
