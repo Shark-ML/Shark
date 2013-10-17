@@ -45,7 +45,7 @@ using namespace shark;
 
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Simple )
 {
-	std::cout<<"testing simple Test"<<std::endl;
+	std::cout<<"testing simple test"<<std::endl;
 	std::vector<RealVector> inputs(5, RealVector(2));
 	inputs[0](0) = 0.0;
 	inputs[0](1) = 0.0;
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Simple )
 
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_NoBias_Simple )
 {
-	std::cout<<"testing simple Test without bias"<<std::endl;
+	std::cout<<"testing simple test without bias"<<std::endl;
 	std::vector<RealVector> inputs(5, RealVector(2));
 	inputs[0](0) = 0.0;
 	inputs[0](1) = 0.0;
@@ -166,13 +166,14 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard_NoBias )
 	GaussianRbfKernel<> kernel;
 	double C = 10;
 	CSvmTrainer<RealVector> trainer(&kernel, C,false);
-	
+	trainer.setMinAccuracy(.000001);
+
 	RealVector parameters = trainer.parameterVector();
 	
 	// efficiently computed loo error
 	std::cout<<"efficient"<<std::endl;
 	LooErrorCSvm<RealVector> loosvm(dataset, &kernel, false);
-	double value = loosvm.eval(parameters);
+	double value = loosvm.eval(parameters,  trainer.stoppingCondition());
 	
 	std::cout<<"\n\nbrute force"<<std::endl;
 	// brute force computation
