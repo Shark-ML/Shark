@@ -40,6 +40,20 @@ struct Fixture {
 	RealMatrix kernelMatrix;
 };
 
+
+template<class MatrixType, class Result>
+void testFullMatrix(MatrixType& matrix, Result const& result){
+	std::size_t size = matrix.size();
+	//calculate full matrix
+	RealMatrix matrixResult(size,size);
+	matrix.matrix(matrixResult);
+	for(std::size_t i = 0; i != size; ++i){
+		for(std::size_t j = 0; j != size; ++j){
+			BOOST_CHECK_SMALL(matrixResult(i,j)-result(i,j),1.-13);
+		}
+	}
+}
+
 template<class MatrixType, class Result>
 void testMatrix(MatrixType& matrix, Result const& result){
 	std::size_t size = matrix.size();
@@ -61,7 +75,7 @@ void testMatrix(MatrixType& matrix, Result const& result){
 		for(std::size_t j = start; j != end; ++j)
 			BOOST_CHECK_SMALL(matrixRow(j)-result(i,j),1.e-13);
 	}
-	
+
 	//flip columns
 	matrix.flipColumnsAndRows(start,end);
 	matrix.row(start,0,size,&matrixRow[0]);//full row
@@ -90,6 +104,7 @@ BOOST_FIXTURE_TEST_SUITE(Algorithms_QP_KernelMatrix, Fixture)
 BOOST_AUTO_TEST_CASE( QP_KernelMatrix ) {
 	RealMatrix matrix = kernelMatrix;
 	KernelMatrix<RealVector,double> km(kernel,data.inputs());
+	testFullMatrix(km,matrix);
 	testMatrix(km,matrix);
 }
 
@@ -101,8 +116,10 @@ BOOST_AUTO_TEST_CASE( QP_RegularizedKernelMatrix ) {
 	}
 	diag(matrix) += diagVec;
 	RegularizedKernelMatrix<RealVector,double> km(kernel,data.inputs(),diagVec);
-
+	
+	testFullMatrix(km,matrix);
 	testMatrix(km,matrix);
+	
 }
 BOOST_AUTO_TEST_CASE( QP_ModifiedKernelMatrix ) {
 	double sameClass = 2;
@@ -118,6 +135,7 @@ BOOST_AUTO_TEST_CASE( QP_ModifiedKernelMatrix ) {
 	}
 	ModifiedKernelMatrix<RealVector,double> km(kernel,data,sameClass,diffClass);
 
+	testFullMatrix(km,matrix);
 	testMatrix(km,matrix);
 }
 
@@ -130,7 +148,15 @@ BOOST_AUTO_TEST_CASE( QP_BlockMatrix ) {
 	KernelMatrix<RealVector,double> kmbase(kernel,data.inputs());
 	BlockMatrix2x2<KernelMatrix<RealVector,double> > km(&kmbase);
 
+	testFullMatrix(km,matrix);
 	testMatrix(km,matrix);
+}
+
+BOOST_AUTO_TEST_CASE( QP_PrecomputedMatrix ) {
+
+	KernelMatrix<RealVector,double> km(kernel,data.inputs());
+	PrecomputedMatrix<KernelMatrix<RealVector,double> > cache(&km);
+	testMatrix(cache,kernelMatrix);
 }
 
 BOOST_AUTO_TEST_CASE( QP_CachedMatrix_Simple ) {
