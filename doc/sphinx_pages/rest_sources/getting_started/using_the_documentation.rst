@@ -4,7 +4,7 @@ Using the documentation
 Now that you've successfully installed Shark, you probably
 want to do something with it.
 
-There are at least five different entry points to get started:
+There are at least six different entry points to get started:
 
 *  the :doc:`online tutorials <../tutorials/tutorials>`;
 *  the C++ example programs shipped with Shark, which can be found
