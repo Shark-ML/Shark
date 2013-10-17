@@ -40,7 +40,7 @@ not support compilers such as GCC 4.2.1. So you
 may need something such as ``sudo port install gcc48`` beforehand.
 
 
-Detailed installation instructions
+Detailed installation instructions .. 
 **********************************
 
 The following guide explains how to install Shark in detail.
@@ -173,7 +173,7 @@ see `More details on CMake`_.
       debug version until you are sure your code is sane.
 
    For a detailed explanation of all other optional Shark build options
-   (starting with ``OPT_``), please see the section :ref:`Shark CMake Options`_
+   (starting with ``OPT_``), please see the section `Shark CMake Options`_
    below.
    
    Shark supports both in-place builds (where the generated files are
