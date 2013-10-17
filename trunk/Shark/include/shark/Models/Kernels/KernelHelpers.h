@@ -29,6 +29,42 @@
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/Data/Dataset.h>
 namespace shark{
+	
+///  \brief Calculates the regularized kernel gram matrix of the points stored inside a dataset.
+///
+///  Regularization is applied by adding the regularizer on the diagonal
+///  \param kernel the kernel for which to calculate the kernel gram matrix
+///  \param dataset the set of points used in the gram matrix
+///  \param matrix the target kernel matrix
+///  \param regularizer the regularizer of the matrix which is always >= 0. default is 0.
+template<class InputType, class M>
+void calculateRegularizedKernelMatrix(
+	AbstractKernelFunction<InputType>const& kernel,
+	Data<InputType> const& dataset,
+	blas::matrix_expression<M>& matrix,
+	double regularizer = 0
+){
+	SHARK_CHECK(regularizer >= 0, "regularizer must be >=0");
+	std::size_t N  = dataset.numberOfElements();
+	ensureSize(matrix,N,N);
+	std::size_t startX = 0;//start of the current batch in x-direction
+	for (std::size_t i=0; i<dataset.numberOfBatches(); i++){
+		std::size_t sizeX=shark::size(dataset.batch(i));
+		std::size_t startY = 0;//start of the current batch in y-direction
+		for (std::size_t j=0; j <= i; j++){
+			std::size_t sizeY=shark::size(dataset.batch(j));
+			RealMatrix submatrix = kernel(dataset.batch(i), dataset.batch(j));
+			noalias(subrange(matrix(),startX,startX+sizeX,startY,startY+sizeY))=submatrix;
+			if(i != j)
+				noalias(subrange(matrix(),startY,startY+sizeY,startX,startX+sizeX))=trans(submatrix);
+			startY+= sizeY;
+		}
+		startX+=sizeX;
+	}
+	for(std::size_t i = 0; i != N; ++i){
+		matrix()(i,i) += regularizer;
+	}
+}
 
 ///  \brief Calculates the regularized kernel gram matrix of the points stored inside a dataset.
 ///
@@ -44,25 +80,8 @@ RealMatrix calculateRegularizedKernelMatrix(
 	double regularizer = 0
 ){
 	SHARK_CHECK(regularizer >= 0, "regularizer must be >=0");
-	std::size_t N  = dataset.numberOfElements();
-	RealMatrix M(N, N);   // kernel gram matrix
-	std::size_t startX = 0;//start of the current batch in x-direction
-	for (std::size_t i=0; i<dataset.numberOfBatches(); i++){
-		std::size_t sizeX=shark::size(dataset.batch(i));
-		std::size_t startY = 0;//start of the current batch in y-direction
-		for (std::size_t j=0; j <= i; j++){
-			std::size_t sizeY=shark::size(dataset.batch(j));
-			RealMatrix submatrix = kernel(dataset.batch(i), dataset.batch(j));
-			noalias(subrange(M,startX,startX+sizeX,startY,startY+sizeY))=submatrix;
-			if(i != j)
-				noalias(subrange(M,startY,startY+sizeY,startX,startX+sizeX))=trans(submatrix);
-			startY+= sizeY;
-		}
-		startX+=sizeX;
-	}
-	for(std::size_t i = 0; i != N; ++i){
-		M(i,i) += regularizer;
-	}
+	RealMatrix M;
+	calculateRegularizedKernelMatrix(kernel,dataset,M,regularizer);
 	return M;
 }
 

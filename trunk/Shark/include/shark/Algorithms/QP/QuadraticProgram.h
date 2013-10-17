@@ -48,6 +48,7 @@
 
 #include <shark/Algorithms/QP/LRUCache.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
+#include <shark/Models/Kernels/KernelHelpers.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataView.h>
 #include <shark/LinAlg/Base.h>
@@ -59,14 +60,6 @@
 
 
 namespace shark {
-
-
-// Useful exchange/swap macros for arrays (with round brackets)
-// and std::vectors (with square brackets):
-// #define XCHG_A(t, a, i, j) {t temp; temp = a(i); a(i) = a(j); a(j) = temp;}
-//todo: O.K. swap(a[i],[aj])?
-#define XCHG_A(t, a, i, j) {t temp; temp = a[i]; a[i] = a[j]; a[j] = temp;}
-#define XCHG_V(t, a, i, j) {t temp; temp = a[i]; a[i] = a[j]; a[j] = temp;}
 
 /// reason for the quadratic programming solver
 /// to stop the iterative optimization process
@@ -188,11 +181,12 @@ public:
 	KernelMatrix(AbstractKernelFunction<InputType> const& kernelfunction,
 			Data<InputType> const& data)
 	: kernel(kernelfunction)
+	, m_data(data)
 	, m_accessCounter( 0 )
 	{
-		std::size_t elements = data.numberOfElements();
+		std::size_t elements = m_data.numberOfElements();
 		x.resize(elements);
-		typename Data<InputType>::const_element_range::iterator iter=data.elements().begin();
+		typename Data<InputType>::const_element_range::iterator iter=m_data.elements().begin();
 		for(std::size_t i = 0; i != elements; ++i,++iter){
 			x[i]=iter.getInnerIterator();
 		}
@@ -222,6 +216,14 @@ public:
 			storage[j-start] = QpFloatType(kernel.eval(xi, *x[j]));
 		}
 	}
+	
+	/// \brief Computes the kernel-matrix
+	template<class M>
+	void matrix(
+		blas::matrix_expression<M> & storage
+	) const{
+		calculateRegularizedKernelMatrix(kernel,m_data,storage);
+	}
 
 	/// swap two variables
 	void flipColumnsAndRows(std::size_t i, std::size_t j){
@@ -245,6 +247,8 @@ protected:
 	/// Kernel function defining the kernel Gram matrix
 	const AbstractKernelFunction<InputType>& kernel;
 
+	Data<InputType> m_data;
+
 	typedef typename Batch<InputType>::const_iterator PointerType;
 	/// Array of data pointers for kernel evaluations
 	std::vector<PointerType> x;
@@ -265,9 +269,6 @@ public:
 	// cost of only four bytes. However, the type definition makes it easy to use double instead
 	// (e.g., in case high accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 	typedef blas::vector<T> InputType;
 
 	/// Constructor
@@ -278,6 +279,7 @@ public:
 		Data<InputType> const& data)
 	: kernel(kernelfunction)
 	, m_data(data)
+	, m_batchStart(data.numberOfBatches())
 	, m_accessCounter( 0 )
 	{
 		m_data.makeIndependent();
@@ -286,6 +288,11 @@ public:
 		typename Data<InputType>::element_range::iterator iter=m_data.elements().begin();
 		for(std::size_t i = 0; i != elements; ++i,++iter){
 			x[i]=iter.getInnerIterator();
+		}
+		
+		for(std::size_t i = 0,start = 0; i != m_data.numberOfBatches(); ++i){
+			m_batchStart[i] = start;
+			start+= m_data.batch(i).size1();
 		}
 	}
 
@@ -307,39 +314,40 @@ public:
 	void row(std::size_t k, std::size_t start,std::size_t end, QpFloatType* storage) const
 	{
 		m_accessCounter +=end-start;
-		typename AbstractKernelFunction<InputType>::ConstInputReference xi = *x[k];
-
-		if(SHARK_NUM_THREADS > 1)//todo try to use batched more in multithread setup as well.
+		
+		typename AbstractKernelFunction<InputType>::ConstInputReference xi = *x[k];		
+		typename blas::matrix<T> mx(1,xi.size());
+		noalias(blas::row(mx,0))=xi;
+		
+		int numBatches = (int)m_data.numberOfBatches();
+		SHARK_PARALLEL_FOR(int i = 0; i < numBatches; i++)
 		{
-			SHARK_PARALLEL_FOR(int j = start; j < (int) end; j++){
-				storage[j-start] = QpFloatType(kernel.eval(xi, *x[j]));
-			}
-		}
-		else
-		{
-			typename blas::matrix<T> mx(1,xi.size());
-			RealMatrix rowpart;
-			noalias(blas::row(mx,0))=xi;
-			std::size_t pos = 0;
-			for(std::size_t i = 0; i < m_data.numberOfBatches(); i++)
-			{
-				std::size_t batchSize = m_data.batch(i).size1();
-				if(pos + batchSize > start && pos < end){
-					kernel.eval(mx,m_data.batch(i),rowpart);
-					std::size_t batchStart = (start <=pos) ? 0: start-pos;
-					std::size_t batchEnd = (pos+batchSize > end) ? end-pos: batchSize;
-					for(std::size_t j =  batchStart;  j !=  batchEnd;++j)
-						storage[pos+j-start] = rowpart(0,j);
+			std::size_t pos = m_batchStart[i];
+			std::size_t batchSize = m_data.batch(i).size1();
+			if(!(pos+batchSize < start || pos > end)){
+				RealMatrix rowpart(1,batchSize);
+				kernel.eval(mx,m_data.batch(i),rowpart);
+				std::size_t batchStart = (start <=pos) ? 0: start-pos;
+				std::size_t batchEnd = (pos+batchSize > end) ? end-pos: batchSize;
+				for(std::size_t j =  batchStart;  j !=  batchEnd;++j){
+					storage[pos+j-start] = rowpart(0,j);
 				}
-				pos+=batchSize;
 			}
 		}
+	}
+	
+	/// \brief Computes the kernel-matrix
+	template<class M>
+	void matrix(
+		blas::matrix_expression<M> & storage
+	) const{
+		calculateRegularizedKernelMatrix(kernel,m_data,storage);
 	}
 
 	/// swap two variables
 	void flipColumnsAndRows(std::size_t i, std::size_t j){
 		if( i == j ) return;
-		(*x[i]).swap(*x[j]);
+		swap(*x[i],*x[j]);
 	}
 
 	/// return the size of the quadratic matrix
@@ -364,6 +372,8 @@ protected:
 	/// Array of data pointers for kernel evaluations
 	std::vector<PointerType> x;
 
+	std::vector<std::size_t> m_batchStart;
+
 	mutable unsigned long long m_accessCounter;
 };
 
@@ -374,17 +384,19 @@ class KernelMatrix<blas::compressed_vector<T>, CacheType>
 public:
 	typedef CacheType QpFloatType;
 	typedef blas::compressed_vector<T> InputType;
+
 	/// Constructor
 	/// \param kernelfunction   kernel function defining the Gram matrix
 	/// \param data             data to evaluate the kernel function
 	KernelMatrix(AbstractKernelFunction<InputType> const& kernelfunction,
 			Data<InputType> const& data)
 	: kernel(kernelfunction)
+	, m_data(data)
 	, m_accessCounter( 0 )
 	{
-		std::size_t elements = data.numberOfElements();
+		std::size_t elements = m_data.numberOfElements();
 		x.resize(elements);
-		typename Data<InputType>::const_element_range::iterator iter=data.elements().begin();
+		typename Data<InputType>::const_element_range::iterator iter= m_data.elements().begin();
 		for(std::size_t i = 0; i != elements; ++i,++iter){
 			x[i]=*iter;
 		}
@@ -412,6 +424,14 @@ public:
 			storage[j-start] = QpFloatType(kernel.eval(x[i], x[j]));
 		}
 	}
+	
+	/// \brief Computes the kernel-matrix
+	template<class M>
+	void matrix(
+		blas::matrix_expression<M> & storage
+	) const{
+		calculateRegularizedKernelMatrix(kernel,m_data,storage);
+	}
 
 	/// swap two variables
 	void flipColumnsAndRows(std::size_t i, std::size_t j){
@@ -434,6 +454,8 @@ public:
 protected:
 	/// Kernel function defining the kernel Gram matrix
 	const AbstractKernelFunction<InputType>& kernel;
+
+	Data<InputType> m_data;
 
 	/// Array of data pointers for kernel evaluations
 	std::vector<blas::FixedSparseVectorProxy<T const,std::size_t> > x;
@@ -494,6 +516,16 @@ public:
 		{
 			double distance = m_squaredNorms(i)-2*inner_prod(x[i], x[j])+m_squaredNorms(j);
 			storage[j-start] = std::exp(- m_gamma * distance);
+		}
+	}
+	
+	/// \brief Computes the kernel-matrix
+	template<class M>
+	void matrix(
+		blas::matrix_expression<M> & storage
+	) const{
+		for(std::size_t i = 0; i != size(); ++i){
+			row(i,0,size(),&storage()(i,0));
 		}
 	}
 
@@ -582,6 +614,17 @@ public:
 			storage[k-start] += (QpFloatType)m_diagMod(k);
 		}
 	}
+	
+	/// \brief Computes the kernel-matrix
+	template<class M>
+	void matrix(
+		blas::matrix_expression<M> & storage
+	) const{
+		m_matrix.matrix(storage);
+		for(std::size_t k = 0; k != size(); ++k){
+			storage()(k,k) += (QpFloatType)m_diagMod(k);
+		}
+	}
 
 	/// swap two variables
 	void flipColumnsAndRows(std::size_t i, std::size_t j){
@@ -664,6 +707,21 @@ public:
 		for(std::size_t j = start; j < end; j++){
 			QpFloatType modifier = (labeli == m_labels[j]) ? m_modifierEq : m_modifierNe;
 			storage[j-start] *= modifier;
+		}
+	}
+	
+	/// \brief Computes the kernel-matrix
+	template<class M>
+	void matrix(
+		blas::matrix_expression<M> & storage
+	) const{
+		m_matrix.matrix(storage);
+		for(std::size_t i = 0; i != size(); ++i){
+			unsigned int labeli = m_labels[i];
+			for(std::size_t j = 0; j != size(); ++j){
+				QpFloatType modifier = (labeli == m_labels[j]) ? m_modifierEq : m_modifierNe;
+				storage()(i,j) *= modifier;
+			}
 		}
 	}
 
@@ -749,6 +807,18 @@ public:
 	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
 		for(std::size_t j = start; j < end; j++){
 			storage[j-start] = m_base->entry(m_mapping[i], m_mapping[j]);
+		}
+	}
+	
+	/// \brief Computes the kernel-matrix
+	template<class M>
+	void matrix(
+		blas::matrix_expression<M> & storage
+	) const{
+		for(std::size_t i = 0; i != size(); ++i){
+			for(std::size_t j = 0; j != size(); ++j){
+				storage()(i,j) = entry(i,j);
+			}
 		}
 	}
 
@@ -1051,15 +1121,7 @@ public:
 	PrecomputedMatrix(Matrix* base)
 	: matrix(base->size(), base->size())
 	{
- 		// naive version
- 		for (std::size_t i=0; i < base->size(); i++)
- 		{
- 			for (std::size_t j=0; j<=i; j++)
-			{
- 				QpFloatType k = base->entry(i, j);
- 				matrix(i, j) = matrix(j, i) = k;
-			}
- 		}
+ 		base->matrix(matrix);
 	}
 	
 	/// \brief Computes the i-th row of the kernel matrix.
@@ -1168,7 +1230,7 @@ public:
 
 	/// swap two variables
 	void flipColumnsAndRows(std::size_t i, std::size_t j)
-	{ XCHG_A(PointerType, x, i, j); }
+	{ std::swap(x[i], x[j]); }
 
 	/// return the size of the quadratic matrix
 	std::size_t size() const
@@ -1205,6 +1267,18 @@ public:
 	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
 		for(std::size_t j = start; j < end; j++){
 			storage[j-start] = entry(i,j);
+		}
+	}
+	
+	/// \brief Computes the kernel-matrix
+	template<class M>
+	void matrix(
+		blas::matrix_expression<M> & storage
+	) const{
+		for(std::size_t i = 0; i != size(); ++i){
+			for(std::size_t j = 0; j != size(); ++j){
+				storage(i,j) = entry(i,j);
+			}
 		}
 	}
 
