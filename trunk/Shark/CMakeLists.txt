@@ -333,8 +333,7 @@ ENDIF( OPT_COMPILE_EXAMPLES )
 #####################################################################
 #                       Include Unit Tests
 #####################################################################
-OPTION( OPT_MAKE_TESTS "Compile unit tests." OFF )
-ENDIF( OPT_DYNAMIC_LIBRARY )
+OPTION( OPT_MAKE_TESTS "Compile unit tests." ON )
 
 IF( OPT_MAKE_TESTS)
 	ADD_SUBDIRECTORY( Test )
