@@ -47,7 +47,7 @@ we consider a slightly more complex learning task than in
 the previous tutorials, namely classification with a simple feed-forward
 neural network. You can learn more on neural networks in Shark in 
 the :doc:`../algorithms/ffnet` tutorial. The code for this example can be found in
-:download:`StoppingCriteria.cpp <../../../../../examples/Supervised/StoppingCriteria.cpp>`.
+:doxy:`StoppingCriteria.cpp <StoppingCriteria.cpp>`.
 
 
 We show how to create a trainer for this task which generalizes

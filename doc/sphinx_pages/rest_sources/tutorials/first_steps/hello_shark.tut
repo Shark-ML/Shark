@@ -10,8 +10,7 @@ LDA classification
 Using a Linear Discriminant Analysis (LDA) as Hello-World (or
 Hello-Shark) program, we will try to separate two classes of inputs
 using a simple linear function. The code for this tutorial can be
-found in :download:`quickstartTutorial.cpp
-<../../../../../examples/Supervised/quickstartTutorial.cpp>` in the
+found in :doxy:`quickstartTutorial.cpp <quickstartTutorial.cpp>` in the
 ``examples/Supervised`` folder.
 
 In order to access the LDA, we include its header file and import the Shark

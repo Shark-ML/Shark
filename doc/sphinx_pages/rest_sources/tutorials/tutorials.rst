@@ -147,10 +147,9 @@ library for "all things linear algebra":
 * :doc:`concepts/lin_alg/lapack`
 
 For convenience, Shark provides a statistics class wrapper, as well as generic
-support for serialization, logging, and the well-known factory-method-pattern:
+support for serialization, and the well-known factory-method-pattern:
 
 * :doc:`concepts/misc/statistics`
-* :doc:`concepts/misc/logging`
 * :doc:`concepts/misc/factory`
 * :doc:`concepts/misc/serialization`
 

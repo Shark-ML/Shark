@@ -52,7 +52,7 @@ Reading in the data
 ^^^^^^^^^^^^^^^^^^^
 
 Let us consider the
-example program  :download:`linearRegressionTutorial.cpp <../../../../../examples/Supervised/linearRegressionTutorial.cpp>`..cpp>`.
+example program  :doxy:`linearRegressionTutorial.cpp <linearRegressionTutorial.cpp>`.
 First, let us read in the data.
 We assume that the inputs and the labels are stored
 in two separate  files, which are passed as command line arguments.
@@ -161,7 +161,7 @@ Full example program
 --------------------
 
 The full example program is
-:download:`linearRegressionTutorial.cpp <../../../../../examples/Supervised/linearRegressionTutorial.cpp>`.
+:doxy:`linearRegressionTutorial.cpp <linearRegressionTutorial.cpp>`.
 
 References
 ----------

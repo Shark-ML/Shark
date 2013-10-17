@@ -76,7 +76,7 @@ problem shipped with the Shark library::
 Model and learning algorithm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To build an SVM, we need a :doxy:`KernelExpansion` and an
+To build an SVM, we need a :doxy:`KernelClassifier`  and an
 :doxy:`CSvmTrainer`.
 
 To define our model, we have to choose a kernel function.  Here we
@@ -93,22 +93,24 @@ by writing::
 All kernels such as the :doxy:`GaussianRbfKernel` are derived from the
 base class :doxy:`AbstractKernelFunction`.
 
-Our model is now a kernel expansion.
+Our model is now a kernel classifier.
 Given the previously defined kernel, the definition ::
 
 ..sharkcode<Supervised/CSvmTutorial.tpp,model>
 
-specifies a model from
+A `KernelClassifier` can be understood as an :doxy:`ArgMaxConverter` which converts the output
+of a :doxy:`KernelExpansion` to a class label by choosing the index of the maximum output.
+The `KernelExpansion` specifies a model from
 :math:`\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}` or
-:math:`\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}`
-depending on whether the Boolean flag ``bias`` is false or true.
+:math:`\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}` 
+depending on whether a bias is used or not.
 
 Training the machine is done by::
 
 ..sharkcode<Supervised/CSvmTutorial.tpp,trainer>
 
 Here ``C`` denotes the regularization parameter (the SVM uses the 1-norm
-penalty for target margin violations by default).
+penalty for target margin violations by default) and `bias` the inclusion of a bias term in the solver..
 The Shark SVM training is inspired by [ChangLin2011]_
 but uses unique features [GlasmachersIgel2006]_.
 
@@ -161,48 +163,13 @@ which we apply to training and test data::
 
 ..sharkcode<Supervised/CSvmTutorial.tpp,eval>
 
-Note the slight differences compared to the :doc:`nearestNeighbor` and
-:doc:`lda` tutorials. We consider the real-valued output of the SVM
-and not the binary decision (see discussion below). Therefore, we
-write ``ZeroOneLoss<unsigned int, RealVector>`` indicating that
-real-valued output is compared to ``unsigned int`` labels.
-
-
-From decision function to hypothesis
-------------------------------------
-
-In the our example, we have directly used the decision function
-:math:`f:X\to\mathbb{R}` learnt by the SVM instead of the
-corresponding hypothesis mapping to :math:`Y`.
-Alternatively, we can consider a combined model of the SVM kernel
-expansion and a converter mapping the SVM output to :math:`Y=\{0,1\}`.
-After including ::
-
-..sharkcode<Supervised/CSvmWithThresholdConverter.tpp,additional_includes>
-
-we can define this concatenated model by::
-
-..sharkcode<Supervised/CSvmWithThresholdConverter.tpp,converter>
-
-Because the concatenated model now outputs proper labels,
-we have to change the loss function and the output container in our
-example for evaluation to ::
-
-..sharkcode<Supervised/CSvmWithThresholdConverter.tpp,eval>
-
-
 
 Full example program
 --------------------
 
 The full example program considered in this tutorial is :doxy:`CSvmTutorial.cpp`.
-There are further SVM examples in the ``examples`` subdirectory: one for SVM
-model selection (see the next tutorial on :doc:`svmModelSelection`); and also
-the file :doxy:`CSvmWithThresholdConverter.cpp`, which is a variant of this present
-tutorial illustrating the concatenated model with ``unsigned int``-output.
-
-
-
+Another relevant example in the ``examples`` subdirectory is the SVM
+model selection (see the next tutorial on :doc:`svmModelSelection`);
 
 References
 ----------

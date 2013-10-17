@@ -299,7 +299,6 @@ Model                                   Description
 :doxy:`ThresholdVectorConverter`        For every value of the input vector apply a ThresholdConverter.
 :doxy:`ArgMaxConverter`                 Assigns the index (e.g., a class label) of the largest component in
                                         the input vector.
-:doxy:`OneHotConverter`                 Converts an integer c (e.g., a class label) to the c-th unit vector.
 ======================================  ======================================================================
 
 
