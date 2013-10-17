@@ -63,30 +63,6 @@ If your matrix is not symmetric, but still has full rank, the more general :doxy
 This function uses a LU-decomposition to solve the system. This is not as numerically stable as the symmetric version and is more expensive to compute.
 There is no solver when :math:`A` does not have full rank.
 
-Inverse of a Matrix
------------------------------------------------------------
-
-Routines for computing inverses are provided in the file
- ``shark/LinAlg/LinAlg.h``.
-
-For Symmetric positive definite matrices, the inverse can be calculated using
-:doxy:`invertSymmPositiveDefinite`::
-
-  invertSymmPositiveDefinite(invA,A);
-  
-For general matrices with full rank, the more general :doxy:`invert` is available which also offers a convenient syntax::
-
-  inverseA=inverse(A);
-
-
-.. note:: 
-  Often computing inverses is  not required, but only the solution to a system of
-  linear equations. In this case, solving the system directly is faster
-  and numerically more stable. 
-
-
-
-
 Eigenvalues of a Matrix
 --------------------------------------------------------------------
 Eigenvalue equations are special linear equations of the form:

@@ -20,10 +20,8 @@ int main(int argc, char** argv)
 	//###end<kernel>
 	//###begin<trainer>
 	double C = 1000.0;          // regularization parameter
-	//###end<trainer>
-	//###begin<model>
 	bool bias = true;           // use bias/offset parameter
-	//###end<model>
+	//###end<trainer>
 	
 	//###begin<kernel>
 	GaussianRbfKernel<> kernel(gamma); // Gaussian kernel

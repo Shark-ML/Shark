@@ -34,7 +34,7 @@ information on Shark models, optimization, and trainers, see the concept
 tutorial :doc:`../concepts/optimization/optimizationtrainer`. Other components
 relevant to task-specific optimization tasks are described in the following. The
 code for this example can be found in
-:download:`regressionTutorial.cpp <../../../../../examples/Supervised/regressionTutorial.cpp>`.
+:doxy:`regressionTutorial.cpp <regressionTutorial.cpp>`.
 
 
 

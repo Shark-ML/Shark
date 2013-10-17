@@ -148,9 +148,9 @@ resulting in the following mean image.
 Full example program
 --------------------
 
-An extended eigenface example program is :download:`PCATutorial.cpp <../../../../../examples/Unsupervised/PCATutorial.cpp>`.  The face database can be downloaded from
-`here
-<http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html>`_.
+An extended eigenface example program is :doxy:`PCATutorial.cpp <PCATutorial.cpp>`. 
+The face database can be downloaded from
+`here <http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html>`_.
 
 
 Additional features

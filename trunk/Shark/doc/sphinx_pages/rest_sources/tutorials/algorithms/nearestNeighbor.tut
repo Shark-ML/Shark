@@ -146,8 +146,7 @@ see how this simple classifier performs compared to random guessing.
 Full example program
 --------------------
 
-The full example program is
-:download:`KNNTutorial.cpp <../../../../../examples/Supervised/KNNTutorial.cpp>`.
+The full example program is :doxy:`KNNTutorial.cpp <KNNTutorial.cpp>`.
 
 Advanced topics
 ---------------

@@ -6,29 +6,22 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 CMAKE_POLICY(SET CMP0003 NEW)
 
-#####################################################################
-#	Adds an example for the shark library
-#	Param: SRC Source files for compilation
-#	Param: NAME Target name for the resulting executable
-#	Param: COMPONENT Installation dir, e.g., EA/MOO
-#	Output: Executable in
-#          * ${SHARK_INSTALL_EXAMPLE_DIR}
-#            * ${COMPONENT}
-#       If OPT_LOG_TEST_OUTPUT is enabled, test log is written
-#	to ${NAME_Log.xml} in ${SHARK}/Test/bin.
-#####################################################################
+add_custom_target(examples)
+
 MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 
 	#generate cpp file if needed
-	if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.cpp" 
-		OR ("${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp" 
-		IS_NEWER_THAN  "${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.cpp")
-	)
-		message("generate ${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.cpp")
-		FILE( READ ${TUT_SRC}.tpp  contents )
-		STRING( REGEX REPLACE "\t*//###[^\n]*\n" "" contents_cleared "${contents}")
-		FILE( WRITE ${TUT_SRC}.cpp "${contents_cleared}")
-	ENDIF()
+	
+	ADD_CUSTOM_COMMAND(
+		OUTPUT ${TUT_SRC}.cpp
+		COMMAND ${CMAKE_COMMAND}
+		ARGS
+			-DTUT_TPP:Filepath=${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp
+			-DTUT_CPP:Filepath=${CMAKE_CURRENT_BINARY_DIR}/${TUT_SRC}.cpp
+			-P ${CMAKE_CURRENT_SOURCE_DIR}/createExampleSource.cmake
+		MAIN_DEPENDENCY
+			${TUT_SRC}.tpp
+		)
 	
 	ADD_EXECUTABLE( ${NAME}
 		${TUT_SRC}.cpp
@@ -38,6 +31,8 @@ MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 		${LINK_LIBRARIES}
 		shark
 	)
+	
+	add_dependencies(examples ${NAME})
 
 	TARGET_LINK_LIBRARIES( ${NAME} ${EXAMPLE_LIBRARIES} )
 
