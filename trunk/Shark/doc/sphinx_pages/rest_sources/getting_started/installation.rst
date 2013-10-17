@@ -5,15 +5,48 @@ Installing Shark
 
 .. contents:: Contents:
 
-This page explains how to install Shark and run the test suite.
 
-.. note::
+Quickstart for  Linux, MacOS, and other Unix-based systems
+**********************************************************
 
-    There is a :doc:`dedicated installation troubleshooting page <../getting_started/troubleshooting>`.
-    For clarity, we here only describe the usual, out-of-the-box installation procedure. If you experience
-    any problems, please also look there. If you are a more experienced or thorough user, you might skim
-    through all items there as well. We however did not want to clutter this page too much. Also see the
-    :doc:`FAQ <../faq/faq>` if something goes wrong in general.
+
+To install Shark, get the sources
+
+.. code-block:: none
+
+      svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
+      
+or a source-code release as described :doc:`here
+<../downloads/downloads>`.
+Then build the library:
+
+.. code-block:: none
+
+      cd Shark
+      cmake -DOPT_ENABLE_ATLAS=ON -DOPT_ENABLE_OPENMP=ON
+      make
+
+Shark relies on `Boost <http://www.boost.org>`_ and uses `CMake
+<http://www.cmake.org/>`_.
+Furthermore, Shark can make use of the linear algebra library ATLAS
+(if you do not want to use ATLAS, just remove the
+``-DOPT_ENABLE_ATLAS=ON`` option). Under **Ubuntu**, you install all
+required packages by  
+``apt-get install cmake cmake-curses-gui libatlas-base-dev
+libboost-all-dev``.
+Under **MacOS** using MacPorts, you get the required packages by
+``sudo port install boost cmake atlas``. Note that Shark does
+not support compilers such as GCC 4.2.1. So you
+may need something such as ``sudo port install gcc48`` beforehand.
+
+
+Detailed installation instructions
+**********************************
+
+The following guide explains how to install Shark in detail.
+If you run into problems, please have a look at the :doc:`installation
+troubleshooting page <../getting_started/troubleshooting>`
+and the more general :doc:`FAQ <../faq/faq>`.
 
 
 Once done installing, verify your Shark installation by running the Shark test suite (see below).
@@ -23,8 +56,10 @@ After successful installation and validation, there is a guide to the documentat
 Requirements
 ------------
 
-Shark relies on `Boost <http://www.boost.org>`_  Version 1.45 or higher. If you also
-want to compile Shark yourself, you will in addition need `CMake <http://www.cmake.org/>`_ (at least version 2.8).
+Shark relies on `Boost <http://www.boost.org>`_  Version 1.45 or higher.
+For compiling the library, you need `CMake <http://www.cmake.org/>`_
+(at least version 2.8)
+and a C++ that is not too old (e.g., GCC > 4.6). 
 
 
 .. Installing pre-built Shark binary packages
@@ -36,17 +71,17 @@ want to compile Shark yourself, you will in addition need `CMake <http://www.cma
     **Linux 32 bit Debian/Ubuntu package** and a **Linux 64 bit Debian/Ubuntu package**.
 
 
-Building Shark from source
---------------------------
+   Building Shark from source
+   --------------------------
 
 .. If your platform is not supported by the binary packages, or if you want an up-to-date version
    from the SVN repositories, you have to build Shark from source.
 
-At the moment, the only way to install Shark is from the source.
+   At the moment, the only way to install Shark is from the source.
 
 
 Download and unpack sources
-***************************
+---------------------------
 
 Either download and unpack the latest official Shark source-code release from :doc:`here
 <../downloads/downloads>`, or check out the current SVN version via (a ``Shark`` directory
@@ -58,79 +93,35 @@ directory, add a space and period ``.`` to the end of the command):
       svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
 
 Building Shark with Linux, MacOS, and other Unix-based systems
-**************************************************************
+--------------------------------------------------------------
 
 In the following, ``<SHARK_SRC_DIR>`` will denote the main Shark
 directory, which will usually be the ``Shark/`` folder in the
-directory into which you checked out the SVN snapshot, or extracted
-the Shark source package. It should contain a ``CMakeLists.txt``
-file as well as an ``include/`` and ``src/`` directory.
+directory into which you checked out the SVN snapshot or extracted
+the Shark source package.
 
-.. admonition:: Quick-Start Installation Summary:
+.. It should contain a ``CMakeLists.txt`` file as well as an ``include/`` and ``src/`` directory.
 
-    **Installation:** **1.** Configure the build using ``ccmake <SHARK_SRC_DIR>``
-    (plus optional build configuration variables, see below). **2.** Call ``make``
-    **3.** Call ``make test`` to verify the build **4.** Optionally call ``make
-    install``. Done!
 
-    **Time requirements:** Building plus testing can take between 15 and 120 minutes, depending on your architecture
-    and build options. You can pass the ``-jN`` flag to both ``make`` and ``make test`` to use ``N`` cores and speed
-    things up.
 
-    **Space requirements:** A full installation (with debug and release libraries, examples, tests, and documentation)
-    can take up around 4.5 GB. This reduces dramatically when not building the tests and examples, and/or when only
-    building the release variant of Shark (but we still strongly encourage you to use the debug version with your newly
-    written code).
+..    **Installation:** **1.** Configure the build using ``ccmake <SHARK_SRC_DIR>``
+      (plus optional build configuration variables, see below). **2.** Call ``make``
+      **3.** Call ``make test`` to verify the build **4.** Optionally call ``make
+      install``. Done!
+
+      **Time requirements:** Building plus testing can take between 15 and 120 minutes, depending on your architecture
+      and build options. You can pass the ``-jN`` flag to both ``make`` and ``make test`` to use ``N`` cores and speed
+      things up.
+
+      **Space requirements:** A full installation (with debug and release libraries, examples, tests, and documentation)
+      can take up around 4.5 GB. This reduces dramatically when not building the tests and examples, and/or when only
+      building the release variant of Shark (but we still strongly encourage you to use the debug version with your newly
+      written code).
 
 
 The first step is to configure the build. In all of the below we use the
-command ``ccmake`` for this.
-
-.. admonition:: Note on CMake command
-
-     If ``ccmake`` is not installed on your system, either consider
-     adding it (sometimes in a package called ``cmake-curses-gui`` or similar),
-     or fall back to the wizard mode of CMake: instead of the above command,
-     simply use the alternative ``cmake -i``, which will query you on the
-     command line. If you already know well the relevant configuration options,
-     you can also pass them directly to ``cmake`` (without the ``-i``), as in
-     for example ``cmake -D CMAKE_BUILD_TYPE=Debug -D OPT_COMPILE_DOCUMENTATION:BOOL=OFF
-     -DBoost_NO_SYSTEM_PATHS=TRUE ...``, etc.  Of course, you can also use the
-     QT GUI-version of CMake (``cmake-gui``); and of course, you
-     can also pass options directly to ``ccmake`` in the above way.
-
-Detailed instructions
-&&&&&&&&&&&&&&&&&&&&&&&&&
-
-#. **Starting notes on in-place vs. out-of-source builds:** Shark supports both in-place
-   builds (where the generated files are put in the Shark directory) and out-of-source
-   builds (where the generated files are put in a completely different directory and the
-   source tree remains unchanged). This choice is handled by the CMake
-   build system (for full details, see their documentation `here
-   <http://www.cmake.org/Wiki/CMake_FAQ#What_is_an_.22out-of-source.22_build.3F>`_ ).
-
-   In short, ``ccmake`` should be called *from the directory in which you want the build
-   files to end up*. The argument to ``ccmake`` should be *the path to your Shark source
-   directory* (``<SHARK_SRC_DIR>``), which contains the main CMakeLists.txt file for Shark.
-   When calling ccmake from an outside directory (i.e., when building out-of-source) *after
-   previous in-place builds*, you must first delete any leftover CMakeCache.txt file from
-   the Shark source directory.
-
-   In general, out-of-source builds have the advantage that you can have e.g. one folder
-   for Debug and one for Release builds. In the following, the
-   generic placeholder ``<SHARK_SRC_DIR>`` can either be just the current directory
-   (e.g., just the dot or period "``.``") in case of in-place builds, or the path to
-   your Shark main directory in case of out-of-source builds. In-place builds will not
-   mess with the SVN repository, because all corresponding ``svn:ignore`` properties
-   are set in the repository by default. In addition to the build tree location, you
-   also have the opportunity to specify an installation directory to which the library
-   will be installed upon issueing ``make install`` after compilation (see below).
-
-   In our view, the most recommendable setup is to have two out-of-source build directories
-   for one debug and one release build, but configure both of these not to build the
-   documentation. The documentation can instead be conveniently built in-place
-   in ``<SHARK_SRC_DIR>/doc`` by issuing ``ccmake .`` there. See the :doc:`documentation
-   tutorial <../tutorials/for_developers/managing_the_documentation>` for more information.
+command ``ccmake`` for this. If you are not familiar with ``cmake``,
+see `More details on CMake`_.
 
 #. **Configuring the build using CMake:** Regardless if from a separate build directory
    or the main Shark folder, to enter the curses-based configuration menu of CMake, simply
@@ -182,8 +173,39 @@ Detailed instructions
       debug version until you are sure your code is sane.
 
    For a detailed explanation of all other optional Shark build options
-   (starting with ``OPT_``), please see the section :ref:`label_for_cmake_options`
+   (starting with ``OPT_``), please see the section :ref:`Shark CMake Options`_
    below.
+   
+   Shark supports both in-place builds (where the generated files are
+   put in the Shark directory) and out-of-source builds (where the
+   generated files are put in a completely different directory and the
+   source tree remains unchanged). This choice is handled by the CMake
+   build system (for full details, see their documentation `here
+   <http://www.cmake.org/Wiki/CMake_FAQ#What_is_an_.22out-of-source.22_build.3F>`_
+   ).
+
+   In short, ``ccmake`` should be called *from the directory in which you want the build
+   files to end up*. The argument to ``ccmake`` should be *the path to your Shark source
+   directory* (``<SHARK_SRC_DIR>``), which contains the main CMakeLists.txt file for Shark.
+   When calling ccmake from an outside directory (i.e., when building out-of-source) *after
+   previous in-place builds*, you must first delete any leftover CMakeCache.txt file from
+   the Shark source directory.
+
+   In general, out-of-source builds have the advantage that you can have e.g. one folder
+   for Debug and one for Release builds. In the following, the
+   generic placeholder ``<SHARK_SRC_DIR>`` can either be just the current directory
+   (e.g., just the dot or period "``.``") in case of in-place builds, or the path to
+   your Shark main directory in case of out-of-source builds. In-place builds will not
+   mess with the SVN repository, because all corresponding ``svn:ignore`` properties
+   are set in the repository by default. In addition to the build tree location, you
+   also have the opportunity to specify an installation directory to which the library
+   will be installed upon issuing ``make install`` after compilation (see below).
+
+   In our view, the most recommendable setup is to have two out-of-source build directories
+   for one debug and one release build, but configure both of these not to build the
+   documentation. The documentation can instead be conveniently built in-place
+   in ``<SHARK_SRC_DIR>/doc`` by issuing ``ccmake .`` there. See the :doc:`documentation
+   tutorial <../tutorials/for_developers/managing_the_documentation>` for more information.
 
 #. Run ``make`` (or e.g. ``make -j4`` to distribute the build on 4 cores).
 
@@ -202,7 +224,7 @@ Detailed instructions
 
 
 Building Shark with Microsoft Windows
-*************************************
+-------------------------------------
 
 There are several ways to compile Shark under Windows.  If you are
 using Microsoft Visual Studio, the perhaps easiest way is to download
@@ -240,11 +262,11 @@ Enabling ATLAS support will change the auto-generated :ref:`CMake files for proj
 <label_for_cmake_example_project>` to automatically use the ATLAS library as well.
 
 See :doc:`the troubleshooting page <../getting_started/troubleshooting>` for information on how
-to verify that Shark is using Atlas.
+to verify that Shark is using ATLAS.
 
 
 More details on CMake
----------------------
+*********************
 
 The Shark machine learning library relies on `CMake
 <http://www.cmake.org/>`_ as primary build system. CMake takes a file
@@ -252,10 +274,27 @@ CMakeLists.txt as input and produces compiler- and IDE-specific
 projects. The range of supported compilers and IDEs includes but is
 not limited to:
 
-* Classic Makefiles.
+* Classic Makefiles
 * Microsoft Visual Studio 2005/2008/2010
 * Apple XCode
 * Eclipse with CDT
+
+Using CMake
+-----------
+
+On MacOs and Linux ``ccmake`` offers a frontend for ``cmake``.  If it
+is not installed on your system, either consider adding it (sometimes
+in a package called ``cmake-curses-gui`` or similar), or fall back to
+the wizard mode of CMake: instead of the above command, simply use the
+alternative ``cmake -i``, which will query you on the command line. If
+you already know well the relevant configuration options, you can also
+pass them directly to ``cmake`` (without the ``-i``), as in for
+example ``cmake -D CMAKE_BUILD_TYPE=Debug -D
+OPT_COMPILE_DOCUMENTATION:BOOL=OFF -DBoost_NO_SYSTEM_PATHS=TRUE ...``,
+etc.  Of course, you can also use the QT GUI-version of CMake
+(``cmake-gui``); and of course, you can also pass options directly to
+``ccmake`` in the above way.
+
 
 The Shark CMake setup generates the following targets (where target means that you
 can add the corresponding keyword to the ``make`` command, e.g., ``make doc`` etc.):
@@ -267,7 +306,7 @@ can add the corresponding keyword to the ``make`` command, e.g., ``make doc`` et
 
 To build a specific target, see your favorite IDE's documentation. In case of Makefiles, add the target name after the make command.
 
-Note that the documentation has its own CMake project in the ``doc/`` subfolder.
+The documentation has its own CMake project in the ``doc/`` subfolder.
 It can be built by issuing ``make doc`` there (in-place build of the documentation),
 and we recommend separating the
 library build process from the documentation build process. See the :doc:`documentation
@@ -276,9 +315,8 @@ tutorial <../tutorials/for_developers/managing_the_documentation>` for more info
 .. _label_for_cmake_options:
 
 
-
 Shark CMake Options
-*******************
+-------------------
 
 The Shark CMake setup offers the following options for configuring the build process of the library:
 

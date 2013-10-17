@@ -189,14 +189,14 @@ public:
 	// --------------
 
 	/// \brief Return a const reference to the element \f$i\f$
-	/// Return a const reference to the element \f$i\f$. With some compilers, this notation will be faster than \c[i]
+	/// Return a const reference to the element \f$i\f$. With some compilers, this notation will be faster than \c[ i ]
 	/// \param i index of the element
 	const_reference operator()(size_type i) const {
 		return data() [i];
 	}
 
 	/// \brief Return a reference to the element \f$i\f$
-	/// Return a reference to the element \f$i\f$. With some compilers, this notation will be faster than \c[i]
+	/// Return a reference to the element \f$i\f$. With some compilers, this notation will be faster than \c[ i ]
 	/// \param i index of the element
 	reference operator()(size_type i) {
 		return data() [i];
@@ -311,8 +311,8 @@ public:
 	/// \brief Assign the sum of the vector and a vector_expression to the vector
 	/// Assign the sum of the vector and a vector_expression to the vector. This is lazy-compiled and will be optimized out by the compiler on any type of expression.
 	/// No temporary is created. Computations are done and stored directly into the resulting vector.
-	/// \tparam AE is the type of the vector_expression
-	/// \param ae is a const reference to the vector_expression
+	/// \tparam C is the type of the vector_expression
+	/// \param v is a const reference to the vector_expression
 	/// \return a reference to the resulting vector
 	template<class C>          // Container assignment without temporary
 	vector &operator += (const vector_container<C> &v) {

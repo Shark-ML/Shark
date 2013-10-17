@@ -44,7 +44,6 @@ namespace shark {
 
 /// \brief Automatic relevance detection kernel for unconstrained parameter optimization
 ///
-/// \par
 /// The automatic relevance detection (ARD) kernel is a general Gaussian kernel with
 /// diagonal covariance matrix:
 /// \f$ k(x, z) = \exp(-\sum_i \gamma_i  (x_i - z_i)^2) \f$.
@@ -54,7 +53,6 @@ namespace shark {
 /// actual computations, because the otherwise Shark-canonical exponential encoding proved
 /// a bit unstable, that is, leading to too big step sizes, in preliminary experiments.
 ///
-/// \par \par
 /// Note that, like all or most models/kernels designed for unconstrained optimization, the
 /// argument to the constructor corresponds to the value of the true weights, while the set
 /// and get methods for the parameter vector set the parameterized values and not the true weights.

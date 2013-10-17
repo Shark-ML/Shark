@@ -46,7 +46,7 @@ namespace shark {
 /// \brief Conjugate-gradient method for unconstrained optimization
 ///
 /// The next CG search Direction  p_{k+1} is computed using the current gradient g_k by
-/// p_{k+1} = \beta p_k - g_k
+/// \f$ p_{k+1} = \beta p_k - g_k \f$
 /// where beta can be computed using different formulas
 /// well known is the Fletcher - Reeves method:
 /// \f$ \beta = ||g_k||2/ ||g_{k-1}||^2 \f$

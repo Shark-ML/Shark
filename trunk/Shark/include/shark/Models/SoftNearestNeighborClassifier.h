@@ -54,7 +54,6 @@ public:
 	///\brief Constructor
 	///
 	/// \param algorithm the used algorithm for nearst neighbor search
-	/// \param classes: number of classes
 	/// \param neighbors: number of neighbors
 	SoftNearestNeighborClassifier(NearestNeighbors const* algorithm, unsigned int neighbors = 3)
 	: m_algorithm(algorithm),m_classes(numberOfClasses(algorithm->dataset())), m_neighbors(neighbors){}

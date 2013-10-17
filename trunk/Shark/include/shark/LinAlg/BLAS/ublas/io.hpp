@@ -124,7 +124,7 @@ namespace shark{ namespace blas{
 
     /** \brief output stream operator for matrix expressions
      *
-     * it outpus the content of a \f$(M \times N)\f$ matrix to a standard output 
+     * it outputs the content of a \f$(M \times N)\f$ matrix to a standard output 
      * stream using the following format:
      * \c[<rows>,<columns>]((<m00>,<m01>,...,<m0N>),...,(<mM0>,<mM1>,...,<mMN>))
      *
