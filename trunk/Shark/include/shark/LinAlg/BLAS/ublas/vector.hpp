@@ -346,8 +346,8 @@ public:
 	/// \brief Assign the difference of the vector and a vector_expression to the vector
 	/// Assign the difference of the vector and a vector_expression to the vector. This is lazy-compiled and will be optimized out by the compiler on any type of expression.
 	/// No temporary is created. Computations are done and stored directly into the resulting vector.
-	/// \tparam AE is the type of the vector_expression
-	/// \param ae is a const reference to the vector_expression
+	/// \tparam C is the type of the vector_expression
+	/// \param v is a const reference to the vector_expression
 	/// \return a reference to the resulting vector
 	template<class C>          // Container assignment without temporary
 	vector &operator -= (const vector_container<C> &v) {

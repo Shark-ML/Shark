@@ -25,7 +25,7 @@ namespace shark{ namespace blas{
      *
      * A vector range can be used as a normal vector in any expression. 
      * If the specified range falls outside that of the index range of the vector, then
-     * the \c vector_range is not a well formed \i Vector \i Expression and access to an 
+     * the \c vector_range is not a well formed vector expression and access to an 
      * element outside of index range of the vector is \b undefined.
      *
      * \tparam V the type of vector referenced (for exaboost::mple \c vector<double>)

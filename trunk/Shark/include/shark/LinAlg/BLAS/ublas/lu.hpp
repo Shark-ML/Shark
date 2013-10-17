@@ -24,7 +24,7 @@
 namespace shark {
 namespace blas {
 
-/** \brieft
+/** \brief Permutation matrix
  *
  * \tparam T
  * \tparam A
