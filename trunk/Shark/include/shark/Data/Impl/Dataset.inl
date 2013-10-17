@@ -74,13 +74,13 @@ inline std::vector<std::size_t> optimalBatchSizes(std::size_t numElements, std::
 	return batchSizes;
 }
 
-///\brief Given the sizes of the partition sets and the maximum batch size, computes a good partitioning
+///\brief Given the sizes of the partition sets and the maximum batch size, computes a good partitioning.
 ///
-/// \param partitionSizes Sizes of the partitions
-/// \param partitionStart Index of the starting batch of the partition
-/// \param batchSizes Sizes of the batches
-/// \param maximumBatchSize The maximum size a batch is allowed to have
-/// \return the total number of batches
+/// \param[in]   partitionSizes    sizes of the partitions (number of elements)
+/// \param[out]  partitionStart    indices of the starting batches of the partition
+/// \param[out]  batchSizes        sizes of the batches
+/// \param[in]   maximumBatchSize  maximal batch size
+/// \return                        the total number of batches
 inline std::size_t batchPartitioning(
 	std::vector<std::size_t> const& partitionSizes,
 	std::vector<std::size_t>& partitionStart,

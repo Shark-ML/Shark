@@ -928,8 +928,8 @@ DatasetT splitAtElement(DatasetT& data, std::size_t elementIndex){
 
 ///\brief reorders the dataset such, that points are grouped by labels
 ///
-/// The elements ar enot only reordered but the batches are also resized such, that every batch
-/// only contains elemnts of one class. This method must be used in order to use binarySubproblem. 
+/// The elements are not only reordered but the batches are also resized such, that every batch
+/// only contains elements of one class. This method must be used in order to use binarySubproblem.
 template<class I>
 void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize = LabeledData<I,unsigned int>::DefaultBatchSize){
 	std::vector<std::size_t > classCounts = classSizes(data);
@@ -938,7 +938,63 @@ void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize 
 	detail::batchPartitioning(classCounts, classStart, partitioning, batchSize);
 
 	data.repartition(partitioning);
-	boost::sort(data.elements());//todo we are lying here, use bidirectional iterator sort.
+
+	// Now place examples into the batches reserved for their class...
+
+	// The following line does the job in principle but it crashes with clang on the mac:
+//	boost::sort(data.elements());//todo we are lying here, use bidirectional iterator sort.
+
+	// The following fixes the issue. As an aside it is even linear time:
+	std::vector<std::size_t> bat = classStart;           // batch index until which the class is already filled in
+	std::vector<std::size_t> idx(classStart.size(), 0);  // index within the batch until which the class is already filled in
+	unsigned int c = 0;                                  // current class in whose batch space we operate
+	typedef typename Batch<I>::type InputBatchType;
+	typedef typename Batch<unsigned int>::type LabelBatchType;
+	for (std::size_t b=0; b<data.numberOfBatches(); b++)
+	{
+		// update class range index
+		std::size_t e = 0;
+		while (c + 1 < classStart.size() && b == classStart[c + 1])
+		{
+			c++;
+			b = bat[c];
+			e = idx[c];
+		}
+		if (b == data.numberOfBatches()) break;
+
+		InputBatchType& bi1 = data.inputs().batch(b);
+		LabelBatchType& bl1 = data.labels().batch(b);
+		while (true)
+		{
+			unsigned int l = shark::get(bl1, e);
+			if (l == c)   // leave element in place
+			{
+				e++;
+				idx[c] = e;
+				if (e == boost::size(bl1))
+				{
+					e = 0;
+					idx[c] = 0;
+					bat[c]++;
+					break;
+				}
+			}
+			else   // swap elements
+			{
+				InputBatchType& bi2 = data.inputs().batch(bat[l]);
+				LabelBatchType& bl2 = data.labels().batch(bat[l]);
+				swap(shark::get(bi1, e), shark::get(bi2, idx[l]));
+				shark::get(bl1, e) = shark::get(bl2, idx[l]);
+				shark::get(bl2, idx[l]) = l;
+				idx[l]++;
+				if (idx[l] == boost::size(bl2))
+				{
+					idx[l] = 0;
+					bat[l]++;
+				}
+			}
+		}
+	}
 }
 
 template<class I>
