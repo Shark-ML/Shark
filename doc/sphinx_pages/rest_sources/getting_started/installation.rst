@@ -40,7 +40,7 @@ not support compilers such as GCC 4.2.1. So you
 may need something such as ``sudo port install gcc48`` beforehand.
 
 
-Detailed installation instructions .. 
+Detailed installation instructions
 **********************************
 
 The following guide explains how to install Shark in detail.

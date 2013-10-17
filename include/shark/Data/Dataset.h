@@ -333,7 +333,7 @@ std::ostream &operator << (std::ostream &stream, const Data<T>& d) {
 }
 /** @*/
 
-/// \brief data set for unbase_typevised learning
+/// \brief Data set for unsupervised learning.
 ///
 /// The UnlabeledData class is basically a standard Data container
 /// with the special interpretation of its data point being
@@ -427,7 +427,7 @@ public:
 };
 
 ///
-/// \brief Data set for base_typevised learning.
+/// \brief Data set for supervised learning.
 ///
 /// The LabeledData class extends UnlabeledData for the
 /// representation of inputs. In addition it holds and
