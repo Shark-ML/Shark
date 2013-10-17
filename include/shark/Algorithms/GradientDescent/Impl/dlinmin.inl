@@ -56,29 +56,14 @@ namespace shark{ namespace detail{
  *  \f$ P \f$ is replaced by \f$ P + \lambda n \f$ and \f$ n \f$
  *  by \f$ \lambda n \f$.
  *
- *      \param  p     N-dimensional initial starting point for the
- *                    search, is set to the point where the function
- *                    takes on a minimum.
- *      \param  searchDirection    N-dimensional search direction, is replaced
- *                    by the actual vector displacement that \em p was
- *                    moved.
- *      \param  value  The function value at the new point \em p.
- *      \param  func  The function that will be minimized.
- *	\param  ax    guess for the lower bracket
- *      \param  bx    guess for the upper bracket
- *      \return       none.
- *      \throw SharkException the type of the exception will be
- *             "size mismatch" and indicates that \em p is not
- *             one-dimensional or that \em p and \em searchDirection don't have
- *             the same length
- *
- *
- *  Please follow the link to view the source code of the example.
- *  The example can be executed in the example directory
- *  of package LinAlg.
- *
- *  \author  M. Kreutz
- *  \date    1998
+ *  \param  p     N-dimensional initial starting point for the search, is set to the point where the function takes on a minimum.
+ *  \param  searchDirection    N-dimensional search direction, is replaced by the actual vector displacement that \em p was moved.
+ *  \param  value  The function value at the new point \em p.
+ *  \param  func  The function that will be minimized.
+ *  \param  ax    guess for the lower bracket
+ *  \param  bx    guess for the upper bracket
+ *  \return       none.
+ *  \throw SharkException the type of the exception will be "size mismatch" and indicates that \em p is not one-dimensional or that \em p and \em searchDirection don't have the same length
  */
 template<class VectorT,class VectorU,class DifferentiableFunction>
 void dlinmin

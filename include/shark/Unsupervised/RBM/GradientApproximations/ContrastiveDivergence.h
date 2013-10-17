@@ -86,7 +86,7 @@ public:
 	
     /// \brief Returns the number of variables of the RBM.
     ///
-	/// @retun the number of variables of the RBM
+	/// @return the number of variables of the RBM
 	std::size_t numberOfVariables()const{
 		return mpe_rbm->numberOfParameters();
 	}

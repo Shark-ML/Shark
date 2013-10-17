@@ -78,7 +78,7 @@ void swap(FusionVectorBatchReference<Reference,Get> ref1, FusionVectorBatchRefer
 
 /// \brief Default implementation for boost::fusion::vector.
 ///
-/// if a sequence is of the Type vector<A,B,C> the BatchType is vector<Batch<A>,Batch<B>,Batch<C> >
+/// if a sequence is of the Type vector< A, B, C > the BatchType is vector< Batch< A >,Batch< B >,Batch< C > >
 /// We define this in it's own file, since boost::fusion is a real hard-hitter on compile-time.
 template<BOOST_PP_ENUM_PARAMS(FUSION_MAX_VECTOR_SIZE, class T) >
 struct Batch<boost::fusion::vector< BOOST_PP_ENUM_PARAMS(FUSION_MAX_VECTOR_SIZE, T)> >{

@@ -292,8 +292,7 @@ protected:
 	///
 	/// \param  w   matrix of (dense) weight vectors (as rows)
 	/// \param  mu  dual step on the variables corresponding to the current sample
-	/// \param  x   current sample
-	/// \param  y   label of the current sample
+	/// \param  index   current sample
 	virtual void updateWeightVectors(RealMatrix& w, RealVector const& mu, std::size_t index) = 0;
 
 	/// \brief Solve the sub-problem posed by a single training example.

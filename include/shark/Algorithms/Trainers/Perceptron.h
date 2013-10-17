@@ -50,6 +50,7 @@ class Perceptron : public AbstractTrainer<KernelClassifier<InputType>,unsigned i
 public:
 	/// \brief Constructor.
 	///
+	/// @param kernel is the (Mercer) kernel function.
 	/// @param maxTimesPattern defines the maximum number of times the data is processed before the algorithms stopps.
 	Perceptron(AbstractKernelFunction<InputType>* kernel, std::size_t maxTimesPattern = 10000)
 	:mpe_kernel(kernel),m_maxTimesPattern(maxTimesPattern){}

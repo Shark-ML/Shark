@@ -48,7 +48,7 @@
 namespace shark {
 
 namespace detail{
-///  \briefCubic interpolation from Numerical Optimization p. 59.
+///  \brief Cubic interpolation from Numerical Optimization p. 59.
 inline double wlsCubicInterp(double t1, double t2,
         double f1, double f2,
         double gtd1, double gtd2

@@ -97,7 +97,7 @@ public:
 	}
 		
 	/// \brief Constructor of a self_type proxy from a block of memory
-	/// \param memory the block of memory used
+	/// \param data the block of memory used
 	/// \param size size of the self_type
  	/// \param stride distance between elements of the self_type in memory
 	FixedDenseVectorProxy(pointer data, size_type size, difference_type stride = 1 ):
@@ -383,9 +383,11 @@ public:
 	}
 		
 	/// \brief Constructor of a self_type proxy from a block of memory
-	/// \param memory the block of memory used
-	/// \param size size of the self_type
- 	/// \param stride distance between elements of the self_type in memory
+	/// \param data the block of memory used
+	/// \param size1 size in 1st direction
+	/// \param size2 size in 2nd direction
+ 	/// \param stride1 distance in 1st direction between elements of the self_type in memory
+ 	/// \param stride2 distance in 2nd direction between elements of the self_type in memory
 	FixedDenseMatrixProxy(
 		pointer data, 
 		size_type size1, size_type size2,

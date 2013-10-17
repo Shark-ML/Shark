@@ -68,6 +68,7 @@ static bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortPair& ri
 /// \param  dataset       container storing the loaded data
 /// \param  stream        stream to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
+/// \param  batchSize     size of batch
 void import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::istream& stream,
@@ -80,6 +81,7 @@ void import_libsvm(
 /// \param  dataset       container storing the loaded data
 /// \param  stream        stream to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
+/// \param  batchSize     size of batch
 void import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::istream& stream,
@@ -92,6 +94,7 @@ void import_libsvm(
 /// \param  dataset       container storing the loaded data
 /// \param  fn            the file to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
+/// \param  batchSize     size of batch
 void import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::string fn,
@@ -104,6 +107,7 @@ void import_libsvm(
 /// \param  dataset       container storing the loaded data
 /// \param  fn            the file to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
+/// \param  batchSize     size of batch
 void import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::string fn,

@@ -445,7 +445,7 @@ matrix_range<Matrix> columns(matrix_expression<Matrix>& mat,std::size_t start, s
  *      \longrightarrow 1 + 6 + 11 + 16 = 34
  *  \f]
  *
- *      \param  v square matrix
+ *      \param  m square matrix
  *      \return the sum of the values at the diagonal of \em v
  */
 template < class MatrixT >
