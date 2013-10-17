@@ -71,7 +71,8 @@ static bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortPair& ri
 void import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::istream& stream,
-	int highestIndex = 0
+	unsigned int highestIndex = 0,
+	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 );
 
 /// \brief Import data from a LIBSVM file.
@@ -82,7 +83,8 @@ void import_libsvm(
 void import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::istream& stream,
-	int highestIndex = 0
+	unsigned int highestIndex = 0,
+	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 );
 
 /// \brief Import data from a LIBSVM file.
@@ -93,7 +95,8 @@ void import_libsvm(
 void import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::string fn,
-	int highestIndex = 0
+	unsigned int highestIndex = 0,
+	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 );
 
 /// \brief Import data from a LIBSVM file.
@@ -104,7 +107,8 @@ void import_libsvm(
 void import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::string fn,
-	int highestIndex = 0
+	unsigned int highestIndex = 0,
+	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 );
 
 
