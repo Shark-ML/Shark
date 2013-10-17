@@ -123,10 +123,19 @@ public:
 	unsigned int const& verbosity() const
 	{ return m_verbosity; }
 
-	/// number of kernel accesses
+	/// Number of kernel accesses
 	unsigned long long const& accessCount() const
 	{ return m_accessCount; }
 
+	// Set threshold for minimum dual accuracy stopping condition
+	void setMinAccuracy(double a) { m_stoppingcondition.minAccuracy = a; }
+	// Set number of iterations for maximum number of iterations stopping condition
+	void setMaxIterations(unsigned long long i) { m_stoppingcondition.maxIterations = i; }
+	// Set values for target value stopping condition
+	void setTargetValue(double v) { m_stoppingcondition.targetValue = v; }
+	// Set maximum training time in seconds for the maximum seconds stopping condition
+	void setMaxSeconds(double s) { m_stoppingcondition.maxSeconds = s; }
+	
 protected:
 	/// conditions for when to stop the QP solver
 	QpStoppingCondition m_stoppingcondition;
