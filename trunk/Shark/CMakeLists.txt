@@ -38,6 +38,7 @@ ENDIF( OPT_DYNAMIC_LIBRARY )
 #		Official Releases are tagged.                       #
 #####################################################################
 OPTION( OPT_OFFICIAL_RELEASE "Is this an official Shark release." OFF )
+mark_as_advanced( OPT_OFFICIAL_RELEASE ) 
 
 IF( OPT_OFFICIAL_RELEASE )
 	ADD_DEFINITIONS( -DSHARK_OFFICIAL_RELEASE )
