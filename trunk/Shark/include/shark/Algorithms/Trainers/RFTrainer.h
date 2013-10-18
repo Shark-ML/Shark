@@ -96,8 +96,13 @@ public:
 	void setOOBratio(double ratio);
 
 protected:
+	struct RFAttribute {
+		double value;
+		std::size_t id;
+	};
+
 	/// attribute table
-	typedef std::vector < RealVector > AttributeTable;
+	typedef std::vector < RFAttribute > AttributeTable;
 	/// collecting of attribute tables
 	typedef std::vector < AttributeTable > AttributeTables;
 
@@ -119,7 +124,7 @@ protected:
 	RFClassifier::SplitMatrixType buildTree(AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId);
 
 	/// comparison function for sorting an attributeTable
-	static bool tableSort(const RealVector& inner1, const RealVector& inner2);
+	static bool tableSort(const RFAttribute& v1, const RFAttribute& v2);
 
 	/// Generate a histogram from the count matrix.
 	RealVector hist(boost::unordered_map<std::size_t, std::size_t> countMatrix);
