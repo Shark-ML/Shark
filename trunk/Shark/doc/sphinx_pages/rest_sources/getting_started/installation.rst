@@ -32,7 +32,7 @@ Furthermore, Shark can make use of the linear algebra library ATLAS
 (if you do not want to use ATLAS, just remove the
 ``-DOPT_ENABLE_ATLAS=ON`` option). Under **Ubuntu**, you install all
 required packages by  
-``apt-get install cmake cmake-curses-gui libatlas-base-dev
+``sudo apt-get install cmake cmake-curses-gui libatlas-base-dev
 libboost-all-dev``.
 Under **MacOS** using MacPorts, you get the required packages by
 ``sudo port install boost cmake atlas``. Note that Shark does
