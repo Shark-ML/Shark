@@ -22,14 +22,14 @@ int main(int argc, char** argv)
 	double C = 1000.0;          // regularization parameter
 	bool bias = true;           // use bias/offset parameter
 	//###end<trainer>
-	
+
 	//###begin<kernel>
 	GaussianRbfKernel<> kernel(gamma); // Gaussian kernel
 	//###end<kernel>
 	//###begin<model>
-	KernelClassifier<RealVector> ke; // (affine) linear function in kernel-induced feature space
+	KernelClassifier<RealVector> kc; // (affine) linear function in kernel-induced feature space
 	//###end<model>
-	
+
 	// generate dataset
 	//###begin<problem>
 	Chessboard problem; // artificial benchmark data
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	//###begin<trainer>
 	CSvmTrainer<RealVector> trainer(&kernel, C, bias);
 	//###end<trainer>
-	
+
 //	// ADDITIONAL/ADVANCED SVM SOLVER OPTIONS:
 //	//to use "double" as kernel matrix cache type internally instead of float:
 //	CSvmTrainer<RealVector, double> trainer(&kernel, C);
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 
 	// train the machine
 	cout << "Algorithm: " << trainer.name() << "\ntraining ..." << flush; // Shark algorithms know their names
-	trainer.train(ke, training);
+	trainer.train(kc, training);
 	cout << "\n  number of iterations: " << trainer.solutionProperties().iterations;
 	cout << "\n  dual value: " << trainer.solutionProperties().value;
 	cout << "\n  training time: " << trainer.solutionProperties().seconds << " seconds\ndone." << endl;
@@ -62,10 +62,10 @@ int main(int argc, char** argv)
 	// evaluate
 	//###begin<eval>
 	ZeroOneLoss<unsigned int> loss; // 0-1 loss
-	Data<unsigned int> output = ke(training.inputs()); // evaluate on training set
+	Data<unsigned int> output = kc(training.inputs()); // evaluate on training set
 	double train_error = loss.eval(training.labels(), output);
 	cout << "training error:\t" <<  train_error << endl;
-	output = ke(test.inputs()); // evaluate on test set
+	output = kc(test.inputs()); // evaluate on test set
 	double test_error = loss.eval(test.labels(), output);
 	cout << "test error:\t" << test_error << endl;
 	//###end<eval>
