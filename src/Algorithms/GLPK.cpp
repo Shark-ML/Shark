@@ -2805,7 +2805,7 @@ int lpf_update_it(LPF *lpf, int j, int bh, int len, const int ind[],
          if (a[i] != 0.0)
             xerror("lpf_update_it: ind[%d] = %d; duplicate row index not allowed", k, i);
          if (val[k] == 0.0)
-            xerror("lpf_update_it: val[%d] = %g; zero element not allowed", k, val[k]);
+            xerror("lpf_update_it: val[%d] = %f; zero element not allowed", k, val[k]);
          a[i] = val[k];
       }
       /* (f g) := inv(P) * (a 0) */
@@ -3202,7 +3202,7 @@ int fhv_update_it(FHV *fhv, int j, int len, const int ind[],
          if (cc_val[i] != 0.0)
             xerror("fhv_update_it: ind[%d] = %d; duplicate row index not allowed", k, i);
          if (val[k] == 0.0)
-            xerror("fhv_update_it: val[%d] = %g; zero element not allowed", k, val[k]);
+            xerror("fhv_update_it: val[%d] = %f; zero element not allowed", k, val[k]);
          cc_val[i] = val[k];
       }
       /* new j-th column of V := inv(F * H) * (new B[j]) */
@@ -6712,19 +6712,19 @@ void glp_set_bfcp(glp_prob *lp, const glp_bfcp *parm)
          if (bfcp->lu_size < 0)
             xerror("glp_set_bfcp: lu_size = %d; invalid parameter", bfcp->lu_size);
          if (!(0.0 < bfcp->piv_tol && bfcp->piv_tol < 1.0))
-            xerror("glp_set_bfcp: piv_tol = %g; invalid parameter", bfcp->piv_tol);
+            xerror("glp_set_bfcp: piv_tol = %f; invalid parameter", bfcp->piv_tol);
          if (bfcp->piv_lim < 1)
             xerror("glp_set_bfcp: piv_lim = %d; invalid parameter", bfcp->piv_lim);
          if (!(bfcp->suhl == GLP_ON || bfcp->suhl == GLP_OFF))
             xerror("glp_set_bfcp: suhl = %d; invalid parameter", bfcp->suhl);
          if (!(0.0 <= bfcp->eps_tol && bfcp->eps_tol <= 1e-6))
-            xerror("glp_set_bfcp: eps_tol = %g; invalid parameter", bfcp->eps_tol);
+            xerror("glp_set_bfcp: eps_tol = %f; invalid parameter", bfcp->eps_tol);
          if (bfcp->max_gro < 1.0)
-            xerror("glp_set_bfcp: max_gro = %g; invalid parameter", bfcp->max_gro);
+            xerror("glp_set_bfcp: max_gro = %f; invalid parameter", bfcp->max_gro);
          if (!(1 <= bfcp->nfs_max && bfcp->nfs_max <= 32767))
             xerror("glp_set_bfcp: nfs_max = %d; invalid parameter", bfcp->nfs_max);
          if (!(0.0 < bfcp->upd_tol && bfcp->upd_tol < 1.0))
-            xerror("glp_set_bfcp: upd_tol = %g; invalid parameter", bfcp->upd_tol);
+            xerror("glp_set_bfcp: upd_tol = %f; invalid parameter", bfcp->upd_tol);
          if (!(1 <= bfcp->nrs_max && bfcp->nrs_max <= 32767))
             xerror("glp_set_bfcp: nrs_max = %d; invalid parameter", bfcp->nrs_max);
          if (bfcp->rs_size < 0)

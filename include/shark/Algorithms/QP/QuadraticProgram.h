@@ -330,7 +330,7 @@ public:
 				std::size_t batchStart = (start <=pos) ? 0: start-pos;
 				std::size_t batchEnd = (pos+batchSize > end) ? end-pos: batchSize;
 				for(std::size_t j =  batchStart;  j !=  batchEnd;++j){
-					storage[pos+j-start] = rowpart(0,j);
+					storage[pos+j-start] = static_cast<QpFloatType>(rowpart(0,j));
 				}
 			}
 		}

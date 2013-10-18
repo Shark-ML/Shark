@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Columns_Inverted ){
 		}
 	}
 	//copy to result
-	RealMatrix APerm(A);
+	IntMatrix APerm(A);
 	
 	swapColumns(P,A);
 	swapColumnsInverted(P,A);

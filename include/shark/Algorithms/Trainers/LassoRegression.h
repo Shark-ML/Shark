@@ -324,7 +324,7 @@ protected:
 				if (psum < 1e-6) n = dim - pos;      // for numerical stability
 				else if (p < psum) n = (dim - pos) * p / psum;
 				else n = (dim - pos);                // for numerical stability
-				int m = (int)floor(n);
+				unsigned int m = (unsigned int)floor(n);
 				double prob = n - m;
 				if ((double)rand() / (double)RAND_MAX < prob) m++;
 				for (std::size_t  j=0; j<m; j++)

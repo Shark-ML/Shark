@@ -47,9 +47,9 @@ RFTrainer::RFTrainer(){
 void RFTrainer::setDefaults(){
 	if(!m_try){
 		if(m_regressionLearner){
-			setMTry(std::ceil(m_inputDimension/3.0));
+			setMTry(static_cast<std::size_t>(std::ceil(m_inputDimension/3.0)));
 		}else{
-			setMTry(std::ceil(std::sqrt((double)m_inputDimension)));
+			setMTry(static_cast<std::size_t>(std::ceil(std::sqrt((double)m_inputDimension))));
 		}
 	}
 
@@ -86,7 +86,7 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 	
 	
 	//we need direct element access sicne we need to generate elementwise subsets
-	std::size_t subsetSize = dataset.numberOfElements()*m_OOBratio;
+	std::size_t subsetSize = static_cast<std::size_t>(dataset.numberOfElements()*m_OOBratio);
 	DataView<RegressionDataset const> elements(dataset);
 
 
@@ -134,7 +134,7 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 	setDefaults();
 
 	//we need direct element access since we need to generate elementwise subsets
-	std::size_t subsetSize = dataset.numberOfElements()*m_OOBratio;
+	std::size_t subsetSize = static_cast<std::size_t>(dataset.numberOfElements()*m_OOBratio);
 	DataView<ClassificationDataset const> elements(dataset);
 
 	//Generate m_B trees
@@ -179,7 +179,6 @@ void RFTrainer::setOOBratio(double ratio){
 
 
 RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
-
 	RFClassifier::SplitMatrixType lSplitMatrix, rSplitMatrix;
 
 	//Construct split matrix
@@ -227,8 +226,8 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, cons
 				prev = i-1;
 
 				//Update the count of the label
-				cBelow[dataset.element(tables[attributeIndex][prev][1]).label]++;
-				cTmpAbove[dataset.element(tables[attributeIndex][prev][1]).label]--;
+				cBelow[dataset.element(tables[attributeIndex][prev][1u]).label]++;
+				cTmpAbove[dataset.element(tables[attributeIndex][prev][1u]).label]--;
 
 				if(tables[attributeIndex][prev][0]!=tables[attributeIndex][i][0]){
 					//n1 = Number of cases to the left child node
@@ -475,7 +474,7 @@ void RFTrainer::splitAttributeTables(const AttributeTables& tables, std::size_t 
 	//Build a hash table for fast lookup
 	boost::unordered_map<std::size_t, bool> hash;
 	for(std::size_t i = 0; i< tables[index].size(); i++){
-		hash[tables[index][i][1]] = i<=valIndex;
+		hash[tables[index][i][1u]] = (i<=valIndex);
 	}
 
 	for(std::size_t i = 0; i < tables.size(); i++){
@@ -483,7 +482,7 @@ void RFTrainer::splitAttributeTables(const AttributeTables& tables, std::size_t 
 		LAttributeTables.push_back(table);
 		RAttributeTables.push_back(table);
 		for(std::size_t j = 0; j < tables[i].size(); j++){
-			if(hash[tables[i][j][1]]){
+			if(hash[tables[i][j][1u]]){
 				//Left
 				LAttributeTables[i].push_back(tables[i][j]);
 			}else{
@@ -526,7 +525,7 @@ void RFTrainer::createAttributeTables(Data<RealVector> const& dataset, Attribute
 	std::size_t elements = dataset.numberOfElements();
 	//Each entry in the outer vector is an attribute table
 	AttributeTable table;
-	RealVector tmpRow(3);
+	RealVector tmpRow(2);
 	//For each column
 	for(std::size_t j=0; j<m_inputDimension; j++){
 		table.clear();
