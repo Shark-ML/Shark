@@ -103,7 +103,7 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 		
 		std::size_t elements = dataTrain.numberOfElements();
 
-		RealVector cAbove;
+		//RealVector cAbove;
 		AttributeTables tables;
 		createAttributeTables(dataTrain.inputs(), tables);
 
@@ -226,10 +226,10 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, cons
 				prev = i-1;
 
 				//Update the count of the label
-				cBelow[dataset.element(tables[attributeIndex][prev][1u]).label]++;
-				cTmpAbove[dataset.element(tables[attributeIndex][prev][1u]).label]--;
+				cBelow[dataset.element(tables[attributeIndex][prev].id).label]++;
+				cTmpAbove[dataset.element(tables[attributeIndex][prev].id).label]--;
 
-				if(tables[attributeIndex][prev][0]!=tables[attributeIndex][i][0]){
+				if(tables[attributeIndex][prev].value!=tables[attributeIndex][i].value){
 					//n1 = Number of cases to the left child node
 					//n2 = number of cases to the right child node
 					n1 = i;
@@ -242,7 +242,7 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, cons
 						bestImpurity = impurity;
 						bestAttributeIndex = attributeIndex;
 						bestAttributeValIndex = prev;
-						bestAttributeVal = tables[attributeIndex][bestAttributeValIndex][0];
+						bestAttributeVal = tables[attributeIndex][bestAttributeValIndex].value;
 						cBestAbove = cTmpAbove;
 						cBestBelow = cBelow;
 					}
@@ -359,15 +359,15 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, cons
 
 			//Create a labels table, that corresponds to the sorted attribute
 			for(std::size_t k=0; k<tables[attributeIndex].size(); k++){
-				tmpLabels.push_back(dataset.element(tables[attributeIndex][k][1]).label);
-				labelSumBelow += dataset.element(tables[attributeIndex][k][1]).label;
+				tmpLabels.push_back(dataset.element(tables[attributeIndex][k].id).label);
+				labelSumBelow += dataset.element(tables[attributeIndex][k].id).label;
 			}
 			labelSumAbove += tmpLabels[0];
 			labelSumBelow -= tmpLabels[0];
 
 			for(std::size_t i=1; i<n; i++){
 				prev = i-1;
-				if(tables[attributeIndex][prev][0]!=tables[attributeIndex][i][0]){
+				if(tables[attributeIndex][prev].value!=tables[attributeIndex][i].value){
 					n1=i;
 					n2 = n-n1;
 					//Calculate the squared error of the split
@@ -379,7 +379,7 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, cons
 						bestImpurity = impurity;
 						bestAttributeIndex = attributeIndex;
 						bestAttributeValIndex = prev;
-						bestAttributeVal = tables[attributeIndex][bestAttributeValIndex][0];
+						bestAttributeVal = tables[attributeIndex][bestAttributeValIndex].value;
 						bestLabels = tmpLabels;
 					}
 				}
@@ -474,7 +474,7 @@ void RFTrainer::splitAttributeTables(const AttributeTables& tables, std::size_t 
 	//Build a hash table for fast lookup
 	boost::unordered_map<std::size_t, bool> hash;
 	for(std::size_t i = 0; i< tables[index].size(); i++){
-		hash[tables[index][i][1u]] = (i<=valIndex);
+		hash[tables[index][i].id] = (i<=valIndex);
 	}
 
 	for(std::size_t i = 0; i < tables.size(); i++){
@@ -482,7 +482,7 @@ void RFTrainer::splitAttributeTables(const AttributeTables& tables, std::size_t 
 		LAttributeTables.push_back(table);
 		RAttributeTables.push_back(table);
 		for(std::size_t j = 0; j < tables[i].size(); j++){
-			if(hash[tables[i][j][1u]]){
+			if(hash[tables[i][j].id]){
 				//Left
 				LAttributeTables[i].push_back(tables[i][j]);
 			}else{
@@ -525,16 +525,16 @@ void RFTrainer::createAttributeTables(Data<RealVector> const& dataset, Attribute
 	std::size_t elements = dataset.numberOfElements();
 	//Each entry in the outer vector is an attribute table
 	AttributeTable table;
-	RealVector tmpRow(2);
+	RFAttribute a;
 	//For each column
 	for(std::size_t j=0; j<m_inputDimension; j++){
 		table.clear();
 		//For each row
 		for(std::size_t i=0; i<elements; i++){
 			//Store Attribute value, class and rid
-			tmpRow[0] = dataset.element(i)[j];
-			tmpRow[1] = i;
-			table.push_back(tmpRow);
+			a.value = dataset.element(i)[j];
+			a.id = i;
+			table.push_back(a);
 		}
 		std::sort(table.begin(), table.end(), tableSort);
 		//Store this attributes attribute table
@@ -550,8 +550,8 @@ void RFTrainer::createCountMatrix(const ClassificationDataset& dataset, boost::u
 	}
 }
 
-bool RFTrainer::tableSort(const RealVector& v1, const RealVector& v2) {
-	return v1[0] < v2[0];
+bool RFTrainer::tableSort(const RFAttribute& v1, const RFAttribute& v2) {
+	return v1.value < v2.value;
 }
 
 
