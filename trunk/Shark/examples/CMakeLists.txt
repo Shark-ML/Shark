@@ -6,47 +6,67 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 CMAKE_POLICY(SET CMP0003 NEW)
 
-add_custom_target(examples)
+add_custom_target(tpp2cpp)
+
+IF( OPT_COMPILE_EXAMPLES )
+	add_custom_target(examples)
+	add_dependencies(examples tpp2cpp)
+ENDIF( OPT_COMPILE_EXAMPLES )
+
+#add_custom_target(examples)
+
+#set(EXAMPLES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(EXAMPLES_CPP_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
 
 MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 
-	#generate cpp file if needed
-	
+	#generate cpp file from tpp file
 	ADD_CUSTOM_COMMAND(
-		OUTPUT ${TUT_SRC}.cpp
+		OUTPUT ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
 		COMMAND ${CMAKE_COMMAND}
 		ARGS
 			-DTUT_TPP:Filepath=${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp
-			-DTUT_CPP:Filepath=${CMAKE_CURRENT_BINARY_DIR}/${TUT_SRC}.cpp
+			-DTUT_CPP:Filepath=${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
 			-P ${CMAKE_CURRENT_SOURCE_DIR}/createExampleSource.cmake
 		MAIN_DEPENDENCY
-			${TUT_SRC}.tpp
+			${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp
+		COMMENT "creating ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp from ${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp"
 		)
-	
-	ADD_EXECUTABLE( ${NAME}
-		${TUT_SRC}.cpp
+
+	set_source_files_properties(
+		${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
+		PROPERTIES GENERATED TRUE
 	)
 
-	SET( EXAMPLE_LIBRARIES
-		${LINK_LIBRARIES}
-		shark
-	)
-	
-	add_dependencies(examples ${NAME})
+	add_dependencies(tpp2cpp ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
 
-	TARGET_LINK_LIBRARIES( ${NAME} ${EXAMPLE_LIBRARIES} )
+	IF( OPT_COMPILE_EXAMPLES )
+		ADD_EXECUTABLE( ${NAME}
+			${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
+		)
 
-	INSTALL( TARGETS ${NAME}
-		RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}/
-		COMPONENT EXAMPLES
-	)
+		SET( EXAMPLE_LIBRARIES
+			${LINK_LIBRARIES}
+			shark
+		)
 
-	INSTALL( FILES
-		${TUT_SRC}.cpp
-	 	DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}
-	)
+		add_dependencies(examples ${NAME})
 
-	SOURCE_GROUP( ${COMPONENT} FILES ${SRC} )
+		TARGET_LINK_LIBRARIES( ${NAME} ${EXAMPLE_LIBRARIES} )
+
+		INSTALL( TARGETS ${NAME}
+			RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}/
+			COMPONENT EXAMPLES
+		)
+
+		INSTALL( FILES
+			${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
+		 	DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}
+		)
+
+		SOURCE_GROUP( ${COMPONENT} FILES ${SRC} )
+	ENDIF( OPT_COMPILE_EXAMPLES )
 ENDMACRO()
 
 SHARK_ADD_EXAMPLE( Core/Oracle Oracle "Core" )
@@ -117,26 +137,30 @@ SHARK_ADD_EXAMPLE( Unsupervised/SparseAETutorial SparseAETutorial "Unsupervised"
 SHARK_ADD_EXAMPLE( Unsupervised/HierarchicalClustering HierarchicalClustering "Unsupervised"  )
 SHARK_ADD_EXAMPLE( Unsupervised/OneClassSvm OneClassSvm "Unsupervised"  )
 
-INSTALL( DIRECTORY
-	 "${CMAKE_CURRENT_SOURCE_DIR}/Supervised/data"
-	 DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Supervised
-	 PATTERN ".*" EXCLUDE
-)
-INSTALL( DIRECTORY
-	 "${CMAKE_CURRENT_SOURCE_DIR}/Unsupervised/data"
-	 DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Unsupervised
-	 PATTERN ".*" EXCLUDE
-)
 
-#####Automatic Generation of example CMakeLists.txt
-CONFIGURE_FILE (
-  "${CMAKE_CURRENT_SOURCE_DIR}/ExampleProject/CMakeLists.txt.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/ExampleProject/CMakeLists.txt"
-  @ONLY
-  )
+IF( OPT_COMPILE_EXAMPLES )
 
-INSTALL(
-	FILES ${CMAKE_CURRENT_SOURCE_DIR}/ExampleProject/CMakeLists.txt
-	DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ExampleProject/
-)
+	INSTALL( DIRECTORY
+		 "${CMAKE_CURRENT_SOURCE_DIR}/Supervised/data"
+		 DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Supervised
+		 PATTERN ".*" EXCLUDE
+	)
+	INSTALL( DIRECTORY
+		 "${CMAKE_CURRENT_SOURCE_DIR}/Unsupervised/data"
+		 DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Unsupervised
+		 PATTERN ".*" EXCLUDE
+	)
 
+	#####Automatic Generation of example CMakeLists.txt
+	CONFIGURE_FILE (
+	  "${CMAKE_CURRENT_SOURCE_DIR}/ExampleProject/CMakeLists.txt.in"
+	  "${CMAKE_CURRENT_SOURCE_DIR}/ExampleProject/CMakeLists.txt"
+	  @ONLY
+	  )
+
+	INSTALL(
+		FILES ${CMAKE_CURRENT_SOURCE_DIR}/ExampleProject/CMakeLists.txt
+		DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ExampleProject/
+	)
+
+ENDIF( OPT_COMPILE_EXAMPLES )

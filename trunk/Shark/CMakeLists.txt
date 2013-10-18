@@ -326,9 +326,9 @@ ADD_SUBDIRECTORY( src )
 #####################################################################
 OPTION( OPT_COMPILE_EXAMPLES "Compile example programs." ON )
 
-IF( OPT_COMPILE_EXAMPLES )
+#IF( OPT_COMPILE_EXAMPLES )
 	ADD_SUBDIRECTORY( examples )
-ENDIF( OPT_COMPILE_EXAMPLES )
+#ENDIF( OPT_COMPILE_EXAMPLES )
 
 #####################################################################
 #                       Include Unit Tests
