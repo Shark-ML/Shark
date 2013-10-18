@@ -30,6 +30,7 @@ foreach(tut ${TutFiles})
 	) 
 endforeach()
 add_dependencies(doc_creation tut2rst)
+add_dependencies(tut2rst tpp2cpp)   # defined in examples folder
 
 add_custom_target( doc ALL
 	COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Shark.dox
