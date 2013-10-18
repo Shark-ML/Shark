@@ -6,11 +6,8 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 CMAKE_POLICY(SET CMP0003 NEW)
 
-add_custom_target(tpp2cpp)
-
 IF( OPT_COMPILE_EXAMPLES )
 	add_custom_target(examples)
-	add_dependencies(examples tpp2cpp)
 ENDIF( OPT_COMPILE_EXAMPLES )
 
 #add_custom_target(examples)
@@ -18,6 +15,7 @@ ENDIF( OPT_COMPILE_EXAMPLES )
 #set(EXAMPLES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(EXAMPLES_CPP_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
+SET(TPP_FILES "")
 
 MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 
@@ -32,14 +30,8 @@ MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 		MAIN_DEPENDENCY
 			${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp
 		COMMENT "creating ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp from ${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp"
-		)
-
-	set_source_files_properties(
-		${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
-		PROPERTIES GENERATED TRUE
 	)
-
-	add_dependencies(tpp2cpp ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
+	LIST(APPEND TPP_FILES ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
 
 	IF( OPT_COMPILE_EXAMPLES )
 		ADD_EXECUTABLE( ${NAME}
@@ -137,6 +129,7 @@ SHARK_ADD_EXAMPLE( Unsupervised/SparseAETutorial SparseAETutorial "Unsupervised"
 SHARK_ADD_EXAMPLE( Unsupervised/HierarchicalClustering HierarchicalClustering "Unsupervised"  )
 SHARK_ADD_EXAMPLE( Unsupervised/OneClassSvm OneClassSvm "Unsupervised"  )
 
+add_custom_target(tpp2cpp DEPENDS ${TPP_FILES})
 
 IF( OPT_COMPILE_EXAMPLES )
 
