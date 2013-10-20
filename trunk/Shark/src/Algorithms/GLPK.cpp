@@ -81,6 +81,15 @@ void xerror(const char* format, int a1)
 	strcat(buffer2, buffer);
 	throw SHARKEXCEPTION(buffer2);
 }
+void xerror(const char* format, double a1)
+{
+	char buffer[1024];
+	snprintf(buffer, 1023, format, a1);
+	char buffer2[1030];
+	strcpy(buffer2, "[LP] ");
+	strcat(buffer2, buffer);
+	throw SHARKEXCEPTION(buffer2);
+}
 void xerror(const char* format, void* a1)
 {
 	char buffer[1024];
@@ -91,6 +100,15 @@ void xerror(const char* format, void* a1)
 	throw SHARKEXCEPTION(buffer2);
 }
 void xerror(const char* format, int a1, int a2)
+{
+	char buffer[1024];
+	snprintf(buffer, 1023, format, a1, a2);
+	char buffer2[1030];
+	strcpy(buffer2, "[LP] ");
+	strcat(buffer2, buffer);
+	throw SHARKEXCEPTION(buffer2);
+}
+void xerror(const char* format, int a1, double a2)
 {
 	char buffer[1024];
 	snprintf(buffer, 1023, format, a1, a2);
