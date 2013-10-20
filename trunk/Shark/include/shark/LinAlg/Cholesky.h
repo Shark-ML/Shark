@@ -85,13 +85,13 @@ void choleskyDecomposition(
  * The computation is carried out in place this means A is destroied and replaced by L.
  *  
  *
- *  \param  A \f$ m \times m \f$ matrix, which must be symmetric and positive definite. It is replaced by L in the end.
+ *  \param  Lref \f$ m \times m \f$ matrix, which must be symmetric and positive definite. It is replaced by L in the end.
  *  \param  P The pivoting matrix
  *  \return The rank of the matrix A
  */
-template<class MatrixA>
+template<class MatrixL>
 std::size_t pivotingCholeskyDecompositionInPlace(
-	matrix_expression<MatrixA>& A,
+	shark::blas::matrix_expression<MatrixL>& Lref,
 	PermutationMatrix& P
 );
 

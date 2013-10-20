@@ -86,7 +86,7 @@ void shark::blas::choleskyDecomposition(
 
 template<class MatrixL>
 std::size_t shark::blas::pivotingCholeskyDecompositionInPlace(
-	matrix_expression<MatrixL>& Lref,
+	shark::blas::matrix_expression<MatrixL> &Lref,
 	PermutationMatrix& P
 ){
 	

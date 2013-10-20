@@ -40,9 +40,9 @@
 
 template<class MatT,class Vec1T,class Vec2T>
 void shark::blas::solveSystem(
-	const matrix_expression<MatT>& A, 
-	vector_expression<Vec1T>& x,
-	const vector_expression<Vec2T>& b
+	const shark::blas::matrix_expression<MatT>& A, 
+	shark::blas::vector_expression<Vec1T>& x,
+	const shark::blas::vector_expression<Vec2T>& b
 ){
 	SIZE_CHECK(A().size1() == b().size());
 	SIZE_CHECK(A().size1() == A().size2());
@@ -64,9 +64,9 @@ void shark::blas::solveSystem(
 
 template<class MatT,class Mat1T,class Mat2T>
 void shark::blas::solveSystem(
-	matrix_expression<MatT> const& A, 
-	matrix_expression<Mat1T>& X,
-	matrix_expression<Mat2T> const& B
+	const shark::blas::matrix_expression<MatT> & A, 
+	shark::blas::matrix_expression<Mat1T>& X,
+	const shark::blas::matrix_expression<Mat2T> & B
 ){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size1() == A().size2());

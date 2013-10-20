@@ -189,14 +189,14 @@ public:
 	// --------------
 
 	/// \brief Return a const reference to the element \f$i\f$
-	/// Return a const reference to the element \f$i\f$. With some compilers, this notation will be faster than \c[ i ]
+	/// Return a const reference to the element \f$i\f$. With some compilers, this notation will be faster than \c operator[]
 	/// \param i index of the element
 	const_reference operator()(size_type i) const {
 		return data() [i];
 	}
 
 	/// \brief Return a reference to the element \f$i\f$
-	/// Return a reference to the element \f$i\f$. With some compilers, this notation will be faster than \c[ i ]
+	/// Return a reference to the element \f$i\f$. With some compilers, this notation will be faster than \c operator[]
 	/// \param i index of the element
 	reference operator()(size_type i) {
 		return data() [i];
@@ -489,7 +489,7 @@ public:
 	/// \param ar Archive object. Can be a flat file, an XML file or any other stream
 	/// \param file_version Optional file version (not yet used)
 	template<class Archive>
-	void serialize(Archive &ar, const unsigned int /* file_version */) {
+	void serialize(Archive &ar, const unsigned int file_version) {
 		ar &boost::serialization::make_nvp("data",data_);
 	}
 
