@@ -28,6 +28,7 @@
 
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/Data/Dataset.h>
+#include <shark/Core/OpenMP.h>
 namespace shark{
 	
 ///  \brief Calculates the regularized kernel gram matrix of the points stored inside a dataset.
@@ -45,25 +46,34 @@ void calculateRegularizedKernelMatrix(
 	double regularizer = 0
 ){
 	SHARK_CHECK(regularizer >= 0, "regularizer must be >=0");
-	std::size_t N  = dataset.numberOfElements();
+	std::size_t B = dataset.numberOfBatches();
+	//get start of all batches in the matrix
+	//also include  the past the end position at the end
+	std::vector<std::size_t> batchStart(B+1,0);
+	for(std::size_t i = 1; i != B+1; ++i){
+		batchStart[i] = batchStart[i-1]+ boost::size(dataset.batch(i-1));
+	}
+	SIZE_CHECK(batchStart[B] == dataset.numberOfElements());
+	std::size_t N  = batchStart[B];//number of elements
 	ensureSize(matrix,N,N);
-	std::size_t startX = 0;//start of the current batch in x-direction
-	for (std::size_t i=0; i<dataset.numberOfBatches(); i++){
-		std::size_t sizeX=shark::size(dataset.batch(i));
-		std::size_t startY = 0;//start of the current batch in y-direction
-		for (std::size_t j=0; j <= i; j++){
-			std::size_t sizeY=shark::size(dataset.batch(j));
+	
+	
+	for (std::size_t i=0; i<B; i++){
+		std::size_t startX = batchStart[i];
+		std::size_t endX = batchStart[i+1];
+		SHARK_PARALLEL_FOR(int j=0; j < B; j++){
+			std::size_t startY = batchStart[j];
+			std::size_t endY = batchStart[j+1];
 			RealMatrix submatrix = kernel(dataset.batch(i), dataset.batch(j));
-			noalias(subrange(matrix(),startX,startX+sizeX,startY,startY+sizeY))=submatrix;
-			if(i != j)
-				noalias(subrange(matrix(),startY,startY+sizeY,startX,startX+sizeX))=trans(submatrix);
-			startY+= sizeY;
+			noalias(subrange(matrix(),startX,endX,startY,endY))=submatrix;
+			//~ if(i != j)
+				//~ noalias(subrange(matrix(),startY,endY,startX,endX))=trans(submatrix);
 		}
-		startX+=sizeX;
+		for(std::size_t k = startX; k != endX; ++k){
+			matrix()(k,k) += static_cast<typename M::value_type>(regularizer);
+		}
 	}
-	for(std::size_t i = 0; i != N; ++i){
-		matrix()(i,i) += regularizer;
-	}
+	
 }
 
 ///  \brief Calculates the regularized kernel gram matrix of the points stored inside a dataset.
