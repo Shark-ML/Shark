@@ -52,6 +52,13 @@ struct promote_traits {
 	typedef typename id::type promote_type;
 };
 
+// special case for bools. b1+b2 creates a boolean return type - which does not make sense
+// for example when summing bools! therefore we use a signed int type
+template<>
+struct promote_traits<bool, bool> {
+	typedef int promote_type;
+};
+
 template<typename R, typename I>
 typename boost::enable_if<
 boost::mpl::and_<

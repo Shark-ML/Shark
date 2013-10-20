@@ -501,7 +501,7 @@ struct scalar_assign:
 	static const bool computed = false ;
 
 	static void apply(argument1_type t1, argument2_type t2) {
-		t1 = t2;
+		t1 = static_cast<typename boost::remove_reference<T1>::type const>(t2);
 	}
 
 	template<class U1, class U2>
