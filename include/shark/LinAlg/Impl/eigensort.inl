@@ -64,27 +64,8 @@
  *  \f$ ( v_{11}\ v_{12}\ v_{13} ) \f$ and \f$ v_1 > v_2 > v_3 \f$.
  *
  *
- *      \param	vmatA \f$ n \times n \f$ matrix with eigenvectors (each column
- *                    contains an eigenvector, corresponding to
- *                    one eigenvalue).
- *	\param  dvecA n-dimensional vector with eigenvalues, will
- *                    contain the eigenvalues in descending order
- *                    when returning from the function.
- *      \return       none.
- *      \throw SharkException the type of the exception will be
- *             "size mismatch" and indicates that \em dvecA
- *             is not one-dimensional or that the number of
- *             rows or the number of columns in \em vmatA
- *             is different from the number of values
- *             in \em dvecA
- *
- *
- *  Please follow the link to view the source code of the example.
- *  The example can be executed in the example directory
- *  of package LinAlg.
- *
- *  \author  M. Kreutz
- *  \date    1998
+ *  \param vmatA \f$ n \times n \f$ matrix with eigenvectors (each column contains an eigenvector, corresponding to one eigenvalue).
+ *  \param dvecA n-dimensional vector with eigenvalues in descending order.
  *
  */
 template<class MatrixT,class VectorT>

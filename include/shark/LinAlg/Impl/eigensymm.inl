@@ -43,31 +43,17 @@
 /*!
  *  \brief Used as frontend for
  *  eigensymm for calculating the eigenvalues and the normalized eigenvectors of a symmetric matrix
- *  'amatA' using the Givens and Householder reduction. Each time this frontend is called additional
+ *  'A' using the Givens and Householder reduction. Each time this frontend is called additional
  *  memory is allocated for intermediate results.
  *
  *
- *      \param  A \f$ n \times n \f$ matrix, which must be symmetric, so
- *                only the bottom triangular matrix must contain values.
- *      \param	G \f$ n \times n \f$ matrix with the calculated normalized
- *                eigenvectors, each column will contain one eigenvector.
- *	\param  l n-dimensional vector with the calculated
- *                eigenvalues in descending order.
- *      \return   none.
+ * \param A \f$ n \times n \f$ matrix, which must be symmetric, so only the bottom triangular matrix must contain values.
+ * \param G \f$ n \times n \f$ matrix with the calculated normalizedeigenvectors, each column will contain one eigenvector.
+ * \param l n-dimensional vector with the calculated eigenvalues in descending order.
+ * \return none.
  *
- *      \throw SharkException
- *
- *  \author  S. Wiegand
- *  \date    2003
- *
- *  \par Changes
- *      none
- *
- *  \par Status
- *      stable
- *
+ * \throw SharkException
  */
-
 template<class MatrixT,class MatrixU,class VectorT>
 void shark::blas::eigensymm
 (
@@ -113,34 +99,14 @@ void shark::blas::eigensymm
  *  So in comparison to the Jacobi method, this function is
  *  faster for matrices with an order greater than 10.
  *
- *      \param  amatA \f$ n \times n \f$ matrix, which must be symmetric, so
- *                    only the bottom triangular matrix must contain values.
- *      \param	vmatA \f$ n \times n \f$ matrix with the calculated normalized
- *                    eigenvectors, each column will contain an
- *                    eigenvector.
- *	\param  dvecA n-dimensional vector with the calculated
- *                    eigenvalues in descending order.
- *	\param  odvecA n-dimensional vector with the calculated
- *                     offdiagonal of the Householder transformation.
+ *  \param amatA \f$ n \times n \f$ matrix, which must be symmetric, so only the bottom triangular matrix must contain values.
+ *  \param vmatA \f$ n \times n \f$ matrix with the calculated normalized eigenvectors, each column will contain an eigenvector.
+ *  \param  dvecA n-dimensional vector with the calculated eigenvalues in descending order.
+ *  \param  odvecA n-dimensional vector with the calculated offdiagonal of the Householder transformation.
  *
- *      \return       none.
+ *  \return       none.
  *
- *      \throw SharkException
- *
- *
- *  Please follow the link to view the source code of the example.
- *  The example can be executed in the example directory
- *  of package LinAlg.
- *
- *  \author  M. Kreutz
- *  \date    1998
- *
- *  \par Changes
- *      2003/09/19 18:55:22  S. Wiegand
- *      lower triangular part of 'amatA' will not corrupted anymore
- *
- *  \par Status
- *      stable
+ *  \throw SharkException
  *
  */
 template<class MatrixT,class MatrixU,class VectorT>

@@ -331,7 +331,7 @@ std::ostream &operator << (std::ostream &stream, const Data<T>& d) {
 		stream << elem << "\n";
 	return stream;
 }
-/** @*/
+/** @} */
 
 /// \brief Data set for unsupervised learning.
 ///
