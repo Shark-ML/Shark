@@ -64,24 +64,31 @@ struct MultiTaskSample : public ISerializable
 		ar << input;
 		ar << task;
 	}
-	
+
 	InputType input;                ///< input data
 	std::size_t task;               ///< task index
-	
+
 };
 }
 
-BOOST_FUSION_ADAPT_TPL_STRUCT(
-    (InputType),
-    (shark::MultiTaskSample) (InputType),
-    (InputType, input)(std::size_t, task)
-)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+    BOOST_FUSION_ADAPT_TPL_STRUCT(
+        (InputType),
+        (shark::MultiTaskSample) (InputType),
+        (InputType, input)(std::size_t, task)
+    )
+
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+
 namespace shark{
 
 
 template<class InputType>
 struct Batch< MultiTaskSample<InputType> >{
-	SHARK_CREATE_BATCH_INTERFACE( 
+	SHARK_CREATE_BATCH_INTERFACE(
 		MultiTaskSample<InputType>,
 		(InputType, input)(std::size_t, task)
 	)
@@ -229,7 +236,7 @@ protected:
 		const std::size_t tasks = numberOfTasks();
 		std::size_t elements = m_data.numberOfElements();
 		std::vector<std::size_t> ell(tasks, 0);
-		for (std::size_t i=0; i<elements; i++) 
+		for (std::size_t i=0; i<elements; i++)
 			ell[m_data.element(i).task]++;
 
 		// compute inner products between mean elements of empirical distributions
@@ -288,7 +295,7 @@ protected:
 /// MultiTaskSample) to inputs and task indices.
 ///
 template <class InputTypeT>
-class MultiTaskKernel 
+class MultiTaskKernel
 : private detail::MklKernelBase<MultiTaskSample<InputTypeT> >
 , public ProductKernel< MultiTaskSample<InputTypeT> >
 {

@@ -36,7 +36,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this library; if not, see <http://www.gnu.org/licenses/>.
- *  
+ *
  */
 #ifndef SHARK_CORE_SHARK_H
 #define SHARK_CORE_SHARK_H
@@ -47,7 +47,9 @@
 /**
  * \brief Bails out the compiler if the boost version is < 1.44.
  */
-BOOST_STATIC_ASSERT( BOOST_VERSION >= 104400 );
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    BOOST_STATIC_ASSERT( BOOST_VERSION >= 104400 );
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include <boost/assign.hpp>
 #include <boost/config.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -57,7 +59,7 @@ BOOST_STATIC_ASSERT( BOOST_VERSION >= 104400 );
 #include <map>
 #include <string>
 
-namespace shark {	
+namespace shark {
 
 /**
  * \namespace General namespace of the whole Shark machine learning library.
@@ -85,9 +87,9 @@ struct BuildTypeTag {
    * \brief The build settings that the library has been compiled with.
    */
 #if defined( _DEBUG ) || defined( DEBUG )
-  static const BuildType VALUE = DEBUG_BUILD_TYPE; 
+  static const BuildType VALUE = DEBUG_BUILD_TYPE;
 #else
-  static const BuildType VALUE = RELEASE_BUILD_TYPE; 
+  static const BuildType VALUE = RELEASE_BUILD_TYPE;
 #endif
 };
 
@@ -96,7 +98,7 @@ struct BuildTypeTag {
  */
 struct OpenMpTag {
 #ifdef _OPENMP
-  static const bool VALUE = true; 
+  static const bool VALUE = true;
 #else
   static const bool VALUE = false;
 #endif
@@ -108,15 +110,15 @@ struct OpenMpTag {
 struct OfficialReleaseTag {
 #ifdef SHARK_OFFICIAL_RELEASE
   static const bool VALUE = true;
-#else	
+#else
   static const bool VALUE = false;
 #endif
 };
-		
+
 }
 
 /**
- * \brief Allows for querying compile settings at runtime. Provides the 
+ * \brief Allows for querying compile settings at runtime. Provides the
  * current command line arguments to the rest of the library.
  */
 class Shark {
@@ -125,7 +127,7 @@ class Shark {
   Shark();
   Shark( const Shark & shark );
   Shark & operator=( const Shark & rhs );
-	
+
   static std::map< BuildType, std::string > m_buildTypeMap; ///< Translates BuildType's to human readable form.
  public:
 
@@ -144,14 +146,14 @@ class Shark {
     static unsigned int MAJOR() {
       return( major );
     }
-		    
+
     /** @brief Returns the minor revision number. */
-    static unsigned int MINOR() { 
+    static unsigned int MINOR() {
       return( minor );
     }
 
     /** @brief Returns the patch revision number. */
-    static unsigned int PATCH() { 
+    static unsigned int PATCH() {
       return( patch );
     }
 
@@ -162,14 +164,14 @@ class Shark {
    */
   typedef Version<
     @SHARK_VERSION_MAJOR@,
-    @SHARK_VERSION_MINOR@, 
+    @SHARK_VERSION_MINOR@,
     @SHARK_VERSION_PATCH@
     > version_type;
 
   /**
    * \brief Marks the boost version Shark has been built against.
    */
-  typedef Version< 
+  typedef Version<
     BOOST_VERSION / 100000,
     ((BOOST_VERSION / 100) % 1000),
     (BOOST_VERSION % 100)
@@ -220,7 +222,7 @@ class Shark {
 
     boost::property_tree::write_json(s, pt);
   }
-		
+
 };
 
 /**
@@ -230,4 +232,4 @@ std::map< BuildType, std::string > Shark::m_buildTypeMap = boost::assign::map_li
 
 }
 
-#endif 
+#endif

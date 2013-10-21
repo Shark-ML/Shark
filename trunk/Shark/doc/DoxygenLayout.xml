@@ -10,7 +10,7 @@
     </tab>
     <tab type="classes" visible="yes" title="">
       <tab type="classes" visible="yes" title=""/>
-      <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/> 
+      <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/>
       <tab type="hierarchy" visible="yes" title=""/>
       <tab type="classmembers" visible="no" title=""/>
     </tab>
@@ -18,8 +18,7 @@
       <tab type="files" visible="no" title=""/>
       <tab type="globals" visible="no" title=""/>
     </tab>
-    <tab type="dirs" visible="no" title=""/>
-    <tab type="examples" visible="no" title=""/>  
+    <tab type="examples" visible="no" title=""/>
   </navindex>
 
   <!-- Layout definition for a class page -->

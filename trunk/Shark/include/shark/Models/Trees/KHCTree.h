@@ -29,7 +29,7 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this library; if not, see <http://www.gnu.org/licenses/>.
-*  
+*
 */
 //===========================================================================
 
@@ -89,15 +89,16 @@ public:
 	KHCTree(Container const& points, kernel_type const* kernel, TreeConstruction tc = TreeConstruction())
 	: base_type(points.size())
 	, mep_kernel(kernel)
-	, m_normalInvNorm(1.0){ 
+	, m_normalInvNorm(1.0)
+    {
 		//create a list to the iterator elements as temporary storage
 		//we need indexed operators to have a fast lookup of the position of the elements in the container
 		std::vector<const_iterator> elements(m_size);
 		boost::iota(elements,const_iterator(boost::begin(points),0));
 
 		buildTree(tc,elements);
-		
-		//after the creation of the trees, the iterators in the array are sorted in the order, 
+
+		//after the creation of the trees, the iterators in the array are sorted in the order,
 		//they are referenced by the nodes.so we can create the indexList using the indizes of the iterators
 		for(std::size_t i = 0; i != m_size; ++i){
 			mp_indexList[i] = elements[i].index();
@@ -115,9 +116,9 @@ public:
 		KHCTree const* p = (KHCTree const*)mep_parent;
 		while (p != NULL){
 			double v = p->distanceFromPlane(reference);
-			if (t == p->mp_right) 
+			if (t == p->mp_right)
 				v = -v;
-			if (v > dist) 
+			if (v > dist)
 				dist = v;
 			t = p;
 			p = (KHCTree const*)p->mep_parent;
@@ -145,11 +146,11 @@ protected:
 	template<class Range>
 	void buildTree(TreeConstruction tc, Range& points){
 		typedef typename Range::iterator range_iterator;
-		
+
 		//check whether we are finished
-		if (tc.maxDepth() == 0 || m_size <= tc.maxBucketSize()) { 
+		if (tc.maxDepth() == 0 || m_size <= tc.maxBucketSize()) {
 			m_nodes = 1;
-			return; 
+			return;
 		}
 
 		// use only a subset of size at most CuttingAccuracy
@@ -160,7 +161,7 @@ protected:
 		}
 		else{
 			boost::array<const_iterator,CuttingAccuracy> samples;
-			for(std::size_t i = 0; i != CuttingAccuracy; i++) 
+			for(std::size_t i = 0; i != CuttingAccuracy; i++)
 				samples[i] = points[m_size * (2*i+1) / (2*CuttingAccuracy)];
 			calculateNormal(samples);
 		}
@@ -170,16 +171,16 @@ protected:
 		for(std::size_t i = 0; i != m_size; ++i){
 			distance[i] = funct(*points[i]);
 		}
-		
-		
+
+
 		// split the list into sub-cells
 		range_iterator split = this->splitList(distance,points);
 		range_iterator begin = boost::begin(points);
 		range_iterator end = boost::end(points);
-		
-		if (split == end) {//can't split points. 
+
+		if (split == end) {//can't split points.
 			m_nodes = 1;
-			return; 
+			return;
 		}
 
 		// create sub-nodes
@@ -194,7 +195,7 @@ protected:
 		((KHCTree*)mp_right)->buildTree(tc.nextDepthLevel(),right);
 		m_nodes = 1 + mp_left->nodes() + mp_right->nodes();
 	}
-	
+
 	template<class Range>
 	void calculateNormal(Range const& samples){
 		std::size_t numSamples = shark::size(samples);
@@ -210,18 +211,18 @@ protected:
 			}
 		}
 		m_normalInvNorm = 1.0 / std::sqrt(best_dist2);
-		if (! (boost::math::isfinite)(m_normalInvNorm)) 
+		if (! (boost::math::isfinite)(m_normalInvNorm))
 			m_normalInvNorm = 1.0;
 	}
-	
-	
+
+
 
 	/// function describing the separating hyperplane
-	double funct(value_type const& reference) const{ 
+	double funct(value_type const& reference) const{
 		double result = mep_kernel->eval(*mep_positive, reference);
 		result -= mep_kernel->eval(*mep_negative, reference);
 		result *= m_normalInvNorm;
-		return  result; 
+		return  result;
 	}
 
 	/// kernel function
