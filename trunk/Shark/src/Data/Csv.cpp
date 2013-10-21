@@ -38,6 +38,7 @@
 #include <boost/fusion/adapted/std_pair.hpp>
 #include <shark/Data/Csv.h>
 #include <vector>
+#include <ctype.h>
 
 namespace {
 
@@ -78,6 +79,10 @@ inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 	
 	double qnan = std::numeric_limits<double>::quiet_NaN();
 	
+	if(std::isspace(separator)){
+		separator = 0;
+	}
+	
 	bool r;
 	if( separator == 0){
 		r = phrase_parse(
@@ -116,6 +121,10 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 	Iterator first = contents.begin();
 	Iterator last = contents.end();
 	std::vector<CsvPoint> fileContents;
+	
+	if(std::isspace(separator)){
+		separator = 0;
+	}
 	
 	using namespace boost::spirit::qi;
 	using boost::spirit::_1;
