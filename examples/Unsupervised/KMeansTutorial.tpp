@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 	UnlabeledData<RealVector> data;
 	try {
 	//###begin<import>
-		import_csv(data, argv[1], 0);
+		import_csv(data, argv[1], ' ');
 	//###end<import>
 	} 
 	catch (...) {

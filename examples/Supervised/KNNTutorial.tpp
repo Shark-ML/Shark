@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 	// read data
 	ClassificationDataset data;
 	try {
-		import_csv(data, argv[1], LAST_COLUMN, 0);
+		import_csv(data, argv[1], LAST_COLUMN, ' ');
 	} 
 	catch (...) {
 		cerr << "unable to read data from file " <<  argv[1] << endl;
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 
 	// split data into training and test set
 //###begin<splitdata>
-	ClassificationDataset dataTest = splitAtElement(data, .5 * data.numberOfElements());
+	ClassificationDataset dataTest = splitAtElement(data, static_cast<std::size_t>(.5 * data.numberOfElements()));
 	cout << "training data points: " << data.numberOfElements() << endl;
 	cout << "test data points: " << dataTest.numberOfElements() << endl;
 //###end<splitdata>

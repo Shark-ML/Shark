@@ -6,19 +6,19 @@ Shark comes with its own solver for Quadratic Programs of the form:
 .. math::
   \max_{\alpha} & v^T\alpha - \frac 1 2 \alpha^T Q \alpha \\
   \text{s.t.}  & l_i < \alpha_i < u_i\\
-  & \sum_i \alpha_i = 0
+  & \[ \sum_i \alpha_i = 0 \]
 
 Where :math:`v` is a vector and :math:`Q` a matrix. The sum to zero constraint is
-optional and the solver is designed for medium to large scale problems, and especially
+optional and the solver is designed for medium to large scale problems. Most importantly it
 does not assume that :math:`Q` fits into main memory.
 This type of problem most often arises with Support Vector Machines, but especially
-theversion without the equality constraint can be found in a lot of different problem
-settings. This documnt will in the following describe the structure of the solver, how
+the version without equality constraint can be found in a lot of different problem
+settings. We will in the following describe the structure of the solver, how
 to use it and how to extend it to possibly different types of problems.
 
 The Algorithm used is the Sequential Minimal Optimization(SMO) method which is an decomposition
-algorithm. It decomposes the algorithm in a sequence of small problems and solves this
-sequence iteratively until the algorithm converges to the optimal solution.
+algorithm. It decomposes the algorithm in a sequence of small problems including only 1 or 2 variables
+and solves this sequence iteratively until the algorithm converges to the optimal solution.
 
 More precisely, at every iteration a working set of 1 or 2 variables are chosen of the
 problem and this sub problem solved optimally. For more information on SMO read...
@@ -52,17 +52,18 @@ For example an C-SVM problem with equality constraint and enabled shrinking is s
     QpStoppingCondition stop;
     solver.solve(stop);
 
-The problem dscription describs the specific interna of a problem, that are the linear and quadratic terms
-:math:`v` and :math:`Q`  as well as lower and upper bounds :math:`l` and :math:`u` and a
+The problem description parameterizes the problem, that is the linear and quadratic terms
+:math:`v` and :math:`Q`  as well as lower and upper bounds :math:`l` and :math:`u` as well as a
 starting point :math:`\alpha` which in this case is just the zero vector. We encapsulate this
 description inside a convenient class for easier reuse. The MatrixType is a special
 matrix type designed for very big matrices and matrices induced by datapoints and a kernel.
 
 The problem definition transforms the problem description into a real instance of the problem.
-This means that additional data structures are allocated as for exampl the gradient of th problem at a given starting
-point alpha. Especially the ConstrainedProblem knows how to perform an optimization step with a given working set.
+This means that additional data structures are allocated, 
+for example the gradient of the problem at a given starting point alpha. 
+Especially the ConstrainedProblem knows how to perform an optimization step with a given working set.
 
-The working set selection strategy is implicit in this case, as the constraint specification readily coms with a
+The working set selection strategy is implicit in this case, as the constraint specification readily comes with a
 suggestion for it. We could make this more explicit and tell the Solver to use a specific working set selection strategy::
 
     QpSolver< ConstrainedProblemType, MVPSelectionCriterion > solver(problem);
@@ -79,17 +80,17 @@ QpSolver<ProblemType, SelectionStrategy>
 
 
 This class is a very simple wrapper for the other components which just solves
-a given problem. In pseudo code a slightly simplified version of the algorithm
-SMO algorithm like this::
+a given problem. In pseudo code a slightly simplified version of the
+SMO algorithm is::
 
-    while(!someStoppingCriteriumIsMet){
+    while(!someStoppingCriterionIsMet){
         (i,j) <- selectWorkingSet(problem);
         problem.updateSMO(i,j)
         problem.shrink()
     }
 
-The QpSolver class thus only takees a description of the problem and a description of the
-selection strategy and does only perform a very simple loop.
+The QpSolver class thus only takes a description of the problem and a description of the
+selection strategy and iteratively calls this methods until the given stopping criterion is met.
 
 
 
@@ -111,6 +112,8 @@ Method                                         Description
                                                taking the constraints into account and a numerically
                                                stable update of the alpha values and the internal variables
                                                is performed.
+``double checkKKT()``			       Returns the current accuracy of the problem derived from the KKT conditions.
+					       This is usually of the inf norm of the gradients of variables which can move.
 ``bool shrink(accuracy)``                      Shrink the problem. At a given level of accuracy of the current solution
                                                unshrinking may be performed previously, to find shrinking errors.
                                                The return value indicates whether a variable was shrunk.
@@ -119,7 +122,9 @@ Method                                         Description
 ``functionValue()``                            Returns the function value of the current alpha.
 ============================================   ============================================================================
 
-And the low level interface is defined by:
+Only the high level interface is used by the QpSolver class, thus a given problem type might offer a different
+low level interface. This for example happens for the Multiclass Svm problems which can include more complex constraints.
+However as box constrained problems are the most important ones we give it as an example:
 
 ============================================   ========================================================================
 Method                                         Description
@@ -127,57 +132,41 @@ Method                                         Description
 ``dimensions()``                               Number of variables of the problem.
 ``active()``                                   Number of active variables of the problem. Be aware that
                                                only the data structures of active variables is updated and a
-                                               working st can not contain indices of variables which are not active.
+                                               working set can not contain indices of variables which are not active.
                                                variables with indices ``[0,...,active()-1]`` are allowed.
 ``alpha(i)``                                   Value of the i-th variable
 ``gradient(i)``                                Gradient of the i-th variable at the current point
 ``boxMin(i)``                                  Lower bound of the i-th variable.
 ``boxMax(i)``                                  Upper bound of the i-th variable.
-``isLowerBound(i)``                            Returns ``alpha(i) == boxMin(i)``.
-``isUpperBound(i)``                            Returns ``alpha(i) == boxMax(i)``.
+``isLowerBound(i)``                            Returns ``alpha(i) == boxMin(i)`` in an optimized way.
+``isUpperBound(i)``                            Returns ``alpha(i) == boxMax(i)`` in an optimized way.
 ``linear(i)``                                  Returns :math:`v_i`.
 ``quadratic()``                                Returns a reference to :math:`Q`
+``permutation(i)``			       Returns the original index of the i-th variable bfore permutation
 ``diagonal(i)``                                Returns :math:`Q(i,i)`
+``flipCoordinates(i,j)``		       Swaps the i-th and j-th variable
 ============================================   ========================================================================
 
 
 
-Only the high level interface is used by the QpSolver class, thus a given problem type might offer a different
-low level interface.
-
-
-Currently there are four types of Problems defined:
-
+Currently there are four types of Problems defined which adhere to this interface:
 
 
 ============================================   =======================================================
 Class                                          Description
 ============================================   =======================================================
-BoxConstrainedProblem                          Simple Box cosntraints and no equality constraints.
+BoxConstrainedProblem                          Simple Box constraints and no equality constraints.
                                                Can use working sets of size 1 (i==j). Does not implement
                                                shrinking.
 BoxConstrainedShrinkingProblem                 BoxConstrainedProblem with shrinking strategy
 SvmProblem                                     Box and Equality constraint. Can only use working sets
                                                of size 2 as it is otherwise impossible to fulfill the
-                                               equality constraint. Does not implementshrinking.
+                                               equality constraint. Does not implement shrinking.
 SvmShrinkingProblem                            SvmProblem with shrinking strategy
 ============================================   =======================================================
 
 Even for the Shrinking-Versions shrinking can be turned off in the constructor. The reason for the
-two separate versions is that it makes testing easier. Shrinking is implemented using one common
-base class, called BaseShrinkingProblem<Problem>. It implements the basic shrinking logic and a fast
-unshrinking algorithm. A derived class only has to implement the decision on which variables to shrink
-and unshrink. For this the following protected methods are offered:
-
-============================================   =======================================================
-Method                                         Description
-============================================   =======================================================
-``shrinkVariable(i)``                          Shrink the i-th variable. This is done by swaping the
-                                               i-th variable with the variable with index active()-1
-                                               Afterwards active() is decremented.
-virtual bool doShrink(epsilon)=0;              Needs to b overwritten: this method decides which active
-                                               variables are to be shrunk
-============================================   =======================================================
+two separate versions is that it makes testing easier.
 
 
 Kernel Matrices

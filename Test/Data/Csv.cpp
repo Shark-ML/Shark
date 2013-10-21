@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Data_Import)
 	}
 	{
 		Data<RealVector> test;
-		csvStringToData(test, test_no_separator, 0,'#',3);
+		csvStringToData(test, test_no_separator, ' ','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		std::cout << test<<std::endl;
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_First_Column )
 
 	{
 		LabeledData<RealVector, unsigned int> test;
-		csvStringToData(test, test_no_separator, FIRST_COLUMN, 0,'#',3);
+		csvStringToData(test, test_no_separator, FIRST_COLUMN, ' ','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(numberOfClasses(test), 3);
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_First_Column )
 	}
 	{
 		LabeledData<RealVector, RealVector> test;
-		csvStringToData(test, test_no_separator, FIRST_COLUMN, 3, 0,'#',3);
+		csvStringToData(test, test_no_separator, FIRST_COLUMN, 3, ' ','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(inputDimension(test), 6);
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_Last_Column )
 
 	{
 		LabeledData<RealVector, unsigned int> test;
-		csvStringToData(test, test_no_separator, LAST_COLUMN, 0,'#',3);
+		csvStringToData(test, test_no_separator, LAST_COLUMN, ' ','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(numberOfClasses(test), 2);
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_Last_Column )
 	}
 	{
 		LabeledData<RealVector, RealVector> test;
-		csvStringToData(test, test_no_separator, LAST_COLUMN, 3, 0,'#',3);
+		csvStringToData(test, test_no_separator, LAST_COLUMN, 3, ' ','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(inputDimension(test), 6);

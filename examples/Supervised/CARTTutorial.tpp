@@ -43,7 +43,7 @@ int main() {
 	//###begin<load>
 	// read data
 	ClassificationDataset dataTrain;
-        import_csv(dataTrain, "data/C.csv", LAST_COLUMN, 0);
+        import_csv(dataTrain, "data/C.csv", LAST_COLUMN, ' ');
 
 
 	//Split the dataset into a training and a test dataset
