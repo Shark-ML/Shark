@@ -20,10 +20,12 @@
         shark::CompressedRealVector crv3;
     };
 
-    BOOST_FUSION_ADAPT_STRUCT(
-        HeterogeneousInputStruct,
-        (shark::RealVector, rv1)(std::size_t, st2)(shark::CompressedRealVector, crv3)
-    )
+    #ifndef DOXYGEN_SHOULD_SKIP_THIS
+        BOOST_FUSION_ADAPT_STRUCT(
+            HeterogeneousInputStruct,
+            (shark::RealVector, rv1)(std::size_t, st2)(shark::CompressedRealVector, crv3)
+        )
+    #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     namespace shark{
         template<>

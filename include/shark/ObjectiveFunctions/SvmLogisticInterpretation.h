@@ -56,7 +56,7 @@ namespace shark {
 /// Parameters. IEEE Transactions on Pattern Analysis and Machine Intelligence, 2010."
 /// At this point, only binary C-SVMs are supported.
 /// \par
-/// This class implements an #AbstactObjectiveFunction. In detail, it provides
+/// This class implements an AbstactObjectiveFunction. In detail, it provides
 /// a differentiable measure of how well a C-SVM with given hyperparameters fulfills
 /// the maximum-likelihood score presented in the paper. This error measure can then
 /// be optimized for externally via gradient-based optimizers. In other words, this
@@ -155,7 +155,7 @@ public:
 		} //else: leave everything as is
 		throw SHARKEXCEPTION("[SvmLogisticInterpretation::closestFeasible] Please first clarify how the kernel parameter feasibility should be dealt with. Afterwards, please write a test for this method. Thanks.");
 	}
-	
+
 	std::size_t numberOfVariables()const{
 		return m_nhp;
 	}
@@ -309,7 +309,7 @@ public:
 				derivative(j) += dL_dsp * dsp_dsvmp * all_validation_predict_derivs(i,j);
 			}
 		}
-		// correct for the fact that AbstractLoss devides the NCLL eval scores 
+		// correct for the fact that AbstractLoss devides the NCLL eval scores
 		// by the number of examples when evaluated in batch mode
 		derivative /= m_numSamples;
 		return ncll.eval(all_validation_labels, sigmoid_predictions);

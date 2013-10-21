@@ -18,7 +18,7 @@
 *
 *  Additionally this class offers a global random number generator of Type #RngType. The Default of this
 *  Is the Mersenne Twister with a cycle length of $2^19937$. This Generator can be used to construct additional
-*  distributions. The seed can be used using #Rng::seed
+*  distributions. The seed can be set via Rng::seed
 *
 *  \par Example
 *  \code
@@ -107,7 +107,7 @@ namespace shark {
 
 	/**
 	* \brief Collection of different variate generators for different distributions.
-	* 
+	*
 	* \tparam RNG The underlying random number generator, needs to model the boost rng concept.
 	*/
 	template<typename RNG>
@@ -144,7 +144,7 @@ namespace shark {
 			LogNormal< rng_type > logNormal(globalRng,location,scale);
 			return logNormal();
 		}
-                
+
 		//! creates a normal distributed number with mean "mean" and variance "sigma"
 		static double gauss(double mean=0.0,double sigma=1.0) {
 			Normal< rng_type > normal(globalRng,mean,sigma);
@@ -196,7 +196,7 @@ namespace shark {
 		static void seed( typename rng_type::result_type s ) {
 			globalRng.seed( s );
 		}
-	};	
+	};
 	template<class Rng>
 	typename BaseRng<Rng>::rng_type BaseRng<Rng>::globalRng = typename BaseRng<Rng>::rng_type();
 
@@ -208,7 +208,7 @@ namespace shark {
 	/*
 	typedef BaseRng< boost::rand48 > FastRng; FastRng::rng_type FastRng::globalRng = FastRng::rng_type();
 		typedef BaseRng< boost::mt19937 > Rng; Rng::rng_type Rng::globalRng = Rng::rng_type();*/
-	
+
 
 }
 

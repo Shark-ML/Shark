@@ -67,8 +67,8 @@ namespace shark{ namespace blas{
      * This is used to feed in vectors with data stored as an ASCII representation
      * from a standard input stream.
      *
-     * From a file or any valid stream, the format is: 
-     * \c [<vector size>](<data1>,<data2>,...<dataN>) like for exaboost::mple:
+     * From a file or any valid stream, the format is:
+     * \c [(vectorsize)]((data1),(data2),...(dataN)) like for example:
      * \code
      * [5](1,2.1,3.2,3.14,0.2)
      * \endcode
@@ -124,9 +124,9 @@ namespace shark{ namespace blas{
 
     /** \brief output stream operator for matrix expressions
      *
-     * it outputs the content of a \f$(M \times N)\f$ matrix to a standard output 
+     * it outputs the content of a \f$ (M \times N) \f$ matrix to a standard output
      * stream using the following format:
-     * \c[<rows>,<columns>]((<m00>,<m01>,...,<m0N>),...,(<mM0>,<mM1>,...,<mMN>))
+     * \c [ (rows),)(columns)](((m00),(m01),...,(m0N)),...,((mM0),(mM1),...,(mMN)))
      *
      * For exaboost::mple:
      * \code
@@ -138,7 +138,7 @@ namespace shark{ namespace blas{
      * [3,3]((0,1,1),(1,0,1),(1,1,0))
      * \endcode
      * This output is made for storing and retrieving matrices in a siboost::mple way but you can
-     * easily recognize the following: 
+     * easily recognize the following:
      * \f[ \left( \begin{array}{ccc} 1 & 1 & 1\\ 1 & 1 & 1\\ 1 & 1 & 1 \end{array} \right) - \left( \begin{array}{ccc} 1 & 0 & 0\\ 0 & 1 & 0\\ 0 & 0 & 1 \end{array} \right) = \left( \begin{array}{ccc} 0 & 1 & 1\\ 1 & 0 & 1\\ 1 & 1 & 0 \end{array} \right) \f]
      *
      * \param os is a standard basic output stream
@@ -183,7 +183,7 @@ namespace shark{ namespace blas{
      * from a standard input stream.
      *
      * From a file or any valid standard stream, the format is:
-     * \c[<rows>,<columns>]((<m00>,<m01>,...,<m0N>),...,(<mM0>,<mM1>,...,<mMN>))
+     * \c[(rows),(columns)](((m00),(m01),...,(m0N)),...,((mM0),(mM1),...,(mMN)))
      *
      * You can use it like this
      * \code
