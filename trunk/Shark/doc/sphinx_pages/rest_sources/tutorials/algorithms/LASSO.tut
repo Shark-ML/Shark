@@ -43,7 +43,7 @@ LASSO in Shark
 --------------
 
 The method in implemented by the :doxy:`LassoRegression` trainer.
-It operates on a standard :doxy:`LinearModel`:
+It operates on a standard :doxy:`LinearModel`: ::
 
 ..sharkcode<Supervised/LassoRegression.tpp,core>
 
