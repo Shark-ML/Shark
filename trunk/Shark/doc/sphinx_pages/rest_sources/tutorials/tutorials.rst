@@ -96,6 +96,7 @@ Let's start with some classical methods:
 * :doc:`algorithms/nearestNeighbor`
 * :doc:`algorithms/lda`
 * :doc:`algorithms/linearRegression`
+* :doc:`algorithms/LASSO`
 * :doc:`algorithms/kmeans`
 
 Neural nets:
