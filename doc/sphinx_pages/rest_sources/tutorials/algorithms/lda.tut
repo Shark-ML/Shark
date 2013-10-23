@@ -99,11 +99,11 @@ References
 .. [DamoulasGirolami2008a] T. Damoulas and M. Girolami.
    Probabilistic multi-class multi-kernel learning: on protein fold
    recognition and remote homology detection. Bioinformatics,
-   24(10):1264–1270, 2008.
+   24(10):1264-1270, 2008.
 
 .. [DingDubchak2001a] C.H.Q. Ding and I. Dubchak.  Multi-class
    protein fold recognition using support vector machines and neural
-   networks. Bioinformatics, 17(4):349–358, 2001.
+   networks. Bioinformatics, 17(4):349-358, 2001.
 
 .. [HastieTibshiraniFriedman2008] T. Hastie, R. Tibshirani and
    J. Friedman.  `The Elements of Statistical Learning
