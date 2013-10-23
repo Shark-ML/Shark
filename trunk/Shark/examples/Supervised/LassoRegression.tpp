@@ -27,7 +27,9 @@
 
 #include <shark/Data/DataDistribution.h>
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
+//###begin<core>
 #include <shark/Algorithms/Trainers/LassoRegression.h>
+//###end<core>
 
 #include <iostream>
 #include <fstream>
@@ -87,15 +89,21 @@ int main(int argc, char** argv)
 	// For this problem the LASSO method identifies the correct
 	// subset of 10 informative coefficients for a large range
 	// of parameter values.
+	//###begin<core>
 	double lambda = 1.0;
+	//###end<core>
 
 	// trainer and model
-	LassoRegression<> trainer(lambda);
+	//###begin<core>
 	LinearModel<> model;
+	LassoRegression<> trainer(lambda);
+	//###end<core>
 
 	// train the model
 	cout << "LASSO training ..." << flush;
+	//###begin<core>
 	trainer.train(model, data);
+	//###end<core>
 	cout << " done." << endl;
 
 	// check non-zero coefficients
