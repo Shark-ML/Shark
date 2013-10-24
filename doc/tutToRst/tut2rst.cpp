@@ -138,14 +138,34 @@ int main(int argc, char** argv)
 				size_t num = 0;
 				while (true)
 				{
+					// identify snippet
 					size_t begin = example.find("//###begin<" + name + ">", start);
 					if (begin == string::npos) break;
 					size_t end = example.find("//###end<" + name + ">", begin);
 					if (end == string::npos) throw string("end marker for '" + name + "' not found in file '" + examplename + "'");
 					while (example[begin] != '\n') begin++;
-					for (size_t i=begin; i<end; i++)
+					string snippet = example.substr(begin, end - begin);
+
+					// remove inner snippet markers
+					size_t s_start = 0;
+					while (true)
 					{
-						char c = example[i];
+						size_t begin1 = snippet.find("//###begin<", s_start);
+						size_t begin2 = snippet.find("//###end<", s_start);
+						if (begin1 == string::npos && begin2 == string::npos) break;
+						size_t begin = min(begin1, begin2);
+						size_t end = snippet.find(">", begin);
+						if (end == string::npos) throw string("sharkcode tag not closed (missing '>')");
+						end++;
+						if (snippet[end] == '\n') end++;
+						snippet.erase(begin, end - begin);
+						s_start = begin;
+					}
+
+					// add snippet to output
+					for (size_t i=0; i<snippet.size(); i++)
+					{
+						char c = snippet[i];
 						if (c == '\n') output += "\n\t";    // make sure code is indented
 						else output += c;
 					}
