@@ -1,19 +1,9 @@
 /**
 *
-*  \brief Illustrates usage of the shark statistics component.
+*  \brief Illustrates usage of the statistics component.
 *
 *  \author T.Voss
 *  \date 2010
-*
-*  \par Copyright (c) 1998-2007:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-25558<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*      <BR>
 *
 *
 *  <BR><HR>
@@ -31,19 +21,42 @@
 *  along with this library; if not, see <http://www.gnu.org/licenses/>.
 *
 */
+
+//###begin<includes>
 #include <shark/Statistics/Statistics.h>
-
 #include <shark/Rng/GlobalRng.h>
+//###end<includes>
 
-int main( int argc, char ** argv ) {
+using namespace shark;
 
-    shark::Statistics stats;
-    
-    // Sample 10000 standard normally distributed random numbers
-    // and update statistics for these numbers.
-    for( std::size_t i = 0; i < 100000; i++ )
-	stats( shark::Rng::gauss() );
 
-    // Output results to the console.
-    std::cout << stats << std::endl;
+int main(int argc, char** argv)
+{
+//###begin<stat>
+	Statistics stats;
+//###end<stat>
+
+//###begin<sample>
+	// Sample 10000 standard normally distributed random numbers
+	// and update statistics for these numbers iteratively.
+	for (std::size_t i = 0; i < 100000; i++)
+		stats( Rng::gauss() );
+//###end<sample>
+
+//###begin<cout>
+	// Output results to the console.
+	std::cout << stats << std::endl;
+//###end<cout>
+
+//###begin<indiv>
+	std::cout << 
+		stats( Statistics::NumSamples() ) << " " <<
+		stats( Statistics::Min() ) << " " <<
+		stats( Statistics::Max() ) << " " <<
+		stats( Statistics::Mean() ) << " " << 
+		stats( Statistics::Variance() ) << " " <<
+		stats( Statistics::Median() ) << " " <<
+		stats( Statistics::LowerQuartile() ) << " " <<
+		stats( Statistics::UpperQuartile() ) << std::endl;
+//###end<indiv>
 }
