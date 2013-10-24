@@ -110,6 +110,11 @@ SHARK_ADD_EXAMPLE( Supervised/FFNNMultiClassCrossEntropy FFNNMultiClassCrossEntr
 SHARK_ADD_EXAMPLE( Supervised/FFNNMultiClassNormalizedTraining FFNNMultiClassNormalizedTraining "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/RFTutorial RFTutorial "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/CARTTutorial CARTTutorial "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-LDA VersatileClassificationTutorial-LDA "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-NN VersatileClassificationTutorial-NN "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-SVM VersatileClassificationTutorial-SVM "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-RF VersatileClassificationTutorial-RF "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-Network VersatileClassificationTutorial-Network "Supervised" )
 
 #basic tutorials
 SHARK_ADD_EXAMPLE( Supervised/quickstartTutorial quickstartTutorial "Supervised" )
