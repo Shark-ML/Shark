@@ -34,28 +34,32 @@ typedef std::pair<int, std::vector<std::pair<std::size_t, double> > > LibSVMPoin
 inline std::vector<LibSVMPoint> 
 import_libsvm_reader(
 	std::istream& stream
-) {
-	stream.unsetf(std::ios::skipws); // No white space skipping!
-	std::istream_iterator<char> streamBegin(stream);
-	std::string storage(// We will read the contents of the file here
-		streamBegin,
-		std::istream_iterator<char>()
-	);
-	
-	using namespace boost::spirit::qi;
-	std::string::const_iterator first = storage.begin();
-	std::string::const_iterator last = storage.end();
+) {	
 	std::vector<LibSVMPoint>  fileContents;
-	bool r = phrase_parse(
-		first, last, 
-		*(
+	while(stream){
+		std::string line;
+		std::getline(stream,line);
+		if(line.empty()) continue;
+		
+		using namespace boost::spirit::qi;
+		std::string::const_iterator first = line.begin();
+		std::string::const_iterator last = line.end();
+		
+		LibSVMPoint newPoint;
+		bool r = phrase_parse(
+			first, last, 
 			int_   >> -(lit('.')>>+lit('0'))//we also want to be able to parse 1.00000 as label 1
-			>> *(uint_ >> ':' >> double_) >> eol
-		),
-		space-eol , fileContents
-	);
-	if(!r || first != last)
-		throw SHARKEXCEPTION("[import_libsvm_reader] problems parsing file");
+				>> *(uint_ >> ':' >> double_),
+			space , newPoint
+		);
+		if(!r || first != last){
+			std::cout<<std::string(first,last)<<std::endl;
+			throw SHARKEXCEPTION("[import_libsvm_reader] problems parsing file");
+		
+		}
+		
+		fileContents.push_back(newPoint);
+	}
 	return fileContents;
 }
 
