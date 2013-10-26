@@ -29,8 +29,10 @@
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <ctime>
 #else
 #include <sys/resource.h>
+#include <sys/time.h>
 #endif 
 
 
@@ -46,39 +48,52 @@ namespace shark {
 class Timer
 {
 public:
-	Timer() 
-	: m_lastLap( 0.0 ),
-	  m_startTime( 0.0 )
+	Timer(bool measureWallclockTime = true) 
+	: m_lastLap( 0.0 )
+	, m_startTime( 0.0 )
+	, m_measureWallclockTime(measureWallclockTime)
+
 	  { }
+	  
+	/// \brief Returns the current time in a microsecond resolution. Att: may in rare cases give decreasing values.
+	static double now(bool measureWallclockTime = true) {
+#ifdef _WIN32
+		if(measureWallclockTime){
+			return static_cast<double>(std::clock()) / CLOCKS_PER_SEC;
+		}
+		else{
+			LARGE_INTEGER tick, tps;
+			QueryPerformanceFrequency(&tps);
+			QueryPerformanceCounter(&tick);
+			return( static_cast<double>( tick.QuadPart ) / static_cast<double>( tps.QuadPart ) );
+		}
+#else
+		if(measureWallclockTime){
+			timeval time;
+			if (gettimeofday(&time,NULL)){
+				//  Handle error
+				return 0;
+			}
+			return time.tv_sec +1e-6 *time.tv_usec;
+		}
+		else
+		{
+			rusage res;
+			getrusage(RUSAGE_SELF, &res);
+			return(res.ru_utime.tv_sec + res.ru_stime.tv_sec)
+				+ 1e-6 * (res.ru_utime.tv_usec + res.ru_stime.tv_usec);
+		}
+#endif
+	}
 
 	/// \brief stores the current time in m_startTime.
 	void start() {
-#ifdef _WIN32
-		LARGE_INTEGER tick, tps;
-		QueryPerformanceFrequency(&tps);
-		QueryPerformanceCounter(&tick);
-		m_startTime = static_cast<double>( tick.QuadPart ) / static_cast<double>( tps.QuadPart );
-#else
-		rusage res;
-		getrusage(RUSAGE_SELF, &res);
-		m_startTime = res.ru_utime.tv_sec + res.ru_stime.tv_sec
-			+ 1e-6 * (res.ru_utime.tv_usec + res.ru_stime.tv_usec);
-#endif
+		m_startTime = now(m_measureWallclockTime);
 	}
 
 	/// \brief returns the difference between current time and m_startTime (but a minimum of 0)
 	double stop() {
-#ifdef _WIN32
-		LARGE_INTEGER tick, tps;
-		QueryPerformanceFrequency(&tps);
-		QueryPerformanceCounter(&tick);
-		double stop = static_cast<double>( tick.QuadPart ) / static_cast<double>( tps.QuadPart );
-#else
-		rusage res;
-		getrusage(RUSAGE_SELF, &res);
-		double stop = res.ru_utime.tv_sec + res.ru_stime.tv_sec
-			+ 1e-6 * (res.ru_utime.tv_usec + res.ru_stime.tv_usec);
-#endif
+		double stop = now(m_measureWallclockTime);
 		m_lastLap = stop - m_startTime;
 
 		// avoid rare cases of non-increasing timer values (cf. eg. http://www.linuxmisc.com/8-freebsd/d4c6ddc8fbfbd523.htm)
@@ -95,24 +110,10 @@ public:
 		return m_lastLap;
 	}
 
-	/// \brief Returns the current time in a microsecond resolution. Att: may in rare cases give decreasing values.
-	static double now() {
-#ifdef _WIN32
-		LARGE_INTEGER tick, tps;
-		QueryPerformanceFrequency(&tps);
-		QueryPerformanceCounter(&tick);
-		return( static_cast<double>( tick.QuadPart ) / static_cast<double>( tps.QuadPart ) );
-#else
-		rusage res;
-		getrusage(RUSAGE_SELF, &res);
-		return(res.ru_utime.tv_sec + res.ru_stime.tv_sec)
-			+ 1e-6 * (res.ru_utime.tv_usec + res.ru_stime.tv_usec);
-#endif
-	}
-
 private:
 	double m_lastLap;
 	double m_startTime;
+	bool m_measureWallclockTime;
 };
 
 
