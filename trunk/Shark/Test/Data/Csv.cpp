@@ -11,7 +11,7 @@ using namespace shark;
 
 const char test_separator[] = "\
 1.000,148.0,72,35,0,33.6,,?,-1\n\
-1,66,29,0,26.6,,,?,-1\r\
+#1,66,29,0,26.6,,,?,-1\r\
 1,183,64,0,0, 23.3,0.672,32,1\r\n\
 2.000,116,\t74\t,\t0 \t\t,0,25.6,0.201 , 30,-1\n\
 1.,78,50,32,88 ,31.0, 0.248,26,1\n\
@@ -154,7 +154,7 @@ void checkDataRegression(double* values, LabeledData<RealVector,RealVector> cons
 		inputStart = labelEnd;
 		inputEnd = numDimensions+1;
 	}
-	
+
 	for (size_t i=0; i != numInputs; ++i){
 		for (size_t j=0; j != numDimensions+1; ++j)
 		{
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Data_Import)
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		std::cout << test<<std::endl;
-		
+
 		checkDataEquality(test_values,test);
 	}
 	{
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Data_Import)
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		std::cout << test<<std::endl;
-		
+
 		checkDataEquality(test_values,test);
 	}
 }
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Separator_First_Column )
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(numberOfClasses(test), 3);
 		std::cout << test<<std::endl;
-		
+
 		checkDataEquality(test_values_1,labels_1,test);
 	}
 	{
@@ -218,9 +218,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Separator_First_Column )
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(inputDimension(test), 6);
 		BOOST_CHECK_EQUAL(labelDimension(test), 3);
-		
+
 		std::cout << test<<std::endl;
-		
+
 		checkDataRegression(test_values,test,0,3);
 	}
 }
@@ -235,9 +235,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_First_Column )
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(numberOfClasses(test), 3);
-		
+
 		std::cout << test<<std::endl;
-		
+
 		checkDataEquality(test_values_1,labels_1,test);
 	}
 	{
@@ -247,9 +247,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_First_Column )
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(inputDimension(test), 6);
 		BOOST_CHECK_EQUAL(labelDimension(test), 3);
-		
+
 		std::cout << test<<std::endl;
-		
+
 		checkDataRegression(test_values,test,0,3);
 	}
 }
@@ -263,9 +263,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_Last_Column )
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(numberOfClasses(test), 2);
-		
+
 		std::cout << test<<std::endl;
-		
+
 		checkDataEquality(test_values_2,labels_2,test);
 	}
 	{
@@ -275,9 +275,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_Last_Column )
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(inputDimension(test), 6);
 		BOOST_CHECK_EQUAL(labelDimension(test), 3);
-		
+
 		std::cout << test<<std::endl;
-		
+
 		checkDataRegression(test_values,test,6,9);
 	}
 }
@@ -291,9 +291,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Separator_Last_Column )
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(numberOfClasses(test), 2);
-		
+
 		std::cout << test<<std::endl;
-		
+
 		checkDataEquality(test_values_2,labels_2,test);
 	}
 	{
@@ -303,9 +303,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Separator_Last_Column )
 		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
 		BOOST_CHECK_EQUAL(inputDimension(test), 6);
 		BOOST_CHECK_EQUAL(labelDimension(test), 3);
-		
+
 		std::cout << test<<std::endl;
-		
+
 		checkDataRegression(test_values,test,6,9);
 	}
 }
@@ -315,33 +315,33 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Export)
 	{
 		LabeledData<RealVector, unsigned int> test;
 		csvStringToData(test, test_separator, FIRST_COLUMN, ',','#',3);
-		
+
 		export_csv(test, "./test_output/check_first.csv", FIRST_COLUMN);
 		LabeledData<RealVector, unsigned int> loaded;
 		import_csv(loaded, "./test_output/check_first.csv", FIRST_COLUMN);
-		
+
 		checkDataEquality(test_values_1,labels_1,loaded);
 	}
-	
+
 	{
 		LabeledData<RealVector, unsigned int> test;
 		csvStringToData(test, test_separator, FIRST_COLUMN, ',','#',3);
-		
+
 		export_csv(test, "./test_output/check_last.csv", LAST_COLUMN);
 		LabeledData<RealVector, unsigned int> loaded;
 		import_csv(loaded, "./test_output/check_last.csv", LAST_COLUMN);
-		
+
 		checkDataEquality(test_values_1,labels_1,loaded);
 	}
-	
+
 	{
 		Data<RealVector> test;
 		csvStringToData(test, test_separator, ',','#',3);
-		
+
 		export_csv(test, "test_output/check_regression.csv");
 		Data<RealVector> loaded;
 		import_csv(loaded, "test_output/check_regression.csv");
-		
+
 		checkDataEquality(test_values,loaded);
 	}
 }

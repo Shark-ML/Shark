@@ -49,19 +49,19 @@ inline std::vector<T> importCSVReaderSingleValue(
 ) {
 	std::string::const_iterator first = contents.begin();
 	std::string::const_iterator last = contents.end();
-	
+
 	using namespace boost::spirit::qi;
 	std::vector<T>  fileContents;
-	
+
 	bool r = phrase_parse(
-		first, last, 
+		first, last,
 		auto_ % (eol|eoi),
 		(space-eol)| (comment >> *(char_ - eol) >> (eol| eoi)), fileContents
 	);
 
 	if(!r || first != last)
-		throw SHARKEXCEPTION("[import_csv_reader_value] problems parsing file");
-	
+		throw SHARKEXCEPTION("[import_csv_reader_value] problems parsing file (1)");
+
 	return fileContents;
 }
 
@@ -73,20 +73,20 @@ inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 ) {
 	std::string::const_iterator first = contents.begin();
 	std::string::const_iterator last = contents.end();
-	
+
 	using namespace boost::spirit::qi;
 	std::vector<std::vector<double> >  fileContents;
-	
+
 	double qnan = std::numeric_limits<double>::quiet_NaN();
-	
+
 	if(std::isspace(separator)){
 		separator = 0;
 	}
-	
+
 	bool r;
 	if( separator == 0){
 		r = phrase_parse(
-			first, last, 
+			first, last,
 			(
 				+(double_ | ('?' >>  attr(qnan) ))
 			) % eol >> -eol,
@@ -95,8 +95,8 @@ inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 	}
 	else{
 		r = phrase_parse(
-			first, last, 
-			(	
+			first, last,
+			(
 				(double_ | ((lit('?')| &lit(separator)) >>  attr(qnan))) % separator
 			) % eol >> -eol,
 			space-eol , fileContents
@@ -104,7 +104,7 @@ inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 	}
 
 	if(!r || first != last){
-		throw SHARKEXCEPTION("[import_csv_reader_values] problems parsing file");
+		throw SHARKEXCEPTION("[import_csv_reader_values] problems parsing file (2)");
 	}
 	return fileContents;
 }
@@ -121,23 +121,23 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 	Iterator first = contents.begin();
 	Iterator last = contents.end();
 	std::vector<CsvPoint> fileContents;
-	
+
 	if(std::isspace(separator)){
 		separator = 0;
 	}
-	
+
 	using namespace boost::spirit::qi;
 	using boost::spirit::_1;
 	using namespace boost::phoenix;
-	
+
 	double qnan = std::numeric_limits<double>::quiet_NaN();
-	
+
 	bool r = false;
 	if(separator == 0 && position == shark::FIRST_COLUMN){
 		r = phrase_parse(
-			first, last, 
+			first, last,
 			(
-				lexeme[int_ >> -(lit('.')>>*lit('0'))] 
+				lexeme[int_ >> -(lit('.')>>*lit('0'))]
 				>> * (double_ | ('?' >>  attr(qnan) ))
 			) % eol >> -eol,
 			space-eol, fileContents
@@ -145,10 +145,10 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 	}
 	else if(separator != 0 && position == shark::FIRST_COLUMN){
 		r = phrase_parse(
-			first, last, 
-			(	
-				lexeme[int_ >> -(lit('.')>>*lit('0'))] 
-				>> *(separator >> (double_ | (-lit('?') >>  attr(qnan) ))) 
+			first, last,
+			(
+				lexeme[int_ >> -(lit('.')>>*lit('0'))]
+				>> *(separator >> (double_ | (-lit('?') >>  attr(qnan) )))
 			) % eol >> -eol,
 			space-eol , fileContents
 		);
@@ -180,9 +180,9 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 		}while(r && first != last);
 	}
 	if(!r || first != last)
-		throw SHARKEXCEPTION("[import_csv_reader_points] problems parsing file");
-	
-	
+		throw SHARKEXCEPTION("[import_csv_reader_points] problems parsing file (3)");
+
+
 	return fileContents;
 }
 
@@ -199,7 +199,7 @@ void csvStringToDataImpl(
 		data = shark::Data<T>();
 		return;
 	}
-	
+
 	//copy rows of the file into the dataset
 	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
 	data = shark::Data<T>(batchSizes.size());
@@ -231,7 +231,7 @@ void shark::csvStringToData(
 		data = Data<RealVector>();
 		return;
 	}
-	
+
 	//copy rows of the file into the dataset
 	std::size_t dimensions = rows[0].size();
 	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
@@ -244,7 +244,7 @@ void shark::csvStringToData(
 		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
 			if(rows[currentRow].size() != dimensions)
 				throw SHARKEXCEPTION("vectors are required to have same size");
-			
+
 			for(std::size_t j = 0; j != dimensions; ++j){
 				batch(i,j) = rows[currentRow][j];
 			}
@@ -296,12 +296,12 @@ void shark::csvStringToData(
 		dataset = LabeledData<RealVector, unsigned int>();
 		return;
 	}
-	
+
 	//check labels for conformity
 	bool binaryLabels = false;
 	int minPositiveLabel = std::numeric_limits<int>::max();
 	{
-		
+
 		int maxPositiveLabel = -1;
 		for(std::size_t i = 0; i != rows.size(); ++i){
 			int label = rows[i].first;
@@ -317,7 +317,7 @@ void shark::csvStringToData(
 		if(binaryLabels && (minPositiveLabel == 0||  maxPositiveLabel > 1))
 			throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
 	}
-	
+
 	//copy rows of the file into the dataset
 	std::size_t dimensions = rows[0].second.size();
 	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
@@ -332,7 +332,7 @@ void shark::csvStringToData(
 		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
 			if(rows[currentRow].second.size() != dimensions)
 				throw SHARKEXCEPTION("vectors are required to have same size");
-			
+
 			for(std::size_t j = 0; j != dimensions; ++j){
 				inputs(i,j) = rows[currentRow].second[j];
 			}
@@ -357,7 +357,7 @@ void shark::csvStringToData(
 		dataset = LabeledData<RealVector, RealVector>();
 		return;
 	}
-	
+
 	//copy rows of the file into the dataset
 	if(rows[0].size() <= numberOfOutputs){
 		throw SHARKEXCEPTION("Files must have more columns than requested number of outputs");
@@ -378,7 +378,7 @@ void shark::csvStringToData(
 		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
 			if(rows[currentRow].size() != dimensions)
 				throw SHARKEXCEPTION("Detected different number of columns in a row of the file!");
-			
+
 			for(std::size_t j = 0; j != numberOfInputs; ++j){
 				inputs(i,j) = rows[currentRow][j+inputStart];
 			}
