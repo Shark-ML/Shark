@@ -274,7 +274,7 @@ protected:
 	// for all c: row(w, c) += mu(c) * x
 	void add_scaled(RealMatrix& w, RealVector const& mu, InputReferenceType x)
 	{
-		for (std::size_t c=0; c<m_classes; c++) row(w, c) += mu(c) * x;
+		for (std::size_t c=0; c<m_classes; c++) noalias(row(w, c)) += mu(c) * x;
 	}
 
 	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
