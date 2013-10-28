@@ -71,129 +71,129 @@ enum LabelPosition {
 
 namespace detail {
 
-// export function for unlabeled data
-template<typename T, typename Stream>
-void export_csv(const T &data,   // Container that holds the samples
-        Stream &out,  // The file to be read from
-        const std::string &separator,  // The separator between elements
-        bool scientific = true, //scientific notation?
-        unsigned int fieldwidth = 0
-) {
-	if (!out) {
-		throw(std::invalid_argument("[export_csv (1)] Stream cannot be opened for writing."));
-	}
+    // export function for unlabeled data
+    template<typename T, typename Stream>
+    void export_csv(const T &data,   // Container that holds the samples
+            Stream &out,  // The file to be read from
+            const std::string &separator,  // The separator between elements
+            bool scientific = true, //scientific notation?
+            unsigned int fieldwidth = 0
+    ) {
+        if (!out) {
+            throw(std::invalid_argument("[export_csv (1)] Stream cannot be opened for writing."));
+        }
 
-	// set output format
-	if (scientific)
-		out.setf(std::ios_base::scientific);
-	std::streamsize ss = out.precision();
-	out.precision(10);
+        // set output format
+        if (scientific)
+            out.setf(std::ios_base::scientific);
+        std::streamsize ss = out.precision();
+        out.precision(10);
 
-	// write out
-	typename T::const_iterator it = data.begin();
-	for (; it != data.end(); ++it) {
-		SHARK_CHECK(it->begin() != it->end(), "[export_csv (1)] record must not be empty");
-		for (std::size_t i=0; i<(*it).size()-1; i++) {
-			out << std::setw(fieldwidth) << (*it)(i) << separator;
-		}
-		out << std::setw(fieldwidth) << (*it)((*it).size()-1) << std::endl;
-	}
+        // write out
+        typename T::const_iterator it = data.begin();
+        for (; it != data.end(); ++it) {
+            SHARK_CHECK(it->begin() != it->end(), "[export_csv (1)] record must not be empty");
+            for (std::size_t i=0; i<(*it).size()-1; i++) {
+                out << std::setw(fieldwidth) << (*it)(i) << separator;
+            }
+            out << std::setw(fieldwidth) << (*it)((*it).size()-1) << std::endl;
+        }
 
-	// restore output format
-	out.precision(ss);
-}
+        // restore output format
+        out.precision(ss);
+    }
 
-// export function for labeled data
+    // export function for labeled data
 
-template<typename T, typename U, typename Stream>
-void export_csv_labeled(const T &input,   // Container that holds the samples
+    template<typename T, typename U, typename Stream>
+    void export_csv_labeled(const T &input,   // Container that holds the samples
+            const U &labels,  // Container that holds the labels
+            Stream &out,  // The file to be read from
+            LabelPosition lp,  // The position of the label
+            const std::string &separator,  // The separator between elements
+            bool scientific = true, //scientific notation?
+            unsigned int fieldwidth = 0, //column-align using this field width
+        typename boost::enable_if<
+            boost::is_arithmetic<typename boost::range_value<U>::type>
+        >::type* dummy = 0//enable this only for arithmetic types
+    ) {
+
+        if (!out) {
+            throw(std::invalid_argument("[export_csv (2)] Stream cannot be opened for writing."));
+        }
+
+
+        if (scientific)
+            out.setf(std::ios_base::scientific);
+        std::streamsize ss = out.precision();
+        out.precision(10);
+
+        typename T::const_iterator iti = input.begin();
+        typename U::const_iterator itl = labels.begin();
+
+
+        for (; iti != input.end(); ++iti, ++itl) {
+            SHARK_CHECK(iti->begin() != iti->end(), "[export_csv (2)] record must not be empty");
+            if (lp == FIRST_COLUMN)
+                out << *itl << separator;
+            for (std::size_t i=0; i<(*iti).size()-1; i++) {
+                out << std::setw(fieldwidth) << (*iti)(i) << separator;
+            }
+            if (lp == FIRST_COLUMN) {
+                out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << std::endl;
+            } else {
+                out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << separator << *itl << std::endl;
+            }
+        }
+        out.precision(ss);
+    }
+
+    // export function for data with vector labels
+    template<typename T, typename U, typename Stream>
+    void export_csv_labeled(
+        const T &input,  // Container that holds the samples
         const U &labels,  // Container that holds the labels
         Stream &out,  // The file to be read from
         LabelPosition lp,  // The position of the label
         const std::string &separator,  // The separator between elements
         bool scientific = true, //scientific notation?
         unsigned int fieldwidth = 0, //column-align using this field width
-	typename boost::enable_if<
-		boost::is_arithmetic<typename boost::range_value<U>::type>
-	>::type* dummy = 0//enable this only for arithmetic types
-) {
+        typename boost::disable_if<
+            boost::is_arithmetic<typename boost::range_value<U>::type>
+        >::type* dummy = 0//enable this only for complex types
+    ) {
 
-	if (!out) {
-		throw(std::invalid_argument("[export_csv (2)] Stream cannot be opened for writing."));
-	}
-
-
-	if (scientific)
-		out.setf(std::ios_base::scientific);
-	std::streamsize ss = out.precision();
-	out.precision(10);
-
-	typename T::const_iterator iti = input.begin();
-	typename U::const_iterator itl = labels.begin();
+        if (!out) {
+            throw(std::invalid_argument("[export_csv (2)] Stream cannot be opened for writing."));
+        }
 
 
-	for (; iti != input.end(); ++iti, ++itl) {
-		SHARK_CHECK(iti->begin() != iti->end(), "[export_csv (2)] record must not be empty");
-		if (lp == FIRST_COLUMN)
-			out << *itl << separator;
-		for (std::size_t i=0; i<(*iti).size()-1; i++) {
-			out << std::setw(fieldwidth) << (*iti)(i) << separator;
-		}
-		if (lp == FIRST_COLUMN) {
-			out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << std::endl;
-		} else {
-			out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << separator << *itl << std::endl;
-		}
-	}
-	out.precision(ss);
-}
+        if (scientific)
+            out.setf(std::ios_base::scientific);
+        std::streamsize ss = out.precision();
+        out.precision(10);
 
-// export function for data with vector labels
-template<typename T, typename U, typename Stream>
-void export_csv_labeled(
-	const T &input,  // Container that holds the samples
-	const U &labels,  // Container that holds the labels
-	Stream &out,  // The file to be read from
-	LabelPosition lp,  // The position of the label
-	const std::string &separator,  // The separator between elements
-	bool scientific = true, //scientific notation?
-	unsigned int fieldwidth = 0, //column-align using this field width
-	typename boost::disable_if<
-		boost::is_arithmetic<typename boost::range_value<U>::type>
-	>::type* dummy = 0//enable this only for complex types
-) {
+        typename T::const_iterator iti = input.begin();
+        typename U::const_iterator itl = labels.begin();
 
-	if (!out) {
-		throw(std::invalid_argument("[export_csv (2)] Stream cannot be opened for writing."));
-	}
-
-
-	if (scientific)
-		out.setf(std::ios_base::scientific);
-	std::streamsize ss = out.precision();
-	out.precision(10);
-
-	typename T::const_iterator iti = input.begin();
-	typename U::const_iterator itl = labels.begin();
-
-	for (; iti != input.end(); ++iti, ++itl) {
-		SHARK_CHECK(iti->begin() != iti->end(), "[export_csv (2)] record must not be empty");
-		if (lp == FIRST_COLUMN) {
-			for (std::size_t j = 0; j < itl->size(); j++) out << std::setw(fieldwidth) << (*itl)(j) << separator;
-		}
-		for (std::size_t i=0; i<(*iti).size()-1; i++) {
-			out << std::setw(fieldwidth) << (*iti)(i) << separator;
-		}
-		if (lp == FIRST_COLUMN) {
-			out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << std::endl;
-		} else {
-			out << std::setw(fieldwidth) << (*iti)((*iti).size()-1);
-			for (std::size_t j = 0; j < itl->size(); j++) out << std::setw(fieldwidth)  << separator << (*itl)(j);
-			out << std::endl;
-		}
-	}
-	out.precision(ss);
-}
+        for (; iti != input.end(); ++iti, ++itl) {
+            SHARK_CHECK(iti->begin() != iti->end(), "[export_csv (2)] record must not be empty");
+            if (lp == FIRST_COLUMN) {
+                for (std::size_t j = 0; j < itl->size(); j++) out << std::setw(fieldwidth) << (*itl)(j) << separator;
+            }
+            for (std::size_t i=0; i<(*iti).size()-1; i++) {
+                out << std::setw(fieldwidth) << (*iti)(i) << separator;
+            }
+            if (lp == FIRST_COLUMN) {
+                out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << std::endl;
+            } else {
+                out << std::setw(fieldwidth) << (*iti)((*iti).size()-1);
+                for (std::size_t j = 0; j < itl->size(); j++) out << std::setw(fieldwidth)  << separator << (*itl)(j);
+                out << std::endl;
+            }
+        }
+        out.precision(ss);
+    }
 } // namespace detail
 
 
@@ -328,7 +328,7 @@ void import_csv(
 ///
 /// \param  data       Container storing the loaded data
 /// \param  fn         The file to be read from
-/// \param  lp                  Position of the label in the record, either first or last column
+/// \param  lp         Position of the label in the record, either first or last column
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset
@@ -345,7 +345,7 @@ void import_csv(
 ///
 /// \param  data       Container storing the loaded data
 /// \param  fn         The file to be read from
-/// \param  lp                  Position of the label in the record, either first or last column
+/// \param  lp         Position of the label in the record, either first or last column
 /// \param  numberOfOutputs dimensionality of the labels
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'

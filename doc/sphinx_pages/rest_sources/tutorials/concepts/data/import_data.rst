@@ -91,12 +91,13 @@ both the two containers::
 
   Data<RealVector> inputs;
   Data<RealVector> labels;
-  import_csv(inputs,"inputs.csv",separator); 
-  import_csv(labels,"labels.csv",separator); 
+  import_csv(inputs,"inputs.csv",separator);
+  import_csv(labels,"labels.csv",separator);
   RegressionDataset dataset(inputs, labels);
 
 Classification data can be read in from a single file. Only `unsigned int`
-labels are currently supported (see also :doc:`labels`): ::
+labels are currently supported (see also :doc:`labels`). Below are three
+different use case examples::
 
   ClassificationDataset dataset;
   // load a csv with labels in the first column of every line
