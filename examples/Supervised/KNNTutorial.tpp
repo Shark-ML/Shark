@@ -89,6 +89,6 @@ int main(int argc, char **argv) {
 	Data<unsigned int> prediction = KNN(data.inputs());
 	cout << K << "-KNN on training set accuracy: " << 1. - loss.eval(data.labels(), prediction) << endl;
 	prediction = KNN(dataTest.inputs());
-	cout << K << "-KNN on test set accuracy:     " << 1. - loss.eval(data.labels(), prediction) << endl;
+	cout << K << "-KNN on test set accuracy:     " << 1. - loss.eval(dataTest.labels(), prediction) << endl;
 //###end<eval>
 }
