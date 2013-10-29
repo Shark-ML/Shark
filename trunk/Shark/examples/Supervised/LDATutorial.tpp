@@ -85,6 +85,6 @@ int main(int argc, char **argv) {
 	prediction = lda(data.inputs());
 	cout << "LDA on training set accuracy: " << 1. - loss(data.labels(), prediction) << endl;
 	prediction = lda(dataTest.inputs());
-	cout << "LDA on test set accuracy:     " << 1. - loss(data.labels(), prediction) << endl;
+	cout << "LDA on test set accuracy:     " << 1. - loss(dataTest.labels(), prediction) << endl;
 //###end<eval>
 }
