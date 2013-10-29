@@ -14,7 +14,7 @@ namespace shark {
  *  \f$ \arg \max_i w_i^T x + b_i \f$
  *  
  *  Thus is it a linear model with arg max computation.
- *  Th internal linear model can be queried using decisionFunction().
+ *  The internal linear model can be queried using decisionFunction().
  */ 
 template<class VectorType = RealVector>
 class LinearClassifier : public ArgMaxConverter<LinearModel<VectorType,RealVector> >
