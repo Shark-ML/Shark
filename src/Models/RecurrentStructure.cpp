@@ -91,7 +91,7 @@ void RecurrentStructure::setStructure(std::size_t inputs, std::size_t outputs, c
 	m_bias = m_inputNeurons;//index of bias neuron
 
 	m_weights.resize(m_numberOfNeurons, m_numberOfUnits);
-	zero(m_weights);
+	m_weights.clear();
 	m_connectionMatrix = connections;
 
 	m_numberOfParameters = 0;
@@ -110,7 +110,7 @@ void RecurrentStructure::setStructure(std::size_t in, std::size_t hidden, std::s
 	IntMatrix connections = IntScalarMatrix(hidden+out,n+1,1);
 
 	if(!bias){
-		zero(column(connections,in));
+		column(connections,in).clear();
 	}
 	setStructure(in,out,connections,sigmoidType);
 }

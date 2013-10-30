@@ -69,7 +69,7 @@ void FisherLDA::train(LinearModel<>& model, LabeledData<RealVector, unsigned int
 	//subspace
 	RealMatrix subspaceDirections = trans(columns(eigenvectors,0,nComp));
 	RealVector offset(inputDim,0.0);
-	fast_prod(subspaceDirections, mean,offset);
+	axpy_prod(subspaceDirections, mean,offset);
 	offset*=-1;
 
 	// write the parameters into the model
@@ -127,7 +127,7 @@ void FisherLDA::meanAndScatter(
 	RealMatrix Sw( inputDim, inputDim,0.0 ); // within-class scatter
 
 	// calculate global mean
-	zero(mean);
+	mean.clear();
 	for (std::size_t c = 0; c != classes; c++) 
 		noalias(mean) += counter[c] * means[c]/inputs;
 	mean /= inputs;

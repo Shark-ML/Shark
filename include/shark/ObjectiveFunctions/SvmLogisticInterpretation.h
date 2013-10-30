@@ -291,7 +291,7 @@ public:
 		//  would also and more consistently be offered by their respective classes. one reason we're doing it
 		//  like this might be the missing batch processing for the evalDerivatives)
 		derivative.resize(m_nhp);
-		zero(derivative);
+		derivative.clear();
 
 		double ss = (m_sigmoidSlopeIsUnconstrained ? std::exp(sigmoid_model.parameterVector()(0)) : sigmoid_model.parameterVector()(0));
 		for (unsigned int i=0; i<m_numSamples; i++) {

@@ -61,8 +61,8 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	typedef LabeledData<RealVector, RealVector>::const_batch_reference BatchRef;
 	for (std::size_t b=0; b != numBatches; b++){
 		BatchRef batch = dataset.batch(b);
-		symmRankKUpdate(trans(batch.input),Ablocks.upperLeft(),true);
-		noalias(column(Ablocks.upperRight(),0))+=sumRows(batch.input);
+		symm_prod(trans(batch.input),Ablocks.upperLeft(),false);
+		noalias(column(Ablocks.upperRight(),0))+=sum_rows(batch.input);
 	}
 	row(Ablocks.lowerLeft(),0) = column(Ablocks.upperRight(),0);
 	matA(inputDim,inputDim) = numInputs;
@@ -75,8 +75,8 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	for (std::size_t b=0; b != numBatches; b++){
 		BatchRef batch = dataset.batch(b);
 		RealSubMatrix PTL = subrange(XTL,0,inputDim,0,outputDim);
-		fast_prod(trans(batch.input),batch.label,PTL,true);
-		noalias(row(XTL,inputDim))+=sumRows(batch.label);
+		axpy_prod(trans(batch.input),batch.label,PTL,false);
+		noalias(row(XTL,inputDim))+=sum_rows(batch.label);
 	}	
 	
 	//we solve the system A Beta = X^T L

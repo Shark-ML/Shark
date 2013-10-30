@@ -177,13 +177,13 @@ BOOST_AUTO_TEST_CASE(Kernel_KMeans_multiple_gauss)
 		BOOST_REQUIRE_EQUAL( clusteringModel.outputSize(), numMeans);
 		
 		//check that every point is assigned to exactly one cluster
-		UIntVector numAssignments = sumColumns(clusteringModel.alpha() != 0.0);
+		UIntVector numAssignments = sum_columns(clusteringModel.alpha() != 0.0);
 		BOOST_REQUIRE_EQUAL(numAssignments.size(),numPoints);
 		for(std::size_t i = 0; i != numPoints; ++i){
 			BOOST_CHECK_EQUAL(numAssignments(i),1);
 		}
 		//check that the weights of every cluster sums to ~1
-		RealVector columnSums = sumRows(clusteringModel.alpha());
+		RealVector columnSums = sum_rows(clusteringModel.alpha());
 		BOOST_REQUIRE_EQUAL(columnSums.size(),numMeans);
 		for(std::size_t i = 0; i != numMeans; ++i){
 			BOOST_CHECK_CLOSE(columnSums(i),2.0, 1.e-5);

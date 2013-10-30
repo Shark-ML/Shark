@@ -106,9 +106,9 @@ public:
 	//!it resets the network to 0 activation and clears the derivative
 	//!this method needs to be called, when a sequence ends and a new sequence is to be started
 	void resetInternalState(){
-		zero(m_lastActivation);
-		zero(m_activation);
-		zero(m_unitGradient);
+		m_lastActivation.clear();
+		m_activation.clear();
+		m_unitGradient.clear();
 	}
 
 	//!  \brief This Method sets the activation of the output neurons

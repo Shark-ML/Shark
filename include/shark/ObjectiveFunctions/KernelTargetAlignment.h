@@ -195,7 +195,7 @@ public:
 		std::size_t parameters = mep_kernel->numberOfParameters();
 		derivative.resize(parameters);
 		RealVector blockDerivative;
-		zero(derivative);
+		derivative.clear();
 		boost::shared_ptr<State> state = mep_kernel->createState();
 		RealMatrix blockK;//block of the KernelMatrix
 		RealMatrix blockW;//block of the WeightMatrix
@@ -320,7 +320,7 @@ private:
 		double KK = 0; //stores \langle K,K \rangle 
 		double YK = 0; //stores \langle Y,K^c \rangle 
 		RealVector k(m_elements);//stores the row/column means of K
-		zero(k);
+		k.clear();
 		std::size_t startRow = 0; //starting row of the current block
 		for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
 			std::size_t rowSize = size(m_data.batch(i));
@@ -329,13 +329,13 @@ private:
 				std::size_t columnSize = size(m_data.batch(j));
 				RealMatrix blockK = (*mep_kernel)(m_data.batch(i).input,m_data.batch(j).input);
 				if(i == j){
-					KK+=sumElements(element_prod(blockK,blockK));
-					subrange(k,startColumn,startColumn+columnSize)+=sumRows(blockK);//update sumRows(K)
+					KK+=sum(element_prod(blockK,blockK));
+					subrange(k,startColumn,startColumn+columnSize)+=sum_rows(blockK);//update sum_rows(K)
 				}
 				else{//use symmetry ok K
-					KK+=2.0*sumElements(element_prod(blockK,blockK));
-					subrange(k,startColumn,startColumn+columnSize)+=sumRows(blockK);
-					subrange(k,startRow,startRow+rowSize)+=sumColumns(blockK);//symmetry: block(j,i)
+					KK+=2.0*sum(element_prod(blockK,blockK));
+					subrange(k,startColumn,startColumn+columnSize)+=sum_rows(blockK);
+					subrange(k,startRow,startRow+rowSize)+=sum_columns(blockK);//symmetry: block(j,i)
 				}
 				YK+=updateYKc(i,j,blockK);
 				startColumn+=columnSize;

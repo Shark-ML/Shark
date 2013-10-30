@@ -51,27 +51,27 @@ namespace shark {
 
 	template<class T>
 	struct ConstProxyReference<blas::vector<T> >{
-		typedef blas::FixedDenseVectorProxy<T const> const& type;
+		typedef blas::dense_vector_adaptor<T const> const& type;
 	};
 	template<class T>
 	struct ConstProxyReference<blas::vector<T> const>{
-		typedef blas::FixedDenseVectorProxy<T const> const& type;
+		typedef blas::dense_vector_adaptor<T const> const& type;
 	};
 	template<class T>
 	struct ConstProxyReference<blas::compressed_vector<T> >{
-		typedef blas::FixedSparseVectorProxy<T const,std::size_t> const& type;
+		typedef blas::sparse_vector_adaptor<T const,std::size_t> const& type;
 	};
 		template<class T>
 	struct ConstProxyReference<blas::compressed_vector<T> const >{
-		typedef blas::FixedSparseVectorProxy<T const,std::size_t> const& type;
+		typedef blas::sparse_vector_adaptor<T const,std::size_t> const& type;
 	};
 	template<class T>
 	struct ConstProxyReference<blas::matrix<T> >{
-		typedef blas::FixedDenseMatrixProxy<T const,blas::row_major> const& type;
+		typedef blas::dense_matrix_adaptor<T const,blas::row_major> const& type;
 	};
 	template<class T>
 	struct ConstProxyReference<blas::matrix<T> const >{
-		typedef blas::FixedDenseMatrixProxy<T const,blas::row_major> const& type;
+		typedef blas::dense_matrix_adaptor<T const,blas::row_major> const& type;
 	};
 }
 #endif

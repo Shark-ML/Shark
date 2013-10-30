@@ -58,10 +58,10 @@ namespace shark {
  *  single dimension.
  */
 template <class InputVectorType = RealVector>
-class LassoRegression : public AbstractTrainer<LinearModel<InputVectorType, RealVector> >, public IParameterizable
+class LassoRegression : public AbstractTrainer<LinearModel<InputVectorType> >, public IParameterizable
 {
 public:
-	typedef LinearModel<InputVectorType, RealVector> ModelType;
+	typedef LinearModel<InputVectorType> ModelType;
 	typedef LabeledData<InputVectorType, RealVector> DataType;
 
 	/// \brief Constructor.
@@ -135,139 +135,13 @@ public:
 		dim = inputDimension(dataset);
 		RealVector alpha(dim, 0.0);
 		trainInternal(alpha, dataset);
-
-		std::size_t nnz = 0;
-		for (std::size_t i=0; i<alpha.size(); i++) if (alpha(i) != 0.0) nnz++;
-
-		if (2 * nnz < alpha.size())
-		{
-			// use sparse model
-			CompressedRealMatrix mat(1, dim);
-			row(mat, 0) = alpha;
-			model.setStructure(mat);
-		}
-		else
-		{
-			// use dense model
-			RealMatrix mat(1, dim);
-			row(mat, 0) = alpha;
-			model.setStructure(mat);
-		}
+		
+		RealMatrix mat(1, dim);
+		row(mat, 0) = alpha;
+		model.setStructure(mat);
 	}
 
 protected:
-	/// \brief Create internal data representation for fast processing.
-	void fillData(DataType const& dataset)
-	{
-		// pass 1: find number of points and number of entries
-		ell = 0;
-		size_t num_entries = 0;
-		for (std::size_t i=0; i<dataset.numberOfBatches(); i++)
-		{
-			typename Batch<InputVectorType>::type const& b = dataset.inputs().batch(i);
-			std::size_t bsz = boost::size(b);
-			ell += bsz;
-			for (std::size_t j=0; j<bsz; j++)
-			{
-				typename Batch<InputVectorType>::const_reference e = get(b, j);
-				if (blas::traits::IsSparse<typename Batch<InputVectorType>::const_reference>::value)
-				{
-					// num_entries += e.nnz() + 1;
-					typename Batch<InputVectorType>::const_reference::const_iterator begin = e.begin();
-					typename Batch<InputVectorType>::const_reference::const_iterator end = e.end();
-					num_entries += std::distance(begin, end);
-				}
-				else
-				{
-					for (std::size_t q=0; q<dim; q++) 
-						if (e(q) != 0.0)
-							num_entries++;
-				}
-				num_entries++;
-			}
-		}
-
-		// prepare memory
-		label.resize(ell);
-		data.resize(dim);
-		storage.resize(num_entries);
-		UIntVector feature(dim, 0u);
-
-		// pass 2: count entries per feature
-		for (std::size_t i=0; i<dataset.numberOfBatches(); i++)
-		{
-			typename Batch<InputVectorType>::type const& b = dataset.inputs().batch(i);
-			std::size_t bsz = boost::size(b);
-			for (std::size_t j=0; j<bsz; j++)
-			{
-				typename Batch<InputVectorType>::const_reference e = get(b, j);
-				if (blas::traits::IsSparse<typename Batch<InputVectorType>::const_reference>::value)
-				{
-					for (typename Batch<InputVectorType>::const_reference::const_iterator it=e.begin(); it != e.end(); ++it) 
-						feature(it.index())++;
-				}
-				else
-				{
-					for (std::size_t q=0; q<dim; q++) if (e(q) != 0.0) feature(q)++;
-				}
-			}
-		}
-
-		// prepare storage and start indices
-		size_t spos = 0;
-		for (size_t i=0; i<dim; i++)
-		{
-			data[i] = &storage[spos];
-			spos += feature[i];
-			storage[spos].index = ((std::size_t)-1);
-			spos++;
-			feature[i] = 0;
-		}
-
-		// pass 3: copy entries and labels
-		for (std::size_t i=0, m=0; i<dataset.numberOfBatches(); i++)
-		{
-			typename Batch<InputVectorType>::type const& b = dataset.inputs().batch(i);
-			std::size_t bsz = boost::size(b);
-			for (std::size_t j=0; j<bsz; j++, m++)
-			{
-				typename Batch<InputVectorType>::const_reference e = get(b, j);
-				if (blas::traits::IsSparse<typename Batch<InputVectorType>::const_reference>::value)
-				{
-					for (typename Batch<InputVectorType>::const_reference::const_iterator it=e.begin(); it != e.end(); ++it)
-					{
-						std::size_t index = it.index();
-						double value = *it;
-
-						data[index][feature[index]].index = m;
-						data[index][feature[index]].value = value;
-						feature[index]++;
-					}
-				}
-				else
-				{
-					for (std::size_t index=0; index<dim; index++)
-					{
-						double value = e(index);
-						if (value == 0.0) continue;
-
-						data[index][feature[index]].index = m;
-						data[index][feature[index]].value = value;
-						feature[index]++;
-					}
-				}
-			}
-		}
-		for (std::size_t i=0, m=0; i<dataset.numberOfBatches(); i++)
-		{
-			Batch<RealVector>::type const& b = dataset.labels().batch(i);
-			std::size_t bsz = boost::size(b);
-			for (std::size_t j=0; j<bsz; j++, m++)
-			{
-				label(m) = get(b, j)(0);
-			}
-		}
-	}
 
 	/// \brief Actual training procedure.
 	void trainInternal(RealVector& alpha, DataType const& dataset)
@@ -280,24 +154,23 @@ protected:
 		// console output
 		const bool verbose = false;
 
-		fillData(dataset);
-
+		//transpose the dataset and push it inside a single matrix
+		data = trans(createBatch(dataset.inputs().elements()));
+		label = column(createBatch(dataset.labels().elements()),0);
+		
 		RealVector diag(dim);
 		RealVector w = label;
 		UIntVector index(dim);
-		RealVector pref(dim);
 
 		// pre-calculate diagonal matrix entries (feature-wise squared norms)
-		for (size_t i=0; i<dim; i++)
-		{
-			double sum = 0.0;
-			for (Entry* e = data[i]; e->index != ((std::size_t)-1); e++) sum += e->value * e->value;
-			diag[i] = sum;
+		for (size_t i=0; i<dim; i++){
+			diag[i] = norm_sqr(row(data,i));
 		}
 
 		// prepare preferences for scheduling
-		for (size_t i=0; i<dim; i++) pref[i] = 1.0;
+		RealVector pref(dim,1.0);
 		double prefsum = (double)dim;
+		
 
 		// prepare performance monitoring for self-adaptation
 		const double gain_learning_rate = 1.0 / dim;
@@ -321,9 +194,11 @@ protected:
 			{
 				double p = pref[i];
 				double n;
-				if (psum < 1e-6) n = dim - pos;      // for numerical stability
-				else if (p < psum) n = (dim - pos) * p / psum;
-				else n = (dim - pos);                // for numerical stability
+				if (psum >= 1e-6 && p < psum) 
+					n = (dim - pos) * p / psum;
+				else 
+					n = (dim - pos);                // for numerical stability
+				
 				unsigned int m = (unsigned int)floor(n);
 				double prob = n - m;
 				if ((double)rand() / (double)RAND_MAX < prob) m++;
@@ -349,8 +224,7 @@ protected:
 				double d = diag[i];
 
 				// compute "gradient component" <w, X_i>
-				double grad = 0.0;
-				for (Entry* e = data[i]; e->index != ((std::size_t)-1); e++) grad += w[e->index] * e->value;
+				double grad = inner_prod(w,row(data,i));
 
 				// compute optimal coordinate descent step and corresponding gain
 				double vio = 0.0;
@@ -411,22 +285,23 @@ protected:
 				}
 
 				// update state
-				if (vio > maxvio) maxvio = vio;
+				if (vio > maxvio)
+					maxvio = vio;
 				if (delta != 0.0)
 				{
 					alpha[i] += delta;
-					for (Entry* e = data[i]; e->index != ((std::size_t)-1); e++) w[e->index] += delta * e->value;
+					noalias(w) += delta*row(data,i);
 				}
 
 				// update gain-based preferences
 				{
-					if (iter == 0) average_gain += gain / (double)dim;
+					if (iter == 0) 
+						average_gain += gain / (double)dim;
 					else
 					{
 						double change = CHANGE_RATE * (gain / average_gain - 1.0);
 						double newpref = pref[i] * std::exp(change);
-						if (newpref < PREF_MIN) newpref = PREF_MIN;
-						else if (newpref > PREF_MAX) newpref = PREF_MAX;
+						newpref = std::min(std::max(newpref,PREF_MIN),PREF_MAX);
 						prefsum += newpref - pref[i];
 						pref[i] = newpref;
 						average_gain = (1.0 - gain_learning_rate) * average_gain + gain_learning_rate * gain;
@@ -437,12 +312,13 @@ protected:
 
 			if (maxvio <= m_accuracy)
 			{
-				if (canstop) break;
+				if (canstop)
+					break;
 				else
 				{
 					// prepare full sweep for a reliable check of the stopping criterion
 					canstop = 1;
-					for (size_t i=0; i<dim; i++) pref[i] = 1.0;
+					noalias(pref) = blas::repeat(10,dim);
 					prefsum = (double)dim;
 					if (verbose) std::cout << "*" << std::flush;
 				}
@@ -453,43 +329,14 @@ protected:
 				if (verbose) std::cout << "." << std::flush;
 			}
 		}
-/*
-		// compute objective value and count non-zero features
-		size_t nnz = 0;
-		double obj = 0.0;
-		for (size_t i=0; i<dim; i++)
-		{
-			if (alpha[i] != 0.0)
-			{
-				nnz++;
-				obj += fabs(alpha[i]);
-			}
-		}
-		obj *= lambda;
-		for (size_t i=0; i<ell; i++) obj += w[i] * w[i];
-
-		// output statistics
-		printf("  optimization time:   %.3g seconds\n", seconds);
-		printf("  update steps:        %lu\n", steps);
-		printf("  objective value:     %f\n", obj);
-		printf("  non-zero features:   %lu\n",nnz);
-*/
 	}
-
-	/// \brief Sparse vector entry.
-	struct Entry
-	{
-		std::size_t index;
-		double value;
-	};
 
 	double m_lambda;             ///< regularization parameter
 	double m_accuracy;           ///< gradient accuracy
 	std::size_t dim;             ///< dimension; number of features
 	std::size_t ell;             ///< number of points
 	RealVector label;            ///< dense label vector, one entry per point
-	std::vector<Entry*> data;    ///< array of sparse vectors, one per feature
-	std::vector<Entry> storage;  ///< linear memory
+	typename Batch<InputVectorType>::type data; ///< matrix of sparse vectors, one row per feature
 };
 
 

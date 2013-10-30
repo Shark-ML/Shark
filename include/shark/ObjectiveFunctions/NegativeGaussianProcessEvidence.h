@@ -201,7 +201,7 @@ public:
 		
 		//calculate z = Wt=M^-1 t
 		RealVector z(N);
-		fast_prod(W,t,z);
+		axpy_prod(W,t,z);
 		
 		// W is already initialized as the inverse of M, so we only need 
 		// to change the sign and add z. to calculate W fully

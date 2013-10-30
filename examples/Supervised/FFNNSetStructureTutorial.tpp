@@ -5,7 +5,6 @@
 #include<shark/ObjectiveFunctions/Loss/NegativeClassificationLogLikelihood.h>
 #include<shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include<shark/Models/FFNet.h>
-#include<shark/LinAlg/BLAS/StorageAdaptors.h>
 
 using namespace shark;
 using namespace std;
@@ -42,7 +41,7 @@ int main(){
 		{1,1,0,0,0,1},
 		{1,1,1,1,0,1},
 	};
-	IntMatrix mat = blas::makeMatrix(connectionMatrix);
+	IntMatrix mat = blas::adapt_matrix(connectionMatrix);
 
 	//first two parameters are number of inputs and output neurons
 	network.setStructure(2, 1, mat);

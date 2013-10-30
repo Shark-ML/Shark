@@ -68,7 +68,7 @@ private:
 	double evalDerivativeSingle(SearchPointType const& point, SearchPointType& gradient) const{
 		typename Batch<RealVector>::type prediction;
 		RealVector dataGradient(mep_model->numberOfParameters());
-		ensureSize(gradient,mep_model->numberOfParameters());
+		ensure_size(gradient,mep_model->numberOfParameters());
 
 		typename Batch<RealVector>::type errorDerivative;
 
@@ -83,10 +83,10 @@ private:
 		RealMatrix W1Derivatives(hiddens,inputs); // hiddenDerivatives * input
 		RealVector hiddenDerivativeSum(hiddens);
 
-		zero(gradient);
-		zero(meanActivation);
-		zero(W1Derivatives);
-		zero(hiddenDerivativeSum);
+		gradient.clear();
+		meanActivation.clear();
+		W1Derivatives.clear();
+		hiddenDerivativeSum.clear();
 		//create an object of the type of the hidden neurons
 		HiddenNeuron hidden;
 
@@ -108,14 +108,14 @@ private:
 			//get part of the responses which are the hidden neurons
 			ConstRealSubMatrix hiddenActivation = rows(mep_model->neuronResponses(*state),inputs,inputs + hiddens);
  			// update mean activation of hidden neurons
-			meanActivation += sumColumns(hiddenActivation);
+			meanActivation += sum_columns(hiddenActivation);
 			// calculate derivative of the hidden neurons
 			RealMatrix hiddenDerivative = hidden.derivative(hiddenActivation);
 			//update sum of derivatives
-			noalias(hiddenDerivativeSum) += sumColumns(hiddenDerivative);
+			noalias(hiddenDerivativeSum) += sum_columns(hiddenDerivative);
 
 			// Calculate the derivative with respect to the lower weight matrix
-			fast_prod(hiddenDerivative,batch.input,W1Derivatives,1.0);
+			axpy_prod(hiddenDerivative,batch.input,W1Derivatives,false);
 		}
 		error /= dataSize;
 		meanActivation /= dataSize;
@@ -194,7 +194,7 @@ private:
 
 			//get the submatrix of activations of the hidden neurons
 			//and sum their activation to every pattern of the batch
-			meanActivation+=sumColumns(
+			meanActivation+=sum_columns(
 				rows(mep_model->neuronResponses(*state),inputs,inputs + hiddens)
 			);
 		}
@@ -296,7 +296,7 @@ public:
 			mep_model->eval(batch.input, prediction,*state);
 			error += mep_loss->eval(batch.label, prediction);
 			//get the submatrix of activations of the hidden neurons and sum their activation to every pattern of the batch
-			meanActivation+=sumColumns(
+			meanActivation+=sum_columns(
 				rows(mep_model->neuronResponses(*state),inputs,inputs+hiddens)
 			);
 		}

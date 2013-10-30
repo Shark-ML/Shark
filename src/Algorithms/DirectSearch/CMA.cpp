@@ -228,7 +228,7 @@ void CMA::updateStrategyParameters( const std::vector<TypedIndividual<RealVector
 		+ m_chromosome.m_cCU * std::sqrt( m_chromosome.m_muEff )  / m_chromosome.m_sigma * (xPrime-m_chromosome.m_mean);
 
 	// Covariance Matrix Update
-	RealMatrix Z = blas::zero_matrix<double>( m_numberOfVariables, m_numberOfVariables );
+	RealMatrix Z( m_numberOfVariables, m_numberOfVariables, 0.0);
 
 	RealMatrix C( m_chromosome.m_mutationDistribution.covarianceMatrix() );
 	// Rank-1-Update

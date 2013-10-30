@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE LinAlg_Proxy
+#define BOOST_TEST_MODULE BLAS_Adaptor
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -7,7 +7,7 @@
 using namespace shark;
 using namespace std;
 
-BOOST_AUTO_TEST_CASE( LinAlg_FixedDenseVectorProxy )
+BOOST_AUTO_TEST_CASE( BLAS_dense_vector_adaptor )
 {
 	double mem[]={0,4,1,4,2,4,3,4};
 	RealVector x(3); 
@@ -23,36 +23,36 @@ BOOST_AUTO_TEST_CASE( LinAlg_FixedDenseVectorProxy )
 	}
 	
 	//create some proxies
-	blas::FixedDenseVectorProxy<double> proxy(x);
-	blas::FixedDenseVectorProxy<double> proxym(mem,4,2);
+	blas::dense_vector_adaptor<double> proxy(x);
+	blas::dense_vector_adaptor<double> proxym(mem,4,2);
 	
 	//check internal variables
 	BOOST_REQUIRE_EQUAL(proxy.size() ,3);
 	BOOST_REQUIRE_EQUAL(proxy.stride() ,1);
-	BOOST_REQUIRE_EQUAL(proxy.data() ,&x(0));
+	BOOST_REQUIRE_EQUAL(proxy.storage() ,&x(0));
 	BOOST_REQUIRE_EQUAL(proxym.size() ,4);
 	BOOST_REQUIRE_EQUAL(proxym.stride() ,2);
-	BOOST_REQUIRE_EQUAL(proxym.data() ,mem);
+	BOOST_REQUIRE_EQUAL(proxym.storage() ,mem);
 	
 	//check traits
-	BOOST_REQUIRE_EQUAL(blas::traits::vector_stride(proxy) ,1);
-	BOOST_REQUIRE_EQUAL(blas::traits::vector_storage(proxy) ,&x(0));
-	BOOST_REQUIRE_EQUAL(blas::traits::vector_stride(proxym) ,2);
-	BOOST_REQUIRE_EQUAL(blas::traits::vector_storage(proxym) ,mem);
+	BOOST_REQUIRE_EQUAL(proxy.stride() ,1);
+	BOOST_REQUIRE_EQUAL(proxy.storage() ,&x(0));
+	BOOST_REQUIRE_EQUAL(proxym.stride() ,2);
+	BOOST_REQUIRE_EQUAL(proxym.storage() ,mem);
 	
 	//check values
 	for(std::size_t i = 0; i != 3; ++i){
 		BOOST_REQUIRE_EQUAL(x(i) ,proxy(i));
-		BOOST_REQUIRE_EQUAL(x(i) ,const_cast<blas::FixedDenseVectorProxy<double> const&>(proxy)(i));
+		BOOST_REQUIRE_EQUAL(x(i) ,const_cast<blas::dense_vector_adaptor<double> const&>(proxy)(i));
 		BOOST_REQUIRE_EQUAL(x(i) ,proxy[i]);
-		BOOST_REQUIRE_EQUAL(x[i] ,const_cast<blas::FixedDenseVectorProxy<double> const&>(proxy)[i]);
+		BOOST_REQUIRE_EQUAL(x[i] ,const_cast<blas::dense_vector_adaptor<double> const&>(proxy)[i]);
 	}
 	for(std::size_t i = 0; i != 4; ++i){
 		BOOST_REQUIRE_EQUAL(mem[2*i] ,proxym(i));
 	}
 	
-	fast_prod(xm,x,result);
-	fast_prod(xm,proxy,resultProxy);
+	axpy_prod(xm,x,result);
+	axpy_prod(xm,proxy,resultProxy);
 	
 	for(std::size_t i = 0; i != 3; ++i){
 		BOOST_REQUIRE_EQUAL(result(i) ,resultProxy(i));
@@ -66,44 +66,38 @@ void checkProxyBase(Vector& vec, std::size_t nnz){
 	BOOST_REQUIRE_EQUAL(proxy.nnz(),nnz);
 	BOOST_REQUIRE_EQUAL(proxy.size(),vec.size());
 	
-	for(std::size_t i = 0; i != vec.size(); ++i){
-		BOOST_CHECK_EQUAL(proxy(i), vec(i));
-		BOOST_CHECK_EQUAL(proxy[i], vec[i]);
-	}
 	//check iterators
 	typename boost::range_iterator<Proxy>::type proxyiter = proxy.begin();
 	typename boost::range_iterator<Vector>::type vectoriter = vec.begin();
-	
 	for(;vectoriter != vec.end(); ++vectoriter, ++ proxyiter){
 		BOOST_REQUIRE(proxyiter != proxy.end());
 		BOOST_CHECK_EQUAL(vectoriter.index(), proxyiter.index());
 		BOOST_CHECK_EQUAL(*vectoriter, *proxyiter);
 	}
-	BOOST_CHECK(proxyiter  == proxy.end());
 }
 template<class Vector>
 void checkProxy(Vector const& vec, std::size_t nnz){
-	checkProxyBase<blas::FixedSparseVectorProxy<double,std::size_t> >(vec,nnz);
-	checkProxyBase<blas::FixedSparseVectorProxy<const double,std::size_t> >(vec,nnz);
-	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(vec,nnz);
-	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(vec,nnz);
+	checkProxyBase<blas::sparse_vector_adaptor<double,std::size_t> >(vec,nnz);
+	checkProxyBase<blas::sparse_vector_adaptor<const double,std::size_t> >(vec,nnz);
+	checkProxyBase<const blas::sparse_vector_adaptor<const double,std::size_t> >(vec,nnz);
+	checkProxyBase<const blas::sparse_vector_adaptor<const double,std::size_t> >(vec,nnz);
 	
 	//check proxy conversion
-	const blas::FixedSparseVectorProxy<const double,std::size_t> proxy(vec);
-	checkProxyBase<blas::FixedSparseVectorProxy<double,std::size_t> >(proxy,nnz);
-	checkProxyBase<blas::FixedSparseVectorProxy<const double,std::size_t> >(proxy,nnz);
-	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(proxy,nnz);
-	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(proxy,nnz);
+	const blas::sparse_vector_adaptor<const double,std::size_t> proxy(vec);
+	checkProxyBase<blas::sparse_vector_adaptor<double,std::size_t> >(proxy,nnz);
+	checkProxyBase<blas::sparse_vector_adaptor<const double,std::size_t> >(proxy,nnz);
+	checkProxyBase<const blas::sparse_vector_adaptor<const double,std::size_t> >(proxy,nnz);
+	checkProxyBase<const blas::sparse_vector_adaptor<const double,std::size_t> >(proxy,nnz);
 	
-	blas::FixedSparseVectorProxy<const double,std::size_t> cproxy(vec);
-	checkProxyBase<blas::FixedSparseVectorProxy<double,std::size_t> >(cproxy,nnz);
-	checkProxyBase<blas::FixedSparseVectorProxy<const double,std::size_t> >(cproxy,nnz);
-	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(cproxy,nnz);
-	checkProxyBase<const blas::FixedSparseVectorProxy<const double,std::size_t> >(cproxy,nnz);
+	blas::sparse_vector_adaptor<const double,std::size_t> cproxy(vec);
+	checkProxyBase<blas::sparse_vector_adaptor<double,std::size_t> >(cproxy,nnz);
+	checkProxyBase<blas::sparse_vector_adaptor<const double,std::size_t> >(cproxy,nnz);
+	checkProxyBase<const blas::sparse_vector_adaptor<const double,std::size_t> >(cproxy,nnz);
+	checkProxyBase<const blas::sparse_vector_adaptor<const double,std::size_t> >(cproxy,nnz);
 }
 
 
-BOOST_AUTO_TEST_CASE( LinAlg_FixedSparseVectorProxy )
+BOOST_AUTO_TEST_CASE( LinAlg_sparse_vector_adaptor )
 {
 	//som vectors to test
 	CompressedRealVector x1(6);
@@ -129,7 +123,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_FixedSparseVectorProxy )
 	checkProxy(x6,1);
 }
 
-BOOST_AUTO_TEST_CASE( LinAlg_FixedSparseVectorProxy_MatrixRow )
+BOOST_AUTO_TEST_CASE( LinAlg_sparse_vector_adaptor_MatrixRow )
 {
 	//som vectors to test
 	CompressedRealMatrix x1(5,6); //(last line is also empty)

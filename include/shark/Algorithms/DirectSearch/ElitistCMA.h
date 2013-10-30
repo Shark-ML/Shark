@@ -89,8 +89,8 @@ namespace shark {
 			* \brief Adjusts the dimension of the chromosome.
 			*/
 			void setDimension( unsigned int dimension ) {
-				m_mean.resize( dimension, 0. );
-				m_evolutionPathC.resize( dimension, 0. );
+				m_mean.resize( dimension);
+				m_evolutionPathC.resize( dimension);
 
 				m_mutationDistribution.resize( dimension );
 			}
@@ -279,8 +279,8 @@ namespace shark {
 
 			m_chromosome.m_generationCounter = 0;
 
-			m_chromosome.m_evolutionPathC = shark::blas::zero_vector< double >( m_numberOfVariables );
-			m_chromosome.m_mean = shark::blas::zero_vector< double >( m_numberOfVariables );
+			m_chromosome.m_evolutionPathC = blas::repeat( 0.0,m_numberOfVariables );
+			m_chromosome.m_mean = blas::repeat( 0.0,m_numberOfVariables );
 			m_chromosome.m_mutationDistribution.resize( m_numberOfVariables );
 
 			

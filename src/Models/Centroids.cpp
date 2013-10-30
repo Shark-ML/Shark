@@ -26,7 +26,6 @@
 
 #include <shark/Models/Clustering/Centroids.h>
 #include <shark/Data/DataView.h>
-#include <shark/LinAlg/BLAS/Initialize.h>
 
 using namespace shark;
 

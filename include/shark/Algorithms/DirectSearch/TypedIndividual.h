@@ -226,9 +226,9 @@ public:
 
 		m_noObjectives = noObjectives;
 
-		m_penalizedFitness.resize(noObjectives, 0.);
-		m_unpenalizedFitness.resize(noObjectives, 0.);
-		m_scaledFitness.resize(noObjectives, 0.);
+		m_penalizedFitness.resize(noObjectives);
+		m_unpenalizedFitness.resize(noObjectives);
+		m_scaledFitness.resize(noObjectives);
 	}
 
 	/**

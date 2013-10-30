@@ -34,7 +34,6 @@
 
 #include <shark/Models/Converter.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
-#include <shark/LinAlg/BLAS/Initialize.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataView.h>
 
@@ -87,7 +86,7 @@ public:
 			m_b.resize(outputs);
 		m_basis = basis;
 		m_alpha.resize(basis.numberOfElements(), outputs);
-		zero(m_alpha);
+		m_alpha.clear();
 	}
 
 	/// \brief From INameable: return the class name.
@@ -240,7 +239,7 @@ public:
 			
 			//get the part of the alpha matrix which is suitable for this batch
 			ConstRealSubMatrix batchAlpha = subrange(m_alpha,batchStart,batchEnd,0,outputSize());
-			fast_prod(trans(kernelEvaluations),batchAlpha,output,1.0);
+			axpy_prod(trans(kernelEvaluations),batchAlpha,output,false);
 			batchStart = batchEnd;
 		}
 	}

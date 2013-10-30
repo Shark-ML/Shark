@@ -37,7 +37,7 @@
 #define SHARK_IMPL_LINALG_CHOLESKY_INL
 
 #ifdef SHARK_USE_ATLAS
-#include <shark/LinAlg/BLAS/Impl/numeric_bindings/atlas/potrf.h>
+#include <shark/LinAlg/BLAS/kernels/atlas/potrf.hpp>
 #endif
 
 #include <shark/Core/Math.h>
@@ -49,9 +49,9 @@ void shark::blas::choleskyDecomposition(
 )
 {
 	size_t m = A().size1();
-	ensureSize(L,m, m);
+	ensure_size(L,m, m);
 #ifdef SHARK_USE_ATLAS
-	zero(L);
+	L().clear();
 	for(std::size_t i = 0; i != m; ++i){
 		for(std::size_t j = 0; j <= i; ++j){
 			L()(i,j) = A()(i,j);
@@ -94,7 +94,7 @@ std::size_t shark::blas::pivotingCholeskyDecompositionInPlace(
 	MatrixL& L = Lref();
 	SIZE_CHECK(L.size1() == L.size2());
 	size_t m = L.size1();
-	ensureSize(P,m);
+	ensure_size(P,m);
 	
 	//The Algorithms works as follows
 	//we begin with the submatrix L^(0)= A
@@ -151,8 +151,8 @@ std::size_t shark::blas::pivotingCholeskyDecompositionInPlace(
 			std::size_t pivot = std::max_element(pivots.begin()+j,pivots.end())-pivots.begin();
 			if(pivot != j){
 				P(k+j) = pivot+k;
-				row(L,k+j).swap(row(L,k+pivot));
-				column(L,k+j).swap(column(L,k+pivot));
+				swap_rows(L,k+j,k+pivot);
+				swap_columns(L,k+j,k+pivot);
 				std::swap(pivots(j),pivots(pivot));
 			}
 			
@@ -161,7 +161,7 @@ std::size_t shark::blas::pivotingCholeskyDecompositionInPlace(
 			if(pivotValue < epsilon){
 				//the remaining part is so near 0, we can just ignore it
 				Blocking<SubL> LkBlocked(Lk,j,j);
-				zero(LkBlocked.lowerRight());
+				LkBlocked.lowerRight().clear();
 				return k+j;
 			}
 			
@@ -179,24 +179,24 @@ std::size_t shark::blas::pivotingCholeskyDecompositionInPlace(
 				//(L1L1T)^(j)+...+(Lj-1Lj-1)^(j)
 				//=L1*L1j+L2*L2j+L3*L3j...
 				//which is a matrix-vector product
-				fast_prod(
+				axpy_prod(
 					LkBlocked.lowerLeft(),
 					subrange(row(Lk,j),0,j),
 					unitTriangularColumn(Lk,j),
-					1.0,-1.0
+					false,-1.0
 				);
 			}
 			unitTriangularColumn(Lk,j) /= Lk(j,j);
 			//set block L12 to 0
-			zero(subrange(Lk,j,j+1,j+1,Lk.size2()));
+			subrange(Lk,j,j+1,j+1,Lk.size2()).clear();
 		}
 		Blocking<SubL> LkBlocked(Lk,currentSize,currentSize);
 		//if we are not finished do the block update
 		if(k+currentSize < m){
-			symmRankKUpdate(
+			symm_prod(
 				LkBlocked.lowerLeft(),
 				LkBlocked.lowerRight(),
-				1.0,-1.0
+				false,-1.0
 			);
 		}
 	}

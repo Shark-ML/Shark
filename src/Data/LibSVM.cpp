@@ -127,7 +127,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 		std::size_t i = 0;
 		typedef typename shark::LabeledData<T, unsigned int>::element_reference ElemRef;
 		BOOST_FOREACH(ElemRef element, data.elements()){
-			zero(element.input);
+			element.input.clear();
 			//todo: check label
 			//we subtract minPositiveLabel to ensore that class indices starting from 0 and 1 are supported
 			element.label = binaryLabels? 1 + (contents[i].first-1)/2 : contents[i].first-minPositiveLabel;

@@ -50,10 +50,9 @@ namespace shark {
 
 
 /// \brief Train a linear model to whiten the data
-template <class VectorType = RealVector>
-class NormalizeComponentsWhitening : public AbstractUnsupervisedTrainer<LinearModel<VectorType, VectorType> >
+class NormalizeComponentsWhitening : public AbstractUnsupervisedTrainer<LinearModel<RealVector> >
 {
-	typedef AbstractUnsupervisedTrainer<LinearModel<VectorType, VectorType> > base_type;
+	typedef AbstractUnsupervisedTrainer<LinearModel<RealVector> > base_type;
 public:
 	
 	double m_targetVariance;
@@ -65,12 +64,13 @@ public:
 	std::string name() const
 	{ return "NormalizeComponentsWhitening"; }
 
-	void train(LinearModel<VectorType, VectorType>& model, UnlabeledData<VectorType> const& input){
+	void train(ModelType& model, UnlabeledData<RealVector> const& input){
 		SHARK_CHECK(input.numberOfElements() >= 2, "[NormalizeComponentsWhitening::train] input needs to contain at least two points");
 		std::size_t dc = dataDimension(input);
-		model.setStructure(dc, dc, true, false); // dense model with bias having input and output dimension equal to data dimension
+		// dense model with bias having input and output dimension equal to data dimension
+		model.setStructure(dc, dc, true); 
 
-		VectorType mean;
+		RealVector mean;
 		RealMatrix covariance;
 		meanvar(input, mean, covariance);
 		
@@ -78,8 +78,8 @@ public:
 		whiteningMatrix*=std::sqrt(m_targetVariance);
 		
 		
-		VectorType offset(dc);
-		fast_prod(trans(whiteningMatrix),mean,offset);
+		RealVector offset(dc);
+		axpy_prod(trans(whiteningMatrix),mean,offset);
 		offset*=-1;
 		
 		model.setStructure(RealMatrix(trans(whiteningMatrix)), offset);
@@ -108,9 +108,9 @@ private:
 		//full rank, means that we can use the typical cholesky inverse with pivoting
 		//so U is P C^-1 P^T
 		if(rank == m){
-			identity(whiteningMatrix);
+			noalias(whiteningMatrix) = blas::identity_matrix<double>( m );
 			solveTriangularSystemInPlace<SolveXAB,Upper>(trans(C),whiteningMatrix);
-			swapFullInverted(permutation,whiteningMatrix);
+			swap_full_inverted(permutation,whiteningMatrix);
 			return whiteningMatrix;
 		}
 		//complex case. 
@@ -118,11 +118,11 @@ private:
 		//=> P^T U P = C(C^TC)^-1
 		//<=> P^T U P (C^TC) = C
 		RealMatrix CTC(rank,rank);
-		fast_prod(trans(C),C,CTC);
+		symm_prod(trans(C),CTC);
 		
 		matrix_range<RealMatrix> submat = columns(whiteningMatrix,0,rank);
 		solveSymmSystem<SolveXAB>(CTC,submat,C);
-		swapFullInverted(permutation,whiteningMatrix);
+		swap_full_inverted(permutation,whiteningMatrix);
 		
 		return whiteningMatrix;
 	}

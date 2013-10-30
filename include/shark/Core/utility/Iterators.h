@@ -277,7 +277,7 @@ private:
 			m_innerBegin = boost::begin(*m_outerPosition);
 			m_innerEnd = boost::end(*m_outerPosition);
 		}
-		m_innerPosition = --m_innerEnd;
+		m_innerPosition = m_innerEnd-1;
 	}
 	//this is not exactly O(1) as the standard wants. in fact it's O(n) in the number of inner sequences
 	//so approximately O(1) if the size of a sequence is big...

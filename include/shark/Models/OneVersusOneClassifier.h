@@ -154,11 +154,11 @@ public:
 	)const{
 		std::size_t numPatterns = size(patterns);
 		output.resize(numPatterns);
-		zero(output);
+		output.clear();
 		
 		//matrix storing the class histogram for all patterns
 		UIntMatrix votes(numPatterns,m_classes);
-		zero(votes);
+		votes.clear();
 		
 		//stores the votes of a classifier distinguishing between classes c and e
 		//for all patterns

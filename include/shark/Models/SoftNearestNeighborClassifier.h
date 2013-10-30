@@ -109,7 +109,7 @@ public:
 		std::vector<typename NearestNeighbors::DistancePair> neighbors = m_algorithm->getNeighbors(patterns,m_neighbors);
 		
 		outputs.resize(numPatterns,m_classes);
-		zero(outputs);
+		outputs.clear();
 
 		for(std::size_t p = 0; p != numPatterns;++p)
 			for ( std::size_t k = 0; k != m_neighbors; ++k)

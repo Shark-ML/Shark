@@ -106,7 +106,7 @@ struct ArithmeticBatch{
 	}
 	
 	static void resize(type& batch, std::size_t batchSize, std::size_t elements){
-		ensureSize(batch,batchSize);
+		ensure_size(batch,batchSize);
 	}
 };
 
@@ -121,7 +121,7 @@ public:
 	:base_type(matrix,i){}
 	template<class T>//special version allows for const-conversion
 	MatrixRowReference(T const& matrixrow)
-	:base_type(matrixrow.data().expression(),matrixrow.index()){}
+	:base_type(matrixrow.expression().expression(),matrixrow.index()){}
 	
 	template<class T> 
 	const MatrixRowReference& operator=(const T& argument){
@@ -136,7 +136,7 @@ public:
 
 template<class M, class V>
 void swap(MatrixRowReference<M,V> ref1, MatrixRowReference<M,V> ref2){
-	swap(static_cast<blas::matrix_row<M>& >(ref1),static_cast<blas::matrix_row<M>& >(ref2));
+	swap_rows(ref1.expression().expression(),ref1.index(),ref2.expression().expression(),ref2.index());
 }
 
 }
@@ -203,7 +203,7 @@ struct Batch<blas::vector<T> >{
 	}
 	
 	static void resize(type& batch, std::size_t batchSize, std::size_t elements){
-		ensureSize(batch,batchSize,elements);
+		ensure_size(batch,batchSize,elements);
 	}
 };
 /// \brief specialization for ublas compressed vectors which are compressed matrices in batch mode!
@@ -238,19 +238,19 @@ struct Batch<shark::blas::compressed_vector<T> >{
 	template<class Range>
 	static type createBatchFromRange(Range const& range){
 		//before creating the batch, we need the number of nonzero elements
-		std::size_t nnz = 0;
+		std::size_t nonzeros = 0;
 		for(typename Range::const_iterator pos = range.begin(); pos != range.end(); ++pos){
-			nnz += nonzeroElements(*pos);
+			nonzeros += pos->nnz();
 		}
 		
-		type batch(range.size(),range.begin()->size(),nnz);
+		type batch(range.size(),range.begin()->size(),nonzeros);
 		std::copy(range.begin(),range.end(),boost::begin(batch));
 		return batch;
 	}
 	
 	
 	static void resize(type& batch, std::size_t batchSize, std::size_t elements){
-		ensureSize(batch,batchSize,elements);
+		ensure_size(batch,batchSize,elements);
 	}
 };
 }
@@ -310,17 +310,17 @@ struct range_const_iterator< shark::blas::matrix_expression<M> >{
 
 //matrix proxy
 template< class T >
-struct range_mutable_iterator< shark::blas::FixedDenseMatrixProxy<T> >{
+struct range_mutable_iterator< shark::blas::dense_matrix_adaptor<T> >{
 	typedef shark::blas::vector<typename boost::remove_const<T>::type> Vector;
-	typedef shark::detail::MatrixRowReference<shark::blas::FixedDenseMatrixProxy<T>,Vector> reference;
-	typedef shark::ProxyIterator<shark::blas::FixedDenseMatrixProxy<T>, Vector, reference > type;
+	typedef shark::detail::MatrixRowReference<shark::blas::dense_matrix_adaptor<T>,Vector> reference;
+	typedef shark::ProxyIterator<shark::blas::dense_matrix_adaptor<T>, Vector, reference > type;
 };
 
 template< class T >
-struct range_const_iterator< shark::blas::FixedDenseMatrixProxy<T> >{
+struct range_const_iterator< shark::blas::dense_matrix_adaptor<T> >{
 	typedef shark::blas::vector<typename boost::remove_const<T>::type> Vector;
-	typedef shark::detail::MatrixRowReference<shark::blas::FixedDenseMatrixProxy<T> const,Vector> reference;
-	typedef shark::ProxyIterator<shark::blas::FixedDenseMatrixProxy<T> const, Vector, reference > type;
+	typedef shark::detail::MatrixRowReference<shark::blas::dense_matrix_adaptor<T> const,Vector> reference;
+	typedef shark::ProxyIterator<shark::blas::dense_matrix_adaptor<T> const, Vector, reference > type;
 };
 }
 
@@ -444,32 +444,32 @@ range_end( matrix_expression<M>& m )
 
 //dense matrix proxy
 template< class T >
-typename boost::range_iterator<shark::blas::FixedDenseMatrixProxy<T> const>::type
-range_begin( shark::blas::FixedDenseMatrixProxy<T> const& m )
+typename boost::range_iterator<shark::blas::dense_matrix_adaptor<T> const>::type
+range_begin( shark::blas::dense_matrix_adaptor<T> const& m )
 {
-	typedef typename boost::range_iterator<shark::blas::FixedDenseMatrixProxy<T> const>::type Iter;
+	typedef typename boost::range_iterator<shark::blas::dense_matrix_adaptor<T> const>::type Iter;
 	return Iter(m,0);
 }
 template< class T >
-typename boost::range_iterator<shark::blas::FixedDenseMatrixProxy<T> >::type
-range_begin( shark::blas::FixedDenseMatrixProxy<T>& m )
+typename boost::range_iterator<shark::blas::dense_matrix_adaptor<T> >::type
+range_begin( shark::blas::dense_matrix_adaptor<T>& m )
 {
-	typedef typename boost::range_iterator<shark::blas::FixedDenseMatrixProxy<T> >::type Iter;
+	typedef typename boost::range_iterator<shark::blas::dense_matrix_adaptor<T> >::type Iter;
 	return Iter(m,0);
 }
 
 template< class T >
-typename boost::range_iterator<shark::blas::FixedDenseMatrixProxy<T> const>::type
-range_end( shark::blas::FixedDenseMatrixProxy<T> const& m )
+typename boost::range_iterator<shark::blas::dense_matrix_adaptor<T> const>::type
+range_end( shark::blas::dense_matrix_adaptor<T> const& m )
 {
-	typedef typename boost::range_iterator<shark::blas::FixedDenseMatrixProxy<T> const>::type Iter;
+	typedef typename boost::range_iterator<shark::blas::dense_matrix_adaptor<T> const>::type Iter;
 	return Iter(m,m.size1());
 }
 template< class T >
-typename boost::range_iterator<shark::blas::FixedDenseMatrixProxy<T> >::type
-range_end( shark::blas::FixedDenseMatrixProxy<T>& m )
+typename boost::range_iterator<shark::blas::dense_matrix_adaptor<T> >::type
+range_end( shark::blas::dense_matrix_adaptor<T>& m )
 {
-	typedef typename boost::range_iterator<shark::blas::FixedDenseMatrixProxy<T> >::type Iter;
+	typedef typename boost::range_iterator<shark::blas::dense_matrix_adaptor<T> >::type Iter;
 	return Iter(m,m.size1());
 }
 

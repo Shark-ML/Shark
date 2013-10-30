@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_Base )
 	}
 	//Decompose
 	std::size_t rank = pivotingCholeskyDecomposition(M,P,C);
-	swapRows(P,C);
+	swap_rows(P,C);
 	
 	double error = norm_inf(prod(C,trans(C))-M);
 	BOOST_CHECK_SMALL(error,1.e-13);
@@ -79,8 +79,8 @@ RealMatrix createRandomMatrix(RealMatrix const& lambda,std::size_t Dimensions){
 	RealMatrix R = blas::randomRotationMatrix(Dimensions);
 	RealMatrix Atemp(Dimensions,Dimensions);
 	RealMatrix A(Dimensions,Dimensions);
-	fast_prod(R,lambda,Atemp);
-	fast_prod(Atemp,trans(R),A);
+	axpy_prod(R,lambda,Atemp);
+	axpy_prod(Atemp,trans(R),A);
 	return A;
 }
 
@@ -110,9 +110,9 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_FullRank ){
 		//create reconstruction of A
 		RealMatrix ATest(Dimensions,Dimensions);
 		
-		swapFull(P,A);
+		swap_full(P,A);
 		
-		fast_prod(C,trans(C),ATest);
+		axpy_prod(C,trans(C),ATest);
 		
 		//test reconstruction error
 		double errorA = norm_inf(A-ATest);
@@ -144,8 +144,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_RankK ){
 		//create reconstruction of A
 		RealMatrix ATest(Dimensions,Dimensions);
 		
-		swapFull(P,A);
-		fast_prod(C,trans(C),ATest);
+		swap_full(P,A);
+		axpy_prod(C,trans(C),ATest);
 		
 		//test reconstruction error
 		double errorA = norm_inf(A-ATest);

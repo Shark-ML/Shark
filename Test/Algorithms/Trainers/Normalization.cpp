@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING)
 		input[i]=dist().first+mean;
 
 	UnlabeledData<RealVector> set = createDataFromRange(input);
-	NormalizeComponentsWhitening<> normalizer(1.5);
+	NormalizeComponentsWhitening normalizer(1.5);
 	LinearModel<> map(3, 3);
 	normalizer.train(map, set);
 	Data<RealVector> transformedSet = map(set);
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING_RANK_2)
 		input[i]=dist().first+mean;
 
 	UnlabeledData<RealVector> set = createDataFromRange(input);
-	NormalizeComponentsWhitening<> normalizer(1.5);
+	NormalizeComponentsWhitening normalizer(1.5);
 	LinearModel<> map(3, 3);
 	normalizer.train(map, set);
 	Data<RealVector> transformedSet = map(set);

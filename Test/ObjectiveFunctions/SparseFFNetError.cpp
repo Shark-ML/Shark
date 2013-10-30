@@ -25,7 +25,7 @@ public:
 		RealMatrix& gradient
 	) const {
 		gradient.resize(prediction.size1(),prediction.size2());
-		zero(gradient);
+		gradient.clear();
 		return 0;
 	}
 };
@@ -63,14 +63,13 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Value ){
 		//now check that the error value reported is actually correct.
 		
 		//evaluate the inputs for the model
-		RealVector activations(2*Dimensions+5);
-		zero(activations);
+		RealVector activations(2*Dimensions+5,0.0);
 		boost::shared_ptr<State> state = model.createState();
 		RealMatrix result;
 		for(std::size_t i = 0; i != 4; ++i){
 			model.eval(dataset.batch(i).input,result,*state);
 			//sum hidden activations
-			activations+=sumColumns(model.neuronResponses(*state));
+			activations+=sum_columns(model.neuronResponses(*state));
 		}
 		activations /= Inputs;
 		
@@ -265,7 +264,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_GradDesc_OneLayer )
 	boost::shared_ptr<State> state = model.createState();
 	model.eval(dataset.batch(0).input,output,*state);
 	//sum hidden activations
-	RealVector activations=sumColumns(model.neuronResponses(*state));
+	RealVector activations=sum_columns(model.neuronResponses(*state));
 	activations /= Inputs;
 	//check that the mean activation is correct
 	for(std::size_t i = 0; i != 5; ++i){
@@ -310,7 +309,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_GradDesc_TwoLayer )
 	boost::shared_ptr<State> state = model.createState();
 	model.eval(dataset.batch(0).input,output,*state);
 	//sum hidden activations
-	RealVector activations=sumColumns(model.neuronResponses(*state));
+	RealVector activations=sum_columns(model.neuronResponses(*state));
 	activations /= Inputs;
 	//check that the mean activation is correct
 	for(std::size_t i = 0; i != 4; ++i){

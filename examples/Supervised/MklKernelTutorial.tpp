@@ -322,8 +322,8 @@ int main(int argc, char** argv)
     // create temporary helper container
     std::vector<HeterogeneousInputStruct> data( num_samples );
     // and fill it
-    data[0].rv1.resize( dim_nonzeros ); data[0].crv3.resize( dim_sparse, dim_nonzeros ); //size 5 w/ 2 non-zeros
-    data[1].rv1.resize( dim_nonzeros ); data[1].crv3.resize( dim_sparse, dim_nonzeros ); //size 5 w/ 2 non-zeros
+    data[0].rv1.resize( dim_nonzeros ); data[0].crv3.resize( dim_sparse); //size 5
+    data[1].rv1.resize( dim_nonzeros ); data[1].crv3.resize( dim_sparse); //size 5
     data[0].rv1(0) = 1.0; data[0].rv1(1) = -1.0; data[0].crv3(1) = -0.5; data[0].crv3(4) = 8.0;
     data[1].rv1(0) = 1.0; data[1].rv1(1) = -2.0; data[1].crv3(1) =  1.0; data[1].crv3(3) = 0.1;
     data[0].st2 = 1; data[1].st2 = 2;

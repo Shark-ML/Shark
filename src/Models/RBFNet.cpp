@@ -32,8 +32,6 @@
 */
 
 //#include <boost/serialization/vector.hpp>
-#include <shark/LinAlg/BLAS/Initialize.h>
-#include <shark/LinAlg/BLAS/StorageAdaptors.h>
 #include <shark/Models/RBFNet.h>
 
 using namespace shark;
@@ -153,7 +151,7 @@ void RBFNet::eval(BatchInputType const& patterns, BatchOutputType& output, State
 	computeGaussianResponses(patterns,s);
 	//evaluate the linear part of the network
 	noalias(output) = repeat(m_bias,numPatterns);
-	fast_prod(s.expNorm,trans(m_linearWeights),output,true);
+	axpy_prod(s.expNorm,trans(m_linearWeights),output,false);
 }
 
 void RBFNet::weightedParameterDerivative(
@@ -177,12 +175,12 @@ void RBFNet::weightedParameterDerivative(
 	//first evaluate the derivatives of the linear part if enabled
 	if(m_trainLinear){
 		//interpret the linear part of the parameter vector as matrix
-		blas::FixedDenseMatrixProxy<double> weightDerivative = blas::makeMatrix(m_outputNeurons,numNeurons,&gradient(0));
-		fast_prod(trans(coefficients),s.expNorm,weightDerivative);
+		blas::dense_matrix_adaptor<double> weightDerivative = blas::adapt_matrix(m_outputNeurons,numNeurons,&gradient(0));
+		axpy_prod(trans(coefficients),s.expNorm,weightDerivative);
 		currentParameter += m_outputNeurons*numNeurons;
 		//bias
 		RealVectorRange biasDerivative = subrange(gradient,currentParameter,currentParameter+outputSize());
-		noalias(biasDerivative) = sumRows(coefficients);
+		noalias(biasDerivative) = sum_rows(coefficients);
 		currentParameter += outputSize();
 	}
 
@@ -197,7 +195,7 @@ void RBFNet::weightedParameterDerivative(
 	//We have to calculate the delta-values first from the coefficients
 	//calculates delta_j=sum_i c_i*w_{ij}<=>delta=coefficients*linearWeights for every element of the pattern
 	RealMatrix delta(numPatterns,numNeurons);
-	fast_prod(coefficients,m_linearWeights,delta);
+	axpy_prod(coefficients,m_linearWeights,delta);
 	
 	//in the next steps, we will compute two derivates of the exponential fucntion.
 	//It has the nice property, that the exponentials of exp(...) also have exp(...) in the
@@ -215,11 +213,11 @@ void RBFNet::weightedParameterDerivative(
 		//for all centers at the same time!
 		//the second part is than just a matrix-diagonal multiplication
 		
-		blas::FixedDenseMatrixProxy<double> centerDerivative = blas::makeMatrix(numNeurons,inputSize(),&gradient(currentParameter));
+		blas::dense_matrix_adaptor<double> centerDerivative = blas::adapt_matrix(numNeurons,inputSize(),&gradient(currentParameter));
 		//compute first part
-		fast_prod(trans(delta),patterns,centerDerivative);
+		axpy_prod(trans(delta),patterns,centerDerivative);
 		//compute second part
-		RealVector weightSum = sumRows(delta);
+		RealVector weightSum = sum_rows(delta);
 		for(std::size_t i = 0; i != numNeurons; ++i){
 			noalias(row(centerDerivative,i)) -= weightSum(i)*row(m_centers,i);
 		}
@@ -240,7 +238,7 @@ void RBFNet::weightedParameterDerivative(
 		//and so gamma_i is in fact e^(pgamma_i) which leads to the fact, that 
 		//we have to derive with respect to pgamma_i.
 		RealVectorRange gammaDerivative = subrange(gradient,currentParameter,gradient.size());
-		noalias(gammaDerivative) = sumRows(-element_prod(delta,s.norm2));
+		noalias(gammaDerivative) = sum_rows(-element_prod(delta,s.norm2));
 		noalias(gammaDerivative) = element_prod(gammaDerivative,m_gamma);
 	}
 }

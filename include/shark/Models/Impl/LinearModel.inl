@@ -185,7 +185,7 @@ public:
 					,false   // Oh thanks ublas for making this necessary!!! damn!
 				);
 		//we multiply with a set of row vectors from the left
-		fast_prod(inputs,trans(m_matrix),outputs);
+		axpy_prod(inputs,trans(m_matrix),outputs);
 		if (base_type::hasOffset()){
 			noalias(outputs)+=repeat(base_type::m_offset,inputs.size1());
 		}
@@ -213,7 +213,7 @@ public:
 		std::size_t first = 0;
 		for (std::size_t output = 0; output < outputs; output++){
 			//sum_i coefficients(output,i)*pattern(i))
-			fast_prod(trans(patterns),column(coefficients,output),subrange(gradient, first, first + inputs),0.0);
+			axpy_prod(trans(patterns),column(coefficients,output),subrange(gradient, first, first + inputs),0.0);
 			first += inputs;
 		}
 		if (base_type::hasOffset()){

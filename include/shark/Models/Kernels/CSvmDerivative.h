@@ -253,9 +253,9 @@ private:
 		m_freeAlphaIndices.push_back( numberOfAlphas ); //b is always free (but don't forget to add to count manually)
 
 		// 2nd round through alphas: build up the RealVector of free and bounded alphas (needed for matrix-vector-products later)
-		m_freeAlphas.resize( m_noofFreeSVs+1, false );
-		m_boundedAlphas.resize( m_noofBoundedSVs, false );
-		m_boundedLabels.resize( m_noofBoundedSVs, false );
+		m_freeAlphas.resize( m_noofFreeSVs+1);
+		m_boundedAlphas.resize( m_noofBoundedSVs );
+		m_boundedLabels.resize( m_noofBoundedSVs );
 		for ( unsigned int i=0; i<m_noofFreeSVs; i++ )
 			m_freeAlphas(i) = m_alpha( m_freeAlphaIndices[i], 0 );
 		m_freeAlphas( m_noofFreeSVs ) = mep_ke->offset(0);
@@ -356,14 +356,14 @@ private:
 
 		// compute the derivative of (\alpha, b) w.r.t. C
 		if ( m_noofBoundedSVs > 0 ) {
-			fast_prod( R, m_boundedLabels, column(m_d_alphab_d_theta,m_nkp));
+			axpy_prod( R, m_boundedLabels, column(m_d_alphab_d_theta,m_nkp));
 		}
 		// compute the derivative of (\alpha, b) w.r.t. the kernel parameters
 		for ( std::size_t k=0; k<m_nkp; k++ ) {
-			RealVector sum( m_noofFreeSVs+1,0.0 );
-			fast_prod( dH[k], m_freeAlphas, sum, true ); //sum = dH * \alpha_f
+			RealVector sum( m_noofFreeSVs+1);
+			axpy_prod( dH[k], m_freeAlphas, sum ); //sum = dH * \alpha_f
 			if(m_noofBoundedSVs > 0)
-				fast_prod( dR[k], m_boundedAlphas, sum, true ); // sum += dR * \alpha_r , i.e., the C*y_g is expressed as alpha_g
+				axpy_prod( dR[k], m_boundedAlphas, sum, false ); // sum += dR * \alpha_r , i.e., the C*y_g is expressed as alpha_g
 			//fill the remaining columns of the derivative matrix (except the last, which is for C)
 			noalias(column(m_d_alphab_d_theta,k)) = sum;
 		}

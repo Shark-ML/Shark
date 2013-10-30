@@ -55,7 +55,7 @@ void calculateRegularizedKernelMatrix(
 	}
 	SIZE_CHECK(batchStart[B] == dataset.numberOfElements());
 	std::size_t N  = batchStart[B];//number of elements
-	ensureSize(matrix,N,N);
+	ensure_size(matrix,N,N);
 	
 	
 	for (std::size_t i=0; i<B; i++){
@@ -115,7 +115,7 @@ RealVector calculateKernelMatrixParameterDerivative(
 	std::size_t kp = kernel.numberOfParameters();
 	RealMatrix block;//stores the kernel results of the block which we need to compute to get the State :(
 	RealVector kernelGradient(kp);//weighted gradient summed over the whole kernel matrix
-	zero(kernelGradient);
+	kernelGradient.clear();
 	
 	//calculate the gradint blockwise taking symmetry into account.
 	RealVector blockGradient(kp);//weighted gradient summed over the whole block

@@ -141,7 +141,7 @@ public:
 			std::size_t tasks,
 			KernelType& inputkernel,
 			double gamma)
-	: DiscreteKernel(RealZeroMatrix(tasks, tasks))
+	: DiscreteKernel(RealMatrix(tasks, tasks,0.0))
 	, m_data(data)
 	, m_inputkernel(inputkernel)
 	, m_gamma(gamma){

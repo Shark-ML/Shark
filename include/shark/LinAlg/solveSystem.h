@@ -41,6 +41,27 @@
 #include <shark/LinAlg/solveTriangular.h>
 
 namespace shark{ namespace blas{
+
+/**
+ * \ingroup shark_globals
+ * 
+ * @{
+ */
+	
+/// \brief In-Place System of linear equations solver.
+///
+///Solves a system of linear equations
+///Ax=b 
+///for x, using LU decomposition and
+///backward substitution sotring the results in b. 
+///This Method is in
+///no way optimized for sparse matrices.
+///Be aware, that the matrix must have full rank!
+template<class MatT,class VecT>
+void solveSystemInPlace(
+	matrix_expression<MatT> const& A, 
+	vector_expression<VecT>& b
+);
 /// \brief System of linear equations solver.
 /// 
 /// Solves asystem of linear equations
@@ -51,11 +72,28 @@ namespace shark{ namespace blas{
 /// Be aware, that the matrix must have full rank!
 template<class MatT,class Vec1T,class Vec2T>
 void solveSystem(
-	const shark::blas::matrix_expression<MatT> & A, 
-	shark::blas::vector_expression<Vec1T>& x,
-	const shark::blas::vector_expression<Vec2T> & b
+	const matrix_expression<MatT> & A, 
+	vector_expression<Vec1T>& x,
+	const vector_expression<Vec2T> & b
 );
 
+/// \brief In-Place system of linear equations solver.
+///
+///Solves multiple systems of linear equations
+///Ax_1=b_1
+///Ax_2=b_2
+///...
+///=>AX=B
+///for X, using LU decomposition and
+///backward substitution and stores the result in b
+///Note, that B=(b_1,...,b_n), so the right hand sides are stored as columns
+///This Method is in no way optimized for sparse matrices.
+///Be aware, that the matrix must have full rank!
+template<class MatT,class Mat2T>
+void solveSystemInPlace(
+	matrix_expression<MatT> const& A, 
+	matrix_expression<Mat2T>& B
+);
 /// \brief System of linear equations solver.
 /// 
 /// Solves multiple systems of linear equations
@@ -70,9 +108,9 @@ void solveSystem(
 /// Be aware that the matrix must have full rank!
 template<class MatT,class Mat1T,class Mat2T>
 void solveSystem(
-	const shark::blas::matrix_expression<MatT> & A, 
-	shark::blas::matrix_expression<Mat1T>& X,
-	const shark::blas::matrix_expression<Mat2T> & B
+	const matrix_expression<MatT> & A, 
+	matrix_expression<Mat1T>& X,
+	const matrix_expression<Mat2T> & B
 );
 
 /// \brief System of symmetric linear equations solver. The result is stored in b
@@ -270,8 +308,8 @@ void approxSolveSymmSystem(
 	SIZE_CHECK(A().size1()==b().size());
 	
 	std::size_t dim = b().size();
-	ensureSize(x,dim);
-	zero(x);
+	ensure_size(x,dim);
+	x().clear();
 	
 	unsigned int maxIt = (maxIterations == 0)? dim: maxIterations;
 	
@@ -282,7 +320,7 @@ void approxSolveSymmSystem(
 	vector<value_type> Ap(dim);
 	
 	for(std::size_t i = 0; i != maxIt; ++i){
-		fast_prod(A,p,Ap);
+		axpy_prod(A,p,Ap);
 		double rsqr=inner_prod(r,r);
 		double alpha = rsqr/inner_prod(p,Ap);
 		noalias(x())+=alpha*p;
@@ -330,6 +368,9 @@ void approxSolveSymmSystemInPlace(
 	swap(x,b);
 }
 
+/** @}*/
 }}
+
+
 #include "Impl/solveSystem.inl"
 #endif

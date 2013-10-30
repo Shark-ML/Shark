@@ -126,7 +126,7 @@ void CMACMap::eval(RealMatrix const& patterns,RealMatrix &output) const{
 	std::size_t numPatterns = patterns.size1();
 	output.resize(numPatterns,m_outputSize);
 	output.clear();
-	//todo: fix fast_prod for sparse matrix before trying this again...
+	//todo: fix axpy_prod for sparse matrix before trying this again...
 	//create feature matrix for the batch. we assume that it is sparse and that tiles>>tilings
 // 	RealCompressedMatrix features(numPatterns,m_outputSize);
 // 	for(std::size_t i = 0; i != numPatterns; ++i){
@@ -136,7 +136,7 @@ void CMACMap::eval(RealMatrix const& patterns,RealMatrix &output) const{
 // 		}
 // 	}
 // 	
-// 	fast_prod(features,trans(m_matrix),output,false);
+// 	axpy_prod(features,trans(m_matrix),output,false);
 	
 	for(std::size_t i = 0; i != numPatterns; ++i){
 		std::vector<std::size_t> indizes = getIndizes(row(patterns,i));

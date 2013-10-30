@@ -34,33 +34,62 @@
 #ifndef SHARK_LINALG_IMPL_SOLVE_SYSTEM_INL
 #define SHARK_LINALG_IMPL_SOLVE_SYSTEM_INL
 
+//full rank indefinite solvers
 #include <shark/LinAlg/Cholesky.h>
 
 //todo implement this using ATLAS
-
-template<class MatT,class Vec1T,class Vec2T>
-void shark::blas::solveSystem(
-	const shark::blas::matrix_expression<MatT>& A, 
-	shark::blas::vector_expression<Vec1T>& x,
-	const shark::blas::vector_expression<Vec2T>& b
+template<class MatT,class VecT>
+void shark::blas::solveSystemInPlace(
+	matrix_expression<MatT> const& A, 
+	vector_expression<VecT>& b
 ){
 	SIZE_CHECK(A().size1() == b().size());
 	SIZE_CHECK(A().size1() == A().size2());
 	std::size_t n = A().size1();
 	
-	permutation_matrix<std::size_t> permutation(n);
+	PermutationMatrix permutation(n);
 	MatT LUDecomposition= A();
 	
 	lu_factorize(LUDecomposition,permutation);
 	
-	ensureSize(x,n);
+	swap_rows(permutation,b);
+	solveTriangularSystemInPlace<SolveAXB,UnitLower>(LUDecomposition,b);
+	solveTriangularSystemInPlace<SolveAXB,Upper>(LUDecomposition,b);
+}
+template<class MatT,class Mat2T>
+void shark::blas::solveSystemInPlace(
+	matrix_expression<MatT> const& A, 
+	matrix_expression<Mat2T> & B
+){
+	SIZE_CHECK(A().size1() == B().size1());
+	SIZE_CHECK(A().size1() == A().size2());
+	std::size_t n = A().size1();
+	
+	PermutationMatrix permutation(n);
+	MatT LUDecomposition = A;
+	
+	lu_factorize(LUDecomposition,permutation);
+	
+	swap_rows(permutation,B);
+	solveTriangularSystemInPlace<SolveAXB,UnitLower>(LUDecomposition,B);
+	solveTriangularSystemInPlace<SolveAXB,Upper>(LUDecomposition,B);
+}
+
+template<class MatT,class Vec1T,class Vec2T>
+void shark::blas::solveSystem(
+	matrix_expression<MatT> const& A, 
+	vector_expression<Vec1T>& x,
+	vector_expression<Vec2T> const& b
+){
+	SIZE_CHECK(A().size1() == b().size());
+	SIZE_CHECK(A().size1() == A().size2());
+	
+	ensure_size(x,A().size1());
 	noalias(x()) = b();
 	
-	//lu_substitute(LUDecomposition,permutation,x());
-	swap_rows(permutation,x());
-	solveTriangularSystemInPlace<SolveAXB,UnitLower>(LUDecomposition,x);
-	solveTriangularSystemInPlace<SolveAXB,Upper>(LUDecomposition,x);
+	solveSystemInPlace(A,x);
 }
+
 
 template<class MatT,class Mat1T,class Mat2T>
 void shark::blas::solveSystem(
@@ -70,21 +99,16 @@ void shark::blas::solveSystem(
 ){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size1() == A().size2());
-	std::size_t n = A().size1();
 	
-	permutation_matrix<std::size_t> permutation(n);
-	MatT LUDecomposition = A;
-	
-	lu_factorize(LUDecomposition,permutation);
-	
-	ensureSize(X,n,B().size2());
+	ensure_size(X,A().size1(),B().size2());
 	noalias(X()) = B();
 	
-	swap_rows(permutation,X());
-	solveTriangularSystemInPlace<SolveAXB,UnitLower>(LUDecomposition,X);
-	solveTriangularSystemInPlace<SolveAXB,Upper>(LUDecomposition,X);
+	solveSystemInPlace(A,X);
 }
 
+
+
+// Symmetric solvers
 template<class System,class MatT,class Mat1T>
 void shark::blas::solveSymmSystemInPlace(
 	matrix_expression<MatT> const& A, 
@@ -124,7 +148,7 @@ void shark::blas::solveSymmSystem(
 ){
 	SIZE_CHECK(A().size1() == b().size());
 	SIZE_CHECK(A().size1() == A().size2());
-	ensureSize(x,A().size1());
+	ensure_size(x,A().size1());
 	noalias(x()) = b();
 	solveSymmSystemInPlace<System>(A,x);
 }
@@ -140,7 +164,7 @@ void shark::blas::solveSymmSystem(
 	}else{
 		SIZE_CHECK(A().size1() == B().size2());
 	}
-	ensureSize(X,B().size1(),B().size2());
+	ensure_size(X,B().size1(),B().size2());
 	noalias(X()) = B();
 	solveSymmSystemInPlace<System>(A,X);
 }
@@ -177,25 +201,25 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 	matrix_range<RealMatrix> L = columns(LDecomp,0,rank);
 	
 	//apply permutation thus remove P from the following equations
-	swapRows(permutation,b);
+	swap_rows(permutation,b);
 	
 	//matrix has full rank, means that we can use the typical cholesky inverse
 	if(rank == m){
 		solveTriangularCholeskyInPlace<SolveAXB>(L,b);
 	}
 	else if (rank == 0){//A is 0
-		zero(b);
+		b().clear();
 	}
 	else
 	{
 		//complex case. 
 		//A' = L(L^TL)^-1(L^TL)^-1 L^T
 		RealMatrix LTL(rank,rank);
-		fast_prod(trans(L),L,LTL);
+		symm_prod(trans(L),LTL);
 		
 		//compute z= L^Tb
 		RealVector z(rank);
-		fast_prod(trans(L),b,z);
+		axpy_prod(trans(L),b,z);
 		
 		//compute cholesky factor of L^TL
 		RealMatrix LTLcholesky(rank,rank);
@@ -204,10 +228,10 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		//A'b =  L(L^TL)^-1(L^TL)^-1z
 		solveTriangularCholeskyInPlace<SolveAXB>(LTLcholesky,z);
 		solveTriangularCholeskyInPlace<SolveAXB>(LTLcholesky,z);
-		fast_prod(L,z,b);
+		axpy_prod(L,z,b);
 	}
 	//finally swap back into the unpermuted coordinate system
-	swapRowsInverted(permutation,b);
+	swap_rows_inverted(permutation,b);
 }
 
 template<class System,class Mat1T,class Mat2T>
@@ -235,27 +259,27 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 	
 	//apply permutation thus remove P from the following equations
 	if(System::left)
-		swapRows(permutation,B);
+		swap_rows(permutation,B);
 	else
-		swapColumns(permutation,B);
+		swap_columns(permutation,B);
 	
 	//matrix has full rank, means that we can use the typical cholesky inverse
 	if(rank == m){
 		solveTriangularCholeskyInPlace<System>(L,B);
 	}
 	else if (rank == 0){//A is 0
-		zero(B);
+		B().clear();
 	}
 	else if(System::left)
 	{
 		//complex case. 
 		//X=L(L^TL)^-1(L^TL)^-1 L^TB
 		RealMatrix LTL(rank,rank);
-		fast_prod(trans(L),L,LTL);
+		symm_prod(trans(L),LTL);
 		
 		//compute z= L^TB
 		RealMatrix Z(rank,B().size2());
-		fast_prod(trans(L),B,Z);
+		axpy_prod(trans(L),B,Z);
 		
 		//compute cholesky factor of L^TL
 		RealMatrix LTLcholesky(rank,rank);
@@ -264,16 +288,16 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		//A'b =  L(L^TL)^-1(L^TL)^-1z
 		solveTriangularCholeskyInPlace<System>(LTLcholesky,Z);
 		solveTriangularCholeskyInPlace<System>(LTLcholesky,Z);
-		fast_prod(L,Z,B);
+		axpy_prod(L,Z,B);
 	}else{
 		//complex case. 
 		//X=BL(L^TL)^-1(L^TL)^-1 L^T
 		RealMatrix LTL(rank,rank);
-		fast_prod(trans(L),L,LTL);
+		symm_prod(trans(L),LTL);
 		
 		//compute z= L^TB
 		RealMatrix Z(B().size1(),rank);
-		fast_prod(B,L,Z);
+		axpy_prod(B,L,Z);
 		
 		//compute cholesky factor of L^TL
 		RealMatrix LTLcholesky(rank,rank);
@@ -282,13 +306,13 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		//A'b =  L(L^TL)^-1(L^TL)^-1z
 		solveTriangularCholeskyInPlace<System>(LTLcholesky,Z);
 		solveTriangularCholeskyInPlace<System>(LTLcholesky,Z);
-		fast_prod(Z,trans(L),B);
+		axpy_prod(Z,trans(L),B);
 	}
 	//finally swap back into the unpermuted coordinate system
 	if(System::left)
-		swapRowsInverted(permutation,B);
+		swap_rows_inverted(permutation,B);
 	else
-		swapColumnsInverted(permutation,B);
+		swap_columns_inverted(permutation,B);
 }
 
 template<class System,class MatT,class VecT>
@@ -306,11 +330,11 @@ void shark::blas::generalSolveSystemInPlace(
 		// with z = Ab => (A^TA) x= z
 		//compute A^TA
 		RealMatrix ATA(n,n);
-		fast_prod(trans(A),A,ATA);
+		axpy_prod(trans(A),A,ATA);
 		
 		//compute z=Ab
 		RealVector z(n);
-		fast_prod(trans(A),b,z);
+		axpy_prod(trans(A),b,z);
 		
 		//call recursively for the quadratic case
 		solveSymmSemiDefiniteSystemInPlace<System>(ATA,z);
@@ -323,11 +347,11 @@ void shark::blas::generalSolveSystemInPlace(
 		// with z = Ab => x^T(AA^T) = z^T
 		//compute AAT
 		RealMatrix AAT(m,m);
-		fast_prod(A,trans(A),AAT);
+		axpy_prod(A,trans(A),AAT);
 		
 		//compute z=Ab
 		RealVector z(m);
-		fast_prod(A,b,z);
+		axpy_prod(A,b,z);
 		
 		//call recursively for the quadratic case
 		solveSymmSemiDefiniteSystemInPlace<System>(AAT,z);
@@ -350,11 +374,11 @@ void shark::blas::generalSolveSystemInPlace(
 		// with Z = A^TB => (A^TA) X= Z
 		//compute A^TA
 		RealMatrix ATA(n,n);
-		fast_prod(trans(A),A,ATA);
+		axpy_prod(trans(A),A,ATA);
 		
 		//compute Z=AB
 		RealMatrix Z(n,B().size2());
-		fast_prod(trans(A),B,Z);
+		axpy_prod(trans(A),B,Z);
 		
 		//call recursively for the quadratic case
 		solveSymmSemiDefiniteSystemInPlace<System>(ATA,Z);
@@ -367,11 +391,11 @@ void shark::blas::generalSolveSystemInPlace(
 		//~ // with Z = BA^T => X(AA^T) = Z
 		//~ //compute AAT
 		RealMatrix AAT(m,m);
-		fast_prod(A,trans(A),AAT);
+		axpy_prod(A,trans(A),AAT);
 		
 		//compute z=Ab
 		RealMatrix Z(B().size1(),m);
-		fast_prod(B,trans(A),Z);
+		axpy_prod(B,trans(A),Z);
 		
 		//call recursively for the quadratic case
 		solveSymmSemiDefiniteSystemInPlace<System>(AAT,Z);

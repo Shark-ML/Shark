@@ -159,7 +159,7 @@ public:
 		//return inner_prod(m_bias,state)
 		
 		RealVector energies(state.size1());
-		fast_prod(state,m_bias,energies);
+		axpy_prod(state,m_bias,energies);
 		return energies;
 	}
 	
@@ -197,7 +197,7 @@ public:
 	template<class Vector, class SampleBatch>
 	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples )const{
 		SIZE_CHECK(derivative.size() == size());
-		sumRows(samples.statistics.probability,derivative);
+		sum_rows(samples.statistics.probability,derivative);
 	}
 	
 	///\brief Calculates the expectation of the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights.
@@ -210,7 +210,7 @@ public:
 	template<class Vector, class SampleBatch, class WeightVector>
 	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples, WeightVector const& weights )const{
 		SIZE_CHECK(derivative.size() == size());
-		fast_prod(trans(samples.statistics.probability),weights,derivative,1.0);
+		axpy_prod(trans(samples.statistics.probability),weights,derivative,false);
 	}
 
 
@@ -222,7 +222,7 @@ public:
 	template<class Vector, class SampleBatch>
 	void parameterDerivative(Vector& derivative, SampleBatch const& samples)const{
 		SIZE_CHECK(derivative.size() == size());
-		sumRows(samples.state,derivative);
+		sum_rows(samples.state,derivative);
 	}
 	
 	///\brief Calculates the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights. 
@@ -234,7 +234,7 @@ public:
 	template<class Vector, class SampleBatch, class WeightVector>
 	void parameterDerivative(Vector& derivative, SampleBatch const& samples, WeightVector const& weights)const{
 		SIZE_CHECK(derivative.size() == size());
-		fast_prod(trans(samples.state),weights,derivative,1.0);
+		axpy_prod(trans(samples.state),weights,derivative,false);
 	}
 	
 	/// \brief Returns the flag of requested values by the expected parameter derivative.

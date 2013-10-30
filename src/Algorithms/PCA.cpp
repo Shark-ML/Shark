@@ -43,8 +43,6 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 	if(algorithm == STANDARD) { // standard case
 		RealMatrix S(m_n,m_n);//covariance matrix
 		meanvar(inputs,m_mean,S);
-		//~ symmRankKUpdate(trans(X0),S);
-		//~ S /= m_l;
 		m_eigenvalues.resize(m_n);
 		m_eigenvectors.resize(m_n, m_n);
 		eigensymm(S, m_eigenvectors, m_eigenvalues);
@@ -53,7 +51,7 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 		//we want to avoid to form it directly but us it's batch represntation in the dataset
 		m_mean = shark::mean(inputs);
 		RealMatrix S(m_l,m_l,0.0);//S=X0 X0^T
-		//as every batch is only  afraction of all samples, we have to loop through all
+		//as every batch is only  a fraction of all samples, we have to loop through all
 		//combinations of the batches of first and second argument and calculate a block of S
 		//so if X0^T = (B0^T,B1^T)
 		//than S = B0 B0^T B0 B1^T
@@ -70,23 +68,21 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 				RealMatrix X2 = inputs.batch(b2)-repeat(m_mean,batchSize2);
 				RealSubMatrix X1X2T= subrange(S,start1,start1+batchSize1,start2,start2+batchSize2);
 				RealSubMatrix X2X1T= subrange(S,start2,start2+batchSize2,start1,start1+batchSize1);
-				fast_prod(X1,trans(X2),X1X2T);// X1 X2^T
+				axpy_prod(X1,trans(X2),X1X2T);// X1 X2^T
 				noalias(X2X1T) = trans(X1X2T);// X2 X1^T
 				start2+=batchSize2;
 			}
 			//diagonal block
 			RealSubMatrix X1X1T= subrange(S,start1,start1+batchSize1,start1,start1+batchSize1);
-			symmRankKUpdate(X1,X1X1T);
+			symm_prod(X1,X1X1T);
 			start1+=batchSize1;
 		}
 		S /= m_l;
-		//~ std::cout<<S<<std::endl;
 		m_eigenvalues.resize(m_l);
 		m_eigenvectors.resize(m_n, m_l);
-		zero(m_eigenvectors);
+		m_eigenvectors.clear();
 		RealMatrix U(m_l, m_l);
 		eigensymm(S, U, m_eigenvalues);
-		//~ std::cout<<"pca U:"<<U<<std::endl;
 		// compute true eigenvectors
 		//eigenv=X0^T U
 		std::size_t batchStart  = 0;
@@ -94,11 +90,9 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 			std::size_t batchSize = inputs.batch(b).size1();
 			std::size_t batchEnd = batchStart+batchSize;
 			RealMatrix X = inputs.batch(b)-repeat(m_mean,batchSize);
-			fast_prod(trans(X),rows(U,batchStart,batchEnd),m_eigenvectors,true);
+			axpy_prod(trans(X),rows(U,batchStart,batchEnd),m_eigenvectors,false);
 			batchStart = batchEnd;
 		}
-		//fast_prod(trans(X0),U,m_eigenvectors);
-		//~ std::cout<<"Eig:"<<m_eigenvectors<<std::endl;
 		//normalize
 		for(std::size_t i=0; i != m_l; i++)
 			column(m_eigenvectors, i) /= norm_2(column(m_eigenvectors, i));
@@ -112,7 +106,7 @@ void PCA::encoder(LinearModel<>& model, std::size_t m) {
 	
 	RealMatrix A = trans(columns(m_eigenvectors, 0, m) );
 	RealVector offset(A.size1()); 
-	fast_prod(A, m_mean, offset, false, -1.0);
+	axpy_prod(A, m_mean, offset, false, -1.0);
 	if(m_whitening){
 		for(std::size_t i=0; i<A.size1(); i++) {
 			row(A, i) = row(A, i) / std::sqrt(m_eigenvalues(i));

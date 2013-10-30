@@ -40,6 +40,17 @@ MACRO( SHARK_ADD_TEST SRC NAME)
     ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} )
 ENDMACRO()
 
+
+#BLAS Tests
+SHARK_ADD_TEST( LinAlg/BLAS/iterators.cpp BLAS_Iterators)
+SHARK_ADD_TEST( LinAlg/BLAS/vector_assign.cpp BLAS_Vector_Assign)
+SHARK_ADD_TEST( LinAlg/BLAS/matrix_assign.cpp BLAS_Matrix_Assign)
+SHARK_ADD_TEST( LinAlg/BLAS/compressed_vector.cpp BLAS_Compressed_Vector)
+SHARK_ADD_TEST( LinAlg/BLAS/compressed_matrix.cpp BLAS_Compressed_Matrix)
+SHARK_ADD_TEST( LinAlg/BLAS/vector_proxy.cpp BLAS_Vector_Proxy)
+SHARK_ADD_TEST( LinAlg/BLAS/matrix_proxy.cpp BLAS_Matrix_Proxy)
+SHARK_ADD_TEST( LinAlg/BLAS/vector_expression.cpp BLAS_Vector_Expression)
+SHARK_ADD_TEST( LinAlg/BLAS/axpy_prod.cpp BLAS_Axpy_Prod)
 #LinAlg Tests
 SHARK_ADD_TEST( LinAlg/DiagonalMatrix.cpp LinAlg_DiagonalMatrix)
 SHARK_ADD_TEST( LinAlg/sumRows.cpp LinAlg_SumRows)
@@ -56,7 +67,6 @@ SHARK_ADD_TEST( LinAlg/choleskyDecomposition.cpp LinAlg_choleskyDecomposition)
 SHARK_ADD_TEST( LinAlg/solve.cpp LinAlg_solve)
 SHARK_ADD_TEST( LinAlg/VectorTransformations.cpp LinAlg_VectorTransformations)
 SHARK_ADD_TEST( LinAlg/Initialize.cpp LinAlg_Initialize)
-SHARK_ADD_TEST( LinAlg/fast_prod.cpp LinAlg_FastProd)
 #Operator tests
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Recombination/Recombination.cpp DirectSearch_Recombination )

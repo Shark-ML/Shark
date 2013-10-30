@@ -27,8 +27,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Rows_Matrix ){
 	row(APerm,3)=row(A,1);
 	row(APerm,4)=row(A,3);
 	
-	swapRows(P,A);
 	
+	swap_rows(P,A);
 	int error = norm_inf(A-APerm);
 	BOOST_CHECK_EQUAL(error, 0);
 }
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Rows_Vector ){
 	vPerm(3)=v(1);
 	vPerm(4)=v(3);
 	
-	swapRows(P,v);
+	swap_rows(P,v);
 	
 	int error = norm_inf(v-vPerm);
 	BOOST_CHECK_EQUAL(error, 0);
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Columns ){
 	column(APerm,3)=column(A,1);
 	column(APerm,4)=column(A,3);
 	
-	swapColumns(P,A);
+	swap_columns(P,A);
 	
 	int error = norm_inf(A-APerm);
 	BOOST_CHECK_EQUAL(error, 0);
@@ -106,8 +106,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Columns_Inverted ){
 	//copy to result
 	IntMatrix APerm(A);
 	
-	swapColumns(P,A);
-	swapColumnsInverted(P,A);
+	swap_columns(P,A);
+	swap_columns_inverted(P,A);
 	
 	int error = norm_inf(A-APerm);
 	BOOST_CHECK_EQUAL(error, 0);
@@ -129,18 +129,16 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Full ){
 	}
 	//generate permutated result
 	IntMatrix APerm(A);
-	row(APerm,0).swap(row(APerm,2));
-	column(APerm,0).swap(column(APerm,2));
-	row(APerm,1).swap(row(APerm,2));
-	column(APerm,1).swap(column(APerm,2));
-	row(APerm,2).swap(row(APerm,4));
-	column(APerm,2).swap(column(APerm,4));
-	row(APerm,3).swap(row(APerm,4));
-	column(APerm,3).swap(column(APerm,4));
-	row(APerm,4).swap(row(APerm,4));
-	column(APerm,4).swap(column(APerm,4));
+	swap_rows(APerm,0,2);
+	swap_columns(APerm,0,2);
+	swap_rows(APerm,1,2);
+	swap_columns(APerm,1,2);
+	swap_rows(APerm,2,4);
+	swap_columns(APerm,2,4);
+	swap_rows(APerm,3,4);
+	swap_columns(APerm,3,4);
 	
-	swapFull(P,A);
+	swap_full(P,A);
 	
 	int error = norm_inf(A-APerm);
 	BOOST_CHECK_EQUAL(error, 0);

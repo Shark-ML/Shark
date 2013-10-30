@@ -108,8 +108,8 @@ public:
 			state,
 			temp
 		);
-		ensureSize(gradient,batchX1.size1(),batchX2.size2());
-		zero(gradient);
+		ensure_size(gradient,batchX1.size1(),batchX2.size2());
+		gradient.clear();
 		noalias(columns(gradient,m_start,m_end)) = temp;
 	}
 

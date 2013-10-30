@@ -219,7 +219,7 @@ public:
 		State const& state, 
 		RealVector& gradient
 	) const{
-		ensureSize(gradient,numberOfParameters());
+		ensure_size(gradient,numberOfParameters());
 		InternalState const& s = state.toState<InternalState>();
 		std::size_t sizeX1 = size(batchX1);
 		std::size_t sizeX2 = size(batchX2);
@@ -234,8 +234,8 @@ public:
 		m_base->weightedParameterDerivative(batchX1,batchX2,weights,s.stateKxy,gradient);
 		
 		noalias(weights) = element_prod(weights,s.kxy);
-		RealVector wx = sumRows(weights);
-		RealVector wy = sumColumns(weights);
+		RealVector wx = sum_rows(weights);
+		RealVector wy = sum_columns(weights);
 		noalias(wx) = 0.5*element_div(wx,s.kxx);
 		noalias(wy) = 0.5*element_div(wy,s.kyy);
 		
@@ -313,7 +313,7 @@ public:
 		m_base->weightedInputDerivative(batchX1,batchX2,weights,s.stateKxy,gradient);
 		
 		noalias(weights) = element_prod(weights,s.kxy);
-		RealVector wx = sumRows(weights);
+		RealVector wx = sum_rows(weights);
 		noalias(wx) = 0.5*element_div(wx,s.kxx);
 		
 		//the following mess could be made easier with an interface like 

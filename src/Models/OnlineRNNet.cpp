@@ -50,8 +50,8 @@ void OnlineRNNet::eval(RealMatrix const& pattern, RealMatrix& output){
 	if(m_lastActivation.size() != numUnits){
 		m_activation.resize(numUnits);
 		m_lastActivation.resize(numUnits);
-		zero(m_activation);
-		zero(m_lastActivation);
+		m_activation.clear();
+		m_lastActivation.clear();
 	}
 	swap(m_lastActivation,m_activation);
 
@@ -64,7 +64,7 @@ void OnlineRNNet::eval(RealMatrix const& pattern, RealMatrix& output){
 
 	//activation of the hidden neurons is now just a matrix vector multiplication
 
-	fast_prod(
+	axpy_prod(
 		mpe_structure->weights(),
 		m_lastActivation,
 		subrange(m_activation,inputSize()+1,numUnits)
@@ -94,7 +94,7 @@ void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const R
 	//of memory for the derivative and set it to zero.
 	if(m_unitGradient.size1() != mpe_structure->parameters() || m_unitGradient.size2() != numNeurons){
 		m_unitGradient.resize(mpe_structure->parameters(),numNeurons);
-		zero(m_unitGradient);
+		m_unitGradient.clear();
 	}
 
 	//for the next steps see Kenji Doya, "Recurrent Networks: Learning Algorithms"
@@ -113,7 +113,7 @@ void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const R
 	
 	//update the new gradient with the effect of last timestep
 	RealMatrix newUnitGradient(mpe_structure->parameters(),numNeurons);
-	fast_prod(m_unitGradient,trans(hiddenWeights),newUnitGradient);
+	axpy_prod(m_unitGradient,trans(hiddenWeights),newUnitGradient);
 	swap(m_unitGradient,newUnitGradient);
 	newUnitGradient = RealMatrix();//empty
 	
@@ -134,7 +134,7 @@ void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const R
 		noalias(row(m_unitGradient,i))= element_prod(row(m_unitGradient,i),neuronDerivatives);
 	}
 	//and formula 4 (the gradient itself)
-	fast_prod(
+	axpy_prod(
 		columns(m_unitGradient,numNeurons-outputSize(),numNeurons),
 		row(coefficients,0),
 		gradient

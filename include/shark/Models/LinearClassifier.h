@@ -17,7 +17,7 @@ namespace shark {
  *  The internal linear model can be queried using decisionFunction().
  */ 
 template<class VectorType = RealVector>
-class LinearClassifier : public ArgMaxConverter<LinearModel<VectorType,RealVector> >
+class LinearClassifier : public ArgMaxConverter<LinearModel<VectorType> >
 {
 public:
 	LinearClassifier(){}

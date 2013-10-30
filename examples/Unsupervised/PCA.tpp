@@ -88,7 +88,7 @@ int main(){
 	//and numerical errors.
 	cout << "RESULTS: " << std::endl;
 	cout << "======== " << std::endl << std::endl;
-	cout << "principal component 1: " << pcaModel.matrixRow(0) * sqrt(pca.eigenvalues()(0)) << std::endl;
-	cout << "principal component 2: " << pcaModel.matrixRow(1) * sqrt( pca.eigenvalues()(1) ) << std::endl;
+	cout << "principal component 1: " << row(pcaModel.matrix(),0) * sqrt(pca.eigenvalues()(0)) << std::endl;
+	cout << "principal component 2: " << row(pcaModel.matrix(),1) * sqrt( pca.eigenvalues()(1) ) << std::endl;
 
 }

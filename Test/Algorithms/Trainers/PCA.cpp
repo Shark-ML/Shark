@@ -205,8 +205,8 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){
 	pca.setWhitening(false);
 	pca.train(pcaModel,data);
 
-	RealVector pc1 = pcaModel.matrixRow(0) * sqrt(pca.eigenvalues()(0));
-	RealVector pc2 = pcaModel.matrixRow(1) * sqrt(pca.eigenvalues()(1));	
+	RealVector pc1 = row(pcaModel.matrix(),0) * sqrt(pca.eigenvalues()(0));
+	RealVector pc2 = row(pcaModel.matrix(),1) * sqrt(pca.eigenvalues()(1));	
 	cout << "principal component 1: " << pc1 << endl;
 	cout << "principal component 2: " << pc2 << endl;
 

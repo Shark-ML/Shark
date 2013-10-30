@@ -51,7 +51,7 @@ void BFGS::computeSearchDirection(){
 	double d = inner_prod(gamma,delta);
 	
 	RealVector Hg(m_dimension,0.0);
-	fast_prod(m_hessian,gamma,Hg);
+	axpy_prod(m_hessian,gamma,Hg);
 	
 	//update hessian
 	if (d < 1e-20)
@@ -69,7 +69,7 @@ void BFGS::computeSearchDirection(){
 	}
 	
 	//compute search direction
-	fast_prod(m_hessian,m_derivative,m_searchDirection);
+	axpy_prod(m_hessian,m_derivative,m_searchDirection);
 	m_searchDirection *= -1;
 }
 

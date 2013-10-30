@@ -76,8 +76,8 @@ public:
 	using AbstractModel<RealVector, RealVector >::eval;
 	void eval(const BatchInputType& patterns, BatchOutputType& outputs)const{
 		// Prepare the output
-		ensureSize(outputs,size(patterns),m_labelDimension);
-		zero(outputs);
+		ensure_size(outputs,size(patterns),m_labelDimension);
+		outputs.clear();
 
 		//For each tree in the forest and every input pattern
 		for(std::size_t i = 0; i != m_forest.size(); i++){

@@ -122,7 +122,7 @@ void CMSA::step(ObjectiveFunctionType const& function){
 void CMSA::updateStrategyParameters( const std::vector< CMSA::Individual > & offspringNew ) {
 	RealVector xPrimeNew = cog( offspringNew, PointExtractor() );
 	// Covariance Matrix Update
-	RealMatrix Znew = blas::zero_matrix<double>( m_numberOfVariables, m_numberOfVariables );
+	RealMatrix Znew( m_numberOfVariables, m_numberOfVariables,0.0 );
 	RealMatrix C( m_chromosome.m_mutationDistribution.covarianceMatrix() );
 	// Rank-mu-Update
 	for( unsigned int i = 0; i < m_mu; i++ ) {
