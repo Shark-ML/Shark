@@ -55,8 +55,8 @@ void shark::blas::eigensymm
 	unsigned int n = A.size1();
 	SIZE_CHECK(A.size2() == n);
 
-	G.resize(n,n, false);
-	l.resize(n, false);
+	G.resize(n,n);
+	l.resize(n);
 
 	VectorT od(n);
 
@@ -115,9 +115,9 @@ void shark::blas::eigensymm
 	vmatA.resize(n,n);
 	dvecA.resize(n);
 	odvecA.resize(n);
-	zero(vmatA);
-	zero(dvecA);
-	zero(odvecA);
+	vmatA.clear();
+	dvecA.clear();
+	odvecA.clear();
 
 	const unsigned maxIterC = 50;
 

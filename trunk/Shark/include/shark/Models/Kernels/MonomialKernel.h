@@ -30,7 +30,6 @@
 
 
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
-#include <shark/LinAlg/BLAS/StorageAdaptors.h>
 namespace shark {
 
 
@@ -105,7 +104,7 @@ public:
 		std::size_t sizeX2 = batchX2.size1();
 		result.resize(sizeX1,sizeX2);
 		//calculate the inner product
-		fast_prod(batchX1,trans(batchX2),result);
+		axpy_prod(batchX1,trans(batchX2),result);
 		if(m_exponent != 1)
 			noalias(result) = pow(result,m_exponent);
 	}
@@ -121,7 +120,7 @@ public:
 		s.resize(sizeX1,sizeX2);
 		
 		//calculate the inner product
-		fast_prod(batchX1,trans(batchX2),s.base);
+		axpy_prod(batchX1,trans(batchX2),s.base);
 		//now do exponentiation
 		if(m_exponent != 1)
 			noalias(result) = pow(s.base,m_exponent);
@@ -171,7 +170,7 @@ public:
 		//The derivative of input i of batch x1 is 
 		//g = sum_j m_exponent*weights(i,j)*x2_j
 		//we now sum over j which is a matrix-matrix product
-		fast_prod(weights,batchX2,gradient);
+		axpy_prod(weights,batchX2,gradient);
 		gradient*= m_exponent;
 	}
 	

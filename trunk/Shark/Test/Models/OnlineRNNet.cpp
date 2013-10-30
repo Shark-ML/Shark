@@ -125,8 +125,7 @@ BOOST_AUTO_TEST_CASE( ONLINE_RNNET_WEIGHTED_PARAMETER_DERIVATIVE ){
 
 		//estimate weighted derivative
 		double epsilon=1.e-5;
-		RealVector testDerivative(numberOfParameters);
-		zero(testDerivative);
+		RealVector testDerivative(numberOfParameters,0.0);
 		for(size_t w=0; w != numberOfParameters; ++w){
 			//create points with an change of +-epsilon in the wth component
 			RealVector point1(parameters);

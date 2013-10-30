@@ -156,7 +156,7 @@ public:
 		std::size_t sizeX1 = batchX1.size1();
 		std::size_t sizeX2 = batchX2.size1();
 
-		ensureSize(result,sizeX1,sizeX2);
+		ensure_size(result,sizeX1,sizeX2);
 		//todo: implement fast version of diagonalMahalanobisDistanceSqr for matrices
 		for(std::size_t i = 0; i != sizeX1; ++i){
 			for(std::size_t j = 0; j != sizeX2; ++j){
@@ -180,7 +180,7 @@ public:
 		InternalState& s = state.toState<InternalState>();
 		s.resize(sizeX1,sizeX2);
 
-		ensureSize(result,sizeX1,sizeX2);
+		ensure_size(result,sizeX1,sizeX2);
 		//todo: implement fast version of diagonalMahalanobisDistanceSqr for matrices
 		for(std::size_t i = 0; i != sizeX1; ++i){
 			for(std::size_t j = 0; j != sizeX2; ++j){
@@ -210,8 +210,8 @@ public:
 		std::size_t sizeX1 = batchX1.size1();
 		std::size_t sizeX2 = batchX2.size1();
 
-		ensureSize(gradient, m_inputDimensions );
-		zero(gradient);
+		ensure_size(gradient, m_inputDimensions );
+		gradient.clear();
 		InternalState const& s = state.toState<InternalState>();
 
 		for(std::size_t i = 0; i != sizeX1; ++i){
@@ -242,8 +242,8 @@ public:
 		std::size_t sizeX2 = batchX2.size1();
 
 		InternalState const& s = state.toState<InternalState>();
-		ensureSize(gradient, sizeX1, m_inputDimensions );
-		zero(gradient);
+		ensure_size(gradient, sizeX1, m_inputDimensions );
+		gradient.clear();
 
 		for(std::size_t i = 0; i != sizeX1; ++i){
 			for(std::size_t j = 0; j != sizeX2; ++j){

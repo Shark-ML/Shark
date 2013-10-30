@@ -136,7 +136,7 @@ public:
 
 			// compute prediction
 			RealVector f_b(classes, 0.0);
-			fast_prod(trans(alpha), row(K, b), f_b, false, alphaScale);
+			axpy_prod(trans(alpha), row(K, b), f_b, false, alphaScale);
 			if (m_offset) f_b += model.offset();
 
 			// stochastic gradient descent (SGD) step

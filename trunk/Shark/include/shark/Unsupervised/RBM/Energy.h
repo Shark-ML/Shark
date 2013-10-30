@@ -28,6 +28,7 @@
 #define SHARK_UNSUPERVISED_RBm_ENERGY_H
 
 #include <shark/LinAlg/Base.h>
+#include <shark/Data/BatchInterface.h>
 
 namespace shark{
 
@@ -170,7 +171,7 @@ struct Energy{
 		SIZE_CHECK(visibleStates.size1() == inputs.size1());
 		SIZE_CHECK(inputs.size2() == m_hiddenNeurons.size());
 		
-		fast_prod(m_visibleNeurons.phi(visibleStates),trans(m_weightMatrix),inputs);
+		axpy_prod(m_visibleNeurons.phi(visibleStates),trans(m_weightMatrix),inputs);
 	}
 
 
@@ -182,7 +183,7 @@ struct Energy{
 		SIZE_CHECK(hiddenStates.size1() == inputs.size1());
 		SIZE_CHECK(inputs.size2() == m_visibleNeurons.size());
 		
-		fast_prod(m_hiddenNeurons.phi(hiddenStates),m_weightMatrix,inputs);
+		axpy_prod(m_hiddenNeurons.phi(hiddenStates),m_weightMatrix,inputs);
 	}
 
 	///\brief Optimization of the calculation of the energy, when the input of the hidden units
@@ -314,7 +315,7 @@ public:
 		for(std::size_t i = 0; i != batchSize; ++i){
 			row(weightedFeatures,i)*= weights(i);
 		}
-		fast_prod(trans(mpe_rbm->hiddenNeurons().expectedPhiValue(hiddens.statistics)),weightedFeatures,m_deltaWeights,1.0);
+		axpy_prod(trans(mpe_rbm->hiddenNeurons().expectedPhiValue(hiddens.statistics)),weightedFeatures,m_deltaWeights,false);
 		mpe_rbm->visibleNeurons().parameterDerivative(m_deltaBiasVisible,visibles,weights);
 		mpe_rbm->hiddenNeurons().expectedParameterDerivative(m_deltaBiasHidden,hiddens,weights);
 	}
@@ -344,7 +345,7 @@ public:
 			row(weightedFeatures,i)*= weights(i);
 		}
 		
-		fast_prod(trans(weightedFeatures),mpe_rbm->visibleNeurons().expectedPhiValue(visibles.statistics),m_deltaWeights,1.0);
+		axpy_prod(trans(weightedFeatures),mpe_rbm->visibleNeurons().expectedPhiValue(visibles.statistics),m_deltaWeights,false);
 		mpe_rbm->hiddenNeurons().parameterDerivative(m_deltaBiasHidden,hiddens,weights);
 		mpe_rbm->visibleNeurons().expectedParameterDerivative(m_deltaBiasVisible,visibles,weights);
 	}

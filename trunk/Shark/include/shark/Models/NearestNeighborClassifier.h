@@ -114,7 +114,7 @@ public:
 		std::vector<typename NearestNeighbors::DistancePair> neighbors = m_algorithm->getNeighbors(patterns,m_neighbors);
 
 		output.resize(numPatterns);
-		zero(output);
+		output.clear();
 
 		for(std::size_t p = 0; p != numPatterns;++p){
 			std::vector<std::size_t> histogram(m_classes,0);

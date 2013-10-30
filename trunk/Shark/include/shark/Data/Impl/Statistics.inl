@@ -32,7 +32,7 @@ void meanvar
 	//sum of variances of each column
 	BOOST_FOREACH(BatchRef batch,data.batches()){
 		std::size_t batchSize = batch.size1();
-		noalias(varianceVec()) += sumRows(sqr(batch-repeat(meanVec,batchSize)));
+		noalias(varianceVec()) += sum_rows(sqr(batch-repeat(meanVec,batchSize)));
 	}
 	varianceVec()/=dataSize;
 }
@@ -68,7 +68,7 @@ void meanvar
 	for(std::size_t b = 0; b != data.numberOfBatches(); ++b){
 		//make the batch mean-free
 		BatchType batch = data.batch(b)-repeat(meanVec,data.batch(b).size1());
-		symmRankKUpdate(trans(batch),covariance,1.0);
+		symm_prod(trans(batch),covariance,false);
 	}
 	covariance()/=dataSize;
 }
@@ -118,7 +118,7 @@ VectorType mean(Data<VectorType> const& data){
 	typedef typename Data<VectorType>::const_batch_reference BatchRef; 
 	 
 	BOOST_FOREACH(BatchRef batch, data.batches()){
-		mean += sumRows(batch);
+		mean += sum_rows(batch);
 	}
 	mean /= data.numberOfElements();
 	return mean;

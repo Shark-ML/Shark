@@ -3,7 +3,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <vector>
-#include <shark/LinAlg/BLAS/Initialize.h>
+#include <shark/LinAlg/Initialize.h>
 #include <shark/Models/FFNet.h>
 
 using namespace shark;

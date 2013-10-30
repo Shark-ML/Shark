@@ -87,7 +87,7 @@ public:
 	void eval(ConstBatchInputReference x1, ConstBatchInputReference x2, RealMatrix& result) const{
 		SIZE_CHECK(x1.size2() == x2.size2());
 		result.resize(x1.size1(),x2.size1());
-		fast_prod(x1,trans(x2),result);
+		axpy_prod(x1,trans(x2),result);
 	}
 	
 	void weightedParameterDerivative(
@@ -112,7 +112,7 @@ public:
 		//~ SIZE_CHECK(cofficientsX2.size2() == batchX2.size1());
 		gradient.resize(batchX1.size1(),batchX1.size2());
 		
-		fast_prod(coefficientsX2,batchX2,gradient);
+		axpy_prod(coefficientsX2,batchX2,gradient);
 	}
 	
 	virtual double featureDistanceSqr(ConstInputReference x1, ConstInputReference x2) const{

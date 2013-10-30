@@ -48,7 +48,7 @@ void RNNet::eval(BatchInputType const& patterns, BatchOutputType& outputs, State
 		s.timeActivation[b].resize(sequenceLength,RealVector(numUnits));
 		outputs[b].resize(size(get(patterns,b)),RealVector(numUnits));
 		Sequence& sequence = s.timeActivation[b];
-		zero(sequence[0]);
+		sequence[0].clear();
 		for (std::size_t t = 1; t < sequenceLength;t++){
 			//we want to treat input neurons exactly as hidden or output neurons, so we copy the current
 			//pattern at the beginning of the the last activation pattern. After that, all activations
@@ -62,7 +62,7 @@ void RNNet::eval(BatchInputType const& patterns, BatchOutputType& outputs, State
 			sequence[t-1](mpe_structure->bias())=1;
 
 			//activation of the hidden neurons is now just a matrix vector multiplication
-			fast_prod(
+			axpy_prod(
 				mpe_structure->weights(),
 				sequence[t-1],
 				subrange(sequence[t],inputSize()+1,numUnits)
@@ -86,7 +86,7 @@ void RNNet::weightedParameterDerivative(
 	//SIZE_CHECK(pattern.size() == coefficients.size());
 	InternalState const& s = state.toState<InternalState>();
 	gradient.resize(numberOfParameters());
-	zero(gradient);
+	gradient.clear();
 	
 	std::size_t numUnits = mpe_structure->numberOfUnits();
 	std::size_t numNeurons = mpe_structure->numberOfNeurons();
@@ -95,7 +95,7 @@ void RNNet::weightedParameterDerivative(
 		Sequence const& sequence = s.timeActivation[b];
 		std::size_t sequenceLength = size(s.timeActivation[b]);
 		RealMatrix errorDerivative(sequenceLength,numNeurons);
-		zero(errorDerivative);
+		errorDerivative.clear();
 		//copy errors
 		for (std::size_t t = warmUpLength+1; t != sequenceLength; ++t)
 			for(std::size_t i = 0; i != outputSize(); ++i)
@@ -107,11 +107,11 @@ void RNNet::weightedParameterDerivative(
 				double derivative = mpe_structure->neuronDerivative(sequence[t](j+mpe_structure->inputs()+1));
 				errorDerivative(t,j)*=derivative;
 			}
-			fast_prod(
+			axpy_prod(
 				trans(columns(mpe_structure->weights(), inputSize()+1,numUnits)),
 				row(errorDerivative,t),
 				row(errorDerivative,t-1),
-				1.0
+				false
 			);
 		}
 		

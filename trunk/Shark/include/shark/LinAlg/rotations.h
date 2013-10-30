@@ -164,7 +164,7 @@ void applyHouseholderOnTheRight(
 	blas::vector<T> temp(matrix().size1());
 	
 	//Ax
-	fast_prod(matrix,reflection,temp);
+	axpy_prod(matrix,reflection,temp);
 	
 	//A -=beta*(Ax)x^T
     noalias(matrix()) -= beta * outer_prod(temp,reflection);
@@ -191,7 +191,7 @@ void applyHouseholderOnTheLeft(
 	blas::vector<T> temp(matrix().size2());
 	
 	//x^T A
-	fast_prod(trans(matrix),reflection,temp);
+	axpy_prod(trans(matrix),reflection,temp);
 	
 	//A -=beta*x(x^T A)
     noalias(matrix()) -= beta * outer_prod(reflection,temp);

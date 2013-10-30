@@ -143,8 +143,8 @@ public:
 		mep_model->setParameterVector(input);
 		boost::shared_ptr<State> state = mep_model->createState();
 		
-		ensureSize(derivative,mep_model->numberOfParameters());
-		zero(derivative);
+		ensure_size(derivative,mep_model->numberOfParameters());
+		derivative.clear();
 		
 		typedef typename AbstractModel<InputType, InputType>::BatchInputType BatchType;
 		

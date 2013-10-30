@@ -377,93 +377,6 @@ protected:
 	mutable unsigned long long m_accessCounter;
 };
 
-///\brief Specialization for sparse vectors which don't have a super ffective lookup.
-template <class T, class CacheType>
-class KernelMatrix<blas::compressed_vector<T>, CacheType>
-{
-public:
-	typedef CacheType QpFloatType;
-	typedef blas::compressed_vector<T> InputType;
-
-	/// Constructor
-	/// \param kernelfunction   kernel function defining the Gram matrix
-	/// \param data             data to evaluate the kernel function
-	KernelMatrix(AbstractKernelFunction<InputType> const& kernelfunction,
-			Data<InputType> const& data)
-	: kernel(kernelfunction)
-	, m_data(data)
-	, m_accessCounter( 0 )
-	{
-		std::size_t elements = m_data.numberOfElements();
-		x.resize(elements);
-		typename Data<InputType>::const_element_range::iterator iter= m_data.elements().begin();
-		for(std::size_t i = 0; i != elements; ++i,++iter){
-			x[i]=*iter;
-		}
-	}
-
-	/// return a single matrix entry
-	QpFloatType operator () (std::size_t i, std::size_t j) const
-	{ return entry(i, j); }
-
-	/// return a single matrix entry
-	QpFloatType entry(std::size_t i, std::size_t j) const
-	{
-		++m_accessCounter;
-		return (QpFloatType)kernel.eval(x[i], x[j]);
-	}
-	
-	/// \brief Computes the i-th row of the kernel matrix.
-	///
-	///The entries start,...,end of the i-th row are computed and stored in storage.
-	///There must be enough room for this operation preallocated.
-	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
-		m_accessCounter +=end-start;
-		SHARK_PARALLEL_FOR(int j = start; j < (int) end; j++)
-		{
-			storage[j-start] = QpFloatType(kernel.eval(x[i], x[j]));
-		}
-	}
-	
-	/// \brief Computes the kernel-matrix
-	template<class M>
-	void matrix(
-		blas::matrix_expression<M> & storage
-	) const{
-		calculateRegularizedKernelMatrix(kernel,m_data,storage);
-	}
-
-	/// swap two variables
-	void flipColumnsAndRows(std::size_t i, std::size_t j){
-		using std::swap;
-		swap(x[i],x[j]);
-	}
-
-	/// return the size of the quadratic matrix
-	std::size_t size() const
-	{ return x.size(); }
-
-	/// query the kernel access counter
-	unsigned long long getAccessCount() const
-	{ return m_accessCounter; }
-
-	/// reset the kernel access counter
-	void resetAccessCount()
-	{ m_accessCounter = 0; }
-
-protected:
-	/// Kernel function defining the kernel Gram matrix
-	const AbstractKernelFunction<InputType>& kernel;
-
-	Data<InputType> m_data;
-
-	/// Array of data pointers for kernel evaluations
-	std::vector<blas::FixedSparseVectorProxy<T const,std::size_t> > x;
-
-	/// counter for the kernel accesses
-	mutable unsigned long long m_accessCounter;
-};
-
 ///\brief Efficient special case if the kernel is gaussian and the inputs are sparse vectors
 template <class T, class CacheType>
 class GaussianKernelMatrix
@@ -550,7 +463,7 @@ public:
 
 protected:
 
-	typedef blas::FixedSparseVectorProxy<typename T::value_type const,std::size_t> PointerType;
+	typedef blas::sparse_vector_adaptor<typename T::value_type const,std::size_t> PointerType;
 	/// Array of data pointers for kernel evaluations
 	std::vector<PointerType> x;
 	
@@ -1162,8 +1075,8 @@ public:
 	/// swap two variables
 	void flipColumnsAndRows(std::size_t i, std::size_t j)
 	{
-		blas::row(matrix,i).swap(blas::row(matrix,j));
-		column(matrix,i).swap(column(matrix,j));
+		swap_rows(matrix,i, j);
+		swap_columns(matrix,i, j);
 	}
 
 	/// return the size of the quadratic matrix

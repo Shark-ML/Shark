@@ -114,7 +114,7 @@ public:
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result) const{
 		std::size_t sizeX1=shark::size(batchX1);
 		std::size_t sizeX2=shark::size(batchX2);
-		ensureSize(result,sizeX1,sizeX2);
+		ensure_size(result,sizeX1,sizeX2);
 		for(std::size_t i = 0; i != sizeX1; ++i)
 			for(std::size_t j = 0; j != sizeX2; ++j)
 				result(i,j)=m_matrix(i,j); 

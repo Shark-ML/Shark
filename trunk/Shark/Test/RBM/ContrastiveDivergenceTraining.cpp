@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		}
 		
 		//marginalize over v -> p_s(h)
-		RealVector pSh=sumRows(phv) / inputs;
+		RealVector pSh=sum_rows(phv) / inputs;
 		
 		//get p(v_i=1|h) for all h
 		RealMatrix visibleInput(numHiddenStates,16);

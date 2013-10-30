@@ -34,8 +34,8 @@
 #ifndef SHARK_LINALG_IMPL_SOLVE_TRIANGULAR_INL
 #define SHARK_LINALG_IMPL_SOLVE_TRIANGULAR_INL
 
-#include <shark/LinAlg/BLAS/Impl/numeric_bindings/trsm.h>
-#include <shark/LinAlg/BLAS/Impl/numeric_bindings/trsv.h>
+#include <shark/LinAlg/BLAS/kernels/trsm.hpp>
+#include <shark/LinAlg/BLAS/kernels/trsv.hpp>
 
 
 namespace shark{ namespace blas{ namespace detail{
@@ -48,7 +48,7 @@ void solveTriangularSystemInPlace(
 	SolveAXB,
 	MatrixTag
 ){
-	bindings::trsv<MatrixTag::upper,MatrixTag::unit>(A,b);
+	kernels::trsv<MatrixTag::upper,MatrixTag::unit>(A,b);
 }
 ///solving xA=b is equal to transposing A
 template<class MatT,class VecT,class MatrixTag>
@@ -58,7 +58,7 @@ void solveTriangularSystemInPlace(
 	SolveXAB,
 	MatrixTag
 ){
-	bindings::trsv<!MatrixTag::upper,MatrixTag::unit>(trans(A),b);
+	kernels::trsv<!MatrixTag::upper,MatrixTag::unit>(trans(A),b);
 }
 
 //////////////////SOLVE CHOLESKY////////////////////////////////
@@ -104,11 +104,14 @@ void shark::blas::solveTriangularSystemInPlace(
 	SIZE_CHECK(A().size1() == A().size2());
 	if(System::left){
 		SIZE_CHECK(A().size1() == B().size1());
+		kernels::trsm<DiagType::upper,DiagType::unit>(A,B);
 	}else{
 		SIZE_CHECK(A().size1() == B().size2());
+		blas::matrix_transpose<MatB> transB = trans(B);
+		kernels::trsm<!DiagType::upper,DiagType::unit>(trans(A),transB);
 	}
 	
-	bindings::trsm<DiagType::upper,System::left,DiagType::unit>(A,B);
+	
 }
 
 template<class System,class MatL,class MatB>

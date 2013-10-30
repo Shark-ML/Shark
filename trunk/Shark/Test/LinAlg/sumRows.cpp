@@ -1,13 +1,14 @@
 #define BOOST_TEST_MODULE LinAlg_Sum_Rows
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+
 #include <shark/Core/Timer.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Rng/GlobalRng.h>
 
 using namespace shark;
 
-BOOST_AUTO_TEST_CASE( LinAlg_sumRows){
+BOOST_AUTO_TEST_CASE( LinAlg_sum_rows){
 	std::size_t rows = 101;
 	std::size_t columns = 89;
 	RealMatrix A(rows, columns);
@@ -18,24 +19,24 @@ BOOST_AUTO_TEST_CASE( LinAlg_sumRows){
 			A(i,j) = Rng::uni(0,1);
 		}
 	}
-	RealMatrix Atrans=trans(A);
+	RealMatrix Atrans = trans(A);
 
 	//test implementation
 	for(std::size_t i = 0; i != rows; ++i){
 		testResult+=row(A,i);
 	}
 	
-	//sumRows with row major argument
-	RealVector test1 = sumRows(A);
+	//sum_rows with row major argument
+	RealVector test1 = sum_rows(A);
 	double error = norm_2(testResult-test1);
 	BOOST_CHECK_SMALL(error,1.e-15);
 	
-	//sumRows with column major argument
-	RealVector test2 = sumRows(trans(Atrans));
+	//sum_rows with column major argument
+	RealVector test2 = sum_rows(trans(Atrans));
 	error = norm_2(testResult-test2);
 	BOOST_CHECK_SMALL(error,1.e-15);
 }
-BOOST_AUTO_TEST_CASE( LinAlg_sumColumns){
+BOOST_AUTO_TEST_CASE( LinAlg_sum_columns){
 	std::size_t rows = 101;
 	std::size_t columns = 89;
 	RealMatrix A(rows, columns);
@@ -46,20 +47,20 @@ BOOST_AUTO_TEST_CASE( LinAlg_sumColumns){
 			A(i,j) = Rng::uni(0,1);
 		} 
 	}
-	RealMatrix Atrans=trans(A);
+	RealMatrix Atrans = trans(A);
 
 	//test implementation
 	for(std::size_t i = 0; i != columns; ++i){
 		testResult+=column(A,i);
 	}
 	
-	//sumRows with row major argument
-	RealVector test1 = sumColumns(A);
+	//sum_rows with row major argument
+	RealVector test1 = sum_columns(A);
 	double error = norm_2(testResult-test1);
 	BOOST_CHECK_SMALL(error,1.e-15);
 	
-	//sumRows with column major argument
-	RealVector test2 = sumColumns(trans(Atrans));
+	//sum_rows with column major argument
+	RealVector test2 = sum_columns(trans(Atrans));
 	error = norm_2(testResult-test2);
 	BOOST_CHECK_SMALL(error,1.e-15);
 }

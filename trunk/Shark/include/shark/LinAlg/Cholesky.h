@@ -126,7 +126,7 @@ std::size_t pivotingCholeskyDecomposition(
 	//ensure sizes are correct
 	SIZE_CHECK(A().size1() == A().size2());
 	size_t m = A().size1();
-	ensureSize(L,m,m);
+	ensure_size(L,m,m);
 	noalias(L()) = A;
 	return pivotingCholeskyDecompositionInPlace(L,P);
 }

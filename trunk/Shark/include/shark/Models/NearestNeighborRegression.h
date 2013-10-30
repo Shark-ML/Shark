@@ -123,7 +123,7 @@ public:
 		
 		std::size_t dimension = neighbors[0].value.size();
 		output.resize(numPatterns,dimension);
-		zero(output);
+		output.clear();
 
 		for(std::size_t p = 0; p != numPatterns;++p)
 			for ( std::size_t k = 0; k != m_neighbors; ++k)

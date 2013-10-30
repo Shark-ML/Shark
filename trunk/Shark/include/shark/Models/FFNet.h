@@ -246,7 +246,7 @@ public:
 			RealSubMatrix responses = subrange(s.responses,beginNeuron,endNeuron,0,numPatterns);
 
 			//calculate activation. if this is the last layer, use output neuron response instead
-			fast_prod(weights,input,responses);
+			axpy_prod(weights,input,responses);
 			if(m_biasNeuron){
 				noalias(responses) += trans(repeat(bias,numPatterns));
 			}
@@ -277,7 +277,7 @@ public:
 		
 		//initialize delta using coefficients and clear the rest
 		RealMatrix delta(m_numberOfNeurons,numPatterns);
-		zero(delta);
+		delta.clear();
 		RealSubMatrix outputDelta = rows(delta,m_firstOutputNeuron,m_numberOfNeurons);
 		noalias(outputDelta) = trans(coefficients);
 
@@ -316,7 +316,7 @@ public:
 			RealSubMatrix layerDeltaInput = subrange(delta,endNeuron,endNeuron+weights.size2(),0,numPatterns);
 			ConstRealSubMatrix layerResponse = subrange(s.responses,beginNeuron,endNeuron,0,numPatterns);
 			RealMatrix propagate(weights.size1(),numPatterns);
-			fast_prod(weights,layerDeltaInput,layerDelta,1.0);//add the values to the mazbe non-empty delta part
+			axpy_prod(weights,layerDeltaInput,layerDelta,false);//add the values to the maybe non-empty delta part
 			noalias(layerDelta) = element_prod(layerDelta,m_hiddenNeuron.derivative(layerResponse));
 			//go a layer backwards
 			endNeuron=beginNeuron;

@@ -25,7 +25,6 @@
 
 #include <shark/Models/AbstractModel.h>
 #include <shark/LinAlg/Base.h>
-#include <shark/LinAlg/BLAS/Initialize.h>
 
 
 namespace shark {
@@ -207,7 +206,7 @@ public:
 	/// overwrite structure and parameters
 	void setStructure(std::size_t dimension, bool hasOffset = false)
 	{
-		m_A.resize(dimension, dimension);
+		m_A.resize(dimension);
 		m_hasOffset = hasOffset;
 		if (hasOffset) m_b.resize(dimension);
 	}
@@ -227,7 +226,7 @@ public:
 	void eval(BatchInputType const& input, BatchOutputType& output) const
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::eval] model is not initialized");
-		output.resize(input.size1(), input.size2(), false);
+		output.resize(input.size1(), input.size2());
 		noalias(output) = element_prod(input, repeat(m_A,input.size1()));
 		if (hasOffset())
 		{

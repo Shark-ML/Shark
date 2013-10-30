@@ -226,7 +226,7 @@ void benchmark(std::size_t batchSize1,std::size_t batchSize2, std::size_t dim, s
 	}
 	double end2=Timer::now();
 	double speedupFactor = (end2-end1)/(end1-start1);
-	std::cout<<batchSize1<<"\t"<<end1-start1<<"\t  "<<end2-end1<<"\t  "<<speedupFactor<<" \t  "<<sumElements(result)<<std::endl;
+	std::cout<<batchSize1<<"\t"<<end1-start1<<"\t  "<<end2-end1<<"\t  "<<speedupFactor<<" \t  "<<sum(result)<<std::endl;
 }
 BOOST_AUTO_TEST_CASE( DenseRbfKernel_BENCHMARK )
 {

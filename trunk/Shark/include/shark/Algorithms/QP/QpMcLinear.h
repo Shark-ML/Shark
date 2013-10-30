@@ -161,8 +161,8 @@ public:
 				RealMatrixRow a = row(alpha, i);
 
 				// compute gradient and KKT violation
-				RealVector wx(m_classes);
-				fast_prod(w,x_i,wx);
+				RealVector wx(m_classes,0.0);
+				axpy_prod(w,x_i,wx,false);
 				RealVector g(m_classes);
 				double kkt = calcGradient(g, wx, a, C, y_i);
 
@@ -315,322 +315,322 @@ protected:
 };
 
 
-/// \brief Generic solver skeleton for linear multi-class SVM problems.
-template < >
-class QpMcLinear<CompressedRealVector>
-{
-public:
-	typedef LabeledData<CompressedRealVector, unsigned int> DatasetType;
+//~ /// \brief Generic solver skeleton for linear multi-class SVM problems.
+//~ template < >
+//~ class QpMcLinear<CompressedRealVector>
+//~ {
+//~ public:
+	//~ typedef LabeledData<CompressedRealVector, unsigned int> DatasetType;
 
-	///
-	/// \brief Constructor
-	///
-	/// \param  dataset  training data
-	/// \param  dim      problem dimension
-	/// \param  classes  number of classes in the problem
-	///
-	QpMcLinear(
-			const DatasetType& dataset,
-			std::size_t dim,
-			std::size_t classes)
-	: m_data(dataset.numberOfElements())
-	, m_xSquared(dataset.numberOfElements())
-	, m_dim(dim)
-	, m_classes(classes)
-	{
-		SHARK_ASSERT(m_dim > 0);
+	//~ ///
+	//~ /// \brief Constructor
+	//~ ///
+	//~ /// \param  dataset  training data
+	//~ /// \param  dim      problem dimension
+	//~ /// \param  classes  number of classes in the problem
+	//~ ///
+	//~ QpMcLinear(
+			//~ const DatasetType& dataset,
+			//~ std::size_t dim,
+			//~ std::size_t classes)
+	//~ : m_data(dataset.numberOfElements())
+	//~ , m_xSquared(dataset.numberOfElements())
+	//~ , m_dim(dim)
+	//~ , m_classes(classes)
+	//~ {
+		//~ SHARK_ASSERT(m_dim > 0);
 
-		// transform ublas sparse vectors into a fast format
-		// (yes, ublas is slow...), and compute the squared
-		// norms of the training examples
-		SparseVector sparse;
-		for (std::size_t b=0, j=0; b<dataset.numberOfBatches(); b++)
-		{
-			DatasetType::const_batch_reference batch = dataset.batch(b);
-			for (std::size_t i=0; i<batch.size(); i++)
-			{
-				CompressedRealVector x_i = shark::get(batch, i).input;
-				unsigned int y_i = shark::get(batch, i).label;
-				m_data[j].label = y_i;
-				double d = 0.0;
-				for (CompressedRealVector::const_iterator it=x_i.begin(); it != x_i.end(); ++it)
-				{
-					double v = *it;
-					sparse.index = it.index();
-					sparse.value = v;
-					storage.push_back(sparse);
-					d += v * v;
-				}
-				sparse.index = (std::size_t)-1;
-				storage.push_back(sparse);
-				m_xSquared(j) = d;
-				j++;
-			}
-		}
-		for (std::size_t i=0, k=0; i<m_data.size(); i++)
-		{
-			CompressedRealVector x_i = dataset.element(i).input;
-			m_data[i].input = &storage[k];
-			for (; storage[k].index != (std::size_t)-1; k++);
-			k++;
-		}
-	}
+		//~ // transform ublas sparse vectors into a fast format
+		//~ // (yes, ublas is slow...), and compute the squared
+		//~ // norms of the training examples
+		//~ SparseVector sparse;
+		//~ for (std::size_t b=0, j=0; b<dataset.numberOfBatches(); b++)
+		//~ {
+			//~ DatasetType::const_batch_reference batch = dataset.batch(b);
+			//~ for (std::size_t i=0; i<batch.size(); i++)
+			//~ {
+				//~ CompressedRealVector x_i = shark::get(batch, i).input;
+				//~ unsigned int y_i = shark::get(batch, i).label;
+				//~ m_data[j].label = y_i;
+				//~ double d = 0.0;
+				//~ for (CompressedRealVector::const_iterator it=x_i.begin(); it != x_i.end(); ++it)
+				//~ {
+					//~ double v = *it;
+					//~ sparse.index = it.index();
+					//~ sparse.value = v;
+					//~ storage.push_back(sparse);
+					//~ d += v * v;
+				//~ }
+				//~ sparse.index = (std::size_t)-1;
+				//~ storage.push_back(sparse);
+				//~ m_xSquared(j) = d;
+				//~ j++;
+			//~ }
+		//~ }
+		//~ for (std::size_t i=0, k=0; i<m_data.size(); i++)
+		//~ {
+			//~ CompressedRealVector x_i = dataset.element(i).input;
+			//~ m_data[i].input = &storage[k];
+			//~ for (; storage[k].index != (std::size_t)-1; k++);
+			//~ k++;
+		//~ }
+	//~ }
 
-	///
-	/// \brief Solve the SVM training problem.
-	///
-	/// \param  C        regularization constant of the SVM
-	/// \param  stop     stopping condition(s)
-	/// \param  prop     solution properties
-	/// \param  verbose  if true, the solver prints status information and solution statistics
-	///
-	RealMatrix solve(
-			double C,
-			QpStoppingCondition& stop,
-			QpSolutionProperties* prop = NULL,
-			bool verbose = false)
-	{
-		// sanity checks
-		SHARK_ASSERT(C > 0.0);
+	//~ ///
+	//~ /// \brief Solve the SVM training problem.
+	//~ ///
+	//~ /// \param  C        regularization constant of the SVM
+	//~ /// \param  stop     stopping condition(s)
+	//~ /// \param  prop     solution properties
+	//~ /// \param  verbose  if true, the solver prints status information and solution statistics
+	//~ ///
+	//~ RealMatrix solve(
+			//~ double C,
+			//~ QpStoppingCondition& stop,
+			//~ QpSolutionProperties* prop = NULL,
+			//~ bool verbose = false)
+	//~ {
+		//~ // sanity checks
+		//~ SHARK_ASSERT(C > 0.0);
 
-		// measure training time
-		Timer timer;
+		//~ // measure training time
+		//~ Timer timer;
 
-		// prepare dimensions and vectors
-		std::size_t ell = m_data.size();             // number of training examples
-		RealMatrix alpha(ell, m_classes + 1, 0.0);   // Lagrange multipliers; dual variables. Reserve one extra column.
-		RealMatrix w(m_classes, m_dim, 0.0);         // weight vectors; primal variables
+		//~ // prepare dimensions and vectors
+		//~ std::size_t ell = m_data.size();             // number of training examples
+		//~ RealMatrix alpha(ell, m_classes + 1, 0.0);   // Lagrange multipliers; dual variables. Reserve one extra column.
+		//~ RealMatrix w(m_classes, m_dim, 0.0);         // weight vectors; primal variables
 
-		// scheduling of steps
-		RealVector pref(ell, 1.0);                   // example-wise measure of success
-		double prefsum = ell;                        // normalization constant
-		std::vector<std::size_t> schedule(ell);
+		//~ // scheduling of steps
+		//~ RealVector pref(ell, 1.0);                   // example-wise measure of success
+		//~ double prefsum = ell;                        // normalization constant
+		//~ std::vector<std::size_t> schedule(ell);
 
-		// prepare counters
-		std::size_t epoch = 0;
-		std::size_t steps = 0;
+		//~ // prepare counters
+		//~ std::size_t epoch = 0;
+		//~ std::size_t steps = 0;
 
-		// prepare performance monitoring
-		double objective = 0.0;
-		double max_violation = 0.0;
-		const double gain_learning_rate = 1.0 / ell;
-		double average_gain = 0.0;
+		//~ // prepare performance monitoring
+		//~ double objective = 0.0;
+		//~ double max_violation = 0.0;
+		//~ const double gain_learning_rate = 1.0 / ell;
+		//~ double average_gain = 0.0;
 
-		// outer optimization loop (epochs)
-		bool canstop = true;
-		while (true)
-		{
-			// define schedule
-			double psum = prefsum;
-			prefsum = 0.0;
-			std::size_t pos = 0;
-			for (std::size_t i=0; i<ell; i++)
-			{
-				double p = pref(i);
-				double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
-				std::size_t n = (std::size_t)std::floor(num);
-				double prob = num - n;
-				if (Rng::uni() < prob) n++;
-				for (std::size_t j=0; j<n; j++)
-				{
-					schedule[pos] = i;
-					pos++;
-				}
-				psum -= p;
-				prefsum += p;
-			}
-			SHARK_ASSERT(pos == ell);
-			for (std::size_t i=0; i<ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
+		//~ // outer optimization loop (epochs)
+		//~ bool canstop = true;
+		//~ while (true)
+		//~ {
+			//~ // define schedule
+			//~ double psum = prefsum;
+			//~ prefsum = 0.0;
+			//~ std::size_t pos = 0;
+			//~ for (std::size_t i=0; i<ell; i++)
+			//~ {
+				//~ double p = pref(i);
+				//~ double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
+				//~ std::size_t n = (std::size_t)std::floor(num);
+				//~ double prob = num - n;
+				//~ if (Rng::uni() < prob) n++;
+				//~ for (std::size_t j=0; j<n; j++)
+				//~ {
+					//~ schedule[pos] = i;
+					//~ pos++;
+				//~ }
+				//~ psum -= p;
+				//~ prefsum += p;
+			//~ }
+			//~ SHARK_ASSERT(pos == ell);
+			//~ for (std::size_t i=0; i<ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
 
-			// inner loop (one epoch)
-			max_violation = 0.0;
-			for (std::size_t j=0; j<ell; j++)
-			{
-				// active example
-				double gain = 0.0;
-				const std::size_t i = schedule[j];
-				const SparseVector* x_i = m_data[i].input;
-				const unsigned int y_i = m_data[i].label;
-				const double q = m_xSquared(i);
-				RealMatrixRow a = row(alpha, i);
+			//~ // inner loop (one epoch)
+			//~ max_violation = 0.0;
+			//~ for (std::size_t j=0; j<ell; j++)
+			//~ {
+				//~ // active example
+				//~ double gain = 0.0;
+				//~ const std::size_t i = schedule[j];
+				//~ const SparseVector* x_i = m_data[i].input;
+				//~ const unsigned int y_i = m_data[i].label;
+				//~ const double q = m_xSquared(i);
+				//~ RealMatrixRow a = row(alpha, i);
 
-				// compute gradient and KKT violation
-				RealVector wx(m_classes, 0.0);
-				for (const SparseVector* p=x_i; p->index != (std::size_t)-1; p++)
-				{
-					const std::size_t idx = p->index;
-					const double v = p->value;
-					for (size_t c=0; c<m_classes; c++) wx(c) += w(c, idx) * v;
-				}
-				RealVector g(m_classes);
-				double kkt = calcGradient(g, wx, a, C, y_i);
+				//~ // compute gradient and KKT violation
+				//~ RealVector wx(m_classes, 0.0);
+				//~ for (const SparseVector* p=x_i; p->index != (std::size_t)-1; p++)
+				//~ {
+					//~ const std::size_t idx = p->index;
+					//~ const double v = p->value;
+					//~ for (size_t c=0; c<m_classes; c++) wx(c) += w(c, idx) * v;
+				//~ }
+				//~ RealVector g(m_classes);
+				//~ double kkt = calcGradient(g, wx, a, C, y_i);
 
-				if (kkt > 0.0)
-				{
-					max_violation = std::max(max_violation, kkt);
+				//~ if (kkt > 0.0)
+				//~ {
+					//~ max_violation = std::max(max_violation, kkt);
 
-					// perform the step on alpha
-					RealVector mu(m_classes, 0.0);
-					gain = solveSub(0.1 * stop.minAccuracy, g, q, C, y_i, a, mu);
-					objective += gain;
-					steps++;
+					//~ // perform the step on alpha
+					//~ RealVector mu(m_classes, 0.0);
+					//~ gain = solveSub(0.1 * stop.minAccuracy, g, q, C, y_i, a, mu);
+					//~ objective += gain;
+					//~ steps++;
 
-					// update weight vectors
-					updateWeightVectors(w, mu, i);
-				}
+					//~ // update weight vectors
+					//~ updateWeightVectors(w, mu, i);
+				//~ }
 
-				// update gain-based preferences
-				{
-					if (epoch == 0) average_gain += gain / (double)ell;
-					else
-					{
-						double change = CHANGE_RATE * (gain / average_gain - 1.0);
-						double newpref = std::min(PREF_MAX, std::max(PREF_MIN, pref(i) * std::exp(change)));
-						prefsum += newpref - pref(i);
-						pref(i) = newpref;
-						average_gain = (1.0 - gain_learning_rate) * average_gain + gain_learning_rate * gain;
-					}
-				}
-			}
+				//~ // update gain-based preferences
+				//~ {
+					//~ if (epoch == 0) average_gain += gain / (double)ell;
+					//~ else
+					//~ {
+						//~ double change = CHANGE_RATE * (gain / average_gain - 1.0);
+						//~ double newpref = std::min(PREF_MAX, std::max(PREF_MIN, pref(i) * std::exp(change)));
+						//~ prefsum += newpref - pref(i);
+						//~ pref(i) = newpref;
+						//~ average_gain = (1.0 - gain_learning_rate) * average_gain + gain_learning_rate * gain;
+					//~ }
+				//~ }
+			//~ }
 
-			epoch++;
+			//~ epoch++;
 
-			// stopping criteria
-			if (stop.maxIterations > 0 && epoch * ell >= stop.maxIterations)
-			{
-				if (prop != NULL) prop->type = QpMaxIterationsReached;
-				break;
-			}
+			//~ // stopping criteria
+			//~ if (stop.maxIterations > 0 && epoch * ell >= stop.maxIterations)
+			//~ {
+				//~ if (prop != NULL) prop->type = QpMaxIterationsReached;
+				//~ break;
+			//~ }
 
-			if (timer.stop() >= stop.maxSeconds)
-			{
-				if (prop != NULL) prop->type = QpTimeout;
-				break;
-			}
+			//~ if (timer.stop() >= stop.maxSeconds)
+			//~ {
+				//~ if (prop != NULL) prop->type = QpTimeout;
+				//~ break;
+			//~ }
 
-			if (max_violation < stop.minAccuracy)
-			{
-				if (verbose) std::cout << "#" << std::flush;
-				if (canstop)
-				{
-					if (prop != NULL) prop->type = QpAccuracyReached;
-					break;
-				}
-				else
-				{
-					// prepare full sweep for a reliable checking of the stopping criterion
-					canstop = true;
-					for (std::size_t i=0; i<ell; i++) pref(i) = 1.0;
-					prefsum = ell;
-				}
-			}
-			else
-			{
-				if (verbose) std::cout << "." << std::flush;
-				canstop = false;
-			}
-		}
-		timer.stop();
+			//~ if (max_violation < stop.minAccuracy)
+			//~ {
+				//~ if (verbose) std::cout << "#" << std::flush;
+				//~ if (canstop)
+				//~ {
+					//~ if (prop != NULL) prop->type = QpAccuracyReached;
+					//~ break;
+				//~ }
+				//~ else
+				//~ {
+					//~ // prepare full sweep for a reliable checking of the stopping criterion
+					//~ canstop = true;
+					//~ for (std::size_t i=0; i<ell; i++) pref(i) = 1.0;
+					//~ prefsum = ell;
+				//~ }
+			//~ }
+			//~ else
+			//~ {
+				//~ if (verbose) std::cout << "." << std::flush;
+				//~ canstop = false;
+			//~ }
+		//~ }
+		//~ timer.stop();
 
-		// calculate dual objective value
-		objective = 0.0;
-		for (std::size_t j=0; j<m_classes; j++)
-		{
-			for (std::size_t d=0; d<m_dim; d++) objective -= w(j, d) * w(j, d);
-		}
-		objective *= 0.5;
-		for (std::size_t i=0; i<ell; i++)
-		{
-			for (std::size_t j=0; j<m_classes; j++) objective += alpha(i, j);
-		}
+		//~ // calculate dual objective value
+		//~ objective = 0.0;
+		//~ for (std::size_t j=0; j<m_classes; j++)
+		//~ {
+			//~ for (std::size_t d=0; d<m_dim; d++) objective -= w(j, d) * w(j, d);
+		//~ }
+		//~ objective *= 0.5;
+		//~ for (std::size_t i=0; i<ell; i++)
+		//~ {
+			//~ for (std::size_t j=0; j<m_classes; j++) objective += alpha(i, j);
+		//~ }
 
-		// return solution statistics
-		if (prop != NULL)
-		{
-			prop->accuracy = max_violation;       // this is approximate, but a good guess
-			prop->iterations = ell * epoch;
-			prop->value = objective;
-			prop->seconds = timer.lastLap();
-		}
+		//~ // return solution statistics
+		//~ if (prop != NULL)
+		//~ {
+			//~ prop->accuracy = max_violation;       // this is approximate, but a good guess
+			//~ prop->iterations = ell * epoch;
+			//~ prop->value = objective;
+			//~ prop->seconds = timer.lastLap();
+		//~ }
 
-		// output solution statistics
-		if (verbose)
-		{
-			std::cout << std::endl;
-			std::cout << "training time (seconds): " << timer.lastLap() << std::endl;
-			std::cout << "number of epochs: " << epoch << std::endl;
-			std::cout << "number of iterations: " << (ell * epoch) << std::endl;
-			std::cout << "number of non-zero steps: " << steps << std::endl;
-			std::cout << "dual accuracy: " << max_violation << std::endl;
-			std::cout << "dual objective value: " << objective << std::endl;
-		}
+		//~ // output solution statistics
+		//~ if (verbose)
+		//~ {
+			//~ std::cout << std::endl;
+			//~ std::cout << "training time (seconds): " << timer.lastLap() << std::endl;
+			//~ std::cout << "number of epochs: " << epoch << std::endl;
+			//~ std::cout << "number of iterations: " << (ell * epoch) << std::endl;
+			//~ std::cout << "number of non-zero steps: " << steps << std::endl;
+			//~ std::cout << "dual accuracy: " << max_violation << std::endl;
+			//~ std::cout << "dual objective value: " << objective << std::endl;
+		//~ }
 
-		// return the solution
-		return w;
-	}
+		//~ // return the solution
+		//~ return w;
+	//~ }
 
-protected:
-	/// \brief Data structure for sparse vectors.
-	struct SparseVector
-	{
-		std::size_t index;
-		double value;
-	};
+//~ protected:
+	//~ /// \brief Data structure for sparse vectors.
+	//~ struct SparseVector
+	//~ {
+		//~ std::size_t index;
+		//~ double value;
+	//~ };
 
-	struct ElementType
-	{
-		const SparseVector* input;
-		unsigned int label;
-	};
+	//~ struct ElementType
+	//~ {
+		//~ const SparseVector* input;
+		//~ unsigned int label;
+	//~ };
 
-	// for all c: row(w, c) += mu(c) * x
-	void add_scaled(RealMatrix& w, RealVector const& mu, const SparseVector* x)
-	{
-		for (; x->index != (std::size_t)-1; x++)
-		{
-			const std::size_t index = x->index;
-			const double value = x->value;
-			for (std::size_t c=0; c<m_classes; c++) w(c, index) += mu(c) * value;
-		}
-	}
+	//~ // for all c: row(w, c) += mu(c) * x
+	//~ void add_scaled(RealMatrix& w, RealVector const& mu, const SparseVector* x)
+	//~ {
+		//~ for (; x->index != (std::size_t)-1; x++)
+		//~ {
+			//~ const std::size_t index = x->index;
+			//~ const double value = x->value;
+			//~ for (std::size_t c=0; c<m_classes; c++) w(c, index) += mu(c) * value;
+		//~ }
+	//~ }
 
-	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
-	///
-	/// \param  gradient  gradient vector to be filled in. The vector is correctly sized.
-	/// \param  wx        inner products of weight vectors with the current sample; wx(c) = <w_c, x>
-	/// \param  alpha     variables corresponding to the current sample
-	/// \param  C         upper bound on the variables
-	/// \param  y         label of the current sample
-	///
-	/// \return  The function must return the violation of the KKT conditions.
-	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y) = 0;
+	//~ /// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
+	//~ ///
+	//~ /// \param  gradient  gradient vector to be filled in. The vector is correctly sized.
+	//~ /// \param  wx        inner products of weight vectors with the current sample; wx(c) = <w_c, x>
+	//~ /// \param  alpha     variables corresponding to the current sample
+	//~ /// \param  C         upper bound on the variables
+	//~ /// \param  y         label of the current sample
+	//~ ///
+	//~ /// \return  The function must return the violation of the KKT conditions.
+	//~ virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y) = 0;
 
-	/// \brief Update the weight vectors (primal variables) after a step on the dual variables.
-	///
-	/// \param  w      matrix of (dense) weight vectors (as rows)
-	/// \param  mu     dual step on the variables corresponding to the current sample
-	/// \param  index  example index
-	virtual void updateWeightVectors(RealMatrix& w, RealVector const& mu, std::size_t index) = 0;
+	//~ /// \brief Update the weight vectors (primal variables) after a step on the dual variables.
+	//~ ///
+	//~ /// \param  w      matrix of (dense) weight vectors (as rows)
+	//~ /// \param  mu     dual step on the variables corresponding to the current sample
+	//~ /// \param  index  example index
+	//~ virtual void updateWeightVectors(RealMatrix& w, RealVector const& mu, std::size_t index) = 0;
 
-	/// \brief Solve the sub-problem posed by a single training example.
-	///
-	/// \param  epsilon   accuracy (dual gradient) up to which the sub-problem should be solved
-	/// \param  gradient  gradient of the objective function w.r.t. alpha
-	/// \param  q         squared norm of the current sample
-	/// \param  C         upper bound on the variables
-	/// \param  y         label of the current sample
-	/// \param  alpha     input: initial point; output: (near) optimal point
-	/// \param  mu        step from initial point to final point
-	///
-	/// \return  The function must return the gain of the step, i.e., the improvement of the objective function.
-	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu) = 0;
+	//~ /// \brief Solve the sub-problem posed by a single training example.
+	//~ ///
+	//~ /// \param  epsilon   accuracy (dual gradient) up to which the sub-problem should be solved
+	//~ /// \param  gradient  gradient of the objective function w.r.t. alpha
+	//~ /// \param  q         squared norm of the current sample
+	//~ /// \param  C         upper bound on the variables
+	//~ /// \param  y         label of the current sample
+	//~ /// \param  alpha     input: initial point; output: (near) optimal point
+	//~ /// \param  mu        step from initial point to final point
+	//~ ///
+	//~ /// \return  The function must return the gain of the step, i.e., the improvement of the objective function.
+	//~ virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu) = 0;
 
-	std::vector<SparseVector> storage;                ///< storage for sparse vectors
-	std::vector<ElementType> m_data;                  ///< resembles data view interface
-	RealVector m_xSquared;                            ///< squared norms of the training data
-	std::size_t m_dim;                                ///< input space dimension
-	std::size_t m_classes;                            ///< number of classes
-};
+	//~ std::vector<SparseVector> storage;                ///< storage for sparse vectors
+	//~ std::vector<ElementType> m_data;                  ///< resembles data view interface
+	//~ RealVector m_xSquared;                            ///< squared norms of the training data
+	//~ std::size_t m_dim;                                ///< input space dimension
+	//~ std::size_t m_classes;                            ///< number of classes
+//~ };
 
 
 /// \brief Solver for the multi-class SVM by Weston & Watkins.

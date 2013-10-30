@@ -87,10 +87,10 @@ public:
 			//off diagonal entries
 			for(std::size_t j = 0; j < i; ++j){
 				RealMatrix matrixBlock = k(batch, input.batch(j));
-				m_mean += 2*sumElements(matrixBlock);
+				m_mean += 2*sum(matrixBlock);
 			}
 			RealMatrix matrixBlock = k(batch, batch);
-			m_mean += sumElements(matrixBlock);
+			m_mean += sum(matrixBlock);
 			m_matrixTrace += blas::trace(matrixBlock);
 		}
 		double tm = m_matrixTrace/N - m_mean/N/N;

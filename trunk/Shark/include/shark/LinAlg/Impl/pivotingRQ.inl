@@ -45,7 +45,7 @@ std::size_t shark::blas::pivotingRQHouseholder
 	blas::matrix_expression<MatrixT> const& matrixA,
 	blas::matrix_container<MatrixU>& matrixR,
 	blas::matrix_container<MatrixU>& householderTransform,
-	blas::permutation_matrix<std::size_t> & permutation
+	blas::permutation_matrix& permutation
 ){
 	std::size_t m = matrixA().size1();
 	std::size_t n = matrixA().size2();
@@ -62,7 +62,7 @@ std::size_t shark::blas::pivotingRQHouseholder
 	
 	//squared norm of the rows
 	//in every step of computation, we choose the row with the highest norm
-	RealVector norms(sumColumns(sqr(matrixA)));
+	RealVector norms(sum_columns(sqr(matrixA)));
 	
 	//threshold for rank determination. if the squared norm is lower than that
 	//the matrix is considered to be 0.
@@ -94,7 +94,7 @@ std::size_t shark::blas::pivotingRQHouseholder
 		}
 		//if the pivot does not equal the current i, we swap the matrix rows
 		if(pivot != i){
-			row(matrixR(),i).swap(row(matrixR(),pivot));
+			swap_rows(matrixR(),i,pivot);
 			permutation(i) = pivot;
 			std::swap(norms(i),norms(pivot));
 		}
@@ -115,7 +115,7 @@ std::size_t shark::blas::pivotingRQHouseholder
 	//"a good starting point". So there is still something to be done 
 	
 	//step3: fill the remainder of R with zeros
-	subrange(matrixR(),rank,m,rank,n) = RealZeroMatrix(m-rank,n-rank);
+	subrange(matrixR(),rank,m,rank,n).clear();
 	return rank;
 }
 
@@ -125,7 +125,7 @@ std::size_t shark::blas::pivotingRQ
 	blas::matrix_expression<MatrixT> const& matrixA,
 	blas::matrix_container<Mat>& matrixR,
 	blas::matrix_container<Mat>& matrixQ,
-	blas::permutation_matrix<std::size_t> & permutation
+	blas::permutation_matrix& permutation
 ){
 	std::size_t n = matrixA().size2();
 	
@@ -143,8 +143,7 @@ std::size_t shark::blas::pivotingRQ
 	//this is of course for column major lower triangular matrices, 
 	//meaning that we have to transpose our matrices U.
 	Mat T(rank,rank);
-	T.clear();
-	symmRankKUpdate(rows(U,0,rank),T);
+	symm_prod(rows(U,0,rank),T);
 	//we now have to explicitely zero the lower half
 	//and the diagonal needs to be divided by two.
 	for(std::size_t i = 0; i != rank; ++i){
@@ -162,7 +161,7 @@ std::size_t shark::blas::pivotingRQ
 	solveTriangularSystemInPlace<SolveAXB,Lower>(trans(T), InvTU);
 	matrixQ().resize(n,n);
 	//now Compute U^T temp = U^T T^-1 U
-	fast_prod(trans(rows(U,0,rank)),InvTU,matrixQ);
+	axpy_prod(trans(rows(U,0,rank)),InvTU,matrixQ);
 	matrixQ()*=-1;
 	matrixQ()+=RealIdentityMatrix(n);
 

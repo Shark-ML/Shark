@@ -65,7 +65,7 @@ std::size_t pivotingRQ
 	blas::matrix_expression<MatrixT> const& matrixA,
 	blas::matrix_container<Mat>& matrixR,
 	blas::matrix_container<Mat>& matrixQ,
-	blas::permutation_matrix<std::size_t> & permutation
+	blas::permutation_matrix& permutation
 );
 
 /*!
@@ -87,7 +87,7 @@ std::size_t pivotingRQHouseholder
 	blas::matrix_expression<MatrixT> const& matrixA,
 	blas::matrix_container<MatrixU>& matrixR,
 	blas::matrix_container<MatrixU>& householderTransform,
-	blas::permutation_matrix<std::size_t> & permutation
+	blas::permutation_matrix& permutation
 );
 
 

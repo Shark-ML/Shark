@@ -29,8 +29,8 @@ public:
 };
 class IdentityOperator{
 public:
-	typedef int HiddenSample;
-	typedef int VisibleSample;
+	typedef IntVector HiddenSample;
+	typedef IntVector VisibleSample;
 	typedef RBMMockup RBM;
 	
 	RBM* m_rbm;
@@ -50,34 +50,34 @@ public:
 		return m_flags;
 	}
 
-	void precomputeHidden(IntVector& hidden,const IntVector& visible, RealVector beta)const{
+	void precomputeHidden(IntMatrix& hidden,const IntMatrix& visible, RealVector beta)const{
 	}
 	///\brief calculates the statistics of the visible units
-	void precomputeVisible(const IntVector& hidden, IntVector& visible, RealVector beta)const{
+	void precomputeVisible(const IntMatrix& hidden, IntMatrix& visible, RealVector beta)const{
 	}
 	
 	///\brief samples the state of the hidden units using the precomputed statistics
-	void sampleHidden(IntVector& sample,double beta = 1.0)const{
+	void sampleHidden(IntMatrix& sample,double beta = 1.0)const{
 	}
 	///\brief samples the visible units using the precomputed statistics
-	void sampleVisible(IntVector& sample,double beta = 1.0)const{
+	void sampleVisible(IntMatrix& sample,double beta = 1.0)const{
 	}
 
 	///\brief creates a hidden/visible sample pair from a sample. this can directly be used to calculate the gradient
-	void createSample(IntVector& hidden,IntVector& visible, const RealMatrix& state, RealVector beta)const{
-			visible = column(state,0);
+	void createSample(IntMatrix& hidden,IntMatrix& visible, const RealMatrix& state, RealVector beta)const{
+		visible = state;
 	}
 	
 	///\brief samples the state of the hidden units using the precomputed statistics
-	void updateHidden(IntVector& sample,double beta = 1.0)const{
+	void updateHidden(IntMatrix& sample,double beta = 1.0)const{
 	}
 	///\brief samples the visible units using the precomputed statistics
-	void updateVisible(IntVector& sample,double beta = 1.0)const{
+	void updateVisible(IntMatrix& sample,double beta = 1.0)const{
 	}
 	
 	//energy is the state of visible
-	RealVector calculateEnergy(const IntVector& hidden, const IntVector& visible){
-		return RealVector(visible);
+	RealVector calculateEnergy(const IntMatrix& hidden, const IntMatrix& visible){
+		return RealVector(column(visible,0));
 	}
 	
 	

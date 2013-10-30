@@ -5,7 +5,7 @@
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Rng/Uniform.h>
 
-#define BOOST_TEST_MODULE ML_ErrorFunction
+#define BOOST_TEST_MODULE ObjFunct_ErrorFunction
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -65,7 +65,7 @@ public:
 };
 
 
-BOOST_AUTO_TEST_CASE( ML_ErrorFunction_BASE )
+BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_BASE )
 {
 	RealVector zero(10);
 	zero.clear();
@@ -93,9 +93,9 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_BASE )
 
 //test whether we can get to the same result as linear regression
 //this is very similar to the linear regrssion test. first we create a model,
-//let it evaluate some responses + gaussian noise. then we lt it forget
+//let it evaluate some responses + gaussian noise. then we let it forget
 //and create an ErrorFunction which is supposed to have a minimum at the point.
-BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
+BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	const size_t trainExamples = 60000;
 	LinearRegression trainer;
 	LinearModel<> model;
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
 		//optimize with rprop
 		IRpropPlus rprop;
 		rprop.init(mse);
-		for(std::size_t i = 0; i != 1000; ++i){
+		for(std::size_t i = 0; i != 100; ++i){
 			rprop.step(mse);
 		}
 		double diff = norm_sqr(rprop.solution().point-optimum);
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE( ML_ErrorFunction_LinearRegression ){
 		//optimize with rprop
 		IRpropPlus rprop;
 		rprop.init(mse);
-		for(std::size_t i = 0; i != 1000; ++i){
+		for(std::size_t i = 0; i != 100; ++i){
 			rprop.step(mse);
 		}
 		double diff = norm_sqr(rprop.solution().point-optimum);

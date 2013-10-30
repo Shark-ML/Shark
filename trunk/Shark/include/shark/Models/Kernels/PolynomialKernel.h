@@ -28,7 +28,6 @@
 #define SHARK_MODELS_KERNELS_POLYNOMIAL_KERNEL_H
 
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
-#include <shark/LinAlg/BLAS/StorageAdaptors.h>
 
 namespace shark {
 
@@ -168,7 +167,7 @@ public:
 		result.resize(sizeX1,sizeX2);
 		
 		//calculate the inner product
-		fast_prod(batchX1,trans(batchX2),result);
+		axpy_prod(batchX1,trans(batchX2),result);
 		result += blas::repeat(m_offset,sizeX1,sizeX2);
 		//now do exponentiation
 		if(m_degree != 1)
@@ -186,7 +185,7 @@ public:
 		result.resize(sizeX1,sizeX2);
 		
 		//calculate the inner product
-		fast_prod(batchX1,trans(batchX2),s.base);
+		axpy_prod(batchX1,trans(batchX2),s.base);
 		s.base += blas::repeat(m_offset,sizeX1,sizeX2);
 		
 		//now do exponentiation
@@ -222,14 +221,14 @@ public:
 		
 		//m_degree == 1 is easy
 		if(m_degree == 1){//result_ij/base_ij = 1
-			gradient(0) = sumElements(coefficients);
+			gradient(0) = sum(coefficients);
 			if ( m_unconstrained ) 
 				gradient(0) *= m_offset;
 			return;
 		}
 		
 		//we just do a looped version of the single gradient since the test for 0 is that awful..
-		gradient(0) =sumElements(element_prod(safeDiv(s.exponentedProd,s.base,0.0),coefficients));
+		gradient(0) =sum(element_prod(safeDiv(s.exponentedProd,s.base,0.0),coefficients));
 		gradient(0) *= m_degree;
 		if ( m_unconstrained ) 
 			gradient(0) *= m_offset;
@@ -265,7 +264,7 @@ public:
 		//again m_degree == 1 is easy, as it is for the i-th row
 		//just c_i X2;
 		if(m_degree == 1){
-			fast_prod(coefficientsX2,batchX2,gradient);
+			axpy_prod(coefficientsX2,batchX2,gradient);
 			return;
 		}
 		
@@ -275,7 +274,7 @@ public:
 		//and the derivative of input i of batch x1 is 
 		//g = sum_j m_n*weights(i,j)*x2_j
 		//we now sum over j which is a matrix-matrix product
-		fast_prod(weights,batchX2,gradient);
+		axpy_prod(weights,batchX2,gradient);
 		gradient*= m_degree;
 	}
 	

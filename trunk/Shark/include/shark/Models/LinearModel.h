@@ -34,9 +34,6 @@
 #define SHARK_MODELS_LINEARMODEL_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/Models/Impl/LinearModel.inl>
-#include <boost/scoped_ptr.hpp>
-#include <boost/serialization/scoped_ptr.hpp>
 namespace shark {
 
 
@@ -49,32 +46,36 @@ namespace shark {
 /// The output may be a single number, and the offset term b may be
 /// dropped.
 ///
-/// \par
-/// Under the hood the class allows for dense and sparse representations
-/// of the matrix A. This is achieved by means of a type erasure.
-///
-template <class InputType = RealVector, class OutputType = InputType>
-class LinearModel : public AbstractModel<InputType, OutputType>
+/// The class allows for dense and sparse input vector types. However it assumes that 
+/// the weight matrix and the ouputs are dense. There are some cases where this is not
+/// good behavior. Check for example Normalizer for a class which is designed for sparse
+/// inputs and outputs.
+template <class InputType = RealVector>
+class LinearModel : public AbstractModel<InputType,RealVector>
 {
 private:
-	typedef AbstractModel<InputType, OutputType> base_type;
-	typedef LinearModel<InputType, OutputType> self_type;
+	typedef AbstractModel<InputType,RealVector> base_type;
+	typedef LinearModel<InputType> self_type;
 	/// Wrapper for the type erasure
-	boost::scoped_ptr<detail::LinearModelWrapperBase<InputType, OutputType> > mp_wrapper;
-
+	RealMatrix m_matrix;
+	RealVector m_offset;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
 
-	/// Constructor of an invalid model; use setStructure later
+	/// CDefault Constructor; use setStructure later
 	LinearModel(){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
+	}
+	/// Constructor creating a model with given dimnsionalities and optional offset term.
+	LinearModel(unsigned int inputs, unsigned int outputs = 1, bool offset = false)
+	: m_matrix(outputs,inputs,0.0),m_offset(offset?outputs:0,0.0){
+		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 	}
 	///copy constructor
-	LinearModel(const self_type& model):mp_wrapper(model.mp_wrapper->clone()){
+	LinearModel(LinearModel const& model)
+	:m_matrix(model.m_matrix),m_offset(model.m_offset){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -82,197 +83,137 @@ public:
 	{ return "LinearModel"; }
 
 	///swap
-	friend void swap(const LinearModel& model1,const LinearModel& model2){
-		model1.mp_wrapper.swap(model2.mp_wrapper);
+	friend void swap(LinearModel& model1,LinearModel& model2){
+		swap(model1.m_matrix,model2.m_matrix);
+		swap(model1.m_offset,model2.m_offset);
 	}
 
 	///operator =
-	const self_type operator=(const self_type& model){
+	LinearModel& operator=(LinearModel const& model){
 		self_type tempModel(model);
 		swap(*this,tempModel);
-	}
-
-	/// Constructor
-	LinearModel(unsigned int inputs, unsigned int outputs = 1, bool offset = false, bool sparse = false){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-
-		if (sparse) 
-			mp_wrapper.reset(new detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType>(inputs, outputs, offset));
-		else 
-			mp_wrapper.reset( new detail::LinearModelWrapper<RealMatrix, InputType, OutputType>(inputs, outputs, offset));
+		return *this;
 	}
 
 	/// Construction from matrix
-	LinearModel(RealMatrix const& matrix){
+	LinearModel(RealMatrix const& matrix):m_matrix(matrix){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		mp_wrapper.reset(new detail::LinearModelWrapper<RealMatrix, InputType, OutputType>(matrix));
 	}
 
 	/// Construction from matrix and vector
-	LinearModel(RealMatrix const& matrix, OutputType offset){
+	LinearModel(RealMatrix const& matrix, RealVector const& offset = RealVector())
+	:m_matrix(matrix),m_offset(offset){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		mp_wrapper.reset(detail::LinearModelWrapper<RealMatrix, InputType, OutputType>(matrix, offset));
-	}
-
-	/// Construction from matrix
-	LinearModel(CompressedRealMatrix const& matrix){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		mp_wrapper.reset(new detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType>(matrix));
-	}
-
-	/// Construction from matrix and vector
-	LinearModel(CompressedRealMatrix const& matrix, RealVector offset){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
-		mp_wrapper.reset(new detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType>(matrix, offset));
 	}
 
 	/// check for the presence of an offset term
 	bool hasOffset() const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::hasOffset] model is not initialized");
-		return mp_wrapper->hasOffset();
+		return m_offset.size() != 0;
 	}
 
 	/// obtain the input dimension
 	size_t inputSize() const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::inputSize] model is not initialized");
-		return mp_wrapper->inputSize();
+		return m_matrix.size2();
 	}
 
 	/// obtain the output dimension
 	size_t outputSize() const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::outputSize] model is not initialized");
-		return mp_wrapper->outputSize();
+		return m_matrix.size1();
 	}
 
 	/// obtain the parameter vector
 	RealVector parameterVector() const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::parameterVector] model is not initialized");
-		return mp_wrapper->parameterVector();
+		RealVector ret(numberOfParameters());
+		init(ret) << toVector(m_matrix),m_offset;
+		
+		return ret;
 	}
 
 	/// overwrite the parameter vector
 	void setParameterVector(RealVector const& newParameters)
 	{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::setParameterVector] model is not initialized");
-		mp_wrapper->setParameterVector(newParameters);
+		init(newParameters) >> toVector(m_matrix),m_offset;
 	}
 
 	/// return the number of parameter
 	size_t numberOfParameters() const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::numberOfParameters] model is not initialized");
-		return mp_wrapper->numberOfParameters();
+		return m_matrix.size1()*m_matrix.size2()+m_offset.size();
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(RealMatrix const& matrix){
-		mp_wrapper.reset(new detail::LinearModelWrapper<RealMatrix, InputType, OutputType>(matrix));
+	void setStructure(unsigned int inputs, unsigned int outputs = 1, bool offset = false){
+		LinearModel<InputType> model(inputs,outputs,offset);
+		swap(*this,model);
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(unsigned int inputs, unsigned int outputs = 1, bool offset = false, bool sparse = false){
-		if (sparse)
-			mp_wrapper.reset(new detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType>(inputs, outputs, offset));
-		else
-			mp_wrapper.reset( new detail::LinearModelWrapper<RealMatrix, InputType, OutputType>(inputs, outputs, offset));
+	void setStructure(RealMatrix const& matrix, RealVector const& offset = RealVector()){
+		m_matrix = matrix;
+		m_offset = offset;
 	}
-
-	/// overwrite structure and parameters
-	void setStructure(RealMatrix const& matrix, const RealVector& offset){
-		mp_wrapper.reset(new detail::LinearModelWrapper<RealMatrix, InputType, OutputType>(matrix, offset));
-	}
-
-	/// overwrite structure and parameters
-	void setStructure(CompressedRealMatrix const& matrix){
-		mp_wrapper.reset( new detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType>(matrix));
-	}
-
-	/// overwrite structure and parameters
-	void setStructure(CompressedRealMatrix const& matrix,const RealVector& offset){
-		SHARK_CHECK(matrix.size1() == offset.size(), "[LinearModel::setStructure] dimension mismatch between matrix and offset");
-		mp_wrapper.reset(new detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType>(matrix, offset));
-	}
-
+	
 	/// return a copy of the matrix in dense format
-	RealMatrix matrix() const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::matrix] model is not initialized");
-		RealMatrix ret; mp_wrapper->matrix(ret); return ret;
+	RealMatrix const& matrix() const{
+		return m_matrix;
 	}
 
 	/// return the offset
-	OutputType const& offset() const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::offset] model is not initialized");
-		return mp_wrapper->offset();
-	}
-
-	/// return a copy of a row of the matrix in dense format
-	RealVector matrixRow(size_t index) const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::matrixRow] model is not initialized");
-		RealVector ret;
-		mp_wrapper->matrixRow(index, ret);
-		return ret;
-	}
-
-	/// return a copy of a column of the matrix in dense format
-	RealVector matrixColumn(size_t index) const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::matrixColumn] model is not initialized");
-		RealVector ret;
-		mp_wrapper->matrixColumn(index, ret);
-		return ret;
+	RealVector const& offset() const{
+		return m_offset;
 	}
 	
 	boost::shared_ptr<State> createState()const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::createState] model is not initialized");
-		return mp_wrapper->createState();
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	using base_type::eval;
 
 	/// Evaluate the model: output = matrix * input + offset
-	void eval(BatchInputType const& input, BatchOutputType& output)const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::eval] model is not initialized");
-		mp_wrapper->eval(input, output);
+	void eval(BatchInputType const& inputs, BatchOutputType& outputs)const{
+		outputs.resize(inputs.size1(),m_matrix.size1());
+		//we multiply with a set of row vectors from the left
+		axpy_prod(inputs,trans(m_matrix),outputs);
+		if (hasOffset()){
+			noalias(outputs)+=repeat(m_offset,inputs.size1());
+		}
 	}
 	/// Evaluate the model: output = matrix * input + offset
-	void eval(BatchInputType const& input, BatchOutputType& output, State& state)const{
-		SHARK_CHECK(mp_wrapper != NULL, "[LinearModel::eval] model is not initialized");
-		mp_wrapper->eval(input, output,state);
+	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
+		eval(inputs,outputs);
 	}
 	
 	///\brief calculates the first derivative w.r.t the parameters and summing them up over all patterns of the last computed batch 
 	void weightedParameterDerivative(
-		BatchInputType const& pattern, RealMatrix const& coefficients, State const& state, RealVector& gradient
+		BatchInputType const& patterns, RealMatrix const& coefficients, State const& state, RealVector& gradient
 	)const{
-		mp_wrapper->weightedParameterDerivative(pattern, coefficients, state, gradient);
-	}
-	void weightedParameterDerivative(
-		BatchInputType const & patterns,
-		BatchOutputType const & coefficients,
-		Batch<RealMatrix>::type const & errorHessian,//maybe a batch of matrices is bad?,
-		State const& state,
-		RealVector& derivative,
-		RealMatrix& hessian
-	)const{
-		mp_wrapper->weightedParameterDerivative(patterns, coefficients, errorHessian, state, derivative, hessian);
+		SIZE_CHECK(coefficients.size2()==outputSize());
+		SIZE_CHECK(coefficients.size1()==patterns.size1());
+
+		gradient.resize(numberOfParameters());
+		std::size_t inputs = inputSize();
+		std::size_t outputs = outputSize();
+		gradient.clear();
+
+		blas::dense_matrix_adaptor<double> weightGradient = blas::adapt_matrix(outputs,inputs,gradient.storage());
+		//sum_i coefficients(output,i)*pattern(i))
+		axpy_prod(trans(coefficients),patterns,weightGradient,false);
+
+		if (hasOffset()){
+			std::size_t start = inputs*outputs;
+			noalias(subrange(gradient, start, start + outputs)) = sum_rows(coefficients);
+		}
 	}
 
 	/// From ISerializable
 	void read(InArchive& archive){
-		//let's hope, noone will ever create a templated setStructure method, in this case, serialization _must_ fail.
-		archive.register_type<detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType> >();
-		archive.register_type<detail::LinearModelWrapper<RealMatrix, InputType, OutputType> >();
-		archive & mp_wrapper;
+		archive >> m_matrix;
+		archive >> m_offset;
 	}
-
 	/// From ISerializable
 	void write(OutArchive& archive) const{
-		archive.register_type<detail::LinearModelWrapper<CompressedRealMatrix, InputType, OutputType> >();
-		archive.register_type<detail::LinearModelWrapper<RealMatrix, InputType, OutputType> >();
-		archive & mp_wrapper;
+		archive << m_matrix;
+		archive << m_offset;
 	}
 };
 

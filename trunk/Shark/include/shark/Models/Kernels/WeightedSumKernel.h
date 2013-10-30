@@ -215,8 +215,8 @@ public:
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result) const{
 		std::size_t sizeX1=shark::size(batchX1);
 		std::size_t sizeX2=shark::size(batchX2);
-		ensureSize(result,sizeX1,sizeX2);
-		zero(result);
+		ensure_size(result,sizeX1,sizeX2);
+		result.clear();
 
 		RealMatrix kernelResult(sizeX1,sizeX2);
 		for (std::size_t i = 0; i != m_base.size(); i++){
@@ -233,8 +233,8 @@ public:
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result, State& state) const{
 		std::size_t sizeX1=shark::size(batchX1);
 		std::size_t sizeX2=shark::size(batchX2);
-		ensureSize(result,sizeX1,sizeX2);
-		zero(result);
+		ensure_size(result,sizeX1,sizeX2);
+		result.clear();
 
 		InternalState& s = state.toState<InternalState>();
 		s.resize(sizeX1,sizeX2);
@@ -255,7 +255,7 @@ public:
 		State const& state,
 		RealVector& gradient
 	) const{
-		ensureSize(gradient,numberOfParameters());
+		ensure_size(gradient,numberOfParameters());
 
 		std::size_t numKernels = m_base.size(); //how far the loop goes;
 
@@ -267,10 +267,10 @@ public:
 		//the first weight is not a parameter and does not need a gradient.
 		//[Theoretically, we wouldn't need to store its result .]
 		//calculate the weighted sum over all results
-		double numeratorSum = sumElements(element_prod(coefficients,s.result));
+		double numeratorSum = sum(element_prod(coefficients,s.result));
 		for (std::size_t i = 1; i != numKernels; i++) {
 			//calculate the weighted sum over all results of this kernel
-			double summedK=sumElements(element_prod(coefficients,s.kernelResults[i]));
+			double summedK=sum(element_prod(coefficients,s.kernelResults[i]));
 			gradient(i-1) = m_base[i].weight * (summedK * m_weightsum - numeratorSum) / sumSquared;
 		}
 
@@ -292,7 +292,7 @@ public:
 	/// \f$ \frac{\partial k(x, y)}{\partial x}
 	///     \frac{\sum_i \exp(w_i) \frac{\partial k_i(x, y)}{\partial x}}
 	///          {\sum_i exp(w_i)} \f$
-	/// and summed up over all elements of the second batch
+	/// and summed up over all  of the second batch
 	void weightedInputDerivative(
 		ConstBatchInputReference batchX1,
 		ConstBatchInputReference batchX2,

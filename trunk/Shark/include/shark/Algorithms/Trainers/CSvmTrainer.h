@@ -268,7 +268,7 @@ private:
 	double computeBias(Problem const& problem, LabeledData<InputType, unsigned int> const& dataset){
 		std::size_t nkp = base_type::m_kernel->numberOfParameters();
 		m_db_dParams.resize(nkp+1);
-		zero(m_db_dParams);
+		m_db_dParams.clear();
 		
 		std::size_t ic = problem.dimensions();
 

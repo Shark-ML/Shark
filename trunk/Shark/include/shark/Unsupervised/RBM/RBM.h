@@ -136,7 +136,7 @@ public:
 	///@param visibleNeurons number of visible neurons.
 	void setStructure(std::size_t visibleNeurons,std::size_t hiddenNeurons){
 		m_weightMatrix.resize(hiddenNeurons,visibleNeurons);
-		zero(m_weightMatrix);
+		m_weightMatrix.clear();
 		
 		m_hiddenNeurons.resize(hiddenNeurons);
 		m_visibleNeurons.resize(visibleNeurons);

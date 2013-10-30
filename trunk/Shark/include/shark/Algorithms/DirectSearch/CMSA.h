@@ -70,7 +70,7 @@ namespace shark {
 			* \brief Adjusts the dimension of the chromosome.
 			*/
 			void setDimension( unsigned int dimension ) {
-				m_mean.resize( dimension, 0. );
+				m_mean.resize( dimension);
 				m_mutationDistribution.resize( dimension );
 			}
 

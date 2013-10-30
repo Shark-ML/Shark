@@ -53,8 +53,6 @@ BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_DefaultCtorAndAssignment){
 	blas::diagonal_matrix<IntVector> diagonal2;
 	BOOST_REQUIRE_EQUAL(diagonal2.size1(),0);
 	BOOST_REQUIRE_EQUAL(diagonal2.size2(),0);
-	BOOST_REQUIRE(diagonal2.begin1() == diagonal2.end1());
-	BOOST_REQUIRE(diagonal2.begin2() == diagonal2.end2());
 	
 	//assignment
 	diagonal2 = diagonal;

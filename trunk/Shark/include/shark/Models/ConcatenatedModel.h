@@ -37,8 +37,6 @@
 #define SHARK_MODEL_CONCATENATEDMODEL_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/LinAlg/BLAS/Initialize.h>
-
 #include <boost/scoped_ptr.hpp>
 #include <boost/serialization/scoped_ptr.hpp>
 

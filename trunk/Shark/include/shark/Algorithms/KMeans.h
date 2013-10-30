@@ -106,7 +106,7 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 		//we need to compute the squared distances between all centers and points that is
 		//d^2(c_k,x_i) = <c_k,c_k> -2 < c_k,x_i> + <x_i,x_i> for the i-th point.
 		//thus we precompute <c_k,c_k>= sum_ij k(x_i,x_j)/(n_k)^2 for all x_i,x_j points of cluster k
-		zero(ckck);
+		ckck.clear();
 		for(std::size_t i = 0; i != ell; ++i){
 			std::size_t c1 = clusterMembership(i);
 			for(std::size_t j = 0; j != ell; ++j){
@@ -136,7 +136,7 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 		);
 		noalias(clusterMembership) = newClusterMembership;
 		//compute new sizes of clusters
-		zero(clusterSizes);
+		clusterSizes.clear();
 		for(std::size_t i = 0; i != ell; ++i){
 			++clusterSizes(clusterMembership(i));
 		}
@@ -156,7 +156,7 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 	KernelExpansion<InputType> expansion;
 	expansion.setStructure(&kernel,dataset,true,k);
 	expansion.offset() = -ckck;
-	zero(expansion.alpha());
+	expansion.alpha().clear();
 	for(std::size_t i = 0; i != ell; ++i){
 		std::size_t c = clusterMembership(i);
 		expansion.alpha()(i,c) = 2.0 / clusterSizes(c);

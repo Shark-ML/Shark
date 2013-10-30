@@ -67,8 +67,7 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 			noalias(row(means,c))+=row(points,e);
 		}
 		//update second moment matrix
-		//fast_prod(trans(batch),batch,covariance,1.0);
-		symmRankKUpdate(trans(points),covariance,1.0);
+		symm_prod(trans(points),covariance,false);
 	}
 	covariance/=inputs-classes;
 	//calculate mean and the covariance matrix from second moment

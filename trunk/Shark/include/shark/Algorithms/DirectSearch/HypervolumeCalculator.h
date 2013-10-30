@@ -135,7 +135,7 @@ namespace shark {
 
 			template<typename VectorType>
 			bool operator()( const VectorType & lhs, const VectorType & rhs ) {
-				return( *m_extractor( lhs ).rbegin() < *m_extractor( rhs ).rbegin() );
+				return( m_extractor( lhs ).back() < m_extractor( rhs ).back() );
 			}
 
 			Extractor & m_extractor;
@@ -186,8 +186,8 @@ namespace shark {
 		for( unsigned int i = 0; i < set.size(); i++ )
 			bbc( set.at( i ) );
 		//std::for_each( set.begin(), set.end(), bbc );
-
-		return( stream( regLow, refPoint, set, extractor, 0, *refPoint.rbegin() ) );	
+		
+		return( stream( regLow, refPoint, set, extractor, 0, refPoint.back() ) );	
 	}
 
 	template<typename VectorType>

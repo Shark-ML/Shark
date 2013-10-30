@@ -284,7 +284,7 @@ RealVector CARTTrainer::hist(boost::unordered_map<std::size_t, std::size_t> coun
 	//create a normed histogram
 	unsigned int totalElements = 0;
 	RealVector normedHistogram(m_maxLabel+1);
-	zero(normedHistogram);
+	normedHistogram.clear();
 	boost::unordered_map<std::size_t, std::size_t>::iterator it;
 	for ( it=countMatrix.begin() ; it != countMatrix.end(); it++ ){
 		normedHistogram(it->first) = it->second;

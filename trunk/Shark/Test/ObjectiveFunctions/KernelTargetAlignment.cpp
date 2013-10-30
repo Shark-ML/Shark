@@ -61,8 +61,7 @@ public:
 		}
 		data  = createLabeledDataFromRange(inputs,labels,10);
 		//center data
-		RealVector mean(dims);
-		zero(mean);
+		RealVector mean(dims,0.0);
 		for(std::size_t i = 0; i != numInputs; ++i)
 			mean += inputs[i];
 		mean /= numInputs;
@@ -73,7 +72,7 @@ public:
 		
 		//calculate Y
 		y.resize(numInputs);
-		zero(y);
+		y.clear();
 		Y.resize(numInputs,numInputs);
 		for(std::size_t i = 0; i != numInputs; ++i){
 			for(std::size_t j = 0; j != numInputs; ++j){
@@ -102,7 +101,7 @@ template<class Kernel, class Data>
 RealMatrix calculateCenteredKernelMatrix(Kernel const& kernel, Data const& data){
 	std::size_t numInputs = data.numberOfElements();
 	RealMatrix K = calculateRegularizedKernelMatrix(kernel,data);
-	RealVector k = sumRows(K)/numInputs;
+	RealVector k = sum_rows(K)/numInputs;
 	double meanK = sum(k)/numInputs;
 	K-= repeat(k,numInputs);
 	K-= trans(repeat(k,numInputs));
@@ -137,8 +136,8 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear )
 	//calculate analytic result from centered Kernel
 	RealMatrix K = calculateRegularizedKernelMatrix(kernel,dataCentered.inputs());
 	
-	double KY=sumElements(element_prod(K,Y));
-	double KK = sumElements(element_prod(K,K));
+	double KY=sum(element_prod(K,Y));
+	double KK = sum(element_prod(K,K));
 	double result = -KY/std::sqrt(KK);
 	
 	//linear Kernel doesn't have any parameters...
@@ -157,8 +156,8 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_GaussKernel 
 	//calculate analytic result from centered Kernel
 	RealMatrix K = calculateCenteredKernelMatrix(kernel,data.inputs());
 	
-	double KY=sumElements(element_prod(K,Y));
-	double KK = sumElements(element_prod(K,K));
+	double KY=sum(element_prod(K,Y));
+	double KK = sum(element_prod(K,K));
 	double result = -KY/std::sqrt(KK);
 	
 	//linear Kernel doesn't have any parameters...
@@ -181,8 +180,8 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_numerics){
 	{
 		GaussianRbfKernel<> kernel(1.0+epsilon);
 		RealMatrix K = calculateCenteredKernelMatrix(kernel,data.inputs());
-		double KY=sumElements(element_prod(K,Y));
-		double KK = sumElements(element_prod(K,K));
+		double KY=sum(element_prod(K,Y));
+		double KK = sum(element_prod(K,K));
 		estimatedDerivativeKcKc+=KK;
 		estimatedDerivativeYKc+=KY;
 		estimatedDerivative+=KY/std::sqrt(KK);
@@ -190,8 +189,8 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_numerics){
 	{
 		GaussianRbfKernel<> kernel(1.0-epsilon);
 		RealMatrix K = calculateCenteredKernelMatrix(kernel,data.inputs());
-		double KY=sumElements(element_prod(K,Y));
-		double KK = sumElements(element_prod(K,K));
+		double KY=sum(element_prod(K,Y));
+		double KK = sum(element_prod(K,K));
 		estimatedDerivativeKcKc-=KK;
 		estimatedDerivativeYKc-=KY;
 		estimatedDerivative-=KY/std::sqrt(KK);
@@ -204,11 +203,11 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_numerics){
 	GaussianRbfKernel<> kernel(1.0);
 	RealMatrix K = calculateRegularizedKernelMatrix(kernel,data.inputs());
 	RealMatrix Kc = calculateCenteredKernelMatrix(kernel,data.inputs());
-	RealVector k = sumRows(K)/numInputs;
+	RealVector k = sum_rows(K)/numInputs;
 	double meanK = sum(k)/numInputs;
 	
-	double YKc=sumElements(element_prod(Kc,Y));
-	double KcKc = sumElements(element_prod(Kc,Kc));
+	double YKc=sum(element_prod(Kc,Y));
+	double KcKc = sum(element_prod(Kc,Kc));
 	//(<Kc,Kc>)'
 	RealMatrix WKcKc = 2*(K-repeat(k, numInputs) -trans(repeat(k, numInputs))+ blas::repeat(meanK,numInputs,numInputs));
 	double derivativeKcKc = calculateKernelMatrixParameterDerivative(kernel,data.inputs(),WKcKc)(0);

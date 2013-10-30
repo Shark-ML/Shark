@@ -184,7 +184,7 @@ public:
 		//return inner_prod(m_bias,state)
 		
 		RealVector energies(state.size1());
-		fast_prod(state,m_bias,energies);
+		axpy_prod(state,m_bias,energies);
 		return energies;
 	}
 	
@@ -227,7 +227,7 @@ public:
 	template<class Vector, class SampleBatch>
 	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples )const{
 		SIZE_CHECK(derivative.size() == size());
-		sumRows(samples.statistics.probability,derivative);
+		sum_rows(samples.statistics.probability,derivative);
 	}
 
 
@@ -239,7 +239,7 @@ public:
 	template<class Vector, class SampleBatch>
 	void parameterDerivative(Vector& derivative, SampleBatch const& samples)const{
 		SIZE_CHECK(derivative.size() == size());
-		sumRows(samples.state,derivative);
+		sum_rows(samples.state,derivative);
 	}
 	
 	/// \brief Returns the flag of requested values by the expected parameter derivative.

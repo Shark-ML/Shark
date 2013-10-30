@@ -2,7 +2,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/LinAlg/BLAS/Metrics.h>
+#include <shark/LinAlg/Metrics.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Rng/GlobalRng.h>
 #include <shark/Core/Timer.h>
@@ -104,8 +104,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Norm_distanceSqr_Matrix_Vector){
 		vec1(2,1) = 6;
 		vec1(2,2) = 8;
 		
-		IntMatrix vec3(3,3);
-		zero(vec3);
+		IntMatrix vec3(3,3,0);
 		vec3(0,2) = 6;
 		vec3(2,0) = 4;
 		vec3(2,1) = 6;
