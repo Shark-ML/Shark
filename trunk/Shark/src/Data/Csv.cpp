@@ -56,7 +56,7 @@ inline std::vector<T> importCSVReaderSingleValue(
 	bool r = phrase_parse(
 		first, last,
 		auto_ % (eol|eoi),
-		(space-eol)| (comment >> *(char_ - eol) >> (eol| eoi)), fileContents
+		((space-eol))| (comment >> *(char_ - eol) >> (eol| eoi)), fileContents
 	);
 
 	if(!r || first != last)
@@ -90,7 +90,7 @@ inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 			(
 				+(double_ | ('?' >>  attr(qnan) ))
 			) % eol >> -eol,
-			space-eol , fileContents
+			(space-eol) | (comment >> *(char_ - eol) >> (eol| eoi)), fileContents
 		);
 	}
 	else{
@@ -99,7 +99,7 @@ inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 			(
 				(double_ | ((lit('?')| &lit(separator)) >>  attr(qnan))) % separator
 			) % eol >> -eol,
-			space-eol , fileContents
+			(space-eol)| (comment >> *(char_ - eol) >> (eol| eoi)) , fileContents
 		);
 	}
 
@@ -140,7 +140,7 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 				lexeme[int_ >> -(lit('.')>>*lit('0'))]
 				>> * (double_ | ('?' >>  attr(qnan) ))
 			) % eol >> -eol,
-			space-eol, fileContents
+			(space-eol)| (comment >> *(char_ - eol) >> (eol| eoi)), fileContents
 		);
 	}
 	else if(separator != 0 && position == shark::FIRST_COLUMN){
@@ -150,7 +150,7 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 				lexeme[int_ >> -(lit('.')>>*lit('0'))]
 				>> *(separator >> (double_ | (-lit('?') >>  attr(qnan) )))
 			) % eol >> -eol,
-			space-eol , fileContents
+			(space-eol)| (comment >> *(char_ - eol) >> (eol| eoi)) , fileContents
 		);
 	}
 	else if(separator == 0 && position == shark::LAST_COLUMN){
@@ -161,7 +161,7 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 				*((double_ >> !(eol|eoi) ) | ('?' >>  attr(qnan)))
 				>> lexeme[int_ >> -(lit('.')>>*lit('0'))]
 				>> (eol|eoi),
-				space-eol , reversed_point
+				(space-eol)| (comment >> *(char_ - eol) >> (eol| eoi)) , reversed_point
 			);
 			fileContents.push_back(CsvPoint(reversed_point.second,reversed_point.first));
 		}while(r && first != last);
@@ -174,7 +174,7 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 				*((double_ | (-lit('?') >>  attr(qnan))) >> separator)
 				>> lexeme[int_ >> -(lit('.')>>*lit('0'))]
 				>> (eol|eoi),
-				space-eol , reversed_point
+				(space-eol)| (comment >> *(char_ - eol) >> (eol| eoi)) , reversed_point
 			);
 			fileContents.push_back(CsvPoint(reversed_point.second,reversed_point.first));
 		}while(r && first != last);
