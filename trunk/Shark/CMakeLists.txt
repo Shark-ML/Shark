@@ -390,3 +390,20 @@ install(FILES
 install(EXPORT SharkTargets DESTINATION
   "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
+
+
+###################################################################
+#                           UNINSTALL                             #
+###################################################################
+
+# refer to
+# http://www.cmake.org/Wiki/CMake_FAQ#Can_I_do_.22make_uninstall.22_with_CMake.3F
+# for details
+
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+  IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
