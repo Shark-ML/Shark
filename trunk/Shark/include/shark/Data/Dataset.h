@@ -1,6 +1,6 @@
 //===========================================================================
 /*!
- *  \brief Data for (un-)base_typevised learning.
+ *  \brief Data for (un-)supervised learning.
  *
  *
  *  \par
