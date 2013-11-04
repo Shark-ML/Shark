@@ -73,7 +73,51 @@ void calculateRegularizedKernelMatrix(
 			matrix()(k,k) += static_cast<typename M::value_type>(regularizer);
 		}
 	}
+}
+
+///  \brief Calculates the kernel gram matrix between two data sets.
+///
+///  \param kernel the kernel for which to calculate the kernel gram matrix
+///  \param dataset1 the set of points corresponding to rows of the Gram matrix
+///  \param dataset2 the set of points corresponding to columns of the Gram matrix
+///  \param matrix the target kernel matrix
+template<class InputType, class M>
+void calculateMixedKernelMatrix(
+	AbstractKernelFunction<InputType>const& kernel,
+	Data<InputType> const& dataset1,
+	Data<InputType> const& dataset2,
+	blas::matrix_expression<M>& matrix
+){
+	std::size_t B1 = dataset1.numberOfBatches();
+	std::size_t B2 = dataset2.numberOfBatches();
+	//get start of all batches in the matrix
+	//also include  the past the end position at the end
+	std::vector<std::size_t> batchStart1(B1+1,0);
+	for(std::size_t i = 1; i != B1+1; ++i){
+		batchStart1[i] = batchStart1[i-1]+ boost::size(dataset1.batch(i-1));
+	}
+	std::vector<std::size_t> batchStart2(B2+1,0);
+	for(std::size_t i = 1; i != B2+1; ++i){
+		batchStart2[i] = batchStart2[i-1]+ boost::size(dataset2.batch(i-1));
+	}
+	SIZE_CHECK(batchStart1[B1] == dataset1.numberOfElements());
+	SIZE_CHECK(batchStart2[B2] == dataset2.numberOfElements());
+	std::size_t N1 = batchStart1[B1];//number of elements
+	std::size_t N2 = batchStart2[B2];//number of elements
+	ensure_size(matrix,N1,N2);
 	
+	for (std::size_t i=0; i<B1; i++){
+		std::size_t startX = batchStart1[i];
+		std::size_t endX = batchStart1[i+1];
+		SHARK_PARALLEL_FOR(int j=0; j < B2; j++){
+			std::size_t startY = batchStart2[j];
+			std::size_t endY = batchStart2[j+1];
+			RealMatrix submatrix = kernel(dataset1.batch(i), dataset2.batch(j));
+			noalias(subrange(matrix(),startX,endX,startY,endY))=submatrix;
+			//~ if(i != j)
+				//~ noalias(subrange(matrix(),startY,endY,startX,endX))=trans(submatrix);
+		}
+	}
 }
 
 ///  \brief Calculates the regularized kernel gram matrix of the points stored inside a dataset.
@@ -92,6 +136,23 @@ RealMatrix calculateRegularizedKernelMatrix(
 	SHARK_CHECK(regularizer >= 0, "regularizer must be >=0");
 	RealMatrix M;
 	calculateRegularizedKernelMatrix(kernel,dataset,M,regularizer);
+	return M;
+}
+
+///  \brief Calculates the kernel gram matrix between two data sets.
+///
+///  \param kernel the kernel for which to calculate the kernel gram matrix
+///  \param dataset1 the set of points corresponding to rows of the Gram matrix
+///  \param dataset2 the set of points corresponding to columns of the Gram matrix
+///  \return matrix the target kernel matrix
+template<class InputType>
+RealMatrix calculateMixedKernelMatrix(
+	AbstractKernelFunction<InputType>const& kernel,
+	Data<InputType> const& dataset1, 
+	Data<InputType> const& dataset2
+){
+	RealMatrix M;
+	calculateMixedKernelMatrix(kernel,dataset1,dataset2,M);
 	return M;
 }
 
