@@ -267,10 +267,10 @@ public:
 		//the first weight is not a parameter and does not need a gradient.
 		//[Theoretically, we wouldn't need to store its result .]
 		//calculate the weighted sum over all results
-		double numeratorSum = sum(element_prod(coefficients,s.result));
+		double numeratorSum = sum(coefficients * s.result);
 		for (std::size_t i = 1; i != numKernels; i++) {
 			//calculate the weighted sum over all results of this kernel
-			double summedK=sum(element_prod(coefficients,s.kernelResults[i]));
+			double summedK=sum(coefficients * s.kernelResults[i]);
 			gradient(i-1) = m_base[i].weight * (summedK * m_weightsum - numeratorSum) / sumSquared;
 		}
 

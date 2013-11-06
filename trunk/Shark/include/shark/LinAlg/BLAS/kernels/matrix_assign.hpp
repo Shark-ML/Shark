@@ -132,7 +132,7 @@ private:
 ////Scalar Assignment to Matrix
 /////////////////////////////////////////////////////
 
-namespace kernel{
+namespace kernels{
 // Explicitly iterating row major
 template<template <class T1, class T2> class F, class M>
 void assign(

@@ -331,7 +331,7 @@ template<class E1, class E2>
 vector_binary<E1, E2, 
 	scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type> 
 >
-safeDiv(
+safe_div(
 	vector_expression<E1> const& e1, 
 	vector_expression<E2> const& e2, 
 	typename promote_traits<

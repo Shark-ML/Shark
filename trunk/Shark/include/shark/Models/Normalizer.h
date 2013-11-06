@@ -227,7 +227,7 @@ public:
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::eval] model is not initialized");
 		output.resize(input.size1(), input.size2());
-		noalias(output) = element_prod(input, repeat(m_A,input.size1()));
+		noalias(output) = input * repeat(m_A,input.size1());
 		if (hasOffset())
 		{
 			noalias(output) += repeat(m_b,input.size1());

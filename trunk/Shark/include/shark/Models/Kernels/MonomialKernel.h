@@ -166,7 +166,7 @@ public:
 		
 		//first calculate weights(i,j) = coeff(i)*exp(i,j)/prod(i,j)
 		//we have to take the usual division by 0 into account
-		RealMatrix weights = element_prod(coefficientsX2,safeDiv(s.exponentedProd,s.base,0.0));
+		RealMatrix weights = coefficientsX2 * safe_div(s.exponentedProd,s.base,0.0);
 		//The derivative of input i of batch x1 is 
 		//g = sum_j m_exponent*weights(i,j)*x2_j
 		//we now sum over j which is a matrix-matrix product

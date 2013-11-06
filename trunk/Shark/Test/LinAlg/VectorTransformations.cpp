@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Sigmoid )
 		BOOST_CHECK_SMALL(ym(i,0) - result(i),1.e-10);
 	}
 }
-BOOST_AUTO_TEST_CASE( LinAlg_SoftPlus )
+BOOST_AUTO_TEST_CASE( LinAlg_Safe_Div )
 {
 	RealVector x(Dimensions); 
 	RealVector y(Dimensions); 
@@ -112,8 +112,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_SoftPlus )
 		ym(i,0) = i % 3;
 		result(i) = (i % 3 == 0)? 2.0: x(i)/y(i);
 	}
-	RealVector z = safeDiv(x,y,2.0);
-	RealMatrix zm = safeDiv(xm,ym,2.0);
+	RealVector z = safe_div(x,y,2.0);
+	RealMatrix zm = safe_div(xm,ym,2.0);
 	//check result
 	for (size_t i = 0; i < Dimensions; i++)
 	{
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_SoftPlus )
 	}
 }
 
-BOOST_AUTO_TEST_CASE( LinAlg_SafeDiv )
+BOOST_AUTO_TEST_CASE( LinAlg_SoftPlus )
 {
 	RealVector x(Dimensions); 
 	RealMatrix xm(Dimensions,1);

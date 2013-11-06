@@ -83,7 +83,7 @@ public:
 	vector(vector_expression<E> const& e):
 		vector_container<self_type> (),
 		m_storage(e().size()) {
-		kernel::assign (*this, e);
+		kernels::assign (*this, e);
 	}
 
 	// ---------
@@ -109,7 +109,7 @@ public:
 		return &m_storage[0];
 	}
 	
-	///\brief Returns th stride between the elements in storage()
+	///\brief Returns the stride between the elements in storage()
 	///
 	/// In general elements of dense storage entities are spaced like storage()[i*stride()] for i=1,...,size()-1
 	/// However for vector strid is guaranteed to be 1.
@@ -185,25 +185,78 @@ public:
 	const_reference back()const{
 		return storage()[size()-1];
 	}
-	
-	// -------
-	// Zeroing
-	// -------
 
 	/// \brief Clear the vector, i.e. set all values to the \c zero value.
 	void clear() {
 		std::fill(m_storage.begin(), m_storage.end(), value_type/*zero*/());
 	}
+	
+	// -------------------
+	// Assignment Functions
+	// -------------------
 
-	// Assignment
-	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
-	/// \param v is the source vector
-	/// \return a reference to a vector (i.e. the destination vector)
-	vector& operator = (vector v) {
-		swap(*this,v);
+	/// \brief Assign the result of a vector_expression to the vector
+	/// Assign the result of a vector_expression to the vector.
+	/// \param e is a const reference to the vector_expression
+	/// \return a reference to the resulting vector
+	template<class E>
+	vector& assign(vector_expression<E> const& e) {
+		kernels::assign (*this, e);
+		return *this;
+	}
+	
+	/// \brief Assign the sum of the vector and a vector_expression to the vector
+	/// Assign the sum of the vector and a vector_expression to the vector.
+	/// No temporary is created. Computations are done and stored directly into the resulting vector.
+	/// \param e is a const reference to the vector_expression
+	/// \return a reference to the resulting vector
+	template<class E>
+	vector& plus_assign(vector_expression<E> const& e) {
+		SIZE_CHECK(size() == e().size());
+		kernels::assign<scalar_plus_assign> (*this, e);
+		return *this;
+	}
+	
+	/// \brief Assign the difference of the vector and a vector_expression to the vector
+	/// Assign the difference of the vector and a vector_expression to the vector.
+	/// No temporary is created. Computations are done and stored directly into the resulting vector.
+	/// \param e is a const reference to the vector_expression
+	/// \return a reference to the resulting vector
+	template<class E>
+	vector& minus_assign(vector_expression<E> const& e) {
+		SIZE_CHECK(size() == e().size());
+		kernels::assign<scalar_minus_assign> (*this, e);
+		return *this;
+	}
+	
+	/// \brief Assign the elementwise product of the vector and a vector_expression to the vector
+	/// Assign the difference of the vector and a vector_expression to the vector.
+	/// No temporary is created. Computations are done and stored directly into the resulting vector.
+	/// \param e is a const reference to the vector_expression
+	/// \return a reference to the resulting vector
+	template<class E>
+	vector& multiply_assign(vector_expression<E> const& e) {
+		SIZE_CHECK(size() == e().size());
+		kernels::assign<scalar_multiply_assign> (*this, e);
+		return *this;
+	}
+	
+	/// \brief Assign the elementwise division of the vector and a vector_expression to the vector
+	/// Assign the difference of the vector and a vector_expression to the vector.
+	/// No temporary is created. Computations are done and stored directly into the resulting vector.
+	/// \param e is a const reference to the vector_expression
+	/// \return a reference to the resulting vector
+	template<class E>
+	vector& divide_assign(vector_expression<E> const& e) {
+		SIZE_CHECK(size() == e().size());
+		kernels::assign<scalar_divide_assign> (*this, e);
 		return *this;
 	}
 
+	// -------------------
+	// Assignment operators
+	// -------------------
+	
 	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
 	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
 	/// \param v is the source vector container
@@ -211,13 +264,11 @@ public:
 	template<class C>          // Container assignment without temporary
 	vector& operator = (vector_container<C> const& v) {
 		resize(v().size());
-		assign(v);
-		return *this;
+		return assign(v);
 	}
 
 	/// \brief Assign the result of a vector_expression to the vector
 	/// Assign the result of a vector_expression to the vector.
-	/// \tparam E is the type of the vector_expression
 	/// \param e is a const reference to the vector_expression
 	/// \return a reference to the resulting vector
 	template<class E>
@@ -226,109 +277,110 @@ public:
 		swap(*this,temporary);
 		return *this;
 	}
-
-	/// \brief Assign the result of a vector_expression to the vector
-	/// Assign the result of a vector_expression to the vector.
-	/// \tparam E is the type of the vector_expression
-	/// \param e is a const reference to the vector_expression
-	/// \return a reference to the resulting vector
-	template<class E>
-	vector& assign(vector_expression<E> const& e) {
-		kernel::assign (*this, e);
+	
+	// Assignment
+	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
+	/// \param v is the source vector
+	/// \return a reference to a vector (i.e. the destination vector)
+	vector& operator = (vector v) {
+		swap(*this,v);
 		return *this;
 	}
-
-	// -------------------
-	// Computed assignment
-	// -------------------
+	
 
 	/// \brief Assign the sum of the vector and a vector_expression to the vector
 	/// Assign the sum of the vector and a vector_expression to the vector.
 	/// A temporary is created for the computations.
-	/// \tparam E is the type of the vector_expression
 	/// \param e is a const reference to the vector_expression
 	/// \return a reference to the resulting vector
 	template<class E>
 	vector& operator += (vector_expression<E> const& e) {
 		SIZE_CHECK(size() == e().size());
-		self_type temporary(*this + e);
-		swap(*this,temporary);
-		return *this;
+		self_type temporary(e);
+		return plus_assign(temporary);
 	}
 
 	/// \brief Assign the sum of the vector and a vector_expression to the vector
 	/// Assign the sum of the vector and a vector_expression to the vector.
 	/// No temporary is created. Computations are done and stored directly into the resulting vector.
-	/// \tparam C is the type of the vector_expression
 	/// \param v is a const reference to the vector_expression
 	/// \return a reference to the resulting vector
 	template<class C>          // Container assignment without temporary
 	vector& operator += (vector_container<C> const& v) {
 		SIZE_CHECK(size() == v().size());
-		plus_assign(v);
-		return *this;
-	}
-
-	/// \brief Assign the sum of the vector and a vector_expression to the vector
-	/// Assign the sum of the vector and a vector_expression to the vector.
-	/// No temporary is created. Computations are done and stored directly into the resulting vector.
-	/// \tparam E is the type of the vector_expression
-	/// \param e is a const reference to the vector_expression
-	/// \return a reference to the resulting vector
-	template<class E>
-	vector& plus_assign(vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		kernel::assign<scalar_plus_assign> (*this, e);
-		return *this;
+		return plus_assign(v);
 	}
 
 	/// \brief Assign the difference of the vector and a vector_expression to the vector
 	/// Assign the difference of the vector and a vector_expression to the vector.
 	/// A temporary is created for the computations.
-	/// \tparam E is the type of the vector_expression
 	/// \param e is a const reference to the vector_expression
 	template<class E>
 	vector& operator -= (vector_expression<E> const& e) {
 		SIZE_CHECK(size() == e().size());
-		self_type temporary(*this - e);
-		swap(*this,temporary);
-		return *this;
+		self_type temporary(e);
+		return minus_assign(temporary);
 	}
 
 	/// \brief Assign the difference of the vector and a vector_expression to the vector
 	/// Assign the difference of the vector and a vector_expression to the vector.
 	/// No temporary is created. Computations are done and stored directly into the resulting vector.
-	/// \tparam C is the type of the vector_expression
 	/// \param v is a const reference to the vector_expression
 	/// \return a reference to the resulting vector
 	template<class C>          // Container assignment without temporary
 	vector& operator -= (vector_container<C> const& v) {
 		SIZE_CHECK(size() == v().size());
-		minus_assign(v);
-		return *this;
+		return minus_assign(v);
 	}
-
-	/// \brief Assign the difference of the vector and a vector_expression to the vector
-	/// Assign the difference of the vector and a vector_expression to the vector.
-	/// No temporary is created. Computations are done and stored directly into the resulting vector.
-	/// \tparam E is the type of the vector_expression
+	
+	/// \brief Assign the elementwise product of the vector and a vector_expression to the vector
+	/// A temporary is created for the computations.
 	/// \param e is a const reference to the vector_expression
 	/// \return a reference to the resulting vector
 	template<class E>
-	vector& minus_assign(vector_expression<E> const& e) {
+	vector& operator *= (vector_expression<E> const& e) {
 		SIZE_CHECK(size() == e().size());
-		kernel::assign<scalar_minus_assign> (*this, e);
-		return *this;
+		self_type temporary(e);
+		return multiply_assign(temporary);
+	}
+
+	/// \brief Assign the elementwise product of the vector and a vector_expression to the vector
+	/// No temporary is created. Computations are done and stored directly into the resulting vector.
+	/// \param v is a const reference to the vector_expression
+	/// \return a reference to the resulting vector
+	template<class C>          // Container assignment without temporary
+	vector& operator *= (vector_container<C> const& v) {
+		SIZE_CHECK(size() == v().size());
+		return multiply_assign(v);
+	}
+	
+	/// \brief Assign the elementwise division of the vector and a vector_expression to the vector
+	/// A temporary is created for the computations.
+	/// \param e is a const reference to the vector_expression
+	/// \return a reference to the resulting vector
+	template<class E>
+	vector& operator /= (vector_expression<E> const& e) {
+		SIZE_CHECK(size() == e().size());
+		self_type temporary(e);
+		return divide_assign(temporary);
+	}
+
+	/// \brief Assign the elementwise product of the vector and a vector_expression to the vector
+	/// No temporary is created. Computations are done and stored directly into the resulting vector.
+	/// \param v is a const reference to the vector_expression
+	/// \return a reference to the resulting vector
+	template<class C>          // Container assignment without temporary
+	vector& operator /= (vector_container<C> const& v) {
+		SIZE_CHECK(size() == v().size());
+		return divide_assign(v);
 	}
 
 	/// \brief Assign the product of the vector and a scalar to the vector
-	/// Assign the product of the vector and a scalar to the vector.
 	/// No temporary is created. Computations are done and stored directly into the resulting vector.
-	/// \tparam E is the type of the vector_expression
 	/// \param at is a const reference to the scalar
 	/// \return a reference to the resulting vector
 	vector& operator *= (value_type t) {
-		kernel::assign<scalar_multiplies_assign> (*this, t);
+		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
 
@@ -339,7 +391,7 @@ public:
 	/// \param at is a const reference to the scalar
 	/// \return a reference to the resulting vector
 	vector& operator /= (value_type t) {
-		kernel::assign<scalar_divides_assign> (*this, t);
+		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
 

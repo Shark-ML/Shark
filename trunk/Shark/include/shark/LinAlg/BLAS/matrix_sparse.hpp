@@ -104,7 +104,7 @@ public:
 		, m_rowStart(e().size1() + 1, 0)
 		, m_rowEnd(e().size1(), 0)
 		, m_indices(non_zeros), m_values(non_zeros), m_zero(0) {
-		kernel::assign(*this, e);
+		kernels::assign(*this, e);
 	}
 
 	// Accessors
@@ -256,7 +256,7 @@ public:
 	}
 	template<class E>
 	compressed_matrix &assign(const matrix_expression<E> &e) {
-		kernel::assign(*this, e);
+		kernels::assign(*this, e);
 		return *this;
 	}
 	template<class E>
@@ -271,7 +271,7 @@ public:
 	}
 	template<class E>
 	compressed_matrix &plus_assign(const matrix_expression<E> &e) {
-		kernel::assign<scalar_plus_assign> (*this, e);
+		kernels::assign<scalar_plus_assign> (*this, e);
 		return *this;
 	}
 	template<class E>
@@ -286,15 +286,15 @@ public:
 	}
 	template<class E>
 	compressed_matrix &minus_assign(const matrix_expression<E> &e) {
-		kernel::assign<scalar_minus_assign> (*this, e);
+		kernels::assign<scalar_minus_assign> (*this, e);
 		return *this;
 	}
 	compressed_matrix &operator *= (value_type t) {
-		kernel::assign<scalar_multiplies_assign> (*this, t);
+		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
 	compressed_matrix &operator /= (value_type t) {
-		kernel::assign<scalar_divides_assign> (*this, t);
+		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
 

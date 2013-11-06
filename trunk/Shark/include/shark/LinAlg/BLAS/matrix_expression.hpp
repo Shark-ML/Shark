@@ -327,6 +327,7 @@ SHARK_UNARY_MATRIX_TRANSFORMATION(log, scalar_log)
 SHARK_UNARY_MATRIX_TRANSFORMATION(exp, scalar_exp)
 SHARK_UNARY_MATRIX_TRANSFORMATION(tanh,scalar_tanh)
 SHARK_UNARY_MATRIX_TRANSFORMATION(sqr, scalar_sqr)
+SHARK_UNARY_MATRIX_TRANSFORMATION(abs_sqr, scalar_abs_sqr)
 SHARK_UNARY_MATRIX_TRANSFORMATION(sqrt, scalar_sqrt)
 SHARK_UNARY_MATRIX_TRANSFORMATION(sigmoid, scalar_sigmoid)
 SHARK_UNARY_MATRIX_TRANSFORMATION(softPlus, scalar_soft_plus)
@@ -490,7 +491,7 @@ template<class E1, class E2>
 matrix_binary<E1, E2, 
 	scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type> 
 >
-safeDiv(
+safe_div(
 	matrix_expression<E1> const& e1, 
 	matrix_expression<E2> const& e2, 
 	typename promote_traits<
@@ -643,56 +644,6 @@ prod(matrix_expression<E1> const& e1,matrix_expression<E2> const& e2) {
 	return result;
 }
 
-
-template<class E>
-typename matrix_norm_1<E>::result_type
-norm_1(const matrix_expression<E> &e) {
-	return matrix_norm_1<E>::apply(e());
-}
-
-template<class E>
-typename matrix_norm_frobenius<E>::result_type
-norm_frobenius(const matrix_expression<E> &e) {
-	return matrix_norm_frobenius<E>::apply(e());
-}
-
-template<class E>
-typename matrix_norm_inf<E>::result_type
-norm_inf(const matrix_expression<E> &e) {
-	return matrix_norm_inf<E>::apply(e());
-}
-
-/*!
- *  \brief Evaluates the sum of the values at the diagonal of
- *         matrix "v".
- *
- *  Example:
- *  \f[
- *      \left(
- *      \begin{array}{*{4}{c}}
- *          {\bf 1} & 5       & 9        & 13\\
- *          2       & {\bf 6} & 10       & 14\\
- *          3       & 7       & {\bf 11} & 15\\
- *          4       & 8       & 12       & {\bf 16}\\
- *      \end{array}
- *      \right)
- *      \longrightarrow 1 + 6 + 11 + 16 = 34
- *  \f]
- *
- *      \param  m square matrix
- *      \return the sum of the values at the diagonal of \em m
- */
-template < class MatrixT >
-typename MatrixT::value_type trace(matrix_expression<MatrixT> const& m)
-{
-	SIZE_CHECK(m().size1() == m().size2());
-
-	typename MatrixT::value_type t(m()(0, 0));
-	for (unsigned i = 1; i < m().size1(); ++i)
-		t += m()(i, i);
-	return t;
-}
-
 namespace detail{
 	
 template<class MatA,class VecB>
@@ -763,6 +714,71 @@ sum_columns(matrix_expression<MatA> const& A){
 template<class MatA>
 typename MatA::value_type sum(matrix_expression<MatA> const& A){
 	return detail::sum_impl(A(),typename MatA::orientation());
+}
+
+
+/// \brief Returns the frobenius inner-product between matrices exprssions 1 and e2.
+///
+///The frobenius inner product is defined as <A,B>_F=\sum_{ij} A_ij*B_ij. It induces the
+/// Frobenius norm \f$ ||A||_F = \sqrt{<A,A>_F} \f$
+template<class E1, class E2>
+typename promote_traits <typename E1::value_type,typename E2::value_type>::promote_type
+frobenius_prod(
+	matrix_expression<E1> const& e1,
+	matrix_expression<E2> const& e2
+) {
+	return sum(e1*e2);
+}
+
+
+template<class E>
+typename matrix_norm_1<E>::result_type
+norm_1(const matrix_expression<E> &e) {
+	return matrix_norm_1<E>::apply(e());
+}
+
+template<class E>
+typename real_traits<typename E::value_type>::type
+norm_frobenius(const matrix_expression<E> &e) {
+	using std::sqrt;
+	return sqrt(sum(abs_sqr(e)));
+}
+
+template<class E>
+typename matrix_norm_inf<E>::result_type
+norm_inf(const matrix_expression<E> &e) {
+	return matrix_norm_inf<E>::apply(e());
+}
+
+/*!
+ *  \brief Evaluates the sum of the values at the diagonal of
+ *         matrix "v".
+ *
+ *  Example:
+ *  \f[
+ *      \left(
+ *      \begin{array}{*{4}{c}}
+ *          {\bf 1} & 5       & 9        & 13\\
+ *          2       & {\bf 6} & 10       & 14\\
+ *          3       & 7       & {\bf 11} & 15\\
+ *          4       & 8       & 12       & {\bf 16}\\
+ *      \end{array}
+ *      \right)
+ *      \longrightarrow 1 + 6 + 11 + 16 = 34
+ *  \f]
+ *
+ *      \param  m square matrix
+ *      \return the sum of the values at the diagonal of \em m
+ */
+template < class MatrixT >
+typename MatrixT::value_type trace(matrix_expression<MatrixT> const& m)
+{
+	SIZE_CHECK(m().size1() == m().size2());
+
+	typename MatrixT::value_type t(m()(0, 0));
+	for (unsigned i = 1; i < m().size1(); ++i)
+		t += m()(i, i);
+	return t;
 }
 
 

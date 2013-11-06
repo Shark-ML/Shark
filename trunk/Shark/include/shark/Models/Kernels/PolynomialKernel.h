@@ -227,9 +227,7 @@ public:
 			return;
 		}
 		
-		//we just do a looped version of the single gradient since the test for 0 is that awful..
-		gradient(0) =sum(element_prod(safeDiv(s.exponentedProd,s.base,0.0),coefficients));
-		gradient(0) *= m_degree;
+		gradient(0) = m_degree * sum(safe_div(s.exponentedProd,s.base,0.0) * coefficients);
 		if ( m_unconstrained ) 
 			gradient(0) *= m_offset;
 	}
@@ -270,7 +268,7 @@ public:
 		
 		//first calculate weights(i,j) = coeff(i)*exp(i,j)/prod(i,j)
 		//we have to take the usual division by 0 into account
-		RealMatrix weights = element_prod(coefficientsX2,safeDiv(s.exponentedProd,s.base,0.0));
+		RealMatrix weights = coefficientsX2 * safe_div(s.exponentedProd,s.base,0.0);
 		//and the derivative of input i of batch x1 is 
 		//g = sum_j m_n*weights(i,j)*x2_j
 		//we now sum over j which is a matrix-matrix product

@@ -120,15 +120,27 @@ public:
 		return *this;
 	}
 	template<class E>
-	vector_reference& operator -= (vector_expression<E> const& e){
-		SIZE_CHECK(size() == e().size());
-		expression().operator -= (e);
-		return *this;
-	}
-	template<class E>
 	vector_reference& minus_assign(vector_expression<E> const& e){
 		SIZE_CHECK(size() == e().size());
 		expression().minus_assign(e);
+		return *this;
+	}
+	template<class E>
+	vector_reference& plus_assign(vector_expression<E> const& e){
+		SIZE_CHECK(size() == e().size());
+		expression().plus_assign(e);
+		return *this;
+	}
+	template<class E>
+	vector_reference& multiply_assign(vector_expression<E> const& e){
+		SIZE_CHECK(size() == e().size());
+		expression().multiply_assign(e);
+		return *this;
+	}
+	template<class E>
+	vector_reference& divide_assign(vector_expression<E> const& e){
+		SIZE_CHECK(size() == e().size());
+		expression().divide_assign(e);
 		return *this;
 	}
 	
@@ -142,15 +154,27 @@ public:
 		return *this;
 	}
 	template<class E>
-	vector_reference& operator += (vector_expression<E> const& e){
+	vector_reference& operator -= (vector_expression<E> const& e){
 		SIZE_CHECK(size() == e().size());
-		expression() += e;
+		expression() -= e();//op() allows for optimization when e is vector_container
 		return *this;
 	}
 	template<class E>
-	vector_reference& plus_assign(vector_expression<E> const& e){
+	vector_reference& operator += (vector_expression<E> const& e){
 		SIZE_CHECK(size() == e().size());
-		expression().plus_assign(e);
+		expression() += e();
+		return *this;
+	}
+	template<class E>
+	vector_reference& operator *= (vector_expression<E> const& e){
+		SIZE_CHECK(size() == e().size());
+		expression() *= e();
+		return *this;
+	}
+	template<class E>
+	vector_reference& operator /= (vector_expression<E> const& e){
+		SIZE_CHECK(size() == e().size());
+		expression() /= e();
 		return *this;
 	}
 	vector_reference& operator *= (value_type t){
@@ -295,61 +319,75 @@ public:
 	// Assignment
 	template<class E>
 	vector_range& assign(vector_expression<E> const& e){
-		kernel::assign(*this, e);
+		kernels::assign(*this, e);
 		return *this;
 	}
 	template<class E>
 	vector_range& plus_assign(vector_expression<E> const& e){
 		SIZE_CHECK(size() == e().size());
-		kernel::assign<scalar_plus_assign> (*this, e);
+		kernels::assign<scalar_plus_assign> (*this, e);
 		return *this;
 	}
 	template<class E>
 	vector_range& minus_assign(vector_expression<E> const& e){
 		SIZE_CHECK(size() == e().size());
-		kernel::assign<scalar_minus_assign> (*this, e);
+		kernels::assign<scalar_minus_assign> (*this, e);
+		return *this;
+	}
+	template<class E>
+	vector_range& multiply_assign(vector_expression<E> const& e){
+		SIZE_CHECK(size() == e().size());
+		kernels::assign<scalar_multiply_assign> (*this, e);
+		return *this;
+	}
+	template<class E>
+	vector_range& divide_assign(vector_expression<E> const& e){
+		SIZE_CHECK(size() == e().size());
+		kernels::assign<scalar_divide_assign> (*this, e);
 		return *this;
 	}
 	
 	vector_range& operator = (vector_range const& vr){
-		kernel::assign (*this, typename vector_temporary<V>::type(vr));
-		return *this;
+		return assign (typename vector_temporary<V>::type(vr));
 	}
 
 	template<class E>
 	vector_range& operator = (vector_expression<E> const& e){
-		kernel::assign(*this, typename vector_temporary<V>::type(e));
-		return *this;
-	}
-	template<class E>
-	vector_range& operator -= (vector_expression<E> const& e){
-		SIZE_CHECK(size() == e().size());
-		kernel::assign(*this, typename vector_temporary<V>::type(*this - e));
-		return *this;
+		return assign(typename vector_temporary<E>::type(e));
 	}
 	template<class E>
 	vector_range& operator += (vector_expression<E> const& e){
 		SIZE_CHECK(size() == e().size());
-		kernel::assign (*this, typename vector_temporary<V>::type(*this + e));
-		return *this;
+		return plus_assign(typename vector_temporary<E>::type(e));
 	}
+	template<class E>
+	vector_range& operator -= (vector_expression<E> const& e){
+		SIZE_CHECK(size() == e().size());
+		return minus_assign(typename vector_temporary<E>::type(e));
+	}
+	template<class E>
+	vector_range& operator *= (vector_expression<E> const& e){
+		SIZE_CHECK(size() == e().size());
+		return multiply_assign(typename vector_temporary<E>::type(e));
+	}
+	template<class E>
+	vector_range& operator /= (vector_expression<E> const& e){
+		SIZE_CHECK(size() == e().size());
+		return divide_assign(typename vector_temporary<E>::type(e));
+	}
+	
 	vector_range& operator *= (value_type t){
-		kernel::assign<scalar_multiplies_assign> (*this, t);
+		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
 	vector_range& operator /= ( value_type t){
-		kernel::assign<scalar_divides_assign> (*this, t);
+		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
 
 	// Closure comparison
 	bool same_closure(vector_range const& vr) const{
 		return m_expression.same_closure(vr.m_expression);
-	}
-
-	// Comparison
-	bool operator == (vector_range const& vr) const{
-		return (*this).m_expression == vr.m_expression& & m_range == vr.m_range;
 	}
 
 	typedef subrange_iterator< typename vector_closure_type::iterator> iterator;
@@ -519,7 +557,7 @@ public:
 	
 	bool same_closure(self_type const& t) const {
 		//same closure if the values segments are overlapping
-		return (t.storage()+t.size()) > storage() && (t.storage() < storage()+size());
+		return (t.storage()+t.size()) > storage()& & (t.storage() < storage()+size());
 	}
 	
 	// --------------
@@ -570,47 +608,64 @@ public:
 	// -------
 	// ASSIGNING
 	// -------
+	
+	template<class E>
+	dense_vector_adaptor& assign(const vector_expression<E>& e) {
+		kernels::assign(*this, e);
+		return *this;
+	}
+	template<class E>
+	dense_vector_adaptor& plus_assign(const vector_expression<E>&  e) {
+		kernels::assign<scalar_plus_assign> (*this, e);
+		return *this;
+	}
+	template<class E>
+	dense_vector_adaptor& minus_assign(const vector_expression<E>& e) {
+		kernels::assign<scalar_minus_assign> (*this, e);
+		return *this;
+	}
+	template<class E>
+	dense_vector_adaptor& multiply_assign(const vector_expression<E>& e) {
+		kernels::assign<scalar_multiply_assign> (*this, e);
+		return *this;
+	}
+	template<class E>
+	dense_vector_adaptor& divide_assign(const vector_expression<E>& e) {
+		kernels::assign<scalar_divide_assign> (*this, e);
+		return *this;
+	}
 
-	dense_vector_adaptor& operator = (dense_vector_adaptor const& ae) {
-		assign (*this, ae);
-		return *this;
+	dense_vector_adaptor& operator = (dense_vector_adaptor const& e) {
+		return assign(typename vector_temporary<self_type>::type(e));
 	}
 	template<class E>
-	dense_vector_adaptor& operator = (const vector_expression<E> &ae) {
-		assign(*this, typename vector_temporary<E>::type(ae));
-		return *this;
+	dense_vector_adaptor& operator = (const vector_expression<E>& e) {
+		return assign(typename vector_temporary<E>::type(e));
+	}
+	
+	template<class E>
+	dense_vector_adaptor& operator += (const vector_expression<E>& e) {
+		return plus_assign(typename vector_temporary<self_type>::type(e));
 	}
 	template<class E>
-	dense_vector_adaptor& assign(const vector_expression<E> &ae) {
-		assign(*this, ae);
-		return *this;
+	dense_vector_adaptor& operator -= (const vector_expression<E>& e) {
+		return minus_assign(typename vector_temporary<E>::type(e));
 	}
 	template<class E>
-	dense_vector_adaptor& operator += (const vector_expression<E> &ae) {
-		assign (*this, typename vector_temporary<E>::type(*this + ae));
-		return *this;
+	dense_vector_adaptor& operator *= (const vector_expression<E>& e) {
+		return multiply_assign(typename vector_temporary<E>::type(e));
 	}
 	template<class E>
-	dense_vector_adaptor& plus_assign(const vector_expression<E> & ae) {
-		kernel::assign<scalar_plus_assign> (*this, ae);
-		return *this;
+	dense_vector_adaptor& operator /= (const vector_expression<E>& e) {
+		return divide_assign(typename vector_temporary<E>::type(e));
 	}
-	template<class E>
-	dense_vector_adaptor& operator -= (const vector_expression<E> &ae) {
-		assign(*this, typename vector_temporary<E>::type(*this - ae));
-		return *this;
-	}
-	template<class E>
-	dense_vector_adaptor& minus_assign(const vector_expression<E> &ae) {
-		kernel::assign<scalar_minus_assign> (*this, ae);
-		return *this;
-	}
+	
 	dense_vector_adaptor& operator *= (value_type t) {
-		kernel::assign<scalar_multiplies_assign> (*this, t);
+		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
 	dense_vector_adaptor& operator /= ( value_type t) {
-		kernel::assign<scalar_divides_assign> (*this, t);
+		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
 	

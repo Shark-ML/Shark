@@ -302,7 +302,7 @@ public:
 		//initialize output neurons using coefficients
 		RealSubMatrix outputDelta = subrange(delta,m_firstOutputNeuron,m_numberOfNeurons,0,numPatterns);
 		ConstRealSubMatrix outputResponse = subrange(s.responses,m_firstOutputNeuron,m_numberOfNeurons,0,numPatterns);
-		outputDelta = element_prod(outputDelta,m_outputNeuron.derivative(outputResponse));
+		noalias(outputDelta) *= m_outputNeuron.derivative(outputResponse);
 
 		//iterate backwards using the backprop matrix and propagate the errors to get the needed delta values
 		std::size_t endNeuron = m_firstOutputNeuron;
@@ -317,7 +317,7 @@ public:
 			ConstRealSubMatrix layerResponse = subrange(s.responses,beginNeuron,endNeuron,0,numPatterns);
 			RealMatrix propagate(weights.size1(),numPatterns);
 			axpy_prod(weights,layerDeltaInput,layerDelta,false);//add the values to the maybe non-empty delta part
-			noalias(layerDelta) = element_prod(layerDelta,m_hiddenNeuron.derivative(layerResponse));
+			noalias(layerDelta) *= m_hiddenNeuron.derivative(layerResponse);
 			//go a layer backwards
 			endNeuron=beginNeuron;
 		}

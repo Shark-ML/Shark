@@ -115,7 +115,7 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 				ckck(c1) += kernelMatrix(i,j);
 			}
 		}
-		noalias(ckck) = safeDiv(ckck,sqr(clusterSizes),0);
+		noalias(ckck) = safe_div(ckck,sqr(clusterSizes),0);
 		
 		UIntVector newClusterMembership(kernelMatrix.size1());
 		RealVector currentDistances(k);

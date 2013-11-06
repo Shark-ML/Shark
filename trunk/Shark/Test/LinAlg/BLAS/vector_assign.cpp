@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign ){
 			target_dense(i) = 3*i+2;
 		}
 		std::cout<<"testing dense-dense"<<std::endl;
-		blas::kernel::assign(target_dense,source_dense);
+		blas::kernels::assign(target_dense,source_dense);
 		checkVectorEqual(target_dense,source_dense);
 	}
 	
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign ){
 			target_dense(i) = 3*i+2;
 		}
 		std::cout<<"testing dense-sparse"<<std::endl;
-		blas::kernel::assign(target_dense,source_sparse);
+		blas::kernels::assign(target_dense,source_sparse);
 		checkVectorEqual(target_dense,source_sparse);
 	}
 	
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign ){
 		target_sparse(7) = 8;
 		target_sparse(9) = 3;
 		std::cout<<"testing sparse-dense"<<std::endl;
-		blas::kernel::assign(target_sparse,source_dense);
+		blas::kernels::assign(target_sparse,source_dense);
 		BOOST_CHECK_EQUAL(target_sparse.nnz(), 10);
 		checkVectorEqual(target_sparse,source_dense);
 	}
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign ){
 		target_sparse(7) = 8;
 		target_sparse(9) = 3;
 		std::cout<<"testing sparse-sparse"<<std::endl;
-		blas::kernel::assign(target_sparse,source_sparse);
+		blas::kernels::assign(target_sparse,source_sparse);
 		BOOST_CHECK_EQUAL(target_sparse.nnz(), 3);
 		checkVectorEqual(target_sparse,source_sparse);
 	}
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign_Functor ){
 			result_dense(i) = source_dense(i)+target_dense(i);
 		}
 		std::cout<<"testing dense-dense"<<std::endl;
-		blas::kernel::assign<blas::scalar_plus_assign>(target_dense,source_dense);
+		blas::kernels::assign<blas::scalar_plus_assign>(target_dense,source_dense);
 		checkVectorEqual(target_dense,result_dense);
 	}
 	
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign_Functor ){
 			result_dense(i) = source_sparse(i)+target_dense(i);
 		}
 		std::cout<<"testing dense-sparse"<<std::endl;
-		blas::kernel::assign<blas::scalar_plus_assign>(target_dense,source_sparse);
+		blas::kernels::assign<blas::scalar_plus_assign>(target_dense,source_sparse);
 		checkVectorEqual(target_dense,result_dense);
 	}
 	
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign_Functor ){
 			result_dense(i) = source_dense(i)+target_sparse(i);
 		}
 		std::cout<<"testing sparse-dense"<<std::endl;
-		blas::kernel::assign<blas::scalar_plus_assign>(target_sparse,source_dense);
+		blas::kernels::assign<blas::scalar_plus_assign>(target_sparse,source_dense);
 		BOOST_CHECK_EQUAL(target_sparse.nnz(), 10);
 		checkVectorEqual(target_sparse,result_dense);
 	}
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign_Functor ){
 			result_dense(i) = source_sparse(i)+target_sparse(i);
 		}
 		std::cout<<"testing sparse-sparse"<<std::endl;
-		blas::kernel::assign<blas::scalar_plus_assign>(target_sparse,source_sparse);
+		blas::kernels::assign<blas::scalar_plus_assign>(target_sparse,source_sparse);
 		BOOST_CHECK_EQUAL(target_sparse.nnz(), 5);
 		checkVectorEqual(target_sparse,result_dense);
 	}

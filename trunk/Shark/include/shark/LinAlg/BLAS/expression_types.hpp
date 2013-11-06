@@ -94,33 +94,42 @@ public:
 	typedef typename C::closure_type closure_type;
 
 
-	noalias_proxy(C &lval): lval_(lval) {}
+	noalias_proxy(C &lval): m_lval(lval) {}
 
-	noalias_proxy(const noalias_proxy &p):lval_(p.lval_) {}
+	noalias_proxy(const noalias_proxy &p):m_lval(p.m_lval) {}
 
 	template <class E>
-
 	closure_type &operator= (const E &e) {
-		lval_.assign(e);
-		return lval_;
+		m_lval.assign(e);
+		return m_lval;
 	}
 
 	template <class E>
-
 	closure_type &operator+= (const E &e) {
-		lval_.plus_assign(e);
-		return lval_;
+		m_lval.plus_assign(e);
+		return m_lval;
 	}
 
 	template <class E>
-
 	closure_type &operator-= (const E &e) {
-		lval_.minus_assign(e);
-		return lval_;
+		m_lval.minus_assign(e);
+		return m_lval;
+	}
+	
+	template <class E>
+	closure_type &operator*= (const E &e) {
+		m_lval.multiply_assign(e);
+		return m_lval;
+	}
+
+	template <class E>
+	closure_type &operator/= (const E &e) {
+		m_lval.divide_assign(e);
+		return m_lval;
 	}
 
 private:
-	closure_type lval_;
+	closure_type m_lval;
 };
 
 // Improve syntax of efficient assignment where no aliases of LHS appear on the RHS
