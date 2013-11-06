@@ -2,6 +2,7 @@
 #define SHARK_LINALG_BLAS_UBLAS_FUNCTIONAL_HPP
 
 #include <boost/math/constants/constants.hpp>
+#include <boost/type_traits/remove_reference.hpp> 
 
 #include "traits.hpp"
 #include <shark/Core/Exception.h>
