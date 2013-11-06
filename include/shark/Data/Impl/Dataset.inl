@@ -312,6 +312,10 @@ public:
 			new BatchType(batch)
 		));
 	}
+	
+	void append(SharedContainer const& other){
+		m_data.insert(m_data.end(),other.m_data.begin(),other.m_data.end());
+	}
 
 	////////////////////////////SPLITTING//////////////////////////////////////
 
