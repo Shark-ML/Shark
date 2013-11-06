@@ -1,7 +1,7 @@
 #ifndef SHARK_LINALG_BLAS_UBLAS_MATRIX_EXPRESSION_HPP
 #define SHARK_LINALG_BLAS_UBLAS_MATRIX_EXPRESSION_HPP
 
- #include <boost/type_traits/is_convertible.hpp> 
+#include <boost/type_traits/is_convertible.hpp> 
 #include "matrix_proxy.hpp"
 #include "operation.hpp"
 
