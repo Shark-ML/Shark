@@ -1,6 +1,6 @@
 //===========================================================================
 /*!
- *  \brief Data for (un-)supervised learning.
+ *  \brief Data for (un-)base_typevised learning.
  *
  *
  *  \par
@@ -287,6 +287,14 @@ public:
 		self_type right;
 		right.m_data=m_data.splice(m_data.begin()+batch);
 		return right;
+	}
+	
+	/// \brief Appends the contents of another data object to the end
+	///
+	/// The batches are not copied but now referenced from both datasets. Thus changing the appended
+	/// dataset might change this one as well. 
+	void append(self_type const& other){
+		m_data.append(other.m_data);
 	}
 
 	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
@@ -646,6 +654,16 @@ public:
 	self_type splice(std::size_t batch){
 		return self_type(m_data.splice(batch),m_label.splice(batch));
 	}
+	
+	/// \brief Appends the contents of another data object to the end
+	///
+	/// The batches are not copied but now referenced from both datasets. Thus changing the appended
+	/// dataset might change this one as well. 
+	void append(self_type const& other){
+		m_data.append(other.m_data);
+		m_label.append(other.m_label);
+	}
+	
 
 	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
 	///

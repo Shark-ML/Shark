@@ -191,6 +191,81 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_Boundary_Test )
 			index+=batchSizes[i];
 	}
 }
+
+BOOST_AUTO_TEST_CASE( Set_Merge_Test )
+{
+	std::vector<int> inputs1;
+	std::vector<int> inputs2;
+
+	for (size_t i=0;i!=50;++i) {
+		inputs1.push_back(i);
+	}
+	
+	for (size_t i=0;i!=70;++i) {
+		inputs2.push_back(50+i);
+	}
+	
+	Data<int> set1= createDataFromRange(inputs1,10);
+	Data<int> set2= createDataFromRange(inputs2,7);
+	
+	set1.append(set2);
+	
+	BOOST_REQUIRE_EQUAL(set1.numberOfBatches(),15);
+	BOOST_REQUIRE_EQUAL(set1.numberOfElements(),120);
+	for(std::size_t i = 0; i != 15; ++i){
+		if(i < 5){
+			BOOST_CHECK_EQUAL(set1.batch(i).size(),10);
+		}
+		else{
+			BOOST_CHECK_EQUAL(set1.batch(i).size(),7);
+		}
+	}
+
+	for(std::size_t i = 0; i != 120;++i){
+		BOOST_CHECK_EQUAL(set1.element(i),i);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( LabledData_Merge_Test )
+{
+	std::vector<int> inputs1;
+	std::vector<int> labels1;
+	std::vector<int> inputs2;
+	std::vector<int> labels2;
+
+	for (size_t i=0;i!=50;++i) {
+		inputs1.push_back(i);
+		labels1.push_back(i*2);
+	}
+	
+	for (size_t i=0;i!=70;++i) {
+		inputs2.push_back(50+i);
+		labels2.push_back((50+i)*2);
+	}
+	
+	LabeledData<int,int> set1= createLabeledDataFromRange(inputs1,labels1,10);
+	LabeledData<int,int> set2= createLabeledDataFromRange(inputs2,labels2,7);
+	
+	set1.append(set2);
+	
+	BOOST_REQUIRE_EQUAL(set1.numberOfBatches(),15);
+	BOOST_REQUIRE_EQUAL(set1.numberOfElements(),120);
+	for(std::size_t i = 0; i != 15; ++i){
+		if(i < 5){
+			BOOST_CHECK_EQUAL(set1.batch(i).size(),10);
+		}
+		else{
+			BOOST_CHECK_EQUAL(set1.batch(i).size(),7);
+		}
+	}
+
+	for(std::size_t i = 0; i != 120;++i){
+		BOOST_CHECK_EQUAL(set1.element(i).input,i);
+		BOOST_CHECK_EQUAL(set1.element(i).label,2*i);
+	}
+}
+
+
 BOOST_AUTO_TEST_CASE( Set_splitAtElement_MiddleOfBatch_Test )
 {
 	std::vector<int> inputs;
