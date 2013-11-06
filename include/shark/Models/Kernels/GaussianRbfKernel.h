@@ -190,12 +190,7 @@ public:
 		SIZE_CHECK(s.expNorm.size2() == sizeX2);
 		
 		gradient.resize(1);
-		gradient(0)=0;
-		for(std::size_t i = 0; i != sizeX1; ++i){
-			for(std::size_t j = 0; j != sizeX2; ++j){
-				gradient(0) -= coefficients(i,j)*s.expNorm(i,j) * s.norm2(i,j);
-			}
-		}
+		gradient(0)= - sum(coefficients *s.expNorm * s.norm2);
 		if(m_unconstrained){
 			gradient *= m_gamma;
 		}
@@ -219,11 +214,12 @@ public:
 		SIZE_CHECK(s.expNorm.size2() == sizeX2);
 		
 		gradient.resize(sizeX1,batchX1.size2());
-		gradient.clear();
+		RealMatrix W = coefficientsX2*s.expNorm;
+		axpy_prod(W,batchX2,gradient);
+		RealVector columnSum = sum_columns(coefficientsX2*s.expNorm);
+		
 		for(std::size_t i = 0; i != sizeX1; ++i){
-			for(std::size_t j = 0; j != sizeX2; ++j){
-				noalias(row(gradient,i)) += (coefficientsX2(i,j)*s.expNorm(i,j)) * (row(batchX2,j) - row(batchX1,i));
-			}
+			noalias(row(gradient,i)) -= columnSum(i) *  row(batchX1,i);
 		}
 		gradient*=2.0*m_gamma;
 	}
