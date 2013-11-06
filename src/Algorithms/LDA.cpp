@@ -92,7 +92,7 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	//which is equivalent to
 	//arg min_i m_i^T C^-1 m_i  -2* x^T C^-1 m_i
 	//arg max_i -m_i^T C^-1 m_i  +2* x^T C^-1 m_i
-	//so we compute first C^-1 m_i and than the first term
+	//so we compute first C^-1 m_i and then the first term
 	
 	//compute m_i^T C^-1  <=>  x C = m_i 
 	RealMatrix transformedMeans = means;
