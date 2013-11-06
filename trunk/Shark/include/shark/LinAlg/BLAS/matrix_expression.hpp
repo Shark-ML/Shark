@@ -1,6 +1,7 @@
 #ifndef SHARK_LINALG_BLAS_UBLAS_MATRIX_EXPRESSION_HPP
 #define SHARK_LINALG_BLAS_UBLAS_MATRIX_EXPRESSION_HPP
 
+ #include <boost/type_traits/is_convertible.hpp> 
 #include "matrix_proxy.hpp"
 #include "operation.hpp"
 
@@ -142,6 +143,17 @@ outer_prod(
         vector_expression<E2> const& e2
 ) {
 	typedef scalar_binary_multiply<typename E1::value_type, typename E2::value_type> Multiplier;
+	return vector_matrix_binary<E1, E2, Multiplier>(e1(), e2(),Multiplier());
+}
+
+// (outer_plus (v1, v2)) [i] [j] = v1 [i] + v2 [j]
+template<class E1, class E2>
+vector_matrix_binary<E1, E2, scalar_binary_multiply<typename E1::value_type, typename E2::value_type> >
+outer_plus(
+	vector_expression<E1> const& e1,
+        vector_expression<E2> const& e2
+) {
+	typedef scalar_binary_plus<typename E1::value_type, typename E2::value_type> Multiplier;
 	return vector_matrix_binary<E1, E2, Multiplier>(e1(), e2(),Multiplier());
 }
 
