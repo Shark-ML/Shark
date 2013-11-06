@@ -58,8 +58,6 @@ private:
 		RealMatrix kxy;
 		RealVector kxx;
 		RealVector kyy;
-		RealVector sqrtKxx;
-		RealVector sqrtKyy;
 		
 		boost::shared_ptr<State> stateKxy;
 		std::vector<boost::shared_ptr<State> > stateKxx;
@@ -165,13 +163,8 @@ public:
 		RealVector sqrtKyy=sqrt(s.kyy);
 		
 		//finally calculate the result
-		result = s.kxx;
-		for(std::size_t i = 0; i != sizeX1; ++i){
-			double sqrtKxx = std::sqrt(s.kxx[i]);
-			for(std::size_t j = 0; j != sizeX2; ++j){
-				result(i,j)/=sqrtKxx*sqrtKyy[j];
-			}
-		}
+		//r(i,j) = k(x_i,x_j)/sqrt(k(x_i,x_i))*sqrt(k(x_j,kx_j))
+		noalias(result) = s.kxx / outer_prod(sqrt(s.kxx),sqrtKyy);
 	}
 	
 	///evaluates \f$ k(x,y) \f$ for a batch of inputs
@@ -201,9 +194,7 @@ public:
 			get(singleBatch,i) = get(batchX1,i);
 			m_base.eval(singleBatch,singleBatch,singleResult,*s.stateKxx[i]);
 			double sqrtKxx = std::sqrt(singleResult(0,0));
-			for(std::size_t j = 0; j != sizeX2; ++j){
-				result(i,j)/=sqrtKxx*sqrtKyy[j];
-			}
+			noalias(row(result,i)) = sqrtKxx* result / sqrtKyy;
 		}
 	}
 
@@ -224,20 +215,13 @@ public:
 		std::size_t sizeX1 = size(batchX1);
 		std::size_t sizeX2 = size(batchX2);
 		
-		RealMatrix weights(sizeX1,sizeX2);
-		for(std::size_t i = 0; i != sizeX1;++i){
-			for(std::size_t j = 0; j != sizeX2; ++j){
-				weights(i,j) = coefficients(i,j)/(s.sqrtKxx[i]*s.sqrtKyy[j]);
-			}
-		}
+		RealMatrix weights = coefficients / sqrt(s.kxx,s.kyy);
 		
 		m_base->weightedParameterDerivative(batchX1,batchX2,weights,s.stateKxy,gradient);
 		
-		noalias(weights) = element_prod(weights,s.kxy);
-		RealVector wx = sum_rows(weights);
-		RealVector wy = sum_columns(weights);
-		noalias(wx) = 0.5*element_div(wx,s.kxx);
-		noalias(wy) = 0.5*element_div(wy,s.kyy);
+		noalias(weights) = weights * s.kxy;
+		RealVector wx = sum_rows(weights) / (2.0 * s.kxx);
+		RealVector wy = sum_columns(weights) / (2.0 * s.kyy);
 		
 		//the following mess could be made easier with an interface like 
 		//m_base->weightedParameterDerivative(batchX1,wx,s.statekxx,subGradient);
@@ -260,32 +244,6 @@ public:
 		}
 	}
 
-//	/// calculates the derivate w.r.t. argument \f$ x \f$
-//	///
-//	/// The derivative is calculated as follows:
-//	///\f[ \frac{\partial \tilde k(x,y)}{\partial x} = \frac{k'(x,y)}{\sqrt{k(x,x) k(y,y)}} - \frac{ k'(x,x) k(y,y) k(x,y)}{(k(x,x) k(y,y))^{3/2}} \f]
-//	/// where \f$ k'(x, y) = \partial k(x, y) / \partial x \f$.
-//	void inputDerivative(ConstInputReference x1, ConstInputReference x2, Intermediate const& intermediate, InputSuperVectorType& gradient) const{
-//		SIZE_CHECK(x1.size() == x2.size());
-//		SIZE_CHECK(intermediate.size() == numberOfIntermediateValues(x1,x2));
-//		
-//		std::size_t kernelIntermediates=m_base->numberOfIntermediateValues(x1,x2);
-//		Intermediate i12(intermediate,3,kernelIntermediates+3);
-//		Intermediate i11(intermediate,kernelIntermediates+3,2 * kernelIntermediates+3);
-//		double kxy = intermediate[0];
-//		double kxx = intermediate[1];
-//		double kyy = intermediate[2];
-//		
-//		InputSuperVectorType d12(x1.size()), d11(x1.size());
-//		m_base->inputDerivative(x1,x2,i12,d12);
-//		m_base->inputDerivative(x1,x1,i11,d11);
-
-//		double norm2 = kxx * kyy;
-//		double norm = std::sqrt(norm2);
-
-//		gradient = (d12 - (kxy / kxx) * d11) / norm;
-//	}
-	
 	/// Input derivative, calculated according to the equation:
 	/// <br/>
 	/// \f$ \frac{\partial k(x, y)}{\partial x}
@@ -312,9 +270,9 @@ public:
 		
 		m_base->weightedInputDerivative(batchX1,batchX2,weights,s.stateKxy,gradient);
 		
-		noalias(weights) = element_prod(weights,s.kxy);
+		noalias(weights) = weights * s.kxy;
 		RealVector wx = sum_rows(weights);
-		noalias(wx) = 0.5*element_div(wx,s.kxx);
+		noalias(wx) = 0.5*wx / s.kxx;
 		
 		//the following mess could be made easier with an interface like 
 		//m_base->weightedInputDerivative(batchX1,wx,s.statekxx,subGradient);

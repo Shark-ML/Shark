@@ -487,7 +487,7 @@ struct scalar_minus_assign{
 };
 
 template<class T1, class T2>
-struct scalar_multiplies_assign{
+struct scalar_multiply_assign{
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
 
@@ -496,7 +496,7 @@ struct scalar_multiplies_assign{
 	}
 };
 template<class T1, class T2>
-struct scalar_divides_assign{
+struct scalar_divide_assign{
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
 	
@@ -587,28 +587,6 @@ struct matrix_norm_1 {
 				t = u;
 		}
 		return t;
-	}
-};
-
-template<class M>
-struct matrix_norm_frobenius{
-	typedef typename M::value_type value_type;
-	typedef typename  real_traits<value_type>::type result_type;
-
-	template<class E>
-	static result_type apply(const matrix_expression<E> &e) {
-		scalar_abs_sqr<value_type> abs_sqr;
-		result_type t = result_type();
-		typedef typename E::size_type matrix_size_type;
-		matrix_size_type size1(e().size1());
-		matrix_size_type size2(e().size2());
-		for (matrix_size_type i = 0; i < size1; ++ i) {
-			for (matrix_size_type j = 0; j < size2; ++ j) {
-				t +=  abs_sqr(e()(i, j));
-			}
-		}
-		using std::sqrt;
-		return sqrt(t);
 	}
 };
 

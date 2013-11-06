@@ -6,7 +6,7 @@
 
 namespace shark {
 namespace blas {
-namespace kernel {
+namespace kernels {
 
 template<template <class T1, class T2> class F, class V>
 void assign(vector_expression<V>& v, typename V::value_type t) {

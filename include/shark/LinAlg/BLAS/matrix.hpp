@@ -159,21 +159,36 @@ public:
 	
 	template<class E>
 	matrix& assign(matrix_expression<E> const& e) {
-		kernel::assign(*this,e);
+		kernels::assign(*this,e);
 		return *this;
 	}
 	template<class E>
 	matrix& plus_assign(matrix_expression<E> const& e) {
 		SIZE_CHECK(size1() == e().size1());
 		SIZE_CHECK(size2() == e().size2());
-		kernel::assign<scalar_plus_assign> (*this, e);
+		kernels::assign<scalar_plus_assign> (*this, e);
 		return *this;
 	}
 	template<class E>
 	matrix& minus_assign(matrix_expression<E> const& e) {
 		SIZE_CHECK(size1() == e().size1());
 		SIZE_CHECK(size2() == e().size2());
-		kernel::assign<scalar_minus_assign> (*this, e);
+		kernels::assign<scalar_minus_assign> (*this, e);
+		return *this;
+	}
+	
+	template<class E>
+	matrix& multiply_assign(matrix_expression<E> const& e) {
+		SIZE_CHECK(size1() == e().size1());
+		SIZE_CHECK(size2() == e().size2());
+		kernels::assign<scalar_multiply_assign> (*this, e);
+		return *this;
+	}
+	template<class E>
+	matrix& divide_assign(matrix_expression<E> const& e) {
+		SIZE_CHECK(size1() == e().size1());
+		SIZE_CHECK(size2() == e().size2());
+		kernels::assign<scalar_divide_assign> (*this, e);
 		return *this;
 	}
 	
@@ -223,12 +238,43 @@ public:
 		SIZE_CHECK(size2() == e().size2());
 		return minus_assign(e);
 	}
+	
+	template<class E>
+	matrix& operator *= (matrix_expression<E> const& e) {
+		SIZE_CHECK(size1() == e().size1());
+		SIZE_CHECK(size2() == e().size2());
+		self_type temporary(*this * e);
+		swap(temporary);
+		return *this;
+	}
+	template<class C>          // Container assignment without temporary
+	matrix& operator *= (const matrix_container<C>& e) {
+		SIZE_CHECK(size1() == e().size1());
+		SIZE_CHECK(size2() == e().size2());
+		return multiply_assign(e);
+	}
+	
+	template<class E>
+	matrix& operator /= (matrix_expression<E> const& e) {
+		SIZE_CHECK(size1() == e().size1());
+		SIZE_CHECK(size2() == e().size2());
+		self_type temporary(*this / e);
+		swap(temporary);
+		return *this;
+	}
+	template<class C>          // Container assignment without temporary
+	matrix& operator /= (matrix_container<C> const& e) {
+		SIZE_CHECK(size1() == e().size1());
+		SIZE_CHECK(size2() == e().size2());
+		return divide_assign(e);
+	}
+	
 	matrix& operator *= (value_type t) {
-		kernel::assign<scalar_multiplies_assign> (*this, t);
+		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
 	matrix& operator /= (value_type t) {
-		kernel::assign<scalar_divides_assign> (*this, t);
+		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
 

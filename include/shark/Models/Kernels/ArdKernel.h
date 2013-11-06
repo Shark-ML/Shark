@@ -217,11 +217,10 @@ public:
 		for(std::size_t i = 0; i != sizeX1; ++i){
 			for(std::size_t j = 0; j != sizeX2; ++j){
 				double coeff = coefficients(i,j) * s.kxy(i,j);
-				gradient += coeff * element_prod(m_params,sqr(row(batchX1,i)-row(batchX2,j)));
+				gradient += coeff * m_params * sqr(row(batchX1,i)-row(batchX2,j));
 			}
 		}
 		gradient *= -2;
-		//noalias(gradient) = -2.0 * exponential * element_prod(m_params,sqr(x1-x2));
  	}
 
 	/// \brief evaluates \f$ \frac {\partial k(x,z)}{\partial x}\f$
@@ -248,12 +247,10 @@ public:
 		for(std::size_t i = 0; i != sizeX1; ++i){
 			for(std::size_t j = 0; j != sizeX2; ++j){
 				double coeff = coefficientsX2(i,j) * s.kxy(i,j);
-				row(gradient,i) += coeff * element_prod(m_gammas,row(batchX1,i)-row(batchX2,j));
+				row(gradient,i) += coeff * m_gammas * (row(batchX1,i)-row(batchX2,j));
 			}
 		}
 		gradient *= -2.0;
-
-		//noalias(gradient) = -2.0 * exponential * element_prod(m_gammas,x1-x2);
 	}
 
 	void read(InArchive& ar){

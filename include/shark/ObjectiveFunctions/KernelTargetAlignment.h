@@ -329,11 +329,11 @@ private:
 				std::size_t columnSize = size(m_data.batch(j));
 				RealMatrix blockK = (*mep_kernel)(m_data.batch(i).input,m_data.batch(j).input);
 				if(i == j){
-					KK+=sum(element_prod(blockK,blockK));
+					KK += frobenius_prod(blockK,blockK);
 					subrange(k,startColumn,startColumn+columnSize)+=sum_rows(blockK);//update sum_rows(K)
 				}
 				else{//use symmetry ok K
-					KK+=2.0*sum(element_prod(blockK,blockK));
+					KK += 2.0* frobenius_prod(blockK,blockK);
 					subrange(k,startColumn,startColumn+columnSize)+=sum_rows(blockK);
 					subrange(k,startRow,startRow+rowSize)+=sum_columns(blockK);//symmetry: block(j,i)
 				}

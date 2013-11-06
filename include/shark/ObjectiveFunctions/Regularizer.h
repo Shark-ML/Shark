@@ -82,7 +82,7 @@ public:
 		}
 		else
 		{
-			return norm_1(element_prod(input,m_mask));
+			return norm_1(input * m_mask);
 		}
 	}
 

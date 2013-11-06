@@ -119,7 +119,7 @@ public:
 	compressed_vector(vector_expression<AE> const& ae, size_type non_zeros = 0)
 	:m_size(ae().size()), m_nnz(0), m_indices(non_zeros,0), m_values(non_zeros),m_zero(0)
 	{
-		kernel::assign(*this, ae);
+		kernels::assign(*this, ae);
 	}
 
 	// Accessors
@@ -222,7 +222,7 @@ public:
 	}
 	template<class AE>
 	compressed_vector &assign(vector_expression<AE> const& ae) {
-		kernel::assign(*this, ae);
+		kernels::assign(*this, ae);
 		return *this;
 	}
 
@@ -239,7 +239,7 @@ public:
 	}
 	template<class AE>
 	compressed_vector &plus_assign(vector_expression<AE> const& ae) {
-		kernel::assign<scalar_plus_assign> (*this, ae);
+		kernels::assign<scalar_plus_assign> (*this, ae);
 		return *this;
 	}
 	template<class AE>
@@ -254,15 +254,15 @@ public:
 	}
 	template<class AE>
 	compressed_vector &minus_assign(vector_expression<AE> const& ae) {
-		kernel::assign<scalar_minus_assign> (*this, ae);
+		kernels::assign<scalar_minus_assign> (*this, ae);
 		return *this;
 	}
 	compressed_vector &operator *= (value_type t) {
-		kernel::assign<scalar_multiplies_assign> (*this, t);
+		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
 	compressed_vector &operator /= (value_type t) {
-		kernel::assign<scalar_divides_assign> (*this, t);
+		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
 

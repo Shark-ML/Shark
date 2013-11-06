@@ -138,7 +138,7 @@ public:
 		RealMatrix kernelResult(sizeX1,sizeX2);
 		for(std::size_t i = 1; i != m_kernels.size(); ++i){
 			m_kernels[i]->eval(batchX1,batchX2,kernelResult);
-			noalias(result) = element_prod(result,kernelResult);
+			noalias(result) *= kernelResult;
 		}
 	}
 	

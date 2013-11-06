@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Binary_Div)
 	checkDenseExpressionEquality(element_div(x,y),result);
 }
 
-BOOST_AUTO_TEST_CASE( BLAS_Vector_SafeDiv )
+BOOST_AUTO_TEST_CASE( BLAS_Vector_Safe_Div )
 {
 	vector<double> x(Dimensions); 
 	vector<double> y(Dimensions); 
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_SafeDiv )
 		y(i) = i % 3;
 		result(i) = (i % 3 == 0)? 2.0: x(i)/y(i);
 	}
-	checkDenseExpressionEquality(safeDiv(x,y,2.0),result);
+	checkDenseExpressionEquality(safe_div(x,y,2.0),result);
 }
 
 /////////////////////////////////////////////////////
