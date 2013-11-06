@@ -1,6 +1,9 @@
 #ifndef _BOOST_UBLAS_ITERATOR_
 #define _BOOST_UBLAS_ITERATOR_
 
+#include <boost/type_traits/remove_const.hpp> 
+#include <boost/type_traits/is_const.hpp> 
+#include <boost/mpl/if.hpp> 
 #include <shark/Core/Exception.h>
 #include <iterator>
 
