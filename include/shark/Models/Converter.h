@@ -238,6 +238,16 @@ public:
 			output = arg_max(modelResult);
 		}
 	}
+	
+	/// From ISerializable
+	void read(InArchive& archive){
+		archive >> m_decisionFunction;
+	}
+	/// From ISerializable
+	void write(OutArchive& archive) const{
+		archive << m_decisionFunction;
+	}
+	
 private:
 	Model m_decisionFunction;
 };
