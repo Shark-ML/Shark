@@ -52,7 +52,7 @@ Different types of Datasets
 --------------------------------
 
 The three dataset classes in shark differ not much in their implementation, as
-thy all use the same underlying structure. However they provide important semantic
+they all use the same underlying structure. However they provide important semantic
 differentiation as well as special functions tailored to this differentiation. Before
 we introduce the interface of the data object we want to clarify this distinction:
 
@@ -62,12 +62,14 @@ we introduce the interface of the data object we want to clarify this distinctio
 
 * :doxy:`UnlabeledData` represents input data which is not labeled.
   This is the input format used for unsupervised learning methods. The unlabeled
-  data class is a subclass of Data and does not offer much new functionality compared to ``Data``.
-  ut it provides an important *semantic* difference, as these data
+  data class is a subclass of Data and does not offer much new functionality
+  compared to ``Data``.
+  But it provides an important *semantic* difference, as these data
   points are interpreted as input data without labels, compared to the above
   mentioned Data class whose contents might store anything (for example model
   outputs, labels or points) . Datasets as used in machine learning are
-  inherently unordered constructs, thus it is okay for an algorithm to shuffle or otherwise
+  inherently unordered constructs, thus it is okay for an algorithm to shuffle or
+  otherwise
   reorder the contents of a dataset. This is reflected in the set, that shuffling
   is actively supported using the :doxy:`UnlabeledData::shuffle` method.
 
