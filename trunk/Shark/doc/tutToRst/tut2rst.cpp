@@ -104,11 +104,12 @@ int main(int argc, char** argv)
 			// parse example filename and snippet name
 			pos += 12;
 			size_t comma = input.find(",", pos);
-			if (comma == string::npos)
+			size_t closing = input.find(">", pos);
+			start = closing + 1;
+			if (closing == string::npos) throw string("sharkcode tag not closed (missing '>')");
+			if (comma > closing)
 			{
 				// simple form for the inclusion of whole files
-				size_t closing = input.find(">", pos);
-				if (closing == string::npos) throw string("sharkcode tag not closed (missing '>')");
 				string examplename = input.substr(pos, closing - pos);
 				cout << "  placing file '" << examplename << "'" << endl;
 
@@ -126,10 +127,7 @@ int main(int argc, char** argv)
 				string examplename = input.substr(pos, comma - pos);
 				size_t npos = comma + 1;
 				while (input[npos] == ' ') npos++;
-				size_t closing = input.find(">", npos);
-				if (closing == string::npos) throw string("sharkcode tag not closed (missing '>')");
 				string name = input.substr(npos, closing - npos);
-				start = closing + 1;
 				cout << "  placing snippet '" << name << "' from file '" << examplename << "'" << endl;
 
 				// insert snippet(s) from example file
