@@ -1,11 +1,12 @@
-#include <shark/Algorithms/Pegasos.h>
-#include <shark/Algorithms/Trainers/McSvmLLWTrainer.h>
+
 #include <shark/Data/Dataset.h>
-#include <shark/Data/DataDistribution.h>
-#include <shark/Models/Converter.h>
-#include <shark/Models/ConcatenatedModel.h>
-#include <shark/Models/LinearModel.h>
+#include <shark/Models/LinearClassifier.h>
+#include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+#include <shark/Data/DataDistribution.h>
+//###begin<includes>
+#include <shark/Algorithms/Trainers/McSvmOVATrainer.h>
+//###end<includes>
 
 using namespace shark;
 
@@ -60,7 +61,9 @@ int main(int argc, char** argv)
 
 	// train the machine
 	std::cout << "machine training ..." << std::endl;
-	LinearMcSvmLLWTrainer<VectorType> trainer(1.0 / (lambda * ell), epsilon);
+//###begin<trainer>
+	LinearMcSvmOVATrainer<VectorType> trainer(1.0 / (lambda * ell), epsilon);
+//###end<trainer>
 	trainer.train(svm, training);
 	std::cout << "done." << std::endl;
 
