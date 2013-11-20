@@ -1,0 +1,95 @@
+==============================
+Linear Support Vector Machines
+==============================
+
+Support vector machines (SVMs) are traditionally viewed as a
+kernel-based learning method. However, flexible non-linear models are
+not always needed, and in particular for huge scale feature spaces
+(e.g., in text mining and bioinformatics) linear models are sufficiently
+rich. The decisive advantage of linear SVMs is that they can be trained
+significantly faster than kernel-based models. Coordinate Descent (CD)
+training of the dual problem is per iteration faster by a factor up to
+the number of data points [HCLKS2008]_, which can make a big difference.
+The algorithms implemented in Shark closely follow [GU2013]_.
+
+Shark provides various trainers for linear SVMs. These are mostly
+analogous to the non-linear case. Therefore you may wish to read the
+tutorial on SVMs first if you have not yet done so: :doc:`svm`
+
+As usual we start with the necessary includes ::
+
+..sharkcode<Supervised/CSvmLinear.tpp,includes>
+..sharkcode<Supervised/McSvmLinear.tpp,includes>
+
+where the last line is one possible choice for multi-class problems,
+see below.
+
+For a linear SVM to be applicable the input components of the data need
+to be vector valued. We consider one of the following, depending on
+whether inputs are sparse or not::
+
+..sharkcode<Supervised/CSvmLinear.tpp,vectortype>
+
+With this definition in place we instanciate a linear classifier model::
+
+..sharkcode<Supervised/CSvmLinear.tpp,model>
+
+mapping inputs to `unsigned int` class labels. This is just a standard
+:doxy:`LinearModel`, concatenated with an :doxy:`ArgMaxConverter`. So it
+computes one linear function per class and predicts the class that got
+the highest score (a single value is computed and thresholded at zero in
+case of only two classes).
+
+
+Machine Training
+----------------
+
+Given a classification data set
+
+..sharkcode<Supervised/CSvmLinear.tpp,traindata>
+
+and a regulariztion constant C > 0 we can train a linear SVM.
+Assuming binary labels the default is to use a C-SVM: ::
+
+..sharkcode<Supervised/CSvmLinear.tpp,trainer>
+..sharkcode<Supervised/CSvmLinear.tpp,training>
+
+A major difference to the non-linear case is that we do not need to
+define a kernel (and thus there is no need to tune kernel parameters).
+Of course we can make predictions and evaluation the model with a loss
+function in the usual way:
+
+..sharkcode<Supervised/CSvmLinear.tpp,evaluation>
+
+In case of more than two labels there is a broad variety of methods
+available, varying mostly in the loss employed for training. The
+one-versus-all (OVA) method is a strong baseline: ::
+
+..sharkcode<Supervised/McSvmLinear.tpp,trainer>
+
+Other possibilities are the machines proposed by Weston and Watkins
+(:doxy:`LinearMcSvmWWTrainer`), Crammer and Singer (:doxy:`LinearMcSvmCSTrainer`),
+Lee, Lin and Wahba (:doxy:`LinearMcSvmLLWTrainer`), and many more
+(:doxy:`LinearMcSvmMMRTrainer`, :doxy:`LinearMcSvmADMTrainer`,
+:doxy:`LinearMcSvmATMTrainer`, and :doxy:`LinearMcSvmATSTrainer`).
+
+Being left with this much choice is probably not helpful. In our
+experience the best strategy for picking a machine is to try WW and CS
+first, and LLW and ATS for high-dimensional feature spaces. OVA can be
+useful at times, and MMR, ADM and ATM can usually be ignored.
+
+Currently Shark does not provide a specialized trainer for linear SVM
+regression. Of course the non-linear :doxy:`EpsilonSvmTrainer` can be
+used with a :doxy:`LinearKernel` for this purpose.
+
+
+References
+----------
+
+.. [HCLKS2008] C. J. Hsieh, K. W. Chang, C. J. Lin, S. S. Keerthi, and S. Sundararajan.
+	A dual coordinate descent method for large-scale linear SVM.
+	In Proceedings of the 30th International Conference on Machine learning (ICML), 2008.
+
+.. [GU2013] T. Glasmachers and Ü. Dogan.
+   Accelerated Coordinate Descent with Adaptive Coordinate Frequencies.
+   In Proceedings of the fifth Asian Conference on Machine Learning (ACML), 2013.

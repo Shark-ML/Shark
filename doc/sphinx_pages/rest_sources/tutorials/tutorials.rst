@@ -118,6 +118,8 @@ Kernel methods -- support vector machine training and model selection:
 * :doc:`algorithms/svmModelSelection`
 * :doc:`algorithms/svmLikelihoodModelSelection`
 * :doc:`algorithms/lkc-mkl`
+* :doc:`algorithms/linear-svm`
+* :doc:`algorithms/kta`
 
 Direct search methods -- the covariance matrix adaptation evolution strategy:
 
