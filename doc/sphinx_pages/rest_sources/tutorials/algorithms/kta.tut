@@ -35,7 +35,7 @@ where c > 0 is any constant.
 Actually realizing a feature mapping with this exact property in practice
 most probably means heavy over-fitting. Still, within a parametric family
 of kernels aiming in this direction usually is a good idea. This preference
-is expressed by kernel target alignment objective function ::
+is expressed by kernel target alignment objective function
 
 .. math ::
 	\frac{\langle K, Y \rangle}{\sqrt{\langle K, K \rangle}}
