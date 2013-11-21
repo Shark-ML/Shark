@@ -557,7 +557,7 @@ public:
 	
 	bool same_closure(self_type const& t) const {
 		//same closure if the values segments are overlapping
-		return (t.storage()+t.size()) > storage()& & (t.storage() < storage()+size());
+		return (t.storage()+t.size()) > storage() && (t.storage() < storage()+size());
 	}
 	
 	// --------------
