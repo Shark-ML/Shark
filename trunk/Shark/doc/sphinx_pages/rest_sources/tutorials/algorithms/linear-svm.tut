@@ -9,8 +9,8 @@ not always needed, and in particular for huge scale feature spaces
 rich. The decisive advantage of linear SVMs is that they can be trained
 significantly faster than kernel-based models. Coordinate Descent (CD)
 training of the dual problem is per iteration faster by a factor up to
-the number of data points [HCLKS2008]_, which can make a big difference.
-The algorithms implemented in Shark closely follow [GU2013]_.
+the number of data points [HCLKS-2008]_, which can make a big difference.
+The algorithms implemented in Shark closely follow [GU-2013]_.
 
 Shark provides various trainers for linear SVMs. These are mostly
 analogous to the non-linear case. Therefore you may wish to read the
@@ -86,10 +86,10 @@ used with a :doxy:`LinearKernel` for this purpose.
 References
 ----------
 
-.. [HCLKS2008] C. J. Hsieh, K. W. Chang, C. J. Lin, S. S. Keerthi, and S. Sundararajan.
+.. [HCLKS-2008] C. J. Hsieh, K. W. Chang, C. J. Lin, S. S. Keerthi, and S. Sundararajan.
 	A dual coordinate descent method for large-scale linear SVM.
 	In Proceedings of the 30th International Conference on Machine learning (ICML), 2008.
 
-.. [GU2013] T. Glasmachers and Ü. Dogan.
+.. [GU-2013] T. Glasmachers and Ãœ. Dogan.
    Accelerated Coordinate Descent with Adaptive Coordinate Frequencies.
    In Proceedings of the fifth Asian Conference on Machine Learning (ACML), 2013.

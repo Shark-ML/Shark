@@ -54,6 +54,7 @@
    rest_sources/tutorials/algorithms/linearRegression
    rest_sources/tutorials/algorithms/nearestNeighbor
    rest_sources/tutorials/algorithms/kmeans
+   rest_sources/tutorials/algorithms/LASSO
 
    rest_sources/tutorials/algorithms/ffnet
    rest_sources/tutorials/algorithms/sparse_ae
@@ -67,6 +68,7 @@
    rest_sources/tutorials/algorithms/svmLikelihoodModelSelection
    rest_sources/tutorials/algorithms/lkc-mkl
    rest_sources/tutorials/algorithms/linear-svm
+   rest_sources/tutorials/algorithms/kta
 
    rest_sources/tutorials/algorithms/cma
    rest_sources/tutorials/algorithms/mocma
