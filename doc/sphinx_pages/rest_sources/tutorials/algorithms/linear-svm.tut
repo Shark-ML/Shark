@@ -44,7 +44,7 @@ case of only two classes).
 Machine Training
 ----------------
 
-Given a classification data set
+Given a classification data set ::
 
 ..sharkcode<Supervised/CSvmLinear.tpp,traindata>
 
@@ -56,14 +56,16 @@ Assuming binary labels the default is to use a C-SVM: ::
 
 A major difference to the non-linear case is that we do not need to
 define a kernel (and thus there is no need to tune kernel parameters).
-Of course we can make predictions and evaluation the model with a loss
-function in the usual way:
+Of course we can make predictions and evaluate the model with a loss
+function in the usual way: ::
 
 ..sharkcode<Supervised/CSvmLinear.tpp,evaluation>
 
-In case of more than two labels there is a broad variety of methods
-available, varying mostly in the loss employed for training. The
-one-versus-all (OVA) method is a strong baseline: ::
+For SVMs the case of more than two classes is very different from the
+binary classification setting. For this so-called multi-class case there
+is a broad variety of methods available, varying mostly in the loss
+employed for training. The one-versus-all (OVA) method is a strong
+baseline: ::
 
 ..sharkcode<Supervised/McSvmLinear.tpp,trainer>
 
