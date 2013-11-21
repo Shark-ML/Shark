@@ -66,7 +66,7 @@ RBF kernel. ::
 ..sharkcode<Supervised/KTA-tutorial.tpp>
 
 The example first constructs a toy data set and a :doxy:`GaussianRbfKernel`
-instance with bandwidth parameter :math:`gamma`. The parameter is set to
+instance with bandwidth parameter :math:`\gamma`. The parameter is set to
 the initial guess of 0.5. Then the KTA objective function is constructed,
 and the kernel object as well as the data is made know to it. The program
 runs 50 iterations of the gradient-based :doxy:`IRpropPlus` optimizer to

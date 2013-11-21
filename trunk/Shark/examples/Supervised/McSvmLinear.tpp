@@ -38,18 +38,18 @@ int main(int argc, char** argv)
 {
 	if (argc != 4)
 	{
-		std::cout << "required parameters: ell lambda epsilon" << std::endl;
+		std::cout << "required parameters: ell C epsilon" << std::endl;
 		return 1;
 	}
 
 	// experiment settings
 	unsigned int ell = std::atoi(argv[1]);
-	double lambda = std::atof(argv[2]);
+	double C = std::atof(argv[2]);
 	double epsilon = std::atof(argv[3]);
 	unsigned int tests = 10000;
-	std::cout <<"ell="<< ell<<std::endl;
-	std::cout <<"lambda="<<  lambda<<std::endl;
-	std::cout <<"epsilon="<< epsilon<<std::endl;
+	std::cout << "ell=" << ell << std::endl;
+	std::cout << "C=" << C << std::endl;
+	std::cout << "epsilon=" << epsilon << std::endl;
 
 	// generate a very simple dataset with a little noise
 	Problem problem;
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 	// train the machine
 	std::cout << "machine training ..." << std::endl;
 //###begin<trainer>
-	LinearMcSvmOVATrainer<VectorType> trainer(1.0 / (lambda * ell), epsilon);
+	LinearMcSvmOVATrainer<VectorType> trainer(C, epsilon);
 //###end<trainer>
 	trainer.train(svm, training);
 	std::cout << "done." << std::endl;
