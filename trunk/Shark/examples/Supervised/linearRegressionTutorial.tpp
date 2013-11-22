@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 	}
 
 	try {
-		import_csv(labels, argv[2], 0);
+		import_csv(labels, argv[2]);
 	}
 	catch (...) {
 		cerr << "unable to read labels from file " <<  argv[2] << endl;
