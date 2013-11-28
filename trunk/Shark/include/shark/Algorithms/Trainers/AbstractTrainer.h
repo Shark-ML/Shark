@@ -70,8 +70,9 @@ public:
 	typedef Model ModelType;
 	typedef typename ModelType::InputType InputType;
 	typedef LabelTypeT LabelType;
+	typedef LabeledData<InputType, LabelType> DatasetType;
 	/// Core of the Trainer interface
-	virtual void train(ModelType& model, const LabeledData<InputType, LabelType>& dataset) = 0;
+	virtual void train(ModelType& model, DatasetType const& dataset) = 0;
 };
 
 

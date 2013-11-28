@@ -147,9 +147,16 @@ public:
 	RealMatrix const& matrix() const{
 		return m_matrix;
 	}
+	
+	RealMatrix& matrix(){
+		return m_matrix;
+	}
 
 	/// return the offset
 	RealVector const& offset() const{
+		return m_offset;
+	}
+	RealVector& offset(){
 		return m_offset;
 	}
 	
