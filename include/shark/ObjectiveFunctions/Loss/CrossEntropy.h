@@ -165,8 +165,8 @@ public:
 		unsigned int const& target,
 		RealVector const& prediction,
 		RealVector& gradient,
-		base_type::MatrixType& hessian) const
-	{
+		RealMatrix& hessian
+	) const{
 		gradient.resize(prediction.size());
 		hessian.resize(prediction.size(),prediction.size());
 		if ( prediction.size() == 1 )
@@ -186,13 +186,7 @@ public:
 			gradient/=norm;
 
 			noalias(hessian)=-outer_prod(gradient,gradient);
-//			for(std::size_t i = 0; i != prediction.size(); ++i){
-//				for(std::size_t j = 0; j != prediction.size(); ++j){
-//					hessian(i,j) = gradient(i)*gradient(j);
-//				}
-//			}
-			for(std::size_t i = 0; i!= prediction.size();++i)
-				hessian(i,i)+=gradient(i);
+			noalias(diag(hessian)) += gradient;
 			gradient(target) -= 1;
 
 			return std::log(norm) - prediction(target);

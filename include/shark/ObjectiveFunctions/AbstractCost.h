@@ -79,7 +79,7 @@ public:
 	/// list of features a cost function can have
 	enum Feature {
 		HAS_FIRST_DERIVATIVE = 1,
-		//~ HAS_SECOND_DERIVATIVE = 2,
+		HAS_SECOND_DERIVATIVE = 2,
 		IS_LOSS_FUNCTION = 4,
 	};
 

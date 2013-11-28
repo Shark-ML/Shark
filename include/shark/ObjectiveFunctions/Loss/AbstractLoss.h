@@ -94,6 +94,20 @@ public:
 		gradient = get(gradientBatch, 0);
 		return ret;
 	}
+	
+	/// \brief evaluate the loss and its first and second derivative for a target and a prediction
+	///
+	/// \param  target      target value
+	/// \param  prediction  prediction, typically made by a model
+	/// \param  gradient    the gradient of the loss function with respect to the prediction
+	/// \param  hessian     the hessian of the loss function with respect to the prediction
+	virtual double evalDerivative(
+		LabelType const& target, OutputType const& prediction,
+		OutputType& gradient,MatrixType & hessian
+	) const {
+		SHARK_FEATURE_EXCEPTION_DERIVED(HAS_SECOND_DERIVATIVE);
+		return 0.0;  // dead code, prevent warning
+	}
 
 	/// \brief evaluate the loss and the derivative w.r.t. the prediction
 	///
