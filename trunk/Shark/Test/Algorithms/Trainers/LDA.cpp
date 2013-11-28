@@ -9,7 +9,7 @@
 using namespace shark;
 
 BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
-	const size_t trainExamples = 10000;
+	const size_t trainExamples = 12000;
 	LDA trainer;
 	LinearClassifier<> model;
 
@@ -32,6 +32,9 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 	mean[0](1)=0;
 	mean[1](0)=6;
 	mean[1](1)=6;
+	
+	double prior[2]={std::log(1.0/3.0),std::log(2.0/3.0)};
+	
 	dist.setCovarianceMatrix(covariance);
 
 
@@ -40,14 +43,14 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 
 	double statisticalBayesRisk=0;
 	for(size_t i=0;i!=trainExamples;++i){
-		//create sample
-		target[i]=i%2;
+		//create samples. class 1 has double as many elements as class 0
+		target[i]=(i%3 == 0);
 		input[i]=dist().first+mean[target[i]];
 		//calculate bayes Target - the best fit to the distributions
 		RealVector diff=input[i]-mean[0];
-		double dist0=inner_prod(diff,prod(inverse,diff));
+		double dist0=inner_prod(diff,prod(inverse,diff))+prior[0];
 		diff=input[i]-mean[1];
-		double dist1=inner_prod(diff,prod(inverse,diff));
+		double dist1=inner_prod(diff,prod(inverse,diff))+prior[1];
 		unsigned int bayesTarget = dist0>dist1;
 		statisticalBayesRisk+= bayesTarget != target[i];
 	}
@@ -70,7 +73,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 }
 
 BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
-	const size_t trainExamples = 10000;
+	const size_t trainExamples = 12000;
 	LDA trainer;
 	LinearClassifier<> model;
 
@@ -96,6 +99,8 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	mean[1](0)=6;
 	mean[1](1)=6;
 	dist.setCovarianceMatrix(covariance);
+	
+	double prior[2]={std::log(2.0/3.0),std::log(1.0/3.0)};
 
 
 	std::vector<RealVector> input(trainExamples,RealVector(3));
@@ -104,13 +109,13 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	double statisticalBayesRisk=0;
 	for(size_t i=0;i!=trainExamples;++i){
 		//create sample
-		target[i]=i%2;
+		target[i]= (i%3 != 0);
 		RealVector vec = dist().first+mean[target[i]];
 		//calculate bayes Target - the best fit to the distributions
 		RealVector diff=vec-mean[0];
-		double dist0=inner_prod(diff,prod(inverse,diff));
+		double dist0=inner_prod(diff,prod(inverse,diff)) + prior[0];
 		diff=vec-mean[1];
-		double dist1=inner_prod(diff,prod(inverse,diff));
+		double dist1=inner_prod(diff,prod(inverse,diff)) + prior[1];
 		unsigned int bayesTarget = dist0>dist1;
 		statisticalBayesRisk+= bayesTarget != target[i];
 		init(input[i])<<vec,0;//add third zero
@@ -152,7 +157,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 	RealMatrix inverse(2,2,0.0);
 	inverse(0,0) = inverse(1,1) = 1.0;
 	blas::solveSymmSystemInPlace<blas::SolveAXB>(covariance,inverse);
-
+	
 	std::vector<RealVector> mean(classes,RealVector(2));
 	for(unsigned int c = 0; c != classes; ++c){
 		for(std::size_t j = 0; j != 2; ++j){

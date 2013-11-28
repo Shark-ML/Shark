@@ -50,7 +50,7 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	std::size_t classes = numberOfClasses(dataset);
 
 	//required statistics
-	std::vector<unsigned > num(classes,0);
+	UIntVector num(classes,0);
 	RealMatrix means(classes, dim,0.0);
 	RealMatrix covariance(dim, dim,0.0);
 	
@@ -63,7 +63,7 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 		for (std::size_t e=0; e != currentBatchSize; e++){
 			//update mean and class count for this sample
 			std::size_t c = labels(e);
-			++num[c];
+			++num(c);
 			noalias(row(means,c))+=row(points,e);
 		}
 		//update second moment matrix
@@ -74,8 +74,8 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	for (std::size_t c = 0; c != classes; c++){
 		if (num[c] == 0) 
 			throw SHARKEXCEPTION("[LDA::train] LDA can not handle a class without examples");
-		row(means,c) /= num[c];
-		double factor = num[c];
+		row(means,c) /= num(c);
+		double factor = num(c);
 		factor/=inputs-classes;
 		noalias(covariance)-= factor*outer_prod(row(means,c),row(means,c));
 	}
@@ -88,23 +88,24 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	}
 	
 	//the formula for the linear classifier is
-	//arg min_i (x-m_i)^T C^-1 (x-m_i)
-	//which is equivalent to
-	//arg min_i m_i^T C^-1 m_i  -2* x^T C^-1 m_i
-	//arg max_i -m_i^T C^-1 m_i  +2* x^T C^-1 m_i
+	// arg max_i log(P(x|i) * P(i))
+	//= arg max_i log(P(x|i)) +log(P(i))
+	//= arg max_i -(x-m_i)^T C^-1 (x-m_i) +log(P(i))
+	//= arg max_i -m_i^T C^-1 m_i  +2* x^T C^-1 m_i + log(P(i))
 	//so we compute first C^-1 m_i and then the first term
 	
-	//compute m_i^T C^-1  <=>  x C = m_i 
+	// compute z = m_i^T C^-1  <=>  z C = m_i 
+	// this is the expensive step of the calculation.
 	RealMatrix transformedMeans = means;
 	blas::solveSymmSemiDefiniteSystemInPlace<blas::SolveXAB>(covariance,transformedMeans);
-	transformedMeans*=-1;//transform to maximisation problem
 	
-	//compute bias terms m_i^T C^-1 m_i
+	//compute bias terms m_i^T C^-1 m_i - log(P(i))
 	RealVector bias(classes);
-	for(std::size_t i = 0; i != classes; ++i){
-		bias(i) = inner_prod(row(means,i),row(transformedMeans,i));
+	for(std::size_t c = 0; c != classes; ++c){
+		double prior = std::log(double(num(c))/inputs);
+		bias(c) = - inner_prod(row(means,c),row(transformedMeans,c)) + prior;
 	}
-	transformedMeans *= -2.0;
+	transformedMeans *= 2.0;
 
 	//fill the model
 	model.decisionFunction().setStructure(transformedMeans,bias);

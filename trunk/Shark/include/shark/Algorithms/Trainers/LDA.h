@@ -48,10 +48,16 @@ namespace shark {
 //!
 //! \brief Linear Discriminant Analysis (LDA)
 //!
-//! \par This class supports two different versions of the LDA. The first is the binary LDA for
-//! 2 Classes. It uses boolean class labels and returns a linear model. The other one is a multiclass
-//! LDA, which uses vectors as class labels.
+//! This classes implements the well known linear discriminant analysis. LDA assumes that
+//! every point is drawn from a multivariate normal distributions. Every class has its own mean
+//! but all classes have the same covariance.
 //!
+//! An arbitrary number of classes is supported. The resulting model is of the form
+//! \f[ \arg \max_c \log(p(x|c)*P(c)) \f]
+//! where \f$ p(x|c) = \exp(-(x-m_c)^T(C+\alpha I)(x-m_c)) \f$.
+//! \f$ m_c\f$ are the means of class c, \f$ C \f$ is the covariance matrix formed by all data points.
+//! The regularization paramter \f$ \alpha \f$ is by default 0. The trainer is implemented such, that
+//! it still works when C is singular, in this case the singular directions are ignored. 	
 class LDA : public AbstractTrainer<LinearClassifier<>, unsigned int>, public IParameterizable
 {
 public:
