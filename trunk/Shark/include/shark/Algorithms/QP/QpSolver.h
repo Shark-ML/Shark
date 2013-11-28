@@ -330,11 +330,11 @@ public:
 		double newCp = m_Cp*factor;
 		double newCn = m_Cn*factor;
 		for(std::size_t i = 0; i != dimensions();  ++i){
-			//~ if(sameFactor&& factor == variableScalingFactor && positive[i] && alpha(i)== m_Cp)
-				//~ alpha(i) = newCp;
-			//~ else if(sameFactor && !positive[i] && alpha(i) == -m_Cn)
-				//~ alpha(i) = -newCn;
-			//~ else
+			if(sameFactor && alpha(i)== m_Cp)
+				alpha(i) = newCp;
+			else if(sameFactor && alpha(i) == -m_Cn)
+				alpha(i) = -newCn;
+			else
 			alpha(i) *= variableScalingFactor;
 		}
 		m_Cp = newCp;
