@@ -106,6 +106,7 @@ public:
 
 		// measure training time
 		Timer timer;
+		timer.start();
 
 		// prepare dimensions and vectors
 		std::size_t ell = m_data.size();
