@@ -1,10 +1,10 @@
 /*!
  *  \author O. Krause
- *  \date 2012
+ *  \date 2013
  *
  *  \par Copyright (c) 1998-2011:
  *      Institut f&uuml;r Neuroinformatik<BR>
- *      Ruhr-Universit&auml;result_type Bochum<BR>
+ *      Ruhr-Universit&auml;t Bochum<BR>
  *      D-44780 Bochum, Germany<BR>
  *      Phone: +49-234-32-25558<BR>
  *      Fax:   +49-234-32-14209<BR>
@@ -31,98 +31,40 @@
 #ifndef SHARK_LINALG_BLAS_UBLAS_KERNELS_DOT_HPP
 #define SHARK_LINALG_BLAS_UBLAS_KERNELS_DOT_HPP
 
-#include "traits.hpp"
+#include "default/dot.hpp"
 
-namespace shark { namespace blas {namespace kernels{
-
-// Dense case
-template<class E1, class E2, class result_type>
-static void dot_impl(
-	vector_expression<E1> const& v1,
-	vector_expression<E2> const& v2,
-	result_type& result,
-	dense_random_access_iterator_tag,
-	dense_random_access_iterator_tag
-) {
-	std::size_t size = v1().size();
-	result = result_type();
-	for(std::size_t i = 0; i != size; ++i){
-		result += v1()(i) * v2()(i);
-	}
-}
-// Sparse case
-template<class E1, class E2, class result_type>
-static void dot_impl(
-	vector_expression<E1> const& v1,
-	vector_expression<E2> const& v2,
-	result_type& result,
-	sparse_bidirectional_iterator_tag,
-	sparse_bidirectional_iterator_tag
-) {
-	typename E1::const_iterator iter1=v1().begin();
-	typename E1::const_iterator end1=v1().end();
-	typename E2::const_iterator iter2=v2().begin();
-	typename E2::const_iterator end2=v2().end();
-	result = result_type();
-	//be aware of empty vectors!
-	while(iter1 != end1 && iter2 != end2)
-	{
-		std::size_t index1=iter1.index();
-		std::size_t index2=iter2.index();
-		if(index1==index2){
-			result += *iter1 * *iter2;
-			++iter1;
-			++iter2;
-		}
-		else if(index1> index2){
-			++iter2;
-		}
-		else {
-			++iter1;
-		}
-	}
-}
-
-// Dense-Sparse case
-template<class E1, class E2, class result_type>
-static void dot_impl(
-	vector_expression<E1> const& v1,
-	vector_expression<E2> const& v2,
-	result_type& result,
-	dense_random_access_iterator_tag,
-	sparse_bidirectional_iterator_tag
-) {
-	typename E2::const_iterator iter2=v2().begin();
-	typename E2::const_iterator end2=v2().end();
-	result = result_type();
-	for(;iter2 != end2;++iter2){
-		result += v1()(iter2.index()) * *iter2;
-	}
-}
-//Sparse-Dense case is reduced to Dense-Sparse using symmetry.
-template<class E1, class E2, class result_type>
-static void dot_impl(
-	vector_expression<E1> const& v1,
-	vector_expression<E2> const& v2,
-	result_type& result,
-	sparse_bidirectional_iterator_tag t1,
-	dense_random_access_iterator_tag t2
-) {
-	//use commutativity!
-	dot_impl(v2,v1,result,t2,t1);
-}
+#ifdef SHARK_USE_ATLAS
+#include "atlas/dot.hpp"
+#else
+// if no bindings are included, we have to provide the default has_optimized_dot
+// otherwise the binding will take care of this
+namespace shark { namespace blas { namespace bindings{
+template<class V1, class V2,class result_type>
+struct  has_optimized_dot
+: public boost::mpl::false_{};
+}}}
+#endif
 	
-///\brief Implements the dot or inner product kernel s = x^Ty.
+namespace shark { namespace blas {namespace kernels{
+	
+///\brief Well known dot-product r=<e1,e2>=sum_i e1_i*e2_i.
+///
+/// If bindings are included and the vector combination allows for a specific binding
+/// to be applied, the binding is called automatically from {binding}/dot.h
+/// otherwise default/dot.h is used which is fully implemented for all dense/sparse combinations.
+/// if a combination is optimized, bindings::has_optimized_dot<E1,E2,R>::type evaluates to boost::mpl::true_
+/// The kernels themselves are implemented in blas::bindings::dot.
 template<class E1, class E2,class result_type>
 void dot(
-	vector_expression<E1> const& v1,
-	vector_expression<E2> const& v2,
+	vector_expression<E1> const& e1,
+	vector_expression<E2> const& e2,
 	result_type& result
 ) {
-	SIZE_CHECK(v1().size()==v2().size());
-	return dot_impl(v1,v2,result,
-		typename E1::const_iterator::iterator_category(),
-		typename E2::const_iterator::iterator_category()
+	SIZE_CHECK(e1().size() == e2().size());
+	
+	bindings::dot(
+		e1, e2,result,
+		typename bindings::has_optimized_dot<E1,E2,result_type>::type()
 	);
 }
 

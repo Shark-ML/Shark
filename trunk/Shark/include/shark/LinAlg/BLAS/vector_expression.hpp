@@ -437,7 +437,7 @@ inner_prod(
 		typename E1::value_type,
 		typename E2::value_type
 	>::promote_type value_type;
-	value_type result;
+	value_type result = value_type();
 	kernels::dot(e1,e2,result);
 	return result;
 }

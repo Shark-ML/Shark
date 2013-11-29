@@ -756,7 +756,7 @@ public:
 	typedef const_index_pointer index_pointer;
 
 	//ublas types
-	typedef dense_tag storage_category;
+	typedef sparse_tag storage_category;
 	typedef vector_reference<self_type const> const const_closure_type;
 	typedef vector_reference<self_type> closure_type;
 
