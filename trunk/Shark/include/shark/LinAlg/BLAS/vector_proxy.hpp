@@ -452,8 +452,8 @@ private:
  * Vector Expression and access to an element outside of index range of the vector is \b undefined.
  */
 template<class V>
-temporary_proxy<vector_range<V> > subrange(V& data, typename V::size_type start, typename V::size_type stop){
-	return vector_range<V> (data, range(start, stop));
+temporary_proxy<vector_range<V> > subrange(vector_expression<V>& data, typename V::size_type start, typename V::size_type stop){
+	return vector_range<V> (data(), range(start, stop));
 }
 
 /** \brief Return a \c const \c vector_range on a specified vector, a start and stop index.
@@ -462,8 +462,13 @@ temporary_proxy<vector_range<V> > subrange(V& data, typename V::size_type start,
  * Vector Expression and access to an element outside of index range of the vector is \b undefined.
  */
 template<class V>
-vector_range<V const> subrange(V const& data, typename V::size_type start, typename V::size_type stop){
-	return vector_range<V const> (data, range(start, stop));
+vector_range<V const> subrange(vector_expression<V> const& data, typename V::size_type start, typename V::size_type stop){
+	return vector_range<V const> (data(), range(start, stop));
+}
+
+template<class V>
+temporary_proxy<vector_range<V> > subrange(temporary_proxy<V> data, typename V::size_type start, typename V::size_type stop){
+	return subrange(static_cast<V&>(data), start, stop);
 }
 
 /// \brief Represents a given chunk of memory as a dense vector of elements of type T.
@@ -727,13 +732,13 @@ private:
 
 /// \brief Converts a chunk of memory into a vector of a given size.
 template <class T>
-dense_vector_adaptor<T> adapt_vector(std::size_t size, T * data){
+temporary_proxy<dense_vector_adaptor<T> > adapt_vector(std::size_t size, T * data){
 	return dense_vector_adaptor<T>(data,size);
 }
 
 /// \brief Converts a C-style array into a vector.
 template <class T, std::size_t N>
-dense_vector_adaptor<T> adapt_vector(T (&array)[N]){
+temporary_proxy<dense_vector_adaptor<T> > adapt_vector(T (&array)[N]){
 	return dense_vector_adaptor<T>(array,N);
 }
 
