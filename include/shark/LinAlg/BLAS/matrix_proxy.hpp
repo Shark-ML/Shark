@@ -600,6 +600,11 @@ temporary_proxy< matrix_transpose<M> > trans(matrix_expression<M>& m) {
 }
 
 template<class M>
+temporary_proxy< matrix_transpose<M> > trans(temporary_proxy<M> m) {
+	return trans(static_cast<M&>(m));
+}
+
+template<class M>
 class matrix_row: public vector_expression<matrix_row<M> > {
 	typedef matrix_row<M> self_type;
 public:
@@ -863,6 +868,11 @@ const matrix_row<M const> row(matrix_expression<M> const& expression, typename M
 }
 
 template<class M>
+temporary_proxy<matrix_row<M> > row(temporary_proxy<M> expression, typename M::index_type i) {
+	return row(static_cast<M&>(expression), i);
+}
+
+template<class M>
 class matrix_column:
 	public vector_expression<matrix_column<M> > 
 {
@@ -1093,6 +1103,11 @@ matrix_column<M const> column(matrix_expression<M> const& expression, typename M
 	return matrix_column<M const> (expression(), j);
 }
 
+template<class M>
+temporary_proxy<matrix_column<M> > column(temporary_proxy<M> expression, typename M::index_type j) {
+	return column(static_cast<M&>(expression), j);
+}
+
 // Matrix based vector range class representing (off-)diagonals of a matrix.
 template<class M>
 class matrix_vector_range:
@@ -1303,6 +1318,11 @@ temporary_proxy< matrix_vector_range<Matrix> > diag(matrix_expression<Matrix>& m
 	SIZE_CHECK(mat().size1() == mat().size2());
 	matrix_vector_range<Matrix> diagonal(mat(),range(0,mat().size1()),range(0,mat().size1()));
 	return diagonal;
+}
+
+template<class Matrix>
+temporary_proxy< matrix_vector_range<Matrix> > diag(temporary_proxy<Matrix> mat){
+	return diag(static_cast<Matrix&>(mat));
 }
 
 // Matrix based range class
@@ -1585,6 +1605,15 @@ matrix_range<M const> subrange(
 }
 
 template<class M>
+temporary_proxy< matrix_range<M> > subrange(
+	temporary_proxy<M> expression, 
+	std::size_t start1, std::size_t stop1,
+	std::size_t start2, std::size_t stop2
+) {
+	return subrange(static_cast<M&>(expression),start1,stop1,start2,stop2);
+}
+
+template<class M>
 temporary_proxy<matrix_range<M> > rows(
 	matrix_expression<M>& expression, 
 	std::size_t start, std::size_t stop
@@ -1605,6 +1634,14 @@ matrix_range<M const> rows(
 }
 
 template<class M>
+temporary_proxy<matrix_range<M> > rows(
+	temporary_proxy<M> expression, 
+	std::size_t start, std::size_t stop
+) {
+	return rows(static_cast<M&>(expression),start,stop);
+}
+
+template<class M>
 temporary_proxy< matrix_range<M> > columns(
 	matrix_expression<M>& expression, 
 	typename M::index_type start, typename M::index_type stop
@@ -1622,6 +1659,14 @@ matrix_range<M const> columns(
 	RANGE_CHECK(start <= stop);
 	SIZE_CHECK(stop <= expression().size2());
 	return subrange(expression, 0,expression().size1(), start, stop);
+}
+
+template<class M>
+temporary_proxy<matrix_range<M> > columns(
+	temporary_proxy<M> expression, 
+	std::size_t start, std::size_t stop
+) {
+	return columns(static_cast<M&>(expression),start,stop);
 }
 
 template<class T,class Orientation=row_major>
