@@ -65,7 +65,7 @@ SHARK_ADD_TEST( LinAlg/eigensymm.cpp LinAlg_eigensymm )
 SHARK_ADD_TEST( LinAlg/svd.cpp LinAlg_svd )
 SHARK_ADD_TEST( LinAlg/choleskyDecomposition.cpp LinAlg_choleskyDecomposition)
 SHARK_ADD_TEST( LinAlg/solve.cpp LinAlg_solve)
-SHARK_ADD_TEST( LinAlg/VectorTransformations.cpp LinAlg_VectorTransformations)
+SHARK_ADD_TEST( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
 SHARK_ADD_TEST( LinAlg/Initialize.cpp LinAlg_Initialize)
 #Operator tests
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )

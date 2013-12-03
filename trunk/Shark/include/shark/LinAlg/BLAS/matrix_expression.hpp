@@ -299,8 +299,8 @@ public:
 	}
 
 	// Iterator types
-	typedef transform_iterator<typename E::row_iterator, F> const_row_iterator;
-	typedef transform_iterator<typename E::column_iterator, F> const_column_iterator;
+	typedef transform_iterator<typename E::const_row_iterator, F> const_row_iterator;
+	typedef transform_iterator<typename E::const_column_iterator, F> const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 	
