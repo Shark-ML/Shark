@@ -42,7 +42,7 @@
 #include "shark/Models/Kernels/PolynomialKernel.h"
 
 #include <boost/optional.hpp>
-
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <vector>
 
 namespace shark {

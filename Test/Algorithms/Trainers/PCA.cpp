@@ -261,7 +261,7 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_LESS_DATA_THAN_DIMENSIONS ){
 			BOOST_CHECK_SMALL(ecovar(i,j) , 1.e-8);
 		}			
 		// is the variance 1 after whitening
-		BOOST_CHECK_SMALL(ecovar(i,i) - 1., 1.e-9);
+		BOOST_CHECK_SMALL(ecovar(i,i) - 1., 1.e-8);
 		// is the mean zero after PCA
 		BOOST_CHECK_SMALL(emean(i), 1.e-9);
 	}
