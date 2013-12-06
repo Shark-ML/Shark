@@ -399,10 +399,11 @@ public:
 		//we need to correct for the equality constraint
 		//that means we have to move enough variables to satisfy the constraint again.
 		for (std::size_t j=0; j<dimensions(); j++){
+			if(alpha(i) == 0.0) break;
 			if (j == i || m_alphaStatus[j] == AlphaDeactivated) continue;
 			//propose the maximum step possible and let applyStep cut it down.
 			applyStep(i,j, -alpha(i));
-			if(alpha(i) == 0.0) break;
+			
 		}
 		m_alphaStatus[i] = AlphaDeactivated;
 	}
@@ -429,6 +430,8 @@ public:
 	void scaleBoxConstraints(double factor, double variableScalingFactor){
 		m_problem.scaleBoxConstraints(factor,variableScalingFactor);
 		for(std::size_t i = 0; i != this->dimensions(); ++i){
+			//don't change deactivated variables
+			if(m_alphaStatus[i] == AlphaDeactivated) continue;
 			m_gradient(i) -= linear(i);
 			m_gradient(i) *= variableScalingFactor;
 			m_gradient(i) += linear(i);
