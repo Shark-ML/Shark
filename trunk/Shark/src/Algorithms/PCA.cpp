@@ -105,12 +105,19 @@ void PCA::encoder(LinearModel<>& model, std::size_t m) {
 	if(!m) m = std::min(m_n,m_l);
 	
 	RealMatrix A = trans(columns(m_eigenvectors, 0, m) );
-	RealVector offset(A.size1()); 
+	RealVector offset(A.size1(),0.0); 
 	axpy_prod(A, m_mean, offset, false, -1.0);
 	if(m_whitening){
 		for(std::size_t i=0; i<A.size1(); i++) {
-			row(A, i) = row(A, i) / std::sqrt(m_eigenvalues(i));
-			offset(i) /= std::sqrt(m_eigenvalues(i));
+			//take care of numerical difficulties for very small eigenvalues.
+			if(m_eigenvalues(i)/m_eigenvalues(0) < 1.e-15){
+				row(A,i).clear();
+				offset(i) = 0;			
+			}
+			else{
+				row(A, i) = row(A, i) / std::sqrt(m_eigenvalues(i));
+				offset(i) /= std::sqrt(m_eigenvalues(i));
+			}
 		}
 	}
 	model.setStructure(A, offset);
@@ -127,7 +134,13 @@ void PCA::decoder(LinearModel<>& model, std::size_t m) {
 	RealMatrix A = columns(m_eigenvectors, 0, m);
 	if(m_whitening){
 		for(std::size_t i=0; i<A.size2(); i++) {
-			column(A, i) = column(A, i) * std::sqrt(m_eigenvalues(i));
+			//take care of numerical difficulties for very small eigenvalues.
+			if(m_eigenvalues(i)/m_eigenvalues(0) < 1.e-15){
+				column(A,i).clear();		
+			}
+			else{
+				column(A, i) = column(A, i) * std::sqrt(m_eigenvalues(i));
+			}
 		}
 	}
 
