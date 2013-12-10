@@ -40,8 +40,11 @@
 
 
 #include <shark/Data/Dataset.h>
-#include <algorithm>
 #include <shark/Core/Traits/ProxyReferenceTraits.h>
+
+#include <boost/range/adaptor/filtered.hpp>
+#include <algorithm>
+
 namespace shark{
 
 
@@ -84,18 +87,65 @@ public:
 					m_stat.push_back(dist);
 				}
 			}
+
 		} else {
-			for(typename Elements::iterator it = elements.begin(); it != elements.end(); ++it){
-				double minDistSqr = 0;
-				Element x = it->input;
-				for (typename Elements::iterator itIn = elements.begin(); itIn != elements.end(); itIn++) {
-					if (itIn->label == it->label) continue;
-					Element y = itIn->input;
-					double dist = distanceSqr(x,y);
-					if( (minDistSqr == 0) || (dist < minDistSqr))  minDistSqr = dist;
+			std::size_t classes = numberOfClasses(dataset);
+			std::size_t dim = inputDimension(dataset);
+			m_stat.resize(dataset.numberOfElements());
+			std::fill(m_stat.begin(),m_stat.end(), std::numeric_limits<double>::max());
+			std::size_t blockStart = 0;
+			for(std::size_t c = 0; c != classes; ++c){
+				
+				typename Elements::iterator leftIt = elements.begin();
+				typename Elements::iterator end = elements.end();
+				while(leftIt != end){
+					//todo: use a filter on the iterator
+					//create the next batch containing only elements of class c as left argument to distanceSqr
+					typename Batch<InputType>::type leftBatch(512,inputDimension(dataset));
+					std::size_t leftElements = 0;
+					while(leftElements < 512 && leftIt != end){
+						if(leftIt->label == c){
+							row(leftBatch,leftElements) = leftIt->input;
+							++leftElements;
+						}
+						++leftIt;
+					}
+					//now go through all elements and again create batches, this time of all elements which are not of class c
+					typename Elements::iterator rightIt = elements.begin();
+					while(rightIt != end){
+						typename Batch<InputType>::type rightBatch(512,inputDimension(dataset));
+						std::size_t rightElements = 0;
+						while(rightElements < 512 && rightIt != end){
+							if(rightIt->label != c){
+								row(rightBatch,rightElements) = rightIt->input;
+								++rightElements;
+							}
+							++rightIt;
+						}
+
+						//now compute distances and update shortest distance
+						RealMatrix distances = distanceSqr(leftBatch,rightBatch);
+						for(std::size_t i = 0; i != leftElements;++i){
+							m_stat[blockStart+i]=std::min(min(subrange(row(distances,i),0,rightElements)),m_stat[blockStart+i]);
+						}
+					}
+					blockStart+= leftElements;
 				}
-				m_stat.push_back(minDistSqr);
 			}
+			
+			//~ for(typename Elements::iterator it = elements.begin(); it != elements.end(); ++it){
+				//~ double minDistSqr = std::numeric_limits<double>::max();//0;
+				//~ Element x = it->input;
+				//~ for (typename Elements::iterator itIn = elements.begin(); itIn != elements.end(); itIn++) {
+					//~ if (itIn->label == it->label) continue;
+					//~ Element y = itIn->input;
+					//~ double dist = distanceSqr(x,y);
+					//~ //if( (minDistSqr == 0) || (dist < minDistSqr))  minDistSqr = dist;
+					//~ if(dist < minDistSqr)  minDistSqr = dist;
+				//~ }
+				//~ m_stat.push_back(minDistSqr);
+			//~ }
+			
 		}
 		std::sort(m_stat.begin(), m_stat.end());
 	}
@@ -141,7 +191,7 @@ public:
 	}
 
 
-protected:
+private:
 	/// all pairwise distances
 	std::vector<double> m_stat;
 };
