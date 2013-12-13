@@ -125,7 +125,7 @@ struct LibSVMSelectionCriterion{
 				
 				double gain = detail::maximumGainQuadratic2DOnLine(
 					problem.diagonal(i),
-					problem.diagonal(j),
+					problem.diagonal(a),
 					q[a],
 					largestUp,ga
 				);
