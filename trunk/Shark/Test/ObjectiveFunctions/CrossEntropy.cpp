@@ -14,14 +14,14 @@
 using namespace shark;
 using namespace std;
 
-BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES ){
+BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES_SINGLE_INPUT ){
 	unsigned int maxTests = 1000;
 	for(unsigned int test = 0; test != maxTests; ++test){
 		CrossEntropy loss;
 
 		//sample point between -10,10
 		RealMatrix testPoint(1,1);
-		testPoint(0,0) = Rng::uni(-10.0,10.0);
+		testPoint(0,0) = Rng::uni(-300.0,300.0);
 
 
 		//sample label
@@ -29,11 +29,9 @@ BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES ){
 		double calcLabel = label ? 1 : -1;
 		UIntVector labelVec(1);
 		labelVec(0) = label;
-		//std::cout<<testPoint(0,0)<<" "<<label<<" "<<calcLabel<<std::endl;
 		//the test results
 		double valueResult = std::log(1 + std::exp(- calcLabel * testPoint(0,0)));
 		RealVector estimatedDerivative = estimateDerivative(loss, testPoint, labelVec);
-//  		RealMatrix estimatedHessian = estimateSecondDerivative(loss, testPoint, label);
 
 		//test eval
 		
@@ -44,17 +42,38 @@ BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES ){
 		RealMatrix derivative;
 		value = loss.evalDerivative(labelVec, testPoint, derivative);
 		BOOST_CHECK_SMALL(value - valueResult, 1.e-13);
-		BOOST_CHECK_SMALL(norm_2(row(derivative,0) - estimatedDerivative), 1.e-9);
-		//std::cout<<derivative(0,0) / estimatedDerivative(0)<<std::endl;
+		BOOST_CHECK_SMALL(norm_2(row(derivative,0) - estimatedDerivative), 1.e-8);
+	}
+}
+BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES_TWO_INPUT ){
+	unsigned int maxTests = 10000;
+	for(unsigned int test = 0; test != maxTests; ++test){
+		CrossEntropy loss;
 
-		//testEvalDerivative (second)
-//  		RealMatrix hessian;
-//  		value = loss.evalDerivative(labelVec, testPoint, derivative, hessian);
-//  		BOOST_CHECK_SMALL(value-valueResult, 1.e-13);
-//  		BOOST_CHECK_SMALL(norm_1(derivative - estimatedDerivative), 1.e-5);
-//  		double hessianDistance = norm_1(hessian - estimatedHessian);
-// 		BOOST_CHECK_SMALL(hessianDistance, 1.e-3);
-		//std::cout<<derivative(0) / estimatedDerivative(0)<<" "<<hessian(0,0)<<" "<<estimatedHessian(0,0)<<std::endl;
+		//sample point between -10,10
+		RealMatrix testPoint(1,2);
+		testPoint(0,0) = Rng::uni(-150.0,150.0);
+		testPoint(0,1) = -testPoint(0,0);
+
+
+		//sample label
+		unsigned int label = Rng::coinToss();
+		UIntVector labelVec(1);
+		labelVec(0) = label;
+		//the test results
+		double valueResult = std::log(1 + std::exp(-2* testPoint(0,label)));
+		RealVector estimatedDerivative = estimateDerivative(loss, testPoint, labelVec);
+
+		//test eval
+		
+		double value = loss.eval(labelVec,testPoint);
+		BOOST_CHECK_SMALL(value-valueResult, 1.e-13);
+
+		//test evalDerivative (first)
+		RealMatrix derivative;
+		value = loss.evalDerivative(labelVec, testPoint, derivative);
+		BOOST_CHECK_SMALL(value - valueResult, 1.e-13);
+		BOOST_CHECK_SMALL(norm_2(row(derivative,0) - estimatedDerivative), 1.e-8);
 	}
 }
 BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_MULTI_CLASS ){

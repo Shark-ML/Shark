@@ -67,31 +67,6 @@ private:
 		}
 		return std::log(1+exponential);
 	}
-	template<class Vec>
-	double expNorm(Vec const& vec) const {
-		double result = 0;
-		for( std::size_t i = 0; i != vec.size(); ++ i)
-		{
-			double term = std::exp(vec(i));
-			if(term > 1.e200)
-				term = 1.e200;
-			result += term;
-		}
-		return result;
-	}
-	template<class Vec1,class Vec2>
-	double expNorm(Vec1 const& vec, Vec2& expVec) const {
-		double result = 0;
-		for( std::size_t i = 0; i != vec.size(); ++ i)
-		{
-			double term = std::exp(vec(i));
-			if(term > 1.e200)
-				term = 1.e200;
-			result += term;
-			expVec(i) = term;
-		}
-		return result;
-	}
 public:
 	CrossEntropy()
 	{
@@ -124,8 +99,20 @@ public:
 			double error = 0;
 			for(std::size_t i = 0; i != prediction.size1(); ++i){
 				RANGE_CHECK ( target(i) < prediction.size2() );
-				double norm = expNorm(row(prediction,i));
-				error+= std::log(norm) - prediction(i,target(i));
+				
+				//calculate the log norm in a numerically stable way
+				//we subtract the maximum prior to exponentiation to 
+				//ensure that the exponntiation result will still fit in double
+				double maximum = max(row(prediction,i));
+				double logNorm = 0;
+				for( std::size_t j = 0; j != prediction.size2(); ++j)
+				{
+					double term = std::exp(prediction(i,j)-maximum);
+					logNorm += term;
+				}
+				logNorm = std::log(logNorm)+maximum;
+				
+				error+= logNorm - prediction(i,target(i));
 			}
 			return error;
 		}
@@ -152,10 +139,18 @@ public:
 			for(std::size_t i = 0; i != prediction.size1(); ++i){
 				RANGE_CHECK ( target(i) < prediction.size2() );
 				RealMatrixRow gradRow=row(gradient,i);
-				double norm = expNorm(row(prediction,i),gradRow);
-				row(gradient,i)/=norm;
+				
+				//calculate the log norm in a numerically stable way
+				//we subtract the maximum prior to exponentiation to 
+				//ensure that the exponntiation result will still fit in double
+				//this does not change the result as the values get normalized by
+				//their sum and thus the correction term cancels out.
+				double maximum = max(row(prediction,i));
+				noalias(gradRow) = exp(row(prediction,i)-blas::repeat(maximum,prediction.size2()));
+				double norm = sum(gradRow);
+				gradRow/=norm;
 				gradient(i,target(i)) -= 1;
-				error+=std::log(norm) - prediction(i,target(i));
+				error+=std::log(norm) - prediction(i,target(i))+maximum;
 			}
 			return error;
 		}
@@ -182,14 +177,21 @@ public:
 		else
 		{
 			RANGE_CHECK ( target < prediction.size() );
-			double norm = expNorm(prediction,gradient);
+			//calculate the log norm in a numerically stable way
+			//we subtract the maximum prior to exponentiation to 
+			//ensure that the exponntiation result will still fit in double
+			//this does not change the result as the values get normalized by
+			//their sum and thus the correction term cancels out.
+			double maximum = max(prediction);
+			noalias(gradient) = exp(prediction-blas::repeat(maximum,prediction.size()));
+			double norm = sum(gradient);
 			gradient/=norm;
 
 			noalias(hessian)=-outer_prod(gradient,gradient);
 			noalias(diag(hessian)) += gradient;
 			gradient(target) -= 1;
 
-			return std::log(norm) - prediction(target);
+			return std::log(norm) - prediction(target) - maximum;
 		}
 	}
 };
