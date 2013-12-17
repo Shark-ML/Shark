@@ -126,26 +126,31 @@ public:
 		std::size_t iterations;
 		if (m_epochs == 0) iterations = std::max(10 * ell, std::size_t(std::ceil(m_C * ell)));
 		else iterations = m_epochs * ell;
+		
+		
+		//preinitialize everything to prevent costly memory allocations in the loop
+		RealVector f_b(classes, 0.0);
+		RealVector derivative(classes, 0.0);
 		for (std::size_t iter = 0; iter < iterations; iter++)
 		{
 			// active variable
 			std::size_t b = Rng::discrete(0, ell - 1);
 
 			// learning rate
-			const double eta = 1.0 / (iter + 2.0);
+			const double eta = 1.0 / (iter + ell);
 
 			// compute prediction
-			RealVector f_b(classes, 0.0);
+			f_b.clear();
 			axpy_prod(trans(alpha), row(K, b), f_b, false, alphaScale);
-			if (m_offset) f_b += model.offset();
+			if (m_offset) noalias(f_b) += model.offset();
 
 			// stochastic gradient descent (SGD) step
-			RealVector derivative(classes, 0.0);
+			derivative.clear();
 			m_loss->evalDerivative(y[b], f_b, derivative);
 //			alphaScale *= (1.0 - eta);
-			alphaScale = (1.0 - 1.0 / (iter + 3.0));   // should be numerically more stable
-			row(alpha, b) -= (eta * m_C / alphaScale) * derivative;
-			if (m_offset) model.offset() -= eta * derivative;
+			alphaScale = (1.0 - 1.0 / (iter + ell+1.0));   // should be numerically more stable
+			noalias(row(alpha, b)) -= (eta * m_C / alphaScale) * derivative;
+			if (m_offset) noalias(model.offset()) -= eta * derivative;
 		}
 
 		alpha *= alphaScale;
