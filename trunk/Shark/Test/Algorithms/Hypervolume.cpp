@@ -22,7 +22,10 @@ namespace shark {
 
 		Fixture() {
 			BOOST_TEST_MESSAGE( "Setting up test sets and reference points " );
-			m_refPoint3D = boost::assign::list_of( 1.1 )( 1.1 )( 1.1 );
+			//m_refPoint3D = boost::assign::list_of( 1.1 )( 1.1 )( 1.1 );
+			m_refPoint3D.push_back(1.1);
+			m_refPoint3D.push_back(1.1);
+			m_refPoint3D.push_back(1.1);
 			m_testSet3D.push_back( boost::assign::list_of( 6.56039859404455e-2 ) (0.4474014917277) (0.891923776019316) );
 			m_testSet3D.push_back( boost::assign::list_of( 3.74945443950542e-2)(3.1364039802686e-2)(0.998804513479922 ) );
 			m_testSet3D.push_back( boost::assign::list_of( 0.271275894554688)(0.962356894778677)(1.66911984440026e-2 ) );
@@ -59,7 +62,9 @@ namespace shark {
 			m_testSet3D.push_back( boost::assign::list_of( 0.30565381275615)(0.792827267212719)(0.527257689476066 ) );
 			m_testSet3D.push_back( boost::assign::list_of( 0.43864576057661)(3.10389339442242e-2)(0.8981238674636 ) );
 
-			m_refPoint2D = boost::assign::list_of( 11 )( 11 );
+			//m_refPoint2D = boost::assign::list_of( 11 )( 11 );
+			m_refPoint2D.push_back(11);
+			m_refPoint2D.push_back(11);
 			m_testSet2D.push_back( boost::assign::list_of( 0.0000000000 )(1.0000000000 ) );
 			m_testSet2D.push_back( boost::assign::list_of( 0.1863801385)(0.9824777066 ) );
 			m_testSet2D.push_back( boost::assign::list_of( 0.2787464911)(0.9603647191 ) );
