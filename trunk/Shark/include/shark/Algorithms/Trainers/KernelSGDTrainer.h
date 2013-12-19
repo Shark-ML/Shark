@@ -137,7 +137,7 @@ public:
 			std::size_t b = Rng::discrete(0, ell - 1);
 
 			// learning rate
-			const double eta = 1.0 / (iter + ell);
+			const double eta = 1.0 / (iter + ell)/m_C;
 
 			// compute prediction
 			f_b.clear();
@@ -147,8 +147,7 @@ public:
 			// stochastic gradient descent (SGD) step
 			derivative.clear();
 			m_loss->evalDerivative(y[b], f_b, derivative);
-//			alphaScale *= (1.0 - eta);
-			alphaScale = (1.0 - 1.0 / (iter + ell+1.0));   // should be numerically more stable
+			alphaScale = (1.0 - 1.0 / (iter + ell+1.0)/m_C);   // should be numerically more stable
 			noalias(row(alpha, b)) -= (eta * m_C / alphaScale) * derivative;
 			if (m_offset) noalias(model.offset()) -= eta * derivative;
 		}
