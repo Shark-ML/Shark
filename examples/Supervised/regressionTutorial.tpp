@@ -15,12 +15,17 @@ using namespace std;
 //loads a pair of files
 //###begin<load>
 RegressionDataset loadData(const std::string& dataFile,const std::string& labelFile){
-	//we first load two separate data files for the trianing inputs and the labels of the data point
+	//we first load two separate data files for the training inputs and the labels of the data point
 	Data<RealVector> inputs;
 	Data<RealVector> labels;
-	import_csv(inputs, dataFile, ' ');
-	import_csv(labels, labelFile, ' ');
-	//now we create a complete dataset which represents pairs of inputs and labels.
+	try {
+		import_csv(inputs, dataFile, ' ');
+		import_csv(labels, labelFile, ' ');
+	} catch (...) {
+		cerr << "Unable to open file " <<  dataFile << " and/or " << labelFile << ". Check paths!" << endl;
+		exit(EXIT_FAILURE);
+	}
+	//now we create a complete dataset which represents pairs of inputs and labels
 	RegressionDataset data(inputs, labels);
 	return data;
 }
