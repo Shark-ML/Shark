@@ -5,7 +5,7 @@ namespace shark {
 namespace blas {
 
 // Storage types
-class range;
+struct range;
 
 // Expression types
 
