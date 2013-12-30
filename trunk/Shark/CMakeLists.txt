@@ -214,7 +214,17 @@ IF( HDF5_FOUND )
 	    SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${HDF5_LIBRARIES} )
 	ENDIF( WIN32 )
     ELSE ( HDF5_C_COMPILER_EXECUTABLE AND HDF5_HL_COMPILER_EXECUTABLE  AND HDF5_CXX_COMPILER_EXECUTABLE )
-	MESSAGE(STATUS "Checking HDF5 installation:HDF5 package might be broken. Disabling HDF5!")
+	MESSAGE(STATUS "Checking HDF5 installation:HDF5 package might be broken.")
+	IF( NOT( HDF5_C_COMPILER_EXECUTABLE))
+            message(STATUS "  C Compiler Extension not found.")
+        ENDIF( NOT( HDF5_C_COMPILER_EXECUTABLE))
+        IF( NOT( HDF5_HL_COMPILER_EXECUTABLE))
+            message(STATUS "  HL Compiler Extension not found.")
+        ENDIF( NOT( HDF5_HL_COMPILER_EXECUTABLE))
+        IF( NOT( HDF5_CXX_COMPILER_EXECUTABLE))
+            message(STATUS "  CXX Compiler Extension not found.")
+        ENDIF( NOT( HDF5_CXX_COMPILER_EXECUTABLE))
+        MESSAGE(STATUS "Disabling HDF5.")
 	UNSET ( HDF5_FOUND )
     ENDIF ( HDF5_C_COMPILER_EXECUTABLE AND HDF5_HL_COMPILER_EXECUTABLE  AND HDF5_CXX_COMPILER_EXECUTABLE )
 ELSE( HDF5_FOUND )
@@ -317,16 +327,32 @@ IF( MSVC )
 ENDIF( MSVC )
 
 
+#####################################################################
+#                Adjust compiler flags and settings for OSX
+#####################################################################
 IF( UNIX )
-	IF( APPLE )
-	  	SET(CMAKE_CXX_CREATE_STATIC_LIBRARY "libtool -static -o <TARGET> <LINK_FLAGS> <OBJECTS>" )
-	ENDIF( APPLE )
+    IF( APPLE )
+        message(STATUS "Apple OSX/Darwin")
+            SET(CMAKE_CXX_CREATE_STATIC_LIBRARY "libtool -static -o <TARGET> <LINK_FLAGS> <OBJECTS>" )
+            IF( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+                IF( NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0" ))
+                    message(STATUS "Adding MAC OS X CLANG 5.0 compiler flag")
+                    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ftemplate-depth-1024")
+                    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ftemplate-depth-1024")
+	  	ENDIF( NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0" ))
+	    ENDIF( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )	
+    ENDIF( APPLE )
 ENDIF( UNIX )
 
+
+#####################################################################
+#                       General Path settings
+#####################################################################
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 INCLUDE_DIRECTORIES( include/ )
 ADD_SUBDIRECTORY( include )
 ADD_SUBDIRECTORY( src )
+
 
 #####################################################################
 #                       Include Examples
