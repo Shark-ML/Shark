@@ -67,11 +67,7 @@ we introduce the interface of the data object we want to clarify this distinctio
   But it provides an important *semantic* difference, as these data
   points are interpreted as input data without labels, compared to the above
   mentioned Data class whose contents might store anything (for example model
-  outputs, labels or points) . Datasets as used in machine learning are
-  inherently unordered constructs, thus it is okay for an algorithm to shuffle or
-  otherwise
-  reorder the contents of a dataset. This is reflected in the set, that shuffling
-  is actively supported using the :doxy:`UnlabeledData::shuffle` method.
+  outputs, labels or points). 
 
 * :doxy:`LabeledData` finally represents datapoints which are a pair of inputs
   and labels. An dataset of type ``LabeledData<I,L>`` can be roughly described
@@ -83,7 +79,19 @@ we introduce the interface of the data object we want to clarify this distinctio
   set of predictions of the model and compare this set of predictions with the set of labels
   using a loss function. Instead of seeing input-label pairs as a fixed grouping, we would
   like to view them as two separate datasets which are conveniently bound together. And this is
-  how the LabeledData object is implemented.
+  how the :doxy:`LabeledData` object is implemented.
+  
+  For convenience, there exist the following three specializations of
+  labeled datasets::
+
+    typedef LabeledData<RealVector, unsigned int> ClassificationDataset;
+    typedef LabeledData<RealVector, RealVector> RegressionDataset;
+    typedef LabeledData<CompressedRealVector, unsigned int> CompressedClassificationDataset;
+
+
+The elements in :doxy:`UnlabeledData` and :doxy:`LabeledData` objects can be conveniently 
+reordered by calling :doxy:`UnlabeledData::shuffle` and
+:doxy:`LabeledData::shuffle`, respectively.
 
 
 The class Data<T>
@@ -103,6 +111,12 @@ In this case a dataset can be created using::
 
   std::vector<RealVector> points; //vector of points
   Data<RealVector> data = createDataFromRange(points);
+
+To create :doxy:`LabeledData`, you can use::
+
+  std::vector<unsigned int> labels;
+  std::vector<RealVector> points;
+  ClassificationDataset data = createLabeledDataFromRange(points, labels);
 
 To create an dataset with space for *n* points, we need to define an example point which
 describes the objects to be saved in the set::
