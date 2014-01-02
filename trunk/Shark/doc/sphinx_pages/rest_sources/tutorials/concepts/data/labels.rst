@@ -36,7 +36,7 @@ writing one's own custom trainers, error functions, losses, etc.
 
 In detail, there exist a convention used by algorithms
 in typical classification settings, and a convention for regression
-settings::
+settings:
 
 * The format for a classification label is a single unsigned integer (C++ type
   ``unsigned int``) in the range ``0,...,d-1``. For binary data, the wide-spread

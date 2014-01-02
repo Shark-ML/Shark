@@ -98,7 +98,6 @@
 
 
    rest_sources/about_shark/news
-   rest_sources/about_shark/todo
    rest_sources/about_shark/copyright
 
 
