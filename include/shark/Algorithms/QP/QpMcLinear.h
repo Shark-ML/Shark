@@ -40,13 +40,16 @@
 namespace shark {
 
 
+#define AVF
+//#define SHRINKING
+
 // strategy constants
 #define CHANGE_RATE 0.2
 #define PREF_MIN 0.05
 #define PREF_MAX 20.0
 
 // inner iteration limit
-#define MAXITER_MULTIPLIER 1000
+#define MAXITER_MULTIPLIER 10
 
 
 /// \brief Generic solver skeleton for linear multi-class SVM problems.
@@ -108,10 +111,18 @@ public:
 		RealMatrix alpha(ell, m_classes + 1, 0.0);   // Lagrange multipliers; dual variables. Reserve one extra column.
 		RealMatrix w(m_classes, m_dim, 0.0);         // weight vectors; primal variables
 
+#ifdef AVF
 		// scheduling of steps
 		RealVector pref(ell, 1.0);                   // example-wise measure of success
 		double prefsum = ell;                        // normalization constant
+#endif
 		std::vector<std::size_t> schedule(ell);
+#ifndef AVF
+		for (std::size_t i=0; i<ell; i++) schedule[i] = i;
+#endif
+#ifdef SHRINKING
+		std::size_t active = ell;
+#endif
 
 		// prepare counters
 		std::size_t epoch = 0;
@@ -120,13 +131,16 @@ public:
 		// prepare performance monitoring
 		double objective = 0.0;
 		double max_violation = 0.0;
+#ifdef AVF
 		const double gain_learning_rate = 1.0 / ell;
 		double average_gain = 0.0;
+#endif
 
 		// outer optimization loop (epochs)
 		bool canstop = true;
 		while (true)
 		{
+#ifdef AVF
 			// define schedule
 			double psum = prefsum;
 			prefsum = 0.0;
@@ -147,11 +161,20 @@ public:
 				prefsum += p;
 			}
 			SHARK_ASSERT(pos == ell);
+#endif
+#ifdef SHRINKING
+			for (std::size_t i=0; i<active; i++) std::swap(schedule[i], schedule[Rng::discrete(0, active - 1)]);
+#else
 			for (std::size_t i=0; i<ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
+#endif
 
 			// inner loop (one epoch)
 			max_violation = 0.0;
+#ifdef SHRINKING
+			for (std::size_t j=0; j<active; j++)
+#else
 			for (std::size_t j=0; j<ell; j++)
+#endif
 			{
 				// active example
 				double gain = 0.0;
@@ -180,7 +203,16 @@ public:
 					// update weight vectors
 					updateWeightVectors(w, mu, i);
 				}
+#ifdef SHRINKING
+				else
+				{
+					active--;
+					std::swap(schedule[j], schedule[active]);
+					j--;
+				}
+#endif
 
+#ifdef AVF
 				// update gain-based preferences
 				{
 					if (epoch == 0) average_gain += gain / (double)ell;
@@ -193,6 +225,7 @@ public:
 						average_gain = (1.0 - gain_learning_rate) * average_gain + gain_learning_rate * gain;
 					}
 				}
+#endif
 			}
 
 			epoch++;
@@ -220,16 +253,28 @@ public:
 				}
 				else
 				{
+#ifdef AVF
 					// prepare full sweep for a reliable checking of the stopping criterion
 					canstop = true;
 					for (std::size_t i=0; i<ell; i++) pref(i) = 1.0;
 					prefsum = ell;
+#endif
+#ifdef SHRINKING
+					// prepare full sweep for a reliable checking of the stopping criterion
+					active = ell;
+					canstop = true;
+#endif
 				}
 			}
 			else
 			{
 				if (verbose) std::cout << "." << std::flush;
+#ifdef AVF
 				canstop = false;
+#endif
+#ifdef SHRINKING
+				canstop = (active == ell);
+#endif
 			}
 		}
 		timer.stop();
