@@ -2,9 +2,7 @@
 /*!
  *  \brief Quadratic programming solvers for linear multi-class SVM training without bias.
  *
- *
  *  \author  T. Glasmachers
- *
  *
  *  <BR><HR>
  *  This file is part of Shark. This library is free software;
@@ -40,7 +38,7 @@
 namespace shark {
 
 
-#define AVF
+#define ACF
 //#define SHRINKING
 
 // strategy constants
@@ -111,13 +109,13 @@ public:
 		RealMatrix alpha(ell, m_classes + 1, 0.0);   // Lagrange multipliers; dual variables. Reserve one extra column.
 		RealMatrix w(m_classes, m_dim, 0.0);         // weight vectors; primal variables
 
-#ifdef AVF
+#ifdef ACF
 		// scheduling of steps
 		RealVector pref(ell, 1.0);                   // example-wise measure of success
 		double prefsum = ell;                        // normalization constant
 #endif
 		std::vector<std::size_t> schedule(ell);
-#ifndef AVF
+#ifndef ACF
 		for (std::size_t i=0; i<ell; i++) schedule[i] = i;
 #endif
 #ifdef SHRINKING
@@ -131,7 +129,7 @@ public:
 		// prepare performance monitoring
 		double objective = 0.0;
 		double max_violation = 0.0;
-#ifdef AVF
+#ifdef ACF
 		const double gain_learning_rate = 1.0 / ell;
 		double average_gain = 0.0;
 #endif
@@ -140,7 +138,7 @@ public:
 		bool canstop = true;
 		while (true)
 		{
-#ifdef AVF
+#ifdef ACF
 			// define schedule
 			double psum = prefsum;
 			prefsum = 0.0;
@@ -212,7 +210,7 @@ public:
 				}
 #endif
 
-#ifdef AVF
+#ifdef ACF
 				// update gain-based preferences
 				{
 					if (epoch == 0) average_gain += gain / (double)ell;
@@ -253,7 +251,7 @@ public:
 				}
 				else
 				{
-#ifdef AVF
+#ifdef ACF
 					// prepare full sweep for a reliable checking of the stopping criterion
 					canstop = true;
 					for (std::size_t i=0; i<ell; i++) pref(i) = 1.0;
@@ -269,7 +267,7 @@ public:
 			else
 			{
 				if (verbose) std::cout << "." << std::flush;
-#ifdef AVF
+#ifdef ACF
 				canstop = false;
 #endif
 #ifdef SHRINKING
