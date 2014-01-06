@@ -380,11 +380,27 @@ std::size_t arg_max(const vector_expression<E> &e) {
 	return std::max_element(e().begin(),e().end()).index();
 }
 
+/// \brief arg_min v = arg min_i v_i
 template<class E>
 std::size_t arg_min(const vector_expression<E> &e) {
 	SIZE_CHECK(e().size() > 0);
 	return arg_max(-e);
 }
+
+/// \brief soft_max v = ln(sum(exp(v)))
+///
+/// Be aware that this is NOT the same function as used in machine learning: exp(v)/sum(exp(v))
+///
+/// The function is computed in an numerically stable way to prevent that too high values of v_i produce inf or nan.
+/// The name of the function comes from the fact that it behaves like a continuous version of max in the respect that soft_max v <= v.size()*max(v)
+/// max is reached in the limit as the gap between the biggest value and the rest grows to infinity.
+template<class E>
+typename E::value_type
+soft_max(const vector_expression<E> &e) {
+	typename E::value_type maximum = max(e);
+	return std::log(sum(exp(e-blas::repeat(maximum,e().size()))))+maximum;
+}
+
 
 ////implement all the norms based on sum!
 
