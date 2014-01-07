@@ -56,8 +56,10 @@ BOOST_AUTO_TEST_CASE( Algorithms_JaakkolaHeuristic )
 	targets[5] = 1;
 	ClassificationDataset dataset = createLabeledDataFromRange(inputs, targets);
 
+	// todo: make test for default version
+	//
 	// obtain values of sigma for different quantiles, including the default
-	JaakkolaHeuristic jh(dataset);
+	JaakkolaHeuristic jh(dataset, false);
 	double sigma         = jh.sigma();
 	double sigma_minimum = jh.sigma(0.0);
 	double sigma_median  = jh.sigma(0.5);
