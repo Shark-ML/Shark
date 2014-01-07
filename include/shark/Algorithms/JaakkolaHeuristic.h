@@ -60,17 +60,18 @@ namespace shark{
 /// based on the median or on any other quantile of the empirical
 /// distribution.
 ///
-/// In the original paper, only the distance to the closest point with
-/// different label is considered. This behavior can be turned on by
-/// an option of the constructor.
+/// By default, only the distance to the closest point with different
+/// label is considered. This behavior can be turned off by an option
+/// of the constructor. This is faster andin accordance with the
+/// original paper.
 class JaakkolaHeuristic
 {
 public:
 	/// Constructor
 	/// \param dataset           vector-valued input data
-	/// \param nearestFalseNeighbor  if true, only the nearest neighboring point with different label is considered (default false)
+	/// \param nearestFalseNeighbor  if true, only the nearest neighboring point with different label is considered (default true)
 	template<class InputType>
-	JaakkolaHeuristic(LabeledData<InputType,unsigned int> const& dataset, bool nearestFalseNeighbor = false)
+	JaakkolaHeuristic(LabeledData<InputType,unsigned int> const& dataset, bool nearestFalseNeighbor = true)
 	{
 		typedef typename LabeledData<InputType,unsigned int>::const_element_range Elements;
 		typedef typename ConstProxyReference<InputType const>::type Element;
@@ -101,7 +102,7 @@ public:
 				while(leftIt != end){
 					//todo: use a filter on the iterator
 					//create the next batch containing only elements of class c as left argument to distanceSqr
-					typename Batch<InputType>::type leftBatch(512,inputDimension(dataset));
+					typename Batch<InputType>::type leftBatch(512, dim);
 					std::size_t leftElements = 0;
 					while(leftElements < 512 && leftIt != end){
 						if(leftIt->label == c){
@@ -113,7 +114,7 @@ public:
 					//now go through all elements and again create batches, this time of all elements which are not of class c
 					typename Elements::iterator rightIt = elements.begin();
 					while(rightIt != end){
-						typename Batch<InputType>::type rightBatch(512,inputDimension(dataset));
+						typename Batch<InputType>::type rightBatch(512, dim);
 						std::size_t rightElements = 0;
 						while(rightElements < 512 && rightIt != end){
 							if(rightIt->label != c){
