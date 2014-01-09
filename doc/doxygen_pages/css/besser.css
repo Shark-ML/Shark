@@ -1423,6 +1423,12 @@ tr.heading h2 {
   }
 }
 
+/* mt: merges of new doxygen.css features/styles */
+.ttc {
+        position: absolute;
+        display: none;
+}
+
 
 /* --------------------------------------------------------------------------------*/
 /* ------------------------ END STANDARD DOXYGEN CSS ------------------------------*/
