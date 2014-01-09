@@ -28,12 +28,167 @@
 #define SHARK_UNSUPERVISED_RBM_IMPL_ANALYTICS_H
 
 #include <shark/Unsupervised/RBM/Tags.h>
-#include <shark/LinAlg/Base.h>
-#include <shark/Data/BatchInterface.h>
+#include <shark/Unsupervised/RBM/Sampling/TemperedMarkovChain.h>
+#include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
+#include <shark/Algorithms/GradientDescent/LineSearch.h>
+
 #include <boost/static_assert.hpp>
 #include <boost/range/numeric.hpp>
 namespace shark {
 namespace detail{
+	
+	///\brief Computes ln Z_1/Z_0 = ln<e^(-1/2*(U_0-U_1))>_1-ln<e^(-1/2*(U_1-U_0))>_0
+	///
+	/// This is a lower variance solution of two-sided AIS which uses a 1 instead of 1/2
+	template<class V0, class V1>
+	double twoSidedAIS(V0 const& energyDiff0, V1 const& energyDiff1){
+		SIZE_CHECK(energyDiff0.size() == energyDiff1.size());
+		std::size_t n = energyDiff0.size();
+		return soft_max(-0.5*energyDiff0)-soft_max(-0.5*energyDiff1);
+	}
+
+	///\brief Implements the Acceptance Ratio method invented by Bennett to estimate ln Z_1/Z_0 
+	///
+	/// It tries to find the number C such that <f(U_0-U_1-C)>_1/<f(U_1-U_0+C)>_0 = 1
+	/// where f is the logistic function. C turn out to be ln Z_1/Z_0
+	template<class V0, class V1>
+	double acceptanceRatio(V0 const& energyDiff0, V1 const& energyDiff1){
+		SIZE_CHECK(energyDiff0.size() == energyDiff1.size());
+		
+		class RatioOptimizationProblem : public SingleObjectiveFunction{
+		private:
+			V0 const& energyDiff0;
+			V1 const& energyDiff1;
+		public:
+			RatioOptimizationProblem(V0 const& v0, V1 const& v1):energyDiff0(v0),energyDiff1(v1){
+				m_features |= HAS_FIRST_DERIVATIVE;
+			}
+			std::string name() const{return "";}
+
+			std::size_t numberOfVariables()const{
+				return 1;
+			}
+			void configure( const PropertyTree &) {}
+
+			double eval( const SearchPointType & C ) const {
+				std::size_t n = energyDiff0.size();
+				return 0.5*sqr(sum(sigmoid(energyDiff0+blas::repeat(C(0),n)))
+					- sum(sigmoid(energyDiff1-blas::repeat(C(0),n))));
+			}
+
+			ResultType evalDerivative( const SearchPointType & C, FirstOrderDerivative & derivative )const {
+				derivative.resize(1);
+				std::size_t n = energyDiff0.size();
+				RealVector sigmoid0 = sigmoid(energyDiff0+blas::repeat(C(0),n));
+				RealVector sigmoid1 = sigmoid(energyDiff1-blas::repeat(C(0),n));
+				
+				double diff = sum(sigmoid0) - sum(sigmoid1);
+				
+				derivative(0) = sum(sigmoid0*(blas::repeat(1.0,n)-sigmoid0))+sum(sigmoid1*(blas::repeat(1.0,n)-sigmoid1));
+				derivative*=diff;
+				return 0.5*sqr(diff);
+
+			}
+			
+		};
+		RatioOptimizationProblem f(energyDiff0,energyDiff1);
+		//initialize with solution of AIS
+		RealVector C(1,twoSidedAIS(energyDiff0,energyDiff1));
+		RealVector derivative;
+		double val = f.evalDerivative(C,derivative);
+		RealVector direction = -derivative;
+		LineSearch search;
+		search.lineSearchType()  = LineSearch::Dlinmin;
+		search.init(f);
+		search(C,val,direction,derivative);
+		
+		return C(0);
+	}
+
+	/// \brief Samples energydifferencebetween different chains from an RBM.
+	///
+	/// Given a set of beta: beta_0> beta_1>.... beta_n >= 0, draws samples from the RBM with the corresponding beta values using 
+	/// Parallel tempering. Forevery such sample the difference in Energy with respect to the neighboringchains is computed. The Difference
+	/// when comparing tothe upper chain is energyDiffUp and when comparing to the lower chain is energyDiffLow.
+	/// For variance reasons the energy of a sample (h,v) is in this case defined as the negative logarithm of the probability of h,
+	/// \f$ -\ln(p_n(h)) = -\ln \int  e^{-\beta_n E(v,h)}\,dv \f$. That means, we integrate over v. Thus energyDiffUp(i) is defined as
+	/// energyDiffUp_i =\ln(p_i(h)) - \ln(p_{i+1}(h)) and energyDiffDown_i = \ln(p_i(h)) - \ln(p_{i-1}(h)).
+	/// this statistic is gathered for every sample. To have an initial starting state a dataset has to be supplied which offers "close" samples.
+	///
+	/// \param rbm The rbm for which to compute the energies.
+	/// \param initDataset dataset from which samples are picked to initialize the chains
+	/// \param beta the inverse temperatures of the chains
+	/// \param energyDiffUp energy difference for a state when it is moved to the next higher chain (higher beta, lower temperature)
+	/// \param energyDiffDown energyDifference for a state when it is moved to the next lower chain(lower beta, higher temperature).
+	template<class RBMType>
+	void sampleEnergies(
+		RBMType& rbm, 
+		Data<RealVector> const& initDataset, 
+		RealVector const& beta, 
+		RealMatrix& energyDiffUp,
+		RealMatrix& energyDiffDown
+	){
+		std::size_t chains = beta.size();
+		std::size_t samples = energyDiffUp.size2();
+		
+		//set up betasfor sampling and target
+		RealVector betaUp(chains);
+		RealVector betaDown(chains);
+		
+		betaUp(0) = 1.0;
+		betaDown(chains-1) = 0.0;
+		for(std::size_t i = 0; i != chains-1; ++i){
+			betaDown(i) = beta(i+1);
+			betaUp(i+1) = beta(i);
+		}
+		
+		//setup sampler
+		typedef TemperedMarkovChain<GibbsOperator<RBMType> > PTSampler;
+		PTSampler sampler(&rbm);
+		sampler.setNumberOfTemperatures(chains);
+		for(std::size_t i = 0; i != chains; ++i){
+			sampler.setBeta(i,beta(i));
+		}
+		sampler.initializeChain(initDataset);
+		
+		//sample and store Energies
+		Energy<RBMType> energy = rbm.energy();	
+		for(std::size_t s = 0; s != samples; ++s){
+			sampler.step(1);
+			
+			//calculate The upper and lower energy difference for every chain.
+			
+			//calculate the first term: -E(state,beta) thats the same for both matrices
+			noalias(column(energyDiffDown,s)) = energy.logUnnormalizedPropabilityHidden(
+				sampler.samples().hidden.state,
+				sampler.samples().visible.input,
+				beta
+			);
+			noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
+			
+			//now add the new term
+			noalias(column(energyDiffUp,s)) -= energy.logUnnormalizedPropabilityHidden(
+				sampler.samples().hidden.state,
+				sampler.samples().visible.input,
+				betaUp
+			);
+			noalias(column(energyDiffDown,s)) -= energy.logUnnormalizedPropabilityHidden(
+				sampler.samples().hidden.state,
+				sampler.samples().visible.input,
+				betaDown
+			);
+			
+			//~ noalias(column(energyDiffDown,s)) = energy.energy(
+				//~ sampler.samples().hidden.state,
+				//~ sampler.samples().visible.state
+			//~ );
+			//~ noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
+			//~ column(energyDiffUp,s)*=1.0/(chains-1);
+			//~ column(energyDiffDown,s)*=-1.0/(chains-1);
+			
+		}
+	}
+	
 
 	///\brief updates the log partition with the Energy of another state
 	///
