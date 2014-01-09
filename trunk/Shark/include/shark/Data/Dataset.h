@@ -102,7 +102,7 @@ namespace shark {
 /// For vectors the results are matrices as mentioned above. If the vector is sparse, so is the matrix.
 /// And for everything else the batch type is just a std::vector of the type, so no optimization can be applied.
 /// \par
-/// When constructing the container the batchSize can be set. If it is not set by the user he default batchSize is chosen. A BatchSize of 0
+/// When constructing the container the batchSize can be set. If it is not set by the user the default batchSize is chosen. A BatchSize of 0
 /// corresponds to putting all data into a single batch. Beware that not only the data needs storage but also
 /// the various models during computation. So the actual amount of space to compute a batch can greatly exceed the batch size.
 ///
@@ -164,7 +164,7 @@ public:
 	typedef boost::iterator_range<typename Container::const_element_iterator> const_element_range;
 	typedef boost::iterator_range<typename Container::iterator> batch_range;
 	typedef boost::iterator_range<typename Container::const_iterator> const_batch_range;
-	
+
 
 	///\brief Returns the range of elements.
 	///
@@ -180,7 +180,7 @@ public:
 	element_range elements(){
 		return element_range(m_data.elemBegin(),m_data.elemEnd());
 	}
-	
+
 	///\brief Returns the range of batches.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
@@ -195,7 +195,7 @@ public:
 	batch_range batches(){
 		return batch_range(m_data.begin(),m_data.end());
 	}
-	
+
 	///\brief Returns the number of batches of the set.
 	std::size_t numberOfBatches() const{
 		return m_data.size();
@@ -204,7 +204,7 @@ public:
 	std::size_t numberOfElements() const{
 		return m_data.numberOfElements();
 	}
-	
+
 	///\brief Check whether the set is empty.
 	bool empty() const{
 		return m_data.empty();
@@ -288,11 +288,11 @@ public:
 		right.m_data=m_data.splice(m_data.begin()+batch);
 		return right;
 	}
-	
+
 	/// \brief Appends the contents of another data object to the end
 	///
 	/// The batches are not copied but now referenced from both datasets. Thus changing the appended
-	/// dataset might change this one as well. 
+	/// dataset might change this one as well.
 	void append(self_type const& other){
 		m_data.append(other.m_data);
 	}
@@ -319,7 +319,7 @@ public:
 		subset.m_data=Container(m_data,indices);
 		complement.m_data=Container(m_data,comp);
 	}
-	
+
 	friend void swap(Data& a, Data& b){
 		swap(a.m_data,b.m_data);
 	}
@@ -431,7 +431,7 @@ public:
 	virtual void shuffle(){
 		DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
 		shark::shuffle(this->elements().begin(),this->elements().end(), uni);
-	} 
+	}
 };
 
 ///
@@ -474,22 +474,22 @@ public:
 
 	// TYPEDEFS FOR  RANGES
 	typedef typename PairRangeType<
-		element_type, 
+		element_type,
 		typename InputContainer::element_range,
 		typename LabelContainer::element_range
 	>::type element_range;
 	typedef typename PairRangeType<
-		element_type, 
+		element_type,
 		typename InputContainer::const_element_range,
 		typename LabelContainer::const_element_range
 	>::type const_element_range;
 	typedef typename PairRangeType<
-		batch_type, 
+		batch_type,
 		typename InputContainer::batch_range,
 		typename LabelContainer::batch_range
 	>::type batch_range;
 	typedef typename PairRangeType<
-		batch_type, 
+		batch_type,
 		typename InputContainer::const_batch_range,
 		typename LabelContainer::const_batch_range
 	>::type const_batch_range;
@@ -514,7 +514,7 @@ public:
 	element_range elements(){
 		return zipPairRange<element_type>(m_data.elements(),m_label.elements());
 	}
-	
+
 	///\brief Returns the range of batches.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
@@ -529,7 +529,7 @@ public:
 	batch_range batches(){
 		return zipPairRange<batch_type>(m_data.batches(),m_label.batches());
 	}
-	
+
 	///\brief Returns the number of batches of the set.
 	std::size_t numberOfBatches() const{
 		return m_data.numberOfBatches();
@@ -538,7 +538,7 @@ public:
 	std::size_t numberOfElements() const{
 		return m_data.numberOfElements();
 	}
-	
+
 	///\brief Check whether the set is empty.
 	bool empty() const{
 		return m_data.empty();
@@ -588,8 +588,8 @@ public:
 
 	///\brief Construction from data.
 	///
-	///Beware that, when calling this constructors the organization of batches must be equal in both containers. This
-	///Constructor won't split the data!
+	///Beware that when calling this constructor the organization of batches must be equal in both
+        ///containers. This Constructor will not split the data!
 	LabeledData(Data<InputType> const& inputs, Data<LabelType> const& labels)
 	: m_data(inputs), m_label(labels)
 	{
@@ -640,7 +640,7 @@ public:
 	virtual void shuffle(){
 		DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
 		shark::shuffle(this->elements().begin(),this->elements().end(), uni);
-	} 
+	}
 
 	void splitBatch(std::size_t batch, std::size_t elementIndex){
 		m_data.splitBatch(batch,elementIndex);
@@ -654,16 +654,16 @@ public:
 	self_type splice(std::size_t batch){
 		return self_type(m_data.splice(batch),m_label.splice(batch));
 	}
-	
+
 	/// \brief Appends the contents of another data object to the end
 	///
 	/// The batches are not copied but now referenced from both datasets. Thus changing the appended
-	/// dataset might change this one as well. 
+	/// dataset might change this one as well.
 	void append(self_type const& other){
 		m_data.append(other.m_data);
 		m_label.append(other.m_label);
 	}
-	
+
 
 	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
 	///
@@ -674,7 +674,7 @@ public:
 		m_data.repartition(batchSizes);
 		m_label.repartition(batchSizes);
 	}
-	
+
 	friend void swap(LabeledData& a, LabeledData& b){
 		swap(a.m_data,b.m_data);
 		swap(a.m_label,b.m_label);
@@ -713,7 +713,7 @@ typedef LabeledData<RealVector, RealVector> RegressionDataset;
 typedef LabeledData<CompressedRealVector, unsigned int> CompressedClassificationDataset;
 
 template<class Functor, class T>
-struct TransformedData{	
+struct TransformedData{
 	typedef Data<typename detail::TransformedDataElement<Functor,T>::type > type;
 };
 
@@ -725,14 +725,14 @@ struct TransformedData{
 
 /// \brief creates a data object from a range of elements
 template<class Range>
-Data<typename boost::range_value<Range>::type> 
+Data<typename boost::range_value<Range>::type>
 createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
 	typedef typename boost::range_value<Range const>::type Input;
 	typedef typename boost::range_iterator<Range const>::type Iterator;
-	
+
 	if (maximumBatchSize == 0)
 		maximumBatchSize = Data<Input>::DefaultBatchSize;
-		
+
 	std::size_t numPoints = shark::size(inputs);
 	//first determine the optimal number of batches as well as batch size
 	std::size_t batches = numPoints / maximumBatchSize;
@@ -741,7 +741,7 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
 	std::size_t optimalBatchSize=numPoints/batches;
 	std::size_t remainder = numPoints-batches*optimalBatchSize;
 	Data<Input> data(batches);
-	
+
 	//now create the batches taking the remainder into account
 	Iterator start= boost::begin(inputs);
 	for(std::size_t i = 0; i != batches; ++i){
@@ -751,8 +751,8 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
 			boost::make_iterator_range(start,end)
 		);
 		start = end;
-	}	
-		
+	}
+
 	return data;
 }
 /// \brief creates a labeled data object from two ranges, representing inputs and labels
@@ -761,14 +761,14 @@ LabeledData<
 	typename boost::range_value<Range1>::type,
 	typename boost::range_value<Range2>::type
 > createLabeledDataFromRange(Range1 const& inputs, Range2 const& labels, std::size_t batchSize = 0){
-	SHARK_CHECK(boost::size(inputs) == boost::size(labels), 
+	SHARK_CHECK(boost::size(inputs) == boost::size(labels),
 	"[createDataFromRange] number of inputs and number of labels must agree");
 	typedef typename boost::range_value<Range1>::type Input;
 	typedef typename boost::range_value<Range2>::type Label;
-	
+
 	if (batchSize == 0)
 		batchSize = LabeledData<Input,Label>::DefaultBatchSize;
-	
+
 	return LabeledData<Input,Label>(
 		createDataFromRange(inputs,batchSize),
 		createDataFromRange(labels,batchSize)
@@ -920,7 +920,7 @@ DatasetT rangeSubset(DatasetT const& dataset, std::size_t size){
 
 /// \brief Removes the last part of a given dataset and returns a new split containing the removed elements
 ///
-/// For this operation, the dataset is not allowed to be shared. 
+/// For this operation, the dataset is not allowed to be shared.
 /// \brief data The dataset which should be splited
 /// \brief index the first element to be split
 /// \returns the  set which contains the splitd element (right part of the given set)
@@ -939,7 +939,7 @@ DatasetT splitAtElement(DatasetT& data, std::size_t elementIndex){
 		data.splitBatch(batchPos,splitPoint);
 		++batchPos;
 	}
-	
+
 	return data.splice(batchPos);
 }
 
@@ -1141,7 +1141,7 @@ public:
 				input(i) += m_offsetv(i);
 		}
 		return input;
-			
+
 	}
 private:
 	double m_offset;
@@ -1157,8 +1157,8 @@ public:
 	///@param minValue All elements below this value are cut to the minimum value
 	///@param maxValue All elements above this value are cut to the maximum value
 	Truncate(double minValue,double maxValue) : m_min(minValue), m_max(maxValue){}
-	///@param minv Lower bound for element-wise truncation 
-	///@param maxv Upper bound for element-wise truncation 
+	///@param minv Lower bound for element-wise truncation
+	///@param maxv Upper bound for element-wise truncation
 	Truncate(const RealVector minv, const RealVector maxv) : m_min(1), m_max(-1), m_minv(minv), m_maxv(maxv) { SIZE_CHECK(m_minv.size() == m_maxv.size()); }
 
 	typedef RealVector result_type;
@@ -1193,8 +1193,8 @@ public:
 	///@param minValue The imterval [minCutValue, maxCutValue] is mapped to [minValue, maxValue]
 	///@param maxValue The imterval [minCutValue, maxCutValue] is mapped to [minValue, maxValue]
 	TruncateAndRescale(double minCutValue, double maxCutValue, double minValue = 0., double maxValue = 1.) : m_minCut(minCutValue), m_maxCut(maxCutValue), m_range(maxValue - minValue), m_min(minValue), m_scalar(true) {}
-	///@param minv Lower bound for element-wise truncation 
-	///@param maxv Upper bound for element-wise truncation 
+	///@param minv Lower bound for element-wise truncation
+	///@param maxv Upper bound for element-wise truncation
 	///@param minValue The imterval [minv, maxv is mapped to [minValue, maxValue]
 	///@param maxValue The imterval [minv, maxv] is mapped to [minValue, maxValue]
 	TruncateAndRescale(const RealVector minv, const RealVector maxv, double minValue = 0., double maxValue = 1.) : m_minCutv(minv), m_maxCutv(maxv), m_range(maxValue - minValue), m_min(minValue), m_scalar(false) { SIZE_CHECK(m_minCutv.size() == m_maxCutv.size()); }

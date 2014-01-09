@@ -38,8 +38,8 @@ In detail, there exist a convention used by algorithms
 in typical classification settings, and a convention for regression
 settings:
 
-* The format for a classification label is a single unsigned integer (C++ type
-  ``unsigned int``) in the range ``0,...,d-1``. For binary data, the wide-spread
+* The format for a classification label is a single unsigned integer (C++
+  type ``unsigned int``) in the range ``0,...,d-1``. For binary data, the wide-spread
   binary labels ``-1``/``+1`` are no longer supported; instead, ``0``/``1``
   is used for the sake of consistency with the multi-class case. When required,
   Binary labels -1/+1  are converted to 0/1 by setting all -1 labels to 0.
