@@ -32,8 +32,6 @@
 
 #include <shark/Unsupervised/RBM/RBM.h>
 #include <shark/Data/Dataset.h>
-#include <shark/LinAlg/Base.h>
-#include <boost/foreach.hpp>
 
 namespace shark {
 ///\brief Calculates the value of the partition function $Z$.
@@ -94,5 +92,50 @@ double negativeLogLikelihood(
 	double const logPartition = logPartitionFunction(rbm,beta);
 	return negativeLogLikelihoodFromLogPartition(rbm,inputs,logPartition,beta);
 }
+
+enum EstimationAlgorithm{
+	AIS,
+	TwoSidedAIS,
+	AcceptanceRatio,
+	WorkAverage
+};
+
+template<class RBMType>
+double estimateLogFreeEnergy(
+	RBMType& rbm, Data<RealVector> const& initDataset, 
+	RealVector const& beta, std::size_t samples,
+	EstimationAlgorithm algorithm = AIS
+){
+	std::size_t chains = beta.size();
+	RealMatrix energyDiffUp(chains,samples);
+	RealMatrix energyDiffDown(chains,samples);
+	detail::sampleEnergies(rbm,initDataset,beta,energyDiffUp,energyDiffDown);
+	
+	double deltaF = 0;
+	
+	switch(algorithm){
+	case AIS:
+		for(std::size_t i = chains-1; i != 0; --i){
+			deltaF += soft_max(-row(energyDiffUp,i))-std::log(double(samples));
+		}
+	break;
+	case TwoSidedAIS:
+		for(std::size_t i = chains-1; i != 0; --i){
+			deltaF += detail::twoSidedAIS(row(energyDiffUp,i),row(energyDiffDown,i-1));
+		}
+	break;
+	case AcceptanceRatio:
+		for(std::size_t i = chains-1; i != 0; --i){
+			deltaF += detail::acceptanceRatio(row(energyDiffUp,i),row(energyDiffDown,i-1));
+		}
+	break;
+	case WorkAverage:
+		deltaF = soft_max(-sum_rows(energyDiffUp))-std::log(double(samples));
+	}
+	
+	return deltaF;
+}
+
+
 }
 #endif
