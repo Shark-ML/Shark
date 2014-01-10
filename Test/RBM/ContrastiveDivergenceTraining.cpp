@@ -2,8 +2,9 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/Unsupervised/RBM/analytics.h>
 #include <shark/Unsupervised/RBM/BinaryRBM.h>
+#include <shark/Unsupervised/RBM/Energy.h>
+#include <shark/Unsupervised/RBM/analytics.h>
 #include <shark/Unsupervised/RBM/Problems/BarsAndStripes.h>
 #include <shark/Algorithms/GradientDescent/SteepestDescent.h>
 
