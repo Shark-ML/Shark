@@ -1,10 +1,63 @@
 Random Numbers
 ==============
 
+
+Global random number generator
+------------------------------
+
 The Shark machine learning library provides many functions for drawing 
 random numbers.
 
-We start with the following header file: ::
+We start with the following header files: ::
 
 ..sharkcode<Statistics/RandomNumbers.tpp,includes>
 
+It provides access to a global random number generator
+and convenience functions to draw from the following distributions:
+
+- Bernoulli with name ``coinToss``
+- DiscreteUniform with name `discrete``
+- Uniform with name ``uni``
+- Normal with name ``gauss``
+- Cauchy with name ``cauchy``
+- Geometric with name ``geom``
+- DiffGeometric with name ``diffGeom``
+- Poisson with name ``poisson``
+- Gamma with name ``gam```
+- Dirichlet with name ``dir``
+
+Examples: ::
+
+..sharkcode<Statistics/RandomNumbers.tpp,draw>
+
+You can set the seed of the global random number generator by: ::
+
+..sharkcode<Statistics/RandomNumbers.tpp,seed>
+
+Examples of distributions
+-------------------------
+
+Some examples of distributions: ::
+
+..sharkcode<Statistics/RandomNumbers.tpp,list>
+
+This example shows how to access the mean and variance of a normal distribution with mean one and unit variance: ::
+
+..sharkcode<Statistics/RandomNumbers.tpp,normal>
+
+Here's an example of a uniform distribution over the real numbers from 1 to 5: ::
+
+..sharkcode<Statistics/RandomNumbers.tpp,uniform>
+
+Multivariate normal distribution
+--------------------------------
+
+The following code shows how to sample from a mean-free multivariate Gaussian distribution: ::
+
+..sharkcode<Statistics/RandomNumbers.tpp,multivariate>
+
+Here the sampling is special, because not only the realization of the
+random vector is returned, but also the realization of the standard
+normally distributed random vector from which it was
+generated. Therefore, the realization has to be accessed using
+``first``.

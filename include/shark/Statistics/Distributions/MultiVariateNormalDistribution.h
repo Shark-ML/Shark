@@ -66,10 +66,19 @@ namespace shark {
 			* \brief Default c'tor.
 			* \param [in] dimension Size of the distribution.
 			*/
-			TypedMultiVariateNormalDistribution( unsigned int dimension = 0 ) : m_covarianceMatrix( dimension, dimension ) {
-				//~ if( dimension != 0 )
-					//~ update();
+			TypedMultiVariateNormalDistribution( unsigned int dimension = 0 ) {
+				resize(dimension);
 			}
+
+			/**
+			* \brief Constructor
+			* \param [in] Sigma covariance matrix
+			*/
+			TypedMultiVariateNormalDistribution( MatrixType &Sigma ) {
+				m_covarianceMatrix = Sigma;
+				update();
+			}
+
 
 			/**
 			* \brief Stores the distribution in the supplied archive.
@@ -119,6 +128,15 @@ namespace shark {
 			*/
 			const MatrixType & covarianceMatrix() const {
 				return( m_covarianceMatrix );
+			}
+
+			/**
+			* \brief Set covariance matrix, update intenally eigenvectors and eigenvalues.
+			* \param [in] size Covariance matrix
+			*/
+			void setCovarianceMatrix( MatrixType &Sigma ) {
+				m_covarianceMatrix = Sigma;
+				update();
 			}
 
 			/**
