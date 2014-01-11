@@ -16,9 +16,9 @@
 *      <li>Dirichlet with name \em dir
 *  </ul>
 *
-*  Additionally this class offers a global random number generator of Type #RngType. The Default of this
-*  Is the Mersenne Twister with a cycle length of $2^19937$. This Generator can be used to construct additional
-*  distributions. The seed can be set via Rng::seed
+*  Additionally this class offers a global random number generator of Type #RngType. The default of this
+*  is the Mersenne Twister with a cycle length of $2^19937$. This generator can be used to construct additional
+*  distributions. The seed can be set via Rng::seed .
 *
 *  \par Example
 *  \code
@@ -49,17 +49,6 @@
 *      cout << "Differential Geometric distribution number   = " << rn7 << endl;
 *  }
 *  \endcode
-*
-*  \par Copyright (c) 1998-2007:
-*      Institut f&uuml;r Neuroinformatik<BR>
-*      Ruhr-Universit&auml;t Bochum<BR>
-*      D-44780 Bochum, Germany<BR>
-*      Phone: +49-234-32-25558<BR>
-*      Fax:   +49-234-32-14209<BR>
-*      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-*      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-*      <BR>
-*
 *
 *  <BR><HR>
 *  This file is part of Shark. This library is free software;
