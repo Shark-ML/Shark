@@ -136,7 +136,11 @@ Tools
 Finally, we present functionality which are not machine learning facilities
 themselves, but necessary or helpful tools.
 
-First of all there is Sharks own solver for Quadratic Programs:
+Shark provides support for random numbers, the basic concepts are introduce here:
+
+* :doc:`concepts/misc/random_numbers`
+
+Sharks comes with its own solver for Quadratic Programs:
 
 * :doc:`algorithms/quadratic_programs`
 
@@ -157,7 +161,6 @@ support for serialization, and the well-known factory-method-pattern:
 * :doc:`concepts/misc/serialization`
 
 
-
 For Shark developers
 ++++++++++++++++++++
 
@@ -173,6 +176,5 @@ If you contribute to Shark, you might also find these documents helpful:
 * :doc:`for_developers/effective_ublas`
 * :doc:`for_developers/writing_tutorials`
 * :doc:`for_developers/managing_the_documentation`
-* :doc:`for_developers/issuing_a_release`
 
 
