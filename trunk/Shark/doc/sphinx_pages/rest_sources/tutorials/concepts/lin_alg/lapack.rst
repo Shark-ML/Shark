@@ -11,7 +11,7 @@ Solving Systems of Linear Equations
 A system of linear equations has the forms
 
 .. math::
-  A\vec{x}=\vec{b} \\
+  Ax=b \\
   AX=B
   
 and we want to find the solution for :math:`x` or :math:`X`. The routines to choose depend highly on the form of :math:`A`. To use the solvers the file 
@@ -19,7 +19,7 @@ and we want to find the solution for :math:`x` or :math:`X`. The routines to cho
 
 The easiest form for an triangular system arises when :math:`A` is a triangular matrix. For a lower triangular matrix all entries above the diagonal 
 are zero. Accordingly, for an upper triangular matrix the elements below the diagonal are zero. Solving this kind of problems is that easy 
-that the system can be solved without additional memory by using :math:`\vec{b}` or :math:`B` to store the results. To solve an equation 
+that the system can be solved without additional memory by using :math:`b` or :math:`B` to store the results. To solve an equation 
 of this form, use doxy:`solveTriangularSystemInPlace`::
 
   bool isLowerTriangular = true;
@@ -74,8 +74,8 @@ The lambdas are called eigenvalues and the :math:`x` are the eigenvectors with :
 
   eigensymm(A,X,lambda);
   
-X stores all eigenvectors of A as columns and lambda is a vector of the corresponding eigenvalues. The *i*-th column 
-of X corresponds to the *i*-th element of lambda. Eigenvalues are sorted in descending order.
+the :math:`X` stores all eigenvectors of :math:`A` as columns and lambda is a vector of the corresponding eigenvalues. The *i*-th column 
+of :math:`X` corresponds to the *i*-th element of lambda. Eigenvalues are sorted in descending order.
 
 Singular Value Decomposition
 --------------------------------------------------------------------

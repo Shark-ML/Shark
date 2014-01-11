@@ -1,0 +1,10 @@
+Random Numbers
+==============
+
+The Shark machine learning library provides many functions for drawing 
+random numbers.
+
+We start with the following header file: ::
+
+..sharkcode<Statistics/RandomNumbers.tpp,includes>
+
