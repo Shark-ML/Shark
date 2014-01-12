@@ -117,6 +117,7 @@ namespace shark {
 
 		//! creates a discrete uniform distributed number in the range from "min" to "max"
 		static int discrete(int min=0,int max=1) {
+			if(min == max) return min;
 			DiscreteUniform< rng_type > disc(globalRng,min,max);
 			return disc( min, max );
 		}
@@ -124,6 +125,7 @@ namespace shark {
 
 		//! creates a uniform distributed number in the range from "min" to "max"
 		static double uni(double min=0.0,double max=1.0) {
+			if(min == max) return min;
 			Uniform< rng_type > uni( globalRng, min, max );
 			return uni();
 		}

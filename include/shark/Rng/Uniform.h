@@ -78,6 +78,7 @@ public:
 	*/
 	double operator()(double low_,double high_)
 	{
+		if(low_ == high_) return low_;
 		boost::uniform_real<> dist( std::min(low_,high_), std::max( high_, low_ ) );
 		return dist(Base::engine());
 	}
