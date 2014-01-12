@@ -67,7 +67,7 @@ namespace shark {
 			* \param [in] dimension Size of the distribution.
 			*/
 			TypedMultiVariateNormalDistribution( unsigned int dimension = 0 ) {
-				resize(dimension);
+				//resize(dimension);
 			}
 
 			/**
