@@ -25,13 +25,13 @@ int main( int argc, char ** argv ) {
 	const unsigned Mu           = 15;
 	const unsigned Lambda       = 100;
 	const unsigned Dimension    = 30;
-	const double InitialSigma 	  = 3.;
+	const double InitialSigma   = 3.;
 	
 	// Instantiate the objective function
 	shark::Ackley ackley( Dimension );
 	
 	// Initialize the mutation distribution
-	shark::MultiVariateNormalDistribution mutationDistribution( Dimension );
+	shark::MultiVariateNormalDistribution mutationDistribution;
 	mutationDistribution.setCovarianceMatrix( shark::blas::identity_matrix< double >( Dimension ) );
 	
 	shark::example::Individual prototypeIndividual;
@@ -40,7 +40,7 @@ int main( int argc, char ** argv ) {
 	shark::example::Population parents( Mu, prototypeIndividual );
 	shark::example::Population offspring( Lambda );
 	
-	// Initialize parents
+	// Initialize parents (not a god idea to start in a single point, shouldn't do this in practice)
 	BOOST_FOREACH( shark::example::Individual & ind, parents ) {
 		ackley.proposeStartingPoint( *ind );
 	}
