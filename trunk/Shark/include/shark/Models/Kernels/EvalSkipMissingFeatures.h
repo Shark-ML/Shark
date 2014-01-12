@@ -126,8 +126,7 @@ double evalSkipMissingFeatures(
 	tempInputB.resize(inputB.size());
 	for (std::size_t index = 0; index < inputA.size(); ++index)
 	{
-		using namespace boost::math;
-		if (!std::isnan(inputA(index)) && !std::isnan(inputB(index)) && !std::isnan(missingness(index)))
+		if (!boost::math::isnan(inputA(index)) && !boost::math::isnan(inputB(index)) && !boost::math::isnan(missingness(index)))
 		{
 			tempInputA.push_back(inputA(index));
 			tempInputB.push_back(inputB(index));
