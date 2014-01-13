@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE( FISHER_LDA_TEST ){
 
 	// create datatsets - three normal distributions
 	// [TG] why not use DataDistribution for this?
-	MultiVariateNormalDistribution dist(2);
+	MultiVariateNormalDistribution dist;
 
 	RealMatrix covariance(3,3);
 	covariance.clear();

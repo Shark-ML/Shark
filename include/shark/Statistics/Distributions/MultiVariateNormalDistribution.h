@@ -66,7 +66,7 @@ namespace shark {
 			* \brief Default c'tor.
 			* \param [in] dimension Size of the distribution.
 			*/
-			TypedMultiVariateNormalDistribution( unsigned int dimension = 0 ) {
+			TypedMultiVariateNormalDistribution() {
 				//resize(dimension);
 			}
 

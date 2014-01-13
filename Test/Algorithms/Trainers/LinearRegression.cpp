@@ -24,8 +24,8 @@ BOOST_AUTO_TEST_CASE( LinearRegression_TEST ){
 	offset(1) = -6;
 	model.setStructure(matrix, offset);
 
-	// create datatset - the model output + gaussian noise
-	MultiVariateNormalDistribution noise(2);
+	// create datatset - the model output + Gaussian noise
+	MultiVariateNormalDistribution noise;
 	RealMatrix covariance(2, 2);
 	covariance(0,0) = 1;
 	covariance(0,1) = 0;

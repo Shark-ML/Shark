@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 
 
 	//create datatsets - two overlapping normal distributions
-	MultiVariateNormalDistribution dist(2);
+	MultiVariateNormalDistribution dist;
 
 	RealMatrix covariance(2,2);
 	covariance(0,0)=16;
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	//create datatsets - two overlapping normal distributions
 	//same as in the previous test aside from that we add a third
 	//variable which is allways 0
-	MultiVariateNormalDistribution dist(2);
+	MultiVariateNormalDistribution dist;
 
 	RealMatrix covariance(2,2);
 	covariance(0,0)=16;
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 
 
 	//create datatsets - overlapping normal distributions
-	MultiVariateNormalDistribution dist(2);
+	MultiVariateNormalDistribution dist;
 
 	RealMatrix covariance(2,2);
 	covariance(0,0)=16;
