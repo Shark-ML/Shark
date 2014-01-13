@@ -70,8 +70,7 @@ UnlabeledData<RealVector> createData3D()
 	covariance = prod(trans(covariance),covariance);
 
 	//now we can create the distribution
-	MultiVariateNormalDistribution distribution(3);
-	distribution.setCovarianceMatrix(covariance);
+	MultiVariateNormalDistribution distribution(covariance);
 
 	//and we sample from it
 	std::vector<RealVector> data(numberOfExamples);
@@ -94,8 +93,7 @@ UnlabeledData<RealVector> createData2D()
 	C(0, 0) = 16.;
 	C(1, 1) = 1.;
 	mu(0) = mu(1) = 1.;
-	MultiVariateNormalDistribution distribution(2);
-	distribution.setCovarianceMatrix(C);
+	MultiVariateNormalDistribution distribution(C);
 
 	std::vector<RealVector> v;
 	for(unsigned i=0; i<numberOfExamples; i++) v.push_back(mu + distribution().first);
@@ -131,8 +129,7 @@ UnlabeledData<RealVector> createDataNotFullRank()
 	covariance = prod(trans(covariance),covariance);
 
 	//now we can create the distribution
-	MultiVariateNormalDistribution distribution(dimensions);
-	distribution.setCovarianceMatrix(covariance);
+	MultiVariateNormalDistribution distribution(covariance);
 
 	//and we sample from it
 	std::vector<RealVector> data(numberOfExamples);

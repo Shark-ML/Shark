@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	RealVector optimum=model.parameterVector();
 
 	// create datatset - the model output + gaussian noise
-	MultiVariateNormalDistribution noise(2);
+	MultiVariateNormalDistribution noise;
 	RealMatrix covariance(2, 2);
 	covariance(0,0) = 1;
 	covariance(0,1) = 0;

@@ -57,8 +57,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING)
 	mean(1)=-1;
 	mean(2)=3;
 	
-	MultiVariateNormalDistribution dist(3);
-	dist.setCovarianceMatrix(mat);
+	MultiVariateNormalDistribution dist(mat);
 	
 	
 	std::vector<RealVector> input(1000,RealVector(3));
@@ -99,9 +98,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING_RANK_2)
 	mean(1)=-1;
 	mean(2)=3;
 	
-	MultiVariateNormalDistribution dist(3);
-	dist.setCovarianceMatrix(mat);
-	
+	MultiVariateNormalDistribution dist(mat);
 	
 	std::vector<RealVector> input(1000,RealVector(3));
 	for(std::size_t i = 0; i != 1000;++i)
