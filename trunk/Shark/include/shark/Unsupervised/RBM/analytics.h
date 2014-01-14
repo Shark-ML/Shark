@@ -93,26 +93,21 @@ double negativeLogLikelihood(
 	return negativeLogLikelihoodFromLogPartition(rbm,inputs,logPartition,beta);
 }
 
-enum EstimationAlgorithm{
+enum PartitionEstimationAlgorithm{
 	AIS,
 	TwoSidedAIS,
 	AcceptanceRatio,
 	WorkAverage
 };
 
-template<class RBMType>
-double estimateLogFreeEnergy(
-	RBMType& rbm, Data<RealVector> const& initDataset, 
-	RealVector const& beta, std::size_t samples,
-	EstimationAlgorithm algorithm = AIS
-){
-	std::size_t chains = beta.size();
-	RealMatrix energyDiffUp(chains,samples);
-	RealMatrix energyDiffDown(chains,samples);
-	detail::sampleEnergies(rbm,initDataset,beta,energyDiffUp,energyDiffDown);
-	
+inline double estimateLogFreeEnergyFromEnergySamples(
+	RealMatrix const& energyDiffUp,
+	RealMatrix const& energyDiffDown,
+	PartitionEstimationAlgorithm algorithm = AIS
+){	
+	std::size_t chains = energyDiffUp.size1();
+	std::size_t samples = energyDiffUp.size2();
 	double deltaF = 0;
-	
 	switch(algorithm){
 	case AIS:
 		for(std::size_t i = chains-1; i != 0; --i){
@@ -134,6 +129,22 @@ double estimateLogFreeEnergy(
 	}
 	
 	return deltaF;
+}
+
+template<class RBMType>
+double estimateLogFreeEnergy(
+	RBMType& rbm, Data<RealVector> const& initDataset, 
+	RealVector const& beta, std::size_t samples,
+	PartitionEstimationAlgorithm algorithm = AIS
+){
+	std::size_t chains = beta.size();
+	RealMatrix energyDiffUp(chains,samples);
+	RealMatrix energyDiffDown(chains,samples);
+	detail::sampleEnergies(rbm,initDataset,beta,energyDiffUp,energyDiffDown);
+	
+	return estimateLogFreeEnergyFromEnergySamples(
+		energyDiffUp,energyDiffDown,algorithm
+	);
 }
 
 
