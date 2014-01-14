@@ -10,7 +10,7 @@ class BarsAndStripes{
 private:
 	UnlabeledData<RealVector> m_data;
 public:
-	BarsAndStripes(){
+	BarsAndStripes(std::size_t batchSize = 32){
 		std::vector<RealVector> data(32,RealVector(16));
 		RealVector line(4);
 		for(size_t x=0; x != 16; x++) {
@@ -26,7 +26,7 @@ public:
 					data[16+x](l*4 + i) = line(l);
 				}
 			}
-			m_data = createDataFromRange(data);
+			m_data = createDataFromRange(data,batchSize);
 		}
 	}
 	///Returns all input pattern of the BarsAndStripes problem
