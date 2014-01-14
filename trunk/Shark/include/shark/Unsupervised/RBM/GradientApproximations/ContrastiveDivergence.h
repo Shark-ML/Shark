@@ -53,7 +53,7 @@ public:
 	{ return "ContrastiveDivergence"; }
 
 	/// \brief Sets the training batch.
-    ///
+	///
 	/// @param data the batch of training data
 	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;
@@ -74,7 +74,7 @@ public:
 	}
 	
 	/// \brief Sets the value of k- the number of steps of the Gibbs Chain 
-    ///
+	///
 	/// @param k  the number of steps
 	void setK(unsigned int k){
 		m_k = k;
@@ -84,45 +84,69 @@ public:
 		startingPoint = mpe_rbm->parameterVector();
 	}
 	
-    /// \brief Returns the number of variables of the RBM.
-    ///
+	/// \brief Returns the number of variables of the RBM.
+	///
 	/// @return the number of variables of the RBM
 	std::size_t numberOfVariables()const{
 		return mpe_rbm->numberOfParameters();
 	}
 	
 	/// \brief Gives the CD-k approximation of the log-likelihood gradient.
-    ///
+	///
 	/// @param parameter the actual parameters of the RBM
-    /// @param derivative holds later the CD-k approximation of the log-likelihood gradient
+	/// @param derivative holds later the CD-k approximation of the log-likelihood gradient
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const{
 		mpe_rbm->setParameterVector(parameter);
+		derivative.resize(mpe_rbm->numberOfParameters());
+		derivative.clear();
 		
-		AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
-		AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
-	
-		BOOST_FOREACH(RealMatrix const& batch,m_data.batches()) {
-			//create the batches for evaluation
-			typename Operator::HiddenSampleBatch hiddenBatch(batch.size1(),mpe_rbm->numberOfHN());
-			typename Operator::VisibleSampleBatch visibleBatch(batch.size1(),mpe_rbm->numberOfVN());
+		std::size_t threads = SHARK_NUM_THREADS;
+		std::size_t numBatches = m_data.numberOfBatches()/threads;
+		std::size_t elements = m_data.numberOfElements();
+		
+		SHARK_PARALLEL_FOR(int t = 0; t < (int)threads; ++t){
+			AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
+			AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
 			
-			m_operator.createSample(hiddenBatch,visibleBatch,batch);
-			empiricalAverage.addVH(hiddenBatch,visibleBatch);
+			std::size_t threadElements = 0;
 			
-			for(std::size_t step = 0; step != m_k; ++step){
-				m_operator.precomputeVisible(hiddenBatch, visibleBatch);
-				m_operator.sampleVisible(visibleBatch);
-				m_operator.precomputeHidden(hiddenBatch, visibleBatch);
-				if( step != m_k-1){
+			std::size_t batchStart = t*numBatches;
+			std::size_t batchEnd = (t== threads-1)? m_data.numberOfBatches() : batchStart+numBatches;
+			for(std::size_t i = batchStart; i != batchEnd; ++i){
+				RealMatrix const& batch = m_data.batch(i);
+				threadElements += batch.size1();
+				
+				//create the batches for evaluation
+				typename Operator::HiddenSampleBatch hiddenBatch(batch.size1(),mpe_rbm->numberOfHN());
+				typename Operator::VisibleSampleBatch visibleBatch(batch.size1(),mpe_rbm->numberOfVN());
+				
+				visibleBatch.state = m_data.batch(i);
+				m_operator.precomputeHidden(hiddenBatch,visibleBatch);
+				SHARK_CRITICAL_REGION{
 					m_operator.sampleHidden(hiddenBatch);
 				}
+				empiricalAverage.addVH(hiddenBatch,visibleBatch);
+				
+				for(std::size_t step = 0; step != m_k; ++step){
+					m_operator.precomputeVisible(hiddenBatch, visibleBatch);
+					SHARK_CRITICAL_REGION{
+						m_operator.sampleVisible(visibleBatch);
+					}
+					m_operator.precomputeHidden(hiddenBatch, visibleBatch);
+					if( step != m_k-1){
+						SHARK_CRITICAL_REGION{
+							m_operator.sampleHidden(hiddenBatch);
+						}
+					}
+				}
+				modelAverage.addVH(hiddenBatch,visibleBatch);
 			}
-			modelAverage.addVH(hiddenBatch,visibleBatch);
+			SHARK_CRITICAL_REGION{
+				double weight = threadElements/double(elements);
+				noalias(derivative) += weight*(modelAverage.result() - empiricalAverage.result());
+			}
+			
 		}
-		
-		derivative.resize(mpe_rbm->numberOfParameters());
-		noalias(derivative) = modelAverage.result() - empiricalAverage.result();
-	
 		return std::numeric_limits<double>::quiet_NaN();
 	}
 

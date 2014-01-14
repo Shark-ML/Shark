@@ -30,7 +30,9 @@
 #include <shark/Unsupervised/RBM/Tags.h>
 #include <shark/Unsupervised/RBM/Sampling/TemperedMarkovChain.h>
 #include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
+#include <shark/Unsupervised/RBM/Energy.h>
 #include <shark/Algorithms/GradientDescent/LineSearch.h>
+#include <shark/Core/OpenMP.h>
 
 #include <boost/static_assert.hpp>
 #include <boost/range/numeric.hpp>
@@ -233,11 +235,9 @@ namespace detail{
 		std::size_t batchSize = std::min(values, std::size_t(500));
 		
 		//over all possible values of the visible neurons
-		RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
-		
-		//double c = 0;
 		double logZ = -std::numeric_limits<double>::infinity();
-		for (std::size_t x = 0; x < values; x+=batchSize) {
+		SHARK_PARALLEL_FOR (std::size_t x = 0; x < values; x+=batchSize) {
+			RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
 			std::size_t currentBatchSize=std::min(batchSize,values-x);
 			stateMatrix.resize(currentBatchSize,rbm.numberOfVN());
 			
@@ -245,14 +245,18 @@ namespace detail{
 				//generation of the x+elem-th state vector
 				Enumeration::state(row(stateMatrix,elem),x+elem);
 			}
+			
+			RealVector p =rbm.energy().logUnnormalizedPropabilityVisible(
+				stateMatrix, blas::repeat(beta,currentBatchSize)
+			);
 	
 			//accumulate changes to the log partition
-			logZ = boost::accumulate(
-				-rbm.energy().logUnnormalizedPropabilityVisible(
-					stateMatrix, blas::repeat(beta,currentBatchSize)
-				),
-				logZ,updateLogPartition
-			);
+			SHARK_CRITICAL_REGION{
+				logZ = boost::accumulate(
+					-p,
+					logZ,updateLogPartition
+				);
+			}
 		}
 		return logZ;
 	}
@@ -276,11 +280,9 @@ namespace detail{
 		std::size_t batchSize=std::min(values,std::size_t(500));
 		
 		//over all possible values of the visible neurons
-		RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
-		
-		//double c = 0;
 		double logZ = -std::numeric_limits<double>::infinity();
-		for (std::size_t x = 0; x < values; x+=batchSize) {
+		SHARK_PARALLEL_FOR(int x = 0; x < values; x+=batchSize) {
+			RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
 			std::size_t currentBatchSize=std::min(batchSize,values-x);
 			stateMatrix.resize(currentBatchSize,rbm.numberOfHN());
 			
@@ -289,13 +291,17 @@ namespace detail{
 				Enumeration::state(row(stateMatrix,elem),x+elem);
 			}
 			
-			//accumulate changes to the log partition
-			logZ = boost::accumulate(
-				-rbm.energy().logUnnormalizedPropabilityHidden(
-					stateMatrix, blas::repeat(beta,currentBatchSize)
-				),
-				logZ,updateLogPartition
+			RealVector p=rbm.energy().logUnnormalizedPropabilityHidden(
+				stateMatrix, blas::repeat(beta,currentBatchSize)
 			);
+			
+			//accumulate changes to the log partition
+			SHARK_CRITICAL_REGION{
+				logZ = boost::accumulate(
+					-p,
+					logZ,updateLogPartition
+				);
+			}
 		}
 		return logZ;
 	}

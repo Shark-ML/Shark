@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergenceTraining_Bars ){
 	
 	std::vector<std::vector<double> > results(trials,std::vector<double>(numUpdates));
 	
-	BarsAndStripes problem;
+	BarsAndStripes problem(9);
 	UnlabeledData<RealVector> data = problem.data();
 	
 	Rng::seed(42);
