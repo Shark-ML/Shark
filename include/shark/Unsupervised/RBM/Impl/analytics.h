@@ -95,7 +95,7 @@ namespace detail{
 		};
 		RatioOptimizationProblem f(energyDiff0,energyDiff1);
 		//initialize with solution of AIS
-		RealVector C(1,twoSidedAIS(energyDiff0,energyDiff1));
+		RealVector C(1,soft_max(-energyDiff0)-std::log(double(energyDiff0.size())));
 		RealVector derivative;
 		double val = f.evalDerivative(C,derivative);
 		RealVector direction = -derivative;
@@ -128,7 +128,8 @@ namespace detail{
 		Data<RealVector> const& initDataset, 
 		RealVector const& beta, 
 		RealMatrix& energyDiffUp,
-		RealMatrix& energyDiffDown
+		RealMatrix& energyDiffDown,
+		bool useDirectEnergies = false
 	){
 		std::size_t chains = beta.size();
 		std::size_t samples = energyDiffUp.size2();
@@ -160,34 +161,36 @@ namespace detail{
 			
 			//calculate The upper and lower energy difference for every chain.
 			
-			//calculate the first term: -E(state,beta) thats the same for both matrices
-			noalias(column(energyDiffDown,s)) = energy.logUnnormalizedPropabilityHidden(
-				sampler.samples().hidden.state,
-				sampler.samples().visible.input,
-				beta
-			);
-			noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
-			
-			//now add the new term
-			noalias(column(energyDiffUp,s)) -= energy.logUnnormalizedPropabilityHidden(
-				sampler.samples().hidden.state,
-				sampler.samples().visible.input,
-				betaUp
-			);
-			noalias(column(energyDiffDown,s)) -= energy.logUnnormalizedPropabilityHidden(
-				sampler.samples().hidden.state,
-				sampler.samples().visible.input,
-				betaDown
-			);
-			
-			//~ noalias(column(energyDiffDown,s)) = energy.energy(
-				//~ sampler.samples().hidden.state,
-				//~ sampler.samples().visible.state
-			//~ );
-			//~ noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
-			//~ column(energyDiffUp,s)*=1.0/(chains-1);
-			//~ column(energyDiffDown,s)*=-1.0/(chains-1);
-			
+			if(useDirectEnergies){
+				noalias(column(energyDiffDown,s)) = energy.energy(
+					sampler.samples().hidden.state,
+					sampler.samples().visible.state
+				);
+				noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
+				column(energyDiffUp,s)*=1.0/(chains-1);
+				column(energyDiffDown,s)*=-1.0/(chains-1);
+			}
+			else{
+				//calculate the first term: -E(state,beta) thats the same for both matrices
+				noalias(column(energyDiffDown,s)) = energy.logUnnormalizedPropabilityHidden(
+					sampler.samples().hidden.state,
+					sampler.samples().visible.input,
+					beta
+				);
+				noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
+				
+				//now add the new term
+				noalias(column(energyDiffUp,s)) -= energy.logUnnormalizedPropabilityHidden(
+					sampler.samples().hidden.state,
+					sampler.samples().visible.input,
+					betaUp
+				);
+				noalias(column(energyDiffDown,s)) -= energy.logUnnormalizedPropabilityHidden(
+					sampler.samples().hidden.state,
+					sampler.samples().visible.input,
+					betaDown
+				);
+			}
 		}
 	}
 	
@@ -282,9 +285,6 @@ namespace detail{
 		//over all possible values of the visible neurons
 		double logZ = -std::numeric_limits<double>::infinity();
 		SHARK_PARALLEL_FOR(long long x = 0; x < values; x+=batchSize) {
-			if(x%100000==0){
-				std::cout<<x<<std::endl;
-			}
 			RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
 			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-x);
 			stateMatrix.resize(currentBatchSize,rbm.numberOfHN());
