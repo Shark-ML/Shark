@@ -100,7 +100,7 @@ public:
 		derivative.resize(mpe_rbm->numberOfParameters());
 		derivative.clear();
 		
-		std::size_t threads = SHARK_NUM_THREADS;
+		std::size_t threads = std::min<std::size_t>(m_data.numberOfBatches(),SHARK_NUM_THREADS);
 		std::size_t numBatches = m_data.numberOfBatches()/threads;
 		std::size_t elements = m_data.numberOfElements();
 		
