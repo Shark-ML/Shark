@@ -199,6 +199,78 @@ namespace detail{
 		}
 	}
 	
+	template<class RBMType>
+	void sampleEnergiesWithTempering(
+		RBMType& rbm, 
+		RealVector const& beta, 
+		RealMatrix& energyDiffUp,
+		bool useDirectEnergies = false
+	){
+		std::size_t chains = beta.size();
+		std::size_t samples = energyDiffUp.size2();
+		
+		//setup sampler
+		GibbsOperator<RBMType> gibbsOperator(&rbm);
+		typedef typename  GibbsOperator<RBMType>::HiddenSampleBatch Hidden;
+		typedef typename  GibbsOperator<RBMType>::VisibleSampleBatch Visible;
+		
+		//sample and store Energies batchwise
+		std::size_t batchSize  = 512;
+		std::size_t numBatches = samples/batchSize;
+		if(numBatches*batchSize < samples)
+			++numBatches;
+		
+		for(unsigned int b = 0; b < (unsigned int)numBatches; ++b){
+			std::size_t batchStart = b*batchSize;
+			std::size_t batchEnd = (b== numBatches-1)? samples : batchStart+batchSize;
+			std::size_t curSize = batchEnd-batchStart;
+
+			Energy<RBMType> energy = rbm.energy();
+			
+			Hidden hidden(curSize,rbm.numberOfHN());
+			Visible visible(curSize,rbm.numberOfVN());
+			//lowest beta must create independent samples, thus we don't need to initialize batches
+			
+			//westart from the lowest beta (usually 0) and sample up to beta(1)
+			//we don't sample beta(0) as we can't generate an energy difference
+			for(std::size_t i  = beta.size()-1; i >0; --i){
+				//sample at current temperature
+				gibbsOperator.precomputeHidden(hidden, visible,blas::repeat(beta(i),curSize));
+				SHARK_CRITICAL_REGION{
+					gibbsOperator.sampleHidden(hidden);
+				}
+				gibbsOperator.precomputeVisible(hidden, visible,blas::repeat(beta(i),curSize));
+				SHARK_CRITICAL_REGION{
+					gibbsOperator.sampleVisible(visible);
+				}
+				
+				
+				//calculate The upper energy difference for every chain.
+				if(useDirectEnergies){
+					noalias(subrange(row(energyDiffUp,i),batchStart,batchEnd)) 
+					= energy.energyFromVisibleInput(
+						visible.input,
+						hidden.state,
+						visible.state
+					) *(beta(i-1)-beta(i));
+				}
+				else{
+					noalias(subrange(row(energyDiffUp,i),batchStart,batchEnd)) = 
+					energy.logUnnormalizedPropabilityHidden(
+						hidden.state,
+						visible.input,
+						blas::repeat(beta(i),curSize)
+					) 
+					- energy.logUnnormalizedPropabilityHidden(
+						hidden.state,
+						visible.input,
+						blas::repeat(beta(i-1),curSize)
+					);
+				}
+			}
+		}
+	}
+	
 
 	///\brief updates the log partition with the Energy of another state
 	///
