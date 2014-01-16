@@ -148,6 +148,17 @@ double estimateLogFreeEnergy(
 	);
 }
 
+template<class RBMType>
+double annealedImportanceSampling(
+	RBMType& rbm,RealVector const& beta, std::size_t samples
+){
+	std::size_t chains = beta.size();
+	RealMatrix energyDiffTempering(chains,samples,0.0);
+	detail::sampleEnergiesWithTempering(rbm,beta,energyDiffTempering);
+	
+	return soft_max(-sum_rows(energyDiffTempering))-std::log(double(samples));
+}
+
 
 }
 #endif
