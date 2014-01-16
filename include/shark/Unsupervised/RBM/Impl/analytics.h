@@ -76,6 +76,9 @@ namespace detail{
 				std::size_t n = energyDiff0.size();
 				return 0.5*sqr(sum(sigmoid(energyDiff0+blas::repeat(C(0),n)))
 					- sum(sigmoid(energyDiff1-blas::repeat(C(0),n))));
+				
+				//~ return sum(softPlus(energyDiff0+blas::repeat(C(0),n)))
+					//~ + sum(softPlus(energyDiff1-blas::repeat(C(0),n)));
 			}
 
 			ResultType evalDerivative( const SearchPointType & C, FirstOrderDerivative & derivative )const {
@@ -89,12 +92,17 @@ namespace detail{
 				derivative(0) = sum(sigmoid0*(blas::repeat(1.0,n)-sigmoid0))+sum(sigmoid1*(blas::repeat(1.0,n)-sigmoid1));
 				derivative*=diff;
 				return 0.5*sqr(diff);
+				
+				//~ derivative(0) = sum(sigmoid(energyDiff0+blas::repeat(C(0),n)))
+					//~ - sum(sigmoid(energyDiff1-blas::repeat(C(0),n)));
+				
+				//~ return eval(C);
 
 			}
 			
 		};
 		RatioOptimizationProblem f(energyDiff0,energyDiff1);
-		//initialize with solution of AIS
+		//initialize with solution of AIS-PT
 		RealVector C(1,soft_max(-energyDiff0)-std::log(double(energyDiff0.size())));
 		RealVector derivative;
 		double val = f.evalDerivative(C,derivative);
@@ -103,6 +111,8 @@ namespace detail{
 		search.lineSearchType()  = LineSearch::Dlinmin;
 		search.init(f);
 		search(C,val,direction,derivative);
+		
+		//~ std::cout<<" "<<C(0)<<" "<<f(0.999*C)<<" "<<f(C)<<" "<<f(1.001*C)<<" "<<std::endl;
 		
 		return C(0);
 	}
@@ -220,7 +230,7 @@ namespace detail{
 		if(numBatches*batchSize < samples)
 			++numBatches;
 		
-		for(unsigned int b = 0; b < (unsigned int)numBatches; ++b){
+		SHARK_PARALLEL_FOR (unsigned int b = 0; b < (unsigned int)numBatches; ++b){
 			std::size_t batchStart = b*batchSize;
 			std::size_t batchEnd = (b== numBatches-1)? samples : batchStart+batchSize;
 			std::size_t curSize = batchEnd-batchStart;
