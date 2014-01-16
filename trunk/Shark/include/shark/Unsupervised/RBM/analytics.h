@@ -135,12 +135,13 @@ template<class RBMType>
 double estimateLogFreeEnergy(
 	RBMType& rbm, Data<RealVector> const& initDataset, 
 	RealVector const& beta, std::size_t samples,
-	PartitionEstimationAlgorithm algorithm = AIS
+	PartitionEstimationAlgorithm algorithm = AIS,
+	float burninInPercentage =0.1
 ){
 	std::size_t chains = beta.size();
 	RealMatrix energyDiffUp(chains,samples);
 	RealMatrix energyDiffDown(chains,samples);
-	detail::sampleEnergies(rbm,initDataset,beta,energyDiffUp,energyDiffDown);
+	detail::sampleEnergies(rbm,initDataset,beta,energyDiffUp,energyDiffDown,burninInPercentage);
 	
 	return estimateLogFreeEnergyFromEnergySamples(
 		energyDiffUp,energyDiffDown,algorithm

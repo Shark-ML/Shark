@@ -129,10 +129,14 @@ namespace detail{
 		RealVector const& beta, 
 		RealMatrix& energyDiffUp,
 		RealMatrix& energyDiffDown,
-		bool useDirectEnergies = false
+		bool useDirectEnergies = false,
+		float burnInPercentage = 0.1
 	){
 		std::size_t chains = beta.size();
 		std::size_t samples = energyDiffUp.size2();
+		
+		std::size_t burnIn = static_cast<std::size_t>(samples*burnInPercentage);
+		if(!burnIn)++burnIn;
 		
 		//set up betasfor sampling and target
 		RealVector betaUp(chains);
@@ -153,6 +157,7 @@ namespace detail{
 			sampler.setBeta(i,beta(i));
 		}
 		sampler.initializeChain(initDataset);
+		sampler.step(burnIn);
 		
 		//sample and store Energies
 		Energy<RBMType> energy = rbm.energy();	
