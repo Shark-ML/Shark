@@ -95,9 +95,10 @@ double negativeLogLikelihood(
 
 enum PartitionEstimationAlgorithm{
 	AIS,
-	TwoSidedAIS,
+	AISMean,
+	TwoSidedAISMean,
 	AcceptanceRatio,
-	WorkAverage
+	AcceptanceRatioMean
 };
 
 inline double estimateLogFreeEnergyFromEnergySamples(
@@ -110,22 +111,25 @@ inline double estimateLogFreeEnergyFromEnergySamples(
 	double deltaF = 0;
 	switch(algorithm){
 	case AIS:
+		deltaF = soft_max(-sum_rows(energyDiffUp))-std::log(double(samples));
+	break;
+	case AISMean:
 		for(std::size_t i = chains-1; i != 0; --i){
 			deltaF += soft_max(-row(energyDiffUp,i))-std::log(double(samples));
 		}
 	break;
-	case TwoSidedAIS:
+	case TwoSidedAISMean:
 		for(std::size_t i = chains-1; i != 0; --i){
 			deltaF += detail::twoSidedAIS(row(energyDiffUp,i),row(energyDiffDown,i-1));
 		}
 	break;
-	case AcceptanceRatio:
+	case AcceptanceRatioMean:
 		for(std::size_t i = chains-1; i != 0; --i){
 			deltaF += detail::acceptanceRatio(row(energyDiffUp,i),row(energyDiffDown,i-1));
 		}
 	break;
-	case WorkAverage:
-		deltaF = soft_max(-sum_rows(energyDiffUp))-std::log(double(samples));
+	case AcceptanceRatio:
+		deltaF = detail::acceptanceRatio(sum_rows(energyDiffUp),sum_rows(energyDiffDown));
 	}
 	
 	return deltaF;

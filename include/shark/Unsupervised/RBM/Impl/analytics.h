@@ -31,7 +31,7 @@
 #include <shark/Unsupervised/RBM/Sampling/TemperedMarkovChain.h>
 #include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
 #include <shark/Unsupervised/RBM/Energy.h>
-#include <shark/Algorithms/GradientDescent/LineSearch.h>
+#include <shark/Algorithms/GradientDescent/Rprop.h>
 #include <shark/Core/OpenMP.h>
 
 #include <boost/static_assert.hpp>
@@ -45,7 +45,6 @@ namespace detail{
 	template<class V0, class V1>
 	double twoSidedAIS(V0 const& energyDiff0, V1 const& energyDiff1){
 		SIZE_CHECK(energyDiff0.size() == energyDiff1.size());
-		std::size_t n = energyDiff0.size();
 		return soft_max(-0.5*energyDiff0)-soft_max(-0.5*energyDiff1);
 	}
 
@@ -104,17 +103,18 @@ namespace detail{
 		RatioOptimizationProblem f(energyDiff0,energyDiff1);
 		//initialize with solution of AIS-PT
 		RealVector C(1,soft_max(-energyDiff0)-std::log(double(energyDiff0.size())));
-		RealVector derivative;
-		double val = f.evalDerivative(C,derivative);
-		RealVector direction = -derivative;
-		LineSearch search;
-		search.lineSearchType()  = LineSearch::Dlinmin;
-		search.init(f);
-		search(C,val,direction,derivative);
+		IRpropPlus optimizer;
+		optimizer.init(f,C);
+		while(optimizer.solution().value > 1.e-10){
+			optimizer.step(f);
+		}
 		
-		//~ std::cout<<" "<<C(0)<<" "<<f(0.999*C)<<" "<<f(C)<<" "<<f(1.001*C)<<" "<<std::endl;
-		
-		return C(0);
+		//~ if(std::abs(C(0)) > 100){
+			//~ RealVector one(1,1);
+			//~ RealVector C0(1,soft_max(-energyDiff0)-std::log(double(energyDiff0.size())));
+			//~ std::cout<<" "<<C(0)<<" "<<C0(0)<<" "<<devTest<<" "<<f(-3*one)<<" "<<f(0*one)<<" "<<f(3*one)<<" "<<f(6*one)<<" "<<std::endl;
+		//~ }
+		return optimizer.solution().point(0);
 	}
 
 	/// \brief Samples energydifferencebetween different chains from an RBM.
@@ -177,13 +177,16 @@ namespace detail{
 			//calculate The upper and lower energy difference for every chain.
 			
 			if(useDirectEnergies){
-				noalias(column(energyDiffDown,s)) = energy.energy(
+				noalias(column(energyDiffDown,s)) = energy.energyFromVisibleInput(
+					sampler.samples().visible.input,
 					sampler.samples().hidden.state,
 					sampler.samples().visible.state
 				);
 				noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
-				column(energyDiffUp,s)*=1.0/(chains-1);
-				column(energyDiffDown,s)*=-1.0/(chains-1);
+				//~ column(energyDiffUp,s) *=1.0/(chains-1);
+				//~ column(energyDiffDown,s) *= -1.0/(chains-1);
+				column(energyDiffUp,s) *= betaUp-beta;
+				column(energyDiffDown,s) *= betaDown-beta;
 			}
 			else{
 				//calculate the first term: -E(state,beta) thats the same for both matrices
