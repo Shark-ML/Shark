@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityHidden )
 		
 		//calculate now the test itself
 		double p=std::exp(energy.logUnnormalizedPropabilityHidden(hiddenState,blas::repeat(i*0.1,4))(0));
-		BOOST_CHECK_CLOSE(pTest,p,1.e-5);
+		BOOST_CHECK_CLOSE(pTest,p,2.e-5);
 	}
 }
 BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityVisible )
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityVisible )
 		
 		//calculate now the test itself
 		double p=std::exp(energy.logUnnormalizedPropabilityVisible(visibleState,blas::repeat(i*0.1,4))(0));
-		BOOST_CHECK_CLOSE(pTest,p,1.e-5);
+		BOOST_CHECK_CLOSE(pTest,p,2.e-5);
 	}
 }
 

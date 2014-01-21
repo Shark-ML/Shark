@@ -55,7 +55,8 @@ void testDerivative(
 	AbstractObjectiveFunction<VectorSpace<double>, double>& function, 
 	const RealVector& point,
 	double epsilon=1.e-10,
-	double epsilonSecond = 1.e-10
+	double epsilonSecond = 1.e-10,
+	double maxErrorPercentage = 0.001
 ){
 	//double maxError = epsilon * 100;
 	
@@ -66,14 +67,15 @@ void testDerivative(
 	Function::FirstOrderDerivative derivative;
 	double resultEvalDerivative = function.evalDerivative(point,derivative);
 	double resultEval = function.eval(point);
-	BOOST_CHECK_CLOSE(resultEvalDerivative,resultEval, 1.e-5);
+	BOOST_CHECK_CLOSE(resultEvalDerivative,resultEval, maxErrorPercentage);
 	
 	//calculate error between both
 	BOOST_REQUIRE_EQUAL(estimatedDerivative.size(),derivative.size());
 	//std::cout<<estimatedDerivative<<std::endl;
 	//std::cout<<derivative<<std::endl;
 	for(std::size_t i=0;i != estimatedDerivative.size(); ++i){
-		BOOST_CHECK_CLOSE(estimatedDerivative(i),derivative(i),0.001);
+		if(derivative(i) > 0.01 && estimatedDerivative(i)>0.001)
+			BOOST_CHECK_CLOSE(estimatedDerivative(i),derivative(i),maxErrorPercentage);
 		//BOOST_CHECK_SMALL(estimatedDerivative(i) -derivative(i),maxError);
 	}
 	
@@ -89,7 +91,7 @@ void testDerivative(
 		//check first derivative again...
 		BOOST_REQUIRE_EQUAL(estimatedDerivative.size(),secondDerivative.m_gradient.size());
 		for(std::size_t i=0;i != estimatedDerivative.size(); ++i){
-			BOOST_CHECK_CLOSE(estimatedDerivative(i),derivative(i),0.001);
+			BOOST_CHECK_CLOSE(estimatedDerivative(i),derivative(i),maxErrorPercentage);
 			//BOOST_CHECK_SMALL(estimatedDerivative(i) - secondDerivative.m_gradient(i),maxError);
 			//std::cout<<i<<" "<<estimatedDerivative(i)<<" "<<secondDerivative.m_gradient(i)<<std::endl;
 		}

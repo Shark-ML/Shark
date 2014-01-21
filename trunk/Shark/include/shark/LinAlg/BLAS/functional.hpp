@@ -6,6 +6,7 @@
 
 #include "traits.hpp"
 #include <shark/Core/Exception.h>
+#include <shark/Core/Math.h>
 
 
 namespace shark {
@@ -270,15 +271,7 @@ struct scalar_soft_plus {
 	static const bool zero_identity = false;
 
 	result_type operator()(argument_type x)const {
-		using std::exp;
-		using std::log;
-		if (x < detail::minExpInput<argument_type>()) {
-			return x;
-		}
-		if (x > detail::maxExpInput<argument_type>()) {
-			return argument_type();
-		}
-		return log(argument_type(1.0)+exp(x));
+		return shark::softPlus(x);
 	}
 };
 
@@ -289,14 +282,7 @@ struct scalar_sigmoid {
 	static const bool zero_identity = false;
 
 	result_type operator()(argument_type x)const {
-		using std::exp;
-		if (x < detail::minExpInput<argument_type>()) {
-			return 0;
-		}
-		if (x > detail::maxExpInput<argument_type>()) {
-			return 1;
-		}
-		return 1.0/(1.0+exp(-x));
+		return shark::sigmoid(x);
 	}
 };
 

@@ -89,6 +89,20 @@ namespace shark {
 		return 1. / (1.+ std::exp(-x));
 	}
 	
+	//~ ///\brief Logistic function/logistic function. Efficient specialisation for double.
+	//~ ///
+	//~ /// Calculates the sigmoid function 1/(1+exp(-x)).  Calculation is carried out in float
+	//~ /// As the numerical errors are small (<10^-8) but the gain in speed big.
+	//~ inline double sigmoid(double x){
+		//~ if(x < -30) {
+			//~ return 0;
+		//~ }
+		//~ if(x > 30) {
+			//~ return 1;
+		//~ }
+		//~ return 1.0f / (1.0f+ std::exp(-float(x)));
+	//~ }
+	
 	///\brief Thresholded exp function, over- and underflow safe.
 	///
 	///Replaces the value of exp(x) for numerical reasons by the a threshold value if it gets too large.
@@ -139,6 +153,20 @@ namespace shark {
 			return 0;
 		}
 		return std::log(1+std::exp(x));
+	}
+	
+	///\brief Numerically stable version of the function log(1+exp(x)). calculated with float precision to save some time
+	///
+	///Numerically stable version of the function log(1+exp(x)).
+	///This function is the integral of the famous sigmoid function.
+	inline double softPlus(double x){
+		if(x > 15){
+			return x;
+		}
+		if(x < -17){
+			return 0;
+		}
+		return std::log(1.0f+std::exp(float(x)));
 	}
 	
 	///brief lets x have the same sign as y.
