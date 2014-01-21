@@ -46,8 +46,7 @@ UnlabeledData<RealVector> createData()
 	covariance = prod(trans(covariance),covariance);
 
 	//now we can create the distribution
-	MultiVariateNormalDistribution distribution(3);
-	distribution.setCovarianceMatrix(covariance);
+	MultiVariateNormalDistribution distribution(covariance);
 
 	//and we sample from it
 	std::vector<RealVector> data(numberOfExamples);
