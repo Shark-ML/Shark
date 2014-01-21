@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
 	TestGradientVH gradient(&rbm);
 	gradient.setData(data);
 	
-	testDerivative(gradient,parameters,1.e-5);
+	testDerivative(gradient,parameters,1.e-3,1.e-10,0.1);
 }
 
 class TestGradientHV : public UnsupervisedObjectiveFunction<RealVector>{
@@ -327,6 +327,6 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeHV )
 	TestGradientHV gradient(&rbm);
 	gradient.setData(data);
 	
-	testDerivative(gradient,parameters,1.e-5);
+	testDerivative(gradient,parameters,1.e-3,1.e-10,0.1);
 }
 

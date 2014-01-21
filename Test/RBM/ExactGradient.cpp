@@ -87,12 +87,12 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_MoreHidden )
 	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
 	
 	for(std::size_t i = 0; i != 10; ++i){
-		initRandomNormal(rbm,2);
+		initRandomNormal(rbm,1);
 		RealVector parameters=rbm.parameterVector();
 		
 		ExactGradient<BinaryRBM> gradient(&rbm);
 		gradient.setData(data);
-		testDerivative(gradient,parameters,1.e-4);
+		testDerivative(gradient,parameters,1.e-2,1.e-10,0.1);
 	}
 }
 
@@ -116,6 +116,6 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_LessHidden )
 		
 		ExactGradient<BinaryRBM> gradient(&rbm);
 		gradient.setData(data);
-		testDerivative(gradient,parameters,1.e-6);
+		testDerivative(gradient,parameters,1.e-2,1.e-10,0.1);
 	}
 }

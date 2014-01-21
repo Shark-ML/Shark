@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_SoftPlus )
 	for (size_t i = 0; i < Dimensions; i++)
 	{
 		x(i) = i;
-		result(i) = std::log(1.0+std::exp(x(i)));
+		result(i) = shark::softPlus(x(i));
 	}
 	checkDenseExpressionEquality(softPlus(x),result);
 }
