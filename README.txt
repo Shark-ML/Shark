@@ -1,11 +1,12 @@
+Shark is a fast, modular, general open-source C++ machine
+learning library. 
 
-DESCRIPTION
------------
+Shark is licensed under the GNU Lesser General Public License, please
+see the files COPYING and COPYING.LESSER, or visit
+http://www.gnu.org/licenses .
 
-SHARK is a fast, modular, feature-rich open-source C++ machine
-learning library. Shark is licensed under GPLv3: Please see the
-file gpl-3.0.txt, or visit http://www.gnu.org/licenses/ .
-
+Any application of the SHARK code toward military research and use is
+expressly against the wishes of the SHARK development team.
 
 
 INSTALLATION / DOCUMENTATION
@@ -38,14 +39,14 @@ include/            This directory and its sub-directories hold
                     some functionality is implemented in lower-
                     level Impl/ folders and inline .inl files.
 
-lib/                The Shark library is placed in this directory.
+lib/              The Shark library is placed in this directory.
                     In the source code distribution this directory
                     is initially empty, and the library is placed
                     into the directory as the results of
                     compilation. Binary distributions already
                     contain the library, pre-built in release mode.
 
-doc/                All documentation files are found in this
+doc/             All documentation files are found in this
                     sub-directory. In packaged versions of Shark
                     the html documentation is pre-built; the
                     repository provides the corresponding sources.
@@ -56,7 +57,7 @@ doc/                All documentation files are found in this
 
 doc/index.html      Entry point to the Shark documentation.
 
-examples/           The examples directory contains example
+examples/   The examples directory contains example
                     use-cases of the most important algorithms
                     implemented in Shark. Besides exemplifying
                     powerful learning algorithms, these programs
