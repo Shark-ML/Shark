@@ -30,7 +30,6 @@
 
 #include <shark/Algorithms/QP/QuadraticProgram.h>
 #include <shark/Algorithms/QP/QpSparseArray.h>
-// #include <shark/Algorithms/LP/GLPK.h>
 #include <shark/Core/Timer.h>
 #include <shark/Data/Dataset.h>
 
