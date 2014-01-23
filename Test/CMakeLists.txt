@@ -136,6 +136,7 @@ SHARK_ADD_TEST( Models/NBClassifierTests.cpp Models_NBClassifier )
 SHARK_ADD_TEST( Models/RBFNet.cpp Models_RBFNet ) 
 SHARK_ADD_TEST( Models/RNNet.cpp Models_RNNet ) 
 SHARK_ADD_TEST( Models/CMAC.cpp Models_CMAC )
+SHARK_ADD_TEST( Models/MeanModel.cpp Models_MeanModel )
 
 SHARK_ADD_TEST( Models/SigmoidModel.cpp Models_SigmoidModel )
 SHARK_ADD_TEST( Models/Softmax.cpp Models_Softmax )
