@@ -1,6 +1,16 @@
-Copyright 2014 Shar Development Team
+\file %FILE%
 
+\brief %BRIEF%
+
+\author %AUTHOR%
+\date %DATE%
+
+
+\par Copyright 1995-2014 Shark Development Team
+
+<BR><HR>
 This file is part of Shark.
+<%HOMEPAGE%/>
 
 Shark is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published 
