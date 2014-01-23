@@ -90,8 +90,6 @@ SHARK_ADD_TEST( Algorithms/GradientDescent/Rprop.cpp GradDesc_Rprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/NoisyRprop.cpp GradDesc_NoisyRprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/Quickprop.cpp GradDesc_Quickprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_SteepestDescent )
-#LP - Linear Programs
-SHARK_ADD_TEST( Algorithms/LP/LinearProgram.cpp LP_LinearProgram )
 #QP - Quadratic Programs
 SHARK_ADD_TEST( Algorithms/QP/LRUCache.cpp QP_LRUCache )
 SHARK_ADD_TEST( Algorithms/QP/KernelMatrix.cpp QP_KernelMatrix )

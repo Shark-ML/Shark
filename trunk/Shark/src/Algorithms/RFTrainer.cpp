@@ -79,7 +79,6 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 
 	//Store the size of the labels
 	m_labelDimension = labelDimension(dataset);
-	model.setLabelDimension(m_labelDimension);
 
 	m_regressionLearner = true;
 	setDefaults();
@@ -112,9 +111,9 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 			labels.push_back(dataTrain.element(i).label);
 		}
 
-		RFClassifier::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, labels, 0);
+		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, labels, 0);
 		SHARK_CRITICAL_REGION{
-			model.addTree(splitMatrix);
+			model.addModel(splitMatrix);
 		}
 	}
 }
@@ -126,7 +125,6 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 
 	//Store the number of input dimensions
 	m_inputDimension = inputDimension(dataset);
-	model.setLabelDimension(numberOfClasses(dataset));
 
 	//Find the largest label, so we know how big the histogram should be
 	m_maxLabel = numberOfClasses(dataset)-1;
@@ -153,9 +151,9 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 		createAttributeTables(dataTrain.inputs(), tables);
 		createCountMatrix(dataTrain, cAbove);
 
-		RFClassifier::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, cAbove, 0);
+		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, cAbove, 0);
 		SHARK_CRITICAL_REGION{
-			model.addTree(splitMatrix);
+			model.addModel(splitMatrix);
 		}
 	}
 }
@@ -178,11 +176,11 @@ void RFTrainer::setOOBratio(double ratio){
 
 
 
-RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
-	RFClassifier::SplitMatrixType lSplitMatrix, rSplitMatrix;
+CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
+	CARTClassifier<RealVector>::SplitMatrixType lSplitMatrix, rSplitMatrix;
 
 	//Construct split matrix
-	RFClassifier::SplitInfo splitInfo;
+	CARTClassifier<RealVector>::SplitInfo splitInfo;
 
 	splitInfo.nodeId = nodeId;
 	splitInfo.leftNodeId = 0;
@@ -271,7 +269,7 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, cons
 	}
 
 	//Store entry in the splitMatrix table
-	RFClassifier::SplitMatrixType splitMatrix;
+	CARTClassifier<RealVector>::SplitMatrixType splitMatrix;
 
 	if(isLeaf){
 		splitInfo.label = hist(cAbove);
@@ -306,10 +304,10 @@ RealVector RFTrainer::hist(boost::unordered_map<std::size_t, std::size_t> countM
 	return normHist;
 }
 
-RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId ){
+CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId ){
 
 	//Construct split matrix
-	RFClassifier::SplitInfo splitInfo;
+	CARTClassifier<RealVector>::SplitInfo splitInfo;
 
 
 	splitInfo.nodeId = nodeId;
@@ -317,7 +315,7 @@ RFClassifier::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, cons
 	splitInfo.rightNodeId = 0;
 	splitInfo.label = average(labels);
 
-	RFClassifier::SplitMatrixType splitMatrix, lSplitMatrix, rSplitMatrix;
+	CARTClassifier<RealVector>::SplitMatrixType splitMatrix, lSplitMatrix, rSplitMatrix;
 
 	//n = Total number of cases in the dataset
 	//n1 = Number of cases to the left child node
