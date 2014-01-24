@@ -1,69 +1,84 @@
-/**
-*  \brief This class subsumes several often used random number generators.
-*
-*  This class offers convenience functions to generate numbers using a global random number generator from the following distributions:
-*
-*  <ul>
-*      <li>Bernoulli with name \em coinToss
-*      <li>DiscreteUniform with name \em discrete
-*      <li>Uniform with name \em uni
-*      <li>Normal with name \em gauss
-*      <li>Cauchy with name \em cauchy
-*      <li>Geometric with name \em geom
-*      <li>DiffGeometric with name \em diffGeom
-*      <li>Poisson with name \em poisson
-*      <li>Gamma with name \em gam
-*      <li>Dirichlet with name \em dir
-*  </ul>
-*
-*  Additionally this class offers a global random number generator of Type #RngType. The default of this
-*  is the Mersenne Twister with a cycle length of $2^19937$. This generator can be used to construct additional
-*  distributions. The seed can be set via Rng::seed .
-*
-*  \par Example
-*  \code
-*  #include "shark/Rng/GlobalRng.h"
-*
-*  void main()
-*  {
-*
-*      // Set seed for all subsumed random number generators:
-*      Rng::seed( 1234 );
-*
-*      // Get random "numbers" for all subsumed random number generators:
-*      bool   rn1 = Rng::coinToss( );
-*      long   rn2 = Rng::discrete( );
-*      double rn3 = Rng::uni( );
-*      double rn4 = Rng::gauss( );
-*      double rn5 = Rng::cauchy( );
-*      long   rn6 = Rng::geom( );
-*      long   rn7 = Rng::diffGeom( );
-*
-*      // Output of random numbers:
-*      cout << "Bernoulli trial                              = " << rn1 << endl;
-*      cout << "Discrete distribution number                 = " << rn2 << endl;
-*      cout << "Uniform distribution number                  = " << rn3 << endl;
-*      cout << "Normal distribution number                   = " << rn4 << endl;
-*      cout << "Cauchy distribution number                   = " << rn5 << endl;
-*      cout << "Geometric distribution number                = " << rn6 << endl;
-*      cout << "Differential Geometric distribution number   = " << rn7 << endl;
-*  }
-*  \endcode
-*
-*  <BR><HR>
-*  This file is part of Shark. This library is free software;
-*  you can redistribute it and/or modify it under the terms of the
-*  GNU General Public License as published by the Free Software
-*  Foundation; either version 3, or (at your option) any later version.
-*
-*  This library is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with this library; if not, see <http://www.gnu.org/licenses/>.
-*/
+/*!
+ * 
+ * \file        GlobalRng.h
+ *
+ * \brief       This class subsumes several often used random number generators.
+ * 
+ * This class offers convenience functions to generate numbers using a global random number generator from the following distributions:
+ * 
+ * <ul>
+ * <li>Bernoulli with name \em coinToss
+ * <li>DiscreteUniform with name \em discrete
+ * <li>Uniform with name \em uni
+ * <li>Normal with name \em gauss
+ * <li>Cauchy with name \em cauchy
+ * <li>Geometric with name \em geom
+ * <li>DiffGeometric with name \em diffGeom
+ * <li>Poisson with name \em poisson
+ * <li>Gamma with name \em gam
+ * <li>Dirichlet with name \em dir
+ * </ul>
+ * 
+ * Additionally this class offers a global random number generator of Type #RngType. The default of this
+ * is the Mersenne Twister with a cycle length of $2^19937$. This generator can be used to construct additional
+ * distributions. The seed can be set via Rng::seed .
+ * 
+ * \par Example
+ * \code
+ * #include "shark/Rng/GlobalRng.h"
+ * 
+ * void main()
+ * {
+ * 
+ * // Set seed for all subsumed random number generators:
+ * Rng::seed( 1234 );
+ * 
+ * // Get random "numbers" for all subsumed random number generators:
+ * bool   rn1 = Rng::coinToss( );
+ * long   rn2 = Rng::discrete( );
+ * double rn3 = Rng::uni( );
+ * double rn4 = Rng::gauss( );
+ * double rn5 = Rng::cauchy( );
+ * long   rn6 = Rng::geom( );
+ * long   rn7 = Rng::diffGeom( );
+ * 
+ * // Output of random numbers:
+ * cout << "Bernoulli trial                              = " << rn1 << endl;
+ * cout << "Discrete distribution number                 = " << rn2 << endl;
+ * cout << "Uniform distribution number                  = " << rn3 << endl;
+ * cout << "Normal distribution number                   = " << rn4 << endl;
+ * cout << "Cauchy distribution number                   = " << rn5 << endl;
+ * cout << "Geometric distribution number                = " << rn6 << endl;
+ * cout << "Differential Geometric distribution number   = " << rn7 << endl;
+ * }
+ * \endcode
+ * 
+ * 
+ *
+ * \author      -
+ * \date        -
+ *
+ *
+ * \par Copyright 1995-2014 Shark Development Team
+ * 
+ * <BR><HR>
+ * This file is part of Shark.
+ * <http://image.diku.dk/shark/>
+ * 
+ * Shark is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published 
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Shark is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 #ifndef SHARK_RNG_GLOBALRNG_H
 #define SHARK_RNG_GLOBALRNG_H
 

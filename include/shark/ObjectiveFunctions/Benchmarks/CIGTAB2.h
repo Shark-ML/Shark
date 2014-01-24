@@ -1,27 +1,42 @@
 //===========================================================================
 /*!
-* \brief Multi-objective optimization benchmark function CIGTAB 2.
-*
-*  The function is described in
-*
-*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
-*  Covariance Matrix Adaptation for Multi-objective Optimization. 
-*  Evolutionary Computation 15(1), pp. 1-28, 2007
-*
-* <BR><HR>
-* This file is part of Shark. This library is free software;
-* you can redistribute it and/or modify it under the terms of the
-* GNU General Public License as published by the Free Software
-* Foundation; either version 3, or (at your option) any later version.
-*
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this library; if not, see <http://www.gnu.org/licenses/>.
-*/
+ * 
+ * \file        CIGTAB2.h
+ *
+ * \brief       Multi-objective optimization benchmark function CIGTAB 2.
+ * 
+ * The function is described in
+ * 
+ * Christian Igel, Nikolaus Hansen, and Stefan Roth. 
+ * Covariance Matrix Adaptation for Multi-objective Optimization. 
+ * Evolutionary Computation 15(1), pp. 1-28, 2007
+ * 
+ * 
+ *
+ * \author      -
+ * \date        -
+ *
+ *
+ * \par Copyright 1995-2014 Shark Development Team
+ * 
+ * <BR><HR>
+ * This file is part of Shark.
+ * <http://image.diku.dk/shark/>
+ * 
+ * Shark is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published 
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Shark is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 //===========================================================================
 #ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_CIGTAB2_H
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_CIGTAB2_H
