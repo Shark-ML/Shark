@@ -1,25 +1,35 @@
 //===========================================================================
 /*!
- *  \brief Model training by means of a general purpose optimization procedure.
+ * 
+ * \file        OptimizationTrainer.h
  *
- *  \author T. Glasmachers
- *  \date 2011-2012
+ * \brief       Model training by means of a general purpose optimization procedure.
+ * 
+ * 
+ *
+ * \author      T. Glasmachers
+ * \date        2011-2012
  *
  *
- *  <BR><HR>
- *  This file is part of Shark. This library is free software;
- *  you can redistribute it and/or modify it under the terms of the
- *  GNU General Public License as published by the Free Software
- *  Foundation; either version 3, or (at your option) any later version.
+ * \par Copyright 1995-2014 Shark Development Team
+ * 
+ * <BR><HR>
+ * This file is part of Shark.
+ * <http://image.diku.dk/shark/>
+ * 
+ * Shark is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published 
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Shark is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this library; if not, see <http://www.gnu.org/licenses/>.
- *  
  */
 //===========================================================================
 
