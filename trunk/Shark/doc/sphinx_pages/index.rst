@@ -116,7 +116,9 @@ feature list :ref:`below <label_for_feature_list>`).
 It serves as a powerful toolbox for real world applications as well as research.
 Shark depends on `Boost <http://www.boost.org>`_ and `CMake <http://www.cmake.org/>`_.
 It is compatible with Windows, Solaris, MacOS X, and Linux. Shark is licensed under
-`GPLv3 <http://gplv3.fsf.org/>`_.
+the permissive
+`GNU Lesser General Public License <http://www.gnu.org/copyleft/lesser.html>`_.
+
 
 For an overview over the previous major release of Shark (2.0) we
 refer to:
