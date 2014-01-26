@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Weibull.h
  *
  * \brief       Implements a Weibull distribution.
  * 

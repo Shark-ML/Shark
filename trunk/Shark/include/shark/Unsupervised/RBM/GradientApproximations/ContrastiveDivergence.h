@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ContrastiveDivergence.h
  *
  * \brief       -
  *

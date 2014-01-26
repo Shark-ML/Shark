@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        UniformCrossover.h
  *
  * \brief       Uniform crossover of arbitrary individuals.
  * 

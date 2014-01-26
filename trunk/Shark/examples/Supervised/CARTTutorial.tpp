@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CARTTutorial.tpp
  *
  * \brief       CART Tutorial Sample Code
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        IHR3.h
  *
  * \brief       Multi-objective optimization benchmark function IHR 3.
  * 

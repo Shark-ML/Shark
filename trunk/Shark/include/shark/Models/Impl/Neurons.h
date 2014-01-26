@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Impl/Neurons.h
  *
  * \brief       -
  *

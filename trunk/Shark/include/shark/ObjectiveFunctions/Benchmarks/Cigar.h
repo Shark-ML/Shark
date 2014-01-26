@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Cigar.h
  *
  * \brief       Convex quadratic benchmark function with single dominant axis
 

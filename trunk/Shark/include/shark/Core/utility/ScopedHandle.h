@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ScopedHandle.h
  *
  * \brief       A scoped_ptr like container for C type handles
  * 

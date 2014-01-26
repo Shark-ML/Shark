@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        GeneralizationLoss.h
  *
  * \brief       Stopping Criterion which stops, when the generalization of the solution gets worse
  * 

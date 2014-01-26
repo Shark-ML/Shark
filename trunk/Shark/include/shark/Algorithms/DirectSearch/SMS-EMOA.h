@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SMS-EMOA.h
  *
  * \brief       Implements the SMS-EMOA.
  * 

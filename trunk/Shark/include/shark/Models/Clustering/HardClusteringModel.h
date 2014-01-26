@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        HardClusteringModel.h
  *
  * \brief       Model for "hard" clustering.
  * 

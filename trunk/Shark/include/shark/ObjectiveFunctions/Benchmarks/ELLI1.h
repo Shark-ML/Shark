@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ELLI1.h
  *
  * \brief       Multi-objective optimization benchmark function ELLI 1.
  * 

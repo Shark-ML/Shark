@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LooError.cpp
  *
  * \brief       unit test for the leave one out error
  * 

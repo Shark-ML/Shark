@@ -1,5 +1,4 @@
 /**
-* \file NDimFS.h
 *
 * \brief Base class for n-dimensional fuzzy sets
 * 

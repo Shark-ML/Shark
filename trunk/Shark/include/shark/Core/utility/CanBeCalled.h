@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        CanBeCalled.h
  *
  * \brief       Template class checking whether for a functor F and Argument U, F(U) can be called.
  * 

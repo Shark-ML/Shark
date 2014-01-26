@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        KeyValuePair.h
  *
  * \brief       Provides a pair of Key and Value, as well as functions working with them.
  * 

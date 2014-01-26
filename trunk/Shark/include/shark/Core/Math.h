@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Math.h
  *
  * \brief       Very basic math abstraction layer.
  * 

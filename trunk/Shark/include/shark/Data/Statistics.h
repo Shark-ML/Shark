@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Data/Statistics.h
  *
  * \brief       some functions for vector valued statistics like mean, variance and covariance
  * 

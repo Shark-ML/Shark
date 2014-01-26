@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KNNTutorial.tpp
  *
  * \brief       Nearest Neighbor Tutorial Sample Code
  * 

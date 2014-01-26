@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NormalizeKernelUnitVariance.h
  *
  * \brief       Determine the scaling factor of a ScaledKernel so that it has unit variance in feature space one on a given dataset.
  * 

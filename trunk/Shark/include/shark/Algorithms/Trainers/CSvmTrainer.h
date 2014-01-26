@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CSvmTrainer.h
  *
  * \brief       Support Vector Machine Trainer for the standard C-SVM
  * 

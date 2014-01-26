@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LooErrorCSvm.cpp
  *
  * \brief       Unit test for the leave one out error for C-SVMs.
  * 

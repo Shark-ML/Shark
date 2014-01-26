@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LZ1.h
  *
  * \brief       Multi-objective optimization benchmark function LZ1.
  * 

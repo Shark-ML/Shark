@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        KullbackLeiberDivergence.h
  *
  * \brief       Provides a function for estimating the kullback-leibler-divergence.
  * 

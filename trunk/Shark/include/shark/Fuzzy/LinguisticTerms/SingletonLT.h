@@ -1,6 +1,5 @@
 
 /**
- * \file SingletonLT.h
  *
  * \brief LinguisticTerm with a single point of positive membership
  * 

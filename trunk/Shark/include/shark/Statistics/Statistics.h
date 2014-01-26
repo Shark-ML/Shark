@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Statistics/Statistics.h
  *
  * \brief       Calculate statistics given a range of values.
  * 

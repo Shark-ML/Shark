@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        default/dot.hpp
  *
  * \brief       -
  *

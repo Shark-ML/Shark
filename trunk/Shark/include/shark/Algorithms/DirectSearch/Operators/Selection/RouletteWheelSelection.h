@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        RouletteWheelSelection.h
  *
  * \brief       Implements fitness proportional selection.
  * 

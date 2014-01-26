@@ -1,5 +1,4 @@
 /**
-* \file LinguisticVariable.h
 *
 * \brief A composite of linguistic terms
 * 

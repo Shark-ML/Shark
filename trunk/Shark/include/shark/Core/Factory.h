@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Factory.h
  *
  * \brief       Implements the factory pattern.
  * 

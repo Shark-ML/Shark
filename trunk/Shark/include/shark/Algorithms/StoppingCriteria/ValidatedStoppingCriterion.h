@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ValidatedStoppingCriterion.h
  *
  * \brief       Stopping Criterion which evaluates the validation error and hands the result over to another stopping criterion.
  * 

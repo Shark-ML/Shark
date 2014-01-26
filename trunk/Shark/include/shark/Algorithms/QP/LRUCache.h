@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LRUCache.h
  *
  * \brief       Cache implementing an Least-Recently-Used Strategy
  * 

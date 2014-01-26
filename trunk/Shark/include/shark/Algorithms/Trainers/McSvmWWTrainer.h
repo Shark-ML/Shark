@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        McSvmWWTrainer.h
  *
  * \brief       Trainer for the Multi-class Support Vector Machine by Weston and Watkins
  * 

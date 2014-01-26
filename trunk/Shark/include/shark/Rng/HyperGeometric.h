@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        HyperGeometric.h
  *
  * \brief       Hypergeometric distribution.
  * 

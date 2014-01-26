@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        DiscreteLoss.h
  *
  * \brief       Flexible error measure for classication tasks
  * 

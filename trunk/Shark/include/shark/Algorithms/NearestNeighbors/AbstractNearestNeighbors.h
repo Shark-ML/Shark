@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractNearestNeighbors.h
  *
  * \brief       Interface for nearest Neighbor queries
  * 

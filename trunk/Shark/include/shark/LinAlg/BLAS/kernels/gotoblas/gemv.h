@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        gemv.h
  *
  * \brief       -
  *

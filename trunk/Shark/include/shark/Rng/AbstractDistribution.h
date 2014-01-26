@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractDistribution.h
  *
  * \brief       Abstract class for statistical distributions
  * 

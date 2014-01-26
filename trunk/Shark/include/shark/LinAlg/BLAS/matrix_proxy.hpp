@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        matrix_proxy.hpp
  *
  * \brief       Matrix proxy classes.
  * 

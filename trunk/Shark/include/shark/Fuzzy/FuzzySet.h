@@ -1,5 +1,4 @@
 /**
-* \file FuzzySet.h
 *
 * \brief Abstract super class for specific fuzzy sets 
 *

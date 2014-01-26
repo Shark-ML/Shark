@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ArdKernel.h
  *
  * \brief       Gaussian automatic relevance detection (ARD) kernel
  * 

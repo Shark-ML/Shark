@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        DiscreteUniform.h
  *
  * \brief       Discrete Uniform distribution
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        RQ.h
  *
  * \brief       Algorithm for Triangular-Quadratic-Decomposition
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        GibbsOperator.h
  *
  * \brief       -
  *

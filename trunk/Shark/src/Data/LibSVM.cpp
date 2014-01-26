@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LibSVM.cpp
  *
  * \brief       implementation of the libsvm data import
  * 

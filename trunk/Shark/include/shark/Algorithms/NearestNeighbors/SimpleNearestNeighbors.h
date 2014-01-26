@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        SimpleNearestNeighbors.h
  *
  * \brief       Efficient brute force implementation of nearest neighbors.
  * 

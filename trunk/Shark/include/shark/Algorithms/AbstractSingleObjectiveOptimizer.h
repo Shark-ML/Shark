@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractSingleObjectiveOptimizer.h
  *
  * \brief       AbstractSingleObjectiveOptimizer
  * 

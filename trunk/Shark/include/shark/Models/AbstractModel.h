@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractModel.h
  *
  * \brief       base class for all models, as well as a specialized differentiable model
  * 

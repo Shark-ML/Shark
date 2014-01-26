@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        RadiusMarginQuotient.cpp
  *
  * \brief       unit test for the radius margin quotient
  * 

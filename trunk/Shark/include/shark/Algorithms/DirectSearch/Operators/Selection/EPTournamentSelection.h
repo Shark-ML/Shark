@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        EPTournamentSelection.h
  *
  * \brief       EP-Tournament selection operator.
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        IRLS.h
  *
  * \brief       simple Newton step method
  * 

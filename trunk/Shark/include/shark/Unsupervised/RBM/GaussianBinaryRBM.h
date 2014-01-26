@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        GaussianBinaryRBM.h
  *
  * \brief       -
  *

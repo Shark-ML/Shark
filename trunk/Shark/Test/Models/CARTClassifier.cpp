@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CARTClassifier.cpp
  *
  * \brief       unit test for CART classifier
  * 

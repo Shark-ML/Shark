@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SteadyStateMOCMA.h
  *
  * \brief       SteadyStateMOCMA.h
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        QpSparseArray.h
  *
  * \brief       Special container for certain coefficients describing multi-class SVMs
  * 

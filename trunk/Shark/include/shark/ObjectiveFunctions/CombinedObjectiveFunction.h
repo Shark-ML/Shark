@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CombinedObjectiveFunction.h
  *
  * \brief       CombinedObjectiveFunction
  * 

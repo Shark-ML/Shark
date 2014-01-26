@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Tags.h
  *
  * \brief       -
  *

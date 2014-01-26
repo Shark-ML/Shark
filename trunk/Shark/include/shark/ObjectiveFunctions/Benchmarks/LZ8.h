@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LZ8.h
  *
  * \brief       Multi-objective optimization benchmark function LZ8.
  * 

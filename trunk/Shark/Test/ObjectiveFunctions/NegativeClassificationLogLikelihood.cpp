@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NegativeClassificationLogLikelihood.cpp
  *
  * \brief       NegativeClassificationLogLikelihood test case
  * 

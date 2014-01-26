@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SteadyStateIndicatorBasedSelection.h
  *
  * \brief       Steady state (+1) Indicator-based selection strategy for multi-objective selection.
  * 

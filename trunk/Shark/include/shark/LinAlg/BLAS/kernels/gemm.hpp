@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        gemm.hpp
  *
  * \brief       -
  *

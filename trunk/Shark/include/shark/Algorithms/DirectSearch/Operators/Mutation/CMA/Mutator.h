@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Mutator.h
  *
  * \brief       Implements the default variation operator of the multi-objective
  * covariance matrix ES.

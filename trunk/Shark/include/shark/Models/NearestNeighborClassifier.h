@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NearestNeighborClassifier.h
  *
  * \brief       Nearest neighbor classification
  * 

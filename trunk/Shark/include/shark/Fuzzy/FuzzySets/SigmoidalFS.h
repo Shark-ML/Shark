@@ -1,6 +1,5 @@
 
 /**
- * \file SigmoidalFS.h
  *
  * \brief FuzzySet with sigmoidal membership function
  * 

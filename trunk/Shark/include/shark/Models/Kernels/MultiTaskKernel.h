@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        MultiTaskKernel.h
  *
  * \brief       Special kernel classes for multi-task and transfer learning.
  * 

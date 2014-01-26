@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        GlobalIntermediateRecombination.h
  *
  * \brief       Recombinates a set of individuals given a weight vector.
  * 

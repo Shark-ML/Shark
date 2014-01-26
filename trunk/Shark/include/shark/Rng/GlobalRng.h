@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        GlobalRng.h
  *
  * \brief       This class subsumes several often used random number generators.
  * 

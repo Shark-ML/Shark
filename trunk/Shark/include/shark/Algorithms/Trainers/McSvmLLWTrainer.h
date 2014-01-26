@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        McSvmLLWTrainer.h
  *
  * \brief       Trainer for the Multi-class Support Vector Machine by Lee, Lin, and Wahba
  * 

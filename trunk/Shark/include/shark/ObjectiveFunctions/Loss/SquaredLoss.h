@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SquaredLoss.h
  *
  * \brief       Implements the Squared Error Loss function for regression.
  * 

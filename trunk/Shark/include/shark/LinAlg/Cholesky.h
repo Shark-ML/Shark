@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Cholesky.h
  *
  * \brief       Cholesky Decompositions for a Matrix A = LL^T
  * 

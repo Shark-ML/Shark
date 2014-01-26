@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        OnlineRNNet.h
  *
  * \brief       Offers the functions to create and to work with a
  * recurrent neural network.

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SvmLogisticInterpretation.h
  *
  * \brief       Maximum-likelihood model selection for binary support vector machines.
  * 

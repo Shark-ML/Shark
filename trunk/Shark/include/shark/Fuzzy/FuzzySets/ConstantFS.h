@@ -1,6 +1,5 @@
 
 /**
- * \file ConstantFS.h
  *
  * \brief FuzzySet with constant membership function
  * 

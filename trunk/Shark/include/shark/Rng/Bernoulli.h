@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Bernoulli.h
  *
  * \brief       Implements a Bernoulli distribution.
  * 

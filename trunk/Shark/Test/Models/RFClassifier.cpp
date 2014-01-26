@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        RFClassifier.cpp
  *
  * \brief       unit test for Random Forest classifier
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        DataView.h
  *
  * \brief       Fast lookup for elements in constant datasets
  * 

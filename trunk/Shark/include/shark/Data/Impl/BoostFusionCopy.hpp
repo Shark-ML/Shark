@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BoostFusionCopy.hpp
  *
  * \brief       -
  *

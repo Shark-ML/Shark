@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        DataEvaluator.h
  *
  * \brief       -
  *

@@ -1,6 +1,5 @@
 
 /**
-* \file BellFS.h
 *
 * \brief FuzzySet with a bell-shaped (Gaussian) membership function
 * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        State.h
  *
  * \brief       Class which externalizes the state of an Object.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NegativeGaussianProcessEvidence.h
  *
  * \brief       Evidence for model selection of a regularization network/Gaussian process.
 

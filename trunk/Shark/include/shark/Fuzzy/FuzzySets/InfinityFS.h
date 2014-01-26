@@ -1,5 +1,4 @@
 /**
- * \file InfinityFS.h
  *
  * \brief FuzzySet with a step function as membership function
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CSvmDerivative.h
  *
  * \brief       Derivative of a C-SVM hypothesis w.r.t. its hyperparameters.
  * 

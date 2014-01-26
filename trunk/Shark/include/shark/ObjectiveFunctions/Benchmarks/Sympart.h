@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Sympart.h
  *
  * \brief       -
  *

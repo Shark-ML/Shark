@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Sphere.h
  *
  * \brief       Convex quadratic benchmark function.
  * 

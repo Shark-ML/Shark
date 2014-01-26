@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        CG.cpp
  *
  * \brief       CG
  * 

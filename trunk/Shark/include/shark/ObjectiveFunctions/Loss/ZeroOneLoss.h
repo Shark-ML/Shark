@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ZeroOneLoss.h
  *
  * \brief       Error measure for classication tasks, typically used for evaluation of results
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractClustering.h
  *
  * \brief       Super class for clustering definitions.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        EA.h
  *
  * \brief       Summarizes definitions and tags common to the EA/DirectSearch component.
 

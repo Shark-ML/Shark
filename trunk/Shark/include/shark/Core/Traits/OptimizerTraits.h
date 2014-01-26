@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        OptimizerTraits.h
  *
  * \brief       OptimizerTraits
  * 

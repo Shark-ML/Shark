@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NBClassifier.h
  *
  * \brief       Implementation of Naive Bayes classifier
  * 

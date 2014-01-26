@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        EpsilonSvmTrainer.cpp
  *
  * \brief       test case for epsilon-SVM
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        TwoStateSpace.h
  *
  * \brief       -
  *

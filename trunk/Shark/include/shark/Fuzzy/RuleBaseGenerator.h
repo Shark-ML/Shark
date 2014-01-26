@@ -1,6 +1,5 @@
 
 /**
- * \file RuleBaseGenerator.h
  *
  * \brief Reads and writes rule bases from and to XML-files.
  * 

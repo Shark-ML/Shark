@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        OneVersusOne.tpp
  *
  * \brief       Example program for the one-versus-one classifier based on SVMs
  * 

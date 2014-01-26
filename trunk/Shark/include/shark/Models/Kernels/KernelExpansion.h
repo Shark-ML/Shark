@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KernelExpansion.h
  *
  * \brief       Affine linear kernel function expansion
  * 

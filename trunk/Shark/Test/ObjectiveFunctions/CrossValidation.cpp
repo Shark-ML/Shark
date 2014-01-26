@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CrossValidation.cpp
  *
  * \brief       Cross validation test case
  * 

@@ -1,5 +1,4 @@
 /**
- * \file CustomizedFS.h
  *
  * \brief A FuzzySet with an user defined mambership function
  * 

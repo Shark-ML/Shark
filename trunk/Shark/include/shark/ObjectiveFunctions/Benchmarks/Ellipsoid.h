@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Ellipsoid.h
  *
  * \brief       Convex quadratic benchmark function.
  * 

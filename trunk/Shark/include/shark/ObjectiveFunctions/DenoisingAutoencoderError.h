@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        DenoisingAutoencoderError.h
  *
  * \brief       Error Function used for training Denoising Autoencoders
  * 

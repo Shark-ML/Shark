@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        GenericDistTrainer.h
  *
  * \brief       Implementations of various distribution trainers.
  * 

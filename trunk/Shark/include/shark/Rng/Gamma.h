@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Gamma.h
  *
  * \brief       Implements a Gamma distribution.
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        eigenvalues.h
  *
  * \brief       Algorithms for Eigenvalue decompositions
  * 

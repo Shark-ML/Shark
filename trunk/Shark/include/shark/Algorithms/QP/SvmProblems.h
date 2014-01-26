@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SvmProblems.h
  *
  * \brief       -
  *

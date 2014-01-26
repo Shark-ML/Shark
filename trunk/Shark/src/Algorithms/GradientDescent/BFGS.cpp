@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BFGS.cpp
  *
  * \brief       BFGS
  * 

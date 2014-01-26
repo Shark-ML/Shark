@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        OnePointCrossover.h
  *
  * \brief       Implements one-point crossover operator.
  * 

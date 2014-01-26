@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractKernelFunction.h
  *
  * \brief       abstract super class of all kernel functions
  * 

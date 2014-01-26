@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        AdditiveEpsilonIndicator.h
  *
  * \brief       Calculates the additive approximation quality of a Pareto-front
  * approximation.

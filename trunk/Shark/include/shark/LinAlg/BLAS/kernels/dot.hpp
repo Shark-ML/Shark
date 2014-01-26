@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        dot.hpp
  *
  * \brief       -
  *

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LDATutorial.tpp
  *
  * \brief       Linear Discriminant Analysis Tutorial Sample Code
  * 

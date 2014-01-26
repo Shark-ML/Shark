@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NormalizeComponentsWhitening.h
  *
  * \brief       Data normalization to zero mean, unit variance and zero covariance 
  * 

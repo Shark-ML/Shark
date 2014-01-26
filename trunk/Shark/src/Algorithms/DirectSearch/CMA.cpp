@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        CMA.cpp
  *
  * \brief       Implements the most recent version of the non-elitist CMA-ES.
  * 

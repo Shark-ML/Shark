@@ -1,5 +1,4 @@
 /**
- * \file SingletonFS.h
  *
  * \brief FuzzySet with a single point of positive membership
  * 

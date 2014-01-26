@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        TemperedMarkovChain.h
  *
  * \brief       -
  *

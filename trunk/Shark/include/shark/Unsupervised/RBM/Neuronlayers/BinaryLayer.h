@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BinaryLayer.h
  *
  * \brief       -
  *

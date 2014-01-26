@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        HierarchicalClustering.h
  *
  * \brief       Hierarchical Clustering.
  * 

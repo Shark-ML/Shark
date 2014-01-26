@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        AGE.h
  *
  * \brief       AGE.h
  * 

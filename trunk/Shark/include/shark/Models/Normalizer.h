@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Normalizer.h
  *
  * \brief       Model for scaling and translation of data vectors.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CrossEntropyIndependent.h
  *
  * \brief       Error measure for classification tasks of non exclusive attributes
  * that can be used for model training.

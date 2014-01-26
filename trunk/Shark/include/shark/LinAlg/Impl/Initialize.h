@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Impl/Initialize.h
  *
  * \brief       Easy initialization of vectors
  * 

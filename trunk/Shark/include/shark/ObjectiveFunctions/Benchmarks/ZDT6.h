@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ZDT6.h
  *
  * \brief       Multi-objective optimization benchmark function ZDT6
  * 

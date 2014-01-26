@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        McSvmMMRTrainer.h
  *
  * \brief       Trainer for the Maximum Margin Regression Multi-class Support Vector Machine
  * 

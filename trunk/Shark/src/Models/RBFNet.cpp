@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        RBFNet.cpp
  *
  * \brief       Implementation of the RBFNet
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NormalTrainer.h
  *
  * \brief       Trainer for normal distribution
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BoxConstrainedProblems.h
  *
  * \brief       Quadratic program definitions.
  * 

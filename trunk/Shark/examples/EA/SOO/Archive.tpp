@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Archive.tpp
  *
  * \brief       Demonstration of the archive fitness function wrapper.
  * 

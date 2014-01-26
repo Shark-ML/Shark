@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KHCTree.h
  *
  * \brief       Tree for nearest neighbor search in kernel-induced feature spaces.
  * 

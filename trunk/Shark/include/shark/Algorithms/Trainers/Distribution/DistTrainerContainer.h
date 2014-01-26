@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        DistTrainerContainer.h
  *
  * \brief       Container for known distribution trainers.
  * 

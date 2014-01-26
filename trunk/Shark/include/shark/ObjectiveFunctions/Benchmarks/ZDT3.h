@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ZDT3.h
  *
  * \brief       Multi-objective optimization benchmark function ZDT3
  * 

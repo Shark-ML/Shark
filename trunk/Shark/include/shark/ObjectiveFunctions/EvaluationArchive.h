@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        EvaluationArchive.h
  *
  * \brief       Archive of evaluated points as an objective function wrapper.
 

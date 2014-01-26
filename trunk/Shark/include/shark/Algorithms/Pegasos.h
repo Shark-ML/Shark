@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Pegasos.h
  *
  * \brief       Pegasos solvers for linear SVMs
  * 

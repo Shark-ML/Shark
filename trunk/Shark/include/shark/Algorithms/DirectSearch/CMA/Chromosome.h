@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Chromosome.h
  *
  * \brief       Chromosome of the CMA-ES.
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        OpenMP.h
  *
  * \brief       Set of macros to help usage of OpenMP with Shark
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        LogNormal.h
  *
  * \brief       Provides a log-normal distribution.
  * 

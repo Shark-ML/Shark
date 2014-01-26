@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        atlas/trsm.hpp
  *
  * \brief       -
  *

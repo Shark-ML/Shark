@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KernelMeanClassifier.h
  *
  * \brief       KernelMeanClassifier
  * 

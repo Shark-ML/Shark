@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LCTree.h
  *
  * \brief       Tree for nearest neighbor search in data with low embedding dimension.
  * 

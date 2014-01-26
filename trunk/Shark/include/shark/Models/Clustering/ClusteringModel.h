@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ClusteringModel.h
  *
  * \brief       Super class for clustering models.
  * 

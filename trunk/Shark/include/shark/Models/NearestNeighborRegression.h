@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NearestNeighborRegression.h
  *
  * \brief       Nearest neighbor regression
  * 

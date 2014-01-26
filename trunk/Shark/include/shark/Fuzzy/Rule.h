@@ -1,5 +1,4 @@
 /**
-* \file Rule.h
 *
 * \brief  A rule which is composed of premise and conclusion
 * 

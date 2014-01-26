@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        IParameterizable.h
  *
  * \brief       IParameterizable interface
  * 

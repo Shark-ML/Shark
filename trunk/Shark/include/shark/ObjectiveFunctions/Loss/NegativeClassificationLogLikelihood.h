@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        NegativeClassificationLogLikelihood.h
  *
  * \brief       Negative logarithm of the likelihood of a probabilistic binary classification model.
  * 

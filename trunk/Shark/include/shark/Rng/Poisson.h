@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Poisson.h
  *
  * \brief       Implements a poisson distribution.
  * 

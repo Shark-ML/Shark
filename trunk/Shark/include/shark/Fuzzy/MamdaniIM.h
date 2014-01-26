@@ -1,5 +1,4 @@
 /**
-* \file MamdaniIM.h
 *
 * \brief Mamdami inference machine
 * 

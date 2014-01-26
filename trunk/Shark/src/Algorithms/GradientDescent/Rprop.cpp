@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Rprop.cpp
  *
  * \brief       implements different versions of Resilient Backpropagation of error.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KernelNearestNeighborRegression.cpp
  *
  * \brief       unit test for kernel nearest neighbor regression
  * 

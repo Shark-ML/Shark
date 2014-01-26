@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        MOCMASimple.tpp
  *
  * \brief       Example for running MO-CMA-ES on an exemplary benchmark function.
 

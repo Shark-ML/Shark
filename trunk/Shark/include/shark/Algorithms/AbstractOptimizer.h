@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractOptimizer.h
  *
  * \brief       AbstractOptimizer
  * 

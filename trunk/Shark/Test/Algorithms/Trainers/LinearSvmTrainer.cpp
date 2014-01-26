@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LinearSvmTrainer.cpp
  *
  * \brief       Test case for various linear SVM trainers.
  * 

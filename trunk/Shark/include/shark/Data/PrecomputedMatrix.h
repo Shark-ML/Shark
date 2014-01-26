@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        PrecomputedMatrix.h
  *
  * \brief       Read and write precomputed kernel matrices (using libsvm format)
  * 

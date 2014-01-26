@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        RealCodedNSGAII.h
  *
  * \brief       RealCodedNSGAII.h
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        TournamentSelection.h
  *
  * \brief       Implements tournament selection.
  * 

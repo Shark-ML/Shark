@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        TreeNearestNeighbors.h
  *
  * \brief       Efficient Nearest neighbor queries.
  * 

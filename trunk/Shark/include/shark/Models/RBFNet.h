@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        RBFNet.h
  *
  * \brief       Offers the functions to create and to work with a
  * radial basis fucntion network

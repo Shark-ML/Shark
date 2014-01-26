@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Centroids.cpp
  *
  * \brief       Clusters defined by centroids.
  * 

@@ -1,5 +1,4 @@
 /**
- * \file LinguisticTerm.h
  *
  * \brief A single linguistic term
  * 

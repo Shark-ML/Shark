@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        AbstractMultiObjectiveOptimizer.h
  *
  * \brief       AbstractMultiObjectiveOptimizer
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        MultiplicativeEpsilonIndicator.h
  *
  * \brief       Calculates the multiplicate approximation quality of a Pareto-front
  * approximation.

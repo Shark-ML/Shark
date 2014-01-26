@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        LeastContributorApproximator.hpp
  *
  * \brief       Approximately determines the individual contributing the least
  * hypervolume.

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NegativeAUC.h
  *
  * \brief       Functions for measuring the area under the (ROC) curve
  * 

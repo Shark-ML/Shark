@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        DiffPowers.h
  *
  * \brief       -
  *

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        syrk.h
  *
  * \brief       -
  *

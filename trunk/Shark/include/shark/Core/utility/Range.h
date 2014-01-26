@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Range.h
  *
  * \brief       Helper Methods to use with boost range.
  * 

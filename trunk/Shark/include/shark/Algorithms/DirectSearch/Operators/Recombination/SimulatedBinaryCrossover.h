@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SimulatedBinaryCrossover.h
  *
  * \brief       Simulated binary crossover operator.
  * 

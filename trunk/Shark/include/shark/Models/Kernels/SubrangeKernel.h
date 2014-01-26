@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        SubrangeKernel.h
  *
  * \brief       Variant of WeightedSumKernel which works on subranges of Vector inputs
  * 

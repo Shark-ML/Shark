@@ -1,5 +1,4 @@
 /**
-* \file Operators.h
 *
 * \brief Operators and connective functions
 * 

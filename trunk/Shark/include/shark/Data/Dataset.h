@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Dataset.h
  *
  * \brief       Data for (un-)base_typevised learning.
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        MarkovChain.h
  *
  * \brief       -
  *

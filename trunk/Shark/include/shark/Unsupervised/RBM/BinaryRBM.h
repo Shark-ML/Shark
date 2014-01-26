@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BinaryRBM.h
  *
  * \brief       -
  *

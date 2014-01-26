@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CrossValidationError.h
  *
  * \brief       cross-validation error for selection of hyper-parameters
 

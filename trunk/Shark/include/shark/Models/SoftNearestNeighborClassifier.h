@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        SoftNearestNeighborClassifier.h
  *
  * \brief       Soft/probabilistic nearest neighbor classifier for vector-valued data.
  * 

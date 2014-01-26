@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Uniform.h
  *
  * \brief       Implements a uniform distribution.
  * 

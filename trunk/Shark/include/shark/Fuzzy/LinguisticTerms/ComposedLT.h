@@ -1,5 +1,4 @@
 /**
- * \file ComposedLT.h
  *
  * \brief A composed LinguisticTerm
  * 

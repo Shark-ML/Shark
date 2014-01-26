@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        AbstractStoppingCriterion.h
  *
  * \brief       Defines a base class for stopping criteria of optimization algorithms.
  * 

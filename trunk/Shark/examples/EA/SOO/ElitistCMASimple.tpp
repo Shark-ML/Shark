@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ElitistCMASimple.tpp
  *
  * \brief       Example for running CMA-ES on an exemplary benchmark function.
 

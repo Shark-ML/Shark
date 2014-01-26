@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ParetoDominanceComparator.h
  *
  * \brief       Implementation of the Pareto-Dominance relation.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Oracle.cpp
  *
  * \brief       Demonstration of Shark's factory pattern.
  * 

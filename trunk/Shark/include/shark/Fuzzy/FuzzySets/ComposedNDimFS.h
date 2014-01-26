@@ -1,5 +1,4 @@
 /**
-* \file ComposedNDimFS.h
 *
 * \brief A composed n-dimensional FuzzySet
 * 

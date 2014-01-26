@@ -1,5 +1,4 @@
 /**
- * \file TrapezoidFS.h
  *
  * \brief FuzzySet with trapezoid membership function
  * 

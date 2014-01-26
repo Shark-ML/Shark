@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SharedVector.h
  *
  * \brief       Vector container prepared for data sharing.
  * 

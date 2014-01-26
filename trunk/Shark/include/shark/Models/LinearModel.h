@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        LinearModel.h
  *
  * \brief       Implements a Model using a linear function.
  * 

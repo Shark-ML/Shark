@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        PolynomialMutation.h
  *
  * \brief       Polynomial mutation operator.
  * 

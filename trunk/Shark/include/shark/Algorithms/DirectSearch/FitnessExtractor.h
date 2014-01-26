@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        FitnessExtractor.h
  *
  * \brief       Explicit traits for extracting fitness values from arbitrary types
  * 
