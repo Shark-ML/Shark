@@ -28,10 +28,11 @@ The article's bibtex entry reads: ::
 License
 -------
 
-The Shark library is made available under the `GNU General Public
-License <http://www.gnu.org/licenses/gpl.html>`_ as published by
-the Free Software Foundation; either version 3, or (at your option)
-any later version.
+The Shark library is made available under the
+`GNU Lesser General Public License <http://www.gnu.org/copyleft/lesser.html>`_.
+
+.. image:: images/lgplv3-147x51.png
+
 
 Hosting institutions
 --------------------
@@ -72,16 +73,6 @@ The development of the Shark library is or has been supported by the following i
 * `nisys GmbH <http://www.nisys.de/>`_
 * `Honda Research Institute Europe (HRI-EU) <http://world.honda.com/group/HondaResearchInstituteEurope/>`_
 
-Third-party software
---------------------
-
-Shark makes use of, includes, links to, or relies on third-party software
-listed below. These are provided by their respective vendors under licenses
-compatible with the GPLv3 of Shark.
-When modifying, building on, or re-distributing Shark, it is your
-responsibility to also ensure that the rights of the respective third-party
-copyright holders are respected in addition to meeting the requirements of
-the Shark GPLv3 license.
 
 
 Source code
@@ -90,23 +81,13 @@ Source code
 * Shark uses and links against parts of the `Boost software libraries <http://www.boost.org>`_.
   The Boost libraries are not shipped with Shark and have to be installed
   independently. The Boost libraries are available under the `Boost software
-  license <http://www.boost.org/LICENSE_1_0.txt>`_, which is compatible with
-  the GPL.
+  license <http://www.boost.org/LICENSE_1_0.txt>`_.
 
 * Shark relies on `CMake <http://www.cmake.org/>`_ as its build system.
   CMake is not included with Shark, but needs to be installed externally.
   However, CMake configuration files are provided with Shark for convenience.
   CMake is available  under the 3-clause (new/modified) `BSD license
   <http://www.opensource.org/licenses/bsd-license.php>`_.
-
-* The Shark machine learning library ships with the simplex solver from
-  GLPK, the GNU Linear Programming Kit (http://www.gnu.org/software/glpk/),
-  version 4.45. GLPK is NOT part of the Shark machine learning library, but
-  its simplex solver is used by Shark and thus distributed within the
-  package for convenience. GLPK code is directly linked into the Shark
-  library. A slightly modified subset of GLPK can be found in the header
-  file GLPK.h and the source file GLPK.cpp. The GLPK is available under the
-  `GNU General Public License <http://www.gnu.org/licenses/gpl.html>`_.
 
 
 Documentation
