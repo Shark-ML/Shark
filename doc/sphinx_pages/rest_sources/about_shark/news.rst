@@ -1,6 +1,15 @@
 News
 ====
 
+Shark goes LGPL
+^^^^^^^^^^^^^^^
+
+As of January 2014, Shark is distributed under the permissive
+`GNU Lesser General Public License <http://http://www.gnu.org/copyleft/lesser.html>`_.
+
+.. image:: images/lgplv3-147x51.png
+
+
 Repository upgraded
 ^^^^^^^^^^^^^^^^^^^
 
@@ -16,7 +25,7 @@ space and period ``.`` to the end of the command):
 
 
 
-Shark 3.0beta moved to svn trunk
+Shark 3.0 alpha moved to svn trunk
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We are happy to announce that the new version 3.0 of Shark has now moved to the trunk of our
@@ -50,56 +59,3 @@ Gold Prize for Shark alpha-release
 **October 22, 2011:**
 We are happy to announce that our alpha-release of Shark 3.0 has won
 the Gold Prize at this year's `Open Source Software World Challenge 2011 <http://www.ossaward.org/>`_.
-
-Alpha release of Shark 3.0 submitted to OSS  World Challenge
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-**September 18 2011:** The first pre-release version of Shark has
-been finalized and uploaded on occasion of the
-`Open Source Software World Challenge 2011 <http://www.ossaward.org/>`_. We
-thank the organizers, hosts, and sponsors of the competition for the opportunity
-to participate in such a challenge.
-
-We for convenience again provide the
-:download:`Shark project development plan <downloads/development_plan_shark_project_igel.pdf>`
-as submitted to the first (registration) stage of the competition.
-
-We also provide direct entry points to all deliverables for the competition:
-
-* **Source code**: please find a complete source code package on the main
-  :doc:`Shark download page <../downloads/downloads>`. There, you will also
-  find pre-compiled binary packages for all major platforms, and other
-  download links.
-
-* **License information**: please find all license information on the
-  :doc:`Credits and Copyright page <../about_shark/copyright>`.
-
-* **Installation instructions**: Shark can be installed either using
-  pre-compiled binary packages or by compiling from source code. Some
-  attention has to be paid to installation/availability of the Boost
-  C++ library as an external dependency. The
-  :doc:`Shark installation page <../getting_started/installation>`
-  will cover all aspects of the installation in detail.
-
-  We recognize that installation practices, systems, and experience may
-  vary between different companies, labs, and universities. If there are any
-  gaps or ambiguities in the installation instructions, or documentation in
-  general, please do not hesitate to point them out to us and we will fix any
-  remaining issues immediately.
-
-* **Other documentation**: We provide class and member documentation extracted
-  from in-code documentation, as well as a vast number of tutorials, test sets,
-  and examples. Please look at our guide to the different entry points into these
-  documentation options :doc:`here <../getting_started/using_the_documentation>`.
-
-* **Introductory videos**: As part of the submission, we created a
-  video giving a short overview over the library:
-
-  .. raw:: html
-
-     <iframe width="420" height="315" src="http://www.youtube.com/embed/zxvApdNZVgA" frameborder="0" allowfullscreen></iframe>
-
-
-  We further provide an introductory video on Shark installation
-  under the Windows operating system on the :doc:`Shark installation
-  page <../getting_started/installation>`.
