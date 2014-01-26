@@ -36,11 +36,6 @@ a group of lower-level changes is included, Shark 3.0 is considered
 in beta stage. Note that Shark 3.0 is already actively used for
 everyday research by several machine learning groups.
 
-Also note that some tutorials still need to be
-updated to reflect recent interface changes, so code from
-some tutorials may not compile. Especially the Data tutorials
-are known to be outdated.
-
 Feel free to try and test Shark, we are happy about any feedback!
 
 You can download Shark from our svn repository:
