@@ -5,7 +5,7 @@ Shark goes LGPL
 ^^^^^^^^^^^^^^^
 
 As of January 2014, Shark is distributed under the permissive
-`GNU Lesser General Public License <http://http://www.gnu.org/copyleft/lesser.html>`_.
+`GNU Lesser General Public License <http://www.gnu.org/copyleft/lesser.html>`_.
 
 .. image:: images/lgplv3-147x51.png
 
