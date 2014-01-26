@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        McSvmATMTrainer.h
  *
  * \brief       Trainer for the ATM Multi-class Support Vector Machine
  * 

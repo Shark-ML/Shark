@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        HypervolumeCalculator.h
  *
  * \brief       Implementation of the exact hypervolume calculation in m dimensions.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        QpSolver.h
  *
  * \brief       General and specialized quadratic program classes and a generic solver.
  * 

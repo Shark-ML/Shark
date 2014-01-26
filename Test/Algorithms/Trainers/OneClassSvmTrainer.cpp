@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        OneClassSvmTrainer.cpp
  *
  * \brief       test case for the one-class-SVM
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractConstraintHandler.h
  *
  * \brief       Base class for constraints.
  * 

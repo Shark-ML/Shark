@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        CovarianceMatrixInitializer.h
  *
  * \brief       Initializer for chromosomes/individuals of the CMA-ES.
  * 

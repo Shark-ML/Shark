@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        MklKernelBase.h
  *
  * \brief       Defines a helper class which assigns to every element of a tuple of points a kernel of a tuple of kernels
  * 

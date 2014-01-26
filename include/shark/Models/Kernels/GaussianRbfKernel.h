@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        GaussianRbfKernel.h
  *
  * \brief       Radial Gaussian kernel
  * 

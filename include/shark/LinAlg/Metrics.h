@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Metrics.h
  *
  * \brief       Helper functions to calculate several norms and distances.
  * 

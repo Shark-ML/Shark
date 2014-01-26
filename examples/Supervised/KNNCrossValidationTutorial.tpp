@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KNNCrossValidationTutorial.tpp
  *
  * \brief       Nearest Neighbor Tutorial Sample Code
  * 

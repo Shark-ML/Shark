@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        CigarDiscus.h
  *
  * \brief       Convex quadratic benchmark function.
  * 

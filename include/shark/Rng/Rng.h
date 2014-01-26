@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Rng.h
  *
  * \brief       Basic types and definitions of the Rng component.
  * 

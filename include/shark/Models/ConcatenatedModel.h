@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ConcatenatedModel.h
  *
  * \brief       concatenation of two models, with type erasure
  * 

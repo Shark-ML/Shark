@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KernelHelpers.h
  *
  * \brief       Collection of functions dealing with typical tasks of kernels
 

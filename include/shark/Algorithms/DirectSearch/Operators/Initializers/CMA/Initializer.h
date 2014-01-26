@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Initializer.h
  *
  * \brief       Initializer for chromosomes/individuals of the (MO-)CMA-ES.
  * 

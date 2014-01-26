@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        nearestneighbors.cpp
  *
  * \brief       Test cases for nearest neighbor queries.
  * 

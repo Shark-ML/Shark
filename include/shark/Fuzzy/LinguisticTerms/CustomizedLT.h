@@ -1,6 +1,5 @@
 
 /**
- * \file CustomizedLT.h
  *
  * \brief A LinguisticTerm with an user defined mambership function
  * 

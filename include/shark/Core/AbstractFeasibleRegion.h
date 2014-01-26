@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        AbstractFeasibleRegion.h
  *
  * \brief       Abstraction of the feasible region of an optimization problem.
  * 

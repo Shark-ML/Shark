@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        TypedIndividual.h
  *
  * \brief       TypedIndividual
 

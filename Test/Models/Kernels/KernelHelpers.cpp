@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KernelHelpers.cpp
  *
  * \brief       Test cases for the functions defined in Models/Kernels/KernelHelpers.cpp
  * 

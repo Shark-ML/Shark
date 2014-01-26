@@ -4,7 +4,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Fonseca.h
  *
  * \brief       Bi-objective real-valued benchmark function proposed by Fonseca and Flemming.
  * 

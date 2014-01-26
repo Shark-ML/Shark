@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        LooErrorCSvm.h
  *
  * \brief       Leave-one-out error for C-SVMs
  * 

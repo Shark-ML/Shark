@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractObjectiveFunction.h
  *
  * \brief       AbstractObjectiveFunction
 

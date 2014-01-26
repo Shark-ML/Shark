@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Libsvm.h
  *
  * \brief       Support for importing and exporting data from and to LIBSVM formatted data files
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        RealSpace.h
  *
  * \brief       -
  *

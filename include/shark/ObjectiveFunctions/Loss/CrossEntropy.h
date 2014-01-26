@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CrossEntropy.h
  *
  * \brief       Error measure for classification tasks that can be used
  * as the objective function for training.

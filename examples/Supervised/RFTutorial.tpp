@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        RFTutorial.tpp
  *
  * \brief       Linear Regression Tutorial Sample Code
  * 

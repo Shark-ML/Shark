@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Entropy.h
  *
  * \brief       Provides a function for estimating the entropy of a distribution.
  * 

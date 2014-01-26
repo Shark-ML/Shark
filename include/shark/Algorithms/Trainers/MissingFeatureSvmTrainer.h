@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        MissingFeatureSvmTrainer.h
  *
  * \brief       Trainer for binary SVMs natively supporting missing features.
  * 

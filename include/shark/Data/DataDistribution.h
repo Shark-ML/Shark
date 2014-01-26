@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        DataDistribution.h
  *
  * \brief       Learning problems given by analytic distributions.
  * 

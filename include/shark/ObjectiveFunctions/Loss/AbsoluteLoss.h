@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        AbsoluteLoss.h
  *
  * \brief       implements the absolute loss, which is the distance between labels and predictions
  * 

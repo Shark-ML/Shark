@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        EvalSkipMissingFeatures.h
  *
  * \brief       Do special kernel evaluation by skipping missing features
  * 

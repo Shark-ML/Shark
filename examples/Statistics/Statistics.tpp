@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Statistics.tpp
  *
  * \brief       Illustrates usage of the statistics component.
  * 

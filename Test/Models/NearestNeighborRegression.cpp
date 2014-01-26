@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NearestNeighborRegression.cpp
  *
  * \brief       Unit test for nearest neighbor regression.
  * 

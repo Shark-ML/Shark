@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        solveSystem.h
  *
  * \brief       Some operations for matrices.
  * 

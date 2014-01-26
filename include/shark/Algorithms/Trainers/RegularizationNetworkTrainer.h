@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        RegularizationNetworkTrainer.h
  *
  * \brief       Trainer for a Regularization Network or a Gaussian Process
  * 

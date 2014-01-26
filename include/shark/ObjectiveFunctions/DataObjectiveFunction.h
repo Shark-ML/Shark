@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        DataObjectiveFunction.h
  *
  * \brief       data-dependent objective functions for learning
 

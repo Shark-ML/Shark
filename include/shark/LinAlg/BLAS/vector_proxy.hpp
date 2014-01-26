@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        vector_proxy.hpp
  *
  * \brief       Vector proxy classes.
  * 

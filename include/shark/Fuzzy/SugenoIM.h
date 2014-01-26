@@ -1,5 +1,4 @@
 /**
-* \file SugenoIM.h
 *
 * \brief Sugeno inference machine
 * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NormalizeComponentsUnitInterval.h
  *
  * \brief       Data normalization to the unit interval
  * 

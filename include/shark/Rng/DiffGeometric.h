@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        DiffGeometric.h
  *
  * \brief       Diff geometric distribution.
  * 

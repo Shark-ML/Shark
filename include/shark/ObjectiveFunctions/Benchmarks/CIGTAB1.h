@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CIGTAB1.h
  *
  * \brief       Multi-objective optimization benchmark function CIGTAB 1.
  * 

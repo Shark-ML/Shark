@@ -1,5 +1,4 @@
 /**
- * \file ConstantLT.h
  *
  * \brief Linguistic Term with constant membership function
  * 

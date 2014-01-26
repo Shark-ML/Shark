@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        McSvmCSTrainer.h
  *
  * \brief       Trainer for the Multi-class Support Vector Machine by Crammer and Singer
  * 

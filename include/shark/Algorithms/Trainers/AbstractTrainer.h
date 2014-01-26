@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractTrainer.h
  *
  * \brief       Abstract Trainer Interface.
  * 

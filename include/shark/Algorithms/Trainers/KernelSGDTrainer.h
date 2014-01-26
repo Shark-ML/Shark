@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KernelSGDTrainer.h
  *
  * \brief       Generic stochastic gradient descent training for kernel-based models.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        tut2rst.cpp
  *
  * \brief       Small tool for preparing the tutorials.
  * 

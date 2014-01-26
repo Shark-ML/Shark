@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbsoluteLoss.cpp
  *
  * \brief       Absolute loss test case
  * 

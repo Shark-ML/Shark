@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        AnalyticProblems.h
  *
  * \brief       Analytic solutions for special problems
  * 

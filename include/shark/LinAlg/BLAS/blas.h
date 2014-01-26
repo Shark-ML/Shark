@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        blas.h
  *
  * \brief       includes all uBLAS files needed by Shark linear Algebra
  * 

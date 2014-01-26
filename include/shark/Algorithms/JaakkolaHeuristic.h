@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        JaakkolaHeuristic.h
  *
  * \brief       Jaakkola's heuristic and related quantities for Gaussian kernel selection
  * 

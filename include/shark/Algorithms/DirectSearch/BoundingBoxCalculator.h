@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BoundingBoxCalculator.h
  *
  * \brief       Bounding box calculator.
  * 

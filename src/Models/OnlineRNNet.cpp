@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        OnlineRNNet.cpp
  *
  * \brief       Recurrent Neural Network
  * 

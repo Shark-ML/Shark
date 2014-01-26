@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NBClassifierTrainerTests.cpp
  *
  * \brief       Test cases for naive Bayes classifier trainer
  * 

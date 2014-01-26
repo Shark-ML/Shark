@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        linearRegressionTutorial.tpp
  *
  * \brief       Linear Regression Tutorial Sample Code
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        HypervolumeApproximator.h
  *
  * \brief       Determine the volume of the union of objects by an FPRAS
  * 

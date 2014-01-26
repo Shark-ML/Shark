@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CSvmDerivative.cpp
  *
  * \brief       unit test for the CSvmDerivative
  * 

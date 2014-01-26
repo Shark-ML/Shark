@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SingleChainApproximator.h
  *
  * \brief       -
  *

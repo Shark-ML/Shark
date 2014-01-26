@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        FitnessComparator.h
  *
  * \brief       Fitness comparator for the single-objective case. 
  * 

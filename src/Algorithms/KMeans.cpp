@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KMeans.cpp
  *
  * \brief       The k-means clustering algorithm.
  * 

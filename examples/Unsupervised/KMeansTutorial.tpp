@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KMeansTutorial.tpp
  *
  * \brief       k-means Clustering Tutorial Sample Code, requires the data
  * set faithful.csv

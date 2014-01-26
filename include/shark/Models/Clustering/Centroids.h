@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Centroids.h
  *
  * \brief       Clusters defined by centroids.
  * 

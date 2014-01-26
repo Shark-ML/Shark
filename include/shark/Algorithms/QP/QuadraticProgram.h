@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        QuadraticProgram.h
  *
  * \brief       Quadratic programming for Support Vector Machines
  * 

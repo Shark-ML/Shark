@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        OneVersusOneClassifier.cpp
  *
  * \brief       Unit test for the generic one-versus-one classifier
  * 

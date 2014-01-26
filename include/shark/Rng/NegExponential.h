@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        NegExponential.h
  *
  * \brief       Implements the negative exponential distribution
  * 

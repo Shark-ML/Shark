@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        CMAC.h
  *
  * \brief       -
  *

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        LinearRanking.h
  *
  * \brief       Roulette-Wheel-Selection based on fitness-rank-based selection probability assignment.
  * 

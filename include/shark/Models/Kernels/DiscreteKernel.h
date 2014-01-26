@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        DiscreteKernel.h
  *
  * \brief       Kernel on a finite, discrete space.
  * 

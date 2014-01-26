@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KernelExpansion.cpp
  *
  * \brief       unit test for the kernel expansion model
  * 

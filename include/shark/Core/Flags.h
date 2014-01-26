@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Flags.h
  *
  * \brief       Flexible and extensible mechanisms for holding flags.
  * 

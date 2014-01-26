@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        CopyConst.h
  *
  * \brief       -
  *

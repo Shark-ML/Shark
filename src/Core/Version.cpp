@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Version.cpp
  *
  * \brief       Dump version information for shark and its dependencies; mostly for error reporting.
  * 

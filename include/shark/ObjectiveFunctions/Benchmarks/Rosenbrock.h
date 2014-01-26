@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Rosenbrock.h
  *
  * \brief       Generalized Rosenbrock benchmark function 
  * 

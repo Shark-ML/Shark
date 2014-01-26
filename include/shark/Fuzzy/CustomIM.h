@@ -1,5 +1,4 @@
 /**
- * \file CustomIM.h
  *
  * \brief An user defined inference machine
  * 

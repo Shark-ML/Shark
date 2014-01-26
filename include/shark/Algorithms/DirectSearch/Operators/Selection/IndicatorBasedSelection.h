@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        IndicatorBasedSelection.h
  *
  * \brief       Indicator-based selection strategy for multi-objective selection.
  * 

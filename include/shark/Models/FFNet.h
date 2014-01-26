@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        FFNet.h
  *
  * \brief       Implements a Feef-Forward multilayer perceptron
  * 

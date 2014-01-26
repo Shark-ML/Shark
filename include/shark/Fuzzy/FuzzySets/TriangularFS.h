@@ -1,5 +1,4 @@
 /**
- * \file TriangularFS.h
  *
  * \brief FuzzySet with triangular membership function
  * 

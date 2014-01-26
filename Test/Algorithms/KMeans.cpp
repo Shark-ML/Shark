@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KMeans.cpp
  *
  * \brief       Test case for k-means clustering.
  * 

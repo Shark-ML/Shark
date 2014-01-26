@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        cblas_inc.hpp
  *
  * \brief       -
  *

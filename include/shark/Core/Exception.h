@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Exception.h
  *
  * \brief       Exception
  * 

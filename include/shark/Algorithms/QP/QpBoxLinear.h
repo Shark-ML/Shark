@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        QpBoxLinear.h
  *
  * \brief       Quadratic programming solver linear SVM training without bias
  * 

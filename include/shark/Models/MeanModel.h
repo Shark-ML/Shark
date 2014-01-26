@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        MeanModel.h
  *
  * \brief       Implements the Mean Model that can be used for ensemble classifiers
  * 

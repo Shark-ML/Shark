@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        FitnessTraits.h
  *
  * \brief       Models extraction of fitness values.
  * 

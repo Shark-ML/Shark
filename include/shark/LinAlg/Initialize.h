@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Initialize.h
  *
  * \brief       Easy initialization of vectors. 
  * 

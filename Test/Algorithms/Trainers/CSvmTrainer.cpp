@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CSvmTrainer.cpp
  *
  * \brief       test case for the CSvmTrainer
  * 

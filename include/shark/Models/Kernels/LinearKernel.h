@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LinearKernel.h
  *
  * \brief       linear kernel (standard inner product)
  * 

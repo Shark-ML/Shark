@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        BinaryTree.h
  *
  * \brief       Binary space-partitioning tree of data points.
  * 

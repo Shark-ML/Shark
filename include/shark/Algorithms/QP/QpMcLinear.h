@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        QpMcLinear.h
  *
  * \brief       Quadratic programming solvers for linear multi-class SVM training without bias.
  * 

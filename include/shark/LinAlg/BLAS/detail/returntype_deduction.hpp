@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        returntype_deduction.hpp
  *
  * \brief       -
  *

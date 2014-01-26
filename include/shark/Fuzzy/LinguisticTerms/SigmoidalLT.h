@@ -1,6 +1,5 @@
 
 /**
- * \file SigmoidalLT.h
  *
  * \brief LinguisticTerm with sigmoidal membership function
  * 

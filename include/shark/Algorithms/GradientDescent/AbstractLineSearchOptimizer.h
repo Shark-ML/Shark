@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractLineSearchOptimizer.h
  *
  * \brief       Base class for Line Search Optimizer
  * 

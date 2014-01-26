@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        MklKernel.h
  *
  * \brief       Weighted sum of base kernels, each acting on a subset of features only.
  * 

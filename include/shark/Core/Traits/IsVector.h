@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        IsVector.h
  *
  * \brief       Traits wich specifies whether a type is part of a vector space.
  * 

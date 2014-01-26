@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Tools.h
  *
  * \brief       Helper functions for linear algebra component.
  * 

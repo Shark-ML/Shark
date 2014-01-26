@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        CMSA.cpp
  *
  * \brief       Implements the CMSA.
  * 

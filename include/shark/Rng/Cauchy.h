@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Cauchy.h
  *
  * \brief       Standard Cauchy distribution
  * 

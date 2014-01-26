@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        LBFGS.cpp
  *
  * \brief       LLBFGS
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        RadiusMarginQuotient.h
  *
  * \brief       Radius Margin Quotient for SVM model selection
  * 

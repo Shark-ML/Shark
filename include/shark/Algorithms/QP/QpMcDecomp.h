@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        QpMcDecomp.h
  *
  * \brief       Quadratic programming solver for multi-class SVMs
  * 

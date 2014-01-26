@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        GaussianLayer.h
  *
  * \brief       -
  *

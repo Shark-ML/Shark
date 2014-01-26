@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        MonomialKernel.h
  *
  * \brief       monomial (polynomial) kernel
  * 

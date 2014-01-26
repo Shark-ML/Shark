@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        GeneralizationQuotient.h
  *
  * \brief       Stopping criterion monitoring the quotient of generalization loss and training progress
  * 

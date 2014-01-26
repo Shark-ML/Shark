@@ -1,6 +1,5 @@
 
 /**
-* \file InferenceMachine.h
 *
 * \brief Fuzzy inference machine.
 * 

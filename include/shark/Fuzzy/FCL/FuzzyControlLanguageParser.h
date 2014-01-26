@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        FuzzyControlLanguageParser.h
  *
  * \brief       Parser for the Fuzzy Control Language (IEC 61131-7).
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractLoss.h
  *
  * \brief       super class of all loss functions
  * 

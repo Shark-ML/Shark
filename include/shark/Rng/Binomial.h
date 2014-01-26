@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Binomial.h
  *
  * \brief       Implements a binomial distribution.
  * 

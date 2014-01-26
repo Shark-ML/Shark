@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Base.h
  *
  * \brief       Entry Point for all Basic Linear Algebra(BLAS) in shark
  * 

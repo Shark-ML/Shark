@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ApproximatedHypervolumeSelection.h
  *
  * \brief       Hypervolume selection based on an approximation scheme.
  * 

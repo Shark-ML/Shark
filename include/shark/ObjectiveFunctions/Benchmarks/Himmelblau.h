@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Himmelblau.h
  *
  * \brief       Two-dimensional, real-valued Himmelblau function.
  * 

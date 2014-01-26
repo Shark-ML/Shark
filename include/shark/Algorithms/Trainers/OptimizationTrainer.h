@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        OptimizationTrainer.h
  *
  * \brief       Model training by means of a general purpose optimization procedure.
  * 

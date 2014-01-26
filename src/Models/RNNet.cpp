@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        RNNet.cpp
  *
  * \brief       Recurrent Neural Network
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ElitistCMA.h
  *
  * \brief       Implements the most recent version of the elitist CMA-ES.
  * 

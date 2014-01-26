@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        MuKommaLambdaSelection.h
  *
  * \brief       Implements \f$(\mu,\lambda)\f$ selection.
  * 

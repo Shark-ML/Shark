@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NormalizeComponentsUnitVariance.h
  *
  * \brief       Data normalization to zero mean and unit variance
  * 

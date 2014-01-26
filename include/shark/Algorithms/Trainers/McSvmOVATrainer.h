@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        McSvmOVATrainer.h
  *
  * \brief       Trainer for One-versus-all (one-versus-rest) Multi-class Support Vector Machines
  * 

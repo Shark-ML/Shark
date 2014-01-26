@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        SoftNearestNeighborClassifier.cpp
  *
  * \brief       unit test for soft nearest neighbor classifier
  * 

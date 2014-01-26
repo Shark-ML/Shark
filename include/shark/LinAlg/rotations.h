@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        rotations.h
  *
  * \brief       Some operations for creating rotation matrices
  * 

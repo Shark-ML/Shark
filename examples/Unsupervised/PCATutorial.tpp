@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        PCATutorial.tpp
  *
  * \brief       Principal Component Analysis Tutorial Sample Code
  * 

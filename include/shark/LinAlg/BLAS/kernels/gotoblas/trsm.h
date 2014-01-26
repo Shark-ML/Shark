@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        trsm.h
  *
  * \brief       -
  *

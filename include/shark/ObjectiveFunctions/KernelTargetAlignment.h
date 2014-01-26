@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        KernelTargetAlignment.h
  *
  * \brief       Kernel Target Alignment - a measure of alignment of a kernel Gram matrix with labels.
  * 

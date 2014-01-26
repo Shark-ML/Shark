@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        McSvmTrainer.cpp
  *
  * \brief       test case for the various multi-class SVM trainers
  * 

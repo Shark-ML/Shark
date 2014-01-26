@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BatchInterfaceAdaptStruct.h
  *
  * \brief       Defines an batch adptor for structures.
  * 

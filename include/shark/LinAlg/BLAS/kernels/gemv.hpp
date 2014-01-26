@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        gemv.hpp
  *
  * \brief       -
  *

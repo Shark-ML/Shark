@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        CVDatasetTools.h
  *
  * \brief       Tools for cross-validation
  * 

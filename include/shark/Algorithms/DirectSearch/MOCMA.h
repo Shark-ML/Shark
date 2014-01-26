@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        MOCMA.h
  *
  * \brief       Implements the generational Multi-objective Covariance Matrix Adapation ES.
  * 

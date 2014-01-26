@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        kNN.tpp
  *
  * \brief       K-nearest-neighbor (k-NN) example program.
  * 

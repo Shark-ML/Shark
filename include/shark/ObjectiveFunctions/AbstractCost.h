@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractCost.h
  *
  * \brief       cost function for quantitative judgement of deviations of predictions from target values
  * 

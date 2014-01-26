@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        svd.h
  *
  * \brief       Algorithm for Singular Value Decomposition
  * 

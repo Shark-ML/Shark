@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        QualityIndicatorTraits.h
  *
  * \brief       Summarizes common properties of unary and binary quality indicators.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        AbstractSvmTrainer.h
  *
  * \brief       Abstract Support Vector Machine Trainer, general and linear case
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        OneClassSvm.tpp
  *
  * \brief       One-Class Support Vector Machine example program.
  * 

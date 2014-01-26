@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        MKLBatchInterface.h
  *
  * \brief       Batch definitions for fusion::vectors which are used in MKL learning.
  * 

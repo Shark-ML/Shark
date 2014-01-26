@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ScaledKernel.h
  *
  * \brief       A kernel function that wraps a member kernel and multiplies it by a scalar.
  * 

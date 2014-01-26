@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        MaxIterations.h
  *
  * \brief       Stopping Criterion which stops after a fixed number of iterations
  * 

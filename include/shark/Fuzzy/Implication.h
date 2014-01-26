@@ -1,6 +1,5 @@
 
 /**
- * \file Implication.h
  *
  * \brief Fuzzy implication.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        SvmLogisticInterpretation.cpp
  *
  * \brief       unit test for maximum-likelihood model selection for support vector machines.
  * 

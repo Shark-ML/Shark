@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Timer.h
  *
  * \brief       Timer abstraction with microsecond resolution
  * 

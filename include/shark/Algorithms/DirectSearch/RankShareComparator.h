@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        RankShareComparator.h
  *
  * \brief       Compares two individuals w.r.t. their level of non-dominance and 
  * w.r.t. the share they contribute to the front both of them belong to.

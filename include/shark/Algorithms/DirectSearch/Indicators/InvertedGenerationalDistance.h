@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        InvertedGenerationalDistance.h
  *
  * \brief       Inverted generational distance for comparing Pareto-front approximations.
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BinaryTournamentSelection.h
  *
  * \brief       Implements binary tournament selection.
  * 

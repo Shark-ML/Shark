@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ExactGradient.h
  *
  * \brief       -
  *

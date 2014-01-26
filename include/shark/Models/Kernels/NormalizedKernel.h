@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NormalizedKernel.h
  *
  * \brief       Normalization of a kernel function.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        McSvmATSTrainer.h
  *
  * \brief       Trainer for the ATS Multi-class Support Vector Machine
  * 

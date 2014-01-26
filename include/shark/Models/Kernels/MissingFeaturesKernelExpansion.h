@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        MissingFeaturesKernelExpansion.h
  *
  * \brief       A kernel expansion with support of missing features
  * 

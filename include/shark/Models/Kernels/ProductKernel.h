@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        ProductKernel.h
  *
  * \brief       Product of kernel functions.
  * 

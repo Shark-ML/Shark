@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        RegularizationNetworkTrainer.cpp
  *
  * \brief       test case for regularization network
  * 

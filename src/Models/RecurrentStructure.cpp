@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        RecurrentStructure.cpp
  *
  * \brief       Base class for Recurrent Neural Networks
  * 

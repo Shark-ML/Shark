@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        atlas/trsv.hpp
  *
  * \brief       -
  *

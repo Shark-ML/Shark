@@ -1,6 +1,5 @@
 
 /**
- * \file FuzzyRelation.h
  *
  * \brief A fuzzy relation
  * 

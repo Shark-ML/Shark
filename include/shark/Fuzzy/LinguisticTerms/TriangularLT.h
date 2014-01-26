@@ -1,6 +1,5 @@
 
 /**
- * \file TriangularLT.h
  *
  * \brief LinguisticTerm with triangular membership function
  * 

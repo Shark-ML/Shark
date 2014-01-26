@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        OneVersusOneClassifier.h
  *
  * \brief       One-versus-one Classifier.
  * 

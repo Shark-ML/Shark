@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ZipPair.h
  *
  * \brief       Range which zips two ranges together while allowing a custom pair type
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BatchInterface.h
  *
  * \brief       Defines the Batch Interface for a type, e.g., for every type a container with optimal structure.
  * 

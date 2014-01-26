@@ -1,6 +1,5 @@
 
 /**
- * \file TrapezoidLT.h
  *
  * \brief LinguisticTerm with trapezoid membership function
  * 

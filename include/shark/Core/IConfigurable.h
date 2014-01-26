@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        IConfigurable.h
  *
  * \brief       IConfigurable interface
  * 

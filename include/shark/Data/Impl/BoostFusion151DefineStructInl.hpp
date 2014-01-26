@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BoostFusion151DefineStructInl.hpp
  *
  * \brief       -
  *

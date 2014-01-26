@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        NoisyErrorFunction.h
  *
  * \brief       implements an error fucntion which only uses a random portion of the data for training
  * 

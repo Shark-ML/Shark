@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        TruncatedExponential.h
  *
  * \brief       Implements a truncated exponential.
  * 

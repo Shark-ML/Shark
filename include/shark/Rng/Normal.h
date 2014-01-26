@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Normal.h
  *
  * \brief       Implements a univariate normal distribution.
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SparseFFNetError.h
  *
  * \brief       Specific error function for Feed-Forward-Networks which enforces it to have sparse hidden neuron activation
  * 

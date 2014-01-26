@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        TSP.tpp
  *
  * \brief       A 10-city traveling salesman problem.
 

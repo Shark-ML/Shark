@@ -1,6 +1,5 @@
 
 /**
-* \file HomogenousNDimFS.h
 *
 * \brief A homogenous n-dimensional fuzzy set
 * 

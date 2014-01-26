@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        TruncExpBinaryRBM.h
  *
  * \brief       -
  *

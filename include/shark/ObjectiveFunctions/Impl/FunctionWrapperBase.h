@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        FunctionWrapperBase.h
  *
  * \brief       Base class for type erasure in error functions.
  * 

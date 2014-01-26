@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Iterators.h
  *
  * \brief       Small Iterator collection.
  * 

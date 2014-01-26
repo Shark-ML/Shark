@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Energy.h
  *
  * \brief       -
  *

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Neurons.h
  *
  * \brief       -
  *

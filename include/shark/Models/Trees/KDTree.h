@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KDTree.h
  *
  * \brief       Tree for nearest neighbor search in low dimensions.
  * 

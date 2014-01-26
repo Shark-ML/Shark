@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        HDF5.h
  *
  * \brief       Support for importing data from HDF5 file
  * 

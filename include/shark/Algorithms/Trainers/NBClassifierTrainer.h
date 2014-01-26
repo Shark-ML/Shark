@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        NBClassifierTrainer.h
  *
  * \brief       Trainer of Naive Bayes classifier
  * 

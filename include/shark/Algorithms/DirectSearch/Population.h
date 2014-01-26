@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        Population.h
  *
  * \brief       Population on an Evolutionary Algorithm
  * 

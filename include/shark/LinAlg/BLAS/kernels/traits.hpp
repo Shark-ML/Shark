@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        traits.hpp
  *
  * \brief       -
  *

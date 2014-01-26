@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        MultiVariateNormalDistribution.h
  *
  * \brief       Implements a multi-variate normal distribution with zero mean.
  * 

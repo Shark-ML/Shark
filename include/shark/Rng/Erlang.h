@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Erlang.h
  *
  * \brief       Implements an Erlang distribution.
  * 

@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        OneClassSvmTrainer.h
  *
  * \brief       Trainer for One-Class Support Vector Machines
  * 

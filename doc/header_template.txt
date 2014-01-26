@@ -1,7 +1,5 @@
 /*!
  * 
- * \file        %FILE%
- *
  * \brief       %BRIEF%
  *
  * \author      %AUTHOR%

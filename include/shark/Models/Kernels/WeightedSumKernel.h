@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        WeightedSumKernel.h
  *
  * \brief       Weighted sum of m_base kernels.
  * 

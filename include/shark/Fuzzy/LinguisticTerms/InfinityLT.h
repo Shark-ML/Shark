@@ -1,6 +1,5 @@
 
 /**
- * \file InfinityLT.h
  *
  * \brief LinguisticTerm with a step function as membership function
  * 

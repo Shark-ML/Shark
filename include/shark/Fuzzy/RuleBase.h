@@ -1,5 +1,4 @@
 /**
-* \file RuleBase.h
 *
 * \brief A composite of rules
 * 

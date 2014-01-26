@@ -1,6 +1,5 @@
 
 /**
-* \file BellLT.h
 *
 * \brief LinguisticTerm with a bell-shaped (Gaussian) membership function
 * 

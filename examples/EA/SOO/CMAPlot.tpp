@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        CMAPlot.tpp
  *
  * \brief       Example for examining characteristics of the CMA with the help of
  * the Probe framework.

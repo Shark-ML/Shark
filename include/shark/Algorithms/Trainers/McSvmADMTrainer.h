@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        McSvmADMTrainer.h
  *
  * \brief       Trainer for the ADM Multi-class Support Vector Machine
  * 

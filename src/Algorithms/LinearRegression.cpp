@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        LinearRegression.cpp
  *
  * \brief       LinearRegression
  * 

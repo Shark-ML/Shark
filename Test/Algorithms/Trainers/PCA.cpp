@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        PCA.cpp
  *
  * \brief       Test case for optimization of the hyperparameters of a
  * Gaussian Process/Regularization Network using evidence/marginal

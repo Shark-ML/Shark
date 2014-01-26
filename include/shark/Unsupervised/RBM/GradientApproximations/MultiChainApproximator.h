@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        MultiChainApproximator.h
  *
  * \brief       -
  *

@@ -1,5 +1,4 @@
 /**
- * \file ComposedFS.h
  *
  * \brief A composed FuzzySet
  * 

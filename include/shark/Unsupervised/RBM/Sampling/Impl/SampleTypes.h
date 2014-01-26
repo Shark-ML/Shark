@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        SampleTypes.h
  *
  * \brief       -
  *

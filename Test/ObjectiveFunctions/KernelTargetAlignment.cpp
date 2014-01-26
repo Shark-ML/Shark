@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KernelTargetAlignment.cpp
  *
  * \brief       unit test for the (negative) kernel target alignment
  * 

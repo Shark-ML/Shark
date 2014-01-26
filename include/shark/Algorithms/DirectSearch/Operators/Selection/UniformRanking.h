@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        UniformRanking.h
  *
  * \brief       Roulette-Wheel-Selection using uniform selection probability assignment.
  * 

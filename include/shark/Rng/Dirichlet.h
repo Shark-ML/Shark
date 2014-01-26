@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Dirichlet.h
  *
  * \brief       Implements a dirichlet distribution.
  * 

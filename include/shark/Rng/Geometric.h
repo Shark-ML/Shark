@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Geometric.h
  *
  * \brief       Implements a geometric distribution.
  * 

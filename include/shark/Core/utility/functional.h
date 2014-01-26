@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        functional.h
  *
  * \brief       Small General algorithm collection.
  * 

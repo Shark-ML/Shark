@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        RBM/Impl/analytics.h
  *
  * \brief       -
  *

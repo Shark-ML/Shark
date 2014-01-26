@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        EpsilonSvmTrainer.h
  *
  * \brief       Trainer for the Epsilon-Support Vector Machine for Regression
  * 

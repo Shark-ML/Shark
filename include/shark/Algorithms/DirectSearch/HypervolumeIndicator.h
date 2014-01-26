@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        HypervolumeIndicator.h
  *
  * \brief       Calculates the hypervolume covered by a set of non-dominated points.
  * 

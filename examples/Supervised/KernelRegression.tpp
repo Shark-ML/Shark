@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KernelRegression.tpp
  *
  * \brief       Kernel-based regression methods example program.
  * 

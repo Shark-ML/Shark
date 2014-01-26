@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        HierarchicalClustering.tpp
  *
  * \brief       Example program for hierarchical clustering.
  * 

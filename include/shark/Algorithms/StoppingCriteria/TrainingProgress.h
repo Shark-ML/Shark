@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        TrainingProgress.h
  *
  * \brief       Stopping Criterion which stops, when the training error seems to converge
  * 

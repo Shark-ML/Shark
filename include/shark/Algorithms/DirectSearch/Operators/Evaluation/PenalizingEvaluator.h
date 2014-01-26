@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        PenalizingEvaluator.h
  *
  * \brief       PenalizingEvaluator
 

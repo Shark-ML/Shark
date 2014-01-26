@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ResultSets.h
  *
  * \brief       Result sets for algorithms.
  * 

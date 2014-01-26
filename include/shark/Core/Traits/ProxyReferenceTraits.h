@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ProxyReferenceTraits.h
  *
  * \brief       Traits which allow to define ProxyReferences for types
  * 

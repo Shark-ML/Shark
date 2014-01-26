@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Quickprop.cpp
  *
  * \brief       Quickprop
  * 

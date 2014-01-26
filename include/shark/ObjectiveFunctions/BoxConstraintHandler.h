@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        BoxConstraintHandler.h
  *
  * \brief       Base class for constraints.
  * 

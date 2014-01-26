@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        SoftClusteringModel.h
  *
  * \brief       Model for "soft" clustering.
  * 

@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        BitflipMutator.h
  *
  * \brief       Bit flip mutation operator.
  * 

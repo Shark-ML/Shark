@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        Discus.h
  *
  * \brief       Convex quadratic benchmark function.
  * 

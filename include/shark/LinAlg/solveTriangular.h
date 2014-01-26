@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        solveTriangular.h
  *
  * \brief       Some operations for matrices.
  * 

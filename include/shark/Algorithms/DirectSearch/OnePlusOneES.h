@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        OnePlusOneES.h
  *
  * \brief       Implements the (1+1)-ES.
  * 

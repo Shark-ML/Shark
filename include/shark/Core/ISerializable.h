@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ISerializable.h
  *
  * \brief       ISerializable interface.
  * 

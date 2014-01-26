@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        JaakkolaHeuristic.cpp
  *
  * \brief       Unit test for Jaakkola's bandwidth selection heuristic.
  * 

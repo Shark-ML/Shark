@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        LooError.h
  *
  * \brief       Leave-one-out error
  * 

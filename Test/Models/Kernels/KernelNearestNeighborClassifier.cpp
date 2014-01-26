@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        KernelNearestNeighborClassifier.cpp
  *
  * \brief       unit test for kernel nearest neighbor classifier
  * 

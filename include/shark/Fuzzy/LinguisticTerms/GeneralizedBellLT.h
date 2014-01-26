@@ -1,5 +1,4 @@
 /**
- * \file GeneralizedBellLT.h
  *
  * \brief LinguisticTerm with a generalized bell-shaped membership function.
  * 

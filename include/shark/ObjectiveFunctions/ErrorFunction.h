@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        ErrorFunction.h
  *
  * \brief       error function for supervised learning
  * 

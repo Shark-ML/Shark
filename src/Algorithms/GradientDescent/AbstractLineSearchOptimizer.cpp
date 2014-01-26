@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        AbstractLineSearchOptimizer.cpp
  *
  * \brief       BFGS
  * 

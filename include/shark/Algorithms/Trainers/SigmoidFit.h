@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  * 
- * \file        SigmoidFit.h
  *
  * \brief       Optimization of the SigmoidModel according to Platt, 1999.
  * 

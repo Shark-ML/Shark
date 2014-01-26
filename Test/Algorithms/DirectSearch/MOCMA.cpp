@@ -1,6 +1,5 @@
 /*!
  * 
- * \file        MOCMA.cpp
  *
  * \brief       Unit tests for class (detail::)MOCMA.
  * 

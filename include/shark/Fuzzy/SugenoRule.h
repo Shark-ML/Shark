@@ -1,6 +1,5 @@
 
 /**
-* \file SugenoRule.h
 *
 * \brief Sugeno rule
 * 
