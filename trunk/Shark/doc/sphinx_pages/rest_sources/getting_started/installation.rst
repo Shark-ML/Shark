@@ -38,7 +38,10 @@ Under **MacOS** using MacPorts, you get the required packages by
 ``sudo port install boost cmake atlas``. Note that Shark does
 not support compilers such as GCC 4.2.1. So you
 may need something such as ``sudo port install gcc48`` beforehand.
-
+Per default, Shark is built as a static library. It may be necessary
+to build a shared library (e.g., if only Boost shared libraries are
+available on your system). To do so, simply add
+`-DOPT_DYNAMIC_LIBRARY=ON``.
 
 Detailed installation instructions
 **********************************
@@ -134,16 +137,16 @@ see `More details on CMake`_.
 
        ccmake -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_INCLUDEDIR=/path/to/boost/include/ -DBOOST_LIBRARYDIR=/path/to/boost/lib/ <SHARK_SRC_DIR>
 
-   If ccmake is installed, the above command will produce a console-style menu in
+   If ``ccmake`` is installed, the above command will produce a console-style menu in
    which you can easily change those installation options you wish to alter.
    First, you may have to press ``c`` to configure the system and populate the menu.
    Next, navigate through the rows with your arrow keys, press enter to change those
    options you wish to, and then press ``c`` twice to configure the installation,
-   followed by ``g`` to generate the according makefile, and ``q`` to quit ccmake.
+   followed by ``g`` to generate the according makefile, and ``q`` to quit ``ccmake``.
 
 
    There are several different build options (see bottom of page) you will
-   encounter in the ccmake menu, and the (arguably) three most important ones are:
+   encounter in the ``ccmake`` menu, and the (arguably) three most important ones are:
 
    * the path to the Boost library (if installed to a custom location),
    * the desired Shark build type (Debug or Release).
@@ -253,7 +256,7 @@ Building Shark with ATLAS backend
 
 ATLAS is an optimized linear algebra library. Using it as a backend to the shark routines can give speed-ups of factor 5-10
 for big problems. Enabling ATLAS is simple. On most Unix systems, only the option "OPT_ENABLE_ATLAS" must be set to true.
-If ATLAS is not placed in a standard path, you will have to tell Shark where the libraries can be found. For this, the ccmake
+If ATLAS is not placed in a standard path, you will have to tell Shark where the libraries can be found. For this, the ``ccmake``
 call above must be changed to::
 
   ccmake -DBoost_NO_SYSTEM_PATHS=TRUE -DBOOST_INCLUDEDIR=/path/to/boost/include/ -DBOOST_LIBRARYDIR=/path/to/boost/lib/ -DATLAS_ROOT:Path=/path/to/ATLAS/ -DOPT_ENABLE_ATLAS=ON <SHARK_SRC_DIR>
