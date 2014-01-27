@@ -173,11 +173,11 @@ mark_as_advanced(
 		  Boost_DIR 
 		  PTHREAD_LIBRARY
 )
-mark_as_advanced( CLEAR
-                  Boost_INCLUDE_DIR
-                  Boost_LIBRARY_DIRS
-) 
-message( STATUS "Using boost from " ${Boost_LIBRARY_DIRS} )
+#mark_as_advanced( CLEAR
+#                  Boost_INCLUDE_DIR
+#                  Boost_LIBRARY_DIR
+#) 
+message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
 
 #####################################################################
 #		Optionally enable OpenMP 
@@ -203,13 +203,13 @@ ENDIF( OPT_ENABLE_OPENMP )
 #####################################################################
 FIND_PACKAGE(HDF5 COMPONENTS C CXX HL QUIET)
 mark_as_advanced( HDF5_DIR ) 
-# mark_as_advanced( CLEAR HDF5_LIBRARY_DIRS DF5_INCLUDE_DIRS ) 
+# mark_as_advanced( CLEAR HDF5_LIBRARY_DIR DF5_INCLUDE_DIR ) 
 IF( HDF5_FOUND )
     if( HDF5_C_COMPILER_EXECUTABLE AND HDF5_HL_COMPILER_EXECUTABLE  AND HDF5_CXX_COMPILER_EXECUTABLE )
 	MESSAGE(STATUS "Checking HDF5 installation: HDF5 installation seems ok.")
-	INCLUDE_DIRECTORIES( ${HDF5_INCLUDE_DIRS} )
+	INCLUDE_DIRECTORIES( ${HDF5_INCLUDE_DIR} )
 	IF( WIN32 )
-	    LINK_DIRECTORIES( ${HDF5_LIBRARY_DIRS} )
+	    LINK_DIRECTORIES( ${HDF5_LIBRARY_DIR} )
 	ELSE( WIN32 )
 	    SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${HDF5_LIBRARIES} )
 	ENDIF( WIN32 )
@@ -241,17 +241,17 @@ IF ( OPT_ENABLE_ATLAS )
 	find_library(CBLAS_LIBRARY
 		cblas
 		HINTS
-		${ATLAS_ROOT}/lib /opt/local/lib
+		${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
 	)
 	find_library(CLAPACK_LIBRARY
 		lapack
 		HINTS
-		${ATLAS_ROOT}/lib /opt/local/lib
+		${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
 	)
 	find_library(ATLAS_LIBRARY
 		atlas
 		HINTS
-		${ATLAS_ROOT}/lib /opt/local/lib
+		${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
 	)
 
 	get_filename_component(ATLAS_PATH @CBLAS_LIBRARY@ PATH )
@@ -405,11 +405,11 @@ export(TARGETS shark Version FILE "${PROJECT_BINARY_DIR}/SharkTargets.cmake")
 #export(PACKAGE Shark)
 
 # Create the SharkConfig.cmake and SharkConfigVersion files
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/" "${Boost_INCLUDE_DIRS}")
+set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/" "${Boost_INCLUDE_DIR}")
 set(CONF_TARGET_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 configure_file(SharkConfig.cmake.in "${PROJECT_BINARY_DIR}/SharkConfig.cmake")
 set(CONF_TARGET_DIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}")
-set(CONF_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include/" "${Boost_INCLUDE_DIRS}")
+set(CONF_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include/" "${Boost_INCLUDE_DIR}")
 configure_file(SharkConfig.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SharkConfig.cmake")
 configure_file(SharkConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/SharkConfigVersion.cmake")
 
