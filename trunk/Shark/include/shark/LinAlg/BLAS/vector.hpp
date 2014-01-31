@@ -2,9 +2,10 @@
 #define SHARK_LINALG_BLAS_UBLAS_VECTOR_HPP
 
 #include "vector_proxy.hpp"
-#include <boost/serialization/collection_size_type.hpp>
+#include <boost/container/vector.hpp>
+#include <boost/serialization/array.hpp>
 #include <boost/serialization/nvp.hpp>
-#include <boost/serialization/vector.hpp>
+#include <boost/serialization/collection_size_type.hpp>
 
 namespace shark {
 namespace blas {
@@ -23,7 +24,7 @@ class vector:
 	public vector_container<vector<T> > {
 
 	typedef vector<T> self_type;
-	typedef std::vector<T> array_type;
+	typedef boost::container::vector<T> array_type;
 public:
 	
 	typedef typename array_type::size_type size_type;
@@ -458,7 +459,13 @@ public:
 	/// \param file_version Optional file version (not yet used)
 	template<class Archive>
 	void serialize(Archive &ar, const unsigned int file_version) {
-		ar &boost::serialization::make_nvp("data",m_storage);
+		boost::serialization::collection_size_type count(size());
+		ar & count;
+		if(!Archive::is_saving::value){
+			resize(count);
+		}
+		if (!empty())
+			ar & boost::serialization::make_array(storage(),size());
 		(void) file_version;//prevent warning
 	}
 
