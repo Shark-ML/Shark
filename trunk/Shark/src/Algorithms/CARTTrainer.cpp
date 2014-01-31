@@ -2,7 +2,7 @@
  * CARTTrainer.c
  *
  *  Created on: Dec 1, 2011
- *      Author: nybohansen
+ *	  Author: nybohansen
  */
 
 #include <shark/Algorithms/Trainers/CARTTrainer.h>
@@ -24,12 +24,11 @@ void CARTTrainer::train(ModelType& model, RegressionDataset const& dataset)
 
 	// create cross-validation folds
 	RegressionDataset set=dataset;
-	unsigned int numberOfFolds= 10;
-	CVFolds<RegressionDataset > folds = createCVSameSize(set, numberOfFolds);
+	CVFolds<RegressionDataset > folds = createCVSameSize(set, m_numberOfFolds);
 	double bestErrorRate = std::numeric_limits<double>::max();
 	CARTClassifier<RealVector>::SplitMatrixType bestSplitMatrix;
 	
-	for (unsigned fold = 0; fold < numberOfFolds; ++fold){
+	for (unsigned fold = 0; fold < m_numberOfFolds; ++fold){
 		//Run through all the cross validation sets
 		RegressionDataset dataTrain = folds.training(fold);
 		RegressionDataset dataTest = folds.validation(fold);
@@ -71,14 +70,13 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 
 	// create cross-validation folds
 	ClassificationDataset set=dataset;
-	const unsigned int numberOfFolds = 10;
-	CVFolds<ClassificationDataset> folds = createCVSameSizeBalanced(set, numberOfFolds);
+	CVFolds<ClassificationDataset> folds = createCVSameSizeBalanced(set, m_numberOfFolds);
 	//find the best tree for the cv folds
 	double bestErrorRate = std::numeric_limits<double>::max();
 	CARTClassifier<RealVector>::SplitMatrixType bestSplitMatrix;
 	
 	//Run through all the cross validation sets
-	for (unsigned fold = 0; fold < numberOfFolds; ++fold) {
+	for (unsigned fold = 0; fold < m_numberOfFolds; ++fold) {
 		ClassificationDataset dataTrain = folds.training(fold);
 		ClassificationDataset dataTest = folds.validation(fold);
 		//Create attribute tables
@@ -92,108 +90,152 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, cAbove, 0);
 		model.setSplitMatrix(splitMatrix);
 		
-        while(splitMatrix.size()!=1){
+		while(splitMatrix.size()!=1){
 			ZeroOneLoss<unsigned int, RealVector> loss;
-            double errorRate = loss.eval(dataTest.labels(), model(dataTest.inputs()));
-            if(errorRate < bestErrorRate){
-                //We have found a subtree that has a smaller error rate when tested!
-                bestErrorRate = errorRate;
-                bestSplitMatrix = splitMatrix;
-            }
-            pruneMatrix(splitMatrix);
-            model.setSplitMatrix(splitMatrix);
-        }
-    }
+			double errorRate = loss.eval(dataTest.labels(), model(dataTest.inputs()));
+			if(errorRate < bestErrorRate){
+				//We have found a subtree that has a smaller error rate when tested!
+				bestErrorRate = errorRate;
+				bestSplitMatrix = splitMatrix;
+			}
+			pruneMatrix(splitMatrix);
+			model.setSplitMatrix(splitMatrix);
+		}
+	}
 
-    model.setSplitMatrix(bestSplitMatrix);
+	model.setSplitMatrix(bestSplitMatrix);
 
 }
 
+//TODO
+//~ // train using weights
+//~ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset, RealVector const& weights, double& error) {
+	//~ //Store the number of input dimensions
+	//~ m_inputDimension = inputDimension(dataset);
+
+	//~ //Find the largest label, so we know how big the histogram should be
+	//~ m_maxLabel = numberOfClasses(dataset)-1;
+
+	//~ // create cross-validation folds
+	//~ ClassificationDataset set=dataset;
+	//~ CVFolds<ClassificationDataset> folds = createCVSameSizeBalanced(set, m_numberOfFolds);
+	//~ //find the best tree for the cv folds
+	//~ double bestErrorRate = std::numeric_limits<double>::max();
+	//~ CARTClassifier<RealVector>::SplitMatrixType bestSplitMatrix;
+	
+	//~ //Run through all the cross validation sets
+	//~ for (unsigned fold = 0; fold < m_numberOfFolds; ++fold) {
+		//~ ClassificationDataset dataTrain = folds.training(fold);
+		//~ ClassificationDataset dataTest = folds.validation(fold);
+		//~ //Create attribute tables
+		//~ boost::unordered_map<size_t, size_t> cAbove = createCountMatrix(dataTrain);
+		//~ AttributeTables tables = createAttributeTables(dataTrain.inputs());
+
+		//~ //create initial split matrix for the fold
+		//~ CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, cAbove, 0);
+		//~ model.setSplitMatrix(splitMatrix);
+		
+		//~ while(splitMatrix.size()!=1){
+			//~ double errorRate = evalWeightedError(model, dataTest, weights);
+			//~ if(errorRate < bestErrorRate){
+				//~ //We have found a subtree that has a smaller error rate when tested!
+				//~ bestErrorRate = errorRate;
+				//~ bestSplitMatrix = splitMatrix;
+			//~ }
+			//~ pruneMatrix(splitMatrix);
+			//~ model.setSplitMatrix(splitMatrix);
+		//~ }
+	//~ }
+
+	//~ error = bestErrorRate;
+	//~ model.setSplitMatrix(bestSplitMatrix);
+//~ }
+
 
 void CARTTrainer::pruneMatrix(SplitMatrixType& splitMatrix){
-    //Calculate g of all the nodes
+
+	//Calculate g of all the nodes
 	measureStrenght(splitMatrix, 0, 0);
 
-    //Find the lowest g of the internal nodes
-    double g = std::numeric_limits<double>::max();
-    for(std::size_t i = 0; i != splitMatrix.size(); i++){
-        if(splitMatrix[i].leftNodeId > 0 && splitMatrix[i].g < g){
-            //Update g
-            g = splitMatrix[i].g;
-        }
-    }
-    //Prune the nodes with lowest g and make them terminal
-    for(std::size_t i=0; i != splitMatrix.size(); i++){
-    	//Make the internal nodes with the smallest g terminal nodes and prune their children!
-        if( splitMatrix[i].leftNodeId > 0 && splitMatrix[i].g == g){
-            pruneNode(splitMatrix, splitMatrix[i].leftNodeId);
-            pruneNode(splitMatrix, splitMatrix[i].rightNodeId);
-            // //Make the node terminal
-            splitMatrix[i].leftNodeId = 0;
-            splitMatrix[i].rightNodeId = 0;
-        }
-    }
+	//Find the lowest g of the internal nodes
+	double g = std::numeric_limits<double>::max();
+	for(std::size_t i = 0; i != splitMatrix.size(); i++){
+		if(splitMatrix[i].leftNodeId > 0 && splitMatrix[i].g < g){
+			//Update g
+			g = splitMatrix[i].g;
+		}
+	}
+	//Prune the nodes with lowest g and make them terminal
+	for(std::size_t i=0; i != splitMatrix.size(); i++){
+		//Make the internal nodes with the smallest g terminal nodes and prune their children!
+		if( splitMatrix[i].leftNodeId > 0 && splitMatrix[i].g == g){
+			pruneNode(splitMatrix, splitMatrix[i].leftNodeId);
+			pruneNode(splitMatrix, splitMatrix[i].rightNodeId);
+			// //Make the node terminal
+			splitMatrix[i].leftNodeId = 0;
+			splitMatrix[i].rightNodeId = 0;
+		}
+	}
 }
 
 std::size_t CARTTrainer::findNode(SplitMatrixType& splitMatrix, std::size_t nodeId){
 	unsigned int i = 0;
 	//while(i<splitMatrix.size() && splitMatrix[i].nodeId!=nodeId){
-    while(splitMatrix[i].nodeId!=nodeId){
-        i++;
-    }
-    return i;
+	while(splitMatrix[i].nodeId!=nodeId){
+		i++;
+	}
+	return i;
 }
 
 /*
-    Removes branch with root node id nodeId, incl. the node itself
+	Removes branch with root node id nodeId, incl. the node itself
 */
 void CARTTrainer::pruneNode(SplitMatrixType& splitMatrix, std::size_t nodeId){
-    unsigned int i = findNode(splitMatrix,nodeId);
+	unsigned int i = findNode(splitMatrix,nodeId);
 
-    if(splitMatrix[i].leftNodeId>0){
-        //Prune left branch
-        pruneNode(splitMatrix, splitMatrix[i].leftNodeId);
-        //Prune right branch
-        pruneNode(splitMatrix, splitMatrix[i].rightNodeId);
-    }
-    //Remove node
-    splitMatrix.erase(splitMatrix.begin()+i);
+	if(splitMatrix[i].leftNodeId>0){
+		//Prune left branch
+		pruneNode(splitMatrix, splitMatrix[i].leftNodeId);
+		//Prune right branch
+		pruneNode(splitMatrix, splitMatrix[i].rightNodeId);
+	}
+	//Remove node
+	splitMatrix.erase(splitMatrix.begin()+i);
 }
 
 
 void CARTTrainer::measureStrenght(SplitMatrixType& splitMatrix, std::size_t nodeId, std::size_t parentNode){
 	std::size_t i = findNode(splitMatrix,nodeId);
 
-    //Reset the entries
-    splitMatrix[i].r = 0;
-    splitMatrix[i].g = 0;
+	//Reset the entries
+	splitMatrix[i].r = 0;
+	splitMatrix[i].g = 0;
 
-    if(splitMatrix[i].leftNodeId==0){
-        //Leaf node
-        //Update number of leafs
-        splitMatrix[parentNode].r+=1;
-        //update R(T) from r(t) of node. R(T) is the sum of all the leaf's r(t)
-        splitMatrix[parentNode].g+=splitMatrix[i].misclassProp;
-    }else{
+	if(splitMatrix[i].leftNodeId==0){
+		//Leaf node
+		//Update number of leafs
+		splitMatrix[parentNode].r+=1;
+		//update R(T) from r(t) of node. R(T) is the sum of all the leaf's r(t)
+		splitMatrix[parentNode].g+=splitMatrix[i].misclassProp;
+	}else{
 
-        //Left recursion
-        measureStrenght(splitMatrix, splitMatrix[i].leftNodeId, i);
-        //Right recursion
-    	measureStrenght(splitMatrix, splitMatrix[i].rightNodeId, i);
+		//Left recursion
+		measureStrenght(splitMatrix, splitMatrix[i].leftNodeId, i);
+		//Right recursion
+		measureStrenght(splitMatrix, splitMatrix[i].rightNodeId, i);
 
-        if(parentNode != i){
-            splitMatrix[parentNode].r+=splitMatrix[i].r;
-            splitMatrix[parentNode].g+=splitMatrix[i].g;
-        }
+		if(parentNode != i){
+			splitMatrix[parentNode].r+=splitMatrix[i].r;
+			splitMatrix[parentNode].g+=splitMatrix[i].g;
+		}
 
-        //Final calculation of g
-        splitMatrix[i].g = (splitMatrix[i].misclassProp-splitMatrix[i].g)/(splitMatrix[i].r-1);
-    }
+		//Final calculation of g
+		splitMatrix[i].g = (splitMatrix[i].misclassProp-splitMatrix[i].g)/(splitMatrix[i].r-1);
+	}
 }
 
 //Classification case
 CARTTrainer::SplitMatrixType CARTTrainer::buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
-	std::cout<<nodeId<<std::endl;
 	//Construct split matrix
 	ModelType::SplitInfo splitInfo;
 	splitInfo.nodeId = nodeId;
