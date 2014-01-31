@@ -121,6 +121,18 @@ public:
 		}
 		return error;
 	}
+	
+	double eval(Data<LabelType> const& targets, Data<OutputType> const& predictions, RealVector const& weights) const{
+		SIZE_CHECK(predictions.numberOfElements() == weights.size());
+		SIZE_CHECK(targets.numberOfElements() == weights.size());
+		SIZE_CHECK(predictions.numberOfBatches() == targets.numberOfBatches());
+		double error = 0;
+		for(std::size_t i = 0; i != weights.size(); ++i){
+			error+= weights(i) * evalSingle(targets.element(i),predictions.element(i));
+		}
+		return error / weights.size();
+	}
+	
 private:
 	template<class VectorType>
 	double evalSingle(unsigned int label, VectorType const& predictions) const{
