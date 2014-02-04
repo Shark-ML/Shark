@@ -53,6 +53,19 @@ const char test_no_separator[] = "\
 0 88 58 11 54 24.8 0.267 22 -1\r\
 # i am a test comment at the end with newline\n";
 
+const char test_single_integer[] = "\
+# i am a test comment at the start\n\
+1\n\
+0\r\
+1\r\n\
+# i am a test comment 1.345\n \
+0\n\
+1\n\
+0\n\
+# 1\n\
+1\r\
+# i am a test comment at the end";
+
 const double qnan = std::numeric_limits<double>::quiet_NaN();
 
 std::size_t const numDimensions = 8;
@@ -113,6 +126,8 @@ double test_values[9*numInputs] ={
 	1,158,76,36,245,31.6,0.851,28,1,
 	0,88,58,11,54,24.8,0.267,22,-1
 };
+
+unsigned int test_values_single_integer[]={1,0,1,0,1,0,1};
 
 unsigned int labels_1[numInputs] = {1,1,1,2,1,2,1,2,1,1,1,0,0,1,1,0};
 unsigned int labels_2[numInputs] = {0,0,1,0,1,1,1,1,1,1,0,0,0,0,1,0};
@@ -203,6 +218,19 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Data_Import)
 		std::cout << test<<std::endl;
 
 		checkDataEquality(test_values,test);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Data_Csv_Data_Import_Single_Integer)
+{
+	Data<unsigned int> test;
+	csvStringToData(test, test_single_integer, ',','#',3);
+	BOOST_REQUIRE_EQUAL(test.numberOfElements(), 7u);
+	BOOST_CHECK_EQUAL(test.numberOfBatches(), 3);
+	std::cout << test<<std::endl;
+	
+	for(std::size_t i = 0; i != 7; ++i){
+		BOOST_CHECK_EQUAL(test.element(i),test_values_single_integer[i]);
 	}
 }
 

@@ -53,13 +53,14 @@ inline std::vector<T> importCSVReaderSingleValue(
 
 	bool r = phrase_parse(
 		first, last,
-		auto_ % (eol|eoi),
-		((space-eol))| (comment >> *(char_ - eol) >> (eol| eoi)), fileContents
+		*auto_,
+		space| (comment >> *(char_ - eol) >> (eol| eoi)), fileContents
 	);
 
-	if(!r || first != last)
+	if(!r || first != last){
+		std::cout<<comment<<"\n"<<std::string(first,last)<<std::endl;
 		throw SHARKEXCEPTION("[import_csv_reader_value] problems parsing file (1)");
-
+	}
 	return fileContents;
 }
 
@@ -192,7 +193,7 @@ void csvStringToDataImpl(
     char comment,
     std::size_t maximumBatchSize
 ){
-	std::vector<T> rows = importCSVReaderSingleValue<T>(contents, separator);
+	std::vector<T> rows = importCSVReaderSingleValue<T>(contents, comment);
 	if(rows.empty()){//empty file leads to empty data object.
 		data = shark::Data<T>();
 		return;
