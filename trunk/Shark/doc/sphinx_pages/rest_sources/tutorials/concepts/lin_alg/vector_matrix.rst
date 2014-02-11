@@ -1,5 +1,5 @@
-LinAlg: Vector and Matrices
-===========================
+LinAlg: Vectors and Matrices
+===============+============
 
 All Linear Algebra related functions and operations are placed in the
 LinAlg Module. LinAlg is based on an altered subset of the boost linear algebra system
@@ -47,15 +47,15 @@ operations to create proxies to various parts of a matrix.
 ======================================= ==============================================
 Operation/Class           		Effect
 ======================================= ==============================================
-``XVector, XMatrix``			Creates a dense Vector with elements the Type X where
-					X can be Real, Float, Int, UInt or Bool.XVector, XMatrix
+``XVector, XMatrix``			Creates a dense Vector with elements of the type X where
+					X can be Real, Float, Int, UInt or Bool.
 ``SparseXVector, SparseXMatrix``	Creates a sparse Vector with elements the Type X where
 					X can be Real, Float, Int, UInt or Bool.
 ``XVector x(n,t)``			Creates a XVector x of size i with elements initialized to t.
 					By default t is 0.
 ``XMatrix A(m,n,t)``			Creates a mxn matrix with elements initialized to t. By default t is 0.
 ``x.size()``				Dimensionality of x.
-`` A.size1(),A.size2()``		Size of the first (number of rows) and second(number of columns) dimension of A.
+``A.size1(),A.size2()``		        Size of the first (number of rows) and second(number of columns) dimension of A.
 ``A(i,j)``				Returns the ij-th element of the matrix A.
 ``x(i)``				Returns the i-th element of the vector x.
 ``row(A,k)``				Returns the k-th row of A as a vector-proxy.
