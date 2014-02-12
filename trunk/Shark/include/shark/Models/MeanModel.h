@@ -52,7 +52,7 @@ public:
 	std::string name() const
 	{ return "MeanModel"; }
 
-	using AbstractModel<RealVector, RealVector >::eval;
+	using base_type::eval;
 	void eval(typename base_type::BatchInputType const& patterns, typename base_type::BatchOutputType& outputs)const{
 		m_models[0].eval(patterns,outputs);
 		outputs *=m_weight[0];
