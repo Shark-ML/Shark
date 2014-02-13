@@ -84,13 +84,18 @@ BOOST_AUTO_TEST_CASE( CART_Classifier ) {
 	ClassificationDataset dataset  = createLabeledDataFromRange(input, target);
 
 	CARTTrainer trainer;
+
 	CARTClassifier<RealVector> model;
 
 	trainer.train(model, dataset);
 
 	Data<RealVector> prediction = model(dataset.inputs());
+
+
 	ZeroOneLoss<unsigned int, RealVector> loss;
 	double error = loss.eval(dataset.labels(), prediction);
+
+	std::cout << model.countAttributes() << std::endl;
 
 	BOOST_CHECK(error == 0.0);
 
