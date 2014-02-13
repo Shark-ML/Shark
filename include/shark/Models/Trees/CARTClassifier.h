@@ -86,7 +86,7 @@ public:
 		}
 	};
 
-	/// Vector of struct's that contains the splitting information and the labels.
+	/// Vector of structs that contains the splitting information and the labels.
 	/// The class label is a normalized histogram in the classification case.
 	/// In the regression case, the label is the regression value.
 	typedef std::vector<SplitInfo> SplitMatrixType;
@@ -99,6 +99,13 @@ public:
 	CARTClassifier(SplitMatrixType const& splitMatrix)
 	{
 		setSplitMatrix(splitMatrix);
+	}
+
+	/// Constructor taking the splitMatrix as argument as well as maximum number of attributes
+	CARTClassifier(SplitMatrixType const& splitMatrix, std::size_t d)
+	{
+		setSplitMatrix(splitMatrix);
+		m_inputDimension = d;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -163,6 +170,31 @@ public:
 		archive << m_splitMatrix;
 	}
 
+
+	//Count how often attributes are used
+	UIntVector countAttributes() const {
+		SHARK_ASSERT(m_inputDimension > 0);
+		UIntVector r(m_inputDimension, 0);
+		typename SplitMatrixType::const_iterator it;
+		for(it = m_splitMatrix.begin(); it != m_splitMatrix.end(); ++it) {
+			//std::cout << "NodeId: " <<it->leftNodeId << std::endl;
+			if(it->leftNodeId != 0) { // not a label 
+				r(it->attributeIndex)++;
+			}
+		}
+		return r;
+	}
+
+	///Return input dimension
+	std::size_t inputSize() const {
+		return m_inputDimension;
+	}
+
+	//Set input dimension
+	void setInputDimension(std::size_t d) {
+		m_inputDimension = d;
+	}
+
 protected:
 	/// split matrix of the model
 	SplitMatrixType m_splitMatrix;
@@ -203,6 +235,10 @@ protected:
 		}
 		return m_splitMatrix[nodeId].label;
 	}
+
+
+	///Number of attributes (set by trainer)
+	std::size_t m_inputDimension;
 };
 
 

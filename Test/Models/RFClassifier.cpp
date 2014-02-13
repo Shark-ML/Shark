@@ -92,6 +92,8 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 	ZeroOneLoss<unsigned int, RealVector> loss;
 	double error = loss.eval(dataset.labels(), prediction);
 
+	std::cout << model.countAttributes() << std::endl;
+
 	BOOST_CHECK(error == 0.0);
 
 }

@@ -19,6 +19,9 @@ void CARTTrainer::train(ModelType& model, RegressionDataset const& dataset)
 	//Store the number of input dimensions
 	m_inputDimension = inputDimension(dataset);
 
+	//Pass input dimension (i.e., number of attributes) to tree model
+	model.setInputDimension(m_inputDimension);
+
 	//Store the size of the labels
 	m_labelDimension = labelDimension(dataset);
 
@@ -64,6 +67,9 @@ void CARTTrainer::train(ModelType& model, RegressionDataset const& dataset)
 void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 	//Store the number of input dimensions
 	m_inputDimension = inputDimension(dataset);
+
+	//Pass input dimension (i.e., number of attributes) to tree model
+	model.setInputDimension(m_inputDimension);
 
 	//Find the largest label, so we know how big the histogram should be
 	m_maxLabel = numberOfClasses(dataset)-1;

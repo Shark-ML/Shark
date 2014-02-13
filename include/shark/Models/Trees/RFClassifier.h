@@ -59,6 +59,18 @@ public:
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "RFClassifier"; }
+
+
+	//Count how often attributes are used
+	UIntVector countAttributes() const {
+		std::size_t n = m_models.size();
+		if(!n) return UIntVector();
+		UIntVector r = m_models[0].countAttributes();
+		for(std::size_t i=1; i< n; i++ ) {
+			noalias(r) += m_models[i].countAttributes();
+		}
+		return r;
+	}
 };
 
 

@@ -123,7 +123,8 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 
 		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, labels, 0);
 		SHARK_CRITICAL_REGION{
-			model.addModel(splitMatrix);
+			//model.addModel(splitMatrix);
+			model.addModel(CARTClassifier<RealVector>(splitMatrix), m_inputDimension);
 		}
 	}
 }
@@ -163,7 +164,8 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 
 		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, cAbove, 0);
 		SHARK_CRITICAL_REGION{
-			model.addModel(splitMatrix);
+			//odel.addModel(splitMatrix);
+			model.addModel(CARTClassifier<RealVector>(splitMatrix, m_inputDimension));
 		}
 	}
 }
