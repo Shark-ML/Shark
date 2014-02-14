@@ -855,6 +855,30 @@ inline std::vector<std::size_t> classSizes(LabeledData<InputType, LabelType> con
 	return classSizes(dataset.labels());
 }
 
+
+//subsetting
+template<class DatasetT>
+DatasetT indexedSubset(
+	DatasetT const& dataset,
+	typename DatasetT::IndexSet const& indices
+){
+	DatasetT subset;
+	dataset.indexedSubset(indices,subset);
+	return subset;
+}
+///\brief  Fill in the subset of batches [start,...,size+start[.
+template<class DatasetT>
+DatasetT rangeSubset(DatasetT const& dataset, std::size_t start, std::size_t end){
+	typename DatasetT::IndexSet indices;
+	detail::range(end-start, start, indices);
+	return indexedSubset(dataset,indices);
+}
+///\brief  Fill in the subset of batches [0,...,size[.
+template<class DatasetT>
+DatasetT rangeSubset(DatasetT const& dataset, std::size_t size){
+	return rangeSubset(dataset,size,0);
+}
+
 // TRANSFORMATION
 ///\brief Transforms a dataset using a Functor f and returns the transformed result.
 ///
@@ -892,7 +916,7 @@ transform(Data<T> const& data, Functor const& f){
 
 ///\brief Transforms the inputs of a dataset and return the transformed result.
 template<class I,class L, class Functor>
-LabeledData<typename detail::TransformedDataElement<Functor,I>::type, L >
+LabeledData<typename detail::TransformedDataElement<Functor,I >::type, L >
 transformInputs(LabeledData<I,L> const& data, Functor const& f){
 	typedef LabeledData<typename detail::TransformedDataElement<Functor,I>::type,L > DatasetType;
 	return DatasetType(transform(data.inputs(),f),data.labels());
@@ -905,27 +929,18 @@ transformLabels(LabeledData<I,L> const& data, Functor const& f){
 	return DatasetType(data.inputs(),transform(data.labels(),f));
 }
 
-template<class DatasetT>
-DatasetT indexedSubset(
-	DatasetT const& dataset,
-	typename DatasetT::IndexSet const& indices
-){
-	DatasetT subset;
-	dataset.indexedSubset(indices,subset);
-	return subset;
+///\brief Creates a copy o a dataset selecting only a certain set of features.
+template<class FeatureSet>
+Data<RealVector> selectFeatures(Data<RealVector> const& data,FeatureSet const& features){
+	return transform(data,detail::SelectFeatures<FeatureSet>(features));
 }
-///\brief  Fill in the subset of batches [start,...,size+start[.
-template<class DatasetT>
-DatasetT rangeSubset(DatasetT const& dataset, std::size_t start, std::size_t end){
-	typename DatasetT::IndexSet indices;
-	detail::range(end-start, start, indices);
-	return indexedSubset(dataset,indices);
+
+template<class T, class FeatureSet>
+LabeledData<RealVector,T> selectInputFeatures(LabeledData<RealVector,T> const& data,FeatureSet const& features){
+	return transformInputs(data, detail::SelectFeatures<FeatureSet>(features));
 }
-///\brief  Fill in the subset of batches [0,...,size[.
-template<class DatasetT>
-DatasetT rangeSubset(DatasetT const& dataset, std::size_t size){
-	return rangeSubset(dataset,size,0);
-}
+
+
 
 /// \brief Removes the last part of a given dataset and returns a new split containing the removed elements
 ///
