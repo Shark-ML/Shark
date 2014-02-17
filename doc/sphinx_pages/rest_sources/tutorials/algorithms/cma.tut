@@ -25,7 +25,7 @@ requires the following steps:
 * Configure the optimizer instance for the objective function instance.
 * Execute the optimizer until a termination criterion is fulfilled.
 
-Thee code for this tutorial can be found in 
+The code for this tutorial can be found in 
 :download:`CMASimple.cpp <../../../../../examples/EA/SOO/CMASimple.cpp>`.
 First of all, the following header files are required::
 
@@ -56,10 +56,10 @@ associated fitness.
 Covariance Matrix Adaptation in Detail
 --------------------------------------
 
-In the example presented before, a very rough overview of the CMA, its
+In the example above, a very rough overview of the CMA, its
 implementation in Shark and its application to an example problem has
 been presented. We now dive into the algorithm in even more
-detail. For the reaminder of the section, we assume the reader to be
+detail. For the reminder of the section, we assume the reader to be
 familiar with the first part of the tutorial. Moreover, we assume an
 audience that is familiar with the CMA-ES. 
 
