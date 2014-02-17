@@ -273,11 +273,11 @@ beginning:
 ========================   ======================================================================
 Type                       Description
 ========================   ======================================================================
-element_type               The type of elements stores in the object
+element_type               The type of elements stores in the object.
 element_reference          Reference to a single element. This is a proxy reference, meaning
                            that it can be something more complex than element_type&, for example
 			   an object describing the row of a matrix.
-element_range              Range over the elements..
+element_range              Range over the elements.
 batch_type                 The batch type of the Dataset. Same as Batch<element_type>::type
 batch_reference            Reference to a batch of points. This is batch_type&.
 batch_range                Range over the batches.
@@ -289,7 +289,7 @@ Methods regarding batch access. All these methods have constant time complexity:
 Method                                       Description
 ==========================================   ======================================================================
 size_t numberOfBatches () const              Returns the number of batches in the set.
-batch_reference batch (size_t i)             Returns the i-th batch of the set
+batch_reference batch (size_t i)             Returns the i-th batch of the set.
 batch_range batches ()                       Returns an stl-compliant random-access-container over the batches.
 ==========================================   ======================================================================
 
@@ -300,7 +300,7 @@ linear in the number of batches:
 Method                                       Description
 ==========================================   ======================================================================
 size_t numberOfElements () const             Returns the number of elements in the set.
-element_reference element (size_t i)         Returns the i-th element of the set
+element_reference element (size_t i)         Returns the i-th element of the set.
 element_range elements ()                    Returns an bidirectional container over the elements. Random access
                                              is also supported, but does not meet the time complexity. Also be aware
 					     that instead of references, proxy-objects are returned as elements are
