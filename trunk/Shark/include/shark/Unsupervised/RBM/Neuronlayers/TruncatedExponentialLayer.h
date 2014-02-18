@@ -245,23 +245,6 @@ public:
 		sum_rows(samples.state,derivative);
 	}
 	
-	/// \brief Returns the flag of requested values by the expected parameter derivative.
-	///
-	/// The samples must provide valid informations for this values only. In this case it is only the sufficient statistics of the layer
-	GradientFlags flagsExpectedGradient()const{
-		GradientFlags flags;
-		flags |= RequiresStatistics;
-		return flags;
-	}
-	/// \brief Returns the flag of requested values by the parameter derivative.
-	///
-	/// The samples must provide valid informations for this values only. In this case it is only the current state of the layer
-	GradientFlags flagsGradient()const{
-		GradientFlags flags;
-		flags |= RequiresState;
-		return flags;
-	}
-	
 	/// \brief Returns the vector with the parameters associated with the neurons in the layer.
 	RealVector parameterVector()const{
 		return m_bias;

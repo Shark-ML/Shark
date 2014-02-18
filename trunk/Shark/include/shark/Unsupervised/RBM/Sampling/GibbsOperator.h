@@ -141,21 +141,6 @@ public:
 		//sample state of the visible neurons, input and statistics was allready computed by precompute
 		mpe_rbm->visibleNeurons().sample(sampleBatch.statistics, sampleBatch.state, mpe_rbm->rng());
 	}
-	
-
-	///\brief Updates the sufficient statistics of the sample after a change of temeprature.
-	template<class BetaVector>
-	void updateVisible(VisibleSampleBatch& visibleBatch, BetaVector const& newBeta)const{
-		mpe_rbm->visibleNeurons().sufficientStatistics(visibleBatch.input,visibleBatch.statistics, newBeta);
-	}
-
-
-	///\brief Updates the value of the sufficient statistics of the sample after a change of temperature.
-	template<class BetaVector>
-	void updateHidden(HiddenSampleBatch& hiddenBatch, BetaVector const& newBeta)const{
-		mpe_rbm->hiddenNeurons().sufficientStatistics(hiddenBatch.input,hiddenBatch.statistics, newBeta);
-	}
-
 
 	///\brief Creates  hidden/visible sample pairs from the states of the visible neurons, i.e. sets the visible units to the given states and samples hidden states based on the states of the visible units. 
 	/// This can directly be used to calculate the gradient.

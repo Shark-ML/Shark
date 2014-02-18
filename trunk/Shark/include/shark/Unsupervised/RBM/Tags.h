@@ -50,63 +50,6 @@ struct DiscreteSpace{};
 struct RealSpace{};
 }
 
-///\brief Possible values a Sampler might need to store.
-enum SamplingFlagTypes{
-	StoreHiddenStatistics = 1,
-	StoreHiddenInput = 2,
-	StoreHiddenState = 4,
-	StoreHiddenFeatures = 8,
-	StoreVisibleStatistics = 16,
-	StoreVisibleInput = 32,
-	StoreVisibleState = 64,
-	StoreVisibleFeatures = 128,
-	StoreEnergyComponents = 256
-};
-
-///\brief Values a gradient may require.
-enum GradientFlagTypes{
-	RequiresStatistics = 1,
-	RequiresInput = 2,
-	RequiresState = 4 ,
-	RequiresFeatures = 8
-};
-
-typedef TypedFlags<SamplingFlagTypes> SamplingFlags;
-typedef TypedFlags<GradientFlagTypes> GradientFlags;
-
-///\brief Transforms a set of visible and hidden gradient flags to a list of general sampling flags
-inline TypedFlags<SamplingFlagTypes> convertToSamplingFlags(TypedFlags<GradientFlagTypes> hiddenFlags, TypedFlags<GradientFlagTypes> visibleFlags){
-	TypedFlags<SamplingFlagTypes> resultFlags;
-	//hidden
-	if(hiddenFlags & RequiresStatistics){
-		resultFlags |= StoreHiddenStatistics;
-	}
-	if(hiddenFlags & RequiresInput){
-		resultFlags |= StoreHiddenInput;
-	}
-	if(hiddenFlags & RequiresState){
-		resultFlags |= StoreHiddenState;
-	}
-	if(hiddenFlags & RequiresFeatures){
-		resultFlags |= StoreVisibleFeatures;
-	}
-	//visible
-	if(visibleFlags & RequiresStatistics){
-		resultFlags |= StoreVisibleStatistics;
-	}
-	if(visibleFlags & RequiresInput){
-		resultFlags |= StoreVisibleInput;
-	}
-	if(visibleFlags & RequiresState){
-		resultFlags |= StoreVisibleState;
-	}
-	if(visibleFlags & RequiresFeatures){
-		resultFlags |= StoreHiddenFeatures;
-	}
-	return resultFlags;
-}
-
-
 }
 
 #endif
