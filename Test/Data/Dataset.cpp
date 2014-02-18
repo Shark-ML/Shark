@@ -226,6 +226,25 @@ BOOST_AUTO_TEST_CASE( Set_Merge_Test )
 	}
 }
 
+BOOST_AUTO_TEST_CASE( Data_ColumnAccess )
+{
+	std::vector<RealVector> inputs;
+	for (size_t i=0;i!=50;++i) {
+		RealVector r(2);
+		r(0) = i / 2;
+		r(1) = 5;
+		inputs.push_back(r);
+	}
+	UnlabeledData<RealVector> set = createDataFromRange(inputs);
+	RealVector c0 = getColumn(set, 0);
+	setColumn(set, 0, c0);
+
+	for(std::size_t i = 0; i != 50; ++i){
+		BOOST_CHECK_EQUAL(set.element(i)(0), set.element(i)(0));
+	}
+}
+
+
 BOOST_AUTO_TEST_CASE( LabledData_Merge_Test )
 {
 	std::vector<int> inputs1;
