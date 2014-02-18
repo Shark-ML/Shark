@@ -1,10 +1,10 @@
 /*!
  * 
  *
- * \brief       -
+ * \brief       Implements Block Gibbs Sampling
  *
- * \author      -
- * \date        -
+ * \author    O.Krause
+ * \date        2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -35,12 +35,20 @@
 #include "Impl/SampleTypes.h"
 namespace shark{
 	
-///\brief Implements Gibbs Sampling related transition operators for various temperatures.
+///\brief Implements Block Gibbs Sampling related transition operators for various temperatures.
 ///
-///The operator generates transitions from the current state of the neurons of an RBM 
+/// The operator generates transitions from the current state of the neurons of an RBM 
 /// to a new one and thus can be used to produce a Markov chain.
-///The Gibbs Operator works by computing the conditional distribution of the hidden given the visible p(h|v) (or
-///vice versa) and than samples the new hidden (or visible) state from it.
+/// The Gibbs Operator works by computing the conditional distribution of the hidden given the visible p(h|v) (or
+/// vice versa) and than samples the new hidden (or visible) state from it.
+///
+/// As an interesting twist, this operator can also be used to implement Flip-The-State sampling using two values alpha_visible
+/// and alpha_hidden both being between 0 and 1 (inclusively). for alpha_visible=alpha_hidden=0, pure gibbs sampling is performed.
+/// if for one of the layers, the value is not 0 a mixture of gibbs and flip-the-state sampling is performed. 1 equals to pure flip-the state
+/// sampling.
+/// The trick of this sampler is that it takes the previous state into account while sampling. If the current state has a low probability,
+/// the sampler jumps deterministically in another state with higher probability. This is counterbalanced by having a higher chance to jump away from
+/// this state.
 template< class RBMType >
 class GibbsOperator:public IConfigurable{
 public:
@@ -72,7 +80,13 @@ public:
 	typedef typename Batch<VisibleSample>::type VisibleSampleBatch;
 
 	///\brief Constructs the Operator using an allready defined Distribution to sample from. 
-	GibbsOperator(RBM* rbm):mpe_rbm(rbm){}
+	GibbsOperator(RBM* rbm, double alphaVisible = 0,double alphaHidden = 0)
+	:mpe_rbm(rbm), m_alphaVisible(alphaVisible),m_alphaHidden(alphaHidden){
+		SHARK_CHECK(alphaVisible >= 0.0, "alpha >= 0 not fulfilled for the visible layer");
+		SHARK_CHECK(alphaVisible <= 1., "alpha <=1 not fulfilled for the visible layer");
+		SHARK_CHECK(alphaHidden >= 0.0, "alpha >= 0 not fulfilled for the hidden layer");
+		SHARK_CHECK(alphaHidden <= 1., "alpha <=1 not fulfilled for the hidden layer");
+	}
 
 	void configure(PropertyTree const& node){}
 		
@@ -132,14 +146,14 @@ public:
 	///\brief Samples a new batch of states of the hidden units using their precomputed statistics.
 	void sampleHidden(HiddenSampleBatch& sampleBatch)const{
 		//sample state of the hidden neurons, input and statistics was allready computed by precompute
-		mpe_rbm->hiddenNeurons().sample(sampleBatch.statistics, sampleBatch.state, mpe_rbm->rng());
+		mpe_rbm->hiddenNeurons().sample(sampleBatch.statistics, sampleBatch.state, m_alphaHidden, mpe_rbm->rng());
 	}
 
 
 	///\brief Samples a new batch of states of the visible units using their precomputed statistics.
 	void sampleVisible(VisibleSampleBatch& sampleBatch)const{
 		//sample state of the visible neurons, input and statistics was allready computed by precompute
-		mpe_rbm->visibleNeurons().sample(sampleBatch.statistics, sampleBatch.state, mpe_rbm->rng());
+		mpe_rbm->visibleNeurons().sample(sampleBatch.statistics, sampleBatch.state, m_alphaVisible, mpe_rbm->rng());
 	}
 
 	///\brief Creates  hidden/visible sample pairs from the states of the visible neurons, i.e. sets the visible units to the given states and samples hidden states based on the states of the visible units. 
@@ -184,6 +198,8 @@ public:
 	}
 private:
 	RBM* mpe_rbm;
+	double m_alphaVisible;
+	double m_alphaHidden;
 };
 
 	

@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_Sample){
 	variance.clear();
 	RealMatrix samples(3,5);
 	for(std::size_t s = 0; s != numSamples; ++s){
-		layer.sample(statistics,samples,Rng::globalRng);
+		layer.sample(statistics,samples,0.0,Rng::globalRng);
 		mean +=samples;
 		noalias(variance) += sqr(samples-statistics.mean);
 	}

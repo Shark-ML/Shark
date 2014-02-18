@@ -34,20 +34,12 @@ public:
 	typedef RBMMockup RBM;
 	
 	RBM* m_rbm;
-	SamplingFlags m_flags;
 
 	IdentityOperator(RBM* rbm):m_rbm(rbm){}
 	
 	RBM* rbm(){
 		return m_rbm;
 	
-	}
-	
-	SamplingFlags& flags(){
-		return m_flags;
-	}
-	const SamplingFlags& flags()const{
-		return m_flags;
 	}
 
 	void precomputeHidden(IntMatrix& hidden,const IntMatrix& visible, RealVector beta)const{
@@ -66,13 +58,6 @@ public:
 	///\brief creates a hidden/visible sample pair from a sample. this can directly be used to calculate the gradient
 	void createSample(IntMatrix& hidden,IntMatrix& visible, const RealMatrix& state, RealVector beta)const{
 		visible = state;
-	}
-	
-	///\brief samples the state of the hidden units using the precomputed statistics
-	void updateHidden(IntMatrix& sample,double beta = 1.0)const{
-	}
-	///\brief samples the visible units using the precomputed statistics
-	void updateVisible(IntMatrix& sample,double beta = 1.0)const{
 	}
 	
 	//energy is the state of visible

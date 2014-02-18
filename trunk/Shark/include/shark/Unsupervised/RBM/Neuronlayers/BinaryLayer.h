@@ -110,24 +110,52 @@ public:
 			noalias(row(statistics.probability,i)) = sigmoid((row(input,i)+m_bias)*beta(i));
 		}
 	}
-
-
-	/// \brief Given the precomputed probability of the neurons to be in state one, the states of the neurons are sampled.
+	
+	/// \brief Samples from the distribution using either Gibbs- or flip-the-state sampling. 
+	///
+	/// For alpha= 0 gibbs sampling is performed. That is the next state for neuron i is directly taken from the conditional distribution of the i-th neuron. 
+	/// In the case of alpha=1, flip-the-state sampling is performed, which takes the last state into account and tries to do deterministically jump 
+	/// into states with higher probability. This is counterbalanced by a higher chance to jump back into a lower probability state in later steps. 
+	/// For alpha between 0 and 1 a mixture of both is performed.
 	///
 	/// @param statistics sufficient statistics containing the probabilities of the neurons to be one
 	/// @param state the state vector that shell hold the sampled states
+	/// @param alpha factor changing from gibbs to flip-the state sampling. 0<=alpha<=1
 	/// @param rng the random number generator used for sampling
-	///
 	template<class Matrix, class Rng>
-	void sample(StatisticsBatch const& statistics, Matrix& state, Rng& rng) const{
+	void sample(StatisticsBatch const& statistics, Matrix& state, double alpha, Rng& rng) const{
 		SIZE_CHECK(statistics.probability.size2() == size());
 		SIZE_CHECK(statistics.probability.size1() == state.size1());
 		SIZE_CHECK(statistics.probability.size2() == state.size2());
 		
 		Bernoulli<Rng> coinToss(rng,0.5);
-		for(std::size_t i = 0; i != state.size1();++i){
-			for(std::size_t j = 0; j != state.size2();++j){
-				state(i,j) = coinToss(statistics.probability(i,j));
+		if(alpha == 0.0){//special case: normal gibbs sampling
+			for(std::size_t s = 0; s != state.size1();++s){
+				for(std::size_t i = 0; i != state.size2();++i){
+					state(s,i) = coinToss(statistics.probability(s,i));
+				}
+			}
+			return;
+		}
+		else{//flip-the state sampling
+			for(size_t s = 0; s != state.size1(); ++s){
+				for (size_t i = 0; i != state.size2(); i++) {
+					double prob = statistics.probability(s,i);
+					if (state(s,i) == 0) {
+						if (prob <= 0.5) {
+							prob = (1. - alpha) * prob + alpha * prob / (1. - prob);
+						} else {
+							prob = (1. - alpha) * prob  + alpha;
+						}
+					} else {
+						if (prob >= 0.5) {
+							prob = (1. - alpha) * prob + alpha * (1. - (1. - prob) / prob);
+						} else {
+							prob = (1. - alpha) * prob;
+						}
+					}
+					state(s,i) = coinToss(prob);
+				}
 			}
 		}
 	}

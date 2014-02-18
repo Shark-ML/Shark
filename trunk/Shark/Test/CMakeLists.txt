@@ -215,6 +215,7 @@ SHARK_ADD_TEST( Rng/Rng.cpp Rng_Distributions )
 
 #RBM
 SHARK_ADD_TEST( RBM/BinaryLayer.cpp RBM_BinaryLayer)
+SHARK_ADD_TEST( RBM/BipolarLayer.cpp RBM_BipolarLayer)
 SHARK_ADD_TEST( RBM/GaussianLayer.cpp RBM_GaussianLayer)
 SHARK_ADD_TEST( RBM/TruncatedExponentialLayer.cpp RBM_TruncatedExponentialLayer)
 

@@ -113,13 +113,18 @@ public:
 
 
 	/// \brief Given a the precomputed statistics (the mean of the Gaussian), the elements of the vector are sampled.
+	/// This happens either with Gibbs-Sampling or Flip-the-State sampling.
+	/// For alpha= 0 gibbs sampling is performed. That is the next state for neuron i is directly taken from the conditional distribution of the i-th neuron. 
+	/// In the case of alpha=1, flip-the-state sampling is performed, which takes the last state into account and tries to do deterministically jump 
+	/// into states with higher probability. THIS IS NOT IMPLEMENTED YET and alpha is ignored!
+	///
 	///
 	/// @param statistics sufficient statistics containing the mean of the conditional Gaussian distribution of the neurons
 	/// @param state the state matrix that will hold the sampled states
+	/// @param alpha factor changing from gibbs to flip-the state sampling. 0<=alpha<=1
 	/// @param rng the random number generator used for sampling
-	///
 	template<class Matrix, class Rng>
-	void sample(StatisticsBatch const& statistics, Matrix& state, Rng& rng) const{
+	void sample(StatisticsBatch const& statistics, Matrix& state, double alpha, Rng& rng) const{
 		SIZE_CHECK(statistics.mean.size2() == size());
 		SIZE_CHECK(statistics.mean.size1() == state.size1());
 		SIZE_CHECK(statistics.mean.size2() == state.size2());
@@ -130,6 +135,7 @@ public:
 				state(i,j) = normal();
 			}
 		}
+		(void) alpha;
 	}
 
 	/// \brief Transforms the current state of the neurons for the multiplication with the weight matrix of the RBM,
