@@ -115,18 +115,23 @@ public:
 	}
 
 
-	///\brief Given the sufficient statistics,(i.e. the parameter lambda and the value of exp(-lambda))
-	///  of the neuron, this function samples from the truncated exponential distribution.
+	/// \brief Samples from the truncated exponential distribution using either Gibbs- or flip-the-state sampling given the sufficient statistics
+	///  (i.e. the parameter lambda and the value of exp(-lambda))
 	///
 	///The truncated exponential function is defined as 
 	///\f[ p(x) = \lambda \frac{e^{-lambdax}}{1 - e^{-\lambda}}\f]
 	///with x being in the range of [0,1]
 	///
+	/// For alpha= 0 gibbs sampling is performed. That is the next state for neuron i is directly taken from the conditional distribution of the i-th neuron. 
+	/// In the case of alpha=1, flip-the-state sampling is performed, which takes the last state into account and tries to do deterministically jump 
+	/// into states with higher probability. THIS IS NOT IMPLEMENTED YET and alpha is ignored!
+	///
 	/// @param statistics sufficient statistics for the batch to be computed
 	/// @param state the state matrix that will hold the sampled states
+	/// @param alpha factor changing from gibbs to flip-the state sampling. 0<=alpha<=1
 	/// @param rng the random number generator used for sampling
 	template<class Matrix, class Rng>
-	void sample(StatisticsBatch const& statistics, Matrix& state, Rng& rng) const{
+	void sample(StatisticsBatch const& statistics, Matrix& state, double alpha, Rng& rng) const{
 		SIZE_CHECK(statistics.lambda.size2() == size());
 		SIZE_CHECK(statistics.lambda.size1() == state.size1());
 		SIZE_CHECK(statistics.lambda.size2() == state.size2());
@@ -138,6 +143,8 @@ public:
 				state(i,j) = truncExp();
 			}
 		}
+		
+		(void)alpha;//TODO: USE ALPHA
 	}
 
 	/// \brief Transforms the current state of the neurons for the multiplication with the weight matrix of the RBM,

@@ -63,23 +63,37 @@ BOOST_AUTO_TEST_CASE( BipolarLayer_Sample){
 	layer.resize(5);
 	Rng::seed(42);
 	
+	std::vector<double> alphas;
+	alphas.push_back(0);
+	alphas.push_back(1);
 	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 0; j != 5; ++j){
-			statistics.probability(i,j) = Rng::uni(0.0,1.0);
-		}
+		alphas.push_back(Rng::uni(0,1));
 	}
 	
-	const std::size_t numSamples = 5000000;
-	RealMatrix mean(10,5,0.0);
-	for(std::size_t i = 0; i != numSamples; ++i){
-		RealMatrix samples(10,5);
-		layer.sample(statistics,samples,Rng::globalRng);
-		mean+=samples;
-	}
-	mean/=numSamples;
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 0; j != 5; ++j){
-			BOOST_CHECK_SMALL(sqr(mean(i,j) - (2*statistics.probability(i,j)-1)),1.e-6);
+	const std::size_t numSamples = 100000;
+	const double epsilon = 1.e-4;
+	
+	
+	for(std::size_t a = 0; a != alphas.size(); ++a){
+		double alpha = alphas[a];
+		for(std::size_t i = 0; i != 10; ++i){
+			for(std::size_t j = 0; j != 5; ++j){
+				statistics.probability(i,j) = Rng::uni(0.0,1.0);
+			}
+		}
+		
+		
+		RealMatrix mean(10,5,0.0);
+		RealMatrix samples(10,5,0.0);
+		for(std::size_t i = 0; i != numSamples; ++i){
+			layer.sample(statistics,samples,alpha,Rng::globalRng);
+			mean+=samples;
+		}
+		mean/=numSamples;
+		for(std::size_t i = 0; i != 10; ++i){
+			for(std::size_t j = 0; j != 5; ++j){
+				BOOST_CHECK_SMALL(sqr(mean(i,j) - (2*statistics.probability(i,j)-1)),epsilon);
+			}
 		}
 	}
 }

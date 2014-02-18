@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( TruncatedExponentialLayer_Sample){
 	mean.clear();
 	for(std::size_t i = 0; i != numSamples; ++i){
 		RealMatrix samples(10,5);
-		layer.sample(statistics,samples,Rng::globalRng);
+		layer.sample(statistics,samples,1.0,Rng::globalRng);
 		mean+=samples;
 	}
 	mean/=numSamples;

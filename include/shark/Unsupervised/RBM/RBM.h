@@ -82,7 +82,7 @@ private:
 			noalias(output) = hiddenNeurons().mean(statisticsBatch);
 		}
 		else{
-			hiddenNeurons().sample(statisticsBatch,output,*mpe_rng);
+			hiddenNeurons().sample(statisticsBatch,output,0.0,*mpe_rng);
 		}
 	}
 
@@ -103,7 +103,7 @@ private:
 			noalias(output) = visibleNeurons().mean(statisticsBatch);
 		}
 		else{
-			visibleNeurons().sample(statisticsBatch,output,*mpe_rng);
+			visibleNeurons().sample(statisticsBatch,output,0.0,*mpe_rng);
 		}
 	}
 public:
