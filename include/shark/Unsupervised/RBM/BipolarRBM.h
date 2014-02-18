@@ -1,10 +1,10 @@
 /*!
  * 
  *
- * \brief       Typedefs for the Binary-Binary RBM.
+ * \brief       Typedefs for the Bipolar RBM
  *
- * \author      Oswin Krause Asja Fischer
- * \date        1.2014
+ * \author      Asja Fischer
+ * \date        1. 2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -27,16 +27,16 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_UNSUPERVISED_RBM_BINARYRBM_H
-#define SHARK_UNSUPERVISED_RBM_BINARYRBM_H
+#ifndef SHARK_UNSUPERVISED_RBM_BIPOLARRBM_H
+#define SHARK_UNSUPERVISED_RBM_BIPOLARRBM_H
 
 #include <shark/Unsupervised/RBM/RBM.h>
 #include <shark/Unsupervised/RBM/Energy.h>
 
-#include <shark/Unsupervised/RBM/Neuronlayers/BinaryLayer.h>
-#include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
-#include <shark/Unsupervised/RBM/Sampling/TemperedMarkovChain.h>
+#include <shark/Unsupervised/RBM/Neuronlayers/BipolarLayer.h>
 #include <shark/Unsupervised/RBM/Sampling/MarkovChain.h>
+#include <shark/Unsupervised/RBM/Sampling/TemperedMarkovChain.h>
+#include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
 
 #include <shark/Unsupervised/RBM/GradientApproximations/ContrastiveDivergence.h>
 #include <shark/Unsupervised/RBM/GradientApproximations/MultiChainApproximator.h>
@@ -44,14 +44,15 @@
 #include <shark/Rng/GlobalRng.h>
 namespace shark{
 
-typedef RBM<BinaryLayer,BinaryLayer, Rng::rng_type> BinaryRBM;
-typedef GibbsOperator<BinaryRBM> BinaryGibbsOperator;
-typedef MarkovChain<BinaryGibbsOperator> BinaryGibbsChain;
-typedef TemperedMarkovChain<BinaryGibbsOperator> BinaryPTChain;
-
-typedef MultiChainApproximator<BinaryGibbsChain> BinaryPCD;
-typedef ContrastiveDivergence<BinaryGibbsOperator> BinaryCD;
-typedef SingleChainApproximator<BinaryPTChain> BinaryParallelTempering;
+typedef RBM<BipolarLayer,BipolarLayer, Rng::rng_type> BipolarRBM;
+typedef GibbsOperator<BipolarRBM> BipolarGibbsOperator;
+typedef MarkovChain<BipolarGibbsOperator> BipolarGibbsChain;
+typedef TemperedMarkovChain<BipolarGibbsOperator> BipolarPTChain;
+	
+typedef MultiChainApproximator<BipolarGibbsChain> BipolarPCD;
+typedef ContrastiveDivergence<BipolarGibbsOperator> BipolarCD;
+typedef SingleChainApproximator<BipolarPTChain> BipolarParallelTempering;
+	
 }
 
 #endif

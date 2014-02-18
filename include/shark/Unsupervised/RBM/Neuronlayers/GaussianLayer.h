@@ -33,7 +33,6 @@
 #include <shark/LinAlg/Base.h>
 #include <shark/Data/BatchInterfaceAdaptStruct.h>
 #include <shark/Unsupervised/RBM/StateSpaces/RealSpace.h>
-#include <shark/Unsupervised/RBM/Tags.h>
 #include <shark/Rng/Normal.h>
 #include <shark/Core/ISerializable.h>
 #include <shark/Core/IParameterizable.h>
@@ -73,9 +72,6 @@ public:
 	typedef detail::GaussianSufficientStatistics<RealVector> SufficientStatistics;
 	///\brief Sufficient statistics of a batch of data.
 	typedef Batch<SufficientStatistics>::type StatisticsBatch;
-	
-	///\brief The type of the State of the Layer.
-	typedef RealVector State;
 	
 	/// \brief Returns the bias values of the units.
 	const RealVector& bias()const{
@@ -202,9 +198,6 @@ public:
 		double lnResult = 0;
 		double logNormalizationTerm = std::log(SQRT_2_PI)  - 0.5 * std::log(beta);
 		
-		//std::cout<<inputs<<" "<<inputs-m_bias<<std::endl;
-		//std::cout<<remainingTerms<<std::endl;
-		
 		for(std::size_t i = 0; i != size(); ++i){
 			lnResult += 0.5 * sqr(inputs(i)+m_bias(i))*beta;
 			lnResult += logNormalizationTerm;
@@ -235,25 +228,6 @@ public:
 		SIZE_CHECK(derivative.size() == size());
 		sum_rows(samples.state,derivative);
 	}
-
-
-	/// \brief Returns the flag of requested values by the expected parameter derivative.
-	///
-	/// The samples must provide valid informations for this values only. In this case it is only the sufficient statistics of the layer
-	GradientFlags flagsExpectedGradient()const{
-		GradientFlags flags;
-		flags |= RequiresStatistics;
-		return flags;
-	}
-
-	/// \brief Returns the flag of requested values by the parameter derivative.
-	///
-	/// The samples must provide valid informations for this values only. In this case it is only the current state of the layer
-	GradientFlags flagsGradient()const{
-		GradientFlags flags;
-		flags |= RequiresState;
-		return flags;
-	}
 	
 	///\brief Returns the vector with the parameters associated with the neurons in the layer.
 	RealVector parameterVector()const{
@@ -265,7 +239,7 @@ public:
 		m_bias = newParameters;
 	}
 
-    ///\brief Returns the number of the parameters associated with the neurons in the layer.
+	///\brief Returns the number of the parameters associated with the neurons in the layer.
 	std::size_t numberOfParameters()const{
 		return size();
 	}
