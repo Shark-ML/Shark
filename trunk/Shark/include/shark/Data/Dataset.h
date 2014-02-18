@@ -1248,6 +1248,28 @@ private:
 	bool m_scalar;
 };
 
+
+template <typename RowType> RowType getColumn(const Data<RowType> &data, std::size_t columnID) {
+	SHARK_ASSERT(dataDimension(data) > columnID);
+	RowType column(data.numberOfElements());
+	std::size_t rowCounter = 0;
+	BOOST_FOREACH(typename Data<RowType>::const_element_reference row, data.elements()){
+		column(rowCounter) = row(columnID);
+		rowCounter++;
+	}
+	return column;
+}
+
+template <typename RowType> void setColumn(Data<RowType> &data, std::size_t columnID, RowType newColumn) {
+	SHARK_ASSERT(dataDimension(data) > columnID);
+	SHARK_ASSERT(data.numberOfElements() == newColumn.size());
+	std::size_t rowCounter = 0;
+	BOOST_FOREACH(typename Data<RowType>::element_reference row, data.elements()){
+		row(columnID) = newColumn(rowCounter);
+		rowCounter++;
+	}
+}
+
 /** @*/
 }
 
