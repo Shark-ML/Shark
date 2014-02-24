@@ -110,14 +110,6 @@ public:
 		//calculate the sufficient statistics of the hidden units
 		mpe_rbm->hiddenNeurons().sufficientStatistics(hiddenBatch.input,hiddenBatch.statistics, beta);
 	}
-	///\brief Calculates internal data needed for sampling the hidden units as well as requested information for the gradient.
-	///
-	///This function calculates the conditional probability distribution p(h|v) with inverse temperature 1 for the whole batch of samples
-	///Be aware that a change of temperature may occur between sampleVisible and precomputeHidden.
-	void precomputeHidden(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch)const{
-		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
-		precomputeHidden(hiddenBatch,visibleBatch,blas::repeat(1.0,visibleBatch.size()));
-	}
 
 
 	///\brief calculates internal data needed for sampling the visible units as well as requested information for the gradient 
@@ -132,16 +124,6 @@ public:
 		mpe_rbm->visibleNeurons().sufficientStatistics(visibleBatch.input,visibleBatch.statistics, beta);
 		
 	}
-	
-	///\brief calculates internal data needed for sampling the visible units as well as requested information for the gradient 
-	///
-	///This function calculates the conditional propability distribution p(v|h) with inverse temperature beta for a whole batch of inputs.
-	///Be aware that a change of temperature may occur between sampleHidden and precomputeVisible.
-	void precomputeVisible(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch)const{
-		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
-		precomputeVisible(hiddenBatch,visibleBatch,blas::repeat(1.0,visibleBatch.size()));
-	}
-	
 
 	///\brief Samples a new batch of states of the hidden units using their precomputed statistics.
 	void sampleHidden(HiddenSampleBatch& sampleBatch)const{
@@ -154,6 +136,20 @@ public:
 	void sampleVisible(VisibleSampleBatch& sampleBatch)const{
 		//sample state of the visible neurons, input and statistics was allready computed by precompute
 		mpe_rbm->visibleNeurons().sample(sampleBatch.statistics, sampleBatch.state, m_alphaVisible, mpe_rbm->rng());
+	}
+	
+	/// \brief Applies the Gibbs operator a number of times to a given sample.
+	///
+	/// Performs one complete step for a sample by sampling first the hidden, than the visible and computing the probability of a hidden given the visible unit
+	/// That is, Given a State (v,h), computes p(v|h),draws v and then computes p(h|v) and draws h . this is repeated several times
+	template<class BetaVector>
+	void stepVH(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch, std::size_t numberOfSteps, BetaVector const& beta){
+		for(unsigned int i=0; i != numberOfSteps; i++){
+			precomputeVisible(hiddenBatch,visibleBatch,beta);
+			sampleVisible(visibleBatch);
+			precomputeHidden(hiddenBatch, visibleBatch,beta);
+			sampleHidden(hiddenBatch);
+		}
 	}
 
 	///\brief Creates  hidden/visible sample pairs from the states of the visible neurons, i.e. sets the visible units to the given states and samples hidden states based on the states of the visible units. 

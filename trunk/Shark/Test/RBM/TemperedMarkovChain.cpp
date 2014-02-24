@@ -1,92 +1,93 @@
-#include <shark/Unsupervised/RBM/Sampling/TemperedMarkovChain.h>
+#include <shark/Unsupervised/RBM/BinaryRBM.h>
 
-#define BOOST_TEST_MODULE RBM_TemepredMarkovChain
+#define BOOST_TEST_MODULE RBM_TemperedMarkovChain
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
 using namespace shark;
 
-
-//this is a mockup test, meaning we implement a failsafe operator to test the tempered markov chain without noise!
-
-//doesn't change the hidden/visible at all so that the swap can be tested.
-
-struct RBMMockup{
-public:
-	typedef Rng::rng_type RngType;
-	typedef RealVector VectorType;
-
-	RngType& rng(){
-		return Rng::globalRng;
-	}
-	
-	std::size_t numberOfHN()const{
-		return 0;
-	}
-	std::size_t numberOfVN()const{
-		return 0;
-	}
-};
-class IdentityOperator{
-public:
-	typedef IntVector HiddenSample;
-	typedef IntVector VisibleSample;
-	typedef RBMMockup RBM;
-	
-	RBM* m_rbm;
-
-	IdentityOperator(RBM* rbm):m_rbm(rbm){}
-	
-	RBM* rbm(){
-		return m_rbm;
-	
-	}
-
-	void precomputeHidden(IntMatrix& hidden,const IntMatrix& visible, RealVector beta)const{
-	}
-	///\brief calculates the statistics of the visible units
-	void precomputeVisible(const IntMatrix& hidden, IntMatrix& visible, RealVector beta)const{
-	}
-	
-	///\brief samples the state of the hidden units using the precomputed statistics
-	void sampleHidden(IntMatrix& sample,double beta = 1.0)const{
-	}
-	///\brief samples the visible units using the precomputed statistics
-	void sampleVisible(IntMatrix& sample,double beta = 1.0)const{
-	}
-
-	///\brief creates a hidden/visible sample pair from a sample. this can directly be used to calculate the gradient
-	void createSample(IntMatrix& hidden,IntMatrix& visible, const RealMatrix& state, RealVector beta)const{
-		visible = state;
-	}
-	
-	//energy is the state of visible
-	RealVector calculateEnergy(const IntMatrix& hidden, const IntMatrix& visible){
-		return RealVector(column(visible,0));
-	}
-	
-	
-};
-
-BOOST_AUTO_TEST_CASE( TemperedMarkovChain_TestSwapEnergy )
+BOOST_AUTO_TEST_CASE( TemperedMarkovChain_Distribution )
 {
-	RBMMockup rbmMockup;
-	TemperedMarkovChain<IdentityOperator> chain(&rbmMockup);
-	chain.setNumberOfTemperatures(5);
-	RealMatrix state(5,1);
-	for(std::size_t i = 0; i != 5; ++i){
-		state(i,0) = 400-i*100;
-		chain.setBeta(i,1-0.2*i);
+	const std::size_t numTemperatures = 10;
+	const std::size_t numSamples = 10000;
+	
+	double states[]={
+		0,0,0,0,
+		1,0,0,0,
+		0,1,0,0,
+		1,1,0,0,
+		0,0,1,0,
+		1,0,1,0,
+		0,1,1,0,
+		1,1,1,0,
+		0,0,0,1,
+		1,0,0,1,
+		0,1,0,1,
+		1,1,0,1,
+		0,0,1,1,
+		1,0,1,1,
+		0,1,1,1,
+		1,1,1,1,
+	};
+	RealMatrix stateMatrix = blas::adapt_matrix(16,4,states);
+	
+	//create rbm and pt object
+	BinaryRBM rbm(Rng::globalRng);
+	rbm.setStructure(4,4);
+	RealVector params(rbm.numberOfParameters());
+	for(std::size_t i = 0; i != params.size();++i){
+		params(i) = Rng::uni(-1,1);
 	}
-	chain.initializeChain(state);
-	//now sample a lot of times and check whether the order is correct.
-	//this test will fail with a remarcably low chance like 1.e-200 or so
-	for(std::size_t i = 0; i != 10000;++i){
-		chain.step(1);
+	rbm.setParameterVector(params);
+	
+	TemperedMarkovChain<GibbsOperator<BinaryRBM> > pt(&rbm);
+	pt.setNumberOfTemperatures(numTemperatures);
+	RealVector beta(numTemperatures);
+	for(std::size_t i = 0; i != numTemperatures; ++i){
+		double factor = numTemperatures - 1;
+		beta(i) = 1.0 - i/factor;
+		pt.setBeta(i,1.0 - i/factor);
 	}
-	//in the end, energies should be orderered such that chain[i].energy<chain[i+1].energy
-	for(std::size_t i = 0; i != 4; ++i){
-		BOOST_CHECK(chain.samples().energy(i) < chain.samples().energy(i+1));
+	pt.initializeChain(RealMatrix(numTemperatures,4,0));
+	pt.step(1000);//burn in
+	
+	//evaluate distribution for all beta values
+	RealMatrix pHidden(numTemperatures,16);
+	RealMatrix pVisible(numTemperatures,16);
+	for(std::size_t i = 0; i != numTemperatures; ++i){
+		row(pHidden,i) =  exp(rbm.energy().logUnnormalizedProbabilityHidden(stateMatrix,blas::repeat(beta(i),16)));
+		row(pVisible,i) =  exp(rbm.energy().logUnnormalizedProbabilityVisible(stateMatrix,blas::repeat(beta(i),16)));
+		//normalize to 1
+		row(pHidden,i) /= sum(row(pHidden,i));
+		row(pVisible,i) /= sum(row(pVisible,i));
 	}
 	
+	RealMatrix pHiddenHist(numTemperatures,16,0.0);
+	RealMatrix pVisibleHist(numTemperatures,16,0.0);
+	
+	for(std::size_t s = 0; s != numSamples; ++s){
+		pt.step(1);
+		RealVector pH = exp(rbm.energy().logUnnormalizedProbabilityHidden(pt.samples().hidden.state,beta));
+		RealVector pV = exp(rbm.energy().logUnnormalizedProbabilityVisible(pt.samples().visible.state,beta));
+		
+		//get state number for every sampled state and add the sample to the histogram
+		for(std::size_t t = 0; t != numTemperatures; ++t){
+			std::size_t stateH = 0;
+			std::size_t stateV = 0;
+			for(std::size_t i = 0; i != 4; ++i){
+				stateH += pt.samples().hidden.state(t,i) > 0? (1<<i):0; 
+				stateV += pt.samples().visible.state(t,i) > 0? (1<<i):0; 
+			}
+			pHiddenHist(t,stateH)+=1.0/numSamples;
+			pVisibleHist(t,stateV)+=1.0/numSamples;
+		}
+	}
+	//calculate KL divergence between distributions
+	for(std::size_t t = 0; t != numTemperatures; ++t){
+		double KLV= sum(row(pVisible*log(pVisible/pVisibleHist),t));
+		double KLH= sum(row(pHidden*log(pHidden/pHiddenHist),t));
+		std::cout<<KLV <<" "<< KLH<<"\n";
+		BOOST_CHECK_SMALL(KLV,0.01);
+		BOOST_CHECK_SMALL(KLH,0.01);
+	}
 }

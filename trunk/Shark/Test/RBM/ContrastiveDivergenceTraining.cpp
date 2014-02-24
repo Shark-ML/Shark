@@ -54,9 +54,9 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 			for(std::size_t j = 0; j != numHiddenStates; ++j){
 				for(std::size_t k = 0; k != 4; ++k){//probability of state j given visible state i
 					if(hiddenStates(j,k) > 0.5)
-						phv(i,j) *= hiddenStatistics.probability(i,k);
+						phv(i,j) *= hiddenStatistics(i,k);
 					else
-						phv(i,j) *= 1.0-hiddenStatistics.probability(i,k);
+						phv(i,j) *= 1.0-hiddenStatistics(i,k);
 				}
 			}
 		}
@@ -79,9 +79,9 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 				double p = 1;//p(v|h)
 				for(std::size_t k = 0; k != 16; ++k){
 					if(state(k) == 1.0)
-						p *= visibleStatistics.probability(j,k);
+						p *= visibleStatistics(j,k);
 					else
-						p *= 1.0-visibleStatistics.probability(j,k);
+						p *= 1.0-visibleStatistics(j,k);
 				}
 				pSv(i) += p*pSh(j);
 			}
@@ -107,8 +107,8 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 			rbm.hiddenNeurons().sufficientStatistics(hInput,hstat, blas::repeat(1.0,1));
 			
 			noalias(visibleGrad) -=row(v,0);
-			noalias(hiddenGrad) -=row(hstat.probability,0);
-			noalias(weightGrad) -=outer_prod(row(hstat.probability,0), row(v,0));
+			noalias(hiddenGrad) -=row(hstat,0);
+			noalias(weightGrad) -=outer_prod(row(hstat,0), row(v,0));
 		}
 		visibleGrad /= inputs;
 		hiddenGrad /= inputs;
@@ -120,8 +120,8 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 			rbm.hiddenNeurons().sufficientStatistics(hInput,hstat, blas::repeat(1.0,1));
 			
 			noalias(visibleGrad) +=pSv(i)*row(v,0);
-			noalias(hiddenGrad) +=pSv(i)*row(hstat.probability,0);
-			noalias(weightGrad) +=pSv(i)*outer_prod(row(hstat.probability,0), row(v,0));
+			noalias(hiddenGrad) +=pSv(i)*row(hstat,0);
+			noalias(weightGrad) +=pSv(i)*outer_prod(row(hstat,0), row(v,0));
 		}
 		
 		

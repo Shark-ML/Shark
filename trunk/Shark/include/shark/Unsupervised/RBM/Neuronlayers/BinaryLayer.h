@@ -38,21 +38,6 @@
 #include <shark/Unsupervised/RBM/StateSpaces/TwoStateSpace.h>
 
 namespace shark{
-namespace detail{
-template<class VectorType>
-struct BinarySufficientStatistics{
-	VectorType probability;
-	
-	BinarySufficientStatistics(std::size_t numberOfNeurons):probability(numberOfNeurons){}
-	BinarySufficientStatistics(){}
-};
-}
-//auto generate the batch interface for the BinarySufficientStatistics
-template<class VectorType>
-struct Batch< detail::BinarySufficientStatistics<VectorType> >{
-	SHARK_CREATE_BATCH_INTERFACE( detail::BinarySufficientStatistics<VectorType>,(VectorType,probability))
-};
-
 
 ///\brief Layer of binary units taking values in {0,1}. 
 
@@ -68,7 +53,7 @@ public:
 	typedef BinarySpace StateSpace;
 
 	///\brief The sufficient statistics for the Binary Layer store the probability for a neuron to be on
-	typedef detail::BinarySufficientStatistics<RealVector> SufficientStatistics;
+	typedef RealVector SufficientStatistics;
 	///\brief Sufficient statistics of a batch of data.
 	typedef Batch<SufficientStatistics>::type StatisticsBatch;
 	
@@ -103,11 +88,11 @@ public:
 	template<class Input, class BetaVector>
 	void sufficientStatistics(Input const& input, StatisticsBatch& statistics,BetaVector const& beta)const{ // \todo: auch hier noch mal namen ueberdenken
 		SIZE_CHECK(input.size2() == size());
-		SIZE_CHECK(statistics.probability.size2() == size());
-		SIZE_CHECK(input.size1() == statistics.probability.size1());
+		SIZE_CHECK(statistics.size2() == size());
+		SIZE_CHECK(input.size1() == statistics.size1());
 		
 		for(std::size_t i = 0; i != input.size1(); ++i){
-			noalias(row(statistics.probability,i)) = sigmoid((row(input,i)+m_bias)*beta(i));
+			noalias(row(statistics,i)) = sigmoid((row(input,i)+m_bias)*beta(i));
 		}
 	}
 	
@@ -124,15 +109,15 @@ public:
 	/// @param rng the random number generator used for sampling
 	template<class Matrix, class Rng>
 	void sample(StatisticsBatch const& statistics, Matrix& state, double alpha, Rng& rng) const{
-		SIZE_CHECK(statistics.probability.size2() == size());
-		SIZE_CHECK(statistics.probability.size1() == state.size1());
-		SIZE_CHECK(statistics.probability.size2() == state.size2());
+		SIZE_CHECK(statistics.size2() == size());
+		SIZE_CHECK(statistics.size1() == state.size1());
+		SIZE_CHECK(statistics.size2() == state.size2());
 		
 		Bernoulli<Rng> coinToss(rng,0.5);
 		if(alpha == 0.0){//special case: normal gibbs sampling
 			for(std::size_t s = 0; s != state.size1();++s){
 				for(std::size_t i = 0; i != state.size2();++i){
-					state(s,i) = coinToss(statistics.probability(s,i));
+					state(s,i) = coinToss(statistics(s,i));
 				}
 			}
 			return;
@@ -140,7 +125,7 @@ public:
 		else{//flip-the state sampling
 			for(size_t s = 0; s != state.size1(); ++s){
 				for (size_t i = 0; i != state.size2(); i++) {
-					double prob = statistics.probability(s,i);
+					double prob = statistics(s,i);
 					if (state(s,i) == 0) {
 						if (prob <= 0.5) {
 							prob = (1. - alpha) * prob + alpha * prob / (1. - prob);
@@ -178,15 +163,15 @@ public:
 	/// 
 	/// @param statistics the sufficient statistics of the layer
 	RealMatrix const& expectedPhiValue(StatisticsBatch const& statistics)const{ 
-		return statistics.probability;	
+		return statistics;	
 	}
 
 	/// \brief Returns the mean given the state of the connected layer, i.e. in this case the probabilities of the neurons having state one.
 	/// 
 	/// @param statistics the sufficient statistics of the layer for a whole batch
 	RealMatrix const& mean(StatisticsBatch const& statistics)const{ 
-		SIZE_CHECK(statistics.probability.size2() == size());
-		return statistics.probability;
+		SIZE_CHECK(statistics.size2() == size());
+		return statistics;
 	}
 
 	/// \brief Returns the energy term this neuron adds to the energy function.
@@ -238,7 +223,7 @@ public:
 	template<class Vector, class SampleBatch>
 	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples )const{
 		SIZE_CHECK(derivative.size() == size());
-		sum_rows(samples.statistics.probability,derivative);
+		sum_rows(samples.statistics,derivative);
 	}
 	
 	///\brief Calculates the expectation of the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights.
@@ -251,7 +236,7 @@ public:
 	template<class Vector, class SampleBatch, class WeightVector>
 	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples, WeightVector const& weights )const{
 		SIZE_CHECK(derivative.size() == size());
-		axpy_prod(trans(samples.statistics.probability),weights,derivative,false);
+		axpy_prod(trans(samples.statistics),weights,derivative,false);
 	}
 
 

@@ -101,7 +101,7 @@ public:
 		
 			gibbsSampler.createSample(hiddenSamples,visibleSamples,batch);
 			empiricalExpectation.addVH(hiddenSamples, visibleSamples);
-			negLogLikelihood -= sum(mpe_rbm->energy().logUnnormalizedPropabilityVisible(
+			negLogLikelihood -= sum(mpe_rbm->energy().logUnnormalizedProbabilityVisible(
 				batch,hiddenSamples.input,blas::repeat(1,currentBatchSize)
 			));
 		}
@@ -155,7 +155,7 @@ private:
 			sampler.createSample(hiddenBatch,visibleBatch,stateBatch);
 			
 			//calculate probabilities and update 
-			RealVector logP = mpe_rbm->energy().logUnnormalizedPropabilityVisible(
+			RealVector logP = mpe_rbm->energy().logUnnormalizedProbabilityVisible(
 				stateBatch,hiddenBatch.input,blas::repeat(1,currentBatchSize)
 			);
 			modelExpectation.addVH(hiddenBatch, visibleBatch, logP);
@@ -188,7 +188,7 @@ private:
 			sampler.precomputeVisible(hiddenBatch,visibleBatch, blas::repeat(1,currentBatchSize));
 			
 			//calculate probabilities and update 
-			RealVector logP = mpe_rbm->energy().logUnnormalizedPropabilityHidden(
+			RealVector logP = mpe_rbm->energy().logUnnormalizedProbabilityHidden(
 				stateBatch,visibleBatch.input,blas::repeat(1,currentBatchSize)
 			);
 			modelExpectation.addHV(hiddenBatch, visibleBatch, logP);

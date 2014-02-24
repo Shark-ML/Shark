@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Hidden )
 	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
 	hiddenBatch.state = batch;
-	gibbs.precomputeVisible(hiddenBatch,visibleBatch);
+	gibbs.precomputeVisible(hiddenBatch,visibleBatch,blas::repeat(1.0,10));
 	
 	grad.addHV(hiddenBatch,visibleBatch);
 	gradTest.addHV(hiddenBatch,visibleBatch,blas::repeat(0.0,10));
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Visible )
 	gradTest.addVH(hiddenBatch,visibleBatch);
 	RealVector gradTestResult= gradTest.result();
 	noalias(subrange(gradTestResult,16,20))= 
-		prod(weights,hiddenBatch.statistics.probability)/std::exp(logWeightSum);
+		prod(weights,hiddenBatch.statistics)/std::exp(logWeightSum);
 	
 	RealVector diff = grad.result()-gradTestResult;
 	
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
 	hiddenBatch.state = batch;
-	gibbs.precomputeVisible(hiddenBatch,visibleBatch);
+	gibbs.precomputeVisible(hiddenBatch,visibleBatch,blas::repeat(1.0,10));
 	
 	grad.addHV(hiddenBatch,visibleBatch,log(weights));
 	BOOST_CHECK_CLOSE(logWeightSum,grad.logWeightSum(),1.e-5);
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 	gradTest.addHV(hiddenBatch,visibleBatch);
 	RealVector gradTestResult= gradTest.result();
 	noalias(subrange(gradTestResult,20,24))= 
-		prod(weights,visibleBatch.statistics.probability)/std::exp(logWeightSum);
+		prod(weights,visibleBatch.statistics)/std::exp(logWeightSum);
 	
 	RealVector diff = grad.result()-gradTestResult;
 	
@@ -194,7 +194,7 @@ public:
 		mpe_rbm->setParameterVector(parameter);
 		double result=0;
 		for(std::size_t i =0; i != m_data.numberOfBatches();++i){
-			result+=sum(mpe_rbm->energy().logUnnormalizedPropabilityVisible(
+			result+=sum(mpe_rbm->energy().logUnnormalizedProbabilityVisible(
 				m_data.batch(i),blas::repeat(1.0,m_data.batch(i).size1())
 			));
 		}
@@ -275,7 +275,7 @@ public:
 		
 		double result=0;
 		for(std::size_t i =0; i != m_data.numberOfBatches();++i){
-			result+=sum(mpe_rbm->energy().logUnnormalizedPropabilityHidden(
+			result+=sum(mpe_rbm->energy().logUnnormalizedProbabilityHidden(
 				m_data.batch(i),blas::repeat(1,m_data.batch(i).size1())
 			));
 		}
@@ -297,7 +297,7 @@ public:
 			GibbsOperator<BinaryRBM>::VisibleSampleBatch visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
 		
 			hiddenSamples.state = m_data.batch(i);
-			sampler.precomputeVisible(hiddenSamples,visibleSamples);
+			sampler.precomputeVisible(hiddenSamples,visibleSamples,blas::repeat(1.0,10));
 			gradient.addHV(hiddenSamples, visibleSamples);
 		}
 		derivative = gradient.result();

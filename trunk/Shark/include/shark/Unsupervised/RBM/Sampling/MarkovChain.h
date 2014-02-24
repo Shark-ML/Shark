@@ -109,12 +109,7 @@ public:
 	/// 
  	/// @param numberOfSteps the number of steps
 	void step(unsigned int numberOfSteps){
-		for(unsigned int i=0; i != numberOfSteps; i++){
-			m_operator.sampleHidden(m_samples.hidden);
-			m_operator.precomputeVisible(m_samples.hidden, m_samples.visible);
-			m_operator.sampleVisible(m_samples.visible);
-			m_operator.precomputeHidden(m_samples.hidden, m_samples.visible);
-		}
+		m_operator.stepVH(m_samples.hidden,m_samples.visible,numberOfSteps,blas::repeat(1.0,batchSize()));
 	}
 	
 	/// \brief Returns the current sample of the Markov chain. 
@@ -140,12 +135,6 @@ public:
 	/// \brief Returns the transition operator of the Markov chain.
 	Operator& transitionOperator(){
 		return m_operator;
-	}
-	
-	/// \brief Is called after the weights of the RBM got updated. 
-	/// this allows the chains to store intermediate results
-	void update(){
-		m_operator.precomputeHidden(m_samples.hidden, m_samples.visible);
 	}
 };
 	

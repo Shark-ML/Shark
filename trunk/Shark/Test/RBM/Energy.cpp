@@ -69,15 +69,11 @@ BOOST_AUTO_TEST_CASE( Energy_EnergyFromInput )
 {
 	Energy<BinaryRBM> energy(rbm.energy());
 	
-	RealVector energyVisible1 = energy.energyFromVisibleInput(visibleInput,hiddenState,visibleState,visibleState);
-	RealVector energyVisible2 = energy.energyFromVisibleInput(visibleInput,hiddenState,visibleState);
-	RealVector energyHidden1 = energy.energyFromHiddenInput(hiddenInput,hiddenState,visibleState, hiddenState);
-	RealVector energyHidden2 = energy.energyFromHiddenInput(hiddenInput,hiddenState,visibleState);
+	RealVector energyVisible = energy.energyFromVisibleInput(visibleInput,hiddenState,visibleState);
+	RealVector energyHidden = energy.energyFromHiddenInput(hiddenInput,hiddenState,visibleState);
 	
-	BOOST_CHECK_SMALL(energyVisible1(0) - energyResult, 1.e-15);
-	BOOST_CHECK_SMALL(energyVisible2(0) - energyResult, 1.e-15);
-	BOOST_CHECK_SMALL(energyHidden1(0) - energyResult, 1.e-15);
-	BOOST_CHECK_SMALL(energyHidden2(0) - energyResult, 1.e-15);
+	BOOST_CHECK_SMALL(energyVisible(0) - energyResult, 1.e-15);
+	BOOST_CHECK_SMALL(energyHidden(0) - energyResult, 1.e-15);
 }
 BOOST_AUTO_TEST_CASE( Energy_SimpleEnergy )
 {
@@ -116,7 +112,7 @@ BOOST_AUTO_TEST_CASE( Energy_SimpleEnergy )
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityHidden )
+BOOST_AUTO_TEST_CASE( Energy_UnnormalizedProbabilityHidden )
 {
 	//all possible state combinations for 2 visible units
 	RealMatrix visibleStateSpace(4,2);
@@ -143,15 +139,15 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityHidden )
 	
 	//now test for several choices of beta
 	for(std::size_t i = 0; i <= 10; ++i){
-		//calculate unnormalized propability of the hiddenState by integrating over the visible state space
+		//calculate unnormalized probability of the hiddenState by integrating over the visible state space
 		double pTest=sum(exp(-(i*0.1)*energies));
 		
 		//calculate now the test itself
-		double p=std::exp(energy.logUnnormalizedPropabilityHidden(hiddenState,blas::repeat(i*0.1,4))(0));
+		double p=std::exp(energy.logUnnormalizedProbabilityHidden(hiddenState,blas::repeat(i*0.1,4))(0));
 		BOOST_CHECK_CLOSE(pTest,p,2.e-5);
 	}
 }
-BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityVisible )
+BOOST_AUTO_TEST_CASE( Energy_UnnormalizedProbabilityVisible )
 {
 	//all possible state combinations for 2 hidden units
 	RealMatrix hiddenStateSpace(4,2);
@@ -178,11 +174,11 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedPropabilityVisible )
 	
 	//now test for several choices of beta
 	for(std::size_t i = 0; i <= 10; ++i){		
-		//calculate unnormalized propability of the visible state by integrating over the hidden state space
+		//calculate unnormalized probability of the visible state by integrating over the hidden state space
 		double pTest=sum(exp(-(i*0.1)*energies));
 		
 		//calculate now the test itself
-		double p=std::exp(energy.logUnnormalizedPropabilityVisible(visibleState,blas::repeat(i*0.1,4))(0));
+		double p=std::exp(energy.logUnnormalizedProbabilityVisible(visibleState,blas::repeat(i*0.1,4))(0));
 		BOOST_CHECK_CLOSE(pTest,p,2.e-5);
 	}
 }

@@ -83,46 +83,6 @@ private:
 		}
 	}
 
-
-	///\brief executes a single sampling step in each Markov chain followed by a swapping step between all even and all odd temperatures.
-	void step(){
-		//do one step of the tempered the Markov chains at the same time
-		m_operator.precomputeHidden(m_temperedChains.hidden, m_temperedChains.visible,m_betas);
-		m_operator.sampleHidden(m_temperedChains.hidden);
-		m_operator.precomputeVisible(m_temperedChains.hidden, m_temperedChains.visible, m_betas);
-		m_operator.sampleVisible(m_temperedChains.visible);
-		
-		//calculate energy for samples at all temperatures
-		m_temperedChains.energy = m_operator.calculateEnergy(
-			m_temperedChains.hidden,
-			m_temperedChains.visible 
-		);
-
-		//EVEN phase
-		std::size_t elems = m_temperedChains.size();
-		for(std::size_t i = 0; i < elems-1; i+=2){
-			metropolisSwap(
-				reference(m_temperedChains,i),m_betas(i),
-				reference(m_temperedChains,i+1),m_betas(i+1)
-			);
-		}
-		//ODD phase
-		for(std::size_t i = 1; i < elems-1; i+=2){
-			metropolisSwap(
-				reference(m_temperedChains,i),m_betas(i),
-				reference(m_temperedChains,i+1),m_betas(i+1)
-			);
-		}
-		
-		//after a swap, information might be outdated and must be reevaluated. since precompute is called
-		//afterwards, only the allready computed precompute of the other neuron must be reevaluated
-// 		for(std::size_t i = 0; i != m_temperedChains.size();++i){
-// 			m_operator.updateVisible(m_temperedChains[i].visible, m_betas[i]);
-// 		}
-		
-		m_operator.precomputeHidden(m_temperedChains.hidden, m_temperedChains.visible,m_betas);
-	}
-	
 public:
 	TemperedMarkovChain(RBM* rbm):m_operator(rbm){
 	}
@@ -147,7 +107,7 @@ public:
 	}
 	
 
-    //\brief Sets the number of temperatures and initializes the tempered chains accordingly. 
+	//\brief Sets the number of temperatures and initializes the tempered chains accordingly. 
 	//
 	// @param number of temperatures  
 	void setNumberOfTemperatures(std::size_t temperatures){
@@ -225,14 +185,34 @@ public:
 	//updates the chain using the current sample
 	void step(unsigned int k){
 		for(std::size_t i = 0; i != k; ++i){
-			step();
+			//do one step of the tempered the Markov chains at the same time
+			m_operator.stepVH(m_temperedChains.hidden, m_temperedChains.visible,1,m_betas);
+			
+			//calculate energy for samples at all temperatures
+			m_temperedChains.energy = m_operator.calculateEnergy(
+				m_temperedChains.hidden,
+				m_temperedChains.visible 
+			);
+
+			//EVEN phase
+			std::size_t elems = m_temperedChains.size();
+			for(std::size_t i = 0; i < elems-1; i+=2){
+				metropolisSwap(
+					reference(m_temperedChains,i),m_betas(i),
+					reference(m_temperedChains,i+1),m_betas(i+1)
+				);
+			}
+			//ODD phase
+			for(std::size_t i = 1; i < elems-1; i+=2){
+				metropolisSwap(
+					reference(m_temperedChains,i),m_betas(i),
+					reference(m_temperedChains,i+1),m_betas(i+1)
+				);
+			}
+			m_operator.rbm()->hiddenNeurons().sufficientStatistics(
+				m_temperedChains.hidden.input,m_temperedChains.hidden.statistics, m_betas
+			);
 		}
-	}
-	
-	//is called after the weights of the rbm got updated. 
-	//this allows the chains to store intermediate results
-	void update(){
-		m_operator.precomputeHidden(m_temperedChains.hidden, m_temperedChains.visible, m_betas);
 	}
 };
 	

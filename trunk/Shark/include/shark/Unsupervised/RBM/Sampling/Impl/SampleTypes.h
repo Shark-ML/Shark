@@ -83,14 +83,21 @@ struct MarkovChainSample{
 	}
 };
 }
+}
+BOOST_FUSION_ADAPT_TPL_STRUCT(
+	(Statistics),
+	(shark::detail::GibbsSample)(Statistics),
+	(shark::RealVector, input)(Statistics, statistics)(shark::RealVector, state)
+)
+namespace shark{
 //now create the batch specialisation for our new sample types
-
-#define GibbsSampleVars (RealVector, input)(Statistics, statistics)(RealVector, state)
 template<class Statistics>
 struct Batch< detail::GibbsSample<Statistics> >{
-	SHARK_CREATE_BATCH_INTERFACE( detail::GibbsSample<Statistics>,GibbsSampleVars)
+	SHARK_CREATE_BATCH_INTERFACE( 
+		detail::GibbsSample<Statistics>,
+		(RealVector, input)(Statistics, statistics)(RealVector, state)
+	)
 };
-#undef GibbsSampleVars
 
 template<class Hidden, class Visible>
 struct Batch< detail::MarkovChainSample<Hidden,Visible> >{
