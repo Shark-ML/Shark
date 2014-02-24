@@ -219,7 +219,7 @@ SHARK_ADD_TEST( RBM/BipolarLayer.cpp RBM_BipolarLayer)
 SHARK_ADD_TEST( RBM/GaussianLayer.cpp RBM_GaussianLayer)
 SHARK_ADD_TEST( RBM/TruncatedExponentialLayer.cpp RBM_TruncatedExponentialLayer)
 
-#SHARK_ADD_TEST( RBM/MarkovChain.cpp RBM_MarkovChain) #does not compile currently
+SHARK_ADD_TEST( RBM/MarkovChain.cpp RBM_MarkovChain)
 #SHARK_ADD_TEST( RBM/GibbsOperator.cpp RBM_GibbsOperator)//not compiling anymore needs rewrite
 
 SHARK_ADD_TEST( RBM/Energy.cpp RBM_Energy)
@@ -228,10 +228,11 @@ SHARK_ADD_TEST( RBM/Analytics.cpp RBM_Analytics)
 
 SHARK_ADD_TEST( RBM/ExactGradient.cpp RBM_ExactGradient)
 #SHARK_ADD_TEST( RBM/ContrastiveDivergence.cpp RBM_ContrastiveDivergence) #does not compile currently
-SHARK_ADD_TEST( RBM/TemperedMarkovChain.cpp RBM_TemperedMarkovChain)   # error with gcc 4.2.1
+SHARK_ADD_TEST( RBM/TemperedMarkovChain.cpp RBM_TemperedMarkovChain)
 
 SHARK_ADD_TEST( RBM/ParallelTemperingTraining.cpp RBM_PTTraining)   # error with gcc 4.2.1
 SHARK_ADD_TEST( RBM/PCDTraining.cpp RBM_PCDTraining)
+#SHARK_ADD_TEST( RBM/ClusteringPCDTraining.cpp RBM_ClusteringPCDTraining)
 SHARK_ADD_TEST( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceTraining)
 SHARK_ADD_TEST( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 

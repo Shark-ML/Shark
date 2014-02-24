@@ -105,7 +105,6 @@ public:
 	
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
 		mpe_rbm->setParameterVector(parameter);
-		m_chain.update();
 		
 		AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
 		AverageEnergyGradient<RBM> modelAverage(mpe_rbm);

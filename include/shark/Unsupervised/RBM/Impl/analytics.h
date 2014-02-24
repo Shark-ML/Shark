@@ -193,7 +193,7 @@ namespace detail{
 			}
 			else{
 				//calculate the first term: -E(state,beta) thats the same for both matrices
-				noalias(column(energyDiffDown,s)) = energy.logUnnormalizedPropabilityHidden(
+				noalias(column(energyDiffDown,s)) = energy.logUnnormalizedProbabilityHidden(
 					sampler.samples().hidden.state,
 					sampler.samples().visible.input,
 					beta
@@ -201,12 +201,12 @@ namespace detail{
 				noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
 				
 				//now add the new term
-				noalias(column(energyDiffUp,s)) -= energy.logUnnormalizedPropabilityHidden(
+				noalias(column(energyDiffUp,s)) -= energy.logUnnormalizedProbabilityHidden(
 					sampler.samples().hidden.state,
 					sampler.samples().visible.input,
 					betaUp
 				);
-				noalias(column(energyDiffDown,s)) -= energy.logUnnormalizedPropabilityHidden(
+				noalias(column(energyDiffDown,s)) -= energy.logUnnormalizedProbabilityHidden(
 					sampler.samples().hidden.state,
 					sampler.samples().visible.input,
 					betaDown
@@ -272,12 +272,12 @@ namespace detail{
 				}
 				else{
 					noalias(subrange(row(energyDiffUp,i),batchStart,batchEnd)) = 
-					energy.logUnnormalizedPropabilityHidden(
+					energy.logUnnormalizedProbabilityHidden(
 						hidden.state,
 						visible.input,
 						blas::repeat(beta(i),curSize)
 					) 
-					- energy.logUnnormalizedPropabilityHidden(
+					- energy.logUnnormalizedProbabilityHidden(
 						hidden.state,
 						visible.input,
 						blas::repeat(beta(i-1),curSize)
@@ -342,7 +342,7 @@ namespace detail{
 				Enumeration::state(row(stateMatrix,elem),x+elem);
 			}
 			
-			RealVector p =rbm.energy().logUnnormalizedPropabilityVisible(
+			RealVector p =rbm.energy().logUnnormalizedProbabilityVisible(
 				stateMatrix, blas::repeat(beta,currentBatchSize)
 			);
 	
@@ -387,7 +387,7 @@ namespace detail{
 				Enumeration::state(row(stateMatrix,elem),x+elem);
 			}
 			
-			RealVector p=rbm.energy().logUnnormalizedPropabilityHidden(
+			RealVector p=rbm.energy().logUnnormalizedProbabilityHidden(
 				stateMatrix, blas::repeat(beta,currentBatchSize)
 			);
 			

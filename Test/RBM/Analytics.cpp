@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE( Energy_NegLogLikelihood )
 		for(std::size_t j = 0; j != 50; ++j){
 			RealMatrix temp(1,8);
 			row(temp,0) = dataVec[j];
-			logProbTest -= rbm.energy().logUnnormalizedPropabilityVisible(temp,blas::repeat(1,1))(0)-logPartition;
+			logProbTest -= rbm.energy().logUnnormalizedProbabilityVisible(temp,blas::repeat(1,1))(0)-logPartition;
 		} 
 		long double logProb = negativeLogLikelihood(rbm,data);
 		BOOST_CHECK_CLOSE(logProbTest,logProb,1.e-5);

@@ -10,12 +10,13 @@ class BarsAndStripes{
 private:
 	UnlabeledData<RealVector> m_data;
 public:
-	BarsAndStripes(std::size_t batchSize = 32){
+	BarsAndStripes(std::size_t batchSize = 32, bool bipolar = false){
 		std::vector<RealVector> data(32,RealVector(16));
 		RealVector line(4);
 		for(size_t x=0; x != 16; x++) {
 			for(size_t j=0; j != 4; j++) {
 				line(j) = (x & (1<<j)) > 0;
+				if(bipolar && line(j)==0) line(j) = -1; 
 			}
 
 			for(int i=0; i != 4; i++) {
@@ -26,8 +27,8 @@ public:
 					data[16+x](l*4 + i) = line(l);
 				}
 			}
-			m_data = createDataFromRange(data,batchSize);
 		}
+		m_data = createDataFromRange(data,batchSize);
 	}
 	///Returns all input pattern of the BarsAndStripes problem
 	UnlabeledData<RealVector> data() const{

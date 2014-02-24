@@ -24,21 +24,6 @@
 #include <shark/Unsupervised/RBM/StateSpaces/TwoStateSpace.h>
 
 namespace shark{
-namespace detail{
-template<class VectorType>
-struct BipolarSufficientStatistics{
-	VectorType probability;
-	
-	BipolarSufficientStatistics(std::size_t numberOfNeurons):probability(numberOfNeurons){}
-	BipolarSufficientStatistics(){}
-};
-}
-//auto generate the batch interface for the BinarySufficientStatistics
-template<class VectorType>
-struct Batch< detail::BipolarSufficientStatistics<VectorType> >{
-	SHARK_CREATE_BATCH_INTERFACE( detail::BipolarSufficientStatistics<VectorType>,(VectorType,probability))
-};
-
 
 ///\brief Layer of bipolar units taking values in {-1,1}. 
 
@@ -54,7 +39,7 @@ public:
 	typedef SymmetricBinarySpace StateSpace;
 
 	///\brief The sufficient statistics for the Binary Layer store the probability for a neuron to be on
-	typedef detail::BipolarSufficientStatistics<RealVector> SufficientStatistics;
+	typedef RealVector SufficientStatistics;
 	///\brief Sufficient statistics of a batch of data.
 	typedef Batch<SufficientStatistics>::type StatisticsBatch;
 	
@@ -89,11 +74,11 @@ public:
 	template<class Input, class BetaVector>
 	void sufficientStatistics(Input const& input, StatisticsBatch& statistics,BetaVector const& beta)const{ // \todo: auch hier noch mal namen ueberdenken
 		SIZE_CHECK(input.size2() == size());
-		SIZE_CHECK(statistics.probability.size2() == size());
-		SIZE_CHECK(input.size1() == statistics.probability.size1());
+		SIZE_CHECK(statistics.size2() == size());
+		SIZE_CHECK(input.size1() == statistics.size1());
 		
 		for(std::size_t i = 0; i != input.size1(); ++i){
-			noalias(row(statistics.probability,i)) = sigmoid(2*(row(input,i)+m_bias)*beta(i));
+			noalias(row(statistics,i)) = sigmoid(2*(row(input,i)+m_bias)*beta(i));
 		}
 	}
 	
@@ -110,15 +95,15 @@ public:
 	/// @param rng the random number generator used for sampling
 	template<class Matrix, class Rng>
 	void sample(StatisticsBatch const& statistics, Matrix& state, double alpha, Rng& rng) const{
-		SIZE_CHECK(statistics.probability.size2() == size());
-		SIZE_CHECK(statistics.probability.size1() == state.size1());
-		SIZE_CHECK(statistics.probability.size2() == state.size2());
+		SIZE_CHECK(statistics.size2() == size());
+		SIZE_CHECK(statistics.size1() == state.size1());
+		SIZE_CHECK(statistics.size2() == state.size2());
 		
 		Bernoulli<Rng> coinToss(rng,0.5);
 		if(alpha == 0.0){//special case: normal gibbs sampling
 			for(std::size_t s = 0; s != state.size1();++s){
 				for(std::size_t i = 0; i != state.size2();++i){
-					state(s,i) = coinToss(statistics.probability(s,i));
+					state(s,i) = coinToss(statistics(s,i));
 					if(state(s,i)==0) state(s,i)=-1.;
 				}
 			}
@@ -127,7 +112,7 @@ public:
 		else{//flip-the state sampling
 			for(size_t s = 0; s != state.size1(); ++s){
 				for (size_t i = 0; i != state.size2(); i++) {
-					double prob = statistics.probability(s,i);
+					double prob = statistics(s,i);
 					if (state(s,i) == -1) {
 						if (prob <= 0.5) {
 							prob = (1. - alpha) * prob + alpha * prob / (1. - prob);
@@ -168,16 +153,16 @@ public:
 	/// @param statistics the sufficient statistics of the layer
 	RealMatrix expectedPhiValue(StatisticsBatch const& statistics)const{ 
 		//calculation of the expectation: 1*P(h_i=1|v)- 1*(1-P(h_i=1|v))= 2*P(h_i=1|v)-1
-		return (2*statistics.probability-blas::repeat(1,statistics.probability.size1(),size()));	
+		return (2*statistics-blas::repeat(1,statistics.size1(),size()));	
 	}
 
 	/// \brief Returns the mean of the distribution
 	/// 
 	/// @param statistics the sufficient statistics of the layer for a whole batch
 	RealMatrix mean(StatisticsBatch const& statistics)const{ 
-		SIZE_CHECK(statistics.probability.size2() == size());
+		SIZE_CHECK(statistics.size2() == size());
 		//calculation of the expectation: 1*P(h_i=1|v)- 1*(1-P(h_i=1|v))= 2*P(h_i=1|v)-1
-		return (2*statistics.probability-blas::repeat(1,statistics.probability.size1(),size()));	
+		return (2*statistics-blas::repeat(1,statistics.size1(),size()));	
 	}
 
 

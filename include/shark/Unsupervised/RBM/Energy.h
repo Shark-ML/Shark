@@ -88,7 +88,7 @@ struct Energy{
 	///@param beta the inverse temperature
 	///@return the unnormalized probability
 	template<class BetaVector>
-	RealVector logUnnormalizedPropabilityHidden(
+	RealVector logUnnormalizedProbabilityHidden(
 		RealMatrix const& hiddenState, 
 		RealMatrix const& visibleInput, 
 		BetaVector beta
@@ -118,7 +118,7 @@ struct Energy{
 	///@param beta the inverse temperature
 	///@return the unnormalized probability
 	template<class BetaVector>
-	RealVector logUnnormalizedPropabilityVisible(
+	RealVector logUnnormalizedProbabilityVisible(
 		RealMatrix const& visibleState,
 		RealMatrix const& hiddenInput, 
 		BetaVector const& beta
@@ -144,12 +144,12 @@ struct Energy{
 	///@param visibleStates the batch of states of the hidden neurons
 	///@param beta the inverse temperature
 	template<class BetaVector>
-	RealVector logUnnormalizedPropabilityVisible(RealMatrix const& visibleStates, BetaVector const& beta)const{
+	RealVector logUnnormalizedProbabilityVisible(RealMatrix const& visibleStates, BetaVector const& beta)const{
 		SIZE_CHECK(visibleStates.size1() == beta.size());
 		
 		RealMatrix hiddenInputs(beta.size(),m_hiddenNeurons.size());
 		inputHidden(hiddenInputs,visibleStates);
-		return logUnnormalizedPropabilityVisible(visibleStates, hiddenInputs, beta);
+		return logUnnormalizedProbabilityVisible(visibleStates, hiddenInputs, beta);
 	}
 	
 	///\brief Computes the logarithm of the unnormalized probability of each state of the hidden neurons from a batch.
@@ -157,12 +157,12 @@ struct Energy{
 	///@param hiddenStates a batch of states of the hidden neurons
 	///@param beta the inverse temperature
 	template<class BetaVector>
-	RealVector logUnnormalizedPropabilityHidden(RealMatrix const& hiddenStates, BetaVector const& beta)const{
+	RealVector logUnnormalizedProbabilityHidden(RealMatrix const& hiddenStates, BetaVector const& beta)const{
 		SIZE_CHECK(hiddenStates.size1() == beta.size());
 		
 		RealMatrix visibleInputs(beta.size(),m_visibleNeurons.size());
 		inputVisible(visibleInputs,hiddenStates);
-		return logUnnormalizedPropabilityHidden(hiddenStates, visibleInputs, beta);
+		return logUnnormalizedProbabilityHidden(hiddenStates, visibleInputs, beta);
 	}
     
     
@@ -189,56 +189,6 @@ struct Energy{
 		axpy_prod(m_hiddenNeurons.phi(hiddenStates),m_weightMatrix,inputs);
 	}
 
-	///\brief Optimization of the calculation of the energy, when the input of the hidden units
-	/// and the value of the phi-function of the hidden neurons is already available.
-	///
-	///@param hiddenInput the vector of inputs of the hidden neurons
-	///@param hidden the states of the hidden neurons
- 	///@param visible the states of the visible neurons
-	///@param phiOfH the values of the phi-function of the hidden neurons
-	///@return the value of the energy function
-	RealVector energyFromHiddenInput(
-		RealMatrix const& hiddenInput,
-		RealMatrix const& hidden, 
-		RealMatrix const& visible,
-		RealMatrix const& phiOfH
-	)const{
-		std::size_t batchSize = size(hiddenInput);
-		RealVector energies(batchSize);
-		for(std::size_t i = 0; i != batchSize; ++i){
-			energies(i) = -inner_prod(row(hiddenInput,i),row(phiOfH,i));
-		}
-		energies -= m_hiddenNeurons.energyTerm(hidden);
-		energies -= m_visibleNeurons.energyTerm(visible);
-		return energies;
-	}
-
-
-	///\brief Optimization of the calculation of the energy, when the input of the visible units.
-	/// and the value of the phi-function of the visible neurons is already available.
-	///
-	///@param visibleInput the vector of inputs of the visible neurons
-	///@param hidden the states of the hidden neurons
- 	///@param visible the states of the visible neurons
-	///@param phiOfV the values of the phi-function of the visible neurons
-	///@return the value of the energy function
-	RealVector energyFromVisibleInput(
-		RealMatrix const& visibleInput,
-		RealMatrix const& hidden, 
-		RealMatrix const& visible,
-		RealMatrix const& phiOfV
-	)const{
-		std::size_t batchSize = size(visibleInput);
-		RealVector energies(batchSize);
-		for(std::size_t i = 0; i != batchSize; ++i){
-			energies(i) = -inner_prod(row(phiOfV,i),row(visibleInput,i));
-		}
-		energies -= m_hiddenNeurons.energyTerm(hidden);
-		energies -= m_visibleNeurons.energyTerm(visible);
-		return energies;
-	}
-
-
 	///\brief Optimization of the calculation of the energy, when the input of the hidden units is already available.
 	///@param hiddenInput the vector of inputs of the hidden neurons
 	///@param hidden the states of the hidden neurons
@@ -249,7 +199,15 @@ struct Energy{
 		RealMatrix const& hidden, 
 		RealMatrix const& visible
 	)const{
-		return energyFromHiddenInput(hiddenInput,hidden,visible,m_hiddenNeurons.phi(hidden));
+		RealMatrix const& phiOfH = m_hiddenNeurons.phi(hidden);
+		std::size_t batchSize = size(hiddenInput);
+		RealVector energies(batchSize);
+		for(std::size_t i = 0; i != batchSize; ++i){
+			energies(i) = -inner_prod(row(hiddenInput,i),row(phiOfH,i));
+		}
+		energies -= m_hiddenNeurons.energyTerm(hidden);
+		energies -= m_visibleNeurons.energyTerm(visible);
+		return energies;
 	}
 
 
@@ -263,7 +221,15 @@ struct Energy{
 		RealMatrix const& hidden, 
 		RealMatrix const& visible
 	)const{
- 		return energyFromVisibleInput(visibleInput,hidden,visible,m_visibleNeurons.phi(visible));
+ 		RealMatrix const& phiOfV = m_visibleNeurons.phi(visible);
+		std::size_t batchSize = size(visibleInput);
+		RealVector energies(batchSize);
+		for(std::size_t i = 0; i != batchSize; ++i){
+			energies(i) = -inner_prod(row(phiOfV,i),row(visibleInput,i));
+		}
+		energies -= m_hiddenNeurons.energyTerm(hidden);
+		energies -= m_visibleNeurons.energyTerm(visible);
+		return energies;
 	}
 private:
 	HiddenType const& m_hiddenNeurons;

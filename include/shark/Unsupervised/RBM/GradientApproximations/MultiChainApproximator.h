@@ -155,7 +155,6 @@ public:
 		//using samples from the Markov chain
 		for(std::size_t i = 0; i != m_chains.size();++i){
 			swap(m_chains[i],m_chainOperator.samples());//set the current GibbsChain
-			m_chainOperator.update();//setParameterVector changed the distribution
 			m_chainOperator.step(m_k);//do the next step along the gibbs chain
 			modelAverage.addVH(m_chainOperator.samples().hidden, m_chainOperator.samples().visible);//update gradient
 			swap(m_chains[i],m_chainOperator.samples());//save the GibbsChain.

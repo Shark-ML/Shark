@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE( BipolarLayer_SufficientStatistics){
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
 				double sigmoid = 1.0/(1+std::exp(-2*testInput(i,j)));
-				BOOST_CHECK_SMALL(sigmoid-statistics.probability(i,j),1.e-15);
+				BOOST_CHECK_SMALL(sigmoid-statistics(i,j),1.e-15);
 			}
 		}
 	}
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( BipolarLayer_Sample){
 		double alpha = alphas[a];
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 5; ++j){
-				statistics.probability(i,j) = Rng::uni(0.0,1.0);
+				statistics(i,j) = Rng::uni(0.0,1.0);
 			}
 		}
 		
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE( BipolarLayer_Sample){
 		mean/=numSamples;
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 5; ++j){
-				BOOST_CHECK_SMALL(sqr(mean(i,j) - (2*statistics.probability(i,j)-1)),epsilon);
+				BOOST_CHECK_SMALL(sqr(mean(i,j) - (2*statistics(i,j)-1)),epsilon);
 			}
 		}
 	}
