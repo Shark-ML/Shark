@@ -33,11 +33,11 @@ simply a typedef for
 ``LabeledData < RealVector, unsigned int >``, as we will use real-valued feature
 vectors and integer labels (see the :ref:`LinAlg tutorials <label_for_linalg_tutorials>`
 for more information on ``RealVector``). The second line loads the data file.
-For example, let us consider the data in 
+For example, let us consider the data in
 :download:`C.csv <../../../../../examples/Supervised/data/quickstartData.csv>`.
-To apply the Shark program to these data, you have to pass teh filename as a command line option, e.g.: ::
+To apply the Shark program to these data, you have to pass the filename as a command line option, e.g.: ::
 
-  ./quickstartTutorial data/quickstartTutorial.csv
+  ./quickstartTutorial data/quickstartData.csv
 
 If you open that file you will see that it contains the label information in the last
 column while the preceding two columns represent the input data points. For this reason,
@@ -45,7 +45,7 @@ the argument ``LAST_COLUMN`` was passed to ``import_csv``. The data formats supp
 Shark are in detail described in the :ref:`data tutorials <label_for_data_tutorials>`.
 
 We want to use only one part of all available data for training, and
-set aside another part for testing. The next line splits (i.e.,
+set aside another part for testing. The next line splits (i.e.
 removes) a test set from our loaded data and stores it inside a new
 dataset. We choose the training set to be 80% of the available data::
 
