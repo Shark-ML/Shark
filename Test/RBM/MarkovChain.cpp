@@ -42,6 +42,7 @@ BOOST_AUTO_TEST_CASE( MarkovChain_Distribution )
 	
 	MarkovChain<GibbsOperator<BinaryRBM> > chain(&rbm);
 	chain.setBatchSize(batchSize);
+	chain.initializeChain(RealMatrix(numTemperatures,4,0));
 	chain.step(1000);//burn in
 	
 	//evaluate distribution for all beta values
@@ -56,9 +57,6 @@ BOOST_AUTO_TEST_CASE( MarkovChain_Distribution )
 	
 	for(std::size_t s = 0; s != numSamples; ++s){
 		chain.step(1);
-		RealVector pH = exp(rbm.energy().logUnnormalizedProbabilityHidden(chain.samples().hidden.state,blas::repeat(1.0,16)));
-		RealVector pV = exp(rbm.energy().logUnnormalizedProbabilityVisible(chain.samples().visible.state,blas::repeat(1.0,16)));
-		
 		//get state number for every sampled state and add the sample to the histogram
 		for(std::size_t k = 0; k != batchSize; ++k){
 			std::size_t stateH = 0;

@@ -67,8 +67,6 @@ BOOST_AUTO_TEST_CASE( TemperedMarkovChain_Distribution )
 	
 	for(std::size_t s = 0; s != numSamples; ++s){
 		pt.step(1);
-		RealVector pH = exp(rbm.energy().logUnnormalizedProbabilityHidden(pt.samples().hidden.state,beta));
-		RealVector pV = exp(rbm.energy().logUnnormalizedProbabilityVisible(pt.samples().visible.state,beta));
 		
 		//get state number for every sampled state and add the sample to the histogram
 		for(std::size_t t = 0; t != numTemperatures; ++t){
