@@ -26,9 +26,9 @@ int main()
 	KernelClassifier<RealVector> svm;
 	bool offset = true;
 	bool unconstrained = true;
-	CSvmTrainer<RealVector> trainer(&kernel, 1.0, offset,unconstrained); 
+	CSvmTrainer<RealVector> trainer(&kernel, 1.0, offset,unconstrained);
 	//###end<setup>
-	
+
 	// cross-validation error
 	//###begin<cv_error>
 	const unsigned int N= 5;  // number of folds
@@ -38,7 +38,7 @@ int main()
 		folds, &trainer, &svm, &trainer, &loss
 	);
 	//###end<cv_error>
-	
+
 
 	// find best parameters
 
@@ -61,12 +61,13 @@ int main()
 	//###begin<grid_train>
 	grid.step(cvError);
 	//###end<grid_train>
-	
+
 	// train model on the full dataset
 	//###begin<train_optimal_params>
 	trainer.setParameterVector(grid.solution().point);
 	trainer.train(svm, dataTrain);
 	//###end<train_optimal_params>
+	cout << "grid.solution().point " << grid.solution().point << endl;
 	cout << "C =\t" << trainer.C() << endl;
 	cout << "gamma =\t" << kernel.gamma() << endl;
 
