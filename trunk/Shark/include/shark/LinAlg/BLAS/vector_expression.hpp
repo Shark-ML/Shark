@@ -197,6 +197,8 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(operator>, scalar_bigger_than)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator>=, scalar_bigger_equal_than)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator==, scalar_equal)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator!=, scalar_not_equal)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(min, scalar_min)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(max, scalar_max)
 #undef SHARK_VECTOR_SCALAR_TRANSFORMATION
 
 // (t * v) [i] = t * v [i]
@@ -326,6 +328,8 @@ SHARK_BINARY_VECTOR_EXPRESSION(operator*, scalar_binary_multiply)
 SHARK_BINARY_VECTOR_EXPRESSION(element_prod, scalar_binary_multiply)
 SHARK_BINARY_VECTOR_EXPRESSION(operator/, scalar_binary_divide)
 SHARK_BINARY_VECTOR_EXPRESSION(element_div, scalar_binary_divide)
+SHARK_BINARY_VECTOR_EXPRESSION(min, scalar_binary_min)
+SHARK_BINARY_VECTOR_EXPRESSION(max, scalar_binary_max)
 #undef SHARK_BINARY_VECTOR_EXPRESSION
 
 template<class E1, class E2>

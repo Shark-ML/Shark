@@ -370,6 +370,34 @@ private:
 	T m_comparator;
 };
 
+template<class T>
+struct scalar_min {
+	typedef T argument_type;
+	typedef argument_type result_type;
+	static const bool zero_identity = true;
+
+	scalar_min(T argument):m_argument(argument) {}
+	result_type operator()(argument_type x)const {
+		using std::min;
+		return min(x,m_argument);
+	}
+private:
+	T m_argument;
+};
+template<class T>
+struct scalar_max {
+	typedef T argument_type;
+	typedef argument_type result_type;
+	static const bool zero_identity = true;
+
+	scalar_max(T argument):m_argument(argument) {}
+	result_type operator()(argument_type x)const {
+		using std::max;
+		return max(x,m_argument);
+	}
+private:
+	T m_argument;
+};
 
 //////BINARY SCALAR OPRATIONS////////////////
 template<class T1,class T2>
