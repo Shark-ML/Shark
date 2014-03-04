@@ -205,6 +205,7 @@ SHARK_ADD_TEST( ObjectiveFunctions/SvmLogisticInterpretation.cpp ObjFunct_SvmLog
 SHARK_ADD_TEST( ObjectiveFunctions/CrossEntropy.cpp ObjFunct_CrossEntropy )
 SHARK_ADD_TEST( ObjectiveFunctions/DenoisingAutoencoderError.cpp ObjFunct_DenoisingAutoencoderError )
 SHARK_ADD_TEST( ObjectiveFunctions/SquaredLoss.cpp ObjFunct_SquaredLoss )
+SHARK_ADD_TEST( ObjectiveFunctions/HingeLoss.cpp ObjFunct_HingeLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/NegativeClassificationLogLikelihood.cpp ObjFunct_NegativeClassificationLogLikelihood )
 SHARK_ADD_TEST( ObjectiveFunctions/AbsoluteLoss.cpp ObjFunct_AbsoluteLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/AUC.cpp ObjFunct_AUC )
@@ -230,9 +231,9 @@ SHARK_ADD_TEST( RBM/ExactGradient.cpp RBM_ExactGradient)
 #SHARK_ADD_TEST( RBM/ContrastiveDivergence.cpp RBM_ContrastiveDivergence) #does not compile currently
 SHARK_ADD_TEST( RBM/TemperedMarkovChain.cpp RBM_TemperedMarkovChain)
 
-SHARK_ADD_TEST( RBM/ParallelTemperingTraining.cpp RBM_PTTraining)   # error with gcc 4.2.1
+SHARK_ADD_TEST( RBM/ParallelTemperingTraining.cpp RBM_PTTraining)
 SHARK_ADD_TEST( RBM/PCDTraining.cpp RBM_PCDTraining)
-#SHARK_ADD_TEST( RBM/ClusteringPCDTraining.cpp RBM_ClusteringPCDTraining)
+SHARK_ADD_TEST( RBM/ClusteringPCDTraining.cpp RBM_ClusteringPCDTraining)
 SHARK_ADD_TEST( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceTraining)
 SHARK_ADD_TEST( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 
