@@ -144,11 +144,9 @@ SHARK_ADD_TEST( Models/NearestNeighborRegression.cpp Models_NearestNeighborRegre
 SHARK_ADD_TEST( Models/OneVersusOneClassifier.cpp Models_OneVersusOneClassifier )
 
 #Kernels
-
-
-#SHARK_ADD_TEST( Models/Kernels/KernelFunction.cpp Models_KernelFunction )
 SHARK_ADD_TEST( Models/Kernels/GaussianRbfKernel.cpp Models_GaussianKernel )
 SHARK_ADD_TEST( Models/Kernels/LinearKernel.cpp Models_LinearKernel )
+SHARK_ADD_TEST( Models/Kernels/NormalizedKernel.cpp Models_NormalizedKernel )
 SHARK_ADD_TEST( Models/Kernels/MonomialKernel.cpp Models_MonomialKernel )
 SHARK_ADD_TEST( Models/Kernels/PolynomialKernel.cpp Models_PolynomialKernel )
 SHARK_ADD_TEST( Models/Kernels/ScaledKernel.cpp Models_ScaledKernel )
