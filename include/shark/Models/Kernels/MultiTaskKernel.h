@@ -88,8 +88,6 @@ struct MultiTaskSample : public ISerializable
         (InputType, input)(std::size_t, task)
     )
 
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
 
 namespace shark{
 
@@ -101,6 +99,8 @@ struct Batch< MultiTaskSample<InputType> >{
 		(InputType, input)(std::size_t, task)
 	)
 };
+
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 
 ///

@@ -355,7 +355,7 @@ public:\
 		return batch;\
 	}\
 	template<class Range>\
-	static type createBatch(Range const& range){\
+	static type createBatchFromRange(Range const& range){\
 		std::size_t points = shark::size(range);\
 		type batch = createBatch(*range.begin(),points);\
 		typename boost::range_iterator<Range>::type pos = range.begin();\

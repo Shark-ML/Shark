@@ -153,10 +153,10 @@ SHARK_ADD_TEST( Models/Kernels/ScaledKernel.cpp Models_ScaledKernel )
 SHARK_ADD_TEST( Models/Kernels/WeightedSumKernel.cpp Models_WeightedSumKernel )
 SHARK_ADD_TEST( Models/Kernels/ProductKernel.cpp Models_ProductKernel )
 SHARK_ADD_TEST( Models/Kernels/ArdKernel.cpp Models_ArdKernel )
-# SHARK_ADD_TEST( Models/Kernels/MklKernel.cpp Models_MklKernel )   # error with gcc 4.2.1
+SHARK_ADD_TEST( Models/Kernels/MklKernel.cpp Models_MklKernel )
 SHARK_ADD_TEST( Models/Kernels/SubrangeKernel.cpp Models_SubrangeKernel )
 SHARK_ADD_TEST( Models/Kernels/DiscreteKernel.cpp Models_DiscreteKernel )
-# SHARK_ADD_TEST( Models/Kernels/MultiTaskKernel.cpp Models_MultiTaskKernel )   # error with gcc 4.2.1
+SHARK_ADD_TEST( Models/Kernels/MultiTaskKernel.cpp Models_MultiTaskKernel )
 
 #KernelMethods
 SHARK_ADD_TEST( Models/Kernels/KernelHelpers.cpp Models_KernelHelpers )

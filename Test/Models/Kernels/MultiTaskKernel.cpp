@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE( MultiTaskKernel_Test )
 	vec.push_back(v4);
 
 	// build a data set object
-	Data<MultiTaskSample<RealVector> > data(vec);
+	Data<MultiTaskSample<RealVector> > data = createDataFromRange(vec);
 	
 	// define a Gaussian kernel on inputs and a special task kernel on tasks
 	const double gamma = 3.0;
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( MultiTaskKernel_Test )
 	{
 		for (std::size_t j=0; j<=i; j++)
 		{
-			double k = gauss(data(i).input, data(j).input);
+			double k = gauss(data.element(i).input, data.element(j).input);
 			g(i, j) = g(j, i) = k;
 		}
 	}
