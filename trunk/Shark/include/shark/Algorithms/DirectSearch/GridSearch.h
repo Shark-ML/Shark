@@ -72,7 +72,7 @@ namespace shark {
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "GridSearch"; }
-	
+
 	//! uniform initialization for all parameters
 	//! \param  params  number of model parameters to optimize
 	//! \param  min     smallest parameter value
@@ -201,9 +201,9 @@ namespace shark {
 	 */
 	virtual void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
 	    (void) objectiveFunction;
-	    
+
 	    if(!m_configured)
-		configure(startingPoint.size(),-1,1,5);
+            configure(startingPoint.size(),-1,1,5);
 	    SIZE_CHECK(startingPoint.size() == m_nodeValues.size());
 	    m_best.point=startingPoint;
 	}
@@ -221,12 +221,10 @@ namespace shark {
 	    SIZE_CHECK( index < m_nodeValues.size() );
 
 	    m_nodeValues[index].clear();
-	    if ( noOfSections == 1 )
-		{
+	    if ( noOfSections == 1 ) {
 		    m_nodeValues[index].push_back(( min+max) / 2.0);
 		}
-	    else
-		{
+	    else {
 		    m_nodeValues[index].reserve(noOfSections);
 		    for (size_t section = 0; section < noOfSections; section++)
 			m_nodeValues[index].push_back(min + section*( max-min ) / ( noOfSections-1.0 ));
@@ -250,7 +248,7 @@ namespace shark {
 	    m_nodeValues[index].clear();
 	    m_nodeValues[index].reserve(max-min);
 	    for (int section = 0; section <= (max-min); section++)
-		m_nodeValues[index].push_back(factor * std::pow( exp_base, section+min ));
+		m_nodeValues[index].push_back( factor * std::pow( exp_base, section+min ));
 	}
 
 	//! Please note that for the grid search optimizer it does
@@ -267,16 +265,19 @@ namespace shark {
 		{
 		    // define the parameters
 		    for (size_t dimension = 0; dimension < dimensions; dimension++)
-			point(dimension) = m_nodeValues[dimension][index[dimension]];
+                point(dimension) = m_nodeValues[dimension][index[dimension]];
 
 		    // evaluate the model
 		    if (objectiveFunction.isFeasible(point))
 			{
 			    double error = objectiveFunction.eval(point);
-			    
+
+#ifdef SHARK_CV_VERBOSE_1
+			    std::cout << "." << std::flush;
+#endif
 #ifdef SHARK_CV_VERBOSE
 			    std::cout << point << "\t" << error << std::endl;
-#endif	    
+#endif
 			    if (error < m_best.value)
 				{
 				    m_best.value = error;
@@ -294,6 +295,9 @@ namespace shark {
 			}
 		    if (dimension == dimensions) break;
 		}
+#ifdef SHARK_CV_VERBOSE_1
+        std::cout << std::endl;
+#endif
 	}
 
     protected:
@@ -439,7 +443,7 @@ namespace shark {
 	//! if NestedGridSearch was not configured before this call, it is default initialized ti the range[-1,1] for every parameter
 	virtual void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
 	    (void) objectiveFunction;
-	    
+
 	    if(!m_configured)
 		configure(startingPoint.size(),-1,1);
 	    SIZE_CHECK(m_stepsize.size()==startingPoint.size());
@@ -589,7 +593,7 @@ namespace shark {
 	//! If the class wasn't configured before, this method samples random uniform distributed points in [-1,1]^n.
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
 	    (void) objectiveFunction;
-	    
+
 	    if(!m_configured)
 		{
 		    size_t parameters=startingPoint.size();
