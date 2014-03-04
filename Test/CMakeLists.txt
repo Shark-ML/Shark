@@ -234,7 +234,6 @@ SHARK_ADD_TEST( RBM/TemperedMarkovChain.cpp RBM_TemperedMarkovChain)
 
 SHARK_ADD_TEST( RBM/ParallelTemperingTraining.cpp RBM_PTTraining)
 SHARK_ADD_TEST( RBM/PCDTraining.cpp RBM_PCDTraining)
-SHARK_ADD_TEST( RBM/ClusteringPCDTraining.cpp RBM_ClusteringPCDTraining)
 SHARK_ADD_TEST( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceTraining)
 SHARK_ADD_TEST( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 

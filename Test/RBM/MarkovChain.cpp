@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( MarkovChain_Distribution )
 	
 	MarkovChain<GibbsOperator<BinaryRBM> > chain(&rbm);
 	chain.setBatchSize(batchSize);
-	chain.initializeChain(RealMatrix(numTemperatures,4,0));
+	chain.initializeChain(RealMatrix(batchSize,4,0));
 	chain.step(1000);//burn in
 	
 	//evaluate distribution for all beta values
