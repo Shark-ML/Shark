@@ -362,16 +362,21 @@ SHARK_MATRIX_SCALAR_TRANSFORMATION(operator==, scalar_equal)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator!=, scalar_not_equal)
 #undef SHARK_MATRIX_SCALAR_TRANSFORMATION
 
-// (t * v) [i] = t * v [i]
-template<class T, class E>
-typename boost::enable_if<
-	boost::is_convertible<T, typename E::value_type >,
-      matrix_unary<E,scalar_multiply1<typename E::value_type> >
->::type
-operator * (T scalar, matrix_expression<E> const &e) {
-	typedef scalar_multiply1<typename E::value_type> functor_type;
-	return matrix_unary<E, functor_type>(e, functor_type(scalar));
+// operations of the form op(t,v)[i,j] = op(t,v[i,j])
+#define SHARK_MATRIX_SCALAR_TRANSFORMATION_2(name, F)\
+template<class T, class E> \
+typename boost::enable_if< \
+	boost::is_convertible<T, typename E::value_type >,\
+        matrix_unary<E,F<typename E::value_type> > \
+>::type \
+name (T scalar, matrix_expression<E> const& e){ \
+	typedef F<typename E::value_type> functor_type; \
+	return matrix_unary<E, functor_type>(e, functor_type(scalar)); \
 }
+SHARK_MATRIX_SCALAR_TRANSFORMATION_2(operator*, scalar_multiply1)
+SHARK_MATRIX_SCALAR_TRANSFORMATION_2(min, scalar_min)
+SHARK_MATRIX_SCALAR_TRANSFORMATION_2(max, scalar_max)
+#undef SHARK_MATRIX_SCALAR_TRANSFORMATION_2
 
 // pow(v,t)[i,j]= pow(v[i,j],t)
 template<class E, class U>
