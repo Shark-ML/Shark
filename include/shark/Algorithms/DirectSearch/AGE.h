@@ -276,7 +276,8 @@ public:
 	        unsigned int lambda = 1,
 	        double pc = 0.9,
 	        double nc = 20.0,
-	        double nm = 20.0) {
+	        double nm = 20.0
+	) {
 		m_mu = mu;
 		m_lambda = lambda;
 		m_crossoverProbability = pc;
@@ -407,51 +408,5 @@ public:
 	}
 };
 }
-
-/**
- * \brief AGE specialization of optimizer traits.
- */
-template<>
-struct OptimizerTraits<detail::AGE> {
-	/**
-	 * \brief Prints out the configuration options and usage remarks of the algorithm to the supplied stream.
-	 * \tparam Stream The type of the stream to output to.
-	 * \param [in,out] s The stream to print usage information to.
-	 */
-	template<typename Stream>
-	static void usage(Stream &s) {
-		s << "AGE usage information:" << std::endl;
-		s << "\t Mu, size of the population, default value: \t\t 100" << std::endl;
-		s << "\t Lambda, size of the offspring population, default value: \t\t 100" << std::endl;
-		s << "\t CrossoverProbability, type: double, default value: \t\t 0.8." << std::endl;
-		s << "\t NC, type: double, default value: \t\t 10." << std::endl;
-		s << "\t NM, type: double; default value: \t\t 20." << std::endl;
-	}
-
-	template<typename Tree>
-	static void defaultConfig(Tree &node) {
-		node.template add<unsigned int>(
-		    "Mu",
-		    100);
-		node.template add<unsigned int>(
-		    "Lambda",
-		    1);
-		node.template add<double>(
-		    "CrossoverProbability",
-		    0.9);
-		node.template add<double>(
-		    "NC",
-		    20);
-		node.template add<double>(
-		    "NM",
-		    20);
-
-	}
-};
-
-/** \brief Injects the AGE into the inheritance hierarchy. */
-typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::AGE > AGE;
-
-ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER(AGE, shark::moo::RealValuedMultiObjectiveOptimizerFactory);
 }
 

@@ -79,17 +79,15 @@ namespace shark {
 		template<typename Set>
 		void updateLimits( const Set & solutionSet ) {
 
-			FitnessTraits<typename Set::value_type> ft;
-
 			m_lowerBounds = RealVector( m_lowerBounds.size(), std::numeric_limits<double>::max() );
 			m_upperBounds = RealVector( m_lowerBounds.size(), -std::numeric_limits<double>::max() );
 
 			typename Set::const_iterator it;
 			for( it = solutionSet.begin(); it != solutionSet.end(); ++it ) {
 
-				for( unsigned int i = 0; i < ft( *it, shark::tag::PenalizedFitness() ).size(); i++ ) {
-					m_lowerBounds( i ) = std::min( m_lowerBounds( i ), ft( (*it), shark::tag::PenalizedFitness() )[i] );
-					m_upperBounds( i ) = std::max( m_upperBounds( i ), ft( (*it), shark::tag::PenalizedFitness() )[i] );
+				for( unsigned int i = 0; i < it->fitness( shark::tag::PenalizedFitness() ).size(); i++ ) {
+					m_lowerBounds( i ) = std::min( m_lowerBounds( i ), it->fitness( shark::tag::PenalizedFitness() )[i] );
+					m_upperBounds( i ) = std::max( m_upperBounds( i ), it->fitness( shark::tag::PenalizedFitness() )[i] );
 				}
 			}
 			m_extents = m_upperBounds - m_lowerBounds;
@@ -153,17 +151,15 @@ namespace shark {
 		template<typename Solution, typename Set>
 		void updateGrid( const Solution & solution, const Set & solutionSet ) {
 
-			FitnessTraits<Solution> ft;
-
 			int it = location( solution );
 			if ( it == -1 ) {
 				//Update lower and upper limits
 				updateLimits( solutionSet );
 
 				//Actualize the lower and upper limits whit the individual
-				for( std::size_t i = 0; i < ft( solution, shark::tag::PenalizedFitness() ).size(); i++ ){
-					m_lowerBounds( i ) = std::min( m_lowerBounds( i ), ft( solution, shark::tag::PenalizedFitness() )[i] );
-					m_upperBounds( i ) = std::max( m_upperBounds( i ), ft( solution, shark::tag::PenalizedFitness() )[i] );
+				for( std::size_t i = 0; i < solution.fitness( shark::tag::PenalizedFitness() ).size(); i++ ){
+					m_lowerBounds( i ) = std::min( m_lowerBounds( i ), solution.fitness( shark::tag::PenalizedFitness() )[i] );
+					m_upperBounds( i ) = std::max( m_upperBounds( i ), solution.fitness( shark::tag::PenalizedFitness() )[i] );
 				} // for
 
 				m_extents = m_upperBounds - m_lowerBounds;
@@ -183,31 +179,30 @@ namespace shark {
 		*/
 		template<typename Solution>
 		int location( const Solution & solution ) const {
-			FitnessTraits<Solution> ft;
 			//Create a int [] to store the range of each objective
-			std::vector< std::size_t > positions( ft( solution, shark::tag::PenalizedFitness() ).size(), 0 );
+			std::vector< std::size_t > positions( solution.fitness( shark::tag::PenalizedFitness() ).size(), 0 );
 
 			//Calculate the position for each objective
-			for( std::size_t obj = 0; obj < ft( solution, shark::tag::PenalizedFitness() ).size(); obj++ ) {
+			for( std::size_t obj = 0; obj < solution.fitness( shark::tag::PenalizedFitness() ).size(); obj++ ) {
 
-				if( ft( solution, shark::tag::PenalizedFitness() )[ obj ] > m_upperBounds( obj ) )
+				if( solution.fitness( shark::tag::PenalizedFitness() )[ obj ] > m_upperBounds( obj ) )
 					return( -1 );
-				if( ft( solution, shark::tag::PenalizedFitness() )[ obj ] < m_lowerBounds( obj ) )
+				if( solution.fitness( shark::tag::PenalizedFitness() )[ obj ] < m_lowerBounds( obj ) )
 					return( -1 );
 
-				if( ft( solution, shark::tag::PenalizedFitness() )[ obj ] == m_lowerBounds[obj] ) {
+				if( solution.fitness( shark::tag::PenalizedFitness() )[ obj ] == m_lowerBounds[obj] ) {
 					positions[ obj ] = 0;
 					continue;
 				}
 
-				if( ft( solution, shark::tag::PenalizedFitness() )[ obj ] == m_upperBounds[ obj ] ) {
+				if( solution.fitness( shark::tag::PenalizedFitness() )[ obj ] == m_upperBounds[ obj ] ) {
 					positions[obj] = static_cast<std::size_t>( (::pow( 2.0, static_cast<double>( m_noBisections ) ) )-1 );
 					continue;
 				}
 
 
 				double tmpSize = m_extents( obj );
-				double value = ft( solution, shark::tag::PenalizedFitness() )[ obj ];
+				double value = solution.fitness( shark::tag::PenalizedFitness() )[ obj ];
 				double account = m_lowerBounds( obj );
 				std::size_t ranges = static_cast<std::size_t>( (::pow( 2.0, static_cast<double>( m_noBisections ) ) ) );
 
@@ -223,7 +218,7 @@ namespace shark {
 
 			//Calculate the location into the hypercubes
 			std::size_t location = 0;
-			for( unsigned int obj = 0; obj < ft( solution, shark::tag::PenalizedFitness() ).size(); obj++ ) {
+			for( unsigned int obj = 0; obj < solution.fitness( shark::tag::PenalizedFitness() ).size(); obj++ ) {
 				location += positions[obj] * static_cast<std::size_t>( (::pow( 2.0, obj * static_cast<double>( m_noBisections ) ) ) );
 			}
 			return( location );

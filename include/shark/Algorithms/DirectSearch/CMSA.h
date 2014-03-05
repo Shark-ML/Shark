@@ -92,18 +92,6 @@ namespace shark {
 				archive & m_mutationDistribution;
 			}
 
-			/**
-			* \brief Prints the chromosome for debugging purposes.
-			*/
-			template<typename Stream>
-			void print( Stream & s ) const {
-				s << "Sigma: " << m_sigma << std::endl;
-				s << "cc: " << m_cC << std::endl;
-				s << "csigma: " << m_cSigma << std::endl;
-				s << "mean: " << m_mean << std::endl;
-				m_mutationDistribution.print( s );
-			}
-
 			double m_sigma; ///< The current step size.
 			double m_cSigma; 
 			double m_cC; ///< Constant for adapting the covariance matrix.
