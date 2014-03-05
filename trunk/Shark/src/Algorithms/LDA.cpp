@@ -100,9 +100,8 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	RealVector bias(classes);
 	for(std::size_t c = 0; c != classes; ++c){
 		double prior = std::log(double(num(c))/inputs);
-		bias(c) = - inner_prod(row(means,c),row(transformedMeans,c)) + prior;
+		bias(c) = - 0.5* inner_prod(row(means,c),row(transformedMeans,c)) + prior;
 	}
-	transformedMeans *= 2.0;
 
 	//fill the model
 	model.decisionFunction().setStructure(transformedMeans,bias);
