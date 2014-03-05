@@ -402,26 +402,5 @@ public:
 	}
 };
 }
-
-/**
- * \brief AGE specialization of optimizer traits.
- */
-template<>
-struct OptimizerTraits<detail::AGE2> {
-	/**
-	 * \brief Prints out the configuration options and usage remarks of the algorithm to the supplied stream.
-	 * \tparam Stream The type of the stream to output to.
-	 * \param [in,out] s The stream to print usage information to.
-	 */
-	template<typename Stream>
-	static void usage(Stream &s) {
-		s << "AGE2 usage information:" << std::endl;
-		s << "\t Mu, size of the population, default value: \t\t 100" << std::endl;
-		s << "\t Lambda, size of the offspring population, default value: \t\t 100" << std::endl;
-		s << "\t CrossoverProbability, type: double, default value: \t\t 0.8." << std::endl;
-		s << "\t NC, type: double, default value: \t\t 10." << std::endl;
-		s << "\t NM, type: double; default value: \t\t 20." << std::endl;
-	}
-};
 }
 
