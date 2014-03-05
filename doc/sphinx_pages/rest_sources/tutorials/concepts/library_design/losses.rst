@@ -213,6 +213,14 @@ Model                                         Description
                                               additional independence assumptions
 :doxy:`NegativeClassificationLogLikelihood`   Logarithmic likelihood function interpreting a model with *C* outputs summing to one as
                                               computing the conditional probability over *C* classes
+:doxy:`HingeLoss`			      Loss used in Maximum margin classification. Binary and multiclass implemented.
+:doxy:`SquaredHingeLoss`		      Loss used in Maximum margin classification. It is the pointwise
+					      Square of the HingeLoss. It is differentiable everywhere.
+:doxy:`EpsilonHingeLoss`		      Loss for regression. It can be underestood as the 1-norm loss which is
+					      cut off to 0 in a box of size epsilon around the label.
+:doxy:`SquaredEpsilonHingeLoss`		      Maximum margin regression. It is zero in a ball of size epsilon around the 
+					      label and outside the squared two-norm of the distance of prediction and label.
+					      Thus very close points are not punished.
 ============================================  ==============================================================================
 
 
