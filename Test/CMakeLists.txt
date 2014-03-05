@@ -205,6 +205,8 @@ SHARK_ADD_TEST( ObjectiveFunctions/DenoisingAutoencoderError.cpp ObjFunct_Denois
 SHARK_ADD_TEST( ObjectiveFunctions/SquaredLoss.cpp ObjFunct_SquaredLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/HingeLoss.cpp ObjFunct_HingeLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/SquaredHingeLoss.cpp ObjFunct_SquaredHingeLoss )
+SHARK_ADD_TEST( ObjectiveFunctions/EpsilonHingeLoss.cpp ObjFunct_EpsilonHingeLoss )
+SHARK_ADD_TEST( ObjectiveFunctions/SquaredEpsilonHingeLoss.cpp ObjFunct_SquaredEpsilonHingeLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/NegativeClassificationLogLikelihood.cpp ObjFunct_NegativeClassificationLogLikelihood )
 SHARK_ADD_TEST( ObjectiveFunctions/AbsoluteLoss.cpp ObjFunct_AbsoluteLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/AUC.cpp ObjFunct_AUC )

@@ -201,16 +201,21 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(min, scalar_min)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(max, scalar_max)
 #undef SHARK_VECTOR_SCALAR_TRANSFORMATION
 
-// (t * v) [i] = t * v [i]
-template<class T, class E>
-typename boost::enable_if< 
-	boost::is_convertible<T, typename E::value_type >,
-        vector_unary<E,scalar_multiply1<typename E::value_type> >
->::type
-operator * (T scalar, vector_expression<E> const& e){
-	typedef scalar_multiply1<typename E::value_type> functor_type;
-	return vector_unary<E, functor_type>(e, functor_type(scalar));
+// operations of the form op(t,v)[i] = op(t,v[i])
+#define SHARK_VECTOR_SCALAR_TRANSFORMATION_2(name, F)\
+template<class T, class E> \
+typename boost::enable_if< \
+	boost::is_convertible<T, typename E::value_type >,\
+        vector_unary<E,F<typename E::value_type> > \
+>::type \
+name (T scalar, vector_expression<E> const& e){ \
+	typedef F<typename E::value_type> functor_type; \
+	return vector_unary<E, functor_type>(e, functor_type(scalar)); \
 }
+SHARK_VECTOR_SCALAR_TRANSFORMATION_2(operator*, scalar_multiply1)
+SHARK_VECTOR_SCALAR_TRANSFORMATION_2(min, scalar_min)
+SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, scalar_max)
+#undef SHARK_VECTOR_SCALAR_TRANSFORMATION_2
 
 // pow(v,t)[i]= pow(v[i],t)
 template<class E, class U>

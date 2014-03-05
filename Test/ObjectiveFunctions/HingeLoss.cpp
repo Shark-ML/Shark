@@ -84,10 +84,10 @@ BOOST_AUTO_TEST_CASE( HINGELOSS_EVAL_MULTICLASS ) {
 
 		std::size_t dim = Rng::discrete(minDim,maxDim);
 		//sample point between -10,10
-		RealMatrix testPoint(20,dim);
-		UIntVector testLabel(20);
-		RealVector valueResultP(20,0);
-		for(std::size_t i = 0; i != 20; ++i){
+		RealMatrix testPoint(5,dim);
+		UIntVector testLabel(5);
+		RealVector valueResultP(5,0);
+		for(std::size_t i = 0; i != 5; ++i){
 			testLabel(i) = Rng::discrete(0,dim-1);
 			testPoint(i,testLabel(i)) = Rng::uni(-10.0,10.0);
 			for(std::size_t j = 0; j != dim; ++j){
@@ -106,11 +106,11 @@ BOOST_AUTO_TEST_CASE( HINGELOSS_EVAL_MULTICLASS ) {
 		RealMatrix derivative;
 		value = loss.evalDerivative(testLabel, testPoint, derivative);
 		BOOST_CHECK_SMALL(value - valueResult, 1.e-13);
-		BOOST_REQUIRE_EQUAL(derivative.size1(), 20);
+		BOOST_REQUIRE_EQUAL(derivative.size1(), 5);
 		BOOST_REQUIRE_EQUAL(derivative.size2(), dim);
 		
-		for(std::size_t i = 0; i != 20; ++i){
-			RealVector estimatedDerivative = estimateDerivative(loss, RealMatrix(rows(testPoint,i,i+1)), subrange(testLabel,i,i+1));
+		for(std::size_t i = 0; i != 5; ++i){
+			RealVector estimatedDerivative = estimateDerivative(loss, RealMatrix(rows(testPoint,i,i+1)), UIntVector(subrange(testLabel,i,i+1)));
 			if(std::abs(valueResultP[i])>1.e-5){
 				BOOST_CHECK_SMALL(norm_2(row(derivative,i) - estimatedDerivative), 1.e-5);
 			}
