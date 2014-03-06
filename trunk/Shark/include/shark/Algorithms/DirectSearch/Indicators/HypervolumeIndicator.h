@@ -75,7 +75,7 @@ public:
 	* \param [in] t Marks the function for considering unary performance indicators.
 	*/
 	template<typename Extractor, typename ParetoFrontType>
-	unsigned int leastContributor( Extractor & extractor, const ParetoFrontType & front)
+	std::size_t leastContributor( Extractor & extractor, const ParetoFrontType & front)
 	{
 		std::vector<double> indicatorValues( front.size() );
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
@@ -121,6 +121,7 @@ public:
 		archive & BOOST_SERIALIZATION_NVP( m_nadirFitness );
 		archive & BOOST_SERIALIZATION_NVP( m_utopianFitness );
 	}
+
 
 	HypervolumeCalculator m_hv;
 	RealVector m_nadirFitness;

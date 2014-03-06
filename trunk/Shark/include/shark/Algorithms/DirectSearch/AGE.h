@@ -1,30 +1,30 @@
 /*!
- * 
+ *
  *
  * \brief       AGE.h
- * 
- * 
+ *
+ *
  *
  * \author      T.Voss
  * \date        2011
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -42,7 +42,7 @@
 #include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
 #include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
 #include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
-#include <shark/Algorithms/DirectSearch/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/RankShareComparator.h>
 
@@ -82,7 +82,8 @@ class AGE {
 protected:
 	/** \cond */
 	struct AdditiveEpsilonIndicator {
-		static double calc(const age::Individual &a, const age::Individual &b) {
+		static double calc(const age::Individual &a, const age::Individual &b)
+		{
 			double result = 0;//-std::numeric_limits<double>::max();
 			for (unsigned int i = 0; i < a.fitness(tag::PenalizedFitness()).size(); i++) {
 				result = std::max(result, a.fitness(tag::PenalizedFitness())[ i ] - b.fitness(tag::PenalizedFitness())[i]);
@@ -102,10 +103,12 @@ protected:
 
 	struct MinElement {
 
-		MinElement(const age::Individual &a) : m_a(a) {
+		MinElement(const age::Individual &a) : m_a(a)
+		{
 		}
 
-		bool operator()(const age::Individual &x, const age::Individual &y) const {
+		bool operator()(const age::Individual &x, const age::Individual &y) const
+		{
 			return(AdditiveEpsilonIndicator::calc(x, m_a) < AdditiveEpsilonIndicator::calc(y, m_a));
 		}
 
@@ -113,7 +116,8 @@ protected:
 
 	};
 
-	std::vector< CacheElement > preProcess(const age::Population &archive, const age::Population &pop) const {
+	std::vector< CacheElement > preProcess(const age::Population &archive, const age::Population &pop) const
+	{
 		std::vector< CacheElement > result(archive.size());
 
 		for (std::size_t i = 0; i < archive.size(); i++) {
@@ -171,7 +175,8 @@ protected:
 		return(result);
 	}
 
-	double beta(std::size_t p) const {
+	double beta(std::size_t p) const
+	{
 		double result = -std::numeric_limits<double>::max();
 		for (std::vector< CacheElement >::const_iterator itt = m_cache.begin(); itt != m_cache.end(); ++itt) {
 			if (itt->m_p1 == p)
@@ -210,14 +215,16 @@ public:
 	/**
 	 * \brief Default c'tor.
 	 */
-	AGE() : m_binaryTournamentSelection(m_pdc) {
+	AGE() : m_binaryTournamentSelection(m_pdc)
+	{
 		init();
 	}
 
 	/**
 	 * \brief Returns the name of the algorithm.
 	 */
-	std::string name() const {
+	std::string name() const
+	{
 		return("AGE1");
 	}
 
@@ -228,7 +235,8 @@ public:
 	 * \param [in] version Currently unused.
 	 */
 	template<typename Archive>
-	void serialize(Archive &archive, const unsigned int version) {
+	void serialize(Archive &archive, const unsigned int version)
+	{
 		archive &m_pop;  ///< Population of size \f$\mu + 1\f$.
 		archive &m_mu;  /// Population size \f$\mu\f$.
 
@@ -254,7 +262,8 @@ public:
 	 *
 	 * \param [in] node The configuration tree node.
 	 */
-	void configure(const PropertyTree &node) {
+	void configure(const PropertyTree &node)
+	{
 		init(
 		    node.get("Mu", 100),
 		    node.get("Lambda", 100),
@@ -273,11 +282,12 @@ public:
 	 * \param [in] nm Parameter of the mutation operator, default value: 20.0.
 	 */
 	void init(unsigned int mu = 100,
-	        unsigned int lambda = 1,
-	        double pc = 0.9,
-	        double nc = 20.0,
-	        double nm = 20.0
-	) {
+	          unsigned int lambda = 1,
+	          double pc = 0.9,
+	          double nc = 20.0,
+	          double nm = 20.0
+	         )
+	{
 		m_mu = mu;
 		m_lambda = lambda;
 		m_crossoverProbability = pc;
@@ -295,7 +305,8 @@ public:
 	 * \param [in] sp An initial search point.
 	 */
 	template<typename Function>
-	void init(const Function &f, const RealVector &sp) {
+	void init(const Function &f, const RealVector &sp)
+	{
 
 		(void) sp;
 
@@ -314,7 +325,6 @@ public:
 			noObjectives = std::max(noObjectives, it->fitness(shark::tag::PenalizedFitness()).size());
 			it->setNoObjectives(noObjectives);
 		}
-		m_selection.setNoObjectives(noObjectives);
 
 		m_sbx.init(f);
 		m_mutator.init(f);
@@ -337,7 +347,8 @@ public:
 	 * \returns The Pareto-set/-front approximation after the iteration.
 	 */
 	template<typename Function>
-	SolutionSetType step(const Function &f) {
+	SolutionSetType step(const Function &f)
+	{
 
 		age::Individual mate1(*m_binaryTournamentSelection(m_pop.begin(), m_pop.begin() + m_mu));
 		age::Individual mate2(*m_binaryTournamentSelection(m_pop.begin(), m_pop.begin() + m_mu));

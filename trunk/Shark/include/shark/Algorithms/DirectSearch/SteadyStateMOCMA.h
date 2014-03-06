@@ -42,7 +42,7 @@
 // MOO specific stuff
 #include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
 #include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
-#include <shark/Algorithms/DirectSearch/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
@@ -289,9 +289,6 @@ struct SteadyStateMOCMA {
 			m_useNewUpdate = true;
 		}
 
-		m_selection.m_useLogHyp = useLogHyp;
-		// m_selection.m_indicator.m_hv.m_useLogHyp = m_selection.m_useLogHyp;
-
 		m_useApproximatedHypervolume = useApproximatedHypervolume;
 		m_approximatedSelection.m_errorBound = errorBound;
 		m_approximatedSelection.m_errorProbability = errorProbability;
@@ -383,9 +380,6 @@ struct SteadyStateMOCMA {
 		BOOST_FOREACH(steady_state_mocma::Individual & ind, m_pop) {
 			m_initializer(ind);
 		}
-
-		m_selection.setNoObjectives(noObjectives);
-		m_approximatedSelection.m_noObjectives = noObjectives;
 
 		m_fastNonDominatedSort(m_pop);
 	}

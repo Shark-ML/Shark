@@ -106,8 +106,8 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume ) {
 	shark::HypervolumeApproximator< shark::FastRng > ha;
 	shark::IdentityFitnessExtractor ife;
 
-	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D, 2 ), shark::Fixture::HV_TEST_SET_2D, 1E-5 );
-	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D, 3 ), shark::Fixture::HV_TEST_SET_3D, 1E-5 );
+	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), shark::Fixture::HV_TEST_SET_2D, 1E-5 );
+	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), shark::Fixture::HV_TEST_SET_3D, 1E-5 );
 
 	shark::Statistics stats;
 	
@@ -123,17 +123,17 @@ BOOST_AUTO_TEST_CASE( Algorithms_LeastContributorApproximator ) {
 	shark::IdentityFitnessExtractor ife;
 	shark::LeastContributorApproximator< shark::FastRng, shark::HypervolumeCalculator > lca;
 
-	double vol = hc( ife, m_testSet3D, m_refPoint3D, 3 );
+	double vol = hc( ife, m_testSet3D, m_refPoint3D );
 	std::vector< double > contributions( m_testSet3D.size(), 0. );
 	for( unsigned int i = 0; i < contributions.size(); i++ ) {
 		std::vector< std::vector<double> > front( m_testSet3D );
 		front.erase( front.begin() + i );
-		contributions[ i ] = vol - hc( ife, front, m_refPoint3D, 3 );
+		contributions[ i ] = vol - hc( ife, front, m_refPoint3D );
 	}
 
 	std::vector< std::vector< double > >::const_iterator it = m_testSet3D.begin();
 	BOOST_CHECK( 
-		std::distance( it, lca( ife, m_testSet3D, m_refPoint3D, 3, 1E-2, 1E-2 ) ) == 
+		lca.leastContributor( ife, m_testSet3D, m_refPoint3D, 1E-2, 1E-2 ) == 
 		std::distance( contributions.begin(), std::min_element( contributions.begin(), contributions.end() ) ) 
 	);
 }

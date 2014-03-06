@@ -43,7 +43,7 @@
 // MOO specific stuff
 #include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
 #include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
-#include <shark/Algorithms/DirectSearch/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/BinaryTournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ApproximatedHypervolumeSelection.h>
@@ -286,9 +286,6 @@ public:
 			ind.setNoObjectives( ind.fitness( shark::tag::PenalizedFitness() ).size() );
 			noObjectives = std::max( noObjectives, ind.fitness( shark::tag::PenalizedFitness() ).size() );
 		}
-
-		m_selection.setNoObjectives( noObjectives );
-		m_approximatedSelection.setNoObjectives( noObjectives );
 
 		m_sbx.init(f);
 		m_mutator.init(f);

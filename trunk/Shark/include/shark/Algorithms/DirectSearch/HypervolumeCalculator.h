@@ -95,11 +95,10 @@ namespace shark {
 		* \brief Executes the algorithm.
 		* \param [in] extractor Function object \f$f\f$to "project" elements of the set to \f$\mathbb{R}^m\f$.
 		* \param [in] set The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: f( s' ) \preceq f( s ) \f$
-		* \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^m\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. 
-		* \param [in] noObjectives Dimensionality \f$m\f$, refPoint.size() == noObjectives needs to be satisfied.
+		* \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^m\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
 		*/
 		template<typename Set,typename Extractor, typename VectorType>
-		double operator()( Extractor & extractor, const Set & set, const VectorType & refPoint, unsigned int noObjectives );
+		double operator()( Extractor & extractor, const Set & set, const VectorType & refPoint);
 
 		/** \cond IMPL */
 		template<typename VectorType>
@@ -158,16 +157,16 @@ namespace shark {
 
 	/** \cond IMPL */
 	template<typename Set,typename Extractor, typename VectorType >
-	double HypervolumeCalculator::operator()( Extractor & extractor, const Set & constSet, const VectorType & refPoint, unsigned int noObjectives ) {
+	double HypervolumeCalculator::operator()( Extractor & extractor, const Set & constSet, const VectorType & refPoint) {
 
-		m_noObjectives = noObjectives;
+		m_noObjectives = extractor(*constSet.begin()).size();
 		m_sqrtNoPoints = static_cast< unsigned int >( ::sqrt( static_cast<double>( constSet.size() ) ) );
 
 		Set set( constSet );
 
 		std::stable_sort( set.begin(), set.end(), LastObjectiveComparator<Extractor>( extractor ) );
 
-		if( noObjectives == 2 ) {
+		if( m_noObjectives == 2 ) {
 
 			double h;
 			if( m_useLogHyp )
@@ -193,12 +192,11 @@ namespace shark {
 			return h;
 		}
 
-		VectorType regUp( noObjectives, -1E15 );
-		VectorType regLow( noObjectives, 1E15 );
+		VectorType regUp( m_noObjectives, -1E15 );
+		VectorType regLow( m_noObjectives, 1E15 );
 		BoundingBoxCalculator<Extractor,VectorType> bbc( extractor, regLow, regUp );
 		for( unsigned int i = 0; i < set.size(); i++ )
-			bbc( set.at( i ) );
-		//std::for_each( set.begin(), set.end(), bbc );
+			bbc( set[i] );
 		
 		return( stream( regLow, refPoint, set, extractor, 0, refPoint.back() ) );	
 	}
