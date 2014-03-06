@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       AGE2.h
- * 
- * 
+ *
+ *
  *
  * \author      T.Voss
  * \date        2010
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -41,7 +41,7 @@
 #include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
 #include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
 #include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
-#include <shark/Algorithms/DirectSearch/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/RankShareComparator.h>
 
@@ -85,7 +85,8 @@ protected:
 
 	/** \cond */
 	struct AdditiveEpsilonIndicator {
-		static double calc(const age2::Individual &a, const age2::Individual &b) {
+		static double calc(const age2::Individual &a, const age2::Individual &b)
+		{
 			double result = -std::numeric_limits<double>::max();
 			for (unsigned int i = 0; i < a.fitness(tag::PenalizedFitness()).size(); i++) {
 				result = std::max(result, b.fitness(tag::PenalizedFitness())[ i ] - a.fitness(tag::PenalizedFitness())[i]);
@@ -103,10 +104,12 @@ protected:
 
 	struct MinElement {
 
-		MinElement(const age2::Individual &a) : m_a(a) {
+		MinElement(const age2::Individual &a) : m_a(a)
+		{
 		}
 
-		bool operator()(const age2::Individual &x, const age2::Individual &y) const {
+		bool operator()(const age2::Individual &x, const age2::Individual &y) const
+		{
 			return(AdditiveEpsilonIndicator::calc(x, m_a) < AdditiveEpsilonIndicator::calc(y, m_a));
 		}
 
@@ -114,7 +117,8 @@ protected:
 
 	};
 
-	std::vector< CacheElement > preProcess(const age2::Population &archive, const age2::Population &pop) const {
+	std::vector< CacheElement > preProcess(const age2::Population &archive, const age2::Population &pop) const
+	{
 		std::vector< CacheElement > result(archive.size());
 
 		for (unsigned int i = 0; i < archive.size(); i++) {
@@ -178,14 +182,16 @@ public:
 	/**
 	 * \brief Default c'tor.
 	 */
-	AGE2() : m_binaryTournamentSelection(rsc) {
+	AGE2() : m_binaryTournamentSelection(rsc)
+	{
 		init();
 	}
 
 	/**
 	 * \brief Returns the name of the algorithm.
 	 */
-	std::string name() const {
+	std::string name() const
+	{
 		return("AGE2");
 	}
 
@@ -196,7 +202,8 @@ public:
 	 * \param [in] version Currently unused.
 	 */
 	template<typename Archive>
-	void serialize(Archive &archive, const unsigned int version) {
+	void serialize(Archive &archive, const unsigned int version)
+	{
 		archive &m_pop;  ///< Population of size \f$\mu + 1\f$.
 		archive &m_mu;  /// Population size \f$\mu\f$.
 
@@ -222,7 +229,8 @@ public:
 	 *
 	 * \param [in] node The configuration tree node.
 	 */
-	void configure(const PropertyTree &node) {
+	void configure(const PropertyTree &node)
+	{
 		init(
 		    node.get("Mu", 100),
 		    node.get("Lambda", 100),
@@ -241,10 +249,11 @@ public:
 	 * \param [in] nm Parameter of the mutation operator, default value: 20.0.
 	 */
 	void init(unsigned int mu = 300,
-	        unsigned int lambda = 100,
-	        double pc = 0.9,
-	        double nc = 20.0,
-	        double nm = 20.0) {
+	          unsigned int lambda = 100,
+	          double pc = 0.9,
+	          double nc = 20.0,
+	          double nm = 20.0)
+	{
 		m_mu = mu;
 		m_lambda = lambda;
 		m_crossoverProbability = pc;
@@ -261,10 +270,11 @@ public:
 	 * \param [in] f The objective function
 	 */
 	template<typename Function>
-	void init(const Function &f) {
+	void init(const Function &f)
+	{
 		m_pop.resize(m_mu + 1);
 		m_selection.setNoObjectives(f.noObjectives());
-		
+
 		for (age2::Population::iterator it = m_pop.begin(); it != m_pop.end(); ++it) {
 			it->age()=0;
 			it->setNoObjectives(f.noObjectives());
@@ -273,10 +283,10 @@ public:
 			it->fitness(shark::tag::PenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >(result);
 			it->fitness(shark::tag::UnpenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >(result);
 		}
-		
+
 		m_sbx.init(f);
 		m_mutator.init(f);
-		
+
 		m_fastNonDominatedSort(m_pop);
 		m_archive.clear();
 		for (age2::Population::iterator it = m_pop.begin(); it != m_pop.end(); ++it) {
@@ -295,7 +305,8 @@ public:
 	 * \returns The Pareto-set/-front approximation after the iteration.
 	 */
 	template<typename Function>
-	SolutionSetType step(const Function &f) {
+	SolutionSetType step(const Function &f)
+	{
 		int maxIdx = 0;
 		for (unsigned int i = 0; i < m_pop.size(); i++) {
 			if (m_pop[i].rank() != 1)

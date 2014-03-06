@@ -1,11 +1,11 @@
 /*!
- * 
+ *
  *
  * \brief       Implements fitness proportional selection.
- * 
+ *
  * See http://en.wikipedia.org/wiki/Fitness_proportionate_selection
- * 
- * 
+ *
+ *
  *
  * \author      T. Voss
 *  \par Copyright (c) 1998-2008:
@@ -14,21 +14,21 @@
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -57,16 +57,17 @@ struct RouletteWheelSelection {
 	* \returns An iterator pointing to the selected individual.
 	*/
 	template<typename Iterator, typename Extractor>
-	Iterator operator()(Iterator it, Iterator itE, Extractor &e) const {
+	Iterator operator()(Iterator it, Iterator itE, Extractor &e) const
+	{
 		std::size_t n = std::distance(it, itE);
 
 		std::vector< double > rouletteWheel(n, 0.);
 
 		std::transform(it,
-		        itE,
-		        rouletteWheel.begin(),
-		        e
-		);
+		               itE,
+		               rouletteWheel.begin(),
+		               e
+		              );
 
 		std::partial_sum(rouletteWheel.begin(), rouletteWheel.end(), rouletteWheel.begin());
 
