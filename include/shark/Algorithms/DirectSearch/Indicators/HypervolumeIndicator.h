@@ -35,6 +35,7 @@
 #include <shark/Core/Exception.h>
 #include <shark/Core/OpenMP.h>
 #include <shark/Algorithms/DirectSearch/HypervolumeCalculator.h>
+#include <shark/LinAlg/Base.h>
 
 #include <algorithm>
 #include <vector>

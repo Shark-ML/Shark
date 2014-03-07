@@ -110,7 +110,7 @@ int main( int argc, char ** argv ) {
 	shark::AdditiveEpsilonIndicator addEps;
 	shark::IdentityFitnessExtractor ife;
 
-	std::cout << addEps( front, refFront, ife ) << std::endl;
+	std::cout << addEps( front.begin(),front.end(), refFront.begin(),refFront.end(), ife ) << std::endl;
 
 	return( EXIT_SUCCESS );
 
