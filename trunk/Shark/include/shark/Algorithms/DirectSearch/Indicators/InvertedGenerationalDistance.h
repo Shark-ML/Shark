@@ -31,7 +31,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_INDICATORS_INVERTED_GENERATIONAL_DISTANCE_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_INDICATORS_INVERTED_GENERATIONAL_DISTANCE_H
 
-#include <shark/Core/Exception.h>
+#include <shark/LinAlg/Base.h>
 #include <shark/Core/OpenMP.h>
 
 #include <algorithm>
