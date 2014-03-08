@@ -61,6 +61,40 @@ MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 	ENDIF( OPT_COMPILE_EXAMPLES )
 ENDMACRO()
 
+
+MACRO( SHARK_ADD_WRAPPER WRAPPER_SRC NAME COMPONENT )
+    LIST(APPEND WRAPPER_CPP_FILES ${EXAMPLES_CPP_DIR}/${WRAPPER_SRC}.cpp)
+
+    IF( OPT_COMPILE_EXAMPLES )
+        ADD_EXECUTABLE( ${NAME}
+            ${EXAMPLES_CPP_DIR}/${WRAPPER_SRC}.cpp
+        )
+
+        SET( EXAMPLE_LIBRARIES
+            ${LINK_LIBRARIES}
+            shark
+        )
+
+        add_dependencies(examples ${NAME})
+
+        TARGET_LINK_LIBRARIES( ${NAME} ${EXAMPLE_LIBRARIES} )
+
+        INSTALL( TARGETS ${NAME}
+            RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}/
+            COMPONENT EXAMPLES
+        )
+
+        INSTALL( FILES
+            ${EXAMPLES_CPP_DIR}/${WRAPPER_SRC}.cpp
+            DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}
+        )
+
+        SOURCE_GROUP( ${COMPONENT} FILES ${SRC} )
+    ENDIF( OPT_COMPILE_EXAMPLES )
+ENDMACRO()
+
+
+
 SHARK_ADD_EXAMPLE( Core/Oracle Oracle "Core" )
 
 SHARK_ADD_EXAMPLE( EA/MOO/AdditiveEpsilonIndicatorMain AdditiveEpsilonIndicatorMain "EA/MOO" )
@@ -135,12 +169,20 @@ SHARK_ADD_EXAMPLE( Unsupervised/SparseAETutorial SparseAETutorial "Unsupervised"
 SHARK_ADD_EXAMPLE( Unsupervised/HierarchicalClustering HierarchicalClustering "Unsupervised"  )
 SHARK_ADD_EXAMPLE( Unsupervised/OneClassSvm OneClassSvm "Unsupervised"  )
 
+
+
+# Wrappers
+SHARK_ADD_WRAPPER( wrapper/sharksvm-train sharksvm-train "sharksvm-train" )
+SHARK_ADD_WRAPPER( wrapper/sharksvm-predict sharksvm-predict "sharksvm-predict" )
+
+
+
 add_custom_target(tpp2cpp DEPENDS ${TPP_FILES})
 
 IF( OPT_COMPILE_EXAMPLES )
 
 	INSTALL( DIRECTORY
-		 "${CMAKE_CURRENT_SOURCE_DIR}/Supervised/data"
+		 "${CMAKE_CURRENT_SOURCE_DIR}/Supervised/data"f
 		 DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Supervised
 		 PATTERN ".*" EXCLUDE
 	)

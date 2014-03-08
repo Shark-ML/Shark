@@ -122,10 +122,19 @@ void import_libsvm(
 /// \param  dense       Flag for using dense output format
 /// \param  oneMinusOne Flag for applying the transformation y<-2y-1 to binary labels
 /// \param  sortLabels  Flag for sorting data points according to labels
+/// \param  append      Flag for appending to the output file instead of overwriting it
 template<typename InputType>
-void export_libsvm(LabeledData<InputType, unsigned int>& dataset, const std::string &fn, bool dense=false, bool oneMinusOne = true, bool sortLabels = false) {
+void export_libsvm(LabeledData<InputType, unsigned int>& dataset, const std::string &fn, bool dense=false, bool oneMinusOne = true, bool sortLabels = false, bool append = false) {
 	std::size_t elements = dataset.numberOfElements();
-	std::ofstream ofs(fn.c_str());
+    std::ofstream ofs;
+    
+    // shall we append only or overwrite?
+    if (append == true) {
+        ofs.open (fn.c_str(), std::fstream::out | std::fstream::app );
+    } else {
+        ofs.open (fn.c_str());
+    }
+    
 	if( !ofs ) {
 		throw( SHARKEXCEPTION( "[export_libsvm] file can not be opened for reading" ) );
 	}
