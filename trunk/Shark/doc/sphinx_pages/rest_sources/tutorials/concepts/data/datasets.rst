@@ -42,9 +42,9 @@ that are important in the context of machine learning:
 
 * Data can be shared among different :doxy:`Data` instances. Thus creating
   subsets on the level of batches is quite cheap as it does not need a physical
-  copy of the contents of the set. On should not confuse this with the different
+  copy of the contents of the set. One should not confuse this with the different
   concept of lazy-copying, which just delays the copy until an actual change is
-  done. Instad sets are shard by default and only copied, when actually required by
+  done. Instead sets are shared by default and only copied, when actually required by
   the algorithm.
 
 
@@ -57,7 +57,7 @@ differentiation as well as special functions tailored to this differentiation. B
 we introduce the interface of the data object we want to clarify this distinction:
 
 * :doxy:`Data` can store arbitrary data. The data class takes the
-  general role of an ``std::vector`` only adapted to the special needs
+  general role of a ``std::vector`` only adapted to the special needs
   for fast computation in a machine learning environment.
 
 * :doxy:`UnlabeledData` represents input data which is not labeled.
@@ -75,7 +75,7 @@ we introduce the interface of the data object we want to clarify this distinctio
   ``Data<std::pair<I,L> >``. There is however an important difference in how labels
   and inputs are treated in machine learning. We often like, especially for unsupervised
   methods, to only use the inputs, thus viewing the object as an ``UnlabeledData<I>``.
-  For evaluation of the model, we also want to first get the set inputs, acquire the
+  For evaluation of the model, we also want to first get the set of inputs, acquire the
   set of predictions of the model and compare this set of predictions with the set of labels
   using a loss function. Instead of seeing input-label pairs as a fixed grouping, we would
   like to view them as two separate datasets which are conveniently bound together. And this is

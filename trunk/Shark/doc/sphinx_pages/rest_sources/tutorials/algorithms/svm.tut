@@ -34,19 +34,19 @@ data to a feature space and perform linear classification in that space.
 For a positive semi-definite kernel function :math:`k:X \times X \to\mathbb{R}`, consider the feature space
 :math:`\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}` and
 function class :math:`\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}`. The decision boundary induced by the sign of a
-function :math:`f \in \mathcal H_k^b` is a hyperplane in :math:`\mathcal H_k`.
-1-Norm Soft Margin SVMs find a solution to
+function :math:`f \in \mathcal H_k^b` is an affine hyperplane in :math:`\mathcal H_k`.
+1-Norm Soft Margin C-SVMs find a solution to
 
 .. math::
-       \underset{f \in\mathcal H_k^b}{\text{minimize}} \frac{1}{\ell} \sum_{i=1}^\ell L_{\text{hinge}}(y_i, f(x_i)) +\frac{\gamma_\ell}{2} \|f\|^2
+       \underset{f \in\mathcal H_k^b}{\text{minimize}}  \frac{1}{2} \|f\|_2^2 + C \sum_{i=1}^\ell L_{\text{hinge}}(y_i, f(x_i))
 
 with loss function
 :math:`L_{\text{hinge}}(y,f(x))=\max\{0, 1-(2y-1)f(x)\}` for
 :math:`Y=\{0,1\}`.
-The parameter :math:`\gamma_\ell >0`
+The parameter :math:`C >= 0`
 controls the trade-off between reducing the empirical loss
-:math:`L_{\text{hinge}}` and the complexity of the hypothesis :math:`\|.\|_k`
-measure by its norm (neglecting the bias parameter :math:`b`).
+:math:`L_{\text{hinge}}` and the complexity of the hypothesis :math:`\|.\|_2`
+measured by its norm (neglecting the bias parameter :math:`b`).
 
 Here we have adopted the Shark library convention of choosing
 :math:`Y=\{0,1\}` instead of :math:`Y=\{-1,1\}`. The latter is the
@@ -93,8 +93,8 @@ by writing::
 All kernels such as the :doxy:`GaussianRbfKernel` are derived from the
 base class :doxy:`AbstractKernelFunction`.
 
-Our model is now a kernel classifier.
-Given the previously defined kernel, the definition ::
+Our model is thus a kernel classifier, which is
+a linear classifier in feature space::
 
 ..sharkcode<Supervised/CSvmTutorial.tpp,model>
 
@@ -129,7 +129,7 @@ but uses unique features [GlasmachersIgel2006]_.
         trainer.stoppingCondition().minAccuracy = 1e-6;
         trainer.setCacheSize( 0x1000000 );
         trainer.train(ke, training);
-        std::cout << "Needed " << trainer.solutionProperties().seconds() << " seconds to reach a dual of " << trainer.solutionProperties().value() << std::endl;
+        std::cout << "Needed " << trainer.solutionProperties().seconds << " seconds to reach a dual of " << trainer.solutionProperties().value << std::endl;
 
     The first line uses one more template parameter in this alternative
     trainer declaration, requesting it to use ``double`` for the matrix
