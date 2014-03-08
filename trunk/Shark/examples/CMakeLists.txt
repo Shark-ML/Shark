@@ -182,7 +182,7 @@ add_custom_target(tpp2cpp DEPENDS ${TPP_FILES})
 IF( OPT_COMPILE_EXAMPLES )
 
 	INSTALL( DIRECTORY
-		 "${CMAKE_CURRENT_SOURCE_DIR}/Supervised/data"f
+		 "${CMAKE_CURRENT_SOURCE_DIR}/Supervised/data"
 		 DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Supervised
 		 PATTERN ".*" EXCLUDE
 	)
