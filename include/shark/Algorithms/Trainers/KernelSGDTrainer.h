@@ -158,7 +158,7 @@ public:
 			derivative.clear();
 			m_loss->evalDerivative(y[b], f_b, derivative);
 
-//			alphaScale *= (1.0 - eta * lambda);
+			// alphaScale *= (1.0 - eta * lambda);
 			alphaScale = (ell - 1.0) / (ell + iter);   // numerically more stable
 
 			noalias(row(alpha, b)) -= (eta / alphaScale) * derivative;
