@@ -48,7 +48,7 @@ namespace shark {
 namespace detail {
 
 typedef std::pair< unsigned int, size_t > LabelSortPair;
-static bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortPair& right) {
+static inline bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortPair& right) {
 	return left.first > right.first; // for sorting in decreasing order
 }
 
