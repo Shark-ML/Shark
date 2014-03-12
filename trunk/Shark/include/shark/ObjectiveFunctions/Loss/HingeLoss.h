@@ -120,7 +120,7 @@ public:
 				SIZE_CHECK(labels(i) < predictions.size2());
 				for(std::size_t o = 0; o != predictions.size2();++o){
 					if( o == labels(i)) continue;
-					double sampleLoss = std::max(0.0,2.0 - predictions(i,labels(i))+predictions(i,o));
+					double sampleLoss = std::max(0.0, 2.0 - predictions(i,labels(i)) + predictions(i,o));
 					if(sampleLoss > 0){
 						gradient(i,o) = 0.5;
 						gradient(i,labels(i)) -= 0.5;

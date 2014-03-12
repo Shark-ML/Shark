@@ -81,7 +81,7 @@ namespace shark {
 /// NOTE: Being an SGD-based solver, this algorithm is relatively fast for
 /// differentiable loss functions such as the logistic loss (class CrossEntropy).
 /// It suffers from significantly slower convergence for non-differentiable
-/// losses, e.g., the hinge loss used in SVM training.
+/// losses, e.g., the hinge loss for SVM training.
 ///
 template <class InputType>
 class KernelSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable
@@ -129,24 +129,25 @@ public:
 		// and create linear array of labels
 		RealMatrix K = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), 0);
 		UIntVector y = createBatch(dataset.labels().elements());
+		const double lambda = 1.0 / (ell * m_C);
 
-		// SGD loop
 		double alphaScale = 1.0;
 		std::size_t iterations;
 		if (m_epochs == 0) iterations = std::max(10 * ell, std::size_t(std::ceil(m_C * ell)));
 		else iterations = m_epochs * ell;
-		
-		
-		//preinitialize everything to prevent costly memory allocations in the loop
+
+		// preinitialize everything to prevent costly memory allocations in the loop
 		RealVector f_b(classes, 0.0);
 		RealVector derivative(classes, 0.0);
+
+		// SGD loop
 		for (std::size_t iter = 0; iter < iterations; iter++)
 		{
 			// active variable
 			std::size_t b = Rng::discrete(0, ell - 1);
 
 			// learning rate
-			const double eta = 1.0 / (iter + ell)/m_C;
+			const double eta = 1.0 / (lambda * (iter + ell));
 
 			// compute prediction
 			f_b.clear();
@@ -156,12 +157,17 @@ public:
 			// stochastic gradient descent (SGD) step
 			derivative.clear();
 			m_loss->evalDerivative(y[b], f_b, derivative);
-			alphaScale = (1.0 - 1.0 / (iter + ell+1.0)/m_C);   // should be numerically more stable
-			noalias(row(alpha, b)) -= (eta * m_C / alphaScale) * derivative;
+
+//			alphaScale *= (1.0 - eta * lambda);
+			alphaScale = (ell - 1.0) / (ell + iter);   // numerically more stable
+
+			noalias(row(alpha, b)) -= (eta / alphaScale) * derivative;
 			if (m_offset) noalias(model.offset()) -= eta * derivative;
 		}
 
 		alpha *= alphaScale;
+
+		// model.sparsify();
 	}
 
 	/// Return the number of training epochs.
