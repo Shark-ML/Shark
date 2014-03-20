@@ -129,7 +129,7 @@ public:
 		// and create linear array of labels
 		RealMatrix K = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), 0);
 		UIntVector y = createBatch(dataset.labels().elements());
-		const double lambda = 1.0 / (ell * m_C);
+		const double lambda = 0.5 / (ell * m_C);
 
 		double alphaScale = 1.0;
 		std::size_t iterations;
