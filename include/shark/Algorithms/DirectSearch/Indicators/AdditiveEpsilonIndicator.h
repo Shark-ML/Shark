@@ -34,11 +34,13 @@
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_INDICATORS_ADDITIVE_EPSILON_INDICATOR_H
 
 #include <shark/LinAlg/Base.h>
+#include <shark/LinAlg/Base.h>
 #include <shark/Core/OpenMP.h>
 
 #include <algorithm>
 #include <limits>
 #include <vector>
+
 
 namespace shark {
 
