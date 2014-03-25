@@ -39,7 +39,6 @@
 
 #include <shark/Core/Exception.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Initializers/CovarianceMatrixInitializer.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/GlobalIntermediateRecombination.h>
 
 #include <boost/lambda/lambda.hpp>

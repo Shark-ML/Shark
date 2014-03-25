@@ -53,7 +53,6 @@
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Algorithms/DirectSearch/TypedIndividual.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Initializers/CovarianceMatrixInitializer.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/GlobalIntermediateRecombination.h>
 
 #include <boost/math/special_functions.hpp>
