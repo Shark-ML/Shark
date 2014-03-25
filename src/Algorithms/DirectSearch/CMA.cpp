@@ -39,7 +39,6 @@
 
 #include <shark/Core/Exception.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Initializers/CovarianceMatrixInitializer.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/GlobalIntermediateRecombination.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/MuKommaLambdaSelection.h>
 
@@ -48,35 +47,6 @@
 
 using namespace shark;
 
-
-//Chromosome
-
-cma::Chromosome::Chromosome( unsigned int dimension) : m_recombinationType( SUPERLINEAR ),
-	m_updateType( RANK_ONE_AND_MU ),
-	m_sigma( 0 ),
-	m_cC( 0 ),
-	m_cCU( 0 ),
-	m_cCov( 0 ),
-	m_cSigma( 0 ),
-	m_cSigmaU( 0 ),
-	m_dSigma( 0 ),
-	m_muEff( 0 ),
-	m_muCov( 0 ) {
-}
-
-/**
-* \brief Adjusts the dimension of the chromosome.
-*/
-void cma::Chromosome::setDimension( unsigned int dimension ) {
-	m_mean.resize( dimension );
-	m_evolutionPathC.resize( dimension );
-	m_evolutionPathSigma.resize( dimension );
-	m_mutationDistribution.resize( dimension );
-	m_mean.clear();
-	m_evolutionPathC.clear();
-	m_evolutionPathSigma.clear();
-}
-
 //Functors used by the CMA-ES
 
 namespace{
@@ -84,13 +54,6 @@ namespace{
 		template<typename Individual>
 		bool operator()( const Individual & a, const Individual & b ) const {
 			return( a.fitness( shark::tag::PenalizedFitness() )[0] < b.fitness( shark::tag::PenalizedFitness() )[0] );
-		}
-	};
-
-	struct IdentityExtractor {
-		template<typename T>
-		const T & operator()( const T & t ) const {
-			return( t );
 		}
 	};
 
@@ -132,23 +95,34 @@ unsigned CMA::suggestLambda( unsigned int dimension ) {
 /**
 * \brief Calculates mu for the supplied lambda and the recombination strategy.
 */
-unsigned CMA::suggestMu( unsigned int lambda, shark::cma::RecombinationType recomb) {
+unsigned CMA::suggestMu( unsigned int lambda, RecombinationType recomb) {
 	unsigned int mu;
 	switch( recomb ) {
-		case shark::cma::EQUAL:         
+		case EQUAL:         
 			mu = static_cast<unsigned int>( ::floor( lambda / 4. ) ); 
 			break;
-		case shark::cma::LINEAR:        
+		case LINEAR:        
 			mu = static_cast<unsigned int>( ::floor( lambda / 2. ) ); 
 			break;
-		case shark::cma::SUPERLINEAR:   
+		case SUPERLINEAR:   
 			mu = static_cast<unsigned int>( ::floor( lambda / 2. ) ); 
 			break;
 	}
 	return( mu );
 }
 
-CMA::CMA() {
+CMA::CMA()
+:m_recombinationType( SUPERLINEAR )
+, m_updateType( RANK_ONE_AND_MU )
+, m_sigma( 0 )
+, m_cC( 0 )
+, m_cCU( 0 )
+, m_cCov( 0 )
+, m_cSigma( 0 )
+, m_cSigmaU( 0 )
+, m_dSigma( 0 )
+, m_muEff( 0 )
+, m_muCov( 0 ) {
 	m_features |= REQUIRES_VALUE;
 }
 
@@ -156,31 +130,74 @@ CMA::CMA() {
 * \brief Configures the algorithm based on the supplied configuration.
 */
 void CMA::configure( const PropertyTree & node ) {
-	m_chromosome.m_recombinationType = static_cast<shark::cma::RecombinationType>( node.get<unsigned int>( "RecombinationType", shark::cma::SUPERLINEAR ) );
-	m_chromosome.m_updateType = static_cast<shark::cma::UpdateType>( node.get<unsigned int>( "UpdateType", shark::cma::RANK_MU ) );
+	m_recombinationType = static_cast<RecombinationType>( node.get<unsigned int>( "RecombinationType", SUPERLINEAR ) );
+	m_updateType = static_cast<UpdateType>( node.get<unsigned int>( "UpdateType", RANK_ONE_AND_MU ) );
 }
 
 void CMA::read( InArchive & archive ) {
 	archive >> m_numberOfVariables;
 	archive >> m_mu;
 	archive >> m_lambda;
-	archive >> m_chromosome;
+	archive >> m_recombinationType;
+	archive >> m_updateType;
+
+	archive >> m_sigma;
+
+	archive >> m_cC;
+	archive >> m_cCU;
+	archive >> m_cCov;
+	archive >> m_cSigma;
+	archive >> m_cSigmaU;
+	archive >> m_dSigma;
+
+	archive >> m_muEff;
+	archive >> m_muCov;
+
+	archive >> m_mean;
+	archive >> m_weights;
+
+	archive >> m_evolutionPathC;
+	archive >> m_evolutionPathSigma;
+	archive >> m_mutationDistribution;
 }
 
 void CMA::write( OutArchive & archive ) const {
 	archive << m_numberOfVariables;
 	archive << m_mu;
 	archive << m_lambda;
-	archive << m_chromosome;
+	
+	archive << m_recombinationType;
+	archive << m_updateType;
+
+	archive << m_sigma;
+
+	archive << m_cC;
+	archive << m_cCU;
+	archive << m_cCov;
+	archive << m_cSigma;
+	archive << m_cSigmaU;
+	archive << m_dSigma;
+
+	archive << m_muEff;
+	archive << m_muCov;
+
+	archive << m_mean;
+	archive << m_weights;
+
+	archive << m_evolutionPathC;
+	archive << m_evolutionPathSigma;
+	archive << m_mutationDistribution;
 }
 
 
 void CMA::init( ObjectiveFunctionType const& function, SearchPointType const& p) {
 	unsigned int lambda = CMA::suggestLambda( p.size() );
-	init( p.size(),
+	unsigned int mu = CMA::suggestMu(  lambda, m_recombinationType );
+	init( function,
+		p,
 		lambda,
-		CMA::suggestMu(  lambda, m_chromosome.m_recombinationType ),
-		p,1.0
+		mu,
+		1.0
 	);
 }
 
@@ -188,77 +205,113 @@ void CMA::init( ObjectiveFunctionType const& function, SearchPointType const& p)
 * \brief Initializes the algorithm for the supplied objective function.
 */
 void CMA::init( 
-	unsigned int numberOfVariables, 
+	ObjectiveFunctionType const& function, 
+	SearchPointType const& initialSearchPoint,
 	unsigned int lambda, 
 	unsigned int mu,
-	const RealVector & initialSearchPoint,
 	double initialSigma,				       
 	const boost::optional< RealMatrix > & initialCovarianceMatrix
 ) {
 
-	m_numberOfVariables = numberOfVariables;
-
+	m_numberOfVariables = function.numberOfVariables();
 	m_lambda = lambda;
 	m_mu = mu;
-	m_chromosome.m_sigma = initialSigma;
+	m_sigma = initialSigma;
 
-	shark::cma::Initializer initializer;
-	initializer( m_chromosome,
-		 m_numberOfVariables,
-		 m_lambda,
-		 m_mu,
-		 m_chromosome.m_sigma
-	);
+	m_mean.resize( m_numberOfVariables );
+	m_evolutionPathC.resize( m_numberOfVariables );
+	m_evolutionPathSigma.resize( m_numberOfVariables );
+	m_mutationDistribution.resize( m_numberOfVariables );
+	m_mean.clear();
+	m_evolutionPathC.clear();
+	m_evolutionPathSigma.clear();
+	if(initialCovarianceMatrix){
+		m_mutationDistribution.setCovarianceMatrix(*initialCovarianceMatrix);
+	}
+	
+	
+	//weighting of the k-best individuals
+	m_weights.resize(mu);
+	switch (m_recombinationType) {
+	case EQUAL:
+		for (unsigned int i = 0; i < mu; i++)
+			m_weights(i) = 1;
+		break;
+	case LINEAR:
+		for (unsigned int i = 0; i < mu; i++)
+			m_weights(i) = mu-i;
+		break;
+	case SUPERLINEAR:
+		for (unsigned int i = 0; i < mu; i++)
+			m_weights(i) = ::log(mu + 1.) - ::log(1. + i);
+		break;
+	}
+	m_weights /= sum(m_weights);
+	m_muEff = 1. / sum(sqr(m_weights));
 
-	m_chromosome.m_mean = initialSearchPoint;
+	// Step size control
+	m_cSigma = (m_muEff + 2.)/(m_numberOfVariables + m_muEff + 3.);
+	m_dSigma = 1. + 2. * std::max(0., ::sqrt((m_muEff-1.)/(m_numberOfVariables+1)) - 1.) + m_cSigma;
+
+	// Covariance matrix adaptation
+	switch (m_updateType) {
+	case RANK_ONE:
+		m_muCov = 1;
+		break;
+	case RANK_ONE_AND_MU:
+		m_muCov = m_muEff;
+		break;
+	}
+
+	m_cC = 4. / (4. + m_numberOfVariables);
+	m_cCov = 1. / m_muCov * 2. / sqr(m_numberOfVariables + ::sqrt(2.)) +
+		(1 - 1. / m_muCov) * std::min(1., (2 * m_muEff - 1) / (sqr(m_numberOfVariables + 2) + m_muEff));
+
+	m_cCU = ::sqrt((2 - m_cC) * m_cC);
+	m_cSigmaU = ::sqrt((2 - m_cSigma) * m_cSigma);
+
+	m_mean = initialSearchPoint;
 	m_best.point = initialSearchPoint; // CI: you can argue about this, as the point is not evaluated
+	m_best.value = function(initialSearchPoint);//OK: evaluating performance of first point :P
 }
 
 /**
 * \brief Updates the strategy parameters based on the supplied offspring population.
 */
 void CMA::updateStrategyParameters( const std::vector<TypedIndividual<RealVector, RealVector> > & offspring ) {
-	RealVector xPrime = cog( offspring, m_chromosome.m_weights, PointExtractor() );
-	RealVector cogSteps = cog( offspring, m_chromosome.m_weights, StepExtractor() );
+	RealVector xPrime = cog( offspring, m_weights, PointExtractor() );
+	RealVector cogSteps = cog( offspring, m_weights, StepExtractor() );
 
-	RealVector v = blas::prod( m_chromosome.m_mutationDistribution.eigenVectors(), cogSteps );
-
-	m_chromosome.m_evolutionPathC = (1. - m_chromosome.m_cC ) * m_chromosome.m_evolutionPathC 
-		+ m_chromosome.m_cCU * std::sqrt( m_chromosome.m_muEff )  / m_chromosome.m_sigma * (xPrime-m_chromosome.m_mean);
+	RealVector v = blas::prod( m_mutationDistribution.eigenVectors(), cogSteps );
 
 	// Covariance Matrix Update
+	m_evolutionPathC = (1. - m_cC ) * m_evolutionPathC + m_cCU * std::sqrt( m_muEff )  / m_sigma * (xPrime-m_mean);
 	RealMatrix Z( m_numberOfVariables, m_numberOfVariables, 0.0);
-
-	RealMatrix C( m_chromosome.m_mutationDistribution.covarianceMatrix() );
+	RealMatrix C( m_mutationDistribution.covarianceMatrix() );
 	// Rank-1-Update
-	C = (1.-m_chromosome.m_cCov) * C +
-		m_chromosome.m_cCov / m_chromosome.m_muCov * blas::outer_prod( m_chromosome.m_evolutionPathC, m_chromosome.m_evolutionPathC );
+	C = (1.-m_cCov) * C +
+		m_cCov / m_muCov * blas::outer_prod( m_evolutionPathC, m_evolutionPathC );
 	// Rank-mu-Update
 	for( unsigned int i = 0; i < m_mu; i++ ) {
-		Z += m_chromosome.m_weights( i ) * blas::outer_prod(
-			*offspring[i] - m_chromosome.m_mean,
-			*offspring[i] - m_chromosome.m_mean
+		Z += m_weights( i ) * blas::outer_prod(
+			*offspring[i] - m_mean,
+			*offspring[i] - m_mean
 		);
 	}
-	C += m_chromosome.m_cCov * (1.-1./m_chromosome.m_muCov) * 1./sqr( m_chromosome.m_sigma ) * Z;
-	m_chromosome.m_mutationDistribution.setCovarianceMatrix( C );
-
+	C += m_cCov * (1.-1./m_muCov) * 1./sqr( m_sigma ) * Z;
+	m_mutationDistribution.setCovarianceMatrix( C );
+	
 	// Step size update
-	m_chromosome.m_evolutionPathSigma = (1. - m_chromosome.m_cSigma)*m_chromosome.m_evolutionPathSigma +
-		m_chromosome.m_cSigmaU * std::sqrt( m_chromosome.m_muEff ) * v;
+	m_evolutionPathSigma = (1. - m_cSigma)*m_evolutionPathSigma +m_cSigmaU * std::sqrt( m_muEff ) * v;
+	m_sigma *= std::exp( (m_cSigma / m_dSigma) * (norm_2(m_evolutionPathSigma)/ chi( m_numberOfVariables ) - 1.) );
+	
+	
+	// check for numerical stability
+	double ev = m_mutationDistribution.eigenValues()( m_mutationDistribution.eigenValues().size() - 1 );
+	if( m_sigma * std::sqrt( std::fabs( ev ) ) < 1E-20 )
+		m_sigma = 1E-20 / std::sqrt( std::fabs( ev ) );
 
-	double sum = norm_2(m_chromosome.m_evolutionPathSigma);
-	//~ for( unsigned int i = 0; i < m_chromosome.m_evolutionPathSigma.size(); i++ )
-		//~ sum += sqr( m_chromosome.m_evolutionPathSigma( i ) );
-	//~ sum = std::sqrt( sum );
-
-	m_chromosome.m_sigma *= std::exp( (m_chromosome.m_cSigma / m_chromosome.m_dSigma) * (sum/ chi( m_numberOfVariables ) - 1.) );
-	double ev = m_chromosome.m_mutationDistribution.eigenValues()( m_chromosome.m_mutationDistribution.eigenValues().size() - 1 );
-
-	if( m_chromosome.m_sigma * std::sqrt( std::fabs( ev ) ) < 1E-20 )
-		m_chromosome.m_sigma = 1E-20 / std::sqrt( std::fabs( ev ) );
-
-	m_chromosome.m_mean = xPrime;
+	m_mean = xPrime;
 }
 
 /**
@@ -270,9 +323,9 @@ void CMA::step(ObjectiveFunctionType const& function){
 
 	shark::soo::PenalizingEvaluator penalizingEvaluator;
 	for( unsigned int i = 0; i < offspring.size(); i++ ) {
-		MultiVariateNormalDistribution::ResultType sample = m_chromosome.m_mutationDistribution();
+		MultiVariateNormalDistribution::ResultType sample = m_mutationDistribution();
 		offspring[ i ].get<0>() = sample.second;
-		*offspring[i] = m_chromosome.m_mean + m_chromosome.m_sigma * sample.first;
+		*offspring[i] = m_mean + m_sigma * sample.first;
 
 		boost::tuple< ObjectiveFunctionType::ResultType, ObjectiveFunctionType::ResultType > evalResult;
 		evalResult = penalizingEvaluator( function, *offspring[i] );
