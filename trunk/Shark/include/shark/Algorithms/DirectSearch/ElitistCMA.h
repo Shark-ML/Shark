@@ -56,7 +56,6 @@
 #include <shark/Algorithms/DirectSearch/Operators/Initializers/CovarianceMatrixInitializer.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/GlobalIntermediateRecombination.h>
 
-#include <boost/lambda/lambda.hpp>
 #include <boost/math/special_functions.hpp>
 
 namespace shark {
@@ -447,9 +446,6 @@ namespace shark {
 	};      
 
 	const double ElitistCMA::SUCCESS_PROBABILITY_THRESHOLD = 0.44;
-
-	/** \brief Registers the elitist CMA with the factory. */
-	ANNOUNCE_SINGLE_OBJECTIVE_OPTIMIZER( ElitistCMA, soo::RealValuedSingleObjectiveOptimizerFactory );
 }
 
 #endif

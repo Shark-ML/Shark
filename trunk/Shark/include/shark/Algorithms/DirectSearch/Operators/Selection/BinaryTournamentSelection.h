@@ -45,15 +45,6 @@ namespace shark {
 */
 template<typename Predicate>
 struct BinaryTournamentSelection {
-
-	/**
-	* \brief C'tor.
-	* \param [in,out] predicate Predicate instance for comparing candidate solutions.
-	*/
-	BinaryTournamentSelection( Predicate & predicate ) : m_predicate( predicate )
-	{
-	}
-
 	/**
 	* \brief Selects individuals from range [inIt,inItE) and places them in
 	* the range [outIt, outItE).
@@ -96,7 +87,7 @@ struct BinaryTournamentSelection {
 		return( m_predicate( *(inIt + i2), *(inIt + i1) ) ? inIt + i2 : inIt + i1 );
 	}
 
-	Predicate & m_predicate; ///< Predicate instance.
+	Predicate m_predicate; ///< Predicate instance.
 };
 }
 

@@ -4,7 +4,7 @@
 
 #include <shark/Algorithms/DirectSearch/HypervolumeCalculator.h>
 #include <shark/Algorithms/DirectSearch/HypervolumeApproximator.h>
-#include <shark/Algorithms/DirectSearch/LeastContributorApproximator.hpp>
+#include <shark/Algorithms/DirectSearch/Indicators/LeastContributorApproximator.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 
 #include <shark/Rng/GlobalRng.h>
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_LeastContributorApproximator ) {
 
 	std::vector< std::vector< double > >::const_iterator it = m_testSet3D.begin();
 	BOOST_CHECK( 
-		lca.leastContributor( ife, m_testSet3D, m_refPoint3D, 1E-2, 1E-2 ) == 
+		lca.leastContributor( ife, m_testSet3D, m_refPoint3D ) == 
 		std::distance( contributions.begin(), std::min_element( contributions.begin(), contributions.end() ) ) 
 	);
 }

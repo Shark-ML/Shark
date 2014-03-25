@@ -34,7 +34,6 @@
 
 #include <shark/Algorithms/AbstractOptimizer.h>
 #include <shark/Core/ResultSets.h>
-#include <shark/Core/Traits/OptimizerTraits.h>
 
 namespace shark {
 
@@ -110,17 +109,10 @@ protected:
 
 }
 
-#include <shark/Core/Factory.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
 
-namespace moo {
-
-/// \brief Defines the default factory type for real-valued multi-objective optimizers.
-typedef Factory< AbstractMultiObjectiveOptimizer< VectorSpace< double > >, std::string > RealValuedMultiObjectiveOptimizerFactory;
-
-}
 
 /// \brief Type erasure to integrate Optimizer adhering to the concept of a 
 /// multi-objective optimizer with the inheritance hierarchy of AbstractOptimizer.
@@ -166,41 +158,6 @@ public:
 		super::m_best = OptimizerBase::step( function );
 	}
 };
-
-/**
- * \brief Implements OptimizerTraits for a type erase MOO.
- */
-template<typename S, typename O>
-struct OptimizerTraits< TypeErasedMultiObjectiveOptimizer<S,O> > {
-
-  template<typename Function>
-  static void report( unsigned int generation, 
-                      unsigned int trial, 
-                      const O & o,
-                      const std::string & optimizerName,
-                      const Function & f,
-                      const std::string & functionName ) {
-    OptimizerTraits<O>::report(generation, trial, o, optimizerName, f, functionName);
-  }
-
-  template<typename Stream>
-  static void usage( Stream & s ) {
-    OptimizerTraits<O>::usage(s);
-  }
-
-  template<typename Tree>
-  static void defaultConfig( Tree & t ) {
-    OptimizerTraits<O>::defaultConfig(t);
-  }
-};
-
 }
-
-#define ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER( Optimizer, Factory )        \
-  namespace Optimizer ## _detail {                                      \
-  typedef TypeErasedAbstractFactory< Optimizer, Factory > abstract_factory_type; \
-  typedef FactoryRegisterer< Factory > factory_registerer_type;         \
-  static factory_registerer_type FACTORY_REGISTERER = factory_registerer_type( #Optimizer, new abstract_factory_type() ); \
-  }                                                                     \
 
 #endif

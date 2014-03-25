@@ -86,15 +86,6 @@ struct EPTournamentSelection {
 			}
 		}
 
-		for( InIterator it = offspring; it != offspringE; ++it, ++itv ) {
-			it->fitness( shark::tag::ScaledFitness() )( 0 ) = 0.;
-			*itv = it;
-			for( std::size_t round = 0; round < tournamentSize; round++ ) {
-				std::size_t idx = shark::Rng::discrete( 0, totalSize-1 );
-				it->fitness( shark::tag::ScaledFitness() )( 0 ) += comp( *it, *( idx < noParents ? parents + idx : offspring + idx - noParents ) ) ? 1. : 0.;
-			}
-		}
-
 		std::sort( view.begin(), view.end(), shark::IndirectFitnessComparator< FitnessType >() );
 
 		itv = view.begin();

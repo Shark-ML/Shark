@@ -257,37 +257,8 @@ public:
 };
 }
 
-/**
-* \brief NSGA-II specialization of optimizer traits.
-*/
-template<>
-struct OptimizerTraits< detail::RealCodedNSGAII<> > {
-	/**
-	* \brief Prints out the configuration options and usage remarks of the algorithm to the supplied stream.
-	* \tparam Stream The type of the stream to output to.
-	* \param [in,out] s The stream to print usage information to.
-	*/
-	template<typename Stream>
-	static void usage( Stream & s ) {
-		s << "RealCodedNSGAII usage information:" << std::endl;
-		s << "\t Mu, size of the population, default value: \t\t 100" << std::endl;
-		s << "\t CrossoverProbability, type: double, default value: \t\t 0.8." << std::endl;
-		s << "\t NC, type: double, default value: \t\t 10." << std::endl;
-		s << "\t NM, type: double; default value: \t\t 20." << std::endl;
-	}
-};
-
-/** \brief Injects the NSGA-II into the inheritance hierarchy. */
 typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::RealCodedNSGAII<> > HypRealCodedNSGAII;
-
-/** \brief Injects the NSGA-II into the inheritance hierarchy. */
 typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::RealCodedNSGAII< shark::AdditiveEpsilonIndicator > > EpsRealCodedNSGAII;
-
-/** \brief Registers the real-coded NSGA-II relying on the hypervolume indicator with the factory. */
-ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER( HypRealCodedNSGAII, moo::RealValuedMultiObjectiveOptimizerFactory );
-
-/** \brief Registers the real-coded NSGA-II relying on the additive epsilon indicator with the factory. */
-ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER( EpsRealCodedNSGAII, moo::RealValuedMultiObjectiveOptimizerFactory )
 }
 
 #endif

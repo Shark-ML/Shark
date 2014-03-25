@@ -242,9 +242,6 @@ protected:
 
 	shark::MultiVariateNormalDistribution m_mvn; ///< Models the search distribution.
 };
-
-/** \brief Registers the (1+1)-ES with the factory. */
-ANNOUNCE_SINGLE_OBJECTIVE_OPTIMIZER( OnePlusOneES, soo::RealValuedSingleObjectiveOptimizerFactory );
 }
 
 #endif

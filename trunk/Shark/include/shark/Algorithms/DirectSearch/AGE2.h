@@ -83,17 +83,14 @@ typedef std::vector<Individual> Population;
 class AGE2 {
 protected:
 
-	/** \cond */
-	struct AdditiveEpsilonIndicator {
-		static double calc(const age2::Individual &a, const age2::Individual &b)
-		{
-			double result = -std::numeric_limits<double>::max();
-			for (unsigned int i = 0; i < a.fitness(tag::PenalizedFitness()).size(); i++) {
-				result = std::max(result, b.fitness(tag::PenalizedFitness())[ i ] - a.fitness(tag::PenalizedFitness())[i]);
-			}
-			return(result);
+	double additiveEpsilon(const age2::Individual &a, const age2::Individual &b)
+	{
+		double result = -std::numeric_limits<double>::max();
+		for (unsigned int i = 0; i < a.fitness(tag::PenalizedFitness()).size(); i++) {
+			result = std::max(result, b.fitness(tag::PenalizedFitness())[ i ] - a.fitness(tag::PenalizedFitness())[i]);
 		}
-	};
+		return result;
+	}
 
 	struct CacheElement {
 		age2::Population::const_iterator m_p1;
@@ -102,37 +99,21 @@ protected:
 		double m_a2;
 	};
 
-	struct MinElement {
-
-		MinElement(const age2::Individual &a) : m_a(a)
-		{
-		}
-
-		bool operator()(const age2::Individual &x, const age2::Individual &y) const
-		{
-			return(AdditiveEpsilonIndicator::calc(x, m_a) < AdditiveEpsilonIndicator::calc(y, m_a));
-		}
-
-		const age2::Individual &m_a;
-
-	};
-
 	std::vector< CacheElement > preProcess(const age2::Population &archive, const age2::Population &pop) const
 	{
 		std::vector< CacheElement > result(archive.size());
 
 		for (unsigned int i = 0; i < archive.size(); i++) {
-			MinElement me(archive[i]);
 			result[i].m_p1 = result[i].m_p2 = pop.end();
 			for (age2::Population::const_iterator it = pop.begin(); it != pop.end(); ++it) {
 				if (result[i].m_p1 == pop.end()) {
 					result[i].m_p1 = it;
 					continue;
 				}
-
-				if (me(*result[i].m_p1, *it)) {
+				
+				if(additiveEpsilon(*result[i].m_p1, archive[i]) < additiveEpsilon(*it, archive[i]))
 					result[i].m_p1 = it;
-					result[i].m_a1 = AdditiveEpsilonIndicator::calc(*it, archive[i]);
+					result[i].m_a1 = additiveEpsilon(*it, archive[i]);
 				}
 			}
 
@@ -147,13 +128,13 @@ protected:
 
 				if (me(*result[i].m_p2, *it)) {
 					result[i].m_p2 = it;
-					result[i].m_a2 = AdditiveEpsilonIndicator::calc(*it, archive[i]);
+					result[i].m_a2 = additiveEpsilon(*it, archive[i]);
 				}
 			}
 
 
 		}
-		return(result);
+		return result;
 	}
 	/** \endcond */
 	std::vector< CacheElement > m_cache;
@@ -164,7 +145,6 @@ protected:
 	unsigned int m_lambda; ///< Offspring population size \f$\lambda\f$.
 
 	shark::moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
-	RankShareComparator rsc; ///< Comparator for individuals based on their multi-objective rank and share.
 	FastNonDominatedSort m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort.
 	IndicatorBasedSelection<HypervolumeIndicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
 	BinaryTournamentSelection< RankShareComparator > m_binaryTournamentSelection; ///< Mating selection operator.
@@ -192,7 +172,7 @@ public:
 	 */
 	std::string name() const
 	{
-		return("AGE2");
+		return "AGE2";
 	}
 
 	/**
@@ -362,7 +342,6 @@ public:
 		if (!dominated)
 			m_archive.push_back(m_pop.back());
 
-		//std::cout << "(II) Evaluation counter: " << f.evaluationCounter() << std::endl;
 		m_cache = preProcess(m_archive, m_pop);
 
 		RealVector beta(m_pop.size(), -std::numeric_limits< double >::max());
@@ -379,30 +358,6 @@ public:
 		RealVector::iterator maxBeta = std::max_element(beta.begin(), beta.end());
 		m_pop[ std::distance(beta.begin(), maxBeta) ].share() = 1;
 		std::sort(m_pop.begin(), m_pop.end(), RankShareComparator());
-		//std::swap( m_pop[ std::distance( beta.begin(), maxBeta ) ], m_pop.back() );
-
-		/*typedef LocalitySensitiveAdditiveEpsilonIndicator< shark::tag::PenalizedFitness > LSAE;
-		  LSAE lsae;
-		  std::vector< LSAE::ResultType > indicatorValues( m_pop.size() );
-		  for( unsigned int i = 0; i < m_pop.size(); i++ ) {
-		  age2::Population p( m_pop );
-		  p.erase( p.begin() + i );
-
-		  indicatorValues[ i ] = lsae( p.begin(), p.end(), m_archive.begin(), m_archive.end() );
-		  }
-
-		  m_fastNonDominatedSort( m_pop );
-		  for( age2::Population::iterator it = m_pop.begin(); it != m_pop.end(); ++it )
-		  it->share() = 0;
-
-		  std::vector<
-		  LSAE::ResultType
-		  >::iterator itr = std::min_element( indicatorValues.begin(), indicatorValues.end() );
-
-		  m_pop[ std::distance( indicatorValues.begin(), itr ) ].share() = 1;
-
-		  std::sort( m_pop.begin(), m_pop.end(), RankShareComparator() );*/
-
 
 		SolutionSetType solutionSet;
 		for (age2::Population::iterator it = m_archive.begin(); it != m_archive.end(); ++it) {

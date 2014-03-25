@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       Calculates the hypervolume covered by a set of non-dominated points.
+ * \brief       Calculates the hypervolume covered by a front of non-dominated points.
  * 
  * 
  *
@@ -43,40 +43,48 @@
 namespace shark {
 
 /**
-*  \brief Calculates the hypervolume covered by a set of non-dominated points.
+*  \brief Calculates the hypervolume covered by a front of non-dominated points.
 */
 struct HypervolumeIndicator {
 public:
+	
+	/**
+	* \brief Calculates the volume of a hyperfront using a reference point
+	*
+	* \param [in,out] extractor Extractor instance that maps elements of the front to \f$\mathbb{R}^d\f$.
+	* \param [in] front pareto front of points to calculate the hypervolume for. 
+	* \param [in] referencePoint reference for measuring the hypervolume
+	*/
+	template<typename Extractor, typename ParetoFrontType, typename VectorType>
+	double operator()( Extractor & extractor, ParetoFrontType const& front, VectorType const& referencePoint) {
+		
+		if(front.empty()) return 0;
+
+		return (m_hv( extractor, front, referencePoint) );
+	}
 
 	/**
 	* \brief Executes the algorithm and calls to an instance of HypervolumeCalculator.
-	* \pre Both the nadir fitness and the utopian fitness vectors need to be set.
-	* \param [in,out] extractor Extractor instance that maps elements of the set to \f$\mathbb{R}^d\f$.
-	* \param [in] set Set of points to calculate the hypervolume for. 
-	* \param [in] noObjectives Defines the dimensioniality d.
+	*
+	* This version uses the reference point estimated by the last call to updateInternals.
+	*
+	* \param [in] extractor Extractor instance that maps elements of the front to \f$\mathbb{R}^d\f$.
+	* \param [in] front front of points to calculate the hypervolume for. 
 	*/
-	template<typename Extractor, typename Set>
-	double operator()( Extractor & extractor, const Set & set) {
-		
-		if( m_nadirFitness.size() != m_utopianFitness.size() )
-			throw shark::Exception( "HypervolumeIndicator: Dimension of utopian and nadir fitness vectors do not match.", __FILE__, __LINE__ );
-		
-		RealVector ref( m_nadirFitness );
-		for( unsigned int i = 0; i < ref.size(); i++ )
-			ref[i] += m_nadirFitness[i] - m_utopianFitness[i];
-
-		return( m_hv( extractor, set, ref) );
+	template<typename Extractor, typename ParetoFrontType>
+	double operator()( Extractor extractor, ParetoFrontType const& front) {
+		return (*this)( extractor, front, m_reference);
 	}
 		
 	/**
 	* \brief Determines the individual contributing the least to the front it belongs to.
 	*
-	* \param [in, out] extractor Maps the individuals to the objective space.
+	* \param [in] extractor Maps the individuals to the objective space.
 	* \param [in] front The front of non-dominated individuals.
-	* \param [in] t Marks the function for considering unary performance indicators.
+	* \param [in] referencePoint reference for measuring the hypervolume
 	*/
-	template<typename Extractor, typename ParetoFrontType>
-	std::size_t leastContributor( Extractor & extractor, const ParetoFrontType & front)
+	template<typename Extractor, typename ParetoFrontType, typename VectorType>
+	std::size_t leastContributor( Extractor extractor, ParetoFrontType const& front, VectorType const& referencePoint)
 	{
 		std::vector<double> indicatorValues( front.size() );
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
@@ -86,28 +94,46 @@ public:
 			ParetoFrontType copy( front );
 			copy.erase( copy.begin() + i );
 
-			indicatorValues[i] = ind( extractor, copy);
+			indicatorValues[i] = ind( extractor, copy,referencePoint);
 		}
 
 		std::vector<double>::iterator it = std::min_element( indicatorValues.begin(), indicatorValues.end() );
 
 		return std::distance( indicatorValues.begin(), it );
 	}
-
+	
 	/**
-	* \brief Adjusts the nadir fitness vector.
-	* \param [in] fitness The new nadir fitness vector.
-	*/
-	void setNadirFitness( const RealVector & fitness ) {
-		m_nadirFitness = fitness;
+	 * \brief Determines the point contributing the least hypervolume to the overall front of points.
+	 *
+	 * This version uses the reference point estimated by the last call to updateInternals.
+	 * 
+	 * \param [in] extractor Extracts point information from front elements.
+	 * \param [in] front pareto front of points
+	 */
+	template<typename Extractor, typename ParetoFrontType>
+	std::size_t leastContributor( Extractor extractor, ParetoFrontType const& front)
+	{
+		return leastContributor(extractor,front,m_reference);
 	}
-
-	/**
-	* \brief Adjusts the utopian fitness vector.
-	* \param [in] fitness The new utopian fitness vector.
-	*/
-	void setUtopianFitness( const RealVector & fitness ) {
-		m_utopianFitness = fitness;
+	
+	/// \brief Updates the internal variables of the indicator using a whole population.
+	///
+	/// Calculates the reference point of the volume from the population
+	/// using the maximum value in every dimension+1
+	/// \param set The set of points.
+	template<typename Extractor, typename PointSet>
+	void updateInternals(Extractor extractor, PointSet const& set){
+		m_reference.clear();
+		if(set.empty()) return;
+		
+		//calculate reference point
+		std::size_t noObjectives = extractor(set[0]).size();
+		m_reference.resize(noObjectives);
+		
+		for( unsigned int i = 0; i < set.size(); i++ )
+			noalias(m_reference) = max(m_reference, extractor(set[i]));
+		
+		noalias(m_reference)+=blas::repeat(1.0,noObjectives);
 	}
 
 	/**
@@ -119,14 +145,10 @@ public:
 	template<typename Archive>
 	void serialize( Archive & archive, const unsigned int version ) {
 		archive & BOOST_SERIALIZATION_NVP( m_hv );
-		archive & BOOST_SERIALIZATION_NVP( m_nadirFitness );
-		archive & BOOST_SERIALIZATION_NVP( m_utopianFitness );
 	}
 
-
 	HypervolumeCalculator m_hv;
-	RealVector m_nadirFitness;
-	RealVector m_utopianFitness;
+	RealVector m_reference;
 };
 }
 

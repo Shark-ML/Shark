@@ -30,8 +30,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_LEASTCONTRIBUTORAPPROXIMATOR_HPP
-#define SHARK_ALGORITHMS_DIRECT_SEARCH_LEASTCONTRIBUTORAPPROXIMATOR_HPP
+#ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_INDICATORS_LEASTCONTRIBUTORAPPROXIMATOR_H
+#define SHARK_ALGORITHMS_DIRECT_SEARCH_INDICATORS_LEASTCONTRIBUTORAPPROXIMATOR_H
 
 #include <shark/Core/Exception.h>
 #include <shark/Core/Math.h>
@@ -351,10 +351,15 @@ struct LeastContributorApproximator {
 	double m_gamma;
 
 	unsigned int m_round;
+	
+	double m_errorProbability; ///<The error probability.
+	double m_errorBound;  ///<The error bound
 
 	Strategy m_strategy;
 	boost::uint_fast64_t m_sampleCounter;
 	boost::uint_fast64_t m_sampleCountThreshold;
+	
+	RealVector m_reference;///< the reference calculates by updateInternals
 
 	/**
 	 * \brief C'tor
@@ -363,18 +368,24 @@ struct LeastContributorApproximator {
 	 * \param [in] minimumDeltaMultiplier Multiplier for adjusting the delta value.
 	 * \param [in] maxNumSamples The maximum number of samples. If reached, the algorithm aborts.
 	 * \param [in] gamma
+	 * \param [in] delta the error probability of the least contributor
+	 * \param [in] eps the error bound of the least contributor
 	 */
 	LeastContributorApproximator( double startDelta = this_type::DEFAULT_START_DELTA(),
 	                              double multiplierDelta = this_type::DEFAULT_MULTIPLIER_DELTA(),
 	                              double minimumDeltaMultiplier = this_type::DEFAULT_MINIMUM_MULTIPLIER_DELTA(),
 	                              unsigned long long maxNumSamples = this_type::DEFAULT_MAX_NUM_SAMPLES(),
-	                              double gamma = this_type::DEFAULT_GAMMA()
+	                              double gamma = this_type::DEFAULT_GAMMA(),
+				      double delta = 1.E-2,
+				      double eps = 1.E-2
 	                            ) : m_startDelta( startDelta ),
 		m_multiplierDelta( multiplierDelta ),
 		m_minimumMultiplierDelta( minimumDeltaMultiplier ),
 		m_maxNumSamples( maxNumSamples ),
 		m_gamma( gamma ),
 		m_round( 0 ),
+		m_errorProbability(delta),
+		m_errorBound(eps),
 		m_strategy( this_type::DEFAULT_STRATEGY() ),
 		m_sampleCounter( 0 ),
 		m_sampleCountThreshold( this_type::DEFAULT_SAMPLE_THRESHOLD() )
@@ -459,11 +470,9 @@ struct LeastContributorApproximator {
 	 * \param [in] e Extracts point information from set elements.
 	 * \param [in] s Set of points.
 	 * \param [in] refPoint The reference point to consider for calculating individual points' contributions.
-	 * \param [in] delta The error probability.
-	 * \param [in] eps The error bound.
 	 */
 	template<typename Extractor, typename Set, typename VectorType>
-	std::size_t leastContributor( Extractor & e, const Set & s, const VectorType & refPoint, double delta, double eps )
+	std::size_t leastContributor( Extractor e, const Set & s, const VectorType & refPoint)
 	{
 		if(s.empty()) return 0;
 		
@@ -490,7 +499,7 @@ struct LeastContributorApproximator {
 			maxBoundingBoxVolume = std::max( maxBoundingBoxVolume, it->m_boundingBoxVolume );
 
 		double _delta = m_startDelta * maxBoundingBoxVolume;
-		m_logFactor = ::log( 2. * front.size() * (1. + m_gamma) / (delta * m_gamma) );
+		m_logFactor = ::log( 2. * front.size() * (1. + m_gamma) / (m_errorProbability * m_gamma) );
 		double minApprox = std::numeric_limits<double>::max();
 
 		typename std::vector<Point< VectorType > >::iterator minimalElement;
@@ -559,13 +568,47 @@ struct LeastContributorApproximator {
 					d = nom/den;
 			}
 
-			if( d < 1. + eps )
+			if( d < 1. + m_errorBound )
 				break;
 
 			_delta *= m_multiplierDelta;
 		}
 
 		return std::distance( front.begin(), minimalElement );
+	}
+	
+	/**
+	 * \brief Determines the point contributing the least hypervolume to the overall front of points.
+	 *
+	 * This version uses the reference point estimated by the last call to updateInternals.
+	 * 
+	 * \param [in] extractor Extracts point information from front elements.
+	 * \param [in] front pareto front of points
+	 */
+	template<typename Extractor, typename ParetoFrontType>
+	std::size_t leastContributor( Extractor extractor, ParetoFrontType const& front)
+	{
+		return leastContributor(extractor,front,m_reference);
+	}
+	
+	/// \brief Updates the internal variables of the indicator using a whole population.
+	///
+	/// Calculates the reference point of the volume from the population
+	/// using the maximum value in every dimension+1
+	/// \param set The set of points.
+	template<typename Extractor, typename PointSet>
+	void updateInternals(Extractor extractor, PointSet const& set){
+		m_reference.clear();
+		if(set.empty()) return;
+		
+		//calculate reference point
+		std::size_t noObjectives = extractor(set[0]).size();
+		m_reference.resize(noObjectives);
+		
+		for( unsigned int i = 0; i < set.size(); i++ )
+			noalias(m_reference) = max(m_reference, extractor(set[i]));
+		
+		noalias(m_reference)+=blas::repeat(1.0,noObjectives);
 	}
 };
 }
