@@ -1,18 +1,11 @@
 /*!
  * 
  *
- * \brief       Implements the most recent version of the non-elitist CMA-ES.
- * 
- * The algorithm is described in
- * 
- * Hansen, N., S. Kern (2004). Evaluating the CMA Evolution Strategy
- * on Multimodal Test Functions. In Proceedings of the Eighth
- * International Conference on Parallel Problem Solving from Nature
- * (PPSN VIII), pp. 282-291, LNCS, Springer-Verlag
+ * \brief       Implements the most recent version of the elitist CMA-ES.
  * 
  *
- * \author      -
- * \date        -
+ * \author      O.Krause, T.Voss
+ * \date        2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
