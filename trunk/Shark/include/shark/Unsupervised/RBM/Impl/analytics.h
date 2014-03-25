@@ -31,7 +31,7 @@
 #define SHARK_UNSUPERVISED_RBM_IMPL_ANALYTICS_H
 
 #include <shark/Unsupervised/RBM/Tags.h>
-#include <shark/Unsupervised/RBM/Sampling/TemperedMarkovChain.h>
+#include <shark/Unsupervised/RBM/Sampling/EnergyStoringTemperedMarkovChain.h>
 #include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
 #include <shark/Unsupervised/RBM/Energy.h>
 #include <shark/Algorithms/GradientDescent/Rprop.h>
@@ -120,7 +120,7 @@ namespace detail{
 		return optimizer.solution().point(0);
 	}
 
-	/// \brief Samples energydifferencebetween different chains from an RBM.
+	/// \brief Samples energy difference between different chains from an RBM.
 	///
 	/// Given a set of beta: beta_0> beta_1>.... beta_n >= 0, draws samples from the RBM with the corresponding beta values using 
 	/// Parallel tempering. Forevery such sample the difference in Energy with respect to the neighboringchains is computed. The Difference
@@ -151,68 +151,92 @@ namespace detail{
 		std::size_t burnIn = static_cast<std::size_t>(samples*burnInPercentage);
 		if(!burnIn)++burnIn;
 		
-		//set up betasfor sampling and target
-		RealVector betaUp(chains);
-		RealVector betaDown(chains);
-		
-		betaUp(0) = 1.0;
-		betaDown(chains-1) = 0.0;
-		for(std::size_t i = 0; i != chains-1; ++i){
-			betaDown(i) = beta(i+1);
-			betaUp(i+1) = beta(i);
-		}
-		
 		//setup sampler
-		typedef TemperedMarkovChain<GibbsOperator<RBMType> > PTSampler;
+		typedef EnergyStoringTemperedMarkovChain<GibbsOperator<RBMType> > PTSampler;
 		PTSampler sampler(&rbm);
 		sampler.setNumberOfTemperatures(chains);
 		for(std::size_t i = 0; i != chains; ++i){
 			sampler.setBeta(i,beta(i));
 		}
-		sampler.initializeChain(initDataset);
+		sampler.storeEnergyDifferences() = false;
 		sampler.step(burnIn);
-		
-		//sample and store Energies
-		Energy<RBMType> energy = rbm.energy();	
+		sampler.storeEnergyDifferences() = true;
+		//acquire the 
 		for(std::size_t s = 0; s != samples; ++s){
 			sampler.step(1);
-			
-			//calculate The upper and lower energy difference for every chain.
-			
-			if(useDirectEnergies){
-				noalias(column(energyDiffDown,s)) = energy.energyFromVisibleInput(
-					sampler.samples().visible.input,
-					sampler.samples().hidden.state,
-					sampler.samples().visible.state
-				);
-				noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
-				//~ column(energyDiffUp,s) *=1.0/(chains-1);
-				//~ column(energyDiffDown,s) *= -1.0/(chains-1);
-				column(energyDiffUp,s) *= betaUp-beta;
-				column(energyDiffDown,s) *= betaDown-beta;
-			}
-			else{
-				//calculate the first term: -E(state,beta) thats the same for both matrices
-				noalias(column(energyDiffDown,s)) = energy.logUnnormalizedProbabilityHidden(
-					sampler.samples().hidden.state,
-					sampler.samples().visible.input,
-					beta
-				);
-				noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
-				
-				//now add the new term
-				noalias(column(energyDiffUp,s)) -= energy.logUnnormalizedProbabilityHidden(
-					sampler.samples().hidden.state,
-					sampler.samples().visible.input,
-					betaUp
-				);
-				noalias(column(energyDiffDown,s)) -= energy.logUnnormalizedProbabilityHidden(
-					sampler.samples().hidden.state,
-					sampler.samples().visible.input,
-					betaDown
-				);
-			}
 		}
+		
+		noalias(energyDiffUp) = sampler.getUpDifferences();
+		noalias(energyDiffDown) = sampler.getDownDifferences();
+		
+		
+		//~ std::size_t chains = beta.size();
+		//~ std::size_t samples = energyDiffUp.size2();
+		
+		//~ std::size_t burnIn = static_cast<std::size_t>(samples*burnInPercentage);
+		//~ if(!burnIn)++burnIn;
+		
+		//~ //set up betasfor sampling and target
+		//~ RealVector betaUp(chains);
+		//~ RealVector betaDown(chains);
+		
+		//~ betaUp(0) = 1.0;
+		//~ betaDown(chains-1) = 0.0;
+		//~ for(std::size_t i = 0; i != chains-1; ++i){
+			//~ betaDown(i) = beta(i+1);
+			//~ betaUp(i+1) = beta(i);
+		//~ }
+		
+		//~ //setup sampler
+		//~ typedef TemperedMarkovChain<GibbsOperator<RBMType> > PTSampler;
+		//~ PTSampler sampler(&rbm);
+		//~ sampler.setNumberOfTemperatures(chains);
+		//~ for(std::size_t i = 0; i != chains; ++i){
+			//~ sampler.setBeta(i,beta(i));
+		//~ }
+		//~ sampler.initializeChain(initDataset);
+		//~ sampler.step(burnIn);
+		
+		//~ //sample and store Energies
+		//~ Energy<RBMType> energy = rbm.energy();	
+		//~ for(std::size_t s = 0; s != samples; ++s){
+			//~ sampler.step(1);
+			
+			//~ //calculate The upper and lower energy difference for every chain.
+			
+			//~ if(useDirectEnergies){
+				//~ noalias(column(energyDiffDown,s)) = energy.energyFromVisibleInput(
+					//~ sampler.samples().visible.input,
+					//~ sampler.samples().hidden.state,
+					//~ sampler.samples().visible.state
+				//~ );
+				//~ noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
+				//~ column(energyDiffUp,s) *= betaUp-beta;
+				//~ column(energyDiffDown,s) *= betaDown-beta;
+			//~ }
+			//~ else{
+				//~ //calculate the first term: -E(state,beta) thats the same for both matrices
+				//~ rbm.energy().inputVisible(sampler.samples().visible.input, sampler.samples().hidden.state);
+				//~ noalias(column(energyDiffDown,s)) = energy.logUnnormalizedProbabilityHidden(
+					//~ sampler.samples().hidden.state,
+					//~ sampler.samples().visible.input,
+					//~ beta
+				//~ );
+				//~ noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
+				
+				//~ //now add the new term
+				//~ noalias(column(energyDiffUp,s)) -= energy.logUnnormalizedProbabilityHidden(
+					//~ sampler.samples().hidden.state,
+					//~ sampler.samples().visible.input,
+					//~ betaUp
+				//~ );
+				//~ noalias(column(energyDiffDown,s)) -= energy.logUnnormalizedProbabilityHidden(
+					//~ sampler.samples().hidden.state,
+					//~ sampler.samples().visible.input,
+					//~ betaDown
+				//~ );
+			//~ }
+		//~ }
 	}
 	
 	template<class RBMType>

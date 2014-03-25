@@ -186,8 +186,8 @@ public:
 	///@param visibleBatch the batch of samples of the visible neurons (holding also the precomputed input of the visibles)
 	///@return the value of the energy function 
 	RealVector calculateEnergy(HiddenSampleBatch const& hiddenBatch, VisibleSampleBatch const& visibleBatch)const{
-		return mpe_rbm->energy().energyFromVisibleInput(
-			visibleBatch.input, 
+		return mpe_rbm->energy().energyFromHiddenInput(
+			hiddenBatch.input, 
 			hiddenBatch.state, 
 			visibleBatch.state
 		);

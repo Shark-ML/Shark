@@ -140,6 +140,10 @@ public:
 		return m_betas(i);
 	}
 	
+	RealVector const& beta()const{
+		return m_betas;
+	}
+	
 	///\brief Returns the current state of the chain for beta = 1.
 	const_reference sample()const{
 		return const_reference(m_temperedChains,0);
