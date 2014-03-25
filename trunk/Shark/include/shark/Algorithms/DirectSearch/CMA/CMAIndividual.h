@@ -112,14 +112,6 @@ public:
 	}
 
 	/**
-	 * \brief Adjusts the number of objectives
-	 */
-	void setNoObjectives(unsigned int noObjectives) {
-		m_penalizedFitness.resize(noObjectives);
-		m_unpenalizedFitness.resize(noObjectives);
-	}
-
-	/**
 	 * \brief Returns the age of the individual (in generations).
 	 */
 	unsigned int age() const {

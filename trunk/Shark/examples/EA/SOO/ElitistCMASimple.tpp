@@ -55,6 +55,6 @@ int main( int argc, char ** argv ) {
 		std::cout << sphere.evaluationCounter() << " "	
 			<< cma.solution().value << " "
 			<< cma.solution().point << " "
-			<< cma.chromosome().m_sigma << std::endl;
+			<< cma.sigma() << std::endl;
 	}while(cma.solution().value > 1E-20 );	
 }
