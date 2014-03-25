@@ -39,11 +39,7 @@
 
 #include <shark/Core/Exception.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Recombination/GlobalIntermediateRecombination.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/MuKommaLambdaSelection.h>
-
-#include <boost/lambda/lambda.hpp>
-#include <boost/math/special_functions.hpp>
 
 using namespace shark;
 
