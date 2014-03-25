@@ -173,6 +173,7 @@ struct Energy{
 	void inputHidden(RealMatrix& inputs, RealMatrix const& visibleStates)const{
 		SIZE_CHECK(visibleStates.size1() == inputs.size1());
 		SIZE_CHECK(inputs.size2() == m_hiddenNeurons.size());
+		SIZE_CHECK( visibleStates.size2() == m_visibleNeurons.size());
 		
 		axpy_prod(m_visibleNeurons.phi(visibleStates),trans(m_weightMatrix),inputs);
 	}
