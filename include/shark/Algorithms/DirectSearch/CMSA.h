@@ -44,7 +44,6 @@
 #ifndef SHARK_EA_CMSA_H
 #define SHARK_EA_CMSA_H
 
-#include <shark/Algorithms/AbstractOptimizer.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Algorithms/DirectSearch/TypedIndividual.h>
 
@@ -230,9 +229,6 @@ namespace shark {
 		*/
 		void updateStrategyParameters( const std::vector< CMSA::Individual > & offspringNew ) ;
 	};
-
-	/** \brief Registers the CMSA with the factory. */
-	ANNOUNCE_SINGLE_OBJECTIVE_OPTIMIZER( CMSA, soo::RealValuedSingleObjectiveOptimizerFactory );
 }
 
 #endif

@@ -43,7 +43,6 @@
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
-
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Algorithms/DirectSearch/TypedIndividual.h>
 
@@ -368,10 +367,6 @@ namespace shark {
 
 		shark::cma::Chromosome m_chromosome; ///< Stores the strategy parameters of the algorithm.
 	};
-
-	/** \brief Registers the CMA with the factory. */
-	ANNOUNCE_SINGLE_OBJECTIVE_OPTIMIZER( CMA, soo::RealValuedSingleObjectiveOptimizerFactory );
-
 }
 
 #endif

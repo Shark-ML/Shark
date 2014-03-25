@@ -69,16 +69,11 @@ struct AdditiveEpsilonIndicator {
 	> 
 	double operator()( IteratorTypeA itPF, IteratorTypeA itePF, IteratorTypeB itRF, IteratorTypeB iteRF, Extractor & e ){
 		double result = -std::numeric_limits<double>::max();
-		for( IteratorTypeA ita = itPF; ita != itePF;++ita ) {
-
+		for( IteratorTypeB itb = itRF; itb != iteRF; ++itb ) {
 			double delta = std::numeric_limits<double>::max();
-			for( IteratorTypeB itb = itRF; itb != iteRF; ++itb ) {
+			for( IteratorTypeA ita = itPF; ita != itePF;++ita ) {
 				SIZE_CHECK(e( *ita ).size() == e( *itb ).size());
-				double d = -std::numeric_limits<double>::max();
-				for( unsigned int i = 0; i <  e(*ita).size(); i++ ) {
-					d = std::max( d, e(*ita)[i]-e(*itb)[i] );
-				}
-				delta = std::min( delta, d );
+				delta = std::min( delta, max(e(*itb)-e(*ita)) );
 			}
 			result = std::max( result, delta );
 		}
@@ -88,32 +83,31 @@ struct AdditiveEpsilonIndicator {
 	
 	/// \brief Given a pareto front, returns the index of the points which is the least contributer
 	template<typename Extractor, typename ParetofrontType>
-	unsigned int leastContributor( Extractor & extractor, const ParetofrontType & front)
+	unsigned int leastContributor( Extractor extractor, const ParetofrontType & front)
 	{
 		std::vector<double> relativeApproximation(front.size());
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
-			relativeApproximation[i] = (*this)( front.begin()+i,front.begin()+(i+1), front.begin(), front.end(), extractor );
+			//find the minimum distance the front with one point removed has to be moved to dominate the original front
+			double result = -std::numeric_limits<double>::max();
+			for(std::size_t j = 0; j != front.size(); ++j){
+				if(j == i) continue; //this point is removed
+				result = std::min<double>(result,max(extractor(front[i])-extractor(front[j]))); 
+			}
+			relativeApproximation[i] = result;
 		}
 		
 		return std::min_element( relativeApproximation.begin(), relativeApproximation.end() ) - relativeApproximation.begin();
 	}
 	
-	/**
-	 * \brief Adjusts the nadir fitness vector, implemented empty.
-	 * \param [in] fitness The new nadir fitness vector.
-	 */
-	void setNadirFitness( const RealVector & fitness )
-	{
-		(void)fitness;
-	}
-
-	/**
-	 * \brief Adjusts the utopian fitness vector, implemented empty.
-	 * \param [in] fitness The new utopian fitness vector.
-	 */
-	void setUtopianFitness( const RealVector & fitness )
-	{
-		(void)fitness;
+	/// \brief Updates the internal variables of the indicator using a whole population.
+	///
+	/// Empty for this Indicator
+	/// \param extractor Functor returning the fitness values
+	/// \param set The set of points.
+	template<typename Extractor, typename PointSet>
+	void updateInternals(Extractor extractor, PointSet const& set){
+		(void)extractor;
+		(void)set;
 	}
 
 	template<typename Archive>

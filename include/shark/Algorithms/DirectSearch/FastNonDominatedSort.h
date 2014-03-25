@@ -3,6 +3,7 @@
 
 #include <shark/Algorithms/DirectSearch/TypedIndividual.h>
 #include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
+#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 
 #include <list>
 #include <vector>
@@ -13,189 +14,93 @@ namespace shark {
  * \brief Implements the well-known non-dominated sorting algorithm.
  *
  * Assembles subsets/fronts of mututally non-dominating individuals.
+ * Afterwards every individual is assigned a rank by pop[i].rank() = fronNumber.
+ * The front of dominating points has the value 1. 
+ * 
+ * The algorithm is dscribed in Deb et al, 
+ * A Fast and Elitist Multiobjective Genetic Algorithm: NSGA-II
+ * IEEE Transactions on Evolutionary Computation, 2002
  *
- * \tparam Comparator Predicate for comparing set members.
+ * \tparam Extractor returning the fitness vector of an individual
  */
-template<typename Comparator>
+template<typename Extractor>
 struct BaseFastNonDominatedSort {
 
 	/**
 	 * \brief Executes the algorithm.
 	 *
-	 * \tparam PopulationType Container type, needs to be random accessible.
+	 * Afterwards every individual is assigned a rank by pop[i].rank() = fronNumber.
+	 * The front of dominating points has the value 1.
 	 *
 	 * \param pop [in,out] Population to subdivide into fronts of non-dominated individuals.
 	 */
 	template<typename PopulationType>
 	void operator()(PopulationType &pop) {
-		std::vector<unsigned> r(pop.size());
-		std::vector<unsigned> n(pop.size(), 0);
+		
+		//dominance relation
+		ParetoDominanceComparator<Extractor> pdc;
+
+		//stors for the i-th point which points are dominated by i
 		std::vector<std::vector<unsigned> > s(pop.size());
-
-		std::vector<unsigned> f;
-		f.reserve(pop.size());
-		std::vector<unsigned>::iterator it, itE, its, itsE;
-
-		Comparator pdc;
-
-		unsigned i, j;
-		for (i = 0; i < pop.size(); i++) {
-			for (j = 0; j < pop.size(); j++) {
+		//stores for every point how many points are dominating it
+		std::vector<unsigned> numberOfDominatingPoints(pop.size(), 0);
+		//stores initially the front of non-dominated points
+		std::vector<unsigned> front;
+		
+		for (std::size_t i = 0; i < pop.size(); i++) {
+			//check which points j are dominated by i and add them to s[i]
+			//also increment n[j] for every i dominating j
+			for (std::size_t  j = 0; j < pop.size(); j++) {
 				if (i == j)
 					continue;
-
-				// if (pop.Dominate(i, j, m_bUnpenalizedFitness) > 1)
-				if (pdc(pop[i], pop[j]) > 1)
+				
+				int domination = pdc(pop[i], pop[j]);
+				if ( domination > 1)//pop[i]> pop[j]
 					s[i].push_back(j);
-				//else if (pop.Dominate(i, j) < -1)
-				else if (pdc(pop[i], pop[j]) < -1)
-					n[i]++;
+				else if (domination < -1)//pop[i]< pop[j]
+					numberOfDominatingPoints[i]++;
 			}
-
-			if (n[i] == 0)
-				f.push_back(i);
+			//all non-dominated points form the first front
+			if (numberOfDominatingPoints[i] == 0){
+				front.push_back(i);
+				pop[i].rank() = 1;//non-dominated points have rank 1
+			}
 		}
 
-		it = f.begin();
-		itE = f.end();
-
-		while (it != itE) {
-			n[*it] = 1;
-			++it;
-		}
-
+		//find subsequent fronts.
 		unsigned frontCounter = 2;
-		std::vector<unsigned> h;
+		std::vector<unsigned> nextFront;
 
-		while (!f.empty()) {
-			it = f.begin();
-			itE = f.end();
-
-			h.clear();
-
-			while (it != itE) {
-				its = s[*it].begin();
-				itsE = s[*it].end();
-
-				while (its != itsE) {
-					n[*its]--;
-
-					if (n[*its] == 0)
-						h.push_back(*its);
-
-					++its;
+		//as long as we can find fronts
+		//visit all points of the last front found and remove them from the
+		//set. All points which are not dominated anymore form the next front
+		while (!front.empty()) {
+			//visit all points of the current front and remove them
+			// if any point is not dominated, it is part the next front.
+			for(std::size_t element = 0; element != front.size(); ++element) {
+				//visit all points dominated by the element
+				std::vector<unsigned int> const& dominatedPoints = s[front[element]];
+				for (std::size_t  j = 0; j != dominatedPoints.size(); ++j){
+					std::size_t point = dominatedPoints[j];
+					numberOfDominatingPoints[point]--;
+					// if no more points are dominating this, add to the next front.
+					if (numberOfDominatingPoints[point] == 0){
+						nextFront.push_back(point);
+						pop[point].rank() = frontCounter;
+					}
 				}
-
-				++it;
 			}
-
-			its = h.begin();
-			itsE = h.end();
-			while (its != itsE) {
-				n[*its] = frontCounter;
-				++its;
-			}
-
-			f = h;
+			
+			//make the new found front the current
+			front.swap(nextFront);
+			nextFront.clear();
 			frontCounter++;
-		}
-
-		for (i = 0; i < pop.size(); i++) {
-			pop[i].rank() = n[i];
-		}
-	}
-
-	/**
-	 * \brief Executes the algorithm.
-	 *
-	 * \tparam PopulationType Container type, needs to be random accessible.
-	 * \tparam Extractor Mapping operator for extracting fitness values from individuals.
-	 * \param pop [in,out] Population to subdivide into fronts of non-dominated individuals.
-	 * \param e [in,out] Extractor instance.
-	 */
-	template<typename PopulationType, typename Extractor>
-	void operator()(PopulationType &pop, Extractor &e) {
-		// std::vector<unsigned> r(pop.size());
-		std::vector<unsigned> n(pop.size(), 0);
-		std::vector<std::vector<unsigned> > s(pop.size());
-
-		std::vector<unsigned> f;
-		f.reserve(pop.size());
-		std::vector<unsigned>::iterator it, itE, its, itsE;
-
-		//ParetoDominanceComparator<PENALIZED_FITNESS_TYPE> pdc;
-		Comparator pdc;
-
-		unsigned i, j;
-		for (i = 0; i < pop.size(); i++) {
-			for (j = 0; j < pop.size(); j++) {
-				if (i == j)
-					continue;
-
-				// if (pop.Dominate(i, j, m_bUnpenalizedFitness) > 1)
-				if (pdc(pop[i], pop[j], e) > 1)
-					s[i].push_back(j);
-				//else if (pop.Dominate(i, j) < -1)
-				else if (pdc(pop[i], pop[j], e) < -1)
-					n[i]++;
-			}
-
-			if (n[i] == 0)
-				f.push_back(i);
-		}
-
-		it = f.begin();
-		itE = f.end();
-
-		while (it != itE) {
-			n[*it] = 1;
-			++it;
-		}
-
-		unsigned frontCounter = 2;
-		std::vector<unsigned> h;
-
-		while (!f.empty()) {
-			it = f.begin();
-			itE = f.end();
-
-			h.clear();
-
-			while (it != itE) {
-				its = s[*it].begin();
-				itsE = s[*it].end();
-
-				while (its != itsE) {
-					n[*its]--;
-
-					if (n[*its] == 0)
-						h.push_back(*its);
-
-					++its;
-				}
-
-				++it;
-			}
-
-			its = h.begin();
-			itsE = h.end();
-			while (its != itsE) {
-				n[*its] = frontCounter;
-				++its;
-			}
-
-			f = h;
-			frontCounter++;
-		}
-
-		for (i = 0; i < pop.size(); i++) {
-			pop[i].setRank(n[i]);
 		}
 	}
 };
 
 /** \brief Default fast non-dominated sorting based on the Pareto-dominance relation. */
-typedef BaseFastNonDominatedSort< ParetoDominanceComparator<tag::PenalizedFitness> > FastNonDominatedSort;
+typedef BaseFastNonDominatedSort< FitnessExtractor > FastNonDominatedSort;
 
 }
 #endif // FASTNONDOMINATEDSORT_H

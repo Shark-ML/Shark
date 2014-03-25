@@ -59,8 +59,7 @@ namespace shark {
 			double m_covarianceMatrixLearningRate; ///< Learning rate (constant) for updating the covariance matrix.
 
 			bool m_needsCovarianceUpdate; ///< If true, the covariance matrix of the search distribution needs to be update.
-
-			Chromosome * mep_parent; ///< Points to the parent chromosome that this chromosome has been generated from.
+			double m_successThreshold; ///< Success threshold \f$p_{\text{thresh}}\f$ for cutting off evolution path updates.
 
 			Chromosome() : m_lambda( 0 ),
 				m_noSuccessfulOffspring( 0 ),
@@ -71,8 +70,42 @@ namespace shark {
 				m_targetSuccessProbability( 0 ),
 				m_evolutionPathLearningRate( 0 ),
 				m_covarianceMatrixLearningRate( 0 ),
-				m_needsCovarianceUpdate( false ),
-				mep_parent( NULL ) {
+				m_needsCovarianceUpdate( false ){
+			}
+			
+			/**
+			* \brief Updates a \f$(\mu+1)\f$-MO-CMA-ES chromosome.
+			*
+			* Updates strategy parameters according to:
+			* \f{align*}
+			*	\vec{p}_c & \leftarrow & (1-c_c) \vec{p}_c + \mathbb{1}_{\bar{p}_{\text{succ}} < p_{\text{thresh}}} \sqrt{c_c (2 - c_c)} \vec{x}_{\text{step}} \\
+			*	\vec{C} & \leftarrow & (1-c_{\text{cov}}) \vec{C} + c_{\text{cov}} \left(  \vec{p}_c \vec{p}_c^T + \mathbb{1}_{\bar{p}_{\text{succ}} \geq p_{\text{thresh}}} c_c (2 - c_c) \vec{C} \right) \\
+			*	\bar{p}_{\text{succ}} & \leftarrow & (1-c_p)\bar{p}_{\text{succ}} + c_p p_{\text{succ}} \\
+			*	\sigma & \leftarrow & \sigma \cdot e^{\frac{1}{d}\frac{\bar{p}_{\text{succ}} - p^{\text{target}}_{\text{succ}}}{1-p^{\text{target}}_{\text{succ}}}}
+			* \f}
+			*/	
+			void update( ) {
+				if( m_needsCovarianceUpdate ) {
+					if( m_successProbability < m_successThreshold ) {
+						m_evolutionPath = (1-m_evolutionPathLearningRate)*m_evolutionPath + ::sqrt( m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate ) ) * m_lastStep;
+						m_mutationDistribution.covarianceMatrix() = (1.-m_covarianceMatrixLearningRate)*m_mutationDistribution.covarianceMatrix() + m_covarianceMatrixLearningRate * blas::outer_prod( m_evolutionPath , m_evolutionPath );
+					} else {
+						m_evolutionPath = (1-m_evolutionPathLearningRate)*m_evolutionPath;
+						m_mutationDistribution.covarianceMatrix() = (1.-m_covarianceMatrixLearningRate)*m_mutationDistribution.covarianceMatrix() + 
+							m_covarianceMatrixLearningRate * ( 
+							blas::outer_prod( m_evolutionPath , m_evolutionPath ) + 
+							m_evolutionPathLearningRate*(2-m_evolutionPathLearningRate)*m_mutationDistribution.covarianceMatrix() 
+							);
+
+					}
+
+					m_mutationDistribution.update();
+					m_needsCovarianceUpdate = false;
+				}
+				m_successProbability = (1 - m_stepSizeLearningRate) * m_successProbability + m_stepSizeLearningRate * ( m_noSuccessfulOffspring / m_lambda );
+				m_stepSize *= ::exp( 1./m_stepSizeDampingFactor * (m_successProbability - m_targetSuccessProbability) / (1-m_targetSuccessProbability) );
+
+				m_noSuccessfulOffspring = 0;
 			}
 
 			/**
@@ -135,8 +168,7 @@ namespace shark {
 					m_targetSuccessProbability == rhs.m_targetSuccessProbability &&
 					m_evolutionPathLearningRate == rhs.m_evolutionPathLearningRate &&
 					m_covarianceMatrixLearningRate == rhs.m_covarianceMatrixLearningRate &&
-					m_needsCovarianceUpdate == rhs.m_needsCovarianceUpdate &&
-					mep_parent == rhs.mep_parent
+					m_needsCovarianceUpdate == rhs.m_needsCovarianceUpdate
 				);
 			}
 		};

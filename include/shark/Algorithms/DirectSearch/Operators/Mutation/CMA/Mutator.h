@@ -35,75 +35,70 @@
 
 namespace shark {
 
-	namespace cma {
-		/**
-		* \brief Implements the mutation operator of the (MO)-CMA.
-		*/
-		template<typename Individual, typename Chromosome, unsigned int ChromosomeIndex>
-		struct Variator {
+namespace cma {
+/**
+* \brief Implements the mutation operator of the (MO)-CMA.
+*/
+template<typename Individual, typename Chromosome, unsigned int ChromosomeIndex>
+struct Variator {
 
-			/**
-			* \brief Index of the chromosome considered by this operator.
-			*/
-			static const unsigned int CHROMOSOME_INDEX = ChromosomeIndex;
+	/**
+	* \brief Chromosome type.
+	*/
+	typedef Chromosome chromosome_type;
 
-			/**
-			* \brief Chromosome type.
-			*/
-			typedef Chromosome chromosome_type;
+	/**
+	* \brief Individual type.
+	*/
+	typedef Individual individual_type;
 
-			/**
-			* \brief Individual type.
-			*/
-			typedef Individual individual_type;
-
-			/**
-			* \brief Mutates the supplied individual.
-			*
-			* Mutates the supplied individual according to:
-			* \f[
-			* \vec{x}' \leftarrow \mathcal{N}( \vec{x}, \sigma^2 \vec{C} )
-			* \f]
-			* where \f$\vec{x}, \sigma, \vec{C}\f$ refer to the individuals search point, 
-			* its step-size and its covariance matrix, respectively.
-			* \param [in,out] ind The individual to be mutated.
-			*/
-			void operator()( individual_type & ind ) {
-				std::pair<
-					typename individual_type::search_point_type,
-					typename individual_type::search_point_type
-				> result = (*this)( ind.template get< CHROMOSOME_INDEX >() );
-				
-				*ind += result.second;
-			}
-
-			std::pair<
-				typename individual_type::search_point_type,
-				typename individual_type::search_point_type
-			> operator()( chromosome_type & c ) {
-				std::pair<
-					typename individual_type::search_point_type,
-					typename individual_type::search_point_type
-				> result;
-				MultiVariateNormalDistribution::ResultType sample = c.m_mutationDistribution();
-				result.first = sample.first;
-				result.second = c.m_stepSize * sample.first;
-				c.m_lastStep = result.first;
-				c.m_needsCovarianceUpdate = true;
-				return( result );
-			}
-
+	/**
+	* \brief Mutates the supplied individual.
+	*
+	* Mutates the supplied individual according to:
+	* \f[
+	* \vec{x}' \leftarrow \mathcal{N}( \vec{x}, \sigma^2 \vec{C} )
+	* \f]
+	* where \f$\vec{x}, \sigma, \vec{C}\f$ refer to the individuals search point, 
+	* its step-size and its covariance matrix, respectively.
+	* \param [in,out] ind The individual to be mutated.
+	*/
+	void operator()( individual_type & ind ) {
+		std::pair<
+			typename individual_type::search_point_type,
+			typename individual_type::search_point_type
+		> result = (*this)( ind.template get< ChromosomeIndex >() );
 		
-			/**
-			* \brief Serialization/deserialization, implemented empty.
-			*/
-			template<typename Archive>
-			void serialize( Archive & archive, const unsigned int version ) {
-				(void) archive;
-				(void) version;
-			}
-
-		};
+		*ind += result.second;
 	}
+
+	std::pair<
+		typename individual_type::search_point_type,
+		typename individual_type::search_point_type
+	> operator()( chromosome_type & c ) {
+		std::pair<
+			typename individual_type::search_point_type,
+			typename individual_type::search_point_type
+		> result;
+		MultiVariateNormalDistribution::ResultType sample = c.m_mutationDistribution();
+		result.first = sample.first;
+		result.second = c.m_stepSize * sample.first;
+		c.m_lastStep = result.first;
+		c.m_needsCovarianceUpdate = true;
+		return result;
+	}
+
+
+	/**
+	* \brief Serialization/deserialization, implemented empty.
+	*/
+	template<typename Archive>
+	void serialize( Archive & archive, const unsigned int version ) {
+		(void) archive;
+		(void) version;
+	}
+
+};
+}
 }
 #endif 

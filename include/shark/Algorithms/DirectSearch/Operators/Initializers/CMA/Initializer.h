@@ -66,8 +66,8 @@ namespace shark {
 				m_noObjectives( 0 ),
 				m_initialSigma( 0 ),
                                 m_isInitialSigmaProvidedByUser( false ),
-				m_useNewUpdate( false ),
-				m_constrainedFitnessFunction( false ) {
+				m_constrainedFitnessFunction( false ),
+				m_successThreshold(0){
 			}
 			/**
 			* \brief Initializes a \f$(\mu+1)\f$-MO-CMA-ES chromosome.
@@ -80,9 +80,8 @@ namespace shark {
 				if( m_noObjectives < 2 )
 					throw( SHARKEXCEPTION( "shark::mocma::Initializer: Objective space dimension must be greater or equal to 2." ) );
 
-				c.mep_parent = NULL;
 				c.m_lambda = 1;
-
+				c.m_successThreshold = m_successThreshold;
 				c.m_mutationDistribution.resize( m_searchSpaceDimension );
 
 				c.m_evolutionPath.resize( m_searchSpaceDimension );
@@ -139,7 +138,6 @@ namespace shark {
 
 				archive & BOOST_SERIALIZATION_NVP( m_initialSigma );
                                 archive & BOOST_SERIALIZATION_NVP( m_isInitialSigmaProvidedByUser );
-				archive & BOOST_SERIALIZATION_NVP( m_useNewUpdate );
 				archive & BOOST_SERIALIZATION_NVP( m_constrainedFitnessFunction );
 			}
 
@@ -150,7 +148,6 @@ namespace shark {
 					shark::blas::norm_2( m_lowerBound - rhs.m_lowerBound ) < 1E-10 &&
 					shark::blas::norm_2( m_upperBound - rhs.m_upperBound ) < 1E-10 &&
 					m_initialSigma == rhs.m_initialSigma &&
-					m_useNewUpdate == rhs.m_useNewUpdate &&
 					m_constrainedFitnessFunction == rhs.m_constrainedFitnessFunction
 					);
 			}
@@ -163,8 +160,9 @@ namespace shark {
 
 			double m_initialSigma;
                         bool m_isInitialSigmaProvidedByUser;
-			bool m_useNewUpdate;
 			bool m_constrainedFitnessFunction;
+			
+			double m_successThreshold;
 
 		};
 	}

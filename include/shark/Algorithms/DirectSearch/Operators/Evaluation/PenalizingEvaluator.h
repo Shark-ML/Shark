@@ -34,14 +34,10 @@
 //===========================================================================
 
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_EVALUATION_PENALIZING_EVALUATOR_H
-
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_EVALUATION_PENALIZING_EVALUATOR_H
 
 #include <shark/LinAlg/Base.h>
-
-
 #include <boost/math/special_functions.hpp>
-
 #include <boost/tuple/tuple.hpp>
 
 

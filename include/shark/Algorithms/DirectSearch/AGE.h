@@ -29,22 +29,17 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_AGE_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_AGE_H
 
-#include <shark/Algorithms/AbstractOptimizer.h>
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
-
-#include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
 #include <shark/Algorithms/DirectSearch/TypedIndividual.h>
-#include <shark/Core/Traits/OptimizerTraits.h>
 // MOO specific stuff
-#include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
 #include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
 #include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
-#include <shark/Algorithms/DirectSearch/RankShareComparator.h>
 
 // AGE specific stuff
 #include <shark/Algorithms/DirectSearch/Operators/Selection/BinaryTournamentSelection.h>
@@ -84,11 +79,7 @@ protected:
 	struct AdditiveEpsilonIndicator {
 		static double calc(const age::Individual &a, const age::Individual &b)
 		{
-			double result = 0;//-std::numeric_limits<double>::max();
-			for (unsigned int i = 0; i < a.fitness(tag::PenalizedFitness()).size(); i++) {
-				result = std::max(result, a.fitness(tag::PenalizedFitness())[ i ] - b.fitness(tag::PenalizedFitness())[i]);
-			}
-			return(result);
+			return max(a.fitness(tag::PenalizedFitness())-b.fitness(tag::PenalizedFitness()));
 		}
 	};
 
@@ -101,38 +92,14 @@ protected:
 		double m_a2;
 	};
 
-	struct MinElement {
-
-		MinElement(const age::Individual &a) : m_a(a)
-		{
-		}
-
-		bool operator()(const age::Individual &x, const age::Individual &y) const
-		{
-			return(AdditiveEpsilonIndicator::calc(x, m_a) < AdditiveEpsilonIndicator::calc(y, m_a));
-		}
-
-		const age::Individual &m_a;
-
-	};
-
 	std::vector< CacheElement > preProcess(const age::Population &archive, const age::Population &pop) const
 	{
 		std::vector< CacheElement > result(archive.size());
 
 		for (std::size_t i = 0; i < archive.size(); i++) {
 			result[ i ].m_a1 = result[ i ].m_a2 = std::numeric_limits<double>::max();
-			// MinElement me( archive[i] );
-			//result[i].m_p1 = result[i].m_p2 = pop.end();
-			// for( age::Population::const_iterator it = pop.begin(); it != pop.end(); ++it ) {
 			for (std::size_t j = 0; j < pop.size(); j++) {
 
-				/*if( result[i].m_p1 == pop.end() ) {
-				  result[i].m_p1 = it;
-				  continue;
-				  }*/
-
-				//if( me( *result[i].m_p1, *it ) ) {
 				if (AdditiveEpsilonIndicator::calc(pop[j], archive[i]) < result[ i ].m_a1) {
 					result[i].m_p1 = j;
 					result[i].m_a1 = AdditiveEpsilonIndicator::calc(pop[j], archive[i]);
@@ -142,37 +109,13 @@ protected:
 			for (std::size_t j = 0; j < pop.size(); j++) {
 				if (result[ i ].m_p1 == j)
 					continue;
-				/*if( result[i].m_p1 == pop.end() ) {
-				  result[i].m_p1 = it;
-				  continue;
-				  }*/
-
-				//if( me( *result[i].m_p1, *it ) ) {
 				if (AdditiveEpsilonIndicator::calc(pop[j], archive[i]) < result[ i ].m_a2) {
 					result[i].m_p2 = j;
 					result[i].m_a2 = AdditiveEpsilonIndicator::calc(pop[j], archive[i]);
 				}
 			}
-
-			/*for( age::Population::const_iterator it = pop.begin(); it != pop.end(); ++it ) {
-			  if( it == result[i].m_p1 )
-			  continue;
-
-			  if( result[i].m_p2 == pop.end() ) {
-			  result[i].m_p2 = it;
-			  continue;
-			  }
-
-			  if( me( *result[i].m_p2, *it ) ) {
-			  result[i].m_p2 = it;
-			  result[i].m_a2 = AdditiveEpsilonIndicator::calc( *it, archive[i] );
-			  }
-			  }*/
-			// result[ i ] = preProcess( archive[ i ], pop );
-
-
 		}
-		return(result);
+		return result;
 	}
 
 	double beta(std::size_t p) const
@@ -197,7 +140,6 @@ protected:
 
 	ParetoDominanceComparator< shark::tag::PenalizedFitness > m_pdc; /// Pareto dominance comparator.
 	shark::moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
-	RankShareComparator rsc; ///< Comparator for individuals based on their multi-objective rank and share.
 	FastNonDominatedSort m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort.
 	IndicatorBasedSelection<HypervolumeIndicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
 	BinaryTournamentSelection< ParetoDominanceComparator<shark::tag::PenalizedFitness> > m_binaryTournamentSelection; ///< Mating selection operator.
@@ -215,7 +157,7 @@ public:
 	/**
 	 * \brief Default c'tor.
 	 */
-	AGE() : m_binaryTournamentSelection(m_pdc)
+	AGE()
 	{
 		init();
 	}
@@ -241,7 +183,6 @@ public:
 		archive &m_mu;  /// Population size \f$\mu\f$.
 
 		archive &m_evaluator;  ///< Evaluation operator.
-		archive &rsc;  ///< Comparator for individuals based on their multi-objective rank and share.
 		archive &m_fastNonDominatedSort;  ///< Operator that provides Deb's fast non-dominated sort.
 		archive &m_selection;  ///< Selection operator relying on the (contributing) hypervolume indicator.
 		archive &m_sbx;  ///< Crossover operator.
@@ -420,4 +361,4 @@ public:
 };
 }
 }
-
+#endif

@@ -83,7 +83,7 @@ struct MultiplicativeEpsilonIndicator {
 	
 	/// \brief Given a pareto front, returns the index of the points which is the least contributer
 	template<typename Extractor, typename ParetofrontType>
-	std::size_t leastContributor( Extractor & extractor, const ParetofrontType & front)
+	std::size_t leastContributor( Extractor extractor, const ParetofrontType & front)
 	{
 		std::vector<double> relativeApproximation(front.size());
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
@@ -93,22 +93,15 @@ struct MultiplicativeEpsilonIndicator {
 		return std::min_element( relativeApproximation.begin(), relativeApproximation.end() ) - relativeApproximation.begin();
 	}
 	
-	/**
-	 * \brief Adjusts the nadir fitness vector, implemented empty.
-	 * \param [in] fitness The new nadir fitness vector.
-	 */
-	void setNadirFitness( const RealVector & fitness )
-	{
-		(void)fitness;
-	}
-
-	/**
-	 * \brief Adjusts the utopian fitness vector, implemented empty.
-	 * \param [in] fitness The new utopian fitness vector.
-	 */
-	void setUtopianFitness( const RealVector & fitness )
-	{
-		(void)fitness;
+	/// \brief Updates the internal variables of the indicator using a whole population.
+	///
+	/// Empty for this Indicator
+	/// \param extractor Functor returning the fitness values
+	/// \param set The set of points.
+	template<typename Extractor, typename PointSet>
+	void updateInternals(Extractor extractor, PointSet const& set){
+		(void)extractor;
+		(void)set;
 	}
 
 	template<typename Archive>

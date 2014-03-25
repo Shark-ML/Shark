@@ -113,7 +113,7 @@ namespace shark {
 				T+=vol[i]-T;
 			}
 
-			shark::ParetoDominanceComparator< tag::PenalizedFitness > pdc;
+			shark::ParetoDominanceComparator< shark::IdentityFitnessExtractor > pdc;
 
 			double r;
 			VectorType rndpoint( referencePoint );
@@ -121,8 +121,6 @@ namespace shark {
 			Iterator itt;
 			boost::uint_fast64_t samples_sofar=0;
 			boost::uint_fast64_t round=0;
-
-			shark::IdentityFitnessExtractor ext;
 
 			while( 1 ) {
 				r = T * Rng::uni();
@@ -144,7 +142,7 @@ namespace shark {
 					itt = begin + static_cast<std::size_t>(noPoints*Rng::uni());
 					samples_sofar++;
 				} 
-				while( pdc( e( *itt ), rndpoint, ext ) < ParetoDominanceComparator< tag::PenalizedFitness >::A_WEAKLY_DOMINATES_B );
+				while( pdc( e( *itt ), rndpoint) < ParetoDominanceComparator< tag::PenalizedFitness >::A_WEAKLY_DOMINATES_B );
 
 				round++;
 			}

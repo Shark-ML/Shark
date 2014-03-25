@@ -74,14 +74,6 @@ struct unused {
 }
 
 /**
- * \brief Explicitly wraps up a chromosome index.
- */
-template<unsigned int Index>
-struct ChromosomeIndex {
-	static const unsigned int INDEX = Index;
-};
-
-/**
  * \brief TypedIndividual is a templated class modelling
  * an individual that acts as a candidate solution in an evolutionary algorithm.
  *
@@ -166,6 +158,17 @@ public:
 	typedef RealVector FitnessType;
 
 	typedef SearchSpaceType search_point_type;
+	
+	// Functors to use for the stl algorithms
+	///\brief returns true if the individual is selected for the next parent set
+	static bool IsSelected(this_type const& individual){
+		return individual.selected();
+	}
+	
+	///\brief Ordering relation by the ranks of the individuals
+	static bool RankOrdering(this_type const& individual1, this_type const& individual2){
+		return individual1.rank() < individual2.rank();
+	}
 
 	/**
 	 * \brief Default constructor that initializes the individual's attributes to default values.
@@ -174,49 +177,50 @@ public:
 		m_matingProbability(0.),
 		m_selectionProbability(0.),
 		m_rank(0),
-		m_share(0) {
+		m_selected(false)
+	{
 		setNoObjectives(1);
 	}
 
 	/**
 	 * \brief Returns a non-const reference to the search point that is associated with the individual.
 	 */
-	inline SearchSpaceType &operator*() {
+	SearchSpaceType &operator*() {
 		return(m_searchPoint);
 	}
 
 	/**
 	 * \brief Returns a const reference to the search point that is associated with the individual.
 	 */
-	inline const SearchSpaceType &operator*() const {
+	const SearchSpaceType &operator*() const {
 		return(m_searchPoint);
 	}
 
 	/**
 	 * \brief Returns a non-const reference to the search point that is associated with the individual.
 	 */
-	inline SearchSpaceType &searchPoint() {
+	SearchSpaceType &searchPoint() {
 		return(m_searchPoint);
 	}
 
 	/**
 	 * \brief Returns a const reference to the search point that is associated with the individual.
 	 */
-	inline const SearchSpaceType &searchPoint() const {
+	const SearchSpaceType &searchPoint() const {
 		return(m_searchPoint);
 	}
 
 	/**
 	 * \brief Returns the number of objectives.
 	 */
-	inline unsigned int noObjectives() const {
-		return(m_noObjectives);
+	unsigned int noObjectives() const {
+		return m_noObjectives;
 	}
 
 	/**
 	 * \brief Adjusts the number of objectives and resizes the fitness vectors.
 	 */
-	inline void setNoObjectives(unsigned int noObjectives) {
+	void setNoObjectives(unsigned int noObjectives) {
 
 		m_noObjectives = noObjectives;
 
@@ -228,7 +232,7 @@ public:
 	/**
 	 * \brief Returns the age of the individual (in generations).
 	 */
-	inline unsigned int age() const {
+	unsigned int age() const {
 		return(m_age);
 	}
 
@@ -236,7 +240,7 @@ public:
 	 * \brief Returns a reference to the age of the individual (in generations).
 	 * Allows for lvalue()-semantics.
 	 */
-	inline unsigned int &age() {
+	unsigned int &age() {
 		return(m_age);
 	}
 
@@ -244,7 +248,7 @@ public:
 	 * \brief Adjusts the age of the individual (in generations).
 	 * Allows for lvalue()-semantics.
 	 */
-	inline void setAge(unsigned int age) {
+	void setAge(unsigned int age) {
 		m_age = age;
 	}
 
@@ -254,7 +258,7 @@ public:
 	 * Please note that the vector of fitness values is of size 1 in the case of single-objective
 	 * optimization.
 	 */
-	inline FitnessType &fitness(tag::UnpenalizedFitness fitness) {
+	FitnessType &fitness(tag::UnpenalizedFitness fitness) {
 		return(m_unpenalizedFitness);
 	}
 
@@ -264,7 +268,7 @@ public:
 	 * Please note that the vector of fitness values is of size 1 in the case of single-objective
 	 * optimization.
 	 */
-	inline const FitnessType &fitness(tag::UnpenalizedFitness fitness) const {
+	const FitnessType &fitness(tag::UnpenalizedFitness fitness) const {
 		return(m_unpenalizedFitness);
 	}
 
@@ -275,7 +279,7 @@ public:
 	 * optimization. For further information on the difference between penalized and unpenalized fitness, please
 	 * refer to the documentation of the respective tags.
 	 */
-	inline FitnessType &fitness(tag::PenalizedFitness fitness) {
+	FitnessType &fitness(tag::PenalizedFitness fitness) {
 		return(m_penalizedFitness);
 	}
 
@@ -286,7 +290,7 @@ public:
 	 * optimization. For further information on the difference between penalized and unpenalized fitness, please
 	 * refer to the documentation of the respective tags.
 	 */
-	inline const FitnessType &fitness(tag::PenalizedFitness fitness) const {
+	const FitnessType &fitness(tag::PenalizedFitness fitness) const {
 		return(m_penalizedFitness);
 	}
 
@@ -296,7 +300,7 @@ public:
 	 * Please note that the vector of fitness values is of size 1 in the case of single-objective
 	 * optimization.
 	 */
-	inline FitnessType &fitness(tag::ScaledFitness fitness) {
+	FitnessType &fitness(tag::ScaledFitness fitness) {
 		return(m_scaledFitness);
 	}
 
@@ -306,7 +310,7 @@ public:
 	 * Please note that the vector of fitness values is of size 1 in the case of single-objective
 	 * optimization.
 	 */
-	inline const FitnessType &fitness(tag::ScaledFitness fitness) const {
+	const FitnessType &fitness(tag::ScaledFitness fitness) const {
 		return(m_scaledFitness);
 	}
 
@@ -314,57 +318,57 @@ public:
 	/**
 	 * \brief Returns a non-const reference to the mating probability of the individual.
 	 */
-	inline double &probability(tag::MatingProbability p) {
+	double &probability(tag::MatingProbability p) {
 		return(m_matingProbability);
 	}
 
 	/**
 	 * \brief Returns a const reference to the mating probability of the individual.
 	 */
-	inline const double &probability(tag::MatingProbability p) const {
+	const double &probability(tag::MatingProbability p) const {
 		return(m_matingProbability);
 	}
 
 	/**
 	 * \brief Returns a non-const reference to the selection probability of the individual.
 	 */
-	inline double &probability(tag::SelectionProbability p) {
+	double &probability(tag::SelectionProbability p) {
 		return(m_selectionProbability);
 	}
 
 	/**
 	 * \brief Returns a const reference to the selection probability of the individual.
 	 */
-	inline const double &probability(tag::SelectionProbability p) const {
+	const double &probability(tag::SelectionProbability p) const {
 		return(m_selectionProbability);
 	}
 
 	/**
 	 * \brief Returns the level of non-dominance of the individual.
 	 */
-	inline unsigned int rank() const {
+	unsigned int rank() const {
 		return(m_rank);
 	}
 
 	/**
 	 * \brief Returns a reference to the level of non-dominance of the individual. Allows for lvalue()-semantic.
 	 */
-	inline unsigned int &rank() {
+	unsigned int &rank() {
 		return(m_rank);
 	}
 
 	/**
-	 * \brief Returns the quality of an individual with respect to the Pareto-front it belongs to.
+	 * \brief Returns true if the individual is selected for the next parent generation 
 	 */
-	inline double share() const {
-		return(m_share);
+	bool selected() const {
+		return(m_selected);
 	}
 
 	/**
-	 * \brief Returns a non-const reference to the quality of an individual with respect to the Pareto-front it belongs to.
+	 * \brief Returns true if the individual is selected for the next parent generation 
 	 */
-	inline double &share() {
-		return(m_share);
+	bool &selected() {
+		return(m_selected);
 	}
 
 	/**
@@ -380,7 +384,7 @@ public:
 		archive &BOOST_SERIALIZATION_NVP(m_penalizedFitness);
 		archive &BOOST_SERIALIZATION_NVP(m_unpenalizedFitness);
 		archive &BOOST_SERIALIZATION_NVP(m_rank);
-		archive &BOOST_SERIALIZATION_NVP(m_share);
+		archive &BOOST_SERIALIZATION_NVP(m_selected);
 
 		archive &boost::serialization::make_nvp("chromosome_0", boost::get<0>(*this));
 		archive &boost::serialization::make_nvp("chromosome_1", boost::get<1>(*this));
@@ -407,7 +411,7 @@ public:
 		archive &BOOST_SERIALIZATION_NVP(m_penalizedFitness);
 		archive &BOOST_SERIALIZATION_NVP(m_unpenalizedFitness);
 		archive &BOOST_SERIALIZATION_NVP(m_rank);
-		archive &BOOST_SERIALIZATION_NVP(m_share);
+		archive &BOOST_SERIALIZATION_NVP(m_selected);
 
 		archive &boost::serialization::make_nvp("chromosome_0", boost::get<0>(*this));
 		archive &boost::serialization::make_nvp("chromosome_1", boost::get<1>(*this));
@@ -434,7 +438,7 @@ public:
 		archive &BOOST_SERIALIZATION_NVP(m_penalizedFitness);
 		archive &BOOST_SERIALIZATION_NVP(m_unpenalizedFitness);
 		archive &BOOST_SERIALIZATION_NVP(m_rank);
-		archive &BOOST_SERIALIZATION_NVP(m_share);
+		archive &BOOST_SERIALIZATION_NVP(m_selected);
 
 		archive &boost::serialization::make_nvp("chromosome_0", boost::get<0>(*this));
 		archive &boost::serialization::make_nvp("chromosome_1", boost::get<1>(*this));
@@ -449,23 +453,6 @@ public:
 
 	}
 
-	/**
-	 * \brief Checks for equality
-	 */
-	bool operator==(const this_type &rhs) const {
-		return(
-		        m_searchPoint == rhs.m_searchPoint &&
-		        m_age == rhs.m_age &&
-		        m_noObjectives == rhs.m_noObjectives &&
-		        m_matingProbability == rhs.m_matingProbability &&
-		        m_selectionProbability == rhs.m_selectionProbability &&
-		        m_rank == rhs.m_rank &&
-		        m_share == rhs.m_share &&
-		        m_penalizedFitness == rhs.m_penalizedFitness &&
-		        m_unpenalizedFitness == rhs.m_unpenalizedFitness
-		      );
-	}
-
 protected:
 	SearchSpaceType m_searchPoint; ///< The search point associated with the individual.
 
@@ -476,7 +463,7 @@ protected:
 	double m_selectionProbability; ///< The selection probability of this individual.
 
 	unsigned int m_rank; ///< The level of non-dominance of the individual. The lower the better.
-	double m_share; ///< The (multi-objective) share of the individual.
+	bool m_selected; ///< Is the individual selcted for the next parent set?
 
 	FitnessType m_penalizedFitness; ///< Penalized fitness of the individual.
 	FitnessType m_unpenalizedFitness; ///< Unpenalized fitness of the individual.
