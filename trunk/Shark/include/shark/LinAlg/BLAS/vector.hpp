@@ -54,6 +54,10 @@ public:
 	/// By default, its elements are initialized to 0.
 	/// \param size initial size of the vector
 	explicit vector(size_type size):m_storage(size) {}
+		
+	/// \brief Constructs the vector from a predefined range
+	template<class Iter>
+	vector(Iter begin, Iter end):m_storage(begin,end){}
 
 	/// \brief Constructor of a vector by copying from another container
 	/// This type has the generic name \c array_typ within the vector definition.
