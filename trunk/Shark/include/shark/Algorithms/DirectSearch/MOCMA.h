@@ -33,16 +33,12 @@
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_MOCMA
 
 // MOO specific stuff
-#include <shark/Algorithms/DirectSearch/TypedIndividual.h>
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/LeastContributorApproximator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-//CMA specific stuff
-#include <shark/Algorithms/DirectSearch/CMA/Chromosome.h>
-#include <shark/Algorithms/DirectSearch/Operators/Initializers/CMA/Initializer.h>
-#include <shark/Algorithms/DirectSearch/Operators/Mutation/CMA/Mutator.h>
+#include <shark/Algorithms/DirectSearch/CMA/CMAIndividual.h>
 
 
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
@@ -65,30 +61,6 @@ namespace detail {
 template<typename Indicator = HypervolumeIndicator>
 class MOCMA {
 public:
-	/**
-	* \brief Chromosome type of the mocma.
-	*/
-	typedef shark::elitist_cma::Chromosome Chromosome;
-
-	/**
-	* \brief The individual type of the \f$(\mu+1)\f$-MO-CMA-ES.
-	*/
-	typedef TypedIndividual<RealVector,Chromosome> Individual;
-
-	/**
-	* \brief The population type of the \f$(\mu+1)\f$-MO-CMA-ES.
-	*/
-	typedef std::vector< Individual > Population;
-
-	/**
-	* \brief Individual and chromosome initializer type.
-	*/
-	typedef shark::elitist_cma::Initializer<Individual,Chromosome,0> Initializer;
-
-	/**
-	* \brief Mutation operator.
-	*/
-	typedef shark::cma::Variator<Individual,Chromosome,0> Variator;
 	
 	/**
 	 * \brief The result type of the optimizer, a vector of tuples \f$( \vec x, \vec{f}( \vec{x} )\f$.
@@ -100,18 +72,13 @@ public:
 	 */
 	typedef MOCMA<Indicator> this_type;
 	
-	Population m_pop; ///< Population of size \f$\mu+\mu\f$.
-	Initializer m_initializer; ///< Initialization operator.
-	Variator m_variator; ///< Mutation operator.
-
+	std::vector<CMAIndividual > m_pop; ///< Population of size \f$\mu+\mu\f$.
 	shark::moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
-
-	FastNonDominatedSort m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort.
 	IndicatorBasedSelection< Indicator > m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
 
-	unsigned int m_mu; ///< Population size \f$\mu\f$.
 	bool m_useNewUpdate; ///< Flag for deciding whether the improved step-size adaptation shall be used.
 	double m_individualSuccessThreshold;
+	double m_initialSigma;
 	
 	/**
 	 * \brief Default parent population size.
@@ -160,6 +127,10 @@ public:
 	std::string name() const {
 		return "MOCMA";
 	}
+	
+	std::size_t mu()const{
+		return m_selection.m_mu;
+	}
 
 	/**
 	 * \brief Stores/loads the algorithm's state.
@@ -170,13 +141,9 @@ public:
 	template<typename Archive>
 	void serialize(Archive &archive, const unsigned int version) {
 		archive &BOOST_SERIALIZATION_NVP(m_pop);
-		archive &BOOST_SERIALIZATION_NVP(m_initializer);
-		archive &BOOST_SERIALIZATION_NVP(m_variator);
 
 		archive &BOOST_SERIALIZATION_NVP(m_evaluator);
 		archive &BOOST_SERIALIZATION_NVP(m_selection);
-
-		archive &BOOST_SERIALIZATION_NVP(m_mu);
 		archive &BOOST_SERIALIZATION_NVP(m_useNewUpdate);
 	}
 
@@ -194,9 +161,8 @@ public:
 	        const std::string &notionOfSuccess = this_type::DEFAULT_NOTION_OF_SUCCESS(),
 		double initialSigma = this_type::DEFAULT_INITIAL_SIGMA()
 	) {
-		m_mu = mu;
 		m_selection.setMu(mu);
-		m_initializer.m_initialSigma = initialSigma;
+		m_initialSigma = initialSigma;
 		m_evaluator.m_penaltyFactor = penaltyFactor;
 		m_individualSuccessThreshold = successThreshold;
 
@@ -219,7 +185,7 @@ public:
 	 *
 	 * \param [in] node The configuration tree node.
 	 */
-	void configure(const PropertyTree &node) {
+	void configure(PropertyTree const& node) {
 		init(
 			node.get<unsigned int>("Mu", this_type::DEFAULT_MU()),
 			node.get<double>("PenaltyFactor", this_type::DEFAULT_PENALTY_FACTOR()),
@@ -238,17 +204,17 @@ public:
 	 */
 	template<typename ObjectiveFunction>
 	void init(const ObjectiveFunction &f, const shark::RealVector &sp = shark::RealVector()) {
-		m_pop.resize(2 * m_mu);
-		m_initializer.m_successThreshold = m_individualSuccessThreshold;
-		m_initializer.m_searchSpaceDimension = f.numberOfVariables();
-		m_initializer.m_noObjectives = f.numberOfObjectives();
-		shark::moo::PenalizingEvaluator evaluator;
-		BOOST_FOREACH(Individual & ind, m_pop) {
-			f.proposeStartingPoint(*ind);
-			boost::tuple< typename ObjectiveFunction::ResultType, typename ObjectiveFunction::ResultType > result = evaluator(f, *ind);
+		m_pop.reserve(2 * mu());
+		std::size_t noObjectives = f.numberOfObjectives();
+		std::size_t noVariables = f.numberOfVariables();
+		
+		for(std::size_t i = 0; i != 2 * mu(); ++i){
+			CMAIndividual ind(noVariables,noObjectives,m_individualSuccessThreshold,m_initialSigma);
+			f.proposeStartingPoint(ind.searchPoint());
+			boost::tuple< RealVector, RealVector > result = m_evaluator(f, ind.searchPoint());
 			ind.fitness(shark::tag::PenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >(result);
 			ind.fitness(shark::tag::UnpenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >(result);
-			m_initializer(ind);
+			m_pop.push_back(ind);
 		}
 	}
 
@@ -261,45 +227,48 @@ public:
 	template<typename Function>
 	SolutionSetType step(const Function &f) {
 
-		for (std::size_t i = 0; i < m_mu; i++) {
-			m_pop[m_mu+i].searchPoint() = m_pop[i].searchPoint();
-			m_variator(m_pop[m_mu+i]);
-			m_pop[m_mu+i].age() = 0;
-			boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator(f, m_pop[m_mu+i].searchPoint());
-			m_pop[m_mu+i].fitness(shark::tag::PenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >(result);
-			m_pop[m_mu+i].fitness(shark::tag::UnpenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >(result);
+		//generate new offspring
+		for (std::size_t i = 0; i < mu(); i++) {
+			m_pop[mu()+i] = m_pop[i];
+			m_pop[mu()+i].mutate();//mutate the search point
+			m_pop[mu()+i].age() = 0;
+			//function value evaluation
+			boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator(f, m_pop[mu()+i].searchPoint());
+			m_pop[mu()+i].fitness(shark::tag::PenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >(result);
+			m_pop[mu()+i].fitness(shark::tag::UnpenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >(result);
 		}
 
 		m_selection(m_pop);
+		//determine from the selection which parent-offspring pair has been successfull
 		if (m_useNewUpdate) {
-			//new update: an individual is successfull if it is selected
-			for (std::size_t i = 0; i < m_mu; i++) {
-				if ( m_pop[m_mu+i].selected()) {
-					m_pop[m_mu+i].get<0>().m_noSuccessfulOffspring += 1.0;
-					m_pop[i].get<0>().m_noSuccessfulOffspring += 1.0;
+			//new update: an offspring is successfull if it is selected
+			for (std::size_t i = 0; i < mu(); i++) {
+				if ( m_pop[mu()+i].selected()) {
+					m_pop[mu()+i].noSuccessfulOffspring() += 1.0;
+					m_pop[i].noSuccessfulOffspring() += 1.0;
 				}
 			}
 		}
 		else
 		{
-			//old update: if the individual is better than its parent, it is successfull
-			for (std::size_t i = 0; i < m_mu; i++) {
-				if ( m_pop[m_mu+i].selected() && m_pop[m_mu+i].rank() <= m_pop[i].rank()) {
-					m_pop[m_mu+i].get<0>().m_noSuccessfulOffspring += 1.0;
-					m_pop[i].get<0>().m_noSuccessfulOffspring += 1.0;
+			//old update: if the offspring is better than its parent, it is successfull
+			for (std::size_t i = 0; i < mu(); i++) {
+				if ( m_pop[mu()+i].selected() && m_pop[mu()+i].rank() <= m_pop[i].rank()) {
+					m_pop[mu()+i].noSuccessfulOffspring() += 1.0;
+					m_pop[i].noSuccessfulOffspring() += 1.0;
 				}
 			}
 		}
 		
 		//partition the selected individuals to the front
-		std::partition(m_pop.begin(), m_pop.end(),Individual::IsSelected);
+		std::partition(m_pop.begin(), m_pop.end(),CMAIndividual::IsSelected);
 		
 
+		//update individuals and generate solution set
 		SolutionSetType solutionSet;
-		for (unsigned int i = 0; i < m_mu; i++) {
+		for (unsigned int i = 0; i < mu(); i++) {
 			m_pop[i].age()++;
-			m_pop[i].get<0>().update();
-
+			m_pop[i].update();
 			solutionSet.push_back(shark::makeResultSet(m_pop[i].searchPoint(), m_pop[i].fitness(shark::tag::UnpenalizedFitness())));
 		}
 

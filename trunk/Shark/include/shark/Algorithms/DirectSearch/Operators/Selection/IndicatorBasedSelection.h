@@ -108,9 +108,6 @@ struct IndicatorBasedSelection {
 	{
 		if(population.empty()) return;
 		
-		//get the number of objectives
-		std::size_t noObjectives =  population[0].fitness( tag::PenalizedFitness() ).size();
-		
 		//perform a nondominated sort to assign the rank to every element
 		FastNonDominatedSort nonDomSort;
 		nonDomSort(population);

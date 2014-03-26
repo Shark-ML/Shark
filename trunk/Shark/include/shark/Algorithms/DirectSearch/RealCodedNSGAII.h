@@ -37,11 +37,9 @@
 #include <shark/Algorithms/DirectSearch/TypedIndividual.h>
 
 // MOO specific stuff
-#include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
 #include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
-#include <shark/Algorithms/DirectSearch/RankShareComparator.h>
 
 // SMS-EMOA specific stuff
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
@@ -49,26 +47,8 @@
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/BinaryTournamentSelection.h>
 
-#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-
 
 namespace shark { namespace detail { 
-	
-namespace nsga2 {
-	/**
-	* \namespace Internal namespace of the NSGA-II.
-	*/
-
-	/**
-	* \brief The individual type of the NSGA-II.
-	*/
-	typedef TypedIndividual<RealVector> Individual;
-
-	/**
-	* \brief The population type of the NSGA-II.
-	*/
-	typedef std::vector<Individual> Population;
-}
 
 /**
 * \brief Implements the NSGA-II.
@@ -78,19 +58,27 @@ namespace nsga2 {
 *  A Fast Elitist Non-dominated Sorting Genetic Algorithm for Multi-objective Optimization: NSGA-II. 
 *  PPSN VI. 
 */
-template<typename Indicator = shark::HypervolumeIndicator>
+template<typename Indicator = HypervolumeIndicator>
 class RealCodedNSGAII {
 protected:
-	nsga2::Population m_pop; ///< Population of size \f$\mu + 1\f$.
+	/**
+	* \brief The individual type of the NSGA-II.
+	*/
+	typedef TypedIndividual<RealVector> Individual;
+
+	/**
+	* \brief The population type of the NSGA-II.
+	*/
+	typedef std::vector<Individual> Population;
+
+	Population m_pop; ///< Population of size \f$\mu + 1\f$.
 	unsigned int m_mu; ///< Population size \f$\mu\f$.
 
-	shark::moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
+	moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
 
-	RankShareComparator m_rsc; ///< Comparator for individuals based on their multi-objective rank and share.
 	FastNonDominatedSort m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort. 
 	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
-
-	BinaryTournamentSelection< RankShareComparator > m_binaryTournamentSelection; ///< Mating selection operator.
+	BinaryTournamentSelection< Individual::RankOrdering > m_parentSelection; ///< Mating selection operator.
 	SimulatedBinaryCrossover< RealVector > m_sbx; ///< Crossover operator.
 	PolynomialMutator m_mutator; ///< Mutation operator.
 
@@ -105,7 +93,7 @@ public:
 	/**
 	* \brief Default c'tor.
 	*/
-	RealCodedNSGAII() : m_binaryTournamentSelection( m_rsc ) {
+	RealCodedNSGAII(){
 		init();
 	}
 
@@ -128,7 +116,6 @@ public:
 		archive & m_mu; /// Population size \f$\mu\f$.
 
 		archive & m_evaluator; ///< Evaluation operator.
-		archive & m_rsc; ///< Comparator for individuals based on their multi-objective rank and share.
 		archive & m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort. 
 		archive & m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
 		archive & m_sbx; ///< Crossover operator.
@@ -153,7 +140,7 @@ public:
 			node.get( "CrossoverProbability", 0.8 ),
 			node.get( "NC", 20.0 ),
 			node.get( "NM", 20.0 )
-			);
+		);
 	}
 
 	/**
@@ -167,13 +154,13 @@ public:
 		double pc = 0.8,
 		double nc = 20.0,
 		double nm = 20.0
-		) {
-			m_mu = mu;
-			m_crossoverProbability = pc;
-			m_sbx.m_nc = nc;
-			m_mutator.m_nm = nm;
+	) {
+		m_mu = mu;
+		m_crossoverProbability = pc;
+		m_sbx.m_nc = nc;
+		m_mutator.m_nm = nm;
 
-			m_selection.setMu( m_mu );
+		m_selection.setMu( m_mu );
 	}
 
 	/**
@@ -189,16 +176,16 @@ public:
 
 		std::size_t noObjectives = 0;
 
-		BOOST_FOREACH( nsga2::Individual & ind, m_pop ) {
+		BOOST_FOREACH( Individual & ind, m_pop ) {
 			ind.age()=0;
 
 			f.proposeStartingPoint( *ind );
 			boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator( f, *ind );
-			ind.fitness( shark::tag::PenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
-			ind.fitness( shark::tag::UnpenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
+			ind.fitness( tag::PenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
+			ind.fitness( tag::UnpenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
 
-			ind.setNoObjectives( ind.fitness( shark::tag::PenalizedFitness() ).size() );
-			noObjectives = std::max( noObjectives, ind.fitness( shark::tag::PenalizedFitness() ).size() );
+			ind.setNoObjectives( ind.fitness( tag::PenalizedFitness() ).size() );
+			noObjectives = std::max( noObjectives, ind.fitness( tag::PenalizedFitness() ).size() );
 		}
 		
 		m_sbx.init(f);
@@ -216,10 +203,12 @@ public:
 	*/
 	template<typename Function>
 	SolutionSetType step( const Function & f ) {
-		m_binaryTournamentSelection( m_pop.begin(), 
+		m_parentSelection(
+			m_pop.begin(), 
 			m_pop.begin() + m_mu,
 			m_pop.begin() + m_mu,
-			m_pop.end() );
+			m_pop.end()
+		);
 
 		for( unsigned int i = 1; i < m_mu; i++ ) {
 			if( Rng::coinToss( 0.8 ) ) {
@@ -231,8 +220,8 @@ public:
 			m_mutator( m_pop[m_mu + i] );
 			m_pop[m_mu + i].age() = 0;
 			boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator( f, *m_pop[ m_mu + i ] );
-			m_pop[m_mu + i].fitness( shark::tag::PenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
-			m_pop[m_mu + i].fitness( shark::tag::UnpenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
+			m_pop[m_mu + i].fitness( tag::PenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
+			m_pop[m_mu + i].fitness( tag::UnpenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
 
 		}
 
@@ -243,13 +232,13 @@ public:
 			m_pop.begin(), 
 			m_pop.begin() + m_mu,
 			m_pop.end(), 
-			RankShareComparator()
-			);	
+			Individual::IsSelected
+		);	
 
 		SolutionSetType solutionSet;
-		for( nsga2::Population::iterator it = m_pop.begin(); it != m_pop.begin() + m_mu; ++it ) {
+		for( Population::iterator it = m_pop.begin(); it != m_pop.begin() + m_mu; ++it ) {
 			it->age()++;
-			solutionSet.push_back( shark::makeResultSet( *(*it), it->fitness( shark::tag::UnpenalizedFitness() ) ) ) ;
+			solutionSet.push_back( makeResultSet( *(*it), it->fitness( tag::UnpenalizedFitness() ) ) ) ;
 		}
 
 		return( solutionSet );
@@ -258,7 +247,7 @@ public:
 }
 
 typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::RealCodedNSGAII<> > HypRealCodedNSGAII;
-typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::RealCodedNSGAII< shark::AdditiveEpsilonIndicator > > EpsRealCodedNSGAII;
+typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::RealCodedNSGAII< AdditiveEpsilonIndicator > > EpsRealCodedNSGAII;
 }
 
 #endif

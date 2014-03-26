@@ -12,8 +12,8 @@
  * 
  * 
  *
- * \author      -
- * \date        -
+ * \author      T.Voss, O.Krause
+ * \date        2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -36,9 +36,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
-
-#include <shark/Algorithms/DirectSearch/BoundingBoxCalculator.h>
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMECALCULATOR_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMECALCULATOR_H
 
 #include <shark/LinAlg/Base.h>
 
@@ -192,12 +191,10 @@ namespace shark {
 			return h;
 		}
 
-		VectorType regUp( m_noObjectives, -1E15 );
 		VectorType regLow( m_noObjectives, 1E15 );
-		BoundingBoxCalculator<Extractor,VectorType> bbc( extractor, regLow, regUp );
-		for( unsigned int i = 0; i < set.size(); i++ )
-			bbc( set[i] );
-		
+		for( unsigned int i = 0; i < set.size(); i++ ){
+			noalias(regLow) = min(regLow,extractor(set[i]));
+		}
 		return( stream( regLow, refPoint, set, extractor, 0, refPoint.back() ) );	
 	}
 
@@ -507,3 +504,4 @@ namespace shark {
 	}
 	/** \endcond IMPL */
 }
+#endif

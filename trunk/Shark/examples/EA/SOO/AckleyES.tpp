@@ -1,4 +1,3 @@
-#include <shark/Algorithms/DirectSearch/FitnessComparator.h>
 #include <shark/Algorithms/DirectSearch/TypedIndividual.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/UniformCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
@@ -13,9 +12,16 @@ namespace example {
 	struct Chromosome {
 		shark::MultiVariateNormalDistribution m_mutationDistribution;
 	};
-	
+
 	typedef TypedIndividual< RealVector, double > Individual;
 	typedef std::vector< Individual > Population;
+
+	struct FitnessComparator {
+		bool operator()( const Individual & a, const Individual & b ) {
+			return( a.fitness( tag::UnpenalizedFitness() )( 0 ) < b.fitness( tag::UnpenalizedFitness() )( 0 ) );
+		}
+
+	};
 }
 
 }
@@ -76,7 +82,7 @@ int main( int argc, char ** argv ) {
 		}
 	
 		// Selection 
-		shark::UnpenalizedFitnessComparator comp;
+		shark::example::FitnessComparator comp;
 		std::sort( offspring.begin(), offspring.end(), comp );
 		std::copy( offspring.begin(), offspring.begin() + Mu, parents.begin() );
 

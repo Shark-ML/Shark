@@ -7,7 +7,6 @@
 #include <boost/progress.hpp>
 #include <boost/serialization/vector.hpp>
 
-#include <shark/Algorithms/DirectSearch/AGE.h>
 #include <shark/Algorithms/DirectSearch/SteadyStateMOCMA.h>
 #include <shark/Algorithms/DirectSearch/SMS-EMOA.h>
 #include <shark/Algorithms/DirectSearch/RealCodedNSGAII.h>

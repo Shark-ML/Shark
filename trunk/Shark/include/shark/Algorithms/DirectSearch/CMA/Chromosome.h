@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       Chromosome of the CMA-ES.
+ * \brief       CMAChromosomeof the CMA-ES.
  * 
  * 
  *
@@ -36,144 +36,117 @@
 
 namespace shark {
 
-	namespace elitist_cma {
+/**
+* \brief Models a CMAChromosomeof the elitist (MO-)CMA-ES that encodes strategy parameters.
+*/
+struct CMAChromosome{
 
-		/**
-		* \brief Models a chromosome of the elitist (MO-)CMA-ES that encodes strategy parameters.
-		*/
-		struct Chromosome {
+	MultiVariateNormalDistribution m_mutationDistribution; ///< Models the search distribution.
 
-			MultiVariateNormalDistribution m_mutationDistribution; ///< Models the search distribution.
+	RealVector m_evolutionPath; ///< Low-pass filtered accumulation of successful mutative steps.
+	RealVector m_lastStep; ///< The most recent successful mutative step.
 
-			RealVector m_evolutionPath; ///< Low-pass filtered accumulation of successful mutative steps.
-			RealVector m_lastStep; ///< The most recent successful mutative step.
+	unsigned int m_lambda; ///< The default number of offspring individuals that are generated from this chromosome, default value: 1.
+	double m_noSuccessfulOffspring; ///< The number of successful offspring individuals generated from this CMAChromosomein \f$[0,\lambda]\f$.
+	double m_stepSize; ///< The step-size used to scale the normally-distributed mutative steps. Dynamically adapted during the run.
+	double m_stepSizeDampingFactor; ///< Damping factor \f$d\f$ used in the step-size update procedure.
+	double m_stepSizeLearningRate; ///< The learning rate for the step-size.
+	double m_successProbability; ///< Current success probability of this parameter set.
+	double m_targetSuccessProbability; ///< Target success probability, close \f$ \frac{1}{5}\f$.
+	double m_evolutionPathLearningRate; ///< Learning rate (constant) for updating the evolution path.
+	double m_covarianceMatrixLearningRate; ///< Learning rate (constant) for updating the covariance matrix.
 
-			unsigned int m_lambda; ///< The default number of offspring individuals that are generated from this chromosome, default value: 1.
-			double m_noSuccessfulOffspring; ///< The number of successful offspring individuals generated from this chromosome in \f$[0,\lambda]\f$.
-			double m_stepSize; ///< The step-size used to scale the normally-distributed mutative steps. Dynamically adapted during the run.
-			double m_stepSizeDampingFactor; ///< Damping factor \f$d\f$ used in the step-size update procedure.
-			double m_stepSizeLearningRate; ///< The learning rate for the step-size.
-			double m_successProbability; ///< Current success probability of this parameter set.
-			double m_targetSuccessProbability; ///< Target success probability, close \f$ \frac{1}{5}\f$.
-			double m_evolutionPathLearningRate; ///< Learning rate (constant) for updating the evolution path.
-			double m_covarianceMatrixLearningRate; ///< Learning rate (constant) for updating the covariance matrix.
+	bool m_needsCovarianceUpdate; ///< If true, the covariance matrix of the search distribution needs to be update.
+	double m_successThreshold; ///< Success threshold \f$p_{\text{thresh}}\f$ for cutting off evolution path updates.
 
-			bool m_needsCovarianceUpdate; ///< If true, the covariance matrix of the search distribution needs to be update.
-			double m_successThreshold; ///< Success threshold \f$p_{\text{thresh}}\f$ for cutting off evolution path updates.
+	CMAChromosome(){}
+	CMAChromosome(
+		std::size_t searchSpaceDimension,
+		double successThreshold,
+		double initialStepSize
+	)
+	: m_lambda( 1 )
+	, m_noSuccessfulOffspring( 0 )
+	, m_stepSize( initialStepSize )
+	, m_covarianceMatrixLearningRate( 0 )
+	, m_needsCovarianceUpdate( false )
+	, m_successThreshold(successThreshold)
+	{
+		m_mutationDistribution.resize( searchSpaceDimension );
+		m_evolutionPath.resize( searchSpaceDimension );
+		m_lastStep.resize( searchSpaceDimension );
 
-			Chromosome() : m_lambda( 0 ),
-				m_noSuccessfulOffspring( 0 ),
-				m_stepSize( 0 ),
-				m_stepSizeDampingFactor( 0 ),
-				m_stepSizeLearningRate( 0 ),
-				m_successProbability( 0 ),
-				m_targetSuccessProbability( 0 ),
-				m_evolutionPathLearningRate( 0 ),
-				m_covarianceMatrixLearningRate( 0 ),
-				m_needsCovarianceUpdate( false ){
-			}
-			
-			/**
-			* \brief Updates a \f$(\mu+1)\f$-MO-CMA-ES chromosome.
-			*
-			* Updates strategy parameters according to:
-			* \f{align*}
-			*	\vec{p}_c & \leftarrow & (1-c_c) \vec{p}_c + \mathbb{1}_{\bar{p}_{\text{succ}} < p_{\text{thresh}}} \sqrt{c_c (2 - c_c)} \vec{x}_{\text{step}} \\
-			*	\vec{C} & \leftarrow & (1-c_{\text{cov}}) \vec{C} + c_{\text{cov}} \left(  \vec{p}_c \vec{p}_c^T + \mathbb{1}_{\bar{p}_{\text{succ}} \geq p_{\text{thresh}}} c_c (2 - c_c) \vec{C} \right) \\
-			*	\bar{p}_{\text{succ}} & \leftarrow & (1-c_p)\bar{p}_{\text{succ}} + c_p p_{\text{succ}} \\
-			*	\sigma & \leftarrow & \sigma \cdot e^{\frac{1}{d}\frac{\bar{p}_{\text{succ}} - p^{\text{target}}_{\text{succ}}}{1-p^{\text{target}}_{\text{succ}}}}
-			* \f}
-			*/	
-			void update( ) {
-				if( m_needsCovarianceUpdate ) {
-					if( m_successProbability < m_successThreshold ) {
-						m_evolutionPath = (1-m_evolutionPathLearningRate)*m_evolutionPath + ::sqrt( m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate ) ) * m_lastStep;
-						m_mutationDistribution.covarianceMatrix() = (1.-m_covarianceMatrixLearningRate)*m_mutationDistribution.covarianceMatrix() + m_covarianceMatrixLearningRate * blas::outer_prod( m_evolutionPath , m_evolutionPath );
-					} else {
-						m_evolutionPath = (1-m_evolutionPathLearningRate)*m_evolutionPath;
-						m_mutationDistribution.covarianceMatrix() = (1.-m_covarianceMatrixLearningRate)*m_mutationDistribution.covarianceMatrix() + 
-							m_covarianceMatrixLearningRate * ( 
-							blas::outer_prod( m_evolutionPath , m_evolutionPath ) + 
-							m_evolutionPathLearningRate*(2-m_evolutionPathLearningRate)*m_mutationDistribution.covarianceMatrix() 
-							);
+		m_targetSuccessProbability = 1.0 / ( 5.0 + ::sqrt( static_cast<double>( m_lambda ) )/2.0 );		
+		m_successProbability = m_targetSuccessProbability;
+		m_stepSizeDampingFactor = 1.0 + searchSpaceDimension / ( 2. * m_lambda );
+		m_stepSizeLearningRate = (m_lambda * m_targetSuccessProbability) / (2. + m_lambda * m_targetSuccessProbability );
+		m_evolutionPathLearningRate = 2.0 / (2.0 + searchSpaceDimension);
+		m_covarianceMatrixLearningRate = 2.0 / (searchSpaceDimension * searchSpaceDimension + 6.);
 
-					}
-
-					m_mutationDistribution.update();
-					m_needsCovarianceUpdate = false;
-				}
-				m_successProbability = (1 - m_stepSizeLearningRate) * m_successProbability + m_stepSizeLearningRate * ( m_noSuccessfulOffspring / m_lambda );
-				m_stepSize *= ::exp( 1./m_stepSizeDampingFactor * (m_successProbability - m_targetSuccessProbability) / (1-m_targetSuccessProbability) );
-
-				m_noSuccessfulOffspring = 0;
-			}
-
-			/**
-			* \brief Prints the chromosome to the supplied stream.
-			* \tparam Stream The type of the stream the chromosome shall be printed to.
-			* \param [in,out] out The stream to print to.
-			*/
-			template<typename Stream>
-			void print( Stream & out ) {
-				out << "Lambda: " << m_lambda << std::endl;
-				out << "NoSuccessfulOffspring: " << m_noSuccessfulOffspring << std::endl;
-				out << "StepSize: " << m_stepSize << std::endl;
-				out << "StepSizeDampingFactor: " << m_stepSizeDampingFactor << std::endl;
-				out << "StepSizeLearningRate: " << m_stepSizeLearningRate << std::endl;
-				out << "SuccessProbability: " << m_successProbability << std::endl;
-				out << "TargetSuccessProbability: " << m_targetSuccessProbability << std::endl;
-				out << "EvolutionPathLearningRate: " << m_evolutionPathLearningRate << std::endl;
-				out << "CovarianceMatrixLearningRate: " << m_covarianceMatrixLearningRate << std::endl;
+	}
+	
+	/**
+	* \brief Updates a \f$(\mu+1)\f$-MO-CMA-ES chromosome.
+	*
+	* Updates strategy parameters according to:
+	* \f{align*}
+	*	\vec{p}_c & \leftarrow & (1-c_c) \vec{p}_c + \mathbb{1}_{\bar{p}_{\text{succ}} < p_{\text{thresh}}} \sqrt{c_c (2 - c_c)} \vec{x}_{\text{step}} \\
+	*	\vec{C} & \leftarrow & (1-c_{\text{cov}}) \vec{C} + c_{\text{cov}} \left(  \vec{p}_c \vec{p}_c^T + \mathbb{1}_{\bar{p}_{\text{succ}} \geq p_{\text{thresh}}} c_c (2 - c_c) \vec{C} \right) \\
+	*	\bar{p}_{\text{succ}} & \leftarrow & (1-c_p)\bar{p}_{\text{succ}} + c_p p_{\text{succ}} \\
+	*	\sigma & \leftarrow & \sigma \cdot e^{\frac{1}{d}\frac{\bar{p}_{\text{succ}} - p^{\text{target}}_{\text{succ}}}{1-p^{\text{target}}_{\text{succ}}}}
+	* \f}
+	*/	
+	void update( ) {
+		if( m_needsCovarianceUpdate ) {
+			if( m_successProbability < m_successThreshold ) {
+				m_evolutionPath = (1-m_evolutionPathLearningRate)*m_evolutionPath + ::sqrt( m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate ) ) * m_lastStep;
+				m_mutationDistribution.covarianceMatrix() = (1.-m_covarianceMatrixLearningRate)*m_mutationDistribution.covarianceMatrix() + m_covarianceMatrixLearningRate * blas::outer_prod( m_evolutionPath , m_evolutionPath );
+			} else {
+				m_evolutionPath = (1-m_evolutionPathLearningRate)*m_evolutionPath;
+				m_mutationDistribution.covarianceMatrix() = (1.-m_covarianceMatrixLearningRate)*m_mutationDistribution.covarianceMatrix() + 
+					m_covarianceMatrixLearningRate * ( 
+					blas::outer_prod( m_evolutionPath , m_evolutionPath ) + 
+					m_evolutionPathLearningRate*(2-m_evolutionPathLearningRate)*m_mutationDistribution.covarianceMatrix() 
+					);
 
 			}
 
-			/**
-			* \brief Serializes the chromosome to the supplied archive.
-			* \tparam Archive The type of the archive the chromosome shall be serialized to.
-			* \param [in,out] archive The archive to serialize to.
-			* \param [in] version Version information (optional and not used here).
-			*/
-			template<typename Archive>
-			void serialize( Archive & archive, const unsigned int version ) {
+			m_mutationDistribution.update();
+			m_needsCovarianceUpdate = false;
+		}
+		m_successProbability = (1 - m_stepSizeLearningRate) * m_successProbability + m_stepSizeLearningRate * ( m_noSuccessfulOffspring / m_lambda );
+		m_stepSize *= ::exp( 1./m_stepSizeDampingFactor * (m_successProbability - m_targetSuccessProbability) / (1-m_targetSuccessProbability) );
 
-				archive & BOOST_SERIALIZATION_NVP( m_mutationDistribution );
-
-				archive & BOOST_SERIALIZATION_NVP( m_evolutionPath );
-				archive & BOOST_SERIALIZATION_NVP( m_lastStep );
-
-				archive & BOOST_SERIALIZATION_NVP( m_lambda );
-				archive & BOOST_SERIALIZATION_NVP( m_noSuccessfulOffspring );
-				archive & BOOST_SERIALIZATION_NVP( m_stepSize );
-				archive & BOOST_SERIALIZATION_NVP( m_stepSizeDampingFactor );
-				archive & BOOST_SERIALIZATION_NVP( m_stepSizeLearningRate );
-				archive & BOOST_SERIALIZATION_NVP( m_successProbability );
-				archive & BOOST_SERIALIZATION_NVP( m_targetSuccessProbability );
-				archive & BOOST_SERIALIZATION_NVP( m_evolutionPathLearningRate );
-				archive & BOOST_SERIALIZATION_NVP( m_covarianceMatrixLearningRate );
-
-				archive & BOOST_SERIALIZATION_NVP( m_needsCovarianceUpdate );
-			}
-
-			bool operator==( const Chromosome & rhs ) const {
-				return( 
-					m_mutationDistribution == rhs.m_mutationDistribution &&
-					shark::blas::norm_2( m_evolutionPath - rhs.m_evolutionPath ) == 0 &&
-					shark::blas::norm_2( m_lastStep - rhs.m_lastStep ) == 0 &&
-					m_lambda == rhs.m_lambda &&
-					m_noSuccessfulOffspring == rhs.m_noSuccessfulOffspring &&
-					m_stepSize == rhs.m_stepSize &&
-					m_stepSizeDampingFactor == rhs.m_stepSizeDampingFactor &&
-					m_stepSizeLearningRate == rhs.m_stepSizeLearningRate &&
-					m_successProbability == rhs.m_successProbability &&
-					m_targetSuccessProbability == rhs.m_targetSuccessProbability &&
-					m_evolutionPathLearningRate == rhs.m_evolutionPathLearningRate &&
-					m_covarianceMatrixLearningRate == rhs.m_covarianceMatrixLearningRate &&
-					m_needsCovarianceUpdate == rhs.m_needsCovarianceUpdate
-				);
-			}
-		};
+		m_noSuccessfulOffspring = 0;
 	}
 
+	/**
+	* \brief Serializes the CMAChromosometo the supplied archive.
+	* \tparam Archive The type of the archive the CMAChromosomeshall be serialized to.
+	* \param [in,out] archive The archive to serialize to.
+	* \param [in] version Version information (optional and not used here).
+	*/
+	template<typename Archive>
+	void serialize( Archive & archive, const unsigned int version ) {
+
+		archive & BOOST_SERIALIZATION_NVP( m_mutationDistribution );
+
+		archive & BOOST_SERIALIZATION_NVP( m_evolutionPath );
+		archive & BOOST_SERIALIZATION_NVP( m_lastStep );
+
+		archive & BOOST_SERIALIZATION_NVP( m_lambda );
+		archive & BOOST_SERIALIZATION_NVP( m_noSuccessfulOffspring );
+		archive & BOOST_SERIALIZATION_NVP( m_stepSize );
+		archive & BOOST_SERIALIZATION_NVP( m_stepSizeDampingFactor );
+		archive & BOOST_SERIALIZATION_NVP( m_stepSizeLearningRate );
+		archive & BOOST_SERIALIZATION_NVP( m_successProbability );
+		archive & BOOST_SERIALIZATION_NVP( m_targetSuccessProbability );
+		archive & BOOST_SERIALIZATION_NVP( m_evolutionPathLearningRate );
+		archive & BOOST_SERIALIZATION_NVP( m_covarianceMatrixLearningRate );
+
+		archive & BOOST_SERIALIZATION_NVP( m_needsCovarianceUpdate );
+	}
+};
 }
 
 #endif 
