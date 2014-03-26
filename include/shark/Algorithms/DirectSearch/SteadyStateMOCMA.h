@@ -32,18 +32,14 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_STEADYSTATEMOCMA
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_STEADYSTATEMOCMA
 
-#include <shark/Algorithms/DirectSearch/TypedIndividual.h>
-#include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
-#include <shark/Algorithms/DirectSearch/CMA/Chromosome.h>
-
-#include <shark/Algorithms/DirectSearch/Operators/Initializers/CMA/Initializer.h>
-#include <shark/Algorithms/DirectSearch/Operators/Mutation/CMA/Mutator.h>
 // MOO specific stuff
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/LeastContributorApproximator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
+#include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
+#include <shark/Algorithms/DirectSearch/CMA/CMAIndividual.h>
+
 #include <shark/Core/ResultSets.h>
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
 #include <boost/foreach.hpp>
@@ -60,31 +56,11 @@ namespace detail {
  */
 template<typename Indicator=HypervolumeIndicator>
 struct SteadyStateMOCMA {
-	/**
-	 * \namespace Internal namespace of the \f$(\mu+1)\f$-MO-CMA-ES.
-	 */
-
-	typedef shark::elitist_cma::Chromosome Chromosome;
-
-	/**
-	 * \brief The individual type of the \f$(\mu+1)\f$-MO-CMA-ES.
-	 */
-	typedef TypedIndividual<RealVector,Chromosome> Individual;
 
 	/**
 	 * \brief The population type of the \f$(\mu+1)\f$-MO-CMA-ES.
 	 */
-	typedef std::vector< Individual > Population;
-
-	/**
-	 * \brief Individual and chromosome initializer type.
-	 */
-	typedef shark::elitist_cma::Initializer<Individual,Chromosome,0> Initializer;
-
-	/**
-	 * \brief Mutation operator.
-	 */
-	typedef shark::cma::Variator<Individual,Chromosome,0> Variator;
+	typedef std::vector< CMAIndividual > Population;
 	/**
 	 * \brief Typedef of the algorithm's own type.
 	 */
@@ -115,7 +91,7 @@ struct SteadyStateMOCMA {
 	 * \brief Default notion of success.
 	 */
 	static const char *DEFAULT_NOTION_OF_SUCCESS(){
-		return "IndividualBased";
+		return "CMAIndividualBased";
 	}
 	
 	/**
@@ -131,15 +107,12 @@ struct SteadyStateMOCMA {
 	typedef std::vector< ResultSet< RealVector, RealVector > > SolutionSetType;
 
 	Population m_pop; ///< Population of size \f$\mu+1\f$.
-	Initializer m_initializer; ///< Initialization operator.
-	Variator m_variator; ///< Mutation operator.
 	shark::moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
-
 	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
 	
-	unsigned int m_mu; ///< Population size \f$\mu\f$.
 	bool m_useNewUpdate; ///< Flag for deciding whether the improved step-size adaptation shall be used.
-	
+	double m_individualSuccessThreshold;
+	double m_initialSigma;
 	/**
 	 * \brief Default c'tor.
 	 */
@@ -153,6 +126,10 @@ struct SteadyStateMOCMA {
 	std::string name() const {
 		return("SteadyStateMOCMA");
 	}
+	
+	std::size_t mu()const{
+		return m_selection.m_mu;
+	}
 
 	/**
 	 * \brief Stores/loads the algorithm's state.
@@ -163,13 +140,10 @@ struct SteadyStateMOCMA {
 	template<typename Archive>
 	void serialize(Archive &archive, const unsigned int version) {
 		archive &BOOST_SERIALIZATION_NVP(m_pop);
-		archive &BOOST_SERIALIZATION_NVP(m_initializer);
-		archive &BOOST_SERIALIZATION_NVP(m_variator);
 
 		archive &BOOST_SERIALIZATION_NVP(m_evaluator);
 		archive &BOOST_SERIALIZATION_NVP(m_selection);
 
-		archive &BOOST_SERIALIZATION_NVP(m_mu);
 		archive &BOOST_SERIALIZATION_NVP(m_useNewUpdate);
 	}
 
@@ -187,11 +161,11 @@ struct SteadyStateMOCMA {
 	        const std::string &notionOfSuccess = this_type::DEFAULT_NOTION_OF_SUCCESS(),
 	        double initialSigma = this_type::DEFAULT_INITIAL_SIGMA()
 	) {
-		m_mu = mu;
 		m_selection.setMu(mu);
 		m_evaluator.m_penaltyFactor = penaltyFactor;
-		m_initializer.m_successThreshold = successThreshold;
-
+		m_individualSuccessThreshold = successThreshold;
+		m_initialSigma = initialSigma;
+		
 		if (notionOfSuccess == "IndividualBased") {
 			m_useNewUpdate = false;
 		} else if (notionOfSuccess == "PopulationBased") {
@@ -206,7 +180,7 @@ struct SteadyStateMOCMA {
 	 *	- Mu, type: unsigned int, default value: 100.
 	 *	- PenaltyFactor, type: double, default value: \f$10^{-6}\f$.
 	 *	- SuccessThreshold, type: double, default value: 0.44.
-	 *	- NotionOfSuccess, type: string, default value: IndividualBased.
+	 *	- NotionOfSuccess, type: string, default value: CMAIndividualBased.
 	 *	- InitialSigma: the initial value of standard deviation of the distribution. default is 1.0.
 	 *
 	 * \param [in] node The configuration tree node.
@@ -231,21 +205,20 @@ struct SteadyStateMOCMA {
 	 */
 	template<typename ObjectiveFunction>
 	void init(const ObjectiveFunction &f, const RealVector &sp = RealVector()) {
-
-		m_pop.resize(m_mu + 1);
-		m_initializer.m_searchSpaceDimension = f.numberOfVariables();
-		m_initializer.m_noObjectives = f.numberOfObjectives();
-
-		shark::moo::PenalizingEvaluator evaluator;
-		BOOST_FOREACH(Individual & ind, m_pop) {
-			f.proposeStartingPoint(*ind);
-			boost::tuple< typename ObjectiveFunction::ResultType, typename ObjectiveFunction::ResultType > 	result = evaluator(f, *ind);
+		m_pop.reserve(mu() +1);
+		std::size_t noObjectives = f.numberOfObjectives();
+		std::size_t noVariables = f.numberOfVariables();
+		
+		for(std::size_t i = 0; i != mu() + 1; ++i){
+			CMAIndividual ind(noVariables,noObjectives,m_individualSuccessThreshold,m_initialSigma);
+			f.proposeStartingPoint(ind.searchPoint());
+			boost::tuple< RealVector, RealVector > result = m_evaluator(f, ind.searchPoint());
 			ind.fitness(shark::tag::PenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >(result);
 			ind.fitness(shark::tag::UnpenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >(result);
-			m_initializer(ind);
+			m_pop.push_back(ind);
 		}
 		m_selection(m_pop);
-		std::sort(m_pop.begin(), m_pop.end(), Individual::RankOrdering);
+		std::sort(m_pop.begin(), m_pop.end(), CMAIndividual::RankOrdering);
 	}
 
 	/**
@@ -263,11 +236,11 @@ struct SteadyStateMOCMA {
 			maxIdx = i;
 		}
 
-		Individual& parent = m_pop[Rng::discrete(0, std::max(0, maxIdx-1))];
-		Individual& offspring = m_pop[m_mu];
-		offspring.searchPoint() = parent.searchPoint();
+		CMAIndividual& parent = m_pop[Rng::discrete(0, std::max(0, maxIdx-1))];
+		CMAIndividual& offspring = m_pop[mu()];
+		offspring = parent;
 		offspring.age() = 0;
-		m_variator(offspring);
+		offspring.mutate();
 
 		shark::moo::PenalizingEvaluator evaluator;
 		boost::tuple< typename Function::ResultType, typename Function::ResultType > result = evaluator(f, offspring.searchPoint());
@@ -277,26 +250,27 @@ struct SteadyStateMOCMA {
 		m_selection(m_pop);
 		if (m_useNewUpdate) {
 			if (offspring.selected()) {
-				offspring.get<0>().m_noSuccessfulOffspring += 1.0;
-				parent.get<0>().m_noSuccessfulOffspring += 1.0;
+				offspring.noSuccessfulOffspring() += 1.0;
+				parent.noSuccessfulOffspring() += 1.0;
 			}
 		} else {
 			if (offspring.selected() && offspring.rank() <= parent.rank() ) {
-				offspring.get<0>().m_noSuccessfulOffspring += 1.0;
-				parent.get<0>().m_noSuccessfulOffspring += 1.0;
+				offspring.noSuccessfulOffspring() += 1.0;
+				parent.noSuccessfulOffspring() += 1.0;
 			}
 		}
 		
 		//update strategy parameter
-		offspring.get<0>().update();
-		parent.get<0>().update();
+		offspring.update();
+		parent.update();
 
 		if(offspring.selected()){
-			std::sort(m_pop.begin(), m_pop.end(), Individual::RankOrdering);
+			std::partition(m_pop.begin(), m_pop.end(),CMAIndividual::IsSelected);
+			std::sort(m_pop.begin(), --m_pop.end(), CMAIndividual::RankOrdering);
 		}
 			
 		SolutionSetType solutionSet;
-		for (unsigned int i = 0; i < m_mu; i++) {
+		for (unsigned int i = 0; i < mu(); i++) {
 			m_pop[i].age()++;
 			solutionSet.push_back(shark::makeResultSet(m_pop[i].searchPoint(), m_pop[i].fitness(shark::tag::UnpenalizedFitness()))) ;
 		}

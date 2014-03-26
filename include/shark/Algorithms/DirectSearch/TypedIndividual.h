@@ -166,9 +166,11 @@ public:
 	}
 	
 	///\brief Ordering relation by the ranks of the individuals
-	static bool RankOrdering(this_type const& individual1, this_type const& individual2){
-		return individual1.rank() < individual2.rank();
-	}
+	struct RankOrdering{
+		bool operator()(this_type const& individual1, this_type const& individual2){
+			return individual1.rank() < individual2.rank();
+		}
+	};
 
 	/**
 	 * \brief Default constructor that initializes the individual's attributes to default values.

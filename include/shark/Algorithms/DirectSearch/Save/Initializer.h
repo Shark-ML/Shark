@@ -65,8 +65,6 @@ namespace shark {
 			Initializer() : m_searchSpaceDimension( 0 ),
 				m_noObjectives( 0 ),
 				m_initialSigma( 0 ),
-                                m_isInitialSigmaProvidedByUser( false ),
-				m_constrainedFitnessFunction( false ),
 				m_successThreshold(0){
 			}
 			/**
@@ -132,36 +130,12 @@ namespace shark {
 			void serialize( Archive & archive, const unsigned int version ) {
 				archive & BOOST_SERIALIZATION_NVP( m_searchSpaceDimension );
 				archive & BOOST_SERIALIZATION_NVP( m_noObjectives );
-
-				archive & BOOST_SERIALIZATION_NVP( m_lowerBound );
-				archive & BOOST_SERIALIZATION_NVP( m_upperBound );
-
 				archive & BOOST_SERIALIZATION_NVP( m_initialSigma );
-                                archive & BOOST_SERIALIZATION_NVP( m_isInitialSigmaProvidedByUser );
-				archive & BOOST_SERIALIZATION_NVP( m_constrainedFitnessFunction );
-			}
-
-			bool operator==( const Initializer & rhs ) const {
-				return( 
-					m_searchSpaceDimension == rhs.m_searchSpaceDimension &&
-					m_noObjectives == rhs.m_noObjectives &&
-					shark::blas::norm_2( m_lowerBound - rhs.m_lowerBound ) < 1E-10 &&
-					shark::blas::norm_2( m_upperBound - rhs.m_upperBound ) < 1E-10 &&
-					m_initialSigma == rhs.m_initialSigma &&
-					m_constrainedFitnessFunction == rhs.m_constrainedFitnessFunction
-					);
 			}
 
 			unsigned int m_searchSpaceDimension;
 			unsigned int m_noObjectives;
-
-			RealVector m_lowerBound;
-			RealVector m_upperBound;
-
 			double m_initialSigma;
-                        bool m_isInitialSigmaProvidedByUser;
-			bool m_constrainedFitnessFunction;
-			
 			double m_successThreshold;
 
 		};

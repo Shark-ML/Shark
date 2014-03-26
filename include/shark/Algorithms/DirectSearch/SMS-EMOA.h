@@ -41,14 +41,10 @@
 #include <shark/Algorithms/DirectSearch/TypedIndividual.h>
 
 // MOO specific stuff
-#include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
 #include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/BinaryTournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
-#include <shark/Algorithms/DirectSearch/RankShareComparator.h>
-
-// SMS-EMOA specific stuff
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
@@ -58,7 +54,6 @@
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 
 #include <boost/foreach.hpp>
-#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 
 namespace shark { namespace detail {
 
@@ -84,9 +79,8 @@ protected:
 
 	Population m_pop; ///< Population of size \f$\mu + 1\f$.
 	unsigned int m_mu; ///< Population size \f$\mu\f$.
-	bool m_useApproximatedHypervolume;///< Flag for deciding whether to use the approximated hypervolume.
 
-	shark::moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
+	moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
 	FastNonDominatedSort m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort. 
 	IndicatorBasedSelection<HypervolumeIndicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
 	SimulatedBinaryCrossover< RealVector > m_sbx; ///< Crossover operator.
@@ -218,8 +212,8 @@ public:
 			ind.age()=0;
 			f.proposeStartingPoint( ind.searchPoint() );
 			boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator( f, *ind );
-			ind.fitness( shark::tag::PenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
-			ind.fitness( shark::tag::UnpenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
+			ind.fitness( tag::PenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
+			ind.fitness( tag::UnpenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
 		}
 
 		m_sbx.init(f);
@@ -234,7 +228,7 @@ public:
 	*/
 	template<typename Function>
 	SolutionSetType step( const Function & f ) {
-		shark::BinaryTournamentSelection< ParetoDominanceComparator<FitnessExtractor> > selection;
+		BinaryTournamentSelection< Individual::RankOrdering > selection;
 
 		Population::iterator parent1 = selection( m_pop.begin(), m_pop.begin() + m_mu );
 		Population::iterator parent2 = selection( m_pop.begin(), m_pop.begin() + m_mu );
@@ -255,8 +249,8 @@ public:
 		}
 
 		boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator( f, m_pop.back().searchPoint() );
-		m_pop.back().fitness( shark::tag::PenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
-		m_pop.back().fitness( shark::tag::UnpenalizedFitness() ) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
+		m_pop.back().fitness( tag::PenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
+		m_pop.back().fitness( tag::UnpenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
 
 		m_selection( m_pop );
 
@@ -264,7 +258,7 @@ public:
 		SolutionSetType solutionSet;
 		for( Population::iterator it = m_pop.begin(); it != m_pop.begin() + m_mu; ++it ) {
 			it->age()++;
-			solutionSet.push_back( shark::makeResultSet( it->searchPoint(), it->fitness( shark::tag::UnpenalizedFitness() ) ) ) ;
+			solutionSet.push_back( makeResultSet( it->searchPoint(), it->fitness( tag::UnpenalizedFitness() ) ) ) ;
 		}
 
 		return solutionSet;

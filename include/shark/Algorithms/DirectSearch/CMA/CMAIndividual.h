@@ -29,8 +29,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_TYPED_INDIVIDUAL_H
-#define SHARK_ALGORITHMS_DIRECT_SEARCH_TYPED_INDIVIDUAL_H
+#ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_CMA_INDIVIDUAL_H
+#define SHARK_ALGORITHMS_DIRECT_SEARCH_CMA_INDIVIDUAL_H
 
 #include <shark/Algorithms/DirectSearch/EA.h>
 #include <shark/Algorithms/DirectSearch/CMA/Chromosome.h>
@@ -44,16 +44,16 @@ class CMAIndividual{
 public:
 
 	typedef RealVector FitnessType;
-	typedef SearchSpaceType search_point_type;
+	typedef RealVector search_point_type;
 	
 	// Functors to use for the stl algorithms
 	///\brief returns true if the individual is selected for the next parent set
-	static bool IsSelected(this_type const& individual){
+	static bool IsSelected(CMAIndividual const& individual){
 		return individual.selected();
 	}
 	
 	///\brief Ordering relation by the ranks of the individuals
-	static bool RankOrdering(this_type const& individual1, this_type const& individual2){
+	static bool RankOrdering(CMAIndividual const& individual1, CMAIndividual const& individual2){
 		return individual1.rank() < individual2.rank();
 	}
 
@@ -73,7 +73,7 @@ public:
 		double initialStepSize
 	)
 	: m_searchPoint(searchSpaceDimension)
-	, m_chromosome(searchSpaceDimnsion, successThreshold, initialStepSize)
+	, m_chromosome(searchSpaceDimension, successThreshold, initialStepSize)
 	, m_age(0)
 	, m_rank(0)
 	, m_selected(false)
@@ -87,20 +87,28 @@ public:
 		MultiVariateNormalDistribution::ResultType sample = m_chromosome.m_mutationDistribution();
 		m_chromosome.m_lastStep = sample.first;
 		m_searchPoint += m_chromosome.m_stepSize * sample.first;
-		m_chromosome.m_nedsCovarianceUpdate = true;
+		m_chromosome.m_needsCovarianceUpdate = true;
+	}
+	
+	double& noSuccessfulOffspring(){
+		return m_chromosome.m_noSuccessfulOffspring;
+	}
+	
+	double noSuccessfulOffspring()const{
+		return m_chromosome.m_noSuccessfulOffspring;
 	}
 
 	/**
 	 * \brief Returns a non-const reference to the search point that is associated with the individual.
 	 */
-	SearchSpaceType &searchPoint() {
+	RealVector &searchPoint() {
 		return m_searchPoint;
 	}
 
 	/**
 	 * \brief Returns a const reference to the search point that is associated with the individual.
 	 */
-	const SearchSpaceType &searchPoint() const {
+	const RealVector &searchPoint() const {
 		return m_searchPoint;
 	}
 
@@ -133,7 +141,7 @@ public:
 	 * optimization.
 	 */
 	FitnessType &fitness(tag::UnpenalizedFitness fitness) {
-		return m_unpenalizedFitness);
+		return m_unpenalizedFitness;
 	}
 
 	/*!
@@ -143,7 +151,7 @@ public:
 	 * optimization.
 	 */
 	const FitnessType &fitness(tag::UnpenalizedFitness fitness) const {
-		return m_unpenalizedFitness);
+		return m_unpenalizedFitness;
 	}
 
 	/**
@@ -154,7 +162,7 @@ public:
 	 * refer to the documentation of the respective tags.
 	 */
 	FitnessType &fitness(tag::PenalizedFitness fitness) {
-		return m_penalizedFitness);
+		return m_penalizedFitness;
 	}
 
 	/**
@@ -165,7 +173,7 @@ public:
 	 * refer to the documentation of the respective tags.
 	 */
 	const FitnessType &fitness(tag::PenalizedFitness fitness) const {
-		return m_penalizedFitness);
+		return m_penalizedFitness;
 	}
 
 	/**
@@ -202,6 +210,7 @@ public:
 	template<typename Archive>
 	void serialize(Archive &archive, const unsigned int version) {
 		archive &BOOST_SERIALIZATION_NVP(m_searchPoint);
+		archive &BOOST_SERIALIZATION_NVP(m_chromosome);
 		archive &BOOST_SERIALIZATION_NVP(m_age);
 		archive &BOOST_SERIALIZATION_NVP(m_rank);
 		archive &BOOST_SERIALIZATION_NVP(m_selected);
@@ -210,7 +219,7 @@ public:
 	}
 
 protected:
-	SearchSpaceType m_searchPoint; ///< The search point associated with the individual.
+	RealVector m_searchPoint; ///< The search point associated with the individual.
 	CMAChromosome m_chromosome; ///< The chromosome of the strategy parameters
 	unsigned int m_age;	///< The age of the individual (in generations).
 	unsigned int m_rank; ///< The level of non-dominance of the individual. The lower the better.
