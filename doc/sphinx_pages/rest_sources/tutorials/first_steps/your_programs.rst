@@ -86,51 +86,9 @@ Shark.  We provide an example CMakeLists.txt for your convenience.
 Try to compile one of the Shark examples with it first. This ensures
 that your installation is working.
 
-You can find the template CMakeLists.txt in your example folder at ``ExampleProject/CMakeLists.txt`` .
-It automatically links to all libraries used by your Shark build configuration. Just add your files
+You can find the template CMakeLists.txt in your example folder at
+``ExampleProject/CMakeLists.txt`` .  It automatically links to all
+libraries used by your Shark build configuration. Just add your files
 to the project and run cmake.
 
 
-Shark directory layout
-***********************
-
-The below diagram gives an overview over the Shark directory structure
-after *having extracted the source code package of shark*.
-
-.. todo::
-  is this still up to date?
-
-.. note::
-   The locations and/or contents of the listed folders may
-   differ for the pre-compiled binary packages and installers. The contents
-   of the ``include/`` folder however, are the same across all installation
-   packages.
-
-.. image:: ../images/shark_directory_structure.png
-  :height: 600px
-  :target: ../../../_images/shark_directory_structure.png
-  :alt: Shark directory structure after installing from source.
-
-The ``include/`` folder's structure well mirrors the Shark library's design
-choices:
-
-* The ``Core/`` Folder provides basic interfaces and functionality
-  for math and other utility functions in shark.
-* In ``LinAlg/``, basic vector and matrix functionality is implemented
-  (e.g., by wrapping the Boost C++ uBLAS libraries).
-* The ``Data/`` folder for example provides import/export routines,
-  and also sets up a :doxy:`Data` class especially suited for
-  machine learning tasks: subsets (e.g., for cross-validation) are
-  lazy copies of the original set.
-* The folders ``Fuzzy/``, ``Network/``, ``Rng/``, ``Statistics/`` all
-  implement specialized functionality pertaining to Fuzzy Logic, HTTP
-  protocols (for RESTful APIs), random number generation, and various
-  statistical tests or distributions, respectively.
-
-* Currently, the only algorithms implemented in the folder ``Unsupervised/``
-  are Restricted Boltzmann machines, but this will be expanded in the future.
-
-* Finally, one of the most important design aspects of Shark is the
-  ``"Model"``-``"ObjectiveFunction"``-``"Optimizer"`` trias. This can be seen as roughly
-  corresponding to the three remaining folders ``Models/``, ``ObjectiveFunctions/``,
-  and ``Algorithms/``
