@@ -37,9 +37,7 @@
 #define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_SELECTION_ROULETTE_WHEEL_SELECTION_H
 
 #include <shark/Rng/GlobalRng.h>
-
-#include <numeric>
-#include <vector>
+#include <shark/LinAlg/Base.h>
 
 namespace shark {
 /**
@@ -50,36 +48,23 @@ namespace shark {
 struct RouletteWheelSelection {
 	/**
 	* \brief Selects an individual from the range of individuals with prob. proportional to its fitness.
-	* \tparam Extractor Type for mapping elements from the underlying range on the real line.
+	* 
 	* \param [in] it Iterator pointing to the first valid element.
 	* \param [in] itE Iterator pointing to the first invalid element.
-	* \param [in, out] e Object of type Extractor for extracting the elements selection probability.
-	* \returns An iterator pointing to the selected individual.
+	* \param [in] probabilities selection probabilities of the individuals
 	*/
-	template<typename Iterator, typename Extractor>
-	Iterator operator()(Iterator it, Iterator itE, Extractor &e) const
+	template<typename Iterator>
+	Iterator operator()(Iterator it, Iterator itE, RealVector const& probabilities) const
 	{
-		std::size_t n = std::distance(it, itE);
-
-		std::vector< double > rouletteWheel(n, 0.);
-
-		std::transform(it,
-		               itE,
-		               rouletteWheel.begin(),
-		               e
-		              );
-
-		std::partial_sum(rouletteWheel.begin(), rouletteWheel.end(), rouletteWheel.begin());
-
-		double rnd = Rng::uni();
-		Iterator result;
-		std::vector< double >::iterator itv = rouletteWheel.begin();
-		for (result = it; result != itE; ++result, ++itv) {
-			if (rnd <= *itv)
-				break;
+		std::size_t n = probabilities.size();
+		double rnd = Rng::uni(0,1);
+		double sum = 0;
+		for(std::size_t pos = 0; pos != n; ++pos,++it){
+			sum += probabilities(pos);
+			if(rnd <= sum)
+				return it;
 		}
-
-		return(result);
+		return it;
 	}
 };
 }

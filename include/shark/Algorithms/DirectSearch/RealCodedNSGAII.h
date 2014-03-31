@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       RealCodedNSGAII.h
+ * \brief       IndicatorBasedRealCodedNSGAII.h
  * 
  * 
  *
@@ -34,21 +34,18 @@
 
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
 
-#include <shark/Algorithms/DirectSearch/TypedIndividual.h>
+#include <shark/Algorithms/DirectSearch/Individual.h>
 
 // MOO specific stuff
-#include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
-
-// SMS-EMOA specific stuff
+#include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Selection/BinaryTournamentSelection.h>
 
 
-namespace shark { namespace detail { 
+namespace shark {
 
 /**
 * \brief Implements the NSGA-II.
@@ -58,50 +55,68 @@ namespace shark { namespace detail {
 *  A Fast Elitist Non-dominated Sorting Genetic Algorithm for Multi-objective Optimization: NSGA-II. 
 *  PPSN VI. 
 */
-template<typename Indicator = HypervolumeIndicator>
-class RealCodedNSGAII {
-protected:
+template<typename Indicator>
+class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<VectorSpace<double> >{
+private:
 	/**
 	* \brief The individual type of the NSGA-II.
 	*/
-	typedef TypedIndividual<RealVector> Individual;
+	typedef shark::Individual<RealVector,RealVector> Individual;
 
-	/**
-	* \brief The population type of the NSGA-II.
-	*/
-	typedef std::vector<Individual> Population;
+	std::vector<Individual> m_pop; ///< Population of size \f$\mu + 1\f$.
+	unsigned int m_mu; ///< Size of parent generation
 
-	Population m_pop; ///< Population of size \f$\mu + 1\f$.
-	unsigned int m_mu; ///< Population size \f$\mu\f$.
-
-	moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
-
-	FastNonDominatedSort m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort. 
 	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
-	BinaryTournamentSelection< Individual::RankOrdering > m_parentSelection; ///< Mating selection operator.
-	SimulatedBinaryCrossover< RealVector > m_sbx; ///< Crossover operator.
+
+	PenalizingEvaluator m_evaluator; ///< Evaluation operator. 
+	SimulatedBinaryCrossover< RealVector > m_crossover; ///< Crossover operator.
 	PolynomialMutator m_mutator; ///< Mutation operator.
 
 	double m_crossoverProbability; ///< Crossover probability.			
 public:
 
 	/**
-	* \brief The result type of the optimizer, a vector of tuples \f$( \vec x, \vec{f}( \vec{x} )\f$.
-	*/
-	typedef std::vector< ResultSet< RealVector, RealVector > > SolutionSetType;
-
-	/**
 	* \brief Default c'tor.
 	*/
-	RealCodedNSGAII(){
-		init();
+	IndicatorBasedRealCodedNSGAII(){
+		mu() = 100;
+		crossoverProbability() = 0.8;
+		nc() = 20.0;
+		nm() = 20.0;
 	}
 
-	/**
-	* \brief Accesses the name of the optimizer.
-	*/
 	std::string name() const {
-		return( "RealCodedNSGAII" );
+		return "RealCodedNSGAII";
+	}
+	
+	/// \brief Returns the probability that crossover is applied.
+	double crossoverProbability()const{
+		return m_crossoverProbability;
+	}
+	/// \brief Returns the probability that crossover is applied.
+	double& crossoverProbability(){
+		return m_crossoverProbability;
+	}
+	
+	double nm()const{
+		return m_mutator.m_nm;
+	}
+	double& nm(){
+		return m_mutator.m_nm;
+	}
+	
+	double nc()const{
+		return m_crossover.m_nc;
+	}
+	double& nc(){
+		return m_crossover.m_nc;
+	}
+	
+	unsigned int mu()const{
+		return m_mu;
+	}
+	unsigned int& mu(){
+		return m_mu;
 	}
 
 	/**
@@ -112,16 +127,15 @@ public:
 	*/
 	template<typename Archive>
 	void serialize( Archive & archive, const unsigned int version ) {
-		archive & m_pop; ///< Population of size \f$\mu + 1\f$.
-		archive & m_mu; /// Population size \f$\mu\f$.
+		archive & m_pop;
+		archive & m_mu;
+		archive & m_best;
 
-		archive & m_evaluator; ///< Evaluation operator.
-		archive & m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort. 
-		archive & m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
-		archive & m_sbx; ///< Crossover operator.
-		archive & m_mutator; ///< Mutation operator.
+		archive & m_evaluator;
+		archive & m_crossover;
+		archive & m_mutator;
 
-		archive & m_crossoverProbability; ///< Crossover probability.
+		archive & m_crossoverProbability;
 	}
 
 	/**
@@ -130,37 +144,16 @@ public:
 	* The following sub keys are recognized:
 	*	- Mu, type: unsigned int, default value: 100.
 	*	- CrossoverProbability, type: double, default value: 0.8.
-	*	- NC, type: double, default value: 10.
+	*	- NC, type: double, default value: 20.
 	*	- NM, type: double; default value: 20.
 	*
 	* \param [in] node The configuration tree node.
 	*/
 	void configure( const PropertyTree & node ) {
-		init( node.get( "Mu", 100 ),
-			node.get( "CrossoverProbability", 0.8 ),
-			node.get( "NC", 20.0 ),
-			node.get( "NM", 20.0 )
-		);
-	}
-
-	/**
-	* \brief Initializes the algorithm.
-	* \param [in] mu The population size. 
-	* \param [in] pc Crossover probability, default value: 0.8.
-	* \param [in] nc Parameter of the simulated binary crossover operator, default value: 10.0.
-	* \param [in] nm Parameter of the mutation operator, default value: 20.0.
-	*/
-	void init( unsigned int mu = 100,
-		double pc = 0.8,
-		double nc = 20.0,
-		double nm = 20.0
-	) {
-		m_mu = mu;
-		m_crossoverProbability = pc;
-		m_sbx.m_nc = nc;
-		m_mutator.m_nm = nm;
-
-		m_selection.setMu( m_mu );
+		mu() = node.get( "Mu", mu() );
+		crossoverProbability() = node.get( "CrossoverProbability", crossoverProbability() );
+		nc() = node.get( "NC", nc() );
+		nm() = node.get( "NM", nm() );
 	}
 
 	/**
@@ -170,84 +163,65 @@ public:
 	* \param [in] f The objective function
 	* \param [in] sp Starting point to initialize the algorithm for.
 	*/
-	template<typename Function>
-	void init( const Function & f, const RealVector & sp  ) {
-		m_pop.resize( 2 * m_mu );
-
-		std::size_t noObjectives = 0;
-
-		BOOST_FOREACH( Individual & ind, m_pop ) {
-			ind.age()=0;
-
-			f.proposeStartingPoint( *ind );
-			boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator( f, *ind );
-			ind.fitness( tag::PenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
-			ind.fitness( tag::UnpenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
-
-			ind.setNoObjectives( ind.fitness( tag::PenalizedFitness() ).size() );
-			noObjectives = std::max( noObjectives, ind.fitness( tag::PenalizedFitness() ).size() );
+	void init( 
+		ObjectiveFunctionType const& function, 
+		std::vector<SearchPointType> const& startingPoints
+	){
+		m_pop.reserve( 2 * mu() );
+		m_pop.resize(mu());
+		for(std::size_t i = 0; i != mu(); ++i){
+			m_pop[i].age()=0;
+			function.proposeStartingPoint( m_pop[i].searchPoint() );
+			m_evaluator( function, m_pop[i] );
+			m_pop.push_back(m_pop[i]);
 		}
+		m_selection( m_pop,m_mu );
+		m_pop.resize(2*mu());
 		
-		m_sbx.init(f);
-		m_mutator.init(f);
-
-		m_fastNonDominatedSort( m_pop );
-		m_selection( m_pop );
+		m_crossover.init(function);
+		m_mutator.init(function);
 	}
 
 	/**
-	* \brief Executes one iteration of the algorithm.
-	* \tparam The type of the objective to iterate upon.
-	* \param [in] f The function to iterate upon.
-	* \returns The Pareto-set/-front approximation after the iteration.
-	*/
-	template<typename Function>
-	SolutionSetType step( const Function & f ) {
-		m_parentSelection(
+	 * \brief Executes one iteration of the algorithm.
+	 * 
+	 * \param [in] function The function to iterate upon.
+	 */
+	void step( ObjectiveFunctionType const& function ) {
+		TournamentSelection< Individual::RankOrdering > matingSelection;
+		
+		matingSelection(
 			m_pop.begin(), 
-			m_pop.begin() + m_mu,
-			m_pop.begin() + m_mu,
+			m_pop.begin() + mu(),
+			m_pop.begin() + mu(),
 			m_pop.end()
 		);
 
-		for( unsigned int i = 1; i < m_mu; i++ ) {
+		for( unsigned int i = 1; i < mu(); i++ ) {
 			if( Rng::coinToss( 0.8 ) ) {
-				m_sbx( m_pop[m_mu + i - 1], m_pop[m_mu + i] );
+				m_crossover( m_pop[mu() + i - 1], m_pop[mu() + i] );
 			}
 		}
 
-		for( unsigned int i = 0; i < m_mu; i++ ) {
-			m_mutator( m_pop[m_mu + i] );
-			m_pop[m_mu + i].age() = 0;
-			boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator( f, *m_pop[ m_mu + i ] );
-			m_pop[m_mu + i].fitness( tag::PenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
-			m_pop[m_mu + i].fitness( tag::UnpenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
+		for( unsigned int i = 0; i < mu(); i++ ) {
+			m_mutator( m_pop[mu() + i] );
+			m_pop[mu() + i].age() = 0;
+			m_evaluator( function, m_pop[ mu() + i ] );
 
 		}
+		m_selection( m_pop, m_mu );
 
-		m_fastNonDominatedSort( m_pop );
-		m_selection( m_pop );
+		std::partition( m_pop.begin(), m_pop.end(), Individual::IsSelected );	
 
-		std::partial_sort( 
-			m_pop.begin(), 
-			m_pop.begin() + m_mu,
-			m_pop.end(), 
-			Individual::IsSelected
-		);	
-
-		SolutionSetType solutionSet;
-		for( Population::iterator it = m_pop.begin(); it != m_pop.begin() + m_mu; ++it ) {
-			it->age()++;
-			solutionSet.push_back( makeResultSet( *(*it), it->fitness( tag::UnpenalizedFitness() ) ) ) ;
+		for( std::size_t i = 0; i != mu(); ++i ) {
+			m_pop[i].age()++;
+			m_best[i].value = m_pop[i].unpenalizedFitness();
+			m_best[i].point = m_pop[i].searchPoint();
 		}
-
-		return( solutionSet );
 	}
 };
-}
 
-typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::RealCodedNSGAII<> > HypRealCodedNSGAII;
-typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::RealCodedNSGAII< AdditiveEpsilonIndicator > > EpsRealCodedNSGAII;
+typedef IndicatorBasedRealCodedNSGAII< HypervolumeIndicator > HypRealCodedNSGAII;
+typedef IndicatorBasedRealCodedNSGAII< AdditiveEpsilonIndicator > EpsRealCodedNSGAII;
 }
-
 #endif

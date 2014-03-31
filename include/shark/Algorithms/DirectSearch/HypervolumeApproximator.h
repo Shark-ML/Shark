@@ -142,7 +142,7 @@ namespace shark {
 					itt = begin + static_cast<std::size_t>(noPoints*Rng::uni());
 					samples_sofar++;
 				} 
-				while( pdc( e( *itt ), rndpoint) < ParetoDominanceComparator< tag::PenalizedFitness >::A_WEAKLY_DOMINATES_B );
+				while( pdc( e( *itt ), rndpoint) < ParetoDominanceComparator< IdentityFitnessExtractor >::A_WEAKLY_DOMINATES_B );
 
 				round++;
 			}

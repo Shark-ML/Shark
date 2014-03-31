@@ -32,7 +32,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_CMA_INDIVIDUAL_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_CMA_INDIVIDUAL_H
 
-#include <shark/Algorithms/DirectSearch/EA.h>
+#include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Algorithms/DirectSearch/CMA/Chromosome.h>
 
 #include <shark/LinAlg/Base.h>
@@ -40,194 +40,42 @@
 
 namespace shark {
 
-class CMAIndividual{
+class CMAIndividual : public Individual<RealVector,RealVector, CMAChromosome>{
 public:
-
-	typedef RealVector FitnessType;
-	typedef RealVector search_point_type;
-	
-	// Functors to use for the stl algorithms
-	///\brief returns true if the individual is selected for the next parent set
-	static bool IsSelected(CMAIndividual const& individual){
-		return individual.selected();
-	}
-	
-	///\brief Ordering relation by the ranks of the individuals
-	static bool RankOrdering(CMAIndividual const& individual1, CMAIndividual const& individual2){
-		return individual1.rank() < individual2.rank();
-	}
 
 	/**
 	 * \brief Default constructor that initializes the individual's attributes to default values.
 	 */
-	CMAIndividual()
-	: m_age(0)
-	, m_rank(0)
-	, m_selected(false){}
-		
-		
+	CMAIndividual(){}
 	CMAIndividual(
 		std::size_t searchSpaceDimension,
 		std::size_t numberOfObjectives,
 		double successThreshold,
 		double initialStepSize
-	)
-	: m_searchPoint(searchSpaceDimension)
-	, m_chromosome(searchSpaceDimension, successThreshold, initialStepSize)
-	, m_age(0)
-	, m_rank(0)
-	, m_selected(false)
-	, m_penalizedFitness(numberOfObjectives)
-	, m_unpenalizedFitness(numberOfObjectives){}
+	){
+		chromosome() = CMAChromosome(searchSpaceDimension, successThreshold, initialStepSize);
+		searchPoint().resize(searchSpaceDimension);
+		penalizedFitness().resize(searchSpaceDimension);
+		unpenalizedFitness().resize(searchSpaceDimension);
+	}
 	
 	void update(){
-		m_chromosome.update();
+		chromosome().update();
 	}
 	void mutate(){
-		MultiVariateNormalDistribution::ResultType sample = m_chromosome.m_mutationDistribution();
-		m_chromosome.m_lastStep = sample.first;
-		m_searchPoint += m_chromosome.m_stepSize * sample.first;
-		m_chromosome.m_needsCovarianceUpdate = true;
+		MultiVariateNormalDistribution::ResultType sample = chromosome().m_mutationDistribution();
+		chromosome().m_lastStep = sample.first;
+		searchPoint() += chromosome().m_stepSize * sample.first;
+		chromosome().m_needsCovarianceUpdate = true;
 	}
 	
 	double& noSuccessfulOffspring(){
-		return m_chromosome.m_noSuccessfulOffspring;
+		return chromosome().m_noSuccessfulOffspring;
 	}
 	
 	double noSuccessfulOffspring()const{
-		return m_chromosome.m_noSuccessfulOffspring;
+		return chromosome().m_noSuccessfulOffspring;
 	}
-
-	/**
-	 * \brief Returns a non-const reference to the search point that is associated with the individual.
-	 */
-	RealVector &searchPoint() {
-		return m_searchPoint;
-	}
-
-	/**
-	 * \brief Returns a const reference to the search point that is associated with the individual.
-	 */
-	const RealVector &searchPoint() const {
-		return m_searchPoint;
-	}
-
-	/**
-	 * \brief Returns the number of objectives.
-	 */
-	unsigned int noObjectives() const {
-		return m_unpenalizedFitness.size();
-	}
-
-	/**
-	 * \brief Returns the age of the individual (in generations).
-	 */
-	unsigned int age() const {
-		return m_age;
-	}
-
-	/**
-	 * \brief Returns a reference to the age of the individual (in generations).
-	 * Allows for lvalue()-semantics.
-	 */
-	unsigned int &age() {
-		return m_age;
-	}
-
-	/**
-	 * \brief Returns a non-const reference to the unpenalized fitness of the individual. Allows for lvalue()-semantics.
-	 *
-	 * Please note that the vector of fitness values is of size 1 in the case of single-objective
-	 * optimization.
-	 */
-	FitnessType &fitness(tag::UnpenalizedFitness fitness) {
-		return m_unpenalizedFitness;
-	}
-
-	/*!
-	 * \brief Returns a const reference to the unpenalized fitness of the individual.
-	 *
-	 * Please note that the vector of fitness values is of size 1 in the case of single-objective
-	 * optimization.
-	 */
-	const FitnessType &fitness(tag::UnpenalizedFitness fitness) const {
-		return m_unpenalizedFitness;
-	}
-
-	/**
-	 * \brief Returns a non-const reference to the penalized fitness of the individual. Allows for lvalue()-semantics.
-	 *
-	 * Please note that the vector of fitness values is of size 1 in the case of single-objective
-	 * optimization. For further information on the difference between penalized and unpenalized fitness, please
-	 * refer to the documentation of the respective tags.
-	 */
-	FitnessType &fitness(tag::PenalizedFitness fitness) {
-		return m_penalizedFitness;
-	}
-
-	/**
-	 * \brief Returns a const reference to the penalized fitness of the individual.
-	 *
-	 * Please note that the vector of fitness values is of size 1 in the case of single-objective
-	 * optimization. For further information on the difference between penalized and unpenalized fitness, please
-	 * refer to the documentation of the respective tags.
-	 */
-	const FitnessType &fitness(tag::PenalizedFitness fitness) const {
-		return m_penalizedFitness;
-	}
-
-	/**
-	 * \brief Returns the level of non-dominance of the individual.
-	 */
-	unsigned int rank() const {
-		return m_rank;
-	}
-
-	/**
-	 * \brief Returns a reference to the level of non-dominance of the individual. Allows for lvalue()-semantic.
-	 */
-	unsigned int &rank() {
-		return m_rank;
-	}
-
-	/**
-	 * \brief Returns true if the individual is selected for the next parent generation 
-	 */
-	bool selected() const {
-		return m_selected;
-	}
-
-	/**
-	 * \brief Returns true if the individual is selected for the next parent generation 
-	 */
-	bool &selected() {
-		return m_selected;
-	}
-
-	/**
-	 * \brief Stores the individual and all of its chromosomes in an archive.
-	 */
-	template<typename Archive>
-	void serialize(Archive &archive, const unsigned int version) {
-		archive &BOOST_SERIALIZATION_NVP(m_searchPoint);
-		archive &BOOST_SERIALIZATION_NVP(m_chromosome);
-		archive &BOOST_SERIALIZATION_NVP(m_age);
-		archive &BOOST_SERIALIZATION_NVP(m_rank);
-		archive &BOOST_SERIALIZATION_NVP(m_selected);
-		archive &BOOST_SERIALIZATION_NVP(m_penalizedFitness);
-		archive &BOOST_SERIALIZATION_NVP(m_unpenalizedFitness);
-	}
-
-protected:
-	RealVector m_searchPoint; ///< The search point associated with the individual.
-	CMAChromosome m_chromosome; ///< The chromosome of the strategy parameters
-	unsigned int m_age;	///< The age of the individual (in generations).
-	unsigned int m_rank; ///< The level of non-dominance of the individual. The lower the better.
-	bool m_selected; ///< Is the individual selcted for the next parent set?
-
-	FitnessType m_penalizedFitness; ///< Penalized fitness of the individual.
-	FitnessType m_unpenalizedFitness; ///< Unpenalized fitness of the individual.
-
 };
 
 }

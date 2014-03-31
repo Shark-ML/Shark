@@ -36,8 +36,6 @@
 #include <shark/LinAlg/Base.h>
 #include <shark/Rng/GlobalRng.h>
 
-#include <vector>
-
 namespace shark {
 
 	/**
@@ -46,19 +44,9 @@ namespace shark {
 	struct PolynomialMutator {
 
 		/**
-		* \brief Typedef for this type.
-		*/
-		typedef PolynomialMutator this_type;
-
-		/**
-		* \brief Default value for the parameter nm.
-		*/
-		static double DEFAULT_NM() { return( 20. ); } 
-
-		/**
 		* \brief Default c'tor.
 		*/
-		PolynomialMutator() : m_nm( this_type::DEFAULT_NM() ) {}
+		PolynomialMutator() : m_nm( 20.0 ) {}
 
 		/**
 		* \brief Initializes the operator for the supplied fitness function.
@@ -93,19 +81,21 @@ namespace shark {
 		template<typename IndividualType>
 		void operator()( IndividualType & ind ) {
 			double delta, deltaQ, expp,  u = 0.;
+			
+			RealVector& point = ind.searchPoint();
            
-			for( unsigned int i = 0; i < (*ind).size(); i++ ) {
+			for( unsigned int i = 0; i < point.size(); i++ ) {
 
 				if( Rng::coinToss( m_prob ) ) {
 					u  = Rng::uni( 0., 1. );
-					if( (*ind)[i] <= m_lower( i ) || (*ind)[i] >= m_upper( i ) ) { 
-						(*ind)[i] = u * (m_upper( i ) - m_lower( i ) ) + m_lower( i );
+					if( point[i] <= m_lower( i ) || point[i] >= m_upper( i ) ) { 
+						point[i] = u * (m_upper( i ) - m_lower( i ) ) + m_lower( i );
 					} else {
 						// Calculate delta
-						if( ((*ind)[i] - m_lower( i ) ) < (m_upper( i ) - (*ind)[i]) )
-							delta = ((*ind)[i] - m_lower( i ) ) / (m_upper( i ) - m_lower( i ) );
+						if( (point[i] - m_lower( i ) ) < (m_upper( i ) - point[i]) )
+							delta = (point[i] - m_lower( i ) ) / (m_upper( i ) - m_lower( i ) );
 						else
-							delta = (m_upper( i ) - (*ind)[i]) / (m_upper( i ) - m_lower( i ));
+							delta = (m_upper( i ) - point[i]) / (m_upper( i ) - m_lower( i ));
 
 						delta = 1. - delta;
 						expp  = (m_nm + 1.);
@@ -120,14 +110,14 @@ namespace shark {
 							deltaQ = 1. - ::pow(deltaQ , expp);
 						}
 
-						(*ind)[i] += deltaQ * (m_upper( i ) - m_lower( i ) );
+						point[i] += deltaQ * (m_upper( i ) - m_lower( i ) );
 
 						//  -> from Deb's implementation, not contained in any paper
-						if ((*ind)[i] < m_lower( i ))
-							(*ind)[i] = m_lower( i );
+						if (point[i] < m_lower( i ))
+							point[i] = m_lower( i );
 
-						if ((*ind)[i] > m_upper( i ))
-							(*ind)[i] = m_upper( i );
+						if (point[i] > m_upper( i ))
+							point[i] = m_upper( i );
 
 					}
 				}

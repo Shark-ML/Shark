@@ -44,31 +44,9 @@ namespace shark {
 	template<typename PointType>
 	struct SimulatedBinaryCrossover {
 
-		/**
-		 * \brief Make PointType known to the outside world.
-		*/
-		typedef PointType point_type;
-
-		/**
-		* \brief Make this type known to the outside world.
-		*/
-		typedef SimulatedBinaryCrossover< point_type > this_type;
-
-		/**
-		* \brief Default value for the parameter nc.
-		*/
-		static double DEFAULT_NC() { return( 20. ); } 
-
-		/**
-		* \brief Default value for the crossover probability.
-		*/
-		static double DEFAULT_CROSSOVER_PROBABILITY() { return( 0.5 ); } 
-
-		/**
-		* \brief Default c'tor.
-		*/
-		SimulatedBinaryCrossover() : m_nc( this_type::DEFAULT_NC() ),
-			m_prob( this_type::DEFAULT_CROSSOVER_PROBABILITY() ) {}
+		SimulatedBinaryCrossover() 
+		: m_nc( 20.0 )
+		, m_prob( 0.5 ) {}
 
 		/**
 		* \brief Initializes the operator for the supplied fitness function.
@@ -102,63 +80,60 @@ namespace shark {
 		* \param [in,out] i2 Individual to be mated.
 		*/
 		template<typename IndividualType>
-		void operator()( IndividualType & i1, IndividualType & i2 ) {		
-			double beta, betaQ, alpha, expp, y1 = 0, y2 = 0, u = 0.;
+		void operator()( IndividualType & i1, IndividualType & i2 ) {	
+			RealVector& point1 = i1.searchPoint();
+			RealVector& point2 = i2.searchPoint();
 
-			for( unsigned int i = 0; i < (*i1).size(); i++ ) {
+			for( unsigned int i = 0; i < point1.size(); i++ ) {
 
 				if( !Rng::coinToss( m_prob ) )
 					continue;
-
-				if( (*i2)[i] < (*i1)[i] ) {
-					y1 = (*i2)[i];
-					y2 = (*i1)[i];
+				
+				double y1 = 0;
+				double y2 = 0;
+				if( point2[i] < point1[i] ) {
+					y1 = point2[i];
+					y2 = point1[i];
 				} else {
-					y1 = (*i1)[i];
-					y2 = (*i2)[i];
+					y1 = point1[i];
+					y2 = point2[i];
 				}
-
-				if( ::fabs(y2 - y1) > 1E-7 ) {					
+				
+				double betaQ = 0.0;
+				if( std::abs(y2 - y1) > 1E-7 ) {					
 					// Find beta value
+					double beta = 0;
 					if( (y1 - m_lower( i )) > (m_upper( i ) - y2) )
-						beta = 1 + (2 * (m_upper( i ) - y2) / (y2 - y1));
+						beta = 1 + 2 * (m_upper( i ) - y2) / (y2 - y1);
 					else
-						beta = 1 + (2 * (y1 - m_lower( i )) / (y2 - y1));
+						beta = 1 + 2 * (y1 - m_lower( i )) / (y2 - y1);
 
 
-					expp = (m_nc + 1.);
-					beta = 1. / beta;
-
+					double expp = m_nc + 1.;
 					// Find alpha
-					alpha = 2. - ::pow(beta , expp);
-
-					expp = 1. / expp;
-
-					u = Rng::uni( 0., 1. );
-
-					//  -> from Deb's implementation, not contained in any paper
-					// do { u = Rng::uni(0, 1); } while(u == 1.);
+					double alpha = 2. - std::pow(1.0/beta , expp);
+					double u = Rng::uni( 0., 1. );
 
 					if( u <= 1. / alpha ) {
 						alpha *= u;
-						betaQ = ::pow( alpha, expp );
+						betaQ = std::pow( alpha, 1.0/expp );
 					} else {
 						alpha *= u;
 						alpha = 1. / (2. - alpha);
-						betaQ = ::pow( alpha, expp );
+						betaQ = std::pow( alpha, 1.0/expp );
 					}
 				} else { // if genes are equal -> from Deb's implementation, not contained in any paper
 					betaQ = 1.;
 				}
 
-				(*i1)[i] = .5 * ((y1 + y2) - betaQ * (y2 - y1));
-				(*i2)[i] = .5 * ((y1 + y2) + betaQ * (y2 - y1));
+				point1[i] = 0.5 * ((y1 + y2) - betaQ * (y2 - y1));
+				point2[i] = 0.5 * ((y1 + y2) + betaQ * (y2 - y1));
 
 				//  -> from Deb's implementation, not contained in any paper
-				(*i1)[i] = std::max( (*i1)[i], m_lower( i ) );
-				(*i1)[i] = std::min( (*i1)[i], m_upper( i ) );
-				(*i2)[i] = std::max( (*i2)[i], m_lower( i ) );
-				(*i2)[i] = std::min( (*i2)[i], m_upper( i ) );
+				point1[i] = std::max( point1[i], m_lower( i ) );
+				point1[i] = std::min( point1[i], m_upper( i ) );
+				point2[i] = std::max( point2[i], m_lower( i ) );
+				point2[i] = std::min( point2[i], m_upper( i ) );
 			}
 
 		}
@@ -180,8 +155,8 @@ namespace shark {
 		double m_nc; ///< Parameter nc.
 		double m_prob; ///< Crossover probability.
 
-		point_type m_upper; ///< Upper bound (box constraint).
-		point_type m_lower; ///< Lower bound (box constraint).
+		RealVector m_upper; ///< Upper bound (box constraint).
+		RealVector m_lower; ///< Lower bound (box constraint).
 	};
 }
 

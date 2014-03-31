@@ -11,8 +11,8 @@
  * 
  * 
  *
- * \author      -
- * \date        -
+ * \author      T.Voss
+ * \date        2011-2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -35,10 +35,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef PARETODOMINANCECOMPARATOR_H
-#define PARETODOMINANCECOMPARATOR_H
-
-#include <shark/Algorithms/DirectSearch/EA.h>
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_PARETODOMINANCECOMPARATOR_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_PARETODOMINANCECOMPARATOR_H
 
 namespace shark {
 /**
@@ -99,4 +97,4 @@ struct ParetoDominanceComparator {
 	}
 };
 }
-#endif // PARETODOMINANCECOMPARATOR_H
+#endif

@@ -15,12 +15,9 @@ using namespace shark;
 BOOST_AUTO_TEST_CASE( ApproximatedHypSteadyStateMOCMA ) {
 
 	PropertyTree node;
-	detail::SteadyStateMOCMA<> ssMocma;
-	BOOST_CHECK_NO_THROW( ssMocma.init() );
+	SteadyStateMOCMA ssMocma;
 	BOOST_CHECK_NO_THROW( ssMocma.configure( node ) );
 
-	//~ AbstractMultiObjectiveFunction< VectorSpace< double > > function;
-	//~ BOOST_CHECK_THROW( ssMocma.init( function ), Exception );
 	DTLZ1 dtlz1;
 	dtlz1.setNumberOfObjectives( 3 );
 	dtlz1.setNumberOfVariables( 10 );
@@ -33,17 +30,17 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypSteadyStateMOCMA ) {
 
 		BOOST_CHECK_NO_THROW( (oa << ssMocma) );
 
-		detail::SteadyStateMOCMA<> ssMocma2;
+		SteadyStateMOCMA ssMocma2;
 
 		boost::archive::text_iarchive ia( ss );
 		BOOST_CHECK_NO_THROW( (ia >> ssMocma2) );
 
 		Rng::seed( 0 );
+		ssMocma.step( dtlz1 );
+		SteadyStateMOCMA::SolutionSetType set1 =  ssMocma.solution();
 		Rng::seed( 0 );
-		detail::SteadyStateMOCMA<>::SolutionSetType set1 = ssMocma.step( dtlz1 );
-		Rng::seed( 0 );
-		Rng::seed( 0 );
-		detail::SteadyStateMOCMA<>::SolutionSetType set2 = ssMocma2.step( dtlz1 );
+		ssMocma2.step( dtlz1 );
+		SteadyStateMOCMA::SolutionSetType set2 =  ssMocma2.solution();
 
 		for( unsigned int i = 0; i < set1.size(); i++ ) {
 			BOOST_CHECK_SMALL( norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
@@ -51,86 +48,4 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypSteadyStateMOCMA ) {
 		}
 
 	}
-
-
-}
-
-BOOST_AUTO_TEST_CASE( ExactHypSteadyStateMOCMA ) {
-
-	PropertyTree node;
-	detail::SteadyStateMOCMA<> ssMocma;
-	BOOST_CHECK_NO_THROW( ssMocma.init() );
-	BOOST_CHECK_NO_THROW( ssMocma.configure( node ) );
-
-	DTLZ1 dtlz1;
-	dtlz1.setNumberOfObjectives( 3 );
-	dtlz1.setNumberOfVariables( 10 );
-	BOOST_CHECK_NO_THROW( ssMocma.init( dtlz1 ) );
-	BOOST_CHECK_NO_THROW( ssMocma.step( dtlz1 ) );
-
-	{
-		std::stringstream ss;
-		boost::archive::text_oarchive oa( ss );
-
-		BOOST_CHECK_NO_THROW( (oa << ssMocma) );
-
-		detail::SteadyStateMOCMA<> ssMocma2;
-
-		boost::archive::text_iarchive ia( ss );
-		BOOST_CHECK_NO_THROW( (ia >> ssMocma2) );
-
-		Rng::seed( 0 );
-		Rng::seed( 0 );
-		detail::SteadyStateMOCMA<>::SolutionSetType set1 = ssMocma.step( dtlz1 );
-		Rng::seed( 0 );
-		Rng::seed( 0 );
-		detail::SteadyStateMOCMA<>::SolutionSetType set2 = ssMocma2.step( dtlz1 );
-
-		for( unsigned int i = 0; i < set1.size(); i++ ) {
-			BOOST_CHECK_SMALL( norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
-			BOOST_CHECK_SMALL( norm_2( set1.at( i ).point - set2.at( i ).point ), 1E-20 );
-		}
-
-	}
-
-
-}
-
-BOOST_AUTO_TEST_CASE( AdditiveEpsSteadyStateMOCMA ) {
-	PropertyTree node;
-	detail::SteadyStateMOCMA< AdditiveEpsilonIndicator > ssMocma;
-	BOOST_CHECK_NO_THROW( ssMocma.init() );
-	BOOST_CHECK_NO_THROW( ssMocma.configure( node ) );
-
-	DTLZ1 dtlz1;
-	dtlz1.setNumberOfObjectives( 3 );
-	dtlz1.setNumberOfVariables( 10 );
-	BOOST_CHECK_NO_THROW( ssMocma.init( dtlz1 ) );
-	BOOST_CHECK_NO_THROW( ssMocma.step( dtlz1 ) );
-
-	{
-		std::stringstream ss;
-		boost::archive::text_oarchive oa( ss );
-
-		BOOST_CHECK_NO_THROW( (oa << ssMocma) );
-
-		detail::SteadyStateMOCMA<AdditiveEpsilonIndicator> ssMocma2;
-
-		boost::archive::text_iarchive ia( ss );
-		BOOST_CHECK_NO_THROW( (ia >> ssMocma2) );
-
-		Rng::seed( 0 );
-		Rng::seed( 0 );
-		detail::SteadyStateMOCMA<AdditiveEpsilonIndicator>::SolutionSetType set1 = ssMocma.step( dtlz1 );
-		Rng::seed( 0 );
-		Rng::seed( 0 );
-		detail::SteadyStateMOCMA<AdditiveEpsilonIndicator>::SolutionSetType set2 = ssMocma2.step( dtlz1 );
-
-		for( unsigned int i = 0; i < set1.size(); i++ ) {
-			BOOST_CHECK_SMALL( norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
-			BOOST_CHECK_SMALL( norm_2( set1.at( i ).point - set2.at( i ).point ), 1E-20 );
-		}
-
-	}
-
 }

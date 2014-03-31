@@ -30,6 +30,7 @@
  */
 #include <shark/Algorithms/DirectSearch/ElitistCMA.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
+#include <shark/Algorithms/DirectSearch/Individual.h>
 
 using namespace shark;
 
@@ -132,25 +133,24 @@ void ElitistCMA::init( ObjectiveFunctionType const& function, SearchPointType co
 */
 void ElitistCMA::step(ObjectiveFunctionType const& function) {
 	//create offspring and select the best
-	shark::soo::PenalizingEvaluator evaluator;
-	RealVector bestOffspringPoint;
-	double bestOffspringFitness = std::numeric_limits<double>::max();
+	PenalizingEvaluator evaluator;
+	Individual<RealVector,double> bestOffspring;
+	bestOffspring.penalizedFitness() = std::numeric_limits<double>::max();
 	for( unsigned int i = 0; i != m_lambda; ++i ) {
-		RealVector offspring = m_mean + m_sigma * m_mutationDistribution().first;
-		boost::tuple< double, double > evalResult = evaluator( function, offspring );
-		double fitness = boost::get< shark::soo::PenalizingEvaluator::PENALIZED_RESULT >(evalResult);
-		if(fitness <= bestOffspringFitness){
-			bestOffspringFitness = fitness;
-			bestOffspringPoint = offspring;
+		Individual<RealVector,double> offspring;
+		offspring.searchPoint() = m_mean + m_sigma * m_mutationDistribution().first;
+		evaluator( function, offspring );
+		if(offspring.penalizedFitness() <= bestOffspring.penalizedFitness()){
+			bestOffspring = offspring;
 		}
 	}
 
-	updateStrategyParameters( bestOffspringPoint, bestOffspringFitness);
+	updateStrategyParameters( bestOffspring.searchPoint(), bestOffspring.penalizedFitness());
 
 	//update the solution if a better was sound
-	if(bestOffspringFitness < m_best.value){
-		m_best.point = bestOffspringPoint;
-		m_best.value = bestOffspringFitness;
+	if(bestOffspring.penalizedFitness() < m_best.value){
+		m_best.point = bestOffspring.searchPoint();
+		m_best.value = bestOffspring.penalizedFitness();
 	}
 }
 

@@ -5,8 +5,8 @@
  * 
  * 
  *
- * \author      T.Voss
- * \date        2010-2011
+ * \author      T.Voss, O.Krause
+ * \date        2010-2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -32,132 +32,27 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_FITNESS_EXTRACTOR_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_FITNESS_EXTRACTOR_H
 
-#include <shark/Algorithms/DirectSearch/EA.h>
 #include <shark/LinAlg/Base.h>
-
-#include <vector>
 
 namespace shark {
 
-    /**
-     * \brief Functor that returns its argument without conversion
-     */
-    struct IdentityFitnessExtractor {
-		
-	/**
-	 * \brief Returns the argument without conversion
-	 * \tparam Member Type of the element
-	 * \param [in] member The member to return
-	 */
+/**
+* \brief Functor that returns its argument without conversion
+*/
+struct IdentityFitnessExtractor {
 	template<typename Member>
 	const Member & operator()( const Member & member ) const {
-	    return( member );
+		return member;	
 	}
 
-	/**
-	 * \brief Serializes/Deserializes the state of the extractor to the supplied archive.
-	 * \tparam Archive Archive type, needs to be a model of a boost::serialization archive.
-	 * \param [in,out] archive Archive to store to/load from.
-	 * \param [in] version Currently unused.
-	 */
-	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {
-	    (void) archive;
-	    (void) version;
+};
+
+struct FitnessExtractor {
+	template<typename Individual>
+		typename Individual::FitnessType const& operator()( Individual const& individual ) const {
+		return individual.penalizedFitness();
 	}
-    };
-
-    /**
-     * \brief Default fitness extractor
-     */
-    struct FitnessExtractor {
-
-	/**
-	 * \brief Calls the function fitness on the supplied element
-	 * \tparam Member Element type; needs to provide a function fitness
-	 * \param [in] member The element to extract fitness values from
-	 */
-	template<typename Member>
-	inline const RealVector & operator()( const Member & member ) const {
-	    return( member.fitness( tag::PenalizedFitness() ) );
-	}
-
-	/**
-	 * \brief Serializes/Deserializes the state of the extractor to the supplied archive.
-	 * \tparam Archive Archive type, needs to be a model of a boost::serialization archive.
-	 * \param [in,out] archive Archive to store to/load from.
-	 * \param [in] version Currently unused.
-	 */
-	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {
-	    (void) archive;
-	    (void) version;
-	}
-
-    };
-
-    namespace soo {
-	/**
-	 * \brief Default fitness extractor
-	 */
-	struct FitnessExtractor {
-
-	    /**
-	     * \brief Calls the function fitness on the supplied element
-	     * \tparam Member Element type; needs to provide a function fitness
-	     * \param [in] member The element to extract fitness values from
-	     */
-	    template<typename Member>
-	    inline const double & operator()( const Member & member ) const {
-		return( member.fitness( tag::PenalizedFitness() )( 0 ) );
-	    }
-
-	    /**
-	     * \brief Serializes/Deserializes the state of the extractor to the supplied archive.
-	     * \tparam Archive Archive type, needs to be a model of a boost::serialization archive.
-	     * \param [in,out] archive Archive to store to/load from.
-	     * \param [in] version Currently unused.
-	     */
-	    template<typename Archive>
-	    void serialize( Archive & archive, const unsigned int version ) {
-		(void) archive;
-		(void) version;
-	    }
-
-	};
-    }
-	
-    /**
-     * \brief Casting fitness extractor
-     * \tparam CastTo Target type for static_cast
-     */
-    template<typename CastTo>
-	struct CastingFitnessExtractor {
-
-	    typedef RealVector fitness_type;
-
-	    /**
-	     * \brief Calls the function fitness on the supplied element
-	     * \tparam Member Element type; needs to provide a function fitness
-	     * \param [in] member The element to extract fitness values from
-	     */
-	    template<typename Member>
-	    const fitness_type & operator()( const Member & member ) const {
-		return( static_cast<const CastTo &>( member).fitness( tag::PenalizedFitness() ) );
-	    }
-
-	    /**
-	     * \brief Serializes/Deserializes the state of the extractor to the supplied archive.
-	     * \tparam Archive Archive type, needs to be a model of a boost::serialization archive.
-	     * \param [in,out] archive Archive to store to/load from.
-	     * \param [in] version Currently unused.
-	     */
-	    template<typename Archive>
-	    void serialize( Archive & archive, const unsigned int version ) {
-		(void) archive;
-		(void) version;
-	    }
-	};
+};
 }
 
 #endif

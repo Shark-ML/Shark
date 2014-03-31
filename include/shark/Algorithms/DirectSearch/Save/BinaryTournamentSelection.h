@@ -40,8 +40,10 @@
 namespace shark {
 
 /**
-* \brief Implements binary tournament selection with a user-selectable predicate.
-* \tparam Predicate Predicate type for comparing candidate solutions.
+* \brief Implements binary tournament mating selection with a user-selectable predicate.
+* 
+* Two individuals are randomly selected from the range  of individuals and compared. The winning individual
+*  is then returned.
 */
 template<typename Predicate>
 struct BinaryTournamentSelection {
@@ -50,25 +52,14 @@ struct BinaryTournamentSelection {
 	* the range [outIt, outItE).
 	*/
 	template<typename IteratorType1, typename IteratorType2>
-	void operator()( IteratorType1 inIt,
-	                 IteratorType1 inItE,
-	                 IteratorType2 outIt,
-	                 IteratorType2 outItE
-	               )
-	{
-		std::size_t inSize = std::distance( inIt, inItE );
-		std::size_t i1, i2;
-		while( outIt != outItE ) {
-
-			i1 = Rng::discrete( 0, inSize - 1);
-			i2 = Rng::discrete( 0, inSize - 1);
-
-			if( m_predicate( *(inIt + i2), *(inIt + i1) ) )
-				*outIt = *(inIt + i2);
-			else
-				*outIt = *(inIt + i1);
-
-			++outIt;
+	void operator()(
+		IteratorType1 inIt,
+		IteratorType1 inItE,
+		IteratorType2 outIt,
+		IteratorType2 outItE
+	){
+		for(; outIt != outItE; ++outIt ) {
+			*outIt = (*this)(inIt,inItE);
 		}
 	}
 
@@ -76,15 +67,16 @@ struct BinaryTournamentSelection {
 	* \brief Selects and returns an individual from range [inIt,inItE).
 	*/
 	template<typename IteratorType>
-	IteratorType operator()( IteratorType inIt, IteratorType inItE )
-	{
+	IteratorType operator()( IteratorType inIt, IteratorType inItE ){
 		std::size_t inSize = std::distance( inIt, inItE );
-		std::size_t i1, i2;
-
-		i1 = Rng::discrete( 0, inSize - 1);
-		i2 = Rng::discrete( 0, inSize - 1);
-
-		return( m_predicate( *(inIt + i2), *(inIt + i1) ) ? inIt + i2 : inIt + i1 );
+		std::size_t i1 = Rng::discrete( 0, inSize - 1);
+		std::size_t i2 = Rng::discrete( 0, inSize - 1);
+		
+		if(m_predicate( *(inIt + i2), *(inIt + i1) ){
+			return inIt + i2;
+		}else{
+			inIt + i1;
+		}
 	}
 
 	Predicate m_predicate; ///< Predicate instance.

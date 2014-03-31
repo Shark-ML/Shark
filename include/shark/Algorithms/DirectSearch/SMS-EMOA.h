@@ -36,26 +36,21 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_SMS_EMOA_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_SMS_EMOA_H
 
-#include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
-
-#include <shark/Algorithms/DirectSearch/TypedIndividual.h>
-
 // MOO specific stuff
-#include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
+#include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Selection/BinaryTournamentSelection.h>
+#include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
-#include <shark/Core/ResultSets.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 
 #include <boost/foreach.hpp>
 
-namespace shark { namespace detail {
+namespace shark {
 
 /**
 * \brief Implements the SMS-EMOA.
@@ -65,77 +60,50 @@ namespace shark { namespace detail {
 *	SMS-EMOA: Multiobjective selection based on dominated hypervolume. 
 *	European Journal of Operational Research.
 */
-class SMSEMOA {
-protected:
-	/**
-	* \brief The individual type of the SMS-EMOA.
-	*/
-	typedef TypedIndividual<RealVector> Individual;
-
-	/**
-	* \brief The population type of the SMS-EMOA.
-	*/
-	typedef std::vector<Individual> Population;
-
-	Population m_pop; ///< Population of size \f$\mu + 1\f$.
-	unsigned int m_mu; ///< Population size \f$\mu\f$.
-
-	moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
-	FastNonDominatedSort m_fastNonDominatedSort; ///< Operator that provides Deb's fast non-dominated sort. 
-	IndicatorBasedSelection<HypervolumeIndicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
-	SimulatedBinaryCrossover< RealVector > m_sbx; ///< Crossover operator.
-	PolynomialMutator m_mutator; ///< Mutation operator.
-
-	double m_crossoverProbability; ///< Crossover probability.
-
+class SMSEMOA : public AbstractMultiObjectiveOptimizer<VectorSpace<double> >{
+private:
+	/// \brief The individual type of the SMS-EMOA.
+	typedef shark::Individual<RealVector,RealVector> Individual;
 public:
-	/**
-	* \brief The result type of the optimizer, a vector of tuples \f$( \vec x, \vec{f}( \vec{x} )\f$.
-	*/
-	typedef std::vector< ResultSet< RealVector, RealVector > > SolutionSetType;
-
-	typedef SMSEMOA this_type;
-
-	/**
-	* \brief Default parent population size.
-	*/
-	static unsigned int DEFAULT_MU() {
-		return( 100 );
-	}
-
-	/**
-	* \brief Default crossover probability.
-	*/
-	static double DEFAULT_PC() {
-		return( 0.9 );
-	}
-
-	/**
-	* \brief Default value for nc.
-	*/
-	static double DEFAULT_NC() {
-		return( 20.0 );
-	}
-
-	/**
-	* \brief Default value for nm.
-	*/
-	static double DEFAULT_NM() {
-		return( 20.0 );
-	}
-
-	/**
-	* \brief Default c'tor.
-	*/
 	SMSEMOA() {
-		init();
+		mu() = 100;
+		crossoverProbability() = 0.9;
+		nc() = 20.0;
+		nm() = 20.0;
 	}
 
-	/**
-	* \brief Returns the name of the algorithm.
-	*/
 	std::string name() const {
-		return( "SMSEMOA" );
+		return "SMSEMOA";
+	}
+	
+	/// \brief Returns the probability that crossover is applied.
+	double crossoverProbability()const{
+		return m_crossoverProbability;
+	}
+	/// \brief Returns the probability that crossover is applied.
+	double& crossoverProbability(){
+		return m_crossoverProbability;
+	}
+	
+	double nm()const{
+		return m_mutator.m_nm;
+	}
+	double& nm(){
+		return m_mutator.m_nm;
+	}
+	
+	double nc()const{
+		return m_crossover.m_nc;
+	}
+	double& nc(){
+		return m_crossover.m_nc;
+	}
+	
+	unsigned int mu()const{
+		return m_mu;
+	}
+	unsigned int& mu(){
+		return m_mu;
 	}
 
 	/**
@@ -147,12 +115,12 @@ public:
 	template<typename Archive>
 	void serialize( Archive & archive, const unsigned int version ) {
 		archive & BOOST_SERIALIZATION_NVP( m_pop );
-		archive & BOOST_SERIALIZATION_NVP( m_mu );
+		archive & BOOST_SERIALIZATION_NVP(m_mu);
+		archive & BOOST_SERIALIZATION_NVP(m_best);
 
 		archive & BOOST_SERIALIZATION_NVP( m_evaluator );
-		archive & BOOST_SERIALIZATION_NVP( m_fastNonDominatedSort );
 		archive & BOOST_SERIALIZATION_NVP( m_selection );
-		archive & BOOST_SERIALIZATION_NVP( m_sbx );
+		archive & BOOST_SERIALIZATION_NVP( m_crossover );
 		archive & BOOST_SERIALIZATION_NVP( m_mutator );
 		archive & BOOST_SERIALIZATION_NVP( m_crossoverProbability );
 	}
@@ -169,75 +137,50 @@ public:
 	* \param [in] node The configuration tree node.
 	*/
 	void configure( const PropertyTree & node ) {
-		init( 
-			node.get( "Mu", this_type::DEFAULT_MU() ),
-			node.get( "CrossoverProbability", this_type::DEFAULT_PC() ),
-			node.get( "NC", this_type::DEFAULT_NC() ),
-			node.get( "NM", this_type::DEFAULT_NM() )
-		);
+		mu() = node.get( "Mu", mu() );
+		crossoverProbability() = node.get( "CrossoverProbability", crossoverProbability() );
+		nc() = node.get( "NC", nc() );
+		nm() = node.get( "NM", nm() );
 	}
 
+	using AbstractMultiObjectiveOptimizer<VectorSpace<double> >::init;
 	/**
-	* \brief Initializes the algorithm.
-	* \param [in] mu The population size. 
-	* \param [in] pc Crossover probability, default value: 0.8.
-	* \param [in] nc Parameter of the simulated binary crossover operator, default value: 20.0.
-	* \param [in] nm Parameter of the mutation operator, default value: 20.0.
-	*/
-	void init( unsigned int mu = this_type::DEFAULT_MU(),
-		double pc = this_type::DEFAULT_PC(),
-		double nc = this_type::DEFAULT_NC(),
-		double nm = this_type::DEFAULT_NM()
-	) {
-		m_mu = mu;
-		m_crossoverProbability = pc;
-		m_sbx.m_prob = 0.5;
-		m_sbx.m_nc = nc;
-		m_mutator.m_nm = nm;
-
-		m_selection.setMu( m_mu );
-	}
-
-	/**
-	* \brief Initializes the algorithm for the supplied objective function.
-	* \tparam ObjectiveFunction The type of the objective function, 
-	* needs to adhere to the concept of an AbstractObjectiveFunction.
-	* \param [in] f The objective function.
-	* \param [in] sp An initial search point.
-	*/
-	template<typename Function>
-	void init( const Function & f, const RealVector & sp ) {
-		m_pop.resize( m_mu + 1 );
-		BOOST_FOREACH( Individual & ind, m_pop ) {
-			ind.age()=0;
-			f.proposeStartingPoint( ind.searchPoint() );
-			boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator( f, *ind );
-			ind.fitness( tag::PenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
-			ind.fitness( tag::UnpenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
+	 * \brief Initializes the algorithm for the supplied objective function.
+	 * 
+	 * \param [in] f The objective function.
+	 * \param [in] startingPoints A set of intiial search points.
+	 */
+	void init( 
+		ObjectiveFunctionType const& function, 
+		std::vector<SearchPointType> const& startingPoints
+	){
+		m_pop.resize( mu() + 1 );
+		m_best.resize(mu());
+		for(std::size_t i = 0; i != mu(); ++i){
+			m_pop[i].age()=0;
+			function.proposeStartingPoint( m_pop[i].searchPoint() );
+			m_evaluator( function, m_pop[i] );
+			m_best[i].point = m_pop[i].searchPoint();
+			m_best[i].value = m_pop[i].unpenalizedFitness();
 		}
-
-		m_sbx.init(f);
-		m_mutator.init(f);
+		m_selection( m_pop, m_mu );
+		m_crossover.init(function);
+		m_mutator.init(function);
 	}
 
 	/**
-	* \brief Executes one iteration of the algorithm.
-	* \tparam The type of the objective to iterate upon.
-	* \param [in] f The function to iterate upon.
-	* \returns The Pareto-set/-front approximation after the iteration.
-	*/
-	template<typename Function>
-	SolutionSetType step( const Function & f ) {
-		BinaryTournamentSelection< Individual::RankOrdering > selection;
+	 * \brief Executes one iteration of the algorithm.
+	 * 
+	 * \param [in] function The function to iterate upon.
+	 */
+	void step( ObjectiveFunctionType const& function ) {
+		TournamentSelection< Individual::RankOrdering > selection;
 
-		Population::iterator parent1 = selection( m_pop.begin(), m_pop.begin() + m_mu );
-		Population::iterator parent2 = selection( m_pop.begin(), m_pop.begin() + m_mu );
-
-		Individual mate1( *parent1 );
-		Individual mate2( *parent2 );
+		Individual mate1( *selection( m_pop.begin(), m_pop.begin() + mu() ) );
+		Individual mate2( *selection( m_pop.begin(), m_pop.begin() + mu() ) );
 
 		if( Rng::coinToss( m_crossoverProbability ) ) {
-			m_sbx( mate1, mate2 );
+			m_crossover( mate1, mate2 );
 		}
 
 		if( Rng::coinToss() ) {
@@ -248,25 +191,33 @@ public:
 			m_pop.back() = mate2;
 		}
 
-		boost::tuple< typename Function::ResultType, typename Function::ResultType > result = m_evaluator( f, m_pop.back().searchPoint() );
-		m_pop.back().fitness( tag::PenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::PENALIZED_RESULT >( result );
-		m_pop.back().fitness( tag::UnpenalizedFitness() ) = boost::get< moo::PenalizingEvaluator::UNPENALIZED_RESULT >( result );
+		m_evaluator( function, m_pop.back() );
+		m_selection( m_pop, m_mu );
 
-		m_selection( m_pop );
-
-		std::partition( m_pop.begin(), m_pop.end(), Individual::IsSelected );	
-		SolutionSetType solutionSet;
-		for( Population::iterator it = m_pop.begin(); it != m_pop.begin() + m_mu; ++it ) {
-			it->age()++;
-			solutionSet.push_back( makeResultSet( it->searchPoint(), it->fitness( tag::UnpenalizedFitness() ) ) ) ;
+		//if the individual got selected, insert it into the parent population
+		if(m_pop.back().selected()){
+			for(std::size_t i = 0; i != mu(); ++i){
+				if(!m_pop[i].selected()){
+					m_best[i].point = m_pop[mu()].searchPoint();
+					m_best[i].value = m_pop[mu()].unpenalizedFitness();
+					m_pop[i] = m_pop.back();
+					break;
+				}
+			}
 		}
-
-		return solutionSet;
 	}
-};
-}
+private:
 
-typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::SMSEMOA > SMSEMOA;
+	std::vector<Individual> m_pop; ///< Population of size \f$\mu + 1\f$.
+	unsigned int m_mu; ///< Size of parent generation
+
+	PenalizingEvaluator m_evaluator; ///< Evaluation operator.
+	IndicatorBasedSelection<HypervolumeIndicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
+	SimulatedBinaryCrossover< RealVector > m_crossover; ///< Crossover operator.
+	PolynomialMutator m_mutator; ///< Mutation operator.
+
+	double m_crossoverProbability; ///< Crossover probability.
+};
 }
 
 

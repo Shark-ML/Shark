@@ -1,11 +1,8 @@
 #ifndef SHARK_ALGORITHMS_DIRECTSEARCH_FASTNONDOMINATEDSORT_H
 #define SHARK_ALGORITHMS_DIRECTSEARCH_FASTNONDOMINATEDSORT_H
 
-#include <shark/Algorithms/DirectSearch/TypedIndividual.h>
 #include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
-
-#include <list>
 #include <vector>
 
 namespace shark {
@@ -103,4 +100,4 @@ struct BaseFastNonDominatedSort {
 typedef BaseFastNonDominatedSort< FitnessExtractor > FastNonDominatedSort;
 
 }
-#endif // FASTNONDOMINATEDSORT_H
+#endif
