@@ -49,21 +49,21 @@ namespace{
 	struct FitnessComparator {
 		template<typename Individual>
 		bool operator()( const Individual & a, const Individual & b ) const {
-			return( a.fitness( shark::tag::PenalizedFitness() )[0] < b.fitness( shark::tag::PenalizedFitness() )[0] );
+			return( a.penalizedFitness() < b.penalizedFitness() );
 		}
 	};
 
 	struct PointExtractor {
 		template<typename T>
 		const RealVector & operator()( const T & t ) const {
-			return( *t );
+			return t.searchPoint();
 		}
 	};
 
 	struct StepExtractor {
 		template<typename T>
 		const RealVector & operator()( const T & t ) const {
-			return( boost::get<0>( t ) );
+			return  t.chromosome();
 		}
 	};
 	
@@ -274,7 +274,7 @@ void CMA::init(
 /**
 * \brief Updates the strategy parameters based on the supplied offspring population.
 */
-void CMA::updateStrategyParameters( const std::vector<TypedIndividual<RealVector, RealVector> > & offspring ) {
+void CMA::updateStrategyParameters( const std::vector<Individual<RealVector, double, RealVector> > & offspring ) {
 	RealVector xPrime = cog( offspring, m_weights, PointExtractor() );
 	RealVector cogSteps = cog( offspring, m_weights, StepExtractor() );
 
@@ -290,8 +290,8 @@ void CMA::updateStrategyParameters( const std::vector<TypedIndividual<RealVector
 	// Rank-mu-Update
 	for( unsigned int i = 0; i < m_mu; i++ ) {
 		Z += m_weights( i ) * blas::outer_prod(
-			*offspring[i] - m_mean,
-			*offspring[i] - m_mean
+			offspring[i].searchPoint() - m_mean,
+			offspring[i].searchPoint() - m_mean
 		);
 	}
 	C += m_cCov * (1.-1./m_muCov) * 1./sqr( m_sigma ) * Z;
@@ -315,23 +315,18 @@ void CMA::updateStrategyParameters( const std::vector<TypedIndividual<RealVector
 */
 void CMA::step(ObjectiveFunctionType const& function){
 
-	std::vector< TypedIndividual<RealVector, RealVector> > offspring( m_lambda );
+	std::vector< Individual<RealVector, double, RealVector> > offspring( m_lambda );
 
-	shark::soo::PenalizingEvaluator penalizingEvaluator;
+	PenalizingEvaluator penalizingEvaluator;
 	for( unsigned int i = 0; i < offspring.size(); i++ ) {
 		MultiVariateNormalDistribution::ResultType sample = m_mutationDistribution();
-		offspring[ i ].get<0>() = sample.second;
-		*offspring[i] = m_mean + m_sigma * sample.first;
-
-		boost::tuple< ObjectiveFunctionType::ResultType, ObjectiveFunctionType::ResultType > evalResult;
-		evalResult = penalizingEvaluator( function, *offspring[i] );
-
-		offspring[i].fitness( shark::tag::UnpenalizedFitness() )[0] = boost::get< shark::soo::PenalizingEvaluator::UNPENALIZED_RESULT >( evalResult );
-		offspring[i].fitness( shark::tag::PenalizedFitness() )[0] = boost::get< shark::soo::PenalizingEvaluator::PENALIZED_RESULT >( evalResult );
+		offspring[ i ].chromosome() = sample.second;
+		offspring[i].searchPoint() = m_mean + m_sigma * sample.first;
+		penalizingEvaluator( function, offspring[i] );
 	}
 
 	// Selection
-	std::vector< TypedIndividual<RealVector, RealVector> > parents( m_mu );
+	std::vector< Individual<RealVector, double, RealVector> > parents( m_mu );
 	select_mu_komma_lambda_p( 
 		parents.begin(),
 		parents.end(),
@@ -342,6 +337,6 @@ void CMA::step(ObjectiveFunctionType const& function){
 	// Strategy parameter update
 	updateStrategyParameters( parents );
 
-	m_best.point= *parents[ 0 ];
-	m_best.value= parents[ 0 ].fitness( shark::tag::UnpenalizedFitness() )[0];
+	m_best.point= parents[ 0 ].searchPoint();
+	m_best.value= parents[ 0 ].unpenalizedFitness();
 }

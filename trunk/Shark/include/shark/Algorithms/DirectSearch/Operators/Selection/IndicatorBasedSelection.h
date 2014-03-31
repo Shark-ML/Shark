@@ -59,6 +59,8 @@ struct IndicatorBasedSelection {
 	struct view_reference {
 		T * mep_value;
 	public:
+		typedef RealVector FitnessType;
+	
 		view_reference() : mep_value( NULL ){}
 		view_reference(T & value) : mep_value( &value ){}
 
@@ -77,10 +79,14 @@ struct IndicatorBasedSelection {
 			*mep_value = rhs;
 			return( *this );
 		}
+
 		
-		template<class U>
-		RealVector const& fitness(U tag)const{
-			return mep_value->fitness(tag);
+		RealVector const& penalizedFitness() const{
+			return mep_value->penalizedFitness();
+		}
+		
+		RealVector const& unpenalizedFitness() const{
+			return mep_value->unpenalizedFitness();
 		}
 		
 		bool& selected(){
@@ -90,21 +96,15 @@ struct IndicatorBasedSelection {
 	/** \endcond */
 
 	/**
-	* \brief Default c'tor.
-	* \param [in] mu The target size mu of the population.
-	* \param [in] noObjectives The number of objectives to consider.
-	*/
-	IndicatorBasedSelection( unsigned int mu = 0) : m_mu( mu ){}
-
-	/**
 	* \brief Executes the algorithm and assigns each member of the population
 	* its level non-dominance (rank) and its individual contribution to the front
 	* it belongs to (share).
 	*
 	* \param [in,out] population The population to be ranked.
+	* \param [in,out] mu the number of individuals to select
 	*/
 	template<typename PopulationType>
-	void operator()( PopulationType & population )
+	void operator()( PopulationType & population, std::size_t mu )
 	{
 		if(population.empty()) return;
 		
@@ -127,7 +127,7 @@ struct IndicatorBasedSelection {
 		unsigned int rank = maxRank;
 		unsigned int popSize = population.size();
 		
-		while(popSize-fronts[rank].size() >= m_mu){
+		while(popSize-fronts[rank].size() >= mu){
 			//deselect all elements in this front
 			View & front = fronts[rank];
 			for(std::size_t i = 0; i != front.size(); ++i){
@@ -140,7 +140,7 @@ struct IndicatorBasedSelection {
 		//now use the indicator to deselect the worst approximating elements of the last selected front
 		m_indicator.updateInternals(FitnessExtractor(),population);
 		View& front = fronts[rank];
-		for(; popSize >=m_mu;--popSize) {
+		for(; popSize >=mu;--popSize) {
 			unsigned int lc = m_indicator.leastContributor(FitnessExtractor(),front);
 			front[lc].selected() = false;
 			front.erase( front.begin() + lc );
@@ -159,7 +159,7 @@ struct IndicatorBasedSelection {
 	*/
 	unsigned int mu() const
 	{
-		return m_mu;
+		return mu;
 	}
 	
 	/**
@@ -168,7 +168,7 @@ struct IndicatorBasedSelection {
 	*/
 	void setMu( unsigned int mu )
 	{
-		m_mu = mu;
+		mu = mu;
 	}
 
 	/**
@@ -181,13 +181,9 @@ struct IndicatorBasedSelection {
 	void serialize( Archive & archive, const unsigned int version )
 	{
 		archive & BOOST_SERIALIZATION_NVP( m_indicator );
-		archive & BOOST_SERIALIZATION_NVP( m_extractor );
-		archive & BOOST_SERIALIZATION_NVP( m_mu );
 	}
 
 	Indicator m_indicator; ///< Instance of the second level sorting criterion.
-	FitnessExtractor m_extractor; ///< Maps individuals to the objective space.
-	unsigned int m_mu; ///< Target population size.
 };
 }
 

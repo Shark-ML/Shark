@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       Unit tests for class (detail::)MOCMA.
+ * \brief       Unit tests for class ()MOCMA.
  * 
  * 
  *
@@ -122,11 +122,8 @@ using namespace shark;
 
 
 BOOST_AUTO_TEST_CASE( MOCMA_SERIALIZATION ) {
-	detail::MOCMA<> mocma;
-	BOOST_CHECK_NO_THROW( mocma.init() );
+	MOCMA mocma;
 
-	//~ AbstractMultiObjectiveFunction< VectorSpace< double > > function;
-	//~ BOOST_CHECK_THROW( mocma.init( function ), Exception );
 	DTLZ1 dtlz1;
 	dtlz1.setNumberOfObjectives( 3 );
 	dtlz1.setNumberOfVariables( 10 );
@@ -139,17 +136,19 @@ BOOST_AUTO_TEST_CASE( MOCMA_SERIALIZATION ) {
 
 		BOOST_CHECK_NO_THROW( (oa << mocma) );
 
-		detail::MOCMA<> mocma2;
+		MOCMA mocma2;
 
 		boost::archive::text_iarchive ia( ss );
 		BOOST_CHECK_NO_THROW( (ia >> mocma2) );
 
 		Rng::seed( 1 );
 		FastRng::seed( 1 );
-		detail::MOCMA<>::SolutionSetType set1 = mocma.step( dtlz1 );
+		mocma.step( dtlz1 );
+		MOCMA::SolutionSetType set1 = mocma.solution();
 		Rng::seed( 1 );
 		FastRng::seed( 1 );
-		detail::MOCMA<>::SolutionSetType set2 = mocma2.step( dtlz1 );
+		mocma2.step( dtlz1 );
+		MOCMA::SolutionSetType set2 = mocma2.solution();
 
 		for( unsigned int i = 0; i < set1.size(); i++ ) {
 			BOOST_CHECK_SMALL( norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
@@ -157,41 +156,4 @@ BOOST_AUTO_TEST_CASE( MOCMA_SERIALIZATION ) {
 		}
 
 	}
-}
-
-BOOST_AUTO_TEST_CASE( AdditiveEpsMOCMA_Serialization ) {
-	detail::MOCMA< AdditiveEpsilonIndicator > mocma;
-	BOOST_CHECK_NO_THROW( mocma.init() );
-
-	DTLZ1 dtlz1;
-	dtlz1.setNumberOfObjectives( 3 );
-	dtlz1.setNumberOfVariables( 10 );
-	BOOST_CHECK_NO_THROW( mocma.init( dtlz1 ) );
-	BOOST_CHECK_NO_THROW( mocma.step( dtlz1 ) );
-
-	{
-		std::stringstream ss;
-		boost::archive::text_oarchive oa( ss );
-
-		BOOST_CHECK_NO_THROW( (oa << mocma) );
-
-		detail::MOCMA<AdditiveEpsilonIndicator> mocma2;
-
-		boost::archive::text_iarchive ia( ss );
-		BOOST_CHECK_NO_THROW( (ia >> mocma2) );
-
-		Rng::seed( 1 );
-		FastRng::seed( 1 );
-		detail::MOCMA<AdditiveEpsilonIndicator>::SolutionSetType set1 = mocma.step( dtlz1 );
-		Rng::seed( 1 );
-		FastRng::seed( 1 );
-		detail::MOCMA<AdditiveEpsilonIndicator>::SolutionSetType set2 = mocma2.step( dtlz1 );
-
-		for( unsigned int i = 0; i < set1.size(); i++ ) {
-			BOOST_CHECK_SMALL( norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );
-			BOOST_CHECK_SMALL( norm_2( set1.at( i ).point - set2.at( i ).point ), 1E-20 );
-		}
-
-	}
-
 }

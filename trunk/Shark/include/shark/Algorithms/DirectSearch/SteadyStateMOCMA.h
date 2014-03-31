@@ -3,8 +3,6 @@
  *
  * \brief       SteadyStateMOCMA.h
  * 
- * 
- *
  * \author      T.Voss
  * \date        2010
  *
@@ -40,12 +38,11 @@
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/CMA/CMAIndividual.h>
 
-#include <shark/Core/ResultSets.h>
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
+#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <boost/foreach.hpp>
 
 namespace shark {
-namespace detail {
 
 /**
  * \brief Implements the \f$(\mu+1)\f$-MO-CMA-ES.
@@ -55,82 +52,69 @@ namespace detail {
  *	- Voﬂ, Hansen and Igel. Improved Step Size Adaptation for the MO-CMA-ES.
  */
 template<typename Indicator=HypervolumeIndicator>
-struct SteadyStateMOCMA {
+class IndicatorBasedSteadyStateMOCMA : public AbstractMultiObjectiveOptimizer<VectorSpace<double> >{
+public:
+	enum NotionOfSuccess{
+		IndividualBased,
+		PopulationBased
+	};
 
-	/**
-	 * \brief The population type of the \f$(\mu+1)\f$-MO-CMA-ES.
-	 */
-	typedef std::vector< CMAIndividual > Population;
-	/**
-	 * \brief Typedef of the algorithm's own type.
-	 */
-	typedef SteadyStateMOCMA<Indicator> this_type;
-
-	/**
-	 * \brief Default parent population size.
-	 */
-	static std::size_t DEFAULT_MU(){
-		return 100;
-	}
-
-	/**
-	 * \brief Default penalty factor for penalizing infeasible solutions.
-	 */
-	static double DEFAULT_PENALTY_FACTOR() {
-		return 1E-6;
-	}
-
-	/**
-	 * \brief Default success threshold for step-size adaptation.
-	 */
-	static double DEFAULT_SUCCESS_THRESHOLD() {
-		return 0.44;
-	}
-
-	/**
-	 * \brief Default notion of success.
-	 */
-	static const char *DEFAULT_NOTION_OF_SUCCESS(){
-		return "CMAIndividualBased";
-	}
+	std::vector< CMAIndividual > m_pop; ///< Population of size \f$\mu+1\f$.
+	unsigned int m_mu; ///< Size of parent population
 	
-	/**
-	 * \brief Default choice for the initial sigma
-	 */
-	static double DEFAULT_INITIAL_SIGMA() {
-		return 1.0;
-	}
-
-	/**
-	 * \brief The result type of the optimizer, a vector of tuples \f$( \vec x, \vec{f}( \vec{x} )\f$.
-	 */
-	typedef std::vector< ResultSet< RealVector, RealVector > > SolutionSetType;
-
-	Population m_pop; ///< Population of size \f$\mu+1\f$.
-	shark::moo::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
+	shark::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
 	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
 	
-	bool m_useNewUpdate; ///< Flag for deciding whether the improved step-size adaptation shall be used.
+	NotionOfSuccess m_notionOfSuccess; ///< Flag for deciding whether the improved step-size adaptation shall be used.
 	double m_individualSuccessThreshold;
 	double m_initialSigma;
+	
 	/**
 	 * \brief Default c'tor.
 	 */
-	SteadyStateMOCMA() {
-		init();
+	IndicatorBasedSteadyStateMOCMA() {
+		m_individualSuccessThreshold = 0.44;
+		initialSigma() = 1.0;
+		constrainedPenaltyFactor() = 1E-6;
+		mu() = 100;
+		notionOfSuccess() = PopulationBased;
 	}
 
 	/**
 	 * \brief Returns the name of the algorithm.
 	 */
 	std::string name() const {
-		return("SteadyStateMOCMA");
+		return "SteadyStateMOCMA";
 	}
 	
-	std::size_t mu()const{
-		return m_selection.m_mu;
+	unsigned int mu()const{
+		return m_mu;
 	}
-
+	unsigned int& mu(){
+		return m_mu;
+	}
+	
+	double initialSigma()const{
+		return m_initialSigma;
+	}
+	double& initialSigma(){
+		return m_initialSigma;
+	}
+	
+	double constrainedPenaltyFactor()const{
+		return m_evaluator.m_penaltyFactor;
+	}
+	
+	double& constrainedPenaltyFactor(){
+		return m_evaluator.m_penaltyFactor;
+	}
+	
+	NotionOfSuccess notionOfSuccess()const{
+		return m_notionOfSuccess;
+	}
+	NotionOfSuccess& notionOfSuccess(){
+		return m_notionOfSuccess;
+	}
 	/**
 	 * \brief Stores/loads the algorithm's state.
 	 * \tparam Archive The type of the archive.
@@ -139,38 +123,14 @@ struct SteadyStateMOCMA {
 	 */
 	template<typename Archive>
 	void serialize(Archive &archive, const unsigned int version) {
-		archive &BOOST_SERIALIZATION_NVP(m_pop);
-
-		archive &BOOST_SERIALIZATION_NVP(m_evaluator);
-		archive &BOOST_SERIALIZATION_NVP(m_selection);
-
-		archive &BOOST_SERIALIZATION_NVP(m_useNewUpdate);
-	}
-
-	/**
-	 * \brief Initializes the algorithm.
-	 * \param [in] mu The population size.
-	 * \param [in] penaltyFactor The penalty factor for penalizing infeasible solutions.
-	 * \param [in] successThreshold The success threshold \f$p_{\text{thresh}}\f$ for cutting off evolution path updates.
-	 * \param [in] notionOfSuccess The notion of success.
-	 * \param [in] initialSigma value for the initial choice of sigma.
-	 */
-	void init(unsigned int mu = this_type::DEFAULT_MU(),
-	        double penaltyFactor = this_type::DEFAULT_PENALTY_FACTOR(),
-	        double successThreshold = this_type::DEFAULT_SUCCESS_THRESHOLD(),
-	        const std::string &notionOfSuccess = this_type::DEFAULT_NOTION_OF_SUCCESS(),
-	        double initialSigma = this_type::DEFAULT_INITIAL_SIGMA()
-	) {
-		m_selection.setMu(mu);
-		m_evaluator.m_penaltyFactor = penaltyFactor;
-		m_individualSuccessThreshold = successThreshold;
-		m_initialSigma = initialSigma;
+		archive & BOOST_SERIALIZATION_NVP(m_pop);
+		archive & BOOST_SERIALIZATION_NVP(m_mu);
+		archive & BOOST_SERIALIZATION_NVP(m_best);
 		
-		if (notionOfSuccess == "IndividualBased") {
-			m_useNewUpdate = false;
-		} else if (notionOfSuccess == "PopulationBased") {
-			m_useNewUpdate = true;
-		}
+		archive & BOOST_SERIALIZATION_NVP(m_evaluator);
+		archive & BOOST_SERIALIZATION_NVP(m_notionOfSuccess);
+		archive & BOOST_SERIALIZATION_NVP(m_individualSuccessThreshold);
+		archive & BOOST_SERIALIZATION_NVP(m_initialSigma);
 	}
 
 	/**
@@ -179,76 +139,79 @@ struct SteadyStateMOCMA {
 	 * The following sub keys are recognized:
 	 *	- Mu, type: unsigned int, default value: 100.
 	 *	- PenaltyFactor, type: double, default value: \f$10^{-6}\f$.
-	 *	- SuccessThreshold, type: double, default value: 0.44.
-	 *	- NotionOfSuccess, type: string, default value: CMAIndividualBased.
-	 *	- InitialSigma: the initial value of standard deviation of the distribution. default is 1.0.
+	 *	- NotionOfSuccess, type: string, default value: PopulationBased. Can also be IndividualBased.
+	 *	- initialSigma, an initial estimate for the diagonal of the covariance matrix.
 	 *
 	 * \param [in] node The configuration tree node.
 	 */
-	template<typename PropTree>
-	void configure(const PropTree &node) {
-		init(
-			node.template get<unsigned int>("Mu", this_type::DEFAULT_MU()),
-			node.template get<double>("PenaltyFactor", this_type::DEFAULT_PENALTY_FACTOR()),
-			node.template get<double>("SuccessThreshold", this_type::DEFAULT_SUCCESS_THRESHOLD()),
-			node.template get<std::string>("NotionOfSuccess", this_type::DEFAULT_NOTION_OF_SUCCESS()),
-			node.template get<double>("InitialSigma",this_type::DEFAULT_INITIAL_SIGMA())
-		);
+	void configure(PropertyTree const& node) {
+		mu() = node.get("Mu", mu());
+		constrainedPenaltyFactor() = node.get("PenaltyFactor", constrainedPenaltyFactor());
+		initialSigma() = node.get("InitialSigma",initialSigma());
+		if(node.find("NotionOfSuccess") != node.not_found()){
+			std::string str = node.get<std::string>("NotionOfSuccess");
+			if(str == "IndividualBased"){
+				notionOfSuccess() = IndividualBased;
+			}else if(str == "PopulationBased"){
+				notionOfSuccess() = PopulationBased;
+			}else{
+				throw SHARKEXCEPTION("Unknown Value for NotionOfSuccess:"+str);
+			}
+		}
 	}
 
+	using AbstractMultiObjectiveOptimizer<VectorSpace<double> >::init;
 	/**
 	 * \brief Initializes the algorithm for the supplied objective function.
-	 * \tparam ObjectiveFunction The type of the objective function,
-	 * needs to adhere to the concept of an AbstractObjectiveFunction.
+	 * 
 	 * \param [in] f The objective function.
-	 * \param [in] sp An initial search point.
+	 * \param [in] startingPoints A set of intiial search points.
 	 */
-	template<typename ObjectiveFunction>
-	void init(const ObjectiveFunction &f, const RealVector &sp = RealVector()) {
+	void init( 
+		ObjectiveFunctionType const& function, 
+		std::vector<SearchPointType> const& startingPoints
+	){
 		m_pop.reserve(mu() +1);
-		std::size_t noObjectives = f.numberOfObjectives();
-		std::size_t noVariables = f.numberOfVariables();
+		m_best.resize(mu());
+		std::size_t noObjectives = function.numberOfObjectives();
+		std::size_t noVariables = function.numberOfVariables();
 		
 		for(std::size_t i = 0; i != mu() + 1; ++i){
-			CMAIndividual ind(noVariables,noObjectives,m_individualSuccessThreshold,m_initialSigma);
-			f.proposeStartingPoint(ind.searchPoint());
-			boost::tuple< RealVector, RealVector > result = m_evaluator(f, ind.searchPoint());
-			ind.fitness(shark::tag::PenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >(result);
-			ind.fitness(shark::tag::UnpenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >(result);
-			m_pop.push_back(ind);
+			CMAIndividual individual(noVariables,noObjectives,m_individualSuccessThreshold,m_initialSigma);
+			function.proposeStartingPoint(individual.searchPoint());
+			m_evaluator(function, individual);
+			m_pop.push_back(individual);
+			m_best[i].point = m_pop[i].searchPoint();
+			m_best[i].value = m_pop[i].unpenalizedFitness();
 		}
-		m_selection(m_pop);
-		std::sort(m_pop.begin(), m_pop.end(), CMAIndividual::RankOrdering);
+		m_selection(m_pop,m_mu);
+		sortRankOneToFront();
 	}
 
 	/**
 	 * \brief Executes one iteration of the algorithm.
-	 * \tparam The type of the objective to iterate upon.
-	 * \param [in] f The function to iterate upon.
-	 * \returns The Pareto-set/-front approximation after the iteration.
+	 * 
+	 * \param [in] function The function to iterate upon.
 	 */
-	template<typename Function>
-	SolutionSetType step(const Function &f) {
+	void step( ObjectiveFunctionType const& function ) {
+		//find the last element with rank 1
 		int maxIdx = 0;
 		for (unsigned int i = 0; i < m_pop.size(); i++) {
 			if (m_pop[i].rank() != 1)
 				break;
 			maxIdx = i;
 		}
-
+		//sample a random parent with rank 1
 		CMAIndividual& parent = m_pop[Rng::discrete(0, std::max(0, maxIdx-1))];
+		//sample offspring from this parent
 		CMAIndividual& offspring = m_pop[mu()];
 		offspring = parent;
 		offspring.age() = 0;
 		offspring.mutate();
+		m_evaluator(function, offspring);
 
-		shark::moo::PenalizingEvaluator evaluator;
-		boost::tuple< typename Function::ResultType, typename Function::ResultType > result = evaluator(f, offspring.searchPoint());
-		offspring.fitness(shark::tag::PenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::PENALIZED_RESULT >(result);
-		offspring.fitness(shark::tag::UnpenalizedFitness()) = boost::get< shark::moo::PenalizingEvaluator::UNPENALIZED_RESULT >(result);
-		
-		m_selection(m_pop);
-		if (m_useNewUpdate) {
+		m_selection(m_pop,m_mu);
+		if (m_notionOfSuccess) {
 			if (offspring.selected()) {
 				offspring.noSuccessfulOffspring() += 1.0;
 				parent.noSuccessfulOffspring() += 1.0;
@@ -261,27 +224,42 @@ struct SteadyStateMOCMA {
 		}
 		
 		//update strategy parameter
-		offspring.update();
 		parent.update();
 
 		if(offspring.selected()){
-			std::partition(m_pop.begin(), m_pop.end(),CMAIndividual::IsSelected);
-			std::sort(m_pop.begin(), --m_pop.end(), CMAIndividual::RankOrdering);
+			offspring.update();
+			//exchange the selected and nonselected elements
+			for(std::size_t i = 0; i != mu(); ++i){
+				if(!m_pop[i].selected()){
+					noalias(m_best[i].point) = m_pop[mu()].searchPoint();
+					m_best[i].value = m_pop[mu()].unpenalizedFitness();
+					swap(m_pop[i] , m_pop[mu()]);
+				}
+			}
+			//now push rank 1 elements to the front
+			sortRankOneToFront();
 		}
-			
-		SolutionSetType solutionSet;
-		for (unsigned int i = 0; i < mu(); i++) {
-			m_pop[i].age()++;
-			solutionSet.push_back(shark::makeResultSet(m_pop[i].searchPoint(), m_pop[i].fitness(shark::tag::UnpenalizedFitness()))) ;
+	}
+protected:
+	void sortRankOneToFront(){
+		std::size_t start = 0;
+		std::size_t end = mu()-1;
+		while(start != end){
+			if(m_pop[start].rank() == 1){
+				++start;
+			}else if(m_pop[end].rank() != 1){
+				--end;
+			}else{
+				swap(m_pop[start],m_pop[end]);
+				swap(m_best[start],m_best[end]);
+			}
 		}
-		return solutionSet;
 	}
 };
-}
 
-typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::SteadyStateMOCMA< HypervolumeIndicator > > SteadyStateMOCMA;
-typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::SteadyStateMOCMA< LeastContributorApproximator< FastRng, HypervolumeCalculator > > > ApproximatedVolumeSteadyStateMOCMA;
-typedef TypeErasedMultiObjectiveOptimizer< VectorSpace<double>, detail::SteadyStateMOCMA< AdditiveEpsilonIndicator > > EpsilonSteadyStateMOCMA;
+typedef IndicatorBasedSteadyStateMOCMA< HypervolumeIndicator > SteadyStateMOCMA;
+typedef IndicatorBasedSteadyStateMOCMA< LeastContributorApproximator< FastRng, HypervolumeCalculator > > ApproximatedVolumeSteadyStateMOCMA;
+typedef IndicatorBasedSteadyStateMOCMA< AdditiveEpsilonIndicator > EpsilonSteadyStateMOCMA;
 
 }
 

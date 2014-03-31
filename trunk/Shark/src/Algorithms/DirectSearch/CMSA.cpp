@@ -36,35 +36,23 @@
  *
  */
 #include <shark/Algorithms/DirectSearch/CMSA.h>
-
-#include <shark/Core/Exception.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-
-#include <boost/lambda/lambda.hpp>
-#include <boost/math/special_functions.hpp>
 
 using namespace shark;
 
 
 namespace{
 	struct FitnessComparator {
-		template<typename Individual>
-		bool operator()( const Individual & a, const Individual & b ) const {
-			return a.fitness( shark::tag::PenalizedFitness() )[0] < b.fitness( shark::tag::PenalizedFitness() )[0];
-		}
-	};
-
-	struct IdentityExtractor {
-		template<typename T>
-		const T & operator()( const T & t ) const {
-			return t;
+		template<typename IndividualType>
+		bool operator()( const IndividualType & a, const IndividualType & b ) const {
+			return a.penalizedFitness() < b.penalizedFitness();
 		}
 	};
 
 	struct PointExtractor {
 		template<typename T>
 		const RealVector & operator()( const T & t ) const {
-			return *t;
+			return t.searchPoint();
 		}
 	};
 
@@ -76,84 +64,84 @@ void CMSA::init( ObjectiveFunctionType const& function, SearchPointType const& p
 	m_lambda = 4 * m_numberOfVariables;
 	m_mu = m_lambda / 4;
 
-	m_chromosome.m_mean = p;
-	m_chromosome.m_mutationDistribution.resize( m_numberOfVariables );
+	m_mean = p;
+	m_mutationDistribution.resize( m_numberOfVariables );
 
-	m_chromosome.m_sigma = 1.0;
-	m_chromosome.m_cSigma = 1./::sqrt( 2. * m_numberOfVariables );
-	m_chromosome.m_cC = 1. + (m_numberOfVariables*(m_numberOfVariables + 1.))/(2.*m_mu);
-
-	std::vector< RealVector > parents( m_mu, p );
-	m_chromosome.m_mean = cog( parents, IdentityExtractor() );
+	m_sigma = 1.0;
+	m_cSigma = 1./::sqrt( 2. * m_numberOfVariables );
+	m_cC = 1. + (m_numberOfVariables*(m_numberOfVariables + 1.))/(2.*m_mu);
 }
 
 
 void CMSA::step(ObjectiveFunctionType const& function){
-	std::vector< CMSA::Individual > offspring( m_lambda );
+	std::vector< IndividualType > offspring( m_lambda );
 
-	shark::soo::PenalizingEvaluator penalizingEvaluator;
+	PenalizingEvaluator penalizingEvaluator;
 	for( unsigned int i = 0; i < offspring.size(); i++ ) {		    
-		MultiVariateNormalDistribution::ResultType sample = m_chromosome.m_mutationDistribution();
-		offspring[i].get<0>().m_sigma = m_chromosome.m_sigma * ::exp( m_chromosome.m_cSigma * Rng::gauss( 0, 1 ) );
-		offspring[i].get<0>().m_step = sample.first;
-		*offspring[i] = m_chromosome.m_mean + offspring[i].get<0>().m_sigma * sample.first;
-		boost::tuple< ObjectiveFunctionType::ResultType, ObjectiveFunctionType::ResultType > evalResult;
-		evalResult = penalizingEvaluator( function, *offspring[i] );
-
-		offspring[i].fitness( shark::tag::UnpenalizedFitness() )[0] = boost::get< shark::soo::PenalizingEvaluator::UNPENALIZED_RESULT >( evalResult );
-		offspring[i].fitness( shark::tag::PenalizedFitness() )[0] = boost::get< shark::soo::PenalizingEvaluator::PENALIZED_RESULT >( evalResult );		    
-
+		MultiVariateNormalDistribution::ResultType sample = m_mutationDistribution();
+		offspring[i].chromosome().sigma = m_sigma * ::exp( m_cSigma * Rng::gauss( 0, 1 ) );
+		offspring[i].chromosome().step = sample.first;
+		offspring[i].searchPoint() = m_mean + offspring[i].chromosome().sigma * sample.first;
+		penalizingEvaluator( function, offspring[i] );
 	}
 
 	// Selection
 	std::sort( offspring.begin(), offspring.end(), FitnessComparator() );
-	std::vector< CMSA::Individual > parentsNew( offspring.begin(), offspring.begin() + m_mu );
+	std::vector< IndividualType > parentsNew( offspring.begin(), offspring.begin() + m_mu );
 
 	// Strategy parameter update
 	updateStrategyParameters( parentsNew );
 
-	m_best.point = *parentsNew.front();
-	m_best.value = parentsNew.front().fitness(shark::tag::UnpenalizedFitness())[0];
+	m_best.point = parentsNew.front().searchPoint();
+	m_best.value = parentsNew.front().unpenalizedFitness();
 }
 
-void CMSA::updateStrategyParameters( const std::vector< CMSA::Individual > & offspringNew ) {
+void CMSA::updateStrategyParameters( const std::vector< CMSA::IndividualType > & offspringNew ) {
 	RealVector xPrimeNew = cog( offspringNew, PointExtractor() );
 	// Covariance Matrix Update
 	RealMatrix Znew( m_numberOfVariables, m_numberOfVariables,0.0 );
-	RealMatrix C( m_chromosome.m_mutationDistribution.covarianceMatrix() );
+	RealMatrix C( m_mutationDistribution.covarianceMatrix() );
 	// Rank-mu-Update
 	for( unsigned int i = 0; i < m_mu; i++ ) {
 		Znew += 1./m_mu * blas::outer_prod( 
-			offspringNew[i].get<0>().m_step,
-			offspringNew[i].get<0>().m_step
-			/*
-			(*offspringNew[i]/offspringNew[i].get<0>().m_sigma - m_chromosome.m_mean),
-									(*offspringNew[i]/offspringNew[i].get<0>().m_sigma - m_chromosome.m_mean)*/
-			
-			);
+			offspringNew[i].chromosome().step,
+			offspringNew[i].chromosome().step
+		);
 	}
-	C = (1. - 1./m_chromosome.m_cC) * C + 1./m_chromosome.m_cC * Znew;
-	m_chromosome.m_mutationDistribution.setCovarianceMatrix( C );
+	C = (1. - 1./m_cC) * C + 1./m_cC * Znew;
+	m_mutationDistribution.setCovarianceMatrix( C );
 
 	// Step size update
 	double sigmaNew = 0.;
 	//double sigma = 0.;
 	for( unsigned int i = 0; i < m_mu; i++ ) {
-		sigmaNew += 1./m_mu * offspringNew[i].get<0>().m_sigma;
+		sigmaNew += 1./m_mu * offspringNew[i].chromosome().sigma;
 	}
-	m_chromosome.m_sigma = sigmaNew;
-	m_chromosome.m_mean = xPrimeNew;
+	m_sigma = sigmaNew;
+	m_mean = xPrimeNew;
 }
 
 void CMSA::read( InArchive & archive ) {
 	archive >> m_numberOfVariables;
 	archive >> m_mu;
 	archive >> m_lambda;
-	archive >> m_chromosome;
+	
+	archive >> m_sigma;
+	archive >> m_cC;
+	archive >> m_cSigma;
+
+	archive >> m_mean;
+	archive >> m_mutationDistribution;
 }
 void CMSA::write( OutArchive & archive ) const {
 	archive << m_numberOfVariables;
 	archive << m_mu;
 	archive << m_lambda;
-	archive << m_chromosome;
+	
+	archive << m_sigma;
+	archive << m_cC;
+	archive << m_cSigma;
+
+	archive << m_mean;
+	archive << m_mutationDistribution;
 }

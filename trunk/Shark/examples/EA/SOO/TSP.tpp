@@ -48,7 +48,7 @@
 
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/RouletteWheelSelection.h>
-#include <shark/Algorithms/DirectSearch/TypedIndividual.h>
+#include <shark/Algorithms/DirectSearch/Individual.h>
 
 #include <shark/LinAlg/Base.h>
 
@@ -93,12 +93,11 @@ namespace shark {
 	typedef boost::property_map<Graph, boost::edge_weight_t>::type WeightMap;
 	typedef boost::property_map<Graph, boost::edge_color_t>::type ColorMap;
 
-	typedef TypedIndividual< Tour > Individual;
-	typedef std::vector< Individual > Population;
-
-	template<typename FitnessTag>
-	bool compare_fitness( const Individual & a, const Individual & b ) {
-		return( a.fitness( FitnessTag() )( 0 ) < b.fitness( FitnessTag() )( 0 ) );
+	typedef Individual< Tour,double > IndividualType;
+	typedef std::vector< IndividualType > Population;
+	
+	bool compare_fitness( const IndividualType & a, const IndividualType & b ) {
+		return( a.unpenalizedFitness() < b.unpenalizedFitness() );
 	}
 
 	/**
@@ -157,23 +156,23 @@ namespace shark {
 		{
 			std::pair< IndividualType, IndividualType > offspring( parent1, parent2 );
 
-			const Tour & t1 = *parent1;
-			const Tour & t2 = *parent2;
+			const Tour & t1 = parent1.searchPoint();
+			const Tour & t2 = parent2.searchPoint();
 
 			std::size_t cuttingPoint1 = shark::Rng::discrete( 0, t1.size() - 1 );
 			std::size_t cuttingPoint2 = shark::Rng::discrete( 0, t2.size() - 1 );
 
 			while( cuttingPoint1 == cuttingPoint2 )
-			cuttingPoint2 = shark::Rng::discrete( 0, t2.size() - 1 );
+				cuttingPoint2 = shark::Rng::discrete( 0, t2.size() - 1 );
 
 			if( cuttingPoint1 > cuttingPoint2 )
-			std::swap( cuttingPoint1, cuttingPoint2 );
+				std::swap( cuttingPoint1, cuttingPoint2 );
 
 			Tour r1( t1.size(), -1 ), r2( t2.size(), -1 );
 
 			for( std::size_t i = cuttingPoint1; i <= cuttingPoint2; i++ ) {
-				(*offspring.first)( i ) = t2( i );
-				(*offspring.second)( i ) = t1( i );
+				offspring.first.searchPoint()( i ) = t2( i );
+				offspring.second.searchPoint()( i ) = t1( i );
 
 				r1[ t2( i ) ] = t1( i );
 				r2[ t1( i ) ] = t2( i );
@@ -196,11 +195,11 @@ namespace shark {
 					n2 = m2 ;
 					m2 = r2[m2] ;
 				}
-				(*offspring.first)[i] = n1 ;
-				(*offspring.second)[i] = n2 ;
+				offspring.first.searchPoint()[i] = n1 ;
+				offspring.second.searchPoint()[i] = n2 ;
 			}
 
-			return( offspring );
+			return offspring;
 		}
 	};
 }
@@ -243,8 +242,6 @@ int main( int argc, char ** argv ) {
 
 	// Mating selection operator
 	shark::RouletteWheelSelection rws;
-	// Fitness extractor for extracting fitness values from individuals.
-	shark::soo::FitnessExtractor fe;
 	// Variation (crossover) operator
 	shark::PartiallyMappedCrossover pmc;    
 	// Fitness function instance.
@@ -265,33 +262,40 @@ int main( int argc, char ** argv ) {
 
 	// Initialize parents
 	for( std::size_t i = 0; i < parents.size(); i++ ) {
-		*( parents[i] ) = t;
+		parents[i].searchPoint() = t;
 		// Generate a permutation.
-		std::random_shuffle( ( *parents[ i ] ).begin(), ( *parents[ i ] ).end() );
+		std::random_shuffle( parents[ i ].searchPoint().begin(), parents[ i ].searchPoint().end() );
 		// Evaluate the individual.
-		parents[i].fitness( shark::tag::PenalizedFitness() )( 0 ) = parents[i].fitness( shark::tag::UnpenalizedFitness() )( 0 ) = ttl( *( parents[i] ) );
+		parents[i].penalizedFitness() = parents[i].unpenalizedFitness() = ttl( parents[i].searchPoint() );
 	}
 
 	// Loop until maximum number of fitness function evaluations is reached.
 	while( ttl.evaluationCounter() < 10000 ) {
-
+		shark::RealVector selectionProbabilities(parents.size());
+		for(std::size_t i = 0; i != parents.size(); ++i){
+			selectionProbabilities(i) = parents[i].unpenalizedFitness();
+		}
+		selectionProbabilities/= sum(selectionProbabilities);
 		// Crossover candidates.
 		for( std::size_t i = 0; i < offspring.size() - 1; i+=2 ) {
 			// Carry out fitness proportional fitness selection and
 			// perform partially mapped crossover on parent individuals.
 			std::pair< 
-			shark::Individual, 
-			shark::Individual 
-			> result = pmc( *rws( parents.begin(), parents.end(), fe ), *rws( parents.begin(), parents.end(), fe ) );
+			shark::IndividualType, 
+			shark::IndividualType 
+			> result = pmc( 
+				*rws( parents.begin(), parents.end(), selectionProbabilities ),
+				*rws( parents.begin(), parents.end(), selectionProbabilities )
+			);
 			offspring[ i ] = result.first;
 			offspring[ i + 1 ] = result.second;
 
 			// Evaluate offspring individuals.
-			offspring[ i ].fitness( shark::tag::PenalizedFitness() )( 0 ) = 
-			offspring[ i ].fitness( shark::tag::UnpenalizedFitness() )( 0 ) = ttl( *offspring[ i ] );		
+			offspring[ i ].penalizedFitness() = 
+			offspring[ i ].unpenalizedFitness() = ttl( offspring[ i ].searchPoint() );		
 
-			offspring[ i+1 ].fitness( shark::tag::PenalizedFitness() )( 0 ) = 
-			offspring[ i+1 ].fitness( shark::tag::UnpenalizedFitness() )( 0 ) = ttl( *offspring[ i+1 ] );
+			offspring[ i+1 ].penalizedFitness() = 
+			offspring[ i+1 ].unpenalizedFitness() = ttl( offspring[ i+1 ].searchPoint()  );
 		}
 
 		// Swap parent and offspring population.
@@ -299,15 +303,15 @@ int main( int argc, char ** argv ) {
 	}
 
 	// Sort in ascending order to find best individual.
-	std::sort( parents.begin(), parents.end(), shark::compare_fitness< shark::tag::UnpenalizedFitness > );
+	std::sort( parents.begin(), parents.end(), shark::compare_fitness);
     
 	// Extract the best tour currently known.
-	Tour final = *parents.front();
+	Tour final = parents.front().searchPoint();
 
 	// Mark the final tour green in the graph.
 	bool extracted = false;
 	for( std::size_t i = 0; i < final.size() - 1; i++ ) {
-	boost::tie( e, extracted ) = boost::edge( shark::Vertex( final( i ) ), shark::Vertex( final( i + 1 ) ), g );
+		boost::tie( e, extracted ) = boost::edge( shark::Vertex( final( i ) ), shark::Vertex( final( i + 1 ) ), g );
 	
 	if( extracted )
 		colorMap[ e ] = "green";
@@ -335,9 +339,9 @@ int main( int argc, char ** argv ) {
 	boost::write_graphviz_dp( outGraphviz, g, dp );
 
 	// Output best solution and corresponding fitness.
-	std::cout << *parents.front() << " -> " << parents.front().fitness( shark::tag::UnpenalizedFitness() ) << std::endl;
+	std::cout << parents.front().searchPoint() << " -> " << parents.front().unpenalizedFitness() << std::endl;
 	// Output approximate solution and corresponding fitness.
-	std::cout << "Approx: " << len << " vs. GA: " << parents.front().fitness( shark::tag::UnpenalizedFitness() ) << std::endl;
+	std::cout << "Approx: " << len << " vs. GA: " << parents.front().unpenalizedFitness() << std::endl;
 
 	return( EXIT_SUCCESS );
 }

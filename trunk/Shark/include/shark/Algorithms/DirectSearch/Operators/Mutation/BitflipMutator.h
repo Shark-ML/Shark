@@ -65,9 +65,9 @@ struct BitflipMutator {
 	template<typename IndividualType>
 	void operator()(IndividualType &ind) {
 
-		for (unsigned int i = 0; i < (*ind).size(); i++) {
+		for (unsigned int i = 0; i < ind.searchPoint().size(); i++) {
 			if (Rng::coinToss(m_mutationStrength)) {
-				(*ind)[ i ] = !(*ind)[ i ];
+				ind.searchPoint()[ i ] = !ind.searchPoint()[ i ];
 			}
 		}
 	}

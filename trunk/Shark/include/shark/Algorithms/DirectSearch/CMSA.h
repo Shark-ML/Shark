@@ -41,68 +41,17 @@
 //===========================================================================
 
 
-#ifndef SHARK_EA_CMSA_H
-#define SHARK_EA_CMSA_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_CMSA_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_CMSA_H
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Algorithms/DirectSearch/TypedIndividual.h>
+#include <shark/Algorithms/DirectSearch/Individual.h>
 
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 
 
 namespace shark {
-	namespace cmsa {
-		/**
-		* \brief Chromosome of the CMSA-ES.
-		*/
-		struct Chromosome {
-
-			/**
-			* \brief Default c'tor.
-			*/
-			Chromosome( unsigned int dimension = 0 ) : m_sigma( 0 ),
-				m_cSigma( 0 ),
-				m_cC( 0 ) {
-			}
-
-			/**
-			* \brief Adjusts the dimension of the chromosome.
-			*/
-			void setDimension( unsigned int dimension ) {
-				m_mean.resize( dimension);
-				m_mutationDistribution.resize( dimension );
-			}
-
-			/**
-			* \brief Serializes the chromosome to the supplied archive.
-			* \tparam Archive Type of the archive.y
-			* \param [in, out] archive Object of type archive.
-			* \param [in] version Currently unused.
-			*/
-			template<typename Archive>
-			void serialize( Archive & archive, const unsigned int version ) {
-				archive & m_sigma;
-
-				archive & m_cC;
-				archive & m_cSigma;
-
-				archive & m_mean;
-				archive & m_mutationDistribution;
-			}
-
-			double m_sigma; ///< The current step size.
-			double m_cSigma; 
-			double m_cC; ///< Constant for adapting the covariance matrix.
-
-			RealVector m_mean; ///< The current cog of the population.
-
-			shark::MultiVariateNormalDistribution m_mutationDistribution; ///< Multi-variate normal mutation distribution.      
-		};
-
-	}
-
-
 	/**
 	* \brief Implements the CMSA.
 	*
@@ -117,24 +66,16 @@ namespace shark {
 		/** \cond */
 
 		struct LightChromosome {
-			RealVector m_step;
-			double m_sigma;
+			RealVector step;
+			double sigma;
 		};
 		/** \endcond */
 		/**
 		* \brief Individual type of the CMSA implementation.
 		*/
-		typedef TypedIndividual< RealVector, LightChromosome > Individual;
+		typedef Individual< RealVector, double, LightChromosome > IndividualType;
 
 	public:
-
-		/** \cond */
-		struct SigmaExtractor {
-			double operator()( const CMSA & cmsa ) const {
-				return cmsa.m_chromosome.m_sigma;
-			}
-		};
-		/** \endcond */
 
 		/**
 		* \brief Default c'tor.
@@ -183,13 +124,6 @@ namespace shark {
 		void step(ObjectiveFunctionType const& function);
 
 		/**
-		* \brief Accesses the chromosome.
-		*/
-		const shark::cmsa::Chromosome & chromosome() const {
-			return m_chromosome;
-		}
-
-		/**
 		* \brief Accesses the size of the parent population.
 		*/
 		unsigned int mu() const {
@@ -222,12 +156,18 @@ namespace shark {
 		unsigned int m_mu; ///< The size of the parent population.
 		unsigned int m_lambda; ///< The size of the offspring population, needs to be larger than mu.
 
-		cmsa::Chromosome m_chromosome; ///< Stores the strategy parameters of the algorithm.
+		double m_sigma; ///< The current step size.
+		double m_cSigma; 
+		double m_cC; ///< Constant for adapting the covariance matrix.
+
+		RealVector m_mean; ///< The current cog of the population.
+
+		shark::MultiVariateNormalDistribution m_mutationDistribution; ///< Multi-variate normal mutation distribution.   
 	private:
 		/**
 		* \brief Updates the strategy parameters based on the supplied offspring population.
 		*/
-		void updateStrategyParameters( const std::vector< CMSA::Individual > & offspringNew ) ;
+		void updateStrategyParameters( const std::vector< IndividualType > & offspringNew ) ;
 	};
 }
 

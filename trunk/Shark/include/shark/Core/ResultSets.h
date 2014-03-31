@@ -41,7 +41,7 @@ template<class SearchPointT, class ResultT>
 struct ResultSet{
 	typedef SearchPointT SearchPointType;
 	typedef ResultT ResultType;
-	ResultSet():value(/*null*/){}
+	ResultSet(){}
 	ResultSet(ResultType const& value, SearchPointType const& point)
 	:point(point),value(value){}
 
@@ -52,6 +52,12 @@ struct ResultSet{
 	void serialize( Archive & archive, const unsigned int /*version*/ ) {
 		archive & point;
 		archive & value;
+	}
+	
+	friend void swap(ResultSet& set1, ResultSet& set2){
+		using std::swap;
+		swap(set1.point,set2.point);
+		swap(set1.value,set2.value);
 	}
 };
 

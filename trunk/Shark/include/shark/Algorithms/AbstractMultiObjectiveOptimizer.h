@@ -82,24 +82,27 @@ public:
 	*/
 	virtual void init( const ObjectiveFunctionType & function ) {
 		if(!(function.features() & ObjectiveFunctionType::CAN_PROPOSE_STARTING_POINT))
-			throw Exception( "Objective function does not propose a starting point", __FILE__, __LINE__ );
-		RealVector startingPoint;
-		function.proposeStartingPoint(startingPoint);
-		init(function,startingPoint);
+			throw SHARKEXCEPTION( "Objective function does not propose a starting point");
+		std::vector<RealVector> startingPoints(1);
+		function.proposeStartingPoint(startingPoints[0]);
+		init(function,startingPoints);
 	}
 
 	/**
 	* \brief Optimizer-specific init-function. Needs to be implemented by subclasses.
 	* \param [in] function The function to initialize the optimizer for.
-	* \param [in] startingPoint An initial point sampled from the function.
+	* \param [in] startingPoints An initial population of points
 	*/
-	virtual void init( ObjectiveFunctionType const& function, SearchPointType const& startingPoint) = 0;
+	virtual void init( 
+		ObjectiveFunctionType const& function, 
+		std::vector<SearchPointType> const& startingPoints
+	) = 0;
 
 	/**
 	* \brief Accesses the current approximation of the Pareto-set and -front, respectively.
 	* \returns The current set of candidate solutions.
 	*/
-	virtual const SolutionSetType & solution() const {
+	const SolutionSetType & solution() const {
 		return m_best;
 	}
 

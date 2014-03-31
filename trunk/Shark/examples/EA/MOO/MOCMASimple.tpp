@@ -49,7 +49,7 @@ int main( int argc, char ** argv ) {
     //###end<problem>		  
 
     //###begin<optimizer>
-    shark::detail::MOCMA<> mocma;
+    shark::MOCMA mocma;
 
     // Initialize the optimizer for the objective function instance.
     mocma.init( dtlz2 );
@@ -58,8 +58,8 @@ int main( int argc, char ** argv ) {
     //###begin<solutiontype>	
     std::vector<
 	shark::ResultSet<
-	    shark::DTLZ2::SearchPointType,
-	    shark::DTLZ2::ResultType
+	    shark::RealVector,
+	    shark::RealVector
 	    >
 	> currentSolution;
     //###end<solutiontype>	
@@ -67,8 +67,9 @@ int main( int argc, char ** argv ) {
     //###begin<loop>
     // Iterate the optimizer
     while( dtlz2.evaluationCounter() < 25000 ) {
-	currentSolution = mocma.step( dtlz2 );
+	mocma.step( dtlz2 );
     }
+    currentSolution = mocma.solution();
     //###end<loop>
     
     // Report information on the optimizer state and the current

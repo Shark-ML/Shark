@@ -44,7 +44,7 @@
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
-#include <shark/Algorithms/DirectSearch/TypedIndividual.h>
+#include <shark/Algorithms/DirectSearch/Individual.h>
 
 
 namespace shark {
@@ -257,7 +257,7 @@ namespace shark {
 		/**
 		* \brief Updates the strategy parameters based on the supplied offspring population.
 		*/
-		void updateStrategyParameters( const std::vector<TypedIndividual<RealVector, RealVector> > & offspring ) ;
+		void updateStrategyParameters( const std::vector<Individual<RealVector, double, RealVector> > & offspring ) ;
 	
 		unsigned int m_numberOfVariables; ///< Stores the dimensionality of the search space.
 		unsigned int m_mu; ///< The size of the parent population.

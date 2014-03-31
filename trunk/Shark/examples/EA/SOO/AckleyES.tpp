@@ -1,4 +1,4 @@
-#include <shark/Algorithms/DirectSearch/TypedIndividual.h>
+#include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/UniformCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Ackley.h>
@@ -13,12 +13,12 @@ namespace example {
 		shark::MultiVariateNormalDistribution m_mutationDistribution;
 	};
 
-	typedef TypedIndividual< RealVector, double > Individual;
-	typedef std::vector< Individual > Population;
+	typedef Individual< RealVector, double, double> IndividualType;
+	typedef std::vector< IndividualType > Population;
 
 	struct FitnessComparator {
-		bool operator()( const Individual & a, const Individual & b ) {
-			return( a.fitness( tag::UnpenalizedFitness() )( 0 ) < b.fitness( tag::UnpenalizedFitness() )( 0 ) );
+		bool operator()( const IndividualType & a, const IndividualType & b ) {
+			return( a.unpenalizedFitness() < b.unpenalizedFitness() );
 		}
 
 	};
@@ -40,15 +40,15 @@ int main( int argc, char ** argv ) {
 	shark::MultiVariateNormalDistribution mutationDistribution;
 	mutationDistribution.setCovarianceMatrix( shark::blas::identity_matrix< double >( Dimension ) );
 	
-	shark::example::Individual prototypeIndividual;
-	prototypeIndividual.get<0>() = InitialSigma;
+	shark::example::IndividualType prototypeIndividual;
+	prototypeIndividual.chromosome() = InitialSigma;
 	
 	shark::example::Population parents( Mu, prototypeIndividual );
 	shark::example::Population offspring( Lambda );
 	
 	// Initialize parents (not a god idea to start in a single point, shouldn't do this in practice)
-	BOOST_FOREACH( shark::example::Individual & ind, parents ) {
-		ackley.proposeStartingPoint( *ind );
+	BOOST_FOREACH( shark::example::IndividualType & ind, parents ) {
+		ackley.proposeStartingPoint( ind.searchPoint() );
 	}
 	
 	// Evolutionary operators
@@ -68,17 +68,17 @@ int main( int argc, char ** argv ) {
 			shark::example::Population::const_iterator dad = parents.begin() + shark::Rng::discrete( 0, parents.size() - 1 );
 		
 			// Recombine step size
-			offspring[i].get< 0 >() = shark::Rng::uni( (*mom).get< 0 >(), (*dad).get< 0 >() );			
+			offspring[i].chromosome() = shark::Rng::uni( mom->chromosome(), dad->chromosome() );			
 			// Mutate step size
-			offspring[i].get< 0 >() *= shark::Rng::logNormal( 0, tau0 + tau1 );
+			offspring[i].chromosome() *= shark::Rng::logNormal( 0, tau0 + tau1 );
 			
 			// Recombine search points
-			*offspring[i] = uniform( **mom, **dad );
+			offspring[i].searchPoint() = uniform( mom->searchPoint(), dad->searchPoint() );
 			// Mutate search point
-			*offspring[i] = offspring[i].get< 0 >() * mutationDistribution().first;
+			offspring[i].searchPoint() = offspring[i].chromosome() * mutationDistribution().first;
 	
 			// Assign fitness
-			offspring[i].fitness( shark::tag::UnpenalizedFitness() )(0) = ackley.eval( *offspring[i] );
+			offspring[i].unpenalizedFitness() = ackley.eval( offspring[i].searchPoint() );
 		}
 	
 		// Selection 
@@ -88,8 +88,8 @@ int main( int argc, char ** argv ) {
 
 		
 		std::cout 	<< ackley.evaluationCounter() << " " 
-					<< parents.front().fitness( shark::tag::UnpenalizedFitness() )( 0 ) << " "
-					<< parents.front().get< 0 >()  
-					<< std::endl;
+				<< parents.front().unpenalizedFitness() << " "
+				<< parents.front().chromosome()  
+				<< std::endl;
 	}	
 }
