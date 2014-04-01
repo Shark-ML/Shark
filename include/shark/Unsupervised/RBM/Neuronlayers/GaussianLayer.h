@@ -223,6 +223,12 @@ public:
 		SIZE_CHECK(derivative.size() == size());
 		sum_rows(samples.statistics.mean,derivative);
 	}
+
+	template<class Vector, class SampleBatch, class Vector2 >
+	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples, Vector2 const& weights )const{
+		SIZE_CHECK(derivative.size() == size());
+		axpy_prod(samples.statistics.mean,weights, derivative);
+	}
 	
 	///\brief Calculates the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights. 
 	///

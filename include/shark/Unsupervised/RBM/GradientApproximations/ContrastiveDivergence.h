@@ -117,7 +117,7 @@ public:
 		std::size_t numBatches = m_data.numberOfBatches()/threads;
 		std::size_t elements = m_data.numberOfElements();
 		
-		SHARK_PARALLEL_FOR(int t = 0; t < (int)threads; ++t){
+		SHARK_PARALLEL_FOR(size_t t = 0; t < threads; ++t){
 			AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
 			AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
 			
