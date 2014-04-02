@@ -29,177 +29,75 @@
  *
  */
 #include <shark/Algorithms/DirectSearch/ElitistCMA.h>
-#include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Individual.h>
+#include <algorithm>
 
 using namespace shark;
 
-namespace {
-/**
-* \brief Calculates the expected length of a vector of length n.
-* \param [in] n The length of the vector.
-*/ 
-double chi( unsigned int n ) {
-	return( std::sqrt( static_cast<double>( n ) )*(1. - 1./(4.*n) + 1./(21.*n*n)) );
-}
-		
-}
-
-ElitistCMA::ElitistCMA(): m_lambda( 1 ),m_activeUpdate(false) {
+ElitistCMA::ElitistCMA(): m_activeUpdate(true) {
 	m_features |= REQUIRES_VALUE;
 }
 
 void ElitistCMA::read( InArchive & archive ) {
-	archive >> m_lambda;
+	archive >> m_individual;
+	archive >> m_ancestralFitness;
 	archive >> m_activeUpdate;
-
-	archive >> m_fitness;
-	archive >> m_lastFitness;
-	archive >> m_fitnessUpdateFrequency;
-	archive >> m_generationCounter;
-	
-	archive >> m_targetSuccessProbability;
-	archive >> m_successProbability;
-	archive >> m_successProbabilityThreshold;
-	archive >> m_mean;
-	archive >> m_evolutionPathC;
-	archive >> m_mutationDistribution;
-	archive >> m_sigma;
-	
-	archive >> m_cSuccessProb;
-	archive >> m_cC;
-	archive >> m_cCov;
-	archive >> m_cCovMinus;
-	archive >> m_cSigma;
-	archive >> m_dSigma;
 }
 
 void ElitistCMA::write( OutArchive & archive ) const {
-	archive << m_lambda;
+	archive << m_individual;
+	archive << m_ancestralFitness;
 	archive << m_activeUpdate;
-
-	archive << m_fitness;
-	archive << m_lastFitness;
-	archive << m_fitnessUpdateFrequency;
-	archive << m_generationCounter;
-	
-	archive << m_targetSuccessProbability;
-	archive << m_successProbability;
-	archive << m_successProbabilityThreshold;
-	archive << m_mean;
-	archive << m_evolutionPathC;
-	archive << m_mutationDistribution;
-	archive << m_sigma;
-	
-	archive << m_cSuccessProb;
-	archive << m_cC;
-	archive << m_cCov;
-	archive << m_cCovMinus;
-	archive << m_cSigma;
-	archive << m_dSigma;
 }
 
 
 void ElitistCMA::init( ObjectiveFunctionType const& function, SearchPointType const& p){
-	std::size_t numberOfVariables = p.size();
-
-	m_fitnessUpdateFrequency = 5;
-	m_generationCounter = 0;
-	m_evolutionPathC = blas::repeat( 0.0,numberOfVariables );
-	m_mean = p;
-	m_mutationDistribution.resize( numberOfVariables );
-	m_sigma = 1.0;
 	
-	m_dSigma = 1. + numberOfVariables/(2.*m_lambda);
-
-	m_targetSuccessProbability = 1./(5.+::sqrt( m_lambda/4.0 ));
-	m_successProbabilityThreshold = 0.44;
-	m_cSuccessProb = (m_targetSuccessProbability*m_lambda)/(2+m_targetSuccessProbability*m_lambda);
-
-	m_cC = 2./(numberOfVariables + 2.);
-	m_cCov = 2./(sqr(numberOfVariables) + 6);
-	m_cCovMinus = 0.4/( std::pow(numberOfVariables, 1.6 )+1. );
-
-	m_fitness = function( m_mean );
-	m_lastFitness = m_fitness;
+	//create and evaluate individual
+	m_individual = CMAIndividual<double>(p.size());
+	noalias(m_individual.searchPoint()) = p;
+	m_evaluator(function,m_individual);
 	
+	//fill the history with the current individual
+	m_ancestralFitness.resize(5);
+	std::fill(m_ancestralFitness.begin(),m_ancestralFitness.end(),m_individual.penalizedFitness());
+	
+	//starting point is best solution so far
 	m_best.point = p;
-	m_best.value = m_fitness;
-
+	m_best.value = m_individual.unpenalizedFitness();
 }
 
-/**
-* \brief Executes one iteration of the algorithm.
-*/
 void ElitistCMA::step(ObjectiveFunctionType const& function) {
-	//create offspring and select the best
-	PenalizingEvaluator evaluator;
-	Individual<RealVector,double> bestOffspring;
-	bestOffspring.penalizedFitness() = std::numeric_limits<double>::max();
-	for( unsigned int i = 0; i != m_lambda; ++i ) {
-		Individual<RealVector,double> offspring;
-		offspring.searchPoint() = m_mean + m_sigma * m_mutationDistribution().first;
-		evaluator( function, offspring );
-		if(offspring.penalizedFitness() <= bestOffspring.penalizedFitness()){
-			bestOffspring = offspring;
-		}
+	//create and evaluate offspring
+	m_individual.mutate();
+	m_evaluator( function, m_individual );
+	
+	//evaluate success status of individual
+	CMAChromosome::IndividualSuccess  success = CMAChromosome::Successful;
+	if( m_individual.penalizedFitness() >= m_ancestralFitness.back()){
+		success = CMAChromosome::Unsuccessful;
 	}
-
-	updateStrategyParameters( bestOffspring.searchPoint(), bestOffspring.penalizedFitness());
-
-	//update the solution if a better was sound
-	if(bestOffspring.penalizedFitness() < m_best.value){
-		m_best.point = bestOffspring.searchPoint();
-		m_best.value = bestOffspring.penalizedFitness();
+	if(m_activeUpdate && m_individual.penalizedFitness() > m_ancestralFitness.front()){
+		success = CMAChromosome::Failure;
 	}
-}
-
-void  ElitistCMA::updateCovarianceMatrix( RealVector const& point ) {
-	if( m_successProbability < m_successProbabilityThreshold ) {
-		m_evolutionPathC = (1-m_cC)*m_evolutionPathC + 
-			::sqrt( m_cC*(2-m_cC) ) * 1./m_sigma * (point - m_mean);
-		RealMatrix & C = m_mutationDistribution.covarianceMatrix();
-		C = (1. - m_cCov) * C + m_cCov * blas::outer_prod( m_evolutionPathC, m_evolutionPathC );
-	} else {
-		m_evolutionPathC = (1-m_cC)*m_evolutionPathC;		  
-		RealMatrix & C = m_mutationDistribution.covarianceMatrix();
-		C = (1. - m_cCov+m_cCov*m_cC*(2.-m_cC)) * C + 
-			m_cCov *blas::outer_prod( m_evolutionPathC, m_evolutionPathC );		    
+	
+	//if the new individual is better, keep it and adapt its strategy
+	if(success == CMAChromosome::Successful){
+		m_individual.updateAsOffspring();
+		
+		//new best solution found
+		noalias(m_best.point) = m_individual.searchPoint();
+		m_best.value = m_individual.unpenalizedFitness();
+		
+		//update ancestory
+		m_ancestralFitness.erase(m_ancestralFitness.begin());
+		m_ancestralFitness.push_back(m_individual.penalizedFitness());
+		
+	}else{
+		//reset to parent individual
+		noalias(m_individual.searchPoint()) = m_best.point;
+		//update its strategy
+		m_individual.updateAsParent(success);
 	}
-	m_mutationDistribution.update();
-}
-
-void ElitistCMA::activeCovarianceMatrixUpdate( RealVector const& point ) {
-	RealVector z = (point - m_mean)/m_sigma;
-	if( 1 - norm_sqr( z ) * m_cCovMinus/(1+m_cCovMinus) <= 0 )
-		return;
-	RealMatrix & C = m_mutationDistribution.covarianceMatrix();
-	C = (1. - m_cCovMinus) * C - m_cCovMinus * blas::outer_prod( z, z );
-	m_mutationDistribution.update();
-}
-
-void ElitistCMA::updateStrategyParameters( RealVector const& point, double fitness ) {
-	bool successful = fitness < m_fitness;//better than the best known?
-	bool unsuccessful = fitness > m_lastFitness;//worse than the the last version a few steps back
-	m_successProbability = (1.-m_cSuccessProb)*m_successProbability + m_cSuccessProb * (successful ? 1 : 0);
-
-	// Covariance Matrix update
-	if( successful )
-		updateCovarianceMatrix( point );
-	else if( unsuccessful  && m_activeUpdate )
-		activeCovarianceMatrixUpdate( point );
-
-	//update the step size based on the current success probability
-	m_sigma *= ::exp( 1./m_dSigma * (m_successProbability - m_targetSuccessProbability)/(1-m_targetSuccessProbability) );
-
-	if( successful ) {
-		m_mean = point;
-		m_fitness = fitness;
-	}
-
-	if( m_generationCounter % m_fitnessUpdateFrequency == 0 )
-		m_lastFitness = m_fitness;
-
-	m_generationCounter++;
-
+	
+	
 }

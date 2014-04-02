@@ -64,7 +64,7 @@ public:
 		PopulationBased
 	};
 	
-	std::vector<CMAIndividual > m_pop; ///< Population of size \f$\mu+\mu\f$.
+	std::vector<CMAIndividual<RealVector> > m_pop; ///< Population of size \f$\mu+\mu\f$.
 	unsigned int m_mu;///< Size of parent generation
 	
 	shark::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
@@ -106,10 +106,16 @@ public:
 		return m_initialSigma;
 	}
 	
+	/// \brief Returns the penalty factor for an individual that is outside the feasible area.
+	///
+	/// The value is multiplied with the distance to the nearest feasible point.
 	double constrainedPenaltyFactor()const{
 		return m_evaluator.m_penaltyFactor;
 	}
 	
+	/// \brief Returns a reference to the penalty factor for an individual that is outside the feasible area.
+	///
+	/// The value is multiplied with the distance to the nearest feasible point.
 	double& constrainedPenaltyFactor(){
 		return m_evaluator.m_penaltyFactor;
 	}
@@ -177,14 +183,12 @@ public:
 		ObjectiveFunctionType const& function, 
 		std::vector<SearchPointType> const& startingPoints
 	){
-		std::cout<<"called"<<mu()<<" "<<std::endl;
 		m_pop.resize(2 * mu());
 		m_best.resize(mu());
-		std::size_t noObjectives = function.numberOfObjectives();
 		std::size_t noVariables = function.numberOfVariables();
 		
 		for(std::size_t i = 0; i != mu(); ++i){
-			CMAIndividual individual(noVariables,noObjectives,m_individualSuccessThreshold,m_initialSigma);
+			CMAIndividual<RealVector> individual(noVariables,m_individualSuccessThreshold,m_initialSigma);
 			function.proposeStartingPoint(individual.searchPoint());
 			m_evaluator(function, individual);
 			m_pop[i] = individual;
@@ -203,40 +207,34 @@ public:
 		//generate new offspring
 		for (std::size_t i = 0; i < mu(); i++) {
 			m_pop[mu()+i] = m_pop[i];
-			m_pop[mu()+i].mutate();//mutate the search point
-			m_pop[mu()+i].age() = 0;
+			m_pop[mu()+i].mutate();
 			m_evaluator(function, m_pop[mu()+i]);
 		}
 
 		m_selection(m_pop,m_mu);
+		
 		//determine from the selection which parent-offspring pair has been successfull
-		if (m_notionOfSuccess == PopulationBased) {
+		for (std::size_t i = 0; i < mu(); i++) {
+			CMAChromosome::IndividualSuccess offspringSuccess = CMAChromosome::Unsuccessful;
 			//new update: an offspring is successfull if it is selected
-			for (std::size_t i = 0; i < mu(); i++) {
-				if ( m_pop[mu()+i].selected()) {
-					m_pop[mu()+i].noSuccessfulOffspring() += 1.0;
-					m_pop[i].noSuccessfulOffspring() += 1.0;
-				}
+			if ( m_notionOfSuccess == PopulationBased && m_pop[mu()+i].selected()) {
+				m_pop[mu()+i].updateAsOffspring();
+				offspringSuccess = CMAChromosome::Successful;
 			}
-		}
-		else
-		{
-			//old update: if the offspring is better than its parent, it is successfull
-			for (std::size_t i = 0; i < mu(); i++) {
-				if ( m_pop[mu()+i].selected() && m_pop[mu()+i].rank() <= m_pop[i].rank()) {
-					m_pop[mu()+i].noSuccessfulOffspring() += 1.0;
-					m_pop[i].noSuccessfulOffspring() += 1.0;
-				}
+			//old update: an offspring is successfull if it is better than its parent
+			else if ( m_notionOfSuccess == IndividualBased && m_pop[mu()+i].selected() && m_pop[mu()+i].rank() <= m_pop[i].rank()) {
+				m_pop[mu()+i].updateAsOffspring();
+				offspringSuccess = CMAChromosome::Successful;
 			}
+			if(m_pop[i].selected()) 
+				m_pop[i].updateAsParent(offspringSuccess);
 		}
 		
 		//partition the selected individuals to the front
-		std::partition(m_pop.begin(), m_pop.end(),CMAIndividual::IsSelected);
+		std::partition(m_pop.begin(), m_pop.end(),CMAIndividual<RealVector>::IsSelected);
 
 		//update individuals and generate solution set
 		for (unsigned int i = 0; i < mu(); i++) {
-			m_pop[i].age()++;
-			m_pop[i].update();
 			noalias(m_best[i].point) = m_pop[i].searchPoint();
 			m_best[i].value = m_pop[i].unpenalizedFitness();
 		}
