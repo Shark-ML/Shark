@@ -222,7 +222,8 @@ void CMA::init(
 	m_evolutionPathC.clear();
 	m_evolutionPathSigma.clear();
 	if(initialCovarianceMatrix){
-		m_mutationDistribution.setCovarianceMatrix(*initialCovarianceMatrix);
+		m_mutationDistribution.covarianceMatrix() = *initialCovarianceMatrix;
+		m_mutationDistribution.update();
 	}
 	
 	
@@ -283,19 +284,18 @@ void CMA::updateStrategyParameters( const std::vector<Individual<RealVector, dou
 	// Covariance Matrix Update
 	m_evolutionPathC = (1. - m_cC ) * m_evolutionPathC + m_cCU * std::sqrt( m_muEff )  / m_sigma * (xPrime-m_mean);
 	RealMatrix Z( m_numberOfVariables, m_numberOfVariables, 0.0);
-	RealMatrix C( m_mutationDistribution.covarianceMatrix() );
+	RealMatrix& C = m_mutationDistribution.covarianceMatrix();
 	// Rank-1-Update
-	C = (1.-m_cCov) * C +
-		m_cCov / m_muCov * blas::outer_prod( m_evolutionPathC, m_evolutionPathC );
+	noalias(C) = (1.-m_cCov) * C + m_cCov / m_muCov * blas::outer_prod( m_evolutionPathC, m_evolutionPathC );
 	// Rank-mu-Update
 	for( unsigned int i = 0; i < m_mu; i++ ) {
-		Z += m_weights( i ) * blas::outer_prod(
+		noalias(Z) += m_weights( i ) * blas::outer_prod(
 			offspring[i].searchPoint() - m_mean,
 			offspring[i].searchPoint() - m_mean
 		);
 	}
-	C += m_cCov * (1.-1./m_muCov) * 1./sqr( m_sigma ) * Z;
-	m_mutationDistribution.setCovarianceMatrix( C );
+	noalias(C) += m_cCov * (1.-1./m_muCov) * 1./sqr( m_sigma ) * Z;
+	m_mutationDistribution.update();
 	
 	// Step size update
 	m_evolutionPathSigma = (1. - m_cSigma)*m_evolutionPathSigma +m_cSigmaU * std::sqrt( m_muEff ) * v;

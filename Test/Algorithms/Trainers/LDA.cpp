@@ -15,8 +15,6 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 
 
 	//create datatsets - two overlapping normal distributions
-	MultiVariateNormalDistribution dist;
-
 	RealMatrix covariance(2,2);
 	covariance(0,0)=16;
 	covariance(0,1)=8;
@@ -34,8 +32,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 	mean[1](1)=6;
 	
 	double prior[2]={std::log(1.0/3.0),std::log(2.0/3.0)};
-	
-	dist.setCovarianceMatrix(covariance);
+	MultiVariateNormalDistribution dist(covariance);
 
 
 	std::vector<RealVector> input(trainExamples,RealVector(2));
@@ -81,7 +78,6 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	//create datatsets - two overlapping normal distributions
 	//same as in the previous test aside from that we add a third
 	//variable which is allways 0
-	MultiVariateNormalDistribution dist;
 
 	RealMatrix covariance(2,2);
 	covariance(0,0)=16;
@@ -98,7 +94,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	mean[0](1)=0;
 	mean[1](0)=6;
 	mean[1](1)=6;
-	dist.setCovarianceMatrix(covariance);
+	MultiVariateNormalDistribution dist(covariance);
 	
 	double prior[2]={std::log(2.0/3.0),std::log(1.0/3.0)};
 
@@ -147,7 +143,6 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 
 
 	//create datatsets - overlapping normal distributions
-	MultiVariateNormalDistribution dist;
 
 	RealMatrix covariance(2,2);
 	covariance(0,0)=16;
@@ -164,7 +159,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 			mean[c](j) = Rng::gauss(0,30);
 		}
 	}
-	dist.setCovarianceMatrix(covariance);
+	MultiVariateNormalDistribution dist(covariance);
 
 
 	std::vector<RealVector> input(trainExamples,RealVector(2));
