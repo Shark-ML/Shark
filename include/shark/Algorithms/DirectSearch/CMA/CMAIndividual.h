@@ -40,27 +40,29 @@
 
 namespace shark {
 
-class CMAIndividual : public Individual<RealVector,RealVector, CMAChromosome>{
+template<class FitnessType>
+class CMAIndividual : public Individual<RealVector,FitnessType, CMAChromosome>{
 public:
-
+	using Individual<RealVector,FitnessType, CMAChromosome>::chromosome;
+	using Individual<RealVector,FitnessType, CMAChromosome>::searchPoint;
 	/**
 	 * \brief Default constructor that initializes the individual's attributes to default values.
 	 */
 	CMAIndividual(){}
 	CMAIndividual(
 		std::size_t searchSpaceDimension,
-		std::size_t numberOfObjectives,
-		double successThreshold,
-		double initialStepSize
+		double successThreshold = 0.44,
+		double initialStepSize = 1.0
 	){
 		chromosome() = CMAChromosome(searchSpaceDimension, successThreshold, initialStepSize);
 		searchPoint().resize(searchSpaceDimension);
-		penalizedFitness().resize(searchSpaceDimension);
-		unpenalizedFitness().resize(searchSpaceDimension);
 	}
 	
-	void update(){
-		chromosome().update();
+	void updateAsParent(CMAChromosome::IndividualSuccess offspringSuccess){
+		chromosome().updateAsParent(offspringSuccess);
+	}
+	void updateAsOffspring(){
+		chromosome().updateAsOffspring();
 	}
 	void mutate(){
 		MultiVariateNormalDistribution::ResultType sample = chromosome().m_mutationDistribution();

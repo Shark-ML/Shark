@@ -40,14 +40,16 @@ namespace shark {
 * \brief Models a CMAChromosomeof the elitist (MO-)CMA-ES that encodes strategy parameters.
 */
 struct CMAChromosome{
-
+	enum IndividualSuccess{
+		Successful = 1,
+		Unsuccessful = 2,
+		Failure = 3
+	};
 	MultiVariateNormalDistribution m_mutationDistribution; ///< Models the search distribution.
 
 	RealVector m_evolutionPath; ///< Low-pass filtered accumulation of successful mutative steps.
-	RealVector m_lastStep; ///< The most recent successful mutative step.
+	RealVector m_lastStep; ///< The most recent mutative step.
 
-	unsigned int m_lambda; ///< The default number of offspring individuals that are generated from this chromosome, default value: 1.
-	double m_noSuccessfulOffspring; ///< The number of successful offspring individuals generated from this CMAChromosomein \f$[0,\lambda]\f$.
 	double m_stepSize; ///< The step-size used to scale the normally-distributed mutative steps. Dynamically adapted during the run.
 	double m_stepSizeDampingFactor; ///< Damping factor \f$d\f$ used in the step-size update procedure.
 	double m_stepSizeLearningRate; ///< The learning rate for the step-size.
@@ -55,8 +57,9 @@ struct CMAChromosome{
 	double m_targetSuccessProbability; ///< Target success probability, close \f$ \frac{1}{5}\f$.
 	double m_evolutionPathLearningRate; ///< Learning rate (constant) for updating the evolution path.
 	double m_covarianceMatrixLearningRate; ///< Learning rate (constant) for updating the covariance matrix.
+	double m_covarianceMatrixUnlearningRate; ///< Learning rate (constant) for unlearning unsuccessful directions from the covariance matrix.
 
-	bool m_needsCovarianceUpdate; ///< If true, the covariance matrix of the search distribution needs to be update.
+	bool m_needsCovarianceUpdate; ///< If true, the covariance matrix of the search distribution needs to be updated.
 	double m_successThreshold; ///< Success threshold \f$p_{\text{thresh}}\f$ for cutting off evolution path updates.
 
 	CMAChromosome(){}
@@ -65,9 +68,7 @@ struct CMAChromosome{
 		double successThreshold,
 		double initialStepSize
 	)
-	: m_lambda( 1 )
-	, m_noSuccessfulOffspring( 0 )
-	, m_stepSize( initialStepSize )
+	: m_stepSize( initialStepSize )
 	, m_covarianceMatrixLearningRate( 0 )
 	, m_needsCovarianceUpdate( false )
 	, m_successThreshold(successThreshold)
@@ -76,48 +77,79 @@ struct CMAChromosome{
 		m_evolutionPath.resize( searchSpaceDimension );
 		m_lastStep.resize( searchSpaceDimension );
 
-		m_targetSuccessProbability = 1.0 / ( 5.0 + ::sqrt( static_cast<double>( m_lambda ) )/2.0 );		
+		m_targetSuccessProbability = 1.0 / ( 5.0 + 1/2.0 );		
 		m_successProbability = m_targetSuccessProbability;
-		m_stepSizeDampingFactor = 1.0 + searchSpaceDimension / ( 2. * m_lambda );
-		m_stepSizeLearningRate = (m_lambda * m_targetSuccessProbability) / (2. + m_lambda * m_targetSuccessProbability );
+		m_stepSizeDampingFactor = 1.0 + searchSpaceDimension / 2.;
+		m_stepSizeLearningRate = m_targetSuccessProbability/ (2. + m_targetSuccessProbability );
 		m_evolutionPathLearningRate = 2.0 / (2.0 + searchSpaceDimension);
-		m_covarianceMatrixLearningRate = 2.0 / (searchSpaceDimension * searchSpaceDimension + 6.);
-
+		m_covarianceMatrixLearningRate = 2.0 / (sqr(searchSpaceDimension) + 6.);
+		m_covarianceMatrixUnlearningRate = 0.4/( std::pow(searchSpaceDimension, 1.6 )+1. );
 	}
 	
 	/**
-	* \brief Updates a \f$(\mu+1)\f$-MO-CMA-ES chromosome.
+	* \brief Updates a \f$(\mu+1)\f$-MO-CMA-ES chromosome of an successful offspring individual. It is assumed that unsuccessful individuals are not selected for future mutation.
 	*
 	* Updates strategy parameters according to:
 	* \f{align*}
+	*	\bar{p}_{\text{succ}} & \leftarrow & (1-c_p)\bar{p}_{\text{succ}} + c_p \\
+	*	\sigma & \leftarrow & \sigma \cdot e^{\frac{1}{d}\frac{\bar{p}_{\text{succ}} - p^{\text{target}}_{\text{succ}}}{1-p^{\text{target}}_{\text{succ}}}}\\
 	*	\vec{p}_c & \leftarrow & (1-c_c) \vec{p}_c + \mathbb{1}_{\bar{p}_{\text{succ}} < p_{\text{thresh}}} \sqrt{c_c (2 - c_c)} \vec{x}_{\text{step}} \\
-	*	\vec{C} & \leftarrow & (1-c_{\text{cov}}) \vec{C} + c_{\text{cov}} \left(  \vec{p}_c \vec{p}_c^T + \mathbb{1}_{\bar{p}_{\text{succ}} \geq p_{\text{thresh}}} c_c (2 - c_c) \vec{C} \right) \\
-	*	\bar{p}_{\text{succ}} & \leftarrow & (1-c_p)\bar{p}_{\text{succ}} + c_p p_{\text{succ}} \\
-	*	\sigma & \leftarrow & \sigma \cdot e^{\frac{1}{d}\frac{\bar{p}_{\text{succ}} - p^{\text{target}}_{\text{succ}}}{1-p^{\text{target}}_{\text{succ}}}}
+	*	\vec{C} & \leftarrow & (1-c_{\text{cov}}) \vec{C} + c_{\text{cov}} \left(  \vec{p}_c \vec{p}_c^T + \mathbb{1}_{\bar{p}_{\text{succ}} \geq p_{\text{thresh}}} c_c (2 - c_c) \vec{C} \right)
 	* \f}
 	*/	
-	void update( ) {
-		if( m_needsCovarianceUpdate ) {
-			if( m_successProbability < m_successThreshold ) {
-				m_evolutionPath = (1-m_evolutionPathLearningRate)*m_evolutionPath + ::sqrt( m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate ) ) * m_lastStep;
-				m_mutationDistribution.covarianceMatrix() = (1.-m_covarianceMatrixLearningRate)*m_mutationDistribution.covarianceMatrix() + m_covarianceMatrixLearningRate * blas::outer_prod( m_evolutionPath , m_evolutionPath );
-			} else {
-				m_evolutionPath = (1-m_evolutionPathLearningRate)*m_evolutionPath;
-				m_mutationDistribution.covarianceMatrix() = (1.-m_covarianceMatrixLearningRate)*m_mutationDistribution.covarianceMatrix() + 
-					m_covarianceMatrixLearningRate * ( 
-					blas::outer_prod( m_evolutionPath , m_evolutionPath ) + 
-					m_evolutionPathLearningRate*(2-m_evolutionPathLearningRate)*m_mutationDistribution.covarianceMatrix() 
-					);
-
-			}
-
-			m_mutationDistribution.update();
-			m_needsCovarianceUpdate = false;
-		}
-		m_successProbability = (1 - m_stepSizeLearningRate) * m_successProbability + m_stepSizeLearningRate * ( m_noSuccessfulOffspring / m_lambda );
+	void updateAsOffspring() {
+		m_successProbability = (1 - m_stepSizeLearningRate) * m_successProbability + m_stepSizeLearningRate;
 		m_stepSize *= ::exp( 1./m_stepSizeDampingFactor * (m_successProbability - m_targetSuccessProbability) / (1-m_targetSuccessProbability) );
+		
+		RealMatrix & C = m_mutationDistribution.covarianceMatrix();
+		double evolutionpathUpdateWeight=m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate );
+		if( m_successProbability < m_successThreshold ) {
+			m_evolutionPath *= 1 - m_evolutionPathLearningRate;
+			noalias(m_evolutionPath) += std::sqrt( evolutionpathUpdateWeight ) * m_lastStep;
+			C *= 1 - m_covarianceMatrixLearningRate;
+			noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
+		} else {
+			m_evolutionPath *= 1 - m_evolutionPathLearningRate;
+			C  *= 1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight;
+			noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
+		}
+		
+		m_mutationDistribution.update();
+	}
+	
+	/**
+	* \brief Updates a \f$(\mu+1)\f$-MO-CMA-ES chromosome of a parent individual.
+	*
+	* This is called when the parent individual survived the last selection process. The update process depends now on how the offspring fares:
+	* It can be successful, unsuccesful or a complete failure.
+	* 
+	* Based on whether it is succesful or not, the global stepsize is adapted as for the child. In the case of a failure the direction of that individual is actively 
+	* purged from the Covariance matrix to make this offspring less likely.
+	*/	
+	void updateAsParent(IndividualSuccess offspringSuccess) {
+		m_successProbability = (1 - m_stepSizeLearningRate) * m_successProbability + m_stepSizeLearningRate * (offspringSuccess == Successful);
+		m_stepSize *= ::exp( 1./m_stepSizeDampingFactor * (m_successProbability - m_targetSuccessProbability) / (1-m_targetSuccessProbability) );
+		
+		if(offspringSuccess != Failure) return;
+		
+		RealMatrix & C = m_mutationDistribution.covarianceMatrix();
+		if( m_successProbability < m_successThreshold ) {
+			//check whether the step is admissible with the proposed update weight
+			double rate = m_covarianceMatrixUnlearningRate;
+			double stepNormSqr = norm_sqr( m_lastStep );
+			if( 1 <  m_covarianceMatrixUnlearningRate*(2*stepNormSqr-1) ){
+				rate = 0.5/(2*stepNormSqr-1);//make the update shorter
+				return;
+			}
+			noalias(C) = (1-rate)*C - rate * outer_prod( m_lastStep, m_lastStep );
+		} else {
+			double evolutionpathUpdateWeight=m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate );
+			m_evolutionPath *= 1 - m_evolutionPathLearningRate;
+			C  *= 1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight;
+			noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
+		}
 
-		m_noSuccessfulOffspring = 0;
+		m_mutationDistribution.update();
 	}
 
 	/**
@@ -134,8 +166,6 @@ struct CMAChromosome{
 		archive & BOOST_SERIALIZATION_NVP( m_evolutionPath );
 		archive & BOOST_SERIALIZATION_NVP( m_lastStep );
 
-		archive & BOOST_SERIALIZATION_NVP( m_lambda );
-		archive & BOOST_SERIALIZATION_NVP( m_noSuccessfulOffspring );
 		archive & BOOST_SERIALIZATION_NVP( m_stepSize );
 		archive & BOOST_SERIALIZATION_NVP( m_stepSizeDampingFactor );
 		archive & BOOST_SERIALIZATION_NVP( m_stepSizeLearningRate );
@@ -143,6 +173,7 @@ struct CMAChromosome{
 		archive & BOOST_SERIALIZATION_NVP( m_targetSuccessProbability );
 		archive & BOOST_SERIALIZATION_NVP( m_evolutionPathLearningRate );
 		archive & BOOST_SERIALIZATION_NVP( m_covarianceMatrixLearningRate );
+		archive & BOOST_SERIALIZATION_NVP( m_covarianceMatrixUnlearningRate );
 
 		archive & BOOST_SERIALIZATION_NVP( m_needsCovarianceUpdate );
 	}

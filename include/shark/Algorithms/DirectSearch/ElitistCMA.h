@@ -47,7 +47,8 @@
 #define SHARK_ALGORITHMS_DIRECTSEARCH_ELITIST_CMA_H
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
+#include <shark/Algorithms/DirectSearch/CMA/CMAIndividual.h>
+#include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 
 namespace shark {
 
@@ -80,78 +81,46 @@ public:
 	void write( OutArchive & archive ) const;
 
 	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
-	/**
-	* \brief Initializes the algorithm for the supplied objective function.
-	*/
+	
+	/// \brief Initializes the algorithm for the supplied objective function.
 	void init( ObjectiveFunctionType const& function, SearchPointType const& p);
 
-	/**
-	* \brief Executes one iteration of the algorithm.
-	*/
+	///\brief Executes one iteration of the algorithm.
 	void step(ObjectiveFunctionType const& function);
-
-	unsigned int lambda() const {
-		return m_lambda;
-	}
-
-	unsigned int& lambda() {
-		return m_lambda;
-	}
 	
-	bool usesActiveUpdate(){
+	/// \brief Returns true when the active update is used (default true).
+	bool activeUpdate()const{
+		return m_activeUpdate;
+	}
+	/// \brief Setter function to enable active update. Returns true when the active update is used (default true).
+	bool& activeUpdate(){
 		return m_activeUpdate;
 	}
 	
-	void setActiveUpdate(bool update){
-		m_activeUpdate = update;
+	/// \brief Returns the penalty factor for an individual that is outside the feasible area.
+	///
+	/// The value is multiplied with the distance to the nearest feasible point.
+	double constrainedPenaltyFactor()const{
+		return m_evaluator.m_penaltyFactor;
 	}
 	
+	/// \brief Returns a reference to the penalty factor for an individual that is outside the feasible area.
+	///
+	/// The value is multiplied with the distance to the nearest feasible point.
+	double& constrainedPenaltyFactor(){
+		return m_evaluator.m_penaltyFactor;
+	}
+	
+	/// \brief  Returns the current step length
 	double sigma()const{
-		return m_sigma;
+		return m_individual.chromosome().m_stepSize;
 	}
 
 private:
-	/**
-	* \brief Updates the covariance matrix of the strategy.
-	* \param [in] point Coordinates of the individual to update the covariance matrix for.
-	*/
-	void updateCovarianceMatrix( RealVector const& point );
-
-	/**
-	* \brief Purges the information contributed by the individual from the strategy's covariance matrix.
-	* \param [in] point Coordinates of the offspring to purge from the strategy's covariance matrix.
-	*/
-	void activeCovarianceMatrixUpdate( RealVector const& point );
-
-	/**
-	* \brief Updates the strategy parameters based on the supplied offspring population.
-	*/
-	void updateStrategyParameters( RealVector const& point, double fitness );
-
-	unsigned int m_lambda; ///< The size of the offspring population, defaults to one.
-	bool m_activeUpdate;///< Should the matrix be updated for non-successful offspring which is better than the previous?
-
-	//current individual
-	double m_fitness; ///< fitness of the current individual
-	double m_lastFitness;///< last recorded fitness of a previous individual
-	unsigned int m_fitnessUpdateFrequency;///<frequency of update of the previous fitness
-	unsigned int m_generationCounter;///< Counter of the current generation
-
-	double m_targetSuccessProbability;///<target probability that the best offspring is successfull
-	double m_successProbability;///< current probability that an offspring is successfull
-	double m_successProbabilityThreshold;///< Threshold for the success probability (TODO: CHECK WHAT THIS DOES)
-	RealVector m_mean; ///< point of the current individual, also the mutation mean
-	RealVector m_evolutionPathC;///< evolution path of the covariance matrix
-	shark::MultiVariateNormalDistribution m_mutationDistribution;///< mutation distribbution around the mean
-	double m_sigma;///< current step size of the mutation
-
-	//learning rates
-	double m_cSuccessProb; ///< Learning rate for the success probability
-	double m_cC; ///< learning rate for the evolution path of the covariance matrix
-	double m_cCov;///< learning rate for the covariance matrix
-	double m_cCovMinus;///< Learning rate for active unlearning
-	double m_cSigma; ///< Larning rate for the step size
-	double m_dSigma;
+	CMAIndividual<double> m_individual;///< Individual holding strategy parameter. usd as parent and offspring
+	PenalizingEvaluator m_evaluator;///< evaluates the fitness of the individual and handles constraints
+	std::vector<double> m_ancestralFitness; ///< stores the last k fitness values (by default 5).
+	bool m_activeUpdate;///< Should bad individuals be actively purged from the strategy?
 };
 }
 

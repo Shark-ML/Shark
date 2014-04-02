@@ -58,8 +58,10 @@ public:
 		IndividualBased,
 		PopulationBased
 	};
+private:
 
-	std::vector< CMAIndividual > m_pop; ///< Population of size \f$\mu+1\f$.
+	typedef CMAIndividual<RealVector> Individual;
+	std::vector< Individual > m_pop; ///< Population of size \f$\mu+1\f$.
 	unsigned int m_mu; ///< Size of parent population
 	
 	shark::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
@@ -68,10 +70,8 @@ public:
 	NotionOfSuccess m_notionOfSuccess; ///< Flag for deciding whether the improved step-size adaptation shall be used.
 	double m_individualSuccessThreshold;
 	double m_initialSigma;
+public:
 	
-	/**
-	 * \brief Default c'tor.
-	 */
 	IndicatorBasedSteadyStateMOCMA() {
 		m_individualSuccessThreshold = 0.44;
 		initialSigma() = 1.0;
@@ -101,10 +101,16 @@ public:
 		return m_initialSigma;
 	}
 	
+	/// \brief Returns the penalty factor for an individual that is outside the feasible area.
+	///
+	/// The value is multiplied with the distance to the nearest feasible point.
 	double constrainedPenaltyFactor()const{
 		return m_evaluator.m_penaltyFactor;
 	}
 	
+	/// \brief Returns a reference to the penalty factor for an individual that is outside the feasible area.
+	///
+	/// The value is multiplied with the distance to the nearest feasible point.
 	double& constrainedPenaltyFactor(){
 		return m_evaluator.m_penaltyFactor;
 	}
@@ -171,20 +177,19 @@ public:
 		ObjectiveFunctionType const& function, 
 		std::vector<SearchPointType> const& startingPoints
 	){
-		m_pop.reserve(mu() +1);
+		m_pop.resize(mu());
 		m_best.resize(mu());
-		std::size_t noObjectives = function.numberOfObjectives();
 		std::size_t noVariables = function.numberOfVariables();
 		
-		for(std::size_t i = 0; i != mu() + 1; ++i){
-			CMAIndividual individual(noVariables,noObjectives,m_individualSuccessThreshold,m_initialSigma);
-			function.proposeStartingPoint(individual.searchPoint());
-			m_evaluator(function, individual);
-			m_pop.push_back(individual);
+		for(std::size_t i = 0; i != mu(); ++i){
+			m_pop[i] = Individual(noVariables,m_individualSuccessThreshold,m_initialSigma);
+			function.proposeStartingPoint(m_pop[i].searchPoint());
+			m_evaluator(function, m_pop[i]);
 			m_best[i].point = m_pop[i].searchPoint();
 			m_best[i].value = m_pop[i].unpenalizedFitness();
 		}
 		m_selection(m_pop,m_mu);
+		m_pop.push_back(Individual(noVariables,m_individualSuccessThreshold,m_initialSigma));
 		sortRankOneToFront();
 	}
 
@@ -202,32 +207,26 @@ public:
 			maxIdx = i;
 		}
 		//sample a random parent with rank 1
-		CMAIndividual& parent = m_pop[Rng::discrete(0, std::max(0, maxIdx-1))];
+		Individual& parent = m_pop[Rng::discrete(0, std::max(0, maxIdx-1))];
 		//sample offspring from this parent
-		CMAIndividual& offspring = m_pop[mu()];
+		Individual& offspring = m_pop[mu()];
 		offspring = parent;
-		offspring.age() = 0;
 		offspring.mutate();
 		m_evaluator(function, offspring);
 
 		m_selection(m_pop,m_mu);
-		if (m_notionOfSuccess) {
-			if (offspring.selected()) {
-				offspring.noSuccessfulOffspring() += 1.0;
-				parent.noSuccessfulOffspring() += 1.0;
-			}
-		} else {
-			if (offspring.selected() && offspring.rank() <= parent.rank() ) {
-				offspring.noSuccessfulOffspring() += 1.0;
-				parent.noSuccessfulOffspring() += 1.0;
-			}
+		if (m_notionOfSuccess == IndividualBased && offspring.selected()) {
+			offspring.updateAsOffspring();
+			parent.updateAsParent(CMAChromosome::Successful);
 		}
-		
-		//update strategy parameter
-		parent.update();
+		else if (m_notionOfSuccess == PopulationBased && offspring.selected() && offspring.rank() <= parent.rank() ) {
+			offspring.updateAsOffspring();
+			parent.updateAsParent(CMAChromosome::Successful);
+		}else{
+			parent.updateAsParent(CMAChromosome::Unsuccessful);
+		}
 
 		if(offspring.selected()){
-			offspring.update();
 			//exchange the selected and nonselected elements
 			for(std::size_t i = 0; i != mu(); ++i){
 				if(!m_pop[i].selected()){
@@ -241,6 +240,7 @@ public:
 		}
 	}
 protected:
+	/// \brief sorts all individuals with rank one to the front
 	void sortRankOneToFront(){
 		std::size_t start = 0;
 		std::size_t end = mu()-1;
