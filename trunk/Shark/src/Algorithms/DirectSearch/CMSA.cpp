@@ -100,16 +100,16 @@ void CMSA::updateStrategyParameters( const std::vector< CMSA::IndividualType > &
 	RealVector xPrimeNew = cog( offspringNew, PointExtractor() );
 	// Covariance Matrix Update
 	RealMatrix Znew( m_numberOfVariables, m_numberOfVariables,0.0 );
-	RealMatrix C( m_mutationDistribution.covarianceMatrix() );
+	RealMatrix& C = m_mutationDistribution.covarianceMatrix();
 	// Rank-mu-Update
 	for( unsigned int i = 0; i < m_mu; i++ ) {
-		Znew += 1./m_mu * blas::outer_prod( 
+		noalias(Znew) += 1./m_mu * blas::outer_prod( 
 			offspringNew[i].chromosome().step,
 			offspringNew[i].chromosome().step
 		);
 	}
-	C = (1. - 1./m_cC) * C + 1./m_cC * Znew;
-	m_mutationDistribution.setCovarianceMatrix( C );
+	noalias(C) = (1. - 1./m_cC) * C + 1./m_cC * Znew;
+	m_mutationDistribution.update();
 
 	// Step size update
 	double sigmaNew = 0.;

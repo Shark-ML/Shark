@@ -6,12 +6,9 @@
 
 #include <boost/foreach.hpp>
 
-namespace shark {
+using namespace shark;
 
 namespace example {
-	struct Chromosome {
-		shark::MultiVariateNormalDistribution m_mutationDistribution;
-	};
 
 	typedef Individual< RealVector, double, double> IndividualType;
 	typedef std::vector< IndividualType > Population;
@@ -24,7 +21,6 @@ namespace example {
 	};
 }
 
-}
 
 int main( int argc, char ** argv ) {
 
@@ -34,25 +30,25 @@ int main( int argc, char ** argv ) {
 	const double InitialSigma   = 3.;
 	
 	// Instantiate the objective function
-	shark::Ackley ackley( Dimension );
+	Ackley ackley( Dimension );
 	
 	// Initialize the mutation distribution
-	shark::MultiVariateNormalDistribution mutationDistribution;
-	mutationDistribution.setCovarianceMatrix( shark::blas::identity_matrix< double >( Dimension ) );
+	MultiVariateNormalDistribution mutationDistribution;
+	mutationDistribution.resize(Dimension);
 	
-	shark::example::IndividualType prototypeIndividual;
+	example::IndividualType prototypeIndividual;
 	prototypeIndividual.chromosome() = InitialSigma;
 	
-	shark::example::Population parents( Mu, prototypeIndividual );
-	shark::example::Population offspring( Lambda );
+	example::Population parents( Mu, prototypeIndividual );
+	example::Population offspring( Lambda );
 	
 	// Initialize parents (not a god idea to start in a single point, shouldn't do this in practice)
-	BOOST_FOREACH( shark::example::IndividualType & ind, parents ) {
+	BOOST_FOREACH( example::IndividualType & ind, parents ) {
 		ackley.proposeStartingPoint( ind.searchPoint() );
 	}
 	
 	// Evolutionary operators
-	shark::UniformCrossover uniform;
+	UniformCrossover uniform;
 	
 	// standard deviations for mutation of sigma
 	double     tau0 = 1. / sqrt(2. * Dimension);
@@ -64,13 +60,13 @@ int main( int argc, char ** argv ) {
 		for( std::size_t i = 0; i < offspring.size(); i++ ) {
 		
 			// Select two parent individuals at random
-			shark::example::Population::const_iterator mom = parents.begin() + shark::Rng::discrete( 0, parents.size() - 1 );
-			shark::example::Population::const_iterator dad = parents.begin() + shark::Rng::discrete( 0, parents.size() - 1 );
+			example::Population::const_iterator mom = parents.begin() + Rng::discrete( 0, parents.size() - 1 );
+			example::Population::const_iterator dad = parents.begin() + Rng::discrete( 0, parents.size() - 1 );
 		
 			// Recombine step size
-			offspring[i].chromosome() = shark::Rng::uni( mom->chromosome(), dad->chromosome() );			
+			offspring[i].chromosome() = Rng::uni( mom->chromosome(), dad->chromosome() );			
 			// Mutate step size
-			offspring[i].chromosome() *= shark::Rng::logNormal( 0, tau0 + tau1 );
+			offspring[i].chromosome() *= Rng::logNormal( 0, tau0 + tau1 );
 			
 			// Recombine search points
 			offspring[i].searchPoint() = uniform( mom->searchPoint(), dad->searchPoint() );
@@ -82,7 +78,7 @@ int main( int argc, char ** argv ) {
 		}
 	
 		// Selection 
-		shark::example::FitnessComparator comp;
+		example::FitnessComparator comp;
 		std::sort( offspring.begin(), offspring.end(), comp );
 		std::copy( offspring.begin(), offspring.begin() + Mu, parents.begin() );
 
