@@ -65,7 +65,7 @@ public:
 		chromosome().updateAsOffspring();
 	}
 	void mutate(){
-		MultiVariateNormalDistribution::ResultType sample = chromosome().m_mutationDistribution();
+		MultiVariateNormalDistribution::result_type sample = chromosome().m_mutationDistribution();
 		chromosome().m_lastStep = sample.first;
 		searchPoint() += chromosome().m_stepSize * sample.first;
 		chromosome().m_needsCovarianceUpdate = true;

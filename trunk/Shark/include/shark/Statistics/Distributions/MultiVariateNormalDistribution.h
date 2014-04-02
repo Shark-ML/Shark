@@ -1,5 +1,5 @@
 /*!
- * 
+ *
  *
  * \brief       Implements a multi-variate normal distribution with zero mean.
  * 
@@ -33,28 +33,23 @@
 #define MULTIVARIATENORMALDISTRIBUTION_H
 
 #include <shark/LinAlg/eigenvalues.h>
+#include <shark/LinAlg/Cholesky.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
 
-/**
-* \brief Implements a multi-variate normal distribution with zero mean.
-*/
+/// \brief Implements a multi-variate normal distribution with zero mean.
 class MultiVariateNormalDistribution {
 public:
-	/**
-	* \brief Result type of a sampling operation.
-	* 
-	* The first element is the result of sampling this distribution, the
-	* second element is the original standard-normally distributed vector drawn
-	* for sampling purposes.
-	*/
-	typedef std::pair<RealVector,RealVector> ResultType;
+	///\brief Result type of a sampling operation.
+	/// 
+	/// The first element is the result of sampling this distribution, the
+	/// second element is the original standard-normally distributed vector drawn
+	/// for sampling purposes.
+	typedef std::pair<RealVector,RealVector> result_type;
 
-	/**
-	* \brief Constructor
-	* \param [in] Sigma covariance matrix
-	*/
+	/// \brief Constructor
+	/// \param [in] Sigma covariance matrix
 	MultiVariateNormalDistribution( RealMatrix const& Sigma ) {
 		m_covarianceMatrix = Sigma;
 		update();
@@ -62,11 +57,9 @@ public:
 	
 	MultiVariateNormalDistribution(){} 
 	
-	/**
-	* \brief Stores/Restores the distribution from the supplied archive.
-	* \param [in,out] ar The archive to read from/write to.
-	* \param [in] version Currently unused.
-	*/
+	/// \brief Stores/Restores the distribution from the supplied archive.
+	/// \param [in,out] ar The archive to read from/write to.
+	/// \param [in] version Currently unused.
 	template<typename Archive>
 	void serialize( Archive & ar, const unsigned int version ) {
 		ar & BOOST_SERIALIZATION_NVP( m_covarianceMatrix );
@@ -74,51 +67,45 @@ public:
 		ar & BOOST_SERIALIZATION_NVP( m_eigenValues );
 	}
 
-	/**
-	* \brief Resizes the distribution. Updates both eigenvectors and eigenvalues.
-	* \param [in] size The new size of the distribution
-	*/
+	/// \brief Resizes the distribution. Updates both eigenvectors and eigenvalues.
+	/// \param [in] size The new size of the distribution
 	void resize( unsigned int size ) {
 		m_covarianceMatrix = blas::identity_matrix<double>( size );
 		m_eigenValues = blas::repeat(1.0,size);
 		m_eigenVectors = blas::identity_matrix<double>( size );
 	}
 
-	/**
-	* \brief Accesses the covariance matrix defining the distribution.
-	*/
+	/// \brief Accesses the covariance matrix defining the distribution.
 	RealMatrix const& covarianceMatrix() const {
 		return m_covarianceMatrix;
 	}
 	
-	/**
-	* \brief Accesses a mutable reference to the covariance matrix 
-	* defining the distribution. Allows for l-value semantics.
-	* 
-	* ATTENTION: If the reference is altered, update needs to be called manually.
-	*/
+	/// \brief Accesses a mutable reference to the covariance matrix 
+	/// defining the distribution. Allows for l-value semantics.
+	/// 
+	/// ATTENTION: If the reference is altered, update needs to be called manually.
 	RealMatrix& covarianceMatrix() {
 		return m_covarianceMatrix;
 	}
+	
+	/// \brief Sets the covariance matrix and updates the internal variables. This is expensive
+	void setCovarianceMatrix(RealMatrix const& matrix){
+		covarianceMatrix() = matrix;
+		update();
+	}
 
-	/**
-	* \brief Accesses an immutable reference to the eigenvectors of the covariance matrix.
-	*/
+	/// \brief Accesses an immutable reference to the eigenvectors of the covariance matrix.
 	const RealMatrix & eigenVectors() const {
 		return m_eigenVectors;
 	}
 
-	/**
-	* \brief Accesses an immutable reference to the eigenvalues of the covariance matrix.
-	*/
+	/// \brief Accesses an immutable reference to the eigenvalues of the covariance matrix.
 	RealVector const& eigenValues() const {
 		return m_eigenValues;
 	}
 
-	/**
-	* \brief Samples the distribution.
-	*/
-	ResultType operator()() const {
+	/// \brief Samples the distribution.
+	result_type operator()() const {
 		RealVector result( m_eigenValues.size(), 0. );
 		RealVector z( m_eigenValues.size() );
 		
@@ -133,18 +120,93 @@ public:
 		return( std::make_pair( result, z ) );
 	}	    
 
-	/**
-	* \brief Calculates the evd of the current covariance matrix.
-	*/
+	/// \brief Calculates the evd of the current covariance matrix.
 	void update() {
 		eigensymm( m_covarianceMatrix, m_eigenVectors, m_eigenValues );
 	}			
 
-	private:
+private:
 	RealMatrix m_covarianceMatrix; ///< Covariance matrix of the mutation distribution.
 	RealMatrix m_eigenVectors; ///< Eigenvectors of the covariance matrix.
 	RealVector m_eigenValues; ///< Eigenvalues of the covariance matrix.
 };
+
+/// \brief Multivariate normal distribution with zero mean using a cholesky decomposition
+class MultiVariateNormalDistributionCholesky {
+public:
+	/// \brief Result type of a sampling operation.
+	/// 
+	/// The first element is the result of sampling this distribution, the
+	/// second element is the original standard-normally distributed vector drawn
+	/// for sampling purposes.
+	typedef std::pair<RealVector,RealVector> result_type;
+
+	/// \brief Constructor
+	/// \param [in] covariance covariance matrix
+	MultiVariateNormalDistributionCholesky( RealMatrix const& covariance ) {
+		setCovarianceMatrix(covariance);
+	}
+	
+	MultiVariateNormalDistributionCholesky(){} 
+	
+	/// \brief Stores/Restores the distribution from the supplied archive.
+	///\param [in,out] ar The archive to read from/write to.
+	///\param [in] version Currently unused.
+	template<typename Archive>
+	void serialize( Archive & ar, const unsigned int version ) {
+		ar & BOOST_SERIALIZATION_NVP( m_lowerCholesky);
+	}
+
+	/// \brief Resizes the distribution. Updates both eigenvectors and eigenvalues.
+	/// \param [in] size The new size of the distribution
+	void resize( unsigned int size ) {
+		m_lowerCholesky = blas::identity_matrix<double>( size );
+	}
+	
+	/// \brief Returns the size of the created vectors
+	std::size_t size()const{
+		return m_lowerCholesky.size1();
+	}
+	
+	/// \brief Sets the new covariance matrix by computing the new cholesky dcomposition
+	void setCovarianceMatrix(RealMatrix const& matrix){
+		choleskyDecomposition(matrix,m_lowerCholesky);
+	}
+
+	/// \brief Returns the lower cholsky factor.
+	RealMatrix const& lowerCholeskyFactor() const {
+		return m_lowerCholesky;
+	}
+
+	/// \brief Returns the lower cholesky factor.
+	RealMatrix& lowerCholeskyFactor(){
+		return m_lowerCholesky;
+	}
+
+	/// \brief Samples the distribution.
+	///
+	/// Returns a vector pair (y,z) where  y=Lz and, L is the lower cholesky factor and z is a vector
+	/// of normally distributed numbers. Thus y is the real sampled point.
+	result_type operator()() const {
+		result_type result;
+		RealVector& z = result.second;
+		RealVector& y = result.first;
+		z.resize(size());
+		y.resize(size());
+		
+		for( unsigned int i = 0; i != size(); i++ ) {
+			z( i ) = Rng::gauss( 0, 1 );
+		}
+		
+		axpy_prod(m_lowerCholesky,z,y,false);
+
+		return result;
+	}
+
+private:
+	RealMatrix m_lowerCholesky; ///< The lower cholesky factor (actually any is oaky as long as it is the left)
+};
+
 
 }
 

@@ -78,7 +78,7 @@ void CMSA::step(ObjectiveFunctionType const& function){
 
 	PenalizingEvaluator penalizingEvaluator;
 	for( unsigned int i = 0; i < offspring.size(); i++ ) {		    
-		MultiVariateNormalDistribution::ResultType sample = m_mutationDistribution();
+		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution();
 		offspring[i].chromosome().sigma = m_sigma * ::exp( m_cSigma * Rng::gauss( 0, 1 ) );
 		offspring[i].chromosome().step = sample.first;
 		offspring[i].searchPoint() = m_mean + offspring[i].chromosome().sigma * sample.first;

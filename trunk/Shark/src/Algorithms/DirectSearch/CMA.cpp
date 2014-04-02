@@ -319,7 +319,7 @@ void CMA::step(ObjectiveFunctionType const& function){
 
 	PenalizingEvaluator penalizingEvaluator;
 	for( unsigned int i = 0; i < offspring.size(); i++ ) {
-		MultiVariateNormalDistribution::ResultType sample = m_mutationDistribution();
+		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution();
 		offspring[ i ].chromosome() = sample.second;
 		offspring[i].searchPoint() = m_mean + m_sigma * sample.first;
 		penalizingEvaluator( function, offspring[i] );
