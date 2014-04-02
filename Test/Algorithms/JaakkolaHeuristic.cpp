@@ -82,4 +82,9 @@ BOOST_AUTO_TEST_CASE( Algorithms_JaakkolaHeuristic )
 	// check consistency
 	BOOST_CHECK_SMALL(std::abs(sigma_median - sigma), 1e-14);
 	BOOST_CHECK_SMALL(std::abs(gamma_median - 0.5 / (sigma_median * sigma_median)), 1e-14);
+
+	// check default variant
+	JaakkolaHeuristic jh2(dataset, true);
+	sigma         = jh2.sigma();
+	BOOST_CHECK_SMALL(std::abs(sigma - 2.0), 1e-14);
 }
