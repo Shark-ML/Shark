@@ -1,0 +1,415 @@
+
+Data Containers
+===============
+
+Data handling is an important aspect of a machine learning
+library. Shark ships with three container classes tailored
+to holding data for machine learning applications:
+:doxy:`Data`, :doxy:`UnlabeledData`, and :doxy:`LabeledData`.
+After familiarizing yourself with the basic concepts, have a look at the
+complete list of :ref:`data tutorials <label_for_data_tutorials>`.
+
+A decisive difference between Shark 3.x and previous Shark version and
+many other machine learning libraries is that the data is not stored in
+a generic container, but in objects tailored to efficient large-scale
+machine learning.
+
+The containers presented in this tutorial can all be used by including::
+
+..sharkcode<Data/Datasets.tpp,include>
+
+
+Key properties
+---------------
+
+The data containers provided by shark can store all types of data that
+could also be  held in one of the standard template library containers.
+In contrast to  a ``std::vector``,  the Data class has three abilities
+that are important in the context of machine learning:
+
+* Elements of a dataset are stored in blocks called batches, such that
+  computations can be carried out block by block, instead of element
+  by element. These batches are optimized for continuous memory access,
+  which allows for more efficient processing and thus faster implementations.
+  For example, a batch of vectors is stored as a matrix with consecutive
+  memory with every point occupying a matrix row, instead of using several vectors
+  with memory locations scattered all over the heap. This is achieved through Shark's
+  :doc:`batch mechanism <../library_design/batches>`.
+
+* A :doxy:`Data` object can be used to create subsets. This is useful,
+  for example, for splitting data into training, validation, and test sets.
+  Repeated splitting (for example for cross-validation) is possible without
+  expensive deep copy operations.
+
+* By the same token data can be shared among different :doxy:`Data` instances.
+  Thus creating subsets (on the level of batches) is quite cheap as it does
+  not need a physical copy of the contents of the set. One should not confuse
+  this with the different concept of lazy-copying, which just delays the copy
+  until an actual change is done. Instead sets are shared by default and only
+  copied when actually required by the algorithm.
+
+
+Different types of Datasets
+--------------------------------
+
+The three dataset classes in shark differ not much in their implementation, as
+they all use the same underlying structure. However they provide important semantic
+differentiation as well as special functions tailored to this differentiation. Before
+we introduce the interface of the data object we want to clarify this distinction:
+
+* :doxy:`Data` can store arbitrary data. The data class takes the
+  general role of a ``std::vector`` only adapted to the special needs
+  for fast computation in a machine learning environment.
+
+* :doxy:`UnlabeledData` represents input data which is not labeled.
+  This is the input format used for unsupervised learning methods. The unlabeled
+  data class is a subclass of Data and does not offer much new functionality
+  beyond ``Data``.
+  But it represents an important *semantic* difference, since the data
+  points are interpreted as input data without labels, whereas the above
+  mentioned Data class might store anything (for example model outputs,
+  labels, or points). 
+
+* :doxy:`LabeledData` finally represents inputs (data points) augmented with
+  labels. Conceptually the class ``LabeledData<I,L>`` can be described roughly
+  as a ``Data`` object storing a pair-type of inputs I and labels L, for example
+  ``Data<std::pair<I,L> >``. There is however an important difference in how
+  labels and inputs are treated in machine learning. Often, especially for
+  unsupervised methods, we use only the inputs, thus viewing the object as
+  an ``UnlabeledData<I>``. For evaluation of the model we first use the set
+  of inputs, then acquire the set of predictions of the model, and finally
+  compare this set of predictions to the set of labels by means of a loss
+  function. Instead of accessing input-label pairs as a fixed grouping, we
+  would like to view them as two separate data sets that are conveniently
+  bound together. And this is how the :doxy:`LabeledData` object is
+  implemented under the hood.
+
+  For convenience, there exist the following three specializations of
+  labeled datasets::
+
+    typedef LabeledData<RealVector, unsigned int> ClassificationDataset;
+    typedef LabeledData<CompressedRealVector, unsigned int> CompressedClassificationDataset;
+    typedef LabeledData<RealVector, RealVector> RegressionDataset;
+
+
+The class Data<T>
+------------------
+This part of the tutorial introduces the interface of :doxy:`Data`.
+The following descriptions also apply to the two other types of datasets.
+
+Creation and copying of datasets
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+Creating a data set is quite easy and can be achieved in several ways.
+The first and by far easiest way is to load data from a file or to sample
+from a distribution. Examples for this are given in the tutorial on
+:doc:`importing data <../../first_steps/general_optimization_tasks>`.
+In some cases data is already in memory and only needs to be imported
+into a data container. In this case a data set can be created using::
+
+..sharkcode<Data/Datasets.tpp,fromrange>
+
+A :doxy:`LabeledData` object is created from inputs and labels::
+
+..sharkcode<Data/Datasets.tpp,fromrange-labeled>
+
+It is also possible to create an data set with pre-allocated space for
+*n* points. This requires an example point::
+
+..sharkcode<Data/Datasets.tpp,construct-size>
+
+In the above example, we create a data container with space for 1000
+5-dimensional vectors. The provided Vector is not copied to all 1000
+elements, but it serves merely as a hint on the structure of the
+objects to be stored. To understand this, remember that objects are
+not stored as single entities, but grouped into batches. A batch of
+``RealVector`` objects in a ``RealMatrix``. The vector's dimension
+is required for the proper creation of the matrices holding the
+batches, and this is what the data dimension is required for. In
+essence this call does not create 1000 instances of ``RealVector?``
+together with the same amount of memory allocations, but only a hand
+full of matrices. By default a safe size is used for the number of
+elements in a batch, but it can also be actively controlled by adding
+the maximum size of batches as a third parameter::
+
+..sharkcode<Data/Datasets.tpp,construct-size-2>
+
+Data sets can be copied and assigned with the usual operators::
+
+..sharkcode<Data/Datasets.tpp,assign>
+
+Here one of the core features of the ``Data`` containers comes into play.
+As already mentioned in the key properties section above, assignment
+does not trigger a deep copy operation. Instead data is shared among
+different instances. The above code thus creates a shallow (hence cheap)
+copy of the underlying data. Afterwards both ``Data`` objects hold
+references to the same data batches.
+
+Sometimes it is important to ensure that contents (batches) of a
+set are not shared with other instances. This can be ensured with::
+
+..sharkcode<Data/Datasets.tpp,makeIndependent>
+
+This function creates a deep copy of all batches that were previously
+shared with other ``Data`` instances.
+
+.. warning::
+	For efficiency and flexibility, ``Data`` objects provide full read and
+	write access to their internal batch structure. This makes it possible
+	to mess with the container's data sharing capability. A direct
+	modification to a shared batch affects all ``Data`` objects sharing
+	this batch, irrespective of which data set was used to access the batch.
+	As a precaution measure **always** call ``makeIndependent`` on a
+	``Data`` object before modifying its internals.
+
+Data sharing is thread-safe, thus it is perfectly fine to create
+shared copies of (parts of) a data object in multiple threads. However,
+it must be stressed that the ``Data`` class does not guard against
+changes to the individual batches or single elements (see the warning
+above). Changing an element in one instance of the data object will
+change the respective elements in all other containers as well.
+This is nearly always undesired and results in hard-to-find bugs.
+
+The elements in :doxy:`UnlabeledData` and :doxy:`LabeledData` objects
+can be conveniently reordered by calling :doxy:`UnlabeledData::shuffle`
+and :doxy:`LabeledData::shuffle`, respectively. This is an examples of
+an operation that needs to reorganize the internal batch structure.
+
+
+Data as a collection of batches
+*******************************
+
+As outlined above, the Data class stores the points internally as batches and
+is therefore optimized for using these batches directly instead of accessing
+single points. Therefore this part of the tutorial will explain how the data
+set provides access to the batches and introduce common usage patterns.
+
+The first thing to note is that the ``Data`` container does not attempt to
+be stl-compatible. This is because it needs to support access to its contents
+at two different levels of granularity, namely batch-wise and for element-wise.
+
+However an stl compatible interface to batches can be acquired with the
+:doxy:`Data::batches` method::
+
+..sharkcode<Data/Datasets.tpp,batches>
+
+or similarly when data is constant or a constant range is desired::
+
+..sharkcode<Data/Datasets.tpp,batches-const>
+
+The above loop still looks a bit inconvenient. We might as well use
+``BOOST_FOREACH`` for traversal::
+
+..sharkcode<Data/Datasets.tpp,batches-foreach>
+
+Or we can resort to index access::
+
+..sharkcode<Data/Datasets.tpp,batches-for>
+
+When iterating over batches in an outer loop, individual elements can be
+accessed within each batch in an inner loop::
+
+..sharkcode<Data/Datasets.tpp,batches-doubleloop>
+
+
+Data as a collection of elements
+********************************
+
+While the data object is optimized for batch access, sometimes direct
+access to single elements is needed. Thus the ``Data`` container also
+provides a convenience interface for elements, however, with much worse
+performance guarantees than for batch access. While the interfaces look
+very similar one should be aware of the important differences.
+
+First of all, all elements stored in the dataset are only virtual for
+most input types. This means that querying the i-th element of the set
+does not return a reference to it, but instead returns a proxy object
+that acts as a reference. For example when storing ``RealVector``
+elements in a ``Data<RealVector>`` object, elements are stored row-wise
+in a (row-major) ``RealMatrix``. Hence a matrix row is returned as a
+proxy.
+This is no problem most of the time, however when using the returned
+value as an argument to a function like for example::
+
+	void function(RealVector& element);
+
+the compiler will complain that a matrix row is not a vector. In the
+case of::
+
+	void function(RealVector const& element);
+
+the compiler is very helpful, creating a temporary vector and copying
+the matrix row into it. However, this is slow, and moreover it is
+unnecessary. Be aware of this performance pitfall and use template
+arguments or the correct reference type of the dataset if possible::
+
+	void function(Data<RealVector>::element_reference const& element);
+
+The second pitfall is that we can't give strong performance guarantees
+for the access methods. As we allow batch resizing and all batches
+having a different size it is not easy to keep track of the actual
+number of elements stored in the set. Thus
+:doxy:`Data::numberOfElements` needs to iterate over all batches and
+hence takes time linear in the number of batches (and thus usually in
+the number of elements). For the same reason, accessing the i-th element
+with :doxy:`Data::element` is a linear time operation in the number of
+batches since it needs to find the batch the element is located in.
+
+.. warning::
+	Element-wise random access to a ``Data`` a object is a linear time
+	operation! It is not to be confused with constant-time element
+	access in arrays (and ``std::vector``). Thus aside from only very
+	small datasets or performance uncritical code you should never use
+	random-access to the dataset.
+
+As a consequence a naive loop iterating over the elements of a ``Data``
+container is a **quadratic time** operation. There are the following
+more appropriate ways of achieving this common operation in linear time::
+
+..sharkcode<Data/Datasets.tpp,elements-loops>
+
+
+Summary of element access
+**************************
+We will now summarize the above description in a more formal tabular layout.
+For brevity of description we only present the non-const version of each
+method and typedef.
+
+Typedefs of the ``Data`` container. For every reference and range there
+exists a corresponding immutable version prepending ``const_`` to the name:
+
+========================   ======================================================================
+Type                       Description
+========================   ======================================================================
+element_type               The type of elements stored in the object.
+element_reference          Reference to a single element. This is a proxy reference, meaning
+                           that it can be something more complex than element_type&, for example
+                           an object describing the row of a matrix.
+element_range              Range over the elements.
+batch_type                 The batch type of the Dataset. Same as Batch<element_type>::type
+batch_reference            Reference to a batch of points. This is batch_type&.
+batch_range                Range over the batches.
+========================   ======================================================================
+
+Methods for batch access. These methods have constant time complexity:
+
+==========================================   ======================================================================
+Method                                       Description
+==========================================   ======================================================================
+size_t numberOfBatches () const              Returns the number of batches in the set.
+batch_reference batch (size_t i)             Returns the i-th batch of the set.
+batch_range batches ()                       Returns an stl-compliant random-access-container over the batches.
+==========================================   ======================================================================
+
+Methods for element access. All these methods have time complexity
+linear in the number of batches:
+
+==========================================   ======================================================================
+Method                                       Description
+==========================================   ======================================================================
+size_t numberOfElements () const             Returns the number of elements in the set.
+element_reference element (size_t i)         Returns the i-th element of the set.
+element_range elements ()                    Returns a bidirectional container of elements. Random access
+                                             is also supported but does not meet stl's time complexity
+                                             requirements. Also be aware that proxy-objects are returned
+                                             instead of references.
+==========================================   ======================================================================
+
+Furthermore, ``LabeledData`` supports direct access to the Containers
+storing elements and labels:
+
+==========================================   ======================================================================
+Method                                       Description
+==========================================   ======================================================================
+UnlabeledData<I>& inputs()                   Returns only the inputs of the LabeledData<I,L> object.
+Data<L>& labels()                            Returns only the labels of the LabeledData<I,L> object.
+==========================================   ======================================================================
+
+
+Querying information about a dataset
+------------------------------------
+
+Sometimes we want to query basic informations about a data set like input
+dimension or the number of classes of a labeled data set. The data classes
+provide several convenience functions for such queries.
+
+For Data and UnlabeledData there are three functions::
+
+..sharkcode<Data/Datasets.tpp,unlabeled-convenience>
+
+For LabeledData we have a similar set of methods::
+
+..sharkcode<Data/Datasets.tpp,labeled-convenience>
+
+
+Transformation of datasets
+---------------------------------------------
+
+In many applications data must be pre-processed before actual learning.
+For example, the data mean is to be removed, or labels need to be altered
+in order to fit into Shark's label convention (see :ref:`labels`).
+For this purpose Shark provides a smart and efficient transformation
+mechanism. Assume function objects f and g such that f(input) returns
+the transformed input vector and g(label) the transformed label. Then we
+can transform data sets by::
+
+..sharkcode<Data/Datasets.tpp,transform-1>
+
+The transformation mechanism itself is smart! If f does not only provide
+a function f(input) but also f(Batch_of_input>) returning the same
+transformation for a whole batch then this is applied instead. Batch
+transformations are often more efficient than applying the same
+transformation to all elements one after another. Hence this can be a
+real time saver. The models provided by Shark are examples of classes
+satisfying this requirement::
+
+..sharkcode<Data/Datasets.tpp,transform-2>
+
+It is easy to write your own transformation.
+A simple example functor that adds a constant to all elements in the
+data set could look like this: ::
+
+..sharkcode<Data/Datasets.tpp,transform-3>
+
+It is applied to the data set by calling: ::
+
+..sharkcode<Data/Datasets.tpp,transform-4>
+
+
+Element views: DataView<Dataset>
+---------------------------------
+
+Sometimes one needs to perform intensive single-element, random access to data
+points, for example in decision tree training. In this case, the performance
+guarantees of Data are not sufficient, as every random access to an element needs
+to be translated into a list traversal. For such scenarios, Shark provides the
+class :doxy:`DataView`. It provides another type of view on a data set under the
+assumption that the data will not change during the lifetime of the DataView
+object. A dataview object consumes linear space, as it stores the exact position
+of every element in the container (i.e., the index of the batch and position
+inside the batch). Thus creating a DataView object might lead to a big initial
+overhead which only pays off if the object is then used a lot. The DataView class
+is made available via::
+
+..sharkcode<Data/Datasets.tpp,include-view>
+
+Using a DataView object is easy::
+
+..sharkcode<Data/Datasets.tpp,view-1>
+
+Using a DataView object it is also possible to create element-wise subsets which
+can then be transformed back into datasets::
+
+..sharkcode<Data/Datasets.tpp,view-2>
+
+After the operation, ``subset`` holds a copy of the points indexed by the subset operation.
+As in all other dataset operations, the subset is organized in several batches. To control the
+maximum size of the batches, ``toDataset`` also takes an optional second parameter, which controls this:
+
+Data<unsigned int> subset = toDataset(subset(view,indices),maximumBatchSize);
+
+And the usual methods for querying dataset informations also works for the view::
+
+..sharkcode<Data/Datasets.tpp,view-3>
+
+See the doxygen documentation for more details!
