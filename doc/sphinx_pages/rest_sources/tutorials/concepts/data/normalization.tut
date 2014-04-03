@@ -29,14 +29,17 @@ if it is known that feature values are bounded. The second class adjusts
 the variance of each component to one, and it can optionally remove the
 mean. This is no whitening, because correlations remain unchanged.
 Removal of the mean is optional. Note that without removal of the mean
-(essentially :math:`b = 0`) this operation can very efficiently be
-applied even to extremely high-dimensional sparse feature vectors.
+(essentially :math:`x \mapsto a x` with :math:`b = 0`) this operation
+can be applied efficiently even to extremely high-dimensional sparse
+feature vectors.
 
 In the following we will normalize data to unit variance and remove the
-mean. First we have to train our normalizer model so that it can perform
-the normalization operation::
+mean. This requires the includes::
 
 ..sharkcode<Data/Normalization.tpp,includes1>
+
+First we have to train our normalizer model so that it can perform
+the normalization operation::
 
 ..sharkcode<Data/Normalization.tpp,training1>
 
@@ -45,7 +48,7 @@ Now the normalizer is ready to use and we can transform the data::
 ..sharkcode<Data/Normalization.tpp,transform1>
 
 In order to apply such a normalization to :doxy:`LabeledData`, the
-methods ``transformInputs`` and ``transformLabels`` can be used.
+methods :doxy:`transformInputs` and :doxy:`transformLabels` can be used.
 Of course, training and test data can be normalized either independently
 or with the same model.
 
@@ -72,7 +75,7 @@ remove correlations between features. A full whitening of the data is
 requires for this purpose. The resulting transformation is represented
 by a :doxy:`LinearModel`, which is trained by a
 :doxy:`NormalizeComponentsWhitening` trainer. The following code is
-analog of the above feature-wise normalization.
+analog of the above feature-wise normalization::
 
 ..sharkcode<Data/Normalization.tpp,includes2>
 
@@ -86,5 +89,5 @@ A few notes are in place. First of all note that different types of
 pre-processing steps are suitable for different types of data. Second,
 not all procedures scale well to high-dimensional feature spaces. Third,
 it usually makes sense to combine feature rescaling with a feature
-selection (filtering) technique. Such techniques are beyond the scope of
-this tutorial.
+selection (e.g., filtering) technique. Such techniques are beyond the
+scope of this tutorial.

@@ -126,6 +126,26 @@ int main()
 //###begin<balanced>
 	createCVSameSizeBalanced(data, numberOfPartitions);
 //###end<balanced>
+
+}
+
+{
+	std::size_t numberOfPartitions = 5;
+	std::size_t numberOfFolds = 3;
+	CVFolds<RegressionDataset> folds;
+
+	for (std::size_t i=0; i<numberOfPartitions; i++)
+	{
+//###begin<nested-cv>
+	// as created in the above example
+	RegressionDataset training = folds.training(i);
+	RegressionDataset validation = folds.validation(i);
+	// explicit copy!
+	training.makeIndependent();
+	// creating a new fold
+	CVFolds<RegressionDataset> innerFolds = createCVSameSize(training, numberOfFolds);
+//###end<nested-cv>
+	}
 }
 
 }

@@ -28,9 +28,12 @@ memory and runtime, as only references to the batches are shared across
 the datasets. This is one of the core features of Shark's data containers.
 It can save the day, e.g., when performing 10-fold cross-validation.
 
-The following basic functions acquire subsets::
+We start by including the data set header::
 
 ..sharkcode<Data/Subsets.tpp,include>
+
+The following basic functions acquire subsets::
+
 ..sharkcode<Data/Subsets.tpp,subsets>
 
 The functions of course also work with :doxy:`Data` and
@@ -121,13 +124,7 @@ scheme, applying another level of cross-validation. Unfortunately, this
 is not directly supported in an efficient manner right now, but we can
 handle it using an explicit copy of the training set::
 
-    // as created in the above example
-    RegressionDataset training = folds.training(i);
-    RegressionDataset validation = folds.validation(i);
-    // explicit copy!
-    training.makeIndependent();
-    // creating a new fold
-    CVFolds<RegressionDataset> innerFolds = createCVSameSize(training, numberOfFolds);
+..sharkcode<Data/Subsets.tpp,nested-cv>
 
 
 One-vs-One Partitioning
