@@ -51,6 +51,7 @@ using namespace shark;
 class F
 {
 public:
+	typedef RealVector result_type;
 	RealVector operator () (RealVector x) const
 	{ return (2.0 * x); }
 };
@@ -58,9 +59,27 @@ public:
 class G
 {
 public:
+	typedef unsigned int result_type;
 	unsigned int operator () (unsigned int y) const
 	{ return y + 1; }
 };
+
+//###begin<transform-3>
+	class Add
+	{
+	public:
+		Add(RealVector offset) : m_offset(offset) {}
+	
+		typedef RealVector result_type;   // do not forget to specify the result type
+	
+		RealVector operator () (RealVector input) const { // const is important
+			return (input + m_offset);
+		}
+	
+	private:
+		RealVector m_offset;
+	};
+//###end<transform-3>
 
 
 int main()
@@ -184,7 +203,6 @@ int main()
 	labeledData = transformLabels(labeledData, g);     // applies g to each label
 //###end<transform-1>
 
-	Data<RealVector> data;
 //###begin<transform-2>
 	// a linear model, for example for whitening
 	LinearModel<> model;
@@ -196,22 +214,6 @@ int main()
 }
 {
 	Data<RealVector> data;
-//###begin<transform-3>
-	class Add
-	{
-	public:
-		Add(RealVector offset) : m_offset(offset) {}
-	
-		typedef RealVector result_type;   // do not forget to specify the result type
-	
-		RealVector operator () (RealVector input) const { // const is important
-			return (input + m_offset);
-		}
-	
-	private:
-		RealVector m_offset;
-	};
-//###end<transform-3>
 //###begin<transform-4>
 	RealVector v(3); v(0) = 1.0; v(1) = 3.0; v(2) = -0.5;
 	data = transform(data, Add(v));
@@ -228,7 +230,7 @@ int main()
 //###begin<view-2>
 	std::vector<std::size_t> indices;
 	// somehow choose a set of indices
-	Data<unsigned int> subset = toDataset(subset(view, indices));
+	Data<unsigned int> subsetData = toDataset(subset(view, indices));
 //###end<view-2>
 }
 {
