@@ -127,6 +127,7 @@ SHARK_ADD_EXAMPLE( Statistics/StatisticsMain StatisticsMain "Statistiscs" )
 SHARK_ADD_EXAMPLE( Statistics/Statistics Statistics "Statistiscs" )
 
 #Data
+SHARK_ADD_EXAMPLE( Data/Datasets Datasets "Data" )
 SHARK_ADD_EXAMPLE( Data/Normalization Normalization "Data" )
 SHARK_ADD_EXAMPLE( Data/Subsets Subsets "Data" )
 SHARK_ADD_EXAMPLE( Data/Import Import "Data" )
