@@ -27,7 +27,7 @@ could also be  held in one of the standard template library containers.
 In contrast to  a ``std::vector``,  the Data class has three abilities
 that are important in the context of machine learning:
 
-* Elements of a dataset are stored in blocks called batches, such that
+* Elements of a data set are stored in blocks called batches, such that
   computations can be carried out block by block, instead of element
   by element. These batches are optimized for continuous memory access,
   which allows for more efficient processing and thus faster implementations.
@@ -49,10 +49,10 @@ that are important in the context of machine learning:
   copied when actually required by the algorithm.
 
 
-Different types of Datasets
---------------------------------
+Different types of data sets
+----------------------------
 
-The three dataset classes in shark differ not much in their implementation, as
+The three data set classes in shark differ not much in their implementation, as
 they all use the same underlying structure. However they provide important semantic
 differentiation as well as special functions tailored to this differentiation. Before
 we introduce the interface of the data object we want to clarify this distinction:
@@ -85,7 +85,7 @@ we introduce the interface of the data object we want to clarify this distinctio
   implemented under the hood.
 
   For convenience, there exist the following three specializations of
-  labeled datasets::
+  labeled data sets::
 
     typedef LabeledData<RealVector, unsigned int> ClassificationDataset;
     typedef LabeledData<CompressedRealVector, unsigned int> CompressedClassificationDataset;
@@ -95,9 +95,9 @@ we introduce the interface of the data object we want to clarify this distinctio
 The class Data<T>
 ------------------
 This part of the tutorial introduces the interface of :doxy:`Data`.
-The following descriptions also apply to the two other types of datasets.
+The following descriptions also apply to the two other types of data sets.
 
-Creation and copying of datasets
+Creation and copying of data sets
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 Creating a data set is quite easy and can be achieved in several ways.
@@ -221,7 +221,7 @@ provides a convenience interface for elements, however, with much worse
 performance guarantees than for batch access. While the interfaces look
 very similar one should be aware of the important differences.
 
-First of all, all elements stored in the dataset are only virtual for
+First of all, all elements stored in the data set are only virtual for
 most input types. This means that querying the i-th element of the set
 does not return a reference to it, but instead returns a proxy object
 that acts as a reference. For example when storing ``RealVector``
@@ -241,7 +241,7 @@ case of::
 the compiler is very helpful, creating a temporary vector and copying
 the matrix row into it. However, this is slow, and moreover it is
 unnecessary. Be aware of this performance pitfall and use template
-arguments or the correct reference type of the dataset if possible::
+arguments or the correct reference type of the data set if possible::
 
 	void function(Data<RealVector>::element_reference const& element);
 
@@ -259,8 +259,8 @@ batches since it needs to find the batch the element is located in.
 	Element-wise random access to a ``Data`` a object is a linear time
 	operation! It is not to be confused with constant-time element
 	access in arrays (and ``std::vector``). Thus aside from only very
-	small datasets or performance uncritical code you should never use
-	random-access to the dataset.
+	small data sets or performance uncritical code you should never use
+	element-wise random-access to a data container.
 
 As a consequence a naive loop iterating over the elements of a ``Data``
 container is a **quadratic time** operation. There are the following
@@ -286,7 +286,7 @@ element_reference          Reference to a single element. This is a proxy refere
                            that it can be something more complex than element_type&, for example
                            an object describing the row of a matrix.
 element_range              Range over the elements.
-batch_type                 The batch type of the Dataset. Same as Batch<element_type>::type
+batch_type                 The batch type of the Data set. Same as Batch<element_type>::type
 batch_reference            Reference to a batch of points. This is batch_type&.
 batch_range                Range over the batches.
 ========================   ======================================================================
@@ -326,8 +326,8 @@ Data<L>& labels()                            Returns only the labels of the Labe
 ==========================================   ======================================================================
 
 
-Querying information about a dataset
-------------------------------------
+Querying information about a data set
+-------------------------------------
 
 Sometimes we want to query basic informations about a data set like input
 dimension or the number of classes of a labeled data set. The data classes
@@ -342,8 +342,8 @@ For LabeledData we have a similar set of methods::
 ..sharkcode<Data/Datasets.tpp,labeled-convenience>
 
 
-Transformation of datasets
----------------------------------------------
+Transformation of data sets
+---------------------------
 
 In many applications data must be pre-processed before actual learning.
 For example, the data mean is to be removed, or labels need to be altered
@@ -375,6 +375,14 @@ It is applied to the data set by calling: ::
 
 ..sharkcode<Data/Datasets.tpp,transform-4>
 
+.. note::
+	Never ever forget the definition of the ``result_type``!
+	It is needed by ``transform`` to be smart, i.e., to deduce
+	the corresponding batch type.
+	If you happen to get nasty template error messages with
+	``transform`` then your first bet should be that you maybe
+	forget to define the ``result_type``.
+
 
 Element views: DataView<Dataset>
 ---------------------------------
@@ -398,17 +406,17 @@ Using a DataView object is easy::
 ..sharkcode<Data/Datasets.tpp,view-1>
 
 Using a DataView object it is also possible to create element-wise subsets which
-can then be transformed back into datasets::
+can then be transformed back into data sets::
 
 ..sharkcode<Data/Datasets.tpp,view-2>
 
 After the operation, ``subset`` holds a copy of the points indexed by the subset operation.
-As in all other dataset operations, the subset is organized in several batches. To control the
+As in all other data set operations, the subset is organized in several batches. To control the
 maximum size of the batches, ``toDataset`` also takes an optional second parameter, which controls this:
 
 Data<unsigned int> subset = toDataset(subset(view,indices),maximumBatchSize);
 
-And the usual methods for querying dataset informations also works for the view::
+And the usual methods for querying data set informations also works for the view::
 
 ..sharkcode<Data/Datasets.tpp,view-3>
 
