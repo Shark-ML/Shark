@@ -31,33 +31,34 @@ However, while the :doxy:`Data` class and its subclasses do not impose
 any restrictions on label formats, several *algorithms* within Shark
 (i.e., some which *work on or with* datasets) in fact do: they may apply
 in a standard classification or regression setting, and might expect
-integer or real-valued labels in accordance with fixed conventions.
-In other words, using custom labels is possible, however, it corresponds
+integer-valued or real-valued labels in accordance with fixed conventions.
+In other words, using custom labels is supported, however, it corresponds
 to non-standard learning tasks and as such might require custom error
-functions, losses, and maybe even trainers.
+functions, losses, and eventually even the adaptation of trainers.
 
-In detail, there exists a convention used by algorithms in typical
+In detail, there exists a convention for algorithms in typical
 classification settings, and a convention for regression settings:
 
 * The format for a classification label is a single unsigned integer
-  (C++ type ``unsigned int``) in the range ``0,...,d-1``. For binary data,
-  the wide-spread binary labels ``-1``/``+1`` are no longer supported;
-  instead, ``0``/``1`` is used for the sake of consistency with the
-  multi-class case. When required, binary labels -1/+1  are converted
-  to 0/1 by setting all -1 labels to 0.
+  (C++ type ``unsigned int``) in the range ``0,...,d-1``. For binary
+  (two-class) labels, the wide-spread binary labels ``-1``/``+1`` are
+  no longer supported; instead, ``0``/``1`` is used for the sake of
+  consistency with the multi-class case. When required, binary labels
+  -1/+1  are converted to 0/1 by setting all -1 labels to 0.
 
 * Labels for regression are  of type ``RealVector``. This is also the
   case for single-dimensional regression problems. In this case the
-  label vectors are one-dimensional. The C++ type ``double'' is not
+  label vectors are one-dimensional. The C++ type ``double`` is not
   used.
 
 Based on the method (model, algorithm), classification labels are
 interpreted differently. The most common interpretation is that of a
-unique atom. By convention, d different atoms (in a classification task
-with d classes) are chosen as ``0,...,d-1''. This value can also serve
-as an index (e.g., to an output neuron) in certain circumstances.
-But the label *c* can also be interpreted as a d-dimensional unit-vector
-for which the *c*-th component is one. This enables the application of,
+unique atom. By convention, ``d`` different atoms (in a classification
+task with ``d`` classes) are chosen as ``0,...,d-1``. Such a value can
+also serve as an index (e.g., indexing output neurons) in certain
+circumstances.
+The label ``c`` can also be interpreted as a ``d``-dimensional unit-vector
+for which the ``c``-th component is one. This enables the application of,
 e.g., the mean-squared error measure on the output of neural networks
 for classification.
 
@@ -65,14 +66,19 @@ for classification.
 Conversions
 -----------
 
-Often Models in Shark (and in machine learning in general) do not
-produce the correct output for classification. This is most often not a
-problem, as the loss function can interpret outputs accordingly and thus
-a neural network can easily be trained in a classification setting, even
-though the network only returns vectors instead of (integer) labels.
-However, if the labels are indeed needed, the output of a Network needs
-to be transformed into an integer label. The following converters exist
-for this purpose:
+Often Models in Shark do not produce the correct output format for
+classification. For example, a neural network for a ``d``-class
+classification problem usually encodes its prediction into an output
+layer of size ``d``, with the prediction being understood as the
+index of the output neuron with highest activity. The network output
+is thus a ``RealVector`` of dimension ``d``, not an unsigned integer.
+This is most often not a problem, the loss function can interpret
+outputs accordingly and thus a neural network can easily be trained
+in a classification setting, even though the network only returns
+vectors instead of (integer) labels.
+However, if integer labels are indeed needed for further
+post-processing then the output of a Network needs to be transformed.
+The following converters exist for this purpose:
 
 * :doxy:`ThresholdConverter`: The class converts single dimensional
   ``RealVector`` input to binary 0/1 class-labels by assigning the value
@@ -91,8 +97,8 @@ for this purpose:
 
 The converters are actual (parameter-free) models, i.e., sub-classes of
 :doxy:`AbstractModel`. Hence they can be concatenated with other models
-that output ``RealVector``s, such as :doxy:`KernelExpansion`s (e.g.,
+that output a ``RealVector``, such as :doxy:`KernelExpansion` (e.g.,
 support vector machines models), decision trees, or neural networks.
-An instance of such a concatenation is the :doxy:`KernelClassifier`<T>,
-which is essentially a :doxy:`KernelExpansion`<T> model that feeds its
+An instance of such a concatenation is the :doxy:`KernelClassifier`,
+which is essentially a :doxy:`KernelExpansion` model that feeds its
 output directly into an :doxy:`ArgMaxConverter`.
