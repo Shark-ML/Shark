@@ -1,5 +1,5 @@
 Normalization of Input Data
-============================================================
+===========================
 
 This short tutorial will demonstrate how data can be normalized using
 Shark. Read the basic :ref:`data tutorials <label_for_data_tutorials>`
@@ -11,7 +11,13 @@ make all features comparable, in a sense, by transforming them to a
 uniform scale.
 
 Shark distinguished between feature-wise normalization and more complex
-methods. For feature-wise rescaling Shark applies a :doxy:`Normalizer`
+methods.
+
+
+Feature-wise Normalization
+--------------------------
+
+For feature-wise rescaling Shark applies a :doxy:`Normalizer`
 model to the data. This model applies an affine linear function
 :math:`x \mapsto a x + b` to each feature component; this is a special
 type of a linear model. Two different trainers for two different types
@@ -30,13 +36,13 @@ In the following we will normalize data to unit variance and remove the
 mean. First we have to train our normalizer model so that it can perform
 the normalization operation::
 
-..sharkcode<Unsupervised/Normalization.tpp,includes>
+..sharkcode<Data/Normalization.tpp,includes1>
 
-..sharkcode<Unsupervised/Normalization.tpp,training>
+..sharkcode<Data/Normalization.tpp,training1>
 
 Now the normalizer is ready to use and we can transform the data::
 
-..sharkcode<Unsupervised/Normalization.tpp,transform>
+..sharkcode<Data/Normalization.tpp,transform1>
 
 In order to apply such a normalization to :doxy:`LabeledData`, the
 methods ``transformInputs`` and ``transformLabels`` can be used.
@@ -58,7 +64,27 @@ tutorial about training the :doc:`../../algorithms/extreme_learning_machine`
 with the complete example source :doxy:`elmTutorial.cpp`.
 
 
+Whitening
+---------
 
+As noted above the feature-wise rescaling to unit variance does not
+remove correlations between features. A full whitening of the data is
+requires for this purpose. The resulting transformation is represented
+by a :doxy:`LinearModel`, which is trained by a
+:doxy:`NormalizeComponentsWhitening` trainer. The following code is
+analog of the above feature-wise normalization.
 
-LinearModel<RealVector>
-For whitening use :doxy:`NormalizeComponentsWhitening`.
+..sharkcode<Data/Normalization.tpp,includes2>
+
+..sharkcode<Data/Normalization.tpp,training2>
+
+Now the normalizer is ready to use and we can transform the data::
+
+..sharkcode<Data/Normalization.tpp,transform2>
+
+A few notes are in place. First of all note that different types of
+pre-processing steps are suitable for different types of data. Second,
+not all procedures scale well to high-dimensional feature spaces. Third,
+it usually makes sense to combine feature rescaling with a feature
+selection (filtering) technique. Such techniques are beyond the scope of
+this tutorial.

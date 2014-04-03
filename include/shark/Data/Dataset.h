@@ -17,7 +17,7 @@
  * 
  *
  * \author      O. Krause, T. Glasmachers
- * \date        2010-2013
+ * \date        2010-2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -288,7 +288,7 @@ public:
 		m_data.splitBatch(m_data.begin()+batch,elementIndex);
 	}
 
-	///\brief Splits the container in two independent parts. The left part remains in the container, the right is stored as return type
+	///\brief Splits the container into two independent parts. The front part remains in the container, the back part is returned.
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
@@ -701,7 +701,7 @@ public:
 	///\brief Fill in the subset defined by the list of indices as well as its complement.
 	void indexedSubset(IndexSet const& indices, self_type& subset, self_type& complement)const{
 		IndexSet comp;
-		detail::complement(indices,m_data.size(),comp);
+		detail::complement(indices,m_data.numberOfBatches(),comp);
 		m_data.indexedSubset(indices,subset.m_data);
 		m_label.indexedSubset(indices,subset.m_label);
 		m_data.indexedSubset(comp,complement.m_data);

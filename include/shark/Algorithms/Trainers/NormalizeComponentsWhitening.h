@@ -51,9 +51,10 @@ class NormalizeComponentsWhitening : public AbstractUnsupervisedTrainer<LinearMo
 {
 	typedef AbstractUnsupervisedTrainer<LinearModel<RealVector> > base_type;
 public:
-	
+
 	double m_targetVariance;
 	NormalizeComponentsWhitening(double targetVariance = 1.0){ 
+		SHARK_CHECK(targetVariance > 0.0, "[NormalizeComponentsWhitening::NormalizeComponentsWhitening] target variance must be positive");
 		m_targetVariance = targetVariance;
 	}
 
@@ -62,39 +63,40 @@ public:
 	{ return "NormalizeComponentsWhitening"; }
 
 	void train(ModelType& model, UnlabeledData<RealVector> const& input){
-		SHARK_CHECK(input.numberOfElements() >= 2, "[NormalizeComponentsWhitening::train] input needs to contain at least two points");
 		std::size_t dc = dataDimension(input);
+		SHARK_CHECK(input.numberOfElements() >= dc + 1, "[NormalizeComponentsWhitening::train] input needs to contain more points than there are input dimensions");
+		SHARK_CHECK(m_targetVariance > 0.0, "[NormalizeComponentsWhitening::train] target variance must be positive");
+
 		// dense model with bias having input and output dimension equal to data dimension
 		model.setStructure(dc, dc, true); 
 
 		RealVector mean;
 		RealMatrix covariance;
 		meanvar(input, mean, covariance);
-		
+
 		RealMatrix whiteningMatrix = createWhiteningMatrix(covariance);
-		whiteningMatrix*=std::sqrt(m_targetVariance);
-		
-		
+		whiteningMatrix *= std::sqrt(m_targetVariance);
+
 		RealVector offset(dc);
 		axpy_prod(trans(whiteningMatrix),mean,offset);
-		offset*=-1;
-		
+		offset *= -1.0;
+
 		model.setStructure(RealMatrix(trans(whiteningMatrix)), offset);
 	}
-	
+
 private:
 	RealMatrix createWhiteningMatrix(
 		RealMatrix& covariance
 	){
 		using namespace blas;
-		
+
 		SIZE_CHECK(covariance.size1() == covariance.size2());
 		std::size_t m = covariance.size1();
 		//we use the inversed cholesky decomposition for whitening
 		//since we have to assume that covariance does not have full rank, we use
 		//the generalized decomposition
 		RealMatrix whiteningMatrix(m,m,0.0);
-		
+
 		//do a pivoting cholesky decomposition
 		//this destroys the covariance matrix as it is not neeeded anymore afterwards.
 		PermutationMatrix permutation(m);
@@ -116,11 +118,11 @@ private:
 		//<=> P^T U P (C^TC) = C
 		RealMatrix CTC(rank,rank);
 		symm_prod(trans(C),CTC);
-		
+
 		matrix_range<RealMatrix> submat = columns(whiteningMatrix,0,rank);
 		solveSymmSystem<SolveXAB>(CTC,submat,C);
 		swap_full_inverted(permutation,whiteningMatrix);
-		
+
 		return whiteningMatrix;
 	}
 };

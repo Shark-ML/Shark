@@ -177,15 +177,16 @@ public:
 	}
 	/// \brief returns the position of the element inside the dataset
 	///
-	/// This is usefull for bagging, when identical elements between several susbsets are to be identified
+	/// This is useful for bagging, when identical elements among
+	/// several subsets are to be identified.
 	std::size_t index(std::size_t position)const{
 		return m_indices[position].datasetIndex;
 	}
-	
+
 	std::size_t size() const{
 		return m_indices.size();
 	}
-	
+
 	iterator begin(){
 		return iterator(*this, 0);
 	}
