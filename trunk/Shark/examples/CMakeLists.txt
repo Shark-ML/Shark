@@ -126,14 +126,18 @@ SHARK_ADD_EXAMPLE( Supervised/StoppingCriteria StoppingCriteriaTutorial "Supervi
 SHARK_ADD_EXAMPLE( Statistics/StatisticsMain StatisticsMain "Statistiscs" )
 SHARK_ADD_EXAMPLE( Statistics/Statistics Statistics "Statistiscs" )
 
+#Data
+SHARK_ADD_EXAMPLE( Data/Normalization Normalization "Data" )
+SHARK_ADD_EXAMPLE( Data/Subsets Subsets "Data" )
+
 #Unsupervisd
-SHARK_ADD_EXAMPLE( Unsupervised/PCA PCA "Unsupervised"  )
-SHARK_ADD_EXAMPLE( Unsupervised/PCATutorial PCATutorial "Unsupervised"  )
-SHARK_ADD_EXAMPLE( Unsupervised/KMeansTutorial KMeansTutorial "Unsupervised"  )
-SHARK_ADD_EXAMPLE( Unsupervised/BinaryRBM BinaryRBM "Unsupervised"  )
-SHARK_ADD_EXAMPLE( Unsupervised/SparseAETutorial SparseAETutorial "Unsupervised"  )
-SHARK_ADD_EXAMPLE( Unsupervised/HierarchicalClustering HierarchicalClustering "Unsupervised"  )
-SHARK_ADD_EXAMPLE( Unsupervised/OneClassSvm OneClassSvm "Unsupervised"  )
+SHARK_ADD_EXAMPLE( Unsupervised/PCA PCA "Unsupervised" )
+SHARK_ADD_EXAMPLE( Unsupervised/PCATutorial PCATutorial "Unsupervised" )
+SHARK_ADD_EXAMPLE( Unsupervised/KMeansTutorial KMeansTutorial "Unsupervised" )
+SHARK_ADD_EXAMPLE( Unsupervised/BinaryRBM BinaryRBM "Unsupervised" )
+SHARK_ADD_EXAMPLE( Unsupervised/SparseAETutorial SparseAETutorial "Unsupervised" )
+SHARK_ADD_EXAMPLE( Unsupervised/HierarchicalClustering HierarchicalClustering "Unsupervised" )
+SHARK_ADD_EXAMPLE( Unsupervised/OneClassSvm OneClassSvm "Unsupervised" )
 
 add_custom_target(tpp2cpp DEPENDS ${TPP_FILES})
 

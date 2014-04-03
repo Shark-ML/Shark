@@ -1,5 +1,7 @@
 //header needed for cross validation
+//###begin<includetools>
 #include <shark/Data/CVDatasetTools.h>
+//###end<includetools>
 
 //headers needed for our test problem
 #include <shark/Data/DataDistribution.h>
@@ -77,46 +79,51 @@ int main(){
 	//we first create the problem. in this simple tutorial,
 	//it's only the 1D wave function sin(x)/x + noise
 	Wave wave;
-	RegressionDataset dataset=wave.generateDataset(100);
+//###begin<cvselection>
+	RegressionDataset dataset;
+//###end<cvselection>
+	dataset = wave.generateDataset(100);
 
 	//now we want to create the cv folds. For this, we
 	//use the CVDatasetTools.h. There are a few functions
 	//to create folds. in this case, we create 4
 	//partitions with the same size. so we have 75 train
 	//and 25 validation data points
+//###begin<cvselection>
 	CVFolds<RegressionDataset> folds = createCVSameSize(dataset,4);
+//###end<cvselection>
 
 	//now we want to use the folds to find the best regularization
 	//parameter for our problem. we use a grid search to accomplish this
-	double bestValidationError = 100000;
+//###begin<cvselection>
+	double bestValidationError = 1e5;
 	double bestRegularization = 0;
-	for(double regularization = 0; regularization < 1.e-4; regularization +=1.e-5){
+	for (double regularization = 0; regularization < 1.e-4; regularization +=1.e-5) {
 		double result = 0;
-		for(unsigned fold = 0; fold != 4; ++fold){//CV
-			//access the fold
+		for (std::size_t fold = 0; fold != folds.size(); ++fold){ //CV
+			// access the fold
 			RegressionDataset training = folds.training(fold);
 			RegressionDataset validation = folds.validation(fold);
-			//train
-			result += trainProblem(training,validation,regularization);
+			// train
+			result += trainProblem(training, validation, regularization);
 		}
-		result /= 4;
+		result /= folds.size();
 
-		//check whether this regularization parameter leads to better results
-		if(result < bestValidationError)
+		// check whether this regularization parameter leads to better results
+		if (result < bestValidationError)
 		{
 			bestValidationError = result;
 			bestRegularization = regularization;
 		}
 
-		//print status:
-		std::cout<<regularization<<" "<< result<<std::endl;
-
+		// print status:
+		std::cout << regularization << " " << result << std::endl;
 	}
+//###end<cvselection>
 
-	//print the best value found
+	// print the best value found
 	cout << "RESULTS: " << std::endl;
 	cout << "======== " << std::endl;
 	cout << "best validation error: " << bestValidationError << std::endl;
 	cout << "best regularization:   " << bestRegularization<< std::endl;
-
 }
