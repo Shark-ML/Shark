@@ -1,0 +1,130 @@
+
+Importing Data
+==============
+
+Shark provides a number of containers for data storage.
+Read the basic :ref:`data tutorials <label_for_data_tutorials>`
+first if you are not familiar with these containers. This tutorial
+deals with how to fill the containers with actual data.
+
+For the examples in this tutorial we need the following includes: ::
+
+..sharkcode<Data/Import.tpp,includes>
+
+For later use we declare a ``Data`` object holding points and a
+``LabeledData`` object (aka ``ClassificationDataset``) holding
+points augmented with unsigned integer labels. ::
+
+..sharkcode<Data/Import.tpp,datasets>
+
+
+File Formats
+------------
+
+Shark supports a number of standard file formats for data sets,
+including the HDF5-based format used by http://www.mldata.org,
+comma(character)-separated-values (CSV), and the LIBSVM format
+(http://www.csie.ntu.edu.tw/~cjlin/libsvm/). Shark does not come
+with its own data set format any more in order to avoid further
+growth of the jungle of data set formats. However, data can be
+serialized, which practially amounts to a data file format.
+
+Most data formats in common use are restricted to (sparse)
+vectorial input data. Thus, when dealing with non-vectorial data
+the user needs to write specialized methods for loading/storing
+the data. It is understood that shark cannot implement any
+possible data format you can dream of. However, if the input
+type is serializable with boost::serialization, then the
+:doxy:`Data` container can be serialized.
+
+
+Generate from Artificial Distributions
+++++++++++++++++++++++++++++++++++++++
+
+Data sets can be generated using artificial distributions.
+Currently, shark comes with a few distributions for testing
+purposes, but if you need automatically generated (pseudo
+random) data then you probably want to create your own
+distribution class. To create your own data distribution,
+you have to derive a class from the :doxy:`DataDistribution`
+or :doxy:`LabeledDataDistribution` interfaces and overload
+the ``draw`` method, which allows shark to draw a examples
+from your probability distribution. Also you can choose which
+types your inputs and labels should have.
+
+As an example, let us generate inputs from the real line with
+labels 0 and 1 with equal probability, with uniform and
+overlapping class-conditional distributions: ::
+
+..sharkcode<Data/Import.tpp,distribution>
+
+Once the distribution is defined it is easy to generate a data set: ::
+
+..sharkcode<Data/Import.tpp,generate>
+
+
+Comma-Separated Values (CSV)
+++++++++++++++++++++++++++++++++++++++++
+
+Shark supports the simplistic but widespread CSV (comma/character
+separated value) data format; however, support of this format is
+currently quite limited. Not all class label types are supported
+and the data must be dense.
+
+Since the separator in the CSV format is left open it needs to be
+specified. A comma (",") is a standard choice, but spaces or tabulators
+are also common. A comma is used as a default.
+
+Now you can call one of the import routines like this::
+
+..sharkcode<Data/Import.tpp,csv>
+
+The last two arguments define the separator (here a comma) and the
+character introducing a comment line. Here they are set to their
+default values, which is the comma and the number sign. Exporting
+data is needed less frequently. It works similarly, see
+:doxy:`export_csv`.
+
+The third argument of the second call is one of the constants
+``FIRST_COLUMN`` or ``LAST_COLUMN``. It indicates that the first
+(or last) number of each line acts as a label - and hence is expected
+to be an integer. If you want to import regression data then you have
+to load data and labels from different csv files and create a
+LabeledData object from the two containers::
+
+..sharkcode<Data/Import.tpp,csv-regression>
+
+
+LibSVM
+++++++++++++++++++++++++++++++++++++++++
+
+Shark can import libSVM data files. This data format is for
+sparse vectorial data augmented with integer class labels.
+
+Similar to the CSV import functions we can call ::
+
+..sharkcode<Data/Import.tpp,libsvm-dense>
+
+Our ``data`` object defined above represents inputs as type ``RealVector``.
+Hence the above call imports the data into a dense ``RealVector`` container.
+This is only suitable if we know beforehand that the data is not (very) sparse.
+For sparse and often high-dimensional data the above approach is not
+only inefficient, it can also easily result in a huge waste of memory,
+extensive swapping to take place, and even memory allocation failures.
+Instead libSVM data should most often be loaded into sparse vector containers ::
+
+..sharkcode<Data/Import.tpp,libsvm-sparse>
+
+For sparse data the actual data dimension can be deduced only if the
+highest feature is non-zero for at least one instance. In a setting like
+cross-validation or data sub-sampling this is not always the case.
+Therefore the data dimension can be provided explicitly to
+:doxy:`import_libsvm` as a third argument. The optional fourth argument
+specifies the default batch size of the container. It should usually be
+left at its default.
+
+
+HDF5 and MLData
+++++++++++++++++++++++++++++++++++++++++
+
+.. todo:: The tutorial section on HDF5 and MLData imports will be part of the official Shark release.
