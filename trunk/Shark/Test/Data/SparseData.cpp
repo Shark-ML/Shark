@@ -1,8 +1,8 @@
-#define BOOST_TEST_MODULE ML_Libsvm
+#define BOOST_TEST_MODULE ML_SparseData
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/Data/Libsvm.h>
+#include <shark/Data/SparseData.h>
 #include <shark/Data/Csv.h> //for safety export test
 
 #include <iostream>
@@ -58,7 +58,7 @@ const char test_export[] = "0.3 0.0 0.0 -4 0.0 0.0 0.0 1.1 0.0 0.0 0.0 0.0 0.0 0
 0.0 4.6 0.0 1000 0.0 0.0 0.0 -0.7 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1\n\
 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 17.4 0.0 0.0 0.0 0.0 -2.24 0\n";
 
-BOOST_AUTO_TEST_CASE( Set_Libsvm )
+BOOST_AUTO_TEST_CASE( Set_SparseData )
 {
 	std::stringstream ssc(test_classification),  ssmcc(test_mc_classification); //dense: classif., mc-classif., regr.
 	std::stringstream sssc(test_classification), sssmcc(test_mc_classification); //sparse: classif., mc-classif., regr.
@@ -68,10 +68,10 @@ BOOST_AUTO_TEST_CASE( Set_Libsvm )
 	LabeledData<CompressedRealVector,unsigned int> test_ds_sc;
 	LabeledData<CompressedRealVector,unsigned int> test_ds_smcc;
 	
-	import_libsvm(test_ds_c, ssc); //dense classif.
-	import_libsvm(test_ds_mcc, ssmcc); //dense mc-classif.
-	import_libsvm(test_ds_sc, sssc); //sparse classif.
-	import_libsvm(test_ds_smcc, sssmcc); //sparse mc-classif.
+	importSparseData(test_ds_c, ssc); //dense classif.
+	importSparseData(test_ds_mcc, ssmcc); //dense mc-classif.
+	importSparseData(test_ds_sc, sssc); //sparse classif.
+	importSparseData(test_ds_smcc, sssmcc); //sparse mc-classif.
 	
 	//check that we got the proper number of lines
 	BOOST_REQUIRE_EQUAL(test_ds_c.numberOfElements(), NumLines);
@@ -119,13 +119,13 @@ BOOST_AUTO_TEST_CASE( Set_Libsvm )
     
     
         //~ // test export functionality
-    //~ detail::import_csv( xe, ye, sse, LAST_COLUMN, " ", "#" );
+    //~ detail::importCSV( xe, ye, sse, LAST_COLUMN, " ", "#" );
     //~ LabeledData<RealVector, unsigned int> test_ds_e = createLabeledDataFromRange( xe, ye );
     //~ BOOST_CHECK_EQUAL(test_ds_e.numberOfElements(), 6);
-    //~ export_libsvm( test_ds_e, "test_output/check1.libsvm" );
-    //~ export_libsvm( test_ds_c, "test_output/check2.libsvm" );
+    //~ exportSparseData( test_ds_e, "test_output/check1.libsvm" );
+    //~ exportSparseData( test_ds_c, "test_output/check2.libsvm" );
     //~ LabeledData<RealVector, unsigned int> import_of_export_1, import_of_export_2;
-    //~ import_libsvm( import_of_export_1, "test_output/check1.libsvm" );
-    //~ import_libsvm( import_of_export_2, "test_output/check2.libsvm" );
+    //~ importSparseData( import_of_export_1, "test_output/check1.libsvm" );
+    //~ importSparseData( import_of_export_2, "test_output/check2.libsvm" );
 
 }

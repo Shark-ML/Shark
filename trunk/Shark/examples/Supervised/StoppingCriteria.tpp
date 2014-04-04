@@ -48,7 +48,7 @@ int main(){
 	//load the diabetes dataset shuffle its entries and split it in training, validation and test set.
 	//###begin<load>
 	ClassificationDataset data;
-	import_csv(data, "data/diabetes.csv",LAST_COLUMN, ' ');
+	importCSV(data, "data/diabetes.csv",LAST_COLUMN, ' ');
 	data.shuffle();
 	ClassificationDataset test = splitAtElement(data,static_cast<std::size_t>(0.75*data.numberOfElements()));
 	ClassificationDataset validation = splitAtElement(data,static_cast<std::size_t>(0.66*data.numberOfElements()));

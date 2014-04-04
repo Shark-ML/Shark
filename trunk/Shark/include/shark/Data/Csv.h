@@ -82,14 +82,14 @@ namespace detail {
 
     // export function for unlabeled data
     template<typename T, typename Stream>
-    void export_csv(const T &data,   // Container that holds the samples
+    void exportCSV(const T &data,   // Container that holds the samples
             Stream &out,  // The file to be read from
             const std::string &separator,  // The separator between elements
             bool scientific = true, //scientific notation?
             unsigned int fieldwidth = 0
     ) {
         if (!out) {
-            throw(std::invalid_argument("[export_csv (1)] Stream cannot be opened for writing."));
+            throw(std::invalid_argument("[exportCSV (1)] Stream cannot be opened for writing."));
         }
 
         // set output format
@@ -101,7 +101,7 @@ namespace detail {
         // write out
         typename T::const_iterator it = data.begin();
         for (; it != data.end(); ++it) {
-            SHARK_CHECK(it->begin() != it->end(), "[export_csv (1)] record must not be empty");
+            SHARK_CHECK(it->begin() != it->end(), "[exportCSV (1)] record must not be empty");
             for (std::size_t i=0; i<(*it).size()-1; i++) {
                 out << std::setw(fieldwidth) << (*it)(i) << separator;
             }
@@ -115,7 +115,7 @@ namespace detail {
     // export function for labeled data
 
     template<typename T, typename U, typename Stream>
-    void export_csv_labeled(const T &input,   // Container that holds the samples
+    void exportCSV_labeled(const T &input,   // Container that holds the samples
             const U &labels,  // Container that holds the labels
             Stream &out,  // The file to be read from
             LabelPosition lp,  // The position of the label
@@ -128,7 +128,7 @@ namespace detail {
     ) {
 
         if (!out) {
-            throw(std::invalid_argument("[export_csv (2)] Stream cannot be opened for writing."));
+            throw(std::invalid_argument("[exportCSV (2)] Stream cannot be opened for writing."));
         }
 
 
@@ -142,7 +142,7 @@ namespace detail {
 
 
         for (; iti != input.end(); ++iti, ++itl) {
-            SHARK_CHECK(iti->begin() != iti->end(), "[export_csv (2)] record must not be empty");
+            SHARK_CHECK(iti->begin() != iti->end(), "[exportCSV (2)] record must not be empty");
             if (lp == FIRST_COLUMN)
                 out << *itl << separator;
             for (std::size_t i=0; i<(*iti).size()-1; i++) {
@@ -159,7 +159,7 @@ namespace detail {
 
     // export function for data with vector labels
     template<typename T, typename U, typename Stream>
-    void export_csv_labeled(
+    void exportCSV_labeled(
         const T &input,  // Container that holds the samples
         const U &labels,  // Container that holds the labels
         Stream &out,  // The file to be read from
@@ -173,7 +173,7 @@ namespace detail {
     ) {
 
         if (!out) {
-            throw(std::invalid_argument("[export_csv (2)] Stream cannot be opened for writing."));
+            throw(std::invalid_argument("[exportCSV (2)] Stream cannot be opened for writing."));
         }
 
 
@@ -186,7 +186,7 @@ namespace detail {
         typename U::const_iterator itl = labels.begin();
 
         for (; iti != input.end(); ++iti, ++itl) {
-            SHARK_CHECK(iti->begin() != iti->end(), "[export_csv (2)] record must not be empty");
+            SHARK_CHECK(iti->begin() != iti->end(), "[exportCSV (2)] record must not be empty");
             if (lp == FIRST_COLUMN) {
                 for (std::size_t j = 0; j < itl->size(); j++) out << std::setw(fieldwidth) << (*itl)(j) << separator;
             }
@@ -315,7 +315,7 @@ void csvStringToData(
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset
 template<class T>
-void import_csv(
+void importCSV(
 	Data<T>& data,
 	std::string fn,
 	char separator = ',',
@@ -341,7 +341,7 @@ void import_csv(
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset
-void import_csv(
+void importCSV(
 	LabeledData<RealVector, unsigned int>& data,
 	std::string fn,
 	LabelPosition lp,
@@ -359,7 +359,7 @@ void import_csv(
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset
-void import_csv(
+void importCSV(
 	LabeledData<RealVector, RealVector>& data,
 	std::string fn,
 	LabelPosition lp,
@@ -377,7 +377,7 @@ void import_csv(
 /// \param  sci        should the output be in scientific notation?
 /// \param  width      argument to std::setw when writing the output
 template<typename Type>
-void export_csv(
+void exportCSV(
 	Data<Type> const& set,
 	std::string fn,
 	std::string separator = ",",
@@ -385,7 +385,7 @@ void export_csv(
 	unsigned int width = 0
 ) {
 	std::ofstream ofs(fn.c_str());
-	detail::export_csv(set.elements(), ofs, separator, sci, width);
+	detail::exportCSV(set.elements(), ofs, separator, sci, width);
 }
 
 
@@ -398,7 +398,7 @@ void export_csv(
 /// \param  sci        should the output be in scientific notation?
 /// \param  width      argument to std::setw when writing the output
 template<typename InputType, typename LabelType>
-void export_csv(
+void exportCSV(
     LabeledData<InputType, LabelType> const &dataset,
     std::string fn,
     LabelPosition lp,
@@ -407,8 +407,106 @@ void export_csv(
     unsigned int width = 0
 ) {
 	std::ofstream ofs(fn.c_str());
-	detail::export_csv_labeled(dataset.inputs().elements(), dataset.labels().elements(), ofs, lp, separator, sci, width);
+	detail::exportCSV_labeled(dataset.inputs().elements(), dataset.labels().elements(), ofs, lp, separator, sci, width);
 }
+
+
+
+template<class T>
+inline void import_csv(
+	Data<T>& data,
+	std::string fn,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = Data<T>::DefaultBatchSize)
+{ importCSV(data, fn, separator, comment, maximumBatchSize); }
+
+/// \brief Import a labeled Dataset from a csv file
+///
+/// \deprecated { use importCSV instead }
+///
+/// \param  data       Container storing the loaded data
+/// \param  fn         The file to be read from
+/// \param  lp         Position of the label in the record, either first or last column
+/// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
+/// \param  comment    Trailing character indicating comment line. By dfault it is '#'
+/// \param  maximumBatchSize   Size of batches in the dataset
+inline void import_csv(
+	LabeledData<RealVector, unsigned int>& data,
+	std::string fn,
+	LabelPosition lp,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+)
+{ importCSV(data, fn, lp, separator, comment, maximumBatchSize); }
+
+
+/// \brief Import a labeled Dataset from a csv file
+///
+/// \deprecated { use importCSV instead }
+///
+/// \param  data       Container storing the loaded data
+/// \param  fn         The file to be read from
+/// \param  lp         Position of the label in the record, either first or last column
+/// \param  numberOfOutputs dimensionality of the labels
+/// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
+/// \param  comment    Trailing character indicating comment line. By dfault it is '#'
+/// \param  maximumBatchSize   Size of batches in the dataset
+inline void import_csv(
+	LabeledData<RealVector, RealVector>& data,
+	std::string fn,
+	LabelPosition lp,
+	std::size_t numberOfOutputs = 1,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+)
+{ importCSV(data, fn, lp, numberOfOutputs, separator, comment, maximumBatchSize); }
+
+/// \brief Format unlabeled data into a character-separated value file.
+///
+/// \deprecated { use exportCSV instead }
+///
+/// \param  set       Container to be exported
+/// \param  fn         The file to be written to
+/// \param  separator  Separator between entries, typically a comma or a space
+/// \param  sci        should the output be in scientific notation?
+/// \param  width      argument to std::setw when writing the output
+template<typename Type>
+inline void export_csv(
+	Data<Type> const& set,
+	std::string fn,
+	std::string separator = ",",
+	bool sci = true,
+	unsigned int width = 0
+)
+{ export_csv(set, fn, separator, sci, width); }
+
+
+/// \brief Format labeled data into a character-separated value file.
+///
+/// \deprecated { use exportCSV instead }
+///
+/// \param  dataset    Container to be exported
+/// \param  fn         The file to be written to
+/// \param  lp         Position of the label in the record, either first or last column
+/// \param  separator  Separator between entries, typically a comma or a space
+/// \param  sci        should the output be in scientific notation?
+/// \param  width      argument to std::setw when writing the output
+template<typename InputType, typename LabelType>
+inline void export_csv(
+    LabeledData<InputType, LabelType> const &dataset,
+    std::string fn,
+    LabelPosition lp,
+    std::string separator = ",",
+    bool sci = true,
+    unsigned int width = 0
+)
+{ exportCSV(dataset, fn, lp, separator, sci, width); }
+
+
+
 
 /** @}*/
 

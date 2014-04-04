@@ -412,9 +412,9 @@ can then be transformed back into data sets::
 
 After the operation, ``subset`` holds a copy of the points indexed by the subset operation.
 As in all other data set operations, the subset is organized in several batches. To control the
-maximum size of the batches, ``toDataset`` also takes an optional second parameter, which controls this:
+maximum size of the batches ``toDataset`` also takes an optional second parameter::
 
-Data<unsigned int> subset = toDataset(subset(view,indices),maximumBatchSize);
+..sharkcode<Data/Datasets.tpp,view-2b>
 
 And the usual methods for querying data set informations also works for the view::
 

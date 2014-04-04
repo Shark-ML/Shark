@@ -54,7 +54,7 @@ int main() {
 	
 	//###begin<import>
 	ClassificationDataset data;
-	import_csv(data, "data/C.csv", LAST_COLUMN, ' ');
+	importCSV(data, "data/C.csv", LAST_COLUMN, ' ');
 
 	//Split the dataset into a training and a test dataset
 	ClassificationDataset dataTest = splitAtElement(data,311);

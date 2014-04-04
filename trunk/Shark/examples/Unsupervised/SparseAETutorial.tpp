@@ -45,7 +45,7 @@ UnlabeledData<RealVector> getSamples()
 	//###begin<data_generation>
 	// Read images
 	UnlabeledData<RealVector> images;
-	import_csv(images, "data/images.csv");
+	importCSV(images, "data/images.csv");
 	unsigned int n = images.numberOfElements(); // number of images
 	//###end<data_generation>
 	cout << "Found " << n << " images of size " << w << "x" << h << endl;
