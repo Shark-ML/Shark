@@ -2,18 +2,18 @@
 /*!
  * 
  *
- * \brief       Support for importing and exporting data from and to LIBSVM formatted data files
+ * \brief   Deprecated import_libsvm and export_libsvm functions.
  * 
  * 
  * \par
- * The most important application of the methods provided in this
- * file is the import of data from LIBSVM files to Shark Data containers.
+ * This file is provided for backwards compatibility.
+ * Its is deprecated, use SparseData.h for new projects.
  * 
  * 
  * 
  *
- * \author      M. Tuma, T. Glasmachers, C. Igel
- * \date        2010
+ * \author      T. Glasmachers
+ * \date        2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -40,19 +40,9 @@
 
 #ifndef SHARK_DATA_LIBSVM_H
 #define SHARK_DATA_LIBSVM_H
-#include <fstream>
-#include <shark/Data/Dataset.h>
+#include <shark/Data/SparseData.h>
 
 namespace shark {
-
-namespace detail {
-
-typedef std::pair< unsigned int, size_t > LabelSortPair;
-static inline bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortPair& right) {
-	return left.first > right.first; // for sorting in decreasing order
-}
-
-} // namespace detail
 
 /**
  * \ingroup shark_globals
@@ -60,62 +50,74 @@ static inline bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortP
  * @{
  */
 
-
-
 /// \brief Import data from a LIBSVM file.
+///
+/// \deprecated { use importSparseData instead }
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  stream        stream to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 /// \param  batchSize     size of batch
-void import_libsvm(
+inline void import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
 	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
-);
+)
+{ importSparseData(dataset, stream, highestIndex, batchSize); }
 
 /// \brief Import data from a LIBSVM file.
+///
+/// \deprecated { use importSparseData instead }
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  stream        stream to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 /// \param  batchSize     size of batch
-void import_libsvm(
+inline void import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
 	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
-);
+)
+{ importSparseData(dataset, stream, highestIndex, batchSize); }
 
 /// \brief Import data from a LIBSVM file.
+///
+/// \deprecated { use importSparseData instead }
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  fn            the file to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 /// \param  batchSize     size of batch
-void import_libsvm(
+inline void import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
 	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
-);
+)
+{ importSparseData(dataset, fn, highestIndex, batchSize); }
 
 /// \brief Import data from a LIBSVM file.
+///
+/// \deprecated { use importSparseData instead }
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  fn            the file to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 /// \param  batchSize     size of batch
-void import_libsvm(
+inline void import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
 	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
-);
+)
+{ importSparseData(dataset, fn, highestIndex, batchSize); }
 
 
 /// \brief Export data to LIBSVM format.
+///
+/// \deprecated { use exportSparseData instead }
 ///
 /// \param  dataset     Container storing the  data
 /// \param  fn          Output file
@@ -124,49 +126,8 @@ void import_libsvm(
 /// \param  sortLabels  Flag for sorting data points according to labels
 /// \param  append      Flag for appending to the output file instead of overwriting it
 template<typename InputType>
-void export_libsvm(LabeledData<InputType, unsigned int>& dataset, const std::string &fn, bool dense=false, bool oneMinusOne = true, bool sortLabels = false, bool append = false) {
-	std::size_t elements = dataset.numberOfElements();
-    std::ofstream ofs;
-    
-    // shall we append only or overwrite?
-    if (append == true) {
-        ofs.open (fn.c_str(), std::fstream::out | std::fstream::app );
-    } else {
-        ofs.open (fn.c_str());
-    }
-    
-	if( !ofs ) {
-		throw( SHARKEXCEPTION( "[export_libsvm] file can not be opened for reading" ) );
-	}
-
-	size_t dim = inputDimension(dataset);
-	if(numberOfClasses(dataset)!=2) oneMinusOne = false;
-
-	std::vector<detail::LabelSortPair> L;
-	if(sortLabels) {
-		for(std::size_t i = 0; i < elements; i++) 
-			L.push_back(detail::LabelSortPair(dataset.element(i).label, i));
-		std::sort (L.begin(), L.end(), detail::cmpLabelSortPair);
-	}
-
-	for(std::size_t ii = 0; ii < elements; ii++) {
-		// apply mapping to sorted indices
-		std::size_t i = 0;
-		if(sortLabels) i = L[ii].second;
-		else i = ii;
-		// apply transformation to label and write it to file
-		if(oneMinusOne) ofs << 2*int(dataset.element(i).label)-1 << " ";
-		//libsvm file format documentation is scarce, but by convention the first class seems to be 1..
-		else ofs << dataset.element(i).label+1 << " ";
-		// write input data to file
-		for(std::size_t j=0; j<dim; j++) {
-			if(dense) 
-				ofs << " " << j+1 << ":" <<dataset.element(i).input(j);
-			else if(dataset.element(i).input(j) != 0) 
-				ofs << " " << j+1 << ":" << dataset.element(i).input(j);
-		}
-		ofs << std::endl;
-	}
+inline void export_libsvm(LabeledData<InputType, unsigned int>& dataset, const std::string &fn, bool dense=false, bool oneMinusOne = true, bool sortLabels = false, bool append = false) {
+	exportSparseData(dataset, fn, dense, oneMinusOne, sortLabels, append);
 }
 
 /** @}*/

@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 	// read data
 	ClassificationDataset data;
 	try {
-		import_csv(data, argv[1], LAST_COLUMN, ' ');
+		importCSV(data, argv[1], LAST_COLUMN, ' ');
 	} 
 	catch (...) {
 		cerr << "unable to read data from file " <<  argv[1] << endl;

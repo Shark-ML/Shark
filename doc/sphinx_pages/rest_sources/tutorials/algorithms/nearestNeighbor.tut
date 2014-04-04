@@ -69,7 +69,7 @@ Then code for reading the data may look like this: ::
 
 ..sharkcode<Supervised/KNNTutorial.tpp, dataimport>
 
-The function ``import_csv`` is used for loading the data from the
+The function ``importCSV`` is used for loading the data from the
 files, as described in the :doc:`../concepts/data/import_data` tutorial.  In this
 example, the inputs and the labels are combined in a single file. The
 argument ``LAST_COLUMN`` specifies that the label is the last entry in

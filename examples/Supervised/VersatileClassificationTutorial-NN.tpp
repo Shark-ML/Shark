@@ -22,7 +22,7 @@ int main()
 	// from a place where the data file can be found. It is located
 	// under [shark]/examples/Supervised/data.
 	ClassificationDataset traindata, testdata;
-	import_csv(traindata, "data/quickstartData.csv", LAST_COLUMN, ' ');
+	importCSV(traindata, "data/quickstartData.csv", LAST_COLUMN, ' ');
 	testdata = splitAtElement(traindata, 70 * traindata.numberOfElements() / 100);
 //###end<skeleton>
 

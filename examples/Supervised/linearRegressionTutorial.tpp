@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 	Data<RealVector> inputs;
 	Data<RealVector> labels;
 	try {
-		import_csv(inputs, argv[1], ' ');
+		importCSV(inputs, argv[1], ' ');
 	} 
 	catch (...) {
 		cerr << "unable to read input data from file " <<  argv[1] << endl;
@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
 	}
 
 	try {
-		import_csv(labels, argv[2]);
+		importCSV(labels, argv[2]);
 	}
 	catch (...) {
 		cerr << "unable to read labels from file " <<  argv[2] << endl;

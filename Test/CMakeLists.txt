@@ -182,7 +182,7 @@ SHARK_ADD_TEST( Data/Statistics.cpp Data_Statistics )
 IF (HDF5_FOUND)
     SHARK_ADD_TEST( Data/HDF5Tests.cpp Data_HDF5 )
 ENDIF(HDF5_FOUND)
-SHARK_ADD_TEST( Data/Libsvm.cpp Data_Libsvm )
+SHARK_ADD_TEST( Data/SparseData.cpp Data_SparseData )
 # SHARK_ADD_TEST( Data/MKLBatchInterface.cpp Data_MKLBatchInterface )   # failes with gcc 4.2.1
 SHARK_ADD_TEST( Data/PrecomputedMatrix.cpp Data_PrecomputedMatrix )
 

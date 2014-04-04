@@ -234,6 +234,15 @@ int main()
 //###end<view-2>
 }
 {
+	Data<unsigned int> dataset;
+	DataView<Data<unsigned int> > view(dataset);
+	std::vector<std::size_t> indices;
+	std::size_t maximumBatchSize = 100;
+//###begin<view-2b>
+	Data<unsigned int> subsetData = toDataset(subset(view, indices), maximumBatchSize);
+//###end<view-2b>
+}
+{
 //###begin<view-3>
 	LabeledData<RealVector, unsigned int> dataset;
 	DataView<LabeledData<RealVector, unsigned int> > view(dataset);

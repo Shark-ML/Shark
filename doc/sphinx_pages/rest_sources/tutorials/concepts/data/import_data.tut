@@ -83,7 +83,7 @@ The last two arguments define the separator (here a comma) and the
 character introducing a comment line. Here they are set to their
 default values, which is the comma and the number sign. Exporting
 data is needed less frequently. It works similarly, see
-:doxy:`export_csv`.
+:doxy:`exportCSV`.
 
 The third argument of the second call is one of the constants
 ``FIRST_COLUMN`` or ``LAST_COLUMN``. It indicates that the first
@@ -98,8 +98,10 @@ LabeledData object from the two containers::
 LibSVM
 ++++++++++++++++++++++++++++++++++++++++
 
-Shark can import libSVM data files. This data format is for
-sparse vectorial data augmented with integer class labels.
+Shark can import sparse vectorial data files. This data format is in
+widespread use for SVM software packages such as libSVM. It represents
+sparse vectorial data augmented with integer class labels in an
+ASCII-based format.
 
 Similar to the CSV import functions we can call ::
 
@@ -119,7 +121,7 @@ For sparse data the actual data dimension can be deduced only if the
 highest feature is non-zero for at least one instance. In a setting like
 cross-validation or data sub-sampling this is not always the case.
 Therefore the data dimension can be provided explicitly to
-:doxy:`import_libsvm` as a third argument. The optional fourth argument
+:doxy:`importSparseData` as a third argument. The optional fourth argument
 specifies the default batch size of the container. It should usually be
 left at its default.
 

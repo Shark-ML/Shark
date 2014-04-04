@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       implementation of the libsvm data import
+ * \brief       implementation of the sparse data (libsvm) import
  * 
  * 
  *
@@ -34,13 +34,13 @@
 #include <limits>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/adapted/std_pair.hpp>
-#include <shark/Data/Libsvm.h>
+#include <shark/Data/SparseData.h>
 
 namespace {
 
 typedef std::pair<int, std::vector<std::pair<std::size_t, double> > > LibSVMPoint;
 inline std::vector<LibSVMPoint> 
-import_libsvm_reader(
+importSparseDataReader(
 	std::istream& stream
 ) {	
 	std::vector<LibSVMPoint>  fileContents;
@@ -62,7 +62,7 @@ import_libsvm_reader(
 		);
 		if(!r || first != last){
 			std::cout<<std::string(first,last)<<std::endl;
-			throw SHARKEXCEPTION("[import_libsvm_reader] problems parsing file");
+			throw SHARKEXCEPTION("[importSparseDataReader] problems parsing file");
 		
 		}
 		
@@ -78,7 +78,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 	std::size_t batchSize
 ){
 	//read contents of stream
-	std::vector<LibSVMPoint> contents = import_libsvm_reader(stream);
+	std::vector<LibSVMPoint> contents = importSparseDataReader(stream);
 	std::size_t numPoints = contents.size();
 	
 	//find data dimension by getting the maximum index
@@ -151,7 +151,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 
 }
 
-void shark::import_libsvm(
+void shark::importSparseData(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex,
@@ -160,7 +160,7 @@ void shark::import_libsvm(
 	dataset =  libsvm_importer<RealVector>(stream, highestIndex,batchSize);
 }
 
-void shark::import_libsvm(
+void shark::importSparseData(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex,
@@ -170,24 +170,24 @@ void shark::import_libsvm(
 }
 
 
-void shark::import_libsvm(
+void shark::importSparseData(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex,
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
-	if (! ifs.good()) throw SHARKEXCEPTION("[shark::import_libsvm] failed to open file for input");
+	if (! ifs.good()) throw SHARKEXCEPTION("[shark::importSparseData] failed to open file for input");
 	dataset =  libsvm_importer<RealVector>(ifs, highestIndex,batchSize);
 }
 
-void shark::import_libsvm(
+void shark::importSparseData(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex,
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
-	if (! ifs.good()) throw SHARKEXCEPTION("[shark::import_libsvm] failed to open file for input");
+	if (! ifs.good()) throw SHARKEXCEPTION("[shark::importSparseData] failed to open file for input");
 	dataset =  libsvm_importer<CompressedRealVector>(ifs, highestIndex,batchSize);
 }

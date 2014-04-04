@@ -22,7 +22,7 @@ Data preparation
 %%%%%%%%%%%%%%%%
 
 Next we would like some data to classify. We can use the :doxy:`Dataset`
-class for holding the data, and load the data with ``import_csv``::
+class for holding the data, and load the data with ``importCSV``::
 
 ..sharkcode<Supervised/quickstartTutorial.tpp,load_data>
 
@@ -41,7 +41,7 @@ To apply the Shark program to these data, you have to pass the filename as a com
 
 If you open that file you will see that it contains the label information in the last
 column while the preceding two columns represent the input data points. For this reason,
-the argument ``LAST_COLUMN`` was passed to ``import_csv``. The data formats supported by
+the argument ``LAST_COLUMN`` was passed to ``importCSV``. The data formats supported by
 Shark are in detail described in the :ref:`data tutorials <label_for_data_tutorials>`.
 
 We want to use only one part of all available data for training, and

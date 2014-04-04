@@ -48,18 +48,8 @@ using namespace shark;
 
 int main()
 {
-	// load data
+	// data container
 	UnlabeledData<RealVector> data;
-	try
-	{
-		import_csv(data, "faithful.csv");
-	}
-	catch (std::exception const& ex)
-	{
-		std::cerr << "EXCEPTION loading data: " << ex.what() << std::endl
-			<< "Please make sure that the file 'faithful.csv' can be found." << std::endl;
-		exit(1);
-	}
 
 //###begin<training1>
 	// create and train data normalizer

@@ -36,9 +36,9 @@
 //===========================================================================
 
 //###begin<includes>
-#include <shark/Data/Csv.h> //importing csv files
-#include <shark/Algorithms/Trainers/CARTTrainer.h> //the CART trainer
-#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //zero one loss for evaluation
+#include <shark/Data/Csv.h>                            // importing CSV files
+#include <shark/Algorithms/Trainers/CARTTrainer.h>     // the CART trainer
+#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> // 0/1 loss for evaluation
 //###end<includes>
 #include <iostream> 
 
@@ -53,7 +53,7 @@ int main() {
 	//###begin<load>
 	// read data
 	ClassificationDataset dataTrain;
-        import_csv(dataTrain, "data/C.csv", LAST_COLUMN, ' ');
+	importCSV(dataTrain, "data/C.csv", LAST_COLUMN, ' ');
 
 
 	//Split the dataset into a training and a test dataset

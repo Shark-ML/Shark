@@ -72,12 +72,12 @@ The code for reading the data may look like this: ::
 We read in two ``Data`` objects holding the *l* samples and their
 labels.  Both the input data points and the labels are real vectors
 and accordingly of the type ``RealVector``, in our simple example
-1-dimensional vectors.  The function ``import_csv`` is used for
+1-dimensional vectors.  The function ``importCSV`` is used for
 loading the data from the files, as described in the
 :doc:`../concepts/data/import_data` tutorial.  The inputs and the labels are combined
 to a regression data set, which is just another name for
-``LabeledData<RealVector, RealVector>``.  For using ``import_csv``, we
-need: ::
+``LabeledData<RealVector, RealVector>``.
+For ``importCSV`` we need: ::
 
 ..sharkcode<Supervised/linearRegressionTutorial.tpp,csv_include>
 

@@ -19,8 +19,8 @@ RegressionDataset loadData(const std::string& dataFile,const std::string& labelF
 	Data<RealVector> inputs;
 	Data<RealVector> labels;
 	try {
-		import_csv(inputs, dataFile, ' ');
-		import_csv(labels, labelFile, ' ');
+		importCSV(inputs, dataFile, ' ');
+		importCSV(labels, labelFile, ' ');
 	} catch (...) {
 		cerr << "Unable to open file " <<  dataFile << " and/or " << labelFile << ". Check paths!" << endl;
 		exit(EXIT_FAILURE);

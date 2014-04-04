@@ -59,7 +59,7 @@ inline std::vector<T> importCSVReaderSingleValue(
 
 	if(!r || first != last){
 		std::cout<<comment<<"\n"<<std::string(first,last)<<std::endl;
-		throw SHARKEXCEPTION("[import_csv_reader_value] problems parsing file (1)");
+		throw SHARKEXCEPTION("[importCSVReaderSingleValue] problems parsing file (1)");
 	}
 	return fileContents;
 }
@@ -103,7 +103,7 @@ inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 	}
 
 	if(!r || first != last){
-		throw SHARKEXCEPTION("[import_csv_reader_values] problems parsing file (2)");
+		throw SHARKEXCEPTION("[importCSVReaderSingleValues] problems parsing file (2)");
 	}
 	return fileContents;
 }
@@ -392,7 +392,7 @@ void shark::csvStringToData(
 
 ///////////////IMPORT WRAPPERS
 
-void shark::import_csv(
+void shark::importCSV(
 	LabeledData<RealVector, unsigned int>& data,
 	std::string fn,
 	LabelPosition lp,
@@ -407,12 +407,12 @@ void shark::import_csv(
 		streamBegin,
 		std::istream_iterator<char>()
 	);
-	//call th actual parser
+	//call the actual parser
 	csvStringToData(data,contents,lp,separator,comment,maximumBatchSize);
 }
 
 
-void shark::import_csv(
+void shark::importCSV(
 	LabeledData<RealVector, RealVector>& data,
 	std::string fn,
 	LabelPosition lp,
@@ -428,6 +428,6 @@ void shark::import_csv(
 		streamBegin,
 		std::istream_iterator<char>()
 	);
-	//call th actual parser
+	//call the actual parser
 	csvStringToData(data,contents,lp, numberOfOutputs, separator,comment,maximumBatchSize);
 }

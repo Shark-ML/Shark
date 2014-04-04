@@ -597,8 +597,8 @@ public:
 
 	///\brief Construction from data.
 	///
-	///Beware that when calling this constructor the organization of batches must be equal in both
-        ///containers. This Constructor will not split the data!
+	/// Beware that when calling this constructor the organization of batches must be equal in both
+	/// containers. This Constructor will not split the data!
 	LabeledData(Data<InputType> const& inputs, Data<LabelType> const& labels)
 	: m_data(inputs), m_label(labels)
 	{
