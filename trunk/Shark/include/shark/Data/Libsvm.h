@@ -5,9 +5,7 @@
  * \brief   Deprecated import_libsvm and export_libsvm functions.
  * 
  * 
- * \par
- * This file is provided for backwards compatibility.
- * Its is deprecated, use SparseData.h for new projects.
+ * \deprecated This file is provided for backwards compatibility. Its is deprecated, use SparseData.h for new projects.
  * 
  * 
  * 
@@ -52,7 +50,7 @@ namespace shark {
 
 /// \brief Import data from a LIBSVM file.
 ///
-/// \deprecated { use importSparseData instead }
+/// \deprecated use importSparseData instead
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  stream        stream to be read from
@@ -68,7 +66,7 @@ inline void import_libsvm(
 
 /// \brief Import data from a LIBSVM file.
 ///
-/// \deprecated { use importSparseData instead }
+/// \deprecated use importSparseData instead
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  stream        stream to be read from
@@ -84,7 +82,7 @@ inline void import_libsvm(
 
 /// \brief Import data from a LIBSVM file.
 ///
-/// \deprecated { use importSparseData instead }
+/// \deprecated use importSparseData instead
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  fn            the file to be read from
@@ -100,7 +98,7 @@ inline void import_libsvm(
 
 /// \brief Import data from a LIBSVM file.
 ///
-/// \deprecated { use importSparseData instead }
+/// \deprecated use importSparseData instead
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  fn            the file to be read from
@@ -117,7 +115,7 @@ inline void import_libsvm(
 
 /// \brief Export data to LIBSVM format.
 ///
-/// \deprecated { use exportSparseData instead }
+/// \deprecated use exportSparseData instead
 ///
 /// \param  dataset     Container storing the  data
 /// \param  fn          Output file
