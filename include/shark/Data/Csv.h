@@ -412,6 +412,15 @@ void exportCSV(
 
 
 
+/// \brief Import a Dataset from a csv file
+///
+/// \deprecated use importCSV instead
+///
+/// \param  data       Container storing the loaded data
+/// \param  fn         The file to be read from
+/// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
+/// \param  comment    Trailing character indicating comment line. By dfault it is '#'
+/// \param  maximumBatchSize   Size of batches in the dataset
 template<class T>
 inline void import_csv(
 	Data<T>& data,
@@ -423,7 +432,7 @@ inline void import_csv(
 
 /// \brief Import a labeled Dataset from a csv file
 ///
-/// \deprecated { use importCSV instead }
+/// \deprecated use importCSV instead
 ///
 /// \param  data       Container storing the loaded data
 /// \param  fn         The file to be read from
@@ -444,7 +453,7 @@ inline void import_csv(
 
 /// \brief Import a labeled Dataset from a csv file
 ///
-/// \deprecated { use importCSV instead }
+/// \deprecated use importCSV instead
 ///
 /// \param  data       Container storing the loaded data
 /// \param  fn         The file to be read from
@@ -466,7 +475,7 @@ inline void import_csv(
 
 /// \brief Format unlabeled data into a character-separated value file.
 ///
-/// \deprecated { use exportCSV instead }
+/// \deprecated use exportCSV instead
 ///
 /// \param  set       Container to be exported
 /// \param  fn         The file to be written to
@@ -486,7 +495,7 @@ inline void export_csv(
 
 /// \brief Format labeled data into a character-separated value file.
 ///
-/// \deprecated { use exportCSV instead }
+/// \deprecated use exportCSV instead
 ///
 /// \param  dataset    Container to be exported
 /// \param  fn         The file to be written to
