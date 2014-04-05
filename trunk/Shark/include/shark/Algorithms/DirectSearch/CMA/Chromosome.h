@@ -45,7 +45,9 @@ struct CMAChromosome{
 		Unsuccessful = 2,
 		Failure = 3
 	};
-	MultiVariateNormalDistribution m_mutationDistribution; ///< Models the search distribution.
+	MultiVariateNormalDistributionCholesky m_mutationDistribution; ///< Models the search distribution using a cholsky matrix
+	//~ MultiVariateNormalDistribution m_mutationDistribution; ///< Models the search distribution using a cholsky matrix
+	RealMatrix m_inverseCholesky;///< inverse cholesky matrix
 
 	RealVector m_evolutionPath; ///< Low-pass filtered accumulation of successful mutative steps.
 	RealVector m_lastStep; ///< The most recent mutative step.
@@ -59,7 +61,6 @@ struct CMAChromosome{
 	double m_covarianceMatrixLearningRate; ///< Learning rate (constant) for updating the covariance matrix.
 	double m_covarianceMatrixUnlearningRate; ///< Learning rate (constant) for unlearning unsuccessful directions from the covariance matrix.
 
-	bool m_needsCovarianceUpdate; ///< If true, the covariance matrix of the search distribution needs to be updated.
 	double m_successThreshold; ///< Success threshold \f$p_{\text{thresh}}\f$ for cutting off evolution path updates.
 
 	CMAChromosome(){}
@@ -70,10 +71,10 @@ struct CMAChromosome{
 	)
 	: m_stepSize( initialStepSize )
 	, m_covarianceMatrixLearningRate( 0 )
-	, m_needsCovarianceUpdate( false )
 	, m_successThreshold(successThreshold)
 	{
 		m_mutationDistribution.resize( searchSpaceDimension );
+		m_inverseCholesky = blas::identity_matrix<double>( searchSpaceDimension );
 		m_evolutionPath.resize( searchSpaceDimension );
 		m_lastStep.resize( searchSpaceDimension );
 
@@ -101,20 +102,27 @@ struct CMAChromosome{
 		m_successProbability = (1 - m_stepSizeLearningRate) * m_successProbability + m_stepSizeLearningRate;
 		m_stepSize *= ::exp( 1./m_stepSizeDampingFactor * (m_successProbability - m_targetSuccessProbability) / (1-m_targetSuccessProbability) );
 		
-		RealMatrix & C = m_mutationDistribution.covarianceMatrix();
+		//~ RealMatrix & C = m_mutationDistribution.covarianceMatrix();
 		double evolutionpathUpdateWeight=m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate );
 		if( m_successProbability < m_successThreshold ) {
 			m_evolutionPath *= 1 - m_evolutionPathLearningRate;
 			noalias(m_evolutionPath) += std::sqrt( evolutionpathUpdateWeight ) * m_lastStep;
-			C *= 1 - m_covarianceMatrixLearningRate;
-			noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
+			rankOneUpdate(1 - m_covarianceMatrixLearningRate,m_covarianceMatrixLearningRate,m_evolutionPath);
+			
+			//~ C *= 1 - m_covarianceMatrixLearningRate;
+			//~ noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
 		} else {
 			m_evolutionPath *= 1 - m_evolutionPathLearningRate;
-			C  *= 1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight;
-			noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
+			rankOneUpdate(
+				1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight,
+				m_covarianceMatrixLearningRate,
+				m_evolutionPath
+			);
+			//~ C  *= 1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight;
+			//~ noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
 		}
 		
-		m_mutationDistribution.update();
+		//~ m_mutationDistribution.update();
 	}
 	
 	/**
@@ -132,7 +140,7 @@ struct CMAChromosome{
 		
 		if(offspringSuccess != Failure) return;
 		
-		RealMatrix & C = m_mutationDistribution.covarianceMatrix();
+		//~ RealMatrix & C = m_mutationDistribution.covarianceMatrix();
 		if( m_successProbability < m_successThreshold ) {
 			//check whether the step is admissible with the proposed update weight
 			double rate = m_covarianceMatrixUnlearningRate;
@@ -141,15 +149,21 @@ struct CMAChromosome{
 				rate = 0.5/(2*stepNormSqr-1);//make the update shorter
 				return;
 			}
-			noalias(C) = (1-rate)*C - rate * outer_prod( m_lastStep, m_lastStep );
+			rankOneUpdate(1-rate,rate,m_lastStep);
+			//~ noalias(C) = (1-rate)*C - rate * outer_prod( m_lastStep, m_lastStep );
 		} else {
 			double evolutionpathUpdateWeight=m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate );
 			m_evolutionPath *= 1 - m_evolutionPathLearningRate;
-			C  *= 1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight;
-			noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
+			rankOneUpdate(
+				1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight,
+				m_covarianceMatrixLearningRate,
+				m_evolutionPath
+			);
+			//~ C  *= 1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight;
+			//~ noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
 		}
 
-		m_mutationDistribution.update();
+		//~ m_mutationDistribution.update();
 	}
 
 	/**
@@ -162,6 +176,7 @@ struct CMAChromosome{
 	void serialize( Archive & archive, const unsigned int version ) {
 
 		archive & BOOST_SERIALIZATION_NVP( m_mutationDistribution );
+		archive & BOOST_SERIALIZATION_NVP( m_inverseCholesky );
 
 		archive & BOOST_SERIALIZATION_NVP( m_evolutionPath );
 		archive & BOOST_SERIALIZATION_NVP( m_lastStep );
@@ -174,8 +189,22 @@ struct CMAChromosome{
 		archive & BOOST_SERIALIZATION_NVP( m_evolutionPathLearningRate );
 		archive & BOOST_SERIALIZATION_NVP( m_covarianceMatrixLearningRate );
 		archive & BOOST_SERIALIZATION_NVP( m_covarianceMatrixUnlearningRate );
+	}
+private:
+	/// \brief Performs a rank one update to the cholesky factor. 
 
-		archive & BOOST_SERIALIZATION_NVP( m_needsCovarianceUpdate );
+	/// This also requries an update of the inverse cholesky factor, that is the only reason, it exists.
+	void rankOneUpdate(double alpha, double beta, RealVector const& v){
+		RealVector w =prod(m_inverseCholesky,v);
+		RealVector wInv =prod(w,m_inverseCholesky);
+		
+		double normWSqr =norm_sqr(w);
+		double a = std::sqrt(alpha);
+		double root = std::sqrt(1+beta/alpha*normWSqr);
+		double b = a/normWSqr * (root-1);
+		RealMatrix& A =m_mutationDistribution.lowerCholeskyFactor();
+		noalias(A) =a*A+b*outer_prod(v,w);
+		noalias(m_inverseCholesky) = 1.0/a * m_inverseCholesky - b/ (a*a+a*b*normWSqr)*outer_prod(w,wInv);
 	}
 };
 }
