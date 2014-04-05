@@ -28,7 +28,7 @@ BOOST_PARAMETER_FUNCTION(
      (fstop, *, 1E-10)
      )) {
 
-  boost::progress_display pd( trials * iterations );
+  //~ boost::progress_display pd( trials * iterations );
 		
   shark::Statistics stats;
 
@@ -41,14 +41,15 @@ BOOST_PARAMETER_FUNCTION(
       optimizer.step( function );
       error=optimizer.solution().value;
 
-      ++pd;
+      //~ ++pd;
 
       if( fstop > error )
         break;
     }
+    std::cout<<error<<" ";
     stats( error );
   }
-
+  std::cout<<std::endl;
   BOOST_CHECK_SMALL( stats( shark::Statistics::Median() ), epsilon );
 }
 }
