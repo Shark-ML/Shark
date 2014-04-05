@@ -53,7 +53,7 @@ public:
 	/// \brief The constructor 
 	///
 	///@param rbm pointer to the RBM which shell be trained 
-	ContrastiveDivergence(RBM* rbm):mpe_rbm(rbm),m_operator(rbm),m_k(1){
+	ContrastiveDivergence(RBM* rbm):mpe_rbm(rbm),m_operator(rbm),m_k(1), m_numBatches(0){
 		SHARK_ASSERT(rbm != NULL);
 
 		base_type::m_features.reset(base_type::HAS_VALUE);
@@ -104,6 +104,20 @@ public:
 		return mpe_rbm->numberOfParameters();
 	}
 	
+	/// \brief Returns the number of batches of the dataset that are used in every iteration.
+	///
+	/// If it is less than all batches, the batches are chosen at random. if it is 0, all batches are used
+	std::size_t numBatches()const{
+		return m_numBatches;
+	}
+	
+	/// \brief Returns a reference to the number of batches of the dataset that are used in every iteration.
+	///
+	/// If it is less than all batches, the batches are chosen at random.if it is 0, all batches are used.
+	std::size_t& numBatches(){
+		return m_numBatches;
+	}
+	
 	/// \brief Gives the CD-k approximation of the log-likelihood gradient.
 	///
 	/// @param parameter the actual parameters of the RBM
@@ -113,9 +127,24 @@ public:
 		derivative.resize(mpe_rbm->numberOfParameters());
 		derivative.clear();
 		
-		std::size_t threads = std::min<std::size_t>(m_data.numberOfBatches(),SHARK_NUM_THREADS);
-		std::size_t numBatches = m_data.numberOfBatches()/threads;
-		std::size_t elements = m_data.numberOfElements();
+		std::size_t batchesForTraining = m_numBatches > 0? m_numBatches: m_data.numberOfBatches();
+		std::size_t elements = 0;
+		//get the batches for this iteration
+		std::vector<std::size_t> batchIds(m_data.numberOfBatches());
+		{
+			for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
+				batchIds[i] = i;
+			}
+			DiscreteUniform<typename RBM::RngType> uni(mpe_rbm->rng(),0,1);
+			std::random_shuffle(batchIds.begin(),batchIds.end(),uni);
+			for(std::size_t i = 0; i != batchesForTraining; ++i){
+				elements += m_data.batch(batchIds[i]).size1();
+			}
+		}
+		
+		std::size_t threads = std::min<std::size_t>(batchesForTraining,SHARK_NUM_THREADS);
+		std::size_t numBatches = batchesForTraining/threads;
+		
 		
 		SHARK_PARALLEL_FOR(size_t t = 0; t < threads; ++t){
 			AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
@@ -124,16 +153,16 @@ public:
 			std::size_t threadElements = 0;
 			
 			std::size_t batchStart = t*numBatches;
-			std::size_t batchEnd = (t== threads-1)? m_data.numberOfBatches() : batchStart+numBatches;
+			std::size_t batchEnd = (t== threads-1)? batchesForTraining : batchStart+numBatches;
 			for(std::size_t i = batchStart; i != batchEnd; ++i){
-				RealMatrix const& batch = m_data.batch(i);
+				RealMatrix const& batch = m_data.batch(batchIds[i]);
 				threadElements += batch.size1();
 				
 				//create the batches for evaluation
 				typename Operator::HiddenSampleBatch hiddenBatch(batch.size1(),mpe_rbm->numberOfHN());
 				typename Operator::VisibleSampleBatch visibleBatch(batch.size1(),mpe_rbm->numberOfVN());
 				
-				visibleBatch.state = m_data.batch(i);
+				visibleBatch.state = batch;
 				m_operator.precomputeHidden(hiddenBatch,visibleBatch,blas::repeat(1.0,batch.size1()));
 				SHARK_CRITICAL_REGION{
 					m_operator.sampleHidden(hiddenBatch);
@@ -168,6 +197,7 @@ private:
 	RBM* mpe_rbm;
 	Operator m_operator;
 	unsigned int m_k;
+	std::size_t m_numBatches;///< number of batches used in every iteration. 0 means all.
 };	
 	
 }

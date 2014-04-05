@@ -27,29 +27,67 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_UNSUPERVISED_RBM_DATAEVALUATOR_H
-#define SHARK_UNSUPERVISED_RBM_DATAEVALUATOR_H
+#ifndef SHARK_UNSUPERVISED_RBM_IMPL_DATAEVALUATOR_H
+#define SHARK_UNSUPERVISED_RBM_IMPL_DATAEVALUATOR_H
 
 #include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
+#include <algorithm>
 namespace shark{
 namespace detail{
 ///\brief function used by gradient approximators to calculate the gradient of the data
-template<class AverageEnergyGradient,class VectorType,class RBM>
-void evaluateData( AverageEnergyGradient& averageGradient, Data<VectorType> const& data, RBM& rbm ){
+template<class VectorType,class RBM>
+RealVector evaluateData(Data<VectorType> const& data, RBM& rbm, std::size_t batchesForTraining = 0 ){
 	typedef GibbsOperator<RBM> Operator;
-	typedef Batch<typename Operator::HiddenSample> HiddenTraits;
-	typedef Batch<typename Operator::VisibleSample> VisibleTraits;
+	Operator gibbs(&rbm);
 	
-	Operator dataEvaluator(&rbm);
-	
-	//calculate the expectation of the energy gradient with respect to the data
-	BOOST_FOREACH(RealMatrix const& batch,data.batches()) {
-		typename HiddenTraits::type hiddenSamples(batch.size1(),rbm.numberOfHN());
-		typename VisibleTraits::type visibleSamples(batch.size1(),rbm.numberOfVN());
-		
-		dataEvaluator.createSample(hiddenSamples,visibleSamples,batch);
-		averageGradient.addVH(hiddenSamples, visibleSamples);
+	if( batchesForTraining == 0){
+		batchesForTraining =  data.numberOfBatches();
 	}
+	
+	std::size_t elements = 0;
+	//get the batches for this iteration
+	std::vector<std::size_t> batchIds(data.numberOfBatches());
+	{
+		for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
+			batchIds[i] = i;
+		}
+		DiscreteUniform<typename RBM::RngType> uni(rbm.rng(),0,1);
+		std::random_shuffle(batchIds.begin(),batchIds.end(),uni);
+		for(std::size_t i = 0; i != batchesForTraining; ++i){
+			elements += data.batch(batchIds[i]).size1();
+		}
+	}
+	
+	RealVector derivative(rbm.numberOfParameters(),0);
+	
+	std::size_t threads = std::min<std::size_t>(batchesForTraining,SHARK_NUM_THREADS);
+	std::size_t numBatches = batchesForTraining/threads;
+	
+	SHARK_PARALLEL_FOR(size_t t = 0; t < threads; ++t){
+		AverageEnergyGradient<RBM> empiricalAverage(&rbm);
+		
+		std::size_t threadElements = 0;
+		
+		std::size_t batchStart = t*numBatches;
+		std::size_t batchEnd = (t== threads-1)? batchesForTraining : batchStart+numBatches;
+		for(std::size_t i = batchStart; i != batchEnd; ++i){
+			RealMatrix const& batch = data.batch(batchIds[i]);
+			threadElements += batch.size1();
+			
+			//create the batches for evaluation
+			typename Operator::HiddenSampleBatch hiddenBatch(batch.size1(),rbm.numberOfHN());
+			typename Operator::VisibleSampleBatch visibleBatch(batch.size1(),rbm.numberOfVN());
+			
+			visibleBatch.state = batch;
+			gibbs.precomputeHidden(hiddenBatch,visibleBatch,blas::repeat(1.0,batch.size1()));
+			empiricalAverage.addVH(hiddenBatch,visibleBatch);
+		}
+		SHARK_CRITICAL_REGION{
+			double weight = threadElements/double(elements);
+			noalias(derivative) += weight* empiricalAverage.result();
+		}
+	}
+	return derivative;
 }
 
 }

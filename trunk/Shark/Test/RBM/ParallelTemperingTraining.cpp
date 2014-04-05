@@ -19,13 +19,8 @@ BOOST_AUTO_TEST_CASE( ParallelTemperingTraining_Bars ){
 	std::size_t numHidden = 8;
 	std::size_t numTemperatures = 5;
 	double learningRate = 0.1;
-	bool save = false;
 	
-	
-	std::size_t numUpdates = steps/updateStep+(steps%updateStep > 0); 
-	std::vector<std::vector<double> > results(trials,std::vector<double>(numUpdates));
-	
-	BarsAndStripes problem;
+	BarsAndStripes problem(8);
 	UnlabeledData<RealVector> data = problem.data();
 	
 	for(unsigned int trial = 0; trial != trials; ++trial){
@@ -44,6 +39,7 @@ BOOST_AUTO_TEST_CASE( ParallelTemperingTraining_Bars ){
 			double factor = numTemperatures - 1;
 			cd.chain().setBeta(i,1.0 - i/factor);
 		}
+		cd.numBatches()=2;
 		cd.setData(data);
 
 		SteepestDescent optimizer;
@@ -57,20 +53,9 @@ BOOST_AUTO_TEST_CASE( ParallelTemperingTraining_Bars ){
 				rbm.setParameterVector(optimizer.solution().point);
 				logLikelyHood = negativeLogLikelihood(rbm,data);
 				std::cout<<i<<" "<<logLikelyHood<<std::endl;
-				results[trial][i/updateStep] = logLikelyHood;
 			}
 			optimizer.step(cd);
 		}
 		BOOST_CHECK( logLikelyHood<200.0 );
-	}
-	if(save){
-		std::ofstream file("resultNewPT.txt");
-		for(std::size_t i = 0; i != numUpdates; ++i){
-			file<<i<<" ";
-			for(unsigned int trial = 0; trial != trials; ++trial){
-				file << results[trial][i]<<" ";
-			}
-			file<<std::endl;
-		}
 	}
 }
