@@ -3,8 +3,8 @@
  *
  * \brief       -
  *
- * \author      -
- * \date        -
+ * \author      O. Krause, A.Fischer
+ * \date        2012-2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
