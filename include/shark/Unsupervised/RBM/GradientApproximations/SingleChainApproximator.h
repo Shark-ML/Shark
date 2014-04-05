@@ -49,7 +49,10 @@ public:
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
 	
 	
-	SingleChainApproximator(RBM* rbm): mpe_rbm(rbm),m_chain(rbm),m_k(1),m_samples(0),m_batchSize(500){
+	SingleChainApproximator(RBM* rbm)
+	: mpe_rbm(rbm),m_chain(rbm),m_k(1)
+	,m_samples(0),m_batchSize(500)
+	,m_numBatches(0){
 		SHARK_ASSERT(rbm != NULL);
 
 		base_type::m_features.reset(base_type::HAS_VALUE);
@@ -69,9 +72,21 @@ public:
 	void setNumberOfSamples(std::size_t samples){
 		m_samples = samples;
 	}
-	void setBatchSize(std::size_t batchSize){
-		m_batchSize = batchSize;
+	
+	/// \brief Returns the number of batches of the dataset that are used in every iteration.
+	///
+	/// If it is less than all batches, the batches are chosen at random. if it is 0, all batches are used
+	std::size_t numBatches()const{
+		return m_numBatches;
 	}
+	
+	/// \brief Returns a reference to the number of batches of the dataset that are used in every iteration.
+	///
+	/// If it is less than all batches, the batches are chosen at random.if it is 0, all batches are used.
+	std::size_t& numBatches(){
+		return m_numBatches;
+	}
+	
 	
 	MarkovChainType& chain(){
 		return m_chain;
@@ -106,10 +121,8 @@ public:
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
 		mpe_rbm->setParameterVector(parameter);
 		
-		AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
 		AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
-		
-		detail::evaluateData(empiricalAverage,m_data,*mpe_rbm);
+		RealVector empiricalAverage = detail::evaluateData(m_data,*mpe_rbm,m_numBatches);
 		
 		//approximate the expectation of the energy gradient with respect to the model distribution
 		//using samples from the Markov chain
@@ -141,7 +154,7 @@ public:
 		}
 		
 		derivative.resize(mpe_rbm->numberOfParameters());
-		noalias(derivative) = modelAverage.result() - empiricalAverage.result();
+		noalias(derivative) = modelAverage.result() - empiricalAverage;
 	
 		return std::numeric_limits<double>::quiet_NaN();
 	}
@@ -154,6 +167,7 @@ private:
 	unsigned int m_k;
 	unsigned int m_samples;
 	std::size_t m_batchSize;
+	std::size_t m_numBatches;
 };	
 	
 }
