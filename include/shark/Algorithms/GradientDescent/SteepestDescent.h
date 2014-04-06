@@ -35,12 +35,11 @@
 #define SHARK_ML_OPTIMIZER_STEEPESTDESCENT_H
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark{
 
 ///@brief Standard steepest descent.
-class SteepestDescent : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+class SteepestDescent : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
 	SteepestDescent() {
@@ -62,7 +61,7 @@ public:
 		m_best.point = startingPoint;
 		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 	}
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
 	void configure( const PropertyTree & node ) {
 		m_learningRate=node.get("learningRate",0.1);

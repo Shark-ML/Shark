@@ -36,9 +36,6 @@
 #define SHARK_ML_OPTIMIZER_NOISYRPROP_H
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
-
-
 namespace shark{
 
 //!
@@ -56,7 +53,7 @@ namespace shark{
 //! of course, slower than the Rprop algorithm, but it can
 //! handle noisy problems with noisy gradient information.
 //!
-class NoisyRprop : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+class NoisyRprop : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
 	NoisyRprop();
@@ -65,7 +62,7 @@ public:
 	std::string name() const
 	{ return "Noisy Rprop"; }
 
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	//! initialization with default values
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 

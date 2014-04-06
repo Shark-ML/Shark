@@ -41,34 +41,8 @@
 #include <shark/Core/Flags.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/ObjectiveFunctions/AbstractConstraintHandler.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
-/** \cond */
-	/// \brief Models a vector space objective function storing the number of variables.
-	/// 
-	/// AbstractObjectiveFunction derives itself from this interface, when the search space type
-	/// is a vector space and thus the notion of a number of variabls makes sense. This class is 
-	/// otherwise not intended for direct use.
-	class AbstractVectorSpaceObjectiveFunction {
-	public:
-		/// \brief Virtual d'tor.
-		virtual ~AbstractVectorSpaceObjectiveFunction() {}
-
-		/// \brief Accesses the number of variables
-		virtual std::size_t numberOfVariables() const=0;
-			
-		virtual bool hasScalableDimensionality()const{
-			return false;
-		}
-
-		/// \brief Adjusts the number of variables if the function is scalable.
-		/// \param [in] numberOfVariables The new dimension.
-		virtual void setNumberOfVariables( std::size_t numberOfVariables ){
-			throw SHARKEXCEPTION("dimensionality of function is not scalable");
-		}
-	};
-/** \endcond */
 
 /// \brief Super class of all objective functions for optimization and learning.
 
@@ -103,17 +77,12 @@ namespace shark {
 /// The features can be queried using the method features() as in
 /// if(!(f.features()&Function::HAS_VALUE))
 
-/// \tparam SearchSpaceT The search space the function is defined upon.
+/// \tparam PointType The search space the function is defined upon.
 /// \tparam ResultT The objective space the function is defined upon.
-template <typename SearchSpaceT, typename ResultT>
-class AbstractObjectiveFunction : public IConfigurable, 
-	public INameable, 
-	/** \cond */
-	public boost::mpl::if_c< SearchSpaceT::IS_VECTOR_SPACE, AbstractVectorSpaceObjectiveFunction, boost::mpl::void_ >::type
-	/** \endcond */{
+template <typename PointType, typename ResultT>
+class AbstractObjectiveFunction : public IConfigurable, public INameable{
 public:
-	typedef SearchSpaceT SearchSpaceType;
-	typedef typename SearchSpaceT::PointType SearchPointType;
+	typedef PointType SearchPointType;
 	typedef ResultT ResultType;
 
 	typedef SearchPointType FirstOrderDerivative;
@@ -189,6 +158,19 @@ public:
 	}
 
 	virtual void init() {}
+	
+	/// \brief Accesses the number of variables
+	virtual std::size_t numberOfVariables() const=0;
+		
+	virtual bool hasScalableDimensionality()const{
+		return false;
+	}
+
+	/// \brief Adjusts the number of variables if the function is scalable.
+	/// \param [in] numberOfVariables The new dimension.
+	virtual void setNumberOfVariables( std::size_t numberOfVariables ){
+		throw SHARKEXCEPTION("dimensionality of function is not scalable");
+	}
 		
 	virtual std::size_t numberOfObjectives() const{
 		return 1;
@@ -305,8 +287,8 @@ protected:
 	}
 };
 
-typedef AbstractObjectiveFunction< VectorSpace< double >, double > SingleObjectiveFunction;
-typedef AbstractObjectiveFunction< VectorSpace< double >, RealVector > MultiObjectiveFunction;
+typedef AbstractObjectiveFunction< RealVector, double > SingleObjectiveFunction;
+typedef AbstractObjectiveFunction< RealVector, RealVector > MultiObjectiveFunction;
 
 }
 

@@ -144,11 +144,11 @@ BOOST_AUTO_TEST_CASE( MOCMA_SERIALIZATION ) {
 		Rng::seed( 1 );
 		FastRng::seed( 1 );
 		mocma.step( dtlz1 );
-		MOCMA::SolutionSetType set1 = mocma.solution();
+		MOCMA::SolutionType set1 = mocma.solution();
 		Rng::seed( 1 );
 		FastRng::seed( 1 );
 		mocma2.step( dtlz1 );
-		MOCMA::SolutionSetType set2 = mocma2.solution();
+		MOCMA::SolutionType set2 = mocma2.solution();
 
 		for( unsigned int i = 0; i < set1.size(); i++ ) {
 			BOOST_CHECK_SMALL( norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );

@@ -54,7 +54,7 @@ public:
 	    Dlinmin,
 	    WolfeCubic
 	};
-	typedef AbstractObjectiveFunction<VectorSpace<double>,double> ObjectiveFunction;
+	typedef AbstractObjectiveFunction<RealVector,double> ObjectiveFunction;
 
 	///Initializes the internal variables of the class to useful default values.
 	///Dlinmin is used as default

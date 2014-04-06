@@ -6,9 +6,9 @@
 
 using namespace shark;
 
-struct TestFunction : public AbstractObjectiveFunction<VectorSpace<double>,double>
+struct TestFunction : public SingleObjectiveFunction
 {
-	typedef AbstractObjectiveFunction<VectorSpace<double>,double> Base;
+	typedef SingleObjectiveFunction Base;
 
 	RealMatrix A;
 	bool m_noisy;

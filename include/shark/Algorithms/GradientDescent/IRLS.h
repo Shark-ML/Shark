@@ -37,7 +37,6 @@
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Algorithms/GradientDescent/LineSearch.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
 
@@ -51,12 +50,12 @@ namespace shark {
 /// memory tand O(n^3) runtime. So for large scale problems
 ///use CG or BFGS instead.
 ///TODO: implement backtracking linesearch for this 
-class IRLS : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+class IRLS : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
 	IRLS();
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	
 	/// \brief From INameable: return the class name.
 	std::string name() const

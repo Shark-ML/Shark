@@ -68,7 +68,7 @@ namespace shark {
  *
  * http://www.scholarpedia.org/article/Evolution_strategies
  */
-class OnePlusOneES : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >{	    
+class OnePlusOneES : public AbstractSingleObjectiveOptimizer<RealVector >{	    
 	/**
 	* \brief The individual type of the (1+1)-ES.
 	*/
@@ -107,7 +107,7 @@ public:
 		archive << m_parent;
 	}
 
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	/**
 	* \brief Initializes the algorithm for the supplied objective function.
 	*/

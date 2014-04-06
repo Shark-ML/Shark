@@ -48,7 +48,7 @@ namespace shark {
 ///
 /// \brief Objective function wrapper storing all function evaluations.
 ///
-/// \tparam SearchSpaceT The search space the function is defined upon.
+/// \tparam PointType The search space the function is defined upon.
 /// \tparam ResultT The objective space the function is defined upon.
 ///
 /// \par
@@ -64,14 +64,13 @@ namespace shark {
 /// evaluations are costly (and an archive makes sense) then the
 /// storage and maintenance overhead should be negligible.
 ///
-template <typename SearchSpaceT, typename ResultT>
-class EvaluationArchive : public AbstractObjectiveFunction<SearchSpaceT, ResultT>
+template <typename PointType, typename ResultT>
+class EvaluationArchive : public AbstractObjectiveFunction<PointType, ResultT>
 {
 public:
-	typedef AbstractObjectiveFunction<SearchSpaceT, ResultT> base_type;
-	typedef SearchSpaceT SearchSpaceType;
-	typedef typename SearchSpaceT::PointType SearchPointType;
-	typedef ResultT ResultType;
+	typedef AbstractObjectiveFunction<PointType, ResultT> base_type;
+	typedef typename base_type::SearchPointType SearchPointType;
+	typedef typename base_type::ResultType ResultType;
 
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
 	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
@@ -80,7 +79,7 @@ public:
 	class PointResultPairType
 	{
 	public:
-		PointResultPairType(SearchPointType p, ResultType r)
+		PointResultPairType(SearchPointType const& p, ResultType r)
 		: point(p)
 		, result(r)
 		{ }
@@ -171,7 +170,7 @@ public:
 	/// \brief Wrapper function; conditional on vector space property.
 	std::size_t numberOfVariables() const
 	{
-		AbstractVectorSpaceObjectiveFunction* avsof = dynamic_cast<AbstractVectorSpaceObjectiveFunction*>(mep_objective);
+		base_type* avsof = dynamic_cast<base_type*>(mep_objective);
 		if (avsof) return avsof->numberOfVariables();
 		else throw SHARKEXCEPTION("search space is not a vector space");
 	}

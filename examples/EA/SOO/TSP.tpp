@@ -43,7 +43,6 @@
  *
  */
 
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
@@ -103,8 +102,8 @@ namespace shark {
 	/**
 	 * \brief Calculates the cost of a tour w.r.t. to a cost matrix.
 	 */
-	struct TspTourLength : public shark::AbstractObjectiveFunction< shark::VectorSpace< std::size_t >, double > {
-		typedef shark::AbstractObjectiveFunction< shark::VectorSpace< std::size_t >, double > base_type;
+	struct TspTourLength : public shark::SingleObjectiveFunction{
+		typedef shark::SingleObjectiveFunction base_type;
 
 		/**
 		 * \brief Default c'tor, initializes the cost matrix.

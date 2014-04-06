@@ -37,7 +37,6 @@
 
 
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
-#include <shark/Core/Traits/IsVector.h>
 
 #include <boost/utility/enable_if.hpp>
 namespace shark {
@@ -358,7 +357,7 @@ protected:
 		RealMatrix const& coefficientsX2,
 		State const& state,
 		BatchInputType& gradient,
-		typename boost::enable_if<IsVector<T> >::type* dummy = 0
+		typename boost::enable_if<boost::is_same<T,RealVector > >::type* dummy = 0
 	)const{
 		std::size_t numKernels = m_base.size(); //how far the loop goes;
 		InternalState const& s = state.toState<InternalState>();
@@ -381,7 +380,7 @@ protected:
 		RealMatrix const& coefficientsX2,
 		State const& state,
 		BatchInputType& gradient,
-		typename boost::disable_if<IsVector<T> >::type* dummy = 0
+		typename boost::disable_if<boost::is_same<T,RealVector > >::type* dummy = 0
 	)const{
 		throw SHARKEXCEPTION("[WeightedSumKernel::weightdInputDerivative] The used BatchInputType is no Vector");
 	}

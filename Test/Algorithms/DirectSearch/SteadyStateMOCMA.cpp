@@ -37,10 +37,10 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypSteadyStateMOCMA ) {
 
 		Rng::seed( 0 );
 		ssMocma.step( dtlz1 );
-		SteadyStateMOCMA::SolutionSetType set1 =  ssMocma.solution();
+		SteadyStateMOCMA::SolutionType set1 =  ssMocma.solution();
 		Rng::seed( 0 );
 		ssMocma2.step( dtlz1 );
-		SteadyStateMOCMA::SolutionSetType set2 =  ssMocma2.solution();
+		SteadyStateMOCMA::SolutionType set2 =  ssMocma2.solution();
 
 		for( unsigned int i = 0; i < set1.size(); i++ ) {
 			BOOST_CHECK_SMALL( norm_2( set1.at( i ).value - set2.at( i ).value ), 1E-20 );

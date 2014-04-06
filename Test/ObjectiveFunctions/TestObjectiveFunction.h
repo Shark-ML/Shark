@@ -12,7 +12,7 @@ namespace shark{
 //estimates Derivative using the formula:
 //df(x)/dx~=(f(x+e)-f(x-e))/2e
 inline RealVector estimateDerivative(
-	AbstractObjectiveFunction<VectorSpace<double>, double>& function,
+	SingleObjectiveFunction& function,
 	const RealVector& point,
 	double epsilon=1.e-10
 ){
@@ -30,11 +30,11 @@ inline RealVector estimateDerivative(
 	return gradient;
 }
 inline RealMatrix estimateSecondDerivative(
-	AbstractObjectiveFunction<VectorSpace<double>, double>& function,
+	SingleObjectiveFunction& function,
 	const RealVector& point,
 	double epsilon=1.e-10
 ){
-	typedef AbstractObjectiveFunction<VectorSpace<double>, double>::FirstOrderDerivative Derivative;
+	typedef SingleObjectiveFunction::FirstOrderDerivative Derivative;
 	
 	RealMatrix hessian(point.size(),point.size());
 	for(std::size_t dim=0;dim!=point.size();++dim){
@@ -52,7 +52,7 @@ inline RealMatrix estimateSecondDerivative(
 	return hessian;
 }
 void testDerivative(
-	AbstractObjectiveFunction<VectorSpace<double>, double>& function, 
+	SingleObjectiveFunction& function, 
 	const RealVector& point,
 	double epsilon=1.e-10,
 	double epsilonSecond = 1.e-10,
@@ -63,7 +63,7 @@ void testDerivative(
 	RealVector estimatedDerivative=estimateDerivative(function,point,epsilon);
 
 	//calculate derivative and check that eval() and evalDerivative() match.
-	typedef  AbstractObjectiveFunction<VectorSpace<double>, double> Function;
+	typedef  SingleObjectiveFunction Function;
 	Function::FirstOrderDerivative derivative;
 	double resultEvalDerivative = function.evalDerivative(point,derivative);
 	double resultEval = function.eval(point);

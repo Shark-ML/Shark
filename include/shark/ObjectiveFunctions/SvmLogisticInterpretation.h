@@ -61,11 +61,10 @@ namespace shark {
 /// C-SVM parameters have to be optimized with regard to this measure
 ///
 template<class InputType = RealVector>
-class SvmLogisticInterpretation : public AbstractObjectiveFunction< VectorSpace<double>, double > {
+class SvmLogisticInterpretation : public SingleObjectiveFunction {
 public:
-	typedef AbstractObjectiveFunction< VectorSpace<double>, double > base_type;
+	typedef SingleObjectiveFunction base_type;
 	typedef typename base_type::SearchPointType SearchPointType;
-	typedef VectorSpace<double>::PointType PType; //mtq: what's the difference between this and the one above?
 	typedef CVFolds< LabeledData<InputType, unsigned int> > FoldsType;
 	typedef AbstractKernelFunction<InputType> KernelType;
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
@@ -222,7 +221,7 @@ public:
 	//! \param parameters the SVM hyperparameters to use for all C-SVMs
 	//! \param derivative will store the computed derivative w.r.t. the current hyperparameters
 	// mtq: should this also follow the first-call-error()-then-call-deriv() paradigm?
-	double evalDerivative(PType const &parameters, FirstOrderDerivative &derivative) const {
+	double evalDerivative(SearchPointType const &parameters, FirstOrderDerivative &derivative) const {
 		SHARK_CHECK(m_nhp == parameters.size(), "[SvmLogisticInterpretation::evalDerivative] wrong number of parameters");
 		// initialize, copy parameters
 		double C_reg = (m_svmCIsUnconstrained ? std::exp(parameters(m_nkp)) : parameters(m_nkp));   //set up regularization parameter

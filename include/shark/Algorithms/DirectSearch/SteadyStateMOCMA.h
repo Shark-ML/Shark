@@ -39,7 +39,6 @@
 #include <shark/Algorithms/DirectSearch/CMA/CMAIndividual.h>
 
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <boost/foreach.hpp>
 
 namespace shark {
@@ -52,7 +51,7 @@ namespace shark {
  *	- Voﬂ, Hansen and Igel. Improved Step Size Adaptation for the MO-CMA-ES.
  */
 template<typename Indicator=HypervolumeIndicator>
-class IndicatorBasedSteadyStateMOCMA : public AbstractMultiObjectiveOptimizer<VectorSpace<double> >{
+class IndicatorBasedSteadyStateMOCMA : public AbstractMultiObjectiveOptimizer<RealVector >{
 public:
 	enum NotionOfSuccess{
 		IndividualBased,
@@ -166,7 +165,7 @@ public:
 		}
 	}
 
-	using AbstractMultiObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractMultiObjectiveOptimizer<RealVector >::init;
 	/**
 	 * \brief Initializes the algorithm for the supplied objective function.
 	 * 

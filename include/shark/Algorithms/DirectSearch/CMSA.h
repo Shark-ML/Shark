@@ -46,8 +46,6 @@
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
-
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 
 
@@ -62,7 +60,7 @@ namespace shark {
 	*  In Proceedings of the Tenth International Conference on Parallel Problem Solving from Nature
 	*  (PPSN X), pp. 123-132, LNCS, Springer-Verlag
 	*/
-	class CMSA : public AbstractSingleObjectiveOptimizer<VectorSpace<double> > {
+	class CMSA : public AbstractSingleObjectiveOptimizer<RealVector > {
 		/** \cond */
 
 		struct LightChromosome {
@@ -112,7 +110,7 @@ namespace shark {
 		void read( InArchive & archive );
 		void write( OutArchive & archive ) const;
 
-		using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+		using AbstractSingleObjectiveOptimizer<RealVector >::init;
 		/**
 		* \brief Initializes the algorithm for the supplied objective function.
 		*/

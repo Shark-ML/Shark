@@ -64,7 +64,7 @@ public:
 	typedef typename base_type::LabelType LabelType;
 	typedef typename base_type::ModelType ModelType;
 
-	typedef AbstractSingleObjectiveOptimizer< VectorSpace<double> > OptimizerType;
+	typedef AbstractSingleObjectiveOptimizer< RealVector > OptimizerType;
 	typedef SupervisedObjectiveFunction<InputType, LabelType> SupervisedObjectiveFunctionType;
 	typedef AbstractStoppingCriterion<SingleObjectiveResultSet<OptimizerType::SearchPointType> > StoppingCriterionType;
 
