@@ -45,8 +45,6 @@
    rest_sources/tutorials/concepts/optimization/conventions_derivatives
 
    rest_sources/tutorials/concepts/misc/random_numbers
-   rest_sources/tutorials/concepts/misc/statistics
-   rest_sources/tutorials/concepts/misc/factory
    rest_sources/tutorials/concepts/misc/serialization
 
 
