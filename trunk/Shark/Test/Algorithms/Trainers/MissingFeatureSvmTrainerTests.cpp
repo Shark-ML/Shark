@@ -16,7 +16,7 @@
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
 #include <shark/Models/Kernels/LinearKernel.h>
-#include <shark/TestHelpers/Utils.h>
+#include "../../Utils.h"
 
 namespace shark {
 

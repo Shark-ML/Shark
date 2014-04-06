@@ -2,7 +2,7 @@
 
 #include "shark/Models/Kernels/LinearKernel.h"
 #include "shark/Models/Kernels/MissingFeaturesKernelExpansion.h"
-#include "shark/TestHelpers/Utils.h"
+#include "../../Utils.h"
 
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
