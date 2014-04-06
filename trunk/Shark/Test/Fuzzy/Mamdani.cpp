@@ -102,11 +102,6 @@ BOOST_AUTO_TEST_CASE( Mamdani ) {
     fanSpeed->addTerm( med );
     fanSpeed->addTerm( high );
 
-	//Plot the lingusitic terms corresponding to the variable "Temperature"
-    cold->makeGNUPlotData( "cold.txt", 100, 0., 100. );
-    warm->makeGNUPlotData( "warm.txt", 100, 0., 100. );
-    hot->makeGNUPlotData( "hot.txt", 100, 0., 100. );
-
 	//define the rules
     boost::shared_ptr< shark::Rule > r1( new shark::Rule() );
     r1->premise().push_back( wet );

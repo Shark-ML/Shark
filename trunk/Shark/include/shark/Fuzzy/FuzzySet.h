@@ -13,8 +13,6 @@
 
 #include <boost/optional.hpp>
 
-#include <fstream>
-#include <iostream>
 #include <limits>
 #include <string>
 
@@ -146,51 +144,6 @@ public:
         };
 
         return out;
-    }
-
-    /**
-    * \brief Writes gnuplot suited data into a file
-    *
-    * This function writes the membership function into a gnuplot suited data
-    * file. Only the specified range is considered.
-    *
-    * @param fileName name of the outputfile (existing files will be
-    * overwritten)
-    * @param steps number of sampling points
-    * @param lowerBound lower bound of plotting interval
-    * @param upperBound upper bound of plotting interval
-    */
-    virtual void makeGNUPlotData( const std::string & fileName,
-                                  unsigned int steps,
-                                  boost::optional<double> lowerBound = boost::optional<double>(),
-                                  boost::optional<double> upperBound = boost::optional<double>() ) const {
-        steps = std::max<unsigned int>( 3, steps );
-
-        if( !lowerBound )
-            lowerBound = min();
-
-        if( !upperBound )
-            upperBound = max();
-
-        std::cout << "Make Plot Data: " << *lowerBound << " to " << *upperBound << std::endl;
-
-        double increment = (*upperBound - *lowerBound)/steps;
-        std::ofstream dataFile( fileName.c_str() );
-
-        if( !dataFile )
-            throw( shark::Exception( "Problem opening file: " + fileName, __FILE__, __LINE__ ) );
-
-        if( *upperBound - *lowerBound < 1E-20 ) {
-            dataFile << *lowerBound << " " << (*this)( *lowerBound ) << std::endl;
-            return;
-        }
-
-        for( double d = *lowerBound - increment;
-             d <= *upperBound + increment;
-             d += increment ) {
-            dataFile << d << " " << (*this)( d ) << std::endl;
-        }
-
     }
 
     /**
