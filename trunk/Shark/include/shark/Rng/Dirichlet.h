@@ -34,7 +34,7 @@
 
 #include <shark/Rng/Gamma.h>
 #include <shark/Rng/Rng.h>
-#include <shark/SharkDefs.h>
+
 
 #include <boost/math/special_functions.hpp>
 #include <boost/random.hpp>

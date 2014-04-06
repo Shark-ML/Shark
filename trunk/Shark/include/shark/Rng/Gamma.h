@@ -33,7 +33,7 @@
 #define SHARK_RNG_GAMMA_H
 
 
-#include <shark/SharkDefs.h>
+
 #include <boost/random/uniform_01.hpp>
 #include <cmath>
 

@@ -34,7 +34,7 @@
 
 #include <shark/Core/Exception.h>
 #include <shark/Rng/Rng.h>
-#include <shark/SharkDefs.h>
+
 
 #include <boost/random.hpp>
 #include <boost/random/uniform_01.hpp>

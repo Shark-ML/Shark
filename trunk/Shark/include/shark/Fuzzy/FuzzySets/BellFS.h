@@ -10,7 +10,7 @@
 #ifndef SHARK_FUZZY_BELLFS_H
 #define SHARK_FUZZY_BELLFS_H
 
-#include <shark/SharkDefs.h>
+
 #include <shark/Fuzzy/LinguisticTerm.h>
 
 #include <boost/math/special_functions.hpp>
