@@ -38,11 +38,10 @@
 //===========================================================================
 
 
-#ifndef SHARK_EA_CMA_H
-#define SHARK_EA_CMA_H
+#ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_CMA_H
+#define SHARK_ALGORITHMS_DIRECT_SEARCH_CMA_H
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 
@@ -58,7 +57,7 @@ namespace shark {
 	*  International Conference on Parallel Problem Solving from Nature
 	*  (PPSN VIII), pp. 282-291, LNCS, Springer-Verlag
 	*/
-	class CMA : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+	class CMA : public AbstractSingleObjectiveOptimizer<RealVector >
 	{
 	public:
 		/**
@@ -121,7 +120,7 @@ namespace shark {
 		void read( InArchive & archive );
 		void write( OutArchive & archive ) const;
 
-		using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+		using AbstractSingleObjectiveOptimizer<RealVector >::init;
 		/**
 		* \brief Initializes the algorithm for the supplied objective function.
 		*/

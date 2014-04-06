@@ -42,7 +42,6 @@
 
 
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 #include <boost/foreach.hpp>
 
@@ -56,7 +55,7 @@ namespace shark {
  *	- Voﬂ, Hansen and Igel. Improved Step Size Adaptation for the MO-CMA-ES.
  */
 template<typename Indicator>
-class IndicatorBasedMOCMA : public AbstractMultiObjectiveOptimizer<VectorSpace<double> >{
+class IndicatorBasedMOCMA : public AbstractMultiObjectiveOptimizer<RealVector >{
 public:
 	
 	enum NotionOfSuccess{
@@ -171,7 +170,7 @@ public:
 		}
 	}
 
-	using AbstractMultiObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractMultiObjectiveOptimizer<RealVector >::init;
 	/**
 	 * \brief Initializes the algorithm for the supplied objective function.
 	 * \tparam ObjectiveFunction The type of the objective function,

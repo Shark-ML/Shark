@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( GAUUSIAN_PROCESS_EVIDENCE )
 	double prevEvidence = evidence.eval(params);
 
 	// compute gradient
-	AbstractObjectiveFunction<VectorSpace<double>, double>::FirstOrderDerivative derivative;
+	SingleObjectiveFunction::FirstOrderDerivative derivative;
 	BOOST_CHECK_SMALL(prevEvidence - evidence.evalDerivative(params, derivative), 1.e-10);
 	
 	/* 

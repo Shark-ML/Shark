@@ -36,7 +36,6 @@
 #define QUICKPROP_H
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 #include <boost/math/special_functions/sign.hpp>
 
@@ -81,7 +80,7 @@ namespace shark{
  *      stable
  *
  */
-class Quickprop : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+class Quickprop : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
 	Quickprop();
@@ -95,7 +94,7 @@ public:
 	void read( InArchive & archive );
 	void write( OutArchive & archive ) const;
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
 	double learningRate()const
 	{
@@ -176,7 +175,7 @@ protected:
  *  "Proceedings of the 1988 Connectionist Models Summer School",
  *  pp. 38-51, San Mateo, CA: Morgan Kaufmann <br>
  */
- class QuickpropOriginal : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+ class QuickpropOriginal : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
 	QuickpropOriginal();
@@ -191,7 +190,7 @@ public:
 	void write( OutArchive & archive ) const;
 
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
 	double learningRate()const
 	{

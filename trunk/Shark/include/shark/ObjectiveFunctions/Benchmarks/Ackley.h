@@ -33,14 +33,13 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARKS_ACKLEY_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
 /**
  * \brief Convex quadratic benchmark function with single dominant axis
  */
-struct Ackley : public AbstractObjectiveFunction< VectorSpace<double>,double > {
+struct Ackley : public SingleObjectiveFunction {
 	Ackley(unsigned int numberOfVariables = 5) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;

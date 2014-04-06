@@ -48,8 +48,8 @@ int main() {
 	sphere.setNumberOfVariables( 2 );
 
 	// Create an archive object as a wrapper around the problem
-	typedef EvaluationArchive< VectorSpace<double>, double> ArchiveType;
-	typedef EvaluationArchive< VectorSpace<double>, double>::PointResultPairConstIterator ArchiveIteratorType;
+	typedef EvaluationArchive< RealVector, double> ArchiveType;
+	typedef EvaluationArchive< RealVector, double>::PointResultPairConstIterator ArchiveIteratorType;
 	ArchiveType wrapper(&sphere);
 
 	// Initialize the optimizer for the objective function instance.

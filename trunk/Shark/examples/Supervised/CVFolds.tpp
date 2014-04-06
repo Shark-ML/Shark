@@ -46,7 +46,7 @@ double trainProblem(const RegressionDataset& training, RegressionDataset const& 
 	TwoNormRegularizer regularizer;
 
 	//combine both functions
-	CombinedObjectiveFunction<VectorSpace<double>, double> regularizedError;
+	CombinedObjectiveFunction<RealVector, double> regularizedError;
 	regularizedError.add(error);
 	regularizedError.add(regularization,regularizer);
 

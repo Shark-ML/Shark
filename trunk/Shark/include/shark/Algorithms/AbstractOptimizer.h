@@ -63,18 +63,17 @@ namespace shark {
 * Also when init() is called as offered by the AbstractOptimizer interface, the function
 * is required to have the CAN_PROPOSE_STARTING_POINT flag.
 * 
-* \tparam SearchSpaceT The type of search space the optimizer works upon.
+* \tparam PointType The type of search space the optimizer works upon.
 * \tparam ResultT The objective space the optimizer works upon.
-* \tparam SetT Don't know.
+* \tparam SolutionTypeT The type of the final solution.
 */
-template <typename SearchSpaceT, typename ResultT, typename SetT>
+template <typename PointType, typename ResultT, typename SolutionTypeT>
 class AbstractOptimizer : public IConfigurable, public INameable, public ISerializable {
 public:
-	typedef SearchSpaceT SearchSpaceType;
-	typedef typename SearchSpaceType::PointType SearchPointType;
+	typedef PointType SearchPointType;
 	typedef ResultT ResultType;
-	typedef SetT SolutionSetType;
-	typedef AbstractObjectiveFunction<SearchSpaceType,ResultType> ObjectiveFunctionType;
+	typedef SolutionTypeT SolutionType;
+	typedef AbstractObjectiveFunction<PointType,ResultType> ObjectiveFunctionType;
 
 	/**
 	* \brief Models features that the optimizer requires from the objective function.
@@ -128,7 +127,7 @@ public:
 	* \brief Accesses the best solution obtained so far. 
 	* \returns An immutable reference to the best solution obtained so far.
 	*/
-	virtual SolutionSetType const& solution() const = 0; //mt_hint: try accessing this thing via solution().point and solution().value..
+	virtual SolutionType const& solution() const = 0; //mt_hint: try accessing this thing via solution().point and solution().value..
 
 protected:
 	/**

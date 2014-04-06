@@ -46,7 +46,6 @@
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 #include <boost/foreach.hpp>
 
@@ -60,7 +59,7 @@ namespace shark {
 *	SMS-EMOA: Multiobjective selection based on dominated hypervolume. 
 *	European Journal of Operational Research.
 */
-class SMSEMOA : public AbstractMultiObjectiveOptimizer<VectorSpace<double> >{
+class SMSEMOA : public AbstractMultiObjectiveOptimizer<RealVector >{
 private:
 	/// \brief The individual type of the SMS-EMOA.
 	typedef shark::Individual<RealVector,RealVector> Individual;
@@ -143,7 +142,7 @@ public:
 		nm() = node.get( "NM", nm() );
 	}
 
-	using AbstractMultiObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractMultiObjectiveOptimizer<RealVector >::init;
 	/**
 	 * \brief Initializes the algorithm for the supplied objective function.
 	 * 

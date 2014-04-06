@@ -65,7 +65,7 @@ namespace shark {
 * D. V. Arnold and N. Hansen: Active covariance matrix adaptation for
 * the (1+1)-CMA-ES. In Proceedings of the Genetic and Evolutionary
 */
-class ElitistCMA : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >{	    
+class ElitistCMA : public AbstractSingleObjectiveOptimizer<RealVector >{	    
 public:
 
 	ElitistCMA();
@@ -80,7 +80,7 @@ public:
 
 	void write( OutArchive & archive ) const;
 
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	
 	/// \brief Initializes the algorithm for the supplied objective function.
 	void init( ObjectiveFunctionType const& function, SearchPointType const& p);

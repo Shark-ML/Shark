@@ -36,7 +36,6 @@
 
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark{
 
@@ -106,7 +105,7 @@ namespace shark{
  *      stable
  *
  */
-class RpropMinus : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+class RpropMinus : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
 	RpropMinus();
@@ -126,7 +125,7 @@ public:
 		SearchPointType const& startingPoint, 
 		RealVector const& initDelta
 	);
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
 	void step(const ObjectiveFunctionType& objectiveFunction);
 	void configure( const PropertyTree & node );
@@ -276,7 +275,7 @@ public:
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
 	void step(const ObjectiveFunctionType& objectiveFunction);
 	void read( InArchive & archive );
@@ -403,7 +402,7 @@ public:
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
 	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
 	void step(const ObjectiveFunctionType& objectiveFunction);
 

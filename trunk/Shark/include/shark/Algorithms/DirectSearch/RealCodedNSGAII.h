@@ -56,7 +56,7 @@ namespace shark {
 *  PPSN VI. 
 */
 template<typename Indicator>
-class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<VectorSpace<double> >{
+class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<RealVector >{
 private:
 	/**
 	* \brief The individual type of the NSGA-II.

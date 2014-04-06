@@ -69,7 +69,7 @@ namespace shark {
 /// and a cost function.
 ///
 template<class ModelTypeT, class LabelTypeT = typename ModelTypeT::OutputType>
-class CrossValidationError : public AbstractObjectiveFunction< VectorSpace<double>, double >
+class CrossValidationError : public SingleObjectiveFunction
 {
 public:
 	typedef typename ModelTypeT::InputType InputType;
@@ -81,7 +81,7 @@ public:
 	typedef AbstractTrainer<ModelType, LabelType> TrainerType;
 	typedef AbstractCost<LabelType, OutputType> CostType;
 private:
-	typedef AbstractObjectiveFunction< VectorSpace<double>, double > base_type;
+	typedef SingleObjectiveFunction base_type;
 
 
 	FoldsType m_folds;

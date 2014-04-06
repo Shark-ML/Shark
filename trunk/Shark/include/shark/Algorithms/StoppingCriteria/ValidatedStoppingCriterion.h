@@ -41,7 +41,7 @@ namespace shark{
 
 /// \brief Given the current Result set of the optimizer, calculates the validation error using a validation function and hands the results over to the underlying stopping criterion.
 ///
-/// Currently only implemented for functions over VectorSpace<double>
+/// Currently only implemented for functions over RealVector
 class ValidatedStoppingCriterion: public AbstractStoppingCriterion< SingleObjectiveResultSet<RealVector> >{
 private:
 	typedef RealVector PointType;
@@ -50,7 +50,7 @@ public:
 	//typedef typename base_type::ResultSet ResultSet;
 	typedef ValidatedSingleObjectiveResultSet<PointType> ValidationResultSet;
 	typedef AbstractStoppingCriterion< ValidationResultSet > StoppingCriterionType;
-	typedef AbstractObjectiveFunction< VectorSpace<double>, double > ObjectiveFunctionType;
+	typedef SingleObjectiveFunction ObjectiveFunctionType;
 
 
 	ValidatedStoppingCriterion(ObjectiveFunctionType* validation, StoppingCriterionType* child)

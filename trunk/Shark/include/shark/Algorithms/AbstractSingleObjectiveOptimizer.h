@@ -45,14 +45,13 @@ namespace shark {
 	///the class requires the ObjectiveFunction to provide a feasible starting point. If this is not possible, a second version of init is provided where the starting point can be 
 	///explicitely defined. 
 	///The Return type of an SingleObjectiveOptimizer is the SingleObjectiveResultSet which is a struct returning the best value of the function and together with it's point.
-	template<class SearchSpace>
-	class AbstractSingleObjectiveOptimizer: public AbstractOptimizer<SearchSpace,double,SingleObjectiveResultSet<typename SearchSpace::PointType> >{
+	template<class PointType>
+	class AbstractSingleObjectiveOptimizer: public AbstractOptimizer<PointType,double,SingleObjectiveResultSet<PointType> >{
 	private:
-		typedef AbstractOptimizer<SearchSpace,double,SingleObjectiveResultSet<typename SearchSpace::PointType> > base_type;
+		typedef AbstractOptimizer<PointType,double,SingleObjectiveResultSet<PointType> > base_type;
 	public:
-		typedef typename base_type::SearchSpaceType SearchSpaceType;
 		typedef typename base_type::SearchPointType SearchPointType;
-		typedef typename base_type::SolutionSetType SolutionSetType;
+		typedef typename base_type::SolutionType SolutionType;
 		typedef typename base_type::ResultType ResultType;
 		typedef typename base_type::ObjectiveFunctionType ObjectiveFunctionType;
 
@@ -68,13 +67,13 @@ namespace shark {
 		///initializes the optimizer using a predefined starting point
 		virtual void init(ObjectiveFunctionType const& function, SearchPointType const& startingPoint)=0;
 		///returns the current solution of the optimizer
-		virtual const SolutionSetType& solution() const{
+		virtual const SolutionType& solution() const{
 			return m_best;
 		}
 
 	protected:
 		///current solution of the optimizer
-		SolutionSetType m_best;
+		SolutionType m_best;
 	};
 
 }

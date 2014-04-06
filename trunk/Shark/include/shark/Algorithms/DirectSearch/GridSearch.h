@@ -37,7 +37,6 @@
 
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Rng/GlobalRng.h>
 #include <boost/foreach.hpp>
 
@@ -62,7 +61,7 @@ namespace shark {
     //! A more sophisticated (less exhaustive) grid search variant is
     //! available with the NestedGridSearch class.
     //!
-    class GridSearch : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+    class GridSearch : public AbstractSingleObjectiveOptimizer<RealVector >
     {
     public:
 	GridSearch(){
@@ -207,7 +206,7 @@ namespace shark {
 	    SIZE_CHECK(startingPoint.size() == m_nodeValues.size());
 	    m_best.point=startingPoint;
 	}
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	/*! Assign linearly progressing grid values to one certain parameter only.
 	 *  This is especially useful if one parameter needs special treatment
 	 *  \param index the index of the parameter to which grid values are assigned
@@ -350,7 +349,7 @@ namespace shark {
     //! the parameter range defined m_minimum and m_maximum.
     //! These invalid landscape values are not used.
     //!
-    class NestedGridSearch : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+    class NestedGridSearch : public AbstractSingleObjectiveOptimizer<RealVector >
     {
     public:
 	//! Constructor
@@ -449,7 +448,7 @@ namespace shark {
 	    SIZE_CHECK(m_stepsize.size()==startingPoint.size());
 
 	}
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
 
 	//! Every call of the optimization member computes the
@@ -540,7 +539,7 @@ namespace shark {
     //! They are uniformly distributed in [-1,1].
     //! parameters^2 points but minimum 20 are sampled in this case.
     //!
-    class PointSearch : public AbstractSingleObjectiveOptimizer<VectorSpace<double> >
+    class PointSearch : public AbstractSingleObjectiveOptimizer<RealVector >
     {
     public:
 	//! Constructor
@@ -601,7 +600,7 @@ namespace shark {
 		    configure(parameters,samples,-1,1);
 		}
 	}
-	using AbstractSingleObjectiveOptimizer<VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	//! Please note that for the point search optimizer it does
 	//! not make sense to call step more than once, as the
 	//! solution does not improve iteratively.

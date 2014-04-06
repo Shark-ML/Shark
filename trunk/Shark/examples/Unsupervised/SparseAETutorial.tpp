@@ -155,7 +155,7 @@ int main()
 	// Add weight regularization
 	//###begin<regularization>
 	TwoNormRegularizer regularizer(error.numberOfVariables());
-	CombinedObjectiveFunction<VectorSpace<double>, double> func;
+	CombinedObjectiveFunction<RealVector, double> func;
 	func.add(error);
 	func.add(lambda, regularizer);
 	//###end<regularization>

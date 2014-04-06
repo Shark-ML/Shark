@@ -36,7 +36,6 @@
 
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 
 namespace shark {
 
@@ -49,11 +48,9 @@ namespace shark {
 /// objective functions within a CombinedObjectiveFunction, in order to
 /// obtain a more smooth and more sparse solution.
 ///
-class OneNormRegularizer : public AbstractObjectiveFunction<VectorSpace<double>, double>
+class OneNormRegularizer : public SingleObjectiveFunction
 {
 public:
- 	typedef RealVector SearchPointType;
- 	typedef double ResultType;
 
 	/// Constructor
 	OneNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables)
@@ -147,13 +144,13 @@ private:
 /// objective functions within a CombinedObjectiveFunction, in order to
 /// obtain a more smooth solution.
 ///
-class TwoNormRegularizer : public AbstractObjectiveFunction<VectorSpace<double>, double>
+class TwoNormRegularizer : public AbstractObjectiveFunction<RealVector, double>
 {
 public:
 	typedef RealVector SearchPointType;
  	typedef double ResultType;
 
-	typedef AbstractObjectiveFunction<VectorSpace<double>, double> super;
+	typedef AbstractObjectiveFunction<RealVector, double> super;
 
 	/// Constructor
 	TwoNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables)

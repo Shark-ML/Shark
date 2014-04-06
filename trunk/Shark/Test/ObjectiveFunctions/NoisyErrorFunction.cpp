@@ -11,9 +11,9 @@
 using namespace shark;
 using namespace std;
 
-struct TestFunction : public AbstractObjectiveFunction<VectorSpace<double>,double>
+struct TestFunction : public SingleObjectiveFunction
 {
-	typedef AbstractObjectiveFunction<VectorSpace<double>,double> Base;
+	typedef SingleObjectiveFunction Base;
 
 	std::string name() const
 	{ return "TestFunction"; }

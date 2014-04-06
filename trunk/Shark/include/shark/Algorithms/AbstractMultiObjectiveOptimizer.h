@@ -43,26 +43,24 @@ namespace shark {
  * Models an abstract multi-objective optimizer for arbitrary search spaces. The objective space
  * is assumed to be \f$ \mathbb{R}^m\f$.
  *
- * \tparam SearchSpace The search space of the optimizer.
+ * \tparam PointType The type of the points that make up the searchspace.
  */
-template<typename SearchSpace>
+template<typename PointTypeT>
 class AbstractMultiObjectiveOptimizer : 
 public AbstractOptimizer<
-	SearchSpace,
-	shark::RealVector,
-	std::vector< ResultSet< typename SearchSpace::PointType, shark::RealVector > > 
+	PointTypeT,
+	RealVector,
+	std::vector< ResultSet< PointTypeT, RealVector > > 
 > {
 private:
 typedef AbstractOptimizer<
-	SearchSpace,
-	shark::RealVector,
-	std::vector< ResultSet< typename SearchSpace::PointType, shark::RealVector > > 
+	PointTypeT,
+	RealVector,
+	std::vector< ResultSet< PointTypeT, RealVector > > 
 > super;
 public:
-	typedef typename super::SearchSpaceType SearchSpaceType;
 	typedef typename super::SearchPointType SearchPointType;
-	typedef typename super::SolutionSetType SolutionSetType;
-	typedef typename super::ResultType ResultType;
+	typedef typename super::SolutionType SolutionType;
 	typedef typename super::ObjectiveFunctionType ObjectiveFunctionType;
 
 	/**
@@ -78,7 +76,7 @@ public:
 	* to the pure-virtual function.
 	*
 	* \param function The function to be initialized for.
-	* \throws shark::Exception if the function does not feature the proposal of starting points.
+	* \throws Exception if the function does not feature the proposal of starting points.
 	*/
 	virtual void init( const ObjectiveFunctionType & function ) {
 		if(!(function.features() & ObjectiveFunctionType::CAN_PROPOSE_STARTING_POINT))
@@ -102,12 +100,12 @@ public:
 	* \brief Accesses the current approximation of the Pareto-set and -front, respectively.
 	* \returns The current set of candidate solutions.
 	*/
-	const SolutionSetType & solution() const {
+	const SolutionType & solution() const {
 		return m_best;
 	}
 
 protected:
-	SolutionSetType m_best; ///< The current Pareto-set/-front.
+	SolutionType m_best; ///< The current Pareto-set/-front.
 };
 
 }

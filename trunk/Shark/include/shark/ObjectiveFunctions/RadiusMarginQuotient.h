@@ -57,23 +57,14 @@ template<class InputType, class CacheType = float>
 class RadiusMarginQuotient : public SupervisedObjectiveFunction<InputType, unsigned int>
 {
 public:
-
-	//////////////////////////////////////////////////////////////////
-	// The types below define the type used for caching kernel values. The default is float,
-	// since this type offers sufficient accuracy in the vast majority of cases, at a memory
-	// cost of only four bytes. However, the type definition makes it easy to use double instead
-	// (e.g., in case high accuracy training is needed).
 	typedef CacheType QpFloatType;
-	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 
 	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
 	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
 
 	typedef SupervisedObjectiveFunction<InputType, unsigned int> base_type;
 	typedef LabeledData<InputType, unsigned int> DatasetType;
-	typedef VectorSpace<double>::PointType PointT;
+	typedef typename base_type::SearchPointType SearchPointType;
 	typedef AbstractKernelFunction<InputType> KernelType;
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
 
@@ -119,7 +110,7 @@ public:
 	/// The parameters are passed into the kernel, and the
 	/// radius-margin quotient is computed w.r.t. the
 	/// kernel-induced metric.
-	double eval(PointT const& parameters) const{
+	double eval(SearchPointType const& parameters) const{
 		SIZE_CHECK(parameters.size() == mep_kernel->numberOfParameters());
 		SHARK_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::eval] call setDataset first");
 		this->m_evaluationCounter++;
@@ -138,7 +129,7 @@ public:
 	/// The parameters are passed into the kernel, and the
 	/// radius-margin quotient and its derivative are computed
 	/// w.r.t. the kernel-induced metric.
-	double evalDerivative(PointT const& parameters, FirstOrderDerivative& derivative) const{
+	double evalDerivative(SearchPointType const& parameters, FirstOrderDerivative& derivative) const{
 		SHARK_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::evalDerivative] call setDataset first");
 		SIZE_CHECK(parameters.size() == mep_kernel->numberOfParameters());
 		this->m_evaluationCounter++;

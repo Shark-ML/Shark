@@ -37,7 +37,6 @@
 #define SHARK_OBJECTIVEFUNCTIONS_DATAOBJECTIVEFUNCTION_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Data/Dataset.h>
 
 namespace shark {
@@ -52,7 +51,7 @@ namespace shark {
 /// machine learning in the form of "error" or "empirical risk"
 /// terms.
 template<class InputType, class LabelType>
-class SupervisedObjectiveFunction : public AbstractObjectiveFunction< VectorSpace<double>, double >
+class SupervisedObjectiveFunction : public SingleObjectiveFunction
 {
 public:
 	typedef LabeledData<InputType, LabelType> DatasetType;
@@ -73,7 +72,7 @@ public:
 /// class of all objective functions that depend on data for
 /// unsupervised learning.
 template<class InputType>
-class UnsupervisedObjectiveFunction : public AbstractObjectiveFunction< VectorSpace<double>, double >
+class UnsupervisedObjectiveFunction : public SingleObjectiveFunction
 {
 public:
 	typedef UnlabeledData<InputType> DatasetType;

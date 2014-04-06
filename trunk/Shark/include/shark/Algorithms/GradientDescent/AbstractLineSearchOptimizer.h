@@ -37,7 +37,6 @@
 #define SHARK_ALGORITHMS_GRADIENTDESCENT_ABSTRACTLINESEARCHOPTIMIZER_H
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Core/SearchSpaces/VectorSpace.h>
 #include <shark/Algorithms/GradientDescent/LineSearch.h>
 
 namespace shark {
@@ -52,7 +51,7 @@ namespace shark {
 ///
 /// Also derived classes should specialise read() and write() methods for serialization if they have additional members
 /// as well as choose a name() for the optimizer.
-class AbstractLineSearchOptimizer : public AbstractSingleObjectiveOptimizer< VectorSpace<double> > {
+class AbstractLineSearchOptimizer : public AbstractSingleObjectiveOptimizer< RealVector > {
 protected:
 	/// \brief Initializes the internal model.
 	///
@@ -73,7 +72,7 @@ public:
 
 	void init(const ObjectiveFunctionType &objectiveFunction, const SearchPointType &startingPoint) ;
 	
-	using AbstractSingleObjectiveOptimizer< VectorSpace<double> >::init;
+	using AbstractSingleObjectiveOptimizer< RealVector >::init;
 
 	void step(const ObjectiveFunctionType &objectiveFunction);
 
