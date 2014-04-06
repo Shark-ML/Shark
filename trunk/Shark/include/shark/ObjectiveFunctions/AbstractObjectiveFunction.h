@@ -37,7 +37,6 @@
 
 #include <shark/Core/IConfigurable.h>
 #include <shark/Core/INameable.h>
-#include <shark/Core/Derivative.h>
 #include <shark/Core/Exception.h>
 #include <shark/Core/Flags.h>
 #include <shark/LinAlg/Base.h>
@@ -118,7 +117,10 @@ public:
 	typedef ResultT ResultType;
 
 	typedef SearchPointType FirstOrderDerivative;
-	typedef TypedSecondOrderDerivative<SearchPointType,RealMatrix> SecondOrderDerivative;
+	struct SecondOrderDerivative {
+		RealVector m_gradient;
+		RealMatrix m_hessian;
+	};
 
 	/// \brief List of features that are supported by an implementation.
 	enum Feature {
