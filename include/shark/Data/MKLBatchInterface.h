@@ -42,7 +42,7 @@
 #include <boost/mpl/transform.hpp>
 
 namespace shark{
-
+/// \cond
 namespace detail{
 
 template<class Reference,class Get>
@@ -201,5 +201,6 @@ public:
 		return batch;
 	}
 };
+/// \endcond
 }
 #endif

@@ -82,6 +82,7 @@ KeyValuePair<Key,Value> makeKeyValuePair(Key const& key,Value const& value){
 }
 
 
+/// \cond
 
 ///\brief Reference type used by zipKeyValuePair
 template<class Key, class Value,class KeyIterator, class ValueIterator>
@@ -138,6 +139,8 @@ public:
 		}
 	};
 };
+
+/// \endcond
 
 template<
 	class Iterator1,

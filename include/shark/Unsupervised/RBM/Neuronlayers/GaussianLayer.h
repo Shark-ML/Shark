@@ -50,11 +50,17 @@ struct GaussianSufficientStatistics{
 	GaussianSufficientStatistics(){}
 };
 }
+
+/// \cond
+
+
 //auto generate the batch interface for the GuassianSufficientStatistics
 template<class VectorType>
 struct Batch< detail::GaussianSufficientStatistics<VectorType> >{
 	SHARK_CREATE_BATCH_INTERFACE( detail::GaussianSufficientStatistics<VectorType>,(VectorType, mean)(double, beta))
 };
+
+/// \endcond
 
 ///\brief A layer of Gaussian neurons.
 ///

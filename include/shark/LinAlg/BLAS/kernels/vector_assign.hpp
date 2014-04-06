@@ -1,7 +1,7 @@
 #ifndef SHARK_LINALG_BLAS_UBLAS_KERNELS_VECTOR_ASSIGN_HPP
 #define SHARK_LINALG_BLAS_UBLAS_KERNELS_VECTOR_ASSIGN_HPP
 
-#include "../functional.hpp"
+#include "../detail/functional.hpp"
 #include "../expression_types.hpp"
 
 namespace shark {

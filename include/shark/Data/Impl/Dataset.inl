@@ -603,6 +603,8 @@ struct DataPair{
 	}
 };
 
+/// \cond
+
 template<class I, class L,class InputIterator, class LabelIterator>
 struct PairReference<DataPair<I, L>, InputIterator, LabelIterator >{
 	struct type{
@@ -651,6 +653,8 @@ struct PairReference<DataPair<I, L>, InputIterator, LabelIterator >{
 		}
 	};
 };
+
+/// \endcond
 
 ///\brief The type used to mimic a pair of data batches.
 ///
@@ -723,6 +727,8 @@ public:
 		return get(*this,i);
 	}
 };
+
+/// \cond
 
 template<class InputType, class LabelType>
 struct Batch<DataPair<InputType, LabelType> >{
@@ -877,6 +883,8 @@ public:
 		}
 	};
 };
+/// \endcond
+
 /** @*/
 }
 #endif

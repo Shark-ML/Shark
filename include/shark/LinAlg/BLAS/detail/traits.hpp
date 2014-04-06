@@ -30,15 +30,15 @@
  */
 //===========================================================================
 
-#ifndef SHARK_LINALG_BLAS_UBLAS_TRAITS_HPP
-#define SHARK_LINALG_BLAS_UBLAS_TRAITS_HPP
+#ifndef SHARK_LINALG_BLAS_DETAIL_TRAITS_HPP
+#define SHARK_LINALG_BLAS_DETAIL_TRAITS_HPP
 
 #include <complex>
 
-#include "fwd.hpp"
-#include "detail/iterator.hpp"
-#include "detail/returntype_deduction.hpp"
-#include "expression_types.hpp"
+#include "../fwd.hpp"
+#include "iterator.hpp"
+#include "returntype_deduction.hpp"
+#include "../expression_types.hpp"
 
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/type_traits/is_const.hpp>
