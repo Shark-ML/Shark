@@ -16,6 +16,8 @@
 #include <shark/Rng/Poisson.h>
 #include <shark/Rng/Uniform.h>
 
+#include <shark/Statistics/Statistics.h>
+
 #define BOOST_TEST_MODULE Rng_Distributions
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
@@ -31,20 +33,14 @@
 
 namespace shark {
 	template<typename Distribution>
-	void check_distribution( Distribution & dist, double targetMean, double targetVariance, unsigned int noTrials = 100000 ) {
-		double mean = 0;
-		double variance = 0;
+	void check_distribution( Distribution & dist, double mean, double variance, unsigned int noTrials = 100000 ) {
+		shark::Statistics stats;
 
-		for( unsigned int i = 0; i < noTrials; i++ ){
-			double val = dist();
-			mean+=val;
-			variance+=val*val;
-		}
-		mean/=noTrials;
-		variance/=noTrials;
-		variance-=mean*mean;
-		BOOST_CHECK_CLOSE( targetMean, mean, 1. );
-		BOOST_CHECK_CLOSE( targetVariance, variance, 1. );
+		for( unsigned int i = 0; i < noTrials; i++ )
+			BOOST_CHECK_NO_THROW( stats( dist() ) );
+
+		BOOST_CHECK_CLOSE( stats( shark::Statistics::Mean() ), mean, 1. );
+		BOOST_CHECK_CLOSE( stats( shark::Statistics::Variance() ), variance, 1. );
 	}
 }
 

@@ -16,6 +16,8 @@
 
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
 
+#include <shark/Statistics/Statistics.h>
+
 #include "TestObjectiveFunction.h"
 
 BOOST_AUTO_TEST_CASE( Himmelblau ) {
