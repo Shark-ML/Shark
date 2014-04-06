@@ -1,12 +1,9 @@
 #ifndef TEST_ALGORITHMS_TESTFUNCTION_H
 #define TEST_ALGORITHMS_TESTFUNCTION_H
-
-#include <shark/Statistics/Statistics.h>
-
 #include <boost/parameter.hpp>
 #include <boost/progress.hpp>
 
-#include <fstream>
+#include <shark/Core/utility/functional.h>
 
 namespace shark {
 BOOST_PARAMETER_NAME(optimizer)    // Note: no semicolon
@@ -30,7 +27,7 @@ BOOST_PARAMETER_FUNCTION(
 
   //~ boost::progress_display pd( trials * iterations );
 		
-  shark::Statistics stats;
+std::vector<double> results;
 
   for( size_t trial =0;trial != static_cast<size_t>(trials);++trial ){
     optimizer.init(function);
@@ -46,11 +43,9 @@ BOOST_PARAMETER_FUNCTION(
       if( fstop > error )
         break;
     }
-    std::cout<<error<<" ";
-    stats( error );
+    results.push_back(error);
   }
-  std::cout<<std::endl;
-  BOOST_CHECK_SMALL( stats( shark::Statistics::Median() ), epsilon );
+  BOOST_CHECK_SMALL( *median_element(results), epsilon );
 }
 }
 template<class Optimizer,class Function>

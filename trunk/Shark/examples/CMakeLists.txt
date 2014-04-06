@@ -120,10 +120,6 @@ SHARK_ADD_EXAMPLE( Supervised/quickstartTutorial quickstartTutorial "Supervised"
 SHARK_ADD_EXAMPLE( Supervised/regressionTutorial regressionTutorial "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/StoppingCriteria StoppingCriteriaTutorial "Supervised" )
 
-#Statistics
-SHARK_ADD_EXAMPLE( Statistics/StatisticsMain StatisticsMain "Statistiscs" )
-SHARK_ADD_EXAMPLE( Statistics/Statistics Statistics "Statistiscs" )
-
 #Data
 SHARK_ADD_EXAMPLE( Data/Datasets Datasets "Data" )
 SHARK_ADD_EXAMPLE( Data/Normalization Normalization "Data" )

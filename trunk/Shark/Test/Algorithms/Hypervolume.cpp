@@ -8,9 +8,7 @@
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 
 #include <shark/Rng/GlobalRng.h>
-
-#include <shark/Statistics/Statistics.h>
-
+#include <shark/Core/utility/functional.h>
 #include <boost/assign.hpp>
 
 
@@ -108,12 +106,12 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume ) {
 	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), Fixture::HV_TEST_SET_2D, 1E-5 );
 	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), Fixture::HV_TEST_SET_3D, 1E-5 );
 
-	Statistics stats;
+	std::vector<double> results;
 	
 	for( unsigned int trial = 0; trial < 10; trial++ )
-			stats( ha( m_testSet3D.begin(), m_testSet3D.end(), ife, m_refPoint3D, 1E-2, 1E-2 ) );
+			results.push_back(ha( m_testSet3D.begin(), m_testSet3D.end(), ife, m_refPoint3D, 1E-2, 1E-2 ) );
 	
-	BOOST_CHECK_SMALL( stats( Statistics::Median() ) - Fixture::HV_TEST_SET_3D, 1E-2 );
+	BOOST_CHECK_SMALL( *median_element(results) - Fixture::HV_TEST_SET_3D, 1E-2 );
 	
 }
 
