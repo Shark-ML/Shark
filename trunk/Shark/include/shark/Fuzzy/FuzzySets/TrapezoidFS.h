@@ -101,6 +101,5 @@ private:
     double m_d;
 
 };
-ANNOUNCE_FUZZY_SET( TrapezoidFS, FuzzySetFactory );
 }
 #endif

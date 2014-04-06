@@ -90,7 +90,5 @@ public:
     };
 };
 
-ANNOUNCE_LINGUISTIC_TERM( BellLT, LinguisticTermFactory );
-
 }
 #endif

@@ -122,59 +122,5 @@ private:
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
 
-ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( LZ5, shark::moo::RealValuedObjectiveFunctionFactory );
-
-	//template<> struct ObjectiveFunctionTraits<LZ5> {
-	//	static LZ5::SolutionSetType referenceSet( std::size_t maxSize,
-	//		unsigned int numberOfVariables,
-	//		unsigned int numberOfObjectives ) {
-	//		shark::IntervalIterator< tag::LinearTag > it( 0., 1., maxSize );
-	//
-	//		LZ5 lz5;
-	//		lz5.numberOfVariables() = numberOfVariables;
-	//
-	//		LZ5::SolutionSetType solutionSet;
-	//		while( it ) {
-	//
-	//			LZ5::SolutionType solution;
-	//
-	//			RealVector v( numberOfVariables );
-	//			v( 0 ) = *it;
-	//			for( unsigned int i = 1; i < numberOfVariables; i++ ) {
-	//				if( i % 2 == 1 )
-	//					v( i ) = (
-	//						(0.3*v(0)*v(0)*::cos(24*M_PI*v(0)+4*i*M_PI/v.size()) + 0.6*v(0))*
-	//						::sin( 6 * M_PI * v( 0 ) + i*M_PI/v.size()  )
-	//					);
-	//				if( i % 2 == 0 )
-	//					v( i ) = (
-	//						(0.3*v(0)*v(0)*::cos(24*M_PI*v(0)+4*i*M_PI/v.size()) + 0.6*v(0))*
-	//						::cos( 6 * M_PI * v( 0 ) + i*M_PI/v.size()  )
-	//					);
-	//			}
-	//
-	//
-	//
-	//			solution.searchPoint() = v;
-	//			solution.objectiveFunctionValue() = lz5.eval( v );
-	//			solutionSet.push_back( solution );
-	//			++it;
-	//		}
-	//		return( solutionSet );
-	//	}
-	//
-	//
-	//	static LZ5::SearchPointType lowerBounds( unsigned int n ) {
-	//		LZ5::SearchPointType sp( n, -1. );
-	//		sp( 0 ) = 0;
-	//
-	//		return( sp );
-	//	}
-	//
-	//	static LZ5::SearchPointType upperBounds( unsigned int n ) {
-	//		return( LZ5::SearchPointType( n, 1. ) );
-	//	}
-	//
-	//};
 }
 #endif

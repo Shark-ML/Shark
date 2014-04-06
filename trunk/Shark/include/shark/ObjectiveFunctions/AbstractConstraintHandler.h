@@ -34,7 +34,6 @@
 #define SHARK_OBJECTIVEFUNCTIONS_ABSTRACTCONSTRAINTHANDLER_H
 
 #include <shark/Core/Exception.h>
-#include <shark/Core/Factory.h>
 #include <shark/Core/Flags.h>
 
 namespace shark{

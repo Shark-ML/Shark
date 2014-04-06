@@ -122,6 +122,5 @@ private:
 	std::size_t m_objectives;
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
-	ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ6, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

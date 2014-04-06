@@ -78,6 +78,5 @@ private:
     double m_c;
 };
 
-ANNOUNCE_FUZZY_SET( ConstantFS, FuzzySetFactory );
 }
 #endif

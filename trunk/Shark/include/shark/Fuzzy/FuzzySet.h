@@ -10,7 +10,6 @@
 #define FUZZYSET_H
 
 #include <shark/Core/Exception.h>
-#include <shark/Core/Factory.h>
 
 #include <boost/optional.hpp>
 
@@ -373,22 +372,6 @@ protected:
 
 };
 
-/**
-* \brief Defines the default factory type for real-valued single-objective optimization problems.
-*/
-typedef Factory< FuzzySet, std::string > FuzzySetFactory;
-
 }
-
-/**
- * \brief Convenience macro for registering single-objective functions with a factory at compile-time.
- */
-#define ANNOUNCE_FUZZY_SET( FuzzySet, Factory )		\
-    namespace FuzzySet ## _detail {					\
-        typedef TypeErasedAbstractFactory< FuzzySet, Factory > abstract_factory_type; \
-        typedef FactoryRegisterer< Factory > factory_registerer_type;	\
-        static factory_registerer_type FACTORY_REGISTERER = factory_registerer_type( #FuzzySet, new abstract_factory_type() ); \
-    }									\
-
 
 #endif

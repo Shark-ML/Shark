@@ -119,6 +119,5 @@ private:
 	std::size_t m_numberOfVariables;
 };
 
-ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( ELLI2, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

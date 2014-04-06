@@ -112,7 +112,6 @@ private:
 	double m_alpha;
 };
 
-ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( Ellipsoid, shark::soo::RealValuedObjectiveFunctionFactory );
 }
 
 #endif

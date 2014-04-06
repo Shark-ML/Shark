@@ -97,8 +97,6 @@ private:
 	double m_alpha;
 	std::size_t m_numberOfVariables;
 };
-
-ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION(Cigar, shark::soo::RealValuedObjectiveFunctionFactory);
 }
 
 #endif // SHARK_EA_CIGAR_H

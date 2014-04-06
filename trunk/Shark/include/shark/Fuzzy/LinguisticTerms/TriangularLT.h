@@ -77,7 +77,5 @@ public:
     };
 
 };
-
-ANNOUNCE_LINGUISTIC_TERM( TriangularLT, LinguisticTermFactory );
 }
 #endif

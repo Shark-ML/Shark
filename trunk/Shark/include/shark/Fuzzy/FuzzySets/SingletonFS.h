@@ -74,6 +74,5 @@ protected:
     double m_epsilon; ///< The precision to which the comparison is carried out
 };
 
-ANNOUNCE_FUZZY_SET( SingletonFS, FuzzySetFactory );
 }
 #endif

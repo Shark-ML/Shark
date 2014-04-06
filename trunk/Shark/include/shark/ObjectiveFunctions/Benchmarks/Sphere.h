@@ -80,7 +80,6 @@ private:
 	std::size_t m_numberOfVariables;
 };
 
-ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION(Sphere, shark::soo::RealValuedObjectiveFunctionFactory);
 }
 
 #endif

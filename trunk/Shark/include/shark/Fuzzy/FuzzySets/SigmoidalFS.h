@@ -107,7 +107,6 @@ protected:
     double m_threshold;
 };
 
-ANNOUNCE_FUZZY_SET( SigmoidalFS, FuzzySetFactory );
 }
 
 #endif

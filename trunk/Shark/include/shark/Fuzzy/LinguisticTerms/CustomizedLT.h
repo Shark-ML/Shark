@@ -67,6 +67,5 @@ public:
 
 };
 
-ANNOUNCE_LINGUISTIC_TERM( CustomizedLT, LinguisticTermFactory );
 }
 #endif

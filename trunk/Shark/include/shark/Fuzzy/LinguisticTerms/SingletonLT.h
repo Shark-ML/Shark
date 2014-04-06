@@ -72,6 +72,5 @@ public:
     }
 
 };
-ANNOUNCE_LINGUISTIC_TERM( SingletonLT, LinguisticTermFactory );
 }
 #endif

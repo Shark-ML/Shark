@@ -111,44 +111,5 @@ private:
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
 
-ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( LZ1, shark::moo::RealValuedObjectiveFunctionFactory );
-//template<> struct ObjectiveFunctionTraits<LZ1> {
-	//	static LZ1::SolutionSetType referenceSet( std::size_t maxSize,
-	//		unsigned int numberOfVariables,
-	//		unsigned int numberOfObjectives ) {
-	//		shark::IntervalIterator< tag::LinearTag > it( 0., 1., maxSize );
-	//
-	//		LZ1 lz1;
-	//		lz1.numberOfVariables() = numberOfVariables;
-	//
-	//		LZ1::SolutionSetType solutionSet;
-	//		while( it ) {
-	//
-	//			LZ1::SolutionType solution;
-	//
-	//			RealVector v( numberOfVariables );
-	//			v( 0 ) = *it;
-	//			for( unsigned int i = 1; i < numberOfVariables; i++ )
-	//				v( i ) = ::pow( v(0), 0.5*(1.0+3*(i-1)/(numberOfVariables-1) ) );
-	//
-	//
-	//			solution.searchPoint() = v;
-	//			solution.objectiveFunctionValue() = lz1.eval( v );
-	//			solutionSet.push_back( solution );
-	//			++it;
-	//		}
-	//		return( solutionSet );
-	//	}
-	//
-	//
-	//	static LZ1::SearchPointType lowerBounds( unsigned int n ) {
-	//		return( LZ1::SearchPointType( n, 0. ) );
-	//	}
-	//
-	//	static LZ1::SearchPointType upperBounds( unsigned int n ) {
-	//		return( LZ1::SearchPointType( n, 1. ) );
-	//	}
-	//
-	//};
 }
 #endif

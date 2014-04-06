@@ -70,8 +70,6 @@ public:
     }
 };
 
-ANNOUNCE_LINGUISTIC_TERM( GeneralizedBellLT, LinguisticTermFactory );
-
 }
 #endif
 

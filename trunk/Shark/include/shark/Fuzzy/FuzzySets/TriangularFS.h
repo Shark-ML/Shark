@@ -93,6 +93,5 @@ protected:
     double m_c;
 
 };
-ANNOUNCE_FUZZY_SET( TriangularFS, FuzzySetFactory );
 }
 #endif

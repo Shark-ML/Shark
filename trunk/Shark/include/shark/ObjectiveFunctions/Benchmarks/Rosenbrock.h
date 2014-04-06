@@ -146,7 +146,6 @@ private:
 	std::size_t m_numberOfVariables;
 };
 
-ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( Rosenbrock, shark::soo::RealValuedObjectiveFunctionFactory );
 }
 
 #endif
