@@ -73,8 +73,8 @@ public:
 	typedef typename SearchSpaceT::PointType SearchPointType;
 	typedef ResultT ResultType;
 
-	typedef SearchPointType FirstOrderDerivative;
-	typedef TypedSecondOrderDerivative<SearchPointType,RealMatrix> SecondOrderDerivative;
+	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
+	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
 
 	/// \brief Pair of point and result.
 	class PointResultPairType
