@@ -50,6 +50,10 @@ struct TruncatedExponentialSufficientStatistics{
 	TruncatedExponentialSufficientStatistics(){}
 };
 }
+
+
+/// \cond
+
 //auto generate the batch interface for the BinarySufficientStatistics
 template<class VectorType>
 struct Batch< detail::TruncatedExponentialSufficientStatistics<VectorType> >{
@@ -58,6 +62,8 @@ struct Batch< detail::TruncatedExponentialSufficientStatistics<VectorType> >{
 		(VectorType, lambda)(VectorType, expMinusLambda)
 	)
 };
+
+/// \endcond
 
 ///\brief A layer of truncated exponential neurons.
 ///

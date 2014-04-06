@@ -46,7 +46,9 @@ namespace shark {
 	struct ConstProxyReference{
 		typedef T const& type;
 	};
-
+	
+	/// \cond
+	
 	template<class T>
 	struct ConstProxyReference<blas::vector<T> >{
 		typedef blas::dense_vector_adaptor<T const> const& type;
@@ -71,5 +73,7 @@ namespace shark {
 	struct ConstProxyReference<blas::matrix<T> const >{
 		typedef blas::dense_matrix_adaptor<T const,blas::row_major> const& type;
 	};
+	
+	/// \endcond
 }
 #endif

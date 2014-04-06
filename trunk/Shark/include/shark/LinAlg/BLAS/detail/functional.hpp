@@ -8,7 +8,6 @@
 #include <shark/Core/Exception.h>
 #include <shark/Core/Math.h>
 
-
 namespace shark {
 namespace blas {
 

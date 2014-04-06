@@ -45,6 +45,8 @@ namespace shark{
 template<class Pair, class Iterator1, class Iterator2>
 struct PairReference;
 
+/// \cond
+
 template<class T, class U,class Iterator1, class Iterator2>
 struct PairReference<std::pair<T, U>, Iterator1, Iterator2 >{
 	typedef std::pair<
@@ -52,6 +54,8 @@ struct PairReference<std::pair<T, U>, Iterator1, Iterator2 >{
 		typename boost::iterator_reference<Iterator2>::type
 	> type;
 };
+
+/// \endcond
 
 ///\brief A Pair-Iterator which gives a unified view of two ranges.
 ///

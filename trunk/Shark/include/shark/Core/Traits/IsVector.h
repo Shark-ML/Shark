@@ -50,7 +50,9 @@ namespace shark {
 	///a unknown type is not confirming to this requirements.
 	template<class T>
 	struct IsVector:public boost::mpl::false_{};
-
+	
+	/// \cond
+		
 	template<class T>
 	struct IsVector<blas::vector<T> >:public boost::mpl::true_{};
 	template<class T>
@@ -59,5 +61,7 @@ namespace shark {
 	struct IsVector<blas::matrix<T> >:public boost::mpl::true_{};
 	template<class T>
 	struct IsVector<blas::compressed_matrix<T> >:public boost::mpl::true_{};
+		
+	/// \endcond
 }
 #endif
