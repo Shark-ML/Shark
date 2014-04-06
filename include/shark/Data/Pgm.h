@@ -44,7 +44,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
-#include <shark/SharkDefs.h>
+
 #include <shark/LinAlg/Base.h>
 #include <shark/Data/Dataset.h>
 

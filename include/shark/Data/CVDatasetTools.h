@@ -38,7 +38,7 @@
 #include <shark/Data/Dataset.h>
 #include <shark/Rng/DiscreteUniform.h>
 #include <algorithm>
-//#include <shark/SharkDefs.h>
+//
 #include <shark/Data/DataView.h>
 
 #include <utility> //for std::pair

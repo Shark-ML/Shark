@@ -5,7 +5,7 @@
 
 #include <shark/Rng/DiscreteUniform.h>
 #include <algorithm>
-#include <shark/SharkDefs.h>
+
 #include <shark/Data/DataView.h>
 namespace shark{
 

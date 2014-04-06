@@ -33,7 +33,7 @@
 #define SHARK_RNG_HYPERGEOMETRIC_H
 
 
-#include <shark/SharkDefs.h>
+
 
 #include <cmath>
 #include <boost/random/uniform_01.hpp>

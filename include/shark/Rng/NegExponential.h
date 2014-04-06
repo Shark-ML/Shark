@@ -33,7 +33,7 @@
 #define SHARK_RNG_NEGEXPONENTIAL_H
 
 
-#include <shark/SharkDefs.h>
+
 
 #include <boost/random/exponential_distribution.hpp>
 
