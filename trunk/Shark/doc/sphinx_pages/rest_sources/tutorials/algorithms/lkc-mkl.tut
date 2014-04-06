@@ -373,10 +373,9 @@ diverse information integration settings. This flexibility comes at a small
 price of added usage code complexity.
 
 First, there is the question what data type the aggregated tuple of sub-inputs
-:math:`x=(x_0,x_1,...)` should have. Here, Shark currently only supports
-`boost::fusion::vector <http://www.boost.org/doc/libs/release/libs/fusion/doc/html/fusion/container/vector.html>`_.
-For most purposes, it is easiest to declare a struct as a composite data type
-and then adapt it for boost::fusion, like so::
+:math:`x=(x_0,x_1,...)` should have. Shark currently supports binding macros for
+arbitrary structures to boost::fusion. For most purposes, it is easiest to declare a 
+struct as a composite data type and then adapt it for boost::fusion, like so::
 
     ..sharkcode<Supervised/MklKernelTutorial.tpp, create_struct_batch_interface>
 

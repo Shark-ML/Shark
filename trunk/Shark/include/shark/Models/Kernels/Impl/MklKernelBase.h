@@ -37,7 +37,6 @@
 
 
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
-#include <shark/Data/MKLBatchInterface.h>//boost::fusion::vector magic for batches
 #include <shark/Data/BatchInterfaceAdaptStruct.h> //need in a lot of MKL-Kernel-Applications
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 #include <boost/fusion/include/as_vector.hpp>
