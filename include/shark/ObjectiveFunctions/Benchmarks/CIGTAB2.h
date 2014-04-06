@@ -124,7 +124,5 @@ private:
 	RealMatrix m_rotationMatrixX;
 	RealMatrix m_rotationMatrixY;
 };
-
-ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( CIGTAB2, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

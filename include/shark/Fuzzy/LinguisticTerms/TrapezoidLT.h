@@ -82,7 +82,6 @@ public:
 
 };
 
-ANNOUNCE_LINGUISTIC_TERM( TrapezoidLT, LinguisticTermFactory );
 }
 
 #endif

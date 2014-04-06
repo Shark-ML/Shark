@@ -90,10 +90,6 @@ struct Himmelblau : public SingleObjectiveFunction {
 	}
 };
 
-/**
-* \brief Makes Himmelblau's function known to the factory.
-*/
-ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( Himmelblau, shark::soo::RealValuedObjectiveFunctionFactory );
 }
 
 #endif

@@ -74,6 +74,6 @@ protected:
     double m_center;
     double m_width;
 };
-ANNOUNCE_FUZZY_SET( GeneralizedBellFS, FuzzySetFactory );
+
 }
 #endif // __GENERALIZEDBELLFS_H__

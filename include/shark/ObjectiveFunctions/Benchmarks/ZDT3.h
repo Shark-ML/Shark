@@ -102,7 +102,5 @@ struct ZDT3 : public MultiObjectiveFunction
 private:
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
-
-ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( ZDT3, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

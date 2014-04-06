@@ -144,7 +144,5 @@ namespace shark {
 	const double BellFS::factor = 0.5*M_2_SQRTPI*M_SQRT1_2;
 	const double BellFS::factor2 = 2*M_SQRT2/M_2_SQRTPI;
 
-        ANNOUNCE_FUZZY_SET( BellFS, FuzzySetFactory );
-
 }
 #endif

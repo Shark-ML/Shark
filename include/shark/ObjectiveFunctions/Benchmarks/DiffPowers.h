@@ -81,8 +81,6 @@ struct DiffPowers : public SingleObjectiveFunction {
 private:
 	std::size_t m_numberOfVariables;
 };
-
-ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( DiffPowers, shark::soo::RealValuedObjectiveFunctionFactory );
 }
 
-#endif // SHARK_EA_SPHERE_H
+#endif

@@ -93,21 +93,5 @@ protected:
     std::string m_name;
 
 };
-
-/**
-  * \brief Defines the default factory type for real-valued single-objective optimization problems.
-  */
-typedef Factory< LinguisticTerm, std::string > LinguisticTermFactory;
 }
-
-/**
- * \brief Convenience macro for registering single-objective functions with a factory at compile-time.
- */
-#define ANNOUNCE_LINGUISTIC_TERM( LinguisticTerm, Factory )		\
-    namespace LinguisticTerm ## _detail {					\
-    typedef TypeErasedAbstractFactory< LinguisticTerm, Factory > abstract_factory_type; \
-    typedef FactoryRegisterer< Factory > factory_registerer_type;	\
-    static factory_registerer_type FACTORY_REGISTERER = factory_registerer_type( #LinguisticTerm, new abstract_factory_type() ); \
-    } \
-
 #endif

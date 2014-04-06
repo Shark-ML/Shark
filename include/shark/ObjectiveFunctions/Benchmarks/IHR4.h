@@ -133,6 +133,5 @@ private:
 	RealMatrix m_rotationMatrix;
 };
 
-ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( IHR4, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif // IHR1_H

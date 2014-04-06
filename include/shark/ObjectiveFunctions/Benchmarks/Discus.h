@@ -96,8 +96,6 @@ private:
 	double m_alpha;
 	std::size_t m_numberOfVariables;
 };
-
-ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION(Discus, shark::soo::RealValuedObjectiveFunctionFactory);
 }
 
 #endif

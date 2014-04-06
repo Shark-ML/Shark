@@ -82,6 +82,5 @@ public:
     }
 };
 
-ANNOUNCE_LINGUISTIC_TERM( InfinityLT, LinguisticTermFactory );
 }
 #endif

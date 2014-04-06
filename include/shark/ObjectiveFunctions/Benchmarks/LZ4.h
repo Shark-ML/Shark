@@ -112,52 +112,5 @@ private:
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
 
-ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( LZ4, shark::moo::RealValuedObjectiveFunctionFactory );
-	//template<> struct ObjectiveFunctionTraits<LZ4> {
-	//	static LZ4::SolutionSetType referenceSet( std::size_t maxSize,
-	//		unsigned int numberOfVariables,
-	//		unsigned int numberOfObjectives ) {
-	//		shark::IntervalIterator< tag::LinearTag > it( 0., 1., maxSize );
-	//
-	//		LZ4 LZ4;
-	//		LZ4.numberOfVariables() = numberOfVariables;
-	//
-	//		LZ4::SolutionSetType solutionSet;
-	//		while( it ) {
-	//
-	//			LZ4::SolutionType solution;
-	//
-	//			RealVector v( numberOfVariables );
-	//			v( 0 ) = *it;
-	//			for( unsigned int i = 1; i < numberOfVariables; i++ ) {
-	//				if( i % 2 == 0 )
-	//					v( i ) = 0.8*v( 0 )*::cos( 1./3.*(6 * M_PI * v( 0 ) + (i-1)*M_PI/(v.size()-1)) );
-	//				if( i % 2 == 1 )
-	//					v( i ) = 0.8*v( 0 )*::sin( 6 * M_PI * v( 0 ) + (i-1)*M_PI/(v.size()-1) );
-	//			}
-	//
-	//
-	//
-	//			solution.searchPoint() = v;
-	//			solution.objectiveFunctionValue() = LZ4.eval( v );
-	//			solutionSet.push_back( solution );
-	//			++it;
-	//		}
-	//		return( solutionSet );
-	//	}
-	//
-	//
-	//	static LZ4::SearchPointType lowerBounds( unsigned int n ) {
-	//		LZ4::SearchPointType sp( n, -1. );
-	//		sp( 0 ) = 0;
-	//
-	//		return( sp );
-	//	}
-	//
-	//	static LZ4::SearchPointType upperBounds( unsigned int n ) {
-	//		return( LZ4::SearchPointType( n, 1. ) );
-	//	}
-	//
-	//};
 }
 #endif

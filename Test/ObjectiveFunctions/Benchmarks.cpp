@@ -18,143 +18,10 @@
 
 #include <shark/Statistics/Statistics.h>
 
-#include <fstream>
-
 #include "TestObjectiveFunction.h"
-
-BOOST_AUTO_TEST_CASE( MultiObjective_Benchmark_Functions ) {
-
-	shark::moo::RealValuedObjectiveFunctionFactory::instance().print( std::cout );
-
-	typedef shark::moo::RealValuedObjectiveFunctionFactory::class_type function_type;
-
-	shark::moo::RealValuedObjectiveFunctionFactory::const_iterator it;
-	for( it = shark::moo::RealValuedObjectiveFunctionFactory::instance().begin();
-		it != shark::moo::RealValuedObjectiveFunctionFactory::instance().end();
-		++it
-		) {
-			std::cout<< "Considering function: " << it->first <<std::endl;
-
-			function_type * function = NULL;
-			BOOST_CHECK( it->second != NULL );
-			function = it->second->create();
-
-			BOOST_CHECK( function != NULL );
-			BOOST_CHECK( function->name() == it->first );
-			BOOST_CHECK_NO_THROW( function->setNumberOfVariables( 10 ) );
-			BOOST_CHECK( function->numberOfVariables() == 10 );
-			BOOST_CHECK_NO_THROW( function->init() );
-
-			function_type::SearchPointType sp;
-
-			if( function->features() & function_type::CAN_PROPOSE_STARTING_POINT ) {
-				
-				BOOST_CHECK_NO_THROW(  function->proposeStartingPoint( sp ) );
-				BOOST_CHECK( function->isFeasible( sp ) );
-				BOOST_CHECK( sp.size() == function->numberOfVariables() );
-
-				//~ function_type::SearchPointType sp2( sp );
-				//~ if( function->features() & function_type::CAN_PROVIDE_CLOSEST_FEASIBLE ) {
-					//~ BOOST_CHECK_NO_THROW( function->closestFeasible( sp2 ) );
-					//~ //BOOST_CHECK( sp == sp2 );
-				//~ } else
-					//~ BOOST_CHECK_THROW( function->closestFeasible( sp2 ), shark::Exception );
-
-				if( function->features() & function_type::HAS_VALUE ) {
-					BOOST_CHECK_NO_THROW( function->eval( sp ) );
-				} else
-					BOOST_CHECK_THROW( function->eval( sp ), shark::Exception );
-
-				function_type::FirstOrderDerivative fod;
-				if( function->features() & function_type::HAS_FIRST_DERIVATIVE ) {
-					BOOST_CHECK_NO_THROW( function->evalDerivative( sp, fod ) );
-				} else
-					BOOST_CHECK_THROW( function->evalDerivative( sp, fod ), shark::Exception );
-
-				function_type::SecondOrderDerivative sod;
-				if( function->features() & function_type::HAS_SECOND_DERIVATIVE ) {
-					BOOST_CHECK_NO_THROW( function->evalDerivative( sp, sod ) );
-				} else
-					BOOST_CHECK_THROW( function->evalDerivative( sp, sod ), shark::Exception );
-					
-			} else {
-				BOOST_CHECK_THROW( function->proposeStartingPoint( sp ), shark::Exception );
-			}
-		
-	}
-}
-
-BOOST_AUTO_TEST_CASE( SingleObjective_Benchmark_Functions ) {
-
-	shark::soo::RealValuedObjectiveFunctionFactory::instance().print( std::cout );
-
-	typedef shark::soo::RealValuedObjectiveFunctionFactory::class_type function_type;
-
-	shark::soo::RealValuedObjectiveFunctionFactory::const_iterator it;
-	for( it = shark::soo::RealValuedObjectiveFunctionFactory::instance().begin();
-		it != shark::soo::RealValuedObjectiveFunctionFactory::instance().end();
-		++it
-		) {
-			std::cout<< "Considering function: " << it->first <<std::endl;
-
-			function_type * function = NULL;
-			BOOST_CHECK( it->second != NULL );
-			function = it->second->create();
-
-			BOOST_CHECK( function != NULL );
-			BOOST_CHECK( function->name() == it->first );
-			if(function->hasScalableDimensionality()){
-				BOOST_CHECK_NO_THROW( function->setNumberOfVariables( 10 ) );
-			}else{
-				BOOST_CHECK_THROW( function->setNumberOfVariables( 10 ), shark::Exception );
-			}
-			BOOST_CHECK_NO_THROW( function->init() );
-
-			function_type::SearchPointType sp;
-
-			if( function->features() & function_type::CAN_PROPOSE_STARTING_POINT ) {
-
-				BOOST_CHECK_NO_THROW(  function->proposeStartingPoint( sp ) );
-				BOOST_CHECK( function->isFeasible( sp ) );
-				BOOST_CHECK( sp.size() == function->numberOfVariables() );
-
-				//~ function_type::SearchPointType sp2( sp );
-				//~ if( function->features() & function_type::CAN_PROVIDE_CLOSEST_FEASIBLE ) {
-					//~ BOOST_CHECK_NO_THROW( function->closestFeasible( sp2 ) );
-					//~ //BOOST_CHECK( sp == sp2 );
-				//~ } else
-					//~ BOOST_CHECK_THROW( function->closestFeasible( sp2 ), shark::Exception );
-
-				if( function->features() & function_type::HAS_VALUE ) {
-					BOOST_CHECK_NO_THROW( function->eval( sp ) );
-				} else
-					BOOST_CHECK_THROW( function->eval( sp ), shark::Exception );
-
-				function_type::FirstOrderDerivative fod;
-				if( function->features() & function_type::HAS_FIRST_DERIVATIVE ) {
-					BOOST_CHECK_NO_THROW( function->evalDerivative( sp, fod ) );
-				} else
-					BOOST_CHECK_THROW( function->evalDerivative( sp, fod ), shark::Exception );
-
-				function_type::SecondOrderDerivative sod;
-				if( function->features() & function_type::HAS_SECOND_DERIVATIVE ) {
-					BOOST_CHECK_NO_THROW( function->evalDerivative( sp, sod ) );
-				} else
-					BOOST_CHECK_THROW( function->evalDerivative( sp, sod ), shark::Exception );
-
-			} else {
-				BOOST_CHECK_THROW( function->proposeStartingPoint( sp ), shark::Exception );
-			}
-
-	}
-}
 
 BOOST_AUTO_TEST_CASE( Himmelblau ) {
 	shark::Himmelblau hb;
-
-	//~ BOOST_CHECK_THROW( hb( shark::RealVector( 1 ) ), shark::Exception );
-	//~ BOOST_CHECK_THROW( hb( shark::RealVector( 3 ) ), shark::Exception );
-
 	shark::RealVector v( 2 );
 	
 	v( 0 ) = -0.270844;
@@ -189,7 +56,7 @@ BOOST_AUTO_TEST_CASE( Rosenbrock_Derivative )
 	{
 		shark::RealVector point(dimensions);
 		rosenbrock.proposeStartingPoint(point);
-		shark::testDerivative(rosenbrock, point,1.e-7,1.e-7);
+		shark::testDerivative(rosenbrock, point,1.e-7,1.e-7,0.005);
 	}
 }
 BOOST_AUTO_TEST_CASE( Ellipsoid_Derivative )

@@ -67,7 +67,6 @@ public:
     }
 
 };
-ANNOUNCE_LINGUISTIC_TERM( SigmoidalLT, LinguisticTermFactory );
 }
 
 #endif

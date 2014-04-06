@@ -114,6 +114,5 @@ private:
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
 
-ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ2, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 #endif

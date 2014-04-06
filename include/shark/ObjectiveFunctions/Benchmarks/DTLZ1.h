@@ -117,7 +117,6 @@ private:
 	
 };
 
-ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( DTLZ1, shark::moo::RealValuedObjectiveFunctionFactory );
 }
 
 #endif

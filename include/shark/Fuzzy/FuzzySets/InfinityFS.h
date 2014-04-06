@@ -103,6 +103,5 @@ protected:
 
 };
 
-ANNOUNCE_FUZZY_SET( InfinityFS, FuzzySetFactory );
 }
 #endif

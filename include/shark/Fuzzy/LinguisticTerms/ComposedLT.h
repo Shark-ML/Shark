@@ -90,7 +90,5 @@ public:
 
 };
 
-ANNOUNCE_LINGUISTIC_TERM( ComposedLT, LinguisticTermFactory );
-
 }
 #endif

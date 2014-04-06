@@ -61,8 +61,6 @@ MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 	ENDIF( OPT_COMPILE_EXAMPLES )
 ENDMACRO()
 
-SHARK_ADD_EXAMPLE( Core/Oracle Oracle "Core" )
-
 SHARK_ADD_EXAMPLE( EA/MOO/AdditiveEpsilonIndicatorMain AdditiveEpsilonIndicatorMain "EA/MOO" )
 #SHARK_ADD_EXAMPLE( EA/MOO/ApproximatedHypervolumeMain ApproximatedHypervolumeMain "EA/MOO" )
 #SHARK_ADD_EXAMPLE( EA/MOO/ExactHypervolumeMain ExactHypervolumeMain "EA/MOO" )

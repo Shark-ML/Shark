@@ -39,7 +39,6 @@
 #include <shark/Core/INameable.h>
 #include <shark/Core/Derivative.h>
 #include <shark/Core/Exception.h>
-#include <shark/Core/Factory.h>
 #include <shark/Core/Flags.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/ObjectiveFunctions/AbstractConstraintHandler.h>
@@ -308,38 +307,5 @@ typedef AbstractObjectiveFunction< VectorSpace< double >, double > SingleObjecti
 typedef AbstractObjectiveFunction< VectorSpace< double >, RealVector > MultiObjectiveFunction;
 
 }
-
-/** \cond */
-namespace shark {
-    namespace soo {
-	///  \brief Defines the default factory type for real-valued single-objective optimization problems.
-	typedef Factory< SingleObjectiveFunction, std::string > RealValuedObjectiveFunctionFactory;
-    }
-}
-
-namespace shark {
-	namespace moo {
-		/** \brief Defines the default factory type for real-valued multi-objective optimization problems. */
-		typedef Factory< MultiObjectiveFunction, std::string > RealValuedObjectiveFunctionFactory;
-	}
-} 
-/** \endcond */
-/**
-* \brief Convenience macro for registering multi-objective functions with a factory at compile-time.
-*/
-#define ANNOUNCE_MULTI_OBJECTIVE_FUNCTION( Function, Factory ) \
-	namespace Function ## _detail {\
-		typedef TypeErasedAbstractFactory< Function, Factory > abstract_factory_type;\
-		typedef FactoryRegisterer< Factory > factory_registerer_type;\
-		static factory_registerer_type FACTORY_REGISTERER = factory_registerer_type( #Function, new abstract_factory_type() );\
-	}\
-
-///  \brief Convenience macro for registering single-objective functions with a factory at compile-time.
-#define ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION( Function, Factory )		\
-    namespace Function ## _detail {					\
-	typedef TypeErasedAbstractFactory< Function, Factory > abstract_factory_type; \
-	typedef FactoryRegisterer< Factory > factory_registerer_type;	\
-	static factory_registerer_type FACTORY_REGISTERER = factory_registerer_type( #Function, new abstract_factory_type() ); \
-    }									\
 
 #endif

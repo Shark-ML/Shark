@@ -80,6 +80,5 @@ protected:
 
 };
 
-ANNOUNCE_FUZZY_SET( CustomizedFS, FuzzySetFactory );
 }
 #endif

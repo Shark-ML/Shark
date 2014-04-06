@@ -36,8 +36,6 @@
 
 #include <shark/Algorithms/AbstractOptimizer.h>
 #include <shark/Core/ResultSets.h>
-#include <shark/Core/ResultSets.h>
-#include <shark/Core/Factory.h>
 
 namespace shark {
 	///\brief Base class for all single objective optimizer
@@ -78,13 +76,6 @@ namespace shark {
 		///current solution of the optimizer
 		SolutionSetType m_best;
 	};
-
-	namespace soo {
-
-		/** \brief Defines the default factory type for real-valued singl-objective optimizers. */
-
-		typedef Factory< AbstractSingleObjectiveOptimizer< VectorSpace< double > >, std::string > RealValuedSingleObjectiveOptimizerFactory;
-	}
 
 }
 #endif
