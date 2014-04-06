@@ -221,6 +221,13 @@ doc/sphinx_pages/rest_sources/tutorials/algorithms/*.rst
 doc/sphinx_pages/rest_sources/tutorials/first_steps/hello_shark.rst
 doc/sphinx_pages/rest_sources/tutorials/first_steps/general_optimization_tasks.rst
 doc/sphinx_pages/rest_sources/tutorials/first_steps/when_to_stop.rst
+doc/sphinx_pages/rest_sources/quickref/datasets.rst
+doc/sphinx_pages/rest_sources/tutorials/concepts/data/dataset_subsets.rst
+doc/sphinx_pages/rest_sources/tutorials/concepts/data/datasets.rst
+doc/sphinx_pages/rest_sources/tutorials/concepts/data/import_data.rst
+doc/sphinx_pages/rest_sources/tutorials/concepts/data/normalization.rst
+doc/sphinx_pages/rest_sources/tutorials/concepts/misc/random_numbers.rst
+doc/sphinx_pages/rest_sources/tutorials/concepts/misc/versatile_classification.rst
 
 
 
