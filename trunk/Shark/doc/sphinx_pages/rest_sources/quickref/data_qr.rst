@@ -3,13 +3,27 @@ Shark Data Containers Quick Reference
 =====================================
 
 
-Types
------
+Related tutorials
+-----------------
 
-:doxy:`Data`, :doxy:`UnlabeledData`, :doxy:`LabeledData`
-(also ClassificationDataset, CompressedClassificationDataset, RegressionDataset)
-:doxy:`DataView`, :doxy:`Data`, :doxy:`DataDistribution`,
-:doxy:`LabeledDataDistribution`, :doxy:`CVFolds`
+* :doc:`../tutorials/concepts/data/datasets`
+* :doc:`../tutorials/concepts/data/labels`
+* :doc:`../tutorials/concepts/data/import_data`
+* :doc:`../tutorials/concepts/data/dataset_subsets`
+* :doc:`../tutorials/concepts/data/normalization`
+
+
+Relevant Types
+--------------
+
+* :doxy:`Data`
+* :doxy:`UnlabeledData`
+* :doxy:`LabeledData` (also the typedefs ClassificationDataset, CompressedClassificationDataset, RegressionDataset)
+* :doxy:`DataView`
+* :doxy:`Data`
+* :doxy:`DataDistribution`
+* :doxy:`LabeledDataDistribution`
+* :doxy:`CVFolds`
 
 
 Container / View Creation

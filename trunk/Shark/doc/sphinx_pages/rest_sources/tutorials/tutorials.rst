@@ -7,7 +7,13 @@ Tutorials
 This page lists all tutorials available for the Shark machine learning library.
 Together with a comprehensive set of example and test programs, they are
 excellent starting points towards developing and evaluating machine learning
-software using Shark. Also see the guide to the different documentation pages
+software using Shark.
+
+If you are familiar with the Shark architecture and/or just want
+a concise overview over usage patterns and interfaces, see the
+:doc:`quick references <../quickref/quickref>`.
+
+Also see the guide to the different documentation pages
 available :doc:`here <../getting_started/using_the_documentation>`.
 
 
