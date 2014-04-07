@@ -153,8 +153,10 @@ library for "all things linear algebra":
 * :doc:`concepts/lin_alg/vector_matrix`
 * :doc:`concepts/lin_alg/lapack`
 
-For convenience, Shark provides a statistics generic support for serialization
+For convenience, Shark provides a statistics class wrapper, as well as generic
+support for serialization:
 
+* :doc:`concepts/misc/statistics`
 * :doc:`concepts/misc/serialization`
 
 
