@@ -4,7 +4,7 @@ Using the documentation
 Now that you've successfully installed Shark, you probably
 want to do something with it.
 
-There are at least six different entry points to get started:
+There are several entry points to get started:
 
 *  the :doc:`online tutorials <../tutorials/tutorials>`;
 *  the C++ example programs shipped with Shark, which can be found
@@ -16,8 +16,9 @@ There are at least six different entry points to get started:
      binary package (``${INSTALLPATH}`` is most likely to be
      ``/usr/local``);
 
+*  the :doc:`quick reference sheets <../quickref/quickref>`.
 *  the `Doxygen documentation <../../../../../doxygen_pages/html/annotated.html>`_ generated from the source code;
-*  our `YouTube Channel <http://www.youtube.com/user/SharkMLLibrary>`_;
+*  our `YouTube Channel <http://www.youtube.com/user/SharkMLLibrary>`_ (to be expanded..);
 *  the C++ test programs shipped with Shark (in the ``Test/`` subdirectory of your Shark installation); and
 *  the source code itself.
 

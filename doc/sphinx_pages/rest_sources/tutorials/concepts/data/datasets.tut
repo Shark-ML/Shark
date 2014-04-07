@@ -68,7 +68,7 @@ we introduce the interface of the data object we want to clarify this distinctio
   But it represents an important *semantic* difference, since the data
   points are interpreted as input data without labels, whereas the above
   mentioned Data class might store anything (for example model outputs,
-  labels, or points). 
+  labels, or points).
 
 * :doxy:`LabeledData` finally represents inputs (data points) augmented with
   labels. Conceptually the class ``LabeledData<I,L>`` can be described roughly
@@ -347,7 +347,8 @@ Transformation of data sets
 
 In many applications data must be pre-processed before actual learning.
 For example, the data mean is to be removed, or labels need to be altered
-in order to fit into Shark's label convention (see :ref:`labels`).
+in order to fit into Shark's label convention (see the tutorial on
+:doc:`labels <labels>`).
 For this purpose Shark provides a smart and efficient transformation
 mechanism. Assume function objects f and g such that f(input) returns
 the transformed input vector and g(label) the transformed label. Then we

@@ -91,6 +91,11 @@
    rest_sources/tutorials/for_developers/issuing_a_release
 
 
+   rest_sources/quickref/quickref
+
+   rest_sources/quickref/data_qr
+
+
    rest_sources/faq/faq
 
 
