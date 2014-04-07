@@ -119,9 +119,6 @@ SHARK_ADD_TEST( Algorithms/nearestneighbors.cpp Algorithms_NearestNeighbor )
 SHARK_ADD_TEST( Algorithms/KMeans.cpp Algorithms_KMeans )
 SHARK_ADD_TEST( Algorithms/JaakkolaHeuristic.cpp Algorithms_JaakkolaHeuristic )
 
-#Fuzzy
-SHARK_ADD_TEST( Fuzzy/FCL.cpp Fuzzy_Control_Language_Parser )
-SHARK_ADD_TEST( Fuzzy/Mamdani.cpp Fuzzy_Mamdani )
 #Models
 SHARK_ADD_TEST( Models/ConcatenatedModel.cpp Models_ConcatenatedModel )
 SHARK_ADD_TEST( Models/FFNet.cpp Models_FFNet )
