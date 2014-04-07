@@ -248,7 +248,7 @@ public:
 	////////////////////////////ITERATOR INTERFACE//////////////////////////////////////
 
 	///////////ITERATORS OVER THE BATCHES//////////////////
-	typedef boost::indirect_iterator< typename Container::const_iterator,const BatchType > const_iterator;
+	typedef boost::indirect_iterator< typename Container::const_iterator,const BatchType, boost::use_default, BatchType const& > const_iterator;
 	typedef boost::indirect_iterator< typename Container::iterator > iterator;
 
 	///\brief Iterator access over the batches.
@@ -273,37 +273,43 @@ public:
 	}
 
 	///////////ITERATORS OVER THE ELEMENTS//////////////////
+private:
+	struct BatchRange:public boost::iterator_range<iterator>{
+	BatchRange(iterator const& begin, iterator const& end):boost::iterator_range<iterator>(begin,end){}
+	};
+	struct ConstBatchRange:public boost::iterator_range<const_iterator>{
+	ConstBatchRange(const_iterator const& begin, const_iterator const& end)
+	:boost::iterator_range<const_iterator>(begin,end){}
+	};
+public:
 
-	typedef MultiSequenceIterator<boost::indirected_range<Container> > element_iterator;
-	typedef MultiSequenceIterator<const boost::indirected_range<const Container> > const_element_iterator;
+	typedef MultiSequenceIterator<BatchRange > element_iterator;
+	typedef MultiSequenceIterator<ConstBatchRange > const_element_iterator;
 
 
 	///\brief Iterator access over the single elements
 	const_element_iterator elemBegin() const{
 		if(size() == 0)
-			return const_element_iterator(m_data,m_data.begin(),typename BatchTraits::const_iterator(),0);
-		else{
-			return const_element_iterator(m_data,m_data.begin(),boost::begin(*m_data[0]),0);
-		}
+			return elemEnd();
+		
+		return const_element_iterator(begin(),end(),begin(),boost::begin(*m_data[0]),0);
 	}
 
 	///\brief Iterator access over the single elements
 	const_element_iterator elemEnd() const{
-		return const_element_iterator(m_data,m_data.end(),typename BatchTraits::const_iterator(),numberOfElements());
+		return const_element_iterator(begin(),end(),end(),typename BatchTraits::const_iterator(),numberOfElements());
 	}
 
 	///\brief Iterator access over the single elements
 	element_iterator elemBegin(){
 		if(size() == 0)
-			return element_iterator(m_data,m_data.begin(),typename BatchTraits::iterator(),0);
-		else{
-			return element_iterator(m_data,m_data.begin(),boost::begin(*m_data[0]),0);
-		}
+			return elemEnd();
+		return element_iterator(begin(),end(),begin(),boost::begin(*m_data[0]),0);
 	}
 
 	///\brief Iterator access over the single elements
 	element_iterator elemEnd(){
-		return element_iterator(m_data,m_data.end(),typename BatchTraits::iterator(),numberOfElements());
+		return element_iterator(begin(),end(),end(),typename BatchTraits::iterator(),numberOfElements());
 	}
 
 	///////////////////////ADDING NEW BATCHES////////////////////////

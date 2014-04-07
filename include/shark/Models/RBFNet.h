@@ -34,7 +34,6 @@
 #define SHARK_MODELS_RBFNET_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/Core/SharedVector.h>
 namespace shark {
 
 ///  \brief Offers the functions to create and to work with radial basis function networks
