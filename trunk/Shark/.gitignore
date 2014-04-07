@@ -241,7 +241,6 @@ examples/Core/*.cpp
 examples/EA/MOO/*.cpp
 examples/EA/SOO/*.cpp
 examples/Statistics/*.cpp
-examples/Statistics/
 examples/Supervised/*.cpp
 examples/Unsupervised/*.cpp
 
