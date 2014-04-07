@@ -29,11 +29,11 @@ BOOST_AUTO_TEST_CASE(MULTI_SEQUENCE_ITERATOR_TEST)
 	
 	{//check op++
 		MultiSequenceIterator<std::vector<std::vector<std::size_t> > > iter(
-			vecs, vecs.begin(),vecs.begin()->begin(),0
+			vecs.begin(),vecs.end(), vecs.begin(),vecs.begin()->begin(),0
 		);
 		
 		MultiSequenceIterator<std::vector<std::vector<std::size_t> > > end(
-			vecs, vecs.end(),std::vector<std::size_t>::iterator(),1000
+			vecs.begin(),vecs.end(), vecs.end(),std::vector<std::size_t>::iterator(),1000
 		);
 		
 		for(std::size_t pos = 0; pos != 1000; ++pos,++iter){
@@ -48,11 +48,11 @@ BOOST_AUTO_TEST_CASE(MULTI_SEQUENCE_ITERATOR_TEST)
 	
 	{//check op+=
 		MultiSequenceIterator<std::vector<std::vector<std::size_t> > > iter(
-			vecs, vecs.begin(),vecs.begin()->begin(),0
+			vecs.begin(),vecs.end(), vecs.begin(),vecs.begin()->begin(),0
 		);
 		
 		MultiSequenceIterator<std::vector<std::vector<std::size_t> > > end(
-			vecs, vecs.end(),std::vector<std::size_t>::iterator(),1000
+			vecs.begin(),vecs.end(), vecs.end(),std::vector<std::size_t>::iterator(),1000
 		);
 		
 		std::ptrdiff_t pos = 0;

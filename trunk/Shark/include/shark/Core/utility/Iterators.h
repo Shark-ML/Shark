@@ -35,7 +35,6 @@
 
 #include "Impl/boost_iterator_facade_fixed.hpp"//thanks, boost.
 
-#include <shark/Core/utility/CopyConst.h>
 #include <shark/Core/utility/Range.h>
 #include <boost/range/iterator.hpp>
 namespace shark{
@@ -174,7 +173,10 @@ namespace detail{
 		typedef typename boost::range_iterator<SequenceContainer>::type outer_iterator;
 		//the inner Sequence type is the value_type of the outer sequence. But if the outer sequence is const
 		//we have to make sure, that we also get const value_type.
-		typedef typename CopyConst<typename boost::iterator_value<outer_iterator>::type,SequenceContainer>::type InnerSequence;
+		//~ typedef typename CopyConst<typename boost::iterator_value<outer_iterator>::type,SequenceContainer>::type InnerSequence;
+		typedef typename boost::remove_reference<
+			typename boost::iterator_reference<outer_iterator>::type
+		>::type InnerSequence;
 		typedef typename boost::range_iterator<InnerSequence>::type inner_iterator;
 		typedef typename boost::iterator_reference<inner_iterator>::type reference;
 		typedef typename boost::iterator_value<inner_iterator>::type value_type;
@@ -206,15 +208,16 @@ public:
 	MultiSequenceIterator()
 	:m_positionInSequence(0){}
 
-	template<class Sequence, class OuterIter, class InnerIter>
+	template<class OuterIter, class InnerIter>
 	MultiSequenceIterator(
-		Sequence& sequence,
+		OuterIter outerBegin,
+		OuterIter outerEnd,
 		OuterIter outerPosition,
 		InnerIter innerPosition,
 		std::size_t positionInSequence
-	):m_outerBegin(outer_iterator(boost::begin(sequence))),
+	):m_outerBegin(outer_iterator(outerBegin)),
 	m_outerPosition(outer_iterator(outerPosition)),
-	m_outerEnd(outer_iterator(boost::end(sequence))),
+	m_outerEnd(outer_iterator(outerEnd)),
 	m_innerPosition(innerPosition),
 	m_positionInSequence(positionInSequence){
 		//we can't dereference if we are past the end...
