@@ -124,10 +124,10 @@ Import / Export
 
 =================================== =============================================================== =================
 :doxy:`importCSV`                   import from comma separated values (CSV) file                   ``Csv.h``
-:doxy:`importSparseData`            import from sparse vector (libSVM) format                       ``SparseData.h``
-:doxy:`importHDF5`                  import from comma separated values (CSV) file                   ``Csv.h``
 :doxy:`exportCSV`                   export to comma separated values (CSV) file                     ``Csv.h``
+:doxy:`importSparseData`            import from sparse vector (libSVM) format                       ``SparseData.h``
 :doxy:`exportSparseData`            export to sparse vector (libSVM) format                         ``SparseData.h``
+:doxy:`importHDF5`                  import from comma separated values (CSV) file                   ``Csv.h``
 :doxy:`importPGM`                   import PGM image                                                ``Pgm.h``
 :doxy:`importPGMDir`                import directory of PGM images                                  ``Pgm.h``
 :doxy:`importPGMSet`                import set of PGM images                                        ``Pgm.h``
