@@ -188,6 +188,7 @@ SHARK_ADD_TEST( ObjectiveFunctions/NoisyErrorFunction.cpp ObjFunct_NoisyErrorFun
 SHARK_ADD_TEST( ObjectiveFunctions/CrossValidation.cpp ObjFunct_CrossValidation )
 SHARK_ADD_TEST( ObjectiveFunctions/Benchmarks.cpp ObjFunct_Benchmarks )
 SHARK_ADD_TEST( ObjectiveFunctions/KernelTargetAlignment.cpp ObjFunct_KernelTargetAlignment )
+SHARK_ADD_TEST( ObjectiveFunctions/KernelBasisDistance.cpp ObjFunct_KernelBasisDistance )
 SHARK_ADD_TEST( ObjectiveFunctions/RadiusMarginQuotient.cpp ObjFunct_RadiusMarginQuotient )
 SHARK_ADD_TEST( ObjectiveFunctions/LooError.cpp ObjFunct_LooError )
 SHARK_ADD_TEST( ObjectiveFunctions/LooErrorCSvm.cpp ObjFunct_LooErrorCSvm )
