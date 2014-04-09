@@ -36,8 +36,8 @@ using namespace blas;
 
 KernelBasisDistance::KernelBasisDistance(
 	KernelExpansion<RealVector>* kernelExpansion,
-	std::size_t approximatingVectors
-):mep_expansion(kernelExpansion),m_approximatingVectors(approximatingVectors){
+	std::size_t numApproximatingVectors
+):mep_expansion(kernelExpansion),m_numApproximatingVectors(numApproximatingVectors){
 	SHARK_CHECK(kernelExpansion != NULL, "[KernelBasisDistance] kernelExpansion must not be NULL");
 	SHARK_CHECK(kernelExpansion->kernel() != NULL, "[KernelBasisDistance] kernelExpansion must have a kernel");
 	mep_expansion -> sparsify(); //purge all non-support vectors
@@ -53,15 +53,15 @@ void KernelBasisDistance::proposeStartingPoint(SearchPointType& startingPoint) c
 	Data<RealVector> const& expansionBasis = mep_expansion->basis();
 	std::size_t dim = dataDimension(expansionBasis);
 	std::size_t elems = mep_expansion->alpha().size1();
-	startingPoint.resize(m_approximatingVectors * dim);
-	for(std::size_t i = 0; i != m_approximatingVectors; ++i){
+	startingPoint.resize(m_numApproximatingVectors * dim);
+	for(std::size_t i = 0; i != m_numApproximatingVectors; ++i){
 		std::size_t k = Rng::discrete(0,elems-1);
 		noalias(subrange(startingPoint,i*dim,(i+1)*dim)) = expansionBasis.element(k);
 	}
 }
 
 std::size_t KernelBasisDistance::numberOfVariables()const{
-	return m_approximatingVectors* dataDimension(mep_expansion->basis());
+	return m_numApproximatingVectors  * dataDimension(mep_expansion->basis());
 }
 
 double KernelBasisDistance::eval(RealVector const& input) const{
@@ -76,10 +76,11 @@ double KernelBasisDistance::eval(RealVector const& input) const{
 	
 	
 	//set up system of equations
-	RealMatrix basis = adapt_matrix(m_approximatingVectors,dim,&input(0));
+	RealMatrix basis = adapt_matrix(m_numApproximatingVectors,dim,&input(0));
 	RealMatrix kBasis = kernel(basis,basis);
-	//construct the linear part!
-	RealMatrix linear(m_approximatingVectors,outputs,0);
+	//construct the linear part = K_xz \alpha!
+	//we do this batch wise for every batch in the basis of the kernel expansion
+	RealMatrix linear(m_numApproximatingVectors,outputs,0);
 	std::size_t start = 0;
 	for(std::size_t i = 0; i != expansionBasis.numberOfBatches(); ++i){
 		RealMatrix const& batch = expansionBasis.batch(i);
@@ -111,15 +112,17 @@ KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const Searc
 	RealMatrix const& alpha= mep_expansion -> alpha();
 	std::size_t dim = dataDimension(expansionBasis);
 	std::size_t outputs = mep_expansion->outputSize();
-	RealMatrix basis = adapt_matrix(m_approximatingVectors,dim,&input(0));
+	RealMatrix basis = adapt_matrix(m_numApproximatingVectors,dim,&input(0));
 	
-	//set up system of equations and
+	//set up system of equations and store the kernel states at the same time
+	// (we assume here thyt everything fits into memory, which is the case as long as the number of
+	// vectors to approximate is quite small)
 	boost::shared_ptr<State> kBasisState = kernel.createState();
 	RealMatrix kBasis;
 	kernel.eval(basis,basis,kBasis,*kBasisState);
 	//construct the linear part!
 	std::vector<boost::shared_ptr<State> > linearState(expansionBasis.numberOfBatches());
-	RealMatrix linear(m_approximatingVectors,outputs,0);
+	RealMatrix linear(m_numApproximatingVectors,outputs,0);
 	std::size_t start = 0;
 	for(std::size_t i = 0; i != expansionBasis.numberOfBatches(); ++i){
 		RealMatrix const& batch = expansionBasis.batch(i);
@@ -136,7 +139,7 @@ KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const Searc
 	
 	//compute derivative
 	derivative.resize(input.size());
-	RealMatrix baseDerivative(m_approximatingVectors,dim);
+	RealMatrix baseDerivative(m_numApproximatingVectors,dim);
 	kernel.weightedInputDerivative(basis,basis,prod(beta,trans(beta)),*kBasisState,baseDerivative);
 	noalias(derivative) = adapt_vector(input.size(), &baseDerivative(0,0));
 	start = 0;
