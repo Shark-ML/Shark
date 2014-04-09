@@ -7,8 +7,8 @@
  * 
  * 
  *
- * \author      T. Glasmachers
- * \date        2011
+ * \author      O. Krause
+ * \date        2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -47,7 +47,7 @@
 using namespace shark;
 
 //Sanity check that checks that the error of the exact same basis is minimal and the derivative is small.
-BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Derivative_Optimal)
+BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Derivative_Optimal )
 {
 	for(std::size_t trial = 0; trial != 10; ++trial){
 		Chessboard problem;
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Derivative_Optimal)
 			}
 		}
 		KernelBasisDistance distance(&expansion,100);
-		
+
 		RealMatrix pointBatch(100,2);
 		RealVector point(2*100);
 		for(std::size_t i = 0; i != 100; ++i){
@@ -70,16 +70,15 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Derivative_Optimal)
 		}
 		RealMatrix K = kernel(pointBatch,pointBatch);
 		//we omit the expensive to compute constant term in the distance, thus we compute it here to
-		//assure that the corrected value is (very close) to zero.
+		//assure that the corrected value is (very close to) zero.
 		double correction = inner_prod(column(expansion.alpha(),0),prod(K,column(expansion.alpha(),0)));
 		correction += inner_prod(column(expansion.alpha(),1),prod(K,column(expansion.alpha(),1)));
 		correction += inner_prod(column(expansion.alpha(),2),prod(K,column(expansion.alpha(),2)));
-		
-		BOOST_CHECK_SMALL(2*distance(point)+ correction,1.e-10);
+
+		BOOST_CHECK_SMALL(2*distance(point) + correction, 1.e-10);
 		RealVector derivative;
-		BOOST_CHECK_SMALL(2*distance.evalDerivative(point,derivative)+ correction,1.e-10);
-		BOOST_CHECK_SMALL(norm_2(derivative)/200,1.e-9);
-		
+		BOOST_CHECK_SMALL(2*distance.evalDerivative(point,derivative) + correction, 1.e-10);
+		BOOST_CHECK_SMALL(norm_2(derivative) / 200, 1.e-9);
 	}
 }
 
@@ -94,7 +93,7 @@ public:
 		}
 	}
 };
-BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Linear)
+BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Linear )
 {
 	for(std::size_t trial = 0; trial != 10; ++trial){
 		NormalDistributedPoints problem;
@@ -105,15 +104,15 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Linear)
 		for(std::size_t i = 0; i != 100; ++i){
 			alpha(i) = expansion.alpha()(i,0) = Rng::gauss(0,1);
 		}
-		
-		//create the primal point
+
+		//construct the target vector in explicit form
 		RealVector optimalPoint(30,0);
 		for(std::size_t i = 0; i != 100; ++i){
 			noalias(optimalPoint) += alpha(i) * dataset.element(i);
 		}
-		
+
 		KernelBasisDistance distance(&expansion,20);
-		
+
 		for(std::size_t test = 0; test != 10; ++test){
 			//create input point as well as batch version
 			Data<RealVector> dataset = problem.generateDataset(20,20);
@@ -122,14 +121,14 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Linear)
 			for(std::size_t i = 0; i != 20; ++i){
 				noalias(subrange(point,i*30,(i+1)*30)) = row(pointBatch,i);
 			}
-			
+
 			//find optimal solution
 			RealMatrix K = prod(pointBatch,trans(pointBatch));
 			RealVector linear = prod(pointBatch,optimalPoint);
 			RealVector beta;
 			blas::solveSymmSystem<blas::SolveAXB>(K,beta,linear);
 			RealVector optimalApproximation = prod(beta,pointBatch);
-			
+
 			double error = distanceSqr(optimalApproximation,optimalPoint)-norm_sqr(optimalPoint);
 			error/=2;
 			BOOST_CHECK_CLOSE(distance(point),error,1.e-10);
@@ -150,13 +149,13 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Linear)
 			}
 		}
 		KernelBasisDistance distance(&expansion,10);
-		
+
 		for(std::size_t test = 0; test != 10; ++test){
 			RealVector point(30*10);
 			for(std::size_t i = 0; i != point.size(); ++i){
 				point(i) = Rng::gauss(0,1);
 			}
-		
+
 			testDerivative(distance,point,1.e-6,0,0.1);
 		}
 	}
@@ -175,13 +174,13 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Gaussian
 			}
 		}
 		KernelBasisDistance distance(&expansion,10);
-		
+
 		for(std::size_t test = 0; test != 10; ++test){
 			RealVector point(30*10);
 			for(std::size_t i = 0; i != point.size(); ++i){
 				point(i) = Rng::gauss(0,1);
 			}
-		
+
 			testDerivative(distance,point,1.e-6,0,0.1);
 		}
 	}
