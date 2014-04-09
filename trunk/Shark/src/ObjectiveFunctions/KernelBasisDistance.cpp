@@ -66,15 +66,14 @@ std::size_t KernelBasisDistance::numberOfVariables()const{
 
 double KernelBasisDistance::eval(RealVector const& input) const{
 	SIZE_CHECK(input.size() == numberOfVariables());
-	
+
 	//get access to the internal variables of the expansion
 	Data<RealVector> const& expansionBasis = mep_expansion->basis();
 	AbstractKernelFunction<RealVector> const& kernel = *mep_expansion->kernel();
-	RealMatrix const& alpha= mep_expansion -> alpha();
+	RealMatrix const& alpha = mep_expansion->alpha();
 	std::size_t dim = dataDimension(expansionBasis);
 	std::size_t outputs = mep_expansion->outputSize();
-	
-	
+
 	//set up system of equations
 	RealMatrix basis = adapt_matrix(m_numApproximatingVectors,dim,&input(0));
 	RealMatrix kBasis = kernel(basis,basis);
@@ -85,14 +84,14 @@ double KernelBasisDistance::eval(RealVector const& input) const{
 	for(std::size_t i = 0; i != expansionBasis.numberOfBatches(); ++i){
 		RealMatrix const& batch = expansionBasis.batch(i);
 		RealMatrix kernelBlock = kernel(basis,batch);
-		noalias(linear) +=prod(kernelBlock,rows(alpha,start,start+batch.size1()));
-		start +=batch.size1();
+		noalias(linear) += prod(kernelBlock, rows(alpha,start,start+batch.size1()));
+		start += batch.size1();
 	}
-	
+
 	//solve for the optimal combination of kernel vectors beta
 	RealMatrix beta = linear;
 	solveSymmSemiDefiniteSystemInPlace<SolveAXB>(kBasis,beta);
-	
+
 	//return error of optimal beta
 	RealMatrix kBeta = prod(kBasis,beta);
 	double error = 0;
@@ -105,22 +104,22 @@ double KernelBasisDistance::eval(RealVector const& input) const{
 
 KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const {
 	SIZE_CHECK(input.size() == numberOfVariables());
-	
+
 	//get access to the internal variables of the expansion
 	Data<RealVector> const& expansionBasis = mep_expansion->basis();
 	AbstractKernelFunction<RealVector> const& kernel = *mep_expansion->kernel();
-	RealMatrix const& alpha= mep_expansion -> alpha();
+	RealMatrix const& alpha = mep_expansion->alpha();
 	std::size_t dim = dataDimension(expansionBasis);
 	std::size_t outputs = mep_expansion->outputSize();
 	RealMatrix basis = adapt_matrix(m_numApproximatingVectors,dim,&input(0));
-	
+
 	//set up system of equations and store the kernel states at the same time
 	// (we assume here thyt everything fits into memory, which is the case as long as the number of
 	// vectors to approximate is quite small)
 	boost::shared_ptr<State> kBasisState = kernel.createState();
 	RealMatrix kBasis;
 	kernel.eval(basis,basis,kBasis,*kBasisState);
-	//construct the linear part!
+	//construct the linear part
 	std::vector<boost::shared_ptr<State> > linearState(expansionBasis.numberOfBatches());
 	RealMatrix linear(m_numApproximatingVectors,outputs,0);
 	std::size_t start = 0;
@@ -129,14 +128,14 @@ KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const Searc
 		RealMatrix kernelBlock;
 		linearState[i] = kernel.createState();
 		kernel.eval(basis,batch,kernelBlock,*linearState[i]);
-		noalias(linear) +=prod(kernelBlock,rows(alpha,start,start+batch.size1()));
-		start +=batch.size1();
+		noalias(linear) += prod(kernelBlock,rows(alpha,start,start+batch.size1()));
+		start += batch.size1();
 	}
-	
+
 	//solve for the optimal combination of kernel vectors beta
-	RealMatrix beta= linear;
+	RealMatrix beta = linear;
 	solveSymmSemiDefiniteSystemInPlace<SolveAXB>(kBasis,beta);
-	
+
 	//compute derivative
 	derivative.resize(input.size());
 	RealMatrix baseDerivative(m_numApproximatingVectors,dim);
@@ -154,7 +153,7 @@ KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const Searc
 		noalias(derivative) -= adapt_vector(input.size(), &baseDerivative(0,0));
 		start +=batch.size1();
 	}
-	
+
 	//return error of optimal beta
 	RealMatrix kBeta = prod(kBasis,beta);
 	double error = 0;
@@ -163,6 +162,4 @@ KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const Searc
 		error -= inner_prod(column(linear,i),column(beta,i));
 	}
 	return error;
-	
-	
 }
