@@ -37,8 +37,7 @@
 
 namespace shark{
 
-
-/// \brief Computes the distance between the optimal point in a basis to the point represented by a KernelExpansion.
+/// \brief Computes the squared distance between the optimal point in a basis to the point represented by a KernelExpansion.
 ///
 /// Assume we are given a kernel expansion \f$ w = \sum_i \alpha_i k(x_i, \cdot) \f$. The KernelBasisDistance takes
 /// a new set of basis vectors \f$ z_i \f$ and finds the linear combination in that space which is closest
@@ -52,7 +51,7 @@ namespace shark{
 /// The target point \f$ w \f$ is set as a KernelExpansion in the constructor. If the kernel is differentiable
 /// with respect to the input point then this objective function is differentiable as well.
 ///
-/// The kernel expansion can represent more than one single point, in this point the error is the sum of approximation errors.
+/// The kernel expansion can represent more than one single point, in this case the error is the sum of approximation errors.
 class KernelBasisDistance : public SingleObjectiveFunction
 {
 public:
@@ -61,8 +60,8 @@ public:
 	/// This functions calls sparsify on the kernel expansion to save computation time in the case of sparse bases.
 	///
 	/// \param kernelExpansion a pointer to the kernel expansion to approximate
-	/// \param approximatingVectors the number of vectors used to approximate the point - the basis size
-	KernelBasisDistance(KernelExpansion<RealVector>* kernelExpansion,std::size_t approximatingVectors);
+	/// \param numApproximatingVectors the number of vectors used to approximate the point - the basis size
+	KernelBasisDistance(KernelExpansion<RealVector>* kernelExpansion,std::size_t numApproximatingVectors);
 
 	/// \brief Returns the name of the class
 	std::string name() const
@@ -91,7 +90,7 @@ public:
 
 private:
 	KernelExpansion<RealVector>* mep_expansion;     ///< kernel expansion to approximate
-	std::size_t m_approximatingVectors; ///< number of vectors in the basis
+	std::size_t m_numApproximatingVectors; ///< number of vectors in the basis
 };
 
 
