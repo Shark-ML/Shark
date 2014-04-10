@@ -36,6 +36,8 @@
 #include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
 #include <shark/Algorithms/QP/SvmProblems.h>
 #include <shark/Models/Kernels/KernelHelpers.h>
+#include <shark/LinAlg/CachedMatrix.h>
+#include <shark/LinAlg/KernelMatrix.h>
 
 namespace shark {
 

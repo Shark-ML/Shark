@@ -41,6 +41,8 @@
 #include "shark/Models/Kernels/MissingFeaturesKernelExpansion.h"
 #include <shark/Algorithms/QP/BoxConstrainedProblems.h>
 #include <shark/Algorithms/QP/SvmProblems.h>
+#include <shark/LinAlg/CachedMatrix.h>
+#include <shark/LinAlg/ExampleModifiedKernelMatrix.h>
 
 #include <boost/foreach.hpp>
 

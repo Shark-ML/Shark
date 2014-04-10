@@ -6,6 +6,12 @@
 #include <shark/Models/Kernels/LinearKernel.h>
 #include <shark/Models/Kernels/KernelHelpers.h>
 #include <shark/Data/DataDistribution.h>
+#include <shark/LinAlg/BlockMatrix2x2.h>
+#include <shark/LinAlg/CachedMatrix.h>
+#include <shark/LinAlg/KernelMatrix.h>
+#include <shark/LinAlg/ModifiedKernelMatrix.h>
+#include <shark/LinAlg/PrecomputedMatrix.h>
+#include <shark/LinAlg/RegularizedKernelMatrix.h>
 
 using namespace shark;
 
