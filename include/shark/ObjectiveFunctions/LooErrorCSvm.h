@@ -37,6 +37,8 @@
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/Algorithms/QP/BoxConstrainedProblems.h>
 #include <shark/Algorithms/QP/SvmProblems.h>
+#include <shark/LinAlg/CachedMatrix.h>
+#include <shark/LinAlg/KernelMatrix.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
 
 namespace shark {

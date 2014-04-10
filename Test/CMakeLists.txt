@@ -58,6 +58,7 @@ SHARK_ADD_TEST( LinAlg/Proxy.cpp LinAlg_Proxy )
 SHARK_ADD_TEST( LinAlg/repeat.cpp LinAlg_Repeat)
 SHARK_ADD_TEST( LinAlg/rotations.cpp LinAlg_rotations )
 SHARK_ADD_TEST( LinAlg/permute.cpp LinAlg_Permutations )
+SHARK_ADD_TEST( LinAlg/KernelMatrix.cpp LinAlg_KernelMatrix )
 SHARK_ADD_TEST( LinAlg/Metrics.cpp LinAlg_Metrics)
 SHARK_ADD_TEST( LinAlg/RQ.cpp LinAlg_RQ )
 SHARK_ADD_TEST( LinAlg/eigensort.cpp LinAlg_eigensort )
@@ -91,7 +92,6 @@ SHARK_ADD_TEST( Algorithms/GradientDescent/Quickprop.cpp GradDesc_Quickprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_SteepestDescent )
 #QP - Quadratic Programs
 SHARK_ADD_TEST( Algorithms/QP/LRUCache.cpp QP_LRUCache )
-SHARK_ADD_TEST( Algorithms/QP/KernelMatrix.cpp QP_KernelMatrix )
 
 #Trainers
 SHARK_ADD_TEST( Algorithms/Trainers/CSvmTrainer.cpp Trainers_CSvmTrainer )

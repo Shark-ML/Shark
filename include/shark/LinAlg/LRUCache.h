@@ -46,9 +46,9 @@ namespace shark{
 /// Low Level Cache which stores cache lines, arrays of T[size] where size is a variable length for every cache line. 
 /// Every line is associated with some index 0<i < max. It is assumed that not all cache lines can be 
 /// stored at the same time, but  only a (small) subset. The size of the cache is bounded by the summed length of all
-/// cache lines, that means that when th liens are very short, the cache can store more lines.
-/// if the cache is full and another line needs to be accessed, or an existing line needs to be resized,
-/// cache lines need to be freed. This cache uss an Least-Rcently-Used strategy. The cache maintains
+/// cache lines, that means that when the lines are very short, the cache can store more lines.
+/// If the cache is full and another line needs to be accessed, or an existing line needs to be resized,
+/// cache lines need to be freed. This cache uses an Least-Recently-Used strategy. The cache maintains
 /// a list. Everytime a cacheline is accessed, it moves to the front of the list. When a line is freed
 /// the end of the list is chosen.
 template<class T>

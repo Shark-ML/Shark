@@ -48,8 +48,13 @@
 #include <shark/Algorithms/QP/BoxConstrainedProblems.h>
 #include <shark/Algorithms/QP/SvmProblems.h>
 #include <shark/Algorithms/QP/QpBoxLinear.h>
-#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+#include <shark/LinAlg/CachedMatrix.h>
+#include <shark/LinAlg/GaussianKernelMatrix.h>
+#include <shark/LinAlg/KernelMatrix.h>
+#include <shark/LinAlg/PrecomputedMatrix.h>
+#include <shark/LinAlg/RegularizedKernelMatrix.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
+#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 
 namespace shark {
 
