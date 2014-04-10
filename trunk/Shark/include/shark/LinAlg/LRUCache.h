@@ -31,8 +31,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_ALGORITHMS_QP_LRUCACHE_H
-#define SHARK_ALGORITHMS_QP_LRUCACHE_H
+#ifndef SHARK_LINALG_LRUCACHE_H
+#define SHARK_LINALG_LRUCACHE_H
 
 #include <shark/Core/Exception.h>
 #include <boost/intrusive/list.hpp>

@@ -53,16 +53,6 @@
 #ifndef SHARK_ALGORITHMS_QP_QUADRATICPROGRAM_H
 #define SHARK_ALGORITHMS_QP_QUADRATICPROGRAM_H
 
-#include <shark/Algorithms/QP/LRUCache.h>
-#include <shark/Models/Kernels/AbstractKernelFunction.h>
-#include <shark/Models/Kernels/KernelHelpers.h>
-#include <shark/Data/Dataset.h>
-#include <shark/Data/DataView.h>
-#include <shark/LinAlg/Base.h>
-#include <shark/Core/OpenMP.h>
-
-#include <boost/range/algorithm_ext/iota.hpp>
-#include <vector>
 #include <cmath>
 
 

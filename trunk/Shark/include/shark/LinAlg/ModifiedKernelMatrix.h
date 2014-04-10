@@ -39,7 +39,6 @@
 #ifndef SHARK_LINALG_MODIFIEDKERNELMATRIX_H
 #define SHARK_LINALG_MODIFIEDKERNELMATRIX_H
 
-#include <shark/Algorithms/QP/LRUCache.h>
 #include <shark/Data/Dataset.h>
 #include <shark/LinAlg/Base.h>
 

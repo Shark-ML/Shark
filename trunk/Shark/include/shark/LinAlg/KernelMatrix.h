@@ -39,8 +39,10 @@
 #ifndef SHARK_LINALG_KERNELMATRIX_H
 #define SHARK_LINALG_KERNELMATRIX_H
 
+
 #include <shark/Data/Dataset.h>
 #include <shark/LinAlg/Base.h>
+#include <shark/Models/Kernels/KernelHelpers.h>
 
 #include <vector>
 #include <cmath>
