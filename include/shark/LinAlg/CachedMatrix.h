@@ -39,9 +39,9 @@
 #ifndef SHARK_LINALG_CACHEDMATRIX_H
 #define SHARK_LINALG_CACHEDMATRIX_H
 
-#include <shark/Algorithms/QP/LRUCache.h>
 #include <shark/Data/Dataset.h>
 #include <shark/LinAlg/Base.h>
+#include <shark/LinAlg/LRUCache.h>
 
 #include <vector>
 #include <cmath>
