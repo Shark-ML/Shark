@@ -1,8 +1,8 @@
-#define BOOST_TEST_MODULE ALGORITHMS_QP_LRUCACHE
+#define BOOST_TEST_MODULE LINALG_LRUCACHE
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/Algorithms/QP/LRUCache.h>
+#include <shark/LinAlg/LRUCache.h>
 #include <shark/Rng/GlobalRng.h>
 #include <algorithm>
 
@@ -91,7 +91,7 @@ void simulateCache(
 }
 
 ///\brief tests whether simple same length access-schemes work
-BOOST_AUTO_TEST_CASE( QP_LRUCache_Simple_Access ) {
+BOOST_AUTO_TEST_CASE( LinAlg_LRUCache_Simple_Access ) {
 	std::size_t cacheSize = 10;
 	std::size_t maxIndex = 20;
 	std::size_t simulationSteps = 10000;
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( QP_LRUCache_Simple_Access ) {
 	simulateCache(maxIndex, cacheSize,accessIndices,accessSizes,flips);
 }
 ///\brief tests whether simple different  length access-schemes work
-BOOST_AUTO_TEST_CASE( QP_LRUCache_DifferentLength_Access ) {
+BOOST_AUTO_TEST_CASE( LinAlg_LRUCache_DifferentLength_Access ) {
 	std::size_t cacheSize = 10;
 	std::size_t maxIndex = 20;
 	std::size_t simulationSteps = 10000;
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE( QP_LRUCache_DifferentLength_Access ) {
 }
 
 ///\brief tests whether simple same length access-schemes work
-BOOST_AUTO_TEST_CASE( QP_LRUCache_DifferentLength_Access_fliped ) {
+BOOST_AUTO_TEST_CASE( LinAlg_LRUCache_DifferentLength_Access_fliped ) {
 	std::size_t cacheSize = 10;
 	std::size_t maxIndex = 20;
 	std::size_t simulationSteps = 10000;

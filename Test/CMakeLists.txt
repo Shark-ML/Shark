@@ -68,6 +68,7 @@ SHARK_ADD_TEST( LinAlg/choleskyDecomposition.cpp LinAlg_choleskyDecomposition)
 SHARK_ADD_TEST( LinAlg/solve.cpp LinAlg_solve)
 SHARK_ADD_TEST( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
 SHARK_ADD_TEST( LinAlg/Initialize.cpp LinAlg_Initialize)
+SHARK_ADD_TEST( LinAlg/LRUCache.cpp LinAlg_LRUCache )
 
 #Algorithms tests 
 #Direct Search
@@ -92,8 +93,7 @@ SHARK_ADD_TEST( Algorithms/GradientDescent/Rprop.cpp GradDesc_Rprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/NoisyRprop.cpp GradDesc_NoisyRprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/Quickprop.cpp GradDesc_Quickprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_SteepestDescent )
-#QP - Quadratic Programs
-SHARK_ADD_TEST( Algorithms/QP/LRUCache.cpp QP_LRUCache )
+
 
 #Trainers
 SHARK_ADD_TEST( Algorithms/Trainers/CSvmTrainer.cpp Trainers_CSvmTrainer )
