@@ -33,8 +33,8 @@
 //===========================================================================
 
 
-#ifndef SHARK_ML_JAAKOLAHEURISTIC_H
-#define SHARK_ML_JAAKOLAHEURISTIC_H
+#ifndef SHARK_ALGORITHMS_JAAKKOLAHEURISTIC_H
+#define SHARK_ALGORITHMS_JAAKKOLAHEURISTIC_H
 
 
 #include <shark/Data/Dataset.h>
