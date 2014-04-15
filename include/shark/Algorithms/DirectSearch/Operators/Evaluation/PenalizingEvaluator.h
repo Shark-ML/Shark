@@ -97,7 +97,7 @@ struct PenalizingEvaluator {
 	
 	template<class SearchPointType>
 	void penalize(SearchPointType const& s, SearchPointType const& t, RealVector& fitness)const{
-		fitness += m_penaltyFactor * norm_sqr( t - s ) * blas::repeat(1,fitness.size());
+		fitness += m_penaltyFactor * norm_sqr( t - s ) * blas::repeat(1.0,fitness.size());
 	}
 
 	/**
