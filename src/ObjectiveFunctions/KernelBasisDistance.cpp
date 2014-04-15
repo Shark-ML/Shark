@@ -64,42 +64,57 @@ std::size_t KernelBasisDistance::numberOfVariables()const{
 	return m_numApproximatingVectors  * dataDimension(mep_expansion->basis());
 }
 
-double KernelBasisDistance::eval(RealVector const& input) const{
-	SIZE_CHECK(input.size() == numberOfVariables());
-
+void KernelBasisDistance::setupAndSolve(RealMatrix& beta, RealVector const& input, RealMatrix& Kz, RealMatrix& linear)const{
 	//get access to the internal variables of the expansion
 	Data<RealVector> const& expansionBasis = mep_expansion->basis();
 	AbstractKernelFunction<RealVector> const& kernel = *mep_expansion->kernel();
 	RealMatrix const& alpha = mep_expansion->alpha();
 	std::size_t dim = dataDimension(expansionBasis);
 	std::size_t outputs = mep_expansion->outputSize();
+	
 
 	//set up system of equations
-	RealMatrix basis = adapt_matrix(m_numApproximatingVectors,dim,&input(0));
-	RealMatrix kBasis = kernel(basis,basis);
+	RealMatrix z = adapt_matrix(m_numApproximatingVectors,dim,&input(0));
+	Kz = kernel(z,z);
 	//construct the linear part = K_xz \alpha!
 	//we do this batch wise for every batch in the basis of the kernel expansion
-	RealMatrix linear(m_numApproximatingVectors,outputs,0);
+	linear.resize(m_numApproximatingVectors,outputs);
+	linear.clear();
 	std::size_t start = 0;
 	for(std::size_t i = 0; i != expansionBasis.numberOfBatches(); ++i){
 		RealMatrix const& batch = expansionBasis.batch(i);
-		RealMatrix kernelBlock = kernel(basis,batch);
-		noalias(linear) += prod(kernelBlock, rows(alpha,start,start+batch.size1()));
-		start += batch.size1();
+		RealMatrix kernelBlock = kernel(z,batch);
+		noalias(linear) += prod(kernelBlock,rows(alpha,start,start+batch.size1()));
+		start +=batch.size1();
 	}
 
 	//solve for the optimal combination of kernel vectors beta
-	RealMatrix beta = linear;
-	solveSymmSemiDefiniteSystemInPlace<SolveAXB>(kBasis,beta);
+	beta = linear;
+	solveSymmSemiDefiniteSystemInPlace<SolveAXB>(Kz,beta);
+}
 
-	//return error of optimal beta
-	RealMatrix kBeta = prod(kBasis,beta);
+double KernelBasisDistance::errorOfSolution(RealMatrix const& beta, RealMatrix const& Kz, RealMatrix const& linear)const{
+	RealMatrix kBeta = prod(Kz,beta);
 	double error = 0;
-	for(std::size_t i = 0; i != outputs; ++i){
+	for(std::size_t i = 0; i != beta.size2(); ++i){
 		error += 0.5*inner_prod(column(beta,i),column(kBeta,i));
 		error -= inner_prod(column(linear,i),column(beta,i));
 	}
 	return error;
+}
+
+RealMatrix KernelBasisDistance::findOptimalBeta(RealVector const& input)const{
+	RealMatrix Kz,beta,linear;
+	setupAndSolve(beta,input,Kz,linear);
+	return beta;
+}
+
+double KernelBasisDistance::eval(RealVector const& input) const{
+	SIZE_CHECK(input.size() == numberOfVariables());
+	
+	RealMatrix Kz,beta,linear;
+	setupAndSolve(beta,input,Kz,linear);
+	return errorOfSolution(beta,Kz,linear);
 }
 
 KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const {
@@ -116,50 +131,51 @@ KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const Searc
 	//set up system of equations and store the kernel states at the same time
 	// (we assume here thyt everything fits into memory, which is the case as long as the number of
 	// vectors to approximate is quite small)
-	boost::shared_ptr<State> kBasisState = kernel.createState();
-	RealMatrix kBasis;
-	kernel.eval(basis,basis,kBasis,*kBasisState);
+	boost::shared_ptr<State> KzState = kernel.createState();
+	RealMatrix Kz;
+	kernel.eval(basis,basis,Kz,*KzState);
 	//construct the linear part
-	std::vector<boost::shared_ptr<State> > linearState(expansionBasis.numberOfBatches());
+	std::vector<boost::shared_ptr<State> > KzxState(expansionBasis.numberOfBatches());
 	RealMatrix linear(m_numApproximatingVectors,outputs,0);
 	std::size_t start = 0;
 	for(std::size_t i = 0; i != expansionBasis.numberOfBatches(); ++i){
 		RealMatrix const& batch = expansionBasis.batch(i);
-		RealMatrix kernelBlock;
-		linearState[i] = kernel.createState();
-		kernel.eval(basis,batch,kernelBlock,*linearState[i]);
-		noalias(linear) += prod(kernelBlock,rows(alpha,start,start+batch.size1()));
+		RealMatrix KzxBlock;
+		KzxState[i] = kernel.createState();
+		kernel.eval(basis,batch,KzxBlock,*KzxState[i]);
+		noalias(linear) += prod(KzxBlock,rows(alpha,start,start+batch.size1()));
 		start += batch.size1();
 	}
 
 	//solve for the optimal combination of kernel vectors beta
 	RealMatrix beta = linear;
-	solveSymmSemiDefiniteSystemInPlace<SolveAXB>(kBasis,beta);
+	solveSymmSemiDefiniteSystemInPlace<SolveAXB>(Kz,beta);
 
 	//compute derivative
+	// the derivative for z_l is given by
+	// beta_l sum_i beta_i d/dz_l k(z_l,z_i)
+	// - beta_l sum_j alpha_j d/dz_l k(z_l,x_i)
 	derivative.resize(input.size());
+	//compute first term by using that we can write beta_l * beta_i is an outer product
+	//thus when using more than one output point it gets to a set of outer products which
+	//can be written as product beta beta^T which are the weights of the derivative
 	RealMatrix baseDerivative(m_numApproximatingVectors,dim);
-	kernel.weightedInputDerivative(basis,basis,prod(beta,trans(beta)),*kBasisState,baseDerivative);
+	kernel.weightedInputDerivative(basis,basis,prod(beta,trans(beta)),*KzState,baseDerivative);
 	noalias(derivative) = adapt_vector(input.size(), &baseDerivative(0,0));
+	
+	//compute the second term in the same way, taking the block structure into account.
 	start = 0;
 	for(std::size_t i = 0; i != expansionBasis.numberOfBatches(); ++i){
 		RealMatrix const& batch = expansionBasis.batch(i);
 		kernel.weightedInputDerivative(
 			basis,batch,
 			prod(beta,trans(rows(alpha,start,start+batch.size1()))),
-			*linearState[i],
+			*KzxState[i],
 			baseDerivative
 		);
 		noalias(derivative) -= adapt_vector(input.size(), &baseDerivative(0,0));
 		start +=batch.size1();
 	}
-
-	//return error of optimal beta
-	RealMatrix kBeta = prod(kBasis,beta);
-	double error = 0;
-	for(std::size_t i = 0; i != outputs; ++i){
-		error += 0.5*inner_prod(column(beta,i),column(kBeta,i));
-		error -= inner_prod(column(linear,i),column(beta,i));
-	}
-	return error;
+	
+	return errorOfSolution(beta,Kz,linear);
 }

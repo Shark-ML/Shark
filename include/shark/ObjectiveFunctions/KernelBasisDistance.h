@@ -31,9 +31,6 @@
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
-#include <shark/LinAlg/solveSystem.h>
-#include <shark/Rng/GlobalRng.h>
-
 
 namespace shark{
 
@@ -61,7 +58,7 @@ public:
 	///
 	/// \param kernelExpansion a pointer to the kernel expansion to approximate
 	/// \param numApproximatingVectors the number of vectors used to approximate the point - the basis size
-	KernelBasisDistance(KernelExpansion<RealVector>* kernelExpansion,std::size_t numApproximatingVectors);
+	KernelBasisDistance(KernelExpansion<RealVector>* kernelExpansion,std::size_t numApproximatingVectors = 1);
 
 	/// \brief Returns the name of the class
 	std::string name() const
@@ -69,6 +66,15 @@ public:
 
 	void configure( const PropertyTree & node ){}
 
+	/// \brief Returns the number of vectors the uses to approximate the point - the basis size
+	std::size_t numApproximatingVectors() const{
+		return m_numApproximatingVectors;
+	}
+	
+	/// \brief Returns a reference the number of vectors the uses to approximate the point - the basis size
+	std::size_t& numApproximatingVectors(){
+		return m_numApproximatingVectors;
+	}
 	/// \brief Returns a starting point of the algorithm
 	///
 	/// Returns a random subset of the basis of the kernel expansion
@@ -76,6 +82,9 @@ public:
 
 	/// \brief Returns the number of variables of the function.
 	std::size_t numberOfVariables()const;
+		
+	/// \brief Given an input basis, returns the point with the minimum error.
+	RealMatrix findOptimalBeta(RealVector const& input)const;
 
 	/// \brief Evaluate the (sum of) squared distance(s) between the closes point in the basis to the point(s) represented by the kernel expansion.
 	///
@@ -89,6 +98,14 @@ public:
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;
 
 private:
+	/// \brief Sets up and solves the regression problem for the base z.
+	///
+	/// calculates K_z, the linear part of the system of equationd and solves for beta.
+	void setupAndSolve(RealMatrix& beta, RealVector const& input, RealMatrix& Kz, RealMatrix& linear)const;
+
+	/// \brief Returns the error of the solution found
+	double errorOfSolution(RealMatrix const& beta, RealMatrix const& Kz, RealMatrix const& linear)const;
+
 	KernelExpansion<RealVector>* mep_expansion;     ///< kernel expansion to approximate
 	std::size_t m_numApproximatingVectors; ///< number of vectors in the basis
 };
