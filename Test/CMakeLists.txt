@@ -68,10 +68,6 @@ SHARK_ADD_TEST( LinAlg/choleskyDecomposition.cpp LinAlg_choleskyDecomposition)
 SHARK_ADD_TEST( LinAlg/solve.cpp LinAlg_solve)
 SHARK_ADD_TEST( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
 SHARK_ADD_TEST( LinAlg/Initialize.cpp LinAlg_Initialize)
-#Operator tests
-SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
-SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Recombination/Recombination.cpp DirectSearch_Recombination )
-SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Mutation/BitflipMutation.cpp DirectSearch_BitflipMutation )
 
 #Algorithms tests 
 #Direct Search
@@ -80,6 +76,11 @@ SHARK_ADD_TEST( Algorithms/DirectSearch/CMSA.cpp DirectSearch_CMSA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/ElitistCMA.cpp DirectSearch_ElitistCMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/MOCMA.cpp DirectSearch_MOCMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/SteadyStateMOCMA.cpp DirectSearch_SteadyStateMOCMA )
+#Direct Search Operator tests
+SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
+SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Recombination/Recombination.cpp DirectSearch_Recombination )
+SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Mutation/BitflipMutation.cpp DirectSearch_BitflipMutation )
+
 #GradientDescent
 SHARK_ADD_TEST( Algorithms/GradientDescent/LineSearch.cpp GradDesc_LineSearch )
 SHARK_ADD_TEST( Algorithms/GradientDescent/BFGS.cpp GradDesc_BFGS )
@@ -193,6 +194,7 @@ SHARK_ADD_TEST( ObjectiveFunctions/RadiusMarginQuotient.cpp ObjFunct_RadiusMargi
 SHARK_ADD_TEST( ObjectiveFunctions/LooError.cpp ObjFunct_LooError )
 SHARK_ADD_TEST( ObjectiveFunctions/LooErrorCSvm.cpp ObjFunct_LooErrorCSvm )
 SHARK_ADD_TEST( ObjectiveFunctions/SvmLogisticInterpretation.cpp ObjFunct_SvmLogisticInterpretation )
+SHARK_ADD_TEST( ObjectiveFunctions/BoxConstraintHandler.cpp ObjFunct_BoxConstraintHandler )
 
 #Objective Functions/Loss
 SHARK_ADD_TEST( ObjectiveFunctions/CrossEntropy.cpp ObjFunct_CrossEntropy )
