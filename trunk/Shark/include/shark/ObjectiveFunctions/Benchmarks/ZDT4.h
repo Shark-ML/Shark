@@ -94,13 +94,13 @@ struct ZDT4 : public MultiObjectiveFunction
 
 		value[0] = x( 0 );
 
-		double g, h, sum = 0.0;
+		double sum = 0.0;
 
 		for (unsigned i = 1; i < numberOfVariables(); i++)
-			sum += ::pow( x( i ), 2) - (10.0 * cos(4 * M_PI * x(i) ) );
+			sum +=sqr(x( i )) - (10.0 * cos(4 * M_PI * x(i) ) );
 
-		g = 1.0 + (10.0 * (numberOfVariables() - 1.0)) + sum;
-		h = 1.0 - ::sqrt(x(0) / g);
+		double g = 1.0 + (10.0 * (numberOfVariables() - 1.0)) + sum;
+		double h = 1.0 - sqrt(x(0) / g);
 
 		value[1] = g * h;
 
