@@ -56,7 +56,7 @@ public:
 	* \param [in] referencePoint reference for measuring the hypervolume
 	*/
 	template<typename Extractor, typename ParetoFrontType, typename VectorType>
-	double operator()( Extractor & extractor, ParetoFrontType const& front, VectorType const& referencePoint) {
+	double operator()( Extractor const& extractor, ParetoFrontType const& front, VectorType const& referencePoint) {
 		
 		if(front.empty()) return 0;
 
@@ -72,7 +72,7 @@ public:
 	* \param [in] front front of points to calculate the hypervolume for. 
 	*/
 	template<typename Extractor, typename ParetoFrontType>
-	double operator()( Extractor extractor, ParetoFrontType const& front) {
+	double operator()( Extractor const& extractor, ParetoFrontType const& front) {
 		return (*this)( extractor, front, m_reference);
 	}
 		
@@ -84,7 +84,7 @@ public:
 	* \param [in] referencePoint reference for measuring the hypervolume
 	*/
 	template<typename Extractor, typename ParetoFrontType, typename VectorType>
-	std::size_t leastContributor( Extractor extractor, ParetoFrontType const& front, VectorType const& referencePoint)
+	std::size_t leastContributor( Extractor const& extractor, ParetoFrontType const& front, VectorType const& referencePoint)
 	{
 		std::vector<double> indicatorValues( front.size() );
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
@@ -97,7 +97,7 @@ public:
 			indicatorValues[i] = ind( extractor, copy,referencePoint);
 		}
 
-		std::vector<double>::iterator it = std::min_element( indicatorValues.begin(), indicatorValues.end() );
+		std::vector<double>::iterator it = std::max_element( indicatorValues.begin(), indicatorValues.end() );
 
 		return std::distance( indicatorValues.begin(), it );
 	}
@@ -111,7 +111,7 @@ public:
 	 * \param [in] front pareto front of points
 	 */
 	template<typename Extractor, typename ParetoFrontType>
-	std::size_t leastContributor( Extractor extractor, ParetoFrontType const& front)
+	std::size_t leastContributor( Extractor const& extractor, ParetoFrontType const& front)
 	{
 		return leastContributor(extractor,front,m_reference);
 	}
@@ -122,13 +122,14 @@ public:
 	/// using the maximum value in every dimension+1
 	/// \param set The set of points.
 	template<typename Extractor, typename PointSet>
-	void updateInternals(Extractor extractor, PointSet const& set){
+	void updateInternals(Extractor const& extractor, PointSet const& set){
 		m_reference.clear();
 		if(set.empty()) return;
 		
 		//calculate reference point
 		std::size_t noObjectives = extractor(set[0]).size();
 		m_reference.resize(noObjectives);
+		m_reference.clear();
 		
 		for( unsigned int i = 0; i < set.size(); i++ )
 			noalias(m_reference) = max(m_reference, extractor(set[i]));
@@ -145,6 +146,7 @@ public:
 	template<typename Archive>
 	void serialize( Archive & archive, const unsigned int version ) {
 		archive & BOOST_SERIALIZATION_NVP( m_hv );
+		archive & BOOST_SERIALIZATION_NVP( m_reference );
 	}
 
 	HypervolumeCalculator m_hv;
