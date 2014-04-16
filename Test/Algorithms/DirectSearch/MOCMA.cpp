@@ -51,31 +51,48 @@ RealVector const& operator()(T const& arg)const{
 }
 };
 
-
-BOOST_AUTO_TEST_CASE( MOCMA_HYPERVOLUME_ZDT1 ) {
-	Rng::seed(42);
-	ZDT1 objective(5);
+void testObjectiveFunctionMOO(
+	MultiObjectiveFunction const& f, 
+	std::size_t mu, 
+	double targetVolume, 
+	std::size_t iterations,
+	RealVector const& reference
+){
 	MOCMA mocma;
-	mocma.notionOfSuccess() = shark::MOCMA::IndividualBased;
-	mocma.mu() = 10;
-	mocma.init( objective);
+	mocma.mu() = mu;
+	mocma.init(f);
 	
-	for(std::size_t i = 0; i != 10000; ++i){
-		mocma.step(objective);
-		std::clog<<"\r"<<i<<std::flush;
+	for(std::size_t i = 0; i != iterations; ++i){
+		mocma.step(f);
+		std::clog<<"\r"<<i<<" "<<std::flush;
 	}
-	BOOST_REQUIRE_EQUAL(mocma.solution().size(), 10);
-	for(std::size_t i = 0; i != 10; ++i){
-		std::cout<<mocma.solution()[i].value(0)<<" "<<mocma.solution()[i].value(1)<<std::endl;
-	}
+	BOOST_REQUIRE_EQUAL(mocma.solution().size(), mu);
+	//~ for(std::size_t i = 0; i != mu; ++i){
+		//~ std::cout<<mocma.solution()[i].value(0)<<" "<<mocma.solution()[i].value(1)<<std::endl;
+	//~ }
 	HypervolumeCalculator hyp;
+	double volume = hyp(PointExtractor(),mocma.solution(),reference);
+	std::cout<<volume<<std::endl;
+	BOOST_CHECK_SMALL(volume - targetVolume, 5.e-3);
+}
+
+
+BOOST_AUTO_TEST_CASE( MOCMA_HYPERVOLUME_Functions ) {
 	RealVector reference(2);
 	reference(0) = 11;
 	reference(1) = 11;
-	double volume = hyp(PointExtractor(),mocma.solution(),reference);
-	std::cout<<volume<<std::endl;
-	BOOST_CHECK_SMALL(volume - 120.613761, 5.e-3);
-	
+	ZDT1 objective(5);
+	double zdt1Volume = 120.613761;
+	testObjectiveFunctionMOO(objective,10,zdt1Volume,10000,reference);
+	DTLZ4 objective2(5);
+	double dtlz4Volume = 120.178966;
+	testObjectiveFunctionMOO(objective2,10,dtlz4Volume,10000,reference);
+	//~ ZDT4 objective3(5);
+	//~ double zdt4Volume = 120.613761;
+	//~ testObjectiveFunctionMOO(objective3,10,zdt4Volume,10000,reference);
+	ZDT6 objective4(5);
+	double zdt6Volume = 117.483246;
+	testObjectiveFunctionMOO(objective4,10,zdt6Volume,10000,reference);
 }
 
 

@@ -90,15 +90,15 @@ struct ZDT1  : public MultiObjectiveFunction
 
 		value[0] = x( 0 );
 
-		double g, h, sum = 0.0;
+		double sum = 0.0;
 
 		for (unsigned i = 1; i < numberOfVariables(); i++)
 			sum += x( i );
 
 		sum /= (numberOfVariables() - 1.0);
 
-		g = 1.0 + (9.0 * sum);
-		h = 1.0 - ::sqrt(x( 0 ) / g);
+		double g = 1.0 + (9.0 * sum);
+		double h = 1.0 - ::sqrt(x( 0 ) / g);
 
 		value[1] = g * h;
 

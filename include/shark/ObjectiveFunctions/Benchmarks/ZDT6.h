@@ -90,19 +90,17 @@ struct ZDT6 : public MultiObjectiveFunction
 
 		value[0] = 1.0 - ::exp(-4.0 * x( 0 )) * ::pow( ::sin(6 * M_PI * x( 0 ) ), 6);
 
-		double g, h, sum = 0.0;
-
+		double sum = 0.0;
 		for (unsigned i = 1; i < numberOfVariables(); i++)
 			sum += x( i );
 
 		sum /= (numberOfVariables() - 1.0);
 
-		g = 1.0 + 9.0 * ::pow(sum, 0.25);
-		h = 1.0 - ::pow(x( 0 ) / g, 2);
+		double g = 1.0 + 9.0 * pow(sum, 0.25);
+		double h = 1.0 - sqr(value[0] / g);
+		value[1] = g*h;
 
-		value[1] = g * h;
-
-		return( value );
+		return value;
 	}
 private:
 	BoxConstraintHandler<SearchPointType> m_handler;
