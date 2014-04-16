@@ -79,6 +79,7 @@ struct PenalizingEvaluator {
 		if( f.isFeasible( individual.searchPoint() ) ) {
 			individual.unpenalizedFitness() = f.eval( individual.searchPoint() );
 			individual.penalizedFitness() = individual.unpenalizedFitness();
+			return;
 		}
 
 		typename Function::SearchPointType t( individual.searchPoint() );

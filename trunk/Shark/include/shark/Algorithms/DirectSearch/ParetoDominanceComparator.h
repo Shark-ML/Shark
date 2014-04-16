@@ -38,6 +38,8 @@
 #ifndef SHARK_ALGORITHMS_DIRECTSEARCH_PARETODOMINANCECOMPARATOR_H
 #define SHARK_ALGORITHMS_DIRECTSEARCH_PARETODOMINANCECOMPARATOR_H
 
+#include <shark/Core/Exception.h>
+
 namespace shark {
 /**
 * \brief Implementation of the Pareto-Dominance relation under the assumption of all objectives to be minimized.
@@ -46,13 +48,14 @@ namespace shark {
 template<typename Extractor>
 struct ParetoDominanceComparator {
 
-	BOOST_STATIC_CONSTANT( int, A_STRICTLY_DOMINATES_B = 3 ); ///< A strictly dominates B.
-	BOOST_STATIC_CONSTANT( int, A_WEAKLY_DOMINATES_B = 2 ); ///< A weakly dominates B.
-	BOOST_STATIC_CONSTANT( int, A_EQUALS_B = 1 ); ///< A equals B for every coordinate.
-	BOOST_STATIC_CONSTANT( int, TRADE_OFF = -1 ); ///< Both A and B are a valid trade-off.
-	BOOST_STATIC_CONSTANT( int, B_WEAKLY_DOMINATES_A = -2 ); ///< B weakly dominates B.
-	BOOST_STATIC_CONSTANT( int, B_STRICTLY_DOMINATES_A = -3 ); ///< B strictly dominates A.
-	
+	enum DominanceRelation{
+		A_STRICTLY_DOMINATES_B = 3, ///< A strictly dominates B.
+		A_WEAKLY_DOMINATES_B = 2, ///< A weakly dominates B.
+		A_EQUALS_B = 1, ///< A equals B for every coordinate.
+		TRADE_OFF = -1, ///< Both A and B are a valid trade-off.
+		B_WEAKLY_DOMINATES_A = -2, ///< B weakly dominates B.
+		B_STRICTLY_DOMINATES_A = -3, ///< B strictly dominates A.
+	};
 	
 
 	/**
