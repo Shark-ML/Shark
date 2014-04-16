@@ -63,7 +63,6 @@ struct BaseFastNonDominatedSort {
 				pop[i].rank() = 1;//non-dominated points have rank 1
 			}
 		}
-
 		//find subsequent fronts.
 		unsigned frontCounter = 2;
 		std::vector<unsigned> nextFront;

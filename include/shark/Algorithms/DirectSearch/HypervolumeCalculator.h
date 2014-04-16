@@ -97,7 +97,7 @@ namespace shark {
 		* \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^m\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
 		*/
 		template<typename Set,typename Extractor, typename VectorType>
-		double operator()( Extractor & extractor, const Set & set, const VectorType & refPoint);
+		double operator()( Extractor const& extractor, const Set & set, const VectorType & refPoint);
 
 		/** \cond IMPL */
 		template<typename VectorType>
@@ -131,7 +131,7 @@ namespace shark {
 		double 	stream	( const VectorType & regionLow, 	
 			const VectorType & regionUp, 	
 			const Set & points, 
-			Extractor & extractor,
+			Extractor const& extractor,
 			int split, 			
 			double cover		
 			);
@@ -142,21 +142,21 @@ namespace shark {
 		template<typename Extractor>
 		struct LastObjectiveComparator {
 
-			LastObjectiveComparator( Extractor & extractor ) : m_extractor( extractor ) {}
+			LastObjectiveComparator( Extractor const& extractor ) : m_extractor( extractor ) {}
 
 			template<typename VectorType>
 			bool operator()( const VectorType & lhs, const VectorType & rhs ) {
 				return( m_extractor( lhs ).back() < m_extractor( rhs ).back() );
 			}
 
-			Extractor & m_extractor;
+			Extractor m_extractor;
 		};
 		/** \endcond IMPL */
 	};
 
 	/** \cond IMPL */
 	template<typename Set,typename Extractor, typename VectorType >
-	double HypervolumeCalculator::operator()( Extractor & extractor, const Set & constSet, const VectorType & refPoint) {
+	double HypervolumeCalculator::operator()( Extractor const& extractor, const Set & constSet, const VectorType & refPoint) {
 
 		m_noObjectives = extractor(*constSet.begin()).size();
 		m_sqrtNoPoints = static_cast< unsigned int >( ::sqrt( static_cast<double>( constSet.size() ) ) );
@@ -341,7 +341,7 @@ namespace shark {
 	double HypervolumeCalculator::stream( const VectorType & regionLow,
 		const VectorType & regionUp,
 		const Set & points,
-		Extractor & extractor,
+		Extractor const& extractor,
 		int split,
 		double cover ) {
 			double coverOld;
