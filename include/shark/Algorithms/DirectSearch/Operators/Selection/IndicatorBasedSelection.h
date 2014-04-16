@@ -77,7 +77,7 @@ struct IndicatorBasedSelection {
 		view_reference<T> operator=( const T & rhs )
 		{
 			*mep_value = rhs;
-			return( *this );
+			return *this;
 		}
 
 		
@@ -140,7 +140,7 @@ struct IndicatorBasedSelection {
 		//now use the indicator to deselect the worst approximating elements of the last selected front
 		m_indicator.updateInternals(FitnessExtractor(),population);
 		View& front = fronts[rank];
-		for(; popSize >=mu;--popSize) {
+		for(; popSize >mu;--popSize) {
 			unsigned int lc = m_indicator.leastContributor(FitnessExtractor(),front);
 			front[lc].selected() = false;
 			front.erase( front.begin() + lc );
@@ -152,23 +152,6 @@ struct IndicatorBasedSelection {
 	void configure( const Node & node )
 	{
 		m_indicator.configure( node );
-	}
-
-	/**
-	* \brief Accesses the target size mu of the population.
-	*/
-	unsigned int mu() const
-	{
-		return mu;
-	}
-	
-	/**
-	* \brief Adjusts the target size mu of the population.
-	* \param [in] mu The new target size mu.
-	*/
-	void setMu( unsigned int mu )
-	{
-		mu = mu;
 	}
 
 	/**

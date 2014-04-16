@@ -81,9 +81,12 @@ SHARK_ADD_TEST( Algorithms/DirectSearch/FastNonDominatedSort.cpp DirectSearch_Fa
 SHARK_ADD_TEST( Algorithms/DirectSearch/ParetoDominanceComparator.cpp DirectSearch_ParetoDominanceComparator )
 #Direct Search Operator tests
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
+SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.cpp DirectSearch_IndicatorBasedSelection )
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Recombination/Recombination.cpp DirectSearch_Recombination )
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Mutation/BitflipMutation.cpp DirectSearch_BitflipMutation )
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/PenalizingEvaluator.cpp DirectSearch_PenalizingEvaluator )
+#Direct Search Indicator tests
+SHARK_ADD_TEST( Algorithms/DirectSearch/Indicators/HypervolumeIndicator.cpp DirectSearch_HypervolumeIndicator )
 
 #GradientDescent
 SHARK_ADD_TEST( Algorithms/GradientDescent/LineSearch.cpp GradDesc_LineSearch )
@@ -237,12 +240,6 @@ SHARK_ADD_TEST( RBM/ParallelTemperingTraining.cpp RBM_PTTraining)
 SHARK_ADD_TEST( RBM/PCDTraining.cpp RBM_PCDTraining)
 SHARK_ADD_TEST( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceTraining)
 SHARK_ADD_TEST( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
-
-# Networking
-IF( OPT_ENABLE_NETWORKING )
-     SHARK_ADD_TEST( Network/HttpServer.cpp Network_Http_Server )
-     SHARK_ADD_TEST( Network/HttpClient.cpp Network_Http_Client )
-ENDIF( OPT_ENABLE_NETWORKING )
 
 # Copy test file
 ADD_CUSTOM_COMMAND(

@@ -43,82 +43,40 @@
 
 using namespace shark;
 
+struct PointExtractor{
 
-//~ BOOST_AUTO_TEST_CASE( MOCMA_CHROMOSOME_SERIALIZATION ) {
+template<class T>
+RealVector const& operator()(T const& arg)const{
+	return arg.value;
+}
+};
 
-	//~ mocma::Chromosome chromosome1, chromosome2;
-	//~ BOOST_CHECK(			chromosome1.m_mutationDistribution.covarianceMatrix().size1() == 0 );
-	//~ BOOST_CHECK(			chromosome1.m_mutationDistribution.covarianceMatrix().size2() == 0 );
-	//~ BOOST_CHECK(			chromosome1.m_mutationDistribution.eigenValues().size() == 0 );
-	//~ BOOST_CHECK(			chromosome1.m_mutationDistribution.eigenVectors().size1() == 0 );
-	//~ BOOST_CHECK(			chromosome1.m_mutationDistribution.eigenVectors().size2() == 0 );
-	//~ BOOST_CHECK(			chromosome1.m_evolutionPath.size() == 0 );
-	//~ BOOST_CHECK(			chromosome1.m_lastStep.size() == 0 );
-	//~ BOOST_CHECK(			chromosome1.m_lambda == 0 );
-	//~ BOOST_CHECK_EQUAL(		chromosome1.m_noSuccessfulOffspring, 0. );
-	//~ BOOST_CHECK_EQUAL(		chromosome1.m_stepSize, 0. );
-	//~ BOOST_CHECK_EQUAL(		chromosome1.m_stepSizeDampingFactor, 0. );
-	//~ BOOST_CHECK_EQUAL(		chromosome1.m_stepSizeLearningRate, 0. );
-	//~ BOOST_CHECK_EQUAL(		chromosome1.m_successProbability, 0. );
-	//~ BOOST_CHECK_EQUAL(		chromosome1.m_targetSuccessProbability, 0. );
-	//~ BOOST_CHECK_EQUAL(		chromosome1.m_evolutionPathLearningRate, 0. );
-	//~ BOOST_CHECK_EQUAL(		chromosome1.m_covarianceMatrixLearningRate, 0. );
-	//~ BOOST_CHECK_EQUAL(		chromosome1.m_needsCovarianceUpdate, false );
 
-	//~ chromosome1.m_mutationDistribution.resize( 10 );
-	//~ chromosome1.m_evolutionPath = blas::repeat(0.0,10);
-	//~ chromosome1.m_lastStep = blas::repeat(0.0,10);
-	//~ chromosome1.m_lambda = 5;
-	//~ chromosome1.m_noSuccessfulOffspring = 5.;
-	//~ chromosome1.m_stepSize = 5.;
-	//~ chromosome1.m_stepSizeDampingFactor = 5.;
-	//~ chromosome1.m_stepSizeLearningRate = 5.;
-	//~ chromosome1.m_successProbability = 5.;
-	//~ chromosome1.m_targetSuccessProbability = 5.;
-	//~ chromosome1.m_evolutionPathLearningRate = 5.;
-	//~ chromosome1.m_covarianceMatrixLearningRate = 5.;
-	//~ chromosome1.m_needsCovarianceUpdate = true;
+BOOST_AUTO_TEST_CASE( MOCMA_HYPERVOLUME_ZDT1 ) {
+	Rng::seed(42);
+	ZDT1 objective(5);
+	MOCMA mocma;
+	mocma.notionOfSuccess() = shark::MOCMA::IndividualBased;
+	mocma.mu() = 10;
+	mocma.init( objective);
 	
-	//~ {
-		//~ std::stringstream ss;
-		//~ boost::archive::text_oarchive oa( ss );
-		//~ BOOST_CHECK_NO_THROW( (oa << chromosome1) );
-
-		//~ boost::archive::text_iarchive ia( ss );
-		//~ BOOST_CHECK_NO_THROW( (ia >> chromosome2) );
-
-		//~ BOOST_CHECK( chromosome1 == chromosome2 );
-	//~ }
-//~ }
-
-//~ BOOST_AUTO_TEST_CASE( MOCMA_SERIALIZER_SERIALIZATION ) {
-	//~ mocma::Chromosome chromosome1, chromosome2;
-	//~ mocma::Initializer initializer1, initializer2;
-	//~ BOOST_CHECK_EQUAL( initializer1.m_searchSpaceDimension, 0 );
-	//~ BOOST_CHECK_EQUAL( initializer1.m_noObjectives, 0 );
-	//~ BOOST_CHECK_CLOSE( initializer1.m_initialSigma, 0., 1E-10 );
-	//~ BOOST_CHECK_EQUAL( initializer1.m_useNewUpdate, false );
-	//~ BOOST_CHECK_EQUAL( initializer1.m_constrainedFitnessFunction, false );
-
-	//~ BOOST_CHECK_THROW( initializer1( chromosome1 ), Exception );
-	//~ initializer1.m_searchSpaceDimension = 5;
-	//~ BOOST_CHECK_THROW( initializer1( chromosome1 ), Exception );
-	//~ initializer1.m_noObjectives = 5;
-	//~ BOOST_CHECK_NO_THROW( initializer1( chromosome1 ) );
-	//~ initializer1.m_initialSigma = 5;
-	//~ initializer1.m_useNewUpdate = true;
-	//~ initializer1.m_constrainedFitnessFunction = true;
-	//~ {
-		//~ std::stringstream ss;
-		//~ boost::archive::text_oarchive oa( ss );
-		//~ BOOST_CHECK_NO_THROW( (oa << initializer1) );
-
-		//~ boost::archive::text_iarchive ia( ss );
-		//~ BOOST_CHECK_NO_THROW( (ia >> initializer2) );
-
-		//~ BOOST_CHECK( initializer1 == initializer2 );
-	//~ }
-//~ }
+	for(std::size_t i = 0; i != 10000; ++i){
+		mocma.step(objective);
+		std::clog<<"\r"<<i<<std::flush;
+	}
+	BOOST_REQUIRE_EQUAL(mocma.solution().size(), 10);
+	for(std::size_t i = 0; i != 10; ++i){
+		std::cout<<mocma.solution()[i].value(0)<<" "<<mocma.solution()[i].value(1)<<std::endl;
+	}
+	HypervolumeCalculator hyp;
+	RealVector reference(2);
+	reference(0) = 11;
+	reference(1) = 11;
+	double volume = hyp(PointExtractor(),mocma.solution(),reference);
+	std::cout<<volume<<std::endl;
+	BOOST_CHECK_SMALL(volume - 120.613761, 5.e-3);
+	
+}
 
 
 BOOST_AUTO_TEST_CASE( MOCMA_SERIALIZATION ) {
