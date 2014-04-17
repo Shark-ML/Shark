@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Generic stochastic gradient descent training for kernel-based models.
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        2013
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -40,12 +40,15 @@
 
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Core/IParameterizable.h>
+#include <shark/LinAlg/KernelMatrix.h>
+#include <shark/LinAlg/PartlyPrecomputedMatrix.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
 #include <shark/Models/Kernels/KernelHelpers.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 
 
-namespace shark {
+namespace shark
+{
 
 
 ///
@@ -83,7 +86,7 @@ namespace shark {
 /// It suffers from significantly slower convergence for non-differentiable
 /// losses, e.g., the hinge loss for SVM training.
 ///
-template <class InputType>
+template <class InputType, class CacheType = float>
 class KernelSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable
 {
 public:
@@ -93,6 +96,11 @@ public:
 	typedef KernelExpansion<InputType> ModelType;
 	typedef AbstractLoss<unsigned int, RealVector> LossType;
 	typedef typename ConstProxyReference<typename Batch<InputType>::type const>::type ConstBatchInputReference;
+	typedef CacheType QpFloatType;
+
+	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
+	typedef PartlyPrecomputedMatrix< KernelMatrixType > PartlyPrecomputedMatrixType;
+
 
 	/// \brief Constructor
 	///
@@ -101,15 +109,28 @@ public:
 	/// \param  C               regularization parameter - always the 'true' value of C, even when unconstrained is set
 	/// \param  offset          whether to train with offset/bias parameter or not
 	/// \param  unconstrained   when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	KernelSGDTrainer(KernelType* kernel, const LossType* loss, double C, bool offset, bool unconstrained = false)
-	: m_kernel(kernel)
-	, m_loss(loss)
-	, m_C(C)
-	, m_offset(offset)
-	, m_unconstrained(unconstrained)
-	, m_epochs(0)
+	KernelSGDTrainer(KernelType* kernel, const LossType* loss, double C, bool offset, bool unconstrained = false, size_t cacheSize = 0x4000000)
+		: m_kernel(kernel)
+		, m_loss(loss)
+		, m_C(C)
+		, m_offset(offset)
+		, m_unconstrained(unconstrained)
+		, m_epochs(0)
+		, m_cacheSize(cacheSize)
 	{ }
 
+
+	/// return current cachesize
+	double cacheSize() const
+	{
+		return m_cacheSize;
+	}
+
+
+	void setCacheSize(std::size_t size)
+	{
+		m_cacheSize = size;
+	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -127,13 +148,14 @@ public:
 
 		// pre-compute the kernel matrix (may change in the future)
 		// and create linear array of labels
-		RealMatrix K = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), 0);
+		KernelMatrixType  km(*(this->m_kernel), dataset.inputs());
+		PartlyPrecomputedMatrixType  K(&km, m_cacheSize);
 		UIntVector y = createBatch(dataset.labels().elements());
 		const double lambda = 0.5 / (ell * m_C);
 
 		double alphaScale = 1.0;
 		std::size_t iterations;
-		if (m_epochs == 0) iterations = std::max(10 * ell, std::size_t(std::ceil(m_C * ell)));
+		if(m_epochs == 0) iterations = std::max(10 * ell, std::size_t(std::ceil(m_C * ell)));
 		else iterations = m_epochs * ell;
 
 		// preinitialize everything to prevent costly memory allocations in the loop
@@ -141,7 +163,8 @@ public:
 		RealVector derivative(classes, 0.0);
 
 		// SGD loop
-		for (std::size_t iter = 0; iter < iterations; iter++)
+		blas::vector<QpFloatType> kernelRow(ell, 0);
+		for(std::size_t iter = 0; iter < iterations; iter++)
 		{
 			// active variable
 			std::size_t b = Rng::discrete(0, ell - 1);
@@ -151,8 +174,9 @@ public:
 
 			// compute prediction
 			f_b.clear();
-			axpy_prod(trans(alpha), row(K, b), f_b, false, alphaScale);
-			if (m_offset) noalias(f_b) += model.offset();
+			K.row(b, kernelRow);
+			axpy_prod(trans(alpha), kernelRow, f_b, false, alphaScale);
+			if(m_offset) noalias(f_b) += model.offset();
 
 			// stochastic gradient descent (SGD) step
 			derivative.clear();
@@ -162,7 +186,7 @@ public:
 			alphaScale = (ell - 1.0) / (ell + iter);   // numerically more stable
 
 			noalias(row(alpha, b)) -= (eta / alphaScale) * derivative;
-			if (m_offset) noalias(model.offset()) -= eta * derivative;
+			if(m_offset) noalias(model.offset()) -= eta * derivative;
 		}
 
 		alpha *= alphaScale;
@@ -216,7 +240,7 @@ public:
 	{
 		size_t kp = m_kernel->numberOfParameters();
 		RealVector ret(kp + 1);
-		if (m_unconstrained)
+		if(m_unconstrained)
 			init(ret) << parameters(m_kernel), log(m_C);
 		else
 			init(ret) << parameters(m_kernel), m_C;
@@ -229,11 +253,12 @@ public:
 		size_t kp = m_kernel->numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == kp + 1);
 		init(newParameters) >> parameters(m_kernel), m_C;
-		if (m_unconstrained) m_C = exp(m_C);
+		if(m_unconstrained) m_C = exp(m_C);
 	}
 
 	///\brief Returns the number of hyper-parameters.
-	size_t numberOfParameters() const{ 
+	size_t numberOfParameters() const
+	{
 		return m_kernel->numberOfParameters() + 1;
 	}
 
@@ -244,6 +269,10 @@ protected:
 	bool m_offset;                            ///< should the resulting model have an offset term?
 	bool m_unconstrained;                     ///< should C be stored as log(C) as a parameter?
 	std::size_t m_epochs;                     ///< number of training epochs (sweeps over the data), or 0 for default = max(10, C)
+
+	// size of cache to use.
+	std::size_t m_cacheSize;
+
 };
 
 
