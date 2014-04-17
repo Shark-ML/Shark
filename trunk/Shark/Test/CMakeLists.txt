@@ -69,6 +69,7 @@ SHARK_ADD_TEST( LinAlg/solve.cpp LinAlg_solve)
 SHARK_ADD_TEST( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
 SHARK_ADD_TEST( LinAlg/Initialize.cpp LinAlg_Initialize)
 SHARK_ADD_TEST( LinAlg/LRUCache.cpp LinAlg_LRUCache )
+SHARK_ADD_TEST( LinAlg/PartlyPrecomputedMatrix.cpp LinAlg_PartlyPrecomputedMatrix )
 
 #Algorithms tests 
 #Direct Search
