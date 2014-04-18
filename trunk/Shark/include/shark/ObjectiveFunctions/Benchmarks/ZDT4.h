@@ -48,6 +48,7 @@ namespace shark {
 /*! \brief Multi-objective optimization benchmark function ZDT4
 *
 *  The function is described in
+*  This function is highly multimodal
 *
 *  Eckart Zitzler, Kalyanmoy Deb, and Lothar Thiele. Comparison of
 *  Multiobjective Evolutionary Algorithms: Empirical
@@ -95,12 +96,11 @@ struct ZDT4 : public MultiObjectiveFunction
 		value[0] = x( 0 );
 
 		double sum = 0.0;
-
 		for (unsigned i = 1; i < numberOfVariables(); i++)
 			sum +=sqr(x( i )) - (10.0 * cos(4 * M_PI * x(i) ) );
 
 		double g = 1.0 + (10.0 * (numberOfVariables() - 1.0)) + sum;
-		double h = 1.0 - sqrt(x(0) / g);
+		double h = 1.0 - std::sqrt(x(0) / g);
 
 		value[1] = g * h;
 

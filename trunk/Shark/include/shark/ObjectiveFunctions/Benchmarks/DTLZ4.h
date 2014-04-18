@@ -88,25 +88,24 @@ struct DTLZ4 : public MultiObjectiveFunction
 
 		ResultType value( numberOfObjectives() );
 
-		//static const double alpha = 100.;
+		//~ const double alpha = 10.;
+		const double alpha = 100.; //original, but numerically extremely difficult
 		
 		int k = numberOfVariables() - numberOfObjectives() + 1 ;
-		double g = 0.0 ;
-
+		double g = 0.0;
 		for( unsigned int i = numberOfVariables() - k; i < numberOfVariables(); i++ )
-		    g += sqr( x( i ) - 0.5 );
+			g += sqr( x( i ) - 0.5);
 
-		for( unsigned int i = 0; i < numberOfObjectives(); i++ ) {
-		    double f = (1 + g);
-		    for( unsigned int j = 0; j < numberOfObjectives() - (i + 1); j++)            
-			f *= std::cos( boost::math::pow<10>( x( j ) ) * ( M_PI / 2.0 ) );
-		    if (i != 0){
-			unsigned int aux = numberOfObjectives() - (i + 1);
-			f *= std::sin( boost::math::pow<10>( x( aux ) ) * ( M_PI / 2.0 ) );
-		    }
-		    value( i ) = f;
+		for (unsigned int i = 0; i < numberOfObjectives(); i++) {
+			value[i] = 1.0+g;
+			for( unsigned int j = 0; j < numberOfObjectives() - i -1; ++j)
+				value[i] *= std::cos(std::pow(x( j ),alpha) * M_PI / 2.0);
+
+			if (i > 0)
+				value[i] *= std::sin(std::pow(x(numberOfObjectives() - i -1),alpha) * M_PI / 2.0);
 		}
 
+		return value;
 		return value;
 	}
     

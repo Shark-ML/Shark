@@ -90,24 +90,19 @@ struct DTLZ2 : public MultiObjectiveFunction
 
 		int k = numberOfVariables() - numberOfObjectives() + 1 ;
 		double g = 0.0;
+		for( unsigned int i = numberOfVariables() - k; i < numberOfVariables(); i++ )
+			g += sqr( x( i ) - 0.5);
 
-		for( unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++ )
-			g += std::pow( x( i-1 ) - 0.5, 2 );
+		for (unsigned int i = 0; i < numberOfObjectives(); i++) {
+			value[i] = 1.0+g;
+			for( unsigned int j = 0; j < numberOfObjectives() - i -1; ++j)
+				value[i] *= std::cos(x( j ) * M_PI / 2.0);
 
-		// g = 100 * (k + g);
-
-		for (unsigned int i = 1; i <= numberOfObjectives(); i++) {
-			double f = 1. + g;
-			for (int j = numberOfObjectives() - i; j >= 1; j--)
-				f *= std::cos(x( j-1 ) * M_PI / 2);
-
-			if (i > 1)
-				f *= std::sin(x( (numberOfObjectives() - i + 1) - 1) * M_PI / 2);
-
-			value[i-1] = f;
+			if (i > 0)
+				value[i] *= std::sin(x(numberOfObjectives() - i -1) * M_PI / 2.0);
 		}
 
-		return( value );
+		return value;
 	}
 private:
 	std::size_t m_objectives;
