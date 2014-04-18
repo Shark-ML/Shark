@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE DirectSearch_CMA
+#define BOOST_TEST_MODULE DirectSearch_STEADYSTATEMOCMA
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
@@ -6,8 +6,6 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/DirectSearch/SteadyStateMOCMA.h>
-
-#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
 
 using namespace shark;

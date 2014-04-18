@@ -38,6 +38,7 @@
 
 // MOO specific stuff
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
@@ -52,8 +53,8 @@ namespace shark {
 *
 * Please see the following papers for further reference:
 *  Deb, Agrawal, Pratap and Meyarivan. 
-*  A Fast Elitist Non-dominated Sorting Genetic Algorithm for Multi-objective Optimization: NSGA-II. 
-*  PPSN VI. 
+*  A Fast and Elitist Multiobjective Genetic Algorithm: NSGA-II 
+*  IEEE TRANSACTIONS ON EVOLUTIONARY COMPUTATION, VOL. 6, NO. 2, APRIL 2002
 */
 template<typename Indicator>
 class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<RealVector >{
@@ -156,6 +157,7 @@ public:
 		nm() = node.get( "NM", nm() );
 	}
 
+	using AbstractMultiObjectiveOptimizer<RealVector >::init;
 	/**
 	* \brief Initializes the algorithm for the supplied objective function.
 	* \tparam ObjectiveFunction The type of the objective function, 
@@ -169,11 +171,14 @@ public:
 	){
 		m_pop.reserve( 2 * mu() );
 		m_pop.resize(mu());
+		m_best.resize(mu());
 		for(std::size_t i = 0; i != mu(); ++i){
 			m_pop[i].age()=0;
 			function.proposeStartingPoint( m_pop[i].searchPoint() );
 			m_evaluator( function, m_pop[i] );
 			m_pop.push_back(m_pop[i]);
+			m_best[i].point = m_pop[i].searchPoint();
+			m_best[i].value = m_pop[i].unpenalizedFitness();
 		}
 		m_selection( m_pop,m_mu );
 		m_pop.resize(2*mu());
@@ -215,13 +220,13 @@ public:
 
 		for( std::size_t i = 0; i != mu(); ++i ) {
 			m_pop[i].age()++;
-			m_best[i].value = m_pop[i].unpenalizedFitness();
-			m_best[i].point = m_pop[i].searchPoint();
+			noalias(m_best[i].value) = m_pop[i].unpenalizedFitness();
+			noalias(m_best[i].point) = m_pop[i].searchPoint();
 		}
 	}
 };
 
-typedef IndicatorBasedRealCodedNSGAII< HypervolumeIndicator > HypRealCodedNSGAII;
+typedef IndicatorBasedRealCodedNSGAII< HypervolumeIndicator > RealCodedNSGAII;
 typedef IndicatorBasedRealCodedNSGAII< AdditiveEpsilonIndicator > EpsRealCodedNSGAII;
 }
 #endif

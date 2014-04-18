@@ -60,7 +60,7 @@ struct TournamentSelection {
 		IteratorType2 outItE
 	){
 		for(; outIt != outItE; ++outIt ) {
-			*outIt = (*this)(inIt,inItE);
+			*outIt = *(*this)(inIt,inItE);
 		}
 	}
 	

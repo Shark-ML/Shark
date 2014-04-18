@@ -60,7 +60,7 @@ namespace shark {
 				m_lower = blas::repeat(-1E20,f.numberOfVariables());
 				m_upper = blas::repeat(1E20,f.numberOfVariables());
 			}
-			else if (f.hasConstraintHandler() &&! f.getConstraintHandler().isBoxConstrained()) {
+			else if (f.hasConstraintHandler() && f.getConstraintHandler().isBoxConstrained()) {
 				typedef BoxConstraintHandler<PointType> ConstraintHandler;
 				ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(f.getConstraintHandler());
 				
