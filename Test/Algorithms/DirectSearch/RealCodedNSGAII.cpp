@@ -48,12 +48,12 @@ BOOST_AUTO_TEST_CASE( RealCodedNSGAII_HYPERVOLUME_Functions ) {
 	DTLZ4 dtlz4(5);
 	double dtlz4Volume = 120.178966;
 	testObjectiveFunctionMOO(dtlz4,10,dtlz4Volume,10000,reference);
-	DTLZ7 dtlz7(5); //not sure whether correctly implemented
-	double dtlz7Volume = 115.964708;
-	testObjectiveFunctionMOO(dtlz7,10,dtlz7Volume,10000,reference);
-	//~ ZDT1 zdt1(5);
-	//~ double zdt1Volume = 120.613761;
-	//~ testObjectiveFunctionMOO(zdt1,10,zdt1Volume,10000,reference);
+	//~ DTLZ7 dtlz7(5); //not sure whether correctly implemented
+	//~ double dtlz7Volume = 115.964708;
+	//~ testObjectiveFunctionMOO(dtlz7,10,dtlz7Volume,10000,reference);
+	ZDT1 zdt1(5);
+	double zdt1Volume = 120.613761;
+	testObjectiveFunctionMOO(zdt1,10,zdt1Volume,10000,reference);
 	ZDT2 zdt2(5); //fails somehow
 	double zdt2Volume = 120.286820;
 	testObjectiveFunctionMOO(zdt2,10,zdt2Volume,10000,reference);
