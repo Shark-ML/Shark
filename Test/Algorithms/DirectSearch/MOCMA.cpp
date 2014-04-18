@@ -45,10 +45,10 @@ using namespace shark;
 
 struct PointExtractor{
 
-template<class T>
-RealVector const& operator()(T const& arg)const{
-	return arg.value;
-}
+	template<class T>
+	RealVector const& operator()(T const& arg)const{
+		return arg.value;
+	}
 };
 
 void testObjectiveFunctionMOO(
@@ -67,12 +67,9 @@ void testObjectiveFunctionMOO(
 		std::clog<<"\r"<<i<<" "<<std::flush;
 	}
 	BOOST_REQUIRE_EQUAL(mocma.solution().size(), mu);
-	//~ for(std::size_t i = 0; i != mu; ++i){
-		//~ std::cout<<mocma.solution()[i].value(0)<<" "<<mocma.solution()[i].value(1)<<std::endl;
-	//~ }
 	HypervolumeCalculator hyp;
 	double volume = hyp(PointExtractor(),mocma.solution(),reference);
-	std::cout<<volume<<std::endl;
+	std::cout<<"\r"<<f.name()<<": "<<volume<<std::endl;
 	BOOST_CHECK_SMALL(volume - targetVolume, 5.e-3);
 }
 
@@ -81,18 +78,27 @@ BOOST_AUTO_TEST_CASE( MOCMA_HYPERVOLUME_Functions ) {
 	RealVector reference(2);
 	reference(0) = 11;
 	reference(1) = 11;
-	ZDT1 objective(5);
-	double zdt1Volume = 120.613761;
-	testObjectiveFunctionMOO(objective,10,zdt1Volume,10000,reference);
-	DTLZ4 objective2(5);
+	DTLZ2 dtlz2(5);
+	double dtlz2Volume = 120.178966;
+	testObjectiveFunctionMOO(dtlz2,10,dtlz2Volume,10000,reference);
+	DTLZ4 dtlz4(5);
 	double dtlz4Volume = 120.178966;
-	testObjectiveFunctionMOO(objective2,10,dtlz4Volume,10000,reference);
-	//~ ZDT4 objective3(5);
-	//~ double zdt4Volume = 120.613761;
-	//~ testObjectiveFunctionMOO(objective3,10,zdt4Volume,10000,reference);
-	ZDT6 objective4(5);
+	testObjectiveFunctionMOO(dtlz4,10,dtlz4Volume,10000,reference);
+	//~ DTLZ7 dtlz7(5); //not sure whether correctly implemented
+	//~ double dtlz7Volume = 115.964708;
+	//~ testObjectiveFunctionMOO(dtlz7,10,dtlz7Volume,10000,reference);
+	ZDT1 zdt1(5);
+	double zdt1Volume = 120.613761;
+	testObjectiveFunctionMOO(zdt1,10,zdt1Volume,10000,reference);
+	ZDT2 zdt2(5);
+	double zdt2Volume = 120.286820;
+	testObjectiveFunctionMOO(zdt2,10,zdt2Volume,10000,reference);
+	ZDT3 zdt3(5);
+	double zdt3Volume = 128.748470;
+	testObjectiveFunctionMOO(zdt3,10,zdt3Volume,10000,reference);
+	ZDT6 zdt6(5);
 	double zdt6Volume = 117.483246;
-	testObjectiveFunctionMOO(objective4,10,zdt6Volume,10000,reference);
+	testObjectiveFunctionMOO(zdt6,10,zdt6Volume,10000,reference);
 }
 
 

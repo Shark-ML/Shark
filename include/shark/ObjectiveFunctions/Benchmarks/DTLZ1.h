@@ -49,7 +49,7 @@ namespace shark {
 */
 struct DTLZ1 : public MultiObjectiveFunction
 {
-	DTLZ1(std::size_t numVariables = 0) : m_objectives(2), m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+	DTLZ1(std::size_t numVariables = 0) : m_objectives(2), m_handler(numVariables,0,1 ){
 		announceConstraintHandler(&m_handler);
 	}
 
@@ -89,24 +89,19 @@ struct DTLZ1 : public MultiObjectiveFunction
 
 		ResultType value( numberOfObjectives() );
 
-		int k = numberOfVariables() - numberOfObjectives() + 1 ;
-		// TODO: Check k
-		double g = 0.0;
+		unsigned int k = numberOfVariables() - numberOfObjectives()+1;
+		double g = k;
+		for( unsigned int i = numberOfVariables() - k; i < numberOfVariables(); i++ )
+			g += sqr( x( i ) - 0.5 ) - std::cos( 20.0 * M_PI * ( x( i ) - 0.5) );
+		g *= 100;
 
-		for( unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++ )
-		    g += sqr( x( i-1 ) - 0.5 ) - std::cos( 20 * M_PI * ( x( i-1 ) - 0.5) );
+		for (unsigned int i = 0; i < numberOfObjectives(); i++) {
+			value[i] = 0.5*(1.0 + g);
+			for( unsigned int j = 0; j < numberOfObjectives() - i -1; ++j)
+				value[i] *= x( j );
 
-		g = 100 * (k + g);
-
-		for (unsigned int i = 1; i <= numberOfObjectives(); i++) {
-			double f = 0.5 * (1 + g);
-			for( unsigned int j = numberOfObjectives() - i; j >= 1; j--)
-				f *= x( j-1 );
-
-			if (i > 1)
-				f *= 1 - x( (numberOfObjectives() - i + 1) - 1);
-
-			value[i-1] = f;
+			if (i > 0)
+				value[i] *= 1 - x( numberOfObjectives() - i -1);
 		}
 
 		return value;

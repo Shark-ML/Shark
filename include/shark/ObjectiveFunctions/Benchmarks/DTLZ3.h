@@ -87,24 +87,20 @@ struct DTLZ3 : public MultiObjectiveFunction
 
 		ResultType value( numberOfObjectives() );
 
-		int k = numberOfVariables() - numberOfObjectives() + 1 ;
-		double g = 0.0 ;
-
+		unsigned int k = numberOfVariables() - numberOfObjectives()+1;
+		double g = k;
 		for( unsigned int i = numberOfVariables() - k; i < numberOfVariables(); i++ )
-			g += sqr( x( i ) - 0.5 ) - std::cos( 20. * M_PI * ( x(i) - 0.5 ) );
+			g += sqr( x( i ) - 0.5 ) - std::cos( 20.0 * M_PI * ( x( i ) - 0.5) );
+		g *= 100;
 
-		g = 100 * (k + g);
+		for (unsigned int i = 0; i < numberOfObjectives(); i++) {
+			value[i] = 1.0+g;
+			for( unsigned int j = 0; j < numberOfObjectives() - i -1; ++j)
+				value[i] *= std::cos(x( j ) * M_PI / 2.0);
 
-		 for( unsigned int i = 0; i < numberOfObjectives(); i++ ) {
-		     double f = (1 + g);
-		     for( unsigned int j = 0; j < numberOfObjectives() - (i + 1); j++)            
-			 f *= std::cos( x[j] * 0.5 * M_PI );                
-		     if (i != 0){
-			 unsigned int aux = numberOfObjectives() - (i + 1);
-			 f *=std ::sin(x[aux] * 0.5 * M_PI);
-		     }
-		     value( i ) = f;
-		 }
+			if (i > 0)
+				value[i] *= std::sin(x(numberOfObjectives() - i -1) * M_PI / 2.0);
+		}
 
 		return value;
 	}

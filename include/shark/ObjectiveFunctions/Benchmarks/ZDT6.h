@@ -88,15 +88,12 @@ struct ZDT6 : public MultiObjectiveFunction
 
 		ResultType value( 2 );
 
-		value[0] = 1.0 - ::exp(-4.0 * x( 0 )) * ::pow( ::sin(6 * M_PI * x( 0 ) ), 6);
+		value[0] = 1.0 - std::exp(-4.0 * x( 0 )) * std::pow( std::sin(6 * M_PI * x( 0 ) ), 6);
 
-		double sum = 0.0;
-		for (unsigned i = 1; i < numberOfVariables(); i++)
-			sum += x( i );
+		double mean = sum(x) - x(0);
+		mean /= (numberOfVariables() - 1.0);
 
-		sum /= (numberOfVariables() - 1.0);
-
-		double g = 1.0 + 9.0 * pow(sum, 0.25);
+		double g = 1.0 + 9.0 * std::pow(mean, 0.25);
 		double h = 1.0 - sqr(value[0] / g);
 		value[1] = g*h;
 

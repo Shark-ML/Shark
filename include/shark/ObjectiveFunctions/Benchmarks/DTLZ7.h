@@ -48,7 +48,7 @@ namespace shark {
 */
 struct DTLZ7 : public MultiObjectiveFunction
 {
-	DTLZ7(std::size_t numVariables = 0) : m_objectives(2), m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,1) ){
+	DTLZ7(std::size_t numVariables = 0) : m_objectives(2), m_handler(numVariables,0,1 ){
 		announceConstraintHandler(&m_handler);
 	}
 
@@ -95,8 +95,8 @@ struct DTLZ7 : public MultiObjectiveFunction
 
 		g = 1 + 9 * g / k;
 
-		for (unsigned int i = 1; i <= numberOfObjectives() - 1; i++)
-			value[i-1] = x(i-1);
+		for (unsigned int i = 0; i != numberOfObjectives(); i++)
+			value[i] = x(i);
 
 		double h = 0.0 ;
 		for (unsigned int j = 1; j <= numberOfObjectives() - 1; j++)

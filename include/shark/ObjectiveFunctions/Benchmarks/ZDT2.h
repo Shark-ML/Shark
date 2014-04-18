@@ -89,14 +89,7 @@ struct ZDT2 : public MultiObjectiveFunction
 
 		value[0] = x( 0 );
 
-		double sum = 0.0;
-
-		for (unsigned i = 1; i < numberOfVariables(); i++)
-			sum += x(i);
-
-		sum /= (numberOfVariables() - 1.0);
-
-		double g = 1.0 + (9.0 * sum);
+		double g = 1.0 + 9.0 *(sum(x)-x(0))/(numberOfVariables() - 1.0);
 		double h = 1.0 - sqr(x( 0 ) / g);
 
 		value[1] = g * h;
