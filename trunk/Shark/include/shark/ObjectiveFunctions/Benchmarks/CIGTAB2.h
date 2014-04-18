@@ -88,8 +88,8 @@ struct CIGTAB2 : public MultiObjectiveFunction {
 	}
 
 	void init() {
-		m_rotationMatrixX = blas::randomRotationMatrix(m_numberOfVariables);
 		m_rotationMatrixY = blas::randomRotationMatrix(m_numberOfVariables);
+		m_rotationMatrixZ = blas::randomRotationMatrix(m_numberOfVariables);
 	}
 
 	ResultType eval( const SearchPointType & x ) const {
@@ -97,8 +97,8 @@ struct CIGTAB2 : public MultiObjectiveFunction {
 
 		ResultType value( 2 );
 
-		SearchPointType y = blas::prod( m_rotationMatrixX, x );
-		SearchPointType z = blas::prod( m_rotationMatrixY, x );
+		SearchPointType y = blas::prod( m_rotationMatrixY, x );
+		SearchPointType z = blas::prod( m_rotationMatrixZ, x );
 		double result_1 = y(0) * y(0) + m_a * m_a * y(numberOfVariables()-1) * y(numberOfVariables()-1);
 		double result_2 = z(0) * z(0) + m_a * m_a * z(numberOfVariables()-1) * z(numberOfVariables()-1);
 
@@ -116,13 +116,13 @@ struct CIGTAB2 : public MultiObjectiveFunction {
 	void proposeStartingPoint( SearchPointType & x ) const {
 		x.resize( m_numberOfVariables );
 		for( unsigned int i = 0; i < m_numberOfVariables; i++ )
-			x( i ) = Rng::gauss( -10., 10. );
+			x( i ) = Rng::uni( -10., 10. );
 	}
 private:
 	double m_a;
 	std::size_t m_numberOfVariables;
-	RealMatrix m_rotationMatrixX;
 	RealMatrix m_rotationMatrixY;
+	RealMatrix m_rotationMatrixZ;
 };
 }
 #endif

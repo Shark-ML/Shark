@@ -57,8 +57,9 @@ namespace shark {
 */
 struct ELLI2 : public MultiObjectiveFunction{
 
-	ELLI2() : m_a( 1E6 ) {
+	ELLI2(std::size_t numVariables = 0) : m_a( 1E6 ){
 		m_features |= CAN_PROPOSE_STARTING_POINT;
+		setNumberOfVariables(numVariables);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -70,20 +71,23 @@ struct ELLI2 : public MultiObjectiveFunction{
 	}
 	
 	std::size_t numberOfVariables()const{
-		return m_numberOfVariables;
+		return m_coefficients.size();
 	}
 	
 	bool hasScalableDimensionality()const{
 		return true;
 	}
 
-	void setNumberOfVariables( std::size_t numberOfVariables ){
-		m_numberOfVariables = numberOfVariables;
+	void setNumberOfVariables( std::size_t numVariables ){
+		m_coefficients.resize(numVariables);
+		for(std::size_t i = 0; i != numVariables; ++i){
+			m_coefficients(i) = std::pow(m_a, 2.0 * (i / (numVariables - 1.0)));
+		}
 	}
 
 	void init() {
-		m_rotationMatrixX = blas::randomRotationMatrix( m_numberOfVariables );
-		m_rotationMatrixY = blas::randomRotationMatrix( m_numberOfVariables );
+		m_rotationMatrix1 = blas::randomRotationMatrix( numberOfVariables() );
+		m_rotationMatrix2 = blas::randomRotationMatrix( numberOfVariables() );
 	}
 
 	ResultType eval( const SearchPointType & x ) const {
@@ -91,32 +95,33 @@ struct ELLI2 : public MultiObjectiveFunction{
 
 		ResultType value( 2 );
 
-		double sum_1 = 0, sum_2 = 0;
+		SearchPointType y = prod( m_rotationMatrix1, x );
+		SearchPointType z = prod( m_rotationMatrix2, x );
 
-		SearchPointType y = blas::prod( m_rotationMatrixX, x );
-		SearchPointType z = blas::prod( m_rotationMatrixY, x );
-
+		double sum1 = 0.0;
+		double sum2 = 0.0;
 		for (unsigned i = 0; i < numberOfVariables(); i++) {
-			sum_1 += std::pow(m_a, 2.0 * (i / (numberOfVariables() - 1.0))) * y(i) * y(i);
-			sum_2 += std::pow(m_a, 2.0 * (i / (numberOfVariables() - 1.0))) * (z(i) - 2.0) * (z(i) - 2.0);
+			sum1 += m_coefficients(i) * sqr( y(i) );
+			sum2 += m_coefficients(i) * sqr( z(i) - 2.0 );
 		}
 
-		value[0] = sum_1 / (m_a * m_a * numberOfVariables());
-		value[1] = sum_2 / (m_a * m_a * numberOfVariables());
+		value[0] = sum1 / ( sqr(m_a) * numberOfVariables() );
+		value[1] = sum2 / ( sqr(m_a) * numberOfVariables() );
 
 		return value;
 	}
 
 	void proposeStartingPoint( SearchPointType & x ) const {
-		x.resize( m_numberOfVariables );
-		for( unsigned int i = 0; i < m_numberOfVariables; i++ )
-			x( i ) = Rng::gauss( -10., 10. );
+		x.resize( numberOfVariables() );
+		for( unsigned int i = 0; i < numberOfVariables(); i++ )
+			x( i ) = Rng::uni( -10., 10. );
 	}
+
 private:
 	double m_a;
-	RealMatrix m_rotationMatrixX;
-	RealMatrix m_rotationMatrixY;
-	std::size_t m_numberOfVariables;
+	RealMatrix m_rotationMatrix1;
+	RealMatrix m_rotationMatrix2;
+	RealVector m_coefficients;
 };
 
 }

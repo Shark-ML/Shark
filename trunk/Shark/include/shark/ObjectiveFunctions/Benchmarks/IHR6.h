@@ -60,7 +60,7 @@ struct IHR6 : public MultiObjectiveFunction{
 
 	IHR6(std::size_t numVariables = 0) 
 	: m_a( 1000 )
-	, m_handler(SearchPointType(numVariables,-1),SearchPointType(numVariables,1) ){
+	, m_handler(numVariables,-1,1 ){
 		announceConstraintHandler(&m_handler);
 	}
 
@@ -89,6 +89,7 @@ struct IHR6 : public MultiObjectiveFunction{
 
 	void init() {
 		m_rotationMatrix = blas::randomRotationMatrix(numberOfVariables());
+		m_ymax = 1.0/norm_inf(row(m_rotationMatrix,0));
 	}
 
 	ResultType eval( const SearchPointType & x )const {
@@ -98,40 +99,34 @@ struct IHR6 : public MultiObjectiveFunction{
 
 		SearchPointType y = prod(m_rotationMatrix,x);
 
-		value[0] = 1 - ::exp(-4 * ::fabs(y(0))) * ::pow(::sin(6 * M_PI * y(0)), 6);
+		value[0] = 1 - std::exp(-4 * std::abs(y(0))) * std::pow(std::sin(6 * M_PI * y(0)), 6);
 
 		double g = 0;
-		double ymax = ::fabs( m_rotationMatrix(0, 0) );
-
-		for( unsigned int i = 1; i < numberOfVariables(); i++ )
-			ymax = std::max( std::abs( m_rotationMatrix(0, i) ), ymax );
-		ymax = 1. / ymax;
-
 		for (unsigned int i = 1; i < numberOfVariables(); i++)
 			g += hg( y(i) );
-
 		g = 1 + 9 * std::pow(g / (numberOfVariables() - 1.0), 0.25);
 
-		value[1] = g * hf(1. - sqr( value[0] / g ), y( 0 ), ymax);
+		value[1] = g * hf(1. - sqr( value[0] / g ), y( 0 ));
 
-		return( value );
+		return value;
 	}
 
-	double h( double x, double n )const {
-		return 1 / ( 1 + ::exp( -x / ::sqrt( n ) ) );
+	double h( double x )const {
+		return 1 / ( 1 + std::exp( -x / std::sqrt( double(numberOfVariables()) ) ) );
 	}
 
-	double hf(double x, double y0, double ymax)const {
-		if(std::abs(y0) <= ymax )
+	double hf(double x, double y0)const {
+		if( std::abs(y0) <= m_ymax )
 			return x;
 		return std::abs( y0 ) + 1.;
 	}
 
 	double hg(double x)const {
-		return (x*x) / ( std::abs(x) + 0.1 );
+		return sqr(x) / ( std::abs(x) + 0.1 );
 	}
 private:
 	double m_a;
+	double m_ymax;
 	BoxConstraintHandler<SearchPointType> m_handler;
 	RealMatrix m_rotationMatrix;
 };

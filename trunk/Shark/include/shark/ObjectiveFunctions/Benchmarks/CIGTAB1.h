@@ -94,9 +94,8 @@ struct CIGTAB1 : public MultiObjectiveFunction {
 	ResultType eval( const SearchPointType & x ) const {
 		m_evaluationCounter++;
 
-		ResultType value( 2 );
+		ResultType value(2);
 
-		//point_type point = m_rotationMatrix % x;
 		ResultType y = prod( m_rotationMatrix, x );
 		double result = sqr( y(0) ) + sqr( m_a ) * sqr( y( numberOfVariables() - 1 ) );
 
@@ -120,7 +119,7 @@ struct CIGTAB1 : public MultiObjectiveFunction {
 	void proposeStartingPoint( SearchPointType & x ) const {
 		x.resize( m_numberOfVariables );
 		for( unsigned int i = 0; i < m_numberOfVariables; i++ )
-			x( i ) = Rng::gauss( -10., 10. );
+			x( i ) = Rng::uni( -10., 10. );
 	}
 private:
 	double m_a;
