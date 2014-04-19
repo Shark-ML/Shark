@@ -2,12 +2,9 @@
  * 
  *
  * \brief       Example of an expriment using the MO-CMA-ES on several benchmark functions
-
- * 
  *
  * \author      O.Krause
- * \date        -
- *
+ * \date        2014
  *
  * \par Copyright 1995-2014 Shark Development Team
  * 
@@ -29,6 +26,7 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+//###begin<includes>
 // Implementation of the MO-CMA-ES
 #include <shark/Algorithms/DirectSearch/MOCMA.h>
 // Access to benchmark functions
@@ -38,8 +36,10 @@
 #include <shark/ObjectiveFunctions/Benchmarks/ZDT6.h>
 		
 using namespace shark;
+//###end<includes>
 
-
+//###begin<hypervolume>
+//functor returning the value vector of a solution object
 struct PointExtractor{
 	template<class T>
 	RealVector const& operator()(T const& arg)const{
@@ -48,20 +48,26 @@ struct PointExtractor{
 };
 template<class Solution>
 double hypervolume( Solution const& solution){
+	// the reference point (11,11).
 	RealVector referencePoint(2,11);
 	//instance of the hypervolume calculator
 	HypervolumeCalculator hypervolume;
 	return hypervolume(PointExtractor(),solution,referencePoint);
 }
+//###end<hypervolume>
+
 
 int main( int argc, char ** argv ) {
+
+//###begin<parameters>
 	std::size_t frontSize = 10; //number of points that approximate the front
-	std::size_t numDimensions = 40; //dimensions of the objective functions
+	std::size_t numDimensions = 10; //dimensions of the objective functions
 	std::size_t numTrials = 10; // how often the optimization is repeated
-	std::size_t recordingInterval = 250; //we want to record after some multiple of this
+	std::size_t recordingInterval = 20; //we want to record after some multiple of this
 	std::size_t numIterations = 20*recordingInterval; //number of iterations to perform
+//###end<parameters>
 	
-	
+//###begin<functions>
 	//assortment of test functions
 	typedef boost::shared_ptr<MultiObjectiveFunction> Function;
 	std::vector<Function > functions;
@@ -69,20 +75,23 @@ int main( int argc, char ** argv ) {
 	functions.push_back(Function(new ZDT2(numDimensions)));
 	functions.push_back(Function(new ZDT3(numDimensions)));
 	functions.push_back(Function(new ZDT6(numDimensions)));
+//###end<functions>	
 	
-	
+//###begin<optimization>
 	RealMatrix meanVolumes(functions.size(), numIterations/recordingInterval+1,0.0);
 	for(std::size_t f = 0; f != functions.size(); ++f){
 		for(std::size_t trial = 0; trial != numTrials; ++trial){
-			std::cout<<"\r" <<functions[f]->name() <<": "<<trial<<"/"<<numTrials<<std::flush;//print progress
+			//print progress
+			std::cout<<"\r" <<functions[f]->name() <<": "<<trial<<"/"<<numTrials<<std::flush;
+			//create and initialize the optimizer
 			MOCMA mocma;
 			mocma.mu() = frontSize;
-			
-			// Initialize the optimizer for the objective function instance.
 			mocma.init( *functions[f] );
 			
-			//optimize and record hyprvolume
+			//record and hypervolume of initial solution
 			meanVolumes(f,0) += hypervolume(mocma.solution()); 
+			
+			//optimize
 			for(std::size_t i = 1; i <= numIterations; ++i){
 				mocma.step(*functions[f]);
 				if(i % recordingInterval == 0){
@@ -92,8 +101,10 @@ int main( int argc, char ** argv ) {
 		}
 	}
 	meanVolumes /= numTrials;
-	
-	std::cout<<"\rIteration ";
+//###end<optimization>
+
+//###begin<print>
+	std::cout<<"\r# Iteration ";
 	for(std::size_t f = 0; f != functions.size(); ++f)
 		std::cout<<functions[f]->name()<<" ";
 	std::cout<<"\n";
@@ -106,4 +117,5 @@ int main( int argc, char ** argv ) {
 		}
 		std::cout<<"\n";
 	}
+//###end<print>
 }
