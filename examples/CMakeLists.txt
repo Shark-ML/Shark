@@ -67,6 +67,7 @@ SHARK_ADD_EXAMPLE( EA/MOO/AdditiveEpsilonIndicatorMain AdditiveEpsilonIndicatorM
 ##SHARK_ADD_EXAMPLE( EA/MOO/BoundingBoxCalculatorMain BoundingBoxCalculatorMain "EA/MOO" )
 
 SHARK_ADD_EXAMPLE( EA/MOO/MOCMASimple MOCMASimple "EA/MOO" )
+SHARK_ADD_EXAMPLE( EA/MOO/MOCMAExperiment MOCMAExperiment "EA/MOO" )
 
 ## SHARK_ADD_EXAMPLE( EA/SOO/XNES XNES "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/CMASimple CMASimple "EA/SOO" )
