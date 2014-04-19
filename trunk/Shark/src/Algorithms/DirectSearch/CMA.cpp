@@ -39,20 +39,14 @@
 
 #include <shark/Core/Exception.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Selection/MuKommaLambdaSelection.h>
+#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
+#include <shark/Algorithms/DirectSearch/Operators/Selection/ElitistSelection.h>
 
 using namespace shark;
 
 //Functors used by the CMA-ES
 
 namespace{
-	struct FitnessComparator {
-		template<typename Individual>
-		bool operator()( const Individual & a, const Individual & b ) const {
-			return( a.penalizedFitness() < b.penalizedFitness() );
-		}
-	};
-
 	struct PointExtractor {
 		template<typename T>
 		const RealVector & operator()( const T & t ) const {
@@ -327,13 +321,8 @@ void CMA::step(ObjectiveFunctionType const& function){
 
 	// Selection
 	std::vector< Individual<RealVector, double, RealVector> > parents( m_mu );
-	select_mu_komma_lambda_p( 
-		parents.begin(),
-		parents.end(),
-		offspring.begin(),
-		offspring.end() ,
-		FitnessComparator()
-	);
+	ElitistSelection<FitnessExtractor> selection;
+	selection(offspring.begin(),offspring.end(),parents.begin(), parents.end());
 	// Strategy parameter update
 	updateStrategyParameters( parents );
 
