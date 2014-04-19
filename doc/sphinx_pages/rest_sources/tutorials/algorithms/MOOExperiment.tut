@@ -1,0 +1,59 @@
+Creating Multi-Objective Benchmarks with Shark
+===============================================================
+
+This is short tutorial on how to use Shark to develop a simple Benchmark.
+It is intended to give a starting point to develop experimental designs.
+This tutorial is based on the :doxy:`MOCMAExperiment.cpp`, which includes a
+complete implementation of this tutorial.
+
+Shark comes with a basic set of multi-objective algorithms including the reference
+implementation of the MO-CMA-ES. Moreover, Shark includes a big set of standard
+multi-objective benchmark functions. The best known are the ZDT, DTLZ, IHR and
+LZ families of functions. All benchmarks are located in "ObjectiveFunctions/Benchmarks".
+
+In the following we will describe a standard setup to evaluate the MO-CMA-ES on
+some of the ZDT-functions. It is not an easy task to evaluate the quality 
+of a solution of a multi-objective function - we have to evaluate how good the 
+points approximate the optimal pareto-front. Instead of doing this directly, we
+will measure the hypervolume covered by the points with respect to a reference point. 
+Optimal results are known for `some benchmarks  <http://www.tik.ee.ethz.ch/sop/download/supplementary/testproblems/>`_.
+We will repeatedly optimize the function and periodically calculate the covered hypervolume. In the end we calculate
+the mean hypervolume covered by the solution.
+
+We start with the includes we need for this example::
+
+..sharkcode<EA/MOO/MOCMAExperiment.tpp,includes>
+
+The first question is how to measure the hypervolume. This is easy as shark comes with an algorithm for it.
+We only have to tell it how to extract the points from the solution object of the MO-CMA and choose a reference point.
+We will use the same reference as the one used for the analytic results for better comparison::
+
+..sharkcode<EA/MOO/MOCMAExperiment.tpp,hypervolume>
+
+Next we set the experimental parameters::
+
+..sharkcode<EA/MOO/MOCMAExperiment.tpp,parameters>
+
+and create a vector of test functions::
+
+..sharkcode<EA/MOO/MOCMAExperiment.tpp,functions>
+
+The next block describes the experiment itself. Every function is optimized seperately. At the beginning of a trial,
+the MO-CMA is created and initialized, which will create an initial solution. 
+The hypervolume of this solution is calculated before starting the optimization process which runs
+for the desired amount of iterations. The hypervolume values are accumulated in the matrix `meanVolumes`. After the optimization is finished,
+the accumulated sums are divided by the number of trials to get the mean::
+
+..sharkcode<EA/MOO/MOCMAExperiment.tpp,optimization>
+
+And we finally print the solution table together with a small legend::
+
+..sharkcode<EA/MOO/MOCMAExperiment.tpp,print>
+
+
+We can plot this with a simple gnuplot script which results in:
+
+.. image:: ../images/MOOExperiment.svg
+   :width: 700px
+   :height: 500px
+   :align: center

@@ -38,50 +38,38 @@
 		
 int main( int argc, char ** argv ) {
 
-    // Adjust the floating-point format to scientific and increase output precision.
-    std::cout.setf( std::ios_base::scientific );
-    std::cout.precision( 10 );
-	
-    // Instantiate both the problem and the optimizer.
-    //###begin<problem>
-    shark::DTLZ2 dtlz2;
-    dtlz2.setNumberOfVariables( 3 );
-    //###end<problem>		  
+	// Adjust the floating-point format to scientific and increase output precision.
+	std::cout.setf( std::ios_base::scientific );
+	std::cout.precision( 10 );
 
-    //###begin<optimizer>
-    shark::MOCMA mocma;
+	// Instantiate both the problem and the optimizer.
+//###begin<problem>
+	shark::DTLZ2 dtlz2;
+	dtlz2.setNumberOfObjectives( 2 );
+	dtlz2.setNumberOfVariables( 3 );
+//###end<problem>		  
 
-    // Initialize the optimizer for the objective function instance.
-    mocma.init( dtlz2 );
-    //###end<optimizer>
-    
-    //###begin<solutiontype>	
-    std::vector<
-	shark::ResultSet<
-	    shark::RealVector,
-	    shark::RealVector
-	    >
-	> currentSolution;
-    //###end<solutiontype>	
-    
-    //###begin<loop>
-    // Iterate the optimizer
-    while( dtlz2.evaluationCounter() < 25000 ) {
-	mocma.step( dtlz2 );
-    }
-    currentSolution = mocma.solution();
-    //###end<loop>
-    
-    // Report information on the optimizer state and the current
-    // solution to the console.
-    for( std::size_t i = 0; i < currentSolution.size(); i++ ) {
-	std::copy(
-		  currentSolution[ i ].value.begin(), // Column 1 & 2
-		  currentSolution[ i ].value.end(), 
-		  std::ostream_iterator< double >( std::cout, " " ) 
-		  );
-	std::cout << std::endl;
-    }
-    
-    return( EXIT_SUCCESS );	
+//###begin<optimizer>
+	shark::MOCMA mocma;
+
+	// Initialize the optimizer for the objective function instance.
+	mocma.init( dtlz2 );
+//###end<optimizer>
+
+//###begin<loop>
+	// Iterate the optimizer
+	while( dtlz2.evaluationCounter() < 25000 ) {
+		mocma.step( dtlz2 );
+	}
+//###end<loop>
+
+//###begin<print>
+	// Print the optimal pareto front
+	for( std::size_t i = 0; i < mocma.solution().size(); i++ ) {
+		for( std::size_t j = 0; j < dtlz2.numberOfObjectives(); j++ ) {
+			std::cout<< mocma.solution()[ i ].value[j]<<" ";
+		}
+		std::cout << std::endl;
+	}
+//###end<print>
 }

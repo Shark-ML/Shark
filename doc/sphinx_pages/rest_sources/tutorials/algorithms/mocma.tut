@@ -4,8 +4,7 @@ Multi-Objective Covariance Matrix Adaptation Evolution Strategy
 The multi-objective covariance matrix adaptation evolution strategy
 (MO-CMA-ES) is one of the most powerful evolutionary algorithms for
 multi-objective real-valued optimization. In Shark, we provide a
-reference implementation of the algorithm (see :doxy:`MOCMA.h`) that is
-integrated with the optimizer class hierarchy.
+reference implementation of the algorithm (see :doxy:`MOCMA.h`).
 
 This tutorial illustrates applying the MO-CMA-ES to the :doxy:`DTLZ2`
 benchmark function. Please note that the methods presented here apply
@@ -32,21 +31,16 @@ Thereafter, the optimizer is instantiated and initialized for the objective func
 
 ..sharkcode<EA/MOO/MOCMASimple.tpp,optimizer>
 
-Subsequently, we declare a variable for storing the current
-approximation of the Pareto-optimal front: ::
-
-..sharkcode<EA/MOO/MOCMASimple.tpp,solutiontype>
-
-In general, the result of an iteration of a multi-objective optimizer
-is a set of tuples consisting of the best known search point and its
-associated vector-valued fitness valuess.
-
 Finally, we iterate the optimizer until the objective function
 instance has been evaluated 25000 times: ::
 
-    while( dtlz2.evaluationCounter() < 25000 ) {
-	currentSolution = mocma.step( dtlz2 );
-    }
+..sharkcode<EA/MOO/MOCMASimple.tpp,loop>
+
+As in all optimizers, the MO-CMA keeps track of the best known solution found so far. In contrast
+to single objective optimization, the solution is not a single point but a pareto front approximated by
+a set of points. We can print the pareto front using the following snippet::
+
+..sharkcode<EA/MOO/MOCMASimple.tpp,print>
 
 Running the example and visualizing the resulting Pareto-front approximation with the help of gnuplot will give you the following graphics: 
 

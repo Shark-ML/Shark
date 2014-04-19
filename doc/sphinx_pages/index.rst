@@ -72,6 +72,7 @@
 
    rest_sources/tutorials/algorithms/cma
    rest_sources/tutorials/algorithms/mocma
+   rest_sources/tutorials/algorithms/MOOExperiment
 
    rest_sources/tutorials/algorithms/rbm_module
    rest_sources/tutorials/algorithms/binary_rbm

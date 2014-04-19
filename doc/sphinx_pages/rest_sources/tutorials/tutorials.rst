@@ -132,6 +132,7 @@ Direct search methods -- the covariance matrix adaptation evolution strategy:
 * :doc:`concepts/optimization/directsearch`
 * :doc:`algorithms/cma`
 * :doc:`algorithms/mocma`
+* :doc:`algorithms/MOOExperiment`
 
 
 
