@@ -183,10 +183,13 @@ SHARK_UNARY_VECTOR_TRANSFORMATION(softPlus, scalar_soft_plus)
 
 //operations of the form op(v,t)[i] = op(v[i],t)
 #define SHARK_VECTOR_SCALAR_TRANSFORMATION(name, F)\
-template<class E> \
-vector_unary<E,F<typename E::value_type> > \
-name (vector_expression<E> const& e, typename E::value_type scalar){ \
-	typedef F<typename E::value_type> functor_type; \
+template<class T, class E> \
+typename boost::enable_if< \
+	boost::is_convertible<T, typename E::value_type >,\
+        vector_unary<E,F<typename E::value_type,T> > \
+>::type \
+name (vector_expression<E> const& e, T scalar){ \
+	typedef F<typename E::value_type,T> functor_type; \
 	return vector_unary<E, functor_type>(e, functor_type(scalar)); \
 }
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator*, scalar_multiply2)
@@ -199,6 +202,7 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(operator==, scalar_equal)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator!=, scalar_not_equal)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(min, scalar_min)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(max, scalar_max)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(pow, scalar_pow)
 #undef SHARK_VECTOR_SCALAR_TRANSFORMATION
 
 // operations of the form op(t,v)[i] = op(t,v[i])
@@ -206,24 +210,16 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(max, scalar_max)
 template<class T, class E> \
 typename boost::enable_if< \
 	boost::is_convertible<T, typename E::value_type >,\
-        vector_unary<E,F<typename E::value_type> > \
+        vector_unary<E,F<typename E::value_type,T> > \
 >::type \
 name (T scalar, vector_expression<E> const& e){ \
-	typedef F<typename E::value_type> functor_type; \
+	typedef F<typename E::value_type,T> functor_type; \
 	return vector_unary<E, functor_type>(e, functor_type(scalar)); \
 }
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(operator*, scalar_multiply1)
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(min, scalar_min)
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, scalar_max)
 #undef SHARK_VECTOR_SCALAR_TRANSFORMATION_2
-
-// pow(v,t)[i]= pow(v[i],t)
-template<class E, class U>
-vector_unary<E,scalar_pow<typename E::value_type, U> >
-pow (vector_expression<E> const& e, U exponent){
-	typedef scalar_pow<typename E::value_type, U> functor_type;
-	return vector_unary<E, functor_type>(e, functor_type(exponent));
-}
 
 
 template<class E1, class E2, class F>

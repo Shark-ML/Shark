@@ -3,7 +3,6 @@
 
 #include <boost/math/constants/constants.hpp>
 #include <boost/type_traits/remove_reference.hpp> 
-
 #include "traits.hpp"
 #include <shark/Core/Exception.h>
 #include <shark/Core/Math.h>
@@ -24,16 +23,16 @@ T minExpInput() {
 }
 
 // Scalar functors
-template<class T>
-struct scalar_identity {
-	typedef T argument_type;
-	typedef argument_type result_type;
-	static const bool zero_identity = true;
+//~ template<class T>
+//~ struct scalar_identity {
+	//~ typedef T argument_type;
+	//~ typedef argument_type result_type;
+	//~ static const bool zero_identity = true;
 
-	result_type operator()(argument_type x)const {
-		return x;
-	}
-};
+	//~ result_type operator()(argument_type x)const {
+		//~ return x;
+	//~ }
+//~ };
 
 template<class T>
 struct scalar_negate {
@@ -46,46 +45,46 @@ struct scalar_negate {
 	}
 };
 
-template<class T>
+template<class T, class ScalarType>
 struct scalar_divide {
 	typedef T argument_type;
-	typedef argument_type result_type;
+	typedef typename promote_traits<T, ScalarType>::promote_type result_type;
 	static const bool zero_identity = true;
 
-	scalar_divide(T divisor):m_divisor(divisor) {}
+	scalar_divide(ScalarType divisor):m_divisor(divisor) {}
 	result_type operator()(argument_type x)const {
 		return x/m_divisor;
 	}
 private:
-	T m_divisor;
+	ScalarType m_divisor;
 };
 
-template<class T>
+template<class T, class ScalarType>
 struct scalar_multiply1 {
 	typedef T argument_type;
-	typedef argument_type result_type;
+	typedef typename promote_traits<T, ScalarType>::promote_type result_type;
 	static const bool zero_identity = true;
 
-	scalar_multiply1(T factor):m_factor(factor) {}
+	scalar_multiply1(ScalarType factor):m_factor(factor) {}
 	result_type operator()(argument_type x)const {
 		return m_factor * x;
 	}
 private:
-	T m_factor;
+	ScalarType m_factor;
 };
 
-template<class T>
+template<class T, class ScalarType>
 struct scalar_multiply2 {
 	typedef T argument_type;
-	typedef argument_type result_type;
+	typedef typename promote_traits<T, ScalarType>::promote_type result_type;
 	static const bool zero_identity = true;
 
-	scalar_multiply2(T factor):m_factor(factor) {}
+	scalar_multiply2(ScalarType factor):m_factor(factor) {}
 	result_type operator()(argument_type x)const {
 		return x * m_factor;
 	}
 private:
-	T m_factor;
+	ScalarType m_factor;
 };
 
 template<class T>
@@ -285,117 +284,115 @@ struct scalar_sigmoid {
 	}
 };
 
-template<class T>
+template<class T, class ScalarType>
 struct scalar_less_than{
 	typedef T argument_type;
 	typedef int result_type;
 	static const bool zero_identity = false;
 
-	scalar_less_than(T comparator):m_comparator(comparator) {}
+	scalar_less_than(ScalarType comparator):m_comparator(comparator) {}
 	result_type operator()(argument_type x)const {
 		return x < m_comparator;
 	}
 private:
-	T m_comparator;
+	ScalarType m_comparator;
 };
 
-template<class T>
+template<class T, class ScalarType>
 struct scalar_less_equal_than{
-	typedef T argument_type;
+	typedef ScalarType argument_type;
 	typedef int result_type;
 	static const bool zero_identity = false;
 
-	scalar_less_equal_than(T comparator):m_comparator(comparator) {}
+	scalar_less_equal_than(ScalarType comparator):m_comparator(comparator) {}
 	result_type operator()(argument_type x)const {
 		return x <= m_comparator;
 	}
 private:
-	T m_comparator;
+	ScalarType m_comparator;
 };
 
-template<class T>
+template<class T, class ScalarType>
 struct scalar_bigger_than{
 	typedef T argument_type;
 	typedef int result_type;
 	static const bool zero_identity = false;
 
-	scalar_bigger_than(T comparator):m_comparator(comparator) {}
+	scalar_bigger_than(ScalarType comparator):m_comparator(comparator) {}
 	result_type operator()(argument_type x)const {
 		return x > m_comparator;
 	}
 private:
-	T m_comparator;
+	ScalarType m_comparator;
 };
 
-template<class T>
+template<class T, class ScalarType>
 struct scalar_bigger_equal_than{
 	typedef T argument_type;
 	typedef int result_type;
 	static const bool zero_identity = false;
 
-	scalar_bigger_equal_than(T comparator):m_comparator(comparator) {}
+	scalar_bigger_equal_than(ScalarType comparator):m_comparator(comparator) {}
 	result_type operator()(argument_type x)const {
 		return x > m_comparator;
 	}
 private:
-	T m_comparator;
+	ScalarType m_comparator;
 };
 
-template<class T>
+template<class T,class ScalarType>
 struct scalar_equal{
 	typedef T argument_type;
 	typedef int result_type;
 	static const bool zero_identity = false;
 
-	scalar_equal(T comparator):m_comparator(comparator) {}
+	scalar_equal(ScalarType comparator):m_comparator(comparator) {}
 	result_type operator()(argument_type x)const {
 		return x == m_comparator;
 	}
 private:
-	T m_comparator;
+	ScalarType m_comparator;
 };
 
-template<class T>
+template<class T, class ScalarType>
 struct scalar_not_equal{
 	typedef T argument_type;
 	typedef int result_type;
 	static const bool zero_identity = false;
 
-	scalar_not_equal(T comparator):m_comparator(comparator) {}
+	scalar_not_equal(ScalarType comparator):m_comparator(comparator) {}
 	result_type operator()(argument_type x)const {
 		return x != m_comparator;
 	}
 private:
-	T m_comparator;
+	ScalarType m_comparator;
 };
 
-template<class T>
+template<class T, class ScalarType>
 struct scalar_min {
 	typedef T argument_type;
-	typedef argument_type result_type;
+	typedef typename promote_traits<T, ScalarType>::promote_type result_type;
 	static const bool zero_identity = true;
 
-	scalar_min(T argument):m_argument(argument) {}
+	scalar_min(result_type argument):m_argument(argument) {}
 	result_type operator()(argument_type x)const {
-		using std::min;
-		return min(x,m_argument);
+		return std::min<result_type>(x,m_argument);
 	}
 private:
-	T m_argument;
+	result_type m_argument;
 };
-template<class T>
+template<class T, class ScalarType>
 struct scalar_max {
 	typedef T argument_type;
-	typedef argument_type result_type;
+	typedef typename promote_traits<T, ScalarType>::promote_type result_type;
 	static const bool zero_identity = true;
 
-	scalar_max(T argument):m_argument(argument) {}
+	scalar_max(ScalarType argument):m_argument(argument) {}
 	result_type operator()(argument_type x)const {
-		using std::max;
-		return max(x,m_argument);
+		return std::max<result_type>(x,m_argument);
 	}
 private:
-	T m_argument;
+	result_type m_argument;
 };
 
 //////BINARY SCALAR OPRATIONS////////////////
