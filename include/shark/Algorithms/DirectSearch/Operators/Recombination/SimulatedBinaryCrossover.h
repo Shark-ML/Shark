@@ -37,10 +37,7 @@
 
 namespace shark {
 
-	/**
-	* \brief Simulated binary crossover operator.
-	* \tparam PointType Type of the point the operator acts upon.
-	*/
+	/// \brief Simulated binary crossover operator.
 	template<typename PointType>
 	struct SimulatedBinaryCrossover {
 
@@ -48,11 +45,9 @@ namespace shark {
 		: m_nc( 20.0 )
 		, m_prob( 0.5 ) {}
 
-		/**
-		* \brief Initializes the operator for the supplied fitness function.
-		* \tparam Function Objective function type. Needs to be model of AbstractVectorSpaceObjectiveFunction.
-		* \param [in] f Instance of the objective function to initialize the operator for.
-		*/
+		/// \brief Initializes the operator for the supplied fitness function.
+		///
+		/// \param [in] f Instance of the objective function to initialize the operator for.
 		template<typename Function>
 		void init( const Function & f ) {
 			m_prob = 0.5;
@@ -72,13 +67,10 @@ namespace shark {
 			}
 		}
 
-		/**
-		* \brief Mates the supplied individuals.
-		* \tparam IndividualType Type of the individual, needs to provider operator* 
-		*  for accessing the actual search point.
-		* \param [in,out] i1 Individual to be mated.
-		* \param [in,out] i2 Individual to be mated.
-		*/
+		/// \brief Mates the supplied individuals.
+		/// 
+		/// \param [in,out] i1 Individual to be mated.
+		/// \param [in,out] i2 Individual to be mated.
 		template<typename IndividualType>
 		void operator()( IndividualType & i1, IndividualType & i2 ) {	
 			RealVector& point1 = i1.searchPoint();
@@ -138,12 +130,10 @@ namespace shark {
 
 		}
 
-		/**
-		* \brief Serializes this instance to the supplied archive.
-		* \tparam Archive The type of the archive the instance shall be serialized to.
-		* \param [in,out] archive The archive to serialize to.
-		* \param [in] version Version information (optional and not used here).
-		*/
+		/// \brief Serializes this instance to the supplied archive.
+		/// \tparam Archive The type of the archive the instance shall be serialized to.
+		/// \param [in,out] archive The archive to serialize to.
+		/// \param [in] version Version information (optional and not used here).
 		template<typename Archive>
 		void serialize( Archive & archive, const unsigned int version ) {
 			archive & BOOST_SERIALIZATION_NVP( m_nc );

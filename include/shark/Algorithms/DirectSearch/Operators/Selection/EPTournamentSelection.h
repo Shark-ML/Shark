@@ -93,7 +93,7 @@ struct EPTournamentSelection {
 	std::size_t tournamentSize;
 private:
 	///Returns a sorted range of pairs indicating, how often every individual won.
-	/// The best individuals are in the back of the range.
+	/// The best individuals are in the front of the range.
 	template<class InIterator>
 	std::vector<KeyValuePair<int, InIterator> > performTournament(InIterator it, InIterator itE){
 		std::size_t size = std::distance( it, itE );

@@ -84,7 +84,6 @@ SHARK_ADD_TEST( Algorithms/DirectSearch/ParetoDominanceComparator.cpp DirectSear
 #Direct Search Operator tests
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.cpp DirectSearch_IndicatorBasedSelection )
-SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Recombination/Recombination.cpp DirectSearch_Recombination )
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Mutation/BitflipMutation.cpp DirectSearch_BitflipMutation )
 SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/PenalizingEvaluator.cpp DirectSearch_PenalizingEvaluator )
 #Direct Search Indicator tests
