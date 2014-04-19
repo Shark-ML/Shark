@@ -36,32 +36,27 @@
 
 namespace shark {
 
-/**
- * \brief Bitflip mutation operator.
- */
+/// \brief Bitflip mutation operator.
+///
+/// Given a binary vector, a coin is flipped for every element. If it is heads, the element of the vector
+/// is flipped. By initializing the mutator with the objective function, this strength is set to a dfault value
+/// of 1/dimensions, thus in the mean one element is flipped.
 struct BitflipMutator {
 
-	/**
-	 * \brief Default c'tor.
-	 */
-	BitflipMutator(double mutationStrength) : m_mutationStrength(mutationStrength) {}
+	/// \brief Default c'tor.
+	BitflipMutator() : m_mutationStrength(0) {}
 
-	/**
-	 * \brief Initializes the operator for the supplied fitness function.
-	 * \tparam Function Objective function type. Needs to be model of AbstractVectorSpaceObjectiveFunction.
-	 * \param [in] f Instance of the objective function to initialize the operator for.
-	 */
+	/// \brief Initializes the operator for the supplied fitness function.
+	///
+	/// \param [in] f Instance of the objective function to initialize the operator for.
 	template<typename Function>
 	void init(const Function &f) {
 		m_mutationStrength = 1./f.numberOfVariables();
 	}
 
-	/**
-	 * \brief Mutates the supplied individual.
-	 * \tparam IndividualType Type of the individual, needs to provider operator*
-	 *  for accessing the actual search point.
-	 * \param [in,out] ind Individual to be mutated.
-	 */
+	/// \brief Mutates the supplied individual.
+	/// 
+	/// \param [in,out] ind Individual to be mutated.
 	template<typename IndividualType>
 	void operator()(IndividualType &ind) {
 
@@ -72,12 +67,10 @@ struct BitflipMutator {
 		}
 	}
 
-	/**
-	 * \brief Serializes this instance to the supplied archive.
-	 * \tparam Archive The type of the archive the instance shall be serialized to.
-	 * \param [in,out] archive The archive to serialize to.
-	 * \param [in] version Version information (optional and not used here).
-	 */
+	/// \brief Serializes this instance to the supplied archive.
+	/// 
+	/// \param [in,out] archive The archive to serialize to.
+	/// \param [in] version Version information (optional and not used here).
 	template<typename Archive>
 	void serialize(Archive &archive, const unsigned int version) {
 		archive &m_mutationStrength;

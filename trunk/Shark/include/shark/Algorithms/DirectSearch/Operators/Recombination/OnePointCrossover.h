@@ -4,7 +4,7 @@
  * \brief       Implements one-point crossover operator.
  * 
  *
- * \author      -
+ * \author    T.Voss O.Krause
  * \date        2010-2011
  *
  *
@@ -35,31 +35,27 @@
 
 namespace shark {
 
-    /**
-     * \brief Implements one-point crossover.
-     */
-    struct TypedOnePointCrossover {
-	
-	template<typename ChromosomeType>
-	ChromosomeType operator()( const ChromosomeType & mom, const ChromosomeType & dad, unsigned int point ) {
+/// \brief Implements one-point crossover.
+///
+/// Given two input points of same size n, draws a random number between 0 and n-1. all variables
+/// smaller than this index have the value of the left, all elements to the right have the value of the 
+/// right parent.
+struct OnePointCrossover {
+	/// \brief Performs the one-point crossover
+	template<typename PointType>
+	PointType operator()( const PointType & mom, const PointType & dad ) {
+		SIZE_CHECK(mom.size() == dad.size());
+		std::size_t point = Rng::discrete( 0, mom.size() - 1 );
 	    
-	    if( mom.size() != dad.size() )
-		throw( shark::Exception( "Parents need to be of the same size.", __FILE__, __LINE__ ) );
+		PointType offspring( mom.size() );
+		std::copy( mom.begin(), mom.begin() + point, offspring.begin() );
+		std::copy( dad.begin() + point, dad.end(), offspring.begin() + point );
 	    
-	    ChromosomeType offspring( mom );
-	    std::copy( dad.begin() + point, dad.end(), offspring.begin() + point );
-	    
-	    return( offspring );
+	    return offspring ;
+		
 	}
-
-	template<typename ChromosomeType>
-	ChromosomeType operator()( const ChromosomeType & mom, const ChromosomeType & dad ) {
-	    return( (*this)( mom, dad, Rgn::discrete( 0, mom.size() - 1 ) ) );	    
-	}
-
-    }
+};
   
-
 }
 
 #endif

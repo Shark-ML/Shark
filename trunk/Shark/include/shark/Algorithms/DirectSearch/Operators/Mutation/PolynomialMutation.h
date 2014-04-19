@@ -38,21 +38,15 @@
 
 namespace shark {
 
-	/**
-	* \brief Polynomial mutation operator.
-	*/
+	/// \brief Polynomial mutation operator.
 	struct PolynomialMutator {
 
-		/**
-		* \brief Default c'tor.
-		*/
+		/// \brief Default c'tor.
 		PolynomialMutator() : m_nm( 20.0 ) {}
 
-		/**
-		* \brief Initializes the operator for the supplied fitness function.
-		* \tparam Function Objective function type. Needs to be model of AbstractVectorSpaceObjectiveFunction.
-		* \param [in] f Instance of the objective function to initialize the operator for.
-		*/
+		/// \brief Initializes the operator for the supplied fitness function.
+		///
+		/// \param [in] f Instance of the objective function to initialize the operator for.
 		template<typename Function>
 		void init( const Function & f ) {
                         m_prob = 1./f.numberOfVariables();
@@ -72,12 +66,10 @@ namespace shark {
 			}                    
 		}
 
-		/**
-		* \brief Mutates the supplied individual.
-		* \tparam IndividualType Type of the individual, needs to provider operator* 
-		*  for accessing the actual search point.
-		* \param [in,out] ind Individual to be mutated.
-		*/
+		/// \brief Mutates the supplied individual.
+		///
+		///  for accessing the actual search point.
+		/// \param [in,out] ind Individual to be mutated.
 		template<typename IndividualType>
 		void operator()( IndividualType & ind ) {
 			double delta, deltaQ, expp,  u = 0.;
@@ -124,12 +116,10 @@ namespace shark {
 			}                        
 		}
 
-		/**
-		* \brief Serializes this instance to the supplied archive.
-		* \tparam Archive The type of the archive the instance shall be serialized to.
-		* \param [in,out] archive The archive to serialize to.
-		* \param [in] version Version information (optional and not used here).
-		*/
+		/// \brief Serializes this instance to the supplied archive.
+		///
+		/// \param [in,out] archive The archive to serialize to.
+		/// \param [in] version Version information (optional and not used here).
 		template<typename Archive>
 		void serialize( Archive & archive, const unsigned int version ) {
 			archive & BOOST_SERIALIZATION_NVP( m_nm );

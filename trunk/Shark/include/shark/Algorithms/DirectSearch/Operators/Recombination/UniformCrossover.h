@@ -36,74 +36,66 @@
 
 namespace shark {
 
-    /**
-     * \brief Uniform crossover of arbitrary individuals.
-     *
-     * Mixes individual genes of parent individuals according to a fixed mixing ratio.
-     * See http://en.wikipedia.org/wiki/Crossover_(genetic_algorithm) for further details.
-     */
-    class UniformCrossover {
-    public:
 
-	/**
-	 * \brief Default c'tor, initializes the per element probability.
-	 * 
-	 * \param [in] mixingRatio Mixing ratio between parent individuals.
-	 */
-    UniformCrossover( double mixingRatio = 0.5 ) : m_mixingRatio( mixingRatio ) {
-	}
+/// \brief Uniform crossover of arbitrary individuals.
+///
+/// Mixes individual genes of parent individuals according to a fixed mixing ratio.
+/// See http://en.wikipedia.org/wiki/Crossover_(genetic_algorithm) for further details.
+class UniformCrossover {
+public:
 	
-	/**
-	 * \brief Executes the uniform crossover.
-	 * \tparam Individual Needs to be a model of \ref TypedIndividual.
-	 * \returns The offspring individual.
-	 */
+	/// \brief Default c'tor, initializes the per element probability.
+	/// 
+	/// \param [in] mixingRatio Mixing ratio between parent individuals.
+	UniformCrossover( double mixingRatio = 0.5 ){
+		setMixingRatio(mixingRatio);
+	}
+
+	/// \brief Executes the uniform crossover.
+	///	
+	/// \return The offspring individual.
 	template<typename Point>
-	    Point operator()( const Point & mom, const Point & dad ) const {
-	    
-	    Point result( mom );
+	Point operator()( const Point & mom, const Point & dad ) const {
+		Point result( mom );
 
-	    for( std::size_t i = 0; i < std::min( mom.size(), dad.size() ); i++ ) {
-		if( Rng::coinToss( std::min( 1., std::max( 0., m_mixingRatio ) ) ) )
-		    result( i ) = dad( i );
-	    }
+		for( std::size_t i = 0; i < std::min( mom.size(), dad.size() ); i++ ) {
+			if( Rng::coinToss( m_mixingRatio ) )
+				result( i ) = dad( i );
+		}
 
-	    return( result );
+		return result;
 	}
 
-	/**
-	 * \brief Returns a const reference to the mixing ratio \f$ \in [0,1]\f$.
-	 */
-	const double & mixingRatio() const {
-	    return( m_mixingRatio );
+
+	/// \brief Returns the mixing ratio \f$ \in [0,1]\f$.
+	double mixingRatio() const {
+		return m_mixingRatio;
 	}
 
-	/**
-	 * \brief Returns a mutable reference to the mixing ratio \f$ \in [0,1]\f$., allows for l-value semantics. 
-	 */	
-	double & mixingRatio() {
-	    return( m_mixingRatio );
+
+	/// \brief Sets the mixing ratio to \f$ \in [0,1]\f$.
+	void setMixingRatio(double newRatio) {
+		SHARK_CHECK(newRatio >= 0.9 && newRatio <= 1.0, "[UniformCrossover] mixing ratio must be between 0 and 1");
+		m_mixingRatio = newRatio;
 	}
-	
-	/**
-	 * \brief Configures the mixing ratio given the configuration node.
-	 */
+
+
+	/// \brief Configures the mixing ratio given the configuration node.
 	template<typename Node>
-	    void configure( const Node & node ) {
-	    m_mixingRatio = node.template get< double >( "MixingRatio", 0.5 );
+	void configure( const Node & node ) {
+		m_mixingRatio = node.template get< double >( "MixingRatio", 0.5 );
 	}
 
-	/**
-	 * \brief Serializes instances of the uniform crossover operator.
-	 */
+
+	/// \brief Serializes instances of the uniform crossover operator.
 	template<typename Archive>
-	    void serialize( Archive & ar, const unsigned int version ) {
-	    (void) version;
-	    ar & m_mixingRatio;
+	void serialize( Archive & ar, const unsigned int version ) {
+		(void) version;
+		ar & m_mixingRatio;
 	}
-    protected:
+private:
 	double m_mixingRatio; ///< Per element probability, default value 0.5.
-    };
+};
 }
 
 #endif 
