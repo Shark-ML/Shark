@@ -47,25 +47,25 @@ BOOST_AUTO_TEST_CASE( MOCMA_HYPERVOLUME_Functions ) {
 	reference(1) = 11;
 	DTLZ2 dtlz2(5);
 	double dtlz2Volume = 120.178966;
-	testObjectiveFunctionMOO(dtlz2,10,dtlz2Volume,10000,reference);
+	testObjectiveFunctionMOO(dtlz2,10,dtlz2Volume,1000,reference);
 	DTLZ4 dtlz4(5);
 	double dtlz4Volume = 120.178966;
-	testObjectiveFunctionMOO(dtlz4,10,dtlz4Volume,10000,reference);
+	testObjectiveFunctionMOO(dtlz4,10,dtlz4Volume,1000,reference);
 	//~ DTLZ7 dtlz7(5); //not sure whether correctly implemented
 	//~ double dtlz7Volume = 115.964708;
 	//~ testObjectiveFunctionMOO(dtlz7,10,dtlz7Volume,10000,reference);
 	ZDT1 zdt1(5);
 	double zdt1Volume = 120.613761;
-	testObjectiveFunctionMOO(zdt1,10,zdt1Volume,10000,reference);
+	testObjectiveFunctionMOO(zdt1,10,zdt1Volume,1000,reference);
 	ZDT2 zdt2(5);
 	double zdt2Volume = 120.286820;
-	testObjectiveFunctionMOO(zdt2,10,zdt2Volume,10000,reference);
+	testObjectiveFunctionMOO(zdt2,10,zdt2Volume,1000,reference);
 	ZDT3 zdt3(5);
 	double zdt3Volume = 128.748470;
-	testObjectiveFunctionMOO(zdt3,10,zdt3Volume,10000,reference);
+	testObjectiveFunctionMOO(zdt3,10,zdt3Volume,1000,reference);
 	ZDT6 zdt6(5);
 	double zdt6Volume = 117.483246;
-	testObjectiveFunctionMOO(zdt6,10,zdt6Volume,10000,reference);
+	testObjectiveFunctionMOO(zdt6,10,zdt6Volume,1000,reference);
 }
 
 

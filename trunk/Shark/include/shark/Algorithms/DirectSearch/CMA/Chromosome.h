@@ -46,7 +46,6 @@ struct CMAChromosome{
 		Failure = 3
 	};
 	MultiVariateNormalDistributionCholesky m_mutationDistribution; ///< Models the search distribution using a cholsky matrix
-	//~ MultiVariateNormalDistribution m_mutationDistribution; ///< Models the search distribution using a cholsky matrix
 	RealMatrix m_inverseCholesky;///< inverse cholesky matrix
 
 	RealVector m_evolutionPath; ///< Low-pass filtered accumulation of successful mutative steps.
@@ -102,27 +101,14 @@ struct CMAChromosome{
 		m_successProbability = (1 - m_stepSizeLearningRate) * m_successProbability + m_stepSizeLearningRate;
 		m_stepSize *= ::exp( 1./m_stepSizeDampingFactor * (m_successProbability - m_targetSuccessProbability) / (1-m_targetSuccessProbability) );
 		
-		//~ RealMatrix & C = m_mutationDistribution.covarianceMatrix();
 		double evolutionpathUpdateWeight=m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate );
 		if( m_successProbability < m_successThreshold ) {
 			m_evolutionPath *= 1 - m_evolutionPathLearningRate;
 			noalias(m_evolutionPath) += std::sqrt( evolutionpathUpdateWeight ) * m_lastStep;
 			rankOneUpdate(1 - m_covarianceMatrixLearningRate,m_covarianceMatrixLearningRate,m_evolutionPath);
-			
-			//~ C *= 1 - m_covarianceMatrixLearningRate;
-			//~ noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
 		} else {
-			m_evolutionPath *= 1 - m_evolutionPathLearningRate;
-			rankOneUpdate(
-				1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight,
-				m_covarianceMatrixLearningRate,
-				m_evolutionPath
-			);
-			//~ C  *= 1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight;
-			//~ noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
+			roundUpdate();
 		}
-		
-		//~ m_mutationDistribution.update();
 	}
 	
 	/**
@@ -140,30 +126,18 @@ struct CMAChromosome{
 		
 		if(offspringSuccess != Failure) return;
 		
-		//~ RealMatrix & C = m_mutationDistribution.covarianceMatrix();
 		if( m_successProbability < m_successThreshold ) {
 			//check whether the step is admissible with the proposed update weight
 			double rate = m_covarianceMatrixUnlearningRate;
 			double stepNormSqr = norm_sqr( m_lastStep );
 			if( 1 <  m_covarianceMatrixUnlearningRate*(2*stepNormSqr-1) ){
 				rate = 0.5/(2*stepNormSqr-1);//make the update shorter
-				return;
+				return; //better be safe for now
 			}
 			rankOneUpdate(1-rate,rate,m_lastStep);
-			//~ noalias(C) = (1-rate)*C - rate * outer_prod( m_lastStep, m_lastStep );
 		} else {
-			double evolutionpathUpdateWeight=m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate );
-			m_evolutionPath *= 1 - m_evolutionPathLearningRate;
-			rankOneUpdate(
-				1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight,
-				m_covarianceMatrixLearningRate,
-				m_evolutionPath
-			);
-			//~ C  *= 1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight;
-			//~ noalias(C)+=m_covarianceMatrixLearningRate * outer_prod( m_evolutionPath , m_evolutionPath );
+			roundUpdate();
 		}
-
-		//~ m_mutationDistribution.update();
 	}
 
 	/**
@@ -192,7 +166,7 @@ struct CMAChromosome{
 	}
 private:
 	/// \brief Performs a rank one update to the cholesky factor. 
-
+	///
 	/// This also requries an update of the inverse cholesky factor, that is the only reason, it exists.
 	void rankOneUpdate(double alpha, double beta, RealVector const& v){
 		RealVector w =prod(m_inverseCholesky,v);
@@ -205,6 +179,20 @@ private:
 		RealMatrix& A =m_mutationDistribution.lowerCholeskyFactor();
 		noalias(A) =a*A+b*outer_prod(v,w);
 		noalias(m_inverseCholesky) = 1.0/a * m_inverseCholesky - b/ (a*a+a*b*normWSqr)*outer_prod(w,wInv);
+	}
+	
+	/// \brief Performs an update step which makes the distribution more round
+	///
+	/// This is called, when the distribution is too successful as this indicates that the step size  
+	/// in some direction is too small to be useful
+	void roundUpdate(){
+		double evolutionpathUpdateWeight = m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate );
+		m_evolutionPath *= 1 - m_evolutionPathLearningRate;
+		rankOneUpdate(
+			1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight,
+			m_covarianceMatrixLearningRate,
+			m_evolutionPath
+		);
 	}
 };
 }
