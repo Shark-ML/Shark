@@ -1,11 +1,11 @@
 /*!
  *
  *
- * \brief       EP-Tournament selection operator.
+ * \brief       Elitist Selection Operator suitable for (mu,lambda) and (mu+lambda) selection
  *
  *
- * \author      T.Voss
- * \date        2010-2011
+ * \author      O.Krause
+ * \date        2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -28,21 +28,20 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_SELECTION_EP_TOURNAMENT_H
-#define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_SELECTION_EP_TOURNAMENT_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_SELECTION_ELITIST_SELECTION_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_SELECTION_ELITIST_SELECTION_H
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/utility/KeyValuePair.h>
 #include <vector>
 namespace shark {
 
-/// \brief Survival and mating selection to find the next parent set.
+/// \brief Survival selection to find the next parent set
 ///
-/// For a given Tournament size k, every individual is compared to k other individuals
-/// The fitness relation is governed by the double value returned by Extractor, which can be the fitness or a 
-/// domination rank. The individuals which won the most torunaments are selected
+/// Given a set of individuals, selects the mu best performing individuals.
+/// The elements are ordered by a double value returned by the Extractor.
 template< typename Extractor >
-struct EPTournamentSelection {
+struct ElitistSelection {
 
 	/// \brief Selects individuals from the range of individuals.
 	///
@@ -56,9 +55,10 @@ struct EPTournamentSelection {
 		OutIterator out,  OutIterator outE
 	){
 		std::size_t outputSize = std::distance( out, outE );
-		std::vector<KeyValuePair<int, InIterator> > results = performTournament(it, itE);
+		std::vector<KeyValuePair<double, InIterator> > results = order(it, itE);
+		std::size_t size = results.size();
 		if(results.size() < outputSize){
-			throw SHARKEXCEPTION("[EPTournamentSelection] Input range must be bigger than output range");
+			throw SHARKEXCEPTION("[ElitistSelection] Input range must be bigger than output range");
 		}
 		
 		for(std::size_t i = 0; i != outputSize; ++i, ++out){
@@ -78,40 +78,29 @@ struct EPTournamentSelection {
 	){
 		SIZE_CHECK(population.size() >= mu);
 		typedef typename Population::iterator InIterator;
-		std::vector<KeyValuePair<int, InIterator> > results = performTournament(population.begin(),population.end());
-		
+		std::vector<KeyValuePair<double, InIterator> > results = order(population.begin(),population.end());
 		
 		for(std::size_t i = 0; i != mu; ++i){
-			individualPerform[i].value->select() = true;
+			results[i].value->select()=true;
 		}
-		for(std::size_t i = mu; i != results.size()-1; ++i){
-			individualPerform[i].value->select() = false;
+		for(std::size_t i = mu; i != results.size(); ++i){
+			results[i].value->select() = false;
 		}
 	}
-	
-	/// \brief Size of the tournament. 4 by default.
-	std::size_t tournamentSize;
 private:
 	///Returns a sorted range of pairs indicating, how often every individual won.
 	/// The best individuals are in the back of the range.
 	template<class InIterator>
-	std::vector<KeyValuePair<int, InIterator> > performTournament(InIterator it, InIterator itE){
+	std::vector<KeyValuePair<double, InIterator> > order(InIterator it, InIterator itE){
 		std::size_t size = std::distance( it, itE );
-		UIntVector selectionProbability(size,0.0);
-		std::vector<KeyValuePair<int, InIterator> > individualPerformance(size);
 		Extractor e;
-		for( std::size_t i = 0; i != size(); ++i ) {
-			individualPerformance[i].value = it+i;
-			for( std::size_t round = 0; round < tournamentSize; round++ ) {
-				std::size_t idx = shark::Rng::discrete( 0,size-1 );
-				if(e(*it) < e(*(it+idx)){
-					individualPerformance[i].key -= 1;
-				}
-			}
+		std::vector<KeyValuePair<double, InIterator> > individuals(size);
+		for(std::size_t i = 0; i != size; ++i){
+			individuals[i].key = e(*(it+i));
+			individuals[i].value = it+i;
 		}
-		
-		std::sort( individualPerformance.begin(), individualPerformance.end());
-		return individualPerformance;
+		std::sort( individuals.begin(), individuals.end());
+		return individuals;
 	}
 };
 
