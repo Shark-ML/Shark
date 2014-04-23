@@ -2,6 +2,7 @@
 #define SHARK_LINALG_BLAS_UBLAS_VECTOR_SPARSE_
 
 #include "vector_proxy.hpp"
+#include <vector>
 
 namespace shark {
 namespace blas {
