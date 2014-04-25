@@ -189,6 +189,7 @@ void testWeightedInputDerivative(Model& net,const Point& point,const RealVector&
 ///samples are taken from the interval -10,10
 template<class Model>
 void testWeightedDerivative(Model& net,unsigned int numberOfTests = 1000, double epsilon=1.e-5,double estimationEpsilon = 1.e-5) {
+	BOOST_CHECK_EQUAL(net.hasFirstParameterDerivative(),true);
 	RealVector parameters(net.numberOfParameters());
 	RealVector coefficients(net.outputSize());
 	RealVector point(net.inputSize());
@@ -213,6 +214,7 @@ void testWeightedDerivative(Model& net,unsigned int numberOfTests = 1000, double
 ///samples are taken from the interval -10,10
 template<class Model>
 void testWeightedInputDerivative(Model& net,unsigned int numberOfTests = 1000, double epsilon=1.e-5,double estimationEpsilon = 1.e-5) {
+	BOOST_CHECK_EQUAL(net.hasFirstInputDerivative(),true);
 	RealVector parameters(net.numberOfParameters());
 	RealVector coefficients(net.outputSize());
 	RealVector point(net.inputSize());
