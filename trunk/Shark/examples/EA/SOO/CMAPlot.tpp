@@ -37,13 +37,7 @@
 using namespace shark;
 using namespace std;
 
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
-#include <boost/progress.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/units/systems/si.hpp>
-
-#include <limits>
 
 int main( int argc, char ** argv ) {
 
@@ -80,8 +74,7 @@ int main( int argc, char ** argv ) {
 		     << cma.mean()( 1 ) << " size "
 		     << cma.eigenValues()(0) * cma.sigma() * 2. << "," // times 2 because gunplot takes diameters as arguments 
 		     << cma.eigenValues()(1) * cma.sigma() * 2. << " angle " 
-		     << 360 + 360 * ::atan( cma.eigenVectors()( 0, 1 ) / cma.eigenVectors()( 0, 0 ) ) * 1./(2*M_PI) << " front fillstyle empty border 2" << endl;
-		//<< 90 * ::atan( eigenVectors( 0, 1 ) / eigenVectors( 0, 0 ) ) * 2./M_PI << " front fillstyle empty border 2" << endl; // CI: Thomas original version, which may be correct, but I did not understand it directly
+		     << ::atan( cma.eigenVectors()( 1, 0 ) / cma.eigenVectors()( 0, 0 ) ) / M_PI * 180 << " front fillstyle empty border 2" << endl;
 		
 		// Report information on the optimizer state and the current solution to the console.
 //###begin<results>
@@ -116,7 +109,7 @@ int main( int argc, char ** argv ) {
 	     << cma.mean()( 1 ) << " size "
 	     << cma.eigenValues()(0) * cma.sigma() * 2. << "," // times 2 because gunplot takes diameters as arguments 
 	     << cma.eigenValues()(1) * cma.sigma() * 2. << " angle " 
-	     << 360 + 360 * ::atan( cma.eigenVectors()( 0, 1 ) / cma.eigenVectors()( 0, 0 ) ) * 1./(2*M_PI) << " front fillstyle empty border 2" << endl;
+	     << ::atan( cma.eigenVectors()( 1, 0 ) / cma.eigenVectors()( 0, 0 ) ) / M_PI * 180  << " front fillstyle empty border 2" << endl;
 	
 	// Report information on the optimizer state and the current solution to the console.
 	results << hb.evaluationCounter() << " "	// Column 1
