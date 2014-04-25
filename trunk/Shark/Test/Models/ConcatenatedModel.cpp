@@ -5,6 +5,7 @@
 
 #include <shark/Models/ConcatenatedModel.h>
 #include <shark/Models/FFNet.h>
+#include <shark/Models/LinearModel.h>
 #include <shark/Models/Softmax.h>
 #include <shark/Rng/Uniform.h>
 
@@ -66,28 +67,94 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_Value )
 BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 {
 	FFNet<LogisticNeuron,LogisticNeuron> net1;
-	Softmax net2(2);
+	LinearModel<> net2;
 	net1.setStructure(3,5,2);
-	size_t modelParameters = net1.numberOfParameters()+net2.numberOfParameters();
+	net2.setStructure(2,4);
 	ConcatenatedModel<RealVector,RealVector> model (&net1,&net2);
+	BOOST_CHECK_EQUAL(model.optimizeFirstModelParameters(),1);
+	BOOST_CHECK_EQUAL(model.optimizeSecondModelParameters(),1);
 
-	//parameters
-	RealVector parameters(modelParameters);
-	RealVector coefficients(2);
-	RealVector point(3);
-	for(unsigned int test = 0; test != 10; ++test){
-		for(size_t i = 0; i != modelParameters;++i){
-			parameters(i) = Rng::uni(-5,5);
+	//test1: all activated
+	{
+		//parameters
+		size_t modelParameters = net1.numberOfParameters()+net2.numberOfParameters();
+		BOOST_REQUIRE_EQUAL(model.numberOfParameters(), modelParameters);
+		RealVector parameters(modelParameters);
+		RealVector coefficients(4);
+		RealVector point(3);
+		for(unsigned int test = 0; test != 10; ++test){
+			for(size_t i = 0; i != modelParameters;++i){
+				parameters(i) = Rng::uni(-5,5);
+			}
+			for(size_t i = 0; i != 4;++i){
+				coefficients(i) = Rng::uni(-5,5);
+			}
+			for(size_t i = 0; i != 3;++i){
+				point(i) = Rng::uni(-5,5);
+			}
+			
+			model.setParameterVector(parameters);
+			testWeightedDerivative(model, point, coefficients, 1.e-5,1.e-8);
 		}
-		for(size_t i = 0; i != 2;++i){
-			coefficients(i) = Rng::uni(-5,5);
+	}
+	
+	//test1: only first model
+	{
+		//parameters
+		size_t modelParameters = net1.numberOfParameters();
+		model.optimizeFirstModelParameters() = true;
+		model.optimizeSecondModelParameters() = false;
+		BOOST_REQUIRE_EQUAL(model.numberOfParameters(), modelParameters);
+		RealVector parameters(modelParameters);
+		RealVector coefficients(4);
+		RealVector point(3);
+		for(unsigned int test = 0; test != 10; ++test){
+			for(size_t i = 0; i != modelParameters;++i){
+				parameters(i) = Rng::uni(-5,5);
+			}
+			for(size_t i = 0; i != 4;++i){
+				coefficients(i) = Rng::uni(-5,5);
+			}
+			for(size_t i = 0; i != 3;++i){
+				point(i) = Rng::uni(-5,5);
+			}
+			
+			model.setParameterVector(parameters);
+			testWeightedDerivative(model, point, coefficients, 1.e-5,1.e-8);
 		}
-		for(size_t i = 0; i != 3;++i){
-			point(i) = Rng::uni(-5,5);
+	}
+	//test2: only second model
+	{
+		//parameters
+		size_t modelParameters = net2.numberOfParameters();
+		model.optimizeFirstModelParameters() = false;
+		model.optimizeSecondModelParameters() = true;
+		BOOST_REQUIRE_EQUAL(model.numberOfParameters(),modelParameters);
+		RealVector parameters(modelParameters);
+		RealVector coefficients(4);
+		RealVector point(3);
+		for(unsigned int test = 0; test != 10; ++test){
+			for(size_t i = 0; i != modelParameters;++i){
+				parameters(i) = Rng::uni(-5,5);
+			}
+			for(size_t i = 0; i != 4;++i){
+				coefficients(i) = Rng::uni(-5,5);
+			}
+			for(size_t i = 0; i != 3;++i){
+				point(i) = Rng::uni(-5,5);
+			}
+			
+			model.setParameterVector(parameters);
+			testWeightedDerivative(model, point, coefficients, 1.e-5,1.e-8);
 		}
-		
-		model.setParameterVector(parameters);
-		testWeightedDerivative(model, point, coefficients, 1.e-5,1.e-8);
+	}
+	
+	//test3: no parameters
+	{
+		//parameters
+		model.optimizeFirstModelParameters() = false;
+		model.optimizeSecondModelParameters() = false;
+		BOOST_REQUIRE_EQUAL(model.numberOfParameters(), 0);
 	}
 }
 BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedInputDerivative )
