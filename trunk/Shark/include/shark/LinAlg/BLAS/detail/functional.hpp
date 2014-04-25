@@ -59,6 +59,17 @@ private:
 	ScalarType m_divisor;
 };
 
+template<class T>
+struct scalar_inverse {
+	typedef T argument_type;
+	typedef argument_type result_type;
+	static const bool zero_identity = false;
+
+	result_type operator()(argument_type x)const {
+		return T(1.0)/x;
+	}
+};
+
 template<class T, class ScalarType>
 struct scalar_multiply1 {
 	typedef T argument_type;

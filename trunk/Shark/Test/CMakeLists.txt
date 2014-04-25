@@ -201,6 +201,7 @@ SHARK_ADD_TEST( ObjectiveFunctions/KernelBasisDistance.cpp ObjFunct_KernelBasisD
 SHARK_ADD_TEST( ObjectiveFunctions/RadiusMarginQuotient.cpp ObjFunct_RadiusMarginQuotient )
 SHARK_ADD_TEST( ObjectiveFunctions/LooError.cpp ObjFunct_LooError )
 SHARK_ADD_TEST( ObjectiveFunctions/LooErrorCSvm.cpp ObjFunct_LooErrorCSvm )
+SHARK_ADD_TEST( ObjectiveFunctions/NegativeLogLikelihood.cpp ObjFunct_NegativeLogLikelihood )
 SHARK_ADD_TEST( ObjectiveFunctions/SvmLogisticInterpretation.cpp ObjFunct_SvmLogisticInterpretation )
 SHARK_ADD_TEST( ObjectiveFunctions/BoxConstraintHandler.cpp ObjFunct_BoxConstraintHandler )
 

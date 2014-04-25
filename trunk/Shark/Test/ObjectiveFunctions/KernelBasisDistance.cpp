@@ -88,20 +88,10 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Derivative_Optimal )
 }
 
 //test that checks that the result with respect to a linear kernel is correct
-class NormalDistributedPoints:public DataDistribution<RealVector>
-{
-public:
-	void draw(RealVector& input) const{
-		input.resize(30);
-		for(std::size_t i = 0; i != 30; ++i){
-			input(i) = Rng::gauss(0,1);
-		}
-	}
-};
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Linear )
 {
 	for(std::size_t trial = 0; trial != 10; ++trial){
-		NormalDistributedPoints problem;
+		NormalDistributedPoints problem(30);
 		Data<RealVector> dataset = problem.generateDataset(100,10);
 		LinearKernel<> kernel;
 		KernelExpansion<RealVector> expansion(&kernel,dataset,false,1);
@@ -152,7 +142,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Linear )
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Linear)
 {
 	for(std::size_t trial = 0; trial != 10; ++trial){
-		NormalDistributedPoints problem;
+		NormalDistributedPoints problem(30);
 		Data<RealVector> dataset = problem.generateDataset(100,10);
 		LinearKernel<> kernel;
 		KernelExpansion<RealVector> expansion(&kernel,dataset,false,1);
@@ -178,7 +168,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Linear)
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Gaussian)
 {
 	for(std::size_t trial = 0; trial != 10; ++trial){
-		NormalDistributedPoints problem;
+		NormalDistributedPoints problem(30);
 		Data<RealVector> dataset = problem.generateDataset(100,10);
 		GaussianRbfKernel<> kernel(0.5);
 		KernelExpansion<RealVector> expansion(&kernel,dataset,false,1);
