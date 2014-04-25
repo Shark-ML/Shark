@@ -97,13 +97,7 @@ public:
 		return *this;
 	}
 
-	/// Construction from matrix
-	LinearModel(RealMatrix const& matrix):m_matrix(matrix){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
-	}
-
-	/// Construction from matrix and vector
+	/// Construction from matrix (and vector)
 	LinearModel(RealMatrix const& matrix, RealVector const& offset = RealVector())
 	:m_matrix(matrix),m_offset(offset){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
