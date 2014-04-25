@@ -135,9 +135,9 @@ public:
 	virtual boost::shared_ptr<State> createState() const
 	{
 		if (hasFirstParameterDerivative()
-				|| hasFirstInputDerivative()
-				|| hasSecondParameterDerivative()
-				|| hasSecondInputDerivative())
+		|| hasFirstInputDerivative()
+		|| hasSecondParameterDerivative()
+		|| hasSecondInputDerivative())
 		{
 			throw SHARKEXCEPTION("[AbstractModel::createState] createState must be overridden by models with derivatives");
 		}

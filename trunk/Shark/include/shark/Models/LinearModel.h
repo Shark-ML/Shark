@@ -65,16 +65,19 @@ public:
 	/// CDefault Constructor; use setStructure later
 	LinearModel(){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
 	/// Constructor creating a model with given dimnsionalities and optional offset term.
 	LinearModel(unsigned int inputs, unsigned int outputs = 1, bool offset = false)
 	: m_matrix(outputs,inputs,0.0),m_offset(offset?outputs:0,0.0){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
 	///copy constructor
 	LinearModel(LinearModel const& model)
 	:m_matrix(model.m_matrix),m_offset(model.m_offset){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -97,13 +100,14 @@ public:
 	/// Construction from matrix
 	LinearModel(RealMatrix const& matrix):m_matrix(matrix){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
 
 	/// Construction from matrix and vector
 	LinearModel(RealMatrix const& matrix, RealVector const& offset = RealVector())
 	:m_matrix(matrix),m_offset(offset){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_SECOND_PARAMETER_DERIVATIVE;
+		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
 
 	/// check for the presence of an offset term
@@ -189,7 +193,7 @@ public:
 		eval(inputs,outputs);
 	}
 	
-	///\brief calculates the first derivative w.r.t the parameters and summing them up over all patterns of the last computed batch 
+	///\brief Calculates the first derivative w.r.t the parameters and summing them up over all patterns of the last computed batch 
 	void weightedParameterDerivative(
 		BatchInputType const& patterns, RealMatrix const& coefficients, State const& state, RealVector& gradient
 	)const{
@@ -209,6 +213,19 @@ public:
 			std::size_t start = inputs*outputs;
 			noalias(subrange(gradient, start, start + outputs)) = sum_rows(coefficients);
 		}
+	}
+	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch 
+	void weightedInputDerivative(
+		BatchInputType const & patterns,
+		BatchOutputType const & coefficients,
+		State const& state,
+		BatchInputType& derivative
+	)const{
+		SIZE_CHECK(coefficients.size2() == outputSize());
+		SIZE_CHECK(coefficients.size1() == patterns.size1());
+
+		derivative.resize(patterns.size1(),inputSize());
+		axpy_prod(coefficients,m_matrix,derivative);
 	}
 
 	/// From ISerializable
