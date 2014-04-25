@@ -51,7 +51,27 @@ namespace detail{
 template<class InputType, class OutputType>
 class ConcatenatedModelWrapperBase:public AbstractModel<InputType,OutputType>{
 public:
+	ConcatenatedModelWrapperBase():m_optimizeFirst(true), m_optimizeSecond(true){}
 	virtual ConcatenatedModelWrapperBase<InputType,OutputType>* clone() const = 0;
+
+	bool optimizeFirstModelParameters()const{
+		return m_optimizeFirst;
+	}
+	
+	bool& optimizeFirstModelParameters(){
+		return m_optimizeFirst;
+	}
+	
+	bool optimizeSecondModelParameters()const{
+		return m_optimizeSecond;
+	}
+	
+	bool& optimizeSecondModelParameters(){
+		return m_optimizeSecond;
+	}
+protected:
+	bool m_optimizeFirst;
+	bool m_optimizeSecond;
 };
 
 ///\brief Internal Wrappertype to connect the output of the first model with the input of the second model.
@@ -63,7 +83,10 @@ protected:
 	typedef typename AbstractModel<InputType,IntermediateType>::BatchOutputType BatchIntermediateType;
 	AbstractModel<InputType,IntermediateType>* m_firstModel;
 	AbstractModel<IntermediateType,OutputType>* m_secondModel;
+
 	typedef ConcatenatedModelWrapperBase<InputType, OutputType> base_type;
+	using base_type::m_optimizeFirst;
+	using base_type::m_optimizeSecond;
 
 	struct InternalState: public State{
 		BatchIntermediateType intermediateResult;
@@ -86,22 +109,11 @@ public:
 			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		}
 
-		/*if(firstModel->hasSecondParameterDerivative()
-		&& secondModel->hasSecondParameterDerivative()
-		&& firstModel ->hasSecondInputDerivative()){
-			m_features|=HAS_SECOND_PARAMETER_DERIVATIVE;
-		}*/
-
 		if (firstModel->hasFirstInputDerivative()
 			&& secondModel->hasFirstInputDerivative())
 		{ 
 			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 		}
-
-		/*if(firstModel->hasSecondInputDerivative()
-		&& secondModel->hasSecondInputDerivative()){
-			m_features|=HAS_SECOND_INPUT_DERIVATIVE;
-		}*/
 	}
 
 	/// \brief From INameable: return the class name.
@@ -114,12 +126,23 @@ public:
 
 	RealVector parameterVector() const {
 		RealVector params(numberOfParameters());
-		init(params) << parameters(*m_firstModel), parameters(*m_secondModel);
+		if(m_optimizeFirst && m_optimizeSecond)
+			init(params) << parameters(*m_firstModel), parameters(*m_secondModel);
+		else if (m_optimizeFirst)
+			params = m_firstModel->parameterVector();
+		else if (m_optimizeSecond)
+			params = m_secondModel->parameterVector();
 		return params;
 	}
 
 	void setParameterVector(RealVector const& newParameters) {
-		init(newParameters) >> parameters(*m_firstModel), parameters(*m_secondModel);
+		if(m_optimizeFirst && m_optimizeSecond)
+			init(newParameters) >> parameters(*m_firstModel), parameters(*m_secondModel);
+		else if (m_optimizeFirst)
+			m_firstModel->setParameterVector(newParameters);
+		else if (m_optimizeSecond)
+			m_secondModel->setParameterVector(newParameters);
+		
 	}
 	
 	boost::shared_ptr<State> createState()const{
@@ -131,7 +154,13 @@ public:
 	}
 
 	std::size_t numberOfParameters() const {
-		return m_firstModel->numberOfParameters() + m_secondModel->numberOfParameters();
+		std::size_t numParams = 0;
+		if(m_optimizeFirst)
+			numParams += m_firstModel->numberOfParameters();
+		if (m_optimizeSecond)
+			numParams += m_secondModel->numberOfParameters();
+		return numParams;
+			
 	}
 
 	void eval( BatchInputType const& patterns, BatchOutputType& outputs)const{
@@ -151,22 +180,36 @@ public:
 		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, RealVector& gradient
 	)const{
 		InternalState const& s = state.toState<InternalState>();
-		std::size_t firstParam=m_firstModel->numberOfParameters();
-		std::size_t secondParam=m_secondModel->numberOfParameters();
-		gradient.resize(firstParam+secondParam);
 
-		RealVector firstParameterDerivative;
-		BatchIntermediateType secondInputDerivative;
-		RealVector secondParameterDerivative;
-
-		m_secondModel->weightedDerivatives(
-			s.intermediateResult,coefficients,*s.secondModelState,
-			secondParameterDerivative,secondInputDerivative
-		);
-		m_firstModel->weightedParameterDerivative(patterns,secondInputDerivative,*s.firstModelState,firstParameterDerivative);
-
-		gradient.resize(firstParam+secondParam);
-		init(gradient)<<firstParameterDerivative,secondParameterDerivative;
+		if(m_optimizeFirst && m_optimizeSecond){
+			RealVector firstParameterDerivative;
+			BatchIntermediateType secondInputDerivative;
+			RealVector secondParameterDerivative;
+			
+			m_secondModel->weightedDerivatives(
+				s.intermediateResult,coefficients,*s.secondModelState,
+				secondParameterDerivative,secondInputDerivative
+			);
+			m_firstModel->weightedParameterDerivative(patterns,secondInputDerivative,*s.firstModelState,firstParameterDerivative);
+			
+			gradient.resize(numberOfParameters());
+			init(gradient)<<firstParameterDerivative,secondParameterDerivative;
+		}else if(m_optimizeFirst){
+			RealVector firstParameterDerivative;
+			BatchIntermediateType secondInputDerivative;
+			
+			m_secondModel->weightedInputDerivative(
+				s.intermediateResult,coefficients,*s.secondModelState,secondInputDerivative
+			);
+			m_firstModel->weightedParameterDerivative(patterns,secondInputDerivative,*s.firstModelState,gradient);
+		}else if(m_optimizeSecond){
+			m_secondModel->weightedParameterDerivative(
+				s.intermediateResult,coefficients,*s.secondModelState,
+				gradient
+			);
+		}else {
+			gradient.resize(0);
+		}
 	}
 
 	void weightedInputDerivative(
@@ -209,12 +252,16 @@ public:
 	void read( InArchive & archive ){
 		m_firstModel->read(archive);
 		m_secondModel->read(archive);
+		archive >> m_optimizeFirst;
+		archive >> m_optimizeSecond;
 	}
 
 	/// From ISerializable
 	void write( OutArchive & archive ) const{
 		m_firstModel->write(archive);
 		m_secondModel->write(archive);
+		archive << m_optimizeFirst;
+		archive << m_optimizeSecond;
 	}
 };
 
@@ -241,22 +288,11 @@ public:
 			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		}
 
-		/*if(firstModel->hasSecondParameterDerivative()
-		&& secondModel->hasSecondParameterDerivative()
-		&& firstModel ->hasSecondInputDerivative()){
-			m_features|=HAS_SECOND_PARAMETER_DERIVATIVE;
-		}*/
-
 		if (base_type::m_firstModel->hasFirstInputDerivative()
 			&& secondModel->hasFirstInputDerivative())
 		{ 
 			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 		}
-
-		/*if(firstModel->hasSecondInputDerivative()
-		&& secondModel->hasSecondInputDerivative()){
-			m_features|=HAS_SECOND_INPUT_DERIVATIVE;
-		}*/
 	}
 
 	~ConcatenatedModelList(){
@@ -311,7 +347,7 @@ operator>>(
 ///warning: model1 and model2 must outlive model. When they are destroyed first, behavior is undefined.
 template<class InputType, class OutputType>
 class ConcatenatedModel: public AbstractModel<InputType,OutputType> {
-protected:
+private:
 	boost::scoped_ptr<detail::ConcatenatedModelWrapperBase<InputType, OutputType> > m_wrapper;
 	typedef AbstractModel<InputType, OutputType> base_type;
 
@@ -355,6 +391,34 @@ public:
 		}
 
 		return *this;
+	}
+	
+	/// \brief Returns whether the parameters of the first model are going to be optimized
+	///
+	/// Remember that concatModel = first >> second, so it is the lower layer.
+	bool optimizeFirstModelParameters()const{
+		return m_wrapper->optimizeFirstModelParameters();
+	}
+	
+	/// \brief Returns a variable indicting whether the parameters of the first model are going to be optimized
+	///
+	/// Remember that concatModel = first >> second, so it is the lower layer.
+	bool& optimizeFirstModelParameters(){
+		return m_wrapper->optimizeFirstModelParameters();
+	}
+	
+	/// \brief Returns whether the parameters of the second model are going to be optimized
+	///
+	/// Remember that concatModel = first >> second, so it is the upper layer.
+	bool optimizeSecondModelParameters()const{
+		return m_wrapper->optimizeSecondModelParameters();
+	}
+	
+	/// \brief Returns a variable indicting whether the parameters of the second model are going to be optimized
+	///
+	/// Remember that concatModel = first >> second, so it is the upper layer.
+	bool& optimizeSecondModelParameters(){
+		return m_wrapper->optimizeSecondModelParameters();
 	}
 
 	ConcatenatedModel(const ConcatenatedModel<InputType, OutputType>& src)
