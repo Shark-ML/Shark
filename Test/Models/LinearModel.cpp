@@ -50,7 +50,8 @@ BOOST_AUTO_TEST_CASE( Models_LinearModel )
 		for (size_t j=0; j!=2; ++j)
 			BOOST_CHECK_SMALL(output(i,j) - testResults(i,j), 10e-15);
 
-	testWeightedDerivative(model,10);
+	testWeightedDerivative(model,1000);
+	testWeightedInputDerivative(model,1000);
 }
 
 BOOST_AUTO_TEST_CASE( Models_AffineLinearModel )
@@ -95,7 +96,8 @@ BOOST_AUTO_TEST_CASE( Models_AffineLinearModel )
 			BOOST_CHECK_SMALL(output(i,j) - testResults(i,j), 1.e-15);
 
 	// Test the weighted derivatives
-	testWeightedDerivative(model,10);
+	testWeightedDerivative(model,1000);
+	testWeightedInputDerivative(model,1000);
 	//testWeightedSecondDerivative(model,testInput,coefficients,coeffHessians);
 }
 
