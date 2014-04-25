@@ -29,8 +29,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef MULTIVARIATENORMALDISTRIBUTION_H
-#define MULTIVARIATENORMALDISTRIBUTION_H
+#ifndef SHARK_STATISTICS_MULTIVARIATENORMALDISTRIBUTION_H
+#define SHARK_STATISTICS_MULTIVARIATENORMALDISTRIBUTION_H
 
 #include <shark/LinAlg/eigenvalues.h>
 #include <shark/LinAlg/Cholesky.h>

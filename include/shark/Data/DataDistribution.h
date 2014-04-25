@@ -39,6 +39,7 @@
 
 #include <shark/Data/Dataset.h>
 #include <shark/Rng/GlobalRng.h>
+#include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <utility>
 
 namespace shark {
@@ -399,6 +400,31 @@ public:
 protected:
 	double m_radius2;
 	double m_noiselevel;
+};
+
+
+/// \brief Generates a set of normally distributed points
+class NormalDistributedPoints:public DataDistribution<RealVector>
+{
+public:
+	/// \brief Generates a simple distribution with 
+	NormalDistributedPoints(std::size_t dim): m_offset(dim,0){
+		RealMatrix covariance(dim,dim,0);
+		diag(covariance) = blas::repeat(1.0,dim);
+		m_dist.setCovarianceMatrix(covariance);
+	}
+	NormalDistributedPoints(RealMatrix const& covariance, RealVector const& offset)
+	:m_dist(covariance), m_offset(offset){
+		SIZE_CHECK(offset.size() == covariance.size1());
+	}
+	void draw(RealVector& input) const{
+		input.resize(m_offset.size());
+		noalias(input) = m_offset;
+		noalias(input) += m_dist().first;
+	}
+private:
+	MultiVariateNormalDistributionCholesky m_dist;
+	RealVector m_offset;
 };
 
 }
