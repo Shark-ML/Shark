@@ -91,7 +91,7 @@ In the following we present a list of arithmetic operations of vectors and matri
 
 
 Elementwise operations transform a matrix or a vector by applying
-a function on every element of the matrix: f(A)_{i,j} = :math:`f(A_{i,j})`.
+a function on every element of the matrix: :math:`f(A)_{i,j} =f(A_{i,j})`.
 For binary elementwise functions, both arguments are assumed to have
 the same dimensionality and the function is applied on every pair
 with the same index, that is :math:`f(A,B)_{i,j} = f(A_{i,j},B_{i,j})`.
