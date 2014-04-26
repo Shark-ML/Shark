@@ -148,6 +148,12 @@ namespace shark {
 			return m_sigma;
 		}
 
+		/** \brief Accesses the current step size. */
+		void setSigma(double sigma) {
+			m_sigma = sigma;
+		}
+
+
 		/** \brief Accesses the current population mean. */
 		RealVector const& mean() const {
 			return m_mean;
