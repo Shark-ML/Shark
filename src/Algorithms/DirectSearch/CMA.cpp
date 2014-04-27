@@ -264,6 +264,8 @@ void CMA::init(
 	m_mean = initialSearchPoint;
 	m_best.point = initialSearchPoint; // CI: you can argue about this, as the point is not evaluated
 	m_best.value = function(initialSearchPoint);//OK: evaluating performance of first point :P
+
+	m_counter = 0;
 }
 
 /**
@@ -314,7 +316,7 @@ void CMA::step(ObjectiveFunctionType const& function){
 	PenalizingEvaluator penalizingEvaluator;
 	for( unsigned int i = 0; i < offspring.size(); i++ ) {
 		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution();
-		offspring[ i ].chromosome() = sample.second;
+		offspring[i].chromosome() = sample.second;
 		offspring[i].searchPoint() = m_mean + m_sigma * sample.first;
 		penalizingEvaluator( function, offspring[i] );
 	}

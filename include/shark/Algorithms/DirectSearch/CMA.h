@@ -288,6 +288,8 @@ namespace shark {
 		RealVector m_evolutionPathC;
 		RealVector m_evolutionPathSigma;
 
+		unsigned m_counter; ///< counter for evaluations
+
 		MultiVariateNormalDistribution m_mutationDistribution;
 	};
 }
