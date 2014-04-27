@@ -80,30 +80,31 @@ struct Ellipsoid : public SingleObjectiveFunction {
 	double eval( const SearchPointType & p ) const {
 		m_evaluationCounter++;
 		double sum = 0;
-		double size = p.size();
+		double sizeMinusOne = p.size() - 1.;
 		for( unsigned int i = 0; i < p.size(); i++ ){
-			sum += ::pow( m_alpha, i / size ) * sqr(p( i ) );
+			sum += ::pow( m_alpha, i / sizeMinusOne ) * sqr(p( i ) );
 		}
 
 		return sum;
 	}
 
 	double evalDerivative( const SearchPointType & p, FirstOrderDerivative & derivative ) const {
-		double size=p.size();
+		double sizeMinusOne=p.size() - 1.;
 		derivative.resize(p.size());
 		for (unsigned int i = 0; i < p.size(); i++) {
-			derivative(i) = 2 * ::pow(m_alpha, i / size) * p(i);
+			derivative(i) = 2 * ::pow(m_alpha, i / sizeMinusOne) * p(i);
 		}
 		return eval(p);
 	}
 	double evalDerivative(const SearchPointType &p, SecondOrderDerivative &derivative)const {
 		std::size_t size=p.size();
+		double sizeMinusOne=p.size() - 1.;
 		derivative.m_gradient.resize(size);
 		derivative.m_hessian.resize(size,size);
 		derivative.m_hessian.clear();
 		for (unsigned int i = 0; i < size; i++) {
-			derivative.m_gradient(i) = 2 * std::pow(m_alpha, i / static_cast<double>( size ) ) * p(i);
-			derivative.m_hessian(i,i) = 2 * std::pow(m_alpha, i / static_cast<double>( size ) );
+			derivative.m_gradient(i) = 2 * std::pow(m_alpha, i / sizeMinusOne ) * p(i);
+			derivative.m_hessian(i,i) = 2 * std::pow(m_alpha, i /sizeMinusOne );
 		}
 		return eval(p);
 	}
