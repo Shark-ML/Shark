@@ -45,7 +45,8 @@ struct CMAChromosome{
 		Unsuccessful = 2,
 		Failure = 3
 	};
-	MultiVariateNormalDistributionCholesky m_mutationDistribution; ///< Models the search distribution using a cholsky matrix
+	MultiVariateNormalDistribution m_mutationDistribution; ///< Models the search distribution
+	//~ MultiVariateNormalDistributionCholesky m_mutationDistribution; ///< Models the search distribution using a cholsky matrix
 	RealMatrix m_inverseCholesky;///< inverse cholesky matrix
 
 	RealVector m_evolutionPath; ///< Low-pass filtered accumulation of successful mutative steps.
@@ -169,16 +170,20 @@ private:
 	///
 	/// This also requries an update of the inverse cholesky factor, that is the only reason, it exists.
 	void rankOneUpdate(double alpha, double beta, RealVector const& v){
-		RealVector w =prod(m_inverseCholesky,v);
-		RealVector wInv =prod(w,m_inverseCholesky);
+		RealMatrix & C = m_mutationDistribution.covarianceMatrix();
+		noalias(C) = alpha*C - beta * outer_prod( m_lastStep, m_lastStep );
+		m_mutationDistribution.update();
 		
-		double normWSqr =norm_sqr(w);
-		double a = std::sqrt(alpha);
-		double root = std::sqrt(1+beta/alpha*normWSqr);
-		double b = a/normWSqr * (root-1);
-		RealMatrix& A =m_mutationDistribution.lowerCholeskyFactor();
-		noalias(A) =a*A+b*outer_prod(v,w);
-		noalias(m_inverseCholesky) = 1.0/a * m_inverseCholesky - b/ (a*a+a*b*normWSqr)*outer_prod(w,wInv);
+		//~ RealVector w =prod(m_inverseCholesky,v);
+		//~ RealVector wInv =prod(w,m_inverseCholesky);
+		
+		//~ double normWSqr =norm_sqr(w);
+		//~ double a = std::sqrt(alpha);
+		//~ double root = std::sqrt(1+beta/alpha*normWSqr);
+		//~ double b = a/normWSqr * (root-1);
+		//~ RealMatrix& A =m_mutationDistribution.lowerCholeskyFactor();
+		//~ noalias(A) =a*A+b*outer_prod(v,w);
+		//~ noalias(m_inverseCholesky) = 1.0/a * m_inverseCholesky - b/ (a*a+a*b*normWSqr)*outer_prod(w,wInv);
 	}
 	
 	/// \brief Performs an update step which makes the distribution more round
