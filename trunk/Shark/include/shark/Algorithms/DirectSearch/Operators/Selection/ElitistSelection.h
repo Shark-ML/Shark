@@ -56,7 +56,6 @@ struct ElitistSelection {
 	){
 		std::size_t outputSize = std::distance( out, outE );
 		std::vector<KeyValuePair<double, InIterator> > results = order(it, itE);
-		std::size_t size = results.size();
 		if(results.size() < outputSize){
 			throw SHARKEXCEPTION("[ElitistSelection] Input range must be bigger than output range");
 		}
