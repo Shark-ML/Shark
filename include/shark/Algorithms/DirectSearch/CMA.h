@@ -4,16 +4,12 @@
  *
  * \brief       Implements the most recent version of the non-elitist CMA-ES.
  * 
- * The algorithm is described in
+ * Hansen, N. The CMA Evolution Startegy: A Tutorial, June 28, 2011
+ * and the eqation numbers refer to this publication (retrieved April 2014).
  * 
- * Hansen, N., S. Kern (2004). Evaluating the CMA Evolution Strategy
- * on Multimodal Test Functions. In Proceedings of the Eighth
- * International Conference on Parallel Problem Solving from Nature
- * (PPSN VIII), pp. 282-291, LNCS, Springer-Verlag
- * 
- * \author      -
- * \date        -
  *
+ * \author      Thomas Voss and Christian Igel
+ * \date        April 2014
  *
  * \par Copyright 1995-2014 Shark Development Team
  * 
@@ -70,14 +66,6 @@ namespace shark {
 		};
 
 		/**
-		* \brief Models the update type.
-		*/
-		enum UpdateType {
-		    RANK_ONE = 0, ///< Rank-one covariance matrix update.
-		    RANK_ONE_AND_MU = 2 ///< Combination of both update variants.
-		};
-
-		/**
 		* \brief Default c'tor.
 		*/
 		CMA();
@@ -92,7 +80,7 @@ namespace shark {
 		* 
 		*/
 		template<typename Container, typename Extractor>
-		RealVector cog( const Container & container, const RealVector & weights, const Extractor & e ) {
+		RealVector weightedSum( const Container & container, const RealVector & weights, const Extractor & e ) {
 
 			RealVector result( m_numberOfVariables, 0. );
 
@@ -110,7 +98,7 @@ namespace shark {
 		/**
 		* \brief Calculates mu for the supplied lambda and the recombination strategy.
 		*/
-		static unsigned suggestMu( unsigned int lambda, RecombinationType recomb = SUPERLINEAR ) ;
+		static double suggestMu( unsigned int lambda, RecombinationType recomb = SUPERLINEAR ) ;
 
 		/**
 		* \brief Configures the algorithm based on the supplied configuration.
@@ -133,7 +121,7 @@ namespace shark {
 			ObjectiveFunctionType const& function, 
 			SearchPointType const& initialSearchPoint,
 			unsigned int lambda, 
-			unsigned int mu,
+			double mu,
 			double initialSigma,				       
 			const boost::optional< RealMatrix > & initialCovarianceMatrix = boost::optional< RealMatrix >()
 		);
@@ -194,17 +182,17 @@ namespace shark {
 		}
 
 		/**
-		 * \brief Returns a const reference to the update type.
+		 * \brief Returns a const reference tothe lower bound on sigma times smalles eigenvalue.
 		 */
-		const UpdateType & updateType() const {
-			return m_updateType;
+		const double & lowerBound() const {
+			return m_lowerBound;
 		}
 
 		/**
-		 * \brief Returns a mutable reference to the update type.
+		 * \brief Returns a mutable reference to the lower bound on sigma times smalles eigenvalue.
 		 */
-		UpdateType& updateType() {
-			return m_updateType;
+		double& lowerBound() {
+			return m_lowerBound;
 		}
 
 		/**
@@ -269,18 +257,16 @@ namespace shark {
 		unsigned int m_lambda; ///< The size of the offspring population, needs to be larger than mu.
 
 		RecombinationType m_recombinationType; ///< Stores the recombination type.
-		UpdateType m_updateType; ///< Stores the update strategy.
 
 		double m_sigma;
 		double m_cC; 
-		double m_cCU; 
-		double m_cCov;
+		double m_c1; 
+		double m_cMu; 
 		double m_cSigma;
-		double m_cSigmaU;
 		double m_dSigma;
-
 		double m_muEff;
-		double m_muCov;
+
+		double m_lowerBound; ///< 
 
 		RealVector m_mean;
 		RealVector m_weights;
@@ -288,7 +274,7 @@ namespace shark {
 		RealVector m_evolutionPathC;
 		RealVector m_evolutionPathSigma;
 
-		unsigned m_counter; ///< counter for evaluations
+		unsigned m_counter; ///< counter for generations
 
 		MultiVariateNormalDistribution m_mutationDistribution;
 	};

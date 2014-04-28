@@ -11,8 +11,8 @@ maintained and adapted.
 
 In Shark, we provide a reference implementation of the algorithm (see
 :doxy:`CMA.h`) that is integrated with the optimizer class
-hierarchy. Please note that our implementation is based on the
-description given in [Hansen2004]_.
+hierarchy. Our implementation is based on the
+description given in [Hansen2011]_.
 
 This tutorial illustrates applying the CMA-ES to the :doxy:`Sphere`
 benchmark function. Please note that the methods presented here apply
@@ -72,7 +72,7 @@ The following table shows the recombination types and the corresponding formular
  =========================== ===============================================================================================================
     CMA::EQUAL         		:math:`\forall 1 \leq i \leq \mu: w_i = 1/\mu`
     CMA::LINEAR        		:math:`\forall 1 \leq i \leq \mu: w'_i = \mu-i, w_i=\frac{w'_i}{\sum_{i=1}^{\mu} w'_i}`
-    CMA::SUPERLINEAR   		:math:`\forall 1 \leq i \leq \mu: w'_i = \ln( \mu + 1. ) - \ln( 1. + i ), w_i=\frac{w'_i}{\sum_{i=1}^{\mu} w'_i}`
+    CMA::SUPERLINEAR   		:math:`\forall 1 \leq i \leq \mu: w'_i = \ln( \mu + 0.5 ) - \ln( i ), w_i=\frac{w'_i}{\sum_{i=1}^{\mu} w'_i}`
  =========================== ===============================================================================================================
 
 Empirically Analyzing the CMA-ES
@@ -115,3 +115,5 @@ References
 ^^^^^^^^^^
 
 .. [Hansen2004] N. Hansen and S. Kern. Evaluating the CMA Evolution Strategy on Multimodal Test Functions. In Eighth International Conference on Parallel Problem Solving from Nature PPSN VIII, Proceedings, pp. 282-291, Berlin: Springer, 2004.
+
+.. [Hansen2011] N. Hansen. The CMA Evolution Startegy: A Tutorial, June 28, 2011.
