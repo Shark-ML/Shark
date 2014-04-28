@@ -1,18 +1,14 @@
 /*!
- * 
  *
  * \brief       Implements the most recent version of the non-elitist CMA-ES.
  * 
  * The algorithm is described in
- * 
- * Hansen, N., S. Kern (2004). Evaluating the CMA Evolution Strategy
- * on Multimodal Test Functions. In Proceedings of the Eighth
- * International Conference on Parallel Problem Solving from Nature
- * (PPSN VIII), pp. 282-291, LNCS, Springer-Verlag
+ * Hansen, N. The CMA Evolution Startegy: A Tutorial, June 28, 2011
+ * and the eqation numbers refer to this publication (retrieved April 2014).
  * 
  *
- * \author      -
- * \date        -
+ * \author      Thomas Voss and Christian Igel
+ * \date        April 2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -64,20 +60,15 @@ namespace{
 	double chi( unsigned int n ) {
 		return( std::sqrt( static_cast<double>( n ) )*(1. - 1./(4.*n) + 1./(21.*n*n)) );
 	}
-	
-	template<typename VectorType>
-	double h( const VectorType & v, double cSigma, unsigned int n ) {
-		static double d = norm_2( v ) / std::sqrt( 1 -sqr( 1 - cSigma ) );
-		return( d < (1.5 + 1./(n-0.5))* chi(n) ? 1 : 0 );
-	}
+
 }
 
 /**
 * \brief Calculates lambda for the supplied dimensionality n.
 */
 unsigned CMA::suggestLambda( unsigned int dimension ) {
-	unsigned lambda = unsigned( 4. + ::floor( 3. * ::log( static_cast<double>( dimension ) ) ) );
-	// heuristics for small search spaces
+	unsigned lambda = unsigned( 4. + ::floor( 3. * ::log( static_cast<double>( dimension ) ) ) ); // eq. (44)
+	// heuristic for small search spaces
 	lambda = std::max<unsigned int>( 5, std::min( lambda, dimension ) );
 	return( lambda );
 }
@@ -85,34 +76,29 @@ unsigned CMA::suggestLambda( unsigned int dimension ) {
 /**
 * \brief Calculates mu for the supplied lambda and the recombination strategy.
 */
-unsigned CMA::suggestMu( unsigned int lambda, RecombinationType recomb) {
-	unsigned int mu;
+double CMA::suggestMu( unsigned int lambda, RecombinationType recomb) {
 	switch( recomb ) {
 		case EQUAL:         
-			mu = static_cast<unsigned int>( ::floor( lambda / 4. ) ); 
-			break;
+			return lambda / 4.;
 		case LINEAR:        
-			mu = static_cast<unsigned int>( ::floor( lambda / 2. ) ); 
-			break;
+			return lambda / 2.; 
 		case SUPERLINEAR:   
-			mu = static_cast<unsigned int>( ::floor( lambda / 2. ) ); 
-			break;
+			return lambda / 2.; // eq. (44)
 	}
-	return( mu );
+	return 0;
 }
 
 CMA::CMA()
 :m_recombinationType( SUPERLINEAR )
-, m_updateType( RANK_ONE_AND_MU )
 , m_sigma( 0 )
 , m_cC( 0 )
-, m_cCU( 0 )
-, m_cCov( 0 )
+, m_c1( 0 )
+, m_cMu( 0 )
 , m_cSigma( 0 )
-, m_cSigmaU( 0 )
 , m_dSigma( 0 )
 , m_muEff( 0 )
-, m_muCov( 0 ) {
+, m_lowerBound( 1E-20)
+, m_counter( 0 ) {
 	m_features |= REQUIRES_VALUE;
 }
 
@@ -121,7 +107,6 @@ CMA::CMA()
 */
 void CMA::configure( const PropertyTree & node ) {
 	m_recombinationType = static_cast<RecombinationType>( node.get<unsigned int>( "RecombinationType", SUPERLINEAR ) );
-	m_updateType = static_cast<UpdateType>( node.get<unsigned int>( "UpdateType", RANK_ONE_AND_MU ) );
 }
 
 void CMA::read( InArchive & archive ) {
@@ -129,19 +114,17 @@ void CMA::read( InArchive & archive ) {
 	archive >> m_mu;
 	archive >> m_lambda;
 	archive >> m_recombinationType;
-	archive >> m_updateType;
+	archive >> m_lowerBound;
 
 	archive >> m_sigma;
 
 	archive >> m_cC;
-	archive >> m_cCU;
-	archive >> m_cCov;
+	archive >> m_c1;
+	archive >> m_cMu;
 	archive >> m_cSigma;
-	archive >> m_cSigmaU;
 	archive >> m_dSigma;
 
 	archive >> m_muEff;
-	archive >> m_muCov;
 
 	archive >> m_mean;
 	archive >> m_weights;
@@ -149,6 +132,8 @@ void CMA::read( InArchive & archive ) {
 	archive >> m_evolutionPathC;
 	archive >> m_evolutionPathSigma;
 	archive >> m_mutationDistribution;
+
+	archive >> m_counter;
 }
 
 void CMA::write( OutArchive & archive ) const {
@@ -157,19 +142,17 @@ void CMA::write( OutArchive & archive ) const {
 	archive << m_lambda;
 	
 	archive << m_recombinationType;
-	archive << m_updateType;
+	archive << m_lowerBound;
 
 	archive << m_sigma;
 
 	archive << m_cC;
-	archive << m_cCU;
-	archive << m_cCov;
+	archive << m_c1;
+	archive << m_cMu;
 	archive << m_cSigma;
-	archive << m_cSigmaU;
 	archive << m_dSigma;
 
 	archive << m_muEff;
-	archive << m_muCov;
 
 	archive << m_mean;
 	archive << m_weights;
@@ -177,6 +160,8 @@ void CMA::write( OutArchive & archive ) const {
 	archive << m_evolutionPathC;
 	archive << m_evolutionPathSigma;
 	archive << m_mutationDistribution;
+
+	archive << m_counter;
 }
 
 
@@ -198,14 +183,14 @@ void CMA::init(
 	ObjectiveFunctionType const& function, 
 	SearchPointType const& initialSearchPoint,
 	unsigned int lambda, 
-	unsigned int mu,
+	double mu,
 	double initialSigma,				       
 	const boost::optional< RealMatrix > & initialCovarianceMatrix
 ) {
 
 	m_numberOfVariables = function.numberOfVariables();
 	m_lambda = lambda;
-	m_mu = mu;
+	m_mu = static_cast<unsigned int>(::floor(mu));
 	m_sigma = initialSigma;
 
 	m_mean.resize( m_numberOfVariables );
@@ -219,52 +204,40 @@ void CMA::init(
 		m_mutationDistribution.covarianceMatrix() = *initialCovarianceMatrix;
 		m_mutationDistribution.update();
 	}
-	
-	
+		
 	//weighting of the k-best individuals
-	m_weights.resize(mu);
+	m_weights.resize(m_mu);
 	switch (m_recombinationType) {
 	case EQUAL:
-		for (unsigned int i = 0; i < mu; i++)
+		for (unsigned int i = 0; i < m_mu; i++)
 			m_weights(i) = 1;
 		break;
 	case LINEAR:
-		for (unsigned int i = 0; i < mu; i++)
+		for (unsigned int i = 0; i < m_mu; i++)
 			m_weights(i) = mu-i;
 		break;
 	case SUPERLINEAR:
-		for (unsigned int i = 0; i < mu; i++)
-			m_weights(i) = ::log(mu + 1.) - ::log(1. + i);
+		for (unsigned int i = 0; i < m_mu; i++)
+			m_weights(i) = ::log(mu + 0.5) - ::log(1. + i); // eq. (45)
 		break;
 	}
-	m_weights /= sum(m_weights);
-	m_muEff = 1. / sum(sqr(m_weights));
+	m_weights /= sum(m_weights); // eq. (45)
+	m_muEff = 1. / sum(sqr(m_weights)); // equal to sum(m_weights)^2 / sum(sqr(m_weights))
 
 	// Step size control
-	m_cSigma = (m_muEff + 2.)/(m_numberOfVariables + m_muEff + 3.);
-	m_dSigma = 1. + 2. * std::max(0., ::sqrt((m_muEff-1.)/(m_numberOfVariables+1)) - 1.) + m_cSigma;
+	m_cSigma = (m_muEff + 2.)/(m_numberOfVariables + m_muEff + 5.); // eq. (46)
+	m_dSigma = 1. + 2. * std::max(0., ::sqrt((m_muEff-1.)/(m_numberOfVariables+1)) - 1.) + m_cSigma; // eq. (46)
 
-	// Covariance matrix adaptation
-	switch (m_updateType) {
-	case RANK_ONE:
-		m_muCov = 1;
-		break;
-	case RANK_ONE_AND_MU:
-		m_muCov = m_muEff;
-		break;
-	}
-
-	m_cC = 4. / (4. + m_numberOfVariables);
-	m_cCov = 1. / m_muCov * 2. / sqr(m_numberOfVariables + ::sqrt(2.)) +
-		(1 - 1. / m_muCov) * std::min(1., (2 * m_muEff - 1) / (sqr(m_numberOfVariables + 2) + m_muEff));
-
-	m_cCU = ::sqrt((2 - m_cC) * m_cC);
-	m_cSigmaU = ::sqrt((2 - m_cSigma) * m_cSigma);
+	m_cC = (4. + m_muEff / m_numberOfVariables) / (m_numberOfVariables + 4. +  2 * m_muEff / m_numberOfVariables); // eq. (47)
+	m_c1 = 2 / (sqr(m_numberOfVariables + 1.3) + m_muEff); // eq. (48)
+	double alphaMu = 2.;
+	m_cMu = std::min(1. - m_c1, alphaMu * (m_muEff - 2. + 1./m_muEff) / (sqr(m_numberOfVariables + 2) + alphaMu * m_muEff / 2)); // eq. (49)
 
 	m_mean = initialSearchPoint;
 	m_best.point = initialSearchPoint; // CI: you can argue about this, as the point is not evaluated
-	m_best.value = function(initialSearchPoint);//OK: evaluating performance of first point :P
+	m_best.value = function(initialSearchPoint); //OK: evaluating performance of first point :P
 
+	m_lowerBound = 1E-20;
 	m_counter = 0;
 }
 
@@ -272,38 +245,43 @@ void CMA::init(
 * \brief Updates the strategy parameters based on the supplied offspring population.
 */
 void CMA::updateStrategyParameters( const std::vector<Individual<RealVector, double, RealVector> > & offspring ) {
-	RealVector xPrime = cog( offspring, m_weights, PointExtractor() );
-	RealVector cogSteps = cog( offspring, m_weights, StepExtractor() );
+	RealVector z = weightedSum( offspring, m_weights, StepExtractor() ); // eq. (38)
+	RealVector m = weightedSum( offspring, m_weights, PointExtractor() ); // eq. (39) 
+	RealVector y = (m - m_mean) / m_sigma;
 
-	RealVector v = blas::prod( m_mutationDistribution.eigenVectors(), cogSteps );
+	// Step size update
+	RealVector CInvY = blas::prod( m_mutationDistribution.eigenVectors(), z ); // C^(-1/2)y = Bz
+	m_evolutionPathSigma = (1. - m_cSigma)*m_evolutionPathSigma + std::sqrt( m_cSigma * (2. - m_cSigma) * m_muEff ) * CInvY; // eq. (40)
+	m_sigma *= std::exp( (m_cSigma / m_dSigma) * (norm_2(m_evolutionPathSigma)/ chi( m_numberOfVariables ) - 1.) ); // eq. (39)
 
-	// Covariance Matrix Update
-	m_evolutionPathC = (1. - m_cC ) * m_evolutionPathC + m_cCU * std::sqrt( m_muEff )  / m_sigma * (xPrime-m_mean);
-	RealMatrix Z( m_numberOfVariables, m_numberOfVariables, 0.0);
+	// Covariance matrix update
 	RealMatrix& C = m_mutationDistribution.covarianceMatrix();
-	// Rank-1-Update
-	noalias(C) = (1.-m_cCov) * C + m_cCov / m_muCov * blas::outer_prod( m_evolutionPathC, m_evolutionPathC );
-	// Rank-mu-Update
+	RealMatrix Z( m_numberOfVariables, m_numberOfVariables, 0.0); // matric for rank-mu update
 	for( unsigned int i = 0; i < m_mu; i++ ) {
 		noalias(Z) += m_weights( i ) * blas::outer_prod(
 			offspring[i].searchPoint() - m_mean,
 			offspring[i].searchPoint() - m_mean
 		);
 	}
-	noalias(C) += m_cCov * (1.-1./m_muCov) * 1./sqr( m_sigma ) * Z;
+	
+	double hSigLHS = norm_2( m_evolutionPathSigma ) / std::sqrt(1. - pow((1 - m_cSigma), 2.*(m_counter+1)));
+	double hSigRHS = (1.4 + 2 / (m_numberOfVariables+1.)) * chi( m_numberOfVariables );
+	double hSig = 0;
+	if(hSigLHS < hSigRHS) hSig = 1.;
+	double deltaHSig = (1.-hSig) * m_cC * (2. - m_cC);
+
+	m_evolutionPathC = (1. - m_cC ) * m_evolutionPathC + hSig * std::sqrt( m_cC * (2. - m_cC) * m_muEff ) * y; // eq. (42)
+	noalias(C) = (1.-m_c1 - m_cMu) * C + m_c1 * ( blas::outer_prod( m_evolutionPathC, m_evolutionPathC ) + deltaHSig * C) + m_cMu * 1./sqr( m_sigma ) * Z; // eq. (43)
+
+	// update mutation distribution
 	m_mutationDistribution.update();
-	
-	// Step size update
-	m_evolutionPathSigma = (1. - m_cSigma)*m_evolutionPathSigma +m_cSigmaU * std::sqrt( m_muEff ) * v;
-	m_sigma *= std::exp( (m_cSigma / m_dSigma) * (norm_2(m_evolutionPathSigma)/ chi( m_numberOfVariables ) - 1.) );
-	
 	
 	// check for numerical stability
 	double ev = m_mutationDistribution.eigenValues()( m_mutationDistribution.eigenValues().size() - 1 );
-	if( m_sigma * std::sqrt( std::fabs( ev ) ) < 1E-20 )
-		m_sigma = 1E-20 / std::sqrt( std::fabs( ev ) );
+	if( m_sigma * std::sqrt( std::fabs( ev ) ) < m_lowerBound )
+		m_sigma = m_lowerBound / std::sqrt( std::fabs( ev ) );
 
-	m_mean = xPrime;
+	m_mean = m;
 }
 
 /**
@@ -326,6 +304,7 @@ void CMA::step(ObjectiveFunctionType const& function){
 	ElitistSelection<FitnessExtractor> selection;
 	selection(offspring.begin(),offspring.end(),parents.begin(), parents.end());
 	// Strategy parameter update
+	m_counter++; // increase generation counter
 	updateStrategyParameters( parents );
 
 	m_best.point= parents[ 0 ].searchPoint();

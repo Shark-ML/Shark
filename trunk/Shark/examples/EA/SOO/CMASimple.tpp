@@ -45,28 +45,24 @@ int main( int argc, char ** argv ) {
 	cout.setf( ios_base::scientific );
 	cout.precision( 10 );
 
-	// Instantiate both the problem
+	// Instantiate the problem.
 	//###begin<problem>
 	Sphere sphere( 2 );
-	sphere.setNumberOfVariables( 2 );
 	//###end<problem>
 	// Initialize the optimizer for the objective function instance.
 	//###begin<optimizer>
 	CMA cma;
 	cma.init( sphere );
+	cma.setSigma(0.); // Explicitely set inital globael step size.
 	//###end<optimizer>
 
 	// Iterate the optimizer until a solution of sufficient quality is found.
 	//###begin<train>
 	do {
-
 		cma.step( sphere );
 
 		// Report information on the optimizer state and the current solution to the console.
-		cout << sphere.evaluationCounter() << " "	
-			<< cma.solution().value << " "
-			<< cma.solution().point << " "
-			<< cma.sigma() << endl;
-	}while(cma.solution().value > 1E-20 );	
+		cout << sphere.evaluationCounter() << " " << cma.solution().value << " " << cma.solution().point << " " << cma.sigma() << endl;
+	} while(cma.solution().value > 1E-20 );	
 	//###end<train>
 }
