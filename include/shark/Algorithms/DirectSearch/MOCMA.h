@@ -189,8 +189,11 @@ public:
 		for(std::size_t i = 0; i != mu(); ++i){
 			CMAIndividual<RealVector> individual(noVariables,m_individualSuccessThreshold,m_initialSigma);
 			function.proposeStartingPoint(individual.searchPoint());
-			m_evaluator(function, individual);
 			m_pop[i] = individual;
+		}
+		//valuate and create first front
+		m_evaluator(function, m_pop.begin(),m_pop.begin()+mu());
+		for(std::size_t i = 0; i != mu(); ++i){
 			m_best[i].point = m_pop[i].searchPoint();
 			m_best[i].value = m_pop[i].unpenalizedFitness();
 		}
@@ -203,13 +206,13 @@ public:
 	 */
 	void step( ObjectiveFunctionType const& function ) {
 
-		//generate new offspring
+		//generate new offspring, evaluate and select
 		for (std::size_t i = 0; i < mu(); i++) {
 			m_pop[mu()+i] = m_pop[i];
 			m_pop[mu()+i].mutate();
 			m_evaluator(function, m_pop[mu()+i]);
 		}
-
+		m_evaluator(function, m_pop.begin()+mu(),m_pop.end());
 		m_selection(m_pop,m_mu);
 		
 		//determine from the selection which parent-offspring pair has been successfull

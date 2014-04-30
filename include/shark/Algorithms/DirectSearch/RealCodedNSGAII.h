@@ -169,18 +169,21 @@ public:
 		ObjectiveFunctionType const& function, 
 		std::vector<SearchPointType> const& startingPoints
 	){
+		//create parent set
 		m_pop.reserve( 2 * mu() );
 		m_pop.resize(mu());
 		m_best.resize(mu());
 		for(std::size_t i = 0; i != mu(); ++i){
-			m_pop[i].age()=0;
 			function.proposeStartingPoint( m_pop[i].searchPoint() );
-			m_evaluator( function, m_pop[i] );
-			m_pop.push_back(m_pop[i]);
+		}
+		//evaluate initial parent set and create best front
+		m_evaluator( function, m_pop.begin(),m_pop.begin()+mu() );
+		m_selection( m_pop,m_mu );
+		for(std::size_t i = 0; i != mu(); ++i){
 			m_best[i].point = m_pop[i].searchPoint();
 			m_best[i].value = m_pop[i].unpenalizedFitness();
 		}
-		m_selection( m_pop,m_mu );
+		//make room for offspring
 		m_pop.resize(2*mu());
 		
 		m_crossover.init(function);
@@ -207,19 +210,15 @@ public:
 				m_crossover( m_pop[mu() + i - 1], m_pop[mu() + i] );
 			}
 		}
-
 		for( unsigned int i = 0; i < mu(); i++ ) {
 			m_mutator( m_pop[mu() + i] );
-			m_pop[mu() + i].age() = 0;
-			m_evaluator( function, m_pop[ mu() + i ] );
-
 		}
+		m_evaluator( function, m_pop.begin()+mu(), m_pop.end() );
 		m_selection( m_pop, m_mu );
 
 		std::partition( m_pop.begin(), m_pop.end(), Individual::IsSelected );	
 
 		for( std::size_t i = 0; i != mu(); ++i ) {
-			m_pop[i].age()++;
 			noalias(m_best[i].value) = m_pop[i].unpenalizedFitness();
 			noalias(m_best[i].point) = m_pop[i].searchPoint();
 		}

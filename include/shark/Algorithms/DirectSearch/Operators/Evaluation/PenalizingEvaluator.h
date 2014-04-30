@@ -59,17 +59,7 @@ struct PenalizingEvaluator {
 
 	/**
 	* \brief Evaluates the supplied function on the supplied individual
-	* 
-	* Evaluates the supplied single-objective function \f$f\f$ for the search point \f$s\f$
-	* according to:
-	* \f{align*}{
-	*   y & = & f( s' )\\
-	*   y' & = & f( s' ) + \alpha \vert\vert s - s' \vert\vert_2^2
-	* \f}
-	* where \f$s'\f$ is the repaired version of \f$s\f$ if \f$s\f$ is not feasible and equal to \f$s\f$ otherwise.
-	* The default value of \f$\alpha\f$ is \f$10^{-6}\f$.
 	*
-	* The Individual must contain the search point [todo DOCU]
 	* \param [in] f The function to be evaluated.
 	* \param [in] individual The individual to evaluate the function for.
 	*/
@@ -89,6 +79,20 @@ struct PenalizingEvaluator {
 		individual.penalizedFitness() = individual.unpenalizedFitness();
 		
 		penalize(individual.searchPoint(),t,individual.penalizedFitness() );
+	}
+	
+	/**
+	* \brief Evaluates The function on individuals in the range [first,last]
+	*
+	* \param [in] f The function to be evaluated.
+	* \param [in] begin first indivdual in the range to be evaluated
+	* \param [in] fiend iterator pointing directly beehind the last individual to be evaluated
+	*/
+	template<typename Function, typename Iterator>
+	void operator()( Function const& f, Iterator begin, Iterator end ) const {
+		for(Iterator pos = begin; pos != end; ++pos){
+			(*this)(f,*pos);
+		}
 	}
 	
 	template<class SearchPointType>

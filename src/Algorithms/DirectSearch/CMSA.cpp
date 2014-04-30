@@ -82,8 +82,8 @@ void CMSA::step(ObjectiveFunctionType const& function){
 		offspring[i].chromosome().sigma = m_sigma * ::exp( m_cSigma * Rng::gauss( 0, 1 ) );
 		offspring[i].chromosome().step = sample.first;
 		offspring[i].searchPoint() = m_mean + offspring[i].chromosome().sigma * sample.first;
-		penalizingEvaluator( function, offspring[i] );
 	}
+	penalizingEvaluator( function, offspring.begin(), offspring.end() );
 
 	// Selection
 	std::sort( offspring.begin(), offspring.end(), FitnessComparator() );

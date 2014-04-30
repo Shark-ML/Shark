@@ -296,8 +296,8 @@ void CMA::step(ObjectiveFunctionType const& function){
 		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution();
 		offspring[i].chromosome() = sample.second;
 		offspring[i].searchPoint() = m_mean + m_sigma * sample.first;
-		penalizingEvaluator( function, offspring[i] );
 	}
+	penalizingEvaluator( function, offspring.begin(), offspring.end() );
 
 	// Selection
 	std::vector< Individual<RealVector, double, RealVector> > parents( m_mu );
