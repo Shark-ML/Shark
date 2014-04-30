@@ -25,7 +25,7 @@ double decomposedMatrix[Dimensions][Dimensions]=
 };
 
 
-BOOST_AUTO_TEST_CASE( LinAlg_CholeskyDecomposition )
+BOOST_AUTO_TEST_CASE( LinAlg_CholeskyDecomposition_Base )
 {
 	RealMatrix M(Dimensions, Dimensions);   // input matrix
 	RealMatrix C(Dimensions, Dimensions);   // matrix for Cholesky Decomposition
@@ -82,6 +82,38 @@ RealMatrix createRandomMatrix(RealMatrix const& lambda,std::size_t Dimensions){
 	axpy_prod(R,lambda,Atemp);
 	axpy_prod(Atemp,trans(R),A);
 	return A;
+}
+
+BOOST_AUTO_TEST_CASE( LinAlg_CholeskyDecomposition ){
+	std::size_t NumTests = 100;
+	std::size_t Dimensions = 48;
+	for(std::size_t test = 0; test != NumTests; ++test){
+		//first generate a suitable eigenvalue problem matrix A
+		RealMatrix lambda(Dimensions,Dimensions);
+		lambda.clear();
+		for(std::size_t i = 0; i != Dimensions; ++i){
+			lambda(i,i) = Rng::uni(1,3.0);
+		}
+		RealMatrix A = createRandomMatrix(lambda,Dimensions);
+		//calculate Cholesky
+		RealMatrix C(Dimensions,Dimensions);
+		choleskyDecomposition(A,C);
+		
+		//test determinant of C
+		double logDetA = trace(log(lambda));
+		double logDetC = trace(log(sqr(C)));
+		BOOST_CHECK_SMALL(std::abs(logDetA)-std::abs(logDetC),1.e-12);
+
+		//create reconstruction of A
+		RealMatrix ATest(Dimensions,Dimensions);
+		
+		axpy_prod(C,trans(C),ATest);
+		
+		//test reconstruction error
+		double errorA = norm_inf(A-ATest);
+		BOOST_CHECK_SMALL(errorA,1.e-12);
+		BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(ATest)));//test for nans
+	}
 }
 
 BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_FullRank ){
@@ -151,5 +183,42 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_RankK ){
 		double errorA = norm_inf(A-ATest);
 		BOOST_CHECK_SMALL(errorA,1.e-13);
 		BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(ATest)));//test for nans
+	}
+}
+
+BOOST_AUTO_TEST_CASE( LinAlg_CholeskyUpdate ){
+	std::size_t NumTests = 100;
+	std::size_t Dimensions = 50;
+	for(std::size_t test = 0; test != NumTests; ++test){
+		//first generate a suitable eigenvalue problem matrix A as well as its decompisition
+		RealMatrix lambda(Dimensions,Dimensions);
+		lambda.clear();
+		for(std::size_t i = 0; i != Dimensions; ++i){
+			lambda(i,i) = Rng::uni(1,3.0);
+		}
+		RealMatrix A = createRandomMatrix(lambda,Dimensions);
+		//calculate Cholesky
+		RealMatrix C(Dimensions,Dimensions);
+		choleskyDecomposition(A,C);
+		
+		//generate proper update
+		double sigma = Rng::uni(-0.8,2);
+		RealVector v(Dimensions);
+		for(std::size_t i = 0; i != Dimensions; ++i){
+			v(i) = Rng::uni(-1,1);
+		}
+		if(sigma < 0)//preserve positive definiteness
+			v /= norm_2(v);
+		
+		//update decomposition
+		noalias(A) += sigma*outer_prod(v,v);
+		RealMatrix CUpdate=C;
+		choleskyDecomposition(A,CUpdate);
+		
+		//Test the fast update
+		choleskyUpdate(C,v,sigma);
+		
+		BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(C)));//test for nans
+		BOOST_CHECK_SMALL(max(abs(C-CUpdate)),1.e-12);
 	}
 }

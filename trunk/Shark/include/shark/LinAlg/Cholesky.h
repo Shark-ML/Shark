@@ -66,6 +66,55 @@ void choleskyDecomposition(
 	matrix_expression<MatrixL>& L
 );
 
+
+/// \brief Updates a covariance factor by a rank one update
+///
+/// Let \f$ A=LL^T \f$ be a matrix with its lower cholesky factor. Assume we want to update 
+/// A using a simple rank-one update \f$ A = A+ \alpha vv^T \f$. This invalidates L and
+/// it needs to be recomputed which is O(n^3). instead we can update the factorisation
+/// directly by performing a similar, albeit more complex algorithm on L, which can be done
+/// in O(L^2). 
+/// 
+/// SAlpha is not required to be positive, but if it is not negative, one has to be carefull
+/// that the update would keep A positive definite. Otherwise the decomposition does not
+/// exist anymore and an exception is thrown.
+///
+/// \param L the lower cholesky factor to be updated
+/// \param v the update vector
+/// \param alpha the update factor. it Can be positive or negative
+template<class Matrix,class Vector>
+void choleskyUpdate(matrix_expression<Matrix>& L, vector_expression<Vector> const& v, double alpha){
+	//implementation blatantly stolen from Eigen
+	std::size_t n = v().size();
+	blas::vector<double> temp = v();
+	double beta = 1;
+	for(std::size_t j=0; j != n; ++j)
+	{
+		double Ljj = L()(j,j);
+		double dj = Ljj*Ljj;
+		double wj = temp(j);
+		double swj2 = alpha*wj*wj;
+		double gamma = dj*beta + swj2;
+
+		double x = dj + swj2/beta;
+		if (x <= 0.0)
+			throw SHARKEXCEPTION("[choleskyUpdate] update makes matrix indefinite, no update available");
+		double nLjj = std::sqrt(x);
+		L()(j,j) = nLjj;
+		beta += swj2/dj;
+		
+		// Update the terms of L
+		if(j+1 <n)
+		{
+			noalias(subrange(temp,j+1,n)) -= (wj/Ljj) * subrange(column(L,j),j+1,n);
+			if(gamma == 0)
+				continue;
+			subrange(column(L,j),j+1,n) *= nLjj/Ljj;
+			noalias(subrange(column(L,j),j+1,n))+= (nLjj * alpha*wj/gamma)*subrange(temp,j+1,n);
+		}
+	}
+}
+
 /*!
  *  \brief Lower triangular Cholesky decomposition with full pivoting performed in place.
  *
