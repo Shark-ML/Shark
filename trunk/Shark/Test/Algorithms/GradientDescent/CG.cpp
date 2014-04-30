@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE( CG_WolfeCubic )
 	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and WolfeCubic"<<std::endl;
-	testFunction(optimizer,function,1,500);
+	testFunction(optimizer,function,100,5000,1.e-10);
 }
 BOOST_AUTO_TEST_CASE( CG_Dlinmin_Rosenbrock )
 {
