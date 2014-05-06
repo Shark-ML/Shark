@@ -210,7 +210,6 @@ public:
 		for (std::size_t i = 0; i < mu(); i++) {
 			m_pop[mu()+i] = m_pop[i];
 			m_pop[mu()+i].mutate();
-			m_evaluator(function, m_pop[mu()+i]);
 		}
 		m_evaluator(function, m_pop.begin()+mu(),m_pop.end());
 		m_selection(m_pop,m_mu);
