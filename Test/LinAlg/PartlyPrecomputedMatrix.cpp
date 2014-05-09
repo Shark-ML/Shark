@@ -220,8 +220,11 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 			// FIXME: everything below X should not be cached
 
 			if(K.isCached(r))
-				if(verbose) std::cout << "+";
-				else if(verbose) std::cout << "-";
+            {
+				if(verbose) { std::cout << "+";}
+            } else { 
+                if(verbose) {std::cout << "-";}
+            }
 		}
 
 		//FIXME: do this cache-rows counting
