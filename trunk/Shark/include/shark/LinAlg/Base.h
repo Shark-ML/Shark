@@ -128,6 +128,7 @@ namespace shark{
 	SHARK_VECTOR_MATRIX_TYPEDEFS(std::complex<double>, Complex)
 	SHARK_VECTOR_MATRIX_TYPEDEFS(int, Int)
 	SHARK_VECTOR_MATRIX_TYPEDEFS(unsigned int, UInt)
+        SHARK_VECTOR_MATRIX_TYPEDEFS(bool, Bool);
 #undef SHARK_VECTOR_MATRIX_TYPEDEFS
 
 ///\brief Template which finds for every Vector type the best fitting Matrix.
@@ -154,6 +155,7 @@ SHARK_VECTOR_MATRIX_ASSIGNMENT(Float)
 SHARK_VECTOR_MATRIX_ASSIGNMENT(Complex)
 SHARK_VECTOR_MATRIX_ASSIGNMENT(Int)
 SHARK_VECTOR_MATRIX_ASSIGNMENT(UInt)
+SHARK_VECTOR_MATRIX_ASSIGNMENT(Bool)
 
 //this ensures, that Sequence is serializable
 
