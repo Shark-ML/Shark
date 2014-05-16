@@ -84,7 +84,7 @@ namespace detail {
     template<typename T, typename Stream>
     void exportCSV(const T &data,   // Container that holds the samples
             Stream &out,  // The file to be read from
-            const std::string &separator,  // The separator between elements
+            char separator,  // The separator between elements
             bool scientific = true, //scientific notation?
             unsigned int fieldwidth = 0
     ) {
@@ -119,7 +119,7 @@ namespace detail {
             const U &labels,  // Container that holds the labels
             Stream &out,  // The file to be read from
             LabelPosition lp,  // The position of the label
-            const std::string &separator,  // The separator between elements
+            char separator,  // The separator between elements
             bool scientific = true, //scientific notation?
             unsigned int fieldwidth = 0, //column-align using this field width
         typename boost::enable_if<
@@ -164,7 +164,7 @@ namespace detail {
         const U &labels,  // Container that holds the labels
         Stream &out,  // The file to be read from
         LabelPosition lp,  // The position of the label
-        const std::string &separator,  // The separator between elements
+        char separator,  // The separator between elements
         bool scientific = true, //scientific notation?
         unsigned int fieldwidth = 0, //column-align using this field width
         typename boost::disable_if<
@@ -380,7 +380,7 @@ template<typename Type>
 void exportCSV(
 	Data<Type> const& set,
 	std::string fn,
-	std::string separator = ",",
+	char separator = ',',
 	bool sci = true,
 	unsigned int width = 0
 ) {
@@ -402,7 +402,7 @@ void exportCSV(
     LabeledData<InputType, LabelType> const &dataset,
     std::string fn,
     LabelPosition lp,
-    std::string separator = ",",
+    char separator = ',',
     bool sci = true,
     unsigned int width = 0
 ) {
