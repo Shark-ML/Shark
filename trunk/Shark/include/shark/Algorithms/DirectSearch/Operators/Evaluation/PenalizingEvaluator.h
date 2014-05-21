@@ -86,7 +86,7 @@ struct PenalizingEvaluator {
 	*
 	* \param [in] f The function to be evaluated.
 	* \param [in] begin first indivdual in the range to be evaluated
-	* \param [in] fiend iterator pointing directly beehind the last individual to be evaluated
+	* \param [in] end iterator pointing directly beehind the last individual to be evaluated
 	*/
 	template<typename Function, typename Iterator>
 	void operator()( Function const& f, Iterator begin, Iterator end ) const {

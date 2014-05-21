@@ -755,7 +755,7 @@ typename MatA::value_type max(matrix_expression<MatA> const& A){
 
 /// \brief Returns the frobenius inner-product between matrices exprssions 1 and e2.
 ///
-///The frobenius inner product is defined as <A,B>_F=\sum_{ij} A_ij*B_ij. It induces the
+///The frobenius inner product is defined as \f$ <A,B>_F=\sum_{ij} A_ij*B_{ij} \f$. It induces the
 /// Frobenius norm \f$ ||A||_F = \sqrt{<A,A>_F} \f$
 template<class E1, class E2>
 typename promote_traits <typename E1::value_type,typename E2::value_type>::promote_type

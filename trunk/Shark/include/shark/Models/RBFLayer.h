@@ -129,9 +129,8 @@ public:
 	///
 	///  \param  numInput  Number of input neurons, equal to dimensionality of
 	///                    input space.
-	///  \param  numOutput Number of output neurons, equal to dimensionality of
+	///  \param  numOutput Number of output neurons (basis functions), equal to dimensionality of
 	///                    output space.
-	///  \param  numHidden Number of hidden neurons.
 	void setStructure(std::size_t numInput, std::size_t numOutput);
 
 	

@@ -382,7 +382,7 @@ public:
 
 	/// \brief Assign the product of the vector and a scalar to the vector
 	/// No temporary is created. Computations are done and stored directly into the resulting vector.
-	/// \param at is a const reference to the scalar
+	/// \param t is a const reference to the scalar
 	/// \return a reference to the resulting vector
 	vector& operator *= (value_type t) {
 		kernels::assign<scalar_multiply_assign> (*this, t);
@@ -393,7 +393,7 @@ public:
 	/// Assign the division of the vector by a scalar to the vector.
 	/// No temporary is created. Computations are done and stored directly into the resulting vector.
 	/// \tparam E is the type of the vector_expression
-	/// \param at is a const reference to the scalar
+	/// \param t is a const reference to the scalar
 	/// \return a reference to the resulting vector
 	vector& operator /= (value_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
