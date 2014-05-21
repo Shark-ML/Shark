@@ -167,7 +167,7 @@ Other network types
 ---------------------
 
 Shark offers many different types of neural other neural networks,
-including radial basis function networks (:doxy:`RBFNet`)
+including radial basis function networks using :doxy:`RBFLayer`
 and recurrent neural networks (:doxy:`RNNet`)
 as well as support vector and regularization networks.
 
