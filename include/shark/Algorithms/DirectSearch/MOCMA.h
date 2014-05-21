@@ -175,7 +175,7 @@ public:
 	 * \brief Initializes the algorithm for the supplied objective function.
 	 * \tparam ObjectiveFunction The type of the objective function,
 	 * needs to adhere to the concept of an AbstractObjectiveFunction.
-	 * \param [in] f The objective function.
+	 * \param [in] function The objective function.
 	 * \param [in] startingPoints A set of intiial search points.
 	 */
 	void init( 

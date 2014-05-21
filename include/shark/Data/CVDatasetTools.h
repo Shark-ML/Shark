@@ -316,12 +316,13 @@ CVFolds<LabeledData<I,L> > createCVSameSize(LabeledData<I,L> &set,std::size_t nu
 //! \param numberOfPartitions  number of partitions to create
 //! \param set the input data from which to draw the partitions
 //! \param batchSize  maximum batch size
+//! \param cv_indices if not NULL [default]: for each element, store the fold it is assigned to; this can be used to later/externally recreate the fold via createCVIndexed
 template<class I>
 CVFolds<LabeledData<I,unsigned int> > createCVSameSizeBalanced (
 	LabeledData<I,unsigned int> &set,
     std::size_t numberOfPartitions,
 	std::size_t batchSize=Data<I>::DefaultBatchSize,
-    RecreationIndices * cv_indices = NULL //if not NULL: for each element, store the fold it is assigned to. this can be used to later/externally recreate the fold via createCVIndexed
+    RecreationIndices * cv_indices = NULL //if not NULL: for each element, store the fold it is assigned to; this can be used to later/externally recreate the fold via createCVIndexed
 ){
 	DataView<LabeledData<I,unsigned int> > setView(set);
 	std::size_t numInputs = setView.size();

@@ -244,7 +244,7 @@ private:
  *
  * A vector range can be used as a normal vector in any expression.
  * If the specified range falls outside that of the index range of the vector, then
- * the \c vector_range is not a well formed \i Vector \i Expression and access to an
+ * the \c vector_range is not a well formed \c vector_expression and access to an
  * element outside of index range of the vector is \b undefined.
  *
  * \tparam V the type of vector referenced (for exaboost::mple \c vector<double>)
@@ -529,7 +529,7 @@ public:
 	, m_stride(expression().stride()){}
 		
 	/// \brief Constructor of a self_type proxy from a block of memory
-	/// \param data the block of memory used
+	/// \param values the block of memory used
 	/// \param size size of the self_type
  	/// \param stride distance between elements of the self_type in memory
 	dense_vector_adaptor(pointer values, size_type size, difference_type stride = 1 ):
