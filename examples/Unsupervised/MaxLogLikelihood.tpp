@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 	combination.setStructure(hiddens);
 	ConcatenatedModel<RealVector,RealVector> mixture= gaussians >> combination;
 	initRandomUniform(mixture,-0.1,0.1);
-	//kMeans(data, gaussians);
+	kMeans(data, gaussians);
 	
 	//create error function
 	NegativeLogLikelihood error(&mixture,data);
