@@ -97,3 +97,11 @@ std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centro
 	// return the number of iterations
 	return iter;
 }
+
+std::size_t shark::kMeans(Data<RealVector> const& data, RBFLayer& model, std::size_t maxIterations){
+	//calculate clustering
+	Centroids centroids;
+	std::size_t iter = kMeans(data,model.outputSize(),centroids,maxIterations);
+	model.centers() = createBatch<RealVector>(centroids.centroids().elements());
+	return iter;
+}

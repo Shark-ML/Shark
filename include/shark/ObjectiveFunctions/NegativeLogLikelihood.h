@@ -95,10 +95,11 @@ public:
 		mep_model->setParameterVector(input);
 		
 		double error = 0;
+		double minProb = 1e-100;//numerical stability is only guaranteed for lower bounded probabilities
 		SHARK_PARALLEL_FOR(int i = 0; i < (int)m_data.numberOfBatches(); ++i){
 			RealMatrix predictions = (*mep_model)(m_data.batch(i));
 			SIZE_CHECK(predictions.size2() == 1);
-			double logLikelihoodOfSamples = sum(log(predictions));
+			double logLikelihoodOfSamples = sum(log(max(predictions,minProb)));
 			SHARK_CRITICAL_REGION{
 				error += logLikelihoodOfSamples;
 			}
@@ -124,6 +125,7 @@ public:
 		std::size_t batchesPerThread = numBatches/numThreads;
 		std::size_t leftOver = numBatches - batchesPerThread*numThreads;
 		double error = 0;
+		double minProb = 1e-100;//numerical stability is only guaranteed for lower bounded probabilities
 		SHARK_PARALLEL_FOR(int ti = 0; ti < (int)numThreads; ++ti){//MSVC does not support unsigned integrals in paralll loops
 			std::size_t t = ti;
 			//~ //get start and end index of batch-range
@@ -139,9 +141,21 @@ public:
 			for(std::size_t i  = start; i != end; ++i){
 				mep_model->eval(m_data.batch(i),predictions,*state);
 				SIZE_CHECK(predictions.size2() == 1);
-				threadError += sum(log(predictions));
+				threadError += sum(log(max(predictions,minProb)));
+				//noalias(predictions) = elem_inv(predictions)
+				//the below handls numeric instabilities...
+				for(std::size_t j = 0; j != predictions.size1(); ++j){
+					for(std::size_t k = 0; k != predictions.size2(); ++k){
+						if(predictions(j,k) < minProb){
+							predictions(j,k) = 0;
+						}
+						else{
+							predictions(j,k) = 1.0/predictions(j,k);
+						}
+					}
+				}
 				mep_model->weightedParameterDerivative(
-					m_data.batch(i),elem_inv(predictions),*state,batchDerivative
+					m_data.batch(i),predictions,*state,batchDerivative
 				);
 				threadDerivative += batchDerivative;
 			}
