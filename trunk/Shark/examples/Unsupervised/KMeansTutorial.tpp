@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 	// normalize data
 	//###begin<normalization>
 	Normalizer<> normalizer;
-	NormalizeComponentsUnitVariance<> normalizingTrainer;
+	NormalizeComponentsUnitVariance<> normalizingTrainer(true);//zero mean
 	normalizingTrainer.train(normalizer, data);
 	data = normalizer(data);
 	//###end<normalization>

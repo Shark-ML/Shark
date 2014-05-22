@@ -39,6 +39,7 @@
 
 #include <shark/Data/Dataset.h>
 #include <shark/Models/Clustering/Centroids.h>
+#include <shark/Models/RBFLayer.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
 #include <shark/Models/Kernels/KernelHelpers.h>
 
@@ -75,6 +76,33 @@ namespace shark{
 /// \return               number of k-means iterations
 ///
 std::size_t kMeans(Data<RealVector> const& data, std::size_t k, Centroids& centroids, std::size_t maxIterations = 0);
+
+///
+/// \brief The k-means clustering algorithm for initializing an RBF Layer
+///
+/// \par
+/// The k-means algorithm takes vector-valued data
+/// \f$ \{x_1, \dots, x_\ell\} \subset \mathbb R^d \f$
+/// and splits it into k clusters, based on centroids
+/// \f$ \{c_1, \dots, c_k\} \f$.
+/// The result is stored in a RBFLayer object that can be used to
+/// construct clustering models.
+///
+/// \par
+/// This is just an alternative frontend to the version using Centroids. it creates a centroid object,
+///  with as many clusters as are outputs in the RBFLayer and copis the result into the model.
+///
+/// \par
+/// Note that the data set needs to include at least k data points
+/// for k-means to work. This is because the current implementation
+/// does not allow for empty clusters.
+///
+/// \param data           vector-valued data to be clustered
+/// \param model     RBFLayer input/output
+/// \param maxIterations  maximum number of k-means iterations; 0: unlimited
+/// \return               number of k-means iterations
+///
+std::size_t kMeans(Data<RealVector> const& data, RBFLayer& model, std::size_t maxIterations = 0);
 
 template<class InputType>
 KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k, AbstractKernelFunction<InputType>& kernel, std::size_t maxIterations = 0){

@@ -153,8 +153,8 @@ public:
 		return m_centers;
 	}
 	///\brief Sets the center values of the neurons.
-	void setCenter(std::size_t i, RealVector const& center){
-		noalias(row(m_centers,i)) = center;
+	BatchInputType& centers(){
+		return m_centers;
 	}
 	
 	///\brief Returns the width parameter of the Gaussian functions 
