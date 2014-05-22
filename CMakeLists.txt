@@ -29,9 +29,10 @@ OPTION( OPT_DYNAMIC_LIBRARY
 IF( OPT_DYNAMIC_LIBRARY )
     set(Boost_USE_STATIC_LIBS OFF)
     add_definitions(-DBOOST_TEST_DYN_LINK)
+    SET (LIB_TYPE SHARED)
 ELSE( OPT_DYNAMIC_LIBRARY )
     set(Boost_USE_STATIC_LIBS ON)
-    SET( LIBRARY_FLAGS STATIC )
+    SET (LIB_TYPE DYNAMIC)
 ENDIF( OPT_DYNAMIC_LIBRARY )
 
 #####################################################################

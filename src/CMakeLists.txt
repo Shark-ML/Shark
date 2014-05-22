@@ -21,11 +21,11 @@ SOURCE_GROUP( src/Fuzzy FILES Fuzzy/*.cpp )
 #####################################################################
 
 IF( WIN32 )
-    ADD_LIBRARY( shark ${SRCS} )
+    ADD_LIBRARY( shark ${LIB_TYPE} ${SRCS} )
     SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_PREFIX ../ )
     SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_POSTFIX _debug )
 ELSE( WIN32 )
-      ADD_LIBRARY( shark ${LIBRARY_FLAGS} ${SRCS} )
+      ADD_LIBRARY( shark ${SRCS} )
       SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_POSTFIX _debug )
 ENDIF( WIN32 )
 
