@@ -71,6 +71,7 @@ SHARK_ADD_EXAMPLE( EA/MOO/MOCMAExperiment MOCMAExperiment "EA/MOO" )
 
 ## SHARK_ADD_EXAMPLE( EA/SOO/XNES XNES "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/CMASimple CMASimple "EA/SOO" )
+SHARK_ADD_EXAMPLE( EA/SOO/CMAExperiment CMAExperiment "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/CMAPlot CMAPlot "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/ElitistCMASimple ElitistCMASimpleMain "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/TSP TSP "EA/SOO" )
@@ -85,7 +86,7 @@ SHARK_ADD_EXAMPLE( Supervised/McSvm McSvm "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/McSvmLinear McSvmLinear "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/KernelRegression KernelRegression "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/KernelSelection KernelSelection "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/OneVersusOne OneVersusOne "Supervised" ) #partially working. Dataset issue
+SHARK_ADD_EXAMPLE( Supervised/OneVersusOne OneVersusOne "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/KernelLogisticRegression KernelLogisticRegression "Supervised" )
 
 SHARK_ADD_EXAMPLE( Supervised/CSvmMaxLikelihoodMS CSvmMaxLikelihoodMS "Supervised" )
