@@ -320,10 +320,15 @@ void importCSV(
 	std::string fn,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = Data<T>::DefaultBatchSize
+	std::size_t maximumBatchSize = Data<T>::DefaultBatchSize,
+	std::size_t titleLines = 0
 ){
 	std::ifstream stream(fn.c_str());
 	stream.unsetf(std::ios::skipws);
+	
+	for(std::size_t i=0; i < titleLines; ++i) // ignoring the first lines
+		stream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
 	std::istream_iterator<char> streamBegin(stream);
 	std::string contents(//read contents of file in string
 		streamBegin,
