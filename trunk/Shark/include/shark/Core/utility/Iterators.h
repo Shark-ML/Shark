@@ -122,7 +122,7 @@ class ProxyIterator: public boost::iterator_facade_fixed<
 	Reference
 >{
 public:
-	ProxyIterator(){}
+	ProxyIterator() : m_position(0) {}
 
 	ProxyIterator(Sequence& seq, std::size_t position)
 	: m_sequence(&seq),m_position(position) {}

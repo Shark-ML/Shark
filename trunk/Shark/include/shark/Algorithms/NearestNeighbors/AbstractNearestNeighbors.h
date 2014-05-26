@@ -58,6 +58,8 @@ public:
 	
 	///\brief returns a const rference to the dataset used by the algorithm
 	virtual LabeledData<InputType,LabelType>const& dataset()const = 0;
+
+	virtual ~AbstractNearestNeighbors() {}
 };
 
 	

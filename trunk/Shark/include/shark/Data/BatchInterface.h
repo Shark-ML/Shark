@@ -103,7 +103,7 @@ struct ArithmeticBatch{
 	
 	///\brief creates a batch which can storne size numbers of type T
 	static type createBatch(T const& input, std::size_t size = 1){
-		return type(size);
+		return type(size,input);
 	}
 	///\brief creates a batch storing the elements referenced by the provided range
 	template<class Range>
