@@ -7,7 +7,7 @@
  * 
  *
  * \author      O.Krause
- * \date        2012
+ * \date        2012-2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -40,10 +40,10 @@
 namespace shark{
 
 	
-///\brief Interface for Narest Neighbor queries.
+/// \brief Interface for Nearest Neighbor queries.
 ///
-///Defines the abstract interface for query of nearest neighbors. This is used to generalize over the different algorithms to query for
-///nearest neighbors.
+/// Defines the abstract interface for query of nearest neighbors. This is used to generalize over the different algorithms
+/// to query for nearest neighbors.
 template<class InputType,class LabelType>
 class AbstractNearestNeighbors{
 public:
@@ -52,11 +52,11 @@ public:
 
 	///\brief Returns the k-nearest neighbors of a batch of points and returns them as linearized array.
 	///
-	///Given a batch of size n, a array with nxk values is returned where each ntry is a key-value pair of distance and label.
+	///Given a batch of size n, a array with nxk values is returned where each entry is a key-value pair of distance and label.
 	///the first k entries are the neighbors of point 1, the next k of point 2 and so on.
 	virtual std::vector<DistancePair> getNeighbors(BatchInputType const& batch, std::size_t k) const = 0;
 	
-	///\brief returns a const rference to the dataset used by the algorithm
+	///\brief returns a const reference to the dataset used by the algorithm
 	virtual LabeledData<InputType,LabelType>const& dataset()const = 0;
 
 	virtual ~AbstractNearestNeighbors() {}
