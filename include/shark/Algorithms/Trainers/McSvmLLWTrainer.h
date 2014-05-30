@@ -42,6 +42,9 @@
 #include <shark/Algorithms/QP/QpMcBoxDecomp.h>
 #include <shark/Algorithms/QP/QpMcLinear.h>
 
+#include <shark/LinAlg/KernelMatrix.h>
+#include <shark/LinAlg/PrecomputedMatrix.h>
+#include <shark/LinAlg/CachedMatrix.h>
 
 namespace shark {
 
