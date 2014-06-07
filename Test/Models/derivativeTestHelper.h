@@ -234,6 +234,47 @@ void testWeightedInputDerivative(Model& net,unsigned int numberOfTests = 1000, d
 	}
 }
 
+///tests whether the derivatives computed separately are the same as the result returned by 
+/// weightedInputDerivative and weightedParameterDerivative
+template<class Model>
+void testWeightedDerivativesSame(Model& net,unsigned int numberOfTests = 100, double epsilon = 1.e-10){
+	BOOST_CHECK_EQUAL(net.hasFirstInputDerivative(),true);
+	RealVector parameters(net.numberOfParameters());
+	RealMatrix coeffBatch(10,net.outputSize());
+	RealMatrix pointBatch(10,net.inputSize());
+	for(unsigned int test = 0; test != numberOfTests; ++test){
+		for(size_t i = 0; i != net.numberOfParameters();++i){
+			parameters(i) = Rng::uni(-10,10);
+		}
+		for(std::size_t j = 0; j != 10; ++j){
+			for(size_t i = 0; i != net.outputSize();++i){
+				coeffBatch(j,i) = Rng::uni(-10,10);
+			}
+			for(size_t i = 0; i != net.inputSize();++i){
+				pointBatch(j,i) = Rng::uni(-10,10);
+			}
+		}
+		net.setParameterVector(parameters);
+		
+		boost::shared_ptr<State> state = net.createState();
+		typename Model::BatchOutputType output; 
+		net.eval(pointBatch,output,*state);
+		
+		RealMatrix inputDerivative;
+		RealVector parameterDerivative;
+		net.weightedInputDerivative(pointBatch,coeffBatch,*state,inputDerivative);
+		net.weightedParameterDerivative(pointBatch,coeffBatch,*state, parameterDerivative);
+		RealMatrix testInputDerivative;
+		RealVector testParameterDerivative;
+		net.weightedDerivatives(pointBatch,coeffBatch,*state, testParameterDerivative, testInputDerivative);
+		double errorInput = max(inputDerivative-testInputDerivative); 
+		double errorParameter = max(parameterDerivative-testParameterDerivative); 
+		
+		BOOST_CHECK_SMALL(errorInput,epsilon);
+		BOOST_CHECK_SMALL(errorParameter,epsilon);
+	}
+}
+
 namespace detail{
 //small helper functions which are used in testEval() to get the error between two samples
 double elementEvalError(unsigned int a, unsigned int b){
