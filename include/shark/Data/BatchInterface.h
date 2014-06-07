@@ -121,15 +121,15 @@ struct ArithmeticBatch{
 ///\brief Wrapper for a matrix row, which offers a conversion operator to
 /// to the Vector Type.
 template<class Matrix, class Vector>
-class MatrixRowReference:public blas::matrix_row<Matrix>{
+class MatrixRowReference: public blas::temporary_proxy<blas::matrix_row<Matrix> >{
 private:
-	typedef blas::matrix_row<Matrix> base_type;
+	typedef blas::temporary_proxy<blas::matrix_row<Matrix> > base_type;
 public:
 	MatrixRowReference( Matrix& matrix, std::size_t i)
-	:base_type(matrix,i){}
+	:base_type(blas::matrix_row<Matrix>(matrix,i)){}
 	template<class T>//special version allows for const-conversion
 	MatrixRowReference(T const& matrixrow)
-	:base_type(matrixrow.expression().expression(),matrixrow.index()){}
+	:base_type(blas::matrix_row<Matrix>(matrixrow.expression().expression(),matrixrow.index())){}
 	
 	template<class T> 
 	const MatrixRowReference& operator=(const T& argument){
