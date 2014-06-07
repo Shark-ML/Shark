@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Value ){
 	RegressionDataset dataset = createLabeledDataFromRange(input,input,25);
 
 	FFNet<LogisticNeuron,LogisticNeuron> model;
-	model.setStructure(Dimensions,5,Dimensions);
+	model.setStructure(Dimensions,5,Dimensions,FFNetStructures::Normal,true);
 	NullLoss loss;
 
 	for(std::size_t iter = 0; iter != Iterations; ++iter){

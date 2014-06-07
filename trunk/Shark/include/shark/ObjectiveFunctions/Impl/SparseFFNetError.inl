@@ -76,7 +76,6 @@ private:
 		std::size_t outputs = mep_model->outputSize();
 		std::size_t neurons = mep_model->numberOfNeurons() - inputs;
 		std::size_t hiddens = neurons - outputs;
-		std::size_t biasIndex = mep_model->numberOfNeurons();
 		std::size_t dataSize = m_dataset.numberOfElements();
 
 		RealVector meanActivation(hiddens);
@@ -136,37 +135,21 @@ private:
 		}
 
 		if(m_beta != 0){
-			//now update the derivative of the FFNet while taking the structure
-			//of the weights into account.
-			//(first layer matrix begins with weight 0)
-			std::size_t currentParam = 0;
-			for(std::size_t i = 0; i != hiddens; ++i){
-				for(std::size_t j = 0; j != inputs; ++j){
-					if(mep_model->connection(i+inputs,j)){
-						gradient(currentParam) += W1Derivatives(i,j);
-						++currentParam;
-					}
-				}
-			}
+			//now update the derivative of the first layer of the FFNet
+			std::size_t W1params = hiddens*inputs;
+			noalias(to_matrix(subrange(gradient,0,W1params),hiddens,inputs)) += W1Derivatives;
 
 			//adjust bias units
-			//since we don't know that the structure is dense, ans so
-			//don't know how many bias units we have, we traverse backwards
-			//through the parameter vector
-			currentParam = mep_model->numberOfParameters()-1-inputs;
-			for(std::size_t i = hiddens; i != 0; --i){
-				if(mep_model->connection(i+inputs-1,biasIndex)){
-					gradient(currentParam) += hiddenDerivativeSum(i-1);
-					--currentParam;
-				}
+			if(!mep_model->bias().empty()){
+				std::size_t biasStart = inputs*hiddens+hiddens*outputs;
+				noalias(subrange(gradient,biasStart,biasStart+hiddens)) += hiddenDerivativeSum;
 			}
-		}
+		}	
 		gradient /= dataSize;
 
-    	// add kl error term to the error
-    	if(m_beta > 1.e-15)
-    	error += m_beta*errorKL(meanActivation);
-
+		// add kl error term to the error
+		if(m_beta > 1.e-15)
+			error += m_beta*errorKL(meanActivation);
 		return error;
 	}
 

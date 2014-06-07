@@ -33,18 +33,10 @@ int main(){
 	//create network and initialize weights random uniform
 	FFNet<LogisticNeuron,LogisticNeuron> network;
 
-	// define connection matrix, last column is for bias neuron
-	int connectionMatrix[5][6]={
-		{0,0,0,0,0,0},
-		{0,0,0,0,0,0},
-		{1,1,0,0,0,1},
-		{1,1,0,0,0,1},
-		{1,1,1,1,0,1},
-	};
-	IntMatrix mat = blas::adapt_matrix(connectionMatrix);
-
-	//first two parameters are number of inputs and output neurons
-	network.setStructure(2, 1, mat);
+	//first three parameters are number of input, hidden and output neurons
+	//the next parameter sets the stuctur: we choose here the default structure without any shortcuts
+	//the last parameter switches the bias neuron on
+	network.setStructure(2, 3, 1, FFNetStructures::Normal,true);
 
 	initRandomUniform(network,-0.1,0.1);
 	

@@ -13,397 +13,680 @@ using namespace std;
 using namespace boost::archive;
 using namespace shark;
 
-//this is the construction for a network with two hidden layers and bias as constructed by setStructure
-bool fullConnections[6][7]=
-{
-	{0,0,0,0,0,0,0},//First Input
-	{0,0,0,0,0,0,0},//second Input-both should be empty
-	{1,1,0,0,0,0,1},//First Hidden
-	{1,1,1,0,0,0,1},//Second Hidden - depends on first hidden
-	{1,1,1,1,0,0,1},//First Output
-	{1,1,1,1,0,0,1},//Second Output
-};
-//weights per neuron
-int fullLayer1[] ={0,1};
-int fullLayer2[] ={2,3,4};
-int fullLayer3[] ={5,6,7,8};
-int fullLayer4[] ={9,10,11,12};
-
-int customMatrix[6][7]=
-{
-	{0,0,0,0,0,0,0},//First Input
-	{0,0,0,0,0,0,0},//second Input-both should be empty
-	{1,1,0,0,0,0,1},//First Hidden
-	{0,0,1,0,0,0,1},//Second Hidden
-	{0,1,1,0,0,0,0},//First Output
-	{0,0,0,1,1,0,1},//Second Output
-};
-
-
-const size_t fullNumberOfWeights=17;
-const size_t customNumberOfWeights=10;
-
 double activation(double a)
 {
 	return 1.0/(1.0+std::exp(-a));
 }
 
-BOOST_AUTO_TEST_CASE( FFNET_setStructure )
+//check that the structure is correct, i.e. matrice have the right form and setting parameters works
+BOOST_AUTO_TEST_CASE( FFNET_structure_Normal)
 {
-	//2 input 2 output
-	FFNet<LogisticNeuron,LogisticNeuron> net;
-
-	//copy fullConnection Array into matrix
-	std::vector<size_t> layer;
-	layer.push_back(2);
-	layer.push_back(1);
-	layer.push_back(1);
-	layer.push_back(2);
-
-	//create a fully connected network
-	net.setStructure(layer,true,true,true,true);
-	//check connection matrix
-	for(size_t i=0;i!=6;++i){
-		for(size_t j=0;j!=7;++j){
-			BOOST_CHECK_EQUAL(net.connections()(i,j) > 0,fullConnections[i][j]);
+	//no bias
+	{
+		std::size_t weightNum = 2*3+3*4;
+		FFNet<LogisticNeuron,LogisticNeuron> net;
+		net.setStructure(2,3,4,FFNetStructures::Normal,false);
+		BOOST_REQUIRE_EQUAL(net.bias().size(),0u);// no bias!
+		BOOST_REQUIRE_EQUAL(net.layerMatrices().size(),2u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size2(), 2u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size1(), 4u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size2(), 3u);
+		
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size1(), 0u);
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size2(), 0u);
+		
+		BOOST_REQUIRE_EQUAL(net.backpropMatrices().size(),2u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size1(), 2u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size2(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size2(), 4u);
+		
+		BOOST_REQUIRE_EQUAL(net.numberOfParameters(),weightNum);
+		
+		RealVector newParams(weightNum);
+		for(std::size_t i = 0; i != weightNum; ++i){
+			newParams(i) = Rng::uni(0,1);
+		}
+		//check that setting and getting parameters works
+		net.setParameterVector(newParams);
+		RealVector params = net.parameterVector();
+		BOOST_REQUIRE_EQUAL(params.size(),newParams.size());
+		for(std::size_t i = 0; i != weightNum; ++i){
+			BOOST_CHECK_CLOSE(newParams(i),params(i), 1.e-10);
+		}
+		//check that the weight matrices have the right values
+		std::size_t param = 0;
+		for(std::size_t k = 0; k != 2; ++k){
+			for(std::size_t i = 0; i != net.layerMatrices()[k].size1(); ++i){
+				for(std::size_t j = 0; j != net.layerMatrices()[k].size2(); ++j,++param){
+					BOOST_CHECK_EQUAL(net.layerMatrices()[k](i,j), newParams(param));
+					BOOST_CHECK_EQUAL(net.backpropMatrices()[k](j,i), net.layerMatrices()[k](i,j));
+				}
+			}
 		}
 	}
-	//check layer structure
-	BOOST_REQUIRE_EQUAL(net.layerMatrices().size(),3u);//3 layers
-	BOOST_CHECK_EQUAL(net.layerMatrices()[0].size1(), 1u);//1 neuron in layer 1
-	BOOST_CHECK_EQUAL(net.layerMatrices()[0].size2(), 2u);//2 connections in layer 1
-	BOOST_CHECK_EQUAL(net.layerMatrices()[1].size1(), 1u);//1 neuron in layer 2
-	BOOST_CHECK_EQUAL(net.layerMatrices()[1].size2(), 3u);//3 connections in layer 2
-	BOOST_CHECK_EQUAL(net.layerMatrices()[2].size1(), 2u);//2 neuron in layer 3
-	BOOST_CHECK_EQUAL(net.layerMatrices()[2].size2(), 4u);//4 connections in layer 3
-	//check backprop structure
-	BOOST_REQUIRE_EQUAL(net.backpropMatrices().size(), 3u);//3 layers
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size1(), 2u);//2 neuron in layer 1
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size2(), 4u);//4 connections in layer 1
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size1(), 1u);//1 neuron in layer 2
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size2(), 3u);//3 connections in layer 2
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[2].size1(), 1u);//1 neuron in layer 3
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[2].size2(), 2u);//2 connections in layer 3
 	
-	//now test parameter setting/getting
-	RealVector params = net.parameterVector();
-	BOOST_REQUIRE_EQUAL(net.numberOfParameters(),fullNumberOfWeights);
-	BOOST_REQUIRE_EQUAL(params.size(),fullNumberOfWeights);
-	
-	for(std::size_t i = 0; i != 20; ++i){
-		for(std::size_t j = 0; j != fullNumberOfWeights; ++j){
-			params(j) = Rng::uni(0,1);
-		}
-		net.setParameterVector(params);
-		RealVector paramResult = net.parameterVector();
-		BOOST_CHECK_SMALL(norm_sqr(params-paramResult),1.e-25);
+	//no bias, 3 layers
+	{
+		std::size_t weightNum = 2*3+3*4+4*5;
+		FFNet<LogisticNeuron,LogisticNeuron> net;
+		net.setStructure(2,3,4,5,FFNetStructures::Normal,false);
+		BOOST_REQUIRE_EQUAL(net.bias().size(),0u);// no bias!
+		BOOST_REQUIRE_EQUAL(net.layerMatrices().size(),3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size2(), 2u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size1(), 4u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size2(), 3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[2].size1(), 5u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[2].size2(), 4u);
 		
-		//now also test, whether the weights are at the correct positions of the layer matrices
-		BOOST_CHECK_SMALL(net.layerMatrices()[0](0,0)-params(0), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[0](0,1)-params(1), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[1](0,0)-params(2), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[1](0,1)-params(3), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[1](0,2)-params(4), 1.e-25);
-		for(std::size_t i = 0; i != 2; ++i){
-			for(std::size_t j = 0; j != 4; ++j){
-				BOOST_CHECK_SMALL(net.layerMatrices()[2](i,j)-params(5+i*4+j), 1.e-25);
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size1(), 0u);
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size2(), 0u);
+		
+		BOOST_REQUIRE_EQUAL(net.backpropMatrices().size(),3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size1(), 2u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size2(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size2(), 4u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[2].size1(), 4u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[2].size2(), 5u);
+		
+		BOOST_REQUIRE_EQUAL(net.numberOfParameters(),weightNum);
+		
+		RealVector newParams(weightNum);
+		for(std::size_t i = 0; i != weightNum; ++i){
+			newParams(i) = Rng::uni(0,1);
+		}
+		//check that setting and getting parameters works
+		net.setParameterVector(newParams);
+		RealVector params = net.parameterVector();
+		BOOST_REQUIRE_EQUAL(params.size(),newParams.size());
+		for(std::size_t i = 0; i != weightNum; ++i){
+			BOOST_CHECK_CLOSE(newParams(i),params(i), 1.e-10);
+		}
+		//check that the weight matrices have the right values
+		std::size_t param = 0;
+		for(std::size_t k = 0; k != 3; ++k){
+			for(std::size_t i = 0; i != net.layerMatrices()[k].size1(); ++i){
+				for(std::size_t j = 0; j != net.layerMatrices()[k].size2(); ++j,++param){
+					BOOST_CHECK_EQUAL(net.layerMatrices()[k](i,j), newParams(param));
+					BOOST_CHECK_EQUAL(net.backpropMatrices()[k](j,i), net.layerMatrices()[k](i,j));
+				}
+			}
+		}
+	}
+	
+	//with bias
+	{
+		std::size_t weightNum = 2*3+3*4+7;
+		FFNet<LogisticNeuron,LogisticNeuron> net;
+		net.setStructure(2,3,4,FFNetStructures::Normal,true);
+		BOOST_REQUIRE_EQUAL(net.bias().size(),7u);
+		BOOST_REQUIRE_EQUAL(net.layerMatrices().size(),2u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size2(), 2u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size1(), 4u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size2(), 3u);
+		
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size1(),0u);
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size2(), 0u);
+		
+		BOOST_REQUIRE_EQUAL(net.backpropMatrices().size(),2u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size1(), 2u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size2(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size2(), 4u);
+		
+		BOOST_REQUIRE_EQUAL(net.numberOfParameters(),weightNum);
+		
+		RealVector newParams(weightNum);
+		for(std::size_t i = 0; i != weightNum; ++i){
+			newParams(i) = Rng::uni(0,1);
+		}
+		//check that setting and getting parameters works
+		net.setParameterVector(newParams);
+		RealVector params = net.parameterVector();
+		BOOST_REQUIRE_EQUAL(params.size(),newParams.size());
+		for(std::size_t i = 0; i != weightNum; ++i){
+			BOOST_CHECK_CLOSE(newParams(i),params(i), 1.e-10);
+		}
+		//check that the weight matrices have the right values
+		std::size_t param = 0;
+		for(std::size_t k = 0; k != 2; ++k){
+			for(std::size_t i = 0; i != net.layerMatrices()[k].size1(); ++i){
+				for(std::size_t j = 0; j != net.layerMatrices()[k].size2(); ++j,++param){
+					BOOST_CHECK_EQUAL(net.layerMatrices()[k](i,j), newParams(param));
+					BOOST_CHECK_EQUAL(net.backpropMatrices()[k](j,i), net.layerMatrices()[k](i,j));
+				}
+			}
+		}
+		for(std::size_t i = 0; i != 7; ++i){
+			BOOST_CHECK_EQUAL(net.bias()(i), newParams(weightNum-7+i));
+		}
+	}
+	
+}
+
+BOOST_AUTO_TEST_CASE( FFNET_structure_InputOutputShortcut)
+{
+	//for this test, we add another layer as the 3 layer version is redirected to Full- the next test
+	//no bias, 3 layers
+	{
+		std::size_t weightNum = 2*3+3*4+4*5+2*5;
+		std::size_t shortcutStart = 2*3+3*4+4*5;
+		FFNet<LogisticNeuron,LogisticNeuron> net;
+		net.setStructure(2,3,4,5,FFNetStructures::InputOutputShortcut,false);
+		BOOST_REQUIRE_EQUAL(net.bias().size(),0u);// no bias!
+		BOOST_REQUIRE_EQUAL(net.layerMatrices().size(),3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size2(), 2u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size1(), 4u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size2(), 3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[2].size1(), 5u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[2].size2(), 4u);
+		
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size1(), 5u);
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size2(), 2u);
+		
+		BOOST_REQUIRE_EQUAL(net.backpropMatrices().size(),3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size1(), 2u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size2(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size2(), 4u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[2].size1(), 4u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[2].size2(), 5u);
+		
+		BOOST_REQUIRE_EQUAL(net.numberOfParameters(),weightNum);
+		
+		RealVector newParams(weightNum);
+		for(std::size_t i = 0; i != weightNum; ++i){
+			newParams(i) = Rng::uni(0,1);
+		}
+		//check that setting and getting parameters works
+		net.setParameterVector(newParams);
+		RealVector params = net.parameterVector();
+		BOOST_REQUIRE_EQUAL(params.size(),newParams.size());
+		for(std::size_t i = 0; i != weightNum; ++i){
+			BOOST_CHECK_CLOSE(newParams(i),params(i), 1.e-10);
+		}
+		//check that the weight matrices have the right values
+		std::size_t param = 0;
+		for(std::size_t k = 0; k != 3; ++k){
+			for(std::size_t i = 0; i != net.layerMatrices()[k].size1(); ++i){
+				for(std::size_t j = 0; j != net.layerMatrices()[k].size2(); ++j,++param){
+					BOOST_CHECK_EQUAL(net.layerMatrices()[k](i,j), newParams(param));
+					BOOST_CHECK_EQUAL(net.backpropMatrices()[k](j,i), net.layerMatrices()[k](i,j));
+				}
 			}
 		}
 		
-		//now also test, whether the weights are at the correct positions of the backprop matrices
-		BOOST_CHECK_SMALL(net.backpropMatrices()[0](0,0)-params(0), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[0](1,0)-params(1), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[0](0,1)-params(2), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[0](1,1)-params(3), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[0](0,2)-params(5), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[0](1,2)-params(6), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[0](0,3)-params(9), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[0](1,3)-params(10), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[1](0,0)-params(4), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[1](0,1)-params(7), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[1](0,2)-params(11), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[2](0,0)-params(8), 1.e-25);
-		BOOST_CHECK_SMALL(net.backpropMatrices()[2](0,1)-params(12), 1.e-25);
+		//check shortcuts
+		std::size_t pos = shortcutStart;
+		for(std::size_t i = 0; i != 4; ++i){
+			for(std::size_t j = 0; j != 2; ++j,++pos){
+				BOOST_CHECK_EQUAL(net.inputOutputShortcut()(i,j), newParams(pos));
+			}
+		}
+	}
+	
+	//no bias, two layers
+	{
+		std::size_t weightNum = 2*3+5*4;
+		FFNet<LogisticNeuron,LogisticNeuron> net;
+		net.setStructure(2,3,4,FFNetStructures::InputOutputShortcut,false);
+		BOOST_REQUIRE_EQUAL(net.bias().size(),0u);
+		BOOST_REQUIRE_EQUAL(net.layerMatrices().size(),2u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size2(), 2u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size1(), 4u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size2(), 5u);
 		
+		//shortcut is implemented by using the usual layerMatrices
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size1(), 0u);
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size2(), 0u);
 		
+		BOOST_REQUIRE_EQUAL(net.backpropMatrices().size(),2u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size1(), 2u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size2(), 7u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size2(), 4u);
 		
+		BOOST_REQUIRE_EQUAL(net.numberOfParameters(),weightNum);
+		
+		RealVector newParams(weightNum);
+		for(std::size_t i = 0; i != weightNum; ++i){
+			newParams(i) = Rng::uni(0,1);
+		}
+		//check that setting and getting parameters works
+		net.setParameterVector(newParams);
+		RealVector params = net.parameterVector();
+		BOOST_REQUIRE_EQUAL(params.size(),newParams.size());
+		for(std::size_t i = 0; i != weightNum; ++i){
+			BOOST_CHECK_CLOSE(newParams(i),params(i), 1.e-10);
+		}
+		//check that the weight matrices have the right values
+		std::size_t param = 0;
+		for(std::size_t k = 0; k != 2; ++k){
+			for(std::size_t i = 0; i != net.layerMatrices()[k].size1(); ++i){
+				for(std::size_t j = 0; j != net.layerMatrices()[k].size2(); ++j,++param){
+					BOOST_CHECK_EQUAL(net.layerMatrices()[k](i,j), newParams(param));
+				}
+			}
+		}
+		
+		//check backprop matrices
+		//weights from layer 1 to layer 0
+		for(std::size_t i = 0; i != net.layerMatrices()[0].size1(); ++i){
+			for(std::size_t j = 0; j != net.layerMatrices()[0].size2(); ++j){
+				BOOST_CHECK_EQUAL(net.backpropMatrices()[0](j,i), net.layerMatrices()[0](i,j));
+			}
+		}
+		//weights from layer 2 to layer 0
+		for(std::size_t i = 0; i != net.layerMatrices()[1].size1(); ++i){
+			for(std::size_t j = 0; j != net.layerMatrices()[0].size2(); ++j){
+				BOOST_CHECK_EQUAL(net.backpropMatrices()[0](j,i+3), net.layerMatrices()[1](i,j));
+			}
+		}
+		//weights from layer 2 to layer 1
+		for(std::size_t i = 0; i != net.layerMatrices()[1].size1(); ++i){
+			for(std::size_t j = 0; j != 3; ++j){
+				BOOST_CHECK_EQUAL(net.backpropMatrices()[1](j,i), net.layerMatrices()[1](i,j+2));
+			}
+		}
+	}
+	
+	//with bias, 3 layers
+	{
+		std::size_t weightNum = 2*3+3*4+4*5+2*5+12;
+		std::size_t shortcutStart = 2*3+3*4+4*5+12;
+		std::size_t biasStart = 2*3+3*4+4*5;
+		FFNet<LogisticNeuron,LogisticNeuron> net;
+		net.setStructure(2,3,4,5,FFNetStructures::InputOutputShortcut,true);
+		BOOST_REQUIRE_EQUAL(net.bias().size(),12u);// no bias!
+		BOOST_REQUIRE_EQUAL(net.layerMatrices().size(),3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[0].size2(), 2u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size1(), 4u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[1].size2(), 3u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[2].size1(), 5u);
+		BOOST_CHECK_EQUAL(net.layerMatrices()[2].size2(), 4u);
+		
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size1(), 5u);
+		BOOST_CHECK_EQUAL(net.inputOutputShortcut().size2(), 2u);
+		
+		BOOST_REQUIRE_EQUAL(net.backpropMatrices().size(),3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size1(), 2u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size2(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size1(), 3u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size2(), 4u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[2].size1(), 4u);
+		BOOST_CHECK_EQUAL(net.backpropMatrices()[2].size2(), 5u);
+		
+		BOOST_REQUIRE_EQUAL(net.numberOfParameters(),weightNum);
+		
+		RealVector newParams(weightNum);
+		for(std::size_t i = 0; i != weightNum; ++i){
+			newParams(i) = Rng::uni(0,1);
+		}
+		//check that setting and getting parameters works
+		net.setParameterVector(newParams);
+		RealVector params = net.parameterVector();
+		BOOST_REQUIRE_EQUAL(params.size(),newParams.size());
+		for(std::size_t i = 0; i != weightNum; ++i){
+			BOOST_CHECK_CLOSE(newParams(i),params(i), 1.e-10);
+		}
+		//check that the weight matrices have the right values
+		std::size_t param = 0;
+		for(std::size_t k = 0; k != 3; ++k){
+			for(std::size_t i = 0; i != net.layerMatrices()[k].size1(); ++i){
+				for(std::size_t j = 0; j != net.layerMatrices()[k].size2(); ++j,++param){
+					BOOST_CHECK_EQUAL(net.layerMatrices()[k](i,j), newParams(param));
+					BOOST_CHECK_EQUAL(net.backpropMatrices()[k](j,i), net.layerMatrices()[k](i,j));
+				}
+			}
+		}
+		
+		//check shortcuts
+		std::size_t pos = shortcutStart;
+		for(std::size_t i = 0; i != 5; ++i){
+			for(std::size_t j = 0; j != 2; ++j,++pos){
+				BOOST_CHECK_EQUAL(net.inputOutputShortcut()(i,j), newParams(pos));
+			}
+		}
+		
+		for(std::size_t i = 0; i != 7; ++i){
+			BOOST_CHECK_EQUAL(net.bias()(i), newParams(biasStart+i));
+		}
 	}
 }
-BOOST_AUTO_TEST_CASE( FFNET_Structure_customMatrix )
-{
-	FFNet<LogisticNeuron,LogisticNeuron> net;
+//todo: test Full (the simple case with 2 layers and shortcut input/output is already tested)
 
-	//copy Array into matrix
-	IntMatrix cmat(6,7);
-	for(size_t i=0;i!=6;++i){
-		for(size_t j=0;j!=7;++j){
-			cmat(i,j) = customMatrix[i][j];
-		}
-	}
-	//2 input 1 output
-	net.setStructure(2,1,cmat);
-	
-	//check layer structure
-	BOOST_REQUIRE_EQUAL(net.layerMatrices().size(),3u);//3 layers
-	BOOST_CHECK_EQUAL(net.layerMatrices()[0].size1(), 1u);//1 neuron in layer 1
-	BOOST_CHECK_EQUAL(net.layerMatrices()[0].size2(), 2u);//2 connections in layer 1
-	BOOST_CHECK_EQUAL(net.layerMatrices()[1].size1(), 2u);//2 neuron in layer 2
-	BOOST_CHECK_EQUAL(net.layerMatrices()[1].size2(), 2u);//2 connections in layer 2
-	BOOST_CHECK_EQUAL(net.layerMatrices()[2].size1(), 1u);//1 neuron in layer 3
-	BOOST_CHECK_EQUAL(net.layerMatrices()[2].size2(), 2u);//2 connections in layer 3
-	//check backprop structure
-	BOOST_REQUIRE_EQUAL(net.backpropMatrices().size(), 3u);//3 layers
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size1(), 2u);//2 neuron in layer 1
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[0].size2(), 3u);//3 connections in layer 1
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size1(), 1u);//1 neuron in layer 2
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[1].size2(), 2u);//2 connections in layer 2
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[2].size1(), 2u);//2 neuron in layer 3
-	BOOST_CHECK_EQUAL(net.backpropMatrices()[2].size2(), 1u);//1 connections in layer 3
-	
-	//now test parameter setting/getting
-	RealVector params = net.parameterVector();
-	BOOST_REQUIRE_EQUAL(net.numberOfParameters(),customNumberOfWeights);
-	BOOST_REQUIRE_EQUAL(params.size(),customNumberOfWeights);
-	
-	for(std::size_t i = 0; i != 20; ++i){
-		for(std::size_t j = 0; j != customNumberOfWeights; ++j){
-			params(j) = Rng::uni(0,1);
-		}
-		net.setParameterVector(params);
-		RealVector paramResult = net.parameterVector();
-		BOOST_CHECK_SMALL(norm_sqr(params-paramResult),1.e-25);
-		
-		BOOST_CHECK_SMALL(net.layerMatrices()[0](0,0)-params(0), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[0](0,1)-params(1), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[1](0,0), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[1](0,1)- params(2), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[1](1,0)- params(3), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[1](1,1)- params(4), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[2](0,0)- params(5), 1.e-25);
-		BOOST_CHECK_SMALL(net.layerMatrices()[2](0,1)- params(6), 1.e-25);
-	}
-}
+
+// given that the structure is correct, we can now test eval by giving it random parameters
+// and random inputs and compute the result by hand. This test is quite long as we have to
+// check a lot of different structures. Also for every structure we ensure that all calls to eval
+// produce the same output given a set of inputs
 BOOST_AUTO_TEST_CASE( FFNET_Value )
 {
-	//2 input 2 output
-	FFNet<LogisticNeuron,LogisticNeuron> net;
+	//2 layers, no shortcut, no bias
+	{
+		FFNet<LogisticNeuron,LinearNeuron> net;
+		net.setStructure(2,3,4,FFNetStructures::Normal,false);
+		std::size_t numParams = 2*3+3*4;
+		
+		for(std::size_t i = 0; i != 100; ++i){
+			//initialize parameters
+			RealVector parameters(numParams);
+			for(size_t j=0; j != numParams;++j)
+				parameters(j)=Rng::gauss(0,1);
+			net.setParameterVector(parameters);
 
-	//copy fullConnection Array into matrix
-	IntMatrix connections(6,7);
-	for(size_t i=0;i!=6;++i)
-		for(size_t j=0;j!=7;++j)
-			connections(i,j)=fullConnections[i][j];
-	net.setStructure(2,2,connections);
+			//the testpoints
+			RealVector point(2);
+			point(0)=Rng::uni(-5,5);
+			point(1)= Rng::uni(-5,5);
 
-	for(std::size_t i = 0; i != 100; ++i){
-		//initialize parameters
-		RealVector parameters(fullNumberOfWeights);
-		for(size_t j=0;j!=fullNumberOfWeights;++j)
-			parameters(j)=Rng::gauss(0,1);
-		net.setParameterVector(parameters);
-
-		//the testpoint
-		RealVector point(2);
-		point(0)=Rng::uni(-5,5);
-		point(1)= Rng::uni(-5,5);
-
-		//evaluate ground truth result
-		RealVector testActivations(6);
-		testActivations(0)=point(0);
-		testActivations(1)=point(1);
-		double input2 = testActivations(0)*parameters(0)+testActivations(1)*parameters(1);
-		testActivations(2)=activation(input2 + parameters(13));
-		double input3 = testActivations(0)*parameters(2)+testActivations(1)*parameters(3)+ testActivations(2)*parameters(4);
-		testActivations(3)=activation(input3 + parameters(14));
-		double input4 = testActivations(0)*parameters(5)+testActivations(1)*parameters(6)+ testActivations(2)*parameters(7);
-		input4 += testActivations(3)*parameters(8);
-		testActivations(4)=activation(input4 + parameters(15));
-		double input5 = testActivations(0)*parameters(9)+testActivations(1)*parameters(10)+ testActivations(2)*parameters(11);
-		input5 += testActivations(3)*parameters(12);
-		testActivations(5)=activation(input5 + parameters(16));
-		
-		//check whether final result is correct
-		RealVector netResult = net(point);
-		BOOST_CHECK_SMALL(netResult(0)-testActivations(4),1.e-12);
-		BOOST_CHECK_SMALL(netResult(1)-testActivations(5),1.e-12);
-		
-		//now do the same for eval with batch and state
-		RealMatrix batchPoints(1,2);
-		row(batchPoints,0)=point;
-		RealMatrix netResultBatch;
-		boost::shared_ptr<State> state= net.createState();
-		RealMatrix netResultBatchState;
-		
-		net.eval(batchPoints,netResultBatch);
-		net.eval(batchPoints,netResultBatchState,*state);
-		
-		BOOST_REQUIRE_EQUAL(netResultBatch.size1(),1u);
-		BOOST_REQUIRE_EQUAL(netResultBatch.size2(),2u);
-		BOOST_REQUIRE_EQUAL(netResultBatchState.size1(),1u);
-		BOOST_REQUIRE_EQUAL(netResultBatchState.size2(),2u);
-		
-		BOOST_CHECK_SMALL(netResultBatch(0,0)-testActivations(4),1.e-12);
-		BOOST_CHECK_SMALL(netResultBatch(0,1)-testActivations(5),1.e-12);
-		BOOST_CHECK_SMALL(netResultBatchState(0,0)-testActivations(4),1.e-12);
-		BOOST_CHECK_SMALL(netResultBatchState(0,1)-testActivations(5),1.e-12);
-		
-		for(size_t i=0;i!=6;++i){
-			BOOST_CHECK_SMALL(testActivations(i)-net.neuronResponses(*state)(i,0),1.e-15);
+			//evaluate ground truth result
+			RealVector hidden = sigmoid(prod(net.layerMatrices()[0],point));
+			RealVector output = prod(net.layerMatrices()[1],hidden);
+			
+			//check whether final result is correct
+			RealVector netResult = net(point);
+			BOOST_CHECK_SMALL(netResult(0)-output(0),1.e-12);
+			BOOST_CHECK_SMALL(netResult(1)-output(1),1.e-12);
+			BOOST_CHECK_SMALL(netResult(2)-output(2),1.e-12);
+			BOOST_CHECK_SMALL(netResult(3)-output(3),1.e-12);
 		}
+		
+		//now also test batches
+		RealMatrix inputs(100,2);
+		for(std::size_t i = 0; i != 100; ++i){
+			inputs(i,0)=Rng::uni(-5,5);
+			inputs(i,1)= Rng::uni(-5,5);
+		}
+		testBatchEval(net,inputs);
+	}
+	
+	//2 layers, no shortcut, bias
+	{
+		FFNet<LogisticNeuron,LinearNeuron> net;
+		net.setStructure(2,3,4,FFNetStructures::Normal,true);
+		std::size_t numParams = 2*3+3*4+7;
+		
+		for(std::size_t i = 0; i != 100; ++i){
+			//initialize parameters
+			RealVector parameters(numParams);
+			for(size_t j=0; j != numParams;++j)
+				parameters(j)=Rng::gauss(0,1);
+			net.setParameterVector(parameters);
+
+			//the testpoints
+			RealVector point(2);
+			point(0)=Rng::uni(-5,5);
+			point(1)= Rng::uni(-5,5);
+
+			//evaluate ground truth result
+			RealVector hidden = sigmoid(prod(net.layerMatrices()[0],point)+subrange(net.bias(),0,3));
+			RealVector output = prod(net.layerMatrices()[1],hidden)+subrange(net.bias(),3,7);
+			
+			//check whether final result is correct
+			RealVector netResult = net(point);
+			BOOST_CHECK_SMALL(netResult(0)-output(0),1.e-12);
+			BOOST_CHECK_SMALL(netResult(1)-output(1),1.e-12);
+			BOOST_CHECK_SMALL(netResult(2)-output(2),1.e-12);
+			BOOST_CHECK_SMALL(netResult(3)-output(3),1.e-12);
+		}
+		
+		//now also test batches
+		RealMatrix inputs(100,2);
+		for(std::size_t i = 0; i != 100; ++i){
+			inputs(i,0)=Rng::uni(-5,5);
+			inputs(i,1)= Rng::uni(-5,5);
+		}
+		testBatchEval(net,inputs);
+	}
+	
+	//2 layers, shortcut, bias
+	{
+		FFNet<LogisticNeuron,TanhNeuron> net;
+		net.setStructure(2,3,4,FFNetStructures::InputOutputShortcut,true);
+		std::size_t numParams = 2*3+3*4+2*4+7;
+		
+		for(std::size_t i = 0; i != 100; ++i){
+			//initialize parameters
+			RealVector parameters(numParams);
+			for(size_t j=0; j != numParams;++j)
+				parameters(j)=Rng::gauss(0,1);
+			net.setParameterVector(parameters);
+
+			//the testpoints
+			RealVector point(2);
+			point(0)=Rng::uni(-5,5);
+			point(1)= Rng::uni(-5,5);
+
+			//evaluate ground truth result
+			RealVector hidden = sigmoid(prod(net.layerMatrices()[0],point)+subrange(net.bias(),0,3));
+			RealVector output = prod(columns(net.layerMatrices()[1],2,5),hidden);
+			output += prod(columns(net.layerMatrices()[1],0,2),point);
+			output += subrange(net.bias(),3,7);
+			output = tanh(output);
+			
+			//check whether final result is correct
+			RealVector netResult = net(point);
+			BOOST_CHECK_SMALL(netResult(0)-output(0),1.e-12);
+			BOOST_CHECK_SMALL(netResult(1)-output(1),1.e-12);
+			BOOST_CHECK_SMALL(netResult(2)-output(2),1.e-12);
+			BOOST_CHECK_SMALL(netResult(3)-output(3),1.e-12);
+		}
+		
+		//now also test batches
+		RealMatrix inputs(100,2);
+		for(std::size_t i = 0; i != 100; ++i){
+			inputs(i,0)=Rng::uni(-5,5);
+			inputs(i,1)= Rng::uni(-5,5);
+		}
+		testBatchEval(net,inputs);
+	}
+	
+	//3 layers, no shortcut
+	{
+		FFNet<LogisticNeuron,LinearNeuron> net;
+		net.setStructure(2,3,4,5,FFNetStructures::Normal,false);
+		std::size_t numParams = 2*3+3*4+4*5;
+		
+		for(std::size_t i = 0; i != 100; ++i){
+			//initialize parameters
+			RealVector parameters(numParams);
+			for(size_t j=0; j != numParams;++j)
+				parameters(j)=Rng::gauss(0,1);
+			net.setParameterVector(parameters);
+
+			//the testpoints
+			RealVector point(2);
+			point(0)=Rng::uni(-5,5);
+			point(1)= Rng::uni(-5,5);
+
+			//evaluate ground truth result
+			RealVector hidden1 = sigmoid(prod(net.layerMatrices()[0],point));
+			RealVector hidden2 = sigmoid(prod(net.layerMatrices()[1],hidden1));
+			RealVector output = prod(net.layerMatrices()[2],hidden2);
+			
+			//check whether final result is correct
+			RealVector netResult = net(point);
+			BOOST_CHECK_SMALL(netResult(0)-output(0),1.e-12);
+			BOOST_CHECK_SMALL(netResult(1)-output(1),1.e-12);
+			BOOST_CHECK_SMALL(netResult(2)-output(2),1.e-12);
+			BOOST_CHECK_SMALL(netResult(3)-output(3),1.e-12);
+			BOOST_CHECK_SMALL(netResult(4)-output(4),1.e-12);
+		}
+		
+		//now also test batches
+		RealMatrix inputs(100,2);
+		for(std::size_t i = 0; i != 100; ++i){
+			inputs(i,0)=Rng::uni(-5,5);
+			inputs(i,1)= Rng::uni(-5,5);
+		}
+		testBatchEval(net,inputs);
+	}
+	
+	//3 layers, shortcut
+	{
+		FFNet<LogisticNeuron,TanhNeuron> net;
+		net.setStructure(2,3,4,5,FFNetStructures::InputOutputShortcut,false);
+		std::size_t numParams = 2*3+3*4+4*5+2*5;
+		
+		for(std::size_t i = 0; i != 100; ++i){
+			//initialize parameters
+			RealVector parameters(numParams);
+			for(size_t j=0; j != numParams;++j)
+				parameters(j)=Rng::gauss(0,1);
+			net.setParameterVector(parameters);
+
+			//the testpoints
+			RealVector point(2);
+			point(0)=Rng::uni(-5,5);
+			point(1)= Rng::uni(-5,5);
+
+			//evaluate ground truth result
+			RealVector hidden1 = sigmoid(prod(net.layerMatrices()[0],point));
+			RealVector hidden2 = sigmoid(prod(net.layerMatrices()[1],hidden1));
+			RealVector output = prod(net.layerMatrices()[2],hidden2)
+				+ prod(net.inputOutputShortcut(),point);
+			output =tanh(output);
+			//check whether final result is correct
+			RealVector netResult = net(point);
+			BOOST_CHECK_SMALL(netResult(0)-output(0),1.e-12);
+			BOOST_CHECK_SMALL(netResult(1)-output(1),1.e-12);
+			BOOST_CHECK_SMALL(netResult(2)-output(2),1.e-12);
+			BOOST_CHECK_SMALL(netResult(3)-output(3),1.e-12);
+			BOOST_CHECK_SMALL(netResult(4)-output(4),1.e-12);
+		}
+		
+		//now also test batches
+		RealMatrix inputs(100,2);
+		for(std::size_t i = 0; i != 100; ++i){
+			inputs(i,0)=Rng::uni(-5,5);
+			inputs(i,1)= Rng::uni(-5,5);
+		}
+		testBatchEval(net,inputs);
+	}
+	
+	//3 layers, full
+	{
+		FFNet<LogisticNeuron,LinearNeuron> net;
+		net.setStructure(2,3,4,5,FFNetStructures::Full,false);
+		std::size_t numParams = 2*3+3*4+4*5+2*5+2*4+3*5;
+		
+		for(std::size_t i = 0; i != 100; ++i){
+			//initialize parameters
+			RealVector parameters(numParams);
+			for(size_t j=0; j != numParams;++j)
+				parameters(j)=Rng::gauss(0,1);
+			net.setParameterVector(parameters);
+
+			//the testpoints
+			RealVector point(2);
+			point(0)=Rng::uni(-5,5);
+			point(1)= Rng::uni(-5,5);
+
+			//evaluate ground truth result
+			RealVector hidden1 = sigmoid(prod(net.layerMatrices()[0],point));
+			
+			RealVector hidden2 = prod(columns(net.layerMatrices()[1],0,2),point);
+			hidden2 += prod(columns(net.layerMatrices()[1],2,5),hidden1);
+			hidden2 = sigmoid(hidden2);
+			
+			RealVector output = prod(columns(net.layerMatrices()[2],0,2),point);
+			output += prod(columns(net.layerMatrices()[2],2,5),hidden1);
+			output += prod(columns(net.layerMatrices()[2],5,9),hidden2);
+			
+			//check whether final result is correct
+			RealVector netResult = net(point);
+			BOOST_CHECK_SMALL(netResult(0)-output(0),1.e-12);
+			BOOST_CHECK_SMALL(netResult(1)-output(1),1.e-12);
+			BOOST_CHECK_SMALL(netResult(2)-output(2),1.e-12);
+			BOOST_CHECK_SMALL(netResult(3)-output(3),1.e-12);
+			BOOST_CHECK_SMALL(netResult(4)-output(4),1.e-12);
+		}
+		
+		//now also test batches
+		RealMatrix inputs(100,2);
+		for(std::size_t i = 0; i != 100; ++i){
+			inputs(i,0)=Rng::uni(-5,5);
+			inputs(i,1)= Rng::uni(-5,5);
+		}
+		testBatchEval(net,inputs);
 	}
 	
 }
-BOOST_AUTO_TEST_CASE( FFNET_Value_Custom )
+
+BOOST_AUTO_TEST_CASE( FFNET_WeightedDerivatives)
 {
-	//2 input 2 output
-	FFNet<LogisticNeuron,LogisticNeuron> net;
-
-	//copy fullConnection Array into matrix
-	IntMatrix connections(6,7);
-	for(size_t i=0;i!=6;++i)
-		for(size_t j=0;j!=7;++j)
-			connections(i,j)=customMatrix[i][j];
-	net.setStructure(2,1,connections);
-
-
-	for(std::size_t i = 0; i != 100; ++i){
-		//initialize parameters
-		RealVector parameters(fullNumberOfWeights);
-		for(size_t j=0;j!=fullNumberOfWeights;++j)
-			parameters(j)=Rng::gauss(0,1);
-		net.setParameterVector(parameters);
-
-		//the testpoint
-		RealVector point(2);
-		point(0)=Rng::uni(-5,5);
-		point(1)= Rng::uni(-5,5); 
-
-		RealVector testActivations(6);
-		testActivations(0)=point(0);
-		testActivations(1)=point(1);
-		double input2 = testActivations(0)*parameters(0)+testActivations(1)*parameters(1);
-		testActivations(2)=activation(input2 + parameters(7));
-		double input3 = testActivations(2)*parameters(2);
-		testActivations(3)=activation(input3 + parameters(8));
-		double input4 = testActivations(1)*parameters(3) + testActivations(2)*parameters(4);
-		testActivations(4)=activation(input4);
-		double input5 = testActivations(3)*parameters(5)+ testActivations(4)*parameters(6);
-		testActivations(5)=activation(input5 + parameters(9)); 
-
-		//check whether final result is correct
-		RealVector netResult = net(point);
-		BOOST_CHECK_SMALL(netResult(0)-testActivations(5),1.e-12);
-		
-		//now do the same for eval with batch and state
-		RealMatrix batchPoints(1,2);
-		row(batchPoints,0)=point;
-		RealMatrix netResultBatch;
-		boost::shared_ptr<State> state= net.createState();
-		RealMatrix netResultBatchState;
-		
-		net.eval(batchPoints,netResultBatch);
-		net.eval(batchPoints,netResultBatchState,*state);
-		
-		BOOST_REQUIRE_EQUAL(netResultBatch.size1(),1u);
-		BOOST_REQUIRE_EQUAL(netResultBatch.size2(),1u);
-		BOOST_REQUIRE_EQUAL(netResultBatchState.size1(),1u);
-		BOOST_REQUIRE_EQUAL(netResultBatchState.size2(),1u);
-		
-		BOOST_CHECK_SMALL(netResultBatch(0,0)-testActivations(5),1.e-12);
-		BOOST_CHECK_SMALL(netResultBatchState(0,0)-testActivations(5),1.e-12);
-		
-		for(size_t i=0;i!=6;++i){
-			BOOST_CHECK_SMALL(testActivations(i)-net.neuronResponses(*state)(i,0),1.e-15);
-		}
-	}
-}
-BOOST_AUTO_TEST_CASE( FFNET_WeightedDerivative )
-{
-	//2 input 2 output
-	FFNet<LogisticNeuron,LogisticNeuron> net;
-	IntMatrix connections(6,7);
-	//copy fullConnection Array into matrix
-	for(size_t i=0;i!=6;++i)
-		for(size_t j=0;j!=7;++j)
-			connections(i,j)=fullConnections[i][j];
-
-	//first check whether the number of weights is correct
-	net.setStructure(2,2,connections);
-
-	testWeightedDerivative(net,10000,5.e-5,1.e-7);
-}
-BOOST_AUTO_TEST_CASE( FFNET_WeightedDerivative_Custom )
-{
-	//2 input 2 output
-	FFNet<LogisticNeuron,LogisticNeuron> net;
-	IntMatrix connections(6,7);
-	//copy fullConnection Array into matrix
-	for(size_t i=0;i!=6;++i)
-		for(size_t j=0;j!=7;++j)
-			connections(i,j)=customMatrix[i][j];
-
-	//first check whether the number of weights is correct
-	net.setStructure(2,1,connections);
-
-	testWeightedDerivative(net,10000,5.e-6,1.e-7);
-}
-BOOST_AUTO_TEST_CASE( FFNET_SERIALIZE )
-{
-	//the target network
-	FFNet<LogisticNeuron,LogisticNeuron> net;
-	IntMatrix connections(6,7);
-	//copy fullConnection Array into matrix
-	for(size_t i=0;i!=6;++i)
-		for(size_t j=0;j!=7;++j)
-			connections(i,j)=fullConnections[i][j];
-	net.setStructure(2,2,connections);
-	//create random parameters
-	RealVector testParameters(net.numberOfParameters());
-	for(size_t param=0;param!=net.numberOfParameters();++param)
+	//2 layers, Normal, no Bias
 	{
-		 testParameters(param)=Rng::gauss(0,1);
-	}
-	net.setParameterVector( testParameters);
+		FFNet<LogisticNeuron,TanhNeuron> net;
+		net.setStructure(2,5,3,FFNetStructures::Normal,false);
 
-	//the test is, that after deserialization, the results must be identical
-	//so we generate some data first
-	std::vector<RealVector> data;
-	std::vector<RealVector> target;
-	RealVector input(net.inputSize());
-	RealVector output(net.outputSize());
-	for (size_t i=0; i<1000; i++)
+		testWeightedInputDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivativesSame(net,1000);
+	}
+	//2 layers, Normal, bias
 	{
-		for(size_t j=0;j!=net.inputSize();++j)
-		{
-			input(j)=Rng::uni(-1,1);
-		}
-		data.push_back(input);
-		target.push_back(net(input));
+		FFNet<LogisticNeuron,TanhNeuron> net;
+		net.setStructure(2,5,3,FFNetStructures::Normal,true);
+
+		testWeightedInputDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivativesSame(net,1000);
 	}
-	RegressionDataset dataset = createLabeledDataFromRange(data,target);
+	//2 layers, Shortcut, bias
+	{
+		FFNet<LogisticNeuron,TanhNeuron> net;
+		net.setStructure(2,5,3,FFNetStructures::InputOutputShortcut,true);
 
-	//now we serialize the FFNet
-	ostringstream outputStream;  
-	polymorphic_text_oarchive oa(outputStream);  
-	oa << net;
-
-	//and create a new net from the serialization
-	FFNet<LogisticNeuron,LogisticNeuron> netDeserialized;
-	istringstream inputStream(outputStream.str());  
-	polymorphic_text_iarchive ia(inputStream);
-	ia >> netDeserialized;
+		testWeightedInputDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivativesSame(net,1000);
+	}
 	
-	//test whether serialization works
-	//first simple parameter and topology check
-	BOOST_CHECK_SMALL(norm_2(netDeserialized.parameterVector() - testParameters),1.e-50);
-	BOOST_REQUIRE_EQUAL(netDeserialized.inputSize(),net.inputSize());
-	BOOST_REQUIRE_EQUAL(netDeserialized.outputSize(),net.outputSize());
-	for(size_t i=0;i!=6;++i)
-		for(size_t j=0;j!=7;++j)
-			BOOST_REQUIRE_EQUAL(netDeserialized.connections()(i,j),net.connections()(i,j));
-	for (size_t i=0; i<1000; i++)
+	//2 layers, Full, bias
 	{
-		RealVector output = netDeserialized(dataset.element(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-2);
+		FFNet<LogisticNeuron,TanhNeuron> net;
+		net.setStructure(2,5,3,FFNetStructures::Full,true);
+
+		testWeightedInputDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivativesSame(net,1000);
+	}
+	//3 layers, Normal, no Bias
+	{
+		FFNet<LogisticNeuron,TanhNeuron> net;
+		net.setStructure(2,5,3,3,FFNetStructures::Normal,false);
+
+		testWeightedInputDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivativesSame(net,1000);
+	}
+	
+	//3 layers, Shortcut, Bias
+	{
+		FFNet<LogisticNeuron,TanhNeuron> net;
+		net.setStructure(2,5,3,3,FFNetStructures::InputOutputShortcut,true);
+
+		testWeightedInputDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivative(net,1000,5.e-6,1.e-7);
+		testWeightedDerivativesSame(net,1000);
+	}
+	
+	//3 layers, Full, Bias
+	{
+		FFNet<LogisticNeuron,TanhNeuron> net;
+		net.setStructure(2,5,3,3,FFNetStructures::Full,true);
+
+		testWeightedInputDerivative(net,100,5.e-6,1.e-7);
+		testWeightedDerivative(net,100,5.e-6,1.e-7);
+		testWeightedDerivativesSame(net,100);
 	}
 }

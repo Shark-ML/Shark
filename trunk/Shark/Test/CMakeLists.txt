@@ -207,7 +207,6 @@ SHARK_ADD_TEST( ObjectiveFunctions/BoxConstraintHandler.cpp ObjFunct_BoxConstrai
 
 #Objective Functions/Loss
 SHARK_ADD_TEST( ObjectiveFunctions/CrossEntropy.cpp ObjFunct_CrossEntropy )
-SHARK_ADD_TEST( ObjectiveFunctions/DenoisingAutoencoderError.cpp ObjFunct_DenoisingAutoencoderError )
 SHARK_ADD_TEST( ObjectiveFunctions/SquaredLoss.cpp ObjFunct_SquaredLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/HingeLoss.cpp ObjFunct_HingeLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/SquaredHingeLoss.cpp ObjFunct_SquaredHingeLoss )
