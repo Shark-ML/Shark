@@ -115,6 +115,11 @@ public:
 	double sigma()const{
 		return m_individual.chromosome().m_stepSize;
 	}
+	
+	/// \brief  Returns the current step length
+	double& sigma(){
+		return m_individual.chromosome().m_stepSize;
+	}
 
 private:
 	CMAIndividual<double> m_individual;///< Individual holding strategy parameter. usd as parent and offspring
