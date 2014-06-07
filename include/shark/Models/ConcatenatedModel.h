@@ -181,7 +181,9 @@ public:
 	)const{
 		InternalState const& s = state.toState<InternalState>();
 
-		if(m_optimizeFirst && m_optimizeSecond){
+		//don't compute the derivative of the first model if it does not have parameters.
+		std::size_t numParamsFirst = m_firstModel->numberOfParameters();
+		if(m_optimizeFirst && m_optimizeSecond && numParamsFirst != 0){
 			RealVector firstParameterDerivative;
 			BatchIntermediateType secondInputDerivative;
 			RealVector secondParameterDerivative;
@@ -194,7 +196,7 @@ public:
 			
 			gradient.resize(numberOfParameters());
 			init(gradient)<<firstParameterDerivative,secondParameterDerivative;
-		}else if(m_optimizeFirst){
+		}else if(m_optimizeFirst && numParamsFirst != 0){
 			RealVector firstParameterDerivative;
 			BatchIntermediateType secondInputDerivative;
 			
@@ -237,13 +239,24 @@ public:
 		RealVector firstParameterDerivative;
 		BatchIntermediateType secondInputDerivative;
 		RealVector secondParameterDerivative;
-
-		m_secondModel->weightedDerivatives(
-			s.intermediateResult, coefficients, *s.firstModelState, secondParameterDerivative, secondInputDerivative
-		);
-		m_firstModel->weightedDerivatives(
-			patterns, secondInputDerivative, *s.secondModelState, parameterDerivative, inputDerivative
-		);
+		if(m_optimizeSecond){
+			m_secondModel->weightedDerivatives(
+				s.intermediateResult, coefficients, *s.firstModelState, secondParameterDerivative, secondInputDerivative
+			);
+		}else{
+			m_secondModel->weightedInputDerivative(
+				s.intermediateResult, coefficients, *s.firstModelState, secondInputDerivative
+			);
+		}
+		if(m_optimizeFirst){
+			m_firstModel->weightedDerivatives(
+				patterns, secondInputDerivative, *s.secondModelState, parameterDerivative, inputDerivative
+			);
+		}else{
+			m_firstModel->weightedInputDerivative(
+				patterns, secondInputDerivative, *s.secondModelState, inputDerivative
+			);
+		}
 
 		parameterDerivative.resize(firstParam+secondParam);
 		init(parameterDerivative)<<firstParameterDerivative,secondParameterDerivative;
