@@ -85,6 +85,19 @@ struct matrix_container: public matrix_expression<C> {
 	}
 };
 
+template<class P>
+struct temporary_proxy:public P{
+	temporary_proxy(P const& p):P(p){}
+	
+	template<class E>
+	P& operator=(E const& e){
+		return static_cast<P&>(*this) = e;
+	}
+	
+	P& operator=(temporary_proxy<P> const& e){
+		return static_cast<P&>(*this) = e;
+	}
+};
 
 // Assignment proxy.
 // Provides temporary free assigment when LHS has no alias on RHS
@@ -139,32 +152,13 @@ noalias_proxy<C> noalias(matrix_expression<C>& lvalue) {
 	return noalias_proxy<C> (lvalue());
 }
 template <class C>
-noalias_proxy<const C> noalias(matrix_expression<C> const& lvalue) {
-	return noalias_proxy<const C> (lvalue());
-}
-template <class C>
 noalias_proxy<C> noalias(vector_expression<C>& lvalue) {
 	return noalias_proxy<C> (lvalue());
 }
 template <class C>
-noalias_proxy<const C> noalias(vector_expression<C> const& lvalue) {
-	return noalias_proxy<const C> (lvalue());
+noalias_proxy<C> noalias(temporary_proxy<C> lvalue) {
+	return noalias_proxy<C> (static_cast<C&>(lvalue));
 }
-
-template<class P>
-struct temporary_proxy:public P{
-	temporary_proxy(P const& p):P(p){}
-	
-	template<class E>
-	P& operator=(E const& e){
-		return static_cast<P&>(*this) = e;
-	}
-	
-	P& operator=(temporary_proxy<P> const& e){
-		return static_cast<P&>(*this) = e;
-	}
-};
-
 
 }
 }
