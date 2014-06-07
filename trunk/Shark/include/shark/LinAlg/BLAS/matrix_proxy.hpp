@@ -1955,7 +1955,7 @@ private:
 
 /// \brief Converts a chunk of memory into a matrix of given size.
 template <class T>
-temporary_proxy< dense_matrix_adaptor<T> > adapt_matrix(std::size_t size1, std::size_t size2, T * data){
+temporary_proxy< dense_matrix_adaptor<T> > adapt_matrix(std::size_t size1, std::size_t size2, T* data){
 	return dense_matrix_adaptor<T>(data,size1, size2);
 }
 
@@ -1963,6 +1963,49 @@ temporary_proxy< dense_matrix_adaptor<T> > adapt_matrix(std::size_t size1, std::
 template <class T, std::size_t M, std::size_t N>
 temporary_proxy<dense_matrix_adaptor<T> > adapt_matrix(T (&array)[M][N]){
 	return dense_matrix_adaptor<T>(&(array[0][0]),M,N);
+}
+
+/// \brief Converts a dense vector to a matrix of a given size
+template <class V>
+typename boost::enable_if<
+	boost::is_same<typename V::storage_category,dense_tag>,
+	temporary_proxy< dense_matrix_adaptor<
+		typename boost::remove_reference<typename V::reference>::type
+	> >
+>::type
+to_matrix(
+	vector_expression<V>& v,
+	std::size_t size1, std::size_t size2
+){
+	typedef typename boost::remove_reference<typename V::reference>::type ElementType;
+	return dense_matrix_adaptor<ElementType>(v().storage(), size1, size2);
+}
+
+/// \brief Converts a dense vector to a matrix of a given size
+template <class V>
+typename boost::enable_if<
+	boost::is_same<typename V::storage_category,dense_tag>,
+	temporary_proxy< dense_matrix_adaptor<typename V::value_type const> >
+>::type 
+to_matrix(
+	vector_expression<V> const& v,
+	std::size_t size1, std::size_t size2
+){
+	return dense_matrix_adaptor<typename V::value_type const>(v().storage(), size1, size2);
+}
+
+template <class E>
+typename boost::enable_if<
+	boost::is_same<typename E::storage_category,dense_tag>,
+	temporary_proxy< dense_matrix_adaptor<
+		typename boost::remove_reference<typename E::reference>::type
+	> >
+>::type 
+to_matrix(
+	temporary_proxy<E> v,
+	std::size_t size1, std::size_t size2
+){
+	return to_matrix(static_cast<E&>(v),size1,size2);
 }
 
 }}
