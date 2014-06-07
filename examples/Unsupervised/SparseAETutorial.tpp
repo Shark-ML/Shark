@@ -95,19 +95,18 @@ UnlabeledData<RealVector> getSamples()
 	return samples;
 }
 
-void setStartingPoint(FFNet<LogisticNeuron, LogisticNeuron>& model)
-{
+void initializeFFNet(FFNet<LogisticNeuron, LogisticNeuron>& model){
 	// Set the starting point for the optimizer. This is 0 for all bias
 	// weights and in the interval [-r, r] for non-bias weights.
-	double r = sqrt(6) / sqrt(numhidden + psize * psize + 1);
-	vector<RealMatrix>& layers = model.layerMatrices();
-	for (int k = 0; k < 2; ++k)
-		for (size_t i = 0; i < layers[k].size1(); ++i)
-			for (size_t j = 0; j < layers[k].size2(); ++j)
-				layers[k](i,j) = ((double)rand()/(double)RAND_MAX) * 2 * r - r;
-	RealVector& bias = model.bias();
-	for (size_t i = 0; i < bias.size(); ++i)
-		bias(i) = 0.0;
+	double r = std::sqrt(6.0) / std::sqrt(model.numberOfHiddenNeurons() + model.inputSize() + 1);
+	RealVector params(model.numberOfParameters(),0);
+	//we use  here, that the weights of the layers are the first in the vectors
+	std::size_t hiddenWeights = model.inputSize()+model.outputSize();
+	hiddenWeights *= model.numberOfHiddenNeurons();
+	for(std::size_t i = 0; i != hiddenWeights;++i){
+		params(i) = Rng::uni(-r,r);
+	}
+	model.setParameterVector(params);
 }
 
 //###begin<export>
@@ -144,7 +143,8 @@ int main()
 	// Prepare the sparse network error function
 	//###begin<ffnet>
 	FFNet<LogisticNeuron, LogisticNeuron> model;
-	model.setStructure(psize * psize, numhidden, psize * psize, true, false, false, true);
+	model.setStructure(psize * psize, numhidden, psize * psize, FFNetStructures::Normal, true);
+	initializeFFNet(model);
 	//###end<ffnet>
 	//###begin<sparsity_error>
 	SquaredLoss<RealVector> loss;
@@ -167,7 +167,6 @@ int main()
 
 	// Train it.
 	//###begin<train>
-	setStartingPoint(model);
 	LBFGS optimizer;
 	optimizer.lineSearch().lineSearchType() = LineSearch::WolfeCubic;
 	optimizer.init(func, model.parameterVector());
