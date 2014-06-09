@@ -49,8 +49,6 @@
 namespace shark {
 
 
-#define ACF
-//#define SHRINKING
 
 // strategy constants
 #define CHANGE_RATE 0.2
@@ -70,6 +68,9 @@ public:
 	typedef typename LabeledData<InputT, unsigned int>::const_element_reference ElementType;
 	typedef typename Batch<InputT>::const_reference InputReferenceType;
 
+    enum CoordinateSelectionStrategy {UNIFORM, ACF};
+
+
 	///
 	/// \brief Constructor
 	///
@@ -80,11 +81,15 @@ public:
 	QpMcLinear(
 			const DatasetType& dataset,
 			std::size_t dim,
-			std::size_t classes)
+			std::size_t classes,
+			std::size_t strategy = ACF,
+			bool shrinking = false)
 	: m_data(dataset)
 	, m_xSquared(dataset.numberOfElements())
 	, m_dim(dim)
 	, m_classes(classes)
+	, m_strategy(strategy)
+	, m_shrinking(shrinking)
 	{
 		SHARK_ASSERT(m_dim > 0);
 
@@ -120,18 +125,18 @@ public:
 		RealMatrix alpha(ell, m_classes + 1, 0.0);   // Lagrange multipliers; dual variables. Reserve one extra column.
 		RealMatrix w(m_classes, m_dim, 0.0);         // weight vectors; primal variables
 
-#ifdef ACF
-		// scheduling of steps
+		// scheduling of steps, for ACF only
 		RealVector pref(ell, 1.0);                   // example-wise measure of success
 		double prefsum = ell;                        // normalization constant
-#endif
+
 		std::vector<std::size_t> schedule(ell);
-#ifndef ACF
-		for (std::size_t i=0; i<ell; i++) schedule[i] = i;
-#endif
-#ifdef SHRINKING
+		if (m_strategy == UNIFORM)
+		{
+			for (std::size_t i=0; i<ell; i++) schedule[i] = i;
+		}
+
+		// used for shrinking
 		std::size_t active = ell;
-#endif
 
 		// prepare counters
 		std::size_t epoch = 0;
@@ -140,50 +145,58 @@ public:
 		// prepare performance monitoring
 		double objective = 0.0;
 		double max_violation = 0.0;
-#ifdef ACF
+
+		// gain for ACF
 		const double gain_learning_rate = 1.0 / ell;
 		double average_gain = 0.0;
-#endif
 
+        
 		// outer optimization loop (epochs)
 		bool canstop = true;
 		while (true)
 		{
-#ifdef ACF
-			// define schedule
-			double psum = prefsum;
-			prefsum = 0.0;
-			std::size_t pos = 0;
-			for (std::size_t i=0; i<ell; i++)
+			if (m_strategy == ACF)
 			{
-				double p = pref(i);
-				double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
-				std::size_t n = (std::size_t)std::floor(num);
-				double prob = num - n;
-				if (Rng::uni() < prob) n++;
-				for (std::size_t j=0; j<n; j++)
+				// define schedule
+				double psum = prefsum;
+				prefsum = 0.0;
+				std::size_t pos = 0;
+				for (std::size_t i=0; i<ell; i++)
 				{
-					schedule[pos] = i;
-					pos++;
+					double p = pref(i);
+					double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
+					std::size_t n = (std::size_t)std::floor(num);
+					double prob = num - n;
+					if (Rng::uni() < prob) n++;
+					for (std::size_t j=0; j<n; j++)
+					{
+						schedule[pos] = i;
+						pos++;
+					}
+					psum -= p;
+					prefsum += p;
 				}
-				psum -= p;
-				prefsum += p;
+				SHARK_ASSERT(pos == ell);
 			}
-			SHARK_ASSERT(pos == ell);
-#endif
-#ifdef SHRINKING
-			for (std::size_t i=0; i<active; i++) std::swap(schedule[i], schedule[Rng::discrete(0, active - 1)]);
-#else
-			for (std::size_t i=0; i<ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
-#endif
 
+			if (m_shrinking == true)
+			{
+				for (std::size_t i=0; i<active; i++) 
+					std::swap(schedule[i], schedule[Rng::discrete(0, active - 1)]);
+			}
+			else
+			{
+				for (std::size_t i=0; i<ell; i++) 
+					std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
+			}
+                
 			// inner loop (one epoch)
 			max_violation = 0.0;
-#ifdef SHRINKING
-			for (std::size_t j=0; j<active; j++)
-#else
-			for (std::size_t j=0; j<ell; j++)
-#endif
+			size_t nPoints = ell;
+			if (m_shrinking == true)
+				nPoints = active;
+
+			for (std::size_t j=0; j<nPoints; j++)
 			{
 				// active example
 				double gain = 0.0;
@@ -212,17 +225,15 @@ public:
 					// update weight vectors
 					updateWeightVectors(w, mu, i);
 				}
-#ifdef SHRINKING
-				else
+				else if (m_shrinking == true)
 				{
 					active--;
 					std::swap(schedule[j], schedule[active]);
 					j--;
 				}
-#endif
 
-#ifdef ACF
 				// update gain-based preferences
+				if (m_strategy == ACF)
 				{
 					if (epoch == 0) average_gain += gain / (double)ell;
 					else
@@ -234,7 +245,6 @@ public:
 						average_gain = (1.0 - gain_learning_rate) * average_gain + gain_learning_rate * gain;
 					}
 				}
-#endif
 			}
 
 			epoch++;
@@ -254,7 +264,8 @@ public:
 
 			if (max_violation < stop.minAccuracy)
 			{
-				if (verbose) std::cout << "#" << std::flush;
+				if (verbose) 
+					std::cout << "#" << std::flush;
 				if (canstop)
 				{
 					if (prop != NULL) prop->type = QpAccuracyReached;
@@ -262,28 +273,29 @@ public:
 				}
 				else
 				{
-#ifdef ACF
-					// prepare full sweep for a reliable checking of the stopping criterion
-					canstop = true;
-					for (std::size_t i=0; i<ell; i++) pref(i) = 1.0;
-					prefsum = ell;
-#endif
-#ifdef SHRINKING
-					// prepare full sweep for a reliable checking of the stopping criterion
-					active = ell;
-					canstop = true;
-#endif
+					if (m_strategy == ACF)
+					{
+						// prepare full sweep for a reliable checking of the stopping criterion
+						canstop = true;
+						for (std::size_t i=0; i<ell; i++) pref(i) = 1.0;
+						prefsum = ell;
+					}
+
+					if (m_shrinking == true)
+					{
+						// prepare full sweep for a reliable checking of the stopping criterion
+						active = ell;
+						canstop = true;
+					}
 				}
 			}
 			else
 			{
 				if (verbose) std::cout << "." << std::flush;
-#ifdef ACF
-				canstop = false;
-#endif
-#ifdef SHRINKING
-				canstop = (active == ell);
-#endif
+				if (m_strategy == ACF)
+					canstop = false;
+				if (m_shrinking == true)
+					canstop = (active == ell);
 			}
 		}
 		timer.stop();
@@ -367,6 +379,8 @@ protected:
 	RealVector m_xSquared;                            ///< diagonal entries of the quadratic matrix
 	std::size_t m_dim;                                ///< input space dimension
 	std::size_t m_classes;                            ///< number of classes
+	std::size_t m_strategy;                         ///< strategy for coordinate selection
+	bool m_shrinking;                               ///< apply shrinking or not?
 };
 
 
