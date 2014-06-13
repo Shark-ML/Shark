@@ -166,7 +166,11 @@ public:
 		return m_basis;
 	}
 
-	/// The sparsify method removes non-support-vectors from
+	Data<InputType>& basis() {
+        return m_basis;
+    }
+    
+    /// The sparsify method removes non-support-vectors from
 	/// its set of basis vectors and the coefficient matrix.
 	void sparsify(){
 		std::size_t ic = m_basis.numberOfElements();
