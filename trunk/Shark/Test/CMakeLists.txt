@@ -188,7 +188,7 @@ IF (HDF5_FOUND)
     SHARK_ADD_TEST( Data/HDF5Tests.cpp Data_HDF5 )
 ENDIF(HDF5_FOUND)
 SHARK_ADD_TEST( Data/SparseData.cpp Data_SparseData )
-SHARK_ADD_TEST( Data/PrecomputedMatrix.cpp Data_PrecomputedMatrix )
+SHARK_ADD_TEST( Data/ExportKernelMatrix.cpp Data_ExportKernelMatrix )
 
 #Objective Functions
 SHARK_ADD_TEST( ObjectiveFunctions/ErrorFunction.cpp ObjFunct_ErrorFunction )
@@ -257,7 +257,7 @@ ADD_CUSTOM_COMMAND(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_output
 )
 ADD_CUSTOM_COMMAND(
-    TARGET Data_PrecomputedMatrix
+    TARGET Data_ExportKernelMatrix
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_output
 )

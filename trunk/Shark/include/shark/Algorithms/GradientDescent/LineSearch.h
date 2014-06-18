@@ -96,7 +96,7 @@ public:
 	///@param searchPoint the point where the linesearch start
 	///@param pointValue the value of the function at searchPoint
 	///@param newtonDirection the search direction of the line search
-	///@param derivative the derivative of the funktion at searchPoint
+	///@param derivative the derivative of the function at searchPoint
 	///@param stepLength initial step length guess for guiding the line search
 	virtual void operator()(RealVector &searchPoint,double &pointValue,RealVector const& newtonDirection, RealVector &derivative, double stepLength = 1.0)const {
 		switch (m_lineSearchType) {

@@ -87,7 +87,7 @@ public:
 
 	/// \brief defines the batch type of the input type.
 	///
-	/// This ould for example be std::vector<InputType> but for example for RealVector it could be RealMatrix
+	/// This could for example be std::vector<InputType> but for example for RealVector it could be RealMatrix
 	typedef typename Batch<InputType>::type BatchInputType;
 	/// \brief defines the batch type of the output type
 	typedef typename Batch<OutputType>::type BatchOutputType;

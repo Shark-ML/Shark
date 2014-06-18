@@ -31,7 +31,7 @@ struct TestFunction : public SingleObjectiveFunction
 	std::size_t numberOfVariables()const{
 		return 3;
 	}
-	// adds just a value c on the input
+
 	virtual double eval(RealVector const& pattern)const
 	{
 		return inner_prod(prod(A,pattern),pattern);

@@ -100,7 +100,7 @@ public:
 private:
 	/// \brief Sets up and solves the regression problem for the base z.
 	///
-	/// calculates K_z, the linear part of the system of equationd and solves for beta.
+	/// calculates K_z, the linear part of the system of equations and solves for beta.
 	void setupAndSolve(RealMatrix& beta, RealVector const& input, RealMatrix& Kz, RealMatrix& linear)const;
 
 	/// \brief Returns the error of the solution found
