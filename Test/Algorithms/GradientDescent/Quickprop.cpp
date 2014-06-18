@@ -28,11 +28,11 @@ struct TestFunction : public SingleObjectiveFunction
 		return 3;
 	}
 	
-	// adds just a value c on the input
 	virtual double eval(RealVector const& pattern)const
 	{
 		return inner_prod(prod(A,pattern),pattern);
 	}
+
 	virtual double evalDerivative(RealVector const& pattern, FirstOrderDerivative& derivative)const
 	{
 		derivative = 2*prod(A,pattern);

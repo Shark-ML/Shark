@@ -129,7 +129,7 @@ KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const Searc
 	RealMatrix basis = adapt_matrix(m_numApproximatingVectors,dim,&input(0));
 
 	//set up system of equations and store the kernel states at the same time
-	// (we assume here thyt everything fits into memory, which is the case as long as the number of
+	// (we assume here that everything fits into memory, which is the case as long as the number of
 	// vectors to approximate is quite small)
 	boost::shared_ptr<State> KzState = kernel.createState();
 	RealMatrix Kz;

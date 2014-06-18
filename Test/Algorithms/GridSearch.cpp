@@ -27,11 +27,12 @@ struct TestFunction : public SingleObjectiveFunction
 	std::size_t numberOfVariables()const{
 		return 2;
 	}
-	// adds just a value c on the input
+
 	virtual double eval(RealVector const& pattern)const
 	{
 		return inner_prod(prod(A,pattern),pattern);
 	}
+	
 	virtual void proposeStartingPoint( SearchPointType & startingPoint /* IN & OUT */ )const {
 		startingPoint.resize(2);
 		startingPoint.clear();
