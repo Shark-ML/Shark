@@ -6,33 +6,6 @@
 
 using namespace shark;
 
-BOOST_AUTO_TEST_CASE( LinAlg_Random_Rotation_Matrix ){
-	std::size_t NumTests = 1;
-	std::size_t Dimensions = 50;
-	Rng::seed(42);
-	RealMatrix result(Dimensions,Dimensions);
-	for(std::size_t test = 0;test!=NumTests;++test){
-
-		//test whether R^TR = RR^T = I
-		RealMatrix R = blas::randomRotationMatrix(Dimensions);
-		
-		for(std::size_t i = 0; i != Dimensions; ++i){
-			BOOST_CHECK_SMALL(norm_2(row(R,i))-1,1.e-12);
-			BOOST_CHECK_SMALL(norm_2(column(R,i))-1,1.e-12);
-		}
-		
-		result.clear();
-		axpy_prod(R,trans(R),result,0);
-		double errorID1 = norm_inf(result-RealIdentityMatrix(Dimensions));
-		result.clear();
-		axpy_prod(trans(R),R,result,0);
-		double errorID2 = norm_inf(result-RealIdentityMatrix(Dimensions));
-		
-		BOOST_CHECK_SMALL(errorID1,1.e-13);
-		BOOST_CHECK_SMALL(errorID2,1.e-13);
-	}
-}
-
 BOOST_AUTO_TEST_CASE( LinAlg_Householder_Creation ){
 	///test for numerical stability of createHouseholderReflection
 	std::size_t NumTests = 1000;
@@ -127,5 +100,31 @@ BOOST_AUTO_TEST_CASE( LinAlg_Householder_Apply_Right ){
 				BOOST_CHECK_SMALL(result(i,j)-test(i,j),1.e-13);
 			}
 		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( LinAlg_Random_Rotation_Matrix ){
+	std::size_t NumTests = 100;
+	std::size_t Dimensions = 50;
+	Rng::seed(42);
+	RealMatrix result(Dimensions,Dimensions);
+	for(std::size_t test = 0;test!=NumTests;++test){
+
+		//test whether R^TR = RR^T = I
+		RealMatrix R = blas::randomRotationMatrix(Dimensions);
+		for(std::size_t i = 0; i != Dimensions; ++i){
+			BOOST_CHECK_SMALL(norm_2(row(R,i))-1,1.e-12);
+			BOOST_CHECK_SMALL(norm_2(column(R,i))-1,1.e-12);
+		}
+		
+		result.clear();
+		axpy_prod(R,trans(R),result,0);
+		double errorID1 = norm_inf(result-RealIdentityMatrix(Dimensions));
+		result.clear();
+		axpy_prod(trans(R),R,result,0);
+		double errorID2 = norm_inf(result-RealIdentityMatrix(Dimensions));
+		
+		BOOST_CHECK_SMALL(errorID1,1.e-13);
+		BOOST_CHECK_SMALL(errorID2,1.e-13);
 	}
 }
