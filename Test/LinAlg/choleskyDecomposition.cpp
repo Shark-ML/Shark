@@ -75,12 +75,13 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_Base )
 	BOOST_CHECK_EQUAL(rank,4);
 }
 
-RealMatrix createRandomMatrix(RealMatrix const& lambda,std::size_t Dimensions){
+RealMatrix createRandomMatrix(RealVector const& lambda,std::size_t Dimensions){
 	RealMatrix R = blas::randomRotationMatrix(Dimensions);
-	RealMatrix Atemp(Dimensions,Dimensions);
+	for(std::size_t i = 0; i != Dimensions; ++i){
+		column(R,i) *= std::sqrt(lambda(i));
+	}
 	RealMatrix A(Dimensions,Dimensions);
-	axpy_prod(R,lambda,Atemp);
-	axpy_prod(Atemp,trans(R),A);
+	axpy_prod(R,trans(R),A);
 	return A;
 }
 
@@ -89,10 +90,9 @@ BOOST_AUTO_TEST_CASE( LinAlg_CholeskyDecomposition ){
 	std::size_t Dimensions = 48;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//first generate a suitable eigenvalue problem matrix A
-		RealMatrix lambda(Dimensions,Dimensions);
-		lambda.clear();
+		RealVector lambda(Dimensions);
 		for(std::size_t i = 0; i != Dimensions; ++i){
-			lambda(i,i) = Rng::uni(1,3.0);
+			lambda(i) = Rng::uni(1,3.0);
 		}
 		RealMatrix A = createRandomMatrix(lambda,Dimensions);
 		//calculate Cholesky
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_CholeskyDecomposition ){
 		choleskyDecomposition(A,C);
 		
 		//test determinant of C
-		double logDetA = trace(log(lambda));
+		double logDetA = sum(log(lambda));
 		double logDetC = trace(log(sqr(C)));
 		BOOST_CHECK_SMALL(std::abs(logDetA)-std::abs(logDetC),1.e-12);
 
@@ -121,10 +121,9 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_FullRank ){
 	std::size_t Dimensions = 48;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//first generate a suitable eigenvalue problem matrix A
-		RealMatrix lambda(Dimensions,Dimensions);
-		lambda.clear();
+		RealVector lambda(Dimensions);
 		for(std::size_t i = 0; i != Dimensions; ++i){
-			lambda(i,i) = Rng::uni(1,3.0);
+			lambda(i) = Rng::uni(1,3.0);
 		}
 		RealMatrix A = createRandomMatrix(lambda,Dimensions);
 		//calculate Cholesky
@@ -135,7 +134,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_FullRank ){
 		BOOST_CHECK_EQUAL(rank,Dimensions);
 		
 		//test determinant of C
-		double logDetA = trace(log(lambda));
+		double logDetA = sum(log(lambda));
 		double logDetC = trace(log(sqr(C)));
 		BOOST_CHECK_SMALL(std::abs(logDetA)-std::abs(logDetC),1.e-12);
 
@@ -159,10 +158,9 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_RankK ){
 	for(std::size_t test = 0; test != NumTests; ++test){
 		std::size_t Rank = Rng::discrete(10,45);
 		//first generate a suitable eigenvalue problem matrix A
-		RealMatrix lambda(Dimensions,Dimensions);
-		lambda.clear();
+		RealVector lambda(Dimensions);
 		for(std::size_t i = 0; i != Rank; ++i){
-			lambda(i,i) = Rng::uni(1,3.0);
+			lambda(i) = Rng::uni(1,3.0);
 		}
 		RealMatrix A = createRandomMatrix(lambda,Dimensions);
 		//calculate Cholesky
@@ -191,10 +189,9 @@ BOOST_AUTO_TEST_CASE( LinAlg_CholeskyUpdate ){
 	std::size_t Dimensions = 50;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//first generate a suitable eigenvalue problem matrix A as well as its decompisition
-		RealMatrix lambda(Dimensions,Dimensions);
-		lambda.clear();
+		RealVector lambda(Dimensions);
 		for(std::size_t i = 0; i != Dimensions; ++i){
-			lambda(i,i) = Rng::uni(1,3.0);
+			lambda(i) = Rng::uni(1,3.0);
 		}
 		RealMatrix A = createRandomMatrix(lambda,Dimensions);
 		//calculate Cholesky
