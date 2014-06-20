@@ -286,36 +286,52 @@ void generalSolveSystemInPlace(
 /// positive semi-definite.
 /// 
 /// This algorithm stops after the maximum number of iterations is
-/// exceeded or after the max-norm of the residual \f$ r_k= Ax_k-b\f$ is 
+/// exceeded or after the max-norm of the residual \f$ r_k= -Ax_k+b\f$ is 
 /// smaller than epsilon.
+///
+/// The initial solution argument governs whether x already stores a possible starting point.
+/// If this is true, it is checked whether it is better than
+/// starting from 0 (i.e. the  max-norm of the initial residual is smaller than -b).
 /// 
 /// \param A the positive semi-definite n x n-Matrix
 /// \param x the solution vector
 /// \param b the right hand side
 /// \param epsilon stopping criterium for the residual
 /// \param maxIterations the maximum number of iterations
-template<class MatT, class VecT>
+/// \param initialSolution if this is true, x stores an initial guess of the solution
+template<class MatT, class VecT, class VecT2>
 void approxSolveSymmSystem(
 	matrix_expression<MatT> const& A,
 	vector_expression<VecT>& x,
-	vector_expression<VecT> const& b,
+	vector_expression<VecT2> const& b,
 	double epsilon = 1.e-10,
+	bool initialSolution = false,
 	unsigned int maxIterations = 0
 ){
 	SIZE_CHECK(A().size1()==A().size2());
 	SIZE_CHECK(A().size1()==b().size());
 	
 	std::size_t dim = b().size();
-	ensure_size(x,dim);
-	x().clear();
-	
 	unsigned int maxIt = (maxIterations == 0)? dim: maxIterations;
 	
 	typedef typename VecT::value_type value_type;
-	vector<value_type> r=b;
-	vector<value_type> rnext(dim);
-	vector<value_type> p=b;
-	vector<value_type> Ap(dim);
+	vector<value_type> r = b;//current residual
+	if(initialSolution){
+		SIZE_CHECK(x().size() == dim);
+		axpy_prod(A,x,r,false,-1.0);
+		if(norm_inf(r) > norm_inf(b)){
+			x().clear();
+			r = b;
+		}
+	}
+	else{
+		ensure_size(x,dim);
+		x().clear();
+	}
+	
+	vector<value_type> rnext(dim); //the next residual
+	vector<value_type> p = r; //the search direction- initially it is the gradient direction
+	vector<value_type> Ap(dim); //stores prod(A,p)
 	
 	for(std::size_t i = 0; i != maxIt; ++i){
 		axpy_prod(A,p,Ap);
@@ -362,7 +378,7 @@ void approxSolveSymmSystemInPlace(
 	SIZE_CHECK(A().size1()==A().size2());
 	SIZE_CHECK(A().size1()==b().size());
 	vector<typename VecT::value_type> x(b.size(),0.0);
-	approxSolveSymmSystem(A,x,b);
+	approxSolveSymmSystem(A,x,b,epsilon,false,maxIterations);
 	swap(x,b);
 }
 
