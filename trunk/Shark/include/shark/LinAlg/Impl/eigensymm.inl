@@ -325,14 +325,14 @@ void shark::blas::eigensymm
 	//
 	// normalizing eigenvectors
 	//
-	for (unsigned j = n; j--;) {
+	for (unsigned j = n-1; j != 0; --j) {
 		s = 0.0;
-		for (unsigned i = n; i--;) {
+		for (unsigned i = n-1; i != 0; --i) {
 			s += vmatA(i, j) * vmatA(i, j);
 		}
 		s = std::sqrt(s);
 
-		for (unsigned i = n; i--;) {
+		for (unsigned i = n-1; i != 0; --i) {
 			vmatA(i, j) /= s;
 		}
 	}
