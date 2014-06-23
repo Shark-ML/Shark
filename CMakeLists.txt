@@ -32,7 +32,7 @@ IF( OPT_DYNAMIC_LIBRARY )
     SET (LIB_TYPE SHARED)
 ELSE( OPT_DYNAMIC_LIBRARY )
     set(Boost_USE_STATIC_LIBS ON)
-    SET (LIB_TYPE DYNAMIC)
+    SET (LIB_TYPE STATIC)
 ENDIF( OPT_DYNAMIC_LIBRARY )
 
 #####################################################################
@@ -238,6 +238,7 @@ ENDIF( HDF5_FOUND )
 #           ATLAS configuration
 #####################################################################
 OPTION( OPT_ENABLE_ATLAS "Use ATLAS as Linear Algebra Library" OFF )
+OPTION( ATLAS_FULL_LAPACK "Signalizes whether ATLAS comes with the full LAPACK package" OFF )
 IF ( OPT_ENABLE_ATLAS )
 	find_library(CBLAS_LIBRARY
 		cblas
@@ -268,6 +269,9 @@ IF ( OPT_ENABLE_ATLAS )
 		SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${CBLAS_LIBRARY} )
 		SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${ATLAS_LIBRARY} )
 		ADD_DEFINITIONS( -DSHARK_USE_ATLAS )
+		if( ATLAS_FULL_LAPACK )
+			ADD_DEFINITIONS( -DSHARK_USE_LAPACK )
+		ENDIF ( ATLAS_FULL_LAPACK )
 		IF ( ATLAS_ROOT )
 				message(STATUS "ATLAS root: " ${ATLAS_ROOT})
 				include_directories ( ${ATLAS_ROOT}/include/ ${ATLAS_ROOT}/include/atlas/ )

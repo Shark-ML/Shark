@@ -55,8 +55,8 @@ RealMatrix createRandomMatrix(RealVector const& lambda,std::size_t Dimensions){
 
 BOOST_AUTO_TEST_CASE( LinAlg_eigensymm_general )
 {
-	std::size_t NumTests = 100;
-	std::size_t Dimensions = 50;
+	std::size_t NumTests = 2;
+	std::size_t Dimensions = 10;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//first generate a suitable eigenvalue problem matrix A as well as its decompisition
 		RealVector lambda(Dimensions);
@@ -82,6 +82,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_eigensymm_general )
 		BOOST_CHECK_SMALL(error2,1.e-12);
 		
 		//check that the eigenvalues are correct
+		//~ std::cout<<eigenvalues<<std::endl;
+		//~ std::cout<<lambda<<std::endl;
 		BOOST_CHECK_SMALL(norm_inf(eigenvalues - lambda),1.e-12);
 		
 		//check that the eigenvectors actually orthogonalize the matrix
