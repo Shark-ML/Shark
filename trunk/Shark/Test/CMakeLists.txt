@@ -217,8 +217,10 @@ SHARK_ADD_TEST( ObjectiveFunctions/AbsoluteLoss.cpp ObjFunct_AbsoluteLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/AUC.cpp ObjFunct_AUC )
 SHARK_ADD_TEST( ObjectiveFunctions/NegativeGaussianProcessEvidence.cpp ObjFunct_NegativeGaussianProcessEvidence )
 
+#Rng
 SHARK_ADD_TEST( Rng/Rng.cpp Rng_Distributions )
 SHARK_ADD_TEST( Rng/MultiVariateNormal.cpp Rng_MultiVariateNormal )
+SHARK_ADD_TEST( Rng/MultiNomial.cpp Rng_MultiNomialDistribution )
 
 
 #RBM
