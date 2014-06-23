@@ -8,7 +8,35 @@
 
 using namespace shark;
 
-BOOST_AUTO_TEST_CASE( MultiNomialL_Cholesky) {
+BOOST_AUTO_TEST_CASE( MultiNomial_same_probabilities) {
+	std::size_t Samples = 100000;
+	
+	std::size_t Dimensions = 10;
+	//Generate probability vector
+	RealVector probabilities(Dimensions,1.0);
+	
+	MultiNomialDistribution dist(probabilities);
+	RealVector draws(Dimensions,0.0);
+	RealVector drawsDiscrete(Dimensions,0.0);
+	for(std::size_t s = 0; s != Samples; ++s){
+		MultiNomialDistribution::result_type sample = dist();
+		BOOST_REQUIRE(sample < Dimensions);
+		draws[sample]++;
+		drawsDiscrete[Rng::discrete(0,Dimensions-1)]++;
+	}
+	draws/=Samples;
+	drawsDiscrete/=Samples;
+	
+	double interval=(max(drawsDiscrete)-min(drawsDiscrete))/2;
+	std::cout<<drawsDiscrete<<"\n"<<draws<<std::endl;
+	std::cout<<"interval: "<<interval<<std::endl;
+	for(std::size_t i = 0; i != Dimensions; ++i){
+		BOOST_CHECK(draws(i) > 1.0/Dimensions -interval*1.5);
+		BOOST_CHECK(draws(i) < 1.0/Dimensions + interval*1.5);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( MultiNomial_different_probabilities) {
 	std::size_t Samples = 1000000;
 	std::size_t trials = 10;
 	
