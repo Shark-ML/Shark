@@ -829,20 +829,20 @@ inline std::vector<std::size_t> classSizes(Data<unsigned int> const& labels){
 	return classCounts;
 }
 
-/// Return the dimensionality of a  dataset.
+///\brief  Return the dimensionality of a  dataset.
 template <class InputType>
 unsigned int dataDimension(Data<InputType> const& dataset){
 	SHARK_ASSERT(dataset.numberOfElements() > 0);
 	return dataset.element(0).size();
 }
 
-/// Return the input dimensionality of a labeled dataset.
+///\brief  Return the input dimensionality of a labeled dataset.
 template <class InputType, class LabelType>
 unsigned int inputDimension(LabeledData<InputType, LabelType> const& dataset){
 	return dataDimension(dataset.inputs());
 }
 
-/// Return the label/output dimensionality of a labeled dataset.
+///\brief  Return the label/output dimensionality of a labeled dataset.
 template <class InputType, class LabelType>
 unsigned int labelDimension(LabeledData<InputType, LabelType> const& dataset){
 	return dataDimension(dataset.labels());
@@ -851,13 +851,6 @@ unsigned int labelDimension(LabeledData<InputType, LabelType> const& dataset){
 template <class InputType>
 unsigned int numberOfClasses(LabeledData<InputType, unsigned int> const& dataset){
 	return numberOfClasses(dataset.labels());
-}
-/// Return the number of classes (size of the label vector)
-/// of a classification dataset with RealVector label encoding.
-template <class InputType>
-unsigned int numberOfClasses(LabeledData<InputType, RealVector> const& dataset){
-	SHARK_ASSERT(dataset.numberOfElements() > 0);
-	return dataset.element(0).label.size();
 }
 ///\brief Returns the number of members of each class in the dataset.
 template<class InputType, class LabelType>
