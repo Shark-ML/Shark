@@ -78,7 +78,7 @@ public:
 #else
 		if(measureWallclockTime){
 			timeval time;
-			if (gettimeofday(&time,NULL)){
+			if (gettimeofday(&time,0)){
 				//  Handle error
 				return 0;
 			}
