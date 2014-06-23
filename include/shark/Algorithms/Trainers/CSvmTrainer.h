@@ -45,6 +45,7 @@
 
 
 #include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
+#include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
 #include <shark/Algorithms/QP/BoxConstrainedProblems.h>
 #include <shark/Algorithms/QP/SvmProblems.h>
 #include <shark/Algorithms/QP/QpBoxLinear.h>
@@ -93,8 +94,18 @@ namespace shark {
 /// http://en.wikipedia.org/wiki/Support_vector_machine
 ///
 template <class InputType, class CacheType = float>
-class CSvmTrainer : public AbstractSvmTrainer<InputType, unsigned int>
+class CSvmTrainer : public AbstractSvmTrainer<
+	InputType, unsigned int, 
+	KernelClassifier<InputType>,
+	AbstractWeightedTrainer<KernelClassifier<InputType> > 
+>
 {
+private:
+	typedef AbstractSvmTrainer<
+		InputType, unsigned int, 
+		KernelClassifier<InputType>,
+		AbstractWeightedTrainer<KernelClassifier<InputType> > 
+	> base_type;
 public:
 
 	/// \brief Convenience typedefs:
@@ -107,9 +118,7 @@ public:
 	/// accuracy training is needed).
 	typedef CacheType QpFloatType;
 
-	typedef AbstractModel<InputType, RealVector> ModelType;
 	typedef AbstractKernelFunction<InputType> KernelType;
-	typedef AbstractSvmTrainer<InputType, unsigned int> base_type;
 
 	//! Constructor
 	//! \param  kernel         kernel function to use for training and prediction
@@ -118,7 +127,7 @@ public:
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	//! \param  computeDerivative  should the derivative of b with respect to C be computed?
 	CSvmTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false, bool computeDerivative = true)
-	: base_type(kernel, C, offset, unconstrained), m_computeDerivative(computeDerivative), m_useIterativeBiasComputation(false)
+	: base_type(kernel, C, offset, unconstrained), m_computeDerivative(computeDerivative)
 	{ }
 	
 	//! Constructor
@@ -128,16 +137,12 @@ public:
 	//! \param offset whether to train the svm with offset term
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	CSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool offset, bool unconstrained = false)
-	: base_type(kernel,negativeC, positiveC, offset, unconstrained), m_computeDerivative(false), m_useIterativeBiasComputation(false)
+	: base_type(kernel,negativeC, positiveC, offset, unconstrained), m_computeDerivative(false)
 	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "CSvmTrainer"; }
-	
-	void setUseIterativeBiasComputation(bool state){
-		m_useIterativeBiasComputation = state;
-	}
 	
 	/// for the rare case that there are only bounded SVs and no free SVs, this gives access to the derivative of b w.r.t. C for external use. Derivative w.r.t. C is last.
 	RealVector const& get_db_dParams() {
@@ -146,32 +151,44 @@ public:
 
 
 	/// \brief Train the C-SVM.
-	/// \note This code is almost verbatim present in the MissingFeatureSvmTrainer. If you change here, please also change there.
 	void train(KernelClassifier<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
 	{
 
 		//prepare model
 		svm.decisionFunction().setStructure(base_type::m_kernel, dataset.inputs(),this->m_trainOffset);
 		
-		//dispatcher for the different types of kernel matrix that can be used
+		//dispatch to use the optimal implementation and solve the problem
 		trainInternal(svm.decisionFunction(),dataset);
 		
 		if (base_type::sparsify())
 			svm.decisionFunction().sparsify();
-
+	}
+	
+	/// \brief Train the C-SVM using weights.
+	void train(KernelClassifier<InputType>& svm, WeightedLabeledData<InputType, unsigned int> const& dataset)
+	{
+		//prepare model
+		svm.decisionFunction().setStructure(base_type::m_kernel, dataset.inputs(),this->m_trainOffset);
+		
+		//dispatch to use the optimal implementation and solve the problem
+		trainInternal(svm.decisionFunction(),dataset);
+		
+		if (base_type::sparsify())
+			svm.decisionFunction().sparsify();
 	}
 
 private:
 	
 	//by default the normal unoptimized kernel matrix is used
-	template<class T>
-	void trainInternal(KernelExpansion<T>& svm, LabeledData<T, unsigned int> const& dataset){
+	template<class T, class DatasetTypeT>
+	void trainInternal(KernelExpansion<T>& svm, DatasetTypeT const& dataset){
 		KernelMatrix<T, QpFloatType> km(*base_type::m_kernel, dataset.inputs());
 		trainInternal(km,svm,dataset);
 	}
 	
 	//in the case of a gaussian kernel and sparse vectors, we can use an optimized approach
-	void trainInternal(KernelExpansion<CompressedRealVector>& svm, LabeledData<CompressedRealVector, unsigned int> const& dataset){
+	template<class T, class DatasetTypeT>
+	void trainInternal(KernelExpansion<CompressedRealVector>& svm, DatasetTypeT const& dataset){
 		//check whether a gaussian kernel is used
 		typedef GaussianRbfKernel<CompressedRealVector> Gaussian;
 		Gaussian const* kernel = dynamic_cast<Gaussian const*> (base_type::m_kernel);
@@ -185,6 +202,7 @@ private:
 		}
 	}
 	
+	//create the problem for the unweighted datasets
 	template<class Matrix, class T>
 	void trainInternal(Matrix& km, KernelExpansion<T>& svm, LabeledData<T, unsigned int> const& dataset){
 		if (QpConfig::precomputeKernel())
@@ -201,12 +219,34 @@ private:
 		}
 		base_type::m_accessCount = km.getAccessCount();
 	}
+	
+	// create the problem for the weighted datasets
+	template<class Matrix, class T>
+	void trainInternal(Matrix& km, KernelExpansion<T>& svm, WeightedLabeledData<T, unsigned int> const& dataset){
+		if (QpConfig::precomputeKernel())
+		{
+			PrecomputedMatrix<Matrix> matrix(&km);
+			GeneralQuadraticProblem<PrecomputedMatrix<Matrix> > svmProblem(
+				matrix,dataset.labels(),dataset.weights(),base_type::m_regularizers
+			);
+			optimize(svm,svmProblem,dataset.data());
+		}
+		else
+		{
+			CachedMatrix<Matrix> matrix(&km);
+			GeneralQuadraticProblem<CachedMatrix<Matrix> > svmProblem(
+				matrix,dataset.labels(),dataset.weights(),base_type::m_regularizers
+			);
+			optimize(svm,svmProblem,dataset.data());
+		}
+		base_type::m_accessCount = km.getAccessCount();
+	}
 
 private:
 	
 	template<class SVMProblemType>
 	void optimize(KernelExpansion<InputType>& svm, SVMProblemType& svmProblem, LabeledData<InputType, unsigned int> const& dataset){
-		if (this->m_trainOffset && !m_useIterativeBiasComputation)
+		if (this->m_trainOffset)
 		{
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 			ProblemType problem(svmProblem,base_type::m_shrinking);
@@ -221,63 +261,12 @@ private:
 			ProblemType problem(svmProblem,base_type::m_shrinking);
 			QpSolver< ProblemType> solver(problem);
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
-			
-			
-			//iteratively solve for the bias if necessary
-			if(svm.hasOffset()){
-				double bias = 0;//current bias value
-				double stepMultiplier = 1;//current length of step
-				double alphaSum = 0;//gradient at current position
-				for(std::size_t i = 0; i != problem.dimensions(); ++i){
-					alphaSum+= problem.alpha(i);
-				}
-				
-				//take step in gradient direction
-				double signAlphaSum = alphaSum > 0? 1:-1;
-				double deltaBias = signAlphaSum*stepMultiplier;
-				bias += deltaBias;
-				//update problem using the new estimate for the bias and solve it
-				for(std::size_t i = 0; i != problem.dimensions(); ++i){
-					problem.setLinear(i,problem.linear(i)-deltaBias);
-				}
-				
-				double epsilon = base_type::stoppingCondition().minAccuracy;
-				do{
-					solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
-					//check whether the step was beneficial
-					double newAlphaSum = 0;
-					for(std::size_t i = 0; i != problem.dimensions(); ++i){
-						newAlphaSum+= problem.alpha(i);
-					}
-					//prolong steps when they are in the same direction
-					if(newAlphaSum*alphaSum > 0){
-						stepMultiplier *= 1.2;
-						alphaSum = newAlphaSum;
-					}
-					else{
-						stepMultiplier *=0.5;
-						alphaSum = newAlphaSum;
-					}
-					//~ std::cout<<newAlphaSum<<" "<<stepMultiplier<<" "<<bias<<std::endl;
-					
-					//take step in gradient direction
-					double signAlphaSum = alphaSum > 0? 1:-1;
-					double deltaBias = signAlphaSum*stepMultiplier;
-					bias += deltaBias;
-					//update problem using the new estimate for the bias and solve it
-					for(std::size_t i = 0; i != problem.dimensions(); ++i){
-						problem.setLinear(i,problem.linear(i)-deltaBias);
-					}
-				}while(problem.checkKKT() > epsilon);
-				svm.offset(0) = bias; 
-			}
 			column(svm.alpha(),0) = problem.getUnpermutedAlpha();
 		}
 	}
 	RealVector m_db_dParams; ///< in the rare case that there are only bounded SVs and no free SVs, this will hold the derivative of b w.r.t. the hyperparameters. Derivative w.r.t. C is last.
 
 	bool m_computeDerivative;
-	bool m_useIterativeBiasComputation;
 
 	template<class Problem>
 	double computeBias(Problem const& problem, LabeledData<InputType, unsigned int> const& dataset){
