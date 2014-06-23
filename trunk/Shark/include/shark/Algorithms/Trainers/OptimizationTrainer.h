@@ -38,7 +38,7 @@
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Core/ResultSets.h>
 #include <shark/Models/AbstractModel.h>
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/ErrorFunction.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Algorithms/StoppingCriteria/AbstractStoppingCriterion.h>
 
@@ -50,8 +50,8 @@ namespace shark {
 ///
 /// \par
 /// The OptimizationTrainer class is designed to allow for
-/// model training via iterative minimization of a (regularized)
-/// risk or error function, such as in neural network
+/// model training via iterative minimization of a
+/// loss function, such as in neural network
 /// "backpropagation" training.
 ///
 template <class Model, class LabelTypeT = typename Model::OutputType>
@@ -65,30 +65,30 @@ public:
 	typedef typename base_type::ModelType ModelType;
 
 	typedef AbstractSingleObjectiveOptimizer< RealVector > OptimizerType;
-	typedef SupervisedObjectiveFunction<InputType, LabelType> SupervisedObjectiveFunctionType;
+	typedef AbstractLoss< LabelType, InputType > LossType;
 	typedef AbstractStoppingCriterion<SingleObjectiveResultSet<OptimizerType::SearchPointType> > StoppingCriterionType;
 
 	OptimizationTrainer(
-			SupervisedObjectiveFunctionType* objective,
+			LossType* loss,
 			OptimizerType* optimizer,
 			StoppingCriterionType* stoppingCriterion)
-	: mep_objective(objective), mep_optimizer(optimizer), mep_stoppingCriterion(stoppingCriterion)
+	: mep_loss(loss), mep_optimizer(optimizer), mep_stoppingCriterion(stoppingCriterion)
 	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{
 		return "OptimizationTrainer<"
-			+ mep_objective->name() + ","
+			+ mep_loss->name() + ","
 			+ mep_optimizer->name() + ">";
 	}
 
 	void train(ModelType& model, LabeledData<InputType, LabelType> const& dataset) {
-		mep_objective->setDataset(dataset);
-		mep_optimizer->init(*mep_objective);
+		ErrorFunction<InputType,LabelType> error(dataset, &model, mep_loss);
+		mep_optimizer->init(error);
 		mep_stoppingCriterion->reset();
 		do {
-			mep_optimizer->step(*mep_objective);
+			mep_optimizer->step(error);
 		}
 		while (! mep_stoppingCriterion->stop(mep_optimizer->solution()));
 		model.setParameterVector(mep_optimizer->solution().point);
@@ -103,17 +103,13 @@ public:
 	}
 
 	void read( InArchive & archive )
-	{
-		archive >> mep_optimizer;
-	}
+	{}
 
 	void write( OutArchive & archive ) const
-	{
-		archive << mep_optimizer;
-	}
+	{}
 
 protected:
-	SupervisedObjectiveFunctionType* mep_objective;
+	LossType* mep_loss;
 	OptimizerType* mep_optimizer;
 	StoppingCriterionType* mep_stoppingCriterion;
 };

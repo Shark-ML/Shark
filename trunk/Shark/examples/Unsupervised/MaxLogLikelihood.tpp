@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 	kMeans(data, gaussians);
 	
 	//create error function
-	NegativeLogLikelihood error(&mixture,data);
+	NegativeLogLikelihood error(data,&mixture);
 	//initialize Rprop
 	IRpropPlus optimizer;
 	optimizer.init(error);

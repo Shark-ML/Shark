@@ -42,7 +42,7 @@ double trainProblem(const RegressionDataset& training, RegressionDataset const& 
 
 	//the error function is a combination of MSE and 2-norm error
 	SquaredLoss<> loss;
-	ErrorFunction<> error(&network,&loss);
+	ErrorFunction<> error(training,&network,&loss);
 	TwoNormRegularizer regularizer;
 
 	//combine both functions
@@ -52,7 +52,6 @@ double trainProblem(const RegressionDataset& training, RegressionDataset const& 
 
 
 	//now train for a number of iterations using Rprop
-	error.setDataset(training);
 	IRpropPlus optimizer;
 	//initialize with our predefined point, since
 	//the combined function can't propose one.
@@ -63,8 +62,7 @@ double trainProblem(const RegressionDataset& training, RegressionDataset const& 
 	}
 
 	//validate and return the error without regularization
-	error.setDataset(validation);
-	return error(optimizer.solution().point);
+	return loss(network(validation.inputs()),validation.labels());
 }
 
 

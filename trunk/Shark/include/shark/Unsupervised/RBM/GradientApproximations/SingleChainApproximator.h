@@ -30,7 +30,7 @@
 #ifndef SHARK_UNSUPERVISED_RBM_SINGLECHAINAPPROXIMATOR_H
 #define SHARK_UNSUPERVISED_RBM_SINGLECHAINAPPROXIMATOR_H
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include "Impl/DataEvaluator.h"
 
 namespace shark{
@@ -41,13 +41,9 @@ namespace shark{
 ///several chains. This approximator should be used with a sampling scheme which also achieves a faster decorrelation of samples like
 ///tempering.
 template<class MarkovChainType>	
-class SingleChainApproximator: public UnsupervisedObjectiveFunction<RealVector>{
+class SingleChainApproximator: public SingleObjectiveFunction{
 public:
-	typedef UnsupervisedObjectiveFunction<RealVector> base_type;
 	typedef typename MarkovChainType::RBM RBM;
-	typedef typename base_type::SearchPointType SearchPointType;
-	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
-	
 	
 	SingleChainApproximator(RBM* rbm)
 	: mpe_rbm(rbm),m_chain(rbm),m_k(1)
@@ -55,9 +51,9 @@ public:
 	,m_numBatches(0){
 		SHARK_ASSERT(rbm != NULL);
 
-		base_type::m_features.reset(base_type::HAS_VALUE);
-		base_type::m_features |= base_type::HAS_FIRST_DERIVATIVE;
-		base_type::m_features |= base_type::CAN_PROPOSE_STARTING_POINT;
+		m_features.reset(HAS_VALUE);
+		m_features |= HAS_FIRST_DERIVATIVE;
+		m_features |= CAN_PROPOSE_STARTING_POINT;
 		
 		m_chain.setBatchSize(1);
 	};
@@ -86,7 +82,6 @@ public:
 	std::size_t& numBatches(){
 		return m_numBatches;
 	}
-	
 	
 	MarkovChainType& chain(){
 		return m_chain;

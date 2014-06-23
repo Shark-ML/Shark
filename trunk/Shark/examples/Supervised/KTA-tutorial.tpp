@@ -19,8 +19,7 @@ int main(int argc, char** argv)
 
 	// set up kernel target alignment as a function of the kernel parameters
 	// on the given data
-	KernelTargetAlignment<RealVector> kta(&kernel);
-	kta.setDataset(data);
+	KernelTargetAlignment<RealVector> kta(data,&kernel);
 
 	// optimize parameters for best alignment
 	IRpropPlus rprop;

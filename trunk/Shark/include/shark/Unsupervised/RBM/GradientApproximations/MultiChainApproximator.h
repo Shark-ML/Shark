@@ -30,7 +30,7 @@
 #ifndef SHARK_UNSUPERVISED_RBM_GRADIENTAPPROXIMATIONS_MULTICHAINAPPROXIMATOR_H
 #define SHARK_UNSUPERVISED_RBM_GRADIENTAPPROXIMATIONS_MULTICHAINAPPROXIMATOR_H
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include "Impl/DataEvaluator.h"
 #include <vector>
 
@@ -41,22 +41,18 @@ namespace shark{
 ///The disadvantage is however, that mixing is slower and a higher value of sampling steps between subsequent samples
 ///need to be chosen. 
 template<class MarkovChainType>	
-class MultiChainApproximator: public UnsupervisedObjectiveFunction<RealVector>{
+class MultiChainApproximator: public SingleObjectiveFunction{
 public:
-	typedef UnsupervisedObjectiveFunction<RealVector> base_type;
 	typedef typename MarkovChainType::RBM RBM;
-	typedef typename base_type::SearchPointType SearchPointType;
-	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
-	
 	
 	MultiChainApproximator(RBM* rbm)
 	: mpe_rbm(rbm),m_chainOperator(rbm),m_k(1),m_samples(0),m_numBatches(0){
 		SHARK_ASSERT(rbm != NULL);
 		setBatchSize(500);
 
-		base_type::m_features.reset(base_type::HAS_VALUE);
-		base_type::m_features |= base_type::HAS_FIRST_DERIVATIVE;
-		base_type::m_features |= base_type::CAN_PROPOSE_STARTING_POINT;
+		m_features.reset(HAS_VALUE);
+		m_features |=HAS_FIRST_DERIVATIVE;
+		m_features |=CAN_PROPOSE_STARTING_POINT;
 	}
 
 	/// \brief From INameable: return the class name.

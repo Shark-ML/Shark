@@ -30,7 +30,7 @@
 #ifndef SHARK_UNSUPERVISED_RBM_GRADIENTAPPROXIMATIONS_CONTRASTIVEDIVERGENCE_H
 #define SHARK_UNSUPERVISED_RBM_GRADIENTAPPROXIMATIONS_CONTRASTIVEDIVERGENCE_H
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Unsupervised/RBM/Energy.h>
 
 namespace shark{
@@ -41,14 +41,9 @@ namespace shark{
 /// chain with a training example and run it for k steps. 
 /// The sample gained after k steps than samples is than used to approximate the mean of the RBM distribution in the gradient.
 template<class Operator>	
-class ContrastiveDivergence: public UnsupervisedObjectiveFunction<RealVector>{
-private:
-	typedef UnsupervisedObjectiveFunction<RealVector> base_type;
+class ContrastiveDivergence: public SingleObjectiveFunction{
 public:
 	typedef typename Operator::RBM RBM;
-	typedef typename base_type::SearchPointType SearchPointType;
-	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
-	
 	
 	/// \brief The constructor 
 	///
@@ -56,9 +51,9 @@ public:
 	ContrastiveDivergence(RBM* rbm):mpe_rbm(rbm),m_operator(rbm),m_k(1), m_numBatches(0){
 		SHARK_ASSERT(rbm != NULL);
 
-		base_type::m_features.reset(base_type::HAS_VALUE);
-		base_type::m_features |= base_type::HAS_FIRST_DERIVATIVE;
-		base_type::m_features |= base_type::CAN_PROPOSE_STARTING_POINT;
+		m_features.reset(HAS_VALUE);
+		m_features |= HAS_FIRST_DERIVATIVE;
+		m_features |= CAN_PROPOSE_STARTING_POINT;
 	};
 
 	/// \brief From INameable: return the class name.

@@ -148,8 +148,7 @@ int main()
 	//###end<ffnet>
 	//###begin<sparsity_error>
 	SquaredLoss<RealVector> loss;
-	SparseFFNetError error(&model, &loss, rho, beta);
-	error.setDataset(data);
+	SparseFFNetError error(data,&model, &loss, rho, beta);
 	//###end<sparsity_error>
 
 	// Add weight regularization

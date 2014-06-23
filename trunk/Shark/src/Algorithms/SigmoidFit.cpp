@@ -48,8 +48,7 @@ SigmoidFitRpropNLL::SigmoidFitRpropNLL( unsigned int iters ){
 void SigmoidFitRpropNLL::train(SigmoidModel& model, LabeledData<RealVector, unsigned int> const& dataset)
 {
 	NegativeClassificationLogLikelihood ncll;
-	ErrorFunction <RealVector, unsigned int> modeling_error( &model, &ncll );
-	modeling_error.setDataset( dataset );
+	ErrorFunction <RealVector, unsigned int> modeling_error( dataset, &model, &ncll );
 	IRpropPlus rprop;
 	rprop.init( modeling_error );
 	for (unsigned int i=0; i<m_iterations; i++) {

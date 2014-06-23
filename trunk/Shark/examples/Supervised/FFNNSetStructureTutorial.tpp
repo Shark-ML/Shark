@@ -34,7 +34,7 @@ int main(){
 	FFNet<LogisticNeuron,LogisticNeuron> network;
 
 	//first three parameters are number of input, hidden and output neurons
-	//the next parameter sets the stuctur: we choose here the default structure without any shortcuts
+	//the next parameter sets the stucture: we choose here the default structure without any shortcuts
 	//the last parameter switches the bias neuron on
 	network.setStructure(2, 3, 1, FFNetStructures::Normal,true);
 
@@ -45,8 +45,7 @@ int main(){
 	
 	//create error function
 	NegativeClassificationLogLikelihood loss; // surrogate loss for training
-	ErrorFunction<RealVector,unsigned int> error(&network,&loss);
-	error.setDataset(dataset);
+	ErrorFunction<RealVector,unsigned int> error(dataset,&network,&loss);
 	
 	// loss for evaluation
 	ZeroOneLoss<unsigned int, RealVector> loss01(0.5); // classification error, output is thresholded at 1/2

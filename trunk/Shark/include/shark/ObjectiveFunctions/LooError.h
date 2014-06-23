@@ -33,7 +33,7 @@
 #define SHARK_OBJECTIVEFUNCTIONS_LOOERROR_H
 
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Models/AbstractModel.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
@@ -60,11 +60,8 @@ namespace shark {
 /// to LooErrorCSvm for an example.
 ///
 template<class ModelTypeT, class LabelType = typename ModelTypeT::OutputType>
-class LooError 
-: public SupervisedObjectiveFunction<typename ModelTypeT::InputType, LabelType>
+class LooError : public SingleObjectiveFunction
 {
-protected:
-	typedef SupervisedObjectiveFunction<typename ModelTypeT::InputType, LabelType> base_type;
 public:
 	typedef ModelTypeT ModelType;
 	typedef typename ModelType::InputType InputType;
@@ -72,30 +69,6 @@ public:
 	typedef LabeledData<InputType, LabelType> DatasetType;
 	typedef AbstractTrainer<ModelType, LabelType> TrainerType;
 	typedef AbstractLoss<LabelType, typename ModelType::OutputType> LossType;
-
-	///
-	/// \brief Constructor.
-	///
-	/// \param  model    Model built on subsets of the data.
-	/// \param  trainer  Trainer for learning on each subset.
-	/// \param  loss     Loss function for judging the validation output.
-	/// \param  meta     Meta object with parameters that influences the process, typically a trainer.
-	///
-	/// \par
-	/// Don't forget to call setDataset before using the object.
-	///
-	LooError(
-		ModelType* model,
-		TrainerType* trainer,
-		LossType* loss,
-		IParameterizable* meta = NULL
-	):mep_meta(meta)
-	, mep_model(model)
-	, mep_trainer(trainer)
-	, mep_loss(loss)
-	{
-		base_type::m_features |= base_type::HAS_VALUE;
-	}
 
 	///
 	/// \brief Constructor.
@@ -118,7 +91,7 @@ public:
 	, mep_trainer(trainer)
 	, mep_loss(loss)
 	{
-		base_type::m_features |= base_type::HAS_VALUE;
+		m_features |= HAS_VALUE;
 	}
 
 
@@ -129,11 +102,6 @@ public:
 				+ mep_model->name() + ","
 				+ mep_trainer->name() + ","
 				+ mep_loss->name() + ">";
-	}
-
-	/// inherited from SupervisedObjectiveFunction
-	void setDataset(DatasetType const& dataset) {
-		m_dataset = dataset;
 	}
 	
 	std::size_t numberOfVariables()const{

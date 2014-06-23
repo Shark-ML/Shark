@@ -24,64 +24,44 @@
 #define SHARK_OBJECTIVEFUNCTIONS_IMPL_NOISYERRORFUNCTION_H
 
 #include <shark/Data/DataView.h>
-#include <shark/Models/AbstractModel.h>
-#include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
 #include <shark/Rng/DiscreteUniform.h>
 
 namespace shark{
 
 namespace detail{
 /// \brief Implementation for the NoisyErrorFunction. It hides the Type of the OutputType.
-template<class InputType,class LabelType, class OutputType, class RngType >
-class NoisyErrorFunctionWrapper : public NoisyErrorFunctionWrapperBase<InputType,LabelType>
+template<class InputType,class LabelType, class OutputType>
+class NoisyErrorFunctionWrapper : public NoisyErrorFunctionWrapperBase
 {
-public:
-	typedef NoisyErrorFunctionWrapperBase<InputType,LabelType> base_type;
-	typedef typename base_type::SearchPointType SearchPointType;
-	typedef typename base_type::ResultType ResultType;
-	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
-	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
-protected:
+private:
 	AbstractModel<InputType, OutputType>* mep_model;
 	AbstractLoss<LabelType>* mep_loss;
 	DataView<LabeledData<InputType,LabelType> const> m_dataset;
 	unsigned int m_batchSize;
-	mutable DiscreteUniform<RngType> m_uni;
+	mutable DiscreteUniform<Rng::rng_type> m_uni;
 	typedef typename AbstractModel<InputType, OutputType>::BatchOutputType BatchOutputType;
 	typedef typename LabeledData<InputType,LabelType>::batch_type BatchDataType;
 
 public:
-	NoisyErrorFunctionWrapper(AbstractModel<InputType,LabelType>* model,AbstractLoss<LabelType>* loss,unsigned int batchSize=1)
-	: m_batchSize(batchSize),m_uni(BaseRng<RngType>::globalRng,0,1){
+	NoisyErrorFunctionWrapper(
+		LabeledData<InputType,LabelType> const& dataset,
+		AbstractModel<InputType,LabelType>* model,
+		AbstractLoss<LabelType>* loss,unsigned int batchSize=1
+	): mep_model(model), mep_loss(loss), m_dataset(dataset), m_batchSize(batchSize),m_uni(Rng::globalRng,0,m_dataset.size()-1){
 		SHARK_ASSERT(model!=NULL);
 		SHARK_ASSERT(loss!=NULL);
-		mep_model = model;
-		mep_loss = loss;
-		updateFeatures();
-	}
-	NoisyErrorFunctionWrapper(AbstractModel<InputType,LabelType>* model,AbstractLoss<LabelType>* loss,RngType& rng,unsigned int batchSize=1)
-	: m_batchSize(batchSize),m_uni(rng,0,1){
-		SHARK_ASSERT(model!=NULL);
-		SHARK_ASSERT(loss!=NULL);
-		mep_model = model;
-		mep_loss = loss;
-		updateFeatures();
+		
+		if(mep_model->hasFirstParameterDerivative() && mep_loss->hasFirstDerivative())
+			this->m_features|=HAS_FIRST_DERIVATIVE;
+		this->m_features|=CAN_PROPOSE_STARTING_POINT;
 	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "NoisyErrorFunctionWrapper"; }
 
-	FunctionWrapperBase<InputType,LabelType>* clone()const{
-		return new NoisyErrorFunctionWrapper<InputType,LabelType,OutputType,RngType>(*this);
-	}
-
-	void updateFeatures(){
-		if(mep_model->hasFirstParameterDerivative() && mep_loss->hasFirstDerivative())
-			this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
-		this->m_features|=base_type::CAN_PROPOSE_STARTING_POINT;
-		//a hack to update changing names...
+	FunctionWrapperBase* clone()const{
+		return new NoisyErrorFunctionWrapper<InputType,LabelType,OutputType>(*this);
 	}
 
 	void configure( const PropertyTree & node ) {
@@ -100,14 +80,7 @@ public:
 		updateFeatures();
 	}
 
-
-	void setDataset(const LabeledData<InputType,LabelType>& dataset){
-		m_dataset = dataset;
-		m_uni.setRange(0,m_dataset.size()-1);
-	}
-
 	void proposeStartingPoint( SearchPointType & startingPoint)const {
-		SHARK_FEATURE_CHECK(CAN_PROPOSE_STARTING_POINT);
 		startingPoint=mep_model->parameterVector();
 	}
 	
@@ -135,7 +108,6 @@ public:
 	}
 
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative )const {
-		SHARK_FEATURE_CHECK(HAS_FIRST_DERIVATIVE);
 
 		this->m_evaluationCounter++;
 
@@ -169,77 +141,67 @@ void swap(const NoisyErrorFunction<InputType,LabelType>& op1, const NoisyErrorFu
 	swap(op1.m_features,op2.m_features);
 }
 
-template<class InputType,class LabelType,class RngType>
+template<class InputType,class LabelType>
 template<class OutputType>
-NoisyErrorFunction<InputType,LabelType,RngType>::NoisyErrorFunction(AbstractModel<InputType,OutputType>* model, AbstractLoss<LabelType, OutputType>* loss,unsigned int batchSize)
-:mp_wrapper(new detail::NoisyErrorFunctionWrapper<InputType,LabelType,OutputType,RngType>(model,loss,batchSize)){
-	this -> m_features = mp_wrapper -> features();
-}
-template<class InputType,class LabelType,class RngType>
-template<class OutputType>
-NoisyErrorFunction<InputType,LabelType,RngType>::NoisyErrorFunction(
+NoisyErrorFunction<InputType,LabelType>::NoisyErrorFunction(
+	DatasetType const& dataset,
 	AbstractModel<InputType,OutputType>* model,
 	AbstractLoss<LabelType, OutputType>* loss,
-	RngType& rng,
 	unsigned int batchSize)
-:mp_wrapper(new detail::NoisyErrorFunctionWrapper<InputType,LabelType,OutputType,RngType>(model,loss,batchSize)){
+:mp_wrapper(new detail::NoisyErrorFunctionWrapper<InputType,LabelType,OutputType>(dataset,model,loss,batchSize)){
 	this -> m_features = mp_wrapper -> features();
 }
-template<class InputType,class LabelType,class RngType>
-NoisyErrorFunction<InputType,LabelType,RngType>::NoisyErrorFunction(const NoisyErrorFunction<InputType,LabelType,RngType>& op){
+template<class InputType,class LabelType>
+NoisyErrorFunction<InputType,LabelType>::NoisyErrorFunction(const NoisyErrorFunction<InputType,LabelType>& op){
 	mp_wrapper = op.mp_wrapper->clone();
 	this -> m_features = mp_wrapper -> features();
 }
 
-template<class InputType,class LabelType,class RngType>
-NoisyErrorFunction<InputType,LabelType,RngType>& 
-NoisyErrorFunction<InputType,LabelType,RngType>::operator = (const NoisyErrorFunction<InputType,LabelType>& op){
-	NoisyErrorFunction<InputType,LabelType,RngType> copy(op);
+template<class InputType,class LabelType>
+NoisyErrorFunction<InputType,LabelType>& 
+NoisyErrorFunction<InputType,LabelType>::operator = (const NoisyErrorFunction<InputType,LabelType>& op){
+	NoisyErrorFunction<InputType,LabelType> copy(op);
 	swap(copy,*this);
 	return *this;
 }
 
-template<class InputType,class LabelType,class RngType>
-void NoisyErrorFunction<InputType,LabelType,RngType>::updateFeatures(){
+template<class InputType,class LabelType>
+void NoisyErrorFunction<InputType,LabelType>::updateFeatures(){
 	mp_wrapper -> updateFeatures();
 	this -> m_features = mp_wrapper -> features();
 }
 
-template<class InputType,class LabelType,class RngType>
-void NoisyErrorFunction<InputType,LabelType,RngType>::configure( const PropertyTree & node ){
+template<class InputType,class LabelType>
+void NoisyErrorFunction<InputType,LabelType>::configure( const PropertyTree & node ){
 	mp_wrapper -> configure(node);
 }
-template<class InputType,class LabelType,class RngType>
-void NoisyErrorFunction<InputType,LabelType,RngType>::setDataset(LabeledData<InputType, LabelType> const& dataset){
-	mp_wrapper -> setDataset(dataset);
-}
 
-template<class InputType,class LabelType,class RngType>
-void NoisyErrorFunction<InputType,LabelType,RngType>::proposeStartingPoint(SearchPointType& startingPoint) const{
+template<class InputType,class LabelType>
+void NoisyErrorFunction<InputType,LabelType>::proposeStartingPoint(SearchPointType& startingPoint) const{
 	mp_wrapper -> proposeStartingPoint(startingPoint);
 }
 
-template<class InputType,class LabelType,class RngType>
-std::size_t NoisyErrorFunction<InputType,LabelType,RngType>::numberOfVariables() const{
+template<class InputType,class LabelType>
+std::size_t NoisyErrorFunction<InputType,LabelType>::numberOfVariables() const{
 	return mp_wrapper -> numberOfVariables();
 }
 
-template<class InputType,class LabelType,class RngType>
-double NoisyErrorFunction<InputType,LabelType,RngType>::eval(RealVector const& input) const{
+template<class InputType,class LabelType>
+double NoisyErrorFunction<InputType,LabelType>::eval(RealVector const& input) const{
 	return mp_wrapper -> eval(input);
 }
-template<class InputType,class LabelType,class RngType>
-typename NoisyErrorFunction<InputType,LabelType,RngType>::ResultType 
-NoisyErrorFunction<InputType,LabelType,RngType>::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
+template<class InputType,class LabelType>
+typename NoisyErrorFunction<InputType,LabelType>::ResultType 
+NoisyErrorFunction<InputType,LabelType>::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
 	return mp_wrapper -> evalDerivative(input,derivative);
 }
 
-template<class InputType,class LabelType,class RngType>
-void NoisyErrorFunction<InputType,LabelType,RngType>::setBatchSize(unsigned int batchSize){
+template<class InputType,class LabelType>
+void NoisyErrorFunction<InputType,LabelType>::setBatchSize(unsigned int batchSize){
 	mp_wrapper -> setBatchSize(batchSize);
 }
-template<class InputType,class LabelType,class RngType>
-unsigned int NoisyErrorFunction<InputType,LabelType,RngType>::batchSize() const{
+template<class InputType,class LabelType>
+unsigned int NoisyErrorFunction<InputType,LabelType>::batchSize() const{
 	return mp_wrapper -> batchSize();
 }
 

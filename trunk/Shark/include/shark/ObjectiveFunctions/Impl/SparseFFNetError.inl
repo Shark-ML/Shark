@@ -27,7 +27,7 @@ namespace shark{
 namespace detail{
 ///\brief Implementation of the SparseFFNetError
 template<class HiddenNeuron,class OutputNeuron>
-class SparseFFNetErrorWrapper:public FunctionWrapperBase<RealVector,RealVector>{
+class SparseFFNetErrorWrapper:public FunctionWrapperBase{
 private:
 	typedef LabeledData<RealVector,RealVector>::const_batch_reference const_reference;
 	///\brief calculates KL error
@@ -216,15 +216,14 @@ private:
 		gradient /= dataSize;
 		return error;
 	}
-
-
-
+	
 public:
 	typedef FFNet<HiddenNeuron, OutputNeuron> Network;
 	SparseFFNetErrorWrapper(
+		LabeledData<RealVector, RealVector> const& dataset,
 		Network* model, AbstractLoss<RealVector, RealVector>* loss,
 		double rho, double beta
-	):m_rho(rho), m_beta(beta) {
+	):m_dataset(dataset), m_rho(rho), m_beta(beta) {
 		SHARK_ASSERT(model!=NULL);
 		SHARK_ASSERT(loss!=NULL);
 		mep_model = model;
@@ -235,7 +234,7 @@ public:
 	std::string name() const
 	{ return "SparseFFNetErrorWrapper"; }
 
-	FunctionWrapperBase<RealVector,RealVector>* clone()const{
+	FunctionWrapperBase* clone()const{
 		return new SparseFFNetErrorWrapper<HiddenNeuron, OutputNeuron>(*this);
 	}
 
@@ -247,10 +246,6 @@ public:
 		}
 		m_rho = node.get<double>("rho",m_rho);
 		m_beta = node.get<double>("beta",m_beta);
-	}
-
-	void setDataset(LabeledData<RealVector, RealVector> const& dataset){
-		m_dataset = dataset;
 	}
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
@@ -316,11 +311,15 @@ private:
 } // namespace detail
 
 template<class HiddenNeuron,class OutputNeuron>
-SparseFFNetError::SparseFFNetError(FFNet<HiddenNeuron, OutputNeuron>* model, AbstractLoss<RealVector, RealVector>* loss, double rho, double beta){
+SparseFFNetError::SparseFFNetError(
+	DatasetType const& dataset,
+	FFNet<HiddenNeuron, OutputNeuron>* model, 
+	AbstractLoss<RealVector, RealVector>* loss, double rho, double beta
+){
 	m_features |= HAS_FIRST_DERIVATIVE;
 	m_features |= CAN_PROPOSE_STARTING_POINT;
 
-	mp_wrapper.reset(new detail::SparseFFNetErrorWrapper<HiddenNeuron, OutputNeuron>(model,loss,rho,beta));
+	mp_wrapper.reset(new detail::SparseFFNetErrorWrapper<HiddenNeuron, OutputNeuron>(dataset,model,loss,rho,beta));
 }
 }
 #endif

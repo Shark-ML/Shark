@@ -46,8 +46,7 @@ int main(){
 	
 	//create error function
 	NegativeClassificationLogLikelihood loss; // surrogate loss for training
-	ErrorFunction<RealVector,unsigned int> error(&network,&loss);
-	error.setDataset(dataset);
+	ErrorFunction<RealVector,unsigned int> error(dataset,&network,&loss);
 	
 	//initialize Rprop and initialize the network randomly
 	initRandomUniform(network,-0.1,0.1);

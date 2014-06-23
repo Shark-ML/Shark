@@ -47,7 +47,7 @@ int main(){
 	
 	//create error function
 	CrossEntropy loss;
-	ErrorFunction<RealVector,unsigned int> error(&network,&loss,training);
+	ErrorFunction<RealVector,unsigned int> error(training,&network,&loss);
 	
 	// loss for evaluation
 	// The zeroOneLoss for multiclass problems assigns the class to the highest output

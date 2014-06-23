@@ -33,7 +33,7 @@
 #define SHARK_OBJECTIVEFUNCTIONS_LOOERRORCSVM_H
 
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/Algorithms/QP/BoxConstrainedProblems.h>
 #include <shark/Algorithms/QP/SvmProblems.h>
@@ -47,21 +47,13 @@ namespace shark {
 /// \brief Leave-one-out error, specifically optimized for C-SVMs.
 ///
 template<class InputType, class CacheType = float>
-class LooErrorCSvm : public SupervisedObjectiveFunction<InputType, unsigned int>
+class LooErrorCSvm : public SingleObjectiveFunction
 {
 public:
-
 	typedef CacheType QpFloatType;
 	typedef AbstractKernelFunction<InputType> KernelType;
 	typedef LabeledData<InputType, unsigned int> DatasetType;
-private:
-	typedef SupervisedObjectiveFunction<InputType, unsigned int> base_type;
 
-	const DatasetType* mep_dataset;
-	KernelType* mep_kernel;
-	bool m_withOffset;
-
-public:
 	/// \brief Constructor.
 	LooErrorCSvm(DatasetType const& dataset, KernelType* kernel, bool withOffset)
 	: mep_dataset(&dataset)
@@ -69,18 +61,13 @@ public:
 	, m_withOffset(withOffset)
 	{
 		SHARK_CHECK(kernel != NULL, "kernel is not allowed to be Null");
-		base_type::m_features |= base_type::HAS_VALUE;
+		m_features |= HAS_VALUE;
 	}
 
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LooErrorCSvm"; }
-
-	/// inherited from SupervisedObjectiveFunction
-	void setDataset(DatasetType const& dataset) {
-		mep_dataset = &dataset;
-	}
 	
 	std::size_t numberOfVariables()const{
 		return mep_kernel->numberOfParameters()+1;
@@ -196,7 +183,7 @@ public:
 		}
 	}
 
-protected:
+private:
 	/// Compute the SVM offset term (b).
 	template<class Problem>
 	double computeBias(Problem const& problem){
@@ -227,6 +214,10 @@ protected:
 		else 
 			return 0.5 * (lowerBound + upperBound);
 	}
+	
+	const DatasetType* mep_dataset;
+	KernelType* mep_kernel;
+	bool m_withOffset;
 };
 
 

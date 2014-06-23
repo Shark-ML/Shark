@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 }
 //now, that we now, that the unweighted version does the same as the weighted, we check
 //that the unweighted version works, by calculating the numerical gradient
-class TestGradientVH : public UnsupervisedObjectiveFunction<RealVector>{
+class TestGradientVH : public SingleObjectiveFunction{
 public:
 	TestGradientVH(BinaryRBM* rbm): mpe_rbm(rbm){
 		m_features |= HAS_FIRST_DERIVATIVE;
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
 	testDerivative(gradient,parameters,1.e-3,1.e-10,0.1);
 }
 
-class TestGradientHV : public UnsupervisedObjectiveFunction<RealVector>{
+class TestGradientHV : public SingleObjectiveFunction{
 public:
 	TestGradientHV(BinaryRBM* rbm): mpe_rbm(rbm){
 		m_features |= HAS_FIRST_DERIVATIVE;

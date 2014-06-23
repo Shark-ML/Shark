@@ -66,8 +66,7 @@ BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
 	SquaredLoss<> loss;
 	LinearModel<> model(3);
 	// batchsize 1 corresponds to stochastic gradient descent
-	NoisyErrorFunction<> mse(&model,&loss,1);
-	mse.setDataset(dataset);
+	NoisyErrorFunction<> mse(dataset,&model,&loss,1);
 	optimizer.init(mse, point);
 	// train the cmac
 	double error = 0.0;

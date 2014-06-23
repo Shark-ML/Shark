@@ -113,15 +113,14 @@ RealMatrix calculateCenteredKernelMatrix(Kernel const& kernel, Data const& data)
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear_Centered )
 {
 	DenseLinearKernel kernel;
-	KernelTargetAlignment<> kta(&kernel);
+	KernelTargetAlignment<> kta(data,&kernel);
+	KernelTargetAlignment<> ktaCentered(dataCentered,&kernel);
 	
 	
 	//linear Kernel doesn't have any parameters...
 	RealVector input;
 	
-	kta.setDataset(dataCentered);
-	double evalCentered = kta.eval(input);
-	kta.setDataset(data);
+	double evalCentered = ktaCentered.eval(input);
 	double eval = kta.eval(input);
 	BOOST_CHECK_CLOSE(eval,evalCentered,1.e-5);
 }
@@ -130,7 +129,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear_Cente
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear )
 {
 	DenseLinearKernel kernel;
-	KernelTargetAlignment<> kta(&kernel);
+	KernelTargetAlignment<> kta(data, &kernel);
 	
 	//calculate analytic result from centered Kernel
 	RealMatrix K = calculateRegularizedKernelMatrix(kernel,dataCentered.inputs());
@@ -141,7 +140,6 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear )
 	
 	//linear Kernel doesn't have any parameters...
 	RealVector input;
-	kta.setDataset(data);
 	double eval = kta.eval(input);
 	BOOST_CHECK_CLOSE(eval,result,1.e-5);
 	
@@ -150,7 +148,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear )
 //calculate centered KTA against "dumb" calculation
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_GaussKernel ){
 	GaussianRbfKernel<> kernel(1);
-	KernelTargetAlignment<> kta(&kernel);
+	KernelTargetAlignment<> kta(data, &kernel);
 	
 	//calculate analytic result from centered Kernel
 	RealMatrix K = calculateCenteredKernelMatrix(kernel,data.inputs());
@@ -162,7 +160,6 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_GaussKernel 
 	//linear Kernel doesn't have any parameters...
 	RealVector input(1);
 	input(0) = 1;
-	kta.setDataset(data);
 	double eval = kta.eval(input);
 	BOOST_CHECK_CLOSE(eval,result,1.e-5);
 	
@@ -223,8 +220,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_numerics){
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_GaussKernel )
 {
 	GaussianRbfKernel<> kernel(1);
-	KernelTargetAlignment<> kta(&kernel);
-	kta.setDataset(data);
+	KernelTargetAlignment<> kta(data,&kernel);
 	
 	for(std::size_t i = 0; i != 100; ++i){
 		RealVector input(1);

@@ -30,7 +30,7 @@
 #ifndef SHARK_UNSUPERVISED_RBM_GRADIENTAPPROXIMATIONS_EXACTGRADIENT_H
 #define SHARK_UNSUPERVISED_RBM_GRADIENTAPPROXIMATIONS_EXACTGRADIENT_H
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
 #include <shark/Unsupervised/RBM/analytics.h>
 #include <boost/type_traits/is_same.hpp>
@@ -38,20 +38,17 @@
 namespace shark{
 
 template<class RBMType>
-class ExactGradient: public UnsupervisedObjectiveFunction<RealVector>{
+class ExactGradient: public SingleObjectiveFunction{
 private:
-	typedef UnsupervisedObjectiveFunction<RealVector> base_type;
 	typedef GibbsOperator<RBMType> Gibbs;
 public:
 	typedef RBMType RBM;
-	typedef typename base_type::SearchPointType SearchPointType;
-	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
 
 	ExactGradient(RBM* rbm): mpe_rbm(rbm){
 		SHARK_ASSERT(rbm != NULL);
 
-		base_type::m_features |= base_type::HAS_FIRST_DERIVATIVE;
-		base_type::m_features |= base_type::CAN_PROPOSE_STARTING_POINT;
+		m_features |= HAS_FIRST_DERIVATIVE;
+		m_features |= CAN_PROPOSE_STARTING_POINT;
 	};
 
 	/// \brief From INameable: return the class name.

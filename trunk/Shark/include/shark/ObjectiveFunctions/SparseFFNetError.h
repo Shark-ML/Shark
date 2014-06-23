@@ -35,7 +35,7 @@
 
 #include <shark/Models/FFNet.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include "Impl/FunctionWrapperBase.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -53,16 +53,17 @@ namespace shark{
 ///
 /// This Error Function has two meta-parameters: rho governs the desired mean activation and
 /// beta the strength of regularization.
-class SparseFFNetError : public SupervisedObjectiveFunction<RealVector, RealVector>
+class SparseFFNetError : public SingleObjectiveFunction
 {
 public:
-
+	typedef LabeledData<RealVector, RealVector> DatasetType;
 	template<class HiddenNeuron,class VisibleNeuron>
-	SparseFFNetError(FFNet<HiddenNeuron,VisibleNeuron>* model, AbstractLoss<RealVector, RealVector>* loss, double rho = 0.5, double beta = 0.1);
-	SparseFFNetError(SparseFFNetError const& op):mp_wrapper(op.mp_wrapper->clone()){
-		m_features |= HAS_FIRST_DERIVATIVE;
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-	}
+	SparseFFNetError(
+		DatasetType const& dataset,
+		FFNet<HiddenNeuron,VisibleNeuron>* model, 
+		AbstractLoss<RealVector, RealVector>* loss, 
+		double rho = 0.5, double beta = 0.1
+	);
 	SparseFFNetError& operator=(SparseFFNetError const& op){
 		mp_wrapper.reset(op.mp_wrapper->clone());
 		return *this;
@@ -78,9 +79,6 @@ public:
 
 	void configure(PropertyTree const& node){
 		mp_wrapper->configure(node);
-	}
-	void setDataset(LabeledData<RealVector, RealVector> const& dataset){
-		mp_wrapper->setDataset(dataset);
 	}
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
@@ -101,7 +99,7 @@ public:
 	}
 
 private:
-	boost::scoped_ptr<detail::FunctionWrapperBase<RealVector,RealVector> > mp_wrapper;
+	boost::scoped_ptr<detail::FunctionWrapperBase > mp_wrapper;
 };
 
 }

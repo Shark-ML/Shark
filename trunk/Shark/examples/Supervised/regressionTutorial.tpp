@@ -47,8 +47,7 @@ int main(){
 	//the ErrorFunction brings model, loss and data together and so automates evaluation
 	//###begin<error_function>
 	SquaredLoss<> loss;
-	ErrorFunction<RealVector,RealVector> errorFunction(&model,&loss);
-	errorFunction.setDataset(data);
+	ErrorFunction<RealVector,RealVector> errorFunction(data, &model,&loss);
 	//###end<error_function>
 
 	//###begin<optimize>

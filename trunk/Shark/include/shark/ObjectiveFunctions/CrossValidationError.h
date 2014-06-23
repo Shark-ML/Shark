@@ -36,7 +36,7 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_CROSSVALIDATIONERROR_H
 #define SHARK_OBJECTIVEFUNCTIONS_CROSSVALIDATIONERROR_H
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/ObjectiveFunctions/AbstractCost.h>

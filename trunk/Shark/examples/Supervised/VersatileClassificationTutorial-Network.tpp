@@ -39,10 +39,9 @@ int main()
 	                                     // and two output neurons (two classes).
 	initRandomUniform(model, -0.1, 0.1); // initialize with small random weights
 	CrossEntropy trainloss;              // differentiable loss for neural network training
-	ErrorFunction<RealVector, unsigned int> error(&model, &trainloss, traindata);
 	IRpropPlus optimizer;                // gradient-based optimization algorithm
 	MaxIterations<> stop(100);           // stop optimization after 100 Rprop steps
-	OptimizationTrainer<ModelType, unsigned int> trainer(&error, &optimizer, &stop);
+	OptimizationTrainer<ModelType, unsigned int> trainer(&trainloss, &optimizer, &stop);
 //###end<Network>
 
 //###begin<skeleton>
