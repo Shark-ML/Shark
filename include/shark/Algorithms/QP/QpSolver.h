@@ -64,9 +64,13 @@ public:
 		}
 	}
 
-	/// \brief constructor which initializes a C-SVM problem
-	GeneralQuadraticProblem(MatrixType& quadratic, Data<unsigned int> const& labels, double C)
-	: quadratic(quadratic)
+	/// \brief constructor which initializes a C-SVM problem with weighted datapoints and different regularizers for every class
+	GeneralQuadraticProblem(
+		MatrixType& quadratic, 
+		Data<unsigned int> const& labels, 
+		Data<double> const& weights, 
+		RealVector const& regularizers
+	): quadratic(quadratic)
 	, linear(quadratic.size())
 	, alpha(quadratic.size(),0)
 	, diagonal(quadratic.size())
@@ -77,14 +81,23 @@ public:
 		SIZE_CHECK(dimensions() == linear.size());
 		SIZE_CHECK(dimensions() == quadratic.size());
 		SIZE_CHECK(dimensions() == labels.numberOfElements());
+		SIZE_CHECK(dimensions() == weights.numberOfElements());
+		SIZE_CHECK(regularizers.size() > 0);
+		SIZE_CHECK(regularizers.size() <= 2);
+		
+		double Cn = regularizers[0];
+		double Cp = regularizers[0];
+		if(regularizers.size() == 2)
+			Cp = regularizers[1];
 
 		for(std::size_t i = 0; i!= dimensions(); ++i){
 			unsigned int label = labels.element(i);
+			double weight = weights.element(i);
 			permutation[i] = i;
 			diagonal(i) = quadratic.entry(i, i);
 			linear(i) = label? 1.0:-1.0;
-			boxMin(i) = label? 0.0:-C;
-			boxMax(i) = label? C : 0.0;
+			boxMin(i) = label? 0.0:-Cn*weight;
+			boxMax(i) = label? Cp*weight : 0.0;
 		}
 	}
 
