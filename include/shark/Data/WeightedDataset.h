@@ -554,10 +554,13 @@ std::ostream &operator << (std::ostream &stream, const WeightedLabeledData<T, U>
 
 /// \brief creates a weighted unweighted data object from two ranges, representing data and weights
 template<class InputRange,class LabelRange, class WeightRange>
-WeightedLabeledData<
-	typename boost::range_value<InputRange>::type,
-	typename boost::range_value<LabelRange>::type
-> createLabeledDataFromRange(InputRange const& inputs, LabelRange const& labels, WeightRange const& weights, std::size_t batchSize = 0){
+typename boost::disable_if<
+	boost::is_arithmetic<WeightRange>,
+	WeightedLabeledData<
+		typename boost::range_value<InputRange>::type,
+		typename boost::range_value<LabelRange>::type
+	>
+>::type createLabeledDataFromRange(InputRange const& inputs, LabelRange const& labels, WeightRange const& weights, std::size_t batchSize = 0){
 	SHARK_CHECK(boost::size(inputs) == boost::size(labels),
 	"[createDataFromRange] number of data points and number of weights must agree");
 	SHARK_CHECK(boost::size(inputs) == boost::size(weights),
@@ -572,6 +575,58 @@ WeightedLabeledData<
 		createLabeledDataFromRange(inputs,labels,batchSize),
 		createDataFromRange(weights,batchSize)
 	);
+}
+
+/// \brief Creates a bootstrap partition of a labeled dataset and returns it using weighting.
+///
+/// Bootstrapping resamples the dataset by drawing a set of points with
+/// replacement. Thus the sampled set will contain some points multiple times
+/// and some points not at all. Bootstrapping is usefull to obtain unbiased
+/// measurements of the mean and variance of an estimator.
+///
+/// Optionally the size of the bootstrap (that is, the number of sampled points)
+/// can be set. By default it is 0, which indicates that it is the same size as the original dataset.
+template<class InputType, class LabelType>
+WeightedLabeledData< InputType, LabelType> bootstrap(
+	LabeledData<InputType,LabelType> const& dataset,
+	std::size_t bootStrapSize = 0
+){
+	if(bootStrapSize == 0)
+		bootStrapSize = dataset.numberOfElements();
+	
+	WeightedLabeledData<InputType,LabelType> bootstrapSet(dataset,0.0);
+
+	for(std::size_t i = 0; i != bootStrapSize; ++i){
+		std::size_t index = Rng::discrete(0,bootStrapSize-1);
+		bootstrapSet.element(index).weight += 1.0;
+	}
+	return bootstrapSet;
+}
+
+/// \brief Creates a bootstrap partition of an unlabeled dataset and returns it using weighting.
+///
+/// Bootstrapping resamples the dataset by drawing a set of points with
+/// replacement. Thus the sampled set will contain some points multiple times
+/// and some points not at all. Bootstrapping is usefull to obtain unbiased
+/// measurements of the mean and variance of an estimator.
+///
+/// Optionally the size of the bootstrap (that is, the number of sampled points)
+/// can be set. By default it is 0, which indicates that it is the same size as the original dataset.
+template<class InputType>
+WeightedUnlabeledData<InputType> bootstrap(
+	UnlabeledData<InputType> const& dataset,
+	std::size_t bootStrapSize = 0
+){
+	if(bootStrapSize == 0)
+		bootStrapSize = dataset.numberOfElements();
+	
+	WeightedUnlabeledData<InputType> bootstrapSet(dataset,0.0);
+
+	for(std::size_t i = 0; i != bootStrapSize; ++i){
+		std::size_t index = Rng::discrete(0,bootStrapSize-1);
+		bootstrapSet.element(index).weight += 1.0;
+	}
+	return bootstrapSet;
 }
 
 /** @*/
