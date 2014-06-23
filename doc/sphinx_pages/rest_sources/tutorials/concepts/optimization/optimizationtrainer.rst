@@ -51,7 +51,7 @@ The concepts do indeed differ in the following three aspects:
 
 First, model training is an atomic step, in contrast to an iterative
 optimization process. This is reflected by the
-:doxy:`AbstractTrainer::train` interface.
+:doxy:`AbstractTrainer::train` interface. 
 
 Second, model training is understood as machine learning, thus, learning
 from data. Hence, training data needs to be provided to the train
@@ -67,7 +67,10 @@ training a linear model to do a linear discriminant analysis
 (:doxy:`LDA`) is specific to a certain class of models, in this case
 linear models, and requires a certain type of training data, in this
 case a classification problem. Thus, :doxy:`IRpropPlus` is an
-optimizer, while :doxy:`LDA` is a trainer.
+optimizer, while :doxy:`LDA` is a trainer. This entails that the whole
+training procedure is known to the trainer and thus very special
+optimization strategies can be applied - for example if the problem
+is convex and separable.
 
 
 Model Training as an Optimization Problem
@@ -89,8 +92,7 @@ However, Shark provides a second mechanism for training the same
 network, which amounts to casting the above process into a trainer.
 The :doxy:`OptimizationTrainer` class encapsulates the above iterative
 training procedure by means of three objects:
-A :doxy:`SupervisedObjectiveFunction`, typically an :doxy:`ErrorFunction`,
-possibly combined with a regularizer, an optimizer, and a stopping
+An :doxy:`AbstractLoss`, an optimizer, and a stopping
 criterion. The last component is encapsulated by the
 :doxy:`AbstractStoppingCriterion` interface. This interface allows
 the :doxy:`OptimizationTrainer` to implement the optimization loop

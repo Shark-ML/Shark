@@ -112,8 +112,8 @@ function that evaluates a point in the search space of solutions and returns
 its performance for the given problem. In the case of the ``ErrorFunction``,
 the search space is formed by the parameters of the model. For evaluation, the
 error function retrieves the performance of the given model with the specified
-parameters on a data set which is specified using ``setDataset``. To assess the
-performance, it applies a loss function to each data point. For linear regression,
+parameters on a data set which is specified as the first argument in the constructor. 
+To assess the performance, it applies a loss function to each data point. For linear regression,
 we want to use the mean squared error, so we use the ``SquaredLoss`` class.
 This loss function computes the squared difference
 
@@ -162,11 +162,6 @@ it is more convenient to use the loss directly. We let the model evaluate the wh
 test set at once and ask the loss how big the error for this set of predictions is::
 
 ..sharkcode<Supervised/regressionTutorial.tpp,test_error>
-
-or, the aforementioned alternative::
-
-  errorFunction.setDataset(test);
-  double testError = errorFunction.eval(optimizer.solution().point);
 
 Let us see the results (do not forget to include the ``iostream`` header
 for this and ``using namespace std;``) ::
