@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       Data for (un-)base_typevised learning.
+ * \brief       Data for (un-)supervised learning.
  * 
  * 
  * \par
@@ -71,7 +71,7 @@ namespace shark {
 /// set of, for example 100 data points, at the same time. If the type of data it stores
 /// is for example RealVector, the batches of this type are RealMatrices. This is good because most often
 /// operations on the whole matrix are faster than operations on the separate vectors.
-/// Nearly all operations of the set have to be interpreted in terms of the batch. So the iterator interface will
+/// Nearly all operations of the set have to be interpreted in terms of the batch. Therefore the iterator interface will
 /// give access to the batches but not to single elements. For this separate element_iterators and const_element_iterators
 /// can be used.
 ///\par
@@ -260,13 +260,6 @@ public:
 	: m_data(size,element,batchSize)
 	{ }
 
-	//~ /// Construction from data
-	//~ ///@param points the data from which to create the Container
-	//~ ///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	//~ Data(std::vector<element_type> const& points, std::size_t batchSize = DefaultBatchSize)
-	//~ : m_data(points,batchSize)
-	//~ { }
-
 	// MISC
 
 	void read(InArchive& archive){
@@ -355,7 +348,6 @@ std::ostream &operator << (std::ostream &stream, const Data<T>& d) {
 /// The UnlabeledData class is basically a standard Data container
 /// with the special interpretation of its data point being
 /// "inputs" to a learning algorithm.
-///
 template <class InputT>
 class UnlabeledData : public Data<InputT>
 {
@@ -373,11 +365,6 @@ public:
 	///\brief Constructor.
 	UnlabeledData()
 	{ }
-
-	//~ ///\brief Construction from data.
-	//~ UnlabeledData(std::vector<InputT> const& points,std::size_t batchSize = base_type::DefaultBatchSize)
-	//~ : base_type(points,batchSize)
-	//~ { }
 
 	///\brief Construction from data.
 	UnlabeledData(Data<InputT> const& points)
@@ -451,10 +438,10 @@ public:
 /// provides access to the corresponding labels.
 ///
 /// LabeledData tries to mimic the underlying data as pairs of input and label data.
-///this means that when accessing a batch by calling batch(splitPointber) or choosing one of the iterators
+/// this means that when accessing a batch by calling batch(i) or choosing one of the iterators
 /// one access the input batch by batch(i).input and the labels by batch(i).label
 ///
-///this also holds true for single element access using operator(). Be aware, that direct access to element is
+///this also holds true for single element access using operator(). Be aware, that direct access to an element is
 ///a linear time operation. So it is not advisable to iterate over the elements, but instead iterate over the batches.
 template <class InputT, class LabelT>
 class LabeledData : public ISerializable
@@ -763,6 +750,13 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
 	}
 
 	return data;
+}
+
+/// \brief creates a data object from a range of elements
+template<class Range>
+UnlabeledData<typename boost::range_value<Range>::type>
+createUnlabeledDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
+	return createDataFromRange(inputs,maximumBatchSize);
 }
 /// \brief creates a labeled data object from two ranges, representing inputs and labels
 template<class Range1, class Range2>

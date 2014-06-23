@@ -76,7 +76,7 @@ public:
 	{ return "NegativeLogLikelihood"; }
 
 	
-	void configure(const PropertyTree & node){}
+	void configure(PropertyTree const& node){}
 	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;
 	}
@@ -89,7 +89,7 @@ public:
 		return mep_model->numberOfParameters();
 	}
 
-	double eval(RealVector const& input) const{
+	ResultType eval(RealVector const& input) const{
 		SIZE_CHECK(input.size() == numberOfVariables());
 		m_evaluationCounter++;
 		mep_model->setParameterVector(input);
@@ -108,7 +108,7 @@ public:
 		return -error;//negative log likelihood
 	}
 	ResultType evalDerivative( 
-		const SearchPointType & input, 
+		SearchPointType const& input, 
 		FirstOrderDerivative & derivative 
 	) const{
 		SIZE_CHECK(input.size() == numberOfVariables());
