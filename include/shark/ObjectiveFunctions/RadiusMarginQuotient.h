@@ -33,7 +33,7 @@
 #define SHARK_OBJECTIVEFUNCTIONS_RADIUSMARGINQUOTIENT_H
 
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Algorithms/QP/SvmProblems.h>
 #include <shark/Models/Kernels/KernelHelpers.h>
 #include <shark/LinAlg/CachedMatrix.h>
@@ -56,7 +56,7 @@ namespace shark {
 /// of a binary hard-margin SVM.
 ///
 template<class InputType, class CacheType = float>
-class RadiusMarginQuotient : public SupervisedObjectiveFunction<InputType, unsigned int>
+class RadiusMarginQuotient : public SingleObjectiveFunction
 {
 public:
 	typedef CacheType QpFloatType;
@@ -64,33 +64,16 @@ public:
 	typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
 	typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
 
-	typedef SupervisedObjectiveFunction<InputType, unsigned int> base_type;
 	typedef LabeledData<InputType, unsigned int> DatasetType;
-	typedef typename base_type::SearchPointType SearchPointType;
 	typedef AbstractKernelFunction<InputType> KernelType;
-	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
-
-	/// \brief Constructor.
-	///
-	/// \par
-	/// Don't forget to call setDataset before using the object.
-	RadiusMarginQuotient(KernelType* kernel)
-	: mep_kernel(kernel)
-	{
-		this->m_features |= base_type::HAS_VALUE;
-		if (mep_kernel->hasFirstParameterDerivative())
-			this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
-	}
 
 	/// \brief Constructor.
 	RadiusMarginQuotient(DatasetType const& dataset, KernelType* kernel)
-	: mep_kernel(kernel)
+	: mep_kernel(kernel),m_dataset(dataset)
 	{
-		setDataset(dataset);
-
-		this->m_features |= base_type::HAS_VALUE;
+		m_features |= HAS_VALUE;
 		if (mep_kernel->hasFirstParameterDerivative())
-			this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
+			m_features |= HAS_FIRST_DERIVATIVE;
 	}
 
 
@@ -98,10 +81,6 @@ public:
 	std::string name() const
 	{ return "RadiusMarginQuotient"; }
 
-	/// \brief Make labeled data known to the radius margin objective function.
-	void setDataset(DatasetType const& dataset)
-	{ m_dataset = dataset; }
-	
 	std::size_t numberOfVariables()const{
 		return mep_kernel->numberOfParameters();
 	}
@@ -115,7 +94,7 @@ public:
 	double eval(SearchPointType const& parameters) const{
 		SIZE_CHECK(parameters.size() == mep_kernel->numberOfParameters());
 		SHARK_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::eval] call setDataset first");
-		this->m_evaluationCounter++;
+		m_evaluationCounter++;
 		
 		
 		mep_kernel->setParameterVector(parameters);
@@ -134,7 +113,7 @@ public:
 	double evalDerivative(SearchPointType const& parameters, FirstOrderDerivative& derivative) const{
 		SHARK_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::evalDerivative] call setDataset first");
 		SIZE_CHECK(parameters.size() == mep_kernel->numberOfParameters());
-		this->m_evaluationCounter++;
+		m_evaluationCounter++;
 		
 		mep_kernel->setParameterVector(parameters);
 

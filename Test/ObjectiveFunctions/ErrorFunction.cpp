@@ -78,9 +78,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_BASE )
 	//every value of input gets 2 added. so the square error of each example is 10*4=40
 	TestModel model(10,2);
 	SquaredLoss<> loss;
-	ErrorFunction<RealVector,RealVector> mse(&model,&loss);
-
-	mse.setDataset(dataset);
+	ErrorFunction<RealVector,RealVector> mse(dataset, &model,&loss);
 
 	double error=mse.eval(parameters);
 	BOOST_CHECK_SMALL(error-40,1.e-15);
@@ -140,8 +138,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	SquaredLoss<> loss;
 	
 	{
-		ErrorFunction<RealVector,RealVector> mse(&model,&loss);
-		mse.setDataset(trainset);
+		ErrorFunction<RealVector,RealVector> mse(trainset, &model,&loss);
 		double val = mse.eval(optimum);
 		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
 		
@@ -166,8 +163,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	}
 	
 	{
-		detail::LossBasedErrorFunctionImpl<RealVector,RealVector,RealVector> mse(&model,&loss);
-		mse.setDataset(trainset);
+		detail::ErrorFunctionImpl<RealVector,RealVector,RealVector> mse(trainset,&model,&loss);
 		double val = mse.eval(optimum);
 		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
 		
@@ -192,8 +188,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	}
 	
 	{
-		detail::ParallelLossBasedErrorFunctionImpl<RealVector,RealVector,RealVector> mse(&model,&loss);
-		mse.setDataset(trainset);
+		detail::ParallelErrorFunctionImpl<RealVector,RealVector,RealVector> mse(trainset,&model,&loss);
 		double val = mse.eval(optimum);
 		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
 		

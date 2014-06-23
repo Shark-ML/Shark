@@ -62,7 +62,7 @@ int main(){
 	
 	//create error function
 	NegativeClassificationLogLikelihood loss;
-	ErrorFunction<RealVector,unsigned int> error(&model,&loss,training);
+	ErrorFunction<RealVector,unsigned int> error(training,&model,&loss);
 	
 	// loss for evaluation
 	// The zeroOneLoss for multiclass problems assigns the class to the highest output

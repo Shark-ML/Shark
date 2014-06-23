@@ -6,7 +6,7 @@
  * 
  *
  * \author      T.Voss, T. Glasmachers, O.Krause
- * \date        2010-2011
+ * \date        2010-2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -32,16 +32,15 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_IMPL_FUNCTIONWRAPPERBASE_H
 #define SHARK_OBJECTIVEFUNCTIONS_IMPL_FUNCTIONWRAPPERBASE_H
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 namespace shark{
 
 namespace detail{
 ///\brief Base class for implementations of the Error Function.
-template<class InputType,class LabelType>
-class FunctionWrapperBase: public SupervisedObjectiveFunction<InputType,LabelType>{
+class FunctionWrapperBase: public SingleObjectiveFunction{
 public:
-	virtual FunctionWrapperBase<InputType,LabelType>* clone()const = 0;
+	virtual FunctionWrapperBase* clone()const = 0;
 };
 }
 }

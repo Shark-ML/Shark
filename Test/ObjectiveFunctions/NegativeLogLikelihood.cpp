@@ -30,7 +30,7 @@ BOOST_FIXTURE_TEST_SUITE(ObjectiveFunctions_NegativeLogLikelihood, Fixture)
 
 BOOST_AUTO_TEST_CASE( ObjFunct_NegativeLogLikelihood_Derivative ){
 	RBFLayer model(10,1);
-	NegativeLogLikelihood function(&model,data);
+	NegativeLogLikelihood function(data,&model);
 	
 	std::size_t numTrials = 1000;
 	RealVector point(model.numberOfParameters());
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_NegativeLogLikelihood_Optimize ){
 	}
 	model.setParameterVector(point);
 	
-	NegativeLogLikelihood function(&model,data);
+	NegativeLogLikelihood function(data,&model);
 	IRpropPlus optimizer;
 	optimizer.init(function);
 	

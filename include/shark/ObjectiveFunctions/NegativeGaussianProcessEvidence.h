@@ -36,7 +36,7 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_NEGATIVEGAUSSIANPROCESSEVIDENCE_H
 #define SHARK_OBJECTIVEFUNCTIONS_NEGATIVEGAUSSIANPROCESSEVIDENCE_H
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Models/Kernels/KernelHelpers.h>
 
 #include <shark/LinAlg/Base.h>
@@ -65,45 +65,30 @@ namespace shark {
 /// The exponential encoding is the proper choice for unconstraint optimization.
 /// Be careful not to mix up different encodings between trainer and evidence.
 template<class InputType = RealVector, class OutputType = RealVector, class LabelType = RealVector>
-class NegativeGaussianProcessEvidence : public SupervisedObjectiveFunction<InputType,LabelType>
+class NegativeGaussianProcessEvidence : public SingleObjectiveFunction
 {
-private:
-	typedef SupervisedObjectiveFunction<InputType, LabelType> base_type;
 public:
-	typedef typename base_type::DatasetType DatasetType;
+	typedef LabeledData<InputType,LabelType> DatasetType;
 	typedef AbstractKernelFunction<InputType> KernelType;
-
-	/// \param kernel: pointer to external kernel function
-	/// \param unconstrained: exponential encoding of regularization parameter for unconstraint optimization
-	NegativeGaussianProcessEvidence(KernelType* kernel, bool unconstrained = false)
-	:mep_kernel(kernel), m_unconstrained(unconstrained)
-	{
-		if (kernel->hasFirstParameterDerivative()) this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
-		setThreshold(0.);
-	}
 
 	/// \param dataset: training data for the Gaussian process
 	/// \param kernel: pointer to external kernel function
 	/// \param unconstrained: exponential encoding of regularization parameter for unconstraint optimization
-	NegativeGaussianProcessEvidence(DatasetType const& dataset,
-					KernelType* kernel,
-					bool unconstrained = false)
-		: m_dataset(dataset)
-		, mep_kernel(kernel)
-		, m_unconstrained(unconstrained)
+	NegativeGaussianProcessEvidence(
+		DatasetType const& dataset,
+		KernelType* kernel,
+		bool unconstrained = false
+	): m_dataset(dataset)
+	, mep_kernel(kernel)
+	, m_unconstrained(unconstrained)
 	{
-		if (kernel->hasFirstParameterDerivative()) this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
+		if (kernel->hasFirstParameterDerivative()) m_features |= HAS_FIRST_DERIVATIVE;
 		setThreshold(0.);
 	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "NegativeGaussianProcessEvidence"; }
-
-	/// inherited from SupervisedObjectiveFunction
-	void setDataset(DatasetType const& dataset) {
-		m_dataset = dataset;
-	}
 	
 	std::size_t numberOfVariables()const{
 		return 1+ mep_kernel->numberOfParameters();
@@ -118,7 +103,7 @@ public:
 		SHARK_ASSERT(1+kp == parameters.size());
 
 		// keep track of how often the objective function is called
-		this->m_evaluationCounter++;
+		m_evaluationCounter++;
 		
 		//set parameters
 		RealVector kernelParams(kp);
@@ -162,7 +147,7 @@ public:
 	/// For a kernel parameter \f$p\f$ and \f$C = \beta^{-1}\f$ we get the derivatives:
 	/// \f[  dE/dC = 1/2 \cdot [ -tr(M^{-1}) + (M^{-1} t)^2 ] \f]
 	/// \f[  dE/dp = 1/2 \cdot [ -tr(M^{-1} dM/dp) + t^T (M^{-1} dM/dp M^{-1}) t ] \f]
-	double evalDerivative(const RealVector& parameters, typename base_type::FirstOrderDerivative& derivative) const {
+	double evalDerivative(const RealVector& parameters, FirstOrderDerivative& derivative) const {
 		std::size_t N  = m_dataset.numberOfElements(); 
 		std::size_t kp = mep_kernel->numberOfParameters();
 
@@ -171,7 +156,7 @@ public:
 		derivative.resize(1 + kp);
 		
 		// keep track of how often the objective function is called
-		this->m_evaluationCounter++;
+		m_evaluationCounter++;
 
 		//set parameters
 		RealVector kernelParams(kp);
@@ -257,18 +242,6 @@ public:
 		
 
 private:
-	//~ RealVector generateLabelVector()const{
-		//~ std::size_t N  = m_dataset.numberOfElements(); 
-		//~ RealVector t(N);
-		//~ std::size_t startX = 0;//start of the current batch
-		//~ for (std::size_t i=0; i<m_dataset.numberOfBatches(); i++){
-			//~ std::size_t sizeX=size(m_dataset.batch(i));
-			//~ for(std::size_t k =0; k != sizeX; ++k){
-				//~ t(startX+k)=m_dataset.batch(i).label(k,0);
-			//~ }
-		//~ }
-		//~ return t;
-	//~ }
 	/// pointer to external data set
 	DatasetType m_dataset;
 

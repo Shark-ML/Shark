@@ -36,7 +36,7 @@
 #include <shark/Models/Kernels/CSvmDerivative.h>
 #include <shark/Algorithms/Trainers/SigmoidFit.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
 #include <shark/ObjectiveFunctions/Loss/NegativeClassificationLogLikelihood.h>
 
@@ -63,13 +63,8 @@ namespace shark {
 template<class InputType = RealVector>
 class SvmLogisticInterpretation : public SingleObjectiveFunction {
 public:
-	typedef SingleObjectiveFunction base_type;
-	typedef typename base_type::SearchPointType SearchPointType;
 	typedef CVFolds< LabeledData<InputType, unsigned int> > FoldsType;
 	typedef AbstractKernelFunction<InputType> KernelType;
-	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
-	//mtq: other options in the bestiarium are ResultType and SecondOrderDerivative in KTA.h; TrainerType in NGPE.h; ModelType and CostType from CVE.h ..
-
 protected:
 	FoldsType m_folds;          ///< the underlying partitioned dataset.
 	KernelType *mep_kernel;     ///< the kernel with which to run the SVM
@@ -106,12 +101,12 @@ public:
 		SHARK_CHECK(kernel != NULL, "[SvmLogisticInterpretation::SvmLogisticInterpretation] kernel is not allowed to be NULL");  //mtq: necessary despite indirect check via call in initialization list?
 		SHARK_CHECK(m_numFolds > 1, "[SvmLogisticInterpretation::SvmLogisticInterpretation] please provide a meaningful number of folds for cross validation");
 		if (!m_svmCIsUnconstrained)   //mtq: important: we additionally need to deal with kernel feasibility indicators! important!
-			this->m_features|=base_type::IS_CONSTRAINED_FEATURE;
-		this->m_features|=base_type::HAS_VALUE;
+			m_features|=IS_CONSTRAINED_FEATURE;
+		m_features|=HAS_VALUE;
 		if (mep_kernel->hasFirstParameterDerivative())
-			this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
-		this->m_features|=base_type::CAN_PROPOSE_STARTING_POINT;
-		this->m_features|=base_type::CAN_PROVIDE_CLOSEST_FEASIBLE;
+			m_features|=HAS_FIRST_DERIVATIVE;
+		m_features|=CAN_PROPOSE_STARTING_POINT;
+		m_features|=CAN_PROVIDE_CLOSEST_FEASIBLE;
 		m_folds = folds;
 	}
 

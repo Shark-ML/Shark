@@ -50,8 +50,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Value ){
 		double roh = Rng::uni(0.1,0.9);
 		double beta = Rng::uni(0.1,0.9);
 		
-		SparseFFNetError error(&model,&loss,roh,beta);
-		error.setDataset(dataset);
+		SparseFFNetError error(dataset, &model,&loss,roh,beta);
 		
 		//evaluate error and check that its consistent
 		SparseFFNetError::FirstOrderDerivative derivative;
@@ -102,8 +101,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Loss_OneLayer ){
 	FFNet<LogisticNeuron,LogisticNeuron> model;
 	model.setStructure(Dimensions,2,Dimensions);
 	SquaredLoss<RealVector> loss;
-	SparseFFNetError error(&model,&loss,0.5,0.0);
-	error.setDataset(dataset);
+	SparseFFNetError error(dataset,&model,&loss,0.5,0.0);
 	
 	double errortest = error.eval(model.parameterVector());
 	BOOST_CHECK_SMALL(errortest-loss(dataset.inputs(),model(dataset.inputs())),1.e-15);
@@ -137,8 +135,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Loss_TwoLayer ){
 	FFNet<LogisticNeuron,LogisticNeuron> model;
 	model.setStructure(Dimensions,2,2,Dimensions);
 	SquaredLoss<RealVector> loss;
-	SparseFFNetError error(&model,&loss,0.5,0.0);
-	error.setDataset(dataset);
+	SparseFFNetError error(dataset,&model,&loss,0.5,0.0);
 	
 	double errortest = error.eval(model.parameterVector());
 	BOOST_CHECK_SMALL(errortest-loss(dataset.inputs(),model(dataset.inputs())),1.e-15);
@@ -178,8 +175,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_OneLayer ){
 		double roh = Rng::uni(0.1,0.9);
 		double beta = Rng::uni(0.1,0.9);
 	
-		SparseFFNetError error(&model,&loss,roh,beta);
-		error.setDataset(dataset);
+		SparseFFNetError error(dataset,&model,&loss,roh,beta);
 		initRandomNormal(model,0.1);
 		RealVector point = model.parameterVector();
 		SparseFFNetError::FirstOrderDerivative derivative;
@@ -211,8 +207,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_TwoLayer ){
 		double roh = Rng::uni(0.1,0.9);
 		double beta = Rng::uni(0.1,0.9);
 	
-		SparseFFNetError error(&model,&loss,roh,beta);
-		error.setDataset(dataset);
+		SparseFFNetError error(dataset,&model,&loss,roh,beta);
 		initRandomNormal(model,0.1);
 		RealVector point = model.parameterVector();
 		SparseFFNetError::FirstOrderDerivative derivative;
@@ -245,8 +240,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_GradDesc_OneLayer )
 	model.setStructure(Dimensions,5,Dimensions);
 	initRandomNormal(model,1);
 	NullLoss loss;
-	SparseFFNetError error(&model,&loss,roh,beta);
-	error.setDataset(dataset);
+	SparseFFNetError error(dataset,&model,&loss,roh,beta);
 
 	IRpropPlus optimizer;
 	optimizer.init(error);
@@ -290,8 +284,7 @@ BOOST_AUTO_TEST_CASE( SparseFFNetError_Derivative_GradDesc_TwoLayer )
 	model.setStructure(Dimensions,2,2,Dimensions);
 	initRandomNormal(model,1);
 	NullLoss loss;
-	SparseFFNetError error(&model,&loss,roh,beta);
-	error.setDataset(dataset);
+	SparseFFNetError error(dataset,&model,&loss,roh,beta);
 
 	IRpropPlus optimizer;
 	optimizer.init(error);

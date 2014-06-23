@@ -4,7 +4,6 @@
 #include <shark/Algorithms/GradientDescent/Rprop.h> //Optimization algorithm
 #include <shark/ObjectiveFunctions/Loss/CrossEntropy.h> //Loss used for training
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //The real loss for testing.
-#include <shark/ObjectiveFunctions/ErrorFunction.h> //The usual error function
 #include <shark/Algorithms/Trainers/OptimizationTrainer.h> // Trainer wrapping iterative optimization
 #include <shark/Algorithms/StoppingCriteria/MaxIterations.h> //A simple stopping criterion that stops after a fixed number of iterations
 #include <shark/Algorithms/StoppingCriteria/TrainingError.h> //Stops when the algorithm seems to converge
@@ -26,15 +25,15 @@ double experiment(AbstractStoppingCriterion<T> & stoppingCriterion, Classificati
 	network.setStructure(inputDimension(trainingset),10,numberOfClasses(trainingset));
 	initRandomUniform(network,-0.1,0.1);
 
-	//The Cross Entropy maximises the activation of the cth output neuron compared to all other outputs for a sample with class c.
+	//The Cross Entropy maximises the activation of the cth output neuron 
+	// compared to all other outputs for a sample with class c.
 	CrossEntropy loss;
-	ErrorFunction<RealVector,unsigned int> errorFunction(&network,&loss);
 
 	//we use IRpropPlus for network optimization
 	IRpropPlus optimizer;
 	
 	//create an optimization trainer and train the model
-	OptimizationTrainer<FFNet<LogisticNeuron,LinearNeuron>,unsigned int > trainer(&errorFunction, &optimizer, &stoppingCriterion);
+	OptimizationTrainer<FFNet<LogisticNeuron,LinearNeuron>,unsigned int > trainer(&loss, &optimizer, &stoppingCriterion);
 	trainer.train(network, trainingset);
 	
 	//evaluate the performance on the test set using the classification loss we choose 0.5 as threshold since Logistic neurons have values between 0 and 1.
@@ -74,9 +73,7 @@ int main(){
 	FFNet<LogisticNeuron,LogisticNeuron> network;
 	network.setStructure(inputDimension(data),10,numberOfClasses(data));
 	CrossEntropy loss;
-	ErrorFunction<RealVector,unsigned int> validationFunction(&network,&loss);
-	validationFunction.setDataset(validation);
-	
+	ErrorFunction<RealVector,unsigned int> validationFunction(validation,&network,&loss);
 	
 	GeneralizationQuotient<> generalizationQuotient(10,0.1);
 	ValidatedStoppingCriterion validatedLoss(&validationFunction,&generalizationQuotient);

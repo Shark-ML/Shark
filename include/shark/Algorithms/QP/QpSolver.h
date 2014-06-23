@@ -38,6 +38,7 @@
 
 #include <shark/Core/Timer.h>
 #include <shark/Algorithms/QP/QuadraticProgram.h>
+#include <shark/Data/Dataset.h>
 
 namespace shark{
 	

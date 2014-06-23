@@ -33,7 +33,7 @@
 #define SHARK_OBJECTIVEFUNCTIONS_NEGATIVE_LOG_LIKELIHOOD_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Rng/GlobalRng.h>
 
 #include <boost/range/algorithm_ext/iota.hpp>
@@ -52,19 +52,14 @@ namespace shark{
 /// For this error function, the model is only allowed to have a single output
 /// - the probability of the sample. The distribution must be normalized as otherwise
 /// the likeelihood does not mean anything. 
-class NegativeLogLikelihood : public UnsupervisedObjectiveFunction<RealVector>
+class NegativeLogLikelihood : public SingleObjectiveFunction
 {
 public:
+	typedef UnlabeledData<RealVector> DatasetType;
+
 	NegativeLogLikelihood(
+		DatasetType const& data,
 		AbstractModel<RealVector,RealVector>* model
-	):mep_model(model){
-		if(mep_model->hasFirstParameterDerivative())
-			m_features |= HAS_FIRST_DERIVATIVE;
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-	}
-	NegativeLogLikelihood(
-		AbstractModel<RealVector,RealVector>* model,
-		UnlabeledData<RealVector> const& data
 	):mep_model(model),m_data(data){
 		if(mep_model->hasFirstParameterDerivative())
 			m_features |= HAS_FIRST_DERIVATIVE;
@@ -77,9 +72,6 @@ public:
 
 	
 	void configure(PropertyTree const& node){}
-	void setData(UnlabeledData<RealVector> const& data){
-		m_data = data;
-	}
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint=mep_model->parameterVector();

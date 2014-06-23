@@ -185,10 +185,6 @@ int main()
 	std::size_t classes = numberOfClasses(data);       // maximal class label minus one
 	std::vector<std::size_t> sizes = classSizes(data); // number of occurrences of every class label
 	std::size_t dim = inputDimension(data);            // dimensionality of the data points
-
-	LabeledData<RealVector, RealVector> dataVec;
-	std::size_t dimLabel = labelDimension(dataVec);    // dimensionality of the labels
-	std::size_t classes2 = numberOfClasses(dataVec);   // number of classes assuming one-hot-encoding
 //###end<labeled-convenience>
 }
 {

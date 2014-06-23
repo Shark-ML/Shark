@@ -34,9 +34,9 @@
 
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/ObjectiveFunctions/AbstractCost.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
+#include <shark/Data/Dataset.h>
 #include "Impl/FunctionWrapperBase.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -59,43 +59,37 @@ namespace shark{
 /// for empirical risk minimization
 
 template<class InputType = RealVector, class LabelType = RealVector>
-class ErrorFunction : public SupervisedObjectiveFunction<InputType, LabelType>
+class ErrorFunction : public SingleObjectiveFunction
 {
 public:
-	typedef SupervisedObjectiveFunction<InputType,LabelType> base_type;
-	typedef typename base_type::SearchPointType SearchPointType;
-	typedef typename base_type::ResultType ResultType;
-	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
-	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
+	typedef LabeledData<InputType, LabelType> DatasetType;
 
 	template<class OutputType>
-	ErrorFunction(AbstractModel<InputType,OutputType>* model, AbstractCost<LabelType, OutputType>* cost);
-	template<class OutputType>
-	ErrorFunction(AbstractModel<InputType,OutputType>* model, AbstractCost<LabelType, OutputType>* cost, LabeledData<InputType, LabelType> const& dataset);
+	ErrorFunction(
+		LabeledData<InputType, LabelType> const& dataset,
+		AbstractModel<InputType,OutputType>* model, 
+		AbstractLoss<LabelType, OutputType>* loss
+		
+	);
 	ErrorFunction(const ErrorFunction& op);
 	ErrorFunction<InputType,LabelType>& operator=(const ErrorFunction<InputType,LabelType>& op);
 
-	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "ErrorFunction"; }
 
-	void updateFeatures();
-
 	void configure(const PropertyTree & node);
-	void setDataset(LabeledData<InputType, LabelType> const& dataset);
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const;
 	std::size_t numberOfVariables()const;
 
 	double eval(RealVector const& input) const;
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;
-	ResultType evalDerivative( const SearchPointType & input, SecondOrderDerivative & derivative ) const;
 	
 	template<class I,class L>
 	friend void swap(const ErrorFunction<I,L>& op1, const ErrorFunction<I,L>& op2);
 
 private:
-	boost::scoped_ptr<detail::FunctionWrapperBase<InputType,LabelType> > mp_wrapper;
+	boost::scoped_ptr<detail::FunctionWrapperBase > mp_wrapper;
 };
 
 }

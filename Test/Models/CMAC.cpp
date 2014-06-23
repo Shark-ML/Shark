@@ -110,8 +110,7 @@ BOOST_AUTO_TEST_CASE( CMAC_COPY )
 
 	IRpropPlus optimizer;
 	SquaredLoss<> loss;
-	ErrorFunction<RealVector,RealVector> mse(&cmacTest,&loss);
-	mse.setDataset(dataset);
+	ErrorFunction<RealVector,RealVector> mse(dataset,&cmacTest,&loss);
 	optimizer.init(mse);
 	// train the cmac
 	double error=0;

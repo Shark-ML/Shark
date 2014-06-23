@@ -32,7 +32,8 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_KERNELTARGETALIGNMENT_H
 #define SHARK_OBJECTIVEFUNCTIONS_KERNELTARGETALIGNMENT_H
 
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
+#include <shark/Data/Dataset.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 
 
@@ -98,44 +99,27 @@ namespace shark{
  *  number of data points, and thus the size of the Gram matrix.
  */
 template<class InputType = RealVector>
-class KernelTargetAlignment : public SupervisedObjectiveFunction<InputType, unsigned int>
+class KernelTargetAlignment : public SingleObjectiveFunction
 {
 public:
-	typedef SupervisedObjectiveFunction<InputType,unsigned int> base_type;
-	typedef typename base_type::SearchPointType SearchPointType;
-	typedef typename base_type::ResultType ResultType;
-	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
-	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
-
 	/// \brief Construction of the Kernel Target Alignment (KTA) from a kernel object.
 	///
 	/// Don't forget to provide a data set with the setDataset method
 	/// before using the object.
-	KernelTargetAlignment(AbstractKernelFunction<InputType>* kernel){
+	KernelTargetAlignment(
+		LabeledData<InputType, unsigned int> const& dataset, 
+		AbstractKernelFunction<InputType>* kernel
+	){
 		SHARK_CHECK(kernel != NULL, "[KernelTargetAlignment] kernel must not be NULL");
 		
 		mep_kernel = kernel;
 		
-		this->m_features|=base_type::HAS_VALUE;
-		this->m_features|=base_type::CAN_PROPOSE_STARTING_POINT;
+		m_features|=HAS_VALUE;
+		m_features|=CAN_PROPOSE_STARTING_POINT;
 		
 		if(mep_kernel -> hasFirstParameterDerivative())
-			this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
-	}
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "KernelTargetAlignment"; }
-
-	void configure( const PropertyTree & node ){
-		PropertyTree::const_assoc_iterator it = node.find("kernel");
-		if(it != node.not_found()){
-			mep_kernel->configure(it->second);
-		}
-	}
-
-	/// Provide a data set for the KTA computation.
-	void setDataset(LabeledData<InputType, unsigned int> const& dataset){
+			m_features|=HAS_FIRST_DERIVATIVE;
+		
 		m_data = dataset;
 		m_elements = dataset.numberOfElements();
 		
@@ -155,6 +139,17 @@ public:
 			m_columnMeanY(i) = classMean(dataset.element(i).label); 
 		}
 		m_meanY=sum(m_columnMeanY)/m_elements;
+	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "KernelTargetAlignment"; }
+
+	void configure( const PropertyTree & node ){
+		PropertyTree::const_assoc_iterator it = node.find("kernel");
+		if(it != node.not_found()){
+			mep_kernel->configure(it->second);
+		}
 	}
 
 	/// Return the current kernel parameters as a starting point for an optimization run.

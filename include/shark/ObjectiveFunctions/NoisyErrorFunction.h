@@ -34,7 +34,7 @@
 
 #include <shark/Models/AbstractModel.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
-#include <shark/ObjectiveFunctions/DataObjectiveFunction.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Rng/DiscreteUniform.h>
 #include "Impl/FunctionWrapperBase.h"
 
@@ -44,8 +44,7 @@ namespace shark{
 
 namespace detail{
 ///\brief Baseclass for the Typewrapper of the Noisy Error Function.
-template<class InputType,class LabelType>
-class NoisyErrorFunctionWrapperBase:public FunctionWrapperBase<InputType,LabelType>{
+class NoisyErrorFunctionWrapperBase:public FunctionWrapperBase{
 protected:
 	size_t m_batchSize;
 public:
@@ -64,22 +63,20 @@ public:
 ///that only a fraction of the training examples is chosen randomly out of the set and
 ///thus noise is introduced. This can be used to perform stochastic gradient
 ///descent or to introduce some noise to a problem.
-template<class InputType = RealVector, class LabelType = RealVector, class RngType = Rng::rng_type>
-class NoisyErrorFunction : public SupervisedObjectiveFunction<InputType,LabelType>
+template<class InputType = RealVector, class LabelType = RealVector>
+class NoisyErrorFunction : public SingleObjectiveFunction
 {
 public:
-	typedef SupervisedObjectiveFunction<InputType,LabelType> base_type;
-	typedef typename base_type::SearchPointType SearchPointType;
-	typedef typename base_type::ResultType ResultType;
-	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
-	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
-
+	typedef LabeledData<InputType,LabelType> DatasetType;
 	template<class OutputType>
-	NoisyErrorFunction(AbstractModel<InputType,OutputType>* model,AbstractLoss<LabelType,OutputType>* loss,unsigned int batchSize=1);
-	template<class OutputType>
-	NoisyErrorFunction(AbstractModel<InputType,OutputType>* model,AbstractLoss<LabelType,OutputType>* loss,RngType& rng,unsigned int batchSize=1);
-	NoisyErrorFunction(const NoisyErrorFunction<InputType,LabelType,RngType>& op1);
-	NoisyErrorFunction<InputType,LabelType,RngType>& operator = (const NoisyErrorFunction<InputType,LabelType>& op1);
+	NoisyErrorFunction(
+		DatasetType const& dataset,
+		AbstractModel<InputType,OutputType>* model,
+		AbstractLoss<LabelType,OutputType>* loss,
+		unsigned int batchSize=1
+	);
+	NoisyErrorFunction(const NoisyErrorFunction<InputType,LabelType>& op1);
+	NoisyErrorFunction<InputType,LabelType>& operator = (const NoisyErrorFunction<InputType,LabelType>& op1);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -90,7 +87,6 @@ public:
 
 	void updateFeatures();
 	void configure( const PropertyTree & node );
-	void setDataset(const LabeledData<InputType,LabelType>& dataset);
 
 	void proposeStartingPoint( SearchPointType & startingPoint)const;
 	std::size_t numberOfVariables()const;
@@ -100,8 +96,8 @@ public:
 
 	template<class I,class L>
 	friend void swap(const NoisyErrorFunction<I,L>& op1, const NoisyErrorFunction<I,L>& op2);
-protected:
-	boost::scoped_ptr<detail::NoisyErrorFunctionWrapperBase<InputType,LabelType> > mp_wrapper;
+private:
+	boost::scoped_ptr<detail::NoisyErrorFunctionWrapperBase> mp_wrapper;
 };
 }
 #endif
