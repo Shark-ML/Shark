@@ -184,11 +184,11 @@ public:
 	, m_weights(size,element.weight,batchSize)
 	{}
 
-	///\brief Construction from data.
+	///\brief Construction from data and a dataset rpresnting the weights
 	///
 	/// Beware that when calling this constructor the organization of batches must be equal in both
 	/// containers. This Constructor will not reorganize the data!
-	 BaseWeightedDataset(DataContainerT const& data, Data<WeightType> const& weights)
+	BaseWeightedDataset(DataContainer const& data, Data<WeightType> const& weights)
 	: m_data(data), m_weights(weights)
 	{
 		SHARK_CHECK(data.numberOfElements() == weights.numberOfElements(), "[ BaseWeightedDataset::WeightedUnlabeledData] number of data and number of weights must agree");
@@ -198,6 +198,18 @@ public:
 		}
 #endif
 	}
+	
+	///\brief Construction from data. All points get the same weight assigned
+	BaseWeightedDataset(DataContainer const& data, double weight)
+	: m_data(data), m_weights(data.numberOfBatches())
+	{
+		for(std::size_t i = 0; i != numberOfBatches(); ++i){
+			std::size_t batchSize = boost::size(m_data.batch(i));
+			m_weights.batch(i) = Batch<WeightType>::type(batchSize,weight);
+		}
+	}
+	
+	
 	// ELEMENT ACCESS
 	element_reference element(std::size_t i){
 		return element_reference(m_data.element(i),m_weights.element(i));
@@ -263,6 +275,14 @@ public:
 	void repartition(Range const& batchSizes){
 		m_data.repartition(batchSizes);
 		m_weights.repartition(batchSizes);
+	}
+	
+	/// \brief Creates a vector with the batch sizes of every batch.
+	///
+	/// This method can be used together with repartition to ensure
+	/// that two datasets have the same batch structure.
+	std::vector<std::size_t> getPartitioning()const{
+		return m_data.getPartitioning();
 	}
 
 	friend void swap( self_type& a, self_type& b){
@@ -354,6 +374,11 @@ public:
 	: base_type(data,weights)
 	{}
 		
+	///\brief Construction from data and a constant weight for all elements
+	WeightedUnlabeledData(UnlabeledData<DataType> const& data, double weight)
+	: base_type(data,weight)
+	{}
+		
 	//we additionally add the two below for compatibility with UnlabeledData
 		
 	///\brief Access to the inputs as a separate container.
@@ -433,14 +458,15 @@ class WeightedLabeledData : public detail::BaseWeightedDataset <LabeledData<Inpu
 private:
 	typedef WeightedLabeledData<InputT,LabelT> self_type;
 	typedef detail::BaseWeightedDataset <LabeledData<InputT,LabelT> > base_type;
-	using base_type::data;
-	using base_type::weights;
 public:
 	typedef typename base_type::DataType DataType;
 	typedef typename base_type::WeightType WeightType;
 	typedef InputT InputType;
 	typedef LabelT LabelType;
 	typedef typename base_type::element_type element_type;
+
+	using base_type::data;
+	using base_type::weights;
 
 	BOOST_STATIC_CONSTANT(std::size_t, DefaultBatchSize = (LabeledData<InputT,LabelT>::DefaultBatchSize));
 
@@ -471,8 +497,13 @@ public:
 	///
 	/// Beware that when calling this constructor the organization of batches must be equal in both
 	/// containers. This Constructor will not reorganize the data!
-	WeightedLabeledData(LabeledData<DataType,LabelType> const& data, Data<WeightType> const& weights)
+	WeightedLabeledData(LabeledData<InputType,LabelType> const& data, Data<WeightType> const& weights)
 	: base_type(data,weights)
+	{}
+		
+	///\brief Construction from data and a constant weight for all elements
+	WeightedLabeledData(LabeledData<InputType,LabelType> const& data, double weight)
+	: base_type(data,weight)
 	{}
 		
 	///\brief Access to the inputs as a separate container.
