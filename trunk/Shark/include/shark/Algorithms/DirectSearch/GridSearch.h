@@ -154,6 +154,26 @@ namespace shark {
 		}
 	}
 
+	//! special case for line search
+	//! \param  min1     smallest value for first parameter
+	//! \param  max1     largest value for first parameter
+	//! \param  sections1   total number of values for first parameter
+	void configure(double min1, double max1, size_t sections1)
+	{
+		RANGE_CHECK(min1<=max1);
+		RANGE_CHECK(sections1 > 0);
+
+		m_nodeValues.resize(1u);
+
+		if ( sections1 == 1 ) {
+			m_nodeValues[0].push_back(( min1 + max1 ) / 2.0);
+		} else {
+			for (size_t section = 0; section < sections1; section++)
+				m_nodeValues[0].push_back(min1 + section * (max1 - min1) / (sections1 - 1.0));
+		}
+	}
+
+
 	//! uniform definition of the values to test for all parameters
 	//! \param  params  number of model parameters to optimize
 	//! \param  values  values used for every coordinate
