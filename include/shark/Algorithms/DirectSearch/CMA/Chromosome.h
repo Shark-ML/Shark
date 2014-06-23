@@ -106,7 +106,7 @@ struct CMAChromosome{
 		if( m_successProbability < m_successThreshold ) {
 			m_evolutionPath *= 1 - m_evolutionPathLearningRate;
 			noalias(m_evolutionPath) += std::sqrt( evolutionpathUpdateWeight ) * m_lastStep;
-			rankOneUpdate(1 - m_covarianceMatrixLearningRate,m_covarianceMatrixLearningRate,m_evolutionPath);
+			m_mutationDistribution.rankOneUpdate(1 - m_covarianceMatrixLearningRate,m_covarianceMatrixLearningRate,m_evolutionPath);
 		} else {
 			roundUpdate();
 		}
@@ -135,7 +135,7 @@ struct CMAChromosome{
 				rate = 0.5/(2*stepNormSqr-1);//make the update shorter
 				return; //better be safe for now
 			}
-			rankOneUpdate(1-rate,rate,m_lastStep);
+			m_mutationDistribution.rankOneUpdate(1-rate,rate,m_lastStep);
 		} else {
 			roundUpdate();
 		}
@@ -166,29 +166,6 @@ struct CMAChromosome{
 		archive & BOOST_SERIALIZATION_NVP( m_covarianceMatrixUnlearningRate );
 	}
 private:
-	/// \brief Performs a rank one update to the cholesky factor. 
-	///
-	/// This also requries an update of the inverse cholesky factor, that is the only reason, it exists.
-	void rankOneUpdate(double alpha, double beta, RealVector const& v){
-		//~ RealMatrix & C = m_mutationDistribution.covarianceMatrix();
-		//~ noalias(C) = alpha*C - beta * outer_prod( m_lastStep, m_lastStep );
-		//~ m_mutationDistribution.update();
-		
-		RealMatrix& A =m_mutationDistribution.lowerCholeskyFactor();
-		A *= alpha; 
-		choleskyUpdate(A,v,beta);
-		//~ RealVector w = prod(m_inverseCholesky,v);
-		//~ if(norm_inf(w) < 1.e-20) return; //precision under which we assum that the update is mostly noise.
-		//~ RealVector wInv = prod(w,m_inverseCholesky);
-		
-		//~ double normWSqr =norm_sqr(w);
-		//~ double a = std::sqrt(alpha);
-		//~ double root = std::sqrt(1+beta/alpha*normWSqr);
-		//~ double b = a/normWSqr * (root-1);
-		//~ RealMatrix& A =m_mutationDistribution.lowerCholeskyFactor();
-		//~ noalias(A) =a*A+b*outer_prod(v,w);
-		//~ noalias(m_inverseCholesky) = 1.0/a * m_inverseCholesky - b/ (a*a+a*b*normWSqr)*outer_prod(w,wInv);
-	}
 	
 	/// \brief Performs an update step which makes the distribution more round
 	///
@@ -197,7 +174,7 @@ private:
 	void roundUpdate(){
 		double evolutionpathUpdateWeight = m_evolutionPathLearningRate * ( 2.-m_evolutionPathLearningRate );
 		m_evolutionPath *= 1 - m_evolutionPathLearningRate;
-		rankOneUpdate(
+		m_mutationDistribution.rankOneUpdate(
 			1 - m_covarianceMatrixLearningRate+evolutionpathUpdateWeight,
 			m_covarianceMatrixLearningRate,
 			m_evolutionPath

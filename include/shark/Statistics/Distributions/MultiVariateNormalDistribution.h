@@ -182,6 +182,11 @@ public:
 	RealMatrix& lowerCholeskyFactor(){
 		return m_lowerCholesky;
 	}
+	
+	void rankOneUpdate(double alpha, double beta, RealVector const& v){
+		m_lowerCholesky *= alpha; 
+		choleskyUpdate(m_lowerCholesky,v,beta);
+	}
 
 	/// \brief Samples the distribution.
 	///
