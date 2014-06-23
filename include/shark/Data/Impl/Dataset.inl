@@ -112,8 +112,6 @@ private:
 	typedef std::vector<boost::shared_ptr<BatchType> > Container;
 public:
 
-
-
 	///\brief Create an empty container.
 	SharedContainer(){}
 
@@ -403,7 +401,18 @@ public:
 
 
 	}
-
+	
+	/// \brief Creates a vector with the batch sizes of every batch.
+	///
+	/// This method can be used together with repartition to ensure
+	/// that two SharedContainers have the same batch structure.
+	std::vector<std::size_t> getPartitioning()const{
+		std::vector<std::size_t> batchSizes(size());
+		for(std::size_t i = 0; i != size(); ++i){
+			batchSizes[i] = boost::size(*m_data[i]);
+		}
+		return batchSizes;
+	}
 	/////////////////////MISC/////////////////////////////////
 
 	///\brief  Is the container independent of all others?

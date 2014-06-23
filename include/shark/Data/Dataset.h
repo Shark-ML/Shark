@@ -307,6 +307,14 @@ public:
 	void repartition(Range const& batchSizes){
 		m_data.repartition(batchSizes);
 	}
+	
+	/// \brief Creates a vector with the batch sizes of every batch.
+	///
+	/// This method can be used together with repartition to ensure
+	/// that two datasets have the same batch structure.
+	std::vector<std::size_t> getPartitioning()const{
+		return m_data.getPartitioning();
+	}
 
 	// SUBSETS
 	///\brief Fill in the subset defined by the list of indices.
@@ -669,6 +677,14 @@ public:
 	void repartition(Range const& batchSizes){
 		m_data.repartition(batchSizes);
 		m_label.repartition(batchSizes);
+	}
+	
+	/// \brief Creates a vector with the batch sizes of every batch.
+	///
+	/// This method can be used together with repartition to ensure
+	/// that two datasets have the same batch structure.
+	std::vector<std::size_t> getPartitioning()const{
+		return m_data.getPartitioning();
 	}
 
 	friend void swap(LabeledData& a, LabeledData& b){
