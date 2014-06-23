@@ -1,10 +1,5 @@
-
-
-
 Shark Conventions for Derivatives
 =================================
-
-
 
 Background
 ----------
@@ -20,11 +15,8 @@ Since Shark aims for maximal speed, the library enforces a very
 specific evaluation scheme for derivative computations. The design
 rationale will be explained in the following.
 
-
-
 An Example: The Derivative of the Error
 ---------------------------------------
-
 
 Let's consider a simple example, namely the derivative of a squared
 error term
@@ -173,9 +165,6 @@ for RAM throughput, etc. To check that this is in fact the same algorithm, defin
 Thus Shark's derivative interfaces can be understood as a generalization of
 the same computational trick. The exact weighting scheme applied slightly
 varies across the different interfaces, e.g., models versus kernels.
-
-
-
 
 
 Batching Derivatives and how to derive them

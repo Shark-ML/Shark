@@ -11,7 +11,7 @@ to find the global optimum of the objective function :math:`f` :
 However, if the function has more than one local optimum, we can usually only
 find one of them. That is, re-starts may be required.
 
-In multi-objective optimization (alos known as multi-criteria or
+In multi-objective optimization (also known as multi-criteria or
 vector optimization), the goal is to optimize with respect to multiple
 objective functions at once.  This usually does not lead to a single
 point solution, since there exist trade-offs between the different
@@ -43,31 +43,29 @@ bottom of this tutorial :ref:`here <label_for_list_of_so_optimizers>`.
     :math:`\arg \max_x f(x) = \arg \min_x -f(x)`.
 
 
-The base class 'AbstractOptimizer<SearchSpaceT, ResultT, SetT>'
----------------------------------------------------------------
+The base class 'AbstractOptimizer<SearchPointType, ResultT, SetT>'
+---------------------------------------------------------------------
 
 
 :doxy:`AbstractOptimizer` is a general and flexible interface for single- as well as
 multi-objective optimization. We first describe the general interface before we take
 a look at the special cases of both single- and multi-objective optimization.
 
-The three template parameters are used to infer two more types, which all are
-part of the public interface and quite useful when working with optimizers:
+The three template parameters are used to infer the objective function type and
+all types are made public using typedefs:
 
 
 ==========================   =================================================================
 Types                        Description
 ==========================   =================================================================
-``SearchSpaceType``          Defines the type of search space used by the objective function.
-                             This often is an instance of :doxy:`VectorSpace`.
 ``SearchPointType``          Single point in the search space, representing an input of the
                              objective function. Most likely RealVector.
 ``ResultType``               Return type of the objective function. For single objective
                              functions, this is double.
-``SoluitonSetType``          Represents the current best solution of the optimizer. For single
+``SolutionSetType``          Represents the current best solution of the optimizer. For single
                              objective functions, this is a point-value pair.
 ``ObjectiveFunctionType``    Type of objective function the algorithm can optimize. Alias for
-                             ``AbstractObjectiveFunction<SearchSpaceType,ResultType>``.
+                             ``AbstractObjectiveFunction<SearchPointType,ResultType>``.
 ==========================   =================================================================
 
 

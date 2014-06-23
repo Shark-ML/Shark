@@ -1,5 +1,3 @@
-
-
 Objective Functions
 ===================
 
@@ -7,7 +5,7 @@ An objective function formalizes an optimization problem for which a
 (somehow) optimal solution is to be found, for example using
 :doc:`optimizers`. Given an input point within its admissible search
 space, an objective function returns a (possibly noisy) objective
-value (and, optionally, its derivative). The input is typically a
+value and, optionally, its derivative. The input is typically a
 vector of real numbers, but the interface allows for more general
 cases as well. For single objective optimization the return value is a
 real number and the goal is to minimize it. For multi-objective
@@ -21,7 +19,7 @@ provide the feasible point closest to an infeasible one.
 
 
 
-The base class 'AbstractObjectiveFunction <SearchSpaceType, ResultT>'
+The base class 'AbstractObjectiveFunction <SearchPointType, ResultT>'
 ---------------------------------------------------------------------
 
 
@@ -29,13 +27,21 @@ Template arguments and public types
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 The base class :doxy:`AbstractObjectiveFunction` has two template arguments.
-The first is the SearchSpaceType, which defines the admissible type of inputs.
-Currently only one type of search space is implemented and used in Shark, the
-typical :doxy:`VectorSpace`. ``ResultT`` defines the return type of the objective
+The first is the SarchPointType, which defines the admissible type of inputs.
+``ResultT`` defines the return type of the objective
 function, which for single-objective functions is ``double``, and ``RealVector``
 for multi-objective functions. Thus, a typical single objective function has as
-type signature ``AbstractObjectiveFunction< VectorSpace<double>, double >`` and
-a multi objective function ``AbstractObjectiveFunction< VectorSpace<double>, RealVector >``.
+type signature ``AbstractObjectiveFunction< RealVector, double >`` and
+a multi objective function ``AbstractObjectiveFunction< RealVector, RealVector >``.
+The following two typedfs are used throughout hark to make the distinction clear:
+
+=================================   ===============================================================================
+Typedef                             Description
+=================================   ===============================================================================
+``SingleObjectiveFunction``         ``SearchPointType`` is ``RealVector``, ``ResultType`` is ``double``
+``MultiObjectiveFunction``          ``SearchPointType`` is ``RealVector``, ``ResultType`` is ``RealVector``
+=================================   ===============================================================================
+
 Based on the search space type, the following types are inferred and made public
 as typedefs:
 
@@ -83,9 +89,12 @@ objective function without a corresponding function itself.  For some
 optimizers, the gradient information is enough to find a better
 point. If the flag is not set, calling ``eval`` is not allowed, and
 other functions return meaningless values like ``qnan``.
-The flag ``HAS_CONSTRAINT_HANDLER`` indicates that cosntraints are represented by a secondary object. This object can be quried
-and might offer more spcial information about the constraints. for example it might indicate that it reprsents box constraints - 
-in this case the exact shape of the box can be queried and an algorithm might choose a specific strategy based on this information.
+The flag ``HAS_CONSTRAINT_HANDLER`` indicates that 
+constraints are represented by a secondary object. This object can be quried
+and might offer more spcial information about the constraints. for example 
+it might indicate that it reprsents box constraints - 
+in this case the exact shape of the box can be queried and an algorithm 
+might choose a specific strategy based on this information.
 
 
 Interface
@@ -169,47 +178,6 @@ cycle. First, it is created and configured. After that, ``init`` is
 called. Then the function can be evaluated using the different forms
 of ``eval`` or ``evalDerivative``.
 
-Finally Shark introduces two typedefs for ``AbstractObectiveFunction`` which represents the default choice for Single and Multiobjeective optimization throughout the library:
-
-==============================================================================   ===============================================================================
-Typedef                                                                          Description
-==============================================================================   ===============================================================================
-``SingleObjectiveFunction``                                                      ``SearchPointType`` is ``RealVector``, ``ResultType`` is ``double``
-``MultiObjectiveFunction``                                                       ``SearchPointType`` is ``RealVector``, ``ResultType`` is ``RealVector``
-==============================================================================   ===============================================================================
-
-
-
-Objective functions depending on data
--------------------------------------
-
-
-All objective functions are derived from ``AbstractObjectiveFunction``. However,
-aside from the benchmark functions used for standard testing of optimizers,
-most objective functions are derived from more refined interfaces which add
-additional methods.
-
-In machine learning, single-objective functions typically need to
-handle data: supervised learning tasks use pairs of inputs and labels,
-while unsupervised learning processes only unlabeled inputs. To
-facilitate handling of data for objective functions, the two
-interfaces :doxy:`SupervisedObjectiveFunction` and
-:doxy:`UnsupervisedObjectiveFunction` are defined:
-
-
-====================================================   ==============================================
-Interfaces                                             Description
-====================================================   ==============================================
-``SupervisedObjectiveFunction<InputType,LabelType>``   Offers a function ``setDataset`` which takes
-                                                       a ``LabeledData<InputType,LabelType>`` object
-``UnsupervisedObjectiveFunction<InputType>``           Offers a function ``setData`` which takes an
-                                                       ``UnlabeledData<InputType,LabelType>`` object
-====================================================   ==============================================
-
-
-
-
-
 List of Objective functions
 ----------------------------------------------------------------
 
@@ -230,15 +198,20 @@ Model                                         Description
                                               is returned. Training time is proportional to the number of partitions.
 :doxy:`LooError`                              Leave-one-out error, the most extreme form of cross validation in which all but one 
                                               point are part of the training sets.
+:doxy:`LooErrorCSvm`                          Special case of the ``LooError`` for SVMs using the structure of the SVM solution
+                                              to speed-up evaluation.
 :doxy:`SparseFFNetError`                      Same as ``ErrorFunction``, but imposes a sparseness constraint on the activation of the
                                               hidden neurons of a neural network using the Kullback-Leibler divergence.
-:doxy:`DenoisingAutoencoderError`             Trains a neural network to be an autoencoder while adding noise to the input
-                                              by setting an input variables to 0.
 :doxy:`SvmLogisticInterpretation`             Model selection for SVMs using a maximum-likelihood criterion
 :doxy:`RadiusMarginQuotient`                  Model selection for SVMs by optimizing the radius-margin quotient.
 :doxy:`NegativeGaussianProcessEvidence`       Model selection for a regularization network/Gaussian process.
-:doxy:`LooErrorCSvm`                          Special case of the ``LooError`` for SVMs using the structure of the SVM solution
-                                              to speed-up evaluation.
+:doxy:`KernelBasisDistance`                   Measures the distance between two points in a kernel space to
+					      approximate one point with a much smaller basis.
+:doxy:`KernelTargetAlignment`                 Model selection algorithm which measures for a given kernel,
+					      how similar points of the same class are and how dissimilar points of
+					      different classes.
+:doxy:`NegativeLogLikelihood`                 Measures how probable a dataset is under a given model parameterized
+					      by the vector of parameters given in the function argument.
 ============================================  ===================================================================================
 
 

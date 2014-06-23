@@ -1,7 +1,7 @@
 Direct Search Algorithms
 ========================
 
-The Shark machine learning library offers classes and methods
+Shark offers classes and methods
 implementing evolutionary single- and multi-objective optimization
 algorithms. The component provides a multitude of different
 evolutionary optimizers together with a rich sample of common
@@ -15,10 +15,7 @@ Conventions
 -----------
 
 In case of direct search algorithms, a minimization goal is
-assumed. Single- and multi-objective optimization problems are treated
-in uniformly. That is, fitness values are modelled as
-vectors. In case of a single objective optimization problem, the size
-of the vector equals 1.
+assumed.
 
 Individuals & Populations
 -------------------------
@@ -31,7 +28,7 @@ following way:
 
 An individual consists of:
 
-* multiple chromosomes,
+* chromosomes,
 * the search point associated with the individual as well as
 * the fitness corresponding to the individual's search point.
 
@@ -41,36 +38,44 @@ point violates one ore more constraints of the optimization problem at
 hand, an evolutionary algorithm might choose to *encode* this
 violation in terms of a penalized fitness value.
 
-The class :doxy:`TypedIndividual` is templated w.r.t. the type of the search
-point and w.r.t. the types of the chromosomes. For the latter ones,
-the types are considered to be default- and copy-constructable. No
-additional requirements on the types are assumed. To access the
-chromosomes, a templated member function is provided::
+The class :doxy:`Individual` is templated w.r.t. the type of the search
+point, the type of fitness and w.r.t. the type of the chromosome. 
+For the latter one, the type is considered to be default- and 
+copy-constructable. The fitness can either be ``double`` or
+vector values, like ``RealVector``. To access the
+chromosome, a templated member function is provided::
 
- typedef IndividualBase< RealVector, int > Individual;
- Individual ind;
- ind.get< 0 >() = 5; // l-value semantic
+ typedef Individual< RealVector, double, int > MyIndividual;
+ MyIndividual ind;
+ ind.chromosome() = 5; // l-value semantic
 
-Access to the search point is available by means of an overloaded
-*-operator. Finally, unified access to the fitness value(s) assigned
-to an individual is implemented in terms of a tagged function *fitness* with two different tags:
+Access to the search point is available by means of::
 
-* PenalizedFitness()
-* UnpenalizedFitness()
+ ind.searchPoint() =...;
+
+Finally, access to the fitness value(s) can be accessed by :
+
+ ind.penalizedFitness() =...;
+ ind.unpenalizedFitness() =...;
+
+For unconstrained fitness functions, both values are the same.
+However in the case that the point violates the boundary, the
+search point is assigned the fitness value of the closest feasible point.
+In that case the penalizedFitness is also assigned an additional error 
+depending on the distance of the point to the feasible region.
 
 Populations, i.e., sets or multi-sets of individuals, are not modelled
 explicitly. Instead, any container type can be used to represent
 populations::
 
- typedef IndividualBase< RealVector, int > Individual;
+ typedef Individual< RealVector, double, int > MyIndividual;
  typedef std::set< Individual > Population;
  typedef std::vector< Individual> RandomAccessPopulation;
 
 Evolutionary Operators - Selection, Variation, Evaluation
 ---------------------------------------------------------
 
-In the Shark direct search component, typical ingredients of
-evolutionary algorithms like mutation or crossover are modelled as
+Typical ingredients of evolutionary algorithms like mutation or crossover are modelled as
 separate operators that do work on a single or a range of individuals. No
 explicit interface is defined to abstract the functionality of
 variation operates but we define loose concepts for every type of
@@ -247,26 +252,4 @@ RecombinationOperatorTraits::
     static const std::size_t INPUT_ARITY = 2;
     static const std::size_t OUTPUT_ARITY = 1;
   };
-
-Integrating Custom Optimizers & Objective Functions
----------------------------------------------------
-
-Custom evolutionary optimizers and custom objective functions can be
-integrated with the Shark library by inheriting
-:doxy:`AbstractOptimizer` or :doxy:`AbstractObjectiveFunction`
-respectively. Please see the abstract base classes
-:doxy:`AbstractSingleObjectiveOptimizer`,
-:doxy:`AbstractMultiObjectiveOptimizer`,
-:doxy:`AbstractObjectiveFunction` and
-the documentation in the file
-:doxy:`AbstractObjectiveFunction.h`. In addition, Shark offers an
-implementation of the factory pattern that can be populated both at
-compile- and at runtime. To this end, developers can rely on the
-following convenience macros to make optimizers and objective
-functions known within Shark:
-
- * ANNOUNCE_SINGLE_OBJECTIVE_FUNCTION
- * ANNOUNCE_MULTI_OBJECTIVE_FUNCTION
- * ANNOUNCE_SINGLE_OBJECTIVE_OPTIMIZER
- * ANNOUNCE_MULTI_OBJECTIVE_OPTIMIZER
 

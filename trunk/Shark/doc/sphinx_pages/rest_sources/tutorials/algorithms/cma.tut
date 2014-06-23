@@ -26,7 +26,7 @@ requires the following steps:
 * Execute the optimizer until a termination criterion is fulfilled.
 
 The code for this tutorial can be found in 
-:download:`CMASimple.cpp <../../../../../examples/EA/SOO/CMASimple.cpp>`.
+:doxy:`CMASimple.cpp`.
 First of all, the following header files are required::
 
 ..sharkcode<EA/SOO/CMASimple.tpp,includes>
@@ -79,7 +79,7 @@ Empirically Analyzing the CMA-ES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In this section, usage of the probe framework for empirical algorithm analysis is illustrated.
 The code for this part of the tutorial can be found in 
-:download:`CMAPlot.cpp <../../../../../examples/EA/SOO/CMAPlot.cpp>`.
+:doxy:`CMAPlot.cpp`.
 
 
 In this tutorial, results are written to two comma-separated values files, i.e.:

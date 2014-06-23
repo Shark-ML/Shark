@@ -151,16 +151,14 @@ Just like for random forests, FFNet objects output RealVectors and
 therefore must be used with the appropriate data containers and loss
 functions.
 
-The important classes here are ErrorFunction and OptimizationTrainer.
-An ErrorFunction allows us to build an objective function that can be
-interfaced by arbitrary optimization strategies from a model, a loss,
-and data. The argument of the ErrorFunction is the parameter vector of
-the model, and its evaluation computes the empirical risk of the model
-measured by the provided loss function on the given data. This allows
-for the definition of a general optimization procedure with an iterative
+The important classes here are the loss function and the OptimizationTrainer.
+The loss function defines how the model to be trained is penalized when
+it does not give the right answer when the input is a point of the dataset to
+be trained on. These aspects can be incorporated in an ``ErrorFunction``,
+which leads to an objective function which can be optimized with an iterative
 optimizer and a stopping condition. The OptimizationTrainer is a simple
-wrapper class that keeps references to the objective function (usually
-an ErrorFunction), the optimizer and the stopping condition and
+wrapper class that replaces the ErrorFunction and  keeps references to
+the loss, the optimizer and the stopping condition and
 implements a straightforward iterative optimization loop in its train
 method. Feel free to use other (differentiable) loss functions for
 training, other (usually gradient-based) optimizers, and different
@@ -168,7 +166,6 @@ stopping criteria. All this can be done without changing the program
 structure. In particular, after all definitions have been made there
 will always be a model and trainer, and that's all we need to care for
 in the end.
-
 
 What you learned
 ================

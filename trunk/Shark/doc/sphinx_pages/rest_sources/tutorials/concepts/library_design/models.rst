@@ -229,8 +229,7 @@ Model                      Description
 :doxy:`LinearModel`        A simple linear model mapping an n-dimensional input to an m-dimensional output
 :doxy:`FFNet`              The well-known feed-forward multilayer perceptron
                            It allows the usage of different types of neurons in the hidden and output layers
-:doxy:`RBFNet`             Implements a radial basis function network using gaussian distributions
-                           The output is a possibly multidimensional linear combination of inputs
+:doxy:`RBFLayer`             Implements a layer of a radial basis function network using gaussian distributions
 :doxy:`CMACMap`            Discretizes the space using several randomized tile maps and calculates a
                            weighted sum of the discretized activation
 :doxy:`RNNet`              Recurrent neural network for sequences
