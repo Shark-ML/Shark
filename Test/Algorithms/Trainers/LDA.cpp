@@ -134,72 +134,72 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 
 }
 
-//~ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
-	//~ const size_t TrainExamples = 200000;
-	//~ const unsigned int classes = 10;
-	//~ LDA trainer;
-	//~ LinearClassifier<> model;
-	//~ Rng::seed(44);
+BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
+	const size_t TrainExamples = 200000;
+	const unsigned int classes = 10;
+	LDA trainer;
+	LinearClassifier<> model;
+	Rng::seed(44);
 
 
-	//~ //create datatsets - overlapping normal distributions
+	//create datatsets - overlapping normal distributions
 
-	//~ RealMatrix covariance(2,2);
-	//~ covariance(0,0)=16;
-	//~ covariance(0,1)=8;
-	//~ covariance(1,0)=8;
-	//~ covariance(1,1)=16;
-	//~ RealMatrix inverse(2,2,0.0);
-	//~ inverse(0,0) = inverse(1,1) = 1.0;
-	//~ blas::solveSymmSystemInPlace<blas::SolveAXB>(covariance,inverse);
+	RealMatrix covariance(2,2);
+	covariance(0,0)=16;
+	covariance(0,1)=8;
+	covariance(1,0)=8;
+	covariance(1,1)=16;
+	RealMatrix inverse(2,2,0.0);
+	inverse(0,0) = inverse(1,1) = 1.0;
+	blas::solveSymmSystemInPlace<blas::SolveAXB>(covariance,inverse);
 	
-	//~ std::vector<RealVector> mean(classes,RealVector(2));
-	//~ for(unsigned int c = 0; c != classes; ++c){
-		//~ for(std::size_t j = 0; j != 2; ++j){
-			//~ mean[c](j) = Rng::gauss(0,30);
-		//~ }
-	//~ }
-	//~ MultiVariateNormalDistribution dist(covariance);
+	std::vector<RealVector> mean(classes,RealVector(2));
+	for(unsigned int c = 0; c != classes; ++c){
+		for(std::size_t j = 0; j != 2; ++j){
+			mean[c](j) = Rng::gauss(0,30);
+		}
+	}
+	MultiVariateNormalDistribution dist(covariance);
 
 
-	//~ std::vector<RealVector> input(TrainExamples,RealVector(2));
-	//~ std::vector<unsigned int> target(TrainExamples);
+	std::vector<RealVector> input(TrainExamples,RealVector(2));
+	std::vector<unsigned int> target(TrainExamples);
 
-	//~ double statisticalBayesRisk=0;
-	//~ for(size_t i=0;i!=TrainExamples;++i){
-		//~ //create sample
-		//~ target[i]=i%classes;
-		//~ input[i]=dist().first+mean[target[i]];
-		//~ //calculate bayes Target - the best fit to the distributions
-		//~ unsigned int bayesTarget = 0;
-		//~ double minDist = 1.e30;
-		//~ for(unsigned int c = 0; c != classes; ++c){
-			//~ RealVector diff=input[i]-mean[c];
-			//~ double dist=inner_prod(diff,prod(inverse,diff));
-			//~ if(dist<minDist){
-				//~ minDist=dist;
-				//~ bayesTarget=c;
-			//~ }
-		//~ }
-		//~ statisticalBayesRisk+= bayesTarget != target[i];
-	//~ }
-	//~ statisticalBayesRisk/=TrainExamples;
+	double statisticalBayesRisk=0;
+	for(size_t i=0;i!=TrainExamples;++i){
+		//create sample
+		target[i]=i%classes;
+		input[i]=dist().first+mean[target[i]];
+		//calculate bayes Target - the best fit to the distributions
+		unsigned int bayesTarget = 0;
+		double minDist = 1.e30;
+		for(unsigned int c = 0; c != classes; ++c){
+			RealVector diff=input[i]-mean[c];
+			double dist=inner_prod(diff,prod(inverse,diff));
+			if(dist<minDist){
+				minDist=dist;
+				bayesTarget=c;
+			}
+		}
+		statisticalBayesRisk+= bayesTarget != target[i];
+	}
+	statisticalBayesRisk/=TrainExamples;
 
-	//~ ClassificationDataset dataset = createLabeledDataFromRange(input,target);
+	ClassificationDataset dataset = createLabeledDataFromRange(input,target);
 
-	//~ trainer.train(model, dataset);
+	trainer.train(model, dataset);
 
-	//~ //double classificatorRisk=0;
-	//~ Data<unsigned int> results = model(dataset.inputs());
+	//double classificatorRisk=0;
+	Data<unsigned int> results = model(dataset.inputs());
 	
-	//~ ZeroOneLoss<> loss;
-	//~ double classificatorRisk = loss.eval(dataset.labels(),results);
+	ZeroOneLoss<> loss;
+	double classificatorRisk = loss.eval(dataset.labels(),results);
 	
-	//~ std::cout<<"statistical bayes Risk: "<<statisticalBayesRisk<<std::endl;
-	//~ std::cout<<"classificator Risk: "<<classificatorRisk<<std::endl;
-	//~ BOOST_CHECK_SMALL(classificatorRisk-statisticalBayesRisk,10e-2);
+	std::cout<<"statistical bayes Risk: "<<statisticalBayesRisk<<std::endl;
+	std::cout<<"classificator Risk: "<<classificatorRisk<<std::endl;
+	BOOST_CHECK_SMALL(classificatorRisk-statisticalBayesRisk,10e-2);
 
-//~ }
+}
 
 
 
