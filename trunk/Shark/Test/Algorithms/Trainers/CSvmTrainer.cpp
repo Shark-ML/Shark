@@ -210,34 +210,62 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_SIMPLE_TEST )
 	}
 }
 
-//compares solving the SVM problem with equality constraint to iteratively finding the optimal bias
-BOOST_AUTO_TEST_CASE( CSVM_TRAINER_ITERATIVE_BIAS_TEST )
-{
-	std::cout << "C-SVM soft margin with iterative bias" << std::endl;
-	CircleInSquare problem(5);
-	ClassificationDataset dataset = problem.generateDataset(1000);
-	
 
-	GaussianRbfKernel<> kernel(2);
-	//LinearKernel<> kernel;
-	CSvmTrainer<RealVector> trainer(&kernel, 10,true);
-	trainer.sparsify() = false;
-	trainer.shrinking() = true;
-	trainer.stoppingCondition().minAccuracy = 1e-4;
+template<class Model1, class Model2, class Dataset>
+void checkSVMSolutionsEqual(
+	Model1 const& model1, Model2 const& model2, 
+	Dataset const& dataset,
+	double epsilon
+){
+	Data<RealVector> decision1 = model1.decisionFunction()(dataset.inputs());
+	Data<RealVector> decision2 = model2.decisionFunction()(dataset.inputs());
 	
-	//train using both algorithms
-	KernelClassifier<RealVector> svmTruth;
-	KernelClassifier<RealVector> svmTest;
-	trainer.setUseIterativeBiasComputation(true);
-	trainer.train(svmTest, dataset);
-	trainer.setUseIterativeBiasComputation(false);
-	trainer.train(svmTruth, dataset);
-	
-	//compare bias
-	BOOST_CHECK_CLOSE(svmTest.decisionFunction().offset(0),svmTruth.decisionFunction().offset(0),1.e-2);
-	ZeroOneLoss<unsigned int> loss;
-	std::cout<<loss.eval(dataset.labels(),svmTruth(dataset.inputs()))<<std::endl;
-	std::cout<<loss.eval(dataset.labels(),svmTest(dataset.inputs()))<<std::endl;
-	//~ std::cout<<svmTest.alpha()<<std::endl;
-	//~ std::cout<<svmTruth.alpha()<<std::endl;
+	for(std::size_t i = 0; i != dataset.numberOfElements(); ++i){
+		BOOST_CHECK_CLOSE(
+			decision1.element(i)(0),
+			decision2.element(i)(0),
+			epsilon
+		);
+	}
 }
+BOOST_AUTO_TEST_CASE( CSVM_WEIGHTED_TEST )
+{
+	// simple  dataset
+	Chessboard problem;
+	ClassificationDataset dataset = problem.generateDataset(30);
+	GaussianRbfKernel<> kernel(1.0);
+	
+	
+	KernelClassifier<RealVector> svmUnweighted;
+	KernelClassifier<RealVector> svmWeighted;
+	CSvmTrainer<RealVector> trainer(&kernel, 1.0, true);
+	trainer.stoppingCondition().minAccuracy = 1e-8;
+	
+	//first check that all weights being equal is working
+	trainer.train(svmUnweighted, dataset);
+	trainer.train(svmWeighted, WeightedLabeledData<RealVector,unsigned int>(dataset,1.0));
+	checkSVMSolutionsEqual(svmUnweighted, svmWeighted, dataset,0.0001);
+	
+	//resample the dataset by creating duplications. This must be the same as the normal
+	//dataset initialized with the correct multiplicities
+	std::size_t const Trials = 10;
+	std::size_t const DatasetSize = 100;
+	for(std::size_t trial = 0; trial != Trials; ++trial){
+		//generate weighted and unweighted dataset
+		WeightedLabeledData<RealVector,unsigned int> weightedDataset(dataset,0.0);
+		ClassificationDataset unweightedDataset(1);
+		unweightedDataset.batch(0).input.resize(DatasetSize,inputDimension(dataset));
+		unweightedDataset.batch(0).label.resize(DatasetSize);
+		for(std::size_t i = 0; i != DatasetSize; ++i){
+			std::size_t index = Rng::discrete(0,29);
+			weightedDataset.element(index).weight +=1.0;
+			unweightedDataset.element(i) = dataset.element(index);
+		}
+		
+		trainer.train(svmUnweighted, unweightedDataset);
+		trainer.train(svmWeighted, weightedDataset);
+		checkSVMSolutionsEqual(svmUnweighted, svmWeighted, dataset,0.0001);
+	}
+	
+}
+

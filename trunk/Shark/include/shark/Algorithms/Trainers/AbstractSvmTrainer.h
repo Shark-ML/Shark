@@ -177,10 +177,13 @@ protected:
 /// size of the kernel cache, the stopping criterion, as well
 /// as information on the actual solution.
 ///
-template <class InputType, class LabelType, class Model = KernelClassifier<InputType> >
+template <
+	class InputType, class LabelType, 
+	class Model = KernelClassifier<InputType>, 
+	class Trainer= AbstractTrainer< Model,LabelType>
+>
 class AbstractSvmTrainer
-: public AbstractTrainer< Model,LabelType>,
-  public QpConfig, public IParameterizable
+: public Trainer,public QpConfig, public IParameterizable
 {
 public:
 	typedef AbstractKernelFunction<InputType> KernelType;
