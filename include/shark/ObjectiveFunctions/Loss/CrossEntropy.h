@@ -45,7 +45,7 @@ namespace shark{
  *         as the objective function for training.
  *
  *  If your model should return a vector whose components reflect the
- *  conditonal probabilities of class membership given any input vector
+ *  logarithmic conditonal probabilities of class membership given any input vector
  *  'CrossEntropy' is the adequate error measure for model-training.
  *  For \em C>1 classes the loss function is defined as
  *  \f[
