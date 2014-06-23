@@ -106,3 +106,75 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	//fill the model
 	model.decisionFunction().setStructure(transformedMeans,bias);
 }
+
+void LDA::train(LinearClassifier<>& model, WeightedLabeledData<RealVector,unsigned int> const& dataset){
+	if(dataset.empty()){
+		throw SHARKEXCEPTION("[LDA::train] the dataset must not be empty");
+	}
+	typedef WeightedLabeledData<RealVector,unsigned int>::const_batch_reference BatchReference;
+	
+	std::size_t inputs = dataset.numberOfElements();
+	std::size_t dim = inputDimension(dataset);
+	std::size_t classes = numberOfClasses(dataset);
+
+	//required statistics
+	RealMatrix means(classes, dim,0.0);
+	RealMatrix covariance(dim, dim,0.0);
+	double weightSum = sumOfWeights(dataset);
+	RealVector classWeight(classes,0.0);
+	
+	//we compute the data batch wise
+	BOOST_FOREACH(BatchReference batch, dataset.batches()){
+		UIntVector const& labels = batch.data.label;
+		RealMatrix points = batch.data.input;
+		RealVector const& weights = batch.weight;
+		//load batch and update mean
+		std::size_t currentBatchSize = points.size1();
+		for (std::size_t e=0; e != currentBatchSize; e++){
+			//update mean and class count for this sample
+			std::size_t c = labels(e);
+			classWeight(c) += weights(e);
+			noalias(row(means,c)) += weights(e)*row(points,e);
+			row(points,e) *= std::sqrt(weights(e));
+			
+		}
+		//update second moment matrix
+		symm_prod(trans(points),covariance,false);
+	}
+	covariance /= weightSum;
+	
+	//calculate mean and the covariance matrix from second moment
+	for (std::size_t c = 0; c != classes; c++){
+		if (classWeight[c] == 0.0) 
+			throw SHARKEXCEPTION("[LDA::train] LDA can not handle a class without examples");
+		row(means,c) /= classWeight(c);
+		double factor = classWeight(c) / weightSum;
+		noalias(covariance)-= factor*outer_prod(row(means,c),row(means,c));
+	}
+	
+
+	//add regularization
+	noalias(diag(covariance)) += blas::repeat(m_regularization,dim);
+	
+	//the formula for the linear classifier is
+	// arg max_i log(P(x|i) * P(i))
+	//= arg max_i log(P(x|i)) +log(P(i))
+	//= arg max_i -(x-m_i)^T C^-1 (x-m_i) +log(P(i))
+	//= arg max_i -m_i^T C^-1 m_i  +2* x^T C^-1 m_i + log(P(i))
+	//so we compute first C^-1 m_i and then the first term
+	
+	// compute z = m_i^T C^-1  <=>  z C = m_i 
+	// this is the expensive step of the calculation.
+	RealMatrix transformedMeans = means;
+	blas::solveSymmSemiDefiniteSystemInPlace<blas::SolveXAB>(covariance,transformedMeans);
+	
+	//compute bias terms m_i^T C^-1 m_i - log(P(i))
+	RealVector bias(classes);
+	for(std::size_t c = 0; c != classes; ++c){
+		double prior = std::log(classWeight(c)/weightSum);
+		bias(c) = - 0.5* inner_prod(row(means,c),row(transformedMeans,c)) + prior;
+	}
+
+	//fill the model
+	model.decisionFunction().setStructure(transformedMeans,bias);
+}
