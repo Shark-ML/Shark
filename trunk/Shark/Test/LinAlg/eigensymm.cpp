@@ -55,7 +55,7 @@ RealMatrix createRandomMatrix(RealVector const& lambda,std::size_t Dimensions){
 
 BOOST_AUTO_TEST_CASE( LinAlg_eigensymm_general )
 {
-	std::size_t NumTests = 2;
+	std::size_t NumTests = 100;
 	std::size_t Dimensions = 10;
 	for(std::size_t test = 0; test != NumTests; ++test){
 		//first generate a suitable eigenvalue problem matrix A as well as its decompisition

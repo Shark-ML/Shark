@@ -55,7 +55,7 @@ inline void syev(
 	double* eigenvalues
 ){
 	if(n == 0) return;
-	int lwork = std::min<int>(130,n)*n;
+	int lwork = std::min<int>(130,4*n)*n;
 	double* work = new double[lwork];
 	int info;
 	char job = 'V';
