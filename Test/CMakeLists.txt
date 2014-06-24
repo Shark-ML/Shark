@@ -51,6 +51,7 @@ SHARK_ADD_TEST( LinAlg/BLAS/vector_proxy.cpp BLAS_Vector_Proxy)
 SHARK_ADD_TEST( LinAlg/BLAS/matrix_proxy.cpp BLAS_Matrix_Proxy)
 SHARK_ADD_TEST( LinAlg/BLAS/vector_expression.cpp BLAS_Vector_Expression)
 SHARK_ADD_TEST( LinAlg/BLAS/axpy_prod.cpp BLAS_Axpy_Prod)
+SHARK_ADD_TEST( LinAlg/BLAS/triangular_prod.cpp BLAS_Triangular_Prod)
 #LinAlg Tests
 SHARK_ADD_TEST( LinAlg/DiagonalMatrix.cpp LinAlg_DiagonalMatrix)
 SHARK_ADD_TEST( LinAlg/sumRows.cpp LinAlg_SumRows)

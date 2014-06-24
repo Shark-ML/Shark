@@ -3,10 +3,13 @@
 
 #include "kernels/gemv.hpp"
 #include "kernels/gemm.hpp"
+#include "kernels/trmv.hpp"
 
 namespace shark {
 namespace blas {
 
+	
+///\brief Computes y=alpha*Ax or y += alpha*Ax
 template<class ResultV, class M, class V>
 void axpy_prod(
 	matrix_expression<M> const& matrix,
@@ -23,7 +26,9 @@ void axpy_prod(
 	kernels::gemv(matrix, vector, result,alpha);
 }
 
-//dispatch for temporary result proxies
+////\brief Computes C=alpha*Ax or C += alpha*Ax
+///
+///This the dispatcher for temporary result proxies
 template<class ResultV, class M, class V>
 void axpy_prod(
 	matrix_expression<M> const& matrix,
@@ -37,7 +42,7 @@ void axpy_prod(
 	axpy_prod(matrix,vector,static_cast<ResultV&>(result),init,alpha);
 }
 
-//dispatch for vector-matrix product
+///\brief Computes y=alpha*xA or y += alpha*xA
 template<class ResultV, class V, class M>
 void axpy_prod(
 	vector_expression<V> const& vector,
@@ -51,6 +56,9 @@ void axpy_prod(
 	axpy_prod(trans(matrix), vector, result,init,alpha);
 }
 
+////\brief Computes C=alpha*xA or C += alpha*xA
+///
+///This the dispatcher for temporary result proxies
 template<class ResultV, class M, class V>
 void axpy_prod(
 	vector_expression<V> const& vector,
@@ -117,6 +125,35 @@ void symm_prod(
 	typename M::value_type alpha = 1.0
 ) {
 	symm_prod(A, static_cast<M&>(m),init, alpha);
+}
+
+/// \brief Computes x=Ax for a triangular matrix A
+///
+/// The first ttemplate argument governs the type
+/// of triangular matrix: Lower, Upper, UnitLower and UnitUpper.
+///
+///Example: triangular_prod<Lower>(A,x);
+template<class TriangularType, class MatrixA, class V>
+void triangular_prod(
+	matrix_expression<MatrixA> const& A,
+	vector_expression<V>& x
+) {
+	kernels::trmv<TriangularType::upper, TriangularType::unit>(A, x);
+}
+
+/// \brief Computes x=Ax for a triangular matrix A
+///
+/// This is the version for temporary proxy objects
+/// The first ttemplate argument governs the type
+/// of triangular matrix: Lower, Upper, UnitLower and UnitUpper.
+///
+///Example: triangular_prod<Lower>(A,x);
+template<class TriangularType, class MatrixA, class V>
+void triangular_prod(
+	matrix_expression<MatrixA> const& A,
+	temporary_proxy<V> x
+) {
+	triangular_prod<TriangularType>(A, static_cast<V&>(x));
 }
 
 
