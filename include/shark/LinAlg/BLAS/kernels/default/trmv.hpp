@@ -45,7 +45,6 @@ void trmv_impl(
         boost::mpl::false_, row_major
 ){
 	//TODO: REASONABLY FAST IMPLEMENTATION
-	typedef typename TriangularA::value_type value_type;
 	
 	std::size_t size = A().size1();
 	for (std::size_t n = 1; n <= size; ++n) {
@@ -81,7 +80,6 @@ void trmv_impl(
 	vector_expression<V> &b,
         boost::mpl::false_, column_major
 ){
-	typedef typename TriangularA::value_type value_type;
 	
 	std::size_t size = A().size1();
 	for (std::size_t n = 1; n <= size; ++n) {
