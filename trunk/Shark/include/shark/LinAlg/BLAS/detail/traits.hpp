@@ -211,6 +211,28 @@ struct unknown_orientation: public row_major{};
 struct unknown_storage_tag {};
 struct sparse_tag:public unknown_storage_tag{};
 struct dense_tag: public unknown_storage_tag{};
+	
+///\brief Flag indicating that the matrix is Upper triangular
+struct Upper{
+	static const bool upper = true;
+	static const bool unit = false;
+};
+///\brief Flag indicating that the matrix is Upper triangular and diagonal elements are to be assumed as 1
+struct UnitUpper{
+	static const bool upper = true;
+	static const bool unit = true;
+};
+///\brief Flag indicating that the matrix is Lower triangular
+struct Lower{
+	static const bool upper = false;
+	static const bool unit = false;
+};
+///\brief Flag indicating that the matrix is Lower triangular and diagonal elements are to be assumed as 1
+struct UnitLower{
+	static const bool upper = false;
+	static const bool unit = true;
+};
+
 
 template<class S1, class S2>
 struct storage_restrict_traits {

@@ -51,27 +51,6 @@ struct SolveXAB{
 	static const bool left = false;
 };
 
-///\brief Flag indicating that the matrix is Upper triangular
-struct Upper{
-	static const bool upper = true;
-	static const bool unit = false;
-};
-///\brief Flag indicating that the matrix is Upper triangular and diagonal elements are to be assumed as 1
-struct UnitUpper{
-	static const bool upper = true;
-	static const bool unit = true;
-};
-///\brief Flag indicating that the matrix is Lower triangular
-struct Lower{
-	static const bool upper = false;
-	static const bool unit = false;
-};
-///\brief Flag indicating that the matrix is Lower triangular and diagonal elements are to be assumed as 1
-struct UnitLower{
-	static const bool upper = false;
-	static const bool unit = true;
-};
-
 /// \brief In-place triangular linear equation solver.
 ///
 ///solves a System of linear equations Ax=b or xA=b
