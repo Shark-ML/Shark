@@ -1,6 +1,6 @@
 //###begin<includes>
 #include <shark/Algorithms/Trainers/Budgeted/KernelBudgetedSGDTrainer.h> // the KernelBudgetedSGD trainer
-#include <shark/Algorithms/Trainers/Budgeted/ProjectBudgetMaintenanceStrategy.h> // the strategy the trainer will use 
+#include <shark/Algorithms/Trainers/Budgeted/MergeBudgetMaintenanceStrategy.h> // the strategy the trainer will use 
 #include <shark/Data/DataDistribution.h> //includes small toy distributions
 #include <shark/Models/Kernels/GaussianRbfKernel.h> //the used kernel for the SVM
 #include <shark/ObjectiveFunctions/Loss/HingeLoss.h> // the loss we want to use for the SGD machine
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 	//###begin<trainer>
 	HingeLoss hingeLoss; // define the loss we want to use while training
 	// as the budget maintenance strategy we choose the merge strategy
-	ProjectBudgetMaintenanceStrategy<RealVector> *strategy = new ProjectBudgetMaintenanceStrategy<RealVector>();
+	MergeBudgetMaintenanceStrategy<RealVector> *strategy = new MergeBudgetMaintenanceStrategy<RealVector>();
 	KernelBudgetedSGDTrainer<RealVector> kernelBudgetedSGDtrainer(&kernel, &hingeLoss, C, bias, false, budgetSize, strategy);        // create the trainer
 	kernelBudgetedSGDtrainer.setEpochs(epochs);      // set the epochs number
 	//###end<trainer>
