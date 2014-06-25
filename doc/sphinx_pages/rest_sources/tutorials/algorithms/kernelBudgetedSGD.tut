@@ -19,8 +19,8 @@ One intuitive method was presented in
 [WangCrammerVucetic2012]. The idea is to put a constraint
 on the complexity of the model, i.e. the sparsity of the weight vector.
 As the weight vector in features space is a sum of basis functions,
-this means that it has to have the form :math: `w = \sum_{i=1}^B k(x_i, \cdot)`,
-where $B$ is the chosen budget size and :math: `x_i` are some
+this means that it has to have the form :math:`w = \sum_{i=1}^B k(x_i, \cdot)`,
+where B is the chosen budget size and :math:`x_i` are some
 data points.
 
 [WangCrammerVucetic2012] employ a well-known 
@@ -37,7 +37,7 @@ In this case, adding a new vector will violate the  size-constraint.
 Therefore one needs a way to reduce the size of the budget.
 These, often heuristic, methods are called budget maintenence strategies.
 Many such strategies exist. One of the easiest is just to remove 
-randomly a vector from a budget. Another strategy is remove the
+randomly a vector from the budget. Another strategy is remove the
 'oldest' vector (this method is called Forgetron).  
 Both strategies maintain the budget size, but are not optimal
 in a certain sense, as they do not really try to minimize the
@@ -45,7 +45,7 @@ degradation of the model that occurs when one removes a
 support vector. A better way was proposed in [WangCrammerVucetic2012]:
 The idea is to find a pair of vectors that, when merged into one vector,
 does degrade the quality of the solution as low as possible. 
-This can be formulated in
+This can be formulated as
 an optimization problem, and it can be shown that with a heuristic
 search for such a pair, training is much better than with a
 random maintenence strategy.
