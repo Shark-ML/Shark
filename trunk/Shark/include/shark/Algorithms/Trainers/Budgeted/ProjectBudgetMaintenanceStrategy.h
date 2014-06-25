@@ -2,12 +2,13 @@
 /*!
  *
  *
- * \brief       Remove budget maintenance strategy
+ * \brief       Project budget maintenance strategy
  *
  * \par
- * This is an budget strategy that simply removes one of the
- * budget vectors. Depending on the flavor, this can be e.g.
- * a random one, the smallest one (w.r.t. to alpha), etc.
+ * This is an budget strategy that simply project one of the
+ * budget vectors onto the others. To save time, the smallest
+ * vector (measured in 2-norm of the alpha-coefficients) will
+ * be selected for projection.
  *
  *
  *
