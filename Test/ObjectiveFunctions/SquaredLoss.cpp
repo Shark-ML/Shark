@@ -76,3 +76,68 @@ BOOST_AUTO_TEST_CASE( SQUAREDLOSS_EVAL_Classification ) {
 		BOOST_CHECK_SMALL(norm_2(row(derivative,0) - estimatedDerivative), 1.e-5);
 	}
 }
+
+BOOST_AUTO_TEST_CASE( SQUAREDLOSS_EVAL_Sequence ) {
+	unsigned int maxTests = 100;
+	unsigned int dims = 10;
+	unsigned int batchSize = 5;
+	unsigned int sequenceLength = 30;
+	for (unsigned int test = 0; test != maxTests; ++test) {
+		SquaredLoss<Sequence,Sequence> loss(10);
+		SquaredLoss<RealVector,RealVector> lossSingleSequence;
+		
+		//create the sequences as well as ground truth
+		std::vector<Sequence> sequenceBatch;
+		std::vector<Sequence> sequenceBatchLabel;
+		std::vector<RealMatrix> sequenceBatchMat;
+		std::vector<RealMatrix> sequenceBatchMatLabel;
+		for(std::size_t b = 0; b != 5; ++b){
+			Sequence seq(10, RealVector(dims,0.0));
+			Sequence seqLabel(10, RealVector(dims,0.0));
+			RealMatrix seqMat(sequenceLength-10, dims);
+			RealMatrix seqMatLabel(sequenceLength-10, dims);
+			
+			for(std::size_t i = 0; i != sequenceLength -10; ++i){
+				for(std::size_t j = 0; j != dims; ++j){
+					seqMat(i,j) = Rng::gauss(0,1);
+					seqMatLabel(i,j) = Rng::gauss(0,1);
+				}
+				seq.push_back(row(seqMat,i));
+				seqLabel.push_back(row(seqMatLabel,i));
+			}
+			sequenceBatch.push_back(seq);
+			sequenceBatchMat.push_back(seqMat);
+			sequenceBatchLabel.push_back(seqLabel);
+			sequenceBatchMatLabel.push_back(seqMatLabel);
+		}
+		
+		
+		//create ground truth error and gradient
+		double errorTruth = 0;
+		std::vector<RealMatrix> gradientTruth(batchSize);
+		for(std::size_t b = 0; b != batchSize; ++b){
+			errorTruth += lossSingleSequence.eval(sequenceBatchMatLabel[b],sequenceBatchMat[b]);
+			lossSingleSequence.evalDerivative(sequenceBatchMatLabel[b],sequenceBatchMat[b], gradientTruth[b]);
+		}
+		
+		double error = loss.eval(sequenceBatchLabel,sequenceBatch);
+		std::vector<Sequence> gradient;
+		double errorDerivative = loss.evalDerivative(sequenceBatchLabel,sequenceBatch,gradient);
+		BOOST_CHECK_CLOSE(error, errorDerivative, 1.e-12);
+		BOOST_CHECK_CLOSE(error, errorTruth, 1.e-10);
+		
+		for(std::size_t b = 0; b != batchSize; ++b){
+			for(std::size_t i = 0; i != 10; ++i){
+				for(std::size_t j = 0; j != dims; ++j){
+					BOOST_CHECK_EQUAL(gradient[b][i][j],0.0);
+				}
+			}
+			for(std::size_t i = 10; i != sequenceLength; ++i){
+				for(std::size_t j = 0; j != dims; ++j){
+					BOOST_CHECK_CLOSE(gradient[b][i][j],gradientTruth[b](i-10,j),1.e-10);
+				}
+			}
+		}
+		
+	}
+}

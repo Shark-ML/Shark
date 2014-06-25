@@ -87,7 +87,6 @@ public:
 };
 
 //specialisation for classification case.
-
 template<class OutputType>
 class SquaredLoss<OutputType,unsigned int> : public AbstractLoss<unsigned int,OutputType>
 {
@@ -134,6 +133,74 @@ public:
 		}
 		return SquaredLoss::eval(labels,predictions);
 	}
+};
+
+//spcialisation for sequence data
+template<>
+class SquaredLoss<Sequence,Sequence> : public AbstractLoss<Sequence,Sequence>
+{
+public:
+	/// \brief Constructor.
+	///
+	/// \param ignore Specifies how many elements of the sequence are to be ignored during evaluation
+	///              must be strictly smaller than the smalles sequnce to evaluate.
+	SquaredLoss(std::size_t ignore=0)
+	:m_ignore(ignore){
+		this->m_features|=base_type::HAS_FIRST_DERIVATIVE;
+	}
+
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SquaredLoss"; }
+
+	using base_type::eval;
+
+	/// \brief Evaluate the squared loss \f$ (label - prediction)^2 \f$.
+	///
+	/// For Sequences this is:
+	/// \f[ sum_{i=i_0} (label_i-prediction_i)^2\f]
+	/// where \f$ i_0 \f$ is the first element to be evaluated. By default it is 0
+	double eval(BatchLabelType const& labels, BatchOutputType const& predictions) const {
+		SIZE_CHECK(labels.size()==predictions.size());
+
+		double error = 0;
+		for(std::size_t i = 0; i != labels.size(); ++i){
+			SIZE_CHECK(labels[i].size()==predictions[i].size());
+			if(labels[i].size() <= m_ignore)
+				throw SHARKEXCEPTION("[SquaredLoss::eval] Number of sequence elements to ignore is too large");
+
+			for(std::size_t j = m_ignore; j != labels[i].size(); ++j){
+				error += distanceSqr(predictions[i][j],labels[i][j]);
+			}
+		}
+		return error;
+	}
+
+	/// Evaluate the squared loss \f$ (label - prediction)^2 \f$
+	/// and its deriative \f$ \frac{\partial}{\partial prediction} 1/2 (label - prediction)^2 = prediction - label \f$.
+	double evalDerivative(BatchLabelType const& labels, BatchOutputType const& predictions, BatchOutputType& gradient) const {
+		SIZE_CHECK(labels.size()==predictions.size());
+		gradient.resize(labels.size());
+		
+		double error = 0;
+		for(std::size_t i = 0; i != labels.size(); ++i){
+			SIZE_CHECK(labels[i].size()==predictions[i].size());
+			if(labels[i].size() <= m_ignore)
+				throw SHARKEXCEPTION("[SquaredLoss::eval] Number of sequence elements to ignore is too large");
+			for(std::size_t j = 0; j != m_ignore; ++j){
+				gradient[i].push_back(RealVector(predictions[i][j].size(),0.0));
+			}
+			for(std::size_t j = m_ignore; j != labels[i].size(); ++j){
+				error += distanceSqr(predictions[i][j],labels[i][j]);
+				gradient[i].push_back(2.0*(predictions[i][j] - labels[i][j]));
+				
+			}
+		}
+		return error;
+	}
+private:
+	std::size_t m_ignore;
 };
 
 }

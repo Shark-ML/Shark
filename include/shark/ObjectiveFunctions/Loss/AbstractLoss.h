@@ -171,34 +171,6 @@ public:
 		return error / targets.numberOfElements();
 	}
 
-	/// from AbstractCost
-	///
-	/// \param  targets      target values
-	/// \param  predictions  predictions, typically made by a model
-	/// \param  gradient     the gradient of the cost function with respect to the predictions
-	double evalDerivative(
-		Data<LabelType> const& targets,
-		Data<OutputType> const& predictions,
-		Data<OutputType>& gradient
-	) const{
-		SHARK_FEATURE_EXCEPTION_DERIVED(HAS_FIRST_DERIVATIVE);
-		SIZE_CHECK(predictions.numberOfElements() == targets.numberOfElements());
-
-		int numBatches = (int) targets.numberOfBatches();
-		std::size_t elements = targets.numberOfElements();
-		gradient = Data<OutputType>(numBatches);
-		
-		double error = 0;
-		SHARK_PARALLEL_FOR(int i = 0; i < numBatches; ++i){
-			double batchError= evalDerivative(targets.batch(i),predictions.batch(i),gradient.batch(i));
-			gradient.batch(i) /= elements;//we return the mean of the loss
-			SHARK_CRITICAL_REGION{
-				error+=batchError;
-			}
-		}
-		return error/elements;
-	}
-
 	/// \brief evaluate the loss for a target and a prediction
 	///
 	/// \par
