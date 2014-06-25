@@ -119,6 +119,10 @@ SHARK_ADD_TEST( Algorithms/Trainers/SigmoidFit.cpp Trainers_SigmoidFit )
 SHARK_ADD_TEST( Algorithms/Trainers/PCA.cpp Trainers_PCA )
 SHARK_ADD_TEST( Algorithms/Trainers/Perceptron.cpp Trainers_Perceptron )
 SHARK_ADD_TEST( Algorithms/Trainers/MissingFeatureSvmTrainerTests.cpp Trainers_MissingFeatureSvmTrainer )
+SHARK_ADD_TEST( Algorithms/Trainers/Budgeted/AbstractBudgetMaintenanceStrategy_Test.cpp Trainers_AbstractBudgetMaintenanceStrategy )
+SHARK_ADD_TEST( Algorithms/Trainers/Budgeted/MergeBudgetMaintenanceStrategy_Test.cpp MergeBudgetMaintenanceStrategy )
+SHARK_ADD_TEST( Algorithms/Trainers/Budgeted/RemoveBudgetMaintenanceStrategy_Test.cpp RemoveBudgetMaintenanceStrategy )
+SHARK_ADD_TEST( Algorithms/Trainers/Budgeted/KernelBudgetedSGDTrainer_Test.cpp KernelBudgetedSGDTrainer )
 
 #misc algorithms
 SHARK_ADD_TEST( Algorithms/GridSearch.cpp Algorithms_GridSearch )

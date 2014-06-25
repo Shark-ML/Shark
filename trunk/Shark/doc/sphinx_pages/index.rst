@@ -69,6 +69,7 @@
    rest_sources/tutorials/algorithms/lkc-mkl
    rest_sources/tutorials/algorithms/linear-svm
    rest_sources/tutorials/algorithms/kta
+   rest_sources/tutorials/algorithms/kernelBudgetedSGD
 
    rest_sources/tutorials/algorithms/cma
    rest_sources/tutorials/algorithms/mocma
