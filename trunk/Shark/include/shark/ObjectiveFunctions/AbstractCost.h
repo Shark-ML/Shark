@@ -114,24 +114,6 @@ public:
 	/// \param  targets      target values
 	/// \param  predictions  predictions, typically made by a model
 	virtual double eval(Data<LabelType> const& targets, Data<OutputType> const& predictions) const = 0;
-
-	/// \brief evaluates the cost and the derivative w.r.t. the prediction
-	///
-	/// \par
-	/// The default implementations throws an exception.
-	/// If you overwrite this method, don't forget to set
-	/// the flag HAS_FIRST_DERIVATIVE.
-	/// \param  targets      target values
-	/// \param  predictions  predictions, typically made by a model
-	/// \param  gradient     the gradient of the cost function with respect to the predictions
-	virtual double evalDerivative(
-				Data<LabelType> const& targets,
-				Data<OutputType> const& predictions,
-				Data<OutputType>& gradient
-	)const{
-		SHARK_FEATURE_EXCEPTION(HAS_FIRST_DERIVATIVE);
-		return 0.0;  // dead code, prevent warning
-	}
 	
 	double operator () (Data<LabelType> const& targets, Data<OutputType> const& predictions) const
 	{ return eval(targets, predictions); }
