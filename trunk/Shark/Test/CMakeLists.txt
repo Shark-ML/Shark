@@ -247,12 +247,14 @@ SHARK_ADD_TEST( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceT
 SHARK_ADD_TEST( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 
 # Copy test file
-ADD_CUSTOM_COMMAND(
-    TARGET Data_HDF5
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_data
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Test/test_data ${CMAKE_BINARY_DIR}/Test/test_data
-)
+IF (HDF5_FOUND)
+	ADD_CUSTOM_COMMAND(
+	    TARGET Data_HDF5
+	    POST_BUILD
+	    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_data
+	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Test/test_data ${CMAKE_BINARY_DIR}/Test/test_data
+	)	
+ENDIF (HDF5_FOUND)
 # Create output dir
 ADD_CUSTOM_COMMAND(
     TARGET Data_Csv
