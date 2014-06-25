@@ -116,6 +116,7 @@ SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-NN VersatileClassi
 SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-SVM VersatileClassificationTutorial-SVM "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-RF VersatileClassificationTutorial-RF "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-Network VersatileClassificationTutorial-Network "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/KernelBudgetedSGDTutorial KernelBudgetedSGDTutorial "Supervised" )
 
 #basic tutorials
 SHARK_ADD_EXAMPLE( Supervised/quickstartTutorial quickstartTutorial "Supervised" )

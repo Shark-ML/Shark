@@ -23,6 +23,7 @@ SOURCE_GROUP( include/shark/ObjectiveFunctions/Benchmarks FILES shark/ObjectiveF
 
 SOURCE_GROUP( include/shark/Algorithms FILES shark/Algorithms/*.h )
 SOURCE_GROUP( include/shark/Algorithms/Trainers FILES shark/Algorithms/Trainers/*.h )
+SOURCE_GROUP( include/shark/Algorithms/Trainers/Budgeted FILES shark/Algorithms/Trainers/Budgeted/*.h )
 SOURCE_GROUP( include/shark/Algorithms/LP FILES shark/Algorithms/LP/*.h )
 SOURCE_GROUP( include/shark/Algorithms/QP FILES shark/Algorithms/QP/*.h )
 SOURCE_GROUP( include/shark/Algorithms/NearestNeighbors FILES shark/Algorithms/NearestNeighbors/*.h )
