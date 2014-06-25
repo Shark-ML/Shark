@@ -51,10 +51,13 @@ namespace shark
 {
 
 ///
-/// \brief Linear classifier in a kernel feature space.
+/// \brief This is the abstract interface for any budget maintenance strategy.
 ///
-/// This model is a simple wrapper for the KernelExpansion calculating the arg max
-/// of the outputs of the model. This is the model used by kernel classifier models like SVMs.
+/// To allow for easy exchange of budget maintenance strategies, each of
+/// them should derive from this class. The only function it defines is addToModel,
+/// which, when implemented, will add a given supportvector and given alphas
+/// to the provided model by applying the respective budget maintenance strategy.
+/// (Note that not all merging strategies need the alphas, but some do)
 ///
 template<class InputType>
 class AbstractBudgetMaintenanceStrategy

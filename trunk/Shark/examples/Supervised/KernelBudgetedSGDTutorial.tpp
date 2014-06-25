@@ -23,8 +23,8 @@ int main(int argc, char** argv)
 	//###begin<trainer>
 	double C = 1.0;          // regularization parameter
 	bool bias = false;           // use bias/offset parameter
-	size_t budgetSize = 32;     // our model shall contain at most 64 vectors
-	size_t epochs = 3;      // we want to run 3 epochs
+	size_t budgetSize = 16;     // our model shall contain at most 16 vectors
+	size_t epochs = 5;      // we want to run 5 epochs
 	//###end<trainer>
 
 
