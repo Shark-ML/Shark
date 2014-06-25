@@ -22,7 +22,7 @@ void checkMatrixVectorMultiply(M const& arg1, V const& arg2, Result const& resul
 }
 
 BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense ){
-	std::size_t dims = 80;
+	std::size_t dims = 231;//chosen as not to be a multiple of the block size
 	//initialize the arguments in both row and column major, lower and upper, unit and non-unit diagonal
 	//we add one on the remaining elements to ensure, that triangular_prod does not tuch these elements
 	matrix<double,row_major> arg1lowerrm(dims,dims,1.0);
