@@ -10,6 +10,24 @@
 using namespace shark;
 using namespace std;
 
+
+// data generating distribution for our toy
+// multi-category classification problem
+class myProblem : public LabeledDataDistribution<RealVector, unsigned int>
+{
+public:
+    void draw(RealVector& input, unsigned int& label)const
+    {
+        label = Rng::discrete(0, 4);
+        input.resize(1);
+        input(0) = Rng::gauss() + 3.0 * label;
+    }
+};
+/// @endcond
+
+
+
+
 int main(int argc, char** argv)
 {
 	// experiment settings
