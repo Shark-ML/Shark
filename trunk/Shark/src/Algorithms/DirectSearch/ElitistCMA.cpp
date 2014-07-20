@@ -54,6 +54,7 @@ void ElitistCMA::init( ObjectiveFunctionType const& function, SearchPointType co
 	
 	//create and evaluate individual
 	m_individual = CMAIndividual<double>(p.size());
+	m_individual.chromosome().m_stepSize = std::sqrt(1.0/p.size());
 	noalias(m_individual.searchPoint()) = p;
 	m_evaluator(function,m_individual);
 	

@@ -172,7 +172,7 @@ void CMA::init( ObjectiveFunctionType const& function, SearchPointType const& p)
 		p,
 		lambda,
 		mu,
-		1.0
+		1.0/std::sqrt(double(p.size()))
 	);
 }
 
