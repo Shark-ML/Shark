@@ -128,6 +128,8 @@ public:
 				m_linear(v) = m_gradient(v) = linearMat(i,p);
 			}
 		}
+		// initialize unshrinking to make valgrind happy.
+		bUnshrinked = false;
 	}
 	
 	/// enable/disable shrinking

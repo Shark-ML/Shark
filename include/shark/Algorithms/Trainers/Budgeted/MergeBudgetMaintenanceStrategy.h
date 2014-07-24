@@ -130,7 +130,6 @@ class MergeBudgetMaintenanceStrategy<RealVector>: public AbstractBudgetMaintenan
 {
 	typedef KernelExpansion<RealVector> ModelType;
 	typedef LabeledData<RealVector, unsigned int> DataType;
-	typedef typename DataType::element_type ElementType;
 	typedef RealVector InputType;
 
 public:
