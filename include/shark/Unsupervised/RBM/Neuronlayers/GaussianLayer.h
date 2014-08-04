@@ -31,36 +31,14 @@
 #define SHARK_UNSUPERVISED_RBM_NEURONLAYERS_GAUSSIANLAYER_H
 
 #include <shark/LinAlg/Base.h>
-#include <shark/Data/BatchInterfaceAdaptStruct.h>
 #include <shark/Unsupervised/RBM/StateSpaces/RealSpace.h>
 #include <shark/Rng/Normal.h>
 #include <shark/Core/ISerializable.h>
 #include <shark/Core/IParameterizable.h>
 #include <shark/Core/Math.h>
+#include <shark/Data/BatchInterfaceAdaptStruct.h>
 
 namespace shark{
-namespace detail{
-template<class VectorType>
-struct GaussianSufficientStatistics{
-	VectorType mean;
-	///unfortunately the beta value needs to be stored since the temperature also changes the variance of the distribution
-	double beta; 
-		
-	GaussianSufficientStatistics(std::size_t numberOfNeurons):mean(numberOfNeurons),beta(1.0){}
-	GaussianSufficientStatistics(){}
-};
-}
-
-/// \cond
-
-
-//auto generate the batch interface for the GuassianSufficientStatistics
-template<class VectorType>
-struct Batch< detail::GaussianSufficientStatistics<VectorType> >{
-	SHARK_CREATE_BATCH_INTERFACE( detail::GaussianSufficientStatistics<VectorType>,(VectorType, mean)(double, beta))
-};
-
-/// \endcond
 
 ///\brief A layer of Gaussian neurons.
 ///
@@ -75,7 +53,7 @@ public:
 	typedef RealSpace StateSpace;
 
 	///\brief The sufficient statistics for the Guassian Layer stores the mean of the neuron and the inverse temperature
-	typedef detail::GaussianSufficientStatistics<RealVector> SufficientStatistics;
+	typedef RealVector SufficientStatistics;
 	///\brief Sufficient statistics of a batch of data.
 	typedef Batch<SufficientStatistics>::type StatisticsBatch;
 	
@@ -108,13 +86,12 @@ public:
 	template<class Input, class BetaVector>
 	void sufficientStatistics(Input const& input, StatisticsBatch& statistics,BetaVector const& beta)const{ // \todo: auch hier noch mal namen ueberdenken
 		SIZE_CHECK(input.size2() == size());
-		SIZE_CHECK(statistics.mean.size2() == size());
-		SIZE_CHECK(input.size1() == statistics.mean.size1());
+		SIZE_CHECK(statistics.size2() == size());
+		SIZE_CHECK(input.size1() == statistics.size1());
 		
 		for(std::size_t i = 0; i != input.size1(); ++i){
-			noalias(row(statistics.mean,i)) = (row(input,i)+m_bias)*beta(i);
+			noalias(row(statistics,i)) = (row(input,i)+m_bias)*beta(i);
 		}
-		statistics.beta=beta;
 	}
 
 
@@ -131,13 +108,13 @@ public:
 	/// @param rng the random number generator used for sampling
 	template<class Matrix, class Rng>
 	void sample(StatisticsBatch const& statistics, Matrix& state, double alpha, Rng& rng) const{
-		SIZE_CHECK(statistics.mean.size2() == size());
-		SIZE_CHECK(statistics.mean.size1() == state.size1());
-		SIZE_CHECK(statistics.mean.size2() == state.size2());
+		SIZE_CHECK(statistics.size2() == size());
+		SIZE_CHECK(statistics.size1() == state.size1());
+		SIZE_CHECK(statistics.size2() == state.size2());
 		
 		for(std::size_t i = 0; i != state.size1();++i){
 			for(std::size_t j = 0; j != state.size2();++j){
-				Normal<Rng> normal(rng,statistics.mean(i,j),1.0/statistics.beta(i));
+				Normal<Rng> normal(rng,statistics(i,j),1.0);
 				state(i,j) = normal();
 			}
 		}
@@ -160,30 +137,33 @@ public:
 	/// \brief Returns the expectation of the phi-function. 
 	/// @param statistics the sufficient statistics (the mean of the distribution).
 	RealMatrix const& expectedPhiValue(StatisticsBatch const& statistics)const{ 
-		SIZE_CHECK(statistics.mean.size2() == size());
-		return statistics.mean;	
+		SIZE_CHECK(statistics.size2() == size());
+		return statistics;	
 	}
 	/// \brief Returns the mean given the state of the connected layer, i.e. in this case the mean of the Gaussian
 	/// 
 	/// @param statistics the sufficient statistics of the layer for a whole batch
 	RealMatrix const& mean(StatisticsBatch const& statistics)const{ 
-		SIZE_CHECK(statistics.mean.size2() == size());
-		return statistics.mean;
+		SIZE_CHECK(statistics.size2() == size());
+		return statistics;
 	}
 
 	/// \brief The energy term this neuron adds to the energy function for a batch of inputs.
 	///
 	/// @param state the state of the neuron layer
+	/// @param beta the inverse temperature of the i-th state
 	/// @return the energy term of the neuron layer
-	template<class Matrix>
-	RealVector energyTerm(Matrix const& state)const{
+	template<class Matrix, class BetaVector>
+	RealVector energyTerm(Matrix const& state, BetaVector const& beta)const{
 		SIZE_CHECK(state.size2() == size());
+		SIZE_CHECK(state.size1() == beta.size());
 		//the following code does for batches the equivalent thing to:
-		//return inner_prod(m_bias,state) - norm_sqr(state)/2.0;
+		//return beta * inner_prod(m_bias,state) - norm_sqr(state)/2.0;
 		
 		std::size_t batchSize = state.size1();
 		RealVector energies(batchSize);
 		axpy_prod(state,m_bias,energies);
+		noalias(energies) *= beta;
 		for(std::size_t i = 0; i != batchSize; ++i){
 			energies(i) -= norm_sqr(row(state,i))/2.0;
 		}
@@ -227,13 +207,13 @@ public:
 	template<class Vector, class SampleBatch>
 	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples )const{
 		SIZE_CHECK(derivative.size() == size());
-		sum_rows(samples.statistics.mean,derivative);
+		sum_rows(samples.statistics,derivative);
 	}
 
 	template<class Vector, class SampleBatch, class Vector2 >
 	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples, Vector2 const& weights )const{
 		SIZE_CHECK(derivative.size() == size());
-		axpy_prod(samples.statistics.mean,weights, derivative);
+		axpy_prod(samples.statistics,weights, derivative);
 	}
 	
 	///\brief Calculates the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights. 
