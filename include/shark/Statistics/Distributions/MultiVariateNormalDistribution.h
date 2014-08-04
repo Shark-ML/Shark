@@ -103,6 +103,11 @@ public:
 	RealVector const& eigenValues() const {
 		return m_eigenValues;
 	}
+	
+	/// \brief Accesses a reference to the eigenvalues of the covariance matrix.
+	RealVector& eigenValues(){
+		return m_eigenValues;
+	}
 
 	/// \brief Samples the distribution.
 	result_type operator()() const {
