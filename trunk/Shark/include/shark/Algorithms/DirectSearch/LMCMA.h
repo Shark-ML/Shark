@@ -267,7 +267,7 @@ public:
 		
 		// learning rates
 		m_muEff = 1. / sum(sqr(m_weights)); // equal to sum(m_weights)^2 / sum(sqr(m_weights))
-		double c1 = 2 / (sqr(m_numberOfVariables + 1.3) + m_muEff);
+		double c1 = 1/(10*std::log(m_numberOfVariables+1.0));
 		m_cC =1.0/m_lambda;
 		
 		//init variables for covariance matrix update
