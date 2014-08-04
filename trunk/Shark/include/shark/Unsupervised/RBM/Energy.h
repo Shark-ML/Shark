@@ -98,13 +98,12 @@ struct Energy{
 		std::size_t batchSize = size(hiddenState);
 		
 		//calculate the energy terms of the hidden neurons for the whole batch
-		RealVector energyTerms = m_hiddenNeurons.energyTerm(hiddenState);
+		RealVector energyTerms = m_hiddenNeurons.energyTerm(hiddenState,beta);
 
 		//calculate resulting probabilities in sequence
 		RealVector p(batchSize);
 		for(std::size_t i = 0; i != batchSize; ++i){
-			double hiddenEnergy = beta(i) * energyTerms(i);
-			p(i) = m_visibleNeurons.logMarginalize(row(visibleInput,i),beta(i))+hiddenEnergy;
+			p(i) = m_visibleNeurons.logMarginalize(row(visibleInput,i),beta(i))+energyTerms(i);
 		}
 		return p;
 	}
@@ -128,12 +127,11 @@ struct Energy{
 		std::size_t batchSize = size(visibleState);
 		
 		//calculate the energy terms of the visible neurons for the whole batch
-		RealVector energyTerms = m_visibleNeurons.energyTerm(visibleState);
+		RealVector energyTerms = m_visibleNeurons.energyTerm(visibleState,beta);
 		
 		RealVector p(batchSize);
 		for(std::size_t i = 0; i != batchSize; ++i){
-			double visibleEnergy = beta(i) * energyTerms(i);
-			p(i) = m_hiddenNeurons.logMarginalize(row(hiddenInput,i),beta(i))+visibleEnergy;
+			p(i) = m_hiddenNeurons.logMarginalize(row(hiddenInput,i),beta(i))+energyTerms(i);
 		}
 		return p;
 	}
@@ -206,8 +204,8 @@ struct Energy{
 		for(std::size_t i = 0; i != batchSize; ++i){
 			energies(i) = -inner_prod(row(hiddenInput,i),row(phiOfH,i));
 		}
-		energies -= m_hiddenNeurons.energyTerm(hidden);
-		energies -= m_visibleNeurons.energyTerm(visible);
+		energies -= m_hiddenNeurons.energyTerm(hidden,blas::repeat(1.0,batchSize));
+		energies -= m_visibleNeurons.energyTerm(visible,blas::repeat(1.0,batchSize));
 		return energies;
 	}
 
@@ -228,8 +226,8 @@ struct Energy{
 		for(std::size_t i = 0; i != batchSize; ++i){
 			energies(i) = -inner_prod(row(phiOfV,i),row(visibleInput,i));
 		}
-		energies -= m_hiddenNeurons.energyTerm(hidden);
-		energies -= m_visibleNeurons.energyTerm(visible);
+		energies -= m_hiddenNeurons.energyTerm(hidden,blas::repeat(1.0,batchSize));
+		energies -= m_visibleNeurons.energyTerm(visible,blas::repeat(1.0,batchSize));
 		return energies;
 	}
 private:

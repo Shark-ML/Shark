@@ -9,7 +9,7 @@ using namespace shark;
 
 BOOST_AUTO_TEST_CASE( GaussianLayer_SufficientStatistics){
 	GaussianLayer layer;
-	GaussianLayer::StatisticsBatch statistics(10,3);
+	RealMatrix statistics(10,3);
 	layer.resize(3);
 	RealMatrix input(10,3);
 	RealMatrix testInput(10,3);
@@ -33,9 +33,8 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_SufficientStatistics){
 		
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
-				BOOST_CHECK_SMALL(testInput(i,j)-statistics.mean(i,j),1.e-15);
+				BOOST_CHECK_SMALL(testInput(i,j)-statistics(i,j),1.e-15);
 			}
-			BOOST_CHECK_SMALL(beta-statistics.beta(i),1.e-15);
 		}
 	}
 }
@@ -65,9 +64,8 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_Sample){
 	
 	for(std::size_t i = 0; i != 3; ++i){
 		for(std::size_t j = 0; j != 5; ++j){
-			statistics.mean(i,j) = Rng::uni(0.0,1.0);
+			statistics(i,j) = Rng::uni(0.0,1.0);
 		}
-		statistics.beta(i) = Rng::uni(0.0,1.0);
 	}
 	
 
@@ -80,14 +78,14 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_Sample){
 	for(std::size_t s = 0; s != numSamples; ++s){
 		layer.sample(statistics,samples,0.0,Rng::globalRng);
 		mean +=samples;
-		noalias(variance) += sqr(samples-statistics.mean);
+		noalias(variance) += sqr(samples-statistics);
 	}
 	mean/=numSamples;
 	variance/=numSamples;
 	for(std::size_t i = 0; i != 3; ++i){
 		for(std::size_t j = 0; j != 5; ++j){
-			BOOST_CHECK_SMALL(sqr(mean(i,j) - statistics.mean(i,j)),1.e-5);
-			BOOST_CHECK_SMALL(sqr(variance(i,j) - 1/statistics.beta(i)),1.e-2);
+			BOOST_CHECK_SMALL(sqr(mean(i,j) - statistics(i,j)),1.e-5);
+			BOOST_CHECK_SMALL(sqr(variance(i,j) - 1),1.e-2);
 		}
 	}
 }

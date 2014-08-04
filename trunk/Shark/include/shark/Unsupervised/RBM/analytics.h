@@ -143,12 +143,12 @@ double estimateLogFreeEnergy(
 	RBMType& rbm, Data<RealVector> const& initDataset, 
 	RealVector const& beta, std::size_t samples,
 	PartitionEstimationAlgorithm algorithm = AIS,
-	float burninInPercentage =0.1
+	float burnInPercentage =0.1
 ){
 	std::size_t chains = beta.size();
 	RealMatrix energyDiffUp(chains,samples);
 	RealMatrix energyDiffDown(chains,samples);
-	detail::sampleEnergies(rbm,initDataset,beta,energyDiffUp,energyDiffDown,burninInPercentage);
+	detail::sampleEnergies(rbm,initDataset,beta,energyDiffUp,energyDiffDown,burnInPercentage);
 	
 	return estimateLogFreeEnergyFromEnergySamples(
 		energyDiffUp,energyDiffDown,algorithm
@@ -166,6 +166,30 @@ double annealedImportanceSampling(
 	return soft_max(-sum_rows(energyDiffTempering))-std::log(double(samples));
 }
 
+template<class RBMType>
+double estimateLogFreeEnergy(
+	RBMType& rbm, Data<RealVector> const& initDataset, 
+	std::size_t chains, std::size_t samples,
+	PartitionEstimationAlgorithm algorithm = AIS,
+	float burnInPercentage =0.1
+){
+	RealVector beta(chains);
+	for(std::size_t i = 0; i  != chains; ++i){
+		beta(i) = 1.0-i/double(chains-1);
+	}
+	estimateLogFreeEnergy(rbm,initDataset,chains,samples,algorithm,burnInPercentage);
+}
+
+template<class RBMType>
+double annealedImportanceSampling(
+	RBMType& rbm,std::size_t chains, std::size_t samples
+){
+	RealVector beta(chains);
+	for(std::size_t i = 0; i  != chains; ++i){
+		beta(i) = 1.0-i/double(chains-1);
+	}
+	return annealedImportanceSampling(rbm,beta,samples);
+}
 
 }
 #endif

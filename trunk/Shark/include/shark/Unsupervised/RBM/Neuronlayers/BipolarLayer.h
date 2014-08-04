@@ -169,13 +169,15 @@ public:
 	/// \brief Returns the energy term this neuron adds to the energy function.
 	///
 	/// @param state the state of the neuron layer 
+	/// @param beta the inverse temperature of the i-th state
 	/// @return the energy term of the neuron layer
-	template<class Matrix>
-	RealVector energyTerm(Matrix const& state)const{
+	template<class Matrix, class BetaVector>
+	RealVector energyTerm(Matrix const& state, BetaVector const& beta)const{
 		SIZE_CHECK(state.size2() == size());
 		
 		RealVector energies(state.size1(),0.0);
 		axpy_prod(state,m_bias,energies,false);
+		noalias(energies) *= beta;
 		return energies;
 	}
 	
