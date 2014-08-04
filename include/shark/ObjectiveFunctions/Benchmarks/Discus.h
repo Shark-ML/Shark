@@ -77,9 +77,9 @@ struct Discus : public SingleObjectiveFunction {
 
 	double eval(const SearchPointType &p) const {
 		m_evaluationCounter++;
-		double sum = m_alpha * sqr(p(0));
+		double sum =  sqr(p(0));
 		for (unsigned int i = 1; i < p.size(); i++)
-			sum += sqr(p(i));
+			sum += m_alpha * sqr(p(i));
 
 		return sum;
 	}
