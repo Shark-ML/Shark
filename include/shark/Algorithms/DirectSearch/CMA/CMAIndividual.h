@@ -67,6 +67,7 @@ public:
 	void mutate(){
 		MultiVariateNormalDistribution::result_type sample = chromosome().m_mutationDistribution();
 		chromosome().m_lastStep = sample.first;
+		chromosome().m_lastZ = sample.second;
 		searchPoint() += chromosome().m_stepSize * sample.first;
 	}
 	

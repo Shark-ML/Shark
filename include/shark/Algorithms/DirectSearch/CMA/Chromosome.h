@@ -47,10 +47,11 @@ struct CMAChromosome{
 	};
 	//~ MultiVariateNormalDistribution m_mutationDistribution; ///< Models the search distribution
 	MultiVariateNormalDistributionCholesky m_mutationDistribution; ///< Models the search distribution using a cholsky matrix
-	RealMatrix m_inverseCholesky;///< inverse cholesky matrix
+	//~ RealMatrix m_inverseCholesky;///< inverse cholesky matrix
 
 	RealVector m_evolutionPath; ///< Low-pass filtered accumulation of successful mutative steps.
 	RealVector m_lastStep; ///< The most recent mutative step.
+	RealVector m_lastZ; ///< The sample from N(0,I) that produced the last step.
 
 	double m_stepSize; ///< The step-size used to scale the normally-distributed mutative steps. Dynamically adapted during the run.
 	double m_stepSizeDampingFactor; ///< Damping factor \f$d\f$ used in the step-size update procedure.
@@ -74,9 +75,10 @@ struct CMAChromosome{
 	, m_successThreshold(successThreshold)
 	{
 		m_mutationDistribution.resize( searchSpaceDimension );
-		m_inverseCholesky = blas::identity_matrix<double>( searchSpaceDimension );
+		//~ m_inverseCholesky = blas::identity_matrix<double>( searchSpaceDimension );
 		m_evolutionPath.resize( searchSpaceDimension );
 		m_lastStep.resize( searchSpaceDimension );
+		m_lastZ.resize( searchSpaceDimension );
 
 		m_targetSuccessProbability = 1.0 / ( 5.0 + 1/2.0 );		
 		m_successProbability = m_targetSuccessProbability;
@@ -130,10 +132,10 @@ struct CMAChromosome{
 		if( m_successProbability < m_successThreshold ) {
 			//check whether the step is admissible with the proposed update weight
 			double rate = m_covarianceMatrixUnlearningRate;
-			double stepNormSqr = norm_sqr( m_lastStep );
+			double stepNormSqr = norm_sqr( m_lastZ );
 			if( 1 <  m_covarianceMatrixUnlearningRate*(2*stepNormSqr-1) ){
 				rate = 0.5/(2*stepNormSqr-1);//make the update shorter
-				return; //better be safe for now
+				//~ return; //better be safe for now
 			}
 			rankOneUpdate(1+rate,-rate,m_lastStep);
 		} else {
@@ -172,18 +174,18 @@ private:
 	/// This also requries an update of the inverse cholesky factor, that is the only reason, it exists.
 	void rankOneUpdate(double alpha, double beta, RealVector const& v){
 		
-		//~ m_mutationDistribution.rankOneUpdate(alpha,beta,v);
-		RealVector w = prod(m_inverseCholesky,v);
-		if(norm_inf(w) < 1.e-20) return; //precision under which we assum that the update is mostly noise.
-		RealVector wInv = prod(w,m_inverseCholesky);
+		m_mutationDistribution.rankOneUpdate(alpha,beta,v);
+		//~ RealVector w = prod(m_inverseCholesky,v);
+		//~ if(norm_inf(w) < 1.e-20) return; //precision under which we assum that the update is mostly noise.
+		//~ RealVector wInv = prod(w,m_inverseCholesky);
 		
-		double normWSqr =norm_sqr(w);
-		double a = std::sqrt(alpha);
-		double root = std::sqrt(1+beta/alpha*normWSqr);
-		double b = a/normWSqr * (root-1);
-		RealMatrix& A =m_mutationDistribution.lowerCholeskyFactor();
-		noalias(A) =a*A+b*outer_prod(v,w);
-		noalias(m_inverseCholesky) = 1.0/a * m_inverseCholesky - b/ (a*a+a*b*normWSqr)*outer_prod(w,wInv);
+		//~ double normWSqr =norm_sqr(w);
+		//~ double a = std::sqrt(alpha);
+		//~ double root = std::sqrt(1+beta/alpha*normWSqr);
+		//~ double b = a/normWSqr * (root-1);
+		//~ RealMatrix& A =m_mutationDistribution.lowerCholeskyFactor();
+		//~ noalias(A) =a*A+b*outer_prod(v,w);
+		//~ noalias(m_inverseCholesky) = 1.0/a * m_inverseCholesky - b/ (a*a+a*b*normWSqr)*outer_prod(w,wInv);
 	}
 	
 	/// \brief Performs an update step which makes the distribution more round
