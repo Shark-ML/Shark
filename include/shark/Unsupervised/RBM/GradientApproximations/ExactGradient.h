@@ -44,7 +44,7 @@ private:
 public:
 	typedef RBMType RBM;
 
-	ExactGradient(RBM* rbm): mpe_rbm(rbm){
+	ExactGradient(RBM* rbm): mpe_rbm(rbm),m_regularization(0.0){
 		SHARK_ASSERT(rbm != NULL);
 
 		m_features |= HAS_FIRST_DERIVATIVE;
@@ -78,6 +78,26 @@ public:
 	double eval( SearchPointType const & parameter) const {
 		mpe_rbm->setParameterVector(parameter);
 		return negativeLogLikelihood(*mpe_rbm,m_data)/m_data.numberOfElements();
+	}
+	
+	/// \brief Returns the current strength of the regularization
+	///
+	/// This regularization is commonly referred in the literature as "weight decay
+	/// as in very step the gradient of the parameters w is a term "regularization*w" added
+	/// which drives the weights low. Other communities refer to this as two-norm regularization.
+	/// this is 0 by default.
+	double regularization()const{
+		return m_regularization;
+	}
+	
+	/// \brief Set the current strength of the regularization
+	///
+	/// This regularization is commonly referred in the literature as "weight decay"
+	/// as in very step a term "regularization*w"  is added, where "w" are the weights, 
+	/// which drives the weights low. Other communities refer to this as two-norm regularization.
+	/// this is 0 by default.
+	void setRegularization(double newRegularization){
+		m_regularization = newRegularization;
 	}
 
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
@@ -113,6 +133,9 @@ public:
 		
 		derivative.resize(mpe_rbm->numberOfParameters());
 		noalias(derivative) = modelExpectation.result() - empiricalExpectation.result();
+		
+		//weight decay
+		noalias(derivative) += m_regularization*parameter;
 	
 		m_logPartition = modelExpectation.logWeightSum();
 		negLogLikelihood/=m_data.numberOfElements();
@@ -195,6 +218,7 @@ private:
 	UnlabeledData<RealVector> m_data;
 
 	mutable double m_logPartition; //the partition function of the model distribution
+	double m_regularization;///< regularization parameter, commonly referred to as "weight decay". 
 };	
 	
 }

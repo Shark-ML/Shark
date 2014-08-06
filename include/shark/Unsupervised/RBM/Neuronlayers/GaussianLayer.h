@@ -90,7 +90,7 @@ public:
 		SIZE_CHECK(input.size1() == statistics.size1());
 		
 		for(std::size_t i = 0; i != input.size1(); ++i){
-			noalias(row(statistics,i)) = (row(input,i)+m_bias)*beta(i);
+			noalias(row(statistics,i)) = row(input,i)*beta(i)+m_bias;
 		}
 	}
 

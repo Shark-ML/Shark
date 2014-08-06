@@ -92,7 +92,9 @@ public:
 	void setNumberOfTemperatures(std::size_t temperatures){
 		m_chain.setNumberOfTemperatures(temperatures);
 	}
-
+	void setUniformTemperatureSpacing(std::size_t temperatures){
+		m_chain.setUniformTemperatureSpacing(temperatures);
+	}
 
 	/// \brief Returns the number Of temperatures.
 	std::size_t numberOfTemperatures()const{

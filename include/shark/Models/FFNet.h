@@ -127,6 +127,20 @@ public:
 	std::vector<RealMatrix> const& layerMatrices()const{
 		return m_layerMatrix;
 	}
+	
+	void setLayer(std::size_t layerNumber, RealMatrix const& m, RealVector const& bias){
+		SIZE_CHECK(m.size1() == bias.size());
+		SIZE_CHECK(m.size1() == m_layerMatrix[layerNumber].size1());
+		SIZE_CHECK(m.size2() == m_layerMatrix[layerNumber].size2());
+		m_layerMatrix[layerNumber] = m;
+		std::size_t start = 0;
+		for(std::size_t i = 0; i != layerNumber; ++i){
+			start += m_layerMatrix[i].size1();
+		}
+		noalias(subrange(m_bias,start,start+bias.size())) = bias;
+		//set backprop matrices
+		setParameterVector(parameterVector());
+	}
 
 	//! \brief Returns the matrices for every layer used by backpropagation.
 	std::vector<RealMatrix> const& backpropMatrices()const{
@@ -146,6 +160,15 @@ public:
 	//! the first entry is the value of the first hidden unit while the last outputSize() units
 	//! are the values of the output units.
 	const RealVector& bias()const{
+		return m_bias;
+	}
+	
+	//! \brief Returns the bias values for hidden and output units.
+	//!
+	//! This is either empty or a vector of size numberOfNeurons()-inputSize().
+	//! the first entry is the value of the first hidden unit while the last outputSize() units
+	//! are the values of the output units.
+	RealVector& bias(){
 		return m_bias;
 	}
 	

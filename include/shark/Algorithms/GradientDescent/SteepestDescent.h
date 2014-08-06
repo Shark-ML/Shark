@@ -46,7 +46,7 @@ public:
 		m_features |= REQUIRES_FIRST_DERIVATIVE;
 
 		m_learningRate = 0.1;
-		m_momentum = 0.3;
+		m_momentum = 0.0;
 	}
 
 	/// \brief From INameable: return the class name.
