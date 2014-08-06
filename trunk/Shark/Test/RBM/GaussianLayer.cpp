@@ -26,8 +26,7 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_SufficientStatistics){
 			}
 			
 			//calculate result
-			row(testInput,i) = row(input,i) + layer.bias();
-			row(testInput,i) *= beta;
+			row(testInput,i) = row(input,i)*beta + layer.bias();
 		}
 		layer.sufficientStatistics(input,statistics,blas::repeat(beta,10));
 		

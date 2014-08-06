@@ -90,11 +90,7 @@ public:
 
 	void configure(PropertyTree const& node){
 		std::size_t temperatures = node.get("temperatures", 1);
-		setNumberOfTemperatures(temperatures);
-		for(std::size_t i = 0; i != temperatures; ++i){
-				double factor = temperatures - 1;
-				setBeta(i,1.0 - i/factor);
-			}		
+		setUniformTemperatureSpacing(temperatures);		
 
 		m_operator.configure(node);
 	}
@@ -107,14 +103,26 @@ public:
 	}
 	
 
-	//\brief Sets the number of temperatures and initializes the tempered chains accordingly. 
-	//
-	// @param number of temperatures  
+	/// \brief Sets the number of temperatures and initializes the tempered chains accordingly. 
+	///
+	/// @param number of temperatures  
 	void setNumberOfTemperatures(std::size_t temperatures){
 		std::size_t visibles=m_operator.rbm()->numberOfVN();
 		std::size_t hiddens=m_operator.rbm()->numberOfHN();
 		m_temperedChains = SampleBatch(temperatures,visibles,hiddens);
 		m_betas.resize(temperatures);
+	}
+	
+	/// \brief Sets the number of temperatures and initializes them in a uniform spacing
+	///
+	/// Temperatures are spaced equally between 0 and 1.
+	/// @param number of temperatures  
+	void setUniformTemperatureSpacing(std::size_t temperatures){
+		setNumberOfTemperatures(temperatures);
+		for(std::size_t i = 0; i != temperatures; ++i){
+			double factor = temperatures - 1;
+			setBeta(i,1.0 - i/factor);
+		}	
 	}
 
 
@@ -160,8 +168,11 @@ public:
 
 	///\brief Initializes the markov chain using samples drawn uniformly from the set.
 	///
+	/// Be aware that the number of chains and the temperatures need to bee specified previously.
 	/// @param dataSet the data set
 	void initializeChain(Data<RealVector> const& dataSet){
+		if(m_temperedChains.size()==0) 
+			throw SHARKEXCEPTION("you did not initialize the number of temperatures bevor initializing the chain!");
 		DiscreteUniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,dataSet.numberOfElements()-1);
 		std::size_t visibles = m_operator.rbm()->numberOfVN();
 		RealMatrix sampleData(m_temperedChains.size(),visibles);
@@ -174,6 +185,7 @@ public:
 	
 	/// \brief Initializes with data points from a batch of points
 	///
+	/// Be aware that the number of chains and the temperatures need to bee specified previously.
 	/// @param sampleData the data set
 	void initializeChain(RealMatrix const& sampleData){
  		if(m_temperedChains.size()==0) 
