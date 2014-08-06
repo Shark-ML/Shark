@@ -59,7 +59,7 @@ After successful installation and validation, there is a guide to the documentat
 Requirements
 ------------
 
-Shark relies on `Boost <http://www.boost.org>`_  Version 1.45 or higher.
+Shark relies on `Boost <http://www.boost.org>`_  Version 1.48 or higher.
 For compiling the library, you need `CMake <http://www.cmake.org/>`_
 (at least version 2.8)
 and a C++ that is not too old (e.g., GCC > 4.6). 
@@ -151,7 +151,7 @@ see `More details on CMake`_.
    * the path to the Boost library (if installed to a custom location),
    * the desired Shark build type (Debug or Release).
    * the installation path (prefix) for Shark when later (and optionally)
-     calling ``make install``. By default it is ``/usr/local/``.
+     calling ``make install``. By default it is ``/usr/local/`` (usually requiring ``sudo make install``).
 
    **If unsure, leave everything as is (perhaps put the build type to ``Debug``), and
    see** :doc:`the troubleshooting page <../getting_started/troubleshooting>` **if
