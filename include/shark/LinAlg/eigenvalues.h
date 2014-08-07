@@ -52,8 +52,8 @@ namespace shark{ namespace blas{
  *
  *
  * \param A \f$ n \times n \f$ matrix, which must be symmetric, so only the bottom triangular matrix must contain values.
- * \param G \f$ n \times n \f$ matrix with the calculated normalizedeigenvectors, each column will contain one eigenvector.
- * \param l n-dimensional vector with the calculated eigenvalues in descending order.
+ * \param eigenVectors \f$ n \times n \f$ matrix with the calculated normalized eigenvectors, each column contains an eigenvector.
+ * \param eigenValues n-dimensional vector with the calculated eigenvalues in descending order.
  * \return none.
  *
  * \throw SharkException

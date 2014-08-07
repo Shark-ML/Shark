@@ -55,6 +55,7 @@ struct MultiplicativeEpsilonIndicator {
 	 * \param [in] itePF Iterator pointing behind the last valid individual of the front approximation.
 	 * \param [in] itRF Iterator pointing to the first valid individual of the reference front.
 	 * \param [in] iteRF Iterator pointing behind the last valid individual of the reference front.
+	 * \param [in] e Extractor instance applied to the elements in the comtainer.
 	 */
 	template<
 		typename IteratorTypeA,

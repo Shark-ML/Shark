@@ -105,7 +105,7 @@ public:
 
 	/// \brief Sets the number of temperatures and initializes the tempered chains accordingly. 
 	///
-	/// @param number of temperatures  
+	/// @param temperatures number of temperatures  
 	void setNumberOfTemperatures(std::size_t temperatures){
 		std::size_t visibles=m_operator.rbm()->numberOfVN();
 		std::size_t hiddens=m_operator.rbm()->numberOfHN();
@@ -116,7 +116,7 @@ public:
 	/// \brief Sets the number of temperatures and initializes them in a uniform spacing
 	///
 	/// Temperatures are spaced equally between 0 and 1.
-	/// @param number of temperatures  
+	/// @param temperatures number of temperatures  
 	void setUniformTemperatureSpacing(std::size_t temperatures){
 		setNumberOfTemperatures(temperatures);
 		for(std::size_t i = 0; i != temperatures; ++i){
