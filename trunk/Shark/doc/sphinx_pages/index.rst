@@ -202,7 +202,5 @@ Shark currently supports:
   * Multi-objective optimization (in particular, highly efficient
     algorithms for computing as well as approximating the contributing hypervolume)
 
-* Fuzzy systems
-
 * Basic linear algebra and optimization algorithms
 
