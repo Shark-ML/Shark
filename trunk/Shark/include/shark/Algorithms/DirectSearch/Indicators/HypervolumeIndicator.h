@@ -120,6 +120,7 @@ public:
 	///
 	/// Calculates the reference point of the volume from the population
 	/// using the maximum value in every dimension+1
+	/// \param extractor Extracts point information from set.
 	/// \param set The set of points.
 	template<typename Extractor, typename PointSet>
 	void updateInternals(Extractor const& extractor, PointSet const& set){

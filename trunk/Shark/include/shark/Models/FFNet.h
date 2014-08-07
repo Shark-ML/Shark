@@ -391,7 +391,7 @@ public:
 	//!
 	//! \param  layers contains the numbers of neurons for each layer of the network.
 	//! \param  connectivity type of connection used between layers
-	//! \param  bias       if set to \em true, connections from
+	//! \param  biasNeuron if set to \em true, connections from
 	//!                    all neurons (except the input neurons)
 	//!                    to the bias will be set.
 	void setStructure(

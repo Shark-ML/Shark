@@ -314,6 +314,7 @@ void csvStringToData(
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset
+/// \param  titleLines   Specifies a number of lines to be skipped in the beginning of the file 
 template<class T>
 void importCSV(
 	Data<T>& data,
