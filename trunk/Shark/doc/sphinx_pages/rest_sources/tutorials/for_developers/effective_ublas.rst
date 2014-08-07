@@ -1,4 +1,4 @@
-Effective uBlas and general code optimization
+Effective uBlas and General Code Optimization
 *********************************************
 
 Modern architectures are increasingly powerful for scientific computation. However, programmers

@@ -1,4 +1,4 @@
-The Shark build system setup
+The Shark Build System Setup
 ============================
 
 Some information on Shark's configuration options for CMake is already provided

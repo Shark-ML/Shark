@@ -1,4 +1,4 @@
-Writing Shark tutorials
+Writing Shark Tutorials
 =======================
 
 So you want to write a tutorial or a similar prose documentation text.

@@ -1,4 +1,3 @@
-
 Coding Convention
 =================
 

@@ -1,4 +1,4 @@
-The Shark development environment
+The Shark Development Environment
 =================================
 
 There is a number of tools the Shark developer team uses to ease
