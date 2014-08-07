@@ -1,4 +1,4 @@
-How to prepare and issue a new Shark release
+How to Prepare and Issue a New Shark Release
 ============================================
 
 This tutorial is both a checklist and knowledge preservation list

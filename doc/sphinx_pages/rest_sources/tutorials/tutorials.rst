@@ -179,7 +179,6 @@ Note that Shark follows a
 If you contribute to Shark, you might also find these documents helpful:
 
 * :doc:`for_developers/the_build_system`
-* :doc:`for_developers/development_environment`
 * :doc:`for_developers/effective_ublas`
 * :doc:`for_developers/writing_tutorials`
 * :doc:`for_developers/managing_the_documentation`

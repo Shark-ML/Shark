@@ -1,6 +1,4 @@
-
-
-The Shark documentation system
+The Shark Documentation System
 ==============================
 
 
