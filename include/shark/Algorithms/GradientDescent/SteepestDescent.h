@@ -65,7 +65,7 @@ public:
 
 	void configure( const PropertyTree & node ) {
 		m_learningRate=node.get("learningRate",0.1);
-		m_momentum=node.get("momentum",0.3);
+		m_momentum=node.get("momentum",0.0);
 	}
 
 	/*!

@@ -50,7 +50,7 @@ public:
 	///@param rbm pointer to the RBM which shell be trained 
 	ContrastiveDivergence(RBM* rbm)
 	: mpe_rbm(rbm),m_operator(rbm)
-	, m_k(1), m_numBatches(0),m_regularization(0.0){
+	, m_k(1), m_numBatches(0),m_regularizer(0){
 		SHARK_ASSERT(rbm != NULL);
 
 		m_features.reset(HAS_VALUE);
@@ -115,24 +115,9 @@ public:
 		return m_numBatches;
 	}
 	
-	/// \brief Returns the current strength of the regularization
-	///
-	/// This regularization is commonly referred in the literature as "weight decay
-	/// as in very step the gradient of the parameters w is a term "regularization*w" added
-	/// which drives the weights low. Other communities refer to this as two-norm regularization.
-	/// this is 0 by default.
-	double regularization()const{
-		return m_regularization;
-	}
-	
-	/// \brief Set the current strength of the regularization
-	///
-	/// This regularization is commonly referred in the literature as "weight decay"
-	/// as in very step a term "regularization*w"  is added, where "w" are the weights, 
-	/// which drives the weights low. Other communities refer to this as two-norm regularization.
-	/// this is 0 by default.
-	void setRegularization(double newRegularization){
-		m_regularization = newRegularization;
+	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
+		m_regularizer = regularizer;
+		m_regularizationStrength = factor;
 	}
 	
 	/// \brief Gives the CD-k approximation of the log-likelihood gradient.
@@ -207,8 +192,11 @@ public:
 			
 		}
 		
-		//weight decay
-		noalias(derivative) += m_regularization*parameter;
+		if(m_regularizer){
+			FirstOrderDerivative regularizerDerivative;
+			m_regularizer->evalDerivative(parameter,regularizerDerivative);
+			noalias(derivative) += m_regularizationStrength*regularizerDerivative;
+		}
 		
 		return std::numeric_limits<double>::quiet_NaN();
 	}
@@ -219,7 +207,9 @@ private:
 	Operator m_operator;
 	unsigned int m_k;
 	std::size_t m_numBatches;///< number of batches used in every iteration. 0 means all.
-	double m_regularization;///< regularization parameter, commonly referred to as "weight decay". 
+
+	SingleObjectiveFunction* m_regularizer;
+	double m_regularizationStrength;
 };	
 	
 }

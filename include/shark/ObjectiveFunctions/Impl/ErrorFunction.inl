@@ -271,6 +271,7 @@ ErrorFunction<InputType,LabelType>::ErrorFunction(
 	AbstractModel<InputType,OutputType>* model, 
 	AbstractLoss<LabelType, OutputType>* loss
 ){
+	m_regularizer = 0;
 	//non sequential models can be parallelized
 	if(model->isSequential() || SHARK_NUM_THREADS == 1)
 		mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType>(dataset,model,loss));
@@ -310,14 +311,23 @@ std::size_t ErrorFunction<InputType,LabelType>::numberOfVariables() const{
 
 template<class InputType,class LabelType>
 double ErrorFunction<InputType,LabelType>::eval(RealVector const& input) const{
-	++(m_evaluationCounter);
-	return mp_wrapper -> eval(input);
+	++m_evaluationCounter;
+	double value = mp_wrapper -> eval(input);
+	if(m_regularizer)
+		value += m_regularizationStrength * m_regularizer->eval(input);
+	return value;
 }
 
 template<class InputType,class LabelType>
 typename ErrorFunction<InputType,LabelType>::ResultType ErrorFunction<InputType,LabelType>::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
-	++(m_evaluationCounter);
-	return mp_wrapper -> evalDerivative(input,derivative);
+	++m_evaluationCounter;
+	double value = mp_wrapper -> evalDerivative(input,derivative);
+	if(m_regularizer){
+		FirstOrderDerivative regularizerDerivative;
+		value += m_regularizationStrength * m_regularizer->evalDerivative(input,regularizerDerivative);
+		noalias(derivative) += m_regularizationStrength*regularizerDerivative;
+	}
+	return value;
 }
 }
 #endif

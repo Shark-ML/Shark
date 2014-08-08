@@ -52,13 +52,15 @@ BOOST_AUTO_TEST_CASE( SteepestDescent_Test )
 	start(1)=1;
 	start(2)=1;
 	SteepestDescent optimizer;
+	optimizer.setLearningRate(0.1*(1-0.3));
+	optimizer.setMomentum(0.3);
 	optimizer.init(function,start);
 
 
 	// train the model
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
 	double error=0;
-	for(size_t iteration=0;iteration<60;++iteration)
+	for(size_t iteration=0;iteration<100;++iteration)
 	{
 		optimizer.step(function);
 		error=optimizer.solution().value;
