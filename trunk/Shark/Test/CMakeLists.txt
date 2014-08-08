@@ -220,6 +220,8 @@ SHARK_ADD_TEST( ObjectiveFunctions/EpsilonHingeLoss.cpp ObjFunct_EpsilonHingeLos
 SHARK_ADD_TEST( ObjectiveFunctions/SquaredEpsilonHingeLoss.cpp ObjFunct_SquaredEpsilonHingeLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/NegativeClassificationLogLikelihood.cpp ObjFunct_NegativeClassificationLogLikelihood )
 SHARK_ADD_TEST( ObjectiveFunctions/AbsoluteLoss.cpp ObjFunct_AbsoluteLoss )
+SHARK_ADD_TEST( ObjectiveFunctions/HuberLoss.cpp ObjFunct_HuberLoss )
+SHARK_ADD_TEST( ObjectiveFunctions/TukeyBiweightLoss.cpp ObjFunct_TukeyBiweightLoss )
 SHARK_ADD_TEST( ObjectiveFunctions/AUC.cpp ObjFunct_AUC )
 SHARK_ADD_TEST( ObjectiveFunctions/NegativeGaussianProcessEvidence.cpp ObjFunct_NegativeGaussianProcessEvidence )
 
