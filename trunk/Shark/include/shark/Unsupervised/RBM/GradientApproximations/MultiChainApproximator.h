@@ -46,7 +46,7 @@ public:
 	typedef typename MarkovChainType::RBM RBM;
 	
 	MultiChainApproximator(RBM* rbm)
-	: mpe_rbm(rbm),m_chainOperator(rbm),m_k(1),m_samples(0),m_numBatches(0),m_regularization(0.0){
+	: mpe_rbm(rbm),m_chainOperator(rbm),m_k(1),m_samples(0),m_numBatches(0),m_regularizer(0){
 		SHARK_ASSERT(rbm != NULL);
 		setBatchSize(500);
 
@@ -152,24 +152,9 @@ public:
 		return mpe_rbm->numberOfParameters();
 	}
 	
-	/// \brief Returns the current strength of the regularization
-	///
-	/// This regularization is commonly referred in the literature as "weight decay
-	/// as in very step the gradient of the parameters w is a term "regularization*w" added
-	/// which drives the weights low. Other communities refer to this as two-norm regularization.
-	/// this is 0 by default.
-	double regularization()const{
-		return m_regularization;
-	}
-	
-	/// \brief Set the current strength of the regularization
-	///
-	/// This regularization is commonly referred in the literature as "weight decay"
-	/// as in very step a term "regularization*w"  is added, where "w" are the weights, 
-	/// which drives the weights low. Other communities refer to this as two-norm regularization.
-	/// this is 0 by default.
-	void setRegularization(double newRegularization){
-		m_regularization = newRegularization;
+	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
+		m_regularizer = regularizer;
+		m_regularizationStrength = factor;
 	}
 	
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
@@ -190,8 +175,11 @@ public:
 		derivative.resize(mpe_rbm->numberOfParameters());
 		noalias(derivative) = modelAverage.result() - empiricalAverage;
 		
-		//weight decay
-		noalias(derivative) += m_regularization*parameter;
+		if(m_regularizer){
+			FirstOrderDerivative regularizerDerivative;
+			m_regularizer->evalDerivative(parameter,regularizerDerivative);
+			noalias(derivative) += m_regularizationStrength*regularizerDerivative;
+		}
 		
 		return std::numeric_limits<double>::quiet_NaN();
 	}
@@ -205,7 +193,9 @@ private:
 	unsigned int m_samples;
 	std::size_t m_batchSize;
 	std::size_t m_numBatches;
-	double m_regularization;///< regularization parameter, commonly referred to as "weight decay". 
+
+	SingleObjectiveFunction* m_regularizer;
+	double m_regularizationStrength;
 };	
 }
 

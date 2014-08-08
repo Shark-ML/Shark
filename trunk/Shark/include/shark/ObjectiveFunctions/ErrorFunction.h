@@ -78,6 +78,11 @@ public:
 	{ return "ErrorFunction"; }
 
 	void configure(const PropertyTree & node);
+	
+	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
+		m_regularizer = regularizer;
+		m_regularizationStrength = factor;
+	}
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const;
 	std::size_t numberOfVariables()const;
@@ -90,6 +95,8 @@ public:
 
 private:
 	boost::scoped_ptr<detail::FunctionWrapperBase > mp_wrapper;
+	SingleObjectiveFunction* m_regularizer;
+	double m_regularizationStrength;
 };
 
 }
