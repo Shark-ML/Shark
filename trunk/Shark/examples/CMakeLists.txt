@@ -69,7 +69,6 @@ SHARK_ADD_EXAMPLE( EA/MOO/AdditiveEpsilonIndicatorMain AdditiveEpsilonIndicatorM
 SHARK_ADD_EXAMPLE( EA/MOO/MOCMASimple MOCMASimple "EA/MOO" )
 SHARK_ADD_EXAMPLE( EA/MOO/MOCMAExperiment MOCMAExperiment "EA/MOO" )
 
-## SHARK_ADD_EXAMPLE( EA/SOO/XNES XNES "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/CMASimple CMASimple "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/CMAExperiment CMAExperiment "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/CMAPlot CMAPlot "EA/SOO" )
@@ -79,6 +78,7 @@ SHARK_ADD_EXAMPLE( EA/SOO/AckleyES AckleyES "EA/SOO" )
 SHARK_ADD_EXAMPLE( EA/SOO/Archive Archive "EA/SOO" )
 
 SHARK_ADD_EXAMPLE( Supervised/MultiTaskSvm MultiTaskSvm "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/DeepNetworkTraining DeepNetworkTraining "Supervised" )
 
 SHARK_ADD_EXAMPLE( Supervised/CVFolds CVFolds "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/CSvmLinear CSvmLinear "Supervised" )
@@ -93,8 +93,6 @@ SHARK_ADD_EXAMPLE( Supervised/CSvmMaxLikelihoodMS CSvmMaxLikelihoodMS "Supervise
 SHARK_ADD_EXAMPLE( Supervised/CSvmGridSearchTutorial CSvmGridSearchTutorial "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/CSvmTutorial CSvmTutorial "Supervised" )
 
-##SHARK_ADD_EXAMPLE( Supervised/OnlineSparseMcSvmExp OnlineSparseMcSvmExp "Supervised" )
-##SHARK_ADD_EXAMPLE( Supervised/OnlineCSMcSvmExp OnlineCSMcSvmExp "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/MklKernelTutorial MklKernelTutorial "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/SubrangeKernelTutorial SubrangeKernelTutorial "Supervised" )
 

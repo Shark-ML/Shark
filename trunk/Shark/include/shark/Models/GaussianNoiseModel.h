@@ -85,7 +85,7 @@ public:
 
 	/// obtain the parameter vector
 	RealVector parameterVector() const{
-		return parameterVector();
+		return RealVector();
 	}
 
 	/// overwrite the parameter vector

@@ -70,16 +70,19 @@ public:
 	bool stop(const ResultSet& set){
 		m_minTraining = std::min(m_minTraining, set.value);
 
-		m_meanPerformance += set.value/m_intervalSize;
+		m_meanPerformance += set.value;
 		m_interval.push(set.value);
 		if(m_interval.size()>m_intervalSize){
-			m_meanPerformance -= m_interval.front()/m_intervalSize;
+			m_meanPerformance -= m_interval.front();
 			m_interval.pop();
-		}else{
+		}
+		m_progress = (m_meanPerformance/(m_minTraining*m_interval.size()))-1;
+		
+		if(m_interval.size()<m_intervalSize){
 			return false;
 		}
 
-		m_progress = (m_meanPerformance/m_minTraining)-1;
+		
 		return m_progress < m_minImprovement;
 	}
 	///resets the internal state
@@ -87,7 +90,7 @@ public:
 		m_interval = std::queue<double>();
 		m_minTraining = 1.e10;
 		m_meanPerformance = 0;
-		m_progress = 1000;
+		m_progress = 0.0;
 	}
 	///returns current value of progress
 	double value()const{

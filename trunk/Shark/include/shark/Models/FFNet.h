@@ -128,6 +128,11 @@ public:
 		return m_layerMatrix;
 	}
 	
+	//! \brief Returns the weight matrix of the i-th layer.
+	RealMatrix const& layerMatrix(std::size_t layer)const{
+		return m_layerMatrix[layer];
+	}
+	
 	void setLayer(std::size_t layerNumber, RealMatrix const& m, RealVector const& bias){
 		SIZE_CHECK(m.size1() == bias.size());
 		SIZE_CHECK(m.size1() == m_layerMatrix[layerNumber].size1());
@@ -163,13 +168,13 @@ public:
 		return m_bias;
 	}
 	
-	//! \brief Returns the bias values for hidden and output units.
-	//!
-	//! This is either empty or a vector of size numberOfNeurons()-inputSize().
-	//! the first entry is the value of the first hidden unit while the last outputSize() units
-	//! are the values of the output units.
-	RealVector& bias(){
-		return m_bias;
+	///\brief Returns the portion of the bias vector of the i-th layer.
+	RealVector bias(std::size_t layer)const{
+		std::size_t start = 0;
+		for(std::size_t i = 0; i != layer; ++i){
+			start +=layerMatrices()[i].size1();
+		}
+		return subrange(m_bias,start,start+layerMatrices()[layer].size1());
 	}
 	
 	//! \brief Returns the total number of parameters of the network. 
@@ -241,6 +246,44 @@ public:
 		return boost::shared_ptr<State>(new InternalState());
 	}
 
+	///\brief Returns the response of the i-th layer given the input of that layer.
+	///
+	/// this is usfull if only a portion of the network needs to be evaluated
+	/// be aware that this only works without shortcuts in the network
+	void evalLayer(std::size_t layer,RealMatrix const& patterns,RealMatrix& outputs)const{
+		std::size_t numPatterns = patterns.size1();
+		std::size_t numOutputs = m_layerMatrix[layer].size1();
+		outputs.resize(numPatterns,numOutputs);
+		outputs.clear();
+
+		//calculate activation. first compute the linear part and the optional bias and then apply
+		// the non-linearity
+		axpy_prod(patterns,trans(layerMatrix(layer)),outputs);
+		if(!bias().empty()){
+			noalias(outputs) += repeat(bias(layer),numPatterns);
+		}
+		// if this is the last layer, use output neuron response
+		if(layer < m_layerMatrix.size()-1) {
+			noalias(outputs) = m_hiddenNeuron(outputs);
+		}
+		else {
+			noalias(outputs) = m_outputNeuron(outputs);
+		}
+	}
+	
+	///\brief Returns the response of the i-th layer given the input of that layer.
+	///
+	/// this is usfull if only a portion of the network needs to be evaluated
+	/// be aware that this only works without shortcuts in the network
+	Data<RealVector> evalLayer(std::size_t layer, Data<RealVector> const& patterns)const{
+		int batches = (int) patterns.numberOfBatches();
+		Data<RealVector> result(batches);
+		SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i){
+			evalLayer(layer,patterns.batch(i),result.batch(i));
+		}
+		return result;
+	}
+	
 	void eval(RealMatrix const& patterns,RealMatrix& output, State& state)const{
 		InternalState& s = state.toState<InternalState>();
 		std::size_t numPatterns = patterns.size1();
