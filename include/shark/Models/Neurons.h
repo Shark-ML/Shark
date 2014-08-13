@@ -144,6 +144,21 @@ struct LinearNeuron: public detail::NeuronBase<LinearNeuron>{
 		return 1.0;
 	}
 };
+
+///\brief Rectifier Neuron f(x) = max(0,x)
+struct RectifierNeuron: public detail::NeuronBase<RectifierNeuron>{
+	template<class T>
+	static T function(T x){
+		return std::max<T>(0,x);
+	}
+	template<class T>
+	static T functionDerivative(T y){
+		if(y == 0) 
+			return T(0);
+		return T(1);
+	}
+};
+
 ///\brief Fast sigmoidal function, which does not need to compute an exponential function.
 ///
 ///It is defined as
