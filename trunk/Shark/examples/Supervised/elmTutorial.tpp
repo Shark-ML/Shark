@@ -68,34 +68,32 @@ int main(){
 	normalizingTrainer.train(normalizer,data.inputs());
 	//###end<normalization>
 	
-	//now we construct the hidden layer of the elm
-	//we use an FFNet with no hidden layer. Instead of hiddens, we abuse the output neurons
-	//for our purposes. This setup also uses bias neurons for the hidden layer
+	// now we construct the hidden layer of the elm
+	// we create a two layer network and initialize it randomly. By keeping the random
+	// hidden weights and only learning the visible later, we will create the elm
 	//###begin<FFNetStructure>
-	FFNet<LogisticNeuron,LogisticNeuron> elmHidden;
-	elmHidden.setStructure(inputDim,0,hiddenNeurons);
-	initRandomUniform(elmHidden,0,1);
+	FFNet<LogisticNeuron,LogisticNeuron> elmNetwork;
+	elmNetwork.setStructure(inputDim,hiddenNeurons,labelDimension(data));
+	initRandomNormal(elmNetwork,1);
 	//###end<FFNetStructure>
-	
-	//now we concatenate the hidden units with the normalizer and get the
-	//full hidden layer
-	//###begin<normalizer_concatenate>
-	ConcatenatedModel<RealVector,RealVector> elm = normalizer >> elmHidden;
-	//###end<normalizer_concatenate>
 	
 	//We need to train the linear part. in this simple example we use the elm standard
 	//technique: linear regression. For this we need to propagate the data first 
-	// through the hidden layer.
+	// through the normalization and the hidden layer of the elm
 	//###begin<train>
-	RegressionDataset transformedData=transformInputs(data,elm);
+	RegressionDataset transformedData = transformInputs(data,normalizer));
+	transformedData.inputs() = elmNetwork.evalLayer(0,transformedData.inputs());
 	LinearModel<> elmOutput;
 	LinearRegression trainer;
 	trainer.train(elmOutput,transformedData);
+	
+	//we need to set the learned weights of the hidden layer of the elm
+	elmNetwork.setLayer(1,elmOutput.matrix(),elmOutput.linear());
 	//###end<train>
 
-	//finally we can construct the complete elm which can than be used for evaluation
+	
 	//###begin<elm>
-	elm = normalizer >> elmHidden >> elmOutput;
+	ConcatenatedModel<RealVector,RealVector> elm = normalizer >> elmNetwork;
 	//###end<elm>
 	//to test whether everything works, we will evaluate the elm and the elmOutput layer separately
 	//both results should be identical

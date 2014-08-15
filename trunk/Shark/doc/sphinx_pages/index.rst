@@ -59,6 +59,7 @@
    rest_sources/tutorials/algorithms/ffnet
    rest_sources/tutorials/algorithms/sparse_ae
    rest_sources/tutorials/algorithms/extreme_learning_machine
+   rest_sources/tutorials/algorithms/deep_denoising_autoencoder_network
 
    rest_sources/tutorials/algorithms/cart
    rest_sources/tutorials/algorithms/rf

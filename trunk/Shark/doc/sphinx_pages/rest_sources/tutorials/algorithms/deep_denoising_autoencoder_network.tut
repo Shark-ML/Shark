@@ -1,0 +1,113 @@
+Deep Learning using Denoising Autoencoders
+==============================================
+
+.. attention::
+  This is an advanced topic
+
+Training Deep Networks became popular over the last few years. It is a challenge 
+to train these networks as normal training easily gets stuck in local optima which 
+prevent the lower layers from learning usefull features. This problem can be 
+partially circumvented by pre-training the layers and thus initialising them in a 
+region of the error function which is easier to train ( or fine-tune) using steepest 
+descent techniques.
+
+In this tutorial, we will implement the architecture presented in 
+"Deep Sparse Rectifier Neural Networks"[Glorot11]_. In this architecture, a 
+multi-layered feed forward network with rectified linear hidden neurons is
+trained layerwise using denoising autoencoders [Vincent08]_. Afterwards, the full 
+network is trained supervised with a L1-regularisation to enforce additional sparsity.
+
+In this tutorial, we will start by showing how to train a denoising autoencoder in shark. 
+In the second step we will use it to train the deep network.
+
+Due to the complexity of the task, a number of includes are needed::
+
+..sharkcode<Supervised/DeepNetworkTraining.tpp,includes>
+
+Training Denoising Autoencoders
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The idea of denoising autoencoders is to train an encoder-decoder pair of models 
+to remove noise from an input. The encoder is supposed to learn a noise-free set
+of features which then can be used by the decoder to recover the input.
+To train this, the ground truth data is corrupted 
+using some source of noise, for example gaussian noise. Using the 
+corrupted images, the autoencoder training is a regression task where the inputs 
+are the corrupted images and the labels are the uncorrupted results.
+
+The biggest problem in autoencoders is how to train them efficiently. As we corrupt 
+the inputs differently in every iteration, the function becomes stochastic and the 
+use of rectified lineear neurons makes the function non-smooth. Thus we can only 
+use simple steepest descent techniques.
+
+In this part, we will create a function, which takes data and a set of training 
+parameters and returns a denoising autoencoder network trained on this data::
+
+..sharkcode<Supervised/DeepNetworkTraining.tpp,autoencoder_signature>
+
+We first need to create the autoencoder. We use a simple feed forward network with
+one hidden layer and connect it with our source of noise. Currently there is only 
+gaussian noise implemente in Shark, but it is very easy to add different sources::
+
+..sharkcode<Supervised/DeepNetworkTraining.tpp,autoencoder_model>
+
+Next, we create the regression error function. We use the mean squared error together
+with L2-Regularisation. The noise is added using the models thus we can use identical
+inputs and labels::
+
+..sharkcode<Supervised/DeepNetworkTraining.tpp,autoencoder_error>
+
+Finally, we create a :doxy:`SteepestDescent` optimizer and set its learning rates. We use
+:doxy:`TrainingError` as a criterion which measures the progress of the optimization over
+an interval and stops once the error functions seems to be converged. Once we
+are done, we initialize the model with the solution vector and return it::
+
+..sharkcode<Supervised/DeepNetworkTraining.tpp,autoencoder_optimization>
+
+
+Deep Network Pretraining
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+We will use the code above to pre-train a deep neural network. We will create another helper
+function which creates and initialises a deep neural network using the denoising autoencoder.
+In the next step a supervised fine-tuning step is applied which is simple gradient descent
+on the supervised learning goal using the pre-trained network as starting point for
+the optimisation.
+
+First, we create a function to initialise the network. We start by training the 
+autoencoders for the two hidden layers. We proceed by taking the original dataset and
+train an autoncoder using this. In the next step, we take the encoder layer - that is
+the connection of inputs to the hidden units and compute the feature vectors for every
+point in the dataset. Finally, we create the auto encoder for the next layer
+by training it on the feature dataset::
+
+..sharkcode<Supervised/DeepNetworkTraining.tpp,pretraining_autoencoder>
+
+We can now create the pre-trained network from the auto encoders by creating 
+a network with two hidden layers, initialize all weights randomly and than setting
+the first and hidden layers to the encoding layers of the auto encoders::
+
+..sharkcode<Supervised/DeepNetworkTraining.tpp,pretraining_creation>
+
+
+Supervised Training
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The supervised training part is overall the same as in previous tutorials and we only
+show the code here. We use the :doxy:`CrossEntropy` loss for classifiction and the
+:doxy:`OneNormRegularizer` for sparsity of the activation function. We again optimize
+using :doxy:`SteepestDescent`::
+
+..sharkcode<Supervised/DeepNetworkTraining.tpp,supervised_training>
+
+Full example program
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The full example program is  :doxy:`DeepNetworkTraining.cpp`.
+
+References
+^^^^^^^^^^
+
+.. [Glorot11] Glorot, Xavier, Antoine Bordes, and Yoshua Bengio. 
+  "Deep sparse rectifier networks." Proceedings of the 14th International Conference on Artificial 
+  Intelligence and Statistics. JMLR W&CP Volume. Vol. 15. 2011.
+
+.. [Vincent08] Vincent, Pascal, et al. "Extracting and composing robust features with denoising autoencoders." 
+  Proceedings of the 25th international conference on Machine learning. ACM, 2008.

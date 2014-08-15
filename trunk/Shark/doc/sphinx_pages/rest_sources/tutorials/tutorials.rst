@@ -110,6 +110,7 @@ Neural nets:
 * :doc:`algorithms/ffnet`
 * :doc:`algorithms/sparse_ae`
 * :doc:`algorithms/extreme_learning_machine`
+* :doc:`algorithms/deep_denoising_autoencoder_network`
 * :doc:`algorithms/rbm_module`
 * :doc:`algorithms/binary_rbm`
 
