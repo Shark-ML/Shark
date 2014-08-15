@@ -1,4 +1,5 @@
-//noisy autoencoder model
+//###begin<includes>
+//noisy autoencoder model and deep network
 #include <shark/Models/FFNet.h>// neural network as autoencoder
 #include <shark/Models/GaussianNoiseModel.h>// model adding noise to the inputs
 #include <shark/Models/ConcatenatedModel.h>// to concatenate autoencoder with noise adding model
@@ -9,15 +10,12 @@
 #include <shark/ObjectiveFunctions/Loss/CrossEntropy.h> // loss used for supervised training
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> // loss used for evaluation of performance
 #include <shark/ObjectiveFunctions/Regularizer.h> //L1 and L2 regularisation
-
-#include <shark/Algorithms/StoppingCriteria/TrainingError.h>
-#include <shark/Algorithms/GradientDescent/SteepestDescent.h>
+#include <shark/Algorithms/StoppingCriteria/TrainingError.h> //stopping criterion for learning
+#include <shark/Algorithms/GradientDescent/SteepestDescent.h> //optimizer: simple gradient descent.
+//###end<includes>
 
 using namespace std;
 using namespace shark;
-
-//the type of neural network architecture we are going to use
-typedef FFNet<RectifierNeuron,LinearNeuron> Network;
 
 //our artificial problem
 LabeledData<RealVector,unsigned int> createProblem(){
@@ -48,30 +46,40 @@ LabeledData<RealVector,unsigned int> createProblem(){
 	return createLabeledDataFromRange(data,label);
 }
 
+//###begin<autoencoder_signature>
+//the type of neural network architecture we are going to use
+typedef FFNet<RectifierNeuron,LinearNeuron> Network;
+
 //training of an auto encoder with one hidden layer
 Network trainDenoisingAutoencoder(
-	UnlabeledData<RealVector> const& data,
-	std::size_t numHidden,
-	double regularisation, double noiseVariance,
-	double learningRate, double momentum
+	UnlabeledData<RealVector> const& data,//the data to train with
+	std::size_t numHidden,//number of features in the autoncoder
+	double regularisation, double noiseVariance,//L2 regularisation and noise strength
+	double learningRate, double momentum//parameters for steepest descent
 ){
+//###end<autoencoder_signature>
 	std::size_t inputs = dataDimension(data);
 	
 	//create the model
+//###begin<autoencoder_model>
 	Network model;
 	model.setStructure(inputs, numHidden, inputs,FFNetStructures::Normal, true);
 	GaussianNoiseModel noise(inputs,noiseVariance);
 	ConcatenatedModel<RealVector,RealVector> denoisingAutoencoder = noise >> model;
 	initRandomNormal(denoisingAutoencoder,0.1);
+//###end<autoencoder_model>
 	
 	//create the objective function
+//###begin<autoencoder_error>
 	LabeledData<RealVector,RealVector> trainSet(data,data);//labels identical to inputs
 	SquaredLoss<RealVector> loss;
 	ErrorFunction<RealVector,RealVector> error(trainSet, &denoisingAutoencoder, &loss);
 	TwoNormRegularizer regularizer(error.numberOfVariables());
 	error.setRegularizer(regularisation,&regularizer);
+//###end<autoencoder_error>
 	
 	//set up optimizer
+//###begin<autoencoder_optimization>
 	SteepestDescent optimizer;
 	optimizer.setLearningRate(learningRate);
 	optimizer.setMomentum(momentum);
@@ -81,16 +89,20 @@ Network trainDenoisingAutoencoder(
 	TrainingError<> stoppingCriterion(1000,0.1);//stop if the relative improvement of the error is smaller than 1.e-5 ina  strip of100 iterations
 	do{
 		optimizer.step(error);
+//###end<autoencoder_optimization>
 		if(error.evaluationCounter() % 200 == 0){
 			std::cout<<error.evaluationCounter()<<" "<<optimizer.solution().value<<std::endl;
 		}
+//###begin<autoencoder_optimization>
 	}while(!stoppingCriterion.stop(optimizer.solution()));
 	denoisingAutoencoder.setParameterVector(optimizer.solution().point);
-	
 	return model;
+//###end<autoencoder_optimization>
+	
 }
 
 //unsupervised pre training of a network with two hidden layers
+//###begin<pretraining_autoencoder>
 Network unsupervisedPreTraining(
 	UnlabeledData<RealVector> const& data,
 	std::size_t numHidden1,std::size_t numHidden2, std::size_t numOutputs,
@@ -113,7 +125,8 @@ Network unsupervisedPreTraining(
 		regularisation, noiseVariance,
 		learningRate, momentum
 	);
-	
+//###end<pretraining_autoencoder>
+//###begin<pretraining_creation>
 	//create the final network
 	Network network;
 	network.setStructure(dataDimension(data),numHidden1,numHidden2, numOutputs);
@@ -122,10 +135,12 @@ Network unsupervisedPreTraining(
 	network.setLayer(1,layer2.layerMatrix(0),layer2.bias(0));
 	
 	return network;
+//###end<pretraining_creation>
 }
 
 int main()
 {
+//###begin<supervised_training>
 	//model parameters
 	std::size_t numHidden1 = 4;
 	std::size_t numHidden2 = 4;
@@ -172,6 +187,7 @@ int main()
 		}
 	}while(!stoppingCriterion.stop(optimizer.solution()));
 	network.setParameterVector(optimizer.solution().point);
+//###end<supervised_training>
 	
 	//evaluation
 	ZeroOneLoss<unsigned int,RealVector> loss01;

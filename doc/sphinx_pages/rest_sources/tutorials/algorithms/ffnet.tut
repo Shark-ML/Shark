@@ -54,6 +54,13 @@ of neurons named after their activation function  [ReedMarks1998]_:
 
 .. math::
   f(x) = \frac x {1+|x|}.
+  
+* :doxy:`RectifierNeuron`: rcent development where the neuron activation
+  is kept at 0 for negative activation levels and linear for all positive values.
+  A network with these neurons is effectively a piecewise linear function.
+
+.. math::
+  f(x) = max(0,x).
 
 * :doxy:`LinearNeuron`: not a good choice for hidden neurons, but
   for output neurons when the output  is not bounded. This activation
@@ -77,58 +84,6 @@ The method  :doxy:`FFNet::setStructure` is versatile. If we wanted a second hidd
   unsigned numHidden2=3;
   unsigned numOutput=1;
   network.setStructure(numInput, numHidden1, numHidden2, numOutput);
-
-But the method can do even more. It has four Boolean parameters specifying the connectivity, which are set to true by default. The example with one hidden layer could also be written as::
-
-  unsigned numInput=2;
-  unsigned numHidden=2;
-  unsigned numOutput=1;
-
-  bool connectConsecutiveLayers = true;
-  bool connectInputsOutputs     = true;
-  bool connectAll               = true;
-  bool useBiasNeuron            = true;
-
-  network.setStructure(numInput, numHidden, numOutput,
-                       connectConsecutiveLayers, connectInputsOutputs,
-		       connectAll, useBiasNeuron);
-
-The first parameter describes whether all neurons in each layer should
-be connected to all neurons in the subsequent layer. You will usually
-want to set this to true. The second flag describes whether there
-should be shortcuts between inputs and output neurons. If you want to
-train autoencoder networks, this is better set to false. The third
-flag now is only useful for networks with more than one hidden
-layer. It connects a layer of the network with all previous
-layers. The last flag switches the bias neuron on, which adds a bias
-or offset to the activation of the neurons. It is usually good to have
-a bias neuron, especially if your data is not mean-free.  There exists
-another version of :doxy:`FFNet::setStructure` which allows for
-arbitrary connections between neurons as long as the network stays
-feed-forward. Our first call to :doxy:`FFNet::setStructure` can be
-translated into this version as::
-
-  int connectionMatrix[5][6]={
-      {0,0,0,0,0,0},
-      {0,0,0,0,0,0},
-      {1,1,0,0,0,1},
-      {1,1,0,0,0,1},
-      {1,1,1,1,0,1},
-  };
-  IntMatrix mat(5,6);
-  //copy the connectionMatrix somehow into mat...
-
-  //first two parameters are number of inputs and output neurons
-  network.setStructure(2,1,mat);
-
-The connection matrix *C* is a *n* x *n+1* matrix, where *n* is the
-total number of neurons (input+hidden+output) of the network. The
-entry *C(i,j)* is set to 1 if neuron *i* receives input of neuron
-*j*. So input Neurons have all empty rows. But for example neuron 3
-gets input from neuron 1 and 2. To ensure that the network is feed
-forward, only the lower diagonal matrix can be set. The upper diagonal
-and the diagonal itself should be set to zero (and are ignored by the
-network). This does not hold for row *n+1*, which encodes the bias neuron.
 
 Training the Network
 ----------------------

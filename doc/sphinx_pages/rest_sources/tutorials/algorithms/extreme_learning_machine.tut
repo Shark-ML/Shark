@@ -3,16 +3,9 @@ Extreme Learning Machine
 
 During the last few years, the Extreme Learning Machine (ELM) got a lot of attention.
 Shark does not have a class tailored to ELMs but supports all building blocks to create one.
-If you need the ELM very often it might be advisable to put the following code blocks inside
-a class so that you can use it easily.
 
 In theory an ELM is not more than a simple Feed Forward neural network where the hidden
-weights are not trained. It is possible to put all the weights into the :doxy:`FFNet` of Shark,
-but it is not straightforward to create the parameter vector for the FFNet. Instead we use an
-easier construction for the ELM in this tutorial which concatenates several models to the
-ELM.
-
-For the ELM, we need the following include files: ::
+weights are not trained. For the ELM, we need the following include files: ::
 
 ..sharkcode<Supervised/elmTutorial.tpp,includes>
   
@@ -22,33 +15,23 @@ This is a linear transformation which can be learned by an affine linear model u
 
 ..sharkcode<Supervised/elmTutorial.tpp,normalization>
   
-Now we can create the hidden layer of the ELM. For this we abuse the :doxy:`FFNet`. We define it to have no hidden 
-neurons, so the weights between input and sigmoidal output neurons are the random weights of the ELM. 
-Next we call :doxy:`initRandomUniform` to initialize the ELM with uniform weights. You should never forget 
-to initialize the seed for the random number generator befor using it! ::
+Now we can create the ELM. We first create an FFNet with a single hidden layer and initialize 
+all its weights randomly. We will keep the random weights of the hidden units but overwrite 
+the output weights later::
 
 ..sharkcode<Supervised/elmTutorial.tpp,FFNetStructure>
 
-Next we must concatenate the normalizer with the hidden units ::
-
-..sharkcode<Supervised/elmTutorial.tpp,normalizer_concatenate>
-
-Now that we have the hidden Layer of the ELM, we can train the output layer. Since the output weights of the ELM
-are linear, we can use linear regression to train them. The best way to do is, is to propagate the training data
-forward through the hidden layer and use the outputs as inputdata for the linear regression ::
+Since the output weights of the ELM are linear, we can now use linear regression to train them. 
+The best way to do is, is to propagate the training data forward through the normalization 
+and hidden layer and use the outputs as input data for the linear regression. After the linear regression
+is done, we set the weights of the second layer of the FFNet to the linear weights::
 
 ..sharkcode<Supervised/elmTutorial.tpp,train>
 
-After training is done, the last thing we have to do is concatenate the hidden units with the outputs and present
-our shiny new elm to the world! ::
+After training is done, the last thing we have to do is concatenate the normalizer with the network
+and present our shiny new elm to the world! ::
   
 ..sharkcode<Supervised/elmTutorial.tpp,elm>
-  
-The downside of this technique is, that in the end  4 objects are needed for a working ELM: the normalizer, 
-the hidden units, the output networks and the concatenated model which put the pieces together. So it
-is advisable to put these parts into a class. Of course putting all weights together into a single FFNet is
-faster, but is also not straight forward and error prone. The difference in speed can be ignored for most 
-applications.
 
 Full example program
 --------------------
