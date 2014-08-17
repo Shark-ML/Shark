@@ -81,14 +81,14 @@ int main(){
 	//technique: linear regression. For this we need to propagate the data first 
 	// through the normalization and the hidden layer of the elm
 	//###begin<train>
-	RegressionDataset transformedData = transformInputs(data,normalizer));
+	RegressionDataset transformedData = transformInputs(data,normalizer);
 	transformedData.inputs() = elmNetwork.evalLayer(0,transformedData.inputs());
 	LinearModel<> elmOutput;
 	LinearRegression trainer;
 	trainer.train(elmOutput,transformedData);
 	
 	//we need to set the learned weights of the hidden layer of the elm
-	elmNetwork.setLayer(1,elmOutput.matrix(),elmOutput.linear());
+	elmNetwork.setLayer(1,elmOutput.matrix(),elmOutput.offset());
 	//###end<train>
 
 	
