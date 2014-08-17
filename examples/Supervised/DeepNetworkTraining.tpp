@@ -86,7 +86,7 @@ Network trainDenoisingAutoencoder(
 	
 	//optimize the model
 	optimizer.init(error);
-	TrainingError<> stoppingCriterion(1000,0.1);//stop if the relative improvement of the error is smaller than 1.e-5 ina  strip of100 iterations
+	TrainingError<> stoppingCriterion(1000,0.1);//stop if the relative improvement of the error is smaller than 1.e-5 in a strip of 100 iterations
 	do{
 		optimizer.step(error);
 //###end<autoencoder_optimization>
@@ -152,7 +152,7 @@ int main()
 	//supervised hyper parameters
 	double regularisation = 0.0001;
 	double momentum = 0.3;
-	double learningRate = 0.1*(1-unsupMomentum);
+	double learningRate = 0.1*(1-momentum);
 	
 	//load data and split into training and test
 	LabeledData<RealVector,unsigned int> data = createProblem();
@@ -179,7 +179,7 @@ int main()
 	//optimize the model
 	std::cout<<"training supervised model"<<std::endl;
 	optimizer.init(error);
-	TrainingError<> stoppingCriterion(1000,0.001);//stop if the relative improvement of the error is smaller than 1.e-5 ina  strip of100 iterations
+	TrainingError<> stoppingCriterion(1000,0.001);//stop if the relative improvement of the error is smaller than 1.e-5 in a strip of 100 iterations
 	do{
 		optimizer.step(error);
 		if(error.evaluationCounter() % 200 == 0){
