@@ -127,6 +127,9 @@ public:
 		// replace vector and alpha
 		model.basis().element(index) = supportVector.input;
 		row(model.alpha(), index) = alpha;
+
+                // we need to clear out the last vector, as it is just a buffer
+                row (model.alpha(), model.basis().numberOfElements() -1).clear();
 	}
 
 

@@ -111,7 +111,7 @@ public:
 
 		// and insert all labels we encounter
 		size_t currentPosition = 0;
-		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
+		for(std::size_t i = 0; i < dataset.numberOfElements(); i++)
 		{
 			// is it a new label?
 			int label = dataset.labels().element(i);
@@ -124,10 +124,10 @@ public:
 		}
 
 		// now map every label
-		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
+		for(std::size_t i = 0; i < dataset.numberOfElements(); i++)
 		{
 			int label = dataset.labels().element(i);
-			dataset.labels().element(i) = foundLabels[label];
+                        dataset.labels().element(i) = foundLabels[label - minLabel];
 		}
 	}
 
@@ -145,10 +145,10 @@ public:
 		// now map every label
 		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
 		{
-			size_t label = dataset.labels().element(i);
+			int label = dataset.labels().element(i);
 
 			// check if the reordering fit the data
-			if(label >= m_labelOrder.size())
+			if(label >= (int) m_labelOrder.size())
 				throw SHARKEXCEPTION("Dataset labels does not fit to the stored ordering!");
 
 			// relabel
@@ -163,26 +163,45 @@ public:
 	///
 	/// \param[out] labelOrder      vector to store the current label order.
 
-	void getLabelOrder(std::vector<unsigned int> &labelOrder)
+	void getLabelOrder(std::vector<int> &labelOrder)
 	{
 		labelOrder = m_labelOrder;
 	}
 
 
 
+	/// \brief Get label ordering directly
+	///
+	/// \param[out] labelOrder      vector to store the current label order.
+
+        void getLabelOrder (std::vector<unsigned int> &labelOrder)
+        {
+                labelOrder = std::vector<unsigned int>( m_labelOrder.begin(), m_labelOrder.end() );
+        }
+
+
 	/// \brief Set label ordering directly
 	///
-	/// \param[out] labelOrder      vector with the new label order
+	/// \param[in] labelOrder      vector with the new label order
 
-	void setLabelOrder(std::vector<unsigned int> &labelOrder)
+	void setLabelOrder(std::vector<int> &labelOrder)
 	{
 		m_labelOrder = labelOrder;
 	}
 
 
+        /// \brief Set label ordering directly
+        ///
+        /// \param[in] labelOrder      vector with the new label order
+        void setLabelOrder (std::vector<unsigned int> &labelOrder)
+        {
+                m_labelOrder  = std::vector<int>( labelOrder.begin(), labelOrder.end() );
+        }
+
+
 protected:
 
-	std::vector<unsigned int> m_labelOrder;
+	std::vector<int> m_labelOrder;
 };
 
 }
