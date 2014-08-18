@@ -262,7 +262,7 @@ public:
 		// constructor of the kernelexpansion. the alphas will be set to zero for none.
 		if((m_preInitializationMethod == RANDOM) || (m_preInitializationMethod == NONE))
 		{
-			for(int j = 0; j < m_budgetSize; j++)
+			for(size_t j = 0; j < m_budgetSize; j++)
 			{
 				// choose a random vector
 				std::size_t b = Rng::discrete(0, ell - 1);
@@ -359,7 +359,7 @@ public:
 			RealVector predictionsCopy = predictions;
 			unsigned int trueClass = y[b];
 			double scoreOfTrueClass = predictions[trueClass];
-			predictions[trueClass] = min(predictions) - 1;
+                        predictions[trueClass] = -std::numeric_limits<double>::infinity();
 			unsigned int runnerupClass = arg_max(predictions);
 			double scoreOfRunnerupClass = predictions[runnerupClass];
 
