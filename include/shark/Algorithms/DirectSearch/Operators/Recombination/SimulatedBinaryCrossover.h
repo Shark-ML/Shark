@@ -120,6 +120,9 @@ namespace shark {
 
 				point1[i] = 0.5 * ((y1 + y2) - betaQ * (y2 - y1));
 				point2[i] = 0.5 * ((y1 + y2) + betaQ * (y2 - y1));
+				// randomly swap loci
+				if( Rng::coinToss() ) std::swap(point1[i], point2[i]);
+
 
 				//  -> from Deb's implementation, not contained in any paper
 				point1[i] = std::max( point1[i], m_lower( i ) );
