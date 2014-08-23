@@ -36,8 +36,8 @@
  *    http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#ifndef _BOOST_UBLAS_NUMERICTYPE_DEDUCTION_
-#define _BOOST_UBLAS_NUMERICTYPE_DEDUCTION_
+#ifndef SHARK_LINALG_BLAS_DETAIL_RETURNTYPE_DEDUCTION_HPP
+#define SHARK_LINALG_BLAS_DETAIL_RETURNTYPE_DEDUCTION_HPP
 
 // See original in boost-sandbox/boost/utility/type_deduction.hpp for comments
 

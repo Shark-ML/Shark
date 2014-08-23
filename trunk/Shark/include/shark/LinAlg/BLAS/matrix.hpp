@@ -1,5 +1,5 @@
-#ifndef SHARK_LINALG_BLAS_UBLAS_MATRIX_HPP
-#define SHARK_LINALG_BLAS_UBLAS_MATRIX_HPP
+#ifndef SHARK_LINALG_BLAS_MATRIX_HPP
+#define SHARK_LINALG_BLAS_MATRIX_HPP
 
 #include "matrix_proxy.hpp"
 #include "vector_proxy.hpp"

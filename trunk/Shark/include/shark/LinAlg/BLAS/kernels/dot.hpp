@@ -27,8 +27,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_LINALG_BLAS_UBLAS_KERNELS_DOT_HPP
-#define SHARK_LINALG_BLAS_UBLAS_KERNELS_DOT_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_DOT_HPP
+#define SHARK_LINALG_BLAS_KERNELS_DOT_HPP
 
 #include "default/dot.hpp"
 

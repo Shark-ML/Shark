@@ -1,5 +1,5 @@
-#ifndef SHARK_LINALG_BLAS_UBLAS_FUNCTIONAL_HPP
-#define SHARK_LINALG_BLAS_UBLAS_FUNCTIONAL_HPP
+#ifndef SHARK_LINALG_BLAS_DETAIL_FUNCTIONAL_HPP
+#define SHARK_LINALG_BLAS_DETAIL_FUNCTIONAL_HPP
 
 #include <boost/math/constants/constants.hpp>
 #include <boost/type_traits/remove_reference.hpp> 

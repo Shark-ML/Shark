@@ -30,8 +30,8 @@
  */
 //===========================================================================
 
-#ifndef SHARK_LINALG_IMPL_NUMERIC_BINDINGS_ATLAS_POTRF_H
-#define SHARK_LINALG_IMPL_NUMERIC_BINDINGS_ATLAS_POTRF_H
+#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_POTRF_H
+#define SHARK_LINALG_BLAS_KERNELS_ATLAS_POTRF_H
 
 #include "cblas_inc.hpp"
 

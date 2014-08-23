@@ -31,8 +31,8 @@
  */
 
 
-#ifndef SHARK_LINALG_BLAS_UBLAS_VECTOR_PROXY_HPP
-#define SHARK_LINALG_BLAS_UBLAS_VECTOR_PROXY_HPP
+#ifndef SHARK_LINALG_BLAS_VECTOR_PROXY_HPP
+#define SHARK_LINALG_BLAS_VECTOR_PROXY_HPP
 
 #include "kernels/vector_assign.hpp"
 #include "detail/iterator.hpp"

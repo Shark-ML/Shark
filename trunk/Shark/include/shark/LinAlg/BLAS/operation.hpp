@@ -1,5 +1,5 @@
-#ifndef SHARK_LINALG_BLAS_UBLAS_OPERATION_HPP
-#define SHARK_LINALG_BLAS_UBLAS_OPERATION_HPP
+#ifndef SHARK_LINALG_BLAS_OPERATION_HPP
+#define SHARK_LINALG_BLAS_OPERATION_HPP
 
 #include "kernels/gemv.hpp"
 #include "kernels/gemm.hpp"

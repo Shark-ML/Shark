@@ -27,8 +27,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_LINALG_BLAS_UBLAS_KERNELS_DEFAULT_GEMV_HPP
-#define SHARK_LINALG_BLAS_UBLAS_KERNELS_DEFAULT_GEMV_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_GEMV_HPP
+#define SHARK_LINALG_BLAS_KERNELS_DEFAULT_GEMV_HPP
 
 #include "../../matrix_proxy.hpp"
 #include "../../vector_expression.hpp"

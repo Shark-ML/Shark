@@ -28,8 +28,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_LINALG_BLAS_UBLAS_KERNELS_DEFAULT_TRMV_HPP
-#define SHARK_LINALG_BLAS_UBLAS_KERNELS_DEFAULT_TRMV_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMV_HPP
+#define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMV_HPP
 
 #include "../../matrix_proxy.hpp"
 #include "../../vector_expression.hpp"

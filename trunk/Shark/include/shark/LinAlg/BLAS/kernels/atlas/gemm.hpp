@@ -29,8 +29,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_LINALG_BLAS_UBLASS_ATLAS_GEMM_HPP
-#define SHARK_LINALG_BLAS_UBLASS_ATLAS_GEMM_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_GEMM_HPP
+#define SHARK_LINALG_BLAS_KERNELS_ATLAS_GEMM_HPP
 
 #include "cblas_inc.hpp"
 
