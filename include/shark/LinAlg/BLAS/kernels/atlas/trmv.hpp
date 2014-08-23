@@ -29,8 +29,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_LINALG_BLAS_UBLAS_KERNELS_ATLAS_TRMV_HPP
-#define SHARK_LINALG_BLAS_UBLAS_KERNELS_ATLAS_TRMV_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_TRMV_HPP
+#define SHARK_LINALG_BLAS_KERNELS_ATLAS_TRMV_HPP
 
 #include "cblas_inc.hpp"
 #include "../../matrix_proxy.hpp"

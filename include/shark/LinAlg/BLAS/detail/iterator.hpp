@@ -1,5 +1,5 @@
-#ifndef _BOOST_UBLAS_ITERATOR_
-#define _BOOST_UBLAS_ITERATOR_
+#ifndef SHARK_LINALG_BLAS_DETAIL_ITERATOR_HPP
+#define SHARK_LINALG_BLAS_DETAIL_ITERATOR_HPP
 
 #include <boost/type_traits/remove_const.hpp> 
 #include <boost/type_traits/is_const.hpp> 

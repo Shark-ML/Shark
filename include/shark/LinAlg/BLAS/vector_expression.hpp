@@ -1,5 +1,5 @@
-#ifndef SHARK_LINALG_BLAS_UBLAS_VECTOR_EXPRESSION_HPP
-#define SHARK_LINALG_BLAS_UBLAS_VECTOR_EXPRESSION_HPP
+#ifndef SHARK_LINALG_BLAS_VECTOR_EXPRESSION_HPP
+#define SHARK_LINALG_BLAS_VECTOR_EXPRESSION_HPP
 
 #include <boost/type_traits/is_convertible.hpp> 
 #include "vector_proxy.hpp"

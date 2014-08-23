@@ -1,5 +1,5 @@
-#ifndef SHARK_LINALG_BLAS_UBLAS_IO_HPP
-#define SHARK_LINALG_BLAS_UBLAS_IO_HPP
+#ifndef SHARK_LINALG_BLAS_IO_HPP
+#define SHARK_LINALG_BLAS_IO_HPP
 
 // Only forward definition required to define stream operations
 #include <iosfwd>

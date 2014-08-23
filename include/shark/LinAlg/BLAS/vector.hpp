@@ -1,5 +1,5 @@
-#ifndef SHARK_LINALG_BLAS_UBLAS_VECTOR_HPP
-#define SHARK_LINALG_BLAS_UBLAS_VECTOR_HPP
+#ifndef SHARK_LINALG_BLAS_VECTOR_HPP
+#define SHARK_LINALG_BLAS_VECTOR_HPP
 
 #include "vector_proxy.hpp"
 #include <boost/container/vector.hpp>

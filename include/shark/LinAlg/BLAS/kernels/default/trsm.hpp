@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef SHARK_LINALG_BLAS_UBLAS_KERNELS_ATLAS_TRSM_HPP
-#define SHARK_LINALG_BLAS_UBLAS_KERNELS_ATLAS_TRSM_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_TRSM_HPP
+#define SHARK_LINALG_BLAS_KERNELS_ATLAS_TRSM_HPP
 
 #include "../../matrix_proxy.hpp"
 #include "../../vector_expression.hpp"

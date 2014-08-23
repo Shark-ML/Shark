@@ -1,5 +1,5 @@
-#ifndef SHARK_LINALG_BLAS_UBLAS_LU_HPP
-#define SHARK_LINALG_BLAS_UBLAS_LU_HPP
+#ifndef SHARK_LINALG_BLAS_LU_HPP
+#define SHARK_LINALG_BLAS_LU_HPP
 
 #include "permutation.hpp"
 #include "vector_proxy.hpp"

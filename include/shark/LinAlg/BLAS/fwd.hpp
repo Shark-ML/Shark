@@ -1,5 +1,5 @@
-#ifndef SHARK_LINALG_BLAS_UBLAS_FWD_H
-#define SHARK_LINALG_BLAS_UBLAS_FWD_H
+#ifndef SHARK_LINALG_BLAS_FWD_H
+#define SHARK_LINALG_BLAS_FWD_H
 
 namespace shark {
 namespace blas {

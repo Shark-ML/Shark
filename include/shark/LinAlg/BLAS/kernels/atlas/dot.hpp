@@ -29,8 +29,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_LINALG_BLAS_UBLAS_KERNELS_ATLAS_DOT_HPP
-#define SHARK_LINALG_BLAS_UBLAS_KERNELS_ATLAS_DOT_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_DOT_HPP
+#define SHARK_LINALG_BLAS_KERNELS_ATLAS_DOT_HPP
 
 #include "cblas_inc.hpp"
 

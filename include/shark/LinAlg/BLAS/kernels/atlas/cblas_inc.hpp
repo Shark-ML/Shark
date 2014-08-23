@@ -52,8 +52,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef SHARK_LINALG_IMPL_NUMERIC_BINDINGS_ATLAS_CBLAS_INC_H
-#define SHARK_LINALG_IMPL_NUMERIC_BINDINGS_ATLAS_CBLAS_INC_H
+#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_CBLAS_INC_HPP
+#define SHARK_LINALG_BLAS_KERNELS_ATLAS_CBLAS_INC_HPP
 
 extern "C" {
 #include <cblas.h>

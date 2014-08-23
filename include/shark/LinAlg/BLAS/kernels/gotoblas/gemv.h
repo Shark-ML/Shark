@@ -27,8 +27,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_LINALG_IMPL_NUMERIC_BINDINGS_GOTOBLAS_GEMV_H
-#define SHARK_LINALG_IMPL_NUMERIC_BINDINGS_GOTOBLAS_GEMV_H
+#ifndef SHARK_LINALG_BLAS_KERNELS_GOTOBLAS_GEMV_H
+#define SHARK_LINALG_BLAS_KERNELS_GOTOBLAS_GEMV_H
 
 #include "cblas_inc.h"
 
