@@ -125,7 +125,7 @@ void PCA::encoder(LinearModel<>& model, std::size_t m) {
 				offset(i) = 0;			
 			}
 			else{
-				row(A, i) = row(A, i) / std::sqrt(m_eigenvalues(i));
+				row(A, i) /= std::sqrt(m_eigenvalues(i));
 				offset(i) /= std::sqrt(m_eigenvalues(i));
 			}
 		}

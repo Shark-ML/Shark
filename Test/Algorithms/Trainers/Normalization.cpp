@@ -5,6 +5,7 @@
 #include <shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h>
 #include <shark/Algorithms/Trainers/NormalizeComponentsUnitInterval.h>
 #include <shark/Algorithms/Trainers/NormalizeComponentsWhitening.h>
+#include <shark/Algorithms/Trainers/NormalizeComponentsZCA.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 
 using namespace shark;
@@ -124,6 +125,47 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING_RANK_2)
 				BOOST_CHECK_SMALL(covariance(i,j)-1.5,1.e-5);
 			}else
 				BOOST_CHECK_SMALL(covariance(i,j),1.e-5);
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( NORMALIZE_ZCA)
+{
+
+	RealMatrix mat(3,3);
+	mat(0,0)=2;   mat(0,1)=0.1; mat(0,2)=0.3;
+	mat(1,0)=0.1; mat(1,1)=5;   mat(1,2)=0.05;
+	mat(2,0)=0.3; mat(2,1)=0.05;mat(2,2)=8;
+	
+	RealVector mean(3);
+	mean(0)=1;
+	mean(1)=-1;
+	mean(2)=3;
+	
+	MultiVariateNormalDistribution dist(mat);
+	
+	
+	std::vector<RealVector> input(1000,RealVector(3));
+	for(std::size_t i = 0; i != 1000;++i)
+		input[i]=dist().first+mean;
+
+	UnlabeledData<RealVector> set = createDataFromRange(input);
+	NormalizeComponentsZCA normalizer(1.5);
+	LinearModel<> map(3, 3);
+	normalizer.train(map, set);
+	Data<RealVector> transformedSet = map(set);
+	
+	RealMatrix covariance;
+	meanvar(transformedSet, mean, covariance);
+	std::cout<<mean<<" "<<covariance<<std::endl;
+	for(std::size_t i = 0; i != 3;++i){
+		BOOST_CHECK_SMALL(mean(i),1.e-10);
+		for(std::size_t j = 0; j != 3;++j){
+			if(j != i){
+				BOOST_CHECK_SMALL(covariance(i,j),1.e-5);
+			}
+			else
+				BOOST_CHECK_SMALL(covariance(i,j)-1.5,1.e-5);
 		}
 	}
 }
