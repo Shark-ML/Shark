@@ -134,6 +134,7 @@ SHARK_ADD_TEST( Algorithms/JaakkolaHeuristic.cpp Algorithms_JaakkolaHeuristic )
 #Models
 SHARK_ADD_TEST( Models/ConcatenatedModel.cpp Models_ConcatenatedModel )
 SHARK_ADD_TEST( Models/FFNet.cpp Models_FFNet )
+SHARK_ADD_TEST( Models/TiedAutoencoder.cpp Models_TiedAutoencoder )
 SHARK_ADD_TEST( Models/LinearModel.cpp Models_LinearModel )
 SHARK_ADD_TEST( Models/LinearNorm.cpp Models_LinearNorm )
 SHARK_ADD_TEST( Models/ConvexCombination.cpp Models_ConvexCombination )
