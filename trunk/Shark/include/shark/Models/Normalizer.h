@@ -142,7 +142,7 @@ public:
 	}
 
 	/// return the offset vector
-	RealVector const& vector() const
+	RealVector const& offset() const
 	{
 		SHARK_CHECK(isValid(), "[Normalizer::vector] model is not initialized");
 		return m_b;
