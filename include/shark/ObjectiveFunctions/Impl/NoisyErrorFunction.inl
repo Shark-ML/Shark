@@ -35,7 +35,7 @@ class NoisyErrorFunctionWrapper : public NoisyErrorFunctionWrapperBase
 {
 private:
 	AbstractModel<InputType, OutputType>* mep_model;
-	AbstractLoss<LabelType>* mep_loss;
+	AbstractLoss<LabelType,OutputType>* mep_loss;
 	DataView<LabeledData<InputType,LabelType> const> m_dataset;
 	unsigned int m_batchSize;
 	mutable DiscreteUniform<Rng::rng_type> m_uni;
@@ -45,9 +45,11 @@ private:
 public:
 	NoisyErrorFunctionWrapper(
 		LabeledData<InputType,LabelType> const& dataset,
-		AbstractModel<InputType,LabelType>* model,
-		AbstractLoss<LabelType>* loss,unsigned int batchSize=1
-	): mep_model(model), mep_loss(loss), m_dataset(dataset), m_batchSize(batchSize),m_uni(Rng::globalRng,0,m_dataset.size()-1){
+		AbstractModel<InputType,OutputType>* model,
+		AbstractLoss<LabelType,OutputType>* loss,unsigned int batchSize=1
+	): mep_model(model), mep_loss(loss), m_dataset(dataset)
+	, m_batchSize(batchSize),m_uni(Rng::globalRng,0,m_dataset.size()-1)
+	{
 		SHARK_ASSERT(model!=NULL);
 		SHARK_ASSERT(loss!=NULL);
 		
@@ -89,8 +91,6 @@ public:
 	}
 
 	double eval(const RealVector & input)const {
-		this->m_evaluationCounter++;
-
 		mep_model->setParameterVector(input);
 		
 		//prepare batch for the current iteration
@@ -108,9 +108,6 @@ public:
 	}
 
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative )const {
-
-		this->m_evaluationCounter++;
-
 		mep_model->setParameterVector(input);
 		boost::shared_ptr<State> state = mep_model->createState();
 		
@@ -148,7 +145,8 @@ NoisyErrorFunction<InputType,LabelType>::NoisyErrorFunction(
 	AbstractModel<InputType,OutputType>* model,
 	AbstractLoss<LabelType, OutputType>* loss,
 	unsigned int batchSize)
-:mp_wrapper(new detail::NoisyErrorFunctionWrapper<InputType,LabelType,OutputType>(dataset,model,loss,batchSize)){
+:mp_wrapper(new detail::NoisyErrorFunctionWrapper<InputType,LabelType,OutputType>(dataset,model,loss,batchSize))
+, m_regularizer(0), m_regularizationStrength(0){
 	this -> m_features = mp_wrapper -> features();
 }
 template<class InputType,class LabelType>
@@ -188,12 +186,23 @@ std::size_t NoisyErrorFunction<InputType,LabelType>::numberOfVariables() const{
 
 template<class InputType,class LabelType>
 double NoisyErrorFunction<InputType,LabelType>::eval(RealVector const& input) const{
-	return mp_wrapper -> eval(input);
+	++m_evaluationCounter;
+	double value = mp_wrapper -> eval(input);
+	if(m_regularizer)
+		value += m_regularizationStrength * m_regularizer->eval(input);
+	return value;
 }
 template<class InputType,class LabelType>
 typename NoisyErrorFunction<InputType,LabelType>::ResultType 
 NoisyErrorFunction<InputType,LabelType>::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
-	return mp_wrapper -> evalDerivative(input,derivative);
+	++m_evaluationCounter;
+	double value = mp_wrapper -> evalDerivative(input,derivative);
+	if(m_regularizer){
+		FirstOrderDerivative regularizerDerivative;
+		value += m_regularizationStrength * m_regularizer->evalDerivative(input,regularizerDerivative);
+		noalias(derivative) += m_regularizationStrength*regularizerDerivative;
+	}
+	return value;
 }
 
 template<class InputType,class LabelType>
