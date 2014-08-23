@@ -90,6 +90,11 @@ public:
 
 	void proposeStartingPoint( SearchPointType & startingPoint)const;
 	std::size_t numberOfVariables()const;
+	
+	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
+		m_regularizer = regularizer;
+		m_regularizationStrength = factor;
+	}
 
 	double eval(const RealVector & input)const;
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative )const;
@@ -98,6 +103,10 @@ public:
 	friend void swap(const NoisyErrorFunction<I,L>& op1, const NoisyErrorFunction<I,L>& op2);
 private:
 	boost::scoped_ptr<detail::NoisyErrorFunctionWrapperBase> mp_wrapper;
+	
+	SingleObjectiveFunction* m_regularizer;
+	double m_regularizationStrength;
+
 };
 }
 #endif
