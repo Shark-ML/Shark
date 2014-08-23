@@ -712,6 +712,24 @@ typename MatA::value_type max_impl(MatA const& matA, row_major){
 	return maximum;
 }
 
+template<class MatA>
+typename MatA::value_type min_impl(MatA const& matA, column_major){
+	typename MatA::value_type minimum = 0;
+	for(std::size_t j = 0; j != matA.size2(); ++j){
+		minimum= std::min(minimum, min(column(matA,j)));
+	}
+	return minimum;
+}
+
+template<class MatA>
+typename MatA::value_type min_impl(MatA const& matA, row_major){
+	typename MatA::value_type minimum = 0;
+	for(std::size_t i = 0; i != matA.size1(); ++i){
+		minimum= std::min(minimum, min(row(matA,i)));
+	}
+	return minimum;
+}
+
 }//end detail
 
 //dispatcher
@@ -753,6 +771,11 @@ typename MatA::value_type sum(matrix_expression<MatA> const& A){
 template<class MatA>
 typename MatA::value_type max(matrix_expression<MatA> const& A){
 	return detail::max_impl(A(),typename MatA::orientation());
+}
+
+template<class MatA>
+typename MatA::value_type min(matrix_expression<MatA> const& A){
+	return detail::min_impl(A(),typename MatA::orientation());
 }
 
 /// \brief Returns the frobenius inner-product between matrices exprssions 1 and e2.
