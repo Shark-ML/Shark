@@ -175,6 +175,31 @@ struct FastSigmoidNeuron: public detail::NeuronBase<FastSigmoidNeuron>{
 		return sqr(1.0 - std::abs(y));
 	}
 };
+
+
+/// \brief Wraps a given neuron type and implements dropout for it
+///
+/// The function works by setting the output randomly to 0 with a 50% chance.
+/// The function assumes for the wrapped neuron type that the derivative
+/// for all points for which the output is 0, is 0. This is true for the LogisticNeuron,
+/// FastSigmoidNeuron and RectifierNeuron.
+template<class Neuron>
+struct DropoutNeuron: public detail::NeuronBase<DropoutNeuron<Neuron> >{
+	template<class T>
+	static T function(T x){
+		if(Rng::coinToss()){
+			return T(0);
+		}
+		else{
+			return Neuron::function(x);
+		}
+	}
+	template<class T>
+	static T functionDerivative(T y){
+		return Neuron::functionDerivative(y);
+	}
+};
+
 }
 
 #endif
