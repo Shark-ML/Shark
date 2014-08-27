@@ -1,9 +1,9 @@
-#define BOOST_TEST_MODULE MODEL_TIEDAUTOENCODER
+#define BOOST_TEST_MODULE MODEL_AUTOENCODER
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include "derivativeTestHelper.h"
 
-#include <shark/Models/TiedAutoencoder.h>
+#include <shark/Models/Autoencoder.h>
 #include <sstream>
 #include <boost/archive/polymorphic_text_iarchive.hpp>
 #include <boost/archive/polymorphic_text_oarchive.hpp>
@@ -14,15 +14,17 @@ using namespace boost::archive;
 using namespace shark;
 
 //check that the structure is correct, i.e. matrice have the right form and setting parameters works
-BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Structure)
+BOOST_AUTO_TEST_CASE( AUTOENCODER_Structure)
 {
-	std::size_t weightNum = 2*3+5;
-	TiedAutoencoder<LogisticNeuron,LogisticNeuron> net;
+	std::size_t weightNum = 2*2*3+5;
+	Autoencoder<LogisticNeuron,LogisticNeuron> net;
 	net.setStructure(2,3);
 	BOOST_REQUIRE_EQUAL(net.hiddenBias().size(),3u);
 	BOOST_REQUIRE_EQUAL(net.outputBias().size(),2u);
 	BOOST_CHECK_EQUAL(net.encoderMatrix().size1(), 3u);
 	BOOST_CHECK_EQUAL(net.encoderMatrix().size2(), 2u);
+	BOOST_CHECK_EQUAL(net.decoderMatrix().size1(), 2u);
+	BOOST_CHECK_EQUAL(net.decoderMatrix().size2(), 3u);
 	BOOST_REQUIRE_EQUAL(net.numberOfParameters(),weightNum);
 	
 	RealVector newParams(weightNum);
@@ -43,6 +45,11 @@ BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Structure)
 			BOOST_CHECK_EQUAL(net.encoderMatrix()(i,j), newParams(param));
 		}
 	}
+	for(std::size_t i = 0; i != net.decoderMatrix().size1(); ++i){
+		for(std::size_t j = 0; j != net.decoderMatrix().size2(); ++j,++param){
+			BOOST_CHECK_EQUAL(net.decoderMatrix()(i,j), newParams(param));
+		}
+	}
 	for(std::size_t i = 0; i != 3; ++i,++param){
 		BOOST_CHECK_EQUAL(net.hiddenBias()(i), newParams(param));
 	}
@@ -50,11 +57,11 @@ BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Structure)
 	BOOST_CHECK_EQUAL(net.outputBias()(1), newParams(param+1));
 }
 
-BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Value )
+BOOST_AUTO_TEST_CASE( AUTOENCODER_Value )
 {
-	TiedAutoencoder<LogisticNeuron,LinearNeuron> net;
+	Autoencoder<LogisticNeuron,LinearNeuron> net;
 	net.setStructure(3,2);
-	std::size_t numParams = 3*2+5;
+	std::size_t numParams = 2*3*2+5;
 	
 	for(std::size_t i = 0; i != 100; ++i){
 		//initialize parameters
@@ -90,9 +97,9 @@ BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Value )
 	testBatchEval(net,inputs);
 }
 
-BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_WeightedDerivatives)
+BOOST_AUTO_TEST_CASE( AUTOENCODER_WeightedDerivatives)
 {
-	TiedAutoencoder<LogisticNeuron,TanhNeuron> net;
+	Autoencoder<LogisticNeuron,TanhNeuron> net;
 	net.setStructure(2,5);
 
 	testWeightedInputDerivative(net,1000,5.e-6,1.e-7);
