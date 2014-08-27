@@ -419,6 +419,36 @@ protected:
 
 };
 
+
+class IRpropPlusFull : public RpropPlus
+{
+public:
+	IRpropPlusFull();
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "IRpropPlusFull"; }
+
+	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
+	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
+	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
+
+	void step(const ObjectiveFunctionType& objectiveFunction);
+
+	void setDerivativeThreshold(double derivativeThreshold);
+
+	void read( InArchive & archive );
+	void write( OutArchive & archive ) const;
+
+protected:
+	//! The error of the last iteration.
+	double m_oldError;
+//! A threshold below which partial derivatives are set to zero
+	double m_derivativeThreshold;
+
+};
+
 //===========================================================================
 /*!
  *  \brief This class offers methods for the usage of the improved
