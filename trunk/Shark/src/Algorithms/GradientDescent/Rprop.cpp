@@ -301,6 +301,82 @@ void IRpropPlus::setDerivativeThreshold(double derivativeThreshold)  {
 }
 
 
+IRpropPlusFull::IRpropPlusFull()
+{
+	m_features |= REQUIRES_VALUE;
+	m_derivativeThreshold = 0.;
+}
+
+void IRpropPlusFull::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
+	init(objectiveFunction,startingPoint,0.01);
+}
+void IRpropPlusFull::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta) {
+	if(!(objectiveFunction.features() & ObjectiveFunctionType::HAS_VALUE))
+		SHARKEXCEPTION("[IRPropPlus::init] requires the value of the function");
+	RpropPlus::init(objectiveFunction,startingPoint,initDelta);
+	m_oldError = std::numeric_limits<double>::max();
+}
+void IRpropPlusFull::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta) {
+	checkFeatures(objectiveFunction);
+
+	RpropPlus::init(objectiveFunction,startingPoint,initDelta);
+	m_oldError = std::numeric_limits<double>::max();
+}
+
+void IRpropPlusFull::step(const ObjectiveFunctionType& objectiveFunction) {
+	if ( m_best.value < m_oldError){//accept the point as the new current one if it is better
+		//step size adaptation
+		for (size_t i = 0; i < m_parameterSize; i++)
+		{
+			if(std::abs(m_derivative(i)) < m_derivativeThreshold) m_derivative(i) = 0.;
+			double direction = m_derivative(i) * m_oldDerivative(i);
+			if(direction < 0){//decrease if we overstepped the optimum
+				m_delta(i) = std::max(m_minDelta, m_decreaseFactor * m_delta(i));
+			}
+			if( direction > 0)//increase if we still go in the same direction
+			{
+				m_delta(i) = std::min(m_maxDelta, m_increaseFactor * m_delta(i));
+			}
+		}
+		//accept the point as the new current one
+		m_oldDerivative = m_derivative;
+		m_oldError = m_best.value;
+	}
+	else{
+		//do a full backtrack
+		noalias(m_best.point) -= m_deltaw;
+		for (size_t i = 0; i < m_parameterSize; i++)
+		{
+			if(std::abs(m_derivative(i)) < m_derivativeThreshold) m_derivative(i) = 0.;
+			double direction = m_derivative(i) * m_oldDerivative(i);
+			if(direction < 0){//this went too far...
+				m_delta(i) = std::max(m_minDelta, m_decreaseFactor * m_delta(i));
+			}
+		}
+	}
+	
+	//propose new step with updated step sizes
+	for (size_t i = 0; i < m_parameterSize; i++)
+	{
+		m_deltaw(i) = m_delta(i) * -boost::math::sign(m_derivative(i));
+		m_best.point(i) += m_deltaw(i);
+	}
+	m_best.value = objectiveFunction.evalDerivative( m_best.point, m_derivative );
+}
+
+void IRpropPlusFull::read( InArchive & archive ) {
+	archive>>boost::serialization::base_object<RpropPlus>(*this);
+	archive>>m_oldError;
+}
+void IRpropPlusFull::write( OutArchive & archive ) const {
+	archive<<boost::serialization::base_object<RpropPlus>(*this);
+	archive<<m_oldError;
+}
+
+void IRpropPlusFull::setDerivativeThreshold(double derivativeThreshold)  {
+	m_derivativeThreshold = derivativeThreshold;		
+}
+
 
 //IRpropMinus
 
