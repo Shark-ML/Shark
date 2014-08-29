@@ -115,7 +115,7 @@ void shark::blas::svd
 	VectorT rv1(n);
 
 	/* copy A to U */
-	noalias(umatA) = amatA;
+	umatA = amatA;
 
 	/* householder reduction to bidiagonal form */
 	g = scale = anorm = 0.0;
@@ -126,10 +126,10 @@ void shark::blas::svd
 		g = s = scale = 0.0;
 
 		if (i < m) {
-//			for (k = i; k < m; k++) {
-//				scale += fabs(umatA(k, i));
-//			}
-			scale += norm_1(column(umatA,i));
+			for (k = i; k < m; k++) {
+				scale += fabs(umatA(k, i));
+			}
+			//~ scale += norm_1(column(umatA,i));
 
 			if (scale != 0.0) {
 				for (k = i; k < m; k++) {
