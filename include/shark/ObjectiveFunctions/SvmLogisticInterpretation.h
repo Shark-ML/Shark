@@ -38,8 +38,7 @@
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
-#include <shark/ObjectiveFunctions/Loss/NegativeClassificationLogLikelihood.h>
-
+#include <boost/math/special_functions/log1p.hpp>
 
 namespace shark {
 
@@ -208,8 +207,19 @@ public:
 		sigmoid_trainer.train(sigmoid_model, validation_dataset);
 		// we're basically done. now only get the final cost value of the best fit, and return it:
 		Data< RealVector > sigmoid_predictions = sigmoid_model(all_validation_predictions);
-		NegativeClassificationLogLikelihood ncll;
-		return ncll.eval(all_validation_labels, sigmoid_predictions);
+		
+		double error = 0;
+		for (unsigned int i=0; i<m_numSamples; i++) {
+			double p = sigmoid_predictions.element(i)(0);
+			if (all_validation_labels.element(i) == 1){   //positive class
+				error -= std::log(p);
+			}
+			else{ //negative class
+				error -= boost::math::log1p(-p);
+			}
+		}
+		
+		return error/m_numSamples;
 	}
 
 	//! the derivative of the error() function above w.r.t. the parameters.
@@ -275,7 +285,6 @@ public:
 		sigmoid_trainer.train(sigmoid_model, validation_dataset);
 		// we're basically done. now only get the final cost value of the best fit, and return it:
 		Data< RealVector > sigmoid_predictions = sigmoid_model(all_validation_predictions);
-		NegativeClassificationLogLikelihood ncll;
 
 		// finally compute the derivative of the sigmoid model predictions:
 		// (we're here a bit un-shark-ish in that we do some of the derivative calculations by hand where they
@@ -285,14 +294,19 @@ public:
 		derivative.clear();
 
 		double ss = (m_sigmoidSlopeIsUnconstrained ? std::exp(sigmoid_model.parameterVector()(0)) : sigmoid_model.parameterVector()(0));
+		double error = 0;
 		for (unsigned int i=0; i<m_numSamples; i++) {
 			double p = sigmoid_predictions.element(i)(0);
 			// compute derivative of the negative log likelihood
 			double dL_dsp; //derivative of likelihood wrt sigmoid predictions
-			if (all_validation_labels.element(i) == 1)   //positive class
+			if (all_validation_labels.element(i) == 1){   //positive class
+				error -= std::log(p);
 				dL_dsp = -1.0/p;
-			else //negative class
+			}
+			else{ //negative class
+				error -= boost::math::log1p(-p);
 				dL_dsp = 1.0/(1.0-p);
+			}
 			// compute derivative of the sigmoid
 			// derivative of sigmoid predictions wrt svm predictions
 			double dsp_dsvmp = ss * p * (1.0-p); //severe sign confusion potential: p(1-p) is deriv. w.r.t. t in 1/(1+e**(-t))!
@@ -300,10 +314,8 @@ public:
 				derivative(j) += dL_dsp * dsp_dsvmp * all_validation_predict_derivs(i,j);
 			}
 		}
-		// correct for the fact that AbstractLoss devides the NCLL eval scores
-		// by the number of examples when evaluated in batch mode
 		derivative /= m_numSamples;
-		return ncll.eval(all_validation_labels, sigmoid_predictions);
+		return error / m_numSamples;
 	}
 };
 

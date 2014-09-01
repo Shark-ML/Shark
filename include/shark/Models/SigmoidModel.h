@@ -51,6 +51,15 @@ public:
 	}
 	// \brief whether to use the offset, or clamp it to zero. offset is active by default.
 	void setOffsetActivity( bool enable_offset );
+	
+	bool hasOffset()const{
+		return m_useOffset;
+	}
+	
+	bool slopeIsExpEncoded()const{
+		return m_transformForUnconstrained;
+	}
+	
 	/*!
 	*  \brief activation function \f$g_{output}(x)\f$
 	*/

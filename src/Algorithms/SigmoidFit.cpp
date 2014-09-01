@@ -34,9 +34,10 @@
 
 
 #include <shark/Algorithms/Trainers/SigmoidFit.h>
+#include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/GradientDescent/Rprop.h>
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
-#include <shark/ObjectiveFunctions/Loss/NegativeClassificationLogLikelihood.h>
+#include <shark/ObjectiveFunctions/Loss/CrossEntropy.h>
 
 using namespace shark;
 
@@ -47,13 +48,22 @@ SigmoidFitRpropNLL::SigmoidFitRpropNLL( unsigned int iters ){
 // optimize the sigmoid using rprop on the negative log-likelihood
 void SigmoidFitRpropNLL::train(SigmoidModel& model, LabeledData<RealVector, unsigned int> const& dataset)
 {
-	NegativeClassificationLogLikelihood ncll;
-	ErrorFunction <RealVector, unsigned int> modeling_error( dataset, &model, &ncll );
+	LinearModel<> trainModel;
+	trainModel.setStructure(1,1,model.hasOffset());
+	CrossEntropy loss;
+	ErrorFunction <RealVector, unsigned int> modeling_error( dataset, &trainModel, &loss );
 	IRpropPlus rprop;
 	rprop.init( modeling_error );
 	for (unsigned int i=0; i<m_iterations; i++) {
 		rprop.step( modeling_error );
 	}
+	RealVector solution = rprop.solution().point;
+	if(model.slopeIsExpEncoded()){
+		solution(0) = std::log(solution(0));
+	}
+	if(model.hasOffset())
+		solution(1) *=-1;
+	model.setParameterVector(solution);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

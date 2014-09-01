@@ -5,8 +5,6 @@
 #include <shark/Algorithms/Trainers/SigmoidFit.h>
 #include <shark/Rng/GlobalRng.h>
 #include <shark/Models/Converter.h>
-#include <shark/ObjectiveFunctions/Loss/NegativeClassificationLogLikelihood.h>
-
 
 using namespace shark;
 
@@ -136,28 +134,6 @@ BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_RPROP_NO_ENCODING_DETERMINISTIC_NOBIAS ){
 	// check the parameters
 	RealVector estimate = test_model.parameterVector();
 	BOOST_CHECK_SMALL( estimate(1), 1E-9);
-
-	// numerically check for minimum (not solid, but the best quick test numerics can buy)
-
-	NegativeClassificationLogLikelihood ncll;
-	Data< RealVector > sigmoid_test_response = test_model( dataset.inputs());
-	double min = ncll.eval( dataset.labels(), sigmoid_test_response );
-
-	RealVector cur_params = test_model.parameterVector();
-	cur_params(0) -= 0.01;
-	test_model.setParameterVector( cur_params );
-
-	sigmoid_test_response = test_model( dataset.inputs());
-	double left = ncll.eval( dataset.labels(), sigmoid_test_response );
-
-	cur_params(0) += 0.02;
-	test_model.setParameterVector( cur_params );
-
-	sigmoid_test_response = test_model( dataset.inputs());
-	double right = ncll.eval( dataset.labels(), sigmoid_test_response );
-
-	BOOST_CHECK( left > min );
-	BOOST_CHECK( right > min );
 }
 
 BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_RPROP_WITH_ENCODING_DETERMINISTIC_NOBIAS ){
@@ -196,32 +172,6 @@ BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_RPROP_WITH_ENCODING_DETERMINISTIC_NOBIAS 
 	test_model.setParameterVector( obscure_parameters );
 	test_model.setOffsetActivity( false ); //clamp offset to zero
 	trainer.train( test_model, dataset );
-
-	// check the parameters
-	RealVector estimate = test_model.parameterVector();
-	BOOST_CHECK_SMALL( estimate(1), 1E-9);
-
-	// numerically check for minimum (not solid, but the best quick test numerics can buy)
-	NegativeClassificationLogLikelihood ncll;
-
-	Data< RealVector > sigmoid_test_response = test_model( dataset.inputs());
-	double min = ncll.eval( dataset.labels(), sigmoid_test_response );
-
-	RealVector cur_params = test_model.parameterVector();
-	cur_params(0) -= 0.01;
-	test_model.setParameterVector( cur_params );
-
-	sigmoid_test_response =  test_model( dataset.inputs());
-	double left = ncll.eval( dataset.labels(), sigmoid_test_response );
-
-	cur_params(0) += 0.02;
-	test_model.setParameterVector( cur_params );
-
-	sigmoid_test_response =  test_model( dataset.inputs());
-	double right = ncll.eval( dataset.labels(), sigmoid_test_response );
-	//std::cout << "value at final parameters + eps " << right << std::endl;
-	BOOST_CHECK( left > min );
-	BOOST_CHECK( right > min );
 }
 
 // NOTE THAT THIS TEST OF PLATT'S METHOD IS NOT AS EXTENSIVE AS THE ABOVE AND MORE A ROUGH ESTIMATE OF USABILITY

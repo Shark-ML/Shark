@@ -1,7 +1,7 @@
 //###begin<includes>
 #include<shark/Models/FFNet.h> //the feed forward neural network
 #include<shark/Algorithms/GradientDescent/Rprop.h> //resilient propagation as optimizer
-#include<shark/ObjectiveFunctions/Loss/NegativeClassificationLogLikelihood.h> // loss during training
+#include<shark/ObjectiveFunctions/Loss/CrossEntropy.h> // loss during training
 #include<shark/ObjectiveFunctions/ErrorFunction.h> //error function to connect data model and loss
 #include<shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //loss for classification
 //###end<includes>
@@ -36,8 +36,8 @@ int main(){
 	unsigned numInput=2;
 	unsigned numHidden=2;
 	unsigned numOutput=1;
-	FFNet<LogisticNeuron,LogisticNeuron> network;
-	network.setStructure(numInput,numHidden,numOutput);
+	FFNet<LogisticNeuron,LinearNeuron> network;
+	network.setStructure(numInput,numHidden,numOutput,FFNetStructures::Normal,true);
 	//###end<network_topology>
 	
 	//###begin<train>
@@ -45,7 +45,7 @@ int main(){
 	LabeledData<RealVector,unsigned int> dataset = xorProblem();
 	
 	//create error function
-	NegativeClassificationLogLikelihood loss; // surrogate loss for training
+	CrossEntropy loss; // surrogate loss for training
 	ErrorFunction<RealVector,unsigned int> error(dataset,&network,&loss);
 	
 	//initialize Rprop and initialize the network randomly
