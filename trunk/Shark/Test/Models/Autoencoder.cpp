@@ -17,7 +17,7 @@ using namespace shark;
 BOOST_AUTO_TEST_CASE( AUTOENCODER_Structure)
 {
 	std::size_t weightNum = 2*2*3+5;
-	Autoencoder<LogisticNeuron,LogisticNeuron> net;
+	Autoencoder<LogisticNeuron> net;
 	net.setStructure(2,3);
 	BOOST_REQUIRE_EQUAL(net.hiddenBias().size(),3u);
 	BOOST_REQUIRE_EQUAL(net.outputBias().size(),2u);
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( AUTOENCODER_Structure)
 
 BOOST_AUTO_TEST_CASE( AUTOENCODER_Value )
 {
-	Autoencoder<LogisticNeuron,LinearNeuron> net;
+	Autoencoder<LogisticNeuron> net;
 	net.setStructure(3,2);
 	std::size_t numParams = 2*3*2+5;
 	
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE( AUTOENCODER_Value )
 
 BOOST_AUTO_TEST_CASE( AUTOENCODER_WeightedDerivatives)
 {
-	Autoencoder<LogisticNeuron,TanhNeuron> net;
+	Autoencoder<TanhNeuron> net;
 	net.setStructure(2,5);
 
 	testWeightedInputDerivative(net,1000,5.e-6,1.e-7);
