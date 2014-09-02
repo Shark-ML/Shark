@@ -51,15 +51,15 @@
 namespace shark {
 
 namespace detail {
-void importPGM( const char * fileName, unsigned char ** ppData, int & sx, int & sy )
+void importPGM( std::string const& fileName, unsigned char ** ppData, int & sx, int & sy )
 {
-	FILE * fp = fopen(fileName, "rb");
+	FILE * fp = fopen(fileName.c_str(), "rb");
 	
-	if ( 0 == fp ) throw( SHARKEXCEPTION( "[importPGM] cannot open file" ) );
+	if( !fp ) throw SHARKEXCEPTION( "[importPGM] cannot open file: " + fileName);
 
 	char format[16];
 	const int nParamRead0 = fscanf(fp, "%s\n", (char *) &format);
-	if ( 0 == nParamRead0 ) throw( std::invalid_argument( "[importPGM] cannot read file" ) );
+	if ( 0 == nParamRead0 ) throw SHARKEXCEPTION( "[importPGM] error reading file: " + fileName );
 	
 	// Ignore comments
 	char tmpCharBuf[256];
@@ -67,7 +67,7 @@ void importPGM( const char * fileName, unsigned char ** ppData, int & sx, int & 
 	fgetpos (fp, &position);
 	while ( true ) {
 		char *s = fgets( tmpCharBuf, 255, fp );
-		if (!s)  throw( SHARKEXCEPTION( "[importPGM] error reading file" ) );
+		if (!s)  throw SHARKEXCEPTION( "[importPGM] error reading file: " + fileName );
 		const int cnt = strncmp( tmpCharBuf, "#", 1 );
 		if (0 != cnt) {
 			fsetpos(fp, &position);
@@ -83,21 +83,21 @@ void importPGM( const char * fileName, unsigned char ** ppData, int & sx, int & 
 	
 	if ( (nParamRead1 != 2) || (nParamRead2 != 1) ) {
 		fclose(fp);
-		throw( std::invalid_argument( "[importPGM] file corrupted or format not recognized" ) );
+		throw SHARKEXCEPTION( "[importPGM] file corrupted or format not recognized in file: " + fileName );
 	} else {
 		if ( (0 == strncmp("P5", format, 2)) && ( (255 == nGrayValues) || (256 == nGrayValues) ) ) {
 			//delete[] *ppData;
 			*ppData = new unsigned char[sx*sy];
 			fseek(fp, -sx*sy*sizeof(unsigned char), SEEK_END);
 			
-			const int readcount = (int)( fread(*ppData, sx*sizeof(unsigned char), sy, fp) );
+			const int readcount = (int)( fread(*ppData, sx*sizeof(unsigned char), sy, fp));
 			if (sy != readcount) {
 				fclose(fp);
-				throw( std::invalid_argument( "[importPGM] file corrupted or format not recognized" ) );
+				throw SHARKEXCEPTION( "[importPGM] file corrupted or format not recognized in file: " + fileName );
 			}
 		} else 	{
 			fclose(fp);
-			throw( std::invalid_argument( "[importPGM] file corrupted or format not recognized" ) );
+			throw SHARKEXCEPTION( "[importPGM] file corrupted or format not recognized in file: " + fileName );
 		}
 	}
 	fclose(fp);
@@ -115,17 +115,17 @@ void importPGM( const char * fileName, unsigned char ** ppData, int & sx, int & 
 /// \param  pData      unsigned char pointer to the data
 /// \param  sx         Width of image
 /// \param  sy         Height of image
-void writePGM( const char * fileName, const unsigned char * pData, const unsigned int sx, const unsigned int sy )
+void writePGM( std::string const& fileName, const unsigned char * pData, const unsigned int sx, const unsigned int sy )
 {
-	FILE* fp = fopen(fileName, "wb");
-	if( !fp ) throw( std::invalid_argument( "[writePGM] cannot open file" ) );
-	
+	FILE* fp = fopen(fileName.c_str(), "wb");
+	if( !fp ) throw SHARKEXCEPTION( "[writePGM] cannot open file: " + fileName);
+
 	fprintf(fp, "P5\n");
 	fprintf(fp, "%d %d\n255\n", sx, sy);
 	
 	if( 1 != fwrite(pData, sx*sy, 1, fp) ) 	{
 		fclose(fp);
-		throw( std::invalid_argument( "[writePGM] write dat to file" ) );
+		throw SHARKEXCEPTION( "[writePGM] can not write data to file: "+ fileName );
 	}
 	fclose(fp);
 }
@@ -138,7 +138,7 @@ void writePGM( const char * fileName, const unsigned char * pData, const unsigne
 /// \param  sx         Width of imported image
 /// \param  sy         Height of imported image
 template <class T>
-void importPGM( const char * fileName, T &data, int & sx, int & sy ) {
+void importPGM( std::string const& fileName, T &data, int & sx, int & sy ) {
 	unsigned char *pData;
 	unsigned i=0;
 	detail::importPGM(fileName, &pData, sx, sy);
@@ -156,7 +156,7 @@ void importPGM( const char * fileName, T &data, int & sx, int & sy ) {
 /// \param  sy         Height of image
 /// \param  normalize  Adjust values to [0,255], default false
 template <class T>
-void exportPGM( const char * fileName, const T &data, int sx, int sy, bool normalize = false ) {
+void exportPGM( std::string const& fileName, const T &data, int sx, int sy, bool normalize = false ) {
 	unsigned i=0;
 	unsigned char *pData = new unsigned char[data.size()];
 	typename T::const_iterator it = data.begin();
@@ -174,6 +174,42 @@ void exportPGM( const char * fileName, const T &data, int sx, int sy, bool norma
 	}
 	detail::writePGM(fileName, pData, sx, sy);
 	delete [] pData;
+}
+
+/// \brief Exports a set of filters as a grid image
+///
+/// It is assumed that the filters each form a row in the filter-matrix.
+/// Moreover, the sizes of the filter images has to be given and it must gold width*height=W.size2().
+/// The filters a re printed on a single image as a grid. The grid will be close to square. And the
+/// image are separated by a black 1 pixel wide line. 
+/// The output will be normalized so that all images are on the same scale.
+/// \param  fileName   File to write to. ".pgm" is appended to the filename
+/// \param  filters       matrix storing the filters row by row
+/// \param  width         Width of the filter image
+/// \param  height         Height of th filter image
+void exportFiltersToPGMGrid(std::string const& basename,RealMatrix const& filters,std::size_t width, std::size_t height) {
+	SIZE_CHECK(filters.size2() == width*height);
+	//try to get a square image
+	std::size_t gridX = std::size_t(std::sqrt(double(filters.size1())));
+	std::size_t gridY = gridX;
+	while(gridX*gridY < filters.size1()) ++gridX;
+	
+	RealMatrix image((height+1)*gridY,(width+1)*gridX,min(filters));
+	
+	for(std::size_t filter = 0; filter != filters.size1(); ++filter){
+		//get grid position from filter
+		std::size_t i = filter/gridX;
+		std::size_t j = filter%gridX;
+		std::size_t startY = (height+1)*i;
+		std::size_t startX = (width+1)*j;
+		//copy images
+		noalias(subrange(image,startY,startY+height,startX,startX+width)) = to_matrix(row(filters,filter),height,width);
+	}
+	exportPGM(
+		(basename+".pgm").c_str(), 
+		blas::adapt_vector((height+1)*gridY*(width+1)*gridX,&image(0,0)),
+		(width+1)*gridY, (height+1)*gridX,
+		true);
 }
 
 

@@ -105,7 +105,7 @@ Let's start with some classical methods:
 * :doc:`algorithms/LASSO`
 * :doc:`algorithms/kmeans`
 
-Neural nets:
+Neural networks and deep learning:
 
 * :doc:`algorithms/ffnet`
 * :doc:`algorithms/sparse_ae`
