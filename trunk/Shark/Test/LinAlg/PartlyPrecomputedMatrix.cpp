@@ -231,8 +231,8 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 
 		if(verbose) std::cout << std::endl;
 
-		uint32_t cachedRowIndex =  0;
-		uint32_t uncachedRowIndex =  currentDimension - 1;
+		size_t cachedRowIndex =  0;
+		size_t uncachedRowIndex =  currentDimension - 1;
 
 		// first test how many uncached rows we roughly can obtain in a certain given timespan.
 		double timespan = 0.01;
