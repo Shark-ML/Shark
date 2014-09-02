@@ -17,7 +17,7 @@ using namespace shark;
 BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Structure)
 {
 	std::size_t weightNum = 2*3+5;
-	TiedAutoencoder<LogisticNeuron> net;
+	TiedAutoencoder<LogisticNeuron,LogisticNeuron> net;
 	net.setStructure(2,3);
 	BOOST_REQUIRE_EQUAL(net.hiddenBias().size(),3u);
 	BOOST_REQUIRE_EQUAL(net.outputBias().size(),2u);
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Structure)
 
 BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Value )
 {
-	TiedAutoencoder<LogisticNeuron> net;
+	TiedAutoencoder<LogisticNeuron,TanhNeuron> net;
 	net.setStructure(3,2);
 	std::size_t numParams = 3*2+5;
 	
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Value )
 
 		//evaluate ground truth result
 		RealVector hidden = sigmoid(prod(net.encoderMatrix(),point)+net.hiddenBias());
-		RealVector output = prod(net.decoderMatrix(),hidden)+net.outputBias();
+		RealVector output = tanh(prod(net.decoderMatrix(),hidden)+net.outputBias());
 		
 		//check whether final result is correct
 		RealVector netResult = net(point);
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Value )
 
 BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_WeightedDerivatives)
 {
-	TiedAutoencoder<TanhNeuron> net;
+	TiedAutoencoder<TanhNeuron,LinearNeuron> net;
 	net.setStructure(2,5);
 
 	testWeightedInputDerivative(net,1000,5.e-6,1.e-7);

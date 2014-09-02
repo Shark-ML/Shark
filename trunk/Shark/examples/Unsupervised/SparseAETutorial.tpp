@@ -3,7 +3,7 @@
 #include <shark/Data/Pgm.h> //for exporting the learned filters
 #include <shark/Data/Csv.h>//for reading in the images as csv
 #include <shark/Data/Statistics.h> //for normalization
-#include <shark/ObjectiveFunctions/SparseFFNetError.h>//the error function performing the regularisation of the hidden neurons
+#include <shark/ObjectiveFunctions/SparseAutoencoderError.h>//the error function performing the regularisation of the hidden neurons
 #include <shark/Algorithms/GradientDescent/LBFGS.h>// the L-BFGS optimization algorithm
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h> // squared loss used for regression
 #include <shark/ObjectiveFunctions/Regularizer.h> //L2 regulariziation
@@ -92,7 +92,7 @@ UnlabeledData<RealVector> getSamples()
 	return samples;
 }
 
-void initializeFFNet(FFNet<LogisticNeuron, LogisticNeuron>& model){
+void initializeFFNet(Autoencoder<LogisticNeuron, LogisticNeuron>& model){
 	// Set the starting point for the optimizer. This is 0 for all bias
 	// weights and in the interval [-r, r] for non-bias weights.
 	double r = std::sqrt(6.0) / std::sqrt(model.numberOfHiddenNeurons() + model.inputSize() + 1);
@@ -121,20 +121,20 @@ int main()
 
 	// Prepare the sparse network error function
 	//###begin<ffnet>
-	FFNet<LogisticNeuron, LogisticNeuron> model;
-	model.setStructure(psize * psize, numhidden, psize * psize, FFNetStructures::Normal, true);
+	Autoencoder<LogisticNeuron, LogisticNeuron> model;
+	model.setStructure(psize * psize, numhidden);
 	initializeFFNet(model);
 	//###end<ffnet>
 	//###begin<sparsity_error>
 	SquaredLoss<RealVector> loss;
-	SparseFFNetError error(data,&model, &loss, rho, beta);
+	SparseAutoencoderError error(data,&model, &loss, rho, beta);
 	// Add weight regularization
 	TwoNormRegularizer regularizer(error.numberOfVariables());
 	error.setRegularizer(lambda,&regularizer);
 	//###end<sparsity_error>
 
 	cout << "Model has: " << model.numberOfParameters() << " params." << endl;
-	cout << "Model has: " << model.numberOfNeurons() << " neurons." << endl;
+	cout << "Model has: " << model.numberOfHiddenNeurons() << "hidden neurons." << endl;
 	cout << "Model has: " << model.inputSize() << " inputs." << endl;
 	cout << "Model has: " << model.outputSize() << " outputs." << endl;
 
@@ -155,6 +155,6 @@ int main()
 	cout << "Function evaluations: " << error.evaluationCounter() << endl;
 
 	//###begin<export>
-	exportFiltersToPGMGrid("features",model.layerMatrices()[0],psize,psize);
+	exportFiltersToPGMGrid("features",model.encoderMatrix(),psize,psize);
 	//###end<export>
 }

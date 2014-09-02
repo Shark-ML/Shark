@@ -37,12 +37,12 @@ namespace shark{
 /// \brief implements the autoencoder
 ///
 /// The formula is
-///  \f[ f(x) = W^T\sigma(Wx+b_1)+b_2)\f]
+///  \f[ f(x) = \sigma_2(W^T\sigma_1(Wx+b_1)+b_2)\f]
 /// Where \f$ W, W_2, b_1 \f$ and \f$b_2 \f$ are the weights and
-///  \f$\sigma\f$ is the activation function for the hidden units.
+///  \f$\sigma_1\f$ and \f$ \sigma_2\f$ are the activation functions for hidden and output units.
 ///
 /// see TiedAutoencoder for the tied weights version where \f$ W_2=W_1^T \f$.
-template<class HiddenNeuron>
+template<class HiddenNeuron,class OutputNeuron>
 class Autoencoder :public AbstractModel<RealVector,RealVector>
 {
 	struct InternalState: public State{
@@ -113,10 +113,6 @@ public:
 		return m_decoderMatrix;
 	}
 	
-	HiddenNeuron const& hiddenActivationFunction()const{
-		return m_hiddenNeuron;
-	}
-	
 	//! \brief Returns the total number of parameters of the network. 
 	std::size_t numberOfParameters()const{
 		return 2*inputSize()*numberOfHiddenNeurons()+inputSize()+numberOfHiddenNeurons();
@@ -138,9 +134,18 @@ public:
 	//!
 	//!     \param  state last result of eval
 	//!     \return Output value of the neurons.
-	RealMatrix const& neuronResponses(State const& state)const{
+	RealMatrix const& hiddenResponses(State const& state)const{
 		InternalState const& s = state.toState<InternalState>();
-		return s.responses;
+		return s.hiddenResponses;
+	}
+	
+	/// \brief Returns the activation function of the hidden units.
+	HiddenNeuron const& hiddenActivationFunction()const{
+		return m_hiddenNeuron;
+	}
+	/// \brief Returns the activation function of the output units.
+	OutputNeuron const& outputActivationFunction()const{
+		return m_outputNeuron;
 	}
 	
 	boost::shared_ptr<State> createState()const{
@@ -167,6 +172,7 @@ public:
 			outputs.clear();
 			axpy_prod(patterns,trans(decoderMatrix()),outputs);
 			noalias(outputs) += repeat(outputBias(),numPatterns);
+			noalias(outputs) = m_outputNeuron(outputs);
 		}
 	}
 	
@@ -264,6 +270,7 @@ private:
 	)const{
 		InternalState const& s = state.toState<InternalState>();
 
+		noalias(outputDelta) *= m_outputNeuron.derivative(s.outputResponses);
 		hiddenDelta.resize(outputDelta.size1(),numberOfHiddenNeurons());
 		axpy_prod(outputDelta,decoderMatrix(),hiddenDelta,true);
 		noalias(hiddenDelta) *= m_hiddenNeuron.derivative(s.hiddenResponses);
@@ -314,6 +321,8 @@ private:
 
 	//!Type of hidden neuron. See Models/Neurons.h for a few choices
 	HiddenNeuron m_hiddenNeuron;
+	//! Type of output neuron. See Models/Neurons.h for a few choices
+	OutputNeuron m_outputNeuron;
 };
 
 

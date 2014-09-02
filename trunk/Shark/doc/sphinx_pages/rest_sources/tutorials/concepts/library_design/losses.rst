@@ -211,8 +211,6 @@ Model                                         Description
                                               useful, e.g., for training of neural networks with linear outputs
 :doxy:`CrossEntropyIndependent`               Logarithmic likelihood function with
                                               additional independence assumptions
-:doxy:`NegativeClassificationLogLikelihood`   Logarithmic likelihood function interpreting a model with *C* outputs summing to one as
-                                              computing the conditional probability over *C* classes
 :doxy:`HingeLoss`			      Loss used in Maximum margin classification. Binary and multiclass implemented.
 :doxy:`SquaredHingeLoss`		      Loss used in Maximum margin classification. It is the pointwise
 					      Square of the HingeLoss. It is differentiable everywhere.
@@ -221,6 +219,10 @@ Model                                         Description
 :doxy:`SquaredEpsilonHingeLoss`		      Maximum margin regression. It is zero in a ball of size epsilon around the 
 					      label and outside the squared two-norm of the distance of prediction and label.
 					      Thus very close points are not punished.
+:doxy:`HuberLoss`			      Robust loss for rgression. It is quadratic close to 0 and becomes
+					      a linear function for big discrepancies between model prediction and target.
+:doxy:`TukeyBiweightLoss`		      Robust loss for regression. It is similar to the Huber loss, but instead
+					      of becoming linear, it becomes constant.
 ============================================  ==============================================================================
 
 
