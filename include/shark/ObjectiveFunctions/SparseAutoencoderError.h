@@ -29,11 +29,12 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_OBJECTIVEFUNCTIONS_SPARSEFFNETERROR_H
-#define SHARK_OBJECTIVEFUNCTIONS_SPARSEFFNETERROR_H
+#ifndef SHARK_OBJECTIVEFUNCTIONS_SparseAutoencoderError_H
+#define SHARK_OBJECTIVEFUNCTIONS_SparseAutoencoderError_H
 
 
-#include <shark/Models/FFNet.h>
+#include <shark/Models/Autoencoder.h>
+#include <shark/Models/TiedAutoencoder.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include "Impl/FunctionWrapperBase.h"
@@ -42,7 +43,7 @@
 namespace shark{
 
 ///
-/// \brief Error Function for FFNets which should be trained with sparse activation of the hidden neurons
+/// \brief Error Function for Autoencoders and TiedAutoencoders which should be trained with sparse activation of the hidden neurons
 ///
 /// This error function optimizes a Network with respect to some loss function similar to the standard
 /// ErrorFunction. Additionally another penalty term is added which enforces a sparse activation pattern of
@@ -52,26 +53,34 @@ namespace shark{
 /// \f$ KL(\rho||\rho_j) = \rho log(\frac{\rho}{\rho_j})+(1-\rho) log(\frac{1-\rho}{1-\rho_j}) \f$
 ///
 /// This Error Function has two meta-parameters: rho governs the desired mean activation and
-/// beta the strength of regularization.
-class SparseFFNetError : public SingleObjectiveFunction
+/// beta the strength of regularization. Another regularizer can be added using setRegularizer as in typical ErrorFunctions.
+class SparseAutoencoderError : public SingleObjectiveFunction
 {
 public:
 	typedef LabeledData<RealVector, RealVector> DatasetType;
-	template<class HiddenNeuron,class VisibleNeuron>
-	SparseFFNetError(
+	template<class HiddenNeuron, class OutputNeuron>
+	SparseAutoencoderError(
 		DatasetType const& dataset,
-		FFNet<HiddenNeuron,VisibleNeuron>* model, 
+		Autoencoder<HiddenNeuron,OutputNeuron>* model, 
 		AbstractLoss<RealVector, RealVector>* loss, 
 		double rho = 0.5, double beta = 0.1
 	);
-	SparseFFNetError& operator=(SparseFFNetError const& op){
+	template<class HiddenNeuron, class OutputNeuron>
+	SparseAutoencoderError(
+		DatasetType const& dataset,
+		TiedAutoencoder<HiddenNeuron,OutputNeuron>* model, 
+		AbstractLoss<RealVector, RealVector>* loss, 
+		double rho = 0.5, double beta = 0.1
+	);
+
+	SparseAutoencoderError& operator=(SparseAutoencoderError const& op){
 		mp_wrapper.reset(op.mp_wrapper->clone());
 		return *this;
 	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
-	{ return "SparseFFNetError"; }
+	{ return "SparseAutoencoderError"; }
 
 	std::size_t numberOfVariables()const{
 		return mp_wrapper->numberOfVariables();
@@ -108,7 +117,7 @@ public:
 		return value;
 	}
 
-	friend void swap(SparseFFNetError& op1, SparseFFNetError& op2){
+	friend void swap(SparseAutoencoderError& op1, SparseAutoencoderError& op2){
 		swap(op1.mp_wrapper,op2.mp_wrapper);
 	}
 
@@ -120,5 +129,5 @@ private:
 };
 
 }
-#include "Impl/SparseFFNetError.inl"
+#include "Impl/SparseAutoencoderError.inl"
 #endif

@@ -108,11 +108,16 @@ Let's start with some classical methods:
 Neural networks and deep learning:
 
 * :doc:`algorithms/ffnet`
-* :doc:`algorithms/sparse_ae`
-* :doc:`algorithms/extreme_learning_machine`
-* :doc:`algorithms/deep_denoising_autoencoder_network`
 * :doc:`algorithms/rbm_module`
 * :doc:`algorithms/binary_rbm`
+* :doc:`algorithms/extreme_learning_machine`
+* Training of autoencoders and network pre-training
+
+  - :doc:`algorithms/autoencoder`
+  - :doc:`algorithms/sparse_ae`
+  - :doc:`algorithms/deep_denoising_autoencoder_network`
+
+
 
 Tree-based algorithms:
 

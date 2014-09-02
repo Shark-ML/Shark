@@ -200,7 +200,7 @@ SHARK_ADD_TEST( Data/ExportKernelMatrix.cpp Data_ExportKernelMatrix )
 
 #Objective Functions
 SHARK_ADD_TEST( ObjectiveFunctions/ErrorFunction.cpp ObjFunct_ErrorFunction )
-SHARK_ADD_TEST( ObjectiveFunctions/SparseFFNetError.cpp ObjFunct_SparseFFNetError )
+SHARK_ADD_TEST( ObjectiveFunctions/SparseAutoencoderError.cpp ObjFunct_SparseAutoencoderError )
 SHARK_ADD_TEST( ObjectiveFunctions/NoisyErrorFunction.cpp ObjFunct_NoisyErrorFunction )
 SHARK_ADD_TEST( ObjectiveFunctions/CrossValidation.cpp ObjFunct_CrossValidation )
 SHARK_ADD_TEST( ObjectiveFunctions/Benchmarks.cpp ObjFunct_Benchmarks )

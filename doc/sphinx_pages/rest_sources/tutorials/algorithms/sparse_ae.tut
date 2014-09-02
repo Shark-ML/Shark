@@ -26,10 +26,10 @@ over all hidden neurons indexed by :math:`j`.  The regularization
 parameter :math:`\rho` defines a target mean activation and the mean
 activation :math:`\rho_j` of hidden neuron :math:`j` over the whole
 training datasetis interpreted as activation propability.  See the
-documentation of the :doxy:`SparseFFNetError` class for more
+documentation of the :doxy:`SparseAutoencoderError` class for more
 information.
 
-For a detailed introduction to autoencoders, we refer to the `Stanford
+For a detailed introduction to sparse autoencoders, we refer to the `Stanford
 UFLDL Tutorial
 <http://ufldl.stanford.edu/wiki/index.php/Exercise:Sparse_Autoencoder>`_.
 In the following, we show how to solve the autoencoder exercise from
@@ -85,20 +85,15 @@ We first load our data and generate a dataset with labels equals to the points::
 This does not create an additional copy of the samples but merely generates 
 another reference to every single point.
 In order to create the objective function for the sparse autoencoder,
-we first need to create a feed-forward neural network with the correct
-layout::
+we first need to create an instance of the :doxy:`Autoencoder` class::
 
 ..sharkcode<Unsupervised/SparseAETutorial.tpp, ffnet>
 
-The Boolean arguments specify that consecutive layers are fully
-connected and that a bias parameter is used, but that there are no shortcut connections.
-We then need to add the sparsity constraint to the regression loss::
+We can also use the :doxy:`TiedAutoencoder` here instead!
+We then need to add the sparsity constraint to the regression loss
+as well as atwo-norm-regularisation::
 
 ..sharkcode<Unsupervised/SparseAETutorial.tpp, sparsity_error>
-
-and weight regularization::
-
-..sharkcode<Unsupervised/SparseAETutorial.tpp, regularization>
 
 This creates the entire objective function for the sparse autoencoder,
 with sparsity constraint and weight regularization.

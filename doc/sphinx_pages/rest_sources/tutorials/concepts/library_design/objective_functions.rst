@@ -212,6 +212,8 @@ Model                                         Description
 					      different classes.
 :doxy:`NegativeLogLikelihood`                 Measures how probable a dataset is under a given model parameterized
 					      by the vector of parameters given in the function argument.
+:doxy:`SparseAutoencoderError` 		      Similar to the ErrorFunction but for the spcial case of Autoencoder training where
+					      a sparisty penalty is imposed on the activation of the hidden units.
 ============================================  ===================================================================================
 
 

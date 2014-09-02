@@ -229,7 +229,7 @@ Model                      Description
 :doxy:`LinearModel`        A simple linear model mapping an n-dimensional input to an m-dimensional output
 :doxy:`FFNet`              The well-known feed-forward multilayer perceptron
                            It allows the usage of different types of neurons in the hidden and output layers
-:doxy:`RBFLayer`             Implements a layer of a radial basis function network using gaussian distributions
+:doxy:`RBFLayer`           Implements a layer of a radial basis function network using gaussian distributions
 :doxy:`CMACMap`            Discretizes the space using several randomized tile maps and calculates a
                            weighted sum of the discretized activation
 :doxy:`RNNet`              Recurrent neural network for sequences
@@ -298,6 +298,19 @@ Model                                   Description
 :doxy:`ThresholdVectorConverter`        For every value of the input vector apply a ThresholdConverter.
 :doxy:`ArgMaxConverter`                 Assigns the index (e.g., a class label) of the largest component in
                                         the input vector.
+:doxy:`Autoencoder`			Special case of the FFNet with a single hidden layer with special 
+					functionality that is guided  towards unsupervised pre-training
+:doxy:`TiedAutoencoder`			Special Autoencoder where the weights of the output layer are 
+					constrained to be the transpose of the input. Has the same interface
+					as the Autoencoder for easy replacement.
+:doxy:`GaussianNoiseModel`		Takes the input and corrupts it using gaussian noise.
+:doxy:`ImpulseNoiseModel`		Takes the input and corrupts it using a noise where every dimension
+					is set to a value - for example 0- with a certain probability.
+:doxy:`MeanModel`			Computes the mean output of a set of models.
+:doxy:`Normalizer`			Special case of the :doxy:`LinearModel` which only has a diagonal
+					matrix and an optional offset. Used for normalisation
+:doxy:`SigmoidModel`			Simple model with a single input and a weight and offset parameter
+					which returns a sigmoidal output.
 ======================================  ======================================================================
 
 
