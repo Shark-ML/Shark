@@ -84,14 +84,28 @@ public:
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		mp_wrapper->proposeStartingPoint(startingPoint);
 	}
+	
+	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
+		m_regularizer = regularizer;
+		m_regularizationStrength = factor;
+	}
 
 	double eval(RealVector const& input) const{
-        m_evaluationCounter++;
-		return mp_wrapper->eval(input);
+		m_evaluationCounter++;
+		double value = mp_wrapper -> eval(input);
+		if(m_regularizer)
+			value += m_regularizationStrength * m_regularizer->eval(input);
+		return value;
 	}
 	ResultType evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative ) const{
-        m_evaluationCounter++;
-		return mp_wrapper->evalDerivative(input,derivative);
+		m_evaluationCounter++;
+		double value = mp_wrapper -> evalDerivative(input,derivative);
+		if(m_regularizer){
+			FirstOrderDerivative regularizerDerivative;
+			value += m_regularizationStrength * m_regularizer->evalDerivative(input,regularizerDerivative);
+			noalias(derivative) += m_regularizationStrength*regularizerDerivative;
+		}
+		return value;
 	}
 
 	friend void swap(SparseFFNetError& op1, SparseFFNetError& op2){
@@ -100,6 +114,9 @@ public:
 
 private:
 	boost::scoped_ptr<detail::FunctionWrapperBase > mp_wrapper;
+
+	SingleObjectiveFunction* m_regularizer;
+	double m_regularizationStrength;
 };
 
 }

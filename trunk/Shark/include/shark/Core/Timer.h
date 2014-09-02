@@ -60,8 +60,7 @@ public:
 	: m_lastLap( 0.0 )
 	, m_startTime( 0.0 )
 	, m_measureWallclockTime(measureWallclockTime)
-
-	  { }
+	{ start();}
 	  
 	/// \brief Returns the current time in a microsecond resolution. Att: may in rare cases give decreasing values.
 	static double now(bool measureWallclockTime = true) {
@@ -99,7 +98,10 @@ public:
 		m_startTime = now(m_measureWallclockTime);
 	}
 
-	/// \brief returns the difference between current time and m_startTime (but a minimum of 0)
+	/// \brief Returns the difference between current time and the start time.
+	///
+	/// The time is meeasured since the last time start() was called. Thus several consecutive
+	/// calls to stop() will return ascending numbers. start() is called automatically at construction time.
 	double stop() {
 		double stop = now(m_measureWallclockTime);
 		m_lastLap = stop - m_startTime;

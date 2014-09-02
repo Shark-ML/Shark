@@ -1,17 +1,14 @@
 
 //###begin<includes>
-#include <shark/Data/Pgm.h>
+#include <shark/Data/Pgm.h> //for exporting the learned filters
 #include <shark/Data/Csv.h>//for reading in the images as csv
 #include <shark/Data/Statistics.h> //for normalization
 #include <shark/ObjectiveFunctions/SparseFFNetError.h>//the error function performing the regularisation of the hidden neurons
 #include <shark/Algorithms/GradientDescent/LBFGS.h>// the L-BFGS optimization algorithm
-#include <shark/ObjectiveFunctions/Loss/SquaredLoss.h> // squard loss usd for regression
-#include <shark/ObjectiveFunctions/Regularizer.h> //L2 rgulariziation
-#include <shark/ObjectiveFunctions/CombinedObjectiveFunction.h> //binds together the regularizer with the Error
+#include <shark/ObjectiveFunctions/Loss/SquaredLoss.h> // squared loss used for regression
+#include <shark/ObjectiveFunctions/Regularizer.h> //L2 regulariziation
 //###end<includes>
-
-#include <fstream>
-#include <boost/format.hpp>
+#include <shark/Core/Timer.h> //measures elapsed time
 
 using namespace std;
 using namespace shark;
@@ -65,8 +62,8 @@ UnlabeledData<RealVector> getSamples()
 	for (ElRef it = images.elements().begin(); it != images.elements().end(); ++it) {
 		for (size_t i = 0; i < patchesPerImg; ++i) {
 			// Upper left corner of image
-			unsigned int ulx = rand() % (w - psize);
-			unsigned int uly = rand() % (h - psize);
+			unsigned int ulx = Rng::discrete(0,w-psize-1);
+			unsigned int uly = Rng::discrete(0,w-psize-1);
 			// Transform 2d coordinate into 1d coordinate and get the sample
 			unsigned int ul = ulx * h + uly;
 			RealVector sample(psize * psize);
@@ -109,28 +106,10 @@ void initializeFFNet(FFNet<LogisticNeuron, LogisticNeuron>& model){
 	model.setParameterVector(params);
 }
 
-//###begin<export>
-void exportFeatureImages(const RealMatrix& W)
-{
-	// Export the visualized features.
-	// Each row of W corresponds to a feature. Some normalization is done and
-	// then it is transformed into a psize x psize image.
-	boost::format filename("feature%d.pgm");
-
-	// Create feature images
-	for (size_t i = 0; i < W.size1(); ++i)
-	{
-		RealVector img(W.size2());
-		for (size_t j = 0; j < W.size2(); ++j)
-			img(j) = W(i,j);
-		exportPGM((filename % i).str().c_str(), img, psize, psize, true);
-	}
-}
-//###end<export>
 int main()
 {
 	// Random needs a seed
-	srand(time(NULL));
+	Rng::seed(42);
 	
 	// Read the data
 	//###begin<create_dataset>
@@ -149,15 +128,10 @@ int main()
 	//###begin<sparsity_error>
 	SquaredLoss<RealVector> loss;
 	SparseFFNetError error(data,&model, &loss, rho, beta);
-	//###end<sparsity_error>
-
 	// Add weight regularization
-	//###begin<regularization>
 	TwoNormRegularizer regularizer(error.numberOfVariables());
-	CombinedObjectiveFunction<RealVector, double> func;
-	func.add(error);
-	func.add(lambda, regularizer);
-	//###end<regularization>
+	error.setRegularizer(lambda,&regularizer);
+	//###end<sparsity_error>
 
 	cout << "Model has: " << model.numberOfParameters() << " params." << endl;
 	cout << "Model has: " << model.numberOfNeurons() << " neurons." << endl;
@@ -168,19 +142,19 @@ int main()
 	//###begin<train>
 	LBFGS optimizer;
 	optimizer.lineSearch().lineSearchType() = LineSearch::WolfeCubic;
-	optimizer.init(func, model.parameterVector());
+	optimizer.init(error);
 	//###end<train>
-	clock_t start = clock();
+	Timer timer;
 	//###begin<train>
 	for (unsigned int i = 0; i < maxIter; ++i) {
-		optimizer.step(func);
+		optimizer.step(error);
 		cout << "Error: " << optimizer.solution().value << endl;
 	}
 	//###end<train>
-	cout << "Elapsed time: " << (double)(clock() - start)/CLOCKS_PER_SEC << endl;
+	cout << "Elapsed time: " << timer.stop() << endl;
 	cout << "Function evaluations: " << error.evaluationCounter() << endl;
 
 	//###begin<export>
-	exportFeatureImages(model.layerMatrices()[0]);
+	exportFiltersToPGMGrid("features",model.layerMatrices()[0],psize,psize);
 	//###end<export>
 }

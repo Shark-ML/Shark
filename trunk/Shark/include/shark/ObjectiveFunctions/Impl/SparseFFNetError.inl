@@ -315,7 +315,7 @@ SparseFFNetError::SparseFFNetError(
 	DatasetType const& dataset,
 	FFNet<HiddenNeuron, OutputNeuron>* model, 
 	AbstractLoss<RealVector, RealVector>* loss, double rho, double beta
-){
+):m_regularizer(0){
 	m_features |= HAS_FIRST_DERIVATIVE;
 	m_features |= CAN_PROPOSE_STARTING_POINT;
 
