@@ -208,7 +208,7 @@ void exportFiltersToPGMGrid(std::string const& basename,RealMatrix const& filter
 	exportPGM(
 		(basename+".pgm").c_str(), 
 		blas::adapt_vector((height+1)*gridY*(width+1)*gridX,&image(0,0)),
-		(width+1)*gridY, (height+1)*gridX,
+		(width+1)*gridX, (height+1)*gridY,
 		true);
 }
 
