@@ -57,6 +57,7 @@
    rest_sources/tutorials/algorithms/LASSO
 
    rest_sources/tutorials/algorithms/ffnet
+   rest_sources/tutorials/algorithms/autoencoders
    rest_sources/tutorials/algorithms/sparse_ae
    rest_sources/tutorials/algorithms/extreme_learning_machine
    rest_sources/tutorials/algorithms/deep_denoising_autoencoder_network

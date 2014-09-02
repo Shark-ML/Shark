@@ -131,11 +131,11 @@ of Shark::
 
 ..sharkcode<Unsupervised/SparseAETutorial.tpp, export>
 
-After scaling the features to *50x50* images an plotting them next to
-each other, we got the following result:
+We got the following result:
 
-.. figure:: ../images/features.*
-  :scale: 100%
+.. figure:: ../images/features.png
+  :width: 400
+  :height: 400
   :alt: Plot of features learned by the autoencoder
 
 

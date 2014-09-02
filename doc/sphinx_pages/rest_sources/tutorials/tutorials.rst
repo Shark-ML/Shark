@@ -113,7 +113,7 @@ Neural networks and deep learning:
 * :doc:`algorithms/extreme_learning_machine`
 * Training of autoencoders and network pre-training
 
-  - :doc:`algorithms/autoencoder`
+  - :doc:`algorithms/autoencoders`
   - :doc:`algorithms/sparse_ae`
   - :doc:`algorithms/deep_denoising_autoencoder_network`
 
