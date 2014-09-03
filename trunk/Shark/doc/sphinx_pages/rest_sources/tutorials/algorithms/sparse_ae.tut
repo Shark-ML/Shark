@@ -1,22 +1,13 @@
-============================
 Sparse Autoencoder
 ============================
 
-Background
-----------
+This tutorial builds up on the previous :doc:`./autoencoders` tutorial. It is recommended to start
+with that article if autoencoders and espcially autoencoders as implemented in Shark are unknown to you.
 
-A sparse autoencoder is a model trained by unsupervised learning.
-It refers to a neural network with a single hidden layer, where the
-target values are set equal to the inputs during training. In other
-words, the autoencoder tries to approximate the identity function. 
-By imposing additional constraints we can make the network learn
-interesting features characterizing the input.
-
-One such constraint is the number of hidden units in the network. If
-this is below the number of input variables the network is actually
-learning a compressed representation of the input. Another constraint
-we will use is to have the average activation of the neurons being low.
-This is done by using a regularization term summing the KL-divergence
+In the previous tutorials in the series on Autoencoders,w e have discussed to regularize autoencoders by either the number 
+of hidden units, tieing their weights, adding noise on the inoputs, are dropping hidden units by setting them randomly to 0. 
+There are more direct regularisation schemes which try to directly regularize the representation of the hidden units.
+This can be done by using a regularization term summing the KL-divergence
 
 .. math ::
    KL(\rho \| \rho_j) = \rho \log(\frac{\rho}{\rho_j}) +
@@ -25,13 +16,18 @@ This is done by using a regularization term summing the KL-divergence
 over all hidden neurons indexed by :math:`j`.  The regularization
 parameter :math:`\rho` defines a target mean activation and the mean
 activation :math:`\rho_j` of hidden neuron :math:`j` over the whole
-training datasetis interpreted as activation propability.  See the
-documentation of the :doxy:`SparseAutoencoderError` class for more
-information.
+training dataset is interpreted as activation propability. With this
+constraint, the optimisation problem can be stated as:
 
-For a detailed introduction to sparse autoencoders, we refer to the `Stanford
-UFLDL Tutorial
-<http://ufldl.stanford.edu/wiki/index.php/Exercise:Sparse_Autoencoder>`_.
+.. math ::
+	\min_{\theta} \frac 1 N \sum_i^N (\vec x_i - f_{\theta}(\vec x_i))^2 +\sum_{j=1}^m KL(\rho \| \rho_j) 
+
+The idea ofthe constraint is to make the hidden representation more sparse by giving the units a very small 
+expected activation, which ideally is close to 0 most of the time. These autoencoders are therefore called
+sparse autoencoders.
+
+For a detailed introduction to sparse autoencoders, we refer to the `Stanford  UFLDL Tutorial 
+<http://ufldl.stanford.edu/wiki/index.php/Exercise:Sparse_Autoencoder>`_. 
 In the following, we show how to solve the autoencoder exercise from
 this recommended tutorial using Shark.
 
@@ -91,7 +87,7 @@ we first need to create an instance of the :doxy:`Autoencoder` class::
 
 We can also use the :doxy:`TiedAutoencoder` here instead!
 We then need to add the sparsity constraint to the regression loss
-as well as atwo-norm-regularisation::
+using the :doxy:`SparseAutoencoderError` as well as atwo-norm-regularisation::
 
 ..sharkcode<Unsupervised/SparseAETutorial.tpp, sparsity_error>
 

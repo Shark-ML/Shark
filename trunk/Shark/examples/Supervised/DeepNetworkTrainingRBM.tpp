@@ -1,9 +1,7 @@
 //###begin<includes>
 //noisy AutoencoderModel model and deep network
 #include <shark/Models/FFNet.h>// neural network for supervised training
-#include <shark/Models/Autoencoder.h>// the autoencoder to train unsupervised
-#include <shark/Models/ImpulseNoiseModel.h>// model adding noise to the inputs
-#include <shark/Models/ConcatenatedModel.h>// to concatenate Autoencoder with noise adding model
+#include <shark/Unsupervised/RBM/BinaryRBM.h> // model for unsupervised pre-training
 
 //training the  model
 #include <shark/ObjectiveFunctions/ErrorFunction.h>//the error function performing the regularisation of the hidden neurons
@@ -47,51 +45,46 @@ LabeledData<RealVector,unsigned int> createProblem(){
 	return createLabeledDataFromRange(data,label);
 }
 
-//training of an auto encoder with one hidden layer
+//training of an RBM
 //###begin<function>
-template<class AutoencoderModel>
-AutoencoderModel trainAutoencoderModel(
+BinaryRBM trainRBM(
 	UnlabeledData<RealVector> const& data,//the data to train with
 	std::size_t numHidden,//number of features in the AutoencoderModel
 	std::size_t iterations, //number of iterations to optimize
 	double regularisation,//strength of the regularisation
-	double noiseStrength // strength of the added noise
+	double learningRate // learning rate of steepest descent
 ){
-//###end<function>
-//###begin<model>	
-	//create the model
+	//create rbm with simple binary units using the global random number generator
 	std::size_t inputs = dataDimension(data);
-	AutoencoderModel baseModel;
-	baseModel.setStructure(inputs, numHidden);
-	initRandomUniform(baseModel,-0.1*std::sqrt(1.0/inputs),0.1*std::sqrt(1.0/inputs));
-	ImpulseNoiseModel noise(noiseStrength,0.0);//set an input pixel with probability p to 0
-	ConcatenatedModel<RealVector,RealVector> model = noise>> baseModel;
-//###end<model>	
-//###begin<objective>		
-	//create the objective function
-	LabeledData<RealVector,RealVector> trainSet(data,data);//labels identical to inputs
-	SquaredLoss<RealVector> loss;
-	ErrorFunction<RealVector,RealVector> error(trainSet, &model, &loss);
-	TwoNormRegularizer regularizer(error.numberOfVariables());
-	error.setRegularizer(regularisation,&regularizer);
-//###end<objective>	
-	//set up optimizer
-//###begin<optimizer>
-	IRpropPlusFull optimizer;
-	optimizer.init(error);
-	std::cout<<"Optimizing model: "+model.name()<<std::endl;
-	for(std::size_t i = 0; i != iterations; ++i){
-		optimizer.step(error);
-		std::cout<<i<<" "<<optimizer.solution().value<<std::endl;
+	BinaryRBM rbm(Rng::globalRng);
+	rbm.setStructure(inputs,numHidden);
+	initRandomUniform(rbm,-0.1*std::sqrt(1.0/inputs),0.1*std::sqrt(1.0/inputs));//initialize weights uniformly
+	
+	//create derivative to optimize the rbm
+	//we want a simple vanilla CD-1.
+	BinaryCD estimator(&rbm);
+	TwoNormRegularizer regularizer;
+	//0.0 is the regularization strength. 0.0 means no regularization. choose as >= 0.0
+	estimator.setRegularizer(regularisation,&regularizer);
+	estimator.setK(1);//number of sampling steps
+	estimator.setData(data);//the data used for optimization
+
+	//create and configure optimizer
+	SteepestDescent optimizer;
+	optimizer.setLearningRate(learningRate);//learning rate of the algorithm
+	
+	//now we train the rbm and evaluate the mean negative log-likelihood at the end
+	unsigned int numIterations = iterations;//iterations for training
+	optimizer.init(estimator);
+	for(unsigned int iteration = 0; iteration != numIterations; ++iteration) {
+		optimizer.step(estimator);
 	}
-//###end<optimizer>
-	model.setParameterVector(optimizer.solution().point);
-	return baseModel;
+	rbm.setParameterVector(optimizer.solution().point);
+	return rbm;
 }
 
 //###begin<network_types>
-typedef Autoencoder<RectifierNeuron,LinearNeuron> AutoencoderModel;//type of autoencoder
-typedef FFNet<RectifierNeuron,LinearNeuron> Network;//final supervised trained structure
+typedef FFNet<LogisticNeuron,LinearNeuron> Network;//final supervised trained structure
 //###end<network_types>
 
 //unsupervised pre training of a network with two hidden layers
@@ -99,24 +92,24 @@ typedef FFNet<RectifierNeuron,LinearNeuron> Network;//final supervised trained s
 Network unsupervisedPreTraining(
 	UnlabeledData<RealVector> const& data,
 	std::size_t numHidden1,std::size_t numHidden2, std::size_t numOutputs,
-	double regularisation, double noiseStrength, std::size_t iterations
+	double regularisation, std::size_t iterations, double learningRate
 ){
 	//train the first hidden layer
 	std::cout<<"training first layer"<<std::endl;
-	AutoencoderModel layer =  trainAutoencoderModel<AutoencoderModel>(
+	BinaryRBM layer =  trainRBM(
 		data,numHidden1,
-		regularisation, noiseStrength,
-		iterations
+		regularisation,iterations, learningRate
 	);
-	//compute the mapping onto the features of the first hidden layer
-	UnlabeledData<RealVector> intermediateData = layer.evalLayer(0,data);
+	
+	//compute the mapping onto features of the first hidden layer
+	layer.evaluationType(true,true);//we compute the direction visible->hidden and want the features and no samples
+	UnlabeledData<RealVector> intermediateData=layer(data);
 	
 	//train the next layer
 	std::cout<<"training second layer"<<std::endl;
-	AutoencoderModel layer2 =  trainAutoencoderModel<AutoencoderModel>(
+	BinaryRBM layer2 =  trainRBM(
 		intermediateData,numHidden2,
-		regularisation, noiseStrength,
-		iterations
+		regularisation,iterations, learningRate
 	);
 //###end<pretraining_autoencoder>
 //###begin<pretraining_creation>
@@ -124,8 +117,8 @@ Network unsupervisedPreTraining(
 	Network network;
 	network.setStructure(dataDimension(data),numHidden1,numHidden2, numOutputs);
 	initRandomNormal(network,0.1);
-	network.setLayer(0,layer.encoderMatrix(),layer.hiddenBias());
-	network.setLayer(1,layer2.encoderMatrix(),layer2.hiddenBias());
+	network.setLayer(0,layer.weightMatrix(),layer.hiddenNeurons().bias());
+	network.setLayer(1,layer2.weightMatrix(),layer2.hiddenNeurons().bias());
 	
 	return network;
 //###end<pretraining_creation>
@@ -139,8 +132,8 @@ int main()
 	std::size_t numHidden2 = 8;
 	//unsupervised hyper parameters
 	double unsupRegularisation = 0.001;
-	double noiseStrength = 0.3;
-	std::size_t unsupIterations = 100;
+	double unsupLearningRate = 0.1;
+	std::size_t unsupIterations = 10000;
 	//supervised hyper parameters
 	double regularisation = 0.0001;
 	std::size_t iterations = 200;
@@ -153,7 +146,7 @@ int main()
 	//unsupervised pre training
 	Network network = unsupervisedPreTraining(
 		data.inputs(),numHidden1, numHidden2,numberOfClasses(data),
-		unsupRegularisation, noiseStrength, unsupIterations
+		unsupRegularisation, unsupIterations, unsupLearningRate
 	);
 	
 	//create the supervised problem. Cross Entropy loss with one norm regularisation
