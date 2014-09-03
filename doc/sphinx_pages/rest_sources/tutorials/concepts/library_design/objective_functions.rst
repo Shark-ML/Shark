@@ -200,7 +200,7 @@ Model                                         Description
                                               point are part of the training sets.
 :doxy:`LooErrorCSvm`                          Special case of the ``LooError`` for SVMs using the structure of the SVM solution
                                               to speed-up evaluation.
-:doxy:`SparseFFNetError`                      Same as ``ErrorFunction``, but imposes a sparseness constraint on the activation of the
+:doxy:`SparseAutoencoderError`                Same as ``ErrorFunction``, but imposes a sparseness constraint on the activation of the
                                               hidden neurons of a neural network using the Kullback-Leibler divergence.
 :doxy:`SvmLogisticInterpretation`             Model selection for SVMs using a maximum-likelihood criterion
 :doxy:`RadiusMarginQuotient`                  Model selection for SVMs by optimizing the radius-margin quotient.
@@ -212,8 +212,6 @@ Model                                         Description
 					      different classes.
 :doxy:`NegativeLogLikelihood`                 Measures how probable a dataset is under a given model parameterized
 					      by the vector of parameters given in the function argument.
-:doxy:`SparseAutoencoderError` 		      Similar to the ErrorFunction but for the spcial case of Autoencoder training where
-					      a sparisty penalty is imposed on the activation of the hidden units.
 ============================================  ===================================================================================
 
 

@@ -11,7 +11,12 @@ and thus initialising them in a region of the error function which is easier to 
 
 One of these unsupervised learning techniques are autoencoders. An autoencoder
 is a feed forward neural network with one hidden layer which is trained to project 
-its input on its output via an intermediate representation. 
+its input on its output via the representation formed by the hidden units. The optimisation
+problem for input data :math:`x_1,\dots,x_N` is stated as:
+
+.. math ::
+	\min_{\theta} \frac 1 N \sum_{i=1}^N (\vec x_i - f_{\theta}(\vec x_i)^2 \enspace .
+
 Of course, without any constraints this is a simple task as the
 model will just try to learn the identity. It becomes a bit more challenging when
 we restrict the size of the intermediate representation. An image with
@@ -124,25 +129,21 @@ how they look like.
 Normal autoencoder:
 
 .. figure:: ../images/featuresAutoencoder.png
-  :scale: 200%
   :alt: Plot of features learned by the normal autoencoders
   
 Autoencoder with tied weights:
 
 .. figure:: ../images/featuresTiedAutoencoder.png
-  :scale: 200%
   :alt: Plot of features learned by the tied autoencoders
   
 Autoencoder with Dropout:
 
 .. figure:: ../images/featuresDropoutAutoencoder.png
-  :scale: 200%
   :alt: Plot of features learned by the normal autoencoders
 
 Autoencoder with Dropout and tied weights.
 
 .. figure:: ../images/featuresDropoutTiedAutoencoder.png
-  :scale: 200%
   :alt: Plot of features learned by the tied autoencoders
 
 Full example program

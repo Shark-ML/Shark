@@ -1,0 +1,72 @@
+Denoising Autoencoders
+==============================================
+
+This tutorial builds up on the previous :doc:`./autoencoders` tutorial. It is recommended to start
+with that article if autoencoders and espcially autoencoders as implemented in Shark are unknown to you.
+
+In this tutorial we will have a deeper look at denoising autoencoders. They are by now a few years old
+but still relevant in practice. The idea behind them is to change the standard autoencoder problem to
+
+.. math ::
+	\min_{\theta} \frac 1 N \sum_i^N (\vec x_i - f_{\theta}(\vec x_i +\vec \epsilon))^2
+	
+where :math:`\epsilon` is a new noise term which corrupts the input. While the standard autoencoder problem
+is to find the parameter vector :math:`\theta` for the model that maps the input best to the output, the goal
+is now to *reconstruct* the original data point.  This makes sense intuitively: when corrupting single pixels of
+an image, we are still able to recognize what the image depicts, even with a large amount of noise. It also
+makes sense from an optimisation view: with big intermediate representations of the autoencoder it becomes
+more and more likely that single neurons specialise on single input images. This happens most of the time by
+focussing on a certain combination of outlier pixels. This is classical overfitting. Adding noise on these outliers
+prevents overfitting on these inputs and more stable features are instead prefered.
+
+The following includes are needed for this tutorial::
+
+..sharkcode<Unsupervised/DenoisingAutoencoderTutorial.tpp,includes>
+
+Training Denoising Autoencoders
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There is not much to explain here as we can build op on the code of the previous tutorial, we will
+thus only show the differences in the model definition.
+
+We will enhance the previously created function by another input the parameter, the strength of noise::
+
+..sharkcode<Unsupervised/AutoEncoderTutorial.tpp,function>
+
+In our chosen noisen model, this will be the probability that the pixel is set to 0. This makes sense in our
+application on the MNIST dataset as the pixels are binary and 0 is the background. Thus the noise will
+corrupt how the digits will look like. This type of noise is represented by the :doxy:`ImpulseNoiseModel`,
+the only thing we have to do is to concatenate it with the input of our trained autoencoder model and 
+use the combined model in the :doxy:`ErrorFunction`::
+
+..sharkcode<Unsupervised/AutoEncoderTutorial.tpp,function>
+
+Thats it. We can now re-run the previous experiments for the denoising autoencoder::
+
+..sharkcode<Unsupervised/AutoEncoderTutorial.tpp,main>
+
+Visualizing the autoencoder
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+After training the different architectures, we printed the feature maps. Now lets take a look,
+how they look like.
+
+Normal autoencoder:
+
+.. figure:: ../images/featuresDenoisingAutoencoder.png
+  :alt: Plot of features learned by the denoising autoencoders
+  
+Autoencoder with tied weights:
+
+.. figure:: ../images/featuresDenoisingTiedAutoencoder.png
+  :alt: Plot of features learned by the denoising autoencoders with tied weights
+  
+
+Full example program
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The full example program is  :doxy:`DenoisingAutoencoderTutorial.cpp`.
+
+.. attention::
+  The settings of the parameters of the program will reproduce the filters. However the program
+  takes some time to run! This might be too long for weaker machines.
