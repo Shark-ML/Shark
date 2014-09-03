@@ -116,7 +116,8 @@ Neural networks and deep learning:
   - :doc:`algorithms/autoencoders`
   - :doc:`algorithms/denoising_autoencoders`
   - :doc:`algorithms/sparse_ae`
-  - :doc:`algorithms/deep_denoising_autoencoder_network`
+
+* :doc:`algorithms/deep_denoising_autoencoder_network`
 
 
 

@@ -79,6 +79,7 @@ SHARK_ADD_EXAMPLE( EA/SOO/Archive Archive "EA/SOO" )
 
 SHARK_ADD_EXAMPLE( Supervised/MultiTaskSvm MultiTaskSvm "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/DeepNetworkTraining DeepNetworkTraining "Supervised" )
+SHARK_ADD_EXAMPLE( Supervised/DeepNetworkTrainingRBM DeepNetworkTrainingRBM "Supervised" )
 
 SHARK_ADD_EXAMPLE( Supervised/CVFolds CVFolds "Supervised" )
 SHARK_ADD_EXAMPLE( Supervised/CSvmLinear CSvmLinear "Supervised" )

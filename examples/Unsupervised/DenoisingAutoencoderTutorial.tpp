@@ -30,8 +30,8 @@ AutoencoderModel trainAutoencoderModel(
 	//create the model
 	std::size_t inputs = dataDimension(data);
 	AutoencoderModel baseModel;
-	model.setStructure(inputs, numHidden);
-	initRandomUniform(model,-0.1*std::sqrt(1.0/inputs),0.1*std::sqrt(1.0/inputs));
+	baseModel.setStructure(inputs, numHidden);
+	initRandomUniform(baseModel,-0.1*std::sqrt(1.0/inputs),0.1*std::sqrt(1.0/inputs));
 	ImpulseNoiseModel noise(noiseStrength,0.0);//set an input pixel with probability p to 0
 	ConcatenatedModel<RealVector,RealVector> model = noise>> baseModel;
 //###end<model>	
