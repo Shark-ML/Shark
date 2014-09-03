@@ -183,11 +183,11 @@ void exportPGM( std::string const& fileName, const T &data, int sx, int sy, bool
 /// The filters a re printed on a single image as a grid. The grid will be close to square. And the
 /// image are separated by a black 1 pixel wide line. 
 /// The output will be normalized so that all images are on the same scale.
-/// \param  fileName   File to write to. ".pgm" is appended to the filename
-/// \param  filters       matrix storing the filters row by row
-/// \param  width         Width of the filter image
-/// \param  height         Height of th filter image
-void exportFiltersToPGMGrid(std::string const& basename,RealMatrix const& filters,std::size_t width, std::size_t height) {
+/// \param  basename   File to write to. ".pgm" is appended to the filename
+/// \param  filters    Matrix storing the filters row by row
+/// \param  width      Width of the filter image
+/// \param  height     Height of th filter image
+void exportFiltersToPGMGrid(std::string const& basename, RealMatrix const& filters,std::size_t width, std::size_t height) {
 	SIZE_CHECK(filters.size2() == width*height);
 	//try to get a square image
 	std::size_t gridX = std::size_t(std::sqrt(double(filters.size1())));
