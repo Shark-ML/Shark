@@ -68,7 +68,7 @@ public:
 	typedef typename LabeledData<InputT, unsigned int>::const_element_reference ElementType;
 	typedef typename Batch<InputT>::const_reference InputReferenceType;
 
-    enum CoordinateSelectionStrategy {UNIFORM, ACF};
+	enum CoordinateSelectionStrategy {UNIFORM, ACF};
 
 
 	///
@@ -77,6 +77,8 @@ public:
 	/// \param  dataset  training data
 	/// \param  dim      problem dimension
 	/// \param  classes  number of classes in the problem
+	/// \param  strategy coordinate selection strategy
+	/// \param  shriking flag turning shrinking on and off
 	///
 	QpMcLinear(
 			const DatasetType& dataset,
