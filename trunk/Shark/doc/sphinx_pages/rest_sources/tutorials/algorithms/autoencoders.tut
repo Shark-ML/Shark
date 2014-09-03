@@ -1,4 +1,4 @@
-Autoencoders, Tied weights and Dropout
+Autoencoders, Tied Weights and Dropout
 ==============================================
 
 
@@ -47,7 +47,7 @@ The following includes are needed for this tutorial::
 
 ..sharkcode<Unsupervised/AutoEncoderTutorial.tpp,includes>
 
-Training Autoencoders
+Training autoencoders
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Training an autoencoder is straight forward in shark. We just create an instance
@@ -89,7 +89,7 @@ stable on the complicated error functions formed by neural networks::
 ..sharkcode<Unsupervised/AutoEncoderTutorial.tpp,optimizer>
 
 
-Experimenting with different Architectures
+Experimenting with different architectures
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We want to use the code above to train different architctures. We first start with the
