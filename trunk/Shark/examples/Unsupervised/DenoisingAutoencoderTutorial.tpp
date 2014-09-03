@@ -4,8 +4,10 @@
 #include <shark/Data/SparseData.h>//for reading in the images as sparseData/Libsvm format
 #include <shark/Models/Autoencoder.h>//normal autoencoder model
 #include <shark/Models/TiedAutoencoder.h>//autoencoder with tied weights
+#include <shark/Models/ImpulseNoiseModel.h>//noise source to corrupt the inputs
+#include <shark/Models/ConcatenatedModel.h>//to concatenate the noise with the model
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
-#include <shark/Algorithms/GradientDescent/Rprop.h>// the RProp optimization algorithm
+#include <shark/Algorithms/GradientDescent/Rprop.h>// the Rprop optimization algorithm
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h> // squared loss used for regression
 #include <shark/ObjectiveFunctions/Regularizer.h> //L2 regulariziation
 //###end<includes>
@@ -20,15 +22,18 @@ AutoencoderModel trainAutoencoderModel(
 	UnlabeledData<RealVector> const& data,//the data to train with
 	std::size_t numHidden,//number of features in the autoencoder
 	std::size_t iterations, //number of iterations to optimize
-	double regularisation//strength of the regularisation
+	double regularisation,//strength of the regularisation
+	double noiseStrength // strength of the added noise
 ){
 //###end<function>
 //###begin<model>	
 	//create the model
 	std::size_t inputs = dataDimension(data);
-	AutoencoderModel model;
+	AutoencoderModel baseModel;
 	model.setStructure(inputs, numHidden);
 	initRandomUniform(model,-0.1*std::sqrt(1.0/inputs),0.1*std::sqrt(1.0/inputs));
+	ImpulseNoiseModel noise(noiseStrength,0.0);//set an input pixel with probability p to 0
+	ConcatenatedModel<RealVector,RealVector> model = noise>> baseModel;
 //###end<model>	
 //###begin<objective>		
 	//create the objective function
@@ -49,8 +54,7 @@ AutoencoderModel trainAutoencoderModel(
 	}
 //###end<optimizer>
 	model.setParameterVector(optimizer.solution().point);
-	return model;
-	
+	return baseModel;
 }
 int main(int argc, char **argv)
 {	
@@ -61,6 +65,7 @@ int main(int argc, char **argv)
 	std::size_t numHidden = 200;
 	std::size_t iterations = 200;
 	double regularisation = 0.01;
+	double noiseStrengt = 0.5;
 	
 	LabeledData<RealVector,unsigned int> train;
 	importSparseData( train, argv[1] );
@@ -79,17 +84,11 @@ int main(int argc, char **argv)
 	//###begin<main>
 	typedef Autoencoder<LogisticNeuron, LogisticNeuron> Autoencoder1;
 	typedef TiedAutoencoder<LogisticNeuron, LogisticNeuron> Autoencoder2;
-	typedef Autoencoder<DropoutNeuron<LogisticNeuron>, LogisticNeuron> Autoencoder3;
-	typedef TiedAutoencoder<DropoutNeuron<LogisticNeuron>, LogisticNeuron> Autoencoder4;
-	
-	Autoencoder1 net1 = trainAutoencoderModel<Autoencoder1>(train.inputs(),numHidden,iterations,regularisation);
-	Autoencoder2 net2 = trainAutoencoderModel<Autoencoder2>(train.inputs(),numHidden,iterations,regularisation);
-	Autoencoder3 net3 = trainAutoencoderModel<Autoencoder3>(train.inputs(),numHidden,iterations,regularisation);
-	Autoencoder3 net4 = trainAutoencoderModel<Autoencoder3>(train.inputs(),numHidden,iterations,regularisation);
+
+	Autoencoder1 net1 = trainAutoencoderModel<Autoencoder1>(train.inputs(),numHidden,iterations,regularisation,noiseStrengt);
+	Autoencoder2 net2 = trainAutoencoderModel<Autoencoder2>(train.inputs(),numHidden,iterations,regularisation,noiseStrengt);
 
 	exportFiltersToPGMGrid("features1",net1.encoderMatrix(),28,28);
 	exportFiltersToPGMGrid("features2",net2.encoderMatrix(),28,28);
-	exportFiltersToPGMGrid("features3",net3.encoderMatrix(),28,28);
-	exportFiltersToPGMGrid("features4",net4.encoderMatrix(),28,28);
 	//###end<main>
 }

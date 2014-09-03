@@ -137,6 +137,7 @@ SHARK_ADD_EXAMPLE( Unsupervised/MaxLogLikelihood MaxLogLikelihoodTutorial "Unsup
 SHARK_ADD_EXAMPLE( Unsupervised/BinaryRBM BinaryRBM "Unsupervised" )
 SHARK_ADD_EXAMPLE( Unsupervised/SparseAETutorial SparseAETutorial "Unsupervised" )
 SHARK_ADD_EXAMPLE( Unsupervised/AutoEncoderTutorial AutoencoderTutorial "Unsupervised" )
+SHARK_ADD_EXAMPLE( Unsupervised/DenoisingAutoencoderTutorial DenoisingAutoencoderTutorial "Unsupervised" )
 SHARK_ADD_EXAMPLE( Unsupervised/HierarchicalClustering HierarchicalClustering "Unsupervised" )
 SHARK_ADD_EXAMPLE( Unsupervised/OneClassSvm OneClassSvm "Unsupervised" )
 

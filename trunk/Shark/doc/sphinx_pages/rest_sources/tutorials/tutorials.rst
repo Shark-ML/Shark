@@ -111,9 +111,10 @@ Neural networks and deep learning:
 * :doc:`algorithms/rbm_module`
 * :doc:`algorithms/binary_rbm`
 * :doc:`algorithms/extreme_learning_machine`
-* Training of autoencoders and network pre-training
+* Training of autoencoders
 
   - :doc:`algorithms/autoencoders`
+  - :doc:`algorithms/denoising_autoencoders`
   - :doc:`algorithms/sparse_ae`
   - :doc:`algorithms/deep_denoising_autoencoder_network`
 
