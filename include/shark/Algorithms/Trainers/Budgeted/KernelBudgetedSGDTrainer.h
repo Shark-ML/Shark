@@ -313,7 +313,7 @@ public:
 
 
 		// set the initial alphas (we do this here, after the array has been initialized by setStructure)
-		if((m_preInitializationMethod == RANDOM))
+		if(m_preInitializationMethod == RANDOM)
 		{
 			for(size_t j = 0; j < m_budgetSize; j++)
 			{
