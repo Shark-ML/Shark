@@ -18,7 +18,7 @@
  * <li>Dirichlet with name \em dir
  * </ul>
  * 
- * Additionally this class offers a global random number generator of Type #RngType. The default of this
+ * Additionally this class offers a global random number generator. The default 
  * is the Mersenne Twister with a cycle length of $2^19937$. This generator can be used to construct additional
  * distributions. The seed can be set via Rng::seed .
  * 
