@@ -59,11 +59,11 @@ public:
 	template<class Iter>
 	vector(Iter begin, Iter end):m_storage(begin,end){}
 
+	/// \todo remove this definition because \c size is not used
 	/// \brief Constructor of a vector by copying from another container
 	/// This type has the generic name \c array_typ within the vector definition.
 	/// \param size initial size of the vector \bug this value is not used
 	/// \param data container of type \c A
-	/// \todo remove this definition because \c size is not used
 	vector(size_type size, const array_type& data):m_storage(data) {}
 
 	/// \brief Constructor of a vector by copying from another container
