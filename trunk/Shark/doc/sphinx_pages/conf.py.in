@@ -9,7 +9,7 @@ import sys, os, glob
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinxcontrib.doxylink'] #using mathjax
-mathjax_path = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+mathjax_path = 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML,http://image.diku.dk/MLLab/mlstyle.js'
 
 todo_include_todos = True
 
@@ -253,6 +253,6 @@ man_pages = [
 
 # for nice inline equations and bold vectors
 # (Temporarily?) Disabled due to problems with Sphinx 1.1.2
-# pngmath_latex_preamble=r'\usepackage[active]{preview}\def\vec#1{\mathchoice{\mbox{\boldmath$\displaystyle#1$}}{\mbox{\boldmath$\textstyle#1$}}{\mbox{\boldmath$\scriptstyle#1$}}{\mbox{\boldmath$\scriptscriptstyle#1$}}}'
-# pngmath_use_preview=True
+pngmath_latex_preamble=r'\usepackage[active]{preview}\def\vec#1{\mathchoice{\mbox{\boldmath$\displaystyle#1$}}{\mbox{\boldmath$\textstyle#1$}}{\mbox{\boldmath$\scriptstyle#1$}}{\mbox{\boldmath$\scriptscriptstyle#1$}}}'
+pngmath_use_preview=True
 
