@@ -1,9 +1,0 @@
-MathJax.Hub.Config({
-  TeX: {
-    Macros: {
-      vec: ["{\\bf #1}",1]
-    }
-  }
-});
-
-MathJax.Ajax.loadComplete("@CMAKE_CURRENT_SOURCE_DIR@/sphinx_pages/mlstyle.js");

@@ -15,21 +15,6 @@ CONFIGURE_FILE (
   "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/conf.py"
 )
 
-CONFIGURE_FILE (
-  "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/mlstyle.js.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/mlstyle.js"
-)
-CONFIGURE_FILE (
-  "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/templates/layout.html.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/templates/layout.html"
-)
-CONFIGURE_FILE (
-  "${CMAKE_CURRENT_SOURCE_DIR}/doxygen_pages/templates/header.html.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/doxygen_pages/templates/header.html"
-)
-
-
-
 set( SPHINX_EXECUTABLE sphinx-build )
 set( SPHINX_PARAMETERS -b html )
 
