@@ -15,6 +15,21 @@ CONFIGURE_FILE (
   "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/conf.py"
 )
 
+CONFIGURE_FILE (
+  "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/mlstyle.js.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/mlstyle.js"
+)
+CONFIGURE_FILE (
+  "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/templates/layout.html.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/templates/layout.html"
+)
+CONFIGURE_FILE (
+  "${CMAKE_CURRENT_SOURCE_DIR}/doxygen_pages/templates/header.html.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/doxygen_pages/templates/header.html"
+)
+
+
+
 set( SPHINX_EXECUTABLE sphinx-build )
 set( SPHINX_PARAMETERS -b html )
 
@@ -25,9 +40,9 @@ file(GLOB_RECURSE TutFiles sphinx_pages *.tut)
 foreach(tut ${TutFiles})
 	GET_FILENAME_COMPONENT(tutPath ${tut} PATH)
 	GET_FILENAME_COMPONENT(tutName ${tut} NAME_WE)
-	add_custom_command(TARGET doc_creation POST_BUILD COMMAND 
+	add_custom_command(TARGET doc_creation POST_BUILD COMMAND
 		tut2rst ${tutPath}/${tutName} ${PROJECT_SOURCE_DIR}/examples
-	) 
+	)
 endforeach()
 add_dependencies(doc_creation tut2rst)
 add_dependencies(tut2rst tpp2cpp)   # defined in examples folder
@@ -38,7 +53,7 @@ add_custom_target( doc ALL
 )
 add_custom_command(TARGET doc PRE_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy
-		${CMAKE_CURRENT_SOURCE_DIR}/doxygen_pages/css/besser.css 
+		${CMAKE_CURRENT_SOURCE_DIR}/doxygen_pages/css/besser.css
 		${CMAKE_CURRENT_BINARY_DIR}/doxygen_pages/css/besser.css )
 
 

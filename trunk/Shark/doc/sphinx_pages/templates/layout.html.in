@@ -3,7 +3,7 @@
 {% block extrahead %}
     <link rel="stylesheet" href="{{ pathto('_static/mt_sphinx_shark.css', 1) }}" type="text/css" />
     <script type="text/javascript">
-       window.MathJax || document.write('<script src="{{ pathto(master_doc, 1) }}/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>');
+       window.MathJax || document.write('<script src="{{ pathto(master_doc, 1) }}/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML,@CMAKE_CURRENT_SOURCE_DIR@/sphinx_pages/mlstyle.js"><\/script>');
     </script>
 {% endblock %}
 
