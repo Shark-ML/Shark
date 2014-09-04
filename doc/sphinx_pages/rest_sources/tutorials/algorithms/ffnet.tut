@@ -2,7 +2,7 @@ Training Feed-Forward Networks
 =================================
 This tutorial serves as a primer for using the Shark implementation of feed-forward
 multi-layer perceptron neural networks [Bishop1995]_. The whole functionality can be discovered
-in the doxygen pages of the :doxy:`FFNet` class. It is recommended to read the
+in the documentation pages of the :doxy:`FFNet` class. It is recommended to read the
 getting started section, especially the introduction about :doc:`../first_steps/general_optimization_tasks`.
 
 For this tutorial the following includes are needed::
@@ -55,51 +55,59 @@ of neurons named after their activation function  [ReedMarks1998]_:
 .. math::
   f(x) = \frac x {1+|x|}.
   
-* :doxy:`RectifierNeuron`: rcent development where the neuron activation
-  is kept at 0 for negative activation levels and linear for all positive values.
-  A network with these neurons is effectively a piecewise linear function.
+* :doxy:`RectifierNeuron`: an activation function that has become
+  popular more recently [KrizhevskyEtAl2012]_. The neuron's activation
+  is kept at 0 for negative activation levels and is linear for all
+  positive values.  A network with these neurons is effectively a
+  piecewise linear function.
 
 .. math::
-  f(x) = max(0,x).
+  f(x) = \max(0,x).
 
 * :doxy:`LinearNeuron`: not a good choice for hidden neurons, but
   for output neurons when the output is not bounded. This activation
   function :math:`f(x)=x` is the typical choice for regression tasks.
 
-For our example, we will use logistic hidden neurons and linear output neurons.
+For our example, we will use logistic hidden neurons and a linear output neuron.
 We choose the neuron types using two template parameters, one
 for the hidden neurons, one for the visible. For the topology, we will
-choose a network with 2 hidden neurons without direct connections between input and output neurons. 
+choose a network with 2 hidden neurons without direct connections between input and output neuron(s). 
 We also want a bias neuron (i.e., bias or offset parameters).
 All this can be achieved with :doxy:`FFNet::setStructure`::
 
 ..sharkcode<Supervised/FFNNBasicTutorial.tpp,network_topology>
 
-The last two parameters are optional and the parameters are the default value and could have been omitted. 
+The last two parameters are optional and here they are set to their default values and could have been omitted. 
 
 
 Training the Network
 ----------------------
 
 After we have defined problem and topology, we can now finally train
-the network. The most frequently used error function for
-training neural networks is arguably the :doxy:`SquaredLoss`, but
-Shark offers alternatives. Since the xor Problem is a classification task, we can
-use the :doxy:`CrossEntropy` error to maximize
-the class probability  [Bishop1995]_. The cross entropy assumes the inputs to be the log of the unnormalized
-probability :math:`p(y=c|x)`, i.e. the probability of the input to belong to class c. The cross entropy uses 
-an exponential normalisation to transform the inputs into proper normalised probabilities, however this is done in
-a numerically stable way.
+the network. The most frequently used error function for training
+neural networks is arguably the :doxy:`SquaredLoss`, but Shark offers
+alternatives. Since the xor Problem is a classification task, we can
+use the :doxy:`CrossEntropy` error to maximize the class probability
+[Bishop1995]_. The cross entropy assumes the inputs to be the log of
+the unnormalized probability :math:`p(y=c|x)`, i.e. the probability of
+the input to belong to class :math:`c`. The cross entropy uses an
+exponential normalisation to transform the inputs into proper
+normalised probabilities, however this is done in a numerically stable
+way.
 
-The c-th output neuron of the network encodes in this case the probability of class c. In case of a binary problem, 
-we can omit one output neuron and in this case, it is assumed that the output of the `imaginary` second neuron 
-is just the negative of the first. The loss function takes care of the normalisation. After training, the most likely 
-class label of an input can be evaluated by picking the class of the neuron with highest activation value. 
-In the case of only one output neuron, the sign decides: negative activation is class 0, positive is class 1.
+The c-th output neuron of the network encodes in this case the
+probability of class c. In case of a binary problem, we can omit one
+output neuron and in this case, it is assumed that the output of the
+`imaginary` second neuron is just the negative of the first. The loss
+function takes care of the normalisation. After training, the most
+likely class label of an input can be evaluated by picking the class
+of the neuron with highest activation value.  In the case of only one
+output neuron, the sign decides: negative activation is class 0,
+positive is class 1.
 
-For optimizing this function the improved
-resilient backpropagation algorithm ([IgelHüsken2003]_, a faster,
-more robust variant of the seminal Rprop algorithm [Riedmiller1994]_) is used: ::
+For optimizing this function the improved resilient backpropagation
+algorithm ([IgelHüsken2003]_, a faster, more robust variant of the
+seminal Rprop algorithm [Riedmiller1994]_) is used: ::
 
 ..sharkcode<Supervised/FFNNBasicTutorial.tpp,train>
 
@@ -126,6 +134,10 @@ References
 
 .. [IgelHüsken2003] C. Igel and M. Hüsken.
    Empirical Evaluation of the Improved Rprop Learning Algorithm. Neurocomputing 50(C), pp. 105-123, 2003
+
+.. [KrizhevskyEtAl2012] A. Krizhevsky, I. Sutskever,
+   G. E. Hinton. ImageNet Classification with Deep Convolutional
+   Neural Networks. In: NIPS 2012, pp. 1097-1105, 2012
 
 .. [ReedMarks1998] R.D. Redd and R.J. Marks. Neural smithing:
    supervised learning in feedforward artificial neural networks. MIT  Press, 1998
