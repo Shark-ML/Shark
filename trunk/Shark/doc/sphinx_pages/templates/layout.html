@@ -3,8 +3,11 @@
 {% block extrahead %}
     <link rel="stylesheet" href="{{ pathto('_static/mt_sphinx_shark.css', 1) }}" type="text/css" />
     <script type="text/javascript">
-       window.MathJax || document.write('<script src="{{ pathto(master_doc, 1) }}/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML,@CMAKE_CURRENT_SOURCE_DIR@/sphinx_pages/mlstyle.js"><\/script>');
+       window.MathJax || document.write('<script src="{{ pathto(master_doc, 1) }}/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
     </script>
+    <script src="{{ pathto(master_doc, 1) }}/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
 {% endblock %}
 
 {% block header %}
