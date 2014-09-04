@@ -13,7 +13,7 @@ train (or fine-tune) using steepest descent techniques.
 One of these unsupervised learning techniques are autoencoders. An autoencoder
 is a feed forward neural network with one hidden layer which is trained to map
 its input to itself via the representation formed by the hidden units. The optimisation
-problem for input data :math:`x_1,\dots,x_N` is stated as:
+problem for input data :math:`\vec{x}_1,\dots,\vec{x}_N` is stated as:
 
 .. math ::
 	\min_{\theta} \frac 1 N \sum_{i=1}^N (\vec x_i - f_{\theta}(\vec x_i)^2 \enspace .
