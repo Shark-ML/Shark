@@ -4,15 +4,15 @@ Pretraining of Deep Neural Networks
 .. attention::
   This is an advanced topic
 
-Training Deep Networks became popular over the last few years. It is a challenge 
-to train these networks as normal training easily gets stuck in local optima which 
-prevent the lower layers from learning useful features. This problem can be 
-partially circumvented by pre-training the layers in an unsupervised fashion
-and thus initialising them in a region of the error function which is easier to train (or fine-tune) 
-using steepest descent techniques.
+Training deep neural networks is a challenge because normal training
+easily gets stuck in undesired local optima which prevent the lower
+layers from learning useful features. This problem can be partially
+circumvented by pretraining the layers in an unsupervised fashion and
+thus initialising them in a region of the error function which is
+easier to train (or fine-tune) using steepest descent techniques.
 
 In this tutorial we will implement the architecture presented in 
-"Deep Sparse Rectifier Neural Networks" [Glorot11]_. They propose a 
+"Deep Sparse Rectifier Neural Networks" [Glorot11]_. The authors propose a 
 multi-layered feed forward network with rectified linear hidden neurons, which is
 first pre-trained layerwise using denoising autoencoders [Vincent08]_. Afterwards, the full 
 network is trained supervised with a L1-regularisation to enforce additional sparsity.
@@ -29,7 +29,7 @@ Deep Network Pre-training
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 We will use the code of the denoising autoencoder tutorial to pre-train a deep neural network and we 
 will create another helper function which initialises a deep neural network 
-using the denoising autoencoder.In the next step a supervised fine-tuning step is applied 
+using the denoising autoencoder. In the next step a supervised fine-tuning step is applied 
 which is simple gradient descent on the supervised learning goal using the pre-trained 
 network as starting point for the optimisation. The types of networks we use are::
 
@@ -37,15 +37,15 @@ network as starting point for the optimisation. The types of networks we use are
 
 First, we create a function to initialise the network. We start by training the 
 autoencoders for the two hidden layers. We proceed by taking the original dataset and
-train an autoencoder using this. In the next step, we take the encoder layer - that is
-the connection of inputs to the hidden units and compute the feature vectors for every
-point in the dataset using ``evalLayer``, amethod specific to autoencoders and feed forward networks. 
+train an autoencoder using this. Next, we take the encoder layer - that is
+the connection of inputs to the hidden units - and compute the feature vectors for every
+point in the dataset using ``evalLayer``, a method specific to autoencoders and feed forward networks. 
 Finally, we create the autoencoder for the next layer by training it on the feature dataset::
 
 ..sharkcode<Supervised/DeepNetworkTraining.tpp,pretraining_autoencoder>
 
 We can now create the pre-trained network from the auto encoders by creating 
-a network with two hidden layers, initialize all weights randomly and than setting
+a network with two hidden layers, initialize all weights randomly, and then setting
 the first and hidden layers to the encoding layers of the auto encoders::
 
 ..sharkcode<Supervised/DeepNetworkTraining.tpp,pretraining_creation>
@@ -54,28 +54,32 @@ the first and hidden layers to the encoding layers of the auto encoders::
 Supervised Training
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The supervised training part is overall the same as in previous tutorials and we only
-show the code here. We use the :doxy:`CrossEntropy` loss for classifiction and the
+show the code here. We use the :doxy:`CrossEntropy` loss for classification and the
 :doxy:`OneNormRegularizer` for sparsity of the activation function. We again optimize
 using :doxy:`IRpropPlusFull`::
 
 ..sharkcode<Supervised/DeepNetworkTraining.tpp,supervised_training>
 
 .. note::
-  In the original paper, the networks are optimized using stochastic gradient descent instead of Rprop.
+  In the original paper, the networks are optimized using stochastic gradient descent instead of RProp.
 
 Full example program
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The full example program is  :doxy:`DeepNetworkTraining.cpp`.
-As an alternative route, :doxy:`DeepNetworkTrainingRBM.cpp` shows how to do unsupervised pre-training
+As an alternative route, :doxy:`DeepNetworkTrainingRBM.cpp` shows how to do unsupervised pretraining
 using the RBM module.
 
 References
 ^^^^^^^^^^
 
-.. [Glorot11] Glorot, Xavier, Antoine Bordes, and Yoshua Bengio. 
-  "Deep sparse rectifier networks." Proceedings of the 14th International Conference on Artificial 
-  Intelligence and Statistics. JMLR W&CP Volume. Vol. 15. 2011.
+.. [Glorot11] X. Glorot, A. Bordes, and Y. Bengio.  Deep sparse
+   rectifier networks. Proceedings of the 14th International
+   Conference on Artificial Intelligence and Statistics. JMLR W&CP
+   (15), 2011.
 
-.. [Vincent08] Vincent, Pascal, et al. "Extracting and composing robust features with denoising autoencoders." 
-  Proceedings of the 25th international conference on Machine learning. ACM, 2008.
+.. [Vincent08] P. Vincent, H. Larochelle Y. Bengio, and
+   P. A. Manzagol. Extracting and Composing Robust Features with
+   Denoising Autoencoders, Proceedings of the Twenty-fifth
+   International Conference on Machine Learning (ICML‘08), pages
+   1096-1103, ACM, 2008.

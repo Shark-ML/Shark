@@ -1,11 +1,9 @@
 Sparse Autoencoder
 ============================
 
-This tutorial builds up on the previous :doc:`./autoencoders` tutorial. It is recommended to start
-with that article if autoencoders and espcially autoencoders as implemented in Shark are unknown to you.
-
-In the previous tutorials in the series on Autoencoders,w e have discussed to regularize autoencoders by either the number 
-of hidden units, tieing their weights, adding noise on the inoputs, are dropping hidden units by setting them randomly to 0. 
+This tutorial builds up on the previous :doc:`./autoencoders` tutorial. 
+In the previous tutorials in the series on autoencoders, we have discussed to regularize autoencoders by either the number 
+of hidden units, tying their weights, adding noise on the inputs, are dropping hidden units by setting them randomly to 0. 
 There are more direct regularisation schemes which try to directly regularize the representation of the hidden units.
 This can be done by using a regularization term summing the KL-divergence
 
@@ -16,7 +14,7 @@ This can be done by using a regularization term summing the KL-divergence
 over all hidden neurons indexed by :math:`j`.  The regularization
 parameter :math:`\rho` defines a target mean activation and the mean
 activation :math:`\rho_j` of hidden neuron :math:`j` over the whole
-training dataset is interpreted as activation propability. With this
+training dataset is interpreted as activation probability. With this
 constraint, the optimisation problem can be stated as:
 
 .. math ::
@@ -99,7 +97,7 @@ Training the autoencoder
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 In order to train the autoencoder we use the limited memory BFGS (L-BFGS)
-algorithm with a line search satisfying the wolfe conditions. We also need
+algorithm with a line search satisfying the Wolfe conditions. We also need
 to chose a starting point for the optimization. For this we use values
 uniformly taken from :math:`[-r, r]` for the weights and :math:`0` for the
 biases, with
