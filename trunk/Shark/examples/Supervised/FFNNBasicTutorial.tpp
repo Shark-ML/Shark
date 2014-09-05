@@ -3,7 +3,11 @@
 #include<shark/Algorithms/GradientDescent/Rprop.h> //resilient propagation as optimizer
 #include<shark/ObjectiveFunctions/Loss/CrossEntropy.h> // loss during training
 #include<shark/ObjectiveFunctions/ErrorFunction.h> //error function to connect data model and loss
-#include<shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //loss for classification
+#include<shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //loss for test performance
+
+//evaluating probabilities
+#include<shark/Models/Softmax.h> //transforms model output into probabilities  
+#include<shark/Models/ConcatenatedModel.h> //provides operator >> for concatenating models
 //###end<includes>
 
 using namespace shark;
@@ -34,7 +38,7 @@ int main(){
 	//create network and initialize weights random uniform
 	//###begin<network_topology>
 	unsigned numInput=2;
-	unsigned numHidden=2;
+	unsigned numHidden=4;
 	unsigned numOutput=1;
 	FFNet<LogisticNeuron,LinearNeuron> network;
 	network.setStructure(numInput,numHidden,numOutput,FFNetStructures::Normal,true);
@@ -65,4 +69,12 @@ int main(){
 	network.setParameterVector(optimizer.solution().point); // set weights to weights found by learning
 	Data<RealVector> prediction = network(dataset.inputs());
 	cout << "classification error after learning:\t" << loss01.eval(dataset.labels(), prediction) << endl;
+	
+	//###begin<probability>
+	cout<<"probabilities:"<<std::endl;
+	Softmax probabilty(1);
+	for(std::size_t i = 0; i != 4; ++i){
+		cout<< (network>>probabilty)(dataset.element(i).input)<<std::endl;
+	}
+	//###end<probability>
 }
