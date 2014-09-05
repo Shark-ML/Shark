@@ -113,6 +113,19 @@ seminal Rprop algorithm [Riedmiller1994]_) is used: ::
 
 If you don't know how to use and evaluate the trained model you will find the information in the getting started section.
 
+
+Calculate the probabilities
+-----------------------------------------
+
+As outlined earlier, the network does not return the actual probabilities after training However, sometimes we are
+interested int he probabilities in which case we need to convert the network output. For this purpose, we can use the
+:doxy:`Softmax` model. It takes the input and applies just the right transformation for the probabilities. Additionally,
+it handles the case of only a single output just as well as if we had trained the model with two output neurons.
+What we need to do is concatenate our ffnet with it and print out the probabilities::
+
+..sharkcode<Supervised/FFNNBasicTutorial.tpp, probability>
+
+
 Other network types
 ---------------------
 

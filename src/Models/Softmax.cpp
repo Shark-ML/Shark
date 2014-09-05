@@ -49,19 +49,28 @@ Softmax::Softmax(){
 void Softmax::eval(BatchInputType const& patterns,BatchOutputType& outputs)const{
 
 	SIZE_CHECK(patterns.size2() == inputSize());
-	outputs.resize(patterns.size1(),inputSize());
-	noalias(outputs) = exp(patterns);
-
+	if(inputSize() == 1){
+		outputs.resize(patterns.size1(),2);
+		for(std::size_t i = 0; i != patterns.size1();++i){
+			outputs(i,0) = exp(patterns(i,0));
+			outputs(i,1) = 1/outputs(i,0);
+		}
+	}else{
+		outputs.resize(patterns.size1(),inputSize());
+		noalias(outputs) = exp(patterns);
+	}
+	
 	for(size_t i = 0; i != patterns.size1(); ++i){
 		row(outputs,i) /= sum(row(outputs,i));
 	}
+	
 }
 
 void Softmax::eval(BatchInputType const& patterns,BatchOutputType& outputs, State& state)const{
 	eval(patterns,outputs);
 	InternalState& s = state.toState<InternalState>();
 	s.resize(patterns.size1(),inputSize());
-	noalias(s.results) =outputs;
+	noalias(s.results) = outputs;
 }
 
 void Softmax::weightedParameterDerivative(
@@ -82,13 +91,21 @@ void Softmax::weightedInputDerivative(
 	InternalState const& s = state.toState<InternalState>();
 	gradient.resize(patterns.size1(),inputSize());
 	gradient.clear();
-	for(size_t i = 0; i != patterns.size1(); ++i){
-		double mass=inner_prod(row(coefficients,i),row(s.results,i));
-		//(c_k-m)*f_k
-		noalias(row(gradient,i))=element_prod(
-			row(coefficients,i)-blas::repeat(mass,inputSize()),
-			row(s.results,i)
-		);
+	if(inputSize() ==1){
+		for(size_t i = 0; i != patterns.size1(); ++i){
+			double sdx= s.results(i,0)*(1-s.results(i,0));
+			gradient(i,0) = coefficients(i,1)+(coefficients(i,0)-coefficients(i,1))*sdx;
+		}
+	}
+	else{
+		for(size_t i = 0; i != patterns.size1(); ++i){
+			double mass=inner_prod(row(coefficients,i),row(s.results,i));
+			//(c_k-m)*f_k
+			noalias(row(gradient,i))=element_prod(
+				row(coefficients,i)-blas::repeat(mass,inputSize()),
+				row(s.results,i)
+			);
+		}
 	}
 }
 

@@ -51,6 +51,16 @@ namespace shark {
 /// \f]
 /// This also corresponds to the exponential norm of the input.
 ///
+/// in the case of n=1, the output is
+/// \f[
+///      f_i(x) = \frac{\exp((2i-1)x)}{\exp(x_j)+\exp(-x_j)}
+/// \f]
+/// and the output dimension is 2. 
+///
+/// This convention ensures that all models that are trained via CrossEntropy
+/// can be used as input to this model and the output will be the probability
+/// of the labels.
+	
 class Softmax : public AbstractModel<RealVector,RealVector>
 {
 private:
@@ -64,7 +74,7 @@ private:
 
 public:
 	/// Constructor
-	Softmax(size_t dim);
+	Softmax(size_t inputs);
 	/// Constructor
 	Softmax();
 
@@ -83,7 +93,7 @@ public:
 		return m_inputSize;
 	}
 	size_t outputSize()const{
-		return m_inputSize;
+		return m_inputSize==1?2:m_inputSize;
 	}
 	size_t numberOfParameters()const{
 		return 0;

@@ -20,13 +20,6 @@ BOOST_AUTO_TEST_CASE( Softmax_Value )
 	BOOST_CHECK_EQUAL(model.numberOfParameters(),0u);
 	BOOST_CHECK_EQUAL(model.inputSize(),2u);
 	BOOST_CHECK_EQUAL(model.outputSize(),2u);
-	//initialize parameters
-//	RealVector parameters(4);
-//	parameters(0)=-1;
-//	parameters(1)=0;
-//	parameters(2)=-0.5;
-//	parameters(3)=1;
-//	model.setParameterVector(parameters);
 
 	//the testpoint
 	RealVector point(2);
@@ -46,6 +39,32 @@ BOOST_AUTO_TEST_CASE( Softmax_Value )
 	BOOST_CHECK_SMALL(difference,1.e-15);
 }
 
+//test whether the special case of single input is the same as dualinput with inputs (x,-x)
+BOOST_AUTO_TEST_CASE( Softmax_Value_Single )
+{
+	Softmax model(1);
+	Softmax modelTest(2);
+	
+	BOOST_CHECK_EQUAL(model.numberOfParameters(),0u);
+	BOOST_CHECK_EQUAL(model.inputSize(),1u);
+	BOOST_CHECK_EQUAL(model.outputSize(),2u);
+
+	//the testpoint
+	RealVector point(1);
+	point(0)=1;
+	RealVector pointTest(2);
+	pointTest(0)=1;
+	pointTest(1)=-1;
+
+
+	//evaluate point
+	RealVector result=model(point);
+	RealVector resultTest=modelTest(pointTest);
+	std::cout<<result<<resultTest<<std::endl;
+	double difference=norm_sqr(resultTest-result);
+	BOOST_CHECK_SMALL(difference,1.e-15);
+}
+
 BOOST_AUTO_TEST_CASE( Softmax_weightedParameterDerivative )
 {
 	Softmax model(2);
@@ -54,9 +73,16 @@ BOOST_AUTO_TEST_CASE( Softmax_weightedParameterDerivative )
 }
 BOOST_AUTO_TEST_CASE( Softmax_weightedInputDerivative )
 {
-	Softmax model(2);
+	{
+		Softmax model(2);
 
-	testWeightedDerivative(model);
+		testWeightedDerivative(model);
+	}
+	{
+		Softmax model(1);
+
+		testWeightedDerivative(model);
+	}
 }
 
 BOOST_AUTO_TEST_CASE( Softmax_SERIALIZE )
