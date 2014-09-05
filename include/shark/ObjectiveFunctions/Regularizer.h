@@ -174,16 +174,35 @@ public:
 	void setNumberOfVariables( std::size_t numberOfVariables ){
 		m_numberOfVariables = numberOfVariables;
 	}
+	
+	void setMask(const RealVector& mask){
+		m_mask = mask;
+	}
+	const RealVector& mask()const{
+		return m_mask;
+	}
 
 	/// Evaluates the objective function.
 	virtual double eval( RealVector const& input ) const
-	{ return 0.5 * norm_sqr(input); }
+	{ 
+		if(m_mask.empty()){
+			return 0.5*norm_sqr(input);
+		}
+		else{
+			return 0.5 * sum(m_mask*sqr(input));
+		}
+	}
 
 	/// Evaluates the objective function
 	/// and calculates its gradient.
 	virtual double evalDerivative( RealVector const& input, FirstOrderDerivative & derivative ) const {
-		derivative = input;
-		return 0.5 * norm_sqr(input);
+		if(m_mask.empty()){
+			derivative = input;
+		}
+		else{
+			derivative = m_mask*input;
+		}
+		return eval(input);
 	}
 
 	/// Evaluates the objective function
@@ -196,6 +215,7 @@ public:
 	}
 private:
 	std::size_t m_numberOfVariables;
+	RealVector m_mask;
 };
 
 
