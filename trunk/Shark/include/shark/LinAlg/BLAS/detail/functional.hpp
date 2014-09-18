@@ -235,6 +235,30 @@ struct scalar_exp {
 };
 
 template<class T>
+struct scalar_sin {
+    typedef T argument_type;
+    typedef argument_type result_type;
+    static const bool zero_identity = false;
+
+    result_type operator()(argument_type x)const {
+        using std::sin;
+        return sin(x);
+    }
+};
+
+template<class T>
+struct scalar_cos {
+    typedef T argument_type;
+    typedef argument_type result_type;
+    static const bool zero_identity = false;
+
+    result_type operator()(argument_type x)const {
+        using std::cos;
+        return cos(x);
+    }
+};
+
+template<class T>
 struct scalar_log {
 	typedef T argument_type;
 	typedef argument_type result_type;
