@@ -139,6 +139,15 @@ public:
 	OutputNeuron const& outputActivationFunction()const{
 		return m_outputNeuron;
 	}
+	
+	/// \brief Returns the activation function of the hidden units.
+	HiddenNeuron& hiddenActivationFunction(){
+		return m_hiddenNeuron;
+	}
+	/// \brief Returns the activation function of the output units.
+	OutputNeuron& outputActivationFunction(){
+		return m_outputNeuron;
+	}
 
 	//! \brief Returns the output of all neurons after the last call of eval
 	//!
