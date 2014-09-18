@@ -88,11 +88,10 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 		if(!inputs.empty())
 			maxIndex = std::max(maxIndex, inputs.back().first);
 	}
-	if(dimensions == 0){
-		dimensions = maxIndex;
-	}
-	else if (maxIndex > dimensions)//LibSVM is one-indexed by default
+	maxIndex = std::max<std::size_t>(maxIndex,dimensions);
+	if(dimensions > 0 && maxIndex > dimensions){
 		throw SHARKEXCEPTION("number of dimensions supplied is smaller than actual index data");
+	}
 
 	//check labels for conformity
 	bool binaryLabels = false;
