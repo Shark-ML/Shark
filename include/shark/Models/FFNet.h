@@ -158,6 +158,24 @@ public:
 	RealMatrix const& inputOutputShortcut() const{
 		return m_inputOutputShortcut;
 	}
+	
+	/// \brief Returns the activation function of the hidden units.
+	HiddenNeuron const& hiddenActivationFunction()const{
+		return m_hiddenNeuron;
+	}
+	/// \brief Returns the activation function of the output units.
+	OutputNeuron const& outputActivationFunction()const{
+		return m_outputNeuron;
+	}
+	
+	/// \brief Returns the activation function of the hidden units.
+	HiddenNeuron& hiddenActivationFunction(){
+		return m_hiddenNeuron;
+	}
+	/// \brief Returns the activation function of the output units.
+	OutputNeuron& outputActivationFunction(){
+		return m_outputNeuron;
+	}
 
 	//! \brief Returns the bias values for hidden and output units.
 	//!

@@ -148,6 +148,15 @@ public:
 		return m_outputNeuron;
 	}
 	
+	/// \brief Returns the activation function of the hidden units.
+	HiddenNeuron& hiddenActivationFunction(){
+		return m_hiddenNeuron;
+	}
+	/// \brief Returns the activation function of the output units.
+	OutputNeuron& outputActivationFunction(){
+		return m_outputNeuron;
+	}
+	
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new InternalState());
 	}
