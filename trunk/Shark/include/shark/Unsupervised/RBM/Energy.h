@@ -318,6 +318,38 @@ public:
 		mpe_rbm->visibleNeurons().expectedParameterDerivative(m_deltaBiasVisible,visibles,weights);
 	}
 	
+	AverageEnergyGradient& operator+=(AverageEnergyGradient const& gradient){
+		double const minExp = minExpInput<double>();
+		double const maxExp = maxExpInput<double>();
+		
+		double weightSumDiff = gradient.m_logWeightSum-m_logWeightSum;
+		//check whether the weight is big enough to have an effect
+		if(weightSumDiff <= minExp )
+			return *this;
+		
+		//if the old weights are to small, there is no use in keeping them
+		if(weightSumDiff >= maxExp ){
+			(*this) = gradient;
+			return *this;
+		}
+
+		double logWeightSumUpdate = softPlus(weightSumDiff);
+		m_logWeightSum += logWeightSumUpdate;
+
+		//scaling factor corrects by multiplying with 
+		//Z/(Z+Z_new)=1/(1+exp(logZ_new - logZ))
+		double const scalingFactor = std::exp(-logWeightSumUpdate);// factor is <=1
+		m_deltaWeights *= scalingFactor;
+		m_deltaBiasVisible *= scalingFactor;
+		m_deltaBiasHidden *= scalingFactor;
+		
+		//now add the new gradient with its corrected weight
+		double weight = std::exp(gradient.m_logWeightSum-m_logWeightSum);
+		noalias(m_deltaWeights) += weight * gradient.m_deltaWeights;
+		noalias(m_deltaBiasVisible) += weight * gradient.m_deltaBiasVisible;
+		noalias(m_deltaBiasHidden) += weight * gradient.m_deltaBiasHidden;
+	}
+	
 	///\brief Calculates the expectation of the energy gradient with respect to p(h|v) for a complete Batch.
 	///
 	///for numerical stability, the logarithm of the weights is used

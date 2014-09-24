@@ -120,6 +120,27 @@ public:
 		}
 		(void) alpha;
 	}
+	
+	/// \brief Computes the log of the probability of the given states in the conditional distribution
+	///
+	/// Currently it is only possible to compute the case with alpha=0
+	///
+	/// @param statistics the statistics of the conditional distribution
+	/// @param state the state to check
+	template<class Matrix>
+	RealVector logProbability(StatisticsBatch const& statistics, Matrix const& state) const{
+		SIZE_CHECK(statistics.size2() == size());
+		SIZE_CHECK(statistics.size1() == state.size1());
+		SIZE_CHECK(statistics.size2() == state.size2());
+		
+		RealVector logProbabilities(state.size1(),1.0);
+		for(std::size_t s = 0; s != state.size1();++s){
+			for(std::size_t i = 0; i != state.size2();++i){
+				logProbabilities(s) -= 0.5*sqr(statistics(s,i)-state(s,i));
+			}
+		}
+		return logProbabilities;
+	}
 
 	/// \brief Transforms the current state of the neurons for the multiplication with the weight matrix of the RBM,
 	/// i.e. calculates the value of the phi-function used in the interaction term.

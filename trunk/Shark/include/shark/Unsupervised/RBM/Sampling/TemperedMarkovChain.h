@@ -120,7 +120,7 @@ public:
 	void setUniformTemperatureSpacing(std::size_t temperatures){
 		setNumberOfTemperatures(temperatures);
 		for(std::size_t i = 0; i != temperatures; ++i){
-			double factor = temperatures - 1;
+			double factor = temperatures - 1.0;
 			setBeta(i,1.0 - i/factor);
 		}	
 	}
