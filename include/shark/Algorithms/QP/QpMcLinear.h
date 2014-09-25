@@ -74,11 +74,11 @@ public:
 	///
 	/// \brief Constructor
 	///
-	/// \param  dataset  training data
-	/// \param  dim      problem dimension
-	/// \param  classes  number of classes in the problem
-	/// \param  strategy coordinate selection strategy
-	/// \param  shriking flag turning shrinking on and off
+	/// \param  dataset   training data
+	/// \param  dim       problem dimension
+	/// \param  classes   number of classes in the problem
+	/// \param  strategy  coordinate selection strategy
+	/// \param  shrinking flag turning shrinking on and off
 	///
 	QpMcLinear(
 			const DatasetType& dataset,
