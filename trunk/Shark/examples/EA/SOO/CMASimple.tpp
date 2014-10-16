@@ -53,7 +53,7 @@ int main( int argc, char ** argv ) {
 	//###begin<optimizer>
 	CMA cma;
 	cma.init( sphere );
-	cma.setSigma( 0. ); // Explicitely set initial globael step size.
+	cma.setSigma( 0.1 ); // Explicitely set initial globael step size.
 	//###end<optimizer>
 
 	// Iterate the optimizer until a solution of sufficient quality is found.
