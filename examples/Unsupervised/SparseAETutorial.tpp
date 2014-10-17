@@ -95,7 +95,7 @@ UnlabeledData<RealVector> getSamples()
 void initializeFFNet(Autoencoder<LogisticNeuron, LogisticNeuron>& model){
 	// Set the starting point for the optimizer. This is 0 for all bias
 	// weights and in the interval [-r, r] for non-bias weights.
-	double r = std::sqrt(6.0) / std::sqrt(model.numberOfHiddenNeurons() + model.inputSize() + 1);
+	double r = std::sqrt(6.0) / std::sqrt(model.numberOfHiddenNeurons() + model.inputSize() + 1.0);
 	RealVector params(model.numberOfParameters(),0);
 	//we use  here, that the weights of the layers are the first in the vectors
 	std::size_t hiddenWeights = model.inputSize()+model.outputSize();
