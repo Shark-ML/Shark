@@ -58,7 +58,12 @@ namespace shark {
 */
 struct Rosenbrock : public SingleObjectiveFunction {
 
-	Rosenbrock(unsigned int dimensions=23):m_numberOfVariables(dimensions) {
+	/// \brief Constructs the problem
+	///
+	/// \param dimensions number of dimensions to optimize
+	/// \param initialSpread spread of the initial starting point
+	Rosenbrock(unsigned int dimensions=23, double initialSpread = 1.0)
+	:m_numberOfVariables(dimensions), m_initialSpread(initialSpread) {
 		m_features|=CAN_PROPOSE_STARTING_POINT;
 		m_features|=HAS_FIRST_DERIVATIVE;
 		m_features|=HAS_SECOND_DERIVATIVE;
@@ -86,7 +91,7 @@ struct Rosenbrock : public SingleObjectiveFunction {
 		x.resize( m_numberOfVariables );
 
 		for( unsigned int i = 0; i < x.size(); i++ ) {
-			x( i ) = Rng::uni( 0, 1 );
+			x( i ) = Rng::uni( 0, m_initialSpread );
 		}
 	}
 
@@ -144,6 +149,7 @@ struct Rosenbrock : public SingleObjectiveFunction {
 
 private:
 	std::size_t m_numberOfVariables;
+	double m_initialSpread;
 };
 
 }
