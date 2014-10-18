@@ -76,6 +76,7 @@ SHARK_ADD_TEST( LinAlg/PartlyPrecomputedMatrix.cpp LinAlg_PartlyPrecomputedMatri
 SHARK_ADD_TEST( Algorithms/DirectSearch/CMA.cpp DirectSearch_CMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/CMSA.cpp DirectSearch_CMSA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/ElitistCMA.cpp DirectSearch_ElitistCMA )
+SHARK_ADD_TEST( Algorithms/DirectSearch/VDCMA.cpp DirectSearch_VDCMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/MOCMA.cpp DirectSearch_MOCMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/SteadyStateMOCMA.cpp DirectSearch_SteadyStateMOCMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/RealCodedNSGAII.cpp DirectSearch_RealCodedNSGAII )

@@ -1,7 +1,7 @@
 /*!
- * \brief       -
+ * \brief       Implements the VD-CMA-ES Algorithm
  *
- * \author      Thomas Voss and Christian Igel
+ * \author     Oswin Krause
  * \date        April 2014
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -37,6 +37,17 @@
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ElitistSelection.h>
 
 
+/// \brief Implements the VD-CMA-ES Algorithm
+///
+/// The VD-CMA-ES implements a restricted form of the CMA-ES where the covariance matrix is restriced to be (D+vv^T)
+/// where D is a diagonal matrix and v a single vector. Therefore this variant is capable of large-scale optimisation
+///
+/// For more reference, see the paper
+/// Akimoto, Y., A. Auger, and N. Hansen (2014). Comparison-Based Natural Gradient Optimization in High Dimension. 
+/// To appear in Genetic and Evolutionary Computation Conference (GECCO 2014), Proceedings, ACM
+///
+/// The implementation differs from the paper to be closer to the reference implementation and to have better numerical
+/// accuracy.
 namespace shark {
 class VDCMA : public AbstractSingleObjectiveOptimizer<RealVector >
 {
@@ -47,22 +58,17 @@ private:
 public:
 
 	/// \brief Default c'tor.
-	VDCMA(){
+	VDCMA():m_initialSigma(0.0){
 		m_features |= REQUIRES_VALUE;
 	}
 	
-	
-
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "VDCMA-ES"; }
 
 	/// \brief Calculates lambda for the supplied dimensionality n.
 	unsigned suggestLambda( unsigned int dimension ) {
-		unsigned lambda = unsigned( 4. + ::floor( 3. * ::log( static_cast<double>( dimension ) ) ) ); // eq. (44)
-		// heuristic for small search spaces
-		lambda = std::max<unsigned int>( 5, std::min( lambda, dimension ) );
-		return( lambda );
+		return unsigned( 4. + ::floor( 3. * ::log( static_cast<double>( dimension ) ) ) ); // eq. (44)
 	}
 
 	/// \brief Calculates mu for the supplied lambda and the recombination strategy.
@@ -77,11 +83,14 @@ public:
 	void init( ObjectiveFunctionType const& function, SearchPointType const& p) {
 		unsigned int lambda = suggestLambda( p.size() );
 		unsigned int mu = suggestMu(  lambda );
+		double sigma = m_initialSigma;
+		if(m_initialSigma == 0) sigma = 1.0/std::sqrt(double(p.size()));
+		
 		init( function,
 			p,
 			lambda,
 			mu,
-			1.0/std::sqrt(double(p.size()))
+			sigma
 		);
 	}
 
@@ -100,10 +109,13 @@ public:
 		m_sigma = initialSigma;
 
 		m_mean = blas::repeat(0.0,m_numberOfVariables);
-		m_v.resize(m_numberOfVariables);
+		m_vn.resize(m_numberOfVariables);
 		for(std::size_t i = 0; i != m_numberOfVariables;++i){
-			m_v(i) = Rng::uni(0,1.0/m_numberOfVariables);
+			m_vn(i) = Rng::uni(0,1.0/m_numberOfVariables);
 		}
+		m_normv = norm_2(m_vn);
+		m_vn /= m_normv;
+		
 		m_D = blas::repeat(1.0,m_numberOfVariables);
 		m_evolutionPathC = blas::repeat(0.0,m_numberOfVariables);
 		m_evolutionPathSigma = blas::repeat(0.0,m_numberOfVariables);
@@ -118,18 +130,18 @@ public:
 		//weighting of the mu-best individuals
 		m_weights.resize(m_mu);
 		for (unsigned int i = 0; i < m_mu; i++){
-			m_weights(i) = ::log(mu + 0.5) - ::log(1. + i); // eq. (45)
+			m_weights(i) = ::log(mu + 0.5) - ::log(1. + i);
 		}
-		m_weights /= sum(m_weights); // eq. (45)
+		m_weights /= sum(m_weights);
 		
 		// constants based on (4) and Step 3 in the algorithm
 		m_muEff = 1. / sum(sqr(m_weights)); // equal to sum(m_weights)^2 / sum(sqr(m_weights))
-		m_cSigma = 0.5/(std::sqrt(m_numberOfVariables/m_muEff));
+		m_cSigma = 0.5/(1+std::sqrt(m_numberOfVariables/m_muEff));
 		m_dSigma = 1. + 2. * std::max(0., std::sqrt((m_muEff-1.)/(m_numberOfVariables+1)) - 1.) + m_cSigma;
 
 		m_cC = (4. + m_muEff / m_numberOfVariables) / (m_numberOfVariables + 4. +  2 * m_muEff / m_numberOfVariables);
 		double correction = (m_numberOfVariables - 5.0)/6.0;
-		m_c1 = correction*2 / (sqr(m_numberOfVariables + 1.3) + m_muEff); // eq. (48)
+		m_c1 = correction*2 / (sqr(m_numberOfVariables + 1.3) + m_muEff);
 		m_cMu = std::min(1. - m_c1, correction* 2 * (m_muEff - 2. + 1./m_muEff) / (sqr(m_numberOfVariables + 2) + m_muEff));
 	}
 
@@ -165,6 +177,17 @@ public:
 	void setSigma(double sigma) {
 		m_sigma = sigma;
 	}
+	
+	/// \brief set the initial step size of the algorithm. 
+	///
+	/// Sets the initial sigma at init to a given value. If this is 0, which it is
+	/// by default, the default initialisation will be sigma= 1/sqrt(N) where N 
+	/// is the number of variables to optimize.
+	///
+	/// this method is the prefered one instead of init()
+	void setInitialSigma(double initialSigma){
+		m_initialSigma = initialSigma;
+	}
 
 
 	/// \brief Accesses the current population mean.
@@ -192,7 +215,7 @@ public:
 		return m_mu;
 	}
 	
-	///\brief Returns a mutabl rference to the size of the parent population \f$\mu\f$.
+	///\brief Returns a mutabl reference to the size of the parent population \f$\mu\f$.
 	unsigned int& mu(){
 		return m_mu;
 	}
@@ -209,7 +232,9 @@ public:
 
 private:
 	/// \brief Updates the strategy parameters based on the supplied offspring population.
-	void updateStrategyParameters( std::vector<Individual<RealVector, double, RealVector> > const& offspring ) {
+	///
+	/// The chromosome stores the y-vector that is the step from the mean in D=1, sigma=1 space.
+	void updateStrategyParameters( std::vector<Individual<RealVector, double, RealVector> >& offspring ) {
 		RealVector m( m_numberOfVariables, 0. );
 		RealVector z( m_numberOfVariables, 0. );
 		
@@ -217,40 +242,43 @@ private:
 			noalias(m) += m_weights( j ) * offspring[j].searchPoint();
 			noalias(z) += m_weights( j ) * offspring[j].chromosome();
 		}
-
+		//compute z from y= (1+(sqrt(1+||v||^2)-1)v_n v_n^T)z
+		//therefore z= (1+(1/sqrt(1+||v||^2)-1)v_n v_n^T)y
+		double b=(1/std::sqrt(1+sqr(m_normv))-1);
+		noalias(z)+= b*inner_prod(z,m_vn)*m_vn;
+		
+		//update paths
+		noalias(m_evolutionPathSigma) = (1. - m_cSigma)*m_evolutionPathSigma + std::sqrt( m_cSigma * (2. - m_cSigma) * m_muEff ) * z;
 		// compute h_sigma
 		double hSigLHS = norm_2( m_evolutionPathSigma ) / std::sqrt(1. - pow((1 - m_cSigma), 2.*(m_counter+1)));
 		double hSigRHS = (1.4 + 2 / (m_numberOfVariables+1.)) * chi( m_numberOfVariables );
 		double hSig = 0;
 		if(hSigLHS < hSigRHS) hSig = 1.;
+		noalias(m_evolutionPathC) = (1. - m_cC ) * m_evolutionPathC + hSig * std::sqrt( m_cC * (2. - m_cC) * m_muEff ) * (m - m_mean) / m_sigma;
 		
-		//update paths
-		m_evolutionPathC = (1. - m_cC ) * m_evolutionPathC + hSig * std::sqrt( m_cC * (2. - m_cC) * m_muEff ) * (m - m_mean) / m_sigma; // eq. (42)
-		m_evolutionPathSigma = (1. - m_cSigma)*m_evolutionPathSigma + std::sqrt( m_cSigma * (2. - m_cSigma) * m_muEff ) * z; // eq. (40)
 		
-		//compute individualwise update of D and v
-		RealVector Dnew = m_D;
-		RealVector vnew = m_v;
-		double normv = norm_2(m_v);
-		RealVector s(m_numberOfVariables);
-		RealVector t(m_numberOfVariables);
-		//rank mu update
+		
+		//we split the computation of s and t in the paper in two parts
+		//we compute the first two steps and then compute the weighted mean over samples and
+		//evolution path. afterwards we compute the rest using the mean result
+		//the paper describes this as first computing S and T for all samples and compute the weighted
+		//mean of that, but the reference implementation does it the other way to prevent numerical instabilities
+		RealVector meanS(m_numberOfVariables,0.0);
+		RealVector meanT(m_numberOfVariables,0.0);
 		for(std::size_t j = 0; j != mu(); ++j){
-			computeSAndT(offspring[j].searchPoint(),s,t);
-			
-			//compute update to v and d
-			double weight = m_cMu*m_weights(j) ;
-			noalias(vnew) +=  (weight/normv) * t;
-			noalias(Dnew) += weight * m_D*s;			
+			computeSAndTFirst(offspring[j].chromosome(),meanS,meanT,m_cMu*m_weights(j));
 		}
-		//rank 1 update similarly
-		computeSAndT(m_mean+m_sigma*m_evolutionPathC,s,t);
-		double weight = (1-hSig)*m_c1;
-		noalias(vnew) +=  (weight/normv) * t;
-		noalias(Dnew) += weight * m_D*s;		
-		//~ std::cout<<s<<t<<std::endl;
-		m_D = Dnew;
-		m_v = vnew;
+		computeSAndTFirst(m_evolutionPathC/m_D,meanS,meanT,hSig*m_c1);
+		
+		//compute the remaining mean S and T steps
+		computeSAndTSecond(meanS,meanT);
+		
+		//compute update to v and d
+		noalias(m_D) += m_D*meanS;
+		noalias(m_vn) = m_vn*m_normv+meanT/m_normv;//result is v and not vn
+		//store the new v separately as vn and its norm
+		m_normv = norm_2(m_vn);
+		m_vn /= m_normv;
 		
 		//update step length
 		m_sigma *= std::exp( (m_cSigma / m_dSigma) * (norm_2(m_evolutionPathSigma)/ chi( m_numberOfVariables ) - 1.) ); // eq. (39)
@@ -259,49 +287,62 @@ private:
 		m_mean = m;
 	}
 	
-	void createSample(RealVector& x,RealVector& z)const{
+	//samples a point and stores additionally y=(x-m_mean)/(sigma*D)
+	//as this is required for calculation later
+	void createSample(RealVector& x,RealVector& y)const{
 		x.resize(m_numberOfVariables);
-		z.resize(m_numberOfVariables);
+		y.resize(m_numberOfVariables);
 		for(std::size_t i = 0; i != m_numberOfVariables; ++i){
-			z(i) = Rng::gauss(0,1);
+			y(i) = Rng::gauss(0,1);
 		}
-		double normv2=norm_sqr(m_v);
-		double a = std::sqrt(1+normv2)-1;
-		a *= inner_prod(z,m_v)/normv2;
-		noalias(x) = m_mean+ m_sigma*m_D*(z+a*m_v);
+		double a = std::sqrt(1+sqr(m_normv))-1;
+		a *= inner_prod(y,m_vn);
+		noalias(y) +=a*m_vn;
+		noalias(x) = m_mean+ m_sigma*m_D*y;
 	}
-	/// \brief Compute s and t as in theorem 3.6
-	void computeSAndT(RealVector const& x, RealVector& s,RealVector& t)const{
-		RealVector y = ((x - m_mean) / m_sigma)/m_D;
-		double normv2 = norm_sqr(m_v);
-		RealVector vbar = m_v/sqrt(normv2);
-		RealVector vbarbar = vbar*vbar;
+	
+	///\brief computes the sample wise first two steps of S and T of theorem 3.6 in the paper
+	///
+	/// S and T arguments accordingly
+	void computeSAndTFirst(RealVector const& y, RealVector& s,RealVector& t, double weight )const{
+		if(weight == 0) return;//nothing to do
+		double yvn = inner_prod(y,m_vn);
+		double normv2 = sqr(m_normv);
 		double gammav = 1+normv2;
-		//alpha from 3.5
-		double alpha = sqr(normv2)+(2*gammav -std::sqrt(gammav))/max(abs(vbar));
+		//step 1
+		noalias(s) += weight*(sqr(y) - (normv2/gammav*yvn)*(y*m_vn)-blas::repeat(1.0,m_numberOfVariables));
+		//step 2
+		noalias(t) += weight*(yvn*y - 0.5*(sqr(yvn)+gammav)*m_vn);
+	}
+		
+	///\brief computes the last three steps of S and T of theorem 3.6 in the paper
+	void computeSAndTSecond(RealVector& s,RealVector& t)const{
+		RealVector vn2 = m_vn*m_vn;
+		double normv2 = sqr(m_normv);
+		double gammav = 1+normv2;
+		//alpha of 3.5
+		double alpha = sqr(normv2)+(2*gammav - std::sqrt(gammav))/max(vn2);
+		alpha=std::sqrt(alpha);
 		alpha /= 2+normv2;
 		alpha = std::min(alpha,1.0);
-		//constants of 3.4
+		//constants (b,A) of 3.4
 		double b=-(1-sqr(alpha))*sqr(normv2)/gammav+2*sqr(alpha);
-		RealVector A= blas::repeat(2.0,m_numberOfVariables)-(b+2*alpha)*sqr(vbar);
+		RealVector A= blas::repeat(2.0,m_numberOfVariables)-(b+2*sqr(alpha))*vn2;
+		RealVector invAvn2= vn2/A;
 		
-		double yvbar = inner_prod(y,vbar);
-		//step 1
-		noalias(s) = sqr(y) - (normv2*yvbar/gammav)*(y*vbar)-blas::repeat(1.0,m_numberOfVariables);
-		//step 2 
-		noalias(t) = yvbar*y - 0.5*(sqr(yvbar)+gammav)*vbar;
 		//step 3
-		noalias(s) -= alpha/gammav*((2+normv2)*(vbar*t)-normv2*inner_prod(vbar,t)*vbarbar);
+		noalias(s) -= alpha/gammav*((2+normv2)*(m_vn*t)-normv2*inner_prod(m_vn,t)*vn2);
 		//step 4
-		noalias(s) = s/A -b/(1+b*inner_prod(vbarbar,vbarbar/A))*inner_prod(s,vbarbar/A)*(vbarbar/A);
+		noalias(s) = s/A -b*inner_prod(s,invAvn2)/(1+b*inner_prod(vn2,invAvn2))*invAvn2;
 		//step 5
-		noalias(t) -= alpha*((2+normv2)*(vbar*s)-inner_prod(s,vbarbar)*vbar);
+		noalias(t) -= alpha*((2+normv2)*(m_vn*s)-inner_prod(s,vn2)*m_vn);
 	}
 	
 	unsigned int m_numberOfVariables; ///< Stores the dimensionality of the search space.
 	unsigned int m_mu; ///< The size of the parent population.
 	unsigned int m_lambda; ///< The size of the offspring population, needs to be larger than mu.
 
+	double m_initialSigma;///0 by default which indicates initial sigma = 1/sqrt(N)
 	double m_sigma;
 	double m_cC; 
 	double m_c1; 
@@ -316,7 +357,11 @@ private:
 	RealVector m_evolutionPathC;
 	RealVector m_evolutionPathSigma;
 	
-	RealVector m_v;
+	///\brief normalised vector v 
+	RealVector m_vn;
+	///\brief norm of the vector v, therefore  v=m_vn*m_normv
+	double m_normv;
+	
 	RealVector m_D;
 
 	unsigned m_counter; ///< counter for generations
