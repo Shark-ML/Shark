@@ -32,7 +32,7 @@ Thus we will only show the differences in the model definition.
 
 We will enhance the previously created function by another input the parameter, the strength of noise::
 
-..sharkcode<Unsupervised/AutoEncoderTutorial.tpp,function>
+..sharkcode<Unsupervised/DenoisingAutoEncoderTutorial.tpp,function>
 
 In our chosen noise model, this will be the probability that the pixel is set to 0. This makes sense in our
 application on the MNIST dataset as the pixels are binary and 0 is the background. Thus the noise will
@@ -40,11 +40,11 @@ corrupt how the digits will look like. This type of noise is represented by the 
 the only thing we have to do is to concatenate it with the input of our trained autoencoder model and 
 use the combined model in the :doxy:`ErrorFunction`::
 
-..sharkcode<Unsupervised/AutoEncoderTutorial.tpp,function>
+..sharkcode<Unsupervised/DenoisingAutoEncoderTutorial.tpp,model>
 
 That's it. We can now re-run the previous experiments for the denoising autoencoder::
 
-..sharkcode<Unsupervised/AutoEncoderTutorial.tpp,main>
+..sharkcode<Unsupervised/DenoisingAutoEncoderTutorial.tpp,main>
 
 Visualizing the autoencoder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
