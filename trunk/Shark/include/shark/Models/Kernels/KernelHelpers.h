@@ -71,7 +71,7 @@ void calculateRegularizedKernelMatrix(
 	for (std::size_t i=0; i<B; i++){
 		std::size_t startX = batchStart[i];
 		std::size_t endX = batchStart[i+1];
-		SHARK_PARALLEL_FOR(std::size_t j=0; j < B; j++){
+		SHARK_PARALLEL_FOR(int j=0; j < (int)B; j++){
 			std::size_t startY = batchStart[j];
 			std::size_t endY = batchStart[j+1];
 			RealMatrix submatrix = kernel(dataset.batch(i), dataset.batch(j));

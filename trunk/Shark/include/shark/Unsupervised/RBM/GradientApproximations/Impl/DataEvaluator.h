@@ -63,7 +63,7 @@ RealVector evaluateData(Data<VectorType> const& data, RBM& rbm, std::size_t batc
 	std::size_t threads = std::min<std::size_t>(batchesForTraining,SHARK_NUM_THREADS);
 	std::size_t numBatches = batchesForTraining/threads;
 	
-	SHARK_PARALLEL_FOR(size_t t = 0; t < threads; ++t){
+	SHARK_PARALLEL_FOR(int t = 0; t < (int)threads; ++t){
 		AverageEnergyGradient<RBM> empiricalAverage(&rbm);
 		
 		std::size_t threadElements = 0;
