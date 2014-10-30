@@ -101,7 +101,7 @@ class NegativeAUC : public AbstractCost<LabelType, OutputType>
 		double   predictionPrev = -std::numeric_limits<double>::max(); // previous prediction
 		for(std::size_t i=0; i != elements; i++)  {
 			if(L[i].key != predictionPrev){
-				A += trapArea(FP,FPPrev,TP,TPPrev);
+				A += trapArea(FP/double(N),FPPrev/double(N),TP/double(P),TPPrev/double(P));
 				predictionPrev = L[i].key;
 				FPPrev = FP;
 				TPPrev = TP;
@@ -112,9 +112,9 @@ class NegativeAUC : public AbstractCost<LabelType, OutputType>
 				FP++; // negative example
 		}
 		// deviation from the original algorithm description: A += trapArea(1, FPPrev, 1, TPPrev);
-		A += trapArea(FP, FPPrev, TP, TPPrev);
+		A += trapArea(FP/double(N), FPPrev/double(N), TP/double(P), TPPrev/double(P));
 
-		A /= double(N*P);
+		//~ A /= double(N*P);
 		return -A;
 	}
 	/// \brief Computes area under the curve. If the prediction vector is
