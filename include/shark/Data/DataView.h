@@ -82,7 +82,7 @@ private:
 		typename dataset_type::batch_range
 	>::type batch_range;
 	template<class Reference, class View>
-	class IteratorBase: public boost::iterator_facade_fixed<
+	class IteratorBase: public SHARK_ITERATOR_FACADE<
 		IteratorBase<Reference,View>,
 		value_type,
 		std::random_access_iterator_tag,
@@ -106,7 +106,7 @@ private:
 		}
 
 	private:
-		friend class boost::iterator_core_access_fixed;
+		friend class SHARK_ITERATOR_CORE_ACCESS;
 		template <class, class> friend class IteratorBase;
 
 		void increment() {

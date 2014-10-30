@@ -34,7 +34,14 @@
 #define SHARK_CORE_ZIPPAIR_H
 
 #include <shark/Core/utility/Range.h>
+#ifdef SHARK_USE_ITERATOR_WORKAROUND
 #include "Impl/boost_iterator_facade_fixed.hpp"//thanks, boost.
+#define SHARK_ITERATOR_FACADE boost::iterator_facade_fixed
+#define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access_fixed
+#else
+#define SHARK_ITERATOR_FACADE boost::iterator_facade
+#define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access
+#endif
 #include <utility>
 
 namespace shark{
@@ -66,7 +73,7 @@ struct PairReference<std::pair<T, U>, Iterator1, Iterator2 >{
 /// \todo Both underlying Iterators must be random access iterators.
 //todo: implement as decorator for boost::zip_iterator
 template<class Value,class Iterator1,class Iterator2>
-class PairIterator: public boost::iterator_facade_fixed<
+class PairIterator: public SHARK_ITERATOR_FACADE<
 	PairIterator<Value,Iterator1,Iterator2>,
 	Value,
 	std::random_access_iterator_tag,
@@ -100,7 +107,7 @@ public:
 	}
 
 private:
-	friend class boost::iterator_core_access_fixed;
+	friend class SHARK_ITERATOR_CORE_ACCESS;
 
 	void increment() {
 		++m_iterator1;
