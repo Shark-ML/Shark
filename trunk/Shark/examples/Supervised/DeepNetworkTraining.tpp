@@ -53,9 +53,9 @@ template<class AutoencoderModel>
 AutoencoderModel trainAutoencoderModel(
 	UnlabeledData<RealVector> const& data,//the data to train with
 	std::size_t numHidden,//number of features in the AutoencoderModel
-	std::size_t iterations, //number of iterations to optimize
 	double regularisation,//strength of the regularisation
-	double noiseStrength // strength of the added noise
+	double noiseStrength, // strength of the added noise
+	std::size_t iterations //number of iterations to optimize
 ){
 //###end<function>
 //###begin<model>	
