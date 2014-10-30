@@ -91,7 +91,7 @@ public:
 	,  m_nhp(kernel->parameterVector().size()+1)
 	,  m_nkp(kernel->parameterVector().size())
 	,  m_numFolds(folds.size())  //gets number of folds!
-	,  m_numSamples(folds.numberOfElements())
+	,  m_numSamples(folds.dataset().numberOfElements())
 	,  m_inputDims(inputDimension(folds.dataset()))
 	,  m_svmCIsUnconstrained(unconstrained)
 	,  mep_svmStoppingCondition(stop_cond)
