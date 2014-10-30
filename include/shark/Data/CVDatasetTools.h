@@ -56,82 +56,72 @@ public:
 	CVFolds() {}
 	///\brief partitions set in validation folds indicated by the second argument.
 	///
-	/// It is assumed that the batches in set are stored such that the batches
-	/// partitionStart[i]...partitionStart[i+1] form a validation set.
-	/// The last batch is partitionStart[n]....set.size() thus there is no need
-	/// to add the last element.
+	/// The folds are given as the batch indices of the validation sets
 	CVFolds(
 	    DatasetType const &set,
-	    std::vector<std::size_t> const &partitionStart
-	) : m_dataset(set) {
-		std::size_t numberOfPartitions = partitionStart.size();
-		std::size_t foldElementStart = 0; //element index of the starting fold
-		for (std::size_t partition = 0; partition != numberOfPartitions; partition++) {
-			m_foldElementStart.push_back(foldElementStart);
-			std::size_t partitionSize = (partition+1 == numberOfPartitions) ? set.numberOfBatches() : partitionStart[partition+1];
-			partitionSize -= partitionStart[partition];
+	    std::vector<IndexSet> const &validationIndizes
+	) : m_dataset(set),m_validationFolds(validationIndizes) {}
+	
+	CVFolds(
+		DatasetType const &set,
+		std::vector<std::size_t> const &foldStart
+	) : m_dataset(set){
+		for (std::size_t partition = 0; partition != foldStart.size(); partition++) {
+			std::size_t partitionSize = (partition+1 == foldStart.size()) ? set.numberOfBatches() : foldStart[partition+1];
+			partitionSize -= foldStart[partition];
 			//create the set with the indices of the validation set of the current partition
 			//also update the starting element
 			IndexSet validationIndizes(partitionSize);
 			for (std::size_t batch = 0; batch != partitionSize; ++batch) {
-				validationIndizes[batch]=batch+partitionStart[partition];
-				foldElementStart += boost::size(set.batch(validationIndizes[batch]));
+				validationIndizes[batch]=batch+foldStart[partition];
 			}
-			//we need the training part of the set for creation of subsets, but this is
-			//just the complement of the validation set.
-			IndexSet partitionIndizes;
-			detail::complement(validationIndizes,set.numberOfBatches(),partitionIndizes);
-
-			//now add the partition to the folds.
-			m_folds.push_back(partitionIndizes);
+			m_validationFolds.push_back(validationIndizes);
 		}
-		m_foldElementStart.push_back(foldElementStart);//this is now the total number of elements
-
-		//internal sanity check
-		SIZE_CHECK(set.numberOfElements() == foldElementStart);
 	}
 
 	DatasetType training(std::size_t i) const {
-		SIZE_CHECK(i < m_folds.size());
+		SIZE_CHECK(i < size());
 
-		return indexedSubset(m_dataset, m_folds[i]);
+		return indexedSubset(m_dataset, trainingFoldIndices(i));
 	}
 	DatasetType validation(std::size_t i) const {
-		SIZE_CHECK(i < m_folds.size());
+		SIZE_CHECK(i < size());
 
-		//TODO: make use of the range structure of the validation fold.
-		IndexSet validationFold;
-		detail::complement(m_folds[i], m_dataset.numberOfBatches(), validationFold);
-
-		return indexedSubset(m_dataset, validationFold);
+		return indexedSubset(m_dataset,validationFoldIndices(i));
 	}
 
-	///\brief returns the indices that make up the i-th fold
-	IndexSet const &foldIndices(std::size_t i)const {
-		SIZE_CHECK(i < m_folds.size());
-		return m_folds[i];
+	///\brief returns the indices that make up the i-th validation fold
+	IndexSet const &validationFoldIndices(std::size_t i)const {
+		SIZE_CHECK(i < size());
+		return m_validationFolds[i];
+	}
+	
+	IndexSet trainingFoldIndices(std::size_t i)const {
+		SIZE_CHECK(i < size());
+		IndexSet trainingFold;
+		detail::complement(m_validationFolds[i], m_dataset.numberOfBatches(), trainingFold);
+		return trainingFold;
 	}
 
 	///\brief Returns the number of folds of the dataset.
 	std::size_t size()const {
-		return m_folds.size();
+		return m_validationFolds.size();
 	}
 
-	/// \brief Returns the overall number of elements in the partitioned dataset
-	std::size_t numberOfElements() const {
-		return m_foldElementStart[size()];
-	}
-	/// \brief Returns the overall number of elements in the fold
-	std::size_t numberOfElements(std::size_t i) const {
-		SIZE_CHECK(i < size());
-		return m_foldElementStart[i+1]-m_foldElementStart[i];
-	}
-
-	/// \brief returns the index of the first element of the i-th fold in the dataset.
-	std::size_t foldElementStart(std::size_t i) const {
-		SIZE_CHECK(i < size());
-		return m_foldElementStart[i];
-	}
+	//~ /// \brief Returns the overall number of elements in the partitioned dataset
+	//~ std::size_t numberOfElements() const {
+		//~ return m_foldElementStart[size()];
+	//~ }
+	//~ /// \brief Returns the overall number of elements in the i-th training fold
+	//~ std::size_t numberOfTrainingElements(std::size_t i) const {
+		//~ SIZE_CHECK(i < size());
+		//~ return m_datasetSize-m_validationFoldSizes[i];
+	//~ }
+	//~ /// \brief Returns the overall number of elements in the i-th valdiation fold
+	//~ std::size_t numberOfValidationElements(std::size_t i) const {
+		//~ SIZE_CHECK(i < size());
+		//~ return m_validationFoldSizes[i];
+	//~ }
 
 	/// \brief Returns the dataset underying the folds
 	DatasetType const& dataset()const{
@@ -140,8 +130,9 @@ public:
 
 private:
 	DatasetType m_dataset;
-	std::vector<IndexSet> m_folds;
-	std::vector<std::size_t> m_foldElementStart;
+	std::vector<IndexSet> m_validationFolds;
+	std::size_t m_datasetSize;
+	std::vector<std::size_t> m_validationFoldSizes;
 };
 
 
@@ -156,15 +147,15 @@ namespace detail {
 /// class which members[k][i] returns the positon of the i-th member of class k in the set.
 template<class I, class L>
 CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
-    LabeledData<I,L> &set,
-    std::size_t numberOfPartitions,
-    std::vector< std::vector<std::size_t> > members,
-    std::size_t batchSize,
-    RecreationIndices * cv_indices = NULL //if not NULL: the first vector stores location information, and
-                                          // the second the partition information. The i-th value of the
-                                          // first vector shows what the original position of the now i-th
-                                          // sample was. The i-th value of the second vector shows what
-                                          // partition that sample now belongs to.
+	LabeledData<I,L> &set,
+	std::size_t numberOfPartitions,
+	std::vector< std::vector<std::size_t> > members,
+	std::size_t batchSize,
+	RecreationIndices * cv_indices = NULL //if not NULL: the first vector stores location information, and
+					  // the second the partition information. The i-th value of the
+					  // first vector shows what the original position of the now i-th
+					  // sample was. The i-th value of the second vector shows what
+					  // partition that sample now belongs to.
 ) {
 	std::size_t numInputs = set.numberOfElements();
 	std::size_t numClasses = members.size();
@@ -196,15 +187,15 @@ CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
 	std::size_t fold = 0;//current fold
 	std::vector<std::vector<std::size_t> > batchElements(numberOfPartitions);
 
-    //initialize the list of position indices which can later be used to re-create the fold (via createCV(Fully)Indexed)
-    if ( cv_indices != NULL ) {
-        cv_indices->first.clear();
-        cv_indices->first.resize( numInputs );
-        cv_indices->second.clear();
-        cv_indices->second.resize( numInputs );
-    }
+	//initialize the list of position indices which can later be used to re-create the fold (via createCV(Fully)Indexed)
+	if ( cv_indices != NULL ) {
+		cv_indices->first.clear();
+		cv_indices->first.resize( numInputs );
+		cv_indices->second.clear();
+		cv_indices->second.resize( numInputs );
+	}
 
-    size_t j = 0; //for recreation indices
+	size_t j = 0; //for recreation indices
 	for (std::size_t c = 0; c != numClasses; c++) {
 		for (std::size_t i = 0; i != members[c].size(); i++) {
 			std::size_t oldPos = members[c][i];
@@ -212,11 +203,11 @@ CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
 
 			batchElements[fold].push_back(oldPos);
 
-            if ( cv_indices != NULL ) {
-                cv_indices->first[ j ] = oldPos; //store the position in which the (now) i-th sample previously resided
-                cv_indices->second[ j ] = fold; //store the partition to which the (now) i-th sample gets assigned
-                // old: //(*cv_indices)[ oldPos ] = fold; //store in vector to recreate partition if desired
-            }
+			if ( cv_indices != NULL ) {
+				cv_indices->first[ j ] = oldPos; //store the position in which the (now) i-th sample previously resided
+				cv_indices->second[ j ] = fold; //store the partition to which the (now) i-th sample gets assigned
+				// old: //(*cv_indices)[ oldPos ] = fold; //store in vector to recreate partition if desired
+			}
 
 			//if all elements for the current batch are found, create it
 			if (batchElements[fold].size() == batchSizes[batchNumber]) {
@@ -227,10 +218,10 @@ CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
 
 			fold = (fold+1) % numberOfPartitions;
 
-            j++;
+			j++;
 		}
 	}
-    SHARK_ASSERT( j == numInputs );
+	SHARK_ASSERT( j == numInputs );
 
 	//swap old and new set
 	swap(set, newSet);
@@ -320,9 +311,9 @@ CVFolds<LabeledData<I,L> > createCVSameSize(LabeledData<I,L> &set,std::size_t nu
 template<class I>
 CVFolds<LabeledData<I,unsigned int> > createCVSameSizeBalanced (
 	LabeledData<I,unsigned int> &set,
-    std::size_t numberOfPartitions,
+	std::size_t numberOfPartitions,
 	std::size_t batchSize=Data<I>::DefaultBatchSize,
-    RecreationIndices * cv_indices = NULL //if not NULL: for each element, store the fold it is assigned to; this can be used to later/externally recreate the fold via createCVIndexed
+	RecreationIndices * cv_indices = NULL //if not NULL: for each element, store the fold it is assigned to; this can be used to later/externally recreate the fold via createCVIndexed
 ){
 	DataView<LabeledData<I,unsigned int> > setView(set);
 	std::size_t numInputs = setView.size();
@@ -338,6 +329,42 @@ CVFolds<LabeledData<I,unsigned int> > createCVSameSizeBalanced (
 
 }
 
+//! \brief Create a partition for cross validation without changing the dataset
+//!
+//! This method behaves similar to createCVIID
+//! with the difference that batches are not reordered. Thus the batches
+//! are only rearranged randomly in folds, but the dataset itself is not changed.
+//!
+//! \param numberOfPartitions  number of partitions to create
+//! \param set the input data from which to draw the partitions
+template<class I, class L>
+CVFolds<LabeledData<I,L> > createCVBatch (
+	LabeledData<I,L> const& set,
+	std::size_t numberOfPartitions
+){
+	std::vector<std::size_t> indizes(set.numberOfBatches());
+	for(std::size_t i= 0; i != set.numberOfBatches(); ++i)
+		indizes[i] = i;
+	DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
+	shark::shuffle(indizes.begin(),indizes.end(), uni);
+	
+	typedef typename LabeledData<I,L>::IndexSet IndexSet;
+	
+	std::vector<IndexSet> folds;
+	std::size_t partitionSize = set.numberOfBatches()/numberOfPartitions;
+	std::size_t remainder = set.numberOfBatches() - partitionSize*numberOfPartitions;
+	std::vector<std::size_t>::iterator pos = indizes.begin();
+	for(std::size_t i = 0; i!= numberOfPartitions; ++i){
+		std::size_t size = partitionSize;
+		if(remainder> 0){
+			++size;
+			--remainder;
+		}
+		folds.push_back(IndexSet(pos,pos+size));
+		pos+=size;
+	}
+	return CVFolds<LabeledData<I,L> >(set,folds);
+}
 
 //! \brief Create a partition for cross validation from indices
 //!
@@ -414,7 +441,7 @@ CVFolds<LabeledData<I,L> > createCVIndexed(
 template<class I,class L>
 CVFolds<LabeledData<I,L> > createCVFullyIndexed(
 	LabeledData<I,L> &set,
-    std::size_t numberOfPartitions,
+	std::size_t numberOfPartitions,
 	RecreationIndices indices,
 	std::size_t batchSize=Data<I>::DefaultBatchSize
 ) {
