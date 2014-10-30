@@ -33,7 +33,20 @@
 #ifndef SHARK_CORE_ITERATORS_H
 #define SHARK_CORE_ITERATORS_H
 
+#include <boost/version.hpp>
+
+#if BOOST_VERSION < 105700
+#define SHARK_USE_ITERATOR_WORKAROUND
+#endif
+
+#ifdef SHARK_USE_ITERATOR_WORKAROUND
 #include "Impl/boost_iterator_facade_fixed.hpp"//thanks, boost.
+#define SHARK_ITERATOR_FACADE boost::iterator_facade_fixed
+#define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access_fixed
+#else
+#define SHARK_ITERATOR_FACADE boost::iterator_facade
+#define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access
+#endif
 
 #include <shark/Core/utility/Range.h>
 #include <boost/range/iterator.hpp>
@@ -43,7 +56,7 @@ namespace shark{
 ///
 ///The underlying Iterator must be a random access iterator
 template<class Iterator>
-class IndexedIterator: public boost::iterator_facade_fixed<
+class IndexedIterator: public  SHARK_ITERATOR_FACADE<
 	IndexedIterator<Iterator>,
 	typename boost::iterator_value<Iterator>::type,
 	std::random_access_iterator_tag,
@@ -68,14 +81,14 @@ public:
 		return m_index;
 	}
 private:
-	typedef boost::iterator_facade_fixed<
+	typedef SHARK_ITERATOR_FACADE<
 		IndexedIterator<Iterator>,
 		typename boost::iterator_value<Iterator>::type,
 		boost::random_access_traversal_tag,
 		typename boost::iterator_reference<Iterator>::type
 	> base_type;
 
-	friend class boost::iterator_core_access_fixed;
+	friend class SHARK_ITERATOR_CORE_ACCESS;
 
 	typename base_type::reference dereference() const {
 		return *m_iterator;
@@ -114,7 +127,7 @@ private:
 /// The second template argument represents the elements by the proxy reference type. it must offer
 /// a constructor Reference(sequence,i) which constructs a reference to the i-th proxy-element
 template<class Sequence, class ValueType, class Reference>
-class ProxyIterator: public boost::iterator_facade_fixed<
+class ProxyIterator: public  SHARK_ITERATOR_FACADE<
 	ProxyIterator<Sequence,ValueType,Reference>,
 	ValueType,
 	//boost::random_access_traversal_tag,
@@ -132,7 +145,7 @@ public:
 	: m_sequence(other.m_sequence),m_position(other.m_position) {}
 
 private:
-	friend class boost::iterator_core_access_fixed;
+	friend class SHARK_ITERATOR_CORE_ACCESS;
 	template <class,class,class> friend class ProxyIterator;
 
 	void increment() {
@@ -182,7 +195,7 @@ namespace detail{
 		typedef typename boost::iterator_value<inner_iterator>::type value_type;
 
 		//typedef boost::iterator_facade_fixed< Self, value_type, boost::random_access_traversal_tag, reference > base;
-		typedef boost::iterator_facade_fixed< Self, value_type, std::random_access_iterator_tag, reference > base;
+		typedef  SHARK_ITERATOR_FACADE< Self, value_type, std::random_access_iterator_tag, reference > base;
 	};
 }
 
@@ -244,7 +257,7 @@ public:
 	}
 
 private:
-	friend class boost::iterator_core_access_fixed;
+	friend class SHARK_ITERATOR_CORE_ACCESS;
 	template <class> friend class MultiSequenceIterator;
 
 	void increment() {
