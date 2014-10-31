@@ -173,21 +173,21 @@ public:
 	/// \brief Compute the derivative of the KTA as a function of the kernel parameters.
 	///
 	/// It holds:
-	/// \f[ \langle K^c, K^c \rangle = \langle K,K \rangle  -2 \ell \langle k,k \rangle  + mk^2 \ell^2 \\ 
-	///     (\langle  K^c, K^c  \rangle )'  = 2 \langle K,K' \rangle  -4\ell \langle k, \frac{1}{\ell} \sum_j K'_ij \rangle  +2 \ell^2 mk \sum_ij 1/(\ell^2) K'_ij \\ 
-	///   = 2 \langle K,K' \rangle  -4 \langle k, \sum_j K'_ij \rangle + 2 mk \sum_ij K_ij \\ 
-	///   = 2 \langle K,K' \rangle  -4 \langle k u^T, K' \rangle + 2 mk \langle  u u^T, K' \rangle \\ 
-	///   = 2\langle K -2 k u^T + mk u u^T, K' \rangle ) \\ 
-	///     \langle Y, K^c \rangle  = \langle Y, K \rangle  - 2 n \langle y, k \rangle  + n^2 my mk \\ 
+	/// \f[ \langle K^c, K^c \rangle = \langle K,K \rangle  -2 \ell \langle k,k \rangle  + mk^2 \ell^2 \\
+	///     (\langle  K^c, K^c  \rangle )'  = 2 \langle K,K' \rangle  -4\ell \langle k, \frac{1}{\ell} \sum_j K'_ij \rangle  +2 \ell^2 mk \sum_ij 1/(\ell^2) K'_ij \\
+	///   = 2 \langle K,K' \rangle  -4 \langle k, \sum_j K'_ij \rangle + 2 mk \sum_ij K_ij \\
+	///   = 2 \langle K,K' \rangle  -4 \langle k u^T, K' \rangle + 2 mk \langle  u u^T, K' \rangle \\
+	///   = 2\langle K -2 k u^T + mk u u^T, K' \rangle ) \\
+	///     \langle Y, K^c \rangle  = \langle Y, K \rangle  - 2 n \langle y, k \rangle  + n^2 my mk \\
 	///     (\langle  Y  , K^c  \rangle )' =   \langle Y -2 y u^T + my u u^T, K'  \rangle \f]
 	/// now the derivative is computed from this values in a second sweep over the data:
 	/// we get:
-	/// \f[ \hat A' = 1/\langle K^c,K^c \rangle ^{3/2} (\langle K^c,K^c \rangle  (\langle Y,K^c \rangle )' - 0.5*\langle Y, K^c \rangle  (\langle  K^c , K^c \rangle )') \\ 
-	///    = 1/\langle K^c,K^c \rangle ^{3/2} \langle  \langle K^c,K^c \rangle  (Y -2 y u^T + my u u^T)- \langle Y, K^c \rangle (K -2 k u^T+ mk u u^T),K'  \rangle \\ 
+	/// \f[ \hat A' = 1/\langle K^c,K^c \rangle ^{3/2} (\langle K^c,K^c \rangle  (\langle Y,K^c \rangle )' - 0.5*\langle Y, K^c \rangle  (\langle  K^c , K^c \rangle )') \\
+	///    = 1/\langle K^c,K^c \rangle ^{3/2} \langle  \langle K^c,K^c \rangle  (Y -2 y u^T + my u u^T)- \langle Y, K^c \rangle (K -2 k u^T+ mk u u^T),K'  \rangle \\
 	///    = 1/\langle K^c,K^c \rangle ^{3/2} \langle W,K' \rangle \f]
 	///reordering rsults in
-	/// \f[ W= \langle K^c,K^c \rangle  Y - \langle Y, K^c \rangle K \\ 
-	///     - 2 (\langle K^c,K^c \rangle y - \langle Y, K^c \rangle k) u^T \\ 
+	/// \f[ W= \langle K^c,K^c \rangle  Y - \langle Y, K^c \rangle K \\
+	///     - 2 (\langle K^c,K^c \rangle y - \langle Y, K^c \rangle k) u^T \\
 	///     +   (\langle K^c,K^c \rangle my - \langle Y, K^c \rangle mk) u u^T \f]
 	/// where \f$ K' \f$ is the derivative of K with respct of the kernel parameters.
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const {
