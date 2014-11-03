@@ -101,20 +101,6 @@ namespace shark {
 		return 1. / (1.+ std::exp(-x));
 	}
 	
-	//~ ///\brief Logistic function/logistic function. Efficient specialisation for double.
-	//~ ///
-	//~ /// Calculates the sigmoid function 1/(1+exp(-x)).  Calculation is carried out in float
-	//~ /// As the numerical errors are small (<10^-8) but the gain in speed big.
-	//~ inline double sigmoid(double x){
-		//~ if(x < -30) {
-			//~ return 0;
-		//~ }
-		//~ if(x > 30) {
-			//~ return 1;
-		//~ }
-		//~ return 1.0f / (1.0f+ std::exp(-float(x)));
-	//~ }
-	
 	///\brief Thresholded exp function, over- and underflow safe.
 	///
 	///Replaces the value of exp(x) for numerical reasons by the a threshold value if it gets too large.
@@ -192,10 +178,49 @@ namespace shark {
 		}
 		return -abs(x);
 	}
+	
+	/// \brief Returns the trigamma function
+	double trigamma(double x){
+		if(x < 0)
+		{
+			//use reflection relation: -psi^1(1-x)-psi^1(x)=pi* d/dz cot(pi*x)
+			//=> psi^1(x) = -psi^1(1-x)-pi* d/dz cot(pi*x)
+			double pi = boost::math::constants::pi<double>();
+			using std::sin;
+			double s = sin(pi*x);
+			double cot_pi_x=-pi / (s * s);
+			return -trigamma(1-x) - pi * cot_pi_x;
+		}
+		//~ if(x > 20)
+		//~ {
+			//~ //reduce by multiplication theorem
+			//~ //psi^1(2x)=1/4[psi^1(x)+psi^1(x+1/2]]
+			//~ return 0.25*trigamma(x)+0.25*trigamma(x+1/2);
+		//~ }
+		//~ else{
+		double g = 7;
+		double p[] = {0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+				771.32342877765313, -176.61502916214059, 12.507343278686905,
+				-0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7};
+		double z = x-1;		
+		double sum = 0;
+		double sumSq = 0;
+		double sumCube  = 0;
+		for(std::size_t i = 1; i != 9; ++i){
+			double zplusi=z+i;
+			sum+=p[i]/zplusi;
+			sumSq+=p[i]/sqr(zplusi);
+			sumCube+=p[i]/cube(zplusi);
+		}
+		
+		double t1=sumSq/(p[0]+sum);
+		t1*=t1;
+		double t2 = sumCube/(p[0]+sum);
+		return 1/(z+g+0.5)+g/sqr(z+g+0.5)-t1+2*t2;
+	}
+
+}
 
 /** @}*/ 
-
-
-};
 
 #endif 
