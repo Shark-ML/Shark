@@ -345,7 +345,7 @@ public:
 			//}
 			
 		}
-		std::cout<<"shrunk. remaining: "<<m_activeEx<<","<<m_activeVar<<std::endl;
+//		std::cout<<"shrunk. remaining: "<<m_activeEx<<","<<m_activeVar<<std::endl;
 		return true;
 	}
 

@@ -217,7 +217,7 @@ protected:
 
 	unsigned int m_age;	///< The age of the individual (in generations).
 	unsigned int m_rank; ///< The level of non-dominance of the individual. The lower the better.
-	bool m_selected; ///< Is the individual selcted for the next parent set?
+	bool m_selected; ///< Is the individual selected for the next parent set?
 
 	FitnessType m_penalizedFitness; ///< Penalized fitness of the individual.
 	FitnessType m_unpenalizedFitness; ///< Unpenalized fitness of the individual.

@@ -48,6 +48,7 @@
 #include <shark/Algorithms/Trainers/McSvmADMTrainer.h>
 #include <shark/Algorithms/Trainers/McSvmATSTrainer.h>
 #include <shark/Algorithms/Trainers/McSvmATMTrainer.h>
+#include <shark/Algorithms/Trainers/McReinforcedSvmTrainer.h>
 #include <shark/Models/Kernels/LinearKernel.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
@@ -212,14 +213,27 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	{
 		double alpha[15] = {0.0, -0.4375, -0.0625, -0.4375, 0.0, -0.0625, 0.0, -0.5, 0.0, -0.375, -0.125, 0.0, 0.0, 0.0, 0.0};
 		KernelClassifier<RealVector> svm;
-		McSvmATMTrainer<RealVector> trainer(&kernel,  0.5, false);
+		McSvmATMTrainer<RealVector> trainer(&kernel, 0.5, false);
 		std::cout << "testing " << trainer.name() << std::endl;
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
 		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+	}
 
+	// Reinforced-SVM
+	{
+		double alpha[15] = {0.5, -0.5, 0.0, -0.5, 0.5, 0.0, -0.5, -0.5, 0.5, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0};
+		KernelClassifier<RealVector> svm;
+		McReinforcedSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
+		std::cout << "testing " << trainer.name() << std::endl;
+		trainer.sparsify() = false;
+		trainer.stoppingCondition().minAccuracy = 1e-8;
+		trainer.train(svm, dataset);
+		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
+		std::cout << svm.parameterVector() << std::endl;
+		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
 	}
 }
 //~ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_ITERATIVE_BIAS_TEST )

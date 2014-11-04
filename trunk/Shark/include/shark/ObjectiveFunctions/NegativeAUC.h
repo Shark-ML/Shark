@@ -51,7 +51,7 @@ namespace shark {
 template<class LabelType = unsigned int, class OutputType = RealVector>
 class NegativeAUC : public AbstractCost<LabelType, OutputType>
 {
- public:
+public:
 	typedef KeyValuePair< double, LabelType > AUCPair;
 
 	/// Constructor.
@@ -72,11 +72,11 @@ class NegativeAUC : public AbstractCost<LabelType, OutputType>
 		SHARK_CHECK(dataDimension(prediction) > column,"[NegativeAUC::eval] column number too large");
 
 		std::size_t elements = target.numberOfElements();
-		
+
 		unsigned P = 0; // positive examples
 		unsigned N = 0; // negative examples
 		std::vector<AUCPair> L(elements); // list of predictions and labels
-		
+
 		for(std::size_t i=0; i!= elements; i++) { // build list
 			LabelType t = target.element(i);
 			// negate predictions if m_invert is set
@@ -90,9 +90,9 @@ class NegativeAUC : public AbstractCost<LabelType, OutputType>
 			else 
 				N++;
 		}    
-					  
+
 		std::sort (L.begin(), L.end(),std::greater<AUCPair>() ); // sort in decreasing order
-	
+
 		double   A = 0; // area
 		unsigned TP = 0; // true positives
 		unsigned FP = 0; // false positives
@@ -117,6 +117,7 @@ class NegativeAUC : public AbstractCost<LabelType, OutputType>
 		//~ A /= double(N*P);
 		return -A;
 	}
+
 	/// \brief Computes area under the curve. If the prediction vector is
 	/// 1-dimensional, the "positive" class is mapped to larger values. If
 	/// the prediction vector is 2-dimensional, the second dimension is
@@ -128,19 +129,19 @@ class NegativeAUC : public AbstractCost<LabelType, OutputType>
 	/// \param prediction: prediction by classifier, OutputType-valued vector
 	double eval(Data<LabelType> const& target, Data<OutputType>  const& prediction) const {
 		SHARK_CHECK(prediction.numberOfElements() >= 1,"[NegativeAUC::eval] empty prediction set");
-		
+
 		std::size_t dim = dataDimension(prediction);
 		if(dim == 1) 
 			return eval(target, prediction, 0);
 		else if(dim == 2) 
 			return eval(target, prediction, 1);
-		
+
 		throw SHARKEXCEPTION("[NegativeAUC::eval] no default value for column");
 		return 0.;
 	}
 
 
- protected:
+protected:
 	double trapArea(double x1, double x2, double y1, double y2) const {
 		double base = std::abs(x1-x2);
 		double heightAvg = (y1+y2)/2;
@@ -164,7 +165,7 @@ class NegativeAUC : public AbstractCost<LabelType, OutputType>
 template<class LabelType = unsigned int, class OutputType = LabelType>
 class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, OutputType>
 {
- public:
+public:
 	/// Constructor.
 	/// \param invert: if set to true, the role of positive and negative class are switched
 	NegativeWilcoxonMannWhitneyStatistic(bool invert = false) {
@@ -197,10 +198,10 @@ class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, Outp
 		}
 		std::size_t m = pos.size();
 		std::size_t n = neg.size();
-		
+
 		std::sort (pos.begin(), pos.end());
 		std::sort (neg.begin(), neg.end());
-		
+
 		double A = 0;
 		for(std::size_t i = 0, j = 0; i != m; i++) {
 			A += j; 
@@ -211,7 +212,7 @@ class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, Outp
 					break;
 			}
 		}
-		
+
 #ifdef DEBUG
 		// most naive implementation 
 		double verifyA = 0.;
@@ -224,13 +225,13 @@ class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, Outp
 			throw( shark::Exception( "shark::WilcoxonMannWhitneyStatistic::eval: error in algorithm, efficient and naive implementation do no coincide", __FILE__, __LINE__ ) );
 		}
 #endif
-		
+
 		return -A / (n*m);
 	}
 
 	double eval(Data<LabelType> const& target, Data<OutputType>  const& prediction) const {
 		SHARK_CHECK(prediction.numberOfElements() >= 1,"[NegativeAUC::eval] empty prediction set");
-		
+
 		std::size_t dim = dataDimension(prediction);
 		if(dim == 1) 
 			return eval(target, prediction, 0);
@@ -240,6 +241,7 @@ class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, Outp
 		throw SHARKEXCEPTION("[NegativeAUC::eval] no default value for column");
 		return 0.;
 	}
+
 private:
 	bool m_invert;
 };
