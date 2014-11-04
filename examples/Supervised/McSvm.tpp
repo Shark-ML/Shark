@@ -14,6 +14,7 @@
 #include <shark/Algorithms/Trainers/McSvmATSTrainer.h>
 #include <shark/Algorithms/Trainers/McSvmATMTrainer.h>
 #include <shark/Algorithms/Trainers/McSvmMMRTrainer.h>
+#include <shark/Algorithms/Trainers/McReinforcedSvmTrainer.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 
 
@@ -59,27 +60,29 @@ int main()
 	// loss measuring classification errors
 	ZeroOneLoss<unsigned int> loss;
 
-	// There are 8 trainers for multi-class SVMs in Shark which can train with or without bias:
-	AbstractSvmTrainer<RealVector, unsigned int>* trainer[16];
-	trainer[0] = new McSvmOVATrainer<RealVector>(&kernel, C,false);
-	trainer[1] = new McSvmCSTrainer<RealVector>(&kernel, C,false);
-	trainer[2] = new McSvmWWTrainer<RealVector>(&kernel, C,false);
-	trainer[3] = new McSvmLLWTrainer<RealVector>(&kernel, C,false);
-	trainer[4] = new McSvmADMTrainer<RealVector>(&kernel, C,false);
-	trainer[5] = new McSvmATSTrainer<RealVector>(&kernel, C,false);
-	trainer[6] = new McSvmATMTrainer<RealVector>(&kernel, C,false);
-	trainer[7] = new McSvmMMRTrainer<RealVector>(&kernel, C,false);
-	trainer[8] = new McSvmOVATrainer<RealVector>(&kernel, C,true);
-	trainer[9] = new McSvmCSTrainer<RealVector>(&kernel, C,true);
-	trainer[10] = new McSvmWWTrainer<RealVector>(&kernel, C,true);
-	trainer[11] = new McSvmLLWTrainer<RealVector>(&kernel, C,true);
-	trainer[12] = new McSvmADMTrainer<RealVector>(&kernel, C,true);
-	trainer[13] = new McSvmATSTrainer<RealVector>(&kernel, C,true);
-	trainer[14] = new McSvmATMTrainer<RealVector>(&kernel, C,true);
-	trainer[15] = new McSvmMMRTrainer<RealVector>(&kernel, C,true);
+	// There are 9 trainers for multi-class SVMs in Shark which can train with or without bias:
+	AbstractSvmTrainer<RealVector, unsigned int>* trainer[18];
+	trainer[0] = new McSvmOVATrainer<RealVector>(&kernel, C, false);
+	trainer[1] = new McSvmCSTrainer<RealVector>(&kernel, C, false);
+	trainer[2] = new McSvmWWTrainer<RealVector>(&kernel, C, false);
+	trainer[3] = new McSvmLLWTrainer<RealVector>(&kernel, C, false);
+	trainer[4] = new McSvmADMTrainer<RealVector>(&kernel, C, false);
+	trainer[5] = new McSvmATSTrainer<RealVector>(&kernel, C, false);
+	trainer[6] = new McSvmATMTrainer<RealVector>(&kernel, C, false);
+	trainer[7] = new McSvmMMRTrainer<RealVector>(&kernel, C, false);
+	trainer[8] = new McReinforcedSvmTrainer<RealVector>(&kernel, C, false);
+	trainer[9] = new McSvmOVATrainer<RealVector>(&kernel, C, true);
+	trainer[10] = new McSvmCSTrainer<RealVector>(&kernel, C, true);
+	trainer[11] = new McSvmWWTrainer<RealVector>(&kernel, C, true);
+	trainer[12] = new McSvmLLWTrainer<RealVector>(&kernel, C, true);
+	trainer[13] = new McSvmADMTrainer<RealVector>(&kernel, C, true);
+	trainer[14] = new McSvmATSTrainer<RealVector>(&kernel, C, true);
+	trainer[15] = new McSvmATMTrainer<RealVector>(&kernel, C, true);
+	trainer[16] = new McSvmMMRTrainer<RealVector>(&kernel, C, true);
+	trainer[17] = new McReinforcedSvmTrainer<RealVector>(&kernel, C, true);
 
-	std::printf("SHARK multi-class SVM example - training 16 machines:\n");
-	for (i=0; i<16; i++)
+	std::printf("SHARK multi-class SVM example - training 18 machines:\n");
+	for (i=0; i<18; i++)
 	{
 		trainer[i]->train(svm, training);
 		Data<unsigned int> output = svm(training.inputs());
@@ -89,7 +92,7 @@ int main()
 
 		std::printf(
 			"[%2d] %10s %s    iterations=%10d    time=%9.4g seconds    training error=%9.4g    test error=%9.4g\n",
-			(2*i+1),
+			i,
 			trainer[i]->name().c_str(),
 			trainer[i]->trainOffset()? "with bias   ":"without bias",
 			(int)trainer[i]->solutionProperties().iterations,
@@ -98,9 +101,9 @@ int main()
 			test_error
 		);
 	}
-	
+
 	//clean up
-	for(std::size_t i = 0; i < 16; ++i){
+	for (std::size_t i = 0; i < 18; ++i){
 		delete trainer[i];
 	}
 }

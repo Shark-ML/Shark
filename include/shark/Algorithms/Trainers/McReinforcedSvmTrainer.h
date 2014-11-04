@@ -83,14 +83,14 @@ public:
 		// prepare the problem description
 		RealMatrix linear(ic, classes, 1.0);
 		{
-			LabeledData<InputType, unsigned int>::LabelContainer const& labels = dataset.labels();
+			typename LabeledData<InputType, unsigned int>::LabelContainer const& labels = dataset.labels();
 			std::size_t i=0;
 			for (std::size_t b=0; b<labels.numberOfBatches(); b++)
 			{
-				LabeledData<InputType, unsigned int>::LabelContainer::const_batch_reference batch = labels.batch(b);
+				typename LabeledData<InputType, unsigned int>::LabelContainer::const_batch_reference batch = labels.batch(b);
 				for (std::size_t e=0; e<boost::size(batch); e++)
 				{
-					unsigned int const& l = shark::get(batch, e)
+					unsigned int const& l = shark::get(batch, e);
 					linear(i, l) = classes - 1.0;   // self-margin target value of reinforced SVM loss
 					i++;
 				}

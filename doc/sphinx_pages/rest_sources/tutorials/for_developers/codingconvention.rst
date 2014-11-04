@@ -145,10 +145,10 @@ Namespaces
 ----------
 
 All code in the Shark library is placed into the namespace ``shark``.
-Currently, the only other namespace in ``shark::detail``. Content within
+Currently, the only other namespace is ``shark::detail``. Content within
 the detail namespace is considered 'protected', and it is often found in
-files places in 'impl' sub-directories. This code may be less
-well-documented than the 'public' code base, since it is not intended to
+files placed in 'impl' sub-directories. This code may be less
+well-documented than the 'public' code base since it is not intended to
 be used directly from outside the library.
 
 
@@ -255,7 +255,7 @@ code base are found in header files. To maintain a clean structure some
 headers are 'hidden' in sub-directories with name *impl*.
 
 Statements with strong side effects should be avoided in header files.
-``using`` statements must not be used at global scope of the scope of
+``using`` statements must not be used at global scope or the scope of
 the *shark* namespace in header files. Definition of names by means of
 ``#define`` statements should be avoided where possible.
 
