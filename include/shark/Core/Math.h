@@ -45,6 +45,7 @@
 #include <boost/type_traits/is_arithmetic.hpp>
 #include <limits>
 #include <cmath>
+#include <shark/Core/Exception.h>
 
 namespace shark {
 
@@ -179,48 +180,139 @@ namespace shark {
 		return -abs(x);
 	}
 	
-	/// \brief Returns the trigamma function
-	double trigamma(double x){
+	/// \brief Calculates the trigamma function -the derivative of the digamma function
+	///
+	/// The trigamma function is defined as
+	/// \f[\Psi^{(1)}(x)= \frac{\partial^2}{\partial ^2} \log \gamma(x)\f]
+	///
+	/// It has poles as x=-1,-2,-3,.. at which the function value is infinity. 
+	/// For more information see http://mathworld.wolfram.com/TrigammaFunction.html
+	///
+	/// We calculate it in two different ways. If the argument is small a taylor expansion
+	/// is used. otherwise the argument is transformed to a valu large enough such that
+	/// the asymptotic series holds which is then easy to calculate with high precision
+	inline double trigamma(double x){
+		double small = 1e-4;//threshold for taylor expansion validity around 0
+		double large = 15;//threshold above which the asymptotic formula is valid
+		//coefficients for taylor expansion - value at 0
+		double trigamma1 = 1.6449340668482264365; // pi^2/6 = Zeta(2) 
+		double tetragamma1 = -2.404113806319188570799476;  // -2 Zeta(3) */
+		//even Bernoulli coefficients B_2..B_10 for the asymptotic formula
+		double b2 =  1./6;
+		double b4 = -1./30;
+		double b6 =  1./42;
+		double b8 = -1./30;
+		double b10 = 5./66;
+		// singularities are at -1, -2, -3,...
+		if((x <= 0) && (std::floor(x) == x)) {
+			return -std::numeric_limits<double>::infinity();
+		}
+		//treating of general negative arguments
 		if(x < 0)
 		{
 			//use reflection relation: -psi^1(1-x)-psi^1(x)=pi* d/dz cot(pi*x)
 			//=> psi^1(x) = -psi^1(1-x)-pi* d/dz cot(pi*x)
 			double pi = boost::math::constants::pi<double>();
-			using std::sin;
-			double s = sin(pi*x);
-			double cot_pi_x=-pi / (s * s);
-			return -trigamma(1-x) - pi * cot_pi_x;
+			double s = std::sin(pi*x);
+			double ddz_cot_pi_x=-pi / (s * s);
+			return -trigamma(1-x) - pi * ddz_cot_pi_x;
 		}
-		//~ if(x > 20)
-		//~ {
-			//~ //reduce by multiplication theorem
-			//~ //psi^1(2x)=1/4[psi^1(x)+psi^1(x+1/2]]
-			//~ return 0.25*trigamma(x)+0.25*trigamma(x+1/2);
-		//~ }
-		//~ else{
-		double g = 7;
-		double p[] = {0.99999999999980993, 676.5203681218851, -1259.1392167224028,
-				771.32342877765313, -176.61502916214059, 12.507343278686905,
-				-0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7};
-		double z = x-1;		
-		double sum = 0;
-		double sumSq = 0;
-		double sumCube  = 0;
-		for(std::size_t i = 1; i != 9; ++i){
-			double zplusi=z+i;
-			sum+=p[i]/zplusi;
-			sumSq+=p[i]/sqr(zplusi);
-			sumCube+=p[i]/cube(zplusi);
+		// Use Taylor series if argument <= small
+		//for this make use of the entity trigamma(x)=trigamma(x+1)+1/x^2
+		//to move the origin to 1 and calculate the taylor expansion at 1 
+		if(x <= small) {
+			return 1/(x*x) + trigamma1 + tetragamma1*x;
 		}
 		
-		double t1=sumSq/(p[0]+sum);
-		t1*=t1;
-		double t2 = sumCube/(p[0]+sum);
-		return 1/(z+g+0.5)+g/sqr(z+g+0.5)-t1+2*t2;
+		//otherwise make use of the same entity
+		//for n steps until x+n > large, which is the threshold for the
+		// asymptotic formula to converge. 
+		double result = 0;
+		while(x < large) {
+			result += 1/(x*x);
+			x++;
+		}
+		//now apply the asymptotic formula
+		//trigamma(x)=1/x+1/(2*x*x)+sum_k B_{2k}/z^{2k+1}
+		if(x >= large) {
+			double r = 1/(x*x);
+			double t = (b4 + r*(b6 + r*(b8 + r*b10)));
+			result += 0.5*r + (1 + r*(b2 + r*t))/x;
+		}
+		return result;
+	}
+
+	/// \brief Calculates the tetragamma function - the derivative of the trigamma function
+	///
+	/// The trigamma function is defined as
+	/// \f[\Psi^{(2)}(x)= \frac{\partial}{\partial x}\Psi^{(1)}(x)= \frac{\partial^3}{\partial ^3} \log \gamma(x)\f]
+	///
+	/// The function is undefined for x=-1,-2,-3,... and an exception is thrown.
+	/// For more information see http://mathworld.wolfram.com/PolygammaFunction.html
+	///
+	/// We calculate it in two different ways. If the argument is small a taylor expansion
+	/// is used. otherwise the argument is transformed to a valu large enough such that
+	/// the asymptotic series holds which is then easy to calculate with high precision
+	inline double tetragamma(double x)
+	{
+		double small = 1e-4;//threshold foruse of taylor expansion if value is close to 0
+		double large = 18;//threshold above which the asymptotic formula is valid
+		//coefficients for taylor expansion at 1
+		double tetragamma1 = -2.404113806319188570799476;  /* -2 Zeta(3) */
+		double pentagamma1 = 6.49393940226682914909602217; /* 6 Zeta(4) */
+		//even Bernoulli coefficients B_2..B_10 for the asymptotic formula
+		double b2 =  1./6;
+		double b4 = -1./30;
+		double b6 =  1./42;
+		double b8 = -1./30;
+		double b10 = 5./66;
+		// singularities are at -1, -2, -3,...
+		if((x <= 0) && (std::floor(x) == x)) {
+			throw SHARKEXCEPTION("[tetragamma] negative whole numbers ar enot allowed");
+		}
+		//treating of general negative arguments
+		if(x < 0)
+		{
+			//use derivative of reflection relation of trigamma: 
+			//-psi^2(1-x)-psi^2(x)=pi* d^2/dz^2 cot(pi*x)
+			//=> psi^2(x) = -psi^2(1-x)-pi* d^2/dz^2 cot(pi*x)
+			//and d^2/dz^2 cot(pi*x)= -pi d/dz 1/sin(pi*x)^2
+			// = 2*pi^2 cos(pi*x)/sin(pi*x)^3
+			double pi = boost::math::constants::pi<double>();
+			double s_pi_x = std::sin(pi*x);
+			double c_pi_x = std::cos(pi*x);
+			double ddz2_cot_pi_x=2*sqr(pi)*c_pi_x/cube(s_pi_x);
+			return -tetragamma(1-x) - pi * ddz2_cot_pi_x;
+		}
+		// Use Taylor series if argument <= small
+		//for this make use of the entity tetragamma(x)=tetragamma(x+1)-2/x^3
+		//to move the origin to 1 and calculate the taylor expansion at 1 
+		if(x <= small) {
+			return -2/cube(x) + tetragamma1 + pentagamma1*x;
+		}
+		
+		//otherwise make use of the same entity
+		//for n steps until x+n > large, which is the threshold for the
+		// asymptotic formula to converge. 
+		double result = 0;
+		while(x < large) {
+			result -= 2/cube(x);
+			x++;
+		}
+		//now apply the asymptotic formula - the derivative of the asymptotic formula
+		// of the trigamma function
+		//tetragamma(x)=-1/x^2-1/(x^3)-sum_k (2k+1)*B_{2k}/z^{2(k+1)}
+		
+		if(x >= large) {
+			double r = 1/(x*x);
+			double t = (5*b4 + r*(7*b6 + r*(9*b8 + r*11*b10)));
+			result -= r/x + r*(1 + r*(3*b2 + r*t));
+		}
+		return result;
+		
 	}
 
 }
-
 /** @}*/ 
 
 #endif 
