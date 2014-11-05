@@ -129,7 +129,7 @@ void symm_prod(
 
 /// \brief Computes x=Ax for a triangular matrix A
 ///
-/// The first ttemplate argument governs the type
+/// The first template argument governs the type
 /// of triangular matrix: Lower, Upper, UnitLower and UnitUpper.
 ///
 ///Example: triangular_prod<Lower>(A,x);
@@ -144,7 +144,7 @@ void triangular_prod(
 /// \brief Computes x=Ax for a triangular matrix A
 ///
 /// This is the version for temporary proxy objects
-/// The first ttemplate argument governs the type
+/// The first template argument governs the type
 /// of triangular matrix: Lower, Upper, UnitLower and UnitUpper.
 ///
 ///Example: triangular_prod<Lower>(A,x);
