@@ -149,6 +149,8 @@ UnlabeledData<RealVector> createDataNotFullRank()
 	return  createDataFromRange(data,2);//small batch size to get batching errors
 }
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_PCA)
+
 BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){
 	//
 	// 1. 2D test with whitening and without dimensionality
@@ -271,3 +273,5 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_LESS_DATA_THAN_DIMENSIONS ){
 		BOOST_CHECK_SMALL(emean(i), 1.e-9);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

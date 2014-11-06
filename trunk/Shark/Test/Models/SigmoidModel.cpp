@@ -17,6 +17,8 @@ double sigmoid(double a){
 	return 1.0/(1.0+std::exp(-a));
 }
 
+BOOST_AUTO_TEST_SUITE (Models_SigmoidModel)
+
 BOOST_AUTO_TEST_CASE( SigmoidModel_Value )
 {
 	SigmoidModel model( false );
@@ -324,3 +326,5 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_Unconstrained )
 		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

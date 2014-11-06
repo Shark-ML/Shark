@@ -13,6 +13,8 @@ using namespace shark;
 
 // This unit test checks correctness of the
 // DiscreteKernel class.
+BOOST_AUTO_TEST_SUITE (Models_Kernels_DiscreteKernel)
+
 BOOST_AUTO_TEST_CASE( DiscreteKernel_Test )
 {
 	// define a positive definite, symmetric matrix
@@ -41,3 +43,5 @@ BOOST_AUTO_TEST_CASE( DiscreteKernel_Test )
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

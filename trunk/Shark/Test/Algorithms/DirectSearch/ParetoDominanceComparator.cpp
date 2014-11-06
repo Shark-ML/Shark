@@ -9,6 +9,8 @@
 using namespace shark;
 
 //check that the relation is correct on a number of selected points
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_ParetoDominanceComparator)
+
 BOOST_AUTO_TEST_CASE( FastNonDominatedSort_Selected_Points_Test ) {
 	RealVector p0(3);
 	p0[0] = -1; p0[1] = 0; p0[2] = 1;
@@ -106,3 +108,4 @@ BOOST_AUTO_TEST_CASE( FastNonDominatedSort_Random_Test ) {
 		}
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

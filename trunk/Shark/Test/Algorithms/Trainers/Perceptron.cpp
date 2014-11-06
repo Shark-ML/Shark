@@ -7,6 +7,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Perceptron)
+
 BOOST_AUTO_TEST_CASE( PERCEPTRON ){
 	DenseLinearKernel kernel;
 	KernelClassifier<RealVector> model;
@@ -44,3 +46,5 @@ BOOST_AUTO_TEST_CASE( PERCEPTRON ){
 
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

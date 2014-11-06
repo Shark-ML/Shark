@@ -15,6 +15,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_WeightedSumKernel)
+
 BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test )
 {
     const double gamma1 = 0.1;
@@ -567,3 +569,5 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test_Detailed_NoDegreeParam_Unconst
 //  testKernelDerivative(kernel, 2, 1.e-6);
 //  testKernelInputDerivative(kernel, 2, 1.e-8);
 //}
+
+BOOST_AUTO_TEST_SUITE_END()

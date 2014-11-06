@@ -78,6 +78,8 @@ const char test[] = "3.2588947676e+00 5.4190801643e-01 1\n\
 
 // on the above mini chessboard problem, optimize CSVM parameters using rprop on the SvmLogisticInterpretation.
 // after every rprop step, assert that the numerical and analytical derivative coincide.
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_SvmLogisticInterpretation)
+
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessboard )
 {
 	double NUMERICAL_INCREASE_FACTOR = 1.00001;
@@ -274,3 +276,5 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Pami_Toy )
 }
 
 
+
+BOOST_AUTO_TEST_SUITE_END()

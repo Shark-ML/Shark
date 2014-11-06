@@ -37,6 +37,8 @@ double resultSVD_V[NumTests][Dim][Dim]=
 	}
 };
 
+BOOST_AUTO_TEST_SUITE (LinAlg_svd)
+
 BOOST_AUTO_TEST_CASE( LinAlg_svd )
 {
 	for(size_t test=0;test!=NumTests;++test)
@@ -110,3 +112,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_svd_big )
 }
 
 
+
+BOOST_AUTO_TEST_SUITE_END()

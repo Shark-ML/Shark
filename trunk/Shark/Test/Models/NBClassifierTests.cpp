@@ -60,7 +60,7 @@ public:
 	}
 };
 
-BOOST_FIXTURE_TEST_SUITE(NaiveBayesClassifierTests, NBClassifierFixture)
+BOOST_FIXTURE_TEST_SUITE (Models_NBClassifierTests, NBClassifierFixture)
 
 BOOST_AUTO_TEST_CASE(Test)
 {

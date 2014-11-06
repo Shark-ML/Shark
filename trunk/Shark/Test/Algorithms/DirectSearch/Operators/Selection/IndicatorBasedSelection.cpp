@@ -10,6 +10,8 @@
 using namespace shark;
 
 //generate random populations and check that the selection chooses the right ones.
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_Selection_IndicatorBasedSelection)
+
 BOOST_AUTO_TEST_CASE( IndicatorBasedSelection_Test ) {
 	std::size_t numPoints = 50;
 	std::size_t numTrials = 100;
@@ -78,3 +80,4 @@ BOOST_AUTO_TEST_CASE( IndicatorBasedSelection_Test ) {
 		//~ }
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

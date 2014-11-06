@@ -6,6 +6,8 @@
 #include <shark/Rng/GlobalRng.h>
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Core_Iterators)
+
 BOOST_AUTO_TEST_CASE(MULTI_SEQUENCE_ITERATOR_TEST)
 {
 	std::vector<std::vector<std::size_t> > vecs(10);
@@ -72,3 +74,5 @@ BOOST_AUTO_TEST_CASE(MULTI_SEQUENCE_ITERATOR_TEST)
 	
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

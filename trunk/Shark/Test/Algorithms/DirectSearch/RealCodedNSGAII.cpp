@@ -51,6 +51,8 @@ void testObjectiveFunctionMOO(
 }
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_RealCodedNSGAII)
+
 BOOST_AUTO_TEST_CASE( RealCodedNSGAII_HYPERVOLUME_Functions ) {
 	RealVector reference(2);
 	reference(0) = 11;
@@ -78,3 +80,5 @@ BOOST_AUTO_TEST_CASE( RealCodedNSGAII_HYPERVOLUME_Functions ) {
 	testObjectiveFunctionMOO(zdt6,10,zdt6Volume,10000,reference);
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

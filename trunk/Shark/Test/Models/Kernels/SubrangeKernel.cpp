@@ -12,6 +12,8 @@ using namespace shark;
 
 
 //since SubrangeKernel is based on weighted sum kernel (which is properly tested) we don't need to do numerical testing.
+BOOST_AUTO_TEST_SUITE (Models_Kernels_SubrangeKernel)
+
 BOOST_AUTO_TEST_CASE( DenseSubrangeKernel_Test)
 {
 	
@@ -76,3 +78,4 @@ BOOST_AUTO_TEST_CASE( DenseSubrangeKernel_Test)
 	testKernelDerivative(kernel,22,1.e-7);
 	testKernelInputDerivative(kernel,22);
 }
+BOOST_AUTO_TEST_SUITE_END()

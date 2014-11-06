@@ -22,6 +22,8 @@ void testEqualCollections(const T& set,const U& vec){
 	}
 }
 
+BOOST_AUTO_TEST_SUITE (Data_CVDatasetTools)
+
 BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateIndexed ){
 	//input for createIndexed
 	std::vector<double> inputs;
@@ -171,3 +173,4 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSizeBalancedUnsigned )
 
 
 }
+BOOST_AUTO_TEST_SUITE_END()

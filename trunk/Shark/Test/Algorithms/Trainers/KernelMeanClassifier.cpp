@@ -8,6 +8,8 @@
 using namespace shark;
 using namespace std;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_KernelMeanClassifier)
+
 BOOST_AUTO_TEST_CASE( KERNEL_MEAN_CLASSIFIER ) {
 	
 	DenseLinearKernel kernel;
@@ -48,3 +50,5 @@ BOOST_AUTO_TEST_CASE( KERNEL_MEAN_CLASSIFIER ) {
 
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

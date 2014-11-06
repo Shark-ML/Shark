@@ -105,7 +105,7 @@ void testMatrix(MatrixType& matrix, Result const& result){
 		BOOST_CHECK_SMALL(matrixRow(j)-result(start,j),1.e-13);
 }
 
-BOOST_FIXTURE_TEST_SUITE(Algorithms_QP_KernelMatrix, Fixture)
+BOOST_FIXTURE_TEST_SUITE (LinAlg_KernelMatrix, Fixture)
 
 BOOST_AUTO_TEST_CASE( QP_KernelMatrix ) {
 	RealMatrix matrix = kernelMatrix;

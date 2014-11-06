@@ -13,6 +13,8 @@ using namespace std;
 using namespace boost::archive;
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Softmax)
+
 BOOST_AUTO_TEST_CASE( Softmax_Value )
 {
 	Softmax model(2);
@@ -139,3 +141,5 @@ BOOST_AUTO_TEST_CASE( Softmax_SERIALIZE )
 		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

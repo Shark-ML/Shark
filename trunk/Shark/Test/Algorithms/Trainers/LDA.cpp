@@ -8,6 +8,8 @@
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_LDA)
+
 BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 	const size_t TrainExamples = 12000;
 	LDA trainer;
@@ -287,3 +289,4 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS_WEIGHTING ){
 		
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

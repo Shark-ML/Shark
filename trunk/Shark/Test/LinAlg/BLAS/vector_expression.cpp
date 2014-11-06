@@ -33,6 +33,8 @@ const std::size_t Dimensions = 10;
 /////////////////////////////////////////////////////////////
 //////UNARY TRANSFORMATIONS///////
 ////////////////////////////////////////////////////////////
+BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_vector_expression)
+
 BOOST_AUTO_TEST_CASE( BLAS_Vector_Unary_Minus )
 {
 	vector<double> x(Dimensions); 
@@ -555,3 +557,4 @@ BOOST_AUTO_TEST_CASE( BLAS_Sparse_Vector_Binary_Multiply)
 	}
 	checkSparseExpressionEquality(x*y,result);
 }
+BOOST_AUTO_TEST_SUITE_END()

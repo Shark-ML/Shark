@@ -79,6 +79,8 @@ void ZeroSum(RealMatrix& mat)
 // This test case checks the resulting model of
 // training eight multi-class SVMs on a minimal
 // test case.
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_LinearSvmTrainer)
+
 BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 {
 	size_t classes = 5;
@@ -164,3 +166,5 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

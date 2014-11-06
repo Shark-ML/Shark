@@ -46,6 +46,8 @@ struct TestFunction : public SingleObjectiveFunction
 };
 
 //First Test: the algorithm should work in a deterministic setting
+BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_NoisyRprop)
+
 BOOST_AUTO_TEST_CASE( NoisyRprop_deterministic )
 {
 	TestFunction function(false);
@@ -98,3 +100,5 @@ BOOST_AUTO_TEST_CASE( NoisyRprop_stochastic )
 	}
 	BOOST_CHECK_SMALL(error,1.e-7);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -8,6 +8,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_SigmoidFit)
+
 BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_RPROP_NO_ENCODING_DETERMINISTIC ){
 	bool TRANSFORM_INPUTS = false; //no encoding, i.e., the non-unconstrained variant
 	unsigned int NUM_DRAWS = 90;
@@ -207,3 +209,5 @@ BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_PLATT ){
 	BOOST_CHECK_SMALL( slope - 1.07, 0.1);
 	BOOST_CHECK_SMALL(offset - 0.95, 0.1);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

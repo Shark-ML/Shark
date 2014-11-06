@@ -32,6 +32,8 @@ RealMatrix createSymmetricMatrix(Vec const& lambda,Mat const& rotation){
 }
 
 //simple test which checks for all argument combinations whether they are correctly translated
+BOOST_AUTO_TEST_SUITE (LinAlg_solve)
+
 BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	
 	//i actually had to come up with a simple hand calculated example here
@@ -946,3 +948,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_generalSolveSystemInPlace_Rectangular2_RankK ){
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

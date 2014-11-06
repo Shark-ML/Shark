@@ -8,6 +8,8 @@
 #include<algorithm>
 #include<iostream>
 
+BOOST_AUTO_TEST_SUITE (EALib_SchwefelEllipsoidCMA)
+
 BOOST_AUTO_TEST_CASE( EALib_SchwefelEllipsoidCMSA )
 {
 	const unsigned Seed = 42;
@@ -44,3 +46,5 @@ BOOST_AUTO_TEST_CASE( EALib_SchwefelEllipsoidCMSA )
 	std::sort(results,results+Trials);
 	BOOST_CHECK_CLOSE(results[Trials/2],230,5);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

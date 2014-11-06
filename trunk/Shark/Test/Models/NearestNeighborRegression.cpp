@@ -42,6 +42,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_NearestNeighborRegression)
+
 BOOST_AUTO_TEST_CASE( Models_NearestNeighborRegression ) {
 
 	// simple data set with paired points
@@ -79,3 +81,5 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighborRegression ) {
 		BOOST_CHECK_SMALL(prediction.element(i)(0) - 4.0 * (i/2 - 1), 1e-14);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

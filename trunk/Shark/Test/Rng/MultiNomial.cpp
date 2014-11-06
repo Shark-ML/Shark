@@ -8,6 +8,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Rng_MultiNomial)
+
 BOOST_AUTO_TEST_CASE( MultiNomial_same_probabilities) {
 	std::size_t Samples = 100000;
 	
@@ -65,3 +67,5 @@ BOOST_AUTO_TEST_CASE( MultiNomial_different_probabilities) {
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

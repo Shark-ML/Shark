@@ -44,6 +44,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_CARTClassifier)
+
 BOOST_AUTO_TEST_CASE( CART_Classifier ) {
 
 	//Test data
@@ -100,3 +102,5 @@ BOOST_AUTO_TEST_CASE( CART_Classifier ) {
 	BOOST_CHECK(error == 0.0);
 
 }
+
+BOOST_AUTO_TEST_SUITE_END()

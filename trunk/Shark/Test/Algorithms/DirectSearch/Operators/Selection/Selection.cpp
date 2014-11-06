@@ -24,6 +24,8 @@ struct NumberComparator {
 
 };
 
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_Selection_Selection)
+
 BOOST_AUTO_TEST_CASE( Tournament_Selection ) {
 
 	double pop[] = { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
@@ -200,3 +202,5 @@ BOOST_AUTO_TEST_CASE( EPTournament ) {
         std::cout << "Individual: " << **it << std::endl;
     
 	}*/
+
+BOOST_AUTO_TEST_SUITE_END()

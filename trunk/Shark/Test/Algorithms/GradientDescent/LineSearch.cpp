@@ -21,6 +21,8 @@ struct Testfunction
 	}
 };
 
+BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_LineSearch)
+
 BOOST_AUTO_TEST_CASE( LineSearch_DLinmin )
 {
 	double fret(0.);// function value at the point that
@@ -37,3 +39,5 @@ BOOST_AUTO_TEST_CASE( LineSearch_DLinmin )
 	// lines below are for self-testing this example, please ignore
 	BOOST_CHECK_SMALL(fret-2,1.e-14);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

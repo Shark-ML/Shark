@@ -7,6 +7,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (LinAlg_repeat)
+
 BOOST_AUTO_TEST_CASE( LinAlg_Repeat_Indexed ){
 	std::size_t dimensions = 3;
 	std::size_t repetitions = 10;
@@ -80,3 +82,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_Repeat_Expressions ){
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

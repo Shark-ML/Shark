@@ -44,6 +44,8 @@ struct TestFunction : public SingleObjectiveFunction
 };
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_SteepestDescent)
+
 BOOST_AUTO_TEST_CASE( SteepestDescent_Test )
 {
 	TestFunction function;
@@ -69,3 +71,5 @@ BOOST_AUTO_TEST_CASE( SteepestDescent_Test )
 	}
 	BOOST_CHECK_SMALL(error,1.e-15);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

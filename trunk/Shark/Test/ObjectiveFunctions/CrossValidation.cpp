@@ -49,6 +49,8 @@ using namespace shark;
 // *not* on a line by means of cross-validation. In
 // this very simple case the error can be computed
 // analytically, and thus can serve validation.
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_CrossValidation)
+
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_CrossValidation )
 {
 	// create a simple dataset with three point,
@@ -87,3 +89,5 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_CrossValidation )
 
 	BOOST_CHECK_LT(std::abs(cve - 5.0 / 3.0), 1e-12);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

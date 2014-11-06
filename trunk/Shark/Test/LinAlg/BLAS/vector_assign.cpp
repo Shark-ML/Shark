@@ -14,6 +14,8 @@ void checkVectorEqual(V1 const& v1, V2 const& v2){
 	}
 }
 
+BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_vector_assign)
+
 BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign ){
 	std::cout<<"testing direct assignment"<<std::endl;
 	blas::vector<unsigned int> source_dense(10);
@@ -137,3 +139,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign_Functor ){
 	}
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

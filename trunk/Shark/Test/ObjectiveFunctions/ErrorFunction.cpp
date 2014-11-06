@@ -65,6 +65,8 @@ public:
 };
 
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_ErrorFunction)
+
 BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_BASE )
 {
 	RealVector zero(10);
@@ -214,3 +216,5 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	
 	
 }
+
+BOOST_AUTO_TEST_SUITE_END()

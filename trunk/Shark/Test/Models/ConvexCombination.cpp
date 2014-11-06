@@ -15,6 +15,8 @@ using namespace boost::archive;
 using namespace shark;
 
 //chck that parameters are set correctly
+BOOST_AUTO_TEST_SUITE (Models_ConvexCombination)
+
 BOOST_AUTO_TEST_CASE( Models_ConvexCombination_Parameters)
 {
 	std::size_t numTrials = 10;
@@ -165,3 +167,5 @@ BOOST_AUTO_TEST_CASE( Models_ConvexCombination_SERIALIZE )
 		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

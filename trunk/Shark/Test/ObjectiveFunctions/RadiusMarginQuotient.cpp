@@ -45,6 +45,8 @@ using namespace shark;
 
 
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_RadiusMarginQuotient)
+
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_RadiusMarginQuotient )
 {
 	std::vector<RealVector> inputs(4, RealVector(1));
@@ -85,3 +87,5 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_RadiusMarginQuotient )
 	BOOST_CHECK_SMALL(quotientDerivative - should, 0.01);
 	BOOST_CHECK_SMALL(derivative(0) - estimate, 0.01);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -7,6 +7,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_FisherLDA)
+
 BOOST_AUTO_TEST_CASE( FISHER_LDA_TEST ){
 	const size_t trainExamples = 200000;
 	FisherLDA trainer;
@@ -65,3 +67,5 @@ BOOST_AUTO_TEST_CASE( FISHER_LDA_TEST ){
 		BOOST_CHECK_SMALL(error, 1e-4);		// [TG] 10e-4 ???
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -73,6 +73,8 @@ namespace shark {
     }
 }
 
+BOOST_AUTO_TEST_SUITE (Network_HttpServer)
+
 BOOST_AUTO_TEST_CASE( HttpServer ) {
 
     shark::Producer producer;
@@ -110,3 +112,5 @@ BOOST_AUTO_TEST_CASE( HttpServer ) {
     } catch( ... ) {
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()

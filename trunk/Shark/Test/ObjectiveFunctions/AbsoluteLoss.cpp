@@ -46,6 +46,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_AbsoluteLoss)
+
 BOOST_AUTO_TEST_CASE( ABSOLUTELOSS_EVAL ) {
 	AbsoluteLoss<> loss;
 	unsigned int maxTests = 1000;
@@ -71,3 +73,5 @@ BOOST_AUTO_TEST_CASE( ABSOLUTELOSS_EVAL ) {
 		BOOST_CHECK_SMALL(l - sum, 1e-12);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

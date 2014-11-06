@@ -8,6 +8,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_LinearKernel)
+
 BOOST_AUTO_TEST_CASE( DenseLinearKernel_Test )
 {
 	double result=-2.0;
@@ -43,3 +45,5 @@ BOOST_AUTO_TEST_CASE( DenseLinearKernel_Test )
 
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -140,6 +140,8 @@ void testTreeStructure(
 // Generate 100.000 i.i.d. standard normally
 // distributed samples in 3D, then query the
 // 1.000 nearest neighbors of the origin.
+BOOST_AUTO_TEST_SUITE (Algorithms_nearestneighbors)
+
 BOOST_AUTO_TEST_CASE(IterativeNearestNeighborQueries)
 {
 	double start;
@@ -198,3 +200,5 @@ BOOST_AUTO_TEST_CASE(IterativeNearestNeighborQueries)
 		testTree(khctree,"KHCTree",data,test[k],index,time_reference);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

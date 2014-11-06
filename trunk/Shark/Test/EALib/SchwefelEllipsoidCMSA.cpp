@@ -7,6 +7,8 @@
 
 #include<algorithm>
 
+BOOST_AUTO_TEST_SUITE (EALib_SchwefelEllipsoidCMSA)
+
 BOOST_AUTO_TEST_CASE( EALib_SchwefelEllipsoidCMSA )
 {
 	const unsigned Seed = 42;
@@ -43,3 +45,5 @@ BOOST_AUTO_TEST_CASE( EALib_SchwefelEllipsoidCMSA )
 	//median should lie between 250 and 278
 	BOOST_CHECK_CLOSE(results[Trials/2],265,5);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -4,6 +4,8 @@
 
 #include <shark/LinAlg/Base.h>
 using namespace shark;
+BOOST_AUTO_TEST_SUITE (LinAlg_permute)
+
 BOOST_AUTO_TEST_CASE( LinAlg_Permute_Rows_Matrix ){
 	PermutationMatrix P(5);
 	P(0)=2;
@@ -143,3 +145,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Full ){
 	int error = norm_inf(A-APerm);
 	BOOST_CHECK_EQUAL(error, 0);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

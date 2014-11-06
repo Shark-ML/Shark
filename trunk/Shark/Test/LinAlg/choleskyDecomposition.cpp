@@ -25,6 +25,8 @@ double decomposedMatrix[Dimensions][Dimensions]=
 };
 
 
+BOOST_AUTO_TEST_SUITE (LinAlg_choleskyDecomposition)
+
 BOOST_AUTO_TEST_CASE( LinAlg_CholeskyDecomposition_Base )
 {
 	RealMatrix M(Dimensions, Dimensions);   // input matrix
@@ -219,3 +221,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_CholeskyUpdate ){
 		BOOST_CHECK_SMALL(max(abs(C-CUpdate)),1.e-12);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

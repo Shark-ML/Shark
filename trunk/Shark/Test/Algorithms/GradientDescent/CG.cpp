@@ -11,6 +11,8 @@
 using namespace shark;
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_CG)
+
 BOOST_AUTO_TEST_CASE( CG_dlinmin )
 {
 	Ellipsoid function(5);
@@ -47,3 +49,5 @@ BOOST_AUTO_TEST_CASE( CG_WolfeCubic_Rosenbrock )
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and WolfeCubic"<<std::endl;
 	testFunction(optimizer,function,100,2000);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

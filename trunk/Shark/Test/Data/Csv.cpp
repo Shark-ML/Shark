@@ -199,6 +199,8 @@ void checkDataRegression(double* values, LabeledData<RealVector,RealVector> cons
 	}
 }
 
+BOOST_AUTO_TEST_SUITE (Data_Csv)
+
 BOOST_AUTO_TEST_CASE( Data_Csv_Data_Import)
 {
 	{
@@ -382,3 +384,5 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Export)
 	}
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

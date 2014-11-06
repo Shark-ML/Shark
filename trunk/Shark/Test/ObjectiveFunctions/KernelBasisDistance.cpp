@@ -46,6 +46,8 @@
 using namespace shark;
 
 //Sanity check that checks that the error of the exact same basis is minimal and the derivative is small.
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_KernelBasisDistance)
+
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Derivative_Optimal )
 {
 	for(std::size_t trial = 0; trial != 10; ++trial){
@@ -189,3 +191,5 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Gaussian
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

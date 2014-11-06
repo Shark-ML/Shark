@@ -41,3 +41,5 @@ int main( int argc, char ** argv ) {
 
     return( EXIT_SUCCESS );
 }
+
+BOOST_AUTO_TEST_SUITE_END()

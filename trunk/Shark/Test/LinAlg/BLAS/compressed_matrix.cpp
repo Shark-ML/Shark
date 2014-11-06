@@ -78,6 +78,8 @@ void checkRowSizes(std::vector<std::size_t> const& rowSizes, compressed_matrix<i
 
 
 //tests whether reserve calls are correct
+BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_compressed_matrix)
+
 BOOST_AUTO_TEST_CASE( LinAlg_sparse_matrix_reserve_row){
 	std::size_t rows = 11;//Should be prime :)
 	std::size_t columns = 30;
@@ -147,3 +149,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_sparse_matrix_insert_element_some_elements ){
 }
 
 
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -10,6 +10,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_NormalizedKernel)
+
 BOOST_AUTO_TEST_CASE( NormalizedKernel_Polynomial_Test )
 {
 	PolynomialKernel<> baseKernel(2,1);
@@ -53,3 +55,4 @@ BOOST_AUTO_TEST_CASE( NormalizedKernel_GaussianRbf_Test )
 	testKernelDerivative(kernel, 2, 1e-7, 1e-4);
 	testKernelInputDerivative(kernel, 2, 1e-7, 1e-2);
 }
+BOOST_AUTO_TEST_SUITE_END()

@@ -58,6 +58,8 @@ const char test_export[] = "0.3 0.0 0.0 -4 0.0 0.0 0.0 1.1 0.0 0.0 0.0 0.0 0.0 0
 0.0 4.6 0.0 1000 0.0 0.0 0.0 -0.7 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1\n\
 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 17.4 0.0 0.0 0.0 0.0 -2.24 0\n";
 
+BOOST_AUTO_TEST_SUITE (Data_SparseData)
+
 BOOST_AUTO_TEST_CASE( Set_SparseData )
 {
 	std::stringstream ssc(test_classification),  ssmcc(test_mc_classification); //dense: classif., mc-classif., regr.
@@ -129,3 +131,5 @@ BOOST_AUTO_TEST_CASE( Set_SparseData )
     //~ importSparseData( import_of_export_2, "test_output/check2.libsvm" );
 
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -97,7 +97,7 @@ struct Fixture {
 const double Fixture::HV_TEST_SET_2D = 120.196858;
 const double Fixture::HV_TEST_SET_3D = 0.60496383631719475;
 
-BOOST_FIXTURE_TEST_SUITE(Algorithms_Hypervolume, Fixture)
+BOOST_FIXTURE_TEST_SUITE (Algorithms_Hypervolume, Fixture)
 
 BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume ) {
 

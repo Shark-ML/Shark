@@ -56,6 +56,8 @@ using namespace shark;
 // tested), we do not need to do numerical testing.
 // However, we instantiate every function to check for compile errors and that
 // eval() matches the hand-evaluated kernels.
+BOOST_AUTO_TEST_SUITE (Models_Kernels_MklKernel)
+
 BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
 {
 
@@ -634,3 +636,5 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
     //~ testKernelDerivative(kernel, 3, 1.e-5, 1.e-5);
     //~ testKernelInputDerivative(kernel, 3, 1.e-5);
 //~ }
+
+BOOST_AUTO_TEST_SUITE_END()

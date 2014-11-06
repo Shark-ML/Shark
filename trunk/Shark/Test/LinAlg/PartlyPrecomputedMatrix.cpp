@@ -111,6 +111,8 @@ protected:
 
 
 ///\brief test if the whole matrix fits, if we make the cache large enough
+BOOST_AUTO_TEST_SUITE (LinAlg_PartlyPrecomputedMatrix)
+
 BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 {
 
@@ -375,3 +377,5 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel)
 }
 
 
+
+BOOST_AUTO_TEST_SUITE_END()

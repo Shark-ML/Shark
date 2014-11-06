@@ -8,6 +8,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_ArdKernel)
+
 BOOST_AUTO_TEST_CASE( DenseARDKernel_Parameters )
 {
 	const double gamma_init = 2.0;
@@ -160,3 +162,5 @@ BOOST_AUTO_TEST_CASE( DenseARDKernel_Derivative )
 	testKernelDerivative(kernel,3,1.e-5,1.e-4);
 	testKernelInputDerivative(kernel,3,1.e-5,1.e-4);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

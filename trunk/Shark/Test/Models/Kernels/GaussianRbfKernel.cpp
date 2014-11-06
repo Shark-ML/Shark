@@ -25,6 +25,8 @@ void testBatch(Kernel& kernel,std::size_t batchSize1,std::size_t batchSize2,std:
 
 }
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_GaussianRbfKernel)
+
 BOOST_AUTO_TEST_CASE( DenseRbfKernel_Test )
 {
 	const double gamma1=0.1;
@@ -245,3 +247,5 @@ BOOST_AUTO_TEST_CASE( DenseRbfKernel_BENCHMARK )
 	}
 }
 #endif
+
+BOOST_AUTO_TEST_SUITE_END()

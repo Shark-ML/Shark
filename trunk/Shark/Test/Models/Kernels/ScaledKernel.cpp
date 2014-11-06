@@ -9,6 +9,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_ScaledKernel)
+
 BOOST_AUTO_TEST_CASE( ScaledKernel_Test ){
 	double result=-0.2;
 	
@@ -44,3 +46,5 @@ BOOST_AUTO_TEST_CASE( ScaledKernel_Test ){
 	testKernelInputDerivative(kernel,2,1.e-7,1.e-5);
 
 }
+
+BOOST_AUTO_TEST_SUITE_END()

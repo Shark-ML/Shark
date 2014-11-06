@@ -15,6 +15,8 @@ namespace shark {
 // a manually computed kernel value, and of
 // the MultiTaskKernel wrapper class by
 // checking that the product is correct.
+BOOST_AUTO_TEST_SUITE (Models_Kernels_MultiTaskKernel)
+
 BOOST_AUTO_TEST_CASE( MultiTaskKernel_Test )
 {
 	// define dummy data composed of an input and a task component
@@ -74,3 +76,5 @@ BOOST_AUTO_TEST_CASE( MultiTaskKernel_Test )
 }
 
 } // namespace shark {
+
+BOOST_AUTO_TEST_SUITE_END()

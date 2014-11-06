@@ -6,6 +6,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (LinAlg_rotations)
+
 BOOST_AUTO_TEST_CASE( LinAlg_Householder_Creation ){
 	///test for numerical stability of createHouseholderReflection
 	std::size_t NumTests = 1000;
@@ -128,3 +130,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_Random_Rotation_Matrix ){
 		BOOST_CHECK_SMALL(errorID2,1.e-13);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

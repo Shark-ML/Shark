@@ -23,6 +23,8 @@ void checkMatrixEqual(M1 const& m1, M2 const& m2){
 //////SIMPLE ASSIGNMENT
 //////////////////////////////////////////////////////
 
+BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_matrix_assign)
+
 BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Dense_Matrix_Assign ){
 	std::cout<<"testing direct dense-dense assignment"<<std::endl;
 	blas::matrix<unsigned int,blas::row_major> source_row_major(10,20);
@@ -445,3 +447,4 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Sparse_Matrix_Plus_Assign ){
 		checkMatrixEqual(target,result);
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

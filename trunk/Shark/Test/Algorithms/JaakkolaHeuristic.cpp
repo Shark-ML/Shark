@@ -42,6 +42,8 @@
 using namespace shark;
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_JaakkolaHeuristic)
+
 BOOST_AUTO_TEST_CASE( Algorithms_JaakkolaHeuristic )
 {
 	// Create a simple data set.
@@ -88,3 +90,5 @@ BOOST_AUTO_TEST_CASE( Algorithms_JaakkolaHeuristic )
 	sigma         = jh2.sigma();
 	BOOST_CHECK_SMALL(std::abs(sigma - 2.0), 1e-14);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

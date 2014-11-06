@@ -47,6 +47,8 @@ using namespace shark;
 // This test case consists of training SVMs with
 // analytically computable solution. This known
 // solution is used to validate the trainer.
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_CSvmTrainer)
+
 BOOST_AUTO_TEST_CASE( CSVM_TRAINER_SIMPLE_TEST )
 {
 	// simple 5-point dataset
@@ -269,3 +271,5 @@ BOOST_AUTO_TEST_CASE( CSVM_WEIGHTED_TEST )
 	
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

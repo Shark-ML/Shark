@@ -52,6 +52,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_KernelNearestNeighborClassifier)
+
 BOOST_AUTO_TEST_CASE( KERNEL_NEAREST_NEIGHBOR_CLASSIFIER ) {
 	std::vector<RealVector> input(6, RealVector(2));
 	input[0](0)=1;
@@ -304,3 +306,5 @@ BOOST_AUTO_TEST_CASE( NEAREST_NEIGHBOR_CLASSIFIER_KDTREE_BRUTE_FORCE ) {
 	}
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -44,7 +44,7 @@ double resultVariance[Dimensions][Dimensions]=
 	{-2.47468, 0.84187, 0.233125, 7.17188}
 };
 
-BOOST_FIXTURE_TEST_SUITE(data, StatisticsFixture);
+BOOST_FIXTURE_TEST_SUITE (Data_Statistics, StatisticsFixture);
 
 BOOST_AUTO_TEST_CASE( Data_Statistics_mean )
 {

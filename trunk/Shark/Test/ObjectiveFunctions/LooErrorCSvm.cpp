@@ -51,6 +51,8 @@ using namespace shark;
 
 
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_LooErrorCSvm)
+
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Simple )
 {
 	std::cout<<"testing simple test"<<std::endl;
@@ -194,3 +196,5 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooErrorCSvm_Chessboard_NoBias )
 	// and to geometric intuition
 	BOOST_CHECK_SMALL(value - standardLoo, 1e-10);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

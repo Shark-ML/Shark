@@ -7,6 +7,8 @@
 using namespace shark;
 using namespace blas;
 
+BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_iterators)
+
 BOOST_AUTO_TEST_CASE( BLAS_Dense_Storage_Iterator)
 {
 	double values[]={0.1,0.2,0.3,0.4,0.5,0.6};
@@ -516,3 +518,4 @@ BOOST_AUTO_TEST_CASE( BLAS_Binary_Transform_Iterator_Compressed)
 		BOOST_REQUIRE_EQUAL(k, 8);
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()
