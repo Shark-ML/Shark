@@ -7,6 +7,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (RBM_GaussianLayer)
+
 BOOST_AUTO_TEST_CASE( GaussianLayer_SufficientStatistics){
 	GaussianLayer layer;
 	RealMatrix statistics(10,3);
@@ -111,3 +113,5 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_Marginalize){
 	BOOST_CHECK_CLOSE(result, testResult, 0.01);
 	BOOST_CHECK_CLOSE(resultHalvedBeta, testResultHalvedBeta, 0.01);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

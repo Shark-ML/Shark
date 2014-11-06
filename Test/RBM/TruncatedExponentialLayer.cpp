@@ -8,6 +8,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (RBM_TruncatedExponentialLayer)
+
 BOOST_AUTO_TEST_CASE( TruncatedExponentialLayer_SufficientStatistics){
 	TruncatedExponentialLayer layer;
 	TruncatedExponentialLayer::StatisticsBatch statistics(10,3);
@@ -113,3 +115,5 @@ BOOST_AUTO_TEST_CASE( TruncatedExponentialLayer_Marginalize){
 	BOOST_CHECK_CLOSE(resultHalvedBeta , testResultHalvedBeta , 0.01);
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -9,6 +9,8 @@
 #include "../ObjectiveFunctions/TestObjectiveFunction.h"
 
 using namespace shark;
+BOOST_AUTO_TEST_SUITE (RBM_ExactGradient)
+
 BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_MoreHidden )
 {
 	
@@ -119,3 +121,5 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_LessHidden )
 		testDerivative(gradient,parameters,1.e-2,1.e-10,0.1);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

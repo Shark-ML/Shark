@@ -6,6 +6,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (RBM_TemperedMarkovChain)
+
 BOOST_AUTO_TEST_CASE( TemperedMarkovChain_Distribution )
 {
 	const std::size_t numTemperatures = 10;
@@ -89,3 +91,5 @@ BOOST_AUTO_TEST_CASE( TemperedMarkovChain_Distribution )
 		BOOST_CHECK_SMALL(KLH,0.01);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

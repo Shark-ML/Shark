@@ -12,6 +12,8 @@
 using namespace shark;
 using namespace std;
 
+BOOST_AUTO_TEST_SUITE (RBM_ExactGradientTraining)
+
 BOOST_AUTO_TEST_CASE( ExactGradientTraining_Bars ){
 	
 	unsigned int trials = 1;
@@ -49,3 +51,5 @@ BOOST_AUTO_TEST_CASE( ExactGradientTraining_Bars ){
 		BOOST_CHECK( logLikelyHood<200.0 );
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

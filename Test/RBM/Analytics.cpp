@@ -9,6 +9,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (RBM_Analytics)
+
 BOOST_AUTO_TEST_CASE( Energy_Partition_VisibleGreaterHidden )
 {
 	//all possible state combinations for 2 hidden units
@@ -120,3 +122,5 @@ BOOST_AUTO_TEST_CASE( Energy_NegLogLikelihood )
 		BOOST_CHECK_CLOSE(logProbTest,logProb,1.e-5);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

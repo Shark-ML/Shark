@@ -14,6 +14,8 @@ using namespace shark;
 using namespace std;
 
 //calculats the *exact* CD gradient and check that the CD gradient approaches it in the limit
+BOOST_AUTO_TEST_SUITE (RBM_ContrastiveDivergenceTraining)
+
 BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 {
 	BarsAndStripes problem;
@@ -224,3 +226,5 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergenceTraining_Bars ){
 		BOOST_CHECK( logLikelyHood<200.0 );
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

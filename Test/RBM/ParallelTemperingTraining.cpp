@@ -11,6 +11,8 @@
 #include <fstream>
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (RBM_ParallelTemperingTraining)
+
 BOOST_AUTO_TEST_CASE( ParallelTemperingTraining_Bars ){
 	
 	unsigned int trials = 1;
@@ -59,3 +61,5 @@ BOOST_AUTO_TEST_CASE( ParallelTemperingTraining_Bars ){
 		BOOST_CHECK( logLikelyHood<200.0 );
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

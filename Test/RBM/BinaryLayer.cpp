@@ -7,6 +7,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (RBM_BinaryLayer)
+
 BOOST_AUTO_TEST_CASE( BinaryLayer_SufficientStatistics){
 	BinaryLayer layer;
 	BinaryLayer::StatisticsBatch statistics(10,3);
@@ -123,3 +125,5 @@ BOOST_AUTO_TEST_CASE( BinaryLayer_LogMarginalize){
 	BOOST_CHECK_CLOSE(result , testResult , 0.01);
 	BOOST_CHECK_CLOSE(resultHalvedBeta , testResultHalvedBeta , 0.01);
  }
+
+BOOST_AUTO_TEST_SUITE_END()

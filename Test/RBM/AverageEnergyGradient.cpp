@@ -13,6 +13,8 @@ using namespace shark;
 
 //test, that the weighted gradient produces correct results for binary units when using addVH
 //test1 is with weight 1
+BOOST_AUTO_TEST_SUITE (RBM_AverageEnergyGradient)
+
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Visible )
 {
 	BinaryRBM rbm(Rng::globalRng);
@@ -330,3 +332,5 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeHV )
 	testDerivative(gradient,parameters,1.e-3,1.e-10,0.1);
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

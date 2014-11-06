@@ -107,6 +107,8 @@ public:
 };
 
 
+BOOST_AUTO_TEST_SUITE (RBM_GibbsOperator)
+
 BOOST_AUTO_TEST_CASE( GibbsOperator_Test_Store )
 {
 	RBMMockup rbmMockup;
@@ -360,3 +362,5 @@ BOOST_AUTO_TEST_CASE( GibbsOperator_Create_Sample)
 //	BOOST_CHECK_SMALL(testEnergy-energyResult, 1.e-15);
 //	
 //}
+
+BOOST_AUTO_TEST_SUITE_END()
