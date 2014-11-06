@@ -60,13 +60,24 @@ public:
 	typedef AbstractModel<InputType, unsigned int> base_type;
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
-	
+
+	/// \brief Type of distance-based weights.
+	enum DistanceWeights
+	{
+		UNIFORM,                ///< uniform (= no) distance-based weights
+		ONE_OVER_DISTANCE,      ///< weight each neighbor's label with 1/distance
+	};
+
 	///\brief Constructor
 	///
 	/// \param algorithm the used algorithm for nearst neighbor search
 	/// \param neighbors: number of neighbors
 	NearestNeighborClassifier(NearestNeighbors const* algorithm, unsigned int neighbors = 3)
-	: m_algorithm(algorithm),m_classes(numberOfClasses(algorithm->dataset())), m_neighbors(neighbors){}
+	: m_algorithm(algorithm)
+	, m_classes(numberOfClasses(algorithm->dataset()))
+	, m_neighbors(neighbors)
+	, m_distanceWeights(UNIFORM)
+	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -82,6 +93,14 @@ public:
 	void setNeighbors(unsigned int neighbors){
 		m_neighbors=neighbors;
 	}
+
+	/// query the way distances enter as weights
+	DistanceWeights getDistanceWeightType() const
+	{ return m_distanceWeights; }
+
+	/// set the way distances enter as weights
+	void setDistanceWeightType(DistanceWeights dw)
+	{ m_distanceWeights = dw; }
 
 	/// configures the classifier.
 	void configure(PropertyTree const& node){
@@ -124,9 +143,15 @@ public:
 		output.clear();
 
 		for(std::size_t p = 0; p != numPatterns;++p){
-			std::vector<std::size_t> histogram(m_classes,0);
+			std::vector<double> histogram(m_classes, 0.0);
 			for ( std::size_t k = 0; k != m_neighbors; ++k){
-				histogram[neighbors[p*m_neighbors+k].value]++;
+				if (m_distanceWeights == UNIFORM) histogram[neighbors[p*m_neighbors+k].value]++;
+				else
+				{
+					double d = neighbors[p*m_neighbors+k].key;
+					if (d < 1e-100) histogram[neighbors[p*m_neighbors+k].value] += 1e100;
+					else histogram[neighbors[p*m_neighbors+k].value] += 1.0 / d;
+				}
 			}
 			output(p) = std::max_element(histogram.begin(),histogram.end()) - histogram.begin();
 		}
@@ -152,6 +177,9 @@ protected:
 
 	/// number of neighbors to be taken into account
 	unsigned int m_neighbors;
+
+	/// type of distance-based weights computation
+	DistanceWeights m_distanceWeights;
 };
 
 
