@@ -174,6 +174,8 @@ public:
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (RBM_ContrastiveDivergence)
+
 BOOST_AUTO_TEST_CASE( ContrastiveDivergence_noHiddenSample )
 {
 	RBMMockup rbm;
@@ -244,3 +246,5 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_WithHiddenSample )
 	BOOST_CHECK(rbm.structure().parametersSet);
 	
 }
+
+BOOST_AUTO_TEST_SUITE_END()

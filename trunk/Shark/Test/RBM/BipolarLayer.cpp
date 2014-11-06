@@ -7,6 +7,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (RBM_BipolarLayer)
+
 BOOST_AUTO_TEST_CASE( BipolarLayer_SufficientStatistics){
 	BipolarLayer layer;
 	BipolarLayer::StatisticsBatch statistics(10,3);
@@ -123,3 +125,5 @@ BOOST_AUTO_TEST_CASE( BipolarLayer_LogMarginalize){
 	BOOST_CHECK_CLOSE(result , testResult , 0.01);
 	BOOST_CHECK_CLOSE(resultHalvedBeta , testResultHalvedBeta , 0.01);
  }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -9,6 +9,8 @@
 #include <shark/Algorithms/GradientDescent/SteepestDescent.h>
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (RBM_PCDTraining)
+
 BOOST_AUTO_TEST_CASE( PCDTraining_Bars ){
 	
 	BarsAndStripes problem;
@@ -47,3 +49,5 @@ BOOST_AUTO_TEST_CASE( PCDTraining_Bars ){
 	
 	BOOST_CHECK( logLikelyhood<200.0 );
 }
+
+BOOST_AUTO_TEST_SUITE_END()

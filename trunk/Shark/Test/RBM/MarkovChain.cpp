@@ -6,6 +6,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (RBM_MarkovChain)
+
 BOOST_AUTO_TEST_CASE( MarkovChain_Distribution )
 {
 	const std::size_t batchSize = 16;
@@ -76,3 +78,5 @@ BOOST_AUTO_TEST_CASE( MarkovChain_Distribution )
 	BOOST_CHECK_SMALL(KLV,0.01);
 	BOOST_CHECK_SMALL(KLH,0.01);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
