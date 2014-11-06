@@ -162,7 +162,7 @@ struct MatrixProxyFixture
 	}
 };
 
-BOOST_FIXTURE_TEST_SUITE(data, MatrixProxyFixture);
+BOOST_FIXTURE_TEST_SUITE (LinAlg_BLAS_matrix_proxy, MatrixProxyFixture);
 
 BOOST_AUTO_TEST_CASE( LinAlg_Dense_Subrange ){
 	//all possible combinations of ranges on the data matrix

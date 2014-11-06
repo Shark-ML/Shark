@@ -10,6 +10,8 @@ using namespace blas;
 
 
 //this test tests push_back behavior of set_element and operator()
+BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_compressed_vector)
+
 BOOST_AUTO_TEST_CASE( LinAlg_sparse_vector_insert_element_end){
 	std::size_t dimensions = 20;
 	
@@ -76,3 +78,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_sparse_vector_insert_element_end){
 //~ }
 
 
+
+BOOST_AUTO_TEST_SUITE_END()

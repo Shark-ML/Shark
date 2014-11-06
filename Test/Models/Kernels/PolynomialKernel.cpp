@@ -8,6 +8,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_PolynomialKernel)
+
 BOOST_AUTO_TEST_CASE( DensePolynomialKernel_Value ){
 	double result3 = 64.0;
 	double result2 = 16.0;
@@ -113,3 +115,5 @@ BOOST_AUTO_TEST_CASE( SparsePolynomialKernel_Test ){
 	testKernelDerivative(kernel,2,1.e-7,1.e-5);
 
 }
+
+BOOST_AUTO_TEST_SUITE_END()

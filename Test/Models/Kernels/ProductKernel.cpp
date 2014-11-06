@@ -14,6 +14,8 @@ using namespace shark;
 // This unit test checks whether the product
 // kernel class correctly computes the product
 // of its component kernels.
+BOOST_AUTO_TEST_SUITE (Models_Kernels_ProductKernel)
+
 BOOST_AUTO_TEST_CASE( ProductKernel_Test )
 {
 
@@ -57,3 +59,5 @@ BOOST_AUTO_TEST_CASE( ProductKernel_Test )
 	}
 	testEval(kp,batchX1,batchX2);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

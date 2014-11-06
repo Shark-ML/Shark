@@ -87,6 +87,8 @@ protected:
 };
 
 
+BOOST_AUTO_TEST_SUITE (Models_OneVersusOneClassifier)
+
 BOOST_AUTO_TEST_CASE( Models_OneVersusOneClassifier )
 {
 	// Create a one-versus-one classifier for four classes.
@@ -146,3 +148,5 @@ BOOST_AUTO_TEST_CASE( Models_OneVersusOneClassifier )
 		BOOST_CHECK_EQUAL(ovo(dataset.element(i).input), dataset.element(i).label);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

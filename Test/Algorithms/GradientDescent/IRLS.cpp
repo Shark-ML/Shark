@@ -11,6 +11,8 @@
 using namespace shark;
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_IRLS)
+
 BOOST_AUTO_TEST_CASE( IRLS_dlinmin )
 {
 	Ellipsoid function(5);
@@ -31,3 +33,5 @@ BOOST_AUTO_TEST_CASE( IRLS_Dlinmin_Rosenbrock )
 	testFunction(optimizer,function,100,1000,1.e-14);
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

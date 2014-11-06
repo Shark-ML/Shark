@@ -61,7 +61,7 @@ struct KernelHelpersFixture {
 };
 
 
-BOOST_FIXTURE_TEST_SUITE( KernelHelpersSuite, KernelHelpersFixture )
+BOOST_FIXTURE_TEST_SUITE (Models_Kernels_KernelHelpers, KernelHelpersFixture )
 
 
 BOOST_AUTO_TEST_CASE( KernelHelpers_calculateRegularizedKernelMatrix ){

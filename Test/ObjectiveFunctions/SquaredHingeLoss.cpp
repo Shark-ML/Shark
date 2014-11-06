@@ -9,6 +9,8 @@
 using namespace shark;
 using namespace std;
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_SquaredHingeLoss)
+
 BOOST_AUTO_TEST_CASE( SQUAREDHINGELOSS_EVAL_TWOCLASS ) {
 	unsigned int maxTests = 10000;
 	for (unsigned int test = 0; test != maxTests; ++test) {
@@ -110,3 +112,5 @@ BOOST_AUTO_TEST_CASE( SQUAREDHINGELOSS_EVAL_MULTICLASS ) {
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

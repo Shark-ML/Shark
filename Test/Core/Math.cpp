@@ -7,6 +7,8 @@
 #include <boost/test/floating_point_comparison.hpp>
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Core_Math)
+
 BOOST_AUTO_TEST_CASE(Math_Trigamma_SpecialValues)
 {
 	double pi = boost::math::constants::pi<double>();
@@ -58,3 +60,5 @@ BOOST_AUTO_TEST_CASE(Math_Trigamma_Random)
 	}
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

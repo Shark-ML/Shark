@@ -7,6 +7,8 @@
 using namespace shark;
 
 
+BOOST_AUTO_TEST_SUITE (Data_DataView)
+
 BOOST_AUTO_TEST_CASE( DataView_Data_Test )
 {
 	//define initial dataset
@@ -349,3 +351,4 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Const_Test )
 		BOOST_CHECK_EQUAL(copy2.batch(i).size(),2u);
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

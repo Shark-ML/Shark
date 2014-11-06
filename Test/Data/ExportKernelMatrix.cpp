@@ -26,6 +26,8 @@ const char test_regression[] = "2.2  1:1 2:1 3:1 4:1.0000 \n\
 	-12          3:1e0     \n\
  +1.4e-1 1:10e-1 3:1\n";
 
+BOOST_AUTO_TEST_SUITE (Data_ExportKernelMatrix)
+
 BOOST_AUTO_TEST_CASE( Set_ExportKernelMatrix )
 {
 	
@@ -77,3 +79,5 @@ BOOST_AUTO_TEST_CASE( Set_ExportKernelMatrix )
 	// mt: todo: add tests here once read-in is supported
 	
 }
+
+BOOST_AUTO_TEST_SUITE_END()

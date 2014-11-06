@@ -11,6 +11,8 @@ const size_t Dimensions=3;
 
 double target[Dimensions] = {3, 4, 15};
 
+BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_transformations)
+
 BOOST_AUTO_TEST_CASE( LinAlg_Exp )
 {
 	RealVector x(Dimensions); 
@@ -263,3 +265,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_UnaryTransformation_Sparse_Matrix ){
 	//~ }
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

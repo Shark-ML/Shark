@@ -10,6 +10,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_BFGS)
+
 BOOST_AUTO_TEST_CASE( BFGS_dlinmin )
 {
 	Ellipsoid function(5);
@@ -46,3 +48,4 @@ BOOST_AUTO_TEST_CASE( BFGS_WolfeCubic_Rosenbrock )
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and WolfeCubic"<<std::endl;
 	testFunction(optimizer,function,100,2000);
 }
+BOOST_AUTO_TEST_SUITE_END()

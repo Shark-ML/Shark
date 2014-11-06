@@ -62,6 +62,8 @@ using namespace shark;
             }
 */
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Budgeted_AbstractBudgetMaintenanceStrategy_Test)
+
 BOOST_AUTO_TEST_CASE( AbstractBudgetMaintenanceStrategy_findSmallestVector)
 {
     typedef RealVector InputType;
@@ -134,3 +136,4 @@ BOOST_AUTO_TEST_CASE( AbstractBudgetMaintenanceStrategy_findSmallestVector)
 
 	
 	
+BOOST_AUTO_TEST_SUITE_END()

@@ -11,6 +11,8 @@ using namespace shark;
 
 //this test compares the network to the MSEFFNET of Shark 2.4
 //since the topology of the net changed, this is not that easy...
+BOOST_AUTO_TEST_SUITE (Models_OnlineRNNet)
+
 BOOST_AUTO_TEST_CASE( ONLINERNNET_VALUE_TEST ){
 	//We simulate a Shark 2.4 network which would be created using
 	//setStructure(2,2) and setting all feed forward connections to 0.
@@ -158,3 +160,4 @@ BOOST_AUTO_TEST_CASE( ONLINE_RNNET_WEIGHTED_PARAMETER_DERIVATIVE ){
 	}
 
 }
+BOOST_AUTO_TEST_SUITE_END()

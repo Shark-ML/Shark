@@ -39,6 +39,8 @@ struct TestFunction : public SingleObjectiveFunction
 	}
 };
 
+BOOST_AUTO_TEST_SUITE (Algorithms_GridSearch)
+
 BOOST_AUTO_TEST_CASE( NestedGridSearch_initialized )
 {
 	std::vector<double> searchMin;
@@ -206,3 +208,5 @@ BOOST_AUTO_TEST_CASE( PointSearch_random )
 	std::cout<<"PointSearch_random done. Error:"<<error<<std::endl;
 	BOOST_CHECK_SMALL(error,1.e-5);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

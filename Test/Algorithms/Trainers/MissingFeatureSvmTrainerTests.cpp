@@ -60,7 +60,7 @@ const std::string SvmWafFixture::m_dataInString2 = "\
 5.42,130,7,?,1\n\
 5.75,150,9,?,1\r";
 
-BOOST_FIXTURE_TEST_SUITE(SvmWafFixtureTests, SvmWafFixture)
+BOOST_FIXTURE_TEST_SUITE (Algorithms_Trainers_MissingFeatureSvmTrainerTests, SvmWafFixture)
 
 BOOST_AUTO_TEST_CASE(NoMissingFeatures)
 {

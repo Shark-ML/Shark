@@ -43,6 +43,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_RFClassifier)
+
 BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 
 	//Test data
@@ -97,3 +99,5 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 	BOOST_CHECK(error == 0.0);
 
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -34,6 +34,8 @@ void testDatasetEquality(LabeledData<int, int> const& set1, LabeledData<int, int
 }
 
 
+BOOST_AUTO_TEST_SUITE (Data_Dataset)
+
 BOOST_AUTO_TEST_CASE( Set_Test )
 {
 	std::vector<int> inputs;
@@ -814,3 +816,5 @@ BOOST_AUTO_TEST_CASE( LABELED_DATA_SERIALIZE )
 	testDatasetEquality(dataSource,dataDeserialized);
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

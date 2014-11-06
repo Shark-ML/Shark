@@ -44,6 +44,8 @@
 using namespace shark;
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_RegularizationNetworkTrainer)
+
 BOOST_AUTO_TEST_CASE( REGULARIZATION_NETWORK_TEST )
 {
 	const std::size_t ell = 200;
@@ -70,3 +72,5 @@ BOOST_AUTO_TEST_CASE( REGULARIZATION_NETWORK_TEST )
 		BOOST_CHECK_SMALL(xi, threshold);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

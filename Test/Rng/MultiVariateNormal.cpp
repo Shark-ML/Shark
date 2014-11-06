@@ -8,6 +8,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Rng_MultiVariateNormal)
+
 BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_EIGENVALUES ) {
 	std::size_t Dimensions = 5;
 	std::size_t Samples = 10000;
@@ -101,3 +103,5 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_Cholesky) {
 	,1.e-2);
 	
 }
+
+BOOST_AUTO_TEST_SUITE_END()

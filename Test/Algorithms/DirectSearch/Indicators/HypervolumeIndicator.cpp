@@ -11,6 +11,8 @@
 using namespace shark;
 
 //checks for random sets that the least contributor actually has the least contribution
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Indicators_HypervolumeIndicator)
+
 BOOST_AUTO_TEST_CASE( HypervolumeIndicator_Consistency ) {
 	std::size_t numPoints = 10;
 	std::size_t numTrials = 50;
@@ -46,3 +48,4 @@ BOOST_AUTO_TEST_CASE( HypervolumeIndicator_Consistency ) {
 		BOOST_CHECK_CLOSE(maxVolume,volumes[indicated],1.e-10);
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

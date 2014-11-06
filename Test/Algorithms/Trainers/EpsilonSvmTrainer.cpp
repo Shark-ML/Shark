@@ -44,6 +44,8 @@
 using namespace shark;
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_EpsilonSvmTrainer)
+
 BOOST_AUTO_TEST_CASE( EPSILON_SVM_TEST )
 {
 	const std::size_t ell = 200;
@@ -81,3 +83,5 @@ BOOST_AUTO_TEST_CASE( EPSILON_SVM_TEST )
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

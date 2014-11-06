@@ -10,6 +10,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_LP_LinearProgram)
+
 BOOST_AUTO_TEST_CASE( ML_LinearProgram )
 {
 	// define the example linear program
@@ -58,3 +60,5 @@ BOOST_AUTO_TEST_CASE( ML_LinearProgram )
 
 	BOOST_CHECK_SMALL(diff, 1e-4);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

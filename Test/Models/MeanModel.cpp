@@ -15,6 +15,8 @@ using namespace std;
 using namespace boost::archive;
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_MeanModel)
+
 BOOST_AUTO_TEST_CASE( MeanModel_Test )
 {
 	MeanModel<LinearModel<> > model;
@@ -124,3 +126,5 @@ BOOST_AUTO_TEST_CASE( MeanModel_Serialize )
 		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-2);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

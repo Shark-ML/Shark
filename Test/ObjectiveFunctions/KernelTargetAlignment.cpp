@@ -94,7 +94,7 @@ public:
 	std::size_t dims;
 };
 
-BOOST_FIXTURE_TEST_SUITE(KTATests, KTAFixture)
+BOOST_FIXTURE_TEST_SUITE (ObjectiveFunctions_KernelTargetAlignment, KTAFixture)
 
 template<class Kernel, class Data>
 RealMatrix calculateCenteredKernelMatrix(Kernel const& kernel, Data const& data){

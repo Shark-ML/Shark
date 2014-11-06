@@ -48,6 +48,8 @@
 using namespace shark;
 
 // very straight-forward dataset with conceptual, hand-picked testing scenario. tests the deriv wrt C only.
+BOOST_AUTO_TEST_SUITE (Models_Kernels_CSvmDerivative)
+
 BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET )
 {
 	// set up dataset
@@ -954,3 +956,5 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 }
 
 
+
+BOOST_AUTO_TEST_SUITE_END()

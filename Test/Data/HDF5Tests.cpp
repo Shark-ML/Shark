@@ -111,7 +111,7 @@ bool HDF5Fixture::validate(const std::string& msg, const shark::Exception& exp)
 	return exp.what() == msg;
 }
 
-BOOST_FIXTURE_TEST_SUITE(HDF5Tests, HDF5Fixture)
+BOOST_FIXTURE_TEST_SUITE (Data_HDF5Tests, HDF5Fixture)
 
 BOOST_AUTO_TEST_CASE(BasicTests)
 {

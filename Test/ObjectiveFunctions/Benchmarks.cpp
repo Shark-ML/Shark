@@ -20,6 +20,8 @@
 
 #include "TestObjectiveFunction.h"
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_Benchmarks)
+
 BOOST_AUTO_TEST_CASE( Himmelblau ) {
 	shark::Himmelblau hb;
 	shark::RealVector v( 2 );
@@ -72,3 +74,5 @@ BOOST_AUTO_TEST_CASE( Ellipsoid_Derivative )
 		shark::testDerivative(ellipsoid, point,1.e-5,1.e-9);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

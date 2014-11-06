@@ -20,6 +20,8 @@ void checkDiagonalMatrix(M const& diagonal, D const& diagonalElements, std::size
 	}
 }
 
+BOOST_AUTO_TEST_SUITE (LinAlg_DiagonalMatrix)
+
 BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_Basic ){
 	std::size_t const Dimensions = 10;
 	IntVector diagonalElements(Dimensions);
@@ -80,3 +82,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_Identity_Matrix ){
 	blas::identity_matrix<int> diagonal(Dimensions);
 	checkDiagonalMatrix(diagonal,diagonalElements,Dimensions);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

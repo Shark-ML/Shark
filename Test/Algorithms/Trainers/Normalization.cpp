@@ -10,6 +10,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Normalization)
+
 BOOST_AUTO_TEST_CASE( NORMALIZE_TO_UNIT_VARIANCE )
 {
 	std::vector<RealVector> input(3);
@@ -169,3 +171,5 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_ZCA)
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

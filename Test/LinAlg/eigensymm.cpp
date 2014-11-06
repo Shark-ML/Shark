@@ -8,6 +8,8 @@
 using namespace shark;
 using namespace blas;
 
+BOOST_AUTO_TEST_SUITE (LinAlg_eigensymm)
+
 BOOST_AUTO_TEST_CASE( LinAlg_eigensymm )
 {
 	RealMatrix A(3, 3);   // input matrix
@@ -94,3 +96,4 @@ BOOST_AUTO_TEST_CASE( LinAlg_eigensymm_general )
 		BOOST_CHECK_SMALL(error_orthogonalize,1.e-12);
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

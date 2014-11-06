@@ -13,6 +13,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_ElitistCMA)
+
 BOOST_AUTO_TEST_CASE( ElitistCMA_Cigar )
 {
 	Cigar function(3);
@@ -52,3 +54,5 @@ BOOST_AUTO_TEST_CASE( ElitistCMA_Rosenbrock )
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
 	test_function( optimizer, function, _trials = 10, _iterations = 2000, _epsilon = 1E-10 );
 }
+
+BOOST_AUTO_TEST_SUITE_END()

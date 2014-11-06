@@ -25,7 +25,7 @@ struct Fixture {
 	UnlabeledData<RealVector> data;
 };
 
-BOOST_FIXTURE_TEST_SUITE(ObjectiveFunctions_NegativeLogLikelihood, Fixture)
+BOOST_FIXTURE_TEST_SUITE (ObjectiveFunctions_NegativeLogLikelihood, Fixture)
 
 
 BOOST_AUTO_TEST_CASE( ObjFunct_NegativeLogLikelihood_Derivative ){

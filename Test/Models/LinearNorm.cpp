@@ -14,6 +14,8 @@ using namespace std;
 using namespace boost::archive;
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_LinearNorm)
+
 BOOST_AUTO_TEST_CASE( LinearNorm_Value )
 {
 	LinearNorm model(2);
@@ -69,3 +71,5 @@ BOOST_AUTO_TEST_CASE( LinearNorm_SERIALIZE )
 	BOOST_REQUIRE_EQUAL(modelDeserialized.inputSize(),model.inputSize());
 	BOOST_REQUIRE_EQUAL(modelDeserialized.outputSize(),model.outputSize());
 }
+
+BOOST_AUTO_TEST_SUITE_END()

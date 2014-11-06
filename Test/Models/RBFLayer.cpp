@@ -13,6 +13,8 @@ using namespace std;
 using namespace boost::archive;
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_RBFLayer)
+
 BOOST_AUTO_TEST_CASE( RBFLayer_Parameters )
 {
 	//2 input 2 output
@@ -221,3 +223,5 @@ BOOST_AUTO_TEST_CASE( RBFLayer_SERIALIZE )
 		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

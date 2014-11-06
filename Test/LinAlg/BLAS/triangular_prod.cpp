@@ -21,6 +21,8 @@ void checkMatrixVectorMultiply(M const& arg1, V const& arg2, Result const& resul
 	}
 }
 
+BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_triangular_prod)
+
 BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense ){
 	std::size_t dims = 231;//chosen as not to be a multiple of the block size
 	//initialize the arguments in both row and column major, lower and upper, unit and non-unit diagonal
@@ -100,3 +102,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense ){
 		checkMatrixVectorMultiply(arg1uppertest,arg2,result);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

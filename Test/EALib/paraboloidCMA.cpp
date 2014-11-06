@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <iostream>
 
+BOOST_AUTO_TEST_SUITE (EALib_paraboloidCMA)
+
 BOOST_AUTO_TEST_CASE( EALib_ParaboloidCMA )
 {
 	const unsigned Seed = 44;
@@ -53,3 +55,5 @@ BOOST_AUTO_TEST_CASE( EALib_ParaboloidCMA )
 	std::sort(results,results+Trials);
 	BOOST_CHECK_SMALL(results[Trials/2],1.e-14);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

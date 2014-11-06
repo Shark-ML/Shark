@@ -14,6 +14,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_CMA)
+
 BOOST_AUTO_TEST_CASE( CMA_Cigar )
 {
 	Cigar function(3);
@@ -87,3 +89,5 @@ BOOST_AUTO_TEST_CASE( CMA_Sphere_Niko )
 	BOOST_CHECK(sigmaHigh);
 	BOOST_CHECK(!condHigh);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -45,6 +45,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_SoftNearestNeighborClassifier)
+
 BOOST_AUTO_TEST_CASE( SOFT_NEAREST_NEIGHBOR_CLASSIFIER ) {
 	std::vector<RealVector> input(6, RealVector(2));
 	input[0](0)=1;
@@ -83,3 +85,5 @@ BOOST_AUTO_TEST_CASE( SOFT_NEAREST_NEIGHBOR_CLASSIFIER ) {
 	double error = loss.eval(dataset.labels(), prediction);
 	BOOST_CHECK(error == 0.0);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

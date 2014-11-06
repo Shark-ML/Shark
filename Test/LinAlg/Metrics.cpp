@@ -9,6 +9,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (LinAlg_Metrics)
+
 BOOST_AUTO_TEST_CASE( LinAlg_Norm_distanceSqr_Vector){
 	//dense - dense
 	{
@@ -274,3 +276,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_Norm_distanceSqr_Matrix_Matrix){
 }
 
 
+
+BOOST_AUTO_TEST_SUITE_END()

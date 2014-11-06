@@ -10,6 +10,8 @@
 
 namespace shark {
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_MissingFeaturesKernelExpansionTests)
+
 BOOST_AUTO_TEST_CASE(TestMissingFeaturesKernelExpansion)
 {
 	// This test case is testing evaluating kernel function while skipping missing features
@@ -66,3 +68,5 @@ BOOST_AUTO_TEST_CASE(TestMissingFeaturesKernelExpansion)
 }
 
 } // namespace shark {
+
+BOOST_AUTO_TEST_SUITE_END()

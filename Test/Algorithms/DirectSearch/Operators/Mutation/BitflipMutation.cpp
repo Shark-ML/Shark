@@ -7,6 +7,8 @@
 #include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/BitflipMutator.h>
 
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_Mutation_BitflipMutation)
+
 BOOST_AUTO_TEST_CASE( BitflipMutation ) {
 	std::size_t n = 10;
 	std::size_t trials = 1000;
@@ -34,3 +36,5 @@ BOOST_AUTO_TEST_CASE( BitflipMutation ) {
 	}
 	
 }
+
+BOOST_AUTO_TEST_SUITE_END()

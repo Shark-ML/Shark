@@ -101,6 +101,8 @@ void CHECK_ALPHAS(std::vector<RealVector> const& input, T const& is, U const& sh
 // This test case checks the resulting model of
 // training eight multi-class SVMs on a minimal
 // test case.
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_McSvmTrainer)
+
 BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 {
 	// simple 5-point dataset, three classes
@@ -288,3 +290,5 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	//~ std::cout<<"WW with bias: "<<loss.eval(dataset.labels(),svmTest2(dataset.inputs()))<<" "<<svmTest2.offset()<<std::endl;
 //~ }
 
+
+BOOST_AUTO_TEST_SUITE_END()

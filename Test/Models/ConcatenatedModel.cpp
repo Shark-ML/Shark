@@ -19,6 +19,8 @@ using namespace shark;
 
 
 
+BOOST_AUTO_TEST_SUITE (Models_ConcatenatedModel)
+
 BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_Value )
 {
 	FFNet<LogisticNeuron,LogisticNeuron> net1;
@@ -325,3 +327,5 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_OPERATOR )
 		BOOST_CHECK_SMALL(modelError3,1.e-35);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

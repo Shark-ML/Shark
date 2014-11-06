@@ -35,6 +35,8 @@ struct TestFunction : public SingleObjectiveFunction
 };
 
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_NoisyErrorFunction)
+
 BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
 {
 	//create regression data from the testfunction
@@ -81,3 +83,5 @@ BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
 	cout << "Optimization done. Error:" << error << std::endl;
 	BOOST_CHECK_SMALL(error, 1.e-15);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

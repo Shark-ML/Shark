@@ -46,6 +46,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Data_LabelOrder_Test)
+
 BOOST_AUTO_TEST_CASE(LabelOrder_General)
 {
 	// create a dataset
@@ -103,3 +105,5 @@ BOOST_AUTO_TEST_CASE(LabelOrder_General)
 
 
 
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -17,6 +17,8 @@ using namespace shark;
 using namespace std;
 using namespace boost::archive;
 
+BOOST_AUTO_TEST_SUITE (Models_CMAC)
+
 BOOST_AUTO_TEST_CASE( CMAC_PARAMETERS ){
 	CMACMap model;
 	model.setStructure(3,5,2,4,-1,1,true);
@@ -189,3 +191,5 @@ BOOST_AUTO_TEST_CASE( CMAC_SERIALIZE )
 		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

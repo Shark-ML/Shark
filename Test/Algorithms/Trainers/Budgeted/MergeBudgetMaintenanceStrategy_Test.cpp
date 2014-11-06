@@ -47,6 +47,8 @@
 using namespace shark;
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Budgeted_MergeBudgetMaintenanceStrategy_Test)
+
 BOOST_AUTO_TEST_CASE( MergeBudgetMaintenanceStrategy_MergingProblemFunction)
 {
     // setup
@@ -108,3 +110,4 @@ BOOST_AUTO_TEST_CASE( MergeBudgetMaintenanceStrategy_addToModel)
 
 	
 	
+BOOST_AUTO_TEST_SUITE_END()

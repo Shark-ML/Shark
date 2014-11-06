@@ -41,6 +41,8 @@ void testObjectiveFunctionMOO(
 }
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_SteadyStateMOCMA)
+
 BOOST_AUTO_TEST_CASE( MOCMA_HYPERVOLUME_Functions ) {
 	RealVector reference(2);
 	reference(0) = 11;
@@ -105,3 +107,4 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypSteadyStateMOCMA ) {
 
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

@@ -9,6 +9,8 @@
 using namespace shark;
 using namespace std;
 
+BOOST_AUTO_TEST_SUITE (LinAlg_Initialize)
+
 BOOST_AUTO_TEST_CASE( LinAlg_init_test_base ){
 	//check that the first step allready works
 	UIntVector vec1(1),vec2(1);
@@ -496,3 +498,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_split_test_parameterSet ){
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -13,6 +13,8 @@ using namespace boost::archive;
 using namespace shark;
 
 
+BOOST_AUTO_TEST_SUITE (Models_LinearModel)
+
 BOOST_AUTO_TEST_CASE( Models_LinearModel )
 {
 	// 2 inputs, 2 outputs, no offset -> 4 parameters
@@ -153,3 +155,5 @@ BOOST_AUTO_TEST_CASE( LinearModel_SERIALIZE )
 		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

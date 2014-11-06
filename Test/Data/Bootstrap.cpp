@@ -6,6 +6,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Data_Bootstrap)
+
 BOOST_AUTO_TEST_CASE( Bootstrap_LabeledData ){
 	//create a toy dataset
 	std::vector<unsigned int> inputs;
@@ -68,3 +70,4 @@ BOOST_AUTO_TEST_CASE( Bootstrap_UnlabeledData ){
 		BOOST_CHECK_CLOSE(weightSums[i],1.0,5);
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

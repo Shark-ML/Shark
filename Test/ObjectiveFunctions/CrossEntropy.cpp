@@ -14,6 +14,8 @@
 using namespace shark;
 using namespace std;
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_CrossEntropy)
+
 BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES_SINGLE_INPUT ){
 	unsigned int maxTests = 1000;
 	for(unsigned int test = 0; test != maxTests; ++test){
@@ -123,3 +125,5 @@ BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_MULTI_CLASS ){
 //  	std::cout<<derivative(0) / estimatedDerivative(0)<<" "<<hessian(0,0)<<" "<<estimatedHessian(0,0)<<std::endl;
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

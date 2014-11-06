@@ -54,6 +54,8 @@ private:
 };
 
 //check that feasible points are not penalized
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_PenalizingEvaluator)
+
 BOOST_AUTO_TEST_CASE( PenalizingEvaluator_SingleObjective_Feasible ) {
 	PenalizingEvaluator evaluator;
 	evaluator.m_penaltyFactor = 1000;//make errors obvious!
@@ -154,3 +156,4 @@ BOOST_AUTO_TEST_CASE( PenalizingEvaluator_MultiObjective_Infeasible ) {
 		++trials;
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

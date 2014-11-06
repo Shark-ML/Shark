@@ -22,7 +22,7 @@ struct Fixture {
 	BoxConstraintHandler<RealVector> handlerSame;
 };
 
-BOOST_FIXTURE_TEST_SUITE(ObjectiveFunctions_BoxConstraintHandler, Fixture)
+BOOST_FIXTURE_TEST_SUITE (ObjectiveFunctions_BoxConstraintHandler, Fixture)
 
 //checks that the handler is constructed with the right bounds
 BOOST_AUTO_TEST_CASE( BoxConstraintHandler_Bounds ) {

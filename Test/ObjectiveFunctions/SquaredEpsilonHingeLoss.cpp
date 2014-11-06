@@ -9,6 +9,8 @@
 using namespace shark;
 using namespace std;
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_SquaredEpsilonHingeLoss)
+
 BOOST_AUTO_TEST_CASE( SQUAREDEPSILONHINGELOSS_EVAL ) {
 	unsigned int maxTests = 10000;
 	unsigned int minDim = 3;
@@ -48,3 +50,5 @@ BOOST_AUTO_TEST_CASE( SQUAREDEPSILONHINGELOSS_EVAL ) {
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

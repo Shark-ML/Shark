@@ -12,6 +12,8 @@ using namespace shark;
 
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_KernelNormalization)
+
 BOOST_AUTO_TEST_CASE( Normalize_Kernel_Unit_Variance_InFeatureSpace_Simple )
 {
 	std::size_t num_points = 3;
@@ -176,3 +178,5 @@ BOOST_AUTO_TEST_CASE( Normalize_Kernel_Unit_Variance_InFeatureSpace_GaussianKern
 //	BOOST_CHECK_SMALL( control - 1.0, 1e-12 );
 //}
 
+
+BOOST_AUTO_TEST_SUITE_END()

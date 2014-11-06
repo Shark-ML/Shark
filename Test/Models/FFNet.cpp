@@ -19,6 +19,8 @@ double activation(double a)
 }
 
 //check that the structure is correct, i.e. matrice have the right form and setting parameters works
+BOOST_AUTO_TEST_SUITE (Models_FFNet)
+
 BOOST_AUTO_TEST_CASE( FFNET_structure_Normal)
 {
 	//no bias
@@ -690,3 +692,5 @@ BOOST_AUTO_TEST_CASE( FFNET_WeightedDerivatives)
 		testWeightedDerivativesSame(net,100);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

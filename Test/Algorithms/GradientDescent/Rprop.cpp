@@ -10,6 +10,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_Rprop)
+
 BOOST_AUTO_TEST_CASE( RPropPlus_Simple )
 {
 	Ellipsoid function(5);
@@ -85,3 +87,5 @@ BOOST_AUTO_TEST_CASE( IRPropMinus_Rosenbrock )
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::flush;
 	testFunction(optimizer,function,100,100000);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

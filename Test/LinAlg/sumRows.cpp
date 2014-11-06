@@ -8,6 +8,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (LinAlg_sumRows)
+
 BOOST_AUTO_TEST_CASE( LinAlg_sum_rows){
 	std::size_t rows = 101;
 	std::size_t columns = 89;
@@ -64,3 +66,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_sum_columns){
 	error = norm_2(testResult-test2);
 	BOOST_CHECK_SMALL(error,1.e-15);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

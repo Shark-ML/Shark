@@ -30,6 +30,8 @@ public:
 	}
 };
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_SparseAutoencoderError)
+
 BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Value ){
 	std::size_t Inputs = 100;
 	std::size_t Iterations = 100;
@@ -318,3 +320,5 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Derivative_GradDesc)
 		BOOST_CHECK_SMALL(activations(i)-roh,1.e-5);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

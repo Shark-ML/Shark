@@ -55,6 +55,8 @@ using namespace shark;
 using namespace std;
 
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_NegativeGaussianProcessEvidence)
+
 BOOST_AUTO_TEST_CASE( GAUUSIAN_PROCESS_EVIDENCE )
 {
 	// experiment settings
@@ -139,3 +141,5 @@ BOOST_AUTO_TEST_CASE( GAUUSIAN_PROCESS_EVIDENCE )
 		prevTestError = testError;
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

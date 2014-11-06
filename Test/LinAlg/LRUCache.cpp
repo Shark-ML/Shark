@@ -91,6 +91,8 @@ void simulateCache(
 }
 
 ///\brief tests whether simple same length access-schemes work
+BOOST_AUTO_TEST_SUITE (LinAlg_LRUCache)
+
 BOOST_AUTO_TEST_CASE( LinAlg_LRUCache_Simple_Access ) {
 	std::size_t cacheSize = 10;
 	std::size_t maxIndex = 20;
@@ -139,3 +141,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_LRUCache_DifferentLength_Access_fliped ) {
 	simulateCache(maxIndex, cacheSize,accessIndices,accessSizes,flips);
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

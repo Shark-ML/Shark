@@ -49,6 +49,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_KernelExpansion)
+
 BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_SIMPLE_VALUE )
 {
 	double k1 = exp(-0.5);
@@ -177,3 +179,5 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_SERIALIZATION )
 		BOOST_CHECK_SMALL(prediction2(1) - (2.0 * k1 + 3.0), 1e-10);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

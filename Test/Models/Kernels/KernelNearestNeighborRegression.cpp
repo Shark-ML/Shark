@@ -44,6 +44,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_KernelNearestNeighborRegression)
+
 BOOST_AUTO_TEST_CASE( KERNEL_NEAREST_NEIGHBOR_REGRESSION )
 {
 	std::vector<RealVector> input(6, RealVector(2));
@@ -79,3 +81,5 @@ BOOST_AUTO_TEST_CASE( KERNEL_NEAREST_NEIGHBOR_REGRESSION )
 		BOOST_CHECK_SMALL(target[i](0) - 3.0 * prediction(0), 1e-12);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

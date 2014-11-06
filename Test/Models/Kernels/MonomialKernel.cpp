@@ -8,6 +8,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Models_Kernels_MonomialKernel)
+
 BOOST_AUTO_TEST_CASE( DenseMonomialKernel_Test )
 {
 	double result=4;
@@ -43,3 +45,5 @@ BOOST_AUTO_TEST_CASE( DenseMonomialKernel_Test )
 
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

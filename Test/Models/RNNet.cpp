@@ -20,6 +20,8 @@ int connections[6][9]=
 
 const size_t numberOfParameters=54;
 
+BOOST_AUTO_TEST_SUITE (Models_RNNet)
+
 BOOST_AUTO_TEST_CASE( RNNET_SIMPLE_SET_STRUCTURE_TEST)
 {
 	RecurrentStructure netStruct;
@@ -219,3 +221,5 @@ BOOST_AUTO_TEST_CASE( RNNET_WEIGHTED_PARAMETER_DERIVATIVE ){
 	//~ archive << netStruct;
 
 //~ }
+
+BOOST_AUTO_TEST_SUITE_END()

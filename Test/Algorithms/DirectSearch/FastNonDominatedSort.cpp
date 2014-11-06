@@ -9,6 +9,8 @@
 using namespace shark;
 
 //randomly creates populations of individuals, sorts them and checks that the ranks are okay.
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_FastNonDominatedSort)
+
 BOOST_AUTO_TEST_CASE( FastNonDominatedSort_Test ) {
 	std::size_t numPoints = 50;
 	std::size_t numTrials = 10;
@@ -45,3 +47,4 @@ BOOST_AUTO_TEST_CASE( FastNonDominatedSort_Test ) {
 		}
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

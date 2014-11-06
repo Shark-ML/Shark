@@ -27,7 +27,7 @@ public:
 	std::vector<int> m_deletedHandles;
 };
 
-BOOST_FIXTURE_TEST_SUITE(ScopedHandleTests, ScopedHandleFixture)
+BOOST_FIXTURE_TEST_SUITE (Core_ScopedHandleTests, ScopedHandleFixture)
 
 BOOST_AUTO_TEST_CASE(BasicTest)
 {

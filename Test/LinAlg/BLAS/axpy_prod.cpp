@@ -21,6 +21,8 @@ void checkMatrixVectorMultiply(M const& arg1, V const& arg2, Result const& resul
 	}
 }
 
+BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_axpy_prod)
+
 BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense ){
 	std::size_t rows = 50;
 	std::size_t columns = 80;
@@ -841,3 +843,4 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_sparse_sparse ){
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultcm,-2.0,0);
 	}
 }
+BOOST_AUTO_TEST_SUITE_END()

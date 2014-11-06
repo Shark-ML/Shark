@@ -26,6 +26,8 @@ RealMatrix createRandomMatrix(RealMatrix const& lambda,std::size_t Dimensions){
 }
 
 //special case first: the matrix is triangular
+BOOST_AUTO_TEST_SUITE (LinAlg_RQ)
+
 BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_Triangular_FullRank ){
 	std::size_t NumTests = 100;
 	std::size_t Dimensions = 50;
@@ -423,3 +425,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankLowerM ){
 		BOOST_CHECK_SMALL(errorID2,1.e-12);
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

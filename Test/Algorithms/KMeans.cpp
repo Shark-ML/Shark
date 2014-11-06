@@ -45,6 +45,8 @@
 using namespace shark;
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_KMeans)
+
 BOOST_AUTO_TEST_CASE(KMeans_simple)
 {
 	RealVector v(1);
@@ -234,3 +236,5 @@ BOOST_AUTO_TEST_CASE(Kernel_KMeans_multiple_gauss)
 		}
 	}
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -10,6 +10,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_VDCMA)
+
 BOOST_AUTO_TEST_CASE( CMA_Ellipsoid )
 {
 	Ellipsoid function(20);
@@ -30,3 +32,4 @@ BOOST_AUTO_TEST_CASE( CMA_Rosenbrock )
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
 	test_function( optimizer, function, _trials = 101, _iterations = 22000/lambda, _epsilon = 1E-10 );
 }
+BOOST_AUTO_TEST_SUITE_END()

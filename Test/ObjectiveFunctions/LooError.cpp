@@ -48,6 +48,8 @@ using namespace shark;
 
 
 
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_LooError)
+
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooError )
 {
 	std::vector<RealVector> inputs(5, RealVector(2));
@@ -79,3 +81,5 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooError )
 	double should = 5.0 / 9.0;                  // manually computed reference value
 	BOOST_CHECK_SMALL(value - should, 1e-10);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

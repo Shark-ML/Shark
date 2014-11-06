@@ -58,6 +58,8 @@ public:
 };
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_OneClassSvmTrainer)
+
 BOOST_AUTO_TEST_CASE( ONE_CLASS_SVM_TEST )
 {
 	const std::size_t ell = 2500;
@@ -92,3 +94,5 @@ BOOST_AUTO_TEST_CASE( ONE_CLASS_SVM_TEST )
 	BOOST_CHECK_SMALL(p - 1.0 + nu, threshold);
 	BOOST_CHECK_SMALL(n - nu, threshold);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -51,6 +51,8 @@
 using namespace shark;
 
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Budgeted_KernelBudgetedSGDTrainer_Test)
+
 BOOST_AUTO_TEST_CASE( KernelBudgetedSGDTrainer_train)
 {
     // Create a Gaussian RBF Kernel 
@@ -116,3 +118,4 @@ BOOST_AUTO_TEST_CASE( KernelBudgetedSGDTrainer_train)
 }
 	
 	
+BOOST_AUTO_TEST_SUITE_END()

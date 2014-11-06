@@ -7,6 +7,8 @@
 using namespace shark;
 using namespace std;
 
+BOOST_AUTO_TEST_SUITE (LinAlg_Proxy)
+
 BOOST_AUTO_TEST_CASE( BLAS_dense_vector_adaptor )
 {
 	double mem[]={0,4,1,4,2,4,3,4};
@@ -146,3 +148,5 @@ BOOST_AUTO_TEST_CASE( LinAlg_sparse_vector_adaptor_MatrixRow )
 	checkProxy(row(x2,1),1);
 }
 
+
+BOOST_AUTO_TEST_SUITE_END()

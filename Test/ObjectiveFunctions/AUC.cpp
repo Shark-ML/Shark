@@ -42,6 +42,8 @@ using namespace std;
 
 /// Example taken from AUCCalculator website maintained by Jesse Davis
 /// and Mark Goadrich and verified using their java code.
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_AUC)
+
 BOOST_AUTO_TEST_CASE( AUC_EVAL ) {
 	Data<RealVector> prediction(10,RealVector(1));
 	Data<unsigned int> label(10,0);
@@ -64,3 +66,5 @@ BOOST_AUTO_TEST_CASE( AUC_EVAL ) {
 	//valueResult = uAuc.eval(label, label);
         //BOOST_CHECK((valueResult == 1.));
 }
+
+BOOST_AUTO_TEST_SUITE_END()

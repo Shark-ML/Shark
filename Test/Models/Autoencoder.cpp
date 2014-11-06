@@ -14,6 +14,8 @@ using namespace boost::archive;
 using namespace shark;
 
 //check that the structure is correct, i.e. matrice have the right form and setting parameters works
+BOOST_AUTO_TEST_SUITE (Models_Autoencoder)
+
 BOOST_AUTO_TEST_CASE( AUTOENCODER_Structure)
 {
 	std::size_t weightNum = 2*2*3+5;
@@ -106,3 +108,5 @@ BOOST_AUTO_TEST_CASE( AUTOENCODER_WeightedDerivatives)
 	testWeightedDerivative(net,1000,5.e-6,1.e-7);
 	testWeightedDerivativesSame(net,1000);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

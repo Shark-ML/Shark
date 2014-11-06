@@ -67,7 +67,7 @@ struct VectorProxyFixture
 	}
 };
 
-BOOST_FIXTURE_TEST_SUITE(data, VectorProxyFixture);
+BOOST_FIXTURE_TEST_SUITE (LinAlg_BLAS_vector_proxy, VectorProxyFixture);
 
 BOOST_AUTO_TEST_CASE( LinAlg_Dense_Subrange ){
 	//all possible combinations of ranges on the data vector

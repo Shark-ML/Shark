@@ -44,6 +44,8 @@ namespace shark {
 	}
 }
 
+BOOST_AUTO_TEST_SUITE (Rng_Rng)
+
 BOOST_AUTO_TEST_CASE( Distribution_DefaultTemplateArgumentCheck ) {
 	shark::Weibull<> dist1( shark::Rng::globalRng );
 	shark::Bernoulli<> dist2( shark::Rng::globalRng );
@@ -457,3 +459,5 @@ BOOST_AUTO_TEST_CASE( Distribution_Uniform ) {
 	for( double x = 1.; x <= 10.; x += 0.1 )
 		BOOST_CHECK_SMALL( uniform.p( x ) - boost::math::pdf( ud, x ), 1E-5 );
 }
+
+BOOST_AUTO_TEST_SUITE_END()

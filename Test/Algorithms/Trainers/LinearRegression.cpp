@@ -10,6 +10,8 @@
 
 using namespace shark;
 
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_LinearRegression)
+
 BOOST_AUTO_TEST_CASE( LinearRegression_TEST ){
 	const size_t trainExamples = 60000;
 	LinearRegression trainer;
@@ -60,3 +62,5 @@ BOOST_AUTO_TEST_CASE( LinearRegression_TEST ){
 	double error=loss(testset.labels(),model(testset.inputs()));
 	BOOST_CHECK_SMALL(error, 1e-4);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -155,7 +155,7 @@ const std::string NBClassifierTrainerFixture::m_dataInString = "\
 5.42,130,7,1\n\
 5.75,150,9,1\r";
 
-BOOST_FIXTURE_TEST_SUITE(NBClassiferTrainerTests, NBClassifierTrainerFixture)
+BOOST_FIXTURE_TEST_SUITE (Algorithms_Trainers_NBClassifierTrainerTests, NBClassifierTrainerFixture)
 
 BOOST_AUTO_TEST_CASE(TestNormal)
 {
