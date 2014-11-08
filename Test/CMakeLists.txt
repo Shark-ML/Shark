@@ -168,6 +168,7 @@ SHARK_ADD_TEST( Models/Kernels/MklKernel.cpp Models_MklKernel )
 SHARK_ADD_TEST( Models/Kernels/SubrangeKernel.cpp Models_SubrangeKernel )
 SHARK_ADD_TEST( Models/Kernels/DiscreteKernel.cpp Models_DiscreteKernel )
 SHARK_ADD_TEST( Models/Kernels/MultiTaskKernel.cpp Models_MultiTaskKernel )
+SHARK_ADD_TEST( Models/Kernels/ModelKernel.cpp Models_ModelKernel )
 
 #KernelMethods
 SHARK_ADD_TEST( Models/Kernels/KernelHelpers.cpp Models_KernelHelpers )
