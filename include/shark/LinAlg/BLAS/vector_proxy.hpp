@@ -49,6 +49,7 @@ public:
 	typedef typename V::size_type size_type;
 	typedef typename V::difference_type difference_type;
 	typedef typename V::value_type value_type;
+	typedef typename V::scalar_type scalar_type;
 	typedef typename V::const_reference const_reference;
 	typedef typename reference<V>::type reference;
 	typedef typename V::const_pointer const_pointer;
@@ -186,11 +187,11 @@ public:
 		expression() /= e();
 		return *this;
 	}
-	vector_reference& operator *= (value_type t){
+	vector_reference& operator *= (scalar_type t){
 		expression() *= t;
 		return *this;
 	}
-	vector_reference& operator /= (value_type t){
+	vector_reference& operator /= (scalar_type t){
 		expression() /= t;
 		return *this;
 	}
@@ -258,6 +259,7 @@ public:
 	typedef typename V::size_type size_type;
 	typedef typename V::difference_type difference_type;
 	typedef typename V::value_type value_type;
+	typedef typename V::scalar_type scalar_type;
 	typedef typename V::const_reference const_reference;
 	typedef typename reference<V>::type reference;
 	typedef typename V::const_pointer const_pointer;
@@ -385,11 +387,11 @@ public:
 		return divide_assign(typename vector_temporary<E>::type(e));
 	}
 	
-	vector_range& operator *= (value_type t){
+	vector_range& operator *= ( scalar_type t){
 		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
-	vector_range& operator /= ( value_type t){
+	vector_range& operator /= ( scalar_type t){
 		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
@@ -492,6 +494,7 @@ public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef typename boost::remove_const<T>::type value_type;
+	typedef value_type scalar_type;
 	typedef value_type const& const_reference;
 	typedef T&  reference;
 	typedef T* pointer;
@@ -674,11 +677,11 @@ public:
 		return divide_assign(typename vector_temporary<E>::type(e));
 	}
 	
-	dense_vector_adaptor& operator *= (value_type t) {
+	dense_vector_adaptor& operator *= ( scalar_type t) {
 		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
-	dense_vector_adaptor& operator /= ( value_type t) {
+	dense_vector_adaptor& operator /= ( scalar_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
@@ -760,6 +763,7 @@ public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef typename boost::remove_const<T>::type value_type;
+	typedef value_type scalar_type;
 	typedef value_type const& const_reference;
 	typedef const_reference  reference;
 	typedef value_type const* const_pointer;

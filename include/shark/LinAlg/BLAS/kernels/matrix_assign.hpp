@@ -17,6 +17,7 @@ public:
 	typedef typename M::size_type size_type;
 	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
+	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 	typedef typename M::const_pointer const_pointer;

@@ -65,6 +65,56 @@ struct matrix_expression {
 	}
 };
 
+/** \brief Base class for expressions of matrix sets
+ *
+ * The matrix set expression type is similar to a tensor type. However it behaves
+ * like a vector of matrices with elements of the vector being matrices. Moreover
+ * all usual operations can be used. There is no distinction to the sizes of the matrices
+ * and all matrices may have different dimensionalities.
+ *
+ * it does not model the Matrix Expression concept but all derived types should.
+ * The class defines a common base type and some common interface for all
+ * statically derived Matrix Expression classes
+ * We iboost::mplement the casts to the statically derived type.
+ */
+template<class E>
+struct matrix_set_expression {
+	typedef E expression_type;
+
+	const expression_type &operator()() const {
+		return *static_cast<const expression_type *>(this);
+	}
+
+	expression_type &operator()() {
+		return *static_cast<expression_type *>(this);
+	}
+};
+
+/** \brief Base class for expressions of vector sets
+ *
+ * The vector set expression type is similar to a matrix type. However it behaves
+ * like a vector of vectors with elements of the vector being vectors. Moreover
+ * all usual vector-space operations can be used . There is no distinction to the sizes of the elements
+ * and all vectors may have different dimensionalities.
+ *
+ * it does not model the Matrix Expression concept but all derived types should.
+ * The class defines a common base type and some common interface for all
+ * statically derived Matrix Expression classes
+ * We iboost::mplement the casts to the statically derived type.
+ */
+template<class E>
+struct vector_set_expression {
+	typedef E expression_type;
+
+	const expression_type &operator()() const {
+		return *static_cast<const expression_type *>(this);
+	}
+
+	expression_type &operator()() {
+		return *static_cast<expression_type *>(this);
+	}
+};
+
 /** \brief Base class for Matrix container models
  *
  * it does not model the Matrix concept but all derived types should.
@@ -105,7 +155,7 @@ template<class C>
 class noalias_proxy{
 public:
 	typedef typename C::closure_type closure_type;
-
+	typedef typename C::scalar_type scalar_type;
 
 	noalias_proxy(C &lval): m_lval(lval) {}
 
@@ -140,6 +190,18 @@ public:
 		m_lval.divide_assign(e);
 		return m_lval;
 	}
+	
+	//this is not needed, but prevents errors when fr example doing noalias(x)*=2;
+	closure_type &operator*= (scalar_type t) {
+		m_lval *= t;
+		return m_lval;
+	}
+
+	//this is not needed, but prevents errors when for example doing noalias(x)/=2;
+	closure_type &operator/= (scalar_type t) {
+		m_lval *=t;
+		return m_lval;
+	}
 
 private:
 	closure_type m_lval;
@@ -153,6 +215,15 @@ noalias_proxy<C> noalias(matrix_expression<C>& lvalue) {
 }
 template <class C>
 noalias_proxy<C> noalias(vector_expression<C>& lvalue) {
+	return noalias_proxy<C> (lvalue());
+}
+
+template <class C>
+noalias_proxy<C> noalias(matrix_set_expression<C>& lvalue) {
+	return noalias_proxy<C> (lvalue());
+}
+template <class C>
+noalias_proxy<C> noalias(vector_set_expression<C>& lvalue) {
 	return noalias_proxy<C> (lvalue());
 }
 template <class C>

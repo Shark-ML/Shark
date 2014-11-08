@@ -52,6 +52,7 @@ public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef typename F::result_type value_type;
+	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 	typedef value_type const* const_pointer;
@@ -168,6 +169,7 @@ public:
 	typedef typename V::size_type size_type;
 	typedef typename V::difference_type difference_type;
 	typedef typename V::value_type value_type;
+	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 	typedef value_type const* pointer;
@@ -260,6 +262,7 @@ public:
 
 	typedef F functor_type;
 	typedef typename functor_type::result_type value_type;
+	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 	typedef value_type const *const_pointer;
@@ -401,6 +404,7 @@ public:
 	typedef typename E1::size_type size_type;
 	typedef typename E1::difference_type difference_type;
 	typedef typename F::result_type value_type;
+	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 	typedef value_type const* const_pointer;
@@ -541,6 +545,7 @@ public:
 		typename E1::difference_type, typename E2::difference_type
 	>::promote_type difference_type;
 	typedef typename F::result_type value_type;
+	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 	typedef value_type const* const_pointer;
@@ -891,6 +896,7 @@ public:
 	typedef const T& const_reference;
 	typedef T& reference;
 	typedef value_type const* const_pointer;
+	typedef value_type scalar_type;
 	typedef const_pointer pointer;
 
 	typedef std::size_t index_type;

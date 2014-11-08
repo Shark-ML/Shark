@@ -179,8 +179,7 @@ typename Batch<typename Range::value_type>::type createBatch(Range const& range)
 
 /// \cond
 
-
-/// \brief specialization for ublas vectors which should be matrices in batch mode!
+/// \brief specialization for vectors which should be matrices in batch mode!
 template<class T>
 struct Batch<blas::vector<T> >{
 	/// \brief Type of a batch of elements.
@@ -217,6 +216,7 @@ struct Batch<blas::vector<T> >{
 		ensure_size(batch,batchSize,elements);
 	}
 };
+
 /// \brief specialization for ublas compressed vectors which are compressed matrices in batch mode!
 template<class T>
 struct Batch<shark::blas::compressed_vector<T> >{
@@ -264,6 +264,45 @@ struct Batch<shark::blas::compressed_vector<T> >{
 		ensure_size(batch,batchSize,elements);
 	}
 };
+/// \brief specialization for blas::matrix which become blas::matrix_set in batch mode!
+template<class T>
+struct Batch<blas::matrix<T> >{
+	/// \brief Type of a batch of elements.
+	typedef shark::blas::matrix_set<blas::matrix<T> > type;
+	/// \brief The type of the elements stored in the batch 
+	typedef blas::matrix<T> value_type;
+	
+	
+	/// \brief Reference to a single element.
+	typedef typename type::reference reference;
+	/// \brief Reference to a single immutable element.
+	typedef typename type::const_reference const_reference;
+	
+	
+	/// \brief the iterator type of the object
+	typedef typename type::iterator iterator;
+	/// \brief the const_iterator type of the object
+	typedef typename type::const_iterator const_iterator;
+	
+	///\brief creates a batch with input as size blueprint
+	template<class Element>
+	static type createBatch(Element const& input, std::size_t size = 1){
+		return type(size,input);
+	}
+	///\brief creates a batch storing the elements referenced by the provided range
+	template<class Range>
+	static type createBatchFromRange(Range const& range){
+		type batch(range.size());
+		std::copy(range.begin(),range.end(),batch.begin());
+		return batch;
+	}
+	
+	//~ static void resize(type& batch, std::size_t batchSize, std::size_t elements){
+		//~ ensure_size(batch,batchSize,elements);
+	//~ }
+};
+
+
 }
 
 //template specialization for boost::matrices so that they offer the iterator interface

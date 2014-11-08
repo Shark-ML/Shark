@@ -13,6 +13,7 @@ public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef T value_type;
+	typedef value_type scalar_type;
 	typedef T const* const_pointer;
 	typedef T* pointer;
 

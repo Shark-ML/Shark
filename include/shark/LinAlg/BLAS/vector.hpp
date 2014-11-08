@@ -30,6 +30,7 @@ public:
 	typedef typename array_type::size_type size_type;
 	typedef typename array_type::difference_type difference_type;
 	typedef typename array_type::value_type value_type;
+	typedef value_type scalar_type;
 	typedef typename array_type::const_reference const_reference;
 	typedef typename array_type::reference reference;
 	typedef T *pointer;
@@ -384,7 +385,7 @@ public:
 	/// No temporary is created. Computations are done and stored directly into the resulting vector.
 	/// \param t is a const reference to the scalar
 	/// \return a reference to the resulting vector
-	vector& operator *= (value_type t) {
+	vector& operator *= (scalar_type t) {
 		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
@@ -395,7 +396,7 @@ public:
 	/// \tparam E is the type of the vector_expression
 	/// \param t is a const reference to the scalar
 	/// \return a reference to the resulting vector
-	vector& operator /= (value_type t) {
+	vector& operator /= (scalar_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
@@ -403,15 +404,25 @@ public:
 	// Iterator types
 	typedef dense_storage_iterator<value_type> iterator;
 	typedef dense_storage_iterator<value_type const> const_iterator;
-
+	
 	/// \brief return an iterator on the first element of the vector
-	const_iterator begin() const {
+	const_iterator cbegin() const {
 		return const_iterator(&m_storage[0],0);
 	}
 
 	/// \brief return an iterator after the last element of the vector
-	const_iterator end() const {
+	const_iterator cend() const {
 		return const_iterator(&m_storage[0],size());
+	}
+
+	/// \brief return an iterator on the first element of the vector
+	const_iterator begin() const {
+		return cbegin();
+	}
+
+	/// \brief return an iterator after the last element of the vector
+	const_iterator end() const {
+		return cend();
 	}
 
 	/// \brief Return an iterator on the first element of the vector

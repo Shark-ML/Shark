@@ -33,6 +33,7 @@ public:
 	typedef typename array_type::size_type size_type;
 	typedef typename array_type::difference_type difference_type;
 	typedef typename array_type::value_type value_type;
+	typedef value_type scalar_type;
 	typedef typename array_type::const_reference const_reference;
 	typedef typename array_type::reference reference;
 	typedef const T* const_pointer;
@@ -269,11 +270,11 @@ public:
 		return divide_assign(e);
 	}
 	
-	matrix& operator *= (value_type t) {
+	matrix& operator *= (scalar_type t) {
 		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
-	matrix& operator /= (value_type t) {
+	matrix& operator /= (scalar_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
@@ -415,6 +416,7 @@ public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef typename VectorType::value_type value_type;
+	typedef typename VectorType::scalar_type scalar_type;
 	typedef typename VectorType::const_reference const_reference;
 	typedef typename VectorType::reference reference;
 	typedef typename VectorType::pointer pointer;
