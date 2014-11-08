@@ -58,6 +58,7 @@ RealVector estimateInputDerivative(Kernel& kernel,const Point& point1,const Poin
 ///it is assumed, that the input points are vectors and batches are matrices
 template<class T>
 void testKernelDerivative(AbstractKernelFunction<T>& kernel,std::size_t inputSize, double epsilon=1.e-8, double testEpsilon= 1.e-6, unsigned int numberOfTests = 5, std::size_t batchSize = 20) {
+	BOOST_REQUIRE_EQUAL(kernel.hasFirstParameterDerivative(),true);
 	for(unsigned int test = 0; test != numberOfTests; ++test) {
 		//create data
 		typename Batch<T>::type batch1(batchSize,inputSize);
@@ -108,6 +109,7 @@ void testKernelDerivative(AbstractKernelFunction<T>& kernel,std::size_t inputSiz
 /// Samples are taken from the interval [-5,5] (for each component).
 template<class T>
 void testKernelInputDerivative(AbstractKernelFunction<T>& kernel,std::size_t inputSize, double epsilon=1.e-8, double testEpsilon= 1.e-6, unsigned int numberOfTests = 5, std::size_t batchSize = 20) {
+	BOOST_REQUIRE_EQUAL(kernel.hasFirstInputDerivative(),true);
 	for(unsigned int test = 0; test != numberOfTests; ++test) {
 		//create data
 		typename Batch<T>::type batch1(batchSize,inputSize);
