@@ -46,6 +46,7 @@ public:
 	typedef typename M::size_type size_type;
 	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
+	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 	typedef typename M::const_pointer const_pointer;
@@ -231,11 +232,11 @@ public:
 		expression() /= e();
 		return *this;
 	}
-	matrix_reference& operator *= (value_type t) {
+	matrix_reference& operator *= (scalar_type t) {
 		expression() *= t;
 		return *this;
 	}
-	matrix_reference& operator /= (value_type t) {
+	matrix_reference& operator /= (scalar_type t) {
 		expression() /= t;
 		return *this;
 	}
@@ -333,6 +334,7 @@ public:
 	typedef typename M::size_type size_type;
 	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
+	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 	typedef typename M::const_pointer const_pointer;
@@ -584,11 +586,11 @@ public:
 		return *this;
 	}
 	
-	matrix_transpose& operator *= (value_type t) {
+	matrix_transpose& operator *= (scalar_type t) {
 		expression() *= t;
 		return *this;
 	}
-	matrix_transpose& operator /= (value_type t) {
+	matrix_transpose& operator /= (scalar_type t) {
 		expression() /= t;
 		return *this;
 	}
@@ -620,6 +622,7 @@ public:
 	typedef std::size_t size_type;
 	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
+	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 	typedef typename M::const_pointer const_pointer;
@@ -761,11 +764,11 @@ public:
 		return divide_assign(typename vector_temporary<E>::type(e));
 	}
 	
-	matrix_row& operator *= (value_type t) {
+	matrix_row& operator *= (scalar_type t) {
 		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
-	matrix_row& operator /= (value_type t) {
+	matrix_row& operator /= (scalar_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
@@ -899,6 +902,7 @@ public:
 	typedef std::size_t size_type;
 	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
+	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 	typedef typename M::const_pointer const_pointer;
@@ -1047,11 +1051,11 @@ public:
 		return *this;
 	}
 	
-	matrix_column& operator *= (value_type at) {
+	matrix_column& operator *= (scalar_type at) {
 		m_wrapper *= at;
 		return *this;
 	}
-	matrix_column& operator /= (value_type at) {
+	matrix_column& operator /= (scalar_type at) {
 		m_wrapper /= at;
 		return *this;
 	}
@@ -1127,6 +1131,7 @@ public:
 	typedef std::size_t size_type;
 	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
+	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 	typedef typename M::const_pointer const_pointer;
@@ -1256,11 +1261,11 @@ public:
 		return divide_assign(typename vector_temporary<E>::type(e));
 	}
 	
-	matrix_vector_range& operator *= (value_type t) {
+	matrix_vector_range& operator *= (scalar_type t) {
 		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
-	matrix_vector_range& operator /= (value_type t) {
+	matrix_vector_range& operator /= (scalar_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
@@ -1342,6 +1347,7 @@ public:
 	typedef std::size_t size_type;
 	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
+	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 	typedef typename M::const_pointer const_pointer;
@@ -1489,11 +1495,11 @@ public:
 		return divide_assign(typename vector_temporary<E>::type(e));
 	}
 	
-	self_type& operator *= (value_type t) {
+	self_type& operator *= (scalar_type t) {
 		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
-	self_type& operator /= (value_type t) {
+	self_type& operator /= (scalar_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
@@ -1687,6 +1693,7 @@ public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef typename boost::remove_const<T>::type value_type;
+	typedef value_type scalar_type;
 	typedef value_type const& const_reference;
 	typedef T&  reference;
 	typedef T* pointer;
@@ -1863,11 +1870,11 @@ public:
 		return divide_assign(typename vector_temporary<E>::type(e));
 	}
 	
-	self_type& operator*=(value_type t) {
+	self_type& operator*=(scalar_type t) {
 		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
 	}
-	self_type& operator/=(value_type  t) {
+	self_type& operator/=(scalar_type  t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}

@@ -36,6 +36,7 @@ public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef T value_type;
+	typedef value_type scalar_type;
 	typedef T *pointer;
 	typedef const T *const_pointer;
 	typedef const T& const_reference;
