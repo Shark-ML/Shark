@@ -49,7 +49,7 @@
 namespace shark {
 
 
-///\brief Efficient special case if the kernel is gaussian and the inputs are sparse vectors
+///\brief Efficient special case if the kernel is Gaussian and the inputs are sparse vectors
 template <class T, class CacheType>
 class GaussianKernelMatrix
 {

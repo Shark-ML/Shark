@@ -41,6 +41,10 @@
 #include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
 #include <shark/Algorithms/QP/QpMcBoxDecomp.h>
 
+#include <shark/LinAlg/KernelMatrix.h>
+#include <shark/LinAlg/CachedMatrix.h>
+#include <shark/LinAlg/PrecomputedMatrix.h>
+
 
 namespace shark {
 
