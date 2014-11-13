@@ -51,7 +51,7 @@ struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
-	{ return "RotatedObjectiveFunction"; }
+	{ return "RotatedObjectiveFunction<"+m_objective->name()+">"; }
 	
 	std::size_t numberOfVariables()const{
 		return m_objective->numberOfVariables();
