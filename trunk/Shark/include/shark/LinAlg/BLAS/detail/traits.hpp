@@ -203,7 +203,7 @@ struct column_major{
 	}
 	
 };
-struct unknown_orientation: public row_major{};
+struct unknown_orientation{typedef unknown_orientation transposed_orientation;};//: public row_major{};
 
 
 // Storage tags -- hierarchical definition of storage characteristics

@@ -302,6 +302,17 @@ void assign(
 	}
 }
 
+//general dispatcher: if the second argument has an unknown orientation
+// it is chosen the same as the first one
+template<class M, class E, class TagE, class TagM>
+void assign(
+	matrix_expression<M> &m, 
+	matrix_expression<E> const& e,
+	row_major, unknown_orientation ,TagE tagE, TagM tagM
+) {
+	assign(m,e,row_major(),row_major(),tagE,tagM);
+}
+
 //general dispatcher: if the first argumeent is column major, we transpose the whole expression
 //so that it  is row-major, this saves us to implment everything twice.
 template<class M, class E,class EOrientation, class TagE, class TagM>
@@ -486,7 +497,18 @@ void assign(
 	//~ }
 }
 
-//general dispatcher: if the first argumeent is column major, we transpose the whole expression
+//general dispatcher: if the second argument has an unknown orientation
+// it is chosen the same as the first one
+template<template <class, class> class F,class M, class E, class TagE, class TagM>
+void assign(
+	matrix_expression<M> &m, 
+	matrix_expression<E> const& e,
+	row_major, unknown_orientation ,TagE tagE, TagM tagM
+) {
+	assign<F>(m,e,row_major(),row_major(),tagE,tagM);
+}
+
+//general dispatcher: if the first argument is column major, we transpose the whole expression
 //so that it  is row-major, this saves us to implment everything twice.
 template<template <class, class> class F, class M, class E,class EOrientation, class TagE, class TagM>
 void assign(
