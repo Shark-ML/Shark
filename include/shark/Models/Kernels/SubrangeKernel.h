@@ -51,7 +51,12 @@ public:
 	typedef typename base_type::ConstBatchInputReference ConstBatchInputReference;
 
 	SubrangeKernelWrapper(AbstractKernelFunction<InputType>* kernel,std::size_t start, std::size_t end)
-	:m_kernel(kernel),m_start(start),m_end(end){}
+	:m_kernel(kernel),m_start(start),m_end(end){
+		if(kernel->hasFirstParameterDerivative())
+			this->m_features|=base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		if(kernel->hasFirstInputDerivative())
+			this->m_features|=base_type::HAS_FIRST_INPUT_DERIVATIVE;
+	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
