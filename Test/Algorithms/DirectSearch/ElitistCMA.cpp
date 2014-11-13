@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( ElitistCMA_Ellipsoid )
 {
 	Ellipsoid function(5);
 	ElitistCMA optimizer;
-	optimizer.activeUpdate() = false;
+	optimizer.activeUpdate() = true;
 	
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
 	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
