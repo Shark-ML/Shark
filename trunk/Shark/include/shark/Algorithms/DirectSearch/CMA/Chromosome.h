@@ -45,7 +45,6 @@ struct CMAChromosome{
 		Unsuccessful = 2,
 		Failure = 3
 	};
-	//~ MultiVariateNormalDistribution m_mutationDistribution; ///< Models the search distribution
 	MultiVariateNormalDistributionCholesky m_mutationDistribution; ///< Models the search distribution using a cholsky matrix
 	//~ RealMatrix m_inverseCholesky;///< inverse cholesky matrix
 
@@ -70,7 +69,8 @@ struct CMAChromosome{
 		double successThreshold,
 		double initialStepSize
 	)
-	: m_stepSize( initialStepSize )
+	: m_mutationDistribution(true)//we do a triangular cholesky factorisation
+	, m_stepSize( initialStepSize )
 	, m_covarianceMatrixLearningRate( 0 )
 	, m_successThreshold(successThreshold)
 	{
@@ -131,10 +131,11 @@ struct CMAChromosome{
 		
 		if( m_successProbability < m_successThreshold ) {
 			//check whether the step is admissible with the proposed update weight
-			double rate = m_covarianceMatrixUnlearningRate;
 			double stepNormSqr = norm_sqr( m_lastZ );
-			if( 1 <  m_covarianceMatrixUnlearningRate*(2*stepNormSqr-1) ){
-				rate = 0.5/(2*stepNormSqr-1);//make the update shorter
+			double rate = m_covarianceMatrixUnlearningRate;
+			
+			if( stepNormSqr > 1 && 1 <  m_covarianceMatrixUnlearningRate*(2*stepNormSqr-1) ){
+				rate = 1.0/(2*stepNormSqr-1);//make the update shorter
 				//~ return; //better be safe for now
 			}
 			rankOneUpdate(1+rate,-rate,m_lastStep);
@@ -183,7 +184,7 @@ private:
 		//~ double a = std::sqrt(alpha);
 		//~ double root = std::sqrt(1+beta/alpha*normWSqr);
 		//~ double b = a/normWSqr * (root-1);
-		//~ RealMatrix& A =m_mutationDistribution.lowerCholeskyFactor();
+		//~ blas::matrix<double,blas::column_major>& A =m_mutationDistribution.lowerCholeskyFactor();
 		//~ noalias(A) =a*A+b*outer_prod(v,w);
 		//~ noalias(m_inverseCholesky) = 1.0/a * m_inverseCholesky - b/ (a*a+a*b*normWSqr)*outer_prod(w,wInv);
 	}

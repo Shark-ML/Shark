@@ -148,11 +148,12 @@ public:
 
 	/// \brief Constructor
 	/// \param [in] covariance covariance matrix
-	MultiVariateNormalDistributionCholesky( RealMatrix const& covariance ) {
+	MultiVariateNormalDistributionCholesky( RealMatrix const& covariance, bool triangular=false ) 
+	:m_triangular(false){
 		setCovarianceMatrix(covariance);
 	}
 	
-	MultiVariateNormalDistributionCholesky(){} 
+	MultiVariateNormalDistributionCholesky(bool triangular=false):m_triangular(triangular){} 
 	
 	/// \brief Stores/Restores the distribution from the supplied archive.
 	///\param [in,out] ar The archive to read from/write to.
@@ -179,18 +180,36 @@ public:
 	}
 
 	/// \brief Returns the lower cholsky factor.
-	RealMatrix const& lowerCholeskyFactor() const {
+	blas::matrix<double,blas::column_major> const& lowerCholeskyFactor() const {
 		return m_lowerCholesky;
 	}
 
 	/// \brief Returns the lower cholesky factor.
-	RealMatrix& lowerCholeskyFactor(){
+	blas::matrix<double,blas::column_major>& lowerCholeskyFactor(){
 		return m_lowerCholesky;
 	}
 	
 	void rankOneUpdate(double alpha, double beta, RealVector const& v){
-		m_lowerCholesky *= alpha; 
-		choleskyUpdate(m_lowerCholesky,v,beta);
+		choleskyUpdate(m_lowerCholesky,v,alpha,beta);
+	}
+	
+	
+	template<class Vector1, class Vector2>
+	void generate(Vector1& y, Vector2& z)const{
+		z.resize(size());
+		y.resize(size());
+		
+		for( unsigned int i = 0; i != size(); i++ ) {
+			z( i ) = Rng::gauss( 0, 1 );
+		}
+		
+		if(m_triangular && size() > 400){
+			y=z;
+			blas::triangular_prod<blas::Lower>(m_lowerCholesky,y);
+		}else{
+			y.clear();
+			axpy_prod(m_lowerCholesky,z,y,false);
+		}
 	}
 
 	/// \brief Samples the distribution.
@@ -201,20 +220,13 @@ public:
 		result_type result;
 		RealVector& z = result.second;
 		RealVector& y = result.first;
-		z.resize(size());
-		y.resize(size());
-		
-		for( unsigned int i = 0; i != size(); i++ ) {
-			z( i ) = Rng::gauss( 0, 1 );
-		}
-		
-		axpy_prod(m_lowerCholesky,z,y,false);
-
+		generate(y,z);
 		return result;
 	}
 
 private:
-	RealMatrix m_lowerCholesky; ///< The lower cholesky factor (actually any is oaky as long as it is the left)
+	blas::matrix<double,blas::column_major> m_lowerCholesky; ///< The lower cholesky factor (actually any is okay as long as it is the left)
+	bool m_triangular;
 };
 
 

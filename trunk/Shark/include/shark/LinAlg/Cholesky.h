@@ -70,47 +70,54 @@ void choleskyDecomposition(
 /// \brief Updates a covariance factor by a rank one update
 ///
 /// Let \f$ A=LL^T \f$ be a matrix with its lower cholesky factor. Assume we want to update 
-/// A using a simple rank-one update \f$ A = A+ \alpha vv^T \f$. This invalidates L and
+/// A using a simple rank-one update \f$ A = \alpha A+ \beta vv^T \f$. This invalidates L and
 /// it needs to be recomputed which is O(n^3). instead we can update the factorisation
 /// directly by performing a similar, albeit more complex algorithm on L, which can be done
 /// in O(L^2). 
 /// 
-/// SAlpha is not required to be positive, but if it is not negative, one has to be carefull
+/// Alpha is not required to be positive, but if it is not negative, one has to be carefull
 /// that the update would keep A positive definite. Otherwise the decomposition does not
 /// exist anymore and an exception is thrown.
 ///
 /// \param L the lower cholesky factor to be updated
 /// \param v the update vector
-/// \param alpha the update factor. it Can be positive or negative
+/// \param alpha the scaling factor, must be positive.
+/// \param beta the update factor. it Can be positive or negative
 template<class Matrix,class Vector>
-void choleskyUpdate(matrix_expression<Matrix>& L, vector_expression<Vector> const& v, double alpha){
+void choleskyUpdate(
+	matrix_expression<Matrix>& L, 
+	vector_expression<Vector> const& v, 
+	double alpha, double beta
+){
 	//implementation blatantly stolen from Eigen
 	std::size_t n = v().size();
 	blas::vector<double> temp = v();
-	double beta = 1;
+	double betaPrime = 1;
+	double a = std::sqrt(alpha);
 	for(std::size_t j=0; j != n; ++j)
 	{
-		double Ljj = L()(j,j);
+		double Ljj = a*L()(j,j);
 		double dj = Ljj*Ljj;
 		double wj = temp(j);
-		double swj2 = alpha*wj*wj;
-		double gamma = dj*beta + swj2;
+		double swj2 = beta*wj*wj;
+		double gamma = dj*betaPrime + swj2;
 
-		double x = dj + swj2/beta;
+		double x = dj + swj2/betaPrime;
 		if (x <= 0.0)
 			throw SHARKEXCEPTION("[choleskyUpdate] update makes matrix indefinite, no update available");
 		double nLjj = std::sqrt(x);
 		L()(j,j) = nLjj;
-		beta += swj2/dj;
+		betaPrime += swj2/dj;
 		
 		// Update the terms of L
 		if(j+1 <n)
 		{
+			subrange(column(L,j),j+1,n) *= a;
 			noalias(subrange(temp,j+1,n)) -= (wj/Ljj) * subrange(column(L,j),j+1,n);
 			if(gamma == 0)
 				continue;
 			subrange(column(L,j),j+1,n) *= nLjj/Ljj;
-			noalias(subrange(column(L,j),j+1,n))+= (nLjj * alpha*wj/gamma)*subrange(temp,j+1,n);
+			noalias(subrange(column(L,j),j+1,n))+= (nLjj * beta*wj/gamma)*subrange(temp,j+1,n);
 		}
 	}
 }

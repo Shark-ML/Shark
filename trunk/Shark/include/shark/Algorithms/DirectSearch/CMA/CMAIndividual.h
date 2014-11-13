@@ -65,10 +65,10 @@ public:
 		chromosome().updateAsOffspring();
 	}
 	void mutate(){
-		MultiVariateNormalDistribution::result_type sample = chromosome().m_mutationDistribution();
-		chromosome().m_lastStep = sample.first;
-		chromosome().m_lastZ = sample.second;
-		searchPoint() += chromosome().m_stepSize * sample.first;
+		chromosome().m_mutationDistribution.generate(
+			chromosome().m_lastStep,chromosome().m_lastZ
+		);
+		noalias(searchPoint()) += chromosome().m_stepSize * chromosome().m_lastStep;
 	}
 	
 	double& noSuccessfulOffspring(){

@@ -201,21 +201,24 @@ BOOST_AUTO_TEST_CASE( LinAlg_CholeskyUpdate ){
 		choleskyDecomposition(A,C);
 		
 		//generate proper update
-		double sigma = Rng::uni(-0.8,2);
+		
+		double alpha = Rng::uni(0.1,1);
+		double beta = Rng::uni(-0.8,2)*alpha;
 		RealVector v(Dimensions);
 		for(std::size_t i = 0; i != Dimensions; ++i){
 			v(i) = Rng::uni(-1,1);
 		}
-		if(sigma < 0)//preserve positive definiteness
+		if(beta < 0)//preserve positive definiteness
 			v /= norm_2(v);
 		
 		//update decomposition
-		noalias(A) += sigma*outer_prod(v,v);
+		A*=alpha;
+		noalias(A) += beta*outer_prod(v,v);
 		RealMatrix CUpdate=C;
 		choleskyDecomposition(A,CUpdate);
 		
 		//Test the fast update
-		choleskyUpdate(C,v,sigma);
+		choleskyUpdate(C,v,alpha,beta);
 		
 		BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(C)));//test for nans
 		BOOST_CHECK_SMALL(max(abs(C-CUpdate)),1.e-12);
