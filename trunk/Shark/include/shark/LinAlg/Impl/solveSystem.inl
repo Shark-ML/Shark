@@ -53,8 +53,8 @@ void shark::blas::solveSystemInPlace(
 	lu_factorize(LUDecomposition,permutation);
 	
 	swap_rows(permutation,b);
-	solveTriangularSystemInPlace<SolveAXB,UnitLower>(LUDecomposition,b);
-	solveTriangularSystemInPlace<SolveAXB,Upper>(LUDecomposition,b);
+	solveTriangularSystemInPlace<SolveAXB,unit_lower>(LUDecomposition,b);
+	solveTriangularSystemInPlace<SolveAXB,upper>(LUDecomposition,b);
 }
 template<class MatT,class Mat2T>
 void shark::blas::solveSystemInPlace(
@@ -71,8 +71,8 @@ void shark::blas::solveSystemInPlace(
 	lu_factorize(LUDecomposition,permutation);
 	
 	swap_rows(permutation,B);
-	solveTriangularSystemInPlace<SolveAXB,UnitLower>(LUDecomposition,B);
-	solveTriangularSystemInPlace<SolveAXB,Upper>(LUDecomposition,B);
+	solveTriangularSystemInPlace<SolveAXB,unit_lower>(LUDecomposition,B);
+	solveTriangularSystemInPlace<SolveAXB,upper>(LUDecomposition,B);
 }
 
 template<class MatT,class Vec1T,class Vec2T>

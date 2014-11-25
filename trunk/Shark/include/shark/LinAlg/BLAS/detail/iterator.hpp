@@ -13,7 +13,8 @@ namespace blas {
 
 // Iterator tags -- hierarchical definition of storage characteristics
 struct sparse_bidirectional_iterator_tag: public std::bidirectional_iterator_tag{};
-struct dense_random_access_iterator_tag: public std::random_access_iterator_tag{};
+struct packed_random_access_iterator_tag: public std::random_access_iterator_tag{};
+struct dense_random_access_iterator_tag: public packed_random_access_iterator_tag{};
 
 template<class I1, class I2>
 struct iterator_restrict_traits {
@@ -24,6 +25,17 @@ template<>
 struct iterator_restrict_traits<dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag> {
 	typedef sparse_bidirectional_iterator_tag iterator_category;
 };
+
+template<>
+struct iterator_restrict_traits<packed_random_access_iterator_tag,dense_random_access_iterator_tag> {
+	typedef dense_random_access_iterator_tag iterator_category;
+};
+
+template<>
+struct iterator_restrict_traits<packed_random_access_iterator_tag,sparse_bidirectional_iterator_tag> {
+	typedef sparse_bidirectional_iterator_tag iterator_category;
+};
+
 
 /** \brief Base class of all bidirectional iterators.
  *
@@ -78,16 +90,16 @@ struct bidirectional_iterator_base:
  *
  * \param I the derived iterator type
  * \param T the value type
- * \param D the difference type, default: std::ptrdiff_t
+ * \param Tag the iterator tag - must be dense/packed_random_access_iterator_tag
  *
  * The random access iterator can proceed in both directions
  * via the post increment/decrement operator or in larger steps
  * via the +, - and +=, -= operators. The random access iterator
- * is LessThan Comparable.
+ * is LessThanComparable.
  */
-template<class I, class T>
+template<class I, class T, class Tag>
 struct random_access_iterator_base
-:public std::iterator<dense_random_access_iterator_tag, T> {
+:public std::iterator<Tag, T> {
 	typedef I derived_iterator_type;
 	typedef T derived_value_type;
 	typedef std::ptrdiff_t difference_type;
@@ -172,13 +184,25 @@ template<>
 struct iterator_base_traits<dense_random_access_iterator_tag> {
 	template<class I, class T>
 	struct iterator_base {
-		typedef random_access_iterator_base<I, T> type;
+		typedef random_access_iterator_base<I, T, dense_random_access_iterator_tag> type;
+	};
+};
+
+template<>
+struct iterator_base_traits<packed_random_access_iterator_tag> {
+	template<class I, class T>
+	struct iterator_base {
+		typedef random_access_iterator_base<I, T, packed_random_access_iterator_tag> type;
 	};
 };
 
 template<class Closure>
 class indexed_iterator:
-	public random_access_iterator_base<indexed_iterator<Closure>,typename Closure::value_type> {
+	public random_access_iterator_base<
+		indexed_iterator<Closure>,
+		typename Closure::value_type,
+		dense_random_access_iterator_tag
+	> {
 public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
@@ -262,11 +286,12 @@ private:
 	template<class> friend class indexed_iterator;
 };
 
-template<class T>
+template<class T, class Tag=dense_random_access_iterator_tag>
 class dense_storage_iterator:
 public random_access_iterator_base<
 	dense_storage_iterator<T>,
-	typename boost::remove_const<T>::type
+	typename boost::remove_const<T>::type, 
+	Tag
 >{
 public:
 	typedef std::size_t size_type;
@@ -277,16 +302,16 @@ public:
 
 	// Construction
 	dense_storage_iterator() {}
-	dense_storage_iterator(pointer arrayBegin, size_type index, difference_type stride = 1)
-	:m_array(arrayBegin), m_index(index), m_stride(stride) {}
+	dense_storage_iterator(pointer pos, size_type index, difference_type stride = 1)
+	:m_pos(pos), m_index(index), m_stride(stride) {}
 	
 	template<class U>
 	dense_storage_iterator(dense_storage_iterator<U> const& iter)
-	:m_array(iter.m_array), m_index(iter.m_index), m_stride(iter.m_stride){}
+	:m_pos(iter.m_pos), m_index(iter.m_index), m_stride(iter.m_stride){}
 		
 	template<class U>
 	dense_storage_iterator& operator=(dense_storage_iterator<U> const& iter){
-		m_array = iter.m_array;
+		m_pos = iter.m_pos;
 		m_index = iter.m_index;
 		m_stride = iter.m_stride;
 		return *this;
@@ -295,32 +320,36 @@ public:
 	// Arithmetic
 	dense_storage_iterator& operator ++ () {
 		++m_index;
+		m_pos += m_stride;
 		return *this;
 	}
 	dense_storage_iterator& operator -- () {
 		--m_index;
+		m_pos -= m_stride;
 		return *this;
 	}
 	dense_storage_iterator& operator += (difference_type n) {
 		m_index += n;
+		m_pos += n*m_stride;
 		return *this;
 	}
 	dense_storage_iterator& operator -= (difference_type n) {
 		m_index -= n;
+		m_pos -= n*m_stride;
 		return *this;
 	}
 	template<class U>
 	difference_type operator - (dense_storage_iterator<U> const& it) const {
-		//RANGE_CHECK(m_array == it.m_array);
+		//RANGE_CHECK(m_pos == it.m_pos);
 		return m_index - it.m_index;
 	}
 
 	// Dereference
 	reference operator*() const {
-		return m_array[m_index*m_stride];
+		return *m_pos;
 	}
 	reference operator [](difference_type n) const {
-		return *((*this) + n);
+		return m_pos[m_stride*n];
 	}
 
 	// Index
@@ -331,20 +360,20 @@ public:
 	// Comparison
 	template<class U>
 	bool operator == (dense_storage_iterator<U> const& it) const {
-		//RANGE_CHECK(m_array == it.m_array);
+		//RANGE_CHECK(m_pos == it.m_pos);
 		return m_index == it.m_index;
 	}
 	template<class U>
 	bool operator <  (dense_storage_iterator<U> const& it) const {
-		//RANGE_CHECK(m_array == it.m_array);
+		//RANGE_CHECK(m_pos == it.m_pos);
 		return m_index < it.m_index;
 	}
 
 private:
-	pointer m_array;
+	pointer m_pos;
 	difference_type m_index;
 	difference_type m_stride;
-	template<class> friend class dense_storage_iterator;
+	template<class,class> friend class dense_storage_iterator;
 };
 template<class T, class I>
 class compressed_storage_iterator:
@@ -545,7 +574,8 @@ template<class T>
 class constant_iterator:
 public random_access_iterator_base<
 	constant_iterator<T>,
-	typename boost::remove_const<T>::type
+	typename boost::remove_const<T>::type,
+	dense_random_access_iterator_tag
 >{
 public:
 	typedef std::size_t size_type;

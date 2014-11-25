@@ -127,6 +127,11 @@ public:
 	DatasetType const& dataset()const{
 		return m_dataset;
 	}
+	
+	/// \brief Returns the dataset underying the folds
+	DatasetType& dataset(){
+		return m_dataset;
+	}
 
 private:
 	DatasetType m_dataset;

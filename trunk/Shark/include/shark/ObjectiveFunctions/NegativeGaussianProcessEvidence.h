@@ -131,7 +131,7 @@ public:
 		//so we will first solve the triangular System Az=t
 		//and then compute ||z||^2
 		//since we don't need t anymore after that, we solve in-place and omit z
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Lower>(choleskyFactor,t);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::lower>(choleskyFactor,t);
 
 		// equation (6.69) on page 311 in the book C.M. Bishop, Pattern Recognition and Machine Learning, Springer, 2006
 		// e = 1/2 \cdot [ -log(det(M)) - t^T M^{-1} t - N log(2 \pi) ]

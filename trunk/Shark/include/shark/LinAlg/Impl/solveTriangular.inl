@@ -48,7 +48,7 @@ void solveTriangularSystemInPlace(
 	SolveAXB,
 	MatrixTag
 ){
-	kernels::trsv<MatrixTag::upper,MatrixTag::unit>(A,b);
+	kernels::trsv<MatrixTag::is_upper,MatrixTag::is_unit>(A,b);
 }
 ///solving xA=b is equal to transposing A
 template<class MatT,class VecT,class MatrixTag>
@@ -58,7 +58,7 @@ void solveTriangularSystemInPlace(
 	SolveXAB,
 	MatrixTag
 ){
-	kernels::trsv<!MatrixTag::upper,MatrixTag::unit>(trans(A),b);
+	kernels::trsv<!MatrixTag::is_upper,MatrixTag::is_unit>(trans(A),b);
 }
 
 //////////////////SOLVE CHOLESKY////////////////////////////////
@@ -68,8 +68,8 @@ void solveTriangularCholeskyInPlace(
 	Arg& b,
 	SolveAXB
 ){
-	shark::blas::solveTriangularSystemInPlace<SolveAXB,Lower>(L,b);
-	shark::blas::solveTriangularSystemInPlace<SolveAXB,Upper>(trans(L),b);
+	shark::blas::solveTriangularSystemInPlace<SolveAXB,lower>(L,b);
+	shark::blas::solveTriangularSystemInPlace<SolveAXB,upper>(trans(L),b);
 }
 template<class MatL,class Arg>
 void solveTriangularCholeskyInPlace(
@@ -77,8 +77,8 @@ void solveTriangularCholeskyInPlace(
 	Arg& b,
 	SolveXAB
 ){
-	shark::blas::solveTriangularSystemInPlace<SolveXAB,Upper>(trans(L),b);
-	shark::blas::solveTriangularSystemInPlace<SolveXAB,Lower>(L,b);
+	shark::blas::solveTriangularSystemInPlace<SolveXAB,upper>(trans(L),b);
+	shark::blas::solveTriangularSystemInPlace<SolveXAB,lower>(L,b);
 }
 
 }}}
@@ -104,11 +104,11 @@ void shark::blas::solveTriangularSystemInPlace(
 	SIZE_CHECK(A().size1() == A().size2());
 	if(System::left){
 		SIZE_CHECK(A().size1() == B().size1());
-		kernels::trsm<DiagType::upper,DiagType::unit>(A,B);
+		kernels::trsm<DiagType::is_upper,DiagType::is_unit>(A,B);
 	}else{
 		SIZE_CHECK(A().size1() == B().size2());
 		blas::matrix_transpose<MatB> transB = trans(B);
-		kernels::trsm<!DiagType::upper,DiagType::unit>(trans(A),transB);
+		kernels::trsm<!DiagType::is_upper,DiagType::is_unit>(trans(A),transB);
 	}
 	
 	

@@ -89,12 +89,47 @@ struct promote_traits<bool, bool> {
 	typedef int promote_type;
 };
 
+struct upper;
+struct unit_upper;
+	
+///\brief Flag indicating that the matrix is lower triangular
+struct lower{
+	static const bool is_upper = false;
+	static const bool is_unit = false;
+	typedef upper transposed_orientation;
+	
+};
+///\brief Flag indicating that the matrix is lower triangular and diagonal elements are to be assumed as 1
+struct unit_lower{
+	static const bool is_upper = false;
+	static const bool is_unit = true;
+	typedef unit_upper transposed_orientation;
+};
+	
+///\brief Flag indicating that the matrix is upper triangular
+struct upper{
+	static const bool is_upper = true;
+	static const bool is_unit = false;
+	typedef lower transposed_orientation;
+};
+///\brief Flag indicating that the matrix is upper triangular and diagonal elements are to be assumed as 1
+struct unit_upper{
+	static const bool is_upper = true;
+	static const bool is_unit = true;
+	typedef unit_lower transposed_orientation;
+};
+
+
+//structure types
+struct linear_structure{};
+struct packed_structure{};
+
 // forward declaration
 struct column_major;
 
 // This traits class defines storage layout and it's properties
 // matrix (i,j) -> storage [i * size_i + j]
-struct row_major{
+struct row_major:public linear_structure{
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef row_major orientation;
@@ -146,11 +181,19 @@ struct row_major{
 	static size_type stride2(size_type /*size_i*/, size_type /*size_j*/){
 		return 1;
 	}
+	
+	static size_type  triangular_index(size_type i, size_type j, size_type size,lower){
+		return i*(i+1)/2+j; 
+	}
+	
+	static size_type  triangular_index(size_type i, size_type j, size_type size,upper){
+		return (i*(2*size-i+1))/2+j-i; 
+	}
 };
 
 // This traits class defines storage layout and it's properties
 // matrix (i,j) -> storage [i + j * size_i]
-struct column_major{
+struct column_major:public linear_structure{
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef row_major transposed_orientation;
@@ -202,36 +245,58 @@ struct column_major{
 		return size_i;
 	}
 	
+	static size_type  triangular_index(size_type i, size_type j, size_type size,lower){
+		return transposed_orientation::triangular_index(j,i,size,upper()); 
+	}
+	
+	static size_type  triangular_index(size_type i, size_type j, size_type size,upper){
+		return transposed_orientation::triangular_index(j,i,size,lower()); 
+	}
 };
-struct unknown_orientation{typedef unknown_orientation transposed_orientation;};//: public row_major{};
+struct unknown_orientation:public linear_structure
+{typedef unknown_orientation transposed_orientation;};
 
+//storage schemes for packed matrices
+template<class Orientation, class TriangularType>
+struct packed:public packed_structure{
+	typedef  TriangularType triangular_type;
+	typedef Orientation orientation;
+	typedef packed<
+		typename Orientation::transposed_orientation,
+		typename TriangularType::transposed_orientation
+	> transposed_orientation;
+	
+	typedef typename Orientation::size_type size_type;
+	static bool non_zero(size_type i, size_type  j){
+		return TriangularType::is_upper? j >= i: i >= j;
+	}
+	
+	static size_type element(size_type i, size_type j, size_type size) {
+		SIZE_CHECK(i <= size);
+		SIZE_CHECK(j <= size);
+		//~ SIZE_CHECK( non_zero(i,j));//lets end iterators fail!
+		
+		return orientation::triangular_index(i,j,size,TriangularType());
+	}
+	
+	static size_type stride1(size_type size_i, size_type size_j){
+		return orientation::stride1(size_i,size_j);
+	}
+	static size_type stride2(size_type size_i, size_type size_j){
+		return orientation::stride2(size_i,size_j);
+	}
+};
 
 // Storage tags -- hierarchical definition of storage characteristics
-
+// this gives the real storage layout of the matix in memory
+// packed_tag ->BLAS packed format and supports packed interface
+// dense_tag -> dense storage scheme an dense interface supported
+// sparse_tag -> sparse storage scheme and supports sparse interface.
+// unknown_storage_tag -> no known storage scheme, only supports basic interface
 struct unknown_storage_tag {};
 struct sparse_tag:public unknown_storage_tag{};
 struct dense_tag: public unknown_storage_tag{};
-	
-///\brief Flag indicating that the matrix is Upper triangular
-struct Upper{
-	static const bool upper = true;
-	static const bool unit = false;
-};
-///\brief Flag indicating that the matrix is Upper triangular and diagonal elements are to be assumed as 1
-struct UnitUpper{
-	static const bool upper = true;
-	static const bool unit = true;
-};
-///\brief Flag indicating that the matrix is Lower triangular
-struct Lower{
-	static const bool upper = false;
-	static const bool unit = false;
-};
-///\brief Flag indicating that the matrix is Lower triangular and diagonal elements are to be assumed as 1
-struct UnitLower{
-	static const bool upper = false;
-	static const bool unit = true;
-};
+struct packed_tag: public unknown_storage_tag{};
 
 
 template<class S1, class S2>

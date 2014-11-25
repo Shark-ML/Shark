@@ -205,7 +205,7 @@ public:
 		
 		if(m_triangular && size() > 400){
 			y=z;
-			blas::triangular_prod<blas::Lower>(m_lowerCholesky,y);
+			blas::triangular_prod<blas::lower>(m_lowerCholesky,y);
 		}else{
 			y.clear();
 			axpy_prod(m_lowerCholesky,z,y,false);

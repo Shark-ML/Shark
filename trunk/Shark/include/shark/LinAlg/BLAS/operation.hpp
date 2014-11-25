@@ -3,10 +3,54 @@
 
 #include "kernels/gemv.hpp"
 #include "kernels/gemm.hpp"
+#include "kernels/tpmv.hpp"
 #include "kernels/trmv.hpp"
 
 namespace shark {
 namespace blas {
+	
+namespace detail{
+	
+///\brief Computes y=alpha*Ax or y += alpha*Ax
+template<class ResultV, class M, class V>
+void axpy_prod_impl(
+	matrix_expression<M> const& matrix,
+        vector_expression<V> const& vector,
+        vector_expression<ResultV>& result,
+	bool init,
+	typename ResultV::value_type alpha,
+	linear_structure
+) {
+	
+	if (init)
+		result().clear();
+	
+	kernels::gemv(matrix, vector, result,alpha);
+}
+///\brief Computes y=alpha*Ax or y += alpha*Ax
+template<class ResultV, class M, class V>
+void axpy_prod_impl(
+	matrix_expression<M> const& matrix,
+        vector_expression<V> const& vector,
+        vector_expression<ResultV>& result,
+	bool init,
+	typename ResultV::value_type alpha,
+	packed_structure
+) {
+	if(init){
+		noalias(result) = vector;
+		kernels::tpmv(matrix, result);
+		result() *= alpha;
+	}else{
+		typename vector_temporary<V>::type temp(result);
+		noalias(result) = vector;
+		kernels::tpmv(matrix, result);
+		result() *= alpha;
+		noalias(result) += temp;
+	}
+}
+
+}
 
 	
 ///\brief Computes y=alpha*Ax or y += alpha*Ax
@@ -20,10 +64,9 @@ void axpy_prod(
 ) {
 	SIZE_CHECK(matrix().size1()==result().size());
 	SIZE_CHECK(matrix().size2()==vector().size());
-	if (init)
-		result().clear();
+	
 
-	kernels::gemv(matrix, vector, result,alpha);
+	detail::axpy_prod_impl(matrix, vector, result,init, alpha,typename M::orientation());
 }
 
 ////\brief Computes C=alpha*Ax or C += alpha*Ax
@@ -132,13 +175,13 @@ void symm_prod(
 /// The first template argument governs the type
 /// of triangular matrix: Lower, Upper, UnitLower and UnitUpper.
 ///
-///Example: triangular_prod<Lower>(A,x);
+///Example: triangular_prod<lower>(A,x);
 template<class TriangularType, class MatrixA, class V>
 void triangular_prod(
 	matrix_expression<MatrixA> const& A,
 	vector_expression<V>& x
 ) {
-	kernels::trmv<TriangularType::upper, TriangularType::unit>(A, x);
+	kernels::trmv<TriangularType::is_upper, TriangularType::is_unit>(A, x);
 }
 
 /// \brief Computes x=Ax for a triangular matrix A
@@ -147,7 +190,7 @@ void triangular_prod(
 /// The first template argument governs the type
 /// of triangular matrix: Lower, Upper, UnitLower and UnitUpper.
 ///
-///Example: triangular_prod<Lower>(A,x);
+///Example: triangular_prod<lower>(A,x);
 template<class TriangularType, class MatrixA, class V>
 void triangular_prod(
 	matrix_expression<MatrixA> const& A,

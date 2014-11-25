@@ -108,7 +108,7 @@ private:
 		//so U is P C^-1 P^T
 		if(rank == m){
 			noalias(whiteningMatrix) = blas::identity_matrix<double>( m );
-			solveTriangularSystemInPlace<SolveXAB,Upper>(trans(C),whiteningMatrix);
+			solveTriangularSystemInPlace<SolveXAB,upper>(trans(C),whiteningMatrix);
 			swap_full_inverted(permutation,whiteningMatrix);
 			return whiteningMatrix;
 		}

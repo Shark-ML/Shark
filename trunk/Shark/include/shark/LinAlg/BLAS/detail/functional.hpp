@@ -517,7 +517,9 @@ template<class T1, class T2>
 struct scalar_plus_assign{
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
-	 void operator()(argument1_type t1, argument2_type t2) {
+	static const bool right_zero_identity = true;
+	static const bool left_zero_identity = false;
+	void operator()(argument1_type t1, argument2_type t2) {
 		t1 += static_cast<typename boost::remove_reference<T1>::type const>(t2);
 	}
 };
@@ -526,7 +528,8 @@ template<class T1, class T2>
 struct scalar_minus_assign{
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
-
+	static const bool right_zero_identity = true;
+	static const bool left_zero_identity = false;
 	void operator()(argument1_type t1, argument2_type t2) {
 		t1 -= t2;
 	}
@@ -536,7 +539,8 @@ template<class T1, class T2>
 struct scalar_multiply_assign{
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
-
+	static const bool right_zero_identity = false;
+	static const bool left_zero_identity = true;
 	void operator()(argument1_type t1, argument2_type t2) {
 		t1 *= t2;
 	}
@@ -545,7 +549,8 @@ template<class T1, class T2>
 struct scalar_divide_assign{
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
-	
+	static const bool right_zero_identity = false;
+	static const bool left_zero_identity = true;
 	void operator()(argument1_type t1, argument2_type t2) {
 		t1 /= t2;
 	}

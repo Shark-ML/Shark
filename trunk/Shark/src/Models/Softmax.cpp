@@ -69,7 +69,7 @@ void Softmax::eval(BatchInputType const& patterns,BatchOutputType& outputs)const
 void Softmax::eval(BatchInputType const& patterns,BatchOutputType& outputs, State& state)const{
 	eval(patterns,outputs);
 	InternalState& s = state.toState<InternalState>();
-	s.resize(patterns.size1(),inputSize());
+	s.resize(patterns.size1(),outputSize());
 	noalias(s.results) = outputs;
 }
 
@@ -77,7 +77,7 @@ void Softmax::weightedParameterDerivative(
 	BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, RealVector& gradient
 )const{
 	SIZE_CHECK(patterns.size2() == inputSize());
-	SIZE_CHECK(coefficients.size2()==patterns.size2());
+	SIZE_CHECK(coefficients.size2()==outputSize());
 	SIZE_CHECK(coefficients.size1()==patterns.size1());
 
 	gradient.resize(0);

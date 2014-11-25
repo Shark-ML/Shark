@@ -34,14 +34,8 @@
 #define SHARK_CORE_ZIPPAIR_H
 
 #include <shark/Core/utility/Range.h>
-#ifdef SHARK_USE_ITERATOR_WORKAROUND
 #include "Impl/boost_iterator_facade_fixed.hpp"//thanks, boost.
-#define SHARK_ITERATOR_FACADE boost::iterator_facade_fixed
-#define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access_fixed
-#else
-#define SHARK_ITERATOR_FACADE boost::iterator_facade
-#define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access
-#endif
+
 #include <utility>
 
 namespace shark{
