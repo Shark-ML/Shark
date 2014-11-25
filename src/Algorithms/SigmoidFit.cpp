@@ -57,12 +57,13 @@ void SigmoidFitRpropNLL::train(SigmoidModel& model, LabeledData<RealVector, unsi
 	for (unsigned int i=0; i<m_iterations; i++) {
 		rprop.step( modeling_error );
 	}
-	RealVector solution = rprop.solution().point;
+	RealVector solution(2,0.0); 
+	solution(0) = rprop.solution().point(0);
 	if(model.slopeIsExpEncoded()){
 		solution(0) = std::log(solution(0));
 	}
 	if(model.hasOffset())
-		solution(1) *=-1;
+		solution(1) =-rprop.solution().point(1);
 	model.setParameterVector(solution);
 }
 

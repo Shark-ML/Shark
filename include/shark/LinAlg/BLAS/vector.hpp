@@ -412,7 +412,7 @@ public:
 
 	/// \brief return an iterator after the last element of the vector
 	const_iterator cend() const {
-		return const_iterator(&m_storage[0],size());
+		return const_iterator(&m_storage[0]+size(),size());
 	}
 
 	/// \brief return an iterator on the first element of the vector
@@ -432,7 +432,7 @@ public:
 
 	/// \brief Return an iterator at the end of the vector
 	iterator end(){
-		return iterator(&m_storage[0],size());
+		return iterator(&m_storage[0]+size(),size());
 	}
 	
 	/////////////////sparse interface///////////////////////////////

@@ -158,7 +158,7 @@ std::size_t shark::blas::pivotingRQ
 	//we first solve for T^-1 U = Temp <=> T Temp = U
 	//this saves us from computing the inverse of T
 	Mat InvTU(rows(U,0,rank));
-	solveTriangularSystemInPlace<SolveAXB,Lower>(trans(T), InvTU);
+	solveTriangularSystemInPlace<SolveAXB,lower>(trans(T), InvTU);
 	matrixQ().resize(n,n);
 	//now Compute U^T temp = U^T T^-1 U
 	axpy_prod(trans(rows(U,0,rank)),InvTU,matrixQ);

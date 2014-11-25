@@ -126,7 +126,6 @@ void trmv_impl(
 	vector_expression<V>& b,
         boost::mpl::true_, column_major
 ){
-	std::cout<<"called"<<std::endl;
 	typedef typename TriangularA::value_type value_typeA;
 	typedef typename V::value_type value_typeV;
 	std::size_t size = A().size1();

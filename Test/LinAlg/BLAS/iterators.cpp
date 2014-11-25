@@ -15,9 +15,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Dense_Storage_Iterator)
 	
 	//reading
 	{
-		dense_storage_iterator<const double> iter(values,1,2);
+		dense_storage_iterator<const double> iter(values+2,1,2);
 		dense_storage_iterator<const double> start=iter;
-		dense_storage_iterator<const double> end(values,3,2);
+		dense_storage_iterator<const double> end(values+6,3,2);
 		BOOST_REQUIRE_EQUAL(end-start, 2);
 		BOOST_REQUIRE_EQUAL(start-iter, 0);
 		BOOST_REQUIRE(start == iter);

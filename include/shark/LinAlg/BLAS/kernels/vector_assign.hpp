@@ -10,7 +10,8 @@ namespace kernels {
 
 template<template <class T1, class T2> class F, class V>
 void assign(vector_expression<V>& v, typename V::value_type t) {
-	 F<typename V::iterator::reference, typename V::value_type> f;
+	typedef F<typename V::iterator::reference, typename V::value_type> Function;
+	Function f;
 	typedef typename V::iterator iterator;
 	iterator end = v().end();
 	for (iterator it = v().begin(); it != end; ++it){
@@ -33,6 +34,72 @@ void assign(
 		v()(i)=e()(i);
 	}
 }
+// Dense-packed case
+template< class V, class E>
+void assign(
+	vector_expression<V>& v, vector_expression<E> const& e, 
+	dense_random_access_iterator_tag, packed_random_access_iterator_tag
+) {
+	SIZE_CHECK(v().size() == e().size());
+	typedef typename E::const_iterator EIterator;
+	typedef typename V::scalar_type scalar_type;
+	EIterator eiter = e.begin();
+	EIterator eend = e.end();
+	//special case:
+	//right hand side is completely 0
+	if(eiter == eend){
+		v().clear();
+		return;
+	}
+	EIterator viter = v.begin();
+	EIterator vend = v.end();
+	
+	//set the first elements to zero
+	for(;viter.index() != eiter.index(); ++viter){
+		*viter= scalar_type/*zero*/();
+	}
+	//copy contents of right-hand side
+	for(;eiter != eend; ++eiter,++viter){
+		*viter= *eiter;
+	}
+	
+	for(;viter!= vend; ++viter){
+		*viter= scalar_type/*zero*/();
+	}
+}
+
+// packed-packed case
+template< class V, class E>
+void assign(
+	vector_expression<V>& v, vector_expression<E> const& e, 
+	packed_random_access_iterator_tag, packed_random_access_iterator_tag
+) {
+	SIZE_CHECK(v().size() == e().size());
+	typedef typename E::const_iterator EIterator;
+	EIterator eiter = e.begin();
+	EIterator eend = e.end();
+	//special case:
+	//right hand side is completely 0
+	if(eiter == eend){
+		v().clear();
+		return;
+	}
+	EIterator viter = v.begin();
+	EIterator vend = v.end();
+	
+	//check for compatible layout
+	SIZE_CHECK(vend-viter);//empty ranges can't be compatible
+	//check whether the right hand side range is included in the left hand side range
+	SIZE_CHECK(viter.index() <= eiter.index());
+	SIZE_CHECK(viter.index()+(vend-viter) >= eiter.index()+(eend-eiter));
+	
+	//copy contents of right-hand side
+	viter += eiter.index()-viter.index();
+	for(;eiter != eend; ++eiter,++viter){
+		*viter= *eiter;
+	}
+}
+
 //Dense-Sparse case
 template<class V, class E>
 void assign(
@@ -108,6 +175,79 @@ void assign(
 		f(v()(i),e()(i));
 	}
 }
+
+//dense packed case
+template<class V, class E, class F>
+void assign(
+	vector_expression<V>& v,
+	vector_expression<E> const& e,
+	F f,
+	dense_random_access_iterator_tag, packed_random_access_iterator_tag
+) {
+	SIZE_CHECK(v().size() == e().size());
+	typedef typename E::const_iterator EIterator;
+	typedef typename V::scalar_type scalar_type;
+	EIterator eiter = e.begin();
+	EIterator eend = e.end();
+	EIterator viter = v.begin();
+	EIterator vend = v.end();
+	//right hand side hasnonzero elements
+	if(eiter != eend){
+		//apply f to the first elements for which the right hand side is 0, unless f is the identity
+		for(;viter.index() != eiter.index() &&!F::right_zero_identity; ++viter){
+			f(*viter,scalar_type/*zero*/());
+		}
+		//copy contents of right-hand side
+		for(;eiter != eend; ++eiter,++viter){
+			f(*viter,*eiter);
+		}
+	}
+	//apply f to the last elements for which the right hand side is 0, unless f is the identity
+	for(;viter!= vend &&!F::right_zero_identity; ++viter){
+		*viter= scalar_type/*zero*/();
+	}
+}
+
+//packed-packed case
+template<class V, class E, class F>
+void assign(
+	vector_expression<V>& v,
+	vector_expression<E> const& e,
+	F f,
+	packed_random_access_iterator_tag, packed_random_access_iterator_tag
+) {
+	SIZE_CHECK(v().size() == e().size());
+	typedef typename E::const_iterator EIterator;
+	typedef typename V::scalar_type scalar_type;
+	EIterator eiter = e.begin();
+	EIterator eend = e.end();
+	EIterator viter = v.begin();
+	EIterator vend = v.end();
+	
+	//right hand side has nonzero elements
+	if(eiter != eend){
+		
+		//check for compatible layout
+		SIZE_CHECK(vend-viter);//empty ranges can't be compatible
+		//check whether the right hand side range is included in the left hand side range
+		SIZE_CHECK(viter.index() <= eiter.index());
+		SIZE_CHECK(viter.index()+(vend-viter) >= eiter.index()+(eend-eiter));
+		
+		//apply f to the first elements for which the right hand side is 0, unless f is the identity
+		for(;viter.index() != eiter.index() &&!F::right_zero_identity; ++viter){
+			f(*viter,scalar_type/*zero*/());
+		}
+		//copy contents of right-hand side
+		for(;eiter != eend; ++eiter,++viter){
+			f(*viter,*eiter);
+		}
+	}
+	//apply f to the last elements for which the right hand side is 0, unless f is the identity
+	for(;viter!= vend &&!F::right_zero_identity; ++viter){
+		*viter= scalar_type/*zero*/();
+	}
+}
+
 //Dense-Sparse case
 template<class V, class E, class F>
 void assign(

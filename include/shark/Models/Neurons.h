@@ -205,7 +205,11 @@ struct DropoutNeuron: public detail::NeuronBase<DropoutNeuron<Neuron> >{
 	}
 	template<class T>
 	T functionDerivative(T y)const{
-		return m_neuron.functionDerivative(y);
+		if(!m_stochastic){
+			return (1-m_probability)*m_neuron.functionDerivative(y/ (1-m_probability));
+		}else{
+			return m_neuron.functionDerivative(y);
+		}
 	}
 	
 	void setProbability(double probability){m_probability = probability;}

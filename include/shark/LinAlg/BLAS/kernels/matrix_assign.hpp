@@ -159,6 +159,17 @@ void assign(
 	}
 }
 
+
+// Spcial case packed - just calls the first two implementations.
+template<template <class T1, class T2> class F, class M, class Orientation, class Triangular>
+void assign(
+	matrix_expression<M> &m, 
+	typename M::value_type t, 
+	packed<Orientation,Triangular>
+){
+	assign(m,t,Orientation());
+}
+
 // Dispatcher
 template<template <class T1, class T2> class F, class M>
 void assign(
@@ -174,7 +185,7 @@ void assign(
 ////////////////////////////////////////////////////////////////
 
 //direct assignment without functor
-//the cases were both argumnts have the same orientation can be implemented using assign.
+//the cases were both arguments have the same orientation can be implemented using assign.
 template<class M, class E,class TagE, class TagM>
 void assign(
 	matrix_expression<M> &m, 
@@ -302,6 +313,48 @@ void assign(
 	}
 }
 
+//packed row_major,row_major
+template<class M, class E,class Triangular>
+void assign(
+	matrix_expression<M> &m, 
+	matrix_expression<E> const& e,
+	packed<row_major,Triangular>, packed<row_major,Triangular>,
+	packed_random_access_iterator_tag, packed_random_access_iterator_tag
+) {
+	typedef typename M::row_iterator MIter;
+	typedef typename E::const_row_iterator EIter;
+	
+	for(std::size_t i = 0; i != m().size1(); ++i){
+		MIter mpos = m().row_begin(i);
+		EIter epos = e().row_begin(i);
+		MIter mend = m().row_end(i);
+		SIZE_CHECK(mpos.index() == epos.index());
+		for(; mpos!=mend; ++mpos,++epos){
+			*mpos = *epos;
+		}
+	}
+}
+
+////packed row_major,column_major
+//todo: this is suboptimal as we do strided access!!!!
+template<class M, class E,class Triangular>
+void assign(
+	matrix_expression<M> &m, 
+	matrix_expression<E> const& e,
+	packed<row_major,Triangular>, packed<column_major,Triangular>,
+	packed_random_access_iterator_tag, packed_random_access_iterator_tag
+) {
+	typedef typename M::row_iterator MIter;
+
+	for(std::size_t i = 0; i != m().size1(); ++i){
+		MIter mpos = m().row_begin(i);
+		MIter mend = m().row_end(i);
+		for(; mpos!=mend; ++mpos){
+			*mpos = e()(i,mpos.index());
+		}
+	}
+}
+
 //general dispatcher: if the second argument has an unknown orientation
 // it is chosen the same as the first one
 template<class M, class E, class TagE, class TagM>
@@ -325,6 +378,21 @@ void assign(
 	detail::internal_transpose_proxy<M> transM(m());
 	detail::internal_transpose_proxy<E const> transE(e());
 	assign(transM,transE,row_major(),TEOrientation(),tagE,tagM);
+}
+
+//first argument is column_major->transpose to row_major
+template<class M, class E,class EOrientation, class Triangular, class TagM, class TagE>
+void assign(
+	matrix_expression<M> &m, 
+	matrix_expression<E> const& e,
+	packed<column_major,Triangular>, packed<EOrientation,Triangular>,
+	TagM tagM, TagE tagE
+) {
+	typedef typename M::orientation::transposed_orientation TMPacked;
+	typedef typename E::orientation::transposed_orientation TEPacked;
+	detail::internal_transpose_proxy<M> transM(m());
+	detail::internal_transpose_proxy<E const> transE(e());
+	assign(transM,transE,TMPacked(),TEPacked(),tagM,tagE);
 }
 
 // Dispatcher
@@ -497,41 +565,138 @@ void assign(
 	//~ }
 }
 
-//general dispatcher: if the second argument has an unknown orientation
-// it is chosen the same as the first one
-template<template <class, class> class F,class M, class E, class TagE, class TagM>
+
+//kernels for packed
+template<template <class, class> class F, class M, class E, class Triangular>
 void assign(
 	matrix_expression<M> &m, 
 	matrix_expression<E> const& e,
-	row_major, unknown_orientation ,TagE tagE, TagM tagM
+	packed<row_major,Triangular>, packed<row_major,Triangular>
 ) {
-	assign<F>(m,e,row_major(),row_major(),tagE,tagM);
+	typedef typename M::row_iterator MIter;
+	typedef typename E::const_row_iterator EIter;
+	typedef F<typename MIter::reference,typename  EIter::value_type> Function;
+	//there is nothing we can do, if F does not leave the non-stored elements 0
+	//this is the case for all current aissgnment functors, but you never know :)
+	BOOST_STATIC_ASSERT( Function::left_zero_identity || Function::right_zero_identity);
+	
+	Function f;
+	for(std::size_t i = 0; i != m().size1(); ++i){
+		MIter mpos = m().row_begin(i);
+		EIter epos = e().row_begin(i);
+		MIter mend = m().row_end(i);
+		SIZE_CHECK(mpos.index() == epos.index());
+		for(; mpos!=mend; ++mpos,++epos){
+			f(*mpos,*epos);
+		}
+	}
 }
 
-//general dispatcher: if the first argument is column major, we transpose the whole expression
-//so that it  is row-major, this saves us to implment everything twice.
-template<template <class, class> class F, class M, class E,class EOrientation, class TagE, class TagM>
+//todo: this is suboptimal as we do strided access!!!!
+template<template <class, class> class F, class M, class E, class Triangular>
 void assign(
 	matrix_expression<M> &m, 
 	matrix_expression<E> const& e,
-	column_major, EOrientation,TagE tagE, TagM tagM
+	packed<row_major,Triangular>, packed<column_major,Triangular>
+) {
+	typedef typename M::row_iterator MIter;
+	typedef typename E::const_row_iterator EIter;
+	typedef F<typename MIter::reference,typename EIter::value_type> Function;
+	//there is nothing we can do, if F does not leave the non-stored elements 0
+	BOOST_STATIC_ASSERT( Function::left_zero_identity);
+	
+	Function f;
+	for(std::size_t i = 0; i != m().size1(); ++i){
+		MIter mpos = m().row_begin(i);
+		MIter mend = m().row_end(i);
+		for(; mpos!=mend; ++mpos){
+			f(*mpos,e()(i,mpos.index()));
+		}
+	}
+}
+
+//second level of dispatcher dispatches to actual computation kernels
+
+//first standard structured matrices which only differ in row_major/column_major 
+//for these we standardize input so that the first argument is row_major. Further
+//we choose in the case if unknown_orientation the second argument to be the same 
+//as the first. more than one dispatcher can be called every time!
+
+
+//everything fulfilled -> dispatch sparse/dense computing versions
+template<template <class, class> class F, class M, class E>
+void assign(
+	matrix_expression<M> &m, 
+	matrix_expression<E> const& e,
+	row_major, row_major
+) {
+	typedef typename M::const_row_iterator::iterator_category MCategory;
+	typedef typename E::const_row_iterator::iterator_category ECategory;
+	assign<F>(m,e,row_major(),row_major(),MCategory(),ECategory());
+}
+//everything fulfilled -> dispatch sparse/dense computing versions
+template<template <class, class> class F, class M, class E>
+void assign(
+	matrix_expression<M> &m, 
+	matrix_expression<E> const& e,
+	row_major, column_major
+) {
+	typedef typename M::const_row_iterator::iterator_category MCategory;
+	typedef typename E::const_column_iterator::iterator_category ECategory;
+	assign<F>(m,e,row_major(),column_major(),MCategory(),ECategory());
+}
+
+//first argument is row_major, second is unknown->choose unknown to be row_major
+template<template <class, class> class F,class M, class E>
+void assign(
+	matrix_expression<M> &m, 
+	matrix_expression<E> const& e,
+	row_major, unknown_orientation
+) {
+	assign<F>(m,e,row_major(),row_major());
+}
+
+
+//first argument is column_major->transpose to row_major
+template<template <class, class> class F, class M, class E,class EOrientation>
+void assign(
+	matrix_expression<M> &m, 
+	matrix_expression<E> const& e,
+	column_major, EOrientation
 ) {
 	typedef typename EOrientation::transposed_orientation TEOrientation;
 	detail::internal_transpose_proxy<M> transM(m());
 	detail::internal_transpose_proxy<E const> transE(e());
-	assign<F>(transM,transE,row_major(),TEOrientation(),tagE,tagM);
+	assign<F>(transM,transE,row_major(),TEOrientation());
 }
 
-// Dispatcher
+//now dispatch packed matrices. Again we dispatch so that the default is row_major
+//we also ensure here that the triangular structure is compatible
+
+//first argument is column_major->transpose to row_major
+template<template <class, class> class F, class M, class E,class EOrientation, class Triangular>
+void assign(
+	matrix_expression<M> &m, 
+	matrix_expression<E> const& e,
+	packed<column_major,Triangular>, packed<EOrientation,Triangular>
+) {
+	typedef typename M::orientation::transposed_orientation TMPacked;
+	typedef typename E::orientation::transposed_orientation TEPacked;
+	detail::internal_transpose_proxy<M> transM(m());
+	detail::internal_transpose_proxy<E const> transE(e());
+	assign<F>(transM,transE,TMPacked(),TEPacked());
+}
+
+
+//First Level Dispatcher, dispatches by orientation
 template<template <class,class> class F, class M, class E>
 void assign(matrix_expression<M> &m, const matrix_expression<E> &e) {
 	SIZE_CHECK(m().size1()  == e().size1());
 	SIZE_CHECK(m().size2()  == e().size2());
 	typedef typename M::orientation MOrientation;
 	typedef typename E::orientation EOrientation;
-	typedef typename major_iterator<M>::type::iterator_category MCategory;
-	typedef typename major_iterator<E>::type::iterator_category ECategory;
-	assign<F>(m, e, MOrientation(),EOrientation(),MCategory(), ECategory());
+	
+	assign<F>(m, e, MOrientation(),EOrientation());
 }
 
 }}}

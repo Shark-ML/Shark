@@ -266,7 +266,7 @@ public:
 		return expression().row_end(i);
 	}
 	
-	const_row_iterator column_begin(index_type j) const {
+	const_column_iterator column_begin(index_type j) const {
 		return expression().column_begin(j);
 	}
 	const_column_iterator column_end(index_type j) const {
@@ -1710,6 +1710,15 @@ public:
         
 
 	// Construction and destruction
+	
+	dense_matrix_adaptor(dense_matrix_adaptor const& expression)
+	: m_values(expression.storage())
+	, m_size1(expression.size1())
+	, m_size2(expression.size2())
+	, m_stride1(expression.stride1())
+	, m_stride2(expression.stride2())
+	{
+	}
 
 	/// \brief Constructor of a self_type proxy from a Dense MatrixExpression
 	///
@@ -1901,29 +1910,29 @@ public:
 	typedef dense_storage_iterator<value_type const> const_column_iterator;
 
 	const_row_iterator row_begin(index_type i) const {
-		return const_row_iterator(&(*this)(0,0)+i*stride1(),0,stride2());
+		return const_row_iterator(m_values+i*stride1(),0,stride2());
 	}
 	const_row_iterator row_end(index_type i) const {
-		return const_row_iterator(&(*this)(0,0)+i*stride1(),size2(),stride2());
+		return const_row_iterator(m_values+i*stride1()+size2()*stride2(),size2(),stride2());
 	}
 	row_iterator row_begin(index_type i){
-		return row_iterator(&(*this)(0,0)+i*stride1(),0,stride2());
+		return row_iterator(m_values+i*stride1(),0,stride2());
 	}
 	row_iterator row_end(index_type i){
-		return row_iterator(&(*this)(0,0)+i*stride1(),size2(),stride2());
+		return row_iterator(m_values+i*stride1()+size2()*stride2(),size2(),stride2());
 	}
 	
-	const_row_iterator column_begin(index_type j) const {
-		return const_column_iterator(&(*this)(0,0)+j*stride2(),0,stride1());
+	const_column_iterator column_begin(index_type j) const {
+		return const_column_iterator(m_values+j*stride2(),0,stride1());
 	}
 	const_column_iterator column_end(index_type j) const {
-		return const_column_iterator(&(*this)(0,0)+j*stride2(),size1(),stride1());
+		return const_column_iterator(m_values+j*stride2()+size1()*stride1(),size1(),stride1());
 	}
 	column_iterator column_begin(index_type j){
-		return column_iterator(&(*this)(0,0)+j*stride2(),0,stride1());
+		return column_iterator(m_values+j*stride2(),0,stride1());
 	}
 	column_iterator column_end(index_type j){
-		return column_iterator(&(*this)(0,0)+j*stride2(),size1(),stride1());
+		return column_iterator(m_values+j*stride2()+size1()*stride1(),size1(),stride1());
 	}
 	
 	typedef typename major_iterator<self_type>::type major_iterator;

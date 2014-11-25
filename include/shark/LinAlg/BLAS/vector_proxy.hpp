@@ -701,7 +701,7 @@ public:
 
 	/// \brief return an iterator after the last element of the vector
 	const_iterator end() const {
-		return const_iterator(m_values,size());
+		return const_iterator(m_values+size()*stride(),size());
 	}
 
 	/// \brief Return an iterator on the first element of the vector
@@ -711,7 +711,7 @@ public:
 
 	/// \brief Return an iterator at the end of the vector
 	iterator end(){
-		return iterator(m_values,size());
+		return iterator(m_values+size()*stride(),size());
 	}
 	
 	//insertion and erasing of elements

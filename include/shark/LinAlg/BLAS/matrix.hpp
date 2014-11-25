@@ -328,26 +328,26 @@ public:
 		return const_row_iterator(&m_data[0] + i*stride1(),0,stride2());
 	}
 	const_row_iterator row_end(index_type i) const {
-		return const_row_iterator(&m_data[0] + i*stride1(),size2(),stride2());
+		return const_row_iterator(&m_data[0] + i*stride1()+stride2()*size2(),size2(),stride2());
 	}
 	row_iterator row_begin(index_type i){
 		return row_iterator(&m_data[0] + i*stride1(),0,stride2());
 	}
 	row_iterator row_end(index_type i){
-		return row_iterator(&m_data[0] + i*stride1(),size2(),stride2());
+		return row_iterator(&m_data[0] + i*stride1()+stride2()*size2(),size2(),stride2());
 	}
 	
 	const_row_iterator column_begin(std::size_t j) const {
-		return const_column_iterator(&(*this)(0,0)+j*stride2(),0,stride1());
+		return const_column_iterator(&m_data[0]+j*stride2(),0,stride1());
 	}
 	const_column_iterator column_end(std::size_t j) const {
-		return const_column_iterator(&(*this)(0,0)+j*stride2(),size1(),stride1());
+		return const_column_iterator(&m_data[0]+j*stride2()+ stride1()*size1(),size1(),stride1());
 	}
 	column_iterator column_begin(std::size_t j){
-		return column_iterator(&(*this)(0,0)+j*stride2(),0,stride1());
+		return column_iterator(&m_data[0]+j*stride2(),0,stride1());
 	}
 	column_iterator column_end(std::size_t j){
-		return column_iterator(&(*this)(0,0)+j*stride2(),size1(),stride1());
+		return column_iterator(&m_data[0]+j*stride2()+ stride1()*size1(),size1(),stride1());
 	}
 	
 	typedef typename blas::major_iterator<self_type>::type major_iterator;

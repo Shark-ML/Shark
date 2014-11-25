@@ -11,6 +11,15 @@
 #ifndef BOOST_ITERATOR_FACADE_23022003THW_HPP_FIXED
 #define BOOST_ITERATOR_FACADE_23022003THW_HPP_FIXED
 
+#if BOOST_VERSION < 105700
+#define SHARK_USE_ITERATOR_WORKAROUND
+#endif
+
+#ifdef SHARK_USE_ITERATOR_WORKAROUND
+
+#define SHARK_ITERATOR_FACADE boost::iterator_facade_fixed
+#define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access_fixed
+
 #include <boost/iterator/iterator_facade.hpp>
 
 #include <boost/iterator/detail/config_def.hpp> // this goes last
@@ -515,5 +524,9 @@ BOOST_ITERATOR_FACADE_PLUS((
 } // namespace boost
 
 #include <boost/iterator/detail/config_undef.hpp>
+#else
+#define SHARK_ITERATOR_FACADE boost::iterator_facade
+#define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access
+#endif
 
 #endif // BOOST_ITERATOR_FACADE_23022003THW_HPP

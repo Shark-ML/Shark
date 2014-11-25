@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	std::cout<<"a"<<std::endl;
 	{
 		RealMatrix testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Lower>(A,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::lower>(A,testResult);
 		RealMatrix result = prod(AInv,input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	std::cout<<"b"<<std::endl;
 	{
 		RealMatrix testResult = subrange(input,0,1,0,2);
-		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::Lower>(A,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::lower>(A,testResult);
 		RealMatrix result = prod(subrange(input,0,1,0,2),AInv);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	std::cout<<"c1"<<std::endl;
 	{
 		RealMatrix testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Upper>(Atrans,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::upper>(Atrans,testResult);
 		RealMatrix result = prod(trans(AInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	std::cout<<"c2"<<std::endl;
 	{
 		RealMatrix testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Upper>(trans(A),testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::upper>(trans(A),testResult);
 		RealMatrix result = prod(trans(AInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	std::cout<<"d1"<<std::endl;
 	{
 		RealMatrix testResult = subrange(input,0,1,0,2);
-		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::Upper>(Atrans,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::upper>(Atrans,testResult);
 		RealMatrix result = prod(subrange(input,0,1,0,2),trans(AInv));
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -113,25 +113,25 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	std::cout<<"d2"<<std::endl;
 	{
 		RealMatrix testResult = subrange(input,0,1,0,2);
-		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::Upper>(trans(A),testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::upper>(trans(A),testResult);
 		RealMatrix result = prod(subrange(input,0,1,0,2),trans(AInv));
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
-	std::cout<<"e"<<std::endl;//(check for column major blas::Lower arguments)
+	std::cout<<"e"<<std::endl;//(check for column major blas::lower arguments)
 	{
 		blas::matrix<double,blas::column_major> AcolMaj = A;
 		blas::matrix<double,blas::column_major> testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Lower>(AcolMaj,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::lower>(AcolMaj,testResult);
 		RealMatrix result = prod(AInv,input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
-	std::cout<<"f"<<std::endl;//(check for row major blas::Upper arguments)
+	std::cout<<"f"<<std::endl;//(check for row major blas::upper arguments)
 	{
 		RealMatrix Atrans = trans(A);
 		RealMatrix testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Upper>(Atrans,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::upper>(Atrans,testResult);
 		RealMatrix result = prod(trans(AInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	std::cout<<"a"<<std::endl;
 	{
 		RealMatrix testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::UnitLower>(A,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::unit_lower>(A,testResult);
 		RealMatrix result = prod(unitAInv,input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	std::cout<<"b"<<std::endl;
 	{
 		RealMatrix testResult = subrange(input,0,1,0,2);
-		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::UnitLower>(A,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::unit_lower>(A,testResult);
 		RealMatrix result = prod(subrange(input,0,1,0,2),unitAInv);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	std::cout<<"c"<<std::endl;
 	{
 		RealMatrix testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::UnitUpper>(trans(A),testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::unit_upper>(trans(A),testResult);
 		RealMatrix result = prod(trans(unitAInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -166,25 +166,25 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Matrix ){
 	std::cout<<"d"<<std::endl;
 	{
 		RealMatrix testResult = subrange(input,0,1,0,2);
-		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::UnitUpper>(trans(A),testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::unit_upper>(trans(A),testResult);
 		RealMatrix result = prod(subrange(input,0,1,0,2),trans(unitAInv));
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
-	std::cout<<"e"<<std::endl;//(check for column major blas::Lower arguments)
+	std::cout<<"e"<<std::endl;//(check for column major blas::lower arguments)
 	{
 		blas::matrix<double,blas::column_major> AcolMaj = A;
 		blas::matrix<double,blas::column_major> testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::UnitLower>(AcolMaj,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::unit_lower>(AcolMaj,testResult);
 		RealMatrix result = prod(unitAInv,input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
-	std::cout<<"f"<<std::endl;//(check for row major blas::Upper arguments)
+	std::cout<<"f"<<std::endl;//(check for row major blas::upper arguments)
 	{
 		RealMatrix Atrans = trans(A);
 		RealMatrix testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::UnitUpper>(Atrans,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::unit_upper>(Atrans,testResult);
 		RealMatrix result = prod(trans(unitAInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 	std::cout<<"a"<<std::endl;
 	{
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Lower>(A,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::lower>(A,testResult);
 		RealVector result = prod(AInv,input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 	std::cout<<"b"<<std::endl;
 	{
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Upper>(trans(A),testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::upper>(trans(A),testResult);
 		RealVector result = prod(trans(AInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 	std::cout<<"c"<<std::endl;
 	{
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::Lower>(A,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::lower>(A,testResult);
 		RealVector result = prod(input,AInv);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -247,25 +247,25 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 	std::cout<<"d"<<std::endl;
 	{
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::Upper>(trans(A),testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::upper>(trans(A),testResult);
 		RealVector result = prod(input,trans(AInv));
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
-	std::cout<<"e"<<std::endl;//(check for column major blas::Lower arguments)
+	std::cout<<"e"<<std::endl;//(check for column major blas::lower arguments)
 	{
 		blas::matrix<double,blas::column_major> AcolMaj = A;
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Lower>(AcolMaj,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::lower>(AcolMaj,testResult);
 		RealVector result = prod(AInv,input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
-	std::cout<<"f"<<std::endl;//(check for row major blas::Upper arguments)
+	std::cout<<"f"<<std::endl;//(check for row major blas::upper arguments)
 	{
 		RealMatrix Atrans = trans(A);
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::Upper>(Atrans,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::upper>(Atrans,testResult);
 		RealVector result = prod(trans(AInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 	std::cout<<"a"<<std::endl;
 	{
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::UnitLower>(A,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::unit_lower>(A,testResult);
 		RealVector result = prod(unitAInv,input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 	std::cout<<"b"<<std::endl;
 	{
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::UnitUpper>(trans(A),testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::unit_upper>(trans(A),testResult);
 		RealVector result = prod(trans(unitAInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 	std::cout<<"c"<<std::endl;
 	{
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::UnitLower>(A,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::unit_lower>(A,testResult);
 		RealVector result = prod(input,unitAInv);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
@@ -300,25 +300,25 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 	std::cout<<"d"<<std::endl;
 	{
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::UnitUpper>(trans(A),testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveXAB,blas::unit_upper>(trans(A),testResult);
 		RealVector result = prod(input,trans(unitAInv));
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
-	std::cout<<"e"<<std::endl;//(check for column major blas::Lower arguments)
+	std::cout<<"e"<<std::endl;//(check for column major blas::lower arguments)
 	{
 		blas::matrix<double,blas::column_major> AcolMaj = A;
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::UnitLower>(AcolMaj,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::unit_lower>(AcolMaj,testResult);
 		RealVector result = prod(unitAInv,input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);
 	}
-	std::cout<<"f"<<std::endl;//(check for row major blas::Upper arguments)
+	std::cout<<"f"<<std::endl;//(check for row major blas::upper arguments)
 	{
 		RealMatrix Atrans = trans(A);
 		RealVector testResult = input;
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::UnitUpper>(Atrans,testResult);
+		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::unit_upper>(Atrans,testResult);
 		RealVector result = prod(trans(unitAInv),input);
 		double error = norm_inf(result-testResult);
 		BOOST_CHECK_SMALL(error, 1.e-12);

@@ -34,19 +34,7 @@
 #define SHARK_CORE_ITERATORS_H
 
 #include <boost/version.hpp>
-
-#if BOOST_VERSION < 105700
-#define SHARK_USE_ITERATOR_WORKAROUND
-#endif
-
-#ifdef SHARK_USE_ITERATOR_WORKAROUND
 #include "Impl/boost_iterator_facade_fixed.hpp"//thanks, boost.
-#define SHARK_ITERATOR_FACADE boost::iterator_facade_fixed
-#define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access_fixed
-#else
-#define SHARK_ITERATOR_FACADE boost::iterator_facade
-#define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access
-#endif
 
 #include <shark/Core/utility/Range.h>
 #include <boost/range/iterator.hpp>

@@ -52,25 +52,25 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense ){
 	{
 		std::cout<<"row major lower Ax"<<std::endl;
 		vector<double> result = arg2;
-		triangular_prod<Lower>(arg1lowerrm,result);
+		triangular_prod<lower>(arg1lowerrm,result);
 		checkMatrixVectorMultiply(arg1lowertest,arg2,result);
 	}
 	{
 		std::cout<<"column major lower Ax"<<std::endl;
 		vector<double> result = arg2;
-		triangular_prod<Lower>(arg1lowercm,result);
+		triangular_prod<lower>(arg1lowercm,result);
 		checkMatrixVectorMultiply(arg1lowertest,arg2,result);
 	}
 	{
 		std::cout<<"row major upper Ax"<<std::endl;
 		vector<double> result = arg2;
-		triangular_prod<Upper>(arg1upperrm,result);
+		triangular_prod<upper>(arg1upperrm,result);
 		checkMatrixVectorMultiply(arg1uppertest,arg2,result);
 	}
 	{
 		std::cout<<"column major upper Ax"<<std::endl;
 		vector<double> result = arg2;
-		triangular_prod<Upper>(arg1uppercm,result);
+		triangular_prod<upper>(arg1uppercm,result);
 		checkMatrixVectorMultiply(arg1uppertest,arg2,result);
 	}
 	
@@ -80,25 +80,25 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense ){
 	{
 		std::cout<<"row major lower Ax"<<std::endl;
 		vector<double> result = arg2;
-		triangular_prod<UnitLower>(arg1lowerrm,result);
+		triangular_prod<unit_lower>(arg1lowerrm,result);
 		checkMatrixVectorMultiply(arg1lowertest,arg2,result);
 	}
 	{
 		std::cout<<"column major lower Ax"<<std::endl;
 		vector<double> result = arg2;
-		triangular_prod<UnitLower>(arg1lowercm,result);
+		triangular_prod<unit_lower>(arg1lowercm,result);
 		checkMatrixVectorMultiply(arg1lowertest,arg2,result);
 	}
 	{
 		std::cout<<"row major upper Ax"<<std::endl;
 		vector<double> result = arg2;
-		triangular_prod<UnitUpper>(arg1upperrm,result);
+		triangular_prod<unit_upper>(arg1upperrm,result);
 		checkMatrixVectorMultiply(arg1uppertest,arg2,result);
 	}
 	{
 		std::cout<<"column major upper Ax"<<std::endl;
 		vector<double> result = arg2;
-		triangular_prod<UnitUpper>(arg1uppercm,result);
+		triangular_prod<unit_upper>(arg1uppercm,result);
 		checkMatrixVectorMultiply(arg1uppertest,arg2,result);
 	}
 }
