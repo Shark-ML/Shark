@@ -329,17 +329,19 @@ public:
 				ConstRealVectorRange bias = subrange(m_bias,beginNeuron-inputSize(),endNeuron-inputSize());
 				noalias(responses) += trans(repeat(bias,numPatterns));
 			}
-			// if this is the last layer, use output neuron response instead
- 			if(layer < m_layerMatrix.size()-1) {
-				noalias(responses) = m_hiddenNeuron(responses);
- 			}
- 			else {
-				//add shortcuts if necessary
-				if(m_inputOutputShortcut.size1() != 0){
-					axpy_prod(m_inputOutputShortcut,trans(patterns),responses,false);
+			SHARK_CRITICAL_REGION{//beware Dropout Neurons!
+				// if this is the last layer, use output neuron response instead
+				if(layer < m_layerMatrix.size()-1) {
+					noalias(responses) = m_hiddenNeuron(responses);
 				}
-				noalias(responses) = m_outputNeuron(responses);
- 			}
+				else {
+					//add shortcuts if necessary
+					if(m_inputOutputShortcut.size1() != 0){
+						axpy_prod(m_inputOutputShortcut,trans(patterns),responses,false);
+					}
+					noalias(responses) = m_outputNeuron(responses);
+				}
+			}
 			//go to the next layer
 			beginNeuron = endNeuron;
 		}
