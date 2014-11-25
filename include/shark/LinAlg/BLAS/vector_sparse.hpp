@@ -302,7 +302,7 @@ public:
 	
 	// Element assignment
 	iterator set_element(iterator pos, size_type index, value_type value) {
-		RANGE_CHECK(pos - begin() <=m_size);
+		RANGE_CHECK(size_type(pos - begin()) <=m_size);
 		
 		if(pos != end() && pos.index() == index){
 			*pos = value;

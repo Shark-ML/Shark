@@ -389,7 +389,7 @@ public:
 	row_iterator set_element(row_iterator pos, size_type index, value_type value) {
 		std::size_t row = pos.row();
 		RANGE_CHECK(row < size1());
-		RANGE_CHECK(row_end(row) - pos <= row_capacity(row));
+		RANGE_CHECK(size_type(row_end(row) - pos) <= row_capacity(row));
 		//todo: check in debug, that iterator position is valid
 
 		//shortcut: element already exists.

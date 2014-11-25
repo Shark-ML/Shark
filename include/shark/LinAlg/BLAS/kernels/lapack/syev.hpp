@@ -90,13 +90,13 @@ void syev(
 	matA() = trans(matA);
 	
 	//reverse eigenvectors and eigenvalues
-	for (int i = 0; i < n-i-1; i++)
+	for (int i = 0; i < (int)n-i-1; i++)
 	{
 		int l =  n-i-1;
 		std::swap(eigenValues()( l ),eigenValues()( i ));
 	}
-	for (int j = 0; j < n; j++) {
-		for (int i = 0; i < n-i-1; i++)
+	for (int j = 0; j < (int)n; j++) {
+		for (int i = 0; i < (int)n-i-1; i++)
 		{
 			int l =  n-i-1;
 			std::swap(matA()( j , l ), matA()( j , i ));
