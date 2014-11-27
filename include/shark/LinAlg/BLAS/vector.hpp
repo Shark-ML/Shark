@@ -191,6 +191,11 @@ public:
 	const_reference back()const{
 		return storage()[size()-1];
 	}
+	
+	///\brief resizes the vector by appending a new element to the end. this invalidates storage 
+	void push_back(value_type const& element){
+		m_storage.push_back(element);
+	}
 
 	/// \brief Clear the vector, i.e. set all values to the \c zero value.
 	void clear() {
