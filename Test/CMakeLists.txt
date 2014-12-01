@@ -5,6 +5,11 @@
 #       Test implementation: Boost UTF                              #
 #####################################################################
 
+
+project(Coverage)
+ENABLE_TESTING()
+cmake_minimum_required(VERSION 2.8)
+
 #####################################################################
 #       Configure logging of test restuls to XML                    #
 #####################################################################
@@ -35,9 +40,10 @@ MACRO( SHARK_ADD_TEST SRC NAME)
         ${Boost_LIBRARIES}
     )
 
-    TARGET_LINK_LIBRARIES( ${NAME} ${LINK_LIBRARIES} )
+    TARGET_LINK_LIBRARIES( ${NAME} ${LINK_LIBRARIES} gcov)
 
     ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} )
+    ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} COMMAND Coverage)
 ENDMACRO()
 
 
