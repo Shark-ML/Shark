@@ -7,7 +7,9 @@
 
 
 project(Coverage)
+
 ENABLE_TESTING()
+
 cmake_minimum_required(VERSION 2.8)
 
 #####################################################################
@@ -40,10 +42,14 @@ MACRO( SHARK_ADD_TEST SRC NAME)
         ${Boost_LIBRARIES}
     )
 
-    TARGET_LINK_LIBRARIES( ${NAME} ${LINK_LIBRARIES} gcov)
+    if(CMAKE_COMPILER_IS_GNUCXX)
+      TARGET_LINK_LIBRARIES( ${NAME} ${LINK_LIBRARIES} gcov)
+    endif (CMAKE_COMPILER_IS_GNUCXX)
 
     ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} )
-    ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} COMMAND Coverage)
+    if(CMAKE_COMPILER_IS_GNUCXX)
+      ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} COMMAND Coverage)
+    endif (CMAKE_COMPILER_IS_GNUCXX)
 ENDMACRO()
 
 
@@ -266,13 +272,15 @@ SHARK_ADD_TEST( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 
 # Copy test file
 IF (HDF5_FOUND)
-	ADD_CUSTOM_COMMAND(
-	    TARGET Data_HDF5
-	    POST_BUILD
-	    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_data
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Test/test_data ${CMAKE_BINARY_DIR}/Test/test_data
-	)	
+  ADD_CUSTOM_COMMAND(
+      TARGET Data_HDF5
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_data
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Test/test_data ${CMAKE_BINARY_DIR}/Test/test_data
+  )	
 ENDIF (HDF5_FOUND)
+
+
 # Create output dir
 ADD_CUSTOM_COMMAND(
     TARGET Data_Csv

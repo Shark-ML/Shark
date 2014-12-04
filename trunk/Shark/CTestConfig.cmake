@@ -9,7 +9,7 @@ set(CTEST_BINARY_DIRECTORY ./Test/bin/)
 set(CTEST_BUILD_NAME "Linux")
 set(CTEST_CMAKE_GENERATOR "cmake")
 set(CTEST_BUILD_COMMAND "gcc")
-set(CTEST_COVERAGE_COMMAND "/usr/bin/gcov")
+set(COVERAGE_EXTRA_FLAGS "-p -l")
 
 set(CTEST_DROP_SITE_CDASH TRUE)
 set(CTEST_PROJECT_NAME "Shark CTests")
@@ -18,6 +18,5 @@ set(CTEST_DROP_LOCATION "./Test/test_output")
 
 # memory check
 set(CTEST_MEMORYCHECK_COMMAND "/usr/bin/valgrind")
-set(MEMORYCHECK_COMMAND_OPTIONS "--xml=yes --xml-file=test.xml")
+set(MEMORYCHECK_COMMAND_OPTIONS "--xml=yes --xml-file=Valgrind_%p_.xml")
 set(ENV{COVFILE} "${CTEST_BINARY_DIRECTORY}/CMake.cov")
-
