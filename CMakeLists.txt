@@ -8,13 +8,12 @@
 #####################################################################
 PROJECT( shark CXX )
 
-INCLUDE(CTest)
-
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 CMAKE_POLICY(SET CMP0003 NEW)
 IF (NOT (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 3.0))
 	CMAKE_POLICY(SET CMP0042 NEW)
 ENDIF (NOT (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 3.0))
+
 
 ENABLE_TESTING()
 
@@ -153,7 +152,6 @@ IF(CMAKE_BUILD_TYPE MATCHES "Release")
 	ADD_DEFINITIONS(-DNDEBUG )
 	ADD_DEFINITIONS(-DBOOST_UBLAS_NDEBUG )
 ENDIF (CMAKE_BUILD_TYPE MATCHES "Release")
-message(STATUS "Will build: " ${CMAKE_BUILD_TYPE})
 
 #####################################################################
 #           Report compilers
@@ -166,8 +164,7 @@ message(STATUS "C compiler: " ${CMAKE_C_COMPILER})
 #####################################################################
 SET(Boost_USE_MULTITHREADED ON)
 ADD_DEFINITIONS( -DBOOST_PARAMETER_MAX_ARITY=15 -DBOOST_FILESYSTEM_VERSION=3 )
-FIND_PACKAGE( Boost 1.48.0 COMPONENTS system date_time filesystem 
-program_options serialization thread unit_test_framework REQUIRED )
+FIND_PACKAGE( Boost 1.48.0 COMPONENTS system date_time filesystem program_options signals serialization thread unit_test_framework REQUIRED )
 include_directories ( ${Boost_INCLUDE_DIR} ) # CI: changed Boost_INCLUDE_DIRS to Boost_INCLUDE_DIR ... hope that this is always works
 IF( WIN32 )
 	link_directories( ${Boost_LIBRARY_DIR} )
@@ -307,22 +304,6 @@ IF( UNIX )
     ENDIF( CPP_CHECK )
 ENDIF( UNIX )
 
-
-#####################################################################
-#                       GCov Code Analysis
-#####################################################################
-mark_as_advanced( GCOV_CHECK )
-IF( UNIX )
-    FIND_PROGRAM( GCOV_CHECK gcov )
-    IF( GCOV_CHECK )
-    	MESSAGE(STATUS "GCov available for static code analysis. Configuring for Code Check." )
-    	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
-		SET(CFLAGS "${CFLAGS} -g -O0 -Wall -W -fprofile-arcs -ftest-coverage")
-		SET(LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
-    ENDIF( GCOV_CHECK )
-ENDIF( UNIX )
-
-
 #####################################################################
 #                Adjust compiler flags and settings for MSVC
 #####################################################################
@@ -400,7 +381,6 @@ OPTION( OPT_MAKE_TESTS "Compile unit tests." ON )
 IF( OPT_MAKE_TESTS)
 	ADD_SUBDIRECTORY( Test )
 ENDIF( OPT_MAKE_TESTS )
-
 
 #####################################################################
 #                       Include Documentation
