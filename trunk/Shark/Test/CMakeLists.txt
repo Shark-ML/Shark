@@ -5,13 +5,6 @@
 #       Test implementation: Boost UTF                              #
 #####################################################################
 
-
-project(Coverage)
-
-ENABLE_TESTING()
-
-cmake_minimum_required(VERSION 2.8)
-
 #####################################################################
 #       Configure logging of test restuls to XML                    #
 #####################################################################
@@ -42,14 +35,9 @@ MACRO( SHARK_ADD_TEST SRC NAME)
         ${Boost_LIBRARIES}
     )
 
-    if(CMAKE_COMPILER_IS_GNUCXX)
-      TARGET_LINK_LIBRARIES( ${NAME} ${LINK_LIBRARIES} gcov)
-    endif (CMAKE_COMPILER_IS_GNUCXX)
+    TARGET_LINK_LIBRARIES( ${NAME} ${LINK_LIBRARIES} )
 
     ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} )
-    if(CMAKE_COMPILER_IS_GNUCXX)
-      ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} COMMAND Coverage)
-    endif (CMAKE_COMPILER_IS_GNUCXX)
 ENDMACRO()
 
 
@@ -58,7 +46,6 @@ SHARK_ADD_TEST( LinAlg/BLAS/iterators.cpp BLAS_Iterators)
 SHARK_ADD_TEST( LinAlg/BLAS/vector_assign.cpp BLAS_Vector_Assign)
 SHARK_ADD_TEST( LinAlg/BLAS/matrix_assign.cpp BLAS_Matrix_Assign)
 SHARK_ADD_TEST( LinAlg/BLAS/compressed_vector.cpp BLAS_Compressed_Vector)
-SHARK_ADD_TEST( LinAlg/BLAS/triangular_matrix.cpp BLAS_Triangular_Matrix)
 SHARK_ADD_TEST( LinAlg/BLAS/compressed_matrix.cpp BLAS_Compressed_Matrix)
 SHARK_ADD_TEST( LinAlg/BLAS/vector_proxy.cpp BLAS_Vector_Proxy)
 SHARK_ADD_TEST( LinAlg/BLAS/matrix_proxy.cpp BLAS_Matrix_Proxy)
@@ -89,7 +76,6 @@ SHARK_ADD_TEST( LinAlg/PartlyPrecomputedMatrix.cpp LinAlg_PartlyPrecomputedMatri
 SHARK_ADD_TEST( Algorithms/DirectSearch/CMA.cpp DirectSearch_CMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/CMSA.cpp DirectSearch_CMSA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/ElitistCMA.cpp DirectSearch_ElitistCMA )
-SHARK_ADD_TEST( Algorithms/DirectSearch/VDCMA.cpp DirectSearch_VDCMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/MOCMA.cpp DirectSearch_MOCMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/SteadyStateMOCMA.cpp DirectSearch_SteadyStateMOCMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/RealCodedNSGAII.cpp DirectSearch_RealCodedNSGAII )
@@ -181,7 +167,6 @@ SHARK_ADD_TEST( Models/Kernels/MklKernel.cpp Models_MklKernel )
 SHARK_ADD_TEST( Models/Kernels/SubrangeKernel.cpp Models_SubrangeKernel )
 SHARK_ADD_TEST( Models/Kernels/DiscreteKernel.cpp Models_DiscreteKernel )
 SHARK_ADD_TEST( Models/Kernels/MultiTaskKernel.cpp Models_MultiTaskKernel )
-SHARK_ADD_TEST( Models/Kernels/ModelKernel.cpp Models_ModelKernel )
 
 #KernelMethods
 SHARK_ADD_TEST( Models/Kernels/KernelHelpers.cpp Models_KernelHelpers )
@@ -198,7 +183,6 @@ SHARK_ADD_TEST( Models/CARTClassifier.cpp Models_CARTClassifier )
 # Core tests
 SHARK_ADD_TEST( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )
 SHARK_ADD_TEST( Core/Iterators.cpp Core_Iterators )
-SHARK_ADD_TEST( Core/Math.cpp Core_Math )
 
 #Data Tests
 SHARK_ADD_TEST( Data/Csv.cpp Data_Csv )
@@ -272,15 +256,13 @@ SHARK_ADD_TEST( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 
 # Copy test file
 IF (HDF5_FOUND)
-  ADD_CUSTOM_COMMAND(
-      TARGET Data_HDF5
-      POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_data
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Test/test_data ${CMAKE_BINARY_DIR}/Test/test_data
-  )	
+	ADD_CUSTOM_COMMAND(
+	    TARGET Data_HDF5
+	    POST_BUILD
+	    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_data
+	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Test/test_data ${CMAKE_BINARY_DIR}/Test/test_data
+	)	
 ENDIF (HDF5_FOUND)
-
-
 # Create output dir
 ADD_CUSTOM_COMMAND(
     TARGET Data_Csv
