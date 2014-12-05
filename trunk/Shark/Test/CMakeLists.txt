@@ -5,11 +5,10 @@
 #       Test implementation: Boost UTF                              #
 #####################################################################
 
+# i am not sure, if i really need this..
 project(Coverage)
 cmake_minimum_required(VERSION 2.8)
-
 ENABLE_TESTING()
-
 
 
 #####################################################################
@@ -43,8 +42,9 @@ MACRO( SHARK_ADD_TEST SRC NAME)
     )
 
     if (GCOV_CHECK)
-      TARGET_LINK_LIBRARIES( ${NAME} ${LINK_LIBRARIES} gcov)
+      SET(LINK_LIBRARIES "${LINK_LIBRARIES}" gcov)
     endif (GCOV_CHECK)
+    TARGET_LINK_LIBRARIES( ${NAME} ${LINK_LIBRARIES})
 
     ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} )
 
