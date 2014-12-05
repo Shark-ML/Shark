@@ -152,6 +152,7 @@ IF(CMAKE_BUILD_TYPE MATCHES "Release")
 	ADD_DEFINITIONS(-DNDEBUG )
 	ADD_DEFINITIONS(-DBOOST_UBLAS_NDEBUG )
 ENDIF (CMAKE_BUILD_TYPE MATCHES "Release")
+message(STATUS "Will build: " ${CMAKE_BUILD_TYPE})
 
 #####################################################################
 #           Report compilers
@@ -164,7 +165,8 @@ message(STATUS "C compiler: " ${CMAKE_C_COMPILER})
 #####################################################################
 SET(Boost_USE_MULTITHREADED ON)
 ADD_DEFINITIONS( -DBOOST_PARAMETER_MAX_ARITY=15 -DBOOST_FILESYSTEM_VERSION=3 )
-FIND_PACKAGE( Boost 1.48.0 COMPONENTS system date_time filesystem program_options signals serialization thread unit_test_framework REQUIRED )
+FIND_PACKAGE( Boost 1.48.0 COMPONENTS system date_time filesystem 
+program_options serialization thread unit_test_framework REQUIRED )
 include_directories ( ${Boost_INCLUDE_DIR} ) # CI: changed Boost_INCLUDE_DIRS to Boost_INCLUDE_DIR ... hope that this is always works
 IF( WIN32 )
 	link_directories( ${Boost_LIBRARY_DIR} )
@@ -303,6 +305,39 @@ IF( UNIX )
 	)
     ENDIF( CPP_CHECK )
 ENDIF( UNIX )
+
+
+#####################################################################
+#                       GCov Code Analysis
+#####################################################################
+OPTION( GCOV_CHECK  "GCov Coverage Check" OFF )
+mark_as_advanced( GCOV_CHECK )
+IF( GCOV_CHECK )
+    INCLUDE(CTest)
+    FIND_PROGRAM( GCOV_CHECK gcov )
+	IF (CMAKE_BUILD_TYPE MATCHES "Release")
+		message( FATAL_ERROR "\nYou specified a Release Build."
+		"This does not make sense, if Coverage is enabled."
+		"Please change Build type to Debug or turn off Coverage." )
+	ENDIF(CMAKE_BUILD_TYPE MATCHES "Release")
+    MESSAGE(STATUS "GCov available for static code analysis. Configuring for Code Check." )
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+    SET(CFLAGS "${CFLAGS} -g -O0 -Wall -W -fprofile-arcs -ftest-coverage")
+    SET(LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+ENDIF( GCOV_CHECK )
+
+
+#####################################################################
+#                       Valgrind Check
+#####################################################################
+OPTION( VALGRIND_CHECK   "Valgrind Memory Check" OFF )
+mark_as_advanced( VALGRIND_CHECK )
+IF( VALGRIND_CHECK )
+    INCLUDE(CTest)
+    FIND_PROGRAM( VALGRIND_CHECK valgrind )
+    MESSAGE(STATUS "Valgrind available for memory check." )
+ENDIF( VALGRIND_CHECK )
+
 
 #####################################################################
 #                Adjust compiler flags and settings for MSVC
