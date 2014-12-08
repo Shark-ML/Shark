@@ -1727,5 +1727,117 @@ protected:
 };
 
 
+/// \brief Solver for the "reinforced" multi-class SVM.
+template <class InputT>
+class QpMcLinearReinforced : public QpMcLinear<InputT>
+{
+public:
+	typedef LabeledData<InputT, unsigned int> DatasetType;
+
+	/// \brief Constructor
+	QpMcLinearReinforced(
+			const DatasetType& dataset,
+			std::size_t dim,
+			std::size_t classes)
+	: QpMcLinear<InputT>(dataset, dim, classes)
+	{ }
+
+protected:
+	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
+	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y)
+	{
+		double violation = 0.0;
+		for (std::size_t c=0; c<m_classes; c++)
+		{
+			const double g = (c == y) ? (m_classes - 1.0) - wx(y) : 1.0 + wx(c);
+			gradient(c) = g;
+			if (g > violation && alpha(c) < C) violation = g;
+			else if (-g > violation && alpha(c) > 0.0) violation = -g;
+		}
+		return violation;
+	}
+
+	/// \brief Update the weight vectors (primal variables) after a step on the dual variables.
+	virtual void updateWeightVectors(RealMatrix& w, RealVector const& mu, std::size_t index)
+	{
+		unsigned int y = m_data[index].label;
+		double mean = -2.0 * mu(y);
+		for (std::size_t c=0; c<m_classes; c++) mean += mu(c);
+		mean /= (double)m_classes;
+		RealVector step(m_classes);
+		for (std::size_t c=0; c<m_classes; c++) step(c) = ((c == y) ? (mu(c) + mean) : (mean - mu(c)));
+		add_scaled(w, step, m_data[index].input);
+	}
+
+	/// \brief Solve the sub-problem posed by a single training example.
+	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu)
+	{
+		const double ood = 1.0 / m_classes;
+		const double qq = (1.0 - ood) * q;
+		double gain = 0.0;
+
+		// SMO loop
+		size_t iter, maxiter = MAXITER_MULTIPLIER * m_classes;
+		for (iter=0; iter<maxiter; iter++)
+		{
+			// select working set
+			std::size_t idx = 0;
+			double kkt = 0.0;
+			for (std::size_t c=0; c<m_classes; c++)
+			{
+				const double g = gradient(c);
+				const double a = alpha(c);
+				if (g > kkt && a < C) { kkt = g; idx = c; }
+				else if (-g > kkt && a > 0.0) { kkt = -g; idx = c; }
+			}
+
+			// check stopping criterion
+			if (kkt < epsilon) break;
+
+			// perform step
+			const double a = alpha(idx);
+			const double g = gradient(idx);
+			double m = g / qq;
+			double a_new = a + m;
+			if (a_new <= 0.0)
+			{
+				m = -a;
+				a_new = 0.0;
+			}
+			else if (a_new >= C)
+			{
+				m = C - a;
+				a_new = C;
+			}
+			alpha(idx) = a_new;
+			mu(idx) += m;
+
+			// update gradient and total gain
+			const double dg = m * q;
+			const double dgc = dg / m_classes;
+			if (idx == y)
+			{
+				for (std::size_t c=0; c<m_classes; c++) gradient(c) -= dgc;
+				gradient(idx) -= dg - 2.0 * dgc;
+			}
+			else
+			{
+				for (std::size_t c=0; c<m_classes; c++) gradient(c) += (c == y) ? -dgc : dgc;
+				gradient(idx) -= dg;
+			}
+
+			gain += m * (g - 0.5 * (dg - dgc));
+		}
+
+		return gain;
+	}
+
+protected:
+	using QpMcLinear<InputT>::add_scaled;
+	using QpMcLinear<InputT>::m_data;
+	using QpMcLinear<InputT>::m_classes;
+};
+
+
 }
 #endif
