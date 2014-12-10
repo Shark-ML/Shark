@@ -197,6 +197,8 @@ name (vector_expression<E> const& e, T scalar){ \
 	typedef F<typename E::value_type,T> functor_type; \
 	return vector_unary<E, functor_type>(e, functor_type(scalar)); \
 }
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator+, scalar_add)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator-, scalar_subtract2)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator*, scalar_multiply2)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator/, scalar_divide)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<, scalar_less_than)
@@ -221,6 +223,8 @@ name (T scalar, vector_expression<E> const& e){ \
 	typedef F<typename E::value_type,T> functor_type; \
 	return vector_unary<E, functor_type>(e, functor_type(scalar)); \
 }
+SHARK_VECTOR_SCALAR_TRANSFORMATION_2(operator+, scalar_add)
+SHARK_VECTOR_SCALAR_TRANSFORMATION_2(operator-, scalar_subtract1)
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(operator*, scalar_multiply1)
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(min, scalar_min)
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, scalar_max)
