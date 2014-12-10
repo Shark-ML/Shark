@@ -361,6 +361,8 @@ name (matrix_expression<E> const& e, T scalar){ \
 	typedef F<typename E::value_type, T> functor_type; \
 	return matrix_unary<E, functor_type>(e, functor_type(scalar)); \
 }
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator+, scalar_add)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator-, scalar_subtract2)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator*, scalar_multiply2)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator/, scalar_divide)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<, scalar_less_than)
@@ -385,6 +387,8 @@ name (T scalar, matrix_expression<E> const& e){ \
 	typedef F<typename E::value_type, T> functor_type; \
 	return matrix_unary<E, functor_type>(e, functor_type(scalar)); \
 }
+SHARK_MATRIX_SCALAR_TRANSFORMATION_2(operator+, scalar_add)
+SHARK_MATRIX_SCALAR_TRANSFORMATION_2(operator-, scalar_subtract1)
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(operator*, scalar_multiply1)
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(min, scalar_min)
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(max, scalar_max)
@@ -683,6 +687,12 @@ void sum_rows_impl(MatA const& matA, VecB& vecB, row_major){
 	}
 }
 
+//dispatcher for triangular matrix
+template<class MatA,class VecB,class Orientation,class Triangular>
+void sum_rows_impl(MatA const& matA, VecB& vecB, packed<Orientation,Triangular>){
+	sum_rows_impl(matA,vecB,Orientation());
+}
+
 template<class MatA>
 typename MatA::value_type sum_impl(MatA const& matA, column_major){
 	typename MatA::value_type totalSum = 0;
@@ -699,6 +709,12 @@ typename MatA::value_type sum_impl(MatA const& matA, row_major){
 		totalSum += sum(row(matA,i));
 	}
 	return totalSum;
+}
+
+//dispatcher for triangular matrix
+template<class MatA,class Orientation,class Triangular>
+typename MatA::value_type sum_impl(MatA const& matA, packed<Orientation,Triangular>){
+	return sum_impl(matA,Orientation());
 }
 
 template<class MatA>
@@ -719,6 +735,12 @@ typename MatA::value_type max_impl(MatA const& matA, row_major){
 	return maximum;
 }
 
+//dispatcher for triangular matrix
+template<class MatA,class Orientation,class Triangular>
+typename MatA::value_type max_impl(MatA const& matA, packed<Orientation,Triangular>){
+	return std::max(max_impl(matA,Orientation()),0.0);
+}
+
 template<class MatA>
 typename MatA::value_type min_impl(MatA const& matA, column_major){
 	typename MatA::value_type minimum = 0;
@@ -735,6 +757,12 @@ typename MatA::value_type min_impl(MatA const& matA, row_major){
 		minimum= std::min(minimum, min(row(matA,i)));
 	}
 	return minimum;
+}
+
+//dispatcher for triangular matrix
+template<class MatA,class Orientation,class Triangular>
+typename MatA::value_type min_impl(MatA const& matA, packed<Orientation,Triangular>){
+	return std::max(min_impl(matA,Orientation()),0.0);
 }
 
 }//end detail
