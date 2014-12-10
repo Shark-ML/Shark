@@ -98,6 +98,53 @@ private:
 	ScalarType m_factor;
 };
 
+template<class T, class ScalarType>
+struct scalar_add{
+	typedef T argument_type;
+	typedef typename promote_traits<T, ScalarType>::promote_type result_type;
+	static const bool zero_identity = false;
+
+	scalar_add(ScalarType summand):m_summand(summand) {}
+	result_type operator()(argument_type x)const {
+		return x + m_summand;
+	}
+private:
+	ScalarType m_summand;
+};
+
+
+//constant-x
+template<class T, class ScalarType>
+struct scalar_subtract1{
+	typedef T argument_type;
+	typedef typename promote_traits<T, ScalarType>::promote_type result_type;
+	static const bool zero_identity = false;
+
+	scalar_subtract1(ScalarType value):m_value(value) {}
+	result_type operator()(argument_type x)const {
+		return m_value -x;
+	}
+private:
+	ScalarType m_value;
+};
+
+//x-constant
+template<class T, class ScalarType>
+struct scalar_subtract2{
+	typedef T argument_type;
+	typedef typename promote_traits<T, ScalarType>::promote_type result_type;
+	static const bool zero_identity = false;
+
+	scalar_subtract2(ScalarType value):m_value(value) {}
+	result_type operator()(argument_type x)const {
+		return x - m_value;
+	}
+private:
+	ScalarType m_value;
+};
+
+
+
 template<class T>
 struct scalar_conj {
 	typedef T argument_type;
