@@ -34,6 +34,7 @@
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Data/Dataset.h>
+#include <shark/Data/Statistics.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 
 
@@ -98,16 +99,18 @@ namespace shark{
  *  label average, and u is the vector of all ones, and \f$ \ell \f$ is the
  *  number of data points, and thus the size of the Gram matrix.
  */
-template<class InputType = RealVector>
+template<class InputType = RealVector,class LabelType = unsigned int>
 class KernelTargetAlignment : public SingleObjectiveFunction
 {
+private:
+	typedef typename Batch<LabelType>::type BatchLabelType;
 public:
 	/// \brief Construction of the Kernel Target Alignment (KTA) from a kernel object.
 	///
 	/// Don't forget to provide a data set with the setDataset method
 	/// before using the object.
 	KernelTargetAlignment(
-		LabeledData<InputType, unsigned int> const& dataset, 
+		LabeledData<InputType, LabelType> const& dataset, 
 		AbstractKernelFunction<InputType>* kernel
 	){
 		SHARK_CHECK(kernel != NULL, "[KernelTargetAlignment] kernel must not be NULL");
@@ -123,22 +126,8 @@ public:
 		m_data = dataset;
 		m_elements = dataset.numberOfElements();
 		
-		//preprocess Y so calculate column means and overall mean
-		//the most efficient way to do this is via the class counts
-		std::vector<std::size_t> classCount = classSizes(dataset);
-		m_numberOfClasses = classCount.size();
-		RealVector classMean(m_numberOfClasses);
-		double dm1 = m_numberOfClasses-1.0;
-		for(std::size_t i = 0; i != m_numberOfClasses; ++i){
-			classMean(i) = classCount[i]-(m_elements-classCount[i])/dm1;
-			classMean /= m_elements;
-		}
 		
-		m_columnMeanY.resize(m_elements);
-		for(std::size_t i = 0; i != m_elements; ++i){
-			m_columnMeanY(i) = classMean(dataset.element(i).label); 
-		}
-		m_meanY=sum(m_columnMeanY)/m_elements;
+		setupY(dataset.labels());
 	}
 
 	/// \brief From INameable: return the class name.
@@ -227,7 +216,7 @@ public:
 
 private:
 	AbstractKernelFunction<InputType>* mep_kernel;     ///< kernel function
-	LabeledData<InputType,unsigned int> m_data;      ///< data points
+	LabeledData<InputType,LabelType> m_data;      ///< data points
 	RealVector m_columnMeanY;                        ///< mean label vector
 	double m_meanY;                                  ///< mean label element
 	unsigned int m_numberOfClasses;                  ///< number of classes
@@ -236,30 +225,94 @@ private:
 	struct KernelMatrixResults{
 		RealVector k;
 		double KcKc;
-		double YKc;
+		double YcKc;
 		double error;
 		double meanK;
 	};
+	
+	void setupY(Data<unsigned int>const& labels){
+		//preprocess Y so calculate column means and overall mean
+		//the most efficient way to do this is via the class counts
+		std::vector<std::size_t> classCount = classSizes(labels);
+		m_numberOfClasses = classCount.size();
+		RealVector classMean(m_numberOfClasses);
+		double dm1 = m_numberOfClasses-1.0;
+		for(std::size_t i = 0; i != m_numberOfClasses; ++i){
+			classMean(i) = classCount[i]-(m_elements-classCount[i])/dm1;
+			classMean /= m_elements;
+		}
+		
+		m_columnMeanY.resize(m_elements);
+		for(std::size_t i = 0; i != m_elements; ++i){
+			m_columnMeanY(i) = classMean(labels.element(i)); 
+		}
+		m_meanY=sum(m_columnMeanY)/m_elements;
+	}
+	
+	void setupY(Data<RealVector>const& labels){
+		RealVector meanLabel = mean(labels);
+		m_columnMeanY.resize(m_elements);
+		for(std::size_t i = 0; i != m_elements; ++i){
+			m_columnMeanY(i) = inner_prod(labels.element(i),meanLabel); 
+		}
+		m_meanY=sum(m_columnMeanY)/m_elements;
+	}
 
 	/// Update a sub-block of the matrix \f$ \langle Y, K^x \rangle \f$.
-	double updateYKc(std::size_t i, std::size_t j, RealMatrix const& block)const{
-		std::size_t blockSize1 = size(m_data.batch(i));
-		std::size_t blockSize2 = size(m_data.batch(j));
+	double updateYKc(UIntVector const& labelsi,UIntVector const& labelsj, RealMatrix const& block)const{
+		std::size_t blockSize1 = labelsi.size();
+		std::size_t blockSize2 = labelsj.size();
 		//todo optimize the i=j case
 		double result = 0;
 		double dm1 = m_numberOfClasses-1;
 		for(std::size_t k = 0; k != blockSize1; ++k){
-			std::size_t label1 = m_data.batch(i).label(k);
 			for(std::size_t l = 0; l != blockSize2; ++l){
-				if(label1 == m_data.batch(j).label(l))
+				if(labelsi(k) == labelsj(l))
 					result += block(k,l);
 				else
 					result -= block(k,l)/dm1;
 			}
 		}
-		if(i != j)
-			result *= 2.0;
 		return result;
+	}
+	
+	/// Update a sub-block of the matrix \f$ \langle Y, K^x \rangle \f$.
+	double updateYKc(RealMatrix const& labelsi,RealMatrix const& labelsj, RealMatrix const& block)const{
+		std::size_t blockSize1 = labelsi.size1();
+		std::size_t blockSize2 = labelsj.size1();
+		//todo optimize the i=j case
+		double result = 0;
+		for(std::size_t k = 0; k != blockSize1; ++k){
+			for(std::size_t l = 0; l != blockSize2; ++l){
+				double y_kl = inner_prod(row(labelsi,k),row(labelsj,l));
+				result += y_kl*block(k,l);
+			}
+		}
+		return result;
+	}
+	
+	void computeBlockY(UIntVector const& labelsi,UIntVector const& labelsj, RealMatrix& blockY)const{
+		std::size_t blockSize1 = labelsi.size();
+		std::size_t blockSize2 = labelsj.size();
+		double dm1 = m_numberOfClasses-1;
+		for(std::size_t k = 0; k != blockSize1; ++k){
+			for(std::size_t l = 0; l != blockSize2; ++l){
+				if( labelsi(k) ==  labelsj(l))
+					blockY(k,l) = 1;
+				else
+					blockY(k,l) = -1.0/dm1;
+			}
+		}
+	}
+	
+	void computeBlockY(RealMatrix const& labelsi,RealMatrix const& labelsj, RealMatrix& blockY)const{
+		std::size_t blockSize1 = labelsi.size1();
+		std::size_t blockSize2 = labelsj.size1();
+		for(std::size_t k = 0; k != blockSize1; ++k){
+			for(std::size_t l = 0; l != blockSize2; ++l){
+				blockY(k,l) = inner_prod(row(labelsi,k),row(labelsj,l));
+			}
+		}
 	}
 
 	/// Compute a sub-block of the matrix
@@ -274,30 +327,22 @@ private:
 		std::size_t blockSize2 = size(m_data.batch(j));
 		//double n = m_elements;
 		double KcKc = matrixStatistics.KcKc;
-		double YKc = matrixStatistics.YKc;
+		double YcKc = matrixStatistics.YcKc;
 		double meanK = matrixStatistics.meanK;
 		RealMatrix blockW(blockSize1,blockSize2);
 		
 		//first calculate \langle Kc,Kc \rangle  Y.
-		double dm1 = m_numberOfClasses-1;
-		for(std::size_t k = 0; k != blockSize1; ++k){
-			std::size_t label1 = m_data.batch(i).label(k);
-			for(std::size_t l = 0; l != blockSize2; ++l){
-				if(label1 == m_data.batch(j).label(l))
-					blockW(k,l) = KcKc;
-				else
-					blockW(k,l) = -KcKc/dm1;
-			}
-		}
+		computeBlockY(m_data.batch(i).label,m_data.batch(j).label,blockW);
+		blockW *= KcKc;
 		//- \langle Y,K^c \rangle K
-		blockW-=YKc*blockK;
+		blockW-=YcKc*blockK;
 		//  -2(\langle Kc,Kc \rangle y -\langle Y, K^c \rangle  k) u^T
 		// implmented as: -(\langle K^c,K^c \rangle y -2\langle Y, K^c \rangle  k) u^T -u^T(\langle K^c,K^c \rangle y -2\langle Y, K^c \rangle  k)^T
 		//todo find out why this is correct and the calculation above is not.
-		blockW-=repeat(subrange(KcKc*m_columnMeanY - YKc*matrixStatistics.k,start2,start2+blockSize2),blockSize1);
-		blockW-=trans(repeat(subrange(KcKc*m_columnMeanY - YKc*matrixStatistics.k,start1,start1+blockSize1),blockSize2));
+		blockW-=repeat(subrange(KcKc*m_columnMeanY - YcKc*matrixStatistics.k,start2,start2+blockSize2),blockSize1);
+		blockW-=trans(repeat(subrange(KcKc*m_columnMeanY - YcKc*matrixStatistics.k,start1,start1+blockSize1),blockSize2));
 		// + (\langle Kc,Kc \rangle  my-2\langle Y, Kc \rangle mk) u u^T
-		blockW+= blas::repeat(KcKc*m_meanY-YKc*meanK,blockSize1,blockSize2);
+		blockW+= blas::repeat(KcKc*m_meanY-YcKc*meanK,blockSize1,blockSize2);
 		blockW /= KcKc*std::sqrt(KcKc);
 		//std::cout<<blockW<<std::endl;
 		//symmetry
@@ -323,7 +368,7 @@ private:
 		// and n the number of elements
 		
 		double KK = 0; //stores \langle K,K \rangle 
-		double YK = 0; //stores \langle Y,K^c \rangle 
+		double YKc = 0; //stores \langle Y,K^c \rangle 
 		RealVector k(m_elements);//stores the row/column means of K
 		k.clear();
 		std::size_t startRow = 0; //starting row of the current block
@@ -336,13 +381,14 @@ private:
 				if(i == j){
 					KK += frobenius_prod(blockK,blockK);
 					subrange(k,startColumn,startColumn+columnSize)+=sum_rows(blockK);//update sum_rows(K)
+					YKc+=updateYKc(m_data.batch(i).label,m_data.batch(j).label,blockK);
 				}
 				else{//use symmetry ok K
-					KK += 2.0* frobenius_prod(blockK,blockK);
+					KK += 2.0 * frobenius_prod(blockK,blockK);
 					subrange(k,startColumn,startColumn+columnSize)+=sum_rows(blockK);
 					subrange(k,startRow,startRow+rowSize)+=sum_columns(blockK);//symmetry: block(j,i)
+					YKc += 2.0 * updateYKc(m_data.batch(i).label,m_data.batch(j).label,blockK);
 				}
-				YK+=updateYKc(i,j,blockK);
 				startColumn+=columnSize;
 				
 			}
@@ -353,15 +399,15 @@ private:
 		k /= n;//means
 		double meanK = sum(k)/n;
 		double n2 = sqr(n);
-		double YKc = YK-2.0*n*inner_prod(k,m_columnMeanY)+n2*m_meanY*meanK;
+		double YcKc = YKc-2.0*n*inner_prod(k,m_columnMeanY)+n2*m_meanY*meanK;
 		double KcKc = KK - 2.0*n*inner_prod(k,k)+n2*sqr(meanK);
 
 		KernelMatrixResults results;
 		results.k=k;
-		results.YKc = YKc;
+		results.YcKc = YcKc;
 		results.KcKc = KcKc;
 		results.meanK = meanK;
-		results.error = YKc/std::sqrt(KcKc);
+		results.error = YcKc/std::sqrt(KcKc);
 		return results;
 	}
 };
