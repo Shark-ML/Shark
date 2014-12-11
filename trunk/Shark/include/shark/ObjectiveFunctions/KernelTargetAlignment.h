@@ -188,15 +188,19 @@ public:
 				
 		std::size_t parameters = mep_kernel->numberOfParameters();
 		derivative.resize(parameters);
-		RealVector blockDerivative;
 		derivative.clear();
-		boost::shared_ptr<State> state = mep_kernel->createState();
-		RealMatrix blockK;//block of the KernelMatrix
-		RealMatrix blockW;//block of the WeightMatrix
-		std::size_t startX = 0;
-		for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
+		SHARK_PARALLEL_FOR(int i = 0; i < (int)m_data.numberOfBatches(); ++i){
+			std::size_t startX = 0;
+			for(int j = 0; j != i; ++j){
+				startX+= size(m_data.batch(j));
+			}
+			RealVector threadDerivative(parameters,0.0);
+			RealVector blockDerivative;
+			boost::shared_ptr<State> state = mep_kernel->createState();
+			RealMatrix blockK;//block of the KernelMatrix
+			RealMatrix blockW;//block of the WeightMatrix
 			std::size_t startY = 0;
-			for(std::size_t j = 0; j <= i; ++j){
+			for(int j = 0; j <= i; ++j){
 				mep_kernel->eval(m_data.batch(i).input,m_data.batch(j).input,blockK,*state);
 				mep_kernel->weightedParameterDerivative(
 					m_data.batch(i).input,m_data.batch(j).input,
@@ -204,12 +208,13 @@ public:
 					*state,
 					blockDerivative
 				);
-				noalias(derivative) += blockDerivative;
+				noalias(threadDerivative) += blockDerivative;
 				startY += size(m_data.batch(j));
 			}
-			startX+= size(m_data.batch(i));
+			SHARK_CRITICAL_REGION{
+				noalias(derivative) += threadDerivative;
+			}
 		}
-		//derivative /= -results.KcKc*std::sqrt(results.KcKc);
 		derivative *= -1;
 		return -results.error;
 	}
@@ -369,30 +374,38 @@ private:
 		
 		double KK = 0; //stores \langle K,K \rangle 
 		double YKc = 0; //stores \langle Y,K^c \rangle 
-		RealVector k(m_elements);//stores the row/column means of K
-		k.clear();
-		std::size_t startRow = 0; //starting row of the current block
-		for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
+		RealVector k(m_elements,0.0);//stores the row/column means of K
+		SHARK_PARALLEL_FOR(int i = 0; i < (int)m_data.numberOfBatches(); ++i){
+			std::size_t startRow = 0;
+			for(int j = 0; j != i; ++j){
+				startRow+= size(m_data.batch(j));
+			}
 			std::size_t rowSize = size(m_data.batch(i));
+			double threadKK = 0;
+			double threadYKc = 0;
+			RealVector threadk(m_elements,0.0);
 			std::size_t startColumn = 0; //starting column of the current block
-			for(std::size_t j = 0; j <= i; ++j){
+			for(int j = 0; j <= i; ++j){
 				std::size_t columnSize = size(m_data.batch(j));
 				RealMatrix blockK = (*mep_kernel)(m_data.batch(i).input,m_data.batch(j).input);
 				if(i == j){
-					KK += frobenius_prod(blockK,blockK);
-					subrange(k,startColumn,startColumn+columnSize)+=sum_rows(blockK);//update sum_rows(K)
-					YKc+=updateYKc(m_data.batch(i).label,m_data.batch(j).label,blockK);
+					threadKK += frobenius_prod(blockK,blockK);
+					subrange(threadk,startColumn,startColumn+columnSize)+=sum_rows(blockK);//update sum_rows(K)
+					threadYKc += updateYKc(m_data.batch(i).label,m_data.batch(j).label,blockK);
 				}
 				else{//use symmetry ok K
-					KK += 2.0 * frobenius_prod(blockK,blockK);
-					subrange(k,startColumn,startColumn+columnSize)+=sum_rows(blockK);
-					subrange(k,startRow,startRow+rowSize)+=sum_columns(blockK);//symmetry: block(j,i)
-					YKc += 2.0 * updateYKc(m_data.batch(i).label,m_data.batch(j).label,blockK);
+					threadKK += 2.0 * frobenius_prod(blockK,blockK);
+					subrange(threadk,startColumn,startColumn+columnSize)+=sum_rows(blockK);
+					subrange(threadk,startRow,startRow+rowSize)+=sum_columns(blockK);//symmetry: block(j,i)
+					threadYKc += 2.0 * updateYKc(m_data.batch(i).label,m_data.batch(j).label,blockK);
 				}
 				startColumn+=columnSize;
-				
 			}
-			startRow+=rowSize;
+			SHARK_CRITICAL_REGION{
+				KK += threadKK;
+				YKc +=threadYKc;
+				noalias(k) +=threadk;
+			}
 		}
 		//calculate the error
 		double n = m_elements;
