@@ -45,7 +45,6 @@
 
 using namespace shark;
 
-/// Fixture for testing naive Bayes classifier
 class KTAFixture
 {
 public:
@@ -53,12 +52,15 @@ public:
 	KTAFixture():numInputs(100),dims(10){
 		std::vector<RealVector> inputs(numInputs, RealVector(dims));
 		std::vector<unsigned int> labels(numInputs);
+		std::vector<RealVector> labelsRegression(numInputs,RealVector(1));
 		for(std::size_t i = 0; i != numInputs; ++i){
 			labels[i] = i%2;
+			labelsRegression[i](0) = Rng::gauss(1,2);
 			for(std::size_t j = 0; j != dims; ++j)
 				inputs[i](j) = Rng::uni(j-1.0+3*labels[i],j+1.0+3*labels[i]);
 		}
 		data  = createLabeledDataFromRange(inputs,labels,10);
+		dataRegression  = createLabeledDataFromRange(inputs,labelsRegression,10);
 		//center data
 		RealVector mean(dims,0.0);
 		for(std::size_t i = 0; i != numInputs; ++i)
@@ -86,6 +88,7 @@ public:
 	}
 	
 	ClassificationDataset data;
+	RegressionDataset dataRegression;
 	ClassificationDataset dataCentered;
 	RealMatrix Y;
 	RealVector y;
@@ -221,6 +224,19 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_Ga
 {
 	GaussianRbfKernel<> kernel(1);
 	KernelTargetAlignment<> kta(data,&kernel);
+	
+	for(std::size_t i = 0; i != 100; ++i){
+		RealVector input(1);
+		input(0) = Rng::uni(0.1,1);
+		testDerivative(kta,input);
+	}
+	
+}
+
+BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_GaussKernel_Regression )
+{
+	GaussianRbfKernel<> kernel(1);
+	KernelTargetAlignment<RealVector,RealVector> kta(dataRegression,&kernel);
 	
 	for(std::size_t i = 0; i != 100; ++i){
 		RealVector input(1);
