@@ -7,7 +7,7 @@
  * 
  *
  * \author      T. Glasmachers, C. Igel, O.Krause
- * \date        2012
+ * \date        2012-2014
  *
  *
  * \par Copyright 1995-2014 Shark Development Team
@@ -66,13 +66,25 @@ public:
 		ONE_OVER_DISTANCE,      ///< weight each neighbor's label with 1/distance
 	};
 
-	///\brief Constructor
+	/// \brief Constructor
 	///
-	/// \param algorithm the used algorithm for nearst neighbor search
-	/// \param neighbors: number of neighbors
+	/// \param algorithm the used algorithm for nearest neighbor search
+	/// \param neighbors number of neighbors
 	SoftNearestNeighborClassifier(NearestNeighbors const* algorithm, unsigned int neighbors = 3)
 	: m_algorithm(algorithm)
 	, m_classes(numberOfClasses(algorithm->dataset()))
+	, m_neighbors(neighbors)
+	, m_distanceWeights(UNIFORM)
+	{ }
+
+	/// \brief Constructor
+	///
+	/// \param algorithm the used algorithm for nearest neighbor search
+	/// \param numClasses number of classes (given explicitly, not derived from the training data)
+	/// \param neighbors number of neighbors
+	SoftNearestNeighborClassifier(NearestNeighbors const* algorithm, unsigned int numClasses, unsigned int neighbors)
+	: m_algorithm(algorithm)
+	, m_classes(numClasses)
 	, m_neighbors(neighbors)
 	, m_distanceWeights(UNIFORM)
 	{ }
@@ -131,9 +143,9 @@ public:
 	}
 
 	/// soft k-nearest-neighbor prediction
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs)const{
+	void eval(BatchInputType const& patterns, BatchOutputType& outputs) const {
 		std::size_t numPatterns = shark::size(patterns);
-		std::vector<typename NearestNeighbors::DistancePair> neighbors = m_algorithm->getNeighbors(patterns,m_neighbors);
+		std::vector<typename NearestNeighbors::DistancePair> neighbors = m_algorithm->getNeighbors(patterns, m_neighbors);
 
 		outputs.resize(numPatterns, m_classes);
 		outputs.clear();
@@ -161,7 +173,7 @@ public:
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State & state)const{
 		eval(patterns, outputs);
 	}
-	
+
 	using base_type::eval;
 
 	/// from ISerializable, reads a model from an archive

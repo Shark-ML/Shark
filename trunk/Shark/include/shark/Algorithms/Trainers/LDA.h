@@ -98,7 +98,7 @@ public:
 	void train(LinearClassifier<>& model, LabeledData<RealVector, unsigned int> const& dataset);
 	//! Compute the LDA solution for a weighted multi-class problem.
 	void train(LinearClassifier<>& model, WeightedLabeledData<RealVector, unsigned int> const& dataset);
-	
+
 protected:
 	//!The regularization parameter \f$ \lambda \f$ adds
 	//! \f$ - \lambda I \f$ to the second moment matrix, where
