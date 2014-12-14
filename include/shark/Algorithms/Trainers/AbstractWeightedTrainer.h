@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       Abstract Trainer Interface for traineers that support weighting
+ * \brief       Abstract Trainer Interface for trainers that support weighting
  * 
  * 
  *
@@ -68,16 +68,16 @@ public:
 	typedef typename base_type::DatasetType DatasetType;
 	typedef WeightedLabeledData<InputType, LabelType> WeightedDatasetType;
 
-	/// \brief Excecutes the algorithm and trains a model on the given weighted data.
-	virtual void train(ModelType& model, WeightedDatasetType const& dataset)=0;
-	
-	/// \brief Excecutes the algorithm and trains a model on the given unweighted data.
+	/// \brief Executes the algorithm and trains a model on the given weighted data.
+	virtual void train(ModelType& model, WeightedDatasetType const& dataset) = 0;
+
+	/// \brief Executes the algorithm and trains a model on the given unweighted data.
 	///
 	/// This method behaves as using train with a weighted dataset where all weights are equal.
 	/// The default implementation just creates such a dataset and executes the weighted
 	/// version of the algorithm.
 	virtual void train(ModelType& model, DatasetType const& dataset){
-		train(model,WeightedDatasetType(dataset,1.0));
+		train(model,WeightedDatasetType(dataset, 1.0));
 	}
 };
 
@@ -101,7 +101,7 @@ public:
 	typedef WeightedUnlabeledData<InputType> WeightedDatasetType;
 
 	/// \brief Excecutes the algorithm and trains a model on the given weighted data.
-	virtual void train(ModelType& model, WeightedDatasetType const& dataset)=0;
+	virtual void train(ModelType& model, WeightedDatasetType const& dataset) = 0;
 
 	/// \brief Excecutes the algorithm and trains a model on the given undata.
 	///
@@ -109,7 +109,7 @@ public:
 	/// The default implementation just creates such a dataset and executes the weighted
 	/// version of the algorithm.
 	virtual void train(ModelType& model, DatasetType const& dataset){
-		train(model,WeightedDatasetType(dataset,1.0));
+		train(model, WeightedDatasetType(dataset, 1.0));
 	}
 };
 
