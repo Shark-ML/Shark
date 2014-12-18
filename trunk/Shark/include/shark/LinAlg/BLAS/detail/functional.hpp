@@ -2,6 +2,7 @@
 #define SHARK_LINALG_BLAS_DETAIL_FUNCTIONAL_HPP
 
 #include <boost/math/constants/constants.hpp>
+#include <boost/math/special_functions/atanh.hpp>
 #include <boost/type_traits/remove_reference.hpp> 
 #include "traits.hpp"
 #include <shark/Core/Exception.h>
@@ -345,6 +346,17 @@ struct scalar_tanh{
 };
 
 template<class T>
+struct scalar_atanh{
+	typedef T argument_type;
+	typedef argument_type result_type;
+	static const bool zero_identity = true;
+
+	result_type operator()(argument_type x)const {
+		return boost::math::atanh(x);
+	}
+};
+
+template<class T>
 struct scalar_soft_plus {
 	typedef T argument_type;
 	typedef argument_type result_type;
@@ -483,7 +495,8 @@ struct scalar_binary_plus {
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
 	typedef typename promote_traits<T1, T2>::promote_type result_type;
-
+	static const bool left_zero_remains =  false;
+	static const bool right_zero_remains =  false;
 	result_type operator()(argument1_type x, argument2_type y)const {
 		return x+y;
 	}
@@ -493,7 +506,8 @@ struct scalar_binary_minus {
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
 	typedef typename promote_traits<T1, T2>::promote_type result_type;
-
+	static const bool left_zero_remains =  false;
+	static const bool right_zero_remains =  false;
 	result_type operator()(argument1_type x, argument2_type y)const {
 		return x-y;
 	}
@@ -504,7 +518,8 @@ struct scalar_binary_multiply {
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
 	typedef typename promote_traits<T1, T2>::promote_type result_type;
-
+	static const bool left_zero_remains =  true;
+	static const bool right_zero_remains =  true;
 	result_type operator()(argument1_type x, argument2_type y)const {
 		return x*y;
 	}
@@ -515,7 +530,8 @@ struct scalar_binary_divide {
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
 	typedef typename promote_traits<T1, T2>::promote_type result_type;
-
+	static const bool left_zero_remains =  true;
+	static const bool right_zero_remains =  false;
 	result_type operator()(argument1_type x, argument2_type y)const {
 		return x/y;
 	}
@@ -525,7 +541,8 @@ struct scalar_binary_safe_divide {
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
 	typedef typename promote_traits<T1, T2>::promote_type result_type;
-
+	static const bool left_zero_remains =  true;
+	static const bool right_zero_remains =  false;
 	scalar_binary_safe_divide(result_type defaultValue):m_defaultValue(defaultValue) {}
 	result_type operator()(argument1_type x, argument2_type y)const {
 		return y == T2()? m_defaultValue : x/y;
@@ -539,7 +556,8 @@ struct scalar_binary_min{
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
 	typedef typename promote_traits<T1, T2>::promote_type result_type;
-
+	static const bool left_zero_remains =  false;
+	static const bool right_zero_remains =  false;
 	result_type operator()(argument1_type x, argument2_type y)const {
 		using std::min;
 		//convert to the bigger type to prevent std::min conversion errors.
@@ -552,7 +570,8 @@ struct scalar_binary_max{
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
 	typedef typename promote_traits<T1, T2>::promote_type result_type;
-
+	static const bool left_zero_remains =  false;
+	static const bool right_zero_remains =  false;
 	result_type operator()(argument1_type x, argument2_type y)const {
 		using std::max;
 		//convert to the bigger type to prevent std::max conversion errors.
@@ -560,6 +579,9 @@ struct scalar_binary_max{
 	}
 };
 
+
+
+///////////////////BINARY ASSIGNMENT/////////////////////////////////
 template<class T1, class T2>
 struct scalar_plus_assign{
 	typedef T1 argument1_type;
