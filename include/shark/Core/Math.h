@@ -192,7 +192,7 @@ namespace shark {
 	/// is used. otherwise the argument is transformed to a valu large enough such that
 	/// the asymptotic series holds which is then easy to calculate with high precision
 	inline double trigamma(double x){
-		double small = 1e-4;//threshold for taylor expansion validity around 0
+		double tiny = 1e-4;//threshold for taylor expansion validity around 0
 		double large = 15;//threshold above which the asymptotic formula is valid
 		//coefficients for taylor expansion - value at 0
 		double trigamma1 = 1.6449340668482264365; // pi^2/6 = Zeta(2) 
@@ -217,10 +217,10 @@ namespace shark {
 			double ddz_cot_pi_x=-pi / (s * s);
 			return -trigamma(1-x) - pi * ddz_cot_pi_x;
 		}
-		// Use Taylor series if argument <= small
+		// Use Taylor series if argument <= tiny
 		//for this make use of the entity trigamma(x)=trigamma(x+1)+1/x^2
 		//to move the origin to 1 and calculate the taylor expansion at 1 
-		if(x <= small) {
+		if(x <= tiny) {
 			return 1/(x*x) + trigamma1 + tetragamma1*x;
 		}
 		
@@ -255,7 +255,7 @@ namespace shark {
 	/// the asymptotic series holds which is then easy to calculate with high precision
 	inline double tetragamma(double x)
 	{
-		double small = 1e-4;//threshold foruse of taylor expansion if value is close to 0
+		double tiny = 1e-4;//threshold foruse of taylor expansion if value is close to 0
 		double large = 18;//threshold above which the asymptotic formula is valid
 		//coefficients for taylor expansion at 1
 		double tetragamma1 = -2.404113806319188570799476;  /* -2 Zeta(3) */
@@ -284,10 +284,10 @@ namespace shark {
 			double ddz2_cot_pi_x=2*sqr(pi)*c_pi_x/cube(s_pi_x);
 			return -tetragamma(1-x) - pi * ddz2_cot_pi_x;
 		}
-		// Use Taylor series if argument <= small
+		// Use Taylor series if argument <= tiny
 		//for this make use of the entity tetragamma(x)=tetragamma(x+1)-2/x^3
 		//to move the origin to 1 and calculate the taylor expansion at 1 
-		if(x <= small) {
+		if(x <= tiny) {
 			return -2/cube(x) + tetragamma1 + pentagamma1*x;
 		}
 		
