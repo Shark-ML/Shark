@@ -78,6 +78,13 @@ public:
 			return individual1.rank() < individual2.rank();
 		}
 	};
+	
+	///\brief Ordering relation by the fitness of the individuals(only single objective)
+	struct FitnessOrdering{
+		bool operator()(Individual const& individual1, Individual const& individual2){
+			return individual1.unpenalizedFitness()  < individual2.unpenalizedFitness() ;
+		}
+	};
 
 	/**
 	 * \brief Default constructor that initializes the individual's attributes to default values.
