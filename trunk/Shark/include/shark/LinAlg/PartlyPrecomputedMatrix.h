@@ -211,11 +211,11 @@ protected:
 	/// container for precomputed values
 	blas::matrix<QpFloatType> m_cachedMatrix;
 
-	// original kernel matrix, will be accessed if entries outsied the cache are requested
-	Matrix* m_baseMatrix;
-
 	// maximal size of cache
 	size_t m_cacheSize;
+
+	// original kernel matrix, will be accessed if entries outsied the cache are requested
+	Matrix* m_baseMatrix;
 
 	// remember how big the original matrix was to prevent access errors
 	size_t m_originalNumberOfRows;
