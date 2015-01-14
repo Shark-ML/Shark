@@ -69,7 +69,7 @@ RealVector evaluateData(Data<VectorType> const& data, RBM& rbm, std::size_t batc
 		std::size_t threadElements = 0;
 		
 		std::size_t batchStart = t*numBatches;
-		std::size_t batchEnd = (t== threads-1)? batchesForTraining : batchStart+numBatches;
+		std::size_t batchEnd = (t== (int)threads-1)? batchesForTraining : batchStart+numBatches;
 		for(std::size_t i = batchStart; i != batchEnd; ++i){
 			RealMatrix const& batch = data.batch(batchIds[i]);
 			threadElements += batch.size1();

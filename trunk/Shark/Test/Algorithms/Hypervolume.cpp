@@ -131,9 +131,9 @@ BOOST_AUTO_TEST_CASE( Algorithms_LeastContributorApproximator ) {
 	}
 
 	std::vector< RealVector >::const_iterator it = m_testSet3D.begin();
-	BOOST_CHECK( 
-		lca.leastContributor( ife, m_testSet3D, m_refPoint3D ) == 
-		std::distance( contributions.begin(), std::min_element( contributions.begin(), contributions.end() ) ) 
+	BOOST_CHECK_EQUAL( 
+		lca.leastContributor( ife, m_testSet3D, m_refPoint3D ),
+		(std::size_t)std::distance( contributions.begin(), std::min_element( contributions.begin(), contributions.end() ) ) 
 	);
 }
 

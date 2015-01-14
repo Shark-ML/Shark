@@ -177,7 +177,7 @@ double estimateLogFreeEnergy(
 	for(std::size_t i = 0; i  != chains; ++i){
 		beta(i) = 1.0-i/double(chains-1);
 	}
-	estimateLogFreeEnergy(rbm,initDataset,chains,samples,algorithm,burnInPercentage);
+	return estimateLogFreeEnergy(rbm,initDataset,chains,samples,algorithm,burnInPercentage);
 }
 
 template<class RBMType>
