@@ -67,16 +67,16 @@ typename X::value_type createHouseholderReflection(
 	typedef typename X::value_type Value;
 	
 	double norm = norm_2(x);
-    if (x()(0) >= 0.0)
-    	norm *= -1.0;
+	if (x()(0) >= 0.0)
+		norm *= -1.0;
     
-    noalias(reflection()) = x;
-    reflection()(0) -= norm;
-    reflection() /= (x()(0) - norm);
-    //if pivot is close to 0, this is one->numericaly stable
-    //compared to the usual formula
-    Value beta = (norm - x()(0)) / norm;
-    return beta;
+	noalias(reflection()) = x;
+	reflection()(0) -= norm;
+	reflection() /= (x()(0) - norm);
+	//if pivot is close to 0, this is one->numericaly stable
+	//compared to the usual formula
+	Value beta = (norm - x()(0)) / norm;
+	return beta;
 }
 //\brief rotates a matrix using a householder reflection 
 //

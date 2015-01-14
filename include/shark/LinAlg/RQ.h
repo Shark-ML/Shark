@@ -49,7 +49,7 @@ namespace shark{ namespace blas{
  *   returning the housholder transformation instead of Q.
  *
  * The pivoting RQ-Decomposition finds an orthonormal matrix Q and a lower Triangular matrix R
- * as well as a permuation matrix P such that PA = R*Q. 
+ * as well as a permutation matrix P such that PA = R*Q. 
  * Since Q is the multiplication of all householder transformations,
  * It is quite expensive to compute. Often, Q is only an intermediate step in computations which can be
  * carried out more efficiently using the Householder Transformations themselves.
@@ -72,19 +72,20 @@ std::size_t pivotingRQ
  * The pivoting RQ-Decomposition finds an orthonormal matrix Q and a lower Triangular matrix R
  * as well as a permuation matrix P such that PA = R*Q. 
  * This function is better known as the QR-Decomposition
- * of a transposed matrix B^T = A and B = QR. We depart from the well known algorithm
- * because it is intended to be used with column major matrices. But since shark uses
- * row-major, a QR decomposition is a lot slower. 
+ * of a transposed matrix B^T = A and B = QR. 
  *
- * This Version of the algorithm is based on householder transformations. since it uses pivoting it can
- * be used to determine the rank of a matrix.
+ * This version of the algorithm is based on householder transformations. since it uses pivoting it can
+ * be used to determine the rank of a matrix. The i-th applied householder decomposition has the form
+ * H_i=I-v_iv_i^T and the v_i are stored separately. 
+ * A mxn natrix needs at most k=min{m,n} transformations.
+ * Also as RQ=AH_1,...,H_k Q=H_k,...,H_1
  */
 template<class MatrixT,class MatrixU>
 std::size_t pivotingRQHouseholder
 (
 	blas::matrix_expression<MatrixT> const& matrixA,
 	blas::matrix_container<MatrixU>& matrixR,
-	blas::matrix_container<MatrixU>& householderTransform,
+	blas::matrix_container<MatrixU>& householderV,
 	blas::permutation_matrix& permutation
 );
 

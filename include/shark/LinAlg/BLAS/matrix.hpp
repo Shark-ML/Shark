@@ -278,6 +278,15 @@ public:
 		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
+	
+	matrix& operator += (scalar_type t) {
+		kernels::assign<scalar_plus_assign> (*this, t);
+		return *this;
+	}
+	matrix& operator -= (scalar_type t) {
+		kernels::assign<scalar_minus_assign> (*this, t);
+		return *this;
+	}
 
 	// Swapping
 	void swap(matrix& m) {
