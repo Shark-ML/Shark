@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 	size_t maxGamma = 100;
 	size_t repeats = 16;
 	bool verbose = false;
-	for(int i = 0; i < repeats; i++)
+	for(size_t i = 0; i < repeats; i++)
 	{
 		// some random dimension
 		size_t currentDimension = Rng::discrete(2, maxDimension);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		// create unionjack matrix
 		std::vector<RealVector> unionJack(currentDimension);
 		RealVector unionJackVector(currentDimension);
-		for(int r = 0; r < currentDimension; r++)
+		for(size_t r = 0; r < currentDimension; r++)
 		{
 			unionJackVector.clear();
 			unionJackVector[currentDimension - r - 1] += 1;
@@ -146,9 +146,9 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		Data<RealVector> unionJackData = createDataFromRange(unionJack);
 		if(verbose) std::cout << ".." << std::endl;
 
-		for(int r = 0; r < unionJackData.numberOfElements(); r++)
+		for(size_t r = 0; r < unionJackData.numberOfElements(); r++)
 		{
-			for(int c = 0; c < unionJackData.element(r).size(); c++)
+			for(size_t c = 0; c < unionJackData.element(r).size(); c++)
 			{
 				if(verbose) std::cout << " " << unionJackData.element(r)[c];
 			}
@@ -175,9 +175,9 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		// if its odd: the row in the middle and the column in
 		// the middle have 1/gamma^6
 		size_t error = 0;
-		for(int r = 0; r < currentDimension; r++)
+		for(size_t r = 0; r < currentDimension; r++)
 		{
-			for(int c = 0; c < currentDimension; c++)
+			for(size_t c = 0; c < currentDimension; c++)
 			{
 				size_t expectedEntry =  gamma * gamma * gamma * gamma;
 				if((r == c) || (c == currentDimension - r - 1))
@@ -194,11 +194,11 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 
 		// get a whole row
 		if(verbose) std::cout << " --- " << std::endl;
-		int r = 1;
+		size_t r = 1;
 		blas::vector<double> kernelRow(currentDimension, 0);
 		K.row(r, kernelRow);
 
-		for(int c = 0; c < currentDimension; c++)
+		for(size_t c = 0; c < currentDimension; c++)
 		{
 			size_t expectedEntry =  gamma * gamma * gamma * gamma;
 			if((r == c) || (c == currentDimension - r - 1))
@@ -268,7 +268,6 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		// now that we know how many evaluations we can roughly do in a given timespan
 		// we do this 10 timespans, but alternating
 
-		double totalTime = timespan * 59;
 		double cachedTotalTime = 0;
 		double uncachedTotalTime = 0;
 		double cachedTotalEvalCount = 0;
@@ -319,9 +318,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel)
 	// FIXME: need a test for 1x1?? ;)
 
 	size_t maxDimension = 120;
-	size_t maxGamma = 100;
 	size_t repeats = 2000;
-	bool verbose = false;
 
 	// create that 'gigantic' matrix
 	size_t currentDimension = Rng::discrete(2, maxDimension) + 1000000;
@@ -365,7 +362,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel)
 
 
 	// do some random access
-	for(int i = 0; i < repeats; i++)
+	for(size_t i = 0; i < repeats; i++)
 	{
 		// find a random entry
 		size_t r = Rng::discrete(0, currentDimension - 1);

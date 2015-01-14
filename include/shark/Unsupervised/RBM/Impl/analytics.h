@@ -356,7 +356,7 @@ namespace detail{
 		
 		//over all possible values of the visible neurons
 		double logZ = -std::numeric_limits<double>::infinity();
-		SHARK_PARALLEL_FOR (long long x = 0; x < values; x+=batchSize) {
+		SHARK_PARALLEL_FOR (long long x = 0; x < (long long) values; x+=batchSize) {
 			RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
 			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-x);
 			stateMatrix.resize(currentBatchSize,rbm.numberOfVN());
@@ -401,7 +401,7 @@ namespace detail{
 		
 		//over all possible values of the visible neurons
 		double logZ = -std::numeric_limits<double>::infinity();
-		SHARK_PARALLEL_FOR(long long x = 0; x < values; x+=batchSize) {
+		SHARK_PARALLEL_FOR(long long x = 0;x < (long long) values; x+=batchSize) {
 			RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
 			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-x);
 			stateMatrix.resize(currentBatchSize,rbm.numberOfHN());

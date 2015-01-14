@@ -155,7 +155,7 @@ public:
 			std::size_t threadElements = 0;
 			
 			std::size_t batchStart = t*numBatches;
-			std::size_t batchEnd = (t== threads-1)? batchesForTraining : batchStart+numBatches;
+			std::size_t batchEnd = (t== (int)threads-1)? batchesForTraining : batchStart+numBatches;
 			for(std::size_t i = batchStart; i != batchEnd; ++i){
 				RealMatrix const& batch = m_data.batch(batchIds[i]);
 				threadElements += batch.size1();

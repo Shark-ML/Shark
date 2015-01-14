@@ -113,7 +113,6 @@ void LDA::train(LinearClassifier<>& model, WeightedLabeledData<RealVector,unsign
 	}
 	typedef WeightedLabeledData<RealVector,unsigned int>::const_batch_reference BatchReference;
 	
-	std::size_t inputs = dataset.numberOfElements();
 	std::size_t dim = inputDimension(dataset);
 	std::size_t classes = numberOfClasses(dataset);
 

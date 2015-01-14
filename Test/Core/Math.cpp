@@ -26,7 +26,6 @@ BOOST_AUTO_TEST_CASE(Math_Trigamma_SpecialValues)
 }
 BOOST_AUTO_TEST_CASE(Math_Tetragamma_SpecialValues)
 {
-	double pi = boost::math::constants::pi<double>();
 	double inputs[]={1.0/2000,0.25,0.5,1,1.5,2.0,10};
 	//values computedusing wolfram alpha - they should get it right
 	double values[]={
