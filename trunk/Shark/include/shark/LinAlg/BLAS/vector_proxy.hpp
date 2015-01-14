@@ -195,6 +195,15 @@ public:
 		expression() /= t;
 		return *this;
 	}
+	
+	vector_reference& operator += (scalar_type t){
+		expression() += t;
+		return *this;
+	}
+	vector_reference& operator -= (scalar_type t){
+		expression() -= t;
+		return *this;
+	}
 
 	// Closure comparison
 	bool same_closure(vector_reference const& vr) const{
@@ -387,6 +396,14 @@ public:
 		return divide_assign(typename vector_temporary<E>::type(e));
 	}
 	
+	vector_range& operator += (scalar_type t){
+		kernels::assign<scalar_plus_assign> (*this, t);
+		return *this;
+	}
+	vector_range& operator -= (scalar_type t){
+		kernels::assign<scalar_minus_assign> (*this, t);
+		return *this;
+	}
 	vector_range& operator *= ( scalar_type t){
 		kernels::assign<scalar_multiply_assign> (*this, t);
 		return *this;
@@ -683,6 +700,15 @@ public:
 	}
 	dense_vector_adaptor& operator /= ( scalar_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
+		return *this;
+	}
+	
+	dense_vector_adaptor& operator += ( scalar_type t) {
+		kernels::assign<scalar_plus_assign> (*this, t);
+		return *this;
+	}
+	dense_vector_adaptor& operator -= ( scalar_type t) {
+		kernels::assign<scalar_minus_assign> (*this, t);
 		return *this;
 	}
 	

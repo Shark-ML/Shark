@@ -240,6 +240,15 @@ public:
 		expression() /= t;
 		return *this;
 	}
+	
+	matrix_reference& operator += (scalar_type t) {
+		expression() += t;
+		return *this;
+	}
+	matrix_reference& operator -= (scalar_type t) {
+		expression() -= t;
+		return *this;
+	}
 
 	// Closure comparison
 	bool same_closure(const matrix_reference& mr) const {
@@ -594,6 +603,15 @@ public:
 		expression() /= t;
 		return *this;
 	}
+	
+	matrix_transpose& operator += (scalar_type t) {
+		expression() += t;
+		return *this;
+	}
+	matrix_transpose& operator -= (scalar_type t) {
+		expression() -= t;
+		return *this;
+	}
 private:
 	matrix_closure_type m_expression;
 };
@@ -770,6 +788,15 @@ public:
 	}
 	matrix_row& operator /= (scalar_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
+		return *this;
+	}
+	
+	matrix_row& operator += (scalar_type t) {
+		kernels::assign<scalar_plus_assign> (*this, t);
+		return *this;
+	}
+	matrix_row& operator -= (scalar_type t) {
+		kernels::assign<scalar_minus_assign> (*this, t);
 		return *this;
 	}
 
@@ -1059,6 +1086,15 @@ public:
 		m_wrapper /= at;
 		return *this;
 	}
+	
+	matrix_column& operator += (scalar_type at) {
+		m_wrapper += at;
+		return *this;
+	}
+	matrix_column& operator -= (scalar_type at) {
+		m_wrapper -= at;
+		return *this;
+	}
 
 	// Closure comparison
 	bool same_closure(matrix_column const& mr) const {
@@ -1267,6 +1303,15 @@ public:
 	}
 	matrix_vector_range& operator /= (scalar_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
+		return *this;
+	}
+	
+	matrix_vector_range& operator += (scalar_type t) {
+		kernels::assign<scalar_plus_assign> (*this, t);
+		return *this;
+	}
+	matrix_vector_range& operator -= (scalar_type t) {
+		kernels::assign<scalar_minus_assign> (*this, t);
 		return *this;
 	}
 
@@ -1501,6 +1546,15 @@ public:
 	}
 	self_type& operator /= (scalar_type t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
+		return *this;
+	}
+	
+	self_type& operator += (scalar_type t) {
+		kernels::assign<scalar_plus_assign> (*this, t);
+		return *this;
+	}
+	self_type& operator -= (scalar_type t) {
+		kernels::assign<scalar_minus_assign> (*this, t);
 		return *this;
 	}
 
@@ -1885,6 +1939,15 @@ public:
 	}
 	self_type& operator/=(scalar_type  t) {
 		kernels::assign<scalar_divide_assign> (*this, t);
+		return *this;
+	}
+	
+	self_type& operator+=(scalar_type t) {
+		kernels::assign<scalar_plus_assign> (*this, t);
+		return *this;
+	}
+	self_type& operator-=(scalar_type  t) {
+		kernels::assign<scalar_minus_assign> (*this, t);
 		return *this;
 	}
 	

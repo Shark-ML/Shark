@@ -405,6 +405,24 @@ public:
 		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
+	
+	/// \brief Add the scalar value to every element of the vector
+	/// No temporary is created. Computations are done and stored directly into the resulting vector.
+	/// \param t the scalar to add
+	/// \return a reference to the resulting vector
+	vector& operator += (scalar_type t) {
+		kernels::assign<scalar_plus_assign> (*this, t);
+		return *this;
+	}
+
+	/// \brief Add the scalar value to every element of the vector
+	/// No temporary is created. Computations are done and stored directly into the resulting vector.
+	/// \param t the scalar to add
+	/// \return a reference to the resulting vector
+	vector& operator -= (scalar_type t) {
+		kernels::assign<scalar_minus_assign> (*this, t);
+		return *this;
+	}
 
 	// Iterator types
 	typedef dense_storage_iterator<value_type> iterator;
