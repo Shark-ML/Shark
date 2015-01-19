@@ -26,7 +26,7 @@
  * \date        2014
  *
  *
- * \par Copyright 1995-2014 Shark Development Team
+ * \par Copyright 1995-2015 Shark Development Team
  *
  * <BR><HR>
  * This file is part of Shark.
