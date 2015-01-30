@@ -1,14 +1,14 @@
 /*!
  * 
  *
- * \brief       Convex quadratic benchmark function.
+ * \brief       Convex benchmark function.
  * 
  *
  * \author      T. Voss
  * \date        2010-2011
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2014 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -28,25 +28,25 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_SPHERE_H
-#define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_SPHERE_H
+#ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_SCHWEFEL_H
+#define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_SCHWEFEL_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
 /**
- * \brief Convex quadratic benchmark function.
+ * \brief Convex benchmark function.
  */
-struct Sphere : public SingleObjectiveFunction {
+struct Schwefel : public SingleObjectiveFunction {
 	
-	Sphere(unsigned int numberOfVariables = 5):m_numberOfVariables(numberOfVariables) {
+	Schwefel(unsigned int numberOfVariables = 5):m_numberOfVariables(numberOfVariables) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
-	{ return "Sphere"; }
+	{ return "Schwefel"; }
 
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;
@@ -74,7 +74,13 @@ struct Sphere : public SingleObjectiveFunction {
 
 	double eval(const SearchPointType &p) const {
 		m_evaluationCounter++;
-		return norm_sqr(p);
+		double value = 0;
+		double sum= 0;
+		for(std::size_t i = 0; i != m_numberOfVariables; ++i){
+			sum+= p(i);
+			value+=sqr(sum);
+		}
+		return value;
 	}
 private:
 	std::size_t m_numberOfVariables;
