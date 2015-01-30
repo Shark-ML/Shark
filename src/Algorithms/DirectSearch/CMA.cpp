@@ -249,11 +249,6 @@ void CMA::updateStrategyParameters( const std::vector<Individual<RealVector, dou
 	RealVector m = weightedSum( offspring, m_weights, PointExtractor() ); // eq. (39) 
 	RealVector y = (m - m_mean) / m_sigma;
 
-	// Step size update
-	RealVector CInvY = blas::prod( m_mutationDistribution.eigenVectors(), z ); // C^(-1/2)y = Bz
-	m_evolutionPathSigma = (1. - m_cSigma)*m_evolutionPathSigma + std::sqrt( m_cSigma * (2. - m_cSigma) * m_muEff ) * CInvY; // eq. (40)
-	m_sigma *= std::exp( (m_cSigma / m_dSigma) * (norm_2(m_evolutionPathSigma)/ chi( m_numberOfVariables ) - 1.) ); // eq. (39)
-
 	// Covariance matrix update
 	RealMatrix& C = m_mutationDistribution.covarianceMatrix();
 	RealMatrix Z( m_numberOfVariables, m_numberOfVariables, 0.0); // matric for rank-mu update
@@ -273,15 +268,24 @@ void CMA::updateStrategyParameters( const std::vector<Individual<RealVector, dou
 	m_evolutionPathC = (1. - m_cC ) * m_evolutionPathC + hSig * std::sqrt( m_cC * (2. - m_cC) * m_muEff ) * y; // eq. (42)
 	noalias(C) = (1.-m_c1 - m_cMu) * C + m_c1 * ( blas::outer_prod( m_evolutionPathC, m_evolutionPathC ) + deltaHSig * C) + m_cMu * 1./sqr( m_sigma ) * Z; // eq. (43)
 
+	// Step size update
+	RealVector CInvY = blas::prod( m_mutationDistribution.eigenVectors(), z ); // C^(-1/2)y = Bz
+	m_evolutionPathSigma = (1. - m_cSigma)*m_evolutionPathSigma + std::sqrt( m_cSigma * (2. - m_cSigma) * m_muEff ) * CInvY; // eq. (40)
+	m_sigma *= std::exp( (m_cSigma / m_dSigma) * (norm_2(m_evolutionPathSigma)/ chi( m_numberOfVariables ) - 1.) ); // eq. (39)
+
+	
 	// update mutation distribution
 	m_mutationDistribution.update();
+	
+	//mean update
+	m_mean = m;
 	
 	// check for numerical stability
 	double ev = m_mutationDistribution.eigenValues()( m_mutationDistribution.eigenValues().size() - 1 );
 	if( m_sigma * std::sqrt( std::fabs( ev ) ) < m_lowerBound )
 		m_sigma = m_lowerBound / std::sqrt( std::fabs( ev ) );
 
-	m_mean = m;
+	
 }
 
 /**
