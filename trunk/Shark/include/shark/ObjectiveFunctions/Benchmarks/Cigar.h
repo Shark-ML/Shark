@@ -41,7 +41,7 @@ namespace shark {
  */
 struct Cigar : public SingleObjectiveFunction {
 
-	Cigar(unsigned int numberOfVariables = 5) : m_alpha(1E-3) {
+	Cigar(unsigned int numberOfVariables = 5, double alpha=1.E-3) : m_alpha(alpha) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;
 	}
