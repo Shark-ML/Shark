@@ -18,5 +18,5 @@ set(CTEST_DROP_LOCATION "./Test/test_output")
 
 # memory check
 set(CTEST_MEMORYCHECK_COMMAND "/usr/bin/valgrind")
-set(MEMORYCHECK_COMMAND_OPTIONS "--xml=yes --xml-file=Valgrind_%p_.xml")
+set(MEMORYCHECK_COMMAND_OPTIONS "--xml=yes --xml-file=valgrind_results/Valgrind_%p_.xml")
 set(ENV{COVFILE} "${CTEST_BINARY_DIRECTORY}/CMake.cov")
