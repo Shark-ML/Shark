@@ -30,10 +30,12 @@ int main()
 	//###end<setup>
 
 	// cross-validation error
-	//###begin<cv_error>
-	const unsigned int N= 5;  // number of folds
+	//###begin<cv_errorinit>
+	const unsigned int K = 5;  // number of folds
 	ZeroOneLoss<unsigned int> loss;
-	CVFolds<ClassificationDataset> folds = createCVSameSizeBalanced(dataTrain, N);
+	CVFolds<ClassificationDataset> folds = createCVSameSizeBalanced(dataTrain, K);
+	//###end<cv_errorinit>
+	//###begin<cv_error>
 	CrossValidationError<KernelClassifier<RealVector>, unsigned int> cvError(
 		folds, &trainer, &svm, &trainer, &loss
 	);
@@ -54,7 +56,7 @@ int main()
 	vector<double> min(2);
 	vector<double> max(2);
 	vector<size_t> sections(2);
-	min[0] = ljg-4.; max[0] = ljg+4; sections[0] = 17;  // kernel parameter gamma
+	min[0] = ljg-4.; max[0] = ljg+4; sections[0] = 9;  // kernel parameter gamma
 	min[1] = 0.0; max[1] = 10.0; sections[1] = 11;	   // regularization parameter C
 	grid.configure(min, max, sections);
 	//###end<grid_configure>

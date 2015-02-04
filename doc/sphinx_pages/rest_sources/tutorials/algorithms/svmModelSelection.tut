@@ -45,7 +45,7 @@ performance of the algorithm when applied to :math:`S`.  Typical
 values for K are 5 and 10 [HastieTibshiraniFriedman-2008]_.
 
 To choose :math:`C` and :math:`\gamma` using K-fold CV, we first split
-the availbale data into K subsets.  Then we compute the CV error using
+the available data into K subsets.  Then we compute the CV error using
 this split error for the SVM classifiers using different values for
 :math:`C` and :math:`\gamma`.  Finally, we pick the :math:`C` and
 :math:`\gamma` with the lowest CV error and use it for training an SVM
@@ -116,28 +116,37 @@ Cross-validation
 ^^^^^^^^^^^^^^^^
 
 Now we define the 
-cross-validation error by instantiating :doxy:`CrossValidationError`:: 
+cross-validation error. First let us define the folds we need :: 
+
+..sharkcode<Supervised/CSvmGridSearchTutorial.tpp,cv_errorinit>
+
+The first line sets the number of folds :math:`K` to 5. Then we define the
+basic error measure underlying the cross-validation error, here the
+standard 0-1 loss. Note that we do classification here, so we need
+to use unsigned int as the template parameter for the 0-1 loss. 
+After that we split the available training data
+into :math:`K` folds using the function :doxy:`createCVSameSizeBalanced` from
+``Data/CVDatasetTools.h``.  
+
+Then we need to instantiate :doxy:`CrossValidationError`:: 
 
 ..sharkcode<Supervised/CSvmGridSearchTutorial.tpp,cv_error>
 
-The first line sets the number of folds. Then we define the
-basic error measure underlying the cross-validation error, here the
-standard 0-1 loss. After that we split the available training data
-into K folds using the function :doxy:`createCVSameSizeBalanced` from
-``Data/CVDatasetTools.h``.  The template arguments of
+The template arguments of
 :doxy:`CrossValidationError` specify the model and that the
-given labels are unsigned integers (encoding classes).  The first and
-the last two parameters of the constructor are clear.  First we have
-to pass the training data to the :doxy:`CrossValidationError`.  The
-final two parameters specify the loss function on which the CV error
-is based and the number of folds, respectively. But what about the
-other parameters?  The :doxy:`CrossValidationError` works as follows.
+given labels are unsigned integers (encoding classes).  The first parameter of the 
+constructor is just the data in form of the folds we defined. 
+The last parameter is the loss function on which the CV error
+is based. But what about the
+other three parameters?  The :doxy:`CrossValidationError` works as follows.
 A new parameter configuration is written into an "meta" object *A*
-that is :doxy:`IParameterizable` (such as a regularizer or a trainer).
+that is :doxy:`IParameterizable` (such as a regularizer or a trainer, in
+our case the trainer we defined earlier).
 Then the specified model *B* is trained with the specified trainer
 *C*.  The pointers to *A*, *B*, and *C* are the arguments 2, 3, and 4
 of the constructor.  In our case of SVM model selection, the meta
-object and the trainier are the same.
+object and the trainer are the same, this is why the trainer 
+occurs twice as a parameter.
 
 
 
@@ -156,7 +165,7 @@ Grid-search
 
 We have two hyperparameters.
 To adapt them using grid-search, we have to define a two-dimensional
-grid. Let us consider 17 grid points for 
+grid. Let us consider 9 grid points for 
 :math:`\ln \gamma` and 11 for :math:`\ln C`.
 Let 
 
