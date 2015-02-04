@@ -56,9 +56,7 @@ namespace shark{
 */
 struct IHR4 : public MultiObjectiveFunction
 {
-	IHR4(std::size_t numVariables = 0) 
-	: m_a( 1000 )
-	, m_handler(numVariables,-5,5){
+	IHR4(std::size_t numVariables = 0) : m_handler(numVariables,-5,5){
 		announceConstraintHandler(&m_handler);
 	}
 
@@ -119,7 +117,6 @@ struct IHR4 : public MultiObjectiveFunction
 		return std::abs( y0 ) + 1.;
 	}
 private:
-	double m_a;
 	double m_ymax;
 	BoxConstraintHandler<SearchPointType> m_handler;
 	RealMatrix m_rotationMatrix;
