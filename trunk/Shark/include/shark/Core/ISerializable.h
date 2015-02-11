@@ -32,23 +32,53 @@
 #ifndef SHARK_CORE_ISERIALIZABLE_H
 #define SHARK_CORE_ISERIALIZABLE_H
 
-#include <boost/archive/polymorphic_iarchive.hpp>
-#include <boost/archive/polymorphic_oarchive.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/tracking.hpp>
 
+#if BOOST_VERSION == 105700 || BOOST_VERSION == 105600
+	#define USE_SERIALIZATION_WORKAROUND
+#endif
+	
+#ifdef USE_SERIALIZATION_WORKAROUND
+	#include <boost/archive/text_iarchive.hpp>
+	#include <boost/archive/text_oarchive.hpp>
+#else
+	#include <boost/archive/polymorphic_iarchive.hpp>
+	#include <boost/archive/polymorphic_oarchive.hpp>
+	#include <boost/archive/polymorphic_text_iarchive.hpp>
+	#include <boost/archive/polymorphic_text_oarchive.hpp>
+#endif
 namespace shark {
+	
 
-    /**
-     * \brief Type of an archive to read from.
-     */
-    typedef boost::archive::polymorphic_iarchive InArchive;
-  
-    /**
-     * \brief Type of an archive to write to.
-     */
-    typedef boost::archive::polymorphic_oarchive OutArchive;
 
+#ifdef USE_SERIALIZATION_WORKAROUND
+	//broken workaround for broken boost version
+	/**
+	* \brief Type of an archive to read from.
+	*/
+	typedef boost::archive::text_iarchive InArchive;
+	typedef boost::archive::text_iarchive TextInArchive;
+	
+
+	/**
+	* \brief Type of an archive to write to.
+	*/
+	typedef boost::archive::text_oarchive OutArchive;
+	typedef boost::archive::text_oarchive TextOutArchive;
+#else	
+	/**
+	* \brief Type of an archive to read from.
+	*/
+	typedef boost::archive::polymorphic_iarchive InArchive;
+	typedef boost::archive::polymorphic_text_iarchive TextInArchive;
+
+	/**
+	* \brief Type of an archive to write to.
+	*/
+	typedef boost::archive::polymorphic_oarchive OutArchive;
+	typedef boost::archive::polymorphic_text_oarchive TextOutArchive;
+#endif
     /**
      * \brief Abstracts serializing functionality.
      * 

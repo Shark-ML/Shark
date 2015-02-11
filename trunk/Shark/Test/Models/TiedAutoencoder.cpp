@@ -5,8 +5,8 @@
 
 #include <shark/Models/TiedAutoencoder.h>
 #include <sstream>
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
+
+
 #include <shark/Rng/GlobalRng.h>
 
 using namespace std;

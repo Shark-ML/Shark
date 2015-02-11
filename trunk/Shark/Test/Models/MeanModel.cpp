@@ -7,8 +7,8 @@
 #include <shark/Models/LinearModel.h>
 
 #include <sstream>
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
+
+
 #include <shark/Rng/GlobalRng.h>
 
 using namespace std;
@@ -111,13 +111,13 @@ BOOST_AUTO_TEST_CASE( MeanModel_Serialize )
 	//now we serialize the model
 	ostringstream outputStream;
 	{
-		polymorphic_text_oarchive oa(outputStream);  
+		TextOutArchive oa(outputStream);  
 		oa << model;
 	}
 	//and create a new model from the serialization
 	MeanModel<LinearModel<> > modelDeserialized;
 	istringstream inputStream(outputStream.str());  
-	polymorphic_text_iarchive ia(inputStream);
+	TextInArchive ia(inputStream);
 	ia >> modelDeserialized;
 	
 	for (size_t i=0; i<1000; i++)

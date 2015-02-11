@@ -10,8 +10,8 @@
 #include "derivativeTestHelper.h"
 
 #include <sstream>
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
+
+
 
 using namespace shark;
 using namespace std;
@@ -171,13 +171,13 @@ BOOST_AUTO_TEST_CASE( CMAC_SERIALIZE )
 	//now we serialize the CMAC
 	
 	ostringstream outputStream;  
-	polymorphic_text_oarchive oa(outputStream);  
+	TextOutArchive oa(outputStream);  
 	oa << cmac;
 
 	//and create a new CMAC from the serialization
 	CMACMap cmacDeserialized;
 	istringstream inputStream(outputStream.str());  
-	polymorphic_text_iarchive ia(inputStream);
+	TextInArchive ia(inputStream);
 	ia >> cmacDeserialized;
 	
 	//test whether serialization works
