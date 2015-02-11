@@ -5,8 +5,6 @@
 #include <shark/Data/Dataset.h>
 
 #include <sstream>
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
 
 using namespace shark;
 
@@ -780,13 +778,13 @@ BOOST_AUTO_TEST_CASE( DATA_SERIALIZE )
 
 	//now we serialize the Dataset
 	std::ostringstream outputStream;  
-	boost::archive::polymorphic_text_oarchive oa(outputStream);  
+	TextOutArchive oa(outputStream);  
 	oa << dataSource;
 
 	//and create a new set from the serialization
 	Data<int> dataDeserialized;
 	std::istringstream inputStream(outputStream.str());  
-	boost::archive::polymorphic_text_iarchive ia(inputStream);
+	TextInArchive ia(inputStream);
 	ia >> dataDeserialized;
 	
 	testSetEquality(dataSource,dataDeserialized);
@@ -804,13 +802,13 @@ BOOST_AUTO_TEST_CASE( LABELED_DATA_SERIALIZE )
 
 	//now we serialize the Dataset
 	std::ostringstream outputStream;  
-	boost::archive::polymorphic_text_oarchive oa(outputStream);  
+	TextOutArchive oa(outputStream);  
 	oa << dataSource;
 
 	//and create a new set from the serialization
 	LabeledData<int,int> dataDeserialized;
 	std::istringstream inputStream(outputStream.str());  
-	boost::archive::polymorphic_text_iarchive ia(inputStream);
+	TextInArchive ia(inputStream);
 	ia >> dataDeserialized;
 	
 	testDatasetEquality(dataSource,dataDeserialized);

@@ -41,8 +41,6 @@
 #include <shark/Rng/GlobalRng.h>
 
 #include <sstream>
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
 
 #include "../derivativeTestHelper.h" //for evalTest
 
@@ -158,7 +156,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_SERIALIZATION )
 		ex.setParameterVector(param);
 
 		// serialize the model
-		boost::archive::polymorphic_text_oarchive oa(ss);
+		TextOutArchive oa(ss);
 		oa << const_cast<KernelExpansion<RealVector> const&>(ex);//prevent compilation warning
 	}
 
@@ -166,7 +164,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_SERIALIZATION )
 		// recover from the stream
 		DenseRbfKernel kernel(1.0);
 		KernelExpansion<RealVector> ex2(&kernel);
-		boost::archive::polymorphic_text_iarchive ia(ss);
+		TextInArchive ia(ss);
 		ia >> ex2;
 
 		// check whether the prediction still works

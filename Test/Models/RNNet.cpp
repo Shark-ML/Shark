@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE( RNNET_WEIGHTED_PARAMETER_DERIVATIVE ){
 //~ BOOST_AUTO_TEST_CASE( RNNET_SERIALIZATION_TEST)
 //~ {
 	//~ std::stringstream str;
-	//~ boost::archive::polymorphic_text_oarchive  archive(str);
+	//~ TextOutArchive  archive(str);
 	//~ RecurrentStructure netStruct;
 	//~ netStruct.setStructure(2,4,2);
 	//~ archive << netStruct;

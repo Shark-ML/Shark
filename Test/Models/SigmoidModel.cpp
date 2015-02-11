@@ -6,8 +6,8 @@
 #include <shark/Models/SigmoidModel.h>
 #include <shark/Core/Math.h>
 #include <sstream>
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
+
+
 
 using namespace std;
 using namespace boost::archive;
@@ -213,13 +213,13 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize )
 
 	//now we serialize the model
 	ostringstream outputStream;  
-	polymorphic_text_oarchive oa(outputStream);  
+	TextOutArchive oa(outputStream);  
 	oa << model;
 
 	//and create a new model from the serialization
 	SigmoidModel modelDeserialized( false );
 	istringstream inputStream(outputStream.str());  
-	polymorphic_text_iarchive ia(inputStream);
+	TextInArchive ia(inputStream);
 	ia >> modelDeserialized;
 	
 	//test whether serialization works
@@ -262,13 +262,13 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_NoOffset )
 
 	//now we serialize the model
 	ostringstream outputStream;  
-	polymorphic_text_oarchive oa(outputStream);  
+	TextOutArchive oa(outputStream);  
 	oa << model;
 
 	//and create a new model from the serialization
 	SigmoidModel modelDeserialized( false );
 	istringstream inputStream(outputStream.str());  
-	polymorphic_text_iarchive ia(inputStream);
+	TextInArchive ia(inputStream);
 	ia >> modelDeserialized;
 	
 	//test whether serialization works
@@ -309,13 +309,13 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_Unconstrained )
 
 	//now we serialize the model
 	ostringstream outputStream;  
-	polymorphic_text_oarchive oa(outputStream);  
+	TextOutArchive oa(outputStream);  
 	oa << model;
 
 	//and create a new model from the serialization
 	SigmoidModel modelDeserialized( true );
 	istringstream inputStream(outputStream.str());  
-	polymorphic_text_iarchive ia(inputStream);
+	TextInArchive ia(inputStream);
 	ia >> modelDeserialized;
 	
 	//test whether serialization works

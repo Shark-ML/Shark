@@ -6,8 +6,8 @@
 #include "derivativeTestHelper.h"
 #include <cmath>
 #include <sstream>
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
+
+
 
 using namespace std;
 using namespace boost::archive;
@@ -121,13 +121,13 @@ BOOST_AUTO_TEST_CASE( Softmax_SERIALIZE )
 	//now we serialize the FFmodel
 	
 	ostringstream outputStream;  
-	polymorphic_text_oarchive oa(outputStream);  
+	TextOutArchive oa(outputStream);  
 	oa << const_cast<const Softmax&>(model);
 
 	//and create a new model from the serialization
 	Softmax modelDeserialized;
 	istringstream inputStream(outputStream.str());  
-	polymorphic_text_iarchive ia(inputStream);
+	TextInArchive ia(inputStream);
 	ia >> modelDeserialized;
 	
 	//test whether serialization works

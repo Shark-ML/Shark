@@ -6,8 +6,8 @@
 #include "derivativeTestHelper.h"
 
 #include <sstream>
-#include <boost/archive/polymorphic_text_iarchive.hpp>
-#include <boost/archive/polymorphic_text_oarchive.hpp>
+
+
 
 using namespace std;
 using namespace boost::archive;
@@ -196,13 +196,13 @@ BOOST_AUTO_TEST_CASE( RBFLayer_SERIALIZE )
 	//now we serialize the FFmodel
 	
 	ostringstream outputStream;  
-	polymorphic_text_oarchive oa(outputStream);  
+	TextOutArchive oa(outputStream);  
 	oa << model;
 
 	//and create a new model from the serialization
 	RBFLayer modelDeserialized;
 	istringstream inputStream(outputStream.str());  
-	polymorphic_text_iarchive ia(inputStream);
+	TextInArchive ia(inputStream);
 	ia >> modelDeserialized;
 	
 	//test whether serialization works
