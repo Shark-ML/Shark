@@ -82,6 +82,8 @@ void RFTrainer::setDefaults(){
 
 void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 {
+	model.clearModels();   // added by TG 23.02.2015
+
 	//TODO O.K.: i am just fixing these things for now so that they are working.
 
 	//Store the number of input dimensions
@@ -133,6 +135,7 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 //Classification
 void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 {
+	model.clearModels();
 
 	//Store the number of input dimensions
 	m_inputDimension = inputDimension(dataset);
@@ -140,9 +143,10 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 	//Find the largest label, so we know how big the histogram should be
 	m_maxLabel = numberOfClasses(dataset)-1;
 
+	m_regressionLearner = false;
 	setDefaults();
 
-	//we need direct element access since we need to generate elementwise subsets
+	//we need direct element access since we need to generate element-wise subsets
 	std::size_t subsetSize = static_cast<std::size_t>(dataset.numberOfElements()*m_OOBratio);
 	DataView<ClassificationDataset const> elements(dataset);
 
@@ -164,7 +168,7 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 
 		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, cAbove, 0);
 		SHARK_CRITICAL_REGION{
-			//odel.addModel(splitMatrix);
+			//model.addModel(splitMatrix);
 			model.addModel(CARTClassifier<RealVector>(splitMatrix, m_inputDimension));
 		}
 	}

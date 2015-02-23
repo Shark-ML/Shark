@@ -86,6 +86,13 @@ public:
 		archive << m_weightSum;
 	}
 
+	/// \brief Removes all models from the ensemble
+	void clearModels(){
+		m_models.clear();
+		m_weight.clear();
+		m_weightSum = 0.0;
+	}
+
 	/// \brief Adds a new model to the ensemble.
 	///
 	/// \param model the new model
@@ -96,7 +103,7 @@ public:
 		m_weight.push_back(weight);
 		m_weightSum+=weight;
 	}
-	
+
 	/// \brief Returns the weight of the i-th model
 	double const& weight(std::size_t i)const{
 		return m_weight[i];
