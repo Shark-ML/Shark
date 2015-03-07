@@ -174,19 +174,7 @@ private:
 	///
 	/// This also requries an update of the inverse cholesky factor, that is the only reason, it exists.
 	void rankOneUpdate(double alpha, double beta, RealVector const& v){
-		
 		m_mutationDistribution.rankOneUpdate(alpha,beta,v);
-		//~ RealVector w = prod(m_inverseCholesky,v);
-		//~ if(norm_inf(w) < 1.e-20) return; //precision under which we assum that the update is mostly noise.
-		//~ RealVector wInv = prod(w,m_inverseCholesky);
-		
-		//~ double normWSqr =norm_sqr(w);
-		//~ double a = std::sqrt(alpha);
-		//~ double root = std::sqrt(1+beta/alpha*normWSqr);
-		//~ double b = a/normWSqr * (root-1);
-		//~ blas::matrix<double,blas::column_major>& A =m_mutationDistribution.lowerCholeskyFactor();
-		//~ noalias(A) =a*A+b*outer_prod(v,w);
-		//~ noalias(m_inverseCholesky) = 1.0/a * m_inverseCholesky - b/ (a*a+a*b*normWSqr)*outer_prod(w,wInv);
 	}
 	
 	/// \brief Performs an update step which makes the distribution more round
