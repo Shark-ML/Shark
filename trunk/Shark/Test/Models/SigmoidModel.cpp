@@ -189,13 +189,10 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize )
 	SigmoidModel model( false );
 
 	//create random parameters
-	RealVector testParameters(model.numberOfParameters());
-	for(size_t param=0;param!=model.numberOfParameters();++param)
-	{
-		 testParameters(param)=Rng::gauss(0,1);
-	}
+	RealVector testParameters(model.numberOfParameters(),0.0);
+	testParameters(0)=std::abs(Rng::gauss(0,1));
+	
 	model.setParameterVector( testParameters );
-
 	//the test is, that after deserialization, the results must be identical
 	//so we generate some data first
 	std::vector<RealVector> data;
@@ -213,9 +210,10 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize )
 
 	//now we serialize the model
 	ostringstream outputStream;  
-	TextOutArchive oa(outputStream);  
-	oa << model;
-
+	{
+		TextOutArchive oa(outputStream);  
+		oa << model;
+	}
 	//and create a new model from the serialization
 	SigmoidModel modelDeserialized( false );
 	istringstream inputStream(outputStream.str());  
@@ -223,7 +221,7 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize )
 	ia >> modelDeserialized;
 	
 	//test whether serialization works
-	BOOST_CHECK_SMALL(norm_2(modelDeserialized.parameterVector() - testParameters),1.e-50);
+	BOOST_CHECK_SMALL(norm_2(modelDeserialized.parameterVector() - testParameters),1.e-15);
 	for (size_t i=0; i<1000; i++)
 	{
 		RealVector output = modelDeserialized(dataset.element(i).input);
@@ -239,7 +237,7 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_NoOffset )
 	RealVector testParameters(model.numberOfParameters());
 	for(size_t param=0;param!=model.numberOfParameters();++param)
 	{
-		 testParameters(param)=Rng::gauss(0,1);
+		 testParameters(param)= std::abs(Rng::gauss(0,1));
 	}
 	model.setParameterVector( testParameters );
 	model.setOffsetActivity(false);
@@ -319,7 +317,7 @@ BOOST_AUTO_TEST_CASE( SigmoidModel_Serialize_Unconstrained )
 	ia >> modelDeserialized;
 	
 	//test whether serialization works
-	BOOST_CHECK_SMALL(norm_2(modelDeserialized.parameterVector() - testParameters),1.e-50);
+	BOOST_CHECK_SMALL(norm_2(modelDeserialized.parameterVector() - testParameters),1.e-15);
 	for (size_t i=0; i<1000; i++)
 	{
 		RealVector output = modelDeserialized(dataset.element(i).input);

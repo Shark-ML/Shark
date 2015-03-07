@@ -32,10 +32,11 @@
 #ifndef SHARK_CORE_ISERIALIZABLE_H
 #define SHARK_CORE_ISERIALIZABLE_H
 
+#include <boost/version.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/tracking.hpp>
 
-#if BOOST_VERSION == 105700 || BOOST_VERSION == 105600
+#if (BOOST_VERSION == 105700) || (BOOST_VERSION == 105600)
 	#define USE_SERIALIZATION_WORKAROUND
 #endif
 	
