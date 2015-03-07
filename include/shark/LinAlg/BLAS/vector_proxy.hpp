@@ -717,7 +717,7 @@ public:
 	// --------------
 	
 
-	typedef dense_storage_iterator<value_type> iterator;
+	typedef dense_storage_iterator<T> iterator;
 	typedef dense_storage_iterator<value_type const> const_iterator;
 
 	/// \brief return an iterator on the first element of the vector

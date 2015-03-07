@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( NoisyRprop_stochastic )
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
 	double error=0;
-	for(size_t iteration=0;iteration<300000;++iteration)
+	for(size_t iteration=0;iteration<500000;++iteration)
 	{
 		optimizer.step(function);
 		if(iteration%10000==0)
