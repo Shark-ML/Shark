@@ -59,7 +59,10 @@ class SoftClusteringModel : public ClusteringModel<InputT, RealVector>
 {
 	typedef ClusteringModel<InputT, RealVector> base_type;
 	typedef AbstractClustering<InputT> ClusteringType;
-
+	typedef typename base_type::InputType InputType;
+	typedef typename base_type::OutputType OutputType;
+	typedef typename base_type::BatchOutputType BatchOutputType;
+	typedef typename base_type::BatchInputType BatchInputType;
 public:
 	/// Constructor
 	SoftClusteringModel(ClusteringType* clustering)
