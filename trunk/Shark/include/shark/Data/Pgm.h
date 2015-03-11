@@ -187,7 +187,7 @@ void exportPGM( std::string const& fileName, const T &data, int sx, int sy, bool
 /// \param  filters    Matrix storing the filters row by row
 /// \param  width      Width of the filter image
 /// \param  height     Height of th filter image
-void exportFiltersToPGMGrid(std::string const& basename, RealMatrix const& filters,std::size_t width, std::size_t height) {
+inline void exportFiltersToPGMGrid(std::string const& basename, RealMatrix const& filters,std::size_t width, std::size_t height) {
 	SIZE_CHECK(filters.size2() == width*height);
 	//try to get a square image
 	std::size_t gridX = std::size_t(std::sqrt(double(filters.size1())));
@@ -204,6 +204,49 @@ void exportFiltersToPGMGrid(std::string const& basename, RealMatrix const& filte
 		std::size_t startX = (width+1)*j;
 		//copy images
 		noalias(subrange(image,startY,startY+height,startX,startX+width)) = to_matrix(row(filters,filter),height,width);
+	}
+	exportPGM(
+		(basename+".pgm").c_str(), 
+		blas::adapt_vector((height+1)*gridY*(width+1)*gridX,&image(0,0)),
+		(width+1)*gridX, (height+1)*gridY,
+		true);
+}
+
+/// \brief Exports a set of filters as a grid image
+///
+/// It is assumed that the filters each form a row in the filter-matrix.
+/// Moreover, the sizes of the filter images has to be given and it must gold width*height=W.size2().
+/// The filters a re printed on a single image as a grid. The grid will be close to square. And the
+/// image are separated by a black 1 pixel wide line. 
+/// The output will be normalized so that all images are on the same scale.
+/// \param  basename   File to write to. ".pgm" is appended to the filename
+/// \param  filters    Matrix storing the filters row by row
+/// \param  width      Width of the filter image
+/// \param  height     Height of th filter image
+inline void exportFiltersToPGMGrid(std::string const& basename, Data<RealVector> const& filters,std::size_t width, std::size_t height) {
+	SIZE_CHECK(dataDimension(filters) == width*height);
+	//try to get a square image
+	std:size_t numFilters = filters.numberOfElements();
+	std::size_t gridX = std::size_t(std::sqrt(double(numFilters)));
+	std::size_t gridY = gridX;
+	while(gridX*gridY < (dataDimension(filters))) ++gridX;
+	
+	double minimum = std::numeric_limits<double>::max();
+	for(std::size_t i = 0; i != filters.numberOfBatches(); ++i){
+		minimum =std::min(minimum,min(filters.batch(i)));
+	}
+	
+	RealMatrix image((height+1)*gridY,(width+1)*gridX,minimum);
+	
+	for(std::size_t filter = 0; filter != numFilters; ++filter){
+		//get grid position from filter
+		std::size_t i = filter/gridX;
+		std::size_t j = filter%gridX;
+		std::size_t startY = (height+1)*i;
+		std::size_t startX = (width+1)*j;
+		RealVector filterImage =filters.element(filter);
+		//copy images
+		noalias(subrange(image,startY,startY+height,startX,startX+width)) = to_matrix(filterImage,height,width);
 	}
 	exportPGM(
 		(basename+".pgm").c_str(), 
