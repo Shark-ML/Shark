@@ -39,19 +39,19 @@ using namespace shark;
 
 
 Centroids::Centroids(){
-	this->m_features & HAS_SOFT_MEMBERSHIP;
+	this->m_features |= HAS_SOFT_MEMBERSHIP;
 }
 
 
 Centroids::Centroids(std::size_t centroids, std::size_t dim)
 : m_centroids(centroids, RealVector(dim, 0.0)){
-	this->m_features & HAS_SOFT_MEMBERSHIP;
+	this->m_features |= HAS_SOFT_MEMBERSHIP;
 }
 
 Centroids::Centroids(Data<RealVector> const& centroids)
 : m_centroids(centroids)
 {
-	this->m_features & HAS_SOFT_MEMBERSHIP;
+	this->m_features |= HAS_SOFT_MEMBERSHIP;
 }
 
 
