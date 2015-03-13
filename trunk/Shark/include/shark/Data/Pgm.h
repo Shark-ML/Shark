@@ -229,7 +229,7 @@ inline void exportFiltersToPGMGrid(std::string const& basename, Data<RealVector>
 	std:size_t numFilters = filters.numberOfElements();
 	std::size_t gridX = std::size_t(std::sqrt(double(numFilters)));
 	std::size_t gridY = gridX;
-	while(gridX*gridY < (dataDimension(filters))) ++gridX;
+	while(gridX*gridY < numFilters) ++gridX;
 	
 	double minimum = std::numeric_limits<double>::max();
 	for(std::size_t i = 0; i != filters.numberOfBatches(); ++i){
