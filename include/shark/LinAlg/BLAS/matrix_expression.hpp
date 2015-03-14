@@ -511,6 +511,7 @@ SHARK_BINARY_MATRIX_EXPRESSION(operator-, scalar_binary_minus)
 SHARK_BINARY_MATRIX_EXPRESSION(operator*, scalar_binary_multiply)
 SHARK_BINARY_MATRIX_EXPRESSION(element_prod, scalar_binary_multiply)
 SHARK_BINARY_MATRIX_EXPRESSION(operator/, scalar_binary_divide)
+SHARK_BINARY_MATRIX_EXPRESSION(pow, scalar_pow)
 SHARK_BINARY_MATRIX_EXPRESSION(element_div, scalar_binary_divide)
 #undef SHARK_BINARY_MATRIX_EXPRESSION
 
