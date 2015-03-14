@@ -136,8 +136,8 @@ public:
 
 protected:
 	/// Compute unnormalized membership from distance.
-	/// The default implementation is to return the inverse distance.
-	virtual double membershipKernel(double dist) const;
+	/// The default implementation is to return \f$ exp(x_i)/sum_j exp(x_j)\f$.
+	virtual RealVector membershipKernel(RealVector const& distances) const;
 
 	/// centroid vectors
 	Data<RealVector> m_centroids;

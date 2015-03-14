@@ -93,11 +93,7 @@ RealVector Centroids::softMembership(RealVector const& pattern) const{
 		subrange(membership,batchBegin,batchEnd) = sqrt(distanceSqr(pattern, m_centroids.batch(i)));
 		batchBegin = batchEnd;
 	}
-	//apply membership kernels and normalize to 1
-	for (std::size_t i=0; i != numClusters; i++){
-		membership(i) = membershipKernel(membership(i));
-	}
-	membership /= sum(membership);
+	membership = membershipKernel(membership);
 	return membership;
 }
 
@@ -114,15 +110,14 @@ RealMatrix Centroids::softMembership(BatchInputType const& patterns) const{
 	}
 	//apply membership kernels and normalize to 1
 	for (std::size_t i=0; i != numPatterns; i++){
-		for (std::size_t j=0; j != numClusters; j++)
-			membership(i,j) = membershipKernel(membership(i,j));
-		row(membership,i) /= sum(row(membership,i));
+			row(membership,i) = membershipKernel(row(membership,i));
 	}
 	return membership;
 }
 
-double Centroids::membershipKernel( double dist ) const{
-	return (dist < 1e-100 ? 1e100 : 1.0 / dist);
+RealVector Centroids::membershipKernel( RealVector const& dist ) const{
+	double maximum = max(-dist);//needed for numerically stable computation if one exp(-dist) is very large
+	return exp(-dist-maximum)/sum(exp(-dist-maximum));
 }
 
 void Centroids::initFromData(const ClassificationDataset &data, unsigned noClusters, unsigned noClasses) {
