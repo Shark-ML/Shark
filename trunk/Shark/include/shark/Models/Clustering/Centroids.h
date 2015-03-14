@@ -115,6 +115,9 @@ public:
 	RealVector softMembership(RealVector const& pattern) const;
 	/// From AbstractClustering: Compute cluster memberships for a batch of patterns.
 	RealMatrix softMembership(BatchInputType const& patterns) const;
+	
+	/// Computes the distances of each pattern to all cluster centers
+	RealMatrix distances(BatchInputType const& patterns) const;
 
 
 	/// initialize centroids from labeled data: take the first
