@@ -552,6 +552,19 @@ private:
 };
 
 template<class T1,class T2>
+struct scalar_binary_pow {
+	typedef T1 argument1_type;
+	typedef T2 argument2_type;
+	typedef typename promote_traits<T1, T2>::promote_type result_type;
+	static const bool left_zero_remains =  false;
+	static const bool right_zero_remains =  false;
+	result_type operator()(argument1_type x, argument2_type y)const {
+		using std::pow;
+		return pow(x,y);
+	}
+};
+
+template<class T1,class T2>
 struct scalar_binary_min{
 	typedef T1 argument1_type;
 	typedef T2 argument2_type;
