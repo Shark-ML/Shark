@@ -122,8 +122,7 @@ RealMatrix Centroids::softMembership(BatchInputType const& patterns) const{
 }
 
 double Centroids::membershipKernel( double dist ) const{
-	//~ return (dist < 1e-100 ? 1e100 : 1.0 / dist);
-	return exp(-dist);
+	return (dist < 1e-100 ? 1e100 : 1.0 / dist);
 }
 
 void Centroids::initFromData(const ClassificationDataset &data, unsigned noClusters, unsigned noClasses) {
