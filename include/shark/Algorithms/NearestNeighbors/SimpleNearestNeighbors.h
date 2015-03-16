@@ -36,7 +36,7 @@
 #define SHARK_ALGORITHMS_NEARESTNEIGHBORS_SIMPLENEARESTNEIGHBORS_H
 
 #include <shark/Algorithms/NearestNeighbors/AbstractNearestNeighbors.h>
-#include <shark/Models/Kernels/AbstractKernelFunction.h>
+#include <shark/Models/Kernels/AbstractMetric.h>
 #include <shark/Core/OpenMP.h>
 #include <algorithm>
 namespace shark {
@@ -45,18 +45,19 @@ namespace shark {
 ///\brief Brute force optimized nearest neighbor implementation
 ///
 ///Returns the labels and distances of the k nearest neighbors of a point 
+/// The distance is measured using an arbitrary metric
 template<class InputType, class LabelType>
 class SimpleNearestNeighbors:public AbstractNearestNeighbors<InputType,LabelType>{
 private:
 	typedef AbstractNearestNeighbors<InputType,LabelType> base_type;
 public:
 	typedef LabeledData<InputType, LabelType> Dataset;
-	typedef AbstractKernelFunction<InputType> Kernel;
+	typedef AbstractMetric<InputType> Metric;
 	typedef typename base_type::DistancePair DistancePair;
 	typedef typename Batch<InputType>::type BatchInputType;
 
-	SimpleNearestNeighbors(Dataset const& dataset, Kernel const* kernel)
-	:m_dataset(dataset), mep_kernel(kernel){}
+	SimpleNearestNeighbors(Dataset const& dataset, Metric const* metric)
+	:m_dataset(dataset), mep_metric(metric){}
 		
 	///\brief returns the k nearest neighbors of the point
 	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const{
@@ -74,7 +75,7 @@ public:
 		//every thread do a KNN-Search on it's subset of data
 		SHARK_PARALLEL_FOR(int b = 0; b < (int)m_dataset.numberOfBatches(); ++b){
 			//evaluate distances between the points of the patterns and the batch
-			RealMatrix distances=mep_kernel->featureDistanceSqr(patterns,m_dataset.batch(b).input);
+			RealMatrix distances=mep_metric->featureDistanceSqr(patterns,m_dataset.batch(b).input);
 			
 			//now update the heaps with the distances
 			for(std::size_t p = 0; p != numPatterns; ++p){
@@ -130,7 +131,7 @@ public:
 	
 private:
 	Dataset m_dataset;
-	Kernel const* mep_kernel; 
+	Metric const* mep_metric; 
 };
 
 
