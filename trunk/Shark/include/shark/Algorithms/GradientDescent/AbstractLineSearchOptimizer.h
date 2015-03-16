@@ -76,9 +76,6 @@ public:
 
 	void step(const ObjectiveFunctionType &objectiveFunction);
 
-	//from IConfigure
-	void configure(const PropertyTree &node);
-
 	//from ISerializable
 	void read(InArchive &archive);
 	void write(OutArchive &archive) const;

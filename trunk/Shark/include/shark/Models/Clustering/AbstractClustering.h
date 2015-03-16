@@ -40,7 +40,6 @@
 #include <shark/Core/Flags.h>
 #include <shark/Core/INameable.h>
 #include <shark/Core/IParameterizable.h>
-#include <shark/Core/IConfigurable.h>
 #include <shark/Core/ISerializable.h>
 
 
@@ -90,7 +89,7 @@ namespace shark {
 /// SoftClusteringModel.
 ///
 template <class InputT>
-class AbstractClustering : public INameable, public IParameterizable, public ISerializable, public IConfigurable
+class AbstractClustering : public INameable, public IParameterizable, public ISerializable
 {
 public:
 	typedef InputT InputType;
@@ -166,10 +165,6 @@ public:
 	virtual RealMatrix softMembership(BatchInputType const& patterns) const{
 		SHARK_FEATURE_EXCEPTION(HAS_SOFT_MEMBERSHIP);
 	}
-
-
-	/// empty default implementation of IConfigurable::configure
-	virtual void configure(PropertyTree const& node) {}
 
 	/// empty default implementation of ISerializable::read
 	void read(InArchive& archive) {}

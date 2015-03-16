@@ -33,13 +33,12 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/ISerializable.h>
-#include <shark/Core/IConfigurable.h>
 namespace shark{
 //!  \brief Offers a basic structure for recurrent networks.
 //!
 //! it is possible to define the tzpe of sigmoids and the form of the connection matrix.
 //! this structure can be shared between different types of ents like the RNNet and the OnlineRNNet
-class RecurrentStructure: public IConfigurable, public ISerializable
+class RecurrentStructure: public ISerializable
 {
 public:
 	//! Creates an empty recurrent neural network.
@@ -191,18 +190,6 @@ public:
 	//! Computes the derivative of the neuron.
 	double neuronDerivative(double activation);
 
-	//!  \brief configures the RNNet. Compared to the strength of the Network, the configuration power
-	//!         is relatively small. if a complete matrix should be loaded, a different approach is needed
-	//!
-	//!  The Data format is as follows:
-	//!  "inputs"  number of input neurons. No default value, must be set!
-	//!  "outputs" number of output neurons. No default value, must be set!
-	//!  "hidden"  number of hidden neurons. No default value, must be set!
-	//!  "bias"    wether bias connections should be created. Default is true!
-	//!
-	//!  The network created with this infomation is the same as the result of	
-	//!   setStructure(inputs,hidden,outputs,bias);
-	void configure( const PropertyTree & node );
 protected:
 
 	//================Convenience index variables=====================

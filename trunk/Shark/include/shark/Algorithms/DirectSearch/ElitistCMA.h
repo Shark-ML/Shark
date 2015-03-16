@@ -74,8 +74,6 @@ public:
 	std::string name() const
 	{ return "ElitistCMA"; }
 
-	void configure( const PropertyTree & node ) {}
-
 	void read( InArchive & archive );
 
 	void write( OutArchive & archive ) const;

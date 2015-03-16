@@ -49,25 +49,6 @@ public:
 	std::string name() const
 	{ return ""; }
 
-	void configure( const PropertyTree & node ) {
-		PropertyTree::const_assoc_iterator it = node.find("model");
-		if(it!=node.not_found())
-		{
-			mep_model->configure(it->second);
-		}
-		// be flexible; allow for "Loss" or "loss"
-		it = node.find("Loss");
-		if(it!=node.not_found())
-		{
-			mep_loss->configure(it->second);
-		}
-		it = node.find("loss");
-		if(it!=node.not_found())
-		{
-			mep_loss->configure(it->second);
-		}
-	}
-
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint = mep_model->parameterVector();
 	}
@@ -159,25 +140,6 @@ public:
 
 	std::string name() const
 	{ return ""; }
-
-	void configure( const PropertyTree & node ) {
-		PropertyTree::const_assoc_iterator it = node.find("model");
-		if(it!=node.not_found())
-		{
-			mep_model->configure(it->second);
-		}
-		// be flexible; allow for "Loss" or "loss"
-		it = node.find("Loss");
-		if(it!=node.not_found())
-		{
-			mep_loss->configure(it->second);
-		}
-		it = node.find("loss");
-		if(it!=node.not_found())
-		{
-			mep_loss->configure(it->second);
-		}
-	}
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint = mep_model->parameterVector();
@@ -292,11 +254,6 @@ ErrorFunction<InputType,LabelType>& ErrorFunction<InputType,LabelType>::operator
 	ErrorFunction<InputType,LabelType> copy(op);
 	swap(copy.mp_wrapper,*this);
 	return *this;
-}
-
-template<class InputType,class LabelType>
-void ErrorFunction<InputType,LabelType>::configure( const PropertyTree & node ){
-	mp_wrapper -> configure(node);
 }
 
 template<class InputType,class LabelType>

@@ -83,10 +83,6 @@ struct CIGTAB1 : public MultiObjectiveFunction {
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	void configure( const PropertyTree & node ) {
-		m_a = node.get( "a", 1E6 );
-	}
-
 	void init() {
 		m_rotationMatrix = blas::randomRotationMatrix(m_numberOfVariables);
 	}

@@ -31,7 +31,6 @@
 #define SHARK_UNSUPERVISED_RBM_SAMPLING_GIBBSOPERATOR_H
 
 #include <shark/LinAlg/Base.h>
-#include <shark/Core/IConfigurable.h>
 #include "Impl/SampleTypes.h"
 namespace shark{
 	
@@ -50,7 +49,7 @@ namespace shark{
 /// the sampler jumps deterministically in another state with higher probability. This is counterbalanced by having a higher chance to jump away from
 /// this state.
 template< class RBMType >
-class GibbsOperator:public IConfigurable{
+class GibbsOperator{
 public:
 	typedef RBMType RBM;
 
@@ -87,8 +86,6 @@ public:
 		SHARK_CHECK(alphaHidden >= 0.0, "alpha >= 0 not fulfilled for the hidden layer");
 		SHARK_CHECK(alphaHidden <= 1., "alpha <=1 not fulfilled for the hidden layer");
 	}
-
-	void configure(PropertyTree const& node){}
 		
 	///\brief Returns the internal RBM.
 	RBM* rbm()const{

@@ -36,7 +36,6 @@
 #define SHARK_ALGORITHMS_GRADIENTDESCENT_LINESEARCH_H
 
 #include <shark/LinAlg/Base.h>
-#include <shark/Core/IConfigurable.h>
 #include <shark/Core/ISerializable.h>
 #include "Impl/wolfecubic.inl"
 #include "Impl/dlinmin.inl"
@@ -48,7 +47,7 @@ namespace shark {
 ///This class is a wrapper for the linesearch class of functions of the linear algebra library.
 ///The class is used for example in CG or BFGS for their internal linesearch learning steps.
 ///It is NOT an Optimizer on its own, since it needs the Newton direction to be specified.
-class LineSearch:public IConfigurable, public ISerializable {
+class LineSearch:public ISerializable {
 public:
 	enum LineSearchType {
 	    Dlinmin,
@@ -108,13 +107,6 @@ public:
 			detail::wolfecubic(searchPoint, newtonDirection, pointValue, *m_function, derivative, stepLength);
 			break;
 		}
-	}
-
-	//IConfigurable
-	void configure(PropertyTree const& node) {
-		m_lineSearchType=static_cast<LineSearchType>(node.get("searchtype",(unsigned int)Dlinmin));
-		m_minInterval=node.get("minInterval",0.0);
-		m_maxInterval=node.get("maxInterval",1.0);
 	}
 
 	//ISerializable

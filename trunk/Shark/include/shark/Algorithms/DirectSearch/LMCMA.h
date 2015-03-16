@@ -221,8 +221,6 @@ public:
 	double suggestMu( unsigned int lambda) {
 		return lambda / 2.; // eq. (44)
 	}
-	///\brief Configures the algorithm based on the supplied configuration.
-	void configure( const PropertyTree & node ){}
 
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	

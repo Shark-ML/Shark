@@ -102,11 +102,6 @@ namespace shark {
 			return result;
 		}
 
-		/**
-		* \brief Configures the algorithm based on the supplied configuration.
-		*/
-		void configure( const PropertyTree & node ) {}
-
 		void read( InArchive & archive );
 		void write( OutArchive & archive ) const;
 

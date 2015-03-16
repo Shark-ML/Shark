@@ -73,14 +73,6 @@ void AbstractLineSearchOptimizer::step(const ObjectiveFunctionType &objectiveFun
 	computeSearchDirection();
 }
 
-//from IConfigure
-void AbstractLineSearchOptimizer::configure(const PropertyTree &node) {
-	PropertyTree::const_assoc_iterator it = node.find("linesearch");
-	if (it!=node.not_found()) {
-		m_linesearch.configure(it->second);
-	}
-}
-
 //from ISerializable
 void AbstractLineSearchOptimizer::read(InArchive &archive) {
 	archive>>m_linesearch;

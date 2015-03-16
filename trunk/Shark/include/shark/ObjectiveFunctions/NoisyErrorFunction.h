@@ -86,7 +86,6 @@ public:
 	unsigned int batchSize() const;
 
 	void updateFeatures();
-	void configure( const PropertyTree & node );
 
 	void proposeStartingPoint( SearchPointType & startingPoint)const;
 	std::size_t numberOfVariables()const;

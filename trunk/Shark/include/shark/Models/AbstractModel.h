@@ -37,7 +37,6 @@
 
 #include <shark/Core/Flags.h>
 #include <shark/Core/IParameterizable.h>
-#include <shark/Core/IConfigurable.h>
 #include <shark/Core/INameable.h>
 #include <shark/Core/State.h>
 #include <shark/Rng/Normal.h>
@@ -74,9 +73,9 @@ namespace shark {
 /// This is no restriction, since typical error measures need the mapping itself and not only the derivative.
 ///
 /// \par
-/// Models have names, can be serialized, and configured.
+/// Models have names and can be serialised
 template<class InputTypeT, class OutputTypeT>
-class AbstractModel : public IParameterizable, public IConfigurable, public INameable, public ISerializable
+class AbstractModel : public IParameterizable, public INameable, public ISerializable
 {
 public:
 	/// \brief Defines the input type of the model.

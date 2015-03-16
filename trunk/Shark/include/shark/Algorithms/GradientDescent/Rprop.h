@@ -128,7 +128,6 @@ public:
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
 	void step(const ObjectiveFunctionType& objectiveFunction);
-	void configure( const PropertyTree & node );
 
 	virtual void read( InArchive & archive );
 	virtual void write( OutArchive & archive ) const;

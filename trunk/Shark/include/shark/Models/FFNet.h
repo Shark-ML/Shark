@@ -94,7 +94,7 @@ class FFNet :public AbstractModel<RealVector,RealVector>
 public:
 	
 	//! Creates an empty feed-forward network. After the constructor is called,
-	//! one version of the #setStructure methods or configure needs to be called
+	//! one version of the #setStructure methods needs to be called
 	//! to define the network topology.
 	FFNet()
 	:m_numberOfNeurons(0),m_inputNeurons(0),m_outputNeurons(0){
@@ -566,73 +566,6 @@ public:
 		layer[2] = hidden2;
 		layer[3] = out;
 		setStructure(layer, connectivity, bias);
-	}
-
-	//! \brief Configures the network.
-	//!
-	//!  The Data format is as follows:
-	//!   general properties:
-	//!  "inputs" number of input neurons. No default value, must be set!
-	//!  "outputs" number of output neurons. No default value, must be set!
-	//!  "inOutConnections" whether shortcuts between in-andoutput neurons should be set. default:true
-	//!  "shortcuts" shortcuts between hidden layers. default:true
-	//!  "bias" whether the bias should be acitvated. default:true
-	//!
-	//! for every hidden Layer a node must be present. The name of the node must be "layer"
-	//! and it needs the following properties
-	//! "number" the layer number - the first has number 1, the next 2...
-	//! "neurons" the number of neurons in the layer.
-	//! The count begins at the bottom of the network. The input layer would have number 0.
-	//! it is not checked whether the layer numbering makes sense, but it is not allowed that the number
-	//! of a layer exceeds the total number of layers.
-	void configure(PropertyTree const& node )
-	{
-		typedef PropertyTree::const_assoc_iterator Iter;
-		//general
-		size_t inputNeurons = node.get<size_t>("inputs");
-		size_t outputNeurons = node.get<size_t>("outputs");
-		bool inOutConnections = node.get("inOutConnections",true);
-		bool allConnections = node.get("shortcuts",true);
-		bool biasConnections = node.get("bias",true);
-
-		//commented out because of bugs in boost!
-		//std::pair<Iter,Iter> range = node.equal_range("layer");
-		//instead this piece of code must be used
-		std::pair<Iter,Iter> range = std::make_pair(node.ordered_begin(),node.not_found());
-		bool first=true;
-		bool last=false;
-		for(Iter node=range.first;node!=range.second&&!last;++node){
-			if(first && node->first=="layer"){
-				first = false;
-				range.first=node;
-			}
-			if(!first && node->first!="layer"){
-				last = true;
-				range.second=node;
-			}
-		}
-		size_t numLayers = std::distance(range.first,range.second);
-		std::vector<size_t> layers(numLayers+2);
-		if(numLayers){
-			layers[0]=inputNeurons;
-			layers.back()=outputNeurons;
-			for(Iter layer=range.first;layer!=range.second;++layer){
-				size_t layerPos = layer->second.get<size_t>("number");
-				size_t layerSize = layer->second.get<size_t>("neurons");
-				if(layerPos > numLayers)
-					SHARKEXCEPTION("[FFNet::configure] layer number too big");
-				layers[layerPos+1] = layerSize;
-			}
-			
-		}
-		if(allConnections){
-			setStructure(layers,FFNetStructures::Full,biasConnections);
-		}
-		else if(inOutConnections){
-			setStructure(layers,FFNetStructures::InputOutputShortcut,biasConnections);
-		}else{
-			setStructure(layers,FFNetStructures::Normal,biasConnections);
-		}
 	}
 
 	//! From ISerializable, reads a model from an archive

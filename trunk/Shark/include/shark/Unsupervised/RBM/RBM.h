@@ -136,13 +136,6 @@ public:
 		init(newParameters) >> toVector(m_weightMatrix),blas::parameters(m_hiddenNeurons),blas::parameters(m_visibleNeurons);
  	}
 	
-	///\brief Configures the structure.
-	void configure( const PropertyTree & node ){
-		size_t numberOfHN = node.get<unsigned int>("numberOfHN");
-		size_t numberOfVN = node.get<unsigned int>("numberOfVN");
-		setStructure(numberOfVN,numberOfHN);
-	}
-	
 	///\brief Creates the structure of the RBM.
 	///
 	///@param hiddenNeurons number of hidden neurons.

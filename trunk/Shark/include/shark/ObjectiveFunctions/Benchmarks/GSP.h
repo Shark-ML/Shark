@@ -36,10 +36,6 @@ struct GSP : public MultiObjectiveFunction
 		);
 	}
 
-	void configure( PropertyTree const& node ) {
-		m_gamma = node.get<double>( "gamma" );
-	}
-
 	ResultType eval( const SearchPointType & x ) const {
 		m_evaluationCounter++;
 

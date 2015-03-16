@@ -102,13 +102,6 @@ CMA::CMA()
 	m_features |= REQUIRES_VALUE;
 }
 
-/**
-* \brief Configures the algorithm based on the supplied configuration.
-*/
-void CMA::configure( const PropertyTree & node ) {
-	m_recombinationType = static_cast<RecombinationType>( node.get<unsigned int>( "RecombinationType", SUPERLINEAR ) );
-}
-
 void CMA::read( InArchive & archive ) {
 	archive >> m_numberOfVariables;
 	archive >> m_mu;

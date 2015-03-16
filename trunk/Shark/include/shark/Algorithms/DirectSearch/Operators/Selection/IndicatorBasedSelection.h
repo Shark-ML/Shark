@@ -147,13 +147,6 @@ struct IndicatorBasedSelection {
 		}
 	}
 
-
-	template <typename Node>
-	void configure( const Node & node )
-	{
-		m_indicator.configure( node );
-	}
-
 	/**
 	 * \brief Stores/restores the serializer's state.
 	 * \tparam Archive Type of the archive.

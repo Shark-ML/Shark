@@ -81,16 +81,6 @@ public:
 		return new SparseAutoencoderErrorWrapper<Network>(*this);
 	}
 
-	void configure( const PropertyTree & node ) {
-		PropertyTree::const_assoc_iterator it = node.find("model");
-		if(it!=node.not_found())
-		{
-			mep_model->configure(it->second);
-		}
-		m_rho = node.get<double>("rho",m_rho);
-		m_beta = node.get<double>("beta",m_beta);
-	}
-
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint = mep_model->parameterVector();
 	}

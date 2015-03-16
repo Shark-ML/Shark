@@ -66,22 +66,6 @@ public:
 		return new NoisyErrorFunctionWrapper<InputType,LabelType,OutputType>(*this);
 	}
 
-	void configure( const PropertyTree & node ) {
-		PropertyTree::const_assoc_iterator it = node.find("model");
-		if(it!=node.not_found())
-		{
-			mep_model->configure(it->second);
-		}
-		it = node.find("loss");
-		if(it!=node.not_found())
-		{
-			mep_loss->configure(it->second);
-		}
-		m_batchSize = node.get("batchSize",1);
-
-		updateFeatures();
-	}
-
 	void proposeStartingPoint( SearchPointType & startingPoint)const {
 		startingPoint=mep_model->parameterVector();
 	}
@@ -167,11 +151,6 @@ template<class InputType,class LabelType>
 void NoisyErrorFunction<InputType,LabelType>::updateFeatures(){
 	mp_wrapper -> updateFeatures();
 	this -> m_features = mp_wrapper -> features();
-}
-
-template<class InputType,class LabelType>
-void NoisyErrorFunction<InputType,LabelType>::configure( const PropertyTree & node ){
-	mp_wrapper -> configure(node);
 }
 
 template<class InputType,class LabelType>

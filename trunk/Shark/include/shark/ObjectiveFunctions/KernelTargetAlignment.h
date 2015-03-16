@@ -134,13 +134,6 @@ public:
 	std::string name() const
 	{ return "KernelTargetAlignment"; }
 
-	void configure( const PropertyTree & node ){
-		PropertyTree::const_assoc_iterator it = node.find("kernel");
-		if(it != node.not_found()){
-			mep_kernel->configure(it->second);
-		}
-	}
-
 	/// Return the current kernel parameters as a starting point for an optimization run.
 	void proposeStartingPoint(SearchPointType& startingPoint) const {
 		startingPoint =  mep_kernel -> parameterVector();

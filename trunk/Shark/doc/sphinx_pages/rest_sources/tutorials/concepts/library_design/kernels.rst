@@ -302,7 +302,7 @@ Other
 
 
 Kernels support several other concepts. They have parameters, can be
-configured, serialized and have an external state object.
+serialized and have an external state object.
 
 ===============================   ===============================================================================
 Method                            Description
@@ -310,7 +310,6 @@ Method                            Description
 ``numberOfParameters``            The number of parameters which can be optimized
 ``parameterVector``               Returns the current parameters of the kernel object
 ``setParameterVector``            Sets the new parameter vector
-``configure``                     Configures the kernel. Options depend on the specific kernel class
 ``createState``                   Returns a newly created State object holding the state to be stored in eval
 ===============================   ===============================================================================
 

@@ -90,16 +90,6 @@ public:
 		return m_chain;
 	}
 	
-	void configure(PropertyTree const& node){
-		PropertyTree::const_assoc_iterator it = node.find("rbm");
-		if(it!=node.not_found())
-		{
-			mpe_rbm->configure(it->second);
-		}
-		setK(node.get<unsigned int>("k",1));
-		setNumberOfSamples(node.get<unsigned int>("samples",0));
-	}
-	
 	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;
 		m_chain.initializeChain(m_data);

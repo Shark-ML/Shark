@@ -58,30 +58,6 @@ public:
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "MultiChainApproximator"; }
-
-	void configure(PropertyTree const& node){
-		PropertyTree::const_assoc_iterator it = node.find("rbm");
-		if(it!=node.not_found())
-		{
-			mpe_rbm->configure(it->second);
-		}
-
-		unsigned int k = node.get<unsigned int>("k",1);
-		unsigned int samples = node.get<unsigned int>("samples",0);
-		std::size_t batchSize = node.get<std::size_t>("batchSize",m_batchSize);
-
-		it = node.find("sampling");
-		if(it!=node.not_found())
-		{
-		    for (std::size_t i=0; i != m_chains.size(); ++i){
-			    m_chainOperator.configure(it->second);
-			}
-		}
-
-		setNumberOfSamples(samples);
-		setBatchSize(batchSize);
-		setK(k);
-	}
 	
 	void setK(unsigned int k){
 		m_k = k;

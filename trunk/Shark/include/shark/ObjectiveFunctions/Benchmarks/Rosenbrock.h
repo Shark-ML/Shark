@@ -85,8 +85,6 @@ struct Rosenbrock : public SingleObjectiveFunction {
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	void configure( const PropertyTree &) {}
-
 	void proposeStartingPoint( SearchPointType & x ) const {
 		x.resize( m_numberOfVariables );
 

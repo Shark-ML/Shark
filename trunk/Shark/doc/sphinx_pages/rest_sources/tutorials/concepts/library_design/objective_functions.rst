@@ -158,8 +158,8 @@ Method                                                                          
 
 
 Besides from this interface, objective functions also have a name
-which can be used for automatic generation of output messages; can be
-configured from a file; and store the number of times ``eval`` was
+which can be used for automatic generation of output messages
+and store the number of times ``eval`` was
 called. The last feature is needed when benchmarking optimizers:
 
 
@@ -168,7 +168,6 @@ Method                                                                          
 ==============================================================================   ===============================================================================
 ``std::string name()``                                                           Returns the name of the function.
 ``std::size_t evaluationCounter()``                                              Returns the number of function evaluations since the last call to init.
-``configure(PropertyTree)``                                                      Configures the objective function. Must be called before ``init``.
 ==============================================================================   ===============================================================================
 
 

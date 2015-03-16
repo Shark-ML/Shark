@@ -42,7 +42,6 @@ A trainer offers the following methods:
 Method                                                      Description
 =========================================================   =================================================
 ``train(ModelType&, LabeledData<InputType, LabelType>)``    Solves the problem and sets the model parameters
-``configure(PropertyTree)``                                 Configures the trainer
 ``std::string name()``                                      Returns the trainer's name
 =========================================================   =================================================
 
@@ -52,7 +51,6 @@ Usage of trainers is equally straightforward::
   MyModel model;
   MyTrainer trainer;
   MyDataset data;
-  trainer.configure(...);      //optional
   trainer.train(model, data);  //model now represents the solution to the problem.
 
 
@@ -81,7 +79,6 @@ These trainers also offer the following methods:
 Method                                                  Description
 =====================================================   ================================================
 ``train(ModelType&, UnlabeledData<InputType>)``         Solves the problem and stores it in the model.
-``configure(PropertyTree)``                             Configures the trainer
 ``std::string name()``                                  Returns the name of the trainer
 =====================================================   ================================================
 

@@ -70,9 +70,6 @@ public:
 	std::string name() const
 	{ return "NegativeLogLikelihood"; }
 
-	
-	void configure(PropertyTree const& node){}
-
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint=mep_model->parameterVector();
 	}

@@ -80,13 +80,6 @@ public:
 	}
 
 
-	/// \brief Configures the mixing ratio given the configuration node.
-	template<typename Node>
-	void configure( const Node & node ) {
-		m_mixingRatio = node.template get< double >( "MixingRatio", 0.5 );
-	}
-
-
 	/// \brief Serializes instances of the uniform crossover operator.
 	template<typename Archive>
 	void serialize( Archive & ar, const unsigned int version ) {

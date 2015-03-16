@@ -70,10 +70,6 @@ struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 		m_objective->setNumberOfVariables(numberOfVariables);
 	}
 
-	void configure( const PropertyTree & node ) {
-		m_objective->configure(node);
-	}
-
 	void proposeStartingPoint( SearchPointType & x ) const {
 		RealVector y(numberOfVariables());
 		m_objective->proposeStartingPoint(y);

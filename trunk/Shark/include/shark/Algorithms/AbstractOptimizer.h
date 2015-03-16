@@ -34,7 +34,6 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_ABSTRACTOPTIMIZER_H
 #define SHARK_OBJECTIVEFUNCTIONS_ABSTRACTOPTIMIZER_H
 
-#include <shark/Core/IConfigurable.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 namespace shark {
@@ -68,7 +67,7 @@ namespace shark {
 * \tparam SolutionTypeT The type of the final solution.
 */
 template <typename PointType, typename ResultT, typename SolutionTypeT>
-class AbstractOptimizer : public IConfigurable, public INameable, public ISerializable {
+class AbstractOptimizer : public INameable, public ISerializable {
 public:
 	typedef PointType SearchPointType;
 	typedef ResultT ResultType;

@@ -113,9 +113,6 @@ public:
 				+ mep_trainer->name() + ","
 				+ mep_cost->name() + ">";
 	}
-
-	/// configure the cross validation
-	void configure( const PropertyTree & node ) {}
 		
 	std::size_t numberOfVariables()const{
 		return mep_meta->numberOfParameters();

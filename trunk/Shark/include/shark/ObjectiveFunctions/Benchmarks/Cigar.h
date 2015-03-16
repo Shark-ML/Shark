@@ -62,11 +62,6 @@ struct Cigar : public SingleObjectiveFunction {
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	void configure(const PropertyTree &node) {
-		m_alpha = node.get("alpha", 1E-3);
-		m_numberOfVariables = node.get("numberOfVariables",5l);
-	}
-
 	void proposeStartingPoint(SearchPointType &x) const {
 		x.resize(m_numberOfVariables);
 
