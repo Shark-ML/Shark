@@ -72,7 +72,6 @@ namespace detail{
 			std::size_t numberOfVariables()const{
 				return 1;
 			}
-			void configure( const PropertyTree &) {}
 
 			double eval( const SearchPointType & C ) const {
 				std::size_t n = energyDiff0.size();

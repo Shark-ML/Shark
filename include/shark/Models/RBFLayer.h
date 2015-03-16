@@ -65,7 +65,7 @@ private:
 	};
 
 public:
-	///  \brief Creates an empty Radial Basis Function layer. A call to configure is required afterwards.
+	///  \brief Creates an empty Radial Basis Function layer.
 	RBFLayer();
 	
 	///  \brief Creates a layer of a Radial Basis Function Network.
@@ -108,17 +108,6 @@ public:
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new InternalState());
 	}
-
-
-	///\brief Configures the RBFLayer using a property tree.
-	///
-	/// the following properties are needed:
-	/// "inputs" number of input neurons.
-	/// "outputs" number of output neurons.
-	/// the following values are enabled as default
-	/// "trainCenters" should the centers be trained?
-	/// "trainWidth" should the widght of the distributions be trained?
-	void configure( PropertyTree const& node );
 	
 	
 	///  \brief Configures a Radial Basis Function Network.

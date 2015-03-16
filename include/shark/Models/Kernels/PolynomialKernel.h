@@ -89,11 +89,6 @@ public:
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "PolynomialKernel"; }
-
-	void configure(PropertyTree const& node){
-		m_degree = node.get("degree", 2);
-		m_offset = node.get("offset", 0.0);
-	}
 	
 	void setDegree( unsigned int deg ) {
 		RANGE_CHECK( deg > 0 );

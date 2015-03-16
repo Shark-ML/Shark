@@ -382,7 +382,6 @@ namespace shark {
 	std::string name() const
 	{ return "NestedGridSearch"; }
 
-	void configure(PropertyTree const&){}
 	//!
 	//! \brief Initialization of the nested grid search.
 	//!

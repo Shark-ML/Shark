@@ -83,27 +83,6 @@ public:
 	        :  m_filename(filename), m_threshold(threshold), m_batchSize(batchSize){
 		init();
 	}
-	//Default constructor. If this is used you have to call configure() for MNIST to work.
-	MNIST(){}
-	
-	//Reads the configurations from a property tree and imports the data set.
-	void configure( const PropertyTree & node ) {
-		m_threshold = node.get("threshold",127);
-		m_filename = node.get<std::string>("filename");
-		m_batchSize = node.get("batchSize", 256);
-		init();
-	}
-	
-	//Configures the MNIST data set.
-	//@param filename the name of the file storing the dataset
-	//@param threshhold the threshold for turning gray values into ones
-	//@param batchSize the size of the batch 
-	void configure(std::string filename, double threshold = 127, std::size_t batchSize = 256) {
-		m_filename = filename;
-		m_threshold = threshold;
-		m_batchSize = batchSize;
-		init();
-	}
 	
 	//Returns the data vector
 	UnlabeledData<RealVector> data() const {

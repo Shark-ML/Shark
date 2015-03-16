@@ -120,13 +120,6 @@ void RpropMinus::step(const ObjectiveFunctionType& objectiveFunction) {
 	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }
 
-void RpropMinus::configure( const PropertyTree & node ) {
-	m_increaseFactor=node.get("increaseFactor",1.2);
-	m_decreaseFactor=node.get("decreaseFactor",0.5);
-	m_maxDelta=node.get("maxDelta",1e100);
-	m_minDelta=node.get("minDelta",0.0);
-}
-
 void RpropMinus::read( InArchive & archive )
 {
 	archive>>m_delta;

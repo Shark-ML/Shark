@@ -41,7 +41,7 @@
 #include "shark/Models/NBClassifier.h"
 
 #include <boost/foreach.hpp>
-
+#include "boost/tuple/tuple.hpp"
 #include <cmath>
 
 namespace shark {

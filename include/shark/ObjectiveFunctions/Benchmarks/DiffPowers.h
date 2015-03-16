@@ -59,9 +59,6 @@ struct DiffPowers : public SingleObjectiveFunction {
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	void configure( const PropertyTree & node ) {
-	}
-
 	void proposeStartingPoint( SearchPointType & x ) const {
 		x.resize( m_numberOfVariables );
 

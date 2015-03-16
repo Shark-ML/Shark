@@ -133,32 +133,6 @@ void RecurrentStructure::write( OutArchive & archive ) const{
 	archive << m_outputNeurons;
 	archive << m_numberOfParameters;
 }
-void RecurrentStructure::configure( const PropertyTree & node ){
-	try{
-		size_t inputNeurons = node.get<size_t>("inputs");
-		size_t hiddenNeurons = node.get<size_t>("hidden");
-		size_t outputNeurons = node.get<size_t>("outputs");
-		bool bias = node.get("bias",true);
-
-		string sigmoidTypeS =node.get<string>("sigmoidType","Logistic");
-		map<string,SigmoidType> types;
-		types.insert(make_pair("tanh",Tanh));
-		types.insert(make_pair("logistic",Logistic));
-		types.insert(make_pair("linear",Linear));
-		types.insert(make_pair("fastSigmoid",FastSigmoid));
-
-		if(types.find(sigmoidTypeS)==types.end() )
-			SHARKEXCEPTION("[FFNet::configure] unknown type of Sigmoid");
-		SigmoidType sigmoidType = types.find(sigmoidTypeS)->second;
-
-		setStructure(inputNeurons,hiddenNeurons,outputNeurons,bias,sigmoidType);
-
-
-	}
-	catch(boost::property_tree::ptree_error&){
-		SHARKEXCEPTION("[RecurrentStructure::configure] wrong data format or missing data");
-	}
-}
 double RecurrentStructure::neuron(double a) {
 	switch(m_sigmoidType){
 		case Tanh:

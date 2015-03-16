@@ -24,8 +24,6 @@ public:
 	std::string name() const
 	{ return "Linear Norm"; }
 
-	void configure( const PropertyTree & node );
-
 	RealVector parameterVector()const{
 		return RealVector();
 	}

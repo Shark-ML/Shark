@@ -62,10 +62,6 @@ struct Himmelblau : public SingleObjectiveFunction {
 		return 2;
 	}
 
-	void configure( const PropertyTree & node ) {
-		(void) node;
-	}
-
 	void proposeStartingPoint( SearchPointType & x ) const {
 		x.resize( 2 );
 

@@ -393,21 +393,6 @@ struct LeastContributorApproximator {
 
 	}
 
-	template<typename Node>
-	void configure( const Node & node )
-	{
-		m_startDelta = node.template get<double>( "StartDelta", this_type::DEFAULT_START_DELTA() );
-		m_multiplierDelta = node.template get< double >( "MultiplierDelta", this_type::DEFAULT_MULTIPLIER_DELTA());
-		m_minimumMultiplierDelta = node.template get< double >( "MinimumDeltaMultiplier", this_type::DEFAULT_MINIMUM_MULTIPLIER_DELTA() );
-		m_maxNumSamples = node.get( "MaxNumSamples", static_cast<unsigned long long>(this_type::DEFAULT_MAX_NUM_SAMPLES()) );
-		m_gamma = node.template get< double >( "Gamma", this_type::DEFAULT_GAMMA() );
-		m_strategy = node.template get< Strategy >( "Strategy", this_type::DEFAULT_STRATEGY() );
-		m_sampleCountThreshold = node.get( "SampleCountThreshold", static_cast<unsigned long long>(this_type::DEFAULT_SAMPLE_THRESHOLD()) );
-
-		std::cout << "Configure: " << m_strategy << std::endl;
-		std::cout << "Configure: " << m_sampleCountThreshold << std::endl;
-	}
-
 	/**
 	 * \brief Samples in the bounding box of the supplied point until a pre-defined threshold is reached.
 	 * \param [in] s Set of points.

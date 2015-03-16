@@ -64,8 +64,6 @@ public:
 	std::string name() const
 	{ return "KernelBasisDistance"; }
 
-	void configure( const PropertyTree & node ){}
-
 	/// \brief Returns the number of vectors the uses to approximate the point - the basis size
 	std::size_t numApproximatingVectors() const{
 		return m_numApproximatingVectors;

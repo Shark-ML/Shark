@@ -76,11 +76,6 @@ public:
 	):m_chain(rbm)
 	, m_integrateEnergyDifferences(integrateEnergyDifferences)
 	, m_storeEnergyDifferences(true){}
-
-
-	void configure(PropertyTree const& node){
-		m_chain.configure(node);
-	}
 	
 	const Operator& transitionOperator()const{
 		return m_chain.transitionOperator();

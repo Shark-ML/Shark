@@ -68,20 +68,6 @@ public:
 	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;
 	}
-
-	void configure(PropertyTree const& node){
-		PropertyTree::const_assoc_iterator it = node.find("rbm");
-		if(it!=node.not_found())
-		{
-			mpe_rbm->configure(it->second);
-		}
-		it = node.find("sampling");
-		if(it!=node.not_found())
-		{
-			m_operator.configure(it->second);
-		}
-		setK(node.get<unsigned int>("k",1));
-	}
 	
 	/// \brief Sets the value of k- the number of steps of the Gibbs Chain 
 	///

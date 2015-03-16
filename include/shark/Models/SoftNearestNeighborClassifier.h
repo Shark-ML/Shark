@@ -112,11 +112,6 @@ public:
 	void setDistanceWeightType(DistanceWeights dw)
 	{ m_distanceWeights = dw; }
 
-	/// configures the classifier.
-	void configure(PropertyTree const& node){
-		m_neighbors = node.get("neighbors", 3);
-	}
-
 	/// get internal parameters of the model
 	virtual RealVector parameterVector() const{
 		RealVector parameters(1);

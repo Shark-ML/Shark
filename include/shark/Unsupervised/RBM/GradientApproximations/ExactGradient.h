@@ -58,14 +58,6 @@ public:
 	void setData(UnlabeledData<RealVector> const& data){
 		m_data = data;
 	}
-	
-	void configure(PropertyTree const& node){
-		PropertyTree::const_assoc_iterator it = node.find("rbm");
-		if(it!=node.not_found())
-		{
-			mpe_rbm->configure(it->second);
-		}
-	}
 
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		startingPoint = mpe_rbm->parameterVector();

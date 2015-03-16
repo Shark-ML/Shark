@@ -123,7 +123,6 @@ Also, optimizers offer several other helper functions
 ============================================   =========================================================================
 Method                                         Description
 ============================================   =========================================================================
-``configure(PropertyTree)``                    Configures internal parameters of the algorithm, like learning rates.
 ``name()``                                     Returns the name of the optimizer. Useful for text output of results.
 ============================================   =========================================================================
 
@@ -133,8 +132,6 @@ Here is a short example on how this interface can be used::
 
   MyObjectiveFunction f;
   MyOptimizer opt;
-  opt.configure(...); //optional configuration step, for example from a file.
-  f.configure(...);   //same for the objective function
   opt.init(f);
 
   while( !someStoppingCriteronMet(opt,f) ) {

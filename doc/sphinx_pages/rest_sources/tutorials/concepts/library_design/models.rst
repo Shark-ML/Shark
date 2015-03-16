@@ -193,8 +193,7 @@ respect to its parameters thus looks like this::
 There are a few more methods which result from the fact that AbstractModel
 implements several higher-level interfaces, namely :doxy:`IParameterizable`,
 :doxy:`IConfigurable`, :doxy:`INameable`, and :doxy:`ISerializable`. For
-example, models are parameterizable, can be configured from a file and
-serialized to store results:
+example, models are parameterizable and serialized to store results:
 
 
 ======================   ==============================================================================
@@ -203,7 +202,6 @@ Method                   Description
 ``numberOfParameters``   Number of parameters which can be optimized
 ``parameterVector``      Returns the current parameter vector of the model
 ``setParameterVector``   Sets the parameter vector to new values
-``configure``            Configures the model. Options depend on the specific model
 ``read``, ``write``      Loads and saves a serializable object
 ``createState``          Returns a newly created State object holding the state to be stored in eval
 ======================   ==============================================================================

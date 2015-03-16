@@ -45,13 +45,6 @@ LinearNorm::LinearNorm(std::size_t inputSize):m_inputSize(inputSize)
 	m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 }
 
-//! configures the network
-//!
-//!This class only needs one item to be presents, the number of inputs "input"
-void LinearNorm::configure( PropertyTree const& node ){
-	m_inputSize = node.get<std::size_t>("inputs");
-}
-
 void LinearNorm::eval(BatchInputType const& patterns, BatchOutputType& output)const{
 	SIZE_CHECK(patterns.size2() == inputSize());
 	output.resize(patterns.size1(),inputSize());

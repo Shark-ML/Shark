@@ -56,7 +56,7 @@ private:
 	}
 	
 public:
-	///generates the DistantModes distribution. It can later be changed using configure
+	///generates the DistantModes distribution.
 	///
 	///\param p the probability of changing a input neuron
 	///\param dim the dimensionality of the data.
@@ -65,19 +65,6 @@ public:
 	///\param batchSize the size of the batches in which the generated data set is organized
 	DistantModes(double p = 0, unsigned dim = 16, unsigned modes=4, unsigned copies =2500, size_t batchSize=0)
 		:m_p(p), m_dim(dim), m_modes(modes), m_copies(copies), m_batchSize(batchSize) {
-		init();
-	}
-	
-	///configure needs the following 4 properties:
-	///p: the probability of disturbance
-	///dimension: input dimension of the data. default is 16
-	///modes: number of basic modes. Default is 4
-	///copies: number of disturbed copies of a mode. default is 2500
-	void configure( const PropertyTree & node ) {
-		m_p = node.get<double>("p");
-		m_dim = node.get("dimension",16);
-		m_modes = node.get("modes",4);
-		m_copies = node.get("copies",2500);
 		init();
 	}
     

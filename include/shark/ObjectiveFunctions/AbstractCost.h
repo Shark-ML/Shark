@@ -37,7 +37,6 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/INameable.h>
-#include <shark/Core/IConfigurable.h>
 #include <shark/Core/Flags.h>
 #include <shark/Data/Dataset.h>
 
@@ -66,7 +65,7 @@ namespace shark {
 /// process LabeledData in an ErrorFunction.
 ///
 template<class LabelT, class OutputT = LabelT>
-class AbstractCost : public INameable, public IConfigurable
+class AbstractCost : public INameable
 {
 public:
 	typedef OutputT OutputType;
@@ -99,16 +98,6 @@ public:
 	bool isLossFunction() const{ 
 		return m_features & IS_LOSS_FUNCTION; 
 	}
-
-	/// \brief configures the loss using informations in the property tree
-	///
-	/// \par
-	/// The default implementation is empty and actually most cost functions
-	/// do not need to be configured. See the specific documentation of the
-	/// corresponding sub-classes for more details.
-	/// \param  node  the configuration node
-	void configure(PropertyTree const& node)
-	{ (void) node; }
 
 	/// Evaluates the cost of predictions, given targets.
 	/// \param  targets      target values

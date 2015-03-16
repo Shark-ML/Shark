@@ -33,7 +33,6 @@
 #include <shark/Data/Dataset.h>
 #include <shark/Rng/DiscreteUniform.h>
 #include <shark/Unsupervised/RBM/Tags.h>
-#include <shark/Core/IConfigurable.h>
 #include "Impl/SampleTypes.h"
 namespace shark{
 
@@ -79,9 +78,6 @@ public:
 	}
 	std::size_t batchSize(){
 		return m_samples.size();
-	}
-	void configure(PropertyTree const& node){
-		m_operator.configure(node);
 	}
 	
 	/// \brief Initializes with data points drawn uniform from the set.

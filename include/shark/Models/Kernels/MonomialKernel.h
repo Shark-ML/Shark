@@ -80,9 +80,6 @@ public:
 	std::string name() const
 	{ return "MonomialKernel"; }
 
-	void configure( PropertyTree const& node ){
-		m_exponent = node.get("exponent",1);
-	}
 	RealVector parameterVector() const{ 
 		return RealVector(0); 
 	}

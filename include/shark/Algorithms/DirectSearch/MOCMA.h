@@ -143,33 +143,6 @@ public:
 		archive & BOOST_SERIALIZATION_NVP(m_initialSigma);
 	}
 
-	/**
-	 * \brief Initializes the algorithm from a configuration-tree node.
-	 *
-	 * The following sub keys are recognized:
-	 *	- Mu, type: unsigned int, default value: 100.
-	 *	- PenaltyFactor, type: double, default value: \f$10^{-6}\f$.
-	 *	- NotionOfSuccess, type: string, default value: PopulationBased. Can also be IndividualBased.
-	 *	- initialSigma, an initial estimate for the diagonal of the covariance matrix.
-	 *
-	 * \param [in] node The configuration tree node.
-	 */
-	void configure(PropertyTree const& node) {
-		mu() = node.get("Mu", mu());
-		constrainedPenaltyFactor() = node.get("PenaltyFactor", constrainedPenaltyFactor());
-		initialSigma() = node.get("InitialSigma",initialSigma());
-		if(node.find("NotionOfSuccess") != node.not_found()){
-			std::string str = node.get<std::string>("NotionOfSuccess");
-			if(str == "IndividualBased"){
-				notionOfSuccess() = IndividualBased;
-			}else if(str == "PopulationBased"){
-				notionOfSuccess() = PopulationBased;
-			}else{
-				throw SHARKEXCEPTION("Unknown Value for NotionOfSuccess:"+str);
-			}
-		}
-	}
-
 	using AbstractMultiObjectiveOptimizer<RealVector >::init;
 	/**
 	 * \brief Initializes the algorithm for the supplied objective function.

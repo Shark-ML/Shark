@@ -35,17 +35,10 @@
 #ifndef SHARK_MODELS_KERNELS_ABSTRACTKERNELFUNCTION_H
 #define SHARK_MODELS_KERNELS_ABSTRACTKERNELFUNCTION_H
 
-
-#include <cmath>
+#include <shark/Models/Kernels/AbstractMetric.h>
 #include <shark/LinAlg/Base.h>
-#include <shark/Data/BatchInterface.h>
-#include <shark/Core/IParameterizable.h>
-#include <shark/Core/ISerializable.h>
-#include <shark/Core/IConfigurable.h>
-#include <shark/Core/INameable.h>
 #include <shark/Core/Flags.h>
 #include <shark/Core/State.h>
-#include <shark/Core/Traits/ProxyReferenceTraits.h>
 namespace shark {
 
 #ifdef SHARK_COUNT_KERNEL_LOOKUPS
@@ -69,39 +62,34 @@ namespace shark {
 /// interface inherits the IParameterizable interface.
 ///
 template<class InputTypeT>
-class AbstractKernelFunction : public INameable, public IParameterizable, public ISerializable, public IConfigurable
+class AbstractKernelFunction : public AbstractMetric<InputTypeT>
 {
 private:
-	/// \brief Meta type describing properties of batches.
+	typedef AbstractMetric<InputTypeT> base_type;
 	typedef Batch<InputTypeT> Traits;
-
 public:
 	/// \brief  Input type of the Kernel.
-	typedef InputTypeT InputType;
+	typedef typename base_type::InputType InputType;
 	/// \brief batch input type of the kernel
-	typedef typename Traits::type BatchInputType;
+	typedef  typename base_type::BatchInputType BatchInputType;
 	/// \brief Const references to InputType
-	typedef typename ConstProxyReference<InputType const>::type ConstInputReference;
+	typedef typename base_type::ConstInputReference ConstInputReference;
 	/// \brief Const references to BatchInputType
-	typedef typename ConstProxyReference<BatchInputType const>::type ConstBatchInputReference;
+	typedef typename base_type::ConstBatchInputReference ConstBatchInputReference;
 
 	AbstractKernelFunction() { }
-	virtual ~AbstractKernelFunction() { }
-
-	/// configure the kernel
-	void configure( PropertyTree const& node ){}
-
-	/// enumerations of kernel features (flags)
+	
+	/// enumerations of kerneland metric features (flags)
 	enum Feature {
 		HAS_FIRST_PARAMETER_DERIVATIVE = 1,    ///< is the kernel differentiable w.r.t. its parameters?
 		HAS_FIRST_INPUT_DERIVATIVE 	   = 2,    ///< is the kernel differentiable w.r.t. its inputs?
 		IS_NORMALIZED                  = 4 ,   ///< does k(x, x) = 1 hold for all inputs x?
 		SUPPORTS_VARIABLE_INPUT_SIZE = 8 ///< Input arguments must have same size, but not the same size in different calls to eval
 	};
-
+	
 	/// This statement declares the member m_features. See Core/Flags.h for details.
 	SHARK_FEATURE_INTERFACE;
-
+	
 	bool hasFirstParameterDerivative()const{
 		return m_features & HAS_FIRST_PARAMETER_DERIVATIVE;
 	}
@@ -113,23 +101,6 @@ public:
 	}
 	bool supportsVariableInputSize() const{
 		return m_features & SUPPORTS_VARIABLE_INPUT_SIZE;
-	}
-
-	/// \brief From ISerializable, reads a kernel from an archive.
-	virtual void read( InArchive & archive ){
-		m_features.read(archive);
-		RealVector p;
-		archive & p;
-		setParameterVector(p);
-	}
-
-	/// \brief From ISerializable, writes a kernel to an archive.
-	///
-	/// The default implementation just saves the parameters.
-	virtual void write( OutArchive & archive ) const{
-		m_features.write(archive);
-		RealVector p = parameterVector();
-		archive & p;
 	}
 
 	///\brief Creates an internal state of the kernel.
@@ -256,12 +227,6 @@ public:
 			}
 		}
 		return result;
-	}
-	
-
-	/// \brief Computes the distance in the kernel induced feature space.
-	double featureDistance(ConstInputReference x1, ConstInputReference x2) const {
-		return std::sqrt(featureDistanceSqr(x1, x2));
 	}
 };
 

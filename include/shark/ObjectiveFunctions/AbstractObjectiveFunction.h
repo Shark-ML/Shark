@@ -34,8 +34,6 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_ABSTRACTOBJECTIVEFUNCTION_H
 #define SHARK_OBJECTIVEFUNCTIONS_ABSTRACTOBJECTIVEFUNCTION_H
 
-
-#include <shark/Core/IConfigurable.h>
 #include <shark/Core/INameable.h>
 #include <shark/Core/Exception.h>
 #include <shark/Core/Flags.h>
@@ -80,7 +78,7 @@ namespace shark {
 /// \tparam PointType The search space the function is defined upon.
 /// \tparam ResultT The objective space the function is defined upon.
 template <typename PointType, typename ResultT>
-class AbstractObjectiveFunction : public IConfigurable, public INameable{
+class AbstractObjectiveFunction :  public INameable{
 public:
 	typedef PointType SearchPointType;
 	typedef ResultT ResultType;
@@ -152,10 +150,6 @@ public:
 	}
 	/// \brief Virtual destructor
 	virtual ~AbstractObjectiveFunction() {}
-
-	virtual void configure( const PropertyTree & node ) {
-		(void) node;
-	}
 
 	virtual void init() {}
 	

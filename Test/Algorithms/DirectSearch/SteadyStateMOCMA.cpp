@@ -72,10 +72,7 @@ BOOST_AUTO_TEST_CASE( MOCMA_HYPERVOLUME_Functions ) {
 
 BOOST_AUTO_TEST_CASE( ApproximatedHypSteadyStateMOCMA ) {
 
-	PropertyTree node;
 	SteadyStateMOCMA ssMocma;
-	BOOST_CHECK_NO_THROW( ssMocma.configure( node ) );
-
 	DTLZ1 dtlz1;
 	dtlz1.setNumberOfObjectives( 3 );
 	dtlz1.setNumberOfVariables( 10 );

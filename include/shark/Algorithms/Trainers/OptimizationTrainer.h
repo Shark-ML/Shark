@@ -94,14 +94,6 @@ public:
 		model.setParameterVector(mep_optimizer->solution().point);
 	}
 
-	void configure( const PropertyTree & node ) {
-		PropertyTree::const_assoc_iterator it = node.find("optimizer");
-		if (it!=node.not_found())
-		{
-			mep_optimizer->configure(it->second);
-		}
-	}
-
 	void read( InArchive & archive )
 	{}
 

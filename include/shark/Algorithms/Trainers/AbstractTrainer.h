@@ -34,8 +34,6 @@
 #ifndef SHARK_ALGORITHMS_TRAINERS_ABSTRACTTRAINER_H
 #define SHARK_ALGORITHMS_TRAINERS_ABSTRACTTRAINER_H
 
-
-#include <shark/Core/IConfigurable.h>
 #include <shark/Core/INameable.h>
 #include <shark/Core/ISerializable.h>
 #include <shark/Data/Dataset.h>
@@ -63,7 +61,7 @@ namespace shark {
 /// calls the specialized train method.
 ///
 template <class Model, class LabelTypeT = typename Model::OutputType>
-class AbstractTrainer : public IConfigurable, public INameable, public ISerializable
+class AbstractTrainer: public INameable, public ISerializable
 {
 public:
 	typedef Model ModelType;
@@ -94,7 +92,7 @@ public:
 /// method.
 ///
 template <class Model>
-class AbstractUnsupervisedTrainer : public IConfigurable, public INameable, public ISerializable
+class AbstractUnsupervisedTrainer : public INameable, public ISerializable
 {
 public:
 	typedef Model ModelType;

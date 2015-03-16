@@ -36,7 +36,6 @@
 #ifndef SHARK_LABELORDER_H
 #define SHARK_LABELORDER_H
 
-#include <shark/Core/IConfigurable.h>
 #include <shark/Core/INameable.h>
 #include <shark/Core/ISerializable.h>
 
@@ -57,9 +56,7 @@ namespace shark
 /// from 0 to N-1, with N the number of classes, so usual Shark
 /// trainers can work with it.
 /// One can then revert the original labeling just by calling restoreOriginalLabels
-
-
-class LabelOrder : public INameable, IConfigurable
+class LabelOrder : public INameable
 {
 private:
 

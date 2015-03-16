@@ -124,24 +124,6 @@ public:
 		archive & BOOST_SERIALIZATION_NVP( m_crossoverProbability );
 	}
 
-	/**
-	* \brief Initializes the algorithm from a configuration-tree node.
-	*
-	* The following sub keys are recognized:
-	*	- Mu, type: unsigned int, default value: 100.
-	*	- CrossoverProbability, type: double, default value: 0.9.
-	*	- NC, type: double, default value: 20.
-	*	- NM, type: double; default value: 20.
-	*
-	* \param [in] node The configuration tree node.
-	*/
-	void configure( const PropertyTree & node ) {
-		mu() = node.get( "Mu", mu() );
-		crossoverProbability() = node.get( "CrossoverProbability", crossoverProbability() );
-		nc() = node.get( "NC", nc() );
-		nm() = node.get( "NM", nm() );
-	}
-
 	using AbstractMultiObjectiveOptimizer<RealVector >::init;
 	/**
 	 * \brief Initializes the algorithm for the supplied objective function.

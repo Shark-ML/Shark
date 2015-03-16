@@ -76,8 +76,6 @@ public:
 
 	std::string name() const
 	{ return "ErrorFunction"; }
-
-	void configure(const PropertyTree & node);
 	
 	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
 		m_regularizer = regularizer;

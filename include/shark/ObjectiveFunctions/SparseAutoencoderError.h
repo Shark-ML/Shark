@@ -86,10 +86,6 @@ public:
 		return mp_wrapper->numberOfVariables();
 	}
 
-	void configure(PropertyTree const& node){
-		mp_wrapper->configure(node);
-	}
-
 	void proposeStartingPoint(SearchPointType& startingPoint) const{
 		mp_wrapper->proposeStartingPoint(startingPoint);
 	}

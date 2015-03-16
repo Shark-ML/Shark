@@ -65,10 +65,6 @@ public:
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	void configure(const PropertyTree &node) {
-		m_alpha = node.get("alpha", 1E-3);
-	}
-
 	void proposeStartingPoint(SearchPointType &x) const {
 		x.resize(m_numberOfVariables);
 

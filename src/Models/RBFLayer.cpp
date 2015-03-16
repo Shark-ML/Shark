@@ -45,17 +45,6 @@ RBFLayer::RBFLayer(std::size_t numInput, std::size_t numOutput)
 	m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
 }
 
-
-void RBFLayer::configure( const PropertyTree & node ){
-	std::size_t inputNeurons = node.get<std::size_t>("inputs");
-	std::size_t outputNeurons = node.get<std::size_t>("outputs");
-	
-	bool trainCenters = node.get("trainCenters",true);
-	bool trainWidth = node.get("trainWidth",true);
-	
-	setStructure(inputNeurons,outputNeurons);
-	setTrainingParameters(trainCenters,trainWidth);
-}
 void RBFLayer::setStructure( std::size_t numInput, std::size_t numOutput ){
 	m_centers.resize(numOutput,numInput);
 	m_gamma.resize(numOutput);

@@ -33,7 +33,6 @@
 #include <shark/Data/Dataset.h>
 #include <shark/Rng/DiscreteUniform.h>
 #include <shark/Unsupervised/RBM/Tags.h>
-#include <shark/Core/IConfigurable.h>
 #include <vector>
 #include "Impl/SampleTypes.h"
 namespace shark{
@@ -84,16 +83,7 @@ private:
 	}
 
 public:
-	TemperedMarkovChain(RBM* rbm):m_operator(rbm){
-	}
-
-
-	void configure(PropertyTree const& node){
-		std::size_t temperatures = node.get("temperatures", 1);
-		setUniformTemperatureSpacing(temperatures);		
-
-		m_operator.configure(node);
-	}
+	TemperedMarkovChain(RBM* rbm):m_operator(rbm){}
 	
 	const Operator& transitionOperator()const{
 		return m_operator;
