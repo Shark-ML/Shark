@@ -71,16 +71,13 @@ public:
 	///     The deleter used for freeing a handle which should return true for valid handles, false otherwise
 	/// @param handleDescription
 	///     A description of handle for easy debugging in case of validation failure
-	/// @param verifier
-	///     Used for verifying passed in a handle. The default value is boost::lambda::_1 >=0
 	ScopedHandle(
 		const T& handle,
 		const DeleterType& deleter,
-		const std::string& handleDescription = "",
-		const VerifierType& verifier = boost::lambda::_1 >= 0)
+		const std::string& handleDescription = "")
 	:
 		m_handle(handle),
-		m_isValidHandle(verifier ? verifier(m_handle) : true), // null verifier means valid handle
+		m_isValidHandle(true), // null verifier means valid handle
 		m_deleter(deleter)
 	{
 		BOOST_ASSERT(deleter);

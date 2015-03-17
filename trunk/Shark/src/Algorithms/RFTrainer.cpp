@@ -45,12 +45,13 @@ using namespace std;
 
 
 //Constructor
-RFTrainer::RFTrainer(){
+RFTrainer::RFTrainer(bool computeFeatureImportances){
 	m_try = 0;
 	m_B = 0;
 	m_nodeSize = 0;
 	m_OOBratio = 0;
 	m_regressionLearner = false;
+	m_computeFeatureImportances = computeFeatureImportances;
 }
 
 //Set trainer parameters to sensible defaults
@@ -80,6 +81,7 @@ void RFTrainer::setDefaults(){
 	}
 }
 
+// Regression
 void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 {
 	model.clearModels();   // added by TG 23.02.2015
@@ -92,53 +94,70 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 	//Store the size of the labels
 	m_labelDimension = labelDimension(dataset);
 
+	model.setInputDimension(m_inputDimension);
+	model.setLabelDimension(m_labelDimension);
+
 	m_regressionLearner = true;
 	setDefaults();
-	
 	
 	//we need direct element access sicne we need to generate elementwise subsets
 	std::size_t subsetSize = static_cast<std::size_t>(dataset.numberOfElements()*m_OOBratio);
 	DataView<RegressionDataset const> elements(dataset);
 
-
 	//Generate m_B trees
 	SHARK_PARALLEL_FOR(int i = 0; i < (int)m_B; ++i){
 		//For each tree generate a subset of the dataset
 		//generate indices of the dataset (pick k out of n elements)
-		std::vector<std::size_t> subsetIndices(elements.size());
+		std::vector<std::size_t> subsetIndices(dataset.numberOfElements());
 		boost::iota(subsetIndices,0);
 		boost::random_shuffle(subsetIndices);
-		subsetIndices.erase(subsetIndices.begin()+subsetSize,subsetIndices.end());
-		//generate the dataset by copying (TODO: this is a quick fix!
-		RegressionDataset dataTrain = toDataset(subset(elements,subsetIndices));
-		
-		std::size_t elements = dataTrain.numberOfElements();
 
-		//RealVector cAbove;
+		// create oob indices
+		std::vector<std::size_t>::iterator oobStart = subsetIndices.begin() + subsetSize;
+		std::vector<std::size_t>::iterator oobEnd   = subsetIndices.end();
+		
+		//generate the dataset by copying (TODO: this is a quick fix!
+		subsetIndices.erase(oobStart, oobEnd);
+		RegressionDataset dataTrain = toDataset(subset(elements,subsetIndices));
+
 		AttributeTables tables;
 		createAttributeTables(dataTrain.inputs(), tables);
 
-		std::vector < RealVector > labels;
-		for(std::size_t i=0; i<elements; i++){
+		std::size_t dataTrainSize = dataTrain.numberOfElements();
+		std::vector<RealVector> labels;
+		for(std::size_t i = 0; i < dataTrainSize; i++){
 			labels.push_back(dataTrain.element(i).label);
 		}
 
 		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, labels, 0);
-		SHARK_CRITICAL_REGION{
-			//model.addModel(splitMatrix);
-			model.addModel(CARTClassifier<RealVector>(splitMatrix), m_inputDimension);
+		CARTClassifier<RealVector> tree(splitMatrix, m_inputDimension);
+
+		if(m_computeFeatureImportances){
+			std::vector<std::size_t> subsetIndicesOOB(oobStart, oobEnd);
+			RegressionDataset dataOOB = toDataset(subset(elements, subsetIndicesOOB));
+			tree.computeFeatureImportances(dataOOB);
 		}
+
+		SHARK_CRITICAL_REGION{
+			model.addModel(tree);
+		}
+	}
+
+	if(m_computeFeatureImportances){
+		model.computeFeatureImportances();
 	}
 }
 
-
-//Classification
+// Classification
 void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 {
 	model.clearModels();
 
 	//Store the number of input dimensions
 	m_inputDimension = inputDimension(dataset);
+
+	model.setInputDimension(m_inputDimension);
+	model.setLabelDimension(numberOfClasses(dataset));
 
 	//Find the largest label, so we know how big the histogram should be
 	m_maxLabel = numberOfClasses(dataset)-1;
@@ -157,9 +176,15 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 		std::vector<std::size_t> subsetIndices(dataset.numberOfElements());
 		boost::iota(subsetIndices,0);
 		boost::random_shuffle(subsetIndices);
-		subsetIndices.erase(subsetIndices.begin()+subsetSize,subsetIndices.end());
+
+		// create oob indices
+		std::vector<std::size_t>::iterator oobStart = subsetIndices.begin() + subsetSize;
+		std::vector<std::size_t>::iterator oobEnd   = subsetIndices.end();
+		
 		//generate the dataset by copying (TODO: this is a quick fix!
+		subsetIndices.erase(oobStart, oobEnd);
 		ClassificationDataset dataTrain = toDataset(subset(elements,subsetIndices));
+
 		//Create attribute tables
 		boost::unordered_map<std::size_t, std::size_t> cAbove;
 		AttributeTables tables;
@@ -167,10 +192,21 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 		createCountMatrix(dataTrain, cAbove);
 
 		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, cAbove, 0);
-		SHARK_CRITICAL_REGION{
-			//model.addModel(splitMatrix);
-			model.addModel(CARTClassifier<RealVector>(splitMatrix, m_inputDimension));
+		CARTClassifier<RealVector> tree(splitMatrix, m_inputDimension);
+
+		if(m_computeFeatureImportances){
+			std::vector<std::size_t> subsetIndicesOOB(oobStart, oobEnd);
+			ClassificationDataset dataOOB = toDataset(subset(elements, subsetIndicesOOB));
+			tree.computeFeatureImportances(dataOOB);
 		}
+
+		SHARK_CRITICAL_REGION{
+			model.addModel(tree);
+		}
+	}
+
+	if(m_computeFeatureImportances){
+		model.computeFeatureImportances();
 	}
 }
 

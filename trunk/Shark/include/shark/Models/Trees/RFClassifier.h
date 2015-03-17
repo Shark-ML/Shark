@@ -6,7 +6,7 @@
  * 
  * 
  *
- * \author      K. N. Hansen, O.Krause
+ * \author      K. N. Hansen, O.Krause, J. Kremer
  * \date        2011-2012
  *
  *
@@ -36,6 +36,7 @@
 #define SHARK_MODELS_TREES_RFCLASSIFIER_H
 
 #include <shark/Models/Trees/CARTClassifier.h>
+#include <shark/Statistics/Statistics.h>
 #include <shark/Models/MeanModel.h>
 
 namespace shark {
@@ -60,6 +61,24 @@ public:
 	std::string name() const
 	{ return "RFClassifier"; }
 
+	// compute the feature importances for the forest
+	void computeFeatureImportances(){
+		m_featureImportances.resize(m_inputDimension);
+		std::size_t n_trees = numberOfModels();
+
+		for(std::size_t i=0;i!=m_inputDimension;++i){
+			Statistics featureStats;
+			for(std::size_t j=0;j!=n_trees;++j){
+				featureStats(m_models[j].featureImportances()[i]);
+			}
+			m_featureImportances[i] = featureStats(Statistics::Mean());
+		}
+	}
+
+	// returns the feature importances
+	RealVector const& featureImportances() const {
+		return m_featureImportances;
+	}
 
 	//Count how often attributes are used
 	UIntVector countAttributes() const {
@@ -71,6 +90,27 @@ public:
 		}
 		return r;
 	}
+
+	/// Set the dimension of the labels
+	void setLabelDimension(std::size_t in){
+		m_labelDimension = in;
+	}
+
+	// Set the input dimension
+	void setInputDimension(std::size_t in){
+		m_inputDimension = in;
+	}
+
+protected:
+	// Dimension of label in the regression case, number of classes in the classification case.
+	std::size_t m_labelDimension;
+
+	// Input dimension
+	std::size_t m_inputDimension;
+
+	// feature importances for the forest
+	RealVector m_featureImportances;
+
 };
 
 

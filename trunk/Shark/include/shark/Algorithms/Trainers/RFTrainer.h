@@ -6,7 +6,7 @@
  * 
  * 
  *
- * \author      K. N. Hansen
+ * \author      K. N. Hansen, J. Kremer
  * \date        2011-2012
  *
  *
@@ -74,12 +74,13 @@ namespace shark {
  */
 class RFTrainer 
 : public AbstractTrainer<RFClassifier, unsigned int>
-, public AbstractTrainer<RFClassifier>
+, public AbstractTrainer<RFClassifier>,
+  public IParameterizable
 {
 
 public:
-	/// Constructor
-	RFTrainer();
+	/// Construct and compute feature importances when training or not
+	RFTrainer(bool computeFeatureImportances = false);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -104,6 +105,21 @@ public:
 	/// Set the fraction of the original training dataset to use as the
 	/// out of bag sample. The default value is 0.66.
 	void setOOBratio(double ratio);
+
+	/// Return the parameter vector.
+	RealVector parameterVector() const
+	{
+		RealVector ret(1); // number of trees
+		init(ret) << m_B;
+		return ret;
+	}
+
+	/// Set the parameter vector.
+	void setParameterVector(RealVector const& newParameters)
+	{
+		SHARK_ASSERT(newParameters.size() == numberOfParameters());
+		setNTrees((size_t) newParameters[0]);
+	}
 
 protected:
 	struct RFAttribute {
@@ -179,8 +195,10 @@ protected:
 
 	/// true if the trainer is used for regression, false otherwise.
 	bool m_regressionLearner;
-};
 
+	// true if the feature importances should be computed
+	bool m_computeFeatureImportances;
+};
 
 }
 #endif
