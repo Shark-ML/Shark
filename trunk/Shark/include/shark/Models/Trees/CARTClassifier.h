@@ -197,6 +197,35 @@ public:
 		m_inputDimension = d;
 	}
 
+	/// Compute oob error, given an oob dataset (Classification)
+	void computeOOBerror(const ClassificationDataset& dataOOB){
+		// define loss
+		ZeroOneLoss<unsigned int, RealVector> lossOOB;
+
+		// predict oob data
+		Data<RealVector> predOOB = (*this)(dataOOB.inputs());
+
+		// count average number of oob misclassifications
+		m_OOBerror = lossOOB.eval(dataOOB.labels(), predOOB);
+	}
+
+	/// Compute oob error, given an oob dataset (Regression)
+	void computeOOBerror(const RegressionDataset& dataOOB){
+		// define loss
+		SquaredLoss<RealVector, RealVector> lossOOB;
+
+		// predict oob data
+		Data<RealVector> predOOB = (*this)(dataOOB.inputs());
+
+		// Compute mean squared error
+		m_OOBerror = lossOOB.eval(dataOOB.labels(), predOOB);
+	}
+
+	/// Return OOB error
+	double OOBerror() const {
+		return m_OOBerror;
+	}
+
 	/// Return feature importances
 	RealVector const& featureImportances() const {
 		return m_featureImportances;
@@ -209,11 +238,11 @@ public:
 		// define loss
 		ZeroOneLoss<unsigned int, RealVector> lossOOB;
 
-		// predict oob data
-		Data<RealVector> predOOB = (*this)(dataOOB.inputs());
+		// compute oob error
+		computeOOBerror(dataOOB);
 
 		// count average number of correct oob predictions
-		double accuracyOOB = 1. - lossOOB.eval(dataOOB.labels(), predOOB);
+		double accuracyOOB = 1. - m_OOBerror;
 
 		// go through all dimensions, permute each dimension across all elements and train the tree on it
 		for(std::size_t i=0;i!=m_inputDimension;++i) {
@@ -244,11 +273,11 @@ public:
 		// define loss
 		SquaredLoss<RealVector, RealVector> lossOOB;
 
-		// predict oob data
-		Data<RealVector> predOOB = (*this)(dataOOB.inputs());
+		// compute oob error
+		computeOOBerror(dataOOB);
 
 		// mean squared error for oob sample
-		double mseOOB = lossOOB.eval(dataOOB.labels(), predOOB);
+		double mseOOB = m_OOBerror;
 
 		// go through all dimensions, permute each dimension across all elements and train the tree on it
 		for(std::size_t i=0;i!=m_inputDimension;++i) {
@@ -319,6 +348,9 @@ protected:
 
 	// feature importances
 	RealVector m_featureImportances;
+
+	// oob error
+	double m_OOBerror;
 };
 
 

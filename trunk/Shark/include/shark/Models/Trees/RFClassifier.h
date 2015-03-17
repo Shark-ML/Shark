@@ -61,6 +61,16 @@ public:
 	std::string name() const
 	{ return "RFClassifier"; }
 
+	// compute the oob error for the forest
+	void computeOOBerror(){
+		std::size_t n_trees = numberOfModels();
+		Statistics stats;
+		for(std::size_t j=0;j!=n_trees;++j){
+			stats(m_models[j].OOBerror());
+		}
+		m_OOBerror = stats(Statistics::Mean());
+	}
+
 	// compute the feature importances for the forest
 	void computeFeatureImportances(){
 		m_featureImportances.resize(m_inputDimension);
@@ -73,6 +83,10 @@ public:
 			}
 			m_featureImportances[i] = featureStats(Statistics::Mean());
 		}
+	}
+
+	double const OOBerror() const {
+		return m_OOBerror;
 	}
 
 	// returns the feature importances
@@ -107,6 +121,9 @@ protected:
 
 	// Input dimension
 	std::size_t m_inputDimension;
+
+	// oob error for the forest
+	double m_OOBerror;
 
 	// feature importances for the forest
 	RealVector m_featureImportances;

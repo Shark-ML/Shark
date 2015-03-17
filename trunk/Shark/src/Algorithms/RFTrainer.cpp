@@ -45,13 +45,14 @@ using namespace std;
 
 
 //Constructor
-RFTrainer::RFTrainer(bool computeFeatureImportances){
+RFTrainer::RFTrainer(bool computeFeatureImportances, bool computeOOBerror){
 	m_try = 0;
 	m_B = 0;
 	m_nodeSize = 0;
 	m_OOBratio = 0;
 	m_regressionLearner = false;
 	m_computeFeatureImportances = computeFeatureImportances;
+	m_computeOOBerror = computeOOBerror;
 }
 
 //Set trainer parameters to sensible defaults
@@ -132,15 +133,27 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, labels, 0);
 		CARTClassifier<RealVector> tree(splitMatrix, m_inputDimension);
 
-		if(m_computeFeatureImportances){
+		// if oob error or importances have to be computed, create an oob sample
+		if(m_computeOOBerror || m_computeFeatureImportances){
 			std::vector<std::size_t> subsetIndicesOOB(oobStart, oobEnd);
 			RegressionDataset dataOOB = toDataset(subset(elements, subsetIndicesOOB));
-			tree.computeFeatureImportances(dataOOB);
+
+			// if importances should be computed, oob errors are computed implicitly
+			if(m_computeFeatureImportances){
+				tree.computeFeatureImportances(dataOOB);
+			} // if importances should not be computed, only compute the oob errors
+			else{
+				tree.computeOOBerror(dataOOB);
+			}
 		}
 
 		SHARK_CRITICAL_REGION{
 			model.addModel(tree);
 		}
+	}
+
+	if(m_computeOOBerror){
+		model.computeOOBerror();
 	}
 
 	if(m_computeFeatureImportances){
@@ -194,10 +207,18 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, cAbove, 0);
 		CARTClassifier<RealVector> tree(splitMatrix, m_inputDimension);
 
-		if(m_computeFeatureImportances){
+		// if oob error or importances have to be computed, create an oob sample
+		if(m_computeOOBerror || m_computeFeatureImportances){
 			std::vector<std::size_t> subsetIndicesOOB(oobStart, oobEnd);
 			ClassificationDataset dataOOB = toDataset(subset(elements, subsetIndicesOOB));
-			tree.computeFeatureImportances(dataOOB);
+
+			// if importances should be computed, oob errors are computed implicitly
+			if(m_computeFeatureImportances){
+				tree.computeFeatureImportances(dataOOB);
+			} // if importances should not be computed, only compute the oob errors
+			else{
+				tree.computeOOBerror(dataOOB);
+			}
 		}
 
 		SHARK_CRITICAL_REGION{
@@ -205,6 +226,12 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 		}
 	}
 
+	// compute the oob error for the whole ensemble
+	if(m_computeOOBerror){
+		model.computeOOBerror();
+	}
+
+	// compute the feature importances for the whole ensemble
 	if(m_computeFeatureImportances){
 		model.computeFeatureImportances();
 	}
@@ -603,9 +630,3 @@ void RFTrainer::createCountMatrix(const ClassificationDataset& dataset, boost::u
 bool RFTrainer::tableSort(const RFAttribute& v1, const RFAttribute& v2) {
 	return v1.value < v2.value;
 }
-
-
-
-
-
-
