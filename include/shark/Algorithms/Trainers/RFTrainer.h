@@ -80,7 +80,7 @@ class RFTrainer
 
 public:
 	/// Construct and compute feature importances when training or not
-	RFTrainer(bool computeFeatureImportances = false);
+	RFTrainer(bool computeFeatureImportances = false, bool computeOOBerror = false);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -198,7 +198,9 @@ protected:
 
 	// true if the feature importances should be computed
 	bool m_computeFeatureImportances;
-};
 
+	// true if OOB error should be computed
+	bool m_computeOOBerror;
+};
 }
 #endif
