@@ -6,7 +6,7 @@
  * 
  * 
  *
- * \author      K. N. Hansen
+ * \author      K. N. Hansen, J. Kremer
  * \date        2012
  *
  *
@@ -36,7 +36,9 @@
 #define SHARK_MODELS_TREES_CARTCLASSIFIER_H
 
 
-#include <shark/Models/AbstractModel.h>                        
+#include <shark/Models/AbstractModel.h>
+#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+#include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>                                  
 #include <shark/Data/Dataset.h>
 
 namespace shark {
@@ -195,6 +197,81 @@ public:
 		m_inputDimension = d;
 	}
 
+	/// Return feature importances
+	RealVector const& featureImportances() const {
+		return m_featureImportances;
+	}
+
+	/// Compute feature importances, given an oob dataset (Classification)
+	void computeFeatureImportances(const ClassificationDataset& dataOOB){
+		m_featureImportances.resize(m_inputDimension);
+
+		// define loss
+		ZeroOneLoss<unsigned int, RealVector> lossOOB;
+
+		// predict oob data
+		Data<RealVector> predOOB = (*this)(dataOOB.inputs());
+
+		// count average number of correct oob predictions
+		double accuracyOOB = 1. - lossOOB.eval(dataOOB.labels(), predOOB);
+
+		// go through all dimensions, permute each dimension across all elements and train the tree on it
+		for(std::size_t i=0;i!=m_inputDimension;++i) {
+			// create permuted dataset by copying
+			ClassificationDataset pDataOOB(dataOOB);
+			pDataOOB.makeIndependent();
+
+			// permute current dimension
+			RealVector v = getColumn(pDataOOB.inputs(), i);
+			std::random_shuffle(v.begin(), v.end());
+			setColumn(pDataOOB.inputs(), i, v);
+
+			// evaluate the data set for which one feature dimension was permuted with this tree
+			Data<RealVector> pPredOOB = (*this)(pDataOOB.inputs());
+
+			// count the number of correct predictions
+			double accuracyPermutedOOB = 1. - lossOOB.eval(pDataOOB.labels(),pPredOOB);
+			
+			// store importance
+			m_featureImportances[i] = std::fabs(accuracyOOB - accuracyPermutedOOB);
+		}
+	}
+
+	/// Compute feature importances, given an oob dataset (Regression)
+	void computeFeatureImportances(const RegressionDataset& dataOOB){
+		m_featureImportances.resize(m_inputDimension);
+
+		// define loss
+		SquaredLoss<RealVector, RealVector> lossOOB;
+
+		// predict oob data
+		Data<RealVector> predOOB = (*this)(dataOOB.inputs());
+
+		// mean squared error for oob sample
+		double mseOOB = lossOOB.eval(dataOOB.labels(), predOOB);
+
+		// go through all dimensions, permute each dimension across all elements and train the tree on it
+		for(std::size_t i=0;i!=m_inputDimension;++i) {
+			// create permuted dataset by copying
+			RegressionDataset pDataOOB(dataOOB);
+			pDataOOB.makeIndependent();
+
+			// permute current dimension
+			RealVector v = getColumn(pDataOOB.inputs(), i);
+			std::random_shuffle(v.begin(), v.end());
+			setColumn(pDataOOB.inputs(), i, v);
+
+			// evaluate the data set for which one feature dimension was permuted with this tree
+			Data<RealVector> pPredOOB = (*this)(pDataOOB.inputs());
+
+			// mean squared error of permuted oob sample
+			double msePermutedOOB = lossOOB.eval(pDataOOB.labels(),pPredOOB);
+			
+			// store importance
+			m_featureImportances[i] = std::fabs(msePermutedOOB - mseOOB);
+		}
+	}
+
 protected:
 	/// split matrix of the model
 	SplitMatrixType m_splitMatrix;
@@ -239,6 +316,9 @@ protected:
 
 	///Number of attributes (set by trainer)
 	std::size_t m_inputDimension;
+
+	// feature importances
+	RealVector m_featureImportances;
 };
 
 
