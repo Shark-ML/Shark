@@ -262,8 +262,13 @@ CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables
 	CARTClassifier<RealVector>::SplitInfo splitInfo;
 
 	splitInfo.nodeId = nodeId;
+	splitInfo.attributeIndex = 0;
+	splitInfo.attributeValue = 0.0;
 	splitInfo.leftNodeId = 0;
 	splitInfo.rightNodeId = 0;
+	splitInfo.misclassProp = 0.0;
+	splitInfo.r = 0;
+	splitInfo.g = 0.0;
 
 	//n = Total number of cases in the dataset
 	//n1 = Number of cases to the left child node
@@ -388,11 +393,15 @@ CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables
 	//Construct split matrix
 	CARTClassifier<RealVector>::SplitInfo splitInfo;
 
-
 	splitInfo.nodeId = nodeId;
+	splitInfo.attributeIndex = 0;
+	splitInfo.attributeValue = 0.0;
 	splitInfo.leftNodeId = 0;
 	splitInfo.rightNodeId = 0;
 	splitInfo.label = average(labels);
+	splitInfo.misclassProp = 0.0;
+	splitInfo.r = 0;
+	splitInfo.g = 0.0;
 
 	CARTClassifier<RealVector>::SplitMatrixType splitMatrix, lSplitMatrix, rSplitMatrix;
 
