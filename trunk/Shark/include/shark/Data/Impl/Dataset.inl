@@ -418,7 +418,7 @@ public:
 	///\brief  Is the container independent of all others?
 	///
 	/// In other words, does it NOT share data?
-	/// This method checks every BatchType if it is shared. So it should not be called too often.
+	/// This method checks for every batch if it is shared. So it should not be called too often.
 	bool isIndependent() const{
 		for(std::size_t i = 0; i != m_data.size(); ++i){
 			if(!m_data[i].unique()){
