@@ -674,7 +674,7 @@ public:
 	
 	void push_back(
 		typename Batch<InputType>::type const& inputs, 
-		typename Batch<InputType>::type const& labels
+		typename Batch<LabelType>::type const& labels
 	){
 		m_data.push_back(inputs);
 		m_label.push_back(labels);
