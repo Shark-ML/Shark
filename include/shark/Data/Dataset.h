@@ -298,6 +298,10 @@ public:
 	void append(self_type const& other){
 		m_data.append(other.m_data);
 	}
+	
+	void push_back(const_batch_reference batch){
+		m_data.push_back(batch);
+	}
 
 	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
 	///
@@ -666,6 +670,20 @@ public:
 	void append(self_type const& other){
 		m_data.append(other.m_data);
 		m_label.append(other.m_label);
+	}
+	
+	void push_back(
+		typename Batch<InputType>::type const& inputs, 
+		typename Batch<InputType>::type const& labels
+	){
+		m_data.push_back(inputs);
+		m_label.push_back(labels);
+	}
+	
+	void push_back(
+		const_batch_reference batch
+	){
+		push_back(batch.inputs,batch.labels);
 	}
 
 
