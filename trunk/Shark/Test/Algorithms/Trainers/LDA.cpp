@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 	covariance(1,1)=16;
 	RealMatrix inverse(2,2,0.0);
 	inverse(0,0) = inverse(1,1) = 1.0;
-	blas::solveSymmSystemInPlace<blas::SolveAXB>(covariance,inverse);
+	blas::solveSymmPosDefSystemInPlace<blas::SolveAXB>(covariance,inverse);
 
 
 	RealVector mean[]={RealVector(2),RealVector(2)};
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	covariance(1,1)=16;
 	RealMatrix inverse(2,2,0.0);
 	inverse(0,0) = inverse(1,1) = 1.0;
-	blas::solveSymmSystemInPlace<blas::SolveAXB>(covariance,inverse);
+	blas::solveSymmPosDefSystemInPlace<blas::SolveAXB>(covariance,inverse);
 
 
 	RealVector mean[]={RealVector(2),RealVector(2)};
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 	covariance(1,1)=16;
 	RealMatrix inverse(2,2,0.0);
 	inverse(0,0) = inverse(1,1) = 1.0;
-	blas::solveSymmSystemInPlace<blas::SolveAXB>(covariance,inverse);
+	blas::solveSymmPosDefSystemInPlace<blas::SolveAXB>(covariance,inverse);
 	
 	std::vector<RealVector> mean(classes,RealVector(2));
 	for(unsigned int c = 0; c != classes; ++c){
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS_WEIGHTING ){
 	covariance(1,1)=16;
 	RealMatrix inverse(2,2,0.0);
 	inverse(0,0) = inverse(1,1) = 1.0;
-	blas::solveSymmSystemInPlace<blas::SolveAXB>(covariance,inverse);
+	blas::solveSymmPosDefSystemInPlace<blas::SolveAXB>(covariance,inverse);
 	
 	std::vector<RealVector> mean(classes,RealVector(2));
 	for(unsigned int c = 0; c != classes; ++c){

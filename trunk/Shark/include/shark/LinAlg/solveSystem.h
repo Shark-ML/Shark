@@ -121,7 +121,7 @@ void solveSystem(
 /// This method is in no way optimized for sparse matrices.
 /// Be aware, that the matrix must have full rank!
 template<class System, class MatT,class VecT>
-void solveSymmSystemInPlace(
+void solveSymmPosDefSystemInPlace(
 	matrix_expression<MatT> const& A,
 	vector_expression<VecT>& b
 );
@@ -145,7 +145,7 @@ void solveSymmSystemInPlace(
 /// @param A the system matrix A
 /// @param B the right hand side of the LGS, also stores the result
 template<class System, class MatT,class Mat1T>
-void solveSymmSystemInPlace(
+void solveSymmPosDefSystemInPlace(
 	matrix_expression<MatT> const& A,
 	matrix_expression<Mat1T>& B
 );
@@ -159,7 +159,7 @@ void solveSymmSystemInPlace(
 /// This Method is in no way optimized for sparse matrices.
 /// Be aware, that the matrix must have full rank!
 template<class System,class MatT,class Vec1T,class Vec2T>
-void solveSymmSystem(
+void solveSymmPosDefSystem(
 	matrix_expression<MatT> const& A, 
 	vector_expression<Vec1T>& x,
 	vector_expression<Vec2T> const& b
@@ -183,7 +183,7 @@ void solveSymmSystem(
 /// @param X the stored result of the solution of LGS
 /// @param B the right hand side of the LGS
 template<class System,class MatT,class Mat1T,class Mat2T>
-void solveSymmSystem(
+void solveSymmPosDefSystem(
 	matrix_expression<MatT> const& A, 
 	matrix_expression<Mat1T>& X,
 	matrix_expression<Mat2T> const& B
@@ -280,7 +280,7 @@ void generalSolveSystemInPlace(
 /// after a very low number of iterations.
 /// Every iteration has complexity O(n^2) and after n iterations the
 /// exact solution is found. However if this solution is needed, the other
-/// methods, as for example solveSymmSystem are more suitable.
+/// methods, as for example solveSymmPosDefSystem are more suitable.
 /// 
 /// This algorithm does not require A to have full rank, however it must be
 /// positive semi-definite.
@@ -300,7 +300,7 @@ void generalSolveSystemInPlace(
 /// \param maxIterations the maximum number of iterations
 /// \param initialSolution if this is true, x stores an initial guess of the solution
 template<class MatT, class VecT, class VecT2>
-void approxSolveSymmSystem(
+void approxsolveSymmPosDefSystem(
 	matrix_expression<MatT> const& A,
 	vector_expression<VecT>& x,
 	vector_expression<VecT2> const& b,
@@ -358,7 +358,7 @@ void approxSolveSymmSystem(
 /// after a very low number of iterations.
 /// Every iteration has complexity O(n^2) and after n iterations the
 /// exact solution is found. However if this solution is needed, the other
-/// methods, as for xample solveSymmSystem are more suitable.
+/// methods, as for xample solveSymmPosDefSystem are more suitable.
 /// 
 /// This algorithm stops after the maximum number of iterations is
 /// exceeded or after the max-norm of the residual \f$ r_k= Ax_k-b\f$ is 
@@ -369,7 +369,7 @@ void approxSolveSymmSystem(
 /// \param epsilon stopping criterium for the residual
 /// \param maxIterations the maximum number of iterations
 template<class MatT, class VecT>
-void approxSolveSymmSystemInPlace(
+void approxsolveSymmPosDefSystemInPlace(
 	matrix_expression<MatT> const& A,
 	vector_expression<VecT>& b,
 	double epsilon = 1.e-10,
@@ -378,7 +378,7 @@ void approxSolveSymmSystemInPlace(
 	SIZE_CHECK(A().size1()==A().size2());
 	SIZE_CHECK(A().size1()==b().size());
 	vector<typename VecT::value_type> x(b.size(),0.0);
-	approxSolveSymmSystem(A,x,b,epsilon,false,maxIterations);
+	approxsolveSymmPosDefSystem(A,x,b,epsilon,false,maxIterations);
 	swap(x,b);
 }
 

@@ -123,8 +123,8 @@ public:
 		// Setup the kernel matrix
 		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), noiseVariance());
 		RealVector v = column(createBatch<RealVector>(dataset.labels().elements()),0);
-		//~ blas::approxSolveSymmSystemInPlace(M,v); //try this later instad the below
-		blas::solveSymmSystemInPlace<blas::SolveAXB>(M,v);
+		//~ blas::approxsolveSymmPosDefSystemInPlace(M,v); //try this later instad the below
+		blas::solveSymmPosDefSystemInPlace<blas::SolveAXB>(M,v);
 		column(svm.alpha(),0) = v;
 	}
 };

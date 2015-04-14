@@ -363,25 +363,25 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_Symmetric_Vector ){
 		RealVector x;
 		
 		//first test AX=B
-		blas::solveSymmSystem<blas::SolveAXB>(A,x,b);
+		blas::solveSymmPosDefSystem<blas::SolveAXB>(A,x,b);
 		RealVector test = prod(A,x);
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
 		
 		//first test trans(A)X=B
-		blas::solveSymmSystem<blas::SolveAXB>(trans(A),x,b);
+		blas::solveSymmPosDefSystem<blas::SolveAXB>(trans(A),x,b);
 		test = prod(trans(A),x);
 		error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
 		
 		//now test XA=B
-		blas::solveSymmSystem<blas::SolveXAB>(A,x,b);
+		blas::solveSymmPosDefSystem<blas::SolveXAB>(A,x,b);
 		test = prod(x,A);
 		error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
 		
 		//now test Xtrans(A)=B
-		blas::solveSymmSystem<blas::SolveXAB>(trans(A),x,b);
+		blas::solveSymmPosDefSystem<blas::SolveXAB>(trans(A),x,b);
 		test = prod(x,trans(A));
 		error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_Symmetric_Approximated_Vector ){
 		RealVector x;
 		
 		//first test AX=B
-		approxSolveSymmSystem(A,x,b,1.e-13);
+		approxsolveSymmPosDefSystem(A,x,b,1.e-13);
 		RealVector test = prod(A,x);
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -452,25 +452,25 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_Symmetric_Matrix ){
 		}
 		
 		RealMatrix X;
-		blas::solveSymmSystem<blas::SolveAXB>(A,X,B);
+		blas::solveSymmPosDefSystem<blas::SolveAXB>(A,X,B);
 		RealMatrix test = prod(A,X);
 		double error = norm_inf(test-B);
 		BOOST_CHECK_SMALL(error,1.e-12);
 		
 		//first test trans(A)X=B
-		blas::solveSymmSystem<blas::SolveAXB>(trans(A),X,B);
+		blas::solveSymmPosDefSystem<blas::SolveAXB>(trans(A),X,B);
 		test = prod(trans(A),X);
 		error = norm_inf(test-B);
 		BOOST_CHECK_SMALL(error,1.e-12);
 		
 		//now test XA=B
-		blas::solveSymmSystem<blas::SolveXAB>(ARight,X,B);
+		blas::solveSymmPosDefSystem<blas::SolveXAB>(ARight,X,B);
 		test = prod(X,ARight);
 		error = norm_inf(test-B);
 		BOOST_CHECK_SMALL(error,1.e-12);
 		
 		//now test Xtrans(A)=B
-		blas::solveSymmSystem<blas::SolveXAB>(trans(ARight),X,B);
+		blas::solveSymmPosDefSystem<blas::SolveXAB>(trans(ARight),X,B);
 		test = prod(X,trans(ARight));
 		error = norm_inf(test-B);
 		BOOST_CHECK_SMALL(error,1.e-12);

@@ -57,7 +57,7 @@ void IRLS::step(const ObjectiveFunctionType& objectiveFunction) {
 	//calculate search direction
 	RealVector searchDirection;
 	if(m_isPositive)
-		blas::solveSymmSystem<blas::SolveAXB>(m_derivatives.m_hessian,searchDirection, -m_derivatives.m_gradient);
+		blas::solveSymmPosDefSystem<blas::SolveAXB>(m_derivatives.m_hessian,searchDirection, -m_derivatives.m_gradient);
 	else
 		blas::solveSystem(m_derivatives.m_hessian,searchDirection, -m_derivatives.m_gradient);
 	

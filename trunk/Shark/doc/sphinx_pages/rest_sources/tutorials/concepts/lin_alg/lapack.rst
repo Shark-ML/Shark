@@ -43,13 +43,13 @@ Cholesky decomposition into
 
 where :math:`C` is a lower triangular matrix. With this decomposition, the system can be solved with the routines above::
 
-  solveTriangularSystemInPlace(true,C,B);
+  solveTriangularSystemInPlace<>(true,C,B);
   solveTriangularSystemInPlace(false,trans(C),B);
 
-Of course, there is a more direct way to solve this system, namely by using :doxy:`solveSymmSystem`::
+Of course, there is a more direct way to solve this system, namely by using :doxy:`solveSymmPosDefSystem`::
 
-  solveSymmSystem(A,x,b);
-  solveSymmSystem(A,X,B);
+  solveSymmPosDefSystem<blas::SolveAXB>(A,x,b);
+  solveSymmPosDefSystem<blas::SolveAXB>(A,X,B);
   
 As you can see, this is not an in-place method anymore. The solution is numerically stable and quite exact.
 Be aware, that :math:`A` must be positive definite. If :math:`A` does not have full rank, the solution to this
@@ -57,8 +57,8 @@ system will be garbage. However, for most problems, this is not an issue.
 
 If your matrix is not symmetric, but still has full rank, the more general :doxy:`solveSystem` can be used::
 
-  solveSystem(A,x,b);
-  solveSystem(A,X,B);
+  solveSystem<blas::SolveAXB>(A,x,b);
+  solveSystem<blas::SolveAXB>(A,X,B);
   
 This function uses a LU-decomposition to solve the system. This is not as numerically stable as the symmetric version and is more expensive to compute.
 There is no solver when :math:`A` does not have full rank.

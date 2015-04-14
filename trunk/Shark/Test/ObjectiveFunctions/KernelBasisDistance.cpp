@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Linear )
 			RealMatrix K = prod(pointBatch,trans(pointBatch));
 			RealVector linear = prod(pointBatch,optimalPoint);
 			RealVector beta;
-			blas::solveSymmSystem<blas::SolveAXB>(K,beta,linear);
+			blas::solveSymmPosDefSystem<blas::SolveAXB>(K,beta,linear);
 			RealVector optimalApproximation = prod(beta,pointBatch);
 			double errorOfApproximation = distanceSqr(optimalApproximation,optimalPoint)-norm_sqr(optimalPoint);
 			errorOfApproximation /= 2;
