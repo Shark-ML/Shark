@@ -110,7 +110,7 @@ void shark::blas::solveSystem(
 
 // Symmetric solvers
 template<class System,class MatT,class Mat1T>
-void shark::blas::solveSymmSystemInPlace(
+void shark::blas::solveSymmPosDefSystemInPlace(
 	matrix_expression<MatT> const& A, 
 	matrix_expression<Mat1T>& B
 ){
@@ -128,7 +128,7 @@ void shark::blas::solveSymmSystemInPlace(
 }
 
 template<class System,class MatT,class VecT>
-void shark::blas::solveSymmSystemInPlace(
+void shark::blas::solveSymmPosDefSystemInPlace(
 	matrix_expression<MatT> const& A, 
 	vector_expression<VecT>& b
 ){
@@ -141,7 +141,7 @@ void shark::blas::solveSymmSystemInPlace(
 }
 
 template<class System,class MatT,class Vec1T,class Vec2T>
-void shark::blas::solveSymmSystem(
+void shark::blas::solveSymmPosDefSystem(
 	const matrix_expression<MatT>& A, 
 	vector_expression<Vec1T>& x,
 	const vector_expression<Vec2T>& b
@@ -150,10 +150,10 @@ void shark::blas::solveSymmSystem(
 	SIZE_CHECK(A().size1() == A().size2());
 	ensure_size(x,A().size1());
 	noalias(x()) = b();
-	solveSymmSystemInPlace<System>(A,x);
+	solveSymmPosDefSystemInPlace<System>(A,x);
 }
 template<class System,class MatT,class Mat1T,class Mat2T>
-void shark::blas::solveSymmSystem(
+void shark::blas::solveSymmPosDefSystem(
 	const matrix_expression<MatT>& A, 
 	matrix_expression<Mat1T>& X,
 	const matrix_expression<Mat2T>& B
@@ -166,7 +166,7 @@ void shark::blas::solveSymmSystem(
 	}
 	ensure_size(X,B().size1(),B().size2());
 	noalias(X()) = B();
-	solveSymmSystemInPlace<System>(A,X);
+	solveSymmPosDefSystemInPlace<System>(A,X);
 }
 
 template<class System,class MatT,class VecT>

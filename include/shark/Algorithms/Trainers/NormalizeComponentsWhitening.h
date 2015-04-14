@@ -120,7 +120,7 @@ private:
 		symm_prod(trans(C),CTC);
 
 		matrix_range<RealMatrix> submat = columns(whiteningMatrix,0,rank);
-		solveSymmSystem<SolveXAB>(CTC,submat,C);
+		solveSymmPosDefSystem<SolveXAB>(CTC,submat,C);
 		swap_full_inverted(permutation,whiteningMatrix);
 
 		return whiteningMatrix;
