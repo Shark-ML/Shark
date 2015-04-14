@@ -98,7 +98,7 @@ public:
 		return expression().stride2();
 	}
 	
-	///\brief Returns the pointer to the beginning of the matrix storage
+	///\brief Returns the pointer to the beginning of the matrix storage.
 	///
 	/// Grants low-level access to the matrix internals. Element order depends on whether the matrix is row_major or column_major.
 	/// to access element (i,j) use storage()[i*stride1()+j*stride2()].
@@ -131,14 +131,14 @@ public:
 		return expression().inner_indices();
 	}
 	
-	///\brief Returns an array containing the start of the rows
+	///\brief Returns an array containing the start of the rows.
 	///
 	/// See documentation of inner_indices() for more details
 	index_pointer outer_indices()const{
 		return expression().outer_indices();
 	}
 	
-	///\brief Returns an array containing the end of the rows
+	///\brief Returns an array containing the end of the rows.
 	///
 	/// See documentation of inner_indices() for more details
 	index_pointer outer_indices_end()const{
@@ -336,7 +336,7 @@ private:
 	M* m_expression;
 };
 
-/// \brief matrix transpose
+/// \brief Matrix transpose.
 template<class M>
 class matrix_transpose: public matrix_expression<matrix_transpose<M> > {
 public:
@@ -418,16 +418,16 @@ public:
 		return expression().inner_indices();
 	}
 	
-	///\brief Returns an array containing the start of the rows
+	///\brief Returns an array containing the start of the rows.
 	///
-	/// See documentation of inner_indices() for more details
+	/// See documentation of inner_indices() for more details.
 	index_pointer outer_indices()const{
 		return expression().outer_indices();
 	}
 	
-	///\brief Returns an array containing the end of the rows
+	///\brief Returns an array containing the end of the rows.
 	///
-	/// See documentation of inner_indices() for more details
+	/// See documentation of inner_indices() for more details.
 	index_pointer outer_indices_end()const{
 		return expression().outer_indices_end();
 	}
@@ -1348,14 +1348,15 @@ private:
 	range m_range2;
 };
 
-///\brief returns the diagonal of a constant square matrix as vector
+///\brief Returns the diagonal of a constant square matrix as vector.
 ///
-///given a matrix 
-///   (1 2 3)
-///A =(4 5 6)
-///   (7 8 9)
+/// given a matrix 
+/// A = (1 2 3)
+///     (4 5 6)
+///     (7 8 9)
 ///
-///diag(A) = (1,5,9)
+/// the diag operation results in
+/// diag(A) = (1,5,9)
 template<class Matrix>
 matrix_vector_range<Matrix const> diag(matrix_expression<Matrix> const& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
@@ -1363,14 +1364,15 @@ matrix_vector_range<Matrix const> diag(matrix_expression<Matrix> const& mat){
 	return diagonal;
 }
 
-///\brief returns the diagonal of a square matrix as vector
+///\brief Returns the diagonal of a square matrix as vector.
 ///
-///given a matrix 
-///   (1 2 3)
-///A =(4 5 6)
-///   (7 8 9)
+/// given a matrix 
+/// A = (1 2 3)
+///     (4 5 6)
+///     (7 8 9)
 ///
-///diag(A) = (1,5,9)
+/// the diag operation results in
+/// diag(A) = (1,5,9)
 template<class Matrix>
 temporary_proxy< matrix_vector_range<Matrix> > diag(matrix_expression<Matrix>& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
