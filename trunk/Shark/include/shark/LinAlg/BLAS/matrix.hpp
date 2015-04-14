@@ -438,7 +438,7 @@ public:
 	typedef const matrix_reference<const self_type> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
 	typedef sparse_tag storage_category;
-	typedef unknown_orientation orientation;
+	typedef row_major orientation;
 
 	// Construction and destruction
 	diagonal_matrix():m_zero(){}
