@@ -106,8 +106,7 @@ tutorial to evaluate our function on the test set after training. ::
 
 The ``ErrorFunction`` is an instance of ``AbstractObjectiveFunction`` -- see the
 concept tutorial on :doc:`../concepts/library_design/objective_functions` for details.
-The template parameters indicate that the training data and the labels are vectors
-as is the usual case for regression. An objective function is a concept of a
+An objective function is a concept of a
 function that evaluates a point in the search space of solutions and returns
 its performance for the given problem. In the case of the ``ErrorFunction``,
 the search space is formed by the parameters of the model. For evaluation, the

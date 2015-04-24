@@ -57,14 +57,15 @@ namespace shark{
 /// The class detects automatically when an AbstractLoss is used 
 /// as Costfunction. In this case, it uses faster algorithms 
 /// for empirical risk minimization
-
-template<class InputType = RealVector, class LabelType = RealVector>
+///
+///\par
+/// It also automatically infers the input und label type from the given dataset and the output type
+/// of the model in the constructor and ensures that Model and loss match. Thus the user does
+/// not need to provide the types as template parameters. 
 class ErrorFunction : public SingleObjectiveFunction
 {
 public:
-	typedef LabeledData<InputType, LabelType> DatasetType;
-
-	template<class OutputType>
+	template<class InputType, class LabelType, class OutputType>
 	ErrorFunction(
 		LabeledData<InputType, LabelType> const& dataset,
 		AbstractModel<InputType,OutputType>* model, 
@@ -72,7 +73,7 @@ public:
 		
 	);
 	ErrorFunction(const ErrorFunction& op);
-	ErrorFunction<InputType,LabelType>& operator=(const ErrorFunction<InputType,LabelType>& op);
+	ErrorFunction& operator=(const ErrorFunction& op);
 
 	std::string name() const
 	{ return "ErrorFunction"; }
@@ -88,8 +89,7 @@ public:
 	double eval(RealVector const& input) const;
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;
 	
-	template<class I,class L>
-	friend void swap(const ErrorFunction<I,L>& op1, const ErrorFunction<I,L>& op2);
+	friend void swap(ErrorFunction& op1, ErrorFunction& op2);
 
 private:
 	boost::scoped_ptr<detail::FunctionWrapperBase > mp_wrapper;

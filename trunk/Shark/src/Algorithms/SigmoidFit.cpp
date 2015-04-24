@@ -51,7 +51,7 @@ void SigmoidFitRpropNLL::train(SigmoidModel& model, LabeledData<RealVector, unsi
 	LinearModel<> trainModel;
 	trainModel.setStructure(1,1,model.hasOffset());
 	CrossEntropy loss;
-	ErrorFunction <RealVector, unsigned int> modeling_error( dataset, &trainModel, &loss );
+	ErrorFunction modeling_error( dataset, &trainModel, &loss );
 	IRpropPlus rprop;
 	rprop.init( modeling_error );
 	for (unsigned int i=0; i<m_iterations; i++) {

@@ -80,13 +80,13 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_BASE )
 	//every value of input gets 2 added. so the square error of each example is 10*4=40
 	TestModel model(10,2);
 	SquaredLoss<> loss;
-	ErrorFunction<RealVector,RealVector> mse(dataset, &model,&loss);
+	ErrorFunction mse(dataset, &model,&loss);
 
 	double error=mse.eval(parameters);
 	BOOST_CHECK_SMALL(error-40,1.e-15);
 
 	//calculate derivative - it should also be 40
-	ErrorFunction<RealVector,RealVector>::FirstOrderDerivative derivative;
+	ErrorFunction::FirstOrderDerivative derivative;
 	mse.evalDerivative(parameters,derivative);
 	BOOST_CHECK_SMALL(derivative(0)-40,1.e-15);
 }
@@ -140,11 +140,11 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	SquaredLoss<> loss;
 	
 	{
-		ErrorFunction<RealVector,RealVector> mse(trainset, &model,&loss);
+		ErrorFunction mse(trainset, &model,&loss);
 		double val = mse.eval(optimum);
 		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
 		
-		ErrorFunction<RealVector,RealVector>::FirstOrderDerivative d;
+		ErrorFunction::FirstOrderDerivative d;
 		double valGrad = mse.evalDerivative(optimum,d);
 		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		double val = mse.eval(optimum);
 		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
 		
-		ErrorFunction<RealVector,RealVector>::FirstOrderDerivative d;
+		ErrorFunction::FirstOrderDerivative d;
 		double valGrad = mse.evalDerivative(optimum,d);
 		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		double val = mse.eval(optimum);
 		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
 		
-		ErrorFunction<RealVector,RealVector>::FirstOrderDerivative d;
+		ErrorFunction::FirstOrderDerivative d;
 		double valGrad = mse.evalDerivative(optimum,d);
 		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);

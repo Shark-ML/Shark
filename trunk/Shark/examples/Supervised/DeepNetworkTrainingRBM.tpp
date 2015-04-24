@@ -151,7 +151,7 @@ int main()
 	
 	//create the supervised problem. Cross Entropy loss with one norm regularisation
 	CrossEntropy loss;
-	ErrorFunction<RealVector,unsigned int> error(data, &network, &loss);
+	ErrorFunction error(data, &network, &loss);
 	OneNormRegularizer regularizer(error.numberOfVariables());
 	error.setRegularizer(regularisation,&regularizer);
 	

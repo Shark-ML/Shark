@@ -42,7 +42,7 @@ double trainProblem(const RegressionDataset& training, RegressionDataset const& 
 
 	//the error function is a combination of MSE and 2-norm error
 	SquaredLoss<> loss;
-	ErrorFunction<> error(training,&network,&loss);
+	ErrorFunction error(training,&network,&loss);
 	TwoNormRegularizer regularizer;
 
 	//combine both functions
