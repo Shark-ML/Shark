@@ -63,20 +63,18 @@ public:
 ///that only a fraction of the training examples is chosen randomly out of the set and
 ///thus noise is introduced. This can be used to perform stochastic gradient
 ///descent or to introduce some noise to a problem.
-template<class InputType = RealVector, class LabelType = RealVector>
 class NoisyErrorFunction : public SingleObjectiveFunction
 {
 public:
-	typedef LabeledData<InputType,LabelType> DatasetType;
-	template<class OutputType>
+	template<class InputType, class LabelType, class OutputType>
 	NoisyErrorFunction(
-		DatasetType const& dataset,
+		LabeledData<InputType,LabelType> const& dataset,
 		AbstractModel<InputType,OutputType>* model,
 		AbstractLoss<LabelType,OutputType>* loss,
 		unsigned int batchSize=1
 	);
-	NoisyErrorFunction(const NoisyErrorFunction<InputType,LabelType>& op1);
-	NoisyErrorFunction<InputType,LabelType>& operator = (const NoisyErrorFunction<InputType,LabelType>& op1);
+	NoisyErrorFunction(NoisyErrorFunction const& op1);
+	NoisyErrorFunction& operator = (NoisyErrorFunction const& op1);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -84,8 +82,6 @@ public:
 
 	void setBatchSize(unsigned int batchSize);
 	unsigned int batchSize() const;
-
-	void updateFeatures();
 
 	void proposeStartingPoint( SearchPointType & startingPoint)const;
 	std::size_t numberOfVariables()const;
@@ -95,11 +91,10 @@ public:
 		m_regularizationStrength = factor;
 	}
 
-	double eval(const RealVector & input)const;
-	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative )const;
+	double eval(RealVector const& input)const;
+	ResultType evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative )const;
 
-	template<class I,class L>
-	friend void swap(const NoisyErrorFunction<I,L>& op1, const NoisyErrorFunction<I,L>& op2);
+	friend void swap(NoisyErrorFunction& op1, NoisyErrorFunction& op2);
 private:
 	boost::scoped_ptr<detail::NoisyErrorFunctionWrapperBase> mp_wrapper;
 	
