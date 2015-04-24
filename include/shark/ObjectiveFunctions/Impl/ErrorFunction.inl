@@ -34,7 +34,7 @@ template<class InputType, class LabelType,class OutputType>
 class ErrorFunctionImpl:public FunctionWrapperBase{
 public:
 	ErrorFunctionImpl(
-		LabeledData<InputType,LabelType> const& dataset,
+		LabeledData<InputType, LabelType> const& dataset,
 		AbstractModel<InputType,OutputType>* model, 
 		AbstractLoss<LabelType, OutputType>* loss
 	):mep_model(model),mep_loss(loss),m_dataset(dataset){
@@ -220,16 +220,15 @@ protected:
 } // namespace detail
 
 
-template<class InputType,class LabelType>
-void swap(const ErrorFunction<InputType,LabelType>& op1, const ErrorFunction<InputType,LabelType>& op2){
+inline void swap(ErrorFunction& op1, ErrorFunction& op2){
+	using std::swap;
 	swap(op1.mp_wrapper,op2.mp_wrapper);
 	swap(op1.m_features,op2.m_features);
 }
 
-template<class InputType,class LabelType>
-template<class OutputType>
-ErrorFunction<InputType,LabelType>::ErrorFunction(
-	DatasetType const& dataset,
+template<class InputType,class LabelType, class OutputType>
+inline ErrorFunction::ErrorFunction(
+	LabeledData<InputType, LabelType> const& dataset,
 	AbstractModel<InputType,OutputType>* model, 
 	AbstractLoss<LabelType, OutputType>* loss
 ){
@@ -243,31 +242,26 @@ ErrorFunction<InputType,LabelType>::ErrorFunction(
 	this -> m_features = mp_wrapper -> features();
 }
 
-template<class InputType,class LabelType>
-ErrorFunction<InputType,LabelType>::ErrorFunction(const ErrorFunction& op)
+inline ErrorFunction::ErrorFunction(const ErrorFunction& op)
 :mp_wrapper(op.mp_wrapper->clone()){
 	this -> m_features = mp_wrapper -> features();
 }
 
-template<class InputType,class LabelType>
-ErrorFunction<InputType,LabelType>& ErrorFunction<InputType,LabelType>::operator = (const ErrorFunction<InputType,LabelType>& op){
-	ErrorFunction<InputType,LabelType> copy(op);
-	swap(copy.mp_wrapper,*this);
+inline ErrorFunction& ErrorFunction::operator = (const ErrorFunction& op){
+	ErrorFunction copy(op);
+	swap(copy.mp_wrapper,mp_wrapper);
 	return *this;
 }
 
-template<class InputType,class LabelType>
-void ErrorFunction<InputType,LabelType>::proposeStartingPoint(SearchPointType& startingPoint) const{
+inline void ErrorFunction::proposeStartingPoint(SearchPointType& startingPoint) const{
 	mp_wrapper -> proposeStartingPoint(startingPoint);
 }
 
-template<class InputType,class LabelType>
-std::size_t ErrorFunction<InputType,LabelType>::numberOfVariables() const{
+inline std::size_t ErrorFunction::numberOfVariables() const{
 	return mp_wrapper -> numberOfVariables();
 }
 
-template<class InputType,class LabelType>
-double ErrorFunction<InputType,LabelType>::eval(RealVector const& input) const{
+inline double ErrorFunction::eval(RealVector const& input) const{
 	++m_evaluationCounter;
 	double value = mp_wrapper -> eval(input);
 	if(m_regularizer)
@@ -275,8 +269,7 @@ double ErrorFunction<InputType,LabelType>::eval(RealVector const& input) const{
 	return value;
 }
 
-template<class InputType,class LabelType>
-typename ErrorFunction<InputType,LabelType>::ResultType ErrorFunction<InputType,LabelType>::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
+inline typename ErrorFunction::ResultType ErrorFunction::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
 	++m_evaluationCounter;
 	double value = mp_wrapper -> evalDerivative(input,derivative);
 	if(m_regularizer){

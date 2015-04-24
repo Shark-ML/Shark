@@ -50,7 +50,7 @@ int main(){
 	
 	//create error function
 	CrossEntropy loss; // surrogate loss for training
-	ErrorFunction<RealVector,unsigned int> error(dataset,&network,&loss);
+	ErrorFunction error(dataset,&network,&loss);
 	
 	//initialize Rprop and initialize the network randomly
 	initRandomUniform(network,-0.1,0.1);

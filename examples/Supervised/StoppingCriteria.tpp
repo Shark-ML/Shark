@@ -73,7 +73,7 @@ int main(){
 	FFNet<LogisticNeuron,LogisticNeuron> network;
 	network.setStructure(inputDimension(data),10,numberOfClasses(data));
 	CrossEntropy loss;
-	ErrorFunction<RealVector,unsigned int> validationFunction(validation,&network,&loss);
+	ErrorFunction validationFunction(validation,&network,&loss);
 	
 	GeneralizationQuotient<> generalizationQuotient(10,0.1);
 	ValidatedStoppingCriterion validatedLoss(&validationFunction,&generalizationQuotient);

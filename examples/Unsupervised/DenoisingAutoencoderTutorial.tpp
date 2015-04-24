@@ -39,7 +39,7 @@ AutoencoderModel trainAutoencoderModel(
 	//create the objective function
 	LabeledData<RealVector,RealVector> trainSet(data,data);//labels identical to inputs
 	SquaredLoss<RealVector> loss;
-	ErrorFunction<RealVector,RealVector> error(trainSet, &model, &loss);
+	ErrorFunction error(trainSet, &model, &loss);
 	TwoNormRegularizer regularizer(error.numberOfVariables());
 	error.setRegularizer(regularisation,&regularizer);
 //###end<objective>	

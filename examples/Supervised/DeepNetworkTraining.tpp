@@ -71,7 +71,7 @@ AutoencoderModel trainAutoencoderModel(
 	//create the objective function
 	LabeledData<RealVector,RealVector> trainSet(data,data);//labels identical to inputs
 	SquaredLoss<RealVector> loss;
-	ErrorFunction<RealVector,RealVector> error(trainSet, &model, &loss);
+	ErrorFunction error(trainSet, &model, &loss);
 	TwoNormRegularizer regularizer(error.numberOfVariables());
 	error.setRegularizer(regularisation,&regularizer);
 //###end<objective>	
@@ -158,7 +158,7 @@ int main()
 	
 	//create the supervised problem. Cross Entropy loss with one norm regularisation
 	CrossEntropy loss;
-	ErrorFunction<RealVector,unsigned int> error(data, &network, &loss);
+	ErrorFunction error(data, &network, &loss);
 	OneNormRegularizer regularizer(error.numberOfVariables());
 	error.setRegularizer(regularisation,&regularizer);
 	
