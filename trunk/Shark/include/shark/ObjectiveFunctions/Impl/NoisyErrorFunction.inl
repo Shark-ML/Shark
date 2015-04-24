@@ -116,16 +116,17 @@ public:
 	}
 };
 }
-template<class InputType,class LabelType>
-void swap(const NoisyErrorFunction<InputType,LabelType>& op1, const NoisyErrorFunction<InputType,LabelType>& op2){
+
+inline void swap(NoisyErrorFunction& op1, NoisyErrorFunction& op2){
+	using std::swap;
 	swap(op1.mp_wrapper,op2.mp_wrapper);
 	swap(op1.m_features,op2.m_features);
 }
 
-template<class InputType,class LabelType>
-template<class OutputType>
-NoisyErrorFunction<InputType,LabelType>::NoisyErrorFunction(
-	DatasetType const& dataset,
+
+template<class InputType, class LabelType, class OutputType>
+NoisyErrorFunction::NoisyErrorFunction(
+	LabeledData<InputType,LabelType> const& dataset,
 	AbstractModel<InputType,OutputType>* model,
 	AbstractLoss<LabelType, OutputType>* loss,
 	unsigned int batchSize)
@@ -133,47 +134,37 @@ NoisyErrorFunction<InputType,LabelType>::NoisyErrorFunction(
 , m_regularizer(0), m_regularizationStrength(0){
 	this -> m_features = mp_wrapper -> features();
 }
-template<class InputType,class LabelType>
-NoisyErrorFunction<InputType,LabelType>::NoisyErrorFunction(const NoisyErrorFunction<InputType,LabelType>& op){
-	mp_wrapper = op.mp_wrapper->clone();
+
+inline NoisyErrorFunction::NoisyErrorFunction(const NoisyErrorFunction& op):
+	mp_wrapper(static_cast<detail::NoisyErrorFunctionWrapperBase*>(op.mp_wrapper->clone()))
+{
 	this -> m_features = mp_wrapper -> features();
 }
 
-template<class InputType,class LabelType>
-NoisyErrorFunction<InputType,LabelType>& 
-NoisyErrorFunction<InputType,LabelType>::operator = (const NoisyErrorFunction<InputType,LabelType>& op){
-	NoisyErrorFunction<InputType,LabelType> copy(op);
+inline NoisyErrorFunction& NoisyErrorFunction::operator = (const NoisyErrorFunction& op){
+	NoisyErrorFunction copy(op);
 	swap(copy,*this);
 	return *this;
 }
 
-template<class InputType,class LabelType>
-void NoisyErrorFunction<InputType,LabelType>::updateFeatures(){
-	mp_wrapper -> updateFeatures();
-	this -> m_features = mp_wrapper -> features();
-}
-
-template<class InputType,class LabelType>
-void NoisyErrorFunction<InputType,LabelType>::proposeStartingPoint(SearchPointType& startingPoint) const{
+inline void NoisyErrorFunction::proposeStartingPoint(SearchPointType& startingPoint) const{
 	mp_wrapper -> proposeStartingPoint(startingPoint);
 }
 
-template<class InputType,class LabelType>
-std::size_t NoisyErrorFunction<InputType,LabelType>::numberOfVariables() const{
+inline std::size_t NoisyErrorFunction::numberOfVariables() const{
 	return mp_wrapper -> numberOfVariables();
 }
 
-template<class InputType,class LabelType>
-double NoisyErrorFunction<InputType,LabelType>::eval(RealVector const& input) const{
+
+inline double NoisyErrorFunction::eval(RealVector const& input) const{
 	++m_evaluationCounter;
 	double value = mp_wrapper -> eval(input);
 	if(m_regularizer)
 		value += m_regularizationStrength * m_regularizer->eval(input);
 	return value;
 }
-template<class InputType,class LabelType>
-typename NoisyErrorFunction<InputType,LabelType>::ResultType 
-NoisyErrorFunction<InputType,LabelType>::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
+
+inline NoisyErrorFunction::ResultType NoisyErrorFunction::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
 	++m_evaluationCounter;
 	double value = mp_wrapper -> evalDerivative(input,derivative);
 	if(m_regularizer){
@@ -184,12 +175,12 @@ NoisyErrorFunction<InputType,LabelType>::evalDerivative( const SearchPointType &
 	return value;
 }
 
-template<class InputType,class LabelType>
-void NoisyErrorFunction<InputType,LabelType>::setBatchSize(unsigned int batchSize){
+
+inline void NoisyErrorFunction::setBatchSize(unsigned int batchSize){
 	mp_wrapper -> setBatchSize(batchSize);
 }
-template<class InputType,class LabelType>
-unsigned int NoisyErrorFunction<InputType,LabelType>::batchSize() const{
+
+inline unsigned int NoisyErrorFunction::batchSize() const{
 	return mp_wrapper -> batchSize();
 }
 
