@@ -269,7 +269,7 @@ inline double ErrorFunction::eval(RealVector const& input) const{
 	return value;
 }
 
-inline typename ErrorFunction::ResultType ErrorFunction::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
+inline ErrorFunction::ResultType ErrorFunction::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
 	++m_evaluationCounter;
 	double value = mp_wrapper -> evalDerivative(input,derivative);
 	if(m_regularizer){
