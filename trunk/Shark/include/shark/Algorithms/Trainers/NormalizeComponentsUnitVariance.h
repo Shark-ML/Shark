@@ -76,7 +76,17 @@ class NormalizeComponentsUnitVariance : public AbstractUnsupervisedTrainer< Norm
 public:
 	typedef AbstractUnsupervisedTrainer< Normalizer<DataType> > base_type;
 
-	NormalizeComponentsUnitVariance(bool zeroMean = false)
+	/// \brief Constructor
+	///
+	/// \par
+	/// The normalizer scales the data to unit variance.
+	/// It can also remove the mean of the data. This is usually
+	/// desired, e.g., for neural network training. Note however
+	/// that this feature is sometimes undesirable since it can
+	/// destroy sparsity.
+	///
+	/// \param  zeroMean  enable or disable data mean removal
+	NormalizeComponentsUnitVariance(bool zeroMean)
 	: m_zeroMean(zeroMean){ }
 
 	/// \brief From INameable: return the class name.
