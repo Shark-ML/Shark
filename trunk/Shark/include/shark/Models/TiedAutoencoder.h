@@ -30,6 +30,7 @@
 
 #include <shark/Models/AbstractModel.h>
 #include <shark/Models/Neurons.h>
+#include <shark/Models/FFNet.h>
 #include <boost/serialization/vector.hpp>
 
 namespace shark{
@@ -198,6 +199,28 @@ public:
 			evalLayer(layer,patterns.batch(i),result.batch(i));
 		}
 		return result;
+	}
+	
+	Data<RealVector> encode(Data<RealVector> const& patterns)const{
+		return evalLayer(0,patterns);
+	}
+	
+	Data<RealVector> decode(Data<RealVector> const& patterns)const{
+		return evalLayer(1,patterns);
+	}
+	
+	template<class Label>
+	LabeledData<RealVector,Label> encode(
+		LabeledData<RealVector,Label> const& data
+	)const{
+		return LabeledData<RealVector,Label>(encode(data.inputs()),data.labels());
+	}
+	
+	template<class Label>
+	LabeledData<RealVector,Label> decode(
+		LabeledData<RealVector,Label> const& data
+	)const{
+		return LabeledData<RealVector,Label>(decode(data.inputs()),data.labels());
 	}
 	
 	void eval(RealMatrix const& patterns,RealMatrix& output, State& state)const{
