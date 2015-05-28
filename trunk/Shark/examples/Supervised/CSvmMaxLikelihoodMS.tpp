@@ -42,7 +42,7 @@ RealVector run_one_trial( bool verbose) {
     //###begin<normalize_data>
     // normalize data as usual
     Normalizer<> normalizer;
-    NormalizeComponentsUnitVariance<> normalizationTrainer;
+    NormalizeComponentsUnitVariance<> normalizationTrainer(false);
     normalizationTrainer.train( normalizer, train.inputs() );
     train = transformInputs( train, normalizer );
     test = transformInputs( test, normalizer );
