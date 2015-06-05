@@ -39,8 +39,9 @@
 #include <shark/Models/Kernels/AbstractMetric.h>
 #include <shark/Core/OpenMP.h>
 #include <algorithm>
-namespace shark {
 
+
+namespace shark {
 
 ///\brief Brute force optimized nearest neighbor implementation
 ///
@@ -56,10 +57,16 @@ public:
 	typedef typename base_type::DistancePair DistancePair;
 	typedef typename Batch<InputType>::type BatchInputType;
 
+	/// \brief Constructor.
+	///
+	/// \par Construct a "brute force" nearest neighbors search algorithm
+	/// from data and a metric. Refer to the AbstractMetric class for details.
+	/// The "default" Euclidean metric is realized by providing a pointer to
+	/// an object of type LinearKernel<InputType>.
 	SimpleNearestNeighbors(Dataset const& dataset, Metric const* metric)
 	:m_dataset(dataset), mep_metric(metric){}
-		
-	///\brief returns the k nearest neighbors of the point
+
+	///\brief Return the k nearest neighbors of the query point.
 	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const{
 		std::size_t numPatterns = size(patterns);
 		std::size_t maxThreads = std::min(SHARK_NUM_THREADS,m_dataset.numberOfBatches());
@@ -124,14 +131,15 @@ public:
 		}
 		return results;
 	}
+
+	/// \brief Direct access to the underlying data set of nearest neighbor points.
 	LabeledData<InputType,LabelType>const& dataset()const {
 		return m_dataset;
 	}
-	
-	
+
 private:
-	Dataset m_dataset;
-	Metric const* mep_metric; 
+	Dataset m_dataset;                        ///< data set of nearest neighbor points
+	Metric const* mep_metric;                 ///< metric for measuring distances, usually given by a kernel function
 };
 
 
