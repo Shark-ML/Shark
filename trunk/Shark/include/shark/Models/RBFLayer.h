@@ -67,7 +67,7 @@ private:
 
 public:
 	///  \brief Creates an empty Radial Basis Function layer.
-	RBFLayer();
+	SHARK_EXPORT_SYMBOL RBFLayer();
 	
 	///  \brief Creates a layer of a Radial Basis Function Network.
 	///

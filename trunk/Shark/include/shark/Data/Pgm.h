@@ -226,7 +226,7 @@ inline void exportFiltersToPGMGrid(std::string const& basename, RealMatrix const
 inline void exportFiltersToPGMGrid(std::string const& basename, Data<RealVector> const& filters,std::size_t width, std::size_t height) {
 	SIZE_CHECK(dataDimension(filters) == width*height);
 	//try to get a square image
-	std:size_t numFilters = filters.numberOfElements();
+	std::size_t numFilters = filters.numberOfElements();
 	std::size_t gridX = std::size_t(std::sqrt(double(numFilters)));
 	std::size_t gridY = gridX;
 	while(gridX*gridY < numFilters) ++gridX;

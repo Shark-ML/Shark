@@ -265,7 +265,7 @@ protected:
 class RpropPlus : public RpropMinus
 {
 public:
-	RpropPlus();
+	SHARK_EXPORT_SYMBOL RpropPlus();
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
