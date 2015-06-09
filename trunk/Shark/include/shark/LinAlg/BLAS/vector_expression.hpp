@@ -2,6 +2,7 @@
 #define SHARK_LINALG_BLAS_VECTOR_EXPRESSION_HPP
 
 #include <boost/type_traits/is_convertible.hpp> 
+#include <boost/utility/enable_if.hpp> 
 #include "vector_proxy.hpp"
 #include "kernels/dot.hpp"
 
