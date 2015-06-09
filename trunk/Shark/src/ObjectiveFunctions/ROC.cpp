@@ -31,6 +31,7 @@
  *
  */
 //===========================================================================
+#define SHARK_COMPILE_DLL
 #include <shark/ObjectiveFunctions/ROC.h>
 
 using namespace shark;

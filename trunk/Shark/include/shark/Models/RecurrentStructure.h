@@ -31,6 +31,7 @@
 #ifndef SHARK_ML_MODEL_RECURENTNETWORK_H
 #define SHARK_ML_MODEL_RECURENTNETWORK_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/ISerializable.h>
 namespace shark{
@@ -43,7 +44,7 @@ class RecurrentStructure: public ISerializable
 public:
 	//! Creates an empty recurrent neural network.
 	//! A call to setStructure is needed afterwards to configure the topology of the network
-	RecurrentStructure();
+	SHARK_EXPORT_SYMBOL RecurrentStructure();
 
 
 	//! type enum for the different variants of sigmoids
@@ -112,7 +113,7 @@ public:
 	//!Sets the weight matrix. It is not allowed that elements are non-zero
 	//!when the element in the connection matrix is 0!
 	//!\param weights the new weight matrix
-	void setWeights(const RealMatrix& weights);
+	SHARK_EXPORT_SYMBOL void setWeights(const RealMatrix& weights);
 
 	//!  \brief Based on a given connection matrix a network is created.
 	//!
@@ -132,7 +133,7 @@ public:
 	//! \param outputs number of output neurons of the network
 	//! \param connections feed-forward connections. default is true
 	//! \param sigmoidType the type of the sigmoid to be used. the default is the Logistic function
-	void setStructure(std::size_t inputs, std::size_t outputs, const IntMatrix& connections, SigmoidType sigmoidType = Logistic);
+	SHARK_EXPORT_SYMBOL void setStructure(std::size_t inputs, std::size_t outputs, const IntMatrix& connections, SigmoidType sigmoidType = Logistic);
 
 
 	//! \brief Creates a fully connected topology for the network with optional bias
@@ -145,19 +146,19 @@ public:
 	//! \param out number of input neurons
 	//! \param bias enables bias neuron, default is true
 	//! \param sigmoidType the type of the sigmoid to be used. the default is the Logistic function
-	void setStructure(std::size_t in, std::size_t hidden, std::size_t out, bool bias = true, SigmoidType sigmoidType = Logistic);
+	SHARK_EXPORT_SYMBOL void setStructure(std::size_t in, std::size_t hidden, std::size_t out, bool bias = true, SigmoidType sigmoidType = Logistic);
 
 	//! get internal parameters of the model
 	RealVector parameterVector() const;
 	
 	//! set internal parameters of the model
-	void setParameterVector(RealVector const& newParameters);
+	SHARK_EXPORT_SYMBOL void setParameterVector(RealVector const& newParameters);
 
 	//! From ISerializable, reads the Network from an archive
-	void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
 
 	//! From ISerializable, writes the Network to an archive
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 
 	//! The number of input neurons of the network
 	std::size_t inputs()const{
@@ -185,10 +186,10 @@ public:
 	}
 
 	//! Activation function for a neuron.
-	double neuron(double activation);
+	SHARK_EXPORT_SYMBOL double neuron(double activation);
 
 	//! Computes the derivative of the neuron.
-	double neuronDerivative(double activation);
+	SHARK_EXPORT_SYMBOL double neuronDerivative(double activation);
 
 protected:
 

@@ -31,6 +31,7 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+ #define SHARK_COMPILE_DLL
 #include <shark/Algorithms/DirectSearch/CMA.h>
 
 #include <shark/Core/Exception.h>

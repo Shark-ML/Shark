@@ -29,6 +29,7 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_KERNELBASISDISTANCE_H
 #define SHARK_OBJECTIVEFUNCTIONS_KERNELBASISDISTANCE_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
 
@@ -58,7 +59,7 @@ public:
 	///
 	/// \param kernelExpansion a pointer to the kernel expansion to approximate
 	/// \param numApproximatingVectors the number of vectors used to approximate the point - the basis size
-	KernelBasisDistance(KernelExpansion<RealVector>* kernelExpansion,std::size_t numApproximatingVectors = 1);
+	SHARK_EXPORT_SYMBOL KernelBasisDistance(KernelExpansion<RealVector>* kernelExpansion,std::size_t numApproximatingVectors = 1);
 
 	/// \brief Returns the name of the class
 	std::string name() const
@@ -76,33 +77,33 @@ public:
 	/// \brief Returns a starting point of the algorithm
 	///
 	/// Returns a random subset of the basis of the kernel expansion
-	void proposeStartingPoint(SearchPointType& startingPoint) const;
+	SHARK_EXPORT_SYMBOL void proposeStartingPoint(SearchPointType& startingPoint) const;
 
 	/// \brief Returns the number of variables of the function.
-	std::size_t numberOfVariables()const;
+	SHARK_EXPORT_SYMBOL std::size_t numberOfVariables()const;
 		
 	/// \brief Given an input basis, returns the point with the minimum error.
-	RealMatrix findOptimalBeta(RealVector const& input)const;
+	SHARK_EXPORT_SYMBOL RealMatrix findOptimalBeta(RealVector const& input)const;
 
 	/// \brief Evaluate the (sum of) squared distance(s) between the closes point in the basis to the point(s) represented by the kernel expansion.
 	///
 	/// See the class description for more details on this computation.
-	double eval(RealVector const& input) const;
+	SHARK_EXPORT_SYMBOL double eval(RealVector const& input) const;
 
 	/// \brief computes the derivative of the function with respect to the supplied basis.
 	///
 	/// Assume \f$ \beta \f$ to be the optimal value. Then the derivative with respect to the basis vectors is:
 	/// \f[	\frac{ \partial f}{\partial z_l} = \beta_l \sum_i \beta_i \frac{ \partial f}{\partial z_l} k(z_l,z_i) - \beta_l \sum_i \alpha_i \frac{ \partial f}{\partial z_l} k(z_l, x_i) \f]
-	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;
+	SHARK_EXPORT_SYMBOL ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;
 
 private:
 	/// \brief Sets up and solves the regression problem for the base z.
 	///
 	/// calculates K_z, the linear part of the system of equations and solves for beta.
-	void setupAndSolve(RealMatrix& beta, RealVector const& input, RealMatrix& Kz, RealMatrix& linear)const;
+	SHARK_EXPORT_SYMBOL void setupAndSolve(RealMatrix& beta, RealVector const& input, RealMatrix& Kz, RealMatrix& linear)const;
 
 	/// \brief Returns the error of the solution found
-	double errorOfSolution(RealMatrix const& beta, RealMatrix const& Kz, RealMatrix const& linear)const;
+	SHARK_EXPORT_SYMBOL double errorOfSolution(RealMatrix const& beta, RealMatrix const& Kz, RealMatrix const& linear)const;
 
 	KernelExpansion<RealVector>* mep_expansion;     ///< kernel expansion to approximate
 	std::size_t m_numApproximatingVectors; ///< number of vectors in the basis

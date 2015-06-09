@@ -1,6 +1,7 @@
 #ifndef SHARK_MODEL_ML_SIGMOIDMODEL_H
 #define SHARK_MODEL_ML_SIGMOIDMODEL_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/AbstractModel.h>
 namespace shark {
 
@@ -34,23 +35,23 @@ public:
 
 	//! default ctor
 	//! \param transform_for_unconstrained when a new paramVector is set, should the exponent of the first parameter be used as the sigmoid's slope?
-	SigmoidModel( bool transform_for_unconstrained = true );
+	SHARK_EXPORT_SYMBOL SigmoidModel( bool transform_for_unconstrained = true );
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "SigmoidModel"; }
 
-	RealVector parameterVector() const;
+	SHARK_EXPORT_SYMBOL RealVector parameterVector() const;
 	
 	//! note that the parameters are not expected to incorporate the minus sign in the sigmoid's equation
 	//! \param newParameters the new parameter vector A and offset B concatenated
-	void setParameterVector(RealVector const& newParameters);
+	SHARK_EXPORT_SYMBOL void setParameterVector(RealVector const& newParameters);
 	
 	std::size_t numberOfParameters() const {
 		return 2; //we always return 2, even if the offset is hard-clamped to zero.
 	}
 	// \brief whether to use the offset, or clamp it to zero. offset is active by default.
-	void setOffsetActivity( bool enable_offset );
+	SHARK_EXPORT_SYMBOL void setOffsetActivity( bool enable_offset );
 	
 	bool hasOffset()const{
 		return m_useOffset;
@@ -63,7 +64,7 @@ public:
 	/*!
 	*  \brief activation function \f$g_{output}(x)\f$
 	*/
-	virtual double sigmoid(double x)const;
+	SHARK_EXPORT_SYMBOL virtual double sigmoid(double x)const;
 	/*!
 	*  \brief Computes the derivative of the activation function
 	*         \f$g_{output}(x)\f$ for the output given the
@@ -75,15 +76,15 @@ public:
 		return boost::shared_ptr<State>(new InternalState());
 	}
 
-	void eval(BatchInputType const&pattern, BatchOutputType& output, State& state)const;
-	void eval(BatchInputType const&pattern, BatchOutputType& output)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const&pattern, BatchOutputType& output, State& state)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const&pattern, BatchOutputType& output)const;
 	using AbstractModel<RealVector,RealVector>::eval;
 
-	void weightedParameterDerivative(
+	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
 		BatchInputType const& pattern, BatchOutputType const& coefficients, State const& state, RealVector& gradient
 	)const;
 	
-	void weightedInputDerivative(
+	SHARK_EXPORT_SYMBOL void weightedInputDerivative(
 		BatchInputType const& pattern, BatchOutputType const& coefficients, State const& state, BatchInputType& derivative
 	)const;
 	
@@ -122,9 +123,9 @@ protected:
 class SimpleSigmoidModel : public SigmoidModel
 {
 public:
-	SimpleSigmoidModel( bool transform_for_unconstrained = true );
-	double sigmoid(double a)const;
-	double sigmoidDerivative(double ga)const;
+	SHARK_EXPORT_SYMBOL SimpleSigmoidModel( bool transform_for_unconstrained = true );
+	SHARK_EXPORT_SYMBOL double sigmoid(double a)const;
+	SHARK_EXPORT_SYMBOL double sigmoidDerivative(double ga)const;
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -139,9 +140,9 @@ public:
 class TanhSigmoidModel : public SigmoidModel
 {
 public:
-	TanhSigmoidModel( bool transform_for_unconstrained = true );
-	double sigmoid(double a)const;
-	double sigmoidDerivative(double ga)const;
+	SHARK_EXPORT_SYMBOL TanhSigmoidModel( bool transform_for_unconstrained = true );
+	SHARK_EXPORT_SYMBOL double sigmoid(double a)const;
+	SHARK_EXPORT_SYMBOL double sigmoidDerivative(double ga)const;
 
 	/// \brief From INameable: return the class name.
 	std::string name() const

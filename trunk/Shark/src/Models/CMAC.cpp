@@ -31,6 +31,7 @@
  *
  */
 //===========================================================================
+#define SHARK_COMPILE_DLL
 #include <shark/Models/CMAC.h>
 #include <boost/serialization/vector.hpp>
 using namespace shark;

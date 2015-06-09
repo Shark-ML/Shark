@@ -37,6 +37,7 @@
 #ifndef SHARK_ALGORITHMS_TRAINER_PCA_H
 #define SHARK_ALGORITHMS_TRAINER_PCA_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 
@@ -120,16 +121,16 @@ public:
 	//! Sets the input data and performs the PCA. This is a
 	//! computationally costly operation. The eigendecomposition
 	//! of the data is stored inthe PCA object.
-	void setData(UnlabeledData<RealVector> const& inputs);
+	SHARK_EXPORT_SYMBOL void setData(UnlabeledData<RealVector> const& inputs);
 
 	//! Returns a model mapping the original data to the
 	//! m-dimensional PCA coordinate system.
-	void encoder(LinearModel<>& model, std::size_t m = 0);
+	SHARK_EXPORT_SYMBOL void encoder(LinearModel<>& model, std::size_t m = 0);
 
 	//! Returns a model mapping encoded data from the
 	//! m-dimensional PCA coordinate system back to the
 	//! n-dimensional original coordinate system.
-	void decoder(LinearModel<>& model, std::size_t m = 0);
+	SHARK_EXPORT_SYMBOL void decoder(LinearModel<>& model, std::size_t m = 0);
 
 	/// Eigenvalues of last training. The number of eigenvalues
 	//! is equal to the minimum of the input dimensions (i.e.,

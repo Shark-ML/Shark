@@ -1,6 +1,7 @@
 #ifndef SHARK_ML_MODEL_LINEAR_NORM_H
 #define SHARK_ML_MODEL_LINEAR_NORM_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/AbstractModel.h>
 namespace shark {
 /*!
@@ -17,8 +18,8 @@ private:
 		}
 	};
 public:
-	LinearNorm();
-	LinearNorm(std::size_t inputSize);
+	SHARK_EXPORT_SYMBOL LinearNorm();
+	SHARK_EXPORT_SYMBOL LinearNorm(std::size_t inputSize);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -48,8 +49,8 @@ public:
 	}
 
 	using AbstractModel<RealVector,RealVector>::eval;
-	void eval(BatchInputType const& patterns,BatchOutputType& output)const;
-	void eval(BatchInputType const& patterns,BatchOutputType& output, State& state)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns,BatchOutputType& output)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns,BatchOutputType& output, State& state)const;
 
 	void weightedParameterDerivative(
 		BatchInputType const& patterns, BatchOutputType const& coefficients,  State const& state, RealVector& gradient
@@ -57,15 +58,15 @@ public:
 		SIZE_CHECK(patterns.size1()==coefficients.size1());
 		gradient.resize(0);
 	}
-	void weightedInputDerivative(
+	SHARK_EXPORT_SYMBOL void weightedInputDerivative(
 		BatchInputType const& pattern,BatchOutputType const& coefficients, State const& state, BatchOutputType& gradient
 	)const;
 
 	/// From ISerializable, reads a model from an archive
-	void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
 
 	/// From ISerializable, writes a model to an archive
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 
 protected:
     std::size_t m_inputSize;

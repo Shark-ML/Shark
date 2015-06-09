@@ -31,6 +31,7 @@
  *
  */
 //===========================================================================
+#define SHARK_COMPILE_DLL
 #include <shark/Algorithms/GradientDescent/NoisyRprop.h>
 #include <algorithm>
 

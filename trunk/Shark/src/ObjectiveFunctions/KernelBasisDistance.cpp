@@ -26,7 +26,7 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
+#define SHARK_COMPILE_DLL
 #include <shark/ObjectiveFunctions/KernelBasisDistance.h>
 #include <shark/LinAlg/solveSystem.h>
 #include <shark/Rng/GlobalRng.h>

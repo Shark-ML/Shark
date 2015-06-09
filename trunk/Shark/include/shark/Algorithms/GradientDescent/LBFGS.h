@@ -40,8 +40,8 @@
 #ifndef SHARK_ML_OPTIMIZER_LBFGS_H
 #define SHARK_ML_OPTIMIZER_LBFGS_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h>
-
 #include <deque>
 
 namespace shark {
@@ -49,8 +49,8 @@ namespace shark {
 //! \brief Limited-Memory Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstrained optimization
 class LBFGS : public AbstractLineSearchOptimizer{
 protected:
-	void initModel();
-	void computeSearchDirection();
+	SHARK_EXPORT_SYMBOL void initModel();
+	SHARK_EXPORT_SYMBOL void computeSearchDirection();
 public:
 	LBFGS() :m_numHist(100){}
 
@@ -67,21 +67,21 @@ public:
 	}
 
 	//from ISerializable
-	void read(InArchive &archive);
-	void write(OutArchive &archive) const;
+	SHARK_EXPORT_SYMBOL void read(InArchive &archive);
+	SHARK_EXPORT_SYMBOL void write(OutArchive &archive) const;
 protected: // Methods
 
 	///\brief Stores another step and searchDirection, discarding the oldest on if necessary.
 	///
 	/// \param step Last performed step
 	/// \param y difference in gradients
-	void updateHist(RealVector& y, RealVector &step);
+	SHARK_EXPORT_SYMBOL void updateHist(RealVector& y, RealVector &step);
 	/// \brief Get the LBFGS direction. 
 	///
 	/// This approximates the inverse hessian multiplied by the gradient.
 	/// This uses the rho, alpha and beta vectors. Description of these
 	/// can be seen in ie. the wiki page of LBFGS.
-	void getDirection(RealVector& searchDirection);
+	SHARK_EXPORT_SYMBOL void getDirection(RealVector& searchDirection);
 
 
 protected: // Instance vars

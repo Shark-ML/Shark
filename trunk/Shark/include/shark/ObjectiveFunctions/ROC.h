@@ -34,7 +34,7 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_ROC_H
 #define SHARK_OBJECTIVEFUNCTIONS_ROC_H
 
-
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/AbstractModel.h>
 #include <shark/Data/Dataset.h>
 #include <vector>
@@ -112,14 +112,14 @@ public:
 	//! that is, for a given false positive rate.
 	//! This threshold, used for classification with the underlying
 	//! model, results in the given false acceptance rate.
-	double threshold(double falseAcceptanceRate)const;
+	SHARK_EXPORT_SYMBOL double threshold(double falseAcceptanceRate)const;
 
 	//! Value of the ROC curve for given false acceptance rate,
 	//! that is, for a given false positive rate.
-	double value(double falseAcceptanceRate)const;
+	SHARK_EXPORT_SYMBOL double value(double falseAcceptanceRate)const;
 
 	//! Computes the equal error rate of the classifier
-	double equalErrorRate()const;
+	SHARK_EXPORT_SYMBOL double equalErrorRate()const;
 
 protected:
 	//! scores of the positive examples

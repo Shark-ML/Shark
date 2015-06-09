@@ -42,6 +42,7 @@
 #ifndef SHARK_DATA_CSV_H
 #define SHARK_DATA_CSV_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Data/Dataset.h>
 
 #include <boost/algorithm/string.hpp>
@@ -216,7 +217,7 @@ namespace detail {
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset
-void csvStringToData(
+SHARK_EXPORT_SYMBOL void csvStringToData(
     Data<RealVector> &data,
     std::string const& contents,
     char separator = ',',
@@ -231,7 +232,7 @@ void csvStringToData(
 /// \param  separator          Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment            Trailing characters indicating comment line. By default it is "#"
 /// \param  maximumBatchSize   Size of batches in the dataset
-void csvStringToData(
+SHARK_EXPORT_SYMBOL void csvStringToData(
     Data<unsigned int> &data,
     std::string const& contents,
     char separator = ',',
@@ -246,7 +247,7 @@ void csvStringToData(
 /// \param  separator          Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment            Trailing characters indicating comment line. By default it is "#"
 /// \param  maximumBatchSize   Size of batches in the dataset
-void csvStringToData(
+SHARK_EXPORT_SYMBOL void csvStringToData(
     Data<int> &data,
     std::string const& contents,
     char separator = ',',
@@ -261,7 +262,7 @@ void csvStringToData(
 /// \param  separator          Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment            Trailing characters indicating comment line. By default it is "#"
 /// \param  maximumBatchSize   Size of batches in the dataset
-void csvStringToData(
+SHARK_EXPORT_SYMBOL void csvStringToData(
     Data<double> &data,
     std::string const& contents,
     char separator = ',',
@@ -277,7 +278,7 @@ void csvStringToData(
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment    Character for indicating a comment, by default '#'
 /// \param  maximumBatchSize  maximum size of a batch in the dataset after import
-void csvStringToData(
+SHARK_EXPORT_SYMBOL void csvStringToData(
     LabeledData<RealVector, unsigned int> &dataset,
     std::string const& contents,
     LabelPosition lp,
@@ -296,7 +297,7 @@ void csvStringToData(
 /// \param  comment             Character for indicating a comment, by default empty
 /// \param  numberOfOutputs     Dimensionality of label/output
 /// \param  maximumBatchSize  maximum size of a batch in the dataset after import
-void csvStringToData(
+SHARK_EXPORT_SYMBOL void csvStringToData(
 	LabeledData<RealVector, RealVector> &dataset,
 	std::string const& contents,
 	LabelPosition lp,
@@ -347,7 +348,7 @@ void importCSV(
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset
-void importCSV(
+SHARK_EXPORT_SYMBOL void importCSV(
 	LabeledData<RealVector, unsigned int>& data,
 	std::string fn,
 	LabelPosition lp,
@@ -365,7 +366,7 @@ void importCSV(
 /// \param  separator  Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset
-void importCSV(
+SHARK_EXPORT_SYMBOL void importCSV(
 	LabeledData<RealVector, RealVector>& data,
 	std::string fn,
 	LabelPosition lp,

@@ -31,6 +31,7 @@
  *
  */
 //===========================================================================
+#define SHARK_COMPILE_DLL
 #include <shark/LinAlg/solveSystem.h>
 #include <shark/Algorithms/Trainers/LinearRegression.h>
 

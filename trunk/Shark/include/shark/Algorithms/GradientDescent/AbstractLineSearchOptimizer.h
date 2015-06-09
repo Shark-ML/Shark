@@ -36,6 +36,7 @@
 #ifndef SHARK_ALGORITHMS_GRADIENTDESCENT_ABSTRACTLINESEARCHOPTIMIZER_H
 #define SHARK_ALGORITHMS_GRADIENTDESCENT_ABSTRACTLINESEARCHOPTIMIZER_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Algorithms/GradientDescent/LineSearch.h>
 
@@ -68,17 +69,17 @@ protected:
 	virtual void computeSearchDirection() = 0;
 
 public:
-	AbstractLineSearchOptimizer();
+	SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer();
 
-	void init(const ObjectiveFunctionType &objectiveFunction, const SearchPointType &startingPoint) ;
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType &objectiveFunction, const SearchPointType &startingPoint) ;
 	
 	using AbstractSingleObjectiveOptimizer< RealVector >::init;
 
-	void step(const ObjectiveFunctionType &objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType &objectiveFunction);
 
 	//from ISerializable
-	void read(InArchive &archive);
-	void write(OutArchive &archive) const;
+	SHARK_EXPORT_SYMBOL void read(InArchive &archive);
+	SHARK_EXPORT_SYMBOL void write(OutArchive &archive) const;
 
 
 	//linesearch handling

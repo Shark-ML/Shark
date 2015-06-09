@@ -31,6 +31,7 @@
  *
  */
 //===========================================================================
+#define SHARK_COMPILE_DLL
 #include <shark/Algorithms/Trainers/FisherLDA.h>
 #include <shark/LinAlg/eigenvalues.h>
 #include <shark/LinAlg/solveSystem.h>

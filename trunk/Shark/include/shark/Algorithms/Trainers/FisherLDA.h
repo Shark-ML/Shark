@@ -34,7 +34,7 @@
 #ifndef SHARK_ALGORITHMS_TRAINERS_FISHERLDA_H
 #define SHARK_ALGORITHMS_TRAINERS_FISHERLDA_H
 
-
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 
@@ -105,10 +105,10 @@ public:
 	}
 
 	/// Compute the FisherLDA solution for a multi-class problem.
-	void train(LinearModel<>& model, LabeledData<RealVector, unsigned int> const& dataset);
+	SHARK_EXPORT_SYMBOL void train(LinearModel<>& model, LabeledData<RealVector, unsigned int> const& dataset);
 
 protected:
-	void meanAndScatter(LabeledData<RealVector, unsigned int> const& dataset, RealVector& mean, RealMatrix& scatter);
+	SHARK_EXPORT_SYMBOL void meanAndScatter(LabeledData<RealVector, unsigned int> const& dataset, RealVector& mean, RealMatrix& scatter);
 	bool m_whitening;
 	std::size_t m_subspaceDimensions;
 };

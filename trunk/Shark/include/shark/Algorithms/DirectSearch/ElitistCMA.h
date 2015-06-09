@@ -46,6 +46,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECTSEARCH_ELITIST_CMA_H
 #define SHARK_ALGORITHMS_DIRECTSEARCH_ELITIST_CMA_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Algorithms/DirectSearch/CMA/CMAIndividual.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
@@ -68,23 +69,23 @@ namespace shark {
 class ElitistCMA : public AbstractSingleObjectiveOptimizer<RealVector >{	    
 public:
 
-	ElitistCMA();
+	SHARK_EXPORT_SYMBOL ElitistCMA();
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "ElitistCMA"; }
 
-	void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
 
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	
 	/// \brief Initializes the algorithm for the supplied objective function.
-	void init( ObjectiveFunctionType const& function, SearchPointType const& p);
+	SHARK_EXPORT_SYMBOL void init( ObjectiveFunctionType const& function, SearchPointType const& p);
 
 	///\brief Executes one iteration of the algorithm.
-	void step(ObjectiveFunctionType const& function);
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& function);
 	
 	/// \brief Returns true when the active update is used (default true).
 	bool activeUpdate()const{

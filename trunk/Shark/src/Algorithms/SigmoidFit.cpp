@@ -32,7 +32,7 @@
  */
 //===========================================================================
 
-
+#define SHARK_COMPILE_DLL
 #include <shark/Algorithms/Trainers/SigmoidFit.h>
 #include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/GradientDescent/Rprop.h>

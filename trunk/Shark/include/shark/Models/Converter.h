@@ -60,6 +60,7 @@
 #ifndef SHARK_ML_MODEL_CONVERTER_H
 #define SHARK_ML_MODEL_CONVERTER_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/AbstractModel.h>
 namespace shark {
 
@@ -79,20 +80,20 @@ namespace shark {
 class ThresholdConverter : public AbstractModel<RealVector, unsigned int>
 {
 public:
-	ThresholdConverter(double threshold = 0.0);
+	SHARK_EXPORT_SYMBOL ThresholdConverter(double threshold = 0.0);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "ThresholdConverter"; }
 
-	RealVector parameterVector() const;
-	void setParameterVector(RealVector const& newParameters);
-	std::size_t numberOfParameters() const;
+	SHARK_EXPORT_SYMBOL RealVector parameterVector() const;
+	SHARK_EXPORT_SYMBOL void setParameterVector(RealVector const& newParameters);
+	SHARK_EXPORT_SYMBOL std::size_t numberOfParameters() const;
 
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns, BatchOutputType& outputs)const;
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
 		eval(patterns,outputs);
 	}
@@ -117,21 +118,21 @@ protected:
 class ThresholdVectorConverter : public AbstractModel<RealVector, RealVector>
 {
 public:
-	ThresholdVectorConverter(double threshold = 0.0);
+	SHARK_EXPORT_SYMBOL ThresholdVectorConverter(double threshold = 0.0);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "ThresholdVectorConverter"; }
 
-	RealVector parameterVector() const;
-	void setParameterVector(RealVector const& newParameters);
-	std::size_t numberOfParameters() const;
+	SHARK_EXPORT_SYMBOL RealVector parameterVector() const;
+	SHARK_EXPORT_SYMBOL void setParameterVector(RealVector const& newParameters);
+	SHARK_EXPORT_SYMBOL std::size_t numberOfParameters() const;
 
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}
 
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns, BatchOutputType& outputs)const;
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
 		eval(patterns,outputs);
 	}

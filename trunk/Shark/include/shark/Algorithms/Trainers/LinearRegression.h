@@ -40,7 +40,7 @@
 #ifndef SHARK_ALGORITHMS_TRAINERS_LINEARREGRESSION_H
 #define SHARK_ALGORITHMS_TRAINERS_LINEARREGRESSION_H
 
-
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/LinearModel.h>
 #include <shark/Core/IParameterizable.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
@@ -61,7 +61,7 @@ namespace shark {
 class LinearRegression : public AbstractTrainer<LinearModel<> >, public IParameterizable
 {
 public:
-	LinearRegression(double regularization = 0.0);
+	SHARK_EXPORT_SYMBOL LinearRegression(double regularization = 0.0);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -88,7 +88,7 @@ public:
 		return 1; 
 	}
 
-	void train(LinearModel<>& model, LabeledData<RealVector, RealVector> const& dataset);
+	SHARK_EXPORT_SYMBOL void train(LinearModel<>& model, LabeledData<RealVector, RealVector> const& dataset);
 protected:
 	double m_regularization;
 };

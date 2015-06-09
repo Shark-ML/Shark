@@ -32,7 +32,7 @@
  */
 //===========================================================================
 
-
+#define SHARK_COMPILE_DLL
 #include <shark/Algorithms/KMeans.h>
 #include <shark/Models/Clustering/HardClusteringModel.h>
 #include <shark/Data/DataView.h>
