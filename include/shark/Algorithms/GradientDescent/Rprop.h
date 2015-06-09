@@ -34,7 +34,7 @@
 #ifndef SHARK_ML_OPTIMIZER_RPROP_H
 #define SHARK_ML_OPTIMIZER_RPROP_H
 
-
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 
 namespace shark{
@@ -108,29 +108,29 @@ namespace shark{
 class RpropMinus : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
-	RpropMinus();
+	SHARK_EXPORT_SYMBOL RpropMinus();
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "RpropMinus"; }
 
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	virtual void init(
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
+	SHARK_EXPORT_SYMBOL virtual void init(
 		ObjectiveFunctionType const& objectiveFunction, 
 		SearchPointType const& startingPoint, 
 		double initDelta
 	);
-	virtual void init(
+	SHARK_EXPORT_SYMBOL virtual void init(
 		ObjectiveFunctionType const& objectiveFunction, 
 		SearchPointType const& startingPoint, 
 		RealVector const& initDelta
 	);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
-	void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
 
-	virtual void read( InArchive & archive );
-	virtual void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL virtual void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL virtual void write( OutArchive & archive ) const;
 
 	//! set decrease factor
 	void setEtaMinus(double etaMinus) {
@@ -271,14 +271,14 @@ public:
 	std::string name() const
 	{ return "RpropPlus"; }
 
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
-	void step(const ObjectiveFunctionType& objectiveFunction);
-	void read( InArchive & archive );
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 
 protected:
 	//! The final update values for all weights.
@@ -392,28 +392,28 @@ protected:
 class IRpropPlus : public RpropPlus
 {
 public:
-	IRpropPlus();
+	SHARK_EXPORT_SYMBOL IRpropPlus();
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "IRpropPlus"; }
 
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
-	void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
 
-	void setDerivativeThreshold(double derivativeThreshold);
+	SHARK_EXPORT_SYMBOL void setDerivativeThreshold(double derivativeThreshold);
 
-	void read( InArchive & archive );
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 
 protected:
 	//! The error of the last iteration.
 	double m_oldError;
-//! A threshold below which partial derivatives are set to zero
+	//! A threshold below which partial derivatives are set to zero
 	double m_derivativeThreshold;
 
 };
@@ -422,28 +422,28 @@ protected:
 class IRpropPlusFull : public RpropPlus
 {
 public:
-	IRpropPlusFull();
+	SHARK_EXPORT_SYMBOL IRpropPlusFull();
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "IRpropPlusFull"; }
 
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
-	void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
 
-	void setDerivativeThreshold(double derivativeThreshold);
+	SHARK_EXPORT_SYMBOL void setDerivativeThreshold(double derivativeThreshold);
 
-	void read( InArchive & archive );
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 
 protected:
 	//! The error of the last iteration.
 	double m_oldError;
-//! A threshold below which partial derivatives are set to zero
+	//! A threshold below which partial derivatives are set to zero
 	double m_derivativeThreshold;
 
 };
@@ -524,13 +524,13 @@ protected:
  */
 class IRpropMinus : public RpropMinus {
 public:
-	IRpropMinus();
+	SHARK_EXPORT_SYMBOL IRpropMinus();
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "IRpropMinus"; }
 
-	void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
 };
 
 //! Used to connect the class names with the year of

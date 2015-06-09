@@ -37,6 +37,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_CMA_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_CMA_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
@@ -68,7 +69,7 @@ namespace shark {
 		/**
 		* \brief Default c'tor.
 		*/
-		CMA();
+		SHARK_EXPORT_SYMBOL CMA();
 
 		/// \brief From INameable: return the class name.
 		std::string name() const
@@ -93,12 +94,12 @@ namespace shark {
 		/**
 		* \brief Calculates lambda for the supplied dimensionality n.
 		*/
-		static unsigned suggestLambda( unsigned int dimension ) ;
+		SHARK_EXPORT_SYMBOL static unsigned suggestLambda( unsigned int dimension ) ;
 
 		/**
 		* \brief Calculates mu for the supplied lambda and the recombination strategy.
 		*/
-		static double suggestMu( unsigned int lambda, RecombinationType recomb = SUPERLINEAR ) ;
+		SHARK_EXPORT_SYMBOL static double suggestMu( unsigned int lambda, RecombinationType recomb = SUPERLINEAR ) ;
 
 		void read( InArchive & archive );
 		void write( OutArchive & archive ) const;
@@ -107,12 +108,12 @@ namespace shark {
 		/**
 		* \brief Initializes the algorithm for the supplied objective function.
 		*/
-		void init( ObjectiveFunctionType const& function, SearchPointType const& p);
+		SHARK_EXPORT_SYMBOL void init( ObjectiveFunctionType const& function, SearchPointType const& p);
 
 		/**
 		* \brief Initializes the algorithm for the supplied objective function.
 		*/
-		void init( 
+		SHARK_EXPORT_SYMBOL void init( 
 			ObjectiveFunctionType const& function, 
 			SearchPointType const& initialSearchPoint,
 			unsigned int lambda, 
@@ -124,7 +125,7 @@ namespace shark {
 		/**
 		* \brief Executes one iteration of the algorithm.
 		*/
-		void step(ObjectiveFunctionType const& function);
+		SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& function);
 
 		/** \brief Accesses the current step size. */
 		double sigma() const {
@@ -245,7 +246,7 @@ namespace shark {
 		/**
 		* \brief Updates the strategy parameters based on the supplied offspring population.
 		*/
-		void updateStrategyParameters( const std::vector<Individual<RealVector, double, RealVector> > & offspring ) ;
+		SHARK_EXPORT_SYMBOL void updateStrategyParameters( const std::vector<Individual<RealVector, double, RealVector> > & offspring ) ;
 	
 		unsigned int m_numberOfVariables; ///< Stores the dimensionality of the search space.
 		unsigned int m_mu; ///< The size of the parent population.

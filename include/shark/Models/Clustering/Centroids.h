@@ -35,6 +35,7 @@
 #ifndef SHARK_MODELS_CLUSTERING_CENTROIDS_H
 #define SHARK_MODELS_CLUSTERING_CENTROIDS_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/Clustering/AbstractClustering.h>
 #include <shark/Data/Dataset.h>
 
@@ -60,31 +61,31 @@ class Centroids : public AbstractClustering<RealVector>
 
 public:
 	/// Default constructor
-	Centroids();
+	SHARK_EXPORT_SYMBOL Centroids();
 
 	/// Constructor
 	///
 	/// \param  centroids  number of centroids in the model (initially zero)
 	/// \param  dimension  dimension of the input space, and thus of the centroids
-	Centroids(std::size_t centroids, std::size_t dimension);
+	SHARK_EXPORT_SYMBOL Centroids(std::size_t centroids, std::size_t dimension);
 
 	/// Constructor
 	///
 	/// \param  centroids  centroid vectors
-	Centroids(Data<RealVector> const& centroids);
+	SHARK_EXPORT_SYMBOL Centroids(Data<RealVector> const& centroids);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "Centroids"; }
 
 	/// from IParameterizable
-	RealVector parameterVector() const;
+	SHARK_EXPORT_SYMBOL RealVector parameterVector() const;
 
 	/// from IParameterizable
-	void setParameterVector(RealVector const& newParameters);
+	SHARK_EXPORT_SYMBOL void setParameterVector(RealVector const& newParameters);
 
 	/// from IParameterizable
-	std::size_t numberOfParameters() const;
+	SHARK_EXPORT_SYMBOL std::size_t numberOfParameters() const;
 
 	/// return the dimension of the inputs
 	std::size_t dimension() const
@@ -93,7 +94,7 @@ public:
 	}
 
 	/// return the number of centroids in the model
-	std::size_t numberOfClusters() const;
+	SHARK_EXPORT_SYMBOL std::size_t numberOfClusters() const;
 
 	/// read access to the centroid vectors
 	Data<RealVector> const& centroids() const{
@@ -106,18 +107,18 @@ public:
 	}
 
 	/// from ISerializable
-	void read(InArchive& archive);
+	SHARK_EXPORT_SYMBOL void read(InArchive& archive);
 
 	/// from ISerializable
-	void write(OutArchive& archive) const;
+	SHARK_EXPORT_SYMBOL void write(OutArchive& archive) const;
 
 	/// from AbstractClustering: Compute cluster memberships.
-	RealVector softMembership(RealVector const& pattern) const;
+	SHARK_EXPORT_SYMBOL RealVector softMembership(RealVector const& pattern) const;
 	/// From AbstractClustering: Compute cluster memberships for a batch of patterns.
-	RealMatrix softMembership(BatchInputType const& patterns) const;
+	SHARK_EXPORT_SYMBOL RealMatrix softMembership(BatchInputType const& patterns) const;
 	
 	/// Computes the distances of each pattern to all cluster centers
-	RealMatrix distances(BatchInputType const& patterns) const;
+	SHARK_EXPORT_SYMBOL RealMatrix distances(BatchInputType const& patterns) const;
 
 
 	/// initialize centroids from labeled data: take the first
@@ -128,19 +129,19 @@ public:
 	/// \param  data  dataset from which to take the centroids
 	/// \param  noClusters  number of centroids in the model, default 0 is mapped to the number of classes in the data set
 	/// \param  noClasses  number of clases in the dataset, default 0 means that the number is computed 
-	void initFromData(ClassificationDataset const& data, unsigned noClusters = 0, unsigned noClasses = 0);
+	SHARK_EXPORT_SYMBOL void initFromData(ClassificationDataset const& data, unsigned noClusters = 0, unsigned noClasses = 0);
 
 	/// initialize centroids from unlabeled data: 
 	/// take a random subset of data points
 	///
 	/// \param  dataset dataset from which to take the centroids
 	/// \param  noClusters  number of centroids in the model
-	void initFromData(Data<RealVector> const& dataset, unsigned noClusters);
+	SHARK_EXPORT_SYMBOL void initFromData(Data<RealVector> const& dataset, unsigned noClusters);
 
 protected:
 	/// Compute unnormalized membership from distance.
 	/// The default implementation is to return exp(-distance)
-	virtual double membershipKernel(double dist) const;
+	SHARK_EXPORT_SYMBOL virtual double membershipKernel(double dist) const;
 
 	/// centroid vectors
 	Data<RealVector> m_centroids;

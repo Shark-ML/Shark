@@ -36,6 +36,7 @@
 #ifndef SHARK_MODELS_SOFTMAX_H
 #define SHARK_MODELS_SOFTMAX_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/AbstractModel.h>
 namespace shark {
 
@@ -74,9 +75,9 @@ private:
 
 public:
 	/// Constructor
-	Softmax(size_t inputs);
+	SHARK_EXPORT_SYMBOL Softmax(size_t inputs);
 	/// Constructor
-	Softmax();
+	SHARK_EXPORT_SYMBOL Softmax();
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -103,14 +104,14 @@ public:
 		return boost::shared_ptr<State>(new InternalState());
 	}
 
-	void eval(BatchInputType const& patterns,BatchOutputType& output)const;
-	void eval(BatchInputType const& patterns,BatchOutputType& output, State & state)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns,BatchOutputType& output)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns,BatchOutputType& output, State & state)const;
 	using AbstractModel<RealVector,RealVector>::eval;
 	
-	void weightedParameterDerivative(
+	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
 		BatchInputType const& patterns, BatchOutputType const& coefficients,  State const& state, RealVector& gradient
 	)const;
-	void weightedInputDerivative(
+	SHARK_EXPORT_SYMBOL void weightedInputDerivative(
 		BatchInputType const& patterns, RealMatrix const& coefficients,  State const& state, BatchOutputType& gradient
 	)const;
 
@@ -119,10 +120,10 @@ public:
 	}
 	
 	/// From ISerializable, reads a model from an archive
-	void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
 
 	/// From ISerializable, writes a model to an archive
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 	
 private:
 	std::size_t m_inputSize;

@@ -30,7 +30,7 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
+#define SHARK_COMPILE_DLL
 #include <shark/ObjectiveFunctions/Loss/DiscreteLoss.h>
 #include <boost/lambda/lambda.hpp>
 using namespace shark;

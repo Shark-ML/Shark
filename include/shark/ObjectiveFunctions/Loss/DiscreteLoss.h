@@ -34,7 +34,7 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_LOSS_DISCRETELOSS_H
 #define SHARK_OBJECTIVEFUNCTIONS_LOSS_DISCRETELOSS_H
 
-
+#include <shark/Core/DLLSupport.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 
 
@@ -60,7 +60,7 @@ public:
 
 	/// Constructor
 	/// \param  cost     cost matrix in the format (target, prediction).
-	DiscreteLoss(RealMatrix const& cost);
+	SHARK_EXPORT_SYMBOL DiscreteLoss(RealMatrix const& cost);
 
 
 	/// \brief From INameable: return the class name.
@@ -68,11 +68,11 @@ public:
 	{ return "DiscreteLoss"; }
 
 	/// inherited from AbstractLoss, evaluation of the loss function
-	double eval(BatchLabelType const& target, BatchOutputType const& prediction) const;
+	SHARK_EXPORT_SYMBOL double eval(BatchLabelType const& target, BatchOutputType const& prediction) const;
 
 	/// Define a new cost structure given by an explicit cost matrix.
 	/// \param  cost   cost matrix in the format (target, prediction).
-	void defineCostMatrix(RealMatrix const& cost);
+	SHARK_EXPORT_SYMBOL void defineCostMatrix(RealMatrix const& cost);
 
 	/// Define a new cost structure so that the cost of misclassifying
 	/// a pattern is anti-proportional to the frequency of its class.
@@ -81,7 +81,7 @@ public:
 	/// another).
 	///
 	/// \param  labels   label set to which the balanced loss should be adapted
-	void defineBalancedCost(UnlabeledData<unsigned int> const& labels);
+	SHARK_EXPORT_SYMBOL void defineBalancedCost(UnlabeledData<unsigned int> const& labels);
 
 protected:
 	/// cost matrix

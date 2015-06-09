@@ -31,7 +31,7 @@
  *
  */
 //===========================================================================
-
+#define SHARK_COMPILE_DLL
 #include <shark/Models/Clustering/Centroids.h>
 #include <shark/Data/DataView.h>
 

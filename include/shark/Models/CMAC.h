@@ -31,6 +31,7 @@
 #ifndef SHARK_ML_MODEL_CMAC_H
 #define SHARK_ML_MODEL_CMAC_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/AbstractModel.h>
 #include <shark/Rng/GlobalRng.h>
 #include <vector>
@@ -69,12 +70,12 @@ protected:
 	RealVector m_parameters;
 
 	///calculates the index in the parameter vector for the activated feature in the tiling
-	std::size_t getArrayIndexForTiling(std::size_t indexOfTiling,RealVector const& point)const;
+	SHARK_EXPORT_SYMBOL std::size_t getArrayIndexForTiling(std::size_t indexOfTiling,RealVector const& point)const;
 	///returns an index in the parameter array for each activated feature
-	std::vector<std::size_t> getIndizes(ConstRealMatrixRow const& point)const;
+	SHARK_EXPORT_SYMBOL std::vector<std::size_t> getIndizes(ConstRealMatrixRow const& point)const;
 public:
 	///\brief construct the CMAC
-	CMACMap();
+	SHARK_EXPORT_SYMBOL CMACMap();
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -89,7 +90,7 @@ public:
 	///\param lower lower bound of input values
 	///\param upper upper bound of input values
 	///\param randomTiles flag specifying whether distance between tiles is regular or randomized
-	void setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, double lower = 0., double upper = 1.,bool randomTiles = false);
+	SHARK_EXPORT_SYMBOL void setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, double lower = 0., double upper = 1.,bool randomTiles = false);
 
 	///\brief initializes the structure of the cmac
 	///
@@ -99,7 +100,7 @@ public:
 	///\param numberOfTiles amount of tiles per dimension
 	///\param bounds lower and upper bounts for every input dimension. every row consists of (lower,upper)
 	///\param randomTiles flag specifying whether distance between tiles is regular or randomized
-	void setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, RealMatrix const& bounds,bool randomTiles = false);
+	SHARK_EXPORT_SYMBOL void setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, RealMatrix const& bounds,bool randomTiles = false);
 
 	virtual std::size_t inputSize()const
 	{
@@ -129,21 +130,21 @@ public:
 	}
 	
 	using AbstractModel<RealVector,RealVector>::eval;
-	void eval(const RealMatrix& patterns,RealMatrix& outputs)const;
+	SHARK_EXPORT_SYMBOL void eval(const RealMatrix& patterns,RealMatrix& outputs)const;
 	void eval(const RealMatrix& patterns,RealMatrix& outputs, State& state)const{
 		eval(patterns,outputs);
 	}
-	void weightedParameterDerivative(
+	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
 		RealMatrix const& pattern, 
 		RealMatrix const& coefficients,  
 		State const& state,
 		RealVector& gradient)const;
 
 	/// From ISerializable, reads a model from an archive
-	void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
 
 	/// From ISerializable, writes a model to an archive
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 };
 
 

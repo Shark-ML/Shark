@@ -31,6 +31,7 @@
  *
  */
 //===========================================================================
+#define SHARK_COMPILE_DLL
 #include <shark/LinAlg/eigenvalues.h>
 #include <shark/Data/Statistics.h>
 #include <shark/Algorithms/Trainers/PCA.h>

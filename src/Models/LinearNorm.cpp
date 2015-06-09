@@ -31,6 +31,7 @@
  *
  */
 //===========================================================================
+#define SHARK_COMPILE_DLL
 #include <shark/Models/LinearNorm.h>
 using namespace shark;
 

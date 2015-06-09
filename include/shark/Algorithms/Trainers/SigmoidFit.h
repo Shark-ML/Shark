@@ -36,6 +36,7 @@
 #ifndef SHARK_ALGORITHMS_TRAINERS_SIGMOIDFIT_H
 #define SHARK_ALGORITHMS_TRAINERS_SIGMOIDFIT_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/Trainers//AbstractTrainer.h>
 #include <shark/Models/SigmoidModel.h>
 
@@ -53,13 +54,13 @@ namespace shark{
 class SigmoidFitRpropNLL: public AbstractTrainer<SigmoidModel, unsigned int>
 {
 public:
-	SigmoidFitRpropNLL( unsigned int iters = 100 );
+	SHARK_EXPORT_SYMBOL SigmoidFitRpropNLL( unsigned int iters = 100 );
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "SigmoidFitRpropNLL"; }
 
-	void train(SigmoidModel& model, LabeledData<RealVector, unsigned int> const& dataset);
+	SHARK_EXPORT_SYMBOL void train(SigmoidModel& model, LabeledData<RealVector, unsigned int> const& dataset);
 	
 private:
 	unsigned int m_iterations;
@@ -84,7 +85,7 @@ private:
 class SigmoidFitPlatt: public AbstractTrainer<SigmoidModel, unsigned int>
 {
 public:
-	void train(SigmoidModel& model, LabeledData<RealVector, unsigned int> const& dataset);
+	SHARK_EXPORT_SYMBOL void train(SigmoidModel& model, LabeledData<RealVector, unsigned int> const& dataset);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const

@@ -39,6 +39,7 @@
 #ifndef SHARK_ALGORITHMS_GRADIENTDESCENT_BFGS_H
 #define SHARK_ALGORITHMS_GRADIENTDESCENT_BFGS_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h>
 
 namespace shark {
@@ -47,15 +48,15 @@ namespace shark {
 class BFGS : public AbstractLineSearchOptimizer
 {
 protected:
-	void initModel();
-	void computeSearchDirection();
+	SHARK_EXPORT_SYMBOL void initModel();
+	SHARK_EXPORT_SYMBOL void computeSearchDirection();
 public:
 	std::string name() const
 	{ return "BFGS"; }
 
 	//from ISerializable
-	void read( InArchive & archive );
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 protected:
 	RealMatrix m_hessian;
 };

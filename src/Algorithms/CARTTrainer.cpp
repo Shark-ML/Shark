@@ -4,7 +4,7 @@
  *  Created on: Dec 1, 2011
  *	  Author: nybohansen
  */
-
+#define SHARK_COMPILE_DLL
 #include <shark/Algorithms/Trainers/CARTTrainer.h>
 #include <shark/Data/CVDatasetTools.h>
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>

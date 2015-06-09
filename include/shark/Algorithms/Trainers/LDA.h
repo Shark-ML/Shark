@@ -34,7 +34,7 @@
 #ifndef SHARK_ALGORITHMS_TRAINERS_LDA_H
 #define SHARK_ALGORITHMS_TRAINERS_LDA_H
 
-
+#include <shark/Core/DLLSupport.h>
 #include <shark/Core/IParameterizable.h>
 #include <shark/Models/LinearClassifier.h>
 #include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
@@ -95,9 +95,9 @@ public:
 	}
 
 	//! Compute the LDA solution for a multi-class problem.
-	void train(LinearClassifier<>& model, LabeledData<RealVector, unsigned int> const& dataset);
+	SHARK_EXPORT_SYMBOL void train(LinearClassifier<>& model, LabeledData<RealVector, unsigned int> const& dataset);
 	//! Compute the LDA solution for a weighted multi-class problem.
-	void train(LinearClassifier<>& model, WeightedLabeledData<RealVector, unsigned int> const& dataset);
+	SHARK_EXPORT_SYMBOL void train(LinearClassifier<>& model, WeightedLabeledData<RealVector, unsigned int> const& dataset);
 
 protected:
 	//!The regularization parameter \f$ \lambda \f$ adds

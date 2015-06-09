@@ -40,6 +40,8 @@
 
 #ifndef SHARK_DATA_SPARSEDATA_H
 #define SHARK_DATA_SPARSEDATA_H
+
+#include <shark/Core/DLLSupport.h>
 #include <fstream>
 #include <shark/Data/Dataset.h>
 
@@ -68,7 +70,7 @@ static inline bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortP
 /// \param  stream        stream to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 /// \param  batchSize     size of batch
-void importSparseData(
+SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
@@ -81,7 +83,7 @@ void importSparseData(
 /// \param  stream        stream to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 /// \param  batchSize     size of batch
-void importSparseData(
+SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
@@ -94,7 +96,7 @@ void importSparseData(
 /// \param  fn            the file to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 /// \param  batchSize     size of batch
-void importSparseData(
+SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
@@ -107,7 +109,7 @@ void importSparseData(
 /// \param  fn            the file to be read from
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 /// \param  batchSize     size of batch
-void importSparseData(
+SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,

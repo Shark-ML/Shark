@@ -36,7 +36,7 @@
 #ifndef SHARK_ALGORITHMS_KMEANS_H
 #define SHARK_ALGORITHMS_KMEANS_H
 
-
+#include <shark/Core/DLLSupport.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Models/Clustering/Centroids.h>
 #include <shark/Models/RBFLayer.h>
@@ -75,7 +75,7 @@ namespace shark{
 /// \param maxIterations  maximum number of k-means iterations; 0: unlimited
 /// \return               number of k-means iterations
 ///
-std::size_t kMeans(Data<RealVector> const& data, std::size_t k, Centroids& centroids, std::size_t maxIterations = 0);
+SHARK_EXPORT_SYMBOL std::size_t kMeans(Data<RealVector> const& data, std::size_t k, Centroids& centroids, std::size_t maxIterations = 0);
 
 ///
 /// \brief The k-means clustering algorithm for initializing an RBF Layer
@@ -102,7 +102,7 @@ std::size_t kMeans(Data<RealVector> const& data, std::size_t k, Centroids& centr
 /// \param maxIterations  maximum number of k-means iterations; 0: unlimited
 /// \return               number of k-means iterations
 ///
-std::size_t kMeans(Data<RealVector> const& data, RBFLayer& model, std::size_t maxIterations = 0);
+SHARK_EXPORT_SYMBOL std::size_t kMeans(Data<RealVector> const& data, RBFLayer& model, std::size_t maxIterations = 0);
 
 template<class InputType>
 KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k, AbstractKernelFunction<InputType>& kernel, std::size_t maxIterations = 0){

@@ -36,7 +36,7 @@
 #ifndef SHARK_ALGORITHMS_TRAINERS_CARTTRAINER_H
 #define SHARK_ALGORITHMS_TRAINERS_CARTTRAINER_H
 
-
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/Trees/CARTClassifier.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <boost/unordered_map.hpp>
@@ -72,7 +72,7 @@ class CARTTrainer
 , public AbstractTrainer<CARTClassifier<RealVector>, RealVector >
 {
 public:
-    typedef CARTClassifier<RealVector> ModelType;
+	typedef CARTClassifier<RealVector> ModelType;
 
 	/// Constructor
 	CARTTrainer(){
@@ -85,10 +85,10 @@ public:
 	{ return "CARTTrainer"; }
 
 	///Train classification
-	void train(ModelType& model, ClassificationDataset const& dataset);
+	SHARK_EXPORT_SYMBOL void train(ModelType& model, ClassificationDataset const& dataset);
 	
 	///Train regression
-	void train(ModelType& model, RegressionDataset const& dataset);
+	SHARK_EXPORT_SYMBOL void train(ModelType& model, RegressionDataset const& dataset);
 
 	///Sets the number of folds used for creation of the trees.
 	void setNumberOfFolds(unsigned int folds){
@@ -129,40 +129,40 @@ protected:
 	//Classification functions
 	///Builds a single decision tree from a classification dataset
 	///The method requires the attribute tables,
-	SplitMatrixType buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId );
+	SHARK_EXPORT_SYMBOL SplitMatrixType buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId );
 
 	///Calculates the Gini impurity of a node. The impurity is defined as
 	///1-sum_j p(j|t)^2
 	///i.e the 1 minus the sum of the squared probability of observing class j in node t
-	double gini(boost::unordered_map<std::size_t, std::size_t>& countMatrix, std::size_t n);
+	SHARK_EXPORT_SYMBOL double gini(boost::unordered_map<std::size_t, std::size_t>& countMatrix, std::size_t n);
 	///Creates a histogram from the count matrix.
-	RealVector hist(boost::unordered_map<std::size_t, std::size_t> countMatrix);
+	SHARK_EXPORT_SYMBOL RealVector hist(boost::unordered_map<std::size_t, std::size_t> countMatrix);
 
 	///Regression functions
-	SplitMatrixType buildTree(AttributeTables const& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, std::size_t trainSize);
+	SHARK_EXPORT_SYMBOL SplitMatrixType buildTree(AttributeTables const& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, std::size_t trainSize);
 	///Calculates the total sum of squares
-	double totalSumOfSquares(std::vector<RealVector> const& labels, std::size_t start, std::size_t length, const RealVector& sumLabel);
+	SHARK_EXPORT_SYMBOL double totalSumOfSquares(std::vector<RealVector> const& labels, std::size_t start, std::size_t length, const RealVector& sumLabel);
 	///Calculates the mean of a vector of labels
-	RealVector mean(std::vector<RealVector> const& labels);
+	SHARK_EXPORT_SYMBOL RealVector mean(std::vector<RealVector> const& labels);
 
 	///Pruning
 	///Prunes decision tree, represented by a split matrix
-	void pruneMatrix(SplitMatrixType& splitMatrix);
+	SHARK_EXPORT_SYMBOL void pruneMatrix(SplitMatrixType& splitMatrix);
 	///Prunes a single node, including the child nodes of the decision tree
-	void pruneNode(SplitMatrixType& splitMatrix, std::size_t nodeId);
+	SHARK_EXPORT_SYMBOL void pruneNode(SplitMatrixType& splitMatrix, std::size_t nodeId);
 	///Updates the node variables used in the cost complexity pruning stage
-	void measureStrenght(SplitMatrixType& splitMatrix, std::size_t nodeId, std::size_t parentNodeId);
+	SHARK_EXPORT_SYMBOL void measureStrenght(SplitMatrixType& splitMatrix, std::size_t nodeId, std::size_t parentNodeId);
 
 	///Returns the index of the node with node id in splitMatrix.
-	std::size_t findNode(SplitMatrixType& splitMatrix, std::size_t nodeId);
+	SHARK_EXPORT_SYMBOL std::size_t findNode(SplitMatrixType& splitMatrix, std::size_t nodeId);
 
 	///Attribute table functions
 	///Create the attribute tables used by the SPRINT algorithm
-	AttributeTables createAttributeTables(Data<RealVector> const& dataset);
+	SHARK_EXPORT_SYMBOL AttributeTables createAttributeTables(Data<RealVector> const& dataset);
 	///Splits the attribute tables by a attribute index and value. Returns a left and a right attribute table in the variables LAttributeTables and RAttributeTables
-	void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
+	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
 	///Crates count matrices from a classification dataset
-	boost::unordered_map<std::size_t, std::size_t> createCountMatrix(ClassificationDataset const& dataset);
+	SHARK_EXPORT_SYMBOL boost::unordered_map<std::size_t, std::size_t> createCountMatrix(ClassificationDataset const& dataset);
 
 
 };

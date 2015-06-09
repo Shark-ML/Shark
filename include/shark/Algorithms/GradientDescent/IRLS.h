@@ -35,6 +35,7 @@
 #ifndef ALGORITHMS_TRAINER_IRLS_H
 #define ALGORITHMS_TRAINER_IRLS_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Algorithms/GradientDescent/LineSearch.h>
 
@@ -53,8 +54,8 @@ namespace shark {
 class IRLS : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
-	IRLS();
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
+	SHARK_EXPORT_SYMBOL IRLS();
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	
 	/// \brief From INameable: return the class name.
@@ -65,7 +66,7 @@ public:
 		m_isPositive= true;
 	}
 
-	void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
 	const LineSearch& lineSearch()const
 	{
 		return m_linesearch;

@@ -34,6 +34,7 @@
 #ifndef SHARK_MODELS_RNNET_H
 #define SHARK_MODELS_RNNET_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/AbstractModel.h>
 #include <shark/Models/RecurrentStructure.h>
 
@@ -111,7 +112,7 @@ public:
 	//!  \param  pattern  batch of timeseries for the network.
 	//!  \param  output Used to store the outputs of the network.
 	//!  \param  state stores additional information which can be reused for the computation of the derivative
-	void eval(BatchInputType const& pattern, BatchOutputType& output, State& state)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& pattern, BatchOutputType& output, State& state)const;
 	using AbstractModel<Sequence,Sequence>::eval;
 	
 	/// obtain the input dimension
@@ -144,7 +145,7 @@ public:
 	//! \param coefficients the coefficients which are used to calculate the weighted sum
 	//! \param state the last state stord during eval
 	//! \param gradient the calculated gradient
-	void weightedParameterDerivative(
+	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
 		BatchInputType const& patterns, BatchInputType const& coefficients,  State const& state, 
 		RealVector& gradient
 	)const;

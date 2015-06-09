@@ -31,6 +31,7 @@
  *
  */
 //===========================================================================
+#define SHARK_COMPILE_DLL
 #include <shark/Models/SigmoidModel.h>
 
 #include <boost/math/special_functions/sign.hpp>

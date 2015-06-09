@@ -32,6 +32,7 @@
 #ifndef SHARK_MODELS_RBFLayer_H
 #define SHARK_MODELS_RBFLayer_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/AbstractModel.h>
 #include <boost/math/constants/constants.hpp>
 namespace shark {
@@ -77,7 +78,7 @@ public:
 	///                    input space.
 	///  \param  numOutput Number of output neurons, equal to dimensionality of
 	///                    output space and number of gaussian distributions
-	RBFLayer(std::size_t numInput, std::size_t numOutput);
+	SHARK_EXPORT_SYMBOL RBFLayer(std::size_t numInput, std::size_t numOutput);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -87,13 +88,13 @@ public:
 	///
 	///The format of the parameter vector is \f$ (m_1,\dots,m_k,\log(\gamma_1),\dots,\log(\gamma_k))\f$
 	///if training of one or more parameters is deactivated, they are removed from the parameter vector
-	RealVector parameterVector()const;
+	SHARK_EXPORT_SYMBOL RealVector parameterVector()const;
 	
 	///\brief Sets the new internal parameters.
-	void setParameterVector(RealVector const& newParameters);
+	SHARK_EXPORT_SYMBOL void setParameterVector(RealVector const& newParameters);
 	
 	///\brief Returns the number of parameters which are currently enabled for training.
-	std::size_t numberOfParameters()const;
+	SHARK_EXPORT_SYMBOL std::size_t numberOfParameters()const;
 
 	///\brief Returns the number of input neurons.
 	std::size_t inputSize()const{
@@ -120,14 +121,14 @@ public:
 	///                    input space.
 	///  \param  numOutput Number of output neurons (basis functions), equal to dimensionality of
 	///                    output space.
-	void setStructure(std::size_t numInput, std::size_t numOutput);
+	SHARK_EXPORT_SYMBOL void setStructure(std::size_t numInput, std::size_t numOutput);
 
 	
 	using AbstractModel<RealVector,RealVector>::eval;
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const;
 	
 
-	void weightedParameterDerivative(
+	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
 		BatchInputType const& pattern, BatchOutputType const& coefficients, State const& state, RealVector& gradient
 	)const;
 
@@ -135,7 +136,7 @@ public:
 	///
 	/// \param centers whether the centers should be trained
 	/// \param width whether the distribution width should be trained
-	void setTrainingParameters(bool centers, bool width);
+	SHARK_EXPORT_SYMBOL void setTrainingParameters(bool centers, bool width);
 
 	///\brief Returns the center values of the neurons.
 	BatchInputType const& centers()const{
@@ -152,13 +153,13 @@ public:
 	}
 	
 	/// \brief sets the width parameters - the gamma values - of the distributions.
-	void setGamma(RealVector const& gamma);
+	SHARK_EXPORT_SYMBOL void setGamma(RealVector const& gamma);
 	
 	/// From ISerializable, reads a model from an archive
-	void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
 
 	/// From ISerializable, writes a model to an archive
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 protected:
 	//====model parameters
 

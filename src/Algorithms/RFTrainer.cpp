@@ -31,6 +31,7 @@
  *
  */
 //===========================================================================
+#define SHARK_COMPILE_DLL
 
 #include <shark/Algorithms/Trainers/RFTrainer.h>
 #include <shark/Models/Trees/RFClassifier.h>

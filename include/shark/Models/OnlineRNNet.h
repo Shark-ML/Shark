@@ -34,6 +34,7 @@
 #ifndef SHARK_MODELS_ONLINERNNET_H
 #define SHARK_MODELS_ONLINERNNET_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Models/AbstractModel.h>
 #include <shark/Models/RecurrentStructure.h>
 namespace shark{
@@ -52,7 +53,7 @@ class OnlineRNNet:public AbstractModel<RealVector,RealVector>
 {
 public:
 	//! creates a configured neural network
-	OnlineRNNet(RecurrentStructure* structure);
+	SHARK_EXPORT_SYMBOL OnlineRNNet(RecurrentStructure* structure);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -63,7 +64,7 @@ public:
 	//!
 	//!  \param  pattern  Input patterns for the network.
 	//!  \param  output Used to store the outputs of the network.
-	void eval(RealMatrix const& pattern,RealMatrix& output);
+	SHARK_EXPORT_SYMBOL void eval(RealMatrix const& pattern,RealMatrix& output);
 	using AbstractModel<RealVector,RealVector>::eval;
 
 	/// obtain the input dimension
@@ -85,7 +86,7 @@ public:
 	//! \param pattern the pattern to evaluate
 	//! \param coefficients the oefficients which are used to calculate the weighted sum
 	//! \param gradient the calculated gradient
-	void weightedParameterDerivative(RealMatrix const& pattern, RealMatrix const& coefficients,  RealVector& gradient);
+	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(RealMatrix const& pattern, RealMatrix const& coefficients,  RealVector& gradient);
 
 	//! get internal parameters of the model
 	RealVector parameterVector() const{

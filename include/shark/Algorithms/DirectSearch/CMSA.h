@@ -44,6 +44,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECTSEARCH_CMSA_H
 #define SHARK_ALGORITHMS_DIRECTSEARCH_CMSA_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
@@ -102,19 +103,19 @@ namespace shark {
 			return result;
 		}
 
-		void read( InArchive & archive );
-		void write( OutArchive & archive ) const;
+		SHARK_EXPORT_SYMBOL void read( InArchive & archive );
+		SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 
 		using AbstractSingleObjectiveOptimizer<RealVector >::init;
 		/**
 		* \brief Initializes the algorithm for the supplied objective function.
 		*/
-		void init( ObjectiveFunctionType const& function, SearchPointType const& p);
+		SHARK_EXPORT_SYMBOL void init( ObjectiveFunctionType const& function, SearchPointType const& p);
 
 		/**
 		* \brief Executes one iteration of the algorithm.
 		*/
-		void step(ObjectiveFunctionType const& function);
+		SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& function);
 
 		/**
 		* \brief Accesses the size of the parent population.
@@ -160,7 +161,7 @@ namespace shark {
 		/**
 		* \brief Updates the strategy parameters based on the supplied offspring population.
 		*/
-		void updateStrategyParameters( const std::vector< IndividualType > & offspringNew ) ;
+		SHARK_EXPORT_SYMBOL void updateStrategyParameters( const std::vector< IndividualType > & offspringNew ) ;
 	};
 }
 

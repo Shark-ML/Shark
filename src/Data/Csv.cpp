@@ -31,6 +31,7 @@
  *
  */
 //===========================================================================
+#define SHARK_COMPILE_DLL
 #include <limits>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/adapted/std_pair.hpp>

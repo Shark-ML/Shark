@@ -34,7 +34,7 @@
 
 #ifndef SHARK_ML_OPTIMIZER_NOISYRPROP_H
 #define SHARK_ML_OPTIMIZER_NOISYRPROP_H
-
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 namespace shark{
 
@@ -56,7 +56,7 @@ namespace shark{
 class NoisyRprop : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
-	NoisyRprop();
+	SHARK_EXPORT_SYMBOL NoisyRprop();
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -64,17 +64,17 @@ public:
 
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	//! initialization with default values
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
 
 	//! user defined initialization
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint,double delta0P);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint,double delta0P);
 
 	//! user defined initialization with
 	//! coordinate wise individual step sizes
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint,const RealVector& delta0P);
+	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint,const RealVector& delta0P);
 
 	//! optimization step
-	void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
 
 protected:
 	//! individual step sizes
