@@ -80,7 +80,7 @@ class FisherLDA : public AbstractTrainer<LinearModel<>, unsigned int>
 {
 public:
 	/// Constructor
-	FisherLDA(bool whitening = false, std::size_t subspaceDimension = 0);
+	SHARK_EXPORT_SYMBOL FisherLDA(bool whitening = false, std::size_t subspaceDimension = 0);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const

@@ -149,7 +149,7 @@ public:
 	SHARK_EXPORT_SYMBOL void setStructure(std::size_t in, std::size_t hidden, std::size_t out, bool bias = true, SigmoidType sigmoidType = Logistic);
 
 	//! get internal parameters of the model
-	RealVector parameterVector() const;
+	SHARK_EXPORT_SYMBOL RealVector parameterVector() const;
 	
 	//! set internal parameters of the model
 	SHARK_EXPORT_SYMBOL void setParameterVector(RealVector const& newParameters);
