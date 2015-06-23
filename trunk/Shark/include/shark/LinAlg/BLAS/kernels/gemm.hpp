@@ -33,7 +33,7 @@
 
 #include "default/gemm.hpp"
 
-#ifdef SHARK_USE_ATLAS
+#ifdef SHARK_USE_CBLAS
 #include "atlas/gemm.hpp"
 #else
 //if no bindings are included, we have to provide the default has_optimized_gemm otherwise the binding will take care of this
@@ -43,7 +43,7 @@ struct  has_optimized_gemm
 : public boost::mpl::false_{};
 }}}
 #endif
-	
+
 namespace shark { namespace blas {namespace kernels{
 	
 ///\brief Well known GEneral Matrix-Matrix product kernel M+=alpha*E1*E2.
