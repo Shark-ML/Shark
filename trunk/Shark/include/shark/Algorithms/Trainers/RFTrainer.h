@@ -41,6 +41,7 @@
 #include <shark/Models/Trees/RFClassifier.h>
 
 #include <boost/unordered_map.hpp>
+#include <set>
 
 namespace shark {
 /*!
