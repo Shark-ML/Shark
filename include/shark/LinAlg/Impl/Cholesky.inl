@@ -36,7 +36,7 @@
 #ifndef SHARK_IMPL_LINALG_CHOLESKY_INL
 #define SHARK_IMPL_LINALG_CHOLESKY_INL
 
-#ifdef SHARK_USE_ATLAS
+#ifdef SHARK_USE_ATLAS_LAPACK
 #include <shark/LinAlg/BLAS/kernels/atlas/potrf.hpp>
 #endif
 
@@ -50,7 +50,7 @@ void shark::blas::choleskyDecomposition(
 {
 	size_t m = A().size1();
 	ensure_size(L,m, m);
-#ifdef SHARK_USE_ATLAS
+#ifdef SHARK_USE_ATLAS_LAPACK
 	L().clear();
 	for(std::size_t i = 0; i != m; ++i){
 		for(std::size_t j = 0; j <= i; ++j){

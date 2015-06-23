@@ -244,52 +244,64 @@ ENDIF( HDF5_FOUND )
 #####################################################################
 #           ATLAS configuration
 #####################################################################
-OPTION( OPT_ENABLE_ATLAS "Use ATLAS as Linear Algebra Library" OFF )
-OPTION( ATLAS_FULL_LAPACK "Signalizes whether ATLAS comes with the full LAPACK package" OFF )
-IF ( OPT_ENABLE_ATLAS )
-	find_library(CBLAS_LIBRARY
-		cblas
-		HINTS
-		${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
-	)
-	find_library(CLAPACK_LIBRARY
-		lapack
-		HINTS
-		${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
-	)
-	find_library(ATLAS_LIBRARY
-		atlas
-		HINTS
-		${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
-	)
+IF (APPLE)
+	OPTION( OPT_ENABLE_ACCELERATE "Use ATLAS as Linear Algebra Library (through the Accelerate framework)" ON )
+	IF ( OPT_ENABLE_ACCELERATE )
+		ADD_DEFINITIONS( -DSHARK_USE_CBLAS )          # most linear algebra routines
+#		ADD_DEFINITIONS( -DSHARK_USE_ATLAS_LAPACK )   # Cholesky decomposition
+#		ADD_DEFINITIONS( -DSHARK_USE_LAPACK )         # eigen decomposition
+		message(STATUS "Using the Accelerate framework")
+		SET(LINK_LIBRARIES ${LINK_LIBRARIES} "-framework Accelerate" )
+	ENDIF (OPT_ENABLE_ACCELERATE)
+ELSE (APPLE)
+	OPTION( OPT_ENABLE_ATLAS "Use ATLAS as Linear Algebra Library" OFF )
+	OPTION( ATLAS_FULL_LAPACK "Signalizes whether ATLAS comes with the full LAPACK package" OFF )
+	IF ( OPT_ENABLE_ATLAS )
+		find_library(CBLAS_LIBRARY
+			cblas
+			HINTS
+			${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+		)
+		find_library(CLAPACK_LIBRARY
+			lapack
+			HINTS
+			${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+		)
+		find_library(ATLAS_LIBRARY
+			atlas
+			HINTS
+			${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+		)
 
-	get_filename_component(ATLAS_PATH @CBLAS_LIBRARY@ PATH )
-	SET (ATLAS_PATH ${ATLAS_PATH}/.. )
-	mark_as_advanced(
-		CBLAS_LIBRARY
-		CLAPACK_LIBRARY
-		ATLAS_LIBRARY
-	)
-	IF ( CBLAS_LIBRARY )
-		message(STATUS "ATLAS found....true")
-		SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${CLAPACK_LIBRARY} )
-		SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${CBLAS_LIBRARY} )
-		SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${ATLAS_LIBRARY} )
-		ADD_DEFINITIONS( -DSHARK_USE_ATLAS )
-		if( ATLAS_FULL_LAPACK )
-			ADD_DEFINITIONS( -DSHARK_USE_LAPACK )
-		ENDIF ( ATLAS_FULL_LAPACK )
-		IF ( ATLAS_ROOT )
-				message(STATUS "ATLAS root: " ${ATLAS_ROOT})
-				include_directories ( ${ATLAS_ROOT}/include/ ${ATLAS_ROOT}/include/atlas/ )
-		ELSE( ATLAS_ROOT )
-				message(STATUS "ATLAS path: " ${ATLAS_PATH})
-				include_directories ( ${ATLAS_PATH}/include/ ${ATLAS_PATH}/include/atlas/ )
-		ENDIF(ATLAS_ROOT)
-	ELSE ( CBLAS_LIBRARY )
-		message(STATUS "ATLAS found....false")
-	ENDIF ( CBLAS_LIBRARY )
-ENDIF ( OPT_ENABLE_ATLAS )
+		get_filename_component(ATLAS_PATH @CBLAS_LIBRARY@ PATH )
+		SET (ATLAS_PATH ${ATLAS_PATH}/.. )
+		mark_as_advanced(
+			CBLAS_LIBRARY
+			CLAPACK_LIBRARY
+			ATLAS_LIBRARY
+		)
+		IF ( CBLAS_LIBRARY )
+			message(STATUS "ATLAS found....true")
+			SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${CLAPACK_LIBRARY} )
+			SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${CBLAS_LIBRARY} )
+			SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${ATLAS_LIBRARY} )
+			ADD_DEFINITIONS( -DSHARK_USE_CBLAS )
+			ADD_DEFINITIONS( -DSHARK_USE_ATLAS_LAPACK )
+			if( ATLAS_FULL_LAPACK )
+				ADD_DEFINITIONS( -DSHARK_USE_LAPACK )
+			ENDIF ( ATLAS_FULL_LAPACK )
+			IF ( ATLAS_ROOT )
+					message(STATUS "ATLAS root: " ${ATLAS_ROOT})
+					include_directories ( ${ATLAS_ROOT}/include/ ${ATLAS_ROOT}/include/atlas/ )
+			ELSE( ATLAS_ROOT )
+					message(STATUS "ATLAS path: " ${ATLAS_PATH})
+					include_directories ( ${ATLAS_PATH}/include/ ${ATLAS_PATH}/include/atlas/ )
+			ENDIF(ATLAS_ROOT)
+		ELSE ( CBLAS_LIBRARY )
+			message(STATUS "ATLAS found....false")
+		ENDIF ( CBLAS_LIBRARY )
+	ENDIF ( OPT_ENABLE_ATLAS )
+ENDIF (APPLE)
 
 #####################################################################
 #                       Static Code Analysis

@@ -31,7 +31,7 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_TRMV_HPP
 #define SHARK_LINALG_BLAS_KERNELS_TRMV_HPP
 
-#ifdef SHARK_USE_ATLAS
+#ifdef SHARK_USE_CBLAS
 #include "atlas/trmv.hpp"
 #else
 // if no bindings are included, we have to provide the default has_optimized_gemv 

@@ -55,10 +55,22 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_CBLAS_INC_HPP
 #define SHARK_LINALG_BLAS_KERNELS_ATLAS_CBLAS_INC_HPP
 
+#ifdef __APPLE__
+
+// Accelerate framework support added by TG 19.06.2015
+extern "C" {
+#include <Accelerate/Accelerate.h>
+}
+#undef nil
+
+#else
+
 extern "C" {
 #include <cblas.h>
 #include <clapack.h>
 }
+
+#endif
 
 //all atlas using functions need this anyway...
 //so we prevent multiple includes in all atlas using functions

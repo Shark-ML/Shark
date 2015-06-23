@@ -32,7 +32,7 @@
 
 #include "default/dot.hpp"
 
-#ifdef SHARK_USE_ATLAS
+#ifdef SHARK_USE_CBLAS
 #include "atlas/dot.hpp"
 #else
 // if no bindings are included, we have to provide the default has_optimized_dot
