@@ -102,7 +102,7 @@ public:
 		State const& state, 
 		RealVector& gradient
 	) const{
-		m_kernel->weightedParameterDerivative(boost::fusion::at_c<N>(batchX1),boost::fusion::at_c<N>(batchX2),coefficients,state,gradient);
+		m_kernel->weightedParameterDerivative(boost::fusion::at_c<N>(fusionize(batchX1)),boost::fusion::at_c<N>(fusionize(batchX2)),coefficients,state,gradient);
 	}
 	void weightedInputDerivative( 
 		BatchInputType const& batchX1, 
@@ -111,7 +111,7 @@ public:
 		State const& state, 
 		BatchInputType& gradient
 	) const{
-		m_kernel->weightedInputDerivative(boost::fusion::at_c<N>(batchX1),boost::fusion::at_c<N>(batchX2),coefficientsX2,state,boost::fusion::at_c<N>(gradient));
+		m_kernel->weightedInputDerivative(boost::fusion::at_c<N>(fusionize(batchX1)),boost::fusion::at_c<N>(fusionize(batchX2)),coefficientsX2,state,boost::fusion::at_c<N>(fusionize(gradient)));
 	}
 	
 	//w don't need serializing here, this is done by the implementing Kernel
