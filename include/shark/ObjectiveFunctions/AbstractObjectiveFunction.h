@@ -151,7 +151,9 @@ public:
 	/// \brief Virtual destructor
 	virtual ~AbstractObjectiveFunction() {}
 
-	virtual void init() {}
+	virtual void init() {
+		m_evaluationCounter=0;
+	}
 	
 	/// \brief Accesses the number of variables
 	virtual std::size_t numberOfVariables() const=0;
