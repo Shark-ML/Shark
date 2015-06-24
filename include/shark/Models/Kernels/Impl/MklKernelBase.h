@@ -84,15 +84,15 @@ public:
 	}
 	
 	double eval(ConstInputReference x1, ConstInputReference x2) const{
-		return m_kernel->eval(boost::fusion::at_c<N>(x1),boost::fusion::at_c<N>(x2));
+		return m_kernel->eval(boost::fusion::at_c<N>(fusionize(x1)),boost::fusion::at_c<N>(fusionize(x2)));
 	}
 	
 	void eval(BatchInputType const& batchX1, BatchInputType const& batchX2, RealMatrix& result, State& state) const{
-		m_kernel->eval(boost::fusion::at_c<N>(batchX1),boost::fusion::at_c<N>(batchX2),result,state);
+		m_kernel->eval(boost::fusion::at_c<N>(fusionize(batchX1)),boost::fusion::at_c<N>(fusionize(batchX2)),result,state);
 	}
 	
 	void eval(BatchInputType const& batchX1, BatchInputType const& batchX2, RealMatrix& result) const{
-		m_kernel->eval(boost::fusion::at_c<N>(batchX1),boost::fusion::at_c<N>(batchX2),result);
+		m_kernel->eval(boost::fusion::at_c<N>(fusionize(batchX1)),boost::fusion::at_c<N>(fusionize(batchX2)),result);
 	}
 	
 	void weightedParameterDerivative(
