@@ -76,8 +76,8 @@ public:
 		m_k = k;
 	}
 
-	void proposeStartingPoint(SearchPointType& startingPoint) const{
-		startingPoint = mpe_rbm->parameterVector();
+	SearchPointType proposeStartingPoint() const{
+		return  mpe_rbm->parameterVector();
 	}
 	
 	/// \brief Returns the number of variables of the RBM.

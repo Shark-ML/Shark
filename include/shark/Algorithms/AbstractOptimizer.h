@@ -112,9 +112,12 @@ public:
 
 	/**
 	* \brief Initialize the optimizer for the supplied objective function.
+	*
+	* This will also call function->init() to reset the internal state of the function,
+	* for example the evaluation counter
 	* \param [in] function The objective function to initialize for.
 	*/
-	virtual void init( ObjectiveFunctionType const& function ) = 0;
+	virtual void init( ObjectiveFunctionType& function ) = 0;
 
 	/**
 	* \brief Carry out one step of the optimizer for the supplied objective function.
@@ -134,7 +137,7 @@ protected:
 	* \param [in] objectiveFunction The function to match with.
 	* \throws shark::Exception
 	*/
-	void checkFeatures (const ObjectiveFunctionType & objectiveFunction){
+	void checkFeatures (ObjectiveFunctionType const& objectiveFunction){
 		//test first derivative
 		if( (m_features & REQUIRES_FIRST_DERIVATIVE) &
 			!(objectiveFunction.features() & ObjectiveFunctionType::HAS_FIRST_DERIVATIVE)

@@ -111,7 +111,6 @@ SHARK_ADD_TEST( Algorithms/GradientDescent/LBFGS.cpp GradDesc_LBFGS )
 SHARK_ADD_TEST( Algorithms/GradientDescent/CG.cpp GradDesc_CG )
 SHARK_ADD_TEST( Algorithms/GradientDescent/IRLS.cpp GradDesc_IRLS )
 SHARK_ADD_TEST( Algorithms/GradientDescent/Rprop.cpp GradDesc_Rprop )
-SHARK_ADD_TEST( Algorithms/GradientDescent/NoisyRprop.cpp GradDesc_NoisyRprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_SteepestDescent )
 
 

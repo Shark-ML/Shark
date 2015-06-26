@@ -48,14 +48,14 @@ namespace shark {
 ///function itself is not quadratic most of the time, IRLS then performs a line search in that 
 ///direction instead of just taking the newton solution as optimal point. This prevents divergence.
 ///Be warned that calculating the inverse hessian takes O(n^2) 
-/// memory tand O(n^3) runtime. So for large scale problems
+/// memory and O(n^3) runtime. So for large scale problems
 ///use CG or BFGS instead.
 ///TODO: implement backtracking linesearch for this 
 class IRLS : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
 	SHARK_EXPORT_SYMBOL IRLS();
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	
 	/// \brief From INameable: return the class name.
@@ -66,7 +66,7 @@ public:
 		m_isPositive= true;
 	}
 
-	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
 	const LineSearch& lineSearch()const
 	{
 		return m_linesearch;

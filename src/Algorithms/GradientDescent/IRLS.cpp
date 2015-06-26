@@ -44,8 +44,10 @@ IRLS::IRLS()
 	m_features |= REQUIRES_SECOND_DERIVATIVE;
 	m_isPositive = false;
 }
-void IRLS::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
+void IRLS::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {
 	checkFeatures(objectiveFunction);
+	objectiveFunction.init();
+	
 	m_best.point = startingPoint;
 	m_linesearch.init(objectiveFunction);
 	

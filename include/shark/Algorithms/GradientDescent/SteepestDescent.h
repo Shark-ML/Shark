@@ -53,9 +53,10 @@ public:
 	std::string name() const
 	{ return "SteepestDescent"; }
 
-	void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
+	void init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
 		checkFeatures(objectiveFunction);
-
+		objectiveFunction.init();
+		
 		m_path.resize(startingPoint.size());
 		m_path.clear();
 		m_best.point = startingPoint;
@@ -93,7 +94,7 @@ public:
 	/*!
 	 *  \brief updates searchdirection and then does simple gradient descent
 	 */
-	void step(const ObjectiveFunctionType& objectiveFunction) {
+	void step(ObjectiveFunctionType const& objectiveFunction) {
 		m_path = -m_learningRate * m_derivative + m_momentum * m_path;
 		m_best.point+=m_path;
 		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);

@@ -65,12 +65,13 @@ struct Ellipsoid : public SingleObjectiveFunction {
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	void proposeStartingPoint( SearchPointType & x ) const {
-		x.resize( m_numberOfVariables );
+	SearchPointType proposeStartingPoint() const {
+		RealVector x(numberOfVariables());
 
-		for( unsigned int i = 0; i < x.size(); i++ ) {
-			x( i ) = Rng::uni( 0, 1 );
+		for (unsigned int i = 0; i < x.size(); i++) {
+			x(i) = Rng::uni(0,1);
 		}
+		return x;
 	}
 
 	double eval( const SearchPointType & p ) const {

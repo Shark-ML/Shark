@@ -86,8 +86,8 @@ public:
 		return mp_wrapper->numberOfVariables();
 	}
 
-	void proposeStartingPoint(SearchPointType& startingPoint) const{
-		mp_wrapper->proposeStartingPoint(startingPoint);
+	SearchPointType proposeStartingPoint() const{
+		return mp_wrapper->proposeStartingPoint();
 	}
 	
 	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){

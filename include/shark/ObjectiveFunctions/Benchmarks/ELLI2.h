@@ -111,10 +111,13 @@ struct ELLI2 : public MultiObjectiveFunction{
 		return value;
 	}
 
-	void proposeStartingPoint( SearchPointType & x ) const {
-		x.resize( numberOfVariables() );
-		for( unsigned int i = 0; i < numberOfVariables(); i++ )
-			x( i ) = Rng::uni( -10., 10. );
+	SearchPointType proposeStartingPoint() const {
+		RealVector x(numberOfVariables());
+
+		for (unsigned int i = 0; i < x.size(); i++) {
+			x(i) = Rng::uni(-10,10);
+		}
+		return x;
 	}
 
 private:

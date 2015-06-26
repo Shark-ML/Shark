@@ -84,6 +84,7 @@ public:
 		crossoverProbability() = 0.8;
 		nc() = 20.0;
 		nm() = 20.0;
+		this->m_features |= AbstractMultiObjectiveOptimizer<RealVector >::CAN_SOLVE_CONSTRAINED;
 	}
 
 	std::string name() const {
@@ -148,15 +149,18 @@ public:
 	* \param [in] startingPoints Starting point to initialize the algorithm for.
 	*/
 	void init( 
-		ObjectiveFunctionType const& function, 
+		ObjectiveFunctionType& function, 
 		std::vector<SearchPointType> const& startingPoints
 	){
+		checkFeatures(function);
+		function.init();
+		
 		//create parent set
 		m_pop.reserve( 2 * mu() );
 		m_pop.resize(mu());
 		m_best.resize(mu());
 		for(std::size_t i = 0; i != mu(); ++i){
-			function.proposeStartingPoint( m_pop[i].searchPoint() );
+			m_pop[i].searchPoint()= function.proposeStartingPoint();
 		}
 		//evaluate initial parent set and create best front
 		m_evaluator( function, m_pop.begin(),m_pop.begin()+mu() );

@@ -51,8 +51,10 @@ void ElitistCMA::write( OutArchive & archive ) const {
 }
 
 
-void ElitistCMA::init( ObjectiveFunctionType const& function, SearchPointType const& p){
-	
+void ElitistCMA::init( ObjectiveFunctionType& function, SearchPointType const& p){
+	checkFeatures(function);
+	function.init();
+
 	//create and evaluate individual
 	m_individual = CMAIndividual<double>(p.size());
 	m_individual.chromosome().m_stepSize = std::sqrt(1.0/p.size());

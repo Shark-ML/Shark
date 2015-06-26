@@ -219,12 +219,15 @@ public:
 
 	///  \brief Proposes a starting point in the feasible search space of the function.
 	/// 
-	///  \param [out] startingPoint The starting point is placed here.
+	///  \return The generated starting point.
 	///  \throws FeatureNotAvailableException in the default implementation
 	///  and if a function does not support this feature.
-	virtual void proposeStartingPoint( SearchPointType & startingPoint )const {
-		if(hasConstraintHandler()&& getConstraintHandler().canGenerateRandomPoint())
+	virtual SearchPointType proposeStartingPoint()const {
+		if(hasConstraintHandler()&& getConstraintHandler().canGenerateRandomPoint()){
+			SearchPointType startingPoint;
 			getConstraintHandler().generateRandomPoint(startingPoint);
+			return startingPoint;
+		}
 		else{
 			SHARK_FEATURE_EXCEPTION(CAN_PROPOSE_STARTING_POINT);
 		}

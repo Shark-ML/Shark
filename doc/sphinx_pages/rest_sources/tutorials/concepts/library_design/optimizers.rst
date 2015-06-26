@@ -107,8 +107,9 @@ the local optimum:
 ============================================   =========================================================================
 Method                                         Description
 ============================================   =========================================================================
-``init(ObjectiveFunctionType)``                Initializes the algorithm. Internal data structures are initialized
-                                               and the flags of the objective function checked.
+``init(ObjectiveFunctionType)``                Initializes the algorithm and calls init of the objective function.
+                                               Internal data structures are initialized and the flags of 
+					       the objective function checked.
 ``step(ObjectiveFunctionType)``                Performs one step of the learning algorithm on the objective function.
 ``SolutionSetType solution()``                 Returns the current best solution found.
 ============================================   =========================================================================

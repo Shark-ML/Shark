@@ -135,9 +135,10 @@ public:
 	{ return "KernelTargetAlignment"; }
 
 	/// Return the current kernel parameters as a starting point for an optimization run.
-	void proposeStartingPoint(SearchPointType& startingPoint) const {
-		startingPoint =  mep_kernel -> parameterVector();
+	SearchPointType proposeStartingPoint() const {
+		return  mep_kernel -> parameterVector();
 	}
+	
 	
 	std::size_t numberOfVariables()const{
 		return mep_kernel->numberOfParameters();

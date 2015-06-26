@@ -94,7 +94,6 @@ struct ELLI1 : public MultiObjectiveFunction{
 
 		ResultType value( 2 );
 
-		//point_type point = m_rotationMatrix * x;
 		SearchPointType y = prod( m_rotationMatrix, x );
 
 		double sum1 = 0.0;
@@ -110,10 +109,13 @@ struct ELLI1 : public MultiObjectiveFunction{
 		return value;
 	}
 
-	void proposeStartingPoint( SearchPointType & x ) const {
-		x.resize( numberOfVariables() );
-		for( unsigned int i = 0; i < numberOfVariables(); i++ )
-			x( i ) = Rng::uni( -10., 10. );
+	SearchPointType proposeStartingPoint() const {
+		RealVector x(numberOfVariables());
+
+		for (unsigned int i = 0; i < x.size(); i++) {
+			x(i) = Rng::uni(-10,10);
+		}
+		return x;
 	}
 
 private:

@@ -77,6 +77,7 @@ public:
 		constrainedPenaltyFactor() = 1E-6;
 		mu() = 100;
 		notionOfSuccess() = PopulationBased;
+		this->m_features |= AbstractMultiObjectiveOptimizer<RealVector >::CAN_SOLVE_CONSTRAINED;
 	}
 
 	/**
@@ -146,16 +147,19 @@ public:
 	 * \param [in] startingPoints A set of intiial search points.
 	 */
 	void init( 
-		ObjectiveFunctionType const& function, 
+		ObjectiveFunctionType& function, 
 		std::vector<SearchPointType> const& startingPoints
 	){
+		checkFeatures(function);
+		function.init();
+		
 		m_pop.resize(mu());
 		m_best.resize(mu());
 		std::size_t noVariables = function.numberOfVariables();
 		
 		for(std::size_t i = 0; i != mu(); ++i){
 			m_pop[i] = Individual(noVariables,m_individualSuccessThreshold,m_initialSigma);
-			function.proposeStartingPoint(m_pop[i].searchPoint());
+			m_pop[i].searchPoint()=function.proposeStartingPoint();
 			m_evaluator(function, m_pop[i]);
 			m_best[i].point = m_pop[i].searchPoint();
 			m_best[i].value = m_pop[i].unpenalizedFitness();

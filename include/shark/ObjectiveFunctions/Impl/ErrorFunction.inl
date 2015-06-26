@@ -49,8 +49,8 @@ public:
 	std::string name() const
 	{ return ""; }
 
-	void proposeStartingPoint(SearchPointType& startingPoint) const{
-		startingPoint = mep_model->parameterVector();
+	SearchPointType proposeStartingPoint() const{
+		return mep_model->parameterVector();
 	}
 	
 	std::size_t numberOfVariables() const{
@@ -141,8 +141,8 @@ public:
 	std::string name() const
 	{ return ""; }
 
-	void proposeStartingPoint(SearchPointType& startingPoint) const{
-		startingPoint = mep_model->parameterVector();
+	SearchPointType proposeStartingPoint() const{
+		return mep_model->parameterVector();
 	}
 	
 	std::size_t numberOfVariables() const{
@@ -251,14 +251,6 @@ inline ErrorFunction& ErrorFunction::operator = (const ErrorFunction& op){
 	ErrorFunction copy(op);
 	swap(copy.mp_wrapper,mp_wrapper);
 	return *this;
-}
-
-inline void ErrorFunction::proposeStartingPoint(SearchPointType& startingPoint) const{
-	mp_wrapper -> proposeStartingPoint(startingPoint);
-}
-
-inline std::size_t ErrorFunction::numberOfVariables() const{
-	return mp_wrapper -> numberOfVariables();
 }
 
 inline double ErrorFunction::eval(RealVector const& input) const{

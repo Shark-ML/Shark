@@ -42,8 +42,9 @@ AbstractLineSearchOptimizer::AbstractLineSearchOptimizer() {
 	m_features |= REQUIRES_FIRST_DERIVATIVE;
 }
 
-void AbstractLineSearchOptimizer::init(const ObjectiveFunctionType &objectiveFunction, const SearchPointType &startingPoint) {
+void AbstractLineSearchOptimizer::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {
 	checkFeatures(objectiveFunction);
+	objectiveFunction.init();
 
 	m_linesearch.init(objectiveFunction);
 	m_dimension = startingPoint.size();
@@ -64,7 +65,7 @@ void AbstractLineSearchOptimizer::init(const ObjectiveFunctionType &objectiveFun
 	initModel();
 }
 
-void AbstractLineSearchOptimizer::step(const ObjectiveFunctionType &objectiveFunction) {
+void AbstractLineSearchOptimizer::step(ObjectiveFunctionType const& objectiveFunction) {
 	// Perform line search
 	m_lastDerivative = m_derivative;
 	m_lastPoint = m_best.point;

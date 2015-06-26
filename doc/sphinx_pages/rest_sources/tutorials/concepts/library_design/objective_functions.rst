@@ -108,7 +108,7 @@ short list of functions:
 ======================================================================  ===================================================================
 Method                                                                  Description
 ======================================================================  ===================================================================
-``init()``                                                              Must be called before starting optimization and allows the
+``init()``                                                              Called by the init function of the optimizer and allows the
                                                                         function to generate internal data after configuration
 ``getConstraintHandler()``                                              Returns the constraint handler of the function, if it has one.
 ``announceConstraintHandler(ConstraintHandler*)``                       Protected function which is called from a derived class to indicate 
@@ -116,7 +116,7 @@ Method                                                                  Descript
 									function automatically.
 ``bool isFeasible(SearchPointType)``                                    Returns true if a search point is feasible
 ``closestFeasible(SearchPointType&)``                                   Selects the feasible point closest to an infeasible one
-``proposeStartingPoint(SearchPointType &)``                             Returns an initial (possibly random) guess for a solution.
+``SearchPointType proposeStartingPoint()``                              Returns an initial (possibly random) guess for a solution.
 ``ResultType eval(SearchPointType)``                                    Evaluates the function on a given point
 ``ResultType operator()(SearchPointType)``                              Convenience operator calling ``eval``
 ``ResultType evalDerivative(SearchPointType, FirstOrderDerivative)``    Evaluates the function as well as the first derivative

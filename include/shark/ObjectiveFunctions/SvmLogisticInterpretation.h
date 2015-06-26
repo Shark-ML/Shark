@@ -104,8 +104,6 @@ public:
 		m_features|=HAS_VALUE;
 		if (mep_kernel->hasFirstParameterDerivative())
 			m_features|=HAS_FIRST_DERIVATIVE;
-		m_features|=CAN_PROPOSE_STARTING_POINT;
-		m_features|=CAN_PROVIDE_CLOSEST_FEASIBLE;
 		m_folds = folds;
 	}
 
@@ -122,28 +120,6 @@ public:
 			return false;
 		}
 		return true;
-	}
-
-	//! propose a starting point to an external optimizer. we use the current kernel parameters and a regularization parameter of 1.
-	//! \param startingPoint the proposed point will be stored in this variable
-	void proposeStartingPoint(SearchPointType &startingPoint) const {
-		startingPoint.resize(m_nhp);
-		startingPoint(m_nkp) = 1.0;   //set C to arbitrary value of 1, regardless of constrained-encoding-ness
-		SearchPointType tmp_params = mep_kernel->parameterVector();
-		for (unsigned int k=0; k<m_nkp; k++) {   //set kernel parameters to current kernel parameters (assuming there are some)
-			startingPoint(k) = tmp_params(k);
-		}
-		throw SHARKEXCEPTION("[SvmLogisticInterpretation::proposeStartingPoint] Please first clarify how the kernel parameter feasibility should be dealt with. Afterwards, please write a test for this method. Thanks.");
-	}
-
-	//! repair a non-feasible point so that it becomes feasible
-	//! \param input the non-feasible point to repair
-	void closestFeasible(SearchPointType &input) const {
-		SHARK_ASSERT(input.size() == m_nhp);
-		if (input(m_nkp) <= 0.0 && !m_svmCIsUnconstrained) {
-			input(m_nkp) = 1e-10;   //should be an alright value to set C to..
-		} //else: leave everything as is
-		throw SHARKEXCEPTION("[SvmLogisticInterpretation::closestFeasible] Please first clarify how the kernel parameter feasibility should be dealt with. Afterwards, please write a test for this method. Thanks.");
 	}
 
 	std::size_t numberOfVariables()const{
