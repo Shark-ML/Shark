@@ -60,12 +60,13 @@ struct Sphere : public SingleObjectiveFunction {
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	void proposeStartingPoint(SearchPointType &x) const {
-		x.resize(numberOfVariables());
+	SearchPointType proposeStartingPoint() const {
+		RealVector x(numberOfVariables());
 
 		for (unsigned int i = 0; i < x.size(); i++) {
-			x(i) = Rng::gauss(0, 1);
+			x(i) = Rng::gauss(0,1);
 		}
+		return x;
 	}
 
 	double eval(const SearchPointType &p) const {

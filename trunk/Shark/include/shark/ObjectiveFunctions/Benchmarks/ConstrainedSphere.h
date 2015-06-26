@@ -69,8 +69,8 @@ struct ConstrainedSphere : public SingleObjectiveFunction {
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	void proposeStartingPoint(SearchPointType &x) const {
-		x.resize(numberOfVariables());
+	SearchPointType proposeStartingPoint() const {
+		RealVector x(numberOfVariables());
 
 		for (unsigned int i = 0; i < m_constraints; i++) {
 			x(i) = std::abs(Rng::gauss(0, 1))+1;
@@ -78,6 +78,7 @@ struct ConstrainedSphere : public SingleObjectiveFunction {
 		for (unsigned int i = m_constraints; i < x.size(); i++) {
 			x(i) = Rng::gauss(0, 1);
 		}
+		return x;
 	}
 	
 	bool isFeasible( SearchPointType const& input) const {

@@ -70,8 +70,8 @@ public:
 	std::string name() const
 	{ return "NegativeLogLikelihood"; }
 
-	void proposeStartingPoint(SearchPointType& startingPoint) const{
-		startingPoint=mep_model->parameterVector();
+	SearchPointType proposeStartingPoint() const{
+		return mep_model->parameterVector();
 	}
 	
 	std::size_t numberOfVariables()const{

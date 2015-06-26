@@ -70,12 +70,10 @@ struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 		m_objective->setNumberOfVariables(numberOfVariables);
 	}
 
-	void proposeStartingPoint( SearchPointType & x ) const {
-		RealVector y(numberOfVariables());
-		m_objective->proposeStartingPoint(y);
+	SearchPointType proposeStartingPoint() const {
+		RealVector y = m_objective->proposeStartingPoint();
 		
-		x.resize( numberOfVariables() );
-		axpy_prod(trans(m_rotation),y,x,true);
+		return prod(trans(m_rotation),y);
 	}
 
 	double eval( const SearchPointType & p ) const {

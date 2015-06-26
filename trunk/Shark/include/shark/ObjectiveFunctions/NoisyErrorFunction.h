@@ -83,8 +83,12 @@ public:
 	void setBatchSize(unsigned int batchSize);
 	unsigned int batchSize() const;
 
-	void proposeStartingPoint( SearchPointType & startingPoint)const;
-	std::size_t numberOfVariables()const;
+	SearchPointType proposeStartingPoint() const{
+		return mp_wrapper -> proposeStartingPoint();
+	}
+	std::size_t numberOfVariables()const{
+		return mp_wrapper -> numberOfVariables();
+	}
 	
 	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
 		m_regularizer = regularizer;

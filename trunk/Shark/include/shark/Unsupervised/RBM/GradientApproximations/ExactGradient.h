@@ -59,8 +59,8 @@ public:
 		m_data = data;
 	}
 
-	void proposeStartingPoint(SearchPointType& startingPoint) const{
-		startingPoint = mpe_rbm->parameterVector();
+	SearchPointType proposeStartingPoint() const{
+		return  mpe_rbm->parameterVector();
 	}
 	
 	std::size_t numberOfVariables()const{

@@ -147,14 +147,6 @@ inline NoisyErrorFunction& NoisyErrorFunction::operator = (const NoisyErrorFunct
 	return *this;
 }
 
-inline void NoisyErrorFunction::proposeStartingPoint(SearchPointType& startingPoint) const{
-	mp_wrapper -> proposeStartingPoint(startingPoint);
-}
-
-inline std::size_t NoisyErrorFunction::numberOfVariables() const{
-	return mp_wrapper -> numberOfVariables();
-}
-
 
 inline double NoisyErrorFunction::eval(RealVector const& input) const{
 	++m_evaluationCounter;

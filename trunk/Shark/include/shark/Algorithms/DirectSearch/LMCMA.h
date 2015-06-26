@@ -225,7 +225,7 @@ public:
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	
 	/// \brief Initializes the algorithm for the supplied objective function.
-	void init( ObjectiveFunctionType const& function, SearchPointType const& p) {
+	void init( ObjectiveFunctionType& function, SearchPointType const& p) {
 		unsigned int lambda = suggestLambda( p.size() );
 		unsigned int mu = suggestMu(  lambda );
 		init( function,
@@ -238,12 +238,15 @@ public:
 
 	/// \brief Initializes the algorithm for the supplied objective function.
 	void init( 
-		ObjectiveFunctionType const& function, 
+		ObjectiveFunctionType& function, 
 		SearchPointType const& initialSearchPoint,
 		unsigned int lambda, 
 		double mu,
 		double initialSigma
 	) {
+		checkFeatures(function);
+		function.init();
+		
 		m_numberOfVariables = function.numberOfVariables();
 		m_lambda = lambda;
 		m_mu = static_cast<unsigned int>(::floor(mu));

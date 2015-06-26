@@ -77,7 +77,7 @@ public:
 	/// \brief Returns a starting point of the algorithm
 	///
 	/// Returns a random subset of the basis of the kernel expansion
-	SHARK_EXPORT_SYMBOL void proposeStartingPoint(SearchPointType& startingPoint) const;
+	SHARK_EXPORT_SYMBOL SearchPointType proposeStartingPoint() const;
 
 	/// \brief Returns the number of variables of the function.
 	SHARK_EXPORT_SYMBOL std::size_t numberOfVariables()const;

@@ -49,15 +49,16 @@ KernelBasisDistance::KernelBasisDistance(
 		m_features|=HAS_FIRST_DERIVATIVE;
 }
 
-void KernelBasisDistance::proposeStartingPoint(SearchPointType& startingPoint) const {
+RealVector KernelBasisDistance::proposeStartingPoint() const {
 	Data<RealVector> const& expansionBasis = mep_expansion->basis();
 	std::size_t dim = dataDimension(expansionBasis);
 	std::size_t elems = mep_expansion->alpha().size1();
-	startingPoint.resize(m_numApproximatingVectors * dim);
+	RealVector startingPoint(m_numApproximatingVectors * dim);
 	for(std::size_t i = 0; i != m_numApproximatingVectors; ++i){
 		std::size_t k = Rng::discrete(0,elems-1);
 		noalias(subrange(startingPoint,i*dim,(i+1)*dim)) = expansionBasis.element(k);
 	}
+	return startingPoint;
 }
 
 std::size_t KernelBasisDistance::numberOfVariables()const{
@@ -111,7 +112,6 @@ RealMatrix KernelBasisDistance::findOptimalBeta(RealVector const& input)const{
 
 double KernelBasisDistance::eval(RealVector const& input) const{
 	SIZE_CHECK(input.size() == numberOfVariables());
-	
 	RealMatrix Kz,beta,linear;
 	setupAndSolve(beta,input,Kz,linear);
 	return errorOfSolution(beta,Kz,linear);

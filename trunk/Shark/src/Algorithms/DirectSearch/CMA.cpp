@@ -159,7 +159,8 @@ void CMA::write( OutArchive & archive ) const {
 }
 
 
-void CMA::init( ObjectiveFunctionType const& function, SearchPointType const& p) {
+void CMA::init( ObjectiveFunctionType & function, SearchPointType const& p) {
+	
 	unsigned int lambda = CMA::suggestLambda( p.size() );
 	unsigned int mu = CMA::suggestMu(  lambda, m_recombinationType );
 	init( function,
@@ -174,14 +175,16 @@ void CMA::init( ObjectiveFunctionType const& function, SearchPointType const& p)
 * \brief Initializes the algorithm for the supplied objective function.
 */
 void CMA::init( 
-	ObjectiveFunctionType const& function, 
+	ObjectiveFunctionType& function, 
 	SearchPointType const& initialSearchPoint,
 	unsigned int lambda, 
 	double mu,
 	double initialSigma,				       
 	const boost::optional< RealMatrix > & initialCovarianceMatrix
 ) {
-
+	checkFeatures(function);
+	function.init();
+	
 	m_numberOfVariables = function.numberOfVariables();
 	m_lambda = lambda;
 	m_mu = static_cast<unsigned int>(::floor(mu));

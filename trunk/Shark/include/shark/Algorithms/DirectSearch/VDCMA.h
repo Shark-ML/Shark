@@ -78,7 +78,10 @@ public:
 
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	
-	void init( ObjectiveFunctionType const& function, SearchPointType const& p) {
+	void init( ObjectiveFunctionType& function, SearchPointType const& p) {
+		checkFeatures(function);
+		function.init();
+		
 		unsigned int lambda = suggestLambda( p.size() );
 		unsigned int mu = suggestMu(  lambda );
 		double sigma = m_initialSigma;

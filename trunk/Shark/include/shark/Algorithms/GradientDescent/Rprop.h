@@ -114,20 +114,11 @@ public:
 	std::string name() const
 	{ return "RpropMinus"; }
 
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	SHARK_EXPORT_SYMBOL virtual void init(
-		ObjectiveFunctionType const& objectiveFunction, 
-		SearchPointType const& startingPoint, 
-		double initDelta
-	);
-	SHARK_EXPORT_SYMBOL virtual void init(
-		ObjectiveFunctionType const& objectiveFunction, 
-		SearchPointType const& startingPoint, 
-		RealVector const& initDelta
-	);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint);
+	SHARK_EXPORT_SYMBOL virtual void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint, double initDelta);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
-	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
 
 	SHARK_EXPORT_SYMBOL virtual void read( InArchive & archive );
 	SHARK_EXPORT_SYMBOL virtual void write( OutArchive & archive ) const;
@@ -271,12 +262,11 @@ public:
 	std::string name() const
 	{ return "RpropPlus"; }
 
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint, double initDelta);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
-	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
 	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
 	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 
@@ -398,12 +388,11 @@ public:
 	std::string name() const
 	{ return "IRpropPlus"; }
 
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint, double initDelta);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
-	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
 
 	SHARK_EXPORT_SYMBOL void setDerivativeThreshold(double derivativeThreshold);
 
@@ -428,12 +417,11 @@ public:
 	std::string name() const
 	{ return "IRpropPlusFull"; }
 
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint);
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta);
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint, double initDelta);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
-	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
 
 	SHARK_EXPORT_SYMBOL void setDerivativeThreshold(double derivativeThreshold);
 
@@ -530,7 +518,7 @@ public:
 	std::string name() const
 	{ return "IRpropMinus"; }
 
-	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType& objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
 };
 
 //! Used to connect the class names with the year of

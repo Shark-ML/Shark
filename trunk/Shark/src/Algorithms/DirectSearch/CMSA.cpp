@@ -59,7 +59,10 @@ namespace{
 
 }
 
-void CMSA::init( ObjectiveFunctionType const& function, SearchPointType const& p) {
+void CMSA::init( ObjectiveFunctionType & function, SearchPointType const& p) {
+	checkFeatures(function);
+	function.init();
+	
 	m_numberOfVariables = p.size();
 
 	m_lambda = 4 * m_numberOfVariables;

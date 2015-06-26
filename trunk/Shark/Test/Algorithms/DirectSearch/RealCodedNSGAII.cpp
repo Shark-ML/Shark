@@ -16,7 +16,7 @@ struct PointExtractor{
 };
 
 double testObjectiveFunctionMOOHelper(
-	MultiObjectiveFunction const& f, 
+	MultiObjectiveFunction& f, 
 	std::size_t mu, 
 	std::size_t iterations,
 	RealVector const& reference
@@ -38,7 +38,7 @@ double testObjectiveFunctionMOOHelper(
 }
 
 void testObjectiveFunctionMOO(
-	MultiObjectiveFunction const& f, 
+	MultiObjectiveFunction& f, 
 	std::size_t mu, 
 	double targetVolume, 
 	std::size_t iterations,

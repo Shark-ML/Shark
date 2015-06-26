@@ -56,8 +56,7 @@ BOOST_AUTO_TEST_CASE( Rosenbrock_Derivative )
 	shark::Rosenbrock rosenbrock(dimensions);
 	for(unsigned i = 0; i != trials; ++i)
 	{
-		shark::RealVector point(dimensions);
-		rosenbrock.proposeStartingPoint(point);
+		shark::RealVector point = rosenbrock.proposeStartingPoint();
 		shark::testDerivative(rosenbrock, point,1.e-7,1.e-7,0.005);
 	}
 }
@@ -69,8 +68,7 @@ BOOST_AUTO_TEST_CASE( Ellipsoid_Derivative )
 	shark::Ellipsoid ellipsoid(dimensions);
 	for(unsigned i = 0; i != trials; ++i)
 	{
-		shark::RealVector point(dimensions);
-		ellipsoid.proposeStartingPoint(point);
+		shark::RealVector point = ellipsoid.proposeStartingPoint();
 		shark::testDerivative(ellipsoid, point,1.e-5,1.e-9);
 	}
 }

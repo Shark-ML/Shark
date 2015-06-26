@@ -83,8 +83,12 @@ public:
 		m_regularizationStrength = factor;
 	}
 
-	void proposeStartingPoint(SearchPointType& startingPoint) const;
-	std::size_t numberOfVariables()const;
+	SearchPointType proposeStartingPoint()const {
+		return mp_wrapper -> proposeStartingPoint();
+	}
+	std::size_t numberOfVariables()const{
+		return mp_wrapper -> numberOfVariables();
+	}
 
 	double eval(RealVector const& input) const;
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;

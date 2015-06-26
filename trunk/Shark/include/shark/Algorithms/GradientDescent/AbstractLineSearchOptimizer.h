@@ -71,11 +71,11 @@ protected:
 public:
 	SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer();
 
-	SHARK_EXPORT_SYMBOL void init(const ObjectiveFunctionType &objectiveFunction, const SearchPointType &startingPoint) ;
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction,  SearchPointType const& startingPoint) ;
 	
 	using AbstractSingleObjectiveOptimizer< RealVector >::init;
 
-	SHARK_EXPORT_SYMBOL void step(const ObjectiveFunctionType &objectiveFunction);
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
 
 	//from ISerializable
 	SHARK_EXPORT_SYMBOL void read(InArchive &archive);
@@ -83,7 +83,7 @@ public:
 
 
 	//linesearch handling
-	const LineSearch &lineSearch()const {
+	LineSearch const& lineSearch()const {
 		return m_linesearch;
 	}
 	LineSearch &lineSearch() {
@@ -97,8 +97,8 @@ protected: // Instance vars
 	std::size_t m_dimension; ///< number of parameters
 	double m_initialStepLength;///< Initial step length to begin with the line search.
 
-	RealVector      m_derivative; ///< gradient of m_best.point
-	RealVector      m_searchDirection;///< search direction of next step
+	RealVector  m_derivative; ///< gradient of m_best.point
+	RealVector  m_searchDirection;///< search direction of next step
 
 	//information from previous step
 	RealVector m_lastPoint; ///<  previous point

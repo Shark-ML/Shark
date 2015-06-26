@@ -108,11 +108,14 @@ struct CIGTAB2 : public MultiObjectiveFunction {
 
 		return value;
 	}
+	
+	SearchPointType proposeStartingPoint() const {
+		RealVector x(m_numberOfVariables);
 
-	void proposeStartingPoint( SearchPointType & x ) const {
-		x.resize( m_numberOfVariables );
-		for( unsigned int i = 0; i < m_numberOfVariables; i++ )
-			x( i ) = Rng::uni( -10., 10. );
+		for (unsigned int i = 0; i < x.size(); i++) {
+			x(i) = Rng::uni(-10.0, 10.0);
+		}
+		return x;
 	}
 private:
 	double m_a;

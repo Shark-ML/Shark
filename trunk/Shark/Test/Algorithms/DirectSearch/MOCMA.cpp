@@ -19,7 +19,7 @@ struct PointExtractor{
 };
 
 void testObjectiveFunctionMOO(
-	MultiObjectiveFunction const& f, 
+	MultiObjectiveFunction& f, 
 	std::size_t mu, 
 	double targetVolume, 
 	std::size_t iterations,

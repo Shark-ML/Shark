@@ -54,16 +54,17 @@ RpropMinus::RpropMinus(){
 	m_minDelta = 0.0;
 }
 
-void RpropMinus::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
+void RpropMinus::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {
 	init(objectiveFunction,startingPoint,0.01);
 }
 void RpropMinus::init(
-	const ObjectiveFunctionType & objectiveFunction, 
-	const SearchPointType& startingPoint, 
+	ObjectiveFunctionType & objectiveFunction, 
+	SearchPointType const& startingPoint, 
 	double initDelta
 ) {
 	checkFeatures(objectiveFunction);
-
+	objectiveFunction.init();
+	
 	m_parameterSize = startingPoint.size();
 	m_delta.resize(m_parameterSize);
 	m_oldDerivative.resize(m_parameterSize);
@@ -74,25 +75,8 @@ void RpropMinus::init(
 	//evaluate initial point
 	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 }
-void RpropMinus::init(
-	const ObjectiveFunctionType & objectiveFunction, 
-	const SearchPointType& startingPoint, 
-	const RealVector& initDelta
-) {
-	checkFeatures(objectiveFunction);
 
-	m_parameterSize = startingPoint.size();
-	m_delta.resize(m_parameterSize);
-	m_oldDerivative.resize(m_parameterSize);
-
-	m_delta   = initDelta;
-	m_oldDerivative.clear();
-	m_best.point=startingPoint;
-	//evaluate initial point
-	m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
-}
-
-void RpropMinus::step(const ObjectiveFunctionType& objectiveFunction) {
+void RpropMinus::step(ObjectiveFunctionType const& objectiveFunction) {
 	for (size_t i = 0; i < m_parameterSize; i++)
 	{
 		double p = m_best.point(i);
@@ -153,25 +137,16 @@ RpropPlus::RpropPlus()
 {
 }
 
-void RpropPlus::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
+void RpropPlus::init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
 	init(objectiveFunction,startingPoint,0.01);
 }
-void RpropPlus::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta)
+void RpropPlus::init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint, double initDelta)
 {
 	RpropMinus::init(objectiveFunction,startingPoint,initDelta);
 	m_deltaw.resize(m_parameterSize);
 	m_deltaw.clear();
 }
-void RpropPlus::init(
-	const ObjectiveFunctionType & objectiveFunction, 
-	const SearchPointType& startingPoint, 
-	const RealVector& initDelta
-){
-	RpropMinus::init(objectiveFunction,startingPoint,initDelta);
-	m_deltaw.resize(m_parameterSize);
-	m_deltaw.clear();
-}
-void RpropPlus::step(const ObjectiveFunctionType& objectiveFunction) {
+void RpropPlus::step(ObjectiveFunctionType const& objectiveFunction) {
 	for (size_t i = 0; i < m_parameterSize; i++)
 	{
 		//save the current value to ensure, that it can be restored
@@ -225,23 +200,17 @@ IRpropPlus::IRpropPlus()
 	m_derivativeThreshold = 0.;
 }
 
-void IRpropPlus::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
+void IRpropPlus::init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
 	init(objectiveFunction,startingPoint,0.01);
 }
-void IRpropPlus::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta) {
+void IRpropPlus::init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint, double initDelta) {
 	if(!(objectiveFunction.features() & ObjectiveFunctionType::HAS_VALUE))
 		SHARKEXCEPTION("[IRPropPlus::init] requires the value of the function");
 	RpropPlus::init(objectiveFunction,startingPoint,initDelta);
 	m_oldError = std::numeric_limits<double>::max();
 }
-void IRpropPlus::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta) {
-	checkFeatures(objectiveFunction);
 
-	RpropPlus::init(objectiveFunction,startingPoint,initDelta);
-	m_oldError = std::numeric_limits<double>::max();
-}
-
-void IRpropPlus::step(const ObjectiveFunctionType& objectiveFunction) {
+void IRpropPlus::step(ObjectiveFunctionType const& objectiveFunction) {
 	for (size_t i = 0; i < m_parameterSize; i++)
 	{
 		if(std::abs(m_derivative(i)) < m_derivativeThreshold) m_derivative(i) = 0.;
@@ -300,23 +269,17 @@ IRpropPlusFull::IRpropPlusFull()
 	m_derivativeThreshold = 0.;
 }
 
-void IRpropPlusFull::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint) {
+void IRpropPlusFull::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {
 	init(objectiveFunction,startingPoint,0.01);
 }
-void IRpropPlusFull::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, double initDelta) {
+void IRpropPlusFull::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint, double initDelta) {
 	if(!(objectiveFunction.features() & ObjectiveFunctionType::HAS_VALUE))
 		SHARKEXCEPTION("[IRPropPlus::init] requires the value of the function");
 	RpropPlus::init(objectiveFunction,startingPoint,initDelta);
 	m_oldError = std::numeric_limits<double>::max();
 }
-void IRpropPlusFull::init(const ObjectiveFunctionType & objectiveFunction, const SearchPointType& startingPoint, const RealVector& initDelta) {
-	checkFeatures(objectiveFunction);
 
-	RpropPlus::init(objectiveFunction,startingPoint,initDelta);
-	m_oldError = std::numeric_limits<double>::max();
-}
-
-void IRpropPlusFull::step(const ObjectiveFunctionType& objectiveFunction) {
+void IRpropPlusFull::step(ObjectiveFunctionType const& objectiveFunction) {
 	if ( m_best.value < m_oldError){//accept the point as the new current one if it is better
 		//step size adaptation
 		for (size_t i = 0; i < m_parameterSize; i++)
@@ -377,7 +340,7 @@ IRpropMinus::IRpropMinus()
 {
 }
 
-void IRpropMinus::step(const ObjectiveFunctionType& objectiveFunction) {
+void IRpropMinus::step(ObjectiveFunctionType const& objectiveFunction) {
 	for (size_t i = 0; i < m_parameterSize; i++)
 	{
 		double p = m_best.point(i);

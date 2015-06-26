@@ -62,12 +62,13 @@ struct Himmelblau : public SingleObjectiveFunction {
 		return 2;
 	}
 
-	void proposeStartingPoint( SearchPointType & x ) const {
-		x.resize( 2 );
+	SearchPointType proposeStartingPoint() const {
+		RealVector x(numberOfVariables());
 
-		for( unsigned int i = 0; i < x.size(); i++ ) {
-			x( i ) = Rng::uni( -3, 3 );
+		for (unsigned int i = 0; i < x.size(); i++) {
+			x(i) = Rng::uni(-3,3);
 		}
+		return x;
 	}
 
 	/**

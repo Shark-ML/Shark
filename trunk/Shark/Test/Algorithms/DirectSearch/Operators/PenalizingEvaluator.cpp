@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE( PenalizingEvaluator_SingleObjective_Feasible ) {
 	SOOTestFunction objective(10);
 	for(std::size_t i = 0; i != 1000; ++i){
 		TestIndividualSOO tester;
-		objective.proposeStartingPoint(tester.m_point);
+		tester.m_point=objective.proposeStartingPoint();
 		
 		BOOST_REQUIRE(objective.isFeasible(tester.m_point));
 		double fitness = objective(tester.m_point);
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( PenalizingEvaluator_MultiObjective_Feasible ) {
 	ZDT1 objective(10);
 	for(std::size_t i = 0; i != 1000; ++i){
 		TestIndividualMOO tester;
-		objective.proposeStartingPoint(tester.m_point);
+		tester.m_point=objective.proposeStartingPoint();
 		
 		BOOST_REQUIRE(objective.isFeasible(tester.m_point));
 		RealVector fitness = objective(tester.m_point);

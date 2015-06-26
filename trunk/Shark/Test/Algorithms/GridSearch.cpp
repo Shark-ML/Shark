@@ -33,9 +33,8 @@ struct TestFunction : public SingleObjectiveFunction
 		return inner_prod(prod(A,pattern),pattern);
 	}
 	
-	virtual void proposeStartingPoint( SearchPointType & startingPoint /* IN & OUT */ )const {
-		startingPoint.resize(2);
-		startingPoint.clear();
+	virtual SearchPointType proposeStartingPoint()const {
+		return RealVector(2,0.0);
 	}
 };
 

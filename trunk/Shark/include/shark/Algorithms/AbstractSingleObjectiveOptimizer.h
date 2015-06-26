@@ -57,15 +57,13 @@ namespace shark {
 
 		///initializes the optimizer. The objectivefunction is required to provide a starting point, so CAN_PROPOSE_STARTING_POINT
 		///must be set. If this is not the case, an exception is thrown
-		virtual void init(ObjectiveFunctionType const& function ){
+		virtual void init(ObjectiveFunctionType& function ){
 			if(!(function.features() & ObjectiveFunctionType::CAN_PROPOSE_STARTING_POINT))
 				throw SHARKEXCEPTION( "[AbstractSingleObjectiveOptimizer::init] Objective function does not propose a starting point");
-			RealVector startingPoint;
-			function.proposeStartingPoint(startingPoint);
-			init(function,startingPoint);
+			init(function,function.proposeStartingPoint());
 		}
 		///initializes the optimizer using a predefined starting point
-		virtual void init(ObjectiveFunctionType const& function, SearchPointType const& startingPoint)=0;
+		virtual void init(ObjectiveFunctionType& function, SearchPointType const& startingPoint)=0;
 		///returns the current solution of the optimizer
 		virtual const SolutionType& solution() const{
 			return m_best;
