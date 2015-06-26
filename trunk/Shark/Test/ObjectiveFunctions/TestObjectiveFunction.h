@@ -89,20 +89,20 @@ void testDerivative(
 		double resultEvalSecondDerivative = function.evalDerivative(point,secondDerivative);
 		BOOST_CHECK_CLOSE(resultEvalSecondDerivative,resultEval, 1.e-5);
 		//check first derivative again...
-		BOOST_REQUIRE_EQUAL(estimatedDerivative.size(),secondDerivative.m_gradient.size());
+		BOOST_REQUIRE_EQUAL(estimatedDerivative.size(),secondDerivative.gradient.size());
 		for(std::size_t i=0;i != estimatedDerivative.size(); ++i){
 			BOOST_CHECK_CLOSE(estimatedDerivative(i),derivative(i),maxErrorPercentage);
-			//BOOST_CHECK_SMALL(estimatedDerivative(i) - secondDerivative.m_gradient(i),maxError);
-			//std::cout<<i<<" "<<estimatedDerivative(i)<<" "<<secondDerivative.m_gradient(i)<<std::endl;
+			//BOOST_CHECK_SMALL(estimatedDerivative(i) - secondDerivative.gradient(i),maxError);
+			//std::cout<<i<<" "<<estimatedDerivative(i)<<" "<<secondDerivative.gradient(i)<<std::endl;
 		}
 		
 		//check second derivative
-		BOOST_REQUIRE_EQUAL(estimatedHessian.size1(),secondDerivative.m_hessian.size1());
-		BOOST_REQUIRE_EQUAL(estimatedHessian.size2(),secondDerivative.m_hessian.size2());
+		BOOST_REQUIRE_EQUAL(estimatedHessian.size1(),secondDerivative.hessian.size1());
+		BOOST_REQUIRE_EQUAL(estimatedHessian.size2(),secondDerivative.hessian.size2());
 		for(std::size_t i=0;i != estimatedDerivative.size(); ++i){
 			for(std::size_t j=0;j != estimatedDerivative.size(); ++j){
-				BOOST_CHECK_SMALL(estimatedHessian(i,j) - secondDerivative.m_hessian(i,j),maxErrorSecond);
-				//std::cout<<i<<" "<<j<<" "<<estimatedHessian(i,j)<<" "<<secondDerivative.m_hessian(i,j)<<std::endl;
+				BOOST_CHECK_SMALL(estimatedHessian(i,j) - secondDerivative.hessian(i,j),maxErrorSecond);
+				//std::cout<<i<<" "<<j<<" "<<estimatedHessian(i,j)<<" "<<secondDerivative.hessian(i,j)<<std::endl;
 			}
 		}
 	}

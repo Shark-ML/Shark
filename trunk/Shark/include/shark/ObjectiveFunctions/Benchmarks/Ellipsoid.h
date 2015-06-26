@@ -96,12 +96,12 @@ struct Ellipsoid : public SingleObjectiveFunction {
 	double evalDerivative(const SearchPointType &p, SecondOrderDerivative &derivative)const {
 		std::size_t size=p.size();
 		double sizeMinusOne=p.size() - 1.;
-		derivative.m_gradient.resize(size);
-		derivative.m_hessian.resize(size,size);
-		derivative.m_hessian.clear();
+		derivative.gradient.resize(size);
+		derivative.hessian.resize(size,size);
+		derivative.hessian.clear();
 		for (unsigned int i = 0; i < size; i++) {
-			derivative.m_gradient(i) = 2 * std::pow(m_alpha, i / sizeMinusOne ) * p(i);
-			derivative.m_hessian(i,i) = 2 * std::pow(m_alpha, i /sizeMinusOne );
+			derivative.gradient(i) = 2 * std::pow(m_alpha, i / sizeMinusOne ) * p(i);
+			derivative.hessian(i,i) = 2 * std::pow(m_alpha, i /sizeMinusOne );
 		}
 		return eval(p);
 	}

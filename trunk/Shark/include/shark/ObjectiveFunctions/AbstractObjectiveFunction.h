@@ -85,8 +85,8 @@ public:
 
 	typedef SearchPointType FirstOrderDerivative;
 	struct SecondOrderDerivative {
-		RealVector m_gradient;
-		RealMatrix m_hessian;
+		RealVector gradient;
+		RealMatrix hessian;
 	};
 
 	/// \brief List of features that are supported by an implementation.

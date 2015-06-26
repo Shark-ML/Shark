@@ -135,13 +135,13 @@ public:
 		typename super::SecondOrderDerivative der;
 		unsigned int i, ic = m_elements.size();
 		typename super::ResultType ret = m_weight[0] * m_elements[0]->evalDerivative(input, der);
-		derivative.m_gradient = m_weight[0] * der.m_gradient;
-		derivative.m_hessian = m_weight[0] * der.m_hessian;
+		derivative.gradient = m_weight[0] * der.gradient;
+		derivative.hessian = m_weight[0] * der.hessian;
 		for (i=1; i<ic; i++)
 		{
 			ret += m_weight[i] * m_elements[i]->evalDerivative(input, der);
-			derivative.m_gradient += m_weight[i] * der.m_gradient;
-			derivative.m_hessian += m_weight[i] * der.m_hessian;
+			derivative.gradient += m_weight[i] * der.gradient;
+			derivative.hessian += m_weight[i] * der.hessian;
 		}
 		return ret;
 	}

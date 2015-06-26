@@ -209,8 +209,10 @@ Model                             Description
                                   and updates it according to the direction of the gradient. The variants of
                                   the algorithm use different step size adaptation rules. :doxy:`IRpropPlus`
                                   is the prefered method of choice for nonlinear optimization.
-:doxy:`IRLS`                      Iterated Reweightes Least Squares. Performs second order optimisation using
-                                  Newton steps and line seach in the optimal direction to ensure convergence.
+:doxy:`TrustRegionNewton`         Second order Method with superlinear convergence. It uses the hessian to compute
+				  the optimal point with a certain maximum distance. Does not require the hessian
+				  to be positive definite and its steps are often much cheaper to compute than cubic
+				  time.
 :doxy:`Quickprop`                 Approximates the objective function locally as a parabola with independent variables.
 :doxy:`SteepestDescent`           Follows the gradient in the direction of steepest descent with fixed step size.
 ================================  =================================================================================
