@@ -213,7 +213,6 @@ Model                             Description
 				  the optimal point with a certain maximum distance. Does not require the hessian
 				  to be positive definite and its steps are often much cheaper to compute than cubic
 				  time.
-:doxy:`Quickprop`                 Approximates the objective function locally as a parabola with independent variables.
 :doxy:`SteepestDescent`           Follows the gradient in the direction of steepest descent with fixed step size.
 ================================  =================================================================================
 
@@ -233,7 +232,6 @@ Model                             Description
                                   Evolution Strategy (CMA-ES)
 :doxy:`CMSA`                      Covariance Matrix Self-Adaptation
                                   Evolution Strategy (CMSA_ES)
-:doxy:`OnePlusOneES`              Elitist CMA-ES
 :doxy:`ElitistCMA`                CMA-ES using the elitist selection rule
 ================================  ========================================================================
 
