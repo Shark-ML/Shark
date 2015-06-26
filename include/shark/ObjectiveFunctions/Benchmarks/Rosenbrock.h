@@ -122,25 +122,25 @@ struct Rosenbrock : public SingleObjectiveFunction {
 	virtual ResultType evalDerivative( const SearchPointType & p, SecondOrderDerivative & derivative )const {
 		double result = eval(p);
 		size_t size = p.size();
-		derivative.m_gradient.resize(size);
-		derivative.m_hessian.resize(size,size);
-		derivative.m_hessian.clear();
+		derivative.gradient.resize(size);
+		derivative.hessian.resize(size,size);
+		derivative.hessian.clear();
 
-		derivative.m_gradient(0) = 2*( p(0) - 1 ) - 400 * ( p(1) - sqr( p(0) ) ) * p(0);
-		derivative.m_gradient(size-1) = 200 * ( p(size - 1) - sqr( p( size - 2 ) ) ) ;
+		derivative.gradient(0) = 2*( p(0) - 1 ) - 400 * ( p(1) - sqr( p(0) ) ) * p(0);
+		derivative.gradient(size-1) = 200 * ( p(size - 1) - sqr( p( size - 2 ) ) ) ;
 
-		derivative.m_hessian(0,0) = 2 - 400* (p(1) - 3*sqr(p(0))) ;
-		derivative.m_hessian(0,1) = -400 * p(0) ;
+		derivative.hessian(0,0) = 2 - 400* (p(1) - 3*sqr(p(0))) ;
+		derivative.hessian(0,1) = -400 * p(0) ;
 
-		derivative.m_hessian(size-1,size-1) = 200;
-		derivative.m_hessian(size-1,size-2) = -400 * p( size - 2 );
+		derivative.hessian(size-1,size-1) = 200;
+		derivative.hessian(size-1,size-2) = -400 * p( size - 2 );
 
 		for(size_t i=1; i != size-1; ++i){
-			derivative.m_gradient( i ) = 2 * ( p(i) - 1 ) - 400 * (p(i+1) - sqr( p(i) ) ) * p( i )+200 * ( p( i )- sqr( p(i-1) ) );
+			derivative.gradient( i ) = 2 * ( p(i) - 1 ) - 400 * (p(i+1) - sqr( p(i) ) ) * p( i )+200 * ( p( i )- sqr( p(i-1) ) );
 
-			derivative.m_hessian(i,i) = 202 - 400 * ( p(i+1) - 3 * sqr(p(i)));
-			derivative.m_hessian(i,i+1) = - 400 * ( p(i) );
-			derivative.m_hessian(i,i-1) = - 400 * ( p(i-1) );
+			derivative.hessian(i,i) = 202 - 400 * ( p(i+1) - 3 * sqr(p(i)));
+			derivative.hessian(i,i+1) = - 400 * ( p(i) );
+			derivative.hessian(i,i-1) = - 400 * ( p(i-1) );
 
 		}
 		return result;

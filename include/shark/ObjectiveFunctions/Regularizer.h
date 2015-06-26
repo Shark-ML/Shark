@@ -113,19 +113,19 @@ public:
 	}
 	double evalDerivative( RealVector const& input, SecondOrderDerivative & derivative ) const {
 		unsigned int i, ic = input.size();
-		derivative.m_gradient.resize(ic);
-		derivative.m_hessian.resize(ic,ic);
-		derivative.m_hessian.clear();
+		derivative.gradient.resize(ic);
+		derivative.hessian.resize(ic,ic);
+		derivative.hessian.clear();
 		if(m_mask.empty()){
 			for (i=0; i<ic; i++){
-				derivative.m_gradient(i) = boost::math::sign(input(i));
+				derivative.gradient(i) = boost::math::sign(input(i));
 			}
 		}
 		else
 		{
 			SIZE_CHECK(m_mask.size() == input.size());
 			for (i=0; i<ic; i++){
-				derivative.m_gradient(i) = m_mask(i)*boost::math::sign(input(i));
+				derivative.gradient(i) = m_mask(i)*boost::math::sign(input(i));
 			}
 		}
 		return eval(input);
@@ -209,8 +209,8 @@ public:
 	/// and calculates its gradient and
 	/// its Hessian.
 	virtual ResultType evalDerivative( const SearchPointType & input, SecondOrderDerivative & derivative )const {
-		derivative.m_gradient = input;
-		derivative.m_hessian = RealIdentityMatrix(input.size());
+		derivative.gradient = input;
+		derivative.hessian = RealIdentityMatrix(input.size());
 		return 0.5 * norm_sqr(input);
 	}
 private:

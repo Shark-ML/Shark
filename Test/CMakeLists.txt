@@ -109,7 +109,7 @@ SHARK_ADD_TEST( Algorithms/GradientDescent/LineSearch.cpp GradDesc_LineSearch )
 SHARK_ADD_TEST( Algorithms/GradientDescent/BFGS.cpp GradDesc_BFGS )
 SHARK_ADD_TEST( Algorithms/GradientDescent/LBFGS.cpp GradDesc_LBFGS )
 SHARK_ADD_TEST( Algorithms/GradientDescent/CG.cpp GradDesc_CG )
-SHARK_ADD_TEST( Algorithms/GradientDescent/IRLS.cpp GradDesc_IRLS )
+SHARK_ADD_TEST( Algorithms/GradientDescent/TrustRegionNewton.cpp GradDesc_TrustRegionNewton )
 SHARK_ADD_TEST( Algorithms/GradientDescent/Rprop.cpp GradDesc_Rprop )
 SHARK_ADD_TEST( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_SteepestDescent )
 

@@ -63,13 +63,16 @@ void testFunction(Optimizer& optimizer,Function& function,unsigned int trials,un
 		double error=0;
 
 		for( size_t iteration = 0; iteration < static_cast<size_t>(iterations); ++iteration ) {
+			//~ std::cout<<iteration<<" "<<iterations<<std::endl;
 			optimizer.step( function );
 			error=optimizer.solution().value;
 
-			++pd;
-
-			if( epsilon > error )
+			if( epsilon > error ){
+				pd+=iterations-iteration;
 				break;
+			}
+			
+			++pd;
 		}
 		stats.push_back(error);
 	}
