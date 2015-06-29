@@ -32,6 +32,7 @@
 
 #include <shark/Models/AbstractModel.h>
 #include <shark/Unsupervised/RBM/Energy.h>
+#include <shark/Unsupervised/RBM/Impl/AverageEnergyGradient.h>
 
 #include <sstream>
 #include <boost/serialization/string.hpp>
@@ -43,10 +44,11 @@ class RBM : public AbstractModel<RealVector, RealVector>{
 private:
 	typedef AbstractModel<RealVector, RealVector> base_type;
 public:
-	typedef HiddenLayerT HiddenType; //< type of the hidden layer
-	typedef VisibleLayerT VisibleType; //< type of the visible layer
+	typedef HiddenLayerT HiddenType; ///< type of the hidden layer
+	typedef VisibleLayerT VisibleType; ///< type of the visible layer
 	typedef RngT RngType;
-	typedef Energy<RBM<VisibleType,HiddenType,RngT> > EnergyType;//< Type of the energy function
+	typedef Energy<RBM<VisibleType,HiddenType,RngT> > EnergyType;///< Type of the energy function
+	typedef detail::AverageEnergyGradient<RBM> GradientType;///< Type of the gradient calculator
 	
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
@@ -176,7 +178,7 @@ public:
 	
 	///\brief Returns the energy function of the RBM.
 	EnergyType energy()const{
-		return EnergyType(m_visibleNeurons,m_hiddenNeurons,m_weightMatrix);
+		return EnergyType(*this);
 	}
 	
 	///\brief Returns the random number generator associated with this RBM.
@@ -229,6 +231,31 @@ public:
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
 		eval(patterns,outputs);
 	}
+	
+	///\brief Calculates the input of the hidden neurons given the state of the visible in a batch-vise fassion.
+	///
+	///@param inputs the batch of vectors the input of the hidden neurons is stored in
+	///@param visibleStates the batch of states of the visible neurons
+	void inputHidden(RealMatrix& inputs, RealMatrix const& visibleStates)const{
+		SIZE_CHECK(visibleStates.size1() == inputs.size1());
+		SIZE_CHECK(inputs.size2() == m_hiddenNeurons.size());
+		SIZE_CHECK( visibleStates.size2() == m_visibleNeurons.size());
+		
+		axpy_prod(m_visibleNeurons.phi(visibleStates),trans(m_weightMatrix),inputs);
+	}
+
+
+	///\brief Calculates the input of the visible neurons given the state of the hidden.
+	///
+	///@param inputs the vector the input of the visible neurons is stored in
+	///@param hiddenStates the state of the hidden neurons
+	void inputVisible(RealMatrix& inputs, RealMatrix const& hiddenStates)const{
+		SIZE_CHECK(hiddenStates.size1() == inputs.size1());
+		SIZE_CHECK(inputs.size2() == m_visibleNeurons.size());
+		
+		axpy_prod(m_hiddenNeurons.phi(hiddenStates),m_weightMatrix,inputs);
+	}
+	
 	using base_type::eval;
 	
 	

@@ -96,7 +96,7 @@ public:
 		m_data = data;
 		
 		//construct a gradient object to get the information about which values of the samples are needed
-		AverageEnergyGradient<RBM> grad(mpe_rbm);
+		typename RBM::GradientType grad(mpe_rbm);
 		
 		//if the number of samples is 0 = unset, set it to the number of points in the data set
 		if(!m_samples){
@@ -136,7 +136,7 @@ public:
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
 		mpe_rbm->setParameterVector(parameter);
 		
-		AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
+		typename RBM::GradientType modelAverage(mpe_rbm);
 		RealVector empiricalAverage = detail::evaluateData(m_data,*mpe_rbm,m_numBatches);
 		
 		//approximate the expectation of the energy gradient with respect to the model distribution

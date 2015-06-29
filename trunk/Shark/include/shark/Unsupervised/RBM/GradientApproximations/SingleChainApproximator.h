@@ -111,7 +111,7 @@ public:
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
 		mpe_rbm->setParameterVector(parameter);
 		
-		AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
+		typename RBM::GradientType modelAverage(mpe_rbm);
 		RealVector empiricalAverage = detail::evaluateData(m_data,*mpe_rbm,m_numBatches);
 		
 		//approximate the expectation of the energy gradient with respect to the model distribution

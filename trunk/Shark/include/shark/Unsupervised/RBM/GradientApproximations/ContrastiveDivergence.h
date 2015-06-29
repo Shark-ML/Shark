@@ -135,8 +135,8 @@ public:
 		
 		
 		SHARK_PARALLEL_FOR(int t = 0; t < (int)threads; ++t){
-			AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
-			AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
+			typename RBM::GradientType empiricalAverage(mpe_rbm);
+			typename RBM::GradientType modelAverage(mpe_rbm);
 			
 			std::size_t threadElements = 0;
 			
