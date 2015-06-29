@@ -57,6 +57,8 @@ public:
 		assign(e);
 	}
 	
+	matrix_set(size_type size, size_type size1, size_type size2)
+	:m_data(size,element_type(size1,size2)){}
 	// --------------
 	// Sizes
 	// --------------
@@ -66,6 +68,16 @@ public:
 		return m_data.size();
 	}
 	
+	///\brief Returns the  first dimension of the matrices in the set
+	size_type size1() const {
+		return m_data.empty()?0:m_data[0].size1();
+	}
+	
+	///\brief Returns the  second dimension of the matrices in the set
+	size_type size2() const {
+		return m_data.empty()?0:m_data[0].size2();
+	}
+	
 	// Resizing
 	/** Resize a matrix_set to new dimensions. If resizing is performed, the data is not preserved.
 	 * \param size the new number of elements
@@ -73,8 +85,6 @@ public:
 	void resize(size_type size) {
 		m_data.resize(size);
 	}
-	
-	
 
 	// --------------
 	// Element access

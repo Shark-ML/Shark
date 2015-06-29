@@ -32,8 +32,8 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Visible )
 	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
-	AverageEnergyGradient<BinaryRBM> grad(&rbm);
-	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
+	detail::AverageEnergyGradient<BinaryRBM> grad(&rbm);
+	detail::AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
 	gibbs.createSample(hiddenBatch,visibleBatch,batch);
 	
@@ -63,8 +63,8 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Hidden )
 	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
-	AverageEnergyGradient<BinaryRBM> grad(&rbm);
-	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
+	detail::AverageEnergyGradient<BinaryRBM> grad(&rbm);
+	detail::AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
 	hiddenBatch.state = batch;
 	gibbs.precomputeVisible(hiddenBatch,visibleBatch,blas::repeat(1.0,10));
@@ -99,8 +99,8 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Visible )
 	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
-	AverageEnergyGradient<BinaryRBM> grad(&rbm);
-	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
+	detail::AverageEnergyGradient<BinaryRBM> grad(&rbm);
+	detail::AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
 	gibbs.createSample(hiddenBatch,visibleBatch,batch);
 	
@@ -146,8 +146,8 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
-	AverageEnergyGradient<BinaryRBM> grad(&rbm);
-	AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
+	detail::AverageEnergyGradient<BinaryRBM> grad(&rbm);
+	detail::AverageEnergyGradient<BinaryRBM> gradTest(&rbm);
 	
 	hiddenBatch.state = batch;
 	gibbs.precomputeVisible(hiddenBatch,visibleBatch,blas::repeat(1.0,10));
@@ -206,7 +206,7 @@ public:
 
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
 		mpe_rbm->setParameterVector(parameter);
-		AverageEnergyGradient<BinaryRBM> gradient(mpe_rbm);
+		detail::AverageEnergyGradient<BinaryRBM> gradient(mpe_rbm);
 		GibbsOperator<BinaryRBM> sampler(mpe_rbm);
 		
 		//create Energy from RBM
@@ -287,7 +287,7 @@ public:
 
 	double evalDerivative( SearchPointType const & parameter, FirstOrderDerivative & derivative ) const {
 		mpe_rbm->setParameterVector(parameter);
-		AverageEnergyGradient<BinaryRBM> gradient(mpe_rbm);
+		detail::AverageEnergyGradient<BinaryRBM> gradient(mpe_rbm);
 		GibbsOperator<BinaryRBM> sampler(mpe_rbm);
 		
 		//create Energy from RBM

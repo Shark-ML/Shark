@@ -86,8 +86,8 @@ public:
 		mpe_rbm->setParameterVector(parameter);
 		
 		//the gradient approximation for the energy terms of the RBM		
-		AverageEnergyGradient<RBM> empiricalExpectation(mpe_rbm);
-		AverageEnergyGradient<RBM> modelExpectation(mpe_rbm);
+		typename RBM::GradientType empiricalExpectation(mpe_rbm);
+		typename RBM::GradientType modelExpectation(mpe_rbm);
 
 		Gibbs gibbsSampler(mpe_rbm);
 		
