@@ -269,6 +269,13 @@ SHARK_ADD_TEST( RBM/PCDTraining.cpp RBM_PCDTraining)
 SHARK_ADD_TEST( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceTraining)
 SHARK_ADD_TEST( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 
+
+#Convolutional Neural Network
+SHARK_ADD_TEST( RBM/ConvolutionalRBMBasic.cpp RBM_ConvolutionalRBMBasic)
+SHARK_ADD_TEST( RBM/ConvolutionalEnergyGradient.cpp RBM_ConvolutionalEnergyGradient)
+SHARK_ADD_TEST( RBM/ConvolutionalCDTraining.cpp RBM_ConvolutionalCDTraining)
+SHARK_ADD_TEST( RBM/ConvolutionalPTTraining.cpp RBM_ConvolutionalPTTraining)
+
 # Copy test file
 IF (HDF5_FOUND)
 	ADD_CUSTOM_COMMAND(
