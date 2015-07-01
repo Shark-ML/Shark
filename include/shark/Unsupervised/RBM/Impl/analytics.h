@@ -331,9 +331,9 @@ namespace detail{
 			return -E;
 		}
 		double diff = logZn + E;// diff between logZn and -E
-		if(diff >= maxExpInput<double>()|| diff <= minExpInput<double>()){
-			return std::max(logZn, -E);
-		}
+		//~ if(diff >= maxExpInput<double>()|| diff <= minExpInput<double>()){
+			//~ return std::max(logZn, -E);
+		//~ }
 		return logZn + softPlus(-diff);
 	}
 
@@ -355,12 +355,11 @@ namespace detail{
 		
 		//over all possible values of the visible neurons
 		double logZ = -std::numeric_limits<double>::infinity();
-		SHARK_PARALLEL_FOR (long long x = 0; x < (long long) values; x+=batchSize) {
-			RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
+		SHARK_PARALLEL_FOR (std::size_t x = 0; x < values; x+=batchSize) {
 			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-x);
-			stateMatrix.resize(currentBatchSize,rbm.numberOfVN());
+			RealMatrix stateMatrix(currentBatchSize,rbm.numberOfVN());
 			
-			for(long long elem = 0; elem != currentBatchSize;++elem){
+			for(std::size_t elem = 0; elem != currentBatchSize;++elem){
 				//generation of the x+elem-th state vector
 				Enumeration::state(row(stateMatrix,elem),x+elem);
 			}
@@ -397,15 +396,14 @@ namespace detail{
 	double logPartitionFunctionImplFactVisible(const RBMType& rbm, Enumeration, double beta){		
 		std::size_t values = Enumeration::numberOfStates(rbm.numberOfHN());
 		std::size_t batchSize=std::min(values,std::size_t(500));
-		
 		//over all possible values of the visible neurons
 		double logZ = -std::numeric_limits<double>::infinity();
-		SHARK_PARALLEL_FOR(long long x = 0;x < (long long) values; x+=batchSize) {
-			RealMatrix stateMatrix(batchSize,rbm.numberOfVN());
+		SHARK_PARALLEL_FOR(std::size_t x = 0;x <  values; x+=batchSize) {
 			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-x);
-			stateMatrix.resize(currentBatchSize,rbm.numberOfHN());
+			RealMatrix stateMatrix(currentBatchSize,rbm.numberOfHN());
 			
-			for(long long elem = 0; elem != currentBatchSize; ++elem){
+			
+			for(std::size_t elem = 0; elem != currentBatchSize; ++elem){
 				//generation of the x-th state vector
 				Enumeration::state(row(stateMatrix,elem),x+elem);
 			}
