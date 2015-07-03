@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_DerivativeVH )
 	for(std::size_t i = 0; i != 100; ++i){
 		initRandomNormal(rbm,1);
 		RealVector parameters = rbm.parameterVector();
-		testDerivative(gradient,parameters,1.e-2,1.e-10,0.01);
+		testDerivative(gradient,parameters,1.e-2,1.e-10,0.025);
 	}
 }
 
