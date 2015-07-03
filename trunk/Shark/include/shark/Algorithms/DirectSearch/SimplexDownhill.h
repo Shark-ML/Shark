@@ -43,19 +43,19 @@
 
 namespace shark {
 
-//!
-//! \brief Simplex Downhill Method
-//!
-//! \par
-//! The Nelder-Mead Simplex Downhill Method is a deterministic direct
-//! search method. It is known to perform quite well in low dimensions,
-//! at least for local search.
-//!
-//! \par
-//! The implementation of the algorithm is along the lines of the
-//! Wikipedia article
-//! https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
-//!
+///
+/// \brief Simplex Downhill Method
+///
+/// \par
+/// The Nelder-Mead Simplex Downhill Method is a deterministic direct
+/// search method. It is known to perform quite well in low dimensions,
+/// at least for local search.
+///
+/// \par
+/// The implementation of the algorithm is along the lines of the
+/// Wikipedia article
+/// https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
+///
 class SimplexDownhill : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
@@ -125,8 +125,8 @@ public:
 		SolutionType xr;
 		xr.point = 2.0 * x0 - worst.point;
 		xr.value = objectiveFunction(xr.point);
-		if (xr.value < m_best.value) m_best = xr;
-		if (best.value <= xr.value && xr.value < worst.value)
+		if (xr.value < m_best.value) m_best = xr;   // keep track of best point
+		if (best.value <= xr.value && xr.value < m_simplex[dim-1].value)
 		{
 			// replace worst point with reflected point
 			worst = xr;
@@ -137,7 +137,7 @@ public:
 			SolutionType xe;
 			xe.point = 3.0 * x0 - 2.0 * worst.point;
 			xe.value = objectiveFunction(xe.point);
-			if (xe.value < m_best.value) m_best = xe;
+			if (xe.value < m_best.value) m_best = xe;   // keep track of best point
 			if (xe.value < xr.value)
 			{
 				// replace worst point with expanded point
@@ -155,7 +155,7 @@ public:
 			SolutionType xc;
 			xc.point = 0.5 * x0 + 0.5 * worst.point;
 			xc.value = objectiveFunction(xc.point);
-			if (xc.value < m_best.value) m_best = xc;
+			if (xc.value < m_best.value) m_best = xc;   // keep track of best point
 			if (xc.value < worst.value)
 			{
 				// replace worst point with contracted point
@@ -168,15 +168,18 @@ public:
 				{
 					m_simplex[j].point = 0.5 * best.point + 0.5 * m_simplex[j].point;
 					m_simplex[j].value = objectiveFunction(m_simplex[j].point);
-					if (m_simplex[j].value < m_best.value) m_best = m_simplex[j];
+					if (m_simplex[j].value < m_best.value) m_best = m_simplex[j];   // keep track of best point
 				}
 			}
 		}
 	}
 
+	/// \brief Read access to the current simplex.
+	std::vector<SolutionType> const& simplex()
+	{ return m_simplex; }
+
 protected:
-	// current simplex (algorithm state)
-	std::vector<SolutionType> m_simplex;
+	std::vector<SolutionType> m_simplex;       ///< \brief Current simplex (algorithm state).
 };
 
 

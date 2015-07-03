@@ -57,8 +57,8 @@ namespace shark {
 
 /// AbstractObjectiveFunction offers a rich interface to support
 /// different types of optimizers. Since not every objective function meets
-/// every requirement, a flagsystem exists which tells the optimizer
-/// which Features are available. These are:
+/// every requirement, a flag system exists which tells the optimizer
+/// which features are available. These are:
 /// HAS_VALUE: The function can be evaluated. If not set, evalDerivative returns a meaningless
 /// value (for example std::numeric_limits<double>::quiet_nan());
 /// HAS_FIRST_DERIVATIVE: evalDerivative can be called for the FirstOrderDerivative.
