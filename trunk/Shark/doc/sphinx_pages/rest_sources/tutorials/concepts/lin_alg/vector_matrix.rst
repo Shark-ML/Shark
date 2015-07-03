@@ -1,5 +1,5 @@
 LinAlg: Vectors and Matrices
-===============+============
+============================
 
 All Linear Algebra related functions and operations are placed in the
 LinAlg Module. LinAlg is based on an altered subset of the boost linear algebra system
@@ -169,13 +169,13 @@ But let's see code. Initializing a vector works like this::
 
   RealVector parameters(7);
   //some things we want to store in the parameter vector
-  RealVector vec (5);
+  RealVector vec(5);
   vec = ...;
   double a = 5;
   double b = 7;
 
   //and now initialize the parameter vector using
-  init(parameters)<<vector,a,b;
+  init(parameters)<<vec,a,b;
 
 After that, parameters is initialized as the vector with elements [0,...,4] being the elements of ``vec``, element 5 being ``a`` and
 element 6 being ``b``. The framework also checks whether the length of
@@ -184,16 +184,16 @@ it is mandatory to initialize the vector with the correct size. For performance 
 of simple vectors also subranges or matrix rows are possible.
 
 If on the other hand your model receives a new parameter vector which needs to be split up into components again, the framework can
-also handle that by only replacing ``<<`` by ``>>``::
+also handle that by only replacing ``<<`` with ``>>``::
 
   RealVector parameters = newParameters();
   //components of the parameter vector
-  RealVector vector(5);
+  RealVector vec(5);
   double a = 0;
   double b = 0;
 
   //and now split the parameter vector
-  init(parameters) >> vector,a,b;
+  init(parameters) >> vec,a,b;
 
 Of course, most models do not only consist of vectors and numbers. As we force the sizes of both expressions to match, this
 framework would not be very useful if we did not support more complex types. So we added some wrappers which can handle single
@@ -227,6 +227,6 @@ very useful. You might want to use ``subrange()`` instead.
 In addition, there also exist operators to directly obtain a row or column from
 a matrix (e.g. ``row()`` or ``RealMatrixRow()``, which are equivalent when row
 is applied to a RealMatrix). See `this ublas page
-<http://www.boost.org/doc/libs/release/libs/numeric/ublas/doc/operations_overview.htm>_`
+<http://www.boost.org/doc/libs/release/libs/numeric/ublas/doc/operations_overview.htm>`_
 for an overview.
 
