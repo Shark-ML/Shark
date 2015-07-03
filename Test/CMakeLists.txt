@@ -87,6 +87,7 @@ SHARK_ADD_TEST( LinAlg/PartlyPrecomputedMatrix.cpp LinAlg_PartlyPrecomputedMatri
 
 #Algorithms tests 
 #Direct Search
+SHARK_ADD_TEST( Algorithms/DirectSearch/SimplexDownhill.cpp DirectSearch_SimplexDownhill )
 SHARK_ADD_TEST( Algorithms/DirectSearch/CMA.cpp DirectSearch_CMA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/CMSA.cpp DirectSearch_CMSA )
 SHARK_ADD_TEST( Algorithms/DirectSearch/ElitistCMA.cpp DirectSearch_ElitistCMA )

@@ -38,6 +38,7 @@
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <boost/serialization/vector.hpp>
+#include <vector>
 
 
 namespace shark {
@@ -70,7 +71,6 @@ public:
 	virtual void read( InArchive & archive )
 	{
 		archive >> m_simplex;
-		archive >> m_values;
 		archive >> m_best.point;
 		archive >> m_best.value;
 	}
@@ -78,7 +78,6 @@ public:
 	virtual void write( OutArchive & archive ) const
 	{
 		archive << m_simplex;
-		archive << m_values;
 		archive << m_best.point;
 		archive << m_best.value;
 	}
@@ -95,12 +94,13 @@ public:
 
 		// create the initial simplex
 		m_best.value = 1e100;
-		m_simplex.resize(dim + 1, RealVector(dim, 0.0));
-		m_values.resize(dim + 1);
+		m_simplex = std::vector<SolutionType>(dim + 1);
 		for (size_t j=0; j<=dim; j++)
 		{
-			for (size_t i=0; i<dim; i++) m_simplex[j].point(i) = startingPoint(i) + ((i == j) ? 1.0 : -0.5);
-			m_simplex[j].value = objectiveFunction.eval(m_simplex[j].point);
+			RealVector p(dim);
+			for (size_t i=0; i<dim; i++) p(i) = startingPoint(i) + ((i == j) ? 1.0 : -0.5);
+			m_simplex[j].point = p;
+			m_simplex[j].value = objectiveFunction.eval(p);
 			if (m_simplex[j].value < m_best.value) m_best = m_simplex[j];
 		}
 	}
@@ -122,8 +122,8 @@ public:
 		x0 /= (double)dim;
 
 		// reflection
-		SolutionType xr(dim);
-		xr.point = (2.0 * x0 - worst.point).truncate2bounds();
+		SolutionType xr;
+		xr.point = 2.0 * x0 - worst.point;
 		xr.value = objectiveFunction(xr.point);
 		if (xr.value < m_best.value) m_best = xr;
 		if (best.value <= xr.value && xr.value < worst.value)
@@ -176,7 +176,7 @@ public:
 
 protected:
 	// current simplex (algorithm state)
-	vector<SolutionType> m_simplex;
+	std::vector<SolutionType> m_simplex;
 };
 
 
