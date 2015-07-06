@@ -122,6 +122,7 @@ namespace{
 			noalias(direction) -= residual;
 			currentNormRes2 = normRes2;
 		}
+		return solution; // added by CI
 	}
 }
 
