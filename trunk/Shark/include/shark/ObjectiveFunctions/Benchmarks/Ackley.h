@@ -63,12 +63,14 @@ struct Ackley : public SingleObjectiveFunction {
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	void proposeStartingPoint(SearchPointType &x) const {
+	SearchPointType proposeStartingPoint() const {
+		SearchPointType x;
 		x.resize(m_numberOfVariables);
 
 		for (unsigned int i = 0; i < x.size(); i++) {
 			x(i) = Rng::uni(-10, 10);
 		}
+		return x;
 	}
 
 	double eval(const SearchPointType &p) const {
