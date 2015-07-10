@@ -44,7 +44,7 @@ int main( int argc, char ** argv ) {
 	
 	// Initialize parents (not a god idea to start in a single point, shouldn't do this in practice)
 	BOOST_FOREACH( example::IndividualType & ind, parents ) {
-		ackley.proposeStartingPoint( ind.searchPoint() );
+		ind.searchPoint() = ackley.proposeStartingPoint( );
 	}
 	
 	// Evolutionary operators
