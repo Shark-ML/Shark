@@ -120,9 +120,6 @@ public:
 
 	GibbsOperator(RBM* rbm):mpe_rbm(rbm){}
 
-        void configure(PropertyTree const& ) {
-        }
-  
 	RBM* rbm()const{
 		return mpe_rbm;
 	}
