@@ -25,7 +25,6 @@
 
 #include <shark/Data/DataView.h>
 #include <shark/Rng/DiscreteUniform.h>
-#include <shark/Core/IConfigurable.h>
 
 namespace shark{
 
