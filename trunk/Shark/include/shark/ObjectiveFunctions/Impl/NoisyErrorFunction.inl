@@ -25,6 +25,7 @@
 
 #include <shark/Data/DataView.h>
 #include <shark/Rng/DiscreteUniform.h>
+#include <shark/Core/IConfigurable.h>
 
 namespace shark{
 
@@ -147,8 +148,8 @@ inline NoisyErrorFunction& NoisyErrorFunction::operator = (const NoisyErrorFunct
 	return *this;
 }
 
-
-inline double NoisyErrorFunction::eval(RealVector const& input) const{
+template<class InputType,class LabelType>
+inline double NoisyErrorFunction<InputType,LabelType>::eval(RealVector const& input) const{
 	++m_evaluationCounter;
 	double value = mp_wrapper -> eval(input);
 	if(m_regularizer)
