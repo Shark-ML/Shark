@@ -147,8 +147,7 @@ inline NoisyErrorFunction& NoisyErrorFunction::operator = (const NoisyErrorFunct
 	return *this;
 }
 
-template<class InputType,class LabelType>
-inline double NoisyErrorFunction<InputType,LabelType>::eval(RealVector const& input) const{
+inline double NoisyErrorFunction::eval(RealVector const& input) const{
 	++m_evaluationCounter;
 	double value = mp_wrapper -> eval(input);
 	if(m_regularizer)
