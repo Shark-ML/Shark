@@ -57,6 +57,32 @@
 
 #ifdef __APPLE__
 
+#ifdef __ASSERTMACROS__ //is AssertMacros already included?
+//AssertMacros automatically defines __ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES as 1
+//if not already included
+#if __ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES
+#warning "AssertMacros.h already included by some file. Disabling macros as otherwise compilation will fail"
+
+//incomplete list (probably the worst offenders that will fail compilation.
+#ifdef check
+     #undef check
+#endif
+#ifdef require
+     #undef require
+#endif
+#ifdef verify
+     #undef verify
+#endif
+
+#endif
+#else
+//noone included it yet, so we can just prevent these macros...
+#define __ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES 0
+#endif
+
+// included to make Accelerate work with boost on MacOS
+#include <boost/intrusive/list.hpp>
+
 // Accelerate framework support added by TG 19.06.2015
 extern "C" {
 #include <Accelerate/Accelerate.h>
