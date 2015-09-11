@@ -138,8 +138,8 @@ public:
 		for(std::size_t i = 0; i != lambda; ++i)
 			m_prevFitness(i) = offspring[i].penalizedFitness();
 	}
-private:
-	double m_stepSize;///< currnt value for the step size
+protected:
+	double m_stepSize;///< current value for the step size
 	RealVector m_prevFitness;///< fitness values of the previous iteration for ranking
 	double m_s; ///< The time average of the population success
 

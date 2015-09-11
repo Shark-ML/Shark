@@ -72,15 +72,20 @@ public:
 		m_alpha = 0;
 	}
 	
+	void setStepSize(double stepSize){
+		m_stepSize = stepSize;
+	}
+	
 	/// \brief updates the step size using the newly sampled population
 	///
 	/// The offspring is assumed to be ordered in ascending order by their penalizedFitness
 	/// (this is the same as ordering by the unpenalized fitness in an unconstrained setting)
 	void update(SingleObjectiveFunction const& f, RealVector const& point,RealVector const& direction){
-		double fminus = f.eval(point + 0.5 * m_stepSize * direction);
-		double fplus = f.eval(point + 1.5 * m_stepSize * direction);
+		double fminus = f.eval(point +m_alphaStep * m_stepSize * direction);
+		double fplus = f.eval(point + (1+m_alphaStep) * m_stepSize * direction);
 		
-		double alphaCurrent = fminus < fplus? -m_alphaStep : m_alphaStep; 
+		//~ double alphaCurrent = fminus < fplus? -m_alphaStep : m_alphaStep; 
+		double alphaCurrent = fminus < fplus? std::log(m_alphaStep) : std::log(1+m_alphaStep); 
 		m_alpha= (1 - m_cAlpha) * m_alpha + m_cAlpha * alphaCurrent;
 		m_stepSize *= std::exp(m_alpha);
 	}
