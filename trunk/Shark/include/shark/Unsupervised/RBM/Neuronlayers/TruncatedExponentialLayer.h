@@ -37,7 +37,7 @@
 #include <shark/Unsupervised/RBM/StateSpaces/RealSpace.h>
 #include <shark/Unsupervised/RBM/Tags.h>
 #include <shark/Rng/TruncatedExponential.h>
-
+#include <shark/Core/OpenMP.h>
 namespace shark{
 namespace detail{
 template<class VectorType>
@@ -142,14 +142,15 @@ public:
 		SIZE_CHECK(statistics.lambda.size1() == state.size1());
 		SIZE_CHECK(statistics.lambda.size2() == state.size2());
 		
-		for(std::size_t i = 0; i != state.size1();++i){
-			for(std::size_t j = 0; j != state.size2();++j){
-				double integral = 1.0 - statistics.expMinusLambda(i,j);
-				TruncatedExponential<Rng> truncExp(integral,rng,statistics.lambda(i,j));
-				state(i,j) = truncExp();
+		SHARK_CRITICAL_REGION{
+			for(std::size_t i = 0; i != state.size1();++i){
+				for(std::size_t j = 0; j != state.size2();++j){
+					double integral = 1.0 - statistics.expMinusLambda(i,j);
+					TruncatedExponential<Rng> truncExp(integral,rng,statistics.lambda(i,j));
+					state(i,j) = truncExp();
+				}
 			}
 		}
-		
 		(void)alpha;//TODO: USE ALPHA
 	}
 

@@ -64,7 +64,8 @@ namespace detail{
 			V0 const& energyDiff0;
 			V1 const& energyDiff1;
 		public:
-			RatioOptimizationProblem(V0 const& v0, V1 const& v1):energyDiff0(v0),energyDiff1(v1){
+			RatioOptimizationProblem(V0 const& v0, V1 const& v1)
+			:energyDiff0(v0),energyDiff1(v1){
 				m_features |= HAS_FIRST_DERIVATIVE;
 			}
 			std::string name() const{return "";}
@@ -141,8 +142,7 @@ namespace detail{
 		RealVector const& beta, 
 		RealMatrix& energyDiffUp,
 		RealMatrix& energyDiffDown,
-		bool useDirectEnergies = false,
-		float burnInPercentage = 0.1
+		double burnInPercentage
 	){
 		std::size_t chains = beta.size();
 		std::size_t samples = energyDiffUp.size2();
@@ -160,90 +160,20 @@ namespace detail{
 		sampler.storeEnergyDifferences() = false;
 		sampler.step(burnIn);
 		sampler.storeEnergyDifferences() = true;
-		//acquire the 
+		//acquire the samples
 		for(std::size_t s = 0; s != samples; ++s){
 			sampler.step(1);
 		}
 		
 		noalias(energyDiffUp) = sampler.getUpDifferences();
 		noalias(energyDiffDown) = sampler.getDownDifferences();
-		
-		
-		//~ std::size_t chains = beta.size();
-		//~ std::size_t samples = energyDiffUp.size2();
-		
-		//~ std::size_t burnIn = static_cast<std::size_t>(samples*burnInPercentage);
-		//~ if(!burnIn)++burnIn;
-		
-		//~ //set up betasfor sampling and target
-		//~ RealVector betaUp(chains);
-		//~ RealVector betaDown(chains);
-		
-		//~ betaUp(0) = 1.0;
-		//~ betaDown(chains-1) = 0.0;
-		//~ for(std::size_t i = 0; i != chains-1; ++i){
-			//~ betaDown(i) = beta(i+1);
-			//~ betaUp(i+1) = beta(i);
-		//~ }
-		
-		//~ //setup sampler
-		//~ typedef TemperedMarkovChain<GibbsOperator<RBMType> > PTSampler;
-		//~ PTSampler sampler(&rbm);
-		//~ sampler.setNumberOfTemperatures(chains);
-		//~ for(std::size_t i = 0; i != chains; ++i){
-			//~ sampler.setBeta(i,beta(i));
-		//~ }
-		//~ sampler.initializeChain(initDataset);
-		//~ sampler.step(burnIn);
-		
-		//~ //sample and store Energies
-		//~ Energy<RBMType> energy = rbm.energy();	
-		//~ for(std::size_t s = 0; s != samples; ++s){
-			//~ sampler.step(1);
-			
-			//~ //calculate The upper and lower energy difference for every chain.
-			
-			//~ if(useDirectEnergies){
-				//~ noalias(column(energyDiffDown,s)) = energy.energyFromVisibleInput(
-					//~ sampler.samples().visible.input,
-					//~ sampler.samples().hidden.state,
-					//~ sampler.samples().visible.state
-				//~ );
-				//~ noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
-				//~ column(energyDiffUp,s) *= betaUp-beta;
-				//~ column(energyDiffDown,s) *= betaDown-beta;
-			//~ }
-			//~ else{
-				//~ //calculate the first term: -E(state,beta) thats the same for both matrices
-				//~ rbm.energy().inputVisible(sampler.samples().visible.input, sampler.samples().hidden.state);
-				//~ noalias(column(energyDiffDown,s)) = energy.logUnnormalizedProbabilityHidden(
-					//~ sampler.samples().hidden.state,
-					//~ sampler.samples().visible.input,
-					//~ beta
-				//~ );
-				//~ noalias(column(energyDiffUp,s)) = column(energyDiffDown,s);
-				
-				//~ //now add the new term
-				//~ noalias(column(energyDiffUp,s)) -= energy.logUnnormalizedProbabilityHidden(
-					//~ sampler.samples().hidden.state,
-					//~ sampler.samples().visible.input,
-					//~ betaUp
-				//~ );
-				//~ noalias(column(energyDiffDown,s)) -= energy.logUnnormalizedProbabilityHidden(
-					//~ sampler.samples().hidden.state,
-					//~ sampler.samples().visible.input,
-					//~ betaDown
-				//~ );
-			//~ }
-		//~ }
 	}
 	
 	template<class RBMType>
 	void sampleEnergiesWithTempering(
 		RBMType& rbm, 
 		RealVector const& beta, 
-		RealMatrix& energyDiffUp,
-		bool useDirectEnergies = false
+		RealMatrix& energyDiffUp
 	){
 		std::size_t chains = beta.size();
 		std::size_t samples = energyDiffUp.size2();
@@ -275,37 +205,23 @@ namespace detail{
 			for(std::size_t i  = beta.size()-1; i >0; --i){
 				//sample at current temperature
 				gibbsOperator.precomputeHidden(hidden, visible,blas::repeat(beta(i),curSize));
-				SHARK_CRITICAL_REGION{
-					gibbsOperator.sampleHidden(hidden);
-				}
+				gibbsOperator.sampleHidden(hidden);
 				gibbsOperator.precomputeVisible(hidden, visible,blas::repeat(beta(i),curSize));
-				SHARK_CRITICAL_REGION{
-					gibbsOperator.sampleVisible(visible);
-				}
+				gibbsOperator.sampleVisible(visible);
 				
 				
 				//calculate The upper energy difference for every chain.
-				if(useDirectEnergies){
-					noalias(subrange(row(energyDiffUp,i),batchStart,batchEnd)) 
-					= energy.energyFromVisibleInput(
-						visible.input,
-						hidden.state,
-						visible.state
-					) *(beta(i-1)-beta(i));
-				}
-				else{
-					noalias(subrange(row(energyDiffUp,i),batchStart,batchEnd)) = 
-					energy.logUnnormalizedProbabilityHidden(
-						hidden.state,
-						visible.input,
-						blas::repeat(beta(i),curSize)
-					) 
-					- energy.logUnnormalizedProbabilityHidden(
-						hidden.state,
-						visible.input,
-						blas::repeat(beta(i-1),curSize)
-					);
-				}
+				noalias(subrange(row(energyDiffUp,i),batchStart,batchEnd)) = 
+				energy.logUnnormalizedProbabilityHidden(
+					hidden.state,
+					visible.input,
+					blas::repeat(beta(i),curSize)
+				) 
+				- energy.logUnnormalizedProbabilityHidden(
+					hidden.state,
+					visible.input,
+					blas::repeat(beta(i-1),curSize)
+				);
 			}
 		}
 	}
@@ -359,7 +275,7 @@ namespace detail{
 			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-x);
 			RealMatrix stateMatrix(currentBatchSize,rbm.numberOfVN());
 			
-			for(std::size_t elem = 0; elem != currentBatchSize;++elem){
+			for(long long elem = 0; elem != currentBatchSize;++elem){
 				//generation of the x+elem-th state vector
 				Enumeration::state(row(stateMatrix,elem),x+elem);
 			}

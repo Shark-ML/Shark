@@ -152,21 +152,15 @@ public:
 				
 				visibleBatch.state = batch;
 				m_operator.precomputeHidden(hiddenBatch,visibleBatch,blas::repeat(1.0,batch.size1()));
-				SHARK_CRITICAL_REGION{
-					m_operator.sampleHidden(hiddenBatch);
-				}
+				m_operator.sampleHidden(hiddenBatch);
 				empiricalAverage.addVH(hiddenBatch,visibleBatch);
 				
 				for(std::size_t step = 0; step != m_k; ++step){
 					m_operator.precomputeVisible(hiddenBatch, visibleBatch,blas::repeat(1.0,batch.size1()));
-					SHARK_CRITICAL_REGION{
-						m_operator.sampleVisible(visibleBatch);
-					}
+					m_operator.sampleVisible(visibleBatch);
 					m_operator.precomputeHidden(hiddenBatch, visibleBatch,blas::repeat(1.0,batch.size1()));
 					if( step != m_k-1){
-						SHARK_CRITICAL_REGION{
-							m_operator.sampleHidden(hiddenBatch);
-						}
+						m_operator.sampleHidden(hiddenBatch);
 					}
 				}
 				modelAverage.addVH(hiddenBatch,visibleBatch);

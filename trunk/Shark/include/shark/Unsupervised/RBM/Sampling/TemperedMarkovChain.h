@@ -72,9 +72,13 @@ private:
 	Operator m_operator;
 	
 	void metropolisSwap(reference low, double betaLow, reference high, double betaHigh){
+		RealVector const& baseRate = transitionOperator().rbm()->visibleNeurons().baseRate();
 		double betaDiff = betaLow - betaHigh;
 		double energyDiff = low.energy - high.energy; 
-		double r = betaDiff * energyDiff;
+		double baseRateDiff = inner_prod(low.visible.state,baseRate) -  inner_prod(high.visible.state,baseRate); 
+		double r = betaDiff * energyDiff + betaDiff*baseRateDiff;
+		
+		
 		Uniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,1);
 		double z = uni();
 		if( r >= 0 || (z > 0 && std::log(z) < r) ){
