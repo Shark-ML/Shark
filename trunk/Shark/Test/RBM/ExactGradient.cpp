@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_MoreHidden )
 		
 		ExactGradient<BinaryRBM> gradient(&rbm);
 		gradient.setData(data);
-		testDerivative(gradient,parameters,1.e-2,1.e-10,0.1);
+		testDerivative(gradient,parameters,1.e-2,1.e-10,0.5);
 	}
 }
 
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_LessHidden )
 		
 		ExactGradient<BinaryRBM> gradient(&rbm);
 		gradient.setData(data);
-		testDerivative(gradient,parameters,1.e-2,1.e-10,0.1);
+		testDerivative(gradient,parameters,1.e-2,1.e-10,0.5);
 	}
 }
 

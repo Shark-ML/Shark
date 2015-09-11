@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		double valGrad = mse.evalDerivative(optimum,d);
 		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
-		BOOST_CHECK_SMALL(gradNorm,1.-10);
+		BOOST_CHECK_SMALL(gradNorm,1.e-1);
 		
 		//let the model forget by reinitializing with random values
 		initRandomNormal(model,2);
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		double valGrad = mse.evalDerivative(optimum,d);
 		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
-		BOOST_CHECK_SMALL(gradNorm,1.-10);
+		BOOST_CHECK_SMALL(gradNorm,1.e-1);
 		
 		//let the model forget by reinitializing with random values
 		initRandomNormal(model,2);
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		double valGrad = mse.evalDerivative(optimum,d);
 		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
-		BOOST_CHECK_SMALL(gradNorm,1.-10);
+		BOOST_CHECK_SMALL(gradNorm,1.e-1);
 		
 		//let the model forget by reinitializing with random values
 		initRandomNormal(model,2);
