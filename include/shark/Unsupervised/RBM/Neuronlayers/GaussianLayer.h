@@ -37,7 +37,7 @@
 #include <shark/Core/IParameterizable.h>
 #include <shark/Core/Math.h>
 #include <shark/Data/BatchInterfaceAdaptStruct.h>
-
+#include <shark/Core/OpenMP.h>
 namespace shark{
 
 ///\brief A layer of Gaussian neurons.
@@ -112,10 +112,12 @@ public:
 		SIZE_CHECK(statistics.size1() == state.size1());
 		SIZE_CHECK(statistics.size2() == state.size2());
 		
-		for(std::size_t i = 0; i != state.size1();++i){
-			for(std::size_t j = 0; j != state.size2();++j){
-				Normal<Rng> normal(rng,statistics(i,j),1.0);
-				state(i,j) = normal();
+		SHARK_CRITICAL_REGION{
+			for(std::size_t i = 0; i != state.size1();++i){
+				for(std::size_t j = 0; j != state.size2();++j){
+					Normal<Rng> normal(rng,statistics(i,j),1.0);
+					state(i,j) = normal();
+				}
 			}
 		}
 		(void) alpha;

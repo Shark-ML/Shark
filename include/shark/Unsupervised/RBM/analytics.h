@@ -46,6 +46,18 @@ namespace shark {
 ///@return the value of the partition function $Z*e^(-constant)$
 template<class RBMType>
 double logPartitionFunction(RBMType const& rbm, double beta = 1.0) {
+	
+	//special case: beta=0 is easy to compute and no explicit summation is needed
+	//as the RBM does not have any cross-terms anymore, the distribution is p(v,h)=p(v)*p(h)
+	//so we can simply assume v=0 and integrate all h in p(0,h) and then integrate over all v in p(v,0)
+	//and then multiply (or add the logarithms).
+	if(beta == 0.0){
+		RealVector zeroH(rbm.numberOfHN(),0.0);
+		RealVector zeroV(rbm.numberOfVN(),0.0);
+		double logPartition = rbm.visibleNeurons().logMarginalize(zeroV,0.0);
+		logPartition += rbm.hiddenNeurons().logMarginalize(zeroH,0.0);
+		return logPartition;
+	}
 	//choose correct version based on the enumeration tags
 	typedef typename RBMType::HiddenType::StateSpace::EnumerationTag HiddenTag;
 	typedef typename RBMType::VisibleType::StateSpace::EnumerationTag VisibleTag;
@@ -142,7 +154,7 @@ template<class RBMType>
 double estimateLogFreeEnergy(
 	RBMType& rbm, Data<RealVector> const& initDataset, 
 	RealVector const& beta, std::size_t samples,
-	PartitionEstimationAlgorithm algorithm = AIS,
+	PartitionEstimationAlgorithm algorithm = AcceptanceRatioMean,
 	float burnInPercentage =0.1
 ){
 	std::size_t chains = beta.size();
@@ -177,7 +189,7 @@ double estimateLogFreeEnergy(
 	for(std::size_t i = 0; i  != chains; ++i){
 		beta(i) = 1.0-i/double(chains-1);
 	}
-	return estimateLogFreeEnergy(rbm,initDataset,chains,samples,algorithm,burnInPercentage);
+	return estimateLogFreeEnergy(rbm,initDataset,beta,samples,algorithm,burnInPercentage);
 }
 
 template<class RBMType>

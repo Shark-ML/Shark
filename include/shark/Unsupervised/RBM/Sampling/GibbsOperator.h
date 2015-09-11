@@ -80,11 +80,8 @@ public:
 
 	///\brief Constructs the Operator using an allready defined Distribution to sample from. 
 	GibbsOperator(RBM* rbm, double alphaVisible = 0,double alphaHidden = 0)
-	:mpe_rbm(rbm), m_alphaVisible(alphaVisible),m_alphaHidden(alphaHidden){
-		SHARK_CHECK(alphaVisible >= 0.0, "alpha >= 0 not fulfilled for the visible layer");
-		SHARK_CHECK(alphaVisible <= 1., "alpha <=1 not fulfilled for the visible layer");
-		SHARK_CHECK(alphaHidden >= 0.0, "alpha >= 0 not fulfilled for the hidden layer");
-		SHARK_CHECK(alphaHidden <= 1., "alpha <=1 not fulfilled for the hidden layer");
+	:mpe_rbm(rbm){
+		setAlpha(alphaVisible,alphaHidden);
 	}
 		
 	///\brief Returns the internal RBM.
@@ -188,6 +185,15 @@ public:
 			hiddenBatch.state, 
 			visibleBatch.state
 		);
+	}
+	
+	void setAlpha(double newAlphaVisible, double newAlphaHidden){
+		SHARK_CHECK(newAlphaVisible >= 0.0, "alpha >= 0 not fulfilled for the visible layer");
+		SHARK_CHECK(newAlphaVisible <= 1., "alpha <=1 not fulfilled for the visible layer");
+		SHARK_CHECK(newAlphaHidden >= 0.0, "alpha >= 0 not fulfilled for the hidden layer");
+		SHARK_CHECK(newAlphaHidden <= 1., "alpha <=1 not fulfilled for the hidden layer");
+		m_alphaVisible = newAlphaVisible;
+		m_alphaHidden = newAlphaHidden;
 	}
 private:
 	RBM* mpe_rbm;
