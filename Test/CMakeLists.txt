@@ -5,16 +5,11 @@
 #       Test implementation: Boost UTF                              #
 #####################################################################
 
-# i am not sure, if i really need this..
-project(Coverage)
-cmake_minimum_required(VERSION 2.8)
-ENABLE_TESTING()
-
 
 #####################################################################
 #       Configure logging of test restuls to XML                    #
 #####################################################################
-OPTION( OPT_LOG_TEST_OUTPUT "Log test output to XML files." OFF )
+option( LOG_TEST_OUTPUT "Log test output to XML files." OFF )
 
 #####################################################################
 #   Adds a unit test for the shark library                          #
@@ -25,274 +20,261 @@ OPTION( OPT_LOG_TEST_OUTPUT "Log test output to XML files." OFF )
 #       If OPT_LOG_TEST_OUTPUT is enabled, test log is written      #
 #   to ${NAME_Log.xml} in ${SHARK}/Test/bin.                        #
 #####################################################################
-MACRO( SHARK_ADD_TEST SRC NAME)
+macro(SHARK_ADD_TEST SRC NAME)
+   
+  if( OPT_LOG_TEST_OUTPUT )
+    set( XML_LOGGING_COMMAND_LINE_ARGS "--log_level=test_suite --log_format=XML --log_sink=${NAME}_Log.xml --report_level=no" )
+  endif( OPT_LOG_TEST_OUTPUT )
 
-    IF( OPT_LOG_TEST_OUTPUT )
-        SET( XML_LOGGING_COMMAND_LINE_ARGS "--log_level=test_suite --log_format=XML --log_sink=${NAME}_Log.xml --report_level=no" )
-    ENDIF( OPT_LOG_TEST_OUTPUT )
+  # Create the test executable
+  add_executable( ${NAME} ${SRC} Models/derivativeTestHelper.h )
+  target_link_libraries( ${NAME} shark)
 
-    ADD_EXECUTABLE( ${NAME}
-        ${SRC}
-        Models/derivativeTestHelper.h
-    )
+  if(GCOV_CHECK)
+    target_link_libraries( ${NAME} gcov)
+  endif (GCOV_CHECK)
 
-    SET( LINK_LIBRARIES
-        shark
-        ${Boost_LIBRARIES}
-    )
+  # Add the test
+  add_test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} )
 
-    if (GCOV_CHECK)
-      SET(LINK_LIBRARIES "${LINK_LIBRARIES}" gcov)
-    endif (GCOV_CHECK)
-    TARGET_LINK_LIBRARIES( ${NAME} ${LINK_LIBRARIES})
+  if(GCOV_CHECK)
+    add_Test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} COMMAND Coverage)
+  endif (GCOV_CHECK)
+endmacro()
 
-    ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} )
+# BLAS Tests
+shark_add_test( LinAlg/BLAS/iterators.cpp BLAS_Iterators)
+shark_add_test( LinAlg/BLAS/vector_assign.cpp BLAS_Vector_Assign)
+shark_add_test( LinAlg/BLAS/matrix_assign.cpp BLAS_Matrix_Assign)
+shark_add_test( LinAlg/BLAS/compressed_vector.cpp BLAS_Compressed_Vector)
+shark_add_test( LinAlg/BLAS/triangular_matrix.cpp BLAS_Triangular_Matrix)
+shark_add_test( LinAlg/BLAS/compressed_matrix.cpp BLAS_Compressed_Matrix)
+shark_add_test( LinAlg/BLAS/vector_proxy.cpp BLAS_Vector_Proxy)
+shark_add_test( LinAlg/BLAS/matrix_proxy.cpp BLAS_Matrix_Proxy)
+shark_add_test( LinAlg/BLAS/vector_expression.cpp BLAS_Vector_Expression)
+shark_add_test( LinAlg/BLAS/axpy_prod.cpp BLAS_Axpy_Prod)
+shark_add_test( LinAlg/BLAS/triangular_prod.cpp BLAS_Triangular_Prod)
 
-    if(GCOV_CHECK)
-      ADD_TEST( ${NAME} ${EXECUTABLE_OUTPUT_PATH}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} COMMAND Coverage)
-    endif (GCOV_CHECK)
-ENDMACRO()
-
-
-#BLAS Tests
-SHARK_ADD_TEST( LinAlg/BLAS/iterators.cpp BLAS_Iterators)
-SHARK_ADD_TEST( LinAlg/BLAS/vector_assign.cpp BLAS_Vector_Assign)
-SHARK_ADD_TEST( LinAlg/BLAS/matrix_assign.cpp BLAS_Matrix_Assign)
-SHARK_ADD_TEST( LinAlg/BLAS/compressed_vector.cpp BLAS_Compressed_Vector)
-SHARK_ADD_TEST( LinAlg/BLAS/triangular_matrix.cpp BLAS_Triangular_Matrix)
-SHARK_ADD_TEST( LinAlg/BLAS/compressed_matrix.cpp BLAS_Compressed_Matrix)
-SHARK_ADD_TEST( LinAlg/BLAS/vector_proxy.cpp BLAS_Vector_Proxy)
-SHARK_ADD_TEST( LinAlg/BLAS/matrix_proxy.cpp BLAS_Matrix_Proxy)
-SHARK_ADD_TEST( LinAlg/BLAS/vector_expression.cpp BLAS_Vector_Expression)
-SHARK_ADD_TEST( LinAlg/BLAS/axpy_prod.cpp BLAS_Axpy_Prod)
-SHARK_ADD_TEST( LinAlg/BLAS/triangular_prod.cpp BLAS_Triangular_Prod)
-#LinAlg Tests
-SHARK_ADD_TEST( LinAlg/DiagonalMatrix.cpp LinAlg_DiagonalMatrix)
-SHARK_ADD_TEST( LinAlg/sumRows.cpp LinAlg_SumRows)
-SHARK_ADD_TEST( LinAlg/Proxy.cpp LinAlg_Proxy )
-SHARK_ADD_TEST( LinAlg/repeat.cpp LinAlg_Repeat)
-SHARK_ADD_TEST( LinAlg/rotations.cpp LinAlg_rotations )
-SHARK_ADD_TEST( LinAlg/permute.cpp LinAlg_Permutations )
-SHARK_ADD_TEST( LinAlg/KernelMatrix.cpp LinAlg_KernelMatrix )
-SHARK_ADD_TEST( LinAlg/Metrics.cpp LinAlg_Metrics)
-SHARK_ADD_TEST( LinAlg/RQ.cpp LinAlg_RQ )
-SHARK_ADD_TEST( LinAlg/eigensymm.cpp LinAlg_eigensymm )
-SHARK_ADD_TEST( LinAlg/svd.cpp LinAlg_svd )
-SHARK_ADD_TEST( LinAlg/choleskyDecomposition.cpp LinAlg_choleskyDecomposition)
-SHARK_ADD_TEST( LinAlg/solve.cpp LinAlg_solve)
-SHARK_ADD_TEST( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
-SHARK_ADD_TEST( LinAlg/Initialize.cpp LinAlg_Initialize)
-SHARK_ADD_TEST( LinAlg/LRUCache.cpp LinAlg_LRUCache )
-SHARK_ADD_TEST( LinAlg/PartlyPrecomputedMatrix.cpp LinAlg_PartlyPrecomputedMatrix )
+# LinAlg Tests
+shark_add_test( LinAlg/DiagonalMatrix.cpp LinAlg_DiagonalMatrix)
+shark_add_test( LinAlg/sumRows.cpp LinAlg_SumRows)
+shark_add_test( LinAlg/Proxy.cpp LinAlg_Proxy )
+shark_add_test( LinAlg/repeat.cpp LinAlg_Repeat)
+shark_add_test( LinAlg/rotations.cpp LinAlg_rotations )
+shark_add_test( LinAlg/permute.cpp LinAlg_Permutations )
+shark_add_test( LinAlg/KernelMatrix.cpp LinAlg_KernelMatrix )
+shark_add_test( LinAlg/Metrics.cpp LinAlg_Metrics)
+shark_add_test( LinAlg/RQ.cpp LinAlg_RQ )
+shark_add_test( LinAlg/eigensymm.cpp LinAlg_eigensymm )
+shark_add_test( LinAlg/svd.cpp LinAlg_svd )
+shark_add_test( LinAlg/choleskyDecomposition.cpp LinAlg_choleskyDecomposition)
+shark_add_test( LinAlg/solve.cpp LinAlg_solve)
+shark_add_test( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
+shark_add_test( LinAlg/Initialize.cpp LinAlg_Initialize)
+shark_add_test( LinAlg/LRUCache.cpp LinAlg_LRUCache )
+shark_add_test( LinAlg/PartlyPrecomputedMatrix.cpp LinAlg_PartlyPrecomputedMatrix )
 
 #Algorithms tests 
 #Direct Search
-SHARK_ADD_TEST( Algorithms/DirectSearch/SimplexDownhill.cpp DirectSearch_SimplexDownhill )
-SHARK_ADD_TEST( Algorithms/DirectSearch/CMA.cpp DirectSearch_CMA )
-SHARK_ADD_TEST( Algorithms/DirectSearch/CMSA.cpp DirectSearch_CMSA )
-SHARK_ADD_TEST( Algorithms/DirectSearch/ElitistCMA.cpp DirectSearch_ElitistCMA )
-SHARK_ADD_TEST( Algorithms/DirectSearch/VDCMA.cpp DirectSearch_VDCMA )
-SHARK_ADD_TEST( Algorithms/DirectSearch/MOCMA.cpp DirectSearch_MOCMA )
-SHARK_ADD_TEST( Algorithms/DirectSearch/SteadyStateMOCMA.cpp DirectSearch_SteadyStateMOCMA )
-SHARK_ADD_TEST( Algorithms/DirectSearch/RealCodedNSGAII.cpp DirectSearch_RealCodedNSGAII )
-SHARK_ADD_TEST( Algorithms/DirectSearch/FastNonDominatedSort.cpp DirectSearch_FastNonDominatedSort )
-SHARK_ADD_TEST( Algorithms/DirectSearch/ParetoDominanceComparator.cpp DirectSearch_ParetoDominanceComparator )
-#Direct Search Operator tests
-SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
-SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.cpp DirectSearch_IndicatorBasedSelection )
-SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/Mutation/BitflipMutation.cpp DirectSearch_BitflipMutation )
-SHARK_ADD_TEST( Algorithms/DirectSearch/Operators/PenalizingEvaluator.cpp DirectSearch_PenalizingEvaluator )
-#Direct Search Indicator tests
-SHARK_ADD_TEST( Algorithms/DirectSearch/Indicators/HypervolumeIndicator.cpp DirectSearch_HypervolumeIndicator )
+shark_add_test( Algorithms/DirectSearch/CMA.cpp DirectSearch_CMA )
+shark_add_test( Algorithms/DirectSearch/CMSA.cpp DirectSearch_CMSA )
+shark_add_test( Algorithms/DirectSearch/ElitistCMA.cpp DirectSearch_ElitistCMA )
+shark_add_test( Algorithms/DirectSearch/VDCMA.cpp DirectSearch_VDCMA )
+shark_add_test( Algorithms/DirectSearch/MOCMA.cpp DirectSearch_MOCMA )
+shark_add_test( Algorithms/DirectSearch/SteadyStateMOCMA.cpp DirectSearch_SteadyStateMOCMA )
+shark_add_test( Algorithms/DirectSearch/RealCodedNSGAII.cpp DirectSearch_RealCodedNSGAII )
+shark_add_test( Algorithms/DirectSearch/FastNonDominatedSort.cpp DirectSearch_FastNonDominatedSort )
+shark_add_test( Algorithms/DirectSearch/ParetoDominanceComparator.cpp DirectSearch_ParetoDominanceComparator )
 
-#GradientDescent
-SHARK_ADD_TEST( Algorithms/GradientDescent/LineSearch.cpp GradDesc_LineSearch )
-SHARK_ADD_TEST( Algorithms/GradientDescent/BFGS.cpp GradDesc_BFGS )
-SHARK_ADD_TEST( Algorithms/GradientDescent/LBFGS.cpp GradDesc_LBFGS )
-SHARK_ADD_TEST( Algorithms/GradientDescent/CG.cpp GradDesc_CG )
-SHARK_ADD_TEST( Algorithms/GradientDescent/TrustRegionNewton.cpp GradDesc_TrustRegionNewton )
-SHARK_ADD_TEST( Algorithms/GradientDescent/Rprop.cpp GradDesc_Rprop )
-SHARK_ADD_TEST( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_SteepestDescent )
+# Direct Search Operator tests
+shark_add_test( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
+shark_add_test( Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.cpp DirectSearch_IndicatorBasedSelection )
+shark_add_test( Algorithms/DirectSearch/Operators/Mutation/BitflipMutation.cpp DirectSearch_BitflipMutation )
+shark_add_test( Algorithms/DirectSearch/Operators/PenalizingEvaluator.cpp DirectSearch_PenalizingEvaluator )
+
+# Direct Search Indicator tests
+shark_add_test( Algorithms/DirectSearch/Indicators/HypervolumeIndicator.cpp DirectSearch_HypervolumeIndicator )
+
+# GradientDescent
+shark_add_test( Algorithms/GradientDescent/LineSearch.cpp GradDesc_LineSearch )
+shark_add_test( Algorithms/GradientDescent/BFGS.cpp GradDesc_BFGS )
+shark_add_test( Algorithms/GradientDescent/LBFGS.cpp GradDesc_LBFGS )
+shark_add_test( Algorithms/GradientDescent/CG.cpp GradDesc_CG )
+shark_add_test( Algorithms/GradientDescent/Rprop.cpp GradDesc_Rprop )
+shark_add_test( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_SteepestDescent )
 
 
-#Trainers
-SHARK_ADD_TEST( Algorithms/Trainers/CSvmTrainer.cpp Trainers_CSvmTrainer )
-SHARK_ADD_TEST( Algorithms/Trainers/FisherLDA.cpp Trainers_FisherLDA )
-SHARK_ADD_TEST( Algorithms/Trainers/KernelMeanClassifier.cpp Trainers_KernelMeanClassifier )
-SHARK_ADD_TEST( Algorithms/Trainers/EpsilonSvmTrainer.cpp Trainers_EpsilonSvmTrainer )
-SHARK_ADD_TEST( Algorithms/Trainers/OneClassSvmTrainer.cpp Trainers_OneClassSvmTrainer )
-SHARK_ADD_TEST( Algorithms/Trainers/RegularizationNetworkTrainer.cpp Trainers_RegularizationNetworkTrainer )
-SHARK_ADD_TEST( Algorithms/Trainers/LDA.cpp Trainers_LDA )
-SHARK_ADD_TEST( Algorithms/Trainers/LinearRegression.cpp Trainers_LinearRegression )
-SHARK_ADD_TEST( Algorithms/Trainers/McSvmTrainer.cpp Trainers_McSvmTrainer )
-SHARK_ADD_TEST( Algorithms/Trainers/LinearSvmTrainer.cpp Trainers_LinearSvmTrainer )
-SHARK_ADD_TEST( Algorithms/Trainers/NBClassifierTrainerTests.cpp Trainers_NBClassifier )
-SHARK_ADD_TEST( Algorithms/Trainers/Normalization.cpp Trainers_Normalization )
-SHARK_ADD_TEST( Algorithms/Trainers/KernelNormalization.cpp Trainers_KernelNormalization )
-SHARK_ADD_TEST( Algorithms/Trainers/SigmoidFit.cpp Trainers_SigmoidFit )
-SHARK_ADD_TEST( Algorithms/Trainers/PCA.cpp Trainers_PCA )
-SHARK_ADD_TEST( Algorithms/Trainers/Perceptron.cpp Trainers_Perceptron )
-SHARK_ADD_TEST( Algorithms/Trainers/MissingFeatureSvmTrainerTests.cpp Trainers_MissingFeatureSvmTrainer )
-SHARK_ADD_TEST( Algorithms/Trainers/Budgeted/AbstractBudgetMaintenanceStrategy_Test.cpp Trainers_AbstractBudgetMaintenanceStrategy )
-SHARK_ADD_TEST( Algorithms/Trainers/Budgeted/MergeBudgetMaintenanceStrategy_Test.cpp MergeBudgetMaintenanceStrategy )
-SHARK_ADD_TEST( Algorithms/Trainers/Budgeted/RemoveBudgetMaintenanceStrategy_Test.cpp RemoveBudgetMaintenanceStrategy )
-SHARK_ADD_TEST( Algorithms/Trainers/Budgeted/KernelBudgetedSGDTrainer_Test.cpp KernelBudgetedSGDTrainer )
+# Trainers
+shark_add_test( Algorithms/Trainers/CSvmTrainer.cpp Trainers_CSvmTrainer )
+shark_add_test( Algorithms/Trainers/FisherLDA.cpp Trainers_FisherLDA )
+shark_add_test( Algorithms/Trainers/KernelMeanClassifier.cpp Trainers_KernelMeanClassifier )
+shark_add_test( Algorithms/Trainers/EpsilonSvmTrainer.cpp Trainers_EpsilonSvmTrainer )
+shark_add_test( Algorithms/Trainers/OneClassSvmTrainer.cpp Trainers_OneClassSvmTrainer )
+shark_add_test( Algorithms/Trainers/RegularizationNetworkTrainer.cpp Trainers_RegularizationNetworkTrainer )
+shark_add_test( Algorithms/Trainers/LDA.cpp Trainers_LDA )
+shark_add_test( Algorithms/Trainers/LinearRegression.cpp Trainers_LinearRegression )
+shark_add_test( Algorithms/Trainers/McSvmTrainer.cpp Trainers_McSvmTrainer )
+shark_add_test( Algorithms/Trainers/LinearSvmTrainer.cpp Trainers_LinearSvmTrainer )
+shark_add_test( Algorithms/Trainers/NBClassifierTrainerTests.cpp Trainers_NBClassifier )
+shark_add_test( Algorithms/Trainers/Normalization.cpp Trainers_Normalization )
+shark_add_test( Algorithms/Trainers/KernelNormalization.cpp Trainers_KernelNormalization )
+shark_add_test( Algorithms/Trainers/SigmoidFit.cpp Trainers_SigmoidFit )
+shark_add_test( Algorithms/Trainers/PCA.cpp Trainers_PCA )
+shark_add_test( Algorithms/Trainers/Perceptron.cpp Trainers_Perceptron )
+shark_add_test( Algorithms/Trainers/MissingFeatureSvmTrainerTests.cpp Trainers_MissingFeatureSvmTrainer )
+shark_add_test( Algorithms/Trainers/Budgeted/AbstractBudgetMaintenanceStrategy_Test.cpp Trainers_AbstractBudgetMaintenanceStrategy )
+shark_add_test( Algorithms/Trainers/Budgeted/MergeBudgetMaintenanceStrategy_Test.cpp MergeBudgetMaintenanceStrategy )
+shark_add_test( Algorithms/Trainers/Budgeted/RemoveBudgetMaintenanceStrategy_Test.cpp RemoveBudgetMaintenanceStrategy )
+shark_add_test( Algorithms/Trainers/Budgeted/KernelBudgetedSGDTrainer_Test.cpp KernelBudgetedSGDTrainer )
 
-#misc algorithms
-SHARK_ADD_TEST( Algorithms/GridSearch.cpp Algorithms_GridSearch )
-SHARK_ADD_TEST( Algorithms/Hypervolume.cpp Algorithms_Hypervolume )
-SHARK_ADD_TEST( Algorithms/nearestneighbors.cpp Algorithms_NearestNeighbor )
-SHARK_ADD_TEST( Algorithms/KMeans.cpp Algorithms_KMeans )
-SHARK_ADD_TEST( Algorithms/JaakkolaHeuristic.cpp Algorithms_JaakkolaHeuristic )
+# Misc algorithms
+shark_add_test( Algorithms/GridSearch.cpp Algorithms_GridSearch )
+shark_add_test( Algorithms/Hypervolume.cpp Algorithms_Hypervolume )
+shark_add_test( Algorithms/nearestneighbors.cpp Algorithms_NearestNeighbor )
+shark_add_test( Algorithms/KMeans.cpp Algorithms_KMeans )
+shark_add_test( Algorithms/JaakkolaHeuristic.cpp Algorithms_JaakkolaHeuristic )
 
-#Models
-SHARK_ADD_TEST( Models/ConcatenatedModel.cpp Models_ConcatenatedModel )
-SHARK_ADD_TEST( Models/FFNet.cpp Models_FFNet )
-SHARK_ADD_TEST( Models/Autoencoder.cpp Models_Autoencoder )
-SHARK_ADD_TEST( Models/TiedAutoencoder.cpp Models_TiedAutoencoder )
-SHARK_ADD_TEST( Models/LinearModel.cpp Models_LinearModel )
-SHARK_ADD_TEST( Models/LinearNorm.cpp Models_LinearNorm )
-SHARK_ADD_TEST( Models/ConvexCombination.cpp Models_ConvexCombination )
-SHARK_ADD_TEST( Models/NBClassifierTests.cpp Models_NBClassifier )
-#SHARK_ADD_TEST( Models/OnlineRNNet.cpp Models_OnlineRNNet )
-SHARK_ADD_TEST( Models/RBFLayer.cpp Models_RBFLayer ) 
-SHARK_ADD_TEST( Models/RNNet.cpp Models_RNNet ) 
-SHARK_ADD_TEST( Models/CMAC.cpp Models_CMAC )
-SHARK_ADD_TEST( Models/MeanModel.cpp Models_MeanModel )
+# Models
+shark_add_test( Models/ConcatenatedModel.cpp Models_ConcatenatedModel )
+shark_add_test( Models/FFNet.cpp Models_FFNet )
+shark_add_test( Models/Autoencoder.cpp Models_Autoencoder )
+shark_add_test( Models/TiedAutoencoder.cpp Models_TiedAutoencoder )
+shark_add_test( Models/LinearModel.cpp Models_LinearModel )
+shark_add_test( Models/LinearNorm.cpp Models_LinearNorm )
+shark_add_test( Models/ConvexCombination.cpp Models_ConvexCombination )
+shark_add_test( Models/NBClassifierTests.cpp Models_NBClassifier )
+#shark_add_test( Models/OnlineRNNet.cpp Models_OnlineRNNet )
+shark_add_test( Models/RBFLayer.cpp Models_RBFLayer ) 
+shark_add_test( Models/RNNet.cpp Models_RNNet ) 
+shark_add_test( Models/CMAC.cpp Models_CMAC )
+shark_add_test( Models/MeanModel.cpp Models_MeanModel )
 
-SHARK_ADD_TEST( Models/SigmoidModel.cpp Models_SigmoidModel )
-SHARK_ADD_TEST( Models/Softmax.cpp Models_Softmax )
-SHARK_ADD_TEST( Models/SoftNearestNeighborClassifier.cpp Models_SoftNearestNeighborClassifier )
-SHARK_ADD_TEST( Models/Kernels/KernelExpansion.cpp Models_KernelExpansion )
-SHARK_ADD_TEST( Models/NearestNeighborRegression.cpp Models_NearestNeighborRegression )
-SHARK_ADD_TEST( Models/OneVersusOneClassifier.cpp Models_OneVersusOneClassifier )
+shark_add_test( Models/SigmoidModel.cpp Models_SigmoidModel )
+shark_add_test( Models/Softmax.cpp Models_Softmax )
+shark_add_test( Models/SoftNearestNeighborClassifier.cpp Models_SoftNearestNeighborClassifier )
+shark_add_test( Models/Kernels/KernelExpansion.cpp Models_KernelExpansion )
+shark_add_test( Models/NearestNeighborRegression.cpp Models_NearestNeighborRegression )
+shark_add_test( Models/OneVersusOneClassifier.cpp Models_OneVersusOneClassifier )
 
-#Kernels
-SHARK_ADD_TEST( Models/Kernels/GaussianRbfKernel.cpp Models_GaussianKernel )
-SHARK_ADD_TEST( Models/Kernels/LinearKernel.cpp Models_LinearKernel )
-SHARK_ADD_TEST( Models/Kernels/NormalizedKernel.cpp Models_NormalizedKernel )
-SHARK_ADD_TEST( Models/Kernels/MonomialKernel.cpp Models_MonomialKernel )
-SHARK_ADD_TEST( Models/Kernels/PolynomialKernel.cpp Models_PolynomialKernel )
-SHARK_ADD_TEST( Models/Kernels/ScaledKernel.cpp Models_ScaledKernel )
-SHARK_ADD_TEST( Models/Kernels/WeightedSumKernel.cpp Models_WeightedSumKernel )
-SHARK_ADD_TEST( Models/Kernels/ProductKernel.cpp Models_ProductKernel )
-SHARK_ADD_TEST( Models/Kernels/ArdKernel.cpp Models_ArdKernel )
-SHARK_ADD_TEST( Models/Kernels/MklKernel.cpp Models_MklKernel )
-SHARK_ADD_TEST( Models/Kernels/SubrangeKernel.cpp Models_SubrangeKernel )
-SHARK_ADD_TEST( Models/Kernels/DiscreteKernel.cpp Models_DiscreteKernel )
-SHARK_ADD_TEST( Models/Kernels/MultiTaskKernel.cpp Models_MultiTaskKernel )
-SHARK_ADD_TEST( Models/Kernels/ModelKernel.cpp Models_ModelKernel )
+# Kernels
+shark_add_test( Models/Kernels/GaussianRbfKernel.cpp Models_GaussianKernel )
+shark_add_test( Models/Kernels/LinearKernel.cpp Models_LinearKernel )
+shark_add_test( Models/Kernels/NormalizedKernel.cpp Models_NormalizedKernel )
+shark_add_test( Models/Kernels/MonomialKernel.cpp Models_MonomialKernel )
+shark_add_test( Models/Kernels/PolynomialKernel.cpp Models_PolynomialKernel )
+shark_add_test( Models/Kernels/ScaledKernel.cpp Models_ScaledKernel )
+shark_add_test( Models/Kernels/WeightedSumKernel.cpp Models_WeightedSumKernel )
+shark_add_test( Models/Kernels/ProductKernel.cpp Models_ProductKernel )
+shark_add_test( Models/Kernels/ArdKernel.cpp Models_ArdKernel )
+shark_add_test( Models/Kernels/MklKernel.cpp Models_MklKernel )
+shark_add_test( Models/Kernels/SubrangeKernel.cpp Models_SubrangeKernel )
+shark_add_test( Models/Kernels/DiscreteKernel.cpp Models_DiscreteKernel )
+shark_add_test( Models/Kernels/MultiTaskKernel.cpp Models_MultiTaskKernel )
+shark_add_test( Models/Kernels/ModelKernel.cpp Models_ModelKernel )
 
-#KernelMethods
-SHARK_ADD_TEST( Models/Kernels/KernelHelpers.cpp Models_KernelHelpers )
-SHARK_ADD_TEST( Models/Kernels/KernelNearestNeighborClassifier.cpp Models_KernelNearestNeighborClassifier )
-SHARK_ADD_TEST( Models/Kernels/KernelNearestNeighborRegression.cpp Models_KernelNearestNeighborRegression )
-SHARK_ADD_TEST( Models/Kernels/EvalSkipMissingFeaturesTests.cpp Models_EvalSkipMissingFeatures )
-SHARK_ADD_TEST( Models/Kernels/MissingFeaturesKernelExpansionTests.cpp Models_MissingFeaturesKernelExpansion )
-SHARK_ADD_TEST( Models/Kernels/CSvmDerivative.cpp Models_CSvmDerivative )
+# KernelMethods
+shark_add_test( Models/Kernels/KernelHelpers.cpp Models_KernelHelpers )
+shark_add_test( Models/Kernels/KernelNearestNeighborClassifier.cpp Models_KernelNearestNeighborClassifier )
+shark_add_test( Models/Kernels/KernelNearestNeighborRegression.cpp Models_KernelNearestNeighborRegression )
+shark_add_test( Models/Kernels/EvalSkipMissingFeaturesTests.cpp Models_EvalSkipMissingFeatures )
+shark_add_test( Models/Kernels/MissingFeaturesKernelExpansionTests.cpp Models_MissingFeaturesKernelExpansion )
+shark_add_test( Models/Kernels/CSvmDerivative.cpp Models_CSvmDerivative )
 
-#Trees
-SHARK_ADD_TEST( Models/RFClassifier.cpp Models_RFClassifier )
-SHARK_ADD_TEST( Models/CARTClassifier.cpp Models_CARTClassifier )
+# Trees
+shark_add_test( Models/RFClassifier.cpp Models_RFClassifier )
+shark_add_test( Models/CARTClassifier.cpp Models_CARTClassifier )
 
 # Core tests
-SHARK_ADD_TEST( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )
-SHARK_ADD_TEST( Core/Iterators.cpp Core_Iterators )
-SHARK_ADD_TEST( Core/Math.cpp Core_Math )
+shark_add_test( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )
+shark_add_test( Core/Iterators.cpp Core_Iterators )
+shark_add_test( Core/Math.cpp Core_Math )
 
-#Data Tests
-SHARK_ADD_TEST( Data/Csv.cpp Data_Csv )
-SHARK_ADD_TEST( Data/Bootstrap.cpp Data_Bootstrap )
-SHARK_ADD_TEST( Data/CVDatasetTools.cpp Data_CVDatasetTools )
-SHARK_ADD_TEST( Data/Dataset.cpp Data_Dataset )
-SHARK_ADD_TEST( Data/DataView.cpp Data_DataView )
-SHARK_ADD_TEST( Data/LabelOrder_Test.cpp Data_LabelOrder )
-SHARK_ADD_TEST( Data/Statistics.cpp Data_Statistics )
-IF (HDF5_FOUND)
-    SHARK_ADD_TEST( Data/HDF5Tests.cpp Data_HDF5 )
-ENDIF(HDF5_FOUND)
-SHARK_ADD_TEST( Data/SparseData.cpp Data_SparseData )
-SHARK_ADD_TEST( Data/ExportKernelMatrix.cpp Data_ExportKernelMatrix )
+# Data Tests
+shark_add_test( Data/Csv.cpp Data_Csv )
+shark_add_test( Data/Bootstrap.cpp Data_Bootstrap )
+shark_add_test( Data/CVDatasetTools.cpp Data_CVDatasetTools )
+shark_add_test( Data/Dataset.cpp Data_Dataset )
+shark_add_test( Data/DataView.cpp Data_DataView )
+shark_add_test( Data/LabelOrder_Test.cpp Data_LabelOrder )
+shark_add_test( Data/Statistics.cpp Data_Statistics )
+if(HDF5_FOUND)
+  shark_add_test( Data/HDF5Tests.cpp Data_HDF5 )
+endif()
+shark_add_test( Data/SparseData.cpp Data_SparseData )
+shark_add_test( Data/ExportKernelMatrix.cpp Data_ExportKernelMatrix )
 
 #Objective Functions
-SHARK_ADD_TEST( ObjectiveFunctions/ErrorFunction.cpp ObjFunct_ErrorFunction )
-SHARK_ADD_TEST( ObjectiveFunctions/SparseAutoencoderError.cpp ObjFunct_SparseAutoencoderError )
-SHARK_ADD_TEST( ObjectiveFunctions/NoisyErrorFunction.cpp ObjFunct_NoisyErrorFunction )
-SHARK_ADD_TEST( ObjectiveFunctions/CrossValidation.cpp ObjFunct_CrossValidation )
-SHARK_ADD_TEST( ObjectiveFunctions/Benchmarks.cpp ObjFunct_Benchmarks )
-SHARK_ADD_TEST( ObjectiveFunctions/KernelTargetAlignment.cpp ObjFunct_KernelTargetAlignment )
-SHARK_ADD_TEST( ObjectiveFunctions/KernelBasisDistance.cpp ObjFunct_KernelBasisDistance )
-SHARK_ADD_TEST( ObjectiveFunctions/RadiusMarginQuotient.cpp ObjFunct_RadiusMarginQuotient )
-SHARK_ADD_TEST( ObjectiveFunctions/LooError.cpp ObjFunct_LooError )
-SHARK_ADD_TEST( ObjectiveFunctions/LooErrorCSvm.cpp ObjFunct_LooErrorCSvm )
-SHARK_ADD_TEST( ObjectiveFunctions/NegativeLogLikelihood.cpp ObjFunct_NegativeLogLikelihood )
-SHARK_ADD_TEST( ObjectiveFunctions/SvmLogisticInterpretation.cpp ObjFunct_SvmLogisticInterpretation )
-SHARK_ADD_TEST( ObjectiveFunctions/BoxConstraintHandler.cpp ObjFunct_BoxConstraintHandler )
+shark_add_test( ObjectiveFunctions/ErrorFunction.cpp ObjFunct_ErrorFunction )
+shark_add_test( ObjectiveFunctions/SparseAutoencoderError.cpp ObjFunct_SparseAutoencoderError )
+shark_add_test( ObjectiveFunctions/NoisyErrorFunction.cpp ObjFunct_NoisyErrorFunction )
+shark_add_test( ObjectiveFunctions/CrossValidation.cpp ObjFunct_CrossValidation )
+shark_add_test( ObjectiveFunctions/Benchmarks.cpp ObjFunct_Benchmarks )
+shark_add_test( ObjectiveFunctions/KernelTargetAlignment.cpp ObjFunct_KernelTargetAlignment )
+shark_add_test( ObjectiveFunctions/KernelBasisDistance.cpp ObjFunct_KernelBasisDistance )
+shark_add_test( ObjectiveFunctions/RadiusMarginQuotient.cpp ObjFunct_RadiusMarginQuotient )
+shark_add_test( ObjectiveFunctions/LooError.cpp ObjFunct_LooError )
+shark_add_test( ObjectiveFunctions/LooErrorCSvm.cpp ObjFunct_LooErrorCSvm )
+shark_add_test( ObjectiveFunctions/NegativeLogLikelihood.cpp ObjFunct_NegativeLogLikelihood )
+shark_add_test( ObjectiveFunctions/SvmLogisticInterpretation.cpp ObjFunct_SvmLogisticInterpretation )
+shark_add_test( ObjectiveFunctions/BoxConstraintHandler.cpp ObjFunct_BoxConstraintHandler )
 
 #Objective Functions/Loss
-SHARK_ADD_TEST( ObjectiveFunctions/CrossEntropy.cpp ObjFunct_CrossEntropy )
-SHARK_ADD_TEST( ObjectiveFunctions/SquaredLoss.cpp ObjFunct_SquaredLoss )
-SHARK_ADD_TEST( ObjectiveFunctions/HingeLoss.cpp ObjFunct_HingeLoss )
-SHARK_ADD_TEST( ObjectiveFunctions/SquaredHingeLoss.cpp ObjFunct_SquaredHingeLoss )
-SHARK_ADD_TEST( ObjectiveFunctions/EpsilonHingeLoss.cpp ObjFunct_EpsilonHingeLoss )
-SHARK_ADD_TEST( ObjectiveFunctions/SquaredEpsilonHingeLoss.cpp ObjFunct_SquaredEpsilonHingeLoss )
-SHARK_ADD_TEST( ObjectiveFunctions/AbsoluteLoss.cpp ObjFunct_AbsoluteLoss )
-SHARK_ADD_TEST( ObjectiveFunctions/HuberLoss.cpp ObjFunct_HuberLoss )
-SHARK_ADD_TEST( ObjectiveFunctions/TukeyBiweightLoss.cpp ObjFunct_TukeyBiweightLoss )
-SHARK_ADD_TEST( ObjectiveFunctions/AUC.cpp ObjFunct_AUC )
-SHARK_ADD_TEST( ObjectiveFunctions/NegativeGaussianProcessEvidence.cpp ObjFunct_NegativeGaussianProcessEvidence )
+shark_add_test( ObjectiveFunctions/CrossEntropy.cpp ObjFunct_CrossEntropy )
+shark_add_test( ObjectiveFunctions/SquaredLoss.cpp ObjFunct_SquaredLoss )
+shark_add_test( ObjectiveFunctions/HingeLoss.cpp ObjFunct_HingeLoss )
+shark_add_test( ObjectiveFunctions/SquaredHingeLoss.cpp ObjFunct_SquaredHingeLoss )
+shark_add_test( ObjectiveFunctions/EpsilonHingeLoss.cpp ObjFunct_EpsilonHingeLoss )
+shark_add_test( ObjectiveFunctions/SquaredEpsilonHingeLoss.cpp ObjFunct_SquaredEpsilonHingeLoss )
+shark_add_test( ObjectiveFunctions/AbsoluteLoss.cpp ObjFunct_AbsoluteLoss )
+shark_add_test( ObjectiveFunctions/HuberLoss.cpp ObjFunct_HuberLoss )
+shark_add_test( ObjectiveFunctions/TukeyBiweightLoss.cpp ObjFunct_TukeyBiweightLoss )
+shark_add_test( ObjectiveFunctions/AUC.cpp ObjFunct_AUC )
+shark_add_test( ObjectiveFunctions/NegativeGaussianProcessEvidence.cpp ObjFunct_NegativeGaussianProcessEvidence )
 
 #Rng
-SHARK_ADD_TEST( Rng/Rng.cpp Rng_Distributions )
-SHARK_ADD_TEST( Rng/MultiVariateNormal.cpp Rng_MultiVariateNormal )
-SHARK_ADD_TEST( Rng/MultiNomial.cpp Rng_MultiNomialDistribution )
-
+shark_add_test( Rng/Rng.cpp Rng_Distributions )
+shark_add_test( Rng/MultiVariateNormal.cpp Rng_MultiVariateNormal )
+shark_add_test( Rng/MultiNomial.cpp Rng_MultiNomialDistribution )
 
 #RBM
-SHARK_ADD_TEST( RBM/BinaryLayer.cpp RBM_BinaryLayer)
-SHARK_ADD_TEST( RBM/BipolarLayer.cpp RBM_BipolarLayer)
-SHARK_ADD_TEST( RBM/GaussianLayer.cpp RBM_GaussianLayer)
-SHARK_ADD_TEST( RBM/TruncatedExponentialLayer.cpp RBM_TruncatedExponentialLayer)
+shark_add_test( RBM/BinaryLayer.cpp RBM_BinaryLayer)
+shark_add_test( RBM/BipolarLayer.cpp RBM_BipolarLayer)
+shark_add_test( RBM/GaussianLayer.cpp RBM_GaussianLayer)
+shark_add_test( RBM/TruncatedExponentialLayer.cpp RBM_TruncatedExponentialLayer)
 
-SHARK_ADD_TEST( RBM/MarkovChain.cpp RBM_MarkovChain)
-#SHARK_ADD_TEST( RBM/GibbsOperator.cpp RBM_GibbsOperator)//not compiling anymore needs rewrite
+shark_add_test( RBM/MarkovChain.cpp RBM_MarkovChain)
+#shark_add_test( RBM/GibbsOperator.cpp RBM_GibbsOperator)//not compiling anymore needs rewrite
 
-SHARK_ADD_TEST( RBM/Energy.cpp RBM_Energy)
-SHARK_ADD_TEST( RBM/AverageEnergyGradient.cpp RBM_AverageEnergyGradient)
-SHARK_ADD_TEST( RBM/Analytics.cpp RBM_Analytics)
+shark_add_test( RBM/Energy.cpp RBM_Energy)
+shark_add_test( RBM/AverageEnergyGradient.cpp RBM_AverageEnergyGradient)
+shark_add_test( RBM/Analytics.cpp RBM_Analytics)
 
-SHARK_ADD_TEST( RBM/ExactGradient.cpp RBM_ExactGradient)
-#SHARK_ADD_TEST( RBM/ContrastiveDivergence.cpp RBM_ContrastiveDivergence) #does not compile currently
-SHARK_ADD_TEST( RBM/TemperedMarkovChain.cpp RBM_TemperedMarkovChain)
+shark_add_test( RBM/ExactGradient.cpp RBM_ExactGradient)
+#shark_add_test( RBM/ContrastiveDivergence.cpp RBM_ContrastiveDivergence) #does not compile currently
+shark_add_test( RBM/TemperedMarkovChain.cpp RBM_TemperedMarkovChain)
 
-SHARK_ADD_TEST( RBM/ParallelTemperingTraining.cpp RBM_PTTraining)
-SHARK_ADD_TEST( RBM/PCDTraining.cpp RBM_PCDTraining)
-SHARK_ADD_TEST( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceTraining)
-SHARK_ADD_TEST( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
-
-
-#Convolutional Neural Network
-SHARK_ADD_TEST( RBM/ConvolutionalRBMBasic.cpp RBM_ConvolutionalRBMBasic)
-SHARK_ADD_TEST( RBM/ConvolutionalEnergyGradient.cpp RBM_ConvolutionalEnergyGradient)
-SHARK_ADD_TEST( RBM/ConvolutionalCDTraining.cpp RBM_ConvolutionalCDTraining)
-SHARK_ADD_TEST( RBM/ConvolutionalPTTraining.cpp RBM_ConvolutionalPTTraining)
+shark_add_test( RBM/ParallelTemperingTraining.cpp RBM_PTTraining)
+shark_add_test( RBM/PCDTraining.cpp RBM_PCDTraining)
+shark_add_test( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceTraining)
+shark_add_test( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 
 # Copy test file
-IF (HDF5_FOUND)
-	ADD_CUSTOM_COMMAND(
+if(HDF5_FOUND)
+	add_custom_command(
 	    TARGET Data_HDF5
 	    POST_BUILD
 	    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_data
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Test/test_data ${CMAKE_BINARY_DIR}/Test/test_data
-	)	
-ENDIF (HDF5_FOUND)
+	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Test/test_data ${CMAKE_BINARY_DIR}/Test/test_data)	
+endif()
+
 # Create output dir
-ADD_CUSTOM_COMMAND(
+add_custom_command(
     TARGET Data_Csv
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_output
 )
-ADD_CUSTOM_COMMAND(
+
+add_custom_command(
     TARGET Data_ExportKernelMatrix
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_output

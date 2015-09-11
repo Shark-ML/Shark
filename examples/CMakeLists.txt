@@ -3,170 +3,135 @@
 #		Setup for example compilation
 #####################################################################
 
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
-CMAKE_POLICY(SET CMP0003 NEW)
-
-IF( OPT_COMPILE_EXAMPLES )
-	add_custom_target(examples)
-ENDIF( OPT_COMPILE_EXAMPLES )
-
-#add_custom_target(examples)
-
-#set(EXAMPLES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+add_custom_target(examples)
 set(EXAMPLES_CPP_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(TPP_FILES "")
 
-SET(TPP_FILES "")
+macro( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 
-MACRO( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
-
-	#generate cpp file from tpp file
-	ADD_CUSTOM_COMMAND(
-		OUTPUT ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
-		COMMAND ${CMAKE_COMMAND}
-		ARGS
-			-DTUT_TPP:Filepath=${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp
-			-DTUT_CPP:Filepath=${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
-			-P ${CMAKE_CURRENT_SOURCE_DIR}/createExampleSource.cmake
-		MAIN_DEPENDENCY
-			${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp
-		COMMENT "creating ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp from ${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp"
+  # Generate cpp file from tpp file
+  add_custom_command(
+	OUTPUT ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
+	COMMAND ${CMAKE_COMMAND}
+	ARGS
+		-DTUT_TPP:Filepath=${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp
+		-DTUT_CPP:Filepath=${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
+		-P ${CMAKE_CURRENT_SOURCE_DIR}/createExampleSource.cmake
+	MAIN_DEPENDENCY
+		${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp
+	COMMENT "creating ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp from ${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp"
 	)
-	LIST(APPEND TPP_FILES ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
 
-	IF( OPT_COMPILE_EXAMPLES )
-		ADD_EXECUTABLE( ${NAME}
-			${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
-		)
+  list(APPEND TPP_FILES ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
 
-		SET( EXAMPLE_LIBRARIES
-			${LINK_LIBRARIES}
-			shark
-		)
+  add_executable(${NAME} ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
+  target_link_libraries(${NAME} shark)
 
-		add_dependencies(examples ${NAME})
+  # Add the dependencies to the target examples
+  add_dependencies(examples ${NAME})
 
-		TARGET_LINK_LIBRARIES( ${NAME} ${EXAMPLE_LIBRARIES} )
+  # Installation
+  install(TARGETS ${NAME}
+		   RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}/
+		   COMPONENT EXAMPLES)
 
-		INSTALL( TARGETS ${NAME}
-			RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}/
-			COMPONENT EXAMPLES
-		)
+  install(FILES ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
+		   DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT})
 
-		INSTALL( FILES
-			${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
-		 	DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}
-		)
+  source_group(${COMPONENT} FILES ${TUT_SRC})
+endmacro()
 
-		SOURCE_GROUP( ${COMPONENT} FILES ${SRC} )
-	ENDIF( OPT_COMPILE_EXAMPLES )
-ENDMACRO()
+shark_add_example( EA/MOO/AdditiveEpsilonIndicatorMain AdditiveEpsilonIndicatorMain "EA/MOO" )
+#shark_add_example( EA/MOO/ApproximatedHypervolumeMain ApproximatedHypervolumeMain "EA/MOO" )
+#shark_add_example( EA/MOO/ExactHypervolumeMain ExactHypervolumeMain "EA/MOO" )
+##shark_add_example( EA/MOO/BoundingBoxCalculatorMain BoundingBoxCalculatorMain "EA/MOO" )
 
-SHARK_ADD_EXAMPLE( EA/MOO/AdditiveEpsilonIndicatorMain AdditiveEpsilonIndicatorMain "EA/MOO" )
-#SHARK_ADD_EXAMPLE( EA/MOO/ApproximatedHypervolumeMain ApproximatedHypervolumeMain "EA/MOO" )
-#SHARK_ADD_EXAMPLE( EA/MOO/ExactHypervolumeMain ExactHypervolumeMain "EA/MOO" )
-##SHARK_ADD_EXAMPLE( EA/MOO/BoundingBoxCalculatorMain BoundingBoxCalculatorMain "EA/MOO" )
+shark_add_example( EA/MOO/MOCMASimple MOCMASimple "EA/MOO" )
+shark_add_example( EA/MOO/MOCMAExperiment MOCMAExperiment "EA/MOO" )
 
-SHARK_ADD_EXAMPLE( EA/MOO/MOCMASimple MOCMASimple "EA/MOO" )
-SHARK_ADD_EXAMPLE( EA/MOO/MOCMAExperiment MOCMAExperiment "EA/MOO" )
+shark_add_example( EA/SOO/CMASimple CMASimple "EA/SOO" )
+shark_add_example( EA/SOO/CMAExperiment CMAExperiment "EA/SOO" )
+shark_add_example( EA/SOO/CMAPlot CMAPlot "EA/SOO" )
+shark_add_example( EA/SOO/ElitistCMASimple ElitistCMASimpleMain "EA/SOO" )
+shark_add_example( EA/SOO/TSP TSP "EA/SOO" )
+shark_add_example( EA/SOO/AckleyES AckleyES "EA/SOO" )
+shark_add_example( EA/SOO/Archive Archive "EA/SOO" )
 
-SHARK_ADD_EXAMPLE( EA/SOO/CMASimple CMASimple "EA/SOO" )
-SHARK_ADD_EXAMPLE( EA/SOO/CMAExperiment CMAExperiment "EA/SOO" )
-SHARK_ADD_EXAMPLE( EA/SOO/CMAPlot CMAPlot "EA/SOO" )
-SHARK_ADD_EXAMPLE( EA/SOO/ElitistCMASimple ElitistCMASimpleMain "EA/SOO" )
-SHARK_ADD_EXAMPLE( EA/SOO/TSP TSP "EA/SOO" )
-SHARK_ADD_EXAMPLE( EA/SOO/AckleyES AckleyES "EA/SOO" )
-SHARK_ADD_EXAMPLE( EA/SOO/Archive Archive "EA/SOO" )
+shark_add_example( Supervised/MultiTaskSvm MultiTaskSvm "Supervised" )
+shark_add_example( Supervised/DeepNetworkTraining DeepNetworkTraining "Supervised" )
+shark_add_example( Supervised/DeepNetworkTrainingRBM DeepNetworkTrainingRBM "Supervised" )
 
-SHARK_ADD_EXAMPLE( Supervised/MultiTaskSvm MultiTaskSvm "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/DeepNetworkTraining DeepNetworkTraining "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/DeepNetworkTrainingRBM DeepNetworkTrainingRBM "Supervised" )
+shark_add_example( Supervised/CVFolds CVFolds "Supervised" )
+shark_add_example( Supervised/CSvmLinear CSvmLinear "Supervised" )
+shark_add_example( Supervised/McSvm McSvm "Supervised" )
+shark_add_example( Supervised/McSvmLinear McSvmLinear "Supervised" )
+shark_add_example( Supervised/KernelRegression KernelRegression "Supervised" )
+shark_add_example( Supervised/KernelSelection KernelSelection "Supervised" )
+shark_add_example( Supervised/OneVersusOne OneVersusOne "Supervised" )
+shark_add_example( Supervised/KernelLogisticRegression KernelLogisticRegression "Supervised" )
 
-SHARK_ADD_EXAMPLE( Supervised/CVFolds CVFolds "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/CSvmLinear CSvmLinear "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/McSvm McSvm "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/McSvmLinear McSvmLinear "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/KernelRegression KernelRegression "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/KernelSelection KernelSelection "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/OneVersusOne OneVersusOne "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/KernelLogisticRegression KernelLogisticRegression "Supervised" )
+shark_add_example( Supervised/CSvmMaxLikelihoodMS CSvmMaxLikelihoodMS "Supervised" )
+shark_add_example( Supervised/CSvmGridSearchTutorial CSvmGridSearchTutorial "Supervised" )
+shark_add_example( Supervised/CSvmTutorial CSvmTutorial "Supervised" )
 
-SHARK_ADD_EXAMPLE( Supervised/CSvmMaxLikelihoodMS CSvmMaxLikelihoodMS "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/CSvmGridSearchTutorial CSvmGridSearchTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/CSvmTutorial CSvmTutorial "Supervised" )
+shark_add_example( Supervised/MklKernelTutorial MklKernelTutorial "Supervised" )
+shark_add_example( Supervised/SubrangeKernelTutorial SubrangeKernelTutorial "Supervised" )
 
-SHARK_ADD_EXAMPLE( Supervised/MklKernelTutorial MklKernelTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/SubrangeKernelTutorial SubrangeKernelTutorial "Supervised" )
-
-SHARK_ADD_EXAMPLE( Supervised/KNNTutorial KNNTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/LDATutorial LDATutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/elmTutorial elmTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/KNNCrossValidationTutorial KNNCrossValidationTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/linearRegressionTutorial linearRegressionTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/LassoRegression LassoRegression "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/FFNNBasicTutorial FFNNBasicTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/FFNNMultiClassCrossEntropy FFNNMultiClassCrossEntropy "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/RFTutorial RFTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/CARTTutorial CARTTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/KTA-tutorial KTA-tutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-LDA VersatileClassificationTutorial-LDA "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-NN VersatileClassificationTutorial-NN "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-SVM VersatileClassificationTutorial-SVM "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-RF VersatileClassificationTutorial-RF "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/VersatileClassificationTutorial-Network VersatileClassificationTutorial-Network "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/KernelBudgetedSGDTutorial KernelBudgetedSGDTutorial "Supervised" )
+shark_add_example( Supervised/KNNTutorial KNNTutorial "Supervised" )
+shark_add_example( Supervised/LDATutorial LDATutorial "Supervised" )
+shark_add_example( Supervised/elmTutorial elmTutorial "Supervised" )
+shark_add_example( Supervised/KNNCrossValidationTutorial KNNCrossValidationTutorial "Supervised" )
+shark_add_example( Supervised/linearRegressionTutorial linearRegressionTutorial "Supervised" )
+shark_add_example( Supervised/LassoRegression LassoRegression "Supervised" )
+shark_add_example( Supervised/FFNNBasicTutorial FFNNBasicTutorial "Supervised" )
+shark_add_example( Supervised/FFNNMultiClassCrossEntropy FFNNMultiClassCrossEntropy "Supervised" )
+shark_add_example( Supervised/RFTutorial RFTutorial "Supervised" )
+shark_add_example( Supervised/CARTTutorial CARTTutorial "Supervised" )
+shark_add_example( Supervised/KTA-tutorial KTA-tutorial "Supervised" )
+shark_add_example( Supervised/VersatileClassificationTutorial-LDA VersatileClassificationTutorial-LDA "Supervised" )
+shark_add_example( Supervised/VersatileClassificationTutorial-NN VersatileClassificationTutorial-NN "Supervised" )
+shark_add_example( Supervised/VersatileClassificationTutorial-SVM VersatileClassificationTutorial-SVM "Supervised" )
+shark_add_example( Supervised/VersatileClassificationTutorial-RF VersatileClassificationTutorial-RF "Supervised" )
+shark_add_example( Supervised/VersatileClassificationTutorial-Network VersatileClassificationTutorial-Network "Supervised" )
+shark_add_example( Supervised/KernelBudgetedSGDTutorial KernelBudgetedSGDTutorial "Supervised" )
 
 #basic tutorials
-SHARK_ADD_EXAMPLE( Supervised/quickstartTutorial quickstartTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/regressionTutorial regressionTutorial "Supervised" )
-SHARK_ADD_EXAMPLE( Supervised/StoppingCriteria StoppingCriteriaTutorial "Supervised" )
+shark_add_example( Supervised/quickstartTutorial quickstartTutorial "Supervised" )
+shark_add_example( Supervised/regressionTutorial regressionTutorial "Supervised" )
+shark_add_example( Supervised/StoppingCriteria StoppingCriteriaTutorial "Supervised" )
 
 #Statistics
-SHARK_ADD_EXAMPLE( Statistics/StatisticsMain StatisticsMain "Statistiscs" )
-SHARK_ADD_EXAMPLE( Statistics/Statistics Statistics "Statistiscs" )
+shark_add_example( Statistics/StatisticsMain StatisticsMain "Statistiscs" )
+shark_add_example( Statistics/Statistics Statistics "Statistiscs" )
 
 #Data
-SHARK_ADD_EXAMPLE( Data/Datasets Datasets "Data" )
-SHARK_ADD_EXAMPLE( Data/Normalization Normalization "Data" )
-SHARK_ADD_EXAMPLE( Data/Subsets Subsets "Data" )
-#SHARK_ADD_EXAMPLE( Data/Import Import "Data" )
+shark_add_example( Data/Datasets Datasets "Data" )
+shark_add_example( Data/Normalization Normalization "Data" )
+shark_add_example( Data/Subsets Subsets "Data" )
 
 #Unsupervisd
-SHARK_ADD_EXAMPLE( Unsupervised/PCA PCA "Unsupervised" )
-SHARK_ADD_EXAMPLE( Unsupervised/PCATutorial PCATutorial "Unsupervised" )
-SHARK_ADD_EXAMPLE( Unsupervised/KMeansTutorial KMeansTutorial "Unsupervised" )
-SHARK_ADD_EXAMPLE( Unsupervised/MaxLogLikelihood MaxLogLikelihoodTutorial "Unsupervised" )
-SHARK_ADD_EXAMPLE( Unsupervised/BinaryRBM BinaryRBM "Unsupervised" )
-SHARK_ADD_EXAMPLE( Unsupervised/SparseAETutorial SparseAETutorial "Unsupervised" )
-SHARK_ADD_EXAMPLE( Unsupervised/AutoEncoderTutorial AutoencoderTutorial "Unsupervised" )
-SHARK_ADD_EXAMPLE( Unsupervised/DenoisingAutoencoderTutorial DenoisingAutoencoderTutorial "Unsupervised" )
-SHARK_ADD_EXAMPLE( Unsupervised/HierarchicalClustering HierarchicalClustering "Unsupervised" )
-SHARK_ADD_EXAMPLE( Unsupervised/OneClassSvm OneClassSvm "Unsupervised" )
+shark_add_example( Unsupervised/PCA PCA "Unsupervised" )
+shark_add_example( Unsupervised/PCATutorial PCATutorial "Unsupervised" )
+shark_add_example( Unsupervised/KMeansTutorial KMeansTutorial "Unsupervised" )
+shark_add_example( Unsupervised/MaxLogLikelihood MaxLogLikelihoodTutorial "Unsupervised" )
+shark_add_example( Unsupervised/BinaryRBM BinaryRBM "Unsupervised" )
+shark_add_example( Unsupervised/SparseAETutorial SparseAETutorial "Unsupervised" )
+shark_add_example( Unsupervised/AutoEncoderTutorial AutoencoderTutorial "Unsupervised" )
+shark_add_example( Unsupervised/DenoisingAutoencoderTutorial DenoisingAutoencoderTutorial "Unsupervised" )
+shark_add_example( Unsupervised/HierarchicalClustering HierarchicalClustering "Unsupervised" )
+shark_add_example( Unsupervised/OneClassSvm OneClassSvm "Unsupervised" )
 
 add_custom_target(tpp2cpp DEPENDS ${TPP_FILES})
 
-IF( OPT_COMPILE_EXAMPLES )
-
-	INSTALL( DIRECTORY
+# Installation of the examples data
+install( DIRECTORY
 		 "${CMAKE_CURRENT_SOURCE_DIR}/Supervised/data"
 		 DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Supervised
-		 PATTERN ".*" EXCLUDE
-	)
-	INSTALL( DIRECTORY
+		 PATTERN ".*" EXCLUDE)
+
+install( DIRECTORY
 		 "${CMAKE_CURRENT_SOURCE_DIR}/Unsupervised/data"
 		 DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Unsupervised
-		 PATTERN ".*" EXCLUDE
-	)
+		 PATTERN ".*" EXCLUDE)
 
-	#####Automatic Generation of example CMakeLists.txt
-	CONFIGURE_FILE (
-	  "${CMAKE_CURRENT_SOURCE_DIR}/ExampleProject/CMakeLists.txt.in"
-	  "${CMAKE_CURRENT_SOURCE_DIR}/ExampleProject/CMakeLists.txt"
-	  @ONLY
-	  )
-
-	INSTALL(
-		FILES ${CMAKE_CURRENT_SOURCE_DIR}/ExampleProject/CMakeLists.txt
-		DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/ExampleProject/
-	)
-
-ENDIF( OPT_COMPILE_EXAMPLES )
+		 

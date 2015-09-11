@@ -1,499 +1,457 @@
 #####################################################################
-#       Shark Machine Learning Library   
-#       Top-Level CMake driver file        
+#       Shark Machine Learning Library
+#       Top-Level CMake driver file
 #       Optionally included sub-probjects:
-#         * Test/CMakeLists.txt                
-#         * examples/CMakeLists.txt                                
-#         * doc/CMakeLists.txt                           
+#         * Test/CMakeLists.txt
+#         * examples/CMakeLists.txt
+#         * doc/CMakeLists.txt
 #####################################################################
-PROJECT( shark CXX )
+project( shark )
 
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
-CMAKE_POLICY(SET CMP0003 NEW)
-IF (NOT (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 3.0))
-	CMAKE_POLICY(SET CMP0042 NEW)
-ENDIF (NOT (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 3.0))
-
-
-ENABLE_TESTING()
-
-SET( EXECUTABLE_OUTPUT_PATH bin )
-SET( LIBRARY_OUTPUT_PATH lib )
-
-ENABLE_LANGUAGE(C) # Fix small issue with OpenMP on some platforms/versions
-
-#####################################################################
-#                       Dynamic or static 
-#####################################################################
-
-OPTION( OPT_DYNAMIC_LIBRARY
-	"Compile shark into a dynamic library instead of a static one."
-	OFF
+cmake_minimum_required( VERSION 2.8 )
+cmake_policy(SET CMP0003 NEW)
+cmake_policy(SET CMP0042 NEW)
+if(POLICY CMP0053)
+	cmake_policy(SET CMP0053 NEW)
+endif()
+#=========================================================
+# Output directories.
+if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${shark_BINARY_DIR}/bin")
+endif()
+if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+	if(UNIX)
+		set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${shark_BINARY_DIR}/lib")
+	else()
+		set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${shark_BINARY_DIR}/bin")
+	endif()
+endif()
+if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${shark_BINARY_DIR}/lib")
+endif()
+mark_as_advanced( 
+	CMAKE_RUNTIME_OUTPUT_DIRECTORY
+	CMAKE_LIBRARY_OUTPUT_DIRECTORY
+	CMAKE_ARCHIVE_OUTPUT_DIRECTORY
 )
 
-IF( OPT_DYNAMIC_LIBRARY )
-    #set(Boost_USE_STATIC_LIBS OFF)
-    set(Boost_USE_STATIC_LIBS ON)
-    #add_definitions(-DBOOST_TEST_DYN_LINK -DSHARK_USE_DYNLIB)
-    add_definitions(-DSHARK_USE_DYNLIB)
-    SET (LIB_TYPE SHARED)
-ELSE( OPT_DYNAMIC_LIBRARY )
-    set(Boost_USE_STATIC_LIBS ON)
-    SET (LIB_TYPE STATIC)
-ENDIF( OPT_DYNAMIC_LIBRARY )
+#####################################################################
+# Static/Shared libraries
+#####################################################################
+option(BUILD_SHARED_LIBS "Compile shark into a dynamic library instead of a static one." OFF)
+if(BUILD_SHARED_LIBS)
+	set(SHARK_USE_DYNLIB 1)
+endif()
 
 #####################################################################
-#		Official Releases are tagged
+# Version information
 #####################################################################
-OPTION( OPT_OFFICIAL_RELEASE "Is this an official Shark release." OFF )
-mark_as_advanced( OPT_OFFICIAL_RELEASE ) 
+option(BUILD_OFFICIAL_RELEASE "Is this an official Shark release." OFF )
+mark_as_advanced( BUILD_OFFICIAL_RELEASE )
 
-IF( OPT_OFFICIAL_RELEASE )
-	ADD_DEFINITIONS( -DSHARK_OFFICIAL_RELEASE )
-ENDIF( OPT_OFFICIAL_RELEASE )
+set(SHARK_VERSION_MAJOR 3)
+set(SHARK_VERSION_MINOR 0)
+set(SHARK_VERSION_PATCH 0)
+set(SHARK_VERSION ${SHARK_VERSION_MAJOR} .${SHARK_VERSION_MINOR} .${SHARK_VERSION_PATCH})
 
-#####################################################################
-#		Marks the official version
-#####################################################################
-SET( SHARK_VERSION_MAJOR 3 )
-SET( SHARK_VERSION_MINOR 0 )
-SET( SHARK_VERSION_PATCH 0 )
-set(SHARK_VERSION
-  ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH})
-
-ADD_DEFINITIONS(
- -DSHARK_VERSION_MAJOR=${SHARK_VERSION_MAJOR}
- -DSHARK_VERSION_MINOR=${SHARK_VERSION_MINOR}
- -DSHARK_VERSION_PATCH=${SHARK_VERSION_PATCH}
-)
-
-CONFIGURE_FILE (
-  "${CMAKE_CURRENT_SOURCE_DIR}/include/shark/Core/Shark.h.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/include/shark/Core/Shark.h"
-  )
 
 #####################################################################
 #	Adjustments for cpack and deb package generation
 #####################################################################
-SET( CPACK_PACKAGE_NAME "libshark-i386" )
-SET( CPACK_BUNDLE_NAME "libshark" )
-SET( CPACK_PACKAGE_VENDOR "Institut fur Neuroinformatik, Ruhr-Universitaet Bochum" )
-SET( CPACK_PACKAGE_VERSION_MAJOR ${SHARK_VERSION_MAJOR} )
-SET( CPACK_PACKAGE_VERSION_MINOR ${SHARK_VERSION_MINOR} )
-SET( CPACK_PACKAGE_VERSION_PATCH ${SHARK_VERSION_PATCH} )
-SET( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/COPYING.LESSER )
+set(CPACK_PACKAGE_NAME "libshark-i386")
+set(CPACK_BUNDLE_NAME "libshark")
+set(CPACK_PACKAGE_VENDOR "Institut fur Neuroinformatik, Ruhr-Universitaet Bochum")
+set(CPACK_PACKAGE_VERSION_MAJOR ${SHARK_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${SHARK_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${SHARK_VERSION_PATCH})
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/COPYING.LESSER)
 
-if (UNIX AND NOT WIN32)
- if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-   SET( CPACK_PACKAGE_NAME "libshark-x86_64" )
-   SET( CPACK_DEBIAN_PACKAGE_NAME libshark-x86-64 )
-   SET( CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64 )
- else (CMAKE_SIZEOF_VOID_P MATCHES "8")
-   SET( CPACK_PACKAGE_NAME "libshark-i386" )
-   SET( CPACK_DEBIAN_PACKAGE_NAME libshark-i386 )
-   SET( CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386 )
- endif (CMAKE_SIZEOF_VOID_P MATCHES "8")
-endif (UNIX AND NOT WIN32)
+if(UNIX AND NOT WIN32)
+	if(CMAKE_SIZEOF_VOID_P MATCHES "8")
+		set(CPACK_PACKAGE_NAME "libshark-x86_64")
+		set(CPACK_DEBIAN_PACKAGE_NAME libshark-x86-64)
+		set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64)
+	else()
+		set(CPACK_PACKAGE_NAME "libshark-i386")
+		set(CPACK_DEBIAN_PACKAGE_NAME libshark-i386)
+		set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386)
+	endif()
+endif()
 
-SET( CPACK_DEBIAN_PACKAGE_VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH} )
+set(CPACK_DEBIAN_PACKAGE_VERSION ${SHARK_VERSION_MAJOR} .${SHARK_VERSION_MINOR} .${SHARK_VERSION_PATCH})
 
-SET( CPACK_DEBIAN_PACKAGE_DESCRIPTION
-     "SHARK is a modular C++ library for the design and optimization of adaptive systems. It provides methods for linear and nonlinear optimization, in particular evolutionary and gradient-based algorithms, kernel-based learning algorithms and neural networks, and various other machine learning techniques. SHARK serves as a toolbox to support real world applications as well as research indifferent domains of computational intelligence and machine learning. The sources are compatible with the following platforms: Windows, Solaris, MacOS X, and Linux."
+set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
+	"SHARK is a modular C++ library for the design and optimization of adaptive systems. It provides methods for linear and nonlinear optimization, in particular evolutionary and gradient-based algorithms, kernel-based learning algorithms and neural networks, and various other machine learning techniques. SHARK serves as a toolbox to support real world applications as well as research indifferent domains of computational intelligence and machine learning. The sources are compatible with the following platforms: Windows, Solaris, MacOS X, and Linux."
 )
-# SET( CPACK_DEBIAN_PACKAGE_DEPENDS ... )
-# SET( DEBIAN_PACKAGE_BUILDS_DEPENDS ... )
-SET( CPACK_DEBIAN_PACKAGE_MAINTAINER "Christian Igel <c.igel@ieee.org>" )
+set( CPACK_DEBIAN_PACKAGE_MAINTAINER "Christian Igel <c.igel@ieee.org>" )
 
 #####################################################################
 #    Adjust include, lib, example and doc paths for installation
 #####################################################################
-IF( UNIX )
-	SET( SHARK_INSTALL_INCLUDE_DIR include/ )
-	SET( SHARK_INSTALL_LIB_DIR lib/ )
-	SET( SHARK_INSTALL_CONTRIB_DIR share/shark/contrib/ )
-	SET( SHARK_INSTALL_EXAMPLE_DIR share/shark/examples/ )
-	SET( SHARK_INSTALL_DOC_DIR share/shark/doc/ )
-ELSE( UNIX )
-	SET( SHARK_INSTALL_INCLUDE_DIR include/shark/ )
-	SET( SHARK_INSTALL_LIB_DIR lib/ )
-	SET( SHARK_INSTALL_CONTRIB_DIR contrib/ )
-	SET( SHARK_INSTALL_EXAMPLE_DIR examples/ )
-	SET( SHARK_INSTALL_DOC_DIR doc )
-ENDIF( UNIX )
+if( UNIX )
+	set( SHARK_INSTALL_INCLUDE_DIR include/ )
+	set( SHARK_INSTALL_LIB_DIR lib/ )
+	set( SHARK_INSTALL_CONTRIB_DIR share/shark/contrib/ )
+	set( SHARK_INSTALL_EXAMPLE_DIR share/shark/examples/ )
+	set( SHARK_INSTALL_DOC_DIR share/shark/doc/ )
+else()
+	set( SHARK_INSTALL_INCLUDE_DIR include/shark/ )
+	set( SHARK_INSTALL_LIB_DIR lib/ )
+	set( SHARK_INSTALL_CONTRIB_DIR contrib/ )
+	set( SHARK_INSTALL_EXAMPLE_DIR examples/ )
+	set( SHARK_INSTALL_DOC_DIR doc )
+endif()
 
 #####################################################################
 #           Enable installer and package generation
 #####################################################################
-INCLUDE( CPack )
+ include( CPack )
 
 #####################################################################
 #           Explicit macro setup for debug configuration
 #####################################################################
 # enable or disable debugging, default is Release
-IF(NOT CMAKE_BUILD_TYPE)
-       SET(CMAKE_BUILD_TYPE "Release")
-ENDIF(NOT CMAKE_BUILD_TYPE)
-IF((CMAKE_BUILD_TYPE MATCHES "debug") OR (CMAKE_BUILD_TYPE MATCHES "DEBUG"))
-	SET(CMAKE_BUILD_TYPE "Debug")
-ENDIF((CMAKE_BUILD_TYPE MATCHES "debug") OR (CMAKE_BUILD_TYPE MATCHES "DEBUG"))
-IF((CMAKE_BUILD_TYPE MATCHES "release") OR (CMAKE_BUILD_TYPE MATCHES "RELEASE"))
-	SET(CMAKE_BUILD_TYPE "Release")
-ENDIF((CMAKE_BUILD_TYPE MATCHES "release") OR (CMAKE_BUILD_TYPE MATCHES "RELEASE"))
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "Release")
+endif()
 
-IF(CMAKE_BUILD_TYPE MATCHES "Debug")
-	ADD_DEFINITIONS(-DDEBUG )
+string( TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE )
+if(CMakeBuildType MATCHES "debug")
+	add_definitions(-DDEBUG )	
 	#we want to be warned in debug mode
-	IF(UNIX)
-		IF(CMAKE_COMPILER_IS_GNUCC)
-			ADD_DEFINITIONS(-Wall)
-		ENDIF(CMAKE_COMPILER_IS_GNUCC)
-	ENDIF(UNIX)
-ENDIF (CMAKE_BUILD_TYPE MATCHES "Debug")
-IF(CMAKE_BUILD_TYPE MATCHES "Release")
-	ADD_DEFINITIONS(-DNDEBUG )
-ENDIF (CMAKE_BUILD_TYPE MATCHES "Release")
-message(STATUS "Will build: " ${CMAKE_BUILD_TYPE})
+	if(UNIX)
+		if(CMAKE_COMPILER_IS_GNUCC)
+			add_definitions(-Wall)
+		endif()
+	endif()
+endif()
 
-#####################################################################
-#           Report compilers
-#####################################################################
-message(STATUS "C++ compiler: " ${CMAKE_CXX_COMPILER})
-message(STATUS "C compiler: " ${CMAKE_C_COMPILER})
+if(CMakeBuildType MATCHES "release")
+	add_definitions(-DNDEBUG)
+endif()
+message(STATUS "Will build: " ${CMAKE_BUILD_TYPE})
 
 #####################################################################
 #           Boost configuration
 #####################################################################
-SET(Boost_USE_MULTITHREADED ON)
-ADD_DEFINITIONS( -DBOOST_PARAMETER_MAX_ARITY=15 -DBOOST_FILESYSTEM_VERSION=3 )
-FIND_PACKAGE( Boost 1.48.0 COMPONENTS system date_time filesystem 
-program_options serialization thread unit_test_framework REQUIRED )
-include_directories ( ${Boost_INCLUDE_DIR} ) # CI: changed Boost_INCLUDE_DIRS to Boost_INCLUDE_DIR ... hope that this is always works
-IF( WIN32 )
-	link_directories( ${Boost_LIBRARY_DIR} )
-ELSE( WIN32 )
-	FIND_LIBRARY( PTHREAD_LIBRARY pthread )
-	SET( LINK_LIBRARIES
-		${Boost_LIBRARIES}
-		${PTHREAD_LIBRARY}
-	)
-ENDIF( WIN32 )
-mark_as_advanced( 
-		  Boost_DIR 
-		  PTHREAD_LIBRARY
+set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
+set(Boost_USE_MULTITHREADED ON)
+add_definitions(-DBOOST_PARAMETER_MAX_ARITY=15)
+add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
+
+# Should we link the boost test dynamically
+if(NOT Boost_USE_STATIC_LIBS)
+	add_definitions(-DBOOST_TEST_DYN_LINK)
+endif()
+
+find_package( 
+	Boost 1.48.0 REQUIRED COMPONENTS
+	system date_time filesystem
+	program_options serialization thread
+	unit_test_framework
 )
-#mark_as_advanced( CLEAR
-#                  Boost_INCLUDE_DIR
-#                  Boost_LIBRARY_DIR
-#) 
+
+if(NOT Boost_FOUND)
+	message(FATAL_ERROR "Please make sure Boost 1.48.0 is installed on your system")
+endif()
+
+if (WIN32)
+	# disable autolinking in boost
+	add_definitions( -DBOOST_ALL_NO_LIB )
+endif()
+
+include_directories( ${Boost_INCLUDE_DIR} )
+link_directories( ${Boost_LIBRARY_DIR} )
+if(UNIX)
+	find_library( PTHREAD_LIBRARY pthread )
+endif()
+
+# Set the libraries needed by Shark
+list(APPEND LINK_LIBRARIES ${Boost_LIBRARIES} ${PTHREAD_LIBRARY})
+
+mark_as_advanced(Boost_DIR PTHREAD_LIBRARY)
 message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
 
 #####################################################################
-#		Optionally enable OpenMP 
+#		Optionally enable OpenMP
 #####################################################################
-OPTION( OPT_ENABLE_OPENMP "Enable OpenMP if available." OFF )
-
-IF( OPT_ENABLE_OPENMP )
-	FIND_PACKAGE( OpenMP QUIET )
-
-	IF( OPENMP_FOUND )
-		MESSAGE( STATUS "OpenMP...found" )
-		ADD_DEFINITIONS( -DSHARK_USE_OPENMP )
+option( ENABLE_OPENMP "Enable OpenMP" OFF )
+if( ENABLE_OPENMP )
+	find_package( OpenMP QUIET )
+	if( OPENMP_FOUND )
+		message( STATUS "OpenMP...found" )
+		set(SHARK_USE_OPENMP 1)
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-	ELSE( OPENMP_FOUND )
-		MESSAGE( WARNING "OpenMP...not found" )
-	ENDIF( OPENMP_FOUND )
-ENDIF( OPT_ENABLE_OPENMP )
+
+		set(SHARK_REQUIRED_C_FLAGS "${OpenMP_C_FLAGS}")
+		set(SHARK_REQUIRED_CXX_FLAGS "${OpenMP_CXX_FLAGS}")
+		set(SHARK_REQUIRED_EXE_LINKER_FLAGS "${OpenMP_EXE_LINKER_FLAGS}")
+
+	else()
+		message( WARNING "OpenMP...not found" )
+	endif()
+endif()
 
 #####################################################################
-#           HDF5 configuration 
+#           HDF5 configuration
 #####################################################################
-FIND_PACKAGE(HDF5 COMPONENTS C CXX HL QUIET)
-mark_as_advanced( HDF5_DIR ) 
-# mark_as_advanced( CLEAR HDF5_LIBRARY_DIR DF5_INCLUDE_DIR ) 
-IF( HDF5_FOUND )
-    if( HDF5_C_COMPILER_EXECUTABLE AND HDF5_HL_COMPILER_EXECUTABLE  AND HDF5_CXX_COMPILER_EXECUTABLE )
-	MESSAGE(STATUS "Checking HDF5 installation: HDF5 installation seems ok.")
-	INCLUDE_DIRECTORIES( ${HDF5_INCLUDE_DIR} )
-	IF( WIN32 )
-	    LINK_DIRECTORIES( ${HDF5_LIBRARY_DIR} )
-	ELSE( WIN32 )
-	    SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${HDF5_LIBRARIES} )
-	ENDIF( WIN32 )
-    ELSE ( HDF5_C_COMPILER_EXECUTABLE AND HDF5_HL_COMPILER_EXECUTABLE  AND HDF5_CXX_COMPILER_EXECUTABLE )
-	MESSAGE(STATUS "Checking HDF5 installation:HDF5 package might be broken.")
-	IF( NOT( HDF5_C_COMPILER_EXECUTABLE))
-            message(STATUS "  C Compiler Extension not found.")
-        ENDIF( NOT( HDF5_C_COMPILER_EXECUTABLE))
-        IF( NOT( HDF5_HL_COMPILER_EXECUTABLE))
-            message(STATUS "  HL Compiler Extension not found.")
-        ENDIF( NOT( HDF5_HL_COMPILER_EXECUTABLE))
-        IF( NOT( HDF5_CXX_COMPILER_EXECUTABLE))
-            message(STATUS "  CXX Compiler Extension not found.")
-        ENDIF( NOT( HDF5_CXX_COMPILER_EXECUTABLE))
-        MESSAGE(STATUS "Disabling HDF5.")
-	UNSET ( HDF5_FOUND )
-    ENDIF ( HDF5_C_COMPILER_EXECUTABLE AND HDF5_HL_COMPILER_EXECUTABLE  AND HDF5_CXX_COMPILER_EXECUTABLE )
-ELSE( HDF5_FOUND )
-    MESSAGE(STATUS "HDF5 not found, skip")
-ENDIF( HDF5_FOUND )
-
-
+find_package(HDF5 COMPONENTS C CXX HL QUIET)
+mark_as_advanced(HDF5_DIR)
+if(HDF5_FOUND)
+	if(HDF5_C_COMPILER_EXECUTABLE AND HDF5_HL_COMPILER_EXECUTABLE  AND HDF5_CXX_COMPILER_EXECUTABLE)
+		message(STATUS "Checking HDF5 installation: HDF5 installation seems ok.")
+		include_directories( ${HDF5_INCLUDE_DIR} )
+		link_directories( ${HDF5_LIBRARY_DIR} )
+		list(APPEND LINK_LIBRARIES ${HDF5_LIBRARIES})
+	else()
+		message(STATUS "Checking HDF5 installation:HDF5 package might be broken.")
+		if(NOT( HDF5_C_COMPILER_EXECUTABLE))
+			message(STATUS "  C Compiler Extension not found.")
+		endif()
+		if(NOT( HDF5_HL_COMPILER_EXECUTABLE))
+			message(STATUS "  HL Compiler Extension not found.")
+		endif()
+		if(NOT( HDF5_CXX_COMPILER_EXECUTABLE))
+			message(STATUS "  CXX Compiler Extension not found.")
+		endif()
+			message(STATUS "Disabling HDF5.")
+		unset( HDF5_FOUND )
+	endif()
+else()
+	message(STATUS "HDF5 not found, skip")
+endif()
 
 #####################################################################
 #           ATLAS configuration
 #####################################################################
-IF (APPLE)
-	OPTION( OPT_ENABLE_ACCELERATE "Use ATLAS as Linear Algebra Library (through the Accelerate framework)" ON )
-	IF ( OPT_ENABLE_ACCELERATE )
-		ADD_DEFINITIONS( -DSHARK_USE_CBLAS )          # most linear algebra routines
-#		ADD_DEFINITIONS( -DSHARK_USE_ATLAS_LAPACK )   # Cholesky decomposition
-#		ADD_DEFINITIONS( -DSHARK_USE_LAPACK )         # eigen decomposition
+
+if (APPLE)
+	option( ENABLE_ACCELERATE "Use Accelerate as Linear Algebra Library" ON )
+	if ( ENABLE_ACCELERATE )
+		set( SHARK_USE_CBLAS 1)          # most linear algebra routines
 		message(STATUS "Using the Accelerate framework")
-		SET(LINK_LIBRARIES ${LINK_LIBRARIES} "-framework Accelerate" )
-	ENDIF (OPT_ENABLE_ACCELERATE)
-ELSE (APPLE)
-	OPTION( OPT_ENABLE_ATLAS "Use ATLAS as Linear Algebra Library" OFF )
-	OPTION( ATLAS_FULL_LAPACK "Signalizes whether ATLAS comes with the full LAPACK package" OFF )
-	IF ( OPT_ENABLE_ATLAS )
-		find_library(CBLAS_LIBRARY
-			cblas
-			HINTS
-			${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
-		)
-		find_library(CLAPACK_LIBRARY
-			lapack
-			HINTS
-			${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
-		)
-		find_library(ATLAS_LIBRARY
-			atlas
-			HINTS
-			${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+		list(APPEND LINK_LIBRARIES "-framework Accelerate" )
+	endif()
+else()
+	option(ENABLE_ATLAS "Use ATLAS as Linear Algebra Library" OFF)
+	option(ATLAS_FULL_LAPACK "Signalizes whether ATLAS comes with the full LAPACK package" OFF)
+
+	if(ENABLE_ATLAS)
+		find_library(CBLAS_LIBRARY cblas
+			HINTS ${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
 		)
 
-		get_filename_component(ATLAS_PATH @CBLAS_LIBRARY@ PATH )
-		SET (ATLAS_PATH ${ATLAS_PATH}/.. )
+		find_library(CLAPACK_LIBRARY lapack
+			HINTS ${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+		)
+
+		find_library(ATLAS_LIBRARY atlas
+			HINTS ${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+		)
+
+		get_filename_component(ATLAS_PATH ${CBLAS_LIBRARY} PATH )
+		set(ATLAS_PATH ${ATLAS_PATH}/..)
 		mark_as_advanced(
 			CBLAS_LIBRARY
 			CLAPACK_LIBRARY
 			ATLAS_LIBRARY
 		)
-		IF ( CBLAS_LIBRARY )
-			message(STATUS "ATLAS found....true")
-			SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${CLAPACK_LIBRARY} )
-			SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${CBLAS_LIBRARY} )
-			SET(LINK_LIBRARIES ${LINK_LIBRARIES} ${ATLAS_LIBRARY} )
-			ADD_DEFINITIONS( -DSHARK_USE_CBLAS )
-			ADD_DEFINITIONS( -DSHARK_USE_ATLAS_LAPACK )
-			if( ATLAS_FULL_LAPACK )
-				ADD_DEFINITIONS( -DSHARK_USE_LAPACK )
-			ENDIF ( ATLAS_FULL_LAPACK )
-			IF ( ATLAS_ROOT )
-					message(STATUS "ATLAS root: " ${ATLAS_ROOT})
-					include_directories ( ${ATLAS_ROOT}/include/ ${ATLAS_ROOT}/include/atlas/ )
-			ELSE( ATLAS_ROOT )
-					message(STATUS "ATLAS path: " ${ATLAS_PATH})
-					include_directories ( ${ATLAS_PATH}/include/ ${ATLAS_PATH}/include/atlas/ )
-			ENDIF(ATLAS_ROOT)
-		ELSE ( CBLAS_LIBRARY )
-			message(STATUS "ATLAS found....false")
-		ENDIF ( CBLAS_LIBRARY )
-	ENDIF ( OPT_ENABLE_ATLAS )
-ENDIF (APPLE)
 
+		if(CBLAS_LIBRARY)
+			message(STATUS "ATLAS found.")
+			list(APPEND LINK_LIBRARIES ${CLAPACK_LIBRARY} ${CBLAS_LIBRARY} ${ATLAS_LIBRARY})
+			set( SHARK_USE_CBLAS 1)
+			set( SHARK_USE_ATLAS_LAPACK 1)
+			if( ATLAS_FULL_LAPACK )
+				set( SHARK_USE_LAPACK 1)
+			endif()
+			if( ATLAS_ROOT )
+				message(STATUS "ATLAS root: " ${ATLAS_ROOT})
+				list(APPEND EXTRA_INCLUDE_DIRECTORIES ${ATLAS_ROOT}/include/)
+				list(APPEND EXTRA_INCLUDE_DIRECTORIES ${ATLAS_ROOT}/include/atlas/)
+				include_directories ( ${ATLAS_ROOT}/include/ ${ATLAS_ROOT}/include/atlas/ )
+			else()
+				message(STATUS "ATLAS path: " ${ATLAS_PATH})
+				list(APPEND EXTRA_INCLUDE_DIRECTORIES ${ATLAS_PATH}/include/atlas/)
+				list(APPEND EXTRA_INCLUDE_DIRECTORIES ${ATLAS_PATH}/include/atlas/)
+				include_directories ( ${ATLAS_PATH}/include/ ${ATLAS_PATH}/include/atlas/ )
+			endif()
+		else()
+			message(STATUS "ATLAS not found.")
+		endif()
+	endif()
+endif()
 #####################################################################
 #                       Static Code Analysis
 #####################################################################
-mark_as_advanced( CPP_CHECK )
-IF( UNIX )
-    FIND_PROGRAM( CPP_CHECK cppcheck )
-    IF( CPP_CHECK )
-    	MESSAGE(STATUS "cppcheck available for static code analysis." )
-    	ADD_CUSTOM_TARGET(
-		code_analysis
-		${CPP_CHECK} --enable=all --xml --force -I${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR} 2> StaticAnalysis.xml
-	)
-    ENDIF( CPP_CHECK )
-ENDIF( UNIX )
-
+option(USE_CPPCHECK "Use CPPCheck Static Code Analysis" OFF)
+mark_as_advanced(USE_CPPCHECK)
+if(USE_CPPCHECK)
+	find_program(CPP_CHECK cppcheck)
+	mark_as_advanced(CPP_CHECK)
+if(CPP_CHECK)
+	message(STATUS "cppcheck available for static code analysis." )
+	add_custom_target(code_analysis
+		${CPP_CHECK} --enable=all --xml --force -I${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR} 2> StaticAnalysis.xml)
+	endif()
+endif()
 
 #####################################################################
 #                       GCov Code Analysis
 #####################################################################
-OPTION( GCOV_CHECK  "GCov Coverage Check" OFF )
-mark_as_advanced( GCOV_CHECK )
-IF( GCOV_CHECK )
-    INCLUDE(CTest)
-    FIND_PROGRAM( GCOV_CHECK gcov )
-	IF (CMAKE_BUILD_TYPE MATCHES "Release")
-		message( FATAL_ERROR "\nYou specified a Release Build."
+option(USE_GCOV_CHECK  "GCov Coverage Check" OFF)
+mark_as_advanced(USE_GCOV_CHECK)
+if(USE_GCOV_CHECK)
+find_program(GCOV_CHECK gcov)
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+	message( FATAL_ERROR 
+		"\nYou specified a Release Build."
 		"This does not make sense, if Coverage is enabled."
-		"Please change Build type to Debug or turn off Coverage." )
-	ENDIF(CMAKE_BUILD_TYPE MATCHES "Release")
-    MESSAGE(STATUS "GCov available for static code analysis. Configuring for Code Check." )
-    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
-    SET(CFLAGS "${CFLAGS} -g -O0 -Wall -W -fprofile-arcs -ftest-coverage")
-    SET(LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
-ENDIF( GCOV_CHECK )
-
-
-#####################################################################
-#                       Valgrind Check
-#####################################################################
-OPTION( VALGRIND_CHECK   "Valgrind Memory Check" OFF )
-mark_as_advanced( VALGRIND_CHECK )
-IF( VALGRIND_CHECK )
-    INCLUDE(CTest)
-    FIND_PROGRAM( VALGRIND_CHECK valgrind )
-    MESSAGE(STATUS "Valgrind available for memory check." )
-ENDIF( VALGRIND_CHECK )
+		"Please change Build type to Debug or turn off Coverage."
+	)
+endif()
+	message(STATUS "GCov available for static code analysis. Configuring for Code Check." )
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+	set(CFLAGS "${CFLAGS} -g -O0 -Wall -W -fprofile-arcs -ftest-coverage")
+	set(LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+endif()
 
 
 #####################################################################
 #                Adjust compiler flags and settings for MSVC
 #####################################################################
-IF( MSVC )
-    message(STATUS "Win32")
-	SET( DISABLE_WARNINGS "/wd4250 /wd4251 /wd4275 /wd4800 /wd4308" )
+if( MSVC )
 	#4250: inherit via dominance
+	add_definitions(/wd4250)
 	#4251: needs to have dll-interface
+	add_definitions(/wd4251)
 	#4275: non-dll interface used as base for dll-interface class
+	add_definitions(/wd4275)
 	#4308: Negative integral constant
-	SET( ADDITIONAL_COMPILER_FLAGS "${DISABLE_WARNINGS}" )
+	add_definitions(/wd4800)
+	add_definitions(/wd4308)
 
-	STRING( REPLACE "/O2" "/Od" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" )
+	string( REPLACE "/O2" "/Od" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" )
+	set( CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE STRING "compiler-flags" FORCE )
 
-	SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${ADDITIONAL_COMPILER_FLAGS}" )
-	SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${ADDITIONAL_COMPILER_FLAGS}" )
-	SET( CMAKE_CXX_FLAGS_MINSIZERELEASE "${CMAKE_CXX_FLAGS_MINSIZERELEASE} ${ADDITIONAL_COMPILER_FLAGS}" CACHE STRING "compiler-flags" FORCE )
-	SET( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${ADDITIONAL_COMPILER_FLAGS}" CACHE STRING "compiler-flags" FORCE )
-
-	SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE STRING "compiler-flags" FORCE )
-	SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "compiler-flags" FORCE )
-	SET( CMAKE_CXX_FLAGS_MINSIZERELEASE "${CMAKE_CXX_FLAGS_MINSIZERELEASE}" CACHE STRING "compiler-flags" FORCE )
-	SET( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING "compiler-flags" FORCE )
-
-	ADD_DEFINITIONS(-D_USE_MATH_DEFINES)
-	ADD_DEFINITIONS(-DNOMINMAX)
-	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
-	ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE) 
-	ADD_DEFINITIONS(-D_SCL_SECURE_NO_WARNINGS)
-	ADD_DEFINITIONS(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1)
-ENDIF( MSVC )
-
-
-#####################################################################
-#                Adjust compiler flags and settings for OSX
-#####################################################################
-IF( UNIX )
-    IF( APPLE )
-        message(STATUS "Apple OSX/Darwin")
-            SET(CMAKE_CXX_CREATE_STATIC_LIBRARY "libtool -static -o <TARGET> <LINK_FLAGS> <OBJECTS>" )
-            IF( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-                IF( NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0" ))
-                    message(STATUS "Adding MAC OS X CLANG 5.0 compiler flag")
-                    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ftemplate-depth-1024")
-                    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ftemplate-depth-1024")
-	  	ENDIF( NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0" ))
-	    ENDIF( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )	
-    ENDIF( APPLE )
-ENDIF( UNIX )
-
+	add_definitions(-D_USE_MATH_DEFINES)
+	add_definitions(-DNOMINMAX)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+	add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+	add_definitions(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1)
+endif()
 
 #####################################################################
 #                       General Path settings
 #####################################################################
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-INCLUDE_DIRECTORIES( include/ )
-ADD_SUBDIRECTORY( include )
-ADD_SUBDIRECTORY( src )
-
+include_directories( ${shark_SOURCE_DIR}/include )
+include_directories( ${shark_BINARY_DIR}/include )
+add_subdirectory( include )
+add_subdirectory( src )
 
 #####################################################################
 #                       Include Examples
 #####################################################################
-OPTION( OPT_COMPILE_EXAMPLES "Compile example programs." ON )
-
-#IF( OPT_COMPILE_EXAMPLES )
-	ADD_SUBDIRECTORY( examples )
-#ENDIF( OPT_COMPILE_EXAMPLES )
+option( BUILD_EXAMPLES "Build example programs." ON )
+if( BUILD_EXAMPLES )
+	add_subdirectory( examples )
+endif()
 
 #####################################################################
 #                       Include Unit Tests
 #####################################################################
-OPTION( OPT_MAKE_TESTS "Compile unit tests." ON )
-
-IF( OPT_MAKE_TESTS)
-	ADD_SUBDIRECTORY( Test )
-ENDIF( OPT_MAKE_TESTS )
+# Enable Testing
+include(CTest)
+if(BUILD_TESTING)
+	enable_testing()
+	add_subdirectory( Test )
+endif()
 
 #####################################################################
 #                       Include Documentation
 #####################################################################
-OPTION( OPT_COMPILE_DOCUMENTATION "Compile documentation." OFF )
-
-IF( OPT_COMPILE_DOCUMENTATION )
-	ADD_SUBDIRECTORY( doc )
-ENDIF( OPT_COMPILE_DOCUMENTATION )
-
-
-#TARGET_LINK_LIBRARIES( Statistics shark ${LINK_LIBRARIES} )
-
-
-
-###################################################################
-#                       CMAKE PACKAGING
-###################################################################
-
-
-if(WIN32 AND NOT CYGWIN)
-  set(INSTALL_CMAKE_DIR CMake)
-else()
-  set(INSTALL_CMAKE_DIR lib/CMake/Shark/)
+option(BUILD_DOCUMENTATION "Build documentation." OFF)
+if(BUILD_DOCUMENTATION)
+	add_subdirectory(doc)
 endif()
 
+###################################################################
+#                       CPACK PACKAGING
+###################################################################
+set(INSTALL_CMAKE_DIR lib/CMake/Shark/)
+
 # Add all targets to the build-tree export set
-export(TARGETS shark Version FILE "${PROJECT_BINARY_DIR}/SharkTargets.cmake")
- 
-# Export the package for use from the build-tree
-# (this registers the build-tree with a global CMake-registry)
-#export(PACKAGE Shark)
+export(TARGETS shark Version FILE "${shark_BINARY_DIR}/SharkTargets.cmake")
 
 # Create the SharkConfig.cmake and SharkConfigVersion files
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/" "${Boost_INCLUDE_DIR}")
-set(CONF_TARGET_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+set(SHARK_USE_FILE "${PROJECT_SOURCE_DIR}/UseShark.cmake")
+set(SHARK_TARGETS_FILE "${PROJECT_BINARY_DIR}/SharkTargets.cmake")
+set(SHARK_LIBRARIES ${LINK_LIBRARIES} shark)
+set(SHARK_LIBRARY_DIRS "${PROJECT_BINARY_DIR}/lib")
+set(SHARK_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include" "${PROJECT_BINARY_DIR}/include" "${Boost_INCLUDE_DIR}" ${EXTRA_INCLUDE_DIRECTORIES})
+
+# Configure the files to be exported
 configure_file(SharkConfig.cmake.in "${PROJECT_BINARY_DIR}/SharkConfig.cmake")
-set(CONF_TARGET_DIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}")
-set(CONF_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include/" "${Boost_INCLUDE_DIR}")
-configure_file(SharkConfig.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SharkConfig.cmake")
 configure_file(SharkConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/SharkConfigVersion.cmake")
+
+# Configure the SharkConfig.cmake for the install tree
+set(SHARK_CONFIG_CODE "
+	# Compute the installation prefix from this SharkConfig.cmake file location.
+	get_filename_component(SHARK_INSTALL_PREFIX \"\${CMAKE_CURRENT_LIST_FILE}\" PATH)")
+
+# Construct the proper number of get_filename_component(... PATH)
+# calls to compute the installation prefix.
+string(REGEX REPLACE "/" ";" _count "${INSTALL_CMAKE_DIR}")
+foreach(p ${_count})
+	set(SHARK_CONFIG_CODE "${SHARK_CONFIG_CODE}
+		get_filename_component(SHARK_INSTALL_PREFIX \"\${SHARK_INSTALL_PREFIX}\" DIRECTORY)")
+endforeach()
+set(SHARK_CONFIG_CODE "${SHARK_CONFIG_CODE}")
+
+set(SHARK_USE_FILE "\${SHARK_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}UseShark.cmake")
+set(SHARK_TARGETS_FILE "\${SHARK_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}SharkTargets.cmake")
+set(SHARK_LIBRARIES ${LINK_LIBRARIES} shark)
+set(SHARK_LIBRARY_DIRS "\${SHARK_INSTALL_PREFIX}/lib")
+set(SHARK_INCLUDE_DIRS "\${SHARK_INSTALL_PREFIX}/${SHARK_INSTALL_INCLUDE_DIR}" "${Boost_INCLUDE_DIR}" ${EXTRA_INCLUDE_DIRECTORIES})
+configure_file(SharkConfig.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SharkConfig.cmake")
 
 # Install the SharkConfig.cmake and SharkConfigVersion.cmake
 install(FILES
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SharkConfig.cmake"
-  "${PROJECT_BINARY_DIR}/SharkConfigVersion.cmake"
-  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
- 
+	"${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SharkConfig.cmake"
+	"${PROJECT_BINARY_DIR}/SharkConfigVersion.cmake"
+	"${PROJECT_SOURCE_DIR}/UseShark.cmake"
+	DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev
+)
+
 # Install the export set for use with the install-tree
-install(EXPORT SharkTargets DESTINATION
-  "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+install(EXPORT SharkTargets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
-
+#####################################################################
+#                  Configure the Shark.h file
+#####################################################################
+configure_file (
+	"${CMAKE_SOURCE_DIR}/include/shark/Core/Shark.h.in"
+	"${CMAKE_BINARY_DIR}/include/shark/Core/Shark.h"
+)
+install(FILES
+	"${CMAKE_BINARY_DIR}/include/shark/Core/Shark.h"
+	DESTINATION "${SHARK_INSTALL_INCLUDE_DIR}/shark/Core/" COMPONENT deV
+)
 
 ###################################################################
 #                           UNINSTALL                             #
 ###################################################################
-
 # refer to
 # http://www.cmake.org/Wiki/CMake_FAQ#Can_I_do_.22make_uninstall.22_with_CMake.3F
 # for details
-
 configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-  IMMEDIATE @ONLY)
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+	IMMEDIATE @ONLY)
 
 add_custom_target(uninstall
-  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
+)

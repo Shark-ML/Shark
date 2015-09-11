@@ -1,5 +1,5 @@
-
-FILE( GLOB SRCS
+# Glob the files
+file( GLOB SHARK_SRCS
 	Models/*.cpp
 	ObjectiveFunctions/*.cpp
 	ObjectiveFunctions/Loss/*.cpp
@@ -10,49 +10,39 @@ FILE( GLOB SRCS
 	Fuzzy/*.cpp
 )
 
-SOURCE_GROUP( src/Models FILES Models/*.cpp )
-SOURCE_GROUP( src/ObjectiveFunctions FILES ObjectiveFunctions/*.cpp )
-SOURCE_GROUP( src/Algorithms FILES Algorithms/*.cpp )
-SOURCE_GROUP( src/Fuzzy FILES Fuzzy/*.cpp )
+# Group the source for MSVC
+source_group( src/Models FILES Models/*.cpp )
+source_group( src/ObjectiveFunctions FILES ObjectiveFunctions/*.cpp )
+source_group( src/Algorithms FILES Algorithms/*.cpp )
+source_group( src/Fuzzy FILES Fuzzy/*.cpp )
 
+# Create the shark library
+add_library( shark ${SHARK_SRCS} )
+target_link_libraries( shark ${LINK_LIBRARIES})
 
-#####################################################################
-#                       Library setup                               #
-#####################################################################
+set_target_properties( shark PROPERTIES DEBUG_POSTFIX _debug )
 
-IF( WIN32 )
-    ADD_LIBRARY( shark ${LIB_TYPE} ${SRCS} )
-    SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_PREFIX ../ )
-    SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_POSTFIX _debug )
-ELSE( WIN32 )
-      ADD_LIBRARY( shark ${LIB_TYPE} ${SRCS} )
-      SET_TARGET_PROPERTIES( shark PROPERTIES DEBUG_POSTFIX _debug )
-ENDIF( WIN32 )
+if( WIN32 )
+  set_target_properties( shark PROPERTIES DEBUG_PREFIX ../ )
+endif()
 
-TARGET_LINK_LIBRARIES( shark ${LINK_LIBRARIES} )
+# Add the version executable
+add_executable(Version Core/Version.cpp)
+target_link_libraries(Version shark)
 
-ADD_EXECUTABLE( Version Core/Version.cpp )
-TARGET_LINK_LIBRARIES( Version ${LINK_LIBRARIES} )
+# Install the library
+set_target_properties( shark PROPERTIES
+	VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH}
+	SOVERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH})
 
-#####################################################################
-#                       Install the library                         #
-#####################################################################
-SET_TARGET_PROPERTIES( shark PROPERTIES
-	VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.{SHARK_VERSION_PATCH}
-	SOVERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.{SHARK_VERSION_PATCH}
-)
-
-INSTALL(
-	TARGETS shark
-	EXPORT SharkTargets
-	RUNTIME DESTINATION bin
-	LIBRARY DESTINATION lib
-	ARCHIVE DESTINATION lib
-)
-INSTALL(
-	TARGETS Version
-	EXPORT SharkTargets
-	RUNTIME DESTINATION bin
-)
+install(TARGETS shark
+	    EXPORT SharkTargets
+	    RUNTIME DESTINATION bin
+	    LIBRARY DESTINATION lib
+	    ARCHIVE DESTINATION lib)
+	
+install(TARGETS Version
+	    EXPORT SharkTargets
+	    RUNTIME DESTINATION bin)
 
 
