@@ -31,7 +31,7 @@
 
 #ifndef SHARK_LINALG_BLAS_BLAS_H
 #define SHARK_LINALG_BLAS_BLAS_H
-
+#include <shark/Core/Shark.h>
 #include <shark/LinAlg/BLAS/vector.hpp>
 #include <shark/LinAlg/BLAS/vector_sparse.hpp>
 #include <shark/LinAlg/BLAS/vector_expression.hpp>

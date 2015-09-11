@@ -33,6 +33,8 @@
 #ifndef SHARK_CORE_OPENMP_H
 #define SHARK_CORE_OPENMP_H
 
+#include <shark/Core/Shark.h>
+
 #ifdef SHARK_USE_OPENMP
 #include <omp.h>
 #include <boost/config.hpp>

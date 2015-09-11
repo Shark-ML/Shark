@@ -42,8 +42,8 @@
 */
 
 //for debug error handling of linear algebra
-#include <shark/Core/Exception.h>
 #include <shark/LinAlg/BLAS/blas.h>
+#include <shark/Core/Exception.h>
 #include <shark/LinAlg/Initialize.h>
 #include <shark/LinAlg/Tools.h>
 #include <shark/LinAlg/Metrics.h>
