@@ -55,7 +55,7 @@ void testFullMatrix(MatrixType& matrix, Result const& result){
 	matrix.matrix(matrixResult);
 	for(std::size_t i = 0; i != size; ++i){
 		for(std::size_t j = 0; j != size; ++j){
-			BOOST_CHECK_SMALL(matrixResult(i,j)-result(i,j),1.-13);
+			BOOST_CHECK_SMALL(matrixResult(i,j)-result(i,j),1.e-13);
 		}
 	}
 }
@@ -66,7 +66,7 @@ void testMatrix(MatrixType& matrix, Result const& result){
 	//check entry
 	for(std::size_t i = 0; i != size; ++i){
 		for(std::size_t j = 0; j != size; ++j){
-			BOOST_CHECK_SMALL(matrix(i,j)-result(i,j),1.-13);
+			BOOST_CHECK_SMALL(matrix(i,j)-result(i,j),1.e-13);
 		}
 	}
 	//check row
