@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # This project is designed to be built outside the Shark source tree.
+# set Shark_DIR to the proper location
 project(ExampleProject)
 
 # Find the Shark libraries and includes
