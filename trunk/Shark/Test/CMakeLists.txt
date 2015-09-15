@@ -185,7 +185,7 @@ shark_add_test( Models/RFClassifier.cpp Models_RFClassifier )
 shark_add_test( Models/CARTClassifier.cpp Models_CARTClassifier )
 
 # Core tests
-shark_add_test( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )
+#shark_add_test( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )
 shark_add_test( Core/Iterators.cpp Core_Iterators )
 shark_add_test( Core/Math.cpp Core_Math )
 
