@@ -173,9 +173,9 @@ mark_as_advanced(Boost_DIR PTHREAD_LIBRARY)
 message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
 
 #####################################################################
-#		Optionally enable OpenMP
+#		OpenMP
 #####################################################################
-option( ENABLE_OPENMP "Enable OpenMP" OFF )
+option( ENABLE_OPENMP "Enable OpenMP" ON )
 if( ENABLE_OPENMP )
 	find_package( OpenMP QUIET )
 	if( OPENMP_FOUND )
@@ -190,8 +190,10 @@ if( ENABLE_OPENMP )
 		set(SHARK_REQUIRED_EXE_LINKER_FLAGS "${OpenMP_EXE_LINKER_FLAGS}")
 
 	else()
-		message( WARNING "OpenMP...not found" )
+		message( STATUS "OpenMP...not found" )
 	endif()
+else()
+	message( STATUS "Building without OpenMP as requested." )
 endif()
 
 #####################################################################
