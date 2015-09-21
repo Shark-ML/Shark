@@ -43,8 +43,8 @@ Under **Ubuntu**, you install all required packages by:
 Under **MacOS** using MacPorts, you get the required packages by:
 
 .. code-block:: none
-	sudo port install boost cmake
 
+	sudo port install boost cmake
 
 
 CMake Options
