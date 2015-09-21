@@ -55,30 +55,30 @@ for a list of options. The default values are **bold**:
 ======================= ===================== ===============================================
 Option           	    Values                Effect
 ======================= ===================== ===============================================
-BUILD_SHARED_LIBS      	ON/**OFF**            Builds Shark as shared lib. 
-Boost_USE_STATIC_LIBS   ON/**OFF**            Searches und uses the static boost libraries.
+BUILD_SHARED_LIBS      	ON/**OFF**            Builds Shark as shared library 
+Boost_USE_STATIC_LIBS   ON/**OFF**            Searches and uses the static boost libraries,
                                               Be aware, that linking static Boost 
                                               libraries to a dynamic Shark
 BOOST_ROOT              Path                  Path to boost, if it is not installed in a default
                                               path.
-                                              can result in problems during build!
-ENABLE_ATLAS            **ON**/OFF            Enables ATLAS as linear algebra library if found.
-                                              Ignored on MacOSX as Accelerate is favourable.
-ATLAS_ROOT              Path                  Additional Path to search for an ATLAS
+                                              Can result in problems during build!
+ENABLE_ATLAS            **ON**/OFF            Enables ATLAS as linear algebra library if found;
+                                              ignored on MacOSX as Accelerate is favourable
+ATLAS_ROOT              Path                  Additional path to search for an ATLAS
                                               installation, if ATLAS is not installed in a
-                                              system path.
+                                              system path
 ATLAS_FULL_LAPACK       ON/**OFF**            Indicates whether ATLAS comes with the full
-                                              LAPACK support. 
-ENABLE_ACCELERATE       **ON**/OFF            Enables Accelerate as linear algebra library.
-                                              Only enabled on MacOSX
+                                              LAPACK support 
+ENABLE_ACCELERATE       **ON**/OFF            Enables Accelerate as linear algebra library,
+                                              only enabled on MacOSX
 ENABLE_OPENMP           **ON**/OFF            Enables OpenMP support if supported by the 
-                                              platform.
-BUILD_DOCUMENTATION     ON/**OFF**            Builds the documentation. requires doxygen.
+                                              platform
+BUILD_DOCUMENTATION     ON/**OFF**            Builds the documentation, requires doxygen
 BUILD_EXAMPLES          **ON**/OFF            Builds the examples
 BUILD_TESTING           **ON**/OFF            Builds the tests
 CMAKE_BUILD_TYPE        Debug/**Release**     Builds Shark in Debug or Release mode.
                                               In debug, the linbrary is called shark_debug
-CMAKE_INSTALL_PREFIX    Path **/usr/local**   Installation path for Shark.
+CMAKE_INSTALL_PREFIX    Path **/usr/local**   Installation path for Shark
 
 ======================= ===================== ===============================================
 
