@@ -38,7 +38,7 @@ Under **Ubuntu**, you install all required packages by:
 
 .. code-block:: none
 	
-	sudo apt-get install cmake cmake-curses-gui libatlas-base-dev libboost-all-dev``.
+	sudo apt-get install cmake cmake-curses-gui libatlas-base-dev libboost-all-dev
 	
 Under **MacOS** using MacPorts, you get the required packages by:
 
