@@ -9,5 +9,5 @@ find_package(Shark REQUIRED)
 include(${SHARK_USE_FILE})
 
 # Executable
-add_executable(ExampleProject HelloWorld.cxx)
+add_executable(ExampleProject HelloWorld.cpp)
 target_link_libraries(ExampleProject ${SHARK_LIBRARIES})

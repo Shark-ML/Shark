@@ -14,3 +14,12 @@ include_directories(BEFORE ${SHARK_INCLUDE_DIRS})
 
 # Add link directories needed to use Shark.
 link_directories(${SHARK_LIBRARY_DIRS})
+
+
+#add DNDEBUG flag in Release mode
+get_target_property(SHARK_CONFIGURATION shark IMPORTED_CONFIGURATIONS)
+list(APPEND COMPILE_DEFINITIONS_RELEASE NDEBUG)
+
+if (CMAKE_BUILD_TYPE STREQUAL "")
+set (CMAKE_BUILD_TYPE Release CACHE STRING "One of: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
+endif ()
