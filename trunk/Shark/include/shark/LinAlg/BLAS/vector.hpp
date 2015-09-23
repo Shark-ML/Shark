@@ -105,14 +105,14 @@ public:
 	///
 	/// Grants low-level access to the vectors internals. Elements storage()[0]...storage()[size()-1] are valid.
 	pointer storage(){
-		return &m_storage[0];
+		return size()?&m_storage[0]:0;
 	}
 	
 	///\brief Returns the pointer to the beginning of the vector storage
 	///
 	/// Grants low-level access to the vectors internals. Elements storage()[0]...storage()[size()-1] are valid.
 	const_pointer storage()const{
-		return &m_storage[0];
+		return size()?&m_storage[0]:0;
 	}
 	
 	///\brief Returns the stride between the elements in storage()
@@ -430,12 +430,12 @@ public:
 	
 	/// \brief return an iterator on the first element of the vector
 	const_iterator cbegin() const {
-		return const_iterator(&m_storage[0],0);
+		return const_iterator(storage(),0);
 	}
 
 	/// \brief return an iterator after the last element of the vector
 	const_iterator cend() const {
-		return const_iterator(&m_storage[0]+size(),size());
+		return const_iterator(storage()+size(),size());
 	}
 
 	/// \brief return an iterator on the first element of the vector
@@ -450,12 +450,12 @@ public:
 
 	/// \brief Return an iterator on the first element of the vector
 	iterator begin(){
-		return iterator(&m_storage[0],0);
+		return iterator(storage(),0);
 	}
 
 	/// \brief Return an iterator at the end of the vector
 	iterator end(){
-		return iterator(&m_storage[0]+size(),size());
+		return iterator(storage()+size(),size());
 	}
 	
 	/////////////////sparse interface///////////////////////////////
