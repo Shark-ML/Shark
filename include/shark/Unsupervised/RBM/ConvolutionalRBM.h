@@ -38,7 +38,10 @@
 #include <boost/serialization/string.hpp>
 namespace shark{
 
-///\brief stub for the ConvolutionalRBM class. at the moment it is just a holder of the parameter set and the Energy.
+///\brief Implements a convolutional RBM with a single greyscale input imge and a set of squared image filters
+///
+/// This class implements a simple RBM which interprets is input as images and instead of learning arbitrary filters, learns a convolution
+/// Thus the ConvolutionalRBM is to an RBM what a ConvolutionalFFNet is to an FFNet.
 template<class VisibleLayerT,class HiddenLayerT, class RngT>
 class ConvolutionalRBM : public AbstractModel<RealVector, RealVector>{
 private:
@@ -143,8 +146,10 @@ public:
 	
 	///\brief Creates the structure of the ConvolutionalRBM.
 	///
-	///@param hiddenNeurons number of hidden neurons.
-	///@param visibleNeurons number of visible neurons.
+	///@param newInputSize1 width of input image
+	///@param newInputSize2 height of input image
+	///@param newNumFilters number of filters to train
+	///@param filterSize size of the sides of the filter
 	void setStructure(
 		std::size_t newInputSize1, std::size_t newInputSize2,
 		std::size_t newNumFilters,
