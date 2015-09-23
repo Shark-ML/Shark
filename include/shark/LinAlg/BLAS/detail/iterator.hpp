@@ -301,7 +301,7 @@ public:
 	typedef T* pointer;
 
 	// Construction
-	dense_storage_iterator() {}
+	dense_storage_iterator():m_pos(0),m_index(0) {}
 	dense_storage_iterator(pointer pos, size_type index, difference_type stride = 1)
 	:m_pos(pos), m_index(index), m_stride(stride) {}
 	
@@ -341,7 +341,7 @@ public:
 	template<class U>
 	difference_type operator - (dense_storage_iterator<U> const& it) const {
 		//RANGE_CHECK(m_pos == it.m_pos);
-		return m_index - it.m_index;
+		return (difference_type)m_index - (difference_type)it.m_index;
 	}
 
 	// Dereference
@@ -361,6 +361,7 @@ public:
 	template<class U>
 	bool operator == (dense_storage_iterator<U> const& it) const {
 		//RANGE_CHECK(m_pos == it.m_pos);
+		//~ RANGE_CHECK(m_index < it.m_index);
 		return m_index == it.m_index;
 	}
 	template<class U>
@@ -371,7 +372,7 @@ public:
 
 private:
 	pointer m_pos;
-	difference_type m_index;
+	size_type m_index;
 	difference_type m_stride;
 	template<class,class> friend class dense_storage_iterator;
 };

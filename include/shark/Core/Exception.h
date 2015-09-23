@@ -103,7 +103,7 @@ inline void THROW_IF(bool unexpectedCondition, const std::string& message)
 
 // some handy macros for special types of checks,
 // throwing standard error messages
-#if defined(DEBUG) || defined(_DEBUG)|| !(defined(NDEBUG)||defined(RELEASE))
+#ifndef NDEBUG
 #define RANGE_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("range check error: "#cond); } while (false)
 #define SIZE_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("size mismatch: "#cond); } while (false)
 #define TYPE_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("type mismatch: "#cond); } while (false)
