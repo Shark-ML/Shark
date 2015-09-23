@@ -59,6 +59,7 @@ namespace shark {
 class NonMarkovPole : public SingleObjectiveFunction {
 
 public:
+  //! \param single Is this an instance of the single pole problem?
   //! \param hidden Number of hidden neurons in underlying neural network
   //! \param bias Whether to use bias in neural network
   //! \param sigmoidType Activation sigmoid function for neural network
