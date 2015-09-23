@@ -9,17 +9,13 @@ Installing Shark
 Linux, MacOS, and other Unix-based systems
 **********************************************************
 
-To install Shark, get the sources
-
-.. code-block:: none
+To install Shark, get the sources::
 
 	svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
 	
 or a source-code release as described :doc:`here
 <../downloads/downloads>`.
-Then build the library:
-
-.. code-block:: none
+Then build the library::
 
 	mkdir Shark/build/
 	cd Shark/build
@@ -34,15 +30,11 @@ Shark relies on `Boost <http://www.boost.org>`_ and uses `CMake
 Furthermore, Shark can make use of different linear algebra libraries.
 On MacOsX, Accelerate is used by default. On linux and Windows, ATLAS
 is used if available.
-Under **Ubuntu**, you install all required packages by:
-
-.. code-block:: none
+Under **Ubuntu**, you install all required packages by::
 	
 	sudo apt-get install cmake cmake-curses-gui libatlas-base-dev libboost-all-dev
 	
-Under **MacOS** using MacPorts, you get the required packages by:
-
-.. code-block:: none
+Under **MacOS** using MacPorts, you get the required packages by::
 
 	sudo port install boost cmake
 
@@ -59,9 +51,9 @@ BUILD_SHARED_LIBS      	ON/**OFF**            Builds Shark as shared library
 Boost_USE_STATIC_LIBS   ON/**OFF**            Searches and uses the static boost libraries,
                                               Be aware, that linking static Boost 
                                               libraries to a dynamic Shark
+					      can result in problems during build!
 BOOST_ROOT              Path                  Path to boost, if it is not installed in a default
                                               path.
-                                              Can result in problems during build!
 ENABLE_ATLAS            **ON**/OFF            Enables ATLAS as linear algebra library if found;
                                               ignored on MacOSX as Accelerate is favourable
 ATLAS_ROOT              Path                  Additional path to search for an ATLAS
@@ -84,8 +76,6 @@ CMAKE_INSTALL_PREFIX    Path **/usr/local**   Installation path for Shark
 
 To enable, either
 use one of the cmake guis or add the options to the cmake call.
-Choosing another path to boost and disabling OpenMP would look like:
-
-.. code-block:: none
+Choosing another path to boost and disabling OpenMP would look like::
 
 	cmake "-DBOOST_ROOT=/path/to/boost" "-DENABLE_OPENMP=OFF" ../

@@ -8,9 +8,8 @@ set(EXAMPLES_CPP_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(TPP_FILES "")
 
 macro( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
-
-  # Generate cpp file from tpp file
-  add_custom_command(
+	# Generate cpp file from tpp file
+	add_custom_command(
 	OUTPUT ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
 	COMMAND ${CMAKE_COMMAND}
 	ARGS
@@ -22,23 +21,25 @@ macro( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 	COMMENT "creating ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp from ${CMAKE_CURRENT_SOURCE_DIR}/${TUT_SRC}.tpp"
 	)
 
-  list(APPEND TPP_FILES ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
+	list(APPEND TPP_FILES ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
 
-  add_executable(${NAME} ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
-  target_link_libraries(${NAME} shark)
+	if( BUILD_EXAMPLES )
+		add_executable(${NAME} ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
+		target_link_libraries(${NAME} shark)
 
-  # Add the dependencies to the target examples
-  add_dependencies(examples ${NAME})
+		# Add the dependencies to the target examples
+		add_dependencies(examples ${NAME})
 
-  # Installation
-  install(TARGETS ${NAME}
-		   RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}/
-		   COMPONENT EXAMPLES)
+		# Installation
+		install(TARGETS ${NAME}
+			   RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}/
+			   COMPONENT EXAMPLES)
 
-  install(FILES ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
-		   DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT})
+		install(FILES ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp
+			   DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT})
 
-  source_group(${COMPONENT} FILES ${TUT_SRC})
+		source_group(${COMPONENT} FILES ${TUT_SRC})
+	endif()
 endmacro()
 
 shark_add_example( EA/MOO/AdditiveEpsilonIndicatorMain AdditiveEpsilonIndicatorMain "EA/MOO" )
@@ -124,14 +125,17 @@ shark_add_example( Unsupervised/OneClassSvm OneClassSvm "Unsupervised" )
 add_custom_target(tpp2cpp DEPENDS ${TPP_FILES})
 
 # Installation of the examples data
-install( DIRECTORY
-		 "${CMAKE_CURRENT_SOURCE_DIR}/Supervised/data"
-		 DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Supervised
-		 PATTERN ".*" EXCLUDE)
+if( BUILD_EXAMPLES )
+	install( DIRECTORY
+		"${CMAKE_CURRENT_SOURCE_DIR}/Supervised/data"
+		DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Supervised
+		PATTERN ".*" EXCLUDE
+	)
 
-install( DIRECTORY
-		 "${CMAKE_CURRENT_SOURCE_DIR}/Unsupervised/data"
-		 DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Unsupervised
-		 PATTERN ".*" EXCLUDE)
-
+	install( DIRECTORY
+		"${CMAKE_CURRENT_SOURCE_DIR}/Unsupervised/data"
+		DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Unsupervised
+		PATTERN ".*" EXCLUDE
+	)
+endif()
 		 
