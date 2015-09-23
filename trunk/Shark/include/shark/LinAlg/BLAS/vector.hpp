@@ -98,14 +98,15 @@ public:
 	///
 	/// Grants low-level access to the vectors internals. Elements storage()[0]...storage()[size()-1] are valid.
 	pointer storage(){
-		return size()?&m_storage[0]:0;
+		return &m_storage[0];
 	}
 	
 	///\brief Returns the pointer to the beginning of the vector storage
 	///
 	/// Grants low-level access to the vectors internals. Elements storage()[0]...storage()[size()-1] are valid.
 	const_pointer storage()const{
-		return size()?&m_storage[0]:0;
+		//~ return size()?&m_storage[0]:0;
+		return &m_storage[0];
 	}
 	
 	///\brief Returns the stride between the elements in storage()
