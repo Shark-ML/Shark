@@ -119,7 +119,6 @@ endif()
 
 string( TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE )
 if(CMakeBuildType MATCHES "debug")
-	add_definitions(-DDEBUG )	
 	#we want to be warned in debug mode
 	if(UNIX)
 		if(CMAKE_COMPILER_IS_GNUCC)
