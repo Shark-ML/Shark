@@ -48,6 +48,7 @@ public:
 
 	/** Packed matrix constructor with defined size and an initial value for all triangular matrix elements
 	 * \param size number of rows and columns
+	 * \param init initial value of the non-zero elements
 	 */
 	triangular_matrix(size_type size, scalar_type init):m_size(size),m_data(size * (size+1)/2,init) {}
 
