@@ -91,9 +91,9 @@ public:
 
 	//! \brief Initialize with specific pole angle
 	//! \param state2init initial pole angle (in radians)
-	void init(double t0 = 0.07) {
+	void init(double state2init = 0.07) {
 		m_state[0] = m_state[1] = m_state[3] = 0.0;
-		m_state[2] = t0;
+		m_state[2] = state2init;
 	}
 
 	//! \brief Initialize full m_state

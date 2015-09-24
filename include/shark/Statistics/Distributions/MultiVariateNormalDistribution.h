@@ -148,7 +148,7 @@ public:
 
 	/// \brief Constructor
 	/// \param [in] covariance covariance matrix
-	/// \param Is the choleksy factor triangular?
+	/// \param triangular Is the choleksy factor triangular?
 	MultiVariateNormalDistributionCholesky( RealMatrix const& covariance, bool triangular=false ) 
 	:m_triangular(false){
 		setCovarianceMatrix(covariance);
