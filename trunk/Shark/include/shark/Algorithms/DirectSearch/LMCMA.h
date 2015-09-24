@@ -389,7 +389,7 @@ private:
 	RealVector m_weights;///< weighting for the mu best individuals
 	double m_muEff;///< effective sample size for the weighted samples
 
-	RealVector m_evolutionPathC;///< 
+	RealVector m_evolutionPathC;///< evolution path
 	
 	
 };

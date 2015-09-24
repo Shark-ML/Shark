@@ -1,9 +1,10 @@
 Your Shark Programs
 ===================
 
-In order to use the Shark library's functionality, you will usually write your own
-C++ programs, which will link against the Shark library. We below give an example configuration for
-CMake, which we recommend using. A minimal setup, compiling a program ``ExampleProject`` from
+To use the Shark library's functionality, you usually write your own
+C++ programs and link them against the Shark library. We below give an example configuration for
+CMake, which we recommend using (see
+`here <http://cmake.org/runningcmake/>`_ for an introduction). A minimal setup, compiling a program ``ExampleProject`` from
 an input file ``HelloWorld.cpp`` is given by::
 
 	cmake_minimum_required(VERSION 2.8)
@@ -21,7 +22,7 @@ an input file ``HelloWorld.cpp`` is given by::
 
 
 You can find the template CMakeLists.txt in your example folder at
-``ExampleProject/CMakeLists.txt`` .  It automatically links to all
+``ExampleProject/CMakeLists.txt``.  It automatically links to all
 libraries used by your Shark build configuration and sets the required
 compiler flags.
 
@@ -43,6 +44,10 @@ For example, if the install directory is ``~/``, the command
 is::
 
 	cmake "-DShark_DIR=~/lib/CMake/Shark" .
+
+
+You can easily change the build options using cmake or its guis (e.g., ccmake), see :doc:`../../getting_started/installation` for specific options.
+
 
 
 

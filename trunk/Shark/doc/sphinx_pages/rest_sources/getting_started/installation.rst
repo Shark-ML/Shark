@@ -13,8 +13,6 @@ To install Shark, get the sources::
 
 	svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
 	
-or a source-code release as described :doc:`here
-<../downloads/downloads>`.
 Then build the library::
 
 	mkdir Shark/build/
@@ -28,7 +26,7 @@ Dependencies
 Shark relies on `Boost <http://www.boost.org>`_ and uses `CMake
 <http://www.cmake.org/>`_.
 Furthermore, Shark can make use of different linear algebra libraries.
-On MacOsX, Accelerate is used by default. On linux and Windows, ATLAS
+On MacOsX, Accelerate is used by default. On Linux and Windows, ATLAS
 is used if available.
 Under **Ubuntu**, you install all required packages by::
 	
@@ -74,8 +72,9 @@ CMAKE_INSTALL_PREFIX    Path **/usr/local**   Installation path for Shark
 
 ======================= ===================== ===============================================
 
-To enable, either
-use one of the cmake guis or add the options to the cmake call.
+To change options, either use one of the cmake guis (e.g., ccmake) or add the options to the cmake call.
 Choosing another path to boost and disabling OpenMP would look like::
 
 	cmake "-DBOOST_ROOT=/path/to/boost" "-DENABLE_OPENMP=OFF" ../
+
+An introduction on how to run cmake can be found `here <http://cmake.org/runningcmake/>`_.

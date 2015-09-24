@@ -63,6 +63,7 @@ template<class HiddenNeuron,class OutputNeuron>
 //! V. Heidrich-Meisner and C. Igel. Neuroevolution strategies for episodic reinforcement learn-ing. Journal of Algorithms, 64(4):152–168, 2009.
 class MarkovPole : public SingleObjectiveFunction {
 public:
+  //! \param single_pole Indicates whether the cast has a single pole (true) or two poles (false)
   //! \param hidden Number of hidden neurons in underlying neural network
   //! \param shortcuts Whether to use shortcuts in neural network
   //! \param bias Whether to use bias in neural network
