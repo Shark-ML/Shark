@@ -52,7 +52,6 @@ struct MVPSelectionCriterion{
 
 		for (std::size_t a=0; a < problem.active(); a++)
 		{
-			double aa = problem.alpha(a);
 			double ga = problem.gradient(a);
 			if (!problem.isUpperBound(a))
 			{
