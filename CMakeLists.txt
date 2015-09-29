@@ -54,12 +54,13 @@ mark_as_advanced( BUILD_OFFICIAL_RELEASE )
 set(SHARK_VERSION_MAJOR 3)
 set(SHARK_VERSION_MINOR 0)
 set(SHARK_VERSION_PATCH 0)
-set(SHARK_VERSION ${SHARK_VERSION_MAJOR} .${SHARK_VERSION_MINOR} .${SHARK_VERSION_PATCH})
+set(SHARK_VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH})
 
 
 #####################################################################
 #	Adjustments for cpack and deb package generation
 #####################################################################
+set(CPACK_GENERATOR TGZ DEB)
 set(CPACK_PACKAGE_NAME "libshark-i386")
 set(CPACK_BUNDLE_NAME "libshark")
 set(CPACK_PACKAGE_VENDOR "Institut fur Neuroinformatik, Ruhr-Universitaet Bochum")
@@ -79,8 +80,8 @@ if(UNIX AND NOT WIN32)
 		set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386)
 	endif()
 endif()
-
-set(CPACK_DEBIAN_PACKAGE_VERSION ${SHARK_VERSION_MAJOR} .${SHARK_VERSION_MINOR} .${SHARK_VERSION_PATCH})
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-all-dev (>= 1.48)")
+set(CPACK_DEBIAN_PACKAGE_VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH})
 
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
 	"SHARK is a modular C++ library for the design and optimization of adaptive systems. It provides methods for linear and nonlinear optimization, in particular evolutionary and gradient-based algorithms, kernel-based learning algorithms and neural networks, and various other machine learning techniques. SHARK serves as a toolbox to support real world applications as well as research indifferent domains of computational intelligence and machine learning. The sources are compatible with the following platforms: Windows, Solaris, MacOS X, and Linux."
