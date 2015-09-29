@@ -27,8 +27,8 @@ if( WIN32 )
 endif()
 
 # Add the version executable
-add_executable(Version Core/Version.cpp)
-target_link_libraries(Version shark)
+add_executable(SharkVersion Core/Version.cpp)
+target_link_libraries(SharkVersion shark)
 
 # Install the library
 set_target_properties( shark PROPERTIES
