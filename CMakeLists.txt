@@ -384,7 +384,7 @@ endif()
 set(INSTALL_CMAKE_DIR lib/CMake/Shark/)
 
 # Add all targets to the build-tree export set
-export(TARGETS shark Version FILE "${shark_BINARY_DIR}/SharkTargets.cmake")
+export(TARGETS shark SharkVersion FILE "${shark_BINARY_DIR}/SharkTargets.cmake")
 
 # Create the SharkConfig.cmake and SharkConfigVersion files
 set(SHARK_USE_FILE "${PROJECT_SOURCE_DIR}/UseShark.cmake")
