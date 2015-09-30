@@ -381,7 +381,7 @@ endif()
 ###################################################################
 #                       CPACK PACKAGING
 ###################################################################
-set(INSTALL_CMAKE_DIR lib/CMake/Shark/)
+set(INSTALL_CMAKE_DIR lib/cmake/Shark/)
 
 # Add all targets to the build-tree export set
 export(TARGETS shark SharkVersion FILE "${shark_BINARY_DIR}/SharkTargets.cmake")
