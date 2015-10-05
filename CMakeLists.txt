@@ -61,7 +61,7 @@ set(SHARK_VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_
 #	Adjustments for cpack and deb package generation
 #####################################################################
 set(CPACK_GENERATOR TGZ DEB)
-set(CPACK_PACKAGE_NAME "libshark-i386")
+set(CPACK_PACKAGE_NAME "libshark")
 set(CPACK_BUNDLE_NAME "libshark")
 set(CPACK_PACKAGE_VENDOR "Institut fur Neuroinformatik, Ruhr-Universitaet Bochum")
 set(CPACK_PACKAGE_VERSION_MAJOR ${SHARK_VERSION_MAJOR})
@@ -69,19 +69,7 @@ set(CPACK_PACKAGE_VERSION_MINOR ${SHARK_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${SHARK_VERSION_PATCH})
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/COPYING.LESSER)
 
-if(UNIX AND NOT WIN32)
-	if(CMAKE_SIZEOF_VOID_P MATCHES "8")
-		set(CPACK_PACKAGE_NAME "libshark-x86_64")
-		set(CPACK_DEBIAN_PACKAGE_NAME libshark-x86-64)
-		set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64)
-	else()
-		set(CPACK_PACKAGE_NAME "libshark-i386")
-		set(CPACK_DEBIAN_PACKAGE_NAME libshark-i386)
-		set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386)
-	endif()
-endif()
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-all-dev (>= 1.48)")
-set(CPACK_DEBIAN_PACKAGE_VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH})
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-all-dev (>=1.54)")
 
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
 	"SHARK is a modular C++ library for the design and optimization of adaptive systems. It provides methods for linear and nonlinear optimization, in particular evolutionary and gradient-based algorithms, kernel-based learning algorithms and neural networks, and various other machine learning techniques. SHARK serves as a toolbox to support real world applications as well as research indifferent domains of computational intelligence and machine learning. The sources are compatible with the following platforms: Windows, Solaris, MacOS X, and Linux."
