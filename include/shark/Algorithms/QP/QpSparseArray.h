@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Special container for certain coefficients describing multi-class SVMs
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -53,23 +53,20 @@ namespace shark {
 /// This allows for efficient storage of the "kernel modifiers"
 /// used to encode dual multi-class support vector machine problems.
 template<class QpFloatType>
-class QpSparseArray
-{
+class QpSparseArray {
 public:
 	/// \brief Non-default (non-zero) array entry.
 	///
 	/// \par
 	/// Data structure describing a non-default
 	/// (typically non-zero) entry of a row.
-	struct Entry
-	{
+	struct Entry {
 		unsigned int index;
 		QpFloatType value;
 	};
 
 	/// \brief Data structure describing a row of the sparse array.
-	struct Row
-	{
+	struct Row {
 		Entry* entry;
 		unsigned int size;
 		QpFloatType defaultvalue;
@@ -77,17 +74,16 @@ public:
 
 	/// Constructor. The space parameter is an upper limit
 	/// on the number of non-default (aka non-zero) entries
-	/// of the array.			
+	/// of the array.
 	QpSparseArray(
-		unsigned int height,
-		unsigned int width,
-		unsigned int space)
-	: m_width(width)
-	, m_height(height)
-	, m_used(0)
-	, m_data(space)
-	, m_row(height)
-	{
+	    unsigned int height,
+	    unsigned int width,
+	    unsigned int space)
+		: m_width(width)
+		, m_height(height)
+		, m_used(0)
+		, m_data(space)
+		, m_row(height) {
 		memset(&m_row[0], 0, height * sizeof(Row));
 	}
 
@@ -100,14 +96,12 @@ public:
 	{ return m_height; }
 
 	/// obtain an element of the matrix
-	QpFloatType operator () (unsigned int row, unsigned int col) const
-	{
+	QpFloatType operator()(unsigned int row, unsigned int col) const {
 		Row const& r = m_row[row];
 		unsigned int i;
-		for (i=0; i<r.size; i++)
-		{
+		for(i = 0; i < r.size; i++) {
 			Entry const& e = r.entry[i];
-			if (e.index == col) return e.value;
+			if(e.index == col) return e.value;
 		}
 		return r.defaultvalue;
 	}
@@ -126,14 +120,13 @@ public:
 	/// elements must be done row-wise, and in order
 	/// within each row. However, the order of rows does
 	/// not matter.
-	void add(unsigned int row, unsigned int col, QpFloatType value)
-	{
+	void add(unsigned int row, unsigned int col, QpFloatType value) {
 		SHARK_CHECK(m_used < m_data.size(), "[QpSparseArray::add] insufficient storage space");
-	
+
 		Row& r = m_row[row];
-		if (r.entry == NULL) r.entry = &m_data[m_used];
+		if(r.entry == NULL) r.entry = &m_data[m_used];
 		else SHARK_CHECK(r.entry + r.size == &m_data[m_used], "[QpSparseArray::add] data must be added row-wise");
-	
+
 		m_data[m_used].index = col;
 		m_data[m_used].value = value;
 		m_used++;

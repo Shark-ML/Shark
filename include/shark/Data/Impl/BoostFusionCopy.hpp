@@ -1,5 +1,5 @@
 /*!
- * 
+ *
  *
  * \brief       -
  *
@@ -8,21 +8,21 @@
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -53,60 +53,55 @@
 #  pragma warning (disable: 4100) // unreferenced formal parameter
 #endif
 
-namespace boost { namespace fusion
-{
-    namespace detail
-    {
-        template <typename Seq1, typename Seq2>
-        struct sequence_copy
-        {
-            typedef typename result_of::end<Seq1>::type end1_type;
-            typedef typename result_of::end<Seq2>::type end2_type;
+namespace boost {
+namespace fusion {
+namespace detail {
+template <typename Seq1, typename Seq2>
+struct sequence_copy {
+	typedef typename result_of::end<Seq1>::type end1_type;
+	typedef typename result_of::end<Seq2>::type end2_type;
 
-            template <typename I1, typename I2>
-            static void
-            call(I1 const&, I2 const&, mpl::true_)
-            {
-            }
+	template <typename I1, typename I2>
+	static void
+	call(I1 const&, I2 const&, mpl::true_) {
+	}
 
-            template <typename I1, typename I2>
-            static void
-            call(I1 const& src, I2 const& dest, mpl::false_)
-            {
-                *dest = *src;
-                call(fusion::next(src), fusion::next(dest));
-            }
+	template <typename I1, typename I2>
+	static void
+	call(I1 const& src, I2 const& dest, mpl::false_) {
+		*dest = *src;
+		call(fusion::next(src), fusion::next(dest));
+	}
 
-            template <typename I1, typename I2>
-            static void
-            call(I1 const& src, I2 const& dest)
-            {
-                typename result_of::equal_to<I1, end1_type>::type eq;
-                return call(src, dest, eq);
-            }
-        };
-    }
+	template <typename I1, typename I2>
+	static void
+	call(I1 const& src, I2 const& dest) {
+		typename result_of::equal_to<I1, end1_type>::type eq;
+		return call(src, dest, eq);
+	}
+};
+}
 
-    template <typename Seq1, typename Seq2>
-    inline
-    typename
-        enable_if_c<
-            type_traits::ice_and<
-                traits::is_sequence<Seq1>::value
-              , traits::is_sequence<Seq2>::value
-            >::value,
-            void
-        >::type
-    copy(Seq1 const& src, Seq2& dest)
-    {
-        BOOST_STATIC_ASSERT(
-            result_of::size<Seq1>::value == result_of::size<Seq2>::value);
+template <typename Seq1, typename Seq2>
+inline
+typename
+enable_if_c <
+type_traits::ice_and <
+traits::is_sequence<Seq1>::value
+, traits::is_sequence<Seq2>::value
+>::value,
+void
+>::type
+copy(Seq1 const& src, Seq2& dest) {
+	BOOST_STATIC_ASSERT(
+	    result_of::size<Seq1>::value == result_of::size<Seq2>::value);
 
-        detail::sequence_copy<
-            Seq1 const, Seq2>::
-            call(fusion::begin(src), fusion::begin(dest));
-    }
-}}
+	detail::sequence_copy <
+	Seq1 const, Seq2 >::
+	call(fusion::begin(src), fusion::begin(dest));
+}
+}
+}
 
 #if defined (BOOST_MSVC)
 #  pragma warning(pop)

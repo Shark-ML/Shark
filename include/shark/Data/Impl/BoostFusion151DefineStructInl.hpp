@@ -1,5 +1,5 @@
 /*!
- * 
+ *
  *
  * \brief       -
  *
@@ -8,21 +8,21 @@
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -43,7 +43,7 @@
 #define SHARK_FUSION_ADAPTED_STRUCT_DETAIL_DEFINE_STRUCT_INLINE_HPP
 
 #include <boost/config.hpp>
-#include <boost/version.hpp> 
+#include <boost/version.hpp>
 #include <boost/fusion/support/category_of.hpp>
 #include <boost/fusion/sequence/sequence_facade.hpp>
 #include <boost/fusion/iterator/iterator_facade.hpp>
@@ -74,14 +74,14 @@
 // nested templates under some circumstances. This affects the implementation
 // of SHARK_FUSION_DEFINE_STRUCT_INLINE, which uses such specializations for
 // the iterator class's 'deref' and 'value_of' metafunctions. On these compilers
-// an alternate implementation for these metafunctions is used that does not 
+// an alternate implementation for these metafunctions is used that does not
 // require such specializations. The alternate implementation takes longer
 // to compile so its use is restricted to the offending compilers.
 // For MSVC, the bug was was reported at https://connect.microsoft.com/VisualStudio/feedback/details/757891/c-compiler-error-involving-partial-specializations-of-nested-templates
 // For GCC, 4.4 and earlier are no longer maintained so there is no need
 // to report a bug.
 #if defined(BOOST_MSVC) || (defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ <= 4)))
-	#define SHARK_FUSION_NEED_NESTED_TEMPLATE_PARTIAL_SPEC_WKND 
+#define SHARK_FUSION_NEED_NESTED_TEMPLATE_PARTIAL_SPEC_WKND
 #endif
 
 #ifdef SHARK_FUSION_NEED_NESTED_TEMPLATE_PARTIAL_SPEC_WKND
@@ -403,8 +403,8 @@ SHARK_FUSION_DEFINE_STRUCT_INLINE_IMPL(NAME, ATTRIBUTES)
 	}                                                                           \
 SHARK_FUSION_DEFINE_STRUCT_INLINE_MEMBERS_COMMON_IMPL(                          \
 	NAME, ATTRIBUTES_SEQ, ATTRIBUTES_SEQ_SIZE)
-	
-	
+
+
 /////////////////////DEFINITION FOR INLINE STRUCT REFERENCES/////////////////
 #define SHARK_FUSION_INITIALIZE(z,i,ATTRIBUTES_SEQ)                             \
 boost::fusion::at_c<i>(seq)
@@ -429,7 +429,7 @@ boost::fusion::at_c<i>(seq)
 		}																		\
 		SHARK_FUSION_DEFINE_STRUCT_REF_INLINE_MEMBERS(NAME, ATTRIBUTES)         \
 	};
-	
+
 #define SHARK_FUSION_DEFINE_STRUCT_CONST_REF_INLINE(NAME, ATTRIBUTES)           \
 	SHARK_FUSION_DEFINE_STRUCT_INLINE_ITERATOR(NAME, ATTRIBUTES)                \
 	struct NAME : boost::fusion::sequence_facade<                               \
@@ -462,9 +462,9 @@ boost::fusion::at_c<i>(seq)
 																				\
 SHARK_FUSION_DEFINE_STRUCT_INLINE_MEMBERS_COMMON_IMPL(                          \
 	NAME, ATTRIBUTES_SEQ, ATTRIBUTES_SEQ_SIZE)
-	
-	
-	
+
+
+
 ///////////////////////DEFINITION OF INLINE ITERATOR/////////////////////////
 #define SHARK_FUSION_DEFINE_STRUCT_INLINE_ITERATOR(NAME, ATTRIBUTES)            \
 	SHARK_FUSION_DEFINE_STRUCT_ITERATOR_IMPL(                                   \
@@ -645,6 +645,6 @@ SHARK_FUSION_DEFINE_STRUCT_INLINE_MEMBERS_COMMON_IMPL(                          
 	BOOST_PP_SEQ_FOR_EACH_I(                                                    \
 		SHARK_FUSION_MAKE_DATA_MEMBER,                                          \
 		~,                                                                      \
-		ATTRIBUTES_SEQ) 
+		ATTRIBUTES_SEQ)
 
 #endif

@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Cart Classifier
- * 
- * 
+ *
+ *
  *
  * \author      K. N. Hansen, J. Kremer
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -38,7 +38,7 @@
 
 #include <shark/Models/AbstractModel.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
-#include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>                                  
+#include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
 #include <shark/Data/Dataset.h>
 
 namespace shark {
@@ -55,15 +55,14 @@ namespace shark {
 /// It is a decision tree algorithm.
 ///
 template<class LabelType>
-class CARTClassifier : public AbstractModel<RealVector,LabelType>
-{
+class CARTClassifier : public AbstractModel<RealVector, LabelType> {
 private:
 	typedef AbstractModel<RealVector, LabelType> base_type;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
 //	Information about a single split. misclassProp, r and g are variables used in the cost complexity step
-	struct SplitInfo{
+	struct SplitInfo {
 		std::size_t nodeId;
 		std::size_t attributeIndex;
 		double attributeValue;
@@ -74,8 +73,8 @@ public:
 		std::size_t r;//TODO: remove this
 		double g;//TODO: remove this
 
-	   template<class Archive>
-	   void serialize(Archive & ar, const unsigned int version){
+		template<class Archive>
+		void serialize(Archive & ar, const unsigned int version) {
 			ar & nodeId;
 			ar & attributeIndex;
 			ar & attributeValue;
@@ -98,14 +97,12 @@ public:
 	{}
 
 	/// Constructor taking the splitMatrix as argument
-	CARTClassifier(SplitMatrixType const& splitMatrix)
-	{
+	CARTClassifier(SplitMatrixType const& splitMatrix) {
 		setSplitMatrix(splitMatrix);
 	}
 
 	/// Constructor taking the splitMatrix as argument as well as maximum number of attributes
-	CARTClassifier(SplitMatrixType const& splitMatrix, std::size_t d)
-	{
+	CARTClassifier(SplitMatrixType const& splitMatrix, std::size_t d) {
 		setSplitMatrix(splitMatrix);
 		m_inputDimension = d;
 	}
@@ -114,41 +111,41 @@ public:
 	std::string name() const
 	{ return "CARTClassifier"; }
 
-	boost::shared_ptr<State> createState()const{
+	boost::shared_ptr<State> createState()const {
 		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	using base_type::eval;
 	/// \brief Evaluate the Tree on a batch of patterns
-	void eval(const BatchInputType& patterns, BatchOutputType& outputs)const{
+	void eval(const BatchInputType& patterns, BatchOutputType& outputs)const {
 		std::size_t numPatterns = shark::size(patterns);
 		//evaluate the first pattern alone and create the batch output from that
-		LabelType const& firstResult = evalPattern(row(patterns,0));
-		outputs = Batch<LabelType>::createBatch(firstResult,numPatterns);
-		get(outputs,0) = firstResult;
-		
+		LabelType const& firstResult = evalPattern(row(patterns, 0));
+		outputs = Batch<LabelType>::createBatch(firstResult, numPatterns);
+		get(outputs, 0) = firstResult;
+
 		//evaluate the rest
-		for(std::size_t i = 0; i != numPatterns; ++i){
-			get(outputs,i) = evalPattern(row(patterns,i));
+		for(std::size_t i = 0; i != numPatterns; ++i) {
+			get(outputs, i) = evalPattern(row(patterns, i));
 		}
 	}
-	
-	void eval(const BatchInputType& patterns, BatchOutputType& outputs, State& state)const{
-		eval(patterns,outputs);
+
+	void eval(const BatchInputType& patterns, BatchOutputType& outputs, State& state)const {
+		eval(patterns, outputs);
 	}
 	/// \brief Evaluate the Tree on a single pattern
-	void eval(RealVector const & pattern, LabelType& output){
-		output = evalPattern(pattern);		
+	void eval(RealVector const & pattern, LabelType& output) {
+		output = evalPattern(pattern);
 	}
 
 	/// Set the model split matrix.
-	void setSplitMatrix(SplitMatrixType const& splitMatrix){
+	void setSplitMatrix(SplitMatrixType const& splitMatrix) {
 		m_splitMatrix = splitMatrix;
 		optimizeSplitMatrix(m_splitMatrix);
 	}
-	
+
 	/// \brief The model does not have any parameters.
-	std::size_t numberOfParameters()const{
+	std::size_t numberOfParameters()const {
 		return 0;
 	}
 
@@ -163,7 +160,7 @@ public:
 	}
 
 	/// from ISerializable, reads a model from an archive
-	void read(InArchive& archive){
+	void read(InArchive& archive) {
 		archive >> m_splitMatrix;
 	}
 
@@ -180,7 +177,7 @@ public:
 		typename SplitMatrixType::const_iterator it;
 		for(it = m_splitMatrix.begin(); it != m_splitMatrix.end(); ++it) {
 			//std::cout << "NodeId: " <<it->leftNodeId << std::endl;
-			if(it->leftNodeId != 0) { // not a label 
+			if(it->leftNodeId != 0) { // not a label
 				r(it->attributeIndex)++;
 			}
 		}
@@ -198,7 +195,7 @@ public:
 	}
 
 	/// Compute oob error, given an oob dataset (Classification)
-	void computeOOBerror(const ClassificationDataset& dataOOB){
+	void computeOOBerror(const ClassificationDataset& dataOOB) {
 		// define loss
 		ZeroOneLoss<unsigned int, RealVector> lossOOB;
 
@@ -210,7 +207,7 @@ public:
 	}
 
 	/// Compute oob error, given an oob dataset (Regression)
-	void computeOOBerror(const RegressionDataset& dataOOB){
+	void computeOOBerror(const RegressionDataset& dataOOB) {
 		// define loss
 		SquaredLoss<RealVector, RealVector> lossOOB;
 
@@ -232,7 +229,7 @@ public:
 	}
 
 	/// Compute feature importances, given an oob dataset (Classification)
-	void computeFeatureImportances(const ClassificationDataset& dataOOB){
+	void computeFeatureImportances(const ClassificationDataset& dataOOB) {
 		m_featureImportances.resize(m_inputDimension);
 
 		// define loss
@@ -245,7 +242,7 @@ public:
 		double accuracyOOB = 1. - m_OOBerror;
 
 		// go through all dimensions, permute each dimension across all elements and train the tree on it
-		for(std::size_t i=0;i!=m_inputDimension;++i) {
+		for(std::size_t i = 0; i != m_inputDimension; ++i) {
 			// create permuted dataset by copying
 			ClassificationDataset pDataOOB(dataOOB);
 			pDataOOB.makeIndependent();
@@ -259,15 +256,15 @@ public:
 			Data<RealVector> pPredOOB = (*this)(pDataOOB.inputs());
 
 			// count the number of correct predictions
-			double accuracyPermutedOOB = 1. - lossOOB.eval(pDataOOB.labels(),pPredOOB);
-			
+			double accuracyPermutedOOB = 1. - lossOOB.eval(pDataOOB.labels(), pPredOOB);
+
 			// store importance
 			m_featureImportances[i] = std::fabs(accuracyOOB - accuracyPermutedOOB);
 		}
 	}
 
 	/// Compute feature importances, given an oob dataset (Regression)
-	void computeFeatureImportances(const RegressionDataset& dataOOB){
+	void computeFeatureImportances(const RegressionDataset& dataOOB) {
 		m_featureImportances.resize(m_inputDimension);
 
 		// define loss
@@ -280,7 +277,7 @@ public:
 		double mseOOB = m_OOBerror;
 
 		// go through all dimensions, permute each dimension across all elements and train the tree on it
-		for(std::size_t i=0;i!=m_inputDimension;++i) {
+		for(std::size_t i = 0; i != m_inputDimension; ++i) {
 			// create permuted dataset by copying
 			RegressionDataset pDataOOB(dataOOB);
 			pDataOOB.makeIndependent();
@@ -294,8 +291,8 @@ public:
 			Data<RealVector> pPredOOB = (*this)(pDataOOB.inputs());
 
 			// mean squared error of permuted oob sample
-			double msePermutedOOB = lossOOB.eval(pDataOOB.labels(),pPredOOB);
-			
+			double msePermutedOOB = lossOOB.eval(pDataOOB.labels(), pPredOOB);
+
 			// store importance
 			m_featureImportances[i] = std::fabs(msePermutedOOB - mseOOB);
 		}
@@ -304,9 +301,9 @@ public:
 protected:
 	/// split matrix of the model
 	SplitMatrixType m_splitMatrix;
-	
+
 	/// \brief Finds the index of the node with a certain nodeID in an unoptimized split matrix.
-	std::size_t findNode(std::size_t nodeId)const{
+	std::size_t findNode(std::size_t nodeId)const {
 		std::size_t index = 0;
 		for(; nodeId != m_splitMatrix[index].nodeId; ++index);
 		return index;
@@ -316,25 +313,25 @@ protected:
 	/// The optimization is done by changing the index of the children
 	/// to use indices instead of node ID.
 	/// Furthermore, the node IDs are converted to index numbers.
-	void optimizeSplitMatrix(SplitMatrixType& splitMatrix)const{
-		for(std::size_t i = 0; i < splitMatrix.size(); i++){
+	void optimizeSplitMatrix(SplitMatrixType& splitMatrix)const {
+		for(std::size_t i = 0; i < splitMatrix.size(); i++) {
 			splitMatrix[i].leftNodeId = findNode(splitMatrix[i].leftNodeId);
 			splitMatrix[i].rightNodeId = findNode(splitMatrix[i].rightNodeId);
 		}
-		for(std::size_t i = 0; i < splitMatrix.size(); i++){
+		for(std::size_t i = 0; i < splitMatrix.size(); i++) {
 			splitMatrix[i].nodeId = i;
 		}
 	}
-	
+
 	/// Evaluate the CART tree on a single sample
 	template<class Vector>
-	LabelType const& evalPattern(Vector const& pattern)const{
+	LabelType const& evalPattern(Vector const& pattern)const {
 		std::size_t nodeId = 0;
-		while(m_splitMatrix[nodeId].leftNodeId != 0){
-			if(pattern[m_splitMatrix[nodeId].attributeIndex]<=m_splitMatrix[nodeId].attributeValue){
+		while(m_splitMatrix[nodeId].leftNodeId != 0) {
+			if(pattern[m_splitMatrix[nodeId].attributeIndex] <= m_splitMatrix[nodeId].attributeValue) {
 				//Branch on left node
 				nodeId = m_splitMatrix[nodeId].leftNodeId;
-			}else{
+			} else {
 				//Branch on right node
 				nodeId = m_splitMatrix[nodeId].rightNodeId;
 			}

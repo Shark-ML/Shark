@@ -1,30 +1,30 @@
 /*!
- * 
+ *
  *
  * \brief       error function for supervised learning
- * 
- * 
+ *
+ *
  *
  * \author      T.Voss, T. Glasmachers, O.Krause
  * \date        2010-2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -41,7 +41,7 @@
 
 #include <boost/scoped_ptr.hpp>
 
-namespace shark{
+namespace shark {
 
 ///
 /// \brief Objective function for supervised learning
@@ -54,31 +54,30 @@ namespace shark{
 /// on the training data, given the targets.
 ///
 /// \par
-/// The class detects automatically when an AbstractLoss is used 
-/// as Costfunction. In this case, it uses faster algorithms 
+/// The class detects automatically when an AbstractLoss is used
+/// as Costfunction. In this case, it uses faster algorithms
 /// for empirical risk minimization
 ///
 ///\par
 /// It also automatically infers the input und label type from the given dataset and the output type
 /// of the model in the constructor and ensures that Model and loss match. Thus the user does
-/// not need to provide the types as template parameters. 
-class ErrorFunction : public SingleObjectiveFunction
-{
+/// not need to provide the types as template parameters.
+class ErrorFunction : public SingleObjectiveFunction {
 public:
 	template<class InputType, class LabelType, class OutputType>
 	ErrorFunction(
-		LabeledData<InputType, LabelType> const& dataset,
-		AbstractModel<InputType,OutputType>* model, 
-		AbstractLoss<LabelType, OutputType>* loss
-		
+	    LabeledData<InputType, LabelType> const& dataset,
+	    AbstractModel<InputType, OutputType>* model,
+	    AbstractLoss<LabelType, OutputType>* loss
+
 	);
 	ErrorFunction(const ErrorFunction& op);
 	ErrorFunction& operator=(const ErrorFunction& op);
 
 	std::string name() const
 	{ return "ErrorFunction"; }
-	
-	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
+
+	void setRegularizer(double factor, SingleObjectiveFunction* regularizer) {
 		m_regularizer = regularizer;
 		m_regularizationStrength = factor;
 	}
@@ -86,13 +85,13 @@ public:
 	SearchPointType proposeStartingPoint()const {
 		return mp_wrapper -> proposeStartingPoint();
 	}
-	std::size_t numberOfVariables()const{
+	std::size_t numberOfVariables()const {
 		return mp_wrapper -> numberOfVariables();
 	}
 
 	double eval(RealVector const& input) const;
-	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;
-	
+	ResultType evalDerivative(const SearchPointType & input, FirstOrderDerivative & derivative) const;
+
 	friend void swap(ErrorFunction& op1, ErrorFunction& op2);
 
 private:

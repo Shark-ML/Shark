@@ -65,8 +65,7 @@
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 
 
-namespace shark
-{
+namespace shark {
 
 
 ///
@@ -94,8 +93,7 @@ namespace shark
 /// from that class. Therefore this class is perhaps numerically not as robust as SGD.
 ///
 template <class InputType, class CacheType = float>
-class KernelBudgetedSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable
-{
+class KernelBudgetedSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable {
 public:
 	typedef AbstractTrainer< KernelExpansion<InputType> > base_type;
 	typedef AbstractKernelFunction<InputType> KernelType;
@@ -132,15 +130,15 @@ public:
 	/// \param[in]  minMargin   the margin every vector has to obey. Usually this is 1.
 	///
 	KernelBudgetedSGDTrainer(KernelType* kernel,
-							 const LossType* loss,
-							 double C,
-							 bool offset,
-							 bool unconstrained = false,
-							 size_t budgetSize = 500,
-							 AbstractBudgetMaintenanceStrategy<InputType> *budgetMaintenanceStrategy = NULL,
-							 size_t epochs = 1,
-							 size_t preInitializationMethod = NONE,
-							 double minMargin = 1.0f)
+	                         const LossType* loss,
+	                         double C,
+	                         bool offset,
+	                         bool unconstrained = false,
+	                         size_t budgetSize = 500,
+	                         AbstractBudgetMaintenanceStrategy<InputType> *budgetMaintenanceStrategy = NULL,
+	                         size_t epochs = 1,
+	                         size_t preInitializationMethod = NONE,
+	                         double minMargin = 1.0f)
 		: m_kernel(kernel)
 		, m_loss(loss)
 		, m_C(C)
@@ -150,8 +148,7 @@ public:
 		, m_budgetMaintenanceStrategy(budgetMaintenanceStrategy)
 		, m_epochs(epochs)
 		, m_preInitializationMethod(preInitializationMethod)
-		, m_minMargin(minMargin)
-	{
+		, m_minMargin(minMargin) {
 
 		// check that the maintenance strategy is not null.
 		if(m_budgetMaintenanceStrategy == NULL)
@@ -162,8 +159,7 @@ public:
 	/// get budget size
 	/// \return     budget size
 	///
-	size_t budgetSize() const
-	{
+	size_t budgetSize() const {
 		return m_budgetSize;
 	}
 
@@ -171,8 +167,7 @@ public:
 	/// set budget size
 	/// \param[in]  budgetSize  size of budget.
 	///
-	void setBudgetSize(std::size_t budgetSize)
-	{
+	void setBudgetSize(std::size_t budgetSize) {
 		m_budgetSize = budgetSize;
 	}
 
@@ -180,8 +175,7 @@ public:
 	/// return pointer to the budget maintenance strategy
 	/// \return pointer to the budget maintenance strategy.
 	///
-	AbstractBudgetMaintenanceStrategy<InputType> *budgetMaintenanceStrategy() const
-	{
+	AbstractBudgetMaintenanceStrategy<InputType> *budgetMaintenanceStrategy() const {
 		return (m_budgetMaintenanceStrategy);
 	}
 
@@ -189,8 +183,7 @@ public:
 	/// set budget maintenance strategy
 	/// \param[in]  budgetMaintenanceStrategy   set strategy to given object.
 	///
-	void setBudgetMaintenanceStrategy(AbstractBudgetMaintenanceStrategy<InputType> *budgetMaintenanceStrategy)
-	{
+	void setBudgetMaintenanceStrategy(AbstractBudgetMaintenanceStrategy<InputType> *budgetMaintenanceStrategy) {
 		m_budgetMaintenanceStrategy = budgetMaintenanceStrategy;
 	}
 
@@ -198,8 +191,7 @@ public:
 	/// return min margin
 	/// \return     current min margin
 	///
-	double minMargin() const
-	{
+	double minMargin() const {
 		return m_minMargin;
 	}
 
@@ -207,15 +199,13 @@ public:
 	/// set min margin
 	/// \param[in]  minMargin   new min margin.
 	///
-	void setMinMargin(double minMargin)
-	{
+	void setMinMargin(double minMargin) {
 		m_minMargin = minMargin;
 	}
 
 
 	/// \brief From INameable: return the class name.
-	std::string name() const
-	{
+	std::string name() const {
 		return "KernelBudgetedSGDTrainer";
 	}
 
@@ -224,15 +214,13 @@ public:
 	/// \param[in]  classifier      classifier object for the final solution.
 	/// \param[in]  dataset     dataset to work with.
 	///
-	void train(ClassifierType &classifier, const LabeledData<InputType, unsigned int> &dataset)
-	{
+	void train(ClassifierType &classifier, const LabeledData<InputType, unsigned int> &dataset) {
 
 		std::size_t ell = dataset.numberOfElements();
 		unsigned int classes = numberOfClasses(dataset);
 
 		// is the budget size larger than reasonable?
-		if(m_budgetSize > ell)
-		{
+		if(m_budgetSize > ell) {
 			// in this case we just set the budgetSize to the given dataset size, so basically
 			// there is an infinite budget.
 			m_budgetSize = ell;
@@ -260,10 +248,8 @@ public:
 		// preinit the vectors first
 		// we still preinit even for no preinit, as we need the vectors in the
 		// constructor of the kernelexpansion. the alphas will be set to zero for none.
-		if((m_preInitializationMethod == RANDOM) || (m_preInitializationMethod == NONE))
-		{
-			for(size_t j = 0; j < m_budgetSize; j++)
-			{
+		if((m_preInitializationMethod == RANDOM) || (m_preInitializationMethod == NONE)) {
+			for(size_t j = 0; j < m_budgetSize; j++) {
 				// choose a random vector
 				std::size_t b = Rng::discrete(0, ell - 1);
 
@@ -313,10 +299,8 @@ public:
 
 
 		// set the initial alphas (we do this here, after the array has been initialized by setStructure)
-		if(m_preInitializationMethod == RANDOM)
-		{
-			for(size_t j = 0; j < m_budgetSize; j++)
-			{
+		if(m_preInitializationMethod == RANDOM) {
+			for(size_t j = 0; j < m_budgetSize; j++) {
 				size_t c = preinitializedBudgetVectors.labels().element(j);
 				budgetAlpha(j, c) = 1 / (1 + lambda);
 				budgetAlpha(j, (c + 1) % classes) = -1 / (1 + lambda);
@@ -338,8 +322,7 @@ public:
 		// SGD loop
 		std::size_t b = 0;
 
-		for(std::size_t iter = 0; iter < iterations; iter++)
-		{
+		for(std::size_t iter = 0; iter < iterations; iter++) {
 			// active variable
 			b = Rng::discrete(0, ell - 1);
 
@@ -359,7 +342,7 @@ public:
 			RealVector predictionsCopy = predictions;
 			unsigned int trueClass = y[b];
 			double scoreOfTrueClass = predictions[trueClass];
-                        predictions[trueClass] = -std::numeric_limits<double>::infinity();
+			predictions[trueClass] = -std::numeric_limits<double>::infinity();
 			unsigned int runnerupClass = arg_max(predictions);
 			double scoreOfRunnerupClass = predictions[runnerupClass];
 
@@ -369,8 +352,7 @@ public:
 			budgetModel.alpha() *= ((long double)(1.0 - 1.0 / (iter + 1.0)));
 
 			// check if there is a margin violation
-			if(scoreOfTrueClass - scoreOfRunnerupClass < m_minMargin)
-			{
+			if(scoreOfTrueClass - scoreOfRunnerupClass < m_minMargin) {
 				// TODO: check if the current vector is already part of our budget
 
 				// as we do not use the predictions anymore, we use them to push the new alpha values
@@ -395,64 +377,54 @@ public:
 
 	/// Return the number of training epochs.
 	/// A value of 0 indicates that the default of max(10, C) should be used.
-	std::size_t epochs() const
-	{
+	std::size_t epochs() const {
 		return m_epochs;
 	}
 
 	/// Set the number of training epochs.
 	/// A value of 0 indicates that the default of max(10, C) should be used.
-	void setEpochs(std::size_t value)
-	{
+	void setEpochs(std::size_t value) {
 		m_epochs = value;
 	}
 
 	/// get the kernel function
-	KernelType *kernel()
-	{
+	KernelType *kernel() {
 		return m_kernel;
 	}
 	/// get the kernel function
-	const KernelType *kernel() const
-	{
+	const KernelType *kernel() const {
 		return m_kernel;
 	}
 	/// set the kernel function
-	void setKernel(KernelType *kernel)
-	{
+	void setKernel(KernelType *kernel) {
 		m_kernel = kernel;
 	}
 
 	/// check whether the parameter C is represented as log(C), thus,
 	/// in a form suitable for unconstrained optimization, in the
 	/// parameter vector
-	bool isUnconstrained() const
-	{
+	bool isUnconstrained() const {
 		return m_unconstrained;
 	}
 
 	/// return the value of the regularization parameter
-	double C() const
-	{
+	double C() const {
 		return m_C;
 	}
 
 	/// set the value of the regularization parameter (must be positive)
-	void setC(double value)
-	{
+	void setC(double value) {
 		RANGE_CHECK(value > 0.0);
 		m_C = value;
 	}
 
 	/// check whether the model to be trained should include an offset term
-	bool trainOffset() const
-	{
+	bool trainOffset() const {
 		return m_offset;
 	}
 
 	///\brief  Returns the vector of hyper-parameters.
-	RealVector parameterVector() const
-	{
+	RealVector parameterVector() const {
 		size_t kp = m_kernel->numberOfParameters();
 		RealVector ret(kp + 1);
 
@@ -465,8 +437,7 @@ public:
 	}
 
 	///\brief  Sets the vector of hyper-parameters.
-	void setParameterVector(RealVector const &newParameters)
-	{
+	void setParameterVector(RealVector const &newParameters) {
 		size_t kp = m_kernel->numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == kp + 1);
 		init(newParameters) >> parameters(m_kernel), m_C;
@@ -475,8 +446,7 @@ public:
 	}
 
 	///\brief Returns the number of hyper-parameters.
-	size_t numberOfParameters() const
-	{
+	size_t numberOfParameters() const {
 		return m_kernel->numberOfParameters() + 1;
 	}
 

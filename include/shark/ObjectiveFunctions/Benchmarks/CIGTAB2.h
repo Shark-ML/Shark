@@ -1,37 +1,37 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Multi-objective optimization benchmark function CIGTAB 2.
- * 
+ *
  * The function is described in
- * 
- * Christian Igel, Nikolaus Hansen, and Stefan Roth. 
- * Covariance Matrix Adaptation for Multi-objective Optimization. 
+ *
+ * Christian Igel, Nikolaus Hansen, and Stefan Roth.
+ * Covariance Matrix Adaptation for Multi-objective Optimization.
  * Evolutionary Computation 15(1), pp. 1-28, 2007
- * 
- * 
+ *
+ *
  *
  * \author      -
  * \date        -
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -50,13 +50,13 @@ namespace shark {
 *
 *  The function is described in
 *
-*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
-*  Covariance Matrix Adaptation for Multi-objective Optimization. 
-*  Evolutionary Computation 15(1), pp. 1-28, 2007 
+*  Christian Igel, Nikolaus Hansen, and Stefan Roth.
+*  Covariance Matrix Adaptation for Multi-objective Optimization.
+*  Evolutionary Computation 15(1), pp. 1-28, 2007
 */
 struct CIGTAB2 : public MultiObjectiveFunction {
 
-	CIGTAB2(std::size_t numberOfVariables = 5) : m_a( 1E-6 ) {
+	CIGTAB2(std::size_t numberOfVariables = 5) : m_a(1E-6) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;
 	}
@@ -65,21 +65,21 @@ struct CIGTAB2 : public MultiObjectiveFunction {
 	std::string name() const
 	{ return "CIGTAB2"; }
 
-	std::size_t numberOfObjectives()const{
+	std::size_t numberOfObjectives()const {
 		return 2;
 	}
-	
-	std::size_t numberOfVariables()const{
+
+	std::size_t numberOfVariables()const {
 		return m_numberOfVariables;
 	}
-	
-	bool hasScalableDimensionality()const{
+
+	bool hasScalableDimensionality()const {
 		return true;
 	}
-	
+
 	/// \brief Adjusts the number of variables if the function is scalable.
 	/// \param [in] numberOfVariables The new dimension.
-	void setNumberOfVariables( std::size_t numberOfVariables ){
+	void setNumberOfVariables(std::size_t numberOfVariables) {
 		m_numberOfVariables = numberOfVariables;
 	}
 
@@ -88,19 +88,19 @@ struct CIGTAB2 : public MultiObjectiveFunction {
 		m_rotationMatrixZ = blas::randomRotationMatrix(m_numberOfVariables);
 	}
 
-	ResultType eval( const SearchPointType & x ) const {
+	ResultType eval(const SearchPointType & x) const {
 		m_evaluationCounter++;
 
-		ResultType value( 2 );
+		ResultType value(2);
 
-		SearchPointType y = blas::prod( m_rotationMatrixY, x );
-		SearchPointType z = blas::prod( m_rotationMatrixZ, x );
-		double result_1 = y(0) * y(0) + m_a * m_a * y(numberOfVariables()-1) * y(numberOfVariables()-1);
-		double result_2 = z(0) * z(0) + m_a * m_a * z(numberOfVariables()-1) * z(numberOfVariables()-1);
+		SearchPointType y = blas::prod(m_rotationMatrixY, x);
+		SearchPointType z = blas::prod(m_rotationMatrixZ, x);
+		double result_1 = y(0) * y(0) + m_a * m_a * y(numberOfVariables() - 1) * y(numberOfVariables() - 1);
+		double result_2 = z(0) * z(0) + m_a * m_a * z(numberOfVariables() - 1) * z(numberOfVariables() - 1);
 
-		for (unsigned i = 1; i < numberOfVariables() - 1; i++) {
-			result_1 += m_a * y( i ) * y( i );
-			result_2 += m_a * (z( i ) - 2) * (z( i ) - 2);
+		for(unsigned i = 1; i < numberOfVariables() - 1; i++) {
+			result_1 += m_a * y(i) * y(i);
+			result_2 += m_a * (z(i) - 2) * (z(i) - 2);
 		}
 
 		value[0] = result_1 / (m_a * m_a * numberOfVariables());
@@ -108,11 +108,11 @@ struct CIGTAB2 : public MultiObjectiveFunction {
 
 		return value;
 	}
-	
+
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(m_numberOfVariables);
 
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for(unsigned int i = 0; i < x.size(); i++) {
 			x(i) = Rng::uni(-10.0, 10.0);
 		}
 		return x;

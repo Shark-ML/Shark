@@ -46,10 +46,9 @@
 
 using namespace shark;
 
-BOOST_AUTO_TEST_SUITE (Data_LabelOrder_Test)
+BOOST_AUTO_TEST_SUITE(Data_LabelOrder_Test)
 
-BOOST_AUTO_TEST_CASE(LabelOrder_General)
-{
+BOOST_AUTO_TEST_CASE(LabelOrder_General) {
 	// create a dataset
 	size_t datasetSize = 64;
 	Chessboard problem(2, 0);
@@ -89,15 +88,12 @@ BOOST_AUTO_TEST_CASE(LabelOrder_General)
 	for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
 		dataset.labels().element(i) = internalOrder.size() + i;
 
-	try
-	{
+	try {
 		labelOrder.restoreOriginalLabels(datasetBroken);
 
 		// this should have thrown an error.
 		BOOST_REQUIRE_EQUAL(1, 0);
-	}
-	catch(...)
-	{
+	} catch(...) {
 		// everything is fine.
 		BOOST_REQUIRE_EQUAL(0, 0);
 	}

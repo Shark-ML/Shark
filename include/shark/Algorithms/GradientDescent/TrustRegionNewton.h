@@ -1,5 +1,5 @@
 /*!
- * 
+ *
  *
  * \brief       Trust-Region Newton-Step Method
  *
@@ -8,21 +8,21 @@
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -50,7 +50,7 @@ namespace shark {
 /// large or larger as the model predicted, we increase \f$\delta\f$ to make larger steps
 /// possible, otherwise we decrease it, if the model predicted a much larger improvement
 /// than observed - in the worst case, the new point is worse than the old one.
-/// 
+///
 /// As a further check, to improve convergence, we do not accept every step, but those
 /// with \f$ \rho > c > 0 \f$. This ensures that we do not overjump the optimum too much
 /// and leads to a better (worst case) convergence rate.
@@ -62,12 +62,11 @@ namespace shark {
 /// is set by a forcing-schedule so that accuracy increases in the vicinity of the
 /// optimum, enabling solutions with arbitrary precision.
 ///
-/// The algorithm is based on 
+/// The algorithm is based on
 /// Jorge Nocedal, Stephen J. Wright
 /// Numerical Optimization, 2nd Edition
 /// Algorithm 4.1 with Algorithm 7.2 to solve the sub-problem
-class TrustRegionNewton : public AbstractSingleObjectiveOptimizer<RealVector >
-{
+class TrustRegionNewton : public AbstractSingleObjectiveOptimizer<RealVector > {
 public:
 	/// \brief Default constructor.
 	SHARK_EXPORT_SYMBOL TrustRegionNewton();
@@ -75,24 +74,24 @@ public:
 	/// \brief Initialize the iterative optimizer with a problem (objective function) and a starting point.
 	///
 	/// The initial trust region radius is set to 0.1
-	void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint){
-		init(objectiveFunction,startingPoint,0.1);
+	void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {
+		init(objectiveFunction, startingPoint, 0.1);
 	}
 	/// \brief Initialize the iterative optimizer with a problem (objective function), a starting point and an initial value for the trust-region
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint,double initialDelta);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint, double initialDelta);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
-	
+
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "TrustRegionNewton"; }
 
 	/// \brief Minimal improvement ratio (see the algorithm details in the class description).
-	double minImprovementRatio()const{
+	double minImprovementRatio()const {
 		return m_minImprovementRatio;
 	}
-	
+
 	/// \brief Minimal improvement ratio (see the algorithm details in the class description).
-	double& minImprovementRatio(){
+	double& minImprovementRatio() {
 		return m_minImprovementRatio;
 	}
 

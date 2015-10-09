@@ -47,8 +47,7 @@
 #include <shark/Models/Kernels/KernelExpansion.h>
 
 
-namespace shark
-{
+namespace shark {
 
 ///
 /// \brief This is the abstract interface for any budget maintenance strategy.
@@ -60,8 +59,7 @@ namespace shark
 /// (Note that not all merging strategies need the alphas, but some do)
 ///
 template<class InputType>
-class AbstractBudgetMaintenanceStrategy
-{
+class AbstractBudgetMaintenanceStrategy {
 
 public:
 	typedef KernelExpansion<InputType> ModelType;
@@ -94,20 +92,17 @@ public:
 	/// @param[out] minIndex    the index of the vector with smallest coefficient
 	/// @param[out] minAlpha    the 2-norm of the alpha coefficient of the found vector
 	///
-	static void findSmallestVector(ModelType const& model, size_t &minIndex, double &minAlpha)
-	{
+	static void findSmallestVector(ModelType const& model, size_t &minIndex, double &minAlpha) {
 		// we do not have it, so we remove the vector with the
 		// smallest 'influcence', measured by the smallest alpha
 
 		minAlpha = std::numeric_limits<double>::infinity();
 		minIndex = 0;
 
-		for(size_t j = 0; j < model.alpha().size1(); j++)
-		{
+		for(size_t j = 0; j < model.alpha().size1(); j++) {
 			double currentNorm = blas::norm_2(row(model.alpha(), j));
 
-			if(currentNorm < minAlpha)
-			{
+			if(currentNorm < minAlpha) {
 				minAlpha = blas::norm_2(row(model.alpha(), j));
 				minIndex = j;
 			}

@@ -12,42 +12,38 @@
 
 using namespace shark;
 
-BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_CMSA)
+BOOST_AUTO_TEST_SUITE(Algorithms_DirectSearch_CMSA)
 
-BOOST_AUTO_TEST_CASE( CMSA_Cigar )
-{
+BOOST_AUTO_TEST_CASE(CMSA_Cigar) {
 	Cigar function(3);
 	CMSA optimizer;
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << std::endl;
+	test_function(optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10);
 }
 
-BOOST_AUTO_TEST_CASE( CMSA_Discus )
-{
+BOOST_AUTO_TEST_CASE(CMSA_Discus) {
 	Discus function(3);
 	CMSA optimizer;
 
-	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
+	test_function(optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10);
 }
 
-BOOST_AUTO_TEST_CASE( CMSA_Ellipsoid )
-{
+BOOST_AUTO_TEST_CASE(CMSA_Ellipsoid) {
 	Ellipsoid function(5);
 	CMSA optimizer;
 
-	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
+	test_function(optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10);
 }
-BOOST_AUTO_TEST_CASE( CMSA_Rosenbrock )
-{
-	Rosenbrock function( 3 );
+BOOST_AUTO_TEST_CASE(CMSA_Rosenbrock) {
+	Rosenbrock function(3);
 	CMSA optimizer;
 
-	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
+	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
 	// TODO: Results here do not correspond to results in Beyer's paper.
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	test_function(optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

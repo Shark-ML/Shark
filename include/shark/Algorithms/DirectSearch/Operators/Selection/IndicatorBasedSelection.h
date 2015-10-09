@@ -60,36 +60,33 @@ struct IndicatorBasedSelection {
 		T * mep_value;
 	public:
 		typedef RealVector FitnessType;
-	
-		view_reference() : mep_value( NULL ){}
-		view_reference(T & value) : mep_value( &value ){}
 
-		operator T & ()
-		{
-			return( *mep_value );
+		view_reference() : mep_value(NULL) {}
+		view_reference(T & value) : mep_value(&value) {}
+
+		operator T & () {
+			return(*mep_value);
 		}
 
-		operator const T & () const
-		{
-			return( *mep_value );
+		operator const T & () const {
+			return(*mep_value);
 		}
 
-		view_reference<T> operator=( const T & rhs )
-		{
+		view_reference<T> operator=(const T & rhs) {
 			*mep_value = rhs;
 			return *this;
 		}
 
-		
-		RealVector const& penalizedFitness() const{
+
+		RealVector const& penalizedFitness() const {
 			return mep_value->penalizedFitness();
 		}
-		
-		RealVector const& unpenalizedFitness() const{
+
+		RealVector const& unpenalizedFitness() const {
 			return mep_value->unpenalizedFitness();
 		}
-		
-		bool& selected(){
+
+		bool& selected() {
 			return mep_value->selected();
 		}
 	};
@@ -104,46 +101,45 @@ struct IndicatorBasedSelection {
 	* \param [in,out] mu the number of individuals to select
 	*/
 	template<typename PopulationType>
-	void operator()( PopulationType & population, std::size_t mu )
-	{
+	void operator()(PopulationType & population, std::size_t mu) {
 		if(population.empty()) return;
-		
+
 		//perform a nondominated sort to assign the rank to every element
 		FastNonDominatedSort nonDomSort;
 		nonDomSort(population);
-		
+
 		typedef std::vector< view_reference<typename PopulationType::value_type > > View;
 
 		unsigned int maxRank = 0;
 		std::map< unsigned int, View > fronts;
 
-		for( unsigned int i = 0; i < population.size(); i++ ) {
-			maxRank = std::max( maxRank, static_cast<unsigned int>( population[i].rank() ) );
-			fronts[population[i].rank()].push_back( population[i] );
+		for(unsigned int i = 0; i < population.size(); i++) {
+			maxRank = std::max(maxRank, static_cast<unsigned int>(population[i].rank()));
+			fronts[population[i].rank()].push_back(population[i]);
 			population[i].selected() = true;
 		}
 
 		//deselect the highest rank fronts until we would end up with less than mu elements
 		unsigned int rank = maxRank;
 		unsigned int popSize = population.size();
-		
-		while(popSize-fronts[rank].size() >= mu){
+
+		while(popSize - fronts[rank].size() >= mu) {
 			//deselect all elements in this front
 			View & front = fronts[rank];
-			for(std::size_t i = 0; i != front.size(); ++i){
+			for(std::size_t i = 0; i != front.size(); ++i) {
 				front[i].selected() = false;
 			}
 			popSize -= front.size();
 			--rank;
 		}
-		
+
 		//now use the indicator to deselect the worst approximating elements of the last selected front
-		m_indicator.updateInternals(FitnessExtractor(),population);
+		m_indicator.updateInternals(FitnessExtractor(), population);
 		View& front = fronts[rank];
-		for(; popSize >mu;--popSize) {
-			unsigned int lc = m_indicator.leastContributor(FitnessExtractor(),front);
+		for(; popSize > mu; --popSize) {
+			unsigned int lc = m_indicator.leastContributor(FitnessExtractor(), front);
 			front[lc].selected() = false;
-			front.erase( front.begin() + lc );
+			front.erase(front.begin() + lc);
 		}
 	}
 
@@ -154,9 +150,8 @@ struct IndicatorBasedSelection {
 	 * \param [in] version number, currently unused.
 	 */
 	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version )
-	{
-		archive & BOOST_SERIALIZATION_NVP( m_indicator );
+	void serialize(Archive & archive, const unsigned int version) {
+		archive & BOOST_SERIALIZATION_NVP(m_indicator);
 	}
 
 	Indicator m_indicator; ///< Instance of the second level sorting criterion.

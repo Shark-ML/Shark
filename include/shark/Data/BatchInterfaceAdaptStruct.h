@@ -1,30 +1,30 @@
 /*!
- * 
+ *
  *
  * \brief       Defines an batch adptor for structures.
- * 
- * 
+ *
+ *
  *
  * \author      O.Krause
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -39,15 +39,15 @@
 
 #include <boost/preprocessor/seq/transform.hpp>
 #include "Impl/BoostFusion151DefineStructInl.hpp"
-namespace shark{
-namespace detail{
+namespace shark {
+namespace detail {
 ///serializes the object into the archive
 template<class Archive>
 struct ItemSerializer {
-	ItemSerializer(Archive& ar):m_ar(ar) {}
+	ItemSerializer(Archive& ar): m_ar(ar) {}
 
 	template<typename T>
-	void operator()(T& o)const{
+	void operator()(T& o)const {
 		m_ar & o;
 	}
 private:
@@ -55,27 +55,27 @@ private:
 };
 
 
-struct CreateBatch{
-	CreateBatch(std::size_t size):m_size(size) {}
+struct CreateBatch {
+	CreateBatch(std::size_t size): m_size(size) {}
 
 	template<class> struct result;
 	template<class T>
 	struct result<CreateBatch(T const&)> {
-		typedef typename shark::Batch<T>::type type;
+	    typedef typename shark::Batch<T>::type type;
 	};
 
 	template<class T>
-	typename result<CreateBatch(T const&)>::type operator()(T const& value)const{
-		return shark::Batch<T>::createBatch(value,m_size);
+	typename result<CreateBatch(T const&)>::type operator()(T const& value)const {
+		return shark::Batch<T>::createBatch(value, m_size);
 	}
 private:
 	std::size_t m_size;
 };
-struct resize{
-	resize(std::size_t size1, std::size_t size2):m_size1(size1),m_size2(size2){};
+struct resize {
+	resize(std::size_t size1, std::size_t size2): m_size1(size1), m_size2(size2) {};
 	template<class T>
-	void operator()(T& batch)const{
-		 shark::Batch<typename boost::range_value<T>::type>::resize(batch,m_size1,m_size2);
+	void operator()(T& batch)const {
+		shark::Batch<typename boost::range_value<T>::type>::resize(batch, m_size1, m_size2);
 	}
 private:
 	std::size_t m_size1;
@@ -83,51 +83,51 @@ private:
 };
 
 ///calls get(container,index) on a container. Used as boost fusion functor in the creation of references in the Batch Interface
-struct MakeRef{
+struct MakeRef {
 	template<class> struct result;
 	template<class T>
 	struct result<MakeRef(T const&)> {
-		typedef typename boost::range_reference<T>::type type;
+	    typedef typename boost::range_reference<T>::type type;
 	};
 
-	MakeRef(std::size_t index):m_index(index){}
+	MakeRef(std::size_t index): m_index(index) {}
 
 	template<class T>
-	typename result<MakeRef(T const&) >::type operator()(T const& container)const{
-		return get(const_cast<T&>(container),m_index);//we need the const cast since the argument type must be a const ref.
+	typename result<MakeRef(T const&) >::type operator()(T const& container)const {
+		return get(const_cast<T&>(container), m_index); //we need the const cast since the argument type must be a const ref.
 	}
 private:
 	std::size_t m_index;
 };
 ///calls get(container,index) on a container. Used as boost fusion functor in the cration of references in the Batch Interface
-struct MakeConstRef{
+struct MakeConstRef {
 	template<class> struct result;
 	template<class T>
 	struct result<MakeConstRef(T const&)> {
-		typedef typename boost::range_reference<T const>::type type;
+	    typedef typename boost::range_reference<T const>::type type;
 	};
 
-	MakeConstRef(std::size_t index):m_index(index){}
+	MakeConstRef(std::size_t index): m_index(index) {}
 
 	template<class T>
-	typename result<MakeConstRef(T const&) >::type operator()(T const& container)const{
-		return get(container,m_index);
+	typename result<MakeConstRef(T const&) >::type operator()(T const& container)const {
+		return get(container, m_index);
 	}
 private:
 	std::size_t m_index;
 };
 
 template<class FusionSequence>
-struct FusionFacade: public FusionSequence{
-	FusionFacade(){}
+struct FusionFacade: public FusionSequence {
+	FusionFacade() {}
 	template<class Sequence>
-	FusionFacade(Sequence const& sequence):FusionSequence(sequence){}
+	FusionFacade(Sequence const& sequence): FusionSequence(sequence) {}
 };
 
 template<class Type>
-struct isFusionFacade{
+struct isFusionFacade {
 private:
-	struct Big{ int big[100]; };
+	struct Big { int big[100]; };
 	template <class S>
 	static Big tester(FusionFacade<S>*);
 	template <class S>
@@ -137,29 +137,29 @@ private:
 
 	BOOST_STATIC_CONSTANT(std::size_t, size = sizeof(tester(generator())));
 public:
-	BOOST_STATIC_CONSTANT(bool, value =  (size!= 1));
+	BOOST_STATIC_CONSTANT(bool, value = (size != 1));
 	typedef boost::mpl::bool_<value> type;
 };
 
 }
 
 template<class S>
-S& fusionize(detail::FusionFacade<S> & facade){
+S& fusionize(detail::FusionFacade<S> & facade) {
 	return static_cast<S&>(facade);
 }
 template<class S>
-S const& fusionize(detail::FusionFacade<S> const& facade){
+S const& fusionize(detail::FusionFacade<S> const& facade) {
 	return static_cast<S const&>(facade);
 }
 
 template<class S>
-typename boost::disable_if<detail::isFusionFacade<S>,S&>::type
-fusionize(S& facade){
+typename boost::disable_if<detail::isFusionFacade<S>, S&>::type
+fusionize(S& facade) {
 	return facade;
 }
 template<class S>
-typename boost::disable_if<detail::isFusionFacade<S>,S const& >::type
-fusionize(S const& facade){
+typename boost::disable_if<detail::isFusionFacade<S>, S const& >::type
+fusionize(S const& facade) {
 	return facade;
 }
 }

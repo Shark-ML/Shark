@@ -1,30 +1,30 @@
 /*!
- * 
+ *
  *
  * \brief       TypedIndividual
 
- * 
+ *
  *
  * \author      T.Voss, T. Glasmachers, O.Krause
  * \date        2010-2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -41,41 +41,41 @@
 namespace shark {
 
 template<class FitnessType>
-class CMAIndividual : public Individual<RealVector,FitnessType, CMAChromosome>{
+class CMAIndividual : public Individual<RealVector, FitnessType, CMAChromosome> {
 public:
-	using Individual<RealVector,FitnessType, CMAChromosome>::chromosome;
-	using Individual<RealVector,FitnessType, CMAChromosome>::searchPoint;
+	using Individual<RealVector, FitnessType, CMAChromosome>::chromosome;
+	using Individual<RealVector, FitnessType, CMAChromosome>::searchPoint;
 	/**
 	 * \brief Default constructor that initializes the individual's attributes to default values.
 	 */
-	CMAIndividual(){}
+	CMAIndividual() {}
 	CMAIndividual(
-		std::size_t searchSpaceDimension,
-		double successThreshold = 0.44,
-		double initialStepSize = 1.0
-	){
+	    std::size_t searchSpaceDimension,
+	    double successThreshold = 0.44,
+	    double initialStepSize = 1.0
+	) {
 		chromosome() = CMAChromosome(searchSpaceDimension, successThreshold, initialStepSize);
 		searchPoint().resize(searchSpaceDimension);
 	}
-	
-	void updateAsParent(CMAChromosome::IndividualSuccess offspringSuccess){
+
+	void updateAsParent(CMAChromosome::IndividualSuccess offspringSuccess) {
 		chromosome().updateAsParent(offspringSuccess);
 	}
-	void updateAsOffspring(){
+	void updateAsOffspring() {
 		chromosome().updateAsOffspring();
 	}
-	void mutate(){
+	void mutate() {
 		chromosome().m_mutationDistribution.generate(
-			chromosome().m_lastStep,chromosome().m_lastZ
+		    chromosome().m_lastStep, chromosome().m_lastZ
 		);
 		noalias(searchPoint()) += chromosome().m_stepSize * chromosome().m_lastStep;
 	}
-	
-	double& noSuccessfulOffspring(){
+
+	double& noSuccessfulOffspring() {
 		return chromosome().m_noSuccessfulOffspring;
 	}
-	
-	double noSuccessfulOffspring()const{
+
+	double noSuccessfulOffspring()const {
 		return chromosome().m_noSuccessfulOffspring;
 	}
 };

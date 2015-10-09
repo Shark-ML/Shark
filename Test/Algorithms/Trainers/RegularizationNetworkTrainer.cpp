@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       test case for regularization network
- * 
- * 
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        2013
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -44,10 +44,9 @@
 using namespace shark;
 
 
-BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_RegularizationNetworkTrainer)
+BOOST_AUTO_TEST_SUITE(Algorithms_Trainers_RegularizationNetworkTrainer)
 
-BOOST_AUTO_TEST_CASE( REGULARIZATION_NETWORK_TEST )
-{
+BOOST_AUTO_TEST_CASE(REGULARIZATION_NETWORK_TEST) {
 	const std::size_t ell = 200;
 	const double lambda = 1e-6;
 	const double threshold = 1e-8;
@@ -64,8 +63,7 @@ BOOST_AUTO_TEST_CASE( REGULARIZATION_NETWORK_TEST )
 	output = svm(training.inputs());
 
 	RealVector alpha = svm.parameterVector();
-	for (std::size_t i=0; i<training.numberOfElements(); i++)
-	{
+	for(std::size_t i = 0; i < training.numberOfElements(); i++) {
 		double y = training.labels().element(i)(0);
 		double f = output.element(i)(0);
 		double xi = (f - y) * (f - y);

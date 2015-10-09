@@ -61,16 +61,14 @@ namespace shark {
 //! A more sophisticated (less exhaustive) grid search variant is
 //! available with the NestedGridSearch class.
 //!
-class GridSearch : public AbstractSingleObjectiveOptimizer<RealVector >
-{
+class GridSearch : public AbstractSingleObjectiveOptimizer<RealVector > {
 public:
 	GridSearch() {
-		m_configured=false;
+		m_configured = false;
 	}
 
 	/// \brief From INameable: return the class name.
-	std::string name() const
-	{
+	std::string name() const {
 		return "GridSearch";
 	}
 
@@ -79,49 +77,42 @@ public:
 	//! \param  min     smallest parameter value
 	//! \param  max     largest parameter value
 	//! \param  numSections   total number of values in the interval
-	void configure(size_t params, double min, double max, size_t numSections)
-	{
-		SIZE_CHECK(params>=1);
-		RANGE_CHECK(min<=max);
-		SIZE_CHECK(numSections>=1);
+	void configure(size_t params, double min, double max, size_t numSections) {
+		SIZE_CHECK(params >= 1);
+		RANGE_CHECK(min <= max);
+		SIZE_CHECK(numSections >= 1);
 		m_nodeValues.resize(params);
-		for (size_t i = 0; i < numSections; i++)
-		{
+		for(size_t i = 0; i < numSections; i++) {
 			double section = min + i * (max - min) / (numSections - 1.0);
-			BOOST_FOREACH(std::vector<double>& node,m_nodeValues)
+			BOOST_FOREACH(std::vector<double>& node, m_nodeValues)
 			node.push_back(section);
 		}
-		m_configured=true;
+		m_configured = true;
 	}
 
 	//! individual definition for every parameter
 	//! \param  min     smallest value for every parameter
 	//! \param  max     largest value for every parameter
 	//! \param  sections   total number of values for every parameter
-	void configure(const std::vector<double>& min, const std::vector<double>& max, const std::vector<size_t>& sections)
-	{
+	void configure(const std::vector<double>& min, const std::vector<double>& max, const std::vector<size_t>& sections) {
 		size_t params = min.size();
 		SIZE_CHECK(sections.size() == params);
 		SIZE_CHECK(max.size() == params);
 		RANGE_CHECK(min <= max);
 
 		m_nodeValues.resize(params);
-		for (size_t dimension = 0; dimension < params; dimension++)
-		{
+		for(size_t dimension = 0; dimension < params; dimension++) {
 			size_t numSections = sections[dimension];
 			std::vector<double>& node = m_nodeValues[dimension];
 			node.resize(numSections);
 
-			if ( numSections == 1 )
-			{
-				node[0] = (( min[dimension] + max[dimension] ) / 2.0);
-			}
-			else for (size_t section = 0; section < numSections; section++)
-				{
+			if(numSections == 1) {
+				node[0] = ((min[dimension] + max[dimension]) / 2.0);
+			} else for(size_t section = 0; section < numSections; section++) {
 					node[section] = (min[dimension] + section * (max[dimension] - min[dimension]) / (numSections - 1.0));
 				}
 		}
-		m_configured=true;
+		m_configured = true;
 	}
 
 
@@ -132,26 +123,25 @@ public:
 	//! \param  min2     smallest value for second parameter
 	//! \param  max2     largest value for second parameter
 	//! \param  sections2   total number of values for second parameter
-	void configure(double min1, double max1, size_t sections1, double min2, double max2, size_t sections2)
-	{
-		RANGE_CHECK(min1<=max1);
-		RANGE_CHECK(min2<=max2);
+	void configure(double min1, double max1, size_t sections1, double min2, double max2, size_t sections2) {
+		RANGE_CHECK(min1 <= max1);
+		RANGE_CHECK(min2 <= max2);
 		RANGE_CHECK(sections1 > 0);
 		RANGE_CHECK(sections2 > 0);
 
 		m_nodeValues.resize(2u);
 
-		if ( sections1 == 1 ) {
-			m_nodeValues[0].push_back(( min1 + max1 ) / 2.0);
+		if(sections1 == 1) {
+			m_nodeValues[0].push_back((min1 + max1) / 2.0);
 		} else {
-			for (size_t section = 0; section < sections1; section++)
+			for(size_t section = 0; section < sections1; section++)
 				m_nodeValues[0].push_back(min1 + section * (max1 - min1) / (sections1 - 1.0));
 		}
 
-		if ( sections2 == 1 ) {
-			m_nodeValues[1].push_back(( min2 + max2 ) / 2.0);
+		if(sections2 == 1) {
+			m_nodeValues[1].push_back((min2 + max2) / 2.0);
 		} else {
-			for (size_t section = 0; section < sections2; section++)
+			for(size_t section = 0; section < sections2; section++)
 				m_nodeValues[1].push_back(min2 + section * (max2 - min2) / (sections2 - 1.0));
 		}
 	}
@@ -160,17 +150,16 @@ public:
 	//! \param  min1     smallest value for first parameter
 	//! \param  max1     largest value for first parameter
 	//! \param  sections1   total number of values for first parameter
-	void configure(double min1, double max1, size_t sections1)
-	{
-		RANGE_CHECK(min1<=max1);
+	void configure(double min1, double max1, size_t sections1) {
+		RANGE_CHECK(min1 <= max1);
 		RANGE_CHECK(sections1 > 0);
 
 		m_nodeValues.resize(1u);
 
-		if ( sections1 == 1 ) {
-			m_nodeValues[0].push_back(( min1 + max1 ) / 2.0);
+		if(sections1 == 1) {
+			m_nodeValues[0].push_back((min1 + max1) / 2.0);
 		} else {
-			for (size_t section = 0; section < sections1; section++)
+			for(size_t section = 0; section < sections1; section++)
 				m_nodeValues[0].push_back(min1 + section * (max1 - min1) / (sections1 - 1.0));
 		}
 	}
@@ -179,40 +168,36 @@ public:
 	//! uniform definition of the values to test for all parameters
 	//! \param  params  number of model parameters to optimize
 	//! \param  values  values used for every coordinate
-	void configure(size_t params, const std::vector<double>& values)
-	{
+	void configure(size_t params, const std::vector<double>& values) {
 		SIZE_CHECK(params > 0);
 		SIZE_CHECK(values.size() > 0);
 		m_nodeValues.resize(params);
-		BOOST_FOREACH(std::vector<double>& node,m_nodeValues)
-		node=values;
-		m_configured=true;
+		BOOST_FOREACH(std::vector<double>& node, m_nodeValues)
+		node = values;
+		m_configured = true;
 	}
 
 	//! individual definition for every parameter
 	//! \param  values  values used. The first dimension is the parameter, the second dimension is the node.
-	void configure(const std::vector<std::vector<double> >& values)
-	{
+	void configure(const std::vector<std::vector<double> >& values) {
 		SIZE_CHECK(values.size() > 0);
 		m_nodeValues = values;
-		m_configured=true;
+		m_configured = true;
 	}
 
 	//from ISerializable
-	virtual void read( InArchive & archive )
-	{
-		archive>>m_nodeValues;
-		archive>>m_configured;
-		archive>>m_best.point;
-		archive>>m_best.value;
+	virtual void read(InArchive & archive) {
+		archive >> m_nodeValues;
+		archive >> m_configured;
+		archive >> m_best.point;
+		archive >> m_best.value;
 	}
 
-	virtual void write( OutArchive & archive ) const
-	{
-		archive<<m_nodeValues;
-		archive<<m_configured;
-		archive<<m_best.point;
-		archive<<m_best.value;
+	virtual void write(OutArchive & archive) const {
+		archive << m_nodeValues;
+		archive << m_configured;
+		archive << m_best.point;
+		archive << m_best.value;
 	}
 
 	/*! If Gridsearch wasn't configured before calling this method, it is default constructed
@@ -225,9 +210,9 @@ public:
 		checkFeatures(objectiveFunction);
 
 		if(!m_configured)
-			configure(startingPoint.size(),-1,1,5);
+			configure(startingPoint.size(), -1, 1, 5);
 		SIZE_CHECK(startingPoint.size() == m_nodeValues.size());
-		m_best.point=startingPoint;
+		m_best.point = startingPoint;
 	}
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	/*! Assign linearly progressing grid values to one certain parameter only.
@@ -236,20 +221,18 @@ public:
 	 *  \param noOfSections how many grid points should be assigned to that parameter
 	 *  \param min smallest value for that parameter
 	 *  \param max largest value for that parameter */
-	void assignLinearRange(size_t index, size_t noOfSections, double min, double max)
-	{
-		SIZE_CHECK( noOfSections >= 1);
-		RANGE_CHECK( min <= max );
-		SIZE_CHECK( index < m_nodeValues.size() );
+	void assignLinearRange(size_t index, size_t noOfSections, double min, double max) {
+		SIZE_CHECK(noOfSections >= 1);
+		RANGE_CHECK(min <= max);
+		SIZE_CHECK(index < m_nodeValues.size());
 
 		m_nodeValues[index].clear();
-		if ( noOfSections == 1 ) {
-			m_nodeValues[index].push_back(( min+max) / 2.0);
-		}
-		else {
+		if(noOfSections == 1) {
+			m_nodeValues[index].push_back((min + max) / 2.0);
+		} else {
 			m_nodeValues[index].reserve(noOfSections);
-			for (size_t section = 0; section < noOfSections; section++)
-				m_nodeValues[index].push_back(min + section*( max-min ) / ( noOfSections-1.0 ));
+			for(size_t section = 0; section < noOfSections; section++)
+				m_nodeValues[index].push_back(min + section * (max - min) / (noOfSections - 1.0));
 		}
 	}
 
@@ -262,15 +245,14 @@ public:
 	 *  \param exp_base the exponential grid will progress on this base (e.g. 2, 10)
 	 *  \param min the smallest exponent for exp_base
 	 *  \param max the largest exponent for exp_base  */
-	void assignExponentialRange(size_t index, double factor, double exp_base, int min, int max)
-	{
-		SIZE_CHECK( min <= max );
-		RANGE_CHECK( index < m_nodeValues.size() );
+	void assignExponentialRange(size_t index, double factor, double exp_base, int min, int max) {
+		SIZE_CHECK(min <= max);
+		RANGE_CHECK(index < m_nodeValues.size());
 
 		m_nodeValues[index].clear();
-		m_nodeValues[index].reserve(max-min);
-		for (int section = 0; section <= (max-min); section++)
-			m_nodeValues[index].push_back( factor * std::pow( exp_base, section+min ));
+		m_nodeValues[index].reserve(max - min);
+		for(int section = 0; section <= (max - min); section++)
+			m_nodeValues[index].push_back(factor * std::pow(exp_base, section + min));
 	}
 
 	//! Please note that for the grid search optimizer it does
@@ -283,15 +265,13 @@ public:
 		RealVector point(dimensions);
 
 		// loop through all grid points
-		while (true)
-		{
+		while(true) {
 			// define the parameters
-			for (size_t dimension = 0; dimension < dimensions; dimension++)
+			for(size_t dimension = 0; dimension < dimensions; dimension++)
 				point(dimension) = m_nodeValues[dimension][index[dimension]];
 
 			// evaluate the model
-			if (objectiveFunction.isFeasible(point))
-			{
+			if(objectiveFunction.isFeasible(point)) {
 				double error = objectiveFunction.eval(point);
 
 #ifdef SHARK_CV_VERBOSE_1
@@ -300,8 +280,7 @@ public:
 #ifdef SHARK_CV_VERBOSE
 				std::cout << point << "\t" << error << std::endl;
 #endif
-				if (error < m_best.value)
-				{
+				if(error < m_best.value) {
 					m_best.value = error;
 					m_best.point = point;		// [TG] swap() solution is out, caused ugly memory bug, I changed this back
 				}
@@ -309,13 +288,12 @@ public:
 
 			// next index
 			size_t dimension = 0;
-			for (; dimension < dimensions; dimension++)
-			{
+			for(; dimension < dimensions; dimension++) {
 				index[dimension]++;
-				if (index[dimension] < m_nodeValues[dimension].size()) break;
+				if(index[dimension] < m_nodeValues[dimension].size()) break;
 				index[dimension] = 0;
 			}
-			if (dimension == dimensions) break;
+			if(dimension == dimensions) break;
 		}
 #ifdef SHARK_CV_VERBOSE_1
 		std::cout << std::endl;
@@ -372,18 +350,15 @@ protected:
 //! the parameter range defined m_minimum and m_maximum.
 //! These invalid landscape values are not used.
 //!
-class NestedGridSearch : public AbstractSingleObjectiveOptimizer<RealVector >
-{
+class NestedGridSearch : public AbstractSingleObjectiveOptimizer<RealVector > {
 public:
 	//! Constructor
-	NestedGridSearch()
-	{
-		m_configured=false;
+	NestedGridSearch() {
+		m_configured = false;
 	}
 
 	/// \brief From INameable: return the class name.
-	std::string name() const
-	{
+	std::string name() const {
 		return "NestedGridSearch";
 	}
 
@@ -397,8 +372,7 @@ public:
 	//!
 	//! \param  min    lower end of the parameter range
 	//! \param  max    upper end of the parameter range
-	void configure(const std::vector<double>& min, const std::vector<double>& max)
-	{
+	void configure(const std::vector<double>& min, const std::vector<double>& max) {
 		size_t dimensions = min.size();
 		SIZE_CHECK(max.size() == dimensions);
 
@@ -407,12 +381,11 @@ public:
 
 		m_stepsize.resize(dimensions);
 		m_best.point.resize(dimensions);
-		for (size_t dimension = 0; dimension < dimensions; dimension++)
-		{
-			m_best.point(dimension)=0.5 *(min[dimension] + max[dimension]);
+		for(size_t dimension = 0; dimension < dimensions; dimension++) {
+			m_best.point(dimension) = 0.5 * (min[dimension] + max[dimension]);
 			m_stepsize[dimension] = 0.25 * (max[dimension] - min[dimension]);
 		}
-		m_configured=true;
+		m_configured = true;
 	}
 
 	//!
@@ -426,41 +399,38 @@ public:
 	//! \param parameters number of parameters to optimize
 	//! \param  min    lower end of the parameter range
 	//! \param  max    upper end of the parameter range
-	void configure(size_t parameters, double min, double max)
-	{
+	void configure(size_t parameters, double min, double max) {
 		SIZE_CHECK(parameters > 0);
 
-		m_minimum=std::vector<double>(parameters,min);
-		m_maximum=std::vector<double>(parameters,max);
-		m_stepsize=std::vector<double>(parameters,0.25 * (max - min));
+		m_minimum = std::vector<double>(parameters, min);
+		m_maximum = std::vector<double>(parameters, max);
+		m_stepsize = std::vector<double>(parameters, 0.25 * (max - min));
 
 		m_best.point.resize(parameters);
 
-		double start=0.5 *(min + max);
-		BOOST_FOREACH(double& value,m_best.point)
-		value=start;
-		m_configured=true;
+		double start = 0.5 * (min + max);
+		BOOST_FOREACH(double & value, m_best.point)
+		value = start;
+		m_configured = true;
 	}
 
 	//from ISerializable
-	virtual void read( InArchive & archive )
-	{
-		archive>>m_minimum;
-		archive>>m_maximum;
-		archive>>m_stepsize;
-		archive>>m_configured;
-		archive>>m_best.point;
-		archive>>m_best.value;
+	virtual void read(InArchive & archive) {
+		archive >> m_minimum;
+		archive >> m_maximum;
+		archive >> m_stepsize;
+		archive >> m_configured;
+		archive >> m_best.point;
+		archive >> m_best.value;
 	}
 
-	virtual void write( OutArchive & archive ) const
-	{
-		archive<<m_minimum;
-		archive<<m_maximum;
-		archive<<m_stepsize;
-		archive<<m_configured;
-		archive<<m_best.point;
-		archive<<m_best.value;
+	virtual void write(OutArchive & archive) const {
+		archive << m_minimum;
+		archive << m_maximum;
+		archive << m_stepsize;
+		archive << m_configured;
+		archive << m_best.point;
+		archive << m_best.value;
 	}
 
 	//! if NestedGridSearch was not configured before this call, it is default initialized ti the range[-1,1] for every parameter
@@ -469,8 +439,8 @@ public:
 		checkFeatures(objectiveFunction);
 
 		if(!m_configured)
-			configure(startingPoint.size(),-1,1);
-		SIZE_CHECK(m_stepsize.size()==startingPoint.size());
+			configure(startingPoint.size(), -1, 1);
+		SIZE_CHECK(m_stepsize.size() == startingPoint.size());
 
 	}
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
@@ -486,51 +456,45 @@ public:
 		SIZE_CHECK(m_maximum.size() == dimensions);
 
 		m_best.value = 1e99;
-		std::vector<size_t> index(dimensions,0);
+		std::vector<size_t> index(dimensions, 0);
 
-		RealVector point=m_best.point;
+		RealVector point = m_best.point;
 
 		// loop through the grid
-		while (true)
-		{
+		while(true) {
 			// compute the grid point,
 
 			// set the parameters
-			bool compute=true;
-			for (size_t d = 0; d < dimensions; d++)
-			{
+			bool compute = true;
+			for(size_t d = 0; d < dimensions; d++) {
 				point(d) += (index[d] - 2.0) * m_stepsize[d];
-				if (point(d) < m_minimum[d] || point(d) > m_maximum[d])
-				{
+				if(point(d) < m_minimum[d] || point(d) > m_maximum[d]) {
 					compute = false;
 					break;
 				}
 			}
 
 			// evaluate the grid point
-			if (compute && objectiveFunction.isFeasible(point))
-			{
+			if(compute && objectiveFunction.isFeasible(point)) {
 				double error = objectiveFunction.eval(point);
 
 				// remember the best solution
-				if (error < m_best.value)
-				{
+				if(error < m_best.value) {
 					m_best.value = error;
-					m_best.point=point;
+					m_best.point = point;
 				}
 			}
 			// move to the next grid point
 			size_t d = 0;
-			for (; d < dimensions; d++)
-			{
+			for(; d < dimensions; d++) {
 				index[d]++;
-				if (index[d] <= 4) break;
+				if(index[d] <= 4) break;
 				index[d] = 0;
 			}
-			if (d == dimensions) break;
+			if(d == dimensions) break;
 		}
 		// decrease the step sizes
-		BOOST_FOREACH(double& step,m_stepsize)
+		BOOST_FOREACH(double & step, m_stepsize)
 		step *= 0.5;
 	}
 
@@ -564,56 +528,50 @@ protected:
 //! They are uniformly distributed in [-1,1].
 //! parameters^2 points but minimum 20 are sampled in this case.
 //!
-class PointSearch : public AbstractSingleObjectiveOptimizer<RealVector >
-{
+class PointSearch : public AbstractSingleObjectiveOptimizer<RealVector > {
 public:
 	//! Constructor
 	PointSearch() {
-		m_configured=false;
+		m_configured = false;
 	}
 
 	/// \brief From INameable: return the class name.
-	std::string name() const
-	{
+	std::string name() const {
 		return "PointSearch";
 	}
 
 	//! Initialization of the search points.
 	//! \param  points  array of points to evaluate
 	void configure(const std::vector<RealVector>& points) {
-		m_points=points;
-		m_configured=true;
+		m_points = points;
+		m_configured = true;
 	}
 
 	//!samples random points in the range [min,max]^parameters
-	void configure(size_t parameters,size_t samples, double min,double max) {
-		RANGE_CHECK(min<=max);
+	void configure(size_t parameters, size_t samples, double min, double max) {
+		RANGE_CHECK(min <= max);
 		m_points.resize(samples);
-		for(size_t sample=0; sample!=samples; ++sample)
-		{
+		for(size_t sample = 0; sample != samples; ++sample) {
 			m_points[sample].resize(parameters);
-			for(size_t param=0; param!=parameters; ++param)
-			{
-				m_points[sample](param)=Rng::uni(min,max);
+			for(size_t param = 0; param != parameters; ++param) {
+				m_points[sample](param) = Rng::uni(min, max);
 			}
 		}
-		m_configured=true;
+		m_configured = true;
 	}
 
-	virtual void read( InArchive & archive )
-	{
-		archive>>m_points;
-		archive>>m_configured;
-		archive>>m_best.point;
-		archive>>m_best.value;
+	virtual void read(InArchive & archive) {
+		archive >> m_points;
+		archive >> m_configured;
+		archive >> m_best.point;
+		archive >> m_best.value;
 	}
 
-	virtual void write( OutArchive & archive ) const
-	{
-		archive<<m_points;
-		archive<<m_configured;
-		archive<<m_best.point;
-		archive<<m_best.value;
+	virtual void write(OutArchive & archive) const {
+		archive << m_points;
+		archive << m_configured;
+		archive << m_best.point;
+		archive << m_best.value;
 	}
 
 	//! If the class wasn't configured before, this method samples random uniform distributed points in [-1,1]^n.
@@ -621,11 +579,10 @@ public:
 		objectiveFunction.init();
 		checkFeatures(objectiveFunction);
 
-		if(!m_configured)
-		{
-			size_t parameters=startingPoint.size();
-			size_t samples=std::min(sqr(parameters),(size_t)20);
-			configure(parameters,samples,-1,1);
+		if(!m_configured) {
+			size_t parameters = startingPoint.size();
+			size_t samples = std::min(sqr(parameters), (size_t)20);
+			configure(parameters, samples, -1, 1);
 		}
 	}
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
@@ -635,23 +592,20 @@ public:
 	void step(ObjectiveFunctionType const& objectiveFunction) {
 		size_t numPoints = m_points.size();
 		m_best.value = 1e100;
-		size_t bestIndex=0;
+		size_t bestIndex = 0;
 
 		// loop through all points
-		for (size_t point = 0; point < numPoints; point++)
-		{
+		for(size_t point = 0; point < numPoints; point++) {
 			// evaluate the model
-			if (objectiveFunction.isFeasible(m_points[point]))
-			{
+			if(objectiveFunction.isFeasible(m_points[point])) {
 				double error = objectiveFunction.eval(m_points[point]);
-				if (error < m_best.value)
-				{
+				if(error < m_best.value) {
 					m_best.value = error;
-					bestIndex=point;
+					bestIndex = point;
 				}
 			}
 		}
-		m_best.point=m_points[bestIndex];
+		m_best.point = m_points[bestIndex];
 	}
 
 protected:

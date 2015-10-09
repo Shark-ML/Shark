@@ -42,26 +42,26 @@ struct UniformRankingSelection {
 	///
 	/// The operator carries out the following steps:
 	///   - Assign uniform selection probabilities to all individuals.
-	///   - Carry out roulette wheel selection on the range of individual and 
+	///   - Carry out roulette wheel selection on the range of individual and
 	///     offspring individuals until the output range is filled.
 	///
 	/// \param [in] individuals Iterator pointing to the first valid individual.
 	/// \param [in] individualsE Iterator pointing to the first invalid individual.
 	/// \param [in] out Iterator pointing to the first valid element of the output range.
 	/// \param [in] outE Iterator pointing to the first invalid element of the output range.
-	template<typename InIterator,typename OutIterator> 
-	void operator()( 
-		InIterator individuals,
-		InIterator individualsE,
-		OutIterator out,
-		OutIterator outE
-	){
-		std::size_t size = std::distance( individuals, individualsE );
-		
-		RealVector selectionProbability(size,1.0/size);
+	template<typename InIterator, typename OutIterator>
+	void operator()(
+	    InIterator individuals,
+	    InIterator individualsE,
+	    OutIterator out,
+	    OutIterator outE
+	) {
+		std::size_t size = std::distance(individuals, individualsE);
+
+		RealVector selectionProbability(size, 1.0 / size);
 		RouletteWheelSelection rws;
-		for( ; out != outE; ++out ){
-			*out = *rws( individuals, individualsE, selectionProbability);
+		for(; out != outE; ++out) {
+			*out = *rws(individuals, individualsE, selectionProbability);
 		}
 	}
 

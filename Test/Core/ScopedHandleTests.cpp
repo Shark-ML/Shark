@@ -7,12 +7,10 @@
 namespace shark {
 
 /// Fixture for testing ScopedHandle
-class ScopedHandleFixture
-{
+class ScopedHandleFixture {
 public:
 	/// A deleter for testing
-	void deleteMe(int handle)
-	{
+	void deleteMe(int handle) {
 		m_deletedHandles.push_back(handle);
 	}
 
@@ -20,10 +18,9 @@ public:
 	std::vector<int> m_deletedHandles;
 };
 
-BOOST_FIXTURE_TEST_SUITE (Core_ScopedHandleTests, ScopedHandleFixture)
+BOOST_FIXTURE_TEST_SUITE(Core_ScopedHandleTests, ScopedHandleFixture)
 
-BOOST_AUTO_TEST_CASE(BasicTest)
-{
+BOOST_AUTO_TEST_CASE(BasicTest) {
 	// Test that ScopedHandle is able to hold a valid handle, access it and delete it upon destruction
 	const int validHandle = 10;
 	const int invalidHandle = -1;

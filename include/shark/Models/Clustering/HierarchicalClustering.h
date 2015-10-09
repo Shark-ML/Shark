@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Hierarchical Clustering.
- * 
- * 
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -56,8 +56,7 @@ namespace shark {
 /// parameter vector of this model is empty.
 ///
 template < class InputT>
-class HierarchicalClustering : public AbstractClustering<InputT>
-{
+class HierarchicalClustering : public AbstractClustering<InputT> {
 public:
 	typedef AbstractClustering<InputT> base_type;
 	typedef BinaryTree<InputT> tree_type;
@@ -71,7 +70,7 @@ public:
 	///
 	/// \param  tree  tree object underlying the clustering
 	HierarchicalClustering(const tree_type* tree)
-	: mep_tree(tree){
+		: mep_tree(tree) {
 		SHARK_CHECK(tree, "[HierarchicalClustering] Tree must not be NULL");
 	}
 
@@ -81,22 +80,21 @@ public:
 
 
 	/// Return the number of clusters.
-	std::size_t numberOfClusters() const{
+	std::size_t numberOfClusters() const {
 		return (mep_tree->nodes() + 1) / 2;
 	}
 
 	/// Return the best matching cluster for very pattern in the batch.
-	BatchOutputType hardMembership(BatchInputType const& patterns) const{
+	BatchOutputType hardMembership(BatchInputType const& patterns) const {
 		std::size_t numPatterns = boost::size(patterns);
 		BatchOutputType memberships(numPatterns);
-		for(std::size_t i = 0; i != numPatterns; ++i){
+		for(std::size_t i = 0; i != numPatterns; ++i) {
 			tree_type const* tree = mep_tree;
 			memberships(i) = 0;
-			while (tree->hasChildren()){
-				if (tree->isLeft(get(patterns,i))){
+			while(tree->hasChildren()) {
+				if(tree->isLeft(get(patterns, i))) {
 					tree = tree->left();
-				}
-				else{
+				} else {
 					memberships(i) += (tree->left()->nodes() + 1) / 2;
 					tree = tree->right();
 				}
@@ -106,17 +104,17 @@ public:
 	}
 
 	/// from IParameterizable
-	RealVector parameterVector() const{
+	RealVector parameterVector() const {
 		return RealVector();
 	}
 
 	/// from IParameterizable
-	void setParameterVector(RealVector const& newParameters){
+	void setParameterVector(RealVector const& newParameters) {
 		SHARK_ASSERT(newParameters.size() == 0);
 	}
 
 	/// from IParameterizable
-	std::size_t numberOfParameters() const{
+	std::size_t numberOfParameters() const {
 		return 0;
 	}
 

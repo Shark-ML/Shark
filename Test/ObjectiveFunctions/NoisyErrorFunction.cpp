@@ -11,34 +11,31 @@
 using namespace shark;
 using namespace std;
 
-struct TestFunction : public SingleObjectiveFunction
-{
+struct TestFunction : public SingleObjectiveFunction {
 	typedef SingleObjectiveFunction Base;
 
 	std::string name() const
 	{ return "TestFunction"; }
 
 	RealVector weights;
-	TestFunction():weights(3){
-		weights(0)=1;
-		weights(1)=2;
-		weights(2)=-1;
+	TestFunction(): weights(3) {
+		weights(0) = 1;
+		weights(1) = 2;
+		weights(2) = -1;
 	}
-	std::size_t numberOfVariables()const{
+	std::size_t numberOfVariables()const {
 		return 3;
 	}
 
-	virtual double eval(RealVector const& pattern)const
-	{
-		return inner_prod(weights,pattern);
+	virtual double eval(RealVector const& pattern)const {
+		return inner_prod(weights, pattern);
 	}
 };
 
 
-BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_NoisyErrorFunction)
+BOOST_AUTO_TEST_SUITE(ObjectiveFunctions_NoisyErrorFunction)
 
-BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
-{
+BOOST_AUTO_TEST_CASE(ML_NoisyErrorFunction) {
 	//create regression data from the testfunction
 	TestFunction function;
 	std::vector<RealVector> data;
@@ -46,18 +43,16 @@ BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
 	RealVector input(3);
 	RealVector output(1);
 
-	for (size_t i=0; i<1000; i++)
-	{
-		for(size_t j=0;j!=3;++j)
-		{
-			input(j)=Rng::uni(-1,1);
+	for(size_t i = 0; i < 1000; i++) {
+		for(size_t j = 0; j != 3; ++j) {
+			input(j) = Rng::uni(-1, 1);
 		}
 		data.push_back(input);
-		output(0)=function.eval(input);
+		output(0) = function.eval(input);
 		target.push_back(output);
 	}
 
-	RegressionDataset dataset = createLabeledDataFromRange(data,target);
+	RegressionDataset dataset = createLabeledDataFromRange(data, target);
 
 	//startingPoint
 	RealVector point(3);
@@ -68,13 +63,13 @@ BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
 	SquaredLoss<> loss;
 	LinearModel<> model(3);
 	// batchsize 1 corresponds to stochastic gradient descent
-	NoisyErrorFunction mse(dataset,&model,&loss,1);
+	NoisyErrorFunction mse(dataset, &model, &loss, 1);
 	optimizer.init(mse, point);
 	// train the cmac
 	double error = 0.0;
-	for (size_t iteration=0; iteration<501; ++iteration){
+	for(size_t iteration = 0; iteration < 501; ++iteration) {
 		optimizer.step(mse);
-		if (iteration % 100 == 0){
+		if(iteration % 100 == 0) {
 			error = optimizer.solution().value;
 			RealVector best = optimizer.solution().point;
 			std::cout << iteration << " error:" << error << " parameter:" << best << std::endl;

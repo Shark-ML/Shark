@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Some operations for matrices.
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      O. Krause
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -38,16 +38,17 @@
 
 #include <shark/LinAlg/Base.h>
 
-namespace shark{ namespace blas{
+namespace shark {
+namespace blas {
 
 //a few flags governing which type of system is to be solved
 
 ///\brief Flag indicating that a system AX=B is to be solved
-struct SolveAXB{
+struct SolveAXB {
 	static const bool left = true;
 };
 ///\brief Flag indicating that a system XA=B is to be solved
-struct SolveXAB{
+struct SolveXAB {
 	static const bool left = false;
 };
 
@@ -61,10 +62,10 @@ struct SolveXAB{
 ///system is to be solved : Ax=b or xA=b
 ///The second flag indicates which type of diagonal is used:
 ///lower unit, upper unit or non unit lower/upper.
-template<class System, class DiagType,class MatT,class VecT>
+template<class System, class DiagType, class MatT, class VecT>
 void solveTriangularSystemInPlace(
-	const matrix_expression<MatT>& A, 
-	vector_expression<VecT>& b
+    const matrix_expression<MatT>& A,
+    vector_expression<VecT>& b
 );
 /// \brief  In-place triangular linear equation solver.
 ///
@@ -81,10 +82,10 @@ void solveTriangularSystemInPlace(
 ///system is to be solved : Ax=b or xA=b
 ///The second flag indicates which type of diagonal is used:
 ///lower unit, upper unit or non unit lower/upper.
-template<class System, class DiagType,class MatA,class MatB>
+template<class System, class DiagType, class MatA, class MatB>
 void solveTriangularSystemInPlace(
-	const matrix_expression<MatA>& A, 
-	matrix_expression<MatB>& B
+    const matrix_expression<MatA>& A,
+    matrix_expression<MatB>& B
 );
 
 /// \brief In-Place solver if A was already cholesky decomposed
@@ -95,10 +96,10 @@ void solveTriangularSystemInPlace(
 ///=>AX=B or XA=B
 ///given an A which was already Cholesky-decomposed as
 ///A=LL^T where L is a lower triangular matrix.
-template<class System,class MatL,class MatB>
+template<class System, class MatL, class MatB>
 void solveTriangularCholeskyInPlace(
-	const matrix_expression<MatL>&L, 
-	matrix_expression<MatB>& B
+    const matrix_expression<MatL>&L,
+    matrix_expression<MatB>& B
 );
 
 /// \brief In-Place solver if A was already cholesky decomposed
@@ -106,12 +107,13 @@ void solveTriangularCholeskyInPlace(
 ///Ax=b
 ///given an A which was already Cholesky-decomposed as
 ///A=LL^T where L is a lower triangular matrix.
-template<class System,class MatL,class VecB>
+template<class System, class MatL, class VecB>
 void solveTriangularCholeskyInPlace(
-	const matrix_expression<MatL>& L, 
-	vector_expression<VecB>& b
+    const matrix_expression<MatL>& L,
+    vector_expression<VecB>& b
 );
 
-}}
+}
+}
 #include "Impl/solveTriangular.inl"
 #endif

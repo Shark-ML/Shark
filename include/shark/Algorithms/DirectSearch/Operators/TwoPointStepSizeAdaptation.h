@@ -34,12 +34,12 @@ namespace shark {
 
 /// \brief Step size adaptation based on the success of the new population compared to the old
 ///
-/// This is the step size adaptation algorithm as proposed in 
+/// This is the step size adaptation algorithm as proposed in
 /// Ilya Loshchilov, "A Computationally Efficient Limited Memory CMA-ES for Large Scale Optimization"
 ///
 /// It ranks the old and new population together and checks whether the mean rank of the new population
 /// is lower than the old one in this combined population. If this is true, the step size is increased
-/// in an exponential fashion. More formally, let \f$ r_t(i) \f$ be the rank of the i-th individual in the 
+/// in an exponential fashion. More formally, let \f$ r_t(i) \f$ be the rank of the i-th individual in the
 /// current population in the combined ranking and 	\f$ r_{t-1}(i) \f$ the rank of the i-th previous
 /// individual. Then we have
 /// \f[ z_t \leftarrow \frac 1 {\lamba^2} \sum_i^{\lambda} r_{t-1}(i) - r_t(i) - z*\f]
@@ -50,43 +50,43 @@ namespace shark {
 /// finally we adapt the step size sigma by
 /// \f[ \sigma_t = \sigma_{t-1} exp(s_t/d) \f]
 /// where the damping factor d defaults to 1
-class TwoPointStepSizeAdaptation{
+class TwoPointStepSizeAdaptation {
 public:
-	TwoPointStepSizeAdaptation():m_cAlpha(0.1), m_alphaStep(0.5){}
-	
-	double stepSize()const{
+	TwoPointStepSizeAdaptation(): m_cAlpha(0.1), m_alphaStep(0.5) {}
+
+	double stepSize()const {
 		return m_stepSize;
 	}
-	
-	void setAlphaStep(double alphaStep){
+
+	void setAlphaStep(double alphaStep) {
 		m_alphaStep = alphaStep;
 	}
-	
-	void setLearningRate(double learningRate){
+
+	void setLearningRate(double learningRate) {
 		m_cAlpha = learningRate;
 	}
-	
+
 	///\brief Initializes a new trial by setting the initial step size and resetting the internal values.
-	void init(double initialStepSize){
+	void init(double initialStepSize) {
 		m_stepSize = initialStepSize;
 		m_alpha = 0;
 	}
-	
-	void setStepSize(double stepSize){
+
+	void setStepSize(double stepSize) {
 		m_stepSize = stepSize;
 	}
-	
+
 	/// \brief updates the step size using the newly sampled population
 	///
 	/// The offspring is assumed to be ordered in ascending order by their penalizedFitness
 	/// (this is the same as ordering by the unpenalized fitness in an unconstrained setting)
-	void update(SingleObjectiveFunction const& f, RealVector const& point,RealVector const& direction){
-		double fminus = f.eval(point +m_alphaStep * m_stepSize * direction);
-		double fplus = f.eval(point + (1+m_alphaStep) * m_stepSize * direction);
-		
-		//~ double alphaCurrent = fminus < fplus? -m_alphaStep : m_alphaStep; 
-		double alphaCurrent = fminus < fplus? std::log(m_alphaStep) : std::log(1+m_alphaStep); 
-		m_alpha= (1 - m_cAlpha) * m_alpha + m_cAlpha * alphaCurrent;
+	void update(SingleObjectiveFunction const& f, RealVector const& point, RealVector const& direction) {
+		double fminus = f.eval(point + m_alphaStep * m_stepSize * direction);
+		double fplus = f.eval(point + (1 + m_alphaStep) * m_stepSize * direction);
+
+		//~ double alphaCurrent = fminus < fplus? -m_alphaStep : m_alphaStep;
+		double alphaCurrent = fminus < fplus ? std::log(m_alphaStep) : std::log(1 + m_alphaStep);
+		m_alpha = (1 - m_cAlpha) * m_alpha + m_cAlpha * alphaCurrent;
 		m_stepSize *= std::exp(m_alpha);
 	}
 private:

@@ -15,15 +15,26 @@ namespace shark {
 // a manually computed kernel value, and of
 // the MultiTaskKernel wrapper class by
 // checking that the product is correct.
-BOOST_AUTO_TEST_SUITE (Models_Kernels_MultiTaskKernel)
+BOOST_AUTO_TEST_SUITE(Models_Kernels_MultiTaskKernel)
 
-BOOST_AUTO_TEST_CASE( MultiTaskKernel_Test )
-{
+BOOST_AUTO_TEST_CASE(MultiTaskKernel_Test) {
 	// define dummy data composed of an input and a task component
-	RealVector x1(3); x1(0) = 1.0; x1(1) = 2.0; x1(2) = 3.0;
-	RealVector x2(3); x2(0) = 0.0; x2(1) = 3.14159; x2(2) = 10.0 / 3.0;
-	RealVector x3(3); x3(0) = 1.5; x3(1) = 2.5; x3(2) = 2.5;
-	RealVector x4(3); x4(0) = 0.5; x4(1) = 3.0; x4(2) = 3.5;
+	RealVector x1(3);
+	x1(0) = 1.0;
+	x1(1) = 2.0;
+	x1(2) = 3.0;
+	RealVector x2(3);
+	x2(0) = 0.0;
+	x2(1) = 3.14159;
+	x2(2) = 10.0 / 3.0;
+	RealVector x3(3);
+	x3(0) = 1.5;
+	x3(1) = 2.5;
+	x3(2) = 2.5;
+	RealVector x4(3);
+	x4(0) = 0.5;
+	x4(1) = 3.0;
+	x4(2) = 3.5;
 
 	// composition of vector and task index
 	MultiTaskSample<RealVector> v1(x1, 0);
@@ -38,7 +49,7 @@ BOOST_AUTO_TEST_CASE( MultiTaskKernel_Test )
 
 	// build a data set object
 	Data<MultiTaskSample<RealVector> > data = createDataFromRange(vec);
-	
+
 	// define a Gaussian kernel on inputs and a special task kernel on tasks
 	const double gamma = 3.0;
 	GaussianRbfKernel<RealVector> gauss(1.0);
@@ -47,10 +58,8 @@ BOOST_AUTO_TEST_CASE( MultiTaskKernel_Test )
 
 	// compute kernel on the inputs
 	RealMatrix g(data.numberOfElements(), data.numberOfElements());
-	for (std::size_t i=0; i<data.numberOfElements(); i++)
-	{
-		for (std::size_t j=0; j<=i; j++)
-		{
+	for(std::size_t i = 0; i < data.numberOfElements(); i++) {
+		for(std::size_t j = 0; j <= i; j++) {
 			double k = gauss(data.element(i).input, data.element(j).input);
 			g(i, j) = g(j, i) = k;
 		}

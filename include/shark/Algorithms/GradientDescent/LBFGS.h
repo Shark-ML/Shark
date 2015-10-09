@@ -1,35 +1,35 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       LBFGS
- * 
+ *
  * The Limited-Memory Broyden, Fletcher, Goldfarb, Shannon (BFGS) algorithm
  * is a quasi-Newton method for unconstrained real-valued optimization.
  * See: http://en.wikipedia.org/wiki/LBFGS for details.
- * 
- * 
+ *
+ *
  *
  * \author      S. Dahlgaard, O.Krause
  * \date        2013
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -47,17 +47,17 @@
 namespace shark {
 
 //! \brief Limited-Memory Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstrained optimization
-class LBFGS : public AbstractLineSearchOptimizer{
+class LBFGS : public AbstractLineSearchOptimizer {
 protected:
 	SHARK_EXPORT_SYMBOL void initModel();
 	SHARK_EXPORT_SYMBOL void computeSearchDirection();
 public:
-	LBFGS() :m_numHist(100){}
+	LBFGS() : m_numHist(100) {}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LBFGS"; }
-	
+
 	///  \brief Specify the amount of steps to be memorized and used to find the L-BFGS direction.
 	///
 	///\param numhist The amount of steps to use.
@@ -76,7 +76,7 @@ protected: // Methods
 	/// \param step Last performed step
 	/// \param y difference in gradients
 	SHARK_EXPORT_SYMBOL void updateHist(RealVector& y, RealVector &step);
-	/// \brief Get the LBFGS direction. 
+	/// \brief Get the LBFGS direction.
 	///
 	/// This approximates the inverse hessian multiplied by the gradient.
 	/// This uses the rho, alpha and beta vectors. Description of these

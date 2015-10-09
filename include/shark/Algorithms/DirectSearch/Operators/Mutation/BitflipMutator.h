@@ -1,30 +1,30 @@
 /*!
- * 
+ *
  *
  * \brief       Bit flip mutation operator.
- * 
- * 
+ *
+ *
  *
  * \author      T.Voss
  * \date        2010
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -51,24 +51,24 @@ struct BitflipMutator {
 	/// \param [in] f Instance of the objective function to initialize the operator for.
 	template<typename Function>
 	void init(const Function &f) {
-		m_mutationStrength = 1./f.numberOfVariables();
+		m_mutationStrength = 1. / f.numberOfVariables();
 	}
 
 	/// \brief Mutates the supplied individual.
-	/// 
+	///
 	/// \param [in,out] ind Individual to be mutated.
 	template<typename IndividualType>
 	void operator()(IndividualType &ind) {
 
-		for (unsigned int i = 0; i < ind.searchPoint().size(); i++) {
-			if (Rng::coinToss(m_mutationStrength)) {
+		for(unsigned int i = 0; i < ind.searchPoint().size(); i++) {
+			if(Rng::coinToss(m_mutationStrength)) {
 				ind.searchPoint()[ i ] = !ind.searchPoint()[ i ];
 			}
 		}
 	}
 
 	/// \brief Serializes this instance to the supplied archive.
-	/// 
+	///
 	/// \param [in,out] archive The archive to serialize to.
 	/// \param [in] version Version information (optional and not used here).
 	template<typename Archive>

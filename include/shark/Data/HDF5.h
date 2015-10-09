@@ -1,38 +1,38 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Support for importing data from HDF5 file
- * 
- * 
+ *
+ *
  * \par
  * The most important application of the methods provided in this
  * file is the import of data from HDF5 files into Shark data
  * containers.
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      B. Li
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -67,45 +67,40 @@ namespace detail {
 ///         http://www.hdfgroup.org/HDF5/doc/RM/PredefDTypes.html
 ///         Need pay special attention to endian.
 ///@{
-herr_t readHDF5Dataset( hid_t loc_id, const char *dset_name, int *buffer )
-{
-	return H5LTread_dataset_int( loc_id, dset_name, buffer );
+herr_t readHDF5Dataset(hid_t loc_id, const char *dset_name, int *buffer) {
+	return H5LTread_dataset_int(loc_id, dset_name, buffer);
 }
 
-herr_t readHDF5Dataset( hid_t loc_id, const char *dset_name, long *buffer )
-{
-	return H5LTread_dataset_long( loc_id, dset_name, buffer );
+herr_t readHDF5Dataset(hid_t loc_id, const char *dset_name, long *buffer) {
+	return H5LTread_dataset_long(loc_id, dset_name, buffer);
 }
 
-herr_t readHDF5Dataset( hid_t loc_id, const char *dset_name, float *buffer )
-{
-	return H5LTread_dataset_float( loc_id, dset_name, buffer );
+herr_t readHDF5Dataset(hid_t loc_id, const char *dset_name, float *buffer) {
+	return H5LTread_dataset_float(loc_id, dset_name, buffer);
 }
 
-herr_t readHDF5Dataset( hid_t loc_id, const char *dset_name, double *buffer )
-{
-	return H5LTread_dataset_double( loc_id, dset_name, buffer );
+herr_t readHDF5Dataset(hid_t loc_id, const char *dset_name, double *buffer) {
+	return H5LTread_dataset_double(loc_id, dset_name, buffer);
 }
 ///@}
 
 /// Check whether typeClass and typeSize are supported by current implementation
 template<typename RawValueType>
-bool isSupported(H5T_class_t typeClass, size_t typeSize)
-{
-	if (H5T_FLOAT == typeClass && 8 == typeSize && boost::is_floating_point < RawValueType > ::value
-	    && sizeof(RawValueType) == 8) {
+bool isSupported(H5T_class_t typeClass, size_t typeSize) {
+	if(H5T_FLOAT == typeClass && 8 == typeSize && boost::is_floating_point < RawValueType > ::value
+	        && sizeof(RawValueType) == 8) {
 		// double
 		return true;
-	} else if (H5T_FLOAT == typeClass && 4 == typeSize && boost::is_floating_point < RawValueType > ::value
-	    && sizeof(RawValueType) == 4) {
+	} else if(H5T_FLOAT == typeClass && 4 == typeSize && boost::is_floating_point < RawValueType > ::value
+	          && sizeof(RawValueType) == 4) {
 		// float
 		return true;
-	} else if (H5T_INTEGER == typeClass && 4 == typeSize && boost::is_integral < RawValueType > ::value
-	    && sizeof(RawValueType) == 4) {
+	} else if(H5T_INTEGER == typeClass && 4 == typeSize && boost::is_integral < RawValueType > ::value
+	          && sizeof(RawValueType) == 4) {
 		// int
 		return true;
-	} else if (H5T_INTEGER == typeClass && 8 == typeSize && boost::is_integral < RawValueType > ::value
-	    && sizeof(RawValueType) == 8) {
+	} else if(H5T_INTEGER == typeClass && 8 == typeSize && boost::is_integral < RawValueType > ::value
+	          && sizeof(RawValueType) == 8) {
 		// long
 		return true;
 	}
@@ -125,8 +120,7 @@ bool isSupported(H5T_class_t typeClass, size_t typeSize)
 /// @tparam MatrixType
 ///     The type of data container which will accept read-in data and should be a 2-dimension matrix
 template<typename MatrixType>
-void loadIntoMatrix(MatrixType& data, const std::string& fileName, const std::string& dataSetName)
-{
+void loadIntoMatrix(MatrixType& data, const std::string& fileName, const std::string& dataSetName) {
 	typedef typename MatrixType::value_type VectorType; // e.g., std::vector<double>
 	typedef typename VectorType::value_type RawValueType; // e.g., double
 
@@ -138,47 +132,47 @@ void loadIntoMatrix(MatrixType& data, const std::string& fileName, const std::st
 
 	// Open the file, and then get dimension
 	const ScopedHandle<hid_t> fileId(
-		H5Fopen(fileName.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT),
-		H5Fclose,
-		(boost::format("[loadIntoMatrix] open file name: %1%") % fileName).str());
+	    H5Fopen(fileName.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT),
+	    H5Fclose,
+	    (boost::format("[loadIntoMatrix] open file name: %1%") % fileName).str());
 
 	boost::array<hsize_t, MAX_DIMENSIONS> dims;
 	dims.assign(0);
 	H5T_class_t typeClass;
 	size_t typeSize;
 	THROW_IF(
-		H5LTget_dataset_info(*fileId, dataSetName.c_str(), dims.c_array(), &typeClass, &typeSize) < 0,
-		(boost::format("[importHDF5] Get data set(%1%) info from file(%2%).") % dataSetName % fileName).str());
+	    H5LTget_dataset_info(*fileId, dataSetName.c_str(), dims.c_array(), &typeClass, &typeSize) < 0,
+	    (boost::format("[importHDF5] Get data set(%1%) info from file(%2%).") % dataSetName % fileName).str());
 
-	if (0 == dims[0])
+	if(0 == dims[0])
 		return;
 
 	// Support 1 or 2 dimensions only at the moment
 	THROW_IF(
-		0 != dims[2],
-		(boost::format(
-			"[loadIntoMatrix][%1%][%2%] Support 1 or 2 dimensions, but this dataset has at least 3 dimensions.") % fileName % dataSetName).str());
+	    0 != dims[2],
+	    (boost::format(
+	         "[loadIntoMatrix][%1%][%2%] Support 1 or 2 dimensions, but this dataset has at least 3 dimensions.") % fileName % dataSetName).str());
 
 	const hsize_t dim0 = dims[0];
 	const hsize_t dim1 = (0 == dims[1]) ? 1 : dims[1]; // treat one dimension as two-dimension of N x 1
 
 	THROW_IF(
-		!detail::isSupported<RawValueType>(typeClass, typeSize),
-		(boost::format(
-			"[loadIntoMatrix] DataType doesn't match. HDF5 data type in dataset(%3%::%4%): %1%, size: %2%")
-			% typeClass
-			% typeSize
-			% fileName
-			% dataSetName).str());
+	    !detail::isSupported<RawValueType>(typeClass, typeSize),
+	    (boost::format(
+	         "[loadIntoMatrix] DataType doesn't match. HDF5 data type in dataset(%3%::%4%): %1%, size: %2%")
+	     % typeClass
+	     % typeSize
+	     % fileName
+	     % dataSetName).str());
 
 	// Read data into a buffer
 	const boost::scoped_array<RawValueType> dataBuffer(new RawValueType[dim0 * dim1]);
 	THROW_IF(detail::readHDF5Dataset(*fileId, dataSetName.c_str(), dataBuffer.get()) < 0, "[loadIntoMatrix] Read data set.");
 
 	// dims[0] = M, dims[1] = N, means each basic vector has M elements, and there are N of them.
-	for (size_t i = 0; i < dim1; ++i) {
+	for(size_t i = 0; i < dim1; ++i) {
 		VectorType sample(dim0);
-		for (size_t j = 0; j < dim0; ++j)
+		for(size_t j = 0; j < dim0; ++j)
 			sample[j] = dataBuffer[i + j * dim1]; // elements in memory are in row-major order
 		data.push_back(sample);
 	}
@@ -190,13 +184,12 @@ void loadIntoMatrix(MatrixType& data, const std::string& fileName, const std::st
 /// @param fileName the name of HDF5 file
 /// @param cscDatasetName dataset names for describing the CSC
 template<typename MatrixType>
-void loadHDF5Csc(MatrixType& data, const std::string& fileName, const std::vector<std::string>& cscDatasetName)
-{
+void loadHDF5Csc(MatrixType& data, const std::string& fileName, const std::vector<std::string>& cscDatasetName) {
 	typedef typename MatrixType::value_type VectorType; // e.g., std::vector<double>
 
 	THROW_IF(
-		3 != cscDatasetName.size(),
-		"[importHDF5] Must provide 3 dataset names for importing Compressed Sparse Column format.");
+	    3 != cscDatasetName.size(),
+	    "[importHDF5] Must provide 3 dataset names for importing Compressed Sparse Column format.");
 
 	std::vector<VectorType> valBuf;
 	std::vector<std::vector<boost::int32_t> > indicesBuf;
@@ -220,8 +213,8 @@ void loadHDF5Csc(MatrixType& data, const std::string& fileName, const std::vecto
 	boost::fill(data, VectorType(rowCount, 0)); // pre-fill zero
 
 	size_t valIdx = 0;
-	for (size_t i = 0; i < columnCount; ++i) {
-		for (boost::int32_t j = indexPtr[i]; j < indexPtr[i + 1]; ++j) {
+	for(size_t i = 0; i < columnCount; ++i) {
+		for(boost::int32_t j = indexPtr[i]; j < indexPtr[i + 1]; ++j) {
 			data[i][indices[j]] = val[valIdx++];
 		}
 	}
@@ -237,16 +230,15 @@ void loadHDF5Csc(MatrixType& data, const std::string& fileName, const std::vecto
 ///     The label for data inside @a dataBuffer
 template<typename VectorType, typename LabelType>
 void constructLabeledData(
-	LabeledData<VectorType, LabelType>& labeledData,
-	const std::vector<VectorType>& dataBuffer,
-	const std::vector<std::vector<LabelType> >& labelBuffer)
-{
+    LabeledData<VectorType, LabelType>& labeledData,
+    const std::vector<VectorType>& dataBuffer,
+    const std::vector<std::vector<LabelType> >& labelBuffer) {
 	THROW_IF(
-		1 != labelBuffer.size(),
-		(boost::format("[importHDF5] Expect only one label vector, but get %1%.") % labelBuffer.size()).str());
+	    1 != labelBuffer.size(),
+	    (boost::format("[importHDF5] Expect only one label vector, but get %1%.") % labelBuffer.size()).str());
 	THROW_IF(
-		dataBuffer.size() != labelBuffer.front().size(),
-		boost::format("[importHDF5] Dimensions of data and label don't match.").str());
+	    dataBuffer.size() != labelBuffer.front().size(),
+	    boost::format("[importHDF5] Dimensions of data and label don't match.").str());
 
 	labeledData = createLabeledDataFromRange(dataBuffer, labelBuffer.front());
 }
@@ -262,10 +254,9 @@ void constructLabeledData(
 /// @tparam VectorType   Type of object stored in Shark data container
 template<typename VectorType>
 void importHDF5(
-	Data<VectorType>& data,
-	const std::string& fileName,
-	const std::string& datasetName)
-{
+    Data<VectorType>& data,
+    const std::string& fileName,
+    const std::string& datasetName) {
 	std::vector<VectorType> readinBuffer;
 	detail::loadIntoMatrix(readinBuffer, fileName, datasetName);
 	data = createDataFromRange(readinBuffer);
@@ -288,11 +279,10 @@ void importHDF5(
 ///     Type of label
 template<typename VectorType, typename LabelType>
 void importHDF5(
-	LabeledData<VectorType, LabelType>& labeledData,
-	const std::string& fileName,
-	const std::string& data,
-	const std::string& label)
-{
+    LabeledData<VectorType, LabelType>& labeledData,
+    const std::string& fileName,
+    const std::string& data,
+    const std::string& label) {
 	std::vector<VectorType> readinData;
 	std::vector < std::vector<LabelType> > readinLabel;
 
@@ -311,10 +301,9 @@ void importHDF5(
 /// @tparam VectorType   Type of object stored in Shark data container
 template<typename VectorType>
 void importHDF5(
-	Data<VectorType>& data,
-	const std::string& fileName,
-	const std::vector<std::string>& cscDatasetName)
-{
+    Data<VectorType>& data,
+    const std::string& fileName,
+    const std::vector<std::string>& cscDatasetName) {
 	std::vector<VectorType> readinBuffer;
 	detail::loadHDF5Csc(readinBuffer, fileName, cscDatasetName);
 	data = createDataFromRange(readinBuffer);
@@ -337,11 +326,10 @@ void importHDF5(
 ///     Type of label
 template<typename VectorType, typename LabelType>
 void importHDF5(
-	LabeledData<VectorType, LabelType>& labeledData,
-	const std::string& fileName,
-	const std::vector<std::string>& cscDatasetName,
-	const std::string& label)
-{
+    LabeledData<VectorType, LabelType>& labeledData,
+    const std::string& fileName,
+    const std::vector<std::string>& cscDatasetName,
+    const std::string& label) {
 	std::vector<VectorType> readinData;
 	std::vector < std::vector<LabelType> > readinLabel;
 

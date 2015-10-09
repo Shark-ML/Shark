@@ -1,31 +1,31 @@
 /*!
- * 
+ *
  *
  * \brief       Algorithms for Eigenvalue decompositions
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      O. Krause
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -36,11 +36,12 @@
 #include <shark/LinAlg/Base.h>
 #include <shark/LinAlg/BLAS/kernels/syev.hpp>
 
-namespace shark{ namespace blas{
+namespace shark {
+namespace blas {
 
 /**
  * \ingroup shark_globals
- * 
+ *
  * @{
  */
 
@@ -58,40 +59,40 @@ namespace shark{ namespace blas{
  *
  * \throw SharkException
  */
-template<class MatrixT,class MatrixU,class VectorT>
+template<class MatrixT, class MatrixU, class VectorT>
 void eigensymm
 (
-	matrix_expression<MatrixT> const& A,
-	matrix_expression<MatrixU>& eigenVectors,
-	vector_expression<VectorT>& eigenValues
-)
-{
+    matrix_expression<MatrixT> const& A,
+    matrix_expression<MatrixU>& eigenVectors,
+    vector_expression<VectorT>& eigenValues
+) {
 	SIZE_CHECK(A().size2() == A().size1());
 	std::size_t n = A().size1();
-	
-	eigenVectors().resize(n,n);
+
+	eigenVectors().resize(n, n);
 	eigenVectors().clear();
 	eigenValues().resize(n);
 	eigenValues().clear();
 	// special case n = 1
-	if (n == 1) {
-		eigenVectors()( 0 ,  0 ) = 1;
-		eigenValues()( 0 ) = A()( 0 ,  0 );
+	if(n == 1) {
+		eigenVectors()(0 ,  0) = 1;
+		eigenValues()(0) = A()(0 ,  0);
 		return;
 	}
 
 	// copy matrix
-	for (std::size_t i = 0; i < n; i++) {
-		for (std::size_t j = 0; j <= i; j++) {
+	for(std::size_t i = 0; i < n; i++) {
+		for(std::size_t j = 0; j <= i; j++) {
 			eigenVectors()(i, j) = A()(i, j);
 		}
 	}
-	
-	kernels::syev(eigenVectors,eigenValues);
+
+	kernels::syev(eigenVectors, eigenValues);
 }
 
 
 
 /** @}*/
-}}
+}
+}
 #endif

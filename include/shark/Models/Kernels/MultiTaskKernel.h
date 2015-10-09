@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Special kernel classes for multi-task and transfer learning.
- * 
- * 
+ *
+ *
  *
  * \author      T. Glasmachers, O.Krause
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -51,8 +51,7 @@ namespace shark {
 /// task identifier in multi-task and transfer learning.
 ///
 template <class InputTypeT>
-struct MultiTaskSample : public ISerializable
-{
+struct MultiTaskSample : public ISerializable {
 	typedef InputTypeT InputType;
 	/// \brief Default constructor.
 	MultiTaskSample()
@@ -60,15 +59,15 @@ struct MultiTaskSample : public ISerializable
 
 	/// \brief Construction from an input and a task index
 	MultiTaskSample(InputType const& i, std::size_t t)
-	: input(i), task(t)
+		: input(i), task(t)
 	{ }
 
-	void read(InArchive& ar){
+	void read(InArchive& ar) {
 		ar >> input;
 		ar >> task;
 	}
 
-	void write(OutArchive& ar) const{
+	void write(OutArchive& ar) const {
 		ar << input;
 		ar << task;
 	}
@@ -82,21 +81,21 @@ struct MultiTaskSample : public ISerializable
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-    BOOST_FUSION_ADAPT_TPL_STRUCT(
-        (InputType),
-        (shark::MultiTaskSample) (InputType),
-        (InputType, input)(std::size_t, task)
-    )
+BOOST_FUSION_ADAPT_TPL_STRUCT(
+    (InputType),
+    (shark::MultiTaskSample)(InputType),
+    (InputType, input)(std::size_t, task)
+)
 
 
-namespace shark{
+namespace shark {
 
 
 template<class InputType>
-struct Batch< MultiTaskSample<InputType> >{
+struct Batch< MultiTaskSample<InputType> > {
 	SHARK_CREATE_BATCH_INTERFACE(
-		MultiTaskSample<InputType>,
-		(InputType, input)(std::size_t, task)
+	    MultiTaskSample<InputType>,
+	    (InputType, input)(std::size_t, task)
 	)
 };
 
@@ -129,8 +128,7 @@ struct Batch< MultiTaskSample<InputType> >{
 /// where k' is an arbitrary kernel on inputs.
 ///
 template <class InputTypeT >
-class GaussianTaskKernel : public DiscreteKernel
-{
+class GaussianTaskKernel : public DiscreteKernel {
 private:
 	typedef DiscreteKernel base_type;
 public:
@@ -145,14 +143,14 @@ public:
 	/// \param  inputkernel  kernel on inputs based on which task similarity is defined
 	/// \param  gamma        Gaussian bandwidth parameter (also refer to the member functions setGamma and setSigma).
 	GaussianTaskKernel(
-			Data<MultiTaskSampleType> const& data,
-			std::size_t tasks,
-			KernelType& inputkernel,
-			double gamma)
-	: DiscreteKernel(RealMatrix(tasks, tasks,0.0))
-	, m_data(data)
-	, m_inputkernel(inputkernel)
-	, m_gamma(gamma){
+	    Data<MultiTaskSampleType> const& data,
+	    std::size_t tasks,
+	    KernelType& inputkernel,
+	    double gamma)
+		: DiscreteKernel(RealMatrix(tasks, tasks, 0.0))
+		, m_data(data)
+		, m_inputkernel(inputkernel)
+		, m_gamma(gamma) {
 		computeMatrix();
 	}
 
@@ -160,20 +158,19 @@ public:
 	std::string name() const
 	{ return "GaussianTaskKernel"; }
 
-	RealVector parameterVector() const
-	{
+	RealVector parameterVector() const {
 		const std::size_t n = m_inputkernel.numberOfParameters();
 		RealVector ret(n + 1);
-		init(ret)<<parameters(m_inputkernel),m_gamma;
+		init(ret) << parameters(m_inputkernel), m_gamma;
 		return ret;
 	}
 
-	void setParameterVector(RealVector const& newParameters){
-		init(newParameters)>>parameters(m_inputkernel),m_gamma;
+	void setParameterVector(RealVector const& newParameters) {
+		init(newParameters) >> parameters(m_inputkernel), m_gamma;
 		computeMatrix();
 	}
 
-	std::size_t numberOfParameters() const{
+	std::size_t numberOfParameters() const {
 		return m_inputkernel.numberOfParameters() + 1;
 	}
 
@@ -191,8 +188,7 @@ public:
 	{ return (1.0 / std::sqrt(2 * m_gamma)); }
 
 	// \brief Set the kernel bandwidth parameter.
-	void setGamma(double gamma)
-	{
+	void setGamma(double gamma) {
 		SHARK_ASSERT(gamma > 0.0);
 		m_gamma = gamma;
 	}
@@ -200,22 +196,19 @@ public:
 	/// \brief Set the kernel width (equivalent to setting the bandwidth).
 	///
 	/// The bandwidth gamma and the width sigma are connected: \f$ gamma = 1 / (2 \cdot sigma^2) \f$.
-	void setWidth(double sigma)
-	{
+	void setWidth(double sigma) {
 		SHARK_ASSERT(sigma > 0.0);
 		m_gamma = 1.0 / (2.0 * sigma * sigma);
 	}
 
 	/// From ISerializable.
-	void read(InArchive& ar)
-	{
+	void read(InArchive& ar) {
 		base_type::read(ar);
 		ar >> m_gamma;
 	}
 
 	/// From ISerializable.
-	void write(OutArchive& ar) const
-	{
+	void write(OutArchive& ar) const {
 		base_type::write(ar);
 		ar << m_gamma;
 	}
@@ -238,21 +231,18 @@ protected:
 	/// of squared distances between empirical distribution, which
 	/// allows for the straightforward computation of a Gaussian
 	/// kernel.
-	void computeMatrix()
-	{
+	void computeMatrix() {
 		// count number of examples for each task
 		const std::size_t tasks = numberOfTasks();
 		std::size_t elements = m_data.numberOfElements();
 		std::vector<std::size_t> ell(tasks, 0);
-		for (std::size_t i=0; i<elements; i++)
+		for(std::size_t i = 0; i < elements; i++)
 			ell[m_data.element(i).task]++;
 
 		// compute inner products between mean elements of empirical distributions
-		for (std::size_t i=0; i<elements; i++)
-		{
+		for(std::size_t i = 0; i < elements; i++) {
 			const std::size_t task_i = m_data.element(i).task;
-			for (std::size_t j=0; j<i; j++)
-			{
+			for(std::size_t j = 0; j < i; j++) {
 				const std::size_t task_j = m_data.element(j).task;
 				const double k = m_inputkernel.eval(m_data.element(i).input, m_data.element(j).input);
 				base_type::m_matrix(task_i, task_j) += k;
@@ -261,29 +251,25 @@ protected:
 			const double k = m_inputkernel.eval(m_data.element(i).input, m_data.element(i).input);
 			base_type::m_matrix(task_i, task_i) += k;
 		}
-		for (std::size_t i=0; i<tasks; i++)
-		{
-			if (ell[i] == 0) continue;
-			for (std::size_t j=0; j<tasks; j++)
-			{
-				if (ell[j] == 0) continue;
+		for(std::size_t i = 0; i < tasks; i++) {
+			if(ell[i] == 0) continue;
+			for(std::size_t j = 0; j < tasks; j++) {
+				if(ell[j] == 0) continue;
 				base_type::m_matrix(i, j) /= (double)(ell[i] * ell[j]);
 			}
 		}
 
 		// compute Gaussian kernel
-		for (std::size_t i=0; i<tasks; i++)
-		{
+		for(std::size_t i = 0; i < tasks; i++) {
 			const double norm2_i = base_type::m_matrix(i, i);
-			for (std::size_t j=0; j<i; j++)
-			{
+			for(std::size_t j = 0; j < i; j++) {
 				const double norm2_j = base_type::m_matrix(j, j);
 				const double dist2 = norm2_i + norm2_j - 2.0 * base_type::m_matrix(i, j);
 				const double k = std::exp(-m_gamma * dist2);
 				base_type::m_matrix(i, j) = base_type::m_matrix(j, i) = k;
 			}
 		}
-		for (std::size_t i=0; i<tasks; i++) base_type::m_matrix(i, i) = 1.0;
+		for(std::size_t i = 0; i < tasks; i++) base_type::m_matrix(i, i) = 1.0;
 	}
 
 
@@ -304,9 +290,8 @@ protected:
 ///
 template <class InputTypeT>
 class MultiTaskKernel
-: private detail::MklKernelBase<MultiTaskSample<InputTypeT> >
-, public ProductKernel< MultiTaskSample<InputTypeT> >
-{
+	: private detail::MklKernelBase<MultiTaskSample<InputTypeT> >
+	, public ProductKernel< MultiTaskSample<InputTypeT> > {
 private:
 	typedef detail::MklKernelBase<MultiTaskSample<InputTypeT> > base_type1;
 	typedef ProductKernel< MultiTaskSample<InputTypeT> > base_type2;
@@ -317,10 +302,10 @@ public:
 	/// \param  inputkernel  kernel on inputs
 	/// \param  taskkernel   kernel on task indices
 	MultiTaskKernel(
-		InputKernelType* inputkernel,
-		DiscreteKernel* taskkernel)
-	:base_type1(boost::fusion::make_vector(inputkernel,taskkernel))
-	,base_type2(base_type1::makeKernelVector())
+	    InputKernelType* inputkernel,
+	    DiscreteKernel* taskkernel)
+		: base_type1(boost::fusion::make_vector(inputkernel, taskkernel))
+		, base_type2(base_type1::makeKernelVector())
 	{}
 
 	/// \brief From INameable: return the class name.

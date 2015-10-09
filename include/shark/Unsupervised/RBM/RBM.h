@@ -1,5 +1,5 @@
 /*!
- * 
+ *
  *
  * \brief       -
  *
@@ -8,21 +8,21 @@
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -36,23 +36,23 @@
 
 #include <sstream>
 #include <boost/serialization/string.hpp>
-namespace shark{
+namespace shark {
 
 ///\brief stub for the RBM class. at the moment it is just a holder of the parameter set and the Energy.
-template<class VisibleLayerT,class HiddenLayerT, class RngT>
-class RBM : public AbstractModel<RealVector, RealVector>{
+template<class VisibleLayerT, class HiddenLayerT, class RngT>
+class RBM : public AbstractModel<RealVector, RealVector> {
 private:
 	typedef AbstractModel<RealVector, RealVector> base_type;
 public:
 	typedef HiddenLayerT HiddenType; ///< type of the hidden layer
 	typedef VisibleLayerT VisibleType; ///< type of the visible layer
 	typedef RngT RngType;
-	typedef Energy<RBM<VisibleType,HiddenType,RngT> > EnergyType;///< Type of the energy function
+	typedef Energy<RBM<VisibleType, HiddenType, RngT> > EnergyType; ///< Type of the energy function
 	typedef detail::AverageEnergyGradient<RBM> GradientType;///< Type of the gradient calculator
-	
+
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
-	
+
 private:
 	/// \brief The weight matrix connecting hidden and visible layer.
 	RealMatrix m_weightMatrix;
@@ -71,20 +71,19 @@ private:
 	///
 	///@param patterns batch of states of visible units
 	///@param outputs batch of (expected) states of hidden units
-	void evalForward(BatchInputType const& state,BatchOutputType& output)const{
-		std::size_t batchSize=state.size1();
-		typename HiddenType::StatisticsBatch statisticsBatch(batchSize,numberOfHN());
-		RealMatrix inputBatch(batchSize,numberOfHN());
-		output.resize(state.size1(),numberOfHN());
-		
-		energy().inputHidden(inputBatch,state);
-		hiddenNeurons().sufficientStatistics(inputBatch,statisticsBatch,blas::repeat(1.0,batchSize));
+	void evalForward(BatchInputType const& state, BatchOutputType& output)const {
+		std::size_t batchSize = state.size1();
+		typename HiddenType::StatisticsBatch statisticsBatch(batchSize, numberOfHN());
+		RealMatrix inputBatch(batchSize, numberOfHN());
+		output.resize(state.size1(), numberOfHN());
 
-		if(m_evalMean){
+		energy().inputHidden(inputBatch, state);
+		hiddenNeurons().sufficientStatistics(inputBatch, statisticsBatch, blas::repeat(1.0, batchSize));
+
+		if(m_evalMean) {
 			noalias(output) = hiddenNeurons().mean(statisticsBatch);
-		}
-		else{
-			hiddenNeurons().sample(statisticsBatch,output,0.0,*mpe_rng);
+		} else {
+			hiddenNeurons().sample(statisticsBatch, output, 0.0, *mpe_rng);
 		}
 	}
 
@@ -92,24 +91,23 @@ private:
 	///
 	///@param patterns batch of states of hidden units
 	///@param outputs batch of (expected) states of visible units
-	void evalBackward(BatchInputType const& state,BatchOutputType& output)const{
+	void evalBackward(BatchInputType const& state, BatchOutputType& output)const {
 		std::size_t batchSize = state.size1();
-		typename VisibleType::StatisticsBatch statisticsBatch(batchSize,numberOfVN());
-		RealMatrix inputBatch(batchSize,numberOfVN());
-		output.resize(batchSize,numberOfVN());
-		
-		energy().inputVisible(inputBatch,state);
-		visibleNeurons().sufficientStatistics(inputBatch,statisticsBatch,blas::repeat(1.0,batchSize));
-		
-		if(m_evalMean){
+		typename VisibleType::StatisticsBatch statisticsBatch(batchSize, numberOfVN());
+		RealMatrix inputBatch(batchSize, numberOfVN());
+		output.resize(batchSize, numberOfVN());
+
+		energy().inputVisible(inputBatch, state);
+		visibleNeurons().sufficientStatistics(inputBatch, statisticsBatch, blas::repeat(1.0, batchSize));
+
+		if(m_evalMean) {
 			noalias(output) = visibleNeurons().mean(statisticsBatch);
-		}
-		else{
-			visibleNeurons().sample(statisticsBatch,output,0.0,*mpe_rng);
+		} else {
+			visibleNeurons().sample(statisticsBatch, output, 0.0, *mpe_rng);
 		}
 	}
 public:
-	RBM(RngType& rng):mpe_rng(&rng),m_forward(true),m_evalMean(true)
+	RBM(RngType& rng): mpe_rng(&rng), m_forward(true), m_evalMean(true)
 	{ }
 
 	/// \brief From INameable: return the class name.
@@ -118,130 +116,129 @@ public:
 
 	///\brief Returns the total number of parameters of the model.
 	std::size_t numberOfParameters()const {
-		std::size_t parameters = numberOfVN()*numberOfHN();
+		std::size_t parameters = numberOfVN() * numberOfHN();
 		parameters += m_hiddenNeurons.numberOfParameters();
 		parameters += m_visibleNeurons.numberOfParameters();
 		return parameters;
 	}
-	
+
 	///\brief Returns the parameters of the Model as parameter vector.
-	RealVector parameterVector () const {
+	RealVector parameterVector() const {
 		RealVector ret(numberOfParameters());
-		init(ret) << toVector(m_weightMatrix),blas::parameters(m_hiddenNeurons),blas::parameters(m_visibleNeurons);
+		init(ret) << toVector(m_weightMatrix), blas::parameters(m_hiddenNeurons), blas::parameters(m_visibleNeurons);
 		return ret;
 	};
 
 	///\brief Sets the parameters of the model.
 	///
-	/// @param newParameters vector of parameters  
- 	void setParameterVector(const RealVector& newParameters) {
-		init(newParameters) >> toVector(m_weightMatrix),blas::parameters(m_hiddenNeurons),blas::parameters(m_visibleNeurons);
- 	}
-	
+	/// @param newParameters vector of parameters
+	void setParameterVector(const RealVector& newParameters) {
+		init(newParameters) >> toVector(m_weightMatrix), blas::parameters(m_hiddenNeurons), blas::parameters(m_visibleNeurons);
+	}
+
 	///\brief Creates the structure of the RBM.
 	///
 	///@param hiddenNeurons number of hidden neurons.
 	///@param visibleNeurons number of visible neurons.
-	void setStructure(std::size_t visibleNeurons,std::size_t hiddenNeurons){
-		m_weightMatrix.resize(hiddenNeurons,visibleNeurons);
+	void setStructure(std::size_t visibleNeurons, std::size_t hiddenNeurons) {
+		m_weightMatrix.resize(hiddenNeurons, visibleNeurons);
 		m_weightMatrix.clear();
-		
+
 		m_hiddenNeurons.resize(hiddenNeurons);
 		m_visibleNeurons.resize(visibleNeurons);
 	}
-	
+
 	///\brief Returns the layer of hidden neurons.
-	HiddenType const& hiddenNeurons()const{
+	HiddenType const& hiddenNeurons()const {
 		return m_hiddenNeurons;
 	}
 	///\brief Returns the layer of hidden neurons.
-	HiddenType& hiddenNeurons(){
+	HiddenType& hiddenNeurons() {
 		return m_hiddenNeurons;
 	}
 	///\brief Returns the layer of visible neurons.
-	VisibleType& visibleNeurons(){
+	VisibleType& visibleNeurons() {
 		return m_visibleNeurons;
 	}
 	///\brief Returns the layer of visible neurons.
-	VisibleType const& visibleNeurons()const{
+	VisibleType const& visibleNeurons()const {
 		return m_visibleNeurons;
 	}
-	
+
 	///\brief Returns the weight matrix connecting the layers.
-	RealMatrix& weightMatrix(){
+	RealMatrix& weightMatrix() {
 		return m_weightMatrix;
 	}
 	///\brief Returns the weight matrix connecting the layers.
-	RealMatrix const& weightMatrix()const{
+	RealMatrix const& weightMatrix()const {
 		return m_weightMatrix;
 	}
-	
+
 	///\brief Returns the energy function of the RBM.
-	EnergyType energy()const{
+	EnergyType energy()const {
 		return EnergyType(*this);
 	}
-	
+
 	///\brief Returns the random number generator associated with this RBM.
-	RngType& rng(){
+	RngType& rng() {
 		return *mpe_rng;
 	}
-	
+
 	///\brief Sets the type of evaluation, eval will perform.
 	///
 	///Eval performs its operation based on the state of this function.
 	///There are two ways to pass data through an rbm: either forward, setting the states of the
 	///visible neurons and sample the hidden states or backwards, where the state of the hidden is fixed and the visible
-	///are sampled. 
-	///Instead of the state of the hidden/visible, one often wants the mean of the state \f$ E_{p(h|v)}\left(h\right)\f$. 
+	///are sampled.
+	///Instead of the state of the hidden/visible, one often wants the mean of the state \f$ E_{p(h|v)}\left(h\right)\f$.
 	///By default, the RBM uses the forward evaluation and returns the mean of the state
 	///
 	///@param forward whether the forward view should be used false=backwards
 	///@param evalMean whether the mean state should be returned. false=a sample is returned
-	void evaluationType(bool forward,bool evalMean){
+	void evaluationType(bool forward, bool evalMean) {
 		m_forward = forward;
 		m_evalMean = evalMean;
 	}
-	
-	boost::shared_ptr<State> createState()const{
+
+	boost::shared_ptr<State> createState()const {
 		return boost::shared_ptr<State>(new EmptyState());
 	}
-	
-	///\brief Passes information through/samples from an RBM in a forward or backward way. 
+
+	///\brief Passes information through/samples from an RBM in a forward or backward way.
 	///
 	///Eval performs its operation based on the given evaluation type.
 	///There are two ways to pass data through an RBM: either forward, setting the states of the
 	///visible neurons and sample the hidden states or backwards, where the state of the hidden is fixed and the visible
-	///are sampled. 
-	///Instead of the state of the hidden/visible, one often wants the mean of the state \f$ E_{p(h|v)}\left(h\right)\f$. 
+	///are sampled.
+	///Instead of the state of the hidden/visible, one often wants the mean of the state \f$ E_{p(h|v)}\left(h\right)\f$.
 	///By default, the RBM uses the forward evaluation and returns the mean of the state,
 	///but other evaluation modes can be set by evaluationType().
 	///
 	///@param patterns the batch of (visible or hidden) inputs
-	///@param outputs the batch of (visible or hidden) outputs 
-	void eval(BatchInputType const& patterns,BatchOutputType& outputs)const{
-		if(m_forward){
-			evalForward(patterns,outputs);
-		}
-		else{
-			evalBackward(patterns,outputs);
+	///@param outputs the batch of (visible or hidden) outputs
+	void eval(BatchInputType const& patterns, BatchOutputType& outputs)const {
+		if(m_forward) {
+			evalForward(patterns, outputs);
+		} else {
+			evalBackward(patterns, outputs);
 		}
 	}
 
 
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
-		eval(patterns,outputs);
+	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const {
+		eval(patterns, outputs);
 	}
-	
+
 	///\brief Calculates the input of the hidden neurons given the state of the visible in a batch-vise fassion.
 	///
 	///@param inputs the batch of vectors the input of the hidden neurons is stored in
 	///@param visibleStates the batch of states of the visible neurons
-	void inputHidden(RealMatrix& inputs, RealMatrix const& visibleStates)const{
+	void inputHidden(RealMatrix& inputs, RealMatrix const& visibleStates)const {
 		SIZE_CHECK(visibleStates.size1() == inputs.size1());
 		SIZE_CHECK(inputs.size2() == m_hiddenNeurons.size());
-		SIZE_CHECK( visibleStates.size2() == m_visibleNeurons.size());
-		
-		axpy_prod(m_visibleNeurons.phi(visibleStates),trans(m_weightMatrix),inputs);
+		SIZE_CHECK(visibleStates.size2() == m_visibleNeurons.size());
+
+		axpy_prod(m_visibleNeurons.phi(visibleStates), trans(m_weightMatrix), inputs);
 	}
 
 
@@ -249,49 +246,49 @@ public:
 	///
 	///@param inputs the vector the input of the visible neurons is stored in
 	///@param hiddenStates the state of the hidden neurons
-	void inputVisible(RealMatrix& inputs, RealMatrix const& hiddenStates)const{
+	void inputVisible(RealMatrix& inputs, RealMatrix const& hiddenStates)const {
 		SIZE_CHECK(hiddenStates.size1() == inputs.size1());
 		SIZE_CHECK(inputs.size2() == m_visibleNeurons.size());
-		
-		axpy_prod(m_hiddenNeurons.phi(hiddenStates),m_weightMatrix,inputs);
+
+		axpy_prod(m_hiddenNeurons.phi(hiddenStates), m_weightMatrix, inputs);
 	}
-	
+
 	using base_type::eval;
-	
-	
+
+
 	///\brief Returns the number of hidden Neurons.
-	std::size_t numberOfHN()const{
+	std::size_t numberOfHN()const {
 		return m_hiddenNeurons.size();
 	}
 	///\brief Returns the number of visible Neurons.
-	std::size_t numberOfVN()const{
+	std::size_t numberOfVN()const {
 		return m_visibleNeurons.size();
 	}
-	
+
 	/// \brief Reads the network from an archive.
-	void read(InArchive& archive){
+	void read(InArchive& archive) {
 		archive >> m_weightMatrix;
 		archive >> m_hiddenNeurons;
 		archive >> m_visibleNeurons;
-		
+
 		//serialization of the rng is a bit...complex
 		//let's hope that we can remove this hack one time. But we really can't ignore the state of the rng.
 		std::string str;
-		archive>> str;
+		archive >> str;
 		std::stringstream stream(str);
-		stream>> *mpe_rng;
+		stream >> *mpe_rng;
 	}
 
 	/// \brief Writes the network to an archive.
-	void write(OutArchive& archive) const{
+	void write(OutArchive& archive) const {
 		archive << m_weightMatrix;
 		archive << m_hiddenNeurons;
 		archive << m_visibleNeurons;
-		
+
 		std::stringstream stream;
-		stream <<*mpe_rng;
+		stream << *mpe_rng;
 		std::string str = stream.str();
-		archive <<str;
+		archive << str;
 	}
 
 };

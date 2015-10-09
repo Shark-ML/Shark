@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Functions for measuring the area under the (ROC) curve
- * 
- * 
+ *
+ *
  *
  * \author      Christian Igel
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -41,16 +41,15 @@
 namespace shark {
 ///
 /// \brief Negative area under the curve
-/// 
+///
 /// This class computes the area under the ROC (receiver operating characteristic) curve.
 /// It implements the algorithm described in:
 /// Tom Fawcett. ROC Graphs: Notes and Practical Considerations for Researchers. 2004
 ///
-/// The area is negated so that optimizing the AUC corresponds to a minimization task. 
+/// The area is negated so that optimizing the AUC corresponds to a minimization task.
 ///
 template<class LabelType = unsigned int, class OutputType = RealVector>
-class NegativeAUC : public AbstractCost<LabelType, OutputType>
-{
+class NegativeAUC : public AbstractCost<LabelType, OutputType> {
 public:
 	typedef KeyValuePair< double, LabelType > AUCPair;
 
@@ -65,11 +64,11 @@ public:
 	{ return "NegativeAUC"; }
 
 	/// \brief Computes area under the curve.
-  	/// \param target: class label, 0 or 1
+	/// \param target: class label, 0 or 1
 	/// \param prediction: prediction by classifier, OutputType-valued vector
 	/// \param column: indicates the column of the prediction vector interpreted as probability of positive class
 	double eval(Data<LabelType> const& target, Data<OutputType> const& prediction, unsigned int column) const {
-		SHARK_CHECK(dataDimension(prediction) > column,"[NegativeAUC::eval] column number too large");
+		SHARK_CHECK(dataDimension(prediction) > column, "[NegativeAUC::eval] column number too large");
 
 		std::size_t elements = target.numberOfElements();
 
@@ -77,7 +76,7 @@ public:
 		unsigned N = 0; // negative examples
 		std::vector<AUCPair> L(elements); // list of predictions and labels
 
-		for(std::size_t i=0; i!= elements; i++) { // build list
+		for(std::size_t i = 0; i != elements; i++) { // build list
 			LabelType t = target.element(i);
 			// negate predictions if m_invert is set
 			if(!m_invert)
@@ -85,13 +84,13 @@ public:
 			else
 				L[i] = AUCPair(-prediction.element(i)(column), t);
 			// count positive and negative examples
-			if(t > 0) 
+			if(t > 0)
 				P++;
-			else 
+			else
 				N++;
-		}    
+		}
 
-		std::sort (L.begin(), L.end(),std::greater<AUCPair>() ); // sort in decreasing order
+		std::sort(L.begin(), L.end(), std::greater<AUCPair>());  // sort in decreasing order
 
 		double   A = 0; // area
 		unsigned TP = 0; // true positives
@@ -99,20 +98,20 @@ public:
 		unsigned TPPrev = 0; // previous true positives
 		unsigned FPPrev = 0; // previous false positives
 		double   predictionPrev = -std::numeric_limits<double>::max(); // previous prediction
-		for(std::size_t i=0; i != elements; i++)  {
-			if(L[i].key != predictionPrev){
-				A += trapArea(FP/double(N),FPPrev/double(N),TP/double(P),TPPrev/double(P));
+		for(std::size_t i = 0; i != elements; i++)  {
+			if(L[i].key != predictionPrev) {
+				A += trapArea(FP / double(N), FPPrev / double(N), TP / double(P), TPPrev / double(P));
 				predictionPrev = L[i].key;
 				FPPrev = FP;
 				TPPrev = TP;
 			}
-			if(L[i].value > 0) 
+			if(L[i].value > 0)
 				TP++; // positive example
-			else 
+			else
 				FP++; // negative example
 		}
 		// deviation from the original algorithm description: A += trapArea(1, FPPrev, 1, TPPrev);
-		A += trapArea(FP/double(N), FPPrev/double(N), TP/double(P), TPPrev/double(P));
+		A += trapArea(FP / double(N), FPPrev / double(N), TP / double(P), TPPrev / double(P));
 
 		//~ A /= double(N*P);
 		return -A;
@@ -128,12 +127,12 @@ public:
 	/// \param target: class label, 0 or 1
 	/// \param prediction: prediction by classifier, OutputType-valued vector
 	double eval(Data<LabelType> const& target, Data<OutputType>  const& prediction) const {
-		SHARK_CHECK(prediction.numberOfElements() >= 1,"[NegativeAUC::eval] empty prediction set");
+		SHARK_CHECK(prediction.numberOfElements() >= 1, "[NegativeAUC::eval] empty prediction set");
 
 		std::size_t dim = dataDimension(prediction);
-		if(dim == 1) 
+		if(dim == 1)
 			return eval(target, prediction, 0);
-		else if(dim == 2) 
+		else if(dim == 2)
 			return eval(target, prediction, 1);
 
 		throw SHARKEXCEPTION("[NegativeAUC::eval] no default value for column");
@@ -143,8 +142,8 @@ public:
 
 protected:
 	double trapArea(double x1, double x2, double y1, double y2) const {
-		double base = std::abs(x1-x2);
-		double heightAvg = (y1+y2)/2;
+		double base = std::abs(x1 - x2);
+		double heightAvg = (y1 + y2) / 2;
 		return base * heightAvg;
 	}
 
@@ -152,19 +151,18 @@ protected:
 };
 
 ///
-/// \brief Negative Wilcoxon-Mann-Whitney statistic 
-/// 
+/// \brief Negative Wilcoxon-Mann-Whitney statistic
+///
 /// This class computes the Wilcoxon-Mann-Whitney statistic, which is
 /// an unbiased estimate of the area under the ROC curve.
 ///
 /// See, for example:
 /// Corinna Cortes, Mehryar Mohri. Confidence Intervals for the Area under the ROC Curve. NIPS, 2004
 ///
-/// The area is negated so that optimizing the AUC corresponds to a minimization task. 
+/// The area is negated so that optimizing the AUC corresponds to a minimization task.
 ///
 template<class LabelType = unsigned int, class OutputType = LabelType>
-class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, OutputType>
-{
+class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, OutputType> {
 public:
 	/// Constructor.
 	/// \param invert: if set to true, the role of positive and negative class are switched
@@ -181,15 +179,15 @@ public:
 	/// \param prediction: interpreted as binary class label
 	/// \param column: indicates the column of the prediction vector interpreted as probability of positive class
 	double eval(Data<LabelType> const& target, Data<OutputType> const& prediction, unsigned int column) const {
-		SHARK_CHECK(prediction(0).size() > column,"[NegativeWilcoxonMannWhitneyStatistic::eval] column number too large");
+		SHARK_CHECK(prediction(0).size() > column, "[NegativeWilcoxonMannWhitneyStatistic::eval] column number too large");
 		std::vector<double> pos, neg;
-		for(std::size_t i=0; i<prediction.size(); i++) {
-			if(!m_invert){
-				if(target(i) > 0) 
+		for(std::size_t i = 0; i < prediction.size(); i++) {
+			if(!m_invert) {
+				if(target(i) > 0)
 					pos.push_back(prediction.element(i)(column));
-				else  
+				else
 					neg.push_back(prediction.element(i)(column));
-			}else{
+			} else {
 				if(target(i) > 0)
 					pos.push_back(-prediction.element(i)(column));
 				else
@@ -199,45 +197,45 @@ public:
 		std::size_t m = pos.size();
 		std::size_t n = neg.size();
 
-		std::sort (pos.begin(), pos.end());
-		std::sort (neg.begin(), neg.end());
+		std::sort(pos.begin(), pos.end());
+		std::sort(neg.begin(), neg.end());
 
 		double A = 0;
 		for(std::size_t i = 0, j = 0; i != m; i++) {
-			A += j; 
+			A += j;
 			for(std::size_t j = 0; j != n; j++) {
-				if(pos[i] > neg[j]) 
+				if(pos[i] > neg[j])
 					A++;
-				else 
+				else
 					break;
 			}
 		}
 
 #ifdef DEBUG
-		// most naive implementation 
+		// most naive implementation
 		double verifyA = 0.;
-		for(std::size_t i=0; i<m; i++) {
-			for(std::size_t  j=0; j<n; j++) {
+		for(std::size_t i = 0; i < m; i++) {
+			for(std::size_t  j = 0; j < n; j++) {
 				if(pos[i] > neg[j]) verifyA++;
 			}
 		}
-		if (A!=verifyA) {
-			throw( shark::Exception( "shark::WilcoxonMannWhitneyStatistic::eval: error in algorithm, efficient and naive implementation do no coincide", __FILE__, __LINE__ ) );
+		if(A != verifyA) {
+			throw(shark::Exception("shark::WilcoxonMannWhitneyStatistic::eval: error in algorithm, efficient and naive implementation do no coincide", __FILE__, __LINE__));
 		}
 #endif
 
-		return -A / (n*m);
+		return -A / (n * m);
 	}
 
 	double eval(Data<LabelType> const& target, Data<OutputType>  const& prediction) const {
-		SHARK_CHECK(prediction.numberOfElements() >= 1,"[NegativeAUC::eval] empty prediction set");
+		SHARK_CHECK(prediction.numberOfElements() >= 1, "[NegativeAUC::eval] empty prediction set");
 
 		std::size_t dim = dataDimension(prediction);
-		if(dim == 1) 
+		if(dim == 1)
 			return eval(target, prediction, 0);
-		else if(dim == 2) 
+		else if(dim == 2)
 			return eval(target, prediction, 1);
-		
+
 		throw SHARKEXCEPTION("[NegativeAUC::eval] no default value for column");
 		return 0.;
 	}

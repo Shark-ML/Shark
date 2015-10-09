@@ -14,47 +14,42 @@
 
 using namespace shark;
 
-BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_CMA)
+BOOST_AUTO_TEST_SUITE(Algorithms_DirectSearch_CMA)
 
-BOOST_AUTO_TEST_CASE( CMA_Cigar )
-{
+BOOST_AUTO_TEST_CASE(CMA_Cigar) {
 	Cigar function(3);
 	CMA optimizer;
 	ElitistCMA elitistCMA;
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << std::endl;
+	test_function(optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10);
 }
 
-BOOST_AUTO_TEST_CASE( CMA_Discus )
-{
+BOOST_AUTO_TEST_CASE(CMA_Discus) {
 	Discus function(3);
 	CMA optimizer;
 
-	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
+	test_function(optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10);
 }
 
-BOOST_AUTO_TEST_CASE( CMA_Ellipsoid )
-{
+BOOST_AUTO_TEST_CASE(CMA_Ellipsoid) {
 	Ellipsoid function(5);
 	CMA optimizer;
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	test_function(optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10);
 }
 
-BOOST_AUTO_TEST_CASE( CMA_Rosenbrock )
-{
-	Rosenbrock function( 3 );
+BOOST_AUTO_TEST_CASE(CMA_Rosenbrock) {
+	Rosenbrock function(3);
 	CMA optimizer;
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	test_function(optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10);
 }
 
-BOOST_AUTO_TEST_CASE( CMA__Ellipsoid_Niko )
-{
+BOOST_AUTO_TEST_CASE(CMA__Ellipsoid_Niko) {
 	const unsigned N = 10;
 	RealVector x0(10, 0.1);
 	Ellipsoid elli(N, 1E6);
@@ -63,13 +58,12 @@ BOOST_AUTO_TEST_CASE( CMA__Ellipsoid_Niko )
 	cma.init(elli, x0);
 	cma.setSigma(0.1);
 
-	for(unsigned i=0; i<6000; i++) 	cma.step( elli );
+	for(unsigned i = 0; i < 6000; i++) 	cma.step(elli);
 	BOOST_CHECK(cma.solution().value < 1E-8);
 	BOOST_CHECK(cma.condition() > 1E5);
 }
 
-BOOST_AUTO_TEST_CASE( CMA_Sphere_Niko )
-{
+BOOST_AUTO_TEST_CASE(CMA_Sphere_Niko) {
 	const unsigned N = 10;
 	RealVector x0(10, 0.1);
 	Sphere sphere(N);
@@ -80,8 +74,8 @@ BOOST_AUTO_TEST_CASE( CMA_Sphere_Niko )
 
 	bool sigmaHigh = false;
 	bool condHigh = false;
-	for(unsigned i=0; i<1500; i++) {
-		cma.step( sphere );
+	for(unsigned i = 0; i < 1500; i++) {
+		cma.step(sphere);
 		if(cma.sigma() > 0.01) sigmaHigh = true;
 		if(cma.condition() > 10) condHigh = true;
 	}

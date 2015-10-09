@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Soft-max transformation.
- * 
- * 
+ *
+ *
  *
  * \author      O. Krause, T. Glasmachers
  * \date        2010-2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -56,20 +56,19 @@ namespace shark {
 /// \f[
 ///      f_i(x) = \frac{\exp((2i-1)x)}{\exp(x_j)+\exp(-x_j)}
 /// \f]
-/// and the output dimension is 2. 
+/// and the output dimension is 2.
 ///
 /// This convention ensures that all models that are trained via CrossEntropy
 /// can be used as input to this model and the output will be the probability
 /// of the labels.
-	
-class Softmax : public AbstractModel<RealVector,RealVector>
-{
+
+class Softmax : public AbstractModel<RealVector, RealVector> {
 private:
-	struct InternalState : public State{
+	struct InternalState : public State {
 		RealMatrix results;
 
-		void resize(std::size_t numPatterns,std::size_t inputs){
-			results.resize(numPatterns,inputs);
+		void resize(std::size_t numPatterns, std::size_t inputs) {
+			results.resize(numPatterns, inputs);
 		}
 	};
 
@@ -83,48 +82,48 @@ public:
 	std::string name() const
 	{ return "Softmax"; }
 
-	RealVector parameterVector()const{
+	RealVector parameterVector()const {
 		return RealVector();
 	}
-	void setParameterVector(RealVector const& newParameters){
-		SIZE_CHECK(newParameters.size()==0);
+	void setParameterVector(RealVector const& newParameters) {
+		SIZE_CHECK(newParameters.size() == 0);
 	}
 
-	size_t inputSize()const{
+	size_t inputSize()const {
 		return m_inputSize;
 	}
-	size_t outputSize()const{
-		return m_inputSize==1?2:m_inputSize;
+	size_t outputSize()const {
+		return m_inputSize == 1 ? 2 : m_inputSize;
 	}
-	size_t numberOfParameters()const{
+	size_t numberOfParameters()const {
 		return 0;
 	}
 
-	boost::shared_ptr<State> createState()const{
+	boost::shared_ptr<State> createState()const {
 		return boost::shared_ptr<State>(new InternalState());
 	}
 
-	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns,BatchOutputType& output)const;
-	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns,BatchOutputType& output, State & state)const;
-	using AbstractModel<RealVector,RealVector>::eval;
-	
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns, BatchOutputType& output)const;
+	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns, BatchOutputType& output, State & state)const;
+	using AbstractModel<RealVector, RealVector>::eval;
+
 	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients,  State const& state, RealVector& gradient
+	    BatchInputType const& patterns, BatchOutputType const& coefficients,  State const& state, RealVector& gradient
 	)const;
 	SHARK_EXPORT_SYMBOL void weightedInputDerivative(
-		BatchInputType const& patterns, RealMatrix const& coefficients,  State const& state, BatchOutputType& gradient
+	    BatchInputType const& patterns, RealMatrix const& coefficients,  State const& state, BatchOutputType& gradient
 	)const;
 
-	void setStructure(std::size_t inputSize){
+	void setStructure(std::size_t inputSize) {
 		m_inputSize = inputSize;
 	}
-	
+
 	/// From ISerializable, reads a model from an archive
-	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void read(InArchive & archive);
 
 	/// From ISerializable, writes a model to an archive
-	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
-	
+	SHARK_EXPORT_SYMBOL void write(OutArchive & archive) const;
+
 private:
 	std::size_t m_inputSize;
 };

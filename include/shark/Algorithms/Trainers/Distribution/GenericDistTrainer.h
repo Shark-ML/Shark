@@ -1,30 +1,30 @@
 /*!
- * 
+ *
  *
  * \brief       Implementations of various distribution trainers.
- * 
- * 
+ *
+ *
  *
  * \author      B. Li
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -44,22 +44,20 @@ namespace shark {
 ///
 /// @note all train functions should be reentrant
 class GenericDistTrainer
-:
-	public DistTrainerContainer
-{
+	:
+	public DistTrainerContainer {
 public:
 
 	/// Train an abstract distribution
 	/// @param abstractDist the distribution we want to train
 	/// @param input the input data used for training the dist
 	/// @throw throw shark exception if training attempt for this distribution failed
-	void train(AbstractDistribution& abstractDist, const std::vector<double>& input) const
-	{
+	void train(AbstractDistribution& abstractDist, const std::vector<double>& input) const {
 		// We have to do manual dispatching here unless distributions are trainer-aware/-friendly
 
-		if (tryTrain<Normal<DefaultRngType> >(abstractDist, getNormalTrainer(), input))
+		if(tryTrain<Normal<DefaultRngType> >(abstractDist, getNormalTrainer(), input))
 			return;
-		if (tryTrain<Normal<FastRngType> >(abstractDist, getNormalTrainer(), input))
+		if(tryTrain<Normal<FastRngType> >(abstractDist, getNormalTrainer(), input))
 			return;
 
 		// Other distributions go here
@@ -77,16 +75,12 @@ private:
 	/// @tparam TrainerType the type of trainer
 	/// @return true if the training attempt succeeded, false otherwise
 	template <typename DistType, typename TrainerType>
-	bool tryTrain(AbstractDistribution& abstractDist, const TrainerType& trainer, const std::vector<double>& input) const
-	{
+	bool tryTrain(AbstractDistribution& abstractDist, const TrainerType& trainer, const std::vector<double>& input) const {
 		DistType* dist = dynamic_cast<DistType*>(&abstractDist);
-		if (dist)
-		{
+		if(dist) {
 			trainer.train(*dist, input);
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}

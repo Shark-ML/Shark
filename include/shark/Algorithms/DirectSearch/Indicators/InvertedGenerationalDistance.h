@@ -45,57 +45,55 @@ namespace shark {
  */
 struct InvertedGenerationalDistance {
 
-	template<
-		typename IteratorTypeA,
-		typename IteratorTypeB
-	>
-	double operator()( IteratorTypeA itPF, IteratorTypeA itePF, IteratorTypeB itRF, IteratorTypeB iteRF )
-	{
+	template <
+	    typename IteratorTypeA,
+	    typename IteratorTypeB
+	    >
+	double operator()(IteratorTypeA itPF, IteratorTypeA itePF, IteratorTypeB itRF, IteratorTypeB iteRF) {
 		double result = 0.;
 		std::size_t noObjectives = e(*ita).size();
-		for( IteratorTypeA ita = itPF; ita != itePF; ++ita ) {
+		for(IteratorTypeA ita = itPF; ita != itePF; ++ita) {
 			SIZE_CHECK(e(*ita).size() == noObjectives);
-			
+
 			double tmp = std::numeric_limits<double>::max();
-			for( IteratorTypeB itb = itRF; itb != iteRF; ++itb ) {
+			for(IteratorTypeB itb = itRF; itb != iteRF; ++itb) {
 				SIZE_CHECK(e(*itb).size() == noObjectives);
-				double sum = 0.;				
-				for( unsigned int i = 0; i < noObjectives; i++ ) {
-					sum += sqr( e(*itb)[i] - e(*ita)[i] );
+				double sum = 0.;
+				for(unsigned int i = 0; i < noObjectives; i++) {
+					sum += sqr(e(*itb)[i] - e(*ita)[i]);
 				}
-				tmp = std::min( tmp, sum );
+				tmp = std::min(tmp, sum);
 			}
 			result += tmp;
 		}
 
-		return std::sqrt( result ) / noObjectives;
+		return std::sqrt(result) / noObjectives;
 	}
-	
+
 	/// \brief Given a pareto front, returns the index of the points which is the least contributer
 	template<typename Extractor, typename ParetofrontType>
-	std::size_t leastContributor( Extractor extractor, const ParetofrontType & front)
-	{
+	std::size_t leastContributor(Extractor extractor, const ParetofrontType & front) {
 		std::vector<double> relativeApproximation(front.size());
-		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
-			relativeApproximation[i] = (*this)( front.begin()+i,front.begin()+(i+1), front.begin(), front.end(), extractor );
+		SHARK_PARALLEL_FOR(int i = 0; i < static_cast< int >(front.size()); i++) {
+			relativeApproximation[i] = (*this)(front.begin() + i, front.begin() + (i + 1), front.begin(), front.end(), extractor);
 		}
-		
-		return std::min_element( relativeApproximation.begin(), relativeApproximation.end() ) - relativeApproximation.begin();
+
+		return std::min_element(relativeApproximation.begin(), relativeApproximation.end()) - relativeApproximation.begin();
 	}
-	
+
 	/// \brief Updates the internal variables of the indicator using a whole population.
 	///
 	/// Empty for this Indicator
 	/// \param extractor Functor returning the fitness values
 	/// \param set The set of points.
 	template<typename Extractor, typename PointSet>
-	void updateInternals(Extractor extractor, PointSet const& set){
+	void updateInternals(Extractor extractor, PointSet const& set) {
 		(void)extractor;
 		(void)set;
 	}
 
 	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {
+	void serialize(Archive & archive, const unsigned int version) {
 		(void)archive;
 		(void)version;
 	}

@@ -20,56 +20,52 @@
 
 #include "TestObjectiveFunction.h"
 
-BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_Benchmarks)
+BOOST_AUTO_TEST_SUITE(ObjectiveFunctions_Benchmarks)
 
-BOOST_AUTO_TEST_CASE( Himmelblau ) {
+BOOST_AUTO_TEST_CASE(Himmelblau) {
 	shark::Himmelblau hb;
-	shark::RealVector v( 2 );
-	
-	v( 0 ) = -0.270844;
-	v( 1 ) = -0.923038;
+	shark::RealVector v(2);
 
-	BOOST_CHECK_SMALL( hb( v ) - 181.616, 1E-3 );
+	v(0) = -0.270844;
+	v(1) = -0.923038;
 
-	v( 0 ) = 3;
-	v( 1 ) = 2;
-	BOOST_CHECK_SMALL( hb( v ), 1E-10 );
+	BOOST_CHECK_SMALL(hb(v) - 181.616, 1E-3);
 
-	v( 0 ) = -2.805118;
-	v( 1 ) = 3.131312;
-	BOOST_CHECK_SMALL( hb( v ), 1E-10 );
+	v(0) = 3;
+	v(1) = 2;
+	BOOST_CHECK_SMALL(hb(v), 1E-10);
 
-	v( 0 ) = -3.779310;
-	v( 1 ) = -3.283186;
-	BOOST_CHECK_SMALL( hb( v ), 1E-10 );
+	v(0) = -2.805118;
+	v(1) = 3.131312;
+	BOOST_CHECK_SMALL(hb(v), 1E-10);
 
-	v( 0 ) = 3.584428;
-	v( 1 ) = -1.848126;
-	BOOST_CHECK_SMALL( hb( v ), 1E-10 );
+	v(0) = -3.779310;
+	v(1) = -3.283186;
+	BOOST_CHECK_SMALL(hb(v), 1E-10);
+
+	v(0) = 3.584428;
+	v(1) = -1.848126;
+	BOOST_CHECK_SMALL(hb(v), 1E-10);
 }
 
-BOOST_AUTO_TEST_CASE( Rosenbrock_Derivative )
-{
+BOOST_AUTO_TEST_CASE(Rosenbrock_Derivative) {
 	const std::size_t dimensions = 5;
 	const unsigned trials = 10000;
-	
+
 	shark::Rosenbrock rosenbrock(dimensions);
-	for(unsigned i = 0; i != trials; ++i)
-	{
+	for(unsigned i = 0; i != trials; ++i) {
 		shark::RealVector point = rosenbrock.proposeStartingPoint();
-		shark::testDerivative(rosenbrock, point,1.e-7,1.e-7,0.005);
+		shark::testDerivative(rosenbrock, point, 1.e-7, 1.e-7, 0.005);
 	}
 }
-BOOST_AUTO_TEST_CASE( Ellipsoid_Derivative )
-{
+BOOST_AUTO_TEST_CASE(Ellipsoid_Derivative) {
 	const std::size_t dimensions = 5;
 	const unsigned trials = 10000;
-	
+
 	shark::Ellipsoid ellipsoid(dimensions);
-	for(unsigned i = 0; i != trials; ++i)
-	{
+	for(unsigned i = 0; i != trials; ++i) {
 		shark::RealVector point = ellipsoid.proposeStartingPoint();
-		shark::testDerivative(ellipsoid, point,1.e-5,1.e-9);
+		shark::testDerivative(ellipsoid, point, 1.e-5, 1.e-9);
 	}
 }
 

@@ -62,56 +62,55 @@ struct AdditiveEpsilonIndicator {
 	 * \param [in] iteRF Iterator pointing behind the last valid individual of the reference front.
 	 * \param [in,out] e Extractor instance that maps elements of the set to \f$\mathbb{R}^d\f$.
 	 */
-	template<
-		typename IteratorTypeA,
-		typename IteratorTypeB,
-		typename Extractor
-	> 
-	double operator()( IteratorTypeA itPF, IteratorTypeA itePF, IteratorTypeB itRF, IteratorTypeB iteRF, Extractor & e ){
+	template <
+	    typename IteratorTypeA,
+	    typename IteratorTypeB,
+	    typename Extractor
+	    >
+	double operator()(IteratorTypeA itPF, IteratorTypeA itePF, IteratorTypeB itRF, IteratorTypeB iteRF, Extractor & e) {
 		double result = -std::numeric_limits<double>::max();
-		for( IteratorTypeB itb = itRF; itb != iteRF; ++itb ) {
+		for(IteratorTypeB itb = itRF; itb != iteRF; ++itb) {
 			double delta = std::numeric_limits<double>::max();
-			for( IteratorTypeA ita = itPF; ita != itePF;++ita ) {
-				SIZE_CHECK(e( *ita ).size() == e( *itb ).size());
-				delta = std::min( delta, max(e(*itb)-e(*ita)) );
+			for(IteratorTypeA ita = itPF; ita != itePF; ++ita) {
+				SIZE_CHECK(e(*ita).size() == e(*itb).size());
+				delta = std::min(delta, max(e(*itb) - e(*ita)));
 			}
-			result = std::max( result, delta );
+			result = std::max(result, delta);
 		}
 
 		return result;
 	}
-	
+
 	/// \brief Given a pareto front, returns the index of the points which is the least contributer
 	template<typename Extractor, typename ParetofrontType>
-	unsigned int leastContributor( Extractor extractor, const ParetofrontType & front)
-	{
+	unsigned int leastContributor(Extractor extractor, const ParetofrontType & front) {
 		std::vector<double> relativeApproximation(front.size());
-		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
+		SHARK_PARALLEL_FOR(int i = 0; i < static_cast< int >(front.size()); i++) {
 			//find the minimum distance the front with one point removed has to be moved to dominate the original front
 			double result = -std::numeric_limits<double>::max();
-			for(std::size_t j = 0; j != front.size(); ++j){
+			for(std::size_t j = 0; j != front.size(); ++j) {
 				if(j == i) continue; //this point is removed
-				result = std::min<double>(result,max(extractor(front[i])-extractor(front[j]))); 
+				result = std::min<double>(result, max(extractor(front[i]) - extractor(front[j])));
 			}
 			relativeApproximation[i] = result;
 		}
-		
-		return std::min_element( relativeApproximation.begin(), relativeApproximation.end() ) - relativeApproximation.begin();
+
+		return std::min_element(relativeApproximation.begin(), relativeApproximation.end()) - relativeApproximation.begin();
 	}
-	
+
 	/// \brief Updates the internal variables of the indicator using a whole population.
 	///
 	/// Empty for this Indicator
 	/// \param extractor Functor returning the fitness values
 	/// \param set The set of points.
 	template<typename Extractor, typename PointSet>
-	void updateInternals(Extractor extractor, PointSet const& set){
+	void updateInternals(Extractor extractor, PointSet const& set) {
 		(void)extractor;
 		(void)set;
 	}
 
 	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {
+	void serialize(Archive & archive, const unsigned int version) {
 		(void)archive;
 		(void)version;
 	}

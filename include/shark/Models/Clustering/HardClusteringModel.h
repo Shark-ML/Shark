@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Model for "hard" clustering.
- * 
- * 
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -52,8 +52,7 @@ namespace shark {
 /// See also SoftClusteringModel for general cluster membership.
 ///
 template <class InputT>
-class HardClusteringModel : public ClusteringModel<InputT, unsigned int>
-{
+class HardClusteringModel : public ClusteringModel<InputT, unsigned int> {
 	typedef ClusteringModel<InputT, unsigned int> base_type;
 	typedef AbstractClustering<InputT> ClusteringType;
 public:
@@ -61,22 +60,22 @@ public:
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	typedef typename base_type::InputType InputType;
 	typedef typename base_type::OutputType OutputType;
-	
-	
+
+
 	/// Constructor
 	HardClusteringModel(ClusteringType* clustering)
-	: base_type(clustering){
+		: base_type(clustering) {
 	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "HardClusteringModel"; }
-	
+
 	/// \brief Compute best matching cluster.
 	///
 	/// \par
 	/// The actual computation is redirected to the clustering object.
-	void eval(InputType const & pattern, OutputType& output)const{
+	void eval(InputType const & pattern, OutputType& output)const {
 		output = this->mep_clustering->hardMembership(pattern);
 	}
 
@@ -84,7 +83,7 @@ public:
 	///
 	/// \par
 	/// The actual computation is redirected to the clustering object.
-	void eval(BatchInputType const & patterns, BatchOutputType& outputs)const{
+	void eval(BatchInputType const & patterns, BatchOutputType& outputs)const {
 		outputs = this->mep_clustering->hardMembership(patterns);
 	}
 };

@@ -1,30 +1,30 @@
 /*!
- * 
+ *
  *
  * \brief       Convex quadratic benchmark function with single dominant axis
 
- * 
+ *
  *
  * \author      -
  * \date        -
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -41,7 +41,7 @@ namespace shark {
  */
 struct Cigar : public SingleObjectiveFunction {
 
-	Cigar(unsigned int numberOfVariables = 5, double alpha=1.E-3) : m_alpha(alpha) {
+	Cigar(unsigned int numberOfVariables = 5, double alpha = 1.E-3) : m_alpha(alpha) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;
 	}
@@ -50,22 +50,22 @@ struct Cigar : public SingleObjectiveFunction {
 	std::string name() const
 	{ return "Cigar"; }
 
-	std::size_t numberOfVariables()const{
+	std::size_t numberOfVariables()const {
 		return m_numberOfVariables;
 	}
-	
-	bool hasScalableDimensionality()const{
+
+	bool hasScalableDimensionality()const {
 		return true;
 	}
-	
-	void setNumberOfVariables( std::size_t numberOfVariables ){
+
+	void setNumberOfVariables(std::size_t numberOfVariables) {
 		m_numberOfVariables = numberOfVariables;
 	}
 
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(numberOfVariables());
 
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for(unsigned int i = 0; i < x.size(); i++) {
 			x(i) = Rng::uni(0, 1);
 		}
 		return x;
@@ -75,7 +75,7 @@ struct Cigar : public SingleObjectiveFunction {
 		m_evaluationCounter++;
 
 		double sum = m_alpha * sqr(p(0));
-		for (unsigned int i = 1; i < p.size(); i++)
+		for(unsigned int i = 1; i < p.size(); i++)
 			sum +=  sqr(p(i));
 
 		return sum;

@@ -1,37 +1,37 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Multi-objective optimization benchmark function IHR 2.
- * 
+ *
  * The function is described in
- * 
- * Christian Igel, Nikolaus Hansen, and Stefan Roth. 
- * Covariance Matrix Adaptation for Multi-objective Optimization. 
+ *
+ * Christian Igel, Nikolaus Hansen, and Stefan Roth.
+ * Covariance Matrix Adaptation for Multi-objective Optimization.
  * Evolutionary Computation 15(1), pp. 1-28, 2007
- * 
- * 
+ *
+ *
  *
  * \author      -
  * \date        -
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -45,19 +45,18 @@
 
 #include <shark/LinAlg/rotations.h>
 
-namespace shark{
+namespace shark {
 /*! \brief Multi-objective optimization benchmark function IHR 2.
 *
 *  The function is described in
 *
-*  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
-*  Covariance Matrix Adaptation for Multi-objective Optimization. 
-*  Evolutionary Computation 15(1), pp. 1-28, 2007 
+*  Christian Igel, Nikolaus Hansen, and Stefan Roth.
+*  Covariance Matrix Adaptation for Multi-objective Optimization.
+*  Evolutionary Computation 15(1), pp. 1-28, 2007
 */
-struct IHR2 : public MultiObjectiveFunction
-{
-	IHR2(std::size_t numVariables = 0) 
-	: m_handler(numVariables,-1, 1 ){
+struct IHR2 : public MultiObjectiveFunction {
+	IHR2(std::size_t numVariables = 0)
+		: m_handler(numVariables, -1, 1) {
 		announceConstraintHandler(&m_handler);
 	}
 
@@ -65,58 +64,58 @@ struct IHR2 : public MultiObjectiveFunction
 	std::string name() const
 	{ return "IHR2"; }
 
-	std::size_t numberOfObjectives()const{
+	std::size_t numberOfObjectives()const {
 		return 2;
 	}
-	
-	std::size_t numberOfVariables()const{
+
+	std::size_t numberOfVariables()const {
 		return m_handler.dimensions();
 	}
-	
-	bool hasScalableDimensionality()const{
+
+	bool hasScalableDimensionality()const {
 		return true;
 	}
 
-	void setNumberOfVariables( std::size_t numberOfVariables ){
+	void setNumberOfVariables(std::size_t numberOfVariables) {
 		m_handler.setBounds(
-			SearchPointType(numberOfVariables,-1),
-			SearchPointType(numberOfVariables,1)
+		    SearchPointType(numberOfVariables, -1),
+		    SearchPointType(numberOfVariables, 1)
 		);
 	}
-	
+
 	void init() {
 		m_rotationMatrix = blas::randomRotationMatrix(numberOfVariables());
-		m_ymax = 1.0/norm_inf(row(m_rotationMatrix,0));
+		m_ymax = 1.0 / norm_inf(row(m_rotationMatrix, 0));
 	}
 
-	ResultType eval( const SearchPointType & x )const {
+	ResultType eval(const SearchPointType & x)const {
 		m_evaluationCounter++;
 
-		ResultType value( 2 );
+		ResultType value(2);
 
-		SearchPointType y = prod(m_rotationMatrix,x);
+		SearchPointType y = prod(m_rotationMatrix, x);
 
-		value[0] = std::abs( y( 0 ) );
+		value[0] = std::abs(y(0));
 
 		double g = 0;
-		for (unsigned i = 1; i < numberOfVariables(); i++)
-			g += hg( y( i ) );
+		for(unsigned i = 1; i < numberOfVariables(); i++)
+			g += hg(y(i));
 		g = 1 + 9 * g / (numberOfVariables() - 1.);
 
 
-		value[1] = g * hf(1. - sqr(y( 0 ) / g), y( 0 ));
+		value[1] = g * hf(1. - sqr(y(0) / g), y(0));
 
 		return value;
 	}
 
 	double hf(double x, double y0)const {
-		if( std::abs(y0) <= m_ymax )
+		if(std::abs(y0) <= m_ymax)
 			return x;
-		return std::abs( y0 ) + 1.;
+		return std::abs(y0) + 1.;
 	}
 
 	double hg(double x)const {
-		return sqr(x) / ( std::abs(x) + 0.1 );
+		return sqr(x) / (std::abs(x) + 0.1);
 	}
 private:
 	double m_ymax;

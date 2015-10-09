@@ -46,8 +46,7 @@
 #include <cmath>
 
 
-namespace shark
-{
+namespace shark {
 
 ///
 /// \brief Partly Precomputed version of a matrix for quadratic programming
@@ -65,8 +64,7 @@ namespace shark
 /// In particular this will help the KernelSGD/Pegasos algorithm.
 ///
 template <class Matrix>
-class PartlyPrecomputedMatrix
-{
+class PartlyPrecomputedMatrix {
 public:
 	typedef typename Matrix::QpFloatType QpFloatType;
 
@@ -77,8 +75,7 @@ public:
 	//                                  depend on this value.
 	PartlyPrecomputedMatrix(Matrix* base, std::size_t cachesize = 0x4000000)
 		: m_cacheSize(cachesize)
-		, m_baseMatrix(base)
-	{
+		, m_baseMatrix(base) {
 		if((m_baseMatrix == NULL) || (m_baseMatrix ->size() == 0))
 			throw SHARKEXCEPTION("Cannot cache a NULL matrix!");
 
@@ -101,10 +98,8 @@ public:
 		m_cachedMatrix.resize(m_nRows, m_baseMatrix ->size());
 
 		// copy the rows
-		for(std::size_t r = 0; r < m_cachedMatrix.size1(); r++)
-		{
-			for(std::size_t j = 0; j < m_baseMatrix->size(); j++)
-			{
+		for(std::size_t r = 0; r < m_cachedMatrix.size1(); r++) {
+			for(std::size_t j = 0; j < m_baseMatrix->size(); j++) {
 				m_cachedMatrix(r, j) = (*m_baseMatrix)(r, j);
 			}
 		}
@@ -115,8 +110,7 @@ public:
 	/// return, if a given row is cached
 	/// \param[in]  k       row to check
 	/// \return     is given row in cached matrix or not?
-	bool isCached(std::size_t k) const
-	{
+	bool isCached(std::size_t k) const {
 		if(k < m_cachedMatrix.size1())
 			return true;
 		return false;
@@ -129,22 +123,16 @@ public:
 	/// be recomputed on-the-fly and not stored.
 	/// param[in]  k       row to compute
 	/// param[in]  storage     vector to store the row. must be the same size as a row!
-	void row(std::size_t k, blas::vector<QpFloatType> &storage) const
-	{
+	void row(std::size_t k, blas::vector<QpFloatType> &storage) const {
 		RANGE_CHECK(k < m_originalNumberOfRows);
 		RANGE_CHECK(0 <= k);
 		SIZE_CHECK(storage.size() == m_cachedMatrix.size2());
-		if(isCached(k) == true)
-		{
-			for(std::size_t j = 0; j < m_cachedMatrix.size2(); j++)
-			{
+		if(isCached(k) == true) {
+			for(std::size_t j = 0; j < m_cachedMatrix.size2(); j++) {
 				storage[j] = m_cachedMatrix(k, j);
 			}
-		}
-		else
-		{
-			for(std::size_t j = 0; j < m_cachedMatrix.size2(); j++)
-			{
+		} else {
+			for(std::size_t j = 0; j < m_cachedMatrix.size2(); j++) {
 				storage[j] = (*m_baseMatrix)(k, j);
 			}
 		}
@@ -156,8 +144,7 @@ public:
 	/// param[in]  i       row of entry
 	/// param[in]  j       column entry
 	/// @return     value of matrix at given position
-	QpFloatType operator()(std::size_t i, std::size_t j) const
-	{
+	QpFloatType operator()(std::size_t i, std::size_t j) const {
 		return entry(i, j);
 	}
 
@@ -167,8 +154,7 @@ public:
 	/// param[in]  i       row of entry
 	/// param[in]  j       column entry
 	/// @return     value of matrix at given position
-	QpFloatType entry(std::size_t i, std::size_t j) const
-	{
+	QpFloatType entry(std::size_t i, std::size_t j) const {
 		// check if we have to compute that or not
 		if(isCached(i))
 			return m_cachedMatrix(i, j);
@@ -181,8 +167,7 @@ public:
 
 	/// return the number of cached rows
 	/// @return     number of rows that are cached
-	std::size_t size() const
-	{
+	std::size_t size() const {
 		return m_cachedMatrix.size();
 	}
 
@@ -190,8 +175,7 @@ public:
 
 	/// return size of cached matrix in QpFloatType units
 	/// @return     the capacity of the cached matrix in QpFloatType units
-	std::size_t getMaxCacheSize()
-	{
+	std::size_t getMaxCacheSize() {
 		return m_cachedMatrix.size() * m_cachedMatrix.size2();
 	}
 
@@ -200,8 +184,7 @@ public:
 	/// return the dimension of a row in the cache (as we do not shorten our
 	/// rows, this must be the same as the dimension of a row in the original kernel matrix).
 	/// @return     dimension of any cached row
-	std::size_t getCacheRowSize() const
-	{
+	std::size_t getCacheRowSize() const {
 		return m_cachedMatrix.size2();
 	}
 

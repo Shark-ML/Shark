@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Weighted sum of base kernels, each acting on a subset of features only.
- * 
- * 
+ *
+ *
  *
  * \author      M. Tuma, O.Krause
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -70,20 +70,19 @@ namespace shark {
 
 template<class InputType>
 class MklKernel
-: private detail::MklKernelBase<InputType>//order is important!
-, public WeightedSumKernel<InputType>
-{
+	: private detail::MklKernelBase<InputType>//order is important!
+	, public WeightedSumKernel<InputType> {
 private:
-    typedef detail::MklKernelBase<InputType> base_type1;
-    typedef WeightedSumKernel<InputType> base_type2;
+	typedef detail::MklKernelBase<InputType> base_type1;
+	typedef WeightedSumKernel<InputType> base_type2;
 public:
 
-    template<class KernelTuple>
-    MklKernel(KernelTuple const& kernels):base_type1(kernels),base_type2(base_type1::makeKernelVector()){}
+	template<class KernelTuple>
+	MklKernel(KernelTuple const& kernels): base_type1(kernels), base_type2(base_type1::makeKernelVector()) {}
 
-    /// \brief From INameable: return the class name.
-    std::string name() const
-    { return "MklKernel"; }
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "MklKernel"; }
 };
 
 }

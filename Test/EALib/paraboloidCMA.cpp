@@ -8,12 +8,11 @@
 #include <algorithm>
 #include <iostream>
 
-BOOST_AUTO_TEST_SUITE (EALib_paraboloidCMA)
+BOOST_AUTO_TEST_SUITE(EALib_paraboloidCMA)
 
-BOOST_AUTO_TEST_CASE( EALib_ParaboloidCMA )
-{
+BOOST_AUTO_TEST_CASE(EALib_ParaboloidCMA) {
 	const unsigned Seed = 44;
-	const unsigned Trials=30;
+	const unsigned Trials = 30;
 	const unsigned Dimension = 8;
 
 	double results[Trials];
@@ -37,23 +36,21 @@ BOOST_AUTO_TEST_CASE( EALib_ParaboloidCMA )
 
 	CMASearch cma;
 
-	for(size_t trial=0;trial!=Trials;++trial)
-	{
+	for(size_t trial = 0; trial != Trials; ++trial) {
 
 		// start point
-		RealVector start=blas::scalar_vector<double>(Dimension,Rng::uni(MinInit, MaxInit));
+		RealVector start = blas::scalar_vector<double>(Dimension, Rng::uni(MinInit, MaxInit));
 		cma.init(f, start, GlobalStepInit);
 
-		for (size_t i=0; i<Iterations; i++)
-		{
+		for(size_t i = 0; i < Iterations; i++) {
 			cma.run();
 		}
-		results[trial]=cma.bestSolutionFitness();
-		std::cout<<trial<<" "<<cma.bestSolutionFitness()<<std::endl;
+		results[trial] = cma.bestSolutionFitness();
+		std::cout << trial << " " << cma.bestSolutionFitness() << std::endl;
 	}
 	//sort results and test the median
-	std::sort(results,results+Trials);
-	BOOST_CHECK_SMALL(results[Trials/2],1.e-14);
+	std::sort(results, results + Trials);
+	BOOST_CHECK_SMALL(results[Trials / 2], 1.e-14);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

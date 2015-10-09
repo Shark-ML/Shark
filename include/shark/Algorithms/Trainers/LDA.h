@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       LDA
- * 
- * 
+ *
+ *
  *
  * \author      O. Krause
  * \date        2010
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -54,12 +54,11 @@ namespace shark {
 //! where \f$ p(x|c) = \exp(-(x-m_c)^T(C+\alpha I)(x-m_c)) \f$.
 //! \f$ m_c\f$ are the means of class c, \f$ C \f$ is the covariance matrix formed by all data points.
 //! The regularization paramter \f$ \alpha \f$ is by default 0. The trainer is implemented such, that
-//! it still works when C is singular, in this case the singular directions are ignored. 	
-class LDA : public AbstractWeightedTrainer<LinearClassifier<>, unsigned int>, public IParameterizable
-{
+//! it still works when C is singular, in this case the singular directions are ignored.
+class LDA : public AbstractWeightedTrainer<LinearClassifier<>, unsigned int>, public IParameterizable {
 public:
 	/// constructor
-	LDA(double regularization = 0.0){
+	LDA(double regularization = 0.0) {
 		setRegularization(regularization);
 	}
 
@@ -68,7 +67,7 @@ public:
 	{ return "Linear Discriminant Analysis (LDA)"; }
 
 	/// return the regularization constant
-	double regularization()const{
+	double regularization()const {
 		return m_regularization;
 	}
 

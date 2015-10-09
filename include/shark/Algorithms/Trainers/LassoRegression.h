@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       LASSO Regression
- * 
- * 
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        2013
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -67,8 +67,7 @@ namespace shark {
  *  single dimension.
  */
 template <class InputVectorType = RealVector>
-class LassoRegression : public AbstractTrainer<LinearModel<InputVectorType> >, public IParameterizable
-{
+class LassoRegression : public AbstractTrainer<LinearModel<InputVectorType> >, public IParameterizable {
 public:
 	typedef LinearModel<InputVectorType> ModelType;
 	typedef LabeledData<InputVectorType, RealVector> DataType;
@@ -78,9 +77,8 @@ public:
 	/// \param  _lambda    value of the regularization parameter (see class description)
 	/// \param  _accuracy  stopping criterion for the iterative solver, maximal gradient component of the objective function (see class description)
 	LassoRegression(double _lambda, double _accuracy = 0.01)
-	: m_lambda(_lambda)
-	, m_accuracy(_accuracy)
-	{
+		: m_lambda(_lambda)
+		, m_accuracy(_accuracy) {
 		RANGE_CHECK(m_lambda >= 0.0);
 		RANGE_CHECK(m_accuracy > 0.0);
 	}
@@ -91,60 +89,52 @@ public:
 
 
 	/// \brief Return the current setting of the regularization parameter.
-	double lambda() const
-	{ 
-		return m_lambda; 
+	double lambda() const {
+		return m_lambda;
 	}
 
 	/// \brief Set the regularization parameter.
-	void setLambda(double lambda)
-	{
+	void setLambda(double lambda) {
 		RANGE_CHECK(lambda >= 0.0);
 		m_lambda = lambda;
 	}
 
 	/// \brief Return the current setting of the accuracy (maximal gradient component of the optimization problem).
-	double accuracy() const
-	{
+	double accuracy() const {
 		return m_accuracy;
 	}
 
 	/// \brief Set the accuracy (maximal gradient component of the optimization problem).
-	void setAccuracy(double _accuracy)
-	{
+	void setAccuracy(double _accuracy) {
 		RANGE_CHECK(_accuracy > 0.0);
 		m_accuracy = _accuracy;
 	}
 
 	/// \brief Get the regularization parameter lambda through the IParameterizable interface.
-	RealVector parameterVector() const
-	{
+	RealVector parameterVector() const {
 		return RealVector(1, m_lambda);
 	}
 
 	/// \brief Set the regularization parameter lambda through the IParameterizable interface.
-	void setParameterVector(const RealVector& param)
-	{
+	void setParameterVector(const RealVector& param) {
 		SIZE_CHECK(param.size() == 1);
 		RANGE_CHECK(param(0) >= 0.0);
 		m_lambda = param(0);
 	}
 
 	/// \brief Return the number of parameters (one in this case).
-	size_t numberOfParameters() const
-	{
+	size_t numberOfParameters() const {
 		return 1;
 	}
 
 	/// \brief Train a linear model with LASSO regression.
-	void train(ModelType& model, DataType const& dataset)
-	{
+	void train(ModelType& model, DataType const& dataset) {
 		SIZE_CHECK(model.outputSize() == 1);
 
 		dim = inputDimension(dataset);
 		RealVector alpha(dim, 0.0);
 		trainInternal(alpha, dataset);
-		
+
 		RealMatrix mat(1, dim);
 		row(mat, 0) = alpha;
 		model.setStructure(mat);
@@ -153,8 +143,7 @@ public:
 protected:
 
 	/// \brief Actual training procedure.
-	void trainInternal(RealVector& alpha, DataType const& dataset)
-	{
+	void trainInternal(RealVector& alpha, DataType const& dataset) {
 		// strategy constants
 		const double CHANGE_RATE = 0.2;
 		const double PREF_MIN = 0.05;
@@ -165,21 +154,21 @@ protected:
 
 		//transpose the dataset and push it inside a single matrix
 		data = trans(createBatch(dataset.inputs().elements()));
-		label = column(createBatch(dataset.labels().elements()),0);
-		
+		label = column(createBatch(dataset.labels().elements()), 0);
+
 		RealVector diag(dim);
 		RealVector w = label;
 		UIntVector index(dim);
 
 		// pre-calculate diagonal matrix entries (feature-wise squared norms)
-		for (size_t i=0; i<dim; i++){
-			diag[i] = norm_sqr(row(data,i));
+		for(size_t i = 0; i < dim; i++) {
+			diag[i] = norm_sqr(row(data, i));
 		}
 
 		// prepare preferences for scheduling
-		RealVector pref(dim,1.0);
+		RealVector pref(dim, 1.0);
 		double prefsum = (double)dim;
-		
+
 
 		// prepare performance monitoring for self-adaptation
 		const double gain_learning_rate = 1.0 / dim;
@@ -190,8 +179,7 @@ protected:
 		// main optimization loop
 		std::size_t iter = 0;
 		std::size_t steps = 0;
-		while (true)
-		{
+		while(true) {
 			double maxvio = 0.0;
 
 			// define schedule
@@ -199,118 +187,98 @@ protected:
 			prefsum = 0.0;
 			int pos = 0;
 
-			for (std::size_t i=0; i<dim; i++)
-			{
+			for(std::size_t i = 0; i < dim; i++) {
 				double p = pref[i];
 				double n;
-				if (psum >= 1e-6 && p < psum) 
+				if(psum >= 1e-6 && p < psum)
 					n = (dim - pos) * p / psum;
-				else 
+				else
 					n = (dim - pos);                // for numerical stability
-				
+
 				unsigned int m = (unsigned int)floor(n);
 				double prob = n - m;
-				if ((double)rand() / (double)RAND_MAX < prob) m++;
-				for (std::size_t  j=0; j<m; j++)
-				{
+				if((double)rand() / (double)RAND_MAX < prob) m++;
+				for(std::size_t  j = 0; j < m; j++) {
 					index[pos] = i;
 					pos++;
 				}
 				psum -= p;
 				prefsum += p;
 			}
-			for (std::size_t i=0; i<dim; i++)
-			{
+			for(std::size_t i = 0; i < dim; i++) {
 				std::size_t r = rand() % dim;
 				std::swap(index[r], index[i]);
 			}
 
 			steps += dim;
-			for (size_t s=0; s<dim; s++)
-			{
+			for(size_t s = 0; s < dim; s++) {
 				std::size_t i = index[s];
 				double a = alpha[i];
 				double d = diag[i];
 
 				// compute "gradient component" <w, X_i>
-				double grad = inner_prod(w,row(data,i));
+				double grad = inner_prod(w, row(data, i));
 
 				// compute optimal coordinate descent step and corresponding gain
 				double vio = 0.0;
 				double gain = 0.0;
 				double delta = 0.0;
-				if (a == 0.0)
-				{
-					if (grad > lambda)
-					{
+				if(a == 0.0) {
+					if(grad > lambda) {
 						vio = grad - lambda;
 						delta = -vio / d;
 						gain = 0.5 * d * delta * delta;
-					}
-					else if (grad < -lambda)
-					{
+					} else if(grad < -lambda) {
 						vio = -grad - lambda;
 						delta = vio / d;
 						gain = 0.5 * d * delta * delta;
 					}
-				}
-				else if (a > 0.0)
-				{
+				} else if(a > 0.0) {
 					grad += lambda;
 					vio = std::fabs(grad);
 					delta = -grad / d;
-					if (delta < -a)
-					{
+					if(delta < -a) {
 						delta = -a;
 						gain = delta * (grad - 0.5 * d * delta);
 						double g0 = grad - a * d - 2.0 * lambda;
-						if (g0 > 0.0)
-						{
+						if(g0 > 0.0) {
 							double dd = -g0 / d;
 							gain = dd * (grad - 0.5 * d * dd);
 							delta += dd;
 						}
-					}
-					else gain = 0.5 * d * delta * delta;
-				}
-				else
-				{
+					} else gain = 0.5 * d * delta * delta;
+				} else {
 					grad -= lambda;
 					vio = std::fabs(grad);
 					delta = -grad / d;
-					if (delta > -a)
-					{
+					if(delta > -a) {
 						delta = -a;
 						gain = delta * (grad - 0.5 * d * delta);
 						double g0 = grad - a * d + 2.0 * lambda;
-						if (g0 < 0.0)
-						{
+						if(g0 < 0.0) {
 							double dd = -g0 / d;
 							gain = dd * (grad - 0.5 * d * dd);
 							delta += dd;
 						}
-					}
-					else gain = 0.5 * d * delta * delta;
+					} else gain = 0.5 * d * delta * delta;
 				}
 
 				// update state
-				if (vio > maxvio)
+				if(vio > maxvio)
 					maxvio = vio;
-				if (delta != 0.0)
-				{
+				if(delta != 0.0) {
 					alpha[i] += delta;
-					noalias(w) += delta*row(data,i);
+					noalias(w) += delta * row(data, i);
 				}
 
 				// update gain-based preferences
 				{
-					if (iter == 0) 
+					if(iter == 0)
 						average_gain += gain / (double)dim;
-					else
-					{
+					else {
 						double change = CHANGE_RATE * (gain / average_gain - 1.0);
 						double newpref = pref[i] * std::exp(change);
-						newpref = std::min(std::max(newpref,PREF_MIN),PREF_MAX);
+						newpref = std::min(std::max(newpref, PREF_MIN), PREF_MAX);
 						prefsum += newpref - pref[i];
 						pref[i] = newpref;
 						average_gain = (1.0 - gain_learning_rate) * average_gain + gain_learning_rate * gain;
@@ -319,23 +287,19 @@ protected:
 			}
 			iter++;
 
-			if (maxvio <= m_accuracy)
-			{
-				if (canstop)
+			if(maxvio <= m_accuracy) {
+				if(canstop)
 					break;
-				else
-				{
+				else {
 					// prepare full sweep for a reliable check of the stopping criterion
 					canstop = 1;
-					noalias(pref) = blas::repeat(10,dim);
+					noalias(pref) = blas::repeat(10, dim);
 					prefsum = (double)dim;
-					if (verbose) std::cout << "*" << std::flush;
+					if(verbose) std::cout << "*" << std::flush;
 				}
-			}
-			else
-			{
+			} else {
 				canstop = 0;
-				if (verbose) std::cout << "." << std::flush;
+				if(verbose) std::cout << "." << std::flush;
 			}
 		}
 	}

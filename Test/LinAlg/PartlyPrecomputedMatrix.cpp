@@ -51,13 +51,11 @@ using namespace shark;
 
 
 template <class InputType, class CacheType>
-class DummyKernelMatrix
-{
+class DummyKernelMatrix {
 public:
 	typedef CacheType QpFloatType;
 
-	DummyKernelMatrix(size_t _size)
-	{
+	DummyKernelMatrix(size_t _size) {
 		m_size = _size;
 	}
 
@@ -66,8 +64,7 @@ public:
 	{ return entry(i, j); }
 
 	/// return a single matrix entry
-	QpFloatType entry(std::size_t i, std::size_t j) const
-	{
+	QpFloatType entry(std::size_t i, std::size_t j) const {
 		return (QpFloatType)(i + 1) / (j + 1);
 	}
 
@@ -75,12 +72,10 @@ public:
 	///
 	///The entries start,...,end of the i-th row are computed and stored in storage.
 	///There must be enough room for this operation preallocated.
-	void row(std::size_t i, std::size_t start, std::size_t end, QpFloatType* storage) const
-	{
+	void row(std::size_t i, std::size_t start, std::size_t end, QpFloatType* storage) const {
 		m_accessCounter += end - start;
 
-		SHARK_PARALLEL_FOR(int j = start; j < (int) end; j++)
-		{
+		SHARK_PARALLEL_FOR(int j = start; j < (int) end; j++) {
 			storage[j - start] = entry(i, j);
 		}
 	}
@@ -111,10 +106,9 @@ protected:
 
 
 ///\brief test if the whole matrix fits, if we make the cache large enough
-BOOST_AUTO_TEST_SUITE (LinAlg_PartlyPrecomputedMatrix)
+BOOST_AUTO_TEST_SUITE(LinAlg_PartlyPrecomputedMatrix)
 
-BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
-{
+BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache) {
 
 	shark::Timer timer;
 	Rng::seed(floor(timer.now()));
@@ -124,8 +118,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 	size_t maxGamma = 100;
 	size_t repeats = 16;
 	bool verbose = false;
-	for(size_t i = 0; i < repeats; i++)
-	{
+	for(size_t i = 0; i < repeats; i++) {
 		// some random dimension
 		size_t currentDimension = Rng::discrete(2, maxDimension);
 
@@ -135,8 +128,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		// create unionjack matrix
 		std::vector<RealVector> unionJack(currentDimension);
 		RealVector unionJackVector(currentDimension);
-		for(size_t r = 0; r < currentDimension; r++)
-		{
+		for(size_t r = 0; r < currentDimension; r++) {
 			unionJackVector.clear();
 			unionJackVector[currentDimension - r - 1] += 1;
 			unionJackVector[r] += 1;
@@ -146,10 +138,8 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		Data<RealVector> unionJackData = createDataFromRange(unionJack);
 		if(verbose) std::cout << ".." << std::endl;
 
-		for(size_t r = 0; r < unionJackData.numberOfElements(); r++)
-		{
-			for(size_t c = 0; c < unionJackData.element(r).size(); c++)
-			{
+		for(size_t r = 0; r < unionJackData.numberOfElements(); r++) {
+			for(size_t c = 0; c < unionJackData.element(r).size(); c++) {
 				if(verbose) std::cout << " " << unionJackData.element(r)[c];
 			}
 			if(verbose) std::cout << std::endl;
@@ -175,10 +165,8 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		// if its odd: the row in the middle and the column in
 		// the middle have 1/gamma^6
 		size_t error = 0;
-		for(size_t r = 0; r < currentDimension; r++)
-		{
-			for(size_t c = 0; c < currentDimension; c++)
-			{
+		for(size_t r = 0; r < currentDimension; r++) {
+			for(size_t c = 0; c < currentDimension; c++) {
 				size_t expectedEntry =  gamma * gamma * gamma * gamma;
 				if((r == c) || (c == currentDimension - r - 1))
 					expectedEntry = 1;
@@ -198,8 +186,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		blas::vector<double> kernelRow(currentDimension, 0);
 		K.row(r, kernelRow);
 
-		for(size_t c = 0; c < currentDimension; c++)
-		{
+		for(size_t c = 0; c < currentDimension; c++) {
 			size_t expectedEntry =  gamma * gamma * gamma * gamma;
 			if((r == c) || (c == currentDimension - r - 1))
 				expectedEntry = 1;
@@ -217,16 +204,14 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		// find a cached and an uncached row
 
 		// test if isCached is what we expected
-		for(size_t r = 0; r < currentDimension; r++)
-		{
+		for(size_t r = 0; r < currentDimension; r++) {
 			// FIXME: everything below X should not be cached
 
-			if(K.isCached(r))
-            {
+			if(K.isCached(r)) {
 				if(verbose) { std::cout << "+";}
-            } else { 
-                if(verbose) {std::cout << "-";}
-            }
+			} else {
+				if(verbose) {std::cout << "-";}
+			}
 		}
 
 		//FIXME: do this cache-rows counting
@@ -241,24 +226,20 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 
 		size_t uncachedRowEvalCount = 0;
 		double uncachedStartTime = timer.now();
-		do
-		{
+		do {
 			// evaluate a whole uncached row
 			uncachedRowEvalCount++;
 			K.row(uncachedRowIndex, kernelRow);
-		}
-		while(timer.now() - uncachedStartTime < timespan);
+		} while(timer.now() - uncachedStartTime < timespan);
 		if(verbose) std::cout << "uncached: " << uncachedRowEvalCount;
 
 		size_t cachedRowEvalCount = 0;
 		double cachedStartTime = timer.now();
-		do
-		{
+		do {
 			// evaluate a whole uncached row
 			cachedRowEvalCount++;
 			K.row(cachedRowIndex, kernelRow);
-		}
-		while(timer.now() - cachedStartTime < timespan);
+		} while(timer.now() - cachedStartTime < timespan);
 		if(verbose) std::cout << "cached: " << cachedRowEvalCount;
 		if(verbose) std::cout << std::endl;
 
@@ -274,8 +255,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		double uncachedTotalEvalCount = 0;
 		double startTime = timer.now();
 
-		do
-		{
+		do {
 			// evaluate N cached rows accesses
 			cachedStartTime = timer.now();
 			for(size_t p = 0; p < cachedRowEvalCount; p++)
@@ -289,8 +269,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 				K.row(uncachedRowIndex, kernelRow);
 			uncachedTotalTime += timer.now() - uncachedStartTime ;
 			uncachedTotalEvalCount += uncachedRowEvalCount;
-		}
-		while(timer.now() - startTime < timespan);
+		} while(timer.now() - startTime < timespan);
 
 		// now we hope to have some kind of balanced, unbiased
 		// time and number of row evals in that time
@@ -310,8 +289,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 
 
 ///\brief test if we can cache a gigantic matrix and still can access all rows
-BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel)
-{
+BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel) {
 
 	shark::Timer timer;
 	Rng::seed(floor(timer.now()));
@@ -334,8 +312,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel)
 
 		// see how many rows are actually cached
 		size_t nCachedRows = 0;
-		for(size_t r = 0; r < currentDimension; r++)
-		{
+		for(size_t r = 0; r < currentDimension; r++) {
 			if(K.isCached(r))
 				nCachedRows++;
 		}
@@ -351,8 +328,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel)
 
 	// see how many rows are actually cached
 	size_t nCachedRows = 0;
-	for(size_t r = 0; r < currentDimension; r++)
-	{
+	for(size_t r = 0; r < currentDimension; r++) {
 		if(K.isCached(r))
 			nCachedRows++;
 	}
@@ -362,8 +338,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel)
 
 
 	// do some random access
-	for(size_t i = 0; i < repeats; i++)
-	{
+	for(size_t i = 0; i < repeats; i++) {
 		// find a random entry
 		size_t r = Rng::discrete(0, currentDimension - 1);
 		size_t c = Rng::discrete(0, currentDimension - 1);

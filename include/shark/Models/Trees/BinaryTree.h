@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Binary space-partitioning tree of data points.
- * 
- * 
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -62,19 +62,18 @@ namespace shark {
 /// is because a space partitioning tree has no
 /// means of separating a single point.
 ///
-class TreeConstruction
-{
+class TreeConstruction {
 public:
 	/// \brief Default constructor: only stop at trivial leaves
 	TreeConstruction()
-	: m_maxDepth(0xffffffff)
-	, m_maxBucketSize(1)
+		: m_maxDepth(0xffffffff)
+		, m_maxBucketSize(1)
 	{ }
 
 	/// \brief Copy constructor.
 	TreeConstruction(TreeConstruction const& other)
-	: m_maxDepth(other.m_maxDepth)
-	, m_maxBucketSize(other.m_maxBucketSize)
+		: m_maxDepth(other.m_maxDepth)
+		, m_maxBucketSize(other.m_maxBucketSize)
 	{ }
 
 	/// \brief Constructor.
@@ -82,8 +81,8 @@ public:
 	/// \param  maxDepth       stop as soon as the given tree depth is reached (zero means unrestricted)
 	/// \param  maxBucketSize  stop as soon as a node holds at most the bucket size of data points (zero means unrestricted)
 	TreeConstruction(unsigned int maxDepth, unsigned int maxBucketSize)
-	: m_maxDepth(maxDepth ? maxDepth : 0xffffffff)
-	, m_maxBucketSize(maxBucketSize ? maxBucketSize : 1)
+		: m_maxDepth(maxDepth ? maxDepth : 0xffffffff)
+		, m_maxBucketSize(maxBucketSize ? maxBucketSize : 1)
 	{ }
 
 
@@ -125,8 +124,7 @@ protected:
 /// but also for kernel-induced feature spaces and other
 /// embeddings.
 template <class InputT>
-class BinaryTree
-{
+class BinaryTree {
 public:
 	typedef InputT value_type;
 
@@ -136,27 +134,25 @@ public:
 	/// for examples of how the binary tree is built.
 	///
 	BinaryTree(std::size_t size)
-	: mep_parent(NULL)
-	, mp_left(NULL)
-	, mp_right(NULL)
-	, mp_indexList(NULL)
-	, m_size(size)
-	, m_nodes(0)
-	, m_threshold(0.0)
-	{
+		: mep_parent(NULL)
+		, mp_left(NULL)
+		, mp_right(NULL)
+		, mp_indexList(NULL)
+		, m_size(size)
+		, m_nodes(0)
+		, m_threshold(0.0) {
 		SHARK_ASSERT(m_size > 0);
 
 		// prepare list of index/pointer pairs to be shared among the whole tree
 		mp_indexList = new std::size_t[m_size];
-		boost::iota(boost::make_iterator_range(mp_indexList,mp_indexList+m_size),0);
+		boost::iota(boost::make_iterator_range(mp_indexList, mp_indexList + m_size), 0);
 	}
 
 	/// Destroy the tree and its internal data structures
-	virtual ~BinaryTree()
-	{
-		if (mp_left != NULL) delete mp_left;
-		if (mp_right != NULL) delete mp_right;
-		if (mep_parent == NULL) delete [] mp_indexList;
+	virtual ~BinaryTree() {
+		if(mp_left != NULL) delete mp_left;
+		if(mp_right != NULL) delete mp_right;
+		if(mep_parent == NULL) delete [] mp_indexList;
 	}
 
 
@@ -201,7 +197,7 @@ public:
 	std::size_t nodes() const
 	{ return m_nodes; }
 
-	std::size_t index(std::size_t point)const{
+	std::size_t index(std::size_t point)const {
 		return mp_indexList[point];
 	}
 
@@ -221,12 +217,12 @@ public:
 	/// cells:<br/>
 	/// left ("negative") cell: {x | distance(x) < 0}<br/>
 	/// right ("positive") cell {x | distance(x) >= 0}
-	double distanceFromPlane(value_type const& point) const{
+	double distanceFromPlane(value_type const& point) const {
 		return funct(point) - m_threshold;
 	}
 
 	/// \brief Separation threshold.
-	double threshold() const{
+	double threshold() const {
 		return m_threshold;
 	}
 
@@ -241,7 +237,7 @@ public:
 	{ return (funct(point) >= m_threshold); }
 
 	/// \brief If the tree uses a kernel metric, returns a pointer to the kernel object, else NULL.
-	virtual AbstractKernelFunction<value_type> const* kernel()const{
+	virtual AbstractKernelFunction<value_type> const* kernel()const {
 		//default is no kernel metric
 		return NULL;
 	}
@@ -260,22 +256,17 @@ public:
 
 #if 0
 	// debug code, please ignore
-	void print(unsigned int ident = 0) const
-	{
-		if (isLeaf())
-		{
-			for (unsigned int j=0; j<size(); j++)
-			{
-				for (unsigned int i=0; i<ident; i++) printf("  ");
+	void print(unsigned int ident = 0) const {
+		if(isLeaf()) {
+			for(unsigned int j = 0; j < size(); j++) {
+				for(unsigned int i = 0; i < ident; i++) printf("  ");
 				printf("index: %d\n", (int)index(j));
 			}
-		}
-		else
-		{
-			for (unsigned int i=0; i<ident; i++) printf("  ");
+		} else {
+			for(unsigned int i = 0; i < ident; i++) printf("  ");
 			printf("[%d]\n", (int)mp_left->size());
 			mp_left->print(ident + 1);
-			for (unsigned int i=0; i<ident; i++) printf("  ");
+			for(unsigned int i = 0; i < ident; i++) printf("  ");
 			printf("[%d]\n", (int)mp_right->size());
 			mp_right->print(ident + 1);
 		}
@@ -288,12 +279,12 @@ protected:
 	/// \par
 	/// Initialize a sub-node
 	BinaryTree(BinaryTree* parent, std::size_t* list, std::size_t size)
-	: mep_parent(parent)
-	, mp_left(NULL)
-	, mp_right(NULL)
-	, mp_indexList(list)
-	, m_size(size)
-	, m_nodes(0)
+		: mep_parent(parent)
+		, mp_left(NULL)
+		, mp_right(NULL)
+		, mp_indexList(list)
+		, m_size(size)
+		, m_nodes(0)
 	{}
 
 
@@ -327,7 +318,7 @@ protected:
 	/// @param points the points themselves
 	/// @returns returns the position were the point list was split
 	template<class Range1, class Range2>
-	typename boost::range_iterator<Range2>::type splitList (Range1& values, Range2& points){
+	typename boost::range_iterator<Range2>::type splitList(Range1& values, Range2& points) {
 		typedef typename boost::range_iterator<Range1>::type iterator1;
 		typedef typename boost::range_iterator<Range2>::type iterator2;
 
@@ -335,10 +326,10 @@ protected:
 		iterator1 valuesEnd = boost::end(values);
 
 		//KeyValueRange<iterator1,iterator2> kvrange = ;
-		std::pair<iterator1, iterator2> splitpoint = partitionEqually(zipKeyValuePairs(values,points)).iterators();
+		std::pair<iterator1, iterator2> splitpoint = partitionEqually(zipKeyValuePairs(values, points)).iterators();
 		iterator1 valuesSplitpoint = splitpoint.first;
 		iterator2 pointsSplitpoint = splitpoint.second;
-		if (valuesSplitpoint == valuesEnd) {
+		if(valuesSplitpoint == valuesEnd) {
 			// partitioning failed, all values are equal :(
 			m_threshold = *valuesBegin;
 			return splitpoint.second;
@@ -349,7 +340,7 @@ protected:
 		// results. So we use the mean of the found splitpoint and the nearest point on the other side
 		// of the boundary.
 		double maximum = *std::max_element(valuesBegin, valuesSplitpoint);
-		m_threshold = 0.5*(maximum + *valuesSplitpoint);
+		m_threshold = 0.5 * (maximum + *valuesSplitpoint);
 
 		return pointsSplitpoint;
 	}

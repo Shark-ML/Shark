@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       unit test for maximum-likelihood model selection for support vector machines.
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      M. Tuma, T. Glasmachers
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -78,51 +78,54 @@ const char test[] = "3.2588947676e+00 5.4190801643e-01 1\n\
 
 // on the above mini chessboard problem, optimize CSVM parameters using rprop on the SvmLogisticInterpretation.
 // after every rprop step, assert that the numerical and analytical derivative coincide.
-BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_SvmLogisticInterpretation)
+BOOST_AUTO_TEST_SUITE(ObjectiveFunctions_SvmLogisticInterpretation)
 
-BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessboard )
-{
+BOOST_AUTO_TEST_CASE(ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessboard) {
 	double NUMERICAL_INCREASE_FACTOR = 1.00001;
 	//~ std::stringstream ss(test);
 	//~ std::vector<RealVector> x;
 	//~ std::vector<unsigned int> y;
 	// create dataset
 	//~ detail::import_csv( x, y, ss, LAST_COLUMN, " ", "");
-	
+
 	ClassificationDataset training_dataset;
-	csvStringToData(training_dataset,test,LAST_COLUMN,0);
+	csvStringToData(training_dataset, test, LAST_COLUMN, 0);
 	//~ ClassificationDataset training_dataset = createLabeledDataFromRange(x,y);
 	unsigned int num_eles = training_dataset.numberOfElements();
 	unsigned int num_folds = 2;
-	std::vector< size_t > indices( num_eles );
-	for ( unsigned int i=0; i<num_eles; i++ ) {
-		indices[i] = (i+num_folds-1) % num_folds;
+	std::vector< size_t > indices(num_eles);
+	for(unsigned int i = 0; i < num_eles; i++) {
+		indices[i] = (i + num_folds - 1) % num_folds;
 	}
-	CVFolds<ClassificationDataset> cv_folds = createCVIndexed( training_dataset, num_folds, indices );
+	CVFolds<ClassificationDataset> cv_folds = createCVIndexed(training_dataset, num_folds, indices);
 	GaussianRbfKernel<> kernel(0.5);
 	QpStoppingCondition stop(1e-10);
-	SvmLogisticInterpretation<> mlms_score( cv_folds, &kernel, false, &stop );
+	SvmLogisticInterpretation<> mlms_score(cv_folds, &kernel, false, &stop);
 
 	// optimize NCLL using rprop
 	IRpropPlus rprop;
 	RealVector start(2);
-	start(0) = 1.0; start(1) = 0.5;
-	rprop.init( mlms_score, start );
+	start(0) = 1.0;
+	start(1) = 0.5;
+	rprop.init(mlms_score, start);
 	unsigned int its = 50;
-	for (unsigned int i=0; i<its; i++) {
-		rprop.step( mlms_score );
+	for(unsigned int i = 0; i < its; i++) {
+		rprop.step(mlms_score);
 		// compare analytical and numerical derivative
 		RealVector params(2);
-		params(0) = rprop.solution().point(0); params(1) = rprop.solution().point(1);
-		double result = mlms_score.eval( params );
+		params(0) = rprop.solution().point(0);
+		params(1) = rprop.solution().point(1);
+		double result = mlms_score.eval(params);
 		RealVector deriv;
-		double der_result = mlms_score.evalDerivative( params, deriv );
+		double der_result = mlms_score.evalDerivative(params, deriv);
 		RealVector cmp_C_params(2);
-		cmp_C_params(0) = params(0)*NUMERICAL_INCREASE_FACTOR; cmp_C_params(1) = params(1);
-		double cmp_C_result = mlms_score.eval( cmp_C_params );
+		cmp_C_params(0) = params(0) * NUMERICAL_INCREASE_FACTOR;
+		cmp_C_params(1) = params(1);
+		double cmp_C_result = mlms_score.eval(cmp_C_params);
 		RealVector cmp_gamma_params(2);
-		cmp_gamma_params(0) = params(0); cmp_gamma_params(1) = params(1)*NUMERICAL_INCREASE_FACTOR;
-		double cmp_gamma_result = mlms_score.eval( cmp_gamma_params );
+		cmp_gamma_params(0) = params(0);
+		cmp_gamma_params(1) = params(1) * NUMERICAL_INCREASE_FACTOR;
+		double cmp_gamma_result = mlms_score.eval(cmp_gamma_params);
 		double diff_C = cmp_C_result - result;
 		double diff_gamma = cmp_gamma_result - result;
 		double denominator_C = cmp_C_params(0) - params(0);
@@ -130,9 +133,9 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 		double ds_dC = diff_C / denominator_C;
 		double ds_dgamma = diff_gamma / denominator_gamma;
 
-		BOOST_CHECK_SMALL( ds_dC - deriv(0), 5e-4 );
-		BOOST_CHECK_SMALL( ds_dgamma - deriv(1), 5e-4 );
-		BOOST_CHECK_SMALL( result - der_result, 1e-12 );
+		BOOST_CHECK_SMALL(ds_dC - deriv(0), 5e-4);
+		BOOST_CHECK_SMALL(ds_dgamma - deriv(1), 5e-4);
+		BOOST_CHECK_SMALL(result - der_result, 1e-12);
 
 	}
 }
@@ -140,8 +143,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 // on the above mini chessboard problem, optimize CSVM parameters using rprop on the SvmLogisticInterpretation.
 // after every rprop step, assert that the numerical and analytical derivative coincide.
 // this test uses the unconstrained formulation for the C-SVMs.
-BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessboard_C_unconstrained )
-{
+BOOST_AUTO_TEST_CASE(ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessboard_C_unconstrained) {
 	double NUMERICAL_INCREASE_FACTOR = 1.00001;
 	//~ std::stringstream ss(test);
 	//~ std::vector<RealVector> x;
@@ -149,39 +151,43 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	//~ detail::import_csv( x, y, ss, LAST_COLUMN, " ", "");
 	//~ ClassificationDataset training_dataset = createLabeledDataFromRange(x,y);
 	ClassificationDataset training_dataset;
-	csvStringToData(training_dataset,test,LAST_COLUMN,0);
+	csvStringToData(training_dataset, test, LAST_COLUMN, 0);
 	unsigned int num_eles = training_dataset.numberOfElements();
 	unsigned int num_folds = 2;
-	std::vector< size_t > indices( num_eles );
-	for ( unsigned int i=0; i<num_eles; i++ ) {
-		indices[i] = (i+num_folds-1) % num_folds;
+	std::vector< size_t > indices(num_eles);
+	for(unsigned int i = 0; i < num_eles; i++) {
+		indices[i] = (i + num_folds - 1) % num_folds;
 	}
-	CVFolds<ClassificationDataset> cv_folds = createCVIndexed( training_dataset, num_folds, indices );
+	CVFolds<ClassificationDataset> cv_folds = createCVIndexed(training_dataset, num_folds, indices);
 	GaussianRbfKernel<> kernel(0.5);
 	QpStoppingCondition stop(1e-10);
-	SvmLogisticInterpretation<> mlms_score( cv_folds, &kernel, false, &stop );
+	SvmLogisticInterpretation<> mlms_score(cv_folds, &kernel, false, &stop);
 
 	// optimize NCLL using rprop
 	IRpropPlus rprop;
 	RealVector start(2);
-	start(0) = 1.0; start(1) = 0.5;
-	rprop.init( mlms_score, start );
+	start(0) = 1.0;
+	start(1) = 0.5;
+	rprop.init(mlms_score, start);
 	unsigned int its = 50;
-	for (unsigned int i=0; i<its; i++) {
-		rprop.step( mlms_score );
+	for(unsigned int i = 0; i < its; i++) {
+		rprop.step(mlms_score);
 
 		// compare analytical and numerical derivative
 		RealVector params(2);
-		params(0) = rprop.solution().point(0); params(1) = rprop.solution().point(1);
-		double result = mlms_score.eval( params );
+		params(0) = rprop.solution().point(0);
+		params(1) = rprop.solution().point(1);
+		double result = mlms_score.eval(params);
 		RealVector deriv;
-		double der_result = mlms_score.evalDerivative( params, deriv );
+		double der_result = mlms_score.evalDerivative(params, deriv);
 		RealVector cmp_C_params(2);
-		cmp_C_params(0) = params(0)*NUMERICAL_INCREASE_FACTOR; cmp_C_params(1) = params(1);
-		double cmp_C_result = mlms_score.eval( cmp_C_params );
+		cmp_C_params(0) = params(0) * NUMERICAL_INCREASE_FACTOR;
+		cmp_C_params(1) = params(1);
+		double cmp_C_result = mlms_score.eval(cmp_C_params);
 		RealVector cmp_gamma_params(2);
-		cmp_gamma_params(0) = params(0); cmp_gamma_params(1) = params(1)*NUMERICAL_INCREASE_FACTOR;
-		double cmp_gamma_result = mlms_score.eval( cmp_gamma_params );
+		cmp_gamma_params(0) = params(0);
+		cmp_gamma_params(1) = params(1) * NUMERICAL_INCREASE_FACTOR;
+		double cmp_gamma_result = mlms_score.eval(cmp_gamma_params);
 		double diff_C = cmp_C_result - result;
 		double diff_gamma = cmp_gamma_result - result;
 		double denominator_C = cmp_C_params(0) - params(0);
@@ -189,9 +195,9 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 		double ds_dC = diff_C / denominator_C;
 		double ds_dgamma = diff_gamma / denominator_gamma;
 
-		BOOST_CHECK_SMALL( ds_dC - deriv(0), 5e-4 );
-		BOOST_CHECK_SMALL( ds_dgamma - deriv(1), 5e-4 );
-		BOOST_CHECK_SMALL( result - der_result, 1e-12 );
+		BOOST_CHECK_SMALL(ds_dC - deriv(0), 5e-4);
+		BOOST_CHECK_SMALL(ds_dgamma - deriv(1), 5e-4);
+		BOOST_CHECK_SMALL(result - der_result, 1e-12);
 
 	}
 }
@@ -199,79 +205,80 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 
 // also test for the ARD kernel on the toy example problem from the pami paper.
 // automatically test derivatives for all components along an entire optimization path
-BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Pami_Toy )
-{
+BOOST_AUTO_TEST_CASE(ObjectiveFunctions_SvmLogisticInterpretation_Pami_Toy) {
 	double NUMERICAL_INCREASE_FACTOR = 1.00001;
 	// create dataset
 	unsigned int ud, nd, td, ntrain = 500;
 	unsigned int ntest = 4000;
-	ud = 5; nd = 5; td = ud+nd;
-	PamiToy prob( ud, nd ); // artificial benchmark data, 2 useful and 2 noise dimensions
-	ClassificationDataset train = prob.generateDataset( ntrain );
-	ClassificationDataset test = prob.generateDataset( ntest );
+	ud = 5;
+	nd = 5;
+	td = ud + nd;
+	PamiToy prob(ud, nd);   // artificial benchmark data, 2 useful and 2 noise dimensions
+	ClassificationDataset train = prob.generateDataset(ntrain);
+	ClassificationDataset test = prob.generateDataset(ntest);
 	unsigned int num_folds = 5;
-	CVFolds<ClassificationDataset> cv_folds = createCVIID( train, num_folds );
-	DenseARDKernel kernel( td, 0.1 ); //dummy gamma, set later for real.
+	CVFolds<ClassificationDataset> cv_folds = createCVIID(train, num_folds);
+	DenseARDKernel kernel(td, 0.1);   //dummy gamma, set later for real.
 	QpStoppingCondition stop(1e-10);
-	SvmLogisticInterpretation<> mlms( cv_folds, &kernel, true, &stop );
+	SvmLogisticInterpretation<> mlms(cv_folds, &kernel, true, &stop);
 
-	RealVector start( td+1 );
+	RealVector start(td + 1);
 	start(0) = 0.1;
-	for ( unsigned int i=0; i<td; i++ ) {
-		start(i+1) = 0.5/td;
+	for(unsigned int i = 0; i < td; i++) {
+		start(i + 1) = 0.5 / td;
 	}
 	double result, eps_result, der_result, eval_diff, param_diff, num_deriv;
 	// original params
-	result = mlms.eval( start );
+	result = mlms.eval(start);
 	RealVector der;
-	der_result = mlms.evalDerivative( start, der );
-	BOOST_CHECK_SMALL( result - der_result, 1e-12 );
+	der_result = mlms.evalDerivative(start, der);
+	BOOST_CHECK_SMALL(result - der_result, 1e-12);
 
 	// c-deriv
 	{
 		RealVector params = start;
 		params(0) *= NUMERICAL_INCREASE_FACTOR;
-		eps_result = mlms.eval( params );
+		eps_result = mlms.eval(params);
 		RealVector eps_deriv;
-		mlms.evalDerivative( params, eps_deriv );
+		mlms.evalDerivative(params, eps_deriv);
 		eval_diff = eps_result - result;
 		param_diff = params(0) - start(0);
 		num_deriv = eval_diff / param_diff;
-		BOOST_CHECK_SMALL( num_deriv - der(0), 5e-4 );
+		BOOST_CHECK_SMALL(num_deriv - der(0), 5e-4);
 	}
 	// kernel derivs
-	for ( unsigned int i=1; i<td+1; i++ ) {
+	for(unsigned int i = 1; i < td + 1; i++) {
 		RealVector params = start;
 		params(i) *= NUMERICAL_INCREASE_FACTOR;
-		eps_result = mlms.eval( params );
+		eps_result = mlms.eval(params);
 		RealVector eps_deriv;
-		mlms.evalDerivative( params, eps_deriv );
+		mlms.evalDerivative(params, eps_deriv);
 		eval_diff = eps_result - result;
 		param_diff = params(i) - start(i);
 		num_deriv = eval_diff / param_diff;
-		BOOST_CHECK_SMALL( num_deriv - der(i), 5e-4 );
+		BOOST_CHECK_SMALL(num_deriv - der(i), 5e-4);
 	}
 
 	// optimize NCLL using rprop
 	IRpropPlus rprop;
-	rprop.init( mlms, start );
+	rprop.init(mlms, start);
 	unsigned int its = 30;
-	for (unsigned int i=0; i<its; i++) {
-		rprop.step( mlms );
+	for(unsigned int i = 0; i < its; i++) {
+		rprop.step(mlms);
 	}
 
 	//construct and evaluate the final machine
 	KernelClassifier<RealVector> svm;
-	CSvmTrainer<RealVector> trainer( &kernel, exp(rprop.solution().point(0)), true );
-	trainer.train( svm, train );
+	CSvmTrainer<RealVector> trainer(&kernel, exp(rprop.solution().point(0)), true);
+	trainer.train(svm, train);
 	ZeroOneLoss<unsigned int> loss; // 0-1 loss
-	Data<unsigned int> output = svm( train.inputs() ); // evaluate on training set
+	Data<unsigned int> output = svm(train.inputs());   // evaluate on training set
 	double train_error = loss.eval(train.labels(), output);
 	std::cout << "train error " << train_error << std::endl;
-	output = svm( test.inputs() ); // evaluate on test set
+	output = svm(test.inputs());   // evaluate on test set
 	double test_error = loss.eval(test.labels(), output);
 	std::cout << "test error " << test_error << std::endl;
-	BOOST_CHECK( test_error < 0.155 ); //should be enough, hopefully..
+	BOOST_CHECK(test_error < 0.155);   //should be enough, hopefully..
 
 }
 

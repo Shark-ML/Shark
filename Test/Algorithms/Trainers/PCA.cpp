@@ -1,33 +1,33 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Test case for optimization of the hyperparameters of a
  * Gaussian Process/Regularization Network using evidence/marginal
  * likelihood maximization.
- * 
- * 
+ *
+ *
  *
  * \author      Christian Igel, Oswin Krause
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -47,16 +47,14 @@ using namespace shark;
 
 ///Principal components of our multivariate data distribution, we will
 ///use them later for checking
-double principalComponents[3][3] =
-{
+double principalComponents[3][3] = {
 	{ 5, 0, 0},
 	{ 0, 2, 2},
-	{ 0,-1, 1}
+	{ 0, -1, 1}
 };
 
 ///The 3D test distribution is just a multivariate Gaussian.
-UnlabeledData<RealVector> createData3D()
-{
+UnlabeledData<RealVector> createData3D() {
 	const unsigned numberOfExamples = 30000;
 
 	RealVector mean(3);
@@ -67,23 +65,20 @@ UnlabeledData<RealVector> createData3D()
 	// to create the covariance matrix we first put the
 	// copy the principal components  in the matrix
 	// and than use an outer product
-	RealMatrix covariance(3,3);
-	for(int i = 0; i != 3; ++i)
-	{
-		for(int j = 0; j != 3; ++j)
-		{
-			covariance(i,j) = principalComponents[i][j];
+	RealMatrix covariance(3, 3);
+	for(int i = 0; i != 3; ++i) {
+		for(int j = 0; j != 3; ++j) {
+			covariance(i, j) = principalComponents[i][j];
 		}
 	}
-	covariance = prod(trans(covariance),covariance);
+	covariance = prod(trans(covariance), covariance);
 
 	//now we can create the distribution
 	MultiVariateNormalDistribution distribution(covariance);
 
 	//and we sample from it
 	std::vector<RealVector> data(numberOfExamples);
-	BOOST_FOREACH(RealVector& sample, data)
-	{
+	BOOST_FOREACH(RealVector & sample, data) {
 		//first element is the sample, second is the underlying uniform gaussian
 		sample = mean + distribution().first;
 	}
@@ -91,8 +86,7 @@ UnlabeledData<RealVector> createData3D()
 }
 
 ///The 2D test distribution is an even simpler Gaussian.
-UnlabeledData<RealVector> createData2D()
-{
+UnlabeledData<RealVector> createData2D() {
 	const unsigned numberOfExamples = 10000;
 
 	RealMatrix C(2, 2);
@@ -104,7 +98,7 @@ UnlabeledData<RealVector> createData2D()
 	MultiVariateNormalDistribution distribution(C);
 
 	std::vector<RealVector> v;
-	for(unsigned i=0; i<numberOfExamples; i++) v.push_back(mu + distribution().first);
+	for(unsigned i = 0; i < numberOfExamples; i++) v.push_back(mu + distribution().first);
 	return  createDataFromRange(v);
 }
 
@@ -112,12 +106,11 @@ UnlabeledData<RealVector> createData2D()
 ///The test distribution here is the same as in createData3D, but in this case
 ///we add a lot of low variance uncorrelatd variables on top. after that w generate a very small
 ///dataset, such that the simple PCA computation does not work anymore.
-UnlabeledData<RealVector> createDataNotFullRank()
-{
+UnlabeledData<RealVector> createDataNotFullRank() {
 	const unsigned dimensions = 10;
 	const unsigned numberOfExamples = 5;
 
-	RealVector mean(dimensions,0);
+	RealVector mean(dimensions, 0);
 	mean(0) = 1;
 	mean(1) = -1;
 	mean(2) = 3;
@@ -125,33 +118,30 @@ UnlabeledData<RealVector> createDataNotFullRank()
 	// to create the covariance matrix we first put the
 	// copy the principal components  in the matrix
 	// and than use an outer product
-	RealMatrix covariance(dimensions,dimensions,0.0);
-	diag(covariance) = blas::repeat(0.001,dimensions);
-	for(int i = 0; i != 3; ++i)
-	{
-		for(int j = 0; j != 3; ++j)
-		{
-			covariance(i,j) = principalComponents[i][j];
+	RealMatrix covariance(dimensions, dimensions, 0.0);
+	diag(covariance) = blas::repeat(0.001, dimensions);
+	for(int i = 0; i != 3; ++i) {
+		for(int j = 0; j != 3; ++j) {
+			covariance(i, j) = principalComponents[i][j];
 		}
 	}
-	covariance = prod(trans(covariance),covariance);
+	covariance = prod(trans(covariance), covariance);
 
 	//now we can create the distribution
 	MultiVariateNormalDistribution distribution(covariance);
 
 	//and we sample from it
 	std::vector<RealVector> data(numberOfExamples);
-	BOOST_FOREACH(RealVector& sample, data)
-	{
+	BOOST_FOREACH(RealVector & sample, data) {
 		//first element is the sample, second is the underlying uniform gaussian
 		sample = mean + distribution().first;
 	}
-	return  createDataFromRange(data,2);//small batch size to get batching errors
+	return  createDataFromRange(data, 2); //small batch size to get batching errors
 }
 
-BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_PCA)
+BOOST_AUTO_TEST_SUITE(Algorithms_Trainers_PCA)
 
-BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){
+BOOST_AUTO_TEST_CASE(PCA_TEST_MORE_DATA_THAN_DIMENSIONS) {
 	//
 	// 1. 2D test with whitening and without dimensionality
 	// reduction
@@ -160,7 +150,7 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){
 	// create 2D sample data
 	UnlabeledData<RealVector> data = createData2D();
 	Data<RealVector> encodedData, decodedData;
-	
+
 	// compute statistics
 	RealVector mean, var;
 	meanvar(data, mean, var);
@@ -187,7 +177,7 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){
 	cout << "decoded mean\t" << dmean << "  \tvariance\t" << dvar  << endl;
 
 	/// do checks
-	for(unsigned i=0; i<2; i++) {
+	for(unsigned i = 0; i < 2; i++) {
 		// have mean and variance correctly been reconstructed
 		BOOST_CHECK_SMALL(mean(i) - dmean(i), 1.e-6);
 		BOOST_CHECK_SMALL(var(i) - dvar(i), 1.e-6);
@@ -197,7 +187,7 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){
 		BOOST_CHECK_SMALL(emean(i), 1.e-10);
 	}
 
-	// 
+	//
 	// 3D test case with dimensionalty reduction, without
 	// whitening
 	//
@@ -208,12 +198,12 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){
 	// inputs=outputs = 3 but since want to do a reduction, we use
 	// only 2 in the second argument.  The third argument is the
 	// bias. The PCA class needs a bias to work.
-	LinearModel<> pcaModel(3,2,true);
+	LinearModel<> pcaModel(3, 2, true);
 	pca.setWhitening(false);
-	pca.train(pcaModel,data);
+	pca.train(pcaModel, data);
 
-	RealVector pc1 = row(pcaModel.matrix(),0) * sqrt(pca.eigenvalues()(0));
-	RealVector pc2 = row(pcaModel.matrix(),1) * sqrt(pca.eigenvalues()(1));	
+	RealVector pc1 = row(pcaModel.matrix(), 0) * sqrt(pca.eigenvalues()(0));
+	RealVector pc2 = row(pcaModel.matrix(), 1) * sqrt(pca.eigenvalues()(1));
 	cout << "principal component 1: " << pc1 << endl;
 	cout << "principal component 2: " << pc2 << endl;
 
@@ -221,21 +211,21 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){
 	// covariance matrix of the underlying distribution. Because
 	// of samplig (and also numerical errors), the tolerance is
 	// pretty high.
-	for(unsigned i=0; i<3; i++) {
+	for(unsigned i = 0; i < 3; i++) {
 		BOOST_CHECK_SMALL(fabs(principalComponents[0][i]) - fabs(pc1(i)), 0.05);
 		BOOST_CHECK_SMALL(fabs(principalComponents[1][i]) - fabs(pc2(i)), 0.05);
 	}
 }
 
 
-BOOST_AUTO_TEST_CASE( PCA_TEST_LESS_DATA_THAN_DIMENSIONS ){
+BOOST_AUTO_TEST_CASE(PCA_TEST_LESS_DATA_THAN_DIMENSIONS) {
 
 	UnlabeledData<RealVector> data = createDataNotFullRank();
 	Data<RealVector> encodedData, decodedData;
 	// compute statistics
 	RealVector mean, var;
 	meanvar(data, mean, var);
-	
+
 	// do PCA with whitening
 	bool whitening = true;
 	PCA pca(data, whitening);
@@ -256,19 +246,19 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_LESS_DATA_THAN_DIMENSIONS ){
 	meanvar(decodedData, dmean, dvar);
 
 	/// do checks
-	for(unsigned i=0; i<mean.size(); i++) {
+	for(unsigned i = 0; i < mean.size(); i++) {
 		// have mean and variance correctly been reconstructed
 		BOOST_CHECK_SMALL(mean(i) - dmean(i), 1.e-5);
 		BOOST_CHECK_SMALL(var(i) - dvar(i), 1.e-4);
 	}
-	
-	for(unsigned i=0; i<emean.size()-1; i++) {
-		for(std::size_t j = 0; j < i; ++j){
+
+	for(unsigned i = 0; i < emean.size() - 1; i++) {
+		for(std::size_t j = 0; j < i; ++j) {
 			//covariance must be 0
-			BOOST_CHECK_SMALL(ecovar(i,j) , 1.e-8);
-		}			
+			BOOST_CHECK_SMALL(ecovar(i, j) , 1.e-8);
+		}
 		// is the variance 1 after whitening
-		BOOST_CHECK_SMALL(ecovar(i,i) - 1., 1.e-8);
+		BOOST_CHECK_SMALL(ecovar(i, i) - 1., 1.e-8);
 		// is the mean zero after PCA
 		BOOST_CHECK_SMALL(emean(i), 1.e-9);
 	}

@@ -1,30 +1,30 @@
 /*!
- * 
+ *
  *
  * \brief       Entry Point for all Basic Linear Algebra(BLAS) in shark
- * 
- * 
+ *
+ *
  *
  * \author      O.Krause, T.Glasmachers, T. Voss
  * \date        2010-2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -51,7 +51,7 @@
 #include <boost/serialization/deque.hpp>
 #include <deque>
 
-namespace shark{
+namespace shark {
 
 #define SHARK_VECTOR_MATRIX_TYPEDEFS(basetype, prefix) \
 	typedef blas::vector< basetype > prefix##Vector; \
@@ -122,13 +122,13 @@ namespace shark{
 		typedef Const##prefix##VectorRange ConstDenseSubType;\
 	};
 
-	SHARK_VECTOR_MATRIX_TYPEDEFS(long double, BigReal);
-	SHARK_VECTOR_MATRIX_TYPEDEFS(double, Real)
-	SHARK_VECTOR_MATRIX_TYPEDEFS(float, Float)
-	SHARK_VECTOR_MATRIX_TYPEDEFS(std::complex<double>, Complex)
-	SHARK_VECTOR_MATRIX_TYPEDEFS(int, Int)
-	SHARK_VECTOR_MATRIX_TYPEDEFS(unsigned int, UInt)
-        SHARK_VECTOR_MATRIX_TYPEDEFS(bool, Bool);
+SHARK_VECTOR_MATRIX_TYPEDEFS(long double, BigReal);
+SHARK_VECTOR_MATRIX_TYPEDEFS(double, Real)
+SHARK_VECTOR_MATRIX_TYPEDEFS(float, Float)
+SHARK_VECTOR_MATRIX_TYPEDEFS(std::complex<double>, Complex)
+SHARK_VECTOR_MATRIX_TYPEDEFS(int, Int)
+SHARK_VECTOR_MATRIX_TYPEDEFS(unsigned int, UInt)
+SHARK_VECTOR_MATRIX_TYPEDEFS(bool, Bool);
 #undef SHARK_VECTOR_MATRIX_TYPEDEFS
 
 ///\brief Template which finds for every Vector type the best fitting Matrix.

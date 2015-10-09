@@ -44,8 +44,7 @@
 
 
 
-namespace shark
-{
+namespace shark {
 
 
 /// \brief This will normalize the labels of a given dataset to 0..N-1
@@ -56,8 +55,7 @@ namespace shark
 /// from 0 to N-1, with N the number of classes, so usual Shark
 /// trainers can work with it.
 /// One can then revert the original labeling just by calling restoreOriginalLabels
-class LabelOrder : public INameable
-{
+class LabelOrder : public INameable {
 private:
 
 public:
@@ -81,13 +79,11 @@ public:
 	///
 	/// \param[in,out]  dataset     dataset that will be relabeled
 
-	void normalizeLabels(LabeledData<RealVector, unsigned int> &dataset)
-	{
+	void normalizeLabels(LabeledData<RealVector, unsigned int> &dataset) {
 		// determine the min and max labels of the given dataset
 		int minLabel = std::numeric_limits<int>::max();
 		int maxLabel = -1;
-		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
-		{
+		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i) {
 			int label = dataset.labels().element(i);
 
 			// we react allergic to negative labels
@@ -108,12 +104,10 @@ public:
 
 		// and insert all labels we encounter
 		size_t currentPosition = 0;
-		for(std::size_t i = 0; i < dataset.numberOfElements(); i++)
-		{
+		for(std::size_t i = 0; i < dataset.numberOfElements(); i++) {
 			// is it a new label?
 			int label = dataset.labels().element(i);
-			if(foundLabels[label - minLabel] == -1)
-			{
+			if(foundLabels[label - minLabel] == -1) {
 				foundLabels[label - minLabel] = currentPosition;
 				m_labelOrder.push_back(label);
 				currentPosition++;
@@ -121,10 +115,9 @@ public:
 		}
 
 		// now map every label
-		for(std::size_t i = 0; i < dataset.numberOfElements(); i++)
-		{
+		for(std::size_t i = 0; i < dataset.numberOfElements(); i++) {
 			int label = dataset.labels().element(i);
-                        dataset.labels().element(i) = foundLabels[label - minLabel];
+			dataset.labels().element(i) = foundLabels[label - minLabel];
 		}
 	}
 
@@ -137,11 +130,9 @@ public:
 	///
 	/// \param[in,out]  dataset     dataset to relabel (restore labels)
 
-	void restoreOriginalLabels(LabeledData<RealVector, unsigned int> &dataset)
-	{
+	void restoreOriginalLabels(LabeledData<RealVector, unsigned int> &dataset) {
 		// now map every label
-		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
-		{
+		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i) {
 			int label = dataset.labels().element(i);
 
 			// check if the reordering fit the data
@@ -160,8 +151,7 @@ public:
 	///
 	/// \param[out] labelOrder      vector to store the current label order.
 
-	void getLabelOrder(std::vector<int> &labelOrder)
-	{
+	void getLabelOrder(std::vector<int> &labelOrder) {
 		labelOrder = m_labelOrder;
 	}
 
@@ -171,29 +161,26 @@ public:
 	///
 	/// \param[out] labelOrder      vector to store the current label order.
 
-        void getLabelOrder (std::vector<unsigned int> &labelOrder)
-        {
-                labelOrder = std::vector<unsigned int>( m_labelOrder.begin(), m_labelOrder.end() );
-        }
+	void getLabelOrder(std::vector<unsigned int> &labelOrder) {
+		labelOrder = std::vector<unsigned int>(m_labelOrder.begin(), m_labelOrder.end());
+	}
 
 
 	/// \brief Set label ordering directly
 	///
 	/// \param[in] labelOrder      vector with the new label order
 
-	void setLabelOrder(std::vector<int> &labelOrder)
-	{
+	void setLabelOrder(std::vector<int> &labelOrder) {
 		m_labelOrder = labelOrder;
 	}
 
 
-        /// \brief Set label ordering directly
-        ///
-        /// \param[in] labelOrder      vector with the new label order
-        void setLabelOrder (std::vector<unsigned int> &labelOrder)
-        {
-                m_labelOrder  = std::vector<int>( labelOrder.begin(), labelOrder.end() );
-        }
+	/// \brief Set label ordering directly
+	///
+	/// \param[in] labelOrder      vector with the new label order
+	void setLabelOrder(std::vector<unsigned int> &labelOrder) {
+		m_labelOrder  = std::vector<int>(labelOrder.begin(), labelOrder.end());
+	}
 
 
 protected:

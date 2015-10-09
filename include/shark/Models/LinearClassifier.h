@@ -10,17 +10,16 @@ namespace shark {
  *  The LinearClassifier class is a multi class classifier model
  *  suited for linear discriminant analysis. For c classes
  *  \f$ 0, \dots, c-1 \f$  the model computes
- *   
+ *
  *  \f$ \arg \max_i w_i^T x + b_i \f$
- *  
+ *
  *  Thus is it a linear model with arg max computation.
  *  The internal linear model can be queried using decisionFunction().
- */ 
+ */
 template<class VectorType = RealVector>
-class LinearClassifier : public ArgMaxConverter<LinearModel<VectorType> >
-{
+class LinearClassifier : public ArgMaxConverter<LinearModel<VectorType> > {
 public:
-	LinearClassifier(){}
+	LinearClassifier() {}
 
 	std::string name() const
 	{ return "LinearClassifier"; }

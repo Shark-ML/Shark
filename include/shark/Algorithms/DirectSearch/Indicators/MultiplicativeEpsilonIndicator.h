@@ -57,56 +57,54 @@ struct MultiplicativeEpsilonIndicator {
 	 * \param [in] iteRF Iterator pointing behind the last valid individual of the reference front.
 	 * \param [in] e Extractor instance applied to the elements in the comtainer.
 	 */
-	template<
-		typename IteratorTypeA,
-		typename IteratorTypeB,
-		typename Extractor
-	> 
-	double operator()( IteratorTypeA itPF, IteratorTypeA itePF, IteratorTypeB itRF, IteratorTypeB iteRF, Extractor& e )
-	{
+	template <
+	    typename IteratorTypeA,
+	    typename IteratorTypeB,
+	    typename Extractor
+	    >
+	double operator()(IteratorTypeA itPF, IteratorTypeA itePF, IteratorTypeB itRF, IteratorTypeB iteRF, Extractor& e) {
 		double result = -std::numeric_limits<double>::max();
 
-		for( IteratorTypeA ita = itPF; ita != itePF;++ita ) {
+		for(IteratorTypeA ita = itPF; ita != itePF; ++ita) {
 			double tmp = std::numeric_limits<double>::max();
-			for( IteratorTypeB itb = itRF; itb != iteRF; ++itb ) {
+			for(IteratorTypeB itb = itRF; itb != iteRF; ++itb) {
 
 				double d = -std::numeric_limits<double>::max();
 				SIZE_CHECK(e(*ita).size() == e(*itb).size());
-				for( unsigned int i = 0; i < e(*ita).size(); i++ ) {
-					d = std::max( d, (*itb)[i]/(*ita)[i] );
+				for(unsigned int i = 0; i < e(*ita).size(); i++) {
+					d = std::max(d, (*itb)[i] / (*ita)[i]);
 				}
-				tmp = std::min( tmp, d );
+				tmp = std::min(tmp, d);
 			}
-			result = std::max( result, tmp );
+			result = std::max(result, tmp);
 		}
 		return result ;
 	}
-	
+
 	/// \brief Given a pareto front, returns the index of the points which is the least contributer
 	template<typename Extractor, typename ParetofrontType>
-	std::size_t leastContributor( Extractor extractor, const ParetofrontType & front)
-	{
+	std::size_t leastContributor(Extractor extractor, const ParetofrontType & front) {
 		std::vector<double> relativeApproximation(front.size());
-		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
-			relativeApproximation[i] = (*this)( front.begin()+i,front.begin()+(i+1), front.begin(), front.end(), extractor );
+		SHARK_PARALLEL_FOR(int i = 0; i < static_cast< int >(front.size()); i++) {
+			relativeApproximation[i] = (*this)(front.begin() + i, front.begin() + (i + 1), front.begin(), front.end(), extractor);
 		}
-		
-		return std::min_element( relativeApproximation.begin(), relativeApproximation.end() ) - relativeApproximation.begin();
+
+		return std::min_element(relativeApproximation.begin(), relativeApproximation.end()) - relativeApproximation.begin();
 	}
-	
+
 	/// \brief Updates the internal variables of the indicator using a whole population.
 	///
 	/// Empty for this Indicator
 	/// \param extractor Functor returning the fitness values
 	/// \param set The set of points.
 	template<typename Extractor, typename PointSet>
-	void updateInternals(Extractor extractor, PointSet const& set){
+	void updateInternals(Extractor extractor, PointSet const& set) {
 		(void)extractor;
 		(void)set;
 	}
 
 	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {
+	void serialize(Archive & archive, const unsigned int version) {
 		(void)archive;
 		(void)version;
 	}

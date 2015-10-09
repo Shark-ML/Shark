@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Test cases for Naive Bayes classifier
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      B. Li
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -47,23 +47,20 @@
 namespace shark {
 
 /// Fixture for testing naive Bayes classifier
-class NBClassifierFixture
-{
+class NBClassifierFixture {
 public:
 
 	typedef NBClassifier<>::AbstractDistPtr AbstractDistPtr;
 
 	/// Create a normal distribution from given @a mean and @a variance
-	AbstractDistPtr createNormalDist(double mean, double variance) const
-	{
+	AbstractDistPtr createNormalDist(double mean, double variance) const {
 		return AbstractDistPtr(new Normal<>(Rng::globalRng, mean, variance));
 	}
 };
 
-BOOST_FIXTURE_TEST_SUITE (Models_NBClassifierTests, NBClassifierFixture)
+BOOST_FIXTURE_TEST_SUITE(Models_NBClassifierTests, NBClassifierFixture)
 
-BOOST_AUTO_TEST_CASE(Test)
-{
+BOOST_AUTO_TEST_CASE(Test) {
 	NBClassifier<>::FeatureDistributionsType featureDists;
 	// class 0
 	std::vector<AbstractDistPtr> class0;

@@ -10,82 +10,74 @@
 
 using namespace shark;
 
-BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_Rprop)
+BOOST_AUTO_TEST_SUITE(Algorithms_GradientDescent_Rprop)
 
-BOOST_AUTO_TEST_CASE( RPropPlus_Simple )
-{
+BOOST_AUTO_TEST_CASE(RPropPlus_Simple) {
 	Ellipsoid function(5);
 	RpropPlus optimizer;
 	optimizer.init(function);
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,1000);
+	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << "... " << std::endl;
+	testFunction(optimizer, function, 100, 1000);
 }
-BOOST_AUTO_TEST_CASE( RPropMinus_Simple )
-{
+BOOST_AUTO_TEST_CASE(RPropMinus_Simple) {
 	Ellipsoid function(5);
 	RpropMinus optimizer;
 	optimizer.init(function);
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,1000);
+	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << "... " << std::endl;
+	testFunction(optimizer, function, 100, 1000);
 }
-BOOST_AUTO_TEST_CASE( IRPropPlus_Simple )
-{
+BOOST_AUTO_TEST_CASE(IRPropPlus_Simple) {
 	Ellipsoid function(5);
 	IRpropPlus optimizer;
 	optimizer.init(function);
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,1000);
+	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << "... " << std::endl;
+	testFunction(optimizer, function, 100, 1000);
 }
-BOOST_AUTO_TEST_CASE( IRPropMinus_Simple )
-{
+BOOST_AUTO_TEST_CASE(IRPropMinus_Simple) {
 	Ellipsoid function(5);
 	IRpropMinus optimizer;
 	optimizer.init(function);
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,10000);
+	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << "... " << std::endl;
+	testFunction(optimizer, function, 100, 10000);
 }
-BOOST_AUTO_TEST_CASE( RPropPlus_Rosenbrock )
-{
+BOOST_AUTO_TEST_CASE(RPropPlus_Rosenbrock) {
 	Rosenbrock function(3);
 	RpropPlus optimizer;
 	optimizer.init(function);
 
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,100000);
+	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << "... " << std::endl;
+	testFunction(optimizer, function, 100, 100000);
 }
-BOOST_AUTO_TEST_CASE( RPropMinus_Rosenbrock )
-{
+BOOST_AUTO_TEST_CASE(RPropMinus_Rosenbrock) {
 	Rosenbrock function(3);
 	RpropMinus optimizer;
 	optimizer.init(function);
 
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,100000);
+	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << "... " << std::endl;
+	testFunction(optimizer, function, 100, 100000);
 }
-BOOST_AUTO_TEST_CASE( IRPropPlus_Rosenbrock )
-{
+BOOST_AUTO_TEST_CASE(IRPropPlus_Rosenbrock) {
 	Rosenbrock function(3);
 	IRpropPlus optimizer;
 	optimizer.init(function);
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,10000);
+	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << "... " << std::endl;
+	testFunction(optimizer, function, 100, 10000);
 }
-BOOST_AUTO_TEST_CASE( IRPropMinus_Rosenbrock )
-{
+BOOST_AUTO_TEST_CASE(IRPropMinus_Rosenbrock) {
 	Rosenbrock function(3);
 	IRpropMinus optimizer;
 	optimizer.init(function);
 
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::flush;
-	testFunction(optimizer,function,100,100000);
+	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << "... " << std::flush;
+	testFunction(optimizer, function, 100, 100000);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

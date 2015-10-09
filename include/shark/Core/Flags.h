@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Flexible and extensible mechanisms for holding flags.
- * 
- * 
+ *
+ *
  *
  * \author      T.Voss
  * \date        2010-2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -57,17 +57,17 @@ namespace shark {
 template<typename Flag>
 class TypedFlags : public ISerializable {
 public:
-	TypedFlags() : m_flags( 0 ) { }
+	TypedFlags() : m_flags(0) { }
 	TypedFlags(TypedFlags const& other) : m_flags(other.m_flags) { }
 
-        virtual ~TypedFlags() {}
+	virtual ~TypedFlags() {}
 
-	inline TypedFlags<Flag> & operator = ( TypedFlags<Flag> const& rhs ) {
+	inline TypedFlags<Flag> & operator = (TypedFlags<Flag> const& rhs) {
 		m_flags = rhs.m_flags;
-		return( *this );
+		return(*this);
 	}
 
-	inline void set( Flag f ) {
+	inline void set(Flag f) {
 		m_flags |= f;
 	}
 
@@ -79,43 +79,43 @@ public:
 		m_flags = 0;
 	}
 
-	inline void reset( Flag f ) {
+	inline void reset(Flag f) {
 		m_flags &= ~f;
 	}
 
-	inline bool test( Flag f ) const {
-		return ( m_flags & f) == (unsigned int)f;
+	inline bool test(Flag f) const {
+		return (m_flags & f) == (unsigned int)f;
 	}
 
-	inline bool operator&( Flag f ) const {
-		return ( m_flags & f) == (unsigned int)f;
+	inline bool operator&(Flag f) const {
+		return (m_flags & f) == (unsigned int)f;
 	}
 
-	inline TypedFlags<Flag> & operator|=( Flag f ) {
+	inline TypedFlags<Flag> & operator|=(Flag f) {
 		m_flags |= f;
-		return( *this );
-	}
-	
-	inline TypedFlags<Flag> & operator|=(const TypedFlags<Flag>& flags ) {
-		m_flags |= flags.m_flags;
-		return( *this );
+		return(*this);
 	}
 
-	inline TypedFlags<Flag> operator|( Flag f ) const {
-		TypedFlags<Flag> copy( *this );
-		copy |= f;
-		return( copy );
+	inline TypedFlags<Flag> & operator|=(const TypedFlags<Flag>& flags) {
+		m_flags |= flags.m_flags;
+		return(*this);
 	}
-	inline TypedFlags<Flag> operator|(const TypedFlags<Flag>& flags ) const {
-		TypedFlags<Flag> copy( *this );
+
+	inline TypedFlags<Flag> operator|(Flag f) const {
+		TypedFlags<Flag> copy(*this);
+		copy |= f;
+		return(copy);
+	}
+	inline TypedFlags<Flag> operator|(const TypedFlags<Flag>& flags) const {
+		TypedFlags<Flag> copy(*this);
 		copy |= flags;
 		return copy;
 	}
 
-	virtual void read( InArchive & archive )
+	virtual void read(InArchive & archive)
 	{ archive & m_flags; }
 
-	virtual void write( OutArchive & archive ) const
+	virtual void write(OutArchive & archive) const
 	{ archive & m_flags; }
 
 protected:
@@ -129,12 +129,12 @@ protected:
 template<class Feature>
 class TypedFeatureNotAvailableException : public Exception {
 public:
-	TypedFeatureNotAvailableException( Feature feature, const std::string & file = std::string(), unsigned int line = 0 )
-	: Exception( "Feature not available", file, line ),
-	m_feature( feature ) {}
-	TypedFeatureNotAvailableException( const std::string & message, Feature feature, const std::string & file = std::string(), unsigned int line = 0 )
-	: Exception( message, file, line ),
-	m_feature( feature ) {}
+	TypedFeatureNotAvailableException(Feature feature, const std::string & file = std::string(), unsigned int line = 0)
+		: Exception("Feature not available", file, line),
+		  m_feature(feature) {}
+	TypedFeatureNotAvailableException(const std::string & message, Feature feature, const std::string & file = std::string(), unsigned int line = 0)
+		: Exception(message, file, line),
+		  m_feature(feature) {}
 
 	Feature feature() const {
 		return m_feature ;
@@ -150,8 +150,8 @@ namespace serialization {
 
 template< typename T >
 struct tracking_level< shark::TypedFlags<T> > {
-    typedef mpl::integral_c_tag tag;
-    BOOST_STATIC_CONSTANT( int, value = track_always );
+	typedef mpl::integral_c_tag tag;
+	BOOST_STATIC_CONSTANT(int, value = track_always);
 };
 
 }

@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Quadratic programming solver linear SVM training without bias
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        -
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -70,8 +70,7 @@ namespace shark {
 /// the shrinking heuristic.
 ///
 template <class InputT>
-class QpBoxLinear
-{
+class QpBoxLinear {
 public:
 	typedef LabeledData<InputT, unsigned int> DatasetType;
 	typedef typename LabeledData<InputT, unsigned int>::const_element_reference ElementType;
@@ -83,15 +82,13 @@ public:
 	/// \param  dim      problem dimension
 	///
 	QpBoxLinear(const DatasetType& dataset, std::size_t dim)
-	: m_data(dataset)
-	, m_xSquared(m_data.size())
-	, m_dim(dim)
-	{
+		: m_data(dataset)
+		, m_xSquared(m_data.size())
+		, m_dim(dim) {
 		SHARK_ASSERT(dim > 0);
 
 		// pre-compute squared norms
-		for (std::size_t i=0; i<m_data.size(); i++)
-		{
+		for(std::size_t i = 0; i < m_data.size(); i++) {
 			ElementType x_i = m_data[i];
 			m_xSquared(i) = inner_prod(x_i.input, x_i.input);
 		}
@@ -106,11 +103,10 @@ public:
 	/// \param  verbose  if true, the solver prints status information and solution statistics
 	///
 	RealVector solve(
-			double C,
-			QpStoppingCondition& stop,
-			QpSolutionProperties* prop = NULL,
-			bool verbose = false)
-	{
+	    double C,
+	    QpStoppingCondition& stop,
+	    QpSolutionProperties* prop = NULL,
+	    bool verbose = false) {
 		// sanity checks
 		SHARK_ASSERT(C > 0.0);
 
@@ -137,21 +133,18 @@ public:
 		bool canstop = true;
 
 		// outer optimization loop
-		while (true)
-		{
+		while(true) {
 			// define schedule
 			double psum = prefsum;
 			prefsum = 0.0;
 			std::size_t pos = 0;
-			for (std::size_t i=0; i<ell; i++)
-			{
+			for(std::size_t i = 0; i < ell; i++) {
 				double p = pref[i];
 				double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
 				std::size_t n = (std::size_t)std::floor(num);
 				double prob = num - n;
-				if (Rng::uni() < prob) n++;
-				for (std::size_t j=0; j<n; j++)
-				{
+				if(Rng::uni() < prob) n++;
+				for(std::size_t j = 0; j < n; j++) {
 					schedule[pos] = i;
 					pos++;
 				}
@@ -159,12 +152,11 @@ public:
 				prefsum += p;
 			}
 			SHARK_ASSERT(pos == ell);
-			for (std::size_t i=0; i<ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
+			for(std::size_t i = 0; i < ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
 
 			// inner loop
 			max_violation = 0.0;
-			for (std::size_t j=0; j<ell; j++)
-			{
+			for(std::size_t j = 0; j < ell; j++) {
 				// active variable
 				std::size_t i = schedule[j];
 				ElementType e_i = m_data[i];
@@ -181,21 +173,17 @@ public:
 				double gain = 0.0;
 
 				// perform the step
-				if (pg != 0.0)
-				{
+				if(pg != 0.0) {
 					// SMO-style coordinate descent step
 					double q = m_xSquared(i);
 					double mu = g / q;
 					double new_a = a + mu;
 
 					// numerically stable update
-					if (new_a <= 0.0)
-					{
+					if(new_a <= 0.0) {
 						mu = -a;
 						new_a = 0.0;
-					}
-					else if (new_a >= C)
-					{
+					} else if(new_a >= C) {
 						mu = C - a;
 						new_a = C;
 					}
@@ -210,9 +198,8 @@ public:
 
 				// update gain-based preferences
 				{
-					if (epoch == 0) average_gain += gain / (double)ell;
-					else
-					{
+					if(epoch == 0) average_gain += gain / (double)ell;
+					else {
 						double change = CHANGE_RATE * (gain / average_gain - 1.0);
 						double newpref = std::min(PREF_MAX, std::max(PREF_MIN, pref(i) * std::exp(change)));
 						prefsum += newpref - pref(i);
@@ -225,37 +212,29 @@ public:
 			epoch++;
 
 			// stopping criteria
-			if (stop.maxIterations > 0 && ell * epoch >= stop.maxIterations)
-			{
-				if (prop != NULL) prop->type = QpMaxIterationsReached;
+			if(stop.maxIterations > 0 && ell * epoch >= stop.maxIterations) {
+				if(prop != NULL) prop->type = QpMaxIterationsReached;
 				break;
 			}
 
-			if (timer.stop() >= stop.maxSeconds)
-			{
-				if (prop != NULL) prop->type = QpTimeout;
+			if(timer.stop() >= stop.maxSeconds) {
+				if(prop != NULL) prop->type = QpTimeout;
 				break;
 			}
 
-			if (max_violation < stop.minAccuracy)
-			{
-				if (verbose) std::cout << "#" << std::flush;
-				if (canstop)
-				{
-					if (prop != NULL) prop->type = QpAccuracyReached;
+			if(max_violation < stop.minAccuracy) {
+				if(verbose) std::cout << "#" << std::flush;
+				if(canstop) {
+					if(prop != NULL) prop->type = QpAccuracyReached;
 					break;
-				}
-				else
-				{
+				} else {
 					// prepare full sweep for a reliable checking of the stopping criterion
 					canstop = true;
-					for (std::size_t i=0; i<ell; i++) pref[i] = 1.0;
+					for(std::size_t i = 0; i < ell; i++) pref[i] = 1.0;
 					prefsum = ell;
 				}
-			}
-			else
-			{
-				if (verbose) std::cout << "." << std::flush;
+			} else {
+				if(verbose) std::cout << "." << std::flush;
 				canstop = false;
 			}
 		}
@@ -266,20 +245,17 @@ public:
 		std::size_t free_SV = 0;
 		std::size_t bounded_SV = 0;
 		double objective = -0.5 * shark::blas::inner_prod(w, w);
-		for (std::size_t i=0; i<ell; i++)
-		{
+		for(std::size_t i = 0; i < ell; i++) {
 			double a = alpha(i);
 			objective += a;
-			if (a > 0.0)
-			{
-				if (a == C) bounded_SV++;
+			if(a > 0.0) {
+				if(a == C) bounded_SV++;
 				else free_SV++;
 			}
 		}
 
 		// return solution statistics
-		if (prop != NULL)
-		{
+		if(prop != NULL) {
 			prop->accuracy = max_violation;       // this is approximate, but a good guess
 			prop->iterations = ell * epoch;
 			prop->value = objective;
@@ -287,8 +263,7 @@ public:
 		}
 
 		// output solution statistics
-		if (verbose)
-		{
+		if(verbose) {
 			std::cout << std::endl;
 			std::cout << "training time (seconds): " << timer.lastLap() << std::endl;
 			std::cout << "number of epochs: " << epoch << std::endl;
@@ -312,8 +287,7 @@ protected:
 
 
 template < >
-class QpBoxLinear<CompressedRealVector>
-{
+class QpBoxLinear<CompressedRealVector> {
 public:
 	typedef LabeledData<CompressedRealVector, unsigned int> DatasetType;
 
@@ -324,49 +298,44 @@ public:
 	/// \param  dim      problem dimension
 	///
 	QpBoxLinear(const DatasetType& dataset, std::size_t dim)
-	: x(dataset.numberOfElements())
-	, y(dataset.numberOfElements())
-	, diagonal(dataset.numberOfElements())
-	, m_dim(dim)
-	{
+		: x(dataset.numberOfElements())
+		, y(dataset.numberOfElements())
+		, diagonal(dataset.numberOfElements())
+		, m_dim(dim) {
 		SHARK_ASSERT(dim > 0);
 
 		// transform ublas sparse vectors into a fast format
 		// (yes, ublas is slow...), and compute the diagonal
 		// elements of the quadratic matrix
 		SparseVector sparse;
-		for (std::size_t b=0, j=0; b<dataset.numberOfBatches(); b++)
-		{
+		for(std::size_t b = 0, j = 0; b < dataset.numberOfBatches(); b++) {
 			DatasetType::const_batch_reference batch = dataset.batch(b);
-			for (std::size_t i=0; i<batch.size(); i++)
-			{
+			for(std::size_t i = 0; i < batch.size(); i++) {
 				CompressedRealVector x_i = shark::get(batch, i).input;
-				if (x_i.nnz() == 0) continue;
+				if(x_i.nnz() == 0) continue;
 
 				unsigned int y_i = shark::get(batch, i).label;
 				y[j] = 2.0 * y_i - 1.0;
 				double d = 0.0;
-				for (CompressedRealVector::const_iterator it=x_i.begin(); it != x_i.end(); ++it)
-				{
+				for(CompressedRealVector::const_iterator it = x_i.begin(); it != x_i.end(); ++it) {
 					double v = *it;
 					sparse.index = it.index();
 					sparse.value = v;
 					storage.push_back(sparse);
 					d += v * v;
 				}
-				sparse.index = (std::size_t)-1;
+				sparse.index = (std::size_t) - 1;
 				storage.push_back(sparse);
 				diagonal(j) = d;
 				j++;
 			}
 		}
-		for (std::size_t i=0, j=0, k=0; i<x.size(); i++)
-		{
+		for(std::size_t i = 0, j = 0, k = 0; i < x.size(); i++) {
 			CompressedRealVector x_i = dataset.element(i).input;
-			if (x_i.nnz() == 0) continue;
+			if(x_i.nnz() == 0) continue;
 
 			x[j] = &storage[k];
-			for (; storage[k].index != (std::size_t)-1; k++);
+			for(; storage[k].index != (std::size_t) - 1; k++);
 			k++;
 			j++;
 		}
@@ -381,11 +350,10 @@ public:
 	/// \param  verbose  if true, the solver prints status information and solution statistics
 	///
 	RealVector solve(
-			double C,
-			QpStoppingCondition& stop,
-			QpSolutionProperties* prop = NULL,
-			bool verbose = false)
-	{
+	    double C,
+	    QpStoppingCondition& stop,
+	    QpSolutionProperties* prop = NULL,
+	    bool verbose = false) {
 		// sanity checks
 		SHARK_ASSERT(C > 0.0);
 
@@ -412,21 +380,18 @@ public:
 		bool canstop = true;
 
 		// outer optimization loop
-		while (true)
-		{
+		while(true) {
 			// define schedule
 			double psum = prefsum;
 			prefsum = 0.0;
 			std::size_t pos = 0;
-			for (std::size_t i=0; i<ell; i++)
-			{
+			for(std::size_t i = 0; i < ell; i++) {
 				double p = pref[i];
 				double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
 				std::size_t n = (std::size_t)std::floor(num);
 				double prob = num - n;
-				if (Rng::uni() < prob) n++;
-				for (std::size_t j=0; j<n; j++)
-				{
+				if(Rng::uni() < prob) n++;
+				for(std::size_t j = 0; j < n; j++) {
 					schedule[pos] = i;
 					pos++;
 				}
@@ -434,12 +399,11 @@ public:
 				prefsum += p;
 			}
 			SHARK_ASSERT(pos == ell);
-			for (std::size_t i=0; i<ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
+			for(std::size_t i = 0; i < ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
 
 			// inner loop
 			max_violation = 0.0;
-			for (std::size_t j=0; j<ell; j++)
-			{
+			for(std::size_t j = 0; j < ell; j++) {
 				// active variable
 				std::size_t i = schedule[j];
 				const SparseVector* x_i = x[i];
@@ -455,21 +419,17 @@ public:
 				double gain = 0.0;
 
 				// perform the step
-				if (pg != 0.0)
-				{
+				if(pg != 0.0) {
 					// SMO-style coordinate descent step
 					double q = diagonal(i);
 					double mu = g / q;
 					double new_a = a + mu;
 
 					// numerically stable update
-					if (new_a <= 0.0)
-					{
+					if(new_a <= 0.0) {
 						mu = -a;
 						new_a = 0.0;
-					}
-					else if (new_a >= C)
-					{
+					} else if(new_a >= C) {
 						mu = C - a;
 						new_a = C;
 					}
@@ -485,9 +445,8 @@ public:
 
 				// update gain-based preferences
 				{
-					if (epoch == 0) average_gain += gain / (double)ell;
-					else
-					{
+					if(epoch == 0) average_gain += gain / (double)ell;
+					else {
 						double change = CHANGE_RATE * (gain / average_gain - 1.0);
 						double newpref = std::min(PREF_MAX, std::max(PREF_MIN, pref(i) * std::exp(change)));
 						prefsum += newpref - pref(i);
@@ -500,37 +459,29 @@ public:
 			epoch++;
 
 			// stopping criteria
-			if (stop.maxIterations > 0 && ell * epoch >= stop.maxIterations)
-			{
-				if (prop != NULL) prop->type = QpMaxIterationsReached;
+			if(stop.maxIterations > 0 && ell * epoch >= stop.maxIterations) {
+				if(prop != NULL) prop->type = QpMaxIterationsReached;
 				break;
 			}
 
-			if (timer.stop() >= stop.maxSeconds)
-			{
-				if (prop != NULL) prop->type = QpTimeout;
+			if(timer.stop() >= stop.maxSeconds) {
+				if(prop != NULL) prop->type = QpTimeout;
 				break;
 			}
 
-			if (max_violation < stop.minAccuracy)
-			{
-				if (verbose) std::cout << "#" << std::flush;
-				if (canstop)
-				{
-					if (prop != NULL) prop->type = QpAccuracyReached;
+			if(max_violation < stop.minAccuracy) {
+				if(verbose) std::cout << "#" << std::flush;
+				if(canstop) {
+					if(prop != NULL) prop->type = QpAccuracyReached;
 					break;
-				}
-				else
-				{
+				} else {
 					// prepare full sweep for a reliable checking of the stopping criterion
 					canstop = true;
-					for (std::size_t i=0; i<ell; i++) pref[i] = 1.0;
+					for(std::size_t i = 0; i < ell; i++) pref[i] = 1.0;
 					prefsum = ell;
 				}
-			}
-			else
-			{
-				if (verbose) std::cout << "." << std::flush;
+			} else {
+				if(verbose) std::cout << "." << std::flush;
 				canstop = false;
 			}
 		}
@@ -541,20 +492,17 @@ public:
 		std::size_t free_SV = 0;
 		std::size_t bounded_SV = 0;
 		double objective = -0.5 * shark::blas::inner_prod(w, w);
-		for (std::size_t i=0; i<ell; i++)
-		{
+		for(std::size_t i = 0; i < ell; i++) {
 			double a = alpha(i);
 			objective += a;
-			if (a > 0.0)
-			{
-				if (a == C) bounded_SV++;
+			if(a > 0.0) {
+				if(a == C) bounded_SV++;
 				else free_SV++;
 			}
 		}
 
 		// return solution statistics
-		if (prop != NULL)
-		{
+		if(prop != NULL) {
 			prop->accuracy = max_violation;       // this is approximate, but a good guess
 			prop->iterations = ell * epoch;
 			prop->value = objective;
@@ -562,8 +510,7 @@ public:
 		}
 
 		// output solution statistics
-		if (verbose)
-		{
+		if(verbose) {
 			std::cout << std::endl;
 			std::cout << "training time (seconds): " << timer.lastLap() << std::endl;
 			std::cout << "number of epochs: " << epoch << std::endl;
@@ -581,30 +528,25 @@ public:
 
 protected:
 	/// \brief Data structure for sparse vectors.
-	struct SparseVector
-	{
+	struct SparseVector {
 		std::size_t index;
 		double value;
 	};
 
 	/// \brief Famous "axpy" product, here adding a multiple of a sparse vector to a dense one.
-	static inline void axpy(RealVector& w, double alpha, const SparseVector* xi)
-	{
-		while (true)
-		{
-			if (xi->index == (std::size_t)-1) return;
+	static inline void axpy(RealVector& w, double alpha, const SparseVector* xi) {
+		while(true) {
+			if(xi->index == (std::size_t) - 1) return;
 			w[xi->index] += alpha * xi->value;
 			xi++;
 		}
 	}
 
 	/// \brief Inner product between a dense and a sparse vector.
-	static inline double inner_prod(RealVector const& w, const SparseVector* xi)
-	{
+	static inline double inner_prod(RealVector const& w, const SparseVector* xi) {
 		double ret = 0.0;
-		while (true)
-		{
-			if (xi->index == (std::size_t)-1) return ret;
+		while(true) {
+			if(xi->index == (std::size_t) - 1) return ret;
 			ret += w[xi->index] * xi->value;
 			xi++;
 		}

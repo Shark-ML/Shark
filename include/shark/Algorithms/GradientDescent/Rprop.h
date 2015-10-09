@@ -1,31 +1,31 @@
 /*!
- * 
+ *
  *
  * \brief       implements different versions of Resilient Backpropagation of error.
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      Oswin Krause
  * \date        2010
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -37,7 +37,7 @@
 #include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 
-namespace shark{
+namespace shark {
 
 /*!
  *  \brief This class offers methods for the usage of the
@@ -105,8 +105,7 @@ namespace shark{
  *      stable
  *
  */
-class RpropMinus : public AbstractSingleObjectiveOptimizer<RealVector >
-{
+class RpropMinus : public AbstractSingleObjectiveOptimizer<RealVector > {
 public:
 	SHARK_EXPORT_SYMBOL RpropMinus();
 
@@ -120,37 +119,37 @@ public:
 
 	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
 
-	SHARK_EXPORT_SYMBOL virtual void read( InArchive & archive );
-	SHARK_EXPORT_SYMBOL virtual void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL virtual void read(InArchive & archive);
+	SHARK_EXPORT_SYMBOL virtual void write(OutArchive & archive) const;
 
 	//! set decrease factor
 	void setEtaMinus(double etaMinus) {
-		RANGE_CHECK( etaMinus < 1 );
-		RANGE_CHECK( etaMinus > 0 );
+		RANGE_CHECK(etaMinus < 1);
+		RANGE_CHECK(etaMinus > 0);
 		m_decreaseFactor = etaMinus;
 	}
 
 	//! set increase factor
 	void setEtaPlus(double etaPlus) {
-		RANGE_CHECK( etaPlus > 1 );
+		RANGE_CHECK(etaPlus > 1);
 		m_increaseFactor = etaPlus;
 	}
 
 	//! set upper limit on update
 	void setMaxDelta(double d) {
-		RANGE_CHECK( d > 0 );
+		RANGE_CHECK(d > 0);
 		m_maxDelta = d;
 	}
 
 	//! set lower limit on update
 	void setMinDelta(double d) {
-		RANGE_CHECK( d >= 0 );
+		RANGE_CHECK(d >= 0);
 		m_minDelta = d;
 	}
 
 	//! return the maximal step size component
 	double maxDelta() const {
-		return *std::max_element(m_delta.begin(),m_delta.end());
+		return *std::max_element(m_delta.begin(), m_delta.end());
 	}
 protected:
 	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
@@ -253,8 +252,7 @@ protected:
  *      stable
  *
  */
-class RpropPlus : public RpropMinus
-{
+class RpropPlus : public RpropMinus {
 public:
 	SHARK_EXPORT_SYMBOL RpropPlus();
 
@@ -267,8 +265,8 @@ public:
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
 	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
-	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
-	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void read(InArchive & archive);
+	SHARK_EXPORT_SYMBOL void write(OutArchive & archive) const;
 
 protected:
 	//! The final update values for all weights.
@@ -379,8 +377,7 @@ protected:
  *      stable
  *
  */
-class IRpropPlus : public RpropPlus
-{
+class IRpropPlus : public RpropPlus {
 public:
 	SHARK_EXPORT_SYMBOL IRpropPlus();
 
@@ -396,8 +393,8 @@ public:
 
 	SHARK_EXPORT_SYMBOL void setDerivativeThreshold(double derivativeThreshold);
 
-	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
-	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void read(InArchive & archive);
+	SHARK_EXPORT_SYMBOL void write(OutArchive & archive) const;
 
 protected:
 	//! The error of the last iteration.
@@ -408,8 +405,7 @@ protected:
 };
 
 
-class IRpropPlusFull : public RpropPlus
-{
+class IRpropPlusFull : public RpropPlus {
 public:
 	SHARK_EXPORT_SYMBOL IRpropPlusFull();
 
@@ -425,8 +421,8 @@ public:
 
 	SHARK_EXPORT_SYMBOL void setDerivativeThreshold(double derivativeThreshold);
 
-	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
-	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void read(InArchive & archive);
+	SHARK_EXPORT_SYMBOL void write(OutArchive & archive) const;
 
 protected:
 	//! The error of the last iteration.

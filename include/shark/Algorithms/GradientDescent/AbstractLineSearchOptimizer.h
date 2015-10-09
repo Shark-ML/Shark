@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Base class for Line Search Optimizer
- * 
- * 
+ *
+ *
  *
  * \author      O. Krause
  * \date        2013
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -62,8 +62,8 @@ protected:
 
 	/// \brief Updates the Model and computes the next search direction
 	///
-	/// After a step was performed, this method is called to compute the next 
-	/// search direction. This usually involves updating the internal model using the 
+	/// After a step was performed, this method is called to compute the next
+	/// search direction. This usually involves updating the internal model using the
 	/// new and old step information. Afterwards m_searchDirection should contain
 	/// the next search direction.
 	virtual void computeSearchDirection() = 0;
@@ -72,7 +72,7 @@ public:
 	SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer();
 
 	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction,  SearchPointType const& startingPoint) ;
-	
+
 	using AbstractSingleObjectiveOptimizer< RealVector >::init;
 
 	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);

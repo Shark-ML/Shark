@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Principal Component Analysis
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      T. Glasmachers, C. Igel
  * \date        2010, 2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -41,7 +41,7 @@
 #include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 
-namespace shark{
+namespace shark {
 
 /*!
  *  \brief Principal Component Analysis
@@ -71,8 +71,7 @@ namespace shark{
  *  corresponding eigenvalues/variances. Furthermore, the eigenvalues
  *  may be rescaled to one, resulting in a whitening of the data.
  */
-class PCA : public AbstractUnsupervisedTrainer<LinearModel<> >
-{
+class PCA : public AbstractUnsupervisedTrainer<LinearModel<> > {
 private:
 	typedef AbstractUnsupervisedTrainer<LinearModel<> > base_type;
 public:
@@ -81,16 +80,16 @@ public:
 	/// Constructor.
 	/// The parameter defines whether the model should also
 	/// whiten the data.
-	PCA(bool whitening = false) 
-	: m_whitening(whitening){
+	PCA(bool whitening = false)
+		: m_whitening(whitening) {
 		m_algorithm = AUTO;
 	};
 	/// Constructor.
 	/// The parameter defines whether the model should also
 	/// whiten the data.
 	/// The eigendecomposition of the data is stored inthe PCA object.
-	PCA(UnlabeledData<RealVector> const& inputs, bool whitening = false) 
-	: m_whitening(whitening){
+	PCA(UnlabeledData<RealVector> const& inputs, bool whitening = false)
+		: m_whitening(whitening) {
 		m_algorithm = AUTO;
 		setData(inputs);
 	};
@@ -114,7 +113,7 @@ public:
 	void train(LinearModel<>& model, UnlabeledData<RealVector> const& inputs) {
 		std::size_t m = model.outputSize(); ///< reduced dimensionality
 		setData(inputs);   // compute PCs
-		encoder(model, m); // define the model 
+		encoder(model, m); // define the model
 	}
 
 
@@ -141,8 +140,8 @@ public:
 	}
 	/// Returns ith eigenvalue.
 	double eigenvalue(std::size_t i) const {
-		SIZE_CHECK( i < m_l );
-		if( i < m_eigenvalues.size()) 
+		SIZE_CHECK(i < m_l);
+		if(i < m_eigenvalues.size())
 			return m_eigenvalues(i);
 		return 0.;
 	}
@@ -151,12 +150,12 @@ public:
 	//! is equal to the minimum of the input dimensions (i.e.,
 	//! number of attributes) and the number of data points used
 	//! for training the PCA.
-	RealMatrix const& eigenvectors() const{
+	RealMatrix const& eigenvectors() const {
 		return m_eigenvectors;
 	}
 
 	/// mean of last training
-	RealVector const& mean() const{
+	RealVector const& mean() const {
 		return m_mean;
 	}
 

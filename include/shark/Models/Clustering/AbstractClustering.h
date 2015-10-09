@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Super class for clustering definitions.
- * 
- * 
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -89,8 +89,7 @@ namespace shark {
 /// SoftClusteringModel.
 ///
 template <class InputT>
-class AbstractClustering : public INameable, public IParameterizable, public ISerializable
-{
+class AbstractClustering : public INameable, public IParameterizable, public ISerializable {
 public:
 	typedef InputT InputType;
 	typedef unsigned int OutputType;
@@ -105,7 +104,7 @@ public:
 	/// Tests whether the clustering can compute a (soft)
 	/// member ship function, describing the membership
 	/// of a sample to the different clusters.
-	bool hasSoftMembershipFunction()const{
+	bool hasSoftMembershipFunction()const {
 		return m_features & HAS_SOFT_MEMBERSHIP;
 	}
 
@@ -119,12 +118,12 @@ public:
 	/// compute the cluster best matching the input pattern.
 	/// The (typically slow) default implementation is to
 	/// create a batch of size 1 and return the result of the batch call to hardMembership
-	virtual unsigned int hardMembership(InputType const& pattern) const{
+	virtual unsigned int hardMembership(InputType const& pattern) const {
 		typename Batch<InputType>::type b = Batch<InputType>::createBatch(pattern);
-		get(b,0) = pattern;
+		get(b, 0) = pattern;
 		return hardMembership(b)(0);
 	}
-	
+
 	/// \brief Compute best matching cluster for a batch of inputs.
 	///
 	/// \par
@@ -132,15 +131,15 @@ public:
 	/// compute the cluster best matching the input pattern.
 	/// The (typically slow) default implementation is to
 	/// return the arg max of the soft membership function for every pattern.
-	virtual BatchOutputType hardMembership(BatchInputType const& patterns) const{
+	virtual BatchOutputType hardMembership(BatchInputType const& patterns) const {
 		std::size_t numPatterns = boost::size(patterns);
 		RealMatrix f = softMembership(patterns);
 		SHARK_ASSERT(f.size2() > 0);
 		SHARK_ASSERT(f.size1() == numPatterns);
 		BatchOutputType outputs(numPatterns);
-		for(std::size_t i = 0; i != numPatterns;++i){
-			RealMatrixRow membership(f,i);
-			outputs(i) = std::max_element(membership.begin(),membership.end())-membership.begin();
+		for(std::size_t i = 0; i != numPatterns; ++i) {
+			RealMatrixRow membership(f, i);
+			outputs(i) = std::max_element(membership.begin(), membership.end()) - membership.begin();
 		}
 		return outputs;
 	}
@@ -150,19 +149,19 @@ public:
 	/// \par
 	/// This function should be overriden by sub-classes to
 	/// compute the membership of a pattern to the clusters.
-	/// The default implementation creates a batch of size 1 
+	/// The default implementation creates a batch of size 1
 	/// and calls the batched version. If this is not overriden, an xception is thrown.
-	virtual RealVector softMembership(InputType const& pattern) const{
-		return row(softMembership(Batch<InputType>::createBatch(pattern)),0);
+	virtual RealVector softMembership(InputType const& pattern) const {
+		return row(softMembership(Batch<InputType>::createBatch(pattern)), 0);
 	}
-	
+
 	/// \brief Compute cluster membership function.
 	///
 	/// \par
 	/// This function should be overriden by sub-classes to
 	/// compute the membership of a pattern to the clusters.
 	/// This default implementation throws an exception.
-	virtual RealMatrix softMembership(BatchInputType const& patterns) const{
+	virtual RealMatrix softMembership(BatchInputType const& patterns) const {
 		SHARK_FEATURE_EXCEPTION(HAS_SOFT_MEMBERSHIP);
 	}
 

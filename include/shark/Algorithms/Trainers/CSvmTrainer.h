@@ -1,38 +1,38 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Support Vector Machine Trainer for the standard C-SVM
- * 
- * 
+ *
+ *
  * \par
  * This file collects trainers for the various types of support
  * vector machines. The trainers carry the hyper-parameters of
  * SVM training, which includes the kernel parameters.
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        -
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -94,18 +94,17 @@ namespace shark {
 /// http://en.wikipedia.org/wiki/Support_vector_machine
 ///
 template <class InputType, class CacheType = float>
-class CSvmTrainer : public AbstractSvmTrainer<
-	InputType, unsigned int, 
+class CSvmTrainer : public AbstractSvmTrainer <
+	InputType, unsigned int,
 	KernelClassifier<InputType>,
-	AbstractWeightedTrainer<KernelClassifier<InputType> > 
->
-{
+	AbstractWeightedTrainer<KernelClassifier<InputType> >
+	> {
 private:
-	typedef AbstractSvmTrainer<
-		InputType, unsigned int, 
-		KernelClassifier<InputType>,
-		AbstractWeightedTrainer<KernelClassifier<InputType> > 
-	> base_type;
+	typedef AbstractSvmTrainer <
+	InputType, unsigned int,
+	           KernelClassifier<InputType>,
+	           AbstractWeightedTrainer<KernelClassifier<InputType> >
+	           > base_type;
 public:
 
 	/// \brief Convenience typedefs:
@@ -127,9 +126,9 @@ public:
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	//! \param  computeDerivative  should the derivative of b with respect to C be computed?
 	CSvmTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false, bool computeDerivative = true)
-	: base_type(kernel, C, offset, unconstrained), m_computeDerivative(computeDerivative)
+		: base_type(kernel, C, offset, unconstrained), m_computeDerivative(computeDerivative)
 	{ }
-	
+
 	//! Constructor
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
@@ -137,13 +136,13 @@ public:
 	//! \param offset whether to train the svm with offset term
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	CSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool offset, bool unconstrained = false)
-	: base_type(kernel,negativeC, positiveC, offset, unconstrained), m_computeDerivative(false)
+		: base_type(kernel, negativeC, positiveC, offset, unconstrained), m_computeDerivative(false)
 	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "CSvmTrainer"; }
-	
+
 	/// for the rare case that there are only bounded SVs and no free SVs, this gives access to the derivative of b w.r.t. C for external use. Derivative w.r.t. C is last.
 	RealVector const& get_db_dParams() {
 		return m_db_dParams;
@@ -151,117 +150,105 @@ public:
 
 
 	/// \brief Train the C-SVM.
-	void train(KernelClassifier<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
-	{
+	void train(KernelClassifier<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset) {
 
 		//prepare model
-		svm.decisionFunction().setStructure(base_type::m_kernel, dataset.inputs(),this->m_trainOffset);
-		
+		svm.decisionFunction().setStructure(base_type::m_kernel, dataset.inputs(), this->m_trainOffset);
+
 		//dispatch to use the optimal implementation and solve the problem
-		trainInternal(svm.decisionFunction(),dataset);
-		
-		if (base_type::sparsify())
+		trainInternal(svm.decisionFunction(), dataset);
+
+		if(base_type::sparsify())
 			svm.decisionFunction().sparsify();
 	}
-	
+
 	/// \brief Train the C-SVM using weights.
-	void train(KernelClassifier<InputType>& svm, WeightedLabeledData<InputType, unsigned int> const& dataset)
-	{
+	void train(KernelClassifier<InputType>& svm, WeightedLabeledData<InputType, unsigned int> const& dataset) {
 		//prepare model
-		svm.decisionFunction().setStructure(base_type::m_kernel, dataset.inputs(),this->m_trainOffset);
-		
+		svm.decisionFunction().setStructure(base_type::m_kernel, dataset.inputs(), this->m_trainOffset);
+
 		//dispatch to use the optimal implementation and solve the problem
-		trainInternal(svm.decisionFunction(),dataset);
-		
-		if (base_type::sparsify())
+		trainInternal(svm.decisionFunction(), dataset);
+
+		if(base_type::sparsify())
 			svm.decisionFunction().sparsify();
 	}
 
 private:
-	
+
 	//by default the normal unoptimized kernel matrix is used
 	template<class T, class DatasetTypeT>
-	void trainInternal(KernelExpansion<T>& svm, DatasetTypeT const& dataset){
+	void trainInternal(KernelExpansion<T>& svm, DatasetTypeT const& dataset) {
 		KernelMatrix<T, QpFloatType> km(*base_type::m_kernel, dataset.inputs());
-		trainInternal(km,svm,dataset);
+		trainInternal(km, svm, dataset);
 	}
-	
+
 	//in the case of a gaussian kernel and sparse vectors, we can use an optimized approach
 	template<class T, class DatasetTypeT>
-	void trainInternal(KernelExpansion<CompressedRealVector>& svm, DatasetTypeT const& dataset){
+	void trainInternal(KernelExpansion<CompressedRealVector>& svm, DatasetTypeT const& dataset) {
 		//check whether a gaussian kernel is used
 		typedef GaussianRbfKernel<CompressedRealVector> Gaussian;
-		Gaussian const* kernel = dynamic_cast<Gaussian const*> (base_type::m_kernel);
-		if(kernel != 0){//jep, use optimized kernel matrix
-			GaussianKernelMatrix<CompressedRealVector,QpFloatType> km(kernel->gamma(),dataset.inputs());
-			trainInternal(km,svm,dataset);
-		}
-		else{
+		Gaussian const* kernel = dynamic_cast<Gaussian const*>(base_type::m_kernel);
+		if(kernel != 0) { //jep, use optimized kernel matrix
+			GaussianKernelMatrix<CompressedRealVector, QpFloatType> km(kernel->gamma(), dataset.inputs());
+			trainInternal(km, svm, dataset);
+		} else {
 			KernelMatrix<CompressedRealVector, QpFloatType> km(*base_type::m_kernel, dataset.inputs());
-			trainInternal(km,svm,dataset);
+			trainInternal(km, svm, dataset);
 		}
 	}
-	
+
 	//create the problem for the unweighted datasets
 	template<class Matrix, class T>
-	void trainInternal(Matrix& km, KernelExpansion<T>& svm, LabeledData<T, unsigned int> const& dataset){
-		if (QpConfig::precomputeKernel())
-		{
+	void trainInternal(Matrix& km, KernelExpansion<T>& svm, LabeledData<T, unsigned int> const& dataset) {
+		if(QpConfig::precomputeKernel()) {
 			PrecomputedMatrix<Matrix> matrix(&km);
-			CSVMProblem<PrecomputedMatrix<Matrix> > svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
-			optimize(svm,svmProblem,dataset);
-		}
-		else
-		{
+			CSVMProblem<PrecomputedMatrix<Matrix> > svmProblem(matrix, dataset.labels(), base_type::m_regularizers);
+			optimize(svm, svmProblem, dataset);
+		} else {
 			CachedMatrix<Matrix> matrix(&km);
-			CSVMProblem<CachedMatrix<Matrix> > svmProblem(matrix,dataset.labels(),base_type::m_regularizers);
-			optimize(svm,svmProblem,dataset);
+			CSVMProblem<CachedMatrix<Matrix> > svmProblem(matrix, dataset.labels(), base_type::m_regularizers);
+			optimize(svm, svmProblem, dataset);
 		}
 		base_type::m_accessCount = km.getAccessCount();
 	}
-	
+
 	// create the problem for the weighted datasets
 	template<class Matrix, class T>
-	void trainInternal(Matrix& km, KernelExpansion<T>& svm, WeightedLabeledData<T, unsigned int> const& dataset){
-		if (QpConfig::precomputeKernel())
-		{
+	void trainInternal(Matrix& km, KernelExpansion<T>& svm, WeightedLabeledData<T, unsigned int> const& dataset) {
+		if(QpConfig::precomputeKernel()) {
 			PrecomputedMatrix<Matrix> matrix(&km);
 			GeneralQuadraticProblem<PrecomputedMatrix<Matrix> > svmProblem(
-				matrix,dataset.labels(),dataset.weights(),base_type::m_regularizers
+			    matrix, dataset.labels(), dataset.weights(), base_type::m_regularizers
 			);
-			optimize(svm,svmProblem,dataset.data());
-		}
-		else
-		{
+			optimize(svm, svmProblem, dataset.data());
+		} else {
 			CachedMatrix<Matrix> matrix(&km);
 			GeneralQuadraticProblem<CachedMatrix<Matrix> > svmProblem(
-				matrix,dataset.labels(),dataset.weights(),base_type::m_regularizers
+			    matrix, dataset.labels(), dataset.weights(), base_type::m_regularizers
 			);
-			optimize(svm,svmProblem,dataset.data());
+			optimize(svm, svmProblem, dataset.data());
 		}
 		base_type::m_accessCount = km.getAccessCount();
 	}
 
 private:
-	
+
 	template<class SVMProblemType>
-	void optimize(KernelExpansion<InputType>& svm, SVMProblemType& svmProblem, LabeledData<InputType, unsigned int> const& dataset){
-		if (this->m_trainOffset)
-		{
+	void optimize(KernelExpansion<InputType>& svm, SVMProblemType& svmProblem, LabeledData<InputType, unsigned int> const& dataset) {
+		if(this->m_trainOffset) {
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
-			ProblemType problem(svmProblem,base_type::m_shrinking);
+			ProblemType problem(svmProblem, base_type::m_shrinking);
 			QpSolver< ProblemType > solver(problem);
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
-			column(svm.alpha(),0)= problem.getUnpermutedAlpha();
-			svm.offset(0) = computeBias(problem,dataset);
-		}
-		else
-		{
+			column(svm.alpha(), 0) = problem.getUnpermutedAlpha();
+			svm.offset(0) = computeBias(problem, dataset);
+		} else {
 			typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
-			ProblemType problem(svmProblem,base_type::m_shrinking);
+			ProblemType problem(svmProblem, base_type::m_shrinking);
 			QpSolver< ProblemType> solver(problem);
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
-			column(svm.alpha(),0) = problem.getUnpermutedAlpha();
+			column(svm.alpha(), 0) = problem.getUnpermutedAlpha();
 		}
 	}
 	RealVector m_db_dParams; ///< in the rare case that there are only bounded SVs and no free SVs, this will hold the derivative of b w.r.t. the hyperparameters. Derivative w.r.t. C is last.
@@ -269,11 +256,11 @@ private:
 	bool m_computeDerivative;
 
 	template<class Problem>
-	double computeBias(Problem const& problem, LabeledData<InputType, unsigned int> const& dataset){
+	double computeBias(Problem const& problem, LabeledData<InputType, unsigned int> const& dataset) {
 		std::size_t nkp = base_type::m_kernel->numberOfParameters();
-		m_db_dParams.resize(nkp+1);
+		m_db_dParams.resize(nkp + 1);
 		m_db_dParams.clear();
-		
+
 		std::size_t ic = problem.dimensions();
 
 		// compute the offset from the KKT conditions
@@ -283,129 +270,120 @@ private:
 		std::size_t freeVars = 0;
 		std::size_t lower_i = 0;
 		std::size_t upper_i = 0;
-		for (std::size_t i=0; i<ic; i++)
-		{
+		for(std::size_t i = 0; i < ic; i++) {
 			double value = problem.gradient(i);
-			if (problem.alpha(i) == problem.boxMin(i))
-			{
-				if (value > lowerBound) { //in case of no free SVs, we are looking for the largest gradient of all alphas at the lower bound
+			if(problem.alpha(i) == problem.boxMin(i)) {
+				if(value > lowerBound) {  //in case of no free SVs, we are looking for the largest gradient of all alphas at the lower bound
 					lowerBound = value;
 					lower_i = i;
 				}
-			}
-			else if (problem.alpha(i) == problem.boxMax(i))
-			{
-				if (value < upperBound) { //in case of no free SVs, we are looking for the smallest gradient of all alphas at the upper bound
+			} else if(problem.alpha(i) == problem.boxMax(i)) {
+				if(value < upperBound) {  //in case of no free SVs, we are looking for the smallest gradient of all alphas at the upper bound
 					upperBound = value;
 					upper_i = i;
 				}
-			}
-			else
-			{
+			} else {
 				sum += value;
 				freeVars++;
 			}
 		}
-		if (freeVars > 0)
+		if(freeVars > 0)
 			return sum / freeVars;		//stabilized (averaged) exact value
 
 		if(!m_computeDerivative)
 			return 0.5 * (lowerBound + upperBound);	//best estimate
-		
+
 		lower_i = problem.permutation(lower_i);
 		upper_i = problem.permutation(upper_i);
-		
-		SHARK_CHECK(base_type::m_regularizers.size() == 1, "derivative only implemented for SVM with one C" );
-		
+
+		SHARK_CHECK(base_type::m_regularizers.size() == 1, "derivative only implemented for SVM with one C");
+
 		// We next compute the derivative of lowerBound and upperBound wrt C, in order to then get that of b wrt C.
 		// The equation at the foundation of this simply is g_i = y_i - \sum_j \alpha_j K_{ij} .
 		double dlower_dC = 0.0;
 		double dupper_dC = 0.0;
 		// At the same time, we also compute the derivative of lowerBound and upperBound wrt the kernel parameters.
 		// The equation at the foundation of this simply is g_i = y_i - \sum_j \alpha_j K_{ij} .
-		RealVector dupper_dkernel( nkp,0 );
-		RealVector dlower_dkernel( nkp,0 );
+		RealVector dupper_dkernel(nkp, 0);
+		RealVector dlower_dkernel(nkp, 0);
 		//state for eval and evalDerivative of the kernel
 		boost::shared_ptr<State> kernelState = base_type::m_kernel->createState();
-		RealVector der(nkp ); //derivative storage helper
+		RealVector der(nkp);  //derivative storage helper
 		//todo: O.K.: here kernel single input derivative would be usefull
 		//also it can be usefull to use here real batch processing and use batches of size 1 for lower /upper
 		//and instead of singleInput whole batches.
 		//what we do is, that we use the batched input versions with batches of size one.
-		typename Batch<InputType>::type singleInput = Batch<InputType>::createBatch( dataset.element(0).input, 1 );
-		typename Batch<InputType>::type lowerInput = Batch<InputType>::createBatch( dataset.element(lower_i).input, 1 );
-		typename Batch<InputType>::type upperInput = Batch<InputType>::createBatch( dataset.element(upper_i).input, 1 );
-		get( lowerInput, 0 ) = dataset.element(lower_i).input; //copy the current input into the batch
-		get( upperInput, 0 ) = dataset.element(upper_i).input; //copy the current input into the batch
-		RealMatrix one(1,1,1); //weight of input
-		RealMatrix result(1,1); //stores the result of the call
+		typename Batch<InputType>::type singleInput = Batch<InputType>::createBatch(dataset.element(0).input, 1);
+		typename Batch<InputType>::type lowerInput = Batch<InputType>::createBatch(dataset.element(lower_i).input, 1);
+		typename Batch<InputType>::type upperInput = Batch<InputType>::createBatch(dataset.element(upper_i).input, 1);
+		get(lowerInput, 0) = dataset.element(lower_i).input;   //copy the current input into the batch
+		get(upperInput, 0) = dataset.element(upper_i).input;   //copy the current input into the batch
+		RealMatrix one(1, 1, 1); //weight of input
+		RealMatrix result(1, 1); //stores the result of the call
 
-		for (std::size_t i=0; i<ic; i++) {
+		for(std::size_t i = 0; i < ic; i++) {
 			double cur_alpha = problem.alpha(problem.permutation(i));
-			if ( cur_alpha != 0 ) {
-				int cur_label = ( cur_alpha>0.0 ? 1 : -1 );
-				get( singleInput, 0 ) = dataset.element(i).input; //copy the current input into the batch
+			if(cur_alpha != 0) {
+				int cur_label = (cur_alpha > 0.0 ? 1 : -1);
+				get(singleInput, 0) = dataset.element(i).input;   //copy the current input into the batch
 				// treat contributions of largest gradient at lower bound
-				base_type::m_kernel->eval( lowerInput, singleInput, result, *kernelState );
-				dlower_dC += cur_label * result(0,0);
-				base_type::m_kernel->weightedParameterDerivative( lowerInput, singleInput,one, *kernelState, der );
-				for ( std::size_t k=0; k<nkp; k++ ) {
+				base_type::m_kernel->eval(lowerInput, singleInput, result, *kernelState);
+				dlower_dC += cur_label * result(0, 0);
+				base_type::m_kernel->weightedParameterDerivative(lowerInput, singleInput, one, *kernelState, der);
+				for(std::size_t k = 0; k < nkp; k++) {
 					dlower_dkernel(k) += cur_label * der(k);
 				}
 				// treat contributions of smallest gradient at upper bound
-				base_type::m_kernel->eval( upperInput, singleInput,result, *kernelState );
-				dupper_dC += cur_label * result(0,0);
-				base_type::m_kernel->weightedParameterDerivative( upperInput, singleInput, one, *kernelState, der );
-				for ( std::size_t k=0; k<nkp; k++ ) {
+				base_type::m_kernel->eval(upperInput, singleInput, result, *kernelState);
+				dupper_dC += cur_label * result(0, 0);
+				base_type::m_kernel->weightedParameterDerivative(upperInput, singleInput, one, *kernelState, der);
+				for(std::size_t k = 0; k < nkp; k++) {
 					dupper_dkernel(k) += cur_label * der(k);
 				}
 			}
 		}
 		// assign final values to derivative of b wrt hyperparameters
-		m_db_dParams( nkp ) = -0.5 * ( dlower_dC + dupper_dC );
-		for ( std::size_t k=0; k<nkp; k++ ) {
-			m_db_dParams(k) = -0.5 * this->C() * ( dlower_dkernel(k) + dupper_dkernel(k) );
+		m_db_dParams(nkp) = -0.5 * (dlower_dC + dupper_dC);
+		for(std::size_t k = 0; k < nkp; k++) {
+			m_db_dParams(k) = -0.5 * this->C() * (dlower_dkernel(k) + dupper_dkernel(k));
 		}
-		if ( base_type::m_unconstrained ) {
-			m_db_dParams( nkp ) *= this->C();
+		if(base_type::m_unconstrained) {
+			m_db_dParams(nkp) *= this->C();
 		}
-		
+
 		return 0.5 * (lowerBound + upperBound);	//best estimate
 	}
 };
 
 
 template <class InputType>
-class LinearCSvmTrainer : public AbstractLinearSvmTrainer<InputType>
-{
+class LinearCSvmTrainer : public AbstractLinearSvmTrainer<InputType> {
 public:
 	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
-	LinearCSvmTrainer(double C, bool unconstrained = false) 
-	: AbstractLinearSvmTrainer<InputType>(C, unconstrained){}
+	LinearCSvmTrainer(double C, bool unconstrained = false)
+		: AbstractLinearSvmTrainer<InputType>(C, unconstrained) {}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LinearCSvmTrainer"; }
 
-	void train(LinearClassifier<InputType>& model, LabeledData<InputType, unsigned int> const& dataset)
-	{
+	void train(LinearClassifier<InputType>& model, LabeledData<InputType, unsigned int> const& dataset) {
 		std::size_t dim = inputDimension(dataset);
 		QpBoxLinear<InputType> solver(dataset, dim);
 		RealMatrix w(1, dim, 0.0);
 		row(w, 0) = solver.solve(
-				base_type::C(),
-				QpConfig::stoppingCondition(),
-				&QpConfig::solutionProperties(),
-				QpConfig::verbosity() > 0);
+		                base_type::C(),
+		                QpConfig::stoppingCondition(),
+		                &QpConfig::solutionProperties(),
+		                QpConfig::verbosity() > 0);
 		model.decisionFunction().setStructure(w);
 	}
 };
 
 
 template <class InputType, class CacheType = float>
-class SquaredHingeCSvmTrainer : public AbstractSvmTrainer<InputType, unsigned int>
-{
+class SquaredHingeCSvmTrainer : public AbstractSvmTrainer<InputType, unsigned int> {
 public:
 	typedef CacheType QpFloatType;
 
@@ -422,16 +400,16 @@ public:
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver??
 	SquaredHingeCSvmTrainer(KernelType* kernel, double C, bool unconstrained = false)
-	: base_type(kernel, C, unconstrained)
+		: base_type(kernel, C, unconstrained)
 	{ }
-	
+
 	//! Constructor
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
 	//! \param  positiveC    regularization parameter of the positive class (label 1)
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	SquaredHingeCSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool unconstrained = false)
-	: base_type(kernel,negativeC, positiveC, unconstrained)
+		: base_type(kernel, negativeC, positiveC, unconstrained)
 	{ }
 
 	/// \brief From INameable: return the class name.
@@ -439,69 +417,61 @@ public:
 	{ return "SquaredHingeCSvmTrainer"; }
 
 	/// \brief Train the C-SVM.
-	void train(KernelClassifier<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
-	{		
-		svm.decisionFunction().setStructure(base_type::m_kernel,dataset.inputs(),this->m_trainOffset);
-		
-		RealVector diagonalModifier(dataset.numberOfElements(),0.5/base_type::m_regularizers(0));
-		if(base_type::m_regularizers.size() != 1){
-			for(std::size_t i = 0; i != diagonalModifier.size();++i){
-				diagonalModifier(i) = 0.5/base_type::m_regularizers(dataset.element(i).label);
+	void train(KernelClassifier<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset) {
+		svm.decisionFunction().setStructure(base_type::m_kernel, dataset.inputs(), this->m_trainOffset);
+
+		RealVector diagonalModifier(dataset.numberOfElements(), 0.5 / base_type::m_regularizers(0));
+		if(base_type::m_regularizers.size() != 1) {
+			for(std::size_t i = 0; i != diagonalModifier.size(); ++i) {
+				diagonalModifier(i) = 0.5 / base_type::m_regularizers(dataset.element(i).label);
 			}
 		}
-		
-		KernelMatrixType km(*base_type::m_kernel, dataset.inputs(),diagonalModifier);
-		if (QpConfig::precomputeKernel())
-		{
+
+		KernelMatrixType km(*base_type::m_kernel, dataset.inputs(), diagonalModifier);
+		if(QpConfig::precomputeKernel()) {
 			PrecomputedMatrixType matrix(&km);
-			optimize(svm.decisionFunction(),matrix,diagonalModifier,dataset);
-		}
-		else
-		{
+			optimize(svm.decisionFunction(), matrix, diagonalModifier, dataset);
+		} else {
 			CachedMatrixType matrix(&km);
-			optimize(svm.decisionFunction(),matrix,diagonalModifier,dataset);
+			optimize(svm.decisionFunction(), matrix, diagonalModifier, dataset);
 		}
 		base_type::m_accessCount = km.getAccessCount();
-		if (base_type::sparsify()) svm.decisionFunction().sparsify();
+		if(base_type::sparsify()) svm.decisionFunction().sparsify();
 
 	}
 
 private:
-	
+
 	template<class Matrix>
-	void optimize(KernelExpansion<InputType>& svm, Matrix& matrix,RealVector const& diagonalModifier, LabeledData<InputType, unsigned int> const& dataset){
+	void optimize(KernelExpansion<InputType>& svm, Matrix& matrix, RealVector const& diagonalModifier, LabeledData<InputType, unsigned int> const& dataset) {
 		typedef CSVMProblem<Matrix> SVMProblemType;
-		SVMProblemType svmProblem(matrix,dataset.labels(),1e100);
-		if (this->m_trainOffset)
-		{
+		SVMProblemType svmProblem(matrix, dataset.labels(), 1e100);
+		if(this->m_trainOffset) {
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
-			ProblemType problem(svmProblem,base_type::m_shrinking);
+			ProblemType problem(svmProblem, base_type::m_shrinking);
 			QpSolver< ProblemType > solver(problem);
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
-			column(svm.alpha(),0)= problem.getUnpermutedAlpha();
+			column(svm.alpha(), 0) = problem.getUnpermutedAlpha();
 			//compute the bias
 			double sum = 0.0;
 			std::size_t freeVars = 0;
-			for (std::size_t i=0; i < problem.dimensions(); i++)
-			{
-				if(problem.alpha(i) > problem.boxMin(i) && problem.alpha(i) < problem.boxMax(i)){
-					sum += problem.gradient(i) - problem.alpha(i)*2*diagonalModifier(i);
+			for(std::size_t i = 0; i < problem.dimensions(); i++) {
+				if(problem.alpha(i) > problem.boxMin(i) && problem.alpha(i) < problem.boxMax(i)) {
+					sum += problem.gradient(i) - problem.alpha(i) * 2 * diagonalModifier(i);
 					freeVars++;
 				}
 			}
-			if (freeVars > 0)
+			if(freeVars > 0)
 				svm.offset(0) =  sum / freeVars;		//stabilized (averaged) exact value
 			else
 				svm.offset(0) = 0;
-		}
-		else
-		{
+		} else {
 			typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
-			ProblemType problem(svmProblem,base_type::m_shrinking);
+			ProblemType problem(svmProblem, base_type::m_shrinking);
 			QpSolver< ProblemType > solver(problem);
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
-			column(svm.alpha(),0) = problem.getUnpermutedAlpha();
-			
+			column(svm.alpha(), 0) = problem.getUnpermutedAlpha();
+
 		}
 	}
 };

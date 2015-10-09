@@ -57,7 +57,7 @@ public:
 
 	//! Number of variables
 	unsigned noVars() const {
-		if(m_isMarkov) 
+		if(m_isMarkov)
 			return 4;
 		return 2;
 	}
@@ -74,8 +74,7 @@ public:
 			this->m_normal_cart = 4.8;
 			this->m_normal_pole = 0.52;
 			this->m_normal_velo = 2;
-		}
-		else {
+		} else {
 			this->m_normal_cart = 1.;
 			this->m_normal_pole = 1.;
 			this->m_normal_velo = 1.;
@@ -117,8 +116,7 @@ public:
 			v(1) = m_state[1] / m_normal_velo;
 			v(2) = m_state[2] / m_normal_pole;
 			v(3) = m_state[3] / m_normal_velo;
-		}
-		else {
+		} else {
 			v(0) = m_state[0] / m_normal_cart;
 			v(1) = m_state[2] / m_normal_pole;
 		}
@@ -127,7 +125,7 @@ public:
 	//! Returns true when this pole is in an illegal position
 	bool failure() {
 		const double twelve_degrees =  degrad(12);
-		if (m_state[0] < -2.4 || m_state[0] > 2.4  || m_state[2] < -twelve_degrees ||
+		if(m_state[0] < -2.4 || m_state[0] > 2.4  || m_state[2] < -twelve_degrees ||
 		        m_state[2] > twelve_degrees) return true;
 		return false;
 	}
@@ -143,8 +141,8 @@ public:
 		for(int i = 0; i < 2; i++) {
 			dydx[0] = m_state[1];
 			dydx[2] = m_state[3];
-			step(output,m_state,dydx);
-			rk4(output,m_state,dydx,m_state);
+			step(output, m_state, dydx);
+			rk4(output, m_state, dydx, m_state);
 		}
 	}
 
@@ -158,7 +156,7 @@ private:
 		const double LENGTH = 0.5;
 		const double FORCE_MAG = 10.0;
 
-		double force = (output -0.5) * FORCE_MAG * 2;
+		double force = (output - 0.5) * FORCE_MAG * 2;
 		double costheta = cos(st[2]);
 		double sintheta = sin(st[2]);
 		double gsintheta = GRAVITY * sintheta;
@@ -173,34 +171,34 @@ private:
 		derivs[3] = -0.75 * (derivs[1] * costheta + gsintheta + temp) / LENGTH;
 	}
 
-	void rk4(double f,double y[], double dydx[], double yout[]) {
+	void rk4(double f, double y[], double dydx[], double yout[]) {
 		const double TAU = 0.01;
 
-		double dym[4],dyt[4],yt[4];
+		double dym[4], dyt[4], yt[4];
 
-		double hh = TAU*0.5;
-		double h6 = TAU/6.0;
-		for (int i = 0; i <= 3; i++) {
-			yt[i] = y[i]+hh*dydx[i];
+		double hh = TAU * 0.5;
+		double h6 = TAU / 6.0;
+		for(int i = 0; i <= 3; i++) {
+			yt[i] = y[i] + hh * dydx[i];
 		}
-		step(f,yt,dyt);
+		step(f, yt, dyt);
 		dyt[0] = yt[1];
 		dyt[2] = yt[3];
-		for (int i = 0; i <= 3; i++) {
-			yt[i] = y[i]+hh*dyt[i];
+		for(int i = 0; i <= 3; i++) {
+			yt[i] = y[i] + hh * dyt[i];
 		}
-		step(f,yt,dym);
+		step(f, yt, dym);
 		dym[0] = yt[1];
 		dym[2] = yt[3];
-		for (int i = 0; i <= 3; i++) {
+		for(int i = 0; i <= 3; i++) {
 			yt[i] = y[i] + TAU * dym[i];
 			dym[i] += dyt[i];
 		}
-		step(f,yt,dyt);
+		step(f, yt, dyt);
 		dyt[0] = yt[1];
 		dyt[2] = yt[3];
-		for (int i = 0; i <= 3; i++) {
-			yout[i] = y[i]+h6*(dydx[i]+dyt[i]+2.0*dym[i]);
+		for(int i = 0; i <= 3; i++) {
+			yout[i] = y[i] + h6 * (dydx[i] + dyt[i] + 2.0 * dym[i]);
 		}
 	}
 

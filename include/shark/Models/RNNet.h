@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Offers the functions to create and to work with a
  * recurrent neural network.
- * 
- * 
+ *
+ *
  *
  * \author      O. Krause
  * \date        2010
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -38,7 +38,7 @@
 #include <shark/Models/AbstractModel.h>
 #include <shark/Models/RecurrentStructure.h>
 
-namespace shark{
+namespace shark {
 
 //!  \brief A recurrent neural network regression model that learns
 //!  with Back Propagation Through Time
@@ -53,10 +53,9 @@ namespace shark{
 //!
 //!  This class is optimized for batch learning. See OnlineRNNet for an online
 //!  version.
-class RNNet:public AbstractModel<Sequence,Sequence >
-{
+class RNNet: public AbstractModel<Sequence, Sequence > {
 private:
-	struct InternalState: public State{
+	struct InternalState: public State {
 		//! Activation of the neurons after processing the time series.
 		//! m_timeActivation(b,t,i) is a 3-dimensional array, the first dimension
 		//! returns the i-th element of the batch, the second dimension returns
@@ -69,9 +68,9 @@ public:
 	//! creates a neural network with a potentially shared structure
 	//! \param structure the structure of this neural network. It can be shared between multiple instances or with then
 	//!                  online version of this net.
-	RNNet(RecurrentStructure* structure):mpe_structure(structure){
-		SHARK_CHECK(mpe_structure,"[RNNet] structure is not allowed to be empty");
-		m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
+	RNNet(RecurrentStructure* structure): mpe_structure(structure) {
+		SHARK_CHECK(mpe_structure, "[RNNet] structure is not allowed to be empty");
+		m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -97,11 +96,11 @@ public:
 	//!
 	//!  \param warmUpSequence the warm up sequence used before each batch of data. The
 	//!                        default is an empty sequence
-	void setWarmUpSequence(Sequence const& warmUpSequence = Sequence()){
+	void setWarmUpSequence(Sequence const& warmUpSequence = Sequence()) {
 		m_warmUpSequence = warmUpSequence;
 	}
-	
-	boost::shared_ptr<State> createState()const{
+
+	boost::shared_ptr<State> createState()const {
 		return boost::shared_ptr<State>(new InternalState());
 	}
 
@@ -113,18 +112,18 @@ public:
 	//!  \param  output Used to store the outputs of the network.
 	//!  \param  state stores additional information which can be reused for the computation of the derivative
 	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& pattern, BatchOutputType& output, State& state)const;
-	using AbstractModel<Sequence,Sequence>::eval;
-	
+	using AbstractModel<Sequence, Sequence>::eval;
+
 	/// obtain the input dimension
-	std::size_t inputSize() const{
+	std::size_t inputSize() const {
 		return mpe_structure->inputs();
 	}
 
 	/// obtain the output dimension
-	std::size_t outputSize() const{
+	std::size_t outputSize() const {
 		return mpe_structure->outputs();
 	}
-	
+
 	//!\brief calculates the weighted sum of gradients w.r.t the parameters
 	//!
 	//!The RNNet uses internally BPTT to calculate the gradient.
@@ -146,23 +145,23 @@ public:
 	//! \param state the last state stord during eval
 	//! \param gradient the calculated gradient
 	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
-		BatchInputType const& patterns, BatchInputType const& coefficients,  State const& state, 
-		RealVector& gradient
+	    BatchInputType const& patterns, BatchInputType const& coefficients,  State const& state,
+	    RealVector& gradient
 	)const;
-	
+
 	//! get internal parameters of the model
-	RealVector parameterVector() const{
+	RealVector parameterVector() const {
 		return mpe_structure->parameterVector();
 	}
-	
+
 	//! set internal parameters of the model
 	//! \param newParameters the new parameters of the model. this changes the internal referenced RecurrentStructure
-	void setParameterVector(RealVector const& newParameters){
+	void setParameterVector(RealVector const& newParameters) {
 		mpe_structure->setParameterVector(newParameters);
 	}
 
 	//!number of parameters of the network
-	std::size_t numberOfParameters() const{
+	std::size_t numberOfParameters() const {
 		return mpe_structure->parameters();
 	}
 protected:

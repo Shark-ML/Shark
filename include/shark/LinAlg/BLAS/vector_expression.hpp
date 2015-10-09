@@ -1,17 +1,17 @@
 #ifndef SHARK_LINALG_BLAS_VECTOR_EXPRESSION_HPP
 #define SHARK_LINALG_BLAS_VECTOR_EXPRESSION_HPP
 
-#include <boost/type_traits/is_convertible.hpp> 
-#include <boost/utility/enable_if.hpp> 
+#include <boost/type_traits/is_convertible.hpp>
+#include <boost/utility/enable_if.hpp>
 #include "vector_proxy.hpp"
 #include "kernels/dot.hpp"
 
 namespace shark {
 namespace blas {
-	
+
 /// \brief Vector expression representing a constant valued vector.
 template<class T>
-class scalar_vector:public vector_expression<scalar_vector<T> > {
+class scalar_vector: public vector_expression<scalar_vector<T> > {
 
 	typedef scalar_vector<T> self_type;
 public:
@@ -34,11 +34,11 @@ public:
 
 	// Construction and destruction
 	scalar_vector()
-	:m_size(0), m_value() {}
+		: m_size(0), m_value() {}
 	explicit scalar_vector(size_type size, value_type value)
-	:m_size(size), m_value(value) {}
+		: m_size(size), m_value(value) {}
 	scalar_vector(const scalar_vector& v)
-	:m_size(v.m_size), m_value(v.m_value) {}
+		: m_size(v.m_size), m_value(v.m_value) {}
 
 	// Accessors
 	size_type size() const {
@@ -64,10 +64,10 @@ public:
 	typedef constant_iterator<T> const_iterator;
 
 	const_iterator begin() const {
-		return const_iterator(0,m_value);
+		return const_iterator(0, m_value);
 	}
 	const_iterator end() const {
-		return const_iterator(m_size,m_value);
+		return const_iterator(m_size, m_value);
 	}
 
 private:
@@ -81,8 +81,8 @@ private:
 ///@param elements the size of the resulting vector
 template<class T>
 typename boost::enable_if<boost::is_arithmetic<T>, scalar_vector<T> >::type
-repeat(T scalar, std::size_t elements){
-	return scalar_vector<T>(elements,scalar);
+repeat(T scalar, std::size_t elements) {
+	return scalar_vector<T>(elements, scalar);
 }
 
 
@@ -147,15 +147,15 @@ public:
 		return expression().same_closure(vu.expression());
 	}
 
-	typedef transform_iterator<typename E::const_iterator,functor_type> const_iterator;
+	typedef transform_iterator<typename E::const_iterator, functor_type> const_iterator;
 	typedef const_iterator iterator;
 
 	// Element lookup
 	const_iterator begin() const {
-		return const_iterator(m_expression.begin(),m_functor);
+		return const_iterator(m_expression.begin(), m_functor);
 	}
 	const_iterator end() const {
-		return const_iterator(m_expression.end(),m_functor);
+		return const_iterator(m_expression.end(), m_functor);
 	}
 private:
 	expression_closure_type m_expression;
@@ -177,8 +177,8 @@ SHARK_UNARY_VECTOR_TRANSFORMATION(log, scalar_log)
 SHARK_UNARY_VECTOR_TRANSFORMATION(exp, scalar_exp)
 SHARK_UNARY_VECTOR_TRANSFORMATION(cos, scalar_cos)
 SHARK_UNARY_VECTOR_TRANSFORMATION(sin, scalar_sin)
-SHARK_UNARY_VECTOR_TRANSFORMATION(tanh,scalar_tanh)
-SHARK_UNARY_VECTOR_TRANSFORMATION(atanh,scalar_atanh)
+SHARK_UNARY_VECTOR_TRANSFORMATION(tanh, scalar_tanh)
+SHARK_UNARY_VECTOR_TRANSFORMATION(atanh, scalar_atanh)
 SHARK_UNARY_VECTOR_TRANSFORMATION(sqr, scalar_sqr)
 SHARK_UNARY_VECTOR_TRANSFORMATION(abs_sqr, scalar_abs_sqr)
 SHARK_UNARY_VECTOR_TRANSFORMATION(sqrt, scalar_sqrt)
@@ -235,8 +235,8 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, scalar_max)
 
 template<class E1, class E2, class F>
 class vector_binary:
-	public vector_expression<vector_binary<E1,E2, F> > {
-	typedef vector_binary<E1,E2, F> self_type;
+	public vector_expression<vector_binary<E1, E2, F> > {
+	typedef vector_binary<E1, E2, F> self_type;
 	typedef E1 const expression1_type;
 	typedef E2 const expression2_type;
 public:
@@ -256,23 +256,23 @@ public:
 	typedef F functor_type;
 	typedef typename E1::const_closure_type expression_closure1_type;
 	typedef typename E2::const_closure_type expression_closure2_type;
-	
+
 	typedef self_type const const_closure_type;
 	typedef self_type closure_type;
 	typedef unknown_storage_tag storage_category;
 
 	// Construction and destruction
-	explicit vector_binary (
-		expression_closure1_type e1, 
-		expression_closure2_type e2,
-		F functor
-	):m_expression1(e1),m_expression2(e2), m_functor(functor) {
+	explicit vector_binary(
+	    expression_closure1_type e1,
+	    expression_closure2_type e2,
+	    F functor
+	): m_expression1(e1), m_expression2(e2), m_functor(functor) {
 		SIZE_CHECK(e1.size() == e2.size());
 	}
 
 	// Accessors
 	size_type size() const {
-		return m_expression1.size ();
+		return m_expression1.size();
 	}
 
 	// Expression accessors
@@ -284,42 +284,42 @@ public:
 	}
 
 	// Element access
-	const_reference operator() (index_type i) const {
+	const_reference operator()(index_type i) const {
 		SIZE_CHECK(i < size());
-		return m_functor(m_expression1(i),m_expression2(i));
+		return m_functor(m_expression1(i), m_expression2(i));
 	}
 
-	const_reference operator[] (index_type i) const {
+	const_reference operator[](index_type i) const {
 		SIZE_CHECK(i < size());
-		return m_functor(m_expression1(i),m_expression2(i));
+		return m_functor(m_expression1(i), m_expression2(i));
 	}
 
 	// Closure comparison
-	bool same_closure (vector_binary const& vu) const {
-		return expression1 ().same_closure (vu.expression1())
-		&& expression2 ().same_closure (vu.expression2());
+	bool same_closure(vector_binary const& vu) const {
+		return expression1().same_closure(vu.expression1())
+		       && expression2().same_closure(vu.expression2());
 	}
 
 	// Iterator types
-	
+
 	// Iterator enhances the iterator of the referenced expressions
 	// with the unary functor.
-	typedef binary_transform_iterator<
-		typename E1::const_iterator,typename E2::const_iterator,functor_type
+	typedef binary_transform_iterator <
+	typename E1::const_iterator, typename E2::const_iterator, functor_type
 	> const_iterator;
 	typedef const_iterator iterator;
 
-	const_iterator begin () const {
-		return const_iterator (m_functor,
-			m_expression1.begin(),m_expression1.end(),
-			m_expression2.begin(),m_expression2.end()
-		);
+	const_iterator begin() const {
+		return const_iterator(m_functor,
+		                      m_expression1.begin(), m_expression1.end(),
+		                      m_expression2.begin(), m_expression2.end()
+		                     );
 	}
 	const_iterator end() const {
-		return const_iterator (m_functor,
-			m_expression1.end(),m_expression1.end(),
-			m_expression2.end(),m_expression2.end()
-		);
+		return const_iterator(m_functor,
+		                      m_expression1.end(), m_expression1.end(),
+		                      m_expression2.end(), m_expression2.end()
+		                     );
 	}
 
 private:
@@ -346,19 +346,19 @@ SHARK_BINARY_VECTOR_EXPRESSION(max, scalar_binary_max)
 #undef SHARK_BINARY_VECTOR_EXPRESSION
 
 template<class E1, class E2>
-vector_binary<E1, E2, 
-	scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type> 
->
-safe_div(
-	vector_expression<E1> const& e1, 
-	vector_expression<E2> const& e2, 
-	typename promote_traits<
-		typename E1::value_type, 
-		typename E2::value_type
-	>::promote_type defaultValue
-){
+vector_binary<E1, E2,
+              scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type>
+              >
+              safe_div(
+                  vector_expression<E1> const& e1,
+                  vector_expression<E2> const& e2,
+                  typename promote_traits <
+                  typename E1::value_type,
+                  typename E2::value_type
+                  >::promote_type defaultValue
+) {
 	typedef scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type> functor_type;
-	return vector_binary<E1, E2, functor_type>(e1(),e2(), functor_type(defaultValue));
+	return vector_binary<E1, E2, functor_type>(e1(), e2(), functor_type(defaultValue));
 }
 
 /////VECTOR REDUCTIONS
@@ -369,7 +369,7 @@ typename E::value_type
 sum(const vector_expression<E> &e) {
 	typedef typename E::value_type value_type;
 	vector_fold<scalar_binary_plus<value_type, value_type> > kernel;
-	return kernel(e,value_type());
+	return kernel(e, value_type());
 }
 
 /// \brief max v = max_i v_i
@@ -378,7 +378,7 @@ typename E::value_type
 max(const vector_expression<E> &e) {
 	typedef typename E::value_type value_type;
 	vector_fold<scalar_binary_max<value_type, value_type> > kernel;
-	return kernel(e,e()(0));
+	return kernel(e, e()(0));
 }
 
 /// \brief min v = min_i v_i
@@ -387,14 +387,14 @@ typename E::value_type
 min(const vector_expression<E> &e) {
 	typedef typename E::value_type value_type;
 	vector_fold<scalar_binary_min<value_type, value_type> > kernel;
-	return kernel(e,e()(0));
+	return kernel(e, e()(0));
 }
 
 /// \brief arg_max v = arg max_i v_i
 template<class E>
 std::size_t arg_max(const vector_expression<E> &e) {
 	SIZE_CHECK(e().size() > 0);
-	return std::max_element(e().begin(),e().end()).index();
+	return std::max_element(e().begin(), e().end()).index();
 }
 
 /// \brief arg_min v = arg min_i v_i
@@ -415,7 +415,7 @@ template<class E>
 typename E::value_type
 soft_max(const vector_expression<E> &e) {
 	typename E::value_type maximum = max(e);
-	return std::log(sum(exp(e-blas::repeat(maximum,e().size()))))+maximum;
+	return std::log(sum(exp(e - blas::repeat(maximum, e().size())))) + maximum;
 }
 
 
@@ -446,32 +446,32 @@ norm_2(const vector_expression<E> &e) {
 /// \brief norm_inf v = max_i |v_i|
 template<class E>
 typename real_traits<typename E::value_type >::type
-norm_inf(vector_expression<E> const &e){
+norm_inf(vector_expression<E> const &e) {
 	return max(abs(e));
 }
 
 /// \brief index_norm_inf v = arg max_i |v_i|
 template<class E>
-std::size_t index_norm_inf(vector_expression<E> const &e){
+std::size_t index_norm_inf(vector_expression<E> const &e) {
 	return arg_max(abs(e));
 }
 
 // inner_prod (v1, v2) = sum_i v1_i * v2_i
 template<class E1, class E2>
-typename promote_traits<
-	typename E1::value_type,
-	typename E2::value_type
->::promote_type
-inner_prod(
-	vector_expression<E1> const& e1,
-	vector_expression<E2> const& e2
+typename promote_traits <
+typename E1::value_type,
+         typename E2::value_type
+         >::promote_type
+         inner_prod(
+             vector_expression<E1> const& e1,
+             vector_expression<E2> const& e2
 ) {
-	typedef typename promote_traits<
-		typename E1::value_type,
-		typename E2::value_type
-	>::promote_type value_type;
+	typedef typename promote_traits <
+	typename E1::value_type,
+	         typename E2::value_type
+	         >::promote_type value_type;
 	value_type result = value_type();
-	kernels::dot(e1,e2,result);
+	kernels::dot(e1, e2, result);
 	return result;
 }
 

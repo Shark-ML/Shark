@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Random Forest Trainer
- * 
- * 
+ *
+ *
  *
  * \author      K. N. Hansen, J. Kremer
  * \date        2011-2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -74,11 +74,10 @@ namespace shark {
  * SPRINT: A Scalable Parallel Classifier for Data Mining
  * by J. Shafer et al.
  */
-class RFTrainer 
-: public AbstractTrainer<RFClassifier, unsigned int>
-, public AbstractTrainer<RFClassifier>,
-  public IParameterizable
-{
+class RFTrainer
+	: public AbstractTrainer<RFClassifier, unsigned int>
+	, public AbstractTrainer<RFClassifier>,
+	  public IParameterizable {
 
 public:
 	/// Construct and compute feature importances when training or not
@@ -109,16 +108,14 @@ public:
 	SHARK_EXPORT_SYMBOL void setOOBratio(double ratio);
 
 	/// Return the parameter vector.
-	RealVector parameterVector() const
-	{
+	RealVector parameterVector() const {
 		RealVector ret(1); // number of trees
 		init(ret) << m_B;
 		return ret;
 	}
 
 	/// Set the parameter vector.
-	void setParameterVector(RealVector const& newParameters)
-	{
+	void setParameterVector(RealVector const& newParameters) {
 		SHARK_ASSERT(newParameters.size() == numberOfParameters());
 		setNTrees((size_t) newParameters[0]);
 	}

@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       test case for the various multi-class SVM trainers
- * 
- * 
- * 
+ *
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -81,11 +81,11 @@ using namespace shark;
 */
 
 template<class T, class U>
-void CHECK_ALPHAS(std::vector<RealVector> const& input, T const& is, U const& should ) {
-	std::cout<<input.size()<<" "<<is.size()<<" "<<std::endl;
+void CHECK_ALPHAS(std::vector<RealVector> const& input, T const& is, U const& should) {
+	std::cout << input.size() << " " << is.size() << " " << std::endl;
 	double w1[3][2] = {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
 	double w2[3][2] = {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}};
-	for (unsigned int i=0; i<is.size(); i++) {
+	for(unsigned int i = 0; i < is.size(); i++) {
 		w1[i % 3][0] += is(i) * input[i / 3](0);
 		w1[i % 3][1] += is(i) * input[i / 3](1);
 		w2[i % 3][0] += should[i] * input[i / 3](0);
@@ -101,19 +101,28 @@ void CHECK_ALPHAS(std::vector<RealVector> const& input, T const& is, U const& sh
 // This test case checks the resulting model of
 // training eight multi-class SVMs on a minimal
 // test case.
-BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_McSvmTrainer)
+BOOST_AUTO_TEST_SUITE(Algorithms_Trainers_McSvmTrainer)
 
-BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
-{
+BOOST_AUTO_TEST_CASE(MCSVM_TRAINER_TEST) {
 	// simple 5-point dataset, three classes
 	std::vector<RealVector> input(5);
 	std::vector<unsigned int> target(5);
-	for (std::size_t i=0; i<5; i++) input[i].resize(2);
-	input[0](0) = -1.0; input[0](1) = -1.0; target[0] = 0;
-	input[1](0) =  1.0; input[1](1) = -1.0; target[1] = 1;
-	input[2](0) =  0.0; input[2](1) =  1.0; target[2] = 2;
-	input[3](0) =  0.0; input[3](1) =  2.0; target[3] = 2;
-	input[4](0) =  0.0; input[4](1) = 99.0; target[4] = 2;
+	for(std::size_t i = 0; i < 5; i++) input[i].resize(2);
+	input[0](0) = -1.0;
+	input[0](1) = -1.0;
+	target[0] = 0;
+	input[1](0) =  1.0;
+	input[1](1) = -1.0;
+	target[1] = 1;
+	input[2](0) =  0.0;
+	input[2](1) =  1.0;
+	target[2] = 2;
+	input[3](0) =  0.0;
+	input[3](1) =  2.0;
+	target[3] = 2;
+	input[4](0) =  0.0;
+	input[4](1) = 99.0;
+	target[4] = 2;
 	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 
 	LinearKernel<> kernel;
@@ -128,7 +137,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
-		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+		CHECK_ALPHAS(input, svm.parameterVector(), alpha);
 	}
 
 	// MMR-SVM
@@ -141,7 +150,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
-		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+		CHECK_ALPHAS(input, svm.parameterVector(), alpha);
 	}
 
 	// WW-SVM
@@ -154,9 +163,9 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		trainer.shrinking() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
-		
+
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
-		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+		CHECK_ALPHAS(input, svm.parameterVector(), alpha);
 	}
 
 	// CS-SVM
@@ -169,7 +178,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
-		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+		CHECK_ALPHAS(input, svm.parameterVector(), alpha);
 	}
 
 	// LLW-SVM
@@ -182,7 +191,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
-		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+		CHECK_ALPHAS(input, svm.parameterVector(), alpha);
 	}
 
 	// ADM-SVM
@@ -195,7 +204,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
-		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+		CHECK_ALPHAS(input, svm.parameterVector(), alpha);
 	}
 
 	// ATS-SVM
@@ -208,7 +217,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
-		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+		CHECK_ALPHAS(input, svm.parameterVector(), alpha);
 	}
 
 	// ATM-SVM
@@ -221,7 +230,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
-		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+		CHECK_ALPHAS(input, svm.parameterVector(), alpha);
 	}
 
 	// Reinforced-SVM
@@ -235,59 +244,59 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
 		std::cout << svm.parameterVector() << std::endl;
-		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
+		CHECK_ALPHAS(input, svm.parameterVector(), alpha);
 	}
 }
 //~ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_ITERATIVE_BIAS_TEST )
 //~ {
-	//~ //Chessboard problem;
-	//~ CircleInSquare problem(2,0.0,true);
-	//~ ClassificationDataset dataset = problem.generateDataset(1000);
-	
+//~ //Chessboard problem;
+//~ CircleInSquare problem(2,0.0,true);
+//~ ClassificationDataset dataset = problem.generateDataset(1000);
 
-	//~ //GaussianRbfKernel<> kernel(0.5);
-	//~ LinearKernel<> kernel;
-	
-	//~ KernelClassifier<RealVector> svmTruth(false);
-	//~ KernelClassifier<RealVector> svmTruth2(true);
-	//~ KernelClassifier<RealVector> svmTruth3(true);
-	//~ KernelClassifier<RealVector> svmTest1(false,2);
-	//~ KernelClassifier<RealVector> svmTest2(true,2);
-	
-	//~ double C = 3;
 
-	//~ {//train as a binary svm problem
-		//~ CSvmTrainer<RealVector> trainerTruth(&kernel, C, false);
-		//~ trainerTruth.sparsify() = false;
-		//~ trainerTruth.shrinking() = false;
-		//~ trainerTruth.stoppingCondition().minAccuracy = 1e-4;
-		//~ trainerTruth.train(svmTruth, dataset);
-		//~ std::cout<<"a"<<std::endl;
-		//~ trainerTruth.train(svmTruth2, dataset);
-		//~ trainerTruth.setUseIterativeBiasComputation(true);
-		//~ trainerTruth.train(svmTruth3, dataset);
-		//~ std::cout<<"b"<<std::endl;
-	//~ }
-	
-	//~ //train as multiclass svm problem
-	//~ McSvmWWTrainer<RealVector> trainer(&kernel, 2*C);
-	//~ trainer.sparsify() = false;
-	//~ trainer.shrinking() = false;
-	//~ trainer.stoppingCondition().minAccuracy = 1e-4;
-	//~ trainer.train(svmTest1, dataset);
-	//~ std::cout<<"c"<<std::endl;
-	//~ trainer.train(svmTest2, dataset);
-	//~ std::cout<<"d"<<std::endl;
-	
-	
-	//~ //compare bias
-	//~ //BOOST_CHECK_CLOSE(svmTest.offset(0),svmTruth.offset(0),1.e-2);
-	//~ ZeroOneLoss<unsigned int, RealVector> loss;
-	//~ std::cout<<"CSVM: "<<loss.eval(dataset.labels(),svmTruth(dataset.inputs()))<<std::endl;
-	//~ std::cout<<"CSVM with bias : "<<loss.eval(dataset.labels(),svmTruth2(dataset.inputs()))<<" "<<svmTruth2.offset()<<std::endl;
-	//~ std::cout<<"CSVM with bias iterative : "<<loss.eval(dataset.labels(),svmTruth3(dataset.inputs()))<<" "<<svmTruth3.offset()<<std::endl;
-	//~ std::cout<<"WW: "<<loss.eval(dataset.labels(),svmTest1(dataset.inputs()))<<std::endl;
-	//~ std::cout<<"WW with bias: "<<loss.eval(dataset.labels(),svmTest2(dataset.inputs()))<<" "<<svmTest2.offset()<<std::endl;
+//~ //GaussianRbfKernel<> kernel(0.5);
+//~ LinearKernel<> kernel;
+
+//~ KernelClassifier<RealVector> svmTruth(false);
+//~ KernelClassifier<RealVector> svmTruth2(true);
+//~ KernelClassifier<RealVector> svmTruth3(true);
+//~ KernelClassifier<RealVector> svmTest1(false,2);
+//~ KernelClassifier<RealVector> svmTest2(true,2);
+
+//~ double C = 3;
+
+//~ {//train as a binary svm problem
+//~ CSvmTrainer<RealVector> trainerTruth(&kernel, C, false);
+//~ trainerTruth.sparsify() = false;
+//~ trainerTruth.shrinking() = false;
+//~ trainerTruth.stoppingCondition().minAccuracy = 1e-4;
+//~ trainerTruth.train(svmTruth, dataset);
+//~ std::cout<<"a"<<std::endl;
+//~ trainerTruth.train(svmTruth2, dataset);
+//~ trainerTruth.setUseIterativeBiasComputation(true);
+//~ trainerTruth.train(svmTruth3, dataset);
+//~ std::cout<<"b"<<std::endl;
+//~ }
+
+//~ //train as multiclass svm problem
+//~ McSvmWWTrainer<RealVector> trainer(&kernel, 2*C);
+//~ trainer.sparsify() = false;
+//~ trainer.shrinking() = false;
+//~ trainer.stoppingCondition().minAccuracy = 1e-4;
+//~ trainer.train(svmTest1, dataset);
+//~ std::cout<<"c"<<std::endl;
+//~ trainer.train(svmTest2, dataset);
+//~ std::cout<<"d"<<std::endl;
+
+
+//~ //compare bias
+//~ //BOOST_CHECK_CLOSE(svmTest.offset(0),svmTruth.offset(0),1.e-2);
+//~ ZeroOneLoss<unsigned int, RealVector> loss;
+//~ std::cout<<"CSVM: "<<loss.eval(dataset.labels(),svmTruth(dataset.inputs()))<<std::endl;
+//~ std::cout<<"CSVM with bias : "<<loss.eval(dataset.labels(),svmTruth2(dataset.inputs()))<<" "<<svmTruth2.offset()<<std::endl;
+//~ std::cout<<"CSVM with bias iterative : "<<loss.eval(dataset.labels(),svmTruth3(dataset.inputs()))<<" "<<svmTruth3.offset()<<std::endl;
+//~ std::cout<<"WW: "<<loss.eval(dataset.labels(),svmTest1(dataset.inputs()))<<std::endl;
+//~ std::cout<<"WW with bias: "<<loss.eval(dataset.labels(),svmTest2(dataset.inputs()))<<" "<<svmTest2.offset()<<std::endl;
 //~ }
 
 
