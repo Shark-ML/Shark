@@ -37,32 +37,40 @@
 
 namespace shark {namespace blas {namespace bindings {
 
-inline int potrf(CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
+inline int potrf(
+	CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
         int const N, float *A, int const lda
 ) {
 	return clapack_spotrf(Order, Uplo, N, A, lda);
 }
 
-inline int potrf(CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
+inline int potrf(
+	CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
         int const N, double *A, int const lda
 ) {
 	return clapack_dpotrf(Order, Uplo, N, A, lda);
 }
 
-inline int potrf(CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
+inline int potrf(
+	CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
         int const N, std::complex<float>* A, int const lda
 ) {
 	return clapack_cpotrf(Order, Uplo, N, static_cast<void *>(A), lda);
 }
 
-inline int potrf(CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
+inline int potrf(
+	CBLAS_ORDER const Order, CBLAS_UPLO const Uplo,
         int const N, std::complex<double>* A, int const lda
 ) {
 	return clapack_zpotrf(Order, Uplo, N, static_cast<void *>(A), lda);
 }
 
-template <typename SymmA>
-inline int potrf(CBLAS_UPLO const uplo, matrix_container<SymmA>& a) {
+template <typename Triangular, typename SymmA>
+inline int potrf(
+	matrix_container<SymmA>& a, 
+	boost::mpl::true_
+) {
+	CBLAS_UPLO const uplo = Triangular::is_upper?CblasUpper:CblasLower;
 	CBLAS_ORDER const stor_ord= 
 		(CBLAS_ORDER)storage_order<typename SymmA::orientation>::value;
 
@@ -74,6 +82,45 @@ inline int potrf(CBLAS_UPLO const uplo, matrix_container<SymmA>& a) {
 	        traits::leading_dimension(a()));
 }
 
+template<class Storage, class T>
+struct optimized_potrf_detail {
+	typedef boost::mpl::false_ type;
+};
+template<>
+struct optimized_potrf_detail <
+	dense_tag
+	double
+> {
+	typedef boost::mpl::true_ type;
+};
+template<>
+struct optimized_potrf_detail <
+	dense_tag
+	float
+> {
+	typedef boost::mpl::true_ type;
+};
+template<>
+struct optimized_potrf_detail <
+	dense_tag
+	std::complex<double>
+> {
+	typedef boost::mpl::true_ type;
+};
 
+template<>
+struct optimized_potrf_detail <
+	dense_tag
+	std::complex<float>
+> {
+	typedef boost::mpl::true_ type;
+};
+
+template<class M>
+struct  has_optimized_potrf
+	: public optimized_potrf_detail <
+	  typename M::storage_category,
+	  typename M::value_type,
+	  > {};
 }}}
 #endif

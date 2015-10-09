@@ -35,6 +35,7 @@
 #define SHARK_LINALG_CHOLESKY_H
 
 #include <shark/LinAlg/Base.h>
+#include <shark/LinAlg/BLAS/kernels/potrf.hpp>
 
 namespace shark{ namespace blas{
 
@@ -64,7 +65,20 @@ template<class MatrixT,class MatrixL>
 void choleskyDecomposition(
 	matrix_expression<MatrixT> const& A, 
 	matrix_expression<MatrixL>& L
-);
+){
+	SIZE_CHECK(A().size1() == A().size2());
+	size_t m = A().size1();
+	ensure_size(L,m, m);
+	L().clear();
+	for(std::size_t i = 0; i != m; ++i){
+		for(std::size_t j = 0; j <= i; ++j){
+			L()(i,j) = A()(i,j);
+		}
+	}
+	if(kernels::potrf<lower>(L()) != 0){
+		throw SHARKEXCEPTION("[Cholesky Decomposition] The Matrix is not positive definite");
+	}
+}
 
 
 /// \brief Updates a covariance factor by a rank one update
