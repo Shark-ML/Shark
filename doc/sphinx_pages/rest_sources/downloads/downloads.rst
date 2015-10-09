@@ -62,7 +62,7 @@ directory, add a space and period ``.`` to the end of the command):
 
 .. code-block:: none
 
-      svn co https://svn.code.sf.net/p/shark-project/code/trunk/Shark
+      git clone https://github.com/Shark-ML/Shark/
 
 
 

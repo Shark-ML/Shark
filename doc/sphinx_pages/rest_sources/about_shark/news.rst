@@ -1,6 +1,11 @@
 News
 ====
 
+Shark moves to GitHub
+^^^^^^^^^^^^^^^
+
+Today, Shark moved to GitHub, please update your repositories, see the downloads page for more details.
+
 Shark goes LGPL
 ^^^^^^^^^^^^^^^
 
