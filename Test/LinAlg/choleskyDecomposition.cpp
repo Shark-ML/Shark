@@ -47,6 +47,28 @@ BOOST_AUTO_TEST_CASE(LinAlg_CholeskyDecomposition_Base) {
 	}
 }
 
+BOOST_AUTO_TEST_CASE(LinAlg_CholeskyDecomposition_Base_ColumnMajor) {
+	blas::matrix<double,blas::column_major> M(Dimensions, Dimensions);   // input matrix
+	blas::matrix<double,blas::column_major> C(Dimensions, Dimensions);   // matrix for Cholesky Decomposition
+
+	// Initializing matrices
+	for(size_t row = 0; row < Dimensions; row++) {
+		for(size_t col = 0; col < Dimensions; col++) {
+			M(row, col) = inputMatrix[row][col];
+			C(row, col) = 0;
+		}
+	}
+	//Decompose
+	choleskyDecomposition(M, C);
+
+	//test for equality
+	for(size_t row = 0; row < Dimensions; row++) {
+		for(size_t col = 0; col < Dimensions; col++) {
+			BOOST_CHECK_SMALL(C(row, col) - decomposedMatrix[row][col], 1.e-14);
+		}
+	}
+}
+
 BOOST_AUTO_TEST_CASE(LinAlg_PivotingCholeskyDecomposition_Base) {
 	RealMatrix M(Dimensions, Dimensions);   // input matrix
 	RealMatrix C(Dimensions, Dimensions);   // matrix for Cholesky Decomposition

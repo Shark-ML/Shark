@@ -36,53 +36,7 @@
 #ifndef SHARK_IMPL_LINALG_CHOLESKY_INL
 #define SHARK_IMPL_LINALG_CHOLESKY_INL
 
-#ifdef SHARK_USE_ATLAS_LAPACK
-#include <shark/LinAlg/BLAS/kernels/atlas/potrf.hpp>
-#endif
-
 #include <shark/Core/Math.h>
-
-template<class MatrixT,class MatrixL>
-void shark::blas::choleskyDecomposition(
-	matrix_expression<MatrixT> const& A, 
-	matrix_expression<MatrixL>& L
-)
-{
-	size_t m = A().size1();
-	ensure_size(L,m, m);
-#ifdef SHARK_USE_ATLAS_LAPACK
-	L().clear();
-	for(std::size_t i = 0; i != m; ++i){
-		for(std::size_t j = 0; j <= i; ++j){
-			L()(i,j) = A()(i,j);
-		}
-	}
-	if(bindings::potrf(CblasLower,L()) != 0){
-		throw SHARKEXCEPTION("[Cholesky Decomposition] The Matrix is not positive definite");
-	}
-#else
-	SIZE_CHECK(A().size1() == A().size2());
-
-	
-	for(size_t j = 0; j < m; j++) {
-		for(size_t i = j; i < m; i++) {
-			double s = A()(i, j);
-			for(size_t k = 0; k < j; k++) {
-				s -= L()(i, k) * L()(j, k);
-			}
-			if (i == j) {
-				if(s<=0)
-					throw SHARKEXCEPTION("[Cholesky Decomposition] The Matrix is not positive definite");
-				L()(i, j) = std::sqrt(s);
-			}
-			else {
-				L()(i, j) = s/L()(j , j);
-				L()(j, i) = 0;
-			}
-		}
-	}
-#endif
-}
 
 template<class MatrixL>
 std::size_t shark::blas::pivotingCholeskyDecompositionInPlace(
