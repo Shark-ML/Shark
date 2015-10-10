@@ -34,17 +34,12 @@ try the following:
 
 
 
-If you encounter problems with the latest SVN sources
+If you encounter problems with the latest sources
 -----------------------------------------------------
 
 
-It is our policy that code in the SVN repository should always compile,
+It is our policy that code in the repository should always compile,
 although there may be incomplete functionality at times. However, at rare
-times it does happen that a current SVN snapshot does not compile on one
+times it does happen that a current snapshot does not compile on one
 or more platforms. In such a case, you can examine the commit logs, inqure
 with the mailing list, or try one or two commits further up or down.
-
-
-.. todo::
-
-    add link to build server for people to check status of SVN HEAD
