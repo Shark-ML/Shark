@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       cross-validation error for selection of hyper-parameters
 
 
- *
+ * 
  *
  * \author      T. Glasmachers, O. Krause
  * \date        2007-2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -69,7 +69,8 @@ namespace shark {
 /// and a cost function.
 ///
 template<class ModelTypeT, class LabelTypeT = typename ModelTypeT::OutputType>
-class CrossValidationError : public SingleObjectiveFunction {
+class CrossValidationError : public SingleObjectiveFunction
+{
 public:
 	typedef typename ModelTypeT::InputType InputType;
 	typedef typename ModelTypeT::OutputType OutputType;
@@ -92,27 +93,28 @@ private:
 public:
 
 	CrossValidationError(
-	    FoldsType const& dataFolds,
-	    IParameterizable* meta,
-	    ModelType* model,
-	    TrainerType* trainer,
-	    CostType* cost)
-		: m_folds(dataFolds)
-		, mep_meta(meta)
-		, mep_model(model)
-		, mep_trainer(trainer)
-		, mep_cost(cost)
+		FoldsType const& dataFolds,
+		IParameterizable* meta,
+		ModelType* model,
+		TrainerType* trainer,
+		CostType* cost)
+	: m_folds(dataFolds)
+	, mep_meta(meta)
+	, mep_model(model)
+	, mep_trainer(trainer)
+	, mep_cost(cost)
 	{ }
 
 	/// \brief From INameable: return the class name.
-	std::string name() const {
+	std::string name() const
+	{
 		return "CrossValidationError<"
-		       + mep_model->name() + ","
-		       + mep_trainer->name() + ","
-		       + mep_cost->name() + ">";
+				+ mep_model->name() + ","
+				+ mep_trainer->name() + ","
+				+ mep_cost->name() + ">";
 	}
-
-	std::size_t numberOfVariables()const {
+		
+	std::size_t numberOfVariables()const{
 		return mep_meta->numberOfParameters();
 	}
 
@@ -124,7 +126,7 @@ public:
 		mep_meta->setParameterVector(parameters);
 
 		double ret = 0.0;
-		for(size_t setID = 0; setID != m_folds.size(); ++setID) {
+		for (size_t setID=0; setID != m_folds.size(); ++setID) {
 			DatasetType train =  m_folds.training(setID);
 			DatasetType validation =  m_folds.validation(setID);
 			mep_trainer->train(*mep_model, train);

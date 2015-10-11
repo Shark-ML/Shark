@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       CART
- *
- *
+ * 
+ * 
  *
  * \author      K. N. Hansen
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -67,14 +67,15 @@ namespace shark {
  * For more detailed information about CART, see \e Classification \e And \e Regression
  * \e Trees written by L. Breiman et al. 1984.
  */
-class CARTTrainer
-	: public AbstractTrainer<CARTClassifier<RealVector>, unsigned int>
-	, public AbstractTrainer<CARTClassifier<RealVector>, RealVector > {
+class CARTTrainer 
+: public AbstractTrainer<CARTClassifier<RealVector>, unsigned int>
+, public AbstractTrainer<CARTClassifier<RealVector>, RealVector >
+{
 public:
 	typedef CARTClassifier<RealVector> ModelType;
 
 	/// Constructor
-	CARTTrainer() {
+	CARTTrainer(){
 		m_nodeSize = 1;
 		m_numberOfFolds = 10;
 	}
@@ -85,22 +86,22 @@ public:
 
 	///Train classification
 	SHARK_EXPORT_SYMBOL void train(ModelType& model, ClassificationDataset const& dataset);
-
+	
 	///Train regression
 	SHARK_EXPORT_SYMBOL void train(ModelType& model, RegressionDataset const& dataset);
 
 	///Sets the number of folds used for creation of the trees.
-	void setNumberOfFolds(unsigned int folds) {
+	void setNumberOfFolds(unsigned int folds){
 		m_numberOfFolds = folds;
 	}
 protected:
 
 	///Types frequently used
-	struct TableEntry {
+	struct TableEntry{
 		double value;
 		std::size_t id;
 
-		bool operator<(TableEntry const& v2)const {
+		bool operator<( TableEntry const& v2)const {
 			return value < v2.value;
 		}
 	};
@@ -128,7 +129,7 @@ protected:
 	//Classification functions
 	///Builds a single decision tree from a classification dataset
 	///The method requires the attribute tables,
-	SHARK_EXPORT_SYMBOL SplitMatrixType buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId);
+	SHARK_EXPORT_SYMBOL SplitMatrixType buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId );
 
 	///Calculates the Gini impurity of a node. The impurity is defined as
 	///1-sum_j p(j|t)^2

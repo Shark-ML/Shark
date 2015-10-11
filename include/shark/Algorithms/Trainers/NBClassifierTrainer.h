@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Trainer of Naive Bayes classifier
- *
- *
- *
+ * 
+ * 
+ * 
  *
  * \author      B. Li
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -56,7 +56,8 @@ namespace shark {
 /// @tparam OutputType the type of class
 template <class InputType = RealVector, class OutputType = unsigned int>
 class NBClassifierTrainer
-	: public AbstractTrainer<NBClassifier<InputType, OutputType> > {
+:public AbstractTrainer<NBClassifier<InputType, OutputType> >
+{
 private:
 
 	typedef NBClassifier<InputType, OutputType> NBClassifierType;
@@ -69,7 +70,8 @@ public:
 	{ return "NBClassifierTrainer"; }
 
 	/// @see AbstractTrainer::train
-	void train(NBClassifierType& model, LabeledData<InputType, OutputType> const& dataset) {
+	void train(NBClassifierType& model, LabeledData<InputType, OutputType> const& dataset)
+	{
 		SIZE_CHECK(dataset.numberOfElements() > 0u);
 
 		// Get size of class/feature
@@ -84,8 +86,10 @@ public:
 		buffer.reserve(dataset.numberOfElements() / classSize);
 
 		// Train individual feature distribution
-		for(std::size_t i = 0; i < classSize; ++i) {
-			for(std::size_t j = 0; j < featureSize; ++j) {
+		for (std::size_t i = 0; i < classSize; ++i)
+		{
+			for (std::size_t j = 0; j < featureSize; ++j)
+			{
 				AbstractDistribution& dist = model.getFeatureDist(i, j);
 				buffer.clear();
 				getFeatureSample(buffer, dataset, i, j);
@@ -97,7 +101,7 @@ public:
 		const std::vector<std::size_t> occuranceCounter = classSizes(dataset);
 
 		const double totalClassOccurances = dataset.numberOfElements();
-		for(std::size_t i = 0; i < classSize; ++i) {
+		for (std::size_t i = 0; i < classSize; ++i) {
 			model.setClassPrior(i, occuranceCounter[i] / totalClassOccurances);
 		}
 	}
@@ -115,15 +119,15 @@ private:
 	///
 	/// @note This can/should be optimized
 	void getFeatureSample(
-	    std::vector<InputValueType>& samples,
-	    const LabeledData<InputType, OutputType>& dataset,
-	    OutputType classIndex,
-	    std::size_t featureIndex
-	) const {
+		std::vector<InputValueType>& samples,
+		const LabeledData<InputType, OutputType>& dataset,
+		OutputType classIndex,
+		std::size_t featureIndex
+	) const{
 		SHARK_CHECK(samples.empty(), "The output buffer should be cleaned before usage usually.");
 		typedef typename  LabeledData<InputType, OutputType>::const_element_reference reference;
-		BOOST_FOREACH(reference elem, dataset.elements()) {
-			if(elem.label == classIndex)
+		BOOST_FOREACH(reference elem, dataset.elements()){
+			if (elem.label == classIndex)
 				samples.push_back(elem.input(featureIndex));
 		}
 	}

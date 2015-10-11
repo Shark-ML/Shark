@@ -10,9 +10,7 @@ extern "C" {
 #include <shark/LinAlg/BLAS/traits/vector_raw.hpp>
 #include <shark/Core/Exception.h>
 
-namespace shark {
-namespace detail {
-namespace bindings {
+namespace shark{ namespace detail{ namespace bindings {
 
 template <typename Ord> struct storage_order {};
 template<> struct storage_order<blas::row_major> {
@@ -31,9 +29,7 @@ template<> struct uplo_triang<blas::lower_tag> {
 	enum ename { value = CblasLower };
 };
 
-}
-}
-}
+}}}
 
 
 

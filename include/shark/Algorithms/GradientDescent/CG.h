@@ -1,33 +1,33 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       CG
- *
+ * 
  * Conjugate-gradient method for unconstraint optimization.
- *
- *
+ * 
+ * 
  *
  * \author      O. Krause
  * \date        2010
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -53,9 +53,9 @@ namespace shark {
 /// which is formula 5.49 in Nocedal, Wright - Numerical Optimization.
 /// This formula has better numerical properties than Fletcher-Reeves for non-quadratic functions
 /// while ensuring a descent direction.
-///
+/// 
 /// We implement restarting to ensure quadratic convergence near the optimum as well as numerical stability
-class CG : public AbstractLineSearchOptimizer {
+class CG : public AbstractLineSearchOptimizer{
 protected:
 	SHARK_EXPORT_SYMBOL void initModel();
 	SHARK_EXPORT_SYMBOL void computeSearchDirection();
@@ -64,8 +64,8 @@ public:
 	{ return "CG"; }
 
 	//from ISerializable
-	SHARK_EXPORT_SYMBOL void read(InArchive & archive);
-	SHARK_EXPORT_SYMBOL void write(OutArchive & archive) const;
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 protected:
 	unsigned m_count;
 };

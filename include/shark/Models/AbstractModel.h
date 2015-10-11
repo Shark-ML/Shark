@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       base class for all models, as well as a specialized differentiable model
- *
- *
+ * 
+ * 
  *
  * \author      T.Glasmachers, O. Krause
  * \date        2010
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -75,7 +75,8 @@ namespace shark {
 /// \par
 /// Models have names and can be serialised
 template<class InputTypeT, class OutputTypeT>
-class AbstractModel : public IParameterizable, public INameable, public ISerializable {
+class AbstractModel : public IParameterizable, public INameable, public ISerializable
+{
 public:
 	/// \brief Defines the input type of the model.
 	typedef InputTypeT InputType;
@@ -105,43 +106,45 @@ public:
 	SHARK_FEATURE_INTERFACE;
 
 	/// \brief Returns true when the first parameter derivative is implemented.
-	bool hasFirstParameterDerivative()const {
+	bool hasFirstParameterDerivative()const{
 		return m_features & HAS_FIRST_PARAMETER_DERIVATIVE;
 	}
 	/// \brief Returns true when the second parameter derivative is implemented.
-	bool hasSecondParameterDerivative()const {
+	bool hasSecondParameterDerivative()const{
 		return m_features & HAS_SECOND_PARAMETER_DERIVATIVE;
 	}
 	/// \brief Returns true when the first input derivative is implemented.
-	bool hasFirstInputDerivative()const {
+	bool hasFirstInputDerivative()const{
 		return m_features & HAS_FIRST_INPUT_DERIVATIVE;
 	}
 	/// \brief Returns true when the second parameter derivative is implemented.
-	bool hasSecondInputDerivative()const {
+	bool hasSecondInputDerivative()const{
 		return m_features & HAS_SECOND_INPUT_DERIVATIVE;
 	}
-	bool isSequential()const {
+	bool isSequential()const{
 		return m_features & IS_SEQUENTIAL;
 	}
-
+	
 	///\brief Creates an internal state of the model.
 	///
 	///The state is needed when the derivatives are to be
 	///calculated. Eval can store a state which is then reused to speed up
 	///the calculations of the derivatives. This also allows eval to be
 	///evaluated in parallel!
-	virtual boost::shared_ptr<State> createState() const {
-		if(hasFirstParameterDerivative()
-		        || hasFirstInputDerivative()
-		        || hasSecondParameterDerivative()
-		        || hasSecondInputDerivative()) {
+	virtual boost::shared_ptr<State> createState() const
+	{
+		if (hasFirstParameterDerivative()
+		|| hasFirstInputDerivative()
+		|| hasSecondParameterDerivative()
+		|| hasSecondInputDerivative())
+		{
 			throw SHARKEXCEPTION("[AbstractModel::createState] createState must be overridden by models with derivatives");
 		}
 		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	/// \brief From ISerializable, reads a model from an archive.
-	virtual void read(InArchive & archive) {
+	virtual void read( InArchive & archive ){
 		m_features.read(archive);
 		RealVector p;
 		archive & p;
@@ -151,7 +154,7 @@ public:
 	/// \brief writes a model to an archive
 	///
 	/// the default implementation just saves the parameters, not the structure!
-	virtual void write(OutArchive & archive) const {
+	virtual void write( OutArchive & archive ) const{
 		m_features.write(archive);
 		RealVector p = parameterVector();
 		archive & p;
@@ -161,11 +164,11 @@ public:
 	///
 	/// \param patterns the inputs of the model
 	/// \param outputs the predictions or response of the model to every pattern
-	virtual void eval(BatchInputType const & patterns, BatchOutputType& outputs) const {
+	virtual void eval(BatchInputType const & patterns, BatchOutputType& outputs) const{
 		boost::shared_ptr<State> state = createState();
-		eval(patterns, outputs, *state);
+		eval(patterns,outputs,*state);
 	}
-
+	
 	/// \brief  Standard interface for evaluating the response of the model to a batch of patterns.
 	///
 	/// \param patterns the inputs of the model
@@ -177,23 +180,23 @@ public:
 	///
 	/// \param pattern the input of the model
 	/// \param output the prediction or response of the model to the pattern
-	virtual void eval(InputType const & pattern, OutputType& output)const {
-		BatchInputType patternBatch = Batch<InputType>::createBatch(pattern);
-		get(patternBatch, 0) = pattern;
+	virtual void eval(InputType const & pattern, OutputType& output)const{
+		BatchInputType patternBatch=Batch<InputType>::createBatch(pattern);
+		get(patternBatch,0) = pattern;
 		BatchOutputType outputBatch;
-		eval(patternBatch, outputBatch);
-		output = get(outputBatch, 0);
+		eval(patternBatch,outputBatch);
+		output = get(outputBatch,0);
 	}
 
 	/// \brief Model evaluation as an operator for a whole dataset. This is a convenience function
 	///
 	/// \param patterns the input of the model
 	/// \returns the responses of the model
-	Data<OutputType> operator()(Data<InputType> const& patterns)const {
+	Data<OutputType> operator()(Data<InputType> const& patterns)const{
 		int batches = (int) patterns.numberOfBatches();
 		Data<OutputType> result(batches);
 		SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
-		result.batch(i) = (*this)(patterns.batch(i));
+			result.batch(i)= (*this)(patterns.batch(i));
 		return result;
 		//return transform(patterns,*this);//todo this leads to compiler errors.
 	}
@@ -202,9 +205,9 @@ public:
 	///
 	/// \param pattern the input of the model
 	/// \returns the response of the model
-	OutputType operator()(InputType const & pattern)const {
+	OutputType operator()(InputType const & pattern)const{
 		OutputType output;
-		eval(pattern, output);
+		eval(pattern,output);
 		return output;
 	}
 
@@ -212,9 +215,9 @@ public:
 	///
 	/// \param patterns the input of the model
 	/// \returns the response of the model
-	BatchOutputType operator()(BatchInputType const & patterns)const {
+	BatchOutputType operator()(BatchInputType const & patterns)const{
 		BatchOutputType output;
-		eval(patterns, output);
+		eval(patterns,output);
 		return output;
 	}
 
@@ -225,11 +228,11 @@ public:
 	/// \param  state intermediate results stored by eval to speed up calculations of the derivatives
 	/// \param  derivative    the calculated derivative as sum over all derivates of all patterns
 	virtual void weightedParameterDerivative(
-	    BatchInputType const & pattern,
-	    BatchOutputType const & coefficients,
-	    State const& state,
-	    RealVector& derivative
-	)const {
+		BatchInputType const & pattern,
+		BatchOutputType const & coefficients,
+		State const& state,
+		RealVector& derivative
+	)const{
 		SHARK_FEATURE_EXCEPTION(HAS_FIRST_PARAMETER_DERIVATIVE);
 	}
 
@@ -242,13 +245,13 @@ public:
 	/// \param  derivative    the calculated derivative as sum over all derivates of all patterns
 	/// \param  hessian       the calculated hessian as sum over all derivates of all patterns
 	virtual void weightedParameterDerivative(
-	    BatchInputType const & pattern,
-	    BatchOutputType const & coefficients,
-	    Batch<RealMatrix>::type const & errorHessian,//maybe a batch of matrices is bad?,
-	    State const& state,
-	    RealVector& derivative,
-	    RealMatrix& hessian
-	)const {
+		BatchInputType const & pattern,
+		BatchOutputType const & coefficients,
+		Batch<RealMatrix>::type const & errorHessian,//maybe a batch of matrices is bad?,
+		State const& state,
+		RealVector& derivative,
+		RealMatrix& hessian
+	)const{
 		SHARK_FEATURE_EXCEPTION(HAS_SECOND_PARAMETER_DERIVATIVE);
 	}
 
@@ -259,11 +262,11 @@ public:
 	/// \param state intermediate results stored by eval to sped up calculations of the derivatives
 	/// \param  derivative    the calculated derivative for every pattern
 	virtual void weightedInputDerivative(
-	    BatchInputType const & pattern,
-	    BatchOutputType const & coefficients,
-	    State const& state,
-	    BatchInputType& derivative
-	)const {
+		BatchInputType const & pattern,
+		BatchOutputType const & coefficients,
+		State const& state,
+		BatchInputType& derivative
+	)const{
 		SHARK_FEATURE_EXCEPTION(HAS_FIRST_INPUT_DERIVATIVE);
 	}
 
@@ -276,13 +279,13 @@ public:
 	/// \param derivative      the calculated derivative for every pattern
 	/// \param hessian       the calculated hessian for every pattern
 	virtual void weightedInputDerivative(
-	    BatchInputType const & pattern,
-	    BatchOutputType const & coefficients,
-	    typename Batch<RealMatrix>::type const & errorHessian,
-	    State const& state,
-	    RealMatrix& derivative,
-	    Batch<RealMatrix>::type& hessian
-	)const {
+		BatchInputType const & pattern,
+		BatchOutputType const & coefficients,
+		typename Batch<RealMatrix>::type const & errorHessian,
+		State const& state,
+		RealMatrix& derivative,
+		Batch<RealMatrix>::type& hessian
+	)const{
 		SHARK_FEATURE_EXCEPTION(HAS_SECOND_INPUT_DERIVATIVE);
 	}
 	///\brief calculates weighted input and parameter derivative at the same time
@@ -297,14 +300,14 @@ public:
 	/// \param parameterDerivative  the calculated parameter derivative as sum over all derivates of all patterns
 	/// \param inputDerivative    the calculated derivative for every pattern
 	virtual void weightedDerivatives(
-	    BatchInputType const & patterns,
-	    BatchOutputType const & coefficients,
-	    State const& state,
-	    RealVector& parameterDerivative,
-	    BatchInputType& inputDerivative
-	)const {
-		weightedParameterDerivative(patterns, coefficients, state, parameterDerivative);
-		weightedInputDerivative(patterns, coefficients, state, inputDerivative);
+		BatchInputType const & patterns,
+		BatchOutputType const & coefficients,
+		State const& state,
+		RealVector& parameterDerivative,
+		BatchInputType& inputDerivative
+	)const{
+		weightedParameterDerivative(patterns,coefficients,state,parameterDerivative);
+		weightedInputDerivative(patterns,coefficients,state,inputDerivative);
 	}
 };
 
@@ -320,8 +323,9 @@ public:
 /// \param model: model to be initialized
 /// \param s: variance of mean-free normal distribution
 template <class InputType, class OutputType>
-void initRandomNormal(AbstractModel<InputType, OutputType>& model, double s) {
-	Normal<> gauss(Rng::globalRng, 0, s);
+void initRandomNormal(AbstractModel<InputType, OutputType>& model, double s)
+{
+	Normal<> gauss(Rng::globalRng,0, s);
 	RealVector weights(model.numberOfParameters());
 	std::generate(weights.begin(), weights.end(), gauss);
 	model.setParameterVector(weights);
@@ -334,8 +338,9 @@ void initRandomNormal(AbstractModel<InputType, OutputType>& model, double s) {
 /// \param l: lower bound of initialization interval
 /// \param h: upper bound of initialization interval
 template <class InputType, class OutputType>
-void initRandomUniform(AbstractModel<InputType, OutputType>& model, double l, double h) {
-	Uniform<> uni(Rng::globalRng, l, h);
+void initRandomUniform(AbstractModel<InputType, OutputType>& model, double l, double h)
+{
+	Uniform<> uni(Rng::globalRng,l, h);
 	RealVector weights(model.numberOfParameters());
 	std::generate(weights.begin(), weights.end(), uni);
 	model.setParameterVector(weights);

@@ -1,10 +1,10 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Quadratic programming for Support Vector Machines
- *
- *
+ * 
+ * 
  * \par
  * This file provides a number of classes representing hugh dense
  * matrices all related to kernel Gram matices of possibly large
@@ -12,37 +12,37 @@
  * (a) providing a matrix entry,
  * (b) swapping two variable indices, and
  * (c) returning the matrix size.
- *
+ * 
  * \par
  * This interface is required by the template class CachedMatrix,
  * which provides a cache mechanism for restricted matrix rows, as it
  * is used by various quadratic program solvers within the library.
  * The PrecomputedMatrix provides a sometimes faster but more memory
  * intensive alternative to CachedMatrix.
- *
- *
- *
+ * 
+ * 
+ * 
  *
  * \author      T. Glasmachers
  * \date        2007-2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -60,7 +60,8 @@ namespace shark {
 
 /// reason for the quadratic programming solver
 /// to stop the iterative optimization process
-enum QpStopType {
+enum QpStopType
+{
 	QpNone = 0,
 	QpAccuracyReached = 1,
 	QpMaxIterationsReached = 4,
@@ -92,9 +93,11 @@ enum QpStopType {
 //! investigating hyperparameters with poor
 //! generalization ability.
 //!
-struct QpStoppingCondition {
+struct QpStoppingCondition
+{
 	/// Constructor
-	QpStoppingCondition(double accuracy = 0.001, unsigned long long iterations = 0xffffffff, double value = 1e100, double seconds = 1e100) {
+	QpStoppingCondition(double accuracy = 0.001, unsigned long long iterations = 0xffffffff, double value = 1e100, double seconds = 1e100)
+	{
 		minAccuracy = accuracy;
 		maxIterations = iterations;
 		targetValue = value;
@@ -127,8 +130,10 @@ struct QpStoppingCondition {
 /// the number of iterations, time elapsed, and the value
 /// of the objective function in the reported solution.
 ///
-struct QpSolutionProperties {
-	QpSolutionProperties() {
+struct QpSolutionProperties
+{
+	QpSolutionProperties()
+	{
 		type = QpNone;
 		accuracy = 1e100;
 		iterations = 0;

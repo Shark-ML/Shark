@@ -50,7 +50,8 @@
 #include <shark/Algorithms/Trainers/Budgeted/AbstractBudgetMaintenanceStrategy.h>
 
 
-namespace shark {
+namespace shark
+{
 
 ///
 /// \brief Budget maintenance strategy that removes a vector
@@ -60,7 +61,8 @@ namespace shark {
 /// a random one, the smallest one (w.r.t. to 2-norm of the alphas)
 ///
 template<class InputType>
-class RemoveBudgetMaintenanceStrategy: public AbstractBudgetMaintenanceStrategy<InputType> {
+class RemoveBudgetMaintenanceStrategy: public AbstractBudgetMaintenanceStrategy<InputType>
+{
 	typedef KernelExpansion<InputType> ModelType;
 	typedef LabeledData<InputType, unsigned int> DataType;
 	typedef typename DataType::element_type ElementType;
@@ -74,7 +76,8 @@ public:
 	/// constructor.
 	/// @param[in] flavor   enum that decides on the method a vector is removed.
 	RemoveBudgetMaintenanceStrategy(size_t flavor = SMALLEST)
-		: m_flavor(flavor) {
+		: m_flavor(flavor)
+	{
 	}
 
 
@@ -85,14 +88,16 @@ public:
 	/// @param[in]  alpha   alphas for the new budget vector
 	/// @param[in]  supportVector the vector to add to the model by applying the maintenance strategy
 	///
-	virtual void addToModel(ModelType& model, InputType const& alpha, ElementType const& supportVector) {
+	virtual void addToModel(ModelType& model, InputType const& alpha, ElementType const& supportVector)
+	{
 
 		// first we check: if the budget is not full, we do not need to do remove anything
 		std::size_t index = 0;
 		double minAlpha = 0;
 		this->findSmallestVector(model, index, minAlpha);
 
-		if(minAlpha == 0.0f) {
+		if(minAlpha == 0.0f)
+		{
 			// replace vector and alpha
 			model.basis().element(index) = supportVector.input;
 			row(model.alpha(), index) = alpha;
@@ -100,14 +105,17 @@ public:
 		}
 
 		// else depending on the flavor we do something
-		switch(m_flavor) {
-		case RANDOM: {
+		switch(m_flavor)
+		{
+		case RANDOM:
+		{
 			// though we have found the smallest one,  we want to remove
 			// a random element.
 			index = Rng::discrete(0, model.basis().numberOfElements() - 1);
 			break;
 		}
-		case SMALLEST: {
+		case SMALLEST:
+		{
 			// we already have found the smallest alpha, so nothing to do
 			break;
 		}
@@ -120,8 +128,8 @@ public:
 		model.basis().element(index) = supportVector.input;
 		row(model.alpha(), index) = alpha;
 
-		// we need to clear out the last vector, as it is just a buffer
-		row(model.alpha(), model.basis().numberOfElements() - 1).clear();
+                // we need to clear out the last vector, as it is just a buffer
+                row (model.alpha(), model.basis().numberOfElements() -1).clear();
 	}
 
 

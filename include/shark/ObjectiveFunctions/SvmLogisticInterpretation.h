@@ -1,30 +1,30 @@
 /*!
- *
+ * 
  *
  * \brief       Maximum-likelihood model selection for binary support vector machines.
- *
- *
+ * 
+ * 
  *
  * \author      M.Tuma, T.Glasmachers
  * \date        2009-2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -84,25 +84,26 @@ public:
 	//! \param unconstrained whether or not the C-parameter of/for the C-SVM is passed for unconstrained optimization mode.
 	//! \param stop_cond the stopping conditions which are to be passed to the
 	SvmLogisticInterpretation(
-	    FoldsType const &folds, KernelType *kernel,
-	    bool unconstrained = true, QpStoppingCondition *stop_cond = NULL
+		FoldsType const &folds, KernelType *kernel,
+	        bool unconstrained = true, QpStoppingCondition *stop_cond = NULL
 	)
-		: mep_kernel(kernel)
-		,  m_nhp(kernel->parameterVector().size() + 1)
-		,  m_nkp(kernel->parameterVector().size())
-		,  m_numFolds(folds.size())  //gets number of folds!
-		,  m_numSamples(folds.dataset().numberOfElements())
-		,  m_inputDims(inputDimension(folds.dataset()))
-		,  m_svmCIsUnconstrained(unconstrained)
-		,  mep_svmStoppingCondition(stop_cond)
-		,  m_sigmoidSlopeIsUnconstrained(true) {
+	: mep_kernel(kernel)
+	,  m_nhp(kernel->parameterVector().size()+1)
+	,  m_nkp(kernel->parameterVector().size())
+	,  m_numFolds(folds.size())  //gets number of folds!
+	,  m_numSamples(folds.dataset().numberOfElements())
+	,  m_inputDims(inputDimension(folds.dataset()))
+	,  m_svmCIsUnconstrained(unconstrained)
+	,  mep_svmStoppingCondition(stop_cond)
+	,  m_sigmoidSlopeIsUnconstrained(true)
+	{
 		SHARK_CHECK(kernel != NULL, "[SvmLogisticInterpretation::SvmLogisticInterpretation] kernel is not allowed to be NULL");  //mtq: necessary despite indirect check via call in initialization list?
 		SHARK_CHECK(m_numFolds > 1, "[SvmLogisticInterpretation::SvmLogisticInterpretation] please provide a meaningful number of folds for cross validation");
-		if(!m_svmCIsUnconstrained)    //mtq: important: we additionally need to deal with kernel feasibility indicators! important!
-			m_features |= IS_CONSTRAINED_FEATURE;
-		m_features |= HAS_VALUE;
-		if(mep_kernel->hasFirstParameterDerivative())
-			m_features |= HAS_FIRST_DERIVATIVE;
+		if (!m_svmCIsUnconstrained)   //mtq: important: we additionally need to deal with kernel feasibility indicators! important!
+			m_features|=IS_CONSTRAINED_FEATURE;
+		m_features|=HAS_VALUE;
+		if (mep_kernel->hasFirstParameterDerivative())
+			m_features|=HAS_FIRST_DERIVATIVE;
 		m_folds = folds;
 	}
 
@@ -115,13 +116,13 @@ public:
 	bool isFeasible(const SearchPointType &input) const {
 		SHARK_ASSERT(input.size() == m_nhp);
 		//throw SHARKEXCEPTION("[SvmLogisticInterpretation::isFeasible] Please first clarify how the kernel parameter feasibility should be dealt with. Afterwards, please write a test for this method. Thanks.");
-		if(input(0) <= 0.0 && !m_svmCIsUnconstrained) {
+		if (input(0) <= 0.0 && !m_svmCIsUnconstrained) {
 			return false;
 		}
 		return true;
 	}
 
-	std::size_t numberOfVariables()const {
+	std::size_t numberOfVariables()const{
 		return m_nhp;
 	}
 
@@ -143,7 +144,7 @@ public:
 		unsigned int next_label = 0; //helper index counter to monitor the next position to be filled in the above vectors
 
 		// for each fold, train an svm and get predictions on the validation data
-		for(unsigned int i = 0; i < m_numFolds; i++) {
+		for (unsigned int i=0; i<m_numFolds; i++) {
 			// get current train/validation partitions as well as corresponding labels
 			ClassificationDataset cur_train_data = m_folds.training(i);
 			ClassificationDataset cur_valid_data = m_folds.validation(i);
@@ -154,7 +155,7 @@ public:
 			KernelClassifier<InputType> svm;
 			CSvmTrainer<InputType, double> csvm_trainer(mep_kernel, C_reg, true, m_svmCIsUnconstrained);   //the trainer
 			csvm_trainer.sparsify() = false;
-			if(mep_svmStoppingCondition != NULL) {
+			if (mep_svmStoppingCondition != NULL) {
 				csvm_trainer.stoppingCondition() = *mep_svmStoppingCondition;
 			} else {
 				csvm_trainer.stoppingCondition().minAccuracy = 1e-3; //mtq: is this necessary? i think it could be set via long chain of default ctors..
@@ -165,7 +166,7 @@ public:
 			csvm_trainer.train(svm, cur_train_data);
 			cur_vscores = svm.decisionFunction()(cur_valid_data.inputs());   //will result in a dataset of RealVector as output
 			// copy the scores and corresponding labels to the dataset-wide storage
-			for(unsigned int j = 0; j < cur_vsize; j++) {
+			for (unsigned int j=0; j<cur_vsize; j++) {
 				tmp_helper_labels[next_label] = cur_vlabels.element(j);
 				tmp_helper_preds[next_label] = cur_vscores.element(j);
 				++next_label;
@@ -182,18 +183,19 @@ public:
 		sigmoid_trainer.train(sigmoid_model, validation_dataset);
 		// we're basically done. now only get the final cost value of the best fit, and return it:
 		Data< RealVector > sigmoid_predictions = sigmoid_model(all_validation_predictions);
-
+		
 		double error = 0;
-		for(unsigned int i = 0; i < m_numSamples; i++) {
+		for (unsigned int i=0; i<m_numSamples; i++) {
 			double p = sigmoid_predictions.element(i)(0);
-			if(all_validation_labels.element(i) == 1) {   //positive class
+			if (all_validation_labels.element(i) == 1){   //positive class
 				error -= std::log(p);
-			} else { //negative class
+			}
+			else{ //negative class
 				error -= boost::math::log1p(-p);
 			}
 		}
-
-		return error / m_numSamples;
+		
+		return error/m_numSamples;
 	}
 
 	//! the derivative of the error() function above w.r.t. the parameters.
@@ -216,7 +218,7 @@ public:
 		RealVector der; //temporary helper for derivative calls
 
 		// for each fold, train an svm and get predictions on the validation data
-		for(unsigned int i = 0; i < m_numFolds; i++) {
+		for (unsigned int i=0; i<m_numFolds; i++) {
 			// get current train/validation partitions as well as corresponding labels
 			ClassificationDataset cur_train_data = m_folds.training(i);
 			ClassificationDataset cur_valid_data = m_folds.validation(i);
@@ -228,7 +230,7 @@ public:
 			KernelClassifier<InputType> svm;   //the SVM
 			CSvmTrainer<InputType, double> csvm_trainer(mep_kernel, C_reg, true, m_svmCIsUnconstrained);   //the trainer
 			csvm_trainer.sparsify() = false;
-			if(mep_svmStoppingCondition != NULL) {
+			if (mep_svmStoppingCondition != NULL) {
 				csvm_trainer.stoppingCondition() = *mep_svmStoppingCondition;
 			} else {
 				csvm_trainer.stoppingCondition().maxIterations = 200 * m_inputDims; //mtq: need good/better heuristics to determine a good value for this
@@ -238,7 +240,7 @@ public:
 			CSvmDerivative<InputType> svm_deriv(&svm, &csvm_trainer);
 			cur_vscores = svm.decisionFunction()(cur_valid_data.inputs());   //will result in a dataset of RealVector as output
 			// copy the scores and corresponding labels to the dataset-wide storage
-			for(unsigned int j = 0; j < cur_vsize; j++) {
+			for (unsigned int j=0; j<cur_vsize; j++) {
 				// copy label and prediction score
 				tmp_helper_labels[next_label] = cur_vlabels.element(j);
 				tmp_helper_preds[next_label] = cur_vscores.element(j);
@@ -269,22 +271,23 @@ public:
 
 		double ss = (m_sigmoidSlopeIsUnconstrained ? std::exp(sigmoid_model.parameterVector()(0)) : sigmoid_model.parameterVector()(0));
 		double error = 0;
-		for(unsigned int i = 0; i < m_numSamples; i++) {
+		for (unsigned int i=0; i<m_numSamples; i++) {
 			double p = sigmoid_predictions.element(i)(0);
 			// compute derivative of the negative log likelihood
 			double dL_dsp; //derivative of likelihood wrt sigmoid predictions
-			if(all_validation_labels.element(i) == 1) {   //positive class
+			if (all_validation_labels.element(i) == 1){   //positive class
 				error -= std::log(p);
-				dL_dsp = -1.0 / p;
-			} else { //negative class
+				dL_dsp = -1.0/p;
+			}
+			else{ //negative class
 				error -= boost::math::log1p(-p);
-				dL_dsp = 1.0 / (1.0 - p);
+				dL_dsp = 1.0/(1.0-p);
 			}
 			// compute derivative of the sigmoid
 			// derivative of sigmoid predictions wrt svm predictions
-			double dsp_dsvmp = ss * p * (1.0 - p); //severe sign confusion potential: p(1-p) is deriv. w.r.t. t in 1/(1+e**(-t))!
-			for(unsigned int j = 0; j < m_nhp; j++) {
-				derivative(j) += dL_dsp * dsp_dsvmp * all_validation_predict_derivs(i, j);
+			double dsp_dsvmp = ss * p * (1.0-p); //severe sign confusion potential: p(1-p) is deriv. w.r.t. t in 1/(1+e**(-t))!
+			for (unsigned int j=0; j<m_nhp; j++) {
+				derivative(j) += dL_dsp * dsp_dsvmp * all_validation_predict_derivs(i,j);
 			}
 		}
 		derivative /= m_numSamples;

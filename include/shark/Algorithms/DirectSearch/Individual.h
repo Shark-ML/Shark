@@ -1,5 +1,5 @@
 /*!
- *
+ * 
  *
  * \brief       TypedIndividual
  *
@@ -8,21 +8,21 @@
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -45,43 +45,43 @@ namespace shark {
  *
  * The states mean the following:
  * - the search point is the point in search space the individual represents.
- * - the penalized and unpenailzed fitness are related by:
+ * - the penalized and unpenailzed fitness are related by: 
  * if the search point is in the search region of the optimization region, penalized and unpenalized
  * fitness are the same. otherwise the unpenalized fitness is the value of the closest feasible point
  * to the search point. The penalized fitness is the same value plus an penalty term. Usually this
  * is ||s-closestFeasible(s)||^2, the squared distance between the search point and the closest
- * feasible point.
+ * feasible point. 
  *  - the domination rank indicates in which front the individual is. a nondominated individual has rank
  *    1, individuals that are only dominated by individuals with rank one have rank 2 and so on.
  *    In single objective optimization, the rank is simply the number of individuals with better fitness+1.
- * -  the age is the number of generations the individual has survived.
+ * -  the age is the number of generations the individual has survived. 
  * - selection: survival selection schemes never delete or move points, instead they indicate which points
  *  are to be deleted.
  */
-template< typename PointType, class FitnessTypeT, class Chromosome = RealVector >
+template< typename PointType, class FitnessTypeT, class Chromosome = RealVector > 
 class Individual {
 public:
 
 	typedef FitnessTypeT FitnessType;
 
 	typedef PointType SearchPointType;
-
+	
 	// Functors to use for the stl algorithms
 	///\brief returns true if the individual is selected for the next parent set
-	static bool IsSelected(Individual const& individual) {
+	static bool IsSelected(Individual const& individual){
 		return individual.selected();
 	}
-
+	
 	///\brief Ordering relation by the ranks of the individuals
-	struct RankOrdering {
-		bool operator()(Individual const& individual1, Individual const& individual2) {
+	struct RankOrdering{
+		bool operator()(Individual const& individual1, Individual const& individual2){
 			return individual1.rank() < individual2.rank();
 		}
 	};
-
+	
 	///\brief Ordering relation by the fitness of the individuals(only single objective)
-	struct FitnessOrdering {
-		bool operator()(Individual const& individual1, Individual const& individual2) {
+	struct FitnessOrdering{
+		bool operator()(Individual const& individual1, Individual const& individual2){
 			return individual1.unpenalizedFitness()  < individual2.unpenalizedFitness() ;
 		}
 	};
@@ -89,10 +89,10 @@ public:
 	/**
 	 * \brief Default constructor that initializes the individual's attributes to default values.
 	 */
-	Individual()
-		: m_age(0)
-		, m_rank(0)
-		, m_selected(false)
+	Individual() 
+	: m_age(0)
+	, m_rank(0)
+	, m_selected(false)
 	{}
 
 	/**
@@ -108,7 +108,7 @@ public:
 	const SearchPointType& searchPoint() const {
 		return m_searchPoint;
 	}
-
+	
 	/**
 	 * \brief Returns a reference to the chromosome that is associated with the individual.
 	 */
@@ -119,7 +119,7 @@ public:
 	/**
 	 * \brief Returns a const reference to the chromosome that is associated with the individual.
 	 */
-	Chromosome const& chromosome() const {
+	Chromosome const& chromosome() const{
 		return m_chromosome;
 	}
 
@@ -138,27 +138,27 @@ public:
 	}
 
 	/**
-	 * \brief Returns a reference to the unpenalized fitness of the individual.
+	 * \brief Returns a reference to the unpenalized fitness of the individual. 
 	 */
 	FitnessType& unpenalizedFitness() {
 		return m_unpenalizedFitness;
 	}
 
 	/**
-	 * \brief Returns the unpenalized fitness of the individual.
+	 * \brief Returns the unpenalized fitness of the individual. 
 	 */
 	FitnessType const& unpenalizedFitness() const {
 		return m_unpenalizedFitness;
 	}
 
 	/**
-	 * \brief Returns a reference to the penalized fitness of the individual.
+	 * \brief Returns a reference to the penalized fitness of the individual. 
 	 */
 	FitnessType& penalizedFitness() {
 		return m_penalizedFitness;
 	}
 	/**
-	 * \brief Returns the unpenalized fitness of the individual.
+	 * \brief Returns the unpenalized fitness of the individual. 
 	 */
 	FitnessType const& penalizedFitness() const {
 		return m_penalizedFitness;
@@ -179,14 +179,14 @@ public:
 	}
 
 	/**
-	 * \brief Returns true if the individual is selected for the next parent generation
+	 * \brief Returns true if the individual is selected for the next parent generation 
 	 */
 	bool selected() const {
 		return m_selected;
 	}
 
 	/**
-	 * \brief Returns true if the individual is selected for the next parent generation
+	 * \brief Returns true if the individual is selected for the next parent generation 
 	 */
 	bool& selected() {
 		return m_selected;
@@ -206,16 +206,16 @@ public:
 		archive & BOOST_SERIALIZATION_NVP(m_selected);
 
 	}
-
-	friend void swap(Individual& i1, Individual& i2) {
+	
+	friend void swap(Individual& i1, Individual& i2){
 		using std::swap;
-		swap(i1.m_searchPoint, i2.m_searchPoint);
-		swap(i1.m_chromosome, i2.m_chromosome);
-		swap(i1.m_age, i2.m_age);
-		swap(i1.m_rank, i2.m_rank);
-		swap(i1.m_selected, i2.m_selected);
-		swap(i1.m_unpenalizedFitness, i2.m_unpenalizedFitness);
-		swap(i1.m_penalizedFitness, i2.m_penalizedFitness);
+		swap(i1.m_searchPoint,i2.m_searchPoint);
+		swap(i1.m_chromosome,i2.m_chromosome);
+		swap(i1.m_age,i2.m_age);
+		swap(i1.m_rank,i2.m_rank);
+		swap(i1.m_selected,i2.m_selected);
+		swap(i1.m_unpenalizedFitness,i2.m_unpenalizedFitness);
+		swap(i1.m_penalizedFitness,i2.m_penalizedFitness);
 	}
 
 protected:

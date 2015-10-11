@@ -49,22 +49,22 @@ struct ElitistSelection {
 	/// \param [in] itE Iterator pointing to the first invalid parent individual.
 	/// \param [in] out Iterator pointing to the first valid element of the output range.
 	/// \param [in] outE Iterator pointing to the first invalid element of the output range.
-	template<typename InIterator, typename OutIterator>
+	template<typename InIterator,typename OutIterator>
 	void operator()(
-	    InIterator it, InIterator itE,
-	    OutIterator out,  OutIterator outE
-	) {
-		std::size_t outputSize = std::distance(out, outE);
+		InIterator it, InIterator itE,
+		OutIterator out,  OutIterator outE
+	){
+		std::size_t outputSize = std::distance( out, outE );
 		std::vector<KeyValuePair<double, InIterator> > results = order(it, itE);
-		if(results.size() < outputSize) {
+		if(results.size() < outputSize){
 			throw SHARKEXCEPTION("[ElitistSelection] Input range must be bigger than output range");
 		}
-
-		for(std::size_t i = 0; i != outputSize; ++i, ++out) {
+		
+		for(std::size_t i = 0; i != outputSize; ++i, ++out){
 			*out = *results[i].value;
 		}
 	}
-
+	
 	/// \brief Selects individuals from the range of individuals.
 	///
 	/// Instead of using an output range, surviving individuals are marked as selected.
@@ -73,16 +73,16 @@ struct ElitistSelection {
 	/// \param [in] mu number of individuals to select
 	template<typename Population>
 	void operator()(
-	    Population& population, std::size_t mu
-	) {
+		Population& population,std::size_t mu
+	){
 		SIZE_CHECK(population.size() >= mu);
 		typedef typename Population::iterator InIterator;
-		std::vector<KeyValuePair<double, InIterator> > results = order(population.begin(), population.end());
-
-		for(std::size_t i = 0; i != mu; ++i) {
-			results[i].value->select() = true;
+		std::vector<KeyValuePair<double, InIterator> > results = order(population.begin(),population.end());
+		
+		for(std::size_t i = 0; i != mu; ++i){
+			results[i].value->select()=true;
 		}
-		for(std::size_t i = mu; i != results.size(); ++i) {
+		for(std::size_t i = mu; i != results.size(); ++i){
 			results[i].value->select() = false;
 		}
 	}
@@ -90,15 +90,15 @@ private:
 	///Returns a sorted range of pairs indicating, how often every individual won.
 	/// The best individuals are in the back of the range.
 	template<class InIterator>
-	std::vector<KeyValuePair<double, InIterator> > order(InIterator it, InIterator itE) {
-		std::size_t size = std::distance(it, itE);
+	std::vector<KeyValuePair<double, InIterator> > order(InIterator it, InIterator itE){
+		std::size_t size = std::distance( it, itE );
 		Extractor e;
 		std::vector<KeyValuePair<double, InIterator> > individuals(size);
-		for(std::size_t i = 0; i != size; ++i) {
-			individuals[i].key = e(*(it + i));
-			individuals[i].value = it + i;
+		for(std::size_t i = 0; i != size; ++i){
+			individuals[i].key = e(*(it+i));
+			individuals[i].value = it+i;
 		}
-		std::sort(individuals.begin(), individuals.end());
+		std::sort( individuals.begin(), individuals.end());
 		return individuals;
 	}
 };

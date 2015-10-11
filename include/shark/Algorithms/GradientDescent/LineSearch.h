@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       LineSearch
- *
- *
+ * 
+ * 
  *
  * \author      O. Krause, S. Dahlgaard
  * \date        2010-2013
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -47,20 +47,20 @@ namespace shark {
 ///This class is a wrapper for the linesearch class of functions of the linear algebra library.
 ///The class is used for example in CG or BFGS for their internal linesearch learning steps.
 ///It is NOT an Optimizer on its own, since it needs the Newton direction to be specified.
-class LineSearch: public ISerializable {
+class LineSearch:public ISerializable {
 public:
 	enum LineSearchType {
-		Dlinmin,
-		WolfeCubic
+	    Dlinmin,
+	    WolfeCubic
 	};
-	typedef AbstractObjectiveFunction<RealVector, double> ObjectiveFunction;
+	typedef AbstractObjectiveFunction<RealVector,double> ObjectiveFunction;
 
 	///Initializes the internal variables of the class to useful default values.
 	///Dlinmin is used as default
 	LineSearch() {
-		m_minInterval = 0;
-		m_maxInterval = 1;
-		m_lineSearchType = Dlinmin;
+		m_minInterval=0;
+		m_maxInterval=1;
+		m_lineSearchType=Dlinmin;
 	}
 
 	LineSearchType lineSearchType()const {
@@ -97,8 +97,8 @@ public:
 	///@param newtonDirection the search direction of the line search
 	///@param derivative the derivative of the function at searchPoint
 	///@param stepLength initial step length guess for guiding the line search
-	virtual void operator()(RealVector &searchPoint, double &pointValue, RealVector const& newtonDirection, RealVector &derivative, double stepLength = 1.0)const {
-		switch(m_lineSearchType) {
+	virtual void operator()(RealVector &searchPoint,double &pointValue,RealVector const& newtonDirection, RealVector &derivative, double stepLength = 1.0)const {
+		switch (m_lineSearchType) {
 		case Dlinmin:
 			detail::dlinmin(searchPoint, newtonDirection, pointValue, *m_function, m_minInterval, m_maxInterval);
 			m_function->evalDerivative(searchPoint, derivative);
@@ -111,15 +111,15 @@ public:
 
 	//ISerializable
 	virtual void read(InArchive &archive) {
-		archive >> m_minInterval;
-		archive >> m_maxInterval;
-		archive >> m_lineSearchType;
+		archive>>m_minInterval;
+		archive>>m_maxInterval;
+		archive>>m_lineSearchType;
 	}
 
 	virtual void write(OutArchive &archive) const {
-		archive << m_minInterval;
-		archive << m_maxInterval;
-		archive << m_lineSearchType;
+		archive<<m_minInterval;
+		archive<<m_maxInterval;
+		archive<<m_lineSearchType;
 	}
 
 

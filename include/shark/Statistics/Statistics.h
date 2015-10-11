@@ -1,30 +1,30 @@
 /*!
- *
+ * 
  *
  * \brief       Calculate statistics given a range of values.
- *
- *
+ * 
+ * 
  *
  * \author      T.Voss, T. Glasmachers, O.Krause
  * \date        2010-2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -55,34 +55,34 @@ namespace ba = boost::accumulators;
 
 namespace shark {
 
-/**
- * \brief Calculate pre-defined statistics given a range of values.
- *
- * \sa examples/Statistics/StatisticsMain.cpp
- *
- * Calculate statistics from standard in:
- * \code
- * shark::Statistics stats;
- * stats = std::for_each( std::istream_iterator<double>( std::cin ), std::istream_iterator<double>(), stats );
- * std::cout << stats << std::endl;
- * \endcode
- * Implemented in terms of boost::accumulators.
- */
-struct Statistics {
+    /**
+     * \brief Calculate pre-defined statistics given a range of values.
+     *
+     * \sa examples/Statistics/StatisticsMain.cpp
+     *
+     * Calculate statistics from standard in:
+     * \code
+     * shark::Statistics stats;
+     * stats = std::for_each( std::istream_iterator<double>( std::cin ), std::istream_iterator<double>(), stats );
+     * std::cout << stats << std::endl;
+     * \endcode
+     * Implemented in terms of boost::accumulators.
+     */
+    struct Statistics {
 
 	/** \cond IMPL */
-	typedef ba::accumulator_set <
-	double,
-	ba::stats <
-	ba::tag::median(ba::with_p_square_quantile),
-	ba::tag::density,
-	ba::tag::mean,
-	ba::tag::variance,
-	ba::tag::min,
-	ba::tag::max,
-	ba::tag::count
-	>
-	> AccumulatorType;
+	typedef ba::accumulator_set<
+	double, 
+	    ba::stats<
+	    ba::tag::median(ba::with_p_square_quantile), 		   
+		   ba::tag::density,
+		   ba::tag::mean, 
+		   ba::tag::variance,
+		   ba::tag::min, 
+		   ba::tag::max, 
+		   ba::tag::count 
+		   > 
+		   > AccumulatorType;
 	typedef ba::accumulator_set<double, ba::stats<ba::tag::p_square_quantile> > QuartileAccumulatorType;
 
 	typedef double LowerQuantileProbability;
@@ -90,11 +90,11 @@ struct Statistics {
 	/** \endcond IMPL */
 
 	/** \brief Histogram type */
-	typedef boost::iterator_range <
-	std::vector <
-	std::pair<double, double>
-	>::iterator
-	> histogram_type;
+	typedef boost::iterator_range< 
+	std::vector< 
+	std::pair<double,double> 
+	    >::iterator 
+	    > histogram_type;
 
 	/**
 	 * \brief Tags the mean value.
@@ -110,7 +110,7 @@ struct Statistics {
 	struct UnbiasedVariance 	{};
 	/**
 	 * \brief Tags the histogram.
-	 */
+	 */ 
 	struct Histogram 			{};
 	/**
 	 * \brief Tags the median.
@@ -142,63 +142,63 @@ struct Statistics {
 	 * \param [in] lowerQuantileProbability Probability for the lower quantile, default value: 0.25.
 	 * \param [in] upperQuantileProbability Probability for the upper quantile, default value: 0.75.
 	 */
-	Statistics(double lowerQuantileProbability = 0.25, double upperQuantileProbability = 0.75) : m_acc(ba::density_cache_size = 5, ba::density_num_bins = 20),
-		m_accLowerQuartile(ba::quantile_probability = lowerQuantileProbability),
-		m_accUpperQuartile(ba::quantile_probability = upperQuantileProbability) {
-	}
+    Statistics( double lowerQuantileProbability = 0.25, double upperQuantileProbability = 0.75 ) : m_acc( ba::density_cache_size = 5, ba::density_num_bins = 20 ),
+	    m_accLowerQuartile( ba::quantile_probability = lowerQuantileProbability ),
+	    m_accUpperQuartile( ba::quantile_probability = upperQuantileProbability ) {
+    }
 
 	/**
 	 * \brief Accesses the mean value of the supplied values.
 	 */
-	double operator()(Mean mean) const { return(ba::mean(m_acc)); }
+	double operator()( Mean mean ) const { return( ba::mean( m_acc ) ); }
 
 	/**
 	 * \brief Accesses the variance of the supplied values.
 	 */
-	double operator()(Variance variance) const { return(ba::variance(m_acc)); }
+	double operator()( Variance variance ) const { return( ba::variance( m_acc ) ); }
 
 	/**
 	 * \brief Accesses the histogram of the supplied values.
 	 */
-	histogram_type operator()(Histogram histogram) const { return(ba::density(m_acc)); }
+	histogram_type operator()( Histogram histogram ) const { return( ba::density( m_acc ) ); }
 	/**
 	 * \brief Accesses the median of the supplied values.
 	 */
-	double operator()(Median median) const { return(ba::median(m_acc)); }
+	double operator()( Median median ) const { return( ba::median( m_acc ) ); }
 
 	/**
 	 * \brief Accesses the lower quartile of the supplied values.
 	 */
-	double operator()(LowerQuartile lq) const { return(ba::p_square_quantile(m_accLowerQuartile)); }
+	double operator()( LowerQuartile lq ) const { return( ba::p_square_quantile( m_accLowerQuartile ) ); }
 
 	/**
 	 * \brief Accesses the upper quartile of the supplied values.
 	 */
-	double operator()(UpperQuartile uq) const { return(ba::p_square_quantile(m_accUpperQuartile)); }
+	double operator()( UpperQuartile uq ) const { return( ba::p_square_quantile( m_accUpperQuartile ) ); }
 
 	/**
 	 * \brief Accesses the minimum of the supplied values.
 	 */
-	double operator()(Min min) const { return(ba::min(m_acc)); }
+	double operator()( Min min ) const { return( ba::min( m_acc ) ); }
 
 	/**
 	 * \brief Accesses the maximum of the supplied values.
 	 */
-	double operator()(Max max) const { return(ba::max(m_acc)); }
+	double operator()( Max max ) const { return( ba::max( m_acc ) ); }
 
 	/**
 	 * \brief Accesses the total number of samples.
 	 */
-	std::size_t operator()(NumSamples numSamples) const { return(ba::count(m_acc)); }
+	std::size_t operator()( NumSamples numSamples ) const { return( ba::count( m_acc ) ); }
 
 	/**
 	 * \brief Updates statistics with the supplied value.
 	 * \param [in] d The value.
 	 */
-	void operator()(double d) {
-		m_acc(d);
-		m_accLowerQuartile(d);
-		m_accUpperQuartile(d);
+	void operator()( double d ) {
+	    m_acc( d );
+	    m_accLowerQuartile( d );
+	    m_accUpperQuartile( d );
 	}
 
 	/**
@@ -208,10 +208,10 @@ struct Statistics {
 	 * \param [in] end Iterator pointing behind the last valid element of the range.
 	 */
 	template<class InputIterator>
-	void operator()(InputIterator begin , InputIterator end) {
-		for(; begin != end; ++begin) {
-			(*this)(*begin);
-		}
+	void operator()( InputIterator begin , InputIterator end ) {
+	    for(;begin != end; ++begin){
+		(*this)(*begin);
+	    }
 	}
 
 	/** \cond IMPL */
@@ -219,24 +219,24 @@ struct Statistics {
 	QuartileAccumulatorType m_accLowerQuartile;
 	QuartileAccumulatorType m_accUpperQuartile;
 	/** \endcond IMPL */
-};
+    };
 
-/**
- * \brief Writes statistics to the supplied stream.
- */
-template<typename CharT, typename Traits>
-static std::basic_ostream<CharT, Traits> & operator<<(std::basic_ostream<CharT, Traits> & s, const Statistics & stats) {
-	s << "Sample size: " 		<< stats(shark::Statistics::NumSamples()) << std::endl;
-	s << "Min: " 				<< stats(shark::Statistics::Min()) << std::endl;
-	s << "Max: " 				<< stats(shark::Statistics::Max()) << std::endl;
-	s << "Mean: " 				<< stats(shark::Statistics::Mean()) << std::endl;
-	s << "Variance: " 			<< stats(shark::Statistics::Variance()) << std::endl;
-	s << "Median: " 			<< stats(shark::Statistics::Median()) << std::endl;
-	s << "Lower Quantile: " 	<< stats(shark::Statistics::LowerQuartile()) << std::endl;
-	s << "Upper Quantile: " 	<< stats(shark::Statistics::UpperQuartile()) << std::endl;
+    /**
+     * \brief Writes statistics to the supplied stream.
+     */
+    template<typename CharT, typename Traits>
+	static std::basic_ostream<CharT,Traits> & operator<<( std::basic_ostream<CharT,Traits> & s, const Statistics & stats ) {
+	s << "Sample size: " 		<< stats( shark::Statistics::NumSamples() ) << std::endl;
+	s << "Min: " 				<< stats( shark::Statistics::Min() ) << std::endl;
+	s << "Max: " 				<< stats( shark::Statistics::Max() ) << std::endl;
+	s << "Mean: " 				<< stats( shark::Statistics::Mean() ) << std::endl;
+	s << "Variance: " 			<< stats( shark::Statistics::Variance() ) << std::endl;
+	s << "Median: " 			<< stats( shark::Statistics::Median() ) << std::endl;
+	s << "Lower Quantile: " 	<< stats( shark::Statistics::LowerQuartile() ) << std::endl;
+	s << "Upper Quantile: " 	<< stats( shark::Statistics::UpperQuartile() ) << std::endl;
 
-	return(s);
-}
+	return( s );
+    }
 }
 
 #endif // SHARK_STATISTICS_H

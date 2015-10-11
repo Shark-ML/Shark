@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Archive of evaluated points as an objective function wrapper.
 
- *
+ * 
  *
  * \author      T. Glasmachers
  * \date        2013
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -65,7 +65,8 @@ namespace shark {
 /// storage and maintenance overhead should be negligible.
 ///
 template <typename PointType, typename ResultT>
-class EvaluationArchive : public AbstractObjectiveFunction<PointType, ResultT> {
+class EvaluationArchive : public AbstractObjectiveFunction<PointType, ResultT>
+{
 public:
 	typedef AbstractObjectiveFunction<PointType, ResultT> base_type;
 	typedef typename base_type::SearchPointType SearchPointType;
@@ -75,25 +76,28 @@ public:
 	typedef typename base_type::SecondOrderDerivative SecondOrderDerivative;
 
 	/// \brief Pair of point and result.
-	class PointResultPairType {
+	class PointResultPairType
+	{
 	public:
 		PointResultPairType(SearchPointType const& p, ResultType r)
-			: point(p)
-			, result(r)
+		: point(p)
+		, result(r)
 		{ }
 
 		PointResultPairType(PointResultPairType const& other)
-			: point(other.point)
-			, result(other.result)
+		: point(other.point)
+		, result(other.result)
 		{ }
 
 		// Comparison is based on string representation.
 		// This is a hack, but it is quite generic.
 		// And a generic solution is needed for std::set.
-		bool operator == (PointResultPairType const& other) const {
+		bool operator == (PointResultPairType const& other) const
+		{
 			return (toString() == other.toString());
 		}
-		bool operator < (PointResultPairType const& other) const {
+		bool operator < (PointResultPairType const& other) const
+		{
 			return (toString() < other.toString());
 		}
 
@@ -101,7 +105,8 @@ public:
 		ResultType result;
 
 	private:
-		std::string toString() const {
+		std::string toString() const
+		{
 			std::stringstream ss;
 			ss << point << " " << result;
 			return ss.str();
@@ -119,7 +124,8 @@ public:
 	/// as an argument. It is assumed that the objective object's
 	/// life time exceeds the life time of the present instance.
 	EvaluationArchive(base_type* objective)
-		: mep_objective(objective) {
+	: mep_objective(objective)
+	{
 		base_type::m_features = mep_objective->features();
 		base_type::m_constraintHandler = mep_objective->hasConstraintHandler() ? &mep_objective->getConstraintHandler() : NULL;
 	}
@@ -162,14 +168,16 @@ public:
 	{ return mep_objective->proposeStartingPoint(startingPoint); }
 
 	/// \brief Wrapper function; conditional on vector space property.
-	std::size_t numberOfVariables() const {
+	std::size_t numberOfVariables() const
+	{
 		base_type* avsof = dynamic_cast<base_type*>(mep_objective);
-		if(avsof) return avsof->numberOfVariables();
+		if (avsof) return avsof->numberOfVariables();
 		else throw SHARKEXCEPTION("search space is not a vector space");
 	}
 
 	/// \brief Wrapper function storing point and result.
-	ResultType eval(const SearchPointType& input) const {
+	ResultType eval(const SearchPointType& input) const
+	{
 		ResultType r = mep_objective->eval(input);
 		base_type::m_evaluationCounter++;
 		m_archive.insert(PointResultPairType(input, r));
@@ -179,11 +187,12 @@ public:
 	// TG: Could someone enlighten me: why do I have to copy this
 	// from the super class to make the compiler find the f**king
 	// operator??
-	ResultType operator()(const SearchPointType & input) const
+	ResultType operator()( const SearchPointType & input ) const
 	{ return eval(input); }
 
 	/// \brief Wrapper function storing point and result.
-	ResultType evalDerivative(const SearchPointType& input, FirstOrderDerivative& derivative) const {
+	ResultType evalDerivative(const SearchPointType& input, FirstOrderDerivative& derivative) const
+	{
 		ResultType r = mep_objective->evalDerivative(input, derivative);
 		base_type::m_evaluationCounter++;
 		m_archive.insert(PointResultPairType(input, r));
@@ -191,7 +200,8 @@ public:
 	}
 
 	/// \brief Wrapper function storing point and result.
-	ResultType evalDerivative(const SearchPointType& input, SecondOrderDerivative& derivative) const {
+	ResultType evalDerivative(const SearchPointType& input, SecondOrderDerivative& derivative) const
+	{
 		ResultType r = mep_objective->evalDerivative(input, derivative);
 		base_type::m_evaluationCounter++;
 		m_archive.insert(PointResultPairType(input, r));

@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       FisherLDA
- *
- *
+ * 
+ * 
  *
  * \author      O. Krause
  * \date        2010
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -76,7 +76,8 @@ namespace shark {
  * For more detailed information about Fisher-LDA, see \e Bishop, \e Pattern
  * \e Recognition \e and \e Machine \e Learning.
  */
-class FisherLDA : public AbstractTrainer<LinearModel<>, unsigned int> {
+class FisherLDA : public AbstractTrainer<LinearModel<>, unsigned int>
+{
 public:
 	/// Constructor
 	SHARK_EXPORT_SYMBOL FisherLDA(bool whitening = false, std::size_t subspaceDimension = 0);
@@ -85,22 +86,22 @@ public:
 	std::string name() const
 	{ return "Fisher-LDA"; }
 
-	void setSubspaceDimensions(std::size_t dimensions) {
+	void setSubspaceDimensions(std::size_t dimensions){
 		m_subspaceDimensions = dimensions;
 	}
-
-	std::size_t subspaceDimensions()const {
+	
+	std::size_t subspaceDimensions()const{
 		return m_subspaceDimensions;
 	}
 
 	/// check whether whitening mode is on
-	bool whitening() const {
-		return m_whitening;
+	bool whitening() const{ 
+		return m_whitening; 
 	}
 
 	/// if active, the model whitenes the inputs
-	void setWhitening(bool newWhitening) {
-		m_whitening = newWhitening;
+	void setWhitening(bool newWhitening){ 
+		m_whitening = newWhitening; 
 	}
 
 	/// Compute the FisherLDA solution for a multi-class problem.

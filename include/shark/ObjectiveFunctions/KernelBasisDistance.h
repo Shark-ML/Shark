@@ -1,5 +1,5 @@
 /*!
- *
+ * 
  *
  * \brief      -
  * \author    O.Krause
@@ -7,21 +7,21 @@
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -33,7 +33,7 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
 
-namespace shark {
+namespace shark{
 
 /// \brief Computes the squared distance between the optimal point in a basis to the point represented by a KernelExpansion.
 ///
@@ -50,7 +50,8 @@ namespace shark {
 /// with respect to the input point then this objective function is differentiable as well.
 ///
 /// The kernel expansion can represent more than one single point, in this case the error is the sum of approximation errors.
-class KernelBasisDistance : public SingleObjectiveFunction {
+class KernelBasisDistance : public SingleObjectiveFunction
+{
 public:
 	/// \brief Constructs the objective function.
 	///
@@ -58,19 +59,19 @@ public:
 	///
 	/// \param kernelExpansion a pointer to the kernel expansion to approximate
 	/// \param numApproximatingVectors the number of vectors used to approximate the point - the basis size
-	SHARK_EXPORT_SYMBOL KernelBasisDistance(KernelExpansion<RealVector>* kernelExpansion, std::size_t numApproximatingVectors = 1);
+	SHARK_EXPORT_SYMBOL KernelBasisDistance(KernelExpansion<RealVector>* kernelExpansion,std::size_t numApproximatingVectors = 1);
 
 	/// \brief Returns the name of the class
 	std::string name() const
 	{ return "KernelBasisDistance"; }
 
 	/// \brief Returns the number of vectors the uses to approximate the point - the basis size
-	std::size_t numApproximatingVectors() const {
+	std::size_t numApproximatingVectors() const{
 		return m_numApproximatingVectors;
 	}
-
+	
 	/// \brief Returns a reference the number of vectors the uses to approximate the point - the basis size
-	std::size_t& numApproximatingVectors() {
+	std::size_t& numApproximatingVectors(){
 		return m_numApproximatingVectors;
 	}
 	/// \brief Returns a starting point of the algorithm
@@ -80,7 +81,7 @@ public:
 
 	/// \brief Returns the number of variables of the function.
 	SHARK_EXPORT_SYMBOL std::size_t numberOfVariables()const;
-
+		
 	/// \brief Given an input basis, returns the point with the minimum error.
 	SHARK_EXPORT_SYMBOL RealMatrix findOptimalBeta(RealVector const& input)const;
 
@@ -93,7 +94,7 @@ public:
 	///
 	/// Assume \f$ \beta \f$ to be the optimal value. Then the derivative with respect to the basis vectors is:
 	/// \f[	\frac{ \partial f}{\partial z_l} = \beta_l \sum_i \beta_i \frac{ \partial f}{\partial z_l} k(z_l,z_i) - \beta_l \sum_i \alpha_i \frac{ \partial f}{\partial z_l} k(z_l, x_i) \f]
-	SHARK_EXPORT_SYMBOL ResultType evalDerivative(const SearchPointType & input, FirstOrderDerivative & derivative) const;
+	SHARK_EXPORT_SYMBOL ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;
 
 private:
 	/// \brief Sets up and solves the regression problem for the base z.

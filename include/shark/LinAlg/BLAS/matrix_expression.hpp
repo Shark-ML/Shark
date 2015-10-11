@@ -1,7 +1,7 @@
 #ifndef SHARK_LINALG_BLAS_MATRIX_EXPRESSION_HPP
 #define SHARK_LINALG_BLAS_MATRIX_EXPRESSION_HPP
 
-#include <boost/type_traits/is_convertible.hpp>
+#include <boost/type_traits/is_convertible.hpp> 
 #include "matrix_proxy.hpp"
 #include "operation.hpp"
 
@@ -9,33 +9,33 @@ namespace shark {
 namespace blas {
 
 template<class E1, class E2, class F>
-class vector_matrix_binary: public matrix_expression<vector_matrix_binary<E1, E2, F> > {
+class vector_matrix_binary:public matrix_expression<vector_matrix_binary<E1, E2, F> > {
 	typedef vector_matrix_binary<E1, E2, F> self_type;
-
-	class Binder1 {
+		
+	class Binder1{
 	public:
 		typedef typename F::argument2_type argument_type;
 		typedef typename F::result_type result_type;
-
+		
 		Binder1(F functor, typename F::argument1_type argument)
-			: m_functor(functor), m_argument(argument) {}
-
+		: m_functor(functor), m_argument(argument){}
+			
 		result_type operator()(argument_type x)const {
-			return m_functor(m_argument, x);
+			return m_functor(m_argument,x);
 		}
 	private:
 		F m_functor;
 		typename F::argument1_type m_argument;
 	};
-
-	class Binder2 {
+	
+	class Binder2{
 	public:
 		typedef typename F::argument1_type argument_type;
 		typedef typename F::result_type result_type;
-
+		
 		Binder2(F functor, typename F::argument2_type argument)
-			: m_functor(functor), m_argument(argument) {}
-
+		: m_functor(functor), m_argument(argument){}
+			
 		result_type operator()(argument_type x)const {
 			return m_functor(x, m_argument);
 		}
@@ -68,9 +68,9 @@ public:
 	typedef unknown_storage_tag storage_category;
 
 	// Construction and destruction
-
+	
 	vector_matrix_binary(expression1_closure_type e1, expression2_closure_type e2, functor_type functor)
-		: m_expression1(e1), m_expression2(e2), m_functor(functor) {}
+	:m_expression1(e1), m_expression2(e2), m_functor(functor) {}
 
 	// Accessors
 	size_type size1() const {
@@ -98,31 +98,31 @@ public:
 		       expression2().same_closure(vmb.expression2());
 	}
 
-	typedef transform_iterator<typename E2::const_iterator, Binder1> const_row_iterator;
-	typedef transform_iterator<typename E1::const_iterator, Binder2> const_column_iterator;
+	typedef transform_iterator<typename E2::const_iterator,Binder1> const_row_iterator;
+	typedef transform_iterator<typename E1::const_iterator,Binder2> const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
-
+	
 	const_row_iterator row_begin(index_type i) const {
 		return const_row_iterator(m_expression2.begin(),
-		                          Binder1(m_functor, m_expression1(i))
-		                         );
+			Binder1(m_functor,m_expression1(i))
+		);
 	}
 	const_row_iterator row_end(index_type i) const {
 		return const_row_iterator(m_expression2.end(),
-		                          Binder1(m_functor, m_expression1(i))
-		                         );
+			Binder1(m_functor,m_expression1(i))
+		);
 	}
 
 	const_column_iterator column_begin(index_type i) const {
 		return const_column_iterator(m_expression1.begin(),
-		                             Binder2(m_functor, m_expression2(i))
-		                            );
+			Binder2(m_functor,m_expression2(i))
+		);
 	}
 	const_column_iterator column_end(index_type i) const {
 		return const_column_iterator(m_expression1.end(),
-		                             Binder2(m_functor, m_expression2(i))
-		                            );
+			Binder2(m_functor,m_expression2(i))
+		);
 	}
 private:
 	expression1_closure_type m_expression1;
@@ -140,26 +140,26 @@ struct vector_matrix_binary_traits {
 template<class E1, class E2>
 vector_matrix_binary<E1, E2, scalar_binary_multiply<typename E1::value_type, typename E2::value_type> >
 outer_prod(
-    vector_expression<E1> const& e1,
-    vector_expression<E2> const& e2
+	vector_expression<E1> const& e1,
+        vector_expression<E2> const& e2
 ) {
 	typedef scalar_binary_multiply<typename E1::value_type, typename E2::value_type> Multiplier;
-	return vector_matrix_binary<E1, E2, Multiplier>(e1(), e2(), Multiplier());
+	return vector_matrix_binary<E1, E2, Multiplier>(e1(), e2(),Multiplier());
 }
 
 // (outer_plus (v1, v2)) [i] [j] = v1 [i] + v2 [j]
 template<class E1, class E2>
 vector_matrix_binary<E1, E2, scalar_binary_multiply<typename E1::value_type, typename E2::value_type> >
 outer_plus(
-    vector_expression<E1> const& e1,
-    vector_expression<E2> const& e2
+	vector_expression<E1> const& e1,
+        vector_expression<E2> const& e2
 ) {
 	typedef scalar_binary_plus<typename E1::value_type, typename E2::value_type> Multiplier;
-	return vector_matrix_binary<E1, E2, Multiplier>(e1(), e2(), Multiplier());
+	return vector_matrix_binary<E1, E2, Multiplier>(e1(), e2(),Multiplier());
 }
 
 template<class V>
-class vector_repeater: public blas::matrix_expression<vector_repeater<V> > {
+class vector_repeater:public blas::matrix_expression<vector_repeater<V> > {
 private:
 	typedef V expression_type;
 	typedef vector_repeater<V> self_type;
@@ -185,8 +185,8 @@ public:
 	typedef blas::unknown_storage_tag storage_category;
 
 	// Construction and destruction
-	explicit vector_repeater(expression_type const& e, std::size_t rows):
-		m_vector(e), m_rows(rows) {}
+	explicit vector_repeater (expression_type const& e, std::size_t rows):
+	m_vector(e), m_rows(rows) {}
 
 	// Accessors
 	size_type size1() const {
@@ -197,18 +197,18 @@ public:
 	}
 
 	// Expression accessors
-	const expression_closure_type &expression() const {
+	const expression_closure_type &expression () const {
 		return m_vector;
 	}
 
 	// Element access
-	const_reference operator()(index_type i, index_type j) const {
+	const_reference operator() (index_type i, index_type j) const {
 		return m_vector(j);
 	}
 
 	// Closure comparison
-	bool same_closure(const vector_repeater &other) const {
-		return (*this).expression().same_closure(other.expression());
+	bool same_closure (const vector_repeater &other) const {
+		return (*this).expression ().same_closure (other.expression ());
 	}
 
 	// Iterator types
@@ -218,23 +218,23 @@ public:
 	typedef const_column_iterator column_iterator;
 
 	// Element lookup
-
+	
 	const_row_iterator row_begin(std::size_t i) const {
-		RANGE_CHECK(i < size1());
+		RANGE_CHECK( i < size1());
 		return m_vector.begin();
 	}
 	const_row_iterator row_end(std::size_t i) const {
-		RANGE_CHECK(i < size1());
+		RANGE_CHECK( i < size1());
 		return m_vector.end();
 	}
-
+	
 	const_column_iterator column_begin(std::size_t j) const {
-		RANGE_CHECK(j < size2());
-		return const_column_iterator(0, m_vector(j));
+		RANGE_CHECK( j < size2());
+		return const_column_iterator(0,m_vector(j));
 	}
 	const_column_iterator column_end(std::size_t j) const {
-		RANGE_CHECK(j < size2());
-		return const_column_iterator(size1(), m_vector(j));
+		RANGE_CHECK( j < size2());
+		return const_column_iterator(size1(),m_vector(j));
 	}
 private:
 	expression_closure_type m_vector;
@@ -250,7 +250,7 @@ private:
 ///arguments - if f(0) != 0 this expression will be dense!
 ///todo: desification is not implemented
 template<class E, class F>
-class matrix_unary: public blas::matrix_expression<matrix_unary<E, F> > {
+class matrix_unary:public blas::matrix_expression<matrix_unary<E, F> > {
 private:
 	typedef matrix_unary<E, F> self_type;
 	typedef E expression_type;
@@ -306,19 +306,19 @@ public:
 	typedef transform_iterator<typename E::const_column_iterator, F> const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
-
+	
 	const_row_iterator row_begin(index_type i) const {
-		return const_row_iterator(m_expression.row_begin(i), m_functor);
+		return const_row_iterator(m_expression.row_begin(i),m_functor);
 	}
 	const_row_iterator row_end(index_type i) const {
-		return const_row_iterator(m_expression.row_end(i), m_functor);
+		return const_row_iterator(m_expression.row_end(i),m_functor);
 	}
 
 	const_column_iterator column_begin(index_type i) const {
-		return const_row_iterator(m_expression.column_begin(i), m_functor);
+		return const_row_iterator(m_expression.column_begin(i),m_functor);
 	}
 	const_column_iterator column_end(index_type i) const {
-		return const_row_iterator(m_expression.column_end(i), m_functor);
+		return const_row_iterator(m_expression.column_end(i),m_functor);
 	}
 
 private:
@@ -342,8 +342,8 @@ SHARK_UNARY_MATRIX_TRANSFORMATION(log, scalar_log)
 SHARK_UNARY_MATRIX_TRANSFORMATION(exp, scalar_exp)
 SHARK_UNARY_MATRIX_TRANSFORMATION(sin, scalar_sin)
 SHARK_UNARY_MATRIX_TRANSFORMATION(cos, scalar_cos)
-SHARK_UNARY_MATRIX_TRANSFORMATION(tanh, scalar_tanh)
-SHARK_UNARY_MATRIX_TRANSFORMATION(atanh, scalar_atanh)
+SHARK_UNARY_MATRIX_TRANSFORMATION(tanh,scalar_tanh)
+SHARK_UNARY_MATRIX_TRANSFORMATION(atanh,scalar_atanh)
 SHARK_UNARY_MATRIX_TRANSFORMATION(sqr, scalar_sqr)
 SHARK_UNARY_MATRIX_TRANSFORMATION(abs_sqr, scalar_abs_sqr)
 SHARK_UNARY_MATRIX_TRANSFORMATION(sqrt, scalar_sqrt)
@@ -426,29 +426,29 @@ public:
 
 	typedef F functor_type;
 
-	// Construction and destruction
+        // Construction and destruction
 
-	matrix_binary(
-	    matrix_expression<E1> const&e1,  matrix_expression<E2> const& e2, functor_type functor
-	): m_expression1(e1()), m_expression2(e2()), m_functor(functor) {}
+        matrix_binary (
+		matrix_expression<E1> const&e1,  matrix_expression<E2> const& e2, functor_type functor 
+	): m_expression1 (e1()), m_expression2 (e2()),m_functor(functor) {}
 
-	// Accessors
-	size_type size1() const {
-		return m_expression1.size1();
-	}
-	size_type size2() const {
-		return m_expression1.size2();
-	}
+        // Accessors
+        size_type size1 () const {
+		return m_expression1.size1 ();
+        }
+        size_type size2 () const {
+		return m_expression1.size2 ();
+        }
 
-	const_reference operator()(index_type i, index_type j) const {
-		return m_functor(m_expression1(i, j), m_expression2(i, j));
-	}
+        const_reference operator () (index_type i, index_type j) const {
+		return m_functor( m_expression1 (i, j), m_expression2(i,j));
+        }
 
-	// Closure comparison
-	bool same_closure(matrix_binary const&mbs2) const {
-		return m_expression1.same_closure(mbs2.m_expression1) ||
-		       m_expression2.same_closure(mbs2.m_expression2);
-	}
+        // Closure comparison
+        bool same_closure (matrix_binary const&mbs2) const {
+		return m_expression1.same_closure (mbs2.m_expression1) ||
+		m_expression2.same_closure (mbs2.m_expression2);
+        }
 
 	// Iterator types
 private:
@@ -458,44 +458,44 @@ private:
 	typedef typename E2::const_column_iterator const_column_iterator2_type;
 
 public:
-	typedef binary_transform_iterator <
-	typename E1::const_row_iterator, typename E2::const_row_iterator, functor_type
+	typedef binary_transform_iterator<
+		typename E1::const_row_iterator,typename E2::const_row_iterator,functor_type
 	> const_row_iterator;
-	typedef binary_transform_iterator <
-	typename E1::const_column_iterator, typename E2::const_column_iterator, functor_type
+	typedef binary_transform_iterator<
+		typename E1::const_column_iterator,typename E2::const_column_iterator,functor_type
 	> const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 
 	const_row_iterator row_begin(std::size_t i) const {
-		return const_row_iterator(m_functor,
-		                          m_expression1.row_begin(i), m_expression1.row_end(i),
-		                          m_expression2.row_begin(i), m_expression2.row_end(i)
-		                         );
+		return const_row_iterator (m_functor,
+			m_expression1.row_begin(i),m_expression1.row_end(i),
+			m_expression2.row_begin(i),m_expression2.row_end(i)
+		);
 	}
 	const_row_iterator row_end(std::size_t i) const {
-		return const_row_iterator(m_functor,
-		                          m_expression1.row_end(i), m_expression1.row_end(i),
-		                          m_expression2.row_end(i), m_expression2.row_end(i)
-		                         );
+		return const_row_iterator (m_functor,
+			m_expression1.row_end(i),m_expression1.row_end(i),
+			m_expression2.row_end(i),m_expression2.row_end(i)
+		);
 	}
 
 	const_column_iterator column_begin(std::size_t j) const {
-		return const_column_iterator(m_functor,
-		                             m_expression1.column_begin(j), m_expression1.column_end(j),
-		                             m_expression2.column_begin(j), m_expression2.column_end(j)
-		                            );
+		return const_column_iterator (m_functor,
+			m_expression1.column_begin(j),m_expression1.column_end(j),
+			m_expression2.column_begin(j),m_expression2.column_end(j)
+		);
 	}
 	const_column_iterator column_end(std::size_t j) const {
-		return const_column_iterator(m_functor,
-		                             m_expression1.column_begin(j), m_expression1.column_end(j),
-		                             m_expression2.column_begin(j), m_expression2.column_end(j)
-		                            );
+		return const_column_iterator (m_functor,
+			m_expression1.column_begin(j),m_expression1.column_end(j),
+			m_expression2.column_begin(j),m_expression2.column_end(j)
+		);
 	}
 
 private:
 	expression1_closure_type m_expression1;
-	expression2_closure_type m_expression2;
+        expression2_closure_type m_expression2;
 	functor_type m_functor;
 };
 
@@ -511,24 +511,24 @@ SHARK_BINARY_MATRIX_EXPRESSION(operator-, scalar_binary_minus)
 SHARK_BINARY_MATRIX_EXPRESSION(operator*, scalar_binary_multiply)
 SHARK_BINARY_MATRIX_EXPRESSION(element_prod, scalar_binary_multiply)
 SHARK_BINARY_MATRIX_EXPRESSION(operator/, scalar_binary_divide)
-SHARK_BINARY_MATRIX_EXPRESSION(pow, scalar_binary_pow)
+SHARK_BINARY_MATRIX_EXPRESSION(pow,scalar_binary_pow)
 SHARK_BINARY_MATRIX_EXPRESSION(element_div, scalar_binary_divide)
 #undef SHARK_BINARY_MATRIX_EXPRESSION
 
 template<class E1, class E2>
-matrix_binary<E1, E2,
-              scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type>
-              >
-              safe_div(
-                  matrix_expression<E1> const& e1,
-                  matrix_expression<E2> const& e2,
-                  typename promote_traits <
-                  typename E1::value_type,
-                  typename E2::value_type
-                  >::promote_type defaultValue
-) {
+matrix_binary<E1, E2, 
+	scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type> 
+>
+safe_div(
+	matrix_expression<E1> const& e1, 
+	matrix_expression<E2> const& e2, 
+	typename promote_traits<
+		typename E1::value_type, 
+		typename E2::value_type
+	>::promote_type defaultValue
+){
 	typedef scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type> functor_type;
-	return matrix_binary<E1, E2, functor_type>(e1, e2, functor_type(defaultValue));
+	return matrix_binary<E1, E2, functor_type>(e1,e2, functor_type(defaultValue));
 }
 
 template<class E1, class E2, class F>
@@ -544,11 +544,11 @@ public:
 private:
 	typedef matrix_vector_binary1<E1, E2, F> self_type;
 public:
-	typedef typename promote_traits <
-	typename E1::size_type, typename E2::size_type
+	typedef typename promote_traits<
+		typename E1::size_type, typename E2::size_type
 	>::promote_type size_type;
-	typedef typename promote_traits <
-	typename E1::difference_type, typename E2::difference_type
+	typedef typename promote_traits<
+		typename E1::difference_type, typename E2::difference_type
 	>::promote_type difference_type;
 	typedef typename F::result_type value_type;
 	typedef value_type scalar_type;
@@ -601,10 +601,10 @@ public:
 	typedef const_iterator iterator;
 
 	const_iterator begin() const {
-		return const_iterator(*this, 0);
+		return const_iterator(*this,0);
 	}
 	const_iterator end() const {
-		return const_iterator(*this, size());
+		return const_iterator(*this,size());
 	}
 private:
 	expression1_closure_type m_expression1;
@@ -615,17 +615,17 @@ template<class E1, class E2>
 struct matrix_vector_binary_traits {
 private:
 	template<class T>
-	struct matrix_vector_prod {
+	struct matrix_vector_prod{
 		typedef T value_type;
 		typedef T result_type;
 
-		template<class U, class V>
+		template<class U,class V>
 		static result_type apply(
-		    const matrix_expression<U> &e1,
-		    const vector_expression<V> &e2,
-		    std::size_t i
+			const matrix_expression<U> &e1,
+			const vector_expression<V> &e2,
+			std::size_t i
 		) {
-			return inner_prod(row(e1, i), e2);
+			return inner_prod(row(e1,i),e2);
 		}
 	};
 public:
@@ -639,17 +639,17 @@ public:
 };
 
 template<class M, class V>
-typename matrix_vector_binary_traits<M, V>::result_type
-prod(matrix_expression<M> const& matrix, vector_expression<V> const& vector) {
-	typedef typename matrix_vector_binary_traits<M, V>::expression_type expression;
-	return expression(matrix(), vector());
+typename matrix_vector_binary_traits<M,V>::result_type
+prod(matrix_expression<M> const& matrix,vector_expression<V> const& vector){
+	typedef typename matrix_vector_binary_traits<M,V>::expression_type expression;
+	return expression(matrix(),vector());
 }
 
 template<class V, class M>
-typename matrix_vector_binary_traits<matrix_transpose<M const>, V>::result_type
-prod(vector_expression<V> const& vector, matrix_expression<M> const& matrix) {
-	typedef typename matrix_vector_binary_traits<matrix_transpose<M const>, V>::expression_type expression;
-	return expression(trans(matrix), vector());
+typename matrix_vector_binary_traits<matrix_transpose<M const>,V>::result_type
+prod(vector_expression<V> const& vector,matrix_expression<M> const& matrix){
+	typedef typename matrix_vector_binary_traits<matrix_transpose<M const>,V>::expression_type expression;
+	return expression(trans(matrix),vector());
 }
 
 //matrix-matrix prod
@@ -659,160 +659,160 @@ prod(vector_expression<V> const& vector, matrix_expression<M> const& matrix) {
 //FIXME: better make this a block expression so that we know the result type and don't need
 // a temporary
 template<class Result, class E1, class E2>
-Result prod(matrix_expression<E1> const& e1, matrix_expression<E2> const& e2) {
-	Result result(e1().size1(), e2().size2(), typename Result::value_type());
-	axpy_prod(e1, e2, result, false);
+Result prod(matrix_expression<E1> const& e1,matrix_expression<E2> const& e2) {
+	Result result(e1().size1(),e2().size2(),typename Result::value_type());
+	axpy_prod(e1,e2,result,false);
 	return result;
 }
 
 template<class E1, class E2>
 typename matrix_temporary<E1>::type
-prod(matrix_expression<E1> const& e1, matrix_expression<E2> const& e2) {
-	typename matrix_temporary<E1>::type result(e1().size1(), e2().size2(), typename E1::value_type());
-	axpy_prod(e1, e2, result, false);
+prod(matrix_expression<E1> const& e1,matrix_expression<E2> const& e2) {
+	typename matrix_temporary<E1>::type result(e1().size1(),e2().size2(),typename E1::value_type());
+	axpy_prod(e1,e2,result,false);
 	return result;
 }
 
-namespace detail {
-
-template<class MatA, class VecB>
-void sum_rows_impl(MatA const& matA, VecB& vecB, column_major) {
-	for(std::size_t i = 0; i != matA.size2(); ++i) {
-		vecB(i) += sum(column(matA, i));
+namespace detail{
+	
+template<class MatA,class VecB>
+void sum_rows_impl(MatA const& matA, VecB& vecB, column_major){
+	for(std::size_t i = 0; i != matA.size2(); ++i){ 
+		vecB(i)+=sum(column(matA,i));
 	}
 }
 
-template<class MatA, class VecB>
-void sum_rows_impl(MatA const& matA, VecB& vecB, row_major) {
-	for(std::size_t i = 0; i != matA.size1(); ++i) {
-		noalias(vecB) += row(matA, i);
+template<class MatA,class VecB>
+void sum_rows_impl(MatA const& matA, VecB& vecB, row_major){
+	for(std::size_t i = 0; i != matA.size1(); ++i){ 
+		noalias(vecB) += row(matA,i);
 	}
 }
 
 //dispatcher for triangular matrix
-template<class MatA, class VecB, class Orientation, class Triangular>
-void sum_rows_impl(MatA const& matA, VecB& vecB, packed<Orientation, Triangular>) {
-	sum_rows_impl(matA, vecB, Orientation());
+template<class MatA,class VecB,class Orientation,class Triangular>
+void sum_rows_impl(MatA const& matA, VecB& vecB, packed<Orientation,Triangular>){
+	sum_rows_impl(matA,vecB,Orientation());
 }
 
 template<class MatA>
-typename MatA::value_type sum_impl(MatA const& matA, column_major) {
+typename MatA::value_type sum_impl(MatA const& matA, column_major){
 	typename MatA::value_type totalSum = 0;
-	for(std::size_t j = 0; j != matA.size2(); ++j) {
-		totalSum += sum(column(matA, j));
+	for(std::size_t j = 0; j != matA.size2(); ++j){
+		totalSum += sum(column(matA,j));
 	}
 	return totalSum;
 }
 
 template<class MatA>
-typename MatA::value_type sum_impl(MatA const& matA, row_major) {
+typename MatA::value_type sum_impl(MatA const& matA, row_major){
 	typename MatA::value_type totalSum = 0;
-	for(std::size_t i = 0; i != matA.size1(); ++i) {
-		totalSum += sum(row(matA, i));
+	for(std::size_t i = 0; i != matA.size1(); ++i){
+		totalSum += sum(row(matA,i));
 	}
 	return totalSum;
 }
 
 //dispatcher for triangular matrix
-template<class MatA, class Orientation, class Triangular>
-typename MatA::value_type sum_impl(MatA const& matA, packed<Orientation, Triangular>) {
-	return sum_impl(matA, Orientation());
+template<class MatA,class Orientation,class Triangular>
+typename MatA::value_type sum_impl(MatA const& matA, packed<Orientation,Triangular>){
+	return sum_impl(matA,Orientation());
 }
 
 template<class MatA>
-typename MatA::value_type max_impl(MatA const& matA, column_major) {
+typename MatA::value_type max_impl(MatA const& matA, column_major){
 	typename MatA::value_type maximum = 0;
-	for(std::size_t j = 0; j != matA.size2(); ++j) {
-		maximum = std::max(maximum, max(column(matA, j)));
+	for(std::size_t j = 0; j != matA.size2(); ++j){
+		maximum= std::max(maximum, max(column(matA,j)));
 	}
 	return maximum;
 }
 
 template<class MatA>
-typename MatA::value_type max_impl(MatA const& matA, row_major) {
+typename MatA::value_type max_impl(MatA const& matA, row_major){
 	typename MatA::value_type maximum = 0;
-	for(std::size_t i = 0; i != matA.size1(); ++i) {
-		maximum = std::max(maximum, max(row(matA, i)));
+	for(std::size_t i = 0; i != matA.size1(); ++i){
+		maximum= std::max(maximum, max(row(matA,i)));
 	}
 	return maximum;
 }
 
 //dispatcher for triangular matrix
-template<class MatA, class Orientation, class Triangular>
-typename MatA::value_type max_impl(MatA const& matA, packed<Orientation, Triangular>) {
-	return std::max(max_impl(matA, Orientation()), 0.0);
+template<class MatA,class Orientation,class Triangular>
+typename MatA::value_type max_impl(MatA const& matA, packed<Orientation,Triangular>){
+	return std::max(max_impl(matA,Orientation()),0.0);
 }
 
 template<class MatA>
-typename MatA::value_type min_impl(MatA const& matA, column_major) {
+typename MatA::value_type min_impl(MatA const& matA, column_major){
 	typename MatA::value_type minimum = 0;
-	for(std::size_t j = 0; j != matA.size2(); ++j) {
-		minimum = std::min(minimum, min(column(matA, j)));
+	for(std::size_t j = 0; j != matA.size2(); ++j){
+		minimum= std::min(minimum, min(column(matA,j)));
 	}
 	return minimum;
 }
 
 template<class MatA>
-typename MatA::value_type min_impl(MatA const& matA, row_major) {
+typename MatA::value_type min_impl(MatA const& matA, row_major){
 	typename MatA::value_type minimum = 0;
-	for(std::size_t i = 0; i != matA.size1(); ++i) {
-		minimum = std::min(minimum, min(row(matA, i)));
+	for(std::size_t i = 0; i != matA.size1(); ++i){
+		minimum= std::min(minimum, min(row(matA,i)));
 	}
 	return minimum;
 }
 
 //dispatcher for triangular matrix
-template<class MatA, class Orientation, class Triangular>
-typename MatA::value_type min_impl(MatA const& matA, packed<Orientation, Triangular>) {
-	return std::max(min_impl(matA, Orientation()), 0.0);
+template<class MatA,class Orientation,class Triangular>
+typename MatA::value_type min_impl(MatA const& matA, packed<Orientation,Triangular>){
+	return std::max(min_impl(matA,Orientation()),0.0);
 }
 
 }//end detail
 
 //dispatcher
 template<class MatA>
-typename vector_temporary_type <
-typename MatA::value_type,
-         dense_random_access_iterator_tag
-         >::type
-sum_rows(matrix_expression<MatA> const& A) {
-	typename vector_temporary_type <
+typename vector_temporary_type<
 	typename MatA::value_type,
-	         dense_random_access_iterator_tag
-	         >::type result(A().size2(), 0.0);
-	detail::sum_rows_impl(A(), result, typename MatA::orientation());
+	dense_random_access_iterator_tag
+>::type
+sum_rows(matrix_expression<MatA> const& A){
+	typename vector_temporary_type<
+		typename MatA::value_type,
+		dense_random_access_iterator_tag
+	>::type result(A().size2(),0.0);
+	detail::sum_rows_impl(A(),result,typename MatA::orientation());
 	return result;
 }
 
 template<class MatA>
-typename vector_temporary_type <
-typename MatA::value_type,
-         dense_random_access_iterator_tag
-         >::type
-sum_columns(matrix_expression<MatA> const& A) {
+typename vector_temporary_type<
+	typename MatA::value_type,
+	dense_random_access_iterator_tag
+>::type
+sum_columns(matrix_expression<MatA> const& A){
 	//implemented using sum_rows_impl by transposing A
-	typename vector_temporary_type <
-	typename MatA::value_type,
-	         dense_random_access_iterator_tag
-	         >::type result(A().size1(), 0.0);
-	detail::sum_rows_impl(trans(A), result, typename MatA::orientation::transposed_orientation());
+	typename vector_temporary_type<
+		typename MatA::value_type,
+		dense_random_access_iterator_tag
+	>::type result(A().size1(),0.0);
+	detail::sum_rows_impl(trans(A),result,typename MatA::orientation::transposed_orientation());
 	return result;
 }
 
 
 template<class MatA>
-typename MatA::value_type sum(matrix_expression<MatA> const& A) {
-	return detail::sum_impl(A(), typename MatA::orientation());
+typename MatA::value_type sum(matrix_expression<MatA> const& A){
+	return detail::sum_impl(A(),typename MatA::orientation());
 }
 
 template<class MatA>
-typename MatA::value_type max(matrix_expression<MatA> const& A) {
-	return detail::max_impl(A(), typename MatA::orientation());
+typename MatA::value_type max(matrix_expression<MatA> const& A){
+	return detail::max_impl(A(),typename MatA::orientation());
 }
 
 template<class MatA>
-typename MatA::value_type min(matrix_expression<MatA> const& A) {
-	return detail::min_impl(A(), typename MatA::orientation());
+typename MatA::value_type min(matrix_expression<MatA> const& A){
+	return detail::min_impl(A(),typename MatA::orientation());
 }
 
 /// \brief Returns the frobenius inner-product between matrices exprssions 1 and e2.
@@ -820,12 +820,12 @@ typename MatA::value_type min(matrix_expression<MatA> const& A) {
 ///The frobenius inner product is defined as \f$ <A,B>_F=\sum_{ij} A_ij*B_{ij} \f$. It induces the
 /// Frobenius norm \f$ ||A||_F = \sqrt{<A,A>_F} \f$
 template<class E1, class E2>
-typename promote_traits <typename E1::value_type, typename E2::value_type>::promote_type
+typename promote_traits <typename E1::value_type,typename E2::value_type>::promote_type
 frobenius_prod(
-    matrix_expression<E1> const& e1,
-    matrix_expression<E2> const& e2
+	matrix_expression<E1> const& e1,
+	matrix_expression<E2> const& e2
 ) {
-	return sum(e1 * e2);
+	return sum(e1*e2);
 }
 
 
@@ -869,11 +869,12 @@ norm_inf(const matrix_expression<E> &e) {
  *      \return the sum of the values at the diagonal of \em m
  */
 template < class MatrixT >
-typename MatrixT::value_type trace(matrix_expression<MatrixT> const& m) {
+typename MatrixT::value_type trace(matrix_expression<MatrixT> const& m)
+{
 	SIZE_CHECK(m().size1() == m().size2());
 
 	typename MatrixT::value_type t(m()(0, 0));
-	for(unsigned i = 1; i < m().size1(); ++i)
+	for (unsigned i = 1; i < m().size1(); ++i)
 		t += m()(i, i);
 	return t;
 }
@@ -889,8 +890,8 @@ typename MatrixT::value_type trace(matrix_expression<MatrixT> const& m) {
 ///@param vector the vector which is to be repeated as the rows of the resulting matrix
 ///@param rows the number of rows of the matrix
 template<class Vector>
-vector_repeater<Vector> repeat(vector_expression<Vector> const& vector, std::size_t rows) {
-	return vector_repeater<Vector>(vector(), rows);
+vector_repeater<Vector> repeat(vector_expression<Vector> const& vector, std::size_t rows){
+	return vector_repeater<Vector>(vector(),rows);
 }
 
 /** \brief An identity matrix with values of type \c T
@@ -901,8 +902,8 @@ template<class T>
 class identity_matrix: public diagonal_matrix<scalar_vector<T> > {
 	typedef diagonal_matrix<scalar_vector<T> > base_type;
 public:
-	identity_matrix() {}
-	identity_matrix(std::size_t size): base_type(scalar_vector<T>(size, T(1))) {}
+	identity_matrix(){}
+	identity_matrix(std::size_t size):base_type(scalar_vector<T>(size,T(1))){}
 };
 
 /** \brief A matrix with all values of type \c T equal to the same value
@@ -957,7 +958,7 @@ public:
 	const_reference operator()(size_type /*i*/, size_type /*j*/) const {
 		return m_value;
 	}
-
+	
 	//Iterators
 	typedef constant_iterator<value_type> const_row_iterator;
 	typedef constant_iterator<value_type> const_column_iterator;
@@ -970,7 +971,7 @@ public:
 	const_row_iterator row_end(std::size_t i) const {
 		return const_row_iterator(size2(), m_value);
 	}
-
+	
 	const_row_iterator column_begin(std::size_t j) const {
 		return const_row_iterator(0, m_value);
 	}
@@ -990,7 +991,7 @@ private:
 ///@param columns the number of columns of the resulting vector
 template<class T>
 typename boost::enable_if<boost::is_arithmetic<T>, scalar_matrix<T> >::type
-repeat(T scalar, std::size_t rows, std::size_t columns) {
+repeat(T scalar, std::size_t rows, std::size_t columns){
 	return scalar_matrix<T>(rows, columns, scalar);
 }
 

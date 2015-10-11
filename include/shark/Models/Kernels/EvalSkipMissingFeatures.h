@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Do special kernel evaluation by skipping missing features
- *
- *
+ * 
+ * 
  *
  * \author      B. Li
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -54,16 +54,17 @@ namespace shark {
 ///
 /// The kernel k(x,y) is evaluated taking missing features into account. For this it is checked whether a feature
 /// of x or y is nan and in this case the corresponding features in @a inputA and @a inputB won't be considered.
-template <typename InputType, typename InputTypeT1, typename InputTypeT2>
+template <typename InputType,typename InputTypeT1,typename InputTypeT2>
 double evalSkipMissingFeatures(
-    const AbstractKernelFunction<InputType>& kernelFunction,
-    const InputTypeT1& inputA,
-    const InputTypeT2& inputB) {
+	const AbstractKernelFunction<InputType>& kernelFunction,
+	const InputTypeT1& inputA,
+	const InputTypeT2& inputB)
+{
 	SIZE_CHECK(inputA.size() == inputB.size());
 	// Do kernel type check
-	if(!kernelFunction.supportsVariableInputSize())
+	if (!kernelFunction.supportsVariableInputSize())
 		throw SHARKEXCEPTION("[evalSkipMissingFeatures] Kernel must support variable input size.");
-
+	
 	// Work out features that are valid for both dataset i and j, and also should not be filtered out by missingness
 	// Because we won't exact length of valid features beforehand, so we choose to construct two vectors and then
 	// construct another two InputTypes with them.
@@ -72,9 +73,11 @@ double evalSkipMissingFeatures(
 	std::vector<InputValueType> tempInputB;
 	tempInputA.reserve(inputA.size());
 	tempInputB.reserve(inputB.size());
-	for(std::size_t index = 0; index < inputA.size(); ++index) {
+	for (std::size_t index = 0; index < inputA.size(); ++index)
+	{
 		//using namespace boost::math;
-		if(!boost::math::isnan(inputA(index)) && !boost::math::isnan(inputB(index))) {
+		if (!boost::math::isnan(inputA(index)) && !boost::math::isnan(inputB(index)))
+		{
 			tempInputA.push_back(inputA(index));
 			tempInputB.push_back(inputB(index));
 		}
@@ -84,8 +87,8 @@ double evalSkipMissingFeatures(
 	SIZE_CHECK(tempInputA.size() > 0);
 	InputType validInputA(tempInputA.size());
 	InputType validInputB(tempInputA.size());
-	std::copy(tempInputA.begin(), tempInputA.end(), validInputA.begin());
-	std::copy(tempInputB.begin(), tempInputB.end(), validInputB.begin());
+	std::copy(tempInputA.begin(),tempInputA.end(),validInputA.begin());
+	std::copy(tempInputB.begin(),tempInputB.end(),validInputB.begin());
 
 	// And then pass them to the kernel for calculation
 	return kernelFunction.eval(validInputA, validInputB);
@@ -98,19 +101,20 @@ double evalSkipMissingFeatures(
 /// @param missingness
 ///     used to decide which features in the inputs to take into consideration for the purpose of evaluation.
 ///     If a feature is NaN, then the corresponding features in @a inputA and @a inputB won't be considered.
-template <typename InputType, typename InputTypeT1, typename InputTypeT2, typename InputTypeT3>
+template <typename InputType,typename InputTypeT1,typename InputTypeT2,typename InputTypeT3>
 double evalSkipMissingFeatures(
-    const AbstractKernelFunction<InputType>& kernelFunction,
-    const InputTypeT1& inputA,
-    const InputTypeT2& inputB,
-    InputTypeT3 const& missingness) {
+	const AbstractKernelFunction<InputType>& kernelFunction,
+	const InputTypeT1& inputA,
+	const InputTypeT2& inputB,
+	InputTypeT3 const& missingness)
+{
 	SIZE_CHECK(inputA.size() == inputB.size());
 	//SIZE_CHECK(inputA.size() == missingness.size());
 	// Do kernel type check
-	if(!kernelFunction.supportsVariableInputSize())
+	if (!kernelFunction.supportsVariableInputSize())
 		throw SHARKEXCEPTION("[evalSkipMissingFeatures] Kernel must support variable input size.");
 
-
+	
 
 	// Work out features that are valid for both dataset i and j, and also should not be filtered out by missingness
 	// Because we won't exact length of valid features beforehand, so we choose to construct two vectors and then
@@ -120,8 +124,10 @@ double evalSkipMissingFeatures(
 	std::vector<InputValueType> tempInputB;
 	tempInputA.resize(inputA.size());
 	tempInputB.resize(inputB.size());
-	for(std::size_t index = 0; index < inputA.size(); ++index) {
-		if(!boost::math::isnan(inputA(index)) && !boost::math::isnan(inputB(index)) && !boost::math::isnan(missingness(index))) {
+	for (std::size_t index = 0; index < inputA.size(); ++index)
+	{
+		if (!boost::math::isnan(inputA(index)) && !boost::math::isnan(inputB(index)) && !boost::math::isnan(missingness(index)))
+		{
 			tempInputA.push_back(inputA(index));
 			tempInputB.push_back(inputB(index));
 		}
@@ -131,7 +137,8 @@ double evalSkipMissingFeatures(
 	SIZE_CHECK(tempInputA.size() > 0);
 	InputType validInputA(tempInputA.size());
 	InputType validInputB(tempInputA.size());
-	for(std::size_t i = 0; i < tempInputA.size(); ++i) {
+	for (std::size_t i = 0; i < tempInputA.size(); ++i)
+	{
 		validInputA(i) = tempInputA[i];
 		validInputB(i) = tempInputB[i];
 	}

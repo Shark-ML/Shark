@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       test case for the one-class-SVM
- *
- *
+ * 
+ * 
  *
  * \author      T. Glasmachers
  * \date        2013
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -44,9 +44,11 @@
 using namespace shark;
 
 
-class Gaussians : public DataDistribution<RealVector> {
+class Gaussians : public DataDistribution<RealVector>
+{
 public:
-	void draw(RealVector& point) const {
+	void draw(RealVector& point) const
+	{
 		point.resize(2);
 		size_t cluster = Rng::discrete(0, 4);
 		double alpha = 0.4 * M_PI * cluster;
@@ -56,9 +58,10 @@ public:
 };
 
 
-BOOST_AUTO_TEST_SUITE(Algorithms_Trainers_OneClassSvmTrainer)
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_OneClassSvmTrainer)
 
-BOOST_AUTO_TEST_CASE(ONE_CLASS_SVM_TEST) {
+BOOST_AUTO_TEST_CASE( ONE_CLASS_SVM_TEST )
+{
 	const std::size_t ell = 2500;
 	const double nu = 0.7;
 	const double gamma = 0.5;
@@ -79,10 +82,11 @@ BOOST_AUTO_TEST_CASE(ONE_CLASS_SVM_TEST) {
 	// check deviation of fraction of negatives from nu
 	std::size_t pos = 0;
 	std::size_t neg = 0;
-	for(std::size_t i = 0; i < ell; i++) {
+	for (std::size_t i=0; i<ell; i++)
+	{
 		double f = output.element(i)(0);
-		if(f > 0.0) pos++;
-		else if(f < 0.0) neg++;
+		if (f > 0.0) pos++;
+		else if (f < 0.0) neg++;
 	}
 
 	double p = (double)pos / (double)ell;

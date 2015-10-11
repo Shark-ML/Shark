@@ -1,45 +1,46 @@
 //===========================================================================
-//!  \brief Offers a basic structure for recurrent networks
-//!
-//!  \author  O. Krause
-//!  \date    2011
-//!
-//!  \par Copyright (c) 1999-2001:
-//!      Institut f&uuml;r Neuroinformatik<BR>
-//!      Ruhr-Universit&auml;t Bochum<BR>
-//!      D-44780 Bochum, Germany<BR>
-//!      Phone: +49-234-32-27974<BR>
-//!      Fax:   +49-234-32-14209<BR>
-//!      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
-//!      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
-//!
-//!
-//!
-//!  <BR><HR>
-//!  This file is part of Shark. This library is free software;
-//!  you can redistribute it and/or modify it under the terms of the
-//!  GNU General Public License as published by the Free Software
-//!  Foundation; either version 3, or (at your option) any later version.
-//!
-//!  This library is distributed in the hope that it will be useful,
-//!  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//!  GNU General Public License for more details.
-//!
-//!  You should have received a copy of the GNU General Public License
-//!  along with this library; if not, see <http://www.gnu.org/licenses/>.
+ //!  \brief Offers a basic structure for recurrent networks
+ //!
+ //!  \author  O. Krause
+ //!  \date    2011
+ //!
+ //!  \par Copyright (c) 1999-2001:
+ //!      Institut f&uuml;r Neuroinformatik<BR>
+ //!      Ruhr-Universit&auml;t Bochum<BR>
+ //!      D-44780 Bochum, Germany<BR>
+ //!      Phone: +49-234-32-27974<BR>
+ //!      Fax:   +49-234-32-14209<BR>
+ //!      eMail: Shark-admin@neuroinformatik.ruhr-uni-bochum.de<BR>
+ //!      www:   http://www.neuroinformatik.ruhr-uni-bochum.de<BR>
+ //!
+ //!
+ //!
+ //!  <BR><HR>
+ //!  This file is part of Shark. This library is free software;
+ //!  you can redistribute it and/or modify it under the terms of the
+ //!  GNU General Public License as published by the Free Software
+ //!  Foundation; either version 3, or (at your option) any later version.
+ //!
+ //!  This library is distributed in the hope that it will be useful,
+ //!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ //!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ //!  GNU General Public License for more details.
+ //!
+ //!  You should have received a copy of the GNU General Public License
+ //!  along with this library; if not, see <http://www.gnu.org/licenses/>.
 #ifndef SHARK_ML_MODEL_RECURENTNETWORK_H
 #define SHARK_ML_MODEL_RECURENTNETWORK_H
 
 #include <shark/Core/DLLSupport.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/ISerializable.h>
-namespace shark {
+namespace shark{
 //!  \brief Offers a basic structure for recurrent networks.
 //!
 //! it is possible to define the tzpe of sigmoids and the form of the connection matrix.
 //! this structure can be shared between different types of ents like the RNNet and the OnlineRNNet
-class RecurrentStructure: public ISerializable {
+class RecurrentStructure: public ISerializable
+{
 public:
 	//! Creates an empty recurrent neural network.
 	//! A call to setStructure is needed afterwards to configure the topology of the network
@@ -47,7 +48,7 @@ public:
 
 
 	//! type enum for the different variants of sigmoids
-	enum SigmoidType {
+	enum SigmoidType{
 		///f(x) = x
 		Linear,
 		///f(x) = 1/(1+exp(-x))
@@ -55,7 +56,7 @@ public:
 		///f(x) = tanh(x)
 		Tanh,
 		/// f(x) = x/(1+|x|)
-		FastSigmoid
+		FastSigmoid 
 	};
 
 	//!returns the connection Matrix of the network.
@@ -73,7 +74,7 @@ public:
 	//!
 	//!The ith row stands for the ith neuron of the network and when an element
 	//!(i,j) is 1, the ith unit will receive input from unit j.
-	//! the first =0,..,inputs-1 columns are the input neurons followd by the column of the bias,
+	//! the first =0,..,inputs-1 columns are the input neurons followd by the column of the bias, 
 	//! which is completely zero in this example
 	//!if j is a hidden or output neuron, the activation from the PREVIOUS time step
 	//!is used. if j is an input neuron, the current input is used.
@@ -81,21 +82,21 @@ public:
 	//!layer can be subdivided in arbitrary sublayers when the right topology is used.
 	//! the last column of the matrix is reserved for the bias neuron. So the matrix has size
 	//! NxN+1
-	const IntMatrix& connections()const {
+	const IntMatrix& connections()const{
 		return m_connectionMatrix;
 	}
 	//! returns whether the connection between neuron i and j exists
-	bool connection(std::size_t i, std::size_t j)const {
-		return m_connectionMatrix(i, j);
+	bool connection(std::size_t i, std::size_t j)const{
+		return m_connectionMatrix(i,j);
 	}
 
 	//!returns the current weight matrix
-	const RealMatrix& weights()const {
+	const RealMatrix& weights()const{
 		return m_weights;
 	}
 	//! returns the weight of the connection between neuron i and j
-	double weight(std::size_t i, std::size_t j)const {
-		return m_weights(i, j);
+	double weight(std::size_t i, std::size_t j)const{
+		return m_weights(i,j);
 	}
 
 	//!returns the type of sigmoid used in this network
@@ -105,7 +106,7 @@ public:
 
 	//!sets the type of sigmoid used in this network
 	//!\param sigmoidType the type of sigmoid
-	void setSigmoidType(SigmoidType sigmoidType) {
+	void setSigmoidType(SigmoidType sigmoidType){
 		m_sigmoidType = sigmoidType;
 	}
 
@@ -149,38 +150,38 @@ public:
 
 	//! get internal parameters of the model
 	SHARK_EXPORT_SYMBOL RealVector parameterVector() const;
-
+	
 	//! set internal parameters of the model
 	SHARK_EXPORT_SYMBOL void setParameterVector(RealVector const& newParameters);
 
 	//! From ISerializable, reads the Network from an archive
-	SHARK_EXPORT_SYMBOL void read(InArchive & archive);
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
 
 	//! From ISerializable, writes the Network to an archive
-	SHARK_EXPORT_SYMBOL void write(OutArchive & archive) const;
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 
 	//! The number of input neurons of the network
-	std::size_t inputs()const {
+	std::size_t inputs()const{
 		return m_inputNeurons;
 	}
 	//! The number of output neurons of the network
-	std::size_t outputs()const {
+	std::size_t outputs()const{
 		return m_outputNeurons;
 	}
-	std::size_t numberOfNeurons()const {
+	std::size_t numberOfNeurons()const{
 		return m_numberOfNeurons;
 	}
-	std::size_t numberOfUnits()const {
+	std::size_t numberOfUnits()const{
 		return m_numberOfUnits;
 	}
 
 	//! The index of the bias unit
-	std::size_t bias()const {
+	std::size_t bias()const{
 		return m_bias;
 	}
 
 	//! number of parameters of the network
-	std::size_t parameters()const {
+	std::size_t parameters()const{
 		return m_numberOfParameters;
 	}
 

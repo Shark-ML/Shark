@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       test case for epsilon-SVM
- *
- *
+ * 
+ * 
  *
  * \author      T. Glasmachers
  * \date        2013
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -44,9 +44,10 @@
 using namespace shark;
 
 
-BOOST_AUTO_TEST_SUITE(Algorithms_Trainers_EpsilonSvmTrainer)
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_EpsilonSvmTrainer)
 
-BOOST_AUTO_TEST_CASE(EPSILON_SVM_TEST) {
+BOOST_AUTO_TEST_CASE( EPSILON_SVM_TEST )
+{
 	const std::size_t ell = 200;
 	const double C = 10.0;
 	const double epsilon = 0.03;
@@ -66,14 +67,18 @@ BOOST_AUTO_TEST_CASE(EPSILON_SVM_TEST) {
 	output = svm(training.inputs());
 
 	RealVector alpha = svm.parameterVector();
-	for(std::size_t i = 0; i < training.numberOfElements(); i++) {
+	for (std::size_t i=0; i<training.numberOfElements(); i++)
+	{
 		double y = training.labels().element(i)(0);
 		double f = output.element(i)(0);
 		double a = alpha(i);
 		double xi = std::max(0.0, std::abs(f - y) - epsilon);
-		if(a == 0.0) {
+		if (a == 0.0)
+		{
 			BOOST_CHECK_SMALL(xi, accuracy);
-		} else {
+		}
+		else
+		{
 			BOOST_CHECK(xi >= -accuracy);
 		}
 	}

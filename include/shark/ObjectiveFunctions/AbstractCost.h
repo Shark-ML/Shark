@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       cost function for quantitative judgement of deviations of predictions from target values
- *
- *
+ * 
+ * 
  *
  * \author      T. Glasmachers
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -65,7 +65,8 @@ namespace shark {
 /// process LabeledData in an ErrorFunction.
 ///
 template<class LabelT, class OutputT = LabelT>
-class AbstractCost : public INameable {
+class AbstractCost : public INameable
+{
 public:
 	typedef OutputT OutputType;
 	typedef LabelT LabelType;
@@ -85,25 +86,25 @@ public:
 	SHARK_FEATURE_INTERFACE;
 
 	/// returns true when the first parameter derivative is implemented
-	bool hasFirstDerivative() const {
-		return m_features & HAS_FIRST_DERIVATIVE;
+	bool hasFirstDerivative() const{ 
+		return m_features & HAS_FIRST_DERIVATIVE; 
 	}
 	//~ /// returns true when the second parameter derivative is implemented
-	//~ bool hasSecondDerivative() const{
-	//~ return m_features & HAS_SECOND_DERIVATIVE;
+	//~ bool hasSecondDerivative() const{ 
+		//~ return m_features & HAS_SECOND_DERIVATIVE; 
 	//~ }
-
+	
 	/// returns true when the cost function is in fact a loss function
-	bool isLossFunction() const {
-		return m_features & IS_LOSS_FUNCTION;
+	bool isLossFunction() const{ 
+		return m_features & IS_LOSS_FUNCTION; 
 	}
 
 	/// Evaluates the cost of predictions, given targets.
 	/// \param  targets      target values
 	/// \param  predictions  predictions, typically made by a model
 	virtual double eval(Data<LabelType> const& targets, Data<OutputType> const& predictions) const = 0;
-
-	double operator()(Data<LabelType> const& targets, Data<OutputType> const& predictions) const
+	
+	double operator () (Data<LabelType> const& targets, Data<OutputType> const& predictions) const
 	{ return eval(targets, predictions); }
 };
 

@@ -51,70 +51,71 @@
 using namespace shark;
 
 
-BOOST_AUTO_TEST_SUITE(Algorithms_Trainers_Budgeted_KernelBudgetedSGDTrainer_Test)
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Budgeted_KernelBudgetedSGDTrainer_Test)
 
-BOOST_AUTO_TEST_CASE(KernelBudgetedSGDTrainer_train) {
-	// Create a Gaussian RBF Kernel
-	double gamma = 1.0f;
-	GaussianRbfKernel<> *kernel = new GaussianRbfKernel<> (gamma);
+BOOST_AUTO_TEST_CASE( KernelBudgetedSGDTrainer_train)
+{
+    // Create a Gaussian RBF Kernel 
+    double gamma = 1.0f;
+    GaussianRbfKernel<> *kernel = new GaussianRbfKernel<> (gamma);
 
-	// We will use the usual hinge Loss
-	HingeLoss *hingeLoss = new HingeLoss();
+    // We will use the usual hinge Loss
+    HingeLoss *hingeLoss = new HingeLoss();
 
-	// As the budget maintenance strategy we choose the merge strategy
-	// We need explicitly to state that we are merging RealVectors.
-	// For the time being this is the only type of objects we can merge.
-	MergeBudgetMaintenanceStrategy<RealVector> *strategy = new MergeBudgetMaintenanceStrategy<RealVector>();
+    // As the budget maintenance strategy we choose the merge strategy
+    // We need explicitly to state that we are merging RealVectors.
+    // For the time being this is the only type of objects we can merge.
+    MergeBudgetMaintenanceStrategy<RealVector> *strategy = new MergeBudgetMaintenanceStrategy<RealVector>();
 
-	// Parameters for the trainer:
-	// Our budget shall have at most 64 vectors
-	size_t budgetSize = 32;
-	// We want to run 3 epochs
-	size_t epochs = 3;
+    // Parameters for the trainer:
+    // Our budget shall have at most 64 vectors
+    size_t budgetSize = 32;
+    // We want to run 3 epochs
+    size_t epochs = 3;
+    
+    // Initialize the KernelBudgetedSGDTrainer and set number of epochs.
+    std::cout << "Creating KernelBudgetedSGDTrainer." << std::endl;
+    double cost = 1.0f;
+    KernelBudgetedSGDTrainer<RealVector> *kernelBudgetedSGDtrainer =
+        new KernelBudgetedSGDTrainer<RealVector> (kernel, hingeLoss, cost, false, false, budgetSize, strategy );
+    kernelBudgetedSGDtrainer -> setEpochs (epochs);
 
-	// Initialize the KernelBudgetedSGDTrainer and set number of epochs.
-	std::cout << "Creating KernelBudgetedSGDTrainer." << std::endl;
-	double cost = 1.0f;
-	KernelBudgetedSGDTrainer<RealVector> *kernelBudgetedSGDtrainer =
-	    new KernelBudgetedSGDTrainer<RealVector> (kernel, hingeLoss, cost, false, false, budgetSize, strategy);
-	kernelBudgetedSGDtrainer -> setEpochs(epochs);
+    // We want to train a normal Chessboard problem.
+    size_t datasetSize = 1000;
+    std::cout << "Creating Chessboard dataset problem with " << datasetSize << " points." << std::endl;
+    Chessboard problem (4);
+    LabeledData<RealVector, unsigned int> trainingData = problem.generateDataset(datasetSize);
 
-	// We want to train a normal Chessboard problem.
-	size_t datasetSize = 1000;
-	std::cout << "Creating Chessboard dataset problem with " << datasetSize << " points." << std::endl;
-	Chessboard problem(4);
-	LabeledData<RealVector, unsigned int> trainingData = problem.generateDataset(datasetSize);
+    // Create classifier that will hold the final model
+    KernelClassifier<RealVector> kernelClassifier;
+    
+     // Train
+    std::cout << "Training the KernelBudgetedSGDTrainer on the problem with a budget of " << budgetSize << " and " << epochs << " Epochs." << std::endl;
+    kernelBudgetedSGDtrainer ->train (kernelClassifier, trainingData);
 
-	// Create classifier that will hold the final model
-	KernelClassifier<RealVector> kernelClassifier;
+    // Check the number of support vectors first, it should be equal to the budgetSize (but can be less)
+    Data<RealVector> supportVectors = kernelClassifier.decisionFunction().basis();
+    
+    size_t nSupportVectors = supportVectors.numberOfElements();
+    std::cout << "We have " << nSupportVectors << " support vectors in our model.\n";
+    if (nSupportVectors > budgetSize)
+        SHARKEXCEPTION ("Something has gone wrong. There are more support vectors in the budget than specified!");
 
-	// Train
-	std::cout << "Training the KernelBudgetedSGDTrainer on the problem with a budget of " << budgetSize << " and " << epochs << " Epochs." << std::endl;
-	kernelBudgetedSGDtrainer ->train(kernelClassifier, trainingData);
+    // Create another test problem with 500 points
+    std::cout << "Creating test data set with 500 points.\n";
+    size_t testDatasetSize = 500;
+    Chessboard testProblem (4);
+    LabeledData<RealVector, unsigned int> testData = testProblem.generateDataset(testDatasetSize);
+    
+    // Check the performance on the test set
+    std::cout << "Computing the performance on the test dataset using 0-1 loss.\n";
+    ZeroOneLoss<unsigned int> loss;
+    Data<unsigned int> prediction = kernelClassifier (testData.inputs());
+    double error_rate = loss (testData.labels(), prediction);
 
-	// Check the number of support vectors first, it should be equal to the budgetSize (but can be less)
-	Data<RealVector> supportVectors = kernelClassifier.decisionFunction().basis();
-
-	size_t nSupportVectors = supportVectors.numberOfElements();
-	std::cout << "We have " << nSupportVectors << " support vectors in our model.\n";
-	if(nSupportVectors > budgetSize)
-		SHARKEXCEPTION("Something has gone wrong. There are more support vectors in the budget than specified!");
-
-	// Create another test problem with 500 points
-	std::cout << "Creating test data set with 500 points.\n";
-	size_t testDatasetSize = 500;
-	Chessboard testProblem(4);
-	LabeledData<RealVector, unsigned int> testData = testProblem.generateDataset(testDatasetSize);
-
-	// Check the performance on the test set
-	std::cout << "Computing the performance on the test dataset using 0-1 loss.\n";
-	ZeroOneLoss<unsigned int> loss;
-	Data<unsigned int> prediction = kernelClassifier(testData.inputs());
-	double error_rate = loss(testData.labels(), prediction);
-
-	// Report performance.
-	std::cout << "Test error rate: " << error_rate << std::endl;
+    // Report performance.
+    std::cout << "Test error rate: " << error_rate << std::endl;
 }
-
-
+	
+	
 BOOST_AUTO_TEST_SUITE_END()

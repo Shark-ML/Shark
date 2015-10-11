@@ -55,7 +55,7 @@ namespace shark {
  */
 template<typename Extractor >
 struct LinearRankingSelection {
-	LinearRankingSelection() {
+	LinearRankingSelection(){
 		etaMax = 1.1;
 	}
 	/// \brief Selects individualss from the range of parent and offspring individuals.
@@ -71,39 +71,39 @@ struct LinearRankingSelection {
 	/// \param [in] out Iterator pointing to the first valid element of the output range.
 	/// \param [in] outE Iterator pointing to the first invalid element of the output range.
 	///
-	template<typename InIterator, typename OutIterator>
-	void operator()(
-	    InIterator individuals,
-	    InIterator individualsE,
-	    OutIterator out,
-	    OutIterator outE
-	) const {
-
+	template<typename InIterator,typename OutIterator> 
+	void operator()( 
+		InIterator individuals,
+		InIterator individualsE,
+		OutIterator out,
+		OutIterator outE
+	) const{
+		
 		//compute rank of each individual
-		std::size_t size = std::distance(individuals, individualsE);
+		std::size_t size = std::distance( individuals, individualsE );
 		std::vector<KeyValuePair<double, InIterator> > individualsPerformance(size);
 
-		for(std::size_t i = 0; i != size; ++i, ++individuals) {
+		for( std::size_t i = 0; i != size; ++i, ++individuals ) {
 			Extractor e;
 			individualsPerformance[i].value = individuals;
 			individualsPerformance[i].key = e(*individuals);
 		}
-		std::sort(individualsPerformance.begin(), individualsPerformance.end());
-
+		std::sort( individualsPerformance.begin(), individualsPerformance.end());
+		
 		RealVector selectionProbability(size);
-		double a = 2. * (etaMax - 1.) / (size - 1.);
-		for(std::size_t i = 0; i != size; ++i) {
-			selectionProbability[i] = (etaMax - a * i);
+		double a = 2. * (etaMax - 1.)/(size - 1.);
+		for( std::size_t i = 0; i != size; ++i ) {
+			selectionProbability[i] = (etaMax - a*i);
 		}
-		selectionProbability /= sum(selectionProbability);
+		selectionProbability /=sum(selectionProbability);
 
 		RouletteWheelSelection rws;
-		for(; out != outE; ++out) {
-			InIterator individuals = rws(individualsPerformance.begin(), individualsPerformance.end(), selectionProbability)->value;
+		for( ; out != outE; ++out ){
+			InIterator individuals = rws( individualsPerformance.begin(), individualsPerformance.end(), selectionProbability)->value;
 			*out = *individuals;
 		}
 	}
-
+	
 	/// \brief Selective pressure, parameter in [1,2] conrolling selection strength. 1.1 by default
 	double etaMax;
 

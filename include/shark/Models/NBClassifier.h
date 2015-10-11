@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Implementation of Naive Bayes classifier
- *
- *
- *
+ * 
+ * 
+ * 
  *
  * \author      B. Li
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -59,7 +59,8 @@ namespace shark {
 template <class InputType = RealVector, class OutputType = unsigned int>
 class NBClassifier :
 	public AbstractModel<InputType, OutputType>,
-	private boost::noncopyable {
+	private boost::noncopyable
+{
 private:
 
 	typedef AbstractModel<InputType, OutputType> base_type;
@@ -84,12 +85,14 @@ public:
 	/// Will build hypothesis that all features in each class follows Normal distribution
 	/// @param classSize size of class
 	/// @param featureSize size of feature
-	NBClassifier(std::size_t classSize, std::size_t featureSize) {
+	NBClassifier(std::size_t classSize, std::size_t featureSize)
+	{
 		SIZE_CHECK(classSize > 0u);
 		SIZE_CHECK(featureSize > 0u);
-		for(std::size_t i = 0; i < classSize; ++i) {
+		for (std::size_t i = 0; i < classSize; ++i)
+		{
 			std::vector<AbstractDistPtr> featureDist;
-			for(std::size_t j = 0; j < featureSize; ++j)
+			for (std::size_t j = 0; j < featureSize; ++j)
 				featureDist.push_back(AbstractDistPtr(new Normal<DefaultRngType>(Rng::globalRng)));
 			m_featureDistributions.push_back(featureDist);
 		}
@@ -99,7 +102,8 @@ public:
 	/// The distributions for each feature in each class are given by @a featureDists
 	/// @param featureDists the distribution of features
 	explicit NBClassifier(FeatureDistributionsType const& featureDists)
-		: m_featureDistributions(featureDists) {
+	: m_featureDistributions(featureDists)
+	{
 		SIZE_CHECK(m_featureDistributions.size() > 0u);
 	}
 
@@ -111,7 +115,8 @@ public:
 	/// @param classIndex index of class
 	/// @param featureIndex index of feature
 	/// @return the distribution for feature @a featureIndex given class @a classIndex
-	AbstractDistribution& getFeatureDist(std::size_t classIndex, std::size_t featureIndex) const {
+	AbstractDistribution& getFeatureDist(std::size_t classIndex, std::size_t featureIndex) const
+	{
 		SIZE_CHECK(classIndex < m_featureDistributions.size());
 		SIZE_CHECK(featureIndex < m_featureDistributions[0].size());
 
@@ -122,42 +127,44 @@ public:
 
 	/// Get the size of distribution in format of (class size, feature size)
 	/// @return the size of distribution
-	DistSizeType getDistSize() const {
+	DistSizeType getDistSize() const
+	{
 		SIZE_CHECK(m_featureDistributions.size() > 0u);
 		return std::make_pair(m_featureDistributions.size(), m_featureDistributions[0].size());
 	}
 
 	using base_type::eval;
-
-	boost::shared_ptr<State> createState()const {
+	
+	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	/// see AbstractModel::eval
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const {
+	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
 		SIZE_CHECK(m_featureDistributions.size() == m_classPriors.size());
 		SIZE_CHECK(m_classPriors.size() > 0u);
 		SIZE_CHECK(size(patterns) > 0);
-
+		
 		outputs.resize(size(patterns));
 
-		for(std::size_t p = 0; p != size(patterns); ++p) {
-			OutputType bestProbClass = 0; // just initialized to avoid warning
+		for(std::size_t p = 0; p != size(patterns); ++p){
+			OutputType bestProbClass = 0; // just initialized to avoid warning 
 			double maxLogProb = - std::numeric_limits<double>::max(); // initialized as smallest negative value
 
 			// For each of possible output values, calculate its corresponding sum-up log prob and return the max one
-			for(OutputType classIndex = 0; classIndex != m_classPriors.size(); ++classIndex) {
+			for(OutputType classIndex = 0; classIndex != m_classPriors.size(); ++classIndex){
 				SIZE_CHECK(patterns.size2() == m_featureDistributions[classIndex].size());
 				double const classDistribution = m_classPriors[classIndex];
 				// Sum up log prob of each features and prior prob of current class
 				// We use log to ensure that the result stays in a valid range of double, even when the propability is very low
-				double currentLogProb = safeLog(classDistribution);
+				double currentLogProb = safeLog(classDistribution); 
 				std::size_t featureIndex = 0u;
-				BOOST_FOREACH(AbstractDistPtr const & featureDistribution, m_featureDistributions[classIndex])
-				currentLogProb += featureDistribution->logP(patterns(p, featureIndex++));
+				BOOST_FOREACH(AbstractDistPtr const& featureDistribution, m_featureDistributions[classIndex])
+					currentLogProb += featureDistribution->logP(patterns(p,featureIndex++));
 
 				// Record the greater one
-				if(currentLogProb > maxLogProb) {
+				if (currentLogProb > maxLogProb)
+				{
 					maxLogProb = currentLogProb;
 					bestProbClass = classIndex;
 				}
@@ -171,13 +178,14 @@ public:
 	/// @param classToAdd the class of which probability will be updated
 	/// @param probability the probability of the class
 	/// @tparam OutputType the type of output class
-	void setClassPrior(OutputType classToAdd, double probability) {
-		if(classToAdd == m_classPriors.size())
+	void setClassPrior(OutputType classToAdd, double probability)
+	{
+		if (classToAdd == m_classPriors.size())
 			m_classPriors.push_back(probability);
 		else
 			throw SHARKEXCEPTION("[NBClassifier] class probability must be added in ascending order.");
 	}
-
+	
 	/// This model does not have any parameters.
 	RealVector parameterVector() const {
 		return RealVector();

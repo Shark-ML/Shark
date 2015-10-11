@@ -5,49 +5,51 @@
 #include  <shark/LinAlg/Base.h>
 
 
-namespace shark {
+namespace shark{
 
 ///Shifter problem
-class Shifter {
+class Shifter{
 private:
 	UnlabeledData<RealVector> m_data;
 public:
-	Shifter() {
-		std::vector<RealVector> data(768, RealVector(19));
-		for(unsigned  x = 0; x <= 255; x++) {
+	Shifter(){
+		std::vector<RealVector> data(768,RealVector(19));
+		for(unsigned  x=0; x<=255; x++) {
 			RealVector element(19);
-			for(size_t i = 0; i < 8; i++) {
-				element(i) = (x & (1 << i)) > 0;
+			for(size_t i=0; i<8; i++) {
+				element(i) = (x & (1<<i)) > 0;
 			}
-			for(int label = 0; label <= 2; label++) {
+			for(int label=0; label<=2; label++) {
 				unsigned char y;
-				if(label == 0) {
-					y = (x << 1 | x >> 7);
-					element(16) = 1;
-					element(17) = 0;
-					element(18) = 0;
-				} else if(label == 1) {
+				if(label==0) {
+					y = (x<<1 | x>>7);
+					element(16)=1;
+					element(17)=0;
+					element(18)=0;
+				}
+				else if(label==1) {	
 					y = x;
-					element(16) = 0;
-					element(17) = 1;
-					element(18) = 0;
-				} else {
-					y = (x >> 1 | x << 7);
-					element(16) = 0;
-					element(17) = 0;
-					element(18) = 1;
+					element(16)=0;
+					element(17)=1;
+					element(18)=0;
 				}
-				for(size_t i = 0; i < 8; i++) {
-					element(i + 8) = (y & (1 << i)) > 0;
+				else {
+					y = (x>>1 | x<<7);
+					element(16)=0;
+					element(17)=0;
+					element(18)=1;
 				}
-				data[x * 3 + label] = element;
+				for(size_t i=0; i<8; i++) {
+					element(i+8) = (y & (1<<i)) > 0;
+				}
+				data[x*3+label]=element;
 			}
 		}
 		m_data = createDataFromRange(data);
 	}
-
+	
 	///returns the generated dataset
-	UnlabeledData<RealVector> data() const {
+	UnlabeledData<RealVector> data() const{
 		return m_data;
 	};
 	///returns the dimensionality of the data

@@ -10,41 +10,45 @@
 
 using namespace shark;
 
-BOOST_AUTO_TEST_SUITE(Algorithms_GradientDescent_LBFGS)
+BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_LBFGS)
 
-BOOST_AUTO_TEST_CASE(LBFGS_dlinmin) {
+BOOST_AUTO_TEST_CASE( LBFGS_dlinmin )
+{
 	Ellipsoid function(5);
 	LBFGS optimizer;
 	optimizer.setHistCount(3);
-	optimizer.lineSearch().lineSearchType() = LineSearch::Dlinmin;
+	optimizer.lineSearch().lineSearchType()=LineSearch::Dlinmin;
 
-	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << " and dlinmin" << std::endl;
-	testFunction(optimizer, function, 100, 100);
+	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
+	testFunction(optimizer,function,100,100);
 }
-BOOST_AUTO_TEST_CASE(LBFGS_wolfe) {
+BOOST_AUTO_TEST_CASE( LBFGS_wolfe )
+{
 	Ellipsoid function(5);
 	LBFGS optimizer;
-	optimizer.lineSearch().lineSearchType() = LineSearch::WolfeCubic;
+	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
 
-	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << " and wolfe line search" << std::endl;
-	testFunction(optimizer, function, 100, 100);
+	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and wolfe line search"<<std::endl;
+	testFunction(optimizer,function,100,100);
 }
-BOOST_AUTO_TEST_CASE(LBFGS_Dlinmin_Rosenbrock) {
+BOOST_AUTO_TEST_CASE( LBFGS_Dlinmin_Rosenbrock )
+{
 	Rosenbrock function(3);
 	LBFGS optimizer;
 	optimizer.setHistCount(3);
-	optimizer.lineSearch().lineSearchType() = LineSearch::Dlinmin;
+	optimizer.lineSearch().lineSearchType()=LineSearch::Dlinmin;
 
-	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << " and dlinmin" << std::endl;
-	testFunction(optimizer, function, 100, 100);
+	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
+	testFunction(optimizer,function,100,100);
 }
-BOOST_AUTO_TEST_CASE(BFGS_wolfe_Rosenbrock) {
+BOOST_AUTO_TEST_CASE( BFGS_wolfe_Rosenbrock )
+{
 	Rosenbrock function(3);
 	LBFGS optimizer;
-	optimizer.lineSearch().lineSearchType() = LineSearch::WolfeCubic;
+	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
 
-	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << " and wolfe line search" << std::endl;
-	testFunction(optimizer, function, 100, 100);
+	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and wolfe line search"<<std::endl;
+	testFunction(optimizer,function,100,100);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

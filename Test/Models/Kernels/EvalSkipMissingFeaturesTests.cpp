@@ -8,9 +8,10 @@
 
 namespace shark {
 
-BOOST_AUTO_TEST_SUITE(Models_Kernels_EvalSkipMissingFeaturesTests)
+BOOST_AUTO_TEST_SUITE (Models_Kernels_EvalSkipMissingFeaturesTests)
 
-BOOST_AUTO_TEST_CASE(TestEvalSkipMissingFeatures) {
+BOOST_AUTO_TEST_CASE(TestEvalSkipMissingFeatures)
+{
 	// This test case is testing evaluating kernel function while skipping missing features
 
 	const double tolerancePct = 0.001;

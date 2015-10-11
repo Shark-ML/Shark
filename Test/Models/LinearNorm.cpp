@@ -14,59 +14,62 @@ using namespace std;
 using namespace boost::archive;
 using namespace shark;
 
-BOOST_AUTO_TEST_SUITE(Models_LinearNorm)
+BOOST_AUTO_TEST_SUITE (Models_LinearNorm)
 
-BOOST_AUTO_TEST_CASE(LinearNorm_Value) {
+BOOST_AUTO_TEST_CASE( LinearNorm_Value )
+{
 	LinearNorm model(2);
 
 	//the testpoint
 	RealVector point(2);
-	point(0) = 1;
-	point(1) = 3;
+	point(0)=1;
+	point(1)=3;
 
 	RealVector testResult(2);
-	testResult(0) = 0.25;
-	testResult(1) = 0.75;
+	testResult(0)=0.25;
+	testResult(1)=0.75;
 
 	//evaluate point
-	RealVector result = model(point);
-	double difference = norm_sqr(testResult - result);
-	BOOST_CHECK_SMALL(difference, 1.e-15);
+	RealVector result=model(point);
+	double difference=norm_sqr(testResult-result);
+	BOOST_CHECK_SMALL(difference,1.e-15);
 }
-BOOST_AUTO_TEST_CASE(LinearNorm_weightedInputDerivative) {
+BOOST_AUTO_TEST_CASE( LinearNorm_weightedInputDerivative )
+{
 	LinearNorm model(2);
 
 	//the testpoint
 	RealVector point(2);
-	point(0) = 1;
-	point(1) = 3;
+	point(0)=1;
+	point(1)=3;
 
 	RealVector coefficients(2);
-	coefficients(0) = 2;
-	coefficients(1) = -1;
+	coefficients(0)=2;
+	coefficients(1)=-1;
 
-	testWeightedInputDerivative(model, point, coefficients);
+	testWeightedInputDerivative(model,point,coefficients);
 }
 
-BOOST_AUTO_TEST_CASE(LinearNorm_SERIALIZE) {
+BOOST_AUTO_TEST_CASE( LinearNorm_SERIALIZE )
+{
 	//the target modelwork
 	LinearNorm model(10);
 
 	//now we serialize the model
-	ostringstream outputStream;
-	TextOutArchive oa(outputStream);
+	ostringstream outputStream;  
+	TextOutArchive oa(outputStream);  
 	oa << const_cast<LinearNorm const&>(model);
 
 	//and create a new model from the serialization
 	LinearNorm modelDeserialized;
-	istringstream inputStream(outputStream.str());
+	istringstream inputStream(outputStream.str());  
 	TextInArchive ia(inputStream);
 	ia >> modelDeserialized;
-
+	
 	//test whether serialization works
 	//topology check
-	BOOST_REQUIRE_EQUAL(modelDeserialized.inputSize(), model.inputSize());
-	BOOST_REQUIRE_EQUAL(modelDeserialized.outputSize(), model.outputSize());
+	BOOST_REQUIRE_EQUAL(modelDeserialized.inputSize(),model.inputSize());
+	BOOST_REQUIRE_EQUAL(modelDeserialized.outputSize(),model.outputSize());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

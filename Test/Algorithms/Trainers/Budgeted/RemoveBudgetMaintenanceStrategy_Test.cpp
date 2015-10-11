@@ -49,16 +49,18 @@ using namespace shark;
 
 
 
-BOOST_AUTO_TEST_SUITE(Algorithms_Trainers_Budgeted_RemoveBudgetMaintenanceStrategy_Test)
+BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Budgeted_RemoveBudgetMaintenanceStrategy_Test)
 
-BOOST_AUTO_TEST_CASE(RemoveBudgetMaintenanceStrategy_reduceBudget) {
+BOOST_AUTO_TEST_CASE( RemoveBudgetMaintenanceStrategy_reduceBudget)
+{
 }
 
 
-BOOST_AUTO_TEST_CASE(RemoveBudgetMaintenanceStrategy_addToModel) {
+BOOST_AUTO_TEST_CASE( RemoveBudgetMaintenanceStrategy_addToModel)
+{
 }
+	
 
-
-
-
+	
+	
 BOOST_AUTO_TEST_SUITE_END()
