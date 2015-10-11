@@ -55,8 +55,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_CholeskyDecomposition_Base )
 }
 
 BOOST_AUTO_TEST_CASE(LinAlg_CholeskyDecomposition_Base_ColumnMajor) {
-	blas::matrix<double,blas::column_major> M(Dimensions, Dimensions);   // input matrix
-	blas::matrix<double,blas::column_major> C(Dimensions, Dimensions);   // matrix for Cholesky Decomposition
+	blas::matrix<double, blas::column_major> M(Dimensions, Dimensions);  // input matrix
+	blas::matrix<double, blas::column_major> C(Dimensions, Dimensions);  // matrix for Cholesky Decomposition
 
 	// Initializing matrices
 	for(size_t row = 0; row < Dimensions; row++) {
