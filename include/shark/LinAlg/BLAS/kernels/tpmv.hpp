@@ -49,7 +49,7 @@ namespace shark { namespace blas {namespace kernels{
 	
 ///\brief Implements the Tringular Packed Matrix-Vector multiplication(TPMV)
 ///
-/// It computes b=Ax where A is a lower or upper packed triangular matrix.
+/// It computes b=A*b where A is a lower or upper packed triangular matrix.
 template <typename TriangularA, typename VecB>
 void tpmv(
 	matrix_expression<TriangularA> const &A, 

@@ -69,19 +69,21 @@ inline int potrf(
 
 template <typename Triangular, typename SymmA>
 inline int potrf(
-    matrix_container<SymmA>& a,
-    boost::mpl::true_
+	matrix_container<SymmA>& A,
+	boost::mpl::true_
 ) {
 	CBLAS_UPLO const uplo = Triangular::is_upper ? CblasUpper : CblasLower;
 	CBLAS_ORDER const stor_ord =
 		(CBLAS_ORDER)storage_order<typename SymmA::orientation>::value;
 
-	std::size_t n = a().size1();
-	SIZE_CHECK(n == a().size2());
+	std::size_t n = A().size1();
+	SIZE_CHECK(n == A().size2());
 
-	return potrf(stor_ord, uplo, (int)n,
-	             traits::storage(a()),
-	             traits::leading_dimension(a()));
+	return potrf(
+		stor_ord, uplo, (int)n,
+	        traits::storage(A()),
+	        traits::leading_dimension(A())
+	);
 }
 
 template<class Storage, class T>
@@ -123,6 +125,6 @@ struct  has_optimized_potrf
 	: public optimized_potrf_detail <
 	  typename M::storage_category,
 	  typename M::value_type
-	  > {};
+	> {};
 }}}
 #endif
