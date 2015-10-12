@@ -158,6 +158,11 @@ public:
 	reference operator()(index_type i, index_type j) const {
 		return expression()(i, j);
 	}
+	
+	void set_element(size_type i, size_type j,value_type t){
+		expression().set_element(i,j,t);
+	}
+
 
 	// Assignment
 	
@@ -453,6 +458,10 @@ public:
 	reference operator()(index_type i, index_type j)const{
 		return expression()(j, i);
 	}
+	
+	void set_element(size_type i, size_type j,value_type t){
+		expression().set_element(j,i,t);
+	}
 
 	// Closure comparison
 	bool same_closure(matrix_transpose const& mu2) const {
@@ -721,6 +730,10 @@ public:
 	}
 	reference operator [](index_type j) const {
 		return (*this)(j);
+	}
+	
+	void set_element(size_type j,value_type t){
+		expression().set_element(m_i,j,t);
 	}
 
 	// Assignment
@@ -1011,6 +1024,10 @@ public:
 	reference operator [](index_type i) const {
 		return m_wrapper[i];
 	}
+	
+	void set_element(size_type i,value_type t){
+		m_wrapper.set_element(i,t);
+	}
 
 	// Assignment
 	
@@ -1220,6 +1237,11 @@ public:
 	difference_type stride()const{
 		return expression().stride1()+expression().stride2();
 	}
+	
+	void set_element(size_type i,value_type t){
+		expression().set_element(m_range1(i),m_range2(i),t);
+	}
+
 	
 	///\brief Returns the pointer to the beginning of the vector storage
 	///
@@ -1962,7 +1984,11 @@ public:
         }
         reference operator () (index_type i, index_type j) {
 		return m_values[i*m_stride1+j*m_stride2];
-        }	
+        }
+	void set_element(size_type i, size_type j,value_type t){
+		m_values[i*m_stride1+j*m_stride2]  = t;
+	}
+
 	
 	// --------------
 	// ITERATORS
