@@ -5,6 +5,7 @@
 #include "kernels/gemm.hpp"
 #include "kernels/tpmv.hpp"
 #include "kernels/trmv.hpp"
+#include "kernels/trmm.hpp"
 
 namespace shark {
 namespace blas {
@@ -173,7 +174,7 @@ void symm_prod(
 /// \brief Computes x=Ax for a triangular matrix A
 ///
 /// The first template argument governs the type
-/// of triangular matrix: Lower, Upper, UnitLower and UnitUpper.
+/// of triangular matrix: lower, upper, unit_lower and unit_upper.
 ///
 ///Example: triangular_prod<lower>(A,x);
 template<class TriangularType, class MatrixA, class V>
@@ -184,19 +185,34 @@ void triangular_prod(
 	kernels::trmv<TriangularType::is_upper, TriangularType::is_unit>(A, x);
 }
 
-/// \brief Computes x=Ax for a triangular matrix A
+/// \brief Computes B=AB for a triangular matrix A and a dense matrix B in place
 ///
-/// This is the version for temporary proxy objects
 /// The first template argument governs the type
-/// of triangular matrix: Lower, Upper, UnitLower and UnitUpper.
+/// of triangular matrix: lower, upper, unit_lower and unit_upper.
 ///
-///Example: triangular_prod<lower>(A,x);
-template<class TriangularType, class MatrixA, class V>
+///Example: triangular_prod<lower>(A,B);
+template<class TriangularType, class MatrixA, class MatB>
 void triangular_prod(
+    matrix_expression<MatrixA> const& A,
+    matrix_expression<MatB>& B
+) {
+	kernels::trmm<TriangularType::is_upper, TriangularType::is_unit>(A, B);
+}
+
+/// \brief triangular prod for temporary left-hand side arguments
+///
+/// Dispatches to the other versions of triangular_prod, see their documentation
+template<class TriangularType, class MatrixA, class X>
+void triangular_prod(
+<<<<<<< Updated upstream
 	matrix_expression<MatrixA> const& A,
 	temporary_proxy<V> x
+=======
+    matrix_expression<MatrixA> const& A,
+    temporary_proxy<X> x
+>>>>>>> Stashed changes
 ) {
-	triangular_prod<TriangularType>(A, static_cast<V&>(x));
+	triangular_prod<TriangularType>(A, static_cast<X&>(x));
 }
 
 
