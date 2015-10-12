@@ -193,8 +193,8 @@ void triangular_prod(
 ///Example: triangular_prod<lower>(A,B);
 template<class TriangularType, class MatrixA, class MatB>
 void triangular_prod(
-    matrix_expression<MatrixA> const& A,
-    matrix_expression<MatB>& B
+	matrix_expression<MatrixA> const& A,
+	matrix_expression<MatB>& B
 ) {
 	kernels::trmm<TriangularType::is_upper, TriangularType::is_unit>(A, B);
 }
@@ -202,17 +202,12 @@ void triangular_prod(
 /// \brief triangular prod for temporary left-hand side arguments
 ///
 /// Dispatches to the other versions of triangular_prod, see their documentation
-template<class TriangularType, class MatrixA, class X>
+template<class TriangularType, class MatrixA, class E>
 void triangular_prod(
-<<<<<<< Updated upstream
 	matrix_expression<MatrixA> const& A,
-	temporary_proxy<V> x
-=======
-    matrix_expression<MatrixA> const& A,
-    temporary_proxy<X> x
->>>>>>> Stashed changes
+	temporary_proxy<E> e
 ) {
-	triangular_prod<TriangularType>(A, static_cast<X&>(x));
+	triangular_prod<TriangularType>(A, static_cast<E&>(e));
 }
 
 
