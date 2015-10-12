@@ -36,30 +36,32 @@
 
 namespace shark { namespace blas { namespace bindings {
 
-inline void gemm(CBLAS_ORDER const Order,
-	CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
+inline void gemm(
+	CBLAS_ORDER const Order, CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
 	int M, int N, int K,
 	float alpha, float const *A, int lda,
 	float const *B, int ldb,
 	float beta, float *C, int ldc
 ){
 	cblas_sgemm(
-		Order, TransA, TransB, M, N, K,
+		Order, TransA, TransB,
+		M, N, K,
 		alpha, A, lda,
 		B, ldb,
 		beta, C, ldc
 	);
 }
 
-inline void gemm(CBLAS_ORDER const Order,
-	CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
+inline void gemm(
+	CBLAS_ORDER const Order, CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
 	int M, int N, int K,
 	double alpha, double const *A, int lda,
 	double const *B, int ldb,
 	double beta, double *C, int ldc
 ){
 	cblas_dgemm(
-		Order, TransA, TransB, M, N, K,
+		Order, TransA, TransB,
+		M, N, K,
 		alpha, 
 		A, lda,
 		B, ldb,
@@ -68,8 +70,8 @@ inline void gemm(CBLAS_ORDER const Order,
 	);
 }
 
-inline void gemm(CBLAS_ORDER const Order,
-	CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
+inline void gemm(
+	CBLAS_ORDER const Order, CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
 	int M, int N, int K,
 	float alpha,
 	std::complex<float> const *A, int lda,
@@ -80,7 +82,8 @@ inline void gemm(CBLAS_ORDER const Order,
 	std::complex<float> alphaArg(alpha,0);
 	std::complex<float> betaArg(beta,0);
 	cblas_cgemm(
-		Order, TransA, TransB, M, N, K,
+		Order, TransA, TransB,
+		M, N, K,
 		static_cast<void const *>(&alphaArg),
 		static_cast<void const *>(A), lda,
 		static_cast<void const *>(B), ldb,
@@ -89,8 +92,8 @@ inline void gemm(CBLAS_ORDER const Order,
 	);
 }
 
-inline void gemm(CBLAS_ORDER const Order,
-	CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
+inline void gemm(
+	CBLAS_ORDER const Order, CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
 	int M, int N, int K,
 	double alpha,
 	std::complex<double> const *A, int lda,
@@ -101,7 +104,8 @@ inline void gemm(CBLAS_ORDER const Order,
 	std::complex<double> alphaArg(alpha,0);
 	std::complex<double> betaArg(beta,0);
 	cblas_zgemm(
-		Order, TransA, TransB, M, N, K,
+		Order, TransA, TransB,
+		M, N, K,
 		static_cast<void const *>(&alphaArg),
 		static_cast<void const *>(A), lda,
 		static_cast<void const *>(B), ldb,
