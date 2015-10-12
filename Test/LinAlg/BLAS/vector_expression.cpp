@@ -408,8 +408,6 @@ void checkSparseExpressionEquality(
 		BOOST_REQUIRE(posOp != op.end());
 		BOOST_REQUIRE_EQUAL(posOp.index(), posResult.index());
 		BOOST_CHECK_SMALL(*posOp-*posResult,1.e-5);
-		++posOp;
-		++posResult;
 	}
 }
 
@@ -546,15 +544,63 @@ BOOST_AUTO_TEST_CASE( BLAS_Sparse_Vector_Binary_Multiply)
 	
 	for (size_t i = 0; i < VectorNNZ; i++)
 	{
-		x(10*i+1) = 0.5*i;
-		x(10*i+2) = i;
-		
-		y(10*i) = 0.5*i;
-		y(10*i+1) = 2*i;
-		result(10*i) = 0;
+		y(10*i) = 0.5*i+1;
+		y(10*i+1) = 2*i+1;
+
+		x(10*i+1) = 0.5*i+1;
+		x(10*i+2) = i+1;
 		result(10*i+1) = x(10*i+1)*y(10*i+1);
-		result(10*i+2) = 0;
 	}
 	checkSparseExpressionEquality(x*y,result);
 }
+
+//////////////////////////////DENSE-SPARSE TESTS//////////////////////////////
+
+//////////////////////////////////////////////////////////////
+//////BINARY TRANSFORMATIONS///////
+/////////////////////////////////////////////////////////////
+
+BOOST_AUTO_TEST_CASE( BLAS_Dense_Sparse_Vector_Binary_Plus)
+{
+	vector<double> x(SparseDimensions); 
+	compressed_vector<double> y(SparseDimensions); 
+	vector<double> result(SparseDimensions);
+	
+	
+	for (size_t i = 0; i < SparseDimensions; i++)
+	{
+		x(i) = 0.5*i+2;
+		result(i) = x(i);
+	}
+	
+	for (size_t i = 0; i < VectorNNZ; i++)
+	{
+		y(10*i+1) = 0.5*i;
+		result(10*i+1) += y(10*i+1);
+	}
+	checkDenseExpressionEquality(x+y,result);
+	checkDenseExpressionEquality(y+x,result);
+}
+
+BOOST_AUTO_TEST_CASE( BLAS_Dense_Sparse_Vector_Binary_Multiply)
+{
+	vector<double> x(SparseDimensions); 
+	compressed_vector<double> y(SparseDimensions); 
+	compressed_vector<double> result(SparseDimensions);
+	
+	for (size_t i = 0; i < SparseDimensions; i++)
+	{
+		x(i) = 0.5*i+2;
+	}
+	
+	for (size_t i = 0; i < VectorNNZ; i++)
+	{
+		y(10*i+1) = 0.5*i;
+		result(10*i+1) = x(10*i+1)*y(10*i+1);
+	}
+	checkSparseExpressionEquality(x*y,result);
+	checkSparseExpressionEquality(y*x,result);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

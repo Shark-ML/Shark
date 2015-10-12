@@ -167,7 +167,7 @@ void assign(
 	typename M::value_type t, 
 	packed<Orientation,Triangular>
 ){
-	assign(m,t,Orientation());
+	assign<F>(m,t,Orientation());
 }
 
 // Dispatcher

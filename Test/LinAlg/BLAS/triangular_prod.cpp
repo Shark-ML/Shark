@@ -138,8 +138,8 @@ BOOST_AUTO_TEST_CASE(LinAlg_triangular_prod_matrix_matrix) {
 		}
 	}
 	matrix<double> arg2(dims,N);
-	for(std::size_t i = 0; i != N; ++i) {
-		for(std::size_t j = 0; j != dims; ++j) {
+	for(std::size_t i = 0; i != dims; ++i) {
+		for(std::size_t j = 0; j != N; ++j) {
 			arg2(i,j)  = 1.5 * j + 2+i;
 		}
 	}

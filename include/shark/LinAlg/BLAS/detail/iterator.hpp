@@ -16,27 +16,6 @@ struct sparse_bidirectional_iterator_tag: public std::bidirectional_iterator_tag
 struct packed_random_access_iterator_tag: public std::random_access_iterator_tag{};
 struct dense_random_access_iterator_tag: public packed_random_access_iterator_tag{};
 
-template<class I1, class I2>
-struct iterator_restrict_traits {
-	typedef I1 iterator_category;
-};
-
-template<>
-struct iterator_restrict_traits<dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag> {
-	typedef sparse_bidirectional_iterator_tag iterator_category;
-};
-
-template<>
-struct iterator_restrict_traits<packed_random_access_iterator_tag,dense_random_access_iterator_tag> {
-	typedef dense_random_access_iterator_tag iterator_category;
-};
-
-template<>
-struct iterator_restrict_traits<packed_random_access_iterator_tag,sparse_bidirectional_iterator_tag> {
-	typedef sparse_bidirectional_iterator_tag iterator_category;
-};
-
-
 /** \brief Base class of all bidirectional iterators.
  *
  * \param I the derived iterator type
@@ -474,6 +453,17 @@ private:
 	}
 	template<class Iterator>
 	Iterator incrementToIndex(
+		Iterator iter, Iterator end, std::size_t index, packed_random_access_iterator_tag
+	) {
+		if(iter < end ){
+			RANGE_CHECK(iter.index() < index);
+			return iter+std::min<std::ptrdiff_t>(std::ptrdiff_t(index-iter.index()),end-iter);
+		}
+		return end;
+	}
+	
+	template<class Iterator>
+	Iterator incrementToIndex(
 	    Iterator iter, Iterator end, std::size_t index,sparse_bidirectional_iterator_tag
 	) {
 		while (iter != end && iter.index() < index)++iter;
@@ -716,6 +706,27 @@ private:
 	F m_functor;
 };
 
+
+template<class I1, class I2>
+struct iterator_restrict_traits {
+	typedef I1 iterator_category;
+};
+
+template<>
+struct iterator_restrict_traits<dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag> {
+	typedef sparse_bidirectional_iterator_tag iterator_category;
+};
+
+template<>
+struct iterator_restrict_traits<packed_random_access_iterator_tag,dense_random_access_iterator_tag> {
+	typedef dense_random_access_iterator_tag iterator_category;
+};
+
+template<>
+struct iterator_restrict_traits<packed_random_access_iterator_tag,sparse_bidirectional_iterator_tag> {
+	typedef sparse_bidirectional_iterator_tag iterator_category;
+};
+
 template<class Iterator1, class Iterator2, class F>
 class binary_transform_iterator:
 public iterator_base_traits<
@@ -727,10 +738,13 @@ public iterator_base_traits<
 	binary_transform_iterator<Iterator1,Iterator2,F>,
 	typename F::result_type
 >::type{
+private:
+	typedef typename Iterator1::iterator_category category1;
+	typedef typename Iterator2::iterator_category category2;
 public:
 	typedef typename iterator_restrict_traits<
-		typename Iterator1::iterator_category,
-		typename Iterator2::iterator_category
+		category1,
+		category2
 	>::iterator_category iterator_category;
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
@@ -749,54 +763,101 @@ public:
 	, m_iterator2(it2), m_end2(end2)
 	, m_functor(functor) 
 	{
+		//ensure that both iterators start at a valid location
+		ensureValidPosition(category1(),category2());
+		
 		//we can't get the correct index for end iterators
-		if(it1 != end1 && it2 != end2)
-			m_index = std::min(it1.index(),it2.index());
+		if(m_iterator1 != end1 && m_iterator2 != end2)
+			m_index = std::min(m_iterator1.index(),m_iterator2.index());
+		
+		
 	}
 
 private:
 	//we need to handle all specializations independently from each other
-
+	
 	// Dense specializations are easy
-	void increment(dense_random_access_iterator_tag) {
+	void ensureValidPosition(
+		dense_random_access_iterator_tag,
+		dense_random_access_iterator_tag
+	){}
+	void increment(
+		dense_random_access_iterator_tag,
+		dense_random_access_iterator_tag
+	) {
 		++ m_index;
 		++ m_iterator1;
 		++ m_iterator2;
 	}
-	void decrement(dense_random_access_iterator_tag) {
+	void decrement(
+		dense_random_access_iterator_tag,
+		dense_random_access_iterator_tag
+	) {
 		-- m_index;
 		-- m_iterator1;
 		-- m_iterator2;
 	}
-	void increment(dense_random_access_iterator_tag, difference_type n) {
+	void increment(
+		dense_random_access_iterator_tag,
+		dense_random_access_iterator_tag, 
+		difference_type n
+	) {
 		m_index += n;
 		m_iterator1 += n;
 		m_iterator2 += n;
 	}
-	void decrement(dense_random_access_iterator_tag, difference_type n) {
-		m_index -= n;
-		m_iterator1 -= n;
-		m_iterator2 -= n;
-	}
-	value_type dereference(dense_random_access_iterator_tag) const {
+	value_type dereference(
+		dense_random_access_iterator_tag,
+		dense_random_access_iterator_tag
+	) const {
 		return m_functor(*m_iterator1, *m_iterator2);
 	}
 
 	// Sparse specializations
-	void increment(sparse_bidirectional_iterator_tag) {
-		if (m_iterator1 != m_end1 && m_iterator2 != m_end2){
-			if( m_iterator1.index() == m_iterator2.index()){
+	void ensureValidPosition(
+		sparse_bidirectional_iterator_tag,
+		sparse_bidirectional_iterator_tag
+	){
+		//ensure that both iterators point to the same index
+		if(F::left_zero_remains || F::right_zero_remains){
+			while(
+				m_iterator1 != m_end1 && m_iterator2 != m_end2 
+				&& m_iterator1.index() != m_iterator2.index()
+			){
+				if(m_iterator1.index() < m_iterator2.index())
+					++m_iterator1;
+				else
+					++m_iterator2;
+			}
+			if( m_iterator1 == m_end1 || m_iterator2 == m_end2){
+				m_iterator2 = m_end2;
+				m_iterator1 = m_end1;
+			}
+		}
+	}
+	void increment(
+		sparse_bidirectional_iterator_tag,
+		sparse_bidirectional_iterator_tag
+	) {
+		if(F::left_zero_remains || F::right_zero_remains){
+			++ m_iterator1;
+			++ m_iterator2;
+			ensureValidPosition(category1(),category2());
+		}else{
+			if (m_iterator1 != m_end1 && m_iterator2 != m_end2){
+				if( m_iterator1.index() == m_iterator2.index()){
+					++ m_iterator1;
+					++ m_iterator2;
+				}
+				else if(m_iterator1.index() < m_iterator2.index())
+					++m_iterator1;
+				else
+					++m_iterator2;
+			}else if(m_iterator1 != m_end1){
 				++ m_iterator1;
+			}else{
 				++ m_iterator2;
 			}
-			else if(m_iterator1.index() < m_iterator2.index())
-				++m_iterator1;
-			else
-				++m_iterator2;
-		}else if(m_iterator1 != m_end1){
-			++ m_iterator1;
-		}else{
-			++ m_iterator2;
 		}
 		size_type index1 = std::numeric_limits<size_type>::max();
 		size_type index2 = std::numeric_limits<size_type>::max();
@@ -807,34 +868,34 @@ private:
 		
 		m_index = std::min(index1, index2);
 	}
-	void decrement(sparse_bidirectional_iterator_tag) {
+	void decrement(
+		sparse_bidirectional_iterator_tag,
+		sparse_bidirectional_iterator_tag
+	) {
 		if (m_index <= m_iterator1.index())
 			-- m_iterator1;
 		if (m_index <= m_iterator2.index())
 			-- m_iterator2;
 		m_index = std::max(m_iterator1.index(), m_iterator2.index());
 	}
-	void increment(sparse_bidirectional_iterator_tag, difference_type n) {
+	void increment(
+		sparse_bidirectional_iterator_tag, 
+		sparse_bidirectional_iterator_tag, 
+		difference_type n
+	) {
 		while (n > 0) {
-			increment(sparse_bidirectional_iterator_tag());
+			increment(category1(),category2());
 			--n;
 		}
 		while (n < 0) {
-			decrement(sparse_bidirectional_iterator_tag());
+			decrement(category1(),category2());
 			++n;
 		}
 	}
-	void decrement(sparse_bidirectional_iterator_tag, difference_type n) {
-		while (n > 0) {
-			decrement(sparse_bidirectional_iterator_tag());
-			--n;
-		}
-		while (n < 0) {
-			increment(sparse_bidirectional_iterator_tag());
-			++n;
-		}
-	}
-	value_type dereference(sparse_bidirectional_iterator_tag) const {
+	value_type dereference(
+		sparse_bidirectional_iterator_tag,
+		sparse_bidirectional_iterator_tag
+	) const {
 		value_type t1 = value_type/*zero*/();
 		if (m_iterator1 != m_end1 && m_iterator1.index() == m_index)
 			t1 = *m_iterator1;
@@ -843,23 +904,175 @@ private:
 			t2 = *m_iterator2;
 		return m_functor(t1, t2);
 	}
+	
+	//dense-sparse
+	// Sparse specializations
+	void ensureValidPosition(
+		dense_random_access_iterator_tag,
+		sparse_bidirectional_iterator_tag
+	){
+		if(F::right_zero_remains){
+			m_iterator1 += m_iterator2.index()-m_iterator1.index();
+		}
+	}
+	
+	void increment(
+		dense_random_access_iterator_tag,
+		sparse_bidirectional_iterator_tag
+	) {
+		if(F::right_zero_remains){
+			++ m_iterator2;
+			m_iterator1 += m_iterator2.index()-m_iterator1.index();
+		}else{
+			if (m_iterator2 != m_end2){
+				if( m_iterator1.index() == m_iterator2.index()){
+					++ m_iterator1;
+					++ m_iterator2;
+				}
+				else if(m_iterator2.index() > m_iterator1.index())
+					++m_iterator1;
+				else
+					++m_iterator2;
+			}else
+				++ m_iterator1;
+		}
+		size_type index1 = index1 = m_iterator1.index();
+		size_type index2 = std::numeric_limits<size_type>::max();
+		if(m_iterator2 != m_end2)
+			index2 = m_iterator2.index();
+		m_index = std::min(index1, index2);
+	}
+	void decrement(
+		dense_random_access_iterator_tag,
+		sparse_bidirectional_iterator_tag
+	) {
+		if(F::right_zero_remains){
+			-- m_iterator2;
+			m_iterator1 -= m_iterator1.index()-m_iterator2.index();
+		}else{
+			if (m_index <= m_iterator1.index())
+				-- m_iterator1;
+			if (m_index <= m_iterator2.index())
+				-- m_iterator2;
+			m_index = std::max(m_iterator1.index(), m_iterator2.index());
+		}
+	}
+	void increment(
+		dense_random_access_iterator_tag, 
+		sparse_bidirectional_iterator_tag, 
+		difference_type n
+	) {
+		while (n > 0) {
+			increment(category1(),category2());
+			--n;
+		}
+		while (n < 0) {
+			decrement(category1(),category2());
+			++n;
+		}
+	}
+	value_type dereference(
+		dense_random_access_iterator_tag,
+		sparse_bidirectional_iterator_tag
+	) const {
+		typedef typename Iterator2::value_type value_type2;
+		value_type t2 = value_type2/*zero*/();
+		if (m_iterator2 != m_end2 && m_iterator2.index() == m_index)
+			t2 = *m_iterator2;
+		return m_functor(*m_iterator1, t2);
+	}
+	
+	//sparse-dense
+	void ensureValidPosition(
+		sparse_bidirectional_iterator_tag,
+		dense_random_access_iterator_tag
+	){
+		if(F::left_zero_remains){
+			m_iterator2 += m_iterator1.index()-m_iterator2.index();
+		}
+	}
+	void increment(
+		sparse_bidirectional_iterator_tag,
+		dense_random_access_iterator_tag
+	) {
+		if(F::left_zero_remains){
+			++ m_iterator1;
+			m_iterator2 += m_iterator1.index()-m_iterator2.index();
+		}else{
+			if (m_iterator1 != m_end1){
+				if( m_iterator1.index() == m_iterator2.index()){
+					++ m_iterator1;
+					++ m_iterator2;
+				}
+				else if(m_iterator1.index() > m_iterator2.index())
+					++m_iterator2;
+				else
+					++m_iterator1;
+			}else
+				++ m_iterator2;
+		}
+		size_type index1 = std::numeric_limits<size_type>::max();
+		size_type index2 = m_iterator2.index();
+		if(m_iterator1 != m_end1)
+			index1 = m_iterator1.index();
+		m_index = std::min(index1, index2);
+	}
+	void decrement(
+		sparse_bidirectional_iterator_tag,
+		dense_random_access_iterator_tag
+	) {
+		if(F::left_zero_remains){
+			-- m_iterator1;
+			m_iterator2 -= m_iterator2.index()-m_iterator1.index();
+		}else{
+			if (m_index <= m_iterator2.index())
+				-- m_iterator2;
+			if (m_index <= m_iterator1.index())
+				-- m_iterator1;
+			m_index = std::max(m_iterator1.index(), m_iterator2.index());
+		}
+	}
+	void increment(
+		sparse_bidirectional_iterator_tag,
+		dense_random_access_iterator_tag,
+		difference_type n
+	) {
+		while (n > 0) {
+			increment(category1(),category2());
+			--n;
+		}
+		while (n < 0) {
+			decrement(category1(),category2());
+			++n;
+		}
+	}
+	value_type dereference(
+		sparse_bidirectional_iterator_tag,
+		dense_random_access_iterator_tag
+	) const {
+		typedef typename Iterator1::value_type value_type1;
+		value_type t1 = value_type1/*zero*/();
+		if (m_iterator1 != m_end1 && m_iterator1.index() == m_index)
+			t1 = *m_iterator1;
+		return m_functor(t1,*m_iterator2);
+	}
 
 	public:
 	// Arithmetic
 	binary_transform_iterator &operator ++ () {
-		increment(iterator_category());
+		increment(category1(),category2());
 		return *this;
 	}
 	binary_transform_iterator &operator -- () {
-		decrement(iterator_category());
+		decrement(category1(),category2());
 		return *this;
 	}
 	binary_transform_iterator &operator += (difference_type n) {
-		increment(iterator_category(), n);
+		increment(category1(),category2(), n);
 		return *this;
 	}
 	binary_transform_iterator &operator -= (difference_type n) {
-		decrement(iterator_category(), n);
+		increment(category1(),category2(), -n);
 		return *this;
 	}
 	difference_type operator - (const binary_transform_iterator &it) const {
@@ -870,7 +1083,7 @@ private:
 
 	// Dereference
 	reference operator * () const {
-		return dereference(iterator_category());
+		return dereference(category1(),category2());
 	}
 	reference operator [](difference_type n) const {
 		return *(*this + n);
