@@ -42,7 +42,7 @@ namespace bindings {
 //upper potrf(row-major)
 template<class MatA>
 std::size_t potrf_impl(
-    matrix_container<MatA>& A,
+    matrix_expression<MatA>& A,
     row_major, lower
 ) {
 	std::size_t m = A().size1();
@@ -67,7 +67,7 @@ std::size_t potrf_impl(
 //lower potrf(row-major)
 template<class MatA>
 std::size_t potrf_impl(
-    matrix_container<MatA>& A,
+    matrix_expression<MatA>& A,
     row_major, upper
 ) {
 	std::size_t m = A().size1();
