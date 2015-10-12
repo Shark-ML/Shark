@@ -16,8 +16,6 @@
 #include <shark/Rng/Poisson.h>
 #include <shark/Rng/Uniform.h>
 
-#include <shark/Statistics/Statistics.h>
-
 #define BOOST_TEST_MODULE Rng_Distributions
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
@@ -31,16 +29,23 @@
 #include <boost/math/distributions/exponential.hpp>
 #include <boost/math/distributions/hypergeometric.hpp>
 
+#include<vector>
+
 namespace shark {
 	template<typename Distribution>
 	void check_distribution( Distribution & dist, double mean, double variance, unsigned int noTrials = 100000 ) {
-		shark::Statistics stats;
 
-		for( unsigned int i = 0; i < noTrials; i++ )
-			BOOST_CHECK_NO_THROW( stats( dist() ) );
-
-		BOOST_CHECK_CLOSE( stats( shark::Statistics::Mean() ), mean, 1. );
-		BOOST_CHECK_CLOSE( stats( shark::Statistics::Variance() ), variance, 1. );
+		double resultMean = 0;
+		double resultVariance = 0;
+		for( unsigned int i = 0; i < noTrials; i++ ){
+			double val = dist();
+			resultMean += val/noTrials;
+			resultVariance += val*val/noTrials;
+		}
+		resultVariance -= resultMean*resultMean;
+		
+		BOOST_CHECK_CLOSE( resultMean, mean, 1. );
+		BOOST_CHECK_CLOSE( resultVariance, variance, 1. );
 	}
 }
 

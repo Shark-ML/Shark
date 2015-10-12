@@ -102,7 +102,6 @@ shark_add_example( Supervised/regressionTutorial regressionTutorial "Supervised"
 shark_add_example( Supervised/StoppingCriteria StoppingCriteriaTutorial "Supervised" )
 
 #Statistics
-shark_add_example( Statistics/StatisticsMain StatisticsMain "Statistiscs" )
 shark_add_example( Statistics/Statistics Statistics "Statistiscs" )
 
 #Data

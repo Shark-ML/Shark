@@ -5,8 +5,8 @@
  * 
  * 
  *
- * \author      T.Voss, T. Glasmachers, O.Krause
- * \date        2010-2011
+ * \author     O.Krause
+ * \date        2015
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
@@ -32,211 +32,350 @@
 #ifndef SHARK_STATISTICS_H
 #define SHARK_STATISTICS_H
 
-#include <shark/Core/Flags.h>
 
-#include <boost/range/iterator_range.hpp>
-#include <boost/optional.hpp>
+//for vector algebra
+#include <shark/LinAlg/Base.h>
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
+//handling of missing values
+#include <limits>
+#include <boost/math/special_functions/fpclassify.hpp>
 
-#include <boost/accumulators/statistics/count.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/median.hpp>
-#include <boost/accumulators/statistics/moment.hpp>
-#include <boost/accumulators/statistics/p_square_quantile.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <iostream>
-#include <vector>
+//for quantiles
+#include <boost/range/algorithm/nth_element.hpp>
 
-namespace ba = boost::accumulators;
+
+//for the result table
+#include <string>
+#include <map>
+#include <iterator>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/vector.hpp>
 
 namespace shark {
-
-    /**
-     * \brief Calculate pre-defined statistics given a range of values.
-     *
-     * \sa examples/Statistics/StatisticsMain.cpp
-     *
-     * Calculate statistics from standard in:
-     * \code
-     * shark::Statistics stats;
-     * stats = std::for_each( std::istream_iterator<double>( std::cin ), std::istream_iterator<double>(), stats );
-     * std::cout << stats << std::endl;
-     * \endcode
-     * Implemented in terms of boost::accumulators.
-     */
-    struct Statistics {
-
-	/** \cond IMPL */
-	typedef ba::accumulator_set<
-	double, 
-	    ba::stats<
-	    ba::tag::median(ba::with_p_square_quantile), 		   
-		   ba::tag::density,
-		   ba::tag::mean, 
-		   ba::tag::variance,
-		   ba::tag::min, 
-		   ba::tag::max, 
-		   ba::tag::count 
-		   > 
-		   > AccumulatorType;
-	typedef ba::accumulator_set<double, ba::stats<ba::tag::p_square_quantile> > QuartileAccumulatorType;
-
-	typedef double LowerQuantileProbability;
-	typedef double UpperQuantileProbability;
-	/** \endcond IMPL */
-
-	/** \brief Histogram type */
-	typedef boost::iterator_range< 
-	std::vector< 
-	std::pair<double,double> 
-	    >::iterator 
-	    > histogram_type;
-
-	/**
-	 * \brief Tags the mean value.
-	 */
-	struct Mean 				{};
-	/**
-	 * \brief Tags the variance.
-	 */
-	struct Variance 			{};
-	/**
-	 * \brief Tags the unbiased variance (not implemented).
-	 */
-	struct UnbiasedVariance 	{};
-	/**
-	 * \brief Tags the histogram.
-	 */ 
-	struct Histogram 			{};
-	/**
-	 * \brief Tags the median.
-	 */
-	struct Median 				{};
-	/**
-	 * \brief Tags the lower quartile.
-	 */
-	struct LowerQuartile 		{};
-	/**
-	 * \brief Tags the upper quartile.
-	 */
-	struct UpperQuartile 		{};
-	/**
-	 * \brief Tags the minimum value.
-	 */
-	struct Min					{};
-	/**
-	 * \brief Tags the maximum value.
-	 */
-	struct Max					{};
-	/**
-	 * \brief Tags the number of samples.
-	 */
-	struct NumSamples			{};
-
-	/**
-	 * \brief Default c'tor.
-	 * \param [in] lowerQuantileProbability Probability for the lower quantile, default value: 0.25.
-	 * \param [in] upperQuantileProbability Probability for the upper quantile, default value: 0.75.
-	 */
-    Statistics( double lowerQuantileProbability = 0.25, double upperQuantileProbability = 0.75 ) : m_acc( ba::density_cache_size = 5, ba::density_num_bins = 20 ),
-	    m_accLowerQuartile( ba::quantile_probability = lowerQuantileProbability ),
-	    m_accUpperQuartile( ba::quantile_probability = upperQuantileProbability ) {
-    }
-
-	/**
-	 * \brief Accesses the mean value of the supplied values.
-	 */
-	double operator()( Mean mean ) const { return( ba::mean( m_acc ) ); }
-
-	/**
-	 * \brief Accesses the variance of the supplied values.
-	 */
-	double operator()( Variance variance ) const { return( ba::variance( m_acc ) ); }
-
-	/**
-	 * \brief Accesses the histogram of the supplied values.
-	 */
-	histogram_type operator()( Histogram histogram ) const { return( ba::density( m_acc ) ); }
-	/**
-	 * \brief Accesses the median of the supplied values.
-	 */
-	double operator()( Median median ) const { return( ba::median( m_acc ) ); }
-
-	/**
-	 * \brief Accesses the lower quartile of the supplied values.
-	 */
-	double operator()( LowerQuartile lq ) const { return( ba::p_square_quantile( m_accLowerQuartile ) ); }
-
-	/**
-	 * \brief Accesses the upper quartile of the supplied values.
-	 */
-	double operator()( UpperQuartile uq ) const { return( ba::p_square_quantile( m_accUpperQuartile ) ); }
-
-	/**
-	 * \brief Accesses the minimum of the supplied values.
-	 */
-	double operator()( Min min ) const { return( ba::min( m_acc ) ); }
-
-	/**
-	 * \brief Accesses the maximum of the supplied values.
-	 */
-	double operator()( Max max ) const { return( ba::max( m_acc ) ); }
-
-	/**
-	 * \brief Accesses the total number of samples.
-	 */
-	std::size_t operator()( NumSamples numSamples ) const { return( ba::count( m_acc ) ); }
-
-	/**
-	 * \brief Updates statistics with the supplied value.
-	 * \param [in] d The value.
-	 */
-	void operator()( double d ) {
-	    m_acc( d );
-	    m_accLowerQuartile( d );
-	    m_accUpperQuartile( d );
-	}
-
-	/**
-	 * \brief Calculates statistics for the supplied range of values.
-	 * \tparam InputIterator Iterator type, needs to be a model of forward iterator.
-	 * \param [in] begin Iterator pointing to the first valid element of the range.
-	 * \param [in] end Iterator pointing behind the last valid element of the range.
-	 */
-	template<class InputIterator>
-	void operator()( InputIterator begin , InputIterator end ) {
-	    for(;begin != end; ++begin){
-		(*this)(*begin);
-	    }
-	}
-
-	/** \cond IMPL */
-	AccumulatorType m_acc;
-	QuartileAccumulatorType m_accLowerQuartile;
-	QuartileAccumulatorType m_accUpperQuartile;
-	/** \endcond IMPL */
-    };
-
-    /**
-     * \brief Writes statistics to the supplied stream.
-     */
-    template<typename CharT, typename Traits>
-	static std::basic_ostream<CharT,Traits> & operator<<( std::basic_ostream<CharT,Traits> & s, const Statistics & stats ) {
-	s << "Sample size: " 		<< stats( shark::Statistics::NumSamples() ) << std::endl;
-	s << "Min: " 				<< stats( shark::Statistics::Min() ) << std::endl;
-	s << "Max: " 				<< stats( shark::Statistics::Max() ) << std::endl;
-	s << "Mean: " 				<< stats( shark::Statistics::Mean() ) << std::endl;
-	s << "Variance: " 			<< stats( shark::Statistics::Variance() ) << std::endl;
-	s << "Median: " 			<< stats( shark::Statistics::Median() ) << std::endl;
-	s << "Lower Quantile: " 	<< stats( shark::Statistics::LowerQuartile() ) << std::endl;
-	s << "Upper Quantile: " 	<< stats( shark::Statistics::UpperQuartile() ) << std::endl;
-
-	return( s );
-    }
+namespace statistics{
+	
+inline double missingValue(){
+	return std::numeric_limits<double>::quiet_NaN();//missing values are a non-signaling NaN
 }
 
+inline bool isMissing(double value){
+	return boost::math::isnan(value);//there is no portable way to distinguish the different types of NaN
+}
+	
+///\brief Base class for all Statistic Objects to be used with Statistics	
+class BaseStatisticsObject{
+public:
+	virtual std::string name() const=0;
+	virtual ~BaseStatisticsObject(){}
+	virtual RealVector statistics(std::vector<RealVector> const& points)const=0;
+};
+
+///\brief for a vector of points computes for every dimension the fraction of missing values
+class FractionMissing:public BaseStatisticsObject{
+public:
+	std::string name() const{
+		return "Missing";
+	}
+	RealVector statistics(std::vector<RealVector> const& points)const{
+		std::size_t N = points.size();
+		RealVector missing(points[0].size(),0.0);
+		for(std::size_t i  = 0; i != N;++i){
+			for(std::size_t j = 0; j != missing.size(); ++j){
+				if(!isMissing(points[i](j)))continue;
+				missing(j) += 1.0;
+			}
+		}
+		missing /= N;
+		return missing;
+	}
+};
+
+///\brief For a vector of points computes for every dimension the mean
+class Mean:public BaseStatisticsObject{
+public:
+	std::string name() const{
+		return "Mean";
+	}
+	RealVector statistics(std::vector<RealVector> const& points)const{
+		std::size_t N = points.size();
+		RealVector sum(points[0].size(),0.0);
+		UIntVector numSamples(points[0].size(),0);
+		for(std::size_t i  = 0; i != N;++i){
+			for(std::size_t j = 0; j != sum.size(); ++j){
+				if(isMissing(points[i](j)))continue;
+				sum(j) += points[i](j);
+				++numSamples(j);
+			}
+		}
+		//calculate mean. if the number of non-missing points was 0, return missingValue() for that dimension
+		return safe_div(sum,numSamples,missingValue());
+	}
+};
+
+///\brief For a vector of points computes for every dimension the variance
+class Variance:public BaseStatisticsObject{
+public:
+	std::string name() const{
+		return "Variance";
+	}
+	RealVector statistics(std::vector<RealVector> const& points)const{
+		std::size_t N = points.size();
+		Mean m;
+		RealVector mean = m.statistics(points);
+		RealVector variance(mean.size(),0.0);
+		UIntVector numSamples(points[0].size(),0);
+		for(std::size_t i  = 0; i != N;++i){
+			for(std::size_t j = 0; j != mean.size(); ++j){
+				if(isMissing(points[i](j)))continue;
+				variance(j) += sqr(points[i](j)-mean(j));
+				++numSamples(j);
+			}
+		}
+		//calculate biased variance. if the number of non-missing points was 0, return missingValue() for that dimension
+		return safe_div(variance,numSamples,missingValue());
+	}
+};
+
+//Quantiles, Median, Lower-Upper
+///\brief For a vector of points computes for every dimension the p-quantile
+class Quantile:public BaseStatisticsObject{
+public:
+	std::string name() const{
+		return boost::lexical_cast<std::string>(m_quantile)+"-Quantile";
+	}
+	Quantile(double quantile):m_quantile(quantile){}
+	RealVector statistics(std::vector<RealVector> const& points)const{
+		std::size_t N = points.size();
+		RealVector quantiles(points[0].size(),missingValue());
+		for(std::size_t j = 0; j != quantiles.size(); ++j){
+			//get all non-missing values of the j-th dimension
+			std::vector<double> values;
+			for(std::size_t i  = 0; i != N;++i){
+				if(isMissing(points[i](j)))continue;
+				values.push_back(points[i](j));
+			}
+			if(values.size() == 0) continue;//no values-> missing value
+			
+			//compute quantile of j-th dimension
+			std::size_t element = std::size_t(values.size()*m_quantile);
+			std::vector<double>::iterator pos= values.begin()+element;
+			boost::nth_element(values,pos);
+			quantiles(j) = *pos;
+		}
+		return quantiles;
+	}
+private:
+	double m_quantile;
+};
+
+///\brief For a vector of points computes for every dimension the median
+class Median:public Quantile{
+public:
+	std::string name() const{
+		return "Median";
+	}
+	Median():Quantile(0.5){}
+};
+
+///\brief For a vector of points computes for every dimension the 25%-quantile
+class LowerQuantile:public Quantile{
+public:
+	LowerQuantile():Quantile(0.25){}
+};
+///\brief For a vector of points computes for every dimension the 75%-quantile
+class UpperQuantile:public Quantile{
+public:
+	UpperQuantile():Quantile(0.75){}
+};
+
+
+///\brief Stores results of a running experiment
+///
+/// This is a simple three dimensional table with the dimensions. Experiments
+/// are thought of having a varied parameter (for example the algorithm names when
+/// several algorithms are compared) and for each parameter a set of vector valued points
+/// is stored - one vector for each trial of the experiment for a given parameter.
+/// It is posible to give every parameter and the whole table a name which adds meta
+/// information, for example to generate outputs.
+template<class Parameter>
+class ResultTable{
+public:
+	typedef typename std::map<Parameter, std::vector<RealVector> >::const_iterator const_iterator;
+
+	ResultTable(std::size_t numDimensions, std::string const& parameterName="unnamed")
+	:m_dimensionNames(numDimensions,"unnamed"),m_parameterName(parameterName){}
+
+	std::string const& parameterName()const{
+		return m_parameterName;
+	}		
+	
+	void setDimensionName(std::size_t i, std::string const& name){
+		m_dimensionNames[i]=name;
+	}
+	
+	std::string const& dimensionName(std::size_t i)const{
+		return m_dimensionNames[i];
+	}
+	
+	std::size_t numDimensions()const{
+		return m_dimensionNames.size();
+	}
+	
+	void update(Parameter const& parameter, RealVector const& point){
+		SIZE_CHECK(point.size() == numDimensions());
+		m_results[parameter].push_back(point);
+	}
+	
+	void update(Parameter const& parameter, double value){
+		RealVector point(1,value);
+		update(parameter, point);
+	}
+	
+	void update(Parameter const& parameter, double value1, double value2){
+		RealVector point(2);
+		point(0)=value1;
+		point(1)=value2;
+		update(parameter, point);
+	}
+	
+	void update(Parameter const& parameter, double value1, double value2,double value3){
+		RealVector point(3);
+		point(0)=value1;
+		point(1)=value2;
+		point(2)=value3;
+		update(parameter, point);
+	}
+	
+	std::vector<RealVector>const& operator[](Parameter const& param)const{
+		return m_results.find(param)->second;
+	}
+	
+	const_iterator begin()const{
+		return m_results.begin();
+	}
+	const_iterator end()const{
+		return m_results.end();
+	}
+	
+	std::size_t numParams()const{
+		return m_results.size();
+	}
+	
+	Parameter const& parameterValue(std::size_t i)const{
+		const_iterator pos = begin();
+		std::advance(pos,i);
+		return pos->first;
+	}
+	
+	
+	template<class Archive>
+	void serialize(Archive &ar, const unsigned int file_version) {
+		ar & m_dimensionNames;
+		ar & m_parameterName;
+		ar & m_results;
+		(void) file_version;//prevent warning
+	}
+	
+private:
+	std::vector<std::string> m_dimensionNames;
+	std::string m_parameterName;
+	std::map<Parameter, std::vector<RealVector> > m_results; 
+};
+
+///\brief Generates Statistics over the results of an experiment
+///
+/// Given the results of an experiment stored in a ResultsTable, computes
+/// several tatistics for each variable.
+template<class Parameter>
+struct Statistics {
+public:
+	typedef typename std::map<Parameter, std::map<std::string,RealVector> >::const_iterator const_iterator;
+	Statistics(ResultTable<Parameter> const* table):m_resultsTable(table){}
+	
+	void addStatistic(std::string const& statisticName, BaseStatisticsObject const& object){
+		typedef typename ResultTable<Parameter>::const_iterator iterator;
+		iterator end = m_resultsTable->end();
+		for(iterator pos=m_resultsTable->begin(); pos != end; ++pos){
+			m_statistics[pos->first][statisticName] = object.statistics(pos->second);
+		}
+		m_statisticNames.push_back(statisticName);
+	}
+	
+	void addStatistic(BaseStatisticsObject const& object){
+		addStatistic(object.name(),object);
+	}
+	
+	std::map<std::string,RealVector> const& operator[](Parameter const& parameter)const{
+		return m_statistics.find(parameter)->second;
+	}
+	
+	const_iterator begin()const{
+		return m_statistics.begin();
+	}
+	const_iterator end()const{
+		return m_statistics.end();
+	}
+	
+	//information about the parameter of the experiments
+	std::string const& parameterName()const{
+		return m_resultsTable->parameterName();
+	}
+	
+	std::size_t numParams()const{
+		return m_resultsTable->numParams();
+	}
+	
+	Parameter const& parameterValue(std::size_t i)const{
+		return m_resultsTable->parameterValue(i);
+	}
+	
+	//information about the names of the dimensions
+	std::size_t numDimensions()const{
+		return m_resultsTable->numDimensions();
+	}
+	
+	std::string const& dimensionName(std::size_t i)const{
+		return m_resultsTable->dimensionName(i);
+	}
+	
+	//information about the statistics
+	std::size_t numStatistics()const{
+		return m_statisticNames.size();
+	}
+	std::string const& statisticName(std::size_t i)const{
+		return m_statisticNames[i];
+	}
+private:
+	std::vector<std::string> m_statisticNames;
+	ResultTable<Parameter> const* m_resultsTable;
+	std::map<Parameter, std::map<std::string,RealVector> > m_statistics;
+};
+
+template<class Parameter>
+void printCSV(Statistics<Parameter> const& statistics){
+	//first print a legend
+	std::cout<<"# "<<statistics.parameterName();
+	for(std::size_t i = 0; i != statistics.numStatistics(); ++i){
+		for(std::size_t j = 0; j != statistics.numDimensions(); ++j){
+			std::cout<<" "<<statistics.statisticName(i)<<"-"<<statistics.dimensionName(j);
+		}
+	}
+	std::cout<<"\n";
+	
+	//print results parameter by parameter
+	for(std::size_t k = 0; k != statistics.numParams(); ++k){
+		Parameter param=statistics.parameterValue(k);
+		std::map<std::string,RealVector> paramResults=statistics[param];
+		std::cout<<param;
+		for(std::size_t i = 0; i != statistics.numStatistics(); ++i){
+			for(std::size_t j = 0; j != statistics.numDimensions(); ++j){
+				std::cout<<" "<<paramResults[statistics.statisticName(i)](j);
+			}
+		}
+		std::cout<<"\n";
+	}
+}
+
+}}
 #endif // SHARK_STATISTICS_H
