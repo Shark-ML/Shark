@@ -141,7 +141,7 @@ public:
 
 	//! Return "jiggle", abstract representation of how much the the cart oscillates
 	double getJiggle() {
-		return (std::abs(m_state[0])+std::abs(m_state[1])+std::abs(m_state[3])+std::abs(m_state[5]));
+		return (std::abs(m_state[0]) + std::abs(m_state[1]) + std::abs(m_state[2]) + std::abs(m_state[3]));
 	}
 
 	//! \brief Move the pole with some force
