@@ -254,6 +254,40 @@ void shark::csvStringToData(
 }
 
 void shark::csvStringToData(
+    Data<FloatVector> &data,
+    std::string const& contents,
+    char separator,
+    char comment,
+    std::size_t maximumBatchSize
+){
+	std::vector<std::vector<double> > rows = importCSVReaderSingleValues(contents, separator,comment);
+	if(rows.empty()){//empty file leads to empty data object.
+		data = Data<FloatVector>();
+		return;
+	}
+
+	//copy rows of the file into the dataset
+	std::size_t dimensions = rows[0].size();
+	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
+	data = Data<FloatVector>(batchSizes.size());
+	std::size_t currentRow = 0;
+	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
+		FloatMatrix& batch = data.batch(b);
+		batch.resize(batchSizes[b],dimensions);
+		//copy the rows into the batch
+		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
+			if(rows[currentRow].size() != dimensions)
+				throw SHARKEXCEPTION("vectors are required to have same size");
+
+			for(std::size_t j = 0; j != dimensions; ++j){
+				batch(i,j) = static_cast<float>(rows[currentRow][j]);
+			}
+		}
+	}
+	SIZE_CHECK(currentRow == rows.size());
+}
+
+void shark::csvStringToData(
     Data<int> &data,
     std::string const& contents,
     char separator,
@@ -265,6 +299,16 @@ void shark::csvStringToData(
 
 void shark::csvStringToData(
     Data<unsigned int> &data,
+    std::string const& contents,
+    char separator,
+    char comment,
+    std::size_t maximumBatchSize
+){
+	csvStringToDataImpl(data,contents,separator,comment,maximumBatchSize);
+}
+
+void shark::csvStringToData(
+    Data<float> &data,
     std::string const& contents,
     char separator,
     char comment,
@@ -344,6 +388,66 @@ void shark::csvStringToData(
 }
 
 void shark::csvStringToData(
+    LabeledData<FloatVector, unsigned int> &dataset,
+    std::string const& contents,
+    LabelPosition lp,
+    char separator,
+    char comment,
+    std::size_t maximumBatchSize
+){
+	std::vector<CsvPoint> rows = import_csv_reader_points(contents, lp, separator,comment);
+	if(rows.empty()){//empty file leads to empty data object.
+		dataset = LabeledData<FloatVector, unsigned int>();
+		return;
+	}
+
+	//check labels for conformity
+	bool binaryLabels = false;
+	int minPositiveLabel = std::numeric_limits<int>::max();
+	{
+
+		int maxPositiveLabel = -1;
+		for(std::size_t i = 0; i != rows.size(); ++i){
+			int label = rows[i].first;
+			if(label < -1)
+				throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
+			else if(label == -1)
+				binaryLabels = true;
+			else if(label < minPositiveLabel)
+				minPositiveLabel = label;
+			else if(label > maxPositiveLabel)
+				maxPositiveLabel = label;
+		}
+		if(binaryLabels && (minPositiveLabel == 0||  maxPositiveLabel > 1))
+			throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
+	}
+
+	//copy rows of the file into the dataset
+	std::size_t dimensions = rows[0].second.size();
+	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
+	dataset = LabeledData<FloatVector, unsigned int>(batchSizes.size());
+	std::size_t currentRow = 0;
+	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
+		FloatMatrix& inputs = dataset.batch(b).input;
+		UIntVector& labels = dataset.batch(b).label;
+		inputs.resize(batchSizes[b],dimensions);
+		labels.resize(batchSizes[b]);
+		//copy the rows into the batch
+		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
+			if(rows[currentRow].second.size() != dimensions)
+				throw SHARKEXCEPTION("vectors are required to have same size");
+
+			for(std::size_t j = 0; j != dimensions; ++j){
+				inputs(i,j) = static_cast<float>(rows[currentRow].second[j]);
+			}
+			int rawLabel = rows[currentRow].first;
+			labels[i] = binaryLabels? 1 + (rawLabel-1)/2 : rawLabel -minPositiveLabel;
+		}
+	}
+	SIZE_CHECK(currentRow == rows.size());
+}
+
+void shark::csvStringToData(
 	LabeledData<RealVector, RealVector> &dataset,
 	std::string const& contents,
 	LabelPosition lp,
@@ -390,45 +494,54 @@ void shark::csvStringToData(
 	SIZE_CHECK(currentRow == rows.size());
 }
 
-
-///////////////IMPORT WRAPPERS
-
-void shark::importCSV(
-	LabeledData<RealVector, unsigned int>& data,
-	std::string fn,
-	LabelPosition lp,
-	char separator,
-	char comment,
-	std::size_t maximumBatchSize
-){
-	std::ifstream stream(fn.c_str());
-	stream.unsetf(std::ios::skipws);
-	std::istream_iterator<char> streamBegin(stream);
-	std::string contents(//read contents of file in string
-		streamBegin,
-		std::istream_iterator<char>()
-	);
-	//call the actual parser
-	csvStringToData(data,contents,lp,separator,comment,maximumBatchSize);
-}
-
-
-void shark::importCSV(
-	LabeledData<RealVector, RealVector>& data,
-	std::string fn,
+void shark::csvStringToData(
+	LabeledData<FloatVector, FloatVector> &dataset,
+	std::string const& contents,
 	LabelPosition lp,
 	std::size_t numberOfOutputs,
 	char separator,
 	char comment,
 	std::size_t maximumBatchSize
 ){
-	std::ifstream stream(fn.c_str());
-	stream.unsetf(std::ios::skipws);
-	std::istream_iterator<char> streamBegin(stream);
-	std::string contents(//read contents of file in string
-		streamBegin,
-		std::istream_iterator<char>()
-	);
-	//call the actual parser
-	csvStringToData(data,contents,lp, numberOfOutputs, separator,comment,maximumBatchSize);
+	std::vector<std::vector<double> > rows = importCSVReaderSingleValues(contents, separator,comment);
+	if(rows.empty()){//empty file leads to empty data object.
+		dataset = LabeledData<FloatVector, FloatVector>();
+		return;
+	}
+
+	//copy rows of the file into the dataset
+	if(rows[0].size() <= numberOfOutputs){
+		throw SHARKEXCEPTION("Files must have more columns than requested number of outputs");
+	}
+	std::size_t dimensions = rows[0].size();
+	std::size_t numberOfInputs = dimensions-numberOfOutputs;
+	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
+	dataset = LabeledData<FloatVector, FloatVector>(batchSizes.size());
+	std::size_t inputStart = (lp == FIRST_COLUMN)? numberOfOutputs : 0;
+	std::size_t outputStart = (lp == FIRST_COLUMN)? 0: numberOfInputs;
+	std::size_t currentRow = 0;
+	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
+		FloatMatrix& inputs = dataset.batch(b).input;
+		FloatMatrix& labels = dataset.batch(b).label;
+		inputs.resize(batchSizes[b],numberOfInputs);
+		labels.resize(batchSizes[b],numberOfOutputs);
+		//copy the rows into the batch
+		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
+			if(rows[currentRow].size() != dimensions)
+				throw SHARKEXCEPTION("Detected different number of columns in a row of the file!");
+
+			for(std::size_t j = 0; j != numberOfInputs; ++j){
+				inputs(i,j) = static_cast<float>(rows[currentRow][j+inputStart]);
+			}
+			for(std::size_t j = 0; j != numberOfOutputs; ++j){
+				labels(i,j) = static_cast<float>(rows[currentRow][j+outputStart]);
+			}
+		}
+	}
+	SIZE_CHECK(currentRow == rows.size());
 }
+
+
+///////////////IMPORT WRAPPERS
+
+
