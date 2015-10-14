@@ -47,7 +47,8 @@
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 
 
-namespace shark {
+namespace shark
+{
 
 
 ///
@@ -86,7 +87,8 @@ namespace shark {
 /// losses, e.g., the hinge loss for SVM training.
 ///
 template <class InputType, class CacheType = float>
-class KernelSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable {
+class KernelSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable
+{
 public:
 	typedef AbstractTrainer< KernelExpansion<InputType> > base_type;
 	typedef AbstractKernelFunction<InputType> KernelType;
@@ -120,12 +122,14 @@ public:
 
 
 	/// return current cachesize
-	double cacheSize() const {
+	double cacheSize() const
+	{
 		return m_cacheSize;
 	}
 
 
-	void setCacheSize(std::size_t size) {
+	void setCacheSize(std::size_t size)
+	{
 		m_cacheSize = size;
 	}
 
@@ -133,7 +137,8 @@ public:
 	std::string name() const
 	{ return "KernelSGDTrainer"; }
 
-	void train(ClassifierType& classifier, const LabeledData<InputType, unsigned int>& dataset) {
+	void train(ClassifierType& classifier, const LabeledData<InputType, unsigned int>& dataset)
+	{
 		std::size_t ell = dataset.numberOfElements();
 		unsigned int classes = numberOfClasses(dataset);
 		ModelType& model = classifier.decisionFunction();
@@ -160,7 +165,8 @@ public:
 
 		// SGD loop
 		blas::vector<QpFloatType> kernelRow(ell, 0);
-		for(std::size_t iter = 0; iter < iterations; iter++) {
+		for(std::size_t iter = 0; iter < iterations; iter++)
+		{
 			// active variable
 			std::size_t b = Rng::discrete(0, ell - 1);
 
@@ -220,7 +226,8 @@ public:
 	{ return m_C; }
 
 	/// set the value of the regularization parameter (must be positive)
-	void setC(double value) {
+	void setC(double value)
+	{
 		RANGE_CHECK(value > 0.0);
 		m_C = value;
 	}
@@ -230,7 +237,8 @@ public:
 	{ return m_offset; }
 
 	///\brief  Returns the vector of hyper-parameters.
-	RealVector parameterVector() const {
+	RealVector parameterVector() const
+	{
 		size_t kp = m_kernel->numberOfParameters();
 		RealVector ret(kp + 1);
 		if(m_unconstrained)
@@ -241,7 +249,8 @@ public:
 	}
 
 	///\brief  Sets the vector of hyper-parameters.
-	void setParameterVector(RealVector const& newParameters) {
+	void setParameterVector(RealVector const& newParameters)
+	{
 		size_t kp = m_kernel->numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == kp + 1);
 		init(newParameters) >> parameters(m_kernel), m_C;
@@ -249,7 +258,8 @@ public:
 	}
 
 	///\brief Returns the number of hyper-parameters.
-	size_t numberOfParameters() const {
+	size_t numberOfParameters() const
+	{
 		return m_kernel->numberOfParameters() + 1;
 	}
 

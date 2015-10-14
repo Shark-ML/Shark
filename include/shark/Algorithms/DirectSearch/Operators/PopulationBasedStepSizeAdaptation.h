@@ -34,12 +34,12 @@ namespace shark {
 
 /// \brief Step size adaptation based on the success of the new population compared to the old
 ///
-/// This is the step size adaptation algorithm as proposed in
+/// This is the step size adaptation algorithm as proposed in 
 /// Ilya Loshchilov, "A Computationally Efficient Limited Memory CMA-ES for Large Scale Optimization"
 ///
 /// It ranks the old and new population together and checks whether the mean rank of the new population
 /// is lower than the old one in this combined population. If this is true, the step size is increased
-/// in an exponential fashion. More formally, let \f$ r_t(i) \f$ be the rank of the i-th individual in the
+/// in an exponential fashion. More formally, let \f$ r_t(i) \f$ be the rank of the i-th individual in the 
 /// current population in the combined ranking and 	\f$ r_{t-1}(i) \f$ the rank of the i-th previous
 /// individual. Then we have
 /// \f[ z_t \leftarrow \frac 1 {\lamba^2} \sum_i^{\lambda} r_{t-1}(i) - r_t(i) - z*\f]
@@ -50,88 +50,89 @@ namespace shark {
 /// finally we adapt the step size sigma by
 /// \f[ \sigma_t = \sigma_{t-1} exp(s_t/d) \f]
 /// where the damping factor d defaults to 1
-class PopulationBasedStepSizeAdaptation {
+class PopulationBasedStepSizeAdaptation{
 public:
-	PopulationBasedStepSizeAdaptation(): m_targetSuccessRate(0.25), m_c(0.3), m_d(1.0) {}
-
+	PopulationBasedStepSizeAdaptation():m_targetSuccessRate(0.25), m_c(0.3), m_d(1.0){}
+	
 	/////Getter and Setter functions/////////
-
-	double targetSuccessRate()const {
+		
+	double targetSuccessRate()const{
 		return m_targetSuccessRate;
 	}
-
-	double& targetSuccessRate() {
+	
+	double& targetSuccessRate(){
 		return m_targetSuccessRate;
 	}
-
-	double learningRate()const {
+	
+	double learningRate()const{
 		return m_c;
 	}
-
-	double& learningRate() {
+	
+	double& learningRate(){
 		return m_c;
 	}
-
-	double dampingFactor()const {
+	
+	double dampingFactor()const{
 		return m_d;
 	}
-
-	double& dampingFactor() {
+	
+	double& dampingFactor(){
 		return m_d;
 	}
-
-	double stepSize()const {
+	
+	double stepSize()const{
 		return m_stepSize;
 	}
-
+	
 	///\brief Initializes a new trial by setting the initial learning rate and resetting the internal values.
-	void init(double initialStepSize) {
+	void init(double initialStepSize){
 		m_stepSize = initialStepSize;
 		m_s = 0;
 		m_prevFitness.resize(0);
 	}
-
+	
 	/// \brief updates the step size using the newly sampled population
 	///
 	/// The offspring is assumed to be ordered in ascending order by their penalizedFitness
 	/// (this is the same as ordering by the unpenalized fitness in an unconstrained setting)
 	template<class Population>
-	void update(Population const& offspring) {
+	void update(Population const& offspring){
 		std::size_t lambda = offspring.size();
-		if(m_prevFitness.size() == lambda) {
+		if (m_prevFitness.size() == lambda){
 			//get estimate of z
 			std::size_t indexOld = 0;
 			std::size_t indexNew = 0;
 			std::size_t rank = 1;
 			double z =  0;
-			while(indexOld < lambda && indexNew < lambda) {
-				if(offspring[indexNew].penalizedFitness() <= m_prevFitness[indexOld]) {
-					z -= rank;
+			while(indexOld < lambda && indexNew < lambda){
+				if (offspring[indexNew].penalizedFitness() <= m_prevFitness[indexOld]){
+					z-=rank;
 					++indexNew;
-				} else {
-					z += rank;
+				}
+				else{
+					z+=rank;
 					++indexOld;
 				}
 				++rank;
 			}
 			//case 1: the worst elements in the old population are better than the worst in the new
-			while(indexNew < lambda) {
-				z -= rank;
+			while(indexNew < lambda){
+				z-=rank;
 				++indexNew;
 				++rank;
 			}
 			//case 2: the opposite
-			while(indexOld < lambda) {
+			while(indexOld< lambda){
 				z += rank;
 				++indexOld;
 				++rank;
 			}
-			z /= lambda * lambda;
+			z /= lambda*lambda;
 			z -= m_targetSuccessRate;
-			m_s = (1 - m_c) * m_s + m_c * z;
-			m_stepSize *= std::exp(m_s / m_d);
+			m_s = (1-m_c)*m_s +m_c*z;
+			m_stepSize *= std::exp(m_s/m_d);
 		}
-
+		
 		//store fitness values of last iteration
 		m_prevFitness.resize(lambda);
 		for(std::size_t i = 0; i != lambda; ++i)

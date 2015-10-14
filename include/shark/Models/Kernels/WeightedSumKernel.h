@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Weighted sum of m_base kernels.
- *
- *
+ * 
+ * 
  *
  * \author      T.Glasmachers, O. Krause, M. Tuma
  * \date        2010, 2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -59,22 +59,23 @@ namespace shark {
 /// kernel weights, so that in total, this amounts to fixing the sum
 /// of the of the weights to one.
 ///
-template<class InputType = RealVector>
-class WeightedSumKernel : public AbstractKernelFunction<InputType> {
+template<class InputType=RealVector>
+class WeightedSumKernel : public AbstractKernelFunction<InputType>
+{
 private:
 	typedef AbstractKernelFunction<InputType> base_type;
 
-	struct InternalState: public State {
+	struct InternalState: public State{
 		RealMatrix result;
 		std::vector<RealMatrix> kernelResults;
 		std::vector<boost::shared_ptr<State> > kernelStates;
 
 		InternalState(std::size_t numSubKernels)
-			: kernelResults(numSubKernels), kernelStates(numSubKernels) {}
+		:kernelResults(numSubKernels),kernelStates(numSubKernels){}
 
-		void resize(std::size_t sizeX1, std::size_t sizeX2) {
+		void resize(std::size_t sizeX1, std::size_t sizeX2){
 			result.resize(sizeX1, sizeX2);
-			for(std::size_t i = 0; i != kernelResults.size(); ++i) {
+			for(std::size_t i = 0; i != kernelResults.size(); ++i){
 				kernelResults[i].resize(sizeX1, sizeX2);
 			}
 		}
@@ -84,14 +85,14 @@ public:
 	typedef typename base_type::ConstInputReference ConstInputReference;
 	typedef typename base_type::ConstBatchInputReference ConstBatchInputReference;
 
-	WeightedSumKernel(const std::vector<AbstractKernelFunction<InputType>* >& base) {
-		SHARK_CHECK(base.size() > 0, "[WeightedSumKernel::WeightedSumKernel] There should be at least one sub-kernel.");
+	WeightedSumKernel(const std::vector<AbstractKernelFunction<InputType>* >& base){
+		SHARK_CHECK( base.size() > 0, "[WeightedSumKernel::WeightedSumKernel] There should be at least one sub-kernel.");
 
-		m_base.resize(base.size());
-		m_numParameters = m_base.size() - 1;
+		m_base.resize( base.size() );
+		m_numParameters = m_base.size()-1;
 
-		for(std::size_t i = 0; i != m_base.size() ; i++) {
-			SHARK_ASSERT(base[i] != NULL);
+		for (std::size_t i=0; i != m_base.size() ; i++) {
+			SHARK_ASSERT( base[i] != NULL );
 			m_base[i].kernel = base[i];
 			m_base[i].weight = 1.0;
 			m_base[i].adaptive = false;
@@ -100,25 +101,25 @@ public:
 
 		// set m_base class features
 		bool hasFirstParameterDerivative = true;
-		for(unsigned int i = 0; i < m_base.size(); i++) {
-			if(!m_base[i].kernel->hasFirstParameterDerivative()) {
+		for ( unsigned int i=0; i<m_base.size(); i++ ){
+			if ( !m_base[i].kernel->hasFirstParameterDerivative() ) {
 				hasFirstParameterDerivative = false;
 				break;
 			}
 		}
 		bool hasFirstInputDerivative = true;
-		for(unsigned int i = 0; i < m_base.size(); i++) {
-			if(!m_base[i].kernel->hasFirstInputDerivative()) {
+		for ( unsigned int i=0; i<m_base.size(); i++ ){
+			if ( !m_base[i].kernel->hasFirstInputDerivative() ) {
 				hasFirstInputDerivative = false;
 				break;
 			}
 		}
 
-		if(hasFirstParameterDerivative)
-			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		if ( hasFirstParameterDerivative )
+			this->m_features|=base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 
-		if(hasFirstInputDerivative)
-			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		if ( hasFirstInputDerivative )
+			this->m_features|=base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -126,23 +127,23 @@ public:
 	{ return "WeightedSumKernel"; }
 
 	/// Check whether m_base kernel index is adaptive.
-	bool isAdaptive(std::size_t index) const {
+	bool isAdaptive( std::size_t index ) const {
 		return m_base[index].adaptive;
 	}
 	/// Set adaptivity of m_base kernel index.
-	void setAdaptive(std::size_t index, bool b = true) {
+	void setAdaptive( std::size_t index, bool b = true ) {
 		m_base[index].adaptive = b;
 		updateNumberOfParameters();
 	}
 	/// Set adaptivity of all m_base kernels.
-	void setAdaptiveAll(bool b = true) {
-		for(std::size_t i = 0; i != m_base.size(); i++)
+	void setAdaptiveAll( bool b = true ) {
+		for (std::size_t i=0; i!= m_base.size(); i++)
 			m_base[i].adaptive = b;
 		updateNumberOfParameters();
 	}
 
 	/// Get the weight of a kernel
-	double weight(std::size_t index) {
+	double weight(std::size_t index){
 		RANGE_CHECK(index < m_base.size());
 		return m_base[index].weight;
 	}
@@ -154,14 +155,14 @@ public:
 		RealVector ret(num);
 
 		std::size_t index = 0;
-		for(; index != m_base.size() - 1; index++) {
-			ret(index) = std::log(m_base[index + 1].weight);
+		for (; index != m_base.size()-1; index++){
+			ret(index) = std::log(m_base[index+1].weight);
 
 		}
-		for(std::size_t i = 0; i != m_base.size(); i++) {
-			if(m_base[i].adaptive) {
+		for (std::size_t i=0; i != m_base.size(); i++){
+			if (m_base[i].adaptive){
 				std::size_t n = m_base[i].kernel->numberOfParameters();
-				subrange(ret, index, index + n) = m_base[i].kernel->parameterVector();
+				subrange(ret,index,index+n) = m_base[i].kernel->parameterVector();
 				index += n;
 			}
 		}
@@ -169,10 +170,10 @@ public:
 	}
 
 	///\brief creates the internal state of the kernel
-	boost::shared_ptr<State> createState()const {
+	boost::shared_ptr<State> createState()const{
 		InternalState* state = new InternalState(m_base.size());
-		for(std::size_t i = 0; i != m_base.size(); ++i) {
-			state->kernelStates[i] = m_base[i].kernel->createState();
+		for(std::size_t i = 0; i != m_base.size(); ++i){
+			state->kernelStates[i]=m_base[i].kernel->createState();
 		}
 		return boost::shared_ptr<State>(state);
 	}
@@ -184,16 +185,16 @@ public:
 
 		m_weightsum = 1.0;
 		std::size_t index = 0;
-		for(; index != m_base.size() - 1; index++) {
+		for (; index != m_base.size()-1; index++){
 			double w = newParameters(index);
-			m_base[index + 1].weight = std::exp(w);
-			m_weightsum += m_base[index + 1].weight;
+			m_base[index+1].weight = std::exp(w);
+			m_weightsum += m_base[index+1].weight;
 
 		}
-		for(std::size_t i = 0; i != m_base.size(); i++) {
-			if(m_base[i].adaptive) {
+		for (std::size_t i=0; i != m_base.size(); i++){
+			if (m_base[i].adaptive){
 				std::size_t n = m_base[i].kernel->numberOfParameters();
-				m_base[i].kernel->setParameterVector(subrange(newParameters, index, index + n));
+				m_base[i].kernel->setParameterVector(subrange(newParameters,index,index+n));
 				index += n;
 			}
 		}
@@ -205,11 +206,11 @@ public:
 
 	/// Evaluate the weighted sum kernel (according to the following equation:)
 	/// \f$ k(x, y) = \frac{\sum_i \exp(w_i) k_i(x, y)}{sum_i exp(w_i)} \f$
-	double eval(ConstInputReference x1, ConstInputReference x2) const {
+	double eval(ConstInputReference x1, ConstInputReference x2) const{
 		double numerator = 0.0;
-		for(std::size_t i = 0; i != m_base.size(); i++) {
+		for (std::size_t i=0; i != m_base.size(); i++){
 			double result = m_base[i].kernel->eval(x1, x2);
-			numerator += m_base[i].weight * result;
+			numerator += m_base[i].weight*result;
 		}
 		return numerator / m_weightsum;
 	}
@@ -217,16 +218,16 @@ public:
 	/// Evaluate the kernel according to the equation:
 	/// \f$ k(x, y) = \frac{\sum_i \exp(w_i) k_i(x, y)}{sum_i exp(w_i)} \f$
 	/// for two batches of inputs.
-	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result) const {
-		std::size_t sizeX1 = shark::size(batchX1);
-		std::size_t sizeX2 = shark::size(batchX2);
-		ensure_size(result, sizeX1, sizeX2);
+	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result) const{
+		std::size_t sizeX1=shark::size(batchX1);
+		std::size_t sizeX2=shark::size(batchX2);
+		ensure_size(result,sizeX1,sizeX2);
 		result.clear();
 
-		RealMatrix kernelResult(sizeX1, sizeX2);
-		for(std::size_t i = 0; i != m_base.size(); i++) {
-			m_base[i].kernel->eval(batchX1, batchX2, kernelResult);
-			result += m_base[i].weight * kernelResult;
+		RealMatrix kernelResult(sizeX1,sizeX2);
+		for (std::size_t i = 0; i != m_base.size(); i++){
+			m_base[i].kernel->eval(batchX1, batchX2,kernelResult);
+			result += m_base[i].weight*kernelResult;
 		}
 		result /= m_weightsum;
 	}
@@ -235,32 +236,32 @@ public:
 	/// \f$ k(x, y) = \frac{\sum_i \exp(w_i) k_i(x, y)}{sum_i exp(w_i)} \f$
 	/// for two batches of inputs.
 	/// (see the documentation of numberOfIntermediateValues for the workings of the intermediates)
-	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result, State& state) const {
-		std::size_t sizeX1 = shark::size(batchX1);
-		std::size_t sizeX2 = shark::size(batchX2);
-		ensure_size(result, sizeX1, sizeX2);
+	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result, State& state) const{
+		std::size_t sizeX1=shark::size(batchX1);
+		std::size_t sizeX2=shark::size(batchX2);
+		ensure_size(result,sizeX1,sizeX2);
 		result.clear();
 
 		InternalState& s = state.toState<InternalState>();
-		s.resize(sizeX1, sizeX2);
+		s.resize(sizeX1,sizeX2);
 
-		for(std::size_t i = 0; i != m_base.size(); i++) {
-			m_base[i].kernel->eval(batchX1, batchX2, s.kernelResults[i], *s.kernelStates[i]);
-			result += m_base[i].weight * s.kernelResults[i];
+		for (std::size_t i=0; i != m_base.size(); i++){
+			m_base[i].kernel->eval(batchX1,batchX2,s.kernelResults[i],*s.kernelStates[i]);
+			result += m_base[i].weight*s.kernelResults[i];
 		}
 		//store summed result
-		s.result = result;
+		s.result=result;
 		result /= m_weightsum;
 	}
 
 	void weightedParameterDerivative(
-	    ConstBatchInputReference batchX1,
-	    ConstBatchInputReference batchX2,
-	    RealMatrix const& coefficients,
-	    State const& state,
-	    RealVector& gradient
-	) const {
-		ensure_size(gradient, numberOfParameters());
+		ConstBatchInputReference batchX1,
+		ConstBatchInputReference batchX2,
+		RealMatrix const& coefficients,
+		State const& state,
+		RealVector& gradient
+	) const{
+		ensure_size(gradient,numberOfParameters());
 
 		std::size_t numKernels = m_base.size(); //how far the loop goes;
 
@@ -273,20 +274,20 @@ public:
 		//[Theoretically, we wouldn't need to store its result .]
 		//calculate the weighted sum over all results
 		double numeratorSum = sum(coefficients * s.result);
-		for(std::size_t i = 1; i != numKernels; i++) {
+		for (std::size_t i = 1; i != numKernels; i++) {
 			//calculate the weighted sum over all results of this kernel
-			double summedK = sum(coefficients * s.kernelResults[i]);
-			gradient(i - 1) = m_base[i].weight * (summedK * m_weightsum - numeratorSum) / sumSquared;
+			double summedK=sum(coefficients * s.kernelResults[i]);
+			gradient(i-1) = m_base[i].weight * (summedK * m_weightsum - numeratorSum) / sumSquared;
 		}
 
-		std::size_t gradPos = numKernels - 1; //starting position of subkerel gradient
+		std::size_t gradPos = numKernels-1; //starting position of subkerel gradient
 		RealVector kernelGrad;
-		for(std::size_t i = 0; i != numKernels; i++) {
-			if(isAdaptive(i)) {
+		for (std::size_t i=0; i != numKernels; i++) {
+			if (isAdaptive(i)){
 				double coeff = m_base[i].weight / m_weightsum;
-				m_base[i].kernel->weightedParameterDerivative(batchX1, batchX2, coefficients, *s.kernelStates[i], kernelGrad);
+				m_base[i].kernel->weightedParameterDerivative(batchX1,batchX2,coefficients,*s.kernelStates[i],kernelGrad);
 				std::size_t n = kernelGrad.size();
-				noalias(subrange(gradient, gradPos, gradPos + n)) = coeff * kernelGrad;
+				noalias(subrange(gradient,gradPos,gradPos+n)) = coeff * kernelGrad;
 				gradPos += n;
 			}
 		}
@@ -299,19 +300,19 @@ public:
 	///          {\sum_i exp(w_i)} \f$
 	/// and summed up over all  of the second batch
 	void weightedInputDerivative(
-	    ConstBatchInputReference batchX1,
-	    ConstBatchInputReference batchX2,
-	    RealMatrix const& coefficientsX2,
-	    State const& state,
-	    BatchInputType& gradient
-	) const {
+		ConstBatchInputReference batchX1,
+		ConstBatchInputReference batchX2,
+		RealMatrix const& coefficientsX2,
+		State const& state,
+		BatchInputType& gradient
+	) const{
 		SIZE_CHECK(coefficientsX2.size1() == shark::size(batchX1));
 		SIZE_CHECK(coefficientsX2.size2() == shark::size(batchX2));
-		weightedInputDerivativeImpl<BatchInputType>(batchX1, batchX2, coefficientsX2, state, gradient);
+		weightedInputDerivativeImpl<BatchInputType>(batchX1,batchX2,coefficientsX2,state,gradient);
 	}
 
-	void read(InArchive& ar) {
-		for(std::size_t i = 0; i != m_base.size(); ++i) {
+	void read(InArchive& ar){
+		for(std::size_t i = 0;i != m_base.size(); ++i ){
 			ar >> m_base[i].weight;
 			ar >> m_base[i].adaptive;
 			ar >> *(m_base[i].kernel);
@@ -319,8 +320,8 @@ public:
 		ar >> m_weightsum;
 		ar >> m_numParameters;
 	}
-	void write(OutArchive& ar) const {
-		for(std::size_t i = 0; i != m_base.size(); ++i) {
+	void write(OutArchive& ar) const{
+		for(std::size_t i=0;i!= m_base.size();++i){
 			ar << m_base[i].weight;
 			ar << m_base[i].adaptive;
 			ar << const_cast<AbstractKernelFunction<InputType> const&>(*(m_base[i].kernel));
@@ -331,16 +332,17 @@ public:
 
 protected:
 	/// structure describing a single m_base kernel
-	struct tBase {
+	struct tBase
+	{
 		AbstractKernelFunction<InputType>* kernel;  ///< pointer to the m_base kernel object
 		double weight;                              ///< weight in the linear combination
 		bool adaptive;                              ///< whether the parameters of the kernel are part of the WeightedSumKernel's parameter vector?
 	};
 
-	void updateNumberOfParameters() {
-		m_numParameters = m_base.size() - 1;
-		for(std::size_t i = 0; i != m_base.size(); i++)
-			if(m_base[i].adaptive)
+	void updateNumberOfParameters(){
+		m_numParameters = m_base.size()-1;
+		for (std::size_t i=0; i != m_base.size(); i++)
+			if (m_base[i].adaptive)
 				m_numParameters += m_base[i].kernel->numberOfParameters();
 	}
 
@@ -350,13 +352,13 @@ protected:
 	//real implementation first.
 	template <class T>
 	void weightedInputDerivativeImpl(
-	    ConstBatchInputReference batchX1,
-	    ConstBatchInputReference batchX2,
-	    RealMatrix const& coefficientsX2,
-	    State const& state,
-	    BatchInputType& gradient,
-	    typename boost::enable_if<boost::is_same<T, RealMatrix > >::type* dummy = 0
-	)const {
+		ConstBatchInputReference batchX1,
+		ConstBatchInputReference batchX2,
+		RealMatrix const& coefficientsX2,
+		State const& state,
+		BatchInputType& gradient,
+		typename boost::enable_if<boost::is_same<T,RealMatrix > >::type* dummy = 0
+	)const{
 		std::size_t numKernels = m_base.size(); //how far the loop goes;
 		InternalState const& s = state.toState<InternalState>();
 
@@ -365,7 +367,7 @@ protected:
 		m_base[0].kernel->weightedInputDerivative(batchX1, batchX2, coefficientsX2, *s.kernelStates[0], gradient);
 		gradient *= m_base[0].weight / m_weightsum;
 		BatchInputType kernelGrad;
-		for(std::size_t i = 1; i != numKernels; i++) {
+		for (std::size_t i=1; i != numKernels; i++){
 			m_base[i].kernel->weightedInputDerivative(batchX1, batchX2, coefficientsX2, *s.kernelStates[i], kernelGrad);
 			double coeff = m_base[i].weight / m_weightsum;
 			gradient += coeff * kernelGrad;
@@ -373,13 +375,13 @@ protected:
 	}
 	template <class T>
 	void weightedInputDerivativeImpl(
-	    ConstBatchInputReference batchX1,
-	    ConstBatchInputReference batchX2,
-	    RealMatrix const& coefficientsX2,
-	    State const& state,
-	    BatchInputType& gradient,
-	    typename boost::disable_if<boost::is_same<T, RealMatrix > >::type* dummy = 0
-	)const {
+		ConstBatchInputReference batchX1,
+		ConstBatchInputReference batchX2,
+		RealMatrix const& coefficientsX2,
+		State const& state,
+		BatchInputType& gradient,
+		typename boost::disable_if<boost::is_same<T,RealMatrix > >::type* dummy = 0
+	)const{
 		throw SHARKEXCEPTION("[WeightedSumKernel::weightdInputDerivative] The used BatchInputType is no Vector");
 	}
 
@@ -416,28 +418,28 @@ typedef WeightedSumKernel<CompressedRealVector> CompressedWeightedSumKernel;
 //~ class FullyWeightedSumKernel : public AbstractKernelFunction<InputType>
 //~ {
 //~ public:
-//~ typedef typename VectorMatrixTraits<InputType>::SuperType InputSuperVectorType;
+	//~ typedef typename VectorMatrixTraits<InputType>::SuperType InputSuperVectorType;
 //~ private:
-//~ typedef AbstractKernelFunction<InputType> Base;
+	//~ typedef AbstractKernelFunction<InputType> Base;
 //~ public:
-//~ FullyWeightedSumKernel(const std::vector<AbstractKernelFunction<InputType>* >& base){
-//~ std::size_t kernels = base.size();
-//~ SHARK_CHECK( kernels > 0, "[FullyWeightedSumKernel::FullyWeightedSumKernel] There should be at least one sub-kernel.");
-//~ m_base.resize(kernels);
-//~ for (std::size_t i=0; i != kernels ; i++){
-//~ SHARK_ASSERT( base[i] != NULL );
-//~ m_base[i].kernel = base[i];
-//~ m_base[i].weight = 1.0;
-//~ m_base[i].adaptive = false;
-//~ }
-//~ m_weightsum = kernels;
-//~ bool tmp = true;
-//~ for ( unsigned int i=0; i<kernels; i++ ) if ( !m_base[i].kernel->hasFirstParameterDerivative() ) { tmp = false; break; }
-//~ if ( tmp ) this->m_features|=Base::HAS_FIRST_PARAMETER_DERIVATIVE;
-//~ tmp = true;
-//~ for ( unsigned int i=0; i<kernels; i++ ) if ( !m_base[i].kernel->hasFirstInputDerivative() ) { tmp = false; break; }
-//~ if ( tmp ) this->m_features|=Base::HAS_FIRST_INPUT_DERIVATIVE;
-//~ }
+	//~ FullyWeightedSumKernel(const std::vector<AbstractKernelFunction<InputType>* >& base){
+		//~ std::size_t kernels = base.size();
+		//~ SHARK_CHECK( kernels > 0, "[FullyWeightedSumKernel::FullyWeightedSumKernel] There should be at least one sub-kernel.");
+		//~ m_base.resize(kernels);
+		//~ for (std::size_t i=0; i != kernels ; i++){
+			//~ SHARK_ASSERT( base[i] != NULL );
+			//~ m_base[i].kernel = base[i];
+			//~ m_base[i].weight = 1.0;
+			//~ m_base[i].adaptive = false;
+		//~ }
+		//~ m_weightsum = kernels;
+		//~ bool tmp = true;
+		//~ for ( unsigned int i=0; i<kernels; i++ ) if ( !m_base[i].kernel->hasFirstParameterDerivative() ) { tmp = false; break; }
+		//~ if ( tmp ) this->m_features|=Base::HAS_FIRST_PARAMETER_DERIVATIVE;
+		//~ tmp = true;
+		//~ for ( unsigned int i=0; i<kernels; i++ ) if ( !m_base[i].kernel->hasFirstInputDerivative() ) { tmp = false; break; }
+		//~ if ( tmp ) this->m_features|=Base::HAS_FIRST_INPUT_DERIVATIVE;
+	//~ }
 //~ /// Check whether m_base kernel index is adaptive.
 //~ bool isAdaptive(std::size_t index) const
 //~ { return m_base[index].adaptive; }
@@ -480,32 +482,32 @@ typedef WeightedSumKernel<CompressedRealVector> CompressedWeightedSumKernel;
 //~         }
 //~     }
 //~ }
-//~ std::size_t numberOfParameters() const{
-//~ std::size_t num = m_base.size();
-//~ for (std::size_t i=0; i != m_base.size(); i++)
-//~ if (m_base[i].adaptive)
-//~ num += m_base[i].kernel->numberOfParameters();
-//~ return num;
-//~ }
+	//~ std::size_t numberOfParameters() const{
+		//~ std::size_t num = m_base.size();
+		//~ for (std::size_t i=0; i != m_base.size(); i++)
+			//~ if (m_base[i].adaptive)
+				//~ num += m_base[i].kernel->numberOfParameters();
+		//~ return num;
+	//~ }
 
-//~ std::size_t numberOfIntermediateValues(InputType const& x1, InputType const& x2)const{
-//~ std::size_t num = m_base.size()+1;
-//~ for (std::size_t i=0; i != m_base.size(); i++){
-//~ num += m_base[i].kernel->numberOfIntermediateValues(x1,x2);
-//~ }
-//~ return num;
-//~ }
+	//~ std::size_t numberOfIntermediateValues(InputType const& x1, InputType const& x2)const{
+		//~ std::size_t num = m_base.size()+1;
+		//~ for (std::size_t i=0; i != m_base.size(); i++){
+			//~ num += m_base[i].kernel->numberOfIntermediateValues(x1,x2);
+		//~ }
+		//~ return num;
+	//~ }
 
-//~ /// \f$ k(x, y) = \frac{\sum_i \exp(w_i) k_i(x, y)}{sum_i exp(w_i)} \f$
-//~ double eval(InputType const& x1, InputType const& x2) const{
-//~ SIZE_CHECK(x1.size() == x2.size());
-//~ double numerator = 0.0;
-//~ for (std::size_t i=0; i != m_base.size(); i++){
-//~ double result = m_base[i].kernel->eval(x1, x2);
-//~ numerator += m_base[i].weight*result;
-//~ }
-//~ return numerator / m_weightsum;
-//~ }
+	//~ /// \f$ k(x, y) = \frac{\sum_i \exp(w_i) k_i(x, y)}{sum_i exp(w_i)} \f$
+	//~ double eval(InputType const& x1, InputType const& x2) const{
+		//~ SIZE_CHECK(x1.size() == x2.size());
+		//~ double numerator = 0.0;
+		//~ for (std::size_t i=0; i != m_base.size(); i++){
+			//~ double result = m_base[i].kernel->eval(x1, x2);
+			//~ numerator += m_base[i].weight*result;
+		//~ }
+		//~ return numerator / m_weightsum;
+	//~ }
 //~ /// \f$ k(x, y) = \frac{\sum_i \exp(w_i) k_i(x, y)}{sum_i exp(w_i)} \f$
 //~ double eval(ConstInputReference x1, ConstInputReference x2, Intermediate& intermediate) const{
 //~     SIZE_CHECK(x1.size() == x2.size());

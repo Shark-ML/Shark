@@ -48,44 +48,45 @@ namespace shark {
 /// The size of the tournament can either be set in the constructor or by setting the variable tournamentSize
 template<class Predicate>
 struct TournamentSelection {
-	TournamentSelection(std::size_t size = 2) {
+	TournamentSelection(std::size_t size = 2){
 		tournamentSize = 2;
 	}
-
+	
 	template<typename IteratorType1, typename IteratorType2>
 	void operator()(
-	    IteratorType1 inIt,
-	    IteratorType1 inItE,
-	    IteratorType2 outIt,
-	    IteratorType2 outItE
-	) {
-		for(; outIt != outItE; ++outIt) {
-			*outIt = *(*this)(inIt, inItE);
+		IteratorType1 inIt,
+		IteratorType1 inItE,
+		IteratorType2 outIt,
+		IteratorType2 outItE
+	){
+		for(; outIt != outItE; ++outIt ) {
+			*outIt = *(*this)(inIt,inItE);
 		}
 	}
-
+	
 	/// \brief Selects an individual from the range of individuals with prob. proportional to its fitness.
 	/// \param [in] it Iterator pointing to the first valid element.
 	/// \param [in] itE Iterator pointing to the first invalid element.
 	/// \return An iterator pointing to the selected individual.
 	template< typename Iterator>
-	Iterator operator()(Iterator it, Iterator itE) const {
-		std::size_t n = std::distance(it, itE);
+	Iterator operator()( Iterator it, Iterator itE) const
+	{
+		std::size_t n = std::distance( it, itE );
 		SHARK_CHECK(tournamentSize > 0, " Tournament size k needs to be larger than 0");
 		SHARK_CHECK(n > tournamentSize, " Size of population needs to be larger than size of tournament");
-
+		
 		Predicate predicate;
-		Iterator result = it + Rng::discrete(0, n - 1);
-		for(std::size_t i = 1; i < tournamentSize; i++) {
-			Iterator itt = it + Rng::discrete(0, n - 1);
-			if(predicate(*itt, *result)) {
+		Iterator result = it + Rng::discrete( 0, n-1 );
+		for( std::size_t i = 1; i < tournamentSize; i++ ) {
+			Iterator itt = it + Rng::discrete(0,n-1);
+			if( predicate(*itt, *result) ){
 				result = itt;
 			}
 		}
 
 		return result;
 	}
-
+	
 	/// \brief Size of the tournament. 2 by default.
 	std::size_t tournamentSize;
 };

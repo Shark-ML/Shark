@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Trainer for normal distribution
- *
- *
- *
+ * 
+ * 
+ * 
  *
  * \author      B. Li
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -48,14 +48,16 @@
 namespace shark {
 
 /// Trainer for normal distribution
-class NormalTrainer {
+class NormalTrainer
+{
 public:
 
 	/// The type of variance. The difference between them is:
 	/// When you have "N" data values that are:
 	/// By Population: divide by N when calculating Variance
 	/// By Sample: divide by N-1 when calculating Variance
-	enum VarianceType {
+	enum VarianceType
+	{
 		VARIANCE_BY_POPULATION,
 		VARIANCE_BY_SAMPLE
 	};
@@ -65,7 +67,8 @@ public:
 
 	/// Internal implementation for trainer of normal distribution
 	template <typename RngType>
-	void train(Normal<RngType>& normal, const std::vector<double>& input) const {
+	void train(Normal<RngType>& normal, const std::vector<double>& input) const
+	{
 		SIZE_CHECK(input.size() > 1u);
 		namespace bae = boost::accumulators::extract;
 
@@ -75,9 +78,9 @@ public:
 
 		normal.mean(bae::mean(accu));
 		normal.variance(
-		    VARIANCE_BY_SAMPLE == m_varianceType
-		    ? bae::variance(accu) * bae::count(accu) / (bae::count(accu) - 1)
-		    : bae::variance(accu));
+			VARIANCE_BY_SAMPLE == m_varianceType
+			? bae::variance(accu) * bae::count(accu) / (bae::count(accu) - 1)
+			: bae::variance(accu));
 	}
 
 private:
@@ -86,11 +89,11 @@ private:
 	VarianceType m_varianceType;
 
 	/// Internal accumulator type
-	typedef boost::accumulators::accumulator_set <
-	double,
-	boost::accumulators::stats <
-	boost::accumulators::tag::count,
-	boost::accumulators::tag::variance > > InternalAccumulatorType;
+	typedef boost::accumulators::accumulator_set<
+		double,
+		boost::accumulators::stats<
+			boost::accumulators::tag::count,
+			boost::accumulators::tag::variance> > InternalAccumulatorType;
 };
 
 } // namespace shark {

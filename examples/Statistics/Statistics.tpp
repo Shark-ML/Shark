@@ -40,31 +40,34 @@ using namespace shark;
 
 int main(int argc, char** argv)
 {
-//###begin<stat>
-	Statistics stats;
-//###end<stat>
+//###begin<table>
+	statistics::ResultTable<double> table(2,"VarianceOfGausian");//set a name for the results
+	table.setDimensionName(0,"input1");
+	table.setDimensionName(1,"input2");
+//###end<table>
 
 //###begin<sample>
-	// Sample 10000 standard normally distributed random numbers
-	// and update statistics for these numbers iteratively.
-	for (std::size_t i = 0; i < 100000; i++)
-		stats( Rng::gauss() );
+	// Fill the table with randomly generated numbers for different variances and mean and also add missing values
+	for(std::size_t k = 1; k != 10; ++k){
+		double var= 10.0*k;
+		for (std::size_t i = 0; i < 10000; i++){
+			double value1=Rng::gauss(0,var);
+			double value2=Rng::gauss(0,var);
+			if(Rng::coinToss() == 1)
+				value2=statistics::missingValue();
+			table.update(var,value1,value2 );
+		}
+	}
 //###end<sample>
+	
+//###begin<statistics>
+	statistics::Statistics<double> stats(&table);
+	stats.addStatistic(statistics::Mean());//adds a statistic "Mean" for each variable
+	stats.addStatistic("Variance", statistics::Variance());//explicit name
+	stats.addStatistic("Missing", statistics::FractionMissing());
+//###end<statistics>
 
-//###begin<cout>
-	// Output results to the console.
-	std::cout << stats << std::endl;
-//###end<cout>
-
-//###begin<indiv>
-	std::cout << 
-		stats( Statistics::NumSamples() ) << " " <<
-		stats( Statistics::Min() ) << " " <<
-		stats( Statistics::Max() ) << " " <<
-		stats( Statistics::Mean() ) << " " << 
-		stats( Statistics::Variance() ) << " " <<
-		stats( Statistics::Median() ) << " " <<
-		stats( Statistics::LowerQuartile() ) << " " <<
-		stats( Statistics::UpperQuartile() ) << std::endl;
-//###end<indiv>
+//###begin<csv>
+	printCSV(stats);
+//###end<csv>
 }

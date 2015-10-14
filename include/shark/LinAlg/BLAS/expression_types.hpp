@@ -32,7 +32,7 @@ struct vector_expression {
  * We implement the casts to the statically derived type.
  */
 template<class C>
-struct vector_container: public vector_expression<C> {
+struct vector_container:public vector_expression<C> {
 	typedef C container_type;
 
 	const container_type &operator()() const {
@@ -136,15 +136,15 @@ struct matrix_container: public matrix_expression<C> {
 };
 
 template<class P>
-struct temporary_proxy: public P {
-	temporary_proxy(P const& p): P(p) {}
-
+struct temporary_proxy:public P{
+	temporary_proxy(P const& p):P(p){}
+	
 	template<class E>
-	P& operator=(E const& e) {
+	P& operator=(E const& e){
 		return static_cast<P&>(*this) = e;
 	}
-
-	P& operator=(temporary_proxy<P> const& e) {
+	
+	P& operator=(temporary_proxy<P> const& e){
 		return static_cast<P&>(*this) = e;
 	}
 };
@@ -152,14 +152,14 @@ struct temporary_proxy: public P {
 // Assignment proxy.
 // Provides temporary free assigment when LHS has no alias on RHS
 template<class C>
-class noalias_proxy {
+class noalias_proxy{
 public:
 	typedef typename C::closure_type closure_type;
 	typedef typename C::scalar_type scalar_type;
 
 	noalias_proxy(C &lval): m_lval(lval) {}
 
-	noalias_proxy(const noalias_proxy &p): m_lval(p.m_lval) {}
+	noalias_proxy(const noalias_proxy &p):m_lval(p.m_lval) {}
 
 	template <class E>
 	closure_type &operator= (const E &e) {
@@ -178,7 +178,7 @@ public:
 		m_lval.minus_assign(e);
 		return m_lval;
 	}
-
+	
 	template <class E>
 	closure_type &operator*= (const E &e) {
 		m_lval.multiply_assign(e);
@@ -190,7 +190,7 @@ public:
 		m_lval.divide_assign(e);
 		return m_lval;
 	}
-
+	
 	//this is not needed, but prevents errors when fr example doing noalias(x)*=2;
 	closure_type &operator*= (scalar_type t) {
 		m_lval *= t;
@@ -199,7 +199,7 @@ public:
 
 	//this is not needed, but prevents errors when for example doing noalias(x)/=2;
 	closure_type &operator/= (scalar_type t) {
-		m_lval *= t;
+		m_lval *=t;
 		return m_lval;
 	}
 

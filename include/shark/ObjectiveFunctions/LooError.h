@@ -1,30 +1,30 @@
 /*!
- *
+ * 
  *
  * \brief       Leave-one-out error
- *
- *
+ * 
+ * 
  *
  * \author      T.Glasmachers
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -60,7 +60,8 @@ namespace shark {
 /// to LooErrorCSvm for an example.
 ///
 template<class ModelTypeT, class LabelType = typename ModelTypeT::OutputType>
-class LooError : public SingleObjectiveFunction {
+class LooError : public SingleObjectiveFunction
+{
 public:
 	typedef ModelTypeT ModelType;
 	typedef typename ModelType::InputType InputType;
@@ -79,29 +80,31 @@ public:
 	/// \param  meta     Meta object with parameters that influences the process, typically a trainer.
 	///
 	LooError(
-	    DatasetType const& dataset,
-	    ModelType* model,
-	    TrainerType* trainer,
-	    LossType* loss,
-	    IParameterizable* meta = NULL)
-		: m_dataset(dataset)
-		, mep_meta(meta)
-		, mep_model(model)
-		, mep_trainer(trainer)
-		, mep_loss(loss) {
+		DatasetType const& dataset,
+		ModelType* model,
+		TrainerType* trainer,
+		LossType* loss,
+		IParameterizable* meta = NULL)
+	: m_dataset(dataset)
+	, mep_meta(meta)
+	, mep_model(model)
+	, mep_trainer(trainer)
+	, mep_loss(loss)
+	{
 		m_features |= HAS_VALUE;
 	}
 
 
 	/// \brief From INameable: return the class name.
-	std::string name() const {
+	std::string name() const
+	{
 		return "LooError<"
-		       + mep_model->name() + ","
-		       + mep_trainer->name() + ","
-		       + mep_loss->name() + ">";
+				+ mep_model->name() + ","
+				+ mep_trainer->name() + ","
+				+ mep_loss->name() + ">";
 	}
-
-	std::size_t numberOfVariables()const {
+	
+	std::size_t numberOfVariables()const{
 		return mep_meta->numberOfParameters();
 	}
 
@@ -115,14 +118,15 @@ public:
 		Data<OutputType> output;
 		double sum = 0.0;
 		std::vector<std::size_t> indices(ell - 1);
-		boost::iota(indices, 0);
-		for(std::size_t i = 0; i < ell - 1; i++) indices[i] = i + 1;
-		for(std::size_t i = 0; i < ell; i++) {
-			DatasetType train = toDataset(subset(m_dataset, indices));
+		boost::iota(indices,0);
+		for (std::size_t i=0; i<ell-1; i++) indices[i] = i+1;
+		for (std::size_t i=0; i<ell; i++)
+		{
+			DatasetType train = toDataset(subset(m_dataset,indices));
 			mep_trainer->train(*mep_model, train);
 			OutputType validation = (*mep_model)(m_dataset[i].input);
 			sum += mep_loss->eval(m_dataset[i].label, validation);
-			if(i < ell - 1) indices[i] = i;
+			if (i < ell - 1) indices[i] = i;
 		}
 		return sum / ell;
 	}

@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Random Forest Classifier.
- *
- *
+ * 
+ * 
  *
  * \author      K. N. Hansen, O.Krause, J. Kremer
  * \date        2011-2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -36,7 +36,6 @@
 #define SHARK_MODELS_TREES_RFCLASSIFIER_H
 
 #include <shark/Models/Trees/CARTClassifier.h>
-#include <shark/Statistics/Statistics.h>
 #include <shark/Models/MeanModel.h>
 
 namespace shark {
@@ -54,33 +53,34 @@ namespace shark {
 /// It is a ensemble learner that uses multiple decision trees built
 /// using the CART methodology.
 ///
-class RFClassifier : public MeanModel<CARTClassifier<RealVector> > {
+class RFClassifier : public MeanModel<CARTClassifier<RealVector> >
+{
 public:
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "RFClassifier"; }
 
 	// compute the oob error for the forest
-	void computeOOBerror() {
+	void computeOOBerror(){
 		std::size_t n_trees = numberOfModels();
-		Statistics stats;
-		for(std::size_t j = 0; j != n_trees; ++j) {
-			stats(m_models[j].OOBerror());
+		m_OOBerror = 0;
+		for(std::size_t j=0;j!=n_trees;++j){
+			m_OOBerror += m_models[j].OOBerror();
 		}
-		m_OOBerror = stats(Statistics::Mean());
+		m_OOBerror /= n_trees;
 	}
 
 	// compute the feature importances for the forest
-	void computeFeatureImportances() {
+	void computeFeatureImportances(){
 		m_featureImportances.resize(m_inputDimension);
 		std::size_t n_trees = numberOfModels();
 
-		for(std::size_t i = 0; i != m_inputDimension; ++i) {
-			Statistics featureStats;
-			for(std::size_t j = 0; j != n_trees; ++j) {
-				featureStats(m_models[j].featureImportances()[i]);
+		for(std::size_t i=0;i!=m_inputDimension;++i){
+			m_featureImportances[i] = 0;
+			for(std::size_t j=0;j!=n_trees;++j){
+				m_featureImportances[i] += m_models[j].featureImportances()[i];
 			}
-			m_featureImportances[i] = featureStats(Statistics::Mean());
+			m_featureImportances[i] /= n_trees;
 		}
 	}
 
@@ -98,19 +98,19 @@ public:
 		std::size_t n = m_models.size();
 		if(!n) return UIntVector();
 		UIntVector r = m_models[0].countAttributes();
-		for(std::size_t i = 1; i < n; i++) {
+		for(std::size_t i=1; i< n; i++ ) {
 			noalias(r) += m_models[i].countAttributes();
 		}
 		return r;
 	}
 
 	/// Set the dimension of the labels
-	void setLabelDimension(std::size_t in) {
+	void setLabelDimension(std::size_t in){
 		m_labelDimension = in;
 	}
 
 	// Set the input dimension
-	void setInputDimension(std::size_t in) {
+	void setInputDimension(std::size_t in){
 		m_inputDimension = in;
 	}
 

@@ -1,30 +1,30 @@
 /*!
- *
+ * 
  *
  * \brief       Stopping Criterion which stops, when the training error seems to converge
- *
- *
+ * 
+ * 
  *
  * \author      O. Krause
  * \date        2010
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -38,7 +38,7 @@
 #include <queue>
 #include <numeric>
 
-namespace shark {
+namespace shark{
 
 
 ///\brief This stopping criterion tracks the improvement of the training error over an interval of iterations.
@@ -55,45 +55,45 @@ namespace shark {
 /// 1524 of LNCS, Springer, 1997.
 ///
 template<class PointType = RealVector>
-class TrainingProgress: public AbstractStoppingCriterion< SingleObjectiveResultSet<PointType> > {
+class TrainingProgress: public AbstractStoppingCriterion< SingleObjectiveResultSet<PointType> >{
 public:
 	typedef SingleObjectiveResultSet<PointType> ResultSet;
 	///constructs the TrainingProgress
 	///@param intervalSize the size of the interval which is checked
 	///@param minImprovement minimum relative improvement of the interval to the minimum training error before training stops
-	TrainingProgress(size_t intervalSize, double minImprovement) {
+	TrainingProgress(size_t intervalSize, double minImprovement){
 		m_minImprovement = minImprovement;
 		m_intervalSize = intervalSize;
 		reset();
 	}
 	/// returns true if training should stop
-	bool stop(const ResultSet& set) {
+	bool stop(const ResultSet& set){
 		m_minTraining = std::min(m_minTraining, set.value);
 
 		m_meanPerformance += set.value;
 		m_interval.push(set.value);
-		if(m_interval.size() > m_intervalSize) {
+		if(m_interval.size()>m_intervalSize){
 			m_meanPerformance -= m_interval.front();
 			m_interval.pop();
 		}
-		m_progress = (m_meanPerformance / (m_minTraining * m_interval.size())) - 1;
-
-		if(m_interval.size() < m_intervalSize) {
+		m_progress = (m_meanPerformance/(m_minTraining*m_interval.size()))-1;
+		
+		if(m_interval.size()<m_intervalSize){
 			return false;
 		}
 
-
+		
 		return m_progress < m_minImprovement;
 	}
 	///resets the internal state
-	void reset() {
+	void reset(){
 		m_interval = std::queue<double>();
 		m_minTraining = 1.e10;
 		m_meanPerformance = 0;
 		m_progress = 0.0;
 	}
 	///returns current value of progress
-	double value()const {
+	double value()const{
 		return m_progress;
 	}
 protected:

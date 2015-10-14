@@ -11,21 +11,23 @@
 using namespace shark;
 
 
-BOOST_AUTO_TEST_SUITE(Algorithms_GradientDescent_TrustRegionNewton)
+BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_TrustRegionNewton)
 
-BOOST_AUTO_TEST_CASE(TrustRegionNewton_Ellipsoid) {
+BOOST_AUTO_TEST_CASE( TrustRegionNewton_Ellipsoid )
+{
 	Ellipsoid function(5);
 	TrustRegionNewton optimizer;
 
-	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << std::endl;
-	testFunction(optimizer, function, 100, 100);
+	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
+	testFunction(optimizer,function,100,100);
 }
-BOOST_AUTO_TEST_CASE(TrustRegionNewton_Rosenbrock) {
+BOOST_AUTO_TEST_CASE( TrustRegionNewton_Rosenbrock )
+{
 	Rosenbrock function(3);
 	TrustRegionNewton optimizer;
 
-	std::cout << "Testing: " << optimizer.name() << " with " << function.name() << std::endl;
-	testFunction(optimizer, function, 100, 1000, 1.e-14);
+	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
+	testFunction(optimizer,function,100,1000,1.e-14);
 }
 
 

@@ -1,33 +1,33 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Test case for optimization of the hyperparameters of a
  * Gaussian Process/Regularization Network using evidence/marginal
  * likelihood maximization.
- *
- *
+ * 
+ * 
  *
  * \author      Christian Igel
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -55,11 +55,12 @@ using namespace shark;
 using namespace std;
 
 
-BOOST_AUTO_TEST_SUITE(ObjectiveFunctions_NegativeGaussianProcessEvidence)
+BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_NegativeGaussianProcessEvidence)
 
-BOOST_AUTO_TEST_CASE(GAUUSIAN_PROCESS_EVIDENCE) {
+BOOST_AUTO_TEST_CASE( GAUUSIAN_PROCESS_EVIDENCE )
+{
 	// experiment settings
-	Rng::seed(0);
+	Rng::seed( 0 );
 	const unsigned int ell   = 100;
 	const unsigned int tests = 10000;
 	const double gamma = 100.;
@@ -84,7 +85,7 @@ BOOST_AUTO_TEST_CASE(GAUUSIAN_PROCESS_EVIDENCE) {
 
 	/*
 	 * Check whether evidence computations coincide.
-	     */
+         */
 	// compute evidence
 	NegativeGaussianProcessEvidence<> evidence(trainingData, &kernel, unconstrained);
 	RealVector params = trainer.parameterVector();
@@ -93,21 +94,21 @@ BOOST_AUTO_TEST_CASE(GAUUSIAN_PROCESS_EVIDENCE) {
 	// compute gradient
 	SingleObjectiveFunction::FirstOrderDerivative derivative;
 	BOOST_CHECK_SMALL(prevEvidence - evidence.evalDerivative(params, derivative), 1.e-10);
-
-	/*
+	
+	/* 
 	 * Check whether gradient is correct.
-	     */
-	for(std::size_t test = 0; test != 100; ++test) {
+         */
+	for(std::size_t test = 0; test != 100; ++test){
 		RealVector parameters(params.size());
-		for(std::size_t i = 0; i != params.size(); ++i) {
-			parameters(i) = Rng::uni(-2, 2);
+		for(std::size_t i = 0; i != params.size(); ++i){
+			parameters(i) = Rng::uni(-2,2);
 		}
-		testDerivative(evidence, parameters, 1.e-8);
+		testDerivative(evidence,parameters,1.e-8);
 	}
 
 	/*
 	 * Check whether optimization works.
-	     */
+         */
 	IRpropPlus rprop;
 	rprop.init(evidence, params);
 
@@ -118,8 +119,8 @@ BOOST_AUTO_TEST_CASE(GAUUSIAN_PROCESS_EVIDENCE) {
 	output = model(testData.inputs());
 	double prevTestError = loss.eval(testData.labels(), output);
 
-	for(unsigned int iter1 = 0; iter1 < 4; iter1++) {
-		for(unsigned int iter2 = 0; iter2 < 10; iter2++)
+	for (unsigned int iter1=0; iter1<4; iter1++) {
+		for (unsigned int iter2=0; iter2<10; iter2++) 
 			rprop.step(evidence);
 
 		trainer.setParameterVector(rprop.solution().point);

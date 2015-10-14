@@ -1,30 +1,30 @@
 /*!
- *
+ * 
  *
  * \brief       Radius Margin Quotient for SVM model selection
- *
- *
+ * 
+ * 
  *
  * \author      T.Glasmachers, O.Krause
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -56,7 +56,8 @@ namespace shark {
 /// of a binary hard-margin SVM.
 ///
 template<class InputType, class CacheType = float>
-class RadiusMarginQuotient : public SingleObjectiveFunction {
+class RadiusMarginQuotient : public SingleObjectiveFunction
+{
 public:
 	typedef CacheType QpFloatType;
 
@@ -68,9 +69,10 @@ public:
 
 	/// \brief Constructor.
 	RadiusMarginQuotient(DatasetType const& dataset, KernelType* kernel)
-		: mep_kernel(kernel), m_dataset(dataset) {
+	: mep_kernel(kernel),m_dataset(dataset)
+	{
 		m_features |= HAS_VALUE;
-		if(mep_kernel->hasFirstParameterDerivative())
+		if (mep_kernel->hasFirstParameterDerivative())
 			m_features |= HAS_FIRST_DERIVATIVE;
 	}
 
@@ -79,7 +81,7 @@ public:
 	std::string name() const
 	{ return "RadiusMarginQuotient"; }
 
-	std::size_t numberOfVariables()const {
+	std::size_t numberOfVariables()const{
 		return mep_kernel->numberOfParameters();
 	}
 
@@ -89,12 +91,12 @@ public:
 	/// The parameters are passed into the kernel, and the
 	/// radius-margin quotient is computed w.r.t. the
 	/// kernel-induced metric.
-	double eval(SearchPointType const& parameters) const {
+	double eval(SearchPointType const& parameters) const{
 		SIZE_CHECK(parameters.size() == mep_kernel->numberOfParameters());
 		SHARK_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::eval] call setDataset first");
 		m_evaluationCounter++;
-
-
+		
+		
 		mep_kernel->setParameterVector(parameters);
 
 		Result result = computeRadiusMargin();
@@ -108,36 +110,36 @@ public:
 	/// The parameters are passed into the kernel, and the
 	/// radius-margin quotient and its derivative are computed
 	/// w.r.t. the kernel-induced metric.
-	double evalDerivative(SearchPointType const& parameters, FirstOrderDerivative& derivative) const {
+	double evalDerivative(SearchPointType const& parameters, FirstOrderDerivative& derivative) const{
 		SHARK_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::evalDerivative] call setDataset first");
 		SIZE_CHECK(parameters.size() == mep_kernel->numberOfParameters());
 		m_evaluationCounter++;
-
+		
 		mep_kernel->setParameterVector(parameters);
 
 		Result result = computeRadiusMargin();
-
+		
 		derivative = calculateKernelMatrixParameterDerivative(
-		                 *mep_kernel, m_dataset.inputs(),
-		                 result.w2 * (RealDiagonalMatrix(result.beta) - outer_prod(result.beta, result.beta))
-		                 - result.R2 * outer_prod(result.alpha, result.alpha)
-		             );
-
-
+			*mep_kernel, m_dataset.inputs(),
+			result.w2*(RealDiagonalMatrix(result.beta)-outer_prod(result.beta,result.beta))
+			-result.R2*outer_prod(result.alpha,result.alpha)
+		);
+		
+		
 		return result.w2 * result.R2;
 	}
 
 protected:
-	struct Result {
+	struct Result{
 		RealVector alpha;
 		RealVector beta;
 		double w2;
 		double R2;
 	};
-
-	Result computeRadiusMargin()const {
+	
+	Result computeRadiusMargin()const{
 		std::size_t ell = m_dataset.numberOfElements();
-
+		
 		QpStoppingCondition stop;
 		Result result;
 		{
@@ -145,10 +147,10 @@ protected:
 			CachedMatrixType cache(&km);
 			typedef CSVMProblem<CachedMatrixType> SVMProblemType;
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
-
-			SVMProblemType svmProblem(cache, m_dataset.labels(), 1e100);
+			
+			SVMProblemType svmProblem(cache,m_dataset.labels(),1e100);
 			ProblemType problem(svmProblem);
-
+			
 			QpSolver< ProblemType> solver(problem);
 			QpSolutionProperties prop;
 			solver.solve(stop, &prop);
@@ -161,15 +163,15 @@ protected:
 			CachedMatrixType cache(&km);
 			typedef BoxedSVMProblem<CachedMatrixType> SVMProblemType;
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
-
+			
 			// Setup the problem
 			RealVector linear(ell);
-			for(std::size_t i = 0; i < ell; i++) {
+			for (std::size_t i=0; i<ell; i++){
 				linear(i) = 0.5 * km(i, i);
 			}
-			SVMProblemType svmProblem(cache, linear, 0.0, 1.0);
+			SVMProblemType svmProblem(cache,linear,0.0,1.0);
 			ProblemType problem(svmProblem);
-
+			
 			//solve it
 			QpSolver< ProblemType> solver(problem);
 			QpSolutionProperties prop;
@@ -179,7 +181,7 @@ protected:
 		}
 		return result;
 	}
-
+	
 	DatasetType m_dataset;                  ///< labeled data for radius and (hard) margin computation
 	KernelType* mep_kernel;            ///< underlying parameterized kernel object
 };

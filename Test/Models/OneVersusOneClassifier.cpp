@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Unit test for the generic one-versus-one classifier
- *
- *
- *
+ * 
+ * 
+ * 
  *
  * \author      T. Glasmachers
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -43,18 +43,20 @@ using namespace shark;
 
 
 // simple classifier for testing only
-class ThresholdClassifier : public AbstractModel<double, unsigned int> {
+class ThresholdClassifier : public AbstractModel<double, unsigned int>
+{
 public:
 	typedef AbstractModel<double, unsigned int> base_type;
 
 	ThresholdClassifier(double threshold)
-		: m_threshold(threshold)
+	: m_threshold(threshold)
 	{ }
 
 	std::string name() const
 	{ return "ThresholdClassifier"; }
 
-	RealVector parameterVector() const {
+	RealVector parameterVector() const
+	{
 		RealVector p(1);
 		p(0) = m_threshold;
 		return p;
@@ -65,16 +67,17 @@ public:
 
 	std::size_t numberOfParameters() const
 	{ return 1; }
-
-	boost::shared_ptr<State> createState()const {
+	
+	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	using base_type::eval;
 
-	void eval(BatchInputType const& x, BatchOutputType& y, State& state)const {
+	void eval(BatchInputType const& x, BatchOutputType& y, State& state)const
+	{ 
 		y.resize(shark::size(x));
-		for(std::size_t i = 0; i != shark::size(x); ++i) {
+		for(std::size_t i = 0; i != shark::size(x); ++i){
 			y(i) = (x(i) < m_threshold) ? 0 : 1;
 		}
 	}
@@ -84,9 +87,10 @@ protected:
 };
 
 
-BOOST_AUTO_TEST_SUITE(Models_OneVersusOneClassifier)
+BOOST_AUTO_TEST_SUITE (Models_OneVersusOneClassifier)
 
-BOOST_AUTO_TEST_CASE(Models_OneVersusOneClassifier) {
+BOOST_AUTO_TEST_CASE( Models_OneVersusOneClassifier )
+{
 	// Create a one-versus-one classifier for four classes.
 	// It consists of 6 binary classifiers.
 	ThresholdClassifier c10(0.5);
@@ -139,7 +143,8 @@ BOOST_AUTO_TEST_CASE(Models_OneVersusOneClassifier) {
 	LabeledData<double, unsigned int> dataset = createLabeledDataFromRange(inputs, targets);
 
 	// check correctness of predictions
-	for(std::size_t i = 0; i < dataset.numberOfElements(); i++) {
+	for (std::size_t i=0; i<dataset.numberOfElements(); i++)
+	{
 		BOOST_CHECK_EQUAL(ovo(dataset.element(i).input), dataset.element(i).label);
 	}
 }

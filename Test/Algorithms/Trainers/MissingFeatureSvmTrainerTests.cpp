@@ -21,14 +21,16 @@
 namespace shark {
 
 /// Test fixture
-class SvmWafFixture {
+class SvmWafFixture
+{
 public:
 
-	SvmWafFixture() {
+	SvmWafFixture()
+	{
 		//~ string2data<RealVector, unsigned int>(m_labeledData, m_dataInString, LAST_COLUMN, true, false, NULL);
 		//~ string2data<RealVector, unsigned int>(m_labeledData2, m_dataInString2, LAST_COLUMN, true, false, NULL);
-		csvStringToData(m_labeledData, m_dataInString, LAST_COLUMN);
-		csvStringToData(m_labeledData2, m_dataInString2, LAST_COLUMN);
+		csvStringToData(m_labeledData,m_dataInString,LAST_COLUMN);
+		csvStringToData(m_labeledData2,m_dataInString2,LAST_COLUMN);
 	}
 
 	static const std::string m_dataInString;
@@ -58,31 +60,22 @@ const std::string SvmWafFixture::m_dataInString2 = "\
 5.42,130,7,?,1\n\
 5.75,150,9,?,1\r";
 
-BOOST_FIXTURE_TEST_SUITE(Algorithms_Trainers_MissingFeatureSvmTrainerTests, SvmWafFixture)
+BOOST_FIXTURE_TEST_SUITE (Algorithms_Trainers_MissingFeatureSvmTrainerTests, SvmWafFixture)
 
-BOOST_AUTO_TEST_CASE(NoMissingFeatures) {
+BOOST_AUTO_TEST_CASE(NoMissingFeatures)
+{
 	// Test that out trainer works fine with normal feature set without Missing features
 	// In this case, we should get the same results as class CSvmTrainer
 
 	// simple 5-point dataset
 	std::vector<RealVector> input(5);
 	std::vector<unsigned int> target(5);
-	for(std::size_t i = 0; i < 5; i++) input[i].resize(2);
-	input[0](0) =  0.0;
-	input[0](1) =  0.0;
-	target[0] = 0;
-	input[1](0) =  2.0;
-	input[1](1) =  2.0;
-	target[1] = 1;
-	input[2](0) = -1.0;
-	input[2](1) = -8.0;
-	target[2] = 0;
-	input[3](0) = -1.0;
-	input[3](1) = -1.0;
-	target[3] = 0;
-	input[4](0) =  3.0;
-	input[4](1) =  3.0;
-	target[4] = 1;
+	for (std::size_t i=0; i<5; i++) input[i].resize(2);
+	input[0](0) =  0.0; input[0](1) =  0.0; target[0] = 0;
+	input[1](0) =  2.0; input[1](1) =  2.0; target[1] = 1;
+	input[2](0) = -1.0; input[2](1) = -8.0; target[2] = 0;
+	input[3](0) = -1.0; input[3](1) = -1.0; target[3] = 0;
+	input[4](0) =  3.0; input[4](1) =  3.0; target[4] = 1;
 	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 
 	// Soft-margin training with linear kernel
@@ -123,7 +116,8 @@ BOOST_AUTO_TEST_CASE(NoMissingFeatures) {
 	}
 }
 
-BOOST_AUTO_TEST_CASE(MissingFeatures) {
+BOOST_AUTO_TEST_CASE(MissingFeatures)
+{
 	RealVector pattern1(3);
 	pattern1(0) = 5.85;
 	pattern1(1) = std::numeric_limits<double>::quiet_NaN();

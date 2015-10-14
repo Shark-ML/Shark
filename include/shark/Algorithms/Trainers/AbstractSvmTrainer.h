@@ -1,10 +1,10 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Abstract Support Vector Machine Trainer, general and linear case
- *
- *
+ * 
+ * 
  * \par
  * This file provides: 1) the QpConfig class, which can configure and
  * provide information about an SVM training procedure; 2) a super-class
@@ -13,30 +13,30 @@
  * AbstractLinearSvmTrainer. In general, the SvmTrainers hold as parameters
  * all hyperparameters of the underlying SVM, which includes the kernel
  * parameters for non-linear SVMs.
- *
- *
- *
+ * 
+ * 
+ * 
  *
  * \author      T. Glasmachers
  * \date        -
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -68,16 +68,17 @@ namespace shark {
 /// setting, e.g., the target solution accuracy and obtaining the
 /// accuracy of the actual solution.
 ///
-class QpConfig {
+class QpConfig
+{
 public:
 	/// Constructor
 	QpConfig(bool precomputedFlag = false, bool sparsifyFlag = true)
-		: m_precomputedKernelMatrix(precomputedFlag)
-		, m_sparsify(sparsifyFlag)
-		, m_shrinking(true)
-		, m_s2do(true)
-		, m_verbosity(0)
-		, m_accessCount(0)
+	: m_precomputedKernelMatrix(precomputedFlag)
+	, m_sparsify(sparsifyFlag)
+	, m_shrinking(true)
+	, m_s2do(true)
+	, m_verbosity(0)
+	, m_accessCount(0)
 	{ }
 
 	/// Read/write access to the stopping condition
@@ -144,7 +145,7 @@ public:
 	void setTargetValue(double v) { m_stoppingcondition.targetValue = v; }
 	// Set maximum training time in seconds for the maximum seconds stopping condition
 	void setMaxSeconds(double s) { m_stoppingcondition.maxSeconds = s; }
-
+	
 protected:
 	/// conditions for when to stop the QP solver
 	QpStoppingCondition m_stoppingcondition;
@@ -177,12 +178,13 @@ protected:
 /// as information on the actual solution.
 ///
 template <
-    class InputType, class LabelType,
-    class Model = KernelClassifier<InputType>,
-    class Trainer = AbstractTrainer< Model, LabelType>
-    >
+	class InputType, class LabelType, 
+	class Model = KernelClassifier<InputType>, 
+	class Trainer= AbstractTrainer< Model,LabelType>
+>
 class AbstractSvmTrainer
-	: public Trainer, public QpConfig, public IParameterizable {
+: public Trainer,public QpConfig, public IParameterizable
+{
 public:
 	typedef AbstractKernelFunction<InputType> KernelType;
 
@@ -192,13 +194,13 @@ public:
 	//! \param offset train svm with offset - this is not supported for all SVM solvers.
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	AbstractSvmTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false)
-		: m_kernel(kernel)
-		, m_regularizers(1, C)
-		, m_trainOffset(offset)
-		, m_unconstrained(unconstrained)
-		, m_cacheSize(0x4000000)
-	{ RANGE_CHECK(C > 0); }
-
+	: m_kernel(kernel)
+	, m_regularizers(1,C)
+	, m_trainOffset(offset)
+	, m_unconstrained(unconstrained)
+	, m_cacheSize(0x4000000)
+	{ RANGE_CHECK( C > 0 ); }
+	
 	//! Constructor featuring two regularization parameters
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
@@ -206,32 +208,36 @@ public:
 	//! \param offset train svm with offset - this is not supported for all SVM solvers.
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	AbstractSvmTrainer(KernelType* kernel, double negativeC, double positiveC, bool offset, bool unconstrained = false)
-		: m_kernel(kernel)
-		, m_regularizers(2)
-		, m_trainOffset(offset)
-		, m_unconstrained(unconstrained)
-		, m_cacheSize(0x4000000) {
-		RANGE_CHECK(positiveC > 0);
-		RANGE_CHECK(negativeC > 0);
+	: m_kernel(kernel)
+	, m_regularizers(2)
+	, m_trainOffset(offset)
+	, m_unconstrained(unconstrained)
+	, m_cacheSize(0x4000000)
+	{ 
+		RANGE_CHECK( positiveC > 0 ); 
+		RANGE_CHECK( negativeC > 0 ); 
 		m_regularizers[0] = negativeC;
 		m_regularizers[1] = positiveC;
-
+		
 	}
 
 	/// \brief Return the value of the regularization parameter C.
-	double C() const {
+	double C() const
+	{
 		SIZE_CHECK(m_regularizers.size() == 1);
 		return m_regularizers[0];
 	}
-
-	RealVector const& regularizationParameters() const {
+	
+	RealVector const& regularizationParameters() const
+	{
 		return m_regularizers;
 	}
-
-	RealVector& regularizationParameters() {
+	
+	RealVector& regularizationParameters()
+	{
 		return m_regularizers;
 	}
-
+	
 	KernelType* kernel()
 	{ return m_kernel; }
 	const KernelType* kernel() const
@@ -241,17 +247,18 @@ public:
 
 	bool isUnconstrained() const
 	{ return m_unconstrained; }
-
+	
 	bool trainOffset() const
 	{ return m_trainOffset; }
 
 	double CacheSize() const
 	{ return m_cacheSize; }
-	void setCacheSize(std::size_t size)
+	void setCacheSize( std::size_t size )
 	{ m_cacheSize = size; }
 
 	/// get the hyper-parameter vector
-	RealVector parameterVector() const {
+	RealVector parameterVector() const
+	{
 		size_t kp = m_kernel->numberOfParameters();
 		RealVector ret(kp + m_regularizers.size());
 		if(m_unconstrained)
@@ -262,7 +269,8 @@ public:
 	}
 
 	/// set the vector of hyper-parameters
-	void setParameterVector(RealVector const& newParameters) {
+	void setParameterVector(RealVector const& newParameters)
+	{
 		size_t kp = m_kernel->numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == kp + m_regularizers.size());
 		init(newParameters) >> parameters(m_kernel), m_regularizers;
@@ -271,17 +279,17 @@ public:
 	}
 
 	/// return the number of hyper-parameters
-	size_t numberOfParameters() const {
+	size_t numberOfParameters() const{ 
 		return m_kernel->numberOfParameters() + m_regularizers.size();
 	}
 
 protected:
 	KernelType* m_kernel;               ///< Kernel object.
-	///\brief Vector of regularization parameters.
+	///\brief Vector of regularization parameters. 
 	///
 	/// If the size of the vector is 1 there is only one regularization parameter for all classes, else there must
 	/// be one for every class in the dataset.
-	/// The exact meaning depends on the sub-class, but the value is always positive,
+	/// The exact meaning depends on the sub-class, but the value is always positive, 
 	/// and higher implies a less regular solution.
 	RealVector m_regularizers;
 	bool m_trainOffset;
@@ -302,9 +310,10 @@ protected:
 ///
 template <class InputType>
 class AbstractLinearSvmTrainer
-	: public AbstractTrainer<LinearClassifier<InputType>, unsigned int>
-	, public QpConfig
-	, public IParameterizable {
+: public AbstractTrainer<LinearClassifier<InputType>, unsigned int>
+, public QpConfig
+, public IParameterizable
+{
 public:
 	typedef AbstractTrainer<LinearClassifier<InputType>, unsigned int> base_type;
 	typedef LinearClassifier<InputType> ModelType;
@@ -313,9 +322,9 @@ public:
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	AbstractLinearSvmTrainer(double C, bool unconstrained = false)
-		: m_C(C)
-		, m_unconstrained(unconstrained)
-	{ RANGE_CHECK(C > 0); }
+	: m_C(C)
+	, m_unconstrained(unconstrained)
+	{ RANGE_CHECK( C > 0 ); }
 
 	/// \brief Return the value of the regularization parameter C.
 	double C() const
@@ -323,7 +332,7 @@ public:
 
 	/// \brief Set the value of the regularization parameter C.
 	void setC(double C) {
-		RANGE_CHECK(C > 0);
+		RANGE_CHECK( C > 0 );
 		m_C = C;
 	}
 
@@ -332,14 +341,16 @@ public:
 	{ return m_unconstrained; }
 
 	/// \brief Get the hyper-parameter vector.
-	RealVector parameterVector() const {
+	RealVector parameterVector() const
+	{
 		RealVector ret(1);
 		ret(0) = (m_unconstrained ? std::log(m_C) : m_C);
 		return ret;
 	}
 
 	/// \brief Set the vector of hyper-parameters.
-	void setParameterVector(RealVector const& newParameters) {
+	void setParameterVector(RealVector const& newParameters)
+	{
 		SHARK_ASSERT(newParameters.size() == 1);
 		setC(m_unconstrained ? std::exp(newParameters(0)) : newParameters(0));
 	}

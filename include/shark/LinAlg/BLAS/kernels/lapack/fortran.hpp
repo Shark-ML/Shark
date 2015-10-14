@@ -7,22 +7,22 @@
  *
  * \par Copyright 1995-2015 Shark Development Team
  *
- * This is based on boost::numeric::bindings, written by Toon Knapen and Kresimir Fresl
- *
+ * This is based on boost::numeric::bindings, written by Toon Knapen and Kresimir Fresl 
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -43,12 +43,12 @@
 #elif defined(__IBMCPP__) || defined(_MSC_VER)
 #define BIND_FORTRAN_LOWERCASE
 #else
-#error do not know how to link with fortran for the given platform
+	#error do not know how to link with fortran for the given platform
 #endif
 
 #endif
 
-// Next we define macro's to convert our symbols to
+// Next we define macro's to convert our symbols to 
 // the current convention
 #if defined(BIND_FORTRAN_LOWERCASE_UNDERSCORE)
 #define FORTRAN_ID( id ) id##_

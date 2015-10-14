@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Efficient Nearest neighbor queries.
- *
- *
+ * 
+ * 
  *
  * \author      T. Glasmachers
  * \date        2011
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -79,7 +79,8 @@ namespace shark {
 /// have O(1) access time. This is crucial for the performance of the tree lookup.
 /// When data is stored in a Data<T>, a View should be chosen as template parameter.
 template <class DataContainer>
-class IterativeNNQuery {
+class IterativeNNQuery
+{
 public:
 	typedef typename DataContainer::value_type value_type;
 	typedef BinaryTree<value_type> tree_type;
@@ -91,19 +92,21 @@ public:
 	/// \param  data    Container holding the stored data which is referenced by the tree
 	/// \param  point   Point whose nearest neighbors are to be found.
 	IterativeNNQuery(tree_type const* tree, DataContainer const& data, value_type const& point)
-		: m_data(data)
-		, m_reference(point)
-		, m_nextIndex(0)
-		, mp_trace(NULL)
-		, mep_head(NULL)
-		, m_squaredRadius(0.0)
-		, m_neighbors(0) {
+	: m_data(data)
+	, m_reference(point)
+	, m_nextIndex(0)
+	, mp_trace(NULL)
+	, mep_head(NULL)
+	, m_squaredRadius(0.0)
+	, m_neighbors(0)
+	{
 		// Initialize the recursion trace: descend to the
 		// leaf covering the reference point and queue it.
 		// The parent of this leaf becomes the "head".
 		mp_trace = new TraceNode(tree, NULL, m_reference);
 		TraceNode* tn = mp_trace;
-		while(tree->hasChildren()) {
+		while (tree->hasChildren())
+		{
 			tn->createLeftNode(tree, m_data, m_reference);
 			tn->createRightNode(tree, m_data, m_reference);
 			bool left = tree->isLeft(m_reference);
@@ -129,26 +132,27 @@ public:
 
 	/// find and return the next nearest neighbor
 	result_type next() {
-		if(m_neighbors >= mp_trace->m_tree->size())
+		if (m_neighbors >= mp_trace->m_tree->size()) 
 			throw SHARKEXCEPTION("[IterativeNNQuery::next] no more neighbors available");
 
 		assert(! m_queue.empty());
 
 		// Check whether the current node has points
 		// left, or whether it should be discarded.
-		if(m_neighbors > 0) {
+		if (m_neighbors > 0){
 			TraceLeaf& q = *m_queue.begin();
-			if(m_nextIndex < q.m_tree->size()) {
+			if (m_nextIndex < q.m_tree->size()){
 				return getNextPoint(q);
-			} else
+			}
+			else
 				m_queue.erase(q);
 		}
-		if(m_queue.empty() || (*m_queue.begin()).m_squaredPtDistance > m_squaredRadius) {
+		if (m_queue.empty() || (*m_queue.begin()).m_squaredPtDistance > m_squaredRadius){
 			// enqueue more points
 			TraceNode* tn = mep_head;
-			while(tn != NULL) {
+			while (tn != NULL){
 				enqueue(tn);
-				if(tn->m_status == COMPLETE) mep_head = tn->mep_parent;
+				if (tn->m_status == COMPLETE) mep_head = tn->mep_parent;
 				tn = tn->mep_parent;
 			}
 
@@ -163,14 +167,15 @@ public:
 	/// return the size of the queue,
 	/// which is a measure of the
 	/// overhead of the search
-	std::size_t queuesize() const {
+	std::size_t queuesize() const{ 
 		return m_queue.size();
 	}
 
 private:
 
 	/// status of a TraceNode object during the search
-	enum Status {
+	enum Status
+	{
 		NONE,            // no points of this node have been queued yet
 		PARTIAL,         // some of the points of this node have been queued
 		COMPLETE,        // all points of this node have been queued
@@ -181,32 +186,34 @@ private:
 	/// of the space partirioning tree that need to be
 	/// traversed in order to find the next nearest
 	/// neighbor.
-	class TraceNode {
+	class TraceNode
+	{
 	public:
 		/// Constructor
 		TraceNode(tree_type const* tree, TraceNode* parent, value_type const& reference)
-			: m_tree(tree)
-			, m_status(NONE)
-			, mep_parent(parent)
-			, mep_left(NULL)
-			, mep_right(NULL)
-			, m_squaredDistance(tree->squaredDistanceLowerBound(reference))
+		: m_tree(tree)
+		, m_status(NONE)
+		, mep_parent(parent)
+		, mep_left(NULL)
+		, mep_right(NULL)
+		, m_squaredDistance(tree->squaredDistanceLowerBound(reference))
 		{ }
 
 		/// Destructor
-		virtual ~TraceNode() {
-			if(mep_left != NULL) delete mep_left;
-			if(mep_right != NULL) delete mep_right;
+		virtual ~TraceNode()
+		{
+			if (mep_left != NULL) delete mep_left;
+			if (mep_right != NULL) delete mep_right;
 		}
-
-		void createLeftNode(tree_type const* tree, DataContainer const& data, value_type const& reference) {
-			if(tree->left()->hasChildren())
+		
+		void createLeftNode(tree_type const* tree, DataContainer const& data, value_type const& reference){
+			if (tree->left()->hasChildren())
 				mep_left = new TraceNode(tree->left(), this, reference);
 			else
 				mep_left = new TraceLeaf(tree->left(), this, data, reference);
 		}
-		void createRightNode(tree_type const* tree, DataContainer const& data, value_type const& reference) {
-			if(tree->right()->hasChildren())
+		void createRightNode(tree_type const* tree, DataContainer const& data, value_type const& reference){
+			if (tree->right()->hasChildren())
 				mep_right = new TraceNode(tree->right(), this, reference);
 			else
 				mep_right = new TraceLeaf(tree->right(), this, data, reference);
@@ -218,13 +225,15 @@ private:
 		/// of the area covered by the queue (in fact, it is
 		/// the radius of the largest sphere around the
 		/// reference point that fits into the covered area).
-		double squaredRadius(value_type const& ref) const {
-			if(m_status == NONE) return m_squaredDistance;
-			else if(m_status == PARTIAL) {
+		double squaredRadius(value_type const& ref) const{
+			if (m_status == NONE) return m_squaredDistance;
+			else if (m_status == PARTIAL)
+			{
 				double l = mep_left->squaredRadius(ref);
 				double r = mep_right->squaredRadius(ref);
 				return std::min(l, r);
-			} else return 1e100;
+			}
+			else return 1e100;
 		}
 
 		/// node of the tree
@@ -255,11 +264,12 @@ private:
 	/// (2) they know the distance of their point to the
 	///     reference point,
 	/// (3) they can be added to the candidates queue.
-	class TraceLeaf : public TraceNode, public HookType {
+	class TraceLeaf : public TraceNode, public HookType
+	{
 	public:
 		/// Constructor
 		TraceLeaf(tree_type const* tree, TraceNode* parent, DataContainer const& data, value_type const& ref)
-			: TraceNode(tree, parent, ref) {
+		: TraceNode(tree, parent, ref){
 			//check whether the tree uses a differen metric than a linear one.
 			if(tree->kernel() != NULL)
 				m_squaredPtDistance = tree->kernel()->featureDistanceSqr(data[tree->index(0)], ref);
@@ -273,8 +283,8 @@ private:
 
 		/// Comparison by distance, ties are broken arbitrarily,
 		/// but deterministically, by tree node pointer.
-		inline bool operator < (TraceLeaf const& rhs) const {
-			if(m_squaredPtDistance == rhs.m_squaredPtDistance)
+		inline bool operator < (TraceLeaf const& rhs) const{
+			if (m_squaredPtDistance == rhs.m_squaredPtDistance) 
 				return (this->m_tree < rhs.m_tree);
 			else
 				return (m_squaredPtDistance < rhs.m_squaredPtDistance);
@@ -285,24 +295,26 @@ private:
 	};
 
 	/// insert a point into the queue
-	void insertIntoQueue(TraceLeaf* leaf) {
+	void insertIntoQueue(TraceLeaf* leaf){
 		m_queue.insert_unique(*leaf);
 
 		// traverse up the tree, updating the state
 		TraceNode* tn = leaf;
 		tn->m_status = COMPLETE;
-		while(true) {
+		while (true){
 			TraceNode* par = tn->mep_parent;
-			if(par == NULL) break;
-			if(par->m_status == NONE) {
+			if (par == NULL) break;
+			if (par->m_status == NONE){
 				par->m_status = PARTIAL;
 				break;
-			} else if(par->m_status == PARTIAL) {
-				if(par->mep_left == tn) {
-					if(par->mep_right->m_status == COMPLETE) par->m_status = COMPLETE;
+			}
+			else if (par->m_status == PARTIAL){
+				if (par->mep_left == tn){
+					if (par->mep_right->m_status == COMPLETE) par->m_status = COMPLETE;
 					else break;
-				} else {
-					if(par->mep_left->m_status == COMPLETE) par->m_status = COMPLETE;
+				}
+				else{
+					if (par->mep_left->m_status == COMPLETE) par->m_status = COMPLETE;
 					else break;
 				}
 			}
@@ -310,42 +322,47 @@ private:
 		}
 	}
 
-	result_type getNextPoint(TraceLeaf const& leaf) {
+	result_type getNextPoint(TraceLeaf const& leaf){
 		double dist = std::sqrt(leaf.m_squaredPtDistance);
 		std::size_t index = leaf.m_tree->index(m_nextIndex);
 		++m_nextIndex;
-		return std::make_pair(dist, index);
+		return std::make_pair(dist,index);
 	}
 
 	/// Recursively descend the node and enqueue
 	/// all points in cells intersecting the
 	/// current bounding sphere.
-	void enqueue(TraceNode* tn) {
+	void enqueue(TraceNode* tn){
 		// check whether this node needs to be enqueued
-		if(tn->m_status == COMPLETE) return;
-		if(! m_queue.empty() && tn->m_squaredDistance >= (*m_queue.begin()).m_squaredPtDistance) return;
+		if (tn->m_status == COMPLETE) return;
+		if (! m_queue.empty() && tn->m_squaredDistance >= (*m_queue.begin()).m_squaredPtDistance) return;
 
 		const tree_type* tree = tn->m_tree;
-		if(tree->hasChildren()) {
+		if (tree->hasChildren()){
 			// extend the tree at need
-			if(tn->mep_left == NULL) {
-				tn->createLeftNode(tree, m_data, m_reference);
+			if (tn->mep_left == NULL){
+				tn->createLeftNode(tree,m_data,m_reference);
 			}
-			if(tn->mep_right == NULL) {
-				tn->createRightNode(tree, m_data, m_reference);
+			if (tn->mep_right == NULL){
+				tn->createRightNode(tree,m_data,m_reference);
 			}
 
 			// first descend into the closer sub-tree
-			if(tree->isLeft(m_reference)) {
+			if (tree->isLeft(m_reference))
+			{
 				// left first
 				enqueue(tn->mep_left);
 				enqueue(tn->mep_right);
-			} else {
+			}
+			else
+			{
 				// right first
 				enqueue(tn->mep_right);
 				enqueue(tn->mep_left);
 			}
-		} else {
+		}
+		else
+		{
 			TraceLeaf* leaf = (TraceLeaf*)tn;
 			insertIntoQueue(leaf);
 		}
@@ -389,9 +406,10 @@ private:
 ///
 /// Returns the labels and distances of the k nearest neighbors of a point.
 template<class InputType, class LabelType>
-class TreeNearestNeighbors: public AbstractNearestNeighbors<InputType, LabelType> {
+class TreeNearestNeighbors:public AbstractNearestNeighbors<InputType,LabelType>
+{
 private:
-	typedef AbstractNearestNeighbors<InputType, LabelType> base_type;
+	typedef AbstractNearestNeighbors<InputType,LabelType> base_type;
 
 public:
 	typedef LabeledData<InputType, LabelType> Dataset;
@@ -400,26 +418,26 @@ public:
 	typedef typename Batch<InputType>::type BatchInputType;
 
 	TreeNearestNeighbors(Dataset const& dataset, Tree const* tree)
-		: m_dataset(dataset), m_inputs(dataset.inputs()), m_labels(dataset.labels()), mep_tree(tree)
+	: m_dataset(dataset), m_inputs(dataset.inputs()), m_labels(dataset.labels()),mep_tree(tree)
 	{ }
 
 	///\brief returns the k nearest neighbors of the point
-	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const {
+	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const{
 		std::size_t numPoints = shark::size(patterns);
-		std::vector<DistancePair> results(k * numPoints);
-		for(std::size_t p = 0; p != numPoints; ++p) {
+		std::vector<DistancePair> results(k*numPoints);
+		for(std::size_t p = 0; p != numPoints; ++p){
 			IterativeNNQuery<DataView<Data<InputType> const> > query(mep_tree, m_inputs, get(patterns, p));
 			//find the neighbors using the queries
-			for(std::size_t i = 0; i != k; ++i) {
+			for(std::size_t i = 0; i != k; ++i){
 				typename IterativeNNQuery<DataView<Data<InputType> const> >::result_type result = query.next();
-				results[i + p * k].key = result.first;
-				results[i + p * k].value = m_labels[result.second];
+				results[i+p*k].key=result.first;
+				results[i+p*k].value= m_labels[result.second]; 
 			}
 		}
 		return results;
 	}
 
-	LabeledData<InputType, LabelType>const& dataset()const {
+	LabeledData<InputType,LabelType>const& dataset()const {
 		return m_dataset;
 	}
 
@@ -428,7 +446,7 @@ private:
 	DataView<Data<InputType> const> m_inputs;
 	DataView<Data<LabelType> const> m_labels;
 	Tree const* mep_tree;
-
+	
 };
 
 

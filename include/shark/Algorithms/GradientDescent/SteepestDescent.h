@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       SteepestDescent
- *
- *
+ * 
+ * 
  *
  * \author      O. Krause
  * \date        2010
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -36,10 +36,11 @@
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 
-namespace shark {
+namespace shark{
 
 ///@brief Standard steepest descent.
-class SteepestDescent : public AbstractSingleObjectiveOptimizer<RealVector > {
+class SteepestDescent : public AbstractSingleObjectiveOptimizer<RealVector >
+{
 public:
 	SteepestDescent() {
 		m_features |= REQUIRES_FIRST_DERIVATIVE;
@@ -55,11 +56,11 @@ public:
 	void init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
 		checkFeatures(objectiveFunction);
 		objectiveFunction.init();
-
+		
 		m_path.resize(startingPoint.size());
 		m_path.clear();
 		m_best.point = startingPoint;
-		m_best.value = objectiveFunction.evalDerivative(m_best.point, m_derivative);
+		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 	}
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 
@@ -95,19 +96,21 @@ public:
 	 */
 	void step(ObjectiveFunctionType const& objectiveFunction) {
 		m_path = -m_learningRate * m_derivative + m_momentum * m_path;
-		m_best.point += m_path;
-		m_best.value = objectiveFunction.evalDerivative(m_best.point, m_derivative);
+		m_best.point+=m_path;
+		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
 	}
-	virtual void read(InArchive & archive) {
-		archive >> m_path;
-		archive >> m_learningRate;
-		archive >> m_momentum;
+	virtual void read( InArchive & archive )
+	{
+		archive>>m_path;
+		archive>>m_learningRate;
+		archive>>m_momentum;
 	}
 
-	virtual void write(OutArchive & archive) const {
-		archive << m_path;
-		archive << m_learningRate;
-		archive << m_momentum;
+	virtual void write( OutArchive & archive ) const
+	{
+		archive<<m_path;
+		archive<<m_learningRate;
+		archive<<m_momentum;
 	}
 
 private:

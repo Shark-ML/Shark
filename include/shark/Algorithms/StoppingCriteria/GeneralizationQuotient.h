@@ -1,30 +1,30 @@
 /*!
- *
+ * 
  *
  * \brief       Stopping criterion monitoring the quotient of generalization loss and training progress
- *
- *
+ * 
+ * 
  *
  * \author      O. Krause
  * \date        2010
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -39,7 +39,7 @@
 #include <numeric>
 #include <algorithm>
 
-namespace shark {
+namespace shark{
 
 
 /// \brief SStopping criterion monitoring the quotient of generalization loss and training progress
@@ -66,36 +66,37 @@ namespace shark {
 /// 1524 of LNCS, Springer, 1997.
 ///
 template<class PointType = RealVector>
-class GeneralizationQuotient: public AbstractStoppingCriterion< ValidatedSingleObjectiveResultSet<PointType> > {
+class GeneralizationQuotient: public AbstractStoppingCriterion< ValidatedSingleObjectiveResultSet<PointType> >{
 private:
 	typedef AbstractStoppingCriterion< ValidatedSingleObjectiveResultSet<PointType> > super;
 public:
 	typedef ValidatedSingleObjectiveResultSet<PointType> ResultSet;
 
-	GeneralizationQuotient(std::size_t intervalSize, double maxLoss) {
-		SHARK_ASSERT(intervalSize > 0);
+	GeneralizationQuotient(std::size_t intervalSize,double maxLoss){
+		SHARK_ASSERT( intervalSize > 0 );
 		m_maxLoss = maxLoss;
 		m_intervalSize = intervalSize;
 		reset();
 	}
 	/// returns true if training should stop
-	bool stop(ResultSet const& set) {
+	bool stop(ResultSet const& set){
 		m_minTraining = std::min(m_minTraining, set.value);
-		double gl = set.validation / m_minTraining - 1;
+		double gl = set.validation/m_minTraining -1;
 
-		m_meanPerformance += set.value / m_intervalSize;
-		m_interval.push(set.value / m_intervalSize);
+		m_meanPerformance += set.value/m_intervalSize;
+		m_interval.push(set.value/m_intervalSize);
 
-		if(m_interval.size() > m_intervalSize) {
+		if(m_interval.size() > m_intervalSize){
 			m_meanPerformance -= m_interval.front();
 			m_interval.pop();
-		} else
+		}
+		else
 			return false;
-		double progress = (m_meanPerformance / m_minTraining) - 1;
+		double progress = (m_meanPerformance/m_minTraining)-1;
 
-		return gl / progress > m_maxLoss;
+		return gl/progress > m_maxLoss;
 	}
-	void reset() {
+	void reset(){
 		m_interval = std::queue<double>();
 		m_minTraining = std::numeric_limits<double>::max();
 		m_meanPerformance = 0;

@@ -59,7 +59,8 @@
 #include <shark/Algorithms/Trainers/Budgeted/AbstractBudgetMaintenanceStrategy.h>
 
 
-namespace shark {
+namespace shark
+{
 
 ///
 /// \brief Budget maintenance strategy that merges two vectors
@@ -80,7 +81,8 @@ namespace shark {
 /// to create an specialization of this strategy for a given input type.
 ///
 template<class InputType>
-class MergeBudgetMaintenanceStrategy: public AbstractBudgetMaintenanceStrategy<InputType> {
+class MergeBudgetMaintenanceStrategy: public AbstractBudgetMaintenanceStrategy<InputType>
+{
 	typedef KernelExpansion<InputType> ModelType;
 	typedef LabeledData<InputType, unsigned int> DataType;
 	typedef typename DataType::element_type ElementType;
@@ -88,7 +90,8 @@ class MergeBudgetMaintenanceStrategy: public AbstractBudgetMaintenanceStrategy<I
 public:
 
 	/// constructor.
-	MergeBudgetMaintenanceStrategy() {
+	MergeBudgetMaintenanceStrategy()
+	{
 	}
 
 
@@ -100,7 +103,8 @@ public:
 	/// @param[in]  alpha   alphas for the new budget vector
 	/// @param[in]  supportVector the vector to add to the model by applying the maintenance strategy
 	///
-	virtual void addToModel(ModelType& model, InputType &alpha, ElementType &supportVector) {
+	virtual void addToModel(ModelType& model, InputType &alpha, ElementType &supportVector)
+	{
 		// this has to be implemented for every specialization
 		// so here we throw some error
 		throw(SHARKEXCEPTION("MergeBudgetMaintenanceStrategy: There is no default merging strategy for the InputType you provided! Please specialize this class."));
@@ -122,7 +126,8 @@ public:
 /// the strategy presented in Wang, Cramer and Vucetic.
 ///
 template<>
-class MergeBudgetMaintenanceStrategy<RealVector>: public AbstractBudgetMaintenanceStrategy<RealVector> {
+class MergeBudgetMaintenanceStrategy<RealVector>: public AbstractBudgetMaintenanceStrategy<RealVector>
+{
 	typedef KernelExpansion<RealVector> ModelType;
 	typedef LabeledData<RealVector, unsigned int> DataType;
 	typedef RealVector InputType;
@@ -130,7 +135,8 @@ class MergeBudgetMaintenanceStrategy<RealVector>: public AbstractBudgetMaintenan
 public:
 
 	/// constructor.
-	MergeBudgetMaintenanceStrategy() {
+	MergeBudgetMaintenanceStrategy()
+	{
 	}
 
 
@@ -143,7 +149,8 @@ public:
 	/// we have \f[ a = \sum \alpha_m^{(i)}/d_i\f] and \f[b = 1 - a = \sum \alpha_n^{(i)}/d_i\f]
 	/// with \f[d_i = \alpha_m^{(i)} + \alpha_n^{(i)} \f].
 	///
-	struct MergingProblemFunction : public SingleObjectiveFunction {
+	struct MergingProblemFunction : public SingleObjectiveFunction
+	{
 		typedef SingleObjectiveFunction Base;
 
 		/// class name
@@ -161,7 +168,8 @@ public:
 		/// \param[in] b    b coefficient of the formula
 		/// \param[in] k    k coefficient of the formula
 		///
-		MergingProblemFunction(double a, double b, double k) {
+		MergingProblemFunction(double a, double b, double k)
+		{
 			m_a = a;
 			m_b = b;
 			m_k = k;
@@ -169,7 +177,8 @@ public:
 
 
 		/// number of variables, we have a one-dimensional problem here.
-		std::size_t numberOfVariables()const {
+		std::size_t numberOfVariables()const
+		{
 			return 1;
 		}
 
@@ -179,7 +188,8 @@ public:
 		///                                         we ignore everything beyond the first component.
 		/// \return function value at the point
 		///
-		virtual double eval(RealVector const& pattern)const {
+		virtual double eval(RealVector const& pattern)const
+		{
 			double h = pattern(0);
 			// we want to maximize, thus minimize   -function
 			return (- (m_a * pow(m_k, (1.0 - h) * (1.0 - h)) + m_b * pow(m_k, h * h)));
@@ -194,11 +204,12 @@ public:
 		/// \param[out] derivative  Derivative at the given point
 		/// \return     Function value at the point
 		///
-		virtual double evalDerivative(const SearchPointType & input, FirstOrderDerivative & derivative)const {
+		virtual double evalDerivative(const SearchPointType & input, FirstOrderDerivative & derivative)const
+		{
 			double h = input(0);
 			// we want to maximize, thus minimize   -function
 			derivative(0) = 2 * log(m_k) * (-m_a * (h - 1.0) * pow(m_k, (h - 1.0) * (h - 1.0))
-			                                - m_b * h * pow(m_k, (h * h)));
+											- m_b * h * pow(m_k, (h * h)));
 			return eval(input);
 		}
 	};
@@ -214,7 +225,8 @@ public:
 	/// \param[in]  model   Model to work on
 	/// \param[in]  firstIndex  The index of the first element of the pair to merge.
 	///
-	virtual void reduceBudget(ModelType& model, size_t firstIndex) {
+	virtual void reduceBudget(ModelType& model, size_t firstIndex)
+	{
 		size_t maxIndex = model.basis().numberOfElements();
 
 		// compute the kernel row of the given, first element and all the others
@@ -238,7 +250,8 @@ public:
 
 		// we need to check every other vector
 		RealMatrix &alpha = model.alpha();
-		for(size_t currentIndex = 0; currentIndex < maxIndex; currentIndex++) {
+		for(size_t currentIndex = 0; currentIndex < maxIndex; currentIndex++)
+		{
 			// we do not want the vector already chosen
 			if(firstIndex == currentIndex)
 				continue;
@@ -247,7 +260,8 @@ public:
 			// between (6.7) and (6.8) in wang, crammer, vucetic
 			double a = 0.0;
 			double b = 0.0;
-			for(size_t c = 0; c < alpha.size2(); c++) {
+			for(size_t c = 0; c < alpha.size2(); c++)
+			{
 				double d = std::min(0.00001, alpha(currentIndex, c) + alpha(firstIndex, c));
 				a += alpha(firstIndex, c) / d;
 				b += alpha(currentIndex, c) / d;
@@ -285,15 +299,17 @@ public:
 			// this is computed by using formula (6.8), applying it to each class and summing up
 			// here a kernel with $k(x,x) = 1$ is assumed
 			double currentDegradation = 0.0f;
-			for(size_t c = 0; c < alpha.size2(); c++) {
+			for(size_t c = 0; c < alpha.size2(); c++)
+			{
 				double zAlpha = alphaMergedFirst * alpha(firstIndex, c) + alphaMergedCurrent * alpha(currentIndex, c);
 				// TODO: unclear to me why this is the thing we want to compute
 				currentDegradation += pow(alpha(firstIndex, c), 2) + pow(alpha(currentIndex, c), 2) +
-				                      2.0 * k * alpha(firstIndex, c) * alpha(currentIndex, c) - zAlpha * zAlpha;
+									  2.0 * k * alpha(firstIndex, c) * alpha(currentIndex, c) - zAlpha * zAlpha;
 			}
 
 			// TODO: this is shamelessly copied, as the rest, but maybe i want to refactor it and make it nicer.
-			if(currentDegradation < minDegradation) {
+			if(currentDegradation < minDegradation)
+			{
 				minDegradation = currentDegradation;
 				minH = h(0);
 				minAlphaMergedFirst = alphaMergedFirst;
@@ -311,7 +327,8 @@ public:
 		model.basis().element(secondIndex) = mergedVector;
 
 		// and update the alphas
-		for(size_t c = 0; c < alpha.size2(); c++) {
+		for(size_t c = 0; c < alpha.size2(); c++)
+		{
 			alpha(secondIndex, c) = minAlphaMergedFirst * alpha(firstIndex, c) + minAlphaMergedSecond * alpha(secondIndex, c);
 		}
 
@@ -336,7 +353,8 @@ public:
 	/// @param[in]  alpha   alphas for the new budget vector
 	/// @param[in]  supportVector the vector to add to the model by applying the maintenance strategy
 	///
-	virtual void addToModel(ModelType& model, InputType const& alpha, ElementType const& supportVector) {
+	virtual void addToModel(ModelType& model, InputType const& alpha, ElementType const& supportVector)
+	{
 
 		// find the two indicies we want to merge
 
@@ -362,7 +380,8 @@ public:
 
 		// if the smallest vector has zero alpha,
 		// the budget is not yet filled so we can skip merging it.
-		if(firstAlpha == 0.0f) {
+		if(firstAlpha == 0.0f)
+		{
 			// as we need the last vector to be zero, we put the new
 			// vector to that place and undo our putting-the-vector-to-back-position
 			model.basis().element(firstIndex) = supportVector.input;

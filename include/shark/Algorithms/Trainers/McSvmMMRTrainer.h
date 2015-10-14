@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Trainer for the Maximum Margin Regression Multi-class Support Vector Machine
- *
- *
- *
+ * 
+ * 
+ * 
  *
  * \author      T. Glasmachers
  * \date        -
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -92,7 +92,8 @@ namespace shark {
 /// PASCAL, 2006.</p>
 ///
 template <class InputType, class CacheType = float>
-class McSvmMMRTrainer : public AbstractSvmTrainer<InputType, unsigned int> {
+class McSvmMMRTrainer : public AbstractSvmTrainer<InputType, unsigned int>
+{
 public:
 	typedef CacheType QpFloatType;
 
@@ -106,96 +107,106 @@ public:
 	//! \param offset    whether to train with offset/bias parameter or not
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
 	McSvmMMRTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false)
-		: base_type(kernel, C, offset, unconstrained)
+	: base_type(kernel, C, offset, unconstrained)
 	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "McSvmMMRTrainer"; }
 
-	void train(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset) {
+	void train(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
+	{
 		std::size_t ic = dataset.numberOfElements();
 		unsigned int classes = numberOfClasses(dataset);
-
+		
 		// prepare the problem description
-		RealVector alpha(ic, 0.0);
-		RealVector bias(classes, 0.0);
-		RealMatrix gamma(classes, 1, 1.0);
-		UIntVector rho(1, 0);
-
+		RealVector alpha(ic,0.0);
+		RealVector bias(classes,0.0);
+		RealMatrix gamma(classes, 1,1.0);
+		UIntVector rho(1,0);
+		
 		QpSparseArray<QpFloatType> nu(classes, classes, classes);
-		for(unsigned int y = 0; y < classes; y++)
+		for (unsigned int y=0; y<classes; y++) 
 			nu.add(y, y, 1.0);
 
 		QpSparseArray<QpFloatType> M(classes * classes, 1, classes);
 		QpFloatType mood = (QpFloatType)(-1.0 / (double)classes);
 		QpFloatType val = (QpFloatType)1.0 + mood;
-		for(unsigned int r = 0, yv = 0; yv < classes; yv++) {
-			for(unsigned int yw = 0; yw < classes; yw++, r++) {
+		for (unsigned int r=0, yv=0; yv<classes; yv++)
+		{
+			for (unsigned int yw=0; yw<classes; yw++, r++)
+			{
 				M.setDefaultValue(r, mood);
-				if(yv == yw) M.add(r, 0, val);
+				if (yv == yw) M.add(r, 0, val);
 			}
 		}
-
+		
 		typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
 		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
 		typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
-
+		
 		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
 
 		// solve the problem
-		if(base_type::precomputeKernel()) {
+		if (base_type::precomputeKernel())
+		{
 			PrecomputedMatrixType matrix(&km);
 			QpMcDecomp< PrecomputedMatrixType > solver(matrix, gamma, rho, nu, M, true);
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			solver.setShrinking(base_type::m_shrinking);
-			if(base_type::m_s2do)
+			if (base_type::m_s2do) 
 				solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
-			else
+			else 
 				solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
-		} else {
+		}
+		else
+		{
 			CachedMatrixType matrix(&km, base_type::m_cacheSize);
 			QpMcDecomp< CachedMatrixType > solver(matrix, gamma, rho, nu, M, true);
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
 			solver.setShrinking(base_type::m_shrinking);
-			if(base_type::m_s2do)
+			if (base_type::m_s2do)
 				solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
 			else
 				solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
 		}
-
-		svm.decisionFunction().setStructure(this->m_kernel, dataset.inputs(), this->m_trainOffset, classes);
+		
+		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
 
 		// write the solution into the model
-		for(std::size_t i = 0; i < ic; i++) {
+		for (std::size_t i=0; i<ic; i++)
+		{
 			unsigned int y = dataset.element(i).label;
-			for(unsigned int c = 0; c < classes; c++) {
-				svm.decisionFunction().alpha(i, c) = nu(y, c) * alpha(i);
+			for (unsigned int c=0; c<classes; c++)
+			{
+				svm.decisionFunction().alpha(i,c) = nu(y, c) * alpha(i);
 			}
 		}
-		if(this->m_trainOffset)
+		if (this->m_trainOffset) 
 			svm.decisionFunction().offset() = bias;
 
 		base_type::m_accessCount = km.getAccessCount();
-		if(this->sparsify())
+		if (this->sparsify()) 
 			svm.decisionFunction().sparsify();
 	}
 };
 
 
 template <class InputType>
-class LinearMcSvmMMRTrainer : public AbstractLinearSvmTrainer<InputType> {
+class LinearMcSvmMMRTrainer : public AbstractLinearSvmTrainer<InputType>
+{
 public:
 	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
 	LinearMcSvmMMRTrainer(double C, bool unconstrained = false)
-		: AbstractLinearSvmTrainer<InputType>(C, unconstrained) { }
+	: AbstractLinearSvmTrainer<InputType>(C, unconstrained){ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LinearMcSvmMMRTrainer"; }
 
-	void train(LinearClassifier<InputType>& model, const LabeledData<InputType, unsigned int>& dataset) {
+	void train(LinearClassifier<InputType>& model, const LabeledData<InputType, unsigned int>& dataset)
+	{
 		std::size_t dim = inputDimension(dataset);
 		std::size_t classes = numberOfClasses(dataset);
 

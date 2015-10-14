@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Error measure for classification tasks of non exclusive attributes
  * that can be used for model training.
- *
- *
+ * 
+ * 
  *
  * \author      -
  * \date        -
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -37,7 +37,7 @@
 
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 
-namespace shark {
+namespace shark{
 /*!
   *  \brief Error measure for classification tasks of non exclusive attributes
  *         that can be used for model training.
@@ -70,27 +70,29 @@ namespace shark {
  *  (binary encoding). For detailed information refer to
  *  (C.M. Bishop, Neural Networks for Pattern Recognition, Clarendon Press 1996, Chapter 6.8.)
  */
-class CrossEntropyIndependent : public AbstractLoss<unsigned int, RealVector> {
+class CrossEntropyIndependent : public AbstractLoss<unsigned int,RealVector>
+{
 	typedef AbstractLoss<unsigned int, RealVector> base_type;
 
 	// This code uses a different formula to compute the binary case for 1 output.
 	// It should be numerically more stable.
-	// formula: ln(1+exp(-yx)) with y = -1/1
-	double evalError(unsigned int target, double exponential, double value) const {
+	// formula: ln(1+exp(-yx)) with y = -1/1 
+	double evalError(unsigned int target,double exponential,double value) const {
 		double label = 2 * static_cast<double>(target) - 1;   // converts labels from 0/1 to -1/+1
-		if(value * label < -100) {
+		if(value*label < -100 ){
 			//below this, we might get numeric instabilities
 			//but we know, that ln(1+exp(x)) converges to x for big arguments
 			return - value * label;
 		}
 		if(target == 0)
-			exponential = 1 / exponential;
+			exponential = 1/exponential;
 
-		return std::log(1 + exponential);
+		return std::log(1+exponential);
 	}
 
 public:
-	CrossEntropyIndependent() {
+	CrossEntropyIndependent()
+	{
 		m_features |= HAS_FIRST_DERIVATIVE;
 		m_features |= HAS_SECOND_DERIVATIVE;
 	}
@@ -103,45 +105,48 @@ public:
 	// annoyingness of C++ templates
 	using base_type::eval;
 
-	double eval(unsigned int const& target, RealVector const& prediction) const {
+	double eval(unsigned int const& target, RealVector const& prediction) const
+	{
 		double error = 0;
-		for(std::size_t c = 0; c != prediction.size(); c++) {
-			double exponential =  exp(-prediction(c));
-			error += evalError(target, exponential, prediction(c));
+		for (std::size_t c = 0; c != prediction.size(); c++){
+			double exponential =  exp ( -prediction ( c ) );
+			error += evalError(target,exponential,prediction ( c ));
 		}
 
 		return error;
 	}
 
-	double evalDerivative(unsigned int const& target, RealVector const& prediction, RealVector& gradient) const {
+	double evalDerivative(unsigned int const& target, RealVector const& prediction, RealVector& gradient) const
+	{
 		gradient.resize(target.size());
-
+		
 		double error = 0;
-		for(std::size_t c = 0; c < output.nelem(); c++) {
-			double exponential = exp(-prediction(c));
-			double sigmoid = 1 / (1 + exponential);
-			gradient(c) = (sigmoid - target);
-			error += evalError(target, exponential, prediction(c));
+		for (std::size_t c = 0; c < output.nelem(); c++){
+			double exponential = exp ( -prediction ( c ) );
+			double sigmoid = 1/ ( 1+ exponential);
+			gradient ( c ) = ( sigmoid - target );
+			error += evalError(target, exponential, prediction ( c ));
 		}
 		return error;
 	}
 
-	double evalDerivative(
-	    unsigned int const& target,
-	    RealVector const& prediction,
-	    RealVector& gradient,
-	    typename base_type::MatrixType& hessian) const {
+	double evalDerivative (
+			unsigned int const& target, 
+			RealVector const& prediction,
+			RealVector& gradient, 
+			typename base_type::MatrixType& hessian) const
+	{
 		gradient.resize(target.size());
-		hessian.resize(0, 0);
+		hessian.resize(0,0);
 		hessian.clear();
 
 		double error = 0;
-		for(std::size_t c = 0; c < output.nelem(); c++) {
-			double exponential = exp(-prediction(c));
-			double sigmoid = 1 / (1 + exponential);
-			gradient(c) = (sigmoid - target);
-			hessian(c, c) = std::max(0.0, sigmoid * (1 - sigmoid));
-			error += evalError(target, exponential, prediction(c));
+		for (std::size_t c = 0; c < output.nelem(); c++){
+			double exponential = exp ( -prediction ( c ) );
+			double sigmoid = 1/ ( 1+ exponential);
+			gradient ( c ) = ( sigmoid - target );
+			hessian ( c,c ) = std::max(0.0, sigmoid * ( 1-sigmoid ));
+			error += evalError(target, exponential, prediction ( c ));
 		}
 		return error;
 	}

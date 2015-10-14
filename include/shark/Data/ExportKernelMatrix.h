@@ -45,7 +45,8 @@
 #include <shark/Algorithms/Trainers/NormalizeKernelUnitVariance.h>
 
 
-namespace shark {
+namespace shark
+{
 
 /**
  * \ingroup shark_globals
@@ -53,7 +54,8 @@ namespace shark {
  * @{
  */
 
-enum KernelMatrixNormalizationType {
+enum KernelMatrixNormalizationType
+{
 	NONE,                               // no normalization. output regular Gram kernel matrix
 	MULTIPLICATIVE_TRACE_ONE,           // determine the trace, and devide each entry by it
 	MULTIPLICATIVE_TRACE_N,             // determine the trace, devide each entry by it, then multiply by the number of samples
@@ -72,13 +74,14 @@ enum KernelMatrixNormalizationType {
 /// \param  fieldwidth      field width for pretty printing
 template<typename InputType, typename LabelType>
 void exportKernelMatrix(
-    LabeledData<InputType, LabelType> const &dataset,
-    AbstractKernelFunction<InputType> &kernel,           // kernel function (can't be const b/c of ScaledKernel later)
-    std::ostream &out,                                     // The stream to be written to
-    KernelMatrixNormalizationType normalizer = NONE, // what kind of normalization to apply. see enum declaration for details.
-    bool scientific = false,                         // scientific notation?
-    unsigned int fieldwidth = 0                      // for pretty-printing
-) {
+	LabeledData<InputType, LabelType> const &dataset,
+	AbstractKernelFunction<InputType> &kernel,           // kernel function (can't be const b/c of ScaledKernel later)
+	std::ostream &out,                                     // The stream to be written to
+	KernelMatrixNormalizationType normalizer = NONE, // what kind of normalization to apply. see enum declaration for details.
+	bool scientific = false,                         // scientific notation?
+	unsigned int fieldwidth = 0                      // for pretty-printing
+)
+{
 	//get access to the range of elements
 	typedef typename LabeledData<InputType, LabelType>::const_element_range Elements;
 	typedef typename Elements::reference ElementRef;
@@ -87,7 +90,8 @@ void exportKernelMatrix(
 
 	SIZE_CHECK(size != 0);
 	// check outstream status
-	if(!out) {
+	if(!out)
+	{
 		throw(std::invalid_argument("[export_kernel_matrix] Can't write to stream."));
 	}
 
@@ -96,20 +100,24 @@ void exportKernelMatrix(
 	// if multiplicative trace normalization: determine trace
 	double trace = 0.0;
 	double trace_factor = 1.0;
-	if(normalizer == MULTIPLICATIVE_TRACE_ONE || normalizer == MULTIPLICATIVE_TRACE_N) {
-		BOOST_FOREACH(ElementRef point, points) {
+	if(normalizer == MULTIPLICATIVE_TRACE_ONE || normalizer == MULTIPLICATIVE_TRACE_N)
+	{
+		BOOST_FOREACH(ElementRef point, points)
+		{
 			trace += kernel.eval(point.input, point.input);
 		}
 		SHARK_ASSERT(trace > 0);
 		trace_factor = 1.0 / trace;
-		if(normalizer == MULTIPLICATIVE_TRACE_N) {
+		if(normalizer == MULTIPLICATIVE_TRACE_N)
+		{
 			trace_factor *= size;
 		}
 	}
 
 	// if multiplicative variance normalization: determine factor
 	double variance_factor = 0.0;
-	if(normalizer == MULTIPLICATIVE_VARIANCE_ONE) {
+	if(normalizer == MULTIPLICATIVE_VARIANCE_ONE)
+	{
 		ScaledKernel<InputType> scaled(&kernel);
 		NormalizeKernelUnitVariance<InputType> normalizer;
 		normalizer.train(scaled, dataset.inputs());
@@ -119,13 +127,16 @@ void exportKernelMatrix(
 	// if centering: determine matrix- and row-wise means;
 	double mean = 0;
 	RealVector rowmeans(size, 0.0);
-	if(normalizer == CENTER_ONLY || normalizer == CENTER_AND_MULTIPLICATIVE_TRACE_ONE) {
+	if(normalizer == CENTER_ONLY || normalizer == CENTER_AND_MULTIPLICATIVE_TRACE_ONE)
+	{
 		// initialization: calculate mean and rowmeans
-		for(std::size_t i = 0; i < size; i++) {
+		for(std::size_t i = 0; i < size; i++)
+		{
 			double k = kernel.eval(points[i].input, points[i].input);
 			mean += k; //add diagonal value to mean once
 			rowmeans(i) += k; //add diagonal to its rowmean
-			for(std::size_t j = 0; j < i; j++) {
+			for(std::size_t j = 0; j < i; j++)
+			{
 				double k = kernel.eval(points[i].input, points[j].input);
 				mean += 2.0 * k; //add off-diagonals to mean twice
 				rowmeans(i) += k; //add to mean of row
@@ -135,9 +146,11 @@ void exportKernelMatrix(
 		mean = mean / (double) size / (double) size;
 		rowmeans /= size;
 		// get trace if necessary
-		if(normalizer == CENTER_AND_MULTIPLICATIVE_TRACE_ONE) {
+		if(normalizer == CENTER_AND_MULTIPLICATIVE_TRACE_ONE)
+		{
 			trace = 0.0;
-			for(std::size_t i = 0; i < size; i++) {
+			for(std::size_t i = 0; i < size; i++)
+			{
 				trace += kernel.eval(points[i].input, points[i].input) - 2 * rowmeans(i) + mean;
 			}
 			SHARK_ASSERT(trace > 0);
@@ -158,7 +171,8 @@ void exportKernelMatrix(
 	double min_label = -max_label;
 	bool binary = false;
 	bool regression = false;
-	BOOST_FOREACH(double cur_label, dataset.labels().elements()) {
+	BOOST_FOREACH(double cur_label, dataset.labels().elements())
+	{
 		if(cur_label > max_label)
 			max_label = cur_label;
 		if(cur_label < min_label)
@@ -173,14 +187,20 @@ void exportKernelMatrix(
 
 	// write to file:
 	// loop through examples (rows)
-	for(std::size_t i = 0; i < size; i++) {
+	for(std::size_t i = 0; i < size; i++)
+	{
 
 		// write label
-		if(regression) {
+		if(regression)
+		{
 			out << std::setw(fieldwidth) << std::left << points[i].label << " ";
-		} else if(binary) {
+		}
+		else if(binary)
+		{
 			out << std::setw(fieldwidth) << std::left << (int)(points[i].label * 2 - 1) << " ";
-		} else {
+		}
+		else
+		{
 			out << std::setw(fieldwidth) << std::left << (unsigned int)(points[i].label + 1) << " ";
 		}
 
@@ -188,34 +208,50 @@ void exportKernelMatrix(
 
 		// loop through examples (columns)
 		// CASE DISTINCTION:
-		if(normalizer == NONE) {
-			for(std::size_t j = 0; j < size; j++) {
+		if(normalizer == NONE)
+		{
+			for(std::size_t j = 0; j < size; j++)
+			{
 				out  << " " << j + 1 << ":" << std::setw(fieldwidth) << std::left << kernel.eval(points[i].input, points[j].input);
 			}
 			out << "\n";
-		} else if(normalizer == MULTIPLICATIVE_TRACE_ONE || normalizer == MULTIPLICATIVE_TRACE_N) {
-			for(std::size_t j = 0; j < size; j++) {
+		}
+		else if(normalizer == MULTIPLICATIVE_TRACE_ONE || normalizer == MULTIPLICATIVE_TRACE_N)
+		{
+			for(std::size_t j = 0; j < size; j++)
+			{
 				out  << " " << j + 1 << ":" << std::setw(fieldwidth) << std::left << trace_factor * kernel.eval(points[i].input, points[j].input);
 			}
 			out << "\n";
-		} else if(normalizer == MULTIPLICATIVE_VARIANCE_ONE) {
-			for(std::size_t j = 0; j < size; j++) {
+		}
+		else if(normalizer == MULTIPLICATIVE_VARIANCE_ONE)
+		{
+			for(std::size_t j = 0; j < size; j++)
+			{
 				out  << " " << j + 1 << ":" << std::setw(fieldwidth) << std::left <<  variance_factor *kernel.eval(points[i].input, points[j].input);
 			}
 			out << "\n";
-		} else if(normalizer == CENTER_ONLY) {
-			for(std::size_t j = 0; j < size; j++) {
+		}
+		else if(normalizer == CENTER_ONLY)
+		{
+			for(std::size_t j = 0; j < size; j++)
+			{
 				double tmp = kernel.eval(points[i].input, points[j].input) - rowmeans(i) - rowmeans(j) + mean;
 				out  << " " << j + 1 << ":" << std::setw(fieldwidth) << std::left << tmp;
 			}
 			out << "\n";
-		} else if(normalizer == CENTER_AND_MULTIPLICATIVE_TRACE_ONE) {
-			for(std::size_t j = 0; j < size; j++) {
+		}
+		else if(normalizer == CENTER_AND_MULTIPLICATIVE_TRACE_ONE)
+		{
+			for(std::size_t j = 0; j < size; j++)
+			{
 				double tmp = kernel.eval(points[i].input, points[j].input) - rowmeans(i) - rowmeans(j) + mean;
 				out  << " " << j + 1 << ":" << std::setw(fieldwidth) << std::left << trace_factor *tmp;
 			}
 			out << "\n";
-		} else {
+		}
+		else
+		{
 			throw SHARKEXCEPTION("[detail::export_kernel_matrix] Unknown normalization type.");
 		}
 
@@ -237,17 +273,20 @@ void exportKernelMatrix(
 /// \param  width      field width for pretty printing
 template<typename InputType, typename LabelType>
 void exportKernelMatrix(
-    LabeledData<InputType, LabelType> const &dataset,
-    AbstractKernelFunction<InputType> &kernel,
-    std::string fn,
-    KernelMatrixNormalizationType normalizer = NONE,
-    bool sci = false,
-    unsigned int width = 0
-) {
+	LabeledData<InputType, LabelType> const &dataset,
+	AbstractKernelFunction<InputType> &kernel,
+	std::string fn,
+	KernelMatrixNormalizationType normalizer = NONE,
+	bool sci = false,
+	unsigned int width = 0
+)
+{
 	std::ofstream ofs(fn.c_str());
-	if(ofs) {
+	if(ofs)
+	{
 		exportKernelMatrix(dataset, kernel, ofs, normalizer, sci, width);
-	} else
+	}
+	else
 		throw(std::invalid_argument("[detail::export_kernel_matrix] Stream cannot be opened for writing."));
 
 }
@@ -258,13 +297,14 @@ void exportKernelMatrix(
 // deprecated wrapper
 template<typename InputType, typename LabelType>
 void export_kernel_matrix(
-    LabeledData<InputType, LabelType> const &dataset,
-    AbstractKernelFunction<InputType> &kernel,           // kernel function (can't be const b/c of ScaledKernel later)
-    std::ostream &out,                                     // The stream to be written to
-    KernelMatrixNormalizationType normalizer = NONE, // what kind of normalization to apply. see enum declaration for details.
-    bool scientific = false,                         // scientific notation?
-    unsigned int fieldwidth = 0                      // for pretty-printing
-) {
+	LabeledData<InputType, LabelType> const &dataset,
+	AbstractKernelFunction<InputType> &kernel,           // kernel function (can't be const b/c of ScaledKernel later)
+	std::ostream &out,                                     // The stream to be written to
+	KernelMatrixNormalizationType normalizer = NONE, // what kind of normalization to apply. see enum declaration for details.
+	bool scientific = false,                         // scientific notation?
+	unsigned int fieldwidth = 0                      // for pretty-printing
+)
+{
 	exportKernelMatrix(dataset, kernel, out, normalizer, scientific, fieldwidth);
 }
 
@@ -272,13 +312,14 @@ void export_kernel_matrix(
 // deprecated wrapper
 template<typename InputType, typename LabelType>
 void export_kernel_matrix(
-    LabeledData<InputType, LabelType> const &dataset,
-    AbstractKernelFunction<InputType> &kernel,
-    std::string fn,
-    KernelMatrixNormalizationType normalizer = NONE,
-    bool sci = false,
-    unsigned int width = 0
-) {
+	LabeledData<InputType, LabelType> const &dataset,
+	AbstractKernelFunction<InputType> &kernel,
+	std::string fn,
+	KernelMatrixNormalizationType normalizer = NONE,
+	bool sci = false,
+	unsigned int width = 0
+)
+{
 	exportKernelMatrix(dataset, kernel, fn, normalizer,  sci, width);
 }
 

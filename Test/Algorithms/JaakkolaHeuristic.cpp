@@ -1,32 +1,32 @@
 //===========================================================================
 /*!
- *
+ * 
  *
  * \brief       Unit test for Jaakkola's bandwidth selection heuristic.
- *
- *
- *
+ * 
+ * 
+ * 
  *
  * \author      T. Glasmachers
  * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
- *
+ * 
  * <BR><HR>
  * This file is part of Shark.
  * <http://image.diku.dk/shark/>
- *
+ * 
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published
+ * it under the terms of the GNU Lesser General Public License as published 
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -42,9 +42,10 @@
 using namespace shark;
 
 
-BOOST_AUTO_TEST_SUITE(Algorithms_JaakkolaHeuristic)
+BOOST_AUTO_TEST_SUITE (Algorithms_JaakkolaHeuristic)
 
-BOOST_AUTO_TEST_CASE(Algorithms_JaakkolaHeuristic) {
+BOOST_AUTO_TEST_CASE( Algorithms_JaakkolaHeuristic )
+{
 	// Create a simple data set.
 	// The distribution of distances of pairs of
 	// different classes is: 1 2 2 3 3 3 4 4 5.

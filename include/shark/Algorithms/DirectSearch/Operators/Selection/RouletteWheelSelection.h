@@ -48,17 +48,18 @@ namespace shark {
 struct RouletteWheelSelection {
 	/**
 	* \brief Selects an individual from the range of individuals with prob. proportional to its fitness.
-	*
+	* 
 	* \param [in] it Iterator pointing to the first valid element.
 	* \param [in] itE Iterator pointing to the first invalid element.
 	* \param [in] probabilities selection probabilities of the individuals
 	*/
 	template<typename Iterator>
-	Iterator operator()(Iterator it, Iterator itE, RealVector const& probabilities) const {
+	Iterator operator()(Iterator it, Iterator itE, RealVector const& probabilities) const
+	{
 		std::size_t n = probabilities.size();
-		double rnd = Rng::uni(0, 1);
+		double rnd = Rng::uni(0,1);
 		double sum = 0;
-		for(std::size_t pos = 0; pos != n; ++pos, ++it) {
+		for(std::size_t pos = 0; pos != n; ++pos,++it){
 			sum += probabilities(pos);
 			if(rnd <= sum)
 				return it;
