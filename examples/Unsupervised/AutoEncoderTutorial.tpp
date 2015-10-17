@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 	Autoencoder1 net1 = trainAutoencoderModel<Autoencoder1>(train.inputs(),numHidden,iterations,regularisation);
 	Autoencoder2 net2 = trainAutoencoderModel<Autoencoder2>(train.inputs(),numHidden,iterations,regularisation);
 	Autoencoder3 net3 = trainAutoencoderModel<Autoencoder3>(train.inputs(),numHidden,iterations,regularisation);
-	Autoencoder3 net4 = trainAutoencoderModel<Autoencoder3>(train.inputs(),numHidden,iterations,regularisation);
+	Autoencoder4 net4 = trainAutoencoderModel<Autoencoder4>(train.inputs(),numHidden,iterations,regularisation);
 
 	exportFiltersToPGMGrid("features1",net1.encoderMatrix(),28,28);
 	exportFiltersToPGMGrid("features2",net2.encoderMatrix(),28,28);
