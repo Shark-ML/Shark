@@ -130,7 +130,7 @@ namespace shark {
 		}
 
 		//! creates a discrete uniform distributed number in the range from "min" to "max"
-		static int discrete(int min=0,int max=1) {
+		static std::size_t discrete(std::size_t min=0,std::size_t max=1) {
 			if(min == max) return min;
 			DiscreteUniform< rng_type > disc(globalRng,min,max);
 			return disc( min, max );

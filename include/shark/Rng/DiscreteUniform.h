@@ -45,18 +45,18 @@ namespace shark{
 	* \brief Implements the discrete uniform distribution.
 	*/
 	template<typename RngType = shark::DefaultRngType>
-	class DiscreteUniform : public boost::variate_generator<RngType*,boost::uniform_int<long> > {
+	class DiscreteUniform : public boost::variate_generator<RngType*,boost::uniform_int<std::size_t> > {
 	private:
 		/** \brief The base type this class inherits from. */
-		typedef boost::variate_generator<RngType*,boost::uniform_int<long> > Base;
+		typedef boost::variate_generator<RngType*,boost::uniform_int<std::size_t> > Base;
 	public:
 		/**
 		* \brief C'tor, initializes the interval the random numbers are sampled from.
 		* \param [in] low_ The lower bound of the interval, defaults to 0.
-		* \param [in] high_ The upper bound of the interval, defaults to std::numeric_limits<long>::max().
+		* \param [in] high_ The upper bound of the interval, defaults to std::numeric_limits<std::size_t>::max().
 		*/
-		/*DiscreteUniform( long low_ = 0,long high_ = std::numeric_limits<long>::max() )
-			:Base(&Rng::globalRng,boost::uniform_int<long>(std::min(low_,high_),std::max(low_,high_)))
+		/*DiscreteUniform( std::size_t low_ = 0,std::size_t high_ = std::numeric_limits<std::size_t>::max() )
+			:Base(&Rng::globalRng,boost::uniform_int<std::size_t>(std::min(low_,high_),std::max(low_,high_)))
 		{}*/
 
 		/**
@@ -64,10 +64,10 @@ namespace shark{
 		* with the supplied RNG.
 		* \param [in,out] rng The RNG this distribution is associated with.
 		* \param [in] low_ The lower bound of the interval, defaults to 0.
-		* \param [in] high_ The upper bound of the interval, defaults to std::numeric_limits<long>::max().
+		* \param [in] high_ The upper bound of the interval, defaults to std::numeric_limits<std::size_t>::max().
 		*/
-		DiscreteUniform(RngType & rng, long low_ = 0,long high_ = std::numeric_limits<long>::max() )
-			:Base(&rng,boost::uniform_int<long>(std::min(low_,high_),std::max(low_,high_)))
+		DiscreteUniform(RngType & rng, std::size_t low_ = 0,std::size_t high_ = std::numeric_limits<std::size_t>::max() )
+			:Base(&rng,boost::uniform_int<std::size_t>(std::min(low_,high_),std::max(low_,high_)))
 		{}
 
 		/**
@@ -82,33 +82,33 @@ namespace shark{
 		* \param [in] low_ The lower bound of the interval.
 		* \param [in] high_ The upper bound of the interval.
 		*/
-		typename Base::result_type operator()(long low_,long high_)
+		typename Base::result_type operator()(std::size_t low_,std::size_t high_)
 		{
-			boost::uniform_int<long> dist(std::min(low_,high_),std::max(low_,high_));
+			boost::uniform_int<std::size_t> dist(std::min(low_,high_),std::max(low_,high_));
 			return dist(Base::engine());
 		}
 
 		/** \brief Returns the lower bound of the interval. */
-		long low()const
+		std::size_t low()const
 		{
 			return Base::distribution().min();
 		}
 
 		/** \brief Adjusts the upper bound of the interval */
-		long high()const
+		std::size_t high()const
 		{
 			return Base::distribution().max();
 		}
 
 		/** \brief Adjusts the range of the interval. */
-		void setRange(long low_,long high_)
+		void setRange(std::size_t low_,std::size_t high_)
 		{
-			boost::uniform_int<long> dist(std::min(low_,high_),std::max(low_,high_));
+			boost::uniform_int<std::size_t> dist(std::min(low_,high_),std::max(low_,high_));
 			Base::distribution()=dist;
 		}
 
 		/** \brief Calculates the probability of x. */
-		double p( long x ) const {
+		double p( std::size_t x ) const {
 			return 1.0/(high()-low()+1);
 		}
 
