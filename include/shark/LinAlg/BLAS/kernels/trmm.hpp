@@ -7,7 +7,7 @@
  * \date        2012
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2014 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -28,37 +28,37 @@
  *
  */
 
-#ifndef SHARK_LINALG_BLAS_KERNELS_TPMV_HPP
-#define SHARK_LINALG_BLAS_KERNELS_TPMV_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_TRMM_HPP
+#define SHARK_LINALG_BLAS_KERNELS_TRMM_HPP
 
 #ifdef SHARK_USE_CBLAS
-#include "atlas/tpmv.hpp"
+#include "atlas/trmm.hpp"
 #else
 // if no bindings are included, we have to provide the default has_optimized_gemv 
 // otherwise the binding will take care of this
 namespace shark { namespace blas { namespace bindings{
 template<class M1, class M2>
-struct  has_optimized_tpmv
+struct  has_optimized_trmm
 : public boost::mpl::false_{};
 }}}
 #endif
 
-#include "default/tpmv.hpp"
+#include "default/trmm.hpp"
 
 namespace shark { namespace blas {namespace kernels{
 	
-///\brief Implements the Tringular Packed Matrix-Vector multiplication(TPMV)
+///\brief Implements the TRiangular Matrix Matrix multiply.
 ///
-/// It computes b=A*b where A is a lower or upper packed triangular matrix.
-template <typename TriangularA, typename VecB>
-void tpmv(
+/// It computes B=A*B in place, where A is a triangular matrix and B a dense matrix
+template <bool Upper,bool Unit,typename TriangularA, typename MatB>
+void trmm(
 	matrix_expression<TriangularA> const &A, 
-	vector_expression<VecB>& b
+	matrix_expression<MatB>& B
 ){
 	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size1() == b().size());
+	SIZE_CHECK(A().size1() == B().size1());
 	
-	bindings::tpmv(A,b,typename bindings::has_optimized_tpmv<TriangularA, VecB>::type());
+	bindings::trmm<Upper,Unit>(A,B,typename bindings::has_optimized_trmm<TriangularA, MatB>::type());
 }
 
 }}}

@@ -114,6 +114,12 @@ public:
 		m_size = size;
 	}
 	
+	void resize(size_type size1, size_type size2) {
+		SIZE_CHECK(size1 == size2);
+		resize(size1);
+		(void)size2;
+	}
+	
 	void clear(){
 		std::fill(m_data.begin(), m_data.end(), value_type/*zero*/());
 	}

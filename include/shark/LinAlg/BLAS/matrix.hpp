@@ -156,6 +156,10 @@ public:
 		return m_data [orientation::element(i, m_size1, j, m_size2)];
 	}
 	
+	void set_element(size_type i, size_type j,value_type t){
+		m_data [orientation::element(i, m_size1, j, m_size2)]  = t;
+	}
+	
 	// Assignment
 	
 	template<class E>
@@ -458,6 +462,11 @@ public:
 			return m_diagonal(i);
 		else
 			return m_zero;
+	}
+
+	void set_element(size_type i, size_type j,value_type t){
+		RANGE_CHECK(i == j);
+		m_diagonal(i) = t;
 	}
 
 	// Assignment

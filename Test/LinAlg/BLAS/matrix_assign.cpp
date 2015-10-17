@@ -19,12 +19,115 @@ void checkMatrixEqual(M1 const& m1, M2 const& m2){
 }
 
 
+BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_matrix_assign)
+
+
+///////////////////////////////////////////////////////////////////////////////
+//////FUNCTOR CONSTANT ASSIGNMENT
+//////////////////////////////////////////////////////////////////////////////
+
+//test for assign of the form m_ij=f(m_ij,t) for constant t
+BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Matrix_Constant_Functor_Assign ){
+	std::cout<<"testing dense functor-constant assignment."<<std::endl;
+	blas::matrix<unsigned int,blas::row_major> input_row_major(10,20);
+	blas::matrix<unsigned int,blas::row_major> input_column_major(10,20);
+	blas::matrix<unsigned int,blas::row_major> target(10,20);
+	const unsigned int t = 2;
+	for(std::size_t i = 0; i != 10; ++i){
+		for(std::size_t j = 0; j != 20; ++j){
+			input_row_major(i,j) = 2*(20*i+1)+1;
+			input_column_major(i,j) = 2*(20*i+1)+1;
+			target(i,j)=t*input_row_major(i,j);
+		}
+	}
+
+	std::cout<<"testing row-major"<<std::endl;
+	blas::kernels::assign<blas::scalar_multiply_assign> (input_row_major, t);
+	checkMatrixEqual(target,input_row_major);
+	
+	std::cout<<"testing column-major"<<std::endl;
+	blas::kernels::assign<blas::scalar_multiply_assign> (input_column_major, t);
+	checkMatrixEqual(target,input_column_major);
+	
+	std::cout<<"\n";
+}
+
+BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Packed_Matrix_Constant_Functor_Assign ){
+	std::cout<<"testing packed functor-constant assignment."<<std::endl;
+	blas::triangular_matrix<unsigned int,blas::row_major,blas::lower> input_row_lower(20);
+	blas::triangular_matrix<unsigned int,blas::row_major,blas::upper> input_row_upper(20);
+	blas::triangular_matrix<unsigned int,blas::column_major,blas::lower> input_column_lower(20);
+	blas::triangular_matrix<unsigned int,blas::column_major,blas::upper> input_column_upper(20);
+	blas::triangular_matrix<unsigned int,blas::row_major,blas::lower> target_lower(20);
+	blas::triangular_matrix<unsigned int,blas::row_major,blas::upper> target_upper(20);
+	const unsigned int t = 2;
+	for(std::size_t i = 0; i != 20; ++i){
+		for(std::size_t j = 0; j <= i; ++j){
+			input_row_lower.set_element(i,j, 2*(20*i+1)+1);
+			input_column_lower.set_element(i,j, 2*(20*i+1)+1);
+			target_lower.set_element(i,j,t*input_row_lower(i,j));
+		}
+	}
+	
+	for(std::size_t i = 0; i != 20; ++i){
+		for(std::size_t j = i; j != 20; ++j){
+			input_row_upper.set_element(i,j,2*(20*i+1)+1);
+			input_column_upper.set_element(i,j,2*(20*i+1)+1);
+			target_upper.set_element(i,j,t*input_row_upper(i,j));
+		}
+	}
+
+	std::cout<<"testing row-major lower"<<std::endl;
+	blas::kernels::assign<blas::scalar_multiply_assign> (input_row_lower, t);
+	checkMatrixEqual(target_lower,input_row_lower);
+	
+	std::cout<<"testing column-major lower"<<std::endl;
+	blas::kernels::assign<blas::scalar_multiply_assign> (input_column_lower, t);
+	checkMatrixEqual(target_lower,input_column_lower);
+	
+	std::cout<<"testing row-major upper"<<std::endl;
+	blas::kernels::assign<blas::scalar_multiply_assign> (input_row_upper, t);
+	checkMatrixEqual(target_upper,input_row_upper);
+	
+	std::cout<<"testing column-major upper"<<std::endl;
+	blas::kernels::assign<blas::scalar_multiply_assign> (input_column_upper, t);
+	checkMatrixEqual(target_upper,input_column_upper);
+	
+	std::cout<<"\n";
+}
+
+BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Matrix_Constant_Functor_Assign ){
+	std::cout<<"testing sparse functor-constant assignment."<<std::endl;
+	blas::compressed_matrix<unsigned int> input_row_major(10,20,0);
+	blas::compressed_matrix<unsigned int> target_row_major(10,20,0);
+	blas::compressed_matrix<unsigned int> input_column_major_base(20,10,0);
+	blas::compressed_matrix<unsigned int> target_column_major_base(20,10,0);
+	blas::matrix_transpose<blas::compressed_matrix<unsigned int> > input_column_major(input_column_major_base);
+	blas::matrix_transpose<blas::compressed_matrix<unsigned int> > target_column_major(target_column_major_base);
+	const unsigned int t = 2;
+	for(std::size_t i = 0; i != 10; ++i){
+		for(std::size_t j = 1; j < 20; j+=(i+1)){
+			input_row_major(i,j) = 2*(20*i+1)+1;
+			input_column_major(i,j) =  2*(20*i+1)+1;//source_row_major(i,j)+2;
+			target_row_major(i,j) = t*input_row_major(i,j);
+			target_column_major(i,j) = t*input_column_major(i,j);
+		}
+	}
+
+	std::cout<<"testing row-major"<<std::endl;
+	blas::kernels::assign<blas::scalar_multiply_assign> (input_row_major, t);
+	checkMatrixEqual(target_row_major,input_row_major);
+	
+	std::cout<<"testing column-major"<<std::endl;
+	blas::kernels::assign<blas::scalar_multiply_assign> (input_column_major, t);
+	checkMatrixEqual(target_column_major,input_column_major);
+	
+	std::cout<<"\n";
+}
 
 //////////////////////////////////////////////////////
 //////SIMPLE ASSIGNMENT
 //////////////////////////////////////////////////////
-
-BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_matrix_assign)
 
 BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Dense_Matrix_Assign ){
 	std::cout<<"testing direct dense-dense assignment"<<std::endl;

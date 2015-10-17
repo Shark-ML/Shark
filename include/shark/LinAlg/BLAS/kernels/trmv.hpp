@@ -37,7 +37,7 @@
 // if no bindings are included, we have to provide the default has_optimized_gemv 
 // otherwise the binding will take care of this
 namespace shark { namespace blas { namespace bindings{
-template<class M1, class M2>
+template<class M, class V>
 struct  has_optimized_trmv
 : public boost::mpl::false_{};
 }}}

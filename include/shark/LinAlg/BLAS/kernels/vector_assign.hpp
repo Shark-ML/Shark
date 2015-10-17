@@ -186,11 +186,12 @@ void assign(
 ) {
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename E::const_iterator EIterator;
+	typedef typename V::const_iterator VIterator;
 	typedef typename V::scalar_type scalar_type;
-	EIterator eiter = e.begin();
-	EIterator eend = e.end();
-	EIterator viter = v.begin();
-	EIterator vend = v.end();
+	EIterator eiter = e().begin();
+	EIterator eend = e().end();
+	VIterator viter = v().begin();
+	VIterator vend = v().end();
 	//right hand side hasnonzero elements
 	if(eiter != eend){
 		//apply f to the first elements for which the right hand side is 0, unless f is the identity
@@ -218,11 +219,12 @@ void assign(
 ) {
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename E::const_iterator EIterator;
+	typedef typename V::const_iterator VIterator;
 	typedef typename V::scalar_type scalar_type;
-	EIterator eiter = e.begin();
-	EIterator eend = e.end();
-	EIterator viter = v.begin();
-	EIterator vend = v.end();
+	EIterator eiter = e().begin();
+	EIterator eend = e().end();
+	VIterator viter = v().begin();
+	VIterator vend = v().end();
 	
 	//right hand side has nonzero elements
 	if(eiter != eend){
