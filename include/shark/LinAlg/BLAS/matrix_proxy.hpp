@@ -255,11 +255,6 @@ public:
 		return *this;
 	}
 
-	// Closure comparison
-	bool same_closure(const matrix_reference& mr) const {
-		return& m_expression ==& mr.m_expression;
-	}
-
 	// Iterator types
 	typedef typename row_iterator<M>::type row_iterator;
 	typedef row_iterator const_row_iterator;
@@ -461,11 +456,6 @@ public:
 	
 	void set_element(size_type i, size_type j,value_type t){
 		expression().set_element(j,i,t);
-	}
-
-	// Closure comparison
-	bool same_closure(matrix_transpose const& mu2) const {
-		return expression().same_closure(mu2.m_expression);
 	}
 
 	typedef typename matrix_closure_type::const_column_iterator const_row_iterator;
@@ -813,11 +803,6 @@ public:
 		return *this;
 	}
 
-	// Closure comparison
-	bool same_closure(const matrix_row& mr) const {
-		return expression().same_closure(mr.m_expression);
-	}
-
 	// Iterator types
 	typedef typename M::const_row_iterator const_iterator;
 	typedef typename row_iterator<M>::type iterator;
@@ -1113,11 +1098,6 @@ public:
 		return *this;
 	}
 
-	// Closure comparison
-	bool same_closure(matrix_column const& mr) const {
-		return m_wrapper.same_closure(mr.m_wrapper);
-	}
-
 	// Iterator types
 	typedef typename wrapper_type::const_iterator const_iterator;
 	typedef typename wrapper_type::iterator iterator;
@@ -1335,11 +1315,6 @@ public:
 	matrix_vector_range& operator -= (scalar_type t) {
 		kernels::assign<scalar_minus_assign> (*this, t);
 		return *this;
-	}
-
-	// Closure comparison
-	bool same_closure(const matrix_vector_range& mvr) const {
-		return expression().same_closure(mvr.m_expression);
 	}
 
 	typedef indexed_iterator<closure_type> iterator;
@@ -1580,11 +1555,6 @@ public:
 	self_type& operator -= (scalar_type t) {
 		kernels::assign<scalar_minus_assign> (*this, t);
 		return *this;
-	}
-
-	// Closure comparison
-	bool same_closure(const self_type& mr) const {
-		return (*this).expression().same_closure(mr.m_expression);
 	}
 
 	// Iterator types

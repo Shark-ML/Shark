@@ -142,11 +142,6 @@ public:
 		return m_functor(m_expression[i]);
 	}
 
-	// Closure comparison
-	bool same_closure(vector_unary const &vu) const {
-		return expression().same_closure(vu.expression());
-	}
-
 	typedef transform_iterator<typename E::const_iterator,functor_type> const_iterator;
 	typedef const_iterator iterator;
 
@@ -292,12 +287,6 @@ public:
 	const_reference operator[] (index_type i) const {
 		SIZE_CHECK(i < size());
 		return m_functor(m_expression1(i),m_expression2(i));
-	}
-
-	// Closure comparison
-	bool same_closure (vector_binary const& vu) const {
-		return expression1 ().same_closure (vu.expression1())
-		&& expression2 ().same_closure (vu.expression2());
 	}
 
 	// Iterator types

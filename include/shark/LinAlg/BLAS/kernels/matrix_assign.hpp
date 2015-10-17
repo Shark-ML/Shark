@@ -58,11 +58,6 @@ public:
 		return m_expression(j, i);
 	}
 
-	// Closure comparison
-	bool same_closure(internal_transpose_proxy const& mu2) const {
-		return m_expression.same_closure(mu2.m_expression);
-	}
-
 	typedef typename matrix_closure_type::const_column_iterator const_row_iterator;
 	typedef typename matrix_closure_type::column_iterator row_iterator;
 	typedef typename matrix_closure_type::const_row_iterator const_column_iterator;

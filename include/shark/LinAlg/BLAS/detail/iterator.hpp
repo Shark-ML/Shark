@@ -220,7 +220,6 @@ public:
 	}
 	template<class T>
 	difference_type operator - (indexed_iterator<T> const& it) const {
-		RANGE_CHECK(m_closure.same_closure(it.m_closure));
 		return m_index - it.m_index;
 	}
 
@@ -250,12 +249,10 @@ public:
 	// Comparison
 	template<class T>
 	bool operator == (indexed_iterator<T> const& it) const {
-		RANGE_CHECK(m_closure.same_closure(it.m_closure));
 		return m_index == it.m_index;
 	}
 	template<class T>
 	bool operator < (indexed_iterator<T> const& it) const {
-		RANGE_CHECK(m_closure.same_closure(it.m_closure));
 		return m_index < it.m_index;
 	}
 

@@ -205,11 +205,6 @@ public:
 		return *this;
 	}
 
-	// Closure comparison
-	bool same_closure(vector_reference const& vr) const{
-		return m_expression == vr.m_expression;
-	}
-
 	// Iterator types
 	typedef typename V::const_iterator const_iterator;
 	typedef typename boost::mpl::if_<boost::is_const<V>,
@@ -413,11 +408,6 @@ public:
 		return *this;
 	}
 
-	// Closure comparison
-	bool same_closure(vector_range const& vr) const{
-		return m_expression.same_closure(vr.m_expression);
-	}
-
 	typedef subrange_iterator< typename vector_closure_type::iterator> iterator;
 	typedef subrange_iterator< typename vector_closure_type::const_iterator> const_iterator;
 
@@ -588,11 +578,6 @@ public:
 	// ---------
 	// High level interface
 	// ---------
-	
-	bool same_closure(self_type const& t) const {
-		//same closure if the values segments are overlapping
-		return (t.storage()+t.size()) > storage() && (t.storage() < storage()+size());
-	}
 	
 	// --------------
 	// Element access

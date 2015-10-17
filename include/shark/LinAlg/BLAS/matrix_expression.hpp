@@ -92,12 +92,6 @@ public:
 		return m_functor(m_expression1(i), m_expression2(j));
 	}
 
-	// Closure comparison
-	bool same_closure(const vector_matrix_binary &vmb) const {
-		return expression1().same_closure(vmb.expression1()) &&
-		       expression2().same_closure(vmb.expression2());
-	}
-
 	typedef transform_iterator<typename E2::const_iterator,Binder1> const_row_iterator;
 	typedef transform_iterator<typename E1::const_iterator,Binder2> const_column_iterator;
 	typedef const_row_iterator row_iterator;
@@ -206,11 +200,6 @@ public:
 		return m_vector(j);
 	}
 
-	// Closure comparison
-	bool same_closure (const vector_repeater &other) const {
-		return (*this).expression ().same_closure (other.expression ());
-	}
-
 	// Iterator types
 	typedef typename V::const_iterator const_row_iterator;
 	typedef const_row_iterator row_iterator;
@@ -294,11 +283,6 @@ public:
 	// Element access
 	const_reference operator()(index_type i, index_type j) const {
 		return m_functor(m_expression(i, j));
-	}
-
-	// Closure comparison
-	bool same_closure(matrix_unary const &other) const {
-		return m_expression.same_closure(other.m_expression);
 	}
 
 	// Iterator types
@@ -444,12 +428,6 @@ public:
 		return m_functor( m_expression1 (i, j), m_expression2(i,j));
         }
 
-        // Closure comparison
-        bool same_closure (matrix_binary const&mbs2) const {
-		return m_expression1.same_closure (mbs2.m_expression1) ||
-		m_expression2.same_closure (mbs2.m_expression2);
-        }
-
 	// Iterator types
 private:
 	typedef typename E1::const_row_iterator const_row_iterator1_type;
@@ -585,12 +563,6 @@ public:
 	// Element access
 	const_reference operator()(index_type i) const {
 		return functor_type::apply(m_expression1, m_expression2, i);
-	}
-
-	// Closure comparison
-	bool same_closure(const matrix_vector_binary1 &mvb1) const {
-		return (*this).expression1().same_closure(mvb1.expression1()) &&
-		       (*this).expression2().same_closure(mvb1.expression2());
 	}
 
 	// Iterator types
