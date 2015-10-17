@@ -115,12 +115,12 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 string( TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE )
-if(CMakeBuildType MATCHES "debug")
+if(${CMAKE_BUILD_TYPE}  MATCHES "debug")
 	#we want to be warned in debug mode
 	if(UNIX)
-		if(CMAKE_COMPILER_IS_GNUCC)
-			add_definitions(-Wall)
-		endif()
+#		if(CMAKE_COMPILER_IS_GNUCC)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+#		endif()
 	endif()
 endif()
 
@@ -138,6 +138,7 @@ add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
 # Should we link the boost test dynamically
 if(NOT Boost_USE_STATIC_LIBS)
 	add_definitions(-DBOOST_TEST_DYN_LINK)
+	add_definitions(-DBOOST_ALL_DYN_LINK)
 endif()
 
 find_package( 
