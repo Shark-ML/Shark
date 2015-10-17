@@ -182,8 +182,9 @@ protected:
 		return result;
 	}
 	
-	DatasetType m_dataset;                  ///< labeled data for radius and (hard) margin computation
 	KernelType* mep_kernel;            ///< underlying parameterized kernel object
+	DatasetType m_dataset;                  ///< labeled data for radius and (hard) margin computation
+	
 };
 
 

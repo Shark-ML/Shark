@@ -129,14 +129,14 @@ public:
 	/// \param  data  dataset from which to take the centroids
 	/// \param  noClusters  number of centroids in the model, default 0 is mapped to the number of classes in the data set
 	/// \param  noClasses  number of clases in the dataset, default 0 means that the number is computed 
-	SHARK_EXPORT_SYMBOL void initFromData(ClassificationDataset const& data, unsigned noClusters = 0, unsigned noClasses = 0);
+	SHARK_EXPORT_SYMBOL void initFromData(ClassificationDataset const& data, std::size_t noClusters = 0, std::size_t noClasses = 0);
 
 	/// initialize centroids from unlabeled data: 
 	/// take a random subset of data points
 	///
 	/// \param  dataset dataset from which to take the centroids
 	/// \param  noClusters  number of centroids in the model
-	SHARK_EXPORT_SYMBOL void initFromData(Data<RealVector> const& dataset, unsigned noClusters);
+	SHARK_EXPORT_SYMBOL void initFromData(Data<RealVector> const& dataset, std::size_t noClusters);
 
 protected:
 	/// Compute unnormalized membership from distance.

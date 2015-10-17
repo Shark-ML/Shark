@@ -99,7 +99,7 @@ namespace shark {
 		/**
 		* \brief Calculates mu for the supplied lambda and the recombination strategy.
 		*/
-		SHARK_EXPORT_SYMBOL static double suggestMu( unsigned int lambda, RecombinationType recomb = SUPERLINEAR ) ;
+		SHARK_EXPORT_SYMBOL static unsigned suggestMu( unsigned int lambda, RecombinationType recomb = SUPERLINEAR ) ;
 
 		void read( InArchive & archive );
 		void write( OutArchive & archive ) const;
@@ -117,7 +117,7 @@ namespace shark {
 			ObjectiveFunctionType& function, 
 			SearchPointType const& initialSearchPoint,
 			unsigned int lambda, 
-			double mu,
+			unsigned int mu,
 			double initialSigma,				       
 			const boost::optional< RealMatrix > & initialCovarianceMatrix = boost::optional< RealMatrix >()
 		);
@@ -248,7 +248,7 @@ namespace shark {
 		*/
 		SHARK_EXPORT_SYMBOL void updateStrategyParameters( const std::vector<Individual<RealVector, double, RealVector> > & offspring ) ;
 	
-		unsigned int m_numberOfVariables; ///< Stores the dimensionality of the search space.
+		std::size_t m_numberOfVariables; ///< Stores the dimensionality of the search space.
 		unsigned int m_mu; ///< The size of the parent population.
 		unsigned int m_lambda; ///< The size of the offspring population, needs to be larger than mu.
 
@@ -262,7 +262,7 @@ namespace shark {
 		double m_dSigma;
 		double m_muEff;
 
-		double m_lowerBound; ///< 
+		double m_lowerBound;
 
 		RealVector m_mean;
 		RealVector m_weights;

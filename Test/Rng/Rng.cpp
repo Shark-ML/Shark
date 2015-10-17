@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE( Distribution_Cauchy )
 
 BOOST_AUTO_TEST_CASE( Distribution_DiscreteUniform ) {
 	shark::Rng::seed(42);
-	long low = 0, high = 100;
+	std::size_t low = 0, high = 100;
 	shark::DiscreteUniform< shark::Rng::rng_type > disc( shark::Rng::globalRng, low, high );
 	BOOST_CHECK( disc.low() == low );
 	BOOST_CHECK( disc.high() == high );

@@ -61,7 +61,7 @@ public:
 	/// \param [in,out] ar The archive to read from/write to.
 	/// \param [in] version Currently unused.
 	template<typename Archive>
-	void serialize( Archive & ar, const unsigned int version ) {
+	void serialize( Archive & ar, const std::size_t version ) {
 		ar & BOOST_SERIALIZATION_NVP( m_covarianceMatrix );
 		ar & BOOST_SERIALIZATION_NVP( m_eigenVectors );
 		ar & BOOST_SERIALIZATION_NVP( m_eigenValues );
@@ -69,7 +69,7 @@ public:
 
 	/// \brief Resizes the distribution. Updates both eigenvectors and eigenvalues.
 	/// \param [in] size The new size of the distribution
-	void resize( unsigned int size ) {
+	void resize( std::size_t size ) {
 		m_covarianceMatrix = blas::identity_matrix<double>( size );
 		m_eigenValues = blas::repeat(1.0,size);
 		m_eigenVectors = blas::identity_matrix<double>( size );
@@ -114,12 +114,12 @@ public:
 		RealVector result( m_eigenValues.size(), 0. );
 		RealVector z( m_eigenValues.size() );
 		
-		for( unsigned int i = 0; i < result.size(); i++ ) {
+		for( std::size_t i = 0; i < result.size(); i++ ) {
 			z( i ) = Rng::gauss( 0., 1. );
 		}
 
-		for( unsigned int i = 0; i < result.size(); i++ )
-			for( unsigned int j = 0; j < result.size(); j++ )
+		for( std::size_t i = 0; i < result.size(); i++ )
+			for( std::size_t j = 0; j < result.size(); j++ )
 				result( i ) += m_eigenVectors( i, j ) * std::sqrt( std::abs( m_eigenValues(j) ) ) * z( j );
 
 		return( std::make_pair( result, z ) );
@@ -160,13 +160,13 @@ public:
 	///\param [in,out] ar The archive to read from/write to.
 	///\param [in] version Currently unused.
 	template<typename Archive>
-	void serialize( Archive & ar, const unsigned int version ) {
+	void serialize( Archive & ar, const std::size_t version ) {
 		ar & BOOST_SERIALIZATION_NVP( m_lowerCholesky);
 	}
 
 	/// \brief Resizes the distribution. Updates both eigenvectors and eigenvalues.
 	/// \param [in] size The new size of the distribution
-	void resize( unsigned int size ) {
+	void resize( std::size_t size ) {
 		m_lowerCholesky = blas::identity_matrix<double>( size );
 	}
 	
@@ -200,7 +200,7 @@ public:
 		z.resize(size());
 		y.resize(size());
 		
-		for( unsigned int i = 0; i != size(); i++ ) {
+		for( std::size_t i = 0; i != size(); i++ ) {
 			z( i ) = Rng::gauss( 0, 1 );
 		}
 		

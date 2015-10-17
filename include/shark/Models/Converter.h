@@ -218,7 +218,7 @@ public:
 		}
 		else{
 			for(std::size_t i = 0; i != batchSize; ++i){
-				output(i) = arg_max(row(modelResult,i));
+				output(i) = static_cast<unsigned int>(arg_max(row(modelResult,i)));
 			}
 		}
 	}
@@ -233,7 +233,7 @@ public:
 			output = modelResult(0) > 0.0;
 		}
 		else{
-			output = arg_max(modelResult);
+			output = static_cast<unsigned int>(arg_max(modelResult));
 		}
 	}
 	

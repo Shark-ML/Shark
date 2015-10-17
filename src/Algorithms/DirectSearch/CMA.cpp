@@ -71,20 +71,20 @@ unsigned CMA::suggestLambda( unsigned int dimension ) {
 	unsigned lambda = unsigned( 4. + ::floor( 3. * ::log( static_cast<double>( dimension ) ) ) ); // eq. (44)
 	// heuristic for small search spaces
 	lambda = std::max<unsigned int>( 5, std::min( lambda, dimension ) );
-	return( lambda );
+	return lambda;
 }
 
 /**
 * \brief Calculates mu for the supplied lambda and the recombination strategy.
 */
-double CMA::suggestMu( unsigned int lambda, RecombinationType recomb) {
+unsigned int CMA::suggestMu( unsigned int lambda, RecombinationType recomb) {
 	switch( recomb ) {
 		case EQUAL:         
-			return lambda / 4.;
+			return lambda / 4;
 		case LINEAR:        
-			return lambda / 2.; 
+			return lambda / 2; 
 		case SUPERLINEAR:   
-			return lambda / 2.; // eq. (44)
+			return lambda / 2;
 	}
 	return 0;
 }
@@ -178,7 +178,7 @@ void CMA::init(
 	ObjectiveFunctionType& function, 
 	SearchPointType const& initialSearchPoint,
 	unsigned int lambda, 
-	double mu,
+	unsigned int mu,
 	double initialSigma,				       
 	const boost::optional< RealMatrix > & initialCovarianceMatrix
 ) {
@@ -231,8 +231,8 @@ void CMA::init(
 	m_cMu = std::min(1. - m_c1, alphaMu * (m_muEff - 2. + 1./m_muEff) / (sqr(m_numberOfVariables + 2) + alphaMu * m_muEff / 2)); // eq. (49)
 
 	m_mean = initialSearchPoint;
-	m_best.point = initialSearchPoint; // CI: you can argue about this, as the point is not evaluated
-	m_best.value = function(initialSearchPoint); //OK: evaluating performance of first point :P
+	m_best.point = initialSearchPoint;
+	m_best.value = function(initialSearchPoint);
 
 	m_lowerBound = 1E-20;
 	m_counter = 0;

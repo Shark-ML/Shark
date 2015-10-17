@@ -45,7 +45,7 @@ void eigensort
 	SIZE_CHECK(eigenValues().size() == matA().size1());
 	SIZE_CHECK(matA().size1() == matA().size2());
 
-	unsigned n = eigenValues().size();
+	std::size_t n = eigenValues().size();
 
 	for (std::size_t i = 0; i < n - 1; i++)
 	{
@@ -70,7 +70,7 @@ void syev(
 	SIZE_CHECK(vmatA().size1() == dvecA().size());
 	
 	const unsigned maxIterC = 50;
-	unsigned n = vmatA().size1();
+	std::size_t n = vmatA().size1();
 	
 	blas::vector<double> odvecA(n,0.0);
 

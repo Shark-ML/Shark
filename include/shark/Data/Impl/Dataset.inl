@@ -489,15 +489,15 @@ void complement(
 	std::size_t n,
 	T2& comp)
 {
-	std::vector<unsigned int > parentSet(n);
+	std::vector<std::size_t> parentSet(n);
 	for(std::size_t i = 0; i != n; ++i){
 		parentSet[i]=i;
 	}
-	std::vector<unsigned int > setCopy(set.begin(),set.end());
+	std::vector<std::size_t> setCopy(set.begin(),set.end());
 	std::sort(setCopy.begin(),setCopy.end());
 
-	std::vector<unsigned int > resultSet(parentSet.size());
-	std::vector<unsigned int >::iterator pos = std::set_difference(
+	std::vector<std::size_t> resultSet(parentSet.size());
+	std::vector<std::size_t>::iterator pos = std::set_difference(
 		parentSet.begin(),parentSet.end(),
 		setCopy.begin(),setCopy.end(),
 		resultSet.begin()

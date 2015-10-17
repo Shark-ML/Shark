@@ -132,7 +132,7 @@ double Centroids::membershipKernel( double dist ) const{
 	return (dist < 1e-100 ? 1e100 : 1.0 / dist);
 }
 
-void Centroids::initFromData(const ClassificationDataset &data, unsigned noClusters, unsigned noClasses) {
+void Centroids::initFromData(const ClassificationDataset &data, std::size_t noClusters, std::size_t noClasses) {
 	if(!noClasses) noClasses = shark::numberOfClasses(data); // default: recompute number of classes
 	if(!noClusters) noClusters = noClasses;  // default: as many centroids as classes
 
@@ -141,8 +141,8 @@ void Centroids::initFromData(const ClassificationDataset &data, unsigned noClust
 	/// are filled with the first elements in the data set
 	std::vector< RealVector >centers;
 	UIntVector flag(noClasses,0);
-	unsigned elementCount = 0; // number of centroids found so far, equal to tmp.size()
-	unsigned classCount = 0; // number of different classes encountered so far
+	std::size_t elementCount = 0; // number of centroids found so far, equal to tmp.size()
+	std::size_t classCount = 0; // number of different classes encountered so far
 
 	typedef ClassificationDataset::const_element_range Elements;
 	Elements elements = data.elements();
@@ -165,6 +165,6 @@ void Centroids::initFromData(const ClassificationDataset &data, unsigned noClust
 	setCentroids(createDataFromRange(centers));
 }
 
-void Centroids::initFromData(Data<RealVector> const& dataset, unsigned noClusters) {
+void Centroids::initFromData(Data<RealVector> const& dataset, std::size_t noClusters) {
 	setCentroids(toDataset(randomSubset(toView(dataset),noClusters)));
 }

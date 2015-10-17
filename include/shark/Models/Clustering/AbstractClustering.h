@@ -140,7 +140,7 @@ public:
 		BatchOutputType outputs(numPatterns);
 		for(std::size_t i = 0; i != numPatterns;++i){
 			RealMatrixRow membership(f,i);
-			outputs(i) = std::max_element(membership.begin(),membership.end())-membership.begin();
+			outputs(i) = (unsigned int)(std::max_element(membership.begin(),membership.end())-membership.begin());
 		}
 		return outputs;
 	}
