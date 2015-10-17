@@ -271,11 +271,11 @@ namespace detail{
 		
 		//over all possible values of the visible neurons
 		double logZ = -std::numeric_limits<double>::infinity();
-		SHARK_PARALLEL_FOR (std::size_t x = 0; x < values; x+=batchSize) {
-			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-x);
+		SHARK_PARALLEL_FOR(int x = 0;x <  (int)values; x+=batchSize) {
+			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-static_cast<std::size_t>(x));
 			RealMatrix stateMatrix(currentBatchSize,rbm.numberOfVN());
 			
-			for(long long elem = 0; elem != currentBatchSize;++elem){
+			for(std::size_t elem = 0; elem != currentBatchSize;++elem){
 				//generation of the x+elem-th state vector
 				Enumeration::state(row(stateMatrix,elem),x+elem);
 			}
@@ -314,8 +314,8 @@ namespace detail{
 		std::size_t batchSize=std::min(values,std::size_t(500));
 		//over all possible values of the visible neurons
 		double logZ = -std::numeric_limits<double>::infinity();
-		SHARK_PARALLEL_FOR(std::size_t x = 0;x <  values; x+=batchSize) {
-			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-x);
+		SHARK_PARALLEL_FOR(int x = 0;x <  (int)values; x+=batchSize) {
+			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-static_cast<std::size_t>(x));
 			RealMatrix stateMatrix(currentBatchSize,rbm.numberOfHN());
 			
 			
