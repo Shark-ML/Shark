@@ -57,10 +57,10 @@ double ROC::threshold(double falseAcceptanceRate)const{
 double ROC::value(double falseAcceptanceRate)const
 {
 	double threshold = this->threshold(falseAcceptanceRate);
-	size_t i;
+	std::size_t i=0;
 
 	// "verification rate" = 1.0 - "false rejection rate"
-	for (i = 0; m_scorePositive[i] < threshold && i < m_scorePositive.size(); i++);
+	for (; m_scorePositive[i] < threshold && i < m_scorePositive.size(); i++);
 	if (i == 0) return 1.0;
 	else if (i == m_scorePositive.size()) return 0.0;
 
@@ -74,22 +74,19 @@ double ROC::value(double falseAcceptanceRate)const
 //! Computes the equal error rate of the classifier
 double ROC::equalErrorRate()const
 {
-	double threshold;
-	int i, c = 0;
+	
 
-	double e1 = 0.0;
-	double e2 = 0.0;
-
-	double dc = m_scorePositive.size();
-	double di = m_scoreNegative.size();
-
-	for (i = 0; i < (int)m_scoreNegative.size(); i++)
+	std::size_t dc = m_scorePositive.size();
+	std::size_t di = m_scoreNegative.size();
+	std::size_t c = 0;
+	double e1 = 0,e2 = 0;
+	for (std::size_t i = 0; i < m_scoreNegative.size(); i++)
 	{
-		threshold = m_scoreNegative[i];
-		for (; m_scorePositive[c] < threshold && c < (int)m_scorePositive.size(); c++);
+		double threshold = m_scoreNegative[i];
+		for (; m_scorePositive[c] < threshold && c < m_scorePositive.size(); c++);
 
-		e1 = i / di;			// type 1 error
-		e2 = 1.0 - c / dc;		// type 2 error
+		e1 = i / static_cast<double>(di);			// type 1 error
+		e2 = 1.0 - c / static_cast<double>(dc);		// type 2 error
 
 		if (e1 >= e2) break;
 	}
