@@ -157,7 +157,7 @@ if (WIN32)
 	add_definitions( -DBOOST_ALL_NO_LIB )
 endif()
 
-include_directories( ${Boost_INCLUDE_DIR} )
+include_directories(SYSTEM ${Boost_INCLUDE_DIR} )
 link_directories( ${Boost_LIBRARY_DIR} )
 if(UNIX)
 	find_library( PTHREAD_LIBRARY pthread )
