@@ -31,7 +31,7 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_POTRF_HPP
 #define SHARK_LINALG_BLAS_KERNELS_POTRF_HPP
 
-#ifdef SHARK_USE_CBLAS
+#ifdef SHARK_USE_ATLAS_LAPACK
 #include "atlas/potrf.hpp"
 #else
 // if no bindings are included, we have to provide the default has_optimized_gemv
