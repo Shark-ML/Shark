@@ -89,8 +89,8 @@ struct LZ5 : public MultiObjectiveFunction
 
 		ResultType value( 2, 0 );
 
-		unsigned int counter1 = 0, counter2 = 0;
-		for( unsigned int i = 1; i < x.size(); i++ ) {
+		std::size_t counter1 = 0, counter2 = 0;
+		for( std::size_t i = 1; i < x.size(); i++ ) {
 			if( i % 2 == 0 ) {
 				counter2++;
 				value[1] += sqr(

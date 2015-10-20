@@ -40,7 +40,7 @@ namespace shark {
  */
 struct Discus : public SingleObjectiveFunction {
 
-	Discus(unsigned int numberOfVariables = 5,double alpha = 1.E-3) : m_alpha(alpha) {
+	Discus(std::size_t numberOfVariables = 5,double alpha = 1.E-3) : m_alpha(alpha) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;
 	}
@@ -66,7 +66,7 @@ struct Discus : public SingleObjectiveFunction {
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(numberOfVariables());
 
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for (std::size_t i = 0; i < x.size(); i++) {
 			x(i) = Rng::uni(0,1);
 		}
 		return x;
@@ -75,7 +75,7 @@ struct Discus : public SingleObjectiveFunction {
 	double eval(const SearchPointType &p) const {
 		m_evaluationCounter++;
 		double sum =  sqr(p(0));
-		for (unsigned int i = 1; i < p.size(); i++)
+		for (std::size_t i = 1; i < p.size(); i++)
 			sum += m_alpha * sqr(p(i));
 
 		return sum;

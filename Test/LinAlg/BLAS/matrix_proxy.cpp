@@ -155,8 +155,8 @@ struct MatrixProxyFixture
 	MatrixProxyFixture():denseData(Dimensions1,Dimensions2),denseDataColMajor(Dimensions1,Dimensions2){
 		for(std::size_t row=0;row!= Dimensions1;++row){
 			for(std::size_t col=0;col!=Dimensions2;++col){
-				denseData(row,col) = row*Dimensions2+col+5;
-				denseDataColMajor(row,col) = row*Dimensions2+col+5;
+				denseData(row,col) = row*Dimensions2+col+5.0;
+				denseDataColMajor(row,col) = row*Dimensions2+col+5.0;
 			}
 		}
 	}
@@ -254,14 +254,14 @@ BOOST_AUTO_TEST_CASE( LinAlg_Dense_row){
 		}
 		//check clear
 		for(std::size_t i = 0; i != Dimensions2; ++i){
-			rowTest(i) = i;
-			rowTestColMajor(i) = i;
+			rowTest(i) = double(i);
+			rowTestColMajor(i) = double(i);
 		}
 		rowTest.clear();
 		rowTestColMajor.clear();
 		for(std::size_t i = 0; i != Dimensions2; ++i){
-			BOOST_CHECK_EQUAL(rowTest(i),0);
-			BOOST_CHECK_EQUAL(rowTestColMajor(i),0);
+			BOOST_CHECK_EQUAL(rowTest(i),0.0);
+			BOOST_CHECK_EQUAL(rowTestColMajor(i),0.0);
 		}
 		
 	}
@@ -291,14 +291,14 @@ BOOST_AUTO_TEST_CASE( LinAlg_Dense_column){
 		}
 		//check clear
 		for(std::size_t i = 0; i != Dimensions1; ++i){
-			columnTest(i) = i;
-			columnTestColMajor(i) = i;
+			columnTest(i) = double(i);
+			columnTestColMajor(i) = double(i);
 		}
 		columnTest.clear();
 		columnTestColMajor.clear();
 		for(std::size_t i = 0; i != Dimensions1; ++i){
-			BOOST_CHECK_EQUAL(columnTest(i),0);
-			BOOST_CHECK_EQUAL(columnTestColMajor(i),0);
+			BOOST_CHECK_EQUAL(columnTest(i),0.0);
+			BOOST_CHECK_EQUAL(columnTestColMajor(i),0.0);
 		}
 	}
 }

@@ -52,7 +52,7 @@ namespace shark {
 class VDCMA : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 private:
-	double chi( unsigned int n ) {
+	double chi( std::size_t n ) {
 		return( std::sqrt( static_cast<double>( n ) )*(1. - 1./(4.*n) + 1./(21.*n*n)) );
 	}
 public:
@@ -67,13 +67,13 @@ public:
 	{ return "VDCMA-ES"; }
 
 	/// \brief Calculates lambda for the supplied dimensionality n.
-	unsigned suggestLambda( unsigned int dimension ) {
+	std::size_t suggestLambda( std::size_t dimension ) {
 		return unsigned( 4. + ::floor( 3. * ::log( static_cast<double>( dimension ) ) ) ); // eq. (44)
 	}
 
 	/// \brief Calculates mu for the supplied lambda and the recombination strategy.
-	double suggestMu( unsigned int lambda) {
-		return lambda / 2.; // eq. (44)
+	std::size_t suggestMu( std::size_t lambda) {
+		return lambda / 2; // eq. (44)
 	}
 
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
@@ -82,10 +82,11 @@ public:
 		checkFeatures(function);
 		function.init();
 		
-		unsigned int lambda = suggestLambda( p.size() );
-		unsigned int mu = suggestMu(  lambda );
+		std::size_t lambda = suggestLambda( p.size() );
+		std::size_t mu = suggestMu(  lambda );
 		double sigma = m_initialSigma;
-		if(m_initialSigma == 0) sigma = 1.0/std::sqrt(double(p.size()));
+		if(m_initialSigma == 0) 
+			sigma = 1.0/std::sqrt(double(p.size()));
 		
 		init( function,
 			p,
@@ -99,14 +100,14 @@ public:
 	void init( 
 		ObjectiveFunctionType const& function, 
 		SearchPointType const& initialSearchPoint,
-		unsigned int lambda, 
-		double mu,
+		std::size_t lambda, 
+		std::size_t mu,
 		double initialSigma
 	) {
 
 		m_numberOfVariables = function.numberOfVariables();
 		m_lambda = lambda;
-		m_mu = static_cast<unsigned int>(::floor(mu));
+		m_mu = mu;
 		m_sigma = initialSigma;
 
 		m_mean = blas::repeat(0.0,m_numberOfVariables);
@@ -130,7 +131,7 @@ public:
 			
 		//weighting of the mu-best individuals
 		m_weights.resize(m_mu);
-		for (unsigned int i = 0; i < m_mu; i++){
+		for (std::size_t i = 0; i < m_mu; i++){
 			m_weights(i) = ::log(mu + 0.5) - ::log(1. + i);
 		}
 		m_weights /= sum(m_weights);
@@ -152,7 +153,7 @@ public:
 		std::vector< Individual<RealVector, double, RealVector> > offspring( m_lambda );
 
 		PenalizingEvaluator penalizingEvaluator;
-		for( unsigned int i = 0; i < offspring.size(); i++ ) {
+		for( std::size_t i = 0; i < offspring.size(); i++ ) {
 			createSample(offspring[i].searchPoint(),offspring[i].chromosome());
 		}
 		penalizingEvaluator( function, offspring.begin(), offspring.end() );
@@ -212,22 +213,22 @@ public:
 	}
 	
 	///\brief Returns the size of the parent population \f$\mu\f$.
-	unsigned int mu() const {
+	std::size_t mu() const {
 		return m_mu;
 	}
 	
 	///\brief Returns a mutabl reference to the size of the parent population \f$\mu\f$.
-	unsigned int& mu(){
+	std::size_t& mu(){
 		return m_mu;
 	}
 	
 	///\brief Returns a immutable reference to the size of the offspring population \f$\mu\f$.
-	unsigned int lambda()const{
+	std::size_t lambda()const{
 		return m_lambda;
 	}
 
 	///\brief Returns a mutable reference to the size of the offspring population \f$\mu\f$.
-	unsigned int & lambda(){
+	std::size_t & lambda(){
 		return m_lambda;
 	}
 
@@ -239,7 +240,7 @@ private:
 		RealVector m( m_numberOfVariables, 0. );
 		RealVector z( m_numberOfVariables, 0. );
 		
-		for( unsigned int j = 0; j < offspring.size(); j++ ){
+		for( std::size_t j = 0; j < offspring.size(); j++ ){
 			noalias(m) += m_weights( j ) * offspring[j].searchPoint();
 			noalias(z) += m_weights( j ) * offspring[j].chromosome();
 		}
@@ -339,9 +340,9 @@ private:
 		noalias(t) -= alpha*((2+normv2)*(m_vn*s)-inner_prod(s,vn2)*m_vn);
 	}
 	
-	unsigned int m_numberOfVariables; ///< Stores the dimensionality of the search space.
-	unsigned int m_mu; ///< The size of the parent population.
-	unsigned int m_lambda; ///< The size of the offspring population, needs to be larger than mu.
+	std::size_t m_numberOfVariables; ///< Stores the dimensionality of the search space.
+	std::size_t m_mu; ///< The size of the parent population.
+	std::size_t m_lambda; ///< The size of the offspring population, needs to be larger than mu.
 
 	double m_initialSigma;///0 by default which indicates initial sigma = 1/sqrt(N)
 	double m_sigma;

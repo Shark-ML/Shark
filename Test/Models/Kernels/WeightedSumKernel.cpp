@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test_Detailed )
         for ( unsigned int j=0; j<num_trials; j++ ) {
             RealVector cur_params(kernel.numberOfParameters());
             for ( unsigned int k=0; k<kernel.numberOfParameters(); k++ )
-                cur_params(k) = Rng::discrete(1,10);
+                cur_params(k) = double(Rng::discrete(1,10));
             kernel.setParameterVector(cur_params);
             BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-15);
         }
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test_Detailed_Unconstrained )
         for ( unsigned int j=0; j<num_trials; j++ ) {
             RealVector cur_params(kernel.numberOfParameters());
             for ( unsigned int k=0; k<kernel.numberOfParameters(); k++ )
-                cur_params(k) = Rng::discrete(1,10);
+                cur_params(k) = double(Rng::discrete(1,10));
             kernel.setParameterVector(cur_params);
             BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-15);
         }
@@ -335,7 +335,7 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test_Detailed_NoDegreeParam )
         for ( unsigned int j=0; j<num_trials; j++ ) {
             RealVector cur_params(kernel.numberOfParameters());
             for ( unsigned int k=0; k<kernel.numberOfParameters(); k++ )
-                cur_params(k) = Rng::discrete(1,10);
+                cur_params(k) = double(Rng::discrete(1,10));
             kernel.setParameterVector(cur_params);
             BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-15);
         }
@@ -438,7 +438,7 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test_Detailed_NoDegreeParam_Unconst
         for ( unsigned int j=0; j<num_trials; j++ ) {
             RealVector cur_params(kernel.numberOfParameters());
             for ( unsigned int k=0; k<kernel.numberOfParameters(); k++ )
-                cur_params(k) = Rng::discrete(1,10);
+                cur_params(k) = double(Rng::discrete(1,10));
             kernel.setParameterVector(cur_params);
             BOOST_CHECK_SMALL(norm_sqr(kernel.parameterVector()-cur_params), 1.e-15);
         }

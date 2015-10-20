@@ -75,7 +75,7 @@ public:
       m_maxPoleEvals(max_pole_evaluations),
       m_normalize(normalize) {
     // number of inputs should be 4 for single pole, 6 for double.
-    int inputs = 0;
+    std::size_t inputs = 0;
     if (single_pole) {
       inputs = 4;
     }
@@ -161,7 +161,7 @@ private:
 
   //! \brief Converts neural network output for use with pole simulator
   //! \param output Output of the neural network.
-  //! \return double precision floating point between 0 and 1.
+  //! \return double precision floating postd::size_t between 0 and 1.
   double convertToPoleMovement(double output) const{
     if (typeid(mp_net->outputActivationFunction())
 	== typeid(LogisticNeuron)) {
@@ -188,7 +188,7 @@ private:
     SinglePole pole(true, m_normalize);
     RealVector state(4);
     RealVector output(1); 
-    int eval_count = 0;
+    std::size_t eval_count = 0;
     bool failed = false;
     
     pole.init(init_angle);
@@ -215,7 +215,7 @@ private:
     DoublePole pole(true, m_normalize);
     RealVector state(6);
     RealVector output(1); 
-    int eval_count = 0;
+    std::size_t eval_count = 0;
     bool failed = false;
 
     pole.init(init_angle);

@@ -63,7 +63,7 @@ public:
 	/// (typically non-zero) entry of a row.
 	struct Entry
 	{
-		unsigned int index;
+		std::size_t index;
 		QpFloatType value;
 	};
 
@@ -71,7 +71,7 @@ public:
 	struct Row
 	{
 		Entry* entry;
-		unsigned int size;
+		std::size_t size;
 		QpFloatType defaultvalue;
 	};
 
@@ -79,9 +79,9 @@ public:
 	/// on the number of non-default (aka non-zero) entries
 	/// of the array.			
 	QpSparseArray(
-		unsigned int height,
-		unsigned int width,
-		unsigned int space)
+		std::size_t height,
+		std::size_t width,
+		std::size_t space)
 	: m_width(width)
 	, m_height(height)
 	, m_used(0)
@@ -92,19 +92,18 @@ public:
 	}
 
 	/// number of columns
-	inline unsigned int width() const
+	inline std::size_t width() const
 	{ return m_width; }
 
 	/// number of rows
-	inline unsigned int height() const
+	inline std::size_t height() const
 	{ return m_height; }
 
 	/// obtain an element of the matrix
-	QpFloatType operator () (unsigned int row, unsigned int col) const
+	QpFloatType operator () (std::size_t row, std::size_t col) const
 	{
 		Row const& r = m_row[row];
-		unsigned int i;
-		for (i=0; i<r.size; i++)
+		for (std::size_t i=0; i<r.size; i++)
 		{
 			Entry const& e = r.entry[i];
 			if (e.index == col) return e.value;
@@ -113,12 +112,12 @@ public:
 	}
 
 	/// obtain a row of the matrix
-	inline Row const& row(unsigned int row) const
+	inline Row const& row(std::size_t row) const
 	{ return m_row[row]; }
 
 	/// set the default value, that is, the value
 	/// of all implicitly defined elements of a row
-	inline void setDefaultValue(unsigned int row, QpFloatType defaultvalue)
+	inline void setDefaultValue(std::size_t row, QpFloatType defaultvalue)
 	{ m_row[row].defaultvalue = defaultvalue; }
 
 	/// Set a specific value. Note that entries can not
@@ -126,7 +125,7 @@ public:
 	/// elements must be done row-wise, and in order
 	/// within each row. However, the order of rows does
 	/// not matter.
-	void add(unsigned int row, unsigned int col, QpFloatType value)
+	void add(std::size_t row, std::size_t col, QpFloatType value)
 	{
 		SHARK_CHECK(m_used < m_data.size(), "[QpSparseArray::add] insufficient storage space");
 	
@@ -142,13 +141,13 @@ public:
 
 protected:
 	/// number of columns
-	unsigned int m_width;
+	std::size_t m_width;
 
 	/// number of rows
-	unsigned int m_height;
+	std::size_t m_height;
 
 	/// current total number of non-default components
-	unsigned int m_used;
+	std::size_t m_used;
 
 	/// storage for Entry structures
 	std::vector<Entry> m_data;

@@ -101,7 +101,7 @@ struct IHR6 : public MultiObjectiveFunction{
 		value[0] = 1 - std::exp(-4 * std::abs(y(0))) * std::pow(std::sin(6 * M_PI * y(0)), 6);
 
 		double g = 0;
-		for (unsigned int i = 1; i < numberOfVariables(); i++)
+		for (std::size_t i = 1; i < numberOfVariables(); i++)
 			g += hg( y(i) );
 		g = 1 + 9 * std::pow(g / (numberOfVariables() - 1.0), 0.25);
 

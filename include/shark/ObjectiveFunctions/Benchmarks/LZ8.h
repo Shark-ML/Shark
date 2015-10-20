@@ -89,14 +89,14 @@ struct LZ8 : public MultiObjectiveFunction
 
 		ResultType value( 2, 0 );
 
-		unsigned int counter1 = 0, counter2 = 0;
-		for( unsigned int i = 1; i < x.size(); i++ ) {
+		std::size_t counter1 = 0, counter2 = 0;
+		for( std::size_t i = 1; i < x.size(); i++ ) {
 			double y = x(i) - ::pow( x(0), 0.5*(1.0 + 3*(i-1)/(x.size()-1) ) );
 			if( i % 2 == 0 ) {
 				counter2++;
 				value[1] += sqr( y );// - ::cos( 8*y*M_PI) + 1.;
 				double product = 2.;
-				for( unsigned int j = 0; j < x.size(); j++ )
+				for( std::size_t j = 0; j < x.size(); j++ )
 					if( j%2 == 0 )
 						product *= ::cos( 20 * y * M_PI / ::sqrt( static_cast<double>( j ) ) );
 				value[1] -= product + 2.;
@@ -104,7 +104,7 @@ struct LZ8 : public MultiObjectiveFunction
 				counter1++;
 				value[0] += sqr( y );// - ::cos( 8*y*M_PI) + 1.;
 				double product = 2.;
-				for( unsigned int j = 0; j < x.size(); j++ )
+				for( std::size_t j = 0; j < x.size(); j++ )
 					if( j%2 == 1 )
 						product *= ::cos( 20 * y * M_PI / ::sqrt( static_cast<double>( j ) ) );
 				value[0] -= product + 2.;

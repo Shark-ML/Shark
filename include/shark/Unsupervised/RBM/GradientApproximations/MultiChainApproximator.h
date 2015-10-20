@@ -166,7 +166,7 @@ private:
 	UnlabeledData<RealVector> m_data;
 
 	unsigned int m_k;
-	unsigned int m_samples;
+	std::size_t m_samples;
 	std::size_t m_batchSize;
 	std::size_t m_numBatches;
 

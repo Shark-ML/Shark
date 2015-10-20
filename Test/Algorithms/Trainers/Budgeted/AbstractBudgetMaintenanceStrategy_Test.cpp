@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( AbstractBudgetMaintenanceStrategy_findSmallestVector)
     size_t datasetSize = 64;
     Chessboard problem (2,0);
     LabeledData<RealVector, unsigned int> dataset = problem.generateDataset(datasetSize);
-    unsigned int classes = numberOfClasses (dataset);
+   std::size_t classes = numberOfClasses (dataset);
     
     // create a budget with some fake entries
     size_t m_budgetSize = 16;
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( AbstractBudgetMaintenanceStrategy_findSmallestVector)
     // create the alphas, we need by just enumerating them
     for (size_t i = 0; i < m_budgetSize; i++)
         for (size_t j = 0; j < classes; j++)
-            budgetModel.alpha(i, j) = i*classes + j;
+            budgetModel.alpha(i, j) = double(i*classes + j);
     
     // find the smallest vector
     AbstractBudgetMaintenanceStrategy<RealVector>::findSmallestVector(budgetModel, index, minAlpha);

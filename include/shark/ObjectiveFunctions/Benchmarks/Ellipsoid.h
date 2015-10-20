@@ -68,7 +68,7 @@ struct Ellipsoid : public SingleObjectiveFunction {
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(numberOfVariables());
 
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for (std::size_t i = 0; i < x.size(); i++) {
 			x(i) = Rng::uni(0,1);
 		}
 		return x;
@@ -78,7 +78,7 @@ struct Ellipsoid : public SingleObjectiveFunction {
 		m_evaluationCounter++;
 		double sum = 0;
 		double sizeMinusOne = p.size() - 1.;
-		for( unsigned int i = 0; i < p.size(); i++ ){
+		for( std::size_t i = 0; i < p.size(); i++ ){
 			sum += ::pow( m_alpha, i / sizeMinusOne ) * sqr(p( i ) );
 		}
 
@@ -88,7 +88,7 @@ struct Ellipsoid : public SingleObjectiveFunction {
 	double evalDerivative( const SearchPointType & p, FirstOrderDerivative & derivative ) const {
 		double sizeMinusOne=p.size() - 1.;
 		derivative.resize(p.size());
-		for (unsigned int i = 0; i < p.size(); i++) {
+		for (std::size_t i = 0; i < p.size(); i++) {
 			derivative(i) = 2 * ::pow(m_alpha, i / sizeMinusOne) * p(i);
 		}
 		return eval(p);
@@ -99,7 +99,7 @@ struct Ellipsoid : public SingleObjectiveFunction {
 		derivative.gradient.resize(size);
 		derivative.hessian.resize(size,size);
 		derivative.hessian.clear();
-		for (unsigned int i = 0; i < size; i++) {
+		for (std::size_t i = 0; i < size; i++) {
 			derivative.gradient(i) = 2 * std::pow(m_alpha, i / sizeMinusOne ) * p(i);
 			derivative.hessian(i,i) = 2 * std::pow(m_alpha, i /sizeMinusOne );
 		}

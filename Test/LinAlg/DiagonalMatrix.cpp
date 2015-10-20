@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_Basic ){
 	std::size_t const Dimensions = 10;
 	IntVector diagonalElements(Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i)
-		diagonalElements(i) = i;
+		diagonalElements(i) = (unsigned int)i;
 	
 	blas::diagonal_matrix<IntVector> diagonal(diagonalElements);
 	checkDiagonalMatrix(diagonal,diagonalElements,Dimensions);
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_Copy ){
 	std::size_t const Dimensions = 10;
 	IntVector diagonalElements(Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i)
-		diagonalElements(i) = i;
+		diagonalElements(i) = (unsigned int)i;
 	
 	blas::diagonal_matrix<IntVector> diagonal(diagonalElements);
 	
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_DefaultCtorAndAssignment){
 	std::size_t const Dimensions = 10;
 	IntVector diagonalElements(Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i)
-		diagonalElements(i) = i;
+		diagonalElements(i) = (unsigned int)i;
 	
 	blas::diagonal_matrix<IntVector> diagonal(diagonalElements);
 	
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_Assignment){
 	std::size_t const Dimensions = 10;
 	IntVector diagonalElements(Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i)
-		diagonalElements(i) = i;
+		diagonalElements(i) = (unsigned int)i;
 	
 	blas::diagonal_matrix<IntVector> diagonal(diagonalElements);
 	

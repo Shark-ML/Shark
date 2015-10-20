@@ -83,12 +83,12 @@ public:
 		SHARK_ASSERT(kernel != NULL);
 	}
 		
-	KernelExpansion(KernelType* kernel, Data<InputType> const& basis,bool offset, unsigned int outputs = 1){
+	KernelExpansion(KernelType* kernel, Data<InputType> const& basis,bool offset, std::size_t outputs = 1){
 		SHARK_ASSERT(kernel != NULL);
 		setStructure(kernel, basis,offset,outputs);
 	}
 	
-	void setStructure(KernelType* kernel, Data<InputType> const& basis,bool offset, unsigned int outputs = 1){
+	void setStructure(KernelType* kernel, Data<InputType> const& basis,bool offset, std::size_t outputs = 1){
 		SHARK_ASSERT(kernel != NULL);
 		mep_kernel = kernel;
 		if(offset)
@@ -148,11 +148,11 @@ public:
 		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b;
 	}
-	double& offset(unsigned int cls){
+	double& offset(std::size_t cls){
 		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b(cls);
 	}
-	double const& offset(unsigned int cls) const{
+	double const& offset(std::size_t cls) const{
 		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b(cls);
 	}

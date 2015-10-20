@@ -72,7 +72,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 	model.setInputDimension(m_inputDimension);
 
 	//Find the largest label, so we know how big the histogram should be
-	m_maxLabel = numberOfClasses(dataset)-1;
+	m_maxLabel = static_cast<unsigned int>(numberOfClasses(dataset))-1;
 
 	// create cross-validation folds
 	ClassificationDataset set=dataset;

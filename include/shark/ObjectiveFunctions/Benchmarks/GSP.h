@@ -44,7 +44,7 @@ struct GSP : public MultiObjectiveFunction
 
 		double sum1 = 0., sum2 = 0.;
 
-		for( unsigned int i = 0; i < x.size(); i++ ) {
+		for( std::size_t i = 0; i < x.size(); i++ ) {
 			sum1 += sqr( x( i ) );
 			sum2 += sqr( 1 - x( i ) );
 		}

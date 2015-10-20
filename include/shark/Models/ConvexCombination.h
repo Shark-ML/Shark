@@ -61,7 +61,7 @@ public:
 	}
 	
 	/// Constructor creating a model with given dimnsionalities and optional offset term.
-	ConvexCombination(unsigned int inputs, unsigned int outputs = 1)
+	ConvexCombination(std::size_t inputs, std::size_t outputs = 1)
 	: m_w(outputs,inputs,0.0){
 		m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
 		m_features |= HAS_FIRST_INPUT_DERIVATIVE;
@@ -90,12 +90,12 @@ public:
 	}
 
 	/// obtain the input dimension
-	size_t inputSize() const{
+	std::size_t inputSize() const{
 		return m_w.size2();
 	}
 
 	/// obtain the output dimension
-	size_t outputSize() const{
+	std::size_t outputSize() const{
 		return m_w.size1();
 	}
 
@@ -117,12 +117,12 @@ public:
 	}
 
 	/// return the number of parameter
-	size_t numberOfParameters() const{
+	std::size_t numberOfParameters() const{
 		return m_w.size1()*m_w.size2();
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(unsigned int inputs, unsigned int outputs = 1){
+	void setStructure(std::size_t inputs, std::size_t outputs = 1){
 		ConvexCombination model(inputs,outputs);
 		swap(*this,model);
 	}
@@ -166,7 +166,7 @@ public:
 		axpy_prod(trans(coefficients), patterns,d);
 		
 		//use the same drivative as in the softmax model
-		for(size_t i = 0; i != outputSize(); ++i){
+		for(std::size_t i = 0; i != outputSize(); ++i){
 			double mass=inner_prod(row(d,i),row(m_w,i));
 			noalias(row(weightGradient,i)) = element_prod(
 				row(d,i) - mass,

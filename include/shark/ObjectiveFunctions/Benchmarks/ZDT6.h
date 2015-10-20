@@ -82,7 +82,7 @@ struct ZDT6 : public MultiObjectiveFunction
 		m_handler.setBounds(numberOfVariables,0,1);
 	}
 
-	// std::vector<double> evaluate( const point_type & x ) {
+	// std::vector<double> evaluate( const postd::size_t_type & x ) {
 	ResultType eval( const SearchPointType & x ) const {
 		m_evaluationCounter++;
 

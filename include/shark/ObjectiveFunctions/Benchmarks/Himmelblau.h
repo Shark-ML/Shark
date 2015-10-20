@@ -65,14 +65,14 @@ struct Himmelblau : public SingleObjectiveFunction {
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(numberOfVariables());
 
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for (std::size_t i = 0; i < x.size(); i++) {
 			x(i) = Rng::uni(-3,3);
 		}
 		return x;
 	}
 
 	/**
-	* \brief Evaluates the function for the supplied search point.
+	* \brief Evaluates the function for the supplied search postd::size_t.
 	* \throws shark::Exception if the size of p does not equal 2.
 	*/
 	double eval( const SearchPointType & p ) const {

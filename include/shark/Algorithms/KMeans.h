@@ -116,7 +116,7 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 	RealVector ckck(k,0);
 	
 	//init cluster assignments
-	for(std::size_t i = 0; i != ell; ++i){
+	for(unsigned int i = 0; i != ell; ++i){
 		clusterMembership(i) = i % k;
 	}
 	DiscreteUniform<Rng::rng_type> uni(Rng::globalRng,0,k-1);
@@ -155,7 +155,7 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 				currentDistances(c) -= 2* kernelMatrix(i,j)/clusterSizes(c);
 			}
 			//choose the index with the smallest distance as new cluster
-			newClusterMembership(i) = arg_min(currentDistances);
+			newClusterMembership(i) = (unsigned int) arg_min(currentDistances);
 		}
 		equal = boost::equal(
 			newClusterMembership,
@@ -169,7 +169,7 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 		}
 		
 		//if a cluster has size , assign a random point to it
-		for(std::size_t i = 0; i != k; ++i){
+		for(unsigned int i = 0; i != k; ++i){
 			if(clusterSizes(i) == 0){
 				std::size_t elem = uni(ell-1);
 				--clusterSizes(clusterMembership(elem));

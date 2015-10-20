@@ -35,12 +35,12 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateIndexed ){
 	//fill the vectors. inputs are the number [0,19], labels go from [20...39]
 	//the indizes are assigned cyclically 0,1,2,3,0,1,2,3 to the numbers.
 	for(size_t i=0;i!=20;++i){
-		inputs.push_back(i);
-		labels.push_back(20+i);
+		inputs.push_back(double(i) );
+		labels.push_back(20.0+i);
 		indizes.push_back(i%numPartitions);
 		for(size_t j=0;j!=numPartitions;++j){
 			if(j!=i%numPartitions){
-				testInputPartitions[j].push_back(i);
+				testInputPartitions[j].push_back(double(i));
 			}
 		}
 	}
@@ -97,8 +97,8 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSize )
 	std::vector<double> labels;
 
 	for(size_t i=0;i!=numExamples;++i){
-		inputs.push_back(i);
-		labels.push_back(numExamples+i);
+		inputs.push_back(double(i));
+		labels.push_back(double(numExamples+i));
 	}
 	LabeledData<double,double> set = createLabeledDataFromRange(inputs,labels,8);
 
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSizeBalancedUnsigned )
 
 	for(size_t i=0;i!=numExamples;++i){
 		RealVector vec(1);
-		vec(0)=i;
+		vec(0)= double(i);
 		inputs.push_back(vec);
 		labels.push_back(i%2);
 	}

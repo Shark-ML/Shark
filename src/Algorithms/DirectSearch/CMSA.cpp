@@ -81,7 +81,7 @@ void CMSA::step(ObjectiveFunctionType const& function){
 	std::vector< IndividualType > offspring( m_lambda );
 
 	PenalizingEvaluator penalizingEvaluator;
-	for( unsigned int i = 0; i < offspring.size(); i++ ) {		    
+	for( std::size_t i = 0; i < offspring.size(); i++ ) {		    
 		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution();
 		offspring[i].chromosome().sigma = m_sigma * ::exp( m_cSigma * Rng::gauss( 0, 1 ) );
 		offspring[i].chromosome().step = sample.first;
@@ -106,7 +106,7 @@ void CMSA::updateStrategyParameters( const std::vector< CMSA::IndividualType > &
 	RealMatrix Znew( m_numberOfVariables, m_numberOfVariables,0.0 );
 	RealMatrix& C = m_mutationDistribution.covarianceMatrix();
 	// Rank-mu-Update
-	for( unsigned int i = 0; i < m_mu; i++ ) {
+	for( std::size_t i = 0; i < m_mu; i++ ) {
 		noalias(Znew) += 1./m_mu * blas::outer_prod( 
 			offspringNew[i].chromosome().step,
 			offspringNew[i].chromosome().step
@@ -118,7 +118,7 @@ void CMSA::updateStrategyParameters( const std::vector< CMSA::IndividualType > &
 	// Step size update
 	double sigmaNew = 0.;
 	//double sigma = 0.;
-	for( unsigned int i = 0; i < m_mu; i++ ) {
+	for( std::size_t i = 0; i < m_mu; i++ ) {
 		sigmaNew += 1./m_mu * offspringNew[i].chromosome().sigma;
 	}
 	m_sigma = sigmaNew;

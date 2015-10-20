@@ -109,7 +109,7 @@ public:
 			derivative+=dataGradient;
 		}
 		error /= dataSize;
-		derivative /= dataSize;
+		derivative /= double(dataSize);
 		return error;
 	}
 

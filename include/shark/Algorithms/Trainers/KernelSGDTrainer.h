@@ -140,7 +140,7 @@ public:
 	void train(ClassifierType& classifier, const LabeledData<InputType, unsigned int>& dataset)
 	{
 		std::size_t ell = dataset.numberOfElements();
-		unsigned int classes = numberOfClasses(dataset);
+		std::size_t classes = numberOfClasses(dataset);
 		ModelType& model = classifier.decisionFunction();
 
 		model.setStructure(m_kernel, dataset.inputs(), m_offset, classes);

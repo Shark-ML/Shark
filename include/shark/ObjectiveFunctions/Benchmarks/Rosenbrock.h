@@ -61,8 +61,8 @@ struct Rosenbrock : public SingleObjectiveFunction {
 	/// \brief Constructs the problem
 	///
 	/// \param dimensions number of dimensions to optimize
-	/// \param initialSpread spread of the initial starting point
-	Rosenbrock(unsigned int dimensions=23, double initialSpread = 1.0)
+	/// \param initialSpread spread of the initial starting postd::size_t
+	Rosenbrock(std::size_t dimensions=23, double initialSpread = 1.0)
 	:m_numberOfVariables(dimensions), m_initialSpread(initialSpread) {
 		m_features|=CAN_PROPOSE_STARTING_POINT;
 		m_features|=HAS_FIRST_DERIVATIVE;
@@ -88,7 +88,7 @@ struct Rosenbrock : public SingleObjectiveFunction {
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(numberOfVariables());
 
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for (std::size_t i = 0; i < x.size(); i++) {
 			x(i) = Rng::uni( 0, m_initialSpread );
 		}
 		return x;
@@ -99,7 +99,7 @@ struct Rosenbrock : public SingleObjectiveFunction {
 
 		double sum = 0;
 
-		for( unsigned int i = 0; i < p.size()-1; i++ ) {
+		for( std::size_t i = 0; i < p.size()-1; i++ ) {
 			sum += 100*sqr( p(i+1) - sqr( p( i ) ) ) +sqr( 1. - p( i ) );
 		}
 

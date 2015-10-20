@@ -115,9 +115,7 @@ BOOST_AUTO_TEST_SUITE (LinAlg_PartlyPrecomputedMatrix)
 
 BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 {
-
-	shark::Timer timer;
-	Rng::seed(floor(timer.now()));
+	Rng::seed(42);
 	// FIXME: need a test for 1x1?? ;)
 
 	size_t maxDimension = 120;
@@ -161,8 +159,9 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		if(verbose)  std::cout << "cache size: " << cacheSize << std::endl;
 
 		// now cache this with a kernel with random gamma
-		double gamma = Rng::discrete(1, maxGamma);
-		if(verbose) std::cout << "g:" << gamma << std::endl;
+		double gamma = Rng::uni(1, maxGamma);
+		if(verbose)
+			std::cout << "g:" << gamma << std::endl;
 
 		GaussianRbfKernel<> kernel(log(gamma));
 		KernelMatrixType  km(kernel, unionJackData);
@@ -174,12 +173,12 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		// if its even: the rest of the entries are 1/gamma^4
 		// if its odd: the row in the middle and the column in
 		// the middle have 1/gamma^6
-		size_t error = 0;
+		double error = 0;
 		for(size_t r = 0; r < currentDimension; r++)
 		{
 			for(size_t c = 0; c < currentDimension; c++)
 			{
-				size_t expectedEntry =  gamma * gamma * gamma * gamma;
+				double expectedEntry =  gamma * gamma * gamma * gamma;
 				if((r == c) || (c == currentDimension - r - 1))
 					expectedEntry = 1;
 				if((currentDimension % 2 == 1) && ((r == currentDimension / 2) || (c == currentDimension / 2)))
@@ -200,7 +199,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 
 		for(size_t c = 0; c < currentDimension; c++)
 		{
-			size_t expectedEntry =  gamma * gamma * gamma * gamma;
+			double expectedEntry =  gamma * gamma * gamma * gamma;
 			if((r == c) || (c == currentDimension - r - 1))
 				expectedEntry = 1;
 			if((currentDimension % 2 == 1) && ((r == currentDimension / 2) || (c == currentDimension / 2)))
@@ -239,6 +238,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		// first test how many uncached rows we roughly can obtain in a certain given timespan.
 		double timespan = 0.01;
 
+		shark::Timer timer;
 		size_t uncachedRowEvalCount = 0;
 		double uncachedStartTime = timer.now();
 		do
@@ -312,9 +312,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 ///\brief test if we can cache a gigantic matrix and still can access all rows
 BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel)
 {
-
-	shark::Timer timer;
-	Rng::seed(floor(timer.now()));
+	Rng::seed(42);
 	// FIXME: need a test for 1x1?? ;)
 
 	size_t maxDimension = 120;

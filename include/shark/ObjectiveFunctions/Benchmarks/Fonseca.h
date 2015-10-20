@@ -44,7 +44,7 @@ namespace shark {
 /// \brief Bi-objective real-valued benchmark function proposed by Fonseca and Flemming.
 ///
 /// Fonseca, C. M. and P. J. Fleming (1998). Multiobjective
-/// optimization and multiple constraint handling with evolutionary
+/// optimization and multiple constrastd::size_t handling with evolutionary
 /// algorithms-Part II: Application example. IEEE Transactions on
 /// Systems, Man, and Cybernetics, Part A: Systems and Humans 28(1),
 /// 38-47
@@ -89,7 +89,7 @@ struct Fonseca : public MultiObjectiveFunction {
 
 		const double d = 1. / std::sqrt( static_cast<double>( x.size() ) );
 		double sum1 = 0., sum2 = 0.;
-		for( unsigned int i = 0; i < x.size(); i++ ) {
+		for( std::size_t i = 0; i < x.size(); i++ ) {
 			sum1 += sqr( x( i ) - d );
 			sum2 += sqr( x( i ) + d );
 		}

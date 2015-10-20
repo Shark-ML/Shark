@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_svd_big )
 		RealMatrix lambda(5,5);
 		lambda.clear();
 		for(std::size_t i = 0; i != 3; ++i){
-			lambda(i,i) = i;
+			lambda(i,i) = double(i);
 		}
 		RealMatrix A = prod(R,lambda);
 		A = prod(A,trans(R));

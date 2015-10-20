@@ -41,7 +41,7 @@ namespace shark {
 /// is rotation invariant. However this does not mean that all its aspects are the same.
 /// Especially linear algebra routines might take longer when the problem is not
 /// axis aligned. This function creates a random rotation function and 
-/// applies it to the given input points to make it no longer axis aligned.
+/// applies it to the given input postd::size_ts to make it no longer axis aligned.
 struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 	RotatedObjectiveFunction(SingleObjectiveFunction* objective)
 	:m_objective(objective){

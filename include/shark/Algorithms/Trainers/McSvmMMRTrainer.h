@@ -117,7 +117,7 @@ public:
 	void train(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
 	{
 		std::size_t ic = dataset.numberOfElements();
-		unsigned int classes = numberOfClasses(dataset);
+		std::size_t classes = numberOfClasses(dataset);
 		
 		// prepare the problem description
 		RealVector alpha(ic,0.0);

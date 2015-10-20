@@ -95,16 +95,16 @@ void LBFGS::getDirection(RealVector& searchDirection) {
 	RealVector alpha(m_numHist);
 	RealVector beta(m_numHist);
 
-	for (size_t i = 0; i < m_steps.size(); ++i)
+	for (std::size_t i = 0; i < m_steps.size(); ++i)
 		rho(i) = 1.0 / inner_prod(m_gradientDifferences[i], m_steps[i]);
 
 	searchDirection = -m_derivative;
-	for (int i = m_steps.size() - 1; i >= 0; --i) {
+	for (std::size_t i = m_steps.size() - 1; i >= 0; --i) {
 		alpha(i) = rho(i) * inner_prod(m_steps[i], searchDirection);
 		searchDirection -= alpha(i) * m_gradientDifferences[i];
 	}
 	searchDirection *= m_hdiag;
-	for (size_t i = 0; i < m_steps.size(); ++i) {
+	for (std::size_t i = 0; i < m_steps.size(); ++i) {
 		beta(i) = rho(i) * inner_prod(m_gradientDifferences[i], searchDirection);
 		searchDirection += m_steps[i] * (alpha(i) - beta(i));
 	}

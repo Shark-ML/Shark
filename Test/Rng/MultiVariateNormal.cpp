@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_EIGENVALUES ) {
 		}
 	}
 	RealMatrix covariance=prod(base,trans(base));
-	covariance /= 2*Dimensions;
+	covariance /= 2.0*Dimensions;
 	
 	
 	MultiVariateNormalDistribution dist(covariance);
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_Cholesky) {
 		}
 	}
 	RealMatrix covariance=prod(base,trans(base));
-	covariance /= 2*Dimensions;
+	covariance /= 2.0*Dimensions;
 	
 	
 	MultiVariateNormalDistributionCholesky dist(covariance);

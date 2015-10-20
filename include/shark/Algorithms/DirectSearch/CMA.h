@@ -85,7 +85,7 @@ namespace shark {
 
 			RealVector result( m_numberOfVariables, 0. );
 
-			for( unsigned int j = 0; j < container.size(); j++ )
+			for( std::size_t j = 0; j < container.size(); j++ )
 				result += weights( j ) * e( container[j] );
 
 			return( result );
@@ -94,12 +94,12 @@ namespace shark {
 		/**
 		* \brief Calculates lambda for the supplied dimensionality n.
 		*/
-		SHARK_EXPORT_SYMBOL static unsigned suggestLambda( unsigned int dimension ) ;
+		SHARK_EXPORT_SYMBOL static std::size_t suggestLambda( std::size_t dimension ) ;
 
 		/**
 		* \brief Calculates mu for the supplied lambda and the recombination strategy.
 		*/
-		SHARK_EXPORT_SYMBOL static unsigned suggestMu( unsigned int lambda, RecombinationType recomb = SUPERLINEAR ) ;
+		SHARK_EXPORT_SYMBOL static std::size_t suggestMu( std::size_t lambda, RecombinationType recomb = SUPERLINEAR ) ;
 
 		void read( InArchive & archive );
 		void write( OutArchive & archive ) const;
@@ -116,8 +116,8 @@ namespace shark {
 		SHARK_EXPORT_SYMBOL void init( 
 			ObjectiveFunctionType& function, 
 			SearchPointType const& initialSearchPoint,
-			unsigned int lambda, 
-			unsigned int mu,
+			std::size_t lambda,
+			std::size_t mu,
 			double initialSigma,				       
 			const boost::optional< RealMatrix > & initialCovarianceMatrix = boost::optional< RealMatrix >()
 		);
@@ -194,28 +194,28 @@ namespace shark {
 		/**
 		 * \brief Returns the size of the parent population \f$\mu\f$.
 		 */
-		unsigned int mu() const {
+		std::size_t mu() const {
 			return m_mu;
 		}
 		
 		/**
 		 * \brief Returns a mutabl rference to the size of the parent population \f$\mu\f$.
 		 */
-		unsigned int& mu(){
+		std::size_t& mu(){
 			return m_mu;
 		}
 		
 		/**
 		 * \brief Returns a immutable reference to the size of the offspring population \f$\mu\f$.
 		 */
-		unsigned int lambda()const{
+		std::size_t lambda()const{
 			return m_lambda;
 		}
 
 		/**
 		 * \brief Returns a mutable reference to the size of the offspring population \f$\mu\f$.
 		 */
-		unsigned int & lambda(){
+		std::size_t & lambda(){
 			return m_lambda;
 		}
 
@@ -249,8 +249,8 @@ namespace shark {
 		SHARK_EXPORT_SYMBOL void updateStrategyParameters( const std::vector<Individual<RealVector, double, RealVector> > & offspring ) ;
 	
 		std::size_t m_numberOfVariables; ///< Stores the dimensionality of the search space.
-		unsigned int m_mu; ///< The size of the parent population.
-		unsigned int m_lambda; ///< The size of the offspring population, needs to be larger than mu.
+		std::size_t m_mu; ///< The size of the parent population.
+		std::size_t m_lambda; ///< The size of the offspring population, needs to be larger than mu.
 
 		RecombinationType m_recombinationType; ///< Stores the recombination type.
 
@@ -270,7 +270,7 @@ namespace shark {
 		RealVector m_evolutionPathC;
 		RealVector m_evolutionPathSigma;
 
-		unsigned m_counter; ///< counter for generations
+		std::size_t m_counter; ///< counter for generations
 
 		MultiVariateNormalDistribution m_mutationDistribution;
 	};

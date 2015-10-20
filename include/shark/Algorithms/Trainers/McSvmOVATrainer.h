@@ -107,7 +107,7 @@ public:
 		base_type::m_solutionproperties.iterations = 0;
 		base_type::m_solutionproperties.value = 0.0;
 		base_type::m_solutionproperties.seconds = 0.0;
-		for (std::size_t c=0; c<classes; c++)
+		for (unsigned int c=0; c<classes; c++)
 		{
 			LabeledData<InputType, unsigned int> bindata = oneVersusRestProblem(dataset, c);
 			KernelClassifier<InputType> binsvm;
@@ -163,7 +163,7 @@ public:
 		std::size_t dim = inputDimension(dataset);
 		std::size_t classes = numberOfClasses(dataset);
 		RealMatrix w(classes, dim);
-		for (std::size_t c=0; c<classes; c++)
+		for (unsigned int c=0; c<classes; c++)
 		{
 			LabeledData<InputType, unsigned int> bindata = oneVersusRestProblem(dataset, c);
 			QpBoxLinear<InputType> solver(bindata, dim);

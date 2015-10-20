@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( HINGELOSS_EVAL_MULTICLASS ) {
 		UIntVector testLabel(5);
 		RealVector valueResultP(5,0);
 		for(std::size_t i = 0; i != 5; ++i){
-			testLabel(i) = Rng::discrete(0,dim-1);
+			testLabel(i) = (unsigned int)Rng::discrete(0,dim-1);
 			testPoint(i,testLabel(i)) = Rng::uni(-10.0,10.0);
 			for(std::size_t j = 0; j != dim; ++j){
 				if(j == testLabel(i)) continue;

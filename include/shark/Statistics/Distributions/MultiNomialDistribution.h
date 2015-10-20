@@ -52,7 +52,7 @@ namespace shark {
 /// is taken.
 class MultiNomialDistribution{
 public:
-	typedef unsigned int result_type;
+	typedef std::size_t result_type;
 
 	MultiNomialDistribution(){}
 
@@ -141,7 +141,7 @@ public:
 private:
 	RealVector m_probabilities; ///< probability of every state.
 	RealVector m_q; ///< probability of the pair (i,J[i]) to draw an.
-	RealVector m_J; ///< defines the second element of the pair (i,J[i])
+	blas::vector<std::size_t> m_J; ///< defines the second element of the pair (i,J[i])
 };
 }
 

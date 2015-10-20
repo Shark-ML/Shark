@@ -67,11 +67,11 @@ public:
 protected:
 	FoldsType m_folds;          ///< the underlying partitioned dataset.
 	KernelType *mep_kernel;     ///< the kernel with which to run the SVM
-	unsigned int m_nhp;         ///< for convenience, the Number of Hyper Parameters
-	unsigned int m_nkp;         ///< for convenience, the Number of Kernel Parameters
-	unsigned int m_numFolds;    ///< the number of folds to be used in cross-validation
-	unsigned int m_numSamples;  ///< overall number of samples in the dataset
-	unsigned int m_inputDims;   ///< input dimensionality
+	std::size_t m_nhp;         ///< for convenience, the Number of Hyper Parameters
+	std::size_t m_nkp;         ///< for convenience, the Number of Kernel Parameters
+	std::size_t m_numFolds;    ///< the number of folds to be used in cross-validation
+	std::size_t m_numSamples;  ///< overall number of samples in the dataset
+	std::size_t m_inputDims;   ///< input dimensionality
 	bool m_svmCIsUnconstrained; ///< the SVM regularization parameter C is passed for unconstrained optimization, and the derivative should compensate for that
 	QpStoppingCondition *mep_svmStoppingCondition; ///< the stopping criterion that is to be passed to the SVM trainer.
 	bool m_sigmoidSlopeIsUnconstrained; ///< whether or not to use the unconstrained variant of the sigmoid. currently always true, not user-settable, existing for safety.
@@ -144,11 +144,11 @@ public:
 		unsigned int next_label = 0; //helper index counter to monitor the next position to be filled in the above vectors
 
 		// for each fold, train an svm and get predictions on the validation data
-		for (unsigned int i=0; i<m_numFolds; i++) {
+		for (std::size_t i=0; i<m_numFolds; i++) {
 			// get current train/validation partitions as well as corresponding labels
 			ClassificationDataset cur_train_data = m_folds.training(i);
 			ClassificationDataset cur_valid_data = m_folds.validation(i);
-			unsigned int cur_vsize = cur_valid_data.numberOfElements();
+			std::size_t cur_vsize = cur_valid_data.numberOfElements();
 			Data< unsigned int > cur_vlabels = cur_valid_data.labels(); //validation labels of this fold
 			Data< RealVector > cur_vscores; //will hold SVM output scores for current validation partition
 			// init SVM
@@ -166,7 +166,7 @@ public:
 			csvm_trainer.train(svm, cur_train_data);
 			cur_vscores = svm.decisionFunction()(cur_valid_data.inputs());   //will result in a dataset of RealVector as output
 			// copy the scores and corresponding labels to the dataset-wide storage
-			for (unsigned int j=0; j<cur_vsize; j++) {
+			for (std::size_t j=0; j<cur_vsize; j++) {
 				tmp_helper_labels[next_label] = cur_vlabels.element(j);
 				tmp_helper_preds[next_label] = cur_vscores.element(j);
 				++next_label;
@@ -185,7 +185,7 @@ public:
 		Data< RealVector > sigmoid_predictions = sigmoid_model(all_validation_predictions);
 		
 		double error = 0;
-		for (unsigned int i=0; i<m_numSamples; i++) {
+		for (std::size_t i=0; i<m_numSamples; i++) {
 			double p = sigmoid_predictions.element(i)(0);
 			if (all_validation_labels.element(i) == 1){   //positive class
 				error -= std::log(p);
@@ -218,11 +218,11 @@ public:
 		RealVector der; //temporary helper for derivative calls
 
 		// for each fold, train an svm and get predictions on the validation data
-		for (unsigned int i=0; i<m_numFolds; i++) {
+		for (std::size_t i=0; i<m_numFolds; i++) {
 			// get current train/validation partitions as well as corresponding labels
 			ClassificationDataset cur_train_data = m_folds.training(i);
 			ClassificationDataset cur_valid_data = m_folds.validation(i);
-			unsigned int cur_vsize = cur_valid_data.numberOfElements();
+			std::size_t cur_vsize = cur_valid_data.numberOfElements();
 			Data< unsigned int > cur_vlabels = cur_valid_data.labels(); //validation labels of this fold
 			Data< RealVector > cur_vinputs = cur_valid_data.inputs(); //validation inputs of this fold
 			Data< RealVector > cur_vscores; //will hold SVM output scores for current validation partition
@@ -240,7 +240,7 @@ public:
 			CSvmDerivative<InputType> svm_deriv(&svm, &csvm_trainer);
 			cur_vscores = svm.decisionFunction()(cur_valid_data.inputs());   //will result in a dataset of RealVector as output
 			// copy the scores and corresponding labels to the dataset-wide storage
-			for (unsigned int j=0; j<cur_vsize; j++) {
+			for (std::size_t j=0; j<cur_vsize; j++) {
 				// copy label and prediction score
 				tmp_helper_labels[next_label] = cur_vlabels.element(j);
 				tmp_helper_preds[next_label] = cur_vscores.element(j);
@@ -271,7 +271,7 @@ public:
 
 		double ss = (m_sigmoidSlopeIsUnconstrained ? std::exp(sigmoid_model.parameterVector()(0)) : sigmoid_model.parameterVector()(0));
 		double error = 0;
-		for (unsigned int i=0; i<m_numSamples; i++) {
+		for (std::size_t i=0; i<m_numSamples; i++) {
 			double p = sigmoid_predictions.element(i)(0);
 			// compute derivative of the negative log likelihood
 			double dL_dsp; //derivative of likelihood wrt sigmoid predictions
@@ -286,7 +286,7 @@ public:
 			// compute derivative of the sigmoid
 			// derivative of sigmoid predictions wrt svm predictions
 			double dsp_dsvmp = ss * p * (1.0-p); //severe sign confusion potential: p(1-p) is deriv. w.r.t. t in 1/(1+e**(-t))!
-			for (unsigned int j=0; j<m_nhp; j++) {
+			for (std::size_t j=0; j<m_nhp; j++) {
 				derivative(j) += dL_dsp * dsp_dsvmp * all_validation_predict_derivs(i,j);
 			}
 		}

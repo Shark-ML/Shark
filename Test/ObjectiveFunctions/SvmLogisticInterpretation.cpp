@@ -92,10 +92,10 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	ClassificationDataset training_dataset;
 	csvStringToData(training_dataset,test,LAST_COLUMN,0);
 	//~ ClassificationDataset training_dataset = createLabeledDataFromRange(x,y);
-	unsigned int num_eles = training_dataset.numberOfElements();
-	unsigned int num_folds = 2;
-	std::vector< size_t > indices( num_eles );
-	for ( unsigned int i=0; i<num_eles; i++ ) {
+	std::size_t num_eles = training_dataset.numberOfElements();
+	std::size_t num_folds = 2;
+	std::vector< std::size_t > indices(num_eles);
+	for(std::size_t i = 0; i<num_eles; i++) {
 		indices[i] = (i+num_folds-1) % num_folds;
 	}
 	CVFolds<ClassificationDataset> cv_folds = createCVIndexed( training_dataset, num_folds, indices );
@@ -150,10 +150,10 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	//~ ClassificationDataset training_dataset = createLabeledDataFromRange(x,y);
 	ClassificationDataset training_dataset;
 	csvStringToData(training_dataset,test,LAST_COLUMN,0);
-	unsigned int num_eles = training_dataset.numberOfElements();
-	unsigned int num_folds = 2;
+	std::size_t num_eles = training_dataset.numberOfElements();
+	std::size_t num_folds = 2;
 	std::vector< size_t > indices( num_eles );
-	for ( unsigned int i=0; i<num_eles; i++ ) {
+	for(std::size_t i = 0; i<num_eles; i++) {
 		indices[i] = (i+num_folds-1) % num_folds;
 	}
 	CVFolds<ClassificationDataset> cv_folds = createCVIndexed( training_dataset, num_folds, indices );

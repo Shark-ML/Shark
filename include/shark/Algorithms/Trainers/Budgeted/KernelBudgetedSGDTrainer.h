@@ -228,7 +228,7 @@ public:
 	{
 
 		std::size_t ell = dataset.numberOfElements();
-		unsigned int classes = numberOfClasses(dataset);
+		std::size_t classes = numberOfClasses(dataset);
 
 		// is the budget size larger than reasonable?
 		if(m_budgetSize > ell)
@@ -360,7 +360,7 @@ public:
 			unsigned int trueClass = y[b];
 			double scoreOfTrueClass = predictions[trueClass];
                         predictions[trueClass] = -std::numeric_limits<double>::infinity();
-			unsigned int runnerupClass = arg_max(predictions);
+			unsigned int runnerupClass = (unsigned int)arg_max(predictions);
 			double scoreOfRunnerupClass = predictions[runnerupClass];
 
 			SHARK_ASSERT(trueClass != runnerupClass);
@@ -488,7 +488,7 @@ protected:
 	bool m_unconstrained;                     ///< should C be stored as log(C) as a parameter?
 
 	// budget size
-	size_t m_budgetSize;
+	std::size_t m_budgetSize;
 
 	// budget maintenance strategy
 	AbstractBudgetMaintenanceStrategy<InputType> *m_budgetMaintenanceStrategy;
@@ -496,7 +496,7 @@ protected:
 	std::size_t m_epochs;                     ///< number of training epochs (sweeps over the data), or 0 for default = max(10, C)
 
 	// method to preinitialize budget
-	size_t m_preInitializationMethod;
+	std::size_t m_preInitializationMethod;
 
 	// needed margin below which we update the model, also called beta sometimes
 	double m_minMargin;

@@ -255,7 +255,7 @@ public:
 
 	void draw(RealVector& input, unsigned int& label)const{
 		input.resize( m_size );
-		label = Rng::discrete( 0, 1 ); //fix label first
+		label = Rng::coinToss(); //fix label first
 		double y2 = label - 0.5; //"clean" informative feature values
 		// now fill the informative features..
 		for ( unsigned int i=0; i<m_sizeUseful; i++ ) {

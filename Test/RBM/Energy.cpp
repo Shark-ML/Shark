@@ -17,11 +17,11 @@ struct RBMFixture {
         visibleState.resize(1,5);
 
         for(std::size_t i = 0; i != 5; ++i) {
-            rbm.weightMatrix()(i,i) = i;
-            rbm.hiddenNeurons().bias()(i) = i;
-            rbm.visibleNeurons().bias()(i) = 5+i;
-            visibleState(0,i) = 10+i;
-            hiddenState(0,i) = 15+i;
+            rbm.weightMatrix()(i,i) = double(i);
+			rbm.hiddenNeurons().bias()(i) = double(i);
+            rbm.visibleNeurons().bias()(i) = 5.0+i;
+            visibleState(0,i) = 10.0+i;
+            hiddenState(0,i) = 15.0+i;
         }
 
         visibleInput = prod(hiddenState,rbm.weightMatrix());

@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE( Bootstrap_LabeledData ){
 	std::vector<unsigned int> inputs;
 	std::vector<unsigned int> labels;
 
-	for(size_t i=0;i != 20;++i){
+	for(unsigned int i=0;i != 20;++i){
 		inputs.push_back(i);
 		labels.push_back(20+i);
 	}
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( Bootstrap_UnlabeledData ){
 	//create a toy dataset
 	std::vector<unsigned int> inputs;
 
-	for(size_t i=0;i != 20;++i){
+	for(unsigned int i=0;i != 20;++i){
 		inputs.push_back(i);
 	}
 	UnlabeledData<unsigned int> set=createDataFromRange(inputs,8);

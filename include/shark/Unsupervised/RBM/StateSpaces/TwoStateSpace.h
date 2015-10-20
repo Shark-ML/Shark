@@ -64,7 +64,7 @@ struct TwoStateSpace{
 	template<class Vector>
 	static void state(Vector& vec,std::size_t stateNumber){
 		for (std::size_t i = 0; i != vec.size(); i++) {
-			bool secondState = stateNumber & (1<<i);
+			bool secondState = stateNumber & (std::size_t(1)<<i);
 			vec(i) = secondState? State2 : State1;
 		}
 	}
@@ -75,7 +75,7 @@ struct TwoStateSpace{
 	template<class Matrix>
 	static void state(blas::matrix_row<Matrix> vec,std::size_t stateNumber){
 		for (std::size_t i = 0; i != vec.size(); i++) {
-			bool secondState = stateNumber & (1<<i);
+			bool secondState = stateNumber & (std::size_t(1)<<i);
 			vec(i) = secondState? State2 : State1;
 		}
 	}

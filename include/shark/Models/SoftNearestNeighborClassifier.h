@@ -82,7 +82,7 @@ public:
 	/// \param algorithm the used algorithm for nearest neighbor search
 	/// \param numClasses number of classes (given explicitly, not derived from the training data)
 	/// \param neighbors number of neighbors
-	SoftNearestNeighborClassifier(NearestNeighbors const* algorithm, unsigned int numClasses, unsigned int neighbors)
+	SoftNearestNeighborClassifier(NearestNeighbors const* algorithm, std::size_t numClasses, unsigned int neighbors)
 	: m_algorithm(algorithm)
 	, m_classes(numClasses)
 	, m_neighbors(neighbors)
@@ -187,7 +187,7 @@ protected:
 	NearestNeighbors const* m_algorithm;
 
 	/// number of classes
-	unsigned int m_classes;
+	std::size_t m_classes;
 
 	/// number of neighbors to be taken into account
 	unsigned int m_neighbors;

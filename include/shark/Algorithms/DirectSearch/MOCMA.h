@@ -64,7 +64,7 @@ public:
 	};
 	
 	std::vector<CMAIndividual<RealVector> > m_pop; ///< Population of size \f$\mu+\mu\f$.
-	unsigned int m_mu;///< Size of parent generation
+	std::size_t m_mu;///< Size of parent generation
 	
 	shark::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
 	IndicatorBasedSelection< Indicator > m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
@@ -93,10 +93,10 @@ public:
 		return "MOCMA";
 	}
 	
-	unsigned int mu()const{
+	std::size_t mu()const{
 		return m_mu;
 	}
-	unsigned int& mu(){
+	std::size_t& mu(){
 		return m_mu;
 	}
 	
@@ -213,7 +213,7 @@ public:
 		std::partition(m_pop.begin(), m_pop.end(),CMAIndividual<RealVector>::IsSelected);
 
 		//update individuals and generate solution set
-		for (unsigned int i = 0; i < mu(); i++) {
+		for (std::size_t i = 0; i < mu(); i++) {
 			noalias(m_best[i].point) = m_pop[i].searchPoint();
 			m_best[i].value = m_pop[i].unpenalizedFitness();
 		}

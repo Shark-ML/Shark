@@ -72,7 +72,7 @@ public:
 	///
 	/// \param algorithm the used algorithm for nearst neighbor search
 	/// \param neighbors: number of neighbors
-	NearestNeighborClassifier(NearestNeighbors const* algorithm, unsigned int neighbors = 3)
+	NearestNeighborClassifier(NearestNeighbors const* algorithm, std::size_t neighbors = 3)
 	: m_algorithm(algorithm)
 	, m_classes(numberOfClasses(algorithm->dataset()))
 	, m_neighbors(neighbors)
@@ -85,12 +85,12 @@ public:
 
 
 	/// return the number of neighbors
-	unsigned int neighbors() const{
+	std::size_t neighbors() const{
 		return m_neighbors;
 	}
 
 	/// set the number of neighbors
-	void setNeighbors(unsigned int neighbors){
+	void setNeighbors(std::size_t neighbors){
 		m_neighbors=neighbors;
 	}
 
@@ -105,7 +105,7 @@ public:
 	/// get internal parameters of the model
 	virtual RealVector parameterVector() const{
 		RealVector parameters(1);
-		parameters(0) = m_neighbors;
+		parameters(0) = (double)m_neighbors;
 		return parameters;
 	}
 
@@ -113,9 +113,9 @@ public:
 	virtual void setParameterVector(RealVector const& newParameters){
 		SHARK_CHECK(newParameters.size() == 1,
 			"[SoftNearestNeighborClassifier::setParameterVector] invalid number of parameters");
-		//~ SHARK_CHECK((unsigned int)newParameters(0) == newParameters(0) && newParameters(0) >= 1.0,
+		//~ SHARK_CHECK((std::size_t)newParameters(0) == newParameters(0) && newParameters(0) >= 1.0,
 			//~ "[SoftNearestNeighborClassifier::setParameterVector] invalid number of neighbors");
-		m_neighbors = (unsigned int)newParameters(0);
+		m_neighbors = (std::size_t)newParameters(0);
 	}
 
 	/// return the size of the parameter vector
@@ -148,7 +148,7 @@ public:
 					else histogram[neighbors[p*m_neighbors+k].value] += 1.0 / d;
 				}
 			}
-			output(p) = std::max_element(histogram.begin(),histogram.end()) - histogram.begin();
+			output(p) = static_cast<unsigned int>(std::max_element(histogram.begin(),histogram.end()) - histogram.begin());
 		}
 	}
 
@@ -168,10 +168,10 @@ protected:
 	NearestNeighbors const* m_algorithm;
 
 	/// number of classes
-	unsigned int m_classes;
+	std::size_t m_classes;
 
 	/// number of neighbors to be taken into account
-	unsigned int m_neighbors;
+	std::size_t m_neighbors;
 
 	/// type of distance-based weights computation
 	DistanceWeights m_distanceWeights;

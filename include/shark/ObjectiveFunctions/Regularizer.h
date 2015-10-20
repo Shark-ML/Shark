@@ -95,36 +95,36 @@ public:
 	/// Evaluates the objective function
 	/// and calculates its gradient.
 	double evalDerivative( RealVector const& input, FirstOrderDerivative & derivative ) const {
-		unsigned int i, ic = input.size();
+		std::size_t ic = input.size();
 		derivative.resize(ic);
 		if(m_mask.empty()){
-			for (i=0; i<ic; i++){
+			for (std::size_t i = 0; i != ic; i++){
 				derivative(i) = boost::math::sign(input(i));
 			}
 		}
 		else
 		{
 			SIZE_CHECK(m_mask.size() == input.size());
-			for (i=0; i<ic; i++){
+			for (std::size_t i=0; i != ic; i++){
 				derivative(i) = m_mask(i)*boost::math::sign(input(i));
 			}
 		}
 		return eval(input);
 	}
 	double evalDerivative( RealVector const& input, SecondOrderDerivative & derivative ) const {
-		unsigned int i, ic = input.size();
+		std::size_t ic = input.size();
 		derivative.gradient.resize(ic);
 		derivative.hessian.resize(ic,ic);
 		derivative.hessian.clear();
 		if(m_mask.empty()){
-			for (i=0; i<ic; i++){
+			for (std::size_t i=0; i != ic; i++){
 				derivative.gradient(i) = boost::math::sign(input(i));
 			}
 		}
 		else
 		{
 			SIZE_CHECK(m_mask.size() == input.size());
-			for (i=0; i<ic; i++){
+			for (std::size_t i=0; i != ic; i++){
 				derivative.gradient(i) = m_mask(i)*boost::math::sign(input(i));
 			}
 		}
