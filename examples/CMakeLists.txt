@@ -30,6 +30,8 @@ macro( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 		# Add the dependencies to the target examples
 		add_dependencies(examples ${NAME})
 
+		set_target_properties( ${NAME} PROPERTIES FOLDER "Examples")
+
 		# Installation
 		install(TARGETS ${NAME}
 			   RUNTIME DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/${COMPONENT}/

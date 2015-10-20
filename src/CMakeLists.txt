@@ -1,23 +1,35 @@
 # Glob the files
-file( GLOB SHARK_SRCS
-	Models/*.cpp
-	ObjectiveFunctions/*.cpp
-	ObjectiveFunctions/Loss/*.cpp
-	Data/*.cpp
-	Algorithms/*.cpp
-	Algorithms/DirectSearch/*.cpp
-	Algorithms/GradientDescent/*.cpp
-	Fuzzy/*.cpp
-)
-
+file( GLOB_RECURSE SHARK_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
+file(GLOB_RECURSE SHARK_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../include/*.h ../include/*.hpp ../include/*.inl)
+message(STATUS ${SHARK_HEADERS})
 # Group the source for MSVC
-source_group( src/Models FILES Models/*.cpp )
-source_group( src/ObjectiveFunctions FILES ObjectiveFunctions/*.cpp )
-source_group( src/Algorithms FILES Algorithms/*.cpp )
-source_group( src/Fuzzy FILES Fuzzy/*.cpp )
+foreach(FILE ${SHARK_SRCS}) 
+    # Get the directory of the source file
+    get_filename_component(PARENT_DIR "${FILE}" DIRECTORY)
+    # Make sure we are using windows slashes
+    string(REPLACE "/" "\\" GROUP "${PARENT_DIR}")
+
+    set(GROUP "src\\${GROUP}")
+
+    source_group("${GROUP}" FILES "${FILE}")
+endforeach()
+#Also Group the Header Files
+foreach(FILE ${SHARK_HEADERS}) 
+    # Get the directory of the source file
+    get_filename_component(PARENT_DIR "${FILE}" DIRECTORY)
+
+	string(REPLACE "../" "" GROUP "${PARENT_DIR}")
+
+    # Make sure we are using windows slashes
+    string(REPLACE "/" "\\" GROUP "${GROUP}")
+
+    source_group("${GROUP}" FILES "${FILE}")
+endforeach()
+
+
 
 # Create the shark library
-add_library( shark ${SHARK_SRCS} )
+add_library( shark ${SHARK_SRCS} ${SHARK_HEADERS} )
 target_link_libraries( shark ${LINK_LIBRARIES})
 
 set_target_properties( shark PROPERTIES DEBUG_POSTFIX _debug )
