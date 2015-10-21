@@ -41,7 +41,7 @@ using namespace shark;
 int main(int argc, char** argv)
 {
 //###begin<table>
-	statistics::ResultTable<double> table(2,"VarianceOfGausian");//set a name for the results
+	statistics::ResultTable<double> table(2,"VarianceOfGaussian");//set a name for the results
 	table.setDimensionName(0,"input1");
 	table.setDimensionName(1,"input2");
 //###end<table>
