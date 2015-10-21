@@ -121,7 +121,7 @@ void writePGM( std::string const& fileName, unsigned char const* pData, std::siz
 	if( !fp ) throw SHARKEXCEPTION( "[writePGM] cannot open file: " + fileName);
 
 	fprintf(fp, "P5\n");
-	fprintf(fp, "%d %d\n255\n", sx, sy);
+	fprintf(fp, "%d %d\n255\n", (int)sx, (int)sy);
 	
 	if( 1 != fwrite(pData, sx*sy, 1, fp) ) 	{
 		fclose(fp);
