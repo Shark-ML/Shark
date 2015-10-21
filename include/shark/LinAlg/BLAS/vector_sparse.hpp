@@ -142,22 +142,22 @@ public:
 	}
 	
 	index_type const* indices() const{
-		if(size() == 0)
+		if(nnz_capacity() == 0)
 			return 0;
 		return &m_indices[0];
 	}
 	index_type* indices(){
-		if(size() == 0)
+		if(nnz_capacity() == 0)
 			return 0;
 		return &m_indices[0];
 	}
 	value_type const* values() const {
-		if(size() == 0)
+		if(nnz_capacity() == 0)
 			return 0;
 		return &m_values[0];
 	}
 	value_type* values(){
-		if(size() == 0)
+		if(nnz_capacity() == 0)
 			return 0;
 		return &m_values[0];
 	}

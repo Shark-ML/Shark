@@ -255,7 +255,7 @@ namespace shark {
 	/// the asymptotic series holds which is then easy to calculate with high precision
 	inline double tetragamma(double x)
 	{
-		double tiny = 1e-4;//threshold foruse of taylor expansion if value is close to 0
+		double tiny = 1e-4;//threshold for use of taylor expansion if value is close to 0
 		double large = 18;//threshold above which the asymptotic formula is valid
 		//coefficients for taylor expansion at 1
 		double tetragamma1 = -2.404113806319188570799476;  /* -2 Zeta(3) */

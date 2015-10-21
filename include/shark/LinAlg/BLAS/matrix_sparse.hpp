@@ -29,8 +29,8 @@ public:
 		}
 		value_type& ref() const {
 			//get array bounds
-			index_type const *start = &m_matrix.m_indices[m_matrix.m_rowStart[m_i]];
-			index_type const *end = &m_matrix.m_indices[m_matrix.m_rowEnd[m_i]];
+			index_type const *start = m_matrix.inner_indices() + m_matrix.m_rowStart[m_i];
+			index_type const *end = m_matrix.inner_indices() + m_matrix.m_rowEnd[m_i];
 			//find position of the index in the array
 			index_type const *pos = std::lower_bound(start,end,m_j);
 
@@ -131,28 +131,44 @@ public:
 	}
 
 	index_type const *outer_indices() const {
+		if(m_rowStart.empty())
+			return 0;
 		return &m_rowStart[0];
 	}
 	index_type const *outer_indices_end() const {
+		if(m_rowEnd.empty())
+			return 0;
 		return &m_rowEnd[0];
 	}
 	index_type const *inner_indices() const {
+		if(nnz_capacity() == 0)
+			return 0;
 		return &m_indices[0];
 	}
 	value_type const *values() const {
+		if(nnz_capacity() == 0)
+			return 0;
 		return &m_values[0];
 	}
 
 	index_type *outer_indices() {
+		if(m_rowStart.empty())
+			return 0;
 		return &m_rowStart[0];
 	}
 	index_type *outer_indices_end() {
+		if(m_rowEnd.empty())
+			return 0;
 		return &m_rowEnd[0];
 	}
 	index_type *inner_indices() {
+		if(nnz_capacity() == 0)
+			return 0;
 		return &m_indices[0];
 	}
 	value_type *values() {
+		if(nnz_capacity() == 0)
+			return 0;
 		return &m_values[0];
 	}
 
@@ -190,7 +206,7 @@ public:
 	void reserve_row(std::size_t row, std::size_t non_zeros) {
 		RANGE_CHECK(row < size1());
 		non_zeros = std::min(m_size2,non_zeros);
-		if (non_zeros < row_capacity(row)) return;
+		if (non_zeros <= row_capacity(row)) return;
 		std::size_t spaceDifference = non_zeros-row_capacity(row);
 
 		//check if there is place in the end of the container to store the elements
@@ -199,10 +215,10 @@ public:
 		}
 		//move the elements of the next rows to make room for the reserved space
 		for (std::size_t i = size1()-1; i != row; --i) {
-			value_type *values = &m_values[m_rowStart[i]];
-			value_type *valueRowEnd = &m_values[m_rowEnd[i]];
-			index_type *indices = &m_indices[m_rowStart[i]];
-			index_type *indicesEnd = &m_indices[m_rowEnd[i]];
+			value_type *values = this->values() + m_rowStart[i];
+			value_type *valueRowEnd = this->values() + m_rowEnd[i];
+			index_type *indices = inner_indices() + m_rowStart[i];
+			index_type *indicesEnd = inner_indices() + m_rowEnd[i];
 			std::copy_backward(values,valueRowEnd, valueRowEnd+spaceDifference);
 			std::copy_backward(indices,indicesEnd, indicesEnd+spaceDifference);
 			m_rowStart[i]+=spaceDifference;
@@ -222,8 +238,8 @@ public:
 		SIZE_CHECK(i < size1());
 		SIZE_CHECK(j < size2());
 		//get array bounds
-		index_type const *start = &m_indices[m_rowStart[i]];
-		index_type const *end = &m_indices[m_rowEnd[i]];
+		index_type const *start = inner_indices() + m_rowStart[i];
+		index_type const *end = inner_indices() + m_rowEnd[i];
 		//find position of the index in the array
 		index_type const *pos = std::lower_bound(start,end,j);
 
@@ -333,10 +349,10 @@ public:
 		SIZE_CHECK(b.row_capacity(j) >= nnzi);
 		SIZE_CHECK(a.row_capacity(i) >= nnzj);
 		
-		index_type* indicesi = &a.m_indices[a.m_rowStart[i]];
-		index_type* indicesj = &b.m_indices[b.m_rowStart[j]];
-		value_type* valuesi = &a.m_values[a.m_rowStart[i]];
-		value_type* valuesj = &b.m_values[b.m_rowStart[j]];
+		index_type* indicesi = a.inner_indices() + a.m_rowStart[i];
+		index_type* indicesj = b.inner_indices() + b.m_rowStart[j];
+		value_type* valuesi = a.values() + a.m_rowStart[i];
+		value_type* valuesj = b.values() + b.m_rowStart[j];
 		
 		//swap all elements of j with the elements in i, don't care about unitialized elements in j
 		std::swap_ranges(indicesi,indicesi+nnzi,indicesj);
