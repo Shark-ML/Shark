@@ -68,7 +68,7 @@ public:
 		std::size_t numInputs = predictions.size1();
 		std::size_t outputDim = predictions.size2();
 		
-		return sum(max(0.0,abs(labels-predictions)-blas::repeat(m_epsilon,numInputs,outputDim)));
+		return sum(max(0.0,abs(labels-predictions)- m_epsilon));
 	}
 
 	double evalDerivative(BatchLabelType const& labels, BatchOutputType const& predictions, BatchOutputType& gradient)const{

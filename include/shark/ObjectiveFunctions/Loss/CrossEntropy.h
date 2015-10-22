@@ -159,7 +159,7 @@ public:
 				//this does not change the result as the values get normalized by
 				//their sum and thus the correction term cancels out.
 				double maximum = max(row(prediction,i));
-				noalias(gradRow) = exp(row(prediction,i)-blas::repeat(maximum,prediction.size2()));
+				noalias(gradRow) = exp(row(prediction,i) - maximum);
 				double norm = sum(gradRow);
 				gradRow/=norm;
 				gradient(i,target(i)) -= 1;
@@ -196,7 +196,7 @@ public:
 			//this does not change the result as the values get normalized by
 			//their sum and thus the correction term cancels out.
 			double maximum = max(prediction);
-			noalias(gradient) = exp(prediction-blas::repeat(maximum,prediction.size()));
+			noalias(gradient) = exp(prediction-maximum);
 			double norm = sum(gradient);
 			gradient/=norm;
 

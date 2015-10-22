@@ -135,7 +135,7 @@ public:
 		for( unsigned int i = 0; i < set.size(); i++ )
 			noalias(m_reference) = max(m_reference, extractor(set[i]));
 		
-		noalias(m_reference)+=blas::repeat(1.0,noObjectives);
+		noalias(m_reference) += 1.0;
 	}
 
 	/**

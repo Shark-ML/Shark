@@ -65,7 +65,7 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	row(Ablocks.lowerLeft(),0) = column(Ablocks.upperRight(),0);
 	matA(inputDim,inputDim) = numInputs;
 	//X^TX+=lambda* I
-	diag(Ablocks.upperLeft())+= blas::repeat(m_regularization,inputDim);
+	diag(Ablocks.upperLeft())+= m_regularization;
 	
 	
 	//we also need to compute X^T L= (P^TL, 1^T L) where L is the matrix of labels 

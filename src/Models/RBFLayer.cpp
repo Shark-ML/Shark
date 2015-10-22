@@ -92,7 +92,7 @@ void RBFLayer::setGamma(RealVector const& gamma){
 	m_gamma = gamma;
 		
 	double logPi = std::log(boost::math::constants::pi<double>());
-	m_logNormalization=  inputSize()*0.5*(blas::repeat(logPi,outputSize()) - log(gamma));
+	m_logNormalization=  inputSize()*0.5*(logPi - log(gamma));
 }
 
 

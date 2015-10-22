@@ -173,7 +173,7 @@ public:
 	/// @param statistics the sufficient statistics of the layer
 	RealMatrix expectedPhiValue(StatisticsBatch const& statistics)const{ 
 		//calculation of the expectation: 1*P(h_i=1|v)- 1*(1-P(h_i=1|v))= 2*P(h_i=1|v)-1
-		return (2*statistics-blas::repeat(1,statistics.size1(),size()));	
+		return 2*statistics - 1;	
 	}
 
 	/// \brief Returns the mean of the distribution
@@ -182,7 +182,7 @@ public:
 	RealMatrix mean(StatisticsBatch const& statistics)const{ 
 		SIZE_CHECK(statistics.size2() == size());
 		//calculation of the expectation: 1*P(h_i=1|v)- 1*(1-P(h_i=1|v))= 2*P(h_i=1|v)-1
-		return (2*statistics-blas::repeat(1,statistics.size1(),size()));	
+		return 2*statistics - 1;	
 	}
 
 

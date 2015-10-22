@@ -154,7 +154,7 @@ void LDA::train(LinearClassifier<>& model, WeightedLabeledData<RealVector,unsign
 	
 
 	//add regularization
-	noalias(diag(covariance)) += blas::repeat(m_regularization,dim);
+	diag(covariance) += m_regularization;
 	
 	//the formula for the linear classifier is
 	// arg max_i log(P(x|i) * P(i))

@@ -415,7 +415,7 @@ template<class E>
 typename E::value_type
 soft_max(const vector_expression<E> &e) {
 	typename E::value_type maximum = max(e);
-	return std::log(sum(exp(e-blas::repeat(maximum,e().size()))))+maximum;
+	return std::log(sum(exp(e - maximum))) + maximum;
 }
 
 

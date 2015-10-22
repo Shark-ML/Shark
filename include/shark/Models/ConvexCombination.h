@@ -169,7 +169,7 @@ public:
 		for(size_t i = 0; i != outputSize(); ++i){
 			double mass=inner_prod(row(d,i),row(m_w,i));
 			noalias(row(weightGradient,i)) = element_prod(
-				row(d,i)-blas::repeat(mass,inputSize()),
+				row(d,i) - mass,
 				row(m_w,i)
 			);
 		}

@@ -940,8 +940,7 @@ public:
 				if (sumToZero)
 				{
 					// project the m_gradient
-					double mean = sum(grad) / (double)classes;
-					grad -= blas::repeat(mean,classes);
+					grad -= sum(grad) / classes;
 				}
 
 				// Rprop
@@ -964,8 +963,7 @@ public:
 				if (sumToZero)
 				{
 					// project the step
-					double mean = sum(step) / (double)classes;
-					step -= blas::repeat(mean,classes);
+					step -= sum(step) / classes;
 				}
 
 				// update the solution and the dual m_gradient

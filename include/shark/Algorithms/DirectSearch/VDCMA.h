@@ -311,7 +311,7 @@ private:
 		double normv2 = sqr(m_normv);
 		double gammav = 1+normv2;
 		//step 1
-		noalias(s) += weight*(sqr(y) - (normv2/gammav*yvn)*(y*m_vn)-blas::repeat(1.0,m_numberOfVariables));
+		noalias(s) += weight*(sqr(y) - (normv2/gammav*yvn)*(y*m_vn)- 1.0);
 		//step 2
 		noalias(t) += weight*(yvn*y - 0.5*(sqr(yvn)+gammav)*m_vn);
 	}
@@ -328,7 +328,7 @@ private:
 		alpha = std::min(alpha,1.0);
 		//constants (b,A) of 3.4
 		double b=-(1-sqr(alpha))*sqr(normv2)/gammav+2*sqr(alpha);
-		RealVector A= blas::repeat(2.0,m_numberOfVariables)-(b+2*sqr(alpha))*vn2;
+		RealVector A= 2.0 - (b+2*sqr(alpha))*vn2;
 		RealVector invAvn2= vn2/A;
 		
 		//step 3

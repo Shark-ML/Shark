@@ -341,7 +341,7 @@ private:
 		blockW-=repeat(subrange(KcKc*m_columnMeanY - YcKc*matrixStatistics.k,start2,start2+blockSize2),blockSize1);
 		blockW-=trans(repeat(subrange(KcKc*m_columnMeanY - YcKc*matrixStatistics.k,start1,start1+blockSize1),blockSize2));
 		// + (\langle Kc,Kc \rangle  my-2\langle Y, Kc \rangle mk) u u^T
-		blockW+= blas::repeat(KcKc*m_meanY-YcKc*meanK,blockSize1,blockSize2);
+		blockW+= KcKc*m_meanY-YcKc*meanK;
 		blockW /= KcKc*std::sqrt(KcKc);
 		//std::cout<<blockW<<std::endl;
 		//symmetry

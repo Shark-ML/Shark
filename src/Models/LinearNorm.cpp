@@ -76,7 +76,7 @@ void LinearNorm::weightedInputDerivative(
 	for(std::size_t i = 0; i != patterns.size1(); ++i){
 		double norm_sqr=sqr(s.norm(i));
 		double constant=inner_prod(row(coefficients,i),row(patterns,i))/norm_sqr;
-		noalias(row(gradient,i))=row(coefficients,i)/s.norm(i)- blas::repeat(constant,inputSize());
+		noalias(row(gradient,i))=row(coefficients,i)/s.norm(i) - constant;
 	}
 }
 

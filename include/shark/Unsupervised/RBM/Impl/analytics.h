@@ -76,27 +76,27 @@ namespace detail{
 
 			double eval( const SearchPointType & C ) const {
 				std::size_t n = energyDiff0.size();
-				return 0.5*sqr(sum(sigmoid(energyDiff0+blas::repeat(C(0),n)))
-					- sum(sigmoid(energyDiff1-blas::repeat(C(0),n))));
+				return 0.5*sqr(sum(sigmoid(energyDiff0 + C(0)))
+					- sum(sigmoid(energyDiff1 - C(0))));
 				
-				//~ return sum(softPlus(energyDiff0+blas::repeat(C(0),n)))
-					//~ + sum(softPlus(energyDiff1-blas::repeat(C(0),n)));
+				//~ return sum(softPlus(energyDiff0 + C(0)))
+					//~ + sum(softPlus(energyDiff1- C(0)));
 			}
 
 			ResultType evalDerivative( const SearchPointType & C, FirstOrderDerivative & derivative )const {
 				derivative.resize(1);
 				std::size_t n = energyDiff0.size();
-				RealVector sigmoid0 = sigmoid(energyDiff0+blas::repeat(C(0),n));
-				RealVector sigmoid1 = sigmoid(energyDiff1-blas::repeat(C(0),n));
+				RealVector sigmoid0 = sigmoid(energyDiff0+ C(0));
+				RealVector sigmoid1 = sigmoid(energyDiff1- C(0));
 				
 				double diff = sum(sigmoid0) - sum(sigmoid1);
 				
-				derivative(0) = sum(sigmoid0*(blas::repeat(1.0,n)-sigmoid0))+sum(sigmoid1*(blas::repeat(1.0,n)-sigmoid1));
+				derivative(0) = sum(sigmoid0*(1.0-sigmoid0))+sum(sigmoid1*(1.0-sigmoid1));
 				derivative*=diff;
 				return 0.5*sqr(diff);
 				
-				//~ derivative(0) = sum(sigmoid(energyDiff0+blas::repeat(C(0),n)))
-					//~ - sum(sigmoid(energyDiff1-blas::repeat(C(0),n)));
+				//~ derivative(0) = sum(sigmoid(energyDiff0 + C(0)))
+					//~ - sum(sigmoid(energyDiff1 - C(0)));
 				
 				//~ return eval(C);
 

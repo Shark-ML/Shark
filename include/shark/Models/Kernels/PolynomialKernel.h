@@ -171,7 +171,7 @@ public:
 		
 		//calculate the inner product
 		axpy_prod(batchX1,trans(batchX2),result);
-		result += blas::repeat(m_offset,sizeX1,sizeX2);
+		result += m_offset;
 		//now do exponentiation
 		if(m_degree != 1)
 			noalias(result) = pow(result,m_degree);
@@ -189,7 +189,7 @@ public:
 		
 		//calculate the inner product
 		axpy_prod(batchX1,trans(batchX2),s.base);
-		s.base += blas::repeat(m_offset,sizeX1,sizeX2);
+		s.base += m_offset;
 		
 		//now do exponentiation
 		if(m_degree != 1)

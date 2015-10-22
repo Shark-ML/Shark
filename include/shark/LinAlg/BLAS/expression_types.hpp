@@ -191,7 +191,19 @@ public:
 		return m_lval;
 	}
 	
-	//this is not needed, but prevents errors when fr example doing noalias(x)*=2;
+	//this is not needed, but prevents errors when for example doing noalias(x)+=2;
+	closure_type &operator+= (scalar_type t) {
+		m_lval += t;
+		return m_lval;
+	}
+
+	//this is not needed, but prevents errors when for example doing noalias(x)-=2;
+	closure_type &operator-= (scalar_type t) {
+		m_lval -=t;
+		return m_lval;
+	}
+	
+	//this is not needed, but prevents errors when for example doing noalias(x)*=2;
 	closure_type &operator*= (scalar_type t) {
 		m_lval *= t;
 		return m_lval;
