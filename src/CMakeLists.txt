@@ -1,7 +1,7 @@
 # Glob the files
 file( GLOB_RECURSE SHARK_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 file(GLOB_RECURSE SHARK_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../include/*.h ../include/*.hpp ../include/*.inl)
-message(STATUS ${SHARK_HEADERS})
+
 # Group the source for MSVC
 foreach(FILE ${SHARK_SRCS}) 
     # Get the directory of the source file
