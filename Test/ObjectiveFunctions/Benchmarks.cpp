@@ -51,10 +51,10 @@ BOOST_AUTO_TEST_CASE( Himmelblau ) {
 BOOST_AUTO_TEST_CASE( Rosenbrock_Derivative )
 {
 	const std::size_t dimensions = 5;
-	const unsigned trials = 10000;
+	const unsigned int trials = 10000;
 	
 	shark::Rosenbrock rosenbrock(dimensions);
-	for(unsigned i = 0; i != trials; ++i)
+	for(unsigned int i = 0; i != trials; ++i)
 	{
 		shark::RealVector point = rosenbrock.proposeStartingPoint();
 		shark::testDerivative(rosenbrock, point,1.e-7,1.e-7,0.005);
@@ -63,10 +63,10 @@ BOOST_AUTO_TEST_CASE( Rosenbrock_Derivative )
 BOOST_AUTO_TEST_CASE( Ellipsoid_Derivative )
 {
 	const std::size_t dimensions = 5;
-	const unsigned trials = 10000;
+	const unsigned int trials = 10000;
 	
 	shark::Ellipsoid ellipsoid(dimensions);
-	for(unsigned i = 0; i != trials; ++i)
+	for(unsigned int i = 0; i != trials; ++i)
 	{
 		shark::RealVector point = ellipsoid.proposeStartingPoint();
 		shark::testDerivative(ellipsoid, point,1.e-5,1.e-9);

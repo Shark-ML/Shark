@@ -11,9 +11,9 @@ BOOST_AUTO_TEST_SUITE (EALib_paraboloidCMSA)
 
 BOOST_AUTO_TEST_CASE( EALib_ParaboloidCMA )
 {
-	const unsigned Seed = 44;
-	const unsigned Trials=30;
-	const unsigned Dimension = 8;
+	const unsigned int Seed = 44;
+	const unsigned int Trials=30;
+	const unsigned int Dimension = 8;
 
 	double results[Trials];
 
@@ -22,13 +22,13 @@ BOOST_AUTO_TEST_CASE( EALib_ParaboloidCMA )
 	//
 	// fitness function
 	//
-	const unsigned a = 1000;  // determines (square root of) problem condition
+	const unsigned int a = 1000;  // determines (square root of) problem condition
 	Paraboloid f(Dimension, a);
 
 	//
 	// EA parameters
 	//
-	const unsigned Iterations     = 1000;
+	const unsigned int Iterations     = 1000;
 	const double   MinInit        = .1;
 	const double   MaxInit        = .3;
 	const double   GlobalStepInit = 1.;
