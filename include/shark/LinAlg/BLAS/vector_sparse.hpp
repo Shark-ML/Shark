@@ -29,7 +29,7 @@ namespace blas {
 template<class T, class I>
 class compressed_vector:public vector_container<compressed_vector<T, I> > {
 
-	typedef T &true_reference;
+	typedef T& true_reference;
 	typedef compressed_vector<T, I> self_type;
 public:
 
@@ -68,7 +68,7 @@ public:
 
 	public:
 		// Construction and destruction
-		reference(self_type &m, size_type i):
+		reference(self_type& m, size_type i):
 			m_vector(m), m_i(i) {}
 
 		// Assignment
@@ -76,7 +76,7 @@ public:
 			return ref()=d;
 		}
 		
-		value_type& operator=(reference const &v ){
+		value_type& operator=(reference const& v ){
 			return ref() = v.value();
 		}
 		
@@ -112,6 +112,7 @@ public:
 	typedef const vector_reference<const self_type> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
 	typedef sparse_tag storage_category;
+	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	compressed_vector():m_size(0), m_nnz(0),m_indices(1,0),m_zero(0){}
@@ -121,7 +122,7 @@ public:
 	compressed_vector(vector_expression<AE> const& ae, size_type non_zeros = 0)
 	:m_size(ae().size()), m_nnz(0), m_indices(non_zeros,0), m_values(non_zeros),m_zero(0)
 	{
-		kernels::assign(*this, ae);
+		assign(*this, ae);
 	}
 
 	// Accessors
@@ -144,22 +145,22 @@ public:
 	index_type const* indices() const{
 		if(nnz_capacity() == 0)
 			return 0;
-		return &m_indices[0];
+		return& m_indices[0];
 	}
 	index_type* indices(){
 		if(nnz_capacity() == 0)
 			return 0;
-		return &m_indices[0];
+		return& m_indices[0];
 	}
 	value_type const* values() const {
 		if(nnz_capacity() == 0)
 			return 0;
-		return &m_values[0];
+		return& m_values[0];
 	}
 	value_type* values(){
 		if(nnz_capacity() == 0)
 			return 0;
-		return &m_values[0];
+		return& m_values[0];
 	}
 
 	void resize(size_type size) {
@@ -199,7 +200,7 @@ public:
 	}
 
 	// Assignment
-	compressed_vector &operator = (compressed_vector const& v) {
+	compressed_vector& operator = (compressed_vector const& v) {
 		m_size = v.m_size;
 		m_nnz = v.m_nnz;
 		m_indices = v.m_indices;
@@ -207,69 +208,20 @@ public:
 		return *this;
 	}
 	template<class C>          // Container assignment without temporary
-	compressed_vector &operator = (vector_container<C> const& v) {
+	compressed_vector& operator = (vector_container<C> const& v) {
 		resize(v().size(), false);
-		assign(v);
-		return *this;
-	}
-
-	compressed_vector &assign_temporary(compressed_vector& v) {
-		swap(v);
+		assign(*this, v);
 		return *this;
 	}
 	template<class AE>
-	compressed_vector &operator = (vector_expression<AE> const& ae) {
+	compressed_vector& operator = (vector_expression<AE> const& ae) {
 		self_type temporary(ae, nnz_capacity());
-		return assign_temporary(temporary);
-	}
-	template<class AE>
-	compressed_vector &assign(vector_expression<AE> const& ae) {
-		kernels::assign(*this, ae);
-		return *this;
-	}
-
-	// Computed assignment
-	template<class AE>
-	compressed_vector &operator += (vector_expression<AE> const& ae) {
-		self_type temporary(*this + ae, nnz_capacity());
-		return assign_temporary(temporary);
-	}
-	template<class C>          // Container assignment without temporary
-	compressed_vector &operator += (vector_container<C> const& v) {
-		plus_assign(v);
-		return *this;
-	}
-	template<class AE>
-	compressed_vector &plus_assign(vector_expression<AE> const& ae) {
-		kernels::assign<scalar_plus_assign> (*this, ae);
-		return *this;
-	}
-	template<class AE>
-	compressed_vector &operator -= (vector_expression<AE> const& ae) {
-		self_type temporary(*this - ae, nnz_capacity());
-		return assign_temporary(temporary);
-	}
-	template<class C>          // Container assignment without temporary
-	compressed_vector &operator -= (vector_container<C> const& v) {
-		minus_assign(v);
-		return *this;
-	}
-	template<class AE>
-	compressed_vector &minus_assign(vector_expression<AE> const& ae) {
-		kernels::assign<scalar_minus_assign> (*this, ae);
-		return *this;
-	}
-	compressed_vector &operator *= (value_type t) {
-		kernels::assign<scalar_multiply_assign> (*this, t);
-		return *this;
-	}
-	compressed_vector &operator /= (value_type t) {
-		kernels::assign<scalar_divide_assign> (*this, t);
+		swap(temporary);
 		return *this;
 	}
 
 	// Swapping
-	void swap(compressed_vector &v) {
+	void swap(compressed_vector& v) {
 		std::swap(m_size, v.m_size);
 		std::swap(m_nnz, v.m_nnz);
 		m_indices.swap(v.m_indices);
@@ -367,16 +319,16 @@ public:
 
 	// Serialization
 	template<class Archive>
-	void serialize(Archive &ar, const unsigned int /* file_version */) {
+	void serialize(Archive& ar, const unsigned int /* file_version */) {
 		boost::serialization::collection_size_type s(m_size);
-		ar &boost::serialization::make_nvp("size",s);
+		ar & boost::serialization::make_nvp("size",s);
 		if (Archive::is_loading::value) {
 			m_size = s;
 		}
 		// ISSUE: m_indices and m_values are undefined between m_nnz and capacity (trouble with 'nan'-values)
-		ar &boost::serialization::make_nvp("nnz", m_nnz);
-		ar &boost::serialization::make_nvp("indices", m_indices);
-		ar &boost::serialization::make_nvp("values", m_values);
+		ar & boost::serialization::make_nvp("nnz", m_nnz);
+		ar & boost::serialization::make_nvp("indices", m_indices);
+		ar & boost::serialization::make_nvp("values", m_values);
 	}
 
 private:

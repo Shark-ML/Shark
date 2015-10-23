@@ -31,6 +31,7 @@ public:
 	typedef const vector_reference<const self_type> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
 	typedef unknown_storage_tag storage_category;
+	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	scalar_vector()
@@ -116,6 +117,7 @@ public:
 	typedef self_type const const_closure_type;
 	typedef self_type closure_type;
 	typedef unknown_storage_tag storage_category;
+	typedef typename E::evaluation_category evaluation_category;
 
 	// Construction and destruction
 	// May be used as mutable expression.
@@ -255,6 +257,7 @@ public:
 	typedef self_type const const_closure_type;
 	typedef self_type closure_type;
 	typedef unknown_storage_tag storage_category;
+	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 
 	// Construction and destruction
 	explicit vector_binary (

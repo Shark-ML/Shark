@@ -33,7 +33,7 @@
 #ifndef SHARK_LINALG_BLAS_MATRIX_PROXY_HPP
 #define SHARK_LINALG_BLAS_MATRIX_PROXY_HPP
 
-#include "kernels/matrix_assign.hpp"
+#include "assignment.hpp"
 
 namespace shark {
 namespace blas {
@@ -60,6 +60,8 @@ public:
 	typedef self_type closure_type;
 	typedef typename M::orientation orientation;
 	typedef typename M::storage_category storage_category;
+	typedef elementwise_tag evaluation_category;
+
 
 	// Construction and destruction
 	matrix_reference(M& m):
@@ -165,93 +167,9 @@ public:
 
 
 	// Assignment
-	
-	template<class E>
-	matrix_reference& assign(matrix_expression<E> const& e) {
-		expression().assign(e);
-		return *this;
-	}
-	template<class E>
-	matrix_reference& plus_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression().plus_assign(e);
-		return *this;
-	}
-	template<class E>
-	matrix_reference& minus_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression().minus_assign(e);
-		return *this;
-	}
-	template<class E>
-	matrix_reference& multiply_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression().multiply_assign(e);
-		return *this;
-	}
-	template<class E>
-	matrix_reference& divide_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression().divide_assign(e);
-		return *this;
-	}
-	
-	matrix_reference& operator = (const matrix_reference& m) {
-		expression() = m();
-		return *this;
-	}
 	template<class E>
 	matrix_reference& operator = (matrix_expression<E> const& e) {
 		expression() = e();
-		return *this;
-	}
-	template<class E>
-	matrix_reference& operator += (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression() +=e();
-		return *this;
-	}
-	template<class E>
-	matrix_reference& operator -= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression() -= e();
-		return *this;
-	}
-	template<class E>
-	matrix_reference& operator *= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression() *= e();
-		return *this;
-	}
-	template<class E>
-	matrix_reference& operator /= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression() /= e();
-		return *this;
-	}
-	matrix_reference& operator *= (scalar_type t) {
-		expression() *= t;
-		return *this;
-	}
-	matrix_reference& operator /= (scalar_type t) {
-		expression() /= t;
-		return *this;
-	}
-	
-	matrix_reference& operator += (scalar_type t) {
-		expression() += t;
-		return *this;
-	}
-	matrix_reference& operator -= (scalar_type t) {
-		expression() -= t;
 		return *this;
 	}
 
@@ -358,6 +276,7 @@ public:
 	typedef matrix_transpose<M> closure_type;
 	typedef typename M::orientation::transposed_orientation orientation;
 	typedef typename M::storage_category storage_category;
+	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	explicit matrix_transpose(matrix_closure_type m):
@@ -521,41 +440,6 @@ public:
 	
 	// Assignment
 	//we implement it by using the identity A^T op= B <=> A op= B^T where op= is one of =,-=,+=
-	
-	template<class E>
-	matrix_transpose& assign(matrix_expression<E> const& e) {
-		expression().assign(matrix_transpose<E const>(e()));
-		return *this;
-	}
-	template<class E>
-	matrix_transpose& plus_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression().plus_assign(matrix_transpose<E const>(e()));
-		return *this;
-	}
-	template<class E>
-	matrix_transpose& minus_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression().minus_assign(matrix_transpose<E const>(e()));
-		return *this;
-	}
-	template<class E>
-	matrix_transpose& multiply_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression().multiply_assign(matrix_transpose<E const>(e()));
-		return *this;
-	}
-	template<class E>
-	matrix_transpose& divide_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression().divide_assign(matrix_transpose<E const>(e()));
-		return *this;
-	}
-	
 	matrix_transpose& operator = (matrix_transpose const& m) {
 		expression() = m.expression();
 		return *this;
@@ -563,52 +447,6 @@ public:
 	template<class E>
 	matrix_transpose& operator = (matrix_expression<E> const& e) {
 		expression() = matrix_transpose<E const>(e());
-		return *this;
-	}
-	template<class E>
-	matrix_transpose& operator += (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression() += matrix_transpose<E const>(e());
-		return *this;
-	}
-	template<class E>
-	matrix_transpose& operator -= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression() -= matrix_transpose<E  const>(e());
-		return *this;
-	}
-	template<class E>
-	matrix_transpose& operator *= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression() *= matrix_transpose<E  const>(e());
-		return *this;
-	}
-	template<class E>
-	matrix_transpose& operator /= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		expression() /= matrix_transpose<E  const>(e());
-		return *this;
-	}
-	
-	matrix_transpose& operator *= (scalar_type t) {
-		expression() *= t;
-		return *this;
-	}
-	matrix_transpose& operator /= (scalar_type t) {
-		expression() /= t;
-		return *this;
-	}
-	
-	matrix_transpose& operator += (scalar_type t) {
-		expression() += t;
-		return *this;
-	}
-	matrix_transpose& operator -= (scalar_type t) {
-		expression() -= t;
 		return *this;
 	}
 private:
@@ -653,6 +491,7 @@ public:
 	typedef const self_type const_closure_type;
 	typedef self_type closure_type;
 	typedef typename M::storage_category storage_category;
+	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	matrix_row(matrix_closure_type const& expression, index_type i):m_expression(expression), m_i(i) {
@@ -727,82 +566,15 @@ public:
 	}
 
 	// Assignment
-	template<class E>
-	matrix_row& assign(vector_expression<E> const& e) {
-		kernels::assign(*this, e);
-		return *this;
-	}
-	template<class E>
-	matrix_row& plus_assign(vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		kernels::assign<scalar_plus_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	matrix_row& minus_assign(vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		kernels::assign<scalar_minus_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	matrix_row& multiply_assign(vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		kernels::assign<scalar_multiply_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	matrix_row& divide_assign(vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		kernels::assign<scalar_divide_assign> (*this, e);
-		return *this;
-	}
 	
 	template<class E>
 	matrix_row& operator = (vector_expression<E> const& e) {
-		return assign(typename vector_temporary<M>::type(e));
+		return assign(*this, typename vector_temporary<M>::type(e));
 	}
 	matrix_row& operator = (matrix_row const& e) {
-		return assign(typename vector_temporary<M>::type(e));
-	}
-	template<class E>
-	matrix_row& operator += (vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		return plus_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	matrix_row& operator -= (vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		return minus_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	matrix_row& operator *= (vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		return multiply_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	matrix_row& operator /= (vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		return divide_assign(typename vector_temporary<E>::type(e));
+		return assign(*this, typename vector_temporary<M>::type(e));
 	}
 	
-	matrix_row& operator *= (scalar_type t) {
-		kernels::assign<scalar_multiply_assign> (*this, t);
-		return *this;
-	}
-	matrix_row& operator /= (scalar_type t) {
-		kernels::assign<scalar_divide_assign> (*this, t);
-		return *this;
-	}
-	
-	matrix_row& operator += (scalar_type t) {
-		kernels::assign<scalar_plus_assign> (*this, t);
-		return *this;
-	}
-	matrix_row& operator -= (scalar_type t) {
-		kernels::assign<scalar_minus_assign> (*this, t);
-		return *this;
-	}
-
 	// Iterator types
 	typedef typename M::const_row_iterator const_iterator;
 	typedef typename row_iterator<M>::type iterator;
@@ -941,6 +713,7 @@ public:
 	typedef const self_type const_closure_type;
 	typedef self_type closure_type;
 	typedef typename M::storage_category storage_category;
+	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	matrix_column(matrix_closure_type expression, index_type j)
@@ -1017,84 +790,12 @@ public:
 	// Assignment
 	
 	template<class E>
-	matrix_column& assign(vector_expression<E> const& e) {
-		m_wrapper.assign(e());
-		return *this;
-	}
-	template<class E>
-	matrix_column& plus_assign(vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		m_wrapper.plus_assign(e());
-		return *this;
-	}
-	template<class E>
-	matrix_column& minus_assign( vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		m_wrapper.minus_assign(e());
-		return *this;
-	}
-	template<class E>
-	matrix_column& multiply_assign( vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		m_wrapper.multiply_assign(e());
-		return *this;
-	}
-	template<class E>
-	matrix_column& divide_assign( vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		m_wrapper.divide_assign(e());
-		return *this;
-	}
-	
-	template<class E>
 	matrix_column& operator = (vector_expression<E> const& e) {
 		m_wrapper = e();
 		return *this;
 	}
 	matrix_column& operator = (matrix_column const& e) {
 		m_wrapper = e;
-		return *this;
-	}
-	template<class E>
-	matrix_column& operator += (vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		m_wrapper += e();
-		return *this;
-	}
-	template<class E>
-	matrix_column& operator -= (vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		m_wrapper -= e();
-		return *this;
-	}
-	template<class E>
-	matrix_column& operator *= (vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		m_wrapper *= e();
-		return *this;
-	}
-	template<class E>
-	matrix_column& operator /= (vector_expression<E> const& e) {
-		SIZE_CHECK(size() == e().size());
-		m_wrapper /= e();
-		return *this;
-	}
-	
-	matrix_column& operator *= (scalar_type at) {
-		m_wrapper *= at;
-		return *this;
-	}
-	matrix_column& operator /= (scalar_type at) {
-		m_wrapper /= at;
-		return *this;
-	}
-	
-	matrix_column& operator += (scalar_type at) {
-		m_wrapper += at;
-		return *this;
-	}
-	matrix_column& operator -= (scalar_type at) {
-		m_wrapper -= at;
 		return *this;
 	}
 
@@ -1178,6 +879,7 @@ public:
 	typedef const self_type const_closure_type;
 	typedef self_type closure_type;
 	typedef typename M::storage_category storage_category;
+	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	matrix_vector_range(matrix_type& expression, range const&r1, range const&r2):
@@ -1244,77 +946,10 @@ public:
 	}
 
 	// Assignment
-	template<class E>
-	matrix_vector_range& assign(vector_expression<E> const& e) {
-		kernels::assign(*this, e);
-		return *this;
-	}
-	template<class E>
-	matrix_vector_range& plus_assign(vector_expression<E>const& e) {
-		SIZE_CHECK(size() == e().size());
-		kernels::assign<scalar_plus_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	matrix_vector_range& minus_assign(vector_expression<E>const& e) {
-		SIZE_CHECK(size() == e().size());
-		kernels::assign<scalar_minus_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	matrix_vector_range& multiply_assign(vector_expression<E>const& e) {
-		SIZE_CHECK(size() == e().size());
-		kernels::assign<scalar_multiply_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	matrix_vector_range& divide_assign(vector_expression<E>const& e) {
-		SIZE_CHECK(size() == e().size());
-		kernels::assign<scalar_divide_assign> (*this, e);
-		return *this;
-	}
 	
 	template<class E>
 	matrix_vector_range& operator = (vector_expression<E> const& e) {
-		return assign(typename vector_temporary<M>::type(e));
-	}
-	template<class E>
-	matrix_vector_range& operator += (vector_expression<E>const& e) {
-		SIZE_CHECK(size() == e().size());
-		return plus_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	matrix_vector_range& operator -= (vector_expression<E>const& e) {
-		SIZE_CHECK(size() == e().size());
-		return minus_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	matrix_vector_range& operator *= (vector_expression<E>const& e) {
-		SIZE_CHECK(size() == e().size());
-		return multiply_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	matrix_vector_range& operator /= (vector_expression<E>const& e) {
-		SIZE_CHECK(size() == e().size());
-		return divide_assign(typename vector_temporary<E>::type(e));
-	}
-	
-	matrix_vector_range& operator *= (scalar_type t) {
-		kernels::assign<scalar_multiply_assign> (*this, t);
-		return *this;
-	}
-	matrix_vector_range& operator /= (scalar_type t) {
-		kernels::assign<scalar_divide_assign> (*this, t);
-		return *this;
-	}
-	
-	matrix_vector_range& operator += (scalar_type t) {
-		kernels::assign<scalar_plus_assign> (*this, t);
-		return *this;
-	}
-	matrix_vector_range& operator -= (scalar_type t) {
-		kernels::assign<scalar_minus_assign> (*this, t);
-		return *this;
+		return assign(*this, typename vector_temporary<M>::type(e));
 	}
 
 	typedef indexed_iterator<closure_type> iterator;
@@ -1405,6 +1040,7 @@ public:
 	typedef const self_type const_closure_type;
 	typedef self_type closure_type;
 	typedef typename M::storage_category storage_category;
+	typedef elementwise_tag evaluation_category;
 	typedef typename M::orientation orientation;
 
 	// Construction and destruction
@@ -1473,88 +1109,13 @@ public:
 	}
 
 	// Assignment
-	template<class E>
-	self_type& assign(matrix_expression<E> const& e) {
-		kernels::assign(*this, e);
-		return *this;
-	}
-	template<class E>
-	self_type& plus_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_plus_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	self_type& minus_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_minus_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	self_type& multiply_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_multiply_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	self_type& divide_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_divide_assign> (*this, e);
-		return *this;
-	}
 	
 	self_type& operator = (self_type const& e) {
-		return assign(typename matrix_temporary<self_type>::type(e));
+		return assign(*this, typename matrix_temporary<self_type>::type(e));
 	}
 	template<class E>
 	self_type& operator = (matrix_expression<E> const& e) {
-		return assign(typename matrix_temporary<E>::type(e));
-	}
-	template<class E>
-	self_type& operator += (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return plus_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	self_type& operator -= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return minus_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	self_type& operator *= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return multiply_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	self_type& operator /= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return divide_assign(typename vector_temporary<E>::type(e));
-	}
-	
-	self_type& operator *= (scalar_type t) {
-		kernels::assign<scalar_multiply_assign> (*this, t);
-		return *this;
-	}
-	self_type& operator /= (scalar_type t) {
-		kernels::assign<scalar_divide_assign> (*this, t);
-		return *this;
-	}
-	
-	self_type& operator += (scalar_type t) {
-		kernels::assign<scalar_plus_assign> (*this, t);
-		return *this;
-	}
-	self_type& operator -= (scalar_type t) {
-		kernels::assign<scalar_minus_assign> (*this, t);
-		return *this;
+		return assign(*this, typename matrix_temporary<E>::type(e));
 	}
 
 	// Iterator types
@@ -1755,6 +1316,7 @@ public:
 	typedef matrix_reference<self_type const> const const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
 	typedef dense_tag storage_category;
+	typedef elementwise_tag evaluation_category;
         
 
 	// Construction and destruction
@@ -1856,93 +1418,17 @@ public:
 	// -------
 	// ASSIGNING
 	// -------
-
-	template<class E>
-	self_type& assign(matrix_expression<E> const& e) {
-		kernels::assign(*this, e);
-		return *this;
-	}
-	template<class E>
-	self_type& plus_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_plus_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	self_type& minus_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_minus_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	self_type& multiply_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_multiply_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	self_type& divide_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_divide_assign> (*this, e);
-		return *this;
-	}
 	
 	self_type& operator = (self_type const& e) {
 		SIZE_CHECK(size1() == e().size1());
 		SIZE_CHECK(size2() == e().size2());
-		return assign(typename matrix_temporary<self_type>::type(e));
+		return assign(*this, typename matrix_temporary<self_type>::type(e));
 	}
 	template<class E>
 	self_type& operator = (matrix_expression<E> const& e) {
 		SIZE_CHECK(size1() == e().size1());
 		SIZE_CHECK(size2() == e().size2());
-		return assign(typename matrix_temporary<self_type>::type(e));
-	}
-	template<class E>
-	self_type& operator += (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return plus_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	self_type& operator -= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return minus_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	self_type& operator *= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return multiply_assign(typename vector_temporary<E>::type(e));
-	}
-	template<class E>
-	self_type& operator /= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return divide_assign(typename vector_temporary<E>::type(e));
-	}
-	
-	self_type& operator*=(scalar_type t) {
-		kernels::assign<scalar_multiply_assign> (*this, t);
-		return *this;
-	}
-	self_type& operator/=(scalar_type  t) {
-		kernels::assign<scalar_divide_assign> (*this, t);
-		return *this;
-	}
-	
-	self_type& operator+=(scalar_type t) {
-		kernels::assign<scalar_plus_assign> (*this, t);
-		return *this;
-	}
-	self_type& operator-=(scalar_type  t) {
-		kernels::assign<scalar_minus_assign> (*this, t);
-		return *this;
+		return assign(*this, typename matrix_temporary<self_type>::type(e));
 	}
 	
 	// --------------

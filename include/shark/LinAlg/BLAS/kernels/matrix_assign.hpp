@@ -32,6 +32,7 @@ public:
 	typedef internal_transpose_proxy<M> closure_type;
 	typedef typename M::orientation::transposed_orientation orientation;
 	typedef typename M::storage_category storage_category;
+	typedef typename M::evaluation_category evaluation_category;
 
 	// Construction and destruction
 	explicit internal_transpose_proxy(matrix_closure_type m):
@@ -189,7 +190,7 @@ void assign(
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		matrix_row<M> rowM(m(),i);
-		assign(rowM,row(e,i));
+		kernels::assign(rowM,row(e,i));
 	}
 }
 
@@ -240,7 +241,7 @@ void assign(
 ) {
 	for(std::size_t i = 0; i != m().size2(); ++i){
 		matrix_column<M> columnM(m(),i);
-		assign(columnM,column(e,i));
+		kernels::assign(columnM,column(e,i));
 	}
 }
 
@@ -254,7 +255,7 @@ void assign(
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		matrix_column<M> rowM(m(),i);
-		assign(rowM,row(e,i));
+		kernels::assign(rowM,row(e,i));
 	}
 }
 
@@ -419,7 +420,7 @@ void assign(
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		matrix_row<M> rowM(m(),i);
-		assign<F>(rowM,row(e,i));
+		kernels::assign<F>(rowM,row(e,i));
 	}
 }
 
@@ -471,7 +472,7 @@ void assign(
 ) {
 	for(std::size_t i = 0; i != m().size2(); ++i){
 		matrix_column<M> columnM(m(),i);
-		assign<F>(columnM,column(e,i));
+		kernels::assign<F>(columnM,column(e,i));
 	}
 }
 
@@ -484,7 +485,7 @@ void assign(
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		matrix_column<M> rowM(m(),i);
-		assign<F>(rowM,row(e,i));
+		kernels::assign<F>(rowM,row(e,i));
 	}
 }
 

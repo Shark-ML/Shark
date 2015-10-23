@@ -298,15 +298,27 @@ struct sparse_tag:public unknown_storage_tag{};
 struct dense_tag: public unknown_storage_tag{};
 struct packed_tag: public unknown_storage_tag{};
 
+//evaluation tags
+struct elementwise_tag{};
+struct blockwise_tag{};
 
-template<class S1, class S2>
-struct storage_restrict_traits {
-	typedef S1 storage_category;
-};
-template<>
-struct storage_restrict_traits<dense_tag, sparse_tag> {
-	typedef sparse_tag storage_category;
-};
+namespace detail{
+	template<class S1, class S2>
+	struct evaluation_restrict_traits {
+		typedef S1 type;
+	};
+	template<>
+	struct evaluation_restrict_traits<elementwise_tag, blockwise_tag> {
+		typedef blockwise_tag type;
+	};
+}
+
+template<class E1, class E2>
+struct evaluation_restrict_traits: public detail::evaluation_restrict_traits<
+	typename E1::evaluation_category,
+	typename E2::evaluation_category
+>{};
+
 
 template<class E>
 struct closure: public boost::mpl::if_<

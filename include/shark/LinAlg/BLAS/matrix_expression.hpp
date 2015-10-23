@@ -66,6 +66,7 @@ public:
 	typedef const_closure_type closure_type;
 	typedef unknown_orientation orientation;
 	typedef unknown_storage_tag storage_category;
+	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 
 	// Construction and destruction
 	
@@ -177,6 +178,7 @@ public:
 	typedef const_closure_type closure_type;
 	typedef blas::row_major orientation;
 	typedef blas::unknown_storage_tag storage_category;
+	typedef typename V::evaluation_category evaluation_category;
 
 	// Construction and destruction
 	explicit vector_repeater (expression_type const& e, std::size_t rows):
@@ -267,6 +269,7 @@ public:
 	typedef const_closure_type closure_type;
 	typedef typename E::orientation orientation;
 	typedef blas::unknown_storage_tag storage_category;
+	typedef typename E::evaluation_category evaluation_category;
 
 	// Construction and destruction
 	matrix_unary(blas::matrix_expression<E> const &e, F const &functor):
@@ -407,6 +410,7 @@ public:
 	typedef const_closure_type closure_type;
 	typedef typename E1::orientation orientation;
 	typedef blas::unknown_storage_tag storage_category;
+	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 
 	typedef F functor_type;
 
@@ -542,6 +546,7 @@ public:
 	typedef const self_type const_closure_type;
 	typedef const_closure_type closure_type;
 	typedef unknown_storage_tag storage_category;
+	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	matrix_vector_binary1(const expression1_type &e1, const expression2_type &e2):
@@ -880,11 +885,7 @@ public:
 
 /** \brief A matrix with all values of type \c T equal to the same value
  *
- * Changing one value has the effect of changing all the values. Assigning it to a normal matrix will copy
- * the same value everywhere in this matrix. All accesses are constant time, due to the trivial value.
- *
  * \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
- * \tparam ALLOC an allocator for storing the unique value. By default, a standar allocator is used.
  */
 template<class T>
 class scalar_matrix:
@@ -909,6 +910,7 @@ public:
 	typedef matrix_reference<self_type> closure_type;
 	typedef dense_tag storage_category;
 	typedef unknown_orientation orientation;
+	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	scalar_matrix():
