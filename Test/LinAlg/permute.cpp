@@ -16,8 +16,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Rows_Matrix ){
 	
 	//generate testing matrix
 	IntMatrix A(5,6);
-	for(std::size_t i = 0; i != 5; ++i){
-		for(std::size_t j = 0; j != 6; ++j){
+	for(int i = 0; i != 5; ++i){
+		for(int j = 0; j != 6; ++j){
 			A(i,j) = i*6+j;
 		}
 	}
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Rows_Vector ){
 	
 	//generate testing matrix
 	IntVector v(5);
-	for(std::size_t i = 0; i != 5; ++i){
+	for(int i = 0; i != 5; ++i){
 		v(i) = i;
 	}
 	//generate permutated result
@@ -72,8 +72,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Columns ){
 	
 	//generate testing matrix
 	IntMatrix A(6,5);
-	for(std::size_t i = 0; i != 6; ++i){
-		for(std::size_t j = 0; j != 5; ++j){
+	for(int i = 0; i != 6; ++i){
+		for(int j = 0; j != 5; ++j){
 			A(i,j) = i*5+j;
 		}
 	}
@@ -100,8 +100,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Columns_Inverted ){
 	
 	//generate testing matrix
 	IntMatrix A(6,5);
-	for(std::size_t i = 0; i != 6; ++i){
-		for(std::size_t j = 0; j != 5; ++j){
+	for(int i = 0; i != 6; ++i){
+		for(int j = 0; j != 5; ++j){
 			A(i,j) = i*5+j;
 		}
 	}
@@ -124,8 +124,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Full ){
 	
 	//generate testing matrix
 	IntMatrix A(6,5);
-	for(std::size_t i = 0; i != 6; ++i){
-		for(std::size_t j = 0; j != 5; ++j){
+	for(int i = 0; i != 6; ++i){
+		for(int j = 0; j != 5; ++j){
 			A(i,j) = i*5+j;
 		}
 	}

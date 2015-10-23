@@ -81,8 +81,8 @@ struct LZ9 : public MultiObjectiveFunction
 
 		ResultType value( numberOfObjectives() );
 
-		unsigned int counter1 = 0, counter2 = 0;
-		for( unsigned int i = 1; i < x.size(); i++ ) {
+		std::size_t counter1 = 0, counter2 = 0;
+		for( std::size_t i = 1; i < x.size(); i++ ) {
 			if( i % 2 == 0 ) {
 				counter2++;
 				value[1] += sqr( x(i) - ::sin( 6 * M_PI * x( 0 ) + i*M_PI/x.size() ) );

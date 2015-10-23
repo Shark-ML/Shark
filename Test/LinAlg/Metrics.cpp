@@ -254,9 +254,9 @@ BOOST_AUTO_TEST_CASE( LinAlg_Norm_distanceSqr_Matrix_Matrix){
 		RealMatrix mat1(64,3);
 		RealMatrix mat2(64,3);
 		for(std::size_t i = 0; i != 64; ++i){
-			mat1(i,0) = 3*i;
-			mat1(i,1) = 3*i+1;
-			mat1(i,2) = 3*i+2;
+			mat1(i,0) = 3.0*i;
+			mat1(i, 1) = 3.0*i + 1;
+			mat1(i, 2) = 3.0*i + 2;
 			mat2(i,0) = 1.5*i;
 			mat2(i,1) = 1.5*i+1;
 			mat2(i,2) = 1.5*i+2;

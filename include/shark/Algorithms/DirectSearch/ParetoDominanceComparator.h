@@ -74,9 +74,9 @@ struct ParetoDominanceComparator {
 		unsigned numEqual = 0;
 		unsigned numSmaller = 0;
 
-		unsigned int noOfObj = e( A ).size();
+		std::size_t noOfObj = e( A ).size();
 
-		for (unsigned i = noOfObj; i--;) {
+		for (std::size_t i = 0; i != noOfObj; i++) {
 			if( e( A )[i] > e( B )[i] )
 				numGreater++;
 			else if( e( A )[i] < e( B )[i] )

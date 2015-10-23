@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( RNNET_BATCH_VALUE_REGRESSION_TEST ){
 	Sequence testInputs(4,RealVector(2));
 	for (size_t i = 0; i < 4; i++){
 		for(size_t j=0;j!=2;++j){
-			testInputs[i](j)  = i+j+1;
+			testInputs[i](j) = double(i + j + 1);
 		}
 	}
 	Sequence testOutputs(4,RealVector(2));
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE( RNNET_WEIGHTED_PARAMETER_DERIVATIVE ){
 	Sequence testInputs(T,RealVector(2));
 	for (size_t t = 0; t < T; t++){
 		for(size_t j=0;j!=2;++j){
-			testInputs[t](j)  = t+j;
+			testInputs[t](j) = double(t + j);
 		}
 	}
 	std::vector<Sequence> testInputBatch(1,testInputs);

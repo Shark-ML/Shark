@@ -115,13 +115,13 @@ void importPGM( std::string const& fileName, unsigned char ** ppData, int & sx, 
 /// \param  pData      unsigned char pointer to the data
 /// \param  sx         Width of image
 /// \param  sy         Height of image
-void writePGM( std::string const& fileName, const unsigned char * pData, const unsigned int sx, const unsigned int sy )
+void writePGM( std::string const& fileName, unsigned char const* pData, std::size_t sx, std::size_t sy )
 {
 	FILE* fp = fopen(fileName.c_str(), "wb");
 	if( !fp ) throw SHARKEXCEPTION( "[writePGM] cannot open file: " + fileName);
 
 	fprintf(fp, "P5\n");
-	fprintf(fp, "%d %d\n255\n", sx, sy);
+	fprintf(fp, "%d %d\n255\n", (int)sx, (int)sy);
 	
 	if( 1 != fwrite(pData, sx*sy, 1, fp) ) 	{
 		fclose(fp);
@@ -138,13 +138,16 @@ void writePGM( std::string const& fileName, const unsigned char * pData, const u
 /// \param  sx         Width of imported image
 /// \param  sy         Height of imported image
 template <class T>
-void importPGM( std::string const& fileName, T &data, int & sx, int & sy ) {
+void importPGM( std::string const& fileName, T& data, std::size_t& sx, std::size_t& sy ) {
 	unsigned char *pData;
 	unsigned i=0;
-	detail::importPGM(fileName, &pData, sx, sy);
+	int isx;
+	int isy;
+	detail::importPGM(fileName, &pData, isx, isy);
+	sx = std::size_t(sx);
+	sx = std::size_t(sy);
 	data.resize(sx*sy);
-	typename T::iterator it = data.begin();
-	for( ; it != data.end(); ++it, ++i ) *it = pData[i];
+	std::copy(pData, pData + sx*sy, data.begin());
 	delete [] pData;
 }
 
@@ -156,21 +159,18 @@ void importPGM( std::string const& fileName, T &data, int & sx, int & sy ) {
 /// \param  sy         Height of image
 /// \param  normalize  Adjust values to [0,255], default false
 template <class T>
-void exportPGM( std::string const& fileName, const T &data, int sx, int sy, bool normalize = false ) {
-	unsigned i=0;
+void exportPGM(std::string const& fileName, T const& data, std::size_t sx, std::size_t sy, bool normalize = false) {
+	unsigned i = 0;
 	unsigned char *pData = new unsigned char[data.size()];
 	typename T::const_iterator it = data.begin();
 	if(normalize) {
-		double lb, ub;
-		ub = lb = *it; 
-		it++;
-		for( ; it != data.end(); ++it) {
-			if(*it > ub) ub = *it;
-			if(*it < lb) lb = *it;
-		}
-		for( it = data.begin() ; it != data.end(); ++it, ++i ) pData[i] = (unsigned char)( (*it - lb) / (ub - lb) * 255 );
+		double lb = *std::min_element(data.begin(),data.end());
+		double ub = *std::max_element(data.begin(), data.end());
+		for( it = data.begin() ; it != data.end(); ++it, ++i )
+			pData[i] = (unsigned char)( (*it - lb) / (ub - lb) * 255 );
 	} else {
-		for( it = data.begin() ; it != data.end(); ++it, ++i ) pData[i] = (unsigned char)( *it );
+		for( it = data.begin() ; it != data.end(); ++it, ++i )
+			pData[i] = (unsigned char)( *it );
 	}
 	detail::writePGM(fileName, pData, sx, sy);
 	delete [] pData;
@@ -209,7 +209,8 @@ inline void exportFiltersToPGMGrid(std::string const& basename, RealMatrix const
 		(basename+".pgm").c_str(), 
 		blas::adapt_vector((height+1)*gridY*(width+1)*gridX,&image(0,0)),
 		(width+1)*gridX, (height+1)*gridY,
-		true);
+		true
+	);
 }
 
 /// \brief Exports a set of filters as a grid image
@@ -259,8 +260,8 @@ inline void exportFiltersToPGMGrid(std::string const& basename, Data<RealVector>
 /// \brief Stores name and size of image externally
 ///
 struct ImageInformation {
-	int x;
-	int y;
+	std::size_t x;
+	std::size_t y;
 	std::string name;
 
 	template<typename Archive>

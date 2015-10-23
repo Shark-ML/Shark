@@ -105,11 +105,11 @@ void shark::blas::svd
 	bool ignoreThreshold
 )
 {
-	unsigned m = amatA.size1(); /* rows */
-	unsigned n = amatA.size2(); /* cols */
+	std::size_t m = amatA.size1(); /* rows */
+	std::size_t n = amatA.size2(); /* cols */
 
 	int flag;
-	unsigned i, its, j, jj, k, l, nm(0);
+	std::size_t i, its, j, jj, k, l, nm(0);
 	double anorm, c, f, g, h, s, scale, x, y, z;
 
 	VectorT rv1(n);

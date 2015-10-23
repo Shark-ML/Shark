@@ -40,7 +40,7 @@ namespace shark {
  * \brief Convex quadratic benchmark function with single dominant axis
  */
 struct Ackley : public SingleObjectiveFunction {
-	Ackley(unsigned int numberOfVariables = 5) {
+	Ackley(std::size_t numberOfVariables = 5) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;
 	}
@@ -67,7 +67,7 @@ struct Ackley : public SingleObjectiveFunction {
 		SearchPointType x;
 		x.resize(m_numberOfVariables);
 
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for (std::size_t i = 0; i < x.size(); i++) {
 			x(i) = Rng::uni(-10, 10);
 		}
 		return x;

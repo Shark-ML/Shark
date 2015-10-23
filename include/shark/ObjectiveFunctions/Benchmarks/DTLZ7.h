@@ -88,18 +88,18 @@ struct DTLZ7 : public MultiObjectiveFunction
 
 		RealVector value( numberOfObjectives() );
 
-		int k = numberOfVariables() - numberOfObjectives() + 1 ;
+		std::size_t k = numberOfVariables() - numberOfObjectives() + 1 ;
 		double g = 0.0 ;
-		for (unsigned int i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++)
+		for (std::size_t i = numberOfVariables() - k + 1; i <= numberOfVariables(); i++)
 			g += x(i-1);
 
 		g = 1 + 9 * g / k;
 
-		for (unsigned int i = 0; i != numberOfObjectives(); i++)
+		for (std::size_t i = 0; i != numberOfObjectives(); i++)
 			value[i] = x(i);
 
 		double h = 0.0 ;
-		for (unsigned int j = 1; j <= numberOfObjectives() - 1; j++)
+		for (std::size_t j = 1; j <= numberOfObjectives() - 1; j++)
 			h += x(j-1) / (1 + g) * ( 1 + std::sin( 3 * M_PI * x(j-1) ) );
 
 		h = numberOfObjectives() - h ;

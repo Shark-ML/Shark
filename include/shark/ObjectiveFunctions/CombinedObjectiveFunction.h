@@ -90,8 +90,10 @@ public:
 	/// Tests whether a point in SearchSpace is feasible,
 	/// e.g., whether the constraints are fulfilled.
 	bool isFeasible( const typename super::SearchPointType & input) const {
-		unsigned int i, ic = m_elements.size();
-		for (i=0; i<ic; i++) if (! m_elements[i]->isFeasible(input)) return false;
+		std::size_t ic = m_elements.size();
+		for ( std::size_t i=0; i<ic; i++)
+			if (! m_elements[i]->isFeasible(input))
+				return false;
 		return true;
 	}
 	
@@ -104,9 +106,10 @@ public:
 	typename super::ResultType eval( const typename super::SearchPointType & input ) const
 	{
 		++this->m_evaluationCounter;
-		unsigned int i, ic = m_elements.size();
+		std::size_t ic = m_elements.size();
 		typename super::ResultType ret = m_weight[0] * m_elements[0]->eval(input);
-		for (i=1; i<ic; i++) ret += m_weight[i] * m_elements[i]->eval(input);
+		for (std::size_t i=1; i<ic; i++)
+			ret += m_weight[i] * m_elements[i]->eval(input);
 		return ret;
 	}
 
@@ -116,10 +119,10 @@ public:
 		++this->m_evaluationCounter;
 		SHARK_CHECK(this->m_features.test(super::HAS_FIRST_DERIVATIVE), "[CombinedObjectiveFunction::evalDerivative] At least one of the objective functions combined is not differentiable");
 		typename super::FirstOrderDerivative der;
-		unsigned int i, ic = m_elements.size();
+		std::size_t ic = m_elements.size();
 		typename super::ResultType ret = m_weight[0] * m_elements[0]->evalDerivative(input, der);
 		derivative = m_weight[0] * der;
-		for (i=1; i<ic; i++)
+		for (std::size_t i=1; i != ic; i++)
 		{
 			ret += m_weight[i] * m_elements[i]->evalDerivative(input, der);
 			derivative += m_weight[i] * der;
@@ -133,11 +136,11 @@ public:
 	typename super::ResultType evalDerivative( const typename super::SearchPointType & input, typename super::SecondOrderDerivative & derivative )const {
 		SHARK_CHECK(this->m_features.test(super::HAS_SECOND_DERIVATIVE), "[CombinedObjectiveFunction::evalDerivative] At least one of the objective functions combined is not twice differentiable");
 		typename super::SecondOrderDerivative der;
-		unsigned int i, ic = m_elements.size();
+		std::size_t ic = m_elements.size();
 		typename super::ResultType ret = m_weight[0] * m_elements[0]->evalDerivative(input, der);
 		derivative.gradient = m_weight[0] * der.gradient;
 		derivative.hessian = m_weight[0] * der.hessian;
-		for (i=1; i<ic; i++)
+		for (std::size_t i=1; i<ic; i++)
 		{
 			ret += m_weight[i] * m_elements[i]->evalDerivative(input, der);
 			derivative.gradient += m_weight[i] * der.gradient;

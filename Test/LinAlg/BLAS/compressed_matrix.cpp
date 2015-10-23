@@ -12,7 +12,7 @@ struct Element{
 	std::size_t column;
 	int value;
 	Element(){}
-	Element(std::size_t r, std::size_t col, double v):row(r),column(col),value(v){}
+	Element(std::size_t r, std::size_t col, int v):row(r),column(col),value(v){}
 };
 
 //checks the internal memory structure of the matrix and ensures that it stores the same elements as 
@@ -108,9 +108,10 @@ BOOST_AUTO_TEST_CASE( LinAlg_sparse_matrix_insert_element_end){
 		compressed_matrix<int>::row_iterator row_iter = matrix_set.row_begin(i);
 		for(std::size_t j = 0; j != columns; ++j,++row_iter){
 			BOOST_REQUIRE_EQUAL(row_iter.row(),i);
-			row_iter = matrix_set.set_element(row_iter,j,i+j);
-			matrix_operator(i,j) = i+j;
-			elements.push_back(Element(i,j,i+j));
+			int val = (int)(i + j);
+			row_iter = matrix_set.set_element(row_iter,j,val);
+			matrix_operator(i, j) = val;
+			elements.push_back(Element(i,j,val));
 			checkCompressedMatrixStructure(elements,matrix_set);
 			checkCompressedMatrixStructure(elements,matrix_operator);
 		}
@@ -139,9 +140,10 @@ BOOST_AUTO_TEST_CASE( LinAlg_sparse_matrix_insert_element_some_elements ){
 		compressed_matrix<int>::row_iterator row_iter = matrix_set.row_begin(i);
 		for(std::size_t elem = 0; elem != colElements; ++elem,++row_iter){
 			std::size_t j = cols[elem];
-			row_iter = matrix_set.set_element(row_iter,j,i+j);
-			matrix_operator(i,j) = i+j;
-			elements.push_back(Element(i,j,i+j));
+			int val = (int)(i + j);
+			row_iter = matrix_set.set_element(row_iter,j,val);
+			matrix_operator(i,j) = val;
+			elements.push_back(Element(i,j,val));
 			checkCompressedMatrixStructure(elements,matrix_set);
 			checkCompressedMatrixStructure(elements,matrix_operator);
 		}

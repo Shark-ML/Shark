@@ -38,7 +38,7 @@ namespace shark {
 /**
  * \brief Constrained Sphere function
  *
- * This is a simple sphere function minimizing \f$ f(x) = \sum_i^N x_i^2-m \f$ under the constraint that
+ * This is a simple sphere function minimizing \f$ f(x) = \sum_i^N x_i^2-m \f$ under the constraints that
  *  \f$ x_i \geq 1\f$ for \f$ i = 1,\dots,m \f$. The minimum is at \f$ x_1=\dots = x_m = 1\f$ and 
  * \f$ x_{m+1}=\dots = x_N = 0 \f$ with function value 0.
  *
@@ -46,7 +46,7 @@ namespace shark {
  */
 struct ConstrainedSphere : public SingleObjectiveFunction {
 	
-	ConstrainedSphere(unsigned int numberOfVariables = 5, unsigned int m = 1)
+	ConstrainedSphere(std::size_t numberOfVariables = 5, std::size_t m = 1)
 	:m_numberOfVariables(numberOfVariables), m_constraints(m) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_features |= IS_CONSTRAINED_FEATURE;
@@ -72,17 +72,17 @@ struct ConstrainedSphere : public SingleObjectiveFunction {
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(numberOfVariables());
 
-		for (unsigned int i = 0; i < m_constraints; i++) {
+		for (std::size_t i = 0; i < m_constraints; i++) {
 			x(i) = std::abs(Rng::gauss(0, 1))+1;
 		}
-		for (unsigned int i = m_constraints; i < x.size(); i++) {
+		for (std::size_t i = m_constraints; i < x.size(); i++) {
 			x(i) = Rng::gauss(0, 1);
 		}
 		return x;
 	}
 	
 	bool isFeasible( SearchPointType const& input) const {
-		for (unsigned int i = 0; i < m_constraints; i++) {
+		for (std::size_t i = 0; i < m_constraints; i++) {
 			if(input(i) < 1) return false;
 		}
 		return true;

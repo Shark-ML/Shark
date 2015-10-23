@@ -794,7 +794,7 @@ sum_columns(matrix_expression<MatA> const& A){
 	typename vector_temporary_type<
 		typename MatA::value_type,
 		dense_random_access_iterator_tag
-	>::type result(A().size1(),0.0);
+	>::type result(A().size1(),0);
 	detail::sum_rows_impl(trans(A),result,typename MatA::orientation::transposed_orientation());
 	return result;
 }

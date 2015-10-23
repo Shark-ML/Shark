@@ -91,7 +91,7 @@ public:
       exit(EXIT_FAILURE);
     }    
 
-    int inputs = 3;
+    std::size_t inputs = 3;
     
     // set features
     m_features |= CAN_PROPOSE_STARTING_POINT;
@@ -169,7 +169,7 @@ public:
     double totalJiggle = 0;
     std::size_t jiggleSize = 100;
     double jiggle[jiggleSize]; // jiggle for last 100 evals
-    int eval_count = 0;
+    std::size_t eval_count = 0;
     bool failed = false;
     
     pole.init(init_angle);
@@ -188,7 +188,7 @@ public:
     }
 
     if(eval_count >= jiggleSize){
-      for(int i = 0; i < jiggleSize;i++){
+      for(std::size_t i = 0; i < jiggleSize;i++){
 	totalJiggle += jiggle[i];
       }
       totalJiggle = .75 / totalJiggle;
@@ -217,7 +217,7 @@ public:
     RealVector state(3);
     RealMatrix output(1,1); 
     RealMatrix inState(1,3);
-    int eval_count = 0;
+    std::size_t eval_count = 0;
     bool failed = false;
     
     pole.init(init_angle);
@@ -252,11 +252,11 @@ public:
     const double statevals[5] = {0.05, 0.25, 0.5, 0.75, 0.95};
     std::size_t successes = 0;
     
-    for (int s0c = 0; s0c < 5; ++s0c){
-      for (int s1c = 0; s1c < 5; ++s1c){
-	for (int s2c = 0; s2c < 5; ++s2c){
-	  for (int s3c = 0; s3c < 5; ++s3c) {
-	    int eval_count = 0; // reset counter
+    for (std::size_t s0c = 0; s0c < 5; ++s0c){
+      for (std::size_t s1c = 0; s1c < 5; ++s1c){
+	for (std::size_t s2c = 0; s2c < 5; ++s2c){
+	  for (std::size_t s3c = 0; s3c < 5; ++s3c) {
+	    std::size_t eval_count = 0; // reset counter
 	    pole.init(statevals[s0c] * 4.32 - 2.16,
 		      statevals[s1c] * 2.70 - 1.35,
 		      statevals[s2c] * 0.12566304 - 0.06283152,

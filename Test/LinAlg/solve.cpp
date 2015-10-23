@@ -327,10 +327,10 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 
 //for the remaining functions, we can use random systems and check, whether they are okay
 BOOST_AUTO_TEST_CASE( LinAlg_Solve_Vector ){
-	unsigned NumTests = 100;
+	unsigned int NumTests = 100;
 	std::size_t Dimensions = 50;
 	std::cout<<"blas::solveSystem vector"<<std::endl;
-	for(unsigned testi = 0; testi != NumTests; ++testi){
+	for(unsigned int testi = 0; testi != NumTests; ++testi){
 		RealMatrix A = createRandomInvertibleMatrix(Dimensions,-2,2);
 		RealVector b(Dimensions);
 		for(std::size_t i = 0; i != Dimensions; ++i){
@@ -349,11 +349,11 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_Vector ){
 }
 
 BOOST_AUTO_TEST_CASE( LinAlg_Solve_Symmetric_Vector ){
-	unsigned NumTests = 100;
+	unsigned int NumTests = 100;
 	std::size_t Dimensions = 50;
 	
 	std::cout<<"blas::solve Symmetric vector"<<std::endl;
-	for(unsigned testi = 0; testi != NumTests; ++testi){
+	for(unsigned int testi = 0; testi != NumTests; ++testi){
 		RealMatrix A = createRandomInvertibleMatrix(Dimensions,0.1,2);
 		RealVector b(Dimensions);
 		for(std::size_t i = 0; i != Dimensions; ++i){
@@ -389,11 +389,11 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_Symmetric_Vector ){
 }
 
 BOOST_AUTO_TEST_CASE( LinAlg_Solve_Symmetric_Approximated_Vector ){
-	unsigned NumTests = 100;
+	unsigned int NumTests = 100;
 	std::size_t Dimensions = 50;
 	
 	std::cout<<"approximately blas::solve Symmetric vector"<<std::endl;
-	for(unsigned testi = 0; testi != NumTests; ++testi){
+	for(unsigned int testi = 0; testi != NumTests; ++testi){
 		RealMatrix A = createRandomInvertibleMatrix(Dimensions,0.1,2);
 		RealVector b(Dimensions);
 		for(std::size_t i = 0; i != Dimensions; ++i){
@@ -411,11 +411,11 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_Symmetric_Approximated_Vector ){
 }
 
 BOOST_AUTO_TEST_CASE( LinAlg_Solve_Matrix ){
-	unsigned NumTests = 100;
+	unsigned int NumTests = 100;
 	std::size_t Dimensions = 50;
 	std::size_t numRhs = 21;
 	std::cout<<"blas::solve matrix"<<std::endl;
-	for(unsigned testi = 0; testi != NumTests; ++testi){
+	for(unsigned int testi = 0; testi != NumTests; ++testi){
 		RealMatrix A = createRandomInvertibleMatrix(Dimensions,-2,2);
 		RealMatrix B(Dimensions,numRhs);
 		for(std::size_t i = 0; i != Dimensions; ++i){
@@ -437,11 +437,11 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_Matrix ){
 }
 
 BOOST_AUTO_TEST_CASE( LinAlg_Solve_Symmetric_Matrix ){
-	unsigned NumTests = 100;
+	unsigned int NumTests = 100;
 	std::size_t Dimensions = 50;
 	std::size_t numRhs = 21;
 	std::cout<<"blas::solve symmetric matrix"<<std::endl;
-	for(unsigned testi = 0; testi != NumTests; ++testi){
+	for(unsigned int testi = 0; testi != NumTests; ++testi){
 		RealMatrix A = createRandomInvertibleMatrix(Dimensions,0.1,2);
 		RealMatrix ARight = createRandomInvertibleMatrix(numRhs,0.1,2);
 		RealMatrix B(Dimensions,numRhs);

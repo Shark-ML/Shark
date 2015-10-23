@@ -38,11 +38,11 @@ struct BaseFastNonDominatedSort {
 		ParetoDominanceComparator<Extractor> pdc;
 
 		//stors for the i-th point which points are dominated by i
-		std::vector<std::vector<unsigned> > s(pop.size());
+		std::vector<std::vector<std::size_t> > s(pop.size());
 		//stores for every point how many points are dominating it
-		std::vector<unsigned> numberOfDominatingPoints(pop.size(), 0);
+		std::vector<std::size_t> numberOfDominatingPoints(pop.size(), 0);
 		//stores initially the front of non-dominated points
-		std::vector<unsigned> front;
+		std::vector<std::size_t> front;
 		
 		for (std::size_t i = 0; i < pop.size(); i++) {
 			//check which points j are dominated by i and add them to s[i]
@@ -65,7 +65,7 @@ struct BaseFastNonDominatedSort {
 		}
 		//find subsequent fronts.
 		unsigned frontCounter = 2;
-		std::vector<unsigned> nextFront;
+		std::vector<std::size_t> nextFront;
 
 		//as long as we can find fronts
 		//visit all points of the last front found and remove them from the
@@ -75,7 +75,7 @@ struct BaseFastNonDominatedSort {
 			// if any point is not dominated, it is part the next front.
 			for(std::size_t element = 0; element != front.size(); ++element) {
 				//visit all points dominated by the element
-				std::vector<unsigned int> const& dominatedPoints = s[front[element]];
+				std::vector<std::size_t> const& dominatedPoints = s[front[element]];
 				for (std::size_t  j = 0; j != dominatedPoints.size(); ++j){
 					std::size_t point = dominatedPoints[j];
 					numberOfDominatingPoints[point]--;

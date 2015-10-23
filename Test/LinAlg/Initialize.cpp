@@ -73,8 +73,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_init_test_base ){
 }
 BOOST_AUTO_TEST_CASE( LinAlg_init_test_vectorSet ){
 	std::vector<UIntVector> vectors(3,UIntVector(3));
-	for(std::size_t i = 0; i != 3; ++i){
-		for(std::size_t j = 0; j != 3; ++j){
+	for(unsigned int i = 0; i != 3; ++i){
+		for(unsigned int j = 0; j != 3; ++j){
 			vectors[i](j)=1+i*3+j;
 		}
 	}
@@ -109,8 +109,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_init_test_vectorSet ){
 BOOST_AUTO_TEST_CASE( LinAlg_init_test_toVector ){
 	//test dense matrix
 	IntMatrix matrix(3,3);
-	for(std::size_t i = 0; i != 3; ++i){
-		for(std::size_t j = 0; j != 3; ++j){
+	for(unsigned int i = 0; i != 3; ++i){
+		for(unsigned int j = 0; j != 3; ++j){
 			matrix(i,j)=1u+i*3+j;
 		}
 	}
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_init_test_toVector ){
 	//test sparse matrix
 	CompressedIntMatrix sparseMatrix(3,3);
 	sparseMatrix.clear();
-	for(std::size_t i = 0; i != 3; ++i){
+	for(unsigned int i = 0; i != 3; ++i){
 		sparseMatrix(i,i)=i+1;
 	}
 	
@@ -151,8 +151,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_init_test_toVector ){
 }
 BOOST_AUTO_TEST_CASE( LinAlg_init_test_matrixSet ){
 	IntMatrix matrix(3,3);
-	for(std::size_t i = 0; i != 3; ++i){
-		for(std::size_t j = 0; j != 3; ++j){
+	for(unsigned int i = 0; i != 3; ++i){
+		for(unsigned int j = 0; j != 3; ++j){
 			matrix(i,j)=1u+i*3+j;
 		}
 	}
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_split_test_base ){
 BOOST_AUTO_TEST_CASE( LinAlg_split_test_vectorSet ){
 	std::vector<UIntVector> vectors(3,RealVector(3));
 	UIntVector input(11);
-	for(std::size_t i = 0; i != 11; ++i){
+	for(unsigned int i = 0; i != 11; ++i){
 		input(i) = i+1;
 	}
 	
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_split_test_toMatrix ){
 	//test dense matrix
 	//input
 	UIntVector input(11);
-	for(std::size_t i = 0; i != 11; ++i){
+	for(unsigned int i = 0; i != 11; ++i){
 		input(i) = i+1;
 	}
 	//check in the middle of an expression
@@ -399,7 +399,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_split_test_toMatrix ){
 	CompressedUIntMatrix sparseMatrix(3,3);
 	sparseMatrix(0,0)=25; sparseMatrix(1u,1u)=25; sparseMatrix(2,2)=25; 
 	UIntVector sparseInput(5);
-	for(std::size_t i = 0; i != 5; ++i){
+	for(unsigned int i = 0; i != 5; ++i){
 		sparseInput(i) = i+1;
 	}
 	
@@ -426,7 +426,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_split_test_toMatrix ){
 
 BOOST_AUTO_TEST_CASE( LinAlg_split_test_matrixSet ){
 	UIntVector input(29);
-	for(std::size_t i = 0; i != 29; ++i){
+	for(unsigned int i = 0; i != 29; ++i){
 		input(i) = i+1;
 	}
 	std::vector<UIntMatrix> matrices(3,IntMatrix(3,3));

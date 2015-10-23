@@ -119,7 +119,7 @@ public:
 	void train(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
 	{
 		std::size_t ic = dataset.numberOfElements();
-		unsigned int classes = numberOfClasses(dataset);
+		std::size_t classes = numberOfClasses(dataset);
 
 		// prepare the problem description
 		RealMatrix linear(ic, classes-1,1.0);
@@ -231,7 +231,7 @@ public:
 			for (std::size_t c=0; c<classes; c++)
 			{
 				double sum = 0.0;
-				unsigned int r = (classes-1) * y;
+				std::size_t r = (classes-1) * y;
 				for (std::size_t p=0; p<classes-1; p++, r++) 
 					sum += nu(r, c) * alpha(i,p);
 				svm.decisionFunction().alpha(i,c) = sum;

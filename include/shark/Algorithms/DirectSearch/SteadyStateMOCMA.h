@@ -61,7 +61,7 @@ private:
 
 	typedef CMAIndividual<RealVector> Individual;
 	std::vector< Individual > m_pop; ///< Population of size \f$\mu+1\f$.
-	unsigned int m_mu; ///< Size of parent population
+	std::size_t m_mu; ///< Size of parent population
 	
 	shark::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
 	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
@@ -87,10 +87,10 @@ public:
 		return "SteadyStateMOCMA";
 	}
 	
-	unsigned int mu()const{
+	std::size_t mu()const{
 		return m_mu;
 	}
-	unsigned int& mu(){
+	std::size_t& mu(){
 		return m_mu;
 	}
 	
@@ -176,14 +176,13 @@ public:
 	 */
 	void step( ObjectiveFunctionType const& function ) {
 		//find the last element with rank 1
-		int maxIdx = 0;
-		for (unsigned int i = 0; i < m_pop.size(); i++) {
-			if (m_pop[i].rank() != 1)
+		std::size_t maxIdx = 0;
+		for (; maxIdx < m_pop.size(); maxIdx++) {
+			if (m_pop[maxIdx].rank() != 1)
 				break;
-			maxIdx = i;
 		}
 		//sample a random parent with rank 1
-		Individual& parent = m_pop[Rng::discrete(0, std::max(0, maxIdx-1))];
+		Individual& parent = m_pop[Rng::discrete(0, std::max<std::size_t>(0, maxIdx-1))];
 		//sample offspring from this parent
 		Individual& offspring = m_pop[mu()];
 		offspring = parent;

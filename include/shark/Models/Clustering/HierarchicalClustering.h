@@ -97,7 +97,7 @@ public:
 					tree = tree->left();
 				}
 				else{
-					memberships(i) += (tree->left()->nodes() + 1) / 2;
+					memberships(i) += unsigned((tree->left()->nodes() + 1) / 2);
 					tree = tree->right();
 				}
 			}

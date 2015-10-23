@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Test )
 {
 	//define initial dataset
 	std::vector<int> inputs;
-	for (size_t i=0;i!=100;++i) {
+	for (int i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
 	UnlabeledData<int> set =  createDataFromRange(inputs,10);
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Const_Test )
 {
 	//define initial dataset
 	std::vector<int> inputs;
-	for (size_t i=0;i!=100;++i) {
+	for (int i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
 	UnlabeledData<int> set0 = createDataFromRange(inputs,10);
@@ -175,11 +175,11 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Test )
 {
 	//define initial dataset
 	std::vector<int> inputs;
-	for (size_t i=0;i!=100;++i) {
+	for (int i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
 	std::vector<unsigned int> labels;
-	for (size_t i=0;i!=100;++i) {
+	for (unsigned int i=0;i!=100;++i) {
 		labels.push_back(200+i);
 	}
 	LabeledData<int,unsigned int> set = createLabeledDataFromRange(inputs,labels,10);
@@ -267,11 +267,11 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Const_Test )
 {
 	//define initial dataset
 	std::vector<int> inputs;
-	for (size_t i=0;i!=100;++i) {
+	for (int i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
 	std::vector<unsigned int> labels;
-	for (size_t i=0;i!=100;++i) {
+	for (unsigned int i=0;i!=100;++i) {
 		labels.push_back(200+i);
 	}
 	LabeledData<int,unsigned int> set0 = createLabeledDataFromRange(inputs,labels,10);

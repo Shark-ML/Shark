@@ -88,14 +88,14 @@ struct DTLZ2 : public MultiObjectiveFunction
 
 		RealVector value( numberOfObjectives() );
 
-		int k = numberOfVariables() - numberOfObjectives() + 1 ;
+		std::size_t k = numberOfVariables() - numberOfObjectives() + 1 ;
 		double g = 0.0;
-		for( unsigned int i = numberOfVariables() - k; i < numberOfVariables(); i++ )
+		for( std::size_t i = numberOfVariables() - k; i < numberOfVariables(); i++ )
 			g += sqr( x( i ) - 0.5);
 
-		for (unsigned int i = 0; i < numberOfObjectives(); i++) {
+		for (std::size_t i = 0; i < numberOfObjectives(); i++) {
 			value[i] = 1.0+g;
-			for( unsigned int j = 0; j < numberOfObjectives() - i -1; ++j)
+			for( std::size_t j = 0; j < numberOfObjectives() - i -1; ++j)
 				value[i] *= std::cos(x( j ) * M_PI / 2.0);
 
 			if (i > 0)

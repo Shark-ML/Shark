@@ -15,7 +15,7 @@ public:
 		RealVector line(4);
 		for(size_t x=0; x != 16; x++) {
 			for(size_t j=0; j != 4; j++) {
-				line(j) = (x & (1<<j)) > 0;
+				line(j) = (x & (std::size_t(1)<<j)) > 0;
 				if(bipolar && line(j)==0) line(j) = -1; 
 			}
 

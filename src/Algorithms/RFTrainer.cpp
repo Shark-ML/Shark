@@ -174,7 +174,7 @@ void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
 	model.setLabelDimension(numberOfClasses(dataset));
 
 	//Find the largest label, so we know how big the histogram should be
-	m_maxLabel = numberOfClasses(dataset)-1;
+	m_maxLabel = static_cast<unsigned int>(numberOfClasses(dataset))-1;
 
 	m_regressionLearner = false;
 	setDefaults();
@@ -362,22 +362,18 @@ CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables
 
 RealVector RFTrainer::hist(boost::unordered_map<std::size_t, std::size_t> countMatrix){
 
-	std::vector<unsigned int> histogram(m_maxLabel+1);
+	RealVector histogram(m_maxLabel+1,0.0);
 
-	unsigned int totalElements = 0;
+	std::size_t totalElements = 0;
 
 	boost::unordered_map<std::size_t, std::size_t>::iterator it;
 	for ( it=countMatrix.begin() ; it != countMatrix.end(); it++ ){
-		histogram[it->first] = it->second;
+		histogram(it->first) = (double)it->second;
 		totalElements += it->second;
 	}
+	histogram /= totalElements;
 
-	RealVector normHist(histogram.size());
-	for(std::size_t n = 0; n < histogram.size(); n++){
-		normHist[n] = double(histogram[n]) / double(totalElements);
-	}
-
-	return normHist;
+	return histogram;
 }
 
 CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId ){

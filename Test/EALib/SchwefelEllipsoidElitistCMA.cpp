@@ -11,9 +11,9 @@ BOOST_AUTO_TEST_SUITE (EALib_SchwefelEllipsoidElitistCMA)
 
 BOOST_AUTO_TEST_CASE( EALib_SchwefelEllipsoidCMSA )
 {
-	const unsigned Seed = 42;
-	const unsigned Trials=30;
-	const unsigned Dimension  = 10;
+	const unsigned int Seed = 42;
+	const unsigned int Trials=30;
+	const unsigned int Dimension  = 10;
 	const double   GlobalStepInit = 1.;
 
 	double results[Trials];

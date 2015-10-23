@@ -69,25 +69,25 @@ void syev(
 	SIZE_CHECK(vmatA().size1() == vmatA().size2());
 	SIZE_CHECK(vmatA().size1() == dvecA().size());
 	
-	const unsigned maxIterC = 50;
+	const std::size_t maxIterC = 50;
 	std::size_t n = vmatA().size1();
 	
 	blas::vector<double> odvecA(n,0.0);
 
-	unsigned j, k, l, m;
+	std::size_t j, k, l, m;
 	double   b, c, f, g, h, hh, p, r, s, scale;
 
 
 	//
 	// reduction to tridiagonal form
 	//
-	for (unsigned i = n; i-- > 1;) {
+	for (std::size_t i = n; i-- > 1;) {
 		h = 0.0;
 		scale = 0.0;
 
 		if (i > 1) {
 			// scale row
-			for (unsigned k = 0; k < i; k++) {
+			for (std::size_t k = 0; k < i; k++) {
 				scale += std::fabs(vmatA()(i, k));
 			}
 		}
@@ -149,7 +149,7 @@ void syev(
 	dvecA()(0) = odvecA(0) = 0.0;
 
 	// accumulation of transformation matrices
-	for (unsigned i = 0; i < n; i++) {
+	for (std::size_t i = 0; i < n; i++) {
 		if (dvecA()(i)) {
 			for (j = 0; j < i; j++) {
 				g = 0.0;
@@ -179,7 +179,7 @@ void syev(
 		return;
 	}
 
-	for (unsigned i = 1; i < n; i++) {
+	for (std::size_t i = 1; i < n; i++) {
 		odvecA(i-1) = odvecA(i);
 	}
 
@@ -210,7 +210,7 @@ void syev(
 				s = c = 1.0;
 				p = 0.0;
 
-				for (unsigned i = m; i-- > l;) {
+				for (std::size_t i = m; i-- > l;) {
 					f = s * odvecA(i);
 					b = c * odvecA(i);
 
@@ -259,14 +259,14 @@ void syev(
 	//
 	// normalizing eigenvectors
 	//
-	for (unsigned j = n; j--;) {
+	for (std::size_t j = n; j--;) {
 		s = 0.0;
-		for (unsigned i = n; i--;) {
+		for (std::size_t i = n; i--;) {
 			s += vmatA()(i, j) * vmatA()(i, j);
 		}
 		s = std::sqrt(s);
 
-		for (unsigned i = n; i--;) {
+		for (std::size_t i = n; i--;) {
 			vmatA()(i, j) /= s;
 		}
 	}

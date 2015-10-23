@@ -8,6 +8,8 @@
 #####################################################################
 project( shark )
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 cmake_minimum_required( VERSION 2.8 )
 cmake_policy(SET CMP0003 NEW)
 if(POLICY CMP0042)

@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE( QP_CachedMatrix_Flipping ) {
 	//next do a running check that the cache works with flipping of rows and random accesses
 	for(std::size_t t = 0; t != simulationSteps; ++t){
 		std::size_t index = Rng::discrete(0,size-1);
-		std::size_t accessSize = Rng::discrete(0.5*size,size-1);
+		std::size_t accessSize = Rng::discrete(size/2,size-1);
 		std::size_t flipi = Rng::discrete(0,size-1);
 		std::size_t flipj = Rng::discrete(0,size-1);
 		

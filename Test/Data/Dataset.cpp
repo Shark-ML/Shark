@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	std::vector<std::size_t> indizes[2];
 
 	// fill the vectors: inputs are the number [100, ..., 199]
-	for (size_t i=0;i!=100;++i) {
+	for (int i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
 	for(std::size_t i = 0; i != 20; ++i){
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE( Set_Repartition )
 	std::vector<int> inputs;
 
 	// fill the vectors: inputs are the number [100, ..., 199]
-	for (size_t i=0;i!=100;++i) {
+	for (int i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
 	//generate a set and than repartition it with unevenly sized batches
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_Boundary_Test )
 	std::vector<int> inputs;
 
 	// fill the vectors: inputs are the number [100, ..., 199]
-	for (size_t i=0;i!=100;++i) {
+	for (int i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
 	//generate a set with unevenly sized batches
@@ -197,11 +197,11 @@ BOOST_AUTO_TEST_CASE( Set_Merge_Test )
 	std::vector<int> inputs1;
 	std::vector<int> inputs2;
 
-	for (size_t i=0;i!=50;++i) {
+	for (int i=0;i!=50;++i) {
 		inputs1.push_back(i);
 	}
 	
-	for (size_t i=0;i!=70;++i) {
+	for (int i=0;i!=70;++i) {
 		inputs2.push_back(50+i);
 	}
 	
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE( Data_ColumnAccess )
 	std::vector<RealVector> inputs;
 	for (size_t i=0;i!=50;++i) {
 		RealVector r(2);
-		r(0) = i / 2;
+		r(0) = i / 2.0;
 		r(1) = 5;
 		inputs.push_back(r);
 	}
@@ -252,12 +252,12 @@ BOOST_AUTO_TEST_CASE( LabledData_Merge_Test )
 	std::vector<int> inputs2;
 	std::vector<int> labels2;
 
-	for (size_t i=0;i!=50;++i) {
+	for (int i=0;i!=50;++i) {
 		inputs1.push_back(i);
 		labels1.push_back(i*2);
 	}
 	
-	for (size_t i=0;i!=70;++i) {
+	for (int i=0;i!=70;++i) {
 		inputs2.push_back(50+i);
 		labels2.push_back((50+i)*2);
 	}
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_MiddleOfBatch_Test )
 	std::vector<int> inputs;
 
 	// fill the vectors: inputs are the number [100, ..., 199]
-	for (size_t i=0;i!=100;++i) {
+	for (int i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
 	//generate a set with unevenly sized batches
@@ -332,7 +332,7 @@ BOOST_AUTO_TEST_CASE( RepartitionByClass_Test )
 	std::vector<unsigned int> labels(101);
 
 	// generate dataset
-	for (size_t i=0;i!=101;++i) {
+	for (int i=0;i!=101;++i) {
 		inputs[i][0] = 100+i;
 		inputs[i][1] = 200+i;
 		inputs[i][2] = 300+i;
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE( RepartitionByClass_Test )
 		BOOST_CHECK_EQUAL(data.element(i).input(1),k+200);
 		BOOST_CHECK_EQUAL(data.element(i).input(2),k+300);
 		BOOST_CHECK_EQUAL(data.element(i).label,k%3);
-		resultInputs[k] = k;
+		resultInputs[k] = (unsigned int)k;
 	}
 	//in the end all elements should be set
 	for(std::size_t i = 0; i != 101; ++i){
@@ -400,14 +400,14 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 		data.batch(i).input.resize(i+10,1);
 		data.batch(i).label.resize(i+10);
 		for(std::size_t j = 0; j != i+10; ++j){
-			data.batch(i).input(j,0) = j;
+			data.batch(i).input(j,0) = (unsigned int)j;
 			data.batch(i).label(j) = labels[i];
 		}
 	}
 	
 	//check all class combinations
-	for(std::size_t ci = 0; ci != 5; ++ci){
-		for(std::size_t cj = 0; cj != 5; ++cj){
+	for(unsigned int ci = 0; ci != 5; ++ci){
+		for(unsigned int cj = 0; cj != 5; ++cj){
 			if(ci == cj) continue;
 			LabeledData<UIntVector,unsigned int> testset = binarySubProblem(data,ci,cj);
 			BOOST_REQUIRE_EQUAL(numberOfClasses(testset),2);
@@ -771,7 +771,7 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 BOOST_AUTO_TEST_CASE( DATA_SERIALIZE )
 {
 	std::vector<int> data(1000);
-	for (size_t i=0; i<1000; i++){
+	for (int i=0; i<1000; i++){
 		data[i]=3*i+5;
 	}
 	Data<int> dataSource = createDataFromRange(data,23);
@@ -794,7 +794,7 @@ BOOST_AUTO_TEST_CASE( LABELED_DATA_SERIALIZE )
 {
 	std::vector<int> data(1000);
 	std::vector<int> labels(1000);
-	for (size_t i=0; i<1000; i++){
+	for (int i=0; i<1000; i++){
 		data[i]=3*i+5;
 		labels[i]=5*i+1001;
 	}

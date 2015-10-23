@@ -81,18 +81,18 @@ void dlinmin
 	const double   GOLD   = 1.618034;
 	const double   GLIMIT = 100.;
 	const double   TINY   = 1.0e-20;
-	const unsigned ITMAX  = 100;
+	const std::size_t ITMAX  = 100;
 	const double   ZEPS   = 1.0e-10;
 	const double   TOL    = 2.0e-4;
 
 	bool     ok1, ok2;
-	unsigned iter;
+	std::size_t iter;
 	double   fa, fb, fc, fp, cx;
 	double   ulim, dum;
 	double   a, b, d(0.), e, fu, fv, fw, fx, q, r, tol1, tol2, u, v, w, x, xm;
 	double   dv, dw, dx, d1, d2, u1, u2, olde;
 
-	unsigned        n = p.size();
+	std::size_t        n = p.size();
 	VectorT xt(n);
 	VectorT gradient(n);
 

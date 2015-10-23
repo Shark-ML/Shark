@@ -65,7 +65,7 @@ private:
 	typedef shark::Individual<RealVector,RealVector> Individual;
 
 	std::vector<Individual> m_pop; ///< Population of size \f$\mu + 1\f$.
-	unsigned int m_mu; ///< Size of parent generation
+	std::size_t m_mu; ///< Size of parent generation
 
 	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
 
@@ -114,10 +114,10 @@ public:
 		return m_crossover.m_nc;
 	}
 	
-	unsigned int mu()const{
+	std::size_t mu()const{
 		return m_mu;
 	}
-	unsigned int& mu(){
+	std::size_t& mu(){
 		return m_mu;
 	}
 
@@ -191,12 +191,12 @@ public:
 			m_pop.end()
 		);
 
-		for( unsigned int i = 1; i < mu(); i++ ) {
+		for( std::size_t i = 1; i < mu(); i++ ) {
 			if( Rng::coinToss( 0.8 ) ) {
 				m_crossover( m_pop[mu() + i - 1], m_pop[mu() + i] );
 			}
 		}
-		for( unsigned int i = 0; i < mu(); i++ ) {
+		for( std::size_t i = 0; i < mu(); i++ ) {
 			m_mutator( m_pop[mu() + i] );
 		}
 		m_evaluator( function, m_pop.begin()+mu(), m_pop.end() );

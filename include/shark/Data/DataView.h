@@ -307,7 +307,7 @@ toDataset(DataView<T> const& view, std::size_t batchSize = DataView<T>::dataset_
 /// Return the number of classes (size of the label vector)
 /// of a classification dataset with RealVector label encoding.
 template <class DatasetType>
-unsigned int numberOfClasses(DataView<DatasetType> const& view){
+std::size_t numberOfClasses(DataView<DatasetType> const& view){
 	return numberOfClasses(view.dataset());
 }
 

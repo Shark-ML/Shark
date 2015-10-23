@@ -89,8 +89,8 @@ struct LZ6 : public MultiObjectiveFunction
 
 		ResultType value( 3, 0 );
 
-		unsigned int counter1 = 0, counter2 = 0, counter3 = 0;
-		for( unsigned int i = 3; i <= x.size(); i++ ) {
+		std::size_t counter1 = 0, counter2 = 0, counter3 = 0;
+		for( std::size_t i = 3; i <= x.size(); i++ ) {
 			if( (i-1) % 3 == 0 ) { //J1
 				counter1++;
 				value[0] += sqr(x(i-1)-2*x( 1 )*::sin( 2 * M_PI * x( 0 ) + i*M_PI/x.size() ) );

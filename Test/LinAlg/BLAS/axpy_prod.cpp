@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_sparse_dense ){
 	matrix_transpose<compressed_matrix<double> >  arg1cmt = trans(arg1cmt_base);
 	for(std::size_t i = 0; i != 10; ++i){
 		for(std::size_t j = 1; j < 20; j+=(i+1)){
-			arg1rm(i,j) = arg1cm(i,j) = 2*(20*i+1)+1;
+			arg1rm(i,j) = arg1cm(i,j) = 2.0*(20*i+1)+1.0;
 			arg1rmt(j,i) = arg1cmt(j,i) = arg1rm(i,j);
 		}
 	}
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_sparse_sparse ){
 	matrix_transpose<compressed_matrix<double> >  arg1cmt = trans(arg1cmt_base);
 	for(std::size_t i = 0; i != 10; ++i){
 		for(std::size_t j = 1; j < 20; j+=(i+1)){
-			arg1rm(i,j) = arg1cm(i,j) = 2*(20*i+1)+1;
+			arg1rm(i,j) = arg1cm(i,j) = 2*(20*i+1)+1.0;
 			arg1rmt(j,i) = arg1cmt(j,i) = arg1rm(i,j);
 		}
 	}
@@ -482,7 +482,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_dense_sparse ){
 	
 	for(std::size_t i = 0; i != middle; ++i){
 		for(std::size_t j = 1; j < columns; j+=(i+1)){
-			arg2rm(i,j) = arg2cm(i,j) = 2*(20*i+1)+1;
+			arg2rm(i,j) = arg2cm(i,j) = 2*(20*i+1)+1.0;
 		}
 	}
 	std::cout<<"\nchecking dense-sparse matrix matrix plusassign multiply"<<std::endl;
@@ -601,7 +601,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_sparse_dense ){
 	matrix_transpose<compressed_matrix<double> >  arg1cm = trans(arg1cm_base);
 	for(std::size_t i = 0; i != rows; ++i){
 		for(std::size_t j = 1; j < middle; j+=(i+1)){
-			arg1rm(i,j) = arg1cm(i,j) = 2*(20*i+1)+1;
+			arg1rm(i,j) = arg1cm(i,j) = 2*(20*i+1)+1.0;
 		}
 	}
 	matrix<double,row_major> arg2rm(middle,columns);
@@ -727,7 +727,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_sparse_sparse ){
 	matrix_transpose<compressed_matrix<double> >  arg1cm = trans(arg1cm_base);
 	for(std::size_t i = 0; i != rows; ++i){
 		for(std::size_t j = 1; j < middle; j+=(i+1)){
-			arg1rm(i,j) = arg1cm(i,j) = 2*(20*i+1)+1;
+			arg1rm(i,j) = arg1cm(i,j) = 2*(20*i+1)+1.0;
 		}
 	}
 	compressed_matrix<double> arg2rm(middle,columns);
@@ -736,7 +736,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_sparse_sparse ){
 	
 	for(std::size_t i = 0; i != middle; ++i){
 		for(std::size_t j = 1; j < columns; j+=(i+1)){
-			arg2rm(i,j) = arg2cm(i,j) = 2*(20*i+1)+1;
+			arg2rm(i,j) = arg2cm(i,j) = 2*(20*i+1)+1.0;
 		}
 	}
 	

@@ -68,7 +68,7 @@ public:
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
 	/// Constructor creating a model with given dimnsionalities and optional offset term.
-	LinearModel(unsigned int inputs, unsigned int outputs = 1, bool offset = false)
+	LinearModel(std::size_t inputs, std::size_t outputs = 1, bool offset = false)
 	: m_matrix(outputs,inputs,0.0),m_offset(offset?outputs:0,0.0){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
@@ -139,7 +139,7 @@ public:
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(unsigned int inputs, unsigned int outputs = 1, bool offset = false){
+	void setStructure(std::size_t inputs, std::size_t outputs = 1, bool offset = false){
 		LinearModel<InputType> model(inputs,outputs,offset);
 		swap(*this,model);
 	}

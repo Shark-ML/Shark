@@ -233,7 +233,7 @@ public:
 		// should take O(B) time, as it is a row of size B
 		blas::vector<float> kernelRow(maxIndex, 0.0);
 		for(size_t j = 0; j < maxIndex; j++)
-			kernelRow(j) = model.kernel()->eval(model.basis().element(firstIndex), model.basis().element(j));
+			kernelRow(j) = static_cast<float>( model.kernel()->eval(model.basis().element(firstIndex), model.basis().element(j)));
 
 		// initialize the search
 		double fret(0.);

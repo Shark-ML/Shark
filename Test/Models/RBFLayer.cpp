@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE( RBFLayer_Parameters )
 		BOOST_REQUIRE_EQUAL(numParams,9);
 		RealVector parameters(numParams);
 		for(size_t i=0;i!=numParams;i++)
-			parameters(i)=i;
+			parameters(i) = double(i);
 		net.setParameterVector(parameters);
 
 		RealVector params = net.parameterVector();
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( RBFLayer_Parameters )
 		BOOST_REQUIRE_EQUAL(numParams,6);
 		RealVector parameters(numParams);
 		for(size_t i=0;i!=numParams;i++)
-			parameters(i)=i;
+			parameters(i)= double(i);
 		net.setParameterVector(parameters);
 
 		RealVector params = net.parameterVector();
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE( RBFLayer_Parameters )
 		BOOST_REQUIRE_EQUAL(numParams,3);
 		RealVector parameters(numParams);
 		for(size_t i=0;i!=numParams;i++)
-			parameters(i)=i;
+			parameters(i) = double(i);
 		net.setParameterVector(parameters);
 
 		RealVector params = net.parameterVector();
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( RBFLayer_Parameters )
 		BOOST_REQUIRE_EQUAL(numParams,9);
 		RealVector parameters(numParams);
 		for(size_t i=0;i!=numParams;i++)
-			parameters(i)=i;
+			parameters(i) = double(i);
 		net.setParameterVector(parameters);
 
 		RealVector params = net.parameterVector();

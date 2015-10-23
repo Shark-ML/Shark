@@ -65,7 +65,7 @@ namespace shark {
 		* \param [in] noPoints The number of points n considered in the runtime estimation.
 		* \param [in] noObjectives The number of points m considered in the runtime estimation.
 		*/
-		static double runtime( unsigned int noPoints, unsigned int noObjectives ) {
+		static double runtime( std::size_t noPoints, std::size_t noObjectives ) {
 			if( noPoints < 10 )
 				return HypervolumeCalculator::runtime( 10, noObjectives );
 			return( 0.03 * noObjectives * noObjectives * ::exp( ::log( static_cast<double>( noPoints ) ) * noObjectives * 0.5 ) );
@@ -84,7 +84,7 @@ namespace shark {
 		* \param [in] version Currently unused.
 		*/
 		template<typename Archive>
-		void serialize( Archive & archive, const unsigned int version ) {
+		void serialize( Archive & archive, const std::size_t version ) {
 			archive & BOOST_SERIALIZATION_NVP( m_noObjectives );
 			archive & BOOST_SERIALIZATION_NVP( m_sqrtNoPoints );
 			archive & BOOST_SERIALIZATION_NVP( m_useLogHyp );
@@ -116,10 +116,10 @@ namespace shark {
 		int isPile( const VectorType & cuboid, const VectorType & regionLow, const VectorType & regionUp );
 
 		template<typename VectorType>
-		int binaryToInt( const VectorType & bs );
+		unsigned int binaryToInt( const VectorType & bs );
 
 		template<typename VectorType>
-		void intToBinary( int i, VectorType & result );
+		void intToBinary( unsigned int i, VectorType & result );
 
 		template<typename VectorType>
 		double computeTrellis( const VectorType & regLow, const VectorType & regUp, const VectorType & trellis );
@@ -136,8 +136,8 @@ namespace shark {
 			double cover		
 			);
 
-		unsigned int m_noObjectives;
-		unsigned int m_sqrtNoPoints;
+		std::size_t m_noObjectives;
+		std::size_t m_sqrtNoPoints;
 		bool m_useLogHyp;
 		template<typename Extractor>
 		struct LastObjectiveComparator {
@@ -159,7 +159,7 @@ namespace shark {
 	double HypervolumeCalculator::operator()( Extractor const& extractor, const Set & constSet, const VectorType & refPoint) {
 
 		m_noObjectives = extractor(*constSet.begin()).size();
-		m_sqrtNoPoints = static_cast< unsigned int >( ::sqrt( static_cast<double>( constSet.size() ) ) );
+		m_sqrtNoPoints = static_cast< std::size_t >( ::sqrt( static_cast<double>( constSet.size() ) ) );
 
 		Set set( constSet );
 
@@ -173,8 +173,8 @@ namespace shark {
 			else
 				h = ( refPoint[0] - extractor( set[0] )[0] ) * ( refPoint[1] - extractor( set[0] )[1] );
 
-			double diffDim1; unsigned int lastValidIndex = 0;
-			for( unsigned int i = 1; i < set.size(); i++ ) {
+			double diffDim1; std::size_t lastValidIndex = 0;
+			for( std::size_t i = 1; i < set.size(); i++ ) {
 				if( m_useLogHyp )
 					diffDim1 = ::log( extractor( set[lastValidIndex] )[0] ) - ::log( extractor( set[i] )[0] );  // Might be negative, if the i-th solution is dominated.
 				else
@@ -192,7 +192,7 @@ namespace shark {
 		}
 
 		VectorType regLow( m_noObjectives, 1E15 );
-		for( unsigned int i = 0; i < set.size(); i++ ){
+		for( std::size_t i = 0; i < set.size(); i++ ){
 			noalias(regLow) = min(regLow,extractor(set[i]));
 		}
 		return( stream( regLow, refPoint, set, extractor, 0, refPoint.back() ) );	
@@ -200,8 +200,8 @@ namespace shark {
 
 	template<typename VectorType>
 	int HypervolumeCalculator::covers( const VectorType & cuboid, const VectorType & regionLow ) {
-		for( unsigned int i = 0; i < m_noObjectives-1; i++ ) {
-			// for( unsigned int i = 0; i < std::min( cuboid.size(), regionLow.size() ); i++ ) {
+		for( std::size_t i = 0; i < m_noObjectives-1; i++ ) {
+			// for( std::size_t i = 0; i < std::min( cuboid.size(), regionLow.size() ); i++ ) {
 			if( cuboid[i] > regionLow[i] )
 				return (0);
 		}
@@ -210,8 +210,8 @@ namespace shark {
 
 	template<typename VectorType>
 	int HypervolumeCalculator::partCovers( const VectorType & cuboid, const VectorType & regionUp ) {
-		// for( unsigned int i = 0; i < std::min( cuboid.size(), regionUp.size() ); i++) {
-		for( unsigned int i = 0; i < m_noObjectives-1; i++) {
+		// for( std::size_t i = 0; i < std::min( cuboid.size(), regionUp.size() ); i++) {
+		for( std::size_t i = 0; i < m_noObjectives-1; i++) {
 			if (cuboid[i] >= regionUp[i])
 				return (0);
 		}
@@ -235,8 +235,8 @@ namespace shark {
 	template<typename VectorType>
 	double HypervolumeCalculator::getMeasure( const VectorType & regionLow, const VectorType & regionUp ) {
 		double volume = 1.0;
-		// for ( unsigned int i = 0; i < regionLow.size(); i++ ) {
-		for( unsigned int i = 0; i < m_noObjectives-1; i++) {
+		// for ( std::size_t i = 0; i < regionLow.size(); i++ ) {
+		for( std::size_t i = 0; i < m_noObjectives-1; i++) {
 			volume *= (regionUp[i] - regionLow[i]);
 		}
 
@@ -247,9 +247,9 @@ namespace shark {
 
 	template<typename VectorType>
 	int HypervolumeCalculator::isPile( const VectorType & cuboid, const VectorType & regionLow, const VectorType & regionUp ) {
-		unsigned int pile = cuboid.size();
-		// for( unsigned int i = 0; i < NO_OBJECTIVES - 1; i++) {
-		for( unsigned int i = 0; i < m_noObjectives-1; i++ ) {
+		std::size_t pile = cuboid.size();
+		// for( std::size_t i = 0; i < NO_OBJECTIVES - 1; i++) {
+		for( std::size_t i = 0; i < m_noObjectives-1; i++ ) {
 			if( cuboid[i] > regionLow[i] ) {
 				if( pile != m_noObjectives ) {
 					return (-1);
@@ -259,28 +259,27 @@ namespace shark {
 			}
 		}
 
-		return (pile);
+		return (int)pile;
 	}
 
 	template<typename VectorType>
-	int HypervolumeCalculator::binaryToInt( const VectorType & v ) {
+	unsigned int HypervolumeCalculator::binaryToInt( const VectorType & v ) {
 		int result = 0;
 		unsigned i;
 		for (i = 0; i < v.size(); i++) {
-			result += v[i] ? ( 1 << i ) : 0;//::pow(2.0, (double)i);
+			result += v[i] ? ( 1 << i ) : 0;
 		}
 
 		return (result);
 	}
 
 	template<typename VectorType>
-	void HypervolumeCalculator::intToBinary(int i, VectorType & result) {
-		unsigned j;
-		for (j = 0; j < m_noObjectives - 1; j++) 
+	void HypervolumeCalculator::intToBinary(unsigned int i, VectorType & result) {
+		for (std::size_t j = 0; j < m_noObjectives - 1; j++) 
 			result[j] = 0;
 
-		int rest = i;
-		int idx = 0;
+		unsigned int rest = i;
+		std::size_t idx = 0;
 
 		while (rest != 0) {
 			result[idx] = (rest % 2);
@@ -292,20 +291,19 @@ namespace shark {
 
 	template<typename VectorType>
 	double HypervolumeCalculator::computeTrellis( const VectorType & regLow, const VectorType & regUp, const VectorType & trellis ) {
-		unsigned i, j;
 		std::vector<int> bs( m_noObjectives-1, 1 );
 
 		double result = 0;
 
-		int noSummands = binaryToInt(bs);
+		unsigned int noSummands = binaryToInt(bs);
 		int oneCounter; double summand;
 
-		for( i = 1; i <= (unsigned)noSummands; i++ ) {
+		for(unsigned i = 1; i <= noSummands; i++ ) {
 			summand = 1;
 			intToBinary(i, bs);
 			oneCounter = 0;
 
-			for( j = 0; j < m_noObjectives-1; j++ ) {
+			for(std::size_t j = 0; j < m_noObjectives-1; j++ ) {
 				if (bs[j] == 1) {
 					summand *= regUp[j] - trellis[j];
 					oneCounter++;

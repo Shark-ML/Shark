@@ -97,7 +97,7 @@ namespace shark {
 
 			RealVector result( m_numberOfVariables, 0. );
 
-			for( unsigned int j = 0; j < container.size(); j++ )
+			for( std::size_t j = 0; j < container.size(); j++ )
 				result += 1./m_mu * e( container[j] );
 
 			return result;
@@ -120,35 +120,35 @@ namespace shark {
 		/**
 		* \brief Accesses the size of the parent population.
 		*/
-		unsigned int mu() const {
+		std::size_t mu() const {
 			return m_mu;
 		}
 
 		/**
 		* \brief Accesses the size of the parent population, allows for l-value semantics.
 		*/
-		unsigned int & mu() {
+		std::size_t & mu() {
 			return m_mu;
 		}
 
 		/**
 		* \brief Accesses the size of the offspring population.
 		*/
-		unsigned int lambda() const {
+		std::size_t lambda() const {
 			return m_lambda;
 		}
 
 		/**
 		* \brief Accesses the size of the offspring population, allows for l-value semantics.
 		*/
-		unsigned int & lambda() {
+		std::size_t & lambda() {
 			return m_lambda;
 		}
 	protected:
 		
-		unsigned int m_numberOfVariables; ///< Stores the dimensionality of the search space.
-		unsigned int m_mu; ///< The size of the parent population.
-		unsigned int m_lambda; ///< The size of the offspring population, needs to be larger than mu.
+		std::size_t m_numberOfVariables; ///< Stores the dimensionality of the search space.
+		std::size_t m_mu; ///< The size of the parent population.
+		std::size_t m_lambda; ///< The size of the offspring population, needs to be larger than mu.
 
 		double m_sigma; ///< The current step size.
 		double m_cSigma; 

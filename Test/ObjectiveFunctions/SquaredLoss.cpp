@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( SQUAREDLOSS_EVAL_Classification ) {
 
 		//sample class label
 		UIntVector testLabelDisc(1);
-		testLabelDisc(0) = Rng::discrete(0,2);
+		testLabelDisc(0) = (unsigned int)Rng::discrete(0,2);
 		
 		RealMatrix testLabel(1,3);
 		testLabel(0,testLabelDisc(0))=1;

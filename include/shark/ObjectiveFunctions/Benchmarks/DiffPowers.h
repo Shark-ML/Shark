@@ -36,7 +36,7 @@
 namespace shark {
 struct DiffPowers : public SingleObjectiveFunction {
 
-	DiffPowers(unsigned int numberOfVariables = 5) {
+	DiffPowers(std::size_t numberOfVariables = 5) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;
 	}
@@ -62,7 +62,7 @@ struct DiffPowers : public SingleObjectiveFunction {
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(numberOfVariables());
 
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for (std::size_t i = 0; i < x.size(); i++) {
 			x(i) = Rng::uni(0,1);
 		}
 		return x;
@@ -71,7 +71,7 @@ struct DiffPowers : public SingleObjectiveFunction {
 	double eval( const SearchPointType & p ) const {
 		m_evaluationCounter++;
 		double sum = 0;
-		for( unsigned int i = 0; i < p.size(); i++ ){
+		for( std::size_t i = 0; i < p.size(); i++ ){
 			sum += std::pow( std::abs( p( i ) ), 2. + (10.*i) / (p.size() - 1.) );
 		}
 		return sum;

@@ -118,7 +118,7 @@ public:
 	void train(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
 	{
 		std::size_t ic = dataset.numberOfElements();
-		unsigned int classes = numberOfClasses(dataset);
+		std::size_t classes = numberOfClasses(dataset);
 
 		RealMatrix linear(ic, classes-1,1.0);
 		UIntVector rho(classes-1);

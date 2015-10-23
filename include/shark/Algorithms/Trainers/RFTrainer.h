@@ -112,7 +112,7 @@ public:
 	RealVector parameterVector() const
 	{
 		RealVector ret(1); // number of trees
-		init(ret) << m_B;
+		init(ret) << (double)m_B;
 		return ret;
 	}
 

@@ -35,8 +35,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Matrix_Constant_Functor_Assign ){
 	const unsigned int t = 2;
 	for(std::size_t i = 0; i != 10; ++i){
 		for(std::size_t j = 0; j != 20; ++j){
-			input_row_major(i,j) = 2*(20*i+1)+1;
-			input_column_major(i,j) = 2*(20*i+1)+1;
+			input_row_major(i,j) = 2*(20*i+1)+1.0;
+			input_column_major(i,j) = 2*(20*i+1)+1.0;
 			target(i,j)=t*input_row_major(i,j);
 		}
 	}
@@ -61,16 +61,16 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Packed_Matrix_Constant_Functor_Assign ){
 	blas::triangular_matrix<unsigned int,blas::row_major,blas::lower> target_lower(20);
 	blas::triangular_matrix<unsigned int,blas::row_major,blas::upper> target_upper(20);
 	const unsigned int t = 2;
-	for(std::size_t i = 0; i != 20; ++i){
-		for(std::size_t j = 0; j <= i; ++j){
+	for(unsigned int i = 0; i != 20; ++i){
+		for(unsigned int j = 0; j <= i; ++j){
 			input_row_lower.set_element(i,j, 2*(20*i+1)+1);
 			input_column_lower.set_element(i,j, 2*(20*i+1)+1);
 			target_lower.set_element(i,j,t*input_row_lower(i,j));
 		}
 	}
 	
-	for(std::size_t i = 0; i != 20; ++i){
-		for(std::size_t j = i; j != 20; ++j){
+	for(unsigned int i = 0; i != 20; ++i){
+		for(unsigned int j = i; j != 20; ++j){
 			input_row_upper.set_element(i,j,2*(20*i+1)+1);
 			input_column_upper.set_element(i,j,2*(20*i+1)+1);
 			target_upper.set_element(i,j,t*input_row_upper(i,j));
@@ -105,8 +105,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Matrix_Constant_Functor_Assign ){
 	blas::matrix_transpose<blas::compressed_matrix<unsigned int> > input_column_major(input_column_major_base);
 	blas::matrix_transpose<blas::compressed_matrix<unsigned int> > target_column_major(target_column_major_base);
 	const unsigned int t = 2;
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 1; j < 20; j+=(i+1)){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 1; j < 20; j += (i + 1)){
 			input_row_major(i,j) = 2*(20*i+1)+1;
 			input_column_major(i,j) =  2*(20*i+1)+1;//source_row_major(i,j)+2;
 			target_row_major(i,j) = t*input_row_major(i,j);
@@ -134,8 +134,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Dense_Matrix_Assign ){
 	blas::matrix<unsigned int,blas::row_major> source_row_major(10,20);
 	blas::matrix<unsigned int,blas::column_major> source_column_major(10,20);
 
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 0; j != 20; ++j){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 0; j != 20; ++j){
 			source_row_major(i,j) = 2*(20*i+1)+1;
 			source_column_major(i,j) =  source_row_major(i,j)+2;
 		}
@@ -144,8 +144,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Dense_Matrix_Assign ){
 	//test all 4 combinations of row/column major
 	{
 		blas::matrix<unsigned int,blas::row_major> target(10,20);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 0; j != 20; ++j){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 0; j != 20; ++j){
 				target(i,j) = 3*(20*i+1)+2;
 			}
 		}
@@ -156,8 +156,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Dense_Matrix_Assign ){
 	
 	{
 		blas::matrix<unsigned int,blas::row_major> target(10,20);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 0; j != 20; ++j){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 0; j != 20; ++j){
 				target(i,j) = 3*(20*i+1)+2;
 			}
 		}
@@ -168,8 +168,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Dense_Matrix_Assign ){
 	
 	{
 		blas::matrix<unsigned int,blas::column_major> target(10,20);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 0; j != 20; ++j){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 0; j != 20; ++j){
 				target(i,j) = 3*(20*i+1)+2;
 			}
 		}
@@ -180,8 +180,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Dense_Matrix_Assign ){
 	
 	{
 		blas::matrix<unsigned int,blas::column_major> target(10,20);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 0; j != 20; ++j){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 0; j != 20; ++j){
 				target(i,j) = 3*(20*i+1)+2;
 			}
 		}
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Packed_Packed_Matrix_Assign ){
 	MCU source_upper_column_major(20);
 	MCL source_lower_column_major(20);
 
-	for(std::size_t i = 0; i != 20; ++i){
+	for(unsigned int i = 0; i != 20; ++i){
 		MRU::row_iterator pos1=source_upper_row_major.row_begin(i);
 		MRL::row_iterator pos2=source_lower_row_major.row_begin(i);
 		MCU::column_iterator pos3=source_upper_column_major.column_begin(i);
@@ -411,8 +411,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Sparse_Matrix_Assign ){
 	blas::compressed_matrix<unsigned int> source_column_major_base(20,10);
 	blas::matrix_transpose<blas::compressed_matrix<unsigned int> > source_column_major(source_column_major_base);
 	
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 1; j < 20; j+=(i+1)){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 1; j < 20; j += (i + 1)){
 			source_row_major(i,j) = 2*(20*i+1)+1;
 			source_column_major(i,j) =  2*(20*i+1)+1;//source_row_major(i,j)+2;
 		}
@@ -420,8 +420,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Sparse_Matrix_Assign ){
 	//test all 4 combinations of row/column major
 	{
 		blas::matrix<unsigned int,blas::row_major> target(10,20);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 0; j != 20; ++j){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 0; j != 20; ++j){
 				target(i,j) = 3*(20*i+1)+2;
 			}
 		}
@@ -432,8 +432,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Sparse_Matrix_Assign ){
 	
 	{
 		blas::matrix<unsigned int,blas::row_major> target(10,20);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 0; j != 20; ++j){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 0; j != 20; ++j){
 				target(i,j) = 3*(20*i+1)+2;
 			}
 		}
@@ -444,8 +444,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Sparse_Matrix_Assign ){
 	
 	{
 		blas::matrix<unsigned int,blas::column_major> target(10,20);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 0; j != 20; ++j){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 0; j != 20; ++j){
 				target(i,j) = 3*(20*i+1)+2;
 			}
 		}
@@ -456,8 +456,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Sparse_Matrix_Assign ){
 	
 	{
 		blas::matrix<unsigned int,blas::column_major> target(10,20);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 0; j != 20; ++j){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 0; j != 20; ++j){
 				target(i,j) = 3*(20*i+1)+2;
 			}
 		}
@@ -473,8 +473,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Dense_Matrix_Assign ){
 	blas::matrix<unsigned int,blas::row_major> source_row_major(10,20);
 	blas::matrix<unsigned int,blas::column_major> source_column_major(10,20);
 
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 0; j != 20; ++j){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 0; j != 20; ++j){
 			source_row_major(i,j) = 2*(20*i+1)+1;
 			source_column_major(i,j) =  source_row_major(i,j)+2;
 		}
@@ -483,8 +483,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Dense_Matrix_Assign ){
 	//test all 4 combinations of row/column major
 	{
 		blas::compressed_matrix<unsigned int> target(10,20,0);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 1; j < 20; j+=(i+1)){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 1; j < 20; j += (i + 1)){
 				target(i,j) = 4*(20*i+1)+9;
 			}
 		}
@@ -496,8 +496,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Dense_Matrix_Assign ){
 	{
 		blas::compressed_matrix<unsigned int> target_base(20,10);
 		blas::matrix_transpose<blas::compressed_matrix<unsigned int> > target(target_base);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 1; j < 20; j+=(i+1)){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 1; j < 20; j += (i + 1)){
 				target(i,j) =  4*(20*i+1)+9;
 			}
 		}
@@ -508,8 +508,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Dense_Matrix_Assign ){
 	
 	{
 		blas::compressed_matrix<unsigned int> target(10,20,0);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 1; j < 20; j+=(i+1)){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 1; j < 20; j += (i + 1)){
 				target(i,j) = 4*(20*i+1)+9;
 			}
 		}
@@ -521,8 +521,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Dense_Matrix_Assign ){
 	{
 		blas::compressed_matrix<unsigned int> target_base(20,10);
 		blas::matrix_transpose<blas::compressed_matrix<unsigned int> > target(target_base);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 1; j < 20; j+=(i+1)){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 1; j < 20; j += (i + 1)){
 				target(i,j) =  4*(20*i+1)+9;
 			}
 		}
@@ -539,8 +539,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Sparse_Matrix_Assign ){
 	blas::compressed_matrix<unsigned int> source_column_major_base(20,10);
 	blas::matrix_transpose<blas::compressed_matrix<unsigned int> > source_column_major(source_column_major_base);
 	
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 1; j < 20; j+=(i+1)){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 1; j < 20; j += (i + 1)){
 			source_row_major(i,j) = 2*(20*i+1)+1;
 			source_column_major(i,j) =  source_row_major(i,j);
 		}
@@ -587,8 +587,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Sparse_Matrix_Assign ){
 	{
 		blas::compressed_matrix<unsigned int> target_base(20,10);
 		blas::matrix_transpose<blas::compressed_matrix<unsigned int> > target(target_base);
-		for(std::size_t i = 0; i != 10; ++i){
-			for(std::size_t j = 1; j < 20; j+=(i+1)){
+		for(unsigned int i = 0; i != 10; ++i){
+			for(unsigned int j = 1; j < 20; j += (i + 1)){
 				target(i,j) =  4*(20*i+1)+9;
 			}
 		}
@@ -611,8 +611,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Dense_Matrix_Plus_Assign ){
 	blas::matrix<unsigned int,blas::row_major> preinit(10,20);
 	blas::matrix<unsigned int,blas::row_major> result(10,20);
 
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 0; j != 20; ++j){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 0; j != 20; ++j){
 			source_row_major(i,j) = 2*(20*i+1)+1;
 			source_column_major(i,j) =  source_row_major(i,j);
 			preinit(i,j) = 3*(20*i+1)+2;
@@ -658,15 +658,15 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Sparse_Matrix_Plus_Assign ){
 	blas::matrix<unsigned int,blas::row_major> preinit(10,20);
 	blas::matrix<unsigned int,blas::row_major> result(10,20);
 	
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 1; j < 20; j+=(i+1)){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 1; j < 20; j += (i + 1)){
 			source_row_major(i,j) = 2*(20*i+1)+1;
 			source_column_major(i,j) = 2*(20*i+1)+1;
 		}
 	}
 
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 0; j != 20; ++j){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 0; j != 20; ++j){
 			preinit(i,j) = 3*(20*i+1)+2;
 			result(i,j) = preinit(i,j)+source_row_major(i,j);
 		}
@@ -711,21 +711,21 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Sparse_Matrix_Plus_Assign ){
 	blas::compressed_matrix<unsigned int> preinit(10,20);
 	blas::compressed_matrix<unsigned int> result(10,20);
 	
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 1; j < 20; j+=(i+1)){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 1; j < 20; j += (i + 1)){
 			source_row_major(i,j) = 2*(20*i+1)+1;
 			source_column_major(i,j) = 2*(20*i+1)+1;
 		}
 	}
 
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 0; j < 20; j+=(i+2)/2){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 0; j < 20; j += (i + 2) / 2){
 			preinit(i,j) = 3*(20*i+1)+2;
 		}
 	}
 	
-	for(std::size_t i = 0; i != 10; ++i){
-		for(std::size_t j = 0; j < 20; ++j){
+	for(unsigned int i = 0; i != 10; ++i){
+		for(unsigned int j = 0; j < 20; ++j){
 			int r = preinit(i,j)+source_row_major(i,j);
 			if(r != 0)
 				result(i,j) = r;

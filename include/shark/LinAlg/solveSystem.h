@@ -312,7 +312,7 @@ void approxsolveSymmPosDefSystem(
 	SIZE_CHECK(A().size1()==b().size());
 	
 	std::size_t dim = b().size();
-	unsigned int maxIt = (maxIterations == 0)? dim: maxIterations;
+	std::size_t maxIt = (maxIterations == 0)? dim: maxIterations;
 	
 	typedef typename VecT::value_type value_type;
 	vector<value_type> r = b;//current residual

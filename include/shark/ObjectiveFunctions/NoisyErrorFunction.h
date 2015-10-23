@@ -46,12 +46,12 @@ namespace detail{
 ///\brief Baseclass for the Typewrapper of the Noisy Error Function.
 class NoisyErrorFunctionWrapperBase:public FunctionWrapperBase{
 protected:
-	size_t m_batchSize;
+	std::size_t m_batchSize;
 public:
-	void setBatchSize(size_t batchSize){
+	void setBatchSize(std::size_t batchSize){
 		m_batchSize = batchSize;
 	}
-	size_t batchSize() const{
+	std::size_t batchSize() const{
 		return m_batchSize;
 	}
 };
@@ -71,7 +71,7 @@ public:
 		LabeledData<InputType,LabelType> const& dataset,
 		AbstractModel<InputType,OutputType>* model,
 		AbstractLoss<LabelType,OutputType>* loss,
-		unsigned int batchSize=1
+		std::size_t batchSize=1
 	);
 	NoisyErrorFunction(NoisyErrorFunction const& op1);
 	NoisyErrorFunction& operator = (NoisyErrorFunction const& op1);
@@ -80,8 +80,8 @@ public:
 	std::string name() const
 	{ return "NoisyErrorFunction"; }
 
-	void setBatchSize(unsigned int batchSize);
-	unsigned int batchSize() const;
+	void setBatchSize(std::size_t batchSize);
+	std::size_t batchSize() const;
 
 	SearchPointType proposeStartingPoint() const{
 		return mp_wrapper -> proposeStartingPoint();

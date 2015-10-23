@@ -31,7 +31,7 @@ void assign(
 ) {
 	SIZE_CHECK(v().size() == e().size());
 	for(std::size_t i = 0; i != v().size(); ++i){
-		v()(i)=e()(i);
+		v()(i) = static_cast<typename V::value_type>(e()(i));
 	}
 }
 // Dense-packed case

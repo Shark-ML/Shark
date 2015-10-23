@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	TRAINER(6, ATS);
 	TRAINER(7, ATM);
 
-	for (size_t run=0; run<10; run++)
+	for (unsigned int run=0; run<10; run++)
 	{
 		// generate random training set
 		Rng::seed(run);
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 		vector<unsigned int> target(ell);
 		for (size_t i=0; i<ell; i++)
 		{
-			unsigned int label = Rng::discrete(0, classes - 1);
+			unsigned int label = (unsigned int)Rng::discrete(0, classes - 1);
 			for (unsigned int d=0; d<dim; d++)
 			{
 				if ((d / var_per_class) == label) input[i](d) = 0.3 * Rng::gauss() + 1.0;

@@ -40,7 +40,7 @@ namespace shark {
  */
 struct Schwefel : public SingleObjectiveFunction {
 	
-	Schwefel(unsigned int numberOfVariables = 5):m_numberOfVariables(numberOfVariables) {
+	Schwefel(std::size_t numberOfVariables = 5):m_numberOfVariables(numberOfVariables) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 	}
 
@@ -63,7 +63,7 @@ struct Schwefel : public SingleObjectiveFunction {
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(numberOfVariables());
 
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for (std::size_t i = 0; i < x.size(); i++) {
 			x(i) = Rng::gauss(0,1);
 		}
 		return x;

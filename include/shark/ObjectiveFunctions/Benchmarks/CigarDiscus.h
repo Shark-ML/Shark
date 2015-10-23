@@ -42,7 +42,7 @@ namespace shark {
 class CigarDiscus : public SingleObjectiveFunction {
 public:
 
-	CigarDiscus(unsigned int numberOfVariables = 5,double alpha=1E-3) : m_alpha(alpha) {
+	CigarDiscus(std::size_t numberOfVariables = 5,double alpha=1E-3) : m_alpha(alpha) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_numberOfVariables = numberOfVariables;
 	}
@@ -68,7 +68,7 @@ public:
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(numberOfVariables());
 
-		for (unsigned int i = 0; i < x.size(); i++) {
+		for (std::size_t i = 0; i < x.size(); i++) {
 			x(i) = Rng::uni(0, 1);
 		}
 		return x;
@@ -79,7 +79,7 @@ public:
 
 		double sum = m_alpha * sqr(p(0)) + sqr(p(p.size() - 1));
 		double alpha = ::sqrt(m_alpha);
-		for (unsigned int i = 1; i < p.size()-1; i++)
+		for (std::size_t i = 1; i < p.size()-1; i++)
 			sum += alpha * sqr(p(i));
 
 		return sum;

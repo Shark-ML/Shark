@@ -79,7 +79,7 @@ public:
     }
 
     // number of inputs should be 2 for single pole, 3 for double.
-    int inputs = 0;
+    std::size_t inputs = 0;
     if (single) {
       inputs = 2;
     }
@@ -199,7 +199,7 @@ private:
     RealVector state(2);
     RealMatrix output(1,1); 
     RealMatrix inState(1,2);
-    int eval_count = 0;
+    std::size_t eval_count = 0;
     bool failed = false;
     
     pole.init(init_angle);
@@ -228,7 +228,7 @@ private:
     RealVector state(3);
     RealMatrix output(1,1); 
     RealMatrix inState(1,3);
-    int eval_count = 0;
+    std::size_t eval_count = 0;
     bool failed = false;
     
     pole.init(init_angle);

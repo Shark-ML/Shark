@@ -111,7 +111,7 @@ void FisherLDA::meanAndScatter(
 	}
 
 	// for every class ...
-	for( unsigned int c = 0; c != classes ; c++ ) {
+	for( std::size_t c = 0; c != classes ; c++ ) {
 		// normalize mean vector
 		means[c] /= counter[c];
 
