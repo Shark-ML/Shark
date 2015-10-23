@@ -34,6 +34,8 @@
 
 #ifdef SHARK_USE_CBLAS
 #include "atlas/dot.hpp"
+#elif SHARK_USE_OPENBLAS
+#include "openblas/dot.hpp"
 #else
 // if no bindings are included, we have to provide the default has_optimized_dot
 // otherwise the binding will take care of this

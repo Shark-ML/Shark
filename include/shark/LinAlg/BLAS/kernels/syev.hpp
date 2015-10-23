@@ -33,6 +33,8 @@
 
 #ifdef SHARK_USE_LAPACK
 #include "lapack/syev.hpp"
+#elif SHARK_USE_OPENBLAS
+#include "openblas/syev.hpp"
 #else
 #include "default/syev.hpp"
 #endif
