@@ -44,7 +44,7 @@ namespace shark {
 /// \brief Bi-objective real-valued benchmark function proposed by Fonseca and Flemming.
 ///
 /// Fonseca, C. M. and P. J. Fleming (1998). Multiobjective
-/// optimization and multiple constrastd::size_t handling with evolutionary
+/// optimization and multiple constraint handling with evolutionary
 /// algorithms-Part II: Application example. IEEE Transactions on
 /// Systems, Man, and Cybernetics, Part A: Systems and Humans 28(1),
 /// 38-47

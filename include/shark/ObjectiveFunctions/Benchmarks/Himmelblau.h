@@ -72,7 +72,7 @@ struct Himmelblau : public SingleObjectiveFunction {
 	}
 
 	/**
-	* \brief Evaluates the function for the supplied search postd::size_t.
+	* \brief Evaluates the function for the supplied search point.
 	* \throws shark::Exception if the size of p does not equal 2.
 	*/
 	double eval( const SearchPointType & p ) const {

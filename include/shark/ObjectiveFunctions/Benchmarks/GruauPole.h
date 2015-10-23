@@ -301,7 +301,7 @@ private:
 
   //! \brief Converts neural network output for use with pole simulator
   //! \param output Output of the neural network.
-  //! \return double precision floating postd::size_t between 0 and 1.
+  //! \return double precision floating point between 0 and 1.
   double convertToPoleMovement(double output) const{
     switch(mp_struct->sigmoidType())
       {

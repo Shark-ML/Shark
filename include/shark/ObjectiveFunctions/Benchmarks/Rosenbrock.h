@@ -61,7 +61,7 @@ struct Rosenbrock : public SingleObjectiveFunction {
 	/// \brief Constructs the problem
 	///
 	/// \param dimensions number of dimensions to optimize
-	/// \param initialSpread spread of the initial starting postd::size_t
+	/// \param initialSpread spread of the initial starting point
 	Rosenbrock(std::size_t dimensions=23, double initialSpread = 1.0)
 	:m_numberOfVariables(dimensions), m_initialSpread(initialSpread) {
 		m_features|=CAN_PROPOSE_STARTING_POINT;
