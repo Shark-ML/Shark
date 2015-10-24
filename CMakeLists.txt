@@ -44,7 +44,11 @@ mark_as_advanced(
 #####################################################################
 option(BUILD_SHARED_LIBS "Compile shark into a dynamic library instead of a static one." OFF)
 if(BUILD_SHARED_LIBS)
-	set(SHARK_USE_DYNLIB 1)
+  IF(NOT MSVC)
+    set(SHARK_USE_DYNLIB 1)
+  ELSE()
+    ADD_DEFINITIONS(-DSHARK_USE_DYNLIB)
+  ENDIF()
 endif()
 
 #####################################################################
