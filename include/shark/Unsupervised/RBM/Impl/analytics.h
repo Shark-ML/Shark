@@ -75,7 +75,7 @@ namespace detail{
 			}
 
 			double eval( const SearchPointType & C ) const {
-				std::size_t n = energyDiff0.size();
+				//~ std::size_t n = energyDiff0.size();
 				return 0.5*sqr(sum(sigmoid(energyDiff0 + C(0)))
 					- sum(sigmoid(energyDiff1 - C(0))));
 				
@@ -85,7 +85,7 @@ namespace detail{
 
 			ResultType evalDerivative( const SearchPointType & C, FirstOrderDerivative & derivative )const {
 				derivative.resize(1);
-				std::size_t n = energyDiff0.size();
+				//~ std::size_t n = energyDiff0.size();
 				RealVector sigmoid0 = sigmoid(energyDiff0+ C(0));
 				RealVector sigmoid1 = sigmoid(energyDiff1- C(0));
 				
