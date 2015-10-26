@@ -59,7 +59,7 @@ namespace detail{
 	}
 	template<class VecX, class VecV>
 	void plus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,blockwise_tag){
-		x().plus_assign_to(v);
+		v().plus_assign_to(x);
 	}
 	template<class VecX, class VecV>
 	void minus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,elementwise_tag){
@@ -67,7 +67,7 @@ namespace detail{
 	}
 	template<class VecX, class VecV>
 	void minus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,blockwise_tag){
-		x().minus_assign_to(v);
+		v().minus_assign_to(x);
 	}
 	template<class VecX, class VecV>
 	void multiply_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,elementwise_tag){
@@ -558,6 +558,78 @@ noalias_proxy<C> noalias(vector_set_expression<C>& lvalue) {
 template <class C>
 noalias_proxy<C> noalias(temporary_proxy<C> lvalue) {
 	return noalias_proxy<C> (static_cast<C&>(lvalue));
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+/////Evaluate blockwise expressions
+//////////////////////////////////////////////////////////////////////
+namespace detail{
+	template<class E>
+	blas::vector_expression<E> const& evaluate_block(
+		blas::vector_expression<E> const& e,
+		elementwise_tag
+	){
+		return e;
+	}
+	template<class E>
+	typename vector_temporary<E>::type evaluate_block(
+		blas::vector_expression<E> const& e,
+		blockwise_tag
+	){
+		return e();
+	}
+	template<class E>
+	blas::matrix_expression<E> const& evaluate_block(
+		blas::matrix_expression<E> const& e,
+		elementwise_tag
+	){
+		return e;
+	}
+	template<class E>
+	typename matrix_temporary<E>::type evaluate_block(
+		blas::matrix_expression<E> const& e,
+		blockwise_tag
+	){
+		return e();
+	}
+}
+
+///\brief conditionally evaluates a vector expression if it is a block expression
+///
+/// If the expression is a block expression, a temporary vector is created to which
+/// the expression is assigned, which is then returned, otherwise the expression itself
+/// is returned
+template<class E>
+typename boost::mpl::if_<
+	boost::is_same<
+		typename E::evaluation_category,
+		blockwise_tag
+	>,
+	typename vector_temporary<E>::type,
+	blas::vector_expression<E> const&
+>::type
+eval_block(blas::vector_expression<E> const& e){
+	return detail::evaluate_block(e,typename E::evaluation_category());
+}
+///\brief conditionally evaluates a matrix expression if it is a block expression
+///
+/// If the expression is a block expression, a temporary matrix is created to which
+/// the expression is assigned, which is then returned, otherwise the expression itself
+/// is returned
+template<class E>
+typename boost::mpl::if_<
+	boost::is_same<
+		typename E::evaluation_category,
+		blockwise_tag
+	>,
+	typename matrix_temporary<E>::type,
+	blas::matrix_expression<E> const&
+>::type
+eval_block(blas::matrix_expression<E> const& e){
+	return detail::evaluate_block(e,typename E::evaluation_category());
 }
 
 }}
