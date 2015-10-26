@@ -35,7 +35,7 @@ and mark this input as missing. Finally, we insert the values into the table::
 Next, we generate a :doxy:`Statistics` object and add the statistics, here
 we use Mean, Variance and Percentage of Missing values::
 
-..sharkcode<Statistics/Statistics.tpp,statisticse>
+..sharkcode<Statistics/Statistics.tpp,statistics>
 
 We can output a summary as csv file to the console: ::
 

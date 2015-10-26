@@ -15,16 +15,14 @@ Packages
 We are supporting packages for the following platforms:
 
 * Arch Linux
-	- current development version downloadable from AUR as packages ``shark-ml-atlas-svn`` and ``shark-ml-svn``
+	- current development version downloadable from AUR as packages ``shark-ml-atlas-git`` and ``shark-ml-git``
 	  for a shark version with and without ATLAS.
 * More to come!
 
 Installation
 ---------------------------------------------
 
-To install Shark, get the sources::
-
-	git clone https://github.com/Shark-ML/Shark/
+To install Shark, get the sources from our * :doc:`Downloads page <downloads>`
 	
 Then build the library::
 

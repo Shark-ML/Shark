@@ -1,8 +1,14 @@
 News
 ====
 
+
+Shark 3.0.0 Released
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+We are happy to announce the release of Shark 3.0.0
+
 Shark moves to GitHub
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Today, Shark moved to GitHub, please update your repositories, see the downloads page for more details.
 

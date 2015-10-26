@@ -258,7 +258,7 @@ batches since it needs to find the batch the element is located in.
 .. warning::
 	Element-wise random access to a ``Data`` a object is a linear time
 	operation! It is not to be confused with constant-time element
-	access in arrays (and ``std::vector``). Thus aside from only very
+	access in arrays. Thus aside from only very
 	small data sets or performance uncritical code you should never use
 	element-wise random-access to a data container.
 
@@ -377,7 +377,7 @@ It is applied to the data set by calling: ::
 ..sharkcode<Data/Datasets.tpp,transform-4>
 
 .. note::
-	Never ever forget the definition of the ``result_type``!
+	Never never forget the definition of the ``result_type``!
 	It is needed by ``transform`` to be smart, i.e., to deduce
 	the corresponding batch type.
 	If you happen to get nasty template error messages with
