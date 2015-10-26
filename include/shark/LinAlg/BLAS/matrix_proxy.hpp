@@ -56,7 +56,7 @@ public:
 	typedef typename M::const_index_pointer const_index_pointer;
 	typedef typename index_pointer<M>::type index_pointer;
 
-	typedef const self_type const_closure_type;
+	typedef matrix_reference<M const> const_closure_type;
 	typedef self_type closure_type;
 	typedef typename M::orientation orientation;
 	typedef typename M::storage_category storage_category;
@@ -64,10 +64,10 @@ public:
 
 
 	// Construction and destruction
-	matrix_reference(M& m):
-		m_expression(&m) {}
-	
-	matrix_reference(matrix_reference const& ref):m_expression(ref.m_expression) {}
+	matrix_reference(M& m):m_expression(&m) {}
+	template<class E>
+	matrix_reference(matrix_reference<E> const& other)
+		:m_expression(&other.expression()){}
 		
 	// Accessors
 
@@ -272,18 +272,30 @@ public:
 	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef typename closure<M>::type matrix_closure_type;
-	typedef const matrix_transpose<M> const_closure_type;
+	typedef matrix_transpose<typename const_expression<M>::type> const_closure_type;
 	typedef matrix_transpose<M> closure_type;
 	typedef typename M::orientation::transposed_orientation orientation;
 	typedef typename M::storage_category storage_category;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
-	explicit matrix_transpose(matrix_closure_type m):
+	explicit matrix_transpose(matrix_closure_type const& m):
 		m_expression(m) {}
+	
+	//conversion closure->const_closure
+	template<class E>
+	matrix_transpose(
+		matrix_transpose<E> const& m,
+		typename boost::disable_if<
+			boost::mpl::or_<
+				boost::is_same<matrix_transpose<E>,matrix_transpose>,
+				boost::is_same<matrix_transpose<E>,matrix_closure_type>
+			> 
+		>::type* dummy = 0
+	):m_expression(m.expression()) {}
 
 	// Expression accessors
-	matrix_closure_type expression() const{
+	matrix_closure_type const& expression() const{
 		return m_expression;
 	}
 	matrix_closure_type expression(){
@@ -456,8 +468,9 @@ private:
 
 // (trans m) [i] [j] = m [j] [i]
 template<class M>
-matrix_transpose<M const> trans(matrix_expression<M> const& m) {
-	return matrix_transpose<M const>(m());
+matrix_transpose<typename const_expression<M>::type >
+trans(matrix_expression<M> const& m) {
+	return matrix_transpose<typename const_expression<M>::type>(m());
 }
 template<class M>
 temporary_proxy< matrix_transpose<M> > trans(matrix_expression<M>& m) {
@@ -472,6 +485,7 @@ temporary_proxy< matrix_transpose<M> > trans(temporary_proxy<M> m) {
 template<class M>
 class matrix_row: public vector_expression<matrix_row<M> > {
 	typedef matrix_row<M> self_type;
+	
 public:
 	typedef M matrix_type;
 	typedef std::size_t size_type;
@@ -488,7 +502,7 @@ public:
 	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef typename closure<M>::type matrix_closure_type;
-	typedef const self_type const_closure_type;
+	typedef matrix_row<typename const_expression<M>::type> const_closure_type;
 	typedef self_type closure_type;
 	typedef typename M::storage_category storage_category;
 	typedef elementwise_tag evaluation_category;
@@ -497,6 +511,10 @@ public:
 	matrix_row(matrix_closure_type const& expression, index_type i):m_expression(expression), m_i(i) {
 		SIZE_CHECK (i < expression.size1());
 	}
+	
+	template<class E>
+	matrix_row(matrix_row<E> const& other)
+	:m_expression(other.expression()),m_i(other.index()){}
 	
 	matrix_closure_type const& expression() const {
 		return m_expression;
@@ -671,8 +689,9 @@ temporary_proxy< matrix_row<M> > row(matrix_expression<M>& expression, typename 
 	return matrix_row<M> (expression(), i);
 }
 template<class M>
-const matrix_row<M const> row(matrix_expression<M> const& expression, typename M::index_type i) {
-	return matrix_row<M const> (expression(), i);
+matrix_row<typename const_expression<M>::type>
+row(matrix_expression<M> const& expression, typename M::index_type i) {
+	return matrix_row<typename const_expression<M>::type> (expression(), i);
 }
 
 template<class M>
@@ -681,19 +700,9 @@ temporary_proxy<matrix_row<M> > row(temporary_proxy<M> expression, typename M::i
 }
 
 template<class M>
-class matrix_column:
-	public vector_expression<matrix_column<M> > 
-{
+class matrix_column: public vector_expression<matrix_column<M> > {
 	typedef matrix_column<M> self_type;
-	typedef matrix_row<matrix_transpose<M> > wrapper_type;
 	
-	// if the argument in the ctor is not M but matrix_reference<M> we need to strip it
-	M& strip_reference( M&  m){
-		return m;
-	}
-	M& strip_reference( matrix_reference<M> m){
-		return m.expression();
-	}
 public:
 	typedef M matrix_type;
 	typedef std::size_t size_type;
@@ -710,39 +719,44 @@ public:
 	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef typename closure<M>::type matrix_closure_type;
-	typedef const self_type const_closure_type;
+	typedef matrix_column<typename const_expression<M>::type> const_closure_type;
 	typedef self_type closure_type;
 	typedef typename M::storage_category storage_category;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
-	matrix_column(matrix_closure_type expression, index_type j)
-	:m_wrapper(trans(strip_reference(expression)), j) {}
-
-
-	// Storage accessors
-	const matrix_closure_type& expression() const {
-		return m_wrapper.expression().expression();
-	}
-	matrix_closure_type& expression() {
-		return m_wrapper.expression().expression();
-	}
-	index_type index() const {
-		return m_wrapper.index();
+	matrix_column(matrix_closure_type const& expression, index_type j)
+	:m_expression(expression), m_j(j) {
+		SIZE_CHECK (j < expression.size2());
 	}
 	
+	template<class E>
+	matrix_column(matrix_column<E> const& other)
+	:m_expression(other.expression()),m_j(other.index()){}
+	
+	matrix_closure_type const& expression() const {
+		return m_expression;
+	}
+	matrix_closure_type& expression() {
+		return m_expression;
+	}
+	
+	index_type index() const {
+		return m_j;
+	}
+	
+	///\brief Returns the size of the vector
+	size_type size() const {
+		return expression().size1();
+	}
+
 	// ---------
 	// Dense low level interface
 	// ---------
 	
-	///\brief Returns the size of the vector
-	size_type size() const {
-		return m_wrapper.size();
-	}
-	
 	///\brief Returns the stride in memory between two elements
 	difference_type stride()const{
-		return m_wrapper.stride();
+		return expression().stride1();
 	}
 	
 	///\brief Returns the pointer to the beginning of the vector storage
@@ -750,93 +764,141 @@ public:
 	/// Grants low-level access to the vector internals.
 	/// to access element i use storage()[i*stride()].
 	pointer storage()const{
-		return m_wrapper.storage();
+		return expression().storage()+index()*expression().stride2();
 	}
 	
 	// ---------
 	// Sparse low level interface
 	// ---------
 	
-	/// \brief Number of nonzero elements of the vector.
-	size_type nnz()const{
-		return m_wrapper.nnz();
-	}
-	/// \brief Array of values of the nonzero elements.
-	const_pointer values()const{
-		return m_wrapper.values();
-	}
+	//~ /// \brief Number of nonzero elements of the vector.
+	//~ size_type nnz()const{
+		//~ return expression().inner_nnz(m_i);
+	//~ }
+	//~ /// \brief Array of values of the nonzero elements.
+	//~ const_pointer values()const{
+		//~ return expression().values()+expression().outer_indices()[m_i];
+	//~ }
 	
-	/// \brief Array of indices of the nonzero elements.
-	index_pointer indices()const{
-		return m_wrapper.indices();
-	}
+	//~ /// \brief Array of indices of the nonzero elements.
+	//~ index_pointer indices()const{
+		//~ return expression().inner_indices()+expression().outer_indices()[m_i];
+	//~ }
 	
 	// ---------
 	// High level interface
 	// ---------
-
+	
 	// Element access
 	reference operator()(index_type i) const {
-		return m_wrapper(i);
+		return m_expression(i,m_j);
 	}
 	reference operator [](index_type i) const {
-		return m_wrapper[i];
+		return (*this)(i);
 	}
 	
 	void set_element(size_type i,value_type t){
-		m_wrapper.set_element(i,t);
+		expression().set_element(i,m_j,t);
 	}
 
 	// Assignment
 	
 	template<class E>
 	matrix_column& operator = (vector_expression<E> const& e) {
-		m_wrapper = e();
-		return *this;
+		return assign(*this, typename vector_temporary<M>::type(e));
 	}
 	matrix_column& operator = (matrix_column const& e) {
-		m_wrapper = e;
-		return *this;
+		return assign(*this, typename vector_temporary<M>::type(e));
 	}
-
+	
 	// Iterator types
-	typedef typename wrapper_type::const_iterator const_iterator;
-	typedef typename wrapper_type::iterator iterator;
+	typedef typename M::const_column_iterator const_iterator;
+	typedef typename column_iterator<M>::type iterator;
 
 	iterator begin() {
-		return m_wrapper.begin();
+		return expression().column_begin(m_j);
 	}
 	iterator end() {
-		return m_wrapper.end();
+		return expression().column_end(m_j);
 	}
 	const_iterator begin()const{
-		return m_wrapper.begin();
+		return expression().column_begin(m_j);
 	}
 	const_iterator end()const{
-		return m_wrapper.end();
+		return expression().column_end(m_j);
 	}
 	
 	iterator set_element(iterator pos, index_type index, value_type value) {
-		return m_wrapper.set_element(pos,index,value);
+		return set_element(pos, index, value, 
+			typename M::orientation(), typename  iterator::iterator_category()
+		);
 	}
 	
 	iterator clear_range(iterator start, iterator end) {
-		return m_wrapper.clear_range(start,end);
+		return clear_range(start,end,
+			typename M::orientation(), typename  iterator::iterator_category()
+		);
 	}
 
 	iterator clear_element(iterator pos) {
-		return m_wrapper.clear_element(pos);
+		return clear_element(pos, 
+			typename M::orientation(), typename  iterator::iterator_category()
+		);
 	}
 	
 	void clear(){
-		return m_wrapper.clear();
+		clear_range(begin(),end());
 	}
 	
-	void reserve(size_type non_zeros) {
-		m_wrapper.reserve(non_zeros);
-	}
+	//~ void reserve(size_type non_zeros) {
+		//~ expression().reserve_row(m_i,non_zeros);
+	//~ }
+	
 private:
-	wrapper_type m_wrapper;
+	//we need two implementations of the sparse-interface, 
+	//depending on whether M is row or column major.
+	
+	//column major case is trivial
+	template<class Tag>
+	iterator set_element(iterator pos, index_type index, value_type value, column_major, Tag) {
+		return expression().set_element(pos,index,value);
+	}
+	template<class Tag>
+	iterator clear_range(iterator start, iterator end, column_major, Tag) {
+		return expression().clear_range(start,end);
+	}
+	template<class Tag>
+	iterator clear_element(iterator pos, column_major, Tag) {
+		return expression().clear_element(pos);
+	}
+	//dense row major case
+	iterator set_element(iterator pos, index_type index, value_type value, 
+		row_major, 
+		dense_random_access_iterator_tag
+	) {
+		RANGE_CHECK(pos.index() == index);
+		*pos = value;
+		return pos;
+	}
+	
+	iterator clear_element(iterator pos,
+		row_major m, 
+		dense_random_access_iterator_tag t
+	) {
+		return set_element(pos,pos.index(),value_type(),m,t);
+	}
+	iterator clear_range(iterator start, iterator end, 
+		row_major m, 
+		dense_random_access_iterator_tag t
+	) {
+		for(;start != end; ++start)
+			clear_element(start,m,t);
+		return end;
+	}
+	//todo: sparse column major case.
+
+	matrix_closure_type m_expression;
+	size_type m_j;
 };
 
 // Projections
@@ -845,8 +907,9 @@ temporary_proxy<matrix_column<M> > column(matrix_expression<M>& expression, type
 	return matrix_column<M> (expression(), j);
 }
 template<class M>
-matrix_column<M const> column(matrix_expression<M> const& expression, typename M::index_type j) {
-	return matrix_column<M const> (expression(), j);
+matrix_column<typename const_expression<M>::type>
+column(matrix_expression<M> const& expression, typename M::index_type j) {
+	return matrix_column<typename const_expression<M>::type> (expression(), j);
 }
 
 template<class M>
@@ -876,7 +939,7 @@ public:
 	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef typename closure<M>::type matrix_closure_type;
-	typedef const self_type const_closure_type;
+	typedef matrix_vector_range<typename const_expression<M>::type> const_closure_type;
 	typedef self_type closure_type;
 	typedef typename M::storage_category storage_category;
 	typedef elementwise_tag evaluation_category;
@@ -890,6 +953,10 @@ public:
 		SIZE_CHECK (m_range2.start() + m_range2.size() <= expression.size2());
 		SIZE_CHECK (m_range1.size() == m_range2.size());
 	}
+	
+	template<class E>
+	matrix_vector_range(matrix_vector_range<E> const& other)
+	:m_expression(other.expression()),m_range1(other.range1()),m_range2(other.range2()){}
 
 	// Accessors
 	size_type start1() const {
@@ -904,6 +971,13 @@ public:
 	}
 	matrix_closure_type& expression() {
 		return m_expression;
+	}
+	
+	range const& range1() const{
+		return m_range1;
+	}
+	range const& range2() const{
+		return m_range2;
 	}
 	
 	// ---------
@@ -989,10 +1063,10 @@ private:
 ///
 /// the diag operation results in
 /// diag(A) = (1,5,9)
-template<class Matrix>
-matrix_vector_range<Matrix const> diag(matrix_expression<Matrix> const& mat){
+template<class M>
+matrix_vector_range<typename const_expression<M>::type > diag(matrix_expression<M> const& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
-	matrix_vector_range<Matrix const> diagonal(mat(),range(0,mat().size1()),range(0,mat().size1()));
+	matrix_vector_range<typename const_expression<M>::type > diagonal(mat(),range(0,mat().size1()),range(0,mat().size1()));
 	return diagonal;
 }
 
@@ -1005,16 +1079,16 @@ matrix_vector_range<Matrix const> diag(matrix_expression<Matrix> const& mat){
 ///
 /// the diag operation results in
 /// diag(A) = (1,5,9)
-template<class Matrix>
-temporary_proxy< matrix_vector_range<Matrix> > diag(matrix_expression<Matrix>& mat){
+template<class M>
+temporary_proxy< matrix_vector_range<M> > diag(matrix_expression<M>& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
-	matrix_vector_range<Matrix> diagonal(mat(),range(0,mat().size1()),range(0,mat().size1()));
+	matrix_vector_range<M> diagonal(mat(),range(0,mat().size1()),range(0,mat().size1()));
 	return diagonal;
 }
 
-template<class Matrix>
-temporary_proxy< matrix_vector_range<Matrix> > diag(temporary_proxy<Matrix> mat){
-	return diag(static_cast<Matrix&>(mat));
+template<class M>
+temporary_proxy< matrix_vector_range<M> > diag(temporary_proxy<M> mat){
+	return diag(static_cast<M&>(mat));
 }
 
 // Matrix based range class
@@ -1037,7 +1111,7 @@ public:
 	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef typename closure<M>::type matrix_closure_type;
-	typedef const self_type const_closure_type;
+	typedef matrix_range<typename const_expression<M>::type> const_closure_type;
 	typedef self_type closure_type;
 	typedef typename M::storage_category storage_category;
 	typedef elementwise_tag evaluation_category;
@@ -1052,7 +1126,18 @@ public:
 		SIZE_CHECK(r2.start() <= expression.size2());
 		SIZE_CHECK(r2.start() +r2.size() <= expression.size2());
 	}
-
+	
+	//conversion closure->const_closure
+	template<class E>
+	matrix_range(
+		matrix_range<E> const& other,
+		typename boost::disable_if<
+			boost::is_same<E,matrix_range>
+		>::type* dummy = 0
+	):m_expression(other.expression())
+	, m_range1(other.range1())
+	, m_range2(other.range2()){}
+		
 	// Accessors
 	size_type start1() const {
 		return m_range1.start();
@@ -1066,6 +1151,13 @@ public:
 	}
 	matrix_closure_type& expression() {
 		return m_expression;
+	}
+	
+	range const& range1() const{
+		return m_range1;
+	}
+	range const& range2() const{
+		return m_range2;
 	}
 	
 	// ---------
@@ -1215,7 +1307,7 @@ temporary_proxy< matrix_range<M> > subrange(
 	return matrix_range<M> (expression(), range(start1, stop1), range(start2, stop2));
 }
 template<class M>
-matrix_range<M const> subrange(
+matrix_range<typename const_expression<M>::type> subrange(
 	matrix_expression<M> const& expression, 
 	std::size_t start1, std::size_t stop1,
 	std::size_t start2, std::size_t stop2
@@ -1224,7 +1316,7 @@ matrix_range<M const> subrange(
 	RANGE_CHECK(start2 <= stop2);
 	SIZE_CHECK(stop1 <= expression().size1());
 	SIZE_CHECK(stop2 <= expression().size2());
-	return matrix_range<M const> (expression(), range(start1, stop1), range(start2, stop2));
+	return matrix_range<typename const_expression<M>::type> (expression(), range(start1, stop1), range(start2, stop2));
 }
 
 template<class M>
@@ -1247,7 +1339,7 @@ temporary_proxy<matrix_range<M> > rows(
 }
 
 template<class M>
-matrix_range<M const> rows(
+matrix_range<typename const_expression<M>::type> rows(
 	matrix_expression<M> const& expression, 
 	std::size_t start, std::size_t stop
 ) {
@@ -1275,7 +1367,7 @@ temporary_proxy< matrix_range<M> > columns(
 }
 
 template<class M>
-matrix_range<M const> columns(
+matrix_range<typename const_expression<M>::type> columns(
 	matrix_expression<M> const& expression, 
 	typename M::index_type start, typename M::index_type stop
 ) {
@@ -1313,7 +1405,7 @@ public:
 	typedef index_type* index_pointer;
 
 	//ublas types
-	typedef matrix_reference<self_type const> const const_closure_type;
+	typedef matrix_reference<self_type const> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
 	typedef dense_tag storage_category;
 	typedef elementwise_tag evaluation_category;
@@ -1321,14 +1413,13 @@ public:
 
 	// Construction and destruction
 	
-	dense_matrix_adaptor(dense_matrix_adaptor const& expression)
+	dense_matrix_adaptor(dense_matrix_adaptor<value_type, Orientation> const& expression)
 	: m_values(expression.storage())
 	, m_size1(expression.size1())
 	, m_size2(expression.size2())
 	, m_stride1(expression.stride1())
 	, m_stride2(expression.stride2())
-	{
-	}
+	{}
 
 	/// \brief Constructor of a self_type proxy from a Dense MatrixExpression
 	///
