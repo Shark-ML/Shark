@@ -322,6 +322,15 @@ struct vector_temporary_type<T,dense_random_access_iterator_tag>{
 	typedef vector<T> type;
 };
 
+template<class T>
+struct const_expression<vector<T> >{
+	typedef vector<T> const type;
+};
+template<class T>
+struct const_expression<vector<T> const>{
+	typedef vector<T> const type;
+};
+
 }
 }
 

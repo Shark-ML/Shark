@@ -495,6 +495,15 @@ private:
 	array_type m_data;
 };
 
+template<class T, class Orientation, class TriangularType>
+struct const_expression<triangular_matrix<T,Orientation, TriangularType> >{
+	typedef triangular_matrix<T,Orientation, TriangularType> const type;
+};
+template<class T, class Orientation, class TriangularType>
+struct const_expression<triangular_matrix<T,Orientation, TriangularType> const>{
+	typedef triangular_matrix<T,Orientation, TriangularType> const type;
+};
+
 }
 }
 

@@ -326,6 +326,11 @@ struct closure: public boost::mpl::if_<
 	typename E::const_closure_type,
 	typename E::closure_type
 >{};
+	
+template<class E>
+struct const_expression{
+	typedef typename E::const_closure_type type;
+};
 
 template<class E>
 struct reference: public boost::mpl::if_<

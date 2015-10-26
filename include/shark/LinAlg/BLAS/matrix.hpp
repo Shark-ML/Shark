@@ -445,6 +445,16 @@ private:
 	VectorType m_diagonal; 
 };
 
+
+template<class T, class Orientation>
+struct const_expression<matrix<T,Orientation> >{
+	typedef matrix<T,Orientation> const type;
+};
+template<class T, class Orientation>
+struct const_expression<matrix<T,Orientation> const>{
+	typedef matrix<T,Orientation> const type;
+};
+
 }
 }
 

@@ -350,6 +350,15 @@ struct vector_temporary_type<T,sparse_bidirectional_iterator_tag>{
 	typedef compressed_vector<T> type;
 };
 
+template<class T,class I>
+struct const_expression<compressed_vector<T,I> >{
+	typedef compressed_vector<T,I> const type;
+};
+template<class T,class I>
+struct const_expression<compressed_vector<T,I> const>{
+	typedef compressed_vector<T,I> const type;
+};
+
 }}
 
 #endif
