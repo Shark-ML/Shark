@@ -192,7 +192,7 @@ respect to its parameters thus looks like this::
 
 There are a few more methods which result from the fact that AbstractModel
 implements several higher-level interfaces, namely :doxy:`IParameterizable`,
-:doxy:`IConfigurable`, :doxy:`INameable`, and :doxy:`ISerializable`. For
+:doxy:`INameable`, and :doxy:`ISerializable`. For
 example, models are parameterizable and serialized to store results:
 
 
@@ -232,7 +232,7 @@ Model                      Description
                            weighted sum of the discretized activation
 :doxy:`RNNet`              Recurrent neural network for sequences
 :doxy:`OnlineRNNet`        Recurrent neural network for online learning
-:doxy:`KernelExpansion`    linear combination of outputs of :doxy:`AbstractKernelFunction <Kernel>`, given
+:doxy:`KernelExpansion`    linear combination of outputs of :doxy:`AbstractKernelFunction`, given
                            points of a dataset and the point to be evaluated (input point)
 ========================   ==================================================================================
 

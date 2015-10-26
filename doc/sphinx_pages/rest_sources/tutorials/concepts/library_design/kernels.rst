@@ -245,9 +245,7 @@ Some Kernels are differentiable with respect to their parameters. This can for e
 be exploited in gradient-based optimization of these parameters, which in turn amounts
 to a computationally efficient way of finding a suitable space :math:`\mathcal H` in which
 to solve a given learning problem. Further, if the input space is differentiable as well,
-even the derivative with respect to the inputs can be computed. This is currently
-not often used within Shark aside from certain approximation schemes as for
-example the :doxy:`SvmApproximation`.
+even the derivative with respect to the inputs can be computed. 
 
 The derivatives are weighted as outlined in :doc:`../optimization/conventions_derivatives`.
 The parameter derivative is a weighted sum of the derivatives of all elements of the block
