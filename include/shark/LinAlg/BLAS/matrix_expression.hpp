@@ -513,120 +513,85 @@ safe_div(
 	return matrix_binary<E1, E2, functor_type>(e1,e2, functor_type(defaultValue));
 }
 
-template<class E1, class E2, class F>
-class matrix_vector_binary1:
-	public vector_expression<matrix_vector_binary1<E1, E2, F> > {
-
+template<class MatA, class VecV>
+class matrix_vector_prod:
+	public vector_expression<matrix_vector_prod<MatA, VecV> > {
 public:
-	typedef E1 expression1_type;
-	typedef E2 expression2_type;
-	typedef F functor_type;
-	typedef typename E1::const_closure_type expression1_closure_type;
-	typedef typename E2::const_closure_type expression2_closure_type;
-private:
-	typedef matrix_vector_binary1<E1, E2, F> self_type;
+	typedef typename MatA::const_closure_type matrix_closure_type;
+	typedef typename VecV::const_closure_type vector_closure_type;
 public:
 	typedef typename promote_traits<
-		typename E1::size_type, typename E2::size_type
-	>::promote_type size_type;
-	typedef typename promote_traits<
-		typename E1::difference_type, typename E2::difference_type
-	>::promote_type difference_type;
-	typedef typename F::result_type value_type;
-	typedef value_type scalar_type;
-	typedef value_type const_reference;
-	typedef const_reference reference;
-	typedef value_type const* const_pointer;
-	typedef const_pointer pointer;
+		typename MatA::scalar_type,
+		typename VecV::scalar_type
+	>::promote_type scalar_type;
+	typedef scalar_type value_type;
+	typedef typename MatA::size_type size_type;
+	typedef typename MatA::difference_type difference_type;
+	typedef typename MatA::index_type index_type;
+	typedef typename MatA::index_pointer index_pointer;
+	typedef typename MatA::const_index_pointer const_index_pointer;
 
-	typedef typename E1::index_type index_type;
-	typedef typename E1::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E1>::type index_pointer;
-
-	typedef const self_type const_closure_type;
+	typedef matrix_vector_prod<MatA, VecV> const_closure_type;
 	typedef const_closure_type closure_type;
 	typedef unknown_storage_tag storage_category;
-	typedef elementwise_tag evaluation_category;
+	typedef blockwise_tag evaluation_category;
 
-	// Construction and destruction
-	matrix_vector_binary1(const expression1_type &e1, const expression2_type &e2):
-		m_expression1(e1), m_expression2(e2) {}
 
-	// Accessors
-	size_type size() const {
-		return m_expression1.size1();
-	}
-
-	// Expression accessors
-	const expression1_closure_type &expression1() const {
-		return m_expression1;
-	}
-	const expression2_closure_type &expression2() const {
-		return m_expression2;
-	}
-
-	// Element access
-	const_reference operator()(index_type i) const {
-		return functor_type::apply(m_expression1, m_expression2, i);
-	}
-
-	// Iterator types
-private:
-	typedef typename E1::const_row_iterator const_subrow_iterator_type;
-public:
-	typedef indexed_iterator<const_closure_type> const_iterator;
+	//FIXME: This workaround is required to be able to generate
+	// temporary vectors
+	typedef typename MatA::const_row_iterator const_iterator;
 	typedef const_iterator iterator;
 
-	const_iterator begin() const {
-		return const_iterator(*this,0);
+	// Construction and destruction
+	matrix_vector_prod(
+		matrix_closure_type const& matrix,
+		vector_closure_type  const& vector
+	):m_matrix(matrix), m_vector(vector) {}
+
+	size_type size() const {
+		return m_matrix.size1();
 	}
-	const_iterator end() const {
-		return const_iterator(*this,size());
+	
+	matrix_closure_type const& matrix() const {
+		return m_matrix;
 	}
+	vector_closure_type const& vector() const {
+		return m_vector;
+	}
+	
+	//computation kernels
+	template<class VecX>
+	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+		x().clear();
+		plus_assign_to(x,alpha);
+	}
+	template<class VecX>
+	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+		kernels::gemv(eval_block(m_matrix), eval_block(m_vector), x, alpha);
+	}
+	
+	template<class VecX>
+	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+		kernels::gemv(eval_block(m_matrix), eval_block(m_vector), x, -alpha);
+	}
+	
 private:
-	expression1_closure_type m_expression1;
-	expression2_closure_type m_expression2;
+	matrix_closure_type m_matrix;
+	vector_closure_type m_vector;
 };
 
-template<class E1, class E2>
-struct matrix_vector_binary_traits {
-private:
-	template<class T>
-	struct matrix_vector_prod{
-		typedef T value_type;
-		typedef T result_type;
 
-		template<class U,class V>
-		static result_type apply(
-			const matrix_expression<U> &e1,
-			const vector_expression<V> &e2,
-			std::size_t i
-		) {
-			return inner_prod(row(e1,i),e2);
-		}
-	};
-public:
-	typedef typename E1::value_type T1;
-	typedef typename E2::value_type T2;
-	typedef unknown_storage_tag storage_category;
-	typedef row_major orientation;
-	typedef typename promote_traits<T1, T2>::promote_type promote_type;
-	typedef matrix_vector_binary1<E1, E2, matrix_vector_prod<promote_type> > expression_type;
-	typedef expression_type result_type;
-};
-
-template<class M, class V>
-typename matrix_vector_binary_traits<M,V>::result_type
-prod(matrix_expression<M> const& matrix,vector_expression<V> const& vector){
-	typedef typename matrix_vector_binary_traits<M,V>::expression_type expression;
-	return expression(matrix(),vector());
+/// \brief computes the matrix-vector product x+=Av
+template<class MatA, class VecV>
+matrix_vector_prod<MatA,VecV> prod(matrix_expression<MatA> const& A,vector_expression<VecV> const& v) {
+	return matrix_vector_prod<MatA,VecV>(A(),v());
 }
 
-template<class V, class M>
-typename matrix_vector_binary_traits<matrix_transpose<M const>,V>::result_type
-prod(vector_expression<V> const& vector,matrix_expression<M> const& matrix){
-	typedef typename matrix_vector_binary_traits<matrix_transpose<M const>,V>::expression_type expression;
-	return expression(trans(matrix),vector());
+/// \brief computes the matrix-vector product x+=v^TA
+template<class MatA, class VecV>
+matrix_vector_prod<matrix_transpose<MatA>,VecV> prod(vector_expression<VecV> const& v,matrix_expression<MatA> const& A) {
+	//compute it using the identity (v^TA)^T= A^Tv
+	return matrix_vector_prod<matrix_transpose<MatA>,VecV>(trans(A),v());
 }
 
 //matrix-matrix prod
