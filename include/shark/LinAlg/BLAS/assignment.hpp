@@ -45,7 +45,7 @@ namespace blas {
 ////////////////////////////////////////////////////////////////////////////////////
 	
 namespace detail{
-	template<class VecX, class VecV, class T>
+	template<class VecX, class VecV>
 	void assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,elementwise_tag){
 		kernels::assign(x,v);
 	}
