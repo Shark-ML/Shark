@@ -305,6 +305,11 @@ struct matrix_temporary_type<T,L,dense_random_access_iterator_tag>{
 	typedef matrix<T,L> type;
 };
 
+template<class T>
+struct matrix_temporary_type<T,unknown_orientation,dense_random_access_iterator_tag>{
+	typedef matrix<T,row_major> type;
+};
+
 /** \brief An diagonal matrix with values stored inside a diagonal vector
  *
  * the matrix stores a Vector representing the diagonal.

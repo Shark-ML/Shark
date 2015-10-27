@@ -232,6 +232,92 @@ private:
 	std::size_t m_rows;
 };
 
+template<class E>
+class matrix_scalar_multiply:public blas::matrix_expression<matrix_scalar_multiply<E> > {
+private:
+	typedef typename E::const_row_iterator const_subrow_iterator_type;
+	typedef typename E::const_column_iterator const_subcolumn_iterator_type;
+	typedef scalar_multiply1<typename E::value_type, typename E::scalar_type> functor_type;
+public:
+	typedef typename E::const_closure_type expression_closure_type;
+
+	typedef typename functor_type::result_type value_type;
+	typedef typename E::scalar_type scalar_type;
+	typedef value_type const_reference;
+	typedef const_reference reference;
+	typedef value_type const *const_pointer;
+	typedef value_type *pointer;
+	typedef typename E::size_type size_type;
+	typedef typename E::difference_type difference_type;
+
+	typedef typename E::index_type index_type;
+	typedef typename E::const_index_pointer const_index_pointer;
+	typedef typename index_pointer<E>::type index_pointer;
+
+	typedef matrix_scalar_multiply const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef typename E::orientation orientation;
+	typedef blas::unknown_storage_tag storage_category;
+	typedef typename E::evaluation_category evaluation_category;
+
+	// Construction and destruction
+	matrix_scalar_multiply(blas::matrix_expression<E> const &e, scalar_type scalar):
+		m_expression(e()), m_scalar(scalar){}
+
+	// Accessors
+	size_type size1() const {
+		return m_expression.size1();
+	}
+	size_type size2() const {
+		return m_expression.size2();
+	}
+
+	// Element access
+	const_reference operator()(index_type i, index_type j) const {
+		return m_scalar * m_expression(i, j);
+	}
+	
+	//computation kernels
+	template<class MatX>
+	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		m_expression.assign_to(X,alpha*m_scalar);
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		m_expression.plus_assign_to(X,alpha*m_scalar);
+	}
+	
+	template<class MatX>
+	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		m_expression.minus_assign_to(X,alpha*m_scalar);
+	}
+
+	// Iterator types
+	typedef transform_iterator<typename E::const_row_iterator, functor_type> const_row_iterator;
+	typedef transform_iterator<typename E::const_column_iterator, functor_type> const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+	
+	const_row_iterator row_begin(index_type i) const {
+		return const_row_iterator(m_expression.row_begin(i),functor_type(m_scalar));
+	}
+	const_row_iterator row_end(index_type i) const {
+		return const_row_iterator(m_expression.row_end(i),functor_type(m_scalar));
+	}
+
+	const_column_iterator column_begin(index_type i) const {
+		return const_row_iterator(m_expression.column_begin(i),functor_type(m_scalar));
+	}
+	const_column_iterator column_end(index_type i) const {
+		return const_row_iterator(m_expression.column_end(i),functor_type(m_scalar));
+	}
+
+private:
+	expression_closure_type m_expression;
+	scalar_type m_scalar;
+};
+
+
 ///\brief class which allows for matrix transformations
 ///
 ///transforms a matrix expression e of type E using a Functiof f of type F as an elementwise transformation f(e(i,j))
@@ -313,6 +399,29 @@ private:
 	functor_type m_functor;
 };
 
+template<class E, class T>
+typename boost::enable_if<
+	boost::is_convertible<T, typename E::scalar_type >,
+        matrix_scalar_multiply<E> 
+>::type
+operator* (matrix_expression<E> const& e, T scalar){
+	return matrix_scalar_multiply<E>(e(), typename E::scalar_type(scalar));
+}
+
+template<class T, class E>
+typename boost::enable_if<
+	boost::is_convertible<T, typename E::scalar_type >,
+        matrix_scalar_multiply<E> 
+>::type
+operator* (T scalar, matrix_expression<E> const& e){
+	return matrix_scalar_multiply<E>(e(), typename E::scalar_type(scalar));
+}
+
+template<class E>
+matrix_scalar_multiply<E> operator-(matrix_expression<E> const& e){
+	return matrix_scalar_multiply<E>(e(), typename E::scalar_type(-1));
+}
+
 #define SHARK_UNARY_MATRIX_TRANSFORMATION(name, F)\
 template<class E>\
 matrix_unary<E,F<typename E::value_type> >\
@@ -320,7 +429,6 @@ name(matrix_expression<E> const& e){\
 	typedef F<typename E::value_type> functor_type;\
 	return matrix_unary<E, functor_type>(e, functor_type());\
 }
-SHARK_UNARY_MATRIX_TRANSFORMATION(operator-, scalar_negate)
 SHARK_UNARY_MATRIX_TRANSFORMATION(conj, scalar_conj)
 SHARK_UNARY_MATRIX_TRANSFORMATION(real, scalar_real)
 SHARK_UNARY_MATRIX_TRANSFORMATION(imag, scalar_imag)
@@ -351,7 +459,6 @@ name (matrix_expression<E> const& e, T scalar){ \
 }
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator+, scalar_add)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator-, scalar_subtract2)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(operator*, scalar_multiply2)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator/, scalar_divide)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<, scalar_less_than)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<=, scalar_less_equal_than)
@@ -377,10 +484,144 @@ name (T scalar, matrix_expression<E> const& e){ \
 }
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(operator+, scalar_add)
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(operator-, scalar_subtract1)
-SHARK_MATRIX_SCALAR_TRANSFORMATION_2(operator*, scalar_multiply1)
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(min, scalar_min)
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(max, scalar_max)
 #undef SHARK_MATRIX_SCALAR_TRANSFORMATION_2
+
+template<class E1, class E2>
+class matrix_addition: public blas::matrix_expression<matrix_addition<E1, E2> > {
+private:
+	typedef scalar_binary_plus<
+		typename E1::value_type,
+		typename E2::value_type
+	> functor_type;
+public:
+	typedef typename E1::const_closure_type expression1_closure_type;
+	typedef typename E2::const_closure_type expression2_closure_type;
+
+	typedef typename E1::size_type size_type;
+	typedef typename E1::difference_type difference_type;
+	typedef typename functor_type::result_type value_type;
+	typedef value_type scalar_type;
+	typedef value_type const_reference;
+	typedef const_reference reference;
+	typedef value_type const* const_pointer;
+	typedef const_pointer pointer;
+
+	typedef typename E1::index_type index_type;
+	typedef typename E1::const_index_pointer const_index_pointer;
+	typedef typename index_pointer<E1>::type index_pointer;
+
+	typedef const matrix_addition<E1, E2> const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef typename E1::orientation orientation;
+	typedef blas::unknown_storage_tag storage_category;
+	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
+
+        // Construction
+        matrix_addition(
+		expression1_closure_type const& e1,
+		expression2_closure_type const& e2
+	): m_expression1 (e1), m_expression2 (e2){}
+
+        // Accessors
+        size_type size1 () const {
+		return m_expression1.size1 ();
+        }
+        size_type size2 () const {
+		return m_expression1.size2 ();
+        }
+
+        const_reference operator () (index_type i, index_type j) const {
+		return m_expression1(i, j) + m_expression2(i,j);
+        }
+	
+	//computation kernels
+	template<class MatX>
+	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		assign(X,alpha * m_expression1);
+		plus_assign(X,alpha * m_expression2);
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		plus_assign(X,alpha * m_expression1);
+		plus_assign(X,alpha * m_expression2);
+	}
+	
+	template<class MatX>
+	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		minus_assign(X,alpha * m_expression1);
+		minus_assign(X,alpha * m_expression2);
+	}
+
+	// Iterator types
+private:
+	typedef typename E1::const_row_iterator const_row_iterator1_type;
+	typedef typename E1::const_column_iterator const_row_column_iterator_type;
+	typedef typename E2::const_row_iterator const_column_iterator1_type;
+	typedef typename E2::const_column_iterator const_column_iterator2_type;
+
+public:
+	typedef binary_transform_iterator<
+		typename E1::const_row_iterator,
+		typename E2::const_row_iterator,
+		functor_type
+	> const_row_iterator;
+	typedef binary_transform_iterator<
+		typename E1::const_column_iterator,
+		typename E2::const_column_iterator,
+		functor_type
+	> const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+
+	const_row_iterator row_begin(std::size_t i) const {
+		return const_row_iterator (functor_type(),
+			m_expression1.row_begin(i),m_expression1.row_end(i),
+			m_expression2.row_begin(i),m_expression2.row_end(i)
+		);
+	}
+	const_row_iterator row_end(std::size_t i) const {
+		return const_row_iterator (functor_type(),
+			m_expression1.row_end(i),m_expression1.row_end(i),
+			m_expression2.row_end(i),m_expression2.row_end(i)
+		);
+	}
+
+	const_column_iterator column_begin(std::size_t j) const {
+		return const_column_iterator (functor_type(),
+			m_expression1.column_begin(j),m_expression1.column_end(j),
+			m_expression2.column_begin(j),m_expression2.column_end(j)
+		);
+	}
+	const_column_iterator column_end(std::size_t j) const {
+		return const_column_iterator (functor_type(),
+			m_expression1.column_begin(j),m_expression1.column_end(j),
+			m_expression2.column_begin(j),m_expression2.column_end(j)
+		);
+	}
+
+private:
+	expression1_closure_type m_expression1;
+        expression2_closure_type m_expression2;
+	functor_type m_functor;
+};
+
+
+template<class E1, class E2>
+matrix_addition<E1, E2 > operator+ (
+	matrix_expression<E1> const& e1,
+	matrix_expression<E2> const& e2
+){
+	return matrix_addition<E1, E2>(e1(),e2());
+}
+template<class E1, class E2>
+matrix_addition<E1, matrix_scalar_multiply<E2> > operator- (
+	matrix_expression<E1> const& e1,
+	matrix_expression<E2> const& e2
+){
+	return matrix_addition<E1, matrix_scalar_multiply<E2> >(e1(),-e2());
+}
 
 template<class E1, class E2, class F>
 class matrix_binary:
@@ -488,8 +729,6 @@ name(matrix_expression<E1> const& e1, matrix_expression<E2> const& e2){\
 	typedef F<typename E1::value_type, typename E2::value_type> functor_type;\
 	return matrix_binary<E1, E2, functor_type>(e1,e2, functor_type());\
 }
-SHARK_BINARY_MATRIX_EXPRESSION(operator+, scalar_binary_plus)
-SHARK_BINARY_MATRIX_EXPRESSION(operator-, scalar_binary_minus)
 SHARK_BINARY_MATRIX_EXPRESSION(operator*, scalar_binary_multiply)
 SHARK_BINARY_MATRIX_EXPRESSION(element_prod, scalar_binary_multiply)
 SHARK_BINARY_MATRIX_EXPRESSION(operator/, scalar_binary_divide)
@@ -595,24 +834,85 @@ matrix_vector_prod<matrix_transpose<MatA>,VecV> prod(vector_expression<VecV> con
 }
 
 //matrix-matrix prod
+template<class MatA, class MatB>
+class matrix_matrix_prod: public matrix_expression<matrix_matrix_prod<MatA, MatB> > {
+public:
+	typedef typename MatA::const_closure_type matrix_closure_typeA;
+	typedef typename MatB::const_closure_type matrix_closure_typeB;
+public:
+	typedef typename promote_traits<
+		typename MatA::scalar_type,
+		typename MatB::scalar_type
+	>::promote_type scalar_type;
+	typedef scalar_type value_type;
+	typedef typename MatA::size_type size_type;
+	typedef typename MatA::difference_type difference_type;
+	typedef typename MatA::index_type index_type;
+	typedef typename MatA::index_pointer index_pointer;
+	typedef typename MatA::const_index_pointer const_index_pointer;
 
-//FIXME: return type is not optimally chosen. We need to take both arguments into account
-//             especially take into account that the type is correct.
-//FIXME: better make this a block expression so that we know the result type and don't need
-// a temporary
-template<class Result, class E1, class E2>
-Result prod(matrix_expression<E1> const& e1,matrix_expression<E2> const& e2) {
-	Result result(e1().size1(),e2().size2(),typename Result::value_type());
-	axpy_prod(e1,e2,result,false);
-	return result;
-}
+	typedef matrix_matrix_prod<MatA, MatB> const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef unknown_storage_tag storage_category;
+	typedef blockwise_tag evaluation_category;
+	typedef unknown_orientation orientation;
 
-template<class E1, class E2>
-typename matrix_temporary<E1>::type
-prod(matrix_expression<E1> const& e1,matrix_expression<E2> const& e2) {
-	typename matrix_temporary<E1>::type result(e1().size1(),e2().size2(),typename E1::value_type());
-	axpy_prod(e1,e2,result,false);
-	return result;
+
+	//FIXME: This workaround is required to be able to generate
+	// temporary matrices
+	typedef typename MatA::const_row_iterator const_row_iterator;
+	typedef typename MatA::const_column_iterator const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+
+	// Construction and destruction
+	matrix_matrix_prod(
+		matrix_closure_typeA const& matrixA,
+		matrix_closure_typeB const& matrixB
+	):m_matrixA(matrixA), m_matrixB(matrixB) {}
+
+	size_type size1() const {
+		return m_matrixA.size1();
+	}
+	size_type size2() const {
+		return m_matrixB.size2();
+	}
+	
+	matrix_closure_typeA const& matrixA() const {
+		return m_matrixA;
+	}
+	matrix_closure_typeB const& matrixB() const {
+		return m_matrixB;
+	}
+	
+	//computation kernels
+	template<class MatX>
+	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		X().clear();
+		plus_assign_to(X,alpha);
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		kernels::gemm(eval_block(m_matrixA), eval_block(m_matrixB), X, alpha);
+	}
+	
+	template<class MatX>
+	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		kernels::gemm(eval_block(m_matrixA), eval_block(m_matrixB), X, -alpha);
+	}
+	
+private:
+	matrix_closure_typeA m_matrixA;
+	matrix_closure_typeB m_matrixB;
+};
+
+/// \brief computes the matrix-matrix product X+=AB
+template<class MatA, class MatB>
+matrix_matrix_prod<MatA,MatB> prod(
+	matrix_expression<MatA> const& A,
+	matrix_expression<MatB> const& B
+) {
+	return matrix_matrix_prod<MatA,MatB>(A(),B());
 }
 
 namespace detail{
@@ -744,17 +1044,17 @@ sum_columns(matrix_expression<MatA> const& A){
 
 template<class MatA>
 typename MatA::value_type sum(matrix_expression<MatA> const& A){
-	return detail::sum_impl(A(),typename MatA::orientation());
+	return detail::sum_impl(eval_block(A),typename matrix_temporary<MatA>::type::orientation());
 }
 
 template<class MatA>
 typename MatA::value_type max(matrix_expression<MatA> const& A){
-	return detail::max_impl(A(),typename MatA::orientation());
+	return detail::max_impl(eval_block(A),typename matrix_temporary<MatA>::type::orientation());
 }
 
 template<class MatA>
 typename MatA::value_type min(matrix_expression<MatA> const& A){
-	return detail::min_impl(A(),typename MatA::orientation());
+	return detail::min_impl(eval_block(A),typename matrix_temporary<MatA>::type::orientation());
 }
 
 /// \brief Returns the frobenius inner-product between matrices exprssions 1 and e2.
@@ -767,27 +1067,27 @@ frobenius_prod(
 	matrix_expression<E1> const& e1,
 	matrix_expression<E2> const& e2
 ) {
-	return sum(e1*e2);
+	return sum(eval_block(e1)*eval_block(e2));
 }
 
 
 template<class E>
 typename matrix_norm_1<E>::result_type
 norm_1(const matrix_expression<E> &e) {
-	return matrix_norm_1<E>::apply(e());
+	return matrix_norm_1<E>::apply(eval_block(e));
 }
 
 template<class E>
 typename real_traits<typename E::value_type>::type
 norm_frobenius(const matrix_expression<E> &e) {
 	using std::sqrt;
-	return sqrt(sum(abs_sqr(e)));
+	return sqrt(sum(abs_sqr(eval_block(e))));
 }
 
 template<class E>
 typename matrix_norm_inf<E>::result_type
 norm_inf(const matrix_expression<E> &e) {
-	return matrix_norm_inf<E>::apply(e());
+	return matrix_norm_inf<E>::apply(eval_block(e));
 }
 
 /*!

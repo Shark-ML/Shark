@@ -568,11 +568,11 @@ noalias_proxy<C> noalias(temporary_proxy<C> lvalue) {
 //////////////////////////////////////////////////////////////////////
 namespace detail{
 	template<class E>
-	blas::vector_expression<E> const& evaluate_block(
+	E const& evaluate_block(
 		blas::vector_expression<E> const& e,
 		elementwise_tag
 	){
-		return e;
+		return e();
 	}
 	template<class E>
 	typename vector_temporary<E>::type evaluate_block(
@@ -582,11 +582,11 @@ namespace detail{
 		return e();
 	}
 	template<class E>
-	blas::matrix_expression<E> const& evaluate_block(
+	E const& evaluate_block(
 		blas::matrix_expression<E> const& e,
 		elementwise_tag
 	){
-		return e;
+		return e();
 	}
 	template<class E>
 	typename matrix_temporary<E>::type evaluate_block(
@@ -609,7 +609,7 @@ typename boost::mpl::if_<
 		blockwise_tag
 	>,
 	typename vector_temporary<E>::type,
-	blas::vector_expression<E> const&
+	E const&
 >::type
 eval_block(blas::vector_expression<E> const& e){
 	return detail::evaluate_block(e,typename E::evaluation_category());
@@ -626,7 +626,7 @@ typename boost::mpl::if_<
 		blockwise_tag
 	>,
 	typename matrix_temporary<E>::type,
-	blas::matrix_expression<E> const&
+	E const&
 >::type
 eval_block(blas::matrix_expression<E> const& e){
 	return detail::evaluate_block(e,typename E::evaluation_category());

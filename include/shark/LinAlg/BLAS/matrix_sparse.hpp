@@ -451,6 +451,11 @@ struct matrix_temporary_type<T,row_major,sparse_bidirectional_iterator_tag> {
 	typedef compressed_matrix<T> type;
 };
 
+template<class T>
+struct matrix_temporary_type<T,unknown_orientation,sparse_bidirectional_iterator_tag> {
+	typedef compressed_matrix<T> type;
+};
+
 template<class T, class I>
 struct const_expression<compressed_matrix<T,I> >{
 	typedef compressed_matrix<T,I> const type;
