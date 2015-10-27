@@ -42,9 +42,6 @@ namespace blas{
 	
 template<class V>
 class vector_reference:public vector_expression<vector_reference<V> >{
-
-	typedef vector_reference<V> self_type;
-	typedef V referred_type;
 public:
 	typedef typename V::size_type size_type;
 	typedef typename V::difference_type difference_type;
@@ -59,16 +56,20 @@ public:
 	typedef typename V::const_index_pointer const_index_pointer;
 	typedef typename index_pointer<V>::type index_pointer;
 	
-	typedef const self_type const_closure_type;
-	typedef self_type closure_type;
+	typedef vector_reference<V const> const_closure_type;
+	typedef vector_reference<V> closure_type;
 	typedef typename V::storage_category storage_category;
 	typedef elementwise_tag evaluation_category;
 
-	// Construction and destruction
-	vector_reference(referred_type& v):m_expression(&v){}
+	// Construction
+	vector_reference(V& v):m_expression(&v){}
+		
+	template<class E>
+	vector_reference(vector_reference<E> const& other)
+		:m_expression(&other.expression()){}
 		
 	// Expression accessors
-	referred_type& expression() const{
+	V& expression() const{
 		return *m_expression;
 	}
 	
@@ -171,7 +172,7 @@ public:
 	}
 
 private:
-	referred_type* m_expression;
+	V* m_expression;
 };
 
 /** \brief A vector referencing a continuous subvector of elements of vector \c v containing all elements specified by \c range.
@@ -185,9 +186,6 @@ private:
  */
 template<class V>
 class vector_range:public vector_expression<vector_range<V> >{
-
-	typedef vector_range<V> self_type;
-	typedef typename closure<V>::type vector_closure_type;
 public:
 	typedef typename V::size_type size_type;
 	typedef typename V::difference_type difference_type;
@@ -202,8 +200,9 @@ public:
 	typedef typename V::const_index_pointer const_index_pointer;
 	typedef typename index_pointer<V>::type index_pointer;
 
-	typedef const self_type const_closure_type;
-	typedef self_type closure_type;
+	typedef typename closure<V>::type vector_closure_type;
+	typedef vector_range<typename const_expression<V>::type> const_closure_type;
+	typedef vector_range<V> closure_type;
 	typedef typename V::storage_category storage_category;
 	typedef elementwise_tag evaluation_category;
 
@@ -213,6 +212,16 @@ public:
 		RANGE_CHECK(start() <= m_expression.size());
 		RANGE_CHECK(start() + size() <= m_expression.size());
 	}
+	
+	//non-const-> const conversion
+	template<class E>
+	vector_range(
+		vector_range<E> const& other,
+		typename boost::disable_if<
+			boost::is_same<E,vector_range>
+		>::type* dummy = 0
+	):m_expression(other.expression())
+	, m_range(other.range()){}
 	
 	// ---------
 	// Internal Accessors
@@ -227,6 +236,10 @@ public:
 	}
 	vector_closure_type& expression(){
 		return m_expression;
+	}
+	
+	blas::range const& range()const{
+		return m_range;
 	}
 	
 	/// \brief Return the size of the vector.
@@ -320,7 +333,7 @@ public:
 	}
 private:
 	vector_closure_type m_expression;
-	range m_range;
+	blas::range m_range;
 };
 
 // ------------------
@@ -343,8 +356,12 @@ temporary_proxy<vector_range<V> > subrange(vector_expression<V>& data, typename 
  * Vector Expression and access to an element outside of index range of the vector is \b undefined.
  */
 template<class V>
-vector_range<V const> subrange(vector_expression<V> const& data, typename V::size_type start, typename V::size_type stop){
-	return vector_range<V const> (data(), range(start, stop));
+vector_range<typename const_expression<V>::type > subrange(
+	vector_expression<V> const& data,
+	typename V::size_type start,
+	typename V::size_type stop
+){
+	return vector_range<typename const_expression<V>::type> (data(), range(start, stop));
 }
 
 template<class V>
