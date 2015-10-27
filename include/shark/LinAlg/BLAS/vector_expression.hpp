@@ -63,16 +63,16 @@ public:
 	//computation kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		m_expression.assign_to(x,m_scalar*alpha);
+		m_expression.assign_to(x,alpha*m_scalar);
 	}
 	template<class VecX>
 	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		m_expression.plus_assign_to(x,m_scalar*alpha);
+		m_expression.plus_assign_to(x,alpha*m_scalar);
 	}
 	
 	template<class VecX>
 	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		m_expression.minus_assign_to(x,m_scalar*alpha);
+		m_expression.minus_assign_to(x,alpha*m_scalar);
 	}
 
 	

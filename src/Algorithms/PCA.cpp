@@ -116,8 +116,7 @@ void PCA::encoder(LinearModel<>& model, std::size_t m) {
 	if(!m) m = std::min(m_n,m_l);
 	
 	RealMatrix A = trans(columns(m_eigenvectors, 0, m) );
-	RealVector offset(A.size1(),0.0); 
-	axpy_prod(A, m_mean, offset, false, -1.0);
+	RealVector offset = -prod(A, m_mean);
 	if(m_whitening){
 		for(std::size_t i=0; i<A.size1(); i++) {
 			//take care of numerical difficulties for very small eigenvalues.

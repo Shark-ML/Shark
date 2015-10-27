@@ -218,8 +218,7 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		symm_prod(trans(L),LTL);
 		
 		//compute z= L^Tb
-		RealVector z(rank);
-		axpy_prod(trans(L),b,z);
+		RealVector z = prod(trans(L),b);
 		
 		//compute cholesky factor of L^TL
 		RealMatrix LTLcholesky(rank,rank);
@@ -228,7 +227,7 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		//A'b =  L(L^TL)^-1(L^TL)^-1z
 		solveTriangularCholeskyInPlace<SolveAXB>(LTLcholesky,z);
 		solveTriangularCholeskyInPlace<SolveAXB>(LTLcholesky,z);
-		axpy_prod(L,z,b);
+		noalias(b)=prod(L,z);
 	}
 	//finally swap back into the unpermuted coordinate system
 	swap_rows_inverted(permutation,b);
@@ -333,8 +332,7 @@ void shark::blas::generalSolveSystemInPlace(
 		axpy_prod(trans(A),A,ATA);
 		
 		//compute z=Ab
-		RealVector z(n);
-		axpy_prod(trans(A),b,z);
+		RealVector z = prod(trans(A),b);
 		
 		//call recursively for the quadratic case
 		solveSymmSemiDefiniteSystemInPlace<System>(ATA,z);
@@ -350,8 +348,7 @@ void shark::blas::generalSolveSystemInPlace(
 		axpy_prod(A,trans(A),AAT);
 		
 		//compute z=Ab
-		RealVector z(m);
-		axpy_prod(A,b,z);
+		RealVector z = prod(A,b);
 		
 		//call recursively for the quadratic case
 		solveSymmSemiDefiniteSystemInPlace<System>(AAT,z);

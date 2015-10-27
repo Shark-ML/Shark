@@ -77,6 +77,10 @@ public:
 	size_type size() const {
 		return expression().size();
 	}
+	
+	void clear(){
+		expression().clear();
+	}
 
 	// ---------
 	// Dense low level interface

@@ -1,0 +1,260 @@
+diff --git a/include/shark/LinAlg/BLAS/matrix_proxy.hpp b/include/shark/LinAlg/BLAS/matrix_proxy.hpp
+index 5e6395e..a97eb82 100644
+--- a/include/shark/LinAlg/BLAS/matrix_proxy.hpp
++++ b/include/shark/LinAlg/BLAS/matrix_proxy.hpp
+@@ -41,7 +41,6 @@ namespace blas {
+ ///\brief Wraps another expression as a reference.
+ template<class M>
+ class matrix_reference:public matrix_expression<matrix_reference<M> > {
+-	typedef matrix_reference<M> self_type;
+ public:
+ 	typedef typename M::size_type size_type;
+ 	typedef typename M::difference_type difference_type;
+@@ -57,7 +56,7 @@ public:
+ 	typedef typename index_pointer<M>::type index_pointer;
+ 
+ 	typedef matrix_reference<M const> const_closure_type;
+-	typedef self_type closure_type;
++	typedef matrix_reference<M> closure_type;
+ 	typedef typename M::orientation orientation;
+ 	typedef typename M::storage_category storage_category;
+ 	typedef elementwise_tag evaluation_category;
+@@ -484,8 +483,6 @@ temporary_proxy< matrix_transpose<M> > trans(temporary_proxy<M> m) {
+ 
+ template<class M>
+ class matrix_row: public vector_expression<matrix_row<M> > {
+-	typedef matrix_row<M> self_type;
+-	
+ public:
+ 	typedef M matrix_type;
+ 	typedef std::size_t size_type;
+@@ -503,7 +500,7 @@ public:
+ 
+ 	typedef typename closure<M>::type matrix_closure_type;
+ 	typedef matrix_row<typename const_expression<M>::type> const_closure_type;
+-	typedef self_type closure_type;
++	typedef matrix_row<M> closure_type;
+ 	typedef typename M::storage_category storage_category;
+ 	typedef elementwise_tag evaluation_category;
+ 
+@@ -701,8 +698,6 @@ temporary_proxy<matrix_row<M> > row(temporary_proxy<M> expression, typename M::i
+ 
+ template<class M>
+ class matrix_column: public vector_expression<matrix_column<M> > {
+-	typedef matrix_column<M> self_type;
+-	
+ public:
+ 	typedef M matrix_type;
+ 	typedef std::size_t size_type;
+@@ -720,7 +715,7 @@ public:
+ 
+ 	typedef typename closure<M>::type matrix_closure_type;
+ 	typedef matrix_column<typename const_expression<M>::type> const_closure_type;
+-	typedef self_type closure_type;
++	typedef matrix_column<M> closure_type;
+ 	typedef typename M::storage_category storage_category;
+ 	typedef elementwise_tag evaluation_category;
+ 
+@@ -919,10 +914,7 @@ temporary_proxy<matrix_column<M> > column(temporary_proxy<M> expression, typenam
+ 
+ // Matrix based vector range class representing (off-)diagonals of a matrix.
+ template<class M>
+-class matrix_vector_range:
+-	public vector_expression<matrix_vector_range<M> > {
+-
+-	typedef matrix_vector_range<M> self_type;
++class matrix_vector_range: public vector_expression<matrix_vector_range<M> > {
+ public:
+ 	typedef M matrix_type;
+ 	typedef std::size_t size_type;
+@@ -940,7 +932,7 @@ public:
+ 
+ 	typedef typename closure<M>::type matrix_closure_type;
+ 	typedef matrix_vector_range<typename const_expression<M>::type> const_closure_type;
+-	typedef self_type closure_type;
++	typedef matrix_vector_range<M>  closure_type;
+ 	typedef typename M::storage_category storage_category;
+ 	typedef elementwise_tag evaluation_category;
+ 
+@@ -1094,7 +1086,6 @@ temporary_proxy< matrix_vector_range<M> > diag(temporary_proxy<M> mat){
+ // Matrix based range class
+ template<class M>
+ class matrix_range:public matrix_expression<matrix_range<M> > {
+-	typedef matrix_range<M> self_type;
+ public:
+ 	typedef M matrix_type;
+ 	typedef std::size_t size_type;
+@@ -1112,7 +1103,7 @@ public:
+ 
+ 	typedef typename closure<M>::type matrix_closure_type;
+ 	typedef matrix_range<typename const_expression<M>::type> const_closure_type;
+-	typedef self_type closure_type;
++	typedef matrix_range<M> closure_type;
+ 	typedef typename M::storage_category storage_category;
+ 	typedef elementwise_tag evaluation_category;
+ 	typedef typename M::orientation orientation;
+@@ -1202,11 +1193,11 @@ public:
+ 
+ 	// Assignment
+ 	
+-	self_type& operator = (self_type const& e) {
+-		return assign(*this, typename matrix_temporary<self_type>::type(e));
++	matrix_range& operator = (matrix_range const& e) {
++		return assign(*this, typename matrix_temporary<matrix_range>::type(e));
+ 	}
+ 	template<class E>
+-	self_type& operator = (matrix_expression<E> const& e) {
++	matrix_range& operator = (matrix_expression<E> const& e) {
+ 		return assign(*this, typename matrix_temporary<E>::type(e));
+ 	}
+ 
+@@ -1421,7 +1412,7 @@ public:
+ 	, m_stride2(expression.stride2())
+ 	{}
+ 
+-	/// \brief Constructor of a self_type proxy from a Dense MatrixExpression
++	/// \brief Constructor of a vector proxy from a Dense MatrixExpression
+ 	///
+ 	/// Be aware that the expression must live longer than the proxy!
+ 	/// \param expression Expression from which to construct the Proxy
+@@ -1438,7 +1429,7 @@ public:
+ 		));
+ 	}
+ 	
+-	/// \brief Constructor of a self_type proxy from a Dense MatrixExpression
++	/// \brief Constructor of a vector proxy from a Dense MatrixExpression
+ 	///
+ 	/// Be aware that the expression must live longer than the proxy!
+ 	/// \param expression Expression from which to construct the Proxy
+@@ -1455,7 +1446,7 @@ public:
+ 		);
+ 	}
+ 		
+-	/// \brief Constructor of a self_type proxy from a block of memory
++	/// \brief Constructor of a vector proxy from a block of memory
+ 	/// \param values the block of memory used
+ 	/// \param size1 size in 1st direction
+ 	/// \param size2 size in 2nd direction
+diff --git a/include/shark/LinAlg/BLAS/vector_proxy.hpp b/include/shark/LinAlg/BLAS/vector_proxy.hpp
+index 6d58283..39ae8af 100644
+--- a/include/shark/LinAlg/BLAS/vector_proxy.hpp
++++ b/include/shark/LinAlg/BLAS/vector_proxy.hpp
+@@ -42,9 +42,6 @@ namespace blas{
+ 	
+ template<class V>
+ class vector_reference:public vector_expression<vector_reference<V> >{
+-
+-	typedef vector_reference<V> self_type;
+-	typedef V referred_type;
+ public:
+ 	typedef typename V::size_type size_type;
+ 	typedef typename V::difference_type difference_type;
+@@ -59,16 +56,20 @@ public:
+ 	typedef typename V::const_index_pointer const_index_pointer;
+ 	typedef typename index_pointer<V>::type index_pointer;
+ 	
+-	typedef const self_type const_closure_type;
+-	typedef self_type closure_type;
++	typedef vector_reference<V const> const_closure_type;
++	typedef vector_reference<V> closure_type;
+ 	typedef typename V::storage_category storage_category;
+ 	typedef elementwise_tag evaluation_category;
+ 
+-	// Construction and destruction
+-	vector_reference(referred_type& v):m_expression(&v){}
++	// Construction
++	vector_reference(V& v):m_expression(&v){}
++		
++	template<class E>
++	vector_reference(vector_reference<E> const& other)
++		:m_expression(&other.expression()){}
+ 		
+ 	// Expression accessors
+-	referred_type& expression() const{
++	V& expression() const{
+ 		return *m_expression;
+ 	}
+ 	
+@@ -171,7 +172,7 @@ public:
+ 	}
+ 
+ private:
+-	referred_type* m_expression;
++	V* m_expression;
+ };
+ 
+ /** \brief A vector referencing a continuous subvector of elements of vector \c v containing all elements specified by \c range.
+@@ -185,9 +186,6 @@ private:
+  */
+ template<class V>
+ class vector_range:public vector_expression<vector_range<V> >{
+-
+-	typedef vector_range<V> self_type;
+-	typedef typename closure<V>::type vector_closure_type;
+ public:
+ 	typedef typename V::size_type size_type;
+ 	typedef typename V::difference_type difference_type;
+@@ -202,8 +200,9 @@ public:
+ 	typedef typename V::const_index_pointer const_index_pointer;
+ 	typedef typename index_pointer<V>::type index_pointer;
+ 
+-	typedef const self_type const_closure_type;
+-	typedef self_type closure_type;
++	typedef typename closure<V>::type vector_closure_type;
++	typedef vector_range<typename const_expression<V>::type> const_closure_type;
++	typedef vector_range<V> closure_type;
+ 	typedef typename V::storage_category storage_category;
+ 	typedef elementwise_tag evaluation_category;
+ 
+@@ -214,6 +213,16 @@ public:
+ 		RANGE_CHECK(start() + size() <= m_expression.size());
+ 	}
+ 	
++	//non-const-> const conversion
++	template<class E>
++	vector_range(
++		vector_range<E> const& other,
++		typename boost::disable_if<
++			boost::is_same<E,vector_range>
++		>::type* dummy = 0
++	):m_expression(other.expression())
++	, m_range(other.range()){}
++	
+ 	// ---------
+ 	// Internal Accessors
+ 	// ---------
+@@ -229,6 +238,10 @@ public:
+ 		return m_expression;
+ 	}
+ 	
++	blas::range const& range()const{
++		return m_range;
++	}
++	
+ 	/// \brief Return the size of the vector.
+ 	size_type size() const {
+ 		return m_range.size();
+@@ -320,7 +333,7 @@ public:
+ 	}
+ private:
+ 	vector_closure_type m_expression;
+-	range m_range;
++	blas::range m_range;
+ };
+ 
+ // ------------------
+@@ -343,8 +356,12 @@ temporary_proxy<vector_range<V> > subrange(vector_expression<V>& data, typename
+  * Vector Expression and access to an element outside of index range of the vector is \b undefined.
+  */
+ template<class V>
+-vector_range<V const> subrange(vector_expression<V> const& data, typename V::size_type start, typename V::size_type stop){
+-	return vector_range<V const> (data(), range(start, stop));
++vector_range<typename const_expression<V>::type > subrange(
++	vector_expression<V> const& data,
++	typename V::size_type start,
++	typename V::size_type stop
++){
++	return vector_range<typename const_expression<V>::type> (data(), range(start, stop));
+ }
+ 
+ template<class V>

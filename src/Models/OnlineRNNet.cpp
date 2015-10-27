@@ -65,10 +65,9 @@ void OnlineRNNet::eval(RealMatrix const& pattern, RealMatrix& output){
 
 	//activation of the hidden neurons is now just a matrix vector multiplication
 
-	axpy_prod(
+	noalias(subrange(m_activation,inputSize()+1,numUnits)) = prod(
 		mpe_structure->weights(),
-		m_lastActivation,
-		subrange(m_activation,inputSize()+1,numUnits)
+		m_lastActivation
 	);
 
 	//now apply the sigmoid function
@@ -135,10 +134,9 @@ void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const R
 		noalias(row(m_unitGradient,i))= element_prod(row(m_unitGradient,i),neuronDerivatives);
 	}
 	//and formula 4 (the gradient itself)
-	axpy_prod(
+	noalias(gradient) = prod(
 		columns(m_unitGradient,numNeurons-outputSize(),numNeurons),
-		row(coefficients,0),
-		gradient
+		row(coefficients,0)
 	);
 	//sanity check
 	SIZE_CHECK(param == mpe_structure->parameters());
