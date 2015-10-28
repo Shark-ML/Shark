@@ -239,7 +239,7 @@ namespace detail{
 		typedef typename Result::value_type value_type;
 		std::size_t sizeX=X.size1();
 		std::size_t sizeY=Y.size1();
-		ensureSize(distances,X.size1(),Y.size1());
+		ensure_size(distances,X.size1(),Y.size1());
 		if(sizeX < 10 || sizeY<10){
 			distanceSqrBlockBlockRowWise(X,Y,distances);
 			return;
