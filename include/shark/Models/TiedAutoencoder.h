@@ -178,7 +178,7 @@ public:
 			SIZE_CHECK(patterns.size2() == decoderMatrix().size2());
 			std::size_t numOutputs = decoderMatrix().size1();
 			outputs.resize(numPatterns,numOutputs);
-			noalias(outputs) = prod(patterns,trans(decoderMatrix()),outputs) + repeat(outputBias(),numPatterns);
+			noalias(outputs) = prod(patterns,trans(decoderMatrix())) + repeat(outputBias(),numPatterns);
 			noalias(outputs) = m_outputNeuron(outputs);
 		}
 	}

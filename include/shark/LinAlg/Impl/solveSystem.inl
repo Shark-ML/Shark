@@ -277,7 +277,7 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		symm_prod(trans(L),LTL);
 		
 		//compute Z= L^TB
-		RealMatrix Z = prod(trans(L),B,Z);
+		RealMatrix Z = prod(trans(L),B);
 		
 		//compute cholesky factor of L^TL
 		RealMatrix LTLcholesky(rank,rank);

@@ -177,7 +177,7 @@ public:
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs)const{
 		outputs.resize(inputs.size1(),m_matrix.size1());
 		//we multiply with a set of row vectors from the left
-		noalias(gradient) = prod(inputs,trans(m_matrix));
+		noalias(outputs) = prod(inputs,trans(m_matrix));
 		if (hasOffset()){
 			noalias(outputs)+=repeat(m_offset,inputs.size1());
 		}
