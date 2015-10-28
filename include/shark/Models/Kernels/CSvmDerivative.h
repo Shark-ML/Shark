@@ -356,14 +356,13 @@ private:
 
 		// compute the derivative of (\alpha, b) w.r.t. C
 		if ( m_noofBoundedSVs > 0 ) {
-			axpy_prod( R, m_boundedLabels, column(m_d_alphab_d_theta,m_nkp));
+			noalias(column(m_d_alphab_d_theta,m_nkp)) = prod( R, m_boundedLabels);
 		}
 		// compute the derivative of (\alpha, b) w.r.t. the kernel parameters
 		for ( std::size_t k=0; k<m_nkp; k++ ) {
-			RealVector sum( m_noofFreeSVs+1);
-			axpy_prod( dH[k], m_freeAlphas, sum ); //sum = dH * \alpha_f
+			RealVector sum = prod( dH[k], m_freeAlphas ); //sum = dH * \alpha_f
 			if(m_noofBoundedSVs > 0)
-				axpy_prod( dR[k], m_boundedAlphas, sum, false ); // sum += dR * \alpha_r , i.e., the C*y_g is expressed as alpha_g
+				noalias(sum) += prod( dR[k], m_boundedAlphas ); // sum += dR * \alpha_r , i.e., the C*y_g is expressed as alpha_g
 			//fill the remaining columns of the derivative matrix (except the last, which is for C)
 			noalias(column(m_d_alphab_d_theta,k)) = sum;
 		}

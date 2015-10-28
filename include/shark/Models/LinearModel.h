@@ -177,7 +177,7 @@ public:
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs)const{
 		outputs.resize(inputs.size1(),m_matrix.size1());
 		//we multiply with a set of row vectors from the left
-		axpy_prod(inputs,trans(m_matrix),outputs);
+		noalias(gradient) = prod(inputs,trans(m_matrix));
 		if (hasOffset()){
 			noalias(outputs)+=repeat(m_offset,inputs.size1());
 		}
@@ -201,7 +201,7 @@ public:
 
 		blas::dense_matrix_adaptor<double> weightGradient = blas::adapt_matrix(outputs,inputs,gradient.storage());
 		//sum_i coefficients(output,i)*pattern(i))
-		axpy_prod(trans(coefficients),patterns,weightGradient,false);
+		noalias(weightGradient) = prod(trans(coefficients),patterns);
 
 		if (hasOffset()){
 			std::size_t start = inputs*outputs;
@@ -219,7 +219,7 @@ public:
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 
 		derivative.resize(patterns.size1(),inputSize());
-		axpy_prod(coefficients,m_matrix,derivative);
+		noalias(derivative) = prod(coefficients,m_matrix);
 	}
 
 	/// From ISerializable

@@ -184,8 +184,7 @@ public:
 		//return beta * inner_prod(m_bias,state) - norm_sqr(state)/2.0;
 		
 		std::size_t batchSize = state.size1();
-		RealVector energies(batchSize);
-		axpy_prod(state,m_bias,energies);
+		RealVector energies = prod(state,m_bias);
 		noalias(energies) *= beta;
 		for(std::size_t i = 0; i != batchSize; ++i){
 			energies(i) -= norm_sqr(row(state,i))/2.0;

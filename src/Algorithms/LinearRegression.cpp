@@ -73,7 +73,7 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	for (std::size_t b=0; b != numBatches; b++){
 		BatchRef batch = dataset.batch(b);
 		RealSubMatrix PTL = subrange(XTL,0,inputDim,0,outputDim);
-		axpy_prod(trans(batch.input),batch.label,PTL,false);
+		noalias(PTL) += prod(trans(batch.input),batch.label);
 		noalias(row(XTL,inputDim))+=sum_rows(batch.label);
 	}	
 	

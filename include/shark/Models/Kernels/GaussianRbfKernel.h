@@ -222,7 +222,7 @@ public:
 		
 		gradient.resize(sizeX1,batchX1.size2());
 		RealMatrix W = coefficientsX2*s.expNorm;
-		axpy_prod(W,batchX2,gradient);
+		noalias(gradient) = prod(W,batchX2);
 		RealVector columnSum = sum_columns(coefficientsX2*s.expNorm);
 		
 		for(std::size_t i = 0; i != sizeX1; ++i){

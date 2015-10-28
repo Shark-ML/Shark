@@ -112,18 +112,14 @@ void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const R
 	);
 	
 	//update the new gradient with the effect of last timestep
-	RealMatrix newUnitGradient(mpe_structure->parameters(),numNeurons);
-	axpy_prod(m_unitGradient,trans(hiddenWeights),newUnitGradient);
-	swap(m_unitGradient,newUnitGradient);
-	newUnitGradient = RealMatrix();//empty
-	
+	noalias(m_unitGradient) = prod(m_unitGradient,trans(hiddenWeights));
 	
 	//add the effect of the current time step
 	std::size_t param = 0;
 	for(std::size_t i = 0; i != numNeurons; ++i){
 		for(std::size_t j = 0; j != numUnits; ++j){
 			if(mpe_structure->connection(i,j)){
-				m_unitGradient(param,i)+=m_lastActivation(j);
+				m_unitGradient(param,i) += m_lastActivation(j);
 				++param;
 			}
 		}
@@ -131,7 +127,7 @@ void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const R
 	
 	//multiply with outer derivative of the neurons
 	for(std::size_t i = 0; i != m_unitGradient.size1();++i){
-		noalias(row(m_unitGradient,i))= element_prod(row(m_unitGradient,i),neuronDerivatives);
+		noalias(row(m_unitGradient,i)) = element_prod(row(m_unitGradient,i),neuronDerivatives);
 	}
 	//and formula 4 (the gradient itself)
 	noalias(gradient) = prod(

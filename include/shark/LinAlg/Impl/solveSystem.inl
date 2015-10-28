@@ -276,9 +276,8 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		RealMatrix LTL(rank,rank);
 		symm_prod(trans(L),LTL);
 		
-		//compute z= L^TB
-		RealMatrix Z(rank,B().size2());
-		axpy_prod(trans(L),B,Z);
+		//compute Z= L^TB
+		RealMatrix Z = prod(trans(L),B,Z);
 		
 		//compute cholesky factor of L^TL
 		RealMatrix LTLcholesky(rank,rank);
@@ -287,7 +286,7 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		//A'b =  L(L^TL)^-1(L^TL)^-1z
 		solveTriangularCholeskyInPlace<System>(LTLcholesky,Z);
 		solveTriangularCholeskyInPlace<System>(LTLcholesky,Z);
-		axpy_prod(L,Z,B);
+		noalias(B) = prod(L,Z);
 	}else{
 		//complex case. 
 		//X=BL(L^TL)^-1(L^TL)^-1 L^T
@@ -295,8 +294,7 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		symm_prod(trans(L),LTL);
 		
 		//compute z= L^TB
-		RealMatrix Z(B().size1(),rank);
-		axpy_prod(B,L,Z);
+		RealMatrix Z = prod(B,L);
 		
 		//compute cholesky factor of L^TL
 		RealMatrix LTLcholesky(rank,rank);
@@ -305,7 +303,7 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		//A'b =  L(L^TL)^-1(L^TL)^-1z
 		solveTriangularCholeskyInPlace<System>(LTLcholesky,Z);
 		solveTriangularCholeskyInPlace<System>(LTLcholesky,Z);
-		axpy_prod(Z,trans(L),B);
+		noalias(B) = prod(Z,trans(L));
 	}
 	//finally swap back into the unpermuted coordinate system
 	if(System::left)
@@ -328,8 +326,7 @@ void shark::blas::generalSolveSystemInPlace(
 		//Ax=b => A^TAx=A'b => x= A'b = (A^TA)' Ab
 		// with z = Ab => (A^TA) x= z
 		//compute A^TA
-		RealMatrix ATA(n,n);
-		axpy_prod(trans(A),A,ATA);
+		RealMatrix ATA = prod(trans(A),A);
 		
 		//compute z=Ab
 		RealVector z = prod(trans(A),b);
@@ -344,8 +341,7 @@ void shark::blas::generalSolveSystemInPlace(
 		//x^TA=b^T => x^TAA'=b^TA' => x^T= b^TA' = b^TA^T(AA^T)'
 		// with z = Ab => x^T(AA^T) = z^T
 		//compute AAT
-		RealMatrix AAT(m,m);
-		axpy_prod(A,trans(A),AAT);
+		RealMatrix AAT = prod(A,trans(A));
 		
 		//compute z=Ab
 		RealVector z = prod(A,b);
@@ -370,12 +366,9 @@ void shark::blas::generalSolveSystemInPlace(
 		//AX=B => A'AX=A'B => X= A'B = (A^TA)' A^TB
 		// with Z = A^TB => (A^TA) X= Z
 		//compute A^TA
-		RealMatrix ATA(n,n);
-		axpy_prod(trans(A),A,ATA);
+		RealMatrix ATA = prod(trans(A),A);
 		
-		//compute Z=AB
-		RealMatrix Z(n,B().size2());
-		axpy_prod(trans(A),B,Z);
+		RealMatrix Z = prod(trans(A),B);
 		
 		//call recursively for the quadratic case
 		solveSymmSemiDefiniteSystemInPlace<System>(ATA,Z);
@@ -387,12 +380,9 @@ void shark::blas::generalSolveSystemInPlace(
 		//~ //XA=B => XAA'=BA' => X = BA' = BA^T(AA^T)'
 		//~ // with Z = BA^T => X(AA^T) = Z
 		//~ //compute AAT
-		RealMatrix AAT(m,m);
-		axpy_prod(A,trans(A),AAT);
+		RealMatrix AAT = prod(A,trans(A));
 		
-		//compute z=Ab
-		RealMatrix Z(B().size1(),m);
-		axpy_prod(B,trans(A),Z);
+		RealMatrix Z= prod(B,trans(A));
 		
 		//call recursively for the quadratic case
 		solveSymmSemiDefiniteSystemInPlace<System>(AAT,Z);
