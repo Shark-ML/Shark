@@ -39,14 +39,14 @@ include/            This directory and its sub-directories hold
                     some functionality is implemented in lower-
                     level Impl/ folders and inline .inl files.
 
-lib/              The Shark library is placed in this directory.
+lib/                The Shark library is placed in this directory.
                     In the source code distribution this directory
                     is initially empty, and the library is placed
                     into the directory as the results of
                     compilation. Binary distributions already
                     contain the library, pre-built in release mode.
 
-doc/             All documentation files are found in this
+doc/                All documentation files are found in this
                     sub-directory. In packaged versions of Shark
                     the html documentation is pre-built; the
                     repository provides the corresponding sources.
@@ -57,7 +57,7 @@ doc/             All documentation files are found in this
 
 doc/index.html      Entry point to the Shark documentation.
 
-examples/   The examples directory contains example
+examples/           The examples directory contains example
                     use-cases of the most important algorithms
                     implemented in Shark. Besides exemplifying
                     powerful learning algorithms, these programs
