@@ -6,7 +6,10 @@ compiler:
   
 os:
   - linux
-  
+
+env:
+  - OMP_NUM_THREADS=2
+
 before_install:
   - sudo add-apt-repository -y ppa:boost-latest/ppa
   - sudo apt-get update
