@@ -5,7 +5,7 @@ file(GLOB_RECURSE SHARK_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../include/
 # Group the source for MSVC
 foreach(FILE ${SHARK_SRCS}) 
     # Get the directory of the source file
-    get_filename_component(PARENT_DIR "${FILE}" DIRECTORY)
+    get_filename_component(PARENT_DIR "${FILE}" PATH)
     # Make sure we are using windows slashes
     string(REPLACE "/" "\\" GROUP "${PARENT_DIR}")
 
@@ -16,7 +16,7 @@ endforeach()
 #Also Group the Header Files
 foreach(FILE ${SHARK_HEADERS}) 
     # Get the directory of the source file
-    get_filename_component(PARENT_DIR "${FILE}" DIRECTORY)
+    get_filename_component(PARENT_DIR "${FILE}" PATH)
 
 	string(REPLACE "../" "" GROUP "${PARENT_DIR}")
 
