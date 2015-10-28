@@ -8,8 +8,13 @@ os:
   - linux
   
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq libboost-dev/precise-backports  
+  - sudo add-apt-repository -y ppa:boost-latest/ppa
+  - sudo apt-get update
+  - sudo apt-get install libboost1.55-dev  libboost-date-time1.55-dev libboost-filesystem1.55-dev 
+  - sudo apt-get install libboost-graph1.55-dev libboost-iostreams1.55-dev libboost-math1.55-dev 
+  - sudo apt-get install libboost-program-options1.55-dev
+  - sudo apt-get install libboost-random1.55-dev libboost-regex1.55-dev libboost-serialization1.55-dev 
+  - sudo apt-get install libboost-system1.55-dev libboost-test1.55-dev libboost-thread1.55-dev
   
 before_script:  
   - mkdir build
