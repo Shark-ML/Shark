@@ -31,7 +31,7 @@ void testObjectiveFunctionMOO(
 	
 	for(std::size_t i = 0; i != iterations; ++i){
 		mocma.step(f);
-		std::clog<<"\r"<<i<<" "<<std::flush;
+		//~ std::clog<<"\r"<<i<<" "<<std::flush;
 	}
 	BOOST_REQUIRE_EQUAL(mocma.solution().size(), mu);
 	HypervolumeCalculator hyp;
