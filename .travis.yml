@@ -9,7 +9,7 @@ os:
   
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libboost-dev
+  - sudo apt-get install -qq libboost-dev/precise-backports  
   
 before_script:  
   - mkdir build
