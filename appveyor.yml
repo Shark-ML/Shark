@@ -1,0 +1,4 @@
+init:
+  - cmd: cmake --version
+  - cmd: msbuild /version
+  - cmd: dir C:\Libraries\boost
