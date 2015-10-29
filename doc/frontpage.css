@@ -101,6 +101,7 @@ table.status
 	width: 100%;
 	background: #eee;
 	color: #000;
+	border-bottom: 1px solid #bbb;
 	overflow: hidden;
 	z-index: 20;
 }
