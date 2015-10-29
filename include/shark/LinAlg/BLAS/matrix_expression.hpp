@@ -260,7 +260,7 @@ public:
 	typedef std::ptrdiff_t difference_type;
 	typedef T value_type;
 	typedef const T& const_reference;
-	typedef T& reference;
+	typedef const_reference reference;
 	typedef value_type const* const_pointer;
 	typedef value_type scalar_type;
 	typedef const_pointer pointer;
@@ -269,8 +269,8 @@ public:
 	typedef index_type const* const_index_pointer;
 	typedef index_type index_pointer;
 
-	typedef const matrix_reference<const self_type> const_closure_type;
-	typedef matrix_reference<self_type> closure_type;
+	typedef self_type const_closure_type;
+	typedef self_type closure_type;
 	typedef dense_tag storage_category;
 	typedef unknown_orientation orientation;
 	typedef elementwise_tag evaluation_category;

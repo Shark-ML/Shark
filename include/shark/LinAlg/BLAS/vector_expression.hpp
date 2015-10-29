@@ -128,16 +128,17 @@ public:
 	typedef T value_type;
 	typedef T scalar_type;
 	typedef const T& const_reference;
-	typedef T& reference;
-	typedef T* pointer;
-	typedef const T *const_pointer;
+	typedef const_reference reference;
+	typedef T const* const_pointer;
+	typedef const_pointer pointer;
+	
 
 	typedef std::size_t index_type;
 	typedef index_type const* const_index_pointer;
 	typedef index_type index_pointer;
 
-	typedef const vector_reference<const self_type> const_closure_type;
-	typedef vector_reference<self_type> closure_type;
+	typedef self_type const_closure_type;
+	typedef self_type closure_type;
 	typedef unknown_storage_tag storage_category;
 	typedef elementwise_tag evaluation_category;
 
@@ -152,11 +153,6 @@ public:
 	// Accessors
 	size_type size() const {
 		return m_size;
-	}
-
-	// Resizing
-	void resize(size_type size, bool /*preserve*/ = true) {
-		m_size = size;
 	}
 
 	// Element access
