@@ -44,9 +44,9 @@ namespace detail{
 
 ///\brief Approximates a Limited Memory Cholesky Matrix from a stream of samples.
 ///
-/// GIven a set of points \f$ v_i\f$, produces an approximation of the cholesky factor of a matrix:
+/// Given a set of points \f$ v_i\f$, produces an approximation of the cholesky factor of a matrix:
 /// \f[ AA^T=C= (1-\alpha) C^{t-1} + \alpha* x_{j_t} x_{j_t}^T \f]
-/// here the \f j_t \f$ are chosen such to have an approximate distance \f$ N_{steps} \f$. It is assumed
+/// here the \f$ j_t \f$ are chosen such to have an approximate distance \f$ N_{steps} \f$. It is assumed
 /// that the \f$x_i \f$ are correlated and thus a big \f$ N_{steps} \f$ tris to get points which are less 
 /// correlated. The matrix keeps a set of vectors and decides at every step which is will discard.
 ///

@@ -163,7 +163,6 @@ Sharks comes with its own solver for Quadratic Programs:
 .. _label_for_linalg_tutorials:
 
 We give an introduction to Shark's usage of the
-`Boost uBLAS <http://www.boost.org/doc/libs/release/libs/numeric>`_
 library for "all things linear algebra":
 
 * :doc:`concepts/lin_alg/vector_matrix`

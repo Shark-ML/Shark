@@ -114,10 +114,6 @@
 Summary
 =======
 
-.. note::
-
-     This is Shark 3.0 beta. See the :doc:`news <rest_sources/about_shark/news>` for more information.
-
 **SHARK is a fast, modular, feature-rich open-source C++ machine learning library**.
 It provides methods for linear and nonlinear optimization, kernel-based learning
 algorithms, neural networks, and various other machine learning techniques (see the

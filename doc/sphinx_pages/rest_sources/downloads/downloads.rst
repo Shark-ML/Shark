@@ -40,12 +40,14 @@ Get the latest snapshot from our svn repository!
 
 
 
-.. Shark sources
-   -------------
+Shark sources
+-------------
 
-   Please download the following package if you want to build Shark yourself:
+   We have two source packages available:
 
-   `Shark source code <https://nisys.dyndns.biz/shark/job/Shark_Source_Package/lastSuccessfulBuild/artifact/libshark-3.0.0-src.tar.bz2>`_
+   `Shark-3.0.0.zip <https://github.com/Shark-ML/Shark/archive/v3.0.0.zip>`_
+   
+   `Shark-3.0.0.tar.gz <https://github.com/Shark-ML/Shark/archive/v3.0.0.tar.gz>`_
 
    See the :doc:`installation guide <../getting_started/installation>`
    for details on how to compile and install the library.

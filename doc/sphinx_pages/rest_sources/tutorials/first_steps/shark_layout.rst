@@ -26,9 +26,8 @@ choices:
   and also sets up a :doxy:`Data` class especially suited for
   machine learning tasks: subsets (e.g., for cross-validation) are
   lazy copies of the original set.
-* The folders ``Fuzzy/``, ``Network/``, ``Rng/``, ``Statistics/`` all
-  implement specialized functionality pertaining to Fuzzy Logic, HTTP
-  protocols (for RESTful APIs), random number generation, and various
+* The folders `Rng/`` and ``Statistics/``
+  implement specialized functionality for random number generation, and various
   statistical tests or distributions, respectively.
 
 * Currently, the only algorithms implemented in the folder ``Unsupervised/``
@@ -38,7 +37,3 @@ choices:
   ``"Model"``-``"ObjectiveFunction"``-``"Optimizer"`` trias. This can be seen as roughly
   corresponding to the three remaining folders ``Models/``, ``ObjectiveFunctions/``,
   and ``Algorithms/``
-
-.. todo::
-  This mindmap will be extended in scope and provided as an interactive,
-  browsable applet in the official release of Shark.

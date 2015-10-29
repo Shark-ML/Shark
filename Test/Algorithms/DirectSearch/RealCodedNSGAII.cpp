@@ -27,7 +27,8 @@ double testObjectiveFunctionMOOHelper(
 	
 	for(std::size_t i = 0; i != iterations; ++i){
 		realCodedNSGAII.step(f);
-		std::clog<<"\r"<<i<<" "<<std::flush;
+		//~ if(i%(iterations/100)==0)
+			//~ std::clog<<"\r"<<i<<" "<<std::flush;
 	}
 	BOOST_REQUIRE_EQUAL(realCodedNSGAII.solution().size(), mu);
 	HypervolumeCalculator hyp;
