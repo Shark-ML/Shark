@@ -2,3 +2,4 @@ init:
   - cmd: cmake --version
   - cmd: msbuild /version
   - cmd: dir C:\Libraries\boost
+  - cmd: dir C:\Libraries\boost\lib32-msvc-12.0
