@@ -4,9 +4,9 @@ platform:
 #  - x64  
 
 # specify branch
-branches:
-  only:
-  - master
+#branches:
+#  only:
+#  - master
   
 # before everything
 init:
