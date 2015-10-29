@@ -931,10 +931,22 @@ void sum_rows_impl(MatA const& matA, VecB& vecB, row_major){
 	}
 }
 
+template<class MatA,class VecB>
+void sum_rows_impl(MatA const& matA, VecB& vecB, unknown_orientation){
+	sum_rows_impl(matA,vecB,row_major());
+}
+
 //dispatcher for triangular matrix
 template<class MatA,class VecB,class Orientation,class Triangular>
 void sum_rows_impl(MatA const& matA, VecB& vecB, packed<Orientation,Triangular>){
 	sum_rows_impl(matA,vecB,Orientation());
+}
+
+
+//dispatcher 
+template<class MatA,class VecB>
+void sum_rows_impl(MatA const& matA, VecB& vecB){
+	sum_rows_impl(matA,vecB,typename MatA::orientation());
 }
 
 template<class MatA>
@@ -955,17 +967,29 @@ typename MatA::value_type sum_impl(MatA const& matA, row_major){
 	return totalSum;
 }
 
+template<class MatA>
+typename MatA::value_type sum_impl(MatA const& matA, unknown_orientation){
+	return sum_impl(matA,row_major());
+}
+
+
 //dispatcher for triangular matrix
 template<class MatA,class Orientation,class Triangular>
 typename MatA::value_type sum_impl(MatA const& matA, packed<Orientation,Triangular>){
 	return sum_impl(matA,Orientation());
 }
 
+//dispatcher
+template<class MatA>
+typename MatA::value_type sum_impl(MatA const& matA){
+	return sum_impl(matA,typename MatA::orientation());
+}
+
 template<class MatA>
 typename MatA::value_type max_impl(MatA const& matA, column_major){
 	typename MatA::value_type maximum = 0;
 	for(std::size_t j = 0; j != matA.size2(); ++j){
-		maximum= std::max(maximum, max(column(matA,j)));
+		maximum = std::max(maximum, max(column(matA,j)));
 	}
 	return maximum;
 }
@@ -979,10 +1003,21 @@ typename MatA::value_type max_impl(MatA const& matA, row_major){
 	return maximum;
 }
 
+template<class MatA>
+typename MatA::value_type max_impl(MatA const& matA, unknown_orientation){
+	return max_impl(matA,row_major());
+}
+
 //dispatcher for triangular matrix
 template<class MatA,class Orientation,class Triangular>
 typename MatA::value_type max_impl(MatA const& matA, packed<Orientation,Triangular>){
 	return std::max(max_impl(matA,Orientation()),0.0);
+}
+
+//dispatcher
+template<class MatA>
+typename MatA::value_type max_impl(MatA const& matA){
+	return max_impl(matA,typename MatA::orientation());
 }
 
 template<class MatA>
@@ -1003,10 +1038,21 @@ typename MatA::value_type min_impl(MatA const& matA, row_major){
 	return minimum;
 }
 
+template<class MatA>
+typename MatA::value_type min_impl(MatA const& matA, unknown_orientation){
+	return min_impl(matA,row_major());
+}
+
 //dispatcher for triangular matrix
 template<class MatA,class Orientation,class Triangular>
 typename MatA::value_type min_impl(MatA const& matA, packed<Orientation,Triangular>){
-	return std::max(min_impl(matA,Orientation()),0.0);
+	return std::min(min_impl(matA,Orientation()),0.0);
+}
+
+//dispatcher
+template<class MatA>
+typename MatA::value_type min_impl(MatA const& matA){
+	return min_impl(matA,typename MatA::orientation());
 }
 
 }//end detail
@@ -1022,7 +1068,7 @@ sum_rows(matrix_expression<MatA> const& A){
 		typename MatA::value_type,
 		dense_random_access_iterator_tag
 	>::type result(A().size2(),0.0);
-	detail::sum_rows_impl(A(),result,typename MatA::orientation());
+	detail::sum_rows_impl(eval_block(A),result);
 	return result;
 }
 
@@ -1037,24 +1083,24 @@ sum_columns(matrix_expression<MatA> const& A){
 		typename MatA::value_type,
 		dense_random_access_iterator_tag
 	>::type result(A().size1(),0);
-	detail::sum_rows_impl(trans(A),result,typename MatA::orientation::transposed_orientation());
+	detail::sum_rows_impl(eval_block(trans(A)),result);
 	return result;
 }
 
 
 template<class MatA>
 typename MatA::value_type sum(matrix_expression<MatA> const& A){
-	return detail::sum_impl(eval_block(A),typename matrix_temporary<MatA>::type::orientation());
+	return detail::sum_impl(eval_block(A));
 }
 
 template<class MatA>
 typename MatA::value_type max(matrix_expression<MatA> const& A){
-	return detail::max_impl(eval_block(A),typename matrix_temporary<MatA>::type::orientation());
+	return detail::max_impl(eval_block(A));
 }
 
 template<class MatA>
 typename MatA::value_type min(matrix_expression<MatA> const& A){
-	return detail::min_impl(eval_block(A),typename matrix_temporary<MatA>::type::orientation());
+	return detail::min_impl(eval_block(A));
 }
 
 /// \brief Returns the frobenius inner-product between matrices exprssions 1 and e2.

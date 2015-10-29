@@ -317,9 +317,6 @@ void shark::blas::generalSolveSystemInPlace(
 	matrix_expression<MatT> const& A, 
 	vector_expression<VecT>& b
 ){
-	std::size_t m = A().size1();
-	std::size_t n = A().size2();
-	
 	if( System::left){
 		SIZE_CHECK(A().size1() == b().size());
 		//reduce to the case of quadratic A
@@ -356,10 +353,7 @@ template<class System,class MatA,class MatB>
 void shark::blas::generalSolveSystemInPlace(
 	matrix_expression<MatA> const& A, 
 	matrix_expression<MatB>& B
-){
-	std::size_t m = A().size1();
-	std::size_t n = A().size2();
-	
+){	
 	if( System::left){
 		SIZE_CHECK(A().size1() == B().size1());
 		//reduce to the case of quadratic A

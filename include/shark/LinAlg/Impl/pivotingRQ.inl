@@ -162,7 +162,7 @@ std::size_t shark::blas::pivotingRQ
 	matrixQ().resize(n,n);
 	//now Compute U^T temp = U^T T^-1 U
 	noalias(matrixQ) = -prod(trans(rows(U,0,rank)),InvTU);
-	diag(matrixQ) += n;
+	diag(matrixQ) += 1;
 
 	//testing algorithm
 //	matrixQ().resize(n,n);

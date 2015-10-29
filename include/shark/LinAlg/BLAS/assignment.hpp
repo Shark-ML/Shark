@@ -603,13 +603,13 @@ namespace detail{
 /// the expression is assigned, which is then returned, otherwise the expression itself
 /// is returned
 template<class E>
-typename boost::mpl::if_<
+typename boost::mpl::eval_if<
 	boost::is_same<
 		typename E::evaluation_category,
 		blockwise_tag
 	>,
-	typename vector_temporary<E>::type,
-	E const&
+	vector_temporary<E>,
+	boost::mpl::identity<E const&>
 >::type
 eval_block(blas::vector_expression<E> const& e){
 	return detail::evaluate_block(e,typename E::evaluation_category());
@@ -620,13 +620,13 @@ eval_block(blas::vector_expression<E> const& e){
 /// the expression is assigned, which is then returned, otherwise the expression itself
 /// is returned
 template<class E>
-typename boost::mpl::if_<
+typename boost::mpl::eval_if<
 	boost::is_same<
 		typename E::evaluation_category,
 		blockwise_tag
 	>,
-	typename matrix_temporary<E>::type,
-	E const&
+	matrix_temporary<E>,
+	boost::mpl::identity<E const&>
 >::type
 eval_block(blas::matrix_expression<E> const& e){
 	return detail::evaluate_block(e,typename E::evaluation_category());

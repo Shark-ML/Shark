@@ -90,6 +90,8 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 		}
 		S /= m_l;
 		m_eigenvalues.resize(m_l);
+		m_eigenvectors.resize(m_n,m_l);
+		m_eigenvectors.clear();
 		RealMatrix U(m_l, m_l);
 		eigensymm(S, U, m_eigenvalues);
 		// compute true eigenvectors
@@ -99,7 +101,7 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 			std::size_t batchSize = inputs.batch(b).size1();
 			std::size_t batchEnd = batchStart+batchSize;
 			RealMatrix X = inputs.batch(b)-repeat(m_mean,batchSize);
-			m_eigenvectors = prod(trans(X),rows(U,batchStart,batchEnd));
+			noalias(m_eigenvectors) += prod(trans(X),rows(U,batchStart,batchEnd));
 			batchStart = batchEnd;
 		}
 		//normalize
