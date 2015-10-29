@@ -3,6 +3,10 @@ platform:
   - Win32
 #  - x64  
 
+# specify branch
+branches:
+  - master
+  
 # before everything
 init:
   - cmd: cmake --version
