@@ -3,21 +3,26 @@ platform:
 #  - Win32
   - x64  
 
+# configuration
+configuration: Release
+
 # set environment variables
 environment:
   BOOST_ROOT: C:\Libraries\boost
   BOOST_LIBRARYDIR: C:\Libraries\boost\lib64-msvc-12.0
-  
+  OMP_NUM_THREADS: 2
+
 # specify branch
-#branches:
-#  only:
-#  - master
+branches:
+  only:
+    - master
   
 # before everything
 init:
   - cmd: cmake --version
   - cmd: msbuild /version
   - cmd: dir %BOOST_LIBRARYDIR%
+  
 
 # clone directory
 clone_folder: C:\projects\shark
