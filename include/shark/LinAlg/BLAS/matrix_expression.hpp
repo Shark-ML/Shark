@@ -730,7 +730,7 @@ typename boost::enable_if<
 	matrix_expression<E> const& e,
 	T t
 ){
-	return e + scalar_matrix<T>(e().size(),t);
+	return e + scalar_matrix<T>(e().size1(),e().size2(),t);
 }
 
 ///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
@@ -742,7 +742,7 @@ typename boost::enable_if<
 	T t,
 	matrix_expression<E> const& e
 ){
-	return e + scalar_matrix<T>(e().size(),t);
+	return e + scalar_matrix<T>(e().size1(),e().size2(),t);
 }
 
 ///\brief Subtracts a scalar which is interpreted as a constant matrix from a matrix.
@@ -754,7 +754,7 @@ typename boost::enable_if<
 	matrix_expression<E> const& e,
 	T t
 ){
-	return e - scalar_matrix<T>(e().size(),t);
+	return e - scalar_matrix<T>(e().size1(),e().size2(),t);
 }
 
 ///\brief Subtracts a matrix from a scalar which is interpreted as a constant matrix
@@ -766,7 +766,7 @@ typename boost::enable_if<
 	T t,
 	matrix_expression<E> const& e
 ){
-	return scalar_matrix<T>(e().size(),t) - e;
+	return scalar_matrix<T>(e().size1(),e().size2(),t) - e;
 }
 
 template<class E1, class E2, class F>
