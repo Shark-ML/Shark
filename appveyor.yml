@@ -1,7 +1,7 @@
 # specify platforms
 platform: 
   - Win32
-%  - x64  
+#  - x64  
 
 # before everything
 init:
