@@ -232,6 +232,106 @@ private:
 	std::size_t m_rows;
 };
 
+///\brief Creates a matrix from a vector by repeating the vector in every row of the matrix
+///
+///example: vector = (1,2,3)
+///repeat(vector,3) results in
+///(1,2,3)
+///(1,2,3)
+///(1,2,3)
+///@param vector the vector which is to be repeated as the rows of the resulting matrix
+///@param rows the number of rows of the matrix
+template<class Vector>
+vector_repeater<Vector> repeat(vector_expression<Vector> const& vector, std::size_t rows){
+	return vector_repeater<Vector>(vector(),rows);
+}
+
+/** \brief A matrix with all values of type \c T equal to the same value
+ *
+ * \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
+ */
+template<class T>
+class scalar_matrix:
+	public matrix_container<scalar_matrix<T> > {
+
+	typedef scalar_matrix<T> self_type;
+public:
+	typedef std::size_t size_type;
+	typedef std::ptrdiff_t difference_type;
+	typedef T value_type;
+	typedef const T& const_reference;
+	typedef T& reference;
+	typedef value_type const* const_pointer;
+	typedef value_type scalar_type;
+	typedef const_pointer pointer;
+
+	typedef std::size_t index_type;
+	typedef index_type const* const_index_pointer;
+	typedef index_type index_pointer;
+
+	typedef const matrix_reference<const self_type> const_closure_type;
+	typedef matrix_reference<self_type> closure_type;
+	typedef dense_tag storage_category;
+	typedef unknown_orientation orientation;
+	typedef elementwise_tag evaluation_category;
+
+	// Construction and destruction
+	scalar_matrix():
+		m_size1(0), m_size2(0), m_value() {}
+	scalar_matrix(size_type size1, size_type size2, const value_type& value = value_type(1)):
+		m_size1(size1), m_size2(size2), m_value(value) {}
+	scalar_matrix(const scalar_matrix& m):
+		m_size1(m.m_size1), m_size2(m.m_size2), m_value(m.m_value) {}
+
+	// Accessors
+	size_type size1() const {
+		return m_size1;
+	}
+	size_type size2() const {
+		return m_size2;
+	}
+
+	// Element access
+	const_reference operator()(size_type /*i*/, size_type /*j*/) const {
+		return m_value;
+	}
+	
+	//Iterators
+	typedef constant_iterator<value_type> const_row_iterator;
+	typedef constant_iterator<value_type> const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+
+	const_row_iterator row_begin(std::size_t i) const {
+		return const_row_iterator(0, m_value);
+	}
+	const_row_iterator row_end(std::size_t i) const {
+		return const_row_iterator(size2(), m_value);
+	}
+	
+	const_row_iterator column_begin(std::size_t j) const {
+		return const_row_iterator(0, m_value);
+	}
+	const_row_iterator column_end(std::size_t j) const {
+		return const_row_iterator(size1(), m_value);
+	}
+private:
+	size_type m_size1;
+	size_type m_size2;
+	value_type m_value;
+};
+
+///brief repeats a single element to form a matrix  of size rows x columns
+///
+///@param scalar the value which is repeated
+///@param rows the number of rows of the resulting vector
+///@param columns the number of columns of the resulting vector
+template<class T>
+typename boost::enable_if<boost::is_arithmetic<T>, scalar_matrix<T> >::type
+repeat(T scalar, std::size_t rows, std::size_t columns){
+	return scalar_matrix<T>(rows, columns, scalar);
+}
+
 template<class E>
 class matrix_scalar_multiply:public blas::matrix_expression<matrix_scalar_multiply<E> > {
 private:
@@ -457,8 +557,6 @@ name (matrix_expression<E> const& e, T scalar){ \
 	typedef F<typename E::value_type, T> functor_type; \
 	return matrix_unary<E, functor_type>(e, functor_type(scalar)); \
 }
-SHARK_MATRIX_SCALAR_TRANSFORMATION(operator+, scalar_add)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(operator-, scalar_subtract2)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator/, scalar_divide)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<, scalar_less_than)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<=, scalar_less_equal_than)
@@ -482,8 +580,6 @@ name (T scalar, matrix_expression<E> const& e){ \
 	typedef F<typename E::value_type, T> functor_type; \
 	return matrix_unary<E, functor_type>(e, functor_type(scalar)); \
 }
-SHARK_MATRIX_SCALAR_TRANSFORMATION_2(operator+, scalar_add)
-SHARK_MATRIX_SCALAR_TRANSFORMATION_2(operator-, scalar_subtract1)
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(min, scalar_min)
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(max, scalar_max)
 #undef SHARK_MATRIX_SCALAR_TRANSFORMATION_2
@@ -607,7 +703,7 @@ private:
 	functor_type m_functor;
 };
 
-
+///\brief Adds two Matrices
 template<class E1, class E2>
 matrix_addition<E1, E2 > operator+ (
 	matrix_expression<E1> const& e1,
@@ -615,12 +711,62 @@ matrix_addition<E1, E2 > operator+ (
 ){
 	return matrix_addition<E1, E2>(e1(),e2());
 }
+
+///\brief Subtracts two Matrices
 template<class E1, class E2>
 matrix_addition<E1, matrix_scalar_multiply<E2> > operator- (
 	matrix_expression<E1> const& e1,
 	matrix_expression<E2> const& e2
 ){
 	return matrix_addition<E1, matrix_scalar_multiply<E2> >(e1(),-e2());
+}
+
+///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
+template<class E, class T>
+typename boost::enable_if<
+	boost::is_convertible<T, typename E::value_type>, 
+	matrix_addition<E, scalar_matrix<T> >
+>::type operator+ (
+	matrix_expression<E> const& e,
+	T t
+){
+	return e + scalar_matrix<T>(e().size(),t);
+}
+
+///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
+template<class T, class E>
+typename boost::enable_if<
+	boost::is_convertible<T, typename E::value_type>,
+	matrix_addition<E, scalar_matrix<T> >
+>::type operator+ (
+	T t,
+	matrix_expression<E> const& e
+){
+	return e + scalar_matrix<T>(e().size(),t);
+}
+
+///\brief Subtracts a scalar which is interpreted as a constant matrix from a matrix.
+template<class E, class T>
+typename boost::enable_if<
+	boost::is_convertible<T, typename E::value_type> ,
+	matrix_addition<E, matrix_scalar_multiply<scalar_matrix<T> > >
+>::type operator- (
+	matrix_expression<E> const& e,
+	T t
+){
+	return e - scalar_matrix<T>(e().size(),t);
+}
+
+///\brief Subtracts a matrix from a scalar which is interpreted as a constant matrix
+template<class E, class T>
+typename boost::enable_if<
+	boost::is_convertible<T, typename E::value_type>,
+	matrix_addition<scalar_matrix<T>, matrix_scalar_multiply<E> >
+>::type operator- (
+	T t,
+	matrix_expression<E> const& e
+){
+	return scalar_matrix<T>(e().size(),t) - e;
 }
 
 template<class E1, class E2, class F>
@@ -1167,21 +1313,6 @@ typename MatrixT::value_type trace(matrix_expression<MatrixT> const& m)
 	return t;
 }
 
-
-///\brief Creates a matrix from a vector by repeating the vector in every row of the matrix
-///
-///example: vector = (1,2,3)
-///repeat(vector,3) results in
-///(1,2,3)
-///(1,2,3)
-///(1,2,3)
-///@param vector the vector which is to be repeated as the rows of the resulting matrix
-///@param rows the number of rows of the matrix
-template<class Vector>
-vector_repeater<Vector> repeat(vector_expression<Vector> const& vector, std::size_t rows){
-	return vector_repeater<Vector>(vector(),rows);
-}
-
 /** \brief An identity matrix with values of type \c T
  *
  * Elements or cordinates \f$(i,i)\f$ are equal to 1 (one) and all others to 0 (zero).
@@ -1193,93 +1324,6 @@ public:
 	identity_matrix(){}
 	identity_matrix(std::size_t size):base_type(scalar_vector<T>(size,T(1))){}
 };
-
-/** \brief A matrix with all values of type \c T equal to the same value
- *
- * \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
- */
-template<class T>
-class scalar_matrix:
-	public matrix_container<scalar_matrix<T> > {
-
-	typedef scalar_matrix<T> self_type;
-public:
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
-	typedef T value_type;
-	typedef const T& const_reference;
-	typedef T& reference;
-	typedef value_type const* const_pointer;
-	typedef value_type scalar_type;
-	typedef const_pointer pointer;
-
-	typedef std::size_t index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type index_pointer;
-
-	typedef const matrix_reference<const self_type> const_closure_type;
-	typedef matrix_reference<self_type> closure_type;
-	typedef dense_tag storage_category;
-	typedef unknown_orientation orientation;
-	typedef elementwise_tag evaluation_category;
-
-	// Construction and destruction
-	scalar_matrix():
-		m_size1(0), m_size2(0), m_value() {}
-	scalar_matrix(size_type size1, size_type size2, const value_type& value = value_type(1)):
-		m_size1(size1), m_size2(size2), m_value(value) {}
-	scalar_matrix(const scalar_matrix& m):
-		m_size1(m.m_size1), m_size2(m.m_size2), m_value(m.m_value) {}
-
-	// Accessors
-	size_type size1() const {
-		return m_size1;
-	}
-	size_type size2() const {
-		return m_size2;
-	}
-
-	// Element access
-	const_reference operator()(size_type /*i*/, size_type /*j*/) const {
-		return m_value;
-	}
-	
-	//Iterators
-	typedef constant_iterator<value_type> const_row_iterator;
-	typedef constant_iterator<value_type> const_column_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef const_column_iterator column_iterator;
-
-	const_row_iterator row_begin(std::size_t i) const {
-		return const_row_iterator(0, m_value);
-	}
-	const_row_iterator row_end(std::size_t i) const {
-		return const_row_iterator(size2(), m_value);
-	}
-	
-	const_row_iterator column_begin(std::size_t j) const {
-		return const_row_iterator(0, m_value);
-	}
-	const_row_iterator column_end(std::size_t j) const {
-		return const_row_iterator(size1(), m_value);
-	}
-private:
-	size_type m_size1;
-	size_type m_size2;
-	value_type m_value;
-};
-
-///brief repeats a single element to form a matrix  of size rows x columns
-///
-///@param scalar the value which is repeated
-///@param rows the number of rows of the resulting vector
-///@param columns the number of columns of the resulting vector
-template<class T>
-typename boost::enable_if<boost::is_arithmetic<T>, scalar_matrix<T> >::type
-repeat(T scalar, std::size_t rows, std::size_t columns){
-	return scalar_matrix<T>(rows, columns, scalar);
-}
-
 
 }
 }

@@ -328,8 +328,6 @@ name (vector_expression<E> const& e, T scalar){ \
 	typedef F<typename E::value_type,T> functor_type; \
 	return vector_unary<E, functor_type>(e, functor_type(scalar)); \
 }
-SHARK_VECTOR_SCALAR_TRANSFORMATION(operator+, scalar_add)
-SHARK_VECTOR_SCALAR_TRANSFORMATION(operator-, scalar_subtract2)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator/, scalar_divide)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<, scalar_less_than)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<=, scalar_less_equal_than)
@@ -353,8 +351,6 @@ name (T scalar, vector_expression<E> const& e){ \
 	typedef F<typename E::value_type,T> functor_type; \
 	return vector_unary<E, functor_type>(e, functor_type(scalar)); \
 }
-SHARK_VECTOR_SCALAR_TRANSFORMATION_2(operator+, scalar_add)
-SHARK_VECTOR_SCALAR_TRANSFORMATION_2(operator-, scalar_subtract1)
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(min, scalar_min)
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, scalar_max)
 #undef SHARK_VECTOR_SCALAR_TRANSFORMATION_2
@@ -464,6 +460,7 @@ private:
 	expression_closure2_type m_expression2;
 };
 
+///\brief Adds two vectors
 template<class E1, class E2>
 vector_addition<E1, E2 > operator+ (
 	vector_expression<E1> const& e1,
@@ -471,12 +468,61 @@ vector_addition<E1, E2 > operator+ (
 ){
 	return vector_addition<E1, E2>(e1(),e2());
 }
+///\brief Subtracts two vectors
 template<class E1, class E2>
 vector_addition<E1, vector_scalar_multiply<E2> > operator- (
 	vector_expression<E1> const& e1,
 	vector_expression<E2> const& e2
 ){
 	return vector_addition<E1, vector_scalar_multiply<E2> >(e1(),-e2());
+}
+
+///\brief Adds a vector plus a scalr which is interpreted as a constant vector
+template<class E, class T>
+typename boost::enable_if<
+	boost::is_convertible<T, typename E::value_type>, 
+	vector_addition<E, scalar_vector<T> >
+>::type operator+ (
+	vector_expression<E> const& e,
+	T t
+){
+	return e + scalar_vector<T>(e().size(),t);
+}
+
+///\brief Adds a vector plus a scalar which is interpreted as a constant vector
+template<class T, class E>
+typename boost::enable_if<
+	boost::is_convertible<T, typename E::value_type>,
+	vector_addition<E, scalar_vector<T> >
+>::type operator+ (
+	T t,
+	vector_expression<E> const& e
+){
+	return e + scalar_vector<T>(e().size(),t);
+}
+
+///\brief Subtracts a scalar which is interpreted as a constant vector from a vector.
+template<class E, class T>
+typename boost::enable_if<
+	boost::is_convertible<T, typename E::value_type> ,
+	vector_addition<E, vector_scalar_multiply<scalar_vector<T> > >
+>::type operator- (
+	vector_expression<E> const& e,
+	T t
+){
+	return e - scalar_vector<T>(e().size(),t);
+}
+
+///\brief Subtracts a vector from a scalar which is interpreted as a constant vector
+template<class E, class T>
+typename boost::enable_if<
+	boost::is_convertible<T, typename E::value_type>,
+	vector_addition<scalar_vector<T>, vector_scalar_multiply<E> >
+>::type operator- (
+	T t,
+	vector_expression<E> const& e
+){
+	return scalar_vector<T>(e().size(),t) - e;
 }
 
 
