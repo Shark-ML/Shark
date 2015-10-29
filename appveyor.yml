@@ -5,6 +5,7 @@ platform:
 
 # specify branch
 branches:
+  only:
   - master
   
 # before everything
