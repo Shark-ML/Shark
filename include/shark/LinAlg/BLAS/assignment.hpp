@@ -566,36 +566,6 @@ noalias_proxy<C> noalias(temporary_proxy<C> lvalue) {
 //////////////////////////////////////////////////////////////////////
 /////Evaluate blockwise expressions
 //////////////////////////////////////////////////////////////////////
-namespace detail{
-	template<class E>
-	E const& evaluate_block(
-		blas::vector_expression<E> const& e,
-		elementwise_tag
-	){
-		return e();
-	}
-	template<class E>
-	typename vector_temporary<E>::type evaluate_block(
-		blas::vector_expression<E> const& e,
-		blockwise_tag
-	){
-		return e();
-	}
-	template<class E>
-	E const& evaluate_block(
-		blas::matrix_expression<E> const& e,
-		elementwise_tag
-	){
-		return e();
-	}
-	template<class E>
-	typename matrix_temporary<E>::type evaluate_block(
-		blas::matrix_expression<E> const& e,
-		blockwise_tag
-	){
-		return e();
-	}
-}
 
 ///\brief conditionally evaluates a vector expression if it is a block expression
 ///
@@ -612,7 +582,7 @@ typename boost::mpl::eval_if<
 	boost::mpl::identity<E const&>
 >::type
 eval_block(blas::vector_expression<E> const& e){
-	return detail::evaluate_block(e,typename E::evaluation_category());
+	return e();//either casts to E const& or returns the copied expression
 }
 ///\brief conditionally evaluates a matrix expression if it is a block expression
 ///
@@ -629,7 +599,7 @@ typename boost::mpl::eval_if<
 	boost::mpl::identity<E const&>
 >::type
 eval_block(blas::matrix_expression<E> const& e){
-	return detail::evaluate_block(e,typename E::evaluation_category());
+	return e();//either casts to E const& or returns the copied expression
 }
 
 }}
