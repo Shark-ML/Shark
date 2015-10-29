@@ -1,8 +1,13 @@
 # specify platforms
 platform: 
-  - Win32
-#  - x64  
+#  - Win32
+  - x64  
 
+# set environment variables
+environment:
+  BOOST_ROOT: C:\Libraries\boost
+  BOOST_LIBRARYDIR: C:\Libraries\boost\lib64-msvc-12.0
+  
 # specify branch
 #branches:
 #  only:
@@ -12,14 +17,8 @@ platform:
 init:
   - cmd: cmake --version
   - cmd: msbuild /version
-  - cmd: dir C:\Libraries\boost\libs
-  - cmd: dir C:\Libraries\boost
+  - cmd: dir %BOOST_LIBRARYDIR%
 
-# set environment variables
-environment:
-  BOOST_ROOT: C:\Libraries\boost
-  BOOST_LIBRARYDIR: C:\Libraries\boost\libs
-  
 # clone directory
 clone_folder: C:\projects\shark
 
