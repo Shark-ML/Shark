@@ -1,13 +1,14 @@
 # specify platforms
 platform: 
   - Win32
-  - x64  
+%  - x64  
 
 # before everything
 init:
   - cmd: cmake --version
   - cmd: msbuild /version
   - cmd: dir C:\Libraries\boost\libs
+  - cmd: dir C:\Libraries\boost
 
 # set environment variables
 environment:
