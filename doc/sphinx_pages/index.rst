@@ -177,7 +177,6 @@ Shark currently supports:
 * Supervised learning
 
   * Linear discriminant analysis (LDA), Fisher--LDA
-  * Naive Bayes classifier (supporting generic distributions)
   * Linear regression
   * Support vector machines (SVMs) for one-class, binary and true
     multi-category classification as well as regression; includes fast variants for linear kernels.
