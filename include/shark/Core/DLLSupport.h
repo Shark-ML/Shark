@@ -36,6 +36,7 @@
 #define SHARK_CORE_DLLSUPPORT_H
 
 #include <boost/config.hpp>
+#include <shark/Core/Shark.h>
 
 #if !( defined SHARK_USE_DYNLIB && defined BOOST_MSVC) 
 #define SHARK_EXPORT_SYMBOL
