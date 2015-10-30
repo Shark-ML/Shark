@@ -128,7 +128,7 @@ public:
 			m_J[smallIndex] = largeIndex;
 			m_q[largeIndex]  -= 1.0 - m_q[smallIndex];
 
-			if(m_q[large] < 1.0)
+			if(m_q[largeIndex] < 1.0)
 				smaller.push_back(largeIndex);
 			else
 				larger.push_back(largeIndex);
