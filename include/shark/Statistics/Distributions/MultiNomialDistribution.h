@@ -125,7 +125,7 @@ public:
 			smaller.pop_front();
 			larger.pop_front();
 
-			m_J[small] = large;
+			m_J[smallIndex] = largeIndex;
 			m_q[large]  -= 1.0 - m_q[smallIndex];
 
 			if(m_q[large] < 1.0)
