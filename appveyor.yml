@@ -16,7 +16,7 @@ environment:
 # specify branch
 branches:
   only:
-    - appveyor
+    - master
   
 # before everything
 init:
