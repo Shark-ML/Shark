@@ -3,7 +3,7 @@
 #		Setup for example compilation
 #####################################################################
 
-add_custom_target(examples)
+add_custom_target(sharkexamples)
 set(EXAMPLES_CPP_DIR ${CMAKE_CURRENT_BINARY_DIR})
 set(TPP_FILES "")
 
@@ -28,9 +28,9 @@ macro( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 		target_link_libraries(${NAME} shark)
 
 		# Add the dependencies to the target examples
-		add_dependencies(examples ${NAME})
+		add_dependencies(sharkexamples ${NAME})
 
-		set_target_properties( ${NAME} PROPERTIES FOLDER "Examples")
+		set_target_properties( ${NAME} PROPERTIES FOLDER "examples")
 
 		# Installation
 		install(TARGETS ${NAME}

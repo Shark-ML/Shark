@@ -120,18 +120,18 @@ public:
 		// appropriately allocate the larger outcomes over the
 		// overall uniform mixture.
 		while(!smaller.empty() && !larger.empty()){
-			std::size_t small = smaller.front();
-			std::size_t large = larger.front();
+			std::size_t smallIndex = smaller.front();
+			std::size_t largeIndex = larger.front();
 			smaller.pop_front();
 			larger.pop_front();
 
-			m_J[small] = large;
-			m_q[large]  -= 1.0 - m_q[small];
+			m_J[smallIndex] = largeIndex;
+			m_q[largeIndex]  -= 1.0 - m_q[smallIndex];
 
-			if(m_q[large] < 1.0)
-				smaller.push_back(large);
+			if(m_q[largeIndex] < 1.0)
+				smaller.push_back(largeIndex);
 			else
-				larger.push_back(large);
+				larger.push_back(largeIndex);
 		}
 		for(std::size_t i = 0; i != larger.size(); ++i){
 			m_q[larger[i]]=std::min(m_q[larger[i]],1.0);
