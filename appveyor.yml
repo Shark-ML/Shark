@@ -4,7 +4,9 @@ platform:
   - x64  
 
 # configuration
-configuration: Debug
+configuration: 
+#  - Debug
+  - Release
 
 # set environment variables
 environment:
@@ -43,4 +45,5 @@ before_build:
 # actual build process
 build:
   project: C:\projects\shark\build\shark.sln 
-  parallel: true                           
+  parallel: true 
+  verbosity: minimal # compiler verbosity
