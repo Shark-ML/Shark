@@ -116,6 +116,7 @@ table.status
 {
 	font-size: 30px;
 	vertical-align: middle;
+	margin-right: 3px;
 }
 #search
 {
@@ -126,7 +127,7 @@ table.status
 .menu
 {
 	font-size: 14px;
-	margin-left: 7px;
+	margin: 0px 3px 0px 3px;
 	vertical-align: middle;
 }
 #spacer
