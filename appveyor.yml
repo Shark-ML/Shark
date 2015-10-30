@@ -23,7 +23,6 @@ init:
   - cmd: cmake --version
   - cmd: msbuild /version
   #- cmd: dir %BOOST_LIBRARYDIR%
-  
 
 # clone directory
 clone_folder: C:\projects\shark
