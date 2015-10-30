@@ -9,7 +9,6 @@ configuration: Debug
 # set environment variables
 environment:
   BOOST_ROOT: C:\Libraries\boost
-  BOOST_LIBRARYDIR: C:\Libraries\boost\lib64-msvc-12.0
   #OMP_NUM_THREADS: 2
 
 # specify branch
@@ -21,7 +20,7 @@ branches:
 init:
   - cmd: cmake --version
   - cmd: msbuild /version
-  - cmd: dir %BOOST_LIBRARYDIR%
+  #- cmd: dir %BOOST_LIBRARYDIR%
   
 
 # clone directory
@@ -30,11 +29,14 @@ clone_folder: C:\projects\shark
 # scripts to run before build
 before_build:
   - cmd: cd C:\projects\shark
-  - cmd: dir 
+  #- cmd: dir 
   - cmd: md build
   - cmd: cd build
   - cmd: if "%platform%"=="Win32" set CMAKE_GENERATOR_NAME=Visual Studio 12
   - cmd: if "%platform%"=="x64"   set CMAKE_GENERATOR_NAME=Visual Studio 12 Win64
+  - cmd: if "%platform%"=="Win32" set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib32-msvc-12.0
+  - cmd: if "%platform%"=="x64"   set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib64-msvc-12.0
+
   - cmd: cmake -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=%configuration%  -DBUILD_EXAMPLES=OFF -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%"   ..
   #- cmd: type C:\projects\shark\build\shark.sln 
   
