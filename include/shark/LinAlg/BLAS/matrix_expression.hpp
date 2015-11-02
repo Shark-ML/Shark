@@ -8,50 +8,17 @@
 namespace shark {
 namespace blas {
 
-template<class E1, class E2, class F>
-class vector_matrix_binary:public matrix_expression<vector_matrix_binary<E1, E2, F> > {
-	typedef vector_matrix_binary<E1, E2, F> self_type;
-		
-	class Binder1{
-	public:
-		typedef typename F::argument2_type argument_type;
-		typedef typename F::result_type result_type;
-		
-		Binder1(F functor, typename F::argument1_type argument)
-		: m_functor(functor), m_argument(argument){}
-			
-		result_type operator()(argument_type x)const {
-			return m_functor(m_argument,x);
-		}
-	private:
-		F m_functor;
-		typename F::argument1_type m_argument;
-	};
-	
-	class Binder2{
-	public:
-		typedef typename F::argument1_type argument_type;
-		typedef typename F::result_type result_type;
-		
-		Binder2(F functor, typename F::argument2_type argument)
-		: m_functor(functor), m_argument(argument){}
-			
-		result_type operator()(argument_type x)const {
-			return m_functor(x, m_argument);
-		}
-	private:
-		F m_functor;
-		typename F::argument2_type m_argument;
-	};
+template<class E1, class E2>
+class outer_product:public matrix_expression<outer_product<E1, E2> > {
+	typedef scalar_multiply1<typename E1::value_type, typename E2::value_type> functor_type;
 public:
+	typedef typename E1::const_closure_type lhs_closure_type;
+	typedef typename E2::const_closure_type rhs_closure_type;
 
-	typedef typename E1::const_closure_type expression1_closure_type;
-	typedef typename E2::const_closure_type expression2_closure_type;
-
-	typedef F functor_type;
+	
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
-	typedef typename F::result_type value_type;
+	typedef typename functor_type::result_type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
@@ -62,95 +29,76 @@ public:
 	typedef typename E1::const_index_pointer const_index_pointer;
 	typedef typename index_pointer<E1>::type index_pointer;
 
-	typedef const self_type const_closure_type;
-	typedef const_closure_type closure_type;
+	typedef outer_product const_closure_type;
+	typedef outer_product closure_type;
 	typedef unknown_orientation orientation;
 	typedef unknown_storage_tag storage_category;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 
 	// Construction and destruction
 	
-	vector_matrix_binary(expression1_closure_type e1, expression2_closure_type e2, functor_type functor)
-	:m_expression1(e1), m_expression2(e2), m_functor(functor) {}
+	outer_product(lhs_closure_type const& e1, rhs_closure_type const& e2)
+	:m_lhs(e1), m_rhs(e2){}
 
 	// Accessors
 	size_type size1() const {
-		return m_expression1.size();
+		return m_lhs.size();
 	}
 	size_type size2() const {
-		return m_expression2.size();
+		return m_rhs.size();
 	}
 
 	// Expression accessors
-	const expression1_closure_type &expression1() const {
-		return m_expression1;
+	const lhs_closure_type &lhs() const {
+		return m_lhs;
 	}
-	const expression2_closure_type &expression2() const {
-		return m_expression2;
+	const rhs_closure_type &rhs() const {
+		return m_rhs;
 	}
 	// Element access
 	const_reference operator()(index_type i, index_type j) const {
-		return m_functor(m_expression1(i), m_expression2(j));
+		return m_lhs(i) * m_rhs(j);
 	}
 
-	typedef transform_iterator<typename E2::const_iterator,Binder1> const_row_iterator;
-	typedef transform_iterator<typename E1::const_iterator,Binder2> const_column_iterator;
+	typedef transform_iterator<typename E2::const_iterator,functor_type> const_row_iterator;
+	typedef transform_iterator<typename E1::const_iterator,functor_type> const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 	
 	const_row_iterator row_begin(index_type i) const {
-		return const_row_iterator(m_expression2.begin(),
-			Binder1(m_functor,m_expression1(i))
+		return const_row_iterator(m_rhs.begin(),
+			functor_type(m_lhs(i))
 		);
 	}
 	const_row_iterator row_end(index_type i) const {
-		return const_row_iterator(m_expression2.end(),
-			Binder1(m_functor,m_expression1(i))
+		return const_row_iterator(m_rhs.end(),
+			functor_type(m_lhs(i))
 		);
 	}
 
 	const_column_iterator column_begin(index_type i) const {
-		return const_column_iterator(m_expression1.begin(),
-			Binder2(m_functor,m_expression2(i))
+		return const_column_iterator(m_lhs.begin(),
+			functor_type(m_rhs(i))
 		);
 	}
 	const_column_iterator column_end(index_type i) const {
-		return const_column_iterator(m_expression1.end(),
-			Binder2(m_functor,m_expression2(i))
+		return const_column_iterator(m_lhs.end(),
+			functor_type(m_rhs(i))
 		);
 	}
 private:
-	expression1_closure_type m_expression1;
-	expression2_closure_type m_expression2;
-	functor_type m_functor;
-};
-
-template<class E1, class E2, class F>
-struct vector_matrix_binary_traits {
-	typedef vector_matrix_binary<E1, E2, F> expression_type;
-	typedef expression_type result_type;
+	lhs_closure_type m_lhs;
+	rhs_closure_type m_rhs;
 };
 
 // (outer_prod (v1, v2)) [i] [j] = v1 [i] * v2 [j]
 template<class E1, class E2>
-vector_matrix_binary<E1, E2, scalar_binary_multiply<typename E1::value_type, typename E2::value_type> >
+outer_product<E1, E2 >
 outer_prod(
 	vector_expression<E1> const& e1,
         vector_expression<E2> const& e2
 ) {
-	typedef scalar_binary_multiply<typename E1::value_type, typename E2::value_type> Multiplier;
-	return vector_matrix_binary<E1, E2, Multiplier>(e1(), e2(),Multiplier());
-}
-
-// (outer_plus (v1, v2)) [i] [j] = v1 [i] + v2 [j]
-template<class E1, class E2>
-vector_matrix_binary<E1, E2, scalar_binary_multiply<typename E1::value_type, typename E2::value_type> >
-outer_plus(
-	vector_expression<E1> const& e1,
-        vector_expression<E2> const& e2
-) {
-	typedef scalar_binary_plus<typename E1::value_type, typename E2::value_type> Multiplier;
-	return vector_matrix_binary<E1, E2, Multiplier>(e1(), e2(),Multiplier());
+	return outer_product<E1, E2>(e1(), e2());
 }
 
 template<class V>
@@ -592,8 +540,8 @@ private:
 		typename E2::value_type
 	> functor_type;
 public:
-	typedef typename E1::const_closure_type expression1_closure_type;
-	typedef typename E2::const_closure_type expression2_closure_type;
+	typedef typename E1::const_closure_type lhs_closure_type;
+	typedef typename E2::const_closure_type rhs_closure_type;
 
 	typedef typename E1::size_type size_type;
 	typedef typename E1::difference_type difference_type;
@@ -616,38 +564,38 @@ public:
 
         // Construction
         matrix_addition(
-		expression1_closure_type const& e1,
-		expression2_closure_type const& e2
-	): m_expression1 (e1), m_expression2 (e2){}
+		lhs_closure_type const& e1,
+		rhs_closure_type const& e2
+	): m_lhs (e1), m_rhs (e2){}
 
         // Accessors
         size_type size1 () const {
-		return m_expression1.size1 ();
+		return m_lhs.size1 ();
         }
         size_type size2 () const {
-		return m_expression1.size2 ();
+		return m_lhs.size2 ();
         }
 
         const_reference operator () (index_type i, index_type j) const {
-		return m_expression1(i, j) + m_expression2(i,j);
+		return m_lhs(i, j) + m_rhs(i,j);
         }
 	
 	//computation kernels
 	template<class MatX>
 	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
-		assign(X,alpha * m_expression1);
-		plus_assign(X,alpha * m_expression2);
+		assign(X,alpha * m_lhs);
+		plus_assign(X,alpha * m_rhs);
 	}
 	template<class MatX>
 	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
-		plus_assign(X,alpha * m_expression1);
-		plus_assign(X,alpha * m_expression2);
+		plus_assign(X,alpha * m_lhs);
+		plus_assign(X,alpha * m_rhs);
 	}
 	
 	template<class MatX>
 	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
-		minus_assign(X,alpha * m_expression1);
-		minus_assign(X,alpha * m_expression2);
+		minus_assign(X,alpha * m_lhs);
+		minus_assign(X,alpha * m_rhs);
 	}
 
 	// Iterator types
@@ -673,33 +621,33 @@ public:
 
 	const_row_iterator row_begin(std::size_t i) const {
 		return const_row_iterator (functor_type(),
-			m_expression1.row_begin(i),m_expression1.row_end(i),
-			m_expression2.row_begin(i),m_expression2.row_end(i)
+			m_lhs.row_begin(i),m_lhs.row_end(i),
+			m_rhs.row_begin(i),m_rhs.row_end(i)
 		);
 	}
 	const_row_iterator row_end(std::size_t i) const {
 		return const_row_iterator (functor_type(),
-			m_expression1.row_end(i),m_expression1.row_end(i),
-			m_expression2.row_end(i),m_expression2.row_end(i)
+			m_lhs.row_end(i),m_lhs.row_end(i),
+			m_rhs.row_end(i),m_rhs.row_end(i)
 		);
 	}
 
 	const_column_iterator column_begin(std::size_t j) const {
 		return const_column_iterator (functor_type(),
-			m_expression1.column_begin(j),m_expression1.column_end(j),
-			m_expression2.column_begin(j),m_expression2.column_end(j)
+			m_lhs.column_begin(j),m_lhs.column_end(j),
+			m_rhs.column_begin(j),m_rhs.column_end(j)
 		);
 	}
 	const_column_iterator column_end(std::size_t j) const {
 		return const_column_iterator (functor_type(),
-			m_expression1.column_begin(j),m_expression1.column_end(j),
-			m_expression2.column_begin(j),m_expression2.column_end(j)
+			m_lhs.column_begin(j),m_lhs.column_end(j),
+			m_rhs.column_begin(j),m_rhs.column_end(j)
 		);
 	}
 
 private:
-	expression1_closure_type m_expression1;
-        expression2_closure_type m_expression2;
+	lhs_closure_type m_lhs;
+        rhs_closure_type m_rhs;
 	functor_type m_functor;
 };
 
@@ -775,10 +723,10 @@ class matrix_binary:
 private:
 	typedef matrix_binary<E1, E2, F> self_type;
 public:
-	typedef E1 expression1_type;
-	typedef E2 expression2_type;
-	typedef typename E1::const_closure_type expression1_closure_type;
-	typedef typename E2::const_closure_type expression2_closure_type;
+	typedef E1 lhs_type;
+	typedef E2 rhs_type;
+	typedef typename E1::const_closure_type lhs_closure_type;
+	typedef typename E2::const_closure_type rhs_closure_type;
 
 	typedef typename E1::size_type size_type;
 	typedef typename E1::difference_type difference_type;
@@ -805,18 +753,18 @@ public:
 
         matrix_binary (
 		matrix_expression<E1> const&e1,  matrix_expression<E2> const& e2, functor_type functor 
-	): m_expression1 (e1()), m_expression2 (e2()),m_functor(functor) {}
+	): m_lhs (e1()), m_rhs (e2()),m_functor(functor) {}
 
         // Accessors
         size_type size1 () const {
-		return m_expression1.size1 ();
+		return m_lhs.size1 ();
         }
         size_type size2 () const {
-		return m_expression1.size2 ();
+		return m_lhs.size2 ();
         }
 
         const_reference operator () (index_type i, index_type j) const {
-		return m_functor( m_expression1 (i, j), m_expression2(i,j));
+		return m_functor( m_lhs (i, j), m_rhs(i,j));
         }
 
 	// Iterator types
@@ -838,33 +786,33 @@ public:
 
 	const_row_iterator row_begin(std::size_t i) const {
 		return const_row_iterator (m_functor,
-			m_expression1.row_begin(i),m_expression1.row_end(i),
-			m_expression2.row_begin(i),m_expression2.row_end(i)
+			m_lhs.row_begin(i),m_lhs.row_end(i),
+			m_rhs.row_begin(i),m_rhs.row_end(i)
 		);
 	}
 	const_row_iterator row_end(std::size_t i) const {
 		return const_row_iterator (m_functor,
-			m_expression1.row_end(i),m_expression1.row_end(i),
-			m_expression2.row_end(i),m_expression2.row_end(i)
+			m_lhs.row_end(i),m_lhs.row_end(i),
+			m_rhs.row_end(i),m_rhs.row_end(i)
 		);
 	}
 
 	const_column_iterator column_begin(std::size_t j) const {
 		return const_column_iterator (m_functor,
-			m_expression1.column_begin(j),m_expression1.column_end(j),
-			m_expression2.column_begin(j),m_expression2.column_end(j)
+			m_lhs.column_begin(j),m_lhs.column_end(j),
+			m_rhs.column_begin(j),m_rhs.column_end(j)
 		);
 	}
 	const_column_iterator column_end(std::size_t j) const {
 		return const_column_iterator (m_functor,
-			m_expression1.column_begin(j),m_expression1.column_end(j),
-			m_expression2.column_begin(j),m_expression2.column_end(j)
+			m_lhs.column_begin(j),m_lhs.column_end(j),
+			m_rhs.column_begin(j),m_rhs.column_end(j)
 		);
 	}
 
 private:
-	expression1_closure_type m_expression1;
-        expression2_closure_type m_expression2;
+	lhs_closure_type m_lhs;
+        rhs_closure_type m_rhs;
 	functor_type m_functor;
 };
 
