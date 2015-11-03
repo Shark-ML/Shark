@@ -100,7 +100,16 @@ public:
 	/// Constructor taking the splitMatrix as argument
 	CARTClassifier(SplitMatrixType const& splitMatrix)
 	{
-		setSplitMatrix(splitMatrix);
+		m_splitMatrix=splitMatrix;
+	}
+
+	/// Constructor taking the splitMatrix as argument and optimize it if requested
+	CARTClassifier(SplitMatrixType const& splitMatrix, bool optimize)
+	{
+		if (optimize)
+			setSplitMatrix(splitMatrix);
+		else
+			m_splitMatrix=splitMatrix;
 	}
 
 	/// Constructor taking the splitMatrix as argument as well as maximum number of attributes
@@ -147,6 +156,11 @@ public:
 		optimizeSplitMatrix(m_splitMatrix);
 	}
 	
+	/// Get the model split matrix.
+	SplitMatrixType getSplitMatrix() const {
+		return m_splitMatrix;
+	}
+
 	/// \brief The model does not have any parameters.
 	std::size_t numberOfParameters()const{
 		return 0;
