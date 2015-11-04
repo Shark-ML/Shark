@@ -44,11 +44,13 @@ mark_as_advanced(
 #####################################################################
 option(BUILD_SHARED_LIBS "Compile shark into a dynamic library instead of a static one." OFF)
 if(BUILD_SHARED_LIBS)
-  IF(NOT MSVC)
-    set(SHARK_USE_DYNLIB 1)
-  ELSE()
+  #IF(NOT MSVC)
+    #set(SHARK_USE_DYNLIB 1)
+    #set(SHARK_COMPILE_DLL 1)
+  #ELSE()
     ADD_DEFINITIONS(-DSHARK_USE_DYNLIB)
-  ENDIF()
+    ADD_DEFINITIONS(-DSHARK_COMPILE_DLL)
+  #ENDIF()
 endif()
 
 #####################################################################
@@ -340,7 +342,7 @@ endif()
 #####################################################################
 if( MSVC )
 	#4250: inherit via dominance
-	add_definitions(/wd4250)
+	add_definitions("/wd4250 /wd4190 /wd4244 /wd4267")
 	#4251: needs to have dll-interface
 	add_definitions(/wd4251)
 	#4275: non-dll interface used as base for dll-interface class
