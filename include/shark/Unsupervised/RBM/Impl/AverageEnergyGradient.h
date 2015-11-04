@@ -50,7 +50,7 @@ public:
 		for(std::size_t i = 0; i != batchSize; ++i){
 			row(weightedFeatures,i)*= weights(i);
 		}
-		axpy_prod(trans(mpe_rbm->hiddenNeurons().expectedPhiValue(hiddens.statistics)),weightedFeatures,m_deltaWeights,false);
+		noalias(m_deltaWeights) += prod(trans(mpe_rbm->hiddenNeurons().expectedPhiValue(hiddens.statistics)),weightedFeatures);
 		mpe_rbm->visibleNeurons().parameterDerivative(m_deltaBiasVisible,visibles,weights);
 		mpe_rbm->hiddenNeurons().expectedParameterDerivative(m_deltaBiasHidden,hiddens,weights);
 	}
@@ -80,7 +80,7 @@ public:
 			row(weightedFeatures,i)*= weights(i);
 		}
 		
-		axpy_prod(trans(weightedFeatures),mpe_rbm->visibleNeurons().expectedPhiValue(visibles.statistics),m_deltaWeights,false);
+		noalias(m_deltaWeights) += prod(trans(weightedFeatures),mpe_rbm->visibleNeurons().expectedPhiValue(visibles.statistics));
 		mpe_rbm->hiddenNeurons().parameterDerivative(m_deltaBiasHidden,hiddens,weights);
 		mpe_rbm->visibleNeurons().expectedParameterDerivative(m_deltaBiasVisible,visibles,weights);
 	}

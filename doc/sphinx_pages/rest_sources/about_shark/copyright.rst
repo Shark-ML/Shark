@@ -117,3 +117,6 @@ Documentation
   `MIT <http://www.opensource.org/licenses/mit-license.php>`_ and
   `GNU GPLv2 <http://www.gnu.org/licenses/gpl-2.0.html>`_
   license.
+* Download icon from the Steel System Icons set by Uriy1966,
+  `iconarchive.com <http://www.iconarchive.com/show/steel-system-icons-by-uriy1966/Download-icon.html>`_,
+  free for non-commercial use.

@@ -27,7 +27,7 @@ typename M::size_type lu_factorize(M &m) {
 		} else if (singular == 0) {
 			singular = i + 1;
 		}
-		subrange(m, i + 1, size1, i + 1, size2).minus_assign(
+		noalias(subrange(m, i + 1, size1, i + 1, size2))-=(
 		    outer_prod(subrange(mci, i + 1, size1),
 		            subrange(mri, i + 1, size2)));
 	}
@@ -61,7 +61,7 @@ typename M::size_type lu_factorize(M &m, PM &pm) {
 		} else if (singular == 0) {
 			singular = i + 1;
 		}
-		subrange(m,i + 1, size1, i + 1, size2).minus_assign(
+		noalias(subrange(m,i + 1, size1, i + 1, size2))-=(
 		    outer_prod(subrange(mci, i + 1, size1),
 		            subrange(mri, i + 1, size2)));
 	}

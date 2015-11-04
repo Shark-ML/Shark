@@ -202,9 +202,7 @@ public:
 		//the following code does for batches the equivalent thing to:
 		//return inner_prod(m_bias,state)
 		
-		RealVector energies(state.size1());
-		axpy_prod(state,m_bias,energies);
-		noalias(energies) *= beta;
+		RealVector energies = beta * prod(state,m_bias);
 		return energies;
 	}
 	

@@ -86,6 +86,7 @@ public:
 	typedef matrix_reference<self_type> closure_type;
 
 	typedef sparse_tag storage_category;
+	typedef elementwise_tag evaluation_category;
 	typedef row_major orientation;
 
 	// Construction and destruction
@@ -105,7 +106,7 @@ public:
 		, m_rowStart(e().size1() + 1, 0)
 		, m_rowEnd(e().size1(), 0)
 		, m_indices(non_zeros), m_values(non_zeros), m_zero(0) {
-		kernels::assign(*this, e);
+		assign(*this, e);
 	}
 
 	// Accessors
@@ -259,59 +260,13 @@ public:
 	template<class C>          // Container assignment without temporary
 	compressed_matrix &operator = (const matrix_container<C> &m) {
 		resize(m().size1(), m().size2());
-		assign(m);
-		return *this;
-	}
-	compressed_matrix &assign_temporary(compressed_matrix &m) {
-		swap(m);
+		assign(*this, m);
 		return *this;
 	}
 	template<class E>
 	compressed_matrix &operator = (const matrix_expression<E> &e) {
 		self_type temporary(e, nnz_capacity());
-		return assign_temporary(temporary);
-	}
-	template<class E>
-	compressed_matrix &assign(const matrix_expression<E> &e) {
-		kernels::assign(*this, e);
-		return *this;
-	}
-	template<class E>
-	compressed_matrix &operator += (const matrix_expression<E> &e) {
-		self_type temporary(*this + e, nnz_capacity());
-		return assign_temporary(temporary);
-	}
-	template<class C>          // Container assignment without temporary
-	compressed_matrix &operator += (const matrix_container<C> &m) {
-		plus_assign(m);
-		return *this;
-	}
-	template<class E>
-	compressed_matrix &plus_assign(const matrix_expression<E> &e) {
-		kernels::assign<scalar_plus_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	compressed_matrix &operator -= (const matrix_expression<E> &e) {
-		self_type temporary(*this - e, nnz_capacity());
-		return assign_temporary(temporary);
-	}
-	template<class C>          // Container assignment without temporary
-	compressed_matrix &operator -= (const matrix_container<C> &m) {
-		minus_assign(m);
-		return *this;
-	}
-	template<class E>
-	compressed_matrix &minus_assign(const matrix_expression<E> &e) {
-		kernels::assign<scalar_minus_assign> (*this, e);
-		return *this;
-	}
-	compressed_matrix &operator *= (value_type t) {
-		kernels::assign<scalar_multiply_assign> (*this, t);
-		return *this;
-	}
-	compressed_matrix &operator /= (value_type t) {
-		kernels::assign<scalar_divide_assign> (*this, t);
+		swap(temporary);
 		return *this;
 	}
 
@@ -494,6 +449,20 @@ private:
 template<class T>
 struct matrix_temporary_type<T,row_major,sparse_bidirectional_iterator_tag> {
 	typedef compressed_matrix<T> type;
+};
+
+template<class T>
+struct matrix_temporary_type<T,unknown_orientation,sparse_bidirectional_iterator_tag> {
+	typedef compressed_matrix<T> type;
+};
+
+template<class T, class I>
+struct const_expression<compressed_matrix<T,I> >{
+	typedef compressed_matrix<T,I> const type;
+};
+template<class T, class I>
+struct const_expression<compressed_matrix<T,I> const>{
+	typedef compressed_matrix<T,I> const type;
 };
 
 }

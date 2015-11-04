@@ -161,7 +161,7 @@ public:
 			noalias(hiddenDerivativeSum) += sum_rows(hiddenDerivative);
 
 			// Calculate the gradient with respect to the lower weight matrix
-			axpy_prod(trans(hiddenDerivative),batch.input,W1Derivatives,false);
+			noalias(W1Derivatives) +=prod(trans(hiddenDerivative),batch.input);
 		}
 		error /= dataSize;
 		meanActivation /= dataSize;

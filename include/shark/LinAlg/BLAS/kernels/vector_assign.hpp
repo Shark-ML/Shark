@@ -379,7 +379,7 @@ void assign(
 	typename vector_temporary<V>::type temporary(v());
 	assign_sparse(temporary,e, f);
 	v().clear();
-	assign(v, temporary);
+	kernels::assign(v, temporary);
 }
 
 // Dispatcher

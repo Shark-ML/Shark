@@ -66,9 +66,7 @@ void FisherLDA::train(LinearModel<>& model, LabeledData<RealVector, unsigned int
 	//reduce the size of the covariance matrix the the needed
 	//subspace
 	RealMatrix subspaceDirections = trans(columns(eigenvectors,0,nComp));
-	RealVector offset(inputDim,0.0);
-	axpy_prod(subspaceDirections, mean,offset);
-	offset*=-1;
+	RealVector offset = -prod(subspaceDirections, mean);
 
 	// write the parameters into the model
 	model.setStructure(subspaceDirections, offset);

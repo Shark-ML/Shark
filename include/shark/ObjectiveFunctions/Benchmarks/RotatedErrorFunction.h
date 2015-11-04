@@ -78,8 +78,7 @@ struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 
 	double eval( const SearchPointType & p ) const {
 		m_evaluationCounter++;
-		RealVector x(numberOfVariables());
-		axpy_prod(m_rotation,p,x);
+		RealVector x = prod(m_rotation,p);
 		return m_objective->eval(x);
 	}
 private:

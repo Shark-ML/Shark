@@ -142,7 +142,7 @@ public:
 	/// Evaluate the model: output = w * input
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs)const{
 		outputs.resize(inputs.size1(),m_w.size1());
-		axpy_prod(inputs,trans(m_w),outputs);
+		noalias(outputs) = prod(inputs,trans(m_w));
 	}
 	/// Evaluate the model: output = w *input
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
@@ -162,8 +162,7 @@ public:
 		//derivative is
 		//sum_i sum_j c_ij sum_k x_ik grad_q w_jk= sum_k sum_j grad_q w_jk (sum_i c_ij x_ik)
 		//and we set d_jk=sum_i c_ij x_ik => d = C^TX
-		RealMatrix d(outputSize(),inputSize());
-		axpy_prod(trans(coefficients), patterns,d);
+		RealMatrix d = prod(trans(coefficients), patterns);
 		
 		//use the same drivative as in the softmax model
 		for(std::size_t i = 0; i != outputSize(); ++i){
@@ -185,7 +184,7 @@ public:
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 
 		derivative.resize(patterns.size1(),inputSize());
-		axpy_prod(coefficients,m_w,derivative);
+		noalias(derivative) = prod(coefficients,m_w);
 	}
 
 	/// From ISerializable

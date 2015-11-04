@@ -252,7 +252,7 @@ public:
 			
 			//get the part of the alpha matrix which is suitable for this batch
 			ConstRealSubMatrix batchAlpha = subrange(m_alpha,batchStart,batchEnd,0,outputSize());
-			axpy_prod(trans(kernelEvaluations),batchAlpha,output,false);
+			noalias(output) += prod(trans(kernelEvaluations),batchAlpha);
 			batchStart = batchEnd;
 		}
 	}
