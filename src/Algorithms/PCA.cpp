@@ -38,7 +38,7 @@
 
 using namespace shark;
 
-	/// Set the input data, which is stored in the PCA object.
+/// Set the input data, which is stored in the PCA object.
 void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 	SHARK_CHECK(inputs.numberOfElements() >= 2, "[PCA::train] input needs to contain at least two points");
 	m_l = inputs.numberOfElements(); ///< number of data points
@@ -79,7 +79,7 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 				RealMatrix X2 = inputs.batch(b2)-repeat(m_mean,batchSize2);
 				RealSubMatrix X1X2T= subrange(S,start1,start1+batchSize1,start2,start2+batchSize2);
 				RealSubMatrix X2X1T= subrange(S,start2,start2+batchSize2,start1,start1+batchSize1);
-				axpy_prod(X1,trans(X2),X1X2T);// X1 X2^T
+				noalias(X1X2T) = prod(X1,trans(X2));// X1 X2^T
 				noalias(X2X1T) = trans(X1X2T);// X2 X1^T
 				start2+=batchSize2;
 			}
@@ -90,7 +90,7 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 		}
 		S /= m_l;
 		m_eigenvalues.resize(m_l);
-		m_eigenvectors.resize(m_n, m_l);
+		m_eigenvectors.resize(m_n,m_l);
 		m_eigenvectors.clear();
 		RealMatrix U(m_l, m_l);
 		eigensymm(S, U, m_eigenvalues);
@@ -101,7 +101,7 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 			std::size_t batchSize = inputs.batch(b).size1();
 			std::size_t batchEnd = batchStart+batchSize;
 			RealMatrix X = inputs.batch(b)-repeat(m_mean,batchSize);
-			axpy_prod(trans(X),rows(U,batchStart,batchEnd),m_eigenvectors,false);
+			noalias(m_eigenvectors) += prod(trans(X),rows(U,batchStart,batchEnd));
 			batchStart = batchEnd;
 		}
 		//normalize
@@ -116,8 +116,7 @@ void PCA::encoder(LinearModel<>& model, std::size_t m) {
 	if(!m) m = std::min(m_n,m_l);
 	
 	RealMatrix A = trans(columns(m_eigenvectors, 0, m) );
-	RealVector offset(A.size1(),0.0); 
-	axpy_prod(A, m_mean, offset, false, -1.0);
+	RealVector offset = -prod(A, m_mean);
 	if(m_whitening){
 		for(std::size_t i=0; i<A.size1(); i++) {
 			//take care of numerical difficulties for very small eigenvalues.

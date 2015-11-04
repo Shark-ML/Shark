@@ -62,10 +62,9 @@ void RNNet::eval(BatchInputType const& patterns, BatchOutputType& outputs, State
 			sequence[t-1](mpe_structure->bias())=1;
 
 			//activation of the hidden neurons is now just a matrix vector multiplication
-			axpy_prod(
+			noalias(subrange(sequence[t],inputSize()+1,numUnits)) = prod(
 				mpe_structure->weights(),
-				sequence[t-1],
-				subrange(sequence[t],inputSize()+1,numUnits)
+				sequence[t-1]
 			);
 			//now apply the sigmoid function
 			for (std::size_t i = inputSize()+1;i != numUnits;i++)
@@ -107,11 +106,9 @@ void RNNet::weightedParameterDerivative(
 				double derivative = mpe_structure->neuronDerivative(sequence[t](j+mpe_structure->inputs()+1));
 				errorDerivative(t,j)*=derivative;
 			}
-			axpy_prod(
+			noalias(row(errorDerivative,t-1)) += prod(
 				trans(columns(mpe_structure->weights(), inputSize()+1,numUnits)),
-				row(errorDerivative,t),
-				row(errorDerivative,t-1),
-				false
+				row(errorDerivative,t)
 			);
 		}
 		

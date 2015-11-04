@@ -107,8 +107,7 @@ public:
 		std::size_t sizeX1 = batchX1.size1();
 		std::size_t sizeX2 = batchX2.size1();
 		result.resize(sizeX1,sizeX2);
-		//calculate the inner product
-		axpy_prod(batchX1,trans(batchX2),result);
+		noalias(result) = prod(batchX1,trans(batchX2));
 		if(m_exponent != 1)
 			noalias(result) = pow(result,m_exponent);
 	}
@@ -124,7 +123,7 @@ public:
 		s.resize(sizeX1,sizeX2);
 		
 		//calculate the inner product
-		axpy_prod(batchX1,trans(batchX2),s.base);
+		noalias(s.base) = prod(batchX1,trans(batchX2));
 		//now do exponentiation
 		if(m_exponent != 1)
 			noalias(result) = pow(s.base,m_exponent);
@@ -174,8 +173,7 @@ public:
 		//The derivative of input i of batch x1 is 
 		//g = sum_j m_exponent*weights(i,j)*x2_j
 		//we now sum over j which is a matrix-matrix product
-		axpy_prod(weights,batchX2,gradient);
-		gradient*= m_exponent;
+		noalias(gradient) = m_exponent * prod(weights,batchX2);
 	}
 	
 	void read(InArchive& ar){

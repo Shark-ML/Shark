@@ -50,8 +50,7 @@ void BFGS::computeSearchDirection(){
 	RealVector delta = m_best.point - m_lastPoint;
 	double d = inner_prod(gamma,delta);
 	
-	RealVector Hg(m_dimension,0.0);
-	axpy_prod(m_hessian,gamma,Hg);
+	RealVector Hg = prod(m_hessian,gamma);
 	
 	//update hessian
 	if (d < 1e-20)
@@ -69,8 +68,7 @@ void BFGS::computeSearchDirection(){
 	}
 	
 	//compute search direction
-	axpy_prod(m_hessian,m_derivative,m_searchDirection);
-	m_searchDirection *= -1;
+	noalias(m_searchDirection) = -prod(m_hessian,m_derivative);
 }
 
 //from ISerializable

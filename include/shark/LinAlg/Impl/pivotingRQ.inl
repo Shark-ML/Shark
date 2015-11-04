@@ -161,9 +161,8 @@ std::size_t shark::blas::pivotingRQ
 	solveTriangularSystemInPlace<SolveAXB,lower>(trans(T), InvTU);
 	matrixQ().resize(n,n);
 	//now Compute U^T temp = U^T T^-1 U
-	axpy_prod(trans(rows(U,0,rank)),InvTU,matrixQ);
-	matrixQ()*=-1;
-	matrixQ()+=RealIdentityMatrix(n);
+	noalias(matrixQ) = -prod(trans(rows(U,0,rank)),InvTU);
+	diag(matrixQ) += 1;
 
 	//testing algorithm
 //	matrixQ().resize(n,n);

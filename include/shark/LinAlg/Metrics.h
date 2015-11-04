@@ -239,14 +239,14 @@ namespace detail{
 		typedef typename Result::value_type value_type;
 		std::size_t sizeX=X.size1();
 		std::size_t sizeY=Y.size1();
+		ensure_size(distances,X.size1(),Y.size1());
 		if(sizeX < 10 || sizeY<10){
 			distanceSqrBlockBlockRowWise(X,Y,distances);
 			return;
 		}
 		//fast blockwise iteration
 		//uses: (a-b)^2 = a^2 -2ab +b^2
-		axpy_prod(X,trans(Y),distances);
-		distances*=-2;
+		noalias(distances) = -2*prod(X,trans(Y));
 		//first a^2+b^2 
 		vector<value_type> ySqr(sizeY);
 		for(std::size_t i = 0; i != sizeY; ++i){

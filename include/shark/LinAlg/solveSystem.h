@@ -318,7 +318,7 @@ void approxsolveSymmPosDefSystem(
 	vector<value_type> r = b;//current residual
 	if(initialSolution){
 		SIZE_CHECK(x().size() == dim);
-		axpy_prod(A,x,r,false,-1.0);
+		noalias(r) -= prod(A,x);
 		if(norm_inf(r) > norm_inf(b)){
 			x().clear();
 			r = b;
@@ -334,7 +334,7 @@ void approxsolveSymmPosDefSystem(
 	vector<value_type> Ap(dim); //stores prod(A,p)
 	
 	for(std::size_t i = 0; i != maxIt; ++i){
-		axpy_prod(A,p,Ap);
+		noalias(Ap) = prod(A,p);
 		double rsqr=inner_prod(r,r);
 		double alpha = rsqr/inner_prod(p,Ap);
 		noalias(x())+=alpha*p;

@@ -97,13 +97,11 @@ void applyHouseholderOnTheRight(
 	}
 	
 	SIZE_CHECK(matrix().size2() == reflection().size());
-	vector<T> temp(matrix().size1());
-	
 	//Ax
-	axpy_prod(matrix,reflection,temp);
+	vector<T> temp = prod(matrix,reflection);
 	
 	//A -=beta*(Ax)x^T
-    noalias(matrix()) -= beta * outer_prod(temp,reflection);
+	noalias(matrix()) -= beta * outer_prod(temp,reflection);
 }
 
 
@@ -125,14 +123,11 @@ void applyHouseholderOnTheLeft(
 		matrix()*=1-beta;
 		return;
 	}
-
-	vector<T> temp(matrix().size2());
-	
 	//x^T A
-	axpy_prod(trans(matrix),reflection,temp);
+	vector<T> temp = prod(trans(matrix),reflection);
 	
 	//A -=beta*x(x^T A)
-    noalias(matrix()) -= beta * outer_prod(reflection,temp);
+	noalias(matrix()) -= beta * outer_prod(reflection,temp);
 }
 
 /// \brief rotates a matrix using a householder reflection 

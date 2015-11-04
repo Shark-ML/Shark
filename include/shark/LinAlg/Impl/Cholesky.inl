@@ -133,11 +133,9 @@ std::size_t shark::blas::pivotingCholeskyDecompositionInPlace(
 				//(L1L1T)^(j)+...+(Lj-1Lj-1)^(j)
 				//=L1*L1j+L2*L2j+L3*L3j...
 				//which is a matrix-vector product
-				axpy_prod(
+				unitTriangularColumn(Lk,j) -= prod(
 					LkBlocked.lowerLeft(),
-					subrange(row(Lk,j),0,j),
-					unitTriangularColumn(Lk,j),
-					false,-1.0
+					subrange(row(Lk,j),0,j)
 				);
 			}
 			unitTriangularColumn(Lk,j) /= Lk(j,j);

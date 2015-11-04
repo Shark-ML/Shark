@@ -208,8 +208,7 @@ public:
 			y=z;
 			blas::triangular_prod<blas::lower>(m_lowerCholesky,y);
 		}else{
-			y.clear();
-			axpy_prod(m_lowerCholesky,z,y,false);
+			noalias(y) = prod(m_lowerCholesky,z);
 		}
 	}
 

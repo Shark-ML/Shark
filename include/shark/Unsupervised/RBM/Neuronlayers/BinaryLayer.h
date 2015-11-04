@@ -228,12 +228,9 @@ public:
 		SIZE_CHECK(state.size1() == beta.size());
 		//the following code does for batches the equivalent thing to:
 		//return inner_prod(m_bias,state)
-		RealVector energies(state.size1());
-		axpy_prod(state,m_bias,energies);
-		RealVector baseRateEnergies(state.size1());
-		axpy_prod(state,m_baseRate,baseRateEnergies);
-		noalias(energies)*=beta;
-		noalias(energies)+=(1-beta)*baseRateEnergies;
+		RealVector energies = prod(state,m_bias);
+		RealVector baseRateEnergies = prod(state,m_baseRate);
+		noalias(energies) = beta*energies +(1-beta)*baseRateEnergies;
 		
 		return energies;
 	}
@@ -286,7 +283,7 @@ public:
 	template<class Vector, class SampleBatch, class WeightVector>
 	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples, WeightVector const& weights )const{
 		SIZE_CHECK(derivative.size() == size());
-		axpy_prod(trans(samples.statistics),weights,derivative,false);
+		noalias(derivative) += prod(weights,samples.statistics);
 	}
 
 
@@ -310,7 +307,7 @@ public:
 	template<class Vector, class SampleBatch, class WeightVector>
 	void parameterDerivative(Vector& derivative, SampleBatch const& samples, WeightVector const& weights)const{
 		SIZE_CHECK(derivative.size() == size());
-		axpy_prod(trans(samples.state),weights,derivative,false);
+		noalias(derivative) += prod(weights,samples.state);
 	}
 	
 	/// \brief Returns the vector with the parameters associated with the neurons in the layer, i.e. the bias vector.

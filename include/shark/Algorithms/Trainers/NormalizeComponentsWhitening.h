@@ -77,9 +77,7 @@ public:
 		RealMatrix whiteningMatrix = createWhiteningMatrix(covariance);
 		whiteningMatrix *= std::sqrt(m_targetVariance);
 
-		RealVector offset(dc);
-		axpy_prod(trans(whiteningMatrix),mean,offset);
-		offset *= -1.0;
+		RealVector offset = -prod(trans(whiteningMatrix),mean);
 
 		model.setStructure(RealMatrix(trans(whiteningMatrix)), offset);
 	}

@@ -34,6 +34,7 @@ public:
 	typedef const matrix_reference<const self_type> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
 	typedef packed_tag storage_category;
+	typedef elementwise_tag evaluation_category;
 	typedef packed<Orientation,TriangularType> orientation;
 
 	// Construction and destruction
@@ -64,7 +65,7 @@ public:
 	triangular_matrix(matrix_expression<E> const& e)
 		:m_size(e().size1()), m_data(m_size * (m_size+1)/2)
 	{
-		assign(e);
+		assign(*this, e);
 	}
 
 	// ---------
@@ -145,42 +146,6 @@ public:
 		return orientation::non_zero(i,j);
 	}
 	
-	// Assignment
-	template<class E>
-	triangular_matrix& assign(matrix_expression<E> const& e) {
-		kernels::assign(*this,e);
-		return *this;
-	}
-	template<class E>
-	triangular_matrix& plus_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_plus_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	triangular_matrix& minus_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_minus_assign> (*this, e);
-		return *this;
-	}
-	
-	template<class E>
-	triangular_matrix& multiply_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_multiply_assign> (*this, e);
-		return *this;
-	}
-	template<class E>
-	triangular_matrix& divide_assign(matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		kernels::assign<scalar_divide_assign> (*this, e);
-		return *this;
-	}
-	
 	/*! @note "pass by value" the key idea to enable move semantics */
 	triangular_matrix& operator = (triangular_matrix m) {
 		swap(m);
@@ -190,81 +155,13 @@ public:
 	triangular_matrix& operator = (const matrix_container<C>& m) {
 		SIZE_CHECK(m().size1()==m().size2());
 		resize(m().size1());
-		assign(m);
+		assign(*this, m);
 		return *this;
 	}
 	template<class E>
 	triangular_matrix& operator = (matrix_expression<E> const& e) {
 		self_type temporary(e);
 		swap(temporary);
-		return *this;
-	}
-	template<class E>
-	triangular_matrix& operator += (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		self_type temporary(*this + e);
-		swap(temporary);
-		return *this;
-	}
-	template<class C>          // Container assignment without temporary
-	triangular_matrix& operator += (const matrix_container<C>& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return plus_assign(e);
-	}
-	
-	template<class E>
-	triangular_matrix& operator -= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		self_type temporary(*this - e);
-		swap(temporary);
-		return *this;
-	}
-	template<class C>          // Container assignment without temporary
-	triangular_matrix& operator -= (matrix_container<C> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return minus_assign(e);
-	}
-	
-	template<class E>
-	triangular_matrix& operator *= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		self_type temporary(*this * e);
-		swap(temporary);
-		return *this;
-	}
-	template<class C>          // Container assignment without temporary
-	triangular_matrix& operator *= (const matrix_container<C>& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return multiply_assign(e);
-	}
-	
-	template<class E>
-	triangular_matrix& operator /= (matrix_expression<E> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		self_type temporary(*this / e);
-		swap(temporary);
-		return *this;
-	}
-	template<class C>          // Container assignment without temporary
-	triangular_matrix& operator /= (matrix_container<C> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
-		return divide_assign(e);
-	}
-	
-	triangular_matrix& operator *= (scalar_type t) {
-		kernels::assign<scalar_multiply_assign> (*this, t);
-		return *this;
-	}
-	triangular_matrix& operator /= (scalar_type t) {
-		kernels::assign<scalar_divide_assign> (*this, t);
 		return *this;
 	}
 
@@ -596,6 +493,15 @@ public:
 private:
 	size_type m_size;
 	array_type m_data;
+};
+
+template<class T, class Orientation, class TriangularType>
+struct const_expression<triangular_matrix<T,Orientation, TriangularType> >{
+	typedef triangular_matrix<T,Orientation, TriangularType> const type;
+};
+template<class T, class Orientation, class TriangularType>
+struct const_expression<triangular_matrix<T,Orientation, TriangularType> const>{
+	typedef triangular_matrix<T,Orientation, TriangularType> const type;
 };
 
 }

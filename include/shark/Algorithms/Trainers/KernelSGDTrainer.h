@@ -174,9 +174,8 @@ public:
 			const double eta = 1.0 / (lambda * (iter + ell));
 
 			// compute prediction
-			f_b.clear();
 			K.row(b, kernelRow);
-			axpy_prod(trans(alpha), kernelRow, f_b, false, alphaScale);
+			noalias(f_b) = alphaScale * prod(trans(alpha), kernelRow);
 			if(m_offset) noalias(f_b) += model.offset();
 
 			// stochastic gradient descent (SGD) step
