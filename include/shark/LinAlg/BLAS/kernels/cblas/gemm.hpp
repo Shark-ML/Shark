@@ -29,8 +29,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_GEMM_HPP
-#define SHARK_LINALG_BLAS_KERNELS_ATLAS_GEMM_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CBLAS_GEMM_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CBLAS_GEMM_HPP
 
 #include "cblas_inc.hpp"
 
@@ -84,11 +84,11 @@ inline void gemm(
 	cblas_cgemm(
 		Order, TransA, TransB,
 		M, N, K,
-		static_cast<void const *>(&alphaArg),
-		static_cast<void const *>(A), lda,
-		static_cast<void const *>(B), ldb,
-		static_cast<void const *>(&betaArg),
-		static_cast<void *>(C), ldc
+		static_cast<cblas_double_complex_type const *>(&alphaArg),
+		static_cast<cblas_double_complex_type const *>(A), lda,
+		static_cast<cblas_double_complex_type const *>(B), ldb,
+		static_cast<cblas_double_complex_type const *>(&betaArg),
+		static_cast<cblas_double_complex_type *>(C), ldc
 	);
 }
 

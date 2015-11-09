@@ -32,7 +32,7 @@
 #define SHARK_LINALG_BLAS_KERNELS_TRSM_HPP
 
 #ifdef SHARK_USE_CBLAS
-#include "atlas/trsm.hpp"
+#include "cblas/trsm.hpp"
 #else
 // if no bindings are included, we have to provide the default has_optimized_gemv 
 // otherwise the binding will take care of this

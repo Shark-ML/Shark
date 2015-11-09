@@ -29,8 +29,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_TRMM_HPP
-#define SHARK_LINALG_BLAS_KERNELS_ATLAS_TRMM_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CBLAS_TRMM_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CBLAS_TRMM_HPP
 
 #include "cblas_inc.hpp"
 #include "../../matrix_proxy.hpp"
@@ -89,9 +89,9 @@ inline void trmm(
 ) {
 	std::complex<float> alpha = 1.0;
 	cblas_ctrmm(order, side, uplo, transA, unit, M, N, 
-		static_cast<void const *>(&alpha),
-		static_cast<void const *>(A), lda,
-	        static_cast<void *>(B), incB
+		reinterpret_cast<cblas_float_complex_type const *>(&alpha),
+		reinterpret_cast<cblas_float_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_float_complex_type *>(B), incB
 	);
 }
 
@@ -108,9 +108,9 @@ inline void trmm(
 ) {
 	std::complex<double> alpha = 1.0;
 	cblas_ztrmm(order, side, uplo, transA, unit, M, N, 
-		static_cast<void const *>(&alpha),
-		static_cast<void const *>(A), lda,
-	        static_cast<void *>(B), incB
+		static_cast<cblas_double_complex_type const *>(&alpha),
+		static_cast<cblas_double_complex_type const *>(A), lda,
+	        static_cast<cblas_double_complex_type *>(B), incB
 	);
 }
 
