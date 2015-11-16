@@ -253,18 +253,33 @@ if( ENABLE_CBLAS )
 			CLAPACK_LIBRARY
 			ATLAS_LIBRARY
 		)
-		if(${CBLAS_LIBRARY} AND ${CLAPACK_LIBRARY} AND ${ATLAS_LIBRARY} )
+		#find the cblas.h include path
+		if(CBLAS_LIBRARY )
 			get_filename_component(CBLAS_LIB_PATH ${CBLAS_LIBRARY} PATH )
 			
-			#find the cblas.h include path
 			find_file(CBLAS_INCLUDES cblas.h 
 				PATHS ${CBLAS_LIB_PATH} ${CBLAS_LIB_PATH}../include ${CBLAS_LIB_PATH}../include/atlas
 			)
-			
-			if(CBLAS_INCLUDES)
-				get_filename_component(CBLAS_INCLUDES ${CBLAS_INCLUDES} PATH )
-				set(CBLAS_VENDOR "ATLAS")
-				set(CBLAS_LIBRARIES ${CLAPACK_LIBRARY} ${CBLAS_LIBRARY} ${ATLAS_LIBRARY})
+			get_filename_component(CBLAS_INCLUDES ${CBLAS_INCLUDES} PATH )
+		endif()
+
+		if( CBLAS_LIBRARY AND CLAPACK_LIBRARY AND ATLAS_LIBRARY AND CBLAS_INCLUDES)
+			set(CBLAS_VENDOR "ATLAS")
+			set(CBLAS_LIBRARIES ${CLAPACK_LIBRARY} ${CBLAS_LIBRARY} ${ATLAS_LIBRARY})
+		elseif( CBLAS_LIBRARY AND CBLAS_INCLUDES)
+			#check that we can compile a basic program with the libraries we have found
+			#vendor versions might come with additional libraries which would be bad.
+			try_compile(CBLAS_COMPILE 
+				"${PROJECT_BINARY_DIR}/cBlasCheck"
+				"${CMAKE_SOURCE_DIR}/cBlasCheck.cpp"
+				CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${CBLAS_INCLUDES}"
+				LINK_LIBRARIES ${CBLAS_LIBRARY}
+			)
+			if(CBLAS_COMPILE)
+				set(CBLAS_VENDOR "GENERIC")
+				set(CBLAS_LIBRARIES ${CBLAS_LIBRARY})
+			else()
+				message(WARNING "Unknown CBLAS. Can not use it")
 			endif()
 		endif()
 	endif()
@@ -276,7 +291,7 @@ if( ENABLE_CBLAS )
 		list(APPEND LINK_LIBRARIES ${CBLAS_LIBRARIES})
 		include_directories ( ${CBLAS_INCLUDES} )
 	else()
-		message(STATUS "No CBLAS Library found. No fast linear Algebra used.")
+		message(STATUS "No usable CBLAS Library found. No fast linear Algebra used.")
 	endif()
 	
 	#Special setup for ATLAS
