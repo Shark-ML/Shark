@@ -84,11 +84,11 @@ inline void gemm(
 	cblas_cgemm(
 		Order, TransA, TransB,
 		M, N, K,
-		static_cast<cblas_double_complex_type const *>(&alphaArg),
-		static_cast<cblas_double_complex_type const *>(A), lda,
-		static_cast<cblas_double_complex_type const *>(B), ldb,
-		static_cast<cblas_double_complex_type const *>(&betaArg),
-		static_cast<cblas_double_complex_type *>(C), ldc
+		reinterpret_cast<cblas_float_complex_type const *>(&alphaArg),
+		reinterpret_cast<cblas_float_complex_type const *>(A), lda,
+		reinterpret_cast<cblas_float_complex_type const *>(B), ldb,
+		reinterpret_cast<cblas_float_complex_type const *>(&betaArg),
+		reinterpret_cast<cblas_float_complex_type *>(C), ldc
 	);
 }
 
@@ -106,11 +106,11 @@ inline void gemm(
 	cblas_zgemm(
 		Order, TransA, TransB,
 		M, N, K,
-		static_cast<void const *>(&alphaArg),
-		static_cast<void const *>(A), lda,
-		static_cast<void const *>(B), ldb,
-		static_cast<void const *>(&betaArg),
-		static_cast<void *>(C), ldc
+		reinterpret_cast<cblas_double_complex_type const *>(&alphaArg),
+		reinterpret_cast<cblas_double_complex_type const *>(A), lda,
+		reinterpret_cast<cblas_double_complex_type const *>(B), ldb,
+		reinterpret_cast<cblas_double_complex_type const *>(&betaArg),
+		reinterpret_cast<cblas_double_complex_type *>(C), ldc
 	);
 }
 

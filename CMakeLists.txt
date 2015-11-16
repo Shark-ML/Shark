@@ -9,6 +9,7 @@
 project( shark )
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+INCLUDE (CheckFunctionExists)
 
 cmake_minimum_required( VERSION 2.8 )
 cmake_policy(SET CMP0003 NEW)
@@ -239,6 +240,9 @@ if( ENABLE_CBLAS )
 		set(CBLAS_LIBRARIES "-framework Accelerate" )
 	else()
 		#todo: do a propper vendor check
+		find_library(OPENBLAS_LIBRARY openblas
+			HINTS ${CBLAS_ROOT}/lib /opt/local/lib
+		)
 		find_library(CBLAS_LIBRARY cblas
 			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
 		)
@@ -249,6 +253,7 @@ if( ENABLE_CBLAS )
 			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
 		)
 		mark_as_advanced(
+			OPENBLAS_LIBRARY
 			CBLAS_LIBRARY
 			CLAPACK_LIBRARY
 			ATLAS_LIBRARY
@@ -256,14 +261,20 @@ if( ENABLE_CBLAS )
 		#find the cblas.h include path
 		if(CBLAS_LIBRARY )
 			get_filename_component(CBLAS_LIB_PATH ${CBLAS_LIBRARY} PATH )
-			
+		elseif( OPENBLAS_LIBRARY)	
+			get_filename_component(CBLAS_LIB_PATH ${OPENBLAS_LIBRARY} PATH )
+		endif()
+		if(CBLAS_LIB_PATH)
 			find_file(CBLAS_INCLUDES cblas.h 
-				PATHS ${CBLAS_LIB_PATH} ${CBLAS_LIB_PATH}../include ${CBLAS_LIB_PATH}../include/atlas
+				PATHS ${CBLAS_LIB_PATH} ${CBLAS_LIB_PATH}/../include ${CBLAS_LIB_PATH}/../include/atlas
 			)
 			get_filename_component(CBLAS_INCLUDES ${CBLAS_INCLUDES} PATH )
 		endif()
 
-		if( CBLAS_LIBRARY AND CLAPACK_LIBRARY AND ATLAS_LIBRARY AND CBLAS_INCLUDES)
+		if( OPENBLAS_LIBRARY AND CBLAS_INCLUDES)
+			set(CBLAS_VENDOR "OpenBLAS")
+			set(CBLAS_LIBRARIES ${OPENBLAS_LIBRARY})
+		elseif( CBLAS_LIBRARY AND CLAPACK_LIBRARY AND ATLAS_LIBRARY AND CBLAS_INCLUDES)
 			set(CBLAS_VENDOR "ATLAS")
 			set(CBLAS_LIBRARIES ${CLAPACK_LIBRARY} ${CBLAS_LIBRARY} ${ATLAS_LIBRARY})
 		elseif( CBLAS_LIBRARY AND CBLAS_INCLUDES)

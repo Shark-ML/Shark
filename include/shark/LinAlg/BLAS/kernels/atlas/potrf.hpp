@@ -34,7 +34,9 @@
 #define SHARK_LINALG_BLAS_KERNELS_ATLAS_POTRF_H
 
 #include "../cblas/cblas_inc.hpp"
-#include <clapack.h>
+extern "C"{
+	#include <clapack.h>
+}
 
 namespace shark {
 namespace blas {

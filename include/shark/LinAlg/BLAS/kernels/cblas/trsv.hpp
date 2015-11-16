@@ -61,8 +61,8 @@ inline void trsv(
 	std::complex<float> const *A, int lda, std::complex<float> *b, int strideX
 ){
 	cblas_ctrsv(order, uplo, transA, unit,n,
-	        static_cast<cblas_float_complex_type const *>(A), lda,
-	        static_cast<cblas_float_complex_type *>(b), strideX);
+	        reinterpret_cast<cblas_float_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_float_complex_type *>(b), strideX);
 }
 inline void trsv(
 	CBLAS_ORDER order, CBLAS_UPLO uplo,
@@ -71,8 +71,8 @@ inline void trsv(
 	std::complex<double> const *A, int lda, std::complex<double> *b, int strideX
 ){
 	cblas_ztrsv(order, uplo, transA, unit,n,
-	        static_cast<cblas_double_complex_type const *>(A), lda,
-	        static_cast<cblas_double_complex_type *>(b), strideX);
+	        reinterpret_cast<cblas_double_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_double_complex_type *>(b), strideX);
 }
 
 // trsv(): solves A system of linear equations A * x = b

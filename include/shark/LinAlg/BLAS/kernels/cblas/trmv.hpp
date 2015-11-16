@@ -80,8 +80,8 @@ inline void trmv(
         std::complex<float>* X, int const incX
 ) {
 	cblas_ctrmv(Order, uplo, transA, unit, N, 
-		static_cast<cblas_float_complex_type const *>(A), lda,
-	        static_cast<cblas_float_complex_type *>(X), incX
+		reinterpret_cast<cblas_float_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_float_complex_type *>(X), incX
 	);
 }
 
@@ -95,8 +95,8 @@ inline void trmv(
         std::complex<double>* X, int const incX
 ) {
 	cblas_ztrmv(Order, uplo, transA, unit, N, 
-		static_cast<cblas_double_complex_type const *>(A), lda,
-	        static_cast<cblas_double_complex_type *>(X), incX
+		reinterpret_cast<cblas_double_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_double_complex_type *>(X), incX
 	);
 }
 

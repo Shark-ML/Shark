@@ -29,8 +29,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_TPMV_HPP
-#define SHARK_LINALG_BLAS_KERNELS_ATLAS_TPMV_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CBLAS_TPMV_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CBLAS_TPMV_HPP
 
 #include "cblas_inc.hpp"
 #include "../../matrix_proxy.hpp"
@@ -80,8 +80,8 @@ inline void tpmv(
         std::complex<float>* X, int const incX
 ) {
 	cblas_ctpmv(Order, uplo, transA, unit, N, 
-		static_cast<void const *>(A),
-	        static_cast<void *>(X), incX
+		reinterpret_cast<cblas_float_complex_type const *>(A),
+	        reinterpret_cast<cblas_float_complex_type *>(X), incX
 	);
 }
 
@@ -95,8 +95,8 @@ inline void tpmv(
         std::complex<double>* X, int const incX
 ) {
 	cblas_ztpmv(Order, uplo, transA, unit, N, 
-		static_cast<void const *>(A),
-	        static_cast<void *>(X), incX
+		reinterpret_cast<cblas_double_complex_type const *>(A),
+	        reinterpret_cast<cblas_double_complex_type *>(X), incX
 	);
 }
 

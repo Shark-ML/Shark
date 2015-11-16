@@ -62,9 +62,9 @@ inline void trsm(
 ) {
 	std::complex<float> alpha(1.0,0);
 	cblas_ctrsm(order, side, uplo, transA, unit,n, nRHS,
-		static_cast<cblas_float_complex_type const *>(&alpha),
-	        static_cast<cblas_float_complex_type const *>(A), lda,
-	        static_cast<cblas_float_complex_type *>(B), ldb);
+		reinterpret_cast<cblas_float_complex_type const *>(&alpha),
+	        reinterpret_cast<cblas_float_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_float_complex_type *>(B), ldb);
 }
 inline void trsm(
 	CBLAS_ORDER order, CBLAS_UPLO uplo,CBLAS_TRANSPOSE transA, 
@@ -74,9 +74,9 @@ inline void trsm(
 ) {
 	std::complex<double> alpha(1.0,0);
 	cblas_ztrsm(order, side, uplo, transA, unit,n, nRHS,
-		static_cast<cblas_double_complex_type const *>(&alpha),
-	        static_cast<cblas_double_complex_type const *>(A), lda,
-	        static_cast<cblas_double_complex_type *>(B), ldb);
+		reinterpret_cast<cblas_double_complex_type const *>(&alpha),
+	        reinterpret_cast<cblas_double_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_double_complex_type *>(B), ldb);
 }
 
 // trsm(): solves A system of linear equations A * X = B

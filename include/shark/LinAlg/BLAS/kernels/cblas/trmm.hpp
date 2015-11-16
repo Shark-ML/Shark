@@ -108,9 +108,9 @@ inline void trmm(
 ) {
 	std::complex<double> alpha = 1.0;
 	cblas_ztrmm(order, side, uplo, transA, unit, M, N, 
-		static_cast<cblas_double_complex_type const *>(&alpha),
-		static_cast<cblas_double_complex_type const *>(A), lda,
-	        static_cast<cblas_double_complex_type *>(B), incB
+		reinterpret_cast<cblas_double_complex_type const *>(&alpha),
+		reinterpret_cast<cblas_double_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_double_complex_type *>(B), incB
 	);
 }
 

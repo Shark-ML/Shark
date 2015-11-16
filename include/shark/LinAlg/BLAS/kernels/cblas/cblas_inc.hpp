@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_CBLAS_INC_HPP
-#define SHARK_LINALG_BLAS_KERNELS_ATLAS_CBLAS_INC_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CBLAS_CBLAS_INC_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CBLAS_CBLAS_INC_HPP
 
 #ifdef __APPLE__
 
@@ -95,9 +95,13 @@ template<> struct storage_order<column_major> {
 
 }}}
 
-
+#ifndef OPENBLAS_CONST
 typedef void cblas_float_complex_type;
 typedef void cblas_double_complex_type;
+#else
+typedef float cblas_float_complex_type;
+typedef double cblas_double_complex_type;
+#endif
 
 
 #endif
