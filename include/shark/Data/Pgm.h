@@ -144,8 +144,8 @@ void importPGM( std::string const& fileName, T& data, std::size_t& sx, std::size
 	int isx;
 	int isy;
 	detail::importPGM(fileName, &pData, isx, isy);
-	sx = std::size_t(sx);
-	sx = std::size_t(sy);
+	sx = std::size_t(isx);
+	sy = std::size_t(isy);
 	data.resize(sx*sy);
 	std::copy(pData, pData + sx*sy, data.begin());
 	delete [] pData;
