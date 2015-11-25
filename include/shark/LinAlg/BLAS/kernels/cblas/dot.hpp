@@ -29,8 +29,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_DOT_HPP
-#define SHARK_LINALG_BLAS_KERNELS_ATLAS_DOT_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CBLAS_DOT_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CBLAS_DOT_HPP
 
 #include "cblas_inc.hpp"
 
@@ -58,9 +58,9 @@ inline void dot(int N,
 	std::complex<float>& result
 ) {
 	cblas_cdotu_sub(N, 
-		static_cast<void const* >(x), strideX, 
-		static_cast<void const* >(y), strideY,
-		static_cast<void*>(&result)
+		reinterpret_cast<cblas_float_complex_type const* >(x), strideX, 
+		reinterpret_cast<cblas_float_complex_type const* >(y), strideY,
+		reinterpret_cast<cblas_float_complex_type*>(&result)
 	);
 }
 
@@ -70,9 +70,9 @@ inline void dot(int N,
 	std::complex<double>& result
 ) {
 	cblas_zdotu_sub(N, 
-		static_cast<void const* >(x), strideX,
-		static_cast<void const* >(y), strideY,
-		static_cast<void*>(&result)
+		reinterpret_cast<cblas_double_complex_type const* >(x), strideX,
+		reinterpret_cast<cblas_double_complex_type const* >(y), strideY,
+		reinterpret_cast<cblas_double_complex_type*>(&result)
 	);
 }
 

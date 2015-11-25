@@ -32,11 +32,9 @@
 
 #include "default/dot.hpp"
 
-#ifdef SHARK_USE_CBLAS
-#include "atlas/dot.hpp"
-#elif SHARK_USE_OPENBLAS
-#include "openblas/dot.hpp"
-#else
+//~ #ifdef SHARK_USE_CBLAS 
+//~ #include "cblas/dot.hpp" // not faster in many cases, the compiler optimizes quite well.
+//~ #else
 // if no bindings are included, we have to provide the default has_optimized_dot
 // otherwise the binding will take care of this
 namespace shark { namespace blas { namespace bindings{
@@ -44,7 +42,7 @@ template<class V1, class V2,class result_type>
 struct  has_optimized_dot
 : public boost::mpl::false_{};
 }}}
-#endif
+//~ #endif
 	
 namespace shark { namespace blas {namespace kernels{
 	

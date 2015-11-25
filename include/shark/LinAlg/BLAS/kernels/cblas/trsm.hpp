@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_TRSM_HPP
-#define SHARK_LINALG_BLAS_KERNELS_ATLAS_TRSM_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CBLAS_TRSM_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CBLAS_TRSM_HPP
 
 #include "cblas_inc.hpp"
 
@@ -62,9 +62,9 @@ inline void trsm(
 ) {
 	std::complex<float> alpha(1.0,0);
 	cblas_ctrsm(order, side, uplo, transA, unit,n, nRHS,
-		static_cast<void const *>(&alpha),
-	        static_cast<void const *>(A), lda,
-	        static_cast<void *>(B), ldb);
+		reinterpret_cast<cblas_float_complex_type const *>(&alpha),
+	        reinterpret_cast<cblas_float_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_float_complex_type *>(B), ldb);
 }
 inline void trsm(
 	CBLAS_ORDER order, CBLAS_UPLO uplo,CBLAS_TRANSPOSE transA, 
@@ -74,9 +74,9 @@ inline void trsm(
 ) {
 	std::complex<double> alpha(1.0,0);
 	cblas_ztrsm(order, side, uplo, transA, unit,n, nRHS,
-		static_cast<void const *>(&alpha),
-	        static_cast<void const *>(A), lda,
-	        static_cast<void *>(B), ldb);
+		reinterpret_cast<cblas_double_complex_type const *>(&alpha),
+	        reinterpret_cast<cblas_double_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_double_complex_type *>(B), ldb);
 }
 
 // trsm(): solves A system of linear equations A * X = B

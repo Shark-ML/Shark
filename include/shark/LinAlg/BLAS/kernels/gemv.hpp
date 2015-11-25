@@ -33,9 +33,7 @@
 #include "default/gemv.hpp"
 
 #ifdef SHARK_USE_CBLAS
-#include "atlas/gemv.hpp"
-#elif SHARK_USE_OPENBLAS
-#include "openblas/gemv.hpp"
+#include "cblas/gemv.hpp"
 #else
 // if no bindings are included, we have to provide the default has_optimized_gemv 
 // otherwise the binding will take care of this

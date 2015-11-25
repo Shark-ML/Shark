@@ -29,8 +29,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_GEMV_HPP
-#define SHARK_LINALG_BLAS_KERNELS_ATLAS_GEMV_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CBLAS_GEMV_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CBLAS_GEMV_HPP
 
 #include "cblas_inc.hpp"
 
@@ -69,11 +69,11 @@ inline void gemv(CBLAS_ORDER const Order,
 	std::complex<float> alphaArg(alpha,0);
 	std::complex<float> betaArg(beta,0);
 	cblas_cgemv(Order, TransA, M, N,
-	        static_cast<void const *>(&alphaArg),
-	        static_cast<void const *>(A), lda,
-	        static_cast<void const *>(X), incX,
-	        static_cast<void const *>(&betaArg),
-	        static_cast<void *>(Y), incY);
+	        reinterpret_cast<cblas_float_complex_type const *>(&alphaArg),
+	        reinterpret_cast<cblas_float_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_float_complex_type const *>(X), incX,
+	        reinterpret_cast<cblas_float_complex_type const *>(&betaArg),
+	        reinterpret_cast<cblas_float_complex_type *>(Y), incY);
 }
 
 inline void gemv(CBLAS_ORDER const Order,
@@ -87,11 +87,11 @@ inline void gemv(CBLAS_ORDER const Order,
 	std::complex<double> alphaArg(alpha,0);
 	std::complex<double> betaArg(beta,0);
 	cblas_zgemv(Order, TransA, M, N,
-	        static_cast<void const *>(&alphaArg),
-	        static_cast<void const *>(A), lda,
-	        static_cast<void const *>(X), incX,
-	        static_cast<void const *>(&betaArg),
-	        static_cast<void *>(Y), incY);
+	        reinterpret_cast<cblas_double_complex_type const *>(&alphaArg),
+	        reinterpret_cast<cblas_double_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_double_complex_type const *>(X), incX,
+	        reinterpret_cast<cblas_double_complex_type const *>(&betaArg),
+	        reinterpret_cast<cblas_double_complex_type *>(Y), incY);
 }
 
 

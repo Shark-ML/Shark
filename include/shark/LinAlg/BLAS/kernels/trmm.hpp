@@ -7,7 +7,7 @@
  * \date        2012
  *
  *
- * \par Copyright 1995-2014 Shark Development Team
+ * \par Copyright 1995-2014 Shark Developcbment Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -32,9 +32,7 @@
 #define SHARK_LINALG_BLAS_KERNELS_TRMM_HPP
 
 #ifdef SHARK_USE_CBLAS
-#include "atlas/trmm.hpp"
-#elif SHARK_USE_OPENBLAS
-#include "openblas/trmm.hpp"
+#include "cblas/trmm.hpp"
 #else
 // if no bindings are included, we have to provide the default has_optimized_gemv 
 // otherwise the binding will take care of this

@@ -33,7 +33,10 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_POTRF_H
 #define SHARK_LINALG_BLAS_KERNELS_ATLAS_POTRF_H
 
-#include "cblas_inc.hpp"
+#include "../cblas/cblas_inc.hpp"
+extern "C"{
+	#include <clapack.h>
+}
 
 namespace shark {
 namespace blas {

@@ -32,9 +32,7 @@
 #define SHARK_LINALG_BLAS_KERNELS_TPMV_HPP
 
 #ifdef SHARK_USE_CBLAS
-#include "atlas/tpmv.hpp"
-#elif SHARK_USE_OPENBLAS
-#include "openblas/tpmv.hpp"
+#include "cblas/tpmv.hpp"
 #else
 // if no bindings are included, we have to provide the default has_optimized_gemv 
 // otherwise the binding will take care of this

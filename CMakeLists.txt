@@ -9,6 +9,7 @@
 project( shark )
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+INCLUDE (CheckFunctionExists)
 
 cmake_minimum_required( VERSION 2.8 )
 cmake_policy(SET CMP0003 NEW)
@@ -44,13 +45,7 @@ mark_as_advanced(
 #####################################################################
 option(BUILD_SHARED_LIBS "Compile shark into a dynamic library instead of a static one." OFF)
 if(BUILD_SHARED_LIBS)
-  #IF(NOT MSVC)
-    #set(SHARK_USE_DYNLIB 1)
-    #set(SHARK_COMPILE_DLL 1)
-  #ELSE()
-    ADD_DEFINITIONS(-DSHARK_USE_DYNLIB)
-    ADD_DEFINITIONS(-DSHARK_COMPILE_DLL)
-  #ENDIF()
+	set(SHARK_USE_DYNLIB 1)
 endif()
 
 #####################################################################
@@ -135,55 +130,47 @@ endif()
 list(APPEND COMPILE_DEFINITIONS_RELEASE NDEBUG)
 message(STATUS "Will build: " ${CMAKE_BUILD_TYPE})
 
+#####################################################################
+#           Boost configuration
+#####################################################################
+set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
+set(Boost_USE_MULTITHREADED ON)
+add_definitions(-DBOOST_PARAMETER_MAX_ARITY=15)
+add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
 
-option( ENABLE_SHARK_DEFAULT_LIBS "Use Default Shark Libraries" OFF )
-option( ENABLE_SHARK_CUSTOMIZED_LIBS "Use Default Shark Libraries" OFF )
-IF(ENABLE_SHARK_CUSTOMIZED_LIBS)
-  INCLUDE(${PROJECT_SOURCE_DIR}/cmake/CustomLibs.cmake)
-ENDIF()
-IF (ENABLE_SHARK_DEFAULT_LIBS)
-  #####################################################################
-  #           Boost configuration
-  #####################################################################
-  set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
-  set(Boost_USE_MULTITHREADED ON)
-  add_definitions(-DBOOST_PARAMETER_MAX_ARITY=15)
-  add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
+# Should we link the boost test dynamically
+if(NOT Boost_USE_STATIC_LIBS)
+	add_definitions(-DBOOST_TEST_DYN_LINK)
+	add_definitions(-DBOOST_ALL_DYN_LINK)
+endif()
 
-  # Should we link the boost test dynamically
-  if(NOT Boost_USE_STATIC_LIBS)
-    add_definitions(-DBOOST_TEST_DYN_LINK)
-    add_definitions(-DBOOST_ALL_DYN_LINK)
-  endif()
+find_package( 
+	Boost 1.48.0 REQUIRED COMPONENTS
+	system date_time filesystem
+	program_options serialization thread
+	unit_test_framework
+)
 
-  find_package( 
-    Boost 1.48.0 REQUIRED COMPONENTS
-    system date_time filesystem
-    program_options serialization thread
-    unit_test_framework
-  )
+if(NOT Boost_FOUND)
+	message(FATAL_ERROR "Please make sure Boost 1.48.0 is installed on your system")
+endif()
 
-  if(NOT Boost_FOUND)
-    message(FATAL_ERROR "Please make sure Boost 1.48.0 is installed on your system")
-  endif()
+if (WIN32)
+	# disable autolinking in boost
+	add_definitions( -DBOOST_ALL_NO_LIB )
+endif()
 
-  if (WIN32)
-    # disable autolinking in boost
-    add_definitions( -DBOOST_ALL_NO_LIB )
-  endif()
+include_directories(SYSTEM ${Boost_INCLUDE_DIR} )
+link_directories( ${Boost_LIBRARY_DIR} )
+if(UNIX)
+	find_library( PTHREAD_LIBRARY pthread )
+endif()
 
-  include_directories(SYSTEM ${Boost_INCLUDE_DIR} )
-  link_directories( ${Boost_LIBRARY_DIR} )
-  if(UNIX)
-    find_library( PTHREAD_LIBRARY pthread )
-  endif()
+# Set the libraries needed by Shark
+list(APPEND LINK_LIBRARIES ${Boost_LIBRARIES} ${PTHREAD_LIBRARY})
 
-  # Set the libraries needed by Shark
-  list(APPEND LINK_LIBRARIES ${Boost_LIBRARIES} ${PTHREAD_LIBRARY})
-
-  mark_as_advanced(Boost_DIR PTHREAD_LIBRARY)
-  message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
-ENDIF()
+mark_as_advanced(Boost_DIR PTHREAD_LIBRARY)
+message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
 
 #####################################################################
 #		OpenMP
@@ -209,95 +196,127 @@ else()
 	message( STATUS "Building without OpenMP as requested." )
 endif()
 
-IF (ENABLE_SHARK_DEFAULT_LIBS)
-  #####################################################################
-  #           HDF5 configuration
-  #####################################################################
-  find_package(HDF5 COMPONENTS C CXX HL QUIET)
-  mark_as_advanced(HDF5_DIR)
-  if(HDF5_FOUND)
-    if(HDF5_C_COMPILER_EXECUTABLE AND HDF5_HL_COMPILER_EXECUTABLE  AND HDF5_CXX_COMPILER_EXECUTABLE)
-      message(STATUS "Checking HDF5 installation: HDF5 installation seems ok.")
-      include_directories( ${HDF5_INCLUDE_DIR} )
-      link_directories( ${HDF5_LIBRARY_DIR} )
-      list(APPEND LINK_LIBRARIES ${HDF5_LIBRARIES})
-    else()
-      message(STATUS "Checking HDF5 installation:HDF5 package might be broken.")
-      if(NOT( HDF5_C_COMPILER_EXECUTABLE))
-        message(STATUS "  C Compiler Extension not found.")
-      endif()
-      if(NOT( HDF5_HL_COMPILER_EXECUTABLE))
-        message(STATUS "  HL Compiler Extension not found.")
-      endif()
-      if(NOT( HDF5_CXX_COMPILER_EXECUTABLE))
-        message(STATUS "  CXX Compiler Extension not found.")
-      endif()
-        message(STATUS "Disabling HDF5.")
-      unset( HDF5_FOUND )
-    endif()
-  else()
-    message(STATUS "HDF5 not found, skip")
-  endif()
-ENDIF()
+#####################################################################
+#           HDF5 configuration
+#####################################################################
+find_package(HDF5 COMPONENTS C CXX HL QUIET)
+mark_as_advanced(HDF5_DIR)
+if(HDF5_FOUND)
+	if(HDF5_C_COMPILER_EXECUTABLE AND HDF5_HL_COMPILER_EXECUTABLE  AND HDF5_CXX_COMPILER_EXECUTABLE)
+		message(STATUS "Checking HDF5 installation: HDF5 installation seems ok.")
+		include_directories( ${HDF5_INCLUDE_DIR} )
+		link_directories( ${HDF5_LIBRARY_DIR} )
+		list(APPEND LINK_LIBRARIES ${HDF5_LIBRARIES})
+	else()
+		message(STATUS "Checking HDF5 installation:HDF5 package might be broken.")
+		if(NOT( HDF5_C_COMPILER_EXECUTABLE))
+			message(STATUS "  C Compiler Extension not found.")
+		endif()
+		if(NOT( HDF5_HL_COMPILER_EXECUTABLE))
+			message(STATUS "  HL Compiler Extension not found.")
+		endif()
+		if(NOT( HDF5_CXX_COMPILER_EXECUTABLE))
+			message(STATUS "  CXX Compiler Extension not found.")
+		endif()
+			message(STATUS "Disabling HDF5.")
+		unset( HDF5_FOUND )
+	endif()
+else()
+	message(STATUS "HDF5 not found, skip")
+endif()
+
 #####################################################################
 #           ATLAS configuration
 #####################################################################
 
-if (APPLE)
-	option( ENABLE_ACCELERATE "Use Accelerate as Linear Algebra Library" ON )
-	if ( ENABLE_ACCELERATE )
-		set( SHARK_USE_CBLAS 1)          # most linear algebra routines
-		message(STATUS "Using the Accelerate framework")
-		list(APPEND LINK_LIBRARIES "-framework Accelerate" )
-	endif()
-else()
-	option(ENABLE_ATLAS "Use ATLAS as Linear Algebra Library" OFF)
-	option(ATLAS_FULL_LAPACK "Signalizes whether ATLAS comes with the full LAPACK package" OFF)
-	option(ENABLE_OpenBlas "Use OpenBlas as Linear Algebra Library" ON)
-	IF(ENABLE_OpenBlas)
-    INCLUDE(${PROJECT_SOURCE_DIR}/cmake/openblasConfig.cmake)
-  ELSEIF(ENABLE_ATLAS)
+
+option( ENABLE_CBLAS "Use Installed Linear Algebra Library" ON )
+
+if( ENABLE_CBLAS )
+	set(CBLAS_VENDOR FALSE)
+	if( APPLE )
+		set(CBLAS_VENDOR "Accelerate")
+		set(CBLAS_INCLUDES "")
+		set(CBLAS_LIBRARIES "-framework Accelerate" )
+	else()
+		#todo: do a propper vendor check
+		find_library(OPENBLAS_LIBRARY openblas
+			HINTS ${CBLAS_ROOT}/lib /opt/local/lib
+		)
 		find_library(CBLAS_LIBRARY cblas
-			HINTS ${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
 		)
-
 		find_library(CLAPACK_LIBRARY lapack
-			HINTS ${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
 		)
-
 		find_library(ATLAS_LIBRARY atlas
-			HINTS ${ATLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
 		)
-
-		get_filename_component(ATLAS_PATH ${CBLAS_LIBRARY} PATH )
-		set(ATLAS_PATH ${ATLAS_PATH}/..)
 		mark_as_advanced(
+			OPENBLAS_LIBRARY
 			CBLAS_LIBRARY
 			CLAPACK_LIBRARY
 			ATLAS_LIBRARY
 		)
+		#find the cblas.h include path
+		if(CBLAS_LIBRARY )
+			get_filename_component(CBLAS_LIB_PATH ${CBLAS_LIBRARY} PATH )
+		elseif( OPENBLAS_LIBRARY)	
+			get_filename_component(CBLAS_LIB_PATH ${OPENBLAS_LIBRARY} PATH )
+		endif()
+		if(CBLAS_LIB_PATH)
+			find_file(CBLAS_INCLUDES cblas.h 
+				PATHS ${CBLAS_LIB_PATH} ${CBLAS_LIB_PATH}/../include ${CBLAS_LIB_PATH}/../include/atlas
+			)
+			get_filename_component(CBLAS_INCLUDES ${CBLAS_INCLUDES} PATH )
+		endif()
 
-		if(CBLAS_LIBRARY)
-			message(STATUS "ATLAS found.")
-			list(APPEND LINK_LIBRARIES ${CLAPACK_LIBRARY} ${CBLAS_LIBRARY} ${ATLAS_LIBRARY})
-			set( SHARK_USE_CBLAS 1)
-			set( SHARK_USE_ATLAS_LAPACK 1)
-			if( ATLAS_FULL_LAPACK )
-				set( SHARK_USE_LAPACK 1)
-			endif()
-			if( ATLAS_ROOT )
-				message(STATUS "ATLAS root: " ${ATLAS_ROOT})
-				list(APPEND EXTRA_INCLUDE_DIRECTORIES ${ATLAS_ROOT}/include/)
-				list(APPEND EXTRA_INCLUDE_DIRECTORIES ${ATLAS_ROOT}/include/atlas/)
-				include_directories ( ${ATLAS_ROOT}/include/ ${ATLAS_ROOT}/include/atlas/ )
+		if( OPENBLAS_LIBRARY AND CBLAS_INCLUDES)
+			set(CBLAS_VENDOR "OpenBLAS")
+			set(CBLAS_LIBRARIES ${OPENBLAS_LIBRARY})
+		elseif( CBLAS_LIBRARY AND CLAPACK_LIBRARY AND ATLAS_LIBRARY AND CBLAS_INCLUDES)
+			set(CBLAS_VENDOR "ATLAS")
+			set(CBLAS_LIBRARIES ${CLAPACK_LIBRARY} ${CBLAS_LIBRARY} ${ATLAS_LIBRARY})
+		elseif( CBLAS_LIBRARY AND CBLAS_INCLUDES)
+			#check that we can compile a basic program with the libraries we have found
+			#vendor versions might come with additional libraries which would be bad.
+			try_compile(CBLAS_COMPILE 
+				"${PROJECT_BINARY_DIR}/cBlasCheck"
+				"${CMAKE_SOURCE_DIR}/cBlasCheck.cpp"
+				CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${CBLAS_INCLUDES}"
+				LINK_LIBRARIES ${CBLAS_LIBRARY}
+			)
+			if(CBLAS_COMPILE)
+				set(CBLAS_VENDOR "GENERIC")
+				set(CBLAS_LIBRARIES ${CBLAS_LIBRARY})
 			else()
-				message(STATUS "ATLAS path: " ${ATLAS_PATH})
-				list(APPEND EXTRA_INCLUDE_DIRECTORIES ${ATLAS_PATH}/include/atlas/)
-				list(APPEND EXTRA_INCLUDE_DIRECTORIES ${ATLAS_PATH}/include/atlas/)
-				include_directories ( ${ATLAS_PATH}/include/ ${ATLAS_PATH}/include/atlas/ )
+				message(WARNING "Unknown CBLAS. Can not use it")
 			endif()
-		else()
-			message(STATUS "ATLAS not found, no fast linear algebra used.")
+		endif()
+	endif()
+	
+	if(CBLAS_VENDOR)
+		message(STATUS "CBLAS FOUND: " ${CBLAS_VENDOR} " with include directory " ${CBLAS_INCLUDES} )
+		set(SHARK_USE_CBLAS 1)
+		list(APPEND EXTRA_INCLUDE_DIRECTORIES ${CBLAS_INCLUDES} )
+		list(APPEND LINK_LIBRARIES ${CBLAS_LIBRARIES})
+		include_directories ( ${CBLAS_INCLUDES} )
+	else()
+		message(STATUS "No usable CBLAS Library found. No fast linear Algebra used.")
+	endif()
+	
+	#Special setup for ATLAS
+	if( CBLAS_VENDOR MATCHES "ATLAS" )
+		set( SHARK_USE_ATLAS_LAPACK 1) # ATLAS always contains some LAPACK methods that we can use
+		
+		#check for full lapack
+		set(CMAKE_REQUIRE_QUIET 1)
+		set(CMAKE_REQUIRED_LIBRARIES ${CBLAS_LIBRARIES})
+		check_function_exists(dsyev_ ATLAS_FULL_LAPACK)
+		
+		if( ATLAS_FULL_LAPACK )
+			set( SHARK_USE_LAPACK 1)
+			message(STATUS "Detected ATLAS with full LAPACK package. Using it!")
 		endif()
 	endif()
 endif()
@@ -342,7 +361,7 @@ endif()
 #####################################################################
 if( MSVC )
 	#4250: inherit via dominance
-	add_definitions("/wd4250 /wd4190 /wd4244 /wd4267")
+	add_definitions(/wd4250)
 	#4251: needs to have dll-interface
 	add_definitions(/wd4251)
 	#4275: non-dll interface used as base for dll-interface class
