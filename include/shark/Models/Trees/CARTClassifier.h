@@ -123,13 +123,13 @@ public:
 	std::string name() const
 	{ return "CARTClassifier"; }
 
-	boost::shared_ptr<State> createState()const{
+	boost::shared_ptr<State> createState() const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	using base_type::eval;
 	/// \brief Evaluate the Tree on a batch of patterns
-	void eval(const BatchInputType& patterns, BatchOutputType& outputs)const{
+	void eval(BatchInputType const& patterns, BatchOutputType & outputs) const{
 		std::size_t numPatterns = shark::size(patterns);
 		//evaluate the first pattern alone and create the batch output from that
 		LabelType const& firstResult = evalPattern(row(patterns,0));
@@ -142,11 +142,11 @@ public:
 		}
 	}
 	
-	void eval(const BatchInputType& patterns, BatchOutputType& outputs, State& state)const{
+	void eval(BatchInputType const& patterns, BatchOutputType & outputs, State& state) const{
 		eval(patterns,outputs);
 	}
 	/// \brief Evaluate the Tree on a single pattern
-	void eval(RealVector const & pattern, LabelType& output){
+	void eval(RealVector const& pattern, LabelType& output){
 		output = evalPattern(pattern);		
 	}
 
@@ -162,7 +162,7 @@ public:
 	}
 
 	/// \brief The model does not have any parameters.
-	std::size_t numberOfParameters()const{
+	std::size_t numberOfParameters() const{
 		return 0;
 	}
 
@@ -172,7 +172,7 @@ public:
 	}
 
 	/// \brief The model does not have any parameters.
-	void setParameterVector(const RealVector& param) {
+	void setParameterVector(RealVector const& param) {
 		SHARK_ASSERT(param.size() == 0);
 	}
 
@@ -224,7 +224,7 @@ public:
 	}
 
 	/// Compute oob error, given an oob dataset (Regression)
-	void computeOOBerror(const RegressionDataset& dataOOB){
+	void computeOOBerror(RegressionDataset const& dataOOB){
 		// define loss
 		SquaredLoss<RealVector, RealVector> lossOOB;
 
@@ -246,7 +246,7 @@ public:
 	}
 
 	/// Compute feature importances, given an oob dataset (Classification)
-	void computeFeatureImportances(const ClassificationDataset& dataOOB){
+	void computeFeatureImportances(ClassificationDataset const& dataOOB){
 		m_featureImportances.resize(m_inputDimension);
 
 		// define loss
@@ -281,7 +281,7 @@ public:
 	}
 
 	/// Compute feature importances, given an oob dataset (Regression)
-	void computeFeatureImportances(const RegressionDataset& dataOOB){
+	void computeFeatureImportances(RegressionDataset const& dataOOB){
 		m_featureImportances.resize(m_inputDimension);
 
 		// define loss
@@ -320,7 +320,7 @@ protected:
 	SplitMatrixType m_splitMatrix;
 	
 	/// \brief Finds the index of the node with a certain nodeID in an unoptimized split matrix.
-	std::size_t findNode(std::size_t nodeId)const{
+	std::size_t findNode(std::size_t nodeId) const{
 		std::size_t index = 0;
 		for(; nodeId != m_splitMatrix[index].nodeId; ++index);
 		return index;
@@ -330,7 +330,7 @@ protected:
 	/// The optimization is done by changing the index of the children
 	/// to use indices instead of node ID.
 	/// Furthermore, the node IDs are converted to index numbers.
-	void optimizeSplitMatrix(SplitMatrixType& splitMatrix)const{
+	void optimizeSplitMatrix(SplitMatrixType& splitMatrix) const{
 		for(std::size_t i = 0; i < splitMatrix.size(); i++){
 			splitMatrix[i].leftNodeId = findNode(splitMatrix[i].leftNodeId);
 			splitMatrix[i].rightNodeId = findNode(splitMatrix[i].rightNodeId);
@@ -342,7 +342,7 @@ protected:
 	
 	/// Evaluate the CART tree on a single sample
 	template<class Vector>
-	LabelType const& evalPattern(Vector const& pattern)const{
+	LabelType const& evalPattern(Vector const& pattern) const{
 		std::size_t nodeId = 0;
 		while(m_splitMatrix[nodeId].leftNodeId != 0){
 			if(pattern[m_splitMatrix[nodeId].attributeIndex]<=m_splitMatrix[nodeId].attributeValue){

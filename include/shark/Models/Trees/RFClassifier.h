@@ -52,7 +52,7 @@ typedef std::vector<SplitMatrixType> ForestInfo;
 /// Random Forests. Leo Breiman. Machine Learning, 1(45), pages 5-32. Springer, 2001.<br/>
 ///
 /// \par
-/// It is a ensemble learner that uses multiple decision trees built
+/// It is an ensemble learner that uses multiple decision trees built
 /// using the CART methodology.
 ///
 class RFClassifier : public MeanModel<CARTClassifier<RealVector> >

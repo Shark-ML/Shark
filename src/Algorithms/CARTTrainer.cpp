@@ -477,7 +477,7 @@ RealVector CARTTrainer::mean(std::vector<RealVector> const& labels){
 /**
  * Returns the Total Sum of Squares
  */
-double CARTTrainer::totalSumOfSquares(std::vector<RealVector> const& labels, std::size_t start, std::size_t length, const RealVector& sumLabel){
+double CARTTrainer::totalSumOfSquares(std::vector<RealVector> const& labels, std::size_t start, std::size_t length, RealVector const& sumLabel){
 	if (length < 1)
 		throw SHARKEXCEPTION("[CARTTrainer::totalSumOfSquares] length < 1");
 	if (start+length > labels.size())

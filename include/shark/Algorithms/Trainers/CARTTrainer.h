@@ -141,7 +141,7 @@ protected:
 	///Regression functions
 	SHARK_EXPORT_SYMBOL SplitMatrixType buildTree(AttributeTables const& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, std::size_t trainSize);
 	///Calculates the total sum of squares
-	SHARK_EXPORT_SYMBOL double totalSumOfSquares(std::vector<RealVector> const& labels, std::size_t start, std::size_t length, const RealVector& sumLabel);
+	SHARK_EXPORT_SYMBOL double totalSumOfSquares(std::vector<RealVector> const& labels, std::size_t start, std::size_t length, RealVector const& sumLabel);
 	///Calculates the mean of a vector of labels
 	SHARK_EXPORT_SYMBOL RealVector mean(std::vector<RealVector> const& labels);
 

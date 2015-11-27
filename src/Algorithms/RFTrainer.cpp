@@ -84,7 +84,7 @@ void RFTrainer::setDefaults(){
 }
 
 // Regression
-void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
+void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 {
 	model.clearModels();   // added by TG 23.02.2015
 
@@ -163,7 +163,7 @@ void RFTrainer::train(RFClassifier& model, const RegressionDataset& dataset)
 }
 
 // Classification
-void RFTrainer::train(RFClassifier& model, const ClassificationDataset& dataset)
+void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 {
 	model.clearModels();
 
@@ -256,7 +256,7 @@ void RFTrainer::setOOBratio(double ratio){
 
 
 
-CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
+CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
 	CARTClassifier<RealVector>::SplitMatrixType lSplitMatrix, rSplitMatrix;
 
 	//Construct split matrix
@@ -376,7 +376,7 @@ RealVector RFTrainer::hist(boost::unordered_map<std::size_t, std::size_t> countM
 	return histogram;
 }
 
-CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, const RegressionDataset& dataset, const std::vector<RealVector>& labels, std::size_t nodeId ){
+CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId ){
 
 	//Construct split matrix
 	CARTClassifier<RealVector>::SplitInfo splitInfo;
@@ -506,7 +506,7 @@ CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables
 /**
  * Returns the average vector of a vector of real vectors
  */
-RealVector RFTrainer::average(const std::vector<RealVector>& labels){
+RealVector RFTrainer::average(std::vector<RealVector> const& labels){
 	RealVector avg(labels[0]);
 	for(std::size_t i = 1; i < labels.size(); i++){
 		avg += labels[i];
@@ -535,7 +535,7 @@ double RFTrainer::totalSumOfSquares(std::vector<RealVector>& labels, std::size_t
  * Returns two attribute tables: LAttrbuteTables and RAttrbuteTables
  * Calculated from splitting tables at (index, valIndex)
  */
-void RFTrainer::splitAttributeTables(const AttributeTables& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables){
+void RFTrainer::splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables){
 	AttributeTable table;
 
 	//Build a hash table for fast lookup
@@ -572,7 +572,7 @@ void RFTrainer::generateRandomTableIndicies(set<std::size_t>& tableIndicies){
 ///Calculates the Gini impurity of a node. The impurity is defined as
 ///1-sum_j p(j|t)^2
 ///i.e the 1 minus the sum of the squared probability of observing class j in node t
-double RFTrainer::gini(boost::unordered_map<std::size_t, std::size_t>& countMatrix, std::size_t n){
+double RFTrainer::gini(boost::unordered_map<std::size_t, std::size_t> & countMatrix, std::size_t n){
 	double res = 0;
 	boost::unordered_map<std::size_t, std::size_t>::iterator it;
 	if(n){
@@ -610,13 +610,13 @@ void RFTrainer::createAttributeTables(Data<RealVector> const& dataset, Attribute
 }
 
 
-void RFTrainer::createCountMatrix(const ClassificationDataset& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove){
+void RFTrainer::createCountMatrix(ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove){
 	std::size_t elements = dataset.numberOfElements();
 	for(std::size_t i = 0 ; i < elements; i++){
 		cAbove[dataset.element(i).label]++;
 	}
 }
 
-bool RFTrainer::tableSort(const RFAttribute& v1, const RFAttribute& v2) {
+bool RFTrainer::tableSort(RFAttribute const& v1, RFAttribute const& v2) {
 	return v1.value < v2.value;
 }
