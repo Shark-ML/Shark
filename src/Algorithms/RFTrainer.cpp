@@ -131,8 +131,8 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 			labels.push_back(dataTrain.element(i).label);
 		}
 
-		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, labels, 0);
-		CARTClassifier<RealVector> tree(splitMatrix, m_inputDimension);
+		CARTClassifier<RealVector>::TreeType tree = buildTree(tables, dataTrain, labels, 0);
+		CARTClassifier<RealVector> cart(tree, m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
 		if(m_computeOOBerror || m_computeFeatureImportances){
@@ -141,15 +141,15 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 
 			// if importances should be computed, oob errors are computed implicitly
 			if(m_computeFeatureImportances){
-				tree.computeFeatureImportances(dataOOB);
+				cart.computeFeatureImportances(dataOOB);
 			} // if importances should not be computed, only compute the oob errors
 			else{
-				tree.computeOOBerror(dataOOB);
+				cart.computeOOBerror(dataOOB);
 			}
 		}
 
 		SHARK_CRITICAL_REGION{
-			model.addModel(tree);
+			model.addModel(cart);
 		}
 	}
 
@@ -205,8 +205,8 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		createAttributeTables(dataTrain.inputs(), tables);
 		createCountMatrix(dataTrain, cAbove);
 
-		CARTClassifier<RealVector>::SplitMatrixType splitMatrix = buildTree(tables, dataTrain, cAbove, 0);
-		CARTClassifier<RealVector> tree(splitMatrix, m_inputDimension);
+		CARTClassifier<RealVector>::TreeType tree = buildTree(tables, dataTrain, cAbove, 0);
+		CARTClassifier<RealVector> cart(tree, m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
 		if(m_computeOOBerror || m_computeFeatureImportances){
@@ -215,15 +215,15 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 
 			// if importances should be computed, oob errors are computed implicitly
 			if(m_computeFeatureImportances){
-				tree.computeFeatureImportances(dataOOB);
+				cart.computeFeatureImportances(dataOOB);
 			} // if importances should not be computed, only compute the oob errors
 			else{
-				tree.computeOOBerror(dataOOB);
+				cart.computeOOBerror(dataOOB);
 			}
 		}
 
 		SHARK_CRITICAL_REGION{
-			model.addModel(tree);
+			model.addModel(cart);
 		}
 	}
 
@@ -256,20 +256,20 @@ void RFTrainer::setOOBratio(double ratio){
 
 
 
-CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
-	CARTClassifier<RealVector>::SplitMatrixType lSplitMatrix, rSplitMatrix;
+CARTClassifier<RealVector>::TreeType RFTrainer::buildTree(AttributeTables& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
+	CARTClassifier<RealVector>::TreeType lTree, rTree;
 
-	//Construct split matrix
-	CARTClassifier<RealVector>::SplitInfo splitInfo;
+	//Construct tree
+	CARTClassifier<RealVector>::NodeInfo nodeInfo;
 
-	splitInfo.nodeId = nodeId;
-	splitInfo.attributeIndex = 0;
-	splitInfo.attributeValue = 0.0;
-	splitInfo.leftNodeId = 0;
-	splitInfo.rightNodeId = 0;
-	splitInfo.misclassProp = 0.0;
-	splitInfo.r = 0;
-	splitInfo.g = 0.0;
+	nodeInfo.nodeId = nodeId;
+	nodeInfo.attributeIndex = 0;
+	nodeInfo.attributeValue = 0.0;
+	nodeInfo.leftNodeId = 0;
+	nodeInfo.rightNodeId = 0;
+	nodeInfo.misclassProp = 0.0;
+	nodeInfo.r = 0;
+	nodeInfo.g = 0.0;
 
 	//n = Total number of cases in the dataset
 	std::size_t n = tables[0].size();
@@ -330,13 +330,13 @@ CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables
 			tables.clear();
 			//Continue recursively
 
-			splitInfo.attributeIndex = bestAttributeIndex;
-			splitInfo.attributeValue = bestAttributeVal;
-			splitInfo.leftNodeId = 2*nodeId+1;
-			splitInfo.rightNodeId = 2*nodeId+2;
+			nodeInfo.attributeIndex = bestAttributeIndex;
+			nodeInfo.attributeValue = bestAttributeVal;
+			nodeInfo.leftNodeId = 2*nodeId+1;
+			nodeInfo.rightNodeId = 2*nodeId+2;
 
-			lSplitMatrix = buildTree(lTables, dataset, cBestBelow, splitInfo.leftNodeId);
-			rSplitMatrix = buildTree(rTables, dataset, cBestAbove, splitInfo.rightNodeId);
+			lTree = buildTree(lTables, dataset, cBestBelow, nodeInfo.leftNodeId);
+			rTree = buildTree(rTables, dataset, cBestAbove, nodeInfo.rightNodeId);
 		}else{
 			//Leaf node
 			isLeaf = true;
@@ -344,20 +344,20 @@ CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables
 
 	}
 
-	//Store entry in the splitMatrix table
-	CARTClassifier<RealVector>::SplitMatrixType splitMatrix;
+	//Store entry in the tree table
+	CARTClassifier<RealVector>::TreeType tree;
 
 	if(isLeaf){
-		splitInfo.label = hist(cAbove);
-		splitMatrix.push_back(splitInfo);
-		return splitMatrix;
+		nodeInfo.label = hist(cAbove);
+		tree.push_back(nodeInfo);
+		return tree;
 	}
 
-	splitMatrix.push_back(splitInfo);
-	splitMatrix.insert(splitMatrix.end(), lSplitMatrix.begin(), lSplitMatrix.end());
-	splitMatrix.insert(splitMatrix.end(), rSplitMatrix.begin(), rSplitMatrix.end());
+	tree.push_back(nodeInfo);
+	tree.insert(tree.end(), lTree.begin(), lTree.end());
+	tree.insert(tree.end(), rTree.begin(), rTree.end());
 
-	return splitMatrix;
+	return tree;
 }
 
 RealVector RFTrainer::hist(boost::unordered_map<std::size_t, std::size_t> countMatrix){
@@ -376,22 +376,22 @@ RealVector RFTrainer::hist(boost::unordered_map<std::size_t, std::size_t> countM
 	return histogram;
 }
 
-CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId ){
+CARTClassifier<RealVector>::TreeType RFTrainer::buildTree(AttributeTables& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId ){
 
-	//Construct split matrix
-	CARTClassifier<RealVector>::SplitInfo splitInfo;
+	//Construct tree
+	CARTClassifier<RealVector>::NodeInfo nodeInfo;
 
-	splitInfo.nodeId = nodeId;
-	splitInfo.attributeIndex = 0;
-	splitInfo.attributeValue = 0.0;
-	splitInfo.leftNodeId = 0;
-	splitInfo.rightNodeId = 0;
-	splitInfo.label = average(labels);
-	splitInfo.misclassProp = 0.0;
-	splitInfo.r = 0;
-	splitInfo.g = 0.0;
+	nodeInfo.nodeId = nodeId;
+	nodeInfo.attributeIndex = 0;
+	nodeInfo.attributeValue = 0.0;
+	nodeInfo.leftNodeId = 0;
+	nodeInfo.rightNodeId = 0;
+	nodeInfo.label = average(labels);
+	nodeInfo.misclassProp = 0.0;
+	nodeInfo.r = 0;
+	nodeInfo.g = 0.0;
 
-	CARTClassifier<RealVector>::SplitMatrixType splitMatrix, lSplitMatrix, rSplitMatrix;
+	CARTClassifier<RealVector>::TreeType tree, lTree, rTree;
 
 	//n = Total number of cases in the dataset
 	std::size_t n = tables[0].size();
@@ -473,13 +473,13 @@ CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables
 			}
 
 			//Continue recursively
-			splitInfo.attributeIndex = bestAttributeIndex;
-			splitInfo.attributeValue = bestAttributeVal;
-			splitInfo.leftNodeId = 2*nodeId+1;
-			splitInfo.rightNodeId = 2*nodeId+2;
+			nodeInfo.attributeIndex = bestAttributeIndex;
+			nodeInfo.attributeValue = bestAttributeVal;
+			nodeInfo.leftNodeId = 2*nodeId+1;
+			nodeInfo.rightNodeId = 2*nodeId+2;
 
-			lSplitMatrix = buildTree(lTables, dataset, lLabels, splitInfo.leftNodeId);
-			rSplitMatrix = buildTree(rTables, dataset, rLabels, splitInfo.rightNodeId);
+			lTree = buildTree(lTables, dataset, lLabels, nodeInfo.leftNodeId);
+			rTree = buildTree(rTables, dataset, rLabels, nodeInfo.rightNodeId);
 		}else{
 			//Leaf node
 			isLeaf = true;
@@ -488,16 +488,16 @@ CARTClassifier<RealVector>::SplitMatrixType RFTrainer::buildTree(AttributeTables
 	}
 
 	if(isLeaf){
-		splitMatrix.push_back(splitInfo);
-		return splitMatrix;
+		tree.push_back(nodeInfo);
+		return tree;
 	}
 
-	splitMatrix.push_back(splitInfo);
-	splitMatrix.insert(splitMatrix.end(), lSplitMatrix.begin(), lSplitMatrix.end());
-	splitMatrix.insert(splitMatrix.end(), rSplitMatrix.begin(), rSplitMatrix.end());
+	tree.push_back(nodeInfo);
+	tree.insert(tree.end(), lTree.begin(), lTree.end());
+	tree.insert(tree.end(), rTree.begin(), rTree.end());
 
-	//Store entry in the splitMatrix table
-	return splitMatrix;
+	//Store entry in the tree
+	return tree;
 
 }
 

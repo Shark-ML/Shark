@@ -108,7 +108,7 @@ protected:
 	typedef std::vector < TableEntry > AttributeTable;
 	typedef std::vector < AttributeTable > AttributeTables;
 
-	typedef ModelType::SplitMatrixType SplitMatrixType;
+	typedef ModelType::TreeType TreeType;
 
 
 	///Number of attributes in the dataset
@@ -129,7 +129,7 @@ protected:
 	//Classification functions
 	///Builds a single decision tree from a classification dataset
 	///The method requires the attribute tables,
-	SHARK_EXPORT_SYMBOL SplitMatrixType buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId );
+	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId );
 
 	///Calculates the Gini impurity of a node. The impurity is defined as
 	///1-sum_j p(j|t)^2
@@ -139,22 +139,22 @@ protected:
 	SHARK_EXPORT_SYMBOL RealVector hist(boost::unordered_map<std::size_t, std::size_t> countMatrix);
 
 	///Regression functions
-	SHARK_EXPORT_SYMBOL SplitMatrixType buildTree(AttributeTables const& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, std::size_t trainSize);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables const& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, std::size_t trainSize);
 	///Calculates the total sum of squares
 	SHARK_EXPORT_SYMBOL double totalSumOfSquares(std::vector<RealVector> const& labels, std::size_t start, std::size_t length, RealVector const& sumLabel);
 	///Calculates the mean of a vector of labels
 	SHARK_EXPORT_SYMBOL RealVector mean(std::vector<RealVector> const& labels);
 
 	///Pruning
-	///Prunes decision tree, represented by a split matrix
-	SHARK_EXPORT_SYMBOL void pruneMatrix(SplitMatrixType& splitMatrix);
+	///Prunes decision tree
+	SHARK_EXPORT_SYMBOL void pruneTree(TreeType & tree);
 	///Prunes a single node, including the child nodes of the decision tree
-	SHARK_EXPORT_SYMBOL void pruneNode(SplitMatrixType& splitMatrix, std::size_t nodeId);
+	SHARK_EXPORT_SYMBOL void pruneNode(TreeType & tree, std::size_t nodeId);
 	///Updates the node variables used in the cost complexity pruning stage
-	SHARK_EXPORT_SYMBOL void measureStrenght(SplitMatrixType& splitMatrix, std::size_t nodeId, std::size_t parentNodeId);
+	SHARK_EXPORT_SYMBOL void measureStrength(TreeType & tree, std::size_t nodeId, std::size_t parentNodeId);
 
-	///Returns the index of the node with node id in splitMatrix.
-	SHARK_EXPORT_SYMBOL std::size_t findNode(SplitMatrixType& splitMatrix, std::size_t nodeId);
+	///Returns the index of the node with node id in tree.
+	SHARK_EXPORT_SYMBOL std::size_t findNode(TreeType & tree, std::size_t nodeId);
 
 	///Attribute table functions
 	///Create the attribute tables used by the SPRINT algorithm
