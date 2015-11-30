@@ -117,54 +117,67 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-if (UNIX)
-    add_compile_options("$<$<CONFIG:DEBUG>:-Wall>")
+string( TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE )
+if(${CMAKE_BUILD_TYPE}  MATCHES "debug")
+	#we want to be warned in debug mode
+	if(UNIX)
+#		if(CMAKE_COMPILER_IS_GNUCC)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+#		endif()
+	endif()
 endif()
 
 list(APPEND COMPILE_DEFINITIONS_RELEASE NDEBUG)
 message(STATUS "Will build: " ${CMAKE_BUILD_TYPE})
 
-#####################################################################
-#           Boost configuration
-#####################################################################
-set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
-set(Boost_USE_MULTITHREADED ON)
-add_definitions(-DBOOST_PARAMETER_MAX_ARITY=15)
-add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
+option( ENABLE_SHARK_DEFAULT_LIBS "Use Default Shark Libraries" OFF )
+option( ENABLE_SHARK_CUSTOMIZED_LIBS "Use Default Shark Libraries" OFF )
+IF(ENABLE_SHARK_CUSTOMIZED_LIBS)
+  INCLUDE(${PROJECT_SOURCE_DIR}/cmake/CustomLibs.cmake)
+ENDIF()
+IF (ENABLE_SHARK_DEFAULT_LIBS)
+  #####################################################################
+  #           Boost configuration
+  #####################################################################
+  set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
+  set(Boost_USE_MULTITHREADED ON)
+  add_definitions(-DBOOST_PARAMETER_MAX_ARITY=15)
+  add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
 
-# Should we link the boost test dynamically
-if(NOT Boost_USE_STATIC_LIBS)
-	add_definitions(-DBOOST_TEST_DYN_LINK)
-	add_definitions(-DBOOST_ALL_DYN_LINK)
-endif()
+  # Should we link the boost test dynamically
+  if(NOT Boost_USE_STATIC_LIBS)
+    add_definitions(-DBOOST_TEST_DYN_LINK)
+    add_definitions(-DBOOST_ALL_DYN_LINK)
+  endif()
 
-find_package( 
-	Boost 1.48.0 REQUIRED COMPONENTS
-	system date_time filesystem
-	program_options serialization thread
-	unit_test_framework
-)
+  find_package( 
+    Boost 1.48.0 REQUIRED COMPONENTS
+    system date_time filesystem
+    program_options serialization thread
+    unit_test_framework
+  )
 
-if(NOT Boost_FOUND)
-	message(FATAL_ERROR "Please make sure Boost 1.48.0 is installed on your system")
-endif()
+  if(NOT Boost_FOUND)
+    message(FATAL_ERROR "Please make sure Boost 1.48.0 is installed on your system")
+  endif()
 
-if (WIN32)
-	# disable autolinking in boost
-	add_definitions( -DBOOST_ALL_NO_LIB )
-endif()
+  if (WIN32)
+    # disable autolinking in boost
+    add_definitions( -DBOOST_ALL_NO_LIB )
+  endif()
 
-include_directories(SYSTEM ${Boost_INCLUDE_DIR} )
-link_directories( ${Boost_LIBRARY_DIR} )
-if(UNIX)
-	find_library( PTHREAD_LIBRARY pthread )
-endif()
+  include_directories(SYSTEM ${Boost_INCLUDE_DIR} )
+  link_directories( ${Boost_LIBRARY_DIR} )
+  if(UNIX)
+    find_library( PTHREAD_LIBRARY pthread )
+  endif()
 
-# Set the libraries needed by Shark
-list(APPEND LINK_LIBRARIES ${Boost_LIBRARIES} ${PTHREAD_LIBRARY})
+  # Set the libraries needed by Shark
+  list(APPEND LINK_LIBRARIES ${Boost_LIBRARIES} ${PTHREAD_LIBRARY})
 
-mark_as_advanced(Boost_DIR PTHREAD_LIBRARY)
-message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
+  mark_as_advanced(Boost_DIR PTHREAD_LIBRARY)
+  message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
+ENDIF()
 
 #####################################################################
 #		OpenMP
@@ -190,32 +203,36 @@ else()
 	message( STATUS "Building without OpenMP as requested." )
 endif()
 
-#####################################################################
-#           HDF5 configuration
-#####################################################################
-find_package(HDF5 COMPONENTS C CXX HL QUIET)
-mark_as_advanced(HDF5_DIR)
-if(HDF5_FOUND)
-	if(HDF5_C_COMPILER_EXECUTABLE AND HDF5_CXX_COMPILER_EXECUTABLE)
-		message(STATUS "Checking HDF5 installation: HDF5 installation seems ok.")
-		include_directories( ${HDF5_INCLUDE_DIR} )
-		link_directories( ${HDF5_LIBRARY_DIR} )
-		list(APPEND LINK_LIBRARIES ${HDF5_LIBRARIES})
-	else()
-		message(STATUS "Checking HDF5 installation:HDF5 package might be broken.")
-		if(NOT( HDF5_C_COMPILER_EXECUTABLE))
-			message(STATUS "  C Compiler Extension not found.")
-		endif()
-		if(NOT( HDF5_CXX_COMPILER_EXECUTABLE))
-			message(STATUS "  CXX Compiler Extension not found.")
-		endif()
-			message(STATUS "Disabling HDF5.")
-		unset( HDF5_FOUND )
-	endif()
-else()
-	message(STATUS "HDF5 not found, skip")
-endif()
-
+IF (ENABLE_SHARK_DEFAULT_LIBS)
+  #####################################################################
+  #           HDF5 configuration
+  #####################################################################
+  find_package(HDF5 COMPONENTS C CXX HL QUIET)
+  mark_as_advanced(HDF5_DIR)
+  if(HDF5_FOUND)
+    if(HDF5_C_COMPILER_EXECUTABLE AND HDF5_HL_COMPILER_EXECUTABLE  AND HDF5_CXX_COMPILER_EXECUTABLE)
+      message(STATUS "Checking HDF5 installation: HDF5 installation seems ok.")
+      include_directories( ${HDF5_INCLUDE_DIR} )
+      link_directories( ${HDF5_LIBRARY_DIR} )
+      list(APPEND LINK_LIBRARIES ${HDF5_LIBRARIES})
+    else()
+      message(STATUS "Checking HDF5 installation:HDF5 package might be broken.")
+      if(NOT( HDF5_C_COMPILER_EXECUTABLE))
+        message(STATUS "  C Compiler Extension not found.")
+      endif()
+      if(NOT( HDF5_HL_COMPILER_EXECUTABLE))
+        message(STATUS "  HL Compiler Extension not found.")
+      endif()
+      if(NOT( HDF5_CXX_COMPILER_EXECUTABLE))
+        message(STATUS "  CXX Compiler Extension not found.")
+      endif()
+        message(STATUS "Disabling HDF5.")
+      unset( HDF5_FOUND )
+    endif()
+  else()
+    message(STATUS "HDF5 not found, skip")
+  endif()
+ENDIF()
 #####################################################################
 #           ATLAS configuration
 #####################################################################
