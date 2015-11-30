@@ -44,8 +44,8 @@ target_link_libraries(SharkVersion shark)
 
 # Install the library
 set_target_properties( shark PROPERTIES
-	VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH}
-	SOVERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH})
+	VERSION ${SHARK_VERSION}
+	SOVERSION ${SHARK_SOVERSION})
 
 install(TARGETS shark
 	    EXPORT SharkTargets
