@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       -
+ * \brief       Symmetric eigenvalue decomposition
  *
  * \author      O. Krause
  * \date        2012

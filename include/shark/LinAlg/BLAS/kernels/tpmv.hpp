@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       -
+ * \brief       Triangular packed matrix-vector multiplication
  *
  * \author      O. Krause
  * \date        2012

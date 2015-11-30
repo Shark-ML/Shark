@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       -
+ * \brief       Traits to obtain memory and storage sizes easily from expression templates
  *
  * \author      O. Krause
  * \date        2013

@@ -1,7 +1,7 @@
 /*!
  *
  *
- * \brief       Dispatches the POTRF algorithmbetween the bindings
+ * \brief       Dispatches the POTRF algorithm
  *
  * \author      O. Krause
  * \date        2012

@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       -
+ * \brief       Triangular Matrix-Matrix multiplication kernel
  *
  * \author      O. Krause
  * \date        2012
