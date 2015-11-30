@@ -29,8 +29,8 @@
  *
  */
 //===========================================================================
-#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_TRMM_HPP
-#define SHARK_LINALG_BLAS_KERNELS_ATLAS_TRMM_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CBLAS_TRMV_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CBLAS_TRMV_HPP
 
 #include "cblas_inc.hpp"
 #include "../../matrix_proxy.hpp"
@@ -39,126 +39,101 @@
 
 namespace shark {namespace blas {namespace bindings {
 
-inline void trmm(
-	CBLAS_ORDER const order,
-	CBLAS_SIDE const side,
+inline void trmv(
+	CBLAS_ORDER const Order,
 	CBLAS_UPLO const uplo,
 	CBLAS_TRANSPOSE const transA,
 	CBLAS_DIAG const unit,
-	int const M,
 	int const N,
 	float const *A, int const lda,
-        float* B, int const incB
+        float* X, int const incX
 ) {
-	cblas_strmm(order, side, uplo, transA, unit, M, N, 
-		1.0,
+	cblas_strmv(Order, uplo, transA, unit, N, 
 		A, lda,
-	        B, incB
+	        X, incX
 	);
 }
 
-inline void trmm(
-	CBLAS_ORDER const order,
-	CBLAS_SIDE const side,
+inline void trmv(
+	CBLAS_ORDER const Order,
 	CBLAS_UPLO const uplo,
 	CBLAS_TRANSPOSE const transA,
 	CBLAS_DIAG const unit,
-	int const M,
 	int const N,
 	double const *A, int const lda,
-        double* B, int const incB
+        double* X, int const incX
 ) {
-	cblas_dtrmm(order, side, uplo, transA, unit, M, N, 
-		1.0,
+	cblas_dtrmv(Order, uplo, transA, unit, N, 
 		A, lda,
-	        B, incB
+	        X, incX
 	);
 }
 
 
-inline void trmm(
-	CBLAS_ORDER const order,
-	CBLAS_SIDE const side,
+inline void trmv(
+	CBLAS_ORDER const Order,
 	CBLAS_UPLO const uplo,
 	CBLAS_TRANSPOSE const transA,
 	CBLAS_DIAG const unit,
-	int const M,
 	int const N,
 	std::complex<float> const *A, int const lda,
-        std::complex<float>* B, int const incB
+        std::complex<float>* X, int const incX
 ) {
-	std::complex<float> alpha = 1.0;
-	cblas_ctrmm(order, side, uplo, transA, unit, M, N, 
-		static_cast<void const *>(&alpha),
-		static_cast<void const *>(A), lda,
-	        static_cast<void *>(B), incB
+	cblas_ctrmv(Order, uplo, transA, unit, N, 
+		reinterpret_cast<cblas_float_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_float_complex_type *>(X), incX
 	);
 }
 
-inline void trmm(
-	CBLAS_ORDER const order,
-	CBLAS_SIDE const side,
+inline void trmv(
+	CBLAS_ORDER const Order,
 	CBLAS_UPLO const uplo,
 	CBLAS_TRANSPOSE const transA,
 	CBLAS_DIAG const unit,
-	int const M,
 	int const N,
 	std::complex<double> const *A, int const lda,
-        std::complex<double>* B, int const incB
+        std::complex<double>* X, int const incX
 ) {
-	std::complex<double> alpha = 1.0;
-	cblas_ztrmm(order, side, uplo, transA, unit, M, N, 
-		static_cast<void const *>(&alpha),
-		static_cast<void const *>(A), lda,
-	        static_cast<void *>(B), incB
+	cblas_ztrmv(Order, uplo, transA, unit, N, 
+		reinterpret_cast<cblas_double_complex_type const *>(A), lda,
+	        reinterpret_cast<cblas_double_complex_type *>(X), incX
 	);
 }
 
-template <bool upper, bool unit, typename MatA, typename MatB>
-void trmm(
-	matrix_expression<MatA> const& A,
-	matrix_expression<MatB>& B,
+template <bool upper, bool unit, typename MatrA, typename VectorX>
+void trmv(
+	matrix_expression<MatrA> const& A,
+	vector_expression<VectorX> &x,
 	boost::mpl::true_
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == B().size1());
+	SIZE_CHECK(x().size() == A().size2());
+	SIZE_CHECK(A().size2() == A().size1());
 	std::size_t n = A().size1();
-	std::size_t m = B().size2();
 	CBLAS_DIAG cblasUnit = unit?CblasUnit:CblasNonUnit;
 	CBLAS_UPLO cblasUplo = upper?CblasUpper:CblasLower;
-	CBLAS_ORDER stor_ord= (CBLAS_ORDER)storage_order<typename MatA::orientation>::value;
-	CBLAS_TRANSPOSE trans=CblasNoTrans;
+	CBLAS_ORDER stor_ord= (CBLAS_ORDER)storage_order<typename MatrA::orientation>::value;
 	
-	//special case: MatA and MatB do not have same storage order. in this case compute as
-	//AB->B^TA^T where transpose of B is done implicitely by exchanging storage order
-	CBLAS_ORDER stor_ordB= (CBLAS_ORDER)storage_order<typename MatB::orientation>::value;
-	if(stor_ord != stor_ordB){
-		trans = CblasTrans;
-		cblasUplo=  upper?CblasLower:CblasUpper;
-	}
-	
-	trmm(stor_ordB, CblasLeft, cblasUplo, trans, cblasUnit,
-		(int)n, int(m),
+	trmv(stor_ord, cblasUplo, CblasNoTrans, cblasUnit, (int)n,
 	        traits::storage(A),
 		traits::leading_dimension(A),
-	        traits::storage(B),
-	        traits::leading_dimension(B)
+	        traits::storage(x),
+	        traits::stride(x)
 	);
 }
 
 template<class Storage1, class Storage2, class T1, class T2>
-struct optimized_trmm_detail{
+struct optimized_trmv_detail{
 	typedef boost::mpl::false_ type;
 };
 template<>
-struct optimized_trmm_detail<
+struct optimized_trmv_detail<
 	dense_tag, dense_tag,
 	double, double
 >{
 	typedef boost::mpl::true_ type;
 };
 template<>
-struct optimized_trmm_detail<
+struct optimized_trmv_detail<
 	dense_tag, dense_tag,
 	float, float
 >{
@@ -166,14 +141,14 @@ struct optimized_trmm_detail<
 };
 
 template<>
-struct optimized_trmm_detail<
+struct optimized_trmv_detail<
 	dense_tag, dense_tag,
 	std::complex<double>, std::complex<double>
 >{
 	typedef boost::mpl::true_ type;
 };
 template<>
-struct optimized_trmm_detail<
+struct optimized_trmv_detail<
 	dense_tag, dense_tag,
 	std::complex<float>, std::complex<float>
 >{
@@ -181,8 +156,8 @@ struct optimized_trmm_detail<
 };
 
 template<class M1, class M2>
-struct  has_optimized_trmm
-: public optimized_trmm_detail<
+struct  has_optimized_trmv
+: public optimized_trmv_detail<
 	typename M1::storage_category,
 	typename M2::storage_category,
 	typename M1::value_type,

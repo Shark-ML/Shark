@@ -28,32 +28,8 @@
  *
  */
 
-/*
- *
- * Copyright (c) Kresimir Fresl 2002
- *
- * Distributed under the Boost Software License, Version 1.0.
- * (See accompanying file LICENSE_1_0.txt or copy at
- * http://www.boost.org/LICENSE_1_0.txt)
- *
- * Author acknowledges the support of the Faculty of Civil Engineering,
- * University of Zagreb, Croatia.
- *
- */
-
-//////////////////////////////////////////////////////////////////////////
-//
-// ATLAS (Automatically Tuned Linear Algebra Software)
-//
-// ''At present, it provides C and Fortran77 interfaces to a portably
-// efficient BLAS implementation, as well as a few routines from LAPACK.''
-//
-// see: http://math-atlas.sourceforge.net/
-//
-//////////////////////////////////////////////////////////////////////////
-
-#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_CBLAS_INC_HPP
-#define SHARK_LINALG_BLAS_KERNELS_ATLAS_CBLAS_INC_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CBLAS_CBLAS_INC_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CBLAS_CBLAS_INC_HPP
 
 #ifdef __APPLE__
 
@@ -93,7 +69,6 @@ extern "C" {
 
 extern "C" {
 #include <cblas.h>
-#include <clapack.h>
 }
 
 #endif
@@ -118,10 +93,15 @@ template<> struct storage_order<column_major> {
 	enum ename { value = CblasColMajor };
 };
 
-}
+}}}
 
-}
-}
+#ifndef OPENBLAS_CONST
+typedef void cblas_float_complex_type;
+typedef void cblas_double_complex_type;
+#else
+typedef float cblas_float_complex_type;
+typedef double cblas_double_complex_type;
+#endif
 
 
 #endif
