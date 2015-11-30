@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       -
+ * \brief       dot-product of vectors
  *
  * \author      O. Krause
  * \date        2013

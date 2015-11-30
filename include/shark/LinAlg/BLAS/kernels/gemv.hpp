@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       -
+ * \brief       matrix-vector multiplication kernel
  *
  * \author      O. Krause
  * \date        2012

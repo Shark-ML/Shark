@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       -
+ * \brief       Traits of matrix expressions
  *
  * \author      O. Krause
  * \date        2013

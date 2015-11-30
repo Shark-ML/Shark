@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       Matrix proxy classes.
+ * \brief      Assignment and evaluation of vector expressions
  * 
  * 
  *

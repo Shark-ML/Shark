@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       -
+ * \brief       Triangular solve kernel for vector expressions.
  *
  * \author      O. Krause
  * \date        2012
