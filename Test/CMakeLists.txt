@@ -261,11 +261,7 @@ shark_add_test( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 
 # Copy test file
 if(HDF5_FOUND)
-	add_custom_command(
-	    TARGET Data_HDF5
-	    POST_BUILD
-	    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_data
-	    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Test/test_data ${CMAKE_BINARY_DIR}/Test/test_data)	
+	file( COPY test_data/ DESTINATION test_data/ )
 endif()
 
 # Create output dir

@@ -137,10 +137,14 @@ void loadIntoMatrix(MatrixType& data, const std::string& fileName, const std::st
 	const size_t MAX_DIMENSIONS = 64u;
 
 	// Open the file, and then get dimension
+	hid_t open = H5Fopen(fileName.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+	if(open < 0)
+		throw SHARKEXCEPTION((boost::format("[loadIntoMatrix] open file name: %1% (FAILED)") % fileName).str());
+	
 	const ScopedHandle<hid_t> fileId(
-		H5Fopen(fileName.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT),
-		H5Fclose,
-		(boost::format("[loadIntoMatrix] open file name: %1%") % fileName).str());
+		open,
+		H5Fclose
+	);
 
 	boost::array<hsize_t, MAX_DIMENSIONS> dims;
 	dims.assign(0);
