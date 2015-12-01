@@ -16,7 +16,7 @@ class HDF5Fixture
 public:
 	HDF5Fixture()
 	:
-		m_exampleFileName("./test_data/testfile_for_import.h5"),
+		m_exampleFileName("./Test/test_data/testfile_for_import.h5"),
 		m_datasetNameData1("data/data1"),
 		m_labelNameLabel1("data/label1"),
 		m_labelNameWrongLabel("data/wrong_label"),
@@ -108,7 +108,10 @@ boost::test_tools::predicate_result HDF5Fixture::verify(
 
 bool HDF5Fixture::validate(const std::string& msg, const shark::Exception& exp)
 {
-	return exp.what() == msg;
+	bool result = exp.what() == msg;
+	if(! result)
+		std::cout<<"expected: "<<msg<<" got: "<<exp.what()<<std::endl;
+	return result;
 }
 
 BOOST_FIXTURE_TEST_SUITE (Data_HDF5Tests, HDF5Fixture)
