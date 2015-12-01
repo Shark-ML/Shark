@@ -33,7 +33,6 @@ add_library( shark ${SHARK_SRCS} ${SHARK_HEADERS} )
 target_link_libraries( shark ${LINK_LIBRARIES})
 
 set_target_properties( shark PROPERTIES DEBUG_POSTFIX _debug )
-set_target_properties( shark PROPERTIES VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH} SOVERSION 0 )
 
 if( WIN32 )
   set_target_properties( shark PROPERTIES DEBUG_PREFIX ../ )
@@ -45,8 +44,8 @@ target_link_libraries(SharkVersion shark)
 
 # Install the library
 set_target_properties( shark PROPERTIES
-	VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH}
-	SOVERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH})
+	VERSION ${SHARK_VERSION}
+	SOVERSION ${SHARK_SOVERSION})
 
 install(TARGETS shark
 	    EXPORT SharkTargets

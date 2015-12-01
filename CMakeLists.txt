@@ -58,6 +58,7 @@ set(SHARK_VERSION_MAJOR 3)
 set(SHARK_VERSION_MINOR 0)
 set(SHARK_VERSION_PATCH 0)
 set(SHARK_VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH})
+set(SHARK_SOVERSION 0)
 
 
 #####################################################################
