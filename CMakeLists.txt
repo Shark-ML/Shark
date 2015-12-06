@@ -258,7 +258,7 @@ if( ENABLE_CBLAS )
 		endif()
 		if(CBLAS_LIB_PATH)
 			find_file(CBLAS_INCLUDES cblas.h 
-				PATHS ${CBLAS_LIB_PATH} ${CBLAS_LIB_PATH}/../include ${CBLAS_LIB_PATH}/../include/atlas
+				PATHS ${CBLAS_LIB_PATH} ${CBLAS_LIB_PATH}/../include ${CBLAS_LIB_PATH}/../../include/atlas
 			)
 			get_filename_component(CBLAS_INCLUDES ${CBLAS_INCLUDES} PATH )
 		endif()
