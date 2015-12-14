@@ -40,6 +40,8 @@
 
 namespace shark {
 
+typedef CARTClassifier<RealVector>::SplitMatrixType SplitMatrixType;
+typedef std::vector<SplitMatrixType> ForestInfo;
 
 ///
 /// \brief Random Forest Classifier.
@@ -112,6 +114,30 @@ public:
 	// Set the input dimension
 	void setInputDimension(std::size_t in){
 		m_inputDimension = in;
+	}
+
+	ForestInfo getForestInfo() const {
+		ForestInfo finfo(m_models.size());
+		for (int i=0; i<m_models.size(); ++i)
+			finfo[i]=m_models[i].getSplitMatrix();
+		return finfo;
+	}
+
+	void setForestInfo(ForestInfo const& finfo, std::vector<double> const& weights = std::vector<double>()) {
+		std::size_t n_tree = finfo.size();
+		std::vector<double> we(weights);
+		m_models.resize(n_tree);
+		if (weights.empty()) // set default weights to 1
+			we.resize(n_tree, 1);
+		else if (weights.size() != n_tree)
+			throw SHARKEXCEPTION("Weights must be the same number as trees");
+
+		for (int i=0; i<n_tree; ++i)
+		{
+			m_models[i]=finfo[i];
+			m_weight.push_back(we[i]);
+			m_weightSum+=we[i];
+		}
 	}
 
 protected:
