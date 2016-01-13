@@ -323,10 +323,11 @@ void CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
 	double ev = m_mutationDistribution.eigenValues()( m_mutationDistribution.eigenValues().size() - 1 );
 	if( m_sigma * std::sqrt( std::fabs( ev ) ) < m_lowerBound )
 		m_sigma = m_lowerBound / std::sqrt( std::fabs( ev ) );
-	
+
 	//store best point
 	m_best.point= selectedOffspring[ 0 ].searchPoint();
 	m_best.value= selectedOffspring[ 0 ].unpenalizedFitness();
+
 }
 void CMA::step(ObjectiveFunctionType const& function){
 	std::vector<IndividualType> offspring = generateOffspring();
