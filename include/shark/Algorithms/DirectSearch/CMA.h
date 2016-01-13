@@ -254,7 +254,7 @@ protected:
 	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring( ) const;
 
 	/// \brief Updates the strategy parameters based on the supplied offspring population.
-	SHARK_EXPORT_SYMBOL std::vector<IndividualType> updatePopulation( std::vector<IndividualType > const& offspring ) ;
+	SHARK_EXPORT_SYMBOL void updatePopulation( std::vector<IndividualType > const& offspring ) ;
 
 	SHARK_EXPORT_SYMBOL  void doInit(
 		AbstractConstraintHandler<SearchPointType> const* handler,

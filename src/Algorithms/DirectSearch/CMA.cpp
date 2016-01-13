@@ -279,7 +279,7 @@ std::vector<CMA::IndividualType> CMA::generateOffspring( ) const{
 	return offspring;
 }
 
-std::vector<CMA::IndividualType > CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
+void CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
 	std::vector< IndividualType > selectedOffspring( m_mu );
 	ElitistSelection<FitnessExtractor> selection;
 	selection(offspring.begin(),offspring.end(),selectedOffspring.begin(), selectedOffspring.end());
@@ -323,15 +323,15 @@ std::vector<CMA::IndividualType > CMA::updatePopulation( std::vector<IndividualT
 	double ev = m_mutationDistribution.eigenValues()( m_mutationDistribution.eigenValues().size() - 1 );
 	if( m_sigma * std::sqrt( std::fabs( ev ) ) < m_lowerBound )
 		m_sigma = m_lowerBound / std::sqrt( std::fabs( ev ) );
-
-	return selectedOffspring;
+	
+	//store best point
+	m_best.point= selectedOffspring[ 0 ].searchPoint();
+	m_best.value= selectedOffspring[ 0 ].unpenalizedFitness();
 }
 void CMA::step(ObjectiveFunctionType const& function){
 	std::vector<IndividualType> offspring = generateOffspring();
 	PenalizingEvaluator penalizingEvaluator;
 	penalizingEvaluator( function, offspring.begin(), offspring.end() );
-	std::vector<IndividualType> const& parents  = updatePopulation(offspring);
-	m_best.point= parents[ 0 ].searchPoint();
-	m_best.value= parents[ 0 ].unpenalizedFitness();
+	updatePopulation(offspring);
 }
 
