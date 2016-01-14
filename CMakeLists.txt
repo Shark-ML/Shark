@@ -258,9 +258,21 @@ if( ENABLE_CBLAS )
 		endif()
 		if(CBLAS_LIB_PATH)
 			find_file(CBLAS_INCLUDES cblas.h 
-				PATHS ${CBLAS_LIB_PATH} ${CBLAS_LIB_PATH}/../include ${CBLAS_LIB_PATH}/../../include/atlas
+				PATHS ${CBLAS_LIB_PATH} ${CBLAS_LIB_PATH}/../include
 			)
 			get_filename_component(CBLAS_INCLUDES ${CBLAS_INCLUDES} PATH )
+		endif()
+		if(ATLAS_LIBRARY)
+			get_filename_component(ATLAS_LIBRARY_PATH ${ATLAS_LIBRARY} PATH )
+			find_file(CLAPACK_INCLUDES clapack.h 
+				PATHS
+				${ATLAS_LIBRARY_PATH} 
+				${ATLAS_LIBRARY_PATH}/../include
+				${ATLAS_LIBRARY_PATH}/../include/atlas
+				${ATLAS_LIBRARY_PATH}/../../include/atlas
+			)
+			
+			set(CBLAS_INCLUDES "${CBLAS_INCLUDES} ${CLAPACK_INCLUDES}")
 		endif()
 
 		if( OPENBLAS_LIBRARY AND CBLAS_INCLUDES)
