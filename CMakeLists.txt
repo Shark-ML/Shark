@@ -271,7 +271,7 @@ if( ENABLE_CBLAS )
 				${ATLAS_LIBRARY_PATH}/../include/atlas
 				${ATLAS_LIBRARY_PATH}/../../include/atlas
 			)
-			
+			get_filename_component(CLAPACK_INCLUDES ${CLAPACK_INCLUDES} PATH )
 			set(CBLAS_INCLUDES "${CBLAS_INCLUDES} ${CLAPACK_INCLUDES}")
 		endif()
 
