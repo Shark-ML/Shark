@@ -45,19 +45,18 @@ namespace shark {
 		: m_nc( 20.0 )
 		, m_prob( 0.5 ) {}
 
-		/// \brief Initializes the operator for the supplied fitness function.
+		/// \brief Initializes the operator for the supplied constraints
 		///
-		/// \param [in] f Instance of the objective function to initialize the operator for.
-		template<typename Function>
-		void init( const Function & f ) {
+		/// \param [in] constraints The constraint handler of the function or 0 if it does not have one
+		void init( AbstractConstraintHandler<PointType> const* constraints, std::size_t n ) {
 			m_prob = 0.5;
-			if(!f.isConstrained()){
-				m_lower = blas::repeat(-1E20,f.numberOfVariables());
-				m_upper = blas::repeat(1E20,f.numberOfVariables());
+			if(!constraints){
+				m_lower = blas::repeat(-1E20,n);
+				m_upper = blas::repeat(1E20,n);
 			}
-			else if (f.hasConstraintHandler() && f.getConstraintHandler().isBoxConstrained()) {
+			else if (constraints && constraints->isBoxConstrained()) {
 				typedef BoxConstraintHandler<PointType> ConstraintHandler;
-				ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(f.getConstraintHandler());
+				ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(*constraints);
 				
 				m_lower = handler.lower();
 				m_upper = handler.upper();

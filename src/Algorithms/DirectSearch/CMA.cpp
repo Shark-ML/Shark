@@ -179,9 +179,30 @@ void CMA::init( ObjectiveFunctionType & function, SearchPointType const& p) {
 	);
 }
 
-/**
-* \brief Initializes the algorithm for the supplied objective function.
-*/
+void CMA::init( 
+	ObjectiveFunctionType& function, 
+	SearchPointType const& p,
+	double initialSigma
+) {
+	SIZE_CHECK(p.size() == function.numberOfVariables());
+	checkFeatures(function);
+	function.init();
+	std::vector<RealVector> points(1,p);
+	std::vector<double> functionValues(1,function.eval(p));
+	AbstractConstraintHandler<SearchPointType> const* handler = 0;
+	if (function.hasConstraintHandler())
+		handler = &function.getConstraintHandler();
+	std::size_t lambda = CMA::suggestLambda( p.size() );
+	doInit(
+		handler,
+		points,
+		functionValues,
+		lambda,
+		CMA::suggestMu(lambda, m_recombinationType),
+		initialSigma
+	);
+}
+
 void CMA::init( 
 	ObjectiveFunctionType& function, 
 	SearchPointType const& p,

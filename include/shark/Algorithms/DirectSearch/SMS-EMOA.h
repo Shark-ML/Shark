@@ -60,15 +60,15 @@ namespace shark {
 *	European Journal of Operational Research.
 */
 class SMSEMOA : public AbstractMultiObjectiveOptimizer<RealVector >{
-private:
+protected:
 	/// \brief The individual type of the SMS-EMOA.
-	typedef shark::Individual<RealVector,RealVector> Individual;
+	typedef shark::Individual<RealVector,RealVector> IndividualType;
 public:
 	SMSEMOA() {
-		mu() = 100;
-		crossoverProbability() = 0.9;
-		nc() = 20.0;
-		nm() = 20.0;
+		m_mu = 100;
+		m_mutator.m_nm = 20.0;
+		m_crossover.m_nc = 20.0;
+		m_crossoverProbability = 0.9;
 		this->m_features |= AbstractMultiObjectiveOptimizer<RealVector >::CAN_SOLVE_CONSTRAINED;
 	}
 
@@ -80,43 +80,34 @@ public:
 	double crossoverProbability()const{
 		return m_crossoverProbability;
 	}
-	/// \brief Returns the probability that crossover is applied.
-	double& crossoverProbability(){
-		return m_crossoverProbability;
-	}
 	
 	double nm()const{
-		return m_mutator.m_nm;
-	}
-	double& nm(){
 		return m_mutator.m_nm;
 	}
 	
 	double nc()const{
 		return m_crossover.m_nc;
 	}
-	double& nc(){
-		return m_crossover.m_nc;
-	}
 	
 	unsigned int mu()const{
 		return m_mu;
 	}
-	unsigned int& mu(){
-		return m_mu;
-	}
 
-	/**
-	* \brief Stores/loads the algorithm's state.
-	* \tparam Archive The type of the archive.
-	* \param [in,out] archive The archive to use for loading/storing.
-	* \param [in] version Currently unused.
-	*/
-	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {
+	void read( InArchive & archive ){
 		archive & BOOST_SERIALIZATION_NVP( m_pop );
-		archive & BOOST_SERIALIZATION_NVP(m_mu);
-		archive & BOOST_SERIALIZATION_NVP(m_best);
+		archive & BOOST_SERIALIZATION_NVP( m_mu );
+		archive & BOOST_SERIALIZATION_NVP( m_best );
+
+		archive & BOOST_SERIALIZATION_NVP( m_evaluator );
+		archive & BOOST_SERIALIZATION_NVP( m_selection );
+		archive & BOOST_SERIALIZATION_NVP( m_crossover );
+		archive & BOOST_SERIALIZATION_NVP( m_mutator );
+		archive & BOOST_SERIALIZATION_NVP( m_crossoverProbability );
+	}
+	void write( OutArchive & archive ) const{
+		archive & BOOST_SERIALIZATION_NVP( m_pop );
+		archive & BOOST_SERIALIZATION_NVP( m_mu );
+		archive & BOOST_SERIALIZATION_NVP( m_best );
 
 		archive & BOOST_SERIALIZATION_NVP( m_evaluator );
 		archive & BOOST_SERIALIZATION_NVP( m_selection );
@@ -138,19 +129,18 @@ public:
 	){
 		checkFeatures(function);
 		function.init();
-
-		m_pop.resize( mu() + 1 );
-		m_best.resize(mu());
-		for(std::size_t i = 0; i != mu(); ++i){
-			m_pop[i].age()=0;
-			m_pop[i].searchPoint() = function.proposeStartingPoint();
-			m_evaluator( function, m_pop[i] );
-			m_best[i].point = m_pop[i].searchPoint();
-			m_best[i].value = m_pop[i].unpenalizedFitness();
+		
+		AbstractConstraintHandler<SearchPointType> const* handler = 0;
+		if (function.hasConstraintHandler())
+			handler = &function.getConstraintHandler();
+		RealVector values(startingPoints.size());
+		for(std::size_t i = 0; i != startingPoints.size(); ++i){
+			if(!startingPoints[i].isFeasible())
+				throw SHAREXCEPTION("[SMS-EMOA::init] starting point(s) not feasible");
+			values[i] = function.eval(startingPoints[i]);
 		}
-		m_selection( m_pop, m_mu );
-		m_crossover.init(function);
-		m_mutator.init(function);
+		
+		doInit(handler,startingPoints,values100,20.0,20.0,0.9);
 	}
 
 	/**
@@ -159,25 +149,65 @@ public:
 	 * \param [in] function The function to iterate upon.
 	 */
 	void step( ObjectiveFunctionType const& function ) {
-		TournamentSelection< Individual::RankOrdering > selection;
+		std::vector<IndividualType> offspring = generateOffspring();
+		PenalizingEvaluator penalizingEvaluator;
+		penalizingEvaluator( function, offspring.begin(), offspring.end() );
+		updatePopulation(offspring);
+	}
+protected:
+	/// \brief The type of individual used for the CMA
+	typedef Individual<RealVector, double, RealVector> IndividualType;
+	
+	/// \brief Samples lambda individuals from the search distribution	
+	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring( ) const;
 
-		Individual mate1( *selection( m_pop.begin(), m_pop.begin() + mu() ) );
-		Individual mate2( *selection( m_pop.begin(), m_pop.begin() + mu() ) );
+	/// \brief Updates the strategy parameters based on the supplied offspring population.
+	SHARK_EXPORT_SYMBOL void updatePopulation( std::vector<IndividualType > const& offspring ) ;
 
-		if( Rng::coinToss( m_crossoverProbability ) ) {
-			m_crossover( mate1, mate2 );
+	void doInit(
+		AbstractConstraintHandler<SearchPointType> const* handler,
+		std::vector<SearchPointType> const& points,
+		std::vector<ResultType> const& functionValues,
+		std::size_t mu,
+		double nm,
+		double nc,
+		double crossover_prob
+	){
+		m_mu = mu;
+		m_mutator.m_nm = nm;
+		m_crossover.m_nc = nc;
+		m_crossoverProbability = crossover_prob;
+		m_best.resize( mu );
+		m_pop.resize( mu );
+		std::size_t numPoints = std::min(mu,points.size());
+		for(std::size_t i = 0; i != numPoints; ++i){
+			m_pop[i].searchPoint() = startingPoints[i];
+			m_pop[i].penalizedFitness() = functionValues[i];
+			m_pop[i].unpenalizedFitness() = functionValues[i];
+			m_best[i].point = m_pop[i].searchPoint();
+			m_best[i].value = m_pop[i].unpenalizedFitness();
 		}
-
-		if( Rng::coinToss() ) {
-			m_mutator( mate1 );
-			m_pop.back() = mate1;
-		} else {					
-			m_mutator( mate2 );
-			m_pop.back() = mate2;
+		for(std::size_t i = numPoints; i != mu()+1; ++i){
+			m_pop[i] = m_pop[Rng::discrete(0,numPoints-1)];
+			m_best[i].point = m_pop[i].searchPoint();
+			m_best[i].value = m_pop[i].unpenalizedFitness();
 		}
-
+		m_selection( m_pop, mu );
+		m_pop.push_back(m_pop[0]);
+		m_crossover.init(handler,points[0].size());
+		m_mutator.init(handler,points[0].size());
+	}
+	
+	std::vector<IndividualType> generateOffspring()const{
+		std::vector<IndividualType> offspring(1);
+		offspring[0] = createOffspring(m_pop.begin(),m_pop.begin()+mu());
+		return offspring;
+	}
+	
+	void updatePopulation(  std::vector<IndividualType> const& offspring) {
+		m_pop.back(offspring.back());
 		m_evaluator( function, m_pop.back() );
-		m_selection( m_pop, m_mu );
+		m_selection( m_pop, mu());
 
 		//if the individual got selected, insert it into the parent population
 		if(m_pop.back().selected()){
@@ -192,6 +222,29 @@ public:
 		}
 	}
 private:
+	
+	IndividualType createOffspring(
+		std::vector<IndividualType>::iterator begin,
+		std::vector<IndividualType>::iterator end
+	)const{
+		std::size_t popSize = end-begin;
+		TournamentSelection< Individual::RankOrdering > selection;
+
+		Individual mate1( *selection( begin, end ) );
+		Individual mate2( *selection( begin, end) );
+
+		if( Rng::coinToss( m_crossoverProbability ) ) {
+			m_crossover( mate1, mate2 );
+		}
+
+		if( Rng::coinToss() ) {
+			m_mutator( mate1 );
+			return mate1;
+		} else {
+			m_mutator( mate1 );
+			return mate2;
+		}
+	}
 
 	std::vector<Individual> m_pop; ///< Population of size \f$\mu + 1\f$.
 	unsigned int m_mu; ///< Size of parent generation

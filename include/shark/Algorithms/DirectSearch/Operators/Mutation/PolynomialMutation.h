@@ -44,26 +44,25 @@ namespace shark {
 		/// \brief Default c'tor.
 		PolynomialMutator() : m_nm( 20.0 ) {}
 
-		/// \brief Initializes the operator for the supplied fitness function.
+		/// \brief Initializes the operator for the supplied constraints
 		///
-		/// \param [in] f Instance of the objective function to initialize the operator for.
-		template<typename Function>
-		void init( const Function & f ) {
-                        m_prob = 1./f.numberOfVariables();
-			if(!f.isConstrained()){
-				m_lower = blas::repeat(-1E20,f.numberOfVariables());
-				m_upper = blas::repeat(1E20,f.numberOfVariables());
+		/// \param [in] constraints the constraint handler of the function or 0 if it does not have one
+		void init( AbstractConstraintHandler<PointType> const* constraints,std::size_t n ) {
+			 m_prob = 1./f.numberOfVariables();
+			if(!constraints){
+				m_lower = blas::repeat(-1E20,n);
+				m_upper = blas::repeat(1E20,n);
 			}
-			else if (f.hasConstraintHandler() && f.getConstraintHandler().isBoxConstrained()) {
-				typedef BoxConstraintHandler<typename Function::SearchPointType> ConstraintHandler;
-				ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(f.getConstraintHandler());
+			else if (constraints && constraints->isBoxConstrained()) {
+				typedef BoxConstraintHandler<PointType> ConstraintHandler;
+				ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(*constraints);
 				
 				m_lower = handler.lower();
 				m_upper = handler.upper();
 
 			} else{
-				throw SHARKEXCEPTION("[PolynomialMutator::init] Algorithm does only allow box constraints");
-			}                    
+				throw SHARKEXCEPTION("[SimulatedBinaryCrossover::init] Algorithm does only allow box constraints");
+			}
 		}
 
 		/// \brief Mutates the supplied individual.

@@ -116,6 +116,14 @@ public:
 	SHARK_EXPORT_SYMBOL void init( 
 		ObjectiveFunctionType& function, 
 		SearchPointType const& initialSearchPoint,
+		double initialSigma
+	);
+	/**
+	* \brief Initializes the algorithm for the supplied objective function.
+	*/
+	SHARK_EXPORT_SYMBOL void init( 
+		ObjectiveFunctionType& function, 
+		SearchPointType const& initialSearchPoint,
 		std::size_t lambda,
 		std::size_t mu,
 		double initialSigma,				       
@@ -229,8 +237,8 @@ protected:
 		AbstractConstraintHandler<SearchPointType> const* handler,
 		std::vector<SearchPointType> const& points,
 		std::vector<ResultType> const& functionValues,
-		std::size_t mu,
 		std::size_t lambda,
+		std::size_t mu,
 		double initialSigma
 	);
 private:
