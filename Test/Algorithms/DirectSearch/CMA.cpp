@@ -60,8 +60,9 @@ BOOST_AUTO_TEST_CASE( CMA__Ellipsoid_Niko )
 	Ellipsoid elli(N, 1E6);
 
 	CMA cma;
-	cma.init(elli, x0);
-	cma.setSigma(0.1);
+	std::size_t lambda = CMA::suggestLambda(N);
+	cma.init(elli, x0,lambda,CMA::suggestMu(lambda),0.1);
+	BOOST_REQUIRE(cma.sigma() == 0.1);
 
 	for(unsigned i=0; i<6000; i++) 	cma.step( elli );
 	BOOST_CHECK(cma.solution().value < 1E-8);
@@ -75,8 +76,9 @@ BOOST_AUTO_TEST_CASE( CMA_Sphere_Niko )
 	Sphere sphere(N);
 
 	CMA cma;
-	cma.init(sphere, x0);
-	cma.setSigma(1e-4);
+	std::size_t lambda = CMA::suggestLambda(N);
+	cma.init(sphere, x0,lambda,CMA::suggestMu(lambda),1.e-4);
+	BOOST_REQUIRE(cma.sigma() == 1.e-4);
 
 	bool sigmaHigh = false;
 	bool condHigh = false;

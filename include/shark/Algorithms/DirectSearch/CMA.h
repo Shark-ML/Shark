@@ -132,16 +132,6 @@ public:
 		return m_sigma;
 	}
 
-	/** \brief Accesses the current step size. */
-	void setSigma(double sigma) {
-		m_sigma = sigma;
-	}
-	
-	void setInitSigma(double initSigma){
-		m_initSigma =initSigma;
-	}
-
-
 	/** \brief Accesses the current population mean. */
 	RealVector const& mean() const {
 		return m_mean;
@@ -189,13 +179,6 @@ public:
 	}
 
 	/**
-	 * \brief Returns a mutable reference to the lower bound on sigma times smalles eigenvalue.
-	 */
-	double& lowerBound() {
-		return m_lowerBound;
-	}
-
-	/**
 	 * \brief Returns the size of the parent population \f$\mu\f$.
 	 */
 	std::size_t mu() const {
@@ -203,23 +186,9 @@ public:
 	}
 	
 	/**
-	 * \brief Returns a mutabl rference to the size of the parent population \f$\mu\f$.
-	 */
-	std::size_t& mu(){
-		return m_mu;
-	}
-	
-	/**
 	 * \brief Returns a immutable reference to the size of the offspring population \f$\mu\f$.
 	 */
 	std::size_t lambda()const{
-		return m_lambda;
-	}
-
-	/**
-	 * \brief Returns a mutable reference to the size of the offspring population \f$\mu\f$.
-	 */
-	std::size_t & lambda(){
 		return m_lambda;
 	}
 
@@ -259,9 +228,10 @@ protected:
 	SHARK_EXPORT_SYMBOL  void doInit(
 		AbstractConstraintHandler<SearchPointType> const* handler,
 		std::vector<SearchPointType> const& points,
-		std::vector<ResultType> const&,
+		std::vector<ResultType> const& functionValues,
+		std::size_t mu,
 		std::size_t lambda,
-		std::size_t mu
+		double initialSigma
 	);
 private:
 
@@ -271,7 +241,6 @@ private:
 
 	RecombinationType m_recombinationType; ///< Stores the recombination type.
 
-	double m_initSigma;
 	double m_sigma;
 	double m_cC; 
 	double m_c1; 

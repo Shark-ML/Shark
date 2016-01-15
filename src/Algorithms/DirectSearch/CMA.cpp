@@ -91,7 +91,6 @@ std::size_t CMA::suggestMu( std::size_t lambda, RecombinationType recomb) {
 
 CMA::CMA()
 :m_recombinationType( SUPERLINEAR )
-, m_initSigma( 0 )
 , m_sigma( 0 )
 , m_cC( 0 )
 , m_c1( 0 )
@@ -166,17 +165,17 @@ void CMA::init( ObjectiveFunctionType & function, SearchPointType const& p) {
 	function.init();
 	std::vector<RealVector> points(1,p);
 	std::vector<double> functionValues(1,function.eval(p));
-	std::size_t lambda = CMA::suggestLambda( p.size() );
-	std::size_t mu = CMA::suggestMu(lambda, m_recombinationType);
 	AbstractConstraintHandler<SearchPointType> const* handler = 0;
 	if (function.hasConstraintHandler())
 		handler = &function.getConstraintHandler();
+	std::size_t lambda = CMA::suggestLambda( p.size() );
 	doInit(
 		handler,
 		points,
 		functionValues,
 		lambda,
-		mu
+		CMA::suggestMu(lambda, m_recombinationType),
+		1.0/std::sqrt(double(m_numberOfVariables))
 	);
 }
 
@@ -196,7 +195,6 @@ void CMA::init(
 	function.init();
 	std::vector<RealVector> points(1,p);
 	std::vector<double> functionValues(1,function.eval(p));
-	m_initSigma = initialSigma;
 	AbstractConstraintHandler<SearchPointType> const* handler = 0;
 	if (function.hasConstraintHandler())
 		handler = &function.getConstraintHandler();
@@ -205,7 +203,8 @@ void CMA::init(
 		points,
 		functionValues,
 		lambda,
-		mu
+		mu,
+		initialSigma
 	);
 	if(initialCovarianceMatrix){
 		m_mutationDistribution.covarianceMatrix() = *initialCovarianceMatrix;
@@ -217,12 +216,13 @@ void CMA::doInit(
 	std::vector<SearchPointType> const& initialSearchPoints,
 	std::vector<ResultType> const& initialValues,
 	std::size_t lambda,
-	std::size_t mu
+	std::size_t mu,
+	double initialSigma
 ) {
 	m_numberOfVariables =initialSearchPoints[0].size();
 	m_lambda = lambda;
 	m_mu = mu;
-	m_sigma =  (m_initSigma == 0)? 1.0/std::sqrt(double(m_numberOfVariables)): m_initSigma;
+	m_sigma =  initialSigma;
 
 	m_mean.resize( m_numberOfVariables );
 	m_evolutionPathC.resize( m_numberOfVariables );
