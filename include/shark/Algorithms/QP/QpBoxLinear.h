@@ -11,7 +11,7 @@
  * \date        -
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -100,19 +100,22 @@ public:
 	///
 	/// \brief Solve the SVM training problem.
 	///
-	/// \param  C        regularization constant of the SVM
+	/// \param  bound    upper bound for alpha-components, complexity parameter of the hinge loss SVM
+	/// \param  reg      coefficient of the penalty term \f$-\frac{reg}{2} \cdot \|\alpha\|^2\f$, reg=1/C where C is the complexity parameter of the squared hinge loss SVM
 	/// \param  stop     stopping condition(s)
 	/// \param  prop     solution properties
 	/// \param  verbose  if true, the solver prints status information and solution statistics
 	///
 	RealVector solve(
-			double C,
+			double bound,
+			double reg,
 			QpStoppingCondition& stop,
 			QpSolutionProperties* prop = NULL,
 			bool verbose = false)
 	{
 		// sanity checks
-		SHARK_ASSERT(C > 0.0);
+		SHARK_ASSERT(bound > 0.0);
+		SHARK_ASSERT(reg >= 0.0);
 
 		// measure training time
 		Timer timer;
@@ -173,8 +176,8 @@ public:
 				// compute gradient and projected gradient
 				double a = alpha(i);
 				double wyx = y_i * inner_prod(w, e_i.input);
-				double g = 1.0 - wyx;
-				double pg = (a == 0.0 && g < 0.0) ? 0.0 : (a == C && g > 0.0 ? 0.0 : g);
+				double g = 1.0 - wyx - reg * a;
+				double pg = (a == 0.0 && g < 0.0) ? 0.0 : (a == bound && g > 0.0 ? 0.0 : g);
 
 				// update maximal KKT violation over the epoch
 				max_violation = std::max(max_violation, std::abs(pg));
@@ -184,7 +187,7 @@ public:
 				if (pg != 0.0)
 				{
 					// SMO-style coordinate descent step
-					double q = m_xSquared(i);
+					double q = m_xSquared(i) + reg;
 					double mu = g / q;
 					double new_a = a + mu;
 
@@ -194,10 +197,10 @@ public:
 						mu = -a;
 						new_a = 0.0;
 					}
-					else if (new_a >= C)
+					else if (new_a >= bound)
 					{
-						mu = C - a;
-						new_a = C;
+						mu = bound - a;
+						new_a = bound;
 					}
 
 					// update both representations of the weight vector: alpha and w
@@ -269,10 +272,11 @@ public:
 		for (std::size_t i=0; i<ell; i++)
 		{
 			double a = alpha(i);
-			objective += a;
 			if (a > 0.0)
 			{
-				if (a == C) bounded_SV++;
+				objective += a;
+				objective -= reg/2.0 * a * a;
+				if (a == bound) bounded_SV++;
 				else free_SV++;
 			}
 		}
@@ -375,19 +379,22 @@ public:
 	///
 	/// \brief Solve the SVM training problem.
 	///
-	/// \param  C        regularization constant of the SVM
+	/// \param  bound    upper bound for alpha-components, complexity parameter of the hinge loss SVM
+	/// \param  reg      coefficient of the penalty term \f$-\frac{reg}{2} \cdot \|\alpha\|^2\f$, reg=1/C where C is the complexity parameter of the squared hinge loss SVM
 	/// \param  stop     stopping condition(s)
 	/// \param  prop     solution properties
 	/// \param  verbose  if true, the solver prints status information and solution statistics
 	///
 	RealVector solve(
-			double C,
+			double bound,
+			double reg,
 			QpStoppingCondition& stop,
 			QpSolutionProperties* prop = NULL,
 			bool verbose = false)
 	{
 		// sanity checks
-		SHARK_ASSERT(C > 0.0);
+		SHARK_ASSERT(bound > 0.0);
+		SHARK_ASSERT(reg >= 0.0);
 
 		// measure training time
 		Timer timer;
@@ -447,8 +454,8 @@ public:
 				// compute gradient and projected gradient
 				double a = alpha(i);
 				double wyx = y(i) * inner_prod(w, x_i);
-				double g = 1.0 - wyx;
-				double pg = (a == 0.0 && g < 0.0) ? 0.0 : (a == C && g > 0.0 ? 0.0 : g);
+				double g = 1.0 - wyx - reg * a;
+				double pg = (a == 0.0 && g < 0.0) ? 0.0 : (a == bound && g > 0.0 ? 0.0 : g);
 
 				// update maximal KKT violation over the epoch
 				max_violation = std::max(max_violation, std::abs(pg));
@@ -458,7 +465,7 @@ public:
 				if (pg != 0.0)
 				{
 					// SMO-style coordinate descent step
-					double q = diagonal(i);
+					double q = diagonal(i) + reg;
 					double mu = g / q;
 					double new_a = a + mu;
 
@@ -468,10 +475,10 @@ public:
 						mu = -a;
 						new_a = 0.0;
 					}
-					else if (new_a >= C)
+					else if (new_a >= bound)
 					{
-						mu = C - a;
-						new_a = C;
+						mu = bound - a;
+						new_a = bound;
 					}
 
 					// update both representations of the weight vector: alpha and w
@@ -544,10 +551,11 @@ public:
 		for (std::size_t i=0; i<ell; i++)
 		{
 			double a = alpha(i);
-			objective += a;
 			if (a > 0.0)
 			{
-				if (a == C) bounded_SV++;
+				objective += a;
+				objective -= reg/2.0 * a * a;
+				if (a == bound) bounded_SV++;
 				else free_SV++;
 			}
 		}
