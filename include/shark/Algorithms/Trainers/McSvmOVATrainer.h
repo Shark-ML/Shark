@@ -11,7 +11,7 @@
  * \date        -
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -168,7 +168,7 @@ public:
 			LabeledData<InputType, unsigned int> bindata = oneVersusRestProblem(dataset, c);
 			QpBoxLinear<InputType> solver(bindata, dim);
 			QpSolutionProperties prop;
-			row(w, c) = solver.solve(this->C(), base_type::m_stoppingcondition, &prop, base_type::m_verbosity > 0);
+			row(w, c) = solver.solve(this->C(), 0.0, base_type::m_stoppingcondition, &prop, base_type::m_verbosity > 0);
 			base_type::m_solutionproperties.iterations += prop.iterations;
 			base_type::m_solutionproperties.seconds += prop.seconds;
 			base_type::m_solutionproperties.accuracy = std::max(base_type::solutionProperties().accuracy, prop.accuracy);

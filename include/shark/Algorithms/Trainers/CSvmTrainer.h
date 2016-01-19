@@ -17,7 +17,7 @@
  * \date        -
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -395,6 +395,7 @@ public:
 		RealMatrix w(1, dim, 0.0);
 		row(w, 0) = solver.solve(
 				base_type::C(),
+				0.0,
 				QpConfig::stoppingCondition(),
 				&QpConfig::solutionProperties(),
 				QpConfig::verbosity() > 0);
@@ -503,6 +504,35 @@ private:
 			column(svm.alpha(),0) = problem.getUnpermutedAlpha();
 			
 		}
+	}
+};
+
+
+template <class InputType>
+class SquaredHingeLinearCSvmTrainer : public AbstractLinearSvmTrainer<InputType>
+{
+public:
+	typedef AbstractLinearSvmTrainer<InputType> base_type;
+
+	SquaredHingeLinearCSvmTrainer(double C, bool unconstrained = false) 
+	: AbstractLinearSvmTrainer<InputType>(C, unconstrained){}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "SquaredHingeLinearCSvmTrainer"; }
+
+	void train(LinearClassifier<InputType>& model, LabeledData<InputType, unsigned int> const& dataset)
+	{
+		std::size_t dim = inputDimension(dataset);
+		QpBoxLinear<InputType> solver(dataset, dim);
+		RealMatrix w(1, dim, 0.0);
+		row(w, 0) = solver.solve(
+				1e100,
+				1.0 / base_type::C(),
+				QpConfig::stoppingCondition(),
+				&QpConfig::solutionProperties(),
+				QpConfig::verbosity() > 0);
+		model.decisionFunction().setStructure(w);
 	}
 };
 
