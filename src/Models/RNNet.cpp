@@ -39,14 +39,14 @@ void RNNet::eval(BatchInputType const& patterns, BatchOutputType& outputs, State
 	InternalState& s = state.toState<InternalState>();
 	std::size_t warmUpLength=m_warmUpSequence.size();
 	std::size_t numUnits = mpe_structure->numberOfUnits();
-	s.timeActivation.resize(size(patterns));
-	outputs.resize(size(patterns));
+	s.timeActivation.resize(patterns.size());
+	outputs.resize(patterns.size());
 
 	//calculation of the sequences
-	for(std::size_t b = 0; b != size(patterns);++b){
-		std::size_t sequenceLength=size(get(patterns,b))+warmUpLength+1;
+	for(std::size_t b = 0; b != patterns.size();++b){
+		std::size_t sequenceLength = patterns[b].size()+warmUpLength+1;
 		s.timeActivation[b].resize(sequenceLength,RealVector(numUnits));
-		outputs[b].resize(size(get(patterns,b)),RealVector(numUnits));
+		outputs[b].resize(patterns[b].size(),RealVector(numUnits));
 		Sequence& sequence = s.timeActivation[b];
 		sequence[0].clear();
 		for (std::size_t t = 1; t < sequenceLength;t++){
@@ -90,9 +90,9 @@ void RNNet::weightedParameterDerivative(
 	std::size_t numUnits = mpe_structure->numberOfUnits();
 	std::size_t numNeurons = mpe_structure->numberOfNeurons();
 	std::size_t warmUpLength=m_warmUpSequence.size();
-	for(std::size_t b = 0; b != size(patterns); ++b){
+	for(std::size_t b = 0; b != patterns.size(); ++b){
 		Sequence const& sequence = s.timeActivation[b];
-		std::size_t sequenceLength = size(s.timeActivation[b]);
+		std::size_t sequenceLength = s.timeActivation[b].size();
 		RealMatrix errorDerivative(sequenceLength,numNeurons);
 		errorDerivative.clear();
 		//copy errors
