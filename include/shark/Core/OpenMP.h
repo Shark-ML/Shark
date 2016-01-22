@@ -50,7 +50,7 @@ for
 _Pragma ( "omp parallel for" )\
 for
 
-#define SHARK_CRITICAL_REGION _Pragma("omp critical")
+#define SHARK_CRITICAL_REGION _Pragma("omp critical (globalSharkLock)")
 #endif
 
 #define SHARK_NUM_THREADS (std::size_t)(omp_in_parallel()?omp_get_num_threads():omp_get_max_threads())
