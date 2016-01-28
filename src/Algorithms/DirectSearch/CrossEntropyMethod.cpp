@@ -35,14 +35,14 @@
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ElitistSelection.h>
-#include <shark/Algorithms/DirectSearch/CrossEntropy.h>
+#include <shark/Algorithms/DirectSearch/CrossEntropyMethod.h>
 
 using namespace shark;
 
 /**
 * \brief Suggest a population size of 100.
 */
-unsigned CrossEntropy::suggestPopulationSize(  ) {
+unsigned CrossEntropyMethod::suggestPopulationSize(  ) {
 	/*
 	 * Most papers suggests a population size of 100, thus
 	 * simply choose 100.
@@ -53,7 +53,7 @@ unsigned CrossEntropy::suggestPopulationSize(  ) {
 /**
 * \brief Calculates Selection Size for the supplied Population Size.
 */
-unsigned int CrossEntropy::suggestSelectionSize( unsigned int populationSize ) {
+unsigned int CrossEntropyMethod::suggestSelectionSize( unsigned int populationSize ) {
 	/* 
 	 * Most papers says 10% of the population size is used for
 	 * the new generation, thus, just take 10% of the population size.
@@ -61,7 +61,7 @@ unsigned int CrossEntropy::suggestSelectionSize( unsigned int populationSize ) {
 	return (unsigned int) (populationSize / 10.0);
 }
 
-CrossEntropy::CrossEntropy()
+CrossEntropyMethod::CrossEntropyMethod()
 : m_variance( 0 )
 , m_counter( 0 )
 , m_distribution( Normal< Rng::rng_type >( Rng::globalRng, 0, 1.0 ) )
@@ -70,7 +70,7 @@ CrossEntropy::CrossEntropy()
 	m_features |= REQUIRES_VALUE;
 }
 
-void CrossEntropy::read( InArchive & archive ) {
+void CrossEntropyMethod::read( InArchive & archive ) {
 	archive >> m_numberOfVariables;
 	archive >> m_selectionSize;
 	archive >> m_populationSize;
@@ -82,7 +82,7 @@ void CrossEntropy::read( InArchive & archive ) {
 	archive >> m_counter;
 }
 
-void CrossEntropy::write( OutArchive & archive ) const {
+void CrossEntropyMethod::write( OutArchive & archive ) const {
 	archive << m_numberOfVariables;
 	archive << m_selectionSize;
 	archive << m_populationSize;
@@ -95,10 +95,10 @@ void CrossEntropy::write( OutArchive & archive ) const {
 }
 
 
-void CrossEntropy::init( ObjectiveFunctionType & function, SearchPointType const& p) {
+void CrossEntropyMethod::init( ObjectiveFunctionType & function, SearchPointType const& p) {
 	
-	unsigned int populationSize = CrossEntropy::suggestPopulationSize( );
-	unsigned int selectionSize = CrossEntropy::suggestSelectionSize( populationSize );
+	unsigned int populationSize = CrossEntropyMethod::suggestPopulationSize( );
+	unsigned int selectionSize = CrossEntropyMethod::suggestSelectionSize( populationSize );
 	RealVector initialVariance(p.size());
 
 	// Most papers set the variance to 100 by default.
@@ -117,7 +117,7 @@ void CrossEntropy::init( ObjectiveFunctionType & function, SearchPointType const
 /**
 * \brief Initializes the algorithm for the supplied objective function.
 */
-void CrossEntropy::init(
+void CrossEntropyMethod::init(
 	ObjectiveFunctionType& function, 
 	SearchPointType const& initialSearchPoint,
 	unsigned int populationSize,
@@ -145,7 +145,7 @@ void CrossEntropy::init(
 /**
 * \brief Updates the strategy parameters based on the supplied parent population.
 */
-void CrossEntropy::updateStrategyParameters( const std::vector<Individual<RealVector, double> > & parents ) {
+void CrossEntropyMethod::updateStrategyParameters( const std::vector<Individual<RealVector, double> > & parents ) {
 
 	/* Calculate the centroid of the parents */
 	RealVector m(m_numberOfVariables);
@@ -184,7 +184,7 @@ void CrossEntropy::updateStrategyParameters( const std::vector<Individual<RealVe
 /**
 * \brief Executes one iteration of the algorithm.
 */
-void CrossEntropy::step(ObjectiveFunctionType const& function){
+void CrossEntropyMethod::step(ObjectiveFunctionType const& function){
 
 	std::vector< Individual<RealVector, double> > offspring( m_populationSize );
 
@@ -212,9 +212,9 @@ void CrossEntropy::step(ObjectiveFunctionType const& function){
 	m_best.value= parents[ 0 ].unpenalizedFitness();
 }
 
-void CrossEntropy::init(ObjectiveFunctionType& function ){
+void CrossEntropyMethod::init(ObjectiveFunctionType& function ){
 	if(!(function.features() & ObjectiveFunctionType::CAN_PROPOSE_STARTING_POINT))
 		throw SHARKEXCEPTION( "[AbstractSingleObjectiveOptimizer::init] Objective function does not propose a starting point");
-	CrossEntropy::init(function,function.proposeStartingPoint());
+	CrossEntropyMethod::init(function,function.proposeStartingPoint());
 }
 

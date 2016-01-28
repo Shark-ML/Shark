@@ -45,7 +45,7 @@
 
 namespace shark {
 
-	class CrossEntropy : public AbstractSingleObjectiveOptimizer<RealVector >
+	class CrossEntropyMethod : public AbstractSingleObjectiveOptimizer<RealVector >
 	{
 	public:
 
@@ -100,11 +100,11 @@ namespace shark {
 		/**
 		* \brief Default c'tor.
 		*/
-		SHARK_EXPORT_SYMBOL CrossEntropy();
+		SHARK_EXPORT_SYMBOL CrossEntropyMethod();
 
 		/// \brief From INameable: return the class name.
 		std::string name() const
-		{ return "Cross Entropy"; }
+		{ return "Cross Entropy Method"; }
 
 		/**
 		* \brief Sets default value for Population size.

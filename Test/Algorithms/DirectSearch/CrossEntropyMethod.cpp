@@ -2,7 +2,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/Algorithms/DirectSearch/CrossEntropy.h>
+#include <shark/Algorithms/DirectSearch/CrossEntropyMethod.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Rosenbrock.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Cigar.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Discus.h>
@@ -14,39 +14,39 @@
 
 using namespace shark;
 
-BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_CrossEntropy)
+BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_CrossEntropyMethod)
 
-BOOST_AUTO_TEST_CASE( CrossEntropy_Cigar )
+BOOST_AUTO_TEST_CASE( CrossEntropyMethod_Cigar )
 {
 	Cigar function(3);
-	CrossEntropy optimizer;
+	CrossEntropyMethod optimizer;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
 	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
 }
 
-BOOST_AUTO_TEST_CASE( CrossEntropy_Discus )
+BOOST_AUTO_TEST_CASE( CrossEntropyMethod_Discus )
 {
 	Discus function(3);
-	CrossEntropy optimizer;
+	CrossEntropyMethod optimizer;
 
 	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
 	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
 }
 
-BOOST_AUTO_TEST_CASE( CrossEntropy_Ellipsoid )
+BOOST_AUTO_TEST_CASE( CrossEntropyMethod_Ellipsoid )
 {
 	Ellipsoid function(5);
-	CrossEntropy optimizer;
+	CrossEntropyMethod optimizer;
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
 	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
 }
 
-BOOST_AUTO_TEST_CASE( CrossEntropy_DiffPowers )
+BOOST_AUTO_TEST_CASE( CrossEntropyMethod_DiffPowers )
 {
 	DiffPowers function( 3 );
-	CrossEntropy optimizer;
+	CrossEntropyMethod optimizer;
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
 	test_function( optimizer, function, _trials = 10, _iterations = 10000, _epsilon = 1E-10 );
