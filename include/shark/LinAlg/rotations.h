@@ -172,12 +172,10 @@ void randomRotationMatrix(matrix_container<MatrixT>& matrixC,RngType& rng){
 	Normal< RngType > normal( rng, 0, 1 );
 	size_t size = matrix.size1();
 	diag(matrix) = repeat(1.0,size);
-	//the first element is just -1 or 1
-	matrix(size-1,size-1) = normal();
-	matrix(size-1,size-1) /= std::abs(matrix(size-1,size-1));
-	
+
 	RealVector v(size);
-	for(std::size_t i = 2; i != size;++i){
+	//we skip the first dimension as the rotation of a 1d vector is just the identity
+	for(std::size_t i = 2; i != size+1;++i){
 		//create the random vector on the unit-sphere for the i-dimensional subproblem
 		for(std::size_t j=0;j != i; ++j){
 			v(j) = normal();
