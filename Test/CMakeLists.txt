@@ -80,6 +80,7 @@ shark_add_test( LinAlg/PartlyPrecomputedMatrix.cpp LinAlg_PartlyPrecomputedMatri
 shark_add_test( Algorithms/DirectSearch/CMA.cpp DirectSearch_CMA )
 shark_add_test( Algorithms/DirectSearch/CMSA.cpp DirectSearch_CMSA )
 shark_add_test( Algorithms/DirectSearch/ElitistCMA.cpp DirectSearch_ElitistCMA )
+shark_add_test( Algorithms/DirectSearch/CrossEntropyMethod.cpp DirectSearch_CrossEntropyMethod )
 shark_add_test( Algorithms/DirectSearch/VDCMA.cpp DirectSearch_VDCMA )
 shark_add_test( Algorithms/DirectSearch/MOCMA.cpp DirectSearch_MOCMA )
 shark_add_test( Algorithms/DirectSearch/SteadyStateMOCMA.cpp DirectSearch_SteadyStateMOCMA )
