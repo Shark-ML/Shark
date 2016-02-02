@@ -45,6 +45,28 @@
 
 namespace shark {
 
+	/**
+	* \brief Implements the Cross Entropy Method.
+	*
+	*  This class implements the noisy cross entropy method 
+	*  as descibed in the following article.
+	*
+	*  Christophe Thiery, Bruno Scherrer. Improvements on Learning Tetris with Cross Entropy.
+	*  International Computer Games Association Journal, ICGA, 2009, 32. <inria-00418930>
+	*
+	*  The algorithm aims to minimize an objective function through stocastic search.
+	*  It works iteratively until a certain stopping criteria is met. At each 
+	*  iteration, it samples a number of vectors from a Gaussian distribution
+	*  and evaluates each of these against the supplied objective function.
+	*  Based on the return value from the objective function a subset if the 
+	*  the best ranked vectors are chosen to update the search parameters 
+	*  of the next generation. 
+	*
+	*  The mean of the Gaussian distribution is set to the centroid of best ranked 
+	*  vectors, and the variance is set to the variance of the best ranked 
+	*  vectors in each individual dimension.
+	*  
+	*/
 	class CrossEntropyMethod : public AbstractSingleObjectiveOptimizer<RealVector >
 	{
 	public:
