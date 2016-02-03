@@ -43,6 +43,7 @@
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/bind/bind.hpp>
+#include <boost/bind/placeholders.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 
 namespace shark {
