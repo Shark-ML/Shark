@@ -73,7 +73,7 @@ public:
 		namespace bae = boost::accumulators::extract;
 
 		InternalAccumulatorType accu;
-		boost::range::for_each(input, boost::bind(boost::ref(accu), _1));
+		boost::range::for_each(input, boost::bind(boost::ref(accu), boost::placeholders::_1));
 		SIZE_CHECK(bae::count(accu) > 1u);
 
 		normal.mean(bae::mean(accu));

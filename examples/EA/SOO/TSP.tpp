@@ -52,6 +52,9 @@
 #include <shark/LinAlg/Base.h>
 
 #include <boost/format.hpp>
+#if BOOST_VERSION == 106000
+#include <boost/type_traits/ice.hpp>//Required because of boost 1.60 bug
+#endif
 #include <boost/graph/adjacency_matrix.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graphml.hpp>

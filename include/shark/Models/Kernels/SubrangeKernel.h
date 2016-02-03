@@ -145,7 +145,7 @@ public:
 
 	template<class Kernels,class Ranges>
 	SubrangeKernelBase(Kernels const& kernels, Ranges const& ranges){
-		SIZE_CHECK(size(kernels) == size(ranges));
+		SIZE_CHECK(kernels.size() == ranges.size());
 		for(std::size_t i = 0; i != kernels.size(); ++i){
 			m_kernelWrappers.push_back(
 				SubrangeKernelWrapper<InputType>(get(kernels,i),get(ranges,i).first,get(ranges,i).second)

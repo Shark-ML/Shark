@@ -48,9 +48,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/format.hpp>
-#include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/newline.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/type_traits.hpp>
 

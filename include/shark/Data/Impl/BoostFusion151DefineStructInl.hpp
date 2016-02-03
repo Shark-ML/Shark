@@ -48,7 +48,7 @@
 #include <boost/fusion/sequence/sequence_facade.hpp>
 #include <boost/fusion/iterator/iterator_facade.hpp>
 
-#if  (BOOST_VERSION % 100) < 4800
+#if  BOOST_VERSION < 104800
 #include "BoostFusionCopy.hpp"
 #else
 #include <boost/fusion/algorithm/auxiliary/copy.hpp>
