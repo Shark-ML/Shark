@@ -63,20 +63,19 @@ namespace{
 void CMSA::init( ObjectiveFunctionType & function, SearchPointType const& p) {
 	SIZE_CHECK(p.size() == function.numberOfVariables());
 	checkFeatures(function);
-	function.init();
 	std::vector<RealVector> points(1,p);
 	std::vector<double> functionValues(1,function.eval(p));
-	std::size_t lambda = 4 * p.size();
-	std::size_t mu = lambda / 4;
-	AbstractConstraintHandler<SearchPointType> const* handler = 0;
-	if (function.hasConstraintHandler())
-		handler = &function.getConstraintHandler();
+	
+	std::size_t lambda = m_userSetLambda? m_lambda:4 * p.size();
+	std::size_t mu  = m_userSetMu? m_mu:lambda / 4;
+	RANGE_CHECK(mu < lambda);
+	double sigma = (m_initSigma > 0)? m_initSigma : 1.0/std::sqrt(double(p.size()));
 	doInit(
-		handler,
 		points,
 		functionValues,
 		lambda,
-		mu
+		mu,
+		sigma
 	);
 }
 void CMSA::init( 
@@ -87,22 +86,16 @@ void CMSA::init(
 	double initialSigma,				       
 	const boost::optional< RealMatrix > & initialCovarianceMatrix
 ) {
-	
 	SIZE_CHECK(p.size() == function.numberOfVariables());
 	checkFeatures(function);
-	function.init();
 	std::vector<RealVector> points(1,p);
 	std::vector<double> functionValues(1,function.eval(p));
-	m_initSigma = initialSigma;
-	AbstractConstraintHandler<SearchPointType> const* handler = 0;
-	if (function.hasConstraintHandler())
-		handler = &function.getConstraintHandler();
 	doInit(
-		handler,
 		points,
 		functionValues,
 		lambda,
-		mu
+		mu,
+		initialSigma
 	);
 	if(initialCovarianceMatrix){
 		m_mutationDistribution.covarianceMatrix() = *initialCovarianceMatrix;
@@ -111,11 +104,11 @@ void CMSA::init(
 }
 
 void CMSA::doInit( 
-	AbstractConstraintHandler<SearchPointType> const* constraints, 
 	std::vector<SearchPointType> const& initialSearchPoints,
 	std::vector<ResultType> const& initialValues,
 	std::size_t lambda,
-	std::size_t mu
+	std::size_t mu,
+	double sima
 ) {
 	m_numberOfVariables = initialSearchPoints[0].size();
 

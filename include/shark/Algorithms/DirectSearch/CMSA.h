@@ -72,7 +72,7 @@ class CMSA : public AbstractSingleObjectiveOptimizer<RealVector > {
 public:
 
 	/// \brief Default c'tor.
-	CMSA() : m_mu( 100 ), m_lambda( 200 ) {
+	CMSA() : m_mu( 100 ), m_lambda( 200 ), m_userSetMu(false),m_userSetLambda(false), m_initSigma(-1) {
 		m_features |= REQUIRES_VALUE;
 	}
 
@@ -114,24 +114,31 @@ public:
 
 	/// \brief Executes one iteration of the algorithm.
 	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& function);
+	
+	/// \brief sets the initial step length sigma
+	///
+	/// It is by default <=0 which means that sigma =1/sqrt(numVariables)
+	void setInitialSigma(double initSigma){
+		m_initSigma = initSigma;
+	}
 
+	/// \brief Sets the number of selected samples
+	void setMu(std::size_t mu){
+		m_mu = mu;
+		m_userSetMu = true;
+	}
+	/// \brief Sets the number of sampled points
+	void setLambda(std::size_t lambda){
+		m_lambda = lambda;
+		m_userSetLambda = true;
+	}	
 	/// \brief Accesses the size of the parent population.
 	std::size_t mu() const {
 		return m_mu;
 	}
 
-	/// \brief Accesses the size of the parent population, allows for l-value semantics.
-	std::size_t & mu() {
-		return m_mu;
-	}
-
 	/// \brief Accesses the size of the offspring population.
 	std::size_t lambda() const {
-		return m_lambda;
-	}
-
-	/// \brief Accesses the size of the offspring population, allows for l-value semantics.
-	std::size_t & lambda() {
 		return m_lambda;
 	}
 protected:
@@ -146,18 +153,21 @@ protected:
 
 	/// \brief Initializes the internal data structures of the CMSA
 	SHARK_EXPORT_SYMBOL  void doInit(
-		AbstractConstraintHandler<SearchPointType> const* handler,
 		std::vector<SearchPointType> const& points,
 		std::vector<ResultType> const& functionValues,
 		std::size_t lambda,
-		std::size_t mu
+		std::size_t mu,
+		double initialSigma
 	);
 private:	
 	std::size_t m_numberOfVariables; ///< Stores the dimensionality of the search space.
 	std::size_t m_mu; ///< The size of the parent population.
 	std::size_t m_lambda; ///< The size of the offspring population, needs to be larger than mu.
 
+	bool m_userSetMu; /// <The user set a value via setMu, do not overwrite with default
+	bool m_userSetLambda; /// <The user set a value via setMu, do not overwrite with default
 	double m_initSigma; ///< The initial step size
+	
 	double m_sigma; ///< The current step size.
 	double m_cSigma; 
 	double m_cC; ///< Constant for adapting the covariance matrix.

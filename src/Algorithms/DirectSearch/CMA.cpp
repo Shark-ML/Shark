@@ -171,7 +171,7 @@ void CMA::init( ObjectiveFunctionType & function, SearchPointType const& p) {
 	std::size_t lambda = m_userSetLambda? m_lambda:CMA::suggestLambda( p.size() );
 	std::size_t mu  = m_userSetMu? m_mu:CMA::suggestMu(lambda, m_recombinationType);
 	RANGE_CHECK(mu < lambda);
-	double sigma = m_initSigma > 0? m_initSigma : 1.0/std::sqrt(double(m_numberOfVariables));
+	double sigma = (m_initSigma > 0)? m_initSigma : 1.0/std::sqrt(double(p.size()));
 	doInit(
 		points,
 		functionValues,
