@@ -73,7 +73,7 @@ public:
 		SIZE_CHECK(input.size() > 1u);
 		namespace bae = boost::accumulators::extract;
 		InternalAccumulatorType accu;
-#ifdef BOOST_VERSION < 106000
+#if (BOOST_VERSION < 106000)
 		boost::range::for_each(input, boost::bind(boost::ref(accu), _1));
 #else
 		boost::range::for_each(input, boost::bind(boost::ref(accu), boost::placeholders::_1));

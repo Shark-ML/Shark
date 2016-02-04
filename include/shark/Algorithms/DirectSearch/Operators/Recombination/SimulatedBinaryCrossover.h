@@ -45,25 +45,12 @@ namespace shark {
 		: m_nc( 20.0 )
 		, m_prob( 0.5 ) {}
 
-		/// \brief Initializes the operator for the supplied constraints
-		///
-		/// \param [in] constraints The constraint handler of the function or 0 if it does not have one
-		void init( AbstractConstraintHandler<PointType> const* constraints, std::size_t n ) {
-			m_prob = 0.5;
-			if(!constraints){
-				m_lower = blas::repeat(-1E20,n);
-				m_upper = blas::repeat(1E20,n);
-			}
-			else if (constraints && constraints->isBoxConstrained()) {
-				typedef BoxConstraintHandler<PointType> ConstraintHandler;
-				ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(*constraints);
-				
-				m_lower = handler.lower();
-				m_upper = handler.upper();
-
-			} else{
-				throw SHARKEXCEPTION("[SimulatedBinaryCrossover::init] Algorithm does only allow box constraints");
-			}
+		/// \brief Initializes the operator for the supplied box-constraints
+		void init( RealVector const& lower, RealVector const& upper ) {
+			SIZE_CHECK(lower.size() == upper.size());
+			m_prob = 1./lower.size();
+			m_lower = lower;
+			m_upper = upper;
 		}
 
 		/// \brief Mates the supplied individuals.
@@ -71,7 +58,7 @@ namespace shark {
 		/// \param [in,out] i1 Individual to be mated.
 		/// \param [in,out] i2 Individual to be mated.
 		template<typename IndividualType>
-		void operator()( IndividualType & i1, IndividualType & i2 ) {	
+		void operator()( IndividualType & i1, IndividualType & i2 )const{	
 			RealVector& point1 = i1.searchPoint();
 			RealVector& point2 = i2.searchPoint();
 

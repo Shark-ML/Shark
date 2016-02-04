@@ -7,13 +7,6 @@
 #include <boost/progress.hpp>
 #include <boost/serialization/vector.hpp>
 
-#include <shark/Algorithms/DirectSearch/SteadyStateMOCMA.h>
-#include <shark/Algorithms/DirectSearch/SMS-EMOA.h>
-#include <shark/Algorithms/DirectSearch/RealCodedNSGAII.h>
-
-#include <shark/Algorithms/DirectSearch/HypervolumeApproximator.h>
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
-
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
 
 #include <shark/Statistics/Statistics.h>

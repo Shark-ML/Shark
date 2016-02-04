@@ -153,7 +153,25 @@ public:
 		std::vector<SearchPointType> const& startingPoints
 	){
 		checkFeatures(function);
-		function.init();
+		std::vector<RealVector> values(startingPoints.size());
+		for(std::size_t i = 0; i != startingPoints.size(); ++i){
+			if(!function.isFeasible(startingPoints[i]))
+				throw SHARKEXCEPTION("[SMS-EMOA::init] starting point(s) not feasible");
+			values[i] = function.eval(startingPoints[i]);
+		}
+		
+		std::size_t dim = function.numberOfVariables();
+		RealVector lowerBounds(dim, -1E20);
+		RealVector upperBounds(dim, 1E20);
+		if (function.hasConstraintHandler() && function.getConstraintHandler().isBoxConstrained()) {
+			typedef BoxConstraintHandler<SearchPointType> ConstraintHandler;
+			ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(function.getConstraintHandler());
+			
+			lowerBounds = handler.lower();
+			upperBounds = handler.upper();
+		} else{
+			throw SHARKEXCEPTION("[RealCodedNSGAII::init] Algorithm does only allow box constraints");
+		}
 		
 		//create parent set
 		m_pop.reserve( 2 * mu() );
@@ -172,8 +190,11 @@ public:
 		//make room for offspring
 		m_pop.resize(2*mu());
 		
-		m_crossover.init(function);
-		m_mutator.init(function);
+		
+		
+		
+		m_crossover.init(lowerBounds, upperBounds);
+		m_mutator.init(lowerBounds, upperBounds);
 	}
 
 	/**

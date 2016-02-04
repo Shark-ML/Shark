@@ -116,14 +116,6 @@ public:
 	SHARK_EXPORT_SYMBOL void init( 
 		ObjectiveFunctionType& function, 
 		SearchPointType const& initialSearchPoint,
-		double initialSigma
-	);
-	/**
-	* \brief Initializes the algorithm for the supplied objective function.
-	*/
-	SHARK_EXPORT_SYMBOL void init( 
-		ObjectiveFunctionType& function, 
-		SearchPointType const& initialSearchPoint,
 		std::size_t lambda,
 		std::size_t mu,
 		double initialSigma,				       
@@ -134,6 +126,13 @@ public:
 	* \brief Executes one iteration of the algorithm.
 	*/
 	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& function);
+	
+	/// \brief sets the initial step length sigma
+	///
+	/// It is by default <=0 which means that sigma =1/sqrt(numVariables)
+	void setInitialSigma(double initSigma){
+		m_initSigma = initSigma;
+	}
 
 	/** \brief Accesses the current step size. */
 	double sigma() const {
@@ -193,6 +192,17 @@ public:
 		return m_mu;
 	}
 	
+	/// \brief Sets the number of selected samples
+	void setMu(std::size_t mu){
+		m_mu = mu;
+		m_userSetMu = true;
+	}
+	/// \brief Sets the number of sampled points
+	void setLambda(std::size_t lambda){
+		m_lambda = lambda;
+		m_userSetLambda = true;
+	}
+	
 	/**
 	 * \brief Returns a immutable reference to the size of the offspring population \f$\mu\f$.
 	 */
@@ -234,7 +244,6 @@ protected:
 	SHARK_EXPORT_SYMBOL void updatePopulation( std::vector<IndividualType > const& offspring ) ;
 
 	SHARK_EXPORT_SYMBOL  void doInit(
-		AbstractConstraintHandler<SearchPointType> const* handler,
 		std::vector<SearchPointType> const& points,
 		std::vector<ResultType> const& functionValues,
 		std::size_t lambda,
@@ -247,8 +256,13 @@ private:
 	std::size_t m_mu; ///< The size of the parent population.
 	std::size_t m_lambda; ///< The size of the offspring population, needs to be larger than mu.
 
+	bool m_userSetMu; /// <The user set a value via setMu, do not overwrite with default
+	bool m_userSetLambda; /// <The user set a value via setMu, do not overwrite with default
+	double m_initSigma; ///< use provided initial value of sigma<=0 =>algorithm chooses
+
 	RecombinationType m_recombinationType; ///< Stores the recombination type.
 
+	
 	double m_sigma;
 	double m_cC; 
 	double m_c1; 

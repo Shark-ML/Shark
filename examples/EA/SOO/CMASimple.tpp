@@ -52,7 +52,8 @@ int main( int argc, char ** argv ) {
 	// Initialize the optimizer for the objective function instance.
 	//###begin<optimizer>
 	CMA cma;
-	cma.init( sphere, sphere.proposeStartingPoint(), 0.1 ); // Explicitely set initial global step size.
+	cma.setInitialSigma(0.1);
+	cma.init( sphere, sphere.proposeStartingPoint()); // Explicitely set initial global step size.
 	//###end<optimizer>
 
 	// Iterate the optimizer until a solution of sufficient quality is found.

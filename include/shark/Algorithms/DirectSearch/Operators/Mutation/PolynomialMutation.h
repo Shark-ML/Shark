@@ -44,25 +44,12 @@ namespace shark {
 		/// \brief Default c'tor.
 		PolynomialMutator() : m_nm( 20.0 ) {}
 
-		/// \brief Initializes the operator for the supplied constraints
-		///
-		/// \param [in] constraints the constraint handler of the function or 0 if it does not have one
-		void init( AbstractConstraintHandler<PointType> const* constraints,std::size_t n ) {
-			 m_prob = 1./f.numberOfVariables();
-			if(!constraints){
-				m_lower = blas::repeat(-1E20,n);
-				m_upper = blas::repeat(1E20,n);
-			}
-			else if (constraints && constraints->isBoxConstrained()) {
-				typedef BoxConstraintHandler<PointType> ConstraintHandler;
-				ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(*constraints);
-				
-				m_lower = handler.lower();
-				m_upper = handler.upper();
-
-			} else{
-				throw SHARKEXCEPTION("[SimulatedBinaryCrossover::init] Algorithm does only allow box constraints");
-			}
+		/// \brief Initializes the operator for the supplied box-constraints
+		void init( RealVector const& lower, RealVector const& upper ) {
+			SIZE_CHECK(lower.size() == upper.size());
+			m_prob = 1./lower.size();
+			m_lower = lower;
+			m_upper = upper;
 		}
 
 		/// \brief Mutates the supplied individual.
@@ -70,7 +57,7 @@ namespace shark {
 		///  for accessing the actual search point.
 		/// \param [in,out] ind Individual to be mutated.
 		template<typename IndividualType>
-		void operator()( IndividualType & ind ) {
+		void operator()( IndividualType & ind )const{
 			double delta, deltaQ, expp,  u = 0.;
 			
 			RealVector& point = ind.searchPoint();

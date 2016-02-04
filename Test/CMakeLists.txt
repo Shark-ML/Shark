@@ -85,6 +85,7 @@ shark_add_test( Algorithms/DirectSearch/VDCMA.cpp DirectSearch_VDCMA )
 shark_add_test( Algorithms/DirectSearch/MOCMA.cpp DirectSearch_MOCMA )
 shark_add_test( Algorithms/DirectSearch/SteadyStateMOCMA.cpp DirectSearch_SteadyStateMOCMA )
 shark_add_test( Algorithms/DirectSearch/RealCodedNSGAII.cpp DirectSearch_RealCodedNSGAII )
+shark_add_test( Algorithms/DirectSearch/SMS-EMOA.cpp DirectSearch_SMS-EMOA )
 shark_add_test( Algorithms/DirectSearch/FastNonDominatedSort.cpp DirectSearch_FastNonDominatedSort )
 shark_add_test( Algorithms/DirectSearch/ParetoDominanceComparator.cpp DirectSearch_ParetoDominanceComparator )
 
