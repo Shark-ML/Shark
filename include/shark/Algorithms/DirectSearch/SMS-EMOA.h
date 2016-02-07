@@ -130,15 +130,11 @@ public:
 	 * \brief Initializes the algorithm for the supplied objective function.
 	 * 
 	 * \param [in] function The objective function.
-	 * \param [in] startingPoints A set of intiial search points.
 	 */
-	void init( 
-		ObjectiveFunctionType& function, 
-		std::vector<SearchPointType> const& startingPoints
-	){
+	void init(ObjectiveFunctionType& function) {
 		checkFeatures(function);
 		function.init();
-		
+
 		m_pop.resize( mu() + 1 );
 		m_best.resize(mu());
 		for(std::size_t i = 0; i != mu(); ++i){
