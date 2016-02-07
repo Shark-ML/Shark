@@ -194,7 +194,7 @@ protected:
 		}
 		//copy points randomly
 		for(std::size_t i = numPoints; i != mu; ++i){
-			std::size_t index = Rng::discrete(0,numPoints-1);
+			std::size_t index = Rng::discrete(0,startingPoints.size()-1);
 			m_pop[i].searchPoint() = startingPoints[index];
 				m_pop[i].penalizedFitness() = functionValues[index];
 				m_pop[i].unpenalizedFitness() = functionValues[index];
@@ -250,7 +250,7 @@ private:
 			m_mutator( mate1 );
 			return mate1;
 		} else {
-			m_mutator( mate1 );
+			m_mutator( mate2 );
 			return mate2;
 		}
 	}
