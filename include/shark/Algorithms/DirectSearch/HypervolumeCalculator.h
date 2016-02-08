@@ -5,18 +5,24 @@
  * 
  * The algorithm is described in
  * 
- * Nicola Beume und G�nter Rudolph. 
+ * Nicola Beume und Günter Rudolph. 
  * Faster S-Metric Calculation by Considering Dominated Hypervolume as Klee's Measure Problem.
  * In: B. Kovalerchuk (ed.): Proceedings of the Second IASTED Conference on Computational Intelligence (CI 2006), 
  * pp. 231-236. ACTA Press: Anaheim, 2006. 
  * 
- * 
+ * A specialized algorithm is used for the three-objective case:
  *
- * \author      T.Voss, O.Krause
- * \date        2014
+ * M. T. M. Emmerich and C. M. Fonseca.
+ * Computing hypervolume contributions in low dimensions: Asymptotically optimal algorithm and complexity results.
+ * In: Evolutionary Multi-Criterion Optimization (EMO) 2011.
+ * Vol. 6576 of Lecture Notes in Computer Science, pp. 121--135, Berlin: Springer, 2011.
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \author      T.Voss, O.Krause, T. Glasmachers
+ * \date        2014-2016
+ *
+ *
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -44,7 +50,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
-
+#include <map>
 #include <cmath>
 
 namespace shark {
@@ -53,7 +59,7 @@ namespace shark {
 	*
 	*  The algorithm is described in
 	*
-	*  Nicola Beume und G�nter Rudolph. 
+	*  Nicola Beume und Günter Rudolph. 
 	*  Faster S-Metric Calculation by Considering Dominated Hypervolume as Klee's Measure Problem.
 	*  In: B. Kovalerchuk (ed.): Proceedings of the Second IASTED Conference on Computational Intelligence (CI 2006), 
 	*  pp. 231-236. ACTA Press: Anaheim, 2006.
@@ -63,7 +69,7 @@ namespace shark {
 		/**
 		* \brief Returns an estimate on the runtime of the algorithm.
 		* \param [in] noPoints The number of points n considered in the runtime estimation.
-		* \param [in] noObjectives The number of points m considered in the runtime estimation.
+		* \param [in] noObjectives The number of objectives m considered in the runtime estimation.
 		*/
 		static double runtime( std::size_t noPoints, std::size_t noObjectives ) {
 			if( noPoints < 10 )
@@ -190,12 +196,103 @@ namespace shark {
 			}
 			return h;
 		}
+		else if (m_noObjectives == 3)
+		{
+			if (m_useLogHyp)
+			{
+				double volume = 0.0;
+				double area = 0.0;
+				std::map<double, double> front2D;
+				double prev_x2 = 0.0;
+				for (size_t i=0; i<set.size(); i++)
+				{
+					VectorType x = extractor(set[i]);
+					if (i > 0) volume += area * (std::log(x[2]) - prev_x2);
 
-		VectorType regLow( m_noObjectives, 1E15 );
-		for( std::size_t i = 0; i < set.size(); i++ ){
-			noalias(regLow) = min(regLow,extractor(set[i]));
+					// check whether x is dominated
+					std::map<double, double>::iterator worse = front2D.upper_bound(std::log(x[0]));
+					double b = std::log(refPoint[1]);
+					if (worse != front2D.begin())
+					{
+						std::map<double, double>::iterator better = worse;
+						if (better == front2D.end() || better->first > std::log(x[0])) --better;
+						if (better->second <= std::log(x[1])) continue;
+						b = better->second;
+					}
+
+					// remove dominated points
+					while (worse != front2D.end())
+					{
+						if (worse->second < std::log(x[1])) break;
+						std::map<double, double>::iterator it = worse;
+						++worse;
+						double r = (worse == front2D.end()) ? std::log(refPoint[0]): worse->first;
+						area -= (r - it->first) * (b - it->second);
+						front2D.erase(it);
+					}
+
+					// insert x
+					front2D[std::log(x[0])] = std::log(x[1]);
+					double r = (worse == front2D.end()) ? std::log(refPoint[0]) : worse->first;
+					area += (r - std::log(x[0])) * (b - std::log(x[1]));
+
+					prev_x2 = std::log(x[2]);
+				}
+				volume += area * (std::log(refPoint[2]) - prev_x2);
+				return volume;
+			}
+			else
+			{
+				double volume = 0.0;
+				double area = 0.0;
+				std::map<double, double> front2D;
+				double prev_x2 = 0.0;
+				for (size_t i=0; i<set.size(); i++)
+				{
+					VectorType x = extractor(set[i]);
+					if (i > 0) volume += area * (x[2] - prev_x2);
+
+					// check whether x is dominated
+					std::map<double, double>::iterator worse = front2D.upper_bound(x[0]);
+					double b = refPoint[1];
+					if (worse != front2D.begin())
+					{
+						std::map<double, double>::iterator better = worse;
+						if (better == front2D.end() || better->first > x[0]) --better;
+						if (better->second <= x[1]) continue;
+						b = better->second;
+					}
+
+					// remove dominated points
+					while (worse != front2D.end())
+					{
+						if (worse->second < x[1]) break;
+						std::map<double, double>::iterator it = worse;
+						++worse;
+						double r = (worse == front2D.end()) ? refPoint[0]: worse->first;
+						area -= (r - it->first) * (b - it->second);
+						front2D.erase(it);
+					}
+
+					// insert x
+					front2D[x[0]] = x[1];
+					double r = (worse == front2D.end()) ? refPoint[0] : worse->first;
+					area += (r - x[0]) * (b - x[1]);
+
+					prev_x2 = x[2];
+				}
+				volume += area * (refPoint[2] - prev_x2);
+				return volume;
+			}
 		}
-		return( stream( regLow, refPoint, set, extractor, 0, refPoint.back() ) );	
+		else
+		{
+			VectorType regLow( m_noObjectives, 1E15 );
+			for( std::size_t i = 0; i < set.size(); i++ ){
+				noalias(regLow) = min(regLow,extractor(set[i]));
+			}
+			return( stream( regLow, refPoint, set, extractor, 0, refPoint.back() ) );	
+		}
 	}
 
 	template<typename VectorType>

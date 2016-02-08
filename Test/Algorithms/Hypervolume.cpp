@@ -22,9 +22,6 @@ struct Fixture {
 	Fixture() {
 		BOOST_TEST_MESSAGE( "Setting up test sets and reference points " );
 		m_refPoint3D = boost::assign::list_of( 1.1 )( 1.1 )( 1.1 );
-		//~ m_refPoint3D.push_back(1.1);
-		//~ m_refPoint3D.push_back(1.1);
-		//~ m_refPoint3D.push_back(1.1);
 		m_testSet3D.push_back( boost::assign::list_of( 6.56039859404455e-2 ) (0.4474014917277) (0.891923776019316) );
 		m_testSet3D.push_back( boost::assign::list_of( 3.74945443950542e-2)(3.1364039802686e-2)(0.998804513479922 ) );
 		m_testSet3D.push_back( boost::assign::list_of( 0.271275894554688)(0.962356894778677)(1.66911984440026e-2 ) );
@@ -106,9 +103,8 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume ) {
 
 	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), Fixture::HV_TEST_SET_2D, 1E-5 );
 	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), Fixture::HV_TEST_SET_3D, 1E-5 );
-
 	std::vector<double> results;
-	
+
 	for( unsigned int trial = 0; trial < 10; trial++ )
 		results.push_back(ha( m_testSet3D.begin(), m_testSet3D.end(), ife, m_refPoint3D, 1E-2, 1E-2 ) );
 	
@@ -130,10 +126,9 @@ BOOST_AUTO_TEST_CASE( Algorithms_LeastContributorApproximator ) {
 	}
 
 	std::vector< RealVector >::const_iterator it = m_testSet3D.begin();
-	BOOST_CHECK_EQUAL( 
-		lca.leastContributor( ife, m_testSet3D, m_refPoint3D ),
-		(std::size_t)std::distance( contributions.begin(), std::min_element( contributions.begin(), contributions.end() ) ) 
-	);
+	std::size_t approx = lca.leastContributor( ife, m_testSet3D, m_refPoint3D );
+	std::size_t exact = (std::size_t)std::distance( contributions.begin(), std::min_element( contributions.begin(), contributions.end() ) );
+	BOOST_CHECK_EQUAL( approx, exact );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
