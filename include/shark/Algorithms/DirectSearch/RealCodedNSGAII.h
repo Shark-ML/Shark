@@ -212,9 +212,9 @@ public:
 			m_pop.end()
 		);
 
-		for( std::size_t i = 1; i < mu(); i++ ) {
+		for( std::size_t i = 0; i < mu()-1; i+=2 ) {
 			if( Rng::coinToss( 0.8 ) ) {
-				m_crossover( m_pop[mu() + i - 1], m_pop[mu() + i] );
+				m_crossover( m_pop[mu() + i ], m_pop[mu() + i +1] );
 			}
 		}
 		for( std::size_t i = 0; i < mu(); i++ ) {
