@@ -95,7 +95,7 @@ public:
 	}
 
 	void read( InArchive & archive ){
-		archive & BOOST_SERIALIZATION_NVP( m_pop );
+		archive & BOOST_SERIALIZATION_NVP( m_parents );
 		archive & BOOST_SERIALIZATION_NVP( m_mu );
 		archive & BOOST_SERIALIZATION_NVP( m_best );
 
@@ -105,7 +105,7 @@ public:
 		archive & BOOST_SERIALIZATION_NVP( m_crossoverProbability );
 	}
 	void write( OutArchive & archive ) const{
-		archive & BOOST_SERIALIZATION_NVP( m_pop );
+		archive & BOOST_SERIALIZATION_NVP( m_parents );
 		archive & BOOST_SERIALIZATION_NVP( m_mu );
 		archive & BOOST_SERIALIZATION_NVP( m_best );
 
@@ -179,30 +179,30 @@ protected:
 		m_crossover.m_nc = nc;
 		m_crossoverProbability = crossover_prob;
 		m_best.resize( mu );
-		m_pop.resize( mu );
+		m_parents.resize( mu );
 		//if the number of supplied points is smaller than mu, fill everything in
 		std::size_t numPoints = 0;
 		if(startingPoints.size()<=mu){
 			numPoints = startingPoints.size();
 			for(std::size_t i = 0; i != numPoints; ++i){
-				m_pop[i].searchPoint() = startingPoints[i];
-				m_pop[i].penalizedFitness() = functionValues[i];
-				m_pop[i].unpenalizedFitness() = functionValues[i];
-				m_best[i].point = m_pop[i].searchPoint();
-				m_best[i].value = m_pop[i].unpenalizedFitness();
+				m_parents[i].searchPoint() = startingPoints[i];
+				m_parents[i].penalizedFitness() = functionValues[i];
+				m_parents[i].unpenalizedFitness() = functionValues[i];
+				m_best[i].point = m_parents[i].searchPoint();
+				m_best[i].value = m_parents[i].unpenalizedFitness();
 			}
 		}
 		//copy points randomly
 		for(std::size_t i = numPoints; i != mu; ++i){
 			std::size_t index = Rng::discrete(0,startingPoints.size()-1);
-			m_pop[i].searchPoint() = startingPoints[index];
-				m_pop[i].penalizedFitness() = functionValues[index];
-				m_pop[i].unpenalizedFitness() = functionValues[index];
-				m_best[i].point = m_pop[i].searchPoint();
-				m_best[i].value = m_pop[i].unpenalizedFitness();
+			m_parents[i].searchPoint() = startingPoints[index];
+				m_parents[i].penalizedFitness() = functionValues[index];
+				m_parents[i].unpenalizedFitness() = functionValues[index];
+				m_best[i].point = m_parents[i].searchPoint();
+				m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
-		m_selection( m_pop, mu );
-		m_pop.push_back(m_pop[0]);
+		m_selection( m_parents, mu );
+		m_parents.push_back(m_parents[0]);
 		
 		m_crossover.init(lowerBounds,upperBounds);
 		m_mutator.init(lowerBounds,upperBounds);
@@ -210,26 +210,28 @@ protected:
 	
 	std::vector<IndividualType> generateOffspring()const{
 		std::vector<IndividualType> offspring(1);
-		offspring[0] = createOffspring(m_pop.begin(),m_pop.begin()+mu());
+		offspring[0] = createOffspring(m_parents.begin(),m_parents.begin()+mu());
 		return offspring;
 	}
 	
 	void updatePopulation(  std::vector<IndividualType> const& offspring) {
-		m_pop.back() = offspring.back();
-		m_selection( m_pop, mu());
+		m_parents.back() = offspring.back();
+		m_selection( m_parents, mu());
 
 		//if the individual got selected, insert it into the parent population
-		if(m_pop.back().selected()){
+		if(m_parents.back().selected()){
 			for(std::size_t i = 0; i != mu(); ++i){
-				if(!m_pop[i].selected()){
-					m_best[i].point = m_pop[mu()].searchPoint();
-					m_best[i].value = m_pop[mu()].unpenalizedFitness();
-					m_pop[i] = m_pop.back();
+				if(!m_parents[i].selected()){
+					m_best[i].point = m_parents[mu()].searchPoint();
+					m_best[i].value = m_parents[mu()].unpenalizedFitness();
+					m_parents[i] = m_parents.back();
 					break;
 				}
 			}
 		}
 	}
+	
+	std::vector<IndividualType> m_parents; ///< Population of size \f$\mu + 1\f$.
 private:
 	
 	IndividualType createOffspring(
@@ -255,7 +257,6 @@ private:
 		}
 	}
 
-	std::vector<IndividualType> m_pop; ///< Population of size \f$\mu + 1\f$.
 	unsigned int m_mu; ///< Size of parent generation
 
 	IndicatorBasedSelection<HypervolumeIndicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
