@@ -147,7 +147,7 @@ public:
 		std::vector<RealVector> values(startingPoints.size());
 		for(std::size_t i = 0; i != startingPoints.size(); ++i){
 			if(!function.isFeasible(startingPoints[i]))
-				throw SHARKEXCEPTION("[SteadyStateMOCMA::init] starting point(s) not feasible");
+				throw SHARKEXCEPTION("[MOCMA::init] starting point(s) not feasible");
 			values[i] = function.eval(startingPoints[i]);
 		}
 		this->doInit(startingPoints,values,mu(),initialSigma() );
@@ -219,7 +219,6 @@ protected:
 	}
 	
 	void updatePopulation(  std::vector<IndividualType> const& offspringVec) {
-		m_parents.push_back(offspringVec[0]);
 		m_parents.insert(m_parents.end(),offspringVec.begin(),offspringVec.end());
 		m_selection( m_parents, mu());
 		
@@ -241,7 +240,7 @@ protected:
 		}
 		
 		//partition the selected individuals to the front and remove the unselected ones
-		std::partition(m_parents.begin(), m_parents.end(),CMAIndividual<RealVector>::IsSelected);
+		std::partition(m_parents.begin(), m_parents.end(),IndividualType::IsSelected);
 		m_parents.erase(m_parents.begin()+mu(),m_parents.end());
 
 		//update solution set

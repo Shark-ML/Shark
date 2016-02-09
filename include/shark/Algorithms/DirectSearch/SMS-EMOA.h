@@ -146,7 +146,7 @@ public:
 		} else{
 			throw SHARKEXCEPTION("[SMS-EMOA::init] Algorithm does only allow box constraints");
 		}
-		this->doInit(startingPoints,values,lowerBounds, upperBounds,mu(),nm(),nc(),crossoverProbability());
+		doInit(startingPoints,values,lowerBounds, upperBounds,mu(),nm(),nc(),crossoverProbability());
 	}
 
 	/**
@@ -188,21 +188,21 @@ protected:
 				m_parents[i].searchPoint() = startingPoints[i];
 				m_parents[i].penalizedFitness() = functionValues[i];
 				m_parents[i].unpenalizedFitness() = functionValues[i];
-				m_best[i].point = m_parents[i].searchPoint();
-				m_best[i].value = m_parents[i].unpenalizedFitness();
 			}
 		}
 		//copy points randomly
 		for(std::size_t i = numPoints; i != mu; ++i){
 			std::size_t index = Rng::discrete(0,startingPoints.size()-1);
 			m_parents[i].searchPoint() = startingPoints[index];
-				m_parents[i].penalizedFitness() = functionValues[index];
-				m_parents[i].unpenalizedFitness() = functionValues[index];
-				m_best[i].point = m_parents[i].searchPoint();
-				m_best[i].value = m_parents[i].unpenalizedFitness();
+			m_parents[i].penalizedFitness() = functionValues[index];
+			m_parents[i].unpenalizedFitness() = functionValues[index];
+		}
+		//create initial mu best points
+		for(std::size_t i = 0; i != mu; ++i){
+			m_best[i].point = m_parents[i].searchPoint();
+			m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
 		m_selection( m_parents, mu );
-		m_parents.push_back(m_parents[0]);
 		
 		m_crossover.init(lowerBounds,upperBounds);
 		m_mutator.init(lowerBounds,upperBounds);
@@ -215,7 +215,7 @@ protected:
 	}
 	
 	void updatePopulation(  std::vector<IndividualType> const& offspring) {
-		m_parents.back() = offspring.back();
+		m_parents.push_back(offspring[0]);
 		m_selection( m_parents, mu());
 
 		//if the individual got selected, insert it into the parent population
@@ -229,6 +229,7 @@ protected:
 				}
 			}
 		}
+		m_parents.pop_back();
 	}
 	
 	std::vector<IndividualType> m_parents; ///< Population of size \f$\mu + 1\f$.
@@ -238,7 +239,6 @@ private:
 		std::vector<IndividualType>::const_iterator begin,
 		std::vector<IndividualType>::const_iterator end
 	)const{
-		std::size_t popSize = end-begin;
 		TournamentSelection< IndividualType::RankOrdering > selection;
 
 		IndividualType mate1( *selection( begin, end ) );
