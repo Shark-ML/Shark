@@ -83,7 +83,7 @@ public:
 	 * \brief Returns the name of the algorithm.
 	 */
 	std::string name() const {
-		return "SteadyStateMOCMA";
+		return "MOCMA";
 	}
 	
 	std::size_t mu()const{
