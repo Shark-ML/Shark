@@ -77,35 +77,33 @@ namespace shark {
 					y2 = point2[i];
 				}
 				
-				double betaQ = 0.0;
-				if( std::abs(y2 - y1) > 1E-7 ) {					
-					// Find beta value
-					double beta = 0;
-					if( (y1 - m_lower( i )) > (m_upper( i ) - y2) )
-						beta = 1 + 2 * (m_upper( i ) - y2) / (y2 - y1);
-					else
-						beta = 1 + 2 * (y1 - m_lower( i )) / (y2 - y1);
+				double betaQ1 = 0.0;
+				double betaQ2 = 0.0;
+				if( std::abs(y2 - y1) < 1E-7 )continue;//equal
+				
+				// Find beta value2
+				double beta1 = 1 + 2 * (y1 - m_lower( i )) / (y2 - y1);
+				double beta2 = 1 + 2 * (m_upper( i ) - y2) / (y2 - y1);
+				double expp = m_nc + 1.;
+				// Find alpha
+				double alpha1 = 2. - std::pow(beta1 , -expp);
+				double alpha2 = 2. - std::pow(beta2 , -expp);
 
-
-					double expp = m_nc + 1.;
-					// Find alpha
-					double alpha = 2. - std::pow(1.0/beta , expp);
-					double u = Rng::uni( 0., 1. );
-
-					if( u <= 1. / alpha ) {
-						alpha *= u;
-						betaQ = std::pow( alpha, 1.0/expp );
-					} else {
-						alpha *= u;
-						alpha = 1. / (2. - alpha);
-						betaQ = std::pow( alpha, 1.0/expp );
-					}
-				} else { // if genes are equal -> from Deb's implementation, not contained in any paper
-					betaQ = 1.;
+				double u = Rng::uni( 0., 1. );
+				alpha1 *=u;
+				alpha2 *=u;
+				if( u > 1. / alpha1 ) {
+					alpha1 = 1. / (2. - alpha1);
 				}
+				if( u > 1. / alpha2 ) {
+					alpha2 = 1. / (2. - alpha2);
+				}
+				betaQ1 = std::pow( alpha1, 1.0/expp );
+				betaQ2 = std::pow( alpha2, 1.0/expp );
 
-				point1[i] = 0.5 * ((y1 + y2) - betaQ * (y2 - y1));
-				point2[i] = 0.5 * ((y1 + y2) + betaQ * (y2 - y1));
+				//recombine points
+				point1[i] = 0.5 * ((y1 + y2) - betaQ1 * (y2 - y1));
+				point2[i] = 0.5 * ((y1 + y2) + betaQ2 * (y2 - y1));
 				// randomly swap loci
 				if( Rng::coinToss() ) std::swap(point1[i], point2[i]);
 

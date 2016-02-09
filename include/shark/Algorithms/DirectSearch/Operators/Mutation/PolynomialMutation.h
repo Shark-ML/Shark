@@ -42,7 +42,7 @@ namespace shark {
 	struct PolynomialMutator {
 
 		/// \brief Default c'tor.
-		PolynomialMutator() : m_nm( 20.0 ) {}
+		PolynomialMutator() : m_nm( 25.0 ) {}
 
 		/// \brief Initializes the operator for the supplied box-constraints
 		void init( RealVector const& lower, RealVector const& upper ) {
@@ -58,34 +58,29 @@ namespace shark {
 		/// \param [in,out] ind Individual to be mutated.
 		template<typename IndividualType>
 		void operator()( IndividualType & ind )const{
-			double delta, deltaQ, expp,  u = 0.;
-			
 			RealVector& point = ind.searchPoint();
            
 			for( unsigned int i = 0; i < point.size(); i++ ) {
 
 				if( Rng::coinToss( m_prob ) ) {
-					u  = Rng::uni( 0., 1. );
-					if( point[i] <= m_lower( i ) || point[i] >= m_upper( i ) ) { 
-						point[i] = u * (m_upper( i ) - m_lower( i ) ) + m_lower( i );
+					if( point[i] < m_lower( i ) || point[i] > m_upper( i ) ) { 
+						point[i] = Rng::uni(m_lower(i),m_upper(i));
 					} else {
-						// Calculate delta
-						if( (point[i] - m_lower( i ) ) < (m_upper( i ) - point[i]) )
-							delta = (point[i] - m_lower( i ) ) / (m_upper( i ) - m_lower( i ) );
-						else
-							delta = (m_upper( i ) - point[i]) / (m_upper( i ) - m_lower( i ));
-
-						delta = 1. - delta;
-						expp  = (m_nm + 1.);
-						delta = ::pow(delta , expp);
-						expp  = 1. / expp;
-
+						// Calculate normalized distance from boundaries
+						double delta1 = (m_upper( i ) - point[i]) / (m_upper( i ) - m_lower( i ));
+						double delta2 = (point[i] - m_lower( i ) ) / (m_upper( i ) - m_lower( i ));
+						
+						//compute change in delta
+						double deltaQ=0;
+						double u = Rng::uni(0,1);
 						if( u <= .5 ) {
-							deltaQ =  2. * u + (1 - 2. * u) * delta;
-							deltaQ = ::pow(deltaQ, expp) - 1. ;
+							double delta = std::pow(delta1 , m_nm + 1.);
+							deltaQ =  2.0 * u + (1.0 - 2.0 * u) * delta;
+							deltaQ = std::pow(deltaQ, 1.0/(m_nm+1.0)) - 1. ;
 						} else {
-							deltaQ = 2. - 2. * u + 2. * (u  - .5) * delta;
-							deltaQ = 1. - ::pow(deltaQ , expp);
+							double delta = std::pow(delta2 , m_nm + 1.);
+							deltaQ = 2 * (1- u) + 2. * (u  - .5) * delta;
+							deltaQ = 1. - std::pow(deltaQ , 1.0/(m_nm+1.0));
 						}
 
 						point[i] += deltaQ * (m_upper( i ) - m_lower( i ) );
