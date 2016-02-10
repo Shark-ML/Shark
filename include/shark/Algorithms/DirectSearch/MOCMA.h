@@ -210,7 +210,7 @@ protected:
 	std::vector<IndividualType> generateOffspring()const{
 		std::vector<IndividualType> offspring(mu());
 		for(std::size_t i = 0; i != mu(); ++i){
-			std::size_t parentId = Rng::discrete(0, mu()-1);
+			std::size_t parentId = i;
 			offspring[i] = m_parents[parentId];
 			offspring[i].mutate();
 			offspring[i].parent() = parentId;
