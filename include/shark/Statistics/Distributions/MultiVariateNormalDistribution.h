@@ -35,7 +35,7 @@
 #include <shark/LinAlg/eigenvalues.h>
 #include <shark/LinAlg/Cholesky.h>
 #include <shark/Rng/GlobalRng.h>
-
+#include <shark/Core/OpenMP.h>
 namespace shark {
 
 /// \brief Implements a multi-variate normal distribution with zero mean.
@@ -114,10 +114,11 @@ public:
 		RealVector result( m_eigenValues.size(), 0. );
 		RealVector z( m_eigenValues.size() );
 		
+		SHARK_CRITICAL_REGION{
 		for( std::size_t i = 0; i < result.size(); i++ ) {
 			z( i ) = Rng::gauss( 0., 1. );
 		}
-
+		}
 		for( std::size_t i = 0; i < result.size(); i++ )
 			for( std::size_t j = 0; j < result.size(); j++ )
 				result( i ) += m_eigenVectors( i, j ) * std::sqrt( std::abs( m_eigenValues(j) ) ) * z( j );
@@ -199,11 +200,11 @@ public:
 	void generate(Vector1& y, Vector2& z)const{
 		z.resize(size());
 		y.resize(size());
-		
+		SHARK_CRITICAL_REGION{
 		for( std::size_t i = 0; i != size(); i++ ) {
 			z( i ) = Rng::gauss( 0, 1 );
 		}
-		
+		}
 		if(m_triangular && size() > 400){
 			y=z;
 			blas::triangular_prod<blas::lower>(m_lowerCholesky,y);
