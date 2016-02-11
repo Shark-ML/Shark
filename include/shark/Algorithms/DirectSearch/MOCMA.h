@@ -61,14 +61,6 @@ public:
 		IndividualBased,
 		PopulationBased
 	};
-private:
-	std::size_t m_mu; ///< Size of parent population
-	
-	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
-	
-	NotionOfSuccess m_notionOfSuccess; ///< Flag for deciding whether the improved step-size adaptation shall be used.
-	double m_individualSuccessThreshold;
-	double m_initialSigma;
 public:
 	
 	IndicatorBasedMOCMA() {
@@ -106,21 +98,25 @@ public:
 	NotionOfSuccess& notionOfSuccess(){
 		return m_notionOfSuccess;
 	}
-	/**
-	 * \brief Stores/loads the algorithm's state.
-	 * \tparam Archive The type of the archive.
-	 * \param [in,out] archive The archive to use for loading/storing.
-	 * \param [in] version Currently unused.
-	 */
-	template<typename Archive>
-	void serialize(Archive &archive, const unsigned int version) {
-		archive & BOOST_SERIALIZATION_NVP(m_parents);
-		archive & BOOST_SERIALIZATION_NVP(m_mu);
-		archive & BOOST_SERIALIZATION_NVP(m_best);
+	void read( InArchive & archive ){
+		archive >> BOOST_SERIALIZATION_NVP(m_parents);
+		archive >> BOOST_SERIALIZATION_NVP(m_mu);
+		archive >> BOOST_SERIALIZATION_NVP(m_best);
 		
-		archive & BOOST_SERIALIZATION_NVP(m_notionOfSuccess);
-		archive & BOOST_SERIALIZATION_NVP(m_individualSuccessThreshold);
-		archive & BOOST_SERIALIZATION_NVP(m_initialSigma);
+		archive >> BOOST_SERIALIZATION_NVP(m_selection);
+		archive >> BOOST_SERIALIZATION_NVP(m_notionOfSuccess);
+		archive >> BOOST_SERIALIZATION_NVP(m_individualSuccessThreshold);
+		archive >> BOOST_SERIALIZATION_NVP(m_initialSigma);
+	}
+	void write( OutArchive & archive ) const{
+		archive << BOOST_SERIALIZATION_NVP(m_parents);
+		archive << BOOST_SERIALIZATION_NVP(m_mu);
+		archive << BOOST_SERIALIZATION_NVP(m_best);
+		
+		archive << BOOST_SERIALIZATION_NVP(m_selection);
+		archive << BOOST_SERIALIZATION_NVP(m_notionOfSuccess);
+		archive << BOOST_SERIALIZATION_NVP(m_individualSuccessThreshold);
+		archive << BOOST_SERIALIZATION_NVP(m_initialSigma);
 	}
 	
 	void init( ObjectiveFunctionType& function){
@@ -251,6 +247,15 @@ protected:
 	}
 	
 	std::vector<IndividualType> m_parents; ///< Population of size \f$\mu + 1\f$.
+	
+private:
+	std::size_t m_mu; ///< Size of parent population
+	
+	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
+	
+	NotionOfSuccess m_notionOfSuccess; ///< Flag for deciding whether the improved step-size adaptation shall be used.
+	double m_individualSuccessThreshold;
+	double m_initialSigma;
 
 };
 

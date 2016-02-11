@@ -105,22 +105,25 @@ public:
 		return m_mu;
 	}
 
-	/**
-	* \brief Stores/loads the algorithm's state.
-	* \tparam Archive The type of the archive.
-	* \param [in,out] archive The archive to use for loading/storing.
-	* \param [in] version Currently unused.
-	*/
-	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {
-		archive & m_parents;
-		archive & m_mu;
-		archive & m_best;
-
-		archive & m_crossover;
-		archive & m_mutation;
-
-		archive & m_crossoverProbability;
+	void read( InArchive & archive ){
+		archive >> BOOST_SERIALIZATION_NVP(m_parents);
+		archive >> BOOST_SERIALIZATION_NVP(m_mu);
+		archive >> BOOST_SERIALIZATION_NVP(m_best);
+		
+		archive >> BOOST_SERIALIZATION_NVP( m_selection );
+		archive >> BOOST_SERIALIZATION_NVP(m_crossover);
+		archive >> BOOST_SERIALIZATION_NVP(m_mutation);
+		archive >> BOOST_SERIALIZATION_NVP(m_crossoverProbability);
+	}
+	void write( OutArchive & archive ) const{
+		archive << BOOST_SERIALIZATION_NVP(m_parents);
+		archive << BOOST_SERIALIZATION_NVP(m_mu);
+		archive << BOOST_SERIALIZATION_NVP(m_best);
+		
+		archive << BOOST_SERIALIZATION_NVP( m_selection );
+		archive << BOOST_SERIALIZATION_NVP(m_crossover);
+		archive << BOOST_SERIALIZATION_NVP(m_mutation);
+		archive << BOOST_SERIALIZATION_NVP(m_crossoverProbability);
 	}
 
 	void init( ObjectiveFunctionType& function){

@@ -101,8 +101,8 @@ public:
 	*/
 	SHARK_EXPORT_SYMBOL static std::size_t suggestMu( std::size_t lambda, RecombinationType recomb = SUPERLINEAR ) ;
 
-	void read( InArchive & archive );
-	void write( OutArchive & archive ) const;
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	/**

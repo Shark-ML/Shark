@@ -82,13 +82,13 @@ BOOST_AUTO_TEST_CASE( MOCMA_SERIALIZATION ) {
 	
 	{
 		std::stringstream ss;
-		boost::archive::text_oarchive oa( ss );
+		TextOutArchive oa( ss );
 
 		BOOST_CHECK_NO_THROW( (oa << mocma) );
 
 		MOCMA mocma2;
 
-		boost::archive::text_iarchive ia( ss );
+		TextInArchive ia( ss );
 		BOOST_CHECK_NO_THROW( (ia >> mocma2) );
 
 		Rng::seed( 1 );
