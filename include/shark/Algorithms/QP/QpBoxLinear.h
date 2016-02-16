@@ -345,7 +345,7 @@ public:
 			for (std::size_t i=0; i<batch.size(); i++)
 			{
 				CompressedRealVector x_i = shark::get(batch, i).input;
-				if (x_i.nnz() == 0) continue;
+				// if (x_i.nnz() == 0) continue;
 
 				unsigned int y_i = shark::get(batch, i).label;
 				y[j] = 2.0 * y_i - 1.0;
@@ -364,15 +364,19 @@ public:
 				j++;
 			}
 		}
-		for (std::size_t i=0, j=0, k=0; i<x.size(); i++)
+		for (std::size_t b=0, j=0, k=0; b<dataset.numberOfBatches(); b++)
 		{
-			CompressedRealVector x_i = dataset.element(i).input;
-			if (x_i.nnz() == 0) continue;
+			DatasetType::const_batch_reference batch = dataset.batch(b);
+			for (std::size_t i=0; i<batch.size(); i++)
+			{
+				CompressedRealVector x_i = shark::get(batch, i).input;
+				// if (x_i.nnz() == 0) continue;
 
-			x[j] = &storage[k];
-			for (; storage[k].index != (std::size_t)-1; k++);
-			k++;
-			j++;
+				x[j] = &storage[k];   // cannot be done in the first loop because of vector reallocation
+				for (; storage[k].index != (std::size_t)-1; k++);
+				k++;
+				j++;
+			}
 		}
 	}
 
