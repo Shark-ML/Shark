@@ -47,12 +47,12 @@
 namespace shark {
 
 
-/// \brief Timer abstraction with microsecond resolution///
+/// \brief Timer abstraction with microsecond resolution
 ///
 /// \par
-/// use start() to start the timer and stop() to retrive the
+/// Use start() to start the timer and stop() to retrive the
 /// elapsed time in seconds (guaranteed/forced to be >= 0 ).
-/// use now() to get the current time (may in rare cases give decreasing values).
+/// Use now() to get the current time (may in rare cases give decreasing values).
 class Timer
 {
 public:
@@ -93,7 +93,7 @@ public:
 #endif
 	}
 
-	/// \brief stores the current time in m_startTime.
+	/// \brief Stores the current time in m_startTime.
 	void start() {
 		m_startTime = now(m_measureWallclockTime);
 	}
@@ -115,7 +115,7 @@ public:
 		return m_lastLap;
 	}
 
-	/// \brief returns the last value of stop()
+	/// \brief Returns the last value of stop().
 	double lastLap() {
 		return m_lastLap;
 	}
