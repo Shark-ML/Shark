@@ -73,21 +73,19 @@ inline void gemm(
 inline void gemm(
 	CBLAS_ORDER const Order, CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
 	int M, int N, int K,
-	float alpha,
+	std::complex<float> alpha,
 	std::complex<float> const *A, int lda,
 	std::complex<float> const *B, int ldb,
-	float beta,
+	std::complex<float> beta,
 	std::complex<float>* C, int ldc
 ) {
-	std::complex<float> alphaArg(alpha,0);
-	std::complex<float> betaArg(beta,0);
 	cblas_cgemm(
 		Order, TransA, TransB,
 		M, N, K,
-		reinterpret_cast<cblas_float_complex_type const *>(&alphaArg),
+		reinterpret_cast<cblas_float_complex_type const *>(&alpha),
 		reinterpret_cast<cblas_float_complex_type const *>(A), lda,
 		reinterpret_cast<cblas_float_complex_type const *>(B), ldb,
-		reinterpret_cast<cblas_float_complex_type const *>(&betaArg),
+		reinterpret_cast<cblas_float_complex_type const *>(&beta),
 		reinterpret_cast<cblas_float_complex_type *>(C), ldc
 	);
 }
@@ -95,21 +93,19 @@ inline void gemm(
 inline void gemm(
 	CBLAS_ORDER const Order, CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
 	int M, int N, int K,
-	double alpha,
+	std::complex<double> alpha,
 	std::complex<double> const *A, int lda,
 	std::complex<double> const *B, int ldb,
-	double beta,
+	std::complex<double> beta,
 	std::complex<double>* C, int ldc
 ) {
-	std::complex<double> alphaArg(alpha,0);
-	std::complex<double> betaArg(beta,0);
 	cblas_zgemm(
 		Order, TransA, TransB,
 		M, N, K,
-		reinterpret_cast<cblas_double_complex_type const *>(&alphaArg),
+		reinterpret_cast<cblas_double_complex_type const *>(&alpha),
 		reinterpret_cast<cblas_double_complex_type const *>(A), lda,
 		reinterpret_cast<cblas_double_complex_type const *>(B), ldb,
-		reinterpret_cast<cblas_double_complex_type const *>(&betaArg),
+		reinterpret_cast<cblas_double_complex_type const *>(&beta),
 		reinterpret_cast<cblas_double_complex_type *>(C), ldc
 	);
 }

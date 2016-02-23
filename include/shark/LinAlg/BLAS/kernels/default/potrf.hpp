@@ -38,6 +38,18 @@ namespace shark {
 namespace blas {
 namespace bindings {
 
+template<class T>
+inline bool good4sqrt(T v) { return v <= 0; }
+template<>
+inline bool good4sqrt<std::complex<double> >(std::complex<double> v) { return false; }
+template<>
+inline bool good4sqrt<std::complex<float> >(std::complex<float> v) { return false; }
+template<class T>
+inline T conj(T v) { return v; }
+template<>
+inline std::complex<double> conj<std::complex<double> >(std::complex<double> v) { return conj(v); }
+template<>
+inline std::complex<float> conj<std::complex<float> >(std::complex<float> v) { return conj(v); }
 
 //upper potrf(row-major)
 template<class MatA>
@@ -48,12 +60,12 @@ std::size_t potrf_impl(
 	std::size_t m = A().size1();
 	for(size_t j = 0; j < m; j++) {
 		for(size_t i = j; i < m; i++) {
-			double s = A()(i, j);
+			typename MatA::value_type s = A()(i, j);
 			for(size_t k = 0; k < j; k++) {
-				s -= A()(i, k) * A()(j, k);
+				s -= A()(i, k) * conj(A()(j, k));
 			}
 			if(i == j) {
-				if(s <= 0)
+				if(good4sqrt(s))
 					return i;
 				A()(i, j) = std::sqrt(s);
 			} else {
