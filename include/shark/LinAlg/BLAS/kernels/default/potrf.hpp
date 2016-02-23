@@ -39,11 +39,11 @@ namespace blas {
 namespace bindings {
 
 template<class T>
-inline bool good4sqrt(T v) { return v <= 0; }
+inline double toDouble(T v) { return (double)v; }
 template<>
-inline bool good4sqrt<std::complex<double> >(std::complex<double> v) { return false; }
+inline double toDouble<std::complex<double> >(std::complex<double> v) { return std::norm(v); }
 template<>
-inline bool good4sqrt<std::complex<float> >(std::complex<float> v) { return false; }
+inline double toDouble<std::complex<float> >(std::complex<float> v) { return std::norm(v); }
 template<class T>
 inline T conj(T v) { return v; }
 template<>
@@ -65,7 +65,7 @@ std::size_t potrf_impl(
 				s -= A()(i, k) * conj(A()(j, k));
 			}
 			if(i == j) {
-				if(good4sqrt(s))
+				if(toDouble(s) <= 0)
 					return i;
 				A()(i, j) = std::sqrt(s);
 			} else {
