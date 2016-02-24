@@ -61,7 +61,7 @@ inline void syev(
 	char job = 'V';
 	char uplo = upper?'U':'L';
 	SHARK_LAPACK_DSYEV(&job, &uplo, &n, A, &lda,eigenvalues,work,&lwork,&info);
-	delete work;
+	delete[] work;
 	
 }
 
