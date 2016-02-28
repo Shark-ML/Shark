@@ -64,7 +64,7 @@ AutoencoderModel trainAutoencoderModel(
 	AutoencoderModel baseModel;
 	baseModel.setStructure(inputs, numHidden);
 	initRandomUniform(baseModel,-0.1*std::sqrt(1.0/inputs),0.1*std::sqrt(1.0/inputs));
-	ImpulseNoiseModel noise(noiseStrength,0.0);//set an input pixel with probability p to 0
+	ImpulseNoiseModel noise(inputs,noiseStrength,0.0);//set an input pixel with probability p to 0
 	ConcatenatedModel<RealVector,RealVector> model = noise>> baseModel;
 //###end<model>	
 //###begin<objective>		
