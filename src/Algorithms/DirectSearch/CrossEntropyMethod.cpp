@@ -99,13 +99,9 @@ void CrossEntropyMethod::init( ObjectiveFunctionType & function, SearchPointType
 	
 	unsigned int populationSize = CrossEntropyMethod::suggestPopulationSize( );
 	unsigned int selectionSize = CrossEntropyMethod::suggestSelectionSize( populationSize );
-	RealVector initialVariance(p.size());
-
+	
 	// Most papers set the variance to 100 by default.
-	for(int i = 0; i < p.size(); i++)
-	{
-		initialVariance(i) = 100;
-	}
+	RealVector initialVariance(p.size(),100);
 	init( function,
 		p,
 		populationSize,
@@ -129,7 +125,7 @@ void CrossEntropyMethod::init(
 	
 	m_numberOfVariables = function.numberOfVariables();
 	m_populationSize = populationSize;
-	m_selectionSize = static_cast<unsigned int>(::floor(selectionSize));
+	m_selectionSize = selectionSize;
 	m_variance = initialVariance;
 
 	m_mean.resize( m_numberOfVariables );
@@ -149,10 +145,10 @@ void CrossEntropyMethod::updateStrategyParameters( const std::vector<Individual<
 
 	/* Calculate the centroid of the parents */
 	RealVector m(m_numberOfVariables);
-	for (int i = 0; i < m_numberOfVariables; i++)
+	for (std::size_t i = 0; i < m_numberOfVariables; i++)
 	{
 		m(i) = 0;
-		for (int j = 0; j < parents.size(); j++)
+		for (std::size_t j = 0; j < parents.size(); j++)
 		{
 			m(i) += parents[j].searchPoint()(i);
 		}
@@ -167,9 +163,9 @@ void CrossEntropyMethod::updateStrategyParameters( const std::vector<Individual<
 	size_t nParents = parents.size();
 	double normalizationFactor = 1.0 / double(nParents);
 
-	for (int j = 0; j < m_numberOfVariables; j++) {
+	for (std::size_t j = 0; j < m_numberOfVariables; j++) {
 		double innerSum = 0.0;
-		for (int i = 0; i < parents.size(); i++) {
+		for (std::size_t i = 0; i < parents.size(); i++) {
 			double diff = parents[i].searchPoint()(j) - m(j);
 			innerSum += diff * diff;
 		}
@@ -189,9 +185,9 @@ void CrossEntropyMethod::step(ObjectiveFunctionType const& function){
 	std::vector< Individual<RealVector, double> > offspring( m_populationSize );
 
 	PenalizingEvaluator penalizingEvaluator;
-	for( unsigned int i = 0; i < offspring.size(); i++ ) {
+	for( std::size_t i = 0; i < offspring.size(); i++ ) {
 		RealVector sample(m_numberOfVariables);
-		for (int j = 0; j < m_numberOfVariables; j++)
+		for (std::size_t j = 0; j < m_numberOfVariables; j++)
 		{
 			sample(j) = m_distribution(m_mean(j), m_variance(j)); // N (0, 100)
 		}

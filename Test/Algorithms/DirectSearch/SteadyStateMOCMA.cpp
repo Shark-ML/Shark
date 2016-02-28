@@ -27,6 +27,7 @@ void testObjectiveFunctionMOO(
 ){
 	SteadyStateMOCMA mocma;
 	mocma.mu() = mu;
+	f.init();
 	mocma.init(f);
 	
 	for(std::size_t i = 0; i != iterations; ++i){

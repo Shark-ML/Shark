@@ -23,6 +23,7 @@ double testObjectiveFunctionMOOHelper(
 ){
 	SMSEMOA smsemoa;
 	smsemoa.mu() = mu;
+	f.init();
 	smsemoa.init(f);
 	
 	for(std::size_t i = 0; i != iterations; ++i){

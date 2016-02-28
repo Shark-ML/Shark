@@ -23,6 +23,7 @@ double testObjectiveFunctionMOOHelper(
 ){
 	RealCodedNSGAII realCodedNSGAII;
 	realCodedNSGAII.mu() = mu;
+	f.init();
 	realCodedNSGAII.init(f);
 	
 	for(std::size_t i = 0; i != iterations; ++i){

@@ -32,6 +32,7 @@ BOOST_PARAMETER_FUNCTION(
 	std::vector<double> stats;
 
 	for( size_t trial =0;trial != static_cast<size_t>(trials);++trial ){
+		function.init();
 		optimizer.init(function);
 				
 		double error=0;

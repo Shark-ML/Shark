@@ -181,8 +181,7 @@ namespace shark {
 
 		/** \brief Set all variance values */
 		void setVariance(double variance){
-			for(int i = 0; i < m_variance.size(); i++)
-				m_variance(i) = variance;
+				m_variance = blas::repeat(variance,m_variance.size());
 		}
 
 		/** \brief Access the current population mean. */
@@ -246,14 +245,13 @@ namespace shark {
 
 		RealVector m_variance; ///< Variance for sample parameters.
 
-		StrongNoisePtr m_noise; ///< Noise type to apply in the update of distribution parameters.
-
+		
 		RealVector m_mean; ///< The mean of the population.
 
 		unsigned m_counter; ///< Counter for generations.
 
 		Normal< Rng::rng_type > m_distribution; ///< Normal distribution.
-
+		StrongNoisePtr m_noise; ///< Noise type to apply in the update of distribution parameters.
 	};
 }
 

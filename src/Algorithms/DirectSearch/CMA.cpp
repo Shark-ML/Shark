@@ -215,6 +215,8 @@ void CMA::doInit(
 	std::size_t mu,
 	double initialSigma
 ) {
+	SIZE_CHECK(initialSearchPoints.size() > 0);
+	
 	m_numberOfVariables =initialSearchPoints[0].size();
 	m_lambda = lambda;
 	m_mu = mu;

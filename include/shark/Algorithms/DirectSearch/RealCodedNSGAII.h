@@ -140,18 +140,18 @@ public:
 	 * \brief Initializes the algorithm for the supplied objective function.
 	 * 
 	 * \param [in] function The objective function.
-	 * \param [in] startingPoints A set of intiial search points.
+	 * \param [in] initialSearchPoints A set of intiial search points.
 	 */
 	void init( 
 		ObjectiveFunctionType& function, 
-		std::vector<SearchPointType> const& startingPoints
+		std::vector<SearchPointType> const& initialSearchPoints
 	){
 		checkFeatures(function);
-		std::vector<RealVector> values(startingPoints.size());
-		for(std::size_t i = 0; i != startingPoints.size(); ++i){
-			if(!function.isFeasible(startingPoints[i]))
+		std::vector<RealVector> values(initialSearchPoints.size());
+		for(std::size_t i = 0; i != initialSearchPoints.size(); ++i){
+			if(!function.isFeasible(initialSearchPoints[i]))
 				throw SHARKEXCEPTION("[RealCodedNSGAII::init] starting point(s) not feasible");
-			values[i] = function.eval(startingPoints[i]);
+			values[i] = function.eval(initialSearchPoints[i]);
 		}
 		
 		std::size_t dim = function.numberOfVariables();
@@ -167,7 +167,7 @@ public:
 			throw SHARKEXCEPTION("[RealCodedNSGAII::init] Algorithm does only allow box constraints");
 		}
 		
-		doInit(startingPoints,values,lowerBounds, upperBounds, mu(), nm(), nc(), crossoverProbability());
+		doInit(initialSearchPoints,values,lowerBounds, upperBounds, mu(), nm(), nc(), crossoverProbability());
 	}
 	
 	/**
@@ -186,7 +186,7 @@ protected:
 	typedef shark::Individual<RealVector,RealVector> IndividualType;
 
 	void doInit(
-		std::vector<SearchPointType> const& startingPoints,
+		std::vector<SearchPointType> const& initialSearchPoints,
 		std::vector<ResultType> const& functionValues,
 		RealVector const& lowerBounds,
 		RealVector const& upperBounds,
@@ -195,6 +195,7 @@ protected:
 		double nc,
 		double crossover_prob
 	){
+		SIZE_CHECK(initialSearchPoints.size() > 0);
 		m_mu = mu;
 		m_mutation.m_nm = nm;
 		m_crossover.m_nc = nc;
@@ -203,18 +204,18 @@ protected:
 		m_parents.resize( mu );
 		//if the number of supplied points is smaller than mu, fill everything in
 		std::size_t numPoints = 0;
-		if(startingPoints.size()<=mu){
-			numPoints = startingPoints.size();
+		if(initialSearchPoints.size()<=mu){
+			numPoints = initialSearchPoints.size();
 			for(std::size_t i = 0; i != numPoints; ++i){
-				m_parents[i].searchPoint() = startingPoints[i];
+				m_parents[i].searchPoint() = initialSearchPoints[i];
 				m_parents[i].penalizedFitness() = functionValues[i];
 				m_parents[i].unpenalizedFitness() = functionValues[i];
 			}
 		}
 		//copy points randomly
 		for(std::size_t i = numPoints; i != mu; ++i){
-			std::size_t index = Rng::discrete(0,startingPoints.size()-1);
-			m_parents[i].searchPoint() = startingPoints[index];
+			std::size_t index = Rng::discrete(0,initialSearchPoints.size()-1);
+			m_parents[i].searchPoint() = initialSearchPoints[index];
 			m_parents[i].penalizedFitness() = functionValues[index];
 			m_parents[i].unpenalizedFitness() = functionValues[index];
 		}

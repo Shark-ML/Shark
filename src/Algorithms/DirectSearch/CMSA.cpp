@@ -110,6 +110,7 @@ void CMSA::doInit(
 	std::size_t mu,
 	double sima
 ) {
+	SIZE_CHECK(initialSearchPoints.size() > 0);
 	m_numberOfVariables = initialSearchPoints[0].size();
 
 	m_lambda = lambda;
