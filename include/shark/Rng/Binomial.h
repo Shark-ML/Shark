@@ -118,8 +118,12 @@ namespace shark{
 
 	};
 
-	template<typename RngType>
-	inline double entropy(const Binomial<RngType> & coin);
+	///\brief Returns a random number from Binomial(n,p) by drawing random numbers from rng
+	template<class RngType>
+	bool coinToss(RngType& rng, unsigned int n, double pHeads){
+		Binomial<RngType> dist(rng, n, pHeads);
+		return dist();
+	}
 }
 #endif
 
