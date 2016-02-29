@@ -54,10 +54,10 @@ struct RouletteWheelSelection {
 	* \param [in] probabilities selection probabilities of the individuals
 	*/
 	template<typename Iterator>
-	Iterator operator()(Iterator it, Iterator itE, RealVector const& probabilities) const
+	Iterator operator()(DefaultRngType& rng, Iterator it, Iterator itE, RealVector const& probabilities) const
 	{
 		std::size_t n = probabilities.size();
-		double rnd = Rng::uni(0,1);
+		double rnd = uni(rng, 0,1);
 		double sum = 0;
 		for(std::size_t pos = 0; pos != n; ++pos,++it){
 			sum += probabilities(pos);

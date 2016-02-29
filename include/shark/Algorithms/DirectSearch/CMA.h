@@ -69,7 +69,7 @@ public:
 	/**
 	* \brief Default c'tor.
 	*/
-	SHARK_EXPORT_SYMBOL CMA();
+	SHARK_EXPORT_SYMBOL CMA(DefaultRngType& rng = Rng::globalRng);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -282,6 +282,7 @@ private:
 	std::size_t m_counter; ///< counter for generations
 
 	MultiVariateNormalDistribution m_mutationDistribution;
+	DefaultRngType* mpe_rng;
 };
 }
 

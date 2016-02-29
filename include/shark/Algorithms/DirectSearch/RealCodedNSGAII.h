@@ -63,7 +63,7 @@ public:
 	/**
 	* \brief Default c'tor.
 	*/
-	IndicatorBasedRealCodedNSGAII(){
+	IndicatorBasedRealCodedNSGAII(DefaultRngType& rng = Rng::globalRng):mpe_rng(&rng){
 		mu() = 100;
 		crossoverProbability() = 0.9;
 		nc() = 20.0;
@@ -214,8 +214,8 @@ protected:
 		}
 		//copy points randomly
 		for(std::size_t i = numPoints; i != mu; ++i){
-			std::size_t index = Rng::discrete(0,initialSearchPoints.size()-1);
-			m_parents[i].searchPoint() = initialSearchPoints[index];
+			std::size_t index = discrete(*mpe_rng, 0,startingPoints.size()-1);
+			m_parents[i].searchPoint() = startingPoints[index];
 			m_parents[i].penalizedFitness() = functionValues[index];
 			m_parents[i].unpenalizedFitness() = functionValues[index];
 		}
@@ -234,6 +234,7 @@ protected:
 		TournamentSelection< IndividualType::RankOrdering > selection;
 		std::vector<IndividualType> offspring(mu());
 		selection(
+			*mpe_rng,
 			m_parents.begin(), 
 			m_parents.end(),
 			offspring.begin(),
@@ -241,12 +242,12 @@ protected:
 		);
 
 		for( std::size_t i = 0; i < mu()-1; i+=2 ) {
-			if( Rng::coinToss( m_crossoverProbability ) ) {
-				m_crossover( offspring[i], offspring[i +1] );
+			if( coinToss(*mpe_rng, m_crossoverProbability ) ) {
+				m_crossover(*mpe_rng,offspring[i], offspring[i +1] );
 			}
 		}
 		for( std::size_t i = 0; i < mu(); i++ ) {
-			m_mutation( offspring[i] );
+			m_mutation(*mpe_rng, offspring[i] );
 		}
 		return offspring;
 	}
@@ -280,7 +281,8 @@ private:
 	SimulatedBinaryCrossover< RealVector > m_crossover; ///< Crossover operator.
 	PolynomialMutator m_mutation; ///< Mutation operator.
 
-	double m_crossoverProbability; ///< Crossover probability.	
+	double m_crossoverProbability; ///< Crossover probability.
+	DefaultRngType* mpe_rng; 
 };
 
 typedef IndicatorBasedRealCodedNSGAII< HypervolumeIndicator > RealCodedNSGAII;

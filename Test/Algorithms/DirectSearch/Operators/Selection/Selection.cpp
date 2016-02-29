@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( Tournament_Selection ) {
 	std::vector<unsigned int> counter(11,0);
 
 	for( unsigned int i = 0; i < 10000; i++ ) {
-		counter[ std::distance( pop, ts( pop, pop + 11 ) ) ]++;
+		counter[ std::distance( pop, ts(shark::Rng::globalRng, pop, pop + 11 ) ) ]++;
 	}
 
 	std::copy( counter.begin(), counter.begin() + 11, std::ostream_iterator<double>( std::cout, "," ) );
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( RouletteWheel_Selection ) {
 	
 	shark::RealVector hist(11,0);
 	for( unsigned int i = 0; i < 1000000; i++ )
-		hist[ *ts( pop, pop + 11,prob) ]+=1.0;
+		hist[ *ts(shark::Rng::globalRng, pop, pop + 11,prob) ]+=1.0;
 	
 	hist /=1000000;
 	for(std::size_t i = 0; i != 11; ++i){

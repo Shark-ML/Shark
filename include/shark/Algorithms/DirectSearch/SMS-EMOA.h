@@ -61,7 +61,7 @@ namespace shark {
 */
 class SMSEMOA : public AbstractMultiObjectiveOptimizer<RealVector >{
 public:
-	SMSEMOA() {
+	SMSEMOA(DefaultRngType& rng = Rng::globalRng):mpe_rng(&rng) {
 		m_mu = 100;
 		m_mutator.m_nm = 20.0;
 		m_crossover.m_nc = 20.0;
@@ -193,8 +193,8 @@ protected:
 		}
 		//copy points randomly
 		for(std::size_t i = numPoints; i != mu; ++i){
-			std::size_t index = Rng::discrete(0,initialSearchPoints.size()-1);
-			m_parents[i].searchPoint() = initialSearchPoints[index];
+			std::size_t index = discrete(*mpe_rng,0,startingPoints.size()-1);
+			m_parents[i].searchPoint() = startingPoints[index];
 			m_parents[i].penalizedFitness() = functionValues[index];
 			m_parents[i].unpenalizedFitness() = functionValues[index];
 		}
@@ -242,18 +242,18 @@ private:
 	)const{
 		TournamentSelection< IndividualType::RankOrdering > selection;
 
-		IndividualType mate1( *selection( begin, end ) );
-		IndividualType mate2( *selection( begin, end) );
+		IndividualType mate1( *selection(*mpe_rng, begin, end ) );
+		IndividualType mate2( *selection(*mpe_rng, begin, end) );
 
-		if( Rng::coinToss( m_crossoverProbability ) ) {
-			m_crossover( mate1, mate2 );
+		if( coinToss(*mpe_rng, m_crossoverProbability ) ) {
+			m_crossover(*mpe_rng, mate1, mate2 );
 		}
 
-		if( Rng::coinToss() ) {
-			m_mutator( mate1 );
+		if( coinToss(*mpe_rng,0.5) ) {
+			m_mutator(*mpe_rng, mate1 );
 			return mate1;
 		} else {
-			m_mutator( mate2 );
+			m_mutator(*mpe_rng, mate2 );
 			return mate2;
 		}
 	}
@@ -265,6 +265,7 @@ private:
 	PolynomialMutator m_mutator; ///< Mutation operator.
 
 	double m_crossoverProbability; ///< Crossover probability.
+	DefaultRngType* mpe_rng;
 };
 }
 

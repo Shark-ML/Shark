@@ -59,7 +59,7 @@ public:
 	};
 public:
 	
-	IndicatorBasedSteadyStateMOCMA() {
+	IndicatorBasedSteadyStateMOCMA(DefaultRngType& rng = Rng::globalRng):mpe_rng(&rng){
 		m_individualSuccessThreshold = 0.44;
 		initialSigma() = 1.0;
 		mu() = 100;
@@ -189,7 +189,7 @@ protected:
 		}
 		//copy points randomly
 		for(std::size_t i = numPoints; i != mu; ++i){
-			std::size_t index = Rng::discrete(0,initialSearchPoints.size()-1);
+			std::size_t index = discrete(*mpe_rng, 0,startingPoints.size()-1);
 			m_parents[i] = IndividualType(noVariables,m_individualSuccessThreshold,m_initialSigma);
 			m_parents[i].searchPoint() = initialSearchPoints[index];
 			m_parents[i].penalizedFitness() = functionValues[index];
@@ -212,10 +212,10 @@ protected:
 				break;
 		}
 		//sample a random parent with rank 1
-		std::size_t parentId = Rng::discrete(0, maxIdx-1);
+		std::size_t parentId = discrete(*mpe_rng, 0, maxIdx-1);
 		std::vector<IndividualType> offspring;
 		offspring.push_back(m_parents[parentId]);
-		offspring[0].mutate();
+		offspring[0].mutate(*mpe_rng);
 		offspring[0].parent() = parentId;
 		return offspring;
 	}
@@ -278,6 +278,8 @@ private:
 			}
 		}
 	}
+	
+	DefaultRngType* mpe_rng;
 };
 
 typedef IndicatorBasedSteadyStateMOCMA< HypervolumeIndicator > SteadyStateMOCMA;

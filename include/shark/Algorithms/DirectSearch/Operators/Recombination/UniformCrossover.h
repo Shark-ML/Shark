@@ -47,19 +47,19 @@ public:
 	/// \brief Default c'tor, initializes the per element probability.
 	/// 
 	/// \param [in] mixingRatio Mixing ratio between parent individuals.
-	UniformCrossover( double mixingRatio = 0.5 ){
+	UniformCrossover(double mixingRatio = 0.5 ){
 		setMixingRatio(mixingRatio);
 	}
 
 	/// \brief Executes the uniform crossover.
 	///	
 	/// \return The offspring individual.
-	template<typename Point>
-	Point operator()( const Point & mom, const Point & dad ) const {
+	template<class RngType, typename Point>
+	Point operator()(RngType& rng, const Point & mom, const Point & dad ) const {
 		Point result( mom );
 
 		for( std::size_t i = 0; i < std::min( mom.size(), dad.size() ); i++ ) {
-			if( Rng::coinToss( m_mixingRatio ) )
+			if( coinToss(rng, m_mixingRatio ) )
 				result( i ) = dad( i );
 		}
 

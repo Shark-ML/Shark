@@ -138,8 +138,8 @@ void CMSA::step(ObjectiveFunctionType const& function){
 std::vector<CMSA::IndividualType> CMSA::generateOffspring( ) const{
 	std::vector< IndividualType > offspring( m_lambda );
 	for( std::size_t i = 0; i < offspring.size(); i++ ) {		    
-		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution();
-		offspring[i].chromosome().sigma = m_sigma * ::exp( m_cSigma * Rng::gauss( 0, 1 ) );
+		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution(*mpe_rng);
+		offspring[i].chromosome().sigma = m_sigma * ::exp( m_cSigma * gauss(*mpe_rng, 0, 1 ) );
 		offspring[i].chromosome().step = sample.first;
 		offspring[i].searchPoint() = m_mean + offspring[i].chromosome().sigma * sample.first;
 	}

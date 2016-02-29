@@ -69,9 +69,9 @@ int main( int argc, char ** argv ) {
 			offspring[i].chromosome() *= Rng::logNormal( 0, tau0 + tau1 );
 			
 			// Recombine search points
-			offspring[i].searchPoint() = uniform( mom->searchPoint(), dad->searchPoint() );
+			offspring[i].searchPoint() = uniform(Rng::globalRng, mom->searchPoint(), dad->searchPoint() );
 			// Mutate search point
-			offspring[i].searchPoint() = offspring[i].chromosome() * mutationDistribution().first;
+			offspring[i].searchPoint() = offspring[i].chromosome() * mutationDistribution(Rng::globalRng).first;
 	
 			// Assign fitness
 			offspring[i].unpenalizedFitness() = ackley.eval( offspring[i].searchPoint() );

@@ -46,7 +46,6 @@ struct CMAChromosome{
 		Failure = 3
 	};
 	MultiVariateNormalDistributionCholesky m_mutationDistribution; ///< Models the search distribution using a cholsky matrix
-	//~ RealMatrix m_inverseCholesky;///< inverse cholesky matrix
 
 	RealVector m_evolutionPath; ///< Low-pass filtered accumulation of successful mutative steps.
 	RealVector m_lastStep; ///< The most recent mutative step.
@@ -62,20 +61,18 @@ struct CMAChromosome{
 	double m_covarianceMatrixUnlearningRate; ///< Learning rate (constant) for unlearning unsuccessful directions from the covariance matrix.
 
 	double m_successThreshold; ///< Success threshold \f$p_{\text{thresh}}\f$ for cutting off evolution path updates.
-
+	
 	CMAChromosome(){}
 	CMAChromosome(
 		std::size_t searchSpaceDimension,
 		double successThreshold,
 		double initialStepSize
 	)
-	: m_mutationDistribution(true)//we do a triangular cholesky factorisation
-	, m_stepSize( initialStepSize )
+	: m_stepSize( initialStepSize )
 	, m_covarianceMatrixLearningRate( 0 )
 	, m_successThreshold(successThreshold)
 	{
 		m_mutationDistribution.resize( searchSpaceDimension );
-		//~ m_inverseCholesky = blas::identity_matrix<double>( searchSpaceDimension );
 		m_evolutionPath.resize( searchSpaceDimension );
 		m_lastStep.resize( searchSpaceDimension );
 		m_lastZ.resize( searchSpaceDimension );

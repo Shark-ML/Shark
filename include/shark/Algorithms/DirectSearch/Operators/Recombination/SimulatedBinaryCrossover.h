@@ -57,14 +57,14 @@ namespace shark {
 		/// 
 		/// \param [in,out] i1 Individual to be mated.
 		/// \param [in,out] i2 Individual to be mated.
-		template<typename IndividualType>
-		void operator()( IndividualType & i1, IndividualType & i2 )const{	
+		template<class RngType, typename IndividualType>
+		void operator()(RngType& rng, IndividualType & i1, IndividualType & i2 )const{	
 			RealVector& point1 = i1.searchPoint();
 			RealVector& point2 = i2.searchPoint();
 
 			for( unsigned int i = 0; i < point1.size(); i++ ) {
 
-				if( !Rng::coinToss( m_prob ) )
+				if( !coinToss(rng, m_prob ) )
 					continue;
 				
 				double y1 = 0;
@@ -89,7 +89,7 @@ namespace shark {
 				double alpha1 = 2. - std::pow(beta1 , -expp);
 				double alpha2 = 2. - std::pow(beta2 , -expp);
 
-				double u = Rng::uni( 0., 1. );
+				double u = uni(rng, 0., 1. );
 				alpha1 *=u;
 				alpha2 *=u;
 				if( u > 1. / alpha1 ) {
@@ -105,7 +105,7 @@ namespace shark {
 				point1[i] = 0.5 * ((y1 + y2) - betaQ1 * (y2 - y1));
 				point2[i] = 0.5 * ((y1 + y2) + betaQ2 * (y2 - y1));
 				// randomly swap loci
-				if( Rng::coinToss() ) std::swap(point1[i], point2[i]);
+				if( coinToss(rng,0.5) ) std::swap(point1[i], point2[i]);
 
 
 				//  -> from Deb's implementation, not contained in any paper

@@ -64,9 +64,10 @@ public:
 	void updateAsOffspring(){
 		chromosome().updateAsOffspring();
 	}
-	void mutate(){
+	template<class RngType>
+	void mutate(RngType& rng){
 		chromosome().m_mutationDistribution.generate(
-			chromosome().m_lastStep,chromosome().m_lastZ
+			rng, chromosome().m_lastStep,chromosome().m_lastZ
 		);
 		noalias(searchPoint()) += chromosome().m_stepSize * chromosome().m_lastStep;
 	}

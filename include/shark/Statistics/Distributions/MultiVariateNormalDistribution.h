@@ -5,8 +5,8 @@
  * 
  * 
  *
- * \author      T.Voss
- * \date        2010
+ * \author      T.Voss, O.Krause
+ * \date        2016
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
@@ -50,11 +50,12 @@ public:
 
 	/// \brief Constructor
 	/// \param [in] Sigma covariance matrix
-	MultiVariateNormalDistribution( RealMatrix const& Sigma ) {
+	MultiVariateNormalDistribution(RealMatrix const& Sigma ) {
 		m_covarianceMatrix = Sigma;
 		update();
 	}
 	
+	/// \brief Constructor
 	MultiVariateNormalDistribution(){} 
 	
 	/// \brief Stores/Restores the distribution from the supplied archive.
@@ -110,14 +111,13 @@ public:
 	}
 
 	/// \brief Samples the distribution.
-	result_type operator()() const {
+	template<class RngType>
+	result_type operator()(RngType& rng) const {
 		RealVector result( m_eigenValues.size(), 0. );
 		RealVector z( m_eigenValues.size() );
 		
-		SHARK_CRITICAL_REGION{
 		for( std::size_t i = 0; i < result.size(); i++ ) {
-			z( i ) = Rng::gauss( 0., 1. );
-		}
+			z( i ) = gauss(rng, 0., 1. );
 		}
 		for( std::size_t i = 0; i < result.size(); i++ )
 			for( std::size_t j = 0; j < result.size(); j++ )
@@ -129,7 +129,7 @@ public:
 	/// \brief Calculates the evd of the current covariance matrix.
 	void update() {
 		eigensymm( m_covarianceMatrix, m_eigenVectors, m_eigenValues );
-	}			
+	}
 
 private:
 	RealMatrix m_covarianceMatrix; ///< Covariance matrix of the mutation distribution.
@@ -148,14 +148,13 @@ public:
 	typedef std::pair<RealVector,RealVector> result_type;
 
 	/// \brief Constructor
+	/// \param [in] rng the random number generator
 	/// \param [in] covariance covariance matrix
-	/// \param triangular Is the choleksy factor triangular?
-	MultiVariateNormalDistributionCholesky( RealMatrix const& covariance, bool triangular=false ) 
-	:m_triangular(false){
+	MultiVariateNormalDistributionCholesky( RealMatrix const& covariance){
 		setCovarianceMatrix(covariance);
 	}
 	
-	MultiVariateNormalDistributionCholesky(bool triangular=false):m_triangular(triangular){} 
+	MultiVariateNormalDistributionCholesky(){} 
 	
 	/// \brief Stores/Restores the distribution from the supplied archive.
 	///\param [in,out] ar The archive to read from/write to.
@@ -196,17 +195,15 @@ public:
 	}
 	
 	
-	template<class Vector1, class Vector2>
-	void generate(Vector1& y, Vector2& z)const{
+	template<class RngType, class Vector1, class Vector2>
+	void generate(RngType& rng, Vector1& y, Vector2& z)const{
 		z.resize(size());
 		y.resize(size());
-		SHARK_CRITICAL_REGION{
 		for( std::size_t i = 0; i != size(); i++ ) {
-			z( i ) = Rng::gauss( 0, 1 );
+			z( i ) = gauss(rng, 0, 1 );
 		}
-		}
-		if(m_triangular && size() > 400){
-			y=z;
+		if(size() > 400){
+			y = z;
 			blas::triangular_prod<blas::lower>(m_lowerCholesky,y);
 		}else{
 			noalias(y) = prod(m_lowerCholesky,z);
@@ -217,17 +214,17 @@ public:
 	///
 	/// Returns a vector pair (y,z) where  y=Lz and, L is the lower cholesky factor and z is a vector
 	/// of normally distributed numbers. Thus y is the real sampled point.
-	result_type operator()() const {
+	template<class RngType>
+	result_type operator()(RngType& rng) const {
 		result_type result;
 		RealVector& z = result.second;
 		RealVector& y = result.first;
-		generate(y,z);
+		generate(rng,y,z);
 		return result;
 	}
 
 private:
 	blas::matrix<double,blas::column_major> m_lowerCholesky; ///< The lower cholesky factor (actually any is okay as long as it is the left)
-	bool m_triangular;
 };
 
 

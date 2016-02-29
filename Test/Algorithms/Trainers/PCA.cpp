@@ -85,7 +85,7 @@ UnlabeledData<RealVector> createData3D()
 	BOOST_FOREACH(RealVector& sample, data)
 	{
 		//first element is the sample, second is the underlying uniform gaussian
-		sample = mean + distribution().first;
+		sample = mean + distribution(Rng::globalRng).first;
 	}
 	return  createDataFromRange(data);
 }
@@ -104,7 +104,7 @@ UnlabeledData<RealVector> createData2D()
 	MultiVariateNormalDistribution distribution(C);
 
 	std::vector<RealVector> v;
-	for(unsigned i=0; i<numberOfExamples; i++) v.push_back(mu + distribution().first);
+	for(unsigned i=0; i<numberOfExamples; i++) v.push_back(mu + distribution(Rng::globalRng).first);
 	return  createDataFromRange(v);
 }
 
@@ -144,7 +144,7 @@ UnlabeledData<RealVector> createDataNotFullRank()
 	BOOST_FOREACH(RealVector& sample, data)
 	{
 		//first element is the sample, second is the underlying uniform gaussian
-		sample = mean + distribution().first;
+		sample = mean + distribution(Rng::globalRng).first;
 	}
 	return  createDataFromRange(data,2);//small batch size to get batching errors
 }

@@ -51,6 +51,7 @@ struct UniformRankingSelection {
 	/// \param [in] outE Iterator pointing to the first invalid element of the output range.
 	template<typename InIterator,typename OutIterator> 
 	void operator()( 
+		DefaultRngType& rng,
 		InIterator individuals,
 		InIterator individualsE,
 		OutIterator out,
@@ -61,7 +62,7 @@ struct UniformRankingSelection {
 		RealVector selectionProbability(size,1.0/size);
 		RouletteWheelSelection rws;
 		for( ; out != outE; ++out ){
-			*out = *rws( individuals, individualsE, selectionProbability);
+			*out = *rws(rng, individuals, individualsE, selectionProbability);
 		}
 	}
 

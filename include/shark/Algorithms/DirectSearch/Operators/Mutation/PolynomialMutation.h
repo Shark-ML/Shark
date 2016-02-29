@@ -57,14 +57,14 @@ namespace shark {
 		///  for accessing the actual search point.
 		/// \param [in,out] ind Individual to be mutated.
 		template<typename IndividualType>
-		void operator()( IndividualType & ind )const{
+		void operator()(DefaultRngType& rng, IndividualType & ind )const{
 			RealVector& point = ind.searchPoint();
            
 			for( unsigned int i = 0; i < point.size(); i++ ) {
 
-				if( Rng::coinToss( m_prob ) ) {
+				if( coinToss(rng, m_prob ) ) {
 					if( point[i] < m_lower( i ) || point[i] > m_upper( i ) ) { 
-						point[i] = Rng::uni(m_lower(i),m_upper(i));
+						point[i] = uni(rng,m_lower(i),m_upper(i));
 					} else {
 						// Calculate normalized distance from boundaries
 						double delta1 = (m_upper( i ) - point[i]) / (m_upper( i ) - m_lower( i ));
@@ -72,7 +72,7 @@ namespace shark {
 						
 						//compute change in delta
 						double deltaQ=0;
-						double u = Rng::uni(0,1);
+						double u = uni(rng,0,1);
 						if( u <= .5 ) {
 							double delta = std::pow(delta1 , m_nm + 1.);
 							deltaQ =  2.0 * u + (1.0 - 2.0 * u) * delta;

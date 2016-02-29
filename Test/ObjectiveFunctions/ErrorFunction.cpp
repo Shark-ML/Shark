@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		input[i](0) = uniform();
 		input[i](1) = uniform();
 		testTarget[i] =  model(input[i]);
-		RealVector noiseVal = noise().first;
+		RealVector noiseVal = noise(Rng::globalRng).first;
 		trainTarget[i] = noiseVal + testTarget[i];
 		optimalMSE+=norm_sqr(noiseVal);
 	}

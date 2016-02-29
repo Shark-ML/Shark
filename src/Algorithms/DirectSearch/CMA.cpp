@@ -89,7 +89,7 @@ std::size_t CMA::suggestMu( std::size_t lambda, RecombinationType recomb) {
 	return 0;
 }
 
-CMA::CMA()
+CMA::CMA(DefaultRngType& rng)
 : m_userSetMu(false)
 , m_userSetLambda(false)
 , m_initSigma(-1)
@@ -102,7 +102,8 @@ CMA::CMA()
 , m_dSigma( 0 )
 , m_muEff( 0 )
 , m_lowerBound( 1E-20)
-, m_counter( 0 ) {
+, m_counter( 0 )
+, mpe_rng(&rng){
 	m_features |= REQUIRES_VALUE;
 }
 
@@ -270,7 +271,7 @@ void CMA::doInit(
 std::vector<CMA::IndividualType> CMA::generateOffspring( ) const{
 	std::vector< IndividualType > offspring( m_lambda );
 	for( std::size_t i = 0; i < offspring.size(); i++ ) {
-		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution();
+		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution(*mpe_rng);
 		offspring[i].chromosome() = sample.second;
 		offspring[i].searchPoint() = m_mean + m_sigma * sample.first;
 	}
