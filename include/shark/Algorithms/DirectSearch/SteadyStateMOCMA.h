@@ -189,7 +189,7 @@ protected:
 		}
 		//copy points randomly
 		for(std::size_t i = numPoints; i != mu; ++i){
-			std::size_t index = discrete(*mpe_rng, 0,startingPoints.size()-1);
+			std::size_t index = discrete(*mpe_rng, 0,initialSearchPoints.size()-1);
 			m_parents[i] = IndividualType(noVariables,m_individualSuccessThreshold,m_initialSigma);
 			m_parents[i].searchPoint() = initialSearchPoints[index];
 			m_parents[i].penalizedFitness() = functionValues[index];
