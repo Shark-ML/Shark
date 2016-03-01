@@ -14,6 +14,37 @@
 
 
 using namespace shark;
+
+
+double inclusionExclusionHelper(std::vector< RealVector > const& points, RealVector const& reference, RealVector point, std::size_t setsize = 0, std::size_t index = 0)
+{
+	if (index == points.size())
+	{
+		if (setsize > 0)
+		{
+			double hv = 1.0;
+			for (std::size_t i=0; i<point.size(); i++) hv *= reference[i] - point[i];
+			return (setsize & 1) ? hv : -hv;
+		}
+		else return 0.0;
+	}
+	else
+	{
+		double ret = inclusionExclusionHelper(points, reference, point, setsize, index + 1);
+		for (std::size_t i=0; i<point.size(); i++) point[i] = std::max(point[i], points[index][i]);
+		ret += inclusionExclusionHelper(points, reference, point, setsize + 1, index + 1);
+		return ret;
+	}
+}
+
+// brute-force exact hypervolume computation in O(2^n m) time
+double inclusionExclusion(std::vector< RealVector > const& points, RealVector const& reference)
+{
+	RealVector point(reference.size(), -1e100);
+	return inclusionExclusionHelper(points, reference, point, 0, 0);
+}
+
+
 struct Fixture {
 
 	static const double HV_TEST_SET_2D;
@@ -101,15 +132,67 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume ) {
 	HypervolumeApproximator< FastRng > ha;
 	IdentityFitnessExtractor ife;
 
+	// check exact algorithms against hard-coded reference values for 2 and 3 objectives
 	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), Fixture::HV_TEST_SET_2D, 1E-5 );
 	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), Fixture::HV_TEST_SET_3D, 1E-5 );
-	std::vector<double> results;
 
+	// check that the approximate algorithm confirms (the plausibility of) the result
+	std::vector<double> results;
 	for( unsigned int trial = 0; trial < 10; trial++ )
 		results.push_back(ha( m_testSet3D.begin(), m_testSet3D.end(), ife, m_refPoint3D, 1E-2, 1E-2 ) );
-	
 	BOOST_CHECK_SMALL( *median_element(results) - Fixture::HV_TEST_SET_3D, 1E-2 );
-	
+
+	// scalable test with random linear front
+	for (unsigned int nObj=2; nObj<=10; nObj++)
+	{
+		std::vector<RealVector> points;
+		for (unsigned int i=0; i<15; i++)
+		{
+			RealVector point(nObj);
+			for (unsigned int j=0; j<nObj; j++) point[j] = Rng::uni();
+			point /= sum(point);
+			points.push_back(point);
+		}
+		RealVector reference(nObj, 1.0);
+
+		double hv1 = hc(ife, points, reference);
+		double hv2 = inclusionExclusion(points, reference);
+		BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
+	}
+
+	// scalable test with many equal objective values
+	for (unsigned int nObj=2; nObj<=10; nObj++)
+	{
+		std::vector<RealVector> points;
+		points.push_back(RealVector(nObj, 0.5));
+		for (unsigned int i=0; i<nObj; i++)
+		{
+			RealVector point(nObj, 0.25);
+			point[i] = 0.75;
+			points.push_back(point);
+		}
+		RealVector reference(nObj, 1.0);
+
+		double hv1 = hc(ife, points, reference);
+		double hv2 = inclusionExclusion(points, reference);
+		BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
+	}
+	for (unsigned int nObj=2; nObj<=10; nObj++)
+	{
+		std::vector<RealVector> points;
+		points.push_back(RealVector(nObj, 0.5));
+		for (unsigned int i=0; i<nObj; i++)
+		{
+			RealVector point(nObj, 0.75);
+			point[i] = 0.25;
+			points.push_back(point);
+		}
+		RealVector reference(nObj, 1.0);
+
+		double hv1 = hc(ife, points, reference);
+		double hv2 = inclusionExclusion(points, reference);
+		BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
+	}
 }
 
 BOOST_AUTO_TEST_CASE( Algorithms_LeastContributorApproximator ) {
