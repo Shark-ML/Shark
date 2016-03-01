@@ -95,6 +95,7 @@ public:
 			copy.erase( copy.begin() + i );
 
 			indicatorValues[i] = ind( extractor, copy,referencePoint);
+			std::cout<<i<<" "<<indicatorValues[i]<<std::endl;
 		}
 
 		std::vector<double>::iterator it = std::max_element( indicatorValues.begin(), indicatorValues.end() );

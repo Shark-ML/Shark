@@ -48,12 +48,12 @@ public:
 	/**
 	 * \brief Default constructor that initializes the individual's attributes to default values.
 	 */
-	CMAIndividual(){}
+	CMAIndividual():m_parent(0){}
 	CMAIndividual(
 		std::size_t searchSpaceDimension,
 		double successThreshold = 0.44,
 		double initialStepSize = 1.0
-	){
+	):m_parent(0){
 		chromosome() = CMAChromosome(searchSpaceDimension, successThreshold, initialStepSize);
 		searchPoint().resize(searchSpaceDimension);
 	}
@@ -64,9 +64,10 @@ public:
 	void updateAsOffspring(){
 		chromosome().updateAsOffspring();
 	}
-	void mutate(){
+	template<class RngType>
+	void mutate(RngType& rng){
 		chromosome().m_mutationDistribution.generate(
-			chromosome().m_lastStep,chromosome().m_lastZ
+			rng, chromosome().m_lastStep,chromosome().m_lastZ
 		);
 		noalias(searchPoint()) += chromosome().m_stepSize * chromosome().m_lastStep;
 	}
@@ -78,6 +79,15 @@ public:
 	double noSuccessfulOffspring()const{
 		return chromosome().m_noSuccessfulOffspring;
 	}
+	
+	std::size_t parent()const{
+		return m_parent;
+	}
+	std::size_t& parent(){
+		return m_parent;
+	}
+private:
+	std::size_t m_parent;
 };
 
 }

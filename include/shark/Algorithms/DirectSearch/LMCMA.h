@@ -200,7 +200,7 @@ class LMCMA: public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
 	/// \brief Default c'tor.
-	LMCMA(){
+	LMCMA(DefaultRngType& rng = Rng::globalRng):mpe_rng(&rng){
 		m_features |= REQUIRES_VALUE;
 	}
 	
@@ -211,7 +211,7 @@ public:
 
 	/// \brief Calculates lambda for the supplied dimensionality n.
 	unsigned suggestLambda( unsigned int dimension ) {
-		unsigned lambda = unsigned( 4. + ::floor( 3. * ::log( static_cast<double>( dimension ) ) ) ); // eq. (44)
+		unsigned lambda = unsigned( 4. + ::floor( 3. * ::log( static_cast<double>( dimension ) ) ) );
 		// heuristic for small search spaces
 		lambda = std::max<unsigned int>( 5, std::min( lambda, dimension ) );
 		return( lambda );
@@ -219,7 +219,7 @@ public:
 
 	/// \brief Calculates mu for the supplied lambda and the recombination strategy.
 	double suggestMu( unsigned int lambda) {
-		return lambda / 2.; // eq. (44)
+		return lambda / 2.;
 	}
 
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
@@ -369,7 +369,7 @@ private:
 		x.resize(m_numberOfVariables);
 		z.resize(m_numberOfVariables);
 		for(std::size_t i = 0; i != m_numberOfVariables; ++i){
-			z(i) = Rng::gauss(0,1);
+			z(i) = gauss(*mpe_rng,0,1);
 		}
 		m_A.prod(x,z);
 		noalias(x) = sigma()*x +m_mean;
@@ -391,6 +391,7 @@ private:
 
 	RealVector m_evolutionPathC;///< evolution path
 	
+	DefaultRngType* mpe_rng;
 	
 };
 

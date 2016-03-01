@@ -57,31 +57,15 @@ namespace shark {
 *  IEEE TRANSACTIONS ON EVOLUTIONARY COMPUTATION, VOL. 6, NO. 2, APRIL 2002
 */
 template<typename Indicator>
-class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<RealVector >{
-private:
-	/**
-	* \brief The individual type of the NSGA-II.
-	*/
-	typedef shark::Individual<RealVector,RealVector> Individual;
-
-	std::vector<Individual> m_pop; ///< Population of size \f$\mu + 1\f$.
-	std::size_t m_mu; ///< Size of parent generation
-
-	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
-
-	PenalizingEvaluator m_evaluator; ///< Evaluation operator. 
-	SimulatedBinaryCrossover< RealVector > m_crossover; ///< Crossover operator.
-	PolynomialMutator m_mutator; ///< Mutation operator.
-
-	double m_crossoverProbability; ///< Crossover probability.			
+class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<RealVector >{		
 public:
 
 	/**
 	* \brief Default c'tor.
 	*/
-	IndicatorBasedRealCodedNSGAII(){
+	IndicatorBasedRealCodedNSGAII(DefaultRngType& rng = Rng::globalRng):mpe_rng(&rng){
 		mu() = 100;
-		crossoverProbability() = 0.8;
+		crossoverProbability() = 0.9;
 		nc() = 20.0;
 		nm() = 20.0;
 		this->m_features |= AbstractMultiObjectiveOptimizer<RealVector >::CAN_SOLVE_CONSTRAINED;
@@ -101,10 +85,10 @@ public:
 	}
 	
 	double nm()const{
-		return m_mutator.m_nm;
+		return m_mutation.m_nm;
 	}
 	double& nm(){
-		return m_mutator.m_nm;
+		return m_mutation.m_nm;
 	}
 	
 	double nc()const{
@@ -121,59 +105,151 @@ public:
 		return m_mu;
 	}
 
-	/**
-	* \brief Stores/loads the algorithm's state.
-	* \tparam Archive The type of the archive.
-	* \param [in,out] archive The archive to use for loading/storing.
-	* \param [in] version Currently unused.
-	*/
-	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {
-		archive & m_pop;
-		archive & m_mu;
-		archive & m_best;
-
-		archive & m_evaluator;
-		archive & m_crossover;
-		archive & m_mutator;
-
-		archive & m_crossoverProbability;
+	void read( InArchive & archive ){
+		archive >> BOOST_SERIALIZATION_NVP(m_parents);
+		archive >> BOOST_SERIALIZATION_NVP(m_mu);
+		archive >> BOOST_SERIALIZATION_NVP(m_best);
+		
+		archive >> BOOST_SERIALIZATION_NVP( m_selection );
+		archive >> BOOST_SERIALIZATION_NVP(m_crossover);
+		archive >> BOOST_SERIALIZATION_NVP(m_mutation);
+		archive >> BOOST_SERIALIZATION_NVP(m_crossoverProbability);
+	}
+	void write( OutArchive & archive ) const{
+		archive << BOOST_SERIALIZATION_NVP(m_parents);
+		archive << BOOST_SERIALIZATION_NVP(m_mu);
+		archive << BOOST_SERIALIZATION_NVP(m_best);
+		
+		archive << BOOST_SERIALIZATION_NVP( m_selection );
+		archive << BOOST_SERIALIZATION_NVP(m_crossover);
+		archive << BOOST_SERIALIZATION_NVP(m_mutation);
+		archive << BOOST_SERIALIZATION_NVP(m_crossoverProbability);
 	}
 
-	using AbstractMultiObjectiveOptimizer<RealVector >::init;
+	void init( ObjectiveFunctionType& function){
+		checkFeatures(function);
+		if(!function.canProposeStartingPoint())
+			throw SHARKEXCEPTION( "[RealCodedNSGAII::init] Objective function does not propose a starting point");
+		std::vector<RealVector> points(mu());
+		for(std::size_t i = 0; i != mu(); ++i){
+			points[i] = function.proposeStartingPoint();
+		}
+		init(function,points);
+	}
 	/**
-	* \brief Initializes the algorithm for the supplied objective function.
-	* \tparam ObjectiveFunction The type of the objective function, 
-	* needs to adhere to the concept of an AbstractObjectiveFunction.
-	* \param [in] function The objective function
-	* \param [in] startingPoints Starting point to initialize the algorithm for.
-	*/
+	 * \brief Initializes the algorithm for the supplied objective function.
+	 * 
+	 * \param [in] function The objective function.
+	 * \param [in] initialSearchPoints A set of intiial search points.
+	 */
 	void init( 
 		ObjectiveFunctionType& function, 
-		std::vector<SearchPointType> const& startingPoints
+		std::vector<SearchPointType> const& initialSearchPoints
 	){
 		checkFeatures(function);
-		function.init();
-		
-		//create parent set
-		m_pop.reserve( 2 * mu() );
-		m_pop.resize(mu());
-		m_best.resize(mu());
-		for(std::size_t i = 0; i != mu(); ++i){
-			m_pop[i].searchPoint()= function.proposeStartingPoint();
+		std::vector<RealVector> values(initialSearchPoints.size());
+		for(std::size_t i = 0; i != initialSearchPoints.size(); ++i){
+			if(!function.isFeasible(initialSearchPoints[i]))
+				throw SHARKEXCEPTION("[RealCodedNSGAII::init] starting point(s) not feasible");
+			values[i] = function.eval(initialSearchPoints[i]);
 		}
-		//evaluate initial parent set and create best front
-		m_evaluator( function, m_pop.begin(),m_pop.begin()+mu() );
-		m_selection( m_pop,m_mu );
-		for(std::size_t i = 0; i != mu(); ++i){
-			m_best[i].point = m_pop[i].searchPoint();
-			m_best[i].value = m_pop[i].unpenalizedFitness();
-		}
-		//make room for offspring
-		m_pop.resize(2*mu());
 		
-		m_crossover.init(function);
-		m_mutator.init(function);
+		std::size_t dim = function.numberOfVariables();
+		RealVector lowerBounds(dim, -1E20);
+		RealVector upperBounds(dim, 1E20);
+		if (function.hasConstraintHandler() && function.getConstraintHandler().isBoxConstrained()) {
+			typedef BoxConstraintHandler<SearchPointType> ConstraintHandler;
+			ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(function.getConstraintHandler());
+			
+			lowerBounds = handler.lower();
+			upperBounds = handler.upper();
+		} else{
+			throw SHARKEXCEPTION("[RealCodedNSGAII::init] Algorithm does only allow box constraints");
+		}
+		
+		doInit(initialSearchPoints,values,lowerBounds, upperBounds, mu(), nm(), nc(), crossoverProbability());
+	}
+	
+	/**
+	 * \brief Executes one iteration of the algorithm.
+	 * 
+	 * \param [in] function The function to iterate upon.
+	 */
+	void step( ObjectiveFunctionType const& function ) {
+		std::vector<IndividualType> offspring = generateOffspring();
+		PenalizingEvaluator penalizingEvaluator;
+		penalizingEvaluator( function, offspring.begin(), offspring.end() );
+		updatePopulation(offspring);
+	}
+protected:
+	/// \brief The individual type of the NSGA-II.
+	typedef shark::Individual<RealVector,RealVector> IndividualType;
+
+	void doInit(
+		std::vector<SearchPointType> const& initialSearchPoints,
+		std::vector<ResultType> const& functionValues,
+		RealVector const& lowerBounds,
+		RealVector const& upperBounds,
+		std::size_t mu,
+		double nm,
+		double nc,
+		double crossover_prob
+	){
+		SIZE_CHECK(initialSearchPoints.size() > 0);
+		m_mu = mu;
+		m_mutation.m_nm = nm;
+		m_crossover.m_nc = nc;
+		m_crossoverProbability = crossover_prob;
+		m_best.resize( mu );
+		m_parents.resize( mu );
+		//if the number of supplied points is smaller than mu, fill everything in
+		std::size_t numPoints = 0;
+		if(initialSearchPoints.size()<=mu){
+			numPoints = initialSearchPoints.size();
+			for(std::size_t i = 0; i != numPoints; ++i){
+				m_parents[i].searchPoint() = initialSearchPoints[i];
+				m_parents[i].penalizedFitness() = functionValues[i];
+				m_parents[i].unpenalizedFitness() = functionValues[i];
+			}
+		}
+		//copy points randomly
+		for(std::size_t i = numPoints; i != mu; ++i){
+			std::size_t index = discrete(*mpe_rng, 0,initialSearchPoints.size()-1);
+			m_parents[i].searchPoint() = initialSearchPoints[index];
+			m_parents[i].penalizedFitness() = functionValues[index];
+			m_parents[i].unpenalizedFitness() = functionValues[index];
+		}
+		//create initial mu best points
+		for(std::size_t i = 0; i != mu; ++i){
+			m_best[i].point = m_parents[i].searchPoint();
+			m_best[i].value = m_parents[i].unpenalizedFitness();
+		}
+		m_selection( m_parents, mu );
+		
+		m_crossover.init(lowerBounds,upperBounds);
+		m_mutation.init(lowerBounds,upperBounds);
+	}
+	
+	std::vector<IndividualType> generateOffspring()const{
+		TournamentSelection< IndividualType::RankOrdering > selection;
+		std::vector<IndividualType> offspring(mu());
+		selection(
+			*mpe_rng,
+			m_parents.begin(), 
+			m_parents.end(),
+			offspring.begin(),
+			offspring.end()
+		);
+
+		for( std::size_t i = 0; i < mu()-1; i+=2 ) {
+			if( coinToss(*mpe_rng, m_crossoverProbability ) ) {
+				m_crossover(*mpe_rng,offspring[i], offspring[i +1] );
+			}
+		}
+		for( std::size_t i = 0; i < mu(); i++ ) {
+			m_mutation(*mpe_rng, offspring[i] );
+		}
+		return offspring;
 	}
 
 	/**
@@ -181,34 +257,32 @@ public:
 	 * 
 	 * \param [in] function The function to iterate upon.
 	 */
-	void step( ObjectiveFunctionType const& function ) {
-		TournamentSelection< Individual::RankOrdering > matingSelection;
+	void updatePopulation(  std::vector<IndividualType> const& offspringVec) {
+		m_parents.insert(m_parents.end(),offspringVec.begin(),offspringVec.end());
+		m_selection( m_parents, mu());
 		
-		matingSelection(
-			m_pop.begin(), 
-			m_pop.begin() + mu(),
-			m_pop.begin() + mu(),
-			m_pop.end()
-		);
+		//partition the selected individuals to the front and remove the unselected ones
+		std::partition(m_parents.begin(), m_parents.end(),IndividualType::IsSelected);
+		m_parents.erase(m_parents.begin()+mu(),m_parents.end());
 
-		for( std::size_t i = 1; i < mu(); i++ ) {
-			if( Rng::coinToss( 0.8 ) ) {
-				m_crossover( m_pop[mu() + i - 1], m_pop[mu() + i] );
-			}
-		}
-		for( std::size_t i = 0; i < mu(); i++ ) {
-			m_mutator( m_pop[mu() + i] );
-		}
-		m_evaluator( function, m_pop.begin()+mu(), m_pop.end() );
-		m_selection( m_pop, m_mu );
-
-		std::partition( m_pop.begin(), m_pop.end(), Individual::IsSelected );	
-
-		for( std::size_t i = 0; i != mu(); ++i ) {
-			noalias(m_best[i].value) = m_pop[i].unpenalizedFitness();
-			noalias(m_best[i].point) = m_pop[i].searchPoint();
+		//update solution set
+		for (std::size_t i = 0; i < mu(); i++) {
+			noalias(m_best[i].point) = m_parents[i].searchPoint();
+			m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
 	}
+private:
+
+	std::vector<IndividualType> m_parents; ///< Population of size \f$\mu + 1\f$.
+	std::size_t m_mu; ///< Size of parent generation
+
+	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
+
+	SimulatedBinaryCrossover< RealVector > m_crossover; ///< Crossover operator.
+	PolynomialMutator m_mutation; ///< Mutation operator.
+
+	double m_crossoverProbability; ///< Crossover probability.
+	DefaultRngType* mpe_rng; 
 };
 
 typedef IndicatorBasedRealCodedNSGAII< HypervolumeIndicator > RealCodedNSGAII;

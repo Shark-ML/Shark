@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 	for(size_t i=0;i!=TrainExamples;++i){
 		//create samples. class 1 has double as many elements as class 0
 		target[i]=(i%3 == 0);
-		input[i]=dist().first+mean[target[i]];
+		input[i]=dist(Rng::globalRng).first+mean[target[i]];
 		//calculate bayes Target - the best fit to the distributions
 		RealVector diff=input[i]-mean[0];
 		double dist0=inner_prod(diff,prod(inverse,diff))+prior[0];
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	for(size_t i=0;i!=TrainExamples;++i){
 		//create sample
 		target[i]= (i%3 != 0);
-		RealVector vec = dist().first+mean[target[i]];
+		RealVector vec = dist(Rng::globalRng).first+mean[target[i]];
 		//calculate bayes Target - the best fit to the distributions
 		RealVector diff=vec-mean[0];
 		double dist0=inner_prod(diff,prod(inverse,diff)) + prior[0];
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 	for(size_t i=0;i!=TrainExamples;++i){
 		//create sample
 		target[i]=i%classes;
-		input[i]=dist().first+mean[target[i]];
+		input[i]=dist(Rng::globalRng).first+mean[target[i]];
 		//calculate bayes Target - the best fit to the distributions
 		unsigned int bayesTarget = 0;
 		double minDist = 1.e30;
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS_WEIGHTING ){
 	for(size_t i=0;i!=TrainExamples;++i){
 		//create sample
 		target[i]=i%classes;
-		input[i]=dist().first+mean[target[i]];
+		input[i]=dist(Rng::globalRng).first+mean[target[i]];
 	}
 	ClassificationDataset dataset = createLabeledDataFromRange(input,target);
 	

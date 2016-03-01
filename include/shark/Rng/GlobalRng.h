@@ -210,11 +210,6 @@ namespace shark {
 
 	ANNOUNCE_SHARK_RNG( shark::FastRngType,		FastRng );
 	ANNOUNCE_SHARK_RNG( shark::DefaultRngType,	Rng		);
-	/*
-	typedef BaseRng< boost::rand48 > FastRng; FastRng::rng_type FastRng::globalRng = FastRng::rng_type();
-		typedef BaseRng< boost::mt19937 > Rng; Rng::rng_type Rng::globalRng = Rng::rng_type();*/
-
-
 }
 
 #endif

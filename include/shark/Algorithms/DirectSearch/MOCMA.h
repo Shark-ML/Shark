@@ -54,36 +54,21 @@ namespace shark {
  *	- Igel, Suttorp and Hansen. Steady-state Selection and Efficient Covariance Matrix Update in the Multi-Objective CMA-ES.
  *	- Voﬂ, Hansen and Igel. Improved Step Size Adaptation for the MO-CMA-ES.
  */
-template<typename Indicator>
+template<typename Indicator=HypervolumeIndicator>
 class IndicatorBasedMOCMA : public AbstractMultiObjectiveOptimizer<RealVector >{
 public:
-	
 	enum NotionOfSuccess{
 		IndividualBased,
 		PopulationBased
 	};
+public:
 	
-	std::vector<CMAIndividual<RealVector> > m_pop; ///< Population of size \f$\mu+\mu\f$.
-	std::size_t m_mu;///< Size of parent generation
-	
-	shark::PenalizingEvaluator m_evaluator; ///< Evaluation operator.
-	IndicatorBasedSelection< Indicator > m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
-
-	NotionOfSuccess m_notionOfSuccess; ///< Flag for deciding whether the improved step-size adaptation shall be used.
-	double m_individualSuccessThreshold;
-	double m_initialSigma;
-
-	/**
-	 * \brief Default c'tor.
-	 */
-	IndicatorBasedMOCMA() {
+	IndicatorBasedMOCMA(DefaultRngType& rng= Rng::globalRng):mpe_rng(&rng) {
 		m_individualSuccessThreshold = 0.44;
 		initialSigma() = 1.0;
-		constrainedPenaltyFactor() = 1E-6;
 		mu() = 100;
 		notionOfSuccess() = PopulationBased;
 		this->m_features |= AbstractMultiObjectiveOptimizer<RealVector >::CAN_SOLVE_CONSTRAINED;
-		
 	}
 
 	/**
@@ -107,118 +92,172 @@ public:
 		return m_initialSigma;
 	}
 	
-	/// \brief Returns the penalty factor for an individual that is outside the feasible area.
-	///
-	/// The value is multiplied with the distance to the nearest feasible point.
-	double constrainedPenaltyFactor()const{
-		return m_evaluator.m_penaltyFactor;
-	}
-	
-	/// \brief Returns a reference to the penalty factor for an individual that is outside the feasible area.
-	///
-	/// The value is multiplied with the distance to the nearest feasible point.
-	double& constrainedPenaltyFactor(){
-		return m_evaluator.m_penaltyFactor;
-	}
-	
 	NotionOfSuccess notionOfSuccess()const{
 		return m_notionOfSuccess;
 	}
 	NotionOfSuccess& notionOfSuccess(){
 		return m_notionOfSuccess;
 	}
-	
-	/**
-	 * \brief Stores/loads the algorithm's state.
-	 * \tparam Archive The type of the archive.
-	 * \param [in,out] archive The archive to use for loading/storing.
-	 * \param [in] version Currently unused.
-	 */
-	template<typename Archive>
-	void serialize(Archive &archive, const unsigned int version) {
-		archive & BOOST_SERIALIZATION_NVP(m_pop);
-		archive & BOOST_SERIALIZATION_NVP(m_mu);
-		archive & BOOST_SERIALIZATION_NVP(m_best);
-		archive & BOOST_SERIALIZATION_NVP(m_evaluator);
-		archive & BOOST_SERIALIZATION_NVP(m_notionOfSuccess);
-		archive & BOOST_SERIALIZATION_NVP(m_individualSuccessThreshold);
-		archive & BOOST_SERIALIZATION_NVP(m_initialSigma);
+	void read( InArchive & archive ){
+		archive >> BOOST_SERIALIZATION_NVP(m_parents);
+		archive >> BOOST_SERIALIZATION_NVP(m_mu);
+		archive >> BOOST_SERIALIZATION_NVP(m_best);
+		
+		archive >> BOOST_SERIALIZATION_NVP(m_selection);
+		archive >> BOOST_SERIALIZATION_NVP(m_notionOfSuccess);
+		archive >> BOOST_SERIALIZATION_NVP(m_individualSuccessThreshold);
+		archive >> BOOST_SERIALIZATION_NVP(m_initialSigma);
 	}
-
-	using AbstractMultiObjectiveOptimizer<RealVector >::init;
+	void write( OutArchive & archive ) const{
+		archive << BOOST_SERIALIZATION_NVP(m_parents);
+		archive << BOOST_SERIALIZATION_NVP(m_mu);
+		archive << BOOST_SERIALIZATION_NVP(m_best);
+		
+		archive << BOOST_SERIALIZATION_NVP(m_selection);
+		archive << BOOST_SERIALIZATION_NVP(m_notionOfSuccess);
+		archive << BOOST_SERIALIZATION_NVP(m_individualSuccessThreshold);
+		archive << BOOST_SERIALIZATION_NVP(m_initialSigma);
+	}
+	
+	void init( ObjectiveFunctionType& function){
+		checkFeatures(function);
+		if(!function.canProposeStartingPoint())
+			throw SHARKEXCEPTION( "Objective function does not propose a starting point");
+		std::vector<RealVector> points(mu());
+		for(std::size_t i = 0; i != mu(); ++i){
+			points[i] = function.proposeStartingPoint();
+		}
+		init(function,points);
+	}
 	/**
 	 * \brief Initializes the algorithm for the supplied objective function.
-	 * \tparam ObjectiveFunction The type of the objective function,
-	 * needs to adhere to the concept of an AbstractObjectiveFunction.
+	 * 
 	 * \param [in] function The objective function.
-	 * \param [in] startingPoints A set of intiial search points.
+	 * \param [in] initialSearchPoints A set of intiial search points.
 	 */
 	void init( 
 		ObjectiveFunctionType& function, 
-		std::vector<SearchPointType> const& startingPoints
+		std::vector<SearchPointType> const& initialSearchPoints
 	){
 		checkFeatures(function);
-		function.init();
-		
-		m_pop.resize(2 * mu());
-		m_best.resize(mu());
-		std::size_t noVariables = function.numberOfVariables();
-		
-		for(std::size_t i = 0; i != mu(); ++i){
-			CMAIndividual<RealVector> individual(noVariables,m_individualSuccessThreshold,m_initialSigma);
-			individual.searchPoint() = function.proposeStartingPoint();
-			m_pop[i] = individual;
+		std::vector<RealVector> values(initialSearchPoints.size());
+		for(std::size_t i = 0; i != initialSearchPoints.size(); ++i){
+			if(!function.isFeasible(initialSearchPoints[i]))
+				throw SHARKEXCEPTION("[MOCMA::init] starting point(s) not feasible");
+			values[i] = function.eval(initialSearchPoints[i]);
 		}
-		//valuate and create first front
-		m_evaluator(function, m_pop.begin(),m_pop.begin()+mu());
-		for(std::size_t i = 0; i != mu(); ++i){
-			m_best[i].point = m_pop[i].searchPoint();
-			m_best[i].value = m_pop[i].unpenalizedFitness();
-		}
+		this->doInit(initialSearchPoints,values,mu(),initialSigma() );
 	}
-
+	
 	/**
 	 * \brief Executes one iteration of the algorithm.
 	 * 
 	 * \param [in] function The function to iterate upon.
 	 */
 	void step( ObjectiveFunctionType const& function ) {
+		std::vector<IndividualType> offspring = generateOffspring();
+		PenalizingEvaluator penalizingEvaluator;
+		penalizingEvaluator( function, offspring.begin(), offspring.end() );
+		updatePopulation(offspring);
+	}
+protected:
+	/// \brief The individual type of the SteadyState-MOCMA.
+	typedef CMAIndividual<RealVector> IndividualType;
 
-		//generate new offspring, evaluate and select
-		for (std::size_t i = 0; i < mu(); i++) {
-			m_pop[mu()+i] = m_pop[i];
-			m_pop[mu()+i].mutate();
-		}
-		m_evaluator(function, m_pop.begin()+mu(),m_pop.end());
-		m_selection(m_pop,m_mu);
+	void doInit(
+		std::vector<SearchPointType> const& initialSearchPoints,
+		std::vector<ResultType> const& functionValues,
+		std::size_t mu,
+		double initialSigma
+	){
+		SIZE_CHECK(initialSearchPoints.size() > 0);
+		m_mu = mu;
+		m_initialSigma = initialSigma;
 		
-		//determine from the selection which parent-offspring pair has been successfull
+		m_best.resize( mu );
+		m_parents.resize( mu );
+		std::size_t noVariables = initialSearchPoints[0].size();
+
+		//if the number of supplied points is smaller than mu, fill everything in
+		std::size_t numPoints = 0;
+		if(initialSearchPoints.size()<=mu){
+			numPoints = initialSearchPoints.size();
+			for(std::size_t i = 0; i != numPoints; ++i){
+				m_parents[i] = IndividualType(noVariables,m_individualSuccessThreshold,m_initialSigma);
+				m_parents[i].searchPoint() = initialSearchPoints[i];
+				m_parents[i].penalizedFitness() = functionValues[i];
+				m_parents[i].unpenalizedFitness() = functionValues[i];
+			}
+		}
+		//copy points randomly
+		for(std::size_t i = numPoints; i != mu; ++i){
+			std::size_t index = discrete(*mpe_rng,0,initialSearchPoints.size()-1);
+			m_parents[i] = IndividualType(noVariables,m_individualSuccessThreshold,m_initialSigma);
+			m_parents[i].searchPoint() = initialSearchPoints[index];
+			m_parents[i].penalizedFitness() = functionValues[index];
+			m_parents[i].unpenalizedFitness() = functionValues[index];
+		}
+		//create initial mu best points
+		for(std::size_t i = 0; i != mu; ++i){
+			m_best[i].point = m_parents[i].searchPoint();
+			m_best[i].value = m_parents[i].unpenalizedFitness();
+		}
+	}
+	
+	std::vector<IndividualType> generateOffspring()const{
+		std::vector<IndividualType> offspring(mu());
+		for(std::size_t i = 0; i != mu(); ++i){
+			std::size_t parentId = i;
+			offspring[i] = m_parents[parentId];
+			offspring[i].mutate(*mpe_rng);
+			offspring[i].parent() = parentId;
+		}
+		return offspring;
+	}
+	
+	void updatePopulation(  std::vector<IndividualType> const& offspringVec) {
+		m_parents.insert(m_parents.end(),offspringVec.begin(),offspringVec.end());
+		m_selection( m_parents, mu());
+		
+		//determine from the selection which parent-offspring pair has been successful
 		for (std::size_t i = 0; i < mu(); i++) {
 			CMAChromosome::IndividualSuccess offspringSuccess = CMAChromosome::Unsuccessful;
-			//new update: an offspring is successfull if it is selected
-			if ( m_notionOfSuccess == PopulationBased && m_pop[mu()+i].selected()) {
-				m_pop[mu()+i].updateAsOffspring();
+			//new update: an offspring is successful if it is selected
+			if ( m_notionOfSuccess == PopulationBased && m_parents[mu()+i].selected()) {
+				m_parents[mu()+i].updateAsOffspring();
 				offspringSuccess = CMAChromosome::Successful;
 			}
 			//old update: an offspring is successfull if it is better than its parent
-			else if ( m_notionOfSuccess == IndividualBased && m_pop[mu()+i].selected() && m_pop[mu()+i].rank() <= m_pop[i].rank()) {
-				m_pop[mu()+i].updateAsOffspring();
+			else if ( m_notionOfSuccess == IndividualBased && m_parents[mu()+i].selected() && m_parents[mu()+i].rank() <= m_parents[i].rank()) {
+				m_parents[mu()+i].updateAsOffspring();
 				offspringSuccess = CMAChromosome::Successful;
 			}
-			if(m_pop[i].selected()) 
-				m_pop[i].updateAsParent(offspringSuccess);
+			if(m_parents[i].selected()) 
+				m_parents[i].updateAsParent(offspringSuccess);
 		}
 		
-		//partition the selected individuals to the front
-		std::partition(m_pop.begin(), m_pop.end(),CMAIndividual<RealVector>::IsSelected);
+		//partition the selected individuals to the front and remove the unselected ones
+		std::partition(m_parents.begin(), m_parents.end(),IndividualType::IsSelected);
+		m_parents.erase(m_parents.begin()+mu(),m_parents.end());
 
-		//update individuals and generate solution set
+		//update solution set
 		for (std::size_t i = 0; i < mu(); i++) {
-			noalias(m_best[i].point) = m_pop[i].searchPoint();
-			m_best[i].value = m_pop[i].unpenalizedFitness();
+			noalias(m_best[i].point) = m_parents[i].searchPoint();
+			m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
-	};
-
+	}
+	
+	std::vector<IndividualType> m_parents; ///< Population of size \f$\mu + 1\f$.
+	
+private:
+	std::size_t m_mu; ///< Size of parent population
+	
+	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
+	
+	NotionOfSuccess m_notionOfSuccess; ///< Flag for deciding whether the improved step-size adaptation shall be used.
+	double m_individualSuccessThreshold;
+	double m_initialSigma;
+	DefaultRngType* mpe_rng;
 };
 
 typedef IndicatorBasedMOCMA< HypervolumeIndicator > MOCMA;

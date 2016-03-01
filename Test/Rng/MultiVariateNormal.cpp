@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_EIGENVALUES ) {
 	Data<RealVector> normalSampleSet(Samples,RealVector(Dimensions));
 	
 	for(std::size_t i = 0; i != Samples; ++i){
-		MultiVariateNormalDistribution::result_type sample = dist();
+		MultiVariateNormalDistribution::result_type sample = dist(Rng::globalRng);
 		sampleSet.element(i) = sample.first;
 		normalSampleSet.element(i) = sample.second;
 	}
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_Cholesky) {
 	Data<RealVector> normalSampleSet(Samples,RealVector(Dimensions));
 	
 	for(std::size_t i = 0; i != Samples; ++i){
-		MultiVariateNormalDistribution::result_type sample = dist();
+		MultiVariateNormalDistribution::result_type sample = dist(Rng::globalRng);
 		sampleSet.element(i) = sample.first;
 		normalSampleSet.element(i) = sample.second;
 	}

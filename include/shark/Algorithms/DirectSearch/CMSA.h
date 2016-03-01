@@ -51,118 +51,138 @@
 
 
 namespace shark {
-	/**
-	* \brief Implements the CMSA.
-	*
-	*  The algorithm is described in
-	*
-	*  H. G. Beyer, B. Sendhoff (2008). 
-	*  Covariance Matrix Adaptation Revisited: The CMSA Evolution Strategy
-	*  In Proceedings of the Tenth International Conference on Parallel Problem Solving from Nature
-	*  (PPSN X), pp. 123-132, LNCS, Springer-Verlag
-	*/
-	class CMSA : public AbstractSingleObjectiveOptimizer<RealVector > {
-		/** \cond */
+/**
+* \brief Implements the CMSA.
+*
+*  The algorithm is described in
+*
+*  H. G. Beyer, B. Sendhoff (2008). 
+*  Covariance Matrix Adaptation Revisited: The CMSA Evolution Strategy
+*  In Proceedings of the Tenth International Conference on Parallel Problem Solving from Nature
+*  (PPSN X), pp. 123-132, LNCS, Springer-Verlag
+*/
+class CMSA : public AbstractSingleObjectiveOptimizer<RealVector > {
+	/** \cond */
 
-		struct LightChromosome {
-			RealVector step;
-			double sigma;
-		};
-		/** \endcond */
-		/**
-		* \brief Individual type of the CMSA implementation.
-		*/
-		typedef Individual< RealVector, double, LightChromosome > IndividualType;
-
-	public:
-
-		/**
-		* \brief Default c'tor.
-		*/
-		CMSA() : m_mu( 100 ), m_lambda( 200 ) {
-			m_features |= REQUIRES_VALUE;
-		}
-
-		/// \brief From INameable: return the class name.
-		std::string name() const
-		{ return "CMSA"; }
-
-		/**
-		* \brief Calculates the center of gravity of the given population \f$ \in \mathbb{R}^d\f$.
-		*
-		* 
-		*/
-		template<typename Container, typename Extractor>
-		RealVector cog( const Container & container, const Extractor & e ) {
-
-			RealVector result( m_numberOfVariables, 0. );
-
-			for( std::size_t j = 0; j < container.size(); j++ )
-				result += 1./m_mu * e( container[j] );
-
-			return result;
-		}
-
-		SHARK_EXPORT_SYMBOL void read( InArchive & archive );
-		SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
-
-		using AbstractSingleObjectiveOptimizer<RealVector >::init;
-		/**
-		* \brief Initializes the algorithm for the supplied objective function.
-		*/
-		SHARK_EXPORT_SYMBOL void init( ObjectiveFunctionType& function, SearchPointType const& p);
-
-		/**
-		* \brief Executes one iteration of the algorithm.
-		*/
-		SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& function);
-
-		/**
-		* \brief Accesses the size of the parent population.
-		*/
-		std::size_t mu() const {
-			return m_mu;
-		}
-
-		/**
-		* \brief Accesses the size of the parent population, allows for l-value semantics.
-		*/
-		std::size_t & mu() {
-			return m_mu;
-		}
-
-		/**
-		* \brief Accesses the size of the offspring population.
-		*/
-		std::size_t lambda() const {
-			return m_lambda;
-		}
-
-		/**
-		* \brief Accesses the size of the offspring population, allows for l-value semantics.
-		*/
-		std::size_t & lambda() {
-			return m_lambda;
-		}
-	protected:
-		
-		std::size_t m_numberOfVariables; ///< Stores the dimensionality of the search space.
-		std::size_t m_mu; ///< The size of the parent population.
-		std::size_t m_lambda; ///< The size of the offspring population, needs to be larger than mu.
-
-		double m_sigma; ///< The current step size.
-		double m_cSigma; 
-		double m_cC; ///< Constant for adapting the covariance matrix.
-
-		RealVector m_mean; ///< The current cog of the population.
-
-		shark::MultiVariateNormalDistribution m_mutationDistribution; ///< Multi-variate normal mutation distribution.   
-	private:
-		/**
-		* \brief Updates the strategy parameters based on the supplied offspring population.
-		*/
-		SHARK_EXPORT_SYMBOL void updateStrategyParameters( const std::vector< IndividualType > & offspringNew ) ;
+	struct LightChromosome {
+		RealVector step;
+		double sigma;
 	};
+	/** \endcond */
+public:
+
+	/// \brief Default c'tor.
+	CMSA(DefaultRngType& rng = Rng::globalRng)
+	: m_mu( 100 )
+	, m_lambda( 200 )
+	, m_userSetMu(false)
+	,m_userSetLambda(false)
+	, m_initSigma(-1)
+	, mpe_rng(&rng){
+		m_features |= REQUIRES_VALUE;
+	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CMSA"; }
+
+	/// \brief Calculates the center of gravity of the given population \f$ \in \mathbb{R}^d\f$.
+	template<typename Container, typename Extractor>
+	RealVector cog( const Container & container, const Extractor & e ) {
+
+		RealVector result( m_numberOfVariables, 0. );
+
+		for( std::size_t j = 0; j < container.size(); j++ )
+			result += 1./m_mu * e( container[j] );
+
+		return result;
+	}
+
+	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
+	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
+
+	using AbstractSingleObjectiveOptimizer<RealVector >::init;
+	
+	/// \brief Initializes the algorithm for the supplied objective function.
+	SHARK_EXPORT_SYMBOL void init( ObjectiveFunctionType& function, SearchPointType const& p);
+	
+	/**
+	* \brief Initializes the algorithm for the supplied objective function.
+	*/
+	SHARK_EXPORT_SYMBOL void init( 
+		ObjectiveFunctionType& function, 
+		SearchPointType const& initialSearchPoint,
+		std::size_t lambda,
+		std::size_t mu,
+		double initialSigma,				       
+		const boost::optional< RealMatrix > & initialCovarianceMatrix = boost::optional< RealMatrix >()
+	);
+
+	/// \brief Executes one iteration of the algorithm.
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& function);
+	
+	/// \brief sets the initial step length sigma
+	///
+	/// It is by default <=0 which means that sigma =1/sqrt(numVariables)
+	void setInitialSigma(double initSigma){
+		m_initSigma = initSigma;
+	}
+
+	/// \brief Sets the number of selected samples
+	void setMu(std::size_t mu){
+		m_mu = mu;
+		m_userSetMu = true;
+	}
+	/// \brief Sets the number of sampled points
+	void setLambda(std::size_t lambda){
+		m_lambda = lambda;
+		m_userSetLambda = true;
+	}	
+	/// \brief Accesses the size of the parent population.
+	std::size_t mu() const {
+		return m_mu;
+	}
+
+	/// \brief Accesses the size of the offspring population.
+	std::size_t lambda() const {
+		return m_lambda;
+	}
+protected:
+	/// \brief The type of individual used by the CMSA
+	typedef Individual< RealVector, double, LightChromosome > IndividualType;
+
+	/// \brief Samples lambda individuals from the search distribution	
+	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring( ) const;
+
+	/// \brief Updates the strategy parameters based on the supplied offspring population.
+	SHARK_EXPORT_SYMBOL void updatePopulation( std::vector< IndividualType > const& offspring );
+
+	/// \brief Initializes the internal data structures of the CMSA
+	SHARK_EXPORT_SYMBOL  void doInit(
+		std::vector<SearchPointType> const& points,
+		std::vector<ResultType> const& functionValues,
+		std::size_t lambda,
+		std::size_t mu,
+		double initialSigma
+	);
+private:	
+	std::size_t m_numberOfVariables; ///< Stores the dimensionality of the search space.
+	std::size_t m_mu; ///< The size of the parent population.
+	std::size_t m_lambda; ///< The size of the offspring population, needs to be larger than mu.
+
+	bool m_userSetMu; /// <The user set a value via setMu, do not overwrite with default
+	bool m_userSetLambda; /// <The user set a value via setMu, do not overwrite with default
+	double m_initSigma; ///< The initial step size
+	
+	double m_sigma; ///< The current step size.
+	double m_cSigma; 
+	double m_cC; ///< Constant for adapting the covariance matrix.
+
+	RealVector m_mean; ///< The current cog of the population.
+
+	MultiVariateNormalDistribution m_mutationDistribution; ///< Multi-variate normal mutation distribution.   
+	DefaultRngType* mpe_rng;
+};
 }
 
 #endif

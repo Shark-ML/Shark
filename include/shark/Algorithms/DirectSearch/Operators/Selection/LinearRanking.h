@@ -73,6 +73,7 @@ struct LinearRankingSelection {
 	///
 	template<typename InIterator,typename OutIterator> 
 	void operator()( 
+		DefaultRngType& rng,
 		InIterator individuals,
 		InIterator individualsE,
 		OutIterator out,
@@ -99,7 +100,7 @@ struct LinearRankingSelection {
 
 		RouletteWheelSelection rws;
 		for( ; out != outE; ++out ){
-			InIterator individuals = rws( individualsPerformance.begin(), individualsPerformance.end(), selectionProbability)->value;
+			InIterator individuals = rws(rng, individualsPerformance.begin(), individualsPerformance.end(), selectionProbability)->value;
 			*out = *individuals;
 		}
 	}

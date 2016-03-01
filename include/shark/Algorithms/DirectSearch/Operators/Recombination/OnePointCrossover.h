@@ -42,10 +42,10 @@ namespace shark {
 /// right parent.
 struct OnePointCrossover {
 	/// \brief Performs the one-point crossover
-	template<typename PointType>
-	PointType operator()( const PointType & mom, const PointType & dad ) {
+	template<class RngType, typename PointType>
+	PointType operator()(RngType& rng, const PointType & mom, const PointType & dad ) {
 		SIZE_CHECK(mom.size() == dad.size());
-		std::size_t point = Rng::discrete( 0, mom.size() - 1 );
+		std::size_t point = discrete(rng, 0, mom.size() - 1 );
 	    
 		PointType offspring( mom.size() );
 		std::copy( mom.begin(), mom.begin() + point, offspring.begin() );

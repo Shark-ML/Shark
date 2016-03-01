@@ -27,6 +27,7 @@ void testObjectiveFunctionMOO(
 ){
 	SteadyStateMOCMA mocma;
 	mocma.mu() = mu;
+	f.init();
 	mocma.init(f);
 	
 	for(std::size_t i = 0; i != iterations; ++i){
@@ -81,13 +82,13 @@ BOOST_AUTO_TEST_CASE( ApproximatedHypSteadyStateMOCMA ) {
 	
 	{
 		std::stringstream ss;
-		boost::archive::text_oarchive oa( ss );
+		TextOutArchive oa( ss );
 
 		BOOST_CHECK_NO_THROW( (oa << ssMocma) );
 
 		SteadyStateMOCMA ssMocma2;
 
-		boost::archive::text_iarchive ia( ss );
+		TextInArchive ia( ss );
 		BOOST_CHECK_NO_THROW( (ia >> ssMocma2) );
 
 		Rng::seed( 0 );

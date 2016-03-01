@@ -27,6 +27,7 @@ void testObjectiveFunctionMOO(
 ){
 	MOCMA mocma;
 	mocma.mu() = mu;
+	f.init();
 	mocma.init(f);
 	
 	for(std::size_t i = 0; i != iterations; ++i){
@@ -53,9 +54,6 @@ BOOST_AUTO_TEST_CASE( MOCMA_HYPERVOLUME_Functions ) {
 	DTLZ4 dtlz4(5);
 	double dtlz4Volume = 120.178966;
 	testObjectiveFunctionMOO(dtlz4,10,dtlz4Volume,1000,reference);
-	//~ DTLZ7 dtlz7(5); //not sure whether correctly implemented
-	//~ double dtlz7Volume = 115.964708;
-	//~ testObjectiveFunctionMOO(dtlz7,10,dtlz7Volume,10000,reference);
 	ZDT1 zdt1(5);
 	double zdt1Volume = 120.613761;
 	testObjectiveFunctionMOO(zdt1,10,zdt1Volume,1000,reference);
@@ -82,13 +80,13 @@ BOOST_AUTO_TEST_CASE( MOCMA_SERIALIZATION ) {
 	
 	{
 		std::stringstream ss;
-		boost::archive::text_oarchive oa( ss );
+		TextOutArchive oa( ss );
 
 		BOOST_CHECK_NO_THROW( (oa << mocma) );
 
 		MOCMA mocma2;
 
-		boost::archive::text_iarchive ia( ss );
+		TextInArchive ia( ss );
 		BOOST_CHECK_NO_THROW( (ia >> mocma2) );
 
 		Rng::seed( 1 );

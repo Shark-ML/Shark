@@ -123,7 +123,7 @@ struct IndicatorBasedSelection {
 			population[i].selected() = true;
 		}
 
-		//deselect the highest rank fronts until we would end up with less than mu elements
+		//deselect the highest rank fronts until we would end up with less or equal mu elements
 		unsigned int rank = maxRank;
 		std::size_t popSize = population.size();
 		
@@ -136,7 +136,6 @@ struct IndicatorBasedSelection {
 			popSize -= front.size();
 			--rank;
 		}
-		
 		//now use the indicator to deselect the worst approximating elements of the last selected front
 		m_indicator.updateInternals(FitnessExtractor(),population);
 		View& front = fronts[rank];

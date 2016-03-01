@@ -420,7 +420,7 @@ public:
 	void draw(RealVector& input) const{
 		input.resize(m_offset.size());
 		noalias(input) = m_offset;
-		noalias(input) += m_dist().first;
+		noalias(input) += m_dist(Rng::globalRng).first;
 	}
 private:
 	MultiVariateNormalDistributionCholesky m_dist;

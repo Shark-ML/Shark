@@ -54,13 +54,14 @@ struct TournamentSelection {
 	
 	template<typename IteratorType1, typename IteratorType2>
 	void operator()(
+		DefaultRngType& rng,
 		IteratorType1 inIt,
 		IteratorType1 inItE,
 		IteratorType2 outIt,
 		IteratorType2 outItE
 	){
 		for(; outIt != outItE; ++outIt ) {
-			*outIt = *(*this)(inIt,inItE);
+			*outIt = *(*this)(rng, inIt,inItE);
 		}
 	}
 	
@@ -69,16 +70,16 @@ struct TournamentSelection {
 	/// \param [in] itE Iterator pointing to the first invalid element.
 	/// \return An iterator pointing to the selected individual.
 	template< typename Iterator>
-	Iterator operator()( Iterator it, Iterator itE) const
+	Iterator operator()(DefaultRngType& rng, Iterator it, Iterator itE) const
 	{
 		std::size_t n = std::distance( it, itE );
 		SHARK_CHECK(tournamentSize > 0, " Tournament size k needs to be larger than 0");
 		SHARK_CHECK(n > tournamentSize, " Size of population needs to be larger than size of tournament");
 		
 		Predicate predicate;
-		Iterator result = it + Rng::discrete( 0, n-1 );
+		Iterator result = it + discrete(rng, 0, n-1 );
 		for( std::size_t i = 1; i < tournamentSize; i++ ) {
-			Iterator itt = it + Rng::discrete(0,n-1);
+			Iterator itt = it + discrete(rng, 0,n-1);
 			if( predicate(*itt, *result) ){
 				result = itt;
 			}

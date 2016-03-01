@@ -286,8 +286,8 @@ int main( int argc, char ** argv ) {
 			shark::IndividualType, 
 			shark::IndividualType 
 			> result = pmc( 
-				*rws( parents.begin(), parents.end(), selectionProbabilities ),
-				*rws( parents.begin(), parents.end(), selectionProbabilities )
+				*rws( shark::Rng::globalRng, parents.begin(), parents.end(), selectionProbabilities ),
+				*rws( shark::Rng::globalRng, parents.begin(), parents.end(), selectionProbabilities )
 			);
 			offspring[ i ] = result.first;
 			offspring[ i + 1 ] = result.second;

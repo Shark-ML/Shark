@@ -88,8 +88,8 @@ struct DTLZ4 : public MultiObjectiveFunction
 
 		ResultType value( numberOfObjectives() );
 
-		//~ const double alpha = 10.;
-		const double alpha = 100.; //original, but numerically extremely difficult
+		const double alpha = 10.;
+		//~ const double alpha = 100.; //original, but numerically extremely difficult
 		
 		std::size_t k = numberOfVariables() - numberOfObjectives() + 1 ;
 		double g = 0.0;

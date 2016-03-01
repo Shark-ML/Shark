@@ -53,7 +53,7 @@ UnlabeledData<RealVector> createData()
 	BOOST_FOREACH(RealVector& sample, data)
 	{
 		//first element is the sample, second is the underlying uniform gaussian
-		sample = mean + distribution().first;
+		sample = mean + distribution(Rng::globalRng).first;
 	}
 	return createDataFromRange(data);
 }

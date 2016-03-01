@@ -6,7 +6,7 @@
  * 
  *
  * \author    O.Krause
- * \date        2014
+ * \date        2016
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
@@ -58,7 +58,7 @@ public:
 
 	/// \brief Constructor
 	/// \param [in] probabilities Probability vector
-	MultiNomialDistribution( RealVector const& probabilities ) 
+	MultiNomialDistribution(RealVector const& probabilities ) 
 	: m_probabilities(probabilities){
 		update();
 	}
@@ -87,12 +87,13 @@ public:
 	}
 
 	/// \brief Samples the distribution.
-	result_type operator()() const {
+	template<class RngType>
+	result_type operator()(RngType& rng) const {
 		std::size_t numStates = m_probabilities.size();
  
-		std::size_t index = Rng::discrete(0,numStates-1);
+		std::size_t index = discrete(rng,0,numStates-1);
  
-		if(Rng::coinToss(m_q[index]))
+		if(coinToss(rng, m_q[index]))
 			return index;
 		else
 			return m_J[index];
@@ -136,7 +137,7 @@ public:
 		for(std::size_t i = 0; i != larger.size(); ++i){
 			m_q[larger[i]]=std::min(m_q[larger[i]],1.0);
 		}
-	}			
+	}
 
 private:
 	RealVector m_probabilities; ///< probability of every state.

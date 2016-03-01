@@ -118,7 +118,7 @@ public:
 
 	ForestInfo getForestInfo() const {
 		ForestInfo finfo(m_models.size());
-		for (int i=0; i<m_models.size(); ++i)
+		for (std::size_t i=0; i<m_models.size(); ++i)
 			finfo[i]=m_models[i].getSplitMatrix();
 		return finfo;
 	}
@@ -132,8 +132,7 @@ public:
 		else if (weights.size() != n_tree)
 			throw SHARKEXCEPTION("Weights must be the same number as trees");
 
-		for (int i=0; i<n_tree; ++i)
-		{
+		for (std::size_t i=0; i<n_tree; ++i){
 			m_models[i]=finfo[i];
 			m_weight.push_back(we[i]);
 			m_weightSum+=we[i];

@@ -132,8 +132,12 @@ namespace shark{
 		}
 
 	};
-	//! Returns the entropy of the bernoulli distribution
-	template<typename RngType>
-	double entropy(const Bernoulli<RngType> & coin);
+	
+	///\brief Flips a coin with probability of heads being pHeads by drawing random numbers from rng.
+	template<class RngType>
+	bool coinToss(RngType& rng, double pHeads){
+		Bernoulli<RngType> dist(rng, pHeads);
+		return dist();
+	}
 }
 #endif

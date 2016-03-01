@@ -89,8 +89,11 @@ std::size_t CMA::suggestMu( std::size_t lambda, RecombinationType recomb) {
 	return 0;
 }
 
-CMA::CMA()
-:m_recombinationType( SUPERLINEAR )
+CMA::CMA(DefaultRngType& rng)
+: m_userSetMu(false)
+, m_userSetLambda(false)
+, m_initSigma(-1)
+, m_recombinationType( SUPERLINEAR )
 , m_sigma( 0 )
 , m_cC( 0 )
 , m_c1( 0 )
@@ -99,7 +102,8 @@ CMA::CMA()
 , m_dSigma( 0 )
 , m_muEff( 0 )
 , m_lowerBound( 1E-20)
-, m_counter( 0 ) {
+, m_counter( 0 )
+, mpe_rng(&rng){
 	m_features |= REQUIRES_VALUE;
 }
 
@@ -160,35 +164,64 @@ void CMA::write( OutArchive & archive ) const {
 
 
 void CMA::init( ObjectiveFunctionType & function, SearchPointType const& p) {
-	
-	std::size_t lambda = CMA::suggestLambda( p.size() );
-	std::size_t mu = CMA::suggestMu(lambda, m_recombinationType);
-	init( function,
-		p,
+	SIZE_CHECK(p.size() == function.numberOfVariables());
+	checkFeatures(function);
+	std::vector<RealVector> points(1,p);
+	std::vector<double> functionValues(1,function.eval(p));
+
+	std::size_t lambda = m_userSetLambda? m_lambda:CMA::suggestLambda( p.size() );
+	std::size_t mu  = m_userSetMu? m_mu:CMA::suggestMu(lambda, m_recombinationType);
+	RANGE_CHECK(mu < lambda);
+	double sigma = (m_initSigma > 0)? m_initSigma : 1.0/std::sqrt(double(p.size()));
+	doInit(
+		points,
+		functionValues,
 		lambda,
 		mu,
-		1.0/std::sqrt(double(p.size()))
+		sigma
 	);
 }
 
-/**
-* \brief Initializes the algorithm for the supplied objective function.
-*/
 void CMA::init( 
 	ObjectiveFunctionType& function, 
-	SearchPointType const& initialSearchPoint,
+	SearchPointType const& p,
 	std::size_t lambda,
 	std::size_t mu,
 	double initialSigma,				       
 	const boost::optional< RealMatrix > & initialCovarianceMatrix
 ) {
+	SIZE_CHECK(p.size() == function.numberOfVariables());
+	RANGE_CHECK(mu < lambda);
+	setMu(mu);
+	setLambda(lambda);
 	checkFeatures(function);
-	function.init();
+	std::vector<RealVector> points(1,p);
+	std::vector<double> functionValues(1,function.eval(p));
+	doInit(
+		points,
+		functionValues,
+		lambda,
+		mu,
+		initialSigma
+	);
+	if(initialCovarianceMatrix){
+		m_mutationDistribution.covarianceMatrix() = *initialCovarianceMatrix;
+		m_mutationDistribution.update();
+	}
+}
+void CMA::doInit( 
+	std::vector<SearchPointType> const& initialSearchPoints,
+	std::vector<ResultType> const& initialValues,
+	std::size_t lambda,
+	std::size_t mu,
+	double initialSigma
+) {
+	SIZE_CHECK(initialSearchPoints.size() > 0);
 	
-	m_numberOfVariables = function.numberOfVariables();
+	m_numberOfVariables =initialSearchPoints[0].size();
 	m_lambda = lambda;
 	m_mu = mu;
-	m_sigma = initialSigma;
+	m_sigma =  initialSigma;
 
 	m_mean.resize( m_numberOfVariables );
 	m_evolutionPathC.resize( m_numberOfVariables );
@@ -197,10 +230,7 @@ void CMA::init(
 	m_mean.clear();
 	m_evolutionPathC.clear();
 	m_evolutionPathSigma.clear();
-	if(initialCovarianceMatrix){
-		m_mutationDistribution.covarianceMatrix() = *initialCovarianceMatrix;
-		m_mutationDistribution.update();
-	}
+	
 		
 	//weighting of the k-best individuals
 	m_weights.resize(m_mu);
@@ -230,20 +260,31 @@ void CMA::init(
 	double alphaMu = 2.;
 	m_cMu = std::min(1. - m_c1, alphaMu * (m_muEff - 2. + 1./m_muEff) / (sqr(m_numberOfVariables + 2) + alphaMu * m_muEff / 2)); // eq. (49)
 
-	m_mean = initialSearchPoint;
-	m_best.point = initialSearchPoint;
-	m_best.value = function(initialSearchPoint);
-
+	std::size_t pos = std::min_element(initialValues.begin(),initialValues.end())-initialValues.begin();
+	m_mean = initialSearchPoints[pos];
+	m_best.point = initialSearchPoints[pos];
+	m_best.value = initialValues[pos];
 	m_lowerBound = 1E-20;
 	m_counter = 0;
 }
 
-/**
-* \brief Updates the strategy parameters based on the supplied offspring population.
-*/
-void CMA::updateStrategyParameters( const std::vector<Individual<RealVector, double, RealVector> > & offspring ) {
-	RealVector z = weightedSum( offspring, m_weights, StepExtractor() ); // eq. (38)
-	RealVector m = weightedSum( offspring, m_weights, PointExtractor() ); // eq. (39) 
+std::vector<CMA::IndividualType> CMA::generateOffspring( ) const{
+	std::vector< IndividualType > offspring( m_lambda );
+	for( std::size_t i = 0; i < offspring.size(); i++ ) {
+		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution(*mpe_rng);
+		offspring[i].chromosome() = sample.second;
+		offspring[i].searchPoint() = m_mean + m_sigma * sample.first;
+	}
+	return offspring;
+}
+
+void CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
+	std::vector< IndividualType > selectedOffspring( m_mu );
+	ElitistSelection<FitnessExtractor> selection;
+	selection(offspring.begin(),offspring.end(),selectedOffspring.begin(), selectedOffspring.end());
+	m_counter++;
+	RealVector z = weightedSum( selectedOffspring, m_weights, StepExtractor() ); // eq. (38)
+	RealVector m = weightedSum( selectedOffspring, m_weights, PointExtractor() ); // eq. (39) 
 	RealVector y = (m - m_mean) / m_sigma;
 
 	// Covariance matrix update
@@ -251,8 +292,8 @@ void CMA::updateStrategyParameters( const std::vector<Individual<RealVector, dou
 	RealMatrix Z( m_numberOfVariables, m_numberOfVariables, 0.0); // matric for rank-mu update
 	for( std::size_t i = 0; i < m_mu; i++ ) {
 		noalias(Z) += m_weights( i ) * blas::outer_prod(
-			offspring[i].searchPoint() - m_mean,
-			offspring[i].searchPoint() - m_mean
+			selectedOffspring[i].searchPoint() - m_mean,
+			selectedOffspring[i].searchPoint() - m_mean
 		);
 	}
 	double expectedChi = chi((std::size_t)m_numberOfVariables);
@@ -270,7 +311,6 @@ void CMA::updateStrategyParameters( const std::vector<Individual<RealVector, dou
 	m_evolutionPathSigma = (1. - m_cSigma)*m_evolutionPathSigma + std::sqrt( m_cSigma * (2. - m_cSigma) * m_muEff ) * CInvY; // eq. (40)
 	m_sigma *= std::exp((m_cSigma / m_dSigma) * (norm_2(m_evolutionPathSigma) / expectedChi - 1.)); // eq. (39)
 
-	
 	// update mutation distribution
 	m_mutationDistribution.update();
 	
@@ -282,32 +322,15 @@ void CMA::updateStrategyParameters( const std::vector<Individual<RealVector, dou
 	if( m_sigma * std::sqrt( std::fabs( ev ) ) < m_lowerBound )
 		m_sigma = m_lowerBound / std::sqrt( std::fabs( ev ) );
 
-	
-}
+	//store best point
+	m_best.point= selectedOffspring[ 0 ].searchPoint();
+	m_best.value= selectedOffspring[ 0 ].unpenalizedFitness();
 
-/**
-* \brief Executes one iteration of the algorithm.
-*/
+}
 void CMA::step(ObjectiveFunctionType const& function){
-
-	std::vector< Individual<RealVector, double, RealVector> > offspring( m_lambda );
-
+	std::vector<IndividualType> offspring = generateOffspring();
 	PenalizingEvaluator penalizingEvaluator;
-	for( std::size_t i = 0; i < offspring.size(); i++ ) {
-		MultiVariateNormalDistribution::result_type sample = m_mutationDistribution();
-		offspring[i].chromosome() = sample.second;
-		offspring[i].searchPoint() = m_mean + m_sigma * sample.first;
-	}
 	penalizingEvaluator( function, offspring.begin(), offspring.end() );
-
-	// Selection
-	std::vector< Individual<RealVector, double, RealVector> > parents( m_mu );
-	ElitistSelection<FitnessExtractor> selection;
-	selection(offspring.begin(),offspring.end(),parents.begin(), parents.end());
-	// Strategy parameter update
-	m_counter++; // increase generation counter
-	updateStrategyParameters( parents );
-
-	m_best.point= parents[ 0 ].searchPoint();
-	m_best.value= parents[ 0 ].unpenalizedFitness();
+	updatePopulation(offspring);
 }
+

@@ -118,6 +118,13 @@ public:
 	}
 };
 
+///\brief Draws a number uniformly in [lower,upper] by drawing random numbers from rng.
+template<class RngType>
+double uni(RngType& rng, double lower, double upper){
+	Uniform<RngType> dist(rng, lower, upper);
+	return dist();
+}
+
 } // namespace shark {
 
 #endif // SHARK_RNG_UNIFORM_H

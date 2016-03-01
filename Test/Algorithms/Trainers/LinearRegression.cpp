@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( LinearRegression_TEST ){
 		input[i](0) = uniform();
 		input[i](1) = uniform();
 		testTarget[i] =  model(input[i]);
-		trainTarget[i] = noise().first + testTarget[i];
+		trainTarget[i] = noise(Rng::globalRng).first + testTarget[i];
 	}
 
 	// let the model forget...

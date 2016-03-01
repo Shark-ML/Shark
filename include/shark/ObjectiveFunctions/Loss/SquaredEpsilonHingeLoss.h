@@ -65,8 +65,7 @@ public:
 	double eval(BatchLabelType const& labels, BatchOutputType const& predictions) const{
 		SIZE_CHECK(predictions.size1() == labels.size1());
 		SIZE_CHECK(predictions.size2() == labels.size2());
-		std::size_t numInputs = predictions.size1();
-		
+
 		return 0.5*sum(max(0.0,sum_columns(sqr(labels-predictions)) - m_sqrEpsilon));
 	}
 

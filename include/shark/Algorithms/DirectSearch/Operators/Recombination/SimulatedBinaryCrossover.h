@@ -45,40 +45,26 @@ namespace shark {
 		: m_nc( 20.0 )
 		, m_prob( 0.5 ) {}
 
-		/// \brief Initializes the operator for the supplied fitness function.
-		///
-		/// \param [in] f Instance of the objective function to initialize the operator for.
-		template<typename Function>
-		void init( const Function & f ) {
-			m_prob = 0.5;
-			if(!f.isConstrained()){
-				m_lower = blas::repeat(-1E20,f.numberOfVariables());
-				m_upper = blas::repeat(1E20,f.numberOfVariables());
-			}
-			else if (f.hasConstraintHandler() && f.getConstraintHandler().isBoxConstrained()) {
-				typedef BoxConstraintHandler<PointType> ConstraintHandler;
-				ConstraintHandler  const& handler = static_cast<ConstraintHandler const&>(f.getConstraintHandler());
-				
-				m_lower = handler.lower();
-				m_upper = handler.upper();
-
-			} else{
-				throw SHARKEXCEPTION("[SimulatedBinaryCrossover::init] Algorithm does only allow box constraints");
-			}
+		/// \brief Initializes the operator for the supplied box-constraints
+		void init( RealVector const& lower, RealVector const& upper ) {
+			SIZE_CHECK(lower.size() == upper.size());
+			m_prob = 1./lower.size();
+			m_lower = lower;
+			m_upper = upper;
 		}
 
 		/// \brief Mates the supplied individuals.
 		/// 
 		/// \param [in,out] i1 Individual to be mated.
 		/// \param [in,out] i2 Individual to be mated.
-		template<typename IndividualType>
-		void operator()( IndividualType & i1, IndividualType & i2 ) {	
+		template<class RngType, typename IndividualType>
+		void operator()(RngType& rng, IndividualType & i1, IndividualType & i2 )const{	
 			RealVector& point1 = i1.searchPoint();
 			RealVector& point2 = i2.searchPoint();
 
 			for( unsigned int i = 0; i < point1.size(); i++ ) {
 
-				if( !Rng::coinToss( m_prob ) )
+				if( !coinToss(rng, m_prob ) )
 					continue;
 				
 				double y1 = 0;
@@ -91,37 +77,35 @@ namespace shark {
 					y2 = point2[i];
 				}
 				
-				double betaQ = 0.0;
-				if( std::abs(y2 - y1) > 1E-7 ) {					
-					// Find beta value
-					double beta = 0;
-					if( (y1 - m_lower( i )) > (m_upper( i ) - y2) )
-						beta = 1 + 2 * (m_upper( i ) - y2) / (y2 - y1);
-					else
-						beta = 1 + 2 * (y1 - m_lower( i )) / (y2 - y1);
+				double betaQ1 = 0.0;
+				double betaQ2 = 0.0;
+				if( std::abs(y2 - y1) < 1E-7 )continue;//equal
+				
+				// Find beta value2
+				double beta1 = 1 + 2 * (y1 - m_lower( i )) / (y2 - y1);
+				double beta2 = 1 + 2 * (m_upper( i ) - y2) / (y2 - y1);
+				double expp = m_nc + 1.;
+				// Find alpha
+				double alpha1 = 2. - std::pow(beta1 , -expp);
+				double alpha2 = 2. - std::pow(beta2 , -expp);
 
-
-					double expp = m_nc + 1.;
-					// Find alpha
-					double alpha = 2. - std::pow(1.0/beta , expp);
-					double u = Rng::uni( 0., 1. );
-
-					if( u <= 1. / alpha ) {
-						alpha *= u;
-						betaQ = std::pow( alpha, 1.0/expp );
-					} else {
-						alpha *= u;
-						alpha = 1. / (2. - alpha);
-						betaQ = std::pow( alpha, 1.0/expp );
-					}
-				} else { // if genes are equal -> from Deb's implementation, not contained in any paper
-					betaQ = 1.;
+				double u = uni(rng, 0., 1. );
+				alpha1 *=u;
+				alpha2 *=u;
+				if( u > 1. / alpha1 ) {
+					alpha1 = 1. / (2. - alpha1);
 				}
+				if( u > 1. / alpha2 ) {
+					alpha2 = 1. / (2. - alpha2);
+				}
+				betaQ1 = std::pow( alpha1, 1.0/expp );
+				betaQ2 = std::pow( alpha2, 1.0/expp );
 
-				point1[i] = 0.5 * ((y1 + y2) - betaQ * (y2 - y1));
-				point2[i] = 0.5 * ((y1 + y2) + betaQ * (y2 - y1));
+				//recombine points
+				point1[i] = 0.5 * ((y1 + y2) - betaQ1 * (y2 - y1));
+				point2[i] = 0.5 * ((y1 + y2) + betaQ2 * (y2 - y1));
 				// randomly swap loci
-				if( Rng::coinToss() ) std::swap(point1[i], point2[i]);
+				if( coinToss(rng,0.5) ) std::swap(point1[i], point2[i]);
 
 
 				//  -> from Deb's implementation, not contained in any paper
