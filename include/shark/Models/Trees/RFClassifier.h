@@ -40,8 +40,8 @@
 
 namespace shark {
 
-typedef CARTClassifier<RealVector>::SplitMatrixType SplitMatrixType;
-typedef std::vector<SplitMatrixType> ForestInfo;
+typedef CARTClassifier<RealVector>::TreeType TreeType;
+typedef std::vector<TreeType> ForestInfo;
 
 ///
 /// \brief Random Forest Classifier.
@@ -52,7 +52,7 @@ typedef std::vector<SplitMatrixType> ForestInfo;
 /// Random Forests. Leo Breiman. Machine Learning, 1(45), pages 5-32. Springer, 2001.<br/>
 ///
 /// \par
-/// It is a ensemble learner that uses multiple decision trees built
+/// It is an ensemble learner that uses multiple decision trees built
 /// using the CART methodology.
 ///
 class RFClassifier : public MeanModel<CARTClassifier<RealVector> >
@@ -119,7 +119,7 @@ public:
 	ForestInfo getForestInfo() const {
 		ForestInfo finfo(m_models.size());
 		for (std::size_t i=0; i<m_models.size(); ++i)
-			finfo[i]=m_models[i].getSplitMatrix();
+			finfo[i]=m_models[i].getTree();
 		return finfo;
 	}
 
