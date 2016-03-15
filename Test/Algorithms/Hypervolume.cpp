@@ -2,7 +2,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/Algorithms/DirectSearch/HypervolumeCalculator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
 #include <shark/Algorithms/DirectSearch/HypervolumeApproximator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/LeastContributorApproximator.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
@@ -136,12 +136,6 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume ) {
 	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), Fixture::HV_TEST_SET_2D, 1E-5 );
 	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), Fixture::HV_TEST_SET_3D, 1E-5 );
 
-	// check that the approximate algorithm confirms (the plausibility of) the result
-	std::vector<double> results;
-	for( unsigned int trial = 0; trial < 10; trial++ )
-		results.push_back(ha( m_testSet3D.begin(), m_testSet3D.end(), ife, m_refPoint3D, 1E-2, 1E-2 ) );
-	BOOST_CHECK_SMALL( *median_element(results) - Fixture::HV_TEST_SET_3D, 1E-2 );
-
 	// scalable test with random linear front
 	for (unsigned int nObj=2; nObj<=10; nObj++)
 	{
@@ -191,8 +185,14 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume ) {
 
 		double hv1 = hc(ife, points, reference);
 		double hv2 = inclusionExclusion(points, reference);
-		BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
+		BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);	
 	}
+	
+	// check that the approximate algorithm confirms (the plausibility of) the result
+	std::vector<double> results;
+	for( unsigned int trial = 0; trial < 10; trial++ )
+		results.push_back(ha( m_testSet3D.begin(), m_testSet3D.end(), ife, m_refPoint3D, 1E-2, 1E-2 ) );
+	BOOST_CHECK_SMALL( *median_element(results) - Fixture::HV_TEST_SET_3D, 1E-2 );
 }
 
 //~ BOOST_AUTO_TEST_CASE( Algorithms_LeastContributorApproximator ) {

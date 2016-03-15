@@ -34,6 +34,7 @@
 
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
+#include <shark/Statistics/Distributions/MultiNomialDistribution.h>
 
 #include <shark/LinAlg/Base.h>
 
@@ -72,7 +73,7 @@ namespace shark {
 		* \param [in] e Extractor instance
 		* \param [in] referencePoint Minimization is considered and the reference point usually is chosen as the Nadir-point.
 		* \param [in] eps Error bound, default value: \f$10^{-2}\f$.
-		* \param [in] delta Error probability, default value: \f$10^{-2}\f$.
+		* \param [in] delta Error probability, default value: \f$10^{-1}\f$.
 		*
 		* \returns The volume or a negative value if the range of objects is empty.
 		*/
@@ -89,7 +90,7 @@ namespace shark {
 			std::size_t noPoints = std::distance( begin, end );
 
 			if( noPoints == 0 )
-				return( -1 );
+				return 0;
 
 			// runtime (O.K: added static_cast to preveent warning on VC10)
 			boost::uint_fast64_t maxSamples=static_cast<boost::uint_fast64_t>( 12. * std::log( 1. / delta ) / std::log( 2. ) * noPoints/eps/eps ); 
@@ -97,52 +98,39 @@ namespace shark {
 			// calc separate volume of each box
 			VectorType vol( noPoints, 1. );
 			typename VectorType::iterator itv = vol.begin();
-			for( Iterator it = begin;
-				 it != end;
-				 ++it, ++itv
-				) {
+			for( Iterator it = begin;it != end;++it, ++itv) {
 				*itv = referencePoint[ 0 ] - e( *it )[ 0 ];
 				for( std::size_t i = 1; i < e( *it ).size(); i++ )
 					*itv *= referencePoint[ i ] - e( *it )[ i ];
 			}
-
-			// calc total volume and partial sum
-			double T = 0;
-			for( size_t i = 0; i < noPoints; i++) {
-				vol[i]+=T;
-				T+=vol[i]-T;
-			}
-
+			//calculate total sum of volumes
+			double totalVolume = sum(vol);
+			
 			shark::ParetoDominanceComparator< shark::IdentityFitnessExtractor > pdc;
-
-			double r;
 			VectorType rndpoint( referencePoint );
-
-			Iterator itt;
 			boost::uint_fast64_t samples_sofar=0;
 			boost::uint_fast64_t round=0;
+			
+			//we pick points randomly based on their volume
+			MultiNomialDistribution pointDist(vol);
 
 			while( 1 ) {
-				r = T * Rng::uni();
-
-				// point is randomly chosen with probability proportional to volume
-				itv = vol.begin();
-				for( itt = begin; itt != end; ++itt, ++itv ) {
-					if( r <= *itv )
-						break;
+				// sample ROI based on its volume. the ROI is defined as the Area between the reference point and a point in the front.
+				Iterator point = begin + pointDist(Rng::globalRng);
+				
+				// sample point in ROI   
+				for( std::size_t i = 0; i < rndpoint.size(); i++ ){
+					rndpoint[ i ] = e( (*point ))[ i ] + Rng::uni() * ( referencePoint[ i ] - e( (*point) )[ i ] );
 				}
-
-				// calc rnd point    
-				for( std::size_t i = 0; i < rndpoint.size(); i++ )
-					rndpoint[ i ] = e( (*itt) )[ i ] + Rng::uni() * ( referencePoint[ i ] - e( (*itt) )[ i ] );
-
+				
+				Iterator candidate;
 				do {
 					if(samples_sofar>=maxSamples) 
-						return maxSamples * T / noPoints / round;
-					itt = begin + static_cast<std::size_t>(noPoints*Rng::uni());
+						return maxSamples * totalVolume / noPoints / round;
+					candidate = begin + static_cast<std::size_t>(noPoints*Rng::uni());
 					samples_sofar++;
 				} 
-				while( pdc( e( *itt ), rndpoint) < ParetoDominanceComparator< IdentityFitnessExtractor >::A_WEAKLY_DOMINATES_B );
+				while( pdc( e( *candidate ), rndpoint) < ParetoDominanceComparator< IdentityFitnessExtractor >::A_WEAKLY_DOMINATES_B );
 
 				round++;
 			}
