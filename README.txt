@@ -191,3 +191,35 @@ Fuzzy               The fuzzy module provides classes for the
 Unsupervised        This module contains the Shark implementation
                     of restricted Bolzmann machines (RBMs),
                     a recent experimental feature of Shark.
+
+Interfacing OpenBlas on Windows (VS2013 and above)
+1.) Download and install the latest MingW libraries from 
+https://sourceforge.net/projects/mingw-w64/
+2.) Download an install Msys
+3.) Clone OpenBlas from https://github.com/xianyi/OpenBLAS
+4.) Open a Msys prompt and follow OpenBlas instructions to build it
+I use the following on my AMD laptop:
+$ make -j4 INTERFACE=64 BINARY=64 USE_OPENMP=1 FC=gfortran CC=gcc TARGET=PILEDRIVER
+5.) Now, follow the instructions at the end of the build to install OpenBlas
+6.) At the location where the headers are installed, you will need to change
+a few lines in lapacke.h; Apparently, VS cannot understand _Complex
+.....
+#ifndef lapack_complex_float
+#include <complex>
+#define lapack_complex_float    std::complex<float>//float _Complex
+#endif
+and
+#ifndef lapack_complex_double
+#include <complex>
+#define lapack_complex_double   std::complex<double>//double _Complex
+#endif
+
+7.) Now, we need to generate import libraries. For that, browse to the exports 
+folder of OpenBlas. There will be a libopenblas.def file that has been generated.
+Open a DOS command prompt and type
+>lib /machine:x64 /def:libopenblas.def
+libopenblas.lib and
+libopenblas.exp files will be generated
+libopenblas.lib file will be used for linking with Shark
+
+
