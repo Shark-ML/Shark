@@ -7,11 +7,12 @@
 #         * doc/CMakeLists.txt
 #####################################################################
 project( shark )
+cmake_minimum_required( VERSION 3.1 FATAL_ERROR)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 INCLUDE (CheckFunctionExists)
 
-cmake_minimum_required( VERSION 2.8 )
+
 cmake_policy(SET CMP0003 NEW)
 if(POLICY CMP0042)
 	cmake_policy(SET CMP0042 NEW)

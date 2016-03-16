@@ -26,6 +26,8 @@ macro( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 	if( BUILD_EXAMPLES )
 		add_executable(${NAME} ${EXAMPLES_CPP_DIR}/${TUT_SRC}.cpp)
 		target_link_libraries(${NAME} shark)
+		set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 11)
+		set_property(TARGET ${NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 
 		# Add the dependencies to the target examples
 		add_dependencies(sharkexamples ${NAME})
@@ -45,9 +47,6 @@ macro( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 endmacro()
 
 shark_add_example( EA/MOO/AdditiveEpsilonIndicatorMain AdditiveEpsilonIndicatorMain "EA/MOO" )
-#shark_add_example( EA/MOO/ApproximatedHypervolumeMain ApproximatedHypervolumeMain "EA/MOO" )
-#shark_add_example( EA/MOO/ExactHypervolumeMain ExactHypervolumeMain "EA/MOO" )
-##shark_add_example( EA/MOO/BoundingBoxCalculatorMain BoundingBoxCalculatorMain "EA/MOO" )
 
 shark_add_example( EA/MOO/MOCMASimple MOCMASimple "EA/MOO" )
 shark_add_example( EA/MOO/MOCMAExperiment MOCMAExperiment "EA/MOO" )
