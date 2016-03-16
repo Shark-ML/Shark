@@ -142,9 +142,8 @@ endif()
 
 find_package( 
 	Boost 1.48.0 REQUIRED COMPONENTS
-	system date_time filesystem
-	program_options serialization thread
-	unit_test_framework
+	serialization
+	filesystem system
 )
 
 if(NOT Boost_FOUND)
@@ -158,14 +157,10 @@ endif()
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIR} )
 link_directories( ${Boost_LIBRARY_DIR} )
-if(UNIX)
-	find_library( PTHREAD_LIBRARY pthread )
-endif()
 
 # Set the libraries needed by Shark
-list(APPEND LINK_LIBRARIES ${Boost_LIBRARIES} ${PTHREAD_LIBRARY})
+list(APPEND LINK_LIBRARIES ${Boost_LIBRARIES})
 
-mark_as_advanced(Boost_DIR PTHREAD_LIBRARY)
 message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
 
 #####################################################################

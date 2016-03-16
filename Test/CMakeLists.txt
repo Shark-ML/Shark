@@ -5,9 +5,18 @@
 #       Test implementation: Boost UTF                              #
 #####################################################################
 
+#####################################################################
+#       Get Boost Unit test                  #
+#####################################################################
+find_package( 
+	Boost 1.48.0 REQUIRED COMPONENTS
+	unit_test_framework
+)
+
+set( boost_unit_test_lib ${Boost_LIBRARIES})
 
 #####################################################################
-#       Configure logging of test restuls to XML                    #
+#       Configure logging of test restults to XML                    #
 #####################################################################
 option( LOG_TEST_OUTPUT "Log test output to XML files." OFF )
 
@@ -28,7 +37,7 @@ macro(SHARK_ADD_TEST SRC NAME)
 
 	# Create the test executable
 	add_executable( ${NAME} ${SRC} Models/derivativeTestHelper.h )
-	target_link_libraries( ${NAME} shark)
+	target_link_libraries( ${NAME} shark ${boost_unit_test_lib})
 	set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 11)
 	set_property(TARGET ${NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 

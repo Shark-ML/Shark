@@ -46,8 +46,6 @@ macro( SHARK_ADD_EXAMPLE TUT_SRC NAME COMPONENT )
 	endif()
 endmacro()
 
-shark_add_example( EA/MOO/AdditiveEpsilonIndicatorMain AdditiveEpsilonIndicatorMain "EA/MOO" )
-
 shark_add_example( EA/MOO/MOCMASimple MOCMASimple "EA/MOO" )
 shark_add_example( EA/MOO/MOCMAExperiment MOCMAExperiment "EA/MOO" )
 
