@@ -56,7 +56,7 @@ namespace shark {
 ///
 ///  The algorithm is described in
 ///
-/// Nicola Beume und Günter Rudolph. 
+/// Nicola Beume und Guenter Rudolph. 
 /// Faster S-Metric Calculation by Considering Dominated Hypervolume as Klee's Measure Problem.
 ///  In: B. Kovalerchuk (ed.): Proceedings of the Second IASTED Conference on Computational Intelligence (CI 2006), 
 /// pp. 231-236. ACTA Press: Anaheim, 2006.

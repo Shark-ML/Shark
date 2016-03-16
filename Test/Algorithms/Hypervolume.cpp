@@ -3,7 +3,6 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
-#include <shark/Algorithms/DirectSearch/HypervolumeApproximator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/LeastContributorApproximator.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Core/utility/functional.h>
@@ -129,7 +128,7 @@ BOOST_FIXTURE_TEST_SUITE (Algorithms_Hypervolume, Fixture)
 BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume ) {
 
 	HypervolumeCalculator hc;
-	HypervolumeApproximator< FastRng > ha;
+	HypervolumeApproximator ha;
 	IdentityFitnessExtractor ife;
 
 	// check exact algorithms against hard-coded reference values for 2 and 3 objectives
@@ -190,8 +189,11 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume ) {
 	
 	// check that the approximate algorithm confirms (the plausibility of) the result
 	std::vector<double> results;
-	for( unsigned int trial = 0; trial < 10; trial++ )
-		results.push_back(ha( m_testSet3D.begin(), m_testSet3D.end(), ife, m_refPoint3D, 1E-2, 1E-2 ) );
+	for( unsigned int trial = 0; trial < 10; trial++ ){
+		ha.delta() = 1E-2;
+		ha.epsilon() = 1E-2;
+		results.push_back(ha(ife, m_testSet3D, m_refPoint3D ) );
+	}
 	BOOST_CHECK_SMALL( *median_element(results) - Fixture::HV_TEST_SET_3D, 1E-2 );
 }
 

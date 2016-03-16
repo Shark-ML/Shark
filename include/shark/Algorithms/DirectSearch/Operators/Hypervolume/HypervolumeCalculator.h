@@ -1,21 +1,7 @@
 /*!
  * 
  *
- * \brief       Implementation of the exact hypervolume calculation in m dimensions.
- * 
- * The algorithm is described in
- * 
- * Nicola Beume und Günter Rudolph. 
- * Faster S-Metric Calculation by Considering Dominated Hypervolume as Klee's Measure Problem.
- * In: B. Kovalerchuk (ed.): Proceedings of the Second IASTED Conference on Computational Intelligence (CI 2006), 
- * pp. 231-236. ACTA Press: Anaheim, 2006. 
- * 
- * A specialized algorithm is used for the three-objective case:
- *
- * M. T. M. Emmerich and C. M. Fonseca.
- * Computing hypervolume contributions in low dimensions: Asymptotically optimal algorithm and complexity results.
- * In: Evolutionary Multi-Criterion Optimization (EMO) 2011.
- * Vol. 6576 of Lecture Notes in Computer Science, pp. 121--135, Berlin: Springer, 2011.
+ * \brief Implements the Frontend for the HypervolumeCalculator algorithms, including the approximations
  *
  *
  * \author      T.Voss, O.Krause, T. Glasmachers
@@ -48,21 +34,48 @@
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator2D.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator3D.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorND.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeApproximator.h>
 
 namespace shark {
-/// \brief Implementation of the exact hypervolume calculation in n dimensions.
+/// \brief Frontend for hypervolume calculation algorithms in n dimensions.
 ///
 ///  Depending on the dimensionality of the problem, one of the specialized algorithms is called.
+///  For large dimensionalities for which there are no specialized fast algorithms,
+///  either the exponential time or the approximated algorithm is called based
+///  On the choice of algorithm
+///  Also a log-transformation of points is supported
 struct HypervolumeCalculator {
 
 	/// \brief Default c'tor.
-	HypervolumeCalculator() : m_useLogHyp( false ) {}
+	HypervolumeCalculator() : m_useLogHyp( false ), m_useApproximation(false) {}
 
 	///\brief True if the logarithmic volume is to be used, e.g. taking the logarithm of all values.
 	void useLogHyp(bool useLogHyp){m_useLogHyp = useLogHyp;}
 	
+	///\brief True if the hypervolume approximation is to be used in dimensions > 3.
+	void useApproximation(bool useApproximation){m_useApproximation = useApproximation;}
+	
+	double approximationEpsilon()const{
+		return m_approximationAlgorithm.epsilon();
+	}
+	double& approximationEpsilon(){
+		return m_approximationAlgorithm.epsilon();
+	}
+	
+	double approximationDelta()const{
+		return m_approximationAlgorithm.delta();
+	}
+	
+	double& approximationDelta(){
+		return m_approximationAlgorithm.delta();
+	}
+	
 	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {}
+	void serialize( Archive & archive, const unsigned int version ) {
+		archive & BOOST_SERIALIZATION_NVP(m_useLogHyp);
+		archive & BOOST_SERIALIZATION_NVP(m_useApproximation);
+		archive & BOOST_SERIALIZATION_NVP(m_approximationAlgorithm);
+	}
 	
 	/// \brief Executes the algorithm.
 	/// \param [in] extractor Function object \f$f\f$to "project" elements of the points to \f$\mathbb{R}^n\f$.
@@ -87,6 +100,12 @@ struct HypervolumeCalculator {
 			}else{
 				return algorithm(extractor, points, refPoint);
 			}
+		}else if(m_useApproximation){
+			if(m_useLogHyp){
+				return m_approximationAlgorithm([&](Point x){return log(extractor(x));}, points, refPoint);
+			}else{
+				return m_approximationAlgorithm(extractor, points, refPoint);
+			}
 		}else{
 			HypervolumeCalculatorND algorithm;
 			if(m_useLogHyp){
@@ -99,6 +118,8 @@ struct HypervolumeCalculator {
 
 private:
 	bool m_useLogHyp;
+	bool m_useApproximation;
+	HypervolumeApproximator m_approximationAlgorithm;
 };
 
 }
