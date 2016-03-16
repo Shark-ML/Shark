@@ -296,6 +296,40 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeNDApprox ) {
 	}
 }
 
+BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeCalculator) {
+	HypervolumeCalculator hc;
+	const std::size_t numTests = 10;
+	const std::size_t numPoints = 15;
+	const std::size_t evals = 10;
+	const double epsilon = 0.05;//runtime is quadratic in this :(
+	
+	//first exact
+	hc.useApproximation(false);
+	
+	//test 1: computes the value of a reference front correctly
+	IdentityFitnessExtractor ife;
+	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), HV_TEST_SET_3D, 1E-5 );
+	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), HV_TEST_SET_2D, 1E-5 );
+
+	// test with random fronts of different shapes
+	for(std::size_t numObj = 2; numObj < 5; ++numObj){
+		testRandomFrontNormP(hc, numTests, numPoints, numObj, 1);
+		testRandomFrontNormP(hc, numTests, numPoints, numObj, 2);
+		testRandomFrontNormP(hc, numTests, numPoints, numObj, 0.5);
+		testEqualFront(hc, numTests, numPoints, numObj);
+	}
+	
+	//test 3: now use the approximator
+	hc.useApproximation(true);
+	hc.approximationEpsilon() = epsilon;
+	// we take the median of 10 runs, so 1-delta=0.7 is relatively safe,
+	// especially as the bound appears to be rather loose
+	hc.approximationDelta() = 0.3;
+	testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, 8, 1);
+	testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, 8, 2);
+	testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, 8, 0.5);
+}
+
 //~ BOOST_AUTO_TEST_CASE( Algorithms_LeastContributorApproximator ) {
 	//~ HypervolumeCalculator hc;
 	//~ IdentityFitnessExtractor ife;
