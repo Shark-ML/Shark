@@ -56,7 +56,7 @@ Run::Run(IDType id)
 void Run::tag(std::string const& tagname)
 {
 	Connection::ParamType param;
-	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
+	param.push_back(std::make_pair("run_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/run/tag", param);
 	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
@@ -66,7 +66,7 @@ void Run::tag(std::string const& tagname)
 void Run::untag(std::string const& tagname)
 {
 	Connection::ParamType param;
-	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
+	param.push_back(std::make_pair("run_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/run/untag", param);
 	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
@@ -79,29 +79,10 @@ void Run::print(std::ostream& os) const
 	Entity::print(os);
 	os << " task: " << taskTypeName[m_task->tasktype()] << " on " << m_task->dataset()->name() << " [" << m_task->id() << "]" << std::endl;
 	os << " flow: " << m_flow->name() << " [" << m_flow->id() << "]" << std::endl;
-//	os << " type: " << taskTypeName[m_tasktype] << std::endl;
-//	os << " data set ID: " << m_datasetID << std::endl;
-//	os << " target feature: " << m_targetFeature << std::endl;
-//	os << " estimation procedure: " << estimationProcedureName[m_estimationProcedure] << std::endl;
-//	os << " splits url: " << m_url << std::endl;
-//	os << " number of repetitions: " << m_repetitions << std::endl;
-//	os << " number of folds: " << m_folds << std::endl;
-//	os << " number of data splits: " << m_repetitions * m_folds << std::endl;
-//	os << " evaluation measure: " << evaluationMeasureName[m_evaluationMeasure] << std::endl;
-//	os << " output format: " << m_outputFormat << std::endl;
-//	os << " file status: ";
-//	if (downloaded()) os << "in cache at " << filename().string();
-//	else os << "not in cache";
-//	os << std::endl;
-//	for (std::size_t i=0; i<m_outputFeature.size(); i++)
-//	{
-//		FeatureDescription const& fd = m_outputFeature[i];
-//		os << "  feature " << i << ": " << fd.name << " (" << featureTypeName[(unsigned int)fd.type] << ")";
-//		if (fd.target) os << " [target]";
-//		if (fd.ignore) os << " [ignore]";
-//		if (fd.rowIdentifier) os << " [row-identifier]";
-//		os << std::endl;
-//	}
+	for (std::size_t i=0; i<m_hyperparameterValue.size(); i++)
+	{
+		os << "  hyperparameter " << m_flow->hyperparameter(i).name << " = " << m_hyperparameterValue[i] << std::endl;
+	}
 }
 
 void Run::commit()
@@ -243,7 +224,7 @@ void Run::commit()
 //	param.push_back(std::make_pair("model_serialized|application/octet-stream", ""));
 	detail::Json result = connection.post("/run", param);
 
-	IDType id = detail::json2number<IDType>(result["upload_run"]["id"]);
+	IDType id = detail::json2number<IDType>(result["upload_run"]["run_id"]);
 	setID(id);
 }
 

@@ -65,14 +65,8 @@ public:
 	std::string const& url() const
 	{ return m_url; }
 
-//	void setUrl(std::string const& url) const
-//	{ m_url = url; }
-
 	PathType const& filename() const
 	{ return m_filename; }
-
-//	void setFilename(std::string const& filename) const
-//	{ m_filename = m_cacheDirectory / filename; }
 
 	bool downloaded() const
 	{ return boost::filesystem::exists(m_filename); }

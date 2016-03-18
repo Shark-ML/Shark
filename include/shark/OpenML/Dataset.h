@@ -75,51 +75,47 @@ public:
 	// property getters
 	//
 
+	/// \brief Name of the data set.
 	std::string const& name() const
 	{ return m_name; }
 
+	/// \brief Textual description of the data set.
 	std::string const& description() const
 	{ return m_description; }
 
+	/// \brief Default target for prediction; ignore - obtain the target feature from the task instead.
 	std::string const& defaultTargetFeature() const
 	{ return m_defaultTargetFeature; }
 
+	/// \brief Data set file format, should be ARFF for now.
 	std::string const& format() const
 	{ return m_format; }
 
+	/// \brief 
 	std::string const& status() const
 	{ return m_status; }
 
-	std::string const& uploadDate() const
-	{ return m_uploadDate; }
-
-	std::string const& version() const
-	{ return m_version; }
-
-	std::string const& versionLabel() const
-	{ return m_versionLabel; }
-
+	/// \brief Data set visibility (e.g., public or private).
 	std::string const& visibility() const
 	{ return m_visibility; }
 
+	/// \brief Number of features of the data set as found in the ARFF data set file.
 	std::size_t numberOfFeatures() const
 	{ return m_feature.size(); }
 
+	/// \brief Obtain a feature description by index.
 	FeatureDescription const& feature(std::size_t index) const
 	{ return m_feature[index]; }
 
 private:
 	// properties
-	std::string m_name;
-	std::string m_description;
-	std::string m_defaultTargetFeature;
-	std::string m_format;
-	std::string m_licence;
-	std::string m_status;
-	std::string m_uploadDate;
-	std::string m_version;
-	std::string m_versionLabel;
-	std::string m_visibility;
+	std::string m_name;                   ///< name of the data set
+	std::string m_description;            ///< textual description of the data set
+	std::string m_defaultTargetFeature;   ///< default target for prediction; ignore - obtain the target feature from the task instead
+	std::string m_format;                 ///< data set file format, should be ARFF for now
+	std::string m_licence;                ///< license, "public domain" if empty
+	std::string m_status;                 ///< data set status (e.g., active)
+	std::string m_visibility;             ///< data set visibility (e.g., public or private)
 
 	// features
 	std::vector<FeatureDescription> m_feature;

@@ -174,6 +174,11 @@ support for serialization:
 * :doc:`concepts/misc/statistics`
 * :doc:`concepts/misc/serialization`
 
+Last but not least, Shark offers a simple API for working with the
+OpenML platform:
+
+* :doc:`concepts/misc/openml`
+
 
 For Shark developers
 ++++++++++++++++++++

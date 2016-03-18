@@ -76,9 +76,20 @@ public:
 	/// \brief Print a human readable summary of the entity.
 	void print(std::ostream& os = std::cout) const;
 
+	/// \brief Obtain the number of hyperparameters of the flow.
+	std::size_t numberOfHyperparameters() const
+	{ return m_flow->numberOfHyperparameters(); }
+
+	/// \brief Define the value of a hyperparameter used for this run.
+	///
+	/// Call this function only on new runs. It fails for runs that were
+	/// already committed to the server, and also for runs that were
+	/// obtained from the server.
 	template <typename ValueType>
 	void setHyperparameterValue(std::string const& name, ValueType const& value)
 	{
+		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set hyperparameter value on an already existing run.");
+
 		// find the index
 		std::size_t num = m_flow->numberOfHyperparameters();
 		for (std::size_t i=0; i<num; i++)
@@ -95,9 +106,15 @@ public:
 	}
 
 	/// \brief Store predictions.
+	///
+	/// Call this function only on new runs. It fails for runs that were
+	/// already committed to the server, and also for runs that were
+	/// obtained from the server.
 	template <typename ContainerType>
 	void storePredictions(std::size_t repetition, std::size_t fold, ContainerType const& predictions)
 	{
+		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set hyperparameter value on an already existing run.");
+
 		SHARK_ASSERT(repetition < m_task->repetitions());
 		SHARK_ASSERT(fold < m_task->folds());
 		std::vector<double>& p = m_predictions[repetition][fold];
@@ -106,9 +123,15 @@ public:
 	}
 
 	/// \brief Store regression predictions as Data<VectorType>.
+	///
+	/// Call this function only on new runs. It fails for runs that were
+	/// already committed to the server, and also for runs that were
+	/// obtained from the server.
 	template <typename VectorType>
 	void storePredictions(std::size_t repetition, std::size_t fold, Data<VectorType> const& predictions)
 	{
+		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set hyperparameter value on an already existing run.");
+
 		SHARK_ASSERT(repetition < m_task->repetitions());
 		SHARK_ASSERT(fold < m_task->folds());
 		std::vector<double>& p = m_predictions[repetition][fold];
@@ -127,8 +150,14 @@ public:
 	}
 
 	/// \brief Store classification predictions as Data<unsigned int>.
+	///
+	/// Call this function only on new runs. It fails for runs that were
+	/// already committed to the server, and also for runs that were
+	/// obtained from the server.
 	inline void storePredictions(std::size_t repetition, std::size_t fold, Data<unsigned int> const& predictions)
 	{
+		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set hyperparameter value on an already existing run.");
+
 		SHARK_ASSERT(repetition < m_task->repetitions());
 		SHARK_ASSERT(fold < m_task->folds());
 		std::vector<double>& p = m_predictions[repetition][fold];
@@ -156,10 +185,10 @@ public:
 	void commit();
 
 private:
-	std::shared_ptr<Task> m_task;
-	std::shared_ptr<Flow> m_flow;
-	std::vector< std::string > m_hyperparameterValue;
-	std::vector< std::vector< std::vector< double > > > m_predictions;
+	std::shared_ptr<Task> m_task;        ///< task associated with the run
+	std::shared_ptr<Flow> m_flow;        ///< flow associated with the run
+	std::vector< std::string > m_hyperparameterValue;                    ///< values of all hyperparameters defined in the flow
+	std::vector< std::vector< std::vector< double > > > m_predictions;   ///< predictions for all repetitions and folds defined in the task
 };
 
 

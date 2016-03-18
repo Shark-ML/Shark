@@ -32,7 +32,6 @@
 
 //###begin<includes>
 #include <shark/OpenML/OpenML.h>
-#include <shark/Data/Arff.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Algorithms/Trainers/McSvmOVATrainer.h>
 #include <iostream>
@@ -56,33 +55,30 @@ int main(int argc, char** argv)
 //###begin<key>
 	// The following line sets the OpenML api key to the Shark library's
 	// demo account. This account is for tutorial demonstration only.
-	// It is a read-only key, which does not allow to make changed to
-	// the OpenML system.
+	// It is a read-only key, which does not allow to make changes to
+	// the OpenML data base.
 	// NOTE: Always use your own api key (attached to your OpenML account)
 	// for actual experiments. Otherwise your results will be lost and you
 	// cannot receive credit for your work. Creating new flows and runs
 	// with this key will silently fail.
 	string api_key = "8d736266baa96f8ef99f10516911d334";
 
-	// use the user's api key instead (if provided)
-	if (argc > 1) api_key = argv[1];
-
 	// register the api key in the global openML::connection object
 	openML::connection.setKey(api_key);
 //###end<key>
 
-//###begin<query-tasks>
+//###begin<query>
 	// query a list of tasks
-//	openML::IDList taskIDs = openML::supervisedClassificationTasks();
-	// TODO: augment IDs with properties dictionary, add filtering mechanisms
-	shark::openML::IDType taskID = 11;   // this should be the result of a query at some point in the future
-//###end<query-tasks>
+//	openML::IDList tasks = openML::supervisedClassificationTasks("p <= 10 AND n >= 100 AND n <= 200");
+//	openML::IDType taskID = tasks[0].id;
+	openML::IDType taskID = 11;   // this should be the result of a query at some point in the future
+//###end<query>
 
-//###begin<tasks>
+//###begin<task>
 	// instantiate the chosen task
 	shared_ptr<openML::Task> task = openML::Task::get(taskID);
 	task->print();
-//###end<tasks>
+//###end<task>
 
 //###begin<dataset>
 	// obtain the data set underlying the task
@@ -90,12 +86,18 @@ int main(int argc, char** argv)
 	dataset->print();
 //###end<dataset>
 
+//###begin<tagging>
+	// set a tag
+	dataset->tag("shark-tutorial-demo-tag");
+//###end<tagging>
+
 //###begin<setup>
 	// setup a learning machine to solve the task
 	double C = 1.0;
 	double gamma = 1.0;
+	bool bias = false;
 	GaussianRbfKernel<RealVector> kernel(gamma);
-	McSvmOVATrainer<RealVector> trainer(&kernel, C, false);
+	McSvmOVATrainer<RealVector> trainer(&kernel, C, bias);
 //###end<setup>
 
 //###begin<flow>
@@ -112,11 +114,14 @@ int main(int argc, char** argv)
 //###begin<run>
 	// create a run object representing the results
 	openML::Run run(task, flow);
+//###end<run>
+
+//###begin<hyperparam>
 	run.setHyperparameterValue("C", trainer.C());                // ideally this would be automated
 	run.setHyperparameterValue("gamma", kernel.gamma());         // ideally this would be automated
 	run.setHyperparameterValue("bias", trainer.trainOffset());   // ideally this would be automated
 	run.print();
-//###end<run>
+//###end<hyperparam>
 
 //###begin<execute>
 	// execute the learning machine and fill the run with predictions
@@ -128,11 +133,11 @@ int main(int argc, char** argv)
 		CVFolds< LabeledData<RealVector, unsigned int> > folds = task->split(r, data);
 		for (std::size_t f=0; f<task->folds(); f++)
 		{
-			ClassificationDataset traindata = folds.training(f);
-			ClassificationDataset testdata  = folds.validation(f);
+			ClassificationDataset traindata      = folds.training(f);
+			ClassificationDataset validationdata = folds.validation(f);
 			KernelClassifier<RealVector> model;
 			trainer.train(model, traindata);
-			Data<unsigned int> predictions = model(testdata.inputs());
+			Data<unsigned int> predictions = model(validationdata.inputs());
 			run.storePredictions(r, f, predictions);
 			cout << "." << flush;
 		}
@@ -143,15 +148,6 @@ int main(int argc, char** argv)
 //###begin<commit>
 	// upload the results to OpenML
 	run.commit();
+	cout << "ID of the new run: " << run.id() << endl;
 //###end<commit>
-
-//###begin<tagging>
-	// tag the run
-	run.tag("shark-tutorial-test-tag");
-	run.print();
-
-	// untag it again
-	run.untag("shark-tutorial-test-tag");
-	run.print();
-//###end<tagging>
 }

@@ -177,7 +177,7 @@ bool Task::download()
 void Task::tag(std::string const& tagname)
 {
 	Connection::ParamType param;
-	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
+	param.push_back(std::make_pair("task_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/task/tag", param);
 	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
@@ -187,7 +187,7 @@ void Task::tag(std::string const& tagname)
 void Task::untag(std::string const& tagname)
 {
 	Connection::ParamType param;
-	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
+	param.push_back(std::make_pair("task_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/task/untag");
 	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");

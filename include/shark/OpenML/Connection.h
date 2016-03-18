@@ -49,6 +49,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <thread>
 
 
 namespace shark {
@@ -119,12 +120,13 @@ private:
 	/// \brief Download a full HTTP response from the socket.
 	bool receiveResponse(detail::HttpResponse& response);
 
-	std::string m_host;
-	unsigned short m_port;
-	std::string m_key;
-	std::string m_prefix;
-	detail::Socket m_socket;
-	std::string m_readbuffer;
+	std::string m_host;                ///< remote host of this connection
+	unsigned short m_port;             ///< remote port of this connection
+	std::string m_key;                 ///< API key of this connection (may be empty)
+	std::string m_prefix;              ///< URL prefix for the OpenML REST API
+	detail::Socket m_socket;           ///< underlying socket object
+	std::string m_readbuffer;          ///< socket read buffer
+	static std::mutex m_mutex;         ///< mutex for global synchronization of API calls and write operations to the file cache
 };
 
 

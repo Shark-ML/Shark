@@ -99,13 +99,11 @@ detail::HttpResponse Connection::getHTTP(std::string const& request, ParamType c
 			"host: " + m_host + "\r\n"
 			"\r\n";
 
-//printf("msg='%s'\n", msg.c_str());
 	if (! m_socket.writeAll(msg.c_str(), msg.size()))
 	{
 		m_socket.close();
 		return response;
 	}
-//printf("receiving ...\n");
 	receiveResponse(response);
 	return response;
 }
@@ -141,64 +139,98 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 	if (! m_socket.connected()) m_socket.connect(m_host, m_port);
 	if (! m_socket.connected()) return response;
 
-	std::string url = m_prefix + request;
+	std::string msg;
 
-	std::string boundary = "--------------------------------";
-	for (std::size_t i=0; i<32; i++) boundary[i] = '0' + (rand() % 10);
-
-	std::string body;
-	for (ParamType::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
+	// check for file uploads
+	bool upload = false;
+	for (std::size_t i=0; i<parameters.size(); i++)
 	{
-		std::string name = it->first;
-		std::string mime;
-		std::size_t pos = it->first.find('|');
-		if (pos != std::string::npos)
-		{
-			name = it->first.substr(0, pos);
-			mime = it->first.substr(pos+1);
-		}
+		if (parameters[i].first.find('|') != std::string::npos) upload = true;
+	}
 
-		body += "--";
-		body += boundary;
-		body += "\r\nContent-Disposition: form-data; name=\"";
-		body += name;
-		body += "\"\r\n";
-		if (! mime.empty())
+	if (upload)
+	{
+		// there are file uploads, use multipart/form-data
+		std::string url = m_prefix + request;
+
+		std::string boundary = "--------------------------------";
+		for (std::size_t i=0; i<32; i++) boundary[i] = '0' + (rand() % 10);
+
+		std::string body;
+		for (ParamType::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
 		{
-			body += "Content-Type: ";
-			body += mime;
+			std::string name = it->first;
+			std::string mime;
+			std::size_t pos = it->first.find('|');
+			if (pos != std::string::npos)
+			{
+				name = it->first.substr(0, pos);
+				mime = it->first.substr(pos+1);
+			}
+
+			body += "--";
+			body += boundary;
+			body += "\r\nContent-Disposition: form-data; name=\"";
+			body += name;
+			body += "\"";
+			if (! mime.empty())
+			{
+				body += "; filename=\"" + name + "\"\r\nContent-Type: ";
+				body += mime;
+				body += "\r\n";
+			}
+			body += "\r\n";
+			body += it->second;
 			body += "\r\n";
 		}
-		body += "\r\n";
-		body += it->second;
-		body += "\r\n";
-	}
-	if (! m_key.empty())
-	{
+		if (! m_key.empty())
+		{
+//			body += "--";
+//			body += boundary;
+//			body += "\r\nContent-Disposition: form-data; name=\"api_key\"\r\n\r\n";
+//			body += m_key;
+//			body += "\r\n";
+			url += "?api_key=" + detail::urlencode(m_key);
+		}
 		body += "--";
 		body += boundary;
-		body += "\r\nContent-Disposition: form-data; name=\"api_key\"\r\n\r\n";
-		body += m_key;
-		body += "\r\n";
+		body += "--\r\n";
+
+		msg = "POST " + url + " HTTP/1.1\r\n"
+				"host: " + m_host + "\r\n"
+				"content-length: " + boost::lexical_cast<std::string>(body.size()) + "\r\n"
+				"content-type: multipart/form-data; boundary=\"" + boundary + "\"\r\n"
+				"\r\n"
+				+ body;
 	}
-	body += "--";
-	body += boundary;
-	body += "--\r\n";
+	else
+	{
+		// there are no file uploads, use application/x-www-form-urlencoded
+		std::string url = m_prefix + request;
 
-	std::string msg = "POST " + url + " HTTP/1.1\r\n"
-			"host: " + m_host + "\r\n"
-			"content-length: " + boost::lexical_cast<std::string>(body.size()) + "\r\n"
-			"content-type: multipart/form-data; boundary=\"" + boundary + "\"\r\n"
-			"\r\n"
-			+ body;
+		std::string body;
+		for (std::size_t i=0; i<parameters.size(); i++)
+		{
+			body += detail::urlencode(parameters[i].first);
+			body += "=";
+			body += detail::urlencode(parameters[i].second);
+			body += "&";
+		}
+		body += "api_key=" + m_key;
 
-//printf("msg='%s'\n", msg.c_str());
+		msg = "POST " + url + " HTTP/1.1\r\n"
+				"host: " + m_host + "\r\n"
+				"content-length: " + boost::lexical_cast<std::string>(body.size()) + "\r\n"
+				"content-type: application/x-www-form-urlencoded\r\n"
+				"\r\n"
+				+ body;
+	}
+
 	if (! m_socket.writeAll(msg.c_str(), msg.size()))
 	{
 		m_socket.close();
 		return response;
 	}
-//printf("receiving ...\n");
 	receiveResponse(response);
 	return response;
 };
@@ -231,7 +263,6 @@ std::size_t Connection::download()
 {
 	char buffer[4096];
 	std::size_t n = m_socket.read(buffer, 4096);
-//for (std::size_t i=0; i<n; i++) printf("%c", buffer[i]);
 	m_readbuffer.append(buffer, n);
 	return n;
 }

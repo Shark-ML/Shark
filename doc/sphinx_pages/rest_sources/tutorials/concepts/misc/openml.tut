@@ -1,0 +1,198 @@
+Integration with the OpenML Platform
+====================================
+
+OpenML (open machine learning, http://www.openml.org) is a platform
+for sharing data, machine learning workflows, and results. It fosters
+collaborative problem solving, it makes research results more
+reproducible, and it can avoids duplicating efforts. Shark comes with
+built-in support for OpenML.
+
+
+Introduction to OpenML
+----------------------
+
+The OpenML platform introduces four main types of objects:
+* data sets (Shark class openML::Dataset)
+* tasks (Shark class openML::Task)
+* flows (Shark class openML::Flow)
+* runs (Shark class openML::Run)
+All of these entities are identified in OpenML with an ID. They are
+represented in Shark with a corresponding class in the namespace
+shark::openML. All four types inherit the common base class
+openML::Entity, which allows to print their properties to a stream
+(usually std::cout), and to add and remove tags (see below).
+
+A task defines what to do with a data set, e.g.,
+"supervised classification tasks; predict feature 'class' from data
+set 'iris'; evaluate with 10-fold cross validation". For best possible
+reproducibility of results the task defines the precise data splits to
+use.
+
+A flow (or workflow) defines a learning machine with its hyperparameters,
+e.g., "k-nearest-neighbor predictor, parameters: k (integer)". Think of
+it as representing one particular implementation of a learning machine,
+e.g., the k-nearest-neighbor classifier in a particular version of the
+Shark library.
+
+Finally, a run represents the application of a flow to a task. It stores
+the values of all hyperparameters defined by the flow and the
+predictions of the learning machine on the hold-out sets defined by the
+task. From these predictions OpenML computes a rich portfolio of
+evaluation metrics.
+
+For further information on OpenML we recommend the OpenML website
+http://www.openml.org/. Start by creating an account, and then export
+the platform.
+
+Each account is identified by a unique **API key**. The key can be
+obtained from the website under "account settings". It is a prerequisite
+for communication with the OpenML server. It connects all uploaded
+data to a user profile and is hence crucial for allowing users to give
+credit for each others work. For the purpose of this tutorial there
+exists a Shark library demo account. This account is read-only, it does
+not allow to make any changes to the OpenML database. It exists only
+for the purpose of this tutorial. Using each user's own key is highly
+recommended for all other uses, including exploration of the OpenML
+service.
+
+OpenML can be used for many different tasks, e.g., for conducting meta
+studies across many tasks and learning machines. In this tutorial we
+use it to store the results of an experiment for later reference.
+This simple step can greatly improve the reproducibility of
+computational studies. In addition it makes sure that the often vast
+computation time for training the models is not lost, since the model's
+predictions are uploaded to the server. The resulting information is
+much more rich than an aggregated performance measure found in a table
+in a research paper. This information become available to other users
+of OpenML, e.g., for conducting meta studies, for comparing the
+performance of different implementations, and even for analyses to be
+invented in the future.
+Note that due to the use of a read-only key the results are not stored.
+
+The user should be aware of the fact that data downloaded from OpenML
+is stored locally as files. This refers to data set files and to split
+files (both in Weka's ARFF format). This can greatly safe bandwidth, at
+the expense of disk space. Deleting these files (while no program using
+them is running) is perfectly safe. The cache directory can be obtained
+from `openML::CachedFile::cacheDirectory()` and changed by calling
+`openML::CachedFile::setCacheDirectory(dir)`. The default is the current
+directory.
+
+
+A brief OpenML Tour
+-------------------
+
+We start by including the central header of Shark's OpenML component,
+as well as a few more Shark headers for the actual learning machine.
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,includes>
+
+The very first step is to set the API key in the global OpenML
+connection object.
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,key>
+
+This will enable us to communicate with the OpenML service. The usual
+entry points for a program working with OpenML are data sets and tasks.
+We query all supervised regression tasks with at most 10 features and
+between 100 and 200 data points, and obtain the ID of the first of these.
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,query>
+
+OpenML data sets, tasks, and flows are managed in object pools to avoid
+the creation of duplicate objects in memory. A shared pointer to an
+object can be obtained from its ID. We output the properties of the task
+to standard output.
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,task>
+
+The data set is the most important property defining a task. Again, we
+dump its description to standard output.
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,dataset>
+
+All objects in OpenML can be tagged, e.g., for easy filtering. Simply
+call the tag method on the object.
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,tagging>
+
+Recall that the tag is not added to the database since we are working
+with a read-only api key. Removing a tag is equally simple, using the
+`untag` function.
+
+It is time to setup an actual machine learning experiment. We use a
+one-versus-all support vector machine for multi-class classification
+using a Gaussian radial basis function kernel.
+This learning machine has two three hyperparameters: the regularization
+parameter $C$, the kernel bandwidth parameter $\gamma$, and a boolean
+parameter deciding whether the trained model should have a bias
+(intercept) or not. For clarity we define these parameters explicitly as
+variables.
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,setup>
+
+The next (and crucial) step is to encode this setup into an OpenML flow
+object. A flow is identified by the name and version of a learning
+machine. Since Shark objects know their name, and the Shark library
+knows its version number, we can simply construct the flow from a
+trainer. However, in this case we must encode two objects, the SVM
+trainer and the kernel function. Hence we decide to construct the name
+string manually.
+The next step is to make all hyperparameters known to OpenML. This is
+important since it forces us (and all other users of the same flow) to
+provide the values of these parameters together with the corresponding
+results (see below). Finally we construct the flow object from its name,
+a short description, and the parameters, and output its properties on
+the console.
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,flow>
+
+Note that the creation of a flow would normally fail with a read-only
+key. If the flow does not exist yet in OpenML then feel free to create
+it with your own account. Afterwards the creation of the openML::Flow
+object works also with the read-only key because flows are not
+duplicated on the server, instead the local object is populated from
+the existing database entry.
+
+The last type of OpenML object we need is a run. We instantiate a run
+corresponding to the application of our flow to the selected task.
+Note that the run object is a local variable since there is no use in
+managing runs in an object pool.
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,run>
+
+A run requires two types of information: the values of all
+hyperparameters declared in the flow, and the predictions of the model
+on all cross-validation hold-out sets. The former step is accomplished
+as follows. Again, we output a textual object summary on the console.
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,hyperparam>
+
+The next step is to follow the instructions of the chosen task. These
+consists in training and evaluating the learning machine for all given
+splits of the data into training and validation subsets. These splits
+are organized into independent repetitions and cross-validation folds.
+We implement this as a double loop. The outer loop runs over repetitions,
+allowing us to split the data set efficiently into folds (also refer to
+the tutorial :doc:`concepts/data/dataset_subsets`).
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,execute>
+
+For each fold we obtain training and validation data, train the learning
+machine, make predictions on the test set, and store the predictions in
+the run object.
+
+The final step is to upload the results to OpenML:
+
+..sharkcode<OpenML/OpenMLTutorial.tpp,commit>
+
+If the upload is successful then the run object is created in OpenML.
+The server automatically computes a long list of performance measures
+for us, all of which can be queried from OpenML a few minutes later
+(since the evaluation measures are computed asynchronously). Also note
+that committing the run to OpenML assigns an ID to the run which can be
+used for subsequent queries of the predictions as well as the computed
+performance metrics.
+
+In general, an unsuccessful OpenML operation result in an exception
+being thrown.

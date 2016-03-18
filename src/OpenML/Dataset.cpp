@@ -65,10 +65,7 @@ Dataset::Dataset(IDType id, bool downloadData)
 		m_format = desc["format"].asString();
 		m_licence = desc["licence"].asString();
 		m_status = desc["status"].asString();
-		m_uploadDate = desc["upload_date"].asString();
 		m_url = desc["url"].asString();
-		m_version = desc["version"].asString();
-		m_versionLabel = desc["version_label"].asString();
 		m_visibility = desc["visibility"].asString();
 	}
 
@@ -108,7 +105,7 @@ Dataset::Dataset(IDType id, bool downloadData)
 void Dataset::tag(std::string const& tagname)
 {
 	Connection::ParamType param;
-	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
+	param.push_back(std::make_pair("data_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/data/tag", param);
 	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
@@ -118,7 +115,7 @@ void Dataset::tag(std::string const& tagname)
 void Dataset::untag(std::string const& tagname)
 {
 	Connection::ParamType param;
-	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
+	param.push_back(std::make_pair("data_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/data/untag", param);
 	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
@@ -134,12 +131,8 @@ void Dataset::print(std::ostream& os) const
 	os << " default target feature: " << m_defaultTargetFeature << std::endl;
 	os << " format: " << m_format << std::endl;
 	os << " license: " << m_licence << std::endl;
-	os << " format: " << m_format << std::endl;
 	os << " status: " << m_status << std::endl;
-	os << " upload date: " << m_uploadDate << std::endl;
 	os << " url: " << url() << std::endl;
-	os << " version: " << m_version << std::endl;
-	os << " version label: " << m_versionLabel << std::endl;
 	os << " visibility: " << m_visibility << std::endl;
 	os << " file status: ";
 	if (downloaded()) os << "in cache at " << filename().string();

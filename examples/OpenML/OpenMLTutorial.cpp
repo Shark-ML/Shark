@@ -80,6 +80,14 @@ int main(int argc, char** argv)
 	shared_ptr<openML::Dataset> dataset = task->dataset();
 	dataset->print();
 
+	// tag the run
+	dataset->tag("shark-tutorial-test-tag");
+	dataset->print();
+
+	// untag it again
+	dataset->untag("shark-tutorial-test-tag");
+	dataset->print();
+
 	// setup a learning machine to solve the task
 	double C = 1.0;
 	double gamma = 1.0;
@@ -124,12 +132,4 @@ int main(int argc, char** argv)
 
 	// upload the results to OpenML
 	run.commit();
-
-	// tag the run
-	run.tag("shark-tutorial-test-tag");
-	run.print();
-
-	// untag it again
-	run.untag("shark-tutorial-test-tag");
-	run.print();
 }

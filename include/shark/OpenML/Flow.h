@@ -52,7 +52,9 @@ namespace openML {
 /// \brief Representation of an OpenML flow.
 SHARK_EXPORT_SYMBOL class Flow : public PooledEntity<Flow>
 {
-public:
+private:
+	friend class PooledEntity<Flow>;
+
 	/// \brief Construct an existing OpenML flow from its ID.
 	Flow(IDType id);
 
@@ -81,30 +83,38 @@ public:
 	/// \brief Print a human readable summary of the entity.
 	void print(std::ostream& os = std::cout) const;
 
+	/// \brief Name of the flow (acts as a key in OpenML).
 	std::string const& name() const
 	{ return m_name; }
 
+	/// \brief Version of the flow (acts as a key in OpenML).
 	std::string const& version() const
 	{ return m_version; }
 
+	/// \brief Short description of the flow.
 	std::string const& description() const
 	{ return m_description; }
 
+	/// \brief Obtain the number of hyperparameters of the flow.
 	std::size_t numberOfHyperparameters() const
 	{ return m_hyperparameter.size(); }
 
+	/// \brief Obtain a hyperparameter description by index.
 	Hyperparameter const& hyperparameter(std::size_t index) const
 	{ return m_hyperparameter[index]; }
 
 private:
+	/// \brief Create the flow on the OpenML server.
 	void create(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
+
+	/// \brief Obtain an existing flow from the OpenML server.
 	void obtainFromServer();
 
-	std::string m_name;
-	std::string m_description;
-	std::string m_version;
-	std::vector<Hyperparameter> m_hyperparameter;
-	std::map<std::string, std::string> m_properties;
+	std::string m_name;                                ///< name of the flow (key)
+	std::string m_description;                         ///< short description of the flow
+	std::string m_version;                             ///< version of the flow (key)
+	std::vector<Hyperparameter> m_hyperparameter;      ///< description of hyperparameters of the flow
+	std::map<std::string, std::string> m_properties;   ///< additional non-mandatory properties of the flow, fields must comply with the OpenML flow XML schema
 };
 
 
