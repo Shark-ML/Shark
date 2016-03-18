@@ -60,21 +60,19 @@ Connection::Connection()
 : m_host(OPENML_REST_API_HOST)
 , m_port(80)
 , m_prefix(OPENML_REST_API_PREFIX)
-, m_cacheDirectory(boost::filesystem::current_path())
 { }
 
 Connection::Connection(std::string const& host, unsigned short port, std::string const& prefix)
 : m_host(host)
 , m_port(port)
 , m_prefix(prefix)
-, m_cacheDirectory(boost::filesystem::current_path())
 { }
 
 Connection::~Connection()
 { }
 
 
-detail::HttpResponse Connection::getHTTP(std::string const& request, std::string const& parameters)
+detail::HttpResponse Connection::getHTTP(std::string const& request, ParamType const& parameters)
 {
 	detail::HttpResponse response;
 
@@ -82,42 +80,61 @@ detail::HttpResponse Connection::getHTTP(std::string const& request, std::string
 	if (! m_socket.connected()) return response;
 
 	std::string url = m_prefix + request;
+	bool q = true;
 	if (! m_key.empty())
 	{
 		url += "?api_key=" + m_key;
-		if (! parameters.empty()) url += "&" + parameters;
+		q = false;
 	}
-	else if (! parameters.empty()) url += "?" + parameters;
+	for (ParamType::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
+	{
+		if (q) url += '?'; else url += '&';
+		url += detail::urlencode(it->first);
+		url += "=";
+		url += detail::urlencode(it->second);
+		q = false;
+	}
+
 	std::string msg = "GET " + url + " HTTP/1.1\r\n"
 			"host: " + m_host + "\r\n"
 			"\r\n";
 
-	if (! m_socket.writeAll(msg.c_str(), msg.size())) return response;
+//printf("msg='%s'\n", msg.c_str());
+	if (! m_socket.writeAll(msg.c_str(), msg.size()))
+	{
+		m_socket.close();
+		return response;
+	}
+//printf("receiving ...\n");
 	receiveResponse(response);
 	return response;
 }
 
-detail::Json Connection::get(std::string const& request, std::string const& parameters)
+detail::Json Connection::get(std::string const& request, ParamType const& parameters)
 {
 	detail::HttpResponse response = getHTTP(request, parameters);
-	if (response.statusCode() == 0) return detail::Json(detail::null);
-	if (response.statusCode() == 200)
+	if (response.statusCode() == 0)
 	{
-		detail::Json json;
-		try
-		{
-			json.parse(response.body());
-			return json;
-		}
-		catch (...)
-		{
-			return detail::Json(detail::null);
-		}
+		// general communication or protocol violation error
+		throw SHARKEXCEPTION("OpenML GET request failed");
 	}
-	else return detail::Json((double)response.statusCode());
+	else if (response.statusCode() != 200)
+	{
+		// request failed, report error
+		std::string msg = "OpenML GET request failed with status code " + boost::lexical_cast<std::string>(response.statusCode());
+		if (! response.body().empty()) msg += " and error message " + response.body();
+		throw SHARKEXCEPTION(msg);
+	}
+	else
+	{
+		// request successful, return JSON reply
+		detail::Json json;
+		json.parse(response.body());
+		return json;
+	}
 }
 
-detail::HttpResponse Connection::postHTTP(std::string const& request, std::string const& body, std::string const& parameters)
+detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType const& parameters)
 {
 	detail::HttpResponse response;
 
@@ -125,47 +142,96 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, std::strin
 	if (! m_socket.connected()) return response;
 
 	std::string url = m_prefix + request;
+
+	std::string boundary = "--------------------------------";
+	for (std::size_t i=0; i<32; i++) boundary[i] = '0' + (rand() % 10);
+
+	std::string body;
+	for (ParamType::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
+	{
+		std::string name = it->first;
+		std::string mime;
+		std::size_t pos = it->first.find('|');
+		if (pos != std::string::npos)
+		{
+			name = it->first.substr(0, pos);
+			mime = it->first.substr(pos+1);
+		}
+
+		body += "--";
+		body += boundary;
+		body += "\r\nContent-Disposition: form-data; name=\"";
+		body += name;
+		body += "\"\r\n";
+		if (! mime.empty())
+		{
+			body += "Content-Type: ";
+			body += mime;
+			body += "\r\n";
+		}
+		body += "\r\n";
+		body += it->second;
+		body += "\r\n";
+	}
 	if (! m_key.empty())
 	{
-		url += "?api_key=" + m_key;
-		if (! parameters.empty()) url += "&" + parameters;
+		body += "--";
+		body += boundary;
+		body += "\r\nContent-Disposition: form-data; name=\"api_key\"\r\n\r\n";
+		body += m_key;
+		body += "\r\n";
 	}
-	else if (! parameters.empty()) url += "?" + parameters;
+	body += "--";
+	body += boundary;
+	body += "--\r\n";
+
 	std::string msg = "POST " + url + " HTTP/1.1\r\n"
-			"host: http://" + m_host + "\r\n"
+			"host: " + m_host + "\r\n"
 			"content-length: " + boost::lexical_cast<std::string>(body.size()) + "\r\n"
+			"content-type: multipart/form-data; boundary=\"" + boundary + "\"\r\n"
 			"\r\n"
 			+ body;
 
-	if (! m_socket.writeAll(msg.c_str(), msg.size())) return response;
+//printf("msg='%s'\n", msg.c_str());
+	if (! m_socket.writeAll(msg.c_str(), msg.size()))
+	{
+		m_socket.close();
+		return response;
+	}
+//printf("receiving ...\n");
 	receiveResponse(response);
 	return response;
 };
 
-detail::Json Connection::post(std::string const& request, std::string const& body, std::string const& parameters)
+detail::Json Connection::post(std::string const& request, ParamType const& parameters)
 {
-	detail::HttpResponse response = postHTTP(request, body, parameters);
-	if (response.statusCode() == 0) return detail::Json(detail::null);
-	if (response.statusCode() == 200)
+	detail::HttpResponse response = postHTTP(request, parameters);
+	if (response.statusCode() == 0)
 	{
-		detail::Json json;
-		try
-		{
-			json.parse(response.body());
-			return json;
-		}
-		catch (...)
-		{
-			return detail::Json(detail::null);
-		}
+		// general communication or protocol violation error
+		throw SHARKEXCEPTION("OpenML POST request failed");
 	}
-	else return detail::Json((double)response.statusCode());
+	else if (response.statusCode() != 200)
+	{
+		// request failed, report error
+		std::string msg = "OpenML POST request failed; " + boost::lexical_cast<std::string>(response.statusCode()) + " " + response.returnPhrase();
+		if (! response.body().empty()) msg += "; " + response.body();
+		throw SHARKEXCEPTION(msg);
+	}
+	else
+	{
+		// request successful, return JSON reply
+		detail::Json json;
+		json.parse(response.body());
+		return json;
+	}
 }
 
 std::size_t Connection::download()
 {
 	char buffer[4096];
 	std::size_t n = m_socket.read(buffer, 4096);
+//for (std::size_t i=0; i<n; i++) printf("%c", buffer[i]);
 	m_readbuffer.append(buffer, n);
 	return n;
 }
@@ -203,7 +269,7 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 	if (space1 == std::string::npos) { m_socket.close(); return false; }
 	std::size_t space2 = statusline.find(' ', space1 + 1);
 	if (space2 == std::string::npos) { m_socket.close(); return false; }
-	if (statusline.substr(0, space1) != "HTTP/1.1") { m_socket.close(); return false; }
+	if (statusline.substr(0, space1) != "HTTP/1.0" && statusline.substr(0, space1) != "HTTP/1.1") { m_socket.close(); return false; }
 	response.m_statusCode = boost::lexical_cast<unsigned int>(statusline.substr(space1+1, space2-space1-1));
 	response.m_returnPhrase = statusline.substr(space2 + 1);
 

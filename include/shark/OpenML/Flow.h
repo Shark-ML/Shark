@@ -37,7 +37,12 @@
 #define SHARK_OPENML_FLOW_H
 
 
-#include "Entity.h"
+#include "Base.h"
+#include "PooledEntity.h"
+#include <shark/Core/INameable.h>
+#include <vector>
+#include <map>
+#include <string>
 
 
 namespace shark {
@@ -45,15 +50,61 @@ namespace openML {
 
 
 /// \brief Representation of an OpenML flow.
-class Flow : public Entity
+SHARK_EXPORT_SYMBOL class Flow : public PooledEntity<Flow>
 {
 public:
-	double namedProperty(std::string const& property) const;
+	/// \brief Construct an existing OpenML flow from its ID.
+	Flow(IDType id);
 
+	/// \brief Construct a new OpenML flow.
+	Flow(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
+
+	/// \brief Construct a new OpenML flow named after a Shark object (usually a trainer).
+	Flow(INameable const& method, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
+
+public:
+	/// \brief Construct a new OpenML flow.
+	static std::shared_ptr<Flow> get(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
+
+	/// \brief Construct a new OpenML flow named after a Shark object (usually a trainer).
+	static std::shared_ptr<Flow> get(INameable const& method, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
+
+	/// \brief Obtain the version string used for creating new flows.
+	static std::string sharkVersion();
+
+	/// \brief Add a tag to the entity.
+	void tag(std::string const& tagname);
+
+	/// \brief Remove a tag from the entity.
+	void untag(std::string const& tagname);
+
+	/// \brief Print a human readable summary of the entity.
 	void print(std::ostream& os = std::cout) const;
 
+	std::string const& name() const
+	{ return m_name; }
+
+	std::string const& version() const
+	{ return m_version; }
+
+	std::string const& description() const
+	{ return m_description; }
+
+	std::size_t numberOfHyperparameters() const
+	{ return m_hyperparameter.size(); }
+
+	Hyperparameter const& hyperparameter(std::size_t index) const
+	{ return m_hyperparameter[index]; }
+
 private:
-	Task* m_task;
+	void create(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
+	void obtainFromServer();
+
+	std::string m_name;
+	std::string m_description;
+	std::string m_version;
+	std::vector<Hyperparameter> m_hyperparameter;
+	std::map<std::string, std::string> m_properties;
 };
 
 

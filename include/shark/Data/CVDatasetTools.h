@@ -123,12 +123,12 @@ public:
 		//~ return m_validationFoldSizes[i];
 	//~ }
 
-	/// \brief Returns the dataset underying the folds
+	/// \brief Returns the dataset underlying the folds
 	DatasetType const& dataset()const{
 		return m_dataset;
 	}
 	
-	/// \brief Returns the dataset underying the folds
+	/// \brief Returns the dataset underlying the folds
 	DatasetType& dataset(){
 		return m_dataset;
 	}

@@ -36,38 +36,40 @@
 #ifndef SHARK_OPENML_DATASET_H
 #define SHARK_OPENML_DATASET_H
 
-#include "Entity.h"
+#include "PooledEntity.h"
+#include "CachedFile.h"
 
 
 namespace shark {
 namespace openML {
 
 
-enum FeatureType
-{
-	NUMERIC = 0,
-	NOMINAL = 1,
-	STRING = 2,
-	DATE = 3,
-	UNKNOWN = 4,
-};
-
-
-struct FeatureDescription
-{
-	FeatureType type;
-	std::string name;
-	bool target;
-	bool ignore;
-	bool rowIdentifier;
-};
-
-
 /// \brief Representation of an OpenML data set.
-class Dataset : public Entity
+SHARK_EXPORT_SYMBOL class Dataset : public PooledEntity<Dataset>, public CachedFile
 {
+private:
+	friend class PooledEntity<Dataset>;
+
+	/// \brief Construct an existing dataset from its ID.
+	Dataset(IDType id, bool downloadData = true);
+
 public:
-	Dataset(IDType id);
+	////////////////////////////////////////////////////////////
+	// tagging
+	//
+
+	/// \brief Add a tag to the entity.
+	void tag(std::string const& tagname);
+
+	/// \brief Remove a tag from the entity.
+	void untag(std::string const& tagname);
+
+	////////////////////////////////////////////////////////////
+	// printing
+	//
+
+	/// \brief Print a human readable summary of the entity.
+	void print(std::ostream& os = std::cout) const;
 
 	////////////////////////////////////////////////////////////
 	// property getters
@@ -79,11 +81,8 @@ public:
 	std::string const& description() const
 	{ return m_description; }
 
-	std::string const& defaultTargetAttribute() const
-	{ return m_defaultTargetAttribute; }
-
-	std::string const& labelname() const
-	{ return m_defaultTargetAttribute; }
+	std::string const& defaultTargetFeature() const
+	{ return m_defaultTargetFeature; }
 
 	std::string const& format() const
 	{ return m_format; }
@@ -93,9 +92,6 @@ public:
 
 	std::string const& uploadDate() const
 	{ return m_uploadDate; }
-
-	std::string const& url() const
-	{ return m_url; }
 
 	std::string const& version() const
 	{ return m_version; }
@@ -112,44 +108,21 @@ public:
 	FeatureDescription const& feature(std::size_t index) const
 	{ return m_feature[index]; }
 
-//	double namedProperty(std::string const& property) const;
-
-	////////////////////////////////////////////////////////////
-	// file cache
-	//
-
-	bool download();
-
-	bool downloaded() const
-	{ return boost::filesystem::exists(m_arffFile); }
-
-	PathType const& filename() const
-	{ return m_arffFile; }
-
-	////////////////////////////////////////////////////////////
-	// dump information
-	//
-	void print(std::ostream& os = std::cout) const;
-
 private:
 	// properties
 	std::string m_name;
 	std::string m_description;
-	std::string m_defaultTargetAttribute;
+	std::string m_defaultTargetFeature;
 	std::string m_format;
 	std::string m_licence;
 	std::string m_status;
 	std::string m_uploadDate;
-	std::string m_url;
 	std::string m_version;
 	std::string m_versionLabel;
 	std::string m_visibility;
 
 	// features
 	std::vector<FeatureDescription> m_feature;
-
-	// path to cached ARFF file
-	PathType m_arffFile;
 };
 
 

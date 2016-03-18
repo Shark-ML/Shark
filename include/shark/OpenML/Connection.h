@@ -46,24 +46,28 @@
 #include "detail/Json.h"
 #include "detail/HttpResponse.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
 
 namespace shark {
 namespace openML {
 
 
-class Dataset;
+class CachedFile;
 
 
 /// \brief OpenML management class.
 ///
-/// The Connection class handles severl low-level tasks.
-/// Its primary purpose is to encapsulate the OpenML service through its
-/// REST API. In addition, the class provides a caching mechanisms for
-/// possibly large downloaded dataset files.
-class Connection
+/// The Connection class handles the communication with the OpenML
+/// webservice through the JSON-based endpoint of its REST API.
+SHARK_EXPORT_SYMBOL class Connection
 {
 public:
-	friend class Dataset;
+	friend class CachedFile;
+
+	typedef std::vector< std::pair<std::string, std::string> > ParamType;
 
 	Connection();
 	Connection(std::string const& host, unsigned short port = 80, std::string const& prefix = "");
@@ -77,28 +81,20 @@ public:
 	void setKey(std::string const& api_key)
 	{ m_key = api_key; }
 
-	/// \brief Obtain the path of the directory where dataset files are stored.
-	PathType const& cacheDirectory() const
-	{ return m_cacheDirectory; }
-
-	/// \brief Set the path of the directory where dataset files are stored.
-	void setCacheDirectory(PathType const& cacheDirectory)
-	{ m_cacheDirectory = cacheDirectory; }
-
 	/// \brief Send an http GET request, expecting a JSON object back.
 	///
 	/// \param   request      REST url, e.g., "/data/list"
-	/// \param   parameters   url-encoded string containing parameters in the format "param1&param2&param3..."
+	/// \param   parameters   tagged-values sent as URL-encoded parameters
 	/// \return  The function returns the JSON reply sent by the server. If the connection is not established it returns a JSON null object. In case of an unsuccessful query it returns the status code as a JSON number.
-	detail::Json get(std::string const& request, std::string const& parameters = "");
+	detail::Json get(std::string const& request, ParamType const& parameters = ParamType());
 
 	/// \brief Send an http POST request, expecting a JSON object back.
 	///
 	/// \param   request      REST url, e.g., "/data/list"
 	/// \param   body         (unencoded) message body
-	/// \param   parameters   url-encoded string containing parameters in the format "param1&param2&param3..."
+	/// \param   parameters   tagged-values sent as URL-encoded form data
 	/// \return  The function returns the JSON reply sent by the server. If the connection is not established it returns a JSON null object. In case of an unsuccessful query it returns the status code as a JSON number.
-	detail::Json post(std::string const& request, std::string const& body, std::string const& parameters = "");
+	detail::Json post(std::string const& request, ParamType const& parameters = ParamType());
 
 private:
 	// non-copyable
@@ -108,15 +104,14 @@ private:
 	/// \brief Send an http GET request.
 	///
 	/// \param   request      REST url, e.g., "/data/list"
-	/// \param   parameters   url-encoded string containing parameters in the format "param1&param2&param3..."
-	detail::HttpResponse getHTTP(std::string const& request, std::string const& parameters = "");
+	/// \param   parameters   tagged-values sent as URL-encoded parameters
+	detail::HttpResponse getHTTP(std::string const& request, ParamType const& parameters = ParamType());
 
 	/// \brief Send an http POST request.
 	///
 	/// \param   request      REST url, e.g., "/data/list"
-	/// \param   body         (unencoded) message body
-	/// \param   parameters   url-encoded string containing parameters in the format "param1&param2&param3..."
-	detail::HttpResponse postHTTP(std::string const& request, std::string const& body, std::string const& parameters = "");
+	/// \param   parameters   tagged-values sent as URL-encoded form data
+	detail::HttpResponse postHTTP(std::string const& request, ParamType const& parameters = ParamType());
 
 	/// \brief Download some more data from the socket and append it to the buffer.
 	std::size_t download();
@@ -130,11 +125,10 @@ private:
 	std::string m_prefix;
 	detail::Socket m_socket;
 	std::string m_readbuffer;
-	PathType m_cacheDirectory;
 };
 
 
-extern Connection connection;
+SHARK_EXPORT_SYMBOL extern Connection connection;
 
 
 };  // namespace openML

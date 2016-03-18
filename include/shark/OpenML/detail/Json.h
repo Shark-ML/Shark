@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       Json class used internally by the OpenML wrapper.
+ * \brief       Json class used internally by the OpenML module.
  * 
  * 
  * 
@@ -529,9 +529,9 @@ public:
 	{ return operator [] (std::string(key)); }
 	inline Json const& operator [] (std::string key) const
 	{ assertObject(); if (! has(key)) return m_undefined; else return (const_cast<Object&>(data().as<Object>()))[key]; }
-	inline Json& operator [] (std::size_t index)
+	inline Json& operator [] (int index)
 	{ assertArray(index); return data().as<Array>()[index]; }
-	inline Json const& operator [] (std::size_t index) const
+	inline Json const& operator [] (int index) const
 	{ assertArray(index); return data().as<Array>()[index]; }
 
 	// container iterator access

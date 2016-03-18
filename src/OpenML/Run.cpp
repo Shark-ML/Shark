@@ -35,12 +35,217 @@
 
 
 #include <shark/OpenML/OpenML.h>
+#include <shark/OpenML/detail/Tools.h>
+#include <shark/OpenML/detail/Json.h>
+#include <shark/Data/Arff.h>
 
 
 namespace shark {
 namespace openML {
 
 
+Run::Run(IDType id)
+: Entity(id)
+{
+	detail::Json result = connection.get("/run/" + boost::lexical_cast<std::string>(id));
+
+	// TODO!
+}
+
+
+void Run::tag(std::string const& tagname)
+{
+	Connection::ParamType param;
+	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
+	param.push_back(std::make_pair("tag", tagname));
+	detail::Json result = connection.post("/run/tag", param);
+	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
+	Entity::tag(tagname);
+}
+
+void Run::untag(std::string const& tagname)
+{
+	Connection::ParamType param;
+	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
+	param.push_back(std::make_pair("tag", tagname));
+	detail::Json result = connection.post("/run/untag", param);
+	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
+	Entity::untag(tagname);
+}
+
+void Run::print(std::ostream& os) const
+{
+	os << "Run:" << std::endl;
+	Entity::print(os);
+	os << " task: " << taskTypeName[m_task->tasktype()] << " on " << m_task->dataset()->name() << " [" << m_task->id() << "]" << std::endl;
+	os << " flow: " << m_flow->name() << " [" << m_flow->id() << "]" << std::endl;
+//	os << " type: " << taskTypeName[m_tasktype] << std::endl;
+//	os << " data set ID: " << m_datasetID << std::endl;
+//	os << " target feature: " << m_targetFeature << std::endl;
+//	os << " estimation procedure: " << estimationProcedureName[m_estimationProcedure] << std::endl;
+//	os << " splits url: " << m_url << std::endl;
+//	os << " number of repetitions: " << m_repetitions << std::endl;
+//	os << " number of folds: " << m_folds << std::endl;
+//	os << " number of data splits: " << m_repetitions * m_folds << std::endl;
+//	os << " evaluation measure: " << evaluationMeasureName[m_evaluationMeasure] << std::endl;
+//	os << " output format: " << m_outputFormat << std::endl;
+//	os << " file status: ";
+//	if (downloaded()) os << "in cache at " << filename().string();
+//	else os << "not in cache";
+//	os << std::endl;
+//	for (std::size_t i=0; i<m_outputFeature.size(); i++)
+//	{
+//		FeatureDescription const& fd = m_outputFeature[i];
+//		os << "  feature " << i << ": " << fd.name << " (" << featureTypeName[(unsigned int)fd.type] << ")";
+//		if (fd.target) os << " [target]";
+//		if (fd.ignore) os << " [ignore]";
+//		if (fd.rowIdentifier) os << " [row-identifier]";
+//		os << std::endl;
+//	}
+}
+
+void Run::commit()
+{
+	if (id() != invalidID) throw SHARKEXCEPTION("Cannot commit an already existing run.");
+
+	std::shared_ptr<Dataset> dataset = m_task->dataset();
+
+	// If the label is a nominal attribute then we have to obtain the
+	// possible values from the ARFF file. This is working around a
+	// weakness in the OpenML API.
+	std::vector<std::string> nominalValue;
+	std::string labelType = "NUMERIC";
+	bool targetNominal = false;
+	std::string const& targetName = m_task->targetFeature();
+	for (std::size_t i=0; i<dataset->numberOfFeatures(); i++)
+	{
+		FeatureDescription const& fd = dataset->feature(i);
+		if (fd.name == targetName)
+		{
+			if (fd.type == NOMINAL)
+			{
+				targetNominal = true;
+				std::ifstream stream(dataset->filename().string().c_str());
+				std::string line;
+				while (std::getline(stream, line))
+				{
+					if (line.empty()) continue;
+					if (line[line.size()-1] == '\r') line.erase(line.size() - 1);
+					if (line.empty()) continue;
+					if (line[0] == '%') continue;
+					if (line[0] != '@') throw SHARKEXCEPTION("invalid line in ARFF data set file");
+					std::size_t pos = line.find(' ');
+					if (pos == std::string::npos) pos = line.size();
+					std::string type = line.substr(0, pos);
+					detail::ASCIItoLowerCase(type);
+					if (type == "@attribute")
+					{
+						std::string name;
+						pos = arff::detail::parseString(line, pos, name, " ");
+						if (name == targetName)
+						{
+							if (line[pos] != '{') throw SHARKEXCEPTION("failed to determine nominal label values from ARFF data set file");
+							pos++;
+							while (pos < line.size())
+							{
+								std::string value;
+								pos = arff::detail::parseString(line, pos, value, ",}");
+								if (value.empty()) break;
+								nominalValue.push_back(value);
+								pos++;
+							}
+							break;
+						}
+					}
+					if (type == "@data") throw SHARKEXCEPTION("target attribute " + targetName + " not found in ARFF data set file");
+				}
+				stream.close();
+
+				if (nominalValue.empty()) throw SHARKEXCEPTION("failed to determine nominal label values from ARFF data set file");
+				labelType = "{" + nominalValue[0];
+				for (std::size_t i=1; i<nominalValue.size(); i++) labelType += "," + nominalValue[i];
+				labelType += "}";
+			}
+		}
+	}
+
+	// compile the predictions into an ARFF file
+	std::string predictions = "@relation openml_task_" + boost::lexical_cast<std::string>(m_task->id()) + "_predictions\n"
+			"@ATTRIBUTE repeat INTEGER\n"
+			"@ATTRIBUTE fold INTEGER\n"
+			"@ATTRIBUTE rowid INTEGER\n"
+			"@ATTRIBUTE prediction " + labelType + "\n";
+	if (targetNominal)
+	{
+		for (std::size_t i=0; i<nominalValue.size(); i++)
+		{
+			predictions += "@ATTRIBUTE confidence." + nominalValue[i] + " NUMERIC\n";
+		}
+	}
+	predictions += "@data\n";
+	for (std::size_t r=0; r<m_task->repetitions(); r++)
+	{
+		std::vector<std::size_t> const& foldIndices = m_task->splitIndices(r);
+
+		for (std::size_t f=0; f<m_task->folds(); f++)
+		{
+			std::vector<double> const& p = m_predictions[r][f];
+			if (p.empty()) throw SHARKEXCEPTION("predictions for repetition " + boost::lexical_cast<std::string>(r) + " and fold " + boost::lexical_cast<std::string>(f) + " are missing");
+			std::size_t row = 0;
+			for (std::size_t i=0; i<p.size(); i++)
+			{
+				while (foldIndices[row] != f) row++;    // find the "row_index" corresponding to the test input
+				predictions += boost::lexical_cast<std::string>(r);
+				predictions += ",";
+				predictions += boost::lexical_cast<std::string>(f);
+				predictions += ",";
+				predictions += boost::lexical_cast<std::string>(row);
+				predictions += ",";
+				if (targetNominal)
+				{
+					unsigned int cls = static_cast<unsigned int>(p[i]);
+					if (cls != p[i]) throw SHARKEXCEPTION("prediction of nominal label must be integer valued");
+					predictions += nominalValue[cls];
+					for (std::size_t j=0; j<nominalValue.size(); j++)
+					{
+						predictions += (cls == j) ? ",1" : ",0";
+					}
+				}
+				else
+				{
+					predictions += boost::lexical_cast<std::string>(p[i]);
+				}
+				predictions += "\n";
+				row++;
+			}
+		}
+	}
+
+	// create an XML description for the run
+	std::string description = "<oml:run xmlns:oml=\"http://openml.org/openml\">"
+				"<oml:task_id>" + boost::lexical_cast<std::string>(m_task->id()) + "</oml:task_id>"
+				"<oml:flow_id>" + boost::lexical_cast<std::string>(m_flow->id()) + "</oml:flow_id>";
+	for (std::size_t i=0; i<m_flow->numberOfHyperparameters(); i++)
+	{
+		if (m_hyperparameterValue[i].empty()) throw SHARKEXCEPTION("hyperparameter " + boost::lexical_cast<std::string>(i) + " (" + m_flow->hyperparameter(i).name + ") is not defined");
+		Hyperparameter const& p = m_flow->hyperparameter(i);
+		description += "<oml:parameter_setting>"
+				"<oml:name>" + detail::xmlencode(p.name) + "</oml:name>"
+				"<oml:value>" + detail::xmlencode(m_hyperparameterValue[i]) + "</oml:value>"
+				"</oml:parameter_setting>";
+	}
+	description += "</oml:run>";
+
+	Connection::ParamType param;
+	param.push_back(std::make_pair("description|application/xml", description));
+	param.push_back(std::make_pair("predictions|application/octet-stream", predictions));
+//	param.push_back(std::make_pair("model_readable|text/plain", ""));
+//	param.push_back(std::make_pair("model_serialized|application/octet-stream", ""));
+	detail::Json result = connection.post("/run", param);
+
+	IDType id = detail::json2number<IDType>(result["upload_run"]["id"]);
+	setID(id);
+}
 
 
 };  // namespace openML

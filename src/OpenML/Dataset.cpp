@@ -39,6 +39,8 @@
 #include <shark/OpenML/detail/HttpResponse.h>
 #include <shark/Core/Exception.h>
 
+#include <boost/lexical_cast.hpp>
+
 #include <fstream>
 
 
@@ -46,22 +48,20 @@ namespace shark {
 namespace openML {
 
 
-static const char* featureTypeName[] = { "numeric", "nominal", "string", "date", "unknown" };
-
-
-Dataset::Dataset(IDType id)
-: Entity(id)
+Dataset::Dataset(IDType id, bool downloadData)
+: PooledEntity<Dataset>(id)
+, CachedFile("", "dataset_" + boost::lexical_cast<std::string>(id) + ".arff")
 {
 	{
 		detail::Json result = connection.get("/data/" + boost::lexical_cast<std::string>(id));
 		if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("failed to query OpenML data set");
 
 		detail::Json desc = result["data_set_description"];
-		setTags(desc["tag"]);
+		if (desc.has("tag")) setTags(desc["tag"]);
 
 		m_name = desc["name"].asString();
 		m_description = desc["description"].asString();
-		m_defaultTargetAttribute = desc["default_target_attribute"].asString();
+		m_defaultTargetFeature = desc["default_target_attribute"].asString();
 		m_format = desc["format"].asString();
 		m_licence = desc["licence"].asString();
 		m_status = desc["status"].asString();
@@ -83,11 +83,13 @@ Dataset::Dataset(IDType id)
 			FeatureDescription fd;
 			std::string type = feature["data_type"].asString();
 			detail::ASCIItoLowerCase(type);
-			if (type == "numeric") fd.type = NUMERIC;
+			if (type == "binary") fd.type = BINARY;
+			else if (type == "integer") fd.type = INTEGER;
+			else if (type == "numeric") fd.type = NUMERIC;
 			else if (type == "nominal") fd.type = NOMINAL;
 			else if (type == "string") fd.type = STRING;
 			else if (type == "date") fd.type = DATE;
-			else fd.type = UNKNOWN;
+			else throw SHARKEXCEPTION("unknown feature type in dataset definition");
 			fd.name = feature["name"].asString();
 			fd.target = detail::json2bool(feature["is_target"]);
 			fd.ignore = detail::json2bool(feature["is_ignore"]);
@@ -96,40 +98,31 @@ Dataset::Dataset(IDType id)
 		}
 	}
 
-	std::string filename = "dataset-" + boost::lexical_cast<std::string>(id);
-	m_arffFile = connection.cacheDirectory() / filename;
+	if (downloadData)
+	{
+		if (! download()) throw SHARKEXCEPTION("failed to download OpenML data set");
+	}
 }
 
-bool Dataset::download()
+
+void Dataset::tag(std::string const& tagname)
 {
-printf("[download] m_arffFile=%s\n", m_arffFile.string().c_str());
-	if (downloaded()) return true;
+	Connection::ParamType param;
+	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
+	param.push_back(std::make_pair("tag", tagname));
+	detail::Json result = connection.post("/data/tag", param);
+	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
+	Entity::tag(tagname);
+}
 
-	std::string host;
-	std::string resource;
-	if (m_url.size() >= 7 && m_url.substr(0, 7) == "http://")
-	{
-		std::size_t slash = m_url.find('/', 7);
-		if (slash == std::string::npos) return false;
-		host = m_url.substr(7, slash - 7);
-		resource = m_url.substr(slash);
-	}
-	else
-	{
-		std::size_t slash = m_url.find('/');
-		if (slash == std::string::npos) return false;
-		host = m_url.substr(0, slash);
-		resource = m_url.substr(slash);
-	}
-
-	Connection conn(host);
-	detail::HttpResponse response = conn.getHTTP(resource);
-	if (response.statusCode() != 200) return false;
-
-	std::ofstream os(m_arffFile.string());
-	os << response.body();
-	os.close();
-	return true;
+void Dataset::untag(std::string const& tagname)
+{
+	Connection::ParamType param;
+	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
+	param.push_back(std::make_pair("tag", tagname));
+	detail::Json result = connection.post("/data/untag", param);
+	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
+	Entity::untag(tagname);
 }
 
 void Dataset::print(std::ostream& os) const
@@ -138,18 +131,18 @@ void Dataset::print(std::ostream& os) const
 	Entity::print(os);
 	os << " name: " << m_name << std::endl;
 //	os << " description: " << m_description << std::endl;
-	os << " default target attribute: " << m_defaultTargetAttribute << std::endl;
+	os << " default target feature: " << m_defaultTargetFeature << std::endl;
 	os << " format: " << m_format << std::endl;
 	os << " license: " << m_licence << std::endl;
 	os << " format: " << m_format << std::endl;
 	os << " status: " << m_status << std::endl;
 	os << " upload date: " << m_uploadDate << std::endl;
-	os << " url: " << m_url << std::endl;
+	os << " url: " << url() << std::endl;
 	os << " version: " << m_version << std::endl;
 	os << " version label: " << m_versionLabel << std::endl;
 	os << " visibility: " << m_visibility << std::endl;
 	os << " file status: ";
-	if (downloaded()) os << "in cache at " << m_arffFile.string();
+	if (downloaded()) os << "in cache at " << filename().string();
 	else os << "not in cache";
 	os << std::endl;
 	os << " " << m_feature.size() << " features:" << std::endl;

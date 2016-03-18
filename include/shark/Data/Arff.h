@@ -3,6 +3,10 @@
  * 
  *
  * \brief       Support for importing and exporting data from and to (Weka) ARFF files.
+ *
+ * The import and export functions in the file aim to comply to the
+ * specification at https://weka.wikispaces.com/ARFF+%28stable+version%29 ,
+ * however, the spec is inaccurate and far from complete.
  * 
  * 
  * \par
@@ -68,59 +72,59 @@ namespace shark {
 
 namespace arff {
 
-/// \brief Helper type for defining how to handle nominal attributes.
-enum HandleNominal
+/// \brief Helper type for defining how to handle nominal attributes during import.
+SHARK_EXPORT_SYMBOL enum HandleNominal
 {
-	NominalIgnore,
-	NominalThrow,
-	NominalOneHotEncoding,
+	NominalIgnore,                     ///< silently ignore nominal attributes
+	NominalThrow,                      ///< throw an exception when encountering a nominal attribute
+	NominalOneHotEncoding,             ///< convert the nominal into a vector with a one-hot encoding
 };
 
-/// \brief Helper type for defining how to handle string attributes.
-enum HandleString
+/// \brief Helper type for defining how to handle string attributes during import.
+SHARK_EXPORT_SYMBOL enum HandleString
 {
-	StringIgnore,
-	StringThrow,
+	StringIgnore,                      ///< silently ignore string attributes
+	StringThrow,                       ///< throw an exception when encountering a string attribute
 };
 
-/// \brief Helper type for defining how to handle date attributes.
-enum HandleDate
+/// \brief Helper type for defining how to handle date attributes during import.
+SHARK_EXPORT_SYMBOL enum HandleDate
 {
-	DateIgnore,
-	DateThrow,
-	DateConvertToUnixTimestamp,
+	DateIgnore,                        ///< silently ignore date attributes
+	DateThrow,                         ///< throw an exception when encountering a date attribute
+	DateConvertToUnixTimestamp,        ///< convert date to a double number, with 0 indicating the start of the epoch
 };
 
-/// \brief Helper type for defining how to handle relational attributes.
-enum HandleRelational
+/// \brief Helper type for defining how to handle relational attributes during import.
+SHARK_EXPORT_SYMBOL enum HandleRelational
 {
-	RelationalIgnore,
-	RelationalThrow,
+	RelationalIgnore,                  ///< silently ignore relational attributes
+	RelationalThrow,                   ///< throw an exception when encountering a relational attribute
 };
 
-/// \brief Helper type for defining how to handle relational attributes.
-enum HandleMissingValue
+/// \brief Helper type for defining how to handle missing values during import.
+SHARK_EXPORT_SYMBOL enum HandleMissingValue
 {
-	MissingValueNaN,               ///< use silent NaN to denote missing values
-	MissingValueThrow,             ///< throw an exception when encountering a missing value
+	MissingValueNaN,                   ///< use silent NaN to denote missing values, and all-zero for one-hot encoded nominal attributes
+	MissingValueThrow,                 ///< throw an exception when encountering a missing value
 };
 
 /// \brief Helper structure for holding (optional) import options.
-struct ImportOptions
+SHARK_EXPORT_SYMBOL struct ImportOptions
 {
 	ImportOptions()
 	: handleNominal(NominalOneHotEncoding)
 	, handleString(StringThrow)
-	, handleDate(DateThrow)
+	, handleDate(DateConvertToUnixTimestamp)
 	, handleRelational(RelationalThrow)
 	, handleMissingValue(MissingValueThrow)
 	{ }
 
-	HandleNominal handleNominal;
-	HandleString handleString;
-	HandleDate handleDate;
-	HandleRelational handleRelational;
-	HandleMissingValue handleMissingValue;
+	HandleNominal handleNominal;       ///< definition of how to handle nominal attributes
+	HandleString handleString;         ///< definition of how to handle string attributes
+	HandleDate handleDate;             ///< definition of how to handle date attributes
+	HandleRelational handleRelational;   ///< definition of how to handle relational attributes
+	HandleMissingValue handleMissingValue;  ///< definition of how to handle missing values
 };
 
 
@@ -134,7 +138,7 @@ enum AttributeType
 	Ignore,
 };
 
-std::size_t parseString(std::string const& line, std::size_t start, std::string& token, std::string const& delimitors)
+SHARK_EXPORT_SYMBOL inline std::size_t parseString(std::string const& line, std::size_t start, std::string& token, std::string const& delimitors)
 {
 	while (line[start] == ' ') start++;
 	std::size_t end = start;
@@ -165,7 +169,7 @@ std::size_t parseString(std::string const& line, std::size_t start, std::string&
 	return end;
 }
 
-std::size_t parseToken(std::string const& line, std::size_t start, std::string& token, char delimitor = ' ')
+SHARK_EXPORT_SYMBOL inline std::size_t parseToken(std::string const& line, std::size_t start, std::string& token, char delimitor = ' ')
 {
 	while (line[start] == ' ') start++;
 	std::size_t end = start;
@@ -175,7 +179,7 @@ std::size_t parseToken(std::string const& line, std::size_t start, std::string& 
 	return end;
 }
 
-double parseDate(std::string const& date, std::string const& format)
+SHARK_EXPORT_SYMBOL inline double parseDate(std::string const& date, std::string const& format)
 {
 	static const boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
 
@@ -202,7 +206,7 @@ void setLabel(T& container, double value)
 }
 
 template <>
-void setLabel<unsigned int>(unsigned int& label, double value)
+inline void setLabel<unsigned int>(unsigned int& label, double value)
 {
 	label = (unsigned int)value;
 	SHARK_ASSERT((double)label == std::floor(value));
@@ -211,18 +215,18 @@ void setLabel<unsigned int>(unsigned int& label, double value)
 template <typename T>
 std::string label2string(T const& label)
 {
-	throw SHARKEXCEPTION("[exportARFF] don't know how to convert label to ARFF output");
+	throw SHARKEXCEPTION("[exportARFF] cannot to convert label to ARFF format");
 }
 
 template <>
-std::string label2string<RealVector>(RealVector const& label)
+inline std::string label2string<RealVector>(RealVector const& label)
 {
 	SHARK_ASSERT(label.size() == 1);
 	return boost::lexical_cast<std::string>(label[0]);
 }
 
 template <>
-std::string label2string<unsigned int>(unsigned int const& label)
+inline std::string label2string<unsigned int>(unsigned int const& label)
 {
 	return boost::lexical_cast<std::string>(label);
 }
@@ -258,6 +262,7 @@ SHARK_EXPORT_SYMBOL template<typename InputT, typename LabelT> void importARFF(
 	{
 		if (line.empty()) continue;
 		if (line[line.size()-1] == '\r') line.erase(line.size() - 1);
+		if (line.empty()) continue;
 		if (line[0] == '%') continue;
 		if (line[0] == '@')
 		{
@@ -353,6 +358,7 @@ SHARK_EXPORT_SYMBOL template<typename InputT, typename LabelT> void importARFF(
 	{
 		if (line.empty()) continue;
 		if (line[line.size()-1] == '\r') line.erase(line.size() - 1);
+		if (line.empty()) continue;
 		if (line[0] == '%') continue;
 
 		InputT input(dimension);
@@ -369,23 +375,47 @@ SHARK_EXPORT_SYMBOL template<typename InputT, typename LabelT> void importARFF(
 				pos = arff::detail::parseString(line, pos, s, ",}");
 				if (attributeType[i] == arff::detail::Nominal)
 				{
-					std::map<std::string, std::size_t>::const_iterator it = attributeNominalValue[i].find(s);
-					if (it == attributeNominalValue[i].end()) throw SHARKEXCEPTION("[importARFF] undeclared value in nominal field");
-					std::size_t value = it->second;
-					if (i == labelIndex) arff::detail::setLabel(label, value);
-					else input(attributeStart[i + value]) = 1.0;
+					if (s == "?")
+					{
+						if (options.handleMissingValue == arff::MissingValueThrow) throw SHARKEXCEPTION("[importARFF] cannot handle missing value");
+						// nothing to do, represented as all-zeros
+					}
+					else
+					{
+						std::map<std::string, std::size_t>::const_iterator it = attributeNominalValue[i].find(s);
+						if (it == attributeNominalValue[i].end()) throw SHARKEXCEPTION("[importARFF] undeclared value in nominal field");
+						std::size_t value = it->second;
+						if (i == labelIndex) arff::detail::setLabel(label, value);
+						else input(attributeStart[i + value]) = 1.0;
+					}
 				}
 				else if (attributeType[i] == arff::detail::Numeric)
 				{
-					double value = boost::lexical_cast<double>(s);
-					if (i == labelIndex) arff::detail::setLabel(label, value);
-					else input(attributeStart[i]) = value;
+					if (s == "?")
+					{
+						if (options.handleMissingValue == arff::MissingValueThrow) throw SHARKEXCEPTION("[importARFF] cannot handle missing value");
+						else input(attributeStart[i]) = std::nan("");
+					}
+					else
+					{
+						double value = boost::lexical_cast<double>(s);
+						if (i == labelIndex) arff::detail::setLabel(label, value);
+						else input(attributeStart[i]) = value;
+					}
 				}
 				else if (attributeType[i] == arff::detail::Date)
 				{
-					double value = arff::detail::parseDate(s, dateFormat[i]);
-					if (i == labelIndex) arff::detail::setLabel(label, value);
-					else input(attributeStart[i]) = value;
+					if (s == "?")
+					{
+						if (options.handleMissingValue == arff::MissingValueThrow) throw SHARKEXCEPTION("[importARFF] cannot handle missing value");
+						else input(attributeStart[i]) = std::nan("");
+					}
+					else
+					{
+						double value = arff::detail::parseDate(s, dateFormat[i]);
+						if (i == labelIndex) arff::detail::setLabel(label, value);
+						else input(attributeStart[i]) = value;
+					}
 				}
 				else
 				{
@@ -404,23 +434,47 @@ SHARK_EXPORT_SYMBOL template<typename InputT, typename LabelT> void importARFF(
 				pos = arff::detail::parseString(line, pos, s, ",");
 				if (attributeType[i] == arff::detail::Nominal)
 				{
-					std::map<std::string, std::size_t>::const_iterator it = attributeNominalValue[i].find(s);
-					if (it == attributeNominalValue[i].end()) throw SHARKEXCEPTION("[importARFF] undeclared value in nominal field");
-					std::size_t value = it->second;
-					if (i == labelIndex) arff::detail::setLabel(label, value);
-					else input(attributeStart[i + value]) = 1.0;
+					if (s == "?")
+					{
+						if (options.handleMissingValue == arff::MissingValueThrow) throw SHARKEXCEPTION("[importARFF] cannot handle missing value");
+						// nothing to do, represented as all-zeros
+					}
+					else
+					{
+						std::map<std::string, std::size_t>::const_iterator it = attributeNominalValue[i].find(s);
+						if (it == attributeNominalValue[i].end()) throw SHARKEXCEPTION("[importARFF] undeclared value in nominal field");
+						std::size_t value = it->second;
+						if (i == labelIndex) arff::detail::setLabel(label, value);
+						else input(attributeStart[i + value]) = 1.0;
+					}
 				}
 				else if (attributeType[i] == arff::detail::Numeric)
 				{
-					double value = boost::lexical_cast<double>(s);
-					if (i == labelIndex) arff::detail::setLabel(label, value);
-					else input(attributeStart[i]) = value;
+					if (s == "?")
+					{
+						if (options.handleMissingValue == arff::MissingValueThrow) throw SHARKEXCEPTION("[importARFF] cannot handle missing value");
+						else input(attributeStart[i]) = std::nan("");
+					}
+					else
+					{
+						double value = boost::lexical_cast<double>(s);
+						if (i == labelIndex) arff::detail::setLabel(label, value);
+						else input(attributeStart[i]) = value;
+					}
 				}
 				else if (attributeType[i] == arff::detail::Date)
 				{
-					double value = arff::detail::parseDate(s, dateFormat[i]);
-					if (i == labelIndex) arff::detail::setLabel(label, value);
-					else input(attributeStart[i]) = value;
+					if (s == "?")
+					{
+						if (options.handleMissingValue == arff::MissingValueThrow) throw SHARKEXCEPTION("[importARFF] cannot handle missing value");
+						else input(attributeStart[i]) = std::nan("");
+					}
+					else
+					{
+						double value = arff::detail::parseDate(s, dateFormat[i]);
+						if (i == labelIndex) arff::detail::setLabel(label, value);
+						else input(attributeStart[i]) = value;
+					}
 				}
 				else
 				{
@@ -541,6 +595,7 @@ SHARK_EXPORT_SYMBOL template<typename LabelT> void exportARFF(
 
 	// check whether features are binary or numeric
 	std::vector<bool> is_binary(dimension, true);
+	std::vector<bool> is_integer(dimension, true);
 	for (std::size_t b=0; b<batches; b++)
 	{
 		typename LabeledData<CompressedRealVector, LabelT>::const_batch_reference batch = dataset.batch(b);
@@ -555,7 +610,12 @@ SHARK_EXPORT_SYMBOL template<typename LabelT> void exportARFF(
 			{
 				std::size_t j = it.index();
 				double value = *it;
-				if (value != 0.0 && value != 1.0) is_binary[j] = false;
+				if (value != std::floor(value))
+				{
+					is_binary[j] = false;
+					is_integer[j] = false;
+				}
+				else if (value != 0.0 && value != 1.0) is_binary[j] = false;
 			}
 		}
 	}
@@ -563,10 +623,13 @@ SHARK_EXPORT_SYMBOL template<typename LabelT> void exportARFF(
 	// write the attributes
 	for (std::size_t i=0; i<dimension; i++)
 	{
+		std::string type = "numerical";
+		if (is_integer[i]) type = "integer";
+		if (is_binary[i]) type = "binary";
 		stream << "@attribute "
 				<< ((featurenames.size() > i) ? featurenames[i] : "attribute" + boost::lexical_cast<std::string>(i))
 				<< " "
-				<< (is_binary[i] ? "binary" : "numerical")
+				<< type
 				<< std::endl;
 	}
 	stream << "@attribute label " << ((boost::is_integral<LabelT>::value) ? "integer" : "numeric") << std::endl;
@@ -588,7 +651,9 @@ SHARK_EXPORT_SYMBOL template<typename LabelT> void exportARFF(
 			{
 				std::size_t j = it.index();
 				double value = *it;
-				stream << j << " " << value << ",";
+				if (std::isnan(value)) stream << "?";
+				else stream << j;
+				stream << " " << value << ",";
 			}
 			LabelT l = element.label;
 			stream << dimension << " " << arff::detail::label2string<LabelT>(l) << "}" << std::endl;

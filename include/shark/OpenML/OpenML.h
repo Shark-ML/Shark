@@ -42,6 +42,7 @@
 #define SHARK_OPENML_OPENML_H
 
 
+#include "Base.h"
 #include "Connection.h"
 #include "Dataset.h"
 #include "Task.h"
@@ -53,29 +54,28 @@ namespace shark {
 namespace openML {
 
 
-typedef std::vector< std::unique_ptr<Dataset> > DatasetList;     ///< \brief Collection of Dataset objects.
-typedef std::vector< std::unique_ptr<Task>    > TaskList;        ///< \brief Collection of Task objects.
-typedef std::vector< std::unique_ptr<Flow>    > FlowList;        ///< \brief Collection of Flow objects.
-typedef std::vector< std::unique_ptr<Run>     > RunList;         ///< \brief Collection of Run objects.
+////////////////////////////////////////////////////////////
+// query functions for data sets, tasks, flows, and runs
+//
 
+SHARK_EXPORT_SYMBOL IDList allDatasets();                                            ///< \brief Obtain the list of all data set IDs from OpenMP.
+SHARK_EXPORT_SYMBOL IDList taggedDatasets(std::string const& tagname);               ///< \brief Obtain the list of all data set IDs with the given tag.
 
-/// \brief Obtain the list of all data sets from OpenML.
-DatasetList datasets();
+SHARK_EXPORT_SYMBOL IDList allTasks();                                               ///< \brief Obtain the list of all task IDs from OpenMP.
+SHARK_EXPORT_SYMBOL IDList supervisedClassificationTasks();                          ///< \brief Obtain the list of all IDs of supervised classification tasks.
+SHARK_EXPORT_SYMBOL IDList supervisedRegressionTasks();                              ///< \brief Obtain the list of all IDs of supervised regression tasks.
+SHARK_EXPORT_SYMBOL IDList taggedTasks(std::string const& tagname);                  ///< \brief Obtain the list of all task IDs with the given tag.
 
-/// \brief Obtain the list of all tasks from OpenML.
-TaskList tasks();
+SHARK_EXPORT_SYMBOL IDList allFlows();                                               ///< \brief Obtain the list of all flow IDs from OpenML.
+SHARK_EXPORT_SYMBOL IDList taggedFlows(std::string const& tagname);                  ///< \brief Obtain the list of all flow IDs with the given tag.
+SHARK_EXPORT_SYMBOL IDList myFlows();                                                ///< \brief Obtain the list of all flow IDs owned by the user.
+SHARK_EXPORT_SYMBOL IDType getFlow(std::string const& name, std::string const& version);  ///< \brief Obtain the flow id, or invalidID if the flow does not exist.
 
-/// \brief Obtain the list of all flows from OpenML.
-FlowList flows();
-
-/// \brief Obtain the list of all runs from OpenML.
-RunList runs();
-
-
-std::vector<Dataset*> filter(std::vector<Dataset*> const& list, std::string const& conditions);
-std::vector<Task*>    filter(std::vector<Task*>    const& list, std::string const& conditions);
-std::vector<Flow*>    filter(std::vector<Flow*>    const& list, std::string const& conditions);
-std::vector<Run*>     filter(std::vector<Run*>     const& list, std::string const& conditions);
+SHARK_EXPORT_SYMBOL IDList taggedRuns(std::string const& tagname);                   ///< \brief Obtain the list of all run IDs with the given tag.
+SHARK_EXPORT_SYMBOL IDList runsByTask(IDType taskID);                                ///< \brief Obtain the list of all run IDs associated with the given task.
+SHARK_EXPORT_SYMBOL IDList runsByTask(Task const& task);                             ///< \brief Obtain the list of all run IDs associated with the given task.
+SHARK_EXPORT_SYMBOL IDList runsByFlow(IDType flowID);                                ///< \brief Obtain the list of all run IDs associated with the given flow.
+SHARK_EXPORT_SYMBOL IDList runsByFlow(Flow const& flow);                             ///< \brief Obtain the list of all run IDs associated with the given flow.
 
 
 };  // namespace openML

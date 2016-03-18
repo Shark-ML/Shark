@@ -37,26 +37,108 @@
 #define SHARK_OPENML_TASK_H
 
 
-#include "Entity.h"
+#include "PooledEntity.h"
+#include "CachedFile.h"
+#include "Dataset.h"
+#include <shark/Data/Arff.h>
+#include <shark/Data/CVDatasetTools.h>
+
+#include <vector>
+#include <memory>
 
 
 namespace shark {
 namespace openML {
 
 
+class Dataset;
+
+
 /// \brief Representation of an OpenML task.
-class Task : public Entity
+SHARK_EXPORT_SYMBOL class Task : public PooledEntity<Task>, public CachedFile
 {
+private:
+	friend class PooledEntity<Task>;
+
+	/// \brief Construct an existing OpenML task from its ID.
+	Task(IDType id, bool downloadSplits = true);
+
 public:
-	Dataset& dataset();
+	/// \brief Add a tag to the entity.
+	void tag(std::string const& tagname);
 
-	double namedProperty(std::string const& property) const;
+	/// \brief Remove a tag from the entity.
+	void untag(std::string const& tagname);
 
+	/// \brief Print a human readable summary of the entity.
 	void print(std::ostream& os = std::cout) const;
 
+	/// \brief Download the splits from OpenML.
+	bool download();
+
+	/// \brief Obtain the type of the task.
+	TaskType tasktype() const
+	{ return m_tasktype; }
+
+	/// \brief Obtain the underlying data set.
+	std::shared_ptr<Dataset> dataset()
+	{ return m_dataset; }
+
+	/// \brief Obtain the name of the target feature to be predicted.
+	std::string const& targetFeature() const
+	{ return m_targetFeature; }
+
+	/// \brief Obtain the number of (cross validation) repetitions.
+	std::size_t repetitions() const
+	{ return m_repetitions; }
+
+	/// \brief Obtain the number of cross validation folds.
+	std::size_t folds() const
+	{ return m_folds; }
+
+	/// \brief Load the data set of the task into a LabeledData container.
+	template <typename InputT, typename LabelT>
+	void loadData(LabeledData<InputT, LabelT>& data) const
+	{
+		importARFF(m_dataset->filename().string(), m_targetFeature, data);
+	}
+
+	/// \brief Obtain the assignment of data points to folds corresponding to a repetition.
+	std::vector<std::size_t> const& splitIndices(std::size_t repetition) const
+	{ return m_split[repetition]; }
+
+	/// \brief Obtain the data split corresponding to a repetition.
+	///
+	/// \par
+	/// NOTE: This function modifies the internal batch structure of the
+	/// data set. Hence, calling the same function with a different
+	/// repetition index invalidates previously obtained CVFolds objects.
+	template <typename InputT, typename LabelT>
+	CVFolds< LabeledData<InputT, LabelT> > split(
+				std::size_t repetition,
+				LabeledData<InputT, LabelT>& data
+			) const
+	{
+		return createCVIndexed(data, m_folds, m_split[repetition]);
+	}
+
 private:
-	Dataset* m_dataset;
-	std::string m_;
+	TaskType m_tasktype;                               ///< task type, e.g., supervised classification
+
+	// dataset spec
+	std::shared_ptr<Dataset> m_dataset;                ///< associated data set
+	std::string m_targetFeature;                       ///< feature of the data set acting as the label to be predicted
+
+	// estimation procedure
+	EstimationProcedure m_estimationProcedure;         ///< type of estimation procedure for assessing the generalization error
+	std::size_t m_repetitions;                         ///< number of independent repetitions of cross validation
+	std::size_t m_folds;                               ///< number of cross validation folds
+	std::vector< std::vector<std::size_t> > m_split;   ///< assignment of points to fold-wise test subsets in the form m_split[repetition][index] = fold
+	EvaluationMeasure m_evaluationMeasure;             ///< preferred evaluation measure
+
+	// expected output
+	std::string m_outputFormat;                        ///< file format for results upload
+	std::vector<FeatureDescription> m_outputFeature;   ///< feature encoding for results upload
 };
 
 

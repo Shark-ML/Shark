@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       HTTP response used internally by the OpenML wrapper.
+ * \brief       HTTP response used internally by the OpenML module.
  * 
  * 
  * 

@@ -1,0 +1,147 @@
+//===========================================================================
+/*!
+ * 
+ *
+ * \brief       This file collects basic definitions in a central place.
+ * 
+ * 
+ *
+ * \author      T. Glasmachers
+ * \date        2016
+ *
+ *
+ * \par Copyright 1995-2016 Shark Development Team
+ * 
+ * <BR><HR>
+ * This file is part of Shark.
+ * <http://image.diku.dk/shark/>
+ * 
+ * Shark is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published 
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Shark is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+//===========================================================================
+
+#ifndef SHARK_OPENML_BASE_H
+#define SHARK_OPENML_BASE_H
+
+
+#include <shark/Core/DLLSupport.h>
+
+#include <boost/filesystem.hpp>
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+
+namespace shark {
+namespace openML {
+
+
+SHARK_EXPORT_SYMBOL typedef boost::filesystem::path PathType;    ///< \brief Path type, e.g., for specifying the cache directory.
+SHARK_EXPORT_SYMBOL typedef std::uint64_t IDType;                ///< \brief An ID is an unsigned integer.
+SHARK_EXPORT_SYMBOL typedef std::vector<IDType> IDList;          ///< \brief Collection of IDs of entities of unspecified type.
+
+SHARK_EXPORT_SYMBOL static const IDType invalidID = 0;           ///< \brief Invalid ID, marker for default constructed objects.
+
+
+/// \brief Feature types known to OpenML (and ARFF).
+SHARK_EXPORT_SYMBOL enum FeatureType
+{
+	BINARY = 0,
+	INTEGER = 1,
+	NUMERIC = 2,
+	NOMINAL = 3,
+	STRING = 4,
+	DATE = 5,
+};
+
+
+/// \brief Names of feature types known to OpenML (and ARFF).
+static const char* featureTypeName[] = { "binary", "integer", "numeric", "nominal", "string", "date" };
+
+
+/// \brief Meta data for an OpenML feature.
+SHARK_EXPORT_SYMBOL struct FeatureDescription
+{
+	FeatureType type;
+	std::string name;
+	bool target;
+	bool ignore;
+	bool rowIdentifier;
+};
+
+
+/// \brief Meta data for an OpenML parameter as found in flows and runs.
+SHARK_EXPORT_SYMBOL struct Hyperparameter
+{
+	Hyperparameter()
+	: defaultValue("none")
+	{ }
+
+	Hyperparameter(std::string const& name_, std::string const& description_, std::string const& datatype_, std::string const& defaultValue_ = "none")
+	: name(name_)
+	, description(description_)
+	, datatype(datatype_)
+	, defaultValue(defaultValue_)
+	{ }
+
+	std::string name;
+	std::string description;
+	std::string datatype;
+	std::string defaultValue;
+};
+
+
+/// \brief Enumeration of supported OpenML task types.
+SHARK_EXPORT_SYMBOL enum TaskType
+{
+	SupervisedClassification = 0,
+	SupervisedRegression = 1,
+};
+
+
+/// \brief Names of task types
+static const char* taskTypeName[] = { "supervised classification", "supervised regression" };
+
+
+/// \brief Enumeration of supported OpenML estimation procedures.
+SHARK_EXPORT_SYMBOL enum EstimationProcedure
+{
+	Holdout = 0,
+	CrossValidation = 1,
+	RepeatedCrossValidation = 2,
+};
+
+
+/// \brief Names of estimation procedures
+static const char* estimationProcedureName[] = { "holdout", "cross validation", "repeated cross validation" };
+
+
+/// \brief Enumeration of supported OpenML evaluation measures.
+SHARK_EXPORT_SYMBOL enum EvaluationMeasure
+{
+	UnspecifiedMeasure = 0,
+	PredictiveAccuracy = 1,
+	MeanSquaredError = 2,
+};
+
+
+/// \brief Names of estimation procedures
+static const char* evaluationMeasureName[] = { "unspecified", "predictive accuracy", "mean squared error" };
+
+
+};  // namespace openML
+};  // namespace shark
+#endif

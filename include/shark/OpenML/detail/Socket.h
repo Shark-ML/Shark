@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       Socket class used internally by the OpenML wrapper.
+ * \brief       Socket class used internally by the OpenML module.
  * 
  * 
  * 

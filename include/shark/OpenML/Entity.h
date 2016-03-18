@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       This file defines several handy types, as well as a base class for all OpenML entities.
+ * \brief       This file defines the base class for all OpenML entities.
  * 
  * 
  *
@@ -35,30 +35,20 @@
 #ifndef SHARK_OPENML_ENTITY_H
 #define SHARK_OPENML_ENTITY_H
 
+#include "Base.h"
 #include "detail/Json.h"
 #include <shark/Core/Exception.h>
 
-#include <boost/filesystem.hpp>
-
-#include <cstdint>
-#include <memory>
-#include <vector>
 #include <set>
-#include <iostream>
+#include <ostream>
 
 
 namespace shark {
 namespace openML {
 
 
-typedef boost::filesystem::path PathType;                        ///< \brief  Path type, e.g., for specifying the cache directory.
-typedef std::uint64_t IDType;                                    ///< \brief  An ID is an unsigned integer.
-
-static const IDType invalidID = 0;                               ///< \brief Invalid ID, marker for default constructed objects.
-
-
 /// \brief Super class of all OpenML entities, providing an ID and tags.
-class Entity
+SHARK_EXPORT_SYMBOL class Entity
 {
 public:
 	/// \brief Default construct an entity, the ID is invalid
@@ -79,11 +69,13 @@ public:
 	std::set<std::string> const& tags() const
 	{ return m_tags; }
 
-	/// \brief Add (set) a tag to the entity.
-//	virtual void addTag(std::string const& tag) = 0;
+	/// \brief Add a tag to the entity.
+	virtual void tag(std::string const& tagname)
+	{ m_tags.insert(tagname); }
 
 	/// \brief Remove a tag from the entity.
-//	virtual void removeTag(std::string const& tag) = 0;
+	virtual void untag(std::string const& tagname)
+	{ m_tags.erase(tagname); }
 
 	/// \brief Print a human readable summary of the entity.
 	virtual void print(std::ostream& os = std::cout) const
