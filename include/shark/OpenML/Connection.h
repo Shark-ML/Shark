@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       Definition of an OpenML Connection.
+ * \brief       Definition of an HTTP Connection for Communication with OpenML.
  * 
  * 
  * \par
@@ -11,7 +11,7 @@
  * 
  * 
  * 
- *
+ * 
  * \author      T. Glasmachers
  * \date        2016
  *

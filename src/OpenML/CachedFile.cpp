@@ -67,7 +67,7 @@ void CachedFile::download() const
 {
 	SYNCHRONIZE
 
-	if (downloaded()) return;
+	if (boost::filesystem::exists(m_filename)) return;
 
 	std::string host;
 	std::string resource;

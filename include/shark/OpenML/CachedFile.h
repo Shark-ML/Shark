@@ -101,7 +101,7 @@ private:
 	PathType m_filename;               ///< filename of the cached resource
 	std::string m_url;                 ///< URL of the original resource
 	static PathType m_cacheDirectory;  ///< directory where new cache entries are placed
-	mutable std::mutex m_mutex;        ///< mutex for file operations
+	mutable std::mutex m_mutex;        ///< mutex protecting the file
 };
 
 

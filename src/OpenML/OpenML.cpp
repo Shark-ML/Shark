@@ -73,11 +73,11 @@ void fillProperties(QueryEntry& entry, detail::Json json)
 			}
 			else if (it->first == "quality")
 			{
-				fillTaggedValueArray(entry, detail::Json j = it->second);
+				fillTaggedValueArray(entry, it->second);
 			}
 			else if (it->first == "input")
 			{
-				fillTaggedValueArray(entry, detail::Json j = it->second);
+				fillTaggedValueArray(entry, it->second);
 			}
 			else
 			{

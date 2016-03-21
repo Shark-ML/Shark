@@ -80,7 +80,9 @@ public:
 	/// \brief Print a human readable summary of the entity.
 	virtual void print(std::ostream& os = std::cout) const
 	{
-		os << " ID: " << m_id << std::endl;
+		os << " ID: " << m_id;
+		if (m_id == invalidID) os << " (invalid ID)";
+		os << std::endl;
 		os << " tags:";
 		for (std::set<std::string>::const_iterator it = m_tags.begin(); it != m_tags.end(); ++it)
 		{

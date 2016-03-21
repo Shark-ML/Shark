@@ -241,7 +241,6 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 				"\r\n"
 				+ body;
 	}
-printf("msg='%s'\n", msg.c_str());
 
 	if (! m_socket.writeAll(msg.c_str(), msg.size()))
 	{

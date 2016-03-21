@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 		// with this key will silently fail.
 		string api_key = "8d736266baa96f8ef99f10516911d334";
 
-openML::connection.setRemote("test.openml.org", 80, "/api/v1/json");
+//openML::connection.setRemote("test.openml.org", 80, "/api/v1/json");
 
 		// register the api key in the global openML::connection object
 		openML::connection.setKey(api_key);
@@ -144,12 +144,13 @@ openML::connection.setRemote("test.openml.org", 80, "/api/v1/json");
 
 //###begin<commit>
 		// upload the results to OpenML
+		cout << "\nNOTE: the following call to commit() fails due to using a read-only account.\n\n";
 		run.commit();
 		cout << "ID of the new run: " << run.id() << endl;
 //###end<commit>
 	}
 	catch (std::exception const& ex)
 	{
-		cout << "Something went wrong:" << std::endl << ex.what() << std::endl;
+		cout << ex.what() << std::endl;
 	}
 }

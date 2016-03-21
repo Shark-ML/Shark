@@ -101,7 +101,7 @@ public:
 	void loadData(LabeledData<InputT, LabelT>& data)
 	{
 		CachedFile const& f = m_dataset->datafile();
-		if (! f.downloaded()) f.download();
+		f.download();
 		importARFF(f.filename().string(), m_targetFeature, data);
 	}
 
