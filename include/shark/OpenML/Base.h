@@ -43,6 +43,8 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <set>
+#include <map>
 
 
 namespace shark {
@@ -51,9 +53,22 @@ namespace openML {
 
 SHARK_EXPORT_SYMBOL typedef boost::filesystem::path PathType;    ///< \brief Path type, e.g., for specifying the cache directory.
 SHARK_EXPORT_SYMBOL typedef std::uint64_t IDType;                ///< \brief An ID is an unsigned integer.
-SHARK_EXPORT_SYMBOL typedef std::vector<IDType> IDList;          ///< \brief Collection of IDs of entities of unspecified type.
 
 SHARK_EXPORT_SYMBOL static const IDType invalidID = 0;           ///< \brief Invalid ID, marker for default constructed objects.
+
+/// \brief Result of querying OpenML objects.
+SHARK_EXPORT_SYMBOL struct QueryEntry
+{
+	QueryEntry()
+	: id(invalidID)
+	{ }
+
+	IDType id;
+	std::map<std::string, std::string> property;
+	std::set<std::string> tag;
+};
+
+SHARK_EXPORT_SYMBOL typedef std::vector<QueryEntry> QueryResult; ///< \brief Collection of descriptions of entities of unspecified type.
 
 
 /// \brief Feature types known to OpenML (and ARFF).

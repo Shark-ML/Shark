@@ -95,7 +95,6 @@ void Flow::tag(std::string const& tagname)
 	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/flow/tag", param);
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	Entity::tag(tagname);
 }
 
@@ -105,7 +104,6 @@ void Flow::untag(std::string const& tagname)
 	param.push_back(std::make_pair("flow_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/flow/untag", param);
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	Entity::untag(tagname);
 }
 
@@ -140,9 +138,8 @@ void Flow::create(std::string const& name, std::string const& description, std::
 
 		Connection::ParamType param;
 		param.push_back(std::make_pair("description|application/xml", xml));
-		param.push_back(std::make_pair("flow|text/plain", ""));   // no source file or similar
+//		param.push_back(std::make_pair("flow|text/plain", ""));   // no source file or similar
 		detail::Json result = connection.post("/flow", param);
-		if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("failed to upload OpenML flow");
 		id = detail::json2number<IDType>(result["upload_flow"]["id"]);
 	}
 
@@ -155,7 +152,6 @@ void Flow::create(std::string const& name, std::string const& description, std::
 void Flow::obtainFromServer()
 {
 	detail::Json result = connection.get("/flow/" + boost::lexical_cast<std::string>(id()));
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("failed to query OpenML flow");
 
 	detail::Json desc = result["flow"];
 	detail::Json param = desc["parameter"];

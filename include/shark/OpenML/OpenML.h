@@ -58,25 +58,34 @@ namespace openML {
 // query functions for data sets, tasks, flows, and runs
 //
 
-SHARK_EXPORT_SYMBOL IDList allDatasets();                                            ///< \brief Obtain the list of all data set IDs from OpenMP.
-SHARK_EXPORT_SYMBOL IDList taggedDatasets(std::string const& tagname);               ///< \brief Obtain the list of all data set IDs with the given tag.
+SHARK_EXPORT_SYMBOL QueryResult allDatasets();                               ///< \brief Obtain the list of all data sets from OpenMP.
+SHARK_EXPORT_SYMBOL QueryResult taggedDatasets(std::string const& tagname);  ///< \brief Obtain the list of all data sets with the given tag.
 
-SHARK_EXPORT_SYMBOL IDList allTasks();                                               ///< \brief Obtain the list of all task IDs from OpenMP.
-SHARK_EXPORT_SYMBOL IDList supervisedClassificationTasks();                          ///< \brief Obtain the list of all IDs of supervised classification tasks.
-SHARK_EXPORT_SYMBOL IDList supervisedRegressionTasks();                              ///< \brief Obtain the list of all IDs of supervised regression tasks.
-SHARK_EXPORT_SYMBOL IDList taggedTasks(std::string const& tagname);                  ///< \brief Obtain the list of all task IDs with the given tag.
+SHARK_EXPORT_SYMBOL QueryResult allTasks();                                  ///< \brief Obtain the list of all taska from OpenMP.
+SHARK_EXPORT_SYMBOL QueryResult supervisedClassificationTasks();             ///< \brief Obtain the list of all supervised classification tasks.
+SHARK_EXPORT_SYMBOL QueryResult supervisedRegressionTasks();                 ///< \brief Obtain the list of all supervised regression tasks.
+SHARK_EXPORT_SYMBOL QueryResult taggedTasks(std::string const& tagname);     ///< \brief Obtain the list of all task with the given tag.
 
-SHARK_EXPORT_SYMBOL IDList allFlows();                                               ///< \brief Obtain the list of all flow IDs from OpenML.
-SHARK_EXPORT_SYMBOL IDList taggedFlows(std::string const& tagname);                  ///< \brief Obtain the list of all flow IDs with the given tag.
-SHARK_EXPORT_SYMBOL IDList myFlows();                                                ///< \brief Obtain the list of all flow IDs owned by the user.
-SHARK_EXPORT_SYMBOL IDType getFlow(std::string const& name, std::string const& version);  ///< \brief Obtain the flow id, or invalidID if the flow does not exist.
+SHARK_EXPORT_SYMBOL QueryResult allFlows();                                  ///< \brief Obtain the list of all flow from OpenML.
+SHARK_EXPORT_SYMBOL QueryResult taggedFlows(std::string const& tagname);     ///< \brief Obtain the list of all flow with the given tag.
+SHARK_EXPORT_SYMBOL QueryResult myFlows();                                   ///< \brief Obtain the list of all flow owned by the user.
+SHARK_EXPORT_SYMBOL IDType getFlow(std::string const& name, std::string const& version);                ///< \brief Obtain the flow id, or invalidID if the flow does not exist.
 
-SHARK_EXPORT_SYMBOL IDList taggedRuns(std::string const& tagname);                   ///< \brief Obtain the list of all run IDs with the given tag.
-SHARK_EXPORT_SYMBOL IDList runsByTask(IDType taskID);                                ///< \brief Obtain the list of all run IDs associated with the given task.
-SHARK_EXPORT_SYMBOL IDList runsByTask(Task const& task);                             ///< \brief Obtain the list of all run IDs associated with the given task.
-SHARK_EXPORT_SYMBOL IDList runsByFlow(IDType flowID);                                ///< \brief Obtain the list of all run IDs associated with the given flow.
-SHARK_EXPORT_SYMBOL IDList runsByFlow(Flow const& flow);                             ///< \brief Obtain the list of all run IDs associated with the given flow.
+SHARK_EXPORT_SYMBOL QueryResult taggedRuns(std::string const& tagname);      ///< \brief Obtain the list of all run with the given tag.
+SHARK_EXPORT_SYMBOL QueryResult runsByTask(IDType taskID);                   ///< \brief Obtain the list of all run associated with the given task.
+SHARK_EXPORT_SYMBOL QueryResult runsByTask(Task const& task);                ///< \brief Obtain the list of all run associated with the given task.
+SHARK_EXPORT_SYMBOL QueryResult runsByFlow(IDType flowID);                   ///< \brief Obtain the list of all run associated with the given flow.
+SHARK_EXPORT_SYMBOL QueryResult runsByFlow(Flow const& flow);                ///< \brief Obtain the list of all run associated with the given flow.
 
+/// \brief Filter an existing query result set by applying a set of conditions.
+///
+/// The parameter strCondition holds a semicolon-separated list of conditions.
+/// There are two types of conditions:
+///  1. check property, syntax: <property> <operator> <value>
+///  2. check presence of a tag, syntax: tagged as <tagname>
+/// valid operators are == != < <= > >=
+/// names and values can be strings or numbers.
+SHARK_EXPORT_SYMBOL QueryResult filter(QueryResult const& list, std::string const& strCondition);
 
 };  // namespace openML
 };  // namespace shark

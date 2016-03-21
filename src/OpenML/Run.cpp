@@ -46,11 +46,20 @@ namespace openML {
 
 Run::Run(IDType id)
 : Entity(id)
+, m_file("run_" + boost::lexical_cast<std::string>(id) + ".arff")
 {
 	detail::Json result = connection.get("/run/" + boost::lexical_cast<std::string>(id));
 
 	// TODO!
 }
+
+Run::Run(std::shared_ptr<Task> task, std::shared_ptr<Flow> flow)
+: Entity()
+, m_task(task)
+, m_flow(flow)
+, m_hyperparameterValue(m_flow->numberOfHyperparameters())
+, m_predictions(m_task->repetitions(), std::vector< std::vector<double> >(m_task->folds()))
+{ }
 
 
 void Run::tag(std::string const& tagname)
@@ -59,7 +68,6 @@ void Run::tag(std::string const& tagname)
 	param.push_back(std::make_pair("run_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/run/tag", param);
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	Entity::tag(tagname);
 }
 
@@ -69,7 +77,6 @@ void Run::untag(std::string const& tagname)
 	param.push_back(std::make_pair("run_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/run/untag", param);
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	Entity::untag(tagname);
 }
 
@@ -106,7 +113,9 @@ void Run::commit()
 			if (fd.type == NOMINAL)
 			{
 				targetNominal = true;
-				std::ifstream stream(dataset->filename().string().c_str());
+				CachedFile const& f = dataset->datafile();
+				f.download();
+				std::ifstream stream(f.filename().string().c_str());
 				std::string line;
 				while (std::getline(stream, line))
 				{
@@ -226,6 +235,11 @@ void Run::commit()
 
 	IDType id = detail::json2number<IDType>(result["upload_run"]["run_id"]);
 	setID(id);
+
+	// cache the results locally
+	m_file.setFilename("run_" + boost::lexical_cast<std::string>(id) + ".arff");
+	std::ofstream ofs(m_file.filename().string().c_str());
+	ofs << predictions;
 }
 
 

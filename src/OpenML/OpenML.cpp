@@ -37,7 +37,7 @@
 #include <shark/OpenML/OpenML.h>
 #include <shark/OpenML/detail/Tools.h>
 #include <boost/lexical_cast.hpp>
-
+#include <boost/algorithm/string/trim.hpp>
 
 namespace shark {
 namespace openML {
@@ -46,52 +46,117 @@ namespace openML {
 ////////////////////////////////////////////////////////////
 
 
-IDList getIDs(std::string const& query, std::string const& level1, std::string const& level2, std::string const& idname)
+void fillTaggedValueArray(QueryEntry& entry, detail::Json json)
+{
+	SHARK_ASSERT(json.isArray());
+	for (std::size_t i=0; i<json.size(); i++)
+	{
+		std::string name = detail::json2string(json[i]["name"]);
+		std::string value = detail::json2string(json[i]["value"]);
+	}
+}
+
+void fillProperties(QueryEntry& entry, detail::Json json)
+{
+	if (json.isArray())
+	{
+		for (std::size_t i=0; i<json.size(); i++) fillProperties(entry, json[i]);
+	}
+	else if (json.isObject())
+	{
+		for (detail::Json::const_object_iterator it=json.object_begin(); it != json.object_end(); ++it)
+		{
+			if (it->first == "tag")
+			{
+				detail::Json j = it->second;
+				for (std::size_t i=0; i<j.size(); i++) entry.tag.insert(j[i].asString());
+			}
+			else if (it->first == "quality")
+			{
+				fillTaggedValueArray(entry, detail::Json j = it->second);
+			}
+			else if (it->first == "input")
+			{
+				fillTaggedValueArray(entry, detail::Json j = it->second);
+			}
+			else
+			{
+				detail::Json j = it->second;
+				if (j.isString()) entry.property[it->first] = it->second.asString();
+				else if (j.isNumber()) entry.property[it->first] = boost::lexical_cast<std::string>(it->second.asNumber());
+			}
+		}
+	}
+}
+
+QueryResult getIDs(std::string const& query, std::string const& level1, std::string const& level2, std::string const& idname)
 {
 	detail::Json result = connection.get(query);
 	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	detail::Json objects = result[level1][level2];
 	SHARK_ASSERT(objects.isArray());
-	IDList ret(objects.size());
-	for (std::size_t i=0; i<objects.size(); i++) ret[i] = detail::json2number<IDType>(objects[i][idname]);
+	QueryResult ret(objects.size());
+	for (std::size_t i=0; i<objects.size(); i++)
+	{
+		ret[i].id = detail::json2number<IDType>(objects[i][idname]);
+		fillProperties(ret[i], objects[i]);
+	}
 	return ret;
 }
 
+QueryResult allDatasets()
+{
+	return getIDs("/data/list", "data", "dataset", "did");
+}
 
-IDList allDatasets()
-{ return getIDs("/data/list", "data", "dataset", "did"); }
+QueryResult taggedDatasets(std::string const& tagname)
+{
+	return getIDs("/data/list/tag/" + detail::urlencode(tagname), "data", "dataset", "did");
+}
 
-IDList taggedDatasets(std::string const& tagname)
-{ return getIDs("/data/list/tag/" + detail::urlencode(tagname), "data", "dataset", "did"); }
+QueryResult allTasks()
+{
+	return getIDs("/task/list", "tasks", "task", "task_id");
+}
+
+QueryResult supervisedClassificationTasks()
+{
+	return getIDs("/task/list/type/1", "tasks", "task", "task_id");
+}
+
+QueryResult supervisedRegressionTasks()
+{
+	return getIDs("/task/list/type/2", "tasks", "task", "task_id");
+}
+
+QueryResult taggedTasks(std::string const& tagname)
+{
+	return getIDs("/task/list/tag/" + detail::urlencode(tagname), "tasks", "task", "task_id");
+}
 
 
-IDList allTasks()
-{ return getIDs("/task/list", "tasks", "task", "task_id"); }
+QueryResult allFlows()
+{
+	return getIDs("/flow/list", "flows", "flow", "id");
+}
 
-IDList supervisedClassificationTasks()
-{ return getIDs("/task/list/type/1", "tasks", "task", "task_id"); }
+QueryResult taggedFlows(std::string const& tagname)
+{
+	return getIDs("/flow/list/tag/" + detail::urlencode(tagname), "flows", "flow", "id");
+}
 
-IDList supervisedRegressionTasks()
-{ return getIDs("/task/list/type/2", "tasks", "task", "task_id"); }
-
-IDList taggedTasks(std::string const& tagname)
-{ return getIDs("/task/list/tag/" + detail::urlencode(tagname), "tasks", "task", "task_id"); }
-
-
-IDList allFlows()
-{ return getIDs("/flow/list", "flows", "flow", "id"); }
-
-IDList taggedFlows(std::string const& tagname)
-{ return getIDs("/flow/list/tag/" + detail::urlencode(tagname), "flows", "flow", "id"); }
-
-IDList myFlows()
+QueryResult myFlows()
 {
 	detail::Json result = connection.get("/flow/owned");
 	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	detail::Json ids = result["flow_owned"]["id"];
 	SHARK_ASSERT(ids.isArray());
-	IDList ret(ids.size());
-	for (std::size_t i=0; i<ids.size(); i++) ret[i] = detail::json2number<IDType>(ids[i]);
+	QueryResult ret(ids.size());
+	for (std::size_t i=0; i<ids.size(); i++)
+	{
+		ret[i].id = detail::json2number<IDType>(ids[i]);
+		// TODO: fill in qualities and tags!
+	}
 	return ret;
 }
 
@@ -105,20 +170,125 @@ IDType getFlow(std::string const& name, std::string const& version)
 }
 
 
-IDList taggedRuns(std::string const& tagname)
-{ return getIDs("/run/list/tag/" + detail::urlencode(tagname), "runs", "run", "run_id"); }
+QueryResult taggedRuns(std::string const& tagname)
+{
+	return getIDs("/run/list/tag/" + detail::urlencode(tagname), "runs", "run", "run_id");
+}
 
-IDList runsByTask(IDType taskID)
-{ return getIDs("/run/list/task/" + boost::lexical_cast<std::string>(taskID), "runs", "run", "run_id"); }
+QueryResult runsByTask(IDType taskID)
+{
+	return getIDs("/run/list/task/" + boost::lexical_cast<std::string>(taskID), "runs", "run", "run_id");
+}
 
-IDList runsByTask(Task const& task)
-{ return getIDs("/run/list/task/" + boost::lexical_cast<std::string>(task.id()), "runs", "run", "run_id"); }
+QueryResult runsByTask(Task const& task)
+{
+	return getIDs("/run/list/task/" + boost::lexical_cast<std::string>(task.id()), "runs", "run", "run_id");
+}
 
-IDList runsByFlow(IDType flowID)
-{ return getIDs("/run/list/flow/" + boost::lexical_cast<std::string>(flowID), "runs", "run", "run_id"); }
+QueryResult runsByFlow(IDType flowID)
+{
+	return getIDs("/run/list/flow/" + boost::lexical_cast<std::string>(flowID), "runs", "run", "run_id");
+}
 
-IDList runsByFlow(Flow const& flow)
-{ return getIDs("/run/list/flow/" + boost::lexical_cast<std::string>(flow.id()), "runs", "run", "run_id"); }
+QueryResult runsByFlow(Flow const& flow)
+{
+	return getIDs("/run/list/flow/" + boost::lexical_cast<std::string>(flow.id()), "runs", "run", "run_id");
+}
+
+
+struct Condition
+{
+	Condition(std::string const& name_, std::string const& op_, std::string const& value_)
+	: name(boost::trim_copy(name_))
+	, op(op_)
+	, value(boost::trim_copy(value_))
+	{ }
+
+	bool operator () (QueryEntry const& entry) const
+	{
+		if (name == "tag" && op == "tag")
+		{
+			// check whether value is present as a tag
+			std::set<std::string>::const_iterator it = entry.tag.find(value);
+			return (it != entry.tag.end());
+		}
+		else
+		{
+			// check a condition on a property
+			std::map<std::string, std::string>::const_iterator it = entry.property.find(name);
+			if (it == entry.property.end()) return false;
+
+			try
+			{
+				// compare as numbers
+		 		double lhs = boost::lexical_cast<double>(value);
+		 		double rhs = boost::lexical_cast<double>(it->second);
+				if (op == "==") return (lhs == rhs);
+				if (op == "!=") return (lhs != rhs);
+				if (op == "<") return (lhs < rhs);
+				if (op == "<=") return (lhs <= rhs);
+				if (op == ">") return (lhs > rhs);
+				if (op == ">=") return (lhs >= rhs);
+				throw SHARKEXCEPTION("[filter] invalid operator");
+			}
+			catch (...)
+			{
+				// compare as strings
+				if (op == "==") return (value == it->second);
+				if (op == "!=") return (value != it->second);
+				throw SHARKEXCEPTION("[filter] invalid operator, non-numerical values cannot be ordered");
+			}
+		}
+	}
+
+	std::string name;
+	std::string op;
+	std::string value;
+};
+
+SHARK_EXPORT_SYMBOL QueryResult filter(QueryResult const& list, std::string const& strCondition)
+{
+	// parse condition string
+	std::vector<Condition> conditions;
+	std::size_t start = 0;
+	while (start >= strCondition.size())
+	{
+		std::size_t semicolon = strCondition.find(';', start);
+		if (semicolon == std::string::npos) semicolon = strCondition.size();
+		if (conditions.size() >= start + 10 && strCondition.substr(start, 10) == "tagged as ")
+		{
+			conditions.push_back(Condition("tag", "tag", strCondition.substr(start + 10, semicolon - start - 10)));
+		}
+		else
+		{
+			std::size_t pos = strCondition.find_first_of("<=>!", start);
+			std::size_t end = pos + 1;
+			if (strCondition[end] == '=') end++;
+			std::string strOP = strCondition.substr(pos, end - pos);
+			if (strOP != "==" && strOP != "!=" && strOP != "<" && strOP != "<=" && strOP != ">" && strOP != ">=") throw SHARKEXCEPTION("[filter] invalid comparison operator: " + strOP);
+			conditions.push_back(Condition(strCondition.substr(start, pos - start), strOP, strCondition.substr(end, semicolon - end)));
+		}
+		start = semicolon + 1;
+	}
+
+	// apply conditions to list
+	QueryResult ret;
+	for (std::size_t i=0; i<list.size(); i++)
+	{
+		bool add = true;
+		for (std::size_t j=0; j<conditions.size(); j++)
+		{
+			if (! conditions[j](list[i]))
+			{
+				add = false;
+				break;
+			}
+		}
+		if (add) ret.push_back(list[i]);
+	}
+
+	return ret;
+}
 
 
 };  // namespace openML

@@ -50,29 +50,24 @@ namespace openML {
 
 Dataset::Dataset(IDType id, bool downloadData)
 : PooledEntity<Dataset>(id)
-, CachedFile("", "dataset_" + boost::lexical_cast<std::string>(id) + ".arff")
+, m_file("dataset_" + boost::lexical_cast<std::string>(id) + ".arff")
 {
 	{
 		detail::Json result = connection.get("/data/" + boost::lexical_cast<std::string>(id));
-		if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("failed to query OpenML data set");
-
 		detail::Json desc = result["data_set_description"];
 		if (desc.has("tag")) setTags(desc["tag"]);
-
 		m_name = desc["name"].asString();
 		m_description = desc["description"].asString();
 		m_defaultTargetFeature = desc["default_target_attribute"].asString();
 		m_format = desc["format"].asString();
 		m_licence = desc["licence"].asString();
 		m_status = desc["status"].asString();
-		m_url = desc["url"].asString();
+		m_file.setUrl(desc["url"].asString());
 		m_visibility = desc["visibility"].asString();
 	}
 
 	{
 		detail::Json result = connection.get("/data/features/" + boost::lexical_cast<std::string>(id));
-		if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("failed to query OpenML data set");
-
 		detail::Json features = result["data_features"]["feature"];
 		for (std::size_t i=0; i<features.size(); i++)
 		{
@@ -95,10 +90,7 @@ Dataset::Dataset(IDType id, bool downloadData)
 		}
 	}
 
-	if (downloadData)
-	{
-		if (! download()) throw SHARKEXCEPTION("failed to download OpenML data set");
-	}
+	if (downloadData) m_file.download();
 }
 
 
@@ -108,7 +100,6 @@ void Dataset::tag(std::string const& tagname)
 	param.push_back(std::make_pair("data_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/data/tag", param);
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	Entity::tag(tagname);
 }
 
@@ -118,7 +109,6 @@ void Dataset::untag(std::string const& tagname)
 	param.push_back(std::make_pair("data_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/data/untag", param);
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	Entity::untag(tagname);
 }
 
@@ -132,10 +122,10 @@ void Dataset::print(std::ostream& os) const
 	os << " format: " << m_format << std::endl;
 	os << " license: " << m_licence << std::endl;
 	os << " status: " << m_status << std::endl;
-	os << " url: " << url() << std::endl;
+	os << " url: " << m_file.url() << std::endl;
 	os << " visibility: " << m_visibility << std::endl;
 	os << " file status: ";
-	if (downloaded()) os << "in cache at " << filename().string();
+	if (m_file.downloaded()) os << "in cache at " << m_file.filename().string();
 	else os << "not in cache";
 	os << std::endl;
 	os << " " << m_feature.size() << " features:" << std::endl;

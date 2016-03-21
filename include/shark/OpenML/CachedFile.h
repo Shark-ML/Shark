@@ -36,7 +36,9 @@
 #define SHARK_OPENML_CACHEDFILE_H
 
 #include "Base.h"
+#include <shark/Core/Exception.h>
 #include <boost/filesystem.hpp>
+#include <mutex>
 
 
 namespace shark {
@@ -48,10 +50,11 @@ SHARK_EXPORT_SYMBOL class CachedFile
 {
 public:
 	/// \brief Construct a cached file object with a cache location.
-	CachedFile(std::string const& url, std::string const& filename)
+	CachedFile(std::string const& filename = "", std::string const& url = "")
 	: m_url(url)
-	, m_filename(m_cacheDirectory / filename)
-	{ }
+	{
+		if (! filename.empty()) m_filename = m_cacheDirectory / filename;
+	}
 
 
 	/// \brief Obtain the path of the directory where dataset files are stored.
@@ -62,21 +65,43 @@ public:
 	static void setCacheDirectory(PathType const& cacheDirectory)
 	{ m_cacheDirectory = cacheDirectory; }
 
+	/// \brief Obtain the URL from which the file is obtained.
 	std::string const& url() const
 	{ return m_url; }
 
+	/// \brief Set the URL of this file.
+	///
+	/// Use this function only once, and only if the URL was not set in the constructor.
+	void setUrl(std::string const& url)
+	{
+		if (! m_url.empty()) throw SHARKEXCEPTION("[CachedFile::setUrl] the URL is already defined");
+		m_url = url;
+	}
+
+	/// \brief Set the name of this file (placed in the cache directory).
+	///
+	/// Use this function only once, and only if the filename was not set in the constructor.
+	void setFilename(std::string const& filename)
+	{
+		if (! m_filename.empty()) throw SHARKEXCEPTION("[CachedFile::setUrl] the filename is already defined");
+		m_filename = m_cacheDirectory / filename;
+	}
+
+	/// \brief Obtain the path where the file is cached in the file system.
 	PathType const& filename() const
 	{ return m_filename; }
 
-	bool downloaded() const
-	{ return boost::filesystem::exists(m_filename); }
+	/// \brief Check whether the file was already downloaded and cached.
+	bool downloaded() const;
 
-	bool download();
+	/// \brief Download the file from the URL and store it as a (local) file.
+	void download() const;
 
-protected:
-	std::string m_url;                 ///< URL of the original resource
+private:
 	PathType m_filename;               ///< filename of the cached resource
+	std::string m_url;                 ///< URL of the original resource
 	static PathType m_cacheDirectory;  ///< directory where new cache entries are placed
+	mutable std::mutex m_mutex;        ///< mutex for file operations
 };
 
 

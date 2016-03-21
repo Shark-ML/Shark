@@ -42,6 +42,9 @@
 #include <boost/filesystem.hpp>
 
 
+#define SYNCHRONIZE std::unique_lock<std::mutex> lock(m_mutex);
+
+
 namespace shark {
 namespace openML {
 
@@ -51,6 +54,7 @@ namespace openML {
 
 static const std::string OPENML_REST_API_HOST = "www.openml.org";
 static const std::string OPENML_REST_API_PREFIX = "/api_new/v1/json";
+std::mutex Connection::m_mutex;
 
 
 ////////////////////////////////////////////////////////////
@@ -68,12 +72,11 @@ Connection::Connection(std::string const& host, unsigned short port, std::string
 , m_prefix(prefix)
 { }
 
-Connection::~Connection()
-{ }
-
 
 detail::HttpResponse Connection::getHTTP(std::string const& request, ParamType const& parameters)
 {
+	SYNCHRONIZE
+
 	detail::HttpResponse response;
 
 	if (! m_socket.connected()) m_socket.connect(m_host, m_port);
@@ -134,6 +137,8 @@ detail::Json Connection::get(std::string const& request, ParamType const& parame
 
 detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType const& parameters)
 {
+	SYNCHRONIZE
+
 	detail::HttpResponse response;
 
 	if (! m_socket.connected()) m_socket.connect(m_host, m_port);
@@ -160,12 +165,23 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 		for (ParamType::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
 		{
 			std::string name = it->first;
-			std::string mime;
+			std::string mime, filename;
 			std::size_t pos = it->first.find('|');
 			if (pos != std::string::npos)
 			{
-				name = it->first.substr(0, pos);
-				mime = it->first.substr(pos+1);
+				std::size_t pos2 = it->first.find('|', pos+1);
+				if (pos2 == std::string::npos)
+				{
+					name = it->first.substr(0, pos);
+					mime = it->first.substr(pos+1);
+					filename = name;
+				}
+				else
+				{
+					name = it->first.substr(0, pos);
+					mime = it->first.substr(pos+1, pos2-pos-1);
+					filename = it->first.substr(pos2+1);
+				}
 			}
 
 			body += "--";
@@ -175,7 +191,7 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 			body += "\"";
 			if (! mime.empty())
 			{
-				body += "; filename=\"" + name + "\"\r\nContent-Type: ";
+				body += "; filename=\"" + filename + "\"\r\nContent-Type: ";
 				body += mime;
 				body += "\r\n";
 			}
@@ -185,12 +201,12 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 		}
 		if (! m_key.empty())
 		{
-//			body += "--";
-//			body += boundary;
-//			body += "\r\nContent-Disposition: form-data; name=\"api_key\"\r\n\r\n";
-//			body += m_key;
-//			body += "\r\n";
-			url += "?api_key=" + detail::urlencode(m_key);
+			body += "--";
+			body += boundary;
+			body += "\r\nContent-Disposition: form-data; name=\"api_key\"\r\n\r\n";
+			body += m_key;
+			body += "\r\n";
+//			url += "?api_key=" + detail::urlencode(m_key);
 		}
 		body += "--";
 		body += boundary;
@@ -199,7 +215,7 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 		msg = "POST " + url + " HTTP/1.1\r\n"
 				"host: " + m_host + "\r\n"
 				"content-length: " + boost::lexical_cast<std::string>(body.size()) + "\r\n"
-				"content-type: multipart/form-data; boundary=\"" + boundary + "\"\r\n"
+				"content-type: multipart/form-data; boundary=" + boundary + "\r\n"
 				"\r\n"
 				+ body;
 	}
@@ -225,6 +241,7 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 				"\r\n"
 				+ body;
 	}
+printf("msg='%s'\n", msg.c_str());
 
 	if (! m_socket.writeAll(msg.c_str(), msg.size()))
 	{
@@ -259,7 +276,7 @@ detail::Json Connection::post(std::string const& request, ParamType const& param
 	}
 }
 
-std::size_t Connection::download()
+std::size_t Connection::read()
 {
 	char buffer[4096];
 	std::size_t n = m_socket.read(buffer, 4096);
@@ -285,7 +302,7 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 		{
 			endline = m_readbuffer.find("\r\n", pos);
 			if (endline != std::string::npos) break;
-			if (! download()) { m_socket.close(); return false; }
+			if (! read()) { m_socket.close(); return false; }
 		}
 		std::string line = m_readbuffer.substr(pos, endline - pos);
 		pos = endline + 2;
@@ -334,13 +351,13 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 				{
 					endline = m_readbuffer.find("\r\n", 0);
 					if (endline != std::string::npos) break;
-					if (! download()) { m_socket.close(); return false; }
+					if (! read()) { m_socket.close(); return false; }
 				}
 				unsigned long length = std::stoul(m_readbuffer.substr(0, endline), 0, 16);
 				if (length == 0) break;
 				while (m_readbuffer.size() < endline + length + 2)
 				{
-					if (! download()) { m_socket.close(); return false; }
+					if (! read()) { m_socket.close(); return false; }
 				}
 				response.m_body += m_readbuffer.substr(endline, length);
 				if (m_readbuffer.substr(endline + length, 2) != "\r\n") { m_socket.close(); return false; }
@@ -348,7 +365,7 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 			}
 			while (m_readbuffer.size() < 2)
 			{
-				if (! download()) { m_socket.close(); return false; }
+				if (! read()) { m_socket.close(); return false; }
 			}
 			if (m_readbuffer.substr(0, 2) != "\r\n") { m_socket.close(); return false; }
 			m_readbuffer.erase(0, 2);
@@ -360,7 +377,7 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 		std::size_t length = boost::lexical_cast<std::size_t>(contentlength);
 		while (m_readbuffer.size() < length)
 		{
-			if (download() == 0) { m_socket.close(); return false; }
+			if (read() == 0) { m_socket.close(); return false; }
 		}
 		response.m_body = m_readbuffer.substr(0, length);
 		m_readbuffer.erase(0, length);

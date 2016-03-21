@@ -92,10 +92,11 @@ connection object.
 
 ..sharkcode<OpenML/OpenMLTutorial.tpp,key>
 
-This will enable us to communicate with the OpenML service. The usual
-entry points for a program working with OpenML are data sets and tasks.
-We query all supervised regression tasks with at most 10 features and
-between 100 and 200 data points, and obtain the ID of the first of these.
+This will enable us to communicate with the OpenML service. Of course,
+this requires an internet connection. The usual entry points for a
+program working with OpenML are data sets and tasks. We query all
+supervised regression tasks with at most 10 features and between 100 and
+200 data points, and obtain the ID of the first of these.
 
 ..sharkcode<OpenML/OpenMLTutorial.tpp,query>
 

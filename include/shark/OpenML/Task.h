@@ -55,13 +55,13 @@ class Dataset;
 
 
 /// \brief Representation of an OpenML task.
-SHARK_EXPORT_SYMBOL class Task : public PooledEntity<Task>, public CachedFile
+SHARK_EXPORT_SYMBOL class Task : public PooledEntity<Task>
 {
 private:
 	friend class PooledEntity<Task>;
 
 	/// \brief Construct an existing OpenML task from its ID.
-	Task(IDType id, bool downloadSplits = true);
+	Task(IDType id, bool downloadSplits = false);
 
 public:
 	/// \brief Add a tag to the entity.
@@ -73,8 +73,8 @@ public:
 	/// \brief Print a human readable summary of the entity.
 	void print(std::ostream& os = std::cout) const;
 
-	/// \brief Download the splits from OpenML.
-	bool download();
+	/// \brief load the splits into memory.
+	void load();
 
 	/// \brief Obtain the type of the task.
 	TaskType tasktype() const
@@ -98,14 +98,19 @@ public:
 
 	/// \brief Load the data set of the task into a LabeledData container.
 	template <typename InputT, typename LabelT>
-	void loadData(LabeledData<InputT, LabelT>& data) const
+	void loadData(LabeledData<InputT, LabelT>& data)
 	{
-		importARFF(m_dataset->filename().string(), m_targetFeature, data);
+		CachedFile const& f = m_dataset->datafile();
+		if (! f.downloaded()) f.download();
+		importARFF(f.filename().string(), m_targetFeature, data);
 	}
 
 	/// \brief Obtain the assignment of data points to folds corresponding to a repetition.
-	std::vector<std::size_t> const& splitIndices(std::size_t repetition) const
-	{ return m_split[repetition]; }
+	std::vector<std::size_t> const& splitIndices(std::size_t repetition)
+	{
+		load();
+		return m_split[repetition];
+	}
 
 	/// \brief Obtain the data split corresponding to a repetition.
 	///
@@ -114,12 +119,9 @@ public:
 	/// data set. Hence, calling the same function with a different
 	/// repetition index invalidates previously obtained CVFolds objects.
 	template <typename InputT, typename LabelT>
-	CVFolds< LabeledData<InputT, LabelT> > split(
-				std::size_t repetition,
-				LabeledData<InputT, LabelT>& data
-			) const
+	CVFolds< LabeledData<InputT, LabelT> > split(std::size_t repetition, LabeledData<InputT, LabelT>& data)
 	{
-		return createCVIndexed(data, m_folds, m_split[repetition]);
+		return createCVIndexed(data, m_folds, splitIndices(repetition));
 	}
 
 private:
@@ -139,6 +141,9 @@ private:
 	// expected output
 	std::string m_outputFormat;                        ///< file format for results upload
 	std::vector<FeatureDescription> m_outputFeature;   ///< feature encoding for results upload
+
+	// external file
+	CachedFile m_file;                                 ///< ARFF file defining the data splits
 };
 
 

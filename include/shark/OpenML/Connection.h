@@ -49,7 +49,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <thread>
+#include <mutex>
 
 
 namespace shark {
@@ -68,11 +68,31 @@ SHARK_EXPORT_SYMBOL class Connection
 public:
 	friend class CachedFile;
 
+	/// \brief Parameters of an HTTP GET or POST request.
+	///
+	/// In contrast to a dictionary (e.g., map<string, string>) this
+	/// container preserves the order of parameters. This is of no
+	/// semantic value, but required by the OpenML REST API.
+	///
+	/// A parameter of a POST request is marked as a file upload by
+	/// specifying a name of the form "name|mine-type", e.g.,
+	/// "file|text/plain". The filename can be specified with the syntax
+	/// "name|mine-type|filename", e.g., "file|text/plain|hello.txt".
 	typedef std::vector< std::pair<std::string, std::string> > ParamType;
 
+	/// \brief Construct an HTTP connection to the OpenML service.
 	Connection();
+
+	/// \brief Construct an HTTP connection to a given host on a given port.
 	Connection(std::string const& host, unsigned short port = 80, std::string const& prefix = "");
-	~Connection();
+
+
+// debug
+	void setRemote(std::string const& host, unsigned short port)
+	{
+		m_host = host;
+		m_port = port;
+	}
 
 	/// \brief Obtain the currently set api_key.
 	std::string const& key() const
@@ -114,8 +134,10 @@ private:
 	/// \param   parameters   tagged-values sent as URL-encoded form data
 	detail::HttpResponse postHTTP(std::string const& request, ParamType const& parameters = ParamType());
 
-	/// \brief Download some more data from the socket and append it to the buffer.
-	std::size_t download();
+	/// \brief Read additional data from the socket and append it to the read buffer.
+	///
+	/// \return  Number of bytes read. The read buffer was grown by the same amount.
+	std::size_t read();
 
 	/// \brief Download a full HTTP response from the socket.
 	bool receiveResponse(detail::HttpResponse& response);
@@ -126,7 +148,7 @@ private:
 	std::string m_prefix;              ///< URL prefix for the OpenML REST API
 	detail::Socket m_socket;           ///< underlying socket object
 	std::string m_readbuffer;          ///< socket read buffer
-	static std::mutex m_mutex;         ///< mutex for global synchronization of API calls and write operations to the file cache
+	static std::mutex m_mutex;         ///< mutex for global synchronization of REST API calls
 };
 
 

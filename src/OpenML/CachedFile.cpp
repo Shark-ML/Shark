@@ -39,43 +39,60 @@
 #include <fstream>
 
 
+#define SYNCHRONIZE std::unique_lock<std::mutex> lock(m_mutex);
+
+
 namespace shark {
 namespace openML {
+
+
+////////////////////////////////////////////////////////////
 
 
 // static
 PathType CachedFile::m_cacheDirectory = boost::filesystem::current_path();
 
 
-bool CachedFile::download()
+////////////////////////////////////////////////////////////
+
+
+bool CachedFile::downloaded() const
 {
-	if (downloaded()) return true;
+	SYNCHRONIZE
+
+	return boost::filesystem::exists(m_filename);
+}
+
+void CachedFile::download() const
+{
+	SYNCHRONIZE
+
+	if (downloaded()) return;
 
 	std::string host;
 	std::string resource;
 	if (m_url.size() >= 7 && m_url.substr(0, 7) == "http://")
 	{
 		std::size_t slash = m_url.find('/', 7);
-		if (slash == std::string::npos) return false;
+		if (slash == std::string::npos) throw SHARKEXCEPTION("invalid URL for file download");
 		host = m_url.substr(7, slash - 7);
 		resource = m_url.substr(slash);
 	}
 	else
 	{
 		std::size_t slash = m_url.find('/');
-		if (slash == std::string::npos) return false;
+		if (slash == std::string::npos) throw SHARKEXCEPTION("invalid URL for file download");
 		host = m_url.substr(0, slash);
 		resource = m_url.substr(slash);
 	}
 
 	Connection conn(host);
 	detail::HttpResponse response = conn.getHTTP(resource);
-	if (response.statusCode() != 200) return false;
+	if (response.statusCode() != 200) throw SHARKEXCEPTION("file download failed");
 
 	std::ofstream os(m_filename.string());
 	os << response.body();
 	os.close();
-	return true;
 }
 
 

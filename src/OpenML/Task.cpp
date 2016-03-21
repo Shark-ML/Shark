@@ -49,10 +49,9 @@ namespace openML {
 
 Task::Task(IDType id, bool downloadSplits)
 : PooledEntity<Task>(id)
-, CachedFile("", "task_" + boost::lexical_cast<std::string>(id) + "_splits.arff")
+, m_file("task_" + boost::lexical_cast<std::string>(id) + "_splits.arff")
 {
 	detail::Json result = connection.get("/task/" + boost::lexical_cast<std::string>(id));
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("failed to query OpenML task");
 
 	detail::Json desc = result["task"];
 	detail::Json input = desc["input"];
@@ -65,6 +64,7 @@ Task::Task(IDType id, bool downloadSplits)
 	else throw SHARKEXCEPTION("unknown task type: " + s);
 
 	IDType datasetID = detail::json2number<IDType>(input[0]["data_set"]["data_set_id"]);
+	m_dataset = Dataset::get(datasetID);
 	m_targetFeature = input[0]["data_set"]["target_feature"].asString();
 
 	detail::Json ep = input[1]["estimation_procedure"];
@@ -72,7 +72,7 @@ Task::Task(IDType id, bool downloadSplits)
 	if (s == "crossvalidation") m_estimationProcedure = CrossValidation;
 	else throw SHARKEXCEPTION("unknown estimation procedure: " + s);
 
-	m_url = ep["data_splits_url"].asString();
+	m_file.setUrl(ep["data_splits_url"].asString());
 
 	m_folds = 1;
 	m_repetitions = 1;
@@ -115,19 +115,16 @@ Task::Task(IDType id, bool downloadSplits)
 
 	if (desc.has("tag")) setTags(desc["tag"]);
 
-	if (downloadSplits)
-	{
-		if (! download()) throw SHARKEXCEPTION("failed to download and/or read OpenML splits file");
-	}
-
-	m_dataset = Dataset::get(datasetID);
+	if (downloadSplits) m_file.download();
 }
 
-bool Task::download()
+void Task::load()
 {
-	if (! CachedFile::download()) return false;
+	if (! m_split.empty()) return;
 
-	std::ifstream stream(filename().string().c_str());
+	m_file.download();
+
+	std::ifstream stream(m_file.filename().string().c_str());
 	std::string line;
 
 	// read the split file header
@@ -170,8 +167,6 @@ bool Task::download()
 	// store test fold indices
 	m_split.resize(m_repetitions, std::vector<std::size_t>(n));
 	for (std::size_t i=0; i<ix.size(); i++) m_split[rp[i]][ix[i]] = fd[i];
-
-	return true;
 }
 
 void Task::tag(std::string const& tagname)
@@ -180,7 +175,6 @@ void Task::tag(std::string const& tagname)
 	param.push_back(std::make_pair("task_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/task/tag", param);
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	Entity::tag(tagname);
 }
 
@@ -190,7 +184,6 @@ void Task::untag(std::string const& tagname)
 	param.push_back(std::make_pair("task_id", boost::lexical_cast<std::string>(id())));
 	param.push_back(std::make_pair("tag", tagname));
 	detail::Json result = connection.post("/task/untag");
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	Entity::untag(tagname);
 }
 
@@ -202,14 +195,14 @@ void Task::print(std::ostream& os) const
 	os << " data set: " << m_dataset->name() << " [" << m_dataset->id() << "]" << std::endl;
 	os << " target feature: " << m_targetFeature << std::endl;
 	os << " estimation procedure: " << estimationProcedureName[m_estimationProcedure] << std::endl;
-	os << " splits url: " << m_url << std::endl;
+	os << " splits url: " << m_file.url() << std::endl;
 	os << " number of repetitions: " << m_repetitions << std::endl;
 	os << " number of folds: " << m_folds << std::endl;
 	os << " number of data splits: " << m_repetitions * m_folds << std::endl;
 	os << " evaluation measure: " << evaluationMeasureName[m_evaluationMeasure] << std::endl;
 	os << " output format: " << m_outputFormat << std::endl;
 	os << " file status: ";
-	if (downloaded()) os << "in cache at " << filename().string();
+	if (m_file.downloaded()) os << "in cache at " << m_file.filename().string();
 	else os << "not in cache";
 	os << std::endl;
 	for (std::size_t i=0; i<m_outputFeature.size(); i++)

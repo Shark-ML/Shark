@@ -111,6 +111,15 @@ T json2number(detail::Json const& json)
 	throw SHARKEXCEPTION("failed to convert json value to number: " + json.stringify());
 }
 
+inline str::string json2string(detail::Json const& json)
+{
+	if (json.isString()) return json.asString();
+	if (json.isNumber()) return boost::lexical_cast<std::string>(json.asNumber());
+	if (json.isBoolean()) return json.asBoolean() ? "true" : "false";
+	if (json.isNull()) return "null";
+	throw SHARKEXCEPTION("failed to convert json value to string: " + json.stringify());
+}
+
 
 };  // namespace detail
 };  // namespace openML

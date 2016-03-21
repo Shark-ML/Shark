@@ -38,6 +38,7 @@
 
 
 #include "Entity.h"
+#include "CachedFile.h"
 #include "Task.h"
 #include "Flow.h"
 #include <shark/Data/Dataset.h>
@@ -59,13 +60,7 @@ public:
 	///
 	/// The run is created in memory, but not yet in the OpenML service.
 	/// Call Run::commit to complete the process.
-	Run(std::shared_ptr<Task> task, std::shared_ptr<Flow> flow)
-	: Entity()
-	, m_task(task)
-	, m_flow(flow)
-	, m_hyperparameterValue(m_flow->numberOfHyperparameters())
-	, m_predictions(m_task->repetitions(), std::vector< std::vector<double> >(m_task->folds()))
-	{ }
+	Run(std::shared_ptr<Task> task, std::shared_ptr<Flow> flow);
 
 	/// \brief Add a tag to the entity.
 	void tag(std::string const& tagname);
@@ -80,6 +75,27 @@ public:
 	std::size_t numberOfHyperparameters() const
 	{ return m_flow->numberOfHyperparameters(); }
 
+	/// \brief Obtain the value of a hyperparameter by name.
+	///
+	/// Each value can be obtained as a string. This function casts the
+	/// value to the requested return type with boost::lexical_cast.
+	template <typename ValueType = std::string>
+	ValueType hyperparameterValue(std::string const& name)
+	{
+		// find the index
+		std::size_t num = m_flow->numberOfHyperparameters();
+		for (std::size_t i=0; i<num; i++)
+		{
+			Hyperparameter const& p = m_flow->hyperparameter(i);
+			if (p.name == name)
+			{
+				// return the value
+				return boost::lexical_cast<ValueType>(m_hyperparameterValue[i]);
+			}
+		}
+		throw SHARKEXCEPTION("[Run::hyperparameterValue] unknown hyperparameter " + name);
+	}
+
 	/// \brief Define the value of a hyperparameter used for this run.
 	///
 	/// Call this function only on new runs. It fails for runs that were
@@ -88,7 +104,7 @@ public:
 	template <typename ValueType>
 	void setHyperparameterValue(std::string const& name, ValueType const& value)
 	{
-		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set hyperparameter value on an already existing run.");
+		if (id() != invalidID) throw SHARKEXCEPTION("[Rub::setHyperparameterValue] Cannot set hyperparameter value on an already existing run.");
 
 		// find the index
 		std::size_t num = m_flow->numberOfHyperparameters();
@@ -189,6 +205,8 @@ private:
 	std::shared_ptr<Flow> m_flow;        ///< flow associated with the run
 	std::vector< std::string > m_hyperparameterValue;                    ///< values of all hyperparameters defined in the flow
 	std::vector< std::vector< std::vector< double > > > m_predictions;   ///< predictions for all repetitions and folds defined in the task
+
+	CachedFile m_file;                   ///< ARFF file storing predictions
 };
 
 

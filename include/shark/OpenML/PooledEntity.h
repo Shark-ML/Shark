@@ -58,22 +58,12 @@ namespace openML {
 SHARK_EXPORT_SYMBOL template <class T> class PooledEntity : public Entity
 {
 public:
-//	/// \brief Obtain a non-owning pointer to an newly created object.
-//	template <class... Args>
-//	static std::shared_ptr<T> create(Args&& args)
-//	{
-//		T* object = new T(std::forward<Args>(args));
-//		m_all[id] = object;
-//		return std::shared_ptr<T>(object);
-//	}
-
 	/// \brief Obtain a non-owning pointer to an object by ID.
 	static std::shared_ptr<T> get(IDType id)
 	{
 		typename std::map<IDType, T*>::iterator it = m_all.find(id);
 		if (it == m_all.end())
 		{
-//			return create<IDType>(id);
 			T* object = new T(id);
 			m_all[id] = object;
 			return std::shared_ptr<T>(object);
@@ -81,16 +71,7 @@ public:
 		else return std::shared_ptr<T>(it->second);
 	}
 
-//	using Entity::id;
-//	using Entity::tags;
-//	using Entity::tag;
-//	using Entity::untag;
-//	using Entity::print;
-
 protected:
-//	using Entity::setID;
-//	using Entity::setTags;
-
 	/// \brief Default constructor.
 	///
 	/// Calling the default constructor makes it OBLIGATORY to call

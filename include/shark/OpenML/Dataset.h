@@ -45,13 +45,13 @@ namespace openML {
 
 
 /// \brief Representation of an OpenML data set.
-SHARK_EXPORT_SYMBOL class Dataset : public PooledEntity<Dataset>, public CachedFile
+SHARK_EXPORT_SYMBOL class Dataset : public PooledEntity<Dataset>
 {
 private:
 	friend class PooledEntity<Dataset>;
 
 	/// \brief Construct an existing dataset from its ID.
-	Dataset(IDType id, bool downloadData = true);
+	Dataset(IDType id, bool downloadData = false);
 
 public:
 	////////////////////////////////////////////////////////////
@@ -107,6 +107,10 @@ public:
 	FeatureDescription const& feature(std::size_t index) const
 	{ return m_feature[index]; }
 
+	/// \brief Obtain the underlying ARFF data set file
+	CachedFile const& datafile() const
+	{ return m_file; }
+
 private:
 	// properties
 	std::string m_name;                   ///< name of the data set
@@ -118,7 +122,10 @@ private:
 	std::string m_visibility;             ///< data set visibility (e.g., public or private)
 
 	// features
-	std::vector<FeatureDescription> m_feature;
+	std::vector<FeatureDescription> m_feature;   ///< feature meta data
+
+	// external file
+	CachedFile m_file;                    ///< underlying ARFF data set file
 };
 
 
