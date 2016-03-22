@@ -61,17 +61,13 @@ Task::Task(IDType id, bool downloadSplits)
 	s = desc["task_type"].asString();
 	if (s == "Supervised Classification") m_tasktype = SupervisedClassification;
 	else if (s == "Supervised Regression") m_tasktype = SupervisedRegression;
-	else throw SHARKEXCEPTION("unknown task type: " + s);
+	else throw SHARKEXCEPTION("unsupported task type: " + s);
 
 	IDType datasetID = detail::json2number<IDType>(input[0]["data_set"]["data_set_id"]);
 	m_dataset = Dataset::get(datasetID);
 	m_targetFeature = input[0]["data_set"]["target_feature"].asString();
 
 	detail::Json ep = input[1]["estimation_procedure"];
-	s = ep["type"].asString();
-	if (s == "crossvalidation") m_estimationProcedure = CrossValidation;
-	else throw SHARKEXCEPTION("unknown estimation procedure: " + s);
-
 	m_file.setUrl(ep["data_splits_url"].asString());
 
 	m_folds = 1;
@@ -84,11 +80,6 @@ Task::Task(IDType id, bool downloadSplits)
 		if (name == "number_repeats") m_repetitions = detail::json2number<std::size_t>(param[i]["value"]);
 		else if (name == "number_folds") m_folds = detail::json2number<std::size_t>(param[i]["value"]);
 	}
-
-	s = input[3]["evaluation_measures"]["evaluation_measure"].asString();
-	if (s == "") m_evaluationMeasure = UnspecifiedMeasure;
-	else if (s == "predictive_accuracy") m_evaluationMeasure = PredictiveAccuracy;
-	else throw SHARKEXCEPTION("unknown evaluation measure: " + s);
 
 	// expected output
 	m_outputFormat = output["predictions"]["format"].asString();
@@ -118,7 +109,7 @@ Task::Task(IDType id, bool downloadSplits)
 	if (downloadSplits) m_file.download();
 }
 
-void Task::load()
+void Task::load() const
 {
 	if (! m_split.empty()) return;
 
@@ -132,13 +123,14 @@ void Task::load()
 	{
 		if (line.empty()) continue;
 		if (line[line.size()-1] == '\r') line.erase(line.size() - 1);
+		detail::ASCIItoLowerCase(line);
 		if (line == "@data") break;
 	}
 
 	// read the split file data section
-	std::vector<size_t> ix;
-	std::vector<size_t> fd;
-	std::vector<size_t> rp;
+	std::vector<std::size_t> ix;
+	std::vector<std::size_t> fd;
+	std::vector<std::size_t> rp;
 	std::size_t n = 0;
 	while (std::getline(stream, line))
 	{
@@ -164,9 +156,12 @@ void Task::load()
 		}
 	}
 
+	// for the load() function we have conceptual (not actual) constness
+	std::vector< std::vector<std::size_t> >& sp = const_cast< std::vector< std::vector<std::size_t> >& >(m_split);
+
 	// store test fold indices
-	m_split.resize(m_repetitions, std::vector<std::size_t>(n));
-	for (std::size_t i=0; i<ix.size(); i++) m_split[rp[i]][ix[i]] = fd[i];
+	sp.resize(m_repetitions, std::vector<std::size_t>(n));
+	for (std::size_t i=0; i<ix.size(); i++) sp[rp[i]][ix[i]] = fd[i];
 }
 
 void Task::tag(std::string const& tagname)
@@ -194,12 +189,10 @@ void Task::print(std::ostream& os) const
 	os << " type: " << taskTypeName[m_tasktype] << std::endl;
 	os << " data set: " << m_dataset->name() << " [" << m_dataset->id() << "]" << std::endl;
 	os << " target feature: " << m_targetFeature << std::endl;
-	os << " estimation procedure: " << estimationProcedureName[m_estimationProcedure] << std::endl;
 	os << " splits url: " << m_file.url() << std::endl;
 	os << " number of repetitions: " << m_repetitions << std::endl;
 	os << " number of folds: " << m_folds << std::endl;
 	os << " number of data splits: " << m_repetitions * m_folds << std::endl;
-	os << " evaluation measure: " << evaluationMeasureName[m_evaluationMeasure] << std::endl;
 	os << " output format: " << m_outputFormat << std::endl;
 	os << " file status: ";
 	if (m_file.downloaded()) os << "in cache at " << m_file.filename().string();

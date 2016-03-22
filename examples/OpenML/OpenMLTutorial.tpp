@@ -56,7 +56,9 @@ int main(int argc, char** argv)
 		// with this key will silently fail.
 		string api_key = "8d736266baa96f8ef99f10516911d334";
 
-//openML::connection.setRemote("test.openml.org", 80, "/api/v1/json");
+// redirect queries to the test server, this will go into the unit tests
+openML::connection.setRemote("test.openml.org", 80, "/api/v1/json");
+if (argc > 1) api_key = argv[1];
 
 		// register the api key in the global openML::connection object
 		openML::connection.setKey(api_key);
@@ -101,9 +103,9 @@ int main(int argc, char** argv)
 		// define a flow representing the setup
 		std::string flowName = trainer.name() + "." + kernel.name();
 		std::vector<openML::Hyperparameter> params;
-		params.push_back(openML::Hyperparameter("C", "double", "regularization parameter, must be positive"));
-		params.push_back(openML::Hyperparameter("gamma", "double", "kernel bandwidth parameter, must be positive"));
-		params.push_back(openML::Hyperparameter("bias", "bool", "presence or absence of the bias 'b' in the model"));
+		params.push_back(openML::Hyperparameter("C", "regularization parameter, must be positive", "double"));
+		params.push_back(openML::Hyperparameter("gamma", "kernel bandwidth parameter, must be positive", "double"));
+		params.push_back(openML::Hyperparameter("bias", "presence or absence of the bias 'b' in the model", "bool"));
 		shared_ptr<openML::Flow> flow = openML::Flow::get(flowName, "one-versus-all C-SVM with Gaussian RBF kernel", params);
 		flow->print();
 //###end<flows>
@@ -125,6 +127,7 @@ int main(int argc, char** argv)
 		cout << "training and predicting " << flush;
 		ClassificationDataset data;
 		task->loadData(data);
+		Data<unsigned int> predictions;
 		for (std::size_t r=0; r<task->repetitions(); r++)
 		{
 			CVFolds< LabeledData<RealVector, unsigned int> > folds = task->split(r, data);
@@ -134,8 +137,8 @@ int main(int argc, char** argv)
 				ClassificationDataset validationdata = folds.validation(f);
 				KernelClassifier<RealVector> model;
 				trainer.train(model, traindata);
-				Data<unsigned int> predictions = model(validationdata.inputs());
-				run.storePredictions(r, f, predictions);
+				predictions = model(validationdata.inputs());
+				run.setPredictions(r, f, predictions);
 				cout << "." << flush;
 			}
 		}
@@ -144,7 +147,7 @@ int main(int argc, char** argv)
 
 //###begin<commit>
 		// upload the results to OpenML
-		cout << "\nNOTE: the following call to commit() fails due to using a read-only account.\n\n";
+		cout << "\nNOTE: the following call to commit() fails due to the read-only account.\n\n";
 		run.commit();
 		cout << "ID of the new run: " << run.id() << endl;
 //###end<commit>

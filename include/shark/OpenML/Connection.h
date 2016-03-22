@@ -87,11 +87,11 @@ public:
 	Connection(std::string const& host, unsigned short port = 80, std::string const& prefix = "");
 
 
-// debug
-	void setRemote(std::string const& host, unsigned short port)
+	void setRemote(std::string const& host, unsigned short port, std::string const& prefix)
 	{
 		m_host = host;
 		m_port = port;
+		m_prefix = prefix;
 	}
 
 	/// \brief Obtain the currently set api_key.

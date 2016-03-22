@@ -40,6 +40,7 @@
 #include "Base.h"
 #include "PooledEntity.h"
 #include <shark/Core/INameable.h>
+#include <shark/Core/Exception.h>
 #include <vector>
 #include <map>
 #include <string>
@@ -65,6 +66,8 @@ private:
 	Flow(INameable const& method, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
 
 public:
+	using PooledEntity<Flow>::get;
+
 	/// \brief Construct a new OpenML flow.
 	static std::shared_ptr<Flow> get(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
 
@@ -103,6 +106,16 @@ public:
 	Hyperparameter const& hyperparameter(std::size_t index) const
 	{ return m_hyperparameter[index]; }
 
+	/// \brief Obtain the index of a hyperparameter by name.
+	std::size_t hyperparameterIndex(std::string const& name) const
+	{
+		for (std::size_t i=0; i<m_hyperparameter.size(); i++)
+		{
+			if (m_hyperparameter[i].name == name) return i;
+		}
+		throw SHARKEXCEPTION("[hyperparameterIndex] hyperparameter " + name + " not found");
+	}
+
 private:
 	/// \brief Create the flow on the OpenML server.
 	void create(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
@@ -113,7 +126,7 @@ private:
 	std::string m_name;                                ///< name of the flow (key)
 	std::string m_description;                         ///< short description of the flow
 	std::string m_version;                             ///< version of the flow (key)
-	std::vector<Hyperparameter> m_hyperparameter;      ///< description of hyperparameters of the flow
+	std::vector<Hyperparameter> m_hyperparameter;      ///< description of hyperparameters of the flow, accessed by index (ordered collection)
 	std::map<std::string, std::string> m_properties;   ///< additional non-mandatory properties of the flow, fields must comply with the OpenML flow XML schema
 };
 

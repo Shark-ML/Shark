@@ -107,6 +107,16 @@ public:
 	FeatureDescription const& feature(std::size_t index) const
 	{ return m_feature[index]; }
 
+	/// \brief Obtain the index of a feature by name.
+	std::size_t featureIndex(std::string const& name) const
+	{
+		for (std::size_t i=0; i<m_feature.size(); i++)
+		{
+			if (m_feature[i].name == name) return i;
+		}
+		throw SHARKEXCEPTION("[featureIndex] feature " + name + " not found");
+	}
+
 	/// \brief Obtain the underlying ARFF data set file
 	CachedFile const& datafile() const
 	{ return m_file; }

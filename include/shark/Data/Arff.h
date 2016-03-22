@@ -6,7 +6,10 @@
  *
  * The import and export functions in the file aim to comply to the
  * specification at https://weka.wikispaces.com/ARFF+%28stable+version%29 ,
- * however, the spec is inaccurate and far from complete.
+ * however, the spec is inaccurate and far from complete. For example,
+ * it does not say anything about escaping inside strings, and values
+ * are not stored in a type-safe way, i.e., numbers may be stored as
+ * strings (e.g., using double quotes).
  * 
  * 
  * \par
@@ -138,7 +141,7 @@ enum AttributeType
 	Ignore,
 };
 
-SHARK_EXPORT_SYMBOL inline std::size_t parseString(std::string const& line, std::size_t start, std::string& token, std::string const& delimitors)
+SHARK_EXPORT_SYMBOL inline std::size_t parseString(std::string const& line, std::size_t start, std::string& token, std::string const& delimiters)
 {
 	while (line[start] == ' ') start++;
 	std::size_t end = start;
@@ -151,16 +154,16 @@ SHARK_EXPORT_SYMBOL inline std::size_t parseString(std::string const& line, std:
 		token = line.substr(start, end - start);
 		end++;
 		if (end == line.size()) return end;
-		if (delimitors.find(line[end]) == std::string::npos)
+		if (delimiters.find(line[end]) == std::string::npos)
 		{
 			while (line[end] == ' ') end++;
 			if (end == line.size()) return end;
-			if (delimitors.find(line[end]) == std::string::npos) throw SHARKEXCEPTION("[importARFF] missing delimitor");
+			if (delimiters.find(line[end]) == std::string::npos) throw SHARKEXCEPTION("[importARFF] missing delimiter");
 		}
 	}
 	else
 	{
-		end = line.find_first_of(delimitors, start);
+		end = line.find_first_of(delimiters, start);
 		if (end == std::string::npos) end = line.size();
 		token = line.substr(start, end - start);
 		if (end == line.size()) return end;
@@ -169,11 +172,11 @@ SHARK_EXPORT_SYMBOL inline std::size_t parseString(std::string const& line, std:
 	return end;
 }
 
-SHARK_EXPORT_SYMBOL inline std::size_t parseToken(std::string const& line, std::size_t start, std::string& token, char delimitor = ' ')
+SHARK_EXPORT_SYMBOL inline std::size_t parseToken(std::string const& line, std::size_t start, std::string& token, char delimiter = ' ')
 {
 	while (line[start] == ' ') start++;
 	std::size_t end = start;
-	while (end < line.size() && line[end] != delimitor) end++;
+	while (end < line.size() && line[end] != delimiter) end++;
 	token = line.substr(start, end - start);
 	while (line[end] == ' ') end++;
 	return end;
@@ -198,47 +201,120 @@ SHARK_EXPORT_SYMBOL inline double parseDate(std::string const& date, std::string
 	}
 }
 
-template <typename T>
+SHARK_EXPORT_SYMBOL template <typename T>
 void setLabel(T& container, double value)
 {
 	SHARK_ASSERT(container.size() == 1);
 	container[0] = value;
 }
 
-template <>
+SHARK_EXPORT_SYMBOL template <>
 inline void setLabel<unsigned int>(unsigned int& label, double value)
 {
 	label = (unsigned int)value;
 	SHARK_ASSERT((double)label == std::floor(value));
 }
 
-template <typename T>
-std::string label2string(T const& label)
+SHARK_EXPORT_SYMBOL template <typename T>
+double label2double(T const& label)
 {
 	throw SHARKEXCEPTION("[exportARFF] cannot to convert label to ARFF format");
 }
 
-template <>
-inline std::string label2string<RealVector>(RealVector const& label)
+SHARK_EXPORT_SYMBOL template <>
+inline double label2double<RealVector>(RealVector const& label)
 {
 	SHARK_ASSERT(label.size() == 1);
-	return boost::lexical_cast<std::string>(label[0]);
+	return label[0];
 }
 
-template <>
-inline std::string label2string<unsigned int>(unsigned int const& label)
+SHARK_EXPORT_SYMBOL template <>
+inline double label2double<unsigned int>(unsigned int const& label)
 {
-	return boost::lexical_cast<std::string>(label);
+	return static_cast<double>(label);
 }
 
 };  // namespace detail
 };  // namespace arff
 
 
+/// \brief Return the possible values of the the nominal label attribute.
+///
+/// \param  stream             the stream to be read from
+/// \param  labelname          name of the attribute acting as a label
+///
+/// The function reads only the file header until it finds the label
+/// attribute. It does not read any data.
+SHARK_EXPORT_SYMBOL inline std::vector<std::string> importARFFnominalLabel(
+	std::istream& stream,
+	std::string const& labelname)
+{
+	std::vector<std::string> ret;
+
+	// read header section
+	std::string line;
+	while (std::getline(stream, line))
+	{
+		if (line.empty()) continue;
+		if (line[line.size()-1] == '\r') line.erase(line.size() - 1);
+		if (line.empty()) continue;
+		if (line[0] == '%') continue;
+		if (line[0] == '@')
+		{
+			std::size_t pos = line.find(' ');
+			if (pos == std::string::npos) pos = line.size();
+			// convert to ASCII lower case (i.e., don't rely on the locale)
+			for (std::size_t i=0; i<pos; i++) if (line[i] >= 65 && line[i] <= 90) line[i] += 32;
+			std::string type = line.substr(0, pos);
+			if (type == "@data") break;
+			else if (type == "@relation") continue;   // ignore
+			else if (type == "@attribute")
+			{
+				std::string s;
+				pos = arff::detail::parseString(line, pos, s, " ");
+				if (s == labelname)
+				{
+					if (line[pos] == '{')
+					{
+						pos++;
+						while (true)
+						{
+							pos = arff::detail::parseString(line, pos, s, ",}");
+							ret.push_back(s);
+							if (line[pos] == ',') pos++;
+							else if (line[pos] == '}') { pos++; break; }
+						}
+					}
+					return ret;
+				}
+			}
+			else throw SHARKEXCEPTION("[importARFF] unsupported header field: " + type);
+		}
+		else throw SHARKEXCEPTION("[importARFF] invalid line in ARFF header");
+	}
+	throw SHARKEXCEPTION("[importARFFnominalLabel] label attribute " + labelname + " not found");
+}
+
+/// \brief Return the possible values of the the nominal label attribute.
+///
+/// \param  stream             the stream to be read from
+/// \param  labelname          name of the attribute acting as a label
+///
+/// The function reads only the file header until it finds the label
+/// attribute. It does not read any data.
+SHARK_EXPORT_SYMBOL inline std::vector<std::string> importARFFnominalLabel(
+	std::string const& filename,
+	std::string const& labelname)
+{
+	std::ifstream stream(filename.c_str());
+	return importARFFnominalLabel(stream, labelname);
+}
+
 /// \brief Import a labeled Dataset from an ARFF file
 ///
 /// \param  stream             the stream to be read from
 /// \param  labelname          name of the attribute acting as a label
+/// \param  nominalLabel       lists of possible values if the label is nominal
 /// \param  dataset            container storing the loaded data
 /// \param  options            options, mostly for handling ARFF oddities
 /// \param  maximumBatchSize   size of batches in the dataset
@@ -383,7 +459,7 @@ SHARK_EXPORT_SYMBOL template<typename InputT, typename LabelT> void importARFF(
 					else
 					{
 						std::map<std::string, std::size_t>::const_iterator it = attributeNominalValue[i].find(s);
-						if (it == attributeNominalValue[i].end()) throw SHARKEXCEPTION("[importARFF] undeclared value in nominal field");
+						if (it == attributeNominalValue[i].end()) throw SHARKEXCEPTION("[importARFF] invalid value in nominal field");
 						std::size_t value = it->second;
 						if (i == labelIndex) arff::detail::setLabel(label, value);
 						else input(attributeStart[i + value]) = 1.0;
@@ -442,7 +518,7 @@ SHARK_EXPORT_SYMBOL template<typename InputT, typename LabelT> void importARFF(
 					else
 					{
 						std::map<std::string, std::size_t>::const_iterator it = attributeNominalValue[i].find(s);
-						if (it == attributeNominalValue[i].end()) throw SHARKEXCEPTION("[importARFF] undeclared value in nominal field");
+						if (it == attributeNominalValue[i].end()) throw SHARKEXCEPTION("[importARFF] invalid value in nominal field");
 						std::size_t value = it->second;
 						if (i == labelIndex) arff::detail::setLabel(label, value);
 						else input(attributeStart[i + value]) = 1.0;
@@ -510,6 +586,7 @@ SHARK_EXPORT_SYMBOL template<typename InputT, typename LabelT> void importARFF(
 	importARFF(stream, labelname, dataset, options, maximumBatchSize);
 }
 
+
 /// \brief Write labeled data to an ARFF stream.
 ///
 /// \param  stream         the stream to be written to
@@ -570,7 +647,7 @@ SHARK_EXPORT_SYMBOL template<typename LabelT> void exportARFF(
 				stream << element.input(j) << ",";
 			}
 			LabelT l = element.label;
-			stream << arff::detail::label2string<LabelT>(l) << std::endl;
+			stream << arff::detail::label2double<LabelT>(l) << std::endl;
 		}
 	}
 }
@@ -656,7 +733,7 @@ SHARK_EXPORT_SYMBOL template<typename LabelT> void exportARFF(
 				stream << " " << value << ",";
 			}
 			LabelT l = element.label;
-			stream << dimension << " " << arff::detail::label2string<LabelT>(l) << "}" << std::endl;
+			stream << dimension << " " << arff::detail::label2double<LabelT>(l) << "}" << std::endl;
 		}
 	}
 }

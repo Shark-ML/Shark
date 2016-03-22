@@ -160,15 +160,22 @@ void Flow::obtainFromServer()
 	m_version = desc["external_version"].asString();
 	m_description = desc["description"].asString();
 
-	for (std::size_t i=0; i<param.size(); i++)
+	if (desc.has("parameter"))
 	{
-		detail::Json jp = param[i];
-		Hyperparameter p;
-		p.name = jp["name"].asString();
-		p.datatype = jp["data_type"].asString();
-		if (jp.has("defaul_value") && jp["default_value"].isString()) p.defaultValue = jp["default_value"].asString();
-		p.description = jp["description"].asString();
-		m_hyperparameter.push_back(p);
+		detail::Json param = desc["parameter"];
+		if (param.isArray())
+		{
+			for (std::size_t i=0; i<param.size(); i++)
+			{
+				detail::Json jp = param[i];
+				Hyperparameter p;
+				p.name = jp["name"].asString();
+				p.datatype = jp["data_type"].asString();
+				if (jp.has("defaul_value") && jp["default_value"].isString()) p.defaultValue = jp["default_value"].asString();
+				p.description = jp["description"].asString();
+				m_hyperparameter.push_back(p);
+			}
+		}
 	}
 
 	// TODO: populate properties...!

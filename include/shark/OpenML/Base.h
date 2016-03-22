@@ -55,6 +55,8 @@ SHARK_EXPORT_SYMBOL typedef boost::filesystem::path PathType;    ///< \brief Pat
 SHARK_EXPORT_SYMBOL typedef std::uint64_t IDType;                ///< \brief An ID is an unsigned integer.
 
 SHARK_EXPORT_SYMBOL static const IDType invalidID = 0;           ///< \brief Invalid ID, marker for default constructed objects.
+SHARK_EXPORT_SYMBOL static const double invalidValue = -1e100;   ///< \brief Invalid value, e.g., undefined prediction
+
 
 /// \brief Result of querying OpenML objects.
 SHARK_EXPORT_SYMBOL struct QueryEntry
@@ -129,32 +131,6 @@ SHARK_EXPORT_SYMBOL enum TaskType
 
 /// \brief Names of task types
 static const char* taskTypeName[] = { "supervised classification", "supervised regression" };
-
-
-/// \brief Enumeration of supported OpenML estimation procedures.
-SHARK_EXPORT_SYMBOL enum EstimationProcedure
-{
-	Holdout = 0,
-	CrossValidation = 1,
-	RepeatedCrossValidation = 2,
-};
-
-
-/// \brief Names of estimation procedures
-static const char* estimationProcedureName[] = { "holdout", "cross validation", "repeated cross validation" };
-
-
-/// \brief Enumeration of supported OpenML evaluation measures.
-SHARK_EXPORT_SYMBOL enum EvaluationMeasure
-{
-	UnspecifiedMeasure = 0,
-	PredictiveAccuracy = 1,
-	MeanSquaredError = 2,
-};
-
-
-/// \brief Names of estimation procedures
-static const char* evaluationMeasureName[] = { "unspecified", "predictive accuracy", "mean squared error" };
 
 
 };  // namespace openML

@@ -42,6 +42,7 @@
 #include "Task.h"
 #include "Flow.h"
 #include <shark/Data/Dataset.h>
+#include <shark/Data/Arff.h>
 #include <vector>
 
 
@@ -54,7 +55,7 @@ SHARK_EXPORT_SYMBOL class Run : public Entity
 {
 public:
 	/// \brief Construct an existing OpenML run from its ID.
-	Run(IDType id);
+	Run(IDType id, bool downloadPredictions = false);
 
 	/// \brief Construct a new OpenML run from task and flow.
 	///
@@ -71,6 +72,9 @@ public:
 	/// \brief Print a human readable summary of the entity.
 	void print(std::ostream& os = std::cout) const;
 
+	/// \brief Load the predictions into memory.
+	void load() const;
+
 	/// \brief Obtain the number of hyperparameters of the flow.
 	std::size_t numberOfHyperparameters() const
 	{ return m_flow->numberOfHyperparameters(); }
@@ -82,18 +86,7 @@ public:
 	template <typename ValueType = std::string>
 	ValueType hyperparameterValue(std::string const& name)
 	{
-		// find the index
-		std::size_t num = m_flow->numberOfHyperparameters();
-		for (std::size_t i=0; i<num; i++)
-		{
-			Hyperparameter const& p = m_flow->hyperparameter(i);
-			if (p.name == name)
-			{
-				// return the value
-				return boost::lexical_cast<ValueType>(m_hyperparameterValue[i]);
-			}
-		}
-		throw SHARKEXCEPTION("[Run::hyperparameterValue] unknown hyperparameter " + name);
+		return boost::lexical_cast<ValueType>(m_hyperparameterValue[m_flow->hyperparameterIndex(name)]);
 	}
 
 	/// \brief Define the value of a hyperparameter used for this run.
@@ -105,20 +98,53 @@ public:
 	void setHyperparameterValue(std::string const& name, ValueType const& value)
 	{
 		if (id() != invalidID) throw SHARKEXCEPTION("[Rub::setHyperparameterValue] Cannot set hyperparameter value on an already existing run.");
+		m_hyperparameterValue[m_flow->hyperparameterIndex(name)] = boost::lexical_cast<std::string>(value);
+	}
 
-		// find the index
-		std::size_t num = m_flow->numberOfHyperparameters();
-		for (std::size_t i=0; i<num; i++)
+	/// \brief Obtain predictions for a given repetition and fold.
+	template <typename ContainerType>
+	void predictions(std::size_t repetition, std::size_t fold, ContainerType& predictions) const
+	{
+		load();
+		std::vector<double> const& p = m_predictions[repetition];
+		std::vector<std::size_t> const& split = m_task->splitIndices(repetition);
+		SHARK_ASSERT(p.size() == split.size());
+		predictions.clear();
+		for (std::size_t i=0; i<p.size(); i++)
 		{
-			Hyperparameter const& p = m_flow->hyperparameter(i);
-			if (p.name == name)
-			{
-				// store the value
-				m_hyperparameterValue[i] = boost::lexical_cast<std::string>(value);
-				return;
-			}
+			if (split[i] == fold) predictions.push_back(p[i]);
 		}
-		throw SHARKEXCEPTION("unknown hyperparameter " + name);
+	}
+
+	/// \brief Obtain predictions for a given repetition and fold.
+	template <typename VectorType>
+	void predictions(std::size_t repetition, std::size_t fold, Data<VectorType>& predictions) const
+	{
+		load();
+		std::vector<double> const& p = m_predictions[repetition];
+		std::vector<std::size_t> const& split = m_task->splitIndices(repetition);
+		SHARK_ASSERT(p.size() == split.size());
+		std::vector<RealVector> tmp;
+		for (std::size_t i=0; i<p.size(); i++)
+		{
+			if (split[i] == fold) tmp.push_back(RealVector(1, p[i]));
+		}
+		predictions = createDataFromRange(tmp);
+	}
+
+	/// \brief Obtain predictions for a given repetition and fold.
+	inline void predictions(std::size_t repetition, std::size_t fold, Data<unsigned int>& predictions) const
+	{
+		load();
+		std::vector<double> const& p = m_predictions[repetition];
+		std::vector<std::size_t> const& split = m_task->splitIndices(repetition);
+		SHARK_ASSERT(p.size() == split.size());
+		std::vector<unsigned int> tmp(p.size());
+		for (std::size_t i=0; i<p.size(); i++)
+		{
+			if (split[i] == fold) tmp.push_back(static_cast<unsigned int>(p[i]));
+		}
+		predictions = createDataFromRange(tmp);
 	}
 
 	/// \brief Store predictions.
@@ -127,66 +153,53 @@ public:
 	/// already committed to the server, and also for runs that were
 	/// obtained from the server.
 	template <typename ContainerType>
-	void storePredictions(std::size_t repetition, std::size_t fold, ContainerType const& predictions)
+	void setPredictions(std::size_t repetition, std::size_t fold, ContainerType const& predictions)
 	{
 		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set hyperparameter value on an already existing run.");
 
 		SHARK_ASSERT(repetition < m_task->repetitions());
 		SHARK_ASSERT(fold < m_task->folds());
-		std::vector<double>& p = m_predictions[repetition][fold];
-		p.resize(predictions.size());
-		for (std::size_t i=0; i<predictions.size(); i++) p[i] = predictions[i];
-	}
 
-	/// \brief Store regression predictions as Data<VectorType>.
-	///
-	/// Call this function only on new runs. It fails for runs that were
-	/// already committed to the server, and also for runs that were
-	/// obtained from the server.
-	template <typename VectorType>
-	void storePredictions(std::size_t repetition, std::size_t fold, Data<VectorType> const& predictions)
-	{
-		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set hyperparameter value on an already existing run.");
-
-		SHARK_ASSERT(repetition < m_task->repetitions());
-		SHARK_ASSERT(fold < m_task->folds());
-		std::vector<double>& p = m_predictions[repetition][fold];
-		p.clear();
-		std::size_t batches = predictions.numberOfBatches();
-		for (std::size_t b=0; b<batches; b++)
+		std::vector<std::size_t> const& split = m_task->splitIndices(repetition);
+		std::vector<double>& pred = m_predictions[repetition];
+		SHARK_ASSERT(split.size() == pred.size());
+		std::size_t j = 0;
+		for (std::size_t i=0; i<predictions.size(); i++)
 		{
-			typename Data<VectorType>::const_batch_reference batch = predictions.batch(b);
-			std::size_t size = boost::size(batch);
-			for (std::size_t i=0; i<size; i++)
-			{
-				typename Data<VectorType>::const_element_reference element = shark::get(batch, i);
-				p.push_back(element(0));
-			}
+			while (split[j] != fold) j++;
+			pred[j] = predictions[i];
+			j++;
 		}
 	}
 
-	/// \brief Store classification predictions as Data<unsigned int>.
+	/// \brief Store regression predictions as Data<LabelType>.
 	///
 	/// Call this function only on new runs. It fails for runs that were
 	/// already committed to the server, and also for runs that were
 	/// obtained from the server.
-	inline void storePredictions(std::size_t repetition, std::size_t fold, Data<unsigned int> const& predictions)
+	template <typename LabelType>
+	void setPredictions(std::size_t repetition, std::size_t fold, Data<LabelType> const& predictions)
 	{
 		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set hyperparameter value on an already existing run.");
 
 		SHARK_ASSERT(repetition < m_task->repetitions());
 		SHARK_ASSERT(fold < m_task->folds());
-		std::vector<double>& p = m_predictions[repetition][fold];
-		p.clear();
+
+		std::vector<std::size_t> const& split = m_task->splitIndices(repetition);
+		std::vector<double>& pred = m_predictions[repetition];
+		SHARK_ASSERT(split.size() == pred.size());
+		std::size_t i = 0, j = 0;
 		std::size_t batches = predictions.numberOfBatches();
 		for (std::size_t b=0; b<batches; b++)
 		{
-			Data<unsigned int>::const_batch_reference batch = predictions.batch(b);
+			typename Data<LabelType>::const_batch_reference batch = predictions.batch(b);
 			std::size_t size = boost::size(batch);
 			for (std::size_t i=0; i<size; i++)
 			{
-				Data<unsigned int>::const_element_reference element = shark::get(batch, i);
-				p.push_back(element);
+				while (split[j] != fold) j++;
+				typename Data<LabelType>::const_element_reference element = shark::get(batch, i);
+				pred[j] = arff::detail::label2double<LabelType>(element);
+				j++;
 			}
 		}
 	}
@@ -203,8 +216,8 @@ public:
 private:
 	std::shared_ptr<Task> m_task;        ///< task associated with the run
 	std::shared_ptr<Flow> m_flow;        ///< flow associated with the run
-	std::vector< std::string > m_hyperparameterValue;                    ///< values of all hyperparameters defined in the flow
-	std::vector< std::vector< std::vector< double > > > m_predictions;   ///< predictions for all repetitions and folds defined in the task
+	std::vector< std::string > m_hyperparameterValue;     ///< values of all hyperparameters defined in the flow
+	std::vector< std::vector< double > > m_predictions;   ///< predictions for all repetitions defined in the task
 
 	CachedFile m_file;                   ///< ARFF file storing predictions
 };

@@ -73,8 +73,8 @@ public:
 	/// \brief Print a human readable summary of the entity.
 	void print(std::ostream& os = std::cout) const;
 
-	/// \brief load the splits into memory.
-	void load();
+	/// \brief Load the splits into memory.
+	void load() const;
 
 	/// \brief Obtain the type of the task.
 	TaskType tasktype() const
@@ -82,6 +82,10 @@ public:
 
 	/// \brief Obtain the underlying data set.
 	std::shared_ptr<Dataset> dataset()
+	{ return m_dataset; }
+
+	/// \brief Obtain the underlying data set.
+	std::shared_ptr<const Dataset> dataset() const
 	{ return m_dataset; }
 
 	/// \brief Obtain the name of the target feature to be predicted.
@@ -106,7 +110,7 @@ public:
 	}
 
 	/// \brief Obtain the assignment of data points to folds corresponding to a repetition.
-	std::vector<std::size_t> const& splitIndices(std::size_t repetition)
+	std::vector<std::size_t> const& splitIndices(std::size_t repetition) const
 	{
 		load();
 		return m_split[repetition];
@@ -119,7 +123,7 @@ public:
 	/// data set. Hence, calling the same function with a different
 	/// repetition index invalidates previously obtained CVFolds objects.
 	template <typename InputT, typename LabelT>
-	CVFolds< LabeledData<InputT, LabelT> > split(std::size_t repetition, LabeledData<InputT, LabelT>& data)
+	CVFolds< LabeledData<InputT, LabelT> > split(std::size_t repetition, LabeledData<InputT, LabelT>& data) const
 	{
 		return createCVIndexed(data, m_folds, splitIndices(repetition));
 	}
@@ -132,11 +136,9 @@ private:
 	std::string m_targetFeature;                       ///< feature of the data set acting as the label to be predicted
 
 	// estimation procedure
-	EstimationProcedure m_estimationProcedure;         ///< type of estimation procedure for assessing the generalization error
 	std::size_t m_repetitions;                         ///< number of independent repetitions of cross validation
 	std::size_t m_folds;                               ///< number of cross validation folds
 	std::vector< std::vector<std::size_t> > m_split;   ///< assignment of points to fold-wise test subsets in the form m_split[repetition][index] = fold
-	EvaluationMeasure m_evaluationMeasure;             ///< preferred evaluation measure
 
 	// expected output
 	std::string m_outputFormat;                        ///< file format for results upload
