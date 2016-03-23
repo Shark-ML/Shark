@@ -107,6 +107,24 @@ void Flow::untag(std::string const& tagname)
 	Entity::untag(tagname);
 }
 
+void Flow::print(std::ostream& os) const
+{
+	os << "Flow:" << std::endl;
+	Entity::print(os);
+	os << " name: " << m_name << std::endl;
+	os << " (external) version: " << m_version << std::endl;
+	os << " description: " << m_description << std::endl;
+	for (std::map<std::string, std::string>::const_iterator it = m_properties.begin(); it != m_properties.end(); ++it)
+	{
+		os << " " << it->first << ": " << it->second << std::endl;
+	}
+	for (std::size_t i=0; i<m_hyperparameter.size(); i++)
+	{
+		Hyperparameter const& p = m_hyperparameter[i];
+		os << "  parameter " << i << ": " << p.name << "; " << p.description << " (" << p.datatype << ") default: " << p.defaultValue << std::endl;
+	}
+}
+
 void Flow::create(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties)
 {
 	std::string version = sharkVersion();
@@ -181,24 +199,6 @@ void Flow::obtainFromServer()
 	// TODO: populate properties...!
 
 	if (desc.has("tag")) setTags(desc["tag"]);
-}
-
-void Flow::print(std::ostream& os) const
-{
-	os << "Flow:" << std::endl;
-	Entity::print(os);
-	os << " name: " << m_name << std::endl;
-	os << " (external) version: " << m_version << std::endl;
-	os << " description: " << m_description << std::endl;
-	for (std::map<std::string, std::string>::const_iterator it = m_properties.begin(); it != m_properties.end(); ++it)
-	{
-		os << " " << it->first << ": " << it->second << std::endl;
-	}
-	for (std::size_t i=0; i<m_hyperparameter.size(); i++)
-	{
-		Hyperparameter const& p = m_hyperparameter[i];
-		os << "  parameter " << i << ": " << p.name << "; " << p.description << " (" << p.datatype << ") default: " << p.defaultValue << std::endl;
-	}
 }
 
 

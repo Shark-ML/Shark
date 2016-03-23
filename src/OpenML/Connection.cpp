@@ -53,8 +53,12 @@ namespace openML {
 
 
 static const std::string OPENML_REST_API_HOST = "www.openml.org";
+static const unsigned short OPENML_REST_API_PORT = 80;
 static const std::string OPENML_REST_API_PREFIX = "/api_new/v1/json";
-std::mutex Connection::m_mutex;
+
+static const std::string TEST_REST_API_HOST = "test.openml.org";
+static const unsigned short TEST_REST_API_PORT = 80;
+static const std::string TEST_REST_API_PREFIX = "/api/v1/json";
 
 
 ////////////////////////////////////////////////////////////
@@ -62,7 +66,7 @@ std::mutex Connection::m_mutex;
 
 Connection::Connection()
 : m_host(OPENML_REST_API_HOST)
-, m_port(80)
+, m_port(OPENML_REST_API_PORT)
 , m_prefix(OPENML_REST_API_PREFIX)
 { }
 
@@ -72,6 +76,14 @@ Connection::Connection(std::string const& host, unsigned short port, std::string
 , m_prefix(prefix)
 { }
 
+
+void Connection::enableTestMode()
+{
+	// redirect all traffic to the OpenML test server
+	m_host = TEST_REST_API_HOST;
+	m_port = TEST_REST_API_PORT;
+	m_prefix = TEST_REST_API_PREFIX;
+}
 
 detail::HttpResponse Connection::getHTTP(std::string const& request, ParamType const& parameters)
 {
@@ -159,7 +171,7 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 		std::string url = m_prefix + request;
 
 		std::string boundary = "--------------------------------";
-		for (std::size_t i=0; i<32; i++) boundary[i] = '0' + (rand() % 10);
+		for (std::size_t i=0; i<boundary.size(); i++) boundary[i] = 48 + (rand() % 10);
 
 		std::string body;
 		for (ParamType::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
@@ -206,7 +218,6 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 			body += "\r\nContent-Disposition: form-data; name=\"api_key\"\r\n\r\n";
 			body += m_key;
 			body += "\r\n";
-//			url += "?api_key=" + detail::urlencode(m_key);
 		}
 		body += "--";
 		body += boundary;
@@ -310,7 +321,7 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 	}
 	if (lines.empty()) { m_socket.close(); return false; }
 
-	// parse status line
+	// parse the status line
 	std::string const& statusline = lines[0];
 	std::size_t space1 = statusline.find(' ');
 	if (space1 == std::string::npos) { m_socket.close(); return false; }
@@ -386,10 +397,7 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 }
 
 
-////////////////////////////////////////////////////////////
-// The global OpenML connection object.
-//
-Connection connection;
+Connection connection;                 ///< \brief The global OpenML connection object.
 
 
 };  // namespace openML

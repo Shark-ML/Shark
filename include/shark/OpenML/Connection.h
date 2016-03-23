@@ -86,14 +86,6 @@ public:
 	/// \brief Construct an HTTP connection to a given host on a given port.
 	Connection(std::string const& host, unsigned short port = 80, std::string const& prefix = "");
 
-
-	void setRemote(std::string const& host, unsigned short port, std::string const& prefix)
-	{
-		m_host = host;
-		m_port = port;
-		m_prefix = prefix;
-	}
-
 	/// \brief Obtain the currently set api_key.
 	std::string const& key() const
 	{ return m_key; }
@@ -116,6 +108,11 @@ public:
 	/// \param   parameters   tagged-values sent as URL-encoded form data
 	/// \return  The function returns the JSON reply sent by the server. If the connection is not established it returns a JSON null object. In case of an unsuccessful query it returns the status code as a JSON number.
 	detail::Json post(std::string const& request, ParamType const& parameters = ParamType());
+
+	/// \brief Redirect all traffic to the OpenML test server.
+	///
+	/// This function is reserved for internal use in unit tests.
+	void enableTestMode();
 
 private:
 	// non-copyable
@@ -148,7 +145,7 @@ private:
 	std::string m_prefix;              ///< URL prefix for the OpenML REST API
 	detail::Socket m_socket;           ///< underlying socket object
 	std::string m_readbuffer;          ///< socket read buffer
-	static std::mutex m_mutex;         ///< mutex for global synchronization of REST API calls
+	std::mutex m_mutex;                ///< mutex for synchronization of REST API calls
 };
 
 

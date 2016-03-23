@@ -58,7 +58,6 @@ Dataset::Dataset(IDType id, bool downloadData)
 		if (desc.has("tag")) setTags(desc["tag"]);
 		m_name = desc["name"].asString();
 		m_description = desc["description"].asString();
-		m_defaultTargetFeature = desc["default_target_attribute"].asString();
 		m_format = desc["format"].asString();
 		m_licence = desc["licence"].asString();
 		m_status = desc["status"].asString();
@@ -117,8 +116,6 @@ void Dataset::print(std::ostream& os) const
 	os << "Dataset:" << std::endl;
 	Entity::print(os);
 	os << " name: " << m_name << std::endl;
-//	os << " description: " << m_description << std::endl;
-	os << " default target feature: " << m_defaultTargetFeature << std::endl;
 	os << " format: " << m_format << std::endl;
 	os << " license: " << m_licence << std::endl;
 	os << " status: " << m_status << std::endl;

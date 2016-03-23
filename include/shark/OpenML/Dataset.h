@@ -83,10 +83,6 @@ public:
 	std::string const& description() const
 	{ return m_description; }
 
-	/// \brief Default target for prediction; ignore - obtain the target feature from the task instead.
-	std::string const& defaultTargetFeature() const
-	{ return m_defaultTargetFeature; }
-
 	/// \brief Data set file format, should be ARFF for now.
 	std::string const& format() const
 	{ return m_format; }
@@ -125,7 +121,6 @@ private:
 	// properties
 	std::string m_name;                   ///< name of the data set
 	std::string m_description;            ///< textual description of the data set
-	std::string m_defaultTargetFeature;   ///< default target for prediction; ignore - obtain the target feature from the task instead
 	std::string m_format;                 ///< data set file format, should be ARFF for now
 	std::string m_licence;                ///< license, "public domain" if empty
 	std::string m_status;                 ///< data set status (e.g., active)

@@ -39,6 +39,7 @@
 #include <shark/Core/Exception.h>
 #include <boost/filesystem.hpp>
 #include <mutex>
+#include <string>
 
 
 namespace shark {

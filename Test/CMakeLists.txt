@@ -208,6 +208,9 @@ endif()
 shark_add_test( Data/SparseData.cpp Data_SparseData )
 shark_add_test( Data/ExportKernelMatrix.cpp Data_ExportKernelMatrix )
 
+# OpenML Tests
+shark_add_test( OpenML/OpenML.cpp OpenML_OpenML )
+
 #Objective Functions
 shark_add_test( ObjectiveFunctions/ErrorFunction.cpp ObjFunct_ErrorFunction )
 shark_add_test( ObjectiveFunctions/SparseAutoencoderError.cpp ObjFunct_SparseAutoencoderError )

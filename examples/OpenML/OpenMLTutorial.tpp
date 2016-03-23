@@ -56,10 +56,6 @@ int main(int argc, char** argv)
 		// with this key will silently fail.
 		string api_key = "8d736266baa96f8ef99f10516911d334";
 
-// redirect queries to the test server, this will go into the unit tests
-openML::connection.setRemote("test.openml.org", 80, "/api/v1/json");
-if (argc > 1) api_key = argv[1];
-
 		// register the api key in the global openML::connection object
 		openML::connection.setKey(api_key);
 //###end<key>

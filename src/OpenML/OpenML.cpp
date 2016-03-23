@@ -148,7 +148,6 @@ QueryResult taggedFlows(std::string const& tagname)
 QueryResult myFlows()
 {
 	detail::Json result = connection.get("/flow/owned");
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
 	detail::Json ids = result["flow_owned"]["id"];
 	SHARK_ASSERT(ids.isArray());
 	QueryResult ret(ids.size());
@@ -162,8 +161,8 @@ QueryResult myFlows()
 
 IDType getFlow(std::string const& name, std::string const& version)
 {
-	detail::Json result = connection.get("/flow/exists/" + detail::urlencode(name) + "/" + detail::urlencode(version));
-	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
+	std::string url = "/flow/exists/" + detail::urlencode(name) + "/" + detail::urlencode(version);
+	detail::Json result = connection.get(url);
 	detail::Json f = result["flow_exists"];
 	if (detail::json2bool(f["exists"])) return detail::json2number<IDType>(f["id"]);
 	else return invalidID;

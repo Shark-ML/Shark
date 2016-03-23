@@ -72,6 +72,22 @@ public:
 	/// \brief Print a human readable summary of the entity.
 	void print(std::ostream& os = std::cout) const;
 
+	/// \brief Obtain the underlying task.
+	std::shared_ptr<Task> task()
+	{ return m_task; }
+
+	/// \brief Obtain the underlying task.
+	std::shared_ptr<const Task> task() const
+	{ return m_task; }
+
+	/// \brief Obtain the underlying flow.
+	std::shared_ptr<Flow> flow()
+	{ return m_flow; }
+
+	/// \brief Obtain the underlying flow.
+	std::shared_ptr<const Flow> flow() const
+	{ return m_flow; }
+
 	/// \brief Load the predictions into memory.
 	void load() const;
 
@@ -212,6 +228,10 @@ public:
 	/// repetition and fold. It is not possible to commit an already
 	/// committed run, or a run that was obtained from the server.
 	void commit();
+
+	/// \brief Obtain the underlying ARFF predictions file
+	CachedFile const& predictionsfile() const
+	{ return m_file; }
 
 private:
 	std::shared_ptr<Task> m_task;        ///< task associated with the run

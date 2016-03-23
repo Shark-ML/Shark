@@ -128,10 +128,14 @@ public:
 		return createCVIndexed(data, m_folds, splitIndices(repetition));
 	}
 
+	/// \brief Obtain the underlying ARFF splits file
+	CachedFile const& splitsfile() const
+	{ return m_file; }
+
 private:
 	TaskType m_tasktype;                               ///< task type, e.g., supervised classification
 
-	// dataset spec
+	// data set spec
 	std::shared_ptr<Dataset> m_dataset;                ///< associated data set
 	std::string m_targetFeature;                       ///< feature of the data set acting as the label to be predicted
 
