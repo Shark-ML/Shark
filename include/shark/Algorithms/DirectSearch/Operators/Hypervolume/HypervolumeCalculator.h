@@ -1,10 +1,10 @@
 /*!
  * 
  *
- * \brief Implements the Frontend for the HypervolumeCalculator algorithms, including the approximations
+ * \brief Implements the frontend for the HypervolumeCalculator algorithms, including the approximations
  *
  *
- * \author      T.Voss, O.Krause, T. Glasmachers
+ * \author     O.Krause
  * \date        2014-2016
  *
  *
@@ -33,16 +33,15 @@
 
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator2D.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator3D.h>
-#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorND.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorMD.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeApproximator.h>
 
 namespace shark {
-/// \brief Frontend for hypervolume calculation algorithms in n dimensions.
+/// \brief Frontend for hypervolume calculation algorithms in m dimensions.
 ///
 ///  Depending on the dimensionality of the problem, one of the specialized algorithms is called.
 ///  For large dimensionalities for which there are no specialized fast algorithms,
-///  either the exponential time or the approximated algorithm is called based
-///  On the choice of algorithm
+///  either the exponential time or the approximated algorithm is called based on the choice of algorithm
 ///  Also a log-transformation of points is supported
 struct HypervolumeCalculator {
 
@@ -107,7 +106,7 @@ struct HypervolumeCalculator {
 				return m_approximationAlgorithm(extractor, points, refPoint);
 			}
 		}else{
-			HypervolumeCalculatorND algorithm;
+			HypervolumeCalculatorMD algorithm;
 			if(m_useLogHyp){
 				return algorithm([&](Point x){return log(extractor(x));}, points, refPoint);
 			}else{

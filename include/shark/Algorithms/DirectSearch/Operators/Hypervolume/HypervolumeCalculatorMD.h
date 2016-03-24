@@ -2,21 +2,6 @@
  * 
  *
  * \brief       Implementation of the exact hypervolume calculation in m dimensions.
- * 
- * The algorithm is described in
- * 
- * Nicola Beume und Günter Rudolph. 
- * Faster S-Metric Calculation by Considering Dominated Hypervolume as Klee's Measure Problem.
- * In: B. Kovalerchuk (ed.): Proceedings of the Second IASTED Conference on Computational Intelligence (CI 2006), 
- * pp. 231-236. ACTA Press: Anaheim, 2006. 
- * 
- * A specialized algorithm is used for the three-objective case:
- *
- * M. T. M. Emmerich and C. M. Fonseca.
- * Computing hypervolume contributions in low dimensions: Asymptotically optimal algorithm and complexity results.
- * In: Evolutionary Multi-Criterion Optimization (EMO) 2011.
- * Vol. 6576 of Lecture Notes in Computer Science, pp. 121--135, Berlin: Springer, 2011.
- *
  *
  * \author      T.Voss, O.Krause, T. Glasmachers
  * \date        2014-2016
@@ -42,8 +27,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMECALCULATOR_ND_H
-#define SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMECALCULATOR_ND_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMECALCULATOR_MD_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMECALCULATOR_MD_H
 
 #include <shark/LinAlg/Base.h>
 
@@ -52,7 +37,7 @@
 #include <map>
 
 namespace shark {
-/// \brief Implementation of the exact hypervolume calculation in n dimensions.
+/// \brief Implementation of the exact hypervolume calculation in m dimensions.
 ///
 ///  The algorithm is described in
 ///
@@ -60,14 +45,12 @@ namespace shark {
 /// Faster S-Metric Calculation by Considering Dominated Hypervolume as Klee's Measure Problem.
 ///  In: B. Kovalerchuk (ed.): Proceedings of the Second IASTED Conference on Computational Intelligence (CI 2006), 
 /// pp. 231-236. ACTA Press: Anaheim, 2006.
-struct HypervolumeCalculatorND {
+struct HypervolumeCalculatorMD {
 
-	/**
-	* \brief Executes the algorithm.
-	* \param [in] extractor Function object \f$f\f$to "project" elements of the set to \f$\mathbb{R}^n\f$.
-	* \param [in] set The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: f( s' ) \preceq f( s ) \f$
-	* \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^n\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
-	*/
+	/// \brief Executes the algorithm.
+	/// \param [in] extractor Function object \f$f\f$to "project" elements of the set to \f$\mathbb{R}^n\f$.
+	/// \param [in] set The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: f( s' ) \preceq f( s ) \f$
+	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^n\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
 	template<typename Set,typename Extractor, typename VectorType >
 	double operator()( Extractor const& extractor, Set const& points, VectorType const& refPoint){
 		if(points.empty())

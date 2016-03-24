@@ -48,7 +48,7 @@ namespace shark {
 /// Algorithms and Computation. Springer Berlin Heidelberg, 2008. 436-447.
 ///
 /// The algorithm computes an approximation of the true Volume V, V' that fulfills
-/// \f[ P((1-epsilon)V < V' (1+epsilon)V'|> \epsilon) < \delta \f]
+/// \f[ P((1-epsilon)V < V' <(1+epsilon)V') < 1-\delta \f]
 ///
 struct HypervolumeApproximator {
 	

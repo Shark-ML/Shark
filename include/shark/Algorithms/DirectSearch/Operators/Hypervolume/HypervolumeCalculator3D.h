@@ -1,25 +1,11 @@
 /*!
  * 
  *
- * \brief       Implementation of the exact hypervolume calculation in m dimensions.
- * 
- * The algorithm is described in
- * 
- * Nicola Beume und Günter Rudolph. 
- * Faster S-Metric Calculation by Considering Dominated Hypervolume as Klee's Measure Problem.
- * In: B. Kovalerchuk (ed.): Proceedings of the Second IASTED Conference on Computational Intelligence (CI 2006), 
- * pp. 231-236. ACTA Press: Anaheim, 2006. 
- * 
- * A specialized algorithm is used for the three-objective case:
- *
- * M. T. M. Emmerich and C. M. Fonseca.
- * Computing hypervolume contributions in low dimensions: Asymptotically optimal algorithm and complexity results.
- * In: Evolutionary Multi-Criterion Optimization (EMO) 2011.
- * Vol. 6576 of Lecture Notes in Computer Science, pp. 121--135, Berlin: Springer, 2011.
+ * \brief       Implementation of the exact hypervolume calculation in 3 dimensions.
  *
  *
- * \author      T.Voss, O.Krause, T. Glasmachers
- * \date        2014-2016
+ * \author      T. Glasmachers
+ * \date        2016
  *
  *
  * \par Copyright 1995-2016 Shark Development Team
@@ -54,14 +40,15 @@
 namespace shark {
 /// \brief Implementation of the exact hypervolume calculation in 3 dimensions.
 ///
-///  Todo: algorithm description
+/// M. T. M. Emmerich and C. M. Fonseca.
+/// Computing hypervolume contributions in low dimensions: Asymptotically optimal algorithm and complexity results.
+/// In: Evolutionary Multi-Criterion Optimization (EMO) 2011.
+/// Vol. 6576 of Lecture Notes in Computer Science, pp. 121--135, Berlin: Springer, 2011.
 struct HypervolumeCalculator3D {
-	/**
-	* \brief Executes the algorithm.
-	* \param [in] extractor Function object \f$f\f$to "project" elements of the set to \f$\mathbb{R}^3\f$.
-	* \param [in] points The set \f$S\f$ of points for which to compute the volume
-	* \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^3\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
-	*/
+	/// \brief Executes the algorithm.
+	/// \param [in] extractor Function object \f$f\f$to "project" elements of the set to \f$\mathbb{R}^3\f$.
+	/// \param [in] points The set \f$S\f$ of points for which to compute the volume
+	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^3\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
 	template<typename Set,typename Extractor, typename VectorType >
 	double operator()( Extractor const& extractor, Set const& points, VectorType const& refPoint){
 		if(points.empty())

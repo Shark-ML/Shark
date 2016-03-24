@@ -246,9 +246,9 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume3D ) {
 	testEqualFront(hc, numTests, numPoints, 3);
 }
 
-BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeND ) {
+BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeMD ) {
 
-	HypervolumeCalculatorND hc;
+	HypervolumeCalculatorMD hc;
 	const std::size_t numTests = 10;
 	const std::size_t numPoints = 15;
 	
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeND ) {
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeNDApprox ) {
+BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeMDApprox ) {
 
 	HypervolumeApproximator hc;
 	const std::size_t numTests = 10;
