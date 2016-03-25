@@ -36,7 +36,7 @@ public:
 			list_of(10.0)(11.0)(12.0);
 
 		// vector of 4 elements
-		m_expectedFromLabel1 = list_of(80.0)(81.0)(82.0)(83.0);
+		m_expectedFromLabel1 = list_of(80.0)(81.0)(82.0)(83.0).convert_to_container<std::vector<boost::int32_t> >();
 	}
 
 	/// Verify the @a actual matrix is the same as @a expected
