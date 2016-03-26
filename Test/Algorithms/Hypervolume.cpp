@@ -2,8 +2,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/Algorithms/DirectSearch/HypervolumeCalculator.h>
-#include <shark/Algorithms/DirectSearch/HypervolumeApproximator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/LeastContributorApproximator.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Core/utility/functional.h>
@@ -47,9 +46,6 @@ double inclusionExclusion(std::vector< RealVector > const& points, RealVector co
 
 struct Fixture {
 
-	static const double HV_TEST_SET_2D;
-	static const double HV_TEST_SET_3D;
-
 	Fixture() {
 		BOOST_TEST_MESSAGE( "Setting up test sets and reference points " );
 		m_refPoint3D = boost::assign::list_of( 1.1 )( 1.1 )( 1.1 );
@@ -88,6 +84,7 @@ struct Fixture {
 		m_testSet3D.push_back( boost::assign::list_of( 1.27610149409238e-2)(9.47996983636579e-2)(0.995414573777096 ) );
 		m_testSet3D.push_back( boost::assign::list_of( 0.30565381275615)(0.792827267212719)(0.527257689476066 ) );
 		m_testSet3D.push_back( boost::assign::list_of( 0.43864576057661)(3.10389339442242e-2)(0.8981238674636 ) );
+		HV_TEST_SET_3D = 0.60496383631719475;
 
 		m_refPoint2D = boost::assign::list_of( 11 )( 11 );
 		//~ m_refPoint2D.push_back(11);
@@ -112,6 +109,7 @@ struct Fixture {
 		m_testSet2D.push_back( boost::assign::list_of( 0.9603643728)(0.2787476843 ) );
 		m_testSet2D.push_back( boost::assign::list_of( 0.9824775804)(0.1863808035 ) );
 		m_testSet2D.push_back( boost::assign::list_of( 1.0000000000)(0.0000000000 ) );
+		HV_TEST_SET_2D = 120.196858;
 	}
 
 	RealVector m_refPoint2D;
@@ -119,80 +117,217 @@ struct Fixture {
 
 	RealVector m_refPoint3D;
 	std::vector< RealVector > m_testSet3D;
+	
+	double HV_TEST_SET_2D;
+	double HV_TEST_SET_3D;
 };
 
-const double Fixture::HV_TEST_SET_2D = 120.196858;
-const double Fixture::HV_TEST_SET_3D = 0.60496383631719475;
+
+//creates points on a front defined by points x in [0,1]^d with norm(x,p)=1
+// 1 is a linear front, 2 a convex front, 1/2 a concave front
+//reference point is 1^d
+
+std::vector<RealVector> createRandomFront(std::size_t numPoints, std::size_t numObj, double p){
+	std::vector<RealVector> points;
+	for (unsigned int i=0; i<numPoints; i++)
+	{
+		RealVector point(numObj);
+		for (unsigned int j=0; j<numObj; j++)
+			point[j] = Rng::uni();
+		point /= std::pow(sum(pow(point,p)),1/p);
+		points.push_back(point);
+	}
+	return points;
+}
+template<class Algorithm>
+void testRandomFrontNormP(Algorithm algorithm, std::size_t numTests, std::size_t numPoints, std::size_t numObj, double p){
+	IdentityFitnessExtractor ife;
+	RealVector reference(numObj,1.0);
+	for(std::size_t t = 0; t != numTests;++t){
+		std::vector<RealVector> points = createRandomFront(numPoints,numObj,p);
+
+		double hv1 = algorithm(ife, points, reference);
+		double hv2 = inclusionExclusion(points, reference);
+		BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
+	}
+}
+
+template<class Algorithm>
+void testRandomFrontNormPApprox(std::size_t evals, double epsilon, Algorithm algorithm, std::size_t numTests, std::size_t numPoints, std::size_t numObj, double p){
+	IdentityFitnessExtractor ife;
+	RealVector reference(numObj,1.0);
+	for(std::size_t t = 0; t != numTests;++t){
+		std::vector<RealVector> points = createRandomFront(numPoints,numObj,p);
+		std::vector<double> results(evals);
+		for(std::size_t e = 0; e != evals; e++)
+			results[e] = algorithm(ife, points, reference);
+		double hv2 = inclusionExclusion(points, reference);
+		double hv1 = *median_element(results);
+		//check bounds
+		BOOST_CHECK(  hv1< (1+epsilon) * hv2 );
+		BOOST_CHECK(  hv1> (1-epsilon) * hv2 );
+	}
+}
+
+
+// scalable test with many equal objective values
+template<class Algorithm>
+void testEqualFront(Algorithm algorithm, std::size_t numTests, std::size_t numPoints, std::size_t numObj){
+	IdentityFitnessExtractor ife;
+	for(std::size_t t = 0; t != numTests;++t){
+		{
+			std::vector<RealVector> points;
+			points.push_back(RealVector(numObj, 0.5));
+			for (unsigned int i=0; i<numObj; i++)
+			{
+				RealVector point(numObj, 0.25);
+				point[i] = 0.75;
+				points.push_back(point);
+			}
+			RealVector reference(numObj, 1.0);
+
+			double hv1 = algorithm(ife, points, reference);
+			double hv2 = inclusionExclusion(points, reference);
+			BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
+		}
+		{
+			std::vector<RealVector> points;
+			points.push_back(RealVector(numObj, 0.5));
+			for (unsigned int i=0; i<numObj; i++)
+			{
+				RealVector point(numObj, 0.75);
+				point[i] = 0.25;
+				points.push_back(point);
+			}
+			RealVector reference(numObj, 1.0);
+
+			double hv1 = algorithm(ife, points, reference);
+			double hv2 = inclusionExclusion(points, reference);
+			BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
+		}
+	}
+}
 
 BOOST_FIXTURE_TEST_SUITE (Algorithms_Hypervolume, Fixture)
 
-BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume ) {
+BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume2D ) {
 
-	HypervolumeCalculator hc;
-	HypervolumeApproximator< FastRng > ha;
+	HypervolumeCalculator2D hc;
+	const std::size_t numTests = 100;
+	const std::size_t numPoints = 15;
+	
+	
+	//test 1: computes the value of a reference front correctly
 	IdentityFitnessExtractor ife;
+	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), HV_TEST_SET_2D, 1E-5 );
 
-	// check exact algorithms against hard-coded reference values for 2 and 3 objectives
-	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), Fixture::HV_TEST_SET_2D, 1E-5 );
-	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), Fixture::HV_TEST_SET_3D, 1E-5 );
+	// test with random fronts of different shapes
+	testRandomFrontNormP(hc, numTests, numPoints, 2, 1);
+	testRandomFrontNormP(hc, numTests, numPoints, 2, 2);
+	testRandomFrontNormP(hc, numTests, numPoints, 2, 0.5);
+	testEqualFront(hc, numTests, numPoints, 2);
+}
 
-	// check that the approximate algorithm confirms (the plausibility of) the result
-	std::vector<double> results;
-	for( unsigned int trial = 0; trial < 10; trial++ )
-		results.push_back(ha( m_testSet3D.begin(), m_testSet3D.end(), ife, m_refPoint3D, 1E-2, 1E-2 ) );
-	BOOST_CHECK_SMALL( *median_element(results) - Fixture::HV_TEST_SET_3D, 1E-2 );
+BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume3D ) {
 
-	// scalable test with random linear front
-	for (unsigned int nObj=2; nObj<=10; nObj++)
-	{
-		std::vector<RealVector> points;
-		for (unsigned int i=0; i<15; i++)
-		{
-			RealVector point(nObj);
-			for (unsigned int j=0; j<nObj; j++) point[j] = Rng::uni();
-			point /= sum(point);
-			points.push_back(point);
-		}
-		RealVector reference(nObj, 1.0);
+	HypervolumeCalculator3D hc;
+	const std::size_t numTests = 100;
+	const std::size_t numPoints = 15;
+	
+	
+	//test 1: computes the value of a reference front correctly
+	IdentityFitnessExtractor ife;
+	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), HV_TEST_SET_3D, 1E-5 );
 
-		double hv1 = hc(ife, points, reference);
-		double hv2 = inclusionExclusion(points, reference);
-		BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
+	// test with random fronts of different shapes
+	testRandomFrontNormP(hc, numTests, numPoints, 3, 1);
+	testRandomFrontNormP(hc, numTests, numPoints, 3, 2);
+	testRandomFrontNormP(hc, numTests, numPoints, 3, 0.5);
+	testEqualFront(hc, numTests, numPoints, 3);
+}
+
+BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeMD ) {
+
+	HypervolumeCalculatorMD hc;
+	const std::size_t numTests = 10;
+	const std::size_t numPoints = 15;
+	
+	
+	//test 1: computes the value of a reference front correctly
+	IdentityFitnessExtractor ife;
+	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), HV_TEST_SET_3D, 1E-5 );
+
+	// test with random fronts of different shapes
+	for(std::size_t numObj = 3; numObj < 5; ++numObj){
+		testRandomFrontNormP(hc, numTests, numPoints, numObj, 1);
+		testRandomFrontNormP(hc, numTests, numPoints, numObj, 2);
+		testRandomFrontNormP(hc, numTests, numPoints, numObj, 0.5);
+		testEqualFront(hc, numTests, numPoints, numObj);
 	}
+}
 
-	// scalable test with many equal objective values
-	for (unsigned int nObj=2; nObj<=10; nObj++)
-	{
-		std::vector<RealVector> points;
-		points.push_back(RealVector(nObj, 0.5));
-		for (unsigned int i=0; i<nObj; i++)
-		{
-			RealVector point(nObj, 0.25);
-			point[i] = 0.75;
-			points.push_back(point);
-		}
-		RealVector reference(nObj, 1.0);
+BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeMDApprox ) {
 
-		double hv1 = hc(ife, points, reference);
-		double hv2 = inclusionExclusion(points, reference);
-		BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
+	HypervolumeApproximator hc;
+	const std::size_t numTests = 10;
+	const std::size_t numPoints = 15;
+	const std::size_t evals = 10;
+	const double epsilon = 0.05;//runtime is quadratic in this :(
+	hc.epsilon() = epsilon;
+	// we take the median of 10 runs, so 1-delta=0.7 is relatively safe,
+	// especially as the bound appears to be rather loose
+	hc.delta() = 0.3;
+	
+	//test 1: computes the value of a reference front correctly
+	IdentityFitnessExtractor ife;
+	std::vector<double> results(evals);
+	for(std::size_t e = 0; e != evals; e++)
+		results[e] = hc( ife, m_testSet3D, m_refPoint3D );
+	double hv = *median_element(results);
+	//check bounds
+	BOOST_CHECK( hv < (1+epsilon) * HV_TEST_SET_3D );
+	BOOST_CHECK( hv > (1-epsilon) * HV_TEST_SET_3D );
+	
+	// test with random fronts of different shapes
+	for(std::size_t numObj = 3; numObj < 5; ++numObj){
+		testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, numObj, 1);
+		testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, numObj, 2);
+		testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, numObj, 0.5);
 	}
-	for (unsigned int nObj=2; nObj<=10; nObj++)
-	{
-		std::vector<RealVector> points;
-		points.push_back(RealVector(nObj, 0.5));
-		for (unsigned int i=0; i<nObj; i++)
-		{
-			RealVector point(nObj, 0.75);
-			point[i] = 0.25;
-			points.push_back(point);
-		}
-		RealVector reference(nObj, 1.0);
+}
 
-		double hv1 = hc(ife, points, reference);
-		double hv2 = inclusionExclusion(points, reference);
-		BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
+BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeCalculator) {
+	HypervolumeCalculator hc;
+	const std::size_t numTests = 10;
+	const std::size_t numPoints = 15;
+	const std::size_t evals = 10;
+	const double epsilon = 0.05;//runtime is quadratic in this :(
+	
+	//first exact
+	hc.useApproximation(false);
+	
+	//test 1: computes the value of a reference front correctly
+	IdentityFitnessExtractor ife;
+	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), HV_TEST_SET_3D, 1E-5 );
+	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), HV_TEST_SET_2D, 1E-5 );
+
+	// test with random fronts of different shapes
+	for(std::size_t numObj = 2; numObj < 5; ++numObj){
+		testRandomFrontNormP(hc, numTests, numPoints, numObj, 1);
+		testRandomFrontNormP(hc, numTests, numPoints, numObj, 2);
+		testRandomFrontNormP(hc, numTests, numPoints, numObj, 0.5);
+		testEqualFront(hc, numTests, numPoints, numObj);
 	}
+	
+	//test 3: now use the approximator
+	hc.useApproximation(true);
+	hc.approximationEpsilon() = epsilon;
+	// we take the median of 10 runs, so 1-delta=0.7 is relatively safe,
+	// especially as the bound appears to be rather loose
+	hc.approximationDelta() = 0.3;
+	testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, 8, 1);
+	testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, 8, 2);
+	testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, 8, 0.5);
 }
 
 //~ BOOST_AUTO_TEST_CASE( Algorithms_LeastContributorApproximator ) {

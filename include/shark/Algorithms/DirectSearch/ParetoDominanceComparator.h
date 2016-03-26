@@ -65,8 +65,8 @@ struct ParetoDominanceComparator {
 	* \param [in] B Individual B.
 	* \returns An integer with values according to the constanst defined within this class.
 	*/
-	template<typename IndividualType>
-	int operator()( const IndividualType & A, const IndividualType & B ) {
+	template<typename IndividualTypeA, typename IndividualTypeB>
+	int operator()( IndividualTypeA const& A, IndividualTypeB const& B ) {
 		Extractor e;
 		SIZE_CHECK(e( A ).size() == e( B ).size());
 		
