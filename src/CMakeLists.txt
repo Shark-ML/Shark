@@ -1,7 +1,7 @@
 # Glob the files
 file( GLOB_RECURSE SHARK_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 file(GLOB_RECURSE SHARK_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../include/*.h ../include/*.hpp ../include/*.inl)
-
+list(REMOVE_ITEM SHARK_SRCS "Version.cpp")
 # Group the source for MSVC
 foreach(FILE ${SHARK_SRCS}) 
     # Get the directory of the source file
@@ -33,14 +33,18 @@ add_library( shark ${SHARK_SRCS} ${SHARK_HEADERS} )
 target_link_libraries( shark ${LINK_LIBRARIES})
 
 set_target_properties( shark PROPERTIES DEBUG_POSTFIX _debug )
+set_property(TARGET shark PROPERTY CXX_STANDARD 11)
+set_property(TARGET shark PROPERTY CXX_STANDARD_REQUIRED ON)
 
 if( WIN32 )
   set_target_properties( shark PROPERTIES DEBUG_PREFIX ../ )
 endif()
 
 # Add the version executable
-add_executable(SharkVersion Core/Version.cpp)
+add_executable(SharkVersion Version.cpp)
 target_link_libraries(SharkVersion shark)
+set_property(TARGET SharkVersion PROPERTY CXX_STANDARD 11)
+set_property(TARGET SharkVersion PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # Install the library
 set_target_properties( shark PROPERTIES

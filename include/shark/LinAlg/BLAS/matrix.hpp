@@ -144,9 +144,9 @@ public:
 	///\brief Returns the pointer to the beginning of the matrix storage
 	///
 	/// Grants low-level access to the matrix internals. Element order depends on whether the matrix is row_major or column_major.
-	/// to access element (i,j) use storage()[i*stride1()+j*stride2()].
+	/// to access element _(i,j) use storage()[i*stride1()+j*stride2()].
 	const_pointer storage()const{
-		return &m_data[0];
+		return m_data.size()? &m_data[0]: 0;
 	}
 	
 	///\brief Returns the pointer to the beginning of the matrix storage
@@ -154,7 +154,7 @@ public:
 	/// Grants low-level access to the matrix internals. Element order depends on whether the matrix is row_major or column_major.
 	/// to access element (i,j) use storage()[i*stride1()+j*stride2()].
 	pointer storage(){
-		return &m_data[0];
+		return m_data.size()? &m_data[0]: 0;
 	}
 	
 	// ---------
@@ -178,14 +178,14 @@ public:
 
 	// Element access
 	const_reference operator()(index_type i, index_type j) const {
-		return m_data [orientation::element(i, m_size1, j, m_size2)];
+		return m_data[orientation::element(i, m_size1, j, m_size2)];
 	}
 	reference operator()(index_type i, index_type j) {
-		return m_data [orientation::element(i, m_size1, j, m_size2)];
+		return m_data[orientation::element(i, m_size1, j, m_size2)];
 	}
 	
 	void set_element(size_type i, size_type j,value_type t){
-		m_data [orientation::element(i, m_size1, j, m_size2)]  = t;
+		m_data[orientation::element(i, m_size1, j, m_size2)]  = t;
 	}
 	
 	// Assignment
@@ -253,29 +253,29 @@ public:
 	typedef dense_storage_iterator<value_type const> const_column_iterator;
 
 	const_row_iterator row_begin(index_type i) const {
-		return const_row_iterator(&m_data[0] + i*stride1(),0,stride2());
+		return const_row_iterator(storage() + i*stride1(),0,stride2());
 	}
 	const_row_iterator row_end(index_type i) const {
-		return const_row_iterator(&m_data[0] + i*stride1()+stride2()*size2(),size2(),stride2());
+		return const_row_iterator(storage() + i*stride1()+stride2()*size2(),size2(),stride2());
 	}
 	row_iterator row_begin(index_type i){
-		return row_iterator(&m_data[0] + i*stride1(),0,stride2());
+		return row_iterator(storage() + i*stride1(),0,stride2());
 	}
 	row_iterator row_end(index_type i){
-		return row_iterator(&m_data[0] + i*stride1()+stride2()*size2(),size2(),stride2());
+		return row_iterator(storage() + i*stride1()+stride2()*size2(),size2(),stride2());
 	}
 	
 	const_row_iterator column_begin(std::size_t j) const {
-		return const_column_iterator(&m_data[0]+j*stride2(),0,stride1());
+		return const_column_iterator(storage() + j*stride2(),0,stride1());
 	}
 	const_column_iterator column_end(std::size_t j) const {
-		return const_column_iterator(&m_data[0]+j*stride2()+ stride1()*size1(),size1(),stride1());
+		return const_column_iterator(storage() + j*stride2()+ stride1()*size1(),size1(),stride1());
 	}
 	column_iterator column_begin(std::size_t j){
-		return column_iterator(&m_data[0]+j*stride2(),0,stride1());
+		return column_iterator(storage() + j*stride2(),0,stride1());
 	}
 	column_iterator column_end(std::size_t j){
-		return column_iterator(&m_data[0]+j*stride2()+ stride1()*size1(),size1(),stride1());
+		return column_iterator(storage() + j * stride2()+ stride1() * size1(), size1(), stride1());
 	}
 	
 	typedef typename blas::major_iterator<self_type>::type major_iterator;

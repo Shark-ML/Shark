@@ -5,9 +5,18 @@
 #       Test implementation: Boost UTF                              #
 #####################################################################
 
+#####################################################################
+#       Get Boost Unit test                  #
+#####################################################################
+find_package( 
+	Boost 1.48.0 REQUIRED COMPONENTS
+	unit_test_framework
+)
+
+set( boost_unit_test_lib ${Boost_LIBRARIES})
 
 #####################################################################
-#       Configure logging of test restuls to XML                    #
+#       Configure logging of test restults to XML                    #
 #####################################################################
 option( LOG_TEST_OUTPUT "Log test output to XML files." OFF )
 
@@ -22,25 +31,27 @@ option( LOG_TEST_OUTPUT "Log test output to XML files." OFF )
 #####################################################################
 macro(SHARK_ADD_TEST SRC NAME)
    
-  if( OPT_LOG_TEST_OUTPUT )
-    set( XML_LOGGING_COMMAND_LINE_ARGS "--log_level=test_suite --log_format=XML --log_sink=${NAME}_Log.xml --report_level=no" )
-  endif( OPT_LOG_TEST_OUTPUT )
+	if( OPT_LOG_TEST_OUTPUT )
+		set( XML_LOGGING_COMMAND_LINE_ARGS "--log_level=test_suite --log_format=XML --log_sink=${NAME}_Log.xml --report_level=no" )
+	endif( OPT_LOG_TEST_OUTPUT )
 
-  # Create the test executable
-  add_executable( ${NAME} ${SRC} Models/derivativeTestHelper.h )
-  target_link_libraries( ${NAME} shark)
+	# Create the test executable
+	add_executable( ${NAME} ${SRC} Models/derivativeTestHelper.h )
+	target_link_libraries( ${NAME} shark ${boost_unit_test_lib})
+	set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 11)
+	set_property(TARGET ${NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 
-  if(GCOV_CHECK)
-    target_link_libraries( ${NAME} gcov)
-  endif (GCOV_CHECK)
+	if(GCOV_CHECK)
+		target_link_libraries( ${NAME} gcov)
+	endif (GCOV_CHECK)
 
-  # Add the test
-  add_test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} )
+	# Add the test
+	add_test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} )
 
-  set_target_properties(${NAME} PROPERTIES FOLDER "Tests")
-  if(GCOV_CHECK)
-    add_Test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} COMMAND Coverage)
-  endif (GCOV_CHECK)
+	set_target_properties(${NAME} PROPERTIES FOLDER "Tests")
+	if(GCOV_CHECK)
+		add_Test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} COMMAND Coverage)
+	endif (GCOV_CHECK)
 endmacro()
 
 # BLAS Tests
@@ -268,13 +279,13 @@ endif()
 
 # Create output dir
 add_custom_command(
-    TARGET Data_Csv
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_output
+	TARGET Data_Csv
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_output
 )
 
 add_custom_command(
-    TARGET Data_ExportKernelMatrix
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_output
+	TARGET Data_ExportKernelMatrix
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_output
 )
