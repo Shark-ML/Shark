@@ -1,5 +1,5 @@
 /*!
- * \brief       Implements the fast nondominated sort algorithm for pareto front calculation
+ * \brief       Implements the fast non-dominated sorting algorithm for Pareto front calculation.
  * 
  * \author      T.Voss, O. Krause
  * \date        2015
@@ -37,11 +37,11 @@ namespace shark {
 /**
  * \brief Implements the well-known non-dominated sorting algorithm.
  *
- * Assembles subsets/fronts of mututally non-dominating individuals.
- * Afterwards every individual is assigned a rank by pop[i].rank() = fronNumber.
+ * Assembles subsets/fronts of mutually non-dominated individuals.
+ * Afterwards every individual is assigned a rank by pop[i].rank() = frontNumber.
  * The front of dominating points has the value 1. 
  * 
- * The algorithm is dscribed in Deb et al, 
+ * The algorithm is described in Deb et al, 
  * A Fast and Elitist Multiobjective Genetic Algorithm: NSGA-II
  * IEEE Transactions on Evolutionary Computation, 2002
  *
@@ -53,8 +53,8 @@ struct BaseFastNonDominatedSort {
 	/**
 	 * \brief Executes the algorithm.
 	 *
-	 * Afterwards every individual is assigned a rank by pop[i].rank() = fronNumber.
-	 * The front of dominating points has the value 1.
+	 * Afterwards every individual is assigned a rank by pop[i].rank() = frontNumber.
+	 * The front of non-dominated points has the value 1.
 	 *
 	 * \param pop [in,out] Population to subdivide into fronts of non-dominated individuals.
 	 */
