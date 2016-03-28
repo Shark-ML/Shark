@@ -28,7 +28,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECTSEARCH_FASTNONDOMINATEDSORT_H
 #define SHARK_ALGORITHMS_DIRECTSEARCH_FASTNONDOMINATEDSORT_H
 
-#include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
+#include <shark/Algorithms/DirectSearch/ParetoDominance.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <vector>
 
@@ -60,9 +60,6 @@ struct BaseFastNonDominatedSort {
 	 */
 	template<typename PopulationType>
 	void operator()(PopulationType &pop) {
-		
-		//dominance relation
-		ParetoDominanceComparator<Extractor> pdc;
 
 		//stors for the i-th point which points are dominated by i
 		std::vector<std::vector<std::size_t> > s(pop.size());
@@ -75,13 +72,11 @@ struct BaseFastNonDominatedSort {
 			//check which points j are dominated by i and add them to s[i]
 			//also increment n[j] for every i dominating j
 			for (std::size_t  j = 0; j < pop.size(); j++) {
-				if (i == j)
-					continue;
-				
-				int domination = pdc(pop[i], pop[j]);
-				if ( domination > 1)//pop[i]> pop[j]
+				if (i == j) continue;
+				ParetoRelation rel = dominance<typename PopulationType::value_type, Extractor>(pop[i], pop[j]);
+				if (prec(rel))       // pop[i] better than pop[j]
 					s[i].push_back(j);
-				else if (domination < -1)//pop[i]< pop[j]
+				else if (succ(rel))  // pop[i] worse than pop[j]
 					numberOfDominatingPoints[i]++;
 			}
 			//all non-dominated points form the first front

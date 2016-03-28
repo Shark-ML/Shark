@@ -33,7 +33,7 @@
 #define HYPERVOLUME_APPROXIMATOR_H
 
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
-#include <shark/Algorithms/DirectSearch/ParetoDominanceComparator.h>
+#include <shark/Algorithms/DirectSearch/ParetoDominance.h>
 #include <shark/Statistics/Distributions/MultiNomialDistribution.h>
 
 #include <shark/LinAlg/Base.h>
@@ -102,7 +102,7 @@ struct HypervolumeApproximator {
 		//calculate total sum of volumes
 		double totalVolume = sum(vol);
 		
-		shark::ParetoDominanceComparator< shark::IdentityFitnessExtractor > pdc;
+//		shark::ParetoDominanceComparator< shark::IdentityFitnessExtractor > pdc;
 		VectorType rndpoint( refPoint );
 		boost::uint_fast64_t samples_sofar=0;
 		boost::uint_fast64_t round=0;
@@ -126,7 +126,8 @@ struct HypervolumeApproximator {
 				candidate = points.begin() + static_cast<std::size_t>(noPoints*Rng::uni());
 				samples_sofar++;
 			} 
-			while( pdc( e( *candidate ), rndpoint) < ParetoDominanceComparator< IdentityFitnessExtractor >::A_WEAKLY_DOMINATES_B );
+//			while( pdc( e( *candidate ), rndpoint) < ParetoDominanceComparator< IdentityFitnessExtractor >::A_WEAKLY_DOMINATES_B );
+			while (succeq(e(*candidate), rndpoint));
 
 			round++;
 		}

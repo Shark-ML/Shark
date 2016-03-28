@@ -24,24 +24,22 @@ BOOST_AUTO_TEST_CASE( FastNonDominatedSort_Test ) {
 				population[i].penalizedFitness()[j]= Rng::uni(-1,2);
 			}
 		}
-		
+
 		FastNonDominatedSort sorter;
 		sorter(population);
-		
-		ParetoDominanceComparator<FitnessExtractor> pdc;
-		
+
 		//check that ranks are okay
 		for(std::size_t i = 0; i != numPoints; ++i){
 			for(std::size_t j = 0; j != numPoints; ++j){
-				int comp = pdc(population[i],population[j]);
-				if(comp > 1){//i dominates j
+				ParetoRelation rel = dominance<Individual<RealVector,RealVector>, FitnessExtractor>(population[i],population[j]);
+				if(prec(rel)){//i dominates j
 					BOOST_CHECK(population[i].rank() < population[j].rank() );
-				} else if (comp < -1){//j dominates i
+				} else if (succ(rel)){//j dominates i
 					BOOST_CHECK(population[i].rank() > population[j].rank() );
 				}
-				
+
 				if(population[i].rank() == population[j].rank()){
-					BOOST_CHECK(comp == 1 || comp == -1);
+					BOOST_CHECK(rel == INCOMPARABLE || rel == EQUIVALENT);
 				}
 			}
 		}

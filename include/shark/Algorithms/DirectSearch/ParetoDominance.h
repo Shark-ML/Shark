@@ -4,7 +4,7 @@
  * \brief       Implementation of the Pareto-Dominance relation.
  * 
  *
- * \author      T. Voss, T. Glasmachers
+ * \author      T. Glasmachers (based on old version by T. Voß)
  * \date        2011-2016
  *
  *
@@ -40,7 +40,11 @@ namespace shark {
 
 /// \brief Result of comparing two objective vectors w.r.t. Pareto dominance.
 ///
-/// The values are arranged so that bits test for weak dominance.
+/// The values of this type should not be tested directly,
+/// instead the functions prec, preceq, succ, succeq, equivalent,
+/// and incomparable should be used. They are overloaded to take
+/// a ParetoRelation, two objective vectors, or two individuals as
+/// arguments.
 enum ParetoRelation
 {
 	INCOMPARABLE = 0,       // LHS and RHS are incomparable
@@ -48,6 +52,38 @@ enum ParetoRelation
 	RHS_PREC_LHS = 2,       // RHS strictly dominates LHS
 	EQUIVALENT = 3,         // LHS and RHS are equally good
 };
+
+/// \brief Shorthand test for strict Pareto dominance of LHS over RHS.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \prec \f$.
+inline bool prec(ParetoRelation relation)
+{ return (relation == LHS_PREC_RHS); }
+
+/// \brief Shorthand test for weak Pareto dominance of LHS over RHS.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \preceq \f$.
+inline bool preceq(ParetoRelation relation)
+{ return (relation & LHS_PREC_RHS); }
+
+/// \brief Shorthand test for strict Pareto dominance of RHS over LHS.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \succ \f$.
+inline bool succ(ParetoRelation relation)
+{ return (relation == RHS_PREC_LHS); }
+
+/// \brief Shorthand test for weak Pareto dominance of RHS over LHS.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \succeq \f$.
+inline bool succeq(ParetoRelation relation)
+{ return (relation & RHS_PREC_LHS); }
+
+/// \brief Shorthand test for equality of the objective vectors LHS and RHS.
+inline bool equivalent(ParetoRelation relation)
+{ return (relation == EQUIVALENT); }
+
+/// \brief Shorthand test for (Pareto) incomparability of the objective vectors LHS and RHS.
+inline bool incomparable(ParetoRelation relation)
+{ return (relation == INCOMPARABLE); }
 
 /// \brief Pareto dominance relation for two objective vectors.
 inline ParetoRelation dominance(RealVector const& lhs, RealVector const& rhs)
@@ -59,24 +95,50 @@ inline ParetoRelation dominance(RealVector const& lhs, RealVector const& rhs)
 		if (lhs[i] < rhs[i]) l++;
 		else if (lhs[i] > rhs[i]) r++;
 	}
-	return ((l > 0) ? LHS_PREC_RHS : 0) | ((r > 0) ? RHS_PREC_LHS : 0);
+
+	if (l > 0)
+	{
+		if (r > 0) return INCOMPARABLE;
+		else return LHS_PREC_RHS;
+	}
+	else
+	{
+		if (r > 0) return RHS_PREC_LHS;
+		else return EQUIVALENT;
+	}
 }
 
 /// \brief Shorthand test for strict Pareto dominance of LHS over RHS.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \prec \f$.
 inline bool prec(RealVector const& lhs, RealVector const& rhs)
-{ return (dominance(lhs, rhs) == LHS_PREC_RHS); }
+{ return (prec(dominance(lhs, rhs))); }
 
 /// \brief Shorthand test for weak Pareto dominance of LHS over RHS.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \preceq \f$.
 inline bool preceq(RealVector const& lhs, RealVector const& rhs)
-{ return (dominance(lhs, rhs) & LHS_PREC_RHS); }
+{ return (preceq(dominance(lhs, rhs))); }
+
+/// \brief Shorthand test for strict Pareto dominance of RHS over LHS.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \succ \f$.
+inline bool succ(RealVector const& lhs, RealVector const& rhs)
+{ return (succ(dominance(lhs, rhs))); }
+
+/// \brief Shorthand test for weak Pareto dominance of RHS over LHS.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \succeq \f$.
+inline bool succeq(RealVector const& lhs, RealVector const& rhs)
+{ return (succeq(dominance(lhs, rhs))); }
 
 /// \brief Shorthand test for equality of the objective vectors LHS and RHS.
 inline bool equivalent(RealVector const& lhs, RealVector const& rhs)
-{ return (dominance(lhs, rhs) == EQUIVALENT); }
+{ return (equivalent(dominance(lhs, rhs))); }
 
 /// \brief Shorthand test for (Pareto) incomparability of the objective vectors LHS and RHS.
 inline bool incomparable(RealVector const& lhs, RealVector const& rhs)
-{ return (dominance(lhs, rhs) == INCOMPARABLE); }
+{ return (incomparable(dominance(lhs, rhs))); }
 
 /// \brief Pareto dominance relation for two individuals.
 /// \tparam  IndividualType  Individual carrying an objective vector.
@@ -91,6 +153,8 @@ ParetoRelation dominance(IndividualType const& lhs, IndividualType const& rhs)
 /// \brief Shorthand test for strict Pareto dominance of LHS over RHS.
 /// \tparam  IndividualType  Individual carrying an objective vector.
 /// \tparam  Extractor       Extractor returning the objective vector of an individual.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \prec \f$.
 template <typename IndividualType, typename Extractor>
 bool prec(IndividualType const& lhs, IndividualType const& rhs)
 {
@@ -101,11 +165,37 @@ bool prec(IndividualType const& lhs, IndividualType const& rhs)
 /// \brief Shorthand test for weak Pareto dominance of LHS over RHS.
 /// \tparam  IndividualType  Individual carrying an objective vector.
 /// \tparam  Extractor       Extractor returning the objective vector of an individual.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \preceq \f$.
 template <typename IndividualType, typename Extractor>
 bool preceq(IndividualType const& lhs, IndividualType const& rhs)
 {
 	Extractor e;
 	return preceq(e(lhs), e(rhs));
+}
+
+/// \brief Shorthand test for strict Pareto dominance of RHS over LHS.
+/// \tparam  IndividualType  Individual carrying an objective vector.
+/// \tparam  Extractor       Extractor returning the objective vector of an individual.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \succ \f$.
+template <typename IndividualType, typename Extractor>
+bool succ(IndividualType const& lhs, IndividualType const& rhs)
+{
+	Extractor e;
+	return succ(e(lhs), e(rhs));
+}
+
+/// \brief Shorthand test for weak Pareto dominance of RHS over LHS.
+/// \tparam  IndividualType  Individual carrying an objective vector.
+/// \tparam  Extractor       Extractor returning the objective vector of an individual.
+///
+/// Note: The function name is derived from the LaTeX symbol \f$ \succeq \f$.
+template <typename IndividualType, typename Extractor>
+bool succeq(IndividualType const& lhs, IndividualType const& rhs)
+{
+	Extractor e;
+	return succeq(e(lhs), e(rhs));
 }
 
 /// \brief Shorthand test for (Pareto) equivalence of the individuals LHS and RHS.
