@@ -1,7 +1,7 @@
 /*!
- * \brief       Implements the fast nondominated sort algorithm for pareto front calculation
+ * \brief       Implements the fast non-dominated sort algorithm.
  * 
- * \author      T.Voss, O. Krause
+ * \author      T. Voss, O. Krause
  * \date        2015
  *
  *
@@ -60,23 +60,23 @@ struct BaseFastNonDominatedSort {
 	 */
 	template<typename PopulationType>
 	void operator()(PopulationType &pop) {
+		Extractor e;
 
-		//stors for the i-th point which points are dominated by i
+		//stores for the i-th point which points are dominated by i
 		std::vector<std::vector<std::size_t> > s(pop.size());
 		//stores for every point how many points are dominating it
 		std::vector<std::size_t> numberOfDominatingPoints(pop.size(), 0);
 		//stores initially the front of non-dominated points
 		std::vector<std::size_t> front;
-		
 		for (std::size_t i = 0; i < pop.size(); i++) {
 			//check which points j are dominated by i and add them to s[i]
 			//also increment n[j] for every i dominating j
 			for (std::size_t  j = 0; j < pop.size(); j++) {
 				if (i == j) continue;
-				ParetoRelation rel = dominance<typename PopulationType::value_type, Extractor>(pop[i], pop[j]);
-				if (prec(rel))       // pop[i] better than pop[j]
+				DominanceRelation rel = dominance(e(pop[i]), e(pop[j]));
+				if (rel == LHS_DOMINATES_RHS)
 					s[i].push_back(j);
-				else if (succ(rel))  // pop[i] worse than pop[j]
+				else if (rel == RHS_DOMINATES_LHS)
 					numberOfDominatingPoints[i]++;
 			}
 			//all non-dominated points form the first front
@@ -108,8 +108,8 @@ struct BaseFastNonDominatedSort {
 					}
 				}
 			}
-			
-			//make the new found front the current
+
+			// make the newly found front the current one
 			front.swap(nextFront);
 			nextFront.clear();
 			frontCounter++;
@@ -117,7 +117,7 @@ struct BaseFastNonDominatedSort {
 	}
 };
 
-/** \brief Default fast non-dominated sorting based on the Pareto-dominance relation. */
+/** \brief Fast non-dominated sorting based on the fitness */
 typedef BaseFastNonDominatedSort< FitnessExtractor > FastNonDominatedSort;
 
 }

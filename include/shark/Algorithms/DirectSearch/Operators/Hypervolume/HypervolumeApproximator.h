@@ -102,7 +102,6 @@ struct HypervolumeApproximator {
 		//calculate total sum of volumes
 		double totalVolume = sum(vol);
 		
-//		shark::ParetoDominanceComparator< shark::IdentityFitnessExtractor > pdc;
 		VectorType rndpoint( refPoint );
 		boost::uint_fast64_t samples_sofar=0;
 		boost::uint_fast64_t round=0;
@@ -110,7 +109,8 @@ struct HypervolumeApproximator {
 		//we pick points randomly based on their volume
 		MultiNomialDistribution pointDist(vol);
 
-		while( 1 ) {
+		while (true)
+		{
 			// sample ROI based on its volume. the ROI is defined as the Area between the reference point and a point in the front.
 			Iterator point = points.begin() + pointDist(Rng::globalRng);
 			
@@ -118,16 +118,16 @@ struct HypervolumeApproximator {
 			for( std::size_t i = 0; i < rndpoint.size(); i++ ){
 				rndpoint[i] = e( (*point ))[i] + Rng::uni() * ( refPoint[i] - e( (*point) )[i] );
 			}
-			
+
 			Iterator candidate;
-			do {
-				if(samples_sofar>=maxSamples) 
-					return maxSamples * totalVolume / noPoints / round;
+			while (true)
+			{
+				if (samples_sofar>=maxSamples) return maxSamples * totalVolume / noPoints / round;
 				candidate = points.begin() + static_cast<std::size_t>(noPoints*Rng::uni());
 				samples_sofar++;
+				DominanceRelation rel = dominance(e(*candidate), rndpoint);
+				if (rel == RHS_DOMINATES_LHS || rel == EQUIVALENT) break;
 			} 
-//			while( pdc( e( *candidate ), rndpoint) < ParetoDominanceComparator< IdentityFitnessExtractor >::A_WEAKLY_DOMINATES_B );
-			while (succeq(e(*candidate), rndpoint));
 
 			round++;
 		}
