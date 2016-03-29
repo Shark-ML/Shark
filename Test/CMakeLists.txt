@@ -97,8 +97,8 @@ shark_add_test( Algorithms/DirectSearch/MOCMA.cpp DirectSearch_MOCMA )
 shark_add_test( Algorithms/DirectSearch/SteadyStateMOCMA.cpp DirectSearch_SteadyStateMOCMA )
 shark_add_test( Algorithms/DirectSearch/RealCodedNSGAII.cpp DirectSearch_RealCodedNSGAII )
 shark_add_test( Algorithms/DirectSearch/SMS-EMOA.cpp DirectSearch_SMS-EMOA )
-shark_add_test( Algorithms/DirectSearch/FastNonDominatedSort.cpp DirectSearch_FastNonDominatedSort )
-shark_add_test( Algorithms/DirectSearch/ParetoDominanceComparator.cpp DirectSearch_ParetoDominanceComparator )
+shark_add_test( Algorithms/DirectSearch/NonDominatedSort.cpp DirectSearch_NonDominatedSort )
+shark_add_test( Algorithms/DirectSearch/ParetoDominance.cpp DirectSearch_ParetoDominance )
 
 # Direct Search Operator tests
 shark_add_test( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
