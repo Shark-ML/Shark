@@ -29,7 +29,7 @@
 #define SHARK_ALGORITHMS_DIRECTSEARCH_NONDOMINATEDSORT_H
 
 #include "FastNonDominatedSort.h"
-#include "SweepingNonDominatedSort.h"
+#include "DCNonDominatedSort.h"
 
 
 namespace shark {
@@ -45,6 +45,7 @@ namespace shark {
 template <class Extractor>
 class BaseNonDominatedSort
 {
+public:
 	/// \brief Executes a non-dominated sorting algorithm.
 	///
 	/// Afterwards every individual is assigned a rank by pop[i].rank() = frontNumber.
@@ -61,7 +62,7 @@ class BaseNonDominatedSort
 		// heuristic switching strategy based on simple benchmarks
 		if (m == 2 || n > 5000 || log(n) / log(3.0) < m + 1.0)
 		{
-			BaseSweepingNonDominatedSort<Extractor> sorter;
+			BaseDCNonDominatedSort<Extractor> sorter;
 			sorter(pop);
 		}
 		else

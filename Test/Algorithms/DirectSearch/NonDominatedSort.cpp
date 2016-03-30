@@ -3,7 +3,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
-#include <shark/Algorithms/DirectSearch/SweepingNonDominatedSort.h>
+#include <shark/Algorithms/DirectSearch/DCNonDominatedSort.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Rng/GlobalRng.h>
 #include <shark/Core/Timer.h>
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( NonDominatedSort_Test )
 			FastNonDominatedSort sorter1;
 			sorter1(population1);
 
-			SweepingNonDominatedSort sorter2;
+			DCNonDominatedSort sorter2;
 			sorter2(population2);
 
 			// check that ranks are consistent with the dominance relation
