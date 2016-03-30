@@ -6,6 +6,7 @@
 #include <shark/Algorithms/DirectSearch/SweepingNonDominatedSort.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Timer.h>
 
 #include <cmath>
 #include <cassert>
@@ -21,7 +22,7 @@ BOOST_AUTO_TEST_CASE( NonDominatedSort_Test )
 {
 	std::size_t numPoints = 100;
 	std::size_t numTrials = 10;
-	for (std::size_t numDims=2; numDims < 5; numDims++)
+	for (std::size_t numDims=2; numDims <= 5; numDims++)
 	{
 		for (std::size_t t = 0; t != numTrials; ++t) {
 			// create random objective vectors
@@ -36,7 +37,6 @@ BOOST_AUTO_TEST_CASE( NonDominatedSort_Test )
 			}
 			std::vector<Individual<RealVector,RealVector> > population2 = population1;
 
-			// sort
 			FastNonDominatedSort sorter1;
 			sorter1(population1);
 

@@ -31,13 +31,13 @@
 #include <shark/Algorithms/DirectSearch/ParetoDominance.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/LinAlg/Base.h>
-//#include <boost/bimap.hpp>
 #include <vector>
 #include <list>
 #include <set>
 #include <map>
 #include <utility>
 #include <algorithm>
+#include <functional>
 
 
 namespace shark {
@@ -100,6 +100,9 @@ private:
 	};
 
 	typedef std::vector<Point*> ContainerType;
+	typedef std::map<std::size_t, double> MapType;
+	typedef std::set<std::size_t, std::greater<std::size_t> > SetType;
+	typedef std::map<double, SetType > InverseMapType;
 
 public:
 	/// \brief Executes the non-dominated sorting algorithm.
@@ -215,20 +218,20 @@ private:
 	// Note: the paper (and also the original paper by Jensen) states
 	// that this is an O(n log(n)) operation. However, the reference
 	// implementation in the DEAP library implements it as an O(n^2)
-	// operation, or more exactly, as an O(n k) operation, where k is
+	// operation, or more exactly, as an O(n c) operation, where c is
 	// the number of fronts. Actually, the Jensen algorithm is really
-	// O(n log(k)).
+	// O(n log(c)).
 	// Implementing it with the correct complexity is surprisingly hard,
 	// at least with standard library containers (including boost::bimap).
-	// However, the implementation is efficient as long as k is small,
+	// However, the implementation is efficient as long as c is small,
 	// which is nearly always the case in practice.
 	void sweepA(ContainerType& S)
 	{
-		std::map<std::size_t, double> T;
+		MapType T;
 		T[S[0]->frt] = S[0]->obj[1];
 		for (std::size_t i=1; i<S.size(); i++)
 		{
-			// O(T.size()) operation, should be logarithmic...
+			// O(T.size()) operation, should be logarithmic...?
 			std::size_t r = 0;
 			for (auto p : T)
 			{
@@ -239,6 +242,43 @@ private:
 
 			T[S[i]->frt] = S[i]->obj[1];
 		}
+
+		// The following code is O(n log(c)), however, it works only if
+		// all "frt" values are equal as a precondition. I.e., it works
+		// for the plain bi-objective case, but not for the more general
+		// case required here.
+//		MapType T;
+//		InverseMapType invT;
+//		T[S[0]->frt] = S[0]->obj[1];
+//		invT[S[0]->obj[1]].insert(S[0]->frt);
+//		for (std::size_t i=1; i<S.size(); i++)
+//		{
+//			std::size_t r = 0;
+//			{
+//				auto it = invT.upper_bound(S[i]->obj[1]);
+//				if (it != invT.begin())
+//				{
+//					--it;
+//					r = *it->second.begin();
+//				}
+//			}
+//
+//			if (r > 0) S[i]->frt = std::max(S[i]->frt, r + 1);
+//
+//			{
+//				auto it = T.find(S[i]->frt);
+//				if (it != T.end())
+//				{
+//					double old_y = it->second;
+//					auto it2 = invT.find(old_y);
+//					SHARK_ASSERT(it2 != invT.end());
+//					if (it2->second.size() == 1) invT.erase(it2);
+//					else it2->second.erase(S[i]->frt);
+//				}
+//				T[S[i]->frt] = S[i]->obj[1];
+//				invT[S[i]->obj[1]].insert(S[i]->frt);
+//			}
+//		}
 	}
 
 	// compute the median of the k-th objective over S
@@ -362,10 +402,9 @@ private:
 
 	// figure 8 in the paper
 	// same as ndHelperB, but a specialized sweeping algorithm for two objectives
-	// The same computational problem arises as in sweepA.
 	void sweepB(ContainerType const& L, ContainerType& H)
 	{
-		std::map<std::size_t, double> T;
+		MapType T;
 		std::size_t i = 0;
 		for (std::size_t j=0; j<H.size(); j++)
 		{
@@ -374,11 +413,14 @@ private:
 				if (L[i]->obj[0] > H[j]->obj[0]) break;
 				if (L[i]->obj[0] == H[j]->obj[0] && L[i]->obj[1] > H[j]->obj[1]) break;
 				auto it = T.find(L[i]->frt);
-				if (it == T.end() || L[i]->obj[1] < it->second) T[L[i]->frt] = L[i]->obj[1];
+				if (it == T.end() || L[i]->obj[1] < it->second)
+				{
+					T[L[i]->frt] = L[i]->obj[1];
+				}
 				i++;
 			}
 
-			// O(T.size()) operation, should be logarithmic...
+//			// O(T.size()) operation, should be logarithmic...
 			std::size_t r = 0;
 			for (auto p : T)
 			{
@@ -390,6 +432,51 @@ private:
 				H[j]->frt = std::max(H[j]->frt, r + 1);
 			}
 		}
+
+		// The following code is O(n log(c)), however, it has the same
+		// limitations as in sweepA, and therefore does not work here.
+//		MapType T;
+//		InverseMapType invT;
+//		std::size_t i = 0;
+//		for (std::size_t j=0; j<H.size(); j++)
+//		{
+//			while (i < L.size())
+//			{
+//				if (L[i]->obj[0] > H[j]->obj[0]) break;
+//				if (L[i]->obj[0] == H[j]->obj[0] && L[i]->obj[1] > H[j]->obj[1]) break;
+//				auto it = T.find(L[i]->frt);
+//				if (it == T.end())
+//				{
+//					T[L[i]->frt] = L[i]->obj[1];
+//					invT[L[i]->obj[1]].insert(L[i]->frt);
+//				}
+//				else if (L[i]->obj[1] < it->second)
+//				{
+//					double old_y = it->second;
+//					auto it2 = invT.find(old_y);
+//					SHARK_ASSERT(it2 != invT.end());
+//					if (it2->second.size() == 1) invT.erase(it2);
+//					else it2->second.erase(L[i]->frt);
+//
+//					T[L[i]->frt] = L[i]->obj[1];
+//					invT[L[i]->obj[1]].insert(L[i]->frt);
+//				}
+//				i++;
+//			}
+//
+//			std::size_t r = 0;
+//			auto it = invT.upper_bound(H[j]->obj[1]);
+//			if (it != invT.begin())
+//			{
+//				--it;
+//				r = *it->second.begin();
+//			}
+//
+//			if (r > 0)   // U \not= \{\}
+//			{
+//				H[j]->frt = std::max(H[j]->frt, r + 1);
+//			}
+//		}
 	}
 
 	// figure 9 in the paper
