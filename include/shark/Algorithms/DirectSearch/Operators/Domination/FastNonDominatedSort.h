@@ -25,10 +25,10 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_FASTNONDOMINATEDSORT_H
-#define SHARK_ALGORITHMS_DIRECTSEARCH_FASTNONDOMINATEDSORT_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_DOMINATION_FASTNONDOMINATEDSORT_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_DOMINATION_FASTNONDOMINATEDSORT_H
 
-#include <shark/Algorithms/DirectSearch/ParetoDominance.h>
+#include <shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <vector>
 

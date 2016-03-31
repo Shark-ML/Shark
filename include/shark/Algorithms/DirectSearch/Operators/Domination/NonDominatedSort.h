@@ -25,8 +25,8 @@
 /// along with Shark.  If not, see <http://www.gnu.org/licenses/>.
 ///
 
-#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_NONDOMINATEDSORT_H
-#define SHARK_ALGORITHMS_DIRECTSEARCH_NONDOMINATEDSORT_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_DOMINATION_NONDOMINATEDSORT_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_DOMINATION_NONDOMINATEDSORT_H
 
 #include "FastNonDominatedSort.h"
 #include "DCNonDominatedSort.h"
@@ -60,7 +60,7 @@ public:
 		double n = pop.size();
 		double m = e(pop[0]).size();
 		// heuristic switching strategy based on simple benchmarks
-		if (m == 2 || n > 5000 || log(n) / log(3.0) < m + 1.0)
+		if (m == 2 || n > 5000 || std::log(n) / log(3.0) < m + 1.0)
 		{
 			BaseDCNonDominatedSort<Extractor> sorter;
 			sorter(pop);

@@ -2,7 +2,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/Algorithms/DirectSearch/ParetoDominance.h>
+#include <shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Rng/GlobalRng.h>
 

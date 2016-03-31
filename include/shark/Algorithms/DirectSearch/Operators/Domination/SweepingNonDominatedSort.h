@@ -1,5 +1,5 @@
 ///
-/// \brief       Implements a divide-and-conquer non-dominated sorting algorithm.
+/// \brief       Implements the Improved Run-Time Complexity Algorithm for Non-Dominated Sorting.
 /// 
 /// \author      T. Glasmachers
 /// \date        2016
@@ -25,10 +25,10 @@
 /// along with Shark.  If not, see <http://www.gnu.org/licenses/>.
 ///
 
-#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_DCNONDOMINATEDSORT_H
-#define SHARK_ALGORITHMS_DIRECTSEARCH_DCNONDOMINATEDSORT_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_DOMINATION_SWEEPINGNONDOMINATEDSORT_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_DOMINATION_SWEEPINGNONDOMINATEDSORT_H
 
-#include <shark/Algorithms/DirectSearch/ParetoDominance.h>
+#include <shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h>
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/LinAlg/Base.h>
 #include <vector>
@@ -44,7 +44,7 @@ namespace shark {
 
 
 ///
-/// \brief Divide-and-conquer algorithm for non-dominated sorting.
+/// \brief Implements the Improved Run-Time Complexity Algorithm for Non-Dominated Sorting.
 ///
 /// Assembles subsets/fronts of mutually non-dominated individuals.
 /// Afterwards every individual is assigned a rank by pop[i].rank() = frontIndex.
@@ -56,19 +56,12 @@ namespace shark {
 /// Proceedings Genetic and Evolutionary Computation Conference (GECCO), pp. 615-622, 2013.
 ///
 /// The algorithm is based on an earlier publication by Jensen, 2003. Its runtime
-/// complexity for n points and m objectives is claimed to be as low as
-/// \f$ \mathcal{O}(n \log(n)^{m-1}) \f$, which is often better than the complexity
-/// \f$ \mathcal{O}(n^2 m) \f$ of the of "fast non-dominated sorting" algorithm,
-/// in particular for small m.
-///
-/// However, the implementation has a complexity of \f$ \mathcal{O}(n \log(n)^{m-2}c) \f$,
-/// where c is the number of distinct non-dominance ranks. If can hence be as bad as
-/// \f$ \mathcal{O}(n^2 \log(n)^{m-2}) \f$, but in practice it is usually fast.
-/// The same applies to the reference implementation in the DEAP library (at the time
-/// of writing, March 2016).
+/// complexity for n points and m objectives is \f$ \mathcal{O}(n \log(n)^m) \f$,
+/// which is often better than the complexity \f$ \mathcal{O}(n^2 m) \f$ of the
+/// classic "fast non-dominated sorting" algorithm.
 ///
 template <class Extractor>
-class BaseDCNonDominatedSort
+class BaseSweepingNonDominatedSort
 {
 private:
 	struct Point
@@ -154,7 +147,7 @@ public:
 	}
 
 private:
-	// Dominance relation restricted to the first k components of the objective vector.
+	// dominance relation restricted to the first k components of the objective vector
 	static DominanceRelation dominance(const Point* lhs, const Point* rhs, std::size_t k)
 	{
 		std::size_t l = 0, r = 0;
@@ -177,11 +170,6 @@ private:
 	}
 
 	// figure 2 in the paper
-	//
-	// This function performs non-dominated sorting of S according to
-	// the first k objectives, while taking previously set front index
-	// values into account (which stem from dominance by points external
-	// to S).
 	void ndHelperA(ContainerType& S, std::size_t k)
 	{
 		if (S.size() < 2) return;
@@ -227,18 +215,16 @@ private:
 	}
 
 	// figure 3 in the paper
-	//
-	// Same functionality as ndHelperA, but a specialized sweeping
-	// algorithm for two objectives.
-	//
 	// Note: the paper (and also the original paper by Jensen) states
 	// that this is an O(n log(n)) operation. However, the reference
 	// implementation in the DEAP library implements it as an O(n^2)
 	// operation, or more exactly, as an O(n c) operation, where c is
-	// the number of fronts. It seems that this is because Jensen's
-	// O(n log(c)) algorithm works only if all initial FRT values
-	// coincide, which holds in the bi-objective case, but not in the
-	// more general case needed here.
+	// the number of fronts. Actually, the Jensen algorithm is really
+	// O(n log(c)).
+	// Implementing it with the correct complexity is surprisingly hard,
+	// at least with standard library containers (including boost::bimap).
+	// However, the implementation is efficient as long as c is small,
+	// which is nearly always the case in practice.
 	void sweepA(ContainerType& S)
 	{
 		MapType T;
@@ -256,9 +242,46 @@ private:
 
 			T[S[i]->frt] = S[i]->obj[1];
 		}
+
+		// The following code is O(n log(c)), however, it works only if
+		// all "frt" values are equal as a precondition. I.e., it works
+		// for the plain bi-objective case, but not for the more general
+		// case required here.
+//		MapType T;
+//		InverseMapType invT;
+//		T[S[0]->frt] = S[0]->obj[1];
+//		invT[S[0]->obj[1]].insert(S[0]->frt);
+//		for (std::size_t i=1; i<S.size(); i++)
+//		{
+//			std::size_t r = 0;
+//			{
+//				auto it = invT.upper_bound(S[i]->obj[1]);
+//				if (it != invT.begin())
+//				{
+//					--it;
+//					r = *it->second.begin();
+//				}
+//			}
+//
+//			if (r > 0) S[i]->frt = std::max(S[i]->frt, r + 1);
+//
+//			{
+//				auto it = T.find(S[i]->frt);
+//				if (it != T.end())
+//				{
+//					double old_y = it->second;
+//					auto it2 = invT.find(old_y);
+//					SHARK_ASSERT(it2 != invT.end());
+//					if (it2->second.size() == 1) invT.erase(it2);
+//					else it2->second.erase(S[i]->frt);
+//				}
+//				T[S[i]->frt] = S[i]->obj[1];
+//				invT[S[i]->obj[1]].insert(S[i]->frt);
+//			}
+//		}
 	}
 
-	// median of the k-th objective over S
+	// compute the median of the k-th objective over S
 	double median(ContainerType const& S, std::size_t k)
 	{
 		std::vector<double> value(S.size());
@@ -271,10 +294,9 @@ private:
 	}
 
 	// figure 5 in the paper
-	//
 	// Split the set S according to the median in objective k
 	// (one-based index) as balanced as possible into subsets
-	// L and H. The subsets remain lexicographically sorted.
+	// L and H. The subsets remain lexicographically ordered.
 	void splitA(ContainerType const& S, std::size_t k, ContainerType& L, ContainerType& H)
 	{
 		k--;   // index is zero-based
@@ -316,13 +338,11 @@ private:
 	}
 
 	// figure 7 in the paper
-	//
 	// preconditions:
 	// * sets L and H are lexicographically orderes
 	// * all points in L are better than those in H according to objective k
 	// * the front indices for L are final
 	// * the front indices of H are all 1
-	// *
 	// postconditions:
 	// * each front index of h \in H is assigned the max of the front indices of l \in L dominating h, plus 1
 	void ndHelperB(ContainerType const& L, ContainerType& H, std::size_t k)
@@ -381,8 +401,7 @@ private:
 	}
 
 	// figure 8 in the paper
-	//
-	// Same as ndHelperB, but a specialized sweeping algorithm for two objectives.
+	// same as ndHelperB, but a specialized sweeping algorithm for two objectives
 	void sweepB(ContainerType const& L, ContainerType& H)
 	{
 		MapType T;
@@ -401,7 +420,7 @@ private:
 				i++;
 			}
 
-			// O(T.size()) operation, should be logarithmic...
+//			// O(T.size()) operation, should be logarithmic...
 			std::size_t r = 0;
 			for (auto p : T)
 			{
@@ -413,14 +432,54 @@ private:
 				H[j]->frt = std::max(H[j]->frt, r + 1);
 			}
 		}
+
+		// The following code is O(n log(c)), however, it has the same
+		// limitations as in sweepA, and therefore does not work here.
+//		MapType T;
+//		InverseMapType invT;
+//		std::size_t i = 0;
+//		for (std::size_t j=0; j<H.size(); j++)
+//		{
+//			while (i < L.size())
+//			{
+//				if (L[i]->obj[0] > H[j]->obj[0]) break;
+//				if (L[i]->obj[0] == H[j]->obj[0] && L[i]->obj[1] > H[j]->obj[1]) break;
+//				auto it = T.find(L[i]->frt);
+//				if (it == T.end())
+//				{
+//					T[L[i]->frt] = L[i]->obj[1];
+//					invT[L[i]->obj[1]].insert(L[i]->frt);
+//				}
+//				else if (L[i]->obj[1] < it->second)
+//				{
+//					double old_y = it->second;
+//					auto it2 = invT.find(old_y);
+//					SHARK_ASSERT(it2 != invT.end());
+//					if (it2->second.size() == 1) invT.erase(it2);
+//					else it2->second.erase(L[i]->frt);
+//
+//					T[L[i]->frt] = L[i]->obj[1];
+//					invT[L[i]->obj[1]].insert(L[i]->frt);
+//				}
+//				i++;
+//			}
+//
+//			std::size_t r = 0;
+//			auto it = invT.upper_bound(H[j]->obj[1]);
+//			if (it != invT.begin())
+//			{
+//				--it;
+//				r = *it->second.begin();
+//			}
+//
+//			if (r > 0)   // U \not= \{\}
+//			{
+//				H[j]->frt = std::max(H[j]->frt, r + 1);
+//			}
+//		}
 	}
 
 	// figure 9 in the paper
-	//
-	// This function splits the sets L and H into subsets L1, L2 and H1, H2,
-	// respectively, using a common split point in objective k. The split
-	// point is optimized to balance the subsets. The subsets remain
-	// lexicographically sorted.
 	void splitB(ContainerType const& L, ContainerType const& H, std::size_t k,
 			ContainerType& L1, ContainerType& L2, ContainerType& H1, ContainerType& H2)
 	{
@@ -489,8 +548,8 @@ private:
 };
 
 
-/// \brief divide-and-conquer non-dominated sorting based on the fitness.
-typedef BaseDCNonDominatedSort< FitnessExtractor > DCNonDominatedSort;
+/// \brief Sweeping non-dominated sorting based on the fitness.
+typedef BaseSweepingNonDominatedSort< FitnessExtractor > SweepingNonDominatedSort;
 
 
 };  // namespace shark
