@@ -2,8 +2,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
-#include <shark/Algorithms/DirectSearch/DCNonDominatedSort.h>
+#include <shark/Algorithms/DirectSearch/Operators/Selection/FastNonDominatedSort.h>
+#include <shark/Algorithms/DirectSearch/Operators/Selection/DCNonDominatedSort.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Rng/GlobalRng.h>
 #include <shark/Core/Timer.h>
@@ -49,9 +49,9 @@ BOOST_AUTO_TEST_CASE( NonDominatedSort_Test )
 				for(std::size_t j = 0; j != numPoints; ++j){
 					DominanceRelation rel = dominance(e(population1[i]), e(population1[j]));
 					if (rel == LHS_DOMINATES_RHS) {
-						BOOST_CHECK(population1[i].rank() < population1[j].rank());
+						BOOST_CHECK_LT(population1[i].rank(), population1[j].rank());
 					} else if (rel == RHS_DOMINATES_LHS) {
-						BOOST_CHECK(population1[i].rank() > population1[j].rank());
+						BOOST_CHECK_LT(population1[i].rank(), population1[j].rank());
 					}
 
 					if (population1[i].rank() == population1[j].rank()) {

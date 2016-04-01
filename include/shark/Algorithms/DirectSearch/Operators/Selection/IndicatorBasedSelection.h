@@ -33,7 +33,7 @@
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_SELECTION_INDICATOR_BASED_SELECTION_H
 
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
-#include <shark/Algorithms/DirectSearch/NonDominatedSort.h>
+#include "NonDominatedSort.h"
 
 #include <map>
 #include <vector>

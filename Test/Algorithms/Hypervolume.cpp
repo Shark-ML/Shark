@@ -164,8 +164,8 @@ void testRandomFrontNormPApprox(std::size_t evals, double epsilon, Algorithm alg
 		double hv2 = inclusionExclusion(points, reference);
 		double hv1 = *median_element(results);
 		//check bounds
-		BOOST_CHECK(  hv1< (1+epsilon) * hv2 );
-		BOOST_CHECK(  hv1> (1-epsilon) * hv2 );
+		BOOST_CHECK_LT(hv1, (1+epsilon) * hv2);
+		BOOST_CHECK_GT(hv1, (1-epsilon) * hv2);
 	}
 }
 
@@ -285,8 +285,8 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeMDApprox ) {
 		results[e] = hc( ife, m_testSet3D, m_refPoint3D );
 	double hv = *median_element(results);
 	//check bounds
-	BOOST_CHECK( hv < (1+epsilon) * HV_TEST_SET_3D );
-	BOOST_CHECK( hv > (1-epsilon) * HV_TEST_SET_3D );
+	BOOST_CHECK_LT( hv, (1+epsilon) * HV_TEST_SET_3D );
+	BOOST_CHECK_GT( hv, (1-epsilon) * HV_TEST_SET_3D );
 	
 	// test with random fronts of different shapes
 	for(std::size_t numObj = 3; numObj < 5; ++numObj){
