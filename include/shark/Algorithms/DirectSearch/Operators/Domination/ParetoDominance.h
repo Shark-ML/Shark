@@ -48,7 +48,8 @@ enum DominanceRelation
 };
 
 /// \brief Pareto dominance relation for two objective vectors.
-inline DominanceRelation dominance(RealVector const& lhs, RealVector const& rhs)
+template<class VectorTypeA, class VectorTypeB>
+inline DominanceRelation dominance(VectorTypeA const& lhs, VectorTypeB const& rhs)
 {
 	SHARK_ASSERT(lhs.size() == rhs.size());
 	std::size_t l = 0, r = 0;
