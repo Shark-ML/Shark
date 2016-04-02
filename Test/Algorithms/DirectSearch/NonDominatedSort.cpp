@@ -45,9 +45,9 @@ BOOST_AUTO_TEST_CASE( NonDominatedSort_Test )
 				for(std::size_t j = 0; j != numPoints; ++j){
 					DominanceRelation rel = dominance(points[i], points[j]);
 					if (rel == LHS_DOMINATES_RHS) {
-						BOOST_CHECK(ranks1[i] < ranks1[j]);
+						BOOST_CHECK_LT(ranks1[i], ranks1[j]);
 					} else if (rel == RHS_DOMINATES_LHS) {
-						BOOST_CHECK(ranks1[i] > ranks1[j]);
+						BOOST_CHECK_GT(ranks1[i], ranks1[j]);
 					}
 					if (ranks1[i] == ranks1[j]) {
 						BOOST_CHECK(rel == INCOMPARABLE || rel == EQUIVALENT);
