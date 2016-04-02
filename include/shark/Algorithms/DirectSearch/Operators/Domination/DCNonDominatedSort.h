@@ -29,7 +29,6 @@
 #define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_DOMINATION_DCNONDOMINATEDSORT_H
 
 #include <shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h>
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/LinAlg/Base.h>
 #include <vector>
 #include <list>
@@ -52,7 +51,7 @@ namespace shark {
 /// 
 /// The algorithm is described in:
 /// Generalizing the Improved Run-Time Complexity Algorithm for Non-Dominated Sorting.
-/// Félix-Antoine Fortin, Simon Grenier, and Marc Parizeau,
+/// Felix-Antoine Fortin, Simon Grenier, and Marc Parizeau,
 /// Proceedings Genetic and Evolutionary Computation Conference (GECCO), pp. 615-622, 2013.
 ///
 /// The algorithm is based on an earlier publication by Jensen, 2003. Its runtime
@@ -67,43 +66,38 @@ namespace shark {
 /// The same applies to the reference implementation in the DEAP library (at the time
 /// of writing, March 2016).
 ///
-template <class Extractor>
 class BaseDCNonDominatedSort
 {
 private:
 	struct Point
 	{
-		Point()   // needed for std::set
-		: obj(nullptr)
-		, frt(1)
-		{ }
+		Point(): frt(1){}
 
 		Point(RealVector const& objvec)
-		: obj(&objvec[0])
+		: obj(objvec.storage())
 		, frt(1)
-		{ }
-
-		const double* obj;  // objective vector
-		std::size_t frt;    // front index (1-based)
-	};
-
-	struct LexicographicOrder
-	{
-		LexicographicOrder(std::size_t m_)
-		: m(m_)
-		{ }
-
-		bool operator () (Point const& lhs, Point const& rhs) const
-		{
-			for (std::size_t i=0; i<m; i++)
+		, m_size(objvec.size())
+		{}
+		
+		bool operator<(Point const& rhs) const{//for lexicographic sorting
+			for (std::size_t i=0; i<m_size; i++)
 			{
-				if (lhs.obj[i] < rhs.obj[i]) return true;
-				if (lhs.obj[i] > rhs.obj[i]) return false;
+				if (obj[i] < rhs.obj[i]) return true;
+				if (obj[i] > rhs.obj[i]) return false;
 			}
 			return false;
 		}
+		bool operator==(Point const& rhs) const{//for std::unique
+			for (std::size_t i=0; i<m_size; i++)
+			{
+				if (obj[i] != rhs.obj[i]) return false;
+			}
+			return true;
+		}
 
-		std::size_t m;
+		std::size_t frt;    // front index (1-based)
+		double const* obj;
+		std::size_t m_size;
 	};
 
 	typedef std::vector<Point*> ContainerType;
@@ -117,63 +111,41 @@ public:
 	/// Afterwards every individual is assigned a rank by pop[i].rank() = frontNumber.
 	/// The front of dominating points has the value 1.
 	///
-	/// \param pop [in,out] Population to subdivide into fronts of non-dominated individuals.
-	///
-	template<typename PopulationType>
-	void operator () (PopulationType& pop)
+	template<typename PointRange, typename RankRange>
+	void operator () (PointRange const& pointRange, RankRange& rankRange)
 	{
-		Extractor e;
-		std::size_t m = e(pop[0]).size();
-		LexicographicOrder comp(m);
-
+		SIZE_CHECK(pointRange.size() == rankRange.size());
+		std::size_t m = pointRange[0].size();
 		// prepare set of unique objective vectors
-		std::set<Point, LexicographicOrder> unique(comp);
-		for (auto const& ind : pop) unique.insert(Point(e(ind)));
-
-		// unroll the set into a vector
-		std::vector<Point> points(unique.size());
-		ContainerType S(unique.size());
-		std::size_t i=0;
-		for (auto it=unique.begin(); it != unique.end(); ++it, i++)
+		std::vector<Point> points(pointRange.size());
+		std::transform(pointRange.begin(),pointRange.end(),points.begin(),[](RealVector const& point){
+			return Point(point);
+		});
+		std::sort(points.begin(),points.end());
+		points.erase(std::unique(points.begin(),points.end()),points.end());
+		ContainerType S(points.size());
+		for (std::size_t i = 0; i != points.size(); ++i)
 		{
-			points[i] = *it;
 			S[i] = &points[i];
 		}
 
 		// call recursive algorithm
-		ndHelperA(S, m);
+		ndHelperA(S,m);
 
 		// assign ranks to individuals
-		for (auto& ind : pop)
+		for (std::size_t i = 0; i != pointRange.size(); ++i)
 		{
-			RealVector obj = e(ind);
-			auto it = std::lower_bound(points.begin(), points.end(), Point(obj), comp);
+			auto it = std::lower_bound(points.begin(), points.end(), Point(pointRange[i]));
 			SHARK_ASSERT(it != points.end());
-			ind.rank() = it->frt;
+			rankRange[i] = it->frt;
 		}
 	}
 
 private:
 	// Dominance relation restricted to the first k components of the objective vector.
-	static DominanceRelation dominance(const Point* lhs, const Point* rhs, std::size_t k)
+	static DominanceRelation dominance(Point const* lhs, Point const* rhs, std::size_t k)
 	{
-		std::size_t l = 0, r = 0;
-		for (std::size_t i=0; i<k; i++)
-		{
-			if (lhs->obj[i] < rhs->obj[i]) l++;
-			else if (lhs->obj[i] > rhs->obj[i]) r++;
-		}
-
-		if (l > 0)
-		{
-			if (r > 0) return INCOMPARABLE;
-			else return LHS_DOMINATES_RHS;
-		}
-		else
-		{
-			if (r > 0) return RHS_DOMINATES_LHS;
-			else return EQUIVALENT;
-		}
+		return shark::dominance(blas::adapt_vector(k,lhs->obj),blas::adapt_vector(k,rhs->obj));
 	}
 
 	// figure 2 in the paper
@@ -489,9 +461,11 @@ private:
 };
 
 
-/// \brief divide-and-conquer non-dominated sorting based on the fitness.
-typedef BaseDCNonDominatedSort< FitnessExtractor > DCNonDominatedSort;
+template<class PointRange, class RankRange>
+void dcNonDominatedSort(PointRange const& points, RankRange& ranks) {
+	BaseDCNonDominatedSort sorter;
+	sorter(points,ranks);
+}
 
-
-};  // namespace shark
+}  // namespace shark
 #endif

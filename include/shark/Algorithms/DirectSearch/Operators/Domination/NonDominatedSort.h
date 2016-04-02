@@ -34,49 +34,37 @@
 
 namespace shark {
 
-
-///
-/// \brief Wrapper for non-dominated sorting algorithms.
+/// \brief Frontend for non-dominated sorting algorithms.
 ///
 /// Assembles subsets/fronts of mutually non-dominated individuals.
 /// Afterwards every individual is assigned a rank by pop[i].rank() = frontIndex.
 /// The front of non-dominated points has the value 1.
 ///
-template <class Extractor>
-class BaseNonDominatedSort
-{
-public:
-	/// \brief Executes a non-dominated sorting algorithm.
-	///
-	/// Afterwards every individual is assigned a rank by pop[i].rank() = frontNumber.
-	/// The front of dominating points has the value 1.
-	///
-	/// \param pop [in,out] Population to subdivide into fronts of non-dominated individuals.
-	///
-	template<typename PopulationType>
-	void operator () (PopulationType& pop)
+/// Depending on dimensionality m and number of points n, either the 
+/// fastNonDominatedSort algorithm with O(n^2 m) or the dcNonDominatedSort
+/// alforithm with complexity O(n log(n)^m) is called.
+template<class PointRange, class RankRange>
+void nonDominatedSort(PointRange const& points, RankRange& ranks) {
+	SIZE_CHECK(points.size() == ranks.size());
+	double n = points.size();
+	if(n == 0) return;
+	double m = points[0].size();
+	// heuristic switching strategy based on simple benchmarks
+	if (m == 2 || n > 5000 || std::log(n) / log(3.0) < m + 1.0)
 	{
-		Extractor e;
-		double n = pop.size();
-		double m = e(pop[0]).size();
-		// heuristic switching strategy based on simple benchmarks
-		if (m == 2 || n > 5000 || std::log(n) / log(3.0) < m + 1.0)
-		{
-			BaseDCNonDominatedSort<Extractor> sorter;
-			sorter(pop);
-		}
-		else
-		{
-			BaseFastNonDominatedSort<Extractor> sorter;
-			sorter(pop);
-		}
+		dcNonDominatedSort(points,ranks);
 	}
-};
+	else
+	{
+		fastNonDominatedSort(points,ranks);
+	}
+}
+
+template<class PointRange, class RankRange>
+void nonDominatedSort(PointRange const& points, RankRange&& ranks) {
+	nonDominatedSort(points,ranks);
+}
 
 
-/// \brief Non-dominated sorting based on the fitness.
-typedef BaseNonDominatedSort< FitnessExtractor > NonDominatedSort;
-
-
-};  // namespace shark
+} // namespace shark
 #endif

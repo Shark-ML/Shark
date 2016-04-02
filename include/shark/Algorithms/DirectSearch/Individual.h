@@ -31,6 +31,7 @@
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_TYPED_INDIVIDUAL_H
 
 #include <shark/LinAlg/Base.h>
+#include <boost/range/adaptor/transformed.hpp>
 
 namespace shark {
 
@@ -229,6 +230,82 @@ protected:
 	FitnessType m_penalizedFitness; ///< Penalized fitness of the individual.
 	FitnessType m_unpenalizedFitness; ///< Unpenalized fitness of the individual.
 };
+
+//TODO: pre C++14, this is too hard to implement using lambdas only.
+namespace detail{
+	struct IndividualPenalizedFitnessFunctor{
+		template<class Individual>
+		typename Individual::FitnessType& operator()(Individual& ind)const{
+			return ind.penalizedFitness();
+		}
+		template<class Individual>
+		typename Individual::FitnessType const& operator()(Individual const& ind)const{
+			return ind.penalizedFitness();
+		}
+	};
+	
+	struct IndividualUnpenalizedFitnessFunctor{
+		template<class Individual>
+		typename Individual::FitnessType& operator()(Individual& ind)const{
+			return ind.unpenalizedFitness();
+		}
+		template<class Individual>
+		typename Individual::FitnessType const& operator()(Individual const& ind)const{
+			return ind.unpenalizedFitness();
+		}
+	};
+	
+	struct IndividualSearchPointFunctor{
+		template<class Individual>
+		typename Individual::SearchPointType& operator()(Individual& ind)const{
+			return ind.unpenalizedFitness();
+		}
+		template<class Individual>
+		typename Individual::SearchPointType const& operator()(Individual const& ind)const{
+			return ind.searchPoint();
+		}
+	};
+	
+	struct IndividualRankFunctor{
+		template<class Individual>
+		unsigned int& operator()(Individual& ind)const{
+			return ind.rank();
+		}
+		template<class Individual>
+		unsigned int operator()(Individual const& ind)const{
+			return ind.rank();
+		}
+	};
+}
+
+template<class IndividualRange>
+auto penalizedFitness(IndividualRange& range) -> decltype(
+		boost::adaptors::transform(range,detail::IndividualPenalizedFitnessFunctor())
+){
+	return boost::adaptors::transform(range,detail::IndividualPenalizedFitnessFunctor());
+}
+
+template<class IndividualRange>
+auto unpenalizedFitness(IndividualRange& range) -> decltype(
+		boost::adaptors::transform(range,detail::IndividualUnpenalizedFitnessFunctor())
+){
+	return boost::adaptors::transform(range,detail::IndividualUnpenalizedFitnessFunctor());
+}
+
+template<class IndividualRange>
+auto ranks(IndividualRange& range) -> decltype(
+		boost::adaptors::transform(range,detail::IndividualRankFunctor())
+){
+	return boost::adaptors::transform(range,detail::IndividualRankFunctor());
+}
+
+
+template<class IndividualRange>
+auto searchPoint(IndividualRange& range) -> decltype(
+		boost::adaptors::transform(range,detail::IndividualSearchPointFunctor())
+){
+	return boost::adaptors::transform(range,detail::IndividualSearchPointFunctor());
+}
 
 }
 #endif

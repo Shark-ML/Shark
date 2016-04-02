@@ -1,3 +1,4 @@
+
 #define BOOST_TEST_MODULE DirectSearch_IndicatorBasedSelection
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
@@ -31,8 +32,7 @@ BOOST_AUTO_TEST_CASE( IndicatorBasedSelection_Test ) {
 		
 		//store copy and compute ranks
 		std::vector<Individual<RealVector,RealVector> > popCopy = population;
-		FastNonDominatedSort sorter;
-		sorter(popCopy);
+		nonDominatedSort(penalizedFitness(popCopy),ranks(popCopy));
 		
 		//store ranks in container and sort
 		std::vector<unsigned int> ranks(numPoints);

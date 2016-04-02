@@ -55,8 +55,8 @@ inline DominanceRelation dominance(VectorTypeA const& lhs, VectorTypeB const& rh
 	std::size_t l = 0, r = 0;
 	for (std::size_t i=0; i<lhs.size(); i++)
 	{
-		if (lhs[i] < rhs[i]) l++;
-		else if (lhs[i] > rhs[i]) r++;
+		if (lhs(i) < rhs(i)) l++;
+		else if (lhs(i) > rhs(i)) r++;
 	}
 
 	if (l > 0)

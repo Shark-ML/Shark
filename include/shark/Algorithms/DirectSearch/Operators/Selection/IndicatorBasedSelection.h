@@ -109,8 +109,7 @@ struct IndicatorBasedSelection {
 		if(population.empty()) return;
 		
 		//perform a nondominated sort to assign the rank to every element
-		NonDominatedSort nonDomSort;
-		nonDomSort(population);
+		nonDominatedSort(penalizedFitness(population), ranks(population));
 
 		typedef std::vector< view_reference<typename PopulationType::value_type > > View;
 
