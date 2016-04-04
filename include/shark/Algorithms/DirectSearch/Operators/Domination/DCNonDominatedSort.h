@@ -95,8 +95,9 @@ private:
 			return true;
 		}
 
-		std::size_t frt;    // front index (1-based)
+		
 		double const* obj;
+		std::size_t frt;    // front index (1-based)
 		std::size_t m_size;
 	};
 

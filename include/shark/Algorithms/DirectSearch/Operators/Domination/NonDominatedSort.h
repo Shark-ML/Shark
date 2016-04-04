@@ -66,7 +66,8 @@ void nonDominatedSort(PointRange const& points, RankRange& ranks) {
 template<class PointRange, class RankRange>
 //~ void nonDominatedSort(PointRange const& points, RankRange&& ranks) {
 void nonDominatedSort(PointRange const& points, RankRange const& ranks) {
-	nonDominatedSort(points,ranks);
+	RankRange ranksCopy=ranks;
+	nonDominatedSort(points,ranksCopy);
 }
 
 
