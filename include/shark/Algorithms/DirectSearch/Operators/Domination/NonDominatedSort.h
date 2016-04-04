@@ -60,8 +60,12 @@ void nonDominatedSort(PointRange const& points, RankRange& ranks) {
 	}
 }
 
+//version that takes temporary ranges as second argument.
+//this allows nonDominatedSort(points,ranks(population) as the second argument will return a temporary proxy
+//we would like to use r-value references here but gcc 4.8 appears to be buggy in that regard
 template<class PointRange, class RankRange>
-void nonDominatedSort(PointRange const& points, RankRange&& ranks) {
+//~ void nonDominatedSort(PointRange const& points, RankRange&& ranks) {
+void nonDominatedSort(PointRange const& points, RankRange const& ranks) {
 	nonDominatedSort(points,ranks);
 }
 
