@@ -83,7 +83,7 @@ struct HypervolumeCalculator {
 	template<typename Points, typename VectorType>
 	double operator()( Points const& points, VectorType const& refPoint){
 		SIZE_CHECK( points.begin()->size() == refPoint.size() );
-		typedef typename Points::const_reference Point;
+		typedef decltype(points[0]) Point;
 		std::size_t numObjectives = refPoint.size();
 		auto logTransform = [](Point const& x){return log(x);};
 		if(numObjectives == 2){

@@ -52,7 +52,8 @@ double hypervolume( Solution const& solution){
 	RealVector referencePoint(2,11);
 	//instance of the hypervolume calculator
 	HypervolumeCalculator hypervolume;
-	return hypervolume(PointExtractor(),solution,referencePoint);
+	auto toPoints = [](typename Solution::const_reference point){return point.value;};
+	return hypervolume(boost::adaptors::transform(solution,toPoints),referencePoint);
 }
 //###end<hypervolume>
 
