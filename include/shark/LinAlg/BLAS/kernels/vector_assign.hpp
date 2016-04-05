@@ -333,7 +333,6 @@ void assign_sparse(
 	typedef typename V::value_type value_type;
 	typedef typename V::size_type size_type;
 	value_type zero = value_type();
-	size_type size = v().size();
 
 	typename V::iterator it = v().begin();
 	typename E::const_iterator ite = e().begin();
