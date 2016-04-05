@@ -126,7 +126,7 @@ struct HypervolumeApproximator {
 				candidate = points.begin() + static_cast<std::size_t>(noPoints*Rng::uni());
 				samples_sofar++;
 				DominanceRelation rel = dominance(e(*candidate), rndpoint);
-				if (rel == RHS_DOMINATES_LHS || rel == EQUIVALENT) break;
+				if (rel == LHS_DOMINATES_RHS || rel == EQUIVALENT) break;
 			} 
 
 			round++;
