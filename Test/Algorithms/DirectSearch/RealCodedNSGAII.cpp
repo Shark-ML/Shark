@@ -28,12 +28,10 @@ double testObjectiveFunctionMOOHelper(
 	
 	for(std::size_t i = 0; i != iterations; ++i){
 		realCodedNSGAII.step(f);
-		//~ if(i%(iterations/100)==0)
-			//~ std::clog<<"\r"<<i<<" "<<std::flush;
 	}
 	BOOST_REQUIRE_EQUAL(realCodedNSGAII.solution().size(), mu);
 	HypervolumeCalculator hyp;
-	double volume = hyp(PointExtractor(),realCodedNSGAII.solution(),reference);
+	double volume = hyp(boost::adaptors::transform(realCodedNSGAII.solution(),PointExtractor()),reference);
 	std::cout<<"\r"<<f.name()<<": "<<volume<<std::endl;
 	return volume;
 //	BOOST_CHECK_SMALL(volume - targetVolume, 5.e-3);

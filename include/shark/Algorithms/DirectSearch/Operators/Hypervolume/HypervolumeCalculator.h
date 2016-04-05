@@ -35,6 +35,7 @@
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator3D.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorMD.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeApproximator.h>
+#include <boost/range/adaptor/transformed.hpp>
 
 namespace shark {
 /// \brief Frontend for hypervolume calculation algorithms in m dimensions.
@@ -77,45 +78,56 @@ struct HypervolumeCalculator {
 	}
 	
 	/// \brief Executes the algorithm.
-	/// \param [in] extractor Function object \f$f\f$to "project" elements of the points to \f$\mathbb{R}^n\f$.
-	/// \param [in] points The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: f( s' ) \preceq f( s ) \f$
+	/// \param [in] points The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: s' \preceq s \f$
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^n\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
-	template<typename Points,typename Extractor, typename VectorType>
-	double operator()( Extractor const& extractor, Points const& points, VectorType const& refPoint){
-		SIZE_CHECK( extractor(*points.begin()).size() == refPoint.size() );
+	template<typename Points, typename VectorType>
+	double operator()( Points const& points, VectorType const& refPoint){
+		SIZE_CHECK( points.begin()->size() == refPoint.size() );
 		typedef typename Points::const_reference Point;
 		std::size_t numObjectives = refPoint.size();
+		auto logTransform = [](Point const& x){return log(x);};
 		if(numObjectives == 2){
 			HypervolumeCalculator2D algorithm;
 			if(m_useLogHyp){
-				return algorithm([&](Point x){return log(extractor(x));}, points, refPoint);
+				return algorithm(boost::adaptors::transform(points,logTransform), refPoint);
 			}else{
-				return algorithm(extractor, points, refPoint);
+				return algorithm(points, refPoint);
 			}
 		}else if(numObjectives == 3){
 			HypervolumeCalculator3D algorithm;
 			if(m_useLogHyp){
-				return algorithm([&](Point x){return log(extractor(x));}, points, refPoint);
+				return algorithm(boost::adaptors::transform(points,logTransform), refPoint);
 			}else{
-				return algorithm(extractor, points, refPoint);
+				return algorithm(points, refPoint);
 			}
 		}else if(m_useApproximation){
 			if(m_useLogHyp){
-				return m_approximationAlgorithm([&](Point x){return log(extractor(x));}, points, refPoint);
+				return m_approximationAlgorithm(boost::adaptors::transform(points,logTransform), refPoint);
 			}else{
-				return m_approximationAlgorithm(extractor, points, refPoint);
+				return m_approximationAlgorithm(points, refPoint);
 			}
 		}else{
 			HypervolumeCalculatorMD algorithm;
 			if(m_useLogHyp){
-				return algorithm([&](Point x){return log(extractor(x));}, points, refPoint);
+				return algorithm(boost::adaptors::transform(points,logTransform), refPoint);
 			}else{
-				return algorithm(extractor, points, refPoint);
+				return algorithm(points, refPoint);
 			}
 		}
 	}
 
 private:
+	//~ struct LogTransform{
+		//~ template<class Input>
+		//~ blas::vector_unary<Input, blas::scalar_log<typename Input::value_type> > operator()(Input const& point) const{
+			//~ return log(point);
+		//~ }
+		
+		//~ template<class Input>
+		//~ Input const& operator()(Input const& point)const{
+			//~ return point;
+		//~ }
+	//~ };
 	bool m_useLogHyp;
 	bool m_useApproximation;
 	HypervolumeApproximator m_approximationAlgorithm;

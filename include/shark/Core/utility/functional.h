@@ -140,5 +140,43 @@ typename boost::range_iterator<Range>::type partitionEqually(Range const& rangeA
 	Range adaptorCopy(rangeAdaptor);
 	return partitionEqually(adaptorCopy);
 }
+
+//~ namespace detail{
+//~ template<typename F>
+//~ class LambdaWrapper
+//~ {
+//~ public:
+    //~ LambdaWrapper(){}
+    //~ LambdaWrapper(F const& source): m_impl(source){}
+	    
+    //~ template<typename Arg>
+    //~ auto operator()(Arg const& arg)-> decltype((*m_impl)(arg)) const
+    //~ {
+        //~ SHARK_ASSERT(m_impl);
+        //~ return (*m_impl)(arg);
+    //~ }
+    //~ template<typename Arg>
+    //~ auto operator()(Arg& arg)-> decltype((*m_impl)(arg)) const
+    //~ {
+        //~ SHARK_ASSERT(m_impl);
+        //~ return (*m_impl)(arg);
+    //~ }
+//~ private:
+    //~ boost::optional<F> m_impl;
+//~ };
+
+//~ template<typename F, typename R>
+//~ struct default_constructible_unary_fn_gen
+//~ {
+    //~ typedef typename boost::mpl::if_<
+        //~ boost::has_trivial_default_constructor<F>,
+        //~ F,
+        //~ LambdaWrapper<F,R>
+    //~ >::type type;
+//~ };
+//~ }
+
+//~ template<class Range>
+//~ auto transform_range
 }
 #endif

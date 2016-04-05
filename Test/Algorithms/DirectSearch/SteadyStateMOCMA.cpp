@@ -32,11 +32,10 @@ void testObjectiveFunctionMOO(
 	
 	for(std::size_t i = 0; i != iterations; ++i){
 		mocma.step(f);
-		//~ std::clog<<"\r"<<i<<" "<<std::flush;
 	}
 	BOOST_REQUIRE_EQUAL(mocma.solution().size(), mu);
 	HypervolumeCalculator hyp;
-	double volume = hyp(PointExtractor(),mocma.solution(),reference);
+	double volume = hyp(boost::adaptors::transform(mocma.solution(),PointExtractor()),reference);
 	std::cout<<"\r"<<f.name()<<": "<<volume<<std::endl;
 	BOOST_CHECK_SMALL(volume - targetVolume, 5.e-3);
 }
