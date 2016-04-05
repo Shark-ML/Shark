@@ -21,13 +21,13 @@ BOOST_AUTO_TEST_CASE( ParetoDominance_RelationsTest ) {
 	RealVector p3(3);  // incomparable to p0
 	p3[0] = -2; p3[1] = 0; p3[2] = 2;
 
-	BOOST_CHECK(dominance(p0, p0) == EQUIVALENT);
-	BOOST_CHECK(dominance(p0, p1) == LHS_DOMINATES_RHS);
-	BOOST_CHECK(dominance(p0, p2) == LHS_DOMINATES_RHS);
-	BOOST_CHECK(dominance(p1, p0) == RHS_DOMINATES_LHS);
-	BOOST_CHECK(dominance(p2, p0) == RHS_DOMINATES_LHS);
-	BOOST_CHECK(dominance(p0, p3) == INCOMPARABLE);
-	BOOST_CHECK(dominance(p3, p0) == INCOMPARABLE);
+	BOOST_CHECK_EQUAL(dominance(p0, p0), EQUIVALENT);
+	BOOST_CHECK_EQUAL(dominance(p0, p1), LHS_DOMINATES_RHS);
+	BOOST_CHECK_EQUAL(dominance(p0, p2), LHS_DOMINATES_RHS);
+	BOOST_CHECK_EQUAL(dominance(p1, p0), RHS_DOMINATES_LHS);
+	BOOST_CHECK_EQUAL(dominance(p2, p0), RHS_DOMINATES_LHS);
+	BOOST_CHECK_EQUAL(dominance(p0, p3), INCOMPARABLE);
+	BOOST_CHECK_EQUAL(dominance(p3, p0), INCOMPARABLE);
 }
 
 // check the Pareto relation on random sets of objective vectors
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( ParetoDominance_Random_Test ) {
 					{
 						bool ne = false;
 						for(std::size_t k = 0; k != numDims; ++k) {
-							BOOST_CHECK(population[i][k] <= population[j][k]);
+							BOOST_CHECK_LE(population[i][k], population[j][k]);
 							ne = ne || (population[i][k] < population[j][k]);
 						}
 						BOOST_CHECK(ne);
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE( ParetoDominance_Random_Test ) {
 					{
 						bool ne = false;
 						for(std::size_t k = 0; k != numDims; ++k) {
-							BOOST_CHECK(population[i][k] >= population[j][k]);
+							BOOST_CHECK_GE(population[i][k], population[j][k]);
 							ne = ne || (population[i][k] > population[j][k]);
 						}
 						BOOST_CHECK(ne);
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( ParetoDominance_Random_Test ) {
 					case EQUIVALENT:
 					{
 						for(std::size_t k = 0; k != numDims; ++k) {
-							BOOST_CHECK(population[i][k] == population[j][k]);
+							BOOST_CHECK_EQUAL(population[i][k], population[j][k]);
 						}
 						break;
 					}
