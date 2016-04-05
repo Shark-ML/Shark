@@ -33,7 +33,7 @@
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_SELECTION_INDICATOR_BASED_SELECTION_H
 
 #include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
-#include <shark/Algorithms/DirectSearch/FastNonDominatedSort.h>
+#include <shark/Algorithms/DirectSearch/Operators/Domination/NonDominatedSort.h>
 
 #include <map>
 #include <vector>
@@ -109,9 +109,8 @@ struct IndicatorBasedSelection {
 		if(population.empty()) return;
 		
 		//perform a nondominated sort to assign the rank to every element
-		FastNonDominatedSort nonDomSort;
-		nonDomSort(population);
-		
+		nonDominatedSort(penalizedFitness(population), ranks(population));
+
 		typedef std::vector< view_reference<typename PopulationType::value_type > > View;
 
 		unsigned int maxRank = 0;
