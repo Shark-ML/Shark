@@ -41,11 +41,11 @@
 namespace shark{
 
 /*!
- *  \brief Error measure for classication tasks that can be used
+ *  \brief Error measure for classification tasks that can be used
  *         as the objective function for training.
  *
  *  If your model should return a vector whose components reflect the
- *  logarithmic conditonal probabilities of class membership given any input vector
+ *  logarithmic conditional probabilities of class membership given any input vector
  *  'CrossEntropy' is the adequate error measure for model-training.
  *  For \em C>1 classes the loss function is defined as
  *  \f[
@@ -155,7 +155,7 @@ public:
 				
 				//calculate the log norm in a numerically stable way
 				//we subtract the maximum prior to exponentiation to 
-				//ensure that the exponntiation result will still fit in double
+				//ensure that the exponentiation result will still fit in double
 				//this does not change the result as the values get normalized by
 				//their sum and thus the correction term cancels out.
 				double maximum = max(row(prediction,i));
@@ -192,7 +192,7 @@ public:
 			RANGE_CHECK ( target < prediction.size() );
 			//calculate the log norm in a numerically stable way
 			//we subtract the maximum prior to exponentiation to 
-			//ensure that the exponntiation result will still fit in double
+			//ensure that the exponentiation result will still fit in double
 			//this does not change the result as the values get normalized by
 			//their sum and thus the correction term cancels out.
 			double maximum = max(prediction);
