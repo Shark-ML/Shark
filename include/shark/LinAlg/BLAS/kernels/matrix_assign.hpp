@@ -599,10 +599,10 @@ void assign(
 	typedef typename M::row_iterator MIter;
 	typedef typename E::const_row_iterator EIter;
 	typedef F<typename MIter::reference,typename  EIter::value_type> Function;
-	//there is nothing we can do, if F does not leave the non-stored elements 0
-	//this is the case for all current aissgnment functors, but you never know :)
-	BOOST_STATIC_ASSERT( Function::left_zero_identity || Function::right_zero_identity);
-	
+	//there is nothing we can do if F does not leave the non-stored elements 0
+	//this is the case for all current assignment functors, but you never know :)
+	static_assert(Function::left_zero_identity || Function::right_zero_identity, "cannot handle the given packed matrix assignment function");
+
 	Function f;
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		MIter mpos = m().row_begin(i);
@@ -626,7 +626,7 @@ void assign(
 	typedef typename E::const_row_iterator EIter;
 	typedef F<typename MIter::reference,typename EIter::value_type> Function;
 	//there is nothing we can do, if F does not leave the non-stored elements 0
-	BOOST_STATIC_ASSERT( Function::left_zero_identity);
+	static_assert(Function::left_zero_identity, "cannot handle the given packed matrix assignment function");
 	
 	Function f;
 	for(std::size_t i = 0; i != m().size1(); ++i){

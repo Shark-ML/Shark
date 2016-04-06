@@ -43,7 +43,7 @@
  * \brief Bails out the compiler if the boost version is < 1.44.
  */
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-    BOOST_STATIC_ASSERT( BOOST_VERSION >= 104400 );
+    static_assert(BOOST_VERSION >= 104400 , "Shark required boost version 1.44 or higher");
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include <boost/assign.hpp>
 #include <boost/config.hpp>
