@@ -122,19 +122,25 @@ struct Fixture {
 };
 
 
-//creates points on a front defined by points x in [0,1]^d with norm(x,p)=1
+//creates points on a front defined by points x in [0,1]^d
 // 1 is a linear front, 2 a convex front, 1/2 a concave front
 //reference point is 1^d
-
 std::vector<RealVector> createRandomFront(std::size_t numPoints, std::size_t numObj, double p){
-	std::vector<RealVector> points;
-	for (unsigned int i=0; i<numPoints; i++)
-	{
-		RealVector point(numObj);
-		for (unsigned int j=0; j<numObj; j++)
-			point[j] = Rng::uni();
-		point /= std::pow(sum(pow(point,p)),1/p);
-		points.push_back(point);
+	std::vector<RealVector> points(numPoints);
+	for (std::size_t i = 0; i != numPoints; ++i) {
+		points[i].resize(numObj);
+		for (std::size_t j = 0; j != numObj - 1; ++j) {
+			points[i][j] = Rng::uni(0.0, 1.0);
+		}
+		if (numObj > 2 && Rng::coinToss())
+		{
+			// make sure that some objective values coincide
+			std::size_t jj = Rng::discrete(0, numObj - 2);
+			points[i][jj] = std::round(4.0 * points[i][jj]) / 4.0;
+		}
+		double sum = 0.0;
+		for (std::size_t j = 0; j != numObj - 1; ++j) sum += points[i][j];
+		points[i][numObj - 1] = pow(1.0 - sum / (numObj - 1.0), p);
 	}
 	return points;
 }
