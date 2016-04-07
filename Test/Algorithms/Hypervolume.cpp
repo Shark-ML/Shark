@@ -4,7 +4,6 @@
 
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/LeastContributorApproximator.h>
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Core/utility/functional.h>
 
 #include <shark/Rng/GlobalRng.h>
@@ -123,30 +122,35 @@ struct Fixture {
 };
 
 
-//creates points on a front defined by points x in [0,1]^d with norm(x,p)=1
+//creates points on a front defined by points x in [0,1]^d
 // 1 is a linear front, 2 a convex front, 1/2 a concave front
 //reference point is 1^d
-
 std::vector<RealVector> createRandomFront(std::size_t numPoints, std::size_t numObj, double p){
-	std::vector<RealVector> points;
-	for (unsigned int i=0; i<numPoints; i++)
-	{
-		RealVector point(numObj);
-		for (unsigned int j=0; j<numObj; j++)
-			point[j] = Rng::uni();
-		point /= std::pow(sum(pow(point,p)),1/p);
-		points.push_back(point);
+	std::vector<RealVector> points(numPoints);
+	for (std::size_t i = 0; i != numPoints; ++i) {
+		points[i].resize(numObj);
+		for (std::size_t j = 0; j != numObj - 1; ++j) {
+			points[i][j] = Rng::uni(0.0, 1.0);
+		}
+		if (numObj > 2 && Rng::coinToss())
+		{
+			// make sure that some objective values coincide
+			std::size_t jj = Rng::discrete(0, numObj - 2);
+			points[i][jj] = std::round(4.0 * points[i][jj]) / 4.0;
+		}
+		double sum = 0.0;
+		for (std::size_t j = 0; j != numObj - 1; ++j) sum += points[i][j];
+		points[i][numObj - 1] = pow(1.0 - sum / (numObj - 1.0), p);
 	}
 	return points;
 }
 template<class Algorithm>
 void testRandomFrontNormP(Algorithm algorithm, std::size_t numTests, std::size_t numPoints, std::size_t numObj, double p){
-	IdentityFitnessExtractor ife;
 	RealVector reference(numObj,1.0);
 	for(std::size_t t = 0; t != numTests;++t){
 		std::vector<RealVector> points = createRandomFront(numPoints,numObj,p);
 
-		double hv1 = algorithm(ife, points, reference);
+		double hv1 = algorithm(points, reference);
 		double hv2 = inclusionExclusion(points, reference);
 		BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
 	}
@@ -154,13 +158,12 @@ void testRandomFrontNormP(Algorithm algorithm, std::size_t numTests, std::size_t
 
 template<class Algorithm>
 void testRandomFrontNormPApprox(std::size_t evals, double epsilon, Algorithm algorithm, std::size_t numTests, std::size_t numPoints, std::size_t numObj, double p){
-	IdentityFitnessExtractor ife;
 	RealVector reference(numObj,1.0);
 	for(std::size_t t = 0; t != numTests;++t){
 		std::vector<RealVector> points = createRandomFront(numPoints,numObj,p);
 		std::vector<double> results(evals);
 		for(std::size_t e = 0; e != evals; e++)
-			results[e] = algorithm(ife, points, reference);
+			results[e] = algorithm(points, reference);
 		double hv2 = inclusionExclusion(points, reference);
 		double hv1 = *median_element(results);
 		//check bounds
@@ -173,7 +176,6 @@ void testRandomFrontNormPApprox(std::size_t evals, double epsilon, Algorithm alg
 // scalable test with many equal objective values
 template<class Algorithm>
 void testEqualFront(Algorithm algorithm, std::size_t numTests, std::size_t numPoints, std::size_t numObj){
-	IdentityFitnessExtractor ife;
 	for(std::size_t t = 0; t != numTests;++t){
 		{
 			std::vector<RealVector> points;
@@ -186,7 +188,7 @@ void testEqualFront(Algorithm algorithm, std::size_t numTests, std::size_t numPo
 			}
 			RealVector reference(numObj, 1.0);
 
-			double hv1 = algorithm(ife, points, reference);
+			double hv1 = algorithm(points, reference);
 			double hv2 = inclusionExclusion(points, reference);
 			BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
 		}
@@ -201,7 +203,7 @@ void testEqualFront(Algorithm algorithm, std::size_t numTests, std::size_t numPo
 			}
 			RealVector reference(numObj, 1.0);
 
-			double hv1 = algorithm(ife, points, reference);
+			double hv1 = algorithm(points, reference);
 			double hv2 = inclusionExclusion(points, reference);
 			BOOST_CHECK_SMALL(hv1 - hv2, 1e-12);
 		}
@@ -218,8 +220,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume2D ) {
 	
 	
 	//test 1: computes the value of a reference front correctly
-	IdentityFitnessExtractor ife;
-	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), HV_TEST_SET_2D, 1E-5 );
+	BOOST_CHECK_CLOSE( hc( m_testSet2D, m_refPoint2D ), HV_TEST_SET_2D, 1E-5 );
 
 	// test with random fronts of different shapes
 	testRandomFrontNormP(hc, numTests, numPoints, 2, 1);
@@ -236,8 +237,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolume3D ) {
 	
 	
 	//test 1: computes the value of a reference front correctly
-	IdentityFitnessExtractor ife;
-	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), HV_TEST_SET_3D, 1E-5 );
+	BOOST_CHECK_CLOSE( hc( m_testSet3D, m_refPoint3D ), HV_TEST_SET_3D, 1E-5 );
 
 	// test with random fronts of different shapes
 	testRandomFrontNormP(hc, numTests, numPoints, 3, 1);
@@ -254,8 +254,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeMD ) {
 	
 	
 	//test 1: computes the value of a reference front correctly
-	IdentityFitnessExtractor ife;
-	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), HV_TEST_SET_3D, 1E-5 );
+	BOOST_CHECK_CLOSE( hc( m_testSet3D, m_refPoint3D ), HV_TEST_SET_3D, 1E-5 );
 
 	// test with random fronts of different shapes
 	for(std::size_t numObj = 3; numObj < 5; ++numObj){
@@ -279,10 +278,9 @@ BOOST_AUTO_TEST_CASE( Algorithms_ExactHypervolumeMDApprox ) {
 	hc.delta() = 0.3;
 	
 	//test 1: computes the value of a reference front correctly
-	IdentityFitnessExtractor ife;
 	std::vector<double> results(evals);
 	for(std::size_t e = 0; e != evals; e++)
-		results[e] = hc( ife, m_testSet3D, m_refPoint3D );
+		results[e] = hc( m_testSet3D, m_refPoint3D );
 	double hv = *median_element(results);
 	//check bounds
 	BOOST_CHECK_LT( hv, (1+epsilon) * HV_TEST_SET_3D );
@@ -307,9 +305,8 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeCalculator) {
 	hc.useApproximation(false);
 	
 	//test 1: computes the value of a reference front correctly
-	IdentityFitnessExtractor ife;
-	BOOST_CHECK_CLOSE( hc( ife, m_testSet3D, m_refPoint3D ), HV_TEST_SET_3D, 1E-5 );
-	BOOST_CHECK_CLOSE( hc( ife, m_testSet2D, m_refPoint2D ), HV_TEST_SET_2D, 1E-5 );
+	BOOST_CHECK_CLOSE( hc( m_testSet3D, m_refPoint3D ), HV_TEST_SET_3D, 1E-5 );
+	BOOST_CHECK_CLOSE( hc( m_testSet2D, m_refPoint2D ), HV_TEST_SET_2D, 1E-5 );
 
 	// test with random fronts of different shapes
 	for(std::size_t numObj = 2; numObj < 5; ++numObj){

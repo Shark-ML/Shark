@@ -60,7 +60,7 @@ public:
 		
 		if(front.empty()) return 0;
 
-		return (m_hv( extractor, front, referencePoint) );
+		return (m_hv( boost::adaptors::transform(front, extractor), referencePoint) );
 	}
 
 	/**

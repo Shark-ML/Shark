@@ -1424,11 +1424,9 @@ public:
 	, m_stride1(expression().stride1())
 	, m_stride2(expression().stride2())
 	{
-		BOOST_STATIC_ASSERT((
-			boost::is_same<typename E::orientation,orientation>::value
-		));
+		static_assert(boost::is_same<typename E::orientation,orientation>::value, "matrix orientation mismatch");
 	}
-	
+
 	/// \brief Constructor of a vector proxy from a Dense MatrixExpression
 	///
 	/// Be aware that the expression must live longer than the proxy!
@@ -1441,9 +1439,7 @@ public:
 	, m_stride1(expression().stride1())
 	, m_stride2(expression().stride2())
 	{
-		BOOST_STATIC_ASSERT(
-			(boost::is_same<typename E::orientation,orientation>::value)
-		);
+		static_assert(boost::is_same<typename E::orientation,orientation>::value, "matrix orientation mismatch");
 	}
 		
 	/// \brief Constructor of a vector proxy from a block of memory

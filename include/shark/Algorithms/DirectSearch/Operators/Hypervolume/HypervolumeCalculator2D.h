@@ -45,21 +45,20 @@ namespace shark {
 struct HypervolumeCalculator2D {
 
 	/// \brief Executes the algorithm.
-	/// \param [in] extractor Function object \f$f\f$to "project" elements of the set to \f$\mathbb{R}^2\f$.
 	/// \param [in] points The set \f$S\f$ of points for which to compute the volume
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
-	template<typename Set,typename Extractor, typename VectorType >
-	double operator()( Extractor const& extractor, Set const& points, VectorType const& refPoint){
+	template<typename Set, typename VectorType >
+	double operator()( Set const& points, VectorType const& refPoint){
 		if(points.empty())
 			return 0;
-		SIZE_CHECK( extractor(*points.begin()).size() == 2 );
+		SIZE_CHECK( points.begin()->size() == 2 );
 		SIZE_CHECK( refPoint.size() == 2 );
 		
 		//copy set and order by first argument
 		std::vector<shark::KeyValuePair<double,double> > set(points.size());
 		for(std::size_t i = 0; i != points.size(); ++i){
-			set[i].key = extractor(points[i])[0];
-			set[i].value = extractor(points[i])[1];
+			set[i].key = points[i][0];
+			set[i].value = points[i][1];
 		}
 		std::sort( set.begin(), set.end());
 

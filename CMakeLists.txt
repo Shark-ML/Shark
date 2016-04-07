@@ -133,6 +133,7 @@ set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
 set(Boost_USE_MULTITHREADED ON)
 add_definitions(-DBOOST_PARAMETER_MAX_ARITY=15)
 add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
+add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
 
 # Should we link the boost test dynamically
 if(NOT Boost_USE_STATIC_LIBS)

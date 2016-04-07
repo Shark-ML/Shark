@@ -48,19 +48,18 @@ namespace shark {
 struct HypervolumeCalculatorMD {
 
 	/// \brief Executes the algorithm.
-	/// \param [in] extractor Function object \f$f\f$to "project" elements of the set to \f$\mathbb{R}^n\f$.
-	/// \param [in] set The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: f( s' ) \preceq f( s ) \f$
+	/// \param [in] set The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: s' \preceq s \f$
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^n\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
-	template<typename Set,typename Extractor, typename VectorType >
-	double operator()( Extractor const& extractor, Set const& points, VectorType const& refPoint){
+	template<typename Set, typename VectorType >
+	double operator()( Set const& points, VectorType const& refPoint){
 		if(points.empty())
 			return 0;
-		SIZE_CHECK( extractor(*points.begin()).size() == refPoint.size() );
+		SIZE_CHECK( points.begin()->size() == refPoint.size() );
 		
 		std::vector<VectorType> set;
 		set.reserve(points.size());
 		for(std::size_t i = 0; i != points.size(); ++i){
-			set.push_back(extractor(points[i]));
+			set.push_back(points[i]);
 		}
 		std::sort( set.begin(), set.end(), [ ](VectorType const& x, VectorType const& y){return x.back() < y.back();});
 

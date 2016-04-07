@@ -77,8 +77,8 @@ struct HypervolumeApproximator {
 	/// \param [in] e Function object \f$f\f$to "project" elements of the set to \f$\mathbb{R}^n\f$.
 	/// \param [in] set The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: f( s' ) \preceq f( s ) \f$
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^n\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
-	template<typename Set,typename Extractor, typename VectorType >
-	double operator()( Extractor const& e, Set const& points, VectorType const& refPoint)const{
+	template<typename Set, typename VectorType >
+	double operator()( Set const& points, VectorType const& refPoint){
 		typedef typename Set::const_iterator Iterator;
 		
 		std::size_t noPoints = points.size();
@@ -93,11 +93,11 @@ struct HypervolumeApproximator {
 		VectorType vol( noPoints, 1. );
 		for( std::size_t p = 0; p != noPoints; ++p) {
 			//guard against points which are worse than the reference
-			if(min(refPoint - e( points[p] ) ) < 0){
+			if(min(refPoint - points[p] ) < 0){
 				throw SHARKEXCEPTION("HyperVolumeApproximator: points must be better than reference point");
 			}
 			//taking the sum of logs instead of their product is numerically more stable in large dimensions were intermediate volumes can become very small or large
-			vol[p] = std::exp(sum(log(refPoint[ 0 ] - e( points[p] ))));
+			vol[p] = std::exp(sum(log(refPoint[ 0 ] - points[p] )));
 		}
 		//calculate total sum of volumes
 		double totalVolume = sum(vol);
@@ -116,17 +116,17 @@ struct HypervolumeApproximator {
 			
 			// sample point in ROI   
 			for( std::size_t i = 0; i < rndpoint.size(); i++ ){
-				rndpoint[i] = e( (*point ))[i] + Rng::uni() * ( refPoint[i] - e( (*point) )[i] );
+				rndpoint[i] = (*point )[i] + Rng::uni() * ( refPoint[i] - (*point)[i] );
 			}
 
-			Iterator candidate;
 			while (true)
 			{
 				if (samples_sofar>=maxSamples) return maxSamples * totalVolume / noPoints / round;
-				candidate = points.begin() + static_cast<std::size_t>(noPoints*Rng::uni());
+				Iterator candidate = points.begin() + static_cast<std::size_t>(noPoints*Rng::uni());
 				samples_sofar++;
-				DominanceRelation rel = dominance(e(*candidate), rndpoint);
+				DominanceRelation rel = dominance(*candidate, rndpoint);
 				if (rel == LHS_DOMINATES_RHS || rel == EQUIVALENT) break;
+
 			} 
 
 			round++;
