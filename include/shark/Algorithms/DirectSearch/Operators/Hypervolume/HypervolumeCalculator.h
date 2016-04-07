@@ -117,17 +117,6 @@ struct HypervolumeCalculator {
 	}
 
 private:
-	//~ struct LogTransform{
-		//~ template<class Input>
-		//~ blas::vector_unary<Input, blas::scalar_log<typename Input::value_type> > operator()(Input const& point) const{
-			//~ return log(point);
-		//~ }
-		
-		//~ template<class Input>
-		//~ Input const& operator()(Input const& point)const{
-			//~ return point;
-		//~ }
-	//~ };
 	bool m_useLogHyp;
 	bool m_useApproximation;
 	HypervolumeApproximator m_approximationAlgorithm;
