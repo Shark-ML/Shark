@@ -4,7 +4,6 @@
 
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Rng/GlobalRng.h>
 #include <limits>
 
@@ -19,32 +18,35 @@ BOOST_AUTO_TEST_CASE( HypervolumeIndicator_Consistency ) {
 	std::size_t numDims = 2;
 	for(std::size_t t = 0; t != numTrials; ++t){ 
 		//create points
-		std::vector<Individual<RealVector,RealVector> > population(numPoints);
+		std::vector<RealVector> population(numPoints);
 		for(std::size_t i = 0; i != numPoints; ++i){
-			population[i].penalizedFitness().resize(numDims);
+			population[i].resize(numDims);
 			for(std::size_t j = 0; j != numDims; ++j){
-				population[i].penalizedFitness()[j]= Rng::uni(-1,10);
+				population[i][j]= Rng::uni(-1,10);
 			}
 		}
 		
 		
-		
 		RealVector ref(numDims,11);
-		HypervolumeIndicator indicator;
+		std::vector<RealVector> refSet(1,RealVector(numDims,10));
 		
 		RealVector volumes(numPoints);
-		
 		double maxVolume = -std::numeric_limits<double>::max();
 		for(std::size_t i = 0; i != numPoints; ++i){
-			std::vector<Individual<RealVector,RealVector> > copy = population;
+			HypervolumeCalculator hv;
+			std::vector<RealVector> copy = population;
 			copy.erase(copy.begin()+i);
-			double volume = indicator(FitnessExtractor(),copy,ref);
+			
+			
+			double volume = hv(copy,ref);
 			volumes[i] =volume;
 			if(maxVolume < volume){
 				maxVolume = volume;
 			}
 		}
-		std::size_t indicated = indicator.leastContributor(FitnessExtractor(),population,ref);
+		HypervolumeIndicator indicator;
+		indicator.updateInternals(refSet);
+		std::size_t indicated = indicator.leastContributor(population);
 		BOOST_CHECK_CLOSE(maxVolume,volumes[indicated],1.e-10);
 	}
 }

@@ -30,8 +30,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_INDICATORS_LEASTCONTRIBUTORAPPROXIMATOR_H
-#define SHARK_ALGORITHMS_DIRECT_SEARCH_INDICATORS_LEASTCONTRIBUTORAPPROXIMATOR_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_LEASTCONTRIBUTORAPPROXIMATOR_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_LEASTCONTRIBUTORAPPROXIMATOR_H
 
 #include <shark/Core/Exception.h>
 #include <shark/Core/Math.h>
@@ -48,138 +48,6 @@
 #include <cmath>
 
 namespace shark {
-
-/**
- * \brief Samples a random point.
- */
-template<typename Rng>
-struct Sampler {
-
-	/**
-	 * \brief Samples a random point and checks whether it is dominated or not.
-	 *
-	 * \tparam Set The type of the set of points.
-	 *
-	 * \param [in] s The set of individuals to check the sampled point against.
-	 * \param [in] point Iterator to the point in the supplied that shall serve as basis for the random point.
-	 *
-	 * \returns true if the sample was successful (i.e. non-dominated) and false otherwise.
-	 *
-	 */
-	template<typename Set>
-	bool operator()( const Set & s, typename Set::iterator point )
-	{
-		point->m_sample = point->m_point;
-		for( unsigned int i = 0; i < point->m_sample.size(); i++ ) {
-			point->m_sample[ i ] += Rng::uni( 0., 1. ) * ( point->m_boundingBox[ i ] - point->m_point[ i ] );
-		}
-
-		bool successful = true;
-		for( unsigned int i = 0; i < point->m_influencingPoints.size(); i++ ) {
-			point->m_noOperations += point->m_sample.size() + 1;
-			bool inside = true;
-			for( unsigned int j = 0; j < point->m_sample.size(); j++ ) {
-				if( point->m_influencingPoints[i]->m_point[ j ] > point->m_sample[ j ] ) {
-					inside = false;
-					break;
-				}
-			}
-
-			if( inside ) {
-				successful = false;
-				break;
-			}
-		}
-
-		return successful;
-	}
-};
-
-/**
- * \brief Calculates bounding boxes.
- * \tparam Set The type of the set of points.
- */
-template<typename Set>
-struct BoundingBoxComputer {
-
-	/**
-	 * \brief Compares points based on their contributed volume.
-	 */
-	struct VolumeComparator {
-		/**
-		 * \brief Compares points based on their contributed volume.
-		 * \returns true if the volume contributed by i1 is larger than the volume contributed by i2, false otherwise.
-		 */
-		template<typename Iterator>
-		bool operator()( Iterator i1, Iterator i2 )
-		{
-			return i1->m_overlappingVolume > i2->m_overlappingVolume;
-		}
-	};
-
-	/**
-	 * \brief Computes bounding boxes and their volume for the range of points defined by the iterators.
-	 * \param [in] begin Iterator pointing to the first valid point.
-	 * \param [in] end Iterator pointing right after the last valid point.
-	 */
-	void operator()( typename Set::iterator begin, typename Set::iterator end )
-	{
-
-		for( typename Set::iterator it = begin; it != end; ++it ) {
-			typename Set::value_type & p1 = *it;
-			for( typename Set::iterator itt = begin; itt != end; ++itt ) {
-
-				if( itt == it )
-					continue;
-
-				typename Set::value_type & p2 = *itt;
-
-				unsigned int coordCounter = 0;
-				unsigned int coord = 0;
-				for( unsigned int o = 0; o < p1.m_point.size(); o++ ) {
-					if( p2.m_point[ o ] > p1.m_point[ o ] ) {
-						coordCounter++;
-						if( coordCounter == 2 )
-							break;
-						coord = o;
-					}
-				}
-
-				if( coordCounter == 1 && p1.m_boundingBox[ coord ] > p2.m_point[ coord ] )
-					p1.m_boundingBox[ coord ] = p2.m_point[ coord ];
-			}
-
-			it->m_boundingBoxVolume = 1.;
-			for( unsigned int i = 0 ; i < it->m_boundingBox.size(); i++ ) {
-
-				it->m_boundingBoxVolume *= it->m_boundingBox[ i ] - it->m_point[ i ];
-
-			}
-
-			for( typename Set::iterator itt = begin; itt != end; ++itt ) {
-				if( itt == it )
-					continue;
-
-				bool isInfluencing = true;
-				double vol = 1.;
-				for( unsigned int i = 0; i < it->m_point.size(); i++ ) {
-
-					if( itt->m_point[ i ] >= it->m_boundingBox[ i ] ) {
-						isInfluencing = false;
-						break;
-					}
-					vol *= std::max( itt->m_point[ i ], it->m_point[ i ] ) - it->m_boundingBox[ i ];//min_dbl(_alc_front[k][l],_alc_front[i][l]) - _alc_boundBoxLower[_alc_noObjectives*i+l];
-				}
-				if( isInfluencing ) {
-					itt->m_overlappingVolume = vol;
-					it->m_influencingPoints.push_back( itt );
-				}
-			}
-
-			std::sort( it->m_influencingPoints.begin(), it->m_influencingPoints.end(), VolumeComparator() );
-		}
-	}
-};
 
 /**
  * \brief Approximately determines the point of a set contributing the least hypervolume.
@@ -210,20 +78,6 @@ struct LeastContributorApproximator {
 	{
 		static registry_type registry = boost::assign::list_of< typename registry_type::relation >( ENSURE_UNION_BOUND, "EnsureUnionBound" )( FAST, "Fast" );
 		return( registry );
-	}
-
-	friend std::ostream & operator<<( std::ostream & stream, Strategy strategy )
-	{
-		stream << STRATEGY_REGISTRY().left.find( strategy )->second;
-		return( stream );
-	}
-
-	friend std::istream & operator>>( std::istream & stream, Strategy & strategy )
-	{
-		static std::string s;
-		stream >> s;
-		strategy = STRATEGY_REGISTRY().right.find( s )->second;
-		return( stream );
 	}
 
 	/**
@@ -318,29 +172,6 @@ struct LeastContributorApproximator {
 		std::size_t m_noOperations;
 		std::size_t m_noSamples;
 		std::size_t m_noSuccessfulSamples;
-
-		template<typename Stream>
-		void print( Stream & s ) const
-		{
-
-			std::copy( m_point.begin(), m_point.end(), std::ostream_iterator<double>( s, " " ) );
-			// s << " || ";
-			std::copy( m_boundingBox.begin(), m_boundingBox.end(), std::ostream_iterator<double>( s, " " ) );
-			// s << " || ";
-			s << m_noOperations << " " << m_noSamples << " " << m_noSuccessfulSamples << " " << m_boundingBoxVolume << std::endl;
-
-		}
-	};
-
-	/**
-	 * \brief Returns the supplied argument.
-	 */
-	struct IdentityFitnessExtractor {
-		template<typename Member>
-		const Member & operator()( const Member & member ) const
-		{
-			return( member );
-		}
 	};
 
 	double m_logFactor;
@@ -393,94 +224,31 @@ struct LeastContributorApproximator {
 
 	}
 
-	/**
-	 * \brief Samples in the bounding box of the supplied point until a pre-defined threshold is reached.
-	 * \param [in] s Set of points.
-	 * \param [in] point Iterator to the point that should be sampled.
-	 * \param [in] r The current round.
-	 * \param [in] delta The delta that should be reached.
-	 * \param [in] refPoint Reference point for hypervolume calculation/approximation.
-	 */
-	template<typename Set, typename VectorType>
-	void sample( const Set & s, typename Set::iterator point, unsigned int r, double delta, const VectorType & refPoint )
-	{
-
-		if( point->m_noSamples >= m_maxNumSamples )
-			return;
-
-
-		if( point->m_noOperations >= ExactHypervolume::runtime( point->m_influencingPoints.size(), refPoint.size() ) ) {
-
-			point->m_noSamples = point->m_noSuccessfulSamples = m_maxNumSamples;
-
-			std::vector< VectorType > neighborhood( point->m_influencingPoints.size(), refPoint );
-			for( unsigned int i = 0; i < point->m_influencingPoints.size(); i++ ) {
-				for( unsigned int j = 0; j < refPoint.size(); j++  )
-					neighborhood[i][j] = std::max( point->m_point[ j ], (point->m_influencingPoints[i])->m_point[ j ] ) + ( refPoint[ j ] - point->m_boundingBox[ j ] );
-			}
-
-			IdentityFitnessExtractor e;
-			ExactHypervolume hv;
-			point->m_approximatedContribution = point->m_boundingBoxVolume - hv( e, neighborhood, refPoint );
-			point->m_boundingBoxVolume = point->m_approximatedContribution;
-			return;
-		}
-
-		Sampler<Rng> sampler;
-
-		double threshold = 0.5 * ( (1. + m_gamma) * ::log( static_cast<double>( r ) ) + m_logFactor ) * sqr( point->m_boundingBoxVolume / delta );
-		for( ; point->m_noSamples == 0 || point->m_noSamples < threshold; point->m_noSamples++ ) {
-			if( m_strategy == FAST )
-				if( m_sampleCounter > m_sampleCountThreshold )
-					throw( SHARKEXCEPTION( "LeastContributorApproximator::sample(): Maximum number of total samples reached." ) );
-			if( sampler( s, point ) )
-				point->m_noSuccessfulSamples++;
-
-			m_sampleCounter++;
-		}
-
-		point->m_approximatedContribution = point->m_boundingBoxVolume * ( static_cast<double>( point->m_noSuccessfulSamples ) / static_cast<double>( point->m_noSamples ) );
-	}
-
-	template<typename iterator>
-	double deltaForPoint( iterator point, unsigned int R )
-	{
-
-		return( ::sqrt( 0.5 * ((1. + m_gamma) * ::log( static_cast<double>( R ) ) + m_logFactor ) / point->m_noSamples ) * point->m_boundingBoxVolume );
-
-	}
-
-	/**
-	 * \brief Determines the point contributing the least hypervolume to the overall set of points.
-	 * \param [in] e Extracts point information from set elements.
-	 * \param [in] s Set of points.
-	 * \param [in] refPoint The reference point to consider for calculating individual points' contributions.
-	 */
-	template<typename Extractor, typename Set, typename VectorType>
-	std::size_t leastContributor( Extractor e, const Set & s, const VectorType & refPoint)
-	{
+	/// \brief Determines the point contributing the least hypervolume to the overall set of points.
+	///
+	/// \param [in] s pareto front of points
+	///\param [in] refPoint The reference point to consider for calculating individual points' contributions.
+	template<typename ParetoFrontType, typename VectorType>
+	std::size_t leastContributor( ParetoFrontType const& s, VectorType const& refPoint){
 		if(s.empty()) return 0;
 		
-		std::size_t noObjectives = e(s[0]).size();
+		std::size_t noObjectives =s[0].size();
 		
 		std::vector< Point<VectorType> > front;
 		front.reserve( s.size() );
 
 		std::vector< typename std::vector< Point<VectorType> >::iterator > activePoints;
 
-		for( typename Set::const_iterator it = s.begin(); it != s.end(); ++it ) {
-			front.push_back( Point<VectorType>( noObjectives, e( *it ), refPoint ) );
+		for(auto it = s.begin(); it != s.end(); ++it ) {
+			front.push_back( Point<VectorType>( noObjectives, *it, refPoint ) );
+			activePoints.push_back( it );//save as reserve prevents front from reallocating on push_backs
 		}
 
-		for( typename std::vector< Point<VectorType> >::iterator it = front.begin(); it != front.end(); ++it )
-			activePoints.push_back( it );
-
-		BoundingBoxComputer< std::vector< Point<VectorType> > > bbc;
-		bbc( front.begin(), front.end() );
+		computeBoundingBoxes( front.begin(), front.end() );
 
 		double maxBoundingBoxVolume = 0.;
 
-		for( typename std::vector< Point<VectorType> >::iterator it = front.begin(); it != front.end(); ++it )
+		for( auto it = front.begin(); it != front.end(); ++it )
 			maxBoundingBoxVolume = std::max( maxBoundingBoxVolume, it->m_boundingBoxVolume );
 
 		double _delta = m_startDelta * maxBoundingBoxVolume;
@@ -497,7 +265,7 @@ struct LeastContributorApproximator {
 			minApprox = std::numeric_limits<double>::max();
 			minimalElement = front.end();
 
-			for( int i = 0; i < static_cast<int>( activePoints.size() ); i++ )
+			for( std::size_t i = 0; i < activePoints.size(); i++ )
 				try {
 					sample( front, activePoints[i], m_round, _delta, refPoint );
 				} catch( ... ) {
@@ -505,7 +273,7 @@ struct LeastContributorApproximator {
 					return idx;
 				}
 
-			for( typename std::vector< typename std::vector< Point<VectorType> >::iterator >::iterator it = activePoints.begin(); it != activePoints.end(); ++it ) {
+			for( auto it = activePoints.begin(); it != activePoints.end(); ++it ) {
 				if( (*it)->m_approximatedContribution < minApprox ) {
 					minApprox = (*it)->m_approximatedContribution;
 					minimalElement = *it;
@@ -529,7 +297,7 @@ struct LeastContributorApproximator {
 				}
 			}
 
-			typename std::vector< typename std::vector< Point<VectorType> >::iterator >::iterator it = activePoints.begin();
+			auto it = activePoints.begin();
 			while( it != activePoints.end() ) {
 				if( (*it)->m_approximatedContribution - minApprox > deltaForPoint( *it, m_round ) + deltaForPoint( minimalElement, m_round ) )
 					it = activePoints.erase( it );
@@ -562,39 +330,195 @@ struct LeastContributorApproximator {
 		return std::distance( front.begin(), minimalElement );
 	}
 	
-	/**
-	 * \brief Determines the point contributing the least hypervolume to the overall front of points.
-	 *
-	 * This version uses the reference point estimated by the last call to updateInternals.
-	 * 
-	 * \param [in] extractor Extracts point information from front elements.
-	 * \param [in] front pareto front of points
-	 */
-	template<typename Extractor, typename ParetoFrontType>
-	std::size_t leastContributor( Extractor extractor, ParetoFrontType const& front)
+	/// \brief Determines the point contributing the least hypervolume to the overall front of points.
+	///
+	/// This version uses the reference point estimated by the last call to updateInternals.
+	///
+	/// \param [in] front pareto front of points
+	template<typename ParetoFrontType>
+	std::size_t leastContributor( ParetoFrontType const& front)
 	{
-		return leastContributor(extractor,front,m_reference);
+		return leastContributor(front,m_reference);
 	}
 	
 	/// \brief Updates the internal variables of the indicator using a whole population.
 	///
 	/// Calculates the reference point of the volume from the population
 	/// using the maximum value in every dimension+1
-	/// \param extractor Extracts point information from set.
-	/// \param set The set of points.
-	template<typename Extractor, typename PointSet>
-	void updateInternals(Extractor extractor, PointSet const& set){
+	///
+	/// \param [in] front pareto front of points
+	template<typename ParetoFrontType>
+	void updateInternals( ParetoFrontType const& front){
 		m_reference.clear();
-		if(set.empty()) return;
+		if(front.empty()) return;
 		
 		//calculate reference point
-		std::size_t noObjectives = extractor(set[0]).size();
+		std::size_t noObjectives = front[0].size();
 		m_reference.resize(noObjectives);
 		
-		for( unsigned int i = 0; i < set.size(); i++ )
-			noalias(m_reference) = max(m_reference, extractor(set[i]));
+		for(auto const& point: front)
+			noalias(m_reference) = max(m_reference, point);
 		
 		noalias(m_reference)+= 1.0;
+	}
+
+private:
+	
+	/**
+	 * \brief Samples in the bounding box of the supplied point until a pre-defined threshold is reached.
+	 * \param [in] s Set of points.
+	 * \param [in] point Iterator to the point that should be sampled.
+	 * \param [in] r The current round.
+	 * \param [in] delta The delta that should be reached.
+	 * \param [in] refPoint Reference point for hypervolume calculation/approximation.
+	 */
+	template<typename Set, typename VectorType>
+	void sample( const Set & s, typename Set::iterator point, unsigned int r, double delta, const VectorType & refPoint )
+	{
+
+		if( point->m_noSamples >= m_maxNumSamples )
+			return;
+
+
+		if( point->m_noOperations >= ExactHypervolume::runtime( point->m_influencingPoints.size(), refPoint.size() ) ) {
+
+			point->m_noSamples = point->m_noSuccessfulSamples = m_maxNumSamples;
+
+			std::vector< VectorType > neighborhood( point->m_influencingPoints.size(), refPoint );
+			for( unsigned int i = 0; i < point->m_influencingPoints.size(); i++ ) {
+				for( unsigned int j = 0; j < refPoint.size(); j++  )
+					neighborhood[i][j] = std::max( point->m_point[ j ], (point->m_influencingPoints[i])->m_point[ j ] ) + ( refPoint[ j ] - point->m_boundingBox[ j ] );
+			}
+
+			ExactHypervolume hv;
+			point->m_approximatedContribution = point->m_boundingBoxVolume - hv( neighborhood, refPoint );
+			point->m_boundingBoxVolume = point->m_approximatedContribution;
+			return;
+		}
+
+		double threshold = 0.5 * ( (1. + m_gamma) * ::log( static_cast<double>( r ) ) + m_logFactor ) * sqr( point->m_boundingBoxVolume / delta );
+		for( ; point->m_noSamples == 0 || point->m_noSamples < threshold; point->m_noSamples++ ) {
+			if( m_strategy == FAST )
+				if( m_sampleCounter > m_sampleCountThreshold )
+					throw( SHARKEXCEPTION( "LeastContributorApproximator::sample(): Maximum number of total samples reached." ) );
+			if( isRandomPointDominated( s, point ) )
+				point->m_noSuccessfulSamples++;
+
+			m_sampleCounter++;
+		}
+
+		point->m_approximatedContribution = point->m_boundingBoxVolume * ( static_cast<double>( point->m_noSuccessfulSamples ) / static_cast<double>( point->m_noSamples ) );
+	}
+	
+	/// \brief Samples a random point in the bounding box and checks whether it is dominated or not.
+	///
+	/// \tparam Set The type of the set of points.
+	///
+	/// \param [in] s The set of individuals to check the sampled point against.
+	/// \param [in] point Iterator to the point in the supplied that shall serve as basis for the random point.
+	///
+	/// \returns true if the sample was successful (i.e. non-dominated) and false otherwise.
+	template<typename Set>
+	bool isRandomPointDominated( Set const& s, typename Set::iterator point )
+	{
+		point->m_sample = point->m_point;
+		for( unsigned int i = 0; i < point->m_sample.size(); i++ ) {
+			point->m_sample[ i ] += Rng::uni( 0., 1. ) * ( point->m_boundingBox[ i ] - point->m_point[ i ] );
+		}
+
+		bool successful = true;
+		for( unsigned int i = 0; i < point->m_influencingPoints.size(); i++ ) {
+			point->m_noOperations += point->m_sample.size() + 1;
+			bool inside = true;
+			for( unsigned int j = 0; j < point->m_sample.size(); j++ ) {
+				if( point->m_influencingPoints[i]->m_point[ j ] > point->m_sample[ j ] ) {
+					inside = false;
+					break;
+				}
+			}
+
+			if( inside ) {
+				successful = false;
+				break;
+			}
+		}
+
+		return successful;
+	}
+
+	template<typename iterator>
+	double deltaForPoint( iterator point, unsigned int R )
+	{
+
+		return( ::sqrt( 0.5 * ((1. + m_gamma) * ::log( static_cast<double>( R ) ) + m_logFactor ) / point->m_noSamples ) * point->m_boundingBoxVolume );
+
+	}
+
+	/// \brief Computes bounding boxes and their volume for the range of points defined by the iterators.
+	///
+	/// \param [in] begin Iterator pointing to the first valid point.
+	/// \param [in] end Iterator pointing right after the last valid point.
+	template<class SetIterator>
+	void computeBoundingBoxes(SetIterator begin, SetIterator end )
+	{
+		for(auto it = begin; it != end; ++it ) {
+			auto& p1 = *it;
+			for(auto itt = begin; itt != end; ++itt ) {
+
+				if( itt == it )
+					continue;
+
+				auto& p2 = *itt;
+
+				unsigned int coordCounter = 0;
+				unsigned int coord = 0;
+				for( unsigned int o = 0; o < p1.m_point.size(); o++ ) {
+					if( p2.m_point[ o ] > p1.m_point[ o ] ) {
+						coordCounter++;
+						if( coordCounter == 2 )
+							break;
+						coord = o;
+					}
+				}
+
+				if( coordCounter == 1 && p1.m_boundingBox[ coord ] > p2.m_point[ coord ] )
+					p1.m_boundingBox[ coord ] = p2.m_point[ coord ];
+			}
+
+			it->m_boundingBoxVolume = 1.;
+			for(unsigned int i = 0 ; i < it->m_boundingBox.size(); i++ ) {
+
+				it->m_boundingBoxVolume *= it->m_boundingBox[ i ] - it->m_point[ i ];
+
+			}
+
+			for(auto itt = begin; itt != end; ++itt ) {
+				if( itt == it )
+					continue;
+
+				bool isInfluencing = true;
+				double vol = 1.;
+				for( unsigned int i = 0; i < it->m_point.size(); i++ ) {
+
+					if( itt->m_point[ i ] >= it->m_boundingBox[ i ] ) {
+						isInfluencing = false;
+						break;
+					}
+					vol *= std::max( itt->m_point[ i ], it->m_point[ i ] ) - it->m_boundingBox[ i ];
+				}
+				if( isInfluencing ) {
+					itt->m_overlappingVolume = vol;
+					it->m_influencingPoints.push_back( itt );
+				}
+			}
+			std::sort( 
+				it->m_influencingPoints.begin(),
+				it->m_influencingPoints.end(),
+				[]( SetIterator i1, SetIterator i2 ){
+					return i1->m_overlappingVolume > i2->m_overlappingVolume;
+				}
+			);
+		}
 	}
 };
 }

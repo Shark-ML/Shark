@@ -234,10 +234,11 @@ namespace shark {
 
 
 	protected:
+		typedef Individual<RealVector, double, RealVector> IndividualType;
 		/**
 		* \brief Updates the strategy parameters based on the supplied parent population.
 		*/
-		SHARK_EXPORT_SYMBOL void updateStrategyParameters( const std::vector<Individual<RealVector, double, RealVector> > & parents ) ;
+		SHARK_EXPORT_SYMBOL void updateStrategyParameters( std::vector< IndividualType > const& parents ) ;
 
 		std::size_t m_numberOfVariables; ///< Stores the dimensionality of the search space.
 		unsigned int m_selectionSize; ///< Number of vectors chosen when updating distribution parameters.

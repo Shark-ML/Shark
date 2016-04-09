@@ -76,22 +76,6 @@ public:
 	{ return "CMA-ES"; }
 
 	/**
-	* \brief Calculates the center of gravity of the given population \f$ \in \mathbb{R}^d\f$.
-	*
-	* 
-	*/
-	template<typename Container, typename Extractor>
-	RealVector weightedSum( const Container & container, const RealVector & weights, const Extractor & e ) {
-
-		RealVector result( m_numberOfVariables, 0. );
-
-		for( std::size_t j = 0; j < container.size(); j++ )
-			result += weights( j ) * e( container[j] );
-
-		return( result );
-	}
-
-	/**
 	* \brief Calculates lambda for the supplied dimensionality n.
 	*/
 	SHARK_EXPORT_SYMBOL static std::size_t suggestLambda( std::size_t dimension ) ;

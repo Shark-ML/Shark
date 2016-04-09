@@ -33,7 +33,6 @@
 
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/PopulationBasedStepSizeAdaptation.h>
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ElitistSelection.h>
 
 
@@ -278,8 +277,8 @@ public:
 
 	/// \brief Executes one iteration of the algorithm.
 	void step(ObjectiveFunctionType const& function){
-
-		std::vector< Individual<RealVector, double, RealVector> > offspring( m_lambda );
+		typedef Individual<RealVector, double, RealVector> IndividualType;
+		std::vector< IndividualType > offspring( m_lambda );
 
 		PenalizingEvaluator penalizingEvaluator;
 		for( unsigned int i = 0; i < offspring.size(); i++ ) {
@@ -290,8 +289,8 @@ public:
 		// Selection and parameter update
 		// opposed to normal CMA selection, we don't remove any indidivudals but only order
 		// them by rank to allow the use of the population based strategy.
-		std::vector< Individual<RealVector, double, RealVector> > parents( lambda() );
-		ElitistSelection<FitnessExtractor> selection;
+		std::vector< IndividualType > parents( lambda() );
+		ElitistSelection< IndividualType::FitnessOrdering > selection;
 		selection(offspring.begin(),offspring.end(),parents.begin(), parents.end());
 		updateStrategyParameters( parents );
 

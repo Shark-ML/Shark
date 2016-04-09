@@ -39,26 +39,7 @@
 #include <shark/Algorithms/DirectSearch/CMSA.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ElitistSelection.h>
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 using namespace shark;
-
-
-namespace{
-	struct FitnessComparator {
-		template<typename IndividualType>
-		bool operator()( const IndividualType & a, const IndividualType & b ) const {
-			return a.penalizedFitness() < b.penalizedFitness();
-		}
-	};
-
-	struct PointExtractor {
-		template<typename T>
-		const RealVector & operator()( const T & t ) const {
-			return t.searchPoint();
-		}
-	};
-
-}
 
 void CMSA::init( ObjectiveFunctionType & function, SearchPointType const& p) {
 	SIZE_CHECK(p.size() == function.numberOfVariables());
@@ -147,10 +128,13 @@ std::vector<CMSA::IndividualType> CMSA::generateOffspring( ) const{
 }
 void CMSA::updatePopulation(std::vector< IndividualType > const& offspring ) {
 	std::vector< IndividualType > selectedOffspring( m_mu );
-	ElitistSelection<FitnessExtractor> selection;
+	ElitistSelection< IndividualType::FitnessOrdering > selection;
 	selection(offspring.begin(),offspring.end(),selectedOffspring.begin(), selectedOffspring.end());
 	
-	RealVector xPrimeNew = cog( selectedOffspring, PointExtractor() );
+	RealVector xPrimeNew ( m_numberOfVariables, 0. );
+	for( auto const& ind : selectedOffspring )
+		noalias(xPrimeNew) += ind.searchPoint() / m_mu;
+	
 	// Covariance Matrix Update
 	RealMatrix Znew( m_numberOfVariables, m_numberOfVariables,0.0 );
 	RealMatrix& C = m_mutationDistribution.covarianceMatrix();

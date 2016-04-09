@@ -53,7 +53,7 @@ namespace shark {
  * Algorithms (ICGA), pp. 101-111, Lawrence Erlbaum Associates, 1985
  *
  */
-template<typename Extractor >
+template<typename Ordering >
 struct LinearRankingSelection {
 	LinearRankingSelection(){
 		etaMax = 1.1;
@@ -62,7 +62,7 @@ struct LinearRankingSelection {
 	///
 	/// The operator carries out the following steps:
 	///   - Calculate selection probabilities of parent and offspring individualss
-	///     according to their rank.
+	///     according to their rank, which is determined by the ordering relation
 	///   - Carry out roulette wheel selection on the range of parent and
 	///     offspring individualss until the output range is filled.
 	///
@@ -82,14 +82,16 @@ struct LinearRankingSelection {
 		
 		//compute rank of each individual
 		std::size_t size = std::distance( individuals, individualsE );
-		std::vector<KeyValuePair<double, InIterator> > individualsPerformance(size);
-
-		for( std::size_t i = 0; i != size; ++i, ++individuals ) {
-			Extractor e;
-			individualsPerformance[i].value = individuals;
-			individualsPerformance[i].key = e(*individuals);
-		}
-		std::sort( individualsPerformance.begin(), individualsPerformance.end());
+		std::vector<InIterator > sortedIndividuals(size);
+		std::iota(sortedIndividuals.begin(),sortedIndividuals.end(),individuals);
+		std::sort(
+			sortedIndividuals.begin(),
+			sortedIndividuals.end(),
+			[](InIterator lhs, InIterator rhs){
+				Ordering ordering;
+				return ordering(*lhs,*rhs);
+			}
+		);
 		
 		RealVector selectionProbability(size);
 		double a = 2. * (etaMax - 1.)/(size - 1.);
@@ -100,7 +102,7 @@ struct LinearRankingSelection {
 
 		RouletteWheelSelection rws;
 		for( ; out != outE; ++out ){
-			InIterator individuals = rws(rng, individualsPerformance.begin(), individualsPerformance.end(), selectionProbability)->value;
+			InIterator individuals = rws(rng, sortedIndividuals.begin(), sortedIndividuals.end(), selectionProbability)->value;
 			*out = *individuals;
 		}
 	}

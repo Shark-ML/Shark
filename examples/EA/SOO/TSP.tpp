@@ -45,7 +45,6 @@
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/RouletteWheelSelection.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 
@@ -63,7 +62,8 @@
 #include <boost/property_map/dynamic_property_map.hpp>
 #include <boost/range/algorithm_ext/iota.hpp>
 
-typedef shark::IntVector Tour;
+using namespace shark;
+typedef IntVector Tour;
 
 /**
  * \brief Defines the problem, i.e., its cost matrix.
@@ -81,149 +81,144 @@ const double cities[10][10] = {
     {       80,     63,     57,     45,     41,     63,     113,    80,     40,     0 }
 };
 
-namespace shark {
+typedef boost::adjacency_matrix< boost::undirectedS,
+	boost::property< boost::vertex_color_t, std::string >,
+	boost::property< boost::edge_weight_t, double,
+		boost::property< boost::edge_color_t, std::string >
+	>,
+	boost::no_property 
+> Graph;
+typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
+typedef boost::graph_traits<Graph>::edge_descriptor Edge;
+typedef boost::property_map<Graph, boost::edge_weight_t>::type WeightMap;
+typedef boost::property_map<Graph, boost::edge_color_t>::type ColorMap;
 
-	typedef boost::adjacency_matrix< boost::undirectedS,
-		boost::property< boost::vertex_color_t, std::string >,
-		boost::property< boost::edge_weight_t, double,
-			boost::property< boost::edge_color_t, std::string >
-		>,
-		boost::no_property 
-	> Graph;
-	typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
-	typedef boost::graph_traits<Graph>::edge_descriptor Edge;
-	typedef boost::property_map<Graph, boost::edge_weight_t>::type WeightMap;
-	typedef boost::property_map<Graph, boost::edge_color_t>::type ColorMap;
+typedef Individual< Tour,double > IndividualType;
+typedef std::vector< IndividualType > Population;
 
-	typedef Individual< Tour,double > IndividualType;
-	typedef std::vector< IndividualType > Population;
-	
-	bool compare_fitness( const IndividualType & a, const IndividualType & b ) {
-		return( a.unpenalizedFitness() < b.unpenalizedFitness() );
+
+/**
+ * \brief Calculates the cost of a tour w.r.t. to a cost matrix.
+ */
+struct TspTourLength : public SingleObjectiveFunction{
+	typedef SingleObjectiveFunction base_type;
+
+	/**
+	 * \brief Default c'tor, initializes the cost matrix.
+	 */
+	TspTourLength( const RealMatrix & costMatrix = RealMatrix() ) : m_costMatrix( costMatrix )
+	{ }
+
+	std::string name() const
+	{ return "TspTourLength"; }
+
+	std::size_t numberOfVariables() const
+	{ return m_costMatrix.size1(); }
+
+	/**
+	 * \brief Calculates the costs of the supplied tour.
+	 */
+	base_type::ResultType eval( const base_type::SearchPointType & input ) const {		    	    
+		SIZE_CHECK( input.size() == m_costMatrix.size1() );
+	    m_evaluationCounter++;
+		base_type::ResultType result( 0 );
+		for( std::size_t i = 0; i < input.size() - 1; i++ ) {
+			result += m_costMatrix( input( i ), input( i+1 ) );
+		}
+	    return( result );
 	}
 
-	/**
-	 * \brief Calculates the cost of a tour w.r.t. to a cost matrix.
-	 */
-	struct TspTourLength : public shark::SingleObjectiveFunction{
-		typedef shark::SingleObjectiveFunction base_type;
+	RealMatrix m_costMatrix;
+};
 
-		/**
-		 * \brief Default c'tor, initializes the cost matrix.
-		 */
-		TspTourLength( const shark::RealMatrix & costMatrix = shark::RealMatrix() ) : m_costMatrix( costMatrix )
-		{ }
-
-		std::string name() const
-		{ return "TspTourLength"; }
-
-		std::size_t numberOfVariables() const
-		{ return m_costMatrix.size1(); }
-
-		/**
-		 * \brief Calculates the costs of the supplied tour.
-		 */
-		base_type::ResultType eval( const base_type::SearchPointType & input ) const {		    	    
-			SIZE_CHECK( input.size() == m_costMatrix.size1() );
-		    m_evaluationCounter++;
-			base_type::ResultType result( 0 );
-			for( std::size_t i = 0; i < input.size() - 1; i++ ) {
-				result += m_costMatrix( input( i ), input( i+1 ) );
-			}
-		    return( result );
-		}
-
-		shark::RealMatrix m_costMatrix;
-	};
+/**
+ * @brief Implements partially mapped crossover
+ * 
+ * Makes sure that only correct tours on the graph
+ * are generated.
+ */
+struct PartiallyMappedCrossover {
 
 	/**
-	 * @brief Implements partially mapped crossover
-	 * 
-	 * Makes sure that only correct tours on the graph
-	 * are generated.
+	 * @brief Performs the crossover.
+	 *
+	 * @param [in] parent1 First parent individual.
+	 * @param [in] parent2 Second parent individual.
+	 * @returns A pair of offspring individuals.
 	 */
-	struct PartiallyMappedCrossover {
+	template<typename IndividualType>
+	std::pair<IndividualType, IndividualType> operator()(
+			const IndividualType & parent1,
+			const IndividualType & parent2 ) const
+	{
+		std::pair< IndividualType, IndividualType > offspring( parent1, parent2 );
 
-		/**
-		 * @brief Performs the crossover.
-		 *
-		 * @param [in] parent1 First parent individual.
-		 * @param [in] parent2 Second parent individual.
-		 * @returns A pair of offspring individuals.
-		 */
-		template<typename IndividualType>
-		std::pair<IndividualType, IndividualType> operator()(
-				const IndividualType & parent1,
-				const IndividualType & parent2 ) const
-		{
-			std::pair< IndividualType, IndividualType > offspring( parent1, parent2 );
+		const Tour & t1 = parent1.searchPoint();
+		const Tour & t2 = parent2.searchPoint();
 
-			const Tour & t1 = parent1.searchPoint();
-			const Tour & t2 = parent2.searchPoint();
+		std::size_t cuttingPoint1 = Rng::discrete( 0, t1.size() - 1 );
+		std::size_t cuttingPoint2 = Rng::discrete( 0, t2.size() - 1 );
 
-			std::size_t cuttingPoint1 = shark::Rng::discrete( 0, t1.size() - 1 );
-			std::size_t cuttingPoint2 = shark::Rng::discrete( 0, t2.size() - 1 );
+		while( cuttingPoint1 == cuttingPoint2 )
+			cuttingPoint2 = Rng::discrete( 0, t2.size() - 1 );
 
-			while( cuttingPoint1 == cuttingPoint2 )
-				cuttingPoint2 = shark::Rng::discrete( 0, t2.size() - 1 );
+		if( cuttingPoint1 > cuttingPoint2 )
+			std::swap( cuttingPoint1, cuttingPoint2 );
 
-			if( cuttingPoint1 > cuttingPoint2 )
-				std::swap( cuttingPoint1, cuttingPoint2 );
+		Tour r1( t1.size(), -1 ), r2( t2.size(), -1 );
 
-			Tour r1( t1.size(), -1 ), r2( t2.size(), -1 );
+		for( std::size_t i = cuttingPoint1; i <= cuttingPoint2; i++ ) {
+			offspring.first.searchPoint()( i ) = t2( i );
+			offspring.second.searchPoint()( i ) = t1( i );
 
-			for( std::size_t i = cuttingPoint1; i <= cuttingPoint2; i++ ) {
-				offspring.first.searchPoint()( i ) = t2( i );
-				offspring.second.searchPoint()( i ) = t1( i );
-
-				r1[ t2( i ) ] = t1( i );
-				r2[ t1( i ) ] = t2( i );
-			}
-
-			for( std::size_t i = 0; i < t1.size(); i++) {
-				if ((i >= cuttingPoint1) && (i <= cuttingPoint2)) continue;
-
-				std::size_t n1 = t1[i] ;
-				std::size_t m1 = r1[n1] ;
-
-				std::size_t n2 = t2[i] ;
-				std::size_t m2 = r2[n2] ;
-
-				while (m1 != std::numeric_limits<std::size_t>::max()) {
-					n1 = m1 ;
-					m1 = r1[m1] ;
-				}
-				while (m2 != std::numeric_limits<std::size_t>::max()) {
-					n2 = m2 ;
-					m2 = r2[m2] ;
-				}
-				offspring.first.searchPoint()[i] = n1 ;
-				offspring.second.searchPoint()[i] = n2 ;
-			}
-
-			return offspring;
+			r1[ t2( i ) ] = t1( i );
+			r2[ t1( i ) ] = t2( i );
 		}
-	};
-}
+
+		for( std::size_t i = 0; i < t1.size(); i++) {
+			if ((i >= cuttingPoint1) && (i <= cuttingPoint2)) continue;
+
+			std::size_t n1 = t1[i] ;
+			std::size_t m1 = r1[n1] ;
+
+			std::size_t n2 = t2[i] ;
+			std::size_t m2 = r2[n2] ;
+
+			while (m1 != std::numeric_limits<std::size_t>::max()) {
+				n1 = m1 ;
+				m1 = r1[m1] ;
+			}
+			while (m2 != std::numeric_limits<std::size_t>::max()) {
+				n2 = m2 ;
+				m2 = r2[m2] ;
+			}
+			offspring.first.searchPoint()[i] = n1 ;
+			offspring.second.searchPoint()[i] = n2 ;
+		}
+
+		return offspring;
+	}
+};
+
 
 
 int main( int argc, char ** argv ) {
 
 	// Define the problem instance
-	shark::Graph g( 10 );
+	Graph g( 10 );
 	// Iterate the graph and assign a label to every vertex
-	boost::graph_traits<shark::Graph>::vertex_iterator v, v_end;
+	boost::graph_traits<Graph>::vertex_iterator v, v_end;
 	for( boost::tie(v,v_end) = boost::vertices(g); v != v_end; ++v )
 	boost::put(boost::vertex_color_t(), g, *v, ( boost::format( "City_%1%" ) % *v ).str() );
 	// Get hold of the weight map and the color map for calculation and visualization purposes.
-	shark::WeightMap weightMap = boost::get( boost::edge_weight, g );
-	shark::ColorMap colorMap = boost::get( boost::edge_color, g );
+	WeightMap weightMap = boost::get( boost::edge_weight, g );
+	ColorMap colorMap = boost::get( boost::edge_color, g );
     
 	// Iterate the graph and insert distances.
-	shark::Edge e;
+	Edge e;
 	bool inserted = false;
     
-	shark::RealMatrix costMatrix( 10, 10 );
+	RealMatrix costMatrix( 10, 10 );
 	for( std::size_t i = 0; i < costMatrix.size1(); i++ ) {
 		for( std::size_t j = 0; j < costMatrix.size1(); j++ ) {
 
@@ -243,11 +238,11 @@ int main( int argc, char ** argv ) {
 	}
 
 	// Mating selection operator
-	shark::RouletteWheelSelection rws;
+	RouletteWheelSelection rws;
 	// Variation (crossover) operator
-	shark::PartiallyMappedCrossover pmc;    
+	PartiallyMappedCrossover pmc;    
 	// Fitness function instance.
-	shark::TspTourLength ttl( costMatrix );
+	TspTourLength ttl( costMatrix );
 
 	// Size of the parent population
 	const std::size_t mu = 100;
@@ -255,9 +250,9 @@ int main( int argc, char ** argv ) {
 	const std::size_t lambda = 100;
 
 	// Parent population
-	shark::Population parents( mu );
+	Population parents( mu );
 	// Offspring population
-	shark::Population offspring( lambda );
+	Population offspring( lambda );
 
 	// Default tour: 0,...,9
 	Tour t( 10 ); boost::iota( t, 0 );
@@ -273,7 +268,7 @@ int main( int argc, char ** argv ) {
 
 	// Loop until maximum number of fitness function evaluations is reached.
 	while( ttl.evaluationCounter() < 10000 ) {
-		shark::RealVector selectionProbabilities(parents.size());
+		RealVector selectionProbabilities(parents.size());
 		for(std::size_t i = 0; i != parents.size(); ++i){
 			selectionProbabilities(i) = parents[i].unpenalizedFitness();
 		}
@@ -283,11 +278,11 @@ int main( int argc, char ** argv ) {
 			// Carry out fitness proportional fitness selection and
 			// perform partially mapped crossover on parent individuals.
 			std::pair< 
-			shark::IndividualType, 
-			shark::IndividualType 
+			IndividualType, 
+			IndividualType 
 			> result = pmc( 
-				*rws( shark::Rng::globalRng, parents.begin(), parents.end(), selectionProbabilities ),
-				*rws( shark::Rng::globalRng, parents.begin(), parents.end(), selectionProbabilities )
+				*rws( Rng::globalRng, parents.begin(), parents.end(), selectionProbabilities ),
+				*rws( Rng::globalRng, parents.begin(), parents.end(), selectionProbabilities )
 			);
 			offspring[ i ] = result.first;
 			offspring[ i + 1 ] = result.second;
@@ -305,7 +300,7 @@ int main( int argc, char ** argv ) {
 	}
 
 	// Sort in ascending order to find best individual.
-	std::sort( parents.begin(), parents.end(), shark::compare_fitness);
+	std::sort( parents.begin(), parents.end(), IndividualType::FitnessOrdering());
     
 	// Extract the best tour currently known.
 	Tour final = parents.front().searchPoint();
@@ -313,7 +308,7 @@ int main( int argc, char ** argv ) {
 	// Mark the final tour green in the graph.
 	bool extracted = false;
 	for( std::size_t i = 0; i < final.size() - 1; i++ ) {
-		boost::tie( e, extracted ) = boost::edge( shark::Vertex( final( i ) ), shark::Vertex( final( i + 1 ) ), g );
+		boost::tie( e, extracted ) = boost::edge( Vertex( final( i ) ), Vertex( final( i + 1 ) ), g );
 	
 	if( extracted )
 		colorMap[ e ] = "green";
@@ -321,7 +316,7 @@ int main( int argc, char ** argv ) {
 
 	// Calculate approximate solution
 	double len = 0.0;
-	std::vector< shark::Vertex > approxTour;
+	std::vector< Vertex > approxTour;
 	boost::metric_tsp_approx( g, boost::make_tsp_tour_len_visitor( g, std::back_inserter( approxTour ) , len, weightMap ) );
 	// Mark the approximation red in the graph.
 	for( std::size_t i = 0; i < approxTour.size() - 1; i++ ) {

@@ -36,33 +36,9 @@
 
 #include <shark/Core/Exception.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ElitistSelection.h>
 
 using namespace shark;
-
-//Functors used by the CMA-ES
-
-namespace{
-	struct PointExtractor {
-		template<typename T>
-		const RealVector & operator()( const T & t ) const {
-			return t.searchPoint();
-		}
-	};
-
-	struct StepExtractor {
-		template<typename T>
-		const RealVector & operator()( const T & t ) const {
-			return  t.chromosome();
-		}
-	};
-	
-	double chi( std::size_t n ) {
-		return( std::sqrt( static_cast<double>( n ) )*(1. - 1./(4.*n) + 1./(21.*n*n)) );
-	}
-
-}
 
 /**
 * \brief Calculates lambda for the supplied dimensionality n.
@@ -280,11 +256,16 @@ std::vector<CMA::IndividualType> CMA::generateOffspring( ) const{
 
 void CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
 	std::vector< IndividualType > selectedOffspring( m_mu );
-	ElitistSelection<FitnessExtractor> selection;
+	ElitistSelection<IndividualType::FitnessOrdering > selection;
 	selection(offspring.begin(),offspring.end(),selectedOffspring.begin(), selectedOffspring.end());
 	m_counter++;
-	RealVector z = weightedSum( selectedOffspring, m_weights, StepExtractor() ); // eq. (38)
-	RealVector m = weightedSum( selectedOffspring, m_weights, PointExtractor() ); // eq. (39) 
+	
+	RealVector z( m_numberOfVariables, 0. );
+	RealVector m( m_numberOfVariables, 0. );
+	for( std::size_t j = 0; j < selectedOffspring.size(); j++ ){
+		noalias(z) += m_weights( j ) * selectedOffspring[j].chromosome();
+		noalias(m) += m_weights( j ) * selectedOffspring[j].searchPoint();
+	}
 	RealVector y = (m - m_mean) / m_sigma;
 
 	// Covariance matrix update
@@ -296,7 +277,8 @@ void CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
 			selectedOffspring[i].searchPoint() - m_mean
 		);
 	}
-	double expectedChi = chi((std::size_t)m_numberOfVariables);
+	double n = static_cast<double>(m_numberOfVariables);
+	double expectedChi = std::sqrt( n )*(1. - 1./(4.*n) + 1./(21.*n*n));
 	double hSigLHS = norm_2( m_evolutionPathSigma ) / std::sqrt(1. - pow((1 - m_cSigma), 2.*(m_counter+1)));
 	double hSigRHS = (1.4 + 2 / (m_numberOfVariables + 1.)) * expectedChi;
 	double hSig = 0;

@@ -32,7 +32,6 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_SELECTION_INDICATOR_BASED_SELECTION_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_SELECTION_INDICATOR_BASED_SELECTION_H
 
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Algorithms/DirectSearch/Operators/Domination/NonDominatedSort.h>
 
 #include <map>
@@ -80,6 +79,13 @@ struct IndicatorBasedSelection {
 			return *this;
 		}
 
+		RealVector& penalizedFitness() {
+			return mep_value->penalizedFitness();
+		}
+		
+		RealVector& unpenalizedFitness(){
+			return mep_value->unpenalizedFitness();
+		}
 		
 		RealVector const& penalizedFitness() const{
 			return mep_value->penalizedFitness();
@@ -136,10 +142,10 @@ struct IndicatorBasedSelection {
 			--rank;
 		}
 		//now use the indicator to deselect the worst approximating elements of the last selected front
-		m_indicator.updateInternals(FitnessExtractor(),population);
+		m_indicator.updateInternals(penalizedFitness(population));
 		View& front = fronts[rank];
 		for(; popSize >mu;--popSize) {
-			std::size_t lc = m_indicator.leastContributor(FitnessExtractor(),front);
+			std::size_t lc = m_indicator.leastContributor(penalizedFitness(front));
 			front[lc].selected() = false;
 			front.erase( front.begin() + lc );
 		}
