@@ -38,8 +38,8 @@
 #define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_SELECTION_LINEARRANKING_H
 
 #include <shark/Algorithms/DirectSearch/Operators/Selection/RouletteWheelSelection.h>
-#include <shark/Core/utility/KeyValuePair.h>
 #include <vector>
+#include <numeric>
 
 namespace shark {
 
@@ -82,7 +82,7 @@ struct LinearRankingSelection {
 		
 		//compute rank of each individual
 		std::size_t size = std::distance( individuals, individualsE );
-		std::vector<InIterator > sortedIndividuals(size);
+		std::vector<InIterator> sortedIndividuals(size);
 		std::iota(sortedIndividuals.begin(),sortedIndividuals.end(),individuals);
 		std::sort(
 			sortedIndividuals.begin(),

@@ -32,8 +32,8 @@
 #define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_SELECTION_ELITIST_SELECTION_H
 
 #include <shark/LinAlg/Base.h>
-#include <shark/Core/utility/KeyValuePair.h>
 #include <vector>
+#include <numeric>
 namespace shark {
 
 /// \brief Survival selection to find the next parent set
@@ -77,7 +77,7 @@ struct ElitistSelection {
 	){
 		SIZE_CHECK(population.size() >= mu);
 		typedef typename Population::iterator InIterator;
-		std::vector<InIterator > results = order(population.begin(),population.end());
+		std::vector<InIterator> results = order(population.begin(),population.end());
 		
 		for(std::size_t i = 0; i != mu; ++i){
 			results[i]->select()=true;
@@ -90,7 +90,7 @@ private:
 	/// Returns a sorted range of pairs indicating, how often every individual won.
 	/// The best individuals are in the back of the range.
 	template<class InIterator>
-	std::vector<InIterator > order(InIterator it, InIterator itE){
+	std::vector<InIterator> order(InIterator it, InIterator itE){
 		std::size_t size = std::distance( it, itE );
 		std::vector<InIterator > individuals(size);
 		std::iota(individuals.begin(),individuals.end(),it);
