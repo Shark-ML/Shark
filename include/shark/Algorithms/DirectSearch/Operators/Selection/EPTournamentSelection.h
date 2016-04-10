@@ -39,9 +39,9 @@ namespace shark {
 /// \brief Survival and mating selection to find the next parent set.
 ///
 /// For a given Tournament size k, every individual is compared to k other individuals
-/// The fitness relation is governed by the double value returned by Extractor, which can be the fitness or a 
-/// domination rank. The individuals which won the most torunaments are selected
-template< typename Extractor >
+/// The ranking of the individuals is given by the template argument. 
+/// The individuals which won the most tournaments are selected
+template< typename Ordering >
 struct EPTournamentSelection {
 
 	/// \brief Selects individuals from the range of individuals.
@@ -101,12 +101,12 @@ private:
 		std::size_t size = std::distance( it, itE );
 		UIntVector selectionProbability(size,0.0);
 		std::vector<KeyValuePair<int, InIterator> > individualPerformance(size);
-		Extractor e;
+		Ordering smaller;
 		for( std::size_t i = 0; i != size(); ++i ) {
 			individualPerformance[i].value = it+i;
 			for( std::size_t round = 0; round < tournamentSize; round++ ) {
 				std::size_t idx = discrete(rng, 0,size-1 );
-				if(e(*it) < e(*(it+idx)){
+				if(smaller(*it, *(it+idx)){
 					individualPerformance[i].key -= 1;
 				}
 			}

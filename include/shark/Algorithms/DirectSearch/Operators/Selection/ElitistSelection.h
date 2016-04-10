@@ -32,15 +32,15 @@
 #define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_SELECTION_ELITIST_SELECTION_H
 
 #include <shark/LinAlg/Base.h>
-#include <shark/Core/utility/KeyValuePair.h>
 #include <vector>
+#include <numeric>
 namespace shark {
 
 /// \brief Survival selection to find the next parent set
 ///
 /// Given a set of individuals, selects the mu best performing individuals.
-/// The elements are ordered by a double value returned by the Extractor.
-template< typename Extractor >
+/// The elements are ordered using the given Ordering Relation
+template< typename Ordering >
 struct ElitistSelection {
 
 	/// \brief Selects individuals from the range of individuals.
@@ -55,13 +55,13 @@ struct ElitistSelection {
 		OutIterator out,  OutIterator outE
 	){
 		std::size_t outputSize = std::distance( out, outE );
-		std::vector<KeyValuePair<double, InIterator> > results = order(it, itE);
+		std::vector<InIterator> results = order(it, itE);
 		if(results.size() < outputSize){
 			throw SHARKEXCEPTION("[ElitistSelection] Input range must be bigger than output range");
 		}
 		
 		for(std::size_t i = 0; i != outputSize; ++i, ++out){
-			*out = *results[i].value;
+			*out = *results[i];
 		}
 	}
 	
@@ -77,28 +77,31 @@ struct ElitistSelection {
 	){
 		SIZE_CHECK(population.size() >= mu);
 		typedef typename Population::iterator InIterator;
-		std::vector<KeyValuePair<double, InIterator> > results = order(population.begin(),population.end());
+		std::vector<InIterator> results = order(population.begin(),population.end());
 		
 		for(std::size_t i = 0; i != mu; ++i){
-			results[i].value->select()=true;
+			results[i]->select()=true;
 		}
 		for(std::size_t i = mu; i != results.size(); ++i){
-			results[i].value->select() = false;
+			results[i]->select() = false;
 		}
 	}
 private:
-	///Returns a sorted range of pairs indicating, how often every individual won.
+	/// Returns a sorted range of pairs indicating, how often every individual won.
 	/// The best individuals are in the back of the range.
 	template<class InIterator>
-	std::vector<KeyValuePair<double, InIterator> > order(InIterator it, InIterator itE){
+	std::vector<InIterator> order(InIterator it, InIterator itE){
 		std::size_t size = std::distance( it, itE );
-		Extractor e;
-		std::vector<KeyValuePair<double, InIterator> > individuals(size);
-		for(std::size_t i = 0; i != size; ++i){
-			individuals[i].key = e(*(it+i));
-			individuals[i].value = it+i;
-		}
-		std::sort( individuals.begin(), individuals.end());
+		std::vector<InIterator > individuals(size);
+		std::iota(individuals.begin(),individuals.end(),it);
+		std::sort(
+			individuals.begin(),
+			individuals.end(),
+			[](InIterator lhs, InIterator rhs){
+				Ordering ordering;
+				return ordering(*lhs,*rhs);
+			}
+		);
 		return individuals;
 	}
 };

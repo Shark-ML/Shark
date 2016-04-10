@@ -86,18 +86,6 @@ public:
 	std::string name() const
 	{ return "CMSA"; }
 
-	/// \brief Calculates the center of gravity of the given population \f$ \in \mathbb{R}^d\f$.
-	template<typename Container, typename Extractor>
-	RealVector cog( const Container & container, const Extractor & e ) {
-
-		RealVector result( m_numberOfVariables, 0. );
-
-		for( std::size_t j = 0; j < container.size(); j++ )
-			result += 1./m_mu * e( container[j] );
-
-		return result;
-	}
-
 	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
 	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
 

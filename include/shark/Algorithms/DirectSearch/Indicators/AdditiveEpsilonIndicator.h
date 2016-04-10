@@ -30,91 +30,55 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_INDICATORS_ADDITIVE_EPSILON_INDICATOR_H
-#define SHARK_ALGORITHMS_DIRECT_SEARCH_INDICATORS_ADDITIVE_EPSILON_INDICATOR_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_ADDITIVE_EPSILON_INDICATOR_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_ADDITIVE_EPSILON_INDICATOR_H
 
 #include <shark/LinAlg/Base.h>
-#include <shark/LinAlg/Base.h>
-#include <shark/Core/OpenMP.h>
-
-#include <algorithm>
 #include <limits>
-#include <vector>
-
 
 namespace shark {
 
-/**
- * \brief Given a reference front R and an approximation F, calculates the
- * additive approximation quality of F.
- *
- * See the following reference for further details:
- *	- Bringmann, Friedrich, Neumann, Wagner. Approximation-Guided Evolutionary Multi-Objective Optimization. IJCAI '11.
- */
+/// \brief Implements the Additive approximation properties of sets
+///
+/// The additive approximation measures which value must be subtracted from a reference set
+/// until it becomes dominated by a target set.
+///
+/// The implemented least contributor algorithm calculates the point
+/// That is approximated best by the remaining points. Thus the reference set is the full set and the target
+/// sets all in which one point is removed.
+///
+/// See the following reference for further details:
+///	- Bringmann, Friedrich, Neumann, Wagner. Approximation-Guided Evolutionary Multi-Objective Optimization. IJCAI '11.
 struct AdditiveEpsilonIndicator {
-
-	/**
-	 * \brief Executes the algorithm for the given ranges of individuals and returns the additive approximation ratio.
-	 *
-	 * \param [in] itPF Iterator pointing to the first valid individual of the front approximation.
-	 * \param [in] itePF Iterator pointing behind the last valid individual of the front approximation.
-	 * \param [in] itRF Iterator pointing to the first valid individual of the reference front.
-	 * \param [in] iteRF Iterator pointing behind the last valid individual of the reference front.
-	 * \param [in,out] e Extractor instance that maps elements of the set to \f$\mathbb{R}^d\f$.
-	 */
-	template<
-		typename IteratorTypeA,
-		typename IteratorTypeB,
-		typename Extractor
-	> 
-	double operator()( IteratorTypeA itPF, IteratorTypeA itePF, IteratorTypeB itRF, IteratorTypeB iteRF, Extractor & e ){
-		double result = -std::numeric_limits<double>::max();
-		for( IteratorTypeB itb = itRF; itb != iteRF; ++itb ) {
-			double delta = std::numeric_limits<double>::max();
-			for( IteratorTypeA ita = itPF; ita != itePF;++ita ) {
-				SIZE_CHECK(e( *ita ).size() == e( *itb ).size());
-				delta = std::min( delta, max(e(*itb)-e(*ita)) );
-			}
-			result = std::max( result, delta );
-		}
-
-		return result;
-	}
-	
-	/// \brief Given a pareto front, returns the index of the points which is the least contributer
-	template<typename Extractor, typename ParetofrontType>
-	unsigned int leastContributor( Extractor extractor, const ParetofrontType & front)
-	{
-		std::vector<double> relativeApproximation(front.size());
-		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
+	/// \brief Given a pareto front, returns the index of the point which is the least contributer
+	template<typename ParetofrontType>
+	unsigned int leastContributor(ParetofrontType const& front){
+		std::size_t leastIndex = 0;
+		double leastValue = -std::numeric_limits<double>::max();
+		for( std::size_t i = 0; i != front.size(); i++ ) {
 			//find the minimum distance the front with one point removed has to be moved to dominate the original front
 			double result = -std::numeric_limits<double>::max();
 			for(std::size_t j = 0; j != front.size(); ++j){
 				if(j == i) continue; //this point is removed
-				result = std::min<double>(result,max(extractor(front[i])-extractor(front[j]))); 
+				result = std::min<double>(result,max(front[i]-front[j])); 
 			}
-			relativeApproximation[i] = result;
+			if(result < leastValue){
+				result = leastValue;
+				leastIndex = i;
+			}
 		}
 		
-		return std::min_element( relativeApproximation.begin(), relativeApproximation.end() ) - relativeApproximation.begin();
+		return leastIndex;
 	}
 	
 	/// \brief Updates the internal variables of the indicator using a whole population.
 	///
 	/// Empty for this Indicator
-	/// \param extractor Functor returning the fitness values
-	/// \param set The set of points.
-	template<typename Extractor, typename PointSet>
-	void updateInternals(Extractor extractor, PointSet const& set){
-		(void)extractor;
-		(void)set;
-	}
-
+	template<typename ParetoFrontType>
+	void updateInternals( ParetoFrontType const&){}
+		
 	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version ) {
-		(void)archive;
-		(void)version;
-	}
+	void serialize( Archive &, const unsigned int ) {}
 };
 
 }

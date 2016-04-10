@@ -33,7 +33,6 @@
 #include <shark/Algorithms/DirectSearch/Individual.h>
 
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ElitistSelection.h>
 
 
@@ -149,8 +148,8 @@ public:
 
 	/// \brief Executes one iteration of the algorithm.
 	void step(ObjectiveFunctionType const& function){
-
-		std::vector< Individual<RealVector, double, RealVector> > offspring( m_lambda );
+		typedef Individual<RealVector, double, RealVector> IndividualType;
+		std::vector< IndividualType > offspring( m_lambda );
 
 		PenalizingEvaluator penalizingEvaluator;
 		for( std::size_t i = 0; i < offspring.size(); i++ ) {
@@ -159,8 +158,8 @@ public:
 		penalizingEvaluator( function, offspring.begin(), offspring.end() );
 
 		// Selection
-		std::vector< Individual<RealVector, double, RealVector> > parents( m_mu );
-		ElitistSelection<FitnessExtractor> selection;
+		std::vector< IndividualType > parents( m_mu );
+		ElitistSelection<IndividualType::FitnessOrdering> selection;
 		selection(offspring.begin(),offspring.end(),parents.begin(), parents.end());
 		// Strategy parameter update
 		m_counter++; // increase generation counter

@@ -33,7 +33,6 @@
 
 #include <shark/Core/Exception.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ElitistSelection.h>
 #include <shark/Algorithms/DirectSearch/CrossEntropyMethod.h>
 
@@ -182,7 +181,7 @@ void CrossEntropyMethod::updateStrategyParameters( const std::vector<Individual<
 */
 void CrossEntropyMethod::step(ObjectiveFunctionType const& function){
 
-	std::vector< Individual<RealVector, double> > offspring( m_populationSize );
+	std::vector< IndividualType > offspring( m_populationSize );
 
 	PenalizingEvaluator penalizingEvaluator;
 	for( std::size_t i = 0; i < offspring.size(); i++ ) {
@@ -198,7 +197,7 @@ void CrossEntropyMethod::step(ObjectiveFunctionType const& function){
 
 	// Selection
 	std::vector< Individual<RealVector, double> > parents( m_selectionSize );
-	ElitistSelection<FitnessExtractor> selection;
+	ElitistSelection< IndividualType::FitnessOrdering > selection;
 	selection(offspring.begin(),offspring.end(),parents.begin(), parents.end());
 	// Strategy parameter update
 	m_counter++; // increase generation counter

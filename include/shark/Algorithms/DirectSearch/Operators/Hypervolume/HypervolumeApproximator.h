@@ -32,7 +32,6 @@
 #ifndef HYPERVOLUME_APPROXIMATOR_H
 #define HYPERVOLUME_APPROXIMATOR_H
 
-#include <shark/Algorithms/DirectSearch/FitnessExtractor.h>
 #include <shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h>
 #include <shark/Statistics/Distributions/MultiNomialDistribution.h>
 

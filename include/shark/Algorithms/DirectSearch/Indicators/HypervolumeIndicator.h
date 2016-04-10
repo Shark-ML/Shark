@@ -29,128 +29,70 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMEINDICATOR_H
-#define SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMEINDICATOR_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_HYPERVOLUMEINDICATOR_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_HYPERVOLUMEINDICATOR_H
 
 #include <shark/Core/Exception.h>
 #include <shark/Core/OpenMP.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
-#include <shark/LinAlg/Base.h>
 
 #include <algorithm>
 #include <vector>
 
 namespace shark {
 
-/**
-*  \brief Calculates the hypervolume covered by a front of non-dominated points.
-*/
+///  \brief Calculates the hypervolume covered by a front of non-dominated points.
 struct HypervolumeIndicator {
 public:
 	
-	/**
-	* \brief Calculates the volume of a hyperfront using a reference point
-	*
-	* \param [in,out] extractor Extractor instance that maps elements of the front to \f$\mathbb{R}^d\f$.
-	* \param [in] front pareto front of points to calculate the hypervolume for. 
-	* \param [in] referencePoint reference for measuring the hypervolume
-	*/
-	template<typename Extractor, typename ParetoFrontType, typename VectorType>
-	double operator()( Extractor const& extractor, ParetoFrontType const& front, VectorType const& referencePoint) {
-		
-		if(front.empty()) return 0;
-
-		return (m_hv( boost::adaptors::transform(front, extractor), referencePoint) );
-	}
-
-	/**
-	* \brief Executes the algorithm and calls to an instance of HypervolumeCalculator.
-	*
-	* This version uses the reference point estimated by the last call to updateInternals.
-	*
-	* \param [in] extractor Extractor instance that maps elements of the front to \f$\mathbb{R}^d\f$.
-	* \param [in] front front of points to calculate the hypervolume for. 
-	*/
-	template<typename Extractor, typename ParetoFrontType>
-	double operator()( Extractor const& extractor, ParetoFrontType const& front) {
-		return (*this)( extractor, front, m_reference);
-	}
-		
-	/**
-	* \brief Determines the individual contributing the least to the front it belongs to.
-	*
-	* \param [in] extractor Maps the individuals to the objective space.
-	* \param [in] front The front of non-dominated individuals.
-	* \param [in] referencePoint reference for measuring the hypervolume
-	*/
-	template<typename Extractor, typename ParetoFrontType, typename VectorType>
-	std::size_t leastContributor( Extractor const& extractor, ParetoFrontType const& front, VectorType const& referencePoint)
+	/// \brief Determines the point contributing the least hypervolume to the overall front of points.
+	///
+	/// This version uses the reference point estimated by the last call to updateInternals.
+	///
+	/// \param [in] front pareto front of points
+	template<typename ParetoFrontType>
+	std::size_t leastContributor( ParetoFrontType const& front)
 	{
 		std::vector<double> indicatorValues( front.size() );
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
-
-			HypervolumeIndicator ind(*this);
-
-			ParetoFrontType copy( front );
+			std::vector<RealVector> copy( front.begin(), front.end() );
 			copy.erase( copy.begin() + i );
-
-			indicatorValues[i] = ind( extractor, copy,referencePoint);
+			
+			HypervolumeCalculator hv;
+			indicatorValues[i] = hv(copy,m_reference);
 		}
 
 		std::vector<double>::iterator it = std::max_element( indicatorValues.begin(), indicatorValues.end() );
 
-		return std::distance( indicatorValues.begin(), it );
-	}
-	
-	/**
-	 * \brief Determines the point contributing the least hypervolume to the overall front of points.
-	 *
-	 * This version uses the reference point estimated by the last call to updateInternals.
-	 * 
-	 * \param [in] extractor Extracts point information from front elements.
-	 * \param [in] front pareto front of points
-	 */
-	template<typename Extractor, typename ParetoFrontType>
-	std::size_t leastContributor( Extractor const& extractor, ParetoFrontType const& front)
-	{
-		return leastContributor(extractor,front,m_reference);
+		return it - indicatorValues.begin();
 	}
 	
 	/// \brief Updates the internal variables of the indicator using a whole population.
 	///
 	/// Calculates the reference point of the volume from the population
 	/// using the maximum value in every dimension+1
-	/// \param extractor Extracts point information from set.
-	/// \param set The set of points.
-	template<typename Extractor, typename PointSet>
-	void updateInternals(Extractor const& extractor, PointSet const& set){
+	///
+	/// \param [in] front pareto front of points
+	template<typename ParetoFrontType>
+	void updateInternals( ParetoFrontType const& front){
 		m_reference.clear();
-		if(set.empty()) return;
+		if(front.empty()) return;
 		
 		//calculate reference point
-		std::size_t noObjectives = extractor(set[0]).size();
+		std::size_t noObjectives = front[0].size();
 		m_reference.resize(noObjectives);
-		m_reference.clear();
 		
-		for( unsigned int i = 0; i < set.size(); i++ )
-			noalias(m_reference) = max(m_reference, extractor(set[i]));
+		for(auto const& point: front)
+			noalias(m_reference) = max(m_reference, point);
 		
 		noalias(m_reference) += 1.0;
 	}
 
-	/**
-	* \brief Serializes/Deserializes the state of the indicator to the supplied archive.
-	* \tparam Archive Archive type, needs to be a model of a boost::serialization archive.
-	* \param [in,out] archive Archive to store to/load from.
-	* \param [in] version Currently unused.
-	*/
 	template<typename Archive>
 	void serialize( Archive & archive, const unsigned int version ) {
-		archive & BOOST_SERIALIZATION_NVP( m_hv );
 		archive & BOOST_SERIALIZATION_NVP( m_reference );
 	}
 
-	HypervolumeCalculator m_hv;
 	RealVector m_reference;
 };
 }
