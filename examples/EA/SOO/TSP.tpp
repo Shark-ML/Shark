@@ -42,11 +42,10 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-
+#include <shark/Algorithms/DirectSearch/Operators/Recombination/PartiallyMappedCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/RouletteWheelSelection.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
+#include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 #include <shark/LinAlg/Base.h>
 
@@ -60,7 +59,7 @@
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/metric_tsp_approx.hpp>
 #include <boost/property_map/dynamic_property_map.hpp>
-#include <boost/range/algorithm_ext/iota.hpp>
+#include <numeric>//for iota
 
 using namespace shark;
 typedef IntVector Tour;
@@ -97,16 +96,11 @@ typedef Individual< Tour,double > IndividualType;
 typedef std::vector< IndividualType > Population;
 
 
-/**
- * \brief Calculates the cost of a tour w.r.t. to a cost matrix.
- */
+/// \brief Calculates the cost of a tour w.r.t. to a cost matrix.
 struct TspTourLength : public SingleObjectiveFunction{
-	typedef SingleObjectiveFunction base_type;
 
-	/**
-	 * \brief Default c'tor, initializes the cost matrix.
-	 */
-	TspTourLength( const RealMatrix & costMatrix = RealMatrix() ) : m_costMatrix( costMatrix )
+	/// \brief Default c'tor, initializes the cost matrix.
+	TspTourLength( RealMatrix const& costMatrix) : m_costMatrix( costMatrix )
 	{ }
 
 	std::string name() const
@@ -118,89 +112,18 @@ struct TspTourLength : public SingleObjectiveFunction{
 	/**
 	 * \brief Calculates the costs of the supplied tour.
 	 */
-	base_type::ResultType eval( const base_type::SearchPointType & input ) const {		    	    
+	ResultType eval( const SearchPointType & input ) const {		    	    
 		SIZE_CHECK( input.size() == m_costMatrix.size1() );
-	    m_evaluationCounter++;
-		base_type::ResultType result( 0 );
+		m_evaluationCounter++;
+		ResultType result(0);
 		for( std::size_t i = 0; i < input.size() - 1; i++ ) {
 			result += m_costMatrix( input( i ), input( i+1 ) );
 		}
-	    return( result );
+		return result;
 	}
 
 	RealMatrix m_costMatrix;
 };
-
-/**
- * @brief Implements partially mapped crossover
- * 
- * Makes sure that only correct tours on the graph
- * are generated.
- */
-struct PartiallyMappedCrossover {
-
-	/**
-	 * @brief Performs the crossover.
-	 *
-	 * @param [in] parent1 First parent individual.
-	 * @param [in] parent2 Second parent individual.
-	 * @returns A pair of offspring individuals.
-	 */
-	template<typename IndividualType>
-	std::pair<IndividualType, IndividualType> operator()(
-			const IndividualType & parent1,
-			const IndividualType & parent2 ) const
-	{
-		std::pair< IndividualType, IndividualType > offspring( parent1, parent2 );
-
-		const Tour & t1 = parent1.searchPoint();
-		const Tour & t2 = parent2.searchPoint();
-
-		std::size_t cuttingPoint1 = Rng::discrete( 0, t1.size() - 1 );
-		std::size_t cuttingPoint2 = Rng::discrete( 0, t2.size() - 1 );
-
-		while( cuttingPoint1 == cuttingPoint2 )
-			cuttingPoint2 = Rng::discrete( 0, t2.size() - 1 );
-
-		if( cuttingPoint1 > cuttingPoint2 )
-			std::swap( cuttingPoint1, cuttingPoint2 );
-
-		Tour r1( t1.size(), -1 ), r2( t2.size(), -1 );
-
-		for( std::size_t i = cuttingPoint1; i <= cuttingPoint2; i++ ) {
-			offspring.first.searchPoint()( i ) = t2( i );
-			offspring.second.searchPoint()( i ) = t1( i );
-
-			r1[ t2( i ) ] = t1( i );
-			r2[ t1( i ) ] = t2( i );
-		}
-
-		for( std::size_t i = 0; i < t1.size(); i++) {
-			if ((i >= cuttingPoint1) && (i <= cuttingPoint2)) continue;
-
-			std::size_t n1 = t1[i] ;
-			std::size_t m1 = r1[n1] ;
-
-			std::size_t n2 = t2[i] ;
-			std::size_t m2 = r2[n2] ;
-
-			while (m1 != std::numeric_limits<std::size_t>::max()) {
-				n1 = m1 ;
-				m1 = r1[m1] ;
-			}
-			while (m2 != std::numeric_limits<std::size_t>::max()) {
-				n2 = m2 ;
-				m2 = r2[m2] ;
-			}
-			offspring.first.searchPoint()[i] = n1 ;
-			offspring.second.searchPoint()[i] = n2 ;
-		}
-
-		return offspring;
-	}
-};
-
-
 
 int main( int argc, char ** argv ) {
 
@@ -240,7 +163,7 @@ int main( int argc, char ** argv ) {
 	// Mating selection operator
 	RouletteWheelSelection rws;
 	// Variation (crossover) operator
-	PartiallyMappedCrossover pmc;    
+	PartiallyMappedCrossover pmx;    
 	// Fitness function instance.
 	TspTourLength ttl( costMatrix );
 
@@ -255,7 +178,8 @@ int main( int argc, char ** argv ) {
 	Population offspring( lambda );
 
 	// Default tour: 0,...,9
-	Tour t( 10 ); boost::iota( t, 0 );
+	Tour t( 10 );
+	std::iota( t.begin(),t.end(), 0 );
 
 	// Initialize parents
 	for( std::size_t i = 0; i < parents.size(); i++ ) {
@@ -277,15 +201,9 @@ int main( int argc, char ** argv ) {
 		for( std::size_t i = 0; i < offspring.size() - 1; i+=2 ) {
 			// Carry out fitness proportional fitness selection and
 			// perform partially mapped crossover on parent individuals.
-			std::pair< 
-			IndividualType, 
-			IndividualType 
-			> result = pmc( 
-				*rws( Rng::globalRng, parents.begin(), parents.end(), selectionProbabilities ),
-				*rws( Rng::globalRng, parents.begin(), parents.end(), selectionProbabilities )
-			);
-			offspring[ i ] = result.first;
-			offspring[ i + 1 ] = result.second;
+			offspring[ i ] = *rws( Rng::globalRng, parents.begin(), parents.end(), selectionProbabilities );
+			offspring[ i+1 ] = *rws( Rng::globalRng, parents.begin(), parents.end(), selectionProbabilities );
+			pmx(Rng::globalRng, offspring[ i ], offspring[ i+1 ]);
 
 			// Evaluate offspring individuals.
 			offspring[ i ].penalizedFitness() = 
@@ -340,5 +258,5 @@ int main( int argc, char ** argv ) {
 	// Output approximate solution and corresponding fitness.
 	std::cout << "Approx: " << len << " vs. GA: " << parents.front().unpenalizedFitness() << std::endl;
 
-	return( EXIT_SUCCESS );
+	return EXIT_SUCCESS;
 }
