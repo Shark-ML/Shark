@@ -263,8 +263,8 @@ void CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
 	RealVector z( m_numberOfVariables, 0. );
 	RealVector m( m_numberOfVariables, 0. );
 	for( std::size_t j = 0; j < selectedOffspring.size(); j++ ){
-		noalias(z) += m_weights( j ) * selectedOffspring[j].chromosome();
-		noalias(m) += m_weights( j ) * selectedOffspring[j].searchPoint();
+		noalias(z) += m_weights( j ) * selectedOffspring[j].chromosome();// eq. (38)
+		noalias(m) += m_weights( j ) * selectedOffspring[j].searchPoint();// eq. (39)
 	}
 	RealVector y = (m - m_mean) / m_sigma;
 
