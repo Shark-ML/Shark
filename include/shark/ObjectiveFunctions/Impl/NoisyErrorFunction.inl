@@ -80,30 +80,51 @@ public:
 	}
 
 	double eval(RealVector const& input)const {
+		if(m_batchSize > 0){
+			//prepare batch for the current iteration
+			std::vector<std::size_t> indices(m_batchSize);
+			std::generate(indices.begin(),indices.end(),m_uni);
+			BatchDataType  batch = subBatch(m_dataset,indices);
+			
+			return evalForBatch(input,batch);
+		}else{
+			std::size_t batchIndex = Rng::discrete(0,m_dataset.dataset().numberOfBatches()-1);
+			return evalForBatch(input,m_dataset.dataset().batch(batchIndex));
+		}
+	}
+
+	ResultType evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative)const {
+		if(m_batchSize > 0){
+			//prepare batch for the current iteration
+			std::vector<std::size_t> indices(m_batchSize);
+			std::generate(indices.begin(),indices.end(),m_uni);
+			BatchDataType  batch = subBatch(m_dataset,indices);
+			
+			return evalDerivativeForBatch(input, derivative, batch);
+		}else{
+			std::size_t batchIndex = Rng::discrete(0,m_dataset.dataset().numberOfBatches()-1);
+			return evalDerivativeForBatch(input, derivative, m_dataset.dataset().batch(batchIndex));
+		}
+		
+		
+	}
+	
+private:
+	double evalForBatch(RealVector const& input, BatchDataType const& batch)const {
 		mep_model->setParameterVector(input);
-		
-		//prepare batch for the current iteration
-		std::vector<std::size_t> indices(m_batchSize);
-		std::generate(indices.begin(),indices.end(),m_uni);
-		BatchDataType  batch = subBatch(m_dataset,indices);
-		
+	
 		BatchOutputType predictions;
 		mep_model->eval(batch.input,predictions);
 
 		//calculate error derivative of the loss function
 		double error= mep_loss->eval(batch.label, predictions);
-		error /= m_batchSize;
+		error /= shark::size(batch);
 		return error;
 	}
-
-	ResultType evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative)const {
+	
+	ResultType evalDerivativeForBatch( SearchPointType const& input, FirstOrderDerivative & derivative, BatchDataType const& batch)const {
 		mep_model->setParameterVector(input);
 		boost::shared_ptr<State> state = mep_model->createState();
-		
-		//prepare batch for the current iteration
-		std::vector<std::size_t> indices(m_batchSize);
-		std::generate(indices.begin(),indices.end(),m_uni);
-		BatchDataType  batch = subBatch(m_dataset,indices);
 		
 		BatchOutputType predictions;
 		mep_model->eval(batch.input,predictions,*state);
@@ -115,10 +136,11 @@ public:
 		//chain rule
 		mep_model->weightedParameterDerivative(batch.input,errorDerivative,*state,derivative);
 	
-		error/=m_batchSize;
-		derivative /= double(m_batchSize);
+		error /= shark::size(batch);
+		derivative /= shark::size(batch);
 		return error;
 	}
+
 };
 }
 

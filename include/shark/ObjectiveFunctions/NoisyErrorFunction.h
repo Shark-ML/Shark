@@ -63,6 +63,10 @@ public:
 ///that only a fraction of the training examples is chosen randomly out of the set and
 ///thus noise is introduced. This can be used to perform stochastic gradient
 ///descent or to introduce some noise to a problem.
+///
+/// Setting the batch size to 0 is equivalent to performing minibatch learning
+/// where one random batch is picked from the dataset instead of sampling
+/// points from it
 class NoisyErrorFunction : public SingleObjectiveFunction
 {
 public:
