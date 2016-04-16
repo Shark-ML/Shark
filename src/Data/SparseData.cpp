@@ -6,11 +6,11 @@
  * 
  * 
  *
- * \author      O.Krause
- * \date        2013
+ * \author      O. Krause, T. Glasmachers
+ * \date        2013-2016
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -37,9 +37,11 @@
 #include <boost/fusion/adapted/std_pair.hpp>
 #include <shark/Data/SparseData.h>
 
+using namespace shark;
+
 namespace {
 
-typedef std::pair<int, std::vector<std::pair<std::size_t, double> > > LibSVMPoint;
+typedef std::pair<double, std::vector<std::pair<std::size_t, double> > > LibSVMPoint;
 inline std::vector<LibSVMPoint> 
 importSparseDataReader(
 	std::istream& stream
@@ -57,8 +59,7 @@ importSparseDataReader(
 		LibSVMPoint newPoint;
 		bool r = phrase_parse(
 			first, last, 
-			int_   >> -(lit('.')>>+lit('0'))//we also want to be able to parse 1.00000 as label 1
-				>> *(uint_ >> ':' >> double_),
+			double_ >> *(uint_ >> ':' >> double_),
 			space , newPoint
 		);
 		if(!r || first != last){
@@ -73,7 +74,7 @@ importSparseDataReader(
 }
 
 template<class T>//We assume T to be vectorial
-shark::LabeledData<T, unsigned int> libsvm_importer(
+shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 	std::istream& stream,
 	unsigned int dimensions,
 	std::size_t batchSize
@@ -101,6 +102,8 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 		int maxPositiveLabel = -1;
 		for(std::size_t i = 0; i != numPoints; ++i){
 			int label = contents[i].first;
+			if (label != contents[i].first)
+				throw SHARKEXCEPTION("non-integer labels are only allows for regression");
 			if(label < -1)
 				throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
 			else if(label == -1)
@@ -138,7 +141,63 @@ shark::LabeledData<T, unsigned int> libsvm_importer(
 			element.input.clear();
 			//todo: check label
 			//we subtract minPositiveLabel to ensure that class indices starting from 0 and 1 are supported
-			element.label = binaryLabels? 1 + (contents[i].first-1)/2 : contents[i].first-minPositiveLabel;
+			int label = static_cast<int>(contents[i].first);
+			element.label = binaryLabels? 1 + (label-1)/2 : label-minPositiveLabel;
+
+			std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
+			for(std::size_t j = 0; j != inputs.size(); ++j)
+				element.input(inputs[j].first - delta) = inputs[j].second;//LibSVM is one-indexed
+			++i;
+		}
+	}
+	return data;
+}
+
+template<class T>//We assume T to be vectorial
+shark::LabeledData<T, RealVector> libsvm_importer_regression(
+	std::istream& stream,
+	unsigned int dimensions,
+	std::size_t batchSize
+){
+	//read contents of stream
+	std::vector<LibSVMPoint> contents = importSparseDataReader(stream);
+	std::size_t numPoints = contents.size();
+	
+	//find data dimension by getting the maximum index
+	std::size_t maxIndex = 0;
+	for(std::size_t i = 0; i != numPoints; ++i){
+		std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
+		if(!inputs.empty())
+			maxIndex = std::max(maxIndex, inputs.back().first);
+	}
+	maxIndex = std::max<std::size_t>(maxIndex,dimensions);
+	if(dimensions > 0 && maxIndex > dimensions){
+		throw SHARKEXCEPTION("number of dimensions supplied is smaller than actual index data");
+	}
+
+	// check for feature index zero (non-standard, but it happens)
+	bool haszero = false;
+	for (std::size_t i=0; i<numPoints; i++)
+	{
+		std::vector<std::pair<std::size_t, double> > const& input = contents[i].second;
+		if (input.empty()) continue;
+		if (input[0].first == 0)
+		{
+			haszero = true;
+			break;
+		}
+	}
+
+	//copy contents into a new dataset
+	typename shark::LabeledData<T, RealVector>::element_type blueprint(T(maxIndex + (haszero ? 1 : 0)), RealVector(1));
+	shark::LabeledData<T, RealVector> data(numPoints, blueprint, batchSize);//create dataset with the right structure
+	{
+		size_t delta = (haszero ? 0 : 1);
+		std::size_t i = 0;
+		typedef typename shark::LabeledData<T, RealVector>::element_reference ElemRef;
+		BOOST_FOREACH(ElemRef element, data.elements()) {
+			element.input.clear();
+			element.label = RealVector(1, contents[i].first);
 
 			std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
 			for(std::size_t j = 0; j != inputs.size(); ++j)
@@ -157,7 +216,16 @@ void shark::importSparseData(
 	unsigned int highestIndex,
 	std::size_t batchSize
 ){
-	dataset =  libsvm_importer<RealVector>(stream, highestIndex,batchSize);
+	dataset =  libsvm_importer_classification<RealVector>(stream, highestIndex, batchSize);
+}
+
+void shark::importSparseData(
+	LabeledData<RealVector, RealVector>& dataset,
+	std::istream& stream,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	dataset =  libsvm_importer_regression<RealVector>(stream, highestIndex, batchSize);
 }
 
 void shark::importSparseData(
@@ -166,9 +234,17 @@ void shark::importSparseData(
 	unsigned int highestIndex,
 	std::size_t batchSize
 ){
-	dataset =  libsvm_importer<CompressedRealVector>(stream, highestIndex,batchSize);
+	dataset =  libsvm_importer_classification<CompressedRealVector>(stream, highestIndex, batchSize);
 }
 
+void shark::importSparseData(
+	LabeledData<CompressedRealVector, RealVector>& dataset,
+	std::istream& stream,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	dataset =  libsvm_importer_regression<CompressedRealVector>(stream, highestIndex, batchSize);
+}
 
 void shark::importSparseData(
 	LabeledData<RealVector, unsigned int>& dataset,
@@ -178,7 +254,18 @@ void shark::importSparseData(
 ){
 	std::ifstream ifs(fn.c_str());
 	if (! ifs.good()) throw SHARKEXCEPTION("[shark::importSparseData] failed to open file for input");
-	dataset =  libsvm_importer<RealVector>(ifs, highestIndex,batchSize);
+	dataset =  libsvm_importer_classification<RealVector>(ifs, highestIndex, batchSize);
+}
+
+void shark::importSparseData(
+	LabeledData<RealVector, RealVector>& dataset,
+	std::string fn,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	std::ifstream ifs(fn.c_str());
+	if (! ifs.good()) throw SHARKEXCEPTION("[shark::importSparseData] failed to open file for input");
+	dataset =  libsvm_importer_regression<RealVector>(ifs, highestIndex, batchSize);
 }
 
 void shark::importSparseData(
@@ -189,5 +276,16 @@ void shark::importSparseData(
 ){
 	std::ifstream ifs(fn.c_str());
 	if (! ifs.good()) throw SHARKEXCEPTION("[shark::importSparseData] failed to open file for input");
-	dataset =  libsvm_importer<CompressedRealVector>(ifs, highestIndex,batchSize);
+	dataset =  libsvm_importer_classification<CompressedRealVector>(ifs, highestIndex, batchSize);
+}
+
+void shark::importSparseData(
+	LabeledData<CompressedRealVector, RealVector>& dataset,
+	std::string fn,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	std::ifstream ifs(fn.c_str());
+	if (! ifs.good()) throw SHARKEXCEPTION("[shark::importSparseData] failed to open file for input");
+	dataset =  libsvm_importer_regression<CompressedRealVector>(ifs, highestIndex, batchSize);
 }

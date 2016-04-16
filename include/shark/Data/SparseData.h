@@ -13,10 +13,10 @@
  * 
  *
  * \author      M. Tuma, T. Glasmachers, C. Igel
- * \date        2010
+ * \date        2010-2016
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -64,7 +64,7 @@ static inline bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortP
 
 
 
-/// \brief Import data from a sparse data (libSVM) file.
+/// \brief Import classification data from a sparse data (libSVM) file.
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  stream        stream to be read from
@@ -77,7 +77,20 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 );
 
-/// \brief Import data from a sparse data (libSVM) file.
+/// \brief Import regression data from a sparse data (libSVM) file.
+///
+/// \param  dataset       container storing the loaded data
+/// \param  stream        stream to be read from
+/// \param  highestIndex  highest feature index, or 0 for auto-detection
+/// \param  batchSize     size of batch
+SHARK_EXPORT_SYMBOL void importSparseData(
+	LabeledData<RealVector, RealVector>& dataset,
+	std::istream& stream,
+	unsigned int highestIndex = 0,
+	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+);
+
+/// \brief Import classification data from a sparse data (libSVM) file.
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  stream        stream to be read from
@@ -90,7 +103,20 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 );
 
-/// \brief Import data from a sparse data (libSVM) file.
+/// \brief Import regression data from a sparse data (libSVM) file.
+///
+/// \param  dataset       container storing the loaded data
+/// \param  stream        stream to be read from
+/// \param  highestIndex  highest feature index, or 0 for auto-detection
+/// \param  batchSize     size of batch
+SHARK_EXPORT_SYMBOL void importSparseData(
+	LabeledData<CompressedRealVector, RealVector>& dataset,
+	std::istream& stream,
+	unsigned int highestIndex = 0,
+	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+);
+
+/// \brief Import classification data from a sparse data (libSVM) file.
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  fn            the file to be read from
@@ -103,7 +129,20 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 );
 
-/// \brief Import data from a sparse data (libSVM) file.
+/// \brief Import regression data from a sparse data (libSVM) file.
+///
+/// \param  dataset       container storing the loaded data
+/// \param  fn            the file to be read from
+/// \param  highestIndex  highest feature index, or 0 for auto-detection
+/// \param  batchSize     size of batch
+SHARK_EXPORT_SYMBOL void importSparseData(
+	LabeledData<RealVector, RealVector>& dataset,
+	std::string fn,
+	unsigned int highestIndex = 0,
+	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+);
+
+/// \brief Import classification data from a sparse data (libSVM) file.
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  fn            the file to be read from
@@ -116,12 +155,25 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 );
 
+/// \brief Import regression data from a sparse data (libSVM) file.
+///
+/// \param  dataset       container storing the loaded data
+/// \param  fn            the file to be read from
+/// \param  highestIndex  highest feature index, or 0 for auto-detection
+/// \param  batchSize     size of batch
+SHARK_EXPORT_SYMBOL void importSparseData(
+	LabeledData<CompressedRealVector, RealVector>& dataset,
+	std::string fn,
+	unsigned int highestIndex = 0,
+	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+);
 
-/// \brief Export data to sparse data (libSVM) format.
+
+/// \brief Export classification data to sparse data (libSVM) format.
 ///
 /// \param  dataset     Container storing the  data
 /// \param  fn          Output file
-/// \param  dense       Flag for using dense output format
+/// \param  dense       Flag for writing all components, including zeros
 /// \param  oneMinusOne Flag for applying the transformation y<-2y-1 to binary labels
 /// \param  sortLabels  Flag for sorting data points according to labels
 /// \param  append      Flag for appending to the output file instead of overwriting it
@@ -145,7 +197,7 @@ void exportSparseData(LabeledData<InputType, unsigned int>& dataset, const std::
 	if(numberOfClasses(dataset)!=2) oneMinusOne = false;
 
 	std::vector<detail::LabelSortPair> L;
-	if(sortLabels) {
+	if (sortLabels) {
 		for(std::size_t i = 0; i < elements; i++) 
 			L.push_back(detail::LabelSortPair(dataset.element(i).label, i));
 		std::sort (L.begin(), L.end(), detail::cmpLabelSortPair);
@@ -168,6 +220,47 @@ void exportSparseData(LabeledData<InputType, unsigned int>& dataset, const std::
 				ofs << " " << j+1 << ":" << dataset.element(i).input(j);
 		}
 		ofs << std::endl;
+	}
+}
+
+/// \brief Export regression data to sparse data (libSVM) format.
+///
+/// \param  dataset     Container storing the  data
+/// \param  fn          Output file
+/// \param  dense       Flag for writing all components, including zeros
+/// \param  append      Flag for appending to the output file instead of overwriting it
+template<typename InputType>
+void exportSparseData(LabeledData<InputType, RealVector>& dataset, const std::string &fn, bool dense=false, bool append = false) {
+	std::ofstream ofs;
+
+	// shall we append only or overwrite?
+	if (append == true) {
+		ofs.open (fn.c_str(), std::fstream::out | std::fstream::app );
+	} else {
+		ofs.open (fn.c_str());
+	}
+
+	if( !ofs ) {
+		throw( SHARKEXCEPTION( "[exportSparseData] file can not be opened for writing" ) );
+	}
+
+	size_t dim = inputDimension(dataset);
+
+	for (std::size_t b=0; b<dataset.numberOfBatches(); b++)
+	{
+		typename LabeledData<InputType, RealVector>::const_batch_reference batch = dataset.batch(b);
+		for (std::size_t i=0; i<boost::size(batch); i++)
+		{
+			ofs << get(batch, i).label << " ";
+			// todo: for sparse vectors loop only over non-zero entries
+			for (std::size_t j=0; j<dim; j++) {
+				if (dense) 
+					ofs << " " << j+1 << ":" << get(batch, i).input(j);
+				else if (dataset.element(i).input(j) != 0) 
+					ofs << " " << j+1 << ":" << get(batch, i).input(j);
+			}
+			ofs << std::endl;
+		}
 	}
 }
 
