@@ -43,31 +43,27 @@ namespace {
 
 typedef std::pair<double, std::vector<std::pair<std::size_t, double> > > LibSVMPoint;
 inline std::vector<LibSVMPoint> 
-importSparseDataReader(
-	std::istream& stream
-) {	
-	std::vector<LibSVMPoint>  fileContents;
-	while(stream){
+importSparseDataReader(std::istream& stream) {
+	std::vector<LibSVMPoint> fileContents;
+	while(stream) {
 		std::string line;
-		std::getline(stream,line);
-		if(line.empty()) continue;
-		
+		std::getline(stream, line);
+		if (line.empty()) continue;
+
 		using namespace boost::spirit::qi;
 		std::string::const_iterator first = line.begin();
 		std::string::const_iterator last = line.end();
-		
+
 		LibSVMPoint newPoint;
 		bool r = phrase_parse(
 			first, last, 
 			double_ >> *(uint_ >> ':' >> double_),
-			space , newPoint
+			space, newPoint
 		);
-		if(!r || first != last){
-			std::cout<<std::string(first,last)<<std::endl;
-			throw SHARKEXCEPTION("[importSparseDataReader] problems parsing file");
-		
+		if (!r || first != last) {
+			throw SHARKEXCEPTION("[importSparseDataReader] failed to parse record: " + line);
 		}
-		
+
 		fileContents.push_back(newPoint);
 	}
 	return fileContents;
@@ -171,7 +167,7 @@ shark::LabeledData<T, RealVector> libsvm_importer_regression(
 			maxIndex = std::max(maxIndex, inputs.back().first);
 	}
 	maxIndex = std::max<std::size_t>(maxIndex,dimensions);
-	if(dimensions > 0 && maxIndex > dimensions){
+	if (dimensions > 0 && maxIndex > dimensions) {
 		throw SHARKEXCEPTION("number of dimensions supplied is smaller than actual index data");
 	}
 
