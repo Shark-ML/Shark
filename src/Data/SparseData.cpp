@@ -97,7 +97,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 	{
 		int maxPositiveLabel = -1;
 		for(std::size_t i = 0; i != numPoints; ++i){
-			int label = contents[i].first;
+			int label = static_cast<int>(contents[i].first);
 			if (label != contents[i].first)
 				throw SHARKEXCEPTION("non-integer labels are only allows for regression");
 			if(label < -1)

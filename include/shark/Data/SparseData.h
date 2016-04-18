@@ -47,15 +47,6 @@
 
 namespace shark {
 
-namespace detail {
-
-typedef std::pair< unsigned int, size_t > LabelSortPair;
-static inline bool cmpLabelSortPair(const  LabelSortPair& left, const LabelSortPair& right) {
-	return left.first > right.first; // for sorting in decreasing order
-}
-
-} // namespace detail
-
 /**
  * \ingroup shark_globals
  *
@@ -173,39 +164,45 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 ///
 /// \param  dataset     Container storing the  data
 /// \param  stream      Output stream
-/// \param  dense       Flag for writing all components, including zeros
 /// \param  oneMinusOne Flag for applying the transformation y<-2y-1 to binary labels
 /// \param  sortLabels  Flag for sorting data points according to labels
 template<typename InputType>
-void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, std::ostream& stream, bool dense=false, bool oneMinusOne = true, bool sortLabels = false)
+void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, std::ostream& stream, bool oneMinusOne = true, bool sortLabels = false)
 {
 	std::size_t elements = dataset.numberOfElements();
 
 	size_t dim = inputDimension(dataset);
 	if(numberOfClasses(dataset)!=2) oneMinusOne = false;
 
-	std::vector<detail::LabelSortPair> L;
-	if (sortLabels) {
-		for(std::size_t i = 0; i < elements; i++) 
-			L.push_back(detail::LabelSortPair(dataset.element(i).label, i));
-		std::sort (L.begin(), L.end(), detail::cmpLabelSortPair);
+	std::vector< std::pair<std::size_t, std::size_t> > order;
+	for (std::size_t b=0; b<dataset.numberOfBatches(); b++)
+	{
+		auto batch = dataset.batch(b);
+		for (std::size_t i=0; i<boost::size(batch); i++)
+		{
+			order.push_back(std::make_pair(b, i));
+		}
+	}
+	if (sortLabels)
+	{
+		std::sort(order.begin(), order.end(),
+				[&dataset] (std::pair<std::size_t, std::size_t> const& lhs, std::pair<std::size_t, std::size_t> const& rhs)
+				{
+					return (get(dataset.batch(lhs.first), lhs.second).label < get(dataset.batch(lhs.first), lhs.second).label);
+				}
+			);
 	}
 
-	for(std::size_t ii = 0; ii < elements; ii++) {
-		// apply mapping to sorted indices
-		std::size_t i = 0;
-		if(sortLabels) i = L[ii].second;
-		else i = ii;
+	for (std::size_t i=0; i<order.size(); i++)
+	{
+		auto element = get(dataset.batch(order[i].first), order[i].second);
 		// apply transformation to label and write it to file
-		if(oneMinusOne) stream << 2*int(dataset.element(i).label)-1 << " ";
+		if (oneMinusOne) stream << 2*int(element.label)-1 << " ";
 		//libsvm file format documentation is scarce, but by convention the first class seems to be 1..
-		else stream << dataset.element(i).label+1 << " ";
+		else stream << element.label+1 << " ";
 		// write input data to file
 		for(std::size_t j=0; j<dim; j++) {
-			if(dense) 
-				stream << " " << j+1 << ":" <<dataset.element(i).input(j);
-			else if(dataset.element(i).input(j) != 0) 
-				stream << " " << j+1 << ":" << dataset.element(i).input(j);
+			stream << " " << j+1 << ":" << element.input(j);
 		}
 		stream << std::endl;
 	}
@@ -215,12 +212,11 @@ void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, std::
 ///
 /// \param  dataset     Container storing the data
 /// \param  fn          Output file name
-/// \param  dense       Flag for writing all components, including zeros
 /// \param  oneMinusOne Flag for applying the transformation y<-2y-1 to binary labels
 /// \param  sortLabels  Flag for sorting data points according to labels
 /// \param  append      Flag for appending to the output file instead of overwriting it
 template<typename InputType>
-void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, const std::string &fn, bool dense=false, bool oneMinusOne = true, bool sortLabels = false, bool append = false)
+void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, const std::string &fn, bool oneMinusOne = true, bool sortLabels = false, bool append = false)
 {
 	std::ofstream ofs;
 
@@ -235,16 +231,15 @@ void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, const
 		throw( SHARKEXCEPTION( "[exportSparseData] file can not be opened for writing" ) );
 	}
 
-	exportSparseData(dataset, ofs, dense, oneMinusOne, sortLabels);
+	exportSparseData(dataset, ofs, oneMinusOne, sortLabels);
 }
 
 /// \brief Export regression data to sparse data (libSVM) format.
 ///
 /// \param  dataset     Container storing the data
 /// \param  stream      Output stream
-/// \param  dense       Flag for writing all components, including zeros
 template<typename InputType>
-void exportSparseData(LabeledData<InputType, RealVector> const& dataset, std::ostream& stream, bool dense=false)
+void exportSparseData(LabeledData<InputType, RealVector> const& dataset, std::ostream& stream)
 {
 	size_t dim = inputDimension(dataset);
 
@@ -256,19 +251,9 @@ void exportSparseData(LabeledData<InputType, RealVector> const& dataset, std::os
 			auto element = get(batch, i);
 			SHARK_ASSERT(element.label.size() == 1);
 			stream << element.label(0) << " ";
-			if (dense)
+			for (auto it = element.input.begin(); it != element.input.end(); ++it)
 			{
-				for (std::size_t j=0; j<dim; j++)
-				{
-					stream << " " << j+1 << ":" << element.input(j);
-				}
-			}
-			else
-			{
-				for (auto it = element.input.begin(); it != element.input.end(); ++it)
-				{
-					stream << " " << it.index()+1 << ":" << *it;
-				}
+				stream << " " << it.index()+1 << ":" << *it;
 			}
 			stream << std::endl;
 		}
@@ -279,10 +264,9 @@ void exportSparseData(LabeledData<InputType, RealVector> const& dataset, std::os
 ///
 /// \param  dataset     Container storing the  data
 /// \param  fn          Output file
-/// \param  dense       Flag for writing all components, including zeros
 /// \param  append      Flag for appending to the output file instead of overwriting it
 template<typename InputType>
-void exportSparseData(LabeledData<InputType, RealVector> const& dataset, const std::string &fn, bool dense=false, bool append = false)
+void exportSparseData(LabeledData<InputType, RealVector> const& dataset, const std::string &fn, bool append = false)
 {
 	std::ofstream ofs;
 
@@ -297,7 +281,7 @@ void exportSparseData(LabeledData<InputType, RealVector> const& dataset, const s
 		throw( SHARKEXCEPTION( "[exportSparseData] file can not be opened for writing" ) );
 	}
 
-	exportSparseData(dataset, ofs, dense);
+	exportSparseData(dataset, ofs);
 }
 
 /** @}*/
