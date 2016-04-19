@@ -99,6 +99,7 @@ shark_add_test( Algorithms/DirectSearch/RealCodedNSGAII.cpp DirectSearch_RealCod
 shark_add_test( Algorithms/DirectSearch/SMS-EMOA.cpp DirectSearch_SMS-EMOA )
 shark_add_test( Algorithms/DirectSearch/NonDominatedSort.cpp DirectSearch_NonDominatedSort )
 shark_add_test( Algorithms/DirectSearch/ParetoDominance.cpp DirectSearch_ParetoDominance )
+shark_add_test( Algorithms/DirectSearch/Operators/HypervolumeSubsetSelection.cpp DirectSearch_HypervolumeSubsetSelection )
 
 # Direct Search Operator tests
 shark_add_test( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
