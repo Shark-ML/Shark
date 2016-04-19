@@ -42,8 +42,9 @@
 #define SHARK_DATA_SPARSEDATA_H
 
 #include <shark/Core/DLLSupport.h>
-#include <fstream>
+#include <shark/Core/utility/KeyValuePair.h>
 #include <shark/Data/Dataset.h>
+#include <fstream>
 
 namespace shark {
 
@@ -171,38 +172,39 @@ void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, std::
 {
 	std::size_t elements = dataset.numberOfElements();
 
-	size_t dim = inputDimension(dataset);
-	if(numberOfClasses(dataset)!=2) oneMinusOne = false;
+	if (numberOfClasses(dataset) != 2) oneMinusOne = false;
 
-	std::vector< std::pair<std::size_t, std::size_t> > order;
+	std::vector< KeyValuePair<unsigned int, std::pair<std::size_t, std::size_t> > > order;
 	for (std::size_t b=0; b<dataset.numberOfBatches(); b++)
 	{
 		auto batch = dataset.batch(b);
 		for (std::size_t i=0; i<boost::size(batch); i++)
 		{
-			order.push_back(std::make_pair(b, i));
+			order.push_back(makeKeyValuePair(get(batch, i).label, std::make_pair(b, i)));
 		}
 	}
 	if (sortLabels)
 	{
-		std::sort(order.begin(), order.end(),
-				[&dataset] (std::pair<std::size_t, std::size_t> const& lhs, std::pair<std::size_t, std::size_t> const& rhs)
-				{
-					return (get(dataset.batch(lhs.first), lhs.second).label < get(dataset.batch(lhs.first), lhs.second).label);
-				}
-			);
+		std::sort(order.begin(), order.end());
+//		std::sort(order.begin(), order.end(),
+//				[&dataset] (std::pair<std::size_t, std::size_t> const& lhs, std::pair<std::size_t, std::size_t> const& rhs)
+//				{
+//					return (get(dataset.batch(lhs.first), lhs.second).label < get(dataset.batch(lhs.first), lhs.second).label);
+//				}
+//			);
 	}
 
-	for (std::size_t i=0; i<order.size(); i++)
+	for (auto const& p : order)
 	{
-		auto element = get(dataset.batch(order[i].first), order[i].second);
+		auto element = get(dataset.batch(p.value.first), p.value.second);
 		// apply transformation to label and write it to file
 		if (oneMinusOne) stream << 2*int(element.label)-1 << " ";
 		//libsvm file format documentation is scarce, but by convention the first class seems to be 1..
 		else stream << element.label+1 << " ";
 		// write input data to file
-		for(std::size_t j=0; j<dim; j++) {
-			stream << " " << j+1 << ":" << element.input(j);
+		for (auto it = element.input.begin(); it != element.input.end(); ++it)
+		{
+			stream << " " << it.index()+1 << ":" << *it;
 		}
 		stream << std::endl;
 	}
@@ -241,8 +243,6 @@ void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, const
 template<typename InputType>
 void exportSparseData(LabeledData<InputType, RealVector> const& dataset, std::ostream& stream)
 {
-	size_t dim = inputDimension(dataset);
-
 	for (std::size_t b=0; b<dataset.numberOfBatches(); b++)
 	{
 		auto batch = dataset.batch(b);
@@ -250,7 +250,7 @@ void exportSparseData(LabeledData<InputType, RealVector> const& dataset, std::os
 		{
 			auto element = get(batch, i);
 			SHARK_ASSERT(element.label.size() == 1);
-			stream << element.label(0) << " ";
+			stream << element.label(0);
 			for (auto it = element.input.begin(); it != element.input.end(); ++it)
 			{
 				stream << " " << it.index()+1 << ":" << *it;
