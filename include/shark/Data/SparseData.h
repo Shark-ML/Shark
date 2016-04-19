@@ -170,8 +170,6 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 template<typename InputType>
 void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, std::ostream& stream, bool oneMinusOne = true, bool sortLabels = false)
 {
-	std::size_t elements = dataset.numberOfElements();
-
 	if (numberOfClasses(dataset) != 2) oneMinusOne = false;
 
 	std::vector< KeyValuePair<unsigned int, std::pair<std::size_t, std::size_t> > > order;
@@ -186,12 +184,6 @@ void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, std::
 	if (sortLabels)
 	{
 		std::sort(order.begin(), order.end());
-//		std::sort(order.begin(), order.end(),
-//				[&dataset] (std::pair<std::size_t, std::size_t> const& lhs, std::pair<std::size_t, std::size_t> const& rhs)
-//				{
-//					return (get(dataset.batch(lhs.first), lhs.second).label < get(dataset.batch(lhs.first), lhs.second).label);
-//				}
-//			);
 	}
 
 	for (auto const& p : order)
