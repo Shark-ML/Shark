@@ -39,6 +39,12 @@ namespace shark {
 /// This algorithm solves the problem of selecting a subset of points with largest hypervolume in 2D.
 /// The algorithm has complexity n (k+log(n)) 
 ///
+/// While this algorithm accepts fronts with dominated points in it, the caller has to ensure
+/// that after domination checks there are at least as many points left as there are to select. The
+/// Algorithm will throw an exception otherwise.
+///
+/// This can easily be ensured by removing the nondominated points prior to calling this function.
+///
 /// The algorithm is described in:
 /// Bringmann, Karl, Tobias Friedrich, and Patrick Klitzke. 
 /// "Two-dimensional subset selection for hypervolume and epsilon-indicator."
@@ -238,6 +244,11 @@ private:
 	}
 public:
 	/// \brief Executes the algorithm.
+	/// While this algorithm in general accepts fronts with dominated points in it, the caller has to ensure
+	/// that after domination checks there are at least as many points left as there are to select. The
+	/// Algorithm will throw an exception otherwise.
+	///
+	/// This can easily be ensured by removing the nondominated points prior to calling this function.
 	/// \param [in] points The set \f$S\f$ of points to select
 	/// \param [out] selected set of the same size as the set of points indicating whether the point is selected (1) or not (0)
 	/// \param [in] k number of points to select. Must be lrger than 0
@@ -268,13 +279,18 @@ public:
 	/// \brief Executes the algorithm.
 	///
 	/// This version does not use a reference point. instead the extreme points are always kept which  implicitely defines a reference point
+	/// that after domination checks there are at least as many points left as there are to select. The
+	/// Algorithm will throw an exception otherwise.
+	///
+	/// This can easily be ensured by removing the nondominated points prior to calling this function.
+	///
 	/// \param [in] points The set \f$S\f$ of points to select
 	/// \param [out] selected set of the same size as the set of points indicating whether the point is selected (1) or not (0)
-	/// \param [in] k number of points to select, must be larger than 2
+	/// \param [in] k number of points to select, must be larger or equal 2
 	template<typename Set, typename SelectedSet>
 	void operator()( Set const& points, SelectedSet& selected, std::size_t k){
 		SIZE_CHECK(points.size() == selected.size());
-		SHARK_CHECK( k > 2, "[HypervolumeSubsetSelection2D] k must be larger than 2");
+		SHARK_CHECK( k >= 2, "[HypervolumeSubsetSelection2D] k must be larger or equal 2");
 		SHARK_CHECK( k <= points.size(), "[HypervolumeSubsetSelection2D] the number of points mjust be larger than k");
 		SIZE_CHECK(points.size() == selected.size());
 		SIZE_CHECK( points.begin()->size() == 2 );
@@ -299,6 +315,7 @@ public:
 		selected[front.back().index] = true;
 		front.pop_back();
 		front.erase(front.begin(),front.begin()+1);
+		if(k == 2) return;
 		
 		//find the optimal set in the front. afterwards selected points have selected=true
 		hypSSP(front,k-2);
