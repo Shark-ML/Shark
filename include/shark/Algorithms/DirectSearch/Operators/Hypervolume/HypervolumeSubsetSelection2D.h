@@ -1,7 +1,7 @@
 /*!
  *
- * \author      O.Krause, T. Glasmachers
- * \date        2014-2016
+ * \author      O.Krause
+ * \date        2016
  *
  *
  * \par Copyright 1995-2016 Shark Development Team
@@ -72,7 +72,19 @@ private:
 	
 	///\brief Linear function a*x+b where a is stored in first and b is stored in section.
 	///
-	/// The linear function also stores an index to uniquely identify it
+	/// The linear function also stores an index to uniquely identify it.
+	///
+	/// Linear functions are used in the algorithm to represent the 
+	/// volume of a given set of points under the change of reference point.
+	/// more formally, let H^l_i be the volume of a set of points of size l with largest
+	/// x-value at the point (x_i,y_i) and reference point x_i(thus H^l_i can only use points
+	/// 1,...,i). 
+	/// Then for x>x_i we have
+	/// f_i^l(x) = H_i^l+ y_i(x_i-x)=-x*y_i+y_i*x_i+H = a*x+b. 
+	/// Later the algorithm will use an upper envelope over a set of those functions
+	/// to decide which points to add to the sets until the size of the sets is k.
+	///
+	/// for this application the stored index is the same as index i of the point stated above.
 	struct LinearFunction{
 	
 		double a;
@@ -95,13 +107,14 @@ private:
 	
 	/// \brief  Calculates for each given x the maximum among the functions f, i.e. the upper envelope of f.
 	/// 
-	/// Algoruthm 2 in the paper. Complexity O(n)
-	/// given a set of functions f_1...f_n, ordered by slope such that f_1.a < f_2.a<... and points with x-coordinate x_1<...<x_n
-	/// computes h_i = max_{1 <= j < i} f_j(x_i) for i=1,...,n as well as the index of the function leading to the value h_i
+	/// Algorithm 2 in the paper. Complexity O(n)
+	/// given a set of functions f_1...f_n, ordered by slope such that f_1.a < f_2.a<...<f_n.a and points with x-coordinate x_1<...<x_n
+	/// computes h_i = max_{1 <= j <= i} f_j(x_i) for i=1,...,n as well as the index of the function leading to the value h_i
 	std::pair<std::vector<double>,std::vector<std::size_t> > upperEnvelope(
 		std::vector<LinearFunction>const& functions,
 		std::vector<Point> const& points
 	)const{
+		SHARK_ASSERT(functions.size() == points.size());
 		std::size_t n = points.size();
 		std::vector<double> h(n);
 		std::vector<std::size_t> chosen(n);
@@ -169,9 +182,13 @@ private:
 	}
 	
 	
-	/// Fast calculation O(n*k) for the hypervolume selection problem
-	/// returns the selected points
+	/// Fast calculation O(n*k) for the hypervolume selection problem. 
+	/// for the selected points, it sets selected=true.
 	void hypSSP(std::vector<Point>& front,std::size_t k)const{
+		SHARK_CHECK( k > 0, "[HypervolumeSubsetSelection2D] k must be non-zero");
+		if( k > front.size())
+			throw SHARKEXCEPTION("[HypervolumeSubsetSelection2D] the front must have at least k nondominated points");
+		
 		std::size_t n = front.size();
 		std::vector<LinearFunction> functions(n);
 		
@@ -222,14 +239,14 @@ private:
 public:
 	/// \brief Executes the algorithm.
 	/// \param [in] points The set \f$S\f$ of points to select
-	/// \param [out] selected set of the same size as the set of points indicating whether the set is selected (1) or not (0)
-	/// \param [in] k number of points to select
+	/// \param [out] selected set of the same size as the set of points indicating whether the point is selected (1) or not (0)
+	/// \param [in] k number of points to select. Must be lrger than 0
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
 	template<typename Set, typename SelectedSet, typename VectorType >
 	void operator()( Set const& points, SelectedSet& selected, std::size_t k, VectorType const& refPoint){
 		SIZE_CHECK(points.size() == selected.size());
-		if(points.empty())
-			return;
+		SHARK_CHECK(k > 0, "[HyperVolumeSubsetSelection2D] k must be >0");
+		SHARK_CHECK( k <= points.size(), "[HypervolumeSubsetSelection2D] the number of points mjust be larger than k");
 		SIZE_CHECK( points.begin()->size() == 2 );
 		SIZE_CHECK( refPoint.size() == 2 );
 		
@@ -250,17 +267,17 @@ public:
 	
 	/// \brief Executes the algorithm.
 	///
-	/// This version does not use a reference point. instead the extreme points are kept which defines a reference point
+	/// This version does not use a reference point. instead the extreme points are always kept which  implicitely defines a reference point
 	/// \param [in] points The set \f$S\f$ of points to select
-	/// \param [out] selected set of the same size as the set of points indicating whether the set is selected (1) or not (0)
+	/// \param [out] selected set of the same size as the set of points indicating whether the point is selected (1) or not (0)
 	/// \param [in] k number of points to select, must be larger than 2
-	template<typename Set, typename SelectedSet, typename VectorType >
+	template<typename Set, typename SelectedSet>
 	void operator()( Set const& points, SelectedSet& selected, std::size_t k){
 		SIZE_CHECK(points.size() == selected.size());
-		if(points.empty())
-			return;
-		SIZE_CHECK( points.begin()->size() == 2 );
 		SHARK_CHECK( k > 2, "[HypervolumeSubsetSelection2D] k must be larger than 2");
+		SHARK_CHECK( k <= points.size(), "[HypervolumeSubsetSelection2D] the number of points mjust be larger than k");
+		SIZE_CHECK(points.size() == selected.size());
+		SIZE_CHECK( points.begin()->size() == 2 );
 		
 		for(auto&& s: selected)
 			s = false;
