@@ -36,7 +36,6 @@
 #include <shark/Core/Exception.h>
 #include <shark/LinAlg/BLAS/blas.h>
 #include <iterator>
-#include <boost/type_traits/remove_reference.hpp>
 namespace shark{
 namespace blas{
 namespace detail{
@@ -119,7 +118,7 @@ template<class Expression>
 class VectorExpression :public InitializerBase<VectorExpression<Expression> >{
 private:
 	Expression m_expression;
-	typedef typename boost::remove_reference<Expression>::type::const_iterator IndexIterator;
+	typedef typename std::remove_reference<Expression>::type::const_iterator IndexIterator;
 public:
 	VectorExpression(Expression expression):m_expression(expression){}
 	template<class Iter>
@@ -265,7 +264,7 @@ private:
 	//the only way to get the reference, which is in the case of const iterator
 	//const value_type& and remove the reference part
 	//this is done using remove_reference
-	//typedef typename boost::remove_reference<typename Iterator::reference>::type value_type;
+	//typedef typename std::remove_reference<typename Iterator::reference>::type value_type;
 public:
 	InitializerRange(Iterator begin,Iterator end):m_begin(begin),m_end(end){}
 	template<class Iter>
@@ -372,7 +371,7 @@ public:
 	~VectorInitializer(){
 		if(m_init){
 			SIZE_CHECK(m_vector.size() == m_expression.size());
-			typename boost::remove_reference<VectorExpression>::type::iterator iter = m_vector.begin();
+			typename std::remove_reference<VectorExpression>::type::iterator iter = m_vector.begin();
 			m_expression.init(iter);
 		}
 	}
@@ -471,7 +470,7 @@ public:
 	~VectorSplitter(){
 		if(m_init){
 			SIZE_CHECK(m_vector.size() == m_expression.size());
-			typename boost::remove_reference<VectorExpression>::type::const_iterator iter = m_vector.begin();
+			typename std::remove_reference<VectorExpression>::type::const_iterator iter = m_vector.begin();
 			m_expression.split(iter);
 		}
 	}

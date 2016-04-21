@@ -44,8 +44,6 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/static_assert.hpp>
 
-#include <boost/type_traits.hpp>
-
 #include <limits>
 #include <utility>
 namespace shark {
@@ -203,9 +201,6 @@ protected:
 	FeatureDistributionsType m_featureDistributions;
 	ClassPriorsType m_classPriors;
 	///@}
-
-	/// Output should be integer/discrete type
-	BOOST_STATIC_ASSERT(boost::is_integral<OutputType>::value);
 };
 
 } // namespace shark {

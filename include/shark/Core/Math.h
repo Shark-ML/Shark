@@ -42,9 +42,9 @@
 #include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/sign.hpp>
 #include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_arithmetic.hpp>
 #include <limits>
 #include <cmath>
+#include <type_traits>
 #include <shark/Core/Exception.h>
 
 namespace shark {
@@ -78,7 +78,7 @@ namespace shark {
 
 	/// Calculates x^2.
 	template <class T> 
-	inline typename boost::enable_if<boost::is_arithmetic<T>, T>::type sqr( const T & x) {
+	inline typename boost::enable_if<std::is_arithmetic<T>, T>::type sqr( const T & x) {
 		return x * x;
 	}
 
@@ -92,7 +92,7 @@ namespace shark {
 	///Calculates the sigmoid function 1/(1+exp(-x)). The type must be arithmetic. For example
 	///float,double,long double, int,... but no custom Type. 
 	template<class T>
-	typename boost::enable_if<boost::is_arithmetic<T>, T>::type sigmoid(T x){
+	typename boost::enable_if<std::is_arithmetic<T>, T>::type sigmoid(T x){
 		if(x < minExpInput<T>()) {
 			return 1;
 		}
@@ -144,7 +144,7 @@ namespace shark {
 	///The type must be arithmetic. For example
 	///float,double,long double, int,... but no custom Type. 
 	template<class T>
-	typename boost::enable_if<boost::is_arithmetic<T>, T>::type softPlus(T x){
+	typename boost::enable_if<std::is_arithmetic<T>, T>::type softPlus(T x){
 		if(x > maxExpInput<T>()){
 			return x;
 		}

@@ -36,6 +36,8 @@
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorMD.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeApproximator.h>
 #include <boost/range/adaptor/transformed.hpp>
+#include <type_traits>
+
 
 namespace shark {
 /// \brief Frontend for hypervolume calculation algorithms in m dimensions.
@@ -83,7 +85,8 @@ struct HypervolumeCalculator {
 	template<typename Points, typename VectorType>
 	double operator()( Points const& points, VectorType const& refPoint){
 		SIZE_CHECK( points.begin()->size() == refPoint.size() );
-		typedef decltype(points[0]) Point;
+		//GCC 4.6 complains if Point is a reference, so remove it
+		typedef typename std::remove_reference<decltype(points[0]) >::type Point;
 		std::size_t numObjectives = refPoint.size();
 		auto logTransform = [](Point const& x){return log(x);};
 		if(numObjectives == 2){

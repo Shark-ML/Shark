@@ -663,10 +663,9 @@ vector_binary<E1, E2,
 safe_div(
 	vector_expression<E1> const& e1, 
 	vector_expression<E2> const& e2, 
-	typename promote_traits<
-		typename E1::value_type, 
-		typename E2::value_type
-	>::promote_type defaultValue
+	decltype(
+		typename E1::value_type() * typename E2::value_type()
+	) defaultValue
 ){
 	typedef scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type> functor_type;
 	return vector_binary<E1, E2, functor_type>(e1(),e2(), functor_type(defaultValue));
@@ -769,18 +768,16 @@ std::size_t index_norm_inf(vector_expression<E> const &e){
 
 // inner_prod (v1, v2) = sum_i v1_i * v2_i
 template<class E1, class E2>
-typename promote_traits<
-	typename E1::value_type,
-	typename E2::value_type
->::promote_type
+decltype(
+	typename E1::value_type() * typename E2::value_type()
+)
 inner_prod(
 	vector_expression<E1> const& e1,
 	vector_expression<E2> const& e2
 ) {
-	typedef typename promote_traits<
-		typename E1::value_type,
-		typename E2::value_type
-	>::promote_type value_type;
+	typedef decltype(
+		typename E1::value_type() * typename E2::value_type()
+	) value_type;
 	value_type result = value_type();
 	kernels::dot(eval_block(e1),eval_block(e2),result);
 	return result;

@@ -33,7 +33,6 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
 #include <shark/Unsupervised/RBM/analytics.h>
-#include <boost/type_traits/is_same.hpp>
 
 namespace shark{
 

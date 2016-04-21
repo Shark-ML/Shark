@@ -864,10 +864,7 @@ matrix_binary<E1, E2,
 safe_div(
 	matrix_expression<E1> const& e1, 
 	matrix_expression<E2> const& e2, 
-	typename promote_traits<
-		typename E1::value_type, 
-		typename E2::value_type
-	>::promote_type defaultValue
+	decltype(typename E1::value_type()/typename E2::value_type()) defaultValue
 ){
 	typedef scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type> functor_type;
 	return matrix_binary<E1, E2, functor_type>(e1,e2, functor_type(defaultValue));
@@ -880,10 +877,9 @@ public:
 	typedef typename MatA::const_closure_type matrix_closure_type;
 	typedef typename VecV::const_closure_type vector_closure_type;
 public:
-	typedef typename promote_traits<
-		typename MatA::scalar_type,
-		typename VecV::scalar_type
-	>::promote_type scalar_type;
+	typedef decltype(
+		typename MatA::scalar_type() * typename VecV::scalar_type()
+	) scalar_type;
 	typedef scalar_type value_type;
 	typedef typename MatA::size_type size_type;
 	typedef typename MatA::difference_type difference_type;
@@ -961,10 +957,9 @@ public:
 	typedef typename MatA::const_closure_type matrix_closure_typeA;
 	typedef typename MatB::const_closure_type matrix_closure_typeB;
 public:
-	typedef typename promote_traits<
-		typename MatA::scalar_type,
-		typename MatB::scalar_type
-	>::promote_type scalar_type;
+	typedef decltype(
+		typename MatA::scalar_type() * typename MatB::scalar_type()
+	) scalar_type;
 	typedef scalar_type value_type;
 	typedef typename MatA::size_type size_type;
 	typedef typename MatA::difference_type difference_type;
@@ -1229,7 +1224,7 @@ typename MatA::value_type min(matrix_expression<MatA> const& A){
 ///The frobenius inner product is defined as \f$ <A,B>_F=\sum_{ij} A_ij*B_{ij} \f$. It induces the
 /// Frobenius norm \f$ ||A||_F = \sqrt{<A,A>_F} \f$
 template<class E1, class E2>
-typename promote_traits <typename E1::value_type,typename E2::value_type>::promote_type
+decltype(typename E1::value_type() * typename E2::value_type())
 frobenius_prod(
 	matrix_expression<E1> const& e1,
 	matrix_expression<E2> const& e2

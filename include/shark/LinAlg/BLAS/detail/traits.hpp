@@ -33,22 +33,17 @@
 #ifndef SHARK_LINALG_BLAS_DETAIL_TRAITS_HPP
 #define SHARK_LINALG_BLAS_DETAIL_TRAITS_HPP
 
-#include <complex>
-
 #include "../fwd.hpp"
 #include "iterator.hpp"
-#include "returntype_deduction.hpp"
 #include "../expression_types.hpp"
-
-#include <boost/type_traits/is_base_of.hpp>
-#include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/is_float.hpp>
-#include <boost/type_traits/is_integral.hpp>
 
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/and.hpp>
 
 #include <boost/range/iterator.hpp>
+
+#include <complex>
+#include <type_traits>
 
 namespace shark {
 namespace blas {
@@ -61,32 +56,6 @@ struct real_traits{
 template<class T>
 struct real_traits<std::complex<T> >{
 	typedef T type;
-};
-
-// Use Joel de Guzman's return type deduction
-// uBLAS assumes a common return type for all binary arithmetic operators
-template<class X, class Y>
-struct promote_traits {
-	typedef type_deduction_detail::base_result_of<X, Y> base_type;
-	static typename base_type::x_type x;
-	static typename base_type::y_type y;
-	static const std::size_t size = sizeof(
-	        type_deduction_detail::test<
-	        typename base_type::x_type
-	        , typename base_type::y_type
-	        >(x + y)     // Use x+y to stand of all the arithmetic actions
-	        );
-
-	static const std::size_t index = (size / sizeof(char)) - 1;
-	typedef typename boost::mpl::at_c<
-	typename base_type::types, index>::type id;
-	typedef typename id::type promote_type;
-};
-// special case for bools. b1+b2 creates a boolean return type - which does not make sense
-// for example when summing bools! therefore we use a signed int type
-template<>
-struct promote_traits<bool, bool> {
-	typedef int promote_type;
 };
 
 struct upper;
@@ -322,7 +291,7 @@ struct evaluation_restrict_traits: public detail::evaluation_restrict_traits<
 
 template<class E>
 struct closure: public boost::mpl::if_<
-	boost::is_const<E>,
+	std::is_const<E>,
 	typename E::const_closure_type,
 	typename E::closure_type
 >{};
@@ -334,41 +303,41 @@ struct const_expression{
 
 template<class E>
 struct reference: public boost::mpl::if_<
-	boost::is_const<E>,
+	std::is_const<E>,
 	typename E::const_reference,
 	typename E::reference
 >{};
 
 template<class E>
 struct pointer: public boost::mpl::if_<
-	boost::is_const<E>,
+	std::is_const<E>,
 	typename E::const_pointer,
 	typename E::pointer
 >{};
 template<class E>
 struct index_pointer: public boost::mpl::if_<
-	boost::is_const<E>,
+	std::is_const<E>,
 	typename E::const_index_pointer,
 	typename E::index_pointer
 >{};
 	
 template<class M>
 struct row_iterator: public boost::mpl::if_<
-	boost::is_const<M>,
+	std::is_const<M>,
 	typename M::const_row_iterator,
 	typename M::row_iterator
 >{};
 	
 template<class M>
 struct column_iterator: public boost::mpl::if_<
-	boost::is_const<M>,
+	std::is_const<M>,
 	typename M::const_column_iterator,
 	typename M::column_iterator
 >{};
 
 template<class Matrix> 
 struct major_iterator:public boost::mpl::if_<
-	boost::is_same<typename Matrix::orientation, column_major>,
+	std::is_same<typename Matrix::orientation, column_major>,
 	typename column_iterator<Matrix>::type,
 	typename row_iterator<Matrix>::type
 >{};	
@@ -423,7 +392,7 @@ struct vector_temporary{
 	typedef typename vector_temporary_type<
 		typename E::value_type,
 		typename boost::mpl::eval_if<
-			typename boost::is_base_of<vector_expression<E>,E>::type,
+			typename std::is_base_of<vector_expression<E>,E>::type,
 			boost::range_iterator<E>,
 			major_iterator<E>
 		>::type::iterator_category
@@ -437,7 +406,7 @@ struct matrix_temporary{
 		typename E::value_type,
 		typename E::orientation,
 		typename boost::mpl::eval_if<
-			typename boost::is_base_of<vector_expression<E>,E>::type,
+			typename std::is_base_of<vector_expression<E>,E>::type,
 			boost::range_iterator<E>,
 			major_iterator<E>
 		>::type::iterator_category
@@ -451,7 +420,7 @@ struct transposed_matrix_temporary{
 		typename E::value_type,
 		typename E::orientation::transposed_orientation,
 		typename boost::mpl::eval_if<
-			typename boost::is_base_of<vector_expression<E>,E>::type,
+			typename std::is_base_of<vector_expression<E>,E>::type,
 			boost::range_iterator<E>,
 			major_iterator<E>
 		>::type::iterator_category
