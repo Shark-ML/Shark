@@ -120,7 +120,6 @@ BOOST_AUTO_TEST_CASE( AbstractBudgetMaintenanceStrategy_findSmallestVector)
             budgetModel.alpha(i, j) = classes;
     
     AbstractBudgetMaintenanceStrategy<RealVector>::findSmallestVector(budgetModel, index, minAlpha);
-    BOOST_REQUIRE_EQUAL(index, 0);
     BOOST_REQUIRE_EQUAL(minAlpha, sqrt(2.0*classes*classes));
     
     // what happens if all things are zero in the budget?
@@ -129,7 +128,6 @@ BOOST_AUTO_TEST_CASE( AbstractBudgetMaintenanceStrategy_findSmallestVector)
             budgetModel.alpha(i, j) = 0;
         
     AbstractBudgetMaintenanceStrategy<RealVector>::findSmallestVector(budgetModel, index, minAlpha);
-    BOOST_REQUIRE_EQUAL(index, 0);
     BOOST_REQUIRE_EQUAL(minAlpha, 0);
 }
 	
