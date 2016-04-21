@@ -30,7 +30,6 @@
 
 #include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/atanh.hpp>
-#include <boost/type_traits/remove_reference.hpp> 
 #include "traits.hpp"
 #include <shark/Core/Exception.h>
 #include <shark/Core/Math.h>
@@ -629,7 +628,7 @@ struct scalar_plus_assign{
 	static const bool right_zero_identity = true;
 	static const bool left_zero_identity = false;
 	void operator()(argument1_type t1, argument2_type t2) {
-		t1 += static_cast<typename boost::remove_reference<T1>::type const>(t2);
+		t1 += static_cast<typename std::decay<T1>::type const>(t2);
 	}
 };
 

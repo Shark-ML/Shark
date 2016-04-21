@@ -28,10 +28,9 @@
 #ifndef SHARK_LINALG_BLAS_VECTOR_EXPRESSION_HPP
 #define SHARK_LINALG_BLAS_VECTOR_EXPRESSION_HPP
 
-#include <boost/type_traits/is_convertible.hpp> 
-#include <boost/utility/enable_if.hpp> 
 #include "vector_proxy.hpp"
 #include "kernels/dot.hpp"
+#include <boost/utility/enable_if.hpp>
 
 namespace shark {
 namespace blas {
@@ -121,7 +120,7 @@ private:
 
 template<class T, class E>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::scalar_type >,
+	std::is_convertible<T, typename E::scalar_type >,
         vector_scalar_multiply<E>
 >::type
 operator* (vector_expression<E> const& e, T scalar){
@@ -130,7 +129,7 @@ operator* (vector_expression<E> const& e, T scalar){
 }
 template<class T, class E>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::scalar_type >,
+	std::is_convertible<T, typename E::scalar_type >,
         vector_scalar_multiply<E>
 >::type
 operator* (T scalar, vector_expression<E> const& e){
@@ -212,7 +211,7 @@ private:
 ///@param scalar the value which is repeated
 ///@param elements the size of the resulting vector
 template<class T>
-typename boost::enable_if<boost::is_arithmetic<T>, scalar_vector<T> >::type
+typename boost::enable_if<std::is_arithmetic<T>, scalar_vector<T> >::type
 repeat(T scalar, std::size_t elements){
 	return scalar_vector<T>(elements,scalar);
 }
@@ -344,7 +343,7 @@ SHARK_UNARY_VECTOR_TRANSFORMATION(elem_inv, scalar_inverse)
 #define SHARK_VECTOR_SCALAR_TRANSFORMATION(name, F)\
 template<class T, class E> \
 typename boost::enable_if< \
-	boost::is_convertible<T, typename E::value_type >,\
+	std::is_convertible<T, typename E::value_type >,\
         vector_unary<E,F<typename E::value_type,T> > \
 >::type \
 name (vector_expression<E> const& e, T scalar){ \
@@ -367,7 +366,7 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(pow, scalar_pow)
 #define SHARK_VECTOR_SCALAR_TRANSFORMATION_2(name, F)\
 template<class T, class E> \
 typename boost::enable_if< \
-	boost::is_convertible<T, typename E::value_type >,\
+	std::is_convertible<T, typename E::value_type >,\
         vector_unary<E,F<typename E::value_type,T> > \
 >::type \
 name (T scalar, vector_expression<E> const& e){ \
@@ -503,7 +502,7 @@ vector_addition<E1, vector_scalar_multiply<E2> > operator- (
 ///\brief Adds a vector plus a scalr which is interpreted as a constant vector
 template<class E, class T>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::value_type>, 
+	std::is_convertible<T, typename E::value_type>, 
 	vector_addition<E, scalar_vector<T> >
 >::type operator+ (
 	vector_expression<E> const& e,
@@ -515,7 +514,7 @@ typename boost::enable_if<
 ///\brief Adds a vector plus a scalar which is interpreted as a constant vector
 template<class T, class E>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::value_type>,
+	std::is_convertible<T, typename E::value_type>,
 	vector_addition<E, scalar_vector<T> >
 >::type operator+ (
 	T t,
@@ -527,7 +526,7 @@ typename boost::enable_if<
 ///\brief Subtracts a scalar which is interpreted as a constant vector from a vector.
 template<class E, class T>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::value_type> ,
+	std::is_convertible<T, typename E::value_type> ,
 	vector_addition<E, vector_scalar_multiply<scalar_vector<T> > >
 >::type operator- (
 	vector_expression<E> const& e,
@@ -539,7 +538,7 @@ typename boost::enable_if<
 ///\brief Subtracts a vector from a scalar which is interpreted as a constant vector
 template<class E, class T>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::value_type>,
+	std::is_convertible<T, typename E::value_type>,
 	vector_addition<scalar_vector<T>, vector_scalar_multiply<E> >
 >::type operator- (
 	T t,

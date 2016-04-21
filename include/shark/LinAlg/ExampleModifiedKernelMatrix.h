@@ -44,6 +44,7 @@
 
 #include <vector>
 #include <cmath>
+#include <algorithm>
 
 
 namespace shark {
@@ -72,7 +73,7 @@ public:
     {
         std::size_t elements = data.numberOfElements();
         x.resize(elements);
-        boost::iota(x,data.elements().begin());
+        std::iota(x.begin(),x.end(),data.elements().begin());
     }
 
     /// return a single matrix entry

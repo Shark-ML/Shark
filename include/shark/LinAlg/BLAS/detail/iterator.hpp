@@ -28,11 +28,10 @@
 #ifndef SHARK_LINALG_BLAS_DETAIL_ITERATOR_HPP
 #define SHARK_LINALG_BLAS_DETAIL_ITERATOR_HPP
 
-#include <boost/type_traits/remove_const.hpp> 
-#include <boost/type_traits/is_const.hpp> 
 #include <boost/mpl/if.hpp> 
 #include <shark/Core/Exception.h>
 #include <iterator>
+#include <type_traits>
 
 
 namespace shark {
@@ -214,7 +213,7 @@ public:
 	typedef std::ptrdiff_t difference_type;
 	typedef typename Closure::value_type value_type;
 	typedef typename boost::mpl::if_<
-		boost::is_const<Closure>,
+		std::is_const<Closure>,
 		typename Closure::const_reference,
 		typename Closure::reference
 	>::type reference;
@@ -293,13 +292,13 @@ template<class T, class Tag=dense_random_access_iterator_tag>
 class dense_storage_iterator:
 public random_access_iterator_base<
 	dense_storage_iterator<T>,
-	typename boost::remove_const<T>::type, 
+	typename std::remove_const<T>::type, 
 	Tag
 >{
 public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
-	typedef typename boost::remove_const<T>::type value_type;
+	typedef typename std::remove_const<T>::type value_type;
 	typedef T& reference;
 	typedef T* pointer;
 
@@ -382,11 +381,11 @@ private:
 template<class T, class I>
 class compressed_storage_iterator:
 	public bidirectional_iterator_base<
-		compressed_storage_iterator<T,I>,typename boost::remove_const<T>::type
+		compressed_storage_iterator<T,I>,typename std::remove_const<T>::type
 	>{
 public:
-	typedef typename boost::remove_const<T>::type value_type;
-	typedef typename boost::remove_const<I>::type index_type;
+	typedef typename std::remove_const<T>::type value_type;
+	typedef typename std::remove_const<I>::type index_type;
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef T& reference;
@@ -589,7 +588,7 @@ template<class T>
 class constant_iterator:
 public random_access_iterator_base<
 	constant_iterator<T>,
-	typename boost::remove_const<T>::type,
+	typename std::remove_const<T>::type,
 	dense_random_access_iterator_tag
 >{
 public:

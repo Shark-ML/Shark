@@ -49,11 +49,11 @@
 #include <hdf5_hl.h>
 
 #include <boost/array.hpp>
-#include <boost/foreach.hpp>
+#include <boost/format.hpp>
 #include <boost/range/algorithm/fill.hpp>
 #include <boost/range/algorithm/max_element.hpp>
 #include <boost/smart_ptr/scoped_array.hpp>
-#include <boost/type_traits.hpp>
+#include <type_traits>
 
 namespace shark {
 
@@ -92,19 +92,19 @@ herr_t readHDF5Dataset( hid_t loc_id, const char *dset_name, double *buffer )
 template<typename RawValueType>
 bool isSupported(H5T_class_t typeClass, size_t typeSize)
 {
-	if (H5T_FLOAT == typeClass && 8 == typeSize && boost::is_floating_point < RawValueType > ::value
+	if (H5T_FLOAT == typeClass && 8 == typeSize && std::is_floating_point < RawValueType > ::value
 	    && sizeof(RawValueType) == 8) {
 		// double
 		return true;
-	} else if (H5T_FLOAT == typeClass && 4 == typeSize && boost::is_floating_point < RawValueType > ::value
+	} else if (H5T_FLOAT == typeClass && 4 == typeSize && std::is_floating_point < RawValueType > ::value
 	    && sizeof(RawValueType) == 4) {
 		// float
 		return true;
-	} else if (H5T_INTEGER == typeClass && 4 == typeSize && boost::is_integral < RawValueType > ::value
+	} else if (H5T_INTEGER == typeClass && 4 == typeSize && std::is_integral < RawValueType > ::value
 	    && sizeof(RawValueType) == 4) {
 		// int
 		return true;
-	} else if (H5T_INTEGER == typeClass && 8 == typeSize && boost::is_integral < RawValueType > ::value
+	} else if (H5T_INTEGER == typeClass && 8 == typeSize && std::is_integral < RawValueType > ::value
 	    && sizeof(RawValueType) == 8) {
 		// long
 		return true;

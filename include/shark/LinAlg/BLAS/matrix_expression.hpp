@@ -28,9 +28,11 @@
 #ifndef SHARK_LINALG_BLAS_MATRIX_EXPRESSION_HPP
 #define SHARK_LINALG_BLAS_MATRIX_EXPRESSION_HPP
 
-#include <boost/type_traits/is_convertible.hpp> 
 #include "matrix_proxy.hpp"
 #include "operation.hpp"
+
+#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 namespace shark {
 namespace blas {
@@ -302,7 +304,7 @@ private:
 ///@param rows the number of rows of the resulting vector
 ///@param columns the number of columns of the resulting vector
 template<class T>
-typename boost::enable_if<boost::is_arithmetic<T>, scalar_matrix<T> >::type
+typename boost::enable_if<std::is_arithmetic<T>, scalar_matrix<T> >::type
 repeat(T scalar, std::size_t rows, std::size_t columns){
 	return scalar_matrix<T>(rows, columns, scalar);
 }
@@ -476,7 +478,7 @@ private:
 
 template<class E, class T>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::scalar_type >,
+	std::is_convertible<T, typename E::scalar_type >,
         matrix_scalar_multiply<E> 
 >::type
 operator* (matrix_expression<E> const& e, T scalar){
@@ -485,7 +487,7 @@ operator* (matrix_expression<E> const& e, T scalar){
 
 template<class T, class E>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::scalar_type >,
+	std::is_convertible<T, typename E::scalar_type >,
         matrix_scalar_multiply<E> 
 >::type
 operator* (T scalar, matrix_expression<E> const& e){
@@ -525,7 +527,7 @@ SHARK_UNARY_MATRIX_TRANSFORMATION(elem_inv, scalar_inverse)
 #define SHARK_MATRIX_SCALAR_TRANSFORMATION(name, F)\
 template<class E, class T> \
 typename boost::enable_if< \
-	boost::is_convertible<T, typename E::value_type >,\
+	std::is_convertible<T, typename E::value_type >,\
         matrix_unary<E,F<typename E::value_type,T> > \
 >::type \
 name (matrix_expression<E> const& e, T scalar){ \
@@ -548,7 +550,7 @@ SHARK_MATRIX_SCALAR_TRANSFORMATION(pow, scalar_pow)
 #define SHARK_MATRIX_SCALAR_TRANSFORMATION_2(name, F)\
 template<class T, class E> \
 typename boost::enable_if< \
-	boost::is_convertible<T, typename E::value_type >,\
+	std::is_convertible<T, typename E::value_type >,\
         matrix_unary<E,F<typename E::value_type,T> > \
 >::type \
 name (T scalar, matrix_expression<E> const& e){ \
@@ -699,7 +701,7 @@ matrix_addition<E1, matrix_scalar_multiply<E2> > operator- (
 ///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
 template<class E, class T>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::value_type>, 
+	std::is_convertible<T, typename E::value_type>, 
 	matrix_addition<E, scalar_matrix<T> >
 >::type operator+ (
 	matrix_expression<E> const& e,
@@ -711,7 +713,7 @@ typename boost::enable_if<
 ///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
 template<class T, class E>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::value_type>,
+	std::is_convertible<T, typename E::value_type>,
 	matrix_addition<E, scalar_matrix<T> >
 >::type operator+ (
 	T t,
@@ -723,7 +725,7 @@ typename boost::enable_if<
 ///\brief Subtracts a scalar which is interpreted as a constant matrix from a matrix.
 template<class E, class T>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::value_type> ,
+	std::is_convertible<T, typename E::value_type> ,
 	matrix_addition<E, matrix_scalar_multiply<scalar_matrix<T> > >
 >::type operator- (
 	matrix_expression<E> const& e,
@@ -735,7 +737,7 @@ typename boost::enable_if<
 ///\brief Subtracts a matrix from a scalar which is interpreted as a constant matrix
 template<class E, class T>
 typename boost::enable_if<
-	boost::is_convertible<T, typename E::value_type>,
+	std::is_convertible<T, typename E::value_type>,
 	matrix_addition<scalar_matrix<T>, matrix_scalar_multiply<E> >
 >::type operator- (
 	T t,

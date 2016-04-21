@@ -40,10 +40,7 @@
 
 #include <shark/Data/Dataset.h>
 #include <shark/Core/utility/functional.h>
-#include <boost/type_traits/is_const.hpp>
-#include <boost/range/adaptor/transformed.hpp>
-#include <boost/bind.hpp>
-#include <boost/range/algorithm/copy.hpp>
+#include <numeric>
 namespace shark {
 /// \brief Constant time Element-Lookup for Datasets
 ///
@@ -63,21 +60,21 @@ template <class DatasetType>   //template parameter can be const!
 class DataView
 {
 public:
-	typedef typename boost::remove_const<DatasetType>::type dataset_type;   //(non const) type of the underlying dataset
+	typedef typename std::remove_const<DatasetType>::type dataset_type;   //(non const) type of the underlying dataset
 	typedef typename dataset_type::element_type value_type;
 	typedef typename dataset_type::const_element_reference const_reference;
 	typedef typename dataset_type::batch_type batch_type;
 	// We want to support immutable as well as mutable datasets. So we query whether the dataset
 	// is mutable and change the reference type to const if the dataset is immutable.
 	typedef typename boost::mpl::if_<
-		boost::is_const<DatasetType>,
+		std::is_const<DatasetType>,
 		typename dataset_type::const_element_reference,
 		typename dataset_type::element_reference
 	>::type reference;
 
 private:
 	typedef typename boost::mpl::if_<
-		boost::is_const<DatasetType>,
+		std::is_const<DatasetType>,
 		typename dataset_type::const_batch_range,
 		typename dataset_type::batch_range
 	>::type batch_range;
@@ -231,7 +228,7 @@ DataView<DatasetType> subset(DataView<DatasetType> const& view, IndexRange const
 template<class DatasetType>
 DataView<DatasetType> randomSubset(DataView<DatasetType> const& view, std::size_t size){
 	std::vector<std::size_t> indices(view.size());
-	boost::iota(indices,0);
+	std::iota(indices.begin(),indices.end(),0);
 	partial_shuffle(indices.begin(),indices.begin()+size,indices.end());
 	return subset(view,boost::make_iterator_range(indices.begin(),indices.begin()+size));
 }
@@ -262,7 +259,7 @@ typename DataView<DatasetType>::batch_type randomSubBatch(
 	std::size_t size
 ){
 	std::vector<std::size_t> indices(view.size());
-	boost::iota(indices,0);
+	std::iota(indices.begin(),indices.end(),0);
 	partial_shuffle(indices.begin(),indices.begin()+size,indices.end());
 	return subBatch(view,boost::make_iterator_range(indices.begin(),indices.begin()+size));
 }

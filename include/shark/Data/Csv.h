@@ -45,16 +45,7 @@
 #include <shark/Core/DLLSupport.h>
 #include <shark/Data/Dataset.h>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/format.hpp>
-#include <boost/iostreams/filter/newline.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/type_traits.hpp>
-
-#include <exception>
 #include <fstream>
-#include <map>
 #include <string>
 
 namespace shark {
@@ -122,7 +113,7 @@ namespace detail {
             bool scientific = true, //scientific notation?
             unsigned int fieldwidth = 0, //column-align using this field width
         typename boost::enable_if<
-            boost::is_arithmetic<typename boost::range_value<U>::type>
+            std::is_arithmetic<typename boost::range_value<U>::type>
         >::type* dummy = 0//enable this only for arithmetic types
     ) {
 
@@ -167,7 +158,7 @@ namespace detail {
         bool scientific = true, //scientific notation?
         unsigned int fieldwidth = 0, //column-align using this field width
         typename boost::disable_if<
-            boost::is_arithmetic<typename boost::range_value<U>::type>
+            std::is_arithmetic<typename boost::range_value<U>::type>
         >::type* dummy = 0//enable this only for complex types
     ) {
 

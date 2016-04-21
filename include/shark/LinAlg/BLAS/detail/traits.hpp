@@ -38,8 +38,6 @@
 #include "../expression_types.hpp"
 
 #include <boost/mpl/eval_if.hpp>
-#include <boost/mpl/and.hpp>
-
 #include <boost/range/iterator.hpp>
 
 #include <complex>

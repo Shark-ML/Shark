@@ -9,6 +9,7 @@
 #include <shark/Data/CVDatasetTools.h>
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+#include <boost/range/algorithm/copy.hpp>
 
 using namespace shark;
 using namespace std;

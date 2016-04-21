@@ -35,13 +35,9 @@
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/utility/Iterators.h>
 
-#include <boost/preprocessor.hpp>
-
-#include <boost/type_traits/is_arithmetic.hpp>
-#include <boost/type_traits/is_same.hpp>
 #include <boost/utility/enable_if.hpp>
-#include <boost/range/algorithm_ext/iota.hpp>
 #include <boost/mpl/if.hpp>
+#include <type_traits>
 
 namespace shark{
 
@@ -160,7 +156,7 @@ template<class T>
 //whether T is arithmetic or not
 struct Batch
 :public boost::mpl::if_<
-	boost::is_arithmetic<T>,
+	std::is_arithmetic<T>,
 	detail::ArithmeticBatch<T>,
 	detail::DefaultBatch<T>
 >::type{};
@@ -361,14 +357,14 @@ struct range_const_iterator< shark::blas::matrix_expression<M> >{
 //matrix proxy
 template< class T >
 struct range_mutable_iterator< shark::blas::dense_matrix_adaptor<T> >{
-	typedef shark::blas::vector<typename boost::remove_const<T>::type> Vector;
+	typedef shark::blas::vector<typename std::decay<T>::type> Vector;
 	typedef shark::detail::MatrixRowReference<shark::blas::dense_matrix_adaptor<T>,Vector> reference;
 	typedef shark::ProxyIterator<shark::blas::dense_matrix_adaptor<T>, Vector, reference > type;
 };
 
 template< class T >
 struct range_const_iterator< shark::blas::dense_matrix_adaptor<T> >{
-	typedef shark::blas::vector<typename boost::remove_const<T>::type> Vector;
+	typedef shark::blas::vector<typename std::decay<T>::type> Vector;
 	typedef shark::detail::MatrixRowReference<shark::blas::dense_matrix_adaptor<T> const,Vector> reference;
 	typedef shark::ProxyIterator<shark::blas::dense_matrix_adaptor<T> const, Vector, reference > type;
 };
