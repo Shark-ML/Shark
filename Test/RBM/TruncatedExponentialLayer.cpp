@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE( TruncatedExponentialLayer_SufficientStatistics){
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
 				BOOST_CHECK_SMALL(testInput(i,j)+statistics.lambda(i,j),1.e-10);
-				BOOST_CHECK_SMALL(exp(testInput(i,j))-statistics.expMinusLambda(i,j),1.e-8);
+				BOOST_CHECK_SMALL(exp(testInput(i,j))-statistics.expMinusLambda(i,j),1.e-7);
 			}
 		}
 	}
