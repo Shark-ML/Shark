@@ -173,7 +173,7 @@ CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
 
 	//calculate number of elements per validation subset in the new to construct container
 	std::size_t nn = numInputs / numberOfPartitions;
-	std::size_t leftOver = numInputs % nn;
+	std::size_t leftOver = numInputs % numberOfPartitions;
 	std::vector<std::size_t> validationSize(numberOfPartitions,nn);
 	for (std::size_t partition = 0; partition != leftOver; partition++) {
 		validationSize[partition]++;
