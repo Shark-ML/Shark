@@ -3,12 +3,12 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeContribution2D.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeContribution3D.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
 
 using namespace shark;
 
-
-std::vector<KeyValuePair<double,std::size_t> > leastContributionsNaive(std::vector<RealVector> const& set, RealVector const& reference){
+std::vector<KeyValuePair<double,std::size_t> > contributionsNaive(std::vector<RealVector> const& set, RealVector const& reference){
 	HypervolumeCalculator hv;
 	double totalVolume = hv(set,reference);
 	std::vector<KeyValuePair<double,std::size_t> > contributions(set.size());
@@ -18,25 +18,40 @@ std::vector<KeyValuePair<double,std::size_t> > leastContributionsNaive(std::vect
 		contributions[i].value = i;
 		contributions[i].key = totalVolume - hv(subset,reference);
 	}
-	
-	std::sort(contributions.begin(),contributions.end());
 	return contributions;
 }
 
 template<class Algorithm>
-void testLeastContribution(Algorithm algorithm, std::vector<RealVector> const& set, std::size_t k, RealVector const& reference){
-	
-	auto naiveContributions = leastContributionsNaive(set, reference);
+void testContribution(Algorithm algorithm, std::vector<RealVector> const& set, std::size_t k, RealVector const& reference){
 	
 	std::vector<std::size_t> leastContributions = algorithm.least(set,k,reference);
 	std::vector<std::size_t> largestContributions = algorithm.largest(set,k,reference);
 	
+	auto naiveContributions = contributionsNaive(set, reference);
+	auto naiveLeastContributions = naiveContributions;
+	std::sort(naiveLeastContributions.begin(),naiveLeastContributions.end());
+
+	
 	BOOST_REQUIRE_EQUAL(leastContributions.size(),k);
 	BOOST_REQUIRE_EQUAL(largestContributions.size(),k);
 	
+	
+	//check that the contributions of the points are equal, this guards
+	//against point with the same contribution. Due to numerical issues
+	//we have to test for closeness.
+	
+	//check least contributors
 	for(std::size_t i = 0; i != k; ++i){
-		BOOST_CHECK_EQUAL(leastContributions[i],naiveContributions[i].value);
-		BOOST_CHECK_EQUAL(largestContributions[i],naiveContributions[set.size()-1-i].value);
+		double contribution = naiveContributions[leastContributions[i]].key;
+		
+		BOOST_CHECK_SMALL(naiveLeastContributions[i].key-contribution,1.e-11);
+	}
+	
+	//check largest contributors
+	for(std::size_t i = 0; i != k; ++i){
+		double contribution = naiveContributions[largestContributions[i]].key;
+		
+		BOOST_CHECK_SMALL(naiveLeastContributions[set.size()-i-1].key-contribution,1.e-11);
 	}
 }
 
@@ -78,10 +93,37 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContribution2D ) {
 		auto frontConcave = createRandomFront(numPoints,2,0.5);
 		
 		for(std::size_t k = 1; k <= numPoints; ++k){
-			testLeastContribution(hs,frontLinear,k,reference);
-			testLeastContribution(hs,frontConvex,k,reference);
-			testLeastContribution(hs,frontConcave,k,reference);
+			testContribution(hs,frontLinear,k,reference);
+			testContribution(hs,frontConvex,k,reference);
+			testContribution(hs,frontConcave,k,reference);
 		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContribution3D ) {
+
+	HypervolumeContribution3D hs;
+	const unsigned int numTests = 100;
+	const std::size_t numPoints = 50;
+	
+	RealVector reference(3,1.0);
+	Rng::seed(42);
+	
+	for(unsigned int t = 0; t != numTests; ++t){
+		auto frontLinear = createRandomFront(numPoints,3,1);
+		auto frontConvex = createRandomFront(numPoints,3,2);
+		auto frontConcave = createRandomFront(numPoints,3,0.5);
+		
+		for(std::size_t k = 1; k <= 10; ++k){
+			testContribution(hs,frontLinear,k,reference);
+			testContribution(hs,frontConvex,k,reference);
+			testContribution(hs,frontConcave,k,reference);
+		}
+		
+		//all points
+		testContribution(hs,frontLinear,numPoints,reference);
+		testContribution(hs,frontConvex,numPoints,reference);
+		testContribution(hs,frontConcave,numPoints,reference);
 	}
 }
 
