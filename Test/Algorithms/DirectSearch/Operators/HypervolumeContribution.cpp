@@ -24,8 +24,8 @@ std::vector<KeyValuePair<double,std::size_t> > contributionsNaive(std::vector<Re
 template<class Algorithm>
 void testContribution(Algorithm algorithm, std::vector<RealVector> const& set, std::size_t k, RealVector const& reference){
 	
-	std::vector<std::size_t> leastContributions = algorithm.least(set,k,reference);
-	std::vector<std::size_t> largestContributions = algorithm.largest(set,k,reference);
+	std::vector<KeyValuePair<double,std::size_t>> leastContributions = algorithm.smallest(set,k,reference);
+	std::vector<KeyValuePair<double,std::size_t>> largestContributions = algorithm.largest(set,k,reference);
 	
 	auto naiveContributions = contributionsNaive(set, reference);
 	auto naiveLeastContributions = naiveContributions;
@@ -42,38 +42,81 @@ void testContribution(Algorithm algorithm, std::vector<RealVector> const& set, s
 	
 	//check least contributors
 	for(std::size_t i = 0; i != k; ++i){
-		double contribution = naiveContributions[leastContributions[i]].key;
-		
-		BOOST_CHECK_SMALL(naiveLeastContributions[i].key-contribution,1.e-11);
+		//ensure returned value is correct
+		BOOST_CHECK_SMALL(naiveLeastContributions[i].key - leastContributions[i].key,1.e-9);
+		//ensure contribution of returned index is the same
+		double contribution = naiveContributions[leastContributions[i].value].key;
+		BOOST_CHECK_SMALL(naiveLeastContributions[i].key - contribution,1.e-9);
 	}
 	
 	//check largest contributors
 	for(std::size_t i = 0; i != k; ++i){
-		double contribution = naiveContributions[largestContributions[i]].key;
-		
-		BOOST_CHECK_SMALL(naiveLeastContributions[set.size()-i-1].key-contribution,1.e-11);
+		//ensure returned value is correct
+		BOOST_CHECK_SMALL(naiveLeastContributions[set.size()-i-1].key - largestContributions[i].key,1.e-9);
+		//ensure contribution of returned index is the same
+		//we can not check returned indizes directly as several might have the same value
+		double contribution = naiveContributions[largestContributions[i].value].key;
+		BOOST_CHECK_SMALL(naiveLeastContributions[set.size()-i-1].key - contribution,1.e-9);
 	}
 }
 
-//creates points on a front defined by points x in [0,1]^d
+
+template<class Algorithm>
+void testContributionNoRef(Algorithm algorithm, std::vector<RealVector> const& set, std::size_t k){
+	
+	std::vector<KeyValuePair<double,std::size_t>> leastContributions = algorithm.smallest(set,k);
+	std::vector<KeyValuePair<double,std::size_t>> largestContributions = algorithm.largest(set,k);
+	
+	//compute reference
+	RealVector reference(set[0]);
+	for(auto const& p: set){
+		noalias(reference) = max(reference,p);
+	}
+	
+	//create a set without extrema
+	auto setNoExt = set;
+	for(std::size_t j = 0; j < set[0].size(); ++j){
+		auto min = std::min_element(setNoExt.begin(),setNoExt.end(),[=](RealVector const& a, RealVector const& b){return a(j) < b(j);});
+		setNoExt.erase(min,min+1);
+	}
+
+	auto naiveLeastContributions = contributionsNaive(setNoExt, reference);
+	std::sort(naiveLeastContributions.begin(),naiveLeastContributions.end());
+
+	
+	BOOST_REQUIRE_EQUAL(leastContributions.size(),k);
+	BOOST_REQUIRE_EQUAL(largestContributions.size(),k);
+	
+	//todo it is non-trivial to check whether the returned indices are correct.
+	
+	//check least contributors
+	for(std::size_t i = 0; i != k; ++i){
+		//ensure returned value is correct
+		BOOST_CHECK_SMALL(naiveLeastContributions[i].key - leastContributions[i].key,1.e-9);
+	}
+	
+	for(std::size_t i = 0; i != k; ++i){
+		//ensure returned value is correct
+		BOOST_CHECK_SMALL(naiveLeastContributions.end()[-i-1].key - largestContributions[i].key,1.e-9);
+	}
+}
+
+//creates points on a front defined by points x in [0,1]^3
 // 1 is a linear front, 2 a convex front, 1/2 a concave front
 //reference point is 1^d
 std::vector<RealVector> createRandomFront(std::size_t numPoints, std::size_t numObj, double p){
 	std::vector<RealVector> points(numPoints);
 	for (std::size_t i = 0; i != numPoints; ++i) {
 		points[i].resize(numObj);
-		for (std::size_t j = 0; j != numObj - 1; ++j) {
-			points[i][j] = Rng::uni(0.0, 1.0);
+		double norm = 0;
+		double sum = 0;
+		for(std::size_t j = 0; j != numObj; ++j){
+			points[i](j) = 1- Rng::uni(0.0, 1.0-sum);
+			sum += 1-points[i](j);
+			norm += std::pow(points[i](j),p);
 		}
-		if (numObj > 2 && Rng::coinToss())
-		{
-			// make sure that some objective values coincide
-			std::size_t jj = Rng::discrete(0, numObj - 2);
-			points[i][jj] = std::round(4.0 * points[i][jj]) / 4.0;
-		}
-		double sum = 0.0;
-		for (std::size_t j = 0; j != numObj - 1; ++j) sum += points[i][j];
-		points[i][numObj - 1] = pow(1.0 - sum / (numObj - 1.0), p);
+		norm = std::pow(norm,1/p);
+		points[i] /= norm;
 	}
 	return points;
 }
@@ -96,6 +139,11 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContribution2D ) {
 			testContribution(hs,frontLinear,k,reference);
 			testContribution(hs,frontConvex,k,reference);
 			testContribution(hs,frontConcave,k,reference);
+			if(k < numPoints - 2){
+				testContributionNoRef(hs,frontLinear,k);
+				testContributionNoRef(hs,frontConvex,k);
+				testContributionNoRef(hs,frontConcave,k);
+			}
 		}
 	}
 }
@@ -114,16 +162,25 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContribution3D ) {
 		auto frontConvex = createRandomFront(numPoints,3,2);
 		auto frontConcave = createRandomFront(numPoints,3,0.5);
 		
-		for(std::size_t k = 1; k <= 10; ++k){
+		for(std::size_t k = 1; k <= 7; ++k){
 			testContribution(hs,frontLinear,k,reference);
 			testContribution(hs,frontConvex,k,reference);
 			testContribution(hs,frontConcave,k,reference);
+			testContributionNoRef(hs,frontLinear,k);
+			testContributionNoRef(hs,frontConvex,k);
+			testContributionNoRef(hs,frontConcave,k);
 		}
 		
 		//all points
 		testContribution(hs,frontLinear,numPoints,reference);
 		testContribution(hs,frontConvex,numPoints,reference);
 		testContribution(hs,frontConcave,numPoints,reference);
+		
+		//without a reference we can not get than numPoints-3 contributions
+		//as three points are required to set up the reference frame
+		testContributionNoRef(hs,frontLinear,numPoints-3);
+		testContributionNoRef(hs,frontConvex,numPoints-3);
+		testContributionNoRef(hs,frontConcave,numPoints-3);
 	}
 }
 

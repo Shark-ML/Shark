@@ -269,9 +269,15 @@ private:
 		
 		return contributions;
 	}
+	
 public:
+	/// \brief Returns the index of the points with smallest contribution.
+	///
+	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
+	/// \param [in] k The number of points to select.
+	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
-	std::vector<std::size_t> least(Set const& points, std::size_t k, VectorType const& ref)const{
+	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k, VectorType const& ref)const{
 		std::vector<Point> front;
 		for(std::size_t i = 0; i != points.size(); ++i){
 			front.emplace_back(points[i](0)-ref(0),points[i](1)-ref(1),points[i](2)-ref(2),i);
@@ -283,16 +289,58 @@ public:
 			}
 		);
 		
-		std::vector<std::size_t> result;
-		for(auto const& p : allContributions(front)){
-			result.push_back(p.value);
-			if(result.size() == k) break;
-		}
+		auto result = allContributions(front);
+		result.erase(result.begin()+k,result.end());
 		return result;
 	}
 	
+	/// \brief Returns the index of the points with smallest contribution.
+	///
+	/// As no reference point is given, the extremum points can not be computed and are never selected.
+	///
+	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
+	/// \param [in] k The number of points to select.
+	template<class Set>
+	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k)const{
+		//reference point computation, and obtain the indizes of the extremum elements
+		std::size_t minIndex[]={0,0,0};
+		double minVal[]={points[0](0),points[0](1),points[0](2)};
+		double ref[]={points[0](0),points[0](1),points[0](2)};
+		for(std::size_t i = 0; i != points.size(); ++i){
+			for(std::size_t j = 0; j != 3; ++j){
+				if(points[i](j)< minVal[j]){
+					minVal[j] = points[i](j);
+					minIndex[j]=i;
+				}
+				ref[j] = std::max(ref[j],points[i](j));
+			}
+		}
+		
+		
+		std::vector<Point> front;
+		for(std::size_t i = 0; i != points.size(); ++i){
+			if((i == minIndex[0])|| (i == minIndex[1]) || (i == minIndex[2])) continue;//skip extrema
+			front.emplace_back(points[i](0)-ref[0],points[i](1)-ref[1],points[i](2)-ref[2],i);
+		}
+		std::sort(
+			front.begin(),front.end(),
+			[](Point const& lhs, Point const& rhs){
+				return lhs.f3 < rhs.f3;
+			}
+		);
+		
+		auto result = allContributions(front);
+		result.erase(result.begin()+k,result.end());
+		return result;
+	}
+
+	
+	/// \brief Returns the index of the points with largest contribution.
+	///
+	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
+	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
-	std::vector<std::size_t> largest(Set const& points, std::size_t k, VectorType const& ref)const{
+	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k, VectorType const& ref)const{
 		std::vector<Point> front;
 		for(std::size_t i = 0; i != points.size(); ++i){
 			front.emplace_back(points[i](0)-ref(0),points[i](1)-ref(1),points[i](2)-ref(2),i);
@@ -304,11 +352,51 @@ public:
 			}
 		);
 		
-		std::vector<std::size_t> result;
-		auto const& contributions = allContributions(front);
-		for(std::size_t i = 0; i != k; ++i){
-			result.push_back(contributions[front.size()-i-1].value);
+		auto result = allContributions(front);
+		result.erase(result.begin(),result.end()-k);
+		std::reverse(result.begin(),result.end());
+		return result;
+	}
+	
+	
+	/// \brief Returns the index of the points with largest contribution.
+	///
+	/// As no reference point is given, the extremum points can not be computed and are never selected.
+	///
+	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
+	/// \param [in] k The number of points to select.
+	template<class Set>
+	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k)const{
+		//reference point computation, and obtain the indizes of the extremum elements
+		std::size_t minIndex[]={0,0,0};
+		double minVal[]={points[0](0),points[0](1),points[0](2)};
+		double ref[]={points[0](0),points[0](1),points[0](2)};
+		for(std::size_t i = 0; i != points.size(); ++i){
+			for(std::size_t j = 0; j != 3; ++j){
+				if(points[i](j)< minVal[j]){
+					minVal[j] = points[i](j);
+					minIndex[j]=i;
+				}
+				ref[j] = std::max(ref[j],points[i](j));
+			}
 		}
+		
+		
+		std::vector<Point> front;
+		for(std::size_t i = 0; i != points.size(); ++i){
+			if((i == minIndex[0])|| (i == minIndex[1]) || (i == minIndex[2])) continue;//skip extrema
+			front.emplace_back(points[i](0)-ref[0],points[i](1)-ref[1],points[i](2)-ref[2],i);
+		}
+		std::sort(
+			front.begin(),front.end(),
+			[](Point const& lhs, Point const& rhs){
+				return lhs.f3 < rhs.f3;
+			}
+		);
+		
+		auto result = allContributions(front);
+		result.erase(result.begin(),result.end()-k);
+		std::reverse(result.begin(),result.end());
 		return result;
 	}
 };
