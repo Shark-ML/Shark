@@ -121,7 +121,6 @@ namespace detail {
             throw(std::invalid_argument("[exportCSV (2)] Stream cannot be opened for writing."));
         }
 
-
         if (scientific)
             out.setf(std::ios_base::scientific);
         std::streamsize ss = out.precision();
@@ -382,6 +381,8 @@ void importCSV(
 	std::size_t titleLines = 0
 ){
 	std::ifstream stream(fn.c_str());
+	if(!stream) throw(std::invalid_argument("[importCSV] Stream cannot be opened for reading."));
+	
 	stream.unsetf(std::ios::skipws);
 	
 	for(std::size_t i=0; i < titleLines; ++i) // ignoring the first lines
@@ -414,6 +415,8 @@ void importCSV(
 	std::size_t maximumBatchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 ){
 	std::ifstream stream(fn.c_str());
+	if(!stream) throw(std::invalid_argument("[importCSV] Stream cannot be opened for reading."));
+
 	stream.unsetf(std::ios::skipws);
 	std::istream_iterator<char> streamBegin(stream);
 	std::string contents(//read contents of file in string
@@ -444,6 +447,8 @@ void importCSV(
 	std::size_t maximumBatchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
 ){
 	std::ifstream stream(fn.c_str());
+	if(!stream) throw(std::invalid_argument("[importCSV] Stream cannot be opened for reading."));
+
 	stream.unsetf(std::ios::skipws);
 	std::istream_iterator<char> streamBegin(stream);
 	std::string contents(//read contents of file in string
