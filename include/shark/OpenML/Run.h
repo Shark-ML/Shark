@@ -204,7 +204,7 @@ public:
 		std::vector<std::size_t> const& split = m_task->splitIndices(repetition);
 		std::vector<double>& pred = m_predictions[repetition];
 		SHARK_ASSERT(split.size() == pred.size());
-		std::size_t i = 0, j = 0;
+		std::size_t j = 0;
 		std::size_t batches = predictions.numberOfBatches();
 		for (std::size_t b=0; b<batches; b++)
 		{

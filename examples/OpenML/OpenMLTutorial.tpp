@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 		// for actual experiments. Otherwise your results will be lost and you
 		// cannot receive credit for your work. Creating new flows and runs
 		// with this key will silently fail.
-		string api_key = "8d736266baa96f8ef99f10516911d334";
+		string api_key = "0076c004519625ecc7ad51e553f40dff";
 
 		// register the api key in the global openML::connection object
 		openML::connection.setKey(api_key);

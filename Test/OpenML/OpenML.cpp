@@ -11,7 +11,7 @@ using namespace shark;
 using namespace openML;
 
 
-static const std::string demo_api_key = "8d736266baa96f8ef99f10516911d334";
+static const std::string demo_api_key = "3e8001889d849f1dbdb109b3ac87c7eb";
 
 
 BOOST_AUTO_TEST_SUITE (OpenML_OpenML)
@@ -70,6 +70,7 @@ BOOST_AUTO_TEST_CASE(OpenML_Task)
 	// construct task from ID
 	std::shared_ptr<Task> task = Task::get(11);
 	BOOST_CHECK_EQUAL(task->id(), 11);
+// TODO: obtain the properties of task 11 ON THE TEST SERVER
 
 	// basic getters
 	BOOST_CHECK_EQUAL(task->tasktype(), SupervisedClassification);
@@ -164,7 +165,7 @@ BOOST_AUTO_TEST_CASE(OpenML_Run)
 	task->split(0, data);
 
 	// store test labels as predictions
-	// (in terms of machine learning this is cheating! but it makes up a nice test)
+	// (in terms of machine learning this is cheating! but it is a useful unit test)
 	for (std::size_t f=0; f<10; f++)
 	{
 		run.setPredictions(0, f, folds.validation(f).labels());
