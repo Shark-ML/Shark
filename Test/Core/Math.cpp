@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(Math_Trigamma_Random)
 {
 	std::size_t numTrials = 1000;
 	double epsilon = 1.e-8;
-	double maxError = 1.e-6;
+	double maxError = 1.e-5;
 	for(std::size_t trial = 0; trial != numTrials; ++trial){
 		double x = Rng::uni(0,5);
 		double y=trigamma(x);
