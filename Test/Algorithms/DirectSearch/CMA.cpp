@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( CMA_Ellipsoid_Niko )
 
 BOOST_AUTO_TEST_CASE( CMA_Sphere_Niko )
 {
-	Rng::seed(42)
+	Rng::seed(42);
 	const unsigned N = 10;
 	RealVector x0(10, 0.1);
 	Sphere sphere(N);
