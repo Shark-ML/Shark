@@ -35,12 +35,12 @@ BOOST_AUTO_TEST_CASE( EPSILONHINGELOSS_EVAL ) {
 
 		//test eval
 		double value = loss.eval(testLabel,testPoint);
-		BOOST_CHECK_SMALL(value-valueResult, 1.e-13);
+		BOOST_CHECK_SMALL(value-valueResult, 1.e-12);
 		
 		//test evalDerivative (first)
 		RealMatrix derivative;
 		value = loss.evalDerivative(testLabel, testPoint, derivative);
-		BOOST_CHECK_SMALL(value - valueResult, 1.e-13);
+		BOOST_CHECK_SMALL(value - valueResult, 1.e-12);
 		BOOST_REQUIRE_EQUAL(derivative.size1(), 5);
 		BOOST_REQUIRE_EQUAL(derivative.size2(), dim);
 		
