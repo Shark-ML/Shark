@@ -9,7 +9,7 @@
  * function first proposed in:
  * 
  * H. H. Rosenbrock. An automatic method for finding the greatest or
- * least value of a function. The Computer Journal 3: 175–184, 1960
+ * least value of a function. The Computer Journal 3: 175-184, 1960
  * 
  * 
  *
@@ -53,7 +53,7 @@ namespace shark {
 *  function first proposed in:
 *
 *  H. H. Rosenbrock. An automatic method for finding the greatest or
-*  least value of a function. The Computer Journal 3: 175–184,
+*  least value of a function. The Computer Journal 3: 175-184,
 *  1960  
 */
 struct Rosenbrock : public SingleObjectiveFunction {
