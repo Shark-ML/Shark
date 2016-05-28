@@ -124,7 +124,7 @@ public:
 			//calculate error and derivative of the current thread
 			FirstOrderDerivative threadDerivative(input.size(),0.0);
 			double threadError = 0;
-			boost::shared_ptr<State> state = mep_model->createState();
+			std::shared_ptr<State> state = mep_model->createState();
 			RealVector batchDerivative;
 			RealMatrix predictions;
 			for(std::size_t i  = start; i != end; ++i){

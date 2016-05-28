@@ -116,9 +116,9 @@ public:
 	}
 
 	/// derivative storage object (empty for this model)
-	boost::shared_ptr<State> createState() const
+	std::shared_ptr<State> createState() const
 	{
-		return boost::shared_ptr<State>(new EmptyState());
+		return std::shared_ptr<State>(new EmptyState());
 	}
 
 

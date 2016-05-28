@@ -98,8 +98,8 @@ public:
 	{ return m_matrix.size1(); }
 	
 	///\brief DiscreteKernels don't have a state so they return an EmptyState object
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new EmptyState());
 	}
 
 	/// \brief Evaluates the kernel function.

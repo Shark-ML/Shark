@@ -101,8 +101,8 @@ public:
 		m_warmUpSequence = warmUpSequence;
 	}
 	
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new InternalState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new InternalState());
 	}
 
 	//!  \brief Feed a data series to the model. The output (i.e., the time

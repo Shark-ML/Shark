@@ -138,8 +138,8 @@ public:
 	}
 	
 	///\brief creates the internal state of the kernel
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new InternalState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new InternalState());
 	}
 
 	/// \brief evaluates \f$ k(x_1,x_2)\f$

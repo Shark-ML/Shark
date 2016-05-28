@@ -38,8 +38,8 @@ public:
 			return m_dim;
 		}
 		
-		boost::shared_ptr<State> createState()const{
-			return boost::shared_ptr<State>(new EmptyState());
+		std::shared_ptr<State> createState()const{
+			return std::shared_ptr<State>(new EmptyState());
 		}
 		
 		// adds just a value c on the input

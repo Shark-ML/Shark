@@ -125,8 +125,8 @@ public:
 		return m_parameters.size();
 	}
 
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new EmptyState());
 	}
 	
 	using AbstractModel<RealVector,RealVector>::eval;

@@ -150,8 +150,8 @@ public:
 		m_binary.insert(m_binary.end(), binmodels.begin(), binmodels.end());
 	}
 
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new EmptyState());
 	}
 
 	using base_type::eval;

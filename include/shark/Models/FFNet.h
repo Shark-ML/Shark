@@ -260,8 +260,8 @@ public:
 		return s.responses;
 	}
 	
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new InternalState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new InternalState());
 	}
 
 	///\brief Returns the response of the i-th layer given the input of that layer.

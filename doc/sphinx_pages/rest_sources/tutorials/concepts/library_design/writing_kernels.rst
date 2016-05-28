@@ -405,8 +405,8 @@ Putting everything together our implementation looks like this::
 	    RealMatrix dk_dgamma;   // derivative of kernel k w.r.t. gamma
 	};
 
-	boost::shared_ptr<State> createState() const {
-	    return boost::shared_ptr<State>(new InternalState());
+	std::shared_ptr<State> createState() const {
+	    return std::shared_ptr<State>(new InternalState());
 	}
 
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result, State& state) const {

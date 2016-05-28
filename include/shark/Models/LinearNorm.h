@@ -71,8 +71,8 @@ public:
 		m_inputSize = inputDimension;
 	}
 	
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new InternalState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new InternalState());
 	}
 
 	using AbstractModel<RealVector,RealVector>::eval;

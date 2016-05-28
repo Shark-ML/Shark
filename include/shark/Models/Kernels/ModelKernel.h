@@ -58,10 +58,10 @@ public:
 	typedef AbstractModel<InputType,IntermediateType> Model;
 private:
 	struct InternalState: public State{
-		boost::shared_ptr<State> kernelStateX1X2;
-		boost::shared_ptr<State> kernelStateX2X1;
-		boost::shared_ptr<State> modelStateX1;
-		boost::shared_ptr<State> modelStateX2;
+		std::shared_ptr<State> kernelStateX1X2;
+		std::shared_ptr<State> kernelStateX2X1;
+		std::shared_ptr<State> modelStateX1;
+		std::shared_ptr<State> modelStateX2;
 		typename Model::BatchOutputType intermediateX1;
 		typename Model::BatchOutputType intermediateX2;
 	};
@@ -91,9 +91,9 @@ public:
 		init(newParameters) >> parameters(*mpe_kernel),parameters(*mpe_model);
 	}
 	
-	boost::shared_ptr<State> createState()const{
+	std::shared_ptr<State> createState()const{
 		InternalState* s = new InternalState();
-		boost::shared_ptr<State> sharedState(s);//create now to allow for destructor to be called in case of exception
+		std::shared_ptr<State> sharedState(s);//create now to allow for destructor to be called in case of exception
 		s->kernelStateX1X2 = mpe_kernel->createState();
 		s->kernelStateX2X1 = mpe_kernel->createState();
 		s->modelStateX1 = mpe_model->createState();
@@ -227,7 +227,7 @@ public:
 	}
 	
 	///\brief Returns the internal state object used for eval and the derivatives.
-	boost::shared_ptr<State> createState()const{
+	std::shared_ptr<State> createState()const{
 		return m_wrapper->createState();
 	}
 

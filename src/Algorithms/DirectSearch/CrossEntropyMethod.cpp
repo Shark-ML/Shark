@@ -64,7 +64,7 @@ CrossEntropyMethod::CrossEntropyMethod()
 : m_variance( 0 )
 , m_counter( 0 )
 , m_distribution( Normal< Rng::rng_type >( Rng::globalRng, 0, 1.0 ) )
-, m_noise (boost::shared_ptr<INoiseType> (new ConstantNoise(0.0)))
+, m_noise (std::shared_ptr<INoiseType> (new ConstantNoise(0.0)))
 {
 	m_features |= REQUIRES_VALUE;
 }

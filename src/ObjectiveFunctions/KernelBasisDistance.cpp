@@ -131,11 +131,11 @@ KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const Searc
 	//set up system of equations and store the kernel states at the same time
 	// (we assume here that everything fits into memory, which is the case as long as the number of
 	// vectors to approximate is quite small)
-	boost::shared_ptr<State> KzState = kernel.createState();
+	std::shared_ptr<State> KzState = kernel.createState();
 	RealMatrix Kz;
 	kernel.eval(basis,basis,Kz,*KzState);
 	//construct the linear part
-	std::vector<boost::shared_ptr<State> > KzxState(expansionBasis.numberOfBatches());
+	std::vector<std::shared_ptr<State> > KzxState(expansionBasis.numberOfBatches());
 	RealMatrix linear(m_numApproximatingVectors,outputs,0);
 	std::size_t start = 0;
 	for(std::size_t i = 0; i != expansionBasis.numberOfBatches(); ++i){

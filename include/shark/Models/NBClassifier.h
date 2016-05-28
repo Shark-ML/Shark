@@ -40,7 +40,6 @@
 #include "shark/Models/AbstractModel.h"
 
 #include <boost/noncopyable.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/static_assert.hpp>
 
 #include <limits>
@@ -70,7 +69,7 @@ public:
 	/// Type of class distribution
 	typedef std::vector<double> ClassPriorsType;
 
-	typedef boost::shared_ptr<AbstractDistribution> AbstractDistPtr;
+	typedef std::shared_ptr<AbstractDistribution> AbstractDistPtr;
 
 	/// Type of features distribution
 	typedef std::vector<std::vector<AbstractDistPtr> > FeatureDistributionsType;
@@ -132,8 +131,8 @@ public:
 
 	using base_type::eval;
 	
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new EmptyState());
 	}
 
 	/// see AbstractModel::eval

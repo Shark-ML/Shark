@@ -290,7 +290,7 @@ private:
   class PoleRNNet : public OnlineRNNet {
   public:
     PoleRNNet(RecurrentStructure* structure) : OnlineRNNet(structure){}
-    boost::shared_ptr<State> createState()const{
+    std::shared_ptr<State> createState()const{
 	    throw std::logic_error("State not available for PoleRNNet.");
     }
     void eval(BatchInputType const & patterns, BatchOutputType &outputs,

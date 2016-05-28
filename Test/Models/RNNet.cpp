@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE( RNNET_WEIGHTED_PARAMETER_DERIVATIVE ){
 	//we choose the same sequence as warmup sequence as to test the net
 	net.setWarmUpSequence(testInputs);
 	//evaluate network
-	boost::shared_ptr<State> state = net.createState();
+	std::shared_ptr<State> state = net.createState();
 	
 	net.eval(testInputBatch,testOutputBatch,*state);
 

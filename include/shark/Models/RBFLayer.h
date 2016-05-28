@@ -106,8 +106,8 @@ public:
 		return m_centers.size1();
 	}
 	
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new InternalState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new InternalState());
 	}
 	
 	

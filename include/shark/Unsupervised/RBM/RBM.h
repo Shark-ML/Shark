@@ -202,8 +202,8 @@ public:
 		m_evalMean = evalMean;
 	}
 	
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new EmptyState());
 	}
 	
 	///\brief Passes information through/samples from an RBM in a forward or backward way. 

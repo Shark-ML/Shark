@@ -50,7 +50,7 @@ namespace shark {
 	}
 
 	std::vector< 
-	    boost::shared_ptr< 
+	    std::shared_ptr< 
 		shark::Probe
 		>
 	    > m_probes;
@@ -84,14 +84,14 @@ BOOST_AUTO_TEST_CASE( HttpServer ) {
     
     httpServer.registerHandler( 
 	"/About", 
-	boost::shared_ptr< shark::HttpServer::AbstractRequestHandler >( new shark::SharkAboutHandler() ) 
+	std::shared_ptr< shark::HttpServer::AbstractRequestHandler >( new shark::SharkAboutHandler() ) 
 	);
     httpServer.registerHandler( 
 	"/ProbeManager", 
-	boost::shared_ptr< shark::HttpServer::AbstractRequestHandler >( new shark::RestHandler() ) 
+	std::shared_ptr< shark::HttpServer::AbstractRequestHandler >( new shark::RestHandler() ) 
 	);
     httpServer.setFallbackHandler(
-	boost::shared_ptr< shark::HttpServer::AbstractRequestHandler >( new shark::FileHandler( boost::filesystem::initial_path() ) ) 
+	std::shared_ptr< shark::HttpServer::AbstractRequestHandler >( new shark::FileHandler( boost::filesystem::initial_path() ) ) 
 	);
 
     try {

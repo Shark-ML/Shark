@@ -159,7 +159,7 @@ public:
 
 		// init helpers
 		RealVector der( m_nhp );
-		boost::shared_ptr<State> state = mep_k->createState(); //state from eval and for derivatives
+		std::shared_ptr<State> state = mep_k->createState(); //state from eval and for derivatives
 		derivative.resize( m_nhp );
 
 		// start calculating derivative
@@ -275,7 +275,7 @@ private:
 		// 		for a definition of these variables. -> It's very easy to follow this code with that chapter open.
 		//		The Keerthi-paper "Efficient method for gradient-based..." is also highly recommended for cross-reference.
 		RealVector der( m_nkp ); //derivative storage helper
-		boost::shared_ptr<State> state = mep_k->createState(); //state object for derivatives
+		std::shared_ptr<State> state = mep_k->createState(); //state object for derivatives
 
 		// create temporary batch helpers
 		RealIdentityMatrix unit_weights(1);

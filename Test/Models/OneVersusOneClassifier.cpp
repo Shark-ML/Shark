@@ -68,8 +68,8 @@ public:
 	std::size_t numberOfParameters() const
 	{ return 1; }
 	
-	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
+	std::shared_ptr<State> createState()const{
+		return std::shared_ptr<State>(new EmptyState());
 	}
 
 	using base_type::eval;

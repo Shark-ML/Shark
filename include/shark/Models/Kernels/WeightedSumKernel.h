@@ -68,7 +68,7 @@ private:
 	struct InternalState: public State{
 		RealMatrix result;
 		std::vector<RealMatrix> kernelResults;
-		std::vector<boost::shared_ptr<State> > kernelStates;
+		std::vector<std::shared_ptr<State> > kernelStates;
 
 		InternalState(std::size_t numSubKernels)
 		:kernelResults(numSubKernels),kernelStates(numSubKernels){}
@@ -170,12 +170,12 @@ public:
 	}
 
 	///\brief creates the internal state of the kernel
-	boost::shared_ptr<State> createState()const{
+	std::shared_ptr<State> createState()const{
 		InternalState* state = new InternalState(m_base.size());
 		for(std::size_t i = 0; i != m_base.size(); ++i){
 			state->kernelStates[i]=m_base[i].kernel->createState();
 		}
-		return boost::shared_ptr<State>(state);
+		return std::shared_ptr<State>(state);
 	}
 
 	/// set the parameter vector. The first N-1 entries are the (log-encoded) kernel

@@ -109,13 +109,13 @@ public:
 	///calculated. Eval can store a state which is then reused to speed up
 	///the calculations of the derivatives. This also allows eval to be
 	///evaluated in parallel!
-	virtual boost::shared_ptr<State> createState()const
+	virtual std::shared_ptr<State> createState()const
 	{
 		if (hasFirstParameterDerivative() || hasFirstInputDerivative())
 		{
 			throw SHARKEXCEPTION("[AbstractKernelFunction::createState] createState must be overridden by kernels with derivatives");
 		}
-		return boost::shared_ptr<State>(new EmptyState());
+		return std::shared_ptr<State>(new EmptyState());
 	}
 
 	///////////////////////////////////////////SINGLE ELEMENT INTERFACE///////////////////////////////////////////
@@ -149,7 +149,7 @@ public:
 	///
 	/// The result matrix is filled in with the values result(i,j) = kernel(x1[i], x2[j]);
 	virtual void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result) const {
-		boost::shared_ptr<State> state = createState();
+		std::shared_ptr<State> state = createState();
 		eval(batchX1, batchX2, result, *state);
 	}
 

@@ -57,9 +57,9 @@ private:
 		RealVector kxx;
 		RealVector kyy;
 		
-		boost::shared_ptr<State> stateKxy;
-		std::vector<boost::shared_ptr<State> > stateKxx;
-		std::vector<boost::shared_ptr<State> > stateKyy;
+		std::shared_ptr<State> stateKxy;
+		std::vector<std::shared_ptr<State> > stateKxx;
+		std::vector<std::shared_ptr<State> > stateKyy;
 		
 		void resize(std::size_t sizeX1,std::size_t sizeX2, AbstractKernelFunction<InputType> const* base){
 			kxy.resize(sizeX1,sizeX2);
@@ -107,9 +107,9 @@ public:
 	}
 	
 	///\brief creates the internal state of the kernel
-	boost::shared_ptr<State> createState()const{
+	std::shared_ptr<State> createState()const{
 		InternalState* state = new InternalState();
-		return boost::shared_ptr<State>(state);
+		return std::shared_ptr<State>(state);
 	}
 
 	///evaluates \f$ k(x,y) \f$
