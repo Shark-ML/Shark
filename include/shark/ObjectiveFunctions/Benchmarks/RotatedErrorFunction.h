@@ -47,6 +47,8 @@ struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 	:m_objective(objective){
 		if(m_objective->canProposeStartingPoint())
 			m_features |= CAN_PROPOSE_STARTING_POINT;
+		if(m_objective->hasFirstDerivative())
+			m_features |= HAS_FIRST_DERIVATIVE;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -80,6 +82,13 @@ struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 		m_evaluationCounter++;
 		RealVector x = prod(m_rotation,p);
 		return m_objective->eval(x);
+	}
+	
+	ResultType evalDerivative( SearchPointType const& p, FirstOrderDerivative& derivative )const {
+		RealVector x = prod(m_rotation,p);
+		double value = m_objective->evalDerivative(x,derivative);
+		derivative = prod(trans(m_rotation),derivative);
+		return value;
 	}
 private:
 	SingleObjectiveFunction* m_objective;

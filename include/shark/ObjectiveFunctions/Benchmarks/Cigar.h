@@ -43,6 +43,7 @@ struct Cigar : public SingleObjectiveFunction {
 
 	Cigar(std::size_t numberOfVariables = 5, double alpha=1.E-3) : m_alpha(alpha) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= HAS_FIRST_DERIVATIVE;
 		m_numberOfVariables = numberOfVariables;
 	}
 
@@ -79,6 +80,12 @@ struct Cigar : public SingleObjectiveFunction {
 			sum +=  sqr(p(i));
 
 		return sum;
+	}
+	double evalDerivative(SearchPointType const& p, FirstOrderDerivative & derivative ) const {
+		derivative.resize(p.size());
+		noalias(derivative) = 2* p;
+		derivative(0) = 2 * m_alpha * p(0);
+		return eval(p);
 	}
 
 	double alpha() const {
