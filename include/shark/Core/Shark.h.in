@@ -36,15 +36,6 @@
 #ifndef SHARK_CORE_SHARK_H
 #define SHARK_CORE_SHARK_H
 
-#include <boost/version.hpp>
-#include <boost/static_assert.hpp>
-
-/**
- * \brief Bails out the compiler if the boost version is < 1.44.
- */
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-    static_assert(BOOST_VERSION >= 104400 , "Shark required boost version 1.44 or higher");
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include <boost/assign.hpp>
 #include <boost/config.hpp>
 #include <boost/property_tree/ptree.hpp>

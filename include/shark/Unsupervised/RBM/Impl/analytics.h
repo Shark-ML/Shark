@@ -37,7 +37,6 @@
 #include <shark/Algorithms/GradientDescent/Rprop.h>
 #include <shark/Core/OpenMP.h>
 
-#include <boost/static_assert.hpp>
 #include <boost/range/numeric.hpp>
 namespace shark {
 namespace detail{
@@ -401,7 +400,7 @@ namespace detail{
 		tags::RealSpace,
 		double beta
 	){
-		BOOST_STATIC_ASSERT(sizeof(RBMType) && "Can't calculate the partition of two real valued layers!");
+		static_assert(sizeof(RBMType), "Can't calculate the partition of two real valued layers!");
 		return 0;
 	}
 }

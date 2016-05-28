@@ -40,7 +40,6 @@
 #include "shark/Models/AbstractModel.h"
 
 #include <boost/noncopyable.hpp>
-#include <boost/static_assert.hpp>
 
 #include <limits>
 #include <utility>

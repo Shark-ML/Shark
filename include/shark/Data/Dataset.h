@@ -46,7 +46,6 @@
 #define SHARK_DATA_DATASET_H
 
 #include <boost/range/iterator_range.hpp>
-#include <boost/range/algorithm/sort.hpp>
 
 #include <shark/Core/Exception.h>
 #include <shark/Core/OpenMP.h>
@@ -982,11 +981,6 @@ void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize 
 	data.repartition(partitioning);
 
 	// Now place examples into the batches reserved for their class...
-
-	// The following line does the job in principle but it crashes with clang on the mac:
-//	boost::sort(data.elements());//todo we are lying here, use bidirectional iterator sort.
-
-	// The following fixes the issue. As an aside it is even linear time:
 	std::vector<std::size_t> bat = classStart;           // batch index until which the class is already filled in
 	std::vector<std::size_t> idx(classStart.size(), 0);  // index within the batch until which the class is already filled in
 	unsigned int c = 0;                                  // current class in whose batch space we operate

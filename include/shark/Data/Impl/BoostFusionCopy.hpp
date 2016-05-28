@@ -44,7 +44,6 @@
 #include <boost/fusion/sequence/comparison/detail/equal_to.hpp>
 #include <boost/fusion/support/is_sequence.hpp>
 #include <boost/config.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/ice.hpp>
 
@@ -99,8 +98,7 @@ namespace boost { namespace fusion
         >::type
     copy(Seq1 const& src, Seq2& dest)
     {
-        BOOST_STATIC_ASSERT(
-            result_of::size<Seq1>::value == result_of::size<Seq2>::value);
+        static_assert( result_of::size<Seq1>::value == result_of::size<Seq2>::value, "Sequences must have the same size");
 
         detail::sequence_copy<
             Seq1 const, Seq2>::
