@@ -42,6 +42,7 @@ struct Sphere : public SingleObjectiveFunction {
 	
 	Sphere(std::size_t numberOfVariables = 5):m_numberOfVariables(numberOfVariables) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= HAS_FIRST_DERIVATIVE;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -69,9 +70,18 @@ struct Sphere : public SingleObjectiveFunction {
 		return x;
 	}
 
-	double eval(const SearchPointType &p) const {
+	double eval(SearchPointType const& x) const {
+		SIZE_CHECK(x.size() == numberOfVariables());
 		m_evaluationCounter++;
-		return norm_sqr(p);
+		return norm_sqr(x);
+	}
+	
+	double evalDerivative(SearchPointType const& x, FirstOrderDerivative& derivative) const {
+		SIZE_CHECK(x.size() == numberOfVariables());
+		m_evaluationCounter++;
+		derivative.resize(x.size());
+		noalias(derivative) = 2*x;
+		return norm_sqr(x);
 	}
 private:
 	std::size_t m_numberOfVariables;

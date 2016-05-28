@@ -42,6 +42,7 @@ struct Discus : public SingleObjectiveFunction {
 
 	Discus(std::size_t numberOfVariables = 5,double alpha = 1.E-3) : m_alpha(alpha) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= HAS_FIRST_DERIVATIVE;
 		m_numberOfVariables = numberOfVariables;
 	}
 
@@ -72,13 +73,19 @@ struct Discus : public SingleObjectiveFunction {
 		return x;
 	}
 
-	double eval(const SearchPointType &p) const {
+	double eval(SearchPointType const& p) const {
 		m_evaluationCounter++;
 		double sum =  sqr(p(0));
 		for (std::size_t i = 1; i < p.size(); i++)
 			sum += m_alpha * sqr(p(i));
 
 		return sum;
+	}
+	double evalDerivative(SearchPointType const& p, FirstOrderDerivative & derivative ) const {
+		derivative.resize(p.size());
+		noalias(derivative) = (2 * m_alpha) * p;
+		derivative(0) = 2 * p(0);
+		return eval(p);
 	}
 
 	double alpha() const {
