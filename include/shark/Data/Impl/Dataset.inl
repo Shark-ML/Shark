@@ -575,13 +575,13 @@ private:
 	template<class B>
 	struct TransformedDataElementTypeFromBatch{
 		typedef typename boost::range_value<
-			typename boost::result_of<Functor(B)>::type 
+			typename std::result_of<Functor(B)>::type 
 		>::type type;
 	};
 public:
 	typedef typename boost::mpl::eval_if<
 		CanBeCalled<Functor,T>,
-		boost::result_of<Functor(T) >,
+		std::result_of<Functor(T) >,
 		TransformedDataElementTypeFromBatch<
 			typename Batch<T>::type 
 		>
