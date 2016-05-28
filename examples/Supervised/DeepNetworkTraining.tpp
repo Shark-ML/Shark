@@ -78,6 +78,7 @@ AutoencoderModel trainAutoencoderModel(
 	//set up optimizer
 //###begin<optimizer>
 	IRpropPlusFull optimizer;
+	error.init();
 	optimizer.init(error);
 	std::cout<<"Optimizing model: "+model.name()<<std::endl;
 	for(std::size_t i = 0; i != iterations; ++i){
@@ -165,6 +166,7 @@ int main()
 	//optimize the model
 	std::cout<<"training supervised model"<<std::endl;
 	IRpropPlusFull optimizer;
+	error.init();
 	optimizer.init(error);
 	for(std::size_t i = 0; i != iterations; ++i){
 		optimizer.step(error);

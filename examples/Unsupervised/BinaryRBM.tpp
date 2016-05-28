@@ -63,6 +63,7 @@ int main(){
 	double meanResult = 0;
 	for(unsigned int trial = 0; trial != numTrials; ++trial) {
 		initializeWeights(rbm);
+		cd.init();
 		optimizer.init(cd);
 
 		for(unsigned int iteration = 0; iteration != numIterations; ++iteration) {

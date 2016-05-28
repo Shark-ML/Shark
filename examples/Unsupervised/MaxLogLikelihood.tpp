@@ -50,6 +50,7 @@ int main(int argc, char **argv) {
 	NegativeLogLikelihood error(data,&mixture);
 	//initialize Rprop
 	IRpropPlus optimizer;
+	error.init();
 	optimizer.init(error);
 	
 	RealMatrix initCenters = gaussians.centers();

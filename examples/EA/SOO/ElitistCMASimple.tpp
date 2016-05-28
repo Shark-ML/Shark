@@ -44,6 +44,7 @@ int main( int argc, char ** argv ) {
 	shark::ElitistCMA cma;
 
 	// Initialize the optimizer for the objective function instance.
+	sphere.init();
 	cma.init( sphere );
 
 	// Iterate the optimizer until a solution of sufficient quality is found.

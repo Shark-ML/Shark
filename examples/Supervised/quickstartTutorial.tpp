@@ -50,7 +50,7 @@ int main(int argc, char **argv){
 	//this code here is just for illustration purposes
 	//###begin<eval>
 	unsigned int correct = 0;
-	BOOST_FOREACH(ClassificationDataset::element_reference point, test.elements()){
+	for(auto point: test.elements()){
 		unsigned int result = classifier(point.input);
 		if (result == point.label){
 			correct++;

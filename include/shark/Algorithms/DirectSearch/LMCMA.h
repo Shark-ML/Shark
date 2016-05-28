@@ -244,7 +244,6 @@ public:
 		double initialSigma
 	) {
 		checkFeatures(function);
-		function.init();
 		
 		m_numberOfVariables = function.numberOfVariables();
 		m_lambda = lambda;

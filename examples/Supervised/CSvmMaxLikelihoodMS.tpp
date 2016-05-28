@@ -94,6 +94,7 @@ RealVector run_one_trial( bool verbose) {
     IRpropPlus rprop;
     double stepsize = 0.1;
     double stop_delta = 1e-3;
+    mlms.init();
     rprop.init( mlms, start, stepsize );
     unsigned int its = 50;
     //###end<setup_optimizer>

@@ -75,6 +75,7 @@ BinaryRBM trainRBM(
 	
 	//now we train the rbm and evaluate the mean negative log-likelihood at the end
 	unsigned int numIterations = iterations;//iterations for training
+	estimator.init();
 	optimizer.init(estimator);
 	for(unsigned int iteration = 0; iteration != numIterations; ++iteration) {
 		optimizer.step(estimator);
@@ -158,6 +159,7 @@ int main()
 	//optimize the model
 	std::cout<<"training supervised model"<<std::endl;
 	IRpropPlusFull optimizer;
+	error.init();
 	optimizer.init(error);
 	for(std::size_t i = 0; i != iterations; ++i){
 		optimizer.step(error);

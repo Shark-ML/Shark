@@ -142,6 +142,7 @@ int main()
 	//###begin<train>
 	LBFGS optimizer;
 	optimizer.lineSearch().lineSearchType() = LineSearch::WolfeCubic;
+	error.init();
 	optimizer.init(error);
 	//###end<train>
 	Timer timer;

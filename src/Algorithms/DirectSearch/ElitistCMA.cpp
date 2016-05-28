@@ -53,7 +53,6 @@ void ElitistCMA::write( OutArchive & archive ) const {
 
 void ElitistCMA::init( ObjectiveFunctionType& function, SearchPointType const& p){
 	checkFeatures(function);
-	function.init();
 
 	//create and evaluate individual
 	m_individual = CMAIndividual<double>(p.size());

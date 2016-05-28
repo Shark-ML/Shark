@@ -221,7 +221,6 @@ public:
 	 *  The startingPoint can actually be anything, only its dimension has to be correct.
 	 */
 	virtual void init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
-		objectiveFunction.init();
 		checkFeatures(objectiveFunction);
 
 		if(!m_configured)

@@ -79,7 +79,6 @@ public:
 	
 	void init( ObjectiveFunctionType& function, SearchPointType const& p) {
 		checkFeatures(function);
-		function.init();
 		
 		std::size_t lambda = suggestLambda( p.size() );
 		std::size_t mu = suggestMu(  lambda );

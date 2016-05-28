@@ -45,7 +45,6 @@ int main( int argc, char ** argv ) {
 	// Instantiate both the problem and the optimizer.
 //###begin<problem>
 	shark::DTLZ2 dtlz2;
-	dtlz2.setNumberOfObjectives( 2 );
 	dtlz2.setNumberOfVariables( 3 );
 //###end<problem>		  
 
@@ -53,6 +52,7 @@ int main( int argc, char ** argv ) {
 	shark::MOCMA mocma;
 
 	// Initialize the optimizer for the objective function instance.
+	dtlz2.init();
 	mocma.init( dtlz2 );
 //###end<optimizer>
 

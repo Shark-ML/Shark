@@ -135,7 +135,6 @@ TrustRegionNewton::TrustRegionNewton()
 
 void TrustRegionNewton::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint, double initialDelta) {
 	checkFeatures(objectiveFunction);
-	objectiveFunction.init();
 
 	m_delta = initialDelta;
 	m_minImprovementRatio = 0.1;

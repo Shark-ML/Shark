@@ -120,7 +120,6 @@ void CrossEntropyMethod::init(
 	RealVector initialVariance
 ) {
 	checkFeatures(function);
-	function.init();
 	
 	m_numberOfVariables = function.numberOfVariables();
 	m_populationSize = populationSize;

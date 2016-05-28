@@ -46,6 +46,7 @@ AutoencoderModel trainAutoencoderModel(
 	//set up optimizer
 //###begin<optimizer>
 	IRpropPlusFull optimizer;
+	error.init();
 	optimizer.init(error);
 	std::cout<<"Optimizing model: "+model.name()<<std::endl;
 	for(std::size_t i = 0; i != iterations; ++i){

@@ -55,7 +55,6 @@ public:
 
 	void init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
 		checkFeatures(objectiveFunction);
-		objectiveFunction.init();
 		
 		m_path.resize(startingPoint.size());
 		m_path.clear();

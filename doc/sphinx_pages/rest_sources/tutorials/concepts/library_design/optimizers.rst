@@ -107,9 +107,10 @@ the local optimum:
 ============================================   =========================================================================
 Method                                         Description
 ============================================   =========================================================================
-``init(ObjectiveFunctionType)``                Initializes the algorithm and calls init of the objective function.
+``init(ObjectiveFunctionType)``                Initializes the algorithm.
                                                Internal data structures are initialized and the flags of 
-					       the objective function checked.
+					       the objective function checked. Note that the objective function must
+					       be initialized before calling this!
 ``step(ObjectiveFunctionType)``                Performs one step of the learning algorithm on the objective function.
 ``SolutionSetType solution()``                 Returns the current best solution found.
 ============================================   =========================================================================
@@ -133,6 +134,7 @@ Here is a short example on how this interface can be used::
 
   MyObjectiveFunction f;
   MyOptimizer opt;
+  f.init();
   opt.init(f);
 
   while( !someStoppingCriteronMet(opt,f) ) {

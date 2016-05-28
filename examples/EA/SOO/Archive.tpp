@@ -54,6 +54,7 @@ int main() {
 
 	// Initialize the optimizer for the objective function instance.
 	CMA cma;
+	wrapper.init();
 	cma.init( wrapper );
 
 	// Iterate the optimizer until a solution of sufficient quality is found.

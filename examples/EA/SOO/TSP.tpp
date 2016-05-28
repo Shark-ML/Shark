@@ -166,6 +166,7 @@ int main( int argc, char ** argv ) {
 	PartiallyMappedCrossover pmx;    
 	// Fitness function instance.
 	TspTourLength ttl( costMatrix );
+	ttl.init();
 
 	// Size of the parent population
 	const std::size_t mu = 100;

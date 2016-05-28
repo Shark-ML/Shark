@@ -61,6 +61,7 @@ int main( int argc, char ** argv ) {
 //###begin<optimizer>
 	Himmelblau hb;
 	CMA cma;
+	hb.init();
 	cma.init( hb );
 //###end<optimizer>
 
@@ -72,7 +73,7 @@ int main( int argc, char ** argv ) {
 		     << " ellipse center " 
 		     << cma.mean()( 0 ) << ","
 		     << cma.mean()( 1 ) << " size "
-		     << cma.eigenValues()(0) * cma.sigma() * 2. << "," // times 2 because gunplot takes diameters as arguments 
+		     << cma.eigenValues()(0) * cma.sigma() * 2. << "," // times 2 because gnuplot takes diameters as arguments 
 		     << cma.eigenValues()(1) * cma.sigma() * 2. << " angle " 
 		     << ::atan( cma.eigenVectors()( 1, 0 ) / cma.eigenVectors()( 0, 0 ) ) / M_PI * 180 << " front fillstyle empty border 2" << endl;
 		

@@ -53,6 +53,7 @@ double trainProblem(const RegressionDataset& training, RegressionDataset const& 
 
 	//now train for a number of iterations using Rprop
 	IRpropPlus optimizer;
+	regularizedError.init();
 	//initialize with our predefined point, since
 	//the combined function can't propose one.
 	optimizer.init(regularizedError,startingPoint);

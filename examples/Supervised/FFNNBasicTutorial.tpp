@@ -55,6 +55,7 @@ int main(){
 	//initialize Rprop and initialize the network randomly
 	initRandomUniform(network,-0.1,0.1);
 	IRpropPlus optimizer;
+	error.init();
 	optimizer.init(error);
 	unsigned numberOfSteps = 1000;
 	for(unsigned step = 0; step != numberOfSteps; ++step) 

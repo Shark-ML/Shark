@@ -53,6 +53,7 @@ int main( int argc, char ** argv ) {
 	//###begin<optimizer>
 	CMA cma;
 	cma.setInitialSigma(0.1);// Explicitely set initial global step size.
+	sphere.init();
 	cma.init( sphere, sphere.proposeStartingPoint()); 
 	//###end<optimizer>
 

@@ -43,7 +43,7 @@ int main( int argc, char ** argv ) {
 	example::Population offspring( Lambda );
 	
 	// Initialize parents (not a god idea to start in a single point, shouldn't do this in practice)
-	BOOST_FOREACH( example::IndividualType & ind, parents ) {
+	for(auto& ind: parents ) {
 		ind.searchPoint() = ackley.proposeStartingPoint( );
 	}
 	

@@ -52,6 +52,7 @@ int main(){
 
 	//###begin<optimize>
 	CG optimizer;
+	errorFunction.init();
 	optimizer.init(errorFunction);
 	for(int i = 0; i != 100; ++i)
 	{

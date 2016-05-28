@@ -66,6 +66,7 @@ int main( int argc, char ** argv ) {
 			std::cout<<"\r" <<functions[f]->name() <<": "<<trial<<"/"<<numTrials<<std::flush;
 			//create and initialize the optimizer
 			CMA cma;
+			functions[f]->init();
 			cma.init( *functions[f] );
 			
 			//record value

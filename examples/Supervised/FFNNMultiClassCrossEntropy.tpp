@@ -59,6 +59,7 @@ int main(){
 
 	//initialize Rprop
 	IRpropPlus optimizer;
+	error.init();
 	optimizer.init(error);
 	
 	for(unsigned step = 0; step != numberOfSteps; ++step) 

@@ -87,6 +87,7 @@ int main( int argc, char ** argv ) {
 			//create and initialize the optimizer
 			MOCMA mocma;
 			mocma.mu() = frontSize;
+			functions[f]->init();
 			mocma.init( *functions[f] );
 			
 			//record and hypervolume of initial solution

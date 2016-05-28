@@ -85,6 +85,7 @@ public:
 
 	void train(ModelType& model, LabeledData<InputType, LabelType> const& dataset) {
 		ErrorFunction error(dataset, &model, mep_loss);
+		error.init();
 		mep_optimizer->init(error);
 		mep_stoppingCriterion->reset();
 		do {

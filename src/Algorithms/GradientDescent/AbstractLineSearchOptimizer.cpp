@@ -44,7 +44,6 @@ AbstractLineSearchOptimizer::AbstractLineSearchOptimizer() {
 
 void AbstractLineSearchOptimizer::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {
 	checkFeatures(objectiveFunction);
-	objectiveFunction.init();
 
 	m_linesearch.init(objectiveFunction);
 	m_dimension = startingPoint.size();

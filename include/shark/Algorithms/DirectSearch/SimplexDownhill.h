@@ -88,7 +88,6 @@ public:
 	///
 	virtual void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint)
 	{
-		objectiveFunction.init();
 		checkFeatures(objectiveFunction);
 		size_t dim = startingPoint.size();
 

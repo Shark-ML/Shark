@@ -33,7 +33,7 @@ function, which for single-objective functions is ``double``, and ``RealVector``
 for multi-objective functions. Thus, a typical single objective function has as
 type signature ``AbstractObjectiveFunction< RealVector, double >`` and
 a multi objective function ``AbstractObjectiveFunction< RealVector, RealVector >``.
-The following two typedfs are used throughout hark to make the distinction clear:
+The following two typedefs are used throughout hark to make the distinction clear:
 
 =================================   ===============================================================================
 Typedef                             Description
@@ -108,8 +108,10 @@ short list of functions:
 ======================================================================  ===================================================================
 Method                                                                  Description
 ======================================================================  ===================================================================
-``init()``                                                              Called by the init function of the optimizer and allows the
-                                                                        function to generate internal data after configuration
+``init()``                                                              Needs to be called before using it with an optimizer. This sets
+									internal variables, e.g. the evaluation counter to 0. For 
+									Benchmark function it picks for example a random rotation or
+									translation.
 ``getConstraintHandler()``                                              Returns the constraint handler of the function, if it has one.
 ``announceConstraintHandler(ConstraintHandler*)``                       Protected function which is called from a derived class to indicate 
 									the presence of the handler. Sets up all flags of the objective 
@@ -129,8 +131,8 @@ components in their setup. For example, certain benchmark functions
 can feature random rotation matrices or optimal points.  It is also
 useful because it allows for easy, centralized configuration and
 allows the objective function to update its internal data structures
-before optimization.  This function is automatically called by the
-optimizer in its ``init`` function.
+before optimization.  This function needs to be called before calling any
+``init`` function of the optimizer.
 
 If the search space is a vector space, additional functions are added which
 return or set the dimensionality of the objective function:
@@ -157,7 +159,7 @@ Method                                                                          
 ==============================================================================   ===============================================================================
 
 
-Besides from this interface, objective functions also have a name
+Besides this, objective functions also have a name
 which can be used for automatic generation of output messages
 and store the number of times ``eval`` was
 called. The last feature is needed when benchmarking optimizers:
