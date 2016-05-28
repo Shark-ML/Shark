@@ -46,7 +46,7 @@ namespace shark {
 
 /// \par
 /// The AbstractObjectiveFunction template class is the most general
-/// interface for a function to be minimized or maximized by an
+/// interface for a function to be minimized by an
 /// optimizer. It subsumes many more specialized classes,
 /// ranging from classical test problems in evolutionary algorithms to
 /// data-dependent objective functions in supervised learning. This
@@ -54,7 +54,7 @@ namespace shark {
 /// used as model training algorithms in a learning task, with
 /// applications ranging from training of neural networks to direct
 /// policy search in reinforcement learning.
-
+///
 /// AbstractObjectiveFunction offers a rich interface to support
 /// different types of optimizers. Since not every objective function meets
 /// every requirement, a flag system exists which tells the optimizer
@@ -64,12 +64,16 @@ namespace shark {
 /// HAS_FIRST_DERIVATIVE: evalDerivative can be called for the FirstOrderDerivative.
 /// The Derivative is defined and as exact as possible;
 /// HAS_SECOND_DERIVATIVE: evalDerivative can be called for the second derivative.
-/// It is defined and non-zero;
 /// IS_CONSTRAINED_FEATURE: The function has constraints and isFeasible might return false;
 /// CAN_PROPOSE_STARTING_POINT: the function can return a possibly randomized starting point;
 /// CAN_PROVIDE_CLOSEST_FEASIBLE: if the function is constrained, closest feasible can be
 /// called to construct a feasible point.
-
+///
+/// In the single objective case, the shark convention is to return a double value, while in
+/// Multi objective optimization a RealVector is returned with an entry for every objective.
+/// Moreoever, derivatives in the single objective case are RealVectors, while they are 
+/// RealMatrix in the multi-objective case (i.e. the jacobian of the function).
+///
 /// Calling the derivatives, proposeStartingPoint or closestFeasible when the flags are not set
 /// will throw an exception.
 /// The features can be queried using the method features() as in
@@ -83,9 +87,15 @@ public:
 	typedef PointType SearchPointType;
 	typedef ResultT ResultType;
 
-	typedef SearchPointType FirstOrderDerivative;
+	//if the result type is not an arithmetic type, we assume it is a vector-type->multi objective optimization
+	typedef typename boost::mpl::if_<
+		std::is_arithmetic<ResultT>,
+		SearchPointType,
+		RealMatrix
+	>::type FirstOrderDerivative;
+
 	struct SecondOrderDerivative {
-		RealVector gradient;
+		FirstOrderDerivative gradient;
 		RealMatrix hessian;
 	};
 
@@ -238,12 +248,12 @@ public:
 	///  \return The result of evaluating the function for the supplied argument.
 	///  \throws FeatureNotAvailableException in the default implementation
 	///  and if a function does not support this feature.
-	virtual ResultType eval( const SearchPointType & input )const {
+	virtual ResultType eval( SearchPointType const& input )const {
 		SHARK_FEATURE_EXCEPTION(HAS_VALUE);
 	}
 
 	/// \brief Evaluates the function. Useful together with STL-Algorithms like std::transform.
-	ResultType operator()( const SearchPointType & input ) const {
+	ResultType operator()( SearchPointType const& input ) const {
 		return eval(input);
 	}
 
@@ -253,7 +263,7 @@ public:
 	/// \return The result of evaluating the function for the supplied argument.
 	/// \throws FeatureNotAvailableException in the default implementation
 	/// and if a function does not support this feature.
-	virtual ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative )const {
+	virtual ResultType evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative )const {
 		SHARK_FEATURE_EXCEPTION(HAS_FIRST_DERIVATIVE);
 	}
 
@@ -263,7 +273,7 @@ public:
 	/// \return The result of evaluating the function for the supplied argument.
 	/// \throws FeatureNotAvailableException in the default implementation
 	/// and if a function does not support this feature.
-	virtual ResultType evalDerivative( const SearchPointType & input, SecondOrderDerivative & derivative )const {
+	virtual ResultType evalDerivative( SearchPointType const& input, SecondOrderDerivative & derivative )const {
 		SHARK_FEATURE_EXCEPTION(HAS_SECOND_DERIVATIVE);
 	}
 
