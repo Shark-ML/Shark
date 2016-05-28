@@ -4,8 +4,6 @@
 #include <shark/ObjectiveFunctions/Benchmarks/Ackley.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 
-#include <boost/foreach.hpp>
-
 using namespace shark;
 
 namespace example {

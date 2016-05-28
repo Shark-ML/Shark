@@ -44,8 +44,6 @@
 #include <shark/LinAlg/CachedMatrix.h>
 #include <shark/LinAlg/ExampleModifiedKernelMatrix.h>
 
-#include <boost/foreach.hpp>
-
 namespace shark {
 
 /// \brief Trainer for binary SVMs natively supporting missing features.

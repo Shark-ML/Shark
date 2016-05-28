@@ -32,9 +32,6 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#include <boost/foreach.hpp>
-
 #include <shark/Algorithms/Trainers/PCA.h>
 #include <shark/Data/Statistics.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
@@ -82,7 +79,7 @@ UnlabeledData<RealVector> createData3D()
 
 	//and we sample from it
 	std::vector<RealVector> data(numberOfExamples);
-	BOOST_FOREACH(RealVector& sample, data)
+	for(auto& sample: data)
 	{
 		//first element is the sample, second is the underlying uniform gaussian
 		sample = mean + distribution(Rng::globalRng).first;
@@ -104,7 +101,8 @@ UnlabeledData<RealVector> createData2D()
 	MultiVariateNormalDistribution distribution(C);
 
 	std::vector<RealVector> v;
-	for(unsigned i=0; i<numberOfExamples; i++) v.push_back(mu + distribution(Rng::globalRng).first);
+	for(unsigned i=0; i<numberOfExamples; i++) 
+		v.push_back(mu + distribution(Rng::globalRng).first);
 	return  createDataFromRange(v);
 }
 
@@ -141,7 +139,7 @@ UnlabeledData<RealVector> createDataNotFullRank()
 
 	//and we sample from it
 	std::vector<RealVector> data(numberOfExamples);
-	BOOST_FOREACH(RealVector& sample, data)
+	for(auto& sample: data)
 	{
 		//first element is the sample, second is the underlying uniform gaussian
 		sample = mean + distribution(Rng::globalRng).first;

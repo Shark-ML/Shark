@@ -42,8 +42,6 @@
 //###end<include-view>
 
 #include <shark/Models/LinearModel.h>
-#include <shark/Models/LinearModel.h>
-
 
 using namespace shark;
 
@@ -125,7 +123,7 @@ int main()
 	Batches batches = data.batches();
 
 	std::cout << batches.size() << std::endl;
-	for (Batches::iterator pos = batches.begin(); pos != batches.end(); ++pos) {
+	for (auto pos = batches.begin(); pos != batches.end(); ++pos) {
 		std::cout << *pos << std::endl;
 	}
 //###end<batches>
@@ -136,8 +134,7 @@ int main()
 	Data<RealVector>::const_batch_range batches = data.batches();
 //###end<batches-const>
 //###begin<batches-foreach>
-	typedef Data<RealVector>::const_batch_reference BatchRef;
-	BOOST_FOREACH(BatchRef batch, data.batches()) {
+	for(auto const& batch: data.batches()) {
 		std::cout << batch << std::endl;
 	}
 //###end<batches-foreach>
@@ -147,7 +144,7 @@ int main()
 	}
 //###end<batches-for>
 //###begin<batches-doubleloop>
-	BOOST_FOREACH(BatchRef batch, data.batches()) {
+	for(auto const& batch: data.batches()) {
 		for(std::size_t i=0; i != boost::size(batch); ++i) {
 			std::cout << shark::get(batch,i );   // prints element i of the batch
 		}
@@ -155,16 +152,16 @@ int main()
 //###end<batches-doubleloop>
 //###begin<elements-loops>
 	typedef Data<RealVector>::element_range Elements;
-	typedef Data<RealVector>::const_element_reference ElementRef;
 
 	// 1: explicit iterator loop using the range over the elements
 	Elements elements = data.elements();
-	for (Elements::iterator pos = elements.begin(); pos != elements.end(); ++pos) {
+	for (auto pos = elements.begin(); pos != elements.end(); ++pos) {
 		std::cout << *pos << std::endl;
 	}
 
-	// 2: BOOST_FOREACH
-	BOOST_FOREACH(ElementRef element, data.elements()) {
+	// 2: foreach
+	//note pass by value, the range returns proxy elements instead of references
+	for(auto element: data.elements()) {
 		std::cout << element << std::endl;
 	}
 //###end<elements-loops>

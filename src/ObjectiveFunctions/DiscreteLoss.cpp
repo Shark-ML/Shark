@@ -71,7 +71,7 @@ void DiscreteLoss::defineBalancedCost(UnlabeledData<unsigned int> const& labels)
 	std::size_t ic = labels.numberOfElements();
 	
 	std::vector<unsigned int> freq(classes);
-	BOOST_FOREACH(unsigned int label, labels.elements()){
+	for(unsigned int label: labels.elements()){
 		freq[label]++;
 	}
 

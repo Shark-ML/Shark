@@ -47,7 +47,6 @@ void meanvar
 )
 {
 	SIZE_CHECK(!data.empty());
-	typedef typename Data<Vec1T>::const_batch_reference BatchRef;
 	std::size_t const dataSize = data.numberOfElements();
 	std::size_t elementSize=dataDimension(data);
 
@@ -57,7 +56,7 @@ void meanvar
 	meanVec()= mean(data);
 	
 	//sum of variances of each column
-	BOOST_FOREACH(BatchRef batch,data.batches()){
+	for(auto& batch: data.batches()){
 		std::size_t batchSize = batch.size1();
 		noalias(varianceVec()) += sum_rows(sqr(batch-repeat(meanVec,batchSize)));
 	}
@@ -144,7 +143,7 @@ VectorType mean(Data<VectorType> const& data){
 	
 	typedef typename Data<VectorType>::const_batch_reference BatchRef; 
 	 
-	BOOST_FOREACH(BatchRef batch, data.batches()){
+	for(auto& batch: data.batches()){
 		mean += sum_rows(batch);
 	}
 	mean /= double(data.numberOfElements());

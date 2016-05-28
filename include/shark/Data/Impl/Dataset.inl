@@ -48,7 +48,6 @@
 
 #include <algorithm>
 
-#include <boost/foreach.hpp>
 namespace shark {
 namespace detail{
 
@@ -378,7 +377,7 @@ public:
 	template<class Range>
 	void repartition(Range const& batchSizes){
 		std::size_t sum = 0;
-		BOOST_FOREACH(std::size_t i, batchSizes)
+		for(std::size_t i: batchSizes)
 			sum += i;
 		SIZE_CHECK(sum == numberOfElements());
 

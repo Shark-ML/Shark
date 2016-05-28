@@ -67,7 +67,7 @@ std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centro
 		std::vector<std::size_t> numPoints(k,0); // number of points in each cluster
 		std::vector<RealVector> newCenters(k,RealVector(dimension,0.0));
 			
-		BOOST_FOREACH(ConstReference element,clusterMembership.elements()){
+		for(auto element: clusterMembership.elements()){
 			std::size_t j = element.label;
 			noalias(newCenters[j]) += element.input;
 			numPoints[j]++;

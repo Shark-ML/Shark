@@ -105,7 +105,7 @@ public:
               boost::assign::map_list_of(5.855, 3.5033e-02)(176.25,1.2292e+02)(11.25,9.1667e-01);
           unsigned int i = 0;
           BOOST_REQUIRE_EQUAL(myNbClassifier.m_featureDistributions[0].size(), 3u);
-          BOOST_FOREACH(const NBClassifier<>::AbstractDistPtr& dist, myNbClassifier.m_featureDistributions[0])
+          for(auto const& dist: myNbClassifier.m_featureDistributions[0])
           {
               const Normal<>& featureDistribution = dynamic_cast<const Normal<>&>(*dist);
               BOOST_CHECK_CLOSE(featureDistribution.mean(), expectedMaleDist[i].first, tolerancePercentage);
@@ -120,7 +120,7 @@ public:
               boost::assign::map_list_of(5.4175,9.7225e-02)(132.5,5.5833e+02)(7.5,1.6667e+00);
           unsigned int i = 0;
           BOOST_REQUIRE_EQUAL(myNbClassifier.m_featureDistributions[1].size(), 3u);
-          BOOST_FOREACH(const NBClassifier<>::AbstractDistPtr& dist, myNbClassifier.m_featureDistributions[1])
+          for(auto const& dist: myNbClassifier.m_featureDistributions[1])
           {
               const Normal<>& featureDistribution = dynamic_cast<const Normal<>&>(*dist);
               BOOST_CHECK_CLOSE(featureDistribution.mean(), expectedFemaleDist[i].first, tolerancePercentage);

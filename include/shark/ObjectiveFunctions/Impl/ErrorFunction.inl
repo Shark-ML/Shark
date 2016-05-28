@@ -74,24 +74,21 @@ public:
 	
 	double evalPointSet() const {
 		std::size_t dataSize = m_dataset.numberOfElements();
-		typedef typename LabeledData<InputType,LabelType>::const_batch_reference const_reference;
-		
 		typename Batch<OutputType>::type prediction;
 		double error = 0.0;
-		BOOST_FOREACH(const_reference batch,m_dataset.batches()){
+		for(auto const& batch: m_dataset.batches()){
 			mep_model->eval(batch.input, prediction);
 			error += mep_loss->eval(batch.label, prediction);
 		}
 		return error/dataSize;
 	}
 
-	ResultType evalDerivative( const SearchPointType & point, FirstOrderDerivative & derivative ) const {
+	ResultType evalDerivative( SearchPointType const& point, FirstOrderDerivative& derivative ) const {
 		mep_model->setParameterVector(point);
 		return evalDerivativePointSet(derivative);
 	}
 	
 	ResultType evalDerivativePointSet( FirstOrderDerivative & derivative ) const {
-		typedef typename LabeledData<InputType,LabelType>::const_batch_reference const_reference;
 		std::size_t dataSize = m_dataset.numberOfElements();
 		derivative.resize(mep_model->numberOfParameters());
 		derivative.clear();
@@ -102,7 +99,7 @@ public:
 
 		double error=0.0;
 		boost::shared_ptr<State> state = mep_model->createState();
-		BOOST_FOREACH(const_reference batch,m_dataset.batches()){
+		for(auto const& batch: m_dataset.batches()){
 			// calculate model output for the batch as well as the derivative
 			mep_model->eval(batch.input, prediction,*state);
 

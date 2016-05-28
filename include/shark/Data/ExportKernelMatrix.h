@@ -83,8 +83,6 @@ void exportKernelMatrix(
 )
 {
 	//get access to the range of elements
-	typedef typename LabeledData<InputType, LabelType>::const_element_range Elements;
-	typedef typename Elements::reference ElementRef;
 	DataView<LabeledData<InputType, LabelType> const> points(dataset);
 	std::size_t size = points.size();
 
@@ -102,7 +100,7 @@ void exportKernelMatrix(
 	double trace_factor = 1.0;
 	if(normalizer == MULTIPLICATIVE_TRACE_ONE || normalizer == MULTIPLICATIVE_TRACE_N)
 	{
-		BOOST_FOREACH(ElementRef point, points)
+		for(auto point: points)
 		{
 			trace += kernel.eval(point.input, point.input);
 		}
@@ -171,7 +169,7 @@ void exportKernelMatrix(
 	double min_label = -max_label;
 	bool binary = false;
 	bool regression = false;
-	BOOST_FOREACH(double cur_label, dataset.labels().elements())
+	for(double cur_label: dataset.labels().elements())
 	{
 		if(cur_label > max_label)
 			max_label = cur_label;

@@ -82,7 +82,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 	//find data dimension by getting the maximum index
 	std::size_t maxIndex = 0;
 	for(std::size_t i = 0; i != numPoints; ++i){
-		std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
+		auto const& inputs = contents[i].second;
 		if(!inputs.empty())
 			maxIndex = std::max(maxIndex, inputs.back().first);
 	}
@@ -132,15 +132,14 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 	{
 		size_t delta = (haszero ? 0 : 1);
 		std::size_t i = 0;
-		typedef typename shark::LabeledData<T, unsigned int>::element_reference ElemRef;
-		BOOST_FOREACH(ElemRef element, data.elements()){
+		for(auto element: data.elements()){
 			element.input.clear();
 			//todo: check label
 			//we subtract minPositiveLabel to ensure that class indices starting from 0 and 1 are supported
 			int label = static_cast<int>(contents[i].first);
 			element.label = binaryLabels? 1 + (label-1)/2 : label-minPositiveLabel;
 
-			std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
+			auto const& inputs = contents[i].second;
 			for(std::size_t j = 0; j != inputs.size(); ++j)
 				element.input(inputs[j].first - delta) = inputs[j].second;//LibSVM is one-indexed
 			++i;
@@ -162,7 +161,7 @@ shark::LabeledData<T, RealVector> libsvm_importer_regression(
 	//find data dimension by getting the maximum index
 	std::size_t maxIndex = 0;
 	for(std::size_t i = 0; i != numPoints; ++i){
-		std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
+		auto const& inputs = contents[i].second;
 		if(!inputs.empty())
 			maxIndex = std::max(maxIndex, inputs.back().first);
 	}
@@ -175,7 +174,7 @@ shark::LabeledData<T, RealVector> libsvm_importer_regression(
 	bool haszero = false;
 	for (std::size_t i=0; i<numPoints; i++)
 	{
-		std::vector<std::pair<std::size_t, double> > const& input = contents[i].second;
+		auto const& input = contents[i].second;
 		if (input.empty()) continue;
 		if (input[0].first == 0)
 		{
@@ -190,12 +189,11 @@ shark::LabeledData<T, RealVector> libsvm_importer_regression(
 	{
 		size_t delta = (haszero ? 0 : 1);
 		std::size_t i = 0;
-		typedef typename shark::LabeledData<T, RealVector>::element_reference ElemRef;
-		BOOST_FOREACH(ElemRef element, data.elements()) {
+		for(auto element: data.elements()) {
 			element.input.clear();
 			element.label = RealVector(1, contents[i].first);
 
-			std::vector<std::pair<std::size_t, double> > const& inputs = contents[i].second;
+			auto const& inputs = contents[i].second;
 			for(std::size_t j = 0; j != inputs.size(); ++j)
 				element.input(inputs[j].first - delta) = inputs[j].second;//LibSVM is one-indexed
 			++i;

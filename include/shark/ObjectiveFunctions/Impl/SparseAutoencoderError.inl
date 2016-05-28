@@ -106,7 +106,7 @@ public:
 
 		typename Batch<RealVector>::type prediction;
 		double error = 0.0;
-		BOOST_FOREACH(const_reference batch,m_dataset.batches()){
+		for( auto const& batch: m_dataset.batches()){
 			mep_model->eval(batch.input, prediction,*state);
 			error += mep_loss->eval(batch.label, prediction);
 			//get the submatrix of activations of the hidden neurons and sum their activation to every pattern of the batch
@@ -143,7 +143,7 @@ public:
 		
 		boost::shared_ptr<State> state = mep_model->createState();
 		double error = 0.0;
-		BOOST_FOREACH(const_reference batch,m_dataset.batches()){
+		for(auto const& batch: m_dataset.batches()){
 			// calculate model output for the batch as well as the gradient
 			mep_model->eval(batch.input, prediction,*state);
 

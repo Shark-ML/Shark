@@ -198,7 +198,7 @@ or similarly when data is constant or a constant range is desired::
 ..sharkcode<Data/Datasets.tpp,batches-const>
 
 The above loop still looks a bit inconvenient. We might as well use
-``BOOST_FOREACH`` for traversal::
+a range-for loop for traversal::
 
 ..sharkcode<Data/Datasets.tpp,batches-foreach>
 

@@ -406,9 +406,7 @@ public:
 ///brief  Outstream of elements for weighted data.
 template<class T>
 std::ostream &operator << (std::ostream &stream, const WeightedUnlabeledData<T>& d) {
-	typedef typename WeightedUnlabeledData<T>::const_element_reference reference;
-	typename WeightedUnlabeledData<T>::const_element_range elements = d.elements();
-	BOOST_FOREACH(reference elem,elements)
+	for(auto elem: d.elements())
 		stream << elem.weight << " [" << elem.data<<"]"<< "\n";
 	return stream;
 }
@@ -547,7 +545,7 @@ template<class T, class U>
 std::ostream &operator << (std::ostream &stream, const WeightedLabeledData<T, U>& d) {
 	typedef typename WeightedLabeledData<T, U>::const_element_reference reference;
 	typename WeightedLabeledData<T, U>::const_element_range elements = d.elements();
-	BOOST_FOREACH(reference elem,elements)
+	for(auto elem: d.elements())
 		stream << elem.weight <<" ("<< elem.data.label << " [" << elem.data.input<<"] )"<< "\n";
 	return stream;
 }

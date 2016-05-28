@@ -83,7 +83,7 @@ double negativeLogLikelihoodFromLogPartition(
 	double beta = 1.0
 ) {
 	double logP=0;
-	BOOST_FOREACH(RealMatrix const& batch,inputs.batches()) {
+	for(RealMatrix const& batch: inputs.batches()) {
 		logP += sum(rbm.energy().logUnnormalizedProbabilityVisible(batch, blas::repeat(beta,batch.size1())));
 		logP -= batch.size1()*logPartition;
 	}

@@ -45,7 +45,6 @@
 #ifndef SHARK_DATA_DATASET_H
 #define SHARK_DATA_DATASET_H
 
-#include <boost/foreach.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/algorithm/sort.hpp>
 
@@ -75,26 +74,10 @@ namespace shark {
 /// give access to the batches but not to single elements. For this separate element_iterators and const_element_iterators
 /// can be used.
 ///\par
-/// There are a lot of these typedefs. The typical typedefs for containers like batch_type or iterator are chosen
-/// as types for the batch interface. For accessing single elements, a different set of typedefs is in place. Thus instead of iterator
-/// you must write element_iterator and instead of batch_type write element_type. Usually you should not use element_type except when
-/// you want to actually copy the data. Instead use element_reference or const_element_reference. Note that these are proxy objects and not
-/// actual references to element_type!
-/// A short example for these typedefs:
-///\code
-///typedef Data<RealVector> Set;
-/// Set data;
-/// for(Set::element_iterator pos=data.elemBegin();pos!= data.elemEnd();++pos){
-///     std::cout<<*pos<<" ";
-///     Set::element_reference ref=*pos;
-///     ref*=2;
-///     std::cout<<*pos<<std::endl;
-///}
-///\endcode
-///When you write C++11 code, this is of course much simpler:
+///When you need to explicitely iterate over all elements, you can use:
 ///\code
 /// Data<RealVector> data;
-/// for(auto pos=data.elemBegin();pos!= data.elemEnd();++pos){
+/// for(auto elem: data.elements()){
 ///     std::cout<<*pos<<" ";
 ///     auto ref=*pos;
 ///     ref*=2;
@@ -103,7 +86,7 @@ namespace shark {
 ///\endcode
 /// \par
 /// Element wise accessing of elements is usually slower than accessing the batches. If possible, use direct batch access, or
-/// at least use the iterator interface to iterate over all elements. Random access to single elements is linear time, so use it wisely.
+/// at least use the iterator interface or the for loop above to iterate over all elements. Random access to single elements is linear time, so use it wisely.
 /// Of course, when you want to use batches, you need to know the actual batch type. This depends on the actual type of the input.
 /// here are the rules:
 /// if the input is an arithmetic type like int or double, the result will be a vector of this
@@ -347,9 +330,7 @@ public:
 /// Outstream of elements.
 template<class T>
 std::ostream &operator << (std::ostream &stream, const Data<T>& d) {
-	typedef typename Data<T>::const_element_reference reference;
-	typename Data<T>::const_element_range elements = d.elements();
-	BOOST_FOREACH(reference elem,elements)
+	for(auto elem:d.elements())
 		stream << elem << "\n";
 	return stream;
 }
@@ -815,9 +796,7 @@ LabeledData<
 ///brief  Outstream of elements for labeled data.
 template<class T, class U>
 std::ostream &operator << (std::ostream &stream, const LabeledData<T, U>& d) {
-	typedef typename LabeledData<T, U>::const_element_reference reference;
-	typename LabeledData<T, U>::const_element_range elements = d.elements();
-	BOOST_FOREACH(reference elem,elements)
+	for(auto elem: d.elements())
 		stream << elem.input << " [" << elem.label <<"]"<< "\n";
 	return stream;
 }
@@ -1270,23 +1249,25 @@ private:
 };
 
 
-template <typename RowType> RowType getColumn(const Data<RowType> &data, std::size_t columnID) {
+template <typename RowType>
+RowType getColumn(Data<RowType> const& data, std::size_t columnID) {
 	SHARK_ASSERT(dataDimension(data) > columnID);
 	RowType column(data.numberOfElements());
 	std::size_t rowCounter = 0;
-	BOOST_FOREACH(typename Data<RowType>::const_element_reference row, data.elements()){
-		column(rowCounter) = row(columnID);
+	for(auto element: data.elements()){
+		column(rowCounter) = element(columnID);
 		rowCounter++;
 	}
 	return column;
 }
 
-template <typename RowType> void setColumn(Data<RowType> &data, std::size_t columnID, RowType newColumn) {
+template <typename RowType>
+void setColumn(Data<RowType>& data, std::size_t columnID, RowType newColumn) {
 	SHARK_ASSERT(dataDimension(data) > columnID);
 	SHARK_ASSERT(data.numberOfElements() == newColumn.size());
 	std::size_t rowCounter = 0;
-	BOOST_FOREACH(typename Data<RowType>::element_reference row, data.elements()){
-		row(columnID) = newColumn(rowCounter);
+	for(auto element: data.elements()){
+		element(columnID) = newColumn(rowCounter);
 		rowCounter++;
 	}
 }

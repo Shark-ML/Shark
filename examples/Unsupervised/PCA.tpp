@@ -2,7 +2,6 @@
 
 //header needed for data generation
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
-#include <boost/foreach.hpp>//just for beauty :)
 
 using namespace shark;
 using namespace std;
@@ -50,7 +49,7 @@ UnlabeledData<RealVector> createData()
 
 	//and we sample from it
 	std::vector<RealVector> data(numberOfExamples);
-	BOOST_FOREACH(RealVector& sample, data)
+	for (auto& sample: data)
 	{
 		//first element is the sample, second is the underlying uniform gaussian
 		sample = mean + distribution(Rng::globalRng).first;

@@ -28,8 +28,6 @@
 #ifndef SHARK_EA_GRID_H
 #define SHARK_EA_GRID_H
 
-#include <boost/foreach.hpp>
-
 #include <map>
 #include <vector>
 

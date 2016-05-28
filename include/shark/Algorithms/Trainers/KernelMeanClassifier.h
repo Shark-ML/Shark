@@ -76,9 +76,8 @@ public:
 		RealVector params(patterns + 1);
 		
 		//todo: slow implementation without batch processing!
-		typedef typename LabeledData<InputType, unsigned int>::const_element_reference ElementRef;
 		std::size_t i  = 0; 
-		BOOST_FOREACH(ElementRef element,dataset.elements()){
+		for(auto element: dataset.elements()){
 		
 			unsigned int y = element.label;
 
@@ -86,7 +85,7 @@ public:
 			params(i) = coeffs[y];
 			++i;
 			// compute values to calculate bias
-			BOOST_FOREACH(ElementRef element2,dataset.elements()){
+			for(auto element2: dataset.elements()){
 				if (element2.label != y) 
 					continue;
 				//todo: fast implementation should create batches of same class elements and process them!

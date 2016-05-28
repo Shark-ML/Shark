@@ -43,8 +43,6 @@
 
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
 
-#include <boost/foreach.hpp>
-
 namespace shark {
 
 /**

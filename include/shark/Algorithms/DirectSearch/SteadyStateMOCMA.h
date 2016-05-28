@@ -39,7 +39,6 @@
 #include <shark/Algorithms/DirectSearch/CMA/CMAIndividual.h>
 
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
-#include <boost/foreach.hpp>
 
 namespace shark {
 

@@ -81,7 +81,7 @@ Evaluation
 %%%%%%%%%%
 
 One way to evaluate our LDA-trained linear model is to count the number of
-correctly classified test samples. We simply use ``BOOST_FOREACH`` to iterate
+correctly classified test samples. We simply use a for loop to iterate
 over all key-value pairs of the dataset::
 
 ..sharkcode<Supervised/quickstartTutorial.tpp,eval>
