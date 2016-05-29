@@ -36,6 +36,7 @@
 
 #include <shark/ObjectiveFunctions/AbstractCost.h>
 #include <shark/LinAlg/Base.h>
+#include <shark/Core/Traits/ProxyReferenceTraits.h>
 namespace shark {
 
 
@@ -66,6 +67,11 @@ public:
 	typedef typename Batch<OutputType>::type BatchOutputType;
 	typedef typename Batch<LabelType>::type BatchLabelType;
 
+	/// \brief Const references to LabelType
+	typedef typename ConstProxyReference<LabelType const>::type ConstLabelReference;
+	/// \brief Const references to OutputType
+	typedef typename ConstProxyReference<OutputType const>::type ConstOutputReference;
+
 	AbstractLoss(){
 		this->m_features |= base_type::IS_LOSS_FUNCTION;
 	}
@@ -80,7 +86,7 @@ public:
 	///
 	/// \param  target      target value
 	/// \param  prediction  prediction, typically made by a model
-	virtual double eval( LabelType const& target, OutputType const& prediction)const{
+	virtual double eval( ConstLabelReference target, ConstOutputReference prediction)const{
 		BatchLabelType labelBatch = Batch<LabelType>::createBatch(target,1);
 		get(labelBatch,0)=target;
 		BatchOutputType predictionBatch = Batch<OutputType>::createBatch(prediction,1);
@@ -93,7 +99,7 @@ public:
 	/// \param  target      target value
 	/// \param  prediction  prediction, typically made by a model
 	/// \param  gradient    the gradient of the loss function with respect to the prediction
-	virtual double evalDerivative(LabelType const& target, OutputType const& prediction, OutputType& gradient) const {
+	virtual double evalDerivative(ConstLabelReference target, ConstOutputReference prediction, OutputType& gradient) const {
 		BatchLabelType labelBatch = Batch<LabelType>::createBatch(target,1);
 		get(labelBatch, 0) = target;
 		BatchOutputType predictionBatch = Batch<OutputType>::createBatch(prediction, 1);
@@ -111,7 +117,7 @@ public:
 	/// \param  gradient    the gradient of the loss function with respect to the prediction
 	/// \param  hessian     the hessian of the loss function with respect to the prediction
 	virtual double evalDerivative(
-		LabelType const& target, OutputType const& prediction,
+		ConstLabelReference target, ConstOutputReference prediction,
 		OutputType& gradient,MatrixType & hessian
 	) const {
 		SHARK_FEATURE_EXCEPTION_DERIVED(HAS_SECOND_DERIVATIVE);

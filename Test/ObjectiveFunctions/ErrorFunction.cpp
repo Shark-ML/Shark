@@ -4,6 +4,7 @@
 #include <shark/Algorithms/GradientDescent/Rprop.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Rng/Uniform.h>
+#include <shark/Data/DataDistribution.h>
 
 #define BOOST_TEST_MODULE ObjFunct_ErrorFunction
 #include <boost/test/unit_test.hpp>
@@ -212,9 +213,51 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		std::cout<<diff<<rprop.solution().point<<" "<<optimum<<std::endl;
 		
 		BOOST_CHECK_SMALL(diff, 1.e-3);
+	}	
+}
+
+BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )
+{
+	WeightedLabeledData<RealVector,RealVector> weightedData;
+	RegressionDataset unweightedData(1);
+	{
+		Wave problem;
+		RegressionDataset data = problem.generateDataset(50,50);
+		UnlabeledData<double> weights(1);
+		weights.batch(0).resize(50);
+		
+		unweightedData.batch(0).input.resize(100,1);
+		unweightedData.batch(0).label.resize(100,1);
+		for(std::size_t i = 0; i != 100; ++i){
+			std::size_t e = Rng::discrete(0,49);
+			unweightedData.element(i).input = data.element(e).input;
+			unweightedData.element(i).label = data.element(e).label;
+			weights.element(e) += 1.0;
+		}
+		weightedData = WeightedLabeledData<RealVector,RealVector>(data, weights);
 	}
+	weightedData.repartition(std::vector<std::size_t>({10,10,10,10,10}));
+
+	LinearModel<> model;
+	model.setStructure(1,1,true);
+	SquaredLoss<> loss;
+	ErrorFunction unweightedError(unweightedData, &model,&loss);
+	ErrorFunction weightedError(weightedData, &model,&loss);
+	RealVector point(2,0.0);
+
+	ErrorFunction::FirstOrderDerivative unWDerivative;
+	double unWError1 = unweightedError.eval(point);
+	double unWError2 = unweightedError.evalDerivative(point,unWDerivative);
 	
+	ErrorFunction::FirstOrderDerivative WDerivative;
+	double WError1 = weightedError.eval(point);
+	double WError2 = weightedError.evalDerivative(point,WDerivative);
 	
+	BOOST_CHECK_CLOSE(unWError1, unWError2,1.e-11);
+	BOOST_CHECK_CLOSE(WError1, WError2,1.e-11);
+	BOOST_CHECK_CLOSE(WError1, unWError1,1.e-11);
+	
+	BOOST_CHECK_SMALL(norm_sqr(unWDerivative - WDerivative),1.e-8);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

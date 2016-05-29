@@ -37,6 +37,7 @@
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Data/Dataset.h>
+#include <shark/Data/WeightedDataset.h>
 #include "Impl/FunctionWrapperBase.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -53,13 +54,8 @@ namespace shark{
 /// objective function is the cost of the model predictions
 /// on the training data, given the targets.
 ///
-/// \par
-/// The class detects automatically when an AbstractLoss is used 
-/// as Costfunction. In this case, it uses faster algorithms 
-/// for empirical risk minimization
-///
 ///\par
-/// It also automatically infers the input und label type from the given dataset and the output type
+/// It automatically infers the input und label type from the given dataset and the output type
 /// of the model in the constructor and ensures that Model and loss match. Thus the user does
 /// not need to provide the types as template parameters. 
 class ErrorFunction : public SingleObjectiveFunction
@@ -70,7 +66,12 @@ public:
 		LabeledData<InputType, LabelType> const& dataset,
 		AbstractModel<InputType,OutputType>* model, 
 		AbstractLoss<LabelType, OutputType>* loss
-		
+	);
+	template<class InputType, class LabelType, class OutputType>
+	ErrorFunction(
+		WeightedLabeledData<InputType, LabelType> const& dataset,
+		AbstractModel<InputType,OutputType>* model, 
+		AbstractLoss<LabelType, OutputType>* loss
 	);
 	ErrorFunction(const ErrorFunction& op);
 	ErrorFunction& operator=(const ErrorFunction& op);

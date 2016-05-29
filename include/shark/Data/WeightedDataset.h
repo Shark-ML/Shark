@@ -543,8 +543,6 @@ public:
 ///brief  Outstream of elements for weighted labeled data.
 template<class T, class U>
 std::ostream &operator << (std::ostream &stream, const WeightedLabeledData<T, U>& d) {
-	typedef typename WeightedLabeledData<T, U>::const_element_reference reference;
-	typename WeightedLabeledData<T, U>::const_element_range elements = d.elements();
 	for(auto elem: d.elements())
 		stream << elem.weight <<" ("<< elem.data.label << " [" << elem.data.input<<"] )"<< "\n";
 	return stream;
