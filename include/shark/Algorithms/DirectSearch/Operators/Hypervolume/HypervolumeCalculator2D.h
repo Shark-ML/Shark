@@ -37,12 +37,12 @@
 #include <algorithm>
 #include <vector>
 
-namespace shark {
+namespace shark{
 /// \brief Implementation of the exact hypervolume calculation in 2 dimensions.
 ///
 ///  The algorithm has complexity n log(n) and works by ordering the data by the first dimension
 ///  and then computing the upper riemann sum skipping dominated points
-struct HypervolumeCalculator2D {
+struct HypervolumeCalculator2D{
 
 	/// \brief Executes the algorithm.
 	/// \param [in] points The set \f$S\f$ of points for which to compute the volume
