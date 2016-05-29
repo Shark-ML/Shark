@@ -124,7 +124,7 @@ private:
 	
 	ResultType evalDerivativeForBatch( SearchPointType const& input, FirstOrderDerivative & derivative, BatchDataType const& batch)const {
 		mep_model->setParameterVector(input);
-		std::shared_ptr<State> state = mep_model->createState();
+		boost::shared_ptr<State> state = mep_model->createState();
 		
 		BatchOutputType predictions;
 		mep_model->eval(batch.input,predictions,*state);

@@ -69,8 +69,8 @@ public:
 		SIZE_CHECK(newParameters.size() == 0); 
 	}
 	
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new EmptyState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	double eval(ConstInputReference x1, ConstInputReference x2) const{

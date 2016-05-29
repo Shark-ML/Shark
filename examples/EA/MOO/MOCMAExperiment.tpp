@@ -70,7 +70,7 @@ int main( int argc, char ** argv ) {
 	
 //###begin<functions>
 	//assortment of test functions
-	typedef std::shared_ptr<MultiObjectiveFunction> Function;
+	typedef boost::shared_ptr<MultiObjectiveFunction> Function;
 	std::vector<Function > functions;
 	functions.push_back(Function(new ZDT1(numDimensions)));
 	functions.push_back(Function(new ZDT2(numDimensions)));

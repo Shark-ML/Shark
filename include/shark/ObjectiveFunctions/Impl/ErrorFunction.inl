@@ -98,7 +98,7 @@ public:
 		typename Batch<OutputType>::type errorDerivative;
 
 		double error=0.0;
-		std::shared_ptr<State> state = mep_model->createState();
+		boost::shared_ptr<State> state = mep_model->createState();
 		for(auto const& batch: m_dataset.batches()){
 			// calculate model output for the batch as well as the derivative
 			mep_model->eval(batch.input, prediction,*state);

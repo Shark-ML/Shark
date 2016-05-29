@@ -99,8 +99,8 @@ public:
 	*/
 	virtual double sigmoidDerivative(double gx)const;
 	
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new InternalState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new InternalState());
 	}
 
 	SHARK_EXPORT_SYMBOL void eval(BatchInputType const&pattern, BatchOutputType& output, State& state)const;

@@ -90,8 +90,8 @@ public:
 	SHARK_EXPORT_SYMBOL void setParameterVector(RealVector const& newParameters);
 	SHARK_EXPORT_SYMBOL std::size_t numberOfParameters() const;
 
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new EmptyState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns, BatchOutputType& outputs)const;
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
@@ -128,8 +128,8 @@ public:
 	SHARK_EXPORT_SYMBOL void setParameterVector(RealVector const& newParameters);
 	SHARK_EXPORT_SYMBOL std::size_t numberOfParameters() const;
 
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new EmptyState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns, BatchOutputType& outputs)const;

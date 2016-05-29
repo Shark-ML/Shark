@@ -133,8 +133,8 @@ public:
 		return 1;
 	}
 	
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new EmptyState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	/// soft k-nearest-neighbor prediction

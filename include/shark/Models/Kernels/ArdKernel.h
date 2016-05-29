@@ -113,8 +113,8 @@ public:
 	}
 
 	///\brief creates the internal state of the kernel
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new InternalState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new InternalState());
 	}
 
 	/// convenience methods for setting/getting the actual gamma values

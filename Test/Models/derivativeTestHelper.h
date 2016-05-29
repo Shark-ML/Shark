@@ -84,7 +84,7 @@ template<class Model,class Point>
 void testWeightedDerivative(Model& net,const Point& point,const RealVector& coefficients,double epsilon=1.e-5,double estimationEpsilon = 1.e-5){
 	RealMatrix pointBatch(1,point.size());
 	row(pointBatch,0)=point;
-	std::shared_ptr<State> state = net.createState();
+	boost::shared_ptr<State> state = net.createState();
 	typename Model::BatchOutputType output; 
 	net.eval(pointBatch,output,*state);
 
@@ -115,7 +115,7 @@ void testWeightedDerivative(Model& net,const Point& point,const RealVector& coef
 
 template<class Model,class Point>
 void testWeightedSecondDerivative(Model& net,const Point& point,const RealVector& coefficients, const RealMatrix& coeffHessian, double epsilon=1.e-5,double estimationEpsilon = 1.e-10){
-	std::shared_ptr<State> state = net.createState();
+	boost::shared_ptr<State> state = net.createState();
 	typename Model::BatchOutputType output; 
 	net.eval(point,output,*state);
 	//now calculate the nets weighted gradient
@@ -164,7 +164,7 @@ void testWeightedInputDerivative(Model& net,const Point& point,const RealVector&
 	row(coeffBatch,0)=coefficients;
 	row(pointBatch,0)=point;
 	
-	std::shared_ptr<State> state = net.createState();
+	boost::shared_ptr<State> state = net.createState();
 	typename Model::BatchOutputType output; 
 	net.eval(pointBatch,output,*state);
 	
@@ -256,7 +256,7 @@ void testWeightedDerivativesSame(Model& net,unsigned int numberOfTests = 100, do
 		}
 		net.setParameterVector(parameters);
 		
-		std::shared_ptr<State> state = net.createState();
+		boost::shared_ptr<State> state = net.createState();
 		typename Model::BatchOutputType output; 
 		net.eval(pointBatch,output,*state);
 		
@@ -293,7 +293,7 @@ void testBatchEval(AbstractModel<T, R>& model, typename Batch<T>::type const& sa
 	//evaluate batch of inputs using a state and without stat.
 	typename Batch<R>::type resultBatch = model(sampleBatch);
 	typename Batch<R>::type resultBatch2;
-	std::shared_ptr<State> state = model.createState();
+	boost::shared_ptr<State> state = model.createState();
 	model.eval(sampleBatch,resultBatch2,*state);
 	
 	//sanity check. if we don't get a result for every input something is seriously broken

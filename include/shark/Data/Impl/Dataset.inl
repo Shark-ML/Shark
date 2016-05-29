@@ -36,16 +36,17 @@
 
 #include <boost/mpl/eval_if.hpp>
 
+#include <boost/shared_ptr.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/adaptor/indirected.hpp>
 
 #include <boost/serialization/string.hpp>
+#include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
 #include <algorithm>
-#include <memory>
 
 namespace shark {
 namespace detail{
@@ -115,7 +116,7 @@ public:
 	template <class T> friend bool operator == (const SharedContainer<T>& op1, const SharedContainer<T>& op2);
 private:
 	typedef Batch<Type> BatchTraits;
-	typedef std::vector<std::shared_ptr<BatchType> > Container;
+	typedef std::vector<boost::shared_ptr<BatchType> > Container;
 public:
 
 	///\brief Create an empty container.
@@ -192,7 +193,7 @@ public:
 		//create batches
 		for(std::size_t i = 0; i != batchSizes.size(); ++i){
 			m_data.push_back(
-				std::shared_ptr<BatchType>(
+				boost::shared_ptr<BatchType>(
 					new BatchType(BatchTraits::createBatch(*container.elemBegin(),batchSizes[i]))
 				)
 			);
@@ -236,7 +237,7 @@ public:
 		return numElems;
 	}
 
-	std::shared_ptr<BatchType> const& pointer(std::size_t i)const{
+	boost::shared_ptr<BatchType> const& pointer(std::size_t i)const{
 		return m_data[i];
 	}
 
@@ -318,7 +319,7 @@ public:
 
 	///////////////////////ADDING NEW BATCHES////////////////////////
 	void push_back(BatchType const& batch){
-		m_data.push_back(std::shared_ptr<BatchType>(
+		m_data.push_back(boost::shared_ptr<BatchType>(
 			new BatchType(batch)
 		));
 	}
@@ -344,10 +345,10 @@ public:
 		if(leftElements == 0 || rightElements == 0)
 			return;
 
-		std::shared_ptr<BatchType> leftSplit(
+		boost::shared_ptr<BatchType> leftSplit(
 			new BatchType(BatchTraits::createBatch(get(source,0),leftElements))
 		);
-		std::shared_ptr<BatchType> rightSplit(
+		boost::shared_ptr<BatchType> rightSplit(
 			new BatchType(BatchTraits::createBatch(get(source,0),rightElements))
 		);
 		std::copy(boost::begin(source),boost::begin(source)+leftElements,boost::begin(*leftSplit));
@@ -388,7 +389,7 @@ public:
 		for(std::size_t i = 0; i != batchSizes.size(); ++i){
 			//create new batch
 			std::size_t currentBatchSize = batchSizes[i];
-			std::shared_ptr<BatchType> newBatch(new BatchType(BatchTraits::createBatch(get(batch(currentBatch),0),currentBatchSize)));
+			boost::shared_ptr<BatchType> newBatch(new BatchType(BatchTraits::createBatch(get(batch(currentBatch),0),currentBatchSize)));
 			for(std::size_t j = 0; j != currentBatchSize; ++j){
 				get(*newBatch,j)=get(batch(currentBatch),currentBatchIndex);
 				++currentBatchIndex;

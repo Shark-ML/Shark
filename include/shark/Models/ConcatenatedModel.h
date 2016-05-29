@@ -90,8 +90,8 @@ protected:
 
 	struct InternalState: public State{
 		BatchIntermediateType intermediateResult;
-		std::shared_ptr<State> firstModelState;
-		std::shared_ptr<State> secondModelState;
+		boost::shared_ptr<State> firstModelState;
+		boost::shared_ptr<State> secondModelState;
 	};
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
@@ -145,9 +145,9 @@ public:
 		
 	}
 	
-	std::shared_ptr<State> createState()const{
+	boost::shared_ptr<State> createState()const{
 		InternalState* state = new InternalState();
-		std::shared_ptr<State> ptrState(state);
+		boost::shared_ptr<State> ptrState(state);
 		state->firstModelState = m_firstModel->createState();
 		state->secondModelState = m_secondModel->createState();
 		return ptrState;
@@ -462,7 +462,7 @@ public:
 		return m_wrapper->numberOfParameters();
 	}
 	
-	std::shared_ptr<State> createState()const{
+	boost::shared_ptr<State> createState()const{
 		return m_wrapper->createState();
 	}
 

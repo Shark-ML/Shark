@@ -190,7 +190,7 @@ RealVector calculateKernelMatrixParameterDerivative(
 	
 	//calculate the gradint blockwise taking symmetry into account.
 	RealVector blockGradient(kp);//weighted gradient summed over the whole block
-	std::shared_ptr<State> state = kernel.createState();
+	boost::shared_ptr<State> state = kernel.createState();
 	std::size_t startX = 0;
 	for (std::size_t i=0; i<dataset.numberOfBatches(); i++){
 		std::size_t sizeX=shark::size(dataset.batch(i));

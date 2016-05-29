@@ -326,7 +326,7 @@ private:
 		RealVector dupper_dkernel( nkp,0 );
 		RealVector dlower_dkernel( nkp,0 );
 		//state for eval and evalDerivative of the kernel
-		std::shared_ptr<State> kernelState = base_type::m_kernel->createState();
+		boost::shared_ptr<State> kernelState = base_type::m_kernel->createState();
 		RealVector der(nkp ); //derivative storage helper
 		//todo: O.K.: here kernel single input derivative would be usefull
 		//also it can be usefull to use here real batch processing and use batches of size 1 for lower /upper

@@ -66,8 +66,8 @@ public:
 	std::string name() const
 	{ return "MissingFeaturesKernelExpansion"; }
 
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new EmptyState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	/// Override eval(...) in the base class

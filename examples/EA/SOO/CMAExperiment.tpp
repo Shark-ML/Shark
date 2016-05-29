@@ -50,7 +50,7 @@ int main( int argc, char ** argv ) {
 	
 //###begin<functions>
 	//assortment of test functions
-	typedef std::shared_ptr<SingleObjectiveFunction > Function;
+	typedef boost::shared_ptr<SingleObjectiveFunction > Function;
 	std::vector<Function > functions;
 	functions.push_back(Function(new Rosenbrock(numDimensions)));
 	functions.push_back(Function(new Cigar(numDimensions)));

@@ -277,7 +277,7 @@ like this::
   MyKernel kernel;  //the differentiable kernel
 
   // evaluate K for X and Y, store the state
-  std::shared_ptr<State> state = kernel.createState();
+  boost::shared_ptr<State> state = kernel.createState();
   kernel.eval(X, Y, result, *state);
 
   // somehow compute some weights and calculate the parameter derivative

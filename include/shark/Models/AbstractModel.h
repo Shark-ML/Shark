@@ -131,7 +131,7 @@ public:
 	///calculated. Eval can store a state which is then reused to speed up
 	///the calculations of the derivatives. This also allows eval to be
 	///evaluated in parallel!
-	virtual std::shared_ptr<State> createState() const
+	virtual boost::shared_ptr<State> createState() const
 	{
 		if (hasFirstParameterDerivative()
 		|| hasFirstInputDerivative()
@@ -140,7 +140,7 @@ public:
 		{
 			throw SHARKEXCEPTION("[AbstractModel::createState] createState must be overridden by models with derivatives");
 		}
-		return std::shared_ptr<State>(new EmptyState());
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	/// \brief From ISerializable, reads a model from an archive.
@@ -165,7 +165,7 @@ public:
 	/// \param patterns the inputs of the model
 	/// \param outputs the predictions or response of the model to every pattern
 	virtual void eval(BatchInputType const & patterns, BatchOutputType& outputs) const{
-		std::shared_ptr<State> state = createState();
+		boost::shared_ptr<State> state = createState();
 		eval(patterns,outputs,*state);
 	}
 	

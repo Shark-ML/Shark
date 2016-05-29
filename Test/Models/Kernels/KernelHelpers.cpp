@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE( KernelHelpers_calculateKernelMatrixParameterDerivative ){
 		BOOST_REQUIRE_EQUAL(kernelGradient.size(),1u);
 		
 		//now check the results y computing the kernel matrix from scratch
-		std::shared_ptr<State> state = kernel.createState();
+		boost::shared_ptr<State> state = kernel.createState();
 		RealMatrix derivativeWeight(1,1);
 		RealVector result(1);
 		result(0) = 0;

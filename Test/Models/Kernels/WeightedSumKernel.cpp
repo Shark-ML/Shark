@@ -66,8 +66,8 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test )
     batchX2(1,0)=3;
     batchX2(1,1)=3;
 
-    std::shared_ptr<State> stateK1Batch = baseKernel1.createState();
-    std::shared_ptr<State> stateK2Batch = baseKernel2.createState();
+    boost::shared_ptr<State> stateK1Batch = baseKernel1.createState();
+    boost::shared_ptr<State> stateK2Batch = baseKernel2.createState();
     RealMatrix k1Batch,k2Batch;
     baseKernel1.eval(batchX1,batchX2,k1Batch,*stateK1Batch);
     baseKernel2.eval(batchX1,batchX2,k2Batch,*stateK2Batch);
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test )
     //evaluate batch
     RealMatrix testBatch,testBatch2;
     kernel.eval(batchX1,batchX2,testBatch);
-    std::shared_ptr<State> stateBatch = kernel.createState();
+    boost::shared_ptr<State> stateBatch = kernel.createState();
     kernel.eval(batchX1,batchX2,testBatch2,*stateBatch);
     BOOST_REQUIRE_SMALL(resultBatch(0,0) - testBatch(0,0), 1.e-15);
     BOOST_REQUIRE_SMALL(resultBatch(0,0) - testBatch2(0,0), 1.e-15);

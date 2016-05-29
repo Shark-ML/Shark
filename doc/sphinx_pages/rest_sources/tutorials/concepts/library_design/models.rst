@@ -181,7 +181,7 @@ respect to its parameters thus looks like this::
   MyModel model;  //the differentiable model
 
   // evaluate the model for the inputs and store the intermediate values in the state
-  std::shared_ptr<State> state = model.createState();
+  boost::shared_ptr<State> state = model.createState();
   model.eval(inputs,outputs,*state);
 
   // somehow compute some weights and calculate the parameter derivative

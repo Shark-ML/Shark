@@ -72,7 +72,7 @@ void testKernelDerivative(AbstractKernelFunction<T>& kernel,std::size_t inputSiz
 		}
 		
 		//evaluate batched derivative
-		std::shared_ptr<State> state = kernel.createState();
+		boost::shared_ptr<State> state = kernel.createState();
 		RealMatrix kernelBatchRes;
 		kernel.eval(batch1,batch2,kernelBatchRes,*state);
 		
@@ -126,7 +126,7 @@ void testKernelInputDerivative(AbstractKernelFunction<T>& kernel,std::size_t inp
 		
 		
 		//evaluate batched derivative
-		std::shared_ptr<State> state = kernel.createState();
+		boost::shared_ptr<State> state = kernel.createState();
 		RealMatrix kernelBatchRes;
 		kernel.eval(batch1,batch2,kernelBatchRes,*state);
 		
@@ -162,7 +162,7 @@ void testEval(AbstractKernelFunction<T>& kernel, typename Batch<T>::type const& 
 	std::size_t batchSize2 = size(sampleBatch2);
 	
 	//evaluate batch on the kernels
-	std::shared_ptr<State> state = kernel.createState();
+	boost::shared_ptr<State> state = kernel.createState();
 	RealMatrix kernelResultsIntermediate;
 	RealMatrix kernelResults = kernel(sampleBatch1,sampleBatch2);
 	kernel.eval(sampleBatch1,sampleBatch2,kernelResultsIntermediate,*state);

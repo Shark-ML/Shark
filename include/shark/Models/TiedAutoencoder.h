@@ -159,8 +159,8 @@ public:
 		return s.hiddenResponses;
 	}
 	
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new InternalState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new InternalState());
 	}
 
 	void evalLayer(std::size_t layer,RealMatrix const& patterns,RealMatrix& outputs)const{

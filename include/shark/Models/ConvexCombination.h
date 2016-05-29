@@ -135,8 +135,8 @@ public:
 		return m_w;
 	}
 	
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new EmptyState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	/// Evaluate the model: output = w * input

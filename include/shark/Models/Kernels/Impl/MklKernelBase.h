@@ -79,7 +79,7 @@ public:
 	}
 
 	///\brief creates the internal state of the kernel
-	std::shared_ptr<State> createState()const{
+	boost::shared_ptr<State> createState()const{
 		return m_kernel->createState();
 	}
 	

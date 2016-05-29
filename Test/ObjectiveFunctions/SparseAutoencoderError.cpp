@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Value ){
 		
 		//evaluate the inputs for the model
 		RealVector activations(5,0.0);
-		std::shared_ptr<State> state = model.createState();
+		boost::shared_ptr<State> state = model.createState();
 		RealMatrix result;
 		for(std::size_t i = 0; i != 4; ++i){
 			model.eval(dataset.batch(i).input,result,*state);
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Value_Tied ){
 		
 		//evaluate the inputs for the model
 		RealVector activations(5,0.0);
-		std::shared_ptr<State> state = model.createState();
+		boost::shared_ptr<State> state = model.createState();
 		RealMatrix result;
 		for(std::size_t i = 0; i != 4; ++i){
 			model.eval(dataset.batch(i).input,result,*state);
@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Derivative_GradDesc)
 	model.setParameterVector(optimizer.solution().point);
 	//evaluate the inputs for the model
 	RealMatrix output;
-	std::shared_ptr<State> state = model.createState();
+	boost::shared_ptr<State> state = model.createState();
 	model.eval(dataset.batch(0).input,output,*state);
 	//sum hidden activations
 	RealVector activations=sum_rows(model.hiddenResponses(*state));

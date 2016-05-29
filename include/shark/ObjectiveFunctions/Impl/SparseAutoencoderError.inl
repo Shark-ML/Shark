@@ -102,7 +102,7 @@ public:
 
 		RealVector meanActivation(hiddens);
 		meanActivation.clear();
-		std::shared_ptr<State> state = mep_model->createState();
+		boost::shared_ptr<State> state = mep_model->createState();
 
 		typename Batch<RealVector>::type prediction;
 		double error = 0.0;
@@ -141,7 +141,7 @@ public:
 		RealVector hiddenDerivativeSum(hiddens,0.0);
 		gradient.clear();
 		
-		std::shared_ptr<State> state = mep_model->createState();
+		boost::shared_ptr<State> state = mep_model->createState();
 		double error = 0.0;
 		for(auto const& batch: m_dataset.batches()){
 			// calculate model output for the batch as well as the gradient

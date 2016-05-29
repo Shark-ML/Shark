@@ -94,8 +94,8 @@ public:
 	size_t numberOfParameters() const{
 		return 0;
 	}
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new EmptyState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	/// \brief Add noise to the input

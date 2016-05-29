@@ -250,8 +250,8 @@ public:
 		m_evalMean = evalMean;
 	}
 	
-	std::shared_ptr<State> createState()const{
-		return std::shared_ptr<State>(new EmptyState());
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 	
 	///\brief Passes information through/samples from an ConvolutionalRBM in a forward or backward way. 

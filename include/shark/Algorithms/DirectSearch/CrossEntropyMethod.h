@@ -41,7 +41,7 @@
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 
-#include <memory>
+#include <boost/shared_ptr.hpp>
 
 namespace shark {
 
@@ -83,7 +83,7 @@ namespace shark {
 		/**
 		 * \brief Smart pointer for noise type.
 		 */
-		typedef std::shared_ptr<INoiseType> StrongNoisePtr;
+		typedef boost::shared_ptr<INoiseType> StrongNoisePtr;
 
 		/**
 		 * \brief Constant noise term z_t = noise.
@@ -222,7 +222,7 @@ namespace shark {
 		 */
 		void setNoiseType( INoiseType* noiseType ) {
 			m_noise.reset();
-			m_noise = std::shared_ptr<INoiseType> (noiseType);
+			m_noise = boost::shared_ptr<INoiseType> (noiseType);
 		}
 
 		/**

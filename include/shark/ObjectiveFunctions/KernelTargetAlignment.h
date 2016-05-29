@@ -190,7 +190,7 @@ public:
 			}
 			RealVector threadDerivative(parameters,0.0);
 			RealVector blockDerivative;
-			std::shared_ptr<State> state = mep_kernel->createState();
+			boost::shared_ptr<State> state = mep_kernel->createState();
 			RealMatrix blockK;//block of the KernelMatrix
 			RealMatrix blockW;//block of the WeightMatrix
 			std::size_t startY = 0;
