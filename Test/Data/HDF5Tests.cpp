@@ -16,7 +16,7 @@ class HDF5Fixture
 public:
 	HDF5Fixture()
 	:
-		m_exampleFileName("./Test/test_data/testfile_for_import.h5"),
+		m_exampleFileName("../Test/test_data/testfile_for_import.h5"),
 		m_datasetNameData1("data/data1"),
 		m_labelNameLabel1("data/label1"),
 		m_labelNameWrongLabel("data/wrong_label"),
