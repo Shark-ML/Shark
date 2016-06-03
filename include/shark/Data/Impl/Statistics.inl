@@ -140,8 +140,6 @@ VectorType mean(Data<VectorType> const& data){
 	SIZE_CHECK(!data.empty());
 
 	VectorType mean(dataDimension(data),0.0);
-	
-	typedef typename Data<VectorType>::const_batch_reference BatchRef; 
 	 
 	for(auto& batch: data.batches()){
 		mean += sum_rows(batch);
