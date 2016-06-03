@@ -48,6 +48,8 @@ namespace shark {
 /// gives 0 contribution to the extremum points (i.e. the ones with best function value), those
 /// points are skipped when computing the contribution (i.e. extremum points are never selected).
 /// Note, that for boundary points that are not extrema, this does not hold and they are selected.
+///
+/// for problems with many objectives, an approximative algorithm can be used.
 struct HypervolumeIndicator {
 	/// \brief Determines the point contributing the least hypervolume to the overall front of points.
 	///
@@ -61,16 +63,35 @@ struct HypervolumeIndicator {
 			return m_algorithm.smallest(front,1)[0].value;
 	}
 	
+	/// \brief Sets the reference point. 
+	///
+	/// If no point is set, it is estimated from the current front and the extremum points are never selected.
 	void setReference(RealVector const& newReference){
 		m_reference = newReference;
 	}
 	
-	HypervolumeContribution const& algorithm()const{
-		return m_algorithm;
+	/// \brief Whether the approximtive algorithm should be used on large problems
+	void useApproximation(bool useApproximation){
+		m_algorithm.useApproximation(useApproximation);
 	}
 	
-	HypervolumeContribution& algorithm(){
-		return m_algorithm;
+	///\brief Error bound for the approximative algorithm
+	double approximationEpsilon()const{
+		return m_algorithm.approximationEpsilon();
+	}
+	///\brief Error bound for the approximative algorithm
+	double& approximationEpsilon(){
+		return m_algorithm.approximationEpsilon();
+	}
+	
+	///\brief Error probability for the approximative algorithm
+	double approximationDelta()const{
+		return m_algorithm.approximationDelta();
+	}
+	
+	///\brief Error probability for the approximative algorithm
+	double& approximationDelta(){
+		return m_algorithm.approximationDelta();
 	}
 
 	template<typename Archive>
