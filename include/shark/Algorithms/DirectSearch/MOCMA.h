@@ -33,8 +33,8 @@
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_MOCMA
 
 // MOO specific stuff
-#include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
-#include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/AdditiveEpsilonIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/CMA/CMAIndividual.h>

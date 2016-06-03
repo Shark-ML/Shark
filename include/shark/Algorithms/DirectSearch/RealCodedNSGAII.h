@@ -37,8 +37,8 @@
 #include <shark/Algorithms/DirectSearch/Individual.h>
 
 // MOO specific stuff
-#include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
-#include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/AdditiveEpsilonIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>

@@ -4,7 +4,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
-#include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Rng/GlobalRng.h>
 
