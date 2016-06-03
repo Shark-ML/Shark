@@ -336,7 +336,7 @@ public:
 					return p.value == minIndex[j];
 				}
 			);
-			if(pos != result.end());
+			if(pos != result.end())
 				result.erase(pos);
 		}
 		result.erase(result.begin()+k,result.end());
@@ -410,7 +410,7 @@ public:
 					return p.value == minIndex[j];
 				}
 			);
-			if(pos != result.end());
+			if(pos != result.end())
 				result.erase(pos);
 		}
 		if(result.size() > k)

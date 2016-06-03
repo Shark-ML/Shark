@@ -161,6 +161,7 @@ struct CMAChromosome{
 		archive & BOOST_SERIALIZATION_NVP( m_stepSizeLearningRate );
 		archive & BOOST_SERIALIZATION_NVP( m_successProbability );
 		archive & BOOST_SERIALIZATION_NVP( m_targetSuccessProbability );
+		archive & BOOST_SERIALIZATION_NVP( m_successThreshold);
 		archive & BOOST_SERIALIZATION_NVP( m_evolutionPathLearningRate );
 		archive & BOOST_SERIALIZATION_NVP( m_covarianceMatrixLearningRate );
 		archive & BOOST_SERIALIZATION_NVP( m_covarianceMatrixUnlearningRate );
