@@ -134,12 +134,6 @@ A single tabulator should be added at each indentation level. Usually
 curly braces indicate the next level of indentation, with the exception
 of namespaces.
 
-Braces and space character placement, other details
-...................................................
-
-Details such as where to place spaces around brackets etc. are not
-specified, since the **astyle** tool makes such conventions superfluous.
-
 
 Namespaces
 ----------
