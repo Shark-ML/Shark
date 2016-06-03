@@ -91,6 +91,13 @@ public:
 	unsigned int& mu(){
 		return m_mu;
 	}
+	
+	HypervolumeIndicator& indicator(){
+		return m_selection.indicator();
+	}
+	HypervolumeIndicator const& indicator()const{
+		return m_selection.indicator();
+	}
 
 	void read( InArchive & archive ){
 		archive & BOOST_SERIALIZATION_NVP( m_parents );

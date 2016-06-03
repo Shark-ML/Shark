@@ -34,7 +34,7 @@
 
 #include <shark/Core/Exception.h>
 #include <shark/Core/OpenMP.h>
-#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeContribution.h>
 
 #include <algorithm>
 #include <vector>
@@ -42,58 +42,46 @@
 namespace shark {
 
 ///  \brief Calculates the hypervolume covered by a front of non-dominated points.
+///
+/// If given, the Indicator uses a provided reference value that can be set via setReference. 
+/// Otherwise, it is computed from the data by using the maximum value in the set. As this usually
+/// gives 0 contribution to the extremum points (i.e. the ones with best function value), those
+/// points are skipped when computing the contribution (i.e. extremum points are never selected).
+/// Note, that for boundary points that are not extrema, this does not hold and they are selected.
 struct HypervolumeIndicator {
-public:
-	
 	/// \brief Determines the point contributing the least hypervolume to the overall front of points.
 	///
-	/// This version uses the reference point estimated by the last call to updateInternals.
-	///
 	/// \param [in] front pareto front of points
 	template<typename ParetoFrontType>
-	std::size_t leastContributor( ParetoFrontType const& front)
-	{
-		std::vector<double> indicatorValues( front.size() );
-		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( front.size() ); i++ ) {
-			std::vector<RealVector> copy( front.begin(), front.end() );
-			copy.erase( copy.begin() + i );
-			
-			HypervolumeCalculator hv;
-			indicatorValues[i] = hv(copy,m_reference);
-		}
-
-		std::vector<double>::iterator it = std::max_element( indicatorValues.begin(), indicatorValues.end() );
-
-		return it - indicatorValues.begin();
+	std::size_t leastContributor( ParetoFrontType const& front)const{
+		HypervolumeContribution algorithm;
+		if(m_reference.size() != 0)
+			return m_algorithm.smallest(front,1,m_reference)[0].value;
+		else	
+			return m_algorithm.smallest(front,1)[0].value;
 	}
 	
-	/// \brief Updates the internal variables of the indicator using a whole population.
-	///
-	/// Calculates the reference point of the volume from the population
-	/// using the maximum value in every dimension+1
-	///
-	/// \param [in] front pareto front of points
-	template<typename ParetoFrontType>
-	void updateInternals( ParetoFrontType const& front){
-		m_reference.clear();
-		if(front.empty()) return;
-		
-		//calculate reference point
-		std::size_t noObjectives = front[0].size();
-		m_reference.resize(noObjectives);
-		
-		for(auto const& point: front)
-			noalias(m_reference) = max(m_reference, point);
-		
-		noalias(m_reference) += 1.0;
+	void setReference(RealVector const& newReference){
+		m_reference = newReference;
+	}
+	
+	HypervolumeContribution const& algorithm()const{
+		return m_algorithm;
+	}
+	
+	HypervolumeContribution& algorithm(){
+		return m_algorithm;
 	}
 
 	template<typename Archive>
 	void serialize( Archive & archive, const unsigned int version ) {
 		archive & BOOST_SERIALIZATION_NVP( m_reference );
+		archive & BOOST_SERIALIZATION_NVP( m_algorithm );
 	}
 
+private:
 	RealVector m_reference;
+	HypervolumeContribution m_algorithm;
 };
 }
 

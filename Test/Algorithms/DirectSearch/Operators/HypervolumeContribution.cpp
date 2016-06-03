@@ -4,6 +4,8 @@
 
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeContribution2D.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeContribution3D.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeContributionMD.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeContributionApproximator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
 
 using namespace shark;
@@ -72,17 +74,21 @@ void testContributionNoRef(Algorithm algorithm, std::vector<RealVector> const& s
 	for(auto const& p: set){
 		noalias(reference) = max(reference,p);
 	}
-	
-	//create a set without extrema
-	auto setNoExt = set;
-	for(std::size_t j = 0; j < set[0].size(); ++j){
-		auto min = std::min_element(setNoExt.begin(),setNoExt.end(),[=](RealVector const& a, RealVector const& b){return a(j) < b(j);});
-		setNoExt.erase(min,min+1);
-	}
 
-	auto naiveLeastContributions = contributionsNaive(setNoExt, reference);
+	//compute contributions
+	auto naiveLeastContributions = contributionsNaive(set, reference);
 	std::sort(naiveLeastContributions.begin(),naiveLeastContributions.end());
-
+	//remove extrema
+	for(std::size_t j = 0; j < set[0].size(); ++j){
+		auto min = std::min_element(set.begin(),set.end(),[=](RealVector const& a, RealVector const& b){return a(j) < b(j);});
+		auto index = min - set.begin();
+		for(std::size_t i = 0; i != naiveLeastContributions.size(); ++i){
+			if(naiveLeastContributions[i].value == index){
+				naiveLeastContributions.erase(naiveLeastContributions.begin()+i);
+				break;
+			}
+		}
+	}
 	
 	BOOST_REQUIRE_EQUAL(leastContributions.size(),k);
 	BOOST_REQUIRE_EQUAL(largestContributions.size(),k);
@@ -181,6 +187,76 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContribution3D ) {
 		testContributionNoRef(hs,frontLinear,numPoints-3);
 		testContributionNoRef(hs,frontConvex,numPoints-3);
 		testContributionNoRef(hs,frontConcave,numPoints-3);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionMD_With_3D ) {
+
+	HypervolumeContributionMD hs;
+	const unsigned int numTests = 20;
+	const std::size_t numPoints = 100;
+	
+	RealVector reference(3,1.0);
+	Rng::seed(42);
+	
+	for(unsigned int t = 0; t != numTests; ++t){
+		auto frontLinear = createRandomFront(numPoints,3,1);
+		auto frontConvex = createRandomFront(numPoints,3,2);
+		auto frontConcave = createRandomFront(numPoints,3,0.5);
+		
+		for(std::size_t k = 1; k <= 7; ++k){
+			testContribution(hs,frontLinear,k,reference);
+			testContribution(hs,frontConvex,k,reference);
+			testContribution(hs,frontConcave,k,reference);
+			testContributionNoRef(hs,frontLinear,k);
+			testContributionNoRef(hs,frontConvex,k);
+			testContributionNoRef(hs,frontConcave,k);
+		}
+		
+		//all points
+		testContribution(hs,frontLinear,numPoints,reference);
+		testContribution(hs,frontConvex,numPoints,reference);
+		testContribution(hs,frontConcave,numPoints,reference);
+		
+		//without a reference we can not get moe than numPoints-3 contributions
+		//as three points are required to set up the reference frame
+		testContributionNoRef(hs,frontLinear,numPoints-3);
+		testContributionNoRef(hs,frontConvex,numPoints-3);
+		testContributionNoRef(hs,frontConcave,numPoints-3);
+	}
+}
+
+
+BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionApproximator ) {
+	const unsigned int numTests = 20;
+	const unsigned int numTrials = 100;
+	const std::size_t numPoints = 20;
+	
+	RealVector reference(3,1.0);
+	Rng::seed(42);
+	
+	for(unsigned int t = 0; t != numTests; ++t){
+		auto set = createRandomFront(numPoints,3,2);
+		
+		auto contributionsTrue = contributionsNaive(set, reference);
+		std::vector<double> contributions(set.size());
+		for(std::size_t i = 0; i != contributionsTrue.size(); ++i){
+			contributions[contributionsTrue[i].value]=contributionsTrue[i].key;
+		}
+
+		HypervolumeContributionApproximator algorithm;
+		algorithm.epsilon() = 0.01;
+		algorithm.delta() = 0.1;
+		std::vector<double> approxContributions;
+		for(std::size_t i = 0; i != numTrials; ++i){
+			auto result = algorithm.smallest(set,1,reference)[0].value;
+			approxContributions.push_back(contributions[result]);
+		}
+		std::sort(approxContributions.begin(),approxContributions.end());
+		
+		//check that we do not have too many errors, i.e. contributions with errors larger than 1+epsilon
+		//we make on average 100*errorProbability=10 errors. we give 50% more slack
+		BOOST_CHECK_LT(approxContributions[(1-1.5*algorithm.delta())*numTrials], (1+algorithm.epsilon())*contributionsTrue[0].key);
 	}
 }
 

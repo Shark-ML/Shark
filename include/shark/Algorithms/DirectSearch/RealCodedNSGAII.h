@@ -104,6 +104,12 @@ public:
 	std::size_t& mu(){
 		return m_mu;
 	}
+	Indicator& indicator(){
+		return m_selection.indicator();
+	}
+	Indicator const& indicator()const{
+		return m_selection.indicator();
+	}
 
 	void read( InArchive & archive ){
 		archive >> BOOST_SERIALIZATION_NVP(m_parents);

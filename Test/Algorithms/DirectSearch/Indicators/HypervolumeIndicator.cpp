@@ -28,7 +28,6 @@ BOOST_AUTO_TEST_CASE( HypervolumeIndicator_Consistency ) {
 		
 		
 		RealVector ref(numDims,11);
-		std::vector<RealVector> refSet(1,RealVector(numDims,10));
 		
 		RealVector volumes(numPoints);
 		double maxVolume = -std::numeric_limits<double>::max();
@@ -45,7 +44,7 @@ BOOST_AUTO_TEST_CASE( HypervolumeIndicator_Consistency ) {
 			}
 		}
 		HypervolumeIndicator indicator;
-		indicator.updateInternals(refSet);
+		indicator.setReference(ref);
 		std::size_t indicated = indicator.leastContributor(population);
 		BOOST_CHECK_CLOSE(maxVolume,volumes[indicated],1.e-10);
 	}

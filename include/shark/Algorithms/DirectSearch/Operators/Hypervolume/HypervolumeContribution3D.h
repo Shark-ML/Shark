@@ -271,7 +271,7 @@ private:
 	}
 	
 public:
-	/// \brief Returns the index of the points with smallest contribution.
+	/// \brief Returns the index of the points with smallest contribution as well as their contribution.
 	///
 	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
 	/// \param [in] k The number of points to select.
@@ -294,7 +294,7 @@ public:
 		return result;
 	}
 	
-	/// \brief Returns the index of the points with smallest contribution.
+	/// \brief Returns the index of the points with smallest contribution as well as their contribution.
 	///
 	/// As no reference point is given, the extremum points can not be computed and are never selected.
 	///
@@ -319,7 +319,6 @@ public:
 		
 		std::vector<Point> front;
 		for(std::size_t i = 0; i != points.size(); ++i){
-			if((i == minIndex[0])|| (i == minIndex[1]) || (i == minIndex[2])) continue;//skip extrema
 			front.emplace_back(points[i](0)-ref[0],points[i](1)-ref[1],points[i](2)-ref[2],i);
 		}
 		std::sort(
@@ -330,14 +329,24 @@ public:
 		);
 		
 		auto result = allContributions(front);
+		for(std::size_t j = 0; j != 3; ++j){
+			auto pos = std::find_if(
+				result.begin(),result.end(),
+				[&](KeyValuePair<double,std::size_t> const& p){
+					return p.value == minIndex[j];
+				}
+			);
+			if(pos != result.end());
+				result.erase(pos);
+		}
 		result.erase(result.begin()+k,result.end());
 		return result;
 	}
 
 	
-	/// \brief Returns the index of the points with largest contribution.
+	/// \brief Returns the index of the points with largest contribution as well as their contribution.
 	///
-	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
+	/// \param [in] points The set \f$S\f$ of points from which to select the largest contributor.
 	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k, VectorType const& ref)const{
@@ -359,11 +368,11 @@ public:
 	}
 	
 	
-	/// \brief Returns the index of the points with largest contribution.
+	/// \brief Returns the index of the points with largest contribution as well as their contribution.
 	///
 	/// As no reference point is given, the extremum points can not be computed and are never selected.
 	///
-	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
+	/// \param [in] points The set \f$S\f$ of points from which to select the largest contributor.
 	/// \param [in] k The number of points to select.
 	template<class Set>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k)const{
@@ -384,7 +393,6 @@ public:
 		
 		std::vector<Point> front;
 		for(std::size_t i = 0; i != points.size(); ++i){
-			if((i == minIndex[0])|| (i == minIndex[1]) || (i == minIndex[2])) continue;//skip extrema
 			front.emplace_back(points[i](0)-ref[0],points[i](1)-ref[1],points[i](2)-ref[2],i);
 		}
 		std::sort(
@@ -395,7 +403,18 @@ public:
 		);
 		
 		auto result = allContributions(front);
-		result.erase(result.begin(),result.end()-k);
+		for(std::size_t j = 0; j != 3; ++j){
+			auto pos = std::find_if(
+				result.begin(),result.end(),
+				[&](KeyValuePair<double,std::size_t> const& p){
+					return p.value == minIndex[j];
+				}
+			);
+			if(pos != result.end());
+				result.erase(pos);
+		}
+		if(result.size() > k)
+			result.erase(result.begin(),result.end()-k);
 		std::reverse(result.begin(),result.end());
 		return result;
 	}

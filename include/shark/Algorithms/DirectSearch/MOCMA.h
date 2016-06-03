@@ -35,7 +35,6 @@
 // MOO specific stuff
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
-#include <shark/Algorithms/DirectSearch/Indicators/LeastContributorApproximator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/CMA/CMAIndividual.h>
@@ -158,6 +157,13 @@ public:
 		penalizingEvaluator( function, offspring.begin(), offspring.end() );
 		updatePopulation(offspring);
 	}
+	
+	Indicator& indicator(){
+		return m_selection.indicator();
+	}
+	Indicator const& indicator()const{
+		return m_selection.indicator();
+	}
 protected:
 	/// \brief The individual type of the SteadyState-MOCMA.
 	typedef CMAIndividual<RealVector> IndividualType;
@@ -260,7 +266,6 @@ private:
 
 typedef IndicatorBasedMOCMA< HypervolumeIndicator > MOCMA;
 typedef IndicatorBasedMOCMA< AdditiveEpsilonIndicator > EpsilonMOCMA;
-typedef IndicatorBasedMOCMA< LeastContributorApproximator< FastRng, HypervolumeCalculator > > ApproximatedVolumeMOCMA;
 
 }
 

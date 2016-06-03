@@ -33,7 +33,6 @@
 // MOO specific stuff
 #include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
-#include <shark/Algorithms/DirectSearch/Indicators/LeastContributorApproximator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/CMA/CMAIndividual.h>
@@ -92,6 +91,13 @@ public:
 	}
 	NotionOfSuccess& notionOfSuccess(){
 		return m_notionOfSuccess;
+	}
+	
+	Indicator& indicator(){
+		return m_selection.indicator();
+	}
+	Indicator const& indicator()const{
+		return m_selection.indicator();
 	}
 	
 	void read( InArchive & archive ){
@@ -282,7 +288,6 @@ private:
 };
 
 typedef IndicatorBasedSteadyStateMOCMA< HypervolumeIndicator > SteadyStateMOCMA;
-typedef IndicatorBasedSteadyStateMOCMA< LeastContributorApproximator< FastRng, HypervolumeCalculator > > ApproximatedVolumeSteadyStateMOCMA;
 typedef IndicatorBasedSteadyStateMOCMA< AdditiveEpsilonIndicator > EpsilonSteadyStateMOCMA;
 
 }

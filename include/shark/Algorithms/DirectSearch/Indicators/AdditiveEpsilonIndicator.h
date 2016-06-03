@@ -70,12 +70,6 @@ struct AdditiveEpsilonIndicator {
 		
 		return leastIndex;
 	}
-	
-	/// \brief Updates the internal variables of the indicator using a whole population.
-	///
-	/// Empty for this Indicator
-	template<typename ParetoFrontType>
-	void updateInternals( ParetoFrontType const&){}
 		
 	template<typename Archive>
 	void serialize( Archive &, const unsigned int ) {}
