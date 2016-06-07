@@ -255,8 +255,9 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionApproximator ) {
 		std::sort(approxContributions.begin(),approxContributions.end());
 		
 		//check that we do not have too many errors, i.e. contributions with errors larger than 1+epsilon
-		//we make on average 100*errorProbability=10 errors. we give 50% more slack
-		BOOST_CHECK_LT(approxContributions[(1-1.5*algorithm.delta())*numTrials], (1+algorithm.epsilon())*contributionsTrue[0].key);
+		//we make on average 100*errorProbability=10 errors. we give 100% more slack to be further away than 3 standard deviations.
+		//failures follow a binomial distribution with p=0.1 thus the stddev is 3 and thus 19 errors are still not completely unlikely
+		BOOST_CHECK_LT(approxContributions[(1-2.0*algorithm.delta())*numTrials], (1+algorithm.epsilon())*contributionsTrue[0].key);
 	}
 }
 

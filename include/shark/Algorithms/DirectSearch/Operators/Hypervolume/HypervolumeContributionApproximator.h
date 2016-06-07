@@ -144,8 +144,8 @@ struct HypervolumeContributionApproximator{
 		SHARK_CHECK(k == 1, "not implemented for k != 1");
 				
 		std::vector< Point<VectorType> > front;
-		for(auto it = points.begin(); it != points.end(); ++it ) {
-			front.emplace_back( *it, reference );
+		for(auto const& point: points) {
+			front.emplace_back( point, reference );
 		}
 		computeBoundingBoxes( front );
 		
@@ -189,8 +189,8 @@ struct HypervolumeContributionApproximator{
 		
 		std::vector< Point<RealVector> > front;
 		front.reserve( points.size() );
-		for(auto it = points.begin(); it != points.end(); ++it ) {
-			front.emplace_back( *it, reference);
+		for(auto const& point: points) {
+			front.emplace_back( point, reference );
 		}
 		computeBoundingBoxes( front );
 		
@@ -286,10 +286,10 @@ private:
 	
 	/// \brief Samples in the bounding box of the supplied point until a pre-defined threshold is reached.
 	///
-	/// \param [in] s Set of points.
 	/// \param [in] point Iterator to the point that should be sampled.
 	/// \param [in] r The current round.
 	/// \param [in] delta The delta that should be reached.
+	/// \param [in] n the total number of points in the front. Required for proper calculation of bounds
 	template<class VectorType>
 	void sample( Point<VectorType>& point, unsigned int r, double delta, std::size_t n )const{
 		double logFactor = std::log( 2. * n * (1. + m_gamma) / (m_errorProbability * m_gamma) );
@@ -304,10 +304,10 @@ private:
 			//sample a point inside the box
 			point.sample.resize(point.point.size());
 			for( unsigned int i = 0; i < point.sample.size(); i++ ) {
-				point.sample[ i ] = point.point[ i ] + Rng::uni( 0., 1. ) * ( point.boundingBox[ i ] - point.point[ i ] );
+				point.sample[ i ] =  Rng::uni( point.point[ i ], point.boundingBox[ i ] );
 			}
 			++point.noSamples;
-			//check if point is not dominated by any of the influencing points
+			//check if the point is not dominated by any of the influencing points
 			if( !isPointDominated( point.influencingPoints, point.sample ) )
 				point.noSuccessfulSamples++;
 		}
