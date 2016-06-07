@@ -64,6 +64,8 @@ namespace detail{
 ///
 /// The generated translations are approximately sampled from the unit ball and starting points are also drawn
 /// by the same distribution around a random optimum (assuming the optimum is at (0,0) of the untranslated function
+///
+/// Note that all objectives must have scalable dimensionality
 template<class ... Objectives>
 class MultiObjectiveBenchmark: public MultiObjectiveFunction{
 public:
@@ -94,12 +96,14 @@ public:
 	
 	void setNumberOfVariables( std::size_t numberOfVariables ){
 		for(auto& f: m_rotations){
+			if(!f.hasScalableDimensionality())
+				throw SHARKEXCEPTION("[MultiObjectiveBenchmark] function is not scalable");
 			f.setNumberOfVariables(numberOfVariables);
 		}
 	}
 	
 	std::size_t numberOfObjectives()const{
-		return m_rotations.size();
+		return sizeof...(Objectives);
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -123,7 +127,7 @@ public:
 		{
 			RealVector translation(numberOfVariables());
 			for(double& v: translation){
-				v=Rng::gauss(0,1)/numberOfVariables();
+				v=Rng::gauss(0,1)/std::sqrt(double(numberOfVariables()));
 			}
 			m_translations.push_back(translation);
 			f.init();
@@ -135,7 +139,7 @@ public:
 
 		std::size_t index = Rng::discrete(0,m_rotations.size()-1);
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = m_translations[index](i)+Rng::gauss(0,1)/numberOfVariables();
+			x(i) = m_translations[index](i)+Rng::gauss(0,1)/std::sqrt(double(numberOfVariables()));
 		}
 		return x;
 	}
