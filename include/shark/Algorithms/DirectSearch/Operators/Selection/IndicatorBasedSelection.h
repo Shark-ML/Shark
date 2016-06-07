@@ -52,6 +52,74 @@ namespace shark {
 */
 template<typename Indicator>
 struct IndicatorBasedSelection {
+	/**
+	* \brief Executes the algorithm and assigns each member of the population
+	* its level non-dominance (rank) and its individual contribution to the front
+	* it belongs to (share).
+	*
+	* \param [in,out] population The population to be ranked.
+	* \param [in,out] mu the number of individuals to select
+	*/
+	template<typename PopulationType>
+	void operator()( PopulationType & population, std::size_t mu )
+	{
+		if(population.empty()) return;
+		
+		//perform a nondominated sort to assign the rank to every element
+		nonDominatedSort(penalizedFitness(population), ranks(population));
+
+		typedef std::vector< view_reference<typename PopulationType::value_type > > View;
+
+		unsigned int maxRank = 0;
+		std::map< unsigned int, View > fronts;
+
+		for( unsigned int i = 0; i < population.size(); i++ ) {
+			maxRank = std::max( maxRank, static_cast<unsigned int>( population[i].rank() ) );
+			fronts[population[i].rank()].push_back( population[i] );
+			population[i].selected() = true;
+		}
+
+		//deselect the highest rank fronts until we would end up with less or equal mu elements
+		unsigned int rank = maxRank;
+		std::size_t popSize = population.size();
+		
+		while(popSize-fronts[rank].size() >= mu){
+			//deselect all elements in this front
+			View & front = fronts[rank];
+			for(std::size_t i = 0; i != front.size(); ++i){
+				front[i].selected() = false;
+			}
+			popSize -= front.size();
+			--rank;
+		}
+		//now use the indicator to deselect the worst approximating elements of the last selected front
+		View& front = fronts[rank];
+		for(; popSize >mu;--popSize) {
+			std::size_t lc = m_indicator.leastContributor(penalizedFitness(front));
+			front[lc].selected() = false;
+			front.erase( front.begin() + lc );
+		}
+	}
+
+	/**
+	 * \brief Stores/restores the serializer's state.
+	 * \tparam Archive Type of the archive.
+	 * \param [in,out] archive The archive to serialize to.
+	 * \param [in] version number, currently unused.
+	 */
+	template<typename Archive>
+	void serialize( Archive & archive, const unsigned int version )
+	{
+		archive & BOOST_SERIALIZATION_NVP( m_indicator );
+	}
+	Indicator& indicator(){
+		return m_indicator;
+	}
+	Indicator const& indicator()const{
+		return m_indicator;
+	}
+private:
+	Indicator m_indicator; ///< Instance of the second level sorting criterion.
 
 	/** \cond */
 	template<typename T>
@@ -100,70 +168,6 @@ struct IndicatorBasedSelection {
 		}
 	};
 	/** \endcond */
-
-	/**
-	* \brief Executes the algorithm and assigns each member of the population
-	* its level non-dominance (rank) and its individual contribution to the front
-	* it belongs to (share).
-	*
-	* \param [in,out] population The population to be ranked.
-	* \param [in,out] mu the number of individuals to select
-	*/
-	template<typename PopulationType>
-	void operator()( PopulationType & population, std::size_t mu )
-	{
-		if(population.empty()) return;
-		
-		//perform a nondominated sort to assign the rank to every element
-		nonDominatedSort(penalizedFitness(population), ranks(population));
-
-		typedef std::vector< view_reference<typename PopulationType::value_type > > View;
-
-		unsigned int maxRank = 0;
-		std::map< unsigned int, View > fronts;
-
-		for( unsigned int i = 0; i < population.size(); i++ ) {
-			maxRank = std::max( maxRank, static_cast<unsigned int>( population[i].rank() ) );
-			fronts[population[i].rank()].push_back( population[i] );
-			population[i].selected() = true;
-		}
-
-		//deselect the highest rank fronts until we would end up with less or equal mu elements
-		unsigned int rank = maxRank;
-		std::size_t popSize = population.size();
-		
-		while(popSize-fronts[rank].size() >= mu){
-			//deselect all elements in this front
-			View & front = fronts[rank];
-			for(std::size_t i = 0; i != front.size(); ++i){
-				front[i].selected() = false;
-			}
-			popSize -= front.size();
-			--rank;
-		}
-		//now use the indicator to deselect the worst approximating elements of the last selected front
-		m_indicator.updateInternals(penalizedFitness(population));
-		View& front = fronts[rank];
-		for(; popSize >mu;--popSize) {
-			std::size_t lc = m_indicator.leastContributor(penalizedFitness(front));
-			front[lc].selected() = false;
-			front.erase( front.begin() + lc );
-		}
-	}
-
-	/**
-	 * \brief Stores/restores the serializer's state.
-	 * \tparam Archive Type of the archive.
-	 * \param [in,out] archive The archive to serialize to.
-	 * \param [in] version number, currently unused.
-	 */
-	template<typename Archive>
-	void serialize( Archive & archive, const unsigned int version )
-	{
-		archive & BOOST_SERIALIZATION_NVP( m_indicator );
-	}
-
-	Indicator m_indicator; ///< Instance of the second level sorting criterion.
 };
 }
 

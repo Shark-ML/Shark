@@ -78,8 +78,6 @@ struct HypervolumeApproximator {
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^n\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
 	template<typename Set, typename VectorType >
 	double operator()( Set const& points, VectorType const& refPoint){
-		typedef typename Set::const_iterator Iterator;
-		
 		std::size_t noPoints = points.size();
 
 		if( noPoints == 0 )
@@ -111,7 +109,7 @@ struct HypervolumeApproximator {
 		while (true)
 		{
 			// sample ROI based on its volume. the ROI is defined as the Area between the reference point and a point in the front.
-			Iterator point = points.begin() + pointDist(Rng::globalRng);
+			auto point = points.begin() + pointDist(Rng::globalRng);
 			
 			// sample point in ROI   
 			for( std::size_t i = 0; i < rndpoint.size(); i++ ){
@@ -121,7 +119,7 @@ struct HypervolumeApproximator {
 			while (true)
 			{
 				if (samples_sofar>=maxSamples) return maxSamples * totalVolume / noPoints / round;
-				Iterator candidate = points.begin() + static_cast<std::size_t>(noPoints*Rng::uni());
+				auto candidate = points.begin() + static_cast<std::size_t>(noPoints*Rng::uni());
 				samples_sofar++;
 				DominanceRelation rel = dominance(*candidate, rndpoint);
 				if (rel == LHS_DOMINATES_RHS || rel == EQUIVALENT) break;

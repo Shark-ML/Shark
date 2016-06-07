@@ -37,8 +37,8 @@
 #include <shark/Algorithms/DirectSearch/Individual.h>
 
 // MOO specific stuff
-#include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
-#include <shark/Algorithms/DirectSearch/Indicators/AdditiveEpsilonIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/AdditiveEpsilonIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
@@ -103,6 +103,12 @@ public:
 	}
 	std::size_t& mu(){
 		return m_mu;
+	}
+	Indicator& indicator(){
+		return m_selection.indicator();
+	}
+	Indicator const& indicator()const{
+		return m_selection.indicator();
 	}
 
 	void read( InArchive & archive ){

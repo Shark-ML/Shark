@@ -3,7 +3,6 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
-#include <shark/Algorithms/DirectSearch/Indicators/LeastContributorApproximator.h>
 #include <shark/Core/utility/functional.h>
 
 #include <shark/Rng/GlobalRng.h>
@@ -326,25 +325,5 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeCalculator) {
 	testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, 8, 2);
 	testRandomFrontNormPApprox(evals,epsilon, hc, numTests, numPoints, 8, 0.5);
 }
-
-//~ BOOST_AUTO_TEST_CASE( Algorithms_LeastContributorApproximator ) {
-	//~ HypervolumeCalculator hc;
-	//~ IdentityFitnessExtractor ife;
-	//~ LeastContributorApproximator< FastRng, HypervolumeCalculator > lca;
-
-	//~ double vol = hc( ife, m_testSet3D, m_refPoint3D );
-	//~ std::vector< double > contributions( m_testSet3D.size(), 0. );
-	//~ for( unsigned int i = 0; i < contributions.size(); i++ ) {
-		//~ std::vector< RealVector > front( m_testSet3D );
-		//~ front.erase( front.begin() + i );
-		//~ std::cout<<i<<" "<<hc( ife, front, m_refPoint3D )<<std::endl;
-		//~ contributions[ i ] = vol - hc( ife, front, m_refPoint3D );
-	//~ }
-
-	//~ std::vector< RealVector >::const_iterator it = m_testSet3D.begin();
-	//~ std::size_t approx = lca.leastContributor( ife, m_testSet3D, m_refPoint3D );
-	//~ std::size_t exact = (std::size_t)std::distance( contributions.begin(), std::min_element( contributions.begin(), contributions.end() ) );
-	//~ BOOST_CHECK_EQUAL( approx, exact );
-//~ }
 
 BOOST_AUTO_TEST_SUITE_END()

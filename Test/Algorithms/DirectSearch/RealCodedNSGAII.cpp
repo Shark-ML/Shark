@@ -23,6 +23,7 @@ double testObjectiveFunctionMOOHelper(
 ){
 	RealCodedNSGAII realCodedNSGAII;
 	realCodedNSGAII.mu() = mu;
+	realCodedNSGAII.indicator().setReference(reference);
 	f.init();
 	realCodedNSGAII.init(f);
 	

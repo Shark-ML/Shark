@@ -35,9 +35,6 @@
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator3D.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorMD.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeApproximator.h>
-#include <boost/range/adaptor/transformed.hpp>
-#include <type_traits>
-
 
 namespace shark {
 /// \brief Frontend for hypervolume calculation algorithms in m dimensions.
@@ -45,17 +42,15 @@ namespace shark {
 ///  Depending on the dimensionality of the problem, one of the specialized algorithms is called.
 ///  For large dimensionalities for which there are no specialized fast algorithms,
 ///  either the exponential time or the approximated algorithm is called based on the choice of algorithm
-///  Also a log-transformation of points is supported
 struct HypervolumeCalculator {
 
 	/// \brief Default c'tor.
-	HypervolumeCalculator() : m_useLogHyp( false ), m_useApproximation(false) {}
-
-	///\brief True if the logarithmic volume is to be used, e.g. taking the logarithm of all values.
-	void useLogHyp(bool useLogHyp){m_useLogHyp = useLogHyp;}
+	HypervolumeCalculator() : m_useApproximation(false) {}
 	
 	///\brief True if the hypervolume approximation is to be used in dimensions > 3.
-	void useApproximation(bool useApproximation){m_useApproximation = useApproximation;}
+	void useApproximation(bool useApproximation){
+		m_useApproximation = useApproximation;
+	}
 	
 	double approximationEpsilon()const{
 		return m_approximationAlgorithm.epsilon();
@@ -74,7 +69,6 @@ struct HypervolumeCalculator {
 	
 	template<typename Archive>
 	void serialize( Archive & archive, const unsigned int version ) {
-		archive & BOOST_SERIALIZATION_NVP(m_useLogHyp);
 		archive & BOOST_SERIALIZATION_NVP(m_useApproximation);
 		archive & BOOST_SERIALIZATION_NVP(m_approximationAlgorithm);
 	}
@@ -85,42 +79,22 @@ struct HypervolumeCalculator {
 	template<typename Points, typename VectorType>
 	double operator()( Points const& points, VectorType const& refPoint){
 		SIZE_CHECK( points.begin()->size() == refPoint.size() );
-		//GCC 4.6 complains if Point is a reference, so remove it
-		typedef typename std::remove_reference<decltype(points[0]) >::type Point;
 		std::size_t numObjectives = refPoint.size();
-		auto logTransform = [](Point const& x){return log(x);};
 		if(numObjectives == 2){
 			HypervolumeCalculator2D algorithm;
-			if(m_useLogHyp){
-				return algorithm(boost::adaptors::transform(points,logTransform), refPoint);
-			}else{
-				return algorithm(points, refPoint);
-			}
+			return algorithm(points, refPoint);
 		}else if(numObjectives == 3){
 			HypervolumeCalculator3D algorithm;
-			if(m_useLogHyp){
-				return algorithm(boost::adaptors::transform(points,logTransform), refPoint);
-			}else{
-				return algorithm(points, refPoint);
-			}
+			return algorithm(points, refPoint);
 		}else if(m_useApproximation){
-			if(m_useLogHyp){
-				return m_approximationAlgorithm(boost::adaptors::transform(points,logTransform), refPoint);
-			}else{
-				return m_approximationAlgorithm(points, refPoint);
-			}
+			return m_approximationAlgorithm(points, refPoint);
 		}else{
 			HypervolumeCalculatorMD algorithm;
-			if(m_useLogHyp){
-				return algorithm(boost::adaptors::transform(points,logTransform), refPoint);
-			}else{
-				return algorithm(points, refPoint);
-			}
+			return algorithm(points, refPoint);
 		}
 	}
 
 private:
-	bool m_useLogHyp;
 	bool m_useApproximation;
 	HypervolumeApproximator m_approximationAlgorithm;
 };

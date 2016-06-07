@@ -38,7 +38,7 @@
 
 // MOO specific stuff
 #include <shark/Algorithms/DirectSearch/Individual.h>
-#include <shark/Algorithms/DirectSearch/Indicators/HypervolumeIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
@@ -90,6 +90,13 @@ public:
 	
 	unsigned int& mu(){
 		return m_mu;
+	}
+	
+	HypervolumeIndicator& indicator(){
+		return m_selection.indicator();
+	}
+	HypervolumeIndicator const& indicator()const{
+		return m_selection.indicator();
 	}
 
 	void read( InArchive & archive ){
