@@ -44,6 +44,5 @@
 #include <shark/LinAlg/BLAS/operation.hpp>
 #include <shark/LinAlg/BLAS/permutation.hpp>
 #include <shark/LinAlg/BLAS/io.hpp>
-#include <shark/LinAlg/BLAS/lu.hpp>
 
 #endif

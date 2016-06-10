@@ -31,18 +31,16 @@
 #include "vector.hpp"
 
 namespace shark { namespace blas{
-struct permutation_matrix:public vector<std::size_t> {
+struct permutation_matrix:public vector<int> {
 	// Construction and destruction
-	explicit permutation_matrix(size_type size):vector<std::size_t> (size){
+	explicit permutation_matrix(size_type size):vector<int> (size){
 		for (size_type i = 0; i < size; ++ i)
 			(*this)(i) = i;
 	}
 
-	explicit permutation_matrix(vector<std::size_t> const& init): vector<std::size_t>(init){ }
-
 	// Assignment
 	permutation_matrix &operator = (permutation_matrix const& m) {
-		vector<std::size_t>::operator = (m);
+		vector<int>::operator = (m);
 		return *this;
 	}
 };

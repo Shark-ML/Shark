@@ -55,13 +55,12 @@ As you can see, this is not an in-place method anymore. The solution is numerica
 Be aware, that :math:`A` must be positive definite. If :math:`A` does not have full rank, the solution to this
 system will be garbage. However, for most problems, this is not an issue.
 
-If your matrix is not symmetric, but still has full rank, the more general :doxy:`solveSystem` can be used::
+If your matrix is not symmetric, or not full rank, the more general :doxy:`solveSystem` can be used::
 
-  solveSystem<blas::SolveAXB>(A,x,b);
-  solveSystem<blas::SolveAXB>(A,X,B);
-  
-This function uses a LU-decomposition to solve the system. This is not as numerically stable as the symmetric version and is more expensive to compute.
-There is no solver when :math:`A` does not have full rank.
+ generalSolveSystemInPlace<blas::SolveAXB>(A,b);
+ generalSolveSystemInPlace<blas::SolveAXB>(A,B);
+
+If A does not have full rank, the solution will not be unique and the algorithm picks among those the solution with smallest norm.
 
 Eigenvalues of a Matrix
 --------------------------------------------------------------------

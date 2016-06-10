@@ -326,27 +326,6 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_TriangularInPlace_Calls_Vector ){
 }
 
 //for the remaining functions, we can use random systems and check, whether they are okay
-BOOST_AUTO_TEST_CASE( LinAlg_Solve_Vector ){
-	unsigned int NumTests = 100;
-	std::size_t Dimensions = 50;
-	std::cout<<"blas::solveSystem vector"<<std::endl;
-	for(unsigned int testi = 0; testi != NumTests; ++testi){
-		RealMatrix A = createRandomInvertibleMatrix(Dimensions,-2,2);
-		RealVector b(Dimensions);
-		for(std::size_t i = 0; i != Dimensions; ++i){
-			b(i) = Rng::gauss(0,1);
-		}
-		
-		RealVector x;
-		blas::solveSystem(A,x,b);
-		
-		//calculate backwards
-		RealVector test = prod(A,x);
-		
-		double error = norm_inf(test-b);
-		BOOST_CHECK_SMALL(error,1.e-11);
-	}
-}
 
 BOOST_AUTO_TEST_CASE( LinAlg_Solve_Symmetric_Vector ){
 	unsigned int NumTests = 100;
@@ -407,32 +386,6 @@ BOOST_AUTO_TEST_CASE( LinAlg_Solve_Symmetric_Approximated_Vector ){
 		RealVector test = prod(A,x);
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
-	}
-}
-
-BOOST_AUTO_TEST_CASE( LinAlg_Solve_Matrix ){
-	unsigned int NumTests = 100;
-	std::size_t Dimensions = 50;
-	std::size_t numRhs = 21;
-	std::cout<<"blas::solve matrix"<<std::endl;
-	for(unsigned int testi = 0; testi != NumTests; ++testi){
-		RealMatrix A = createRandomInvertibleMatrix(Dimensions,-2,2);
-		RealMatrix B(Dimensions,numRhs);
-		for(std::size_t i = 0; i != Dimensions; ++i){
-			for(std::size_t j = 0; j != numRhs; ++j){
-				B(i,j) = Rng::gauss(0,1);
-			}
-		}
-		
-		RealMatrix X;
-		blas::solveSystem(A,X,B);
-		
-		//calculate backwards
-		RealMatrix test(Dimensions,numRhs);
-		axpy_prod(A,X,test);
-		
-		double error = norm_inf(test-B);
-		BOOST_CHECK_SMALL(error,1.e-10);
 	}
 }
 

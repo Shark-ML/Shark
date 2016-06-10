@@ -28,78 +28,7 @@
 #define SHARK_LINALG_IMPL_SOLVE_SYSTEM_INL
 
 //full rank indefinite solvers
-#include <shark/LinAlg/Cholesky.h>
-
-//todo implement this using ATLAS
-template<class MatT,class VecT>
-void shark::blas::solveSystemInPlace(
-	matrix_expression<MatT> const& A, 
-	vector_expression<VecT>& b
-){
-	SIZE_CHECK(A().size1() == b().size());
-	SIZE_CHECK(A().size1() == A().size2());
-	std::size_t n = A().size1();
-	
-	PermutationMatrix permutation(n);
-	MatT LUDecomposition= A();
-	
-	lu_factorize(LUDecomposition,permutation);
-	
-	swap_rows(permutation,b);
-	solveTriangularSystemInPlace<SolveAXB,unit_lower>(LUDecomposition,b);
-	solveTriangularSystemInPlace<SolveAXB,upper>(LUDecomposition,b);
-}
-template<class MatT,class Mat2T>
-void shark::blas::solveSystemInPlace(
-	matrix_expression<MatT> const& A, 
-	matrix_expression<Mat2T> & B
-){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size1() == A().size2());
-	std::size_t n = A().size1();
-	
-	PermutationMatrix permutation(n);
-	MatT LUDecomposition = A;
-	
-	lu_factorize(LUDecomposition,permutation);
-	
-	swap_rows(permutation,B);
-	solveTriangularSystemInPlace<SolveAXB,unit_lower>(LUDecomposition,B);
-	solveTriangularSystemInPlace<SolveAXB,upper>(LUDecomposition,B);
-}
-
-template<class MatT,class Vec1T,class Vec2T>
-void shark::blas::solveSystem(
-	matrix_expression<MatT> const& A, 
-	vector_expression<Vec1T>& x,
-	vector_expression<Vec2T> const& b
-){
-	SIZE_CHECK(A().size1() == b().size());
-	SIZE_CHECK(A().size1() == A().size2());
-	
-	ensure_size(x,A().size1());
-	noalias(x()) = b();
-	
-	solveSystemInPlace(A,x);
-}
-
-
-template<class MatT,class Mat1T,class Mat2T>
-void shark::blas::solveSystem(
-	const shark::blas::matrix_expression<MatT> & A, 
-	shark::blas::matrix_expression<Mat1T>& X,
-	const shark::blas::matrix_expression<Mat2T> & B
-){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size1() == A().size2());
-	
-	ensure_size(X,A().size1(),B().size2());
-	noalias(X()) = B();
-	
-	solveSystemInPlace(A,X);
-}
-
-
+#include "../Cholesky.h"
 
 // Symmetric solvers
 template<class System,class MatT,class Mat1T>
