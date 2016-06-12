@@ -49,12 +49,6 @@
 namespace shark {
 
 
-// strategy constants
-#define CHANGE_RATE 0.2
-#define PREF_MIN 0.05
-#define PREF_MAX 20.0
-
-
 ///
 /// \brief Quadratic program solver for box-constrained problems with linear kernel
 ///
@@ -216,6 +210,11 @@ public:
 					if (epoch == 0) average_gain += gain / (double)ell;
 					else
 					{
+						// strategy constants
+						constexpr double CHANGE_RATE = 0.2;
+						constexpr double PREF_MIN = 0.05;
+						constexpr double PREF_MAX = 20.0;
+
 						double change = CHANGE_RATE * (gain / average_gain - 1.0);
 						double newpref = std::min(PREF_MAX, std::max(PREF_MIN, pref(i) * std::exp(change)));
 						prefsum += newpref - pref(i);
@@ -499,6 +498,11 @@ public:
 					if (epoch == 0) average_gain += gain / (double)ell;
 					else
 					{
+						// strategy constants
+						constexpr double CHANGE_RATE = 0.2;
+						constexpr double PREF_MIN = 0.05;
+						constexpr double PREF_MAX = 20.0;
+
 						double change = CHANGE_RATE * (gain / average_gain - 1.0);
 						double newpref = std::min(PREF_MAX, std::max(PREF_MIN, pref(i) * std::exp(change)));
 						prefsum += newpref - pref(i);
