@@ -94,7 +94,7 @@ public:
 	/// \param v is the vector to be moved
 	vector(vector && v) = default;
 		
-	vector(std::initializer_list<T>  list) : m_storage(list){}
+	vector(std::initializer_list<T>  list) : m_storage(std::begin(list),std::end(list)){}
 
 	/// \brief Copy-constructor of a vector from a vector_expression
 	/// \param e the vector_expression whose values will be duplicated into the vector
