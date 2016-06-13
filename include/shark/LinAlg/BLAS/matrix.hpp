@@ -31,7 +31,8 @@
 #include "matrix_proxy.hpp"
 #include "vector_proxy.hpp"
 #include "kernels/matrix_assign.hpp"
-
+#include <array>
+#include <initializer_list>
 #include <boost/serialization/collection_size_type.hpp>
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/nvp.hpp>
@@ -70,53 +71,104 @@ public:
 	typedef index_type const* const_index_pointer;
 	typedef index_type index_pointer;
 
-	typedef const matrix_reference<const self_type> const_closure_type;
+	typedef matrix_reference<self_type const> const const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
 	typedef dense_tag storage_category;
 	typedef elementwise_tag evaluation_category;
 	typedef L orientation;
 
-	// Construction and destruction
+	// Construction
 
-	/// Default dense matrix constructor. Make a dense matrix of size (0,0)
+	/// \brief Default dense matrix constructor. Make a dense matrix of size (0,0)
 	matrix():m_size1(0), m_size2(0){}
+	
+	/// \brief Constructor from a nested initializer list.
+	///
+	/// Constructs a matrix like this: m = {{1,2},{3,4}}.
+	/// \param list The nested initializer list storing the values of the matrix.
+	matrix(std::initializer_list<std::initializer_list<T> > list)
+	: m_size1(list.size())
+	, m_size2(list.begin()->size())
+	, m_data(m_size1*m_size2){
+		auto pos = list.begin();
+		for(std::size_t i = 0; i != list.size(); ++i,++pos){
+			SIZE_CHECK(pos->size() == m_size2);
+			std::copy(pos->begin(),pos->end(),row_begin(i));
+		}
+	}
 
-	/** Dense matrix constructor with defined size
-	 * \param size1 number of rows
-	 * \param size2 number of columns
-	 */
+	/// \brief Dense matrix constructor with defined size
+	/// \param size1 number of rows
+	/// \param size2 number of columns
 	matrix(size_type size1, size_type size2)
-		:m_size1(size1), m_size2(size2), m_data(size1 * size2) {}
+	:m_size1(size1)
+	, m_size2(size2)
+	, m_data(size1 * size2) {}
 
-	/** Dense matrix constructor with defined size a initial value for all the matrix elements
-	 * \param size1 number of rows
-	 * \param size2 number of columns
-	 * \param init initial value assigned to all elements
-	 */
-	matrix(size_type size1, size_type size2, const value_type& init):
-		m_size1(size1), m_size2(size2), m_data(size1 * size2, init) {}
+	/// \brief  Dense matrix constructor with defined size a initial value for all the matrix elements
+	/// \param size1 number of rows
+	/// \param size2 number of columns
+	/// \param init initial value assigned to all elements
+	matrix(size_type size1, size_type size2, value_type const& init)
+	: m_size1(size1)
+	, m_size2(size2)
+	, m_data(size1 * size2, init) {}
 
-	/** Dense matrix constructor with defined size and an initial data array
-	 * \param size1 number of rows
-	 * \param size2 number of columns
-	 * \param data array to copy into the matrix. Must have the same dimension as the matrix
-	 */
-	matrix(size_type size1, size_type size2, const array_type& data):
-		m_size1(size1), m_size2(size2), m_data(data) {}
+	/// \brief Copy-constructor of a dense matrix
+	///\param m is a dense matrix
+	matrix(const matrix& m) = default;
+			
+	/// \brief Move-constructor of a dense matrix
+	///\param m is a dense matrix
+	matrix(matrix&& m) = default;
 
-	/** Copy-constructor of a dense matrix
-	 * \param m is a dense matrix
-	 */
-	matrix(const matrix& m):
-		m_size1(m.m_size1), m_size2(m.m_size2), m_data(m.m_data) {}
-
-	/** Copy-constructor of a dense matrix from a matrix expression
-	 * \param e is a matrix expression
-	 */
+	/// \brief Constructor of a dense matrix from a matrix expression.
+	/// 
+	/// Constructs the matrix by evaluating the expression and assigning the
+	/// results to the newly constructed matrix using a call to assign.
+	///
+	/// \param e is a matrix expression
 	template<class E>
-	matrix(matrix_expression<E> const& e):
-		m_size1(e().size1()), m_size2(e().size2()), m_data(m_size1 * m_size2) {
+	matrix(matrix_expression<E> const& e)
+	: m_size1(e().size1())
+	, m_size2(e().size2())
+	, m_data(m_size1 * m_size2) {
 		assign(*this,e);
+	}
+	
+	// Assignment
+	
+	/// \brief Assigns m to this
+	matrix& operator = (matrix const& m) = default;
+	
+	/// \brief Move-Assigns m to this
+	matrix& operator = (matrix&& m) = default;
+	
+	/// \brief Assigns m to this
+	/// 
+	/// evaluates the expression and assign the
+	/// results to this using a call to assign.
+	/// As containers are assumed to not overlap, no temporary is created
+	///
+	/// \param m is a matrix expression
+	template<class C>
+	matrix& operator = (matrix_container<C> const& m) {
+		resize(m().size1(), m().size2());
+		assign(*this, m);
+		return *this;
+	}
+	/// \brief Assigns e to this
+	/// 
+	/// evaluates the expression and assign the
+	/// results to this using a call to assign.
+	/// A temporary is created to prevent aliasing.
+	///
+	/// \param e is a matrix expression
+	template<class E>
+	matrix& operator = (matrix_expression<E> const& e) {
+		self_type temporary(e);
+		swap(temporary);
+		return *this;
 	}
 
 	// ---------
@@ -146,7 +198,7 @@ public:
 	/// Grants low-level access to the matrix internals. Element order depends on whether the matrix is row_major or column_major.
 	/// to access element _(i,j) use storage()[i*stride1()+j*stride2()].
 	const_pointer storage()const{
-		return m_data.size()? &m_data[0]: 0;
+		return m_data.data();
 	}
 	
 	///\brief Returns the pointer to the beginning of the matrix storage
@@ -154,7 +206,7 @@ public:
 	/// Grants low-level access to the matrix internals. Element order depends on whether the matrix is row_major or column_major.
 	/// to access element (i,j) use storage()[i*stride1()+j*stride2()].
 	pointer storage(){
-		return m_data.size()? &m_data[0]: 0;
+		return m_data.data();
 	}
 	
 	// ---------
@@ -162,10 +214,9 @@ public:
 	// ---------
 
 	// Resizing
-	/** Resize a matrix to new dimensions. If resizing is performed, the data is not preserved.
-	 * \param size1 the new number of rows
-	 * \param size2 the new number of colums
-	 */
+	/// \brief Resize a matrix to new dimensions. If resizing is performed, the data is not preserved.
+	/// \param size1 the new number of rows
+	/// \param size2 the new number of colums
 	void resize(size_type size1, size_type size2) {
 		m_data.resize(size1* size2);
 		m_size1 = size1;
@@ -178,33 +229,20 @@ public:
 
 	// Element access
 	const_reference operator()(index_type i, index_type j) const {
+		SIZE_CHECK(i < size1());
+		SIZE_CHECK(j < size2());
 		return m_data[orientation::element(i, m_size1, j, m_size2)];
 	}
 	reference operator()(index_type i, index_type j) {
+		SIZE_CHECK(i < size1());
+		SIZE_CHECK(j < size2());
 		return m_data[orientation::element(i, m_size1, j, m_size2)];
 	}
 	
 	void set_element(size_type i, size_type j,value_type t){
+		SIZE_CHECK(i < size1());
+		SIZE_CHECK(j < size2());
 		m_data[orientation::element(i, m_size1, j, m_size2)]  = t;
-	}
-	
-	// Assignment
-	/*! @note "pass by value" the key idea to enable move semantics */
-	matrix& operator = (matrix m) {
-		swap(m);
-		return *this;
-	}
-	template<class C>          // Container assignment without temporary
-	matrix& operator = (matrix_container<C> const& m) {
-		resize(m().size1(), m().size2());
-		assign(*this, m);
-		return *this;
-	}
-	template<class E>
-	matrix& operator = (matrix_expression<E> const& e) {
-		self_type temporary(e);
-		swap(temporary);
-		return *this;
 	}
 
 	// Swapping
@@ -336,147 +374,6 @@ template<class T>
 struct matrix_temporary_type<T,unknown_orientation,dense_random_access_iterator_tag>{
 	typedef matrix<T,row_major> type;
 };
-
-/** \brief An diagonal matrix with values stored inside a diagonal vector
- *
- * the matrix stores a Vector representing the diagonal.
- */
-template<class VectorType>
-class diagonal_matrix: public matrix_container<diagonal_matrix< VectorType > > {
-	typedef diagonal_matrix< VectorType > self_type;
-public:
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
-	typedef typename VectorType::value_type value_type;
-	typedef typename VectorType::scalar_type scalar_type;
-	typedef typename VectorType::const_reference const_reference;
-	typedef typename VectorType::reference reference;
-	typedef typename VectorType::pointer pointer;
-	typedef typename VectorType::const_pointer const_pointer;
-
-	typedef std::size_t index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type index_pointer;
-
-	typedef const matrix_reference<const self_type> const_closure_type;
-	typedef matrix_reference<self_type> closure_type;
-	typedef sparse_tag storage_category;
-	typedef elementwise_tag evaluation_category;
-	typedef row_major orientation;
-
-	// Construction and destruction
-	diagonal_matrix():m_zero(){}
-	diagonal_matrix(VectorType const& diagonal):m_zero(),m_diagonal(diagonal){}
-
-	// Accessors
-	size_type size1() const {
-		return m_diagonal.size();
-	}
-	size_type size2() const {
-		return m_diagonal.size();
-	}
-	
-	// Element access
-	const_reference operator()(index_type i, index_type j) const {
-		if (i == j)
-			return m_diagonal(i);
-		else
-			return m_zero;
-	}
-
-	void set_element(size_type i, size_type j,value_type t){
-		RANGE_CHECK(i == j);
-		m_diagonal(i) = t;
-	}
-
-	// Assignment
-	diagonal_matrix& operator = (diagonal_matrix const& m) {
-		m_diagonal = m.m_diagonal;
-		return *this;
-	}
-
-	// Swapping
-	void swap(diagonal_matrix& m) {
-		swap(m_diagonal,m.m_diagonal);
-	}
-	friend void swap(diagonal_matrix& m1, diagonal_matrix& m2) {
-		m1.swap(m2);
-	}
-	
-	//Iterators
-	
-	class const_row_iterator:public bidirectional_iterator_base<const_row_iterator, value_type> {
-	public:
-		typedef typename diagonal_matrix::value_type value_type;
-		typedef typename diagonal_matrix::difference_type difference_type;
-		typedef typename diagonal_matrix::const_reference reference;
-		typedef value_type const* pointer;
-
-		// Construction and destruction
-		const_row_iterator(){}
-		const_row_iterator(index_type index, value_type value, bool isEnd)
-			:m_index(index),m_value(value),m_isEnd(isEnd){}
-
-		// Arithmetic
-		const_row_iterator& operator ++ () {
-			m_isEnd = true;
-			return *this;
-		}
-		const_row_iterator& operator -- () {
-			m_isEnd = false;
-			return *this;
-		}
-
-		// Dereference
-		const_reference operator*() const {
-			return m_value;
-		}
-
-		// Indices
-		index_type index() const{
-			return m_index;
-		}
-
-		// Assignment
-		const_row_iterator& operator = (const_row_iterator const& it) {
-			m_index = it.m_index;
-			return *this;
-		}
-
-		// Comparison
-		bool operator == (const_row_iterator const& it) const {
-			RANGE_CHECK(m_index == it.m_index);
-			return m_isEnd == it.m_isEnd;
-		}
-
-	private:
-		index_type m_index;
-		value_type m_value;
-		bool m_isEnd;
-	};
-	typedef const_row_iterator const_column_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef const_column_iterator column_iterator;
-
-	
-	const_row_iterator row_begin(index_type i) const {
-		return row_iterator(i, m_diagonal(i),false);
-	}
-	const_row_iterator row_end(index_type i) const {
-		return const_row_iterator(i, m_zero,true);
-	}
-	const_column_iterator column_begin(index_type i) const {
-		return column_iterator(i, m_diagonal(i),false);
-	}
-	const_column_iterator column_end(index_type i) const {
-		return const_column_iterator(i, m_zero,true);
-	}
-
-private:
-	value_type const m_zero;
-	VectorType m_diagonal; 
-};
-
 
 template<class T, class Orientation>
 struct const_expression<matrix<T,Orientation> >{
