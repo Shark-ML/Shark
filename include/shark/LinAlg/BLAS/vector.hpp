@@ -31,6 +31,7 @@
 #include "vector_proxy.hpp"
 #include <boost/container/vector.hpp>
 #include <array>
+#include <initializer_list>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/collection_size_type.hpp>
 #include <boost/serialization/array.hpp>
@@ -94,7 +95,7 @@ public:
 	/// \param v is the vector to be moved
 	vector(vector && v) = default;
 		
-	vector(std::initializer_list<T>  list) : m_storage(std::begin(list),std::end(list)){}
+	vector(std::initializer_list<T>  list) : m_storage(list.begin(),list.end()){}
 
 	/// \brief Copy-constructor of a vector from a vector_expression
 	/// \param e the vector_expression whose values will be duplicated into the vector
