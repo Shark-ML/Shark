@@ -663,7 +663,7 @@ public:
 	void push_back(
 		const_batch_reference batch
 	){
-		push_back(batch.inputs,batch.labels);
+		push_back(batch.input,batch.label);
 	}
 
 

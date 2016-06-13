@@ -31,6 +31,7 @@
 #include "vector_proxy.hpp"
 #include <boost/container/vector.hpp>
 #include <array>
+#include <initializer_list>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/collection_size_type.hpp>
 #include <boost/serialization/array.hpp>
@@ -94,13 +95,49 @@ public:
 	/// \param v is the vector to be moved
 	vector(vector && v) = default;
 		
-	vector(std::initializer_list<T>  list) : m_storage(list){}
+	vector(std::initializer_list<T>  list) : m_storage(list.begin(),list.end()){}
 
 	/// \brief Copy-constructor of a vector from a vector_expression
 	/// \param e the vector_expression whose values will be duplicated into the vector
 	template<class E>
 	vector(vector_expression<E> const& e):m_storage(e().size()) {
 		assign(*this, e);
+	}
+	
+	// -------------------
+	// Assignment operators
+	// -------------------
+	
+	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
+	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
+	/// \param v is the source vector container
+	/// \return a reference to a vector (i.e. the destination vector)
+	vector& operator = (vector const& v) = default;
+	
+	/// \brief Move-Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
+	/// \param v is the source vector container
+	/// \return a reference to a vector (i.e. the destination vector)
+	vector& operator = (vector && v) = default;
+	
+	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
+	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
+	/// \param v is the source vector container
+	/// \return a reference to a vector (i.e. the destination vector)
+	template<class C>          // Container assignment without temporary
+	vector& operator = (vector_container<C> const& v) {
+		resize(v().size());
+		return assign(*this, v);
+	}
+
+	/// \brief Assign the result of a vector_expression to the vector
+	/// Assign the result of a vector_expression to the vector.
+	/// \param e is a const reference to the vector_expression
+	/// \return a reference to the resulting vector
+	template<class E>
+	vector& operator = (vector_expression<E> const& e) {
+		self_type temporary(e);
+		swap(*this,temporary);
+		return *this;
 	}
 
 	// ---------
@@ -216,41 +253,7 @@ public:
 	void clear() {
 		std::fill(m_storage.begin(), m_storage.end(), value_type/*zero*/());
 	}
-
-	// -------------------
-	// Assignment operators
-	// -------------------
 	
-	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
-	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
-	/// \param v is the source vector container
-	/// \return a reference to a vector (i.e. the destination vector)
-	vector& operator = (vector const& v) {
-		m_storage = v.m_storage;
-		return *this;
-	}
-	
-	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
-	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
-	/// \param v is the source vector container
-	/// \return a reference to a vector (i.e. the destination vector)
-	template<class C>          // Container assignment without temporary
-	vector& operator = (vector_container<C> const& v) {
-		resize(v().size());
-		return assign(*this, v);
-	}
-
-	/// \brief Assign the result of a vector_expression to the vector
-	/// Assign the result of a vector_expression to the vector.
-	/// \param e is a const reference to the vector_expression
-	/// \return a reference to the resulting vector
-	template<class E>
-	vector& operator = (vector_expression<E> const& e) {
-		self_type temporary(e);
-		swap(*this,temporary);
-		return *this;
-	}
-
 	// Iterator types
 	typedef dense_storage_iterator<value_type> iterator;
 	typedef dense_storage_iterator<value_type const> const_iterator;
@@ -360,10 +363,10 @@ struct const_expression<vector<T> const>{
 ///
 /// \tparam T type of the objects stored in the vector (like int, double, complex,...)
 template<class T, std::size_t N>
-class small_vector: public vector_container<small_vector<T,N> > {
+class vectorN: public vector_container<vectorN<T,N> > {
 
-	typedef small_vector<T,N> self_type;
-	typedef boost::array<T,N> array_type;
+	typedef vectorN<T,N> self_type;
+	typedef std::array<T,N> array_type;
 public:
 	
 	typedef typename array_type::size_type size_type;
@@ -386,22 +389,17 @@ public:
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and assignment
-	small_vector() = default;
-	small_vector(small_vector const& v) = default;
-	small_vector(small_vector&& v) = default;
-
-	/// \brief Constructs a vector of size N with all values being init
-	/// \param init value to assign to each element of the vector
-	small_vector(value_type init){
-		std::fill(begin(),end(),init);
+	vectorN() = default;
+	vectorN(vectorN const& v) = default;
+	vectorN(vectorN&& v) = default;
+	template<class... Init>
+	vectorN(Init&&... init):m_storage({T(init)...}){
+		static_assert(sizeof...(Init) == N, "initialisation must have same number of elements as array size");
 	}
-
-
-
 	/// \brief Copy-constructor of a vector from a vector_expression
 	/// \param e the vector_expression which values will be duplicated into the vector. Must have size N.
 	template<class E>
-	small_vector(vector_expression<E> const& e){
+	vectorN(vector_expression<E> const& e){
 		SIZE_CHECK(e().size() == N);
 		assign(*this, e);
 	}
@@ -517,14 +515,14 @@ public:
 	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
 	/// \param v is the source vector container
 	/// \return a reference to a vector (i.e. the destination vector)
-	small_vector& operator=(small_vector const&) = default;
+	vectorN& operator=(vectorN const&) = default;
 	
 	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
 	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
 	/// \param v is the source vector container
 	/// \return a reference to a vector (i.e. the destination vector)
 	template<class C>          // Container assignment without temporary
-	small_vector& operator = (vector_container<C> const& v) {
+	vectorN& operator = (vector_container<C> const& v) {
 		SIZE_CHECK(v().size() == N);
 		resize(v().size());
 		return assign(*this, v);
@@ -535,7 +533,7 @@ public:
 	/// \param e is a const reference to the vector_expression
 	/// \return a reference to the resulting vector
 	template<class E>
-	small_vector& operator = (vector_expression<E> const& e) {
+	vectorN& operator = (vector_expression<E> const& e) {
 		SIZE_CHECK(e().size() == N);
 		self_type temporary(e);
 		swap(*this,temporary);
@@ -603,7 +601,7 @@ public:
 	/// \brief Swap the content of two vectors
 	/// \param v1 is the first vector. It takes values from v2
 	/// \param v2 is the second vector It takes values from v1
-	friend void swap(small_vector& v1, small_vector& v2) {
+	friend void swap(vectorN& v1, vectorN& v2) {
 		v1.m_storage.swap(v2.m_storage);
 	}
 	// -------------
@@ -620,12 +618,12 @@ private:
 };
 
 template<class T, std::size_t N>
-struct const_expression<small_vector<T,N> >{
-	typedef small_vector<T,N> const type;
+struct const_expression<vectorN<T,N> >{
+	typedef vectorN<T,N> const type;
 };
 template<class T, std::size_t N>
-struct const_expression<small_vector<T,N> const>{
-	typedef small_vector<T,N> const type;
+struct const_expression<vectorN<T,N> const>{
+	typedef vectorN<T,N> const type;
 };
 
 
