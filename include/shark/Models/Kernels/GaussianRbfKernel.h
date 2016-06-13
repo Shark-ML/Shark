@@ -104,12 +104,12 @@ public:
 	}
 
 	/// Get the bandwidth parameter value.
-	inline double gamma() const {
+	double gamma() const {
 		return m_gamma;
 	}
 
 	/// Return ``standard deviation'' of Gaussian.
-	inline double sigma() const{ 
+	double sigma() const{ 
 		return 1. / std::sqrt(2 * m_gamma); 
 	}
 
@@ -121,8 +121,8 @@ public:
 	}
 
 	/// Set ``standard deviation'' of Gaussian.
-	inline double setSigma(double sigma) const{ 
-		return m_gamma = 1. / (2 * sigma * sigma); 
+	void setSigma(double sigma){ 
+		m_gamma = 1. / (2 * sigma * sigma); 
 	}
 
 	/// From ISerializable.
