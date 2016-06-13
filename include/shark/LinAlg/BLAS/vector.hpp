@@ -112,12 +112,12 @@ public:
 	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
 	/// \param v is the source vector container
 	/// \return a reference to a vector (i.e. the destination vector)
-	vector& operator = (vector const& v) = default
+	vector& operator = (vector const& v) = default;
 	
 	/// \brief Move-Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
 	/// \param v is the source vector container
 	/// \return a reference to a vector (i.e. the destination vector)
-	vector& operator = (vector && v) =default;
+	vector& operator = (vector && v) = default;
 	
 	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
 	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
