@@ -130,6 +130,7 @@ shark_add_test( Algorithms/Trainers/OneClassSvmTrainer.cpp Trainers_OneClassSvmT
 shark_add_test( Algorithms/Trainers/RegularizationNetworkTrainer.cpp Trainers_RegularizationNetworkTrainer )
 shark_add_test( Algorithms/Trainers/LDA.cpp Trainers_LDA )
 shark_add_test( Algorithms/Trainers/LinearRegression.cpp Trainers_LinearRegression )
+shark_add_test( Algorithms/Trainers/LassoRegression.cpp Trainers_LassoRegression )
 shark_add_test( Algorithms/Trainers/McSvmTrainer.cpp Trainers_McSvmTrainer )
 shark_add_test( Algorithms/Trainers/LinearSvmTrainer.cpp Trainers_LinearSvmTrainer )
 shark_add_test( Algorithms/Trainers/NBClassifierTrainerTests.cpp Trainers_NBClassifier )
