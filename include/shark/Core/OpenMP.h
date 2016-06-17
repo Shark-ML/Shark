@@ -39,7 +39,7 @@
 #include <omp.h>
 #include <boost/config.hpp>
 
-#ifdef BOOST_MSVC
+#if defined(BOOST_MSVC) || defined(__INTEL_COMPILER)
 #define SHARK_PARALLEL_FOR __pragma(omp parallel for)\
 for
 

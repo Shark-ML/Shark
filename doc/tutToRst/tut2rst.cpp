@@ -60,6 +60,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 
 using namespace std;
@@ -159,7 +160,7 @@ int main(int argc, char** argv)
 						size_t begin1 = snippet.find("//###begin<", s_start);
 						size_t begin2 = snippet.find("//###end<", s_start);
 						if (begin1 == string::npos && begin2 == string::npos) break;
-						size_t begin = min(begin1, begin2);
+						size_t begin = std::min(begin1, begin2);
 						size_t end = snippet.find(">", begin);
 						if (end == string::npos) throw string("sharkcode tag not closed (missing '>')");
 						end++;
