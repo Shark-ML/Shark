@@ -1141,7 +1141,7 @@ private:
 		return m_iterator1 == it.m_iterator1 && m_iterator2 == it.m_iterator2;
 	}
 	bool operator < (binary_transform_iterator const &it) const {
-		return m_iterator1 < it.m_iterator1 || m_iterator2 < m_iterator2;
+		return m_iterator1 < it.m_iterator1 || m_iterator2 < it.m_iterator2;
 	}
 private:
 	size_type m_index;
