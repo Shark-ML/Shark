@@ -65,7 +65,7 @@ void trmv_impl(
 		std::size_t sizebi = std::min(blockSize,size-startbi);
 		dense_vector_adaptor<value_typeA> values(valueStorage,sizebi);
 		
-		//store and save the values of b we ar enow changing
+		//store and save the values of b we are now changing
 		noalias(values) = subrange(b,startbi,startbi+sizebi);
 		
 		//multiply with triangular element
@@ -147,7 +147,7 @@ void trmv_impl(
 		std::size_t sizebj = std::min(blockSize,size-startbj);
 		dense_vector_adaptor<value_typeA> values(valueStorage,sizebj);
 		
-		//store and save the values of b we ar enow changing
+		//store and save the values of b we are now changing
 		noalias(values) = subrange(b,startbj,startbj+sizebj);
 		subrange(b,startbj,startbj+sizebj).clear();
 		//multiply with triangular element

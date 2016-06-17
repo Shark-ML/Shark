@@ -35,10 +35,10 @@
 template<class MatrixT,class MatrixU>
 std::size_t shark::blas::pivotingRQHouseholder
 (
-	blas::matrix_expression<MatrixT> const& matrixA,
-	blas::matrix_container<MatrixU>& matrixR,
-	blas::matrix_container<MatrixU>& householderTransform,
-	blas::permutation_matrix& permutation
+	matrix_expression<MatrixT> const& matrixA,
+	matrix_container<MatrixU>& matrixR,
+	matrix_container<MatrixU>& householderTransform,
+	permutation_matrix& permutation
 ){
 	std::size_t m = matrixA().size1();
 	std::size_t n = matrixA().size2();
@@ -72,7 +72,7 @@ std::size_t shark::blas::pivotingRQHouseholder
 	std::size_t rank = 0;
 	for(std::size_t i = 0; i != k; ++i,++rank){
 		//we work mainly on a subrange of R aside from pivoting
-		blas::matrix_range<MatrixU> subR = subrange(matrixR(),i,m,i,n);
+		matrix_range<MatrixU> subR = subrange(matrixR(),i,m,i,n);
 		
 		//step 1: pivoting
 		std::size_t pivot = std::max_element(norms.begin()+i,norms.end())-norms.begin();
@@ -94,8 +94,8 @@ std::size_t shark::blas::pivotingRQHouseholder
 		
 		//step 2: apply householder transformation
 		//get the exact part of the current row which is used to store the householder reflection
-		blas::matrix_row<MatrixU> r = row(householderTransform(),i);
-		blas::vector_range<blas::matrix_row<MatrixU> > reflection = subrange(r,i,n);
+		matrix_row<MatrixU> r = row(householderTransform(),i);
+		vector_range<matrix_row<MatrixU> > reflection = subrange(r,i,n);
 		
 		//now we are sure that our current pivot is at index i and do a 
 		//householder transformation on the first row
@@ -115,10 +115,10 @@ std::size_t shark::blas::pivotingRQHouseholder
 template<class MatrixT,class Mat>
 std::size_t shark::blas::pivotingRQ
 (
-	blas::matrix_expression<MatrixT> const& matrixA,
-	blas::matrix_container<Mat>& matrixR,
-	blas::matrix_container<Mat>& matrixQ,
-	blas::permutation_matrix& permutation
+	matrix_expression<MatrixT> const& matrixA,
+	matrix_container<Mat>& matrixR,
+	matrix_container<Mat>& matrixQ,
+	permutation_matrix& permutation
 ){
 	std::size_t n = matrixA().size2();
 	
@@ -135,8 +135,7 @@ std::size_t shark::blas::pivotingRQ
 	//with T = upperDiag(U^TU) -1/2 diagof(U^T U)
 	//this is of course for column major lower triangular matrices, 
 	//meaning that we have to transpose our matrices U.
-	Mat T(rank,rank);
-	symm_prod(rows(U,0,rank),T);
+	Mat T = prod(rows(U,0,rank),trans(rows(U,0,rank)));
 	//we now have to explicitely zero the lower half
 	//and the diagonal needs to be divided by two.
 	for(std::size_t i = 0; i != rank; ++i){
@@ -157,26 +156,6 @@ std::size_t shark::blas::pivotingRQ
 	noalias(matrixQ) = -prod(trans(rows(U,0,rank)),InvTU);
 	diag(matrixQ) += 1;
 
-	//testing algorithm
-//	matrixQ().resize(n,n);
-//	matrixQ().clear();
-//	for(std::size_t i = 0; i != n; ++i){
-//		matrixQ()(i,i) = 1;
-//	}
-//	//apply transformations one after another.
-//	for(std::size_t i = 0; i != std::min(k,rank); ++i){
-//		//std::cout<<matrixQ<<std::endl;
-//		blas::vector_range<blas::matrix_row<Mat> const > reflection = subrange(row(U,i),i,n);
-//		
-//		double tau = 0;
-//		if(reflection.size() != 1){
-//			tau = 2/norm_sqr(reflection);
-//		}
-//		blas::matrix_range<Mat> subQ = rows(matrixQ(),i,n);
-//		applyHouseholderOnTheLeft(subQ,reflection,tau);
-//		//std::cout<<matrixQ()<<std::endl;
-//		//std::cout<<i<<" "<<reflection<<std::endl;
-//	}
 	return rank;
 }
 

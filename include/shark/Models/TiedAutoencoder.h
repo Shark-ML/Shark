@@ -318,17 +318,9 @@ private:
 		std::size_t hiddenParams = inputSize()*numberOfHiddenNeurons();
 		std::size_t numHidden = numberOfHiddenNeurons();
 		gradient.resize(numberOfParameters());
-		gradient.clear();
-		axpy_prod(
-			trans(s.hiddenResponses),
-			outputDelta,
-			to_matrix(subrange(gradient,0,hiddenParams),numHidden,inputSize()),false
-		);
-		axpy_prod(
-			trans(hiddenDelta),
-			patterns,
-			to_matrix(subrange(gradient,0,hiddenParams),numHidden,inputSize()),false
-		);
+		auto  gradEncoder  = to_matrix(subrange(gradient,0,hiddenParams),numHidden,inputSize());
+		noalias(gradEncoder) = prod(trans(s.hiddenResponses),outputDelta);
+		noalias(gradEncoder) += prod(trans(hiddenDelta),patterns);
 		
 		std::size_t hiddenBiasPos = hiddenParams;
 		std::size_t outputBiasPos = hiddenBiasPos+numHidden;

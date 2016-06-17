@@ -85,7 +85,7 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 			}
 			//diagonal block
 			RealSubMatrix X1X1T= subrange(S,start1,start1+batchSize1,start1,start1+batchSize1);
-			symm_prod(X1,X1X1T);
+			noalias(X1X1T) = prod(X1,trans(X1));
 			start1+=batchSize1;
 		}
 		S /= m_l;

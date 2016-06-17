@@ -2,7 +2,7 @@ LinAlg: Vectors and Matrices
 ============================
 
 All Linear Algebra related functions and operations are placed in the
-LinAlg Module. LinAlg is based on an altered subset of the boost linear algebra system
+LinAlg Module. LinAlg is based on an heavily altered subset of the boost linear algebra system
 `uBLAS <http://www.boost.org/doc/libs/release/libs/numeric>`_ This tutorial
 will give a short introduction to the library and how it is used in Shark.
 
@@ -10,23 +10,43 @@ The linear algebra library has a fundamental distinction between vectors and mat
 Matrix and vectors are different types. There is no distinction between row and column vectors.
 So when multiplying a vector from the right side to a matrix, it is assumed to be a column vector
 and when multiplied from the left, it becomes a row-vector. Matrices have an orientation
-that is a 1xn matrix has a different structure than a nx1 matrix.
+that is a 1xn matrix has a different structure than a nx1 matrix and both are not the same as a vector.
 
 Furthermore the library differentiates between container, proxies to containers and
 vector expressions. The typical vector or matrix objects are a container storing
 the values of the matrix. Proxies reference parts of a container, for example a single row
 of a matrix or a subrange of a vector. And finally there are expressions which represent
-arbitrary computations, for example a matrix-vector product. All of these entities are objects.
-That means that just writing ``A+B`` does not compute the addition of two matrices but only
-an object which can only compute the result. the computations occur only when the expression is assigned
-to a container or proxy.
+arbitrary computations, for example a matrix-vector product.
+
+Aliasing
+------------------------------------------------------
+
+All of then aforementioned entities are objects.
+That means that just writing ``A+B`` does not compute the addition of two matrices but returns
+an object which can compute the result. the computations occur only when the expression is assigned
+to a container or proxy. Thus it is computed only in an expression like ``C=A+B``. In such an expression
+the library assumes by default, that the left and right hand side are aliasing, i.e. that the same variable appears on
+both sides of the expression. In many cases this means that changing elements of the result during computation,
+will change future results. This happens for example in a matrix-matrix multiplication where the same variables are 
+read at different points in time. To prevent this, the library generates temporary variables. So that an expression like
+``A=prod(A,B)`` will be computed as::
+
+   matrix<double> Temp=prod(A,B); 
+   A=Temp; 
+
+In many cases aliasing will not happen and this temporary result is an unneeded overhead. For this case, the 
+noalias-proxy can be used::
+
+  noalias(A) = prod(B,C);
+
+
 
 We use the following notation for vectors, arguments and scalars:
 
 ======================= ====================================
 Symbol           	Meaning
 ======================= ====================================
-A,B			Matrix expression
+A,B,C		Matrix expression
 x,y			Vector expression
 C,z			Matrix or vector container or proxy to a
 			subset of the matrix or vector.
@@ -44,27 +64,35 @@ We first want to describe the fundamental operations that are needed to use the 
 That is creating vectors and matrices and access their values. furthermore we describe the basic
 operations to create proxies to various parts of a matrix.
 
-======================================= ==============================================
-Operation/Class           		Effect
-======================================= ==============================================
-``XVector, XMatrix``			Creates a dense Vector with elements of the type X where
-					X can be Real, Float, Int, UInt or Bool.
-``SparseXVector, SparseXMatrix``	Creates a sparse Vector with elements the Type X where
-					X can be Real, Float, Int, UInt or Bool.
-``XVector x(n,t)``			Creates a XVector x of size i with elements initialized to t.
-					By default t is 0.
-``XMatrix A(m,n,t)``			Creates a mxn matrix with elements initialized to t. By default t is 0.
-``x.size()``				Dimensionality of x.
-``A.size1(),A.size2()``		        Size of the first (number of rows) and second(number of columns) dimension of A.
-``A(i,j)``				Returns the ij-th element of the matrix A.
-``x(i)``				Returns the i-th element of the vector x.
-``row(A,k)``				Returns the k-th row of A as a vector-proxy.
-``column(A,k)``				Returns the k-th column of A as a vector-proxy.
-``rows(A,k,l)``				Returns the rows k,...,l of A as a matrix-proxy.
-``columns(A,k,l)``			Returns the columns k,...,l of A as a matrix-proxy.
-``subrange(x,i,j)``			Returns a sub-vector of x with the elements :math:`x_i,\dots,x_{j-1}`.
-``subrange(A,i,j,k,l)``			Returns a sub-matrix of A with element indicated by i,j and k,l.
-======================================= ==============================================
+=============================================== ==============================================
+Operation/Class           			Effect
+=============================================== ==============================================
+``blas::vector<T>``				Dense Vector storing values of type T.
+``blas::matrix<T,Orientation>``			Dense Matrix storing values of type T.
+						Values are either stored in row-major or
+						column-major format depicted by the tags
+						blas::row_major and blas::column_major. 
+						row-major is the default format.
+``blas::compressed_vector<T>``			Sparse Vector storing values of type T in compressed format.
+``blas::compressed_matrix<T>``			Sparse Matrix storing values of type T in compressed format.
+						Only row-major format is supported.
+``XVector,XMatrix,SparseXVector,SparseXMatrix``	Shorthand for the above types.
+						X can be Real, Float, Int, UInt or Bool.
+						X can be Real, Float, Int, UInt or Bool.
+``XVector x(n,t)``				Creates a XVector x of size i with elements initialized to t.
+						By default t is 0.
+``XMatrix A(m,n,t)``				Creates a mxn matrix with elements initialized to t. By default t is 0.
+``x.size()``					Dimensionality of x.
+``A.size1(),A.size2()``		        	Size of the first (number of rows) and second(number of columns) dimension of A.
+``A(i,j)``					Returns the ij-th element of the matrix A.
+``x(i)``					Returns the i-th element of the vector x.
+``row(A,k)``					Returns the k-th row of A as a vector-proxy.
+``column(A,k)``					Returns the k-th column of A as a vector-proxy.
+``rows(A,k,l)``					Returns the rows k,...,l of A as a matrix-proxy.
+``columns(A,k,l)``				Returns the columns k,...,l of A as a matrix-proxy.
+``subrange(x,i,j)``				Returns a sub-vector of x with the elements :math:`x_i,\dots,x_{j-1}`.
+``subrange(A,i,j,k,l)``				Returns a sub-matrix of A with element indicated by i,j and k,l.
+=============================================== ==============================================
 
 Assignment
 -----------------------------------------------------
@@ -106,7 +134,7 @@ Operation           		Effect
 ``B/t``      			scalar division: :math:`A_{ij}/t`.
 ``A+B``      			Elementwise Addition: :math:`A_{ij}+B_{ij}`.
 ``A-B``      			Elementwise Subtraction: :math:`A_{ij}-B_{ij}`.
-``A*B, element_prod``   	Elementwise Multiplication or Hadamard-Product:
+``A*B, element_prod(A,B)``   	Elementwise Multiplication or Hadamard-Product:
 				:math:`A_{ij} \cdot B_{ij}`.
 ``A/B, element_div(A,B)``	Elementwise division: :math:`A_{ij} \cdot B_{ij}`.
 ``safe_div(A,B,x)``     	Elementwise division with check for division for zero.
@@ -133,15 +161,19 @@ Operation           		Effect
 ``prod(A,B)``			Matrix-Matrix product. Be aware that A is a mxk and B kxn matrix
 				so that the resulting matrix is a mxn matrix.
 ``prod(A,x), prod(x,A)``	Matrix-Vector product :math:`Ax` and :math:`xA`.
+``triangular_prod<Type>(A,x)``	Interpretes the matrix A as triangular matrix
+				and claculates :math:`Ax`. 
+				Type specifies the part of A that 
+				is going to be treated as triangular. 
+				Type can be lower,upper, unit_lower and unit_upper. The
+				uni-variants represent a matrix with unit diagonal.
+``triangular_prod<Type>(A,B)``	Interpretes the matrix A as triangular matrix
+				and claculates :math:`AB`. 
+				Type specifies the part of A that 
+				is going to be treated as triangular. 
+				Type is the same as above.
 ``inner_prod(x,y)``		vector product leading a scalar: :math:`\sum_i x_i y_i`.
 ``outer_prod(x,y)``		outer product leading a matrix C with :math:`C_{ij}=x_i y_j`.
-``fast_prod(A,B,C,b,t)``	Efficient Matrix-Matrix product for dense storage matrices A, B and C.
-				Computes ``C+= t*prod(A,B)`` if b is true and ``C= t*prod(A,B)`` otherwise.
-				By default b = false and t = 1.
-``fast_prod(A,x,z,b,t)``	Same as above for matrix-vector products.
-``fast_prod(x,A,z,b,t)``	Same as above for vector-matrix products.
-``symmRankKUpdate(A,C,b,t)``	Computes ``fast_prod(A,trans(A), C,b,t)`` in an efficient manner.
-				It is assumed that C is symmetric.
 =============================== ==================================================================
 
 The fast variants of the functions above use ATLAS to speed up computation of

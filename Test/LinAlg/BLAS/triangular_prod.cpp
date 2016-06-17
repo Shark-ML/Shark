@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE LinAlg_triangular_prod
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/mpl/list.hpp>
 
 #include <shark/LinAlg/BLAS/blas.h>
 
@@ -8,18 +9,18 @@ using namespace shark;
 using namespace blas;
 
 template<class M, class V, class Result>
-void checkMatrixVectorMultiply(M const& arg1, V const& arg2, Result const& result){
+void checkMatrixVectorMultiply(M const& arg1, V const& arg2, Result const& result,double init, double alpha){
 	BOOST_REQUIRE_EQUAL(arg1.size1(), result.size());
 	BOOST_REQUIRE_EQUAL(arg2.size(), arg1.size2());
 
 	for(std::size_t i = 0; i != arg1.size1(); ++i) {
-		double test_result = inner_prod(row(arg1,i),arg2);
+		double test_result = alpha*inner_prod(row(arg1,i),arg2)+init;
 		BOOST_CHECK_CLOSE(result(i), test_result, 1.e-10);
 	}
 }
 
 template<class M1, class M2, class Result>
-void checkMatrixMatrixMultiply(M1 const& arg1, M2 const& arg2, Result const& result) {
+void checkMatrixMatrixMultiply(M1 const& arg1, M2 const& arg2, Result const& result,double init, double alpha) {
 	BOOST_REQUIRE_EQUAL(arg1.size1(), arg1.size2());
 	BOOST_REQUIRE_EQUAL(arg1.size2(), arg2.size1());
 	BOOST_REQUIRE_EQUAL(arg1.size2(), result.size1());
@@ -27,7 +28,7 @@ void checkMatrixMatrixMultiply(M1 const& arg1, M2 const& arg2, Result const& res
 	
 	for(std::size_t i = 0; i != arg2.size1(); ++i) {
 		for(std::size_t j = 0; j != arg2.size2(); ++j) {
-			double test_result = inner_prod(row(arg1,i),column(arg2,j));
+			double test_result = alpha*inner_prod(row(arg1,i),column(arg2,j))+init;
 			BOOST_CHECK_CLOSE(result(i,j), test_result, 1.e-10);
 		}
 	}
@@ -60,63 +61,218 @@ BOOST_AUTO_TEST_CASE(LinAlg_triangular_prod_matrix_vector) {
 		arg2(j)  = 1.5*j+2;
 	}
 
-	std::cout<<"\nchecking matrix-vector prod non-unit"<<std::endl;
+	std::cout<<"\nchecking matrix-vector prod v=Ax non-unit"<<std::endl;
 	{
 		std::cout<<"row major lower Ax"<<std::endl;
-		vector<double> result = arg2;
-		triangular_prod<lower>(arg1lowerrm,result);
-		checkMatrixVectorMultiply(arg1lowertest,arg2,result);
+		vector<double> result(dims,3.0);
+		result = triangular_prod<lower>(arg1lowerrm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,0.0,1);
 	}
 	{
 		std::cout<<"column major lower Ax"<<std::endl;
-		vector<double> result = arg2;
-		triangular_prod<lower>(arg1lowercm,result);
-		checkMatrixVectorMultiply(arg1lowertest,arg2,result);
+		vector<double> result(dims,3.0);
+		result = triangular_prod<lower>(arg1lowercm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,0.0,1);
 	}
 	{
 		std::cout<<"row major upper Ax"<<std::endl;
-		vector<double> result = arg2;
-		triangular_prod<upper>(arg1upperrm,result);
-		checkMatrixVectorMultiply(arg1uppertest,arg2,result);
+		vector<double> result(dims,3.0);
+		result = triangular_prod<upper>(arg1upperrm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,0.0,1);
 	}
 	{
 		std::cout<<"column major upper Ax"<<std::endl;
-		vector<double> result = arg2;
-		triangular_prod<upper>(arg1uppercm,result);
-		checkMatrixVectorMultiply(arg1uppertest,arg2,result);
+		vector<double> result(dims,3.0);
+		result = triangular_prod<upper>(arg1uppercm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,0.0,1);
 	}
+	//with prefactor
+	{
+		std::cout<<"row major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result = -2 * triangular_prod<lower>(arg1lowerrm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"column major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result = -2 * triangular_prod<lower>(arg1lowercm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"row major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result = -2 * triangular_prod<upper>(arg1upperrm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"column major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result = -2 * triangular_prod<upper>(arg1uppercm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,0.0,-2);
+	}
+	std::cout<<"\nchecking matrix-vector prod v+=Ax non-unit"<<std::endl;
+	{
+		std::cout<<"row major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result += -2 * triangular_prod<lower>(arg1lowerrm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result += -2 * triangular_prod<lower>(arg1lowercm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"row major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result += -2 * triangular_prod<upper>(arg1upperrm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result += -2 * triangular_prod<upper>(arg1uppercm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	std::cout<<"\nchecking matrix-vector prod v-=Ax non-unit"<<std::endl;
+	{
+		std::cout<<"row major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result -= 2 * triangular_prod<lower>(arg1lowerrm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result -= 2 * triangular_prod<lower>(arg1lowercm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"row major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result -= 2 * triangular_prod<upper>(arg1upperrm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result -= 2 * triangular_prod<upper>(arg1uppercm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	
 	
 	diag(arg1lowertest) = blas::repeat(1.0,dims);
 	diag(arg1uppertest) = blas::repeat(1.0,dims);
-	std::cout<<"\nchecking matrix-vector prod unit"<<std::endl;
+	std::cout<<"\nchecking matrix-vector prod v=Ax unit"<<std::endl;
 	{
 		std::cout<<"row major lower Ax"<<std::endl;
-		vector<double> result = arg2;
-		triangular_prod<unit_lower>(arg1lowerrm,result);
-		checkMatrixVectorMultiply(arg1lowertest,arg2,result);
+		vector<double> result(dims,3.0);
+		result = triangular_prod<unit_lower>(arg1lowerrm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,0.0,1);
 	}
 	{
 		std::cout<<"column major lower Ax"<<std::endl;
-		vector<double> result = arg2;
-		triangular_prod<unit_lower>(arg1lowercm,result);
-		checkMatrixVectorMultiply(arg1lowertest,arg2,result);
+		vector<double> result(dims,3.0);
+		result = triangular_prod<unit_lower>(arg1lowercm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,0.0,1);
 	}
 	{
 		std::cout<<"row major upper Ax"<<std::endl;
-		vector<double> result = arg2;
-		triangular_prod<unit_upper>(arg1upperrm,result);
-		checkMatrixVectorMultiply(arg1uppertest,arg2,result);
+		vector<double> result(dims,3.0);
+		result = triangular_prod<unit_upper>(arg1upperrm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,0.0,1);
 	}
 	{
 		std::cout<<"column major upper Ax"<<std::endl;
-		vector<double> result = arg2;
-		triangular_prod<unit_upper>(arg1uppercm,result);
-		checkMatrixVectorMultiply(arg1uppertest,arg2,result);
+		vector<double> result(dims,3.0);
+		result = triangular_prod<unit_upper>(arg1uppercm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,0.0,1);
+	}
+	//with prefactor
+	{
+		std::cout<<"row major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result = -2 * triangular_prod<unit_lower>(arg1lowerrm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"column major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result = -2 * triangular_prod<unit_lower>(arg1lowercm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"row major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result = -2 * triangular_prod<unit_upper>(arg1upperrm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"column major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result = -2 * triangular_prod<unit_upper>(arg1uppercm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,0.0,-2);
+	}
+	std::cout<<"\nchecking matrix-vector prod v+=Ax unit"<<std::endl;
+	{
+		std::cout<<"row major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result += -2 * triangular_prod<unit_lower>(arg1lowerrm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result += -2 * triangular_prod<unit_lower>(arg1lowercm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"row major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result += -2 * triangular_prod<unit_upper>(arg1upperrm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result += -2 * triangular_prod<unit_upper>(arg1uppercm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	std::cout<<"\nchecking matrix-vector prod v-=Ax unit"<<std::endl;
+	{
+		std::cout<<"row major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result -= 2 * triangular_prod<unit_lower>(arg1lowerrm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major lower Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result -= 2 * triangular_prod<unit_lower>(arg1lowercm,arg2);
+		checkMatrixVectorMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"row major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result -= 2 * triangular_prod<unit_upper>(arg1upperrm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major upper Ax"<<std::endl;
+		vector<double> result(dims,3.0);
+		result -= 2 * triangular_prod<unit_upper>(arg1uppercm,arg2);
+		checkMatrixVectorMultiply(arg1uppertest,arg2,result,3.0,-2);
 	}
 }
 
 
+
+typedef boost::mpl::list<row_major,column_major> result_orientations;
+//~ BOOST_AUTO_TEST_CASE_TEMPLATE(LinAlg_triangular_prod_matrix_matrix, Orientation,result_orientations) {
 BOOST_AUTO_TEST_CASE(LinAlg_triangular_prod_matrix_matrix) {
+	typedef row_major Orientation;
 	std::size_t dims = 231;//chosen as not to be a multiple of the block size
 	std::size_t N = 30;
 	//initialize the arguments in both row and column major, lower and upper, unit and non-unit diagonal
@@ -144,58 +300,209 @@ BOOST_AUTO_TEST_CASE(LinAlg_triangular_prod_matrix_matrix) {
 		}
 	}
 
-	std::cout << "\nchecking matrix-matrix prod non-unit" << std::endl;
+	std::cout << "\nchecking matrix-matrix prod V=AX non-unit" << std::endl;
 	{
-		std::cout << "row major lower AX" << std::endl;
-		matrix<double> result = arg2;
-		triangular_prod<lower>(arg1lowerrm, result);
-		checkMatrixMatrixMultiply(arg1lowertest, arg2, result);
+		std::cout<<"row major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = triangular_prod<lower>(arg1lowerrm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,0.0,1);
 	}
 	{
-		std::cout << "row major upper AX" << std::endl;
-		matrix<double> result = arg2;
-		triangular_prod<upper>(arg1upperrm, result);
-		checkMatrixMatrixMultiply(arg1uppertest, arg2, result);
+		std::cout<<"column major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = triangular_prod<lower>(arg1lowercm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,0.0,1);
 	}
 	{
-		std::cout << "column major lower AX" << std::endl;
-		matrix<double> result = arg2;
-		triangular_prod<lower>(arg1lowercm, result);
-		checkMatrixMatrixMultiply(arg1lowertest, arg2, result);
+		std::cout<<"row major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = triangular_prod<upper>(arg1upperrm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,0.0,1);
 	}
 	{
-		std::cout << "column major upper AX" << std::endl;
-		matrix<double> result = arg2;
-		triangular_prod<upper>(arg1uppercm, result);
-		checkMatrixMatrixMultiply(arg1uppertest, arg2, result);
+		std::cout<<"column major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = triangular_prod<upper>(arg1uppercm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,0.0,1);
 	}
+	//with prefactor
+	{
+		std::cout<<"row major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = -2 * triangular_prod<lower>(arg1lowerrm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"column major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = -2 * triangular_prod<lower>(arg1lowercm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"row major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = -2 * triangular_prod<upper>(arg1upperrm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"column major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = -2 * triangular_prod<upper>(arg1uppercm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,0.0,-2);
+	}
+	std::cout << "\nchecking matrix-matrix prod V+=AX non-unit" << std::endl;
+	{
+		std::cout<<"row major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result += -2 * triangular_prod<lower>(arg1lowerrm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result += -2 * triangular_prod<lower>(arg1lowercm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"row major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result += -2 * triangular_prod<upper>(arg1upperrm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result += -2 * triangular_prod<upper>(arg1uppercm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	std::cout << "\nchecking matrix-matrix prod V-=AX non-unit" << std::endl;
+	{
+		std::cout<<"row major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result -= 2 * triangular_prod<lower>(arg1lowerrm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result -= 2 * triangular_prod<lower>(arg1lowercm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"row major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result -= 2 * triangular_prod<upper>(arg1upperrm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result -= 2 * triangular_prod<upper>(arg1uppercm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	
 
 	diag(arg1lowertest) = blas::repeat(1.0, dims);
 	diag(arg1uppertest) = blas::repeat(1.0, dims);
-	std::cout << "\nchecking matrix-matrix prod unit" << std::endl;
+	std::cout << "\nchecking matrix-matrix prod V=AX unit" << std::endl;
 	{
-		std::cout << "row major lower AX" << std::endl;
-		matrix<double> result = arg2;
-		triangular_prod<unit_lower>(arg1lowerrm, result);
-		checkMatrixMatrixMultiply(arg1lowertest, arg2, result);
+		std::cout<<"row major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = triangular_prod<unit_lower>(arg1lowerrm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,0.0,1);
 	}
 	{
-		std::cout << "row major upper AX" << std::endl;
-		matrix<double> result = arg2;
-		triangular_prod<unit_upper>(arg1upperrm, result);
-		checkMatrixMatrixMultiply(arg1uppertest, arg2, result);
+		std::cout<<"column major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = triangular_prod<unit_lower>(arg1lowercm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,0.0,1);
 	}
 	{
-		std::cout << "column major lower AX" << std::endl;
-		matrix<double> result = arg2;
-		triangular_prod<unit_lower>(arg1lowercm, result);
-		checkMatrixMatrixMultiply(arg1lowertest, arg2, result);
+		std::cout<<"row major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = triangular_prod<unit_upper>(arg1upperrm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,0.0,1);
 	}
 	{
-		std::cout << "column major upper AX" << std::endl;
-		matrix<double> result = arg2;
-		triangular_prod<unit_upper>(arg1uppercm, result);
-		checkMatrixMatrixMultiply(arg1uppertest, arg2, result);
+		std::cout<<"column major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = triangular_prod<unit_upper>(arg1uppercm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,0.0,1);
+	}
+	//with prefactor
+	{
+		std::cout<<"row major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = -2 * triangular_prod<unit_lower>(arg1lowerrm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"column major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = -2 * triangular_prod<unit_lower>(arg1lowercm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"row major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = -2 * triangular_prod<unit_upper>(arg1upperrm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,0.0,-2);
+	}
+	{
+		std::cout<<"column major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result = -2 * triangular_prod<unit_upper>(arg1uppercm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,0.0,-2);
+	}
+	std::cout << "\nchecking matrix-matrix prod V+=AX unit" << std::endl;
+	{
+		std::cout<<"row major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result += -2 * triangular_prod<unit_lower>(arg1lowerrm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result += -2 * triangular_prod<unit_lower>(arg1lowercm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"row major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result += -2 * triangular_prod<unit_upper>(arg1upperrm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result += -2 * triangular_prod<unit_upper>(arg1uppercm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	std::cout << "\nchecking matrix-matrix prod V-=AX unit" << std::endl;
+	{
+		std::cout<<"row major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result -= 2 * triangular_prod<unit_lower>(arg1lowerrm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major lower AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result -= 2 * triangular_prod<unit_lower>(arg1lowercm,arg2);
+		checkMatrixMatrixMultiply(arg1lowertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"row major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result -= 2 * triangular_prod<unit_upper>(arg1upperrm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,3.0,-2);
+	}
+	{
+		std::cout<<"column major upper AX"<<std::endl;
+		matrix<double,Orientation> result(dims, N, 3.0);
+		result -= 2 * triangular_prod<unit_upper>(arg1uppercm,arg2);
+		checkMatrixMatrixMultiply(arg1uppertest,arg2,result,3.0,-2);
 	}
 }
 

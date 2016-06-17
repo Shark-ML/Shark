@@ -138,10 +138,8 @@ std::size_t shark::blas::pivotingCholeskyDecompositionInPlace(
 		Blocking<SubL> LkBlocked(Lk,currentSize,currentSize);
 		//if we are not finished do the block update
 		if(k+currentSize < m){
-			symm_prod(
-				LkBlocked.lowerLeft(),
-				LkBlocked.lowerRight(),
-				false,-1.0
+			noalias(LkBlocked.lowerRight()) -= prod(
+				LkBlocked.lowerLeft(),trans(LkBlocked.lowerLeft())
 			);
 		}
 	}

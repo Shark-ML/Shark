@@ -136,8 +136,7 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 	{
 		//complex case. 
 		//A' = L(L^TL)^-1(L^TL)^-1 L^T
-		RealMatrix LTL(rank,rank);
-		symm_prod(trans(L),LTL);
+		RealMatrix LTL = prod(trans(L),L);
 		
 		//compute z= L^Tb
 		RealVector z = prod(trans(L),b);
@@ -195,8 +194,7 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 	{
 		//complex case. 
 		//X=L(L^TL)^-1(L^TL)^-1 L^TB
-		RealMatrix LTL(rank,rank);
-		symm_prod(trans(L),LTL);
+		RealMatrix LTL = prod(trans(L),L);
 		
 		//compute Z= L^TB
 		RealMatrix Z = prod(trans(L),B);
@@ -212,8 +210,7 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 	}else{
 		//complex case. 
 		//X=BL(L^TL)^-1(L^TL)^-1 L^T
-		RealMatrix LTL(rank,rank);
-		symm_prod(trans(L),LTL);
+		RealMatrix LTL = prod(trans(L),L);
 		
 		//compute z= L^TB
 		RealMatrix Z = prod(B,L);

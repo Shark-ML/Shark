@@ -81,7 +81,7 @@ void testContributionNoRef(Algorithm algorithm, std::vector<RealVector> const& s
 	//remove extrema
 	for(std::size_t j = 0; j < set[0].size(); ++j){
 		auto min = std::min_element(set.begin(),set.end(),[=](RealVector const& a, RealVector const& b){return a(j) < b(j);});
-		auto index = min - set.begin();
+		std::size_t index = min - set.begin();
 		for(std::size_t i = 0; i != naiveLeastContributions.size(); ++i){
 			if(naiveLeastContributions[i].value == index){
 				naiveLeastContributions.erase(naiveLeastContributions.begin()+i);
@@ -129,9 +129,9 @@ std::vector<RealVector> createRandomFront(std::size_t numPoints, std::size_t num
 
 BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_HypervolumeContribution)
 BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContribution2D ) {
-
+	std::cout<<"Contribution 2D"<<std::endl;
 	HypervolumeContribution2D hs;
-	const unsigned int numTests = 100;
+	const unsigned int numTests = 10;
 	const std::size_t numPoints = 10;
 	
 	RealVector reference(2,1.0);
@@ -155,9 +155,9 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContribution2D ) {
 }
 
 BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContribution3D ) {
-
+	std::cout<<"Contribution 3D"<<std::endl;
 	HypervolumeContribution3D hs;
-	const unsigned int numTests = 100;
+	const unsigned int numTests = 10;
 	const std::size_t numPoints = 50;
 	
 	RealVector reference(3,1.0);
@@ -191,10 +191,10 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContribution3D ) {
 }
 
 BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionMD_With_3D ) {
-
+	std::cout<<"Contribution MD"<<std::endl;
 	HypervolumeContributionMD hs;
 	const unsigned int numTests = 20;
-	const std::size_t numPoints = 100;
+	const std::size_t numPoints = 50;
 	
 	RealVector reference(3,1.0);
 	Rng::seed(42);
@@ -228,9 +228,9 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionMD_With_3D ) {
 
 
 BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionApproximator ) {
-	const unsigned int numTests = 20;
+	const unsigned int numTests = 10;
 	const unsigned int numTrials = 100;
-	const std::size_t numPoints = 20;
+	const std::size_t numPoints = 10;
 	
 	RealVector reference(3,1.0);
 	Rng::seed(42);
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionApproximator ) {
 		}
 
 		HypervolumeContributionApproximator algorithm;
-		algorithm.epsilon() = 0.01;
+		algorithm.epsilon() = 0.1;
 		algorithm.delta() = 0.1;
 		std::vector<double> approxContributions;
 		for(std::size_t i = 0; i != numTrials; ++i){

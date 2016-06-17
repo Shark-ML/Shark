@@ -600,8 +600,8 @@ private:
 		InternalState const& s = state.toState<InternalState>();
 
 		//initialize output neurons using coefficients
-		RealSubMatrix outputDelta = rows(delta,delta.size1()-outputSize(),delta.size1());
-		ConstRealSubMatrix outputResponse = rows(s.responses,delta.size1()-outputSize(),delta.size1());
+		auto outputDelta = rows(delta,delta.size1()-outputSize(),delta.size1());
+		auto outputResponse = rows(s.responses,delta.size1()-outputSize(),delta.size1());
 		noalias(outputDelta) *= m_outputNeuron.derivative(outputResponse);
 
 		//iterate backwards using the backprop matrix and propagate the errors to get the needed delta values
@@ -617,9 +617,9 @@ private:
 			RealMatrix const& weights = m_backpropMatrix[layer];
 			std::size_t beginNeuron = endNeuron - weights.size1();//first neuron of the current layer
 			//get the delta and response values of this layer
-			RealSubMatrix layerDelta = rows(delta,beginNeuron,endNeuron);
-			RealSubMatrix layerDeltaInput = rows(delta,endNeuron,endNeuron+weights.size2());
-			ConstRealSubMatrix layerResponse = rows(s.responses,beginNeuron,endNeuron);
+			auto layerDelta = rows(delta,beginNeuron,endNeuron);
+			auto layerDeltaInput = rows(delta,endNeuron,endNeuron+weights.size2());
+			auto layerResponse = rows(s.responses,beginNeuron,endNeuron);
 
 			noalias(layerDelta) += prod(weights,layerDeltaInput);//add the values to the maybe non-empty delta part
 			if(layer != 0){
@@ -644,15 +644,15 @@ private:
 		std::size_t pos = 0;
 		std::size_t layerStart = inputSize();
 		for(std::size_t layer = 0; layer != layerMatrices().size(); ++layer){
+			//obtain input, delta and gradients for the current layer
 			std::size_t layerRows =  layerMatrices()[layer].size1();
 			std::size_t layerColumns =  layerMatrices()[layer].size2();
 			std::size_t params = layerRows*layerColumns;
-			axpy_prod(
-				rows(delta,layerStart,layerStart+layerRows),
-				trans(rows(s.responses,layerStart-layerColumns,layerStart)),
-				//interpret part of the gradient as the weights of the layer
-				to_matrix(subrange(gradient,pos,pos+params),layerRows,layerColumns)
-			);
+			auto gradMatrix  = to_matrix(subrange(gradient,pos,pos+params),layerRows,layerColumns);
+			auto deltaLayer = rows(delta,layerStart,layerStart+layerRows);
+			auto inputLayer = rows(s.responses,layerStart-layerColumns,layerStart);
+			noalias(gradMatrix) = prod(deltaLayer, trans(inputLayer));
+			
 			pos += params;
 			layerStart += layerRows;
 		}
@@ -667,11 +667,10 @@ private:
 		//compute shortcut derivative
 		if(inputOutputShortcut().size1() != 0){
 			std::size_t params = inputSize()*outputSize();
-			axpy_prod(
-				rows(delta,delta.size1()-outputSize(),delta.size1()),
-				trans(rows(s.responses,0,inputSize())),
-				to_matrix(subrange(gradient,pos,pos+params),outputSize(),inputSize())
-			);
+			auto gradMatrix  = to_matrix(subrange(gradient,pos,pos+params),outputSize(),inputSize());
+			auto deltaLayer = rows(delta,delta.size1()-outputSize(),delta.size1());
+			auto inputLayer = rows(s.responses,0,inputSize());
+			noalias(gradMatrix) = prod(deltaLayer, trans(inputLayer));
 		}
 		
 	}

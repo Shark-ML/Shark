@@ -63,7 +63,7 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 			noalias(row(means,c))+=row(points,e);
 		}
 		//update second moment matrix
-		symm_prod(trans(points),covariance,false);
+		noalias(covariance) += prod(trans(points),points);
 	}
 	covariance/=inputs-classes;
 	//calculate mean and the covariance matrix from second moment
@@ -135,7 +135,7 @@ void LDA::train(LinearClassifier<>& model, WeightedLabeledData<RealVector,unsign
 			
 		}
 		//update second moment matrix
-		symm_prod(trans(points),covariance,false);
+		noalias(covariance) += prod(trans(points),points);
 	}
 	covariance /= weightSum;
 	

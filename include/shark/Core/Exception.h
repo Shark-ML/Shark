@@ -104,12 +104,14 @@ inline void THROW_IF(bool unexpectedCondition, const std::string& message)
 // some handy macros for special types of checks,
 // throwing standard error messages
 #ifndef NDEBUG
-#define RANGE_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("range check error: "#cond); } while (false)
-#define SIZE_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("size mismatch: "#cond); } while (false)
-#define TYPE_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("type mismatch: "#cond); } while (false)
-#define IO_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("I/O error "); } while (false)
-#define SHARK_ASSERT(cond) do { if (!(cond)) throw SHARKEXCEPTION("assertion failed: "#cond); } while (false)
-#define SHARK_CHECK(cond, error) do { if (!(cond)) throw SHARKEXCEPTION(error); } while (false)
+//~ #define RANGE_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("range check error: "#cond); } while (false)
+//~ #define SIZE_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("size mismatch: "#cond); } while (false)
+//~ #define SHARK_ASSERT(cond) do { if (!(cond)) throw SHARKEXCEPTION("assertion failed: "#cond); } while (false)
+//~ #define SHARK_CHECK(cond, error) do { if (!(cond)) throw SHARKEXCEPTION(error); } while (false)
+#define RANGE_CHECK(cond) assert(cond)
+#define SIZE_CHECK(cond) assert(cond)
+#define SHARK_ASSERT(cond) assert(cond)
+#define SHARK_CHECK(cond, error) assert(cond)
 #else
 #define RANGE_CHECK(cond) do { (void)sizeof(cond); } while (false)
 #define SIZE_CHECK(cond) do { (void)sizeof(cond); } while (false)

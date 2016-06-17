@@ -62,7 +62,7 @@ public:
 	typedef matrix_reference<self_type> closure_type;
 	typedef packed_tag storage_category;
 	typedef elementwise_tag evaluation_category;
-	typedef packed<Orientation,TriangularType> orientation;
+	typedef triangular<Orientation,TriangularType> orientation;
 
 	// Construction and destruction
 
@@ -113,9 +113,7 @@ public:
 	/// Grants low-level access to the matrix internals. Element order depends on whether the matrix is
 	///  row_major or column_major and upper or lower triangular
 	const_pointer storage()const{
-		if(m_data.empty())
-			return 0;
-		return &m_data[0];
+		return m_data.data();
 	}
 	
 	///\brief Returns the pointer to the beginning of the matrix storage
@@ -123,9 +121,7 @@ public:
 	/// Grants low-level access to the matrix internals. Element order depends on whether the matrix is row_major or column_major.
 	/// to access element (i,j) use storage()[i*stride1()+j*stride2()].
 	pointer storage(){
-		if(m_data.empty())
-			return 0;
-		return &m_data[0];
+		return m_data.data();
 	}
 	
 	///\brief Number of nonzero-elements stores in the matrix.
@@ -158,18 +154,25 @@ public:
 
 	// Element access read only
 	const_reference operator()(index_type i, index_type j) const {
+		SIZE_CHECK(i < size1());
+		SIZE_CHECK(j < size2());
 		if(!orientation::non_zero(i,j)) 
 			return value_type();
-		return m_data [orientation::element(i,j,size1())];
+		SIZE_CHECK(orientation::element(i,j,size1(),packed_tag())<m_data.size());
+		return m_data [orientation::element(i,j,size1(),packed_tag())];
 	}
 	
 	// separate write access
 	void set_element(std::size_t i,std::size_t j, value_type t){
+		SIZE_CHECK(i < size1());
+		SIZE_CHECK(j < size2());
 		SIZE_CHECK(orientation::non_zero(i,j));
-		m_data [orientation::element(i,j,size1())] = t;
+		m_data [orientation::element(i,j,size1(),packed_tag())] = t;
 	}
 	
 	bool non_zero(std::size_t i,std::size_t j)const{
+		SIZE_CHECK(i < size1());
+		SIZE_CHECK(j < size2());
 		return orientation::non_zero(i,j);
 	}
 	
@@ -395,7 +398,7 @@ public:
 	
 	typedef typename boost::mpl::if_<
 		boost::is_same<Orientation,row_major>,
-		dense_storage_iterator<value_type>,
+		dense_storage_iterator<value_type,packed_random_access_iterator_tag>,
 		typename boost::mpl::if_c<
 			TriangularType::is_upper,
 			major1_iterator<value_type>,
@@ -409,12 +412,12 @@ public:
 			major2_iterator<value_type>,
 			major1_iterator<value_type>
 		>::type,
-		dense_storage_iterator<value_type>
+		dense_storage_iterator<value_type,packed_random_access_iterator_tag>
 	>::type column_iterator;
 	
 	typedef typename boost::mpl::if_<
 		boost::is_same<Orientation,row_major>,
-		dense_storage_iterator<value_type const>,
+		dense_storage_iterator<value_type const,packed_random_access_iterator_tag>,
 		typename boost::mpl::if_c<
 			TriangularType::is_upper,
 			major1_iterator<value_type const>,
@@ -428,7 +431,7 @@ public:
 			major2_iterator<value_type const>,
 			major1_iterator<value_type const>
 		>::type,
-		dense_storage_iterator<value_type const>
+		dense_storage_iterator<value_type const,packed_random_access_iterator_tag>
 	>::type const_column_iterator;
 	
 public:
@@ -436,66 +439,66 @@ public:
 	const_row_iterator row_begin(index_type i) const {
 		std::size_t index = TriangularType::is_upper?i:0;
 		return const_row_iterator(
-			storage()+orientation::element(i,index,size1())
+			storage()+orientation::element(i,index,size1(),packed_tag())
 			,index
-			,orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
+			,orientation::orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
 		);
 	}
 	const_row_iterator row_end(index_type i) const {
 		std::size_t index = TriangularType::is_upper?size2():i+1;
 		return const_row_iterator(
-			storage() + orientation::element(i, index, size1())
+			storage() + orientation::element(i, index, size1(),packed_tag())
 			,index
-			,orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
+			,orientation::orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
 		);
 	}
 	row_iterator row_begin(index_type i){
 		std::size_t index = TriangularType::is_upper?i:0;
 		return row_iterator(
-			storage() + orientation::element(i, index, size1())
+			storage() + orientation::element(i, index, size1(),packed_tag())
 			,index
-			,orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
+			,orientation::orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
 		);
 	}
 	row_iterator row_end(index_type i){
 		std::size_t index = TriangularType::is_upper?size2():i+1;
 		return row_iterator(
-			storage() + orientation::element(i, index, size1())
+			storage() + orientation::element(i, index, size1(),packed_tag())
 			,index
-			,orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
+			,orientation::orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
 		);
 	}
 	
 	const_column_iterator column_begin(index_type i) const {
 		std::size_t index = TriangularType::is_upper?0:i;
 		return const_column_iterator(
-			storage() + orientation::element(index, i, size1())
+			storage() + orientation::element(index, i, size1(),packed_tag())
 			,index
-			,orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
+			,orientation::orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
 		);
 	}
 	const_column_iterator column_end(index_type i) const {
 		std::size_t index = TriangularType::is_upper?i+1:size2();
 		return const_column_iterator(
-			storage() + orientation::element(index, i, size1())
+			storage() + orientation::element(index, i, size1(),packed_tag())
 			,index
-			,orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
+			,orientation::orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
 		);
 	}
 	column_iterator column_begin(index_type i){
 		std::size_t index = TriangularType::is_upper?0:i;
 		return column_iterator(
-			storage() + orientation::element(index, i, size1())
+			storage() + orientation::element(index, i, size1(),packed_tag())
 			,index
-			,orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
+			,orientation::orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
 		);
 	}
 	column_iterator column_end(index_type i){
 		std::size_t index = TriangularType::is_upper?i+1:size2();
 		return column_iterator(
-			storage() + orientation::element(index, i, size1())
+			storage() + orientation::element(index, i, size1(),packed_tag())
 			,index
-			,orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
+			,orientation::orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
 		);
 	}
 

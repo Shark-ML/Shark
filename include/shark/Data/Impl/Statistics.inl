@@ -94,7 +94,7 @@ void meanvar
 	for(std::size_t b = 0; b != data.numberOfBatches(); ++b){
 		//make the batch mean-free
 		BatchType batch = data.batch(b)-repeat(meanVec,data.batch(b).size1());
-		symm_prod(trans(batch),covariance,false);
+		noalias(covariance) += prod(trans(batch),batch);
 	}
 	covariance() /= double(dataSize);
 }

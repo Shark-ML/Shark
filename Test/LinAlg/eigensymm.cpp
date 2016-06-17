@@ -50,8 +50,7 @@ RealMatrix createRandomMatrix(RealVector const& lambda,std::size_t Dimensions){
 	for(std::size_t i = 0; i != Dimensions; ++i){
 		column(R,i) *= std::sqrt(lambda(i));
 	}
-	RealMatrix A(Dimensions,Dimensions);
-	axpy_prod(R,trans(R),A);
+	RealMatrix A = prod(R,trans(R));
 	return A;
 }
 

@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE( BLAS_dense_vector_adaptor )
 		BOOST_REQUIRE_EQUAL(mem[2*i] ,proxym(i));
 	}
 	
-	axpy_prod(xm,x,result);
-	axpy_prod(xm,proxy,resultProxy);
+	noalias(result) = prod(xm,x);
+	noalias(resultProxy) = prod(xm,proxy);
 	
 	for(std::size_t i = 0; i != 3; ++i){
 		BOOST_REQUIRE_EQUAL(result(i) ,resultProxy(i));

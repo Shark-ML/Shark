@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE LinAlg_axpy_prod
+#define BOOST_TEST_MODULE BLAS_prod
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -22,9 +22,9 @@ void checkMatrixVectorMultiply(M const& arg1, V const& arg2, Result const& resul
 	}
 }
 
-BOOST_AUTO_TEST_SUITE (LinAlg_BLAS_axpy_prod)
+BOOST_AUTO_TEST_SUITE (BLAS_prod)
 
-BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense ){
+BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_vector_dense ){
 	std::size_t rows = 50;
 	std::size_t columns = 80;
 	//initialize the arguments in both row and column major as well as transposed
@@ -44,29 +44,29 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense ){
 	}
 
 	std::cout<<"\nchecking dense matrix vector plusassign multiply"<<std::endl;
-	//test first expressions of the form A+=B*C
+	//test first expressions of the form A += alpha*B*C 
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1rm,arg2,result,false,-2.0);
+		noalias(result) += -2*prod(arg1rm,arg2);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1cm,arg2,result,false,-2.0);
+		noalias(result) += -2*prod(arg1cm,arg2);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rmt,result,false,-2.0);
+		noalias(result) += -2*prod(arg2,arg1rmt);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cmt,result,false,-2.0);
+		noalias(result) += -2*prod(arg2,arg1cmt);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
 	std::cout<<"\nchecking dense matrix vector assign multiply"<<std::endl;
@@ -74,30 +74,30 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense ){
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1rm,arg2,result,true,-2.0);
+		noalias(result) = -2*prod(arg1rm,arg2);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1cm,arg2,result,true,-2.0);
+		noalias(result) = -2*prod(arg1cm,arg2);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rmt,result,true,-2.0);
+		noalias(result) = -2*prod(arg2,arg1rmt);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cmt,result,true,-2.0);
+		noalias(result) = -2*prod(arg2,arg1cmt);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 }
 
-BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense_sparse ){
+BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_vector_dense_sparse ){
 	std::size_t rows = 50;
 	std::size_t columns = 80;
 	//initialize the arguments in both row and column major as well as transposed
@@ -117,29 +117,29 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense_sparse ){
 	}
 
 	std::cout<<"\nchecking dense-sparse matrix vector plusassign multiply"<<std::endl;
-	//test first expressions of the form A+=B*C
+	//test first expressions of the form A += alpha*B*C 
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1rm,arg2,result,false,-2.0);
+		noalias(result) += -2*prod(arg1rm,arg2);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1cm,arg2,result,false,-2.0);
+		noalias(result) += -2*prod(arg1cm,arg2);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rmt,result,false,-2.0);
+		noalias(result) += -2*prod(arg2,arg1rmt);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cmt,result,false,-2.0);
+		noalias(result) += -2*prod(arg2,arg1cmt);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
 	std::cout<<"\nchecking dense-sparse matrix vector assign multiply"<<std::endl;
@@ -147,30 +147,30 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_dense_sparse ){
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1rm,arg2,result,true,-2.0);
+		noalias(result) = -2*prod(arg1rm,arg2);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1cm,arg2,result,true,-2.0);
+		noalias(result) = -2*prod(arg1cm,arg2);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rmt,result,true,-2.0);
+		noalias(result) = -2*prod(arg2,arg1rmt);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cmt,result,true,-2.0);
+		noalias(result) = -2*prod(arg2,arg1cmt);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 }
 
-BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_sparse_dense ){
+BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_vector_sparse_dense ){
 	std::size_t rows = 50;
 	std::size_t columns = 80;
 	//initialize the arguments in both row and column major as well as transposed
@@ -193,29 +193,29 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_sparse_dense ){
 	}
 
 	std::cout<<"\nchecking sparse-dense matrix vector plusassign multiply"<<std::endl;
-	//test first expressions of the form A+=B*C
+	//test first expressions of the form A += alpha*B*C 
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1rm,arg2,result,false,-2.0);
+		noalias(result) += -2*prod(arg1rm,arg2);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1cm,arg2,result,false,-2.0);
+		noalias(result) += -2*prod(arg1cm,arg2);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rmt,result,false,-2.0);
+		noalias(result) += -2*prod(arg2,arg1rmt);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cmt,result,false,-2.0);
+		noalias(result) += -2*prod(arg2,arg1cmt);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
 	std::cout<<"\nchecking sparse-dense matrix vector assign multiply"<<std::endl;
@@ -223,30 +223,30 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_sparse_dense ){
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1rm,arg2,result,true,-2.0);
+		noalias(result) = -2*prod(arg1rm,arg2);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1cm,arg2,result,true,-2.0);
+		noalias(result) = -2*prod(arg1cm,arg2);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rmt,result,true,-2.0);
+		noalias(result) = -2*prod(arg2,arg1rmt);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cmt,result,true,-2.0);
+		noalias(result) = -2*prod(arg2,arg1cmt);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 }
 
-BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_sparse_sparse ){
+BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_vector_sparse_sparse ){
 	std::size_t rows = 50;
 	std::size_t columns = 80;
 	//initialize the arguments in both row and column major as well as transposed
@@ -269,29 +269,29 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_sparse_sparse ){
 	}
 
 	std::cout<<"\nchecking sparse-sparse matrix vector plusassign multiply"<<std::endl;
-	//test first expressions of the form A+=B*C
+	//test first expressions of the form A += alpha*B*C 
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1rm,arg2,result,false,-2.0);
+		noalias(result) += -2*prod(arg1rm,arg2);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1cm,arg2,result,false,-2.0);
+		noalias(result) += -2*prod(arg1cm,arg2);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rmt,result,false,-2.0);
+		noalias(result) += -2*prod(arg2,arg1rmt);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cmt,result,false,-2.0);
+		noalias(result) += -2*prod(arg2,arg1cmt);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
 	std::cout<<"\nchecking sparse-sparse matrix vector assign multiply"<<std::endl;
@@ -299,25 +299,25 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_sparse_sparse ){
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1rm,arg2,result,true,-2.0);
+		noalias(result) = -2*prod(arg1rm,arg2);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1cm,arg2,result,true,-2.0);
+		noalias(result) = -2*prod(arg1cm,arg2);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rmt,result,true,-2.0);
+		noalias(result) = -2*prod(arg2,arg1rmt);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cmt,result,true,-2.0);
+		noalias(result) = -2*prod(arg2,arg1cmt);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 }
@@ -339,7 +339,7 @@ void checkMatrixMatrixMultiply(Arg1 const& arg1, Arg2 const& arg2, Result const&
 	}
 }
 
-BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_dense_dense ){
+BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_matrix_dense_dense ){
 	std::size_t rows = 50;
 	std::size_t columns = 80;
 	std::size_t middle = 33;
@@ -363,50 +363,50 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_dense_dense ){
 	{
 		std::cout<<"rrr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rrc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultcm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rcr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rcc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultcm,-2.0,1.5);
 	}
 	
 	{
 		std::cout<<"crr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"crc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultcm,-2.0,1.5);
 	}
 	{
 		std::cout<<"ccr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"ccc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultcm,-2.0,1.5);
 	}
 	
@@ -415,56 +415,56 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_dense_dense ){
 	{
 		std::cout<<"rrr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"rrc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultcm,-2.0,0);
 	}
 	{
 		std::cout<<"rcr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"rcc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultcm,-2.0,0);
 	}
 	
 	{
 		std::cout<<"crr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"crc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultcm,-2.0,0);
 	}
 	{
 		std::cout<<"ccr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"ccc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultcm,-2.0,0);
 	}
 }
 
 //second argument sparse
-BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_dense_sparse ){
+BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_matrix_dense_sparse ){
 	std::size_t rows = 50;
 	std::size_t columns = 80;
 	std::size_t middle = 33;
@@ -490,50 +490,50 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_dense_sparse ){
 	{
 		std::cout<<"rrr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rrc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultcm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rcr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rcc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultcm,-2.0,1.5);
 	}
 	
 	{
 		std::cout<<"crr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"crc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultcm,-2.0,1.5);
 	}
 	{
 		std::cout<<"ccr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"ccc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultcm,-2.0,1.5);
 	}
 	
@@ -542,56 +542,56 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_dense_sparse ){
 	{
 		std::cout<<"rrr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"rrc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultcm,-2.0,0);
 	}
 	{
 		std::cout<<"rcr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"rcc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultcm,-2.0,0);
 	}
 	
 	{
 		std::cout<<"crr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"crc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultcm,-2.0,0);
 	}
 	{
 		std::cout<<"ccr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"ccc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultcm,-2.0,0);
 	}
 }
 
 //first argument sparse
-BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_sparse_dense ){
+BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_matrix_sparse_dense ){
 	std::size_t rows = 50;
 	std::size_t columns = 80;
 	std::size_t middle = 33;
@@ -617,50 +617,50 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_sparse_dense ){
 	{
 		std::cout<<"rrr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rrc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultcm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rcr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rcc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultcm,-2.0,1.5);
 	}
 	
 	{
 		std::cout<<"crr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"crc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultcm,-2.0,1.5);
 	}
 	{
 		std::cout<<"ccr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"ccc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultcm,-2.0,1.5);
 	}
 	
@@ -669,55 +669,55 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_sparse_dense ){
 	{
 		std::cout<<"rrr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"rrc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultcm,-2.0,0);
 	}
 	{
 		std::cout<<"rcr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"rcc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultcm,-2.0,0);
 	}
 	
 	{
 		std::cout<<"crr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"crc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultcm,-2.0,0);
 	}
 	{
 		std::cout<<"ccr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"ccc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultcm,-2.0,0);
 	}
 }
 
-BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_sparse_sparse ){
+BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_matrix_sparse_sparse ){
 	std::size_t rows = 50;
 	std::size_t columns = 80;
 	std::size_t middle = 33;
@@ -745,50 +745,50 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_sparse_sparse ){
 	{
 		std::cout<<"rrr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rrc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultcm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rcr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"rcc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultcm,-2.0,1.5);
 	}
 	
 	{
 		std::cout<<"crr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"crc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultcm,-2.0,1.5);
 	}
 	{
 		std::cout<<"ccr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultrm,false,-2.0);
+		noalias(resultrm) += -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultrm,-2.0,1.5);
 	}
 	{
 		std::cout<<"ccc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultcm,false,-2.0);
+		noalias(resultcm) += -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultcm,-2.0,1.5);
 	}
 	
@@ -797,55 +797,55 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_matrix_sparse_sparse ){
 	{
 		std::cout<<"rrr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"rrc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2rm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1rm,arg2rm);
 		checkMatrixMatrixMultiply(arg1rm,arg2rm,resultcm,-2.0,0);
 	}
 	{
 		std::cout<<"rcr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"rcc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1rm,arg2cm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1rm,arg2cm);
 		checkMatrixMatrixMultiply(arg1rm,arg2cm,resultcm,-2.0,0);
 	}
 	
 	{
 		std::cout<<"crr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"crc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2rm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1cm,arg2rm);
 		checkMatrixMatrixMultiply(arg1cm,arg2rm,resultcm,-2.0,0);
 	}
 	{
 		std::cout<<"ccr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultrm,true,-2.0);
+		noalias(resultrm) = -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultrm,-2.0,0);
 	}
 	{
 		std::cout<<"ccc"<<std::endl;
 		matrix<double,column_major> resultcm(rows,columns,1.5);
-		axpy_prod(arg1cm,arg2cm,resultcm,true,-2.0);
+		noalias(resultcm) = -2.0 * prod(arg1cm,arg2cm);
 		checkMatrixMatrixMultiply(arg1cm,arg2cm,resultcm,-2.0,0);
 	}
 }
 
-BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_triangular ){
+BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_vector_triangular ){
 	std::size_t rows = 50;
 	//initialize the arguments in both row and column major as well as transposed
 	triangular_matrix<double,row_major,lower> arg1rm(rows);
@@ -866,107 +866,56 @@ BOOST_AUTO_TEST_CASE( LinAlg_axpy_prod_matrix_vector_triangular ){
 	}
 
 	std::cout<<"\nchecking packed matrix vector plusassign multiply"<<std::endl;
-	//test first expressions of the form A+=B*C
+	//test first expressions of the form A += alpha*B*C 
 	{
-		std::cout<<"lower row major Ax"<<std::endl;
+		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1rm,arg2,result,false,-2.0);
+		noalias(result) += -2*prod(arg1rm,arg2);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
-		std::cout<<"lower column major Ax"<<std::endl;
+		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1cm,arg2,result,false,-2.0);
+		noalias(result) += -2*prod(arg1cm,arg2);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
-	}
-	{
-		std::cout<<"upper row major Ax"<<std::endl;
-		vector<double> result(rows,1.5);
-		axpy_prod(arg1rmt,arg2,result,false,-2.0);
-		checkMatrixVectorMultiply(arg1rmt,arg2,result,-2.0,1.5);
-	}
-	{
-		std::cout<<"upper column major Ax"<<std::endl;
-		vector<double> result(rows,1.5);
-		axpy_prod(arg1cmt,arg2,result,false,-2.0);
-		checkMatrixVectorMultiply(arg1cmt,arg2,result,-2.0,1.5);
-	}
-	
-	{
-		std::cout<<"lower row major xA"<<std::endl;
-		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rm,result,false,-2.0);
-		checkMatrixVectorMultiply(arg1rmt,arg2,result,-2.0,1.5);
-	}
-	{
-		std::cout<<"lower column major xA"<<std::endl;
-		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cm,result,false,-2.0);
-		checkMatrixVectorMultiply(arg1cmt,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rmt,result,false,-2.0);
+		noalias(result) += -2*prod(arg2,arg1rmt);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cmt,result,false,-2.0);
+		noalias(result) += -2*prod(arg2,arg1cmt);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
-	
-	std::cout<<"\nchecking dense matrix vector assign multiply"<<std::endl;
+	std::cout<<"\nchecking packed matrix vector assign multiply"<<std::endl;
 	//test expressions of the form A=B*C
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1rm,arg2,result,true,-2.0);
+		noalias(result) = -2*prod(arg1rm,arg2);
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg1cm,arg2,result,true,-2.0);
+		noalias(result) = -2*prod(arg1cm,arg2);
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 	{
-		std::cout<<"upper row major Ax"<<std::endl;
-		vector<double> result(rows,1.5);
-		axpy_prod(arg1rmt,arg2,result,true,-2.0);
-		checkMatrixVectorMultiply(arg1rmt,arg2,result,-2.0,0.0);
-	}
-	{
-		std::cout<<"upper column major Ax"<<std::endl;
-		vector<double> result(rows,1.5);
-		axpy_prod(arg1cmt,arg2,result,true,-2.0);
-		checkMatrixVectorMultiply(arg1cmt,arg2,result,-2.0,0.0);
-	}
-	
-	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rm,result,true,-2.0);
-		checkMatrixVectorMultiply(arg1rmt,arg2,result,-2.0,0);
+		noalias(result) = -2*prod(arg2,arg1rmt);
+		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cm,result,true,-2.0);
-		checkMatrixVectorMultiply(arg1cmt,arg2,result,-2.0,0);
-	}
-	{
-		std::cout<<"upper row major xA"<<std::endl;
-		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1rmt,result,true,-2.0);
-		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0.0);
-	}
-	{
-		std::cout<<"upper column major xA"<<std::endl;
-		vector<double> result(rows,1.5);
-		axpy_prod(arg2,arg1cmt,result,true,-2.0);
-		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0.0);
+		noalias(result) = -2*prod(arg2,arg1cmt);
+		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 }
 

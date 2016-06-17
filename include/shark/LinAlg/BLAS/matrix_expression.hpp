@@ -28,8 +28,12 @@
 #ifndef SHARK_LINALG_BLAS_MATRIX_EXPRESSION_HPP
 #define SHARK_LINALG_BLAS_MATRIX_EXPRESSION_HPP
 
+#include "kernels/gemv.hpp"
+#include "kernels/tpmv.hpp"
+#include "kernels/trmv.hpp"
+#include "kernels/gemm.hpp"
+#include "kernels/trmm.hpp"
 #include "matrix_proxy.hpp"
-#include "operation.hpp"
 
 #include <boost/utility/enable_if.hpp>
 #include <type_traits>
@@ -917,23 +921,58 @@ public:
 		return m_vector;
 	}
 	
-	//computation kernels
+	//dispatcher to computation kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		x().clear();
-		plus_assign_to(x,alpha);
+		assign_to(x, alpha, typename MatA::orientation(), typename MatA::storage_category());
 	}
 	template<class VecX>
 	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		kernels::gemv(eval_block(m_matrix), eval_block(m_vector), x, alpha);
+		plus_assign_to(x, alpha, typename MatA::orientation(), typename MatA::storage_category());
 	}
 	
 	template<class VecX>
 	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		kernels::gemv(eval_block(m_matrix), eval_block(m_vector), x, -alpha);
+		plus_assign_to(x,-alpha, typename MatA::orientation(), typename MatA::storage_category());
 	}
 	
 private:
+	//gemv
+	template<class VecX, class Category>
+	void assign_to(vector_expression<VecX>& x, scalar_type alpha, linear_structure, Category c)const{
+		x().clear();
+		plus_assign_to(x,alpha, linear_structure(), c);
+	}
+	template<class VecX, class Category>
+	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha, linear_structure, Category )const{
+		kernels::gemv(eval_block(m_matrix), eval_block(m_vector), x, alpha);
+	}
+	//tpmv
+	template<class VecX>
+	void assign_to(vector_expression<VecX>& x, scalar_type alpha, triangular_structure, packed_tag )const{
+		noalias(x) = eval_block(alpha * m_vector);
+		kernels::tpmv(eval_block(m_matrix), x);
+	}
+	template<class VecX>
+	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha, triangular_structure, packed_tag )const{
+		//computation of tpmv is in-place so we need a temporary for plus-assign.
+		typename vector_temporary<VecX>::type temp( eval_block(alpha * m_vector));
+		kernels::tpmv(eval_block(m_matrix), temp);
+		noalias(x) += temp;
+	}
+	//trmv
+	template<class VecX>
+	void assign_to(vector_expression<VecX>& x, scalar_type alpha, triangular_structure, dense_tag )const{
+		noalias(x) = eval_block(alpha * m_vector);
+		kernels::trmv<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_matrix.expression(), x);
+	}
+	template<class VecX>
+	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha, triangular_structure, dense_tag )const{
+		//computation of tpmv is in-place so we need a temporary for plus-assign.
+		typename vector_temporary<VecX>::type temp( eval_block(alpha * m_vector));
+		kernels::trmv<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_matrix.expression(), temp);
+		noalias(x) += temp;
+	}
 	matrix_closure_type m_matrix;
 	vector_closure_type m_vector;
 };
@@ -950,6 +989,81 @@ template<class MatA, class VecV>
 matrix_vector_prod<matrix_transpose<MatA>,VecV> prod(vector_expression<VecV> const& v,matrix_expression<MatA> const& A) {
 	//compute it using the identity (v^TA)^T= A^Tv
 	return matrix_vector_prod<matrix_transpose<MatA>,VecV>(trans(A),v());
+}
+
+
+namespace detail{
+template<class M, class TriangularType>
+class dense_triangular_proxy: public matrix_expression<dense_triangular_proxy<M, TriangularType> > {
+	typedef dense_triangular_proxy<M, TriangularType> self_type;
+public:
+	static_assert(std::is_same<typename M::storage_category, dense_tag>::value, "Can only create triangular proxies of dense matrices");
+
+	typedef typename M::size_type size_type;
+	typedef typename M::difference_type difference_type;
+	typedef typename M::value_type value_type;
+	typedef typename M::scalar_type scalar_type;
+	typedef typename M::const_reference const_reference;
+	typedef typename reference<M>::type reference;
+	typedef typename M::const_pointer const_pointer;
+	typedef typename pointer<M>::type pointer;
+
+	typedef typename M::index_type index_type;
+	typedef typename M::const_index_pointer const_index_pointer;
+	typedef typename index_pointer<M>::type index_pointer;
+
+	typedef typename closure<M>::type matrix_closure_type;
+	typedef dense_triangular_proxy<typename const_expression<M>::type,TriangularType> const_closure_type;
+	typedef dense_triangular_proxy<M,TriangularType> closure_type;
+
+	typedef dense_tag storage_category;
+	typedef elementwise_tag evaluation_category;
+	typedef triangular<typename M::orientation,TriangularType> orientation;
+
+	// Construction and destruction
+	explicit dense_triangular_proxy(matrix_closure_type const& m)
+	: m_expression(m) {
+		SIZE_CHECK(m.size1() == m.size2());
+	}
+
+	// Expression accessors
+	matrix_closure_type const& expression() const{
+		return m_expression;
+	}
+	matrix_closure_type expression(){
+		return m_expression;
+	}
+	
+	 size_type size1 () const {
+		return expression().size1 ();
+        }
+        size_type size2 () const {
+		return expression().size2 ();
+        }
+	
+	typedef typename row_iterator<M>::type row_iterator;
+	typedef row_iterator const_row_iterator;
+	typedef typename column_iterator<M>::type column_iterator;
+	typedef column_iterator const_column_iterator;
+private:
+	matrix_closure_type m_expression;
+};
+}
+
+/// \brief Computes the matrix-vector product x+= alpha * Av or x= alpha * Av
+///
+/// A is interpreted as triangular matrix.
+/// The first template argument governs the type
+/// of triangular matrix: lower, upper, unit_lower and unit_upper.
+///
+///Example: x += triangular_prod<lower>(A,v);
+template<class TriangularType, class MatA, class VecV>
+matrix_vector_prod<detail::dense_triangular_proxy<MatA const,TriangularType> ,VecV> triangular_prod(
+	matrix_expression<MatA> const& A,
+	vector_expression<VecV>& v
+) {
+	typedef detail::dense_triangular_proxy<MatA const,TriangularType> Wrapper;
+	return matrix_vector_prod<Wrapper ,VecV>(Wrapper(A()), v());
 }
 
 //matrix-matrix prod
@@ -1003,22 +1117,45 @@ public:
 		return m_matrixB;
 	}
 	
-	//computation kernels
+	//dispatcher to computation kernels
 	template<class MatX>
 	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
-		X().clear();
-		plus_assign_to(X,alpha);
+		assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_category());
 	}
 	template<class MatX>
 	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
-		kernels::gemm(eval_block(m_matrixA), eval_block(m_matrixB), X, alpha);
+		plus_assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_category());
 	}
 	
 	template<class MatX>
 	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
-		kernels::gemm(eval_block(m_matrixA), eval_block(m_matrixB), X, -alpha);
+		plus_assign_to(X, -alpha, typename MatA::orientation(), typename MatA::storage_category());
 	}
 	
+private:
+	//gemm
+	template<class MatX, class Category>
+	void assign_to(matrix_expression<MatX>& X, scalar_type alpha, linear_structure, Category c )const{
+		X().clear();
+		plus_assign_to(X,alpha, linear_structure(), c);
+	}
+	template<class MatX, class Category>
+	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha, linear_structure, Category )const{
+		kernels::gemm(eval_block(m_matrixA), eval_block(m_matrixB), X, alpha);
+	}
+	//trmv
+	template<class MatX>
+	void assign_to(matrix_expression<MatX>& X, scalar_type alpha, triangular_structure, dense_tag)const{
+		noalias(X) = eval_block(alpha * m_matrixB);
+		kernels::trmm<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_matrixA.expression(), X);
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha, triangular_structure, dense_tag )const{
+		//computation of tpmv is in-place so we need a temporary for plus-assign.
+		typename matrix_temporary<MatX>::type temp( eval_block(alpha * m_matrixB));
+		kernels::trmm<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_matrixA.expression(), temp);
+		noalias(X) += temp;
+	}
 private:
 	matrix_closure_typeA m_matrixA;
 	matrix_closure_typeB m_matrixB;
@@ -1030,7 +1167,29 @@ matrix_matrix_prod<MatA,MatB> prod(
 	matrix_expression<MatA> const& A,
 	matrix_expression<MatB> const& B
 ) {
+	static_assert(std::is_base_of<linear_structure, typename MatA::orientation>::value, "A must be linearly stored");
+	static_assert(std::is_base_of<linear_structure, typename MatB::orientation>::value, "B must be linearly stored");
 	return matrix_matrix_prod<MatA,MatB>(A(),B());
+}
+
+/// \brief Computes the matrix-vector product x+= alpha * AB or x= alpha * AB
+///
+/// A is interpreted as triangular matrix.
+/// The first template argument governs the type
+/// of triangular matrix: lower, upper, unit_lower and unit_upper.
+/// B is interpreted as dense matrix.
+///
+///Example: x += triangular_prod<lower>(A,v);
+template<class TriangularType, class MatA, class MatB>
+matrix_matrix_prod<detail::dense_triangular_proxy<MatA const,TriangularType> ,MatB>
+triangular_prod(
+	matrix_expression<MatA> const& A,
+	matrix_expression<MatB> const& B
+) {
+	static_assert(std::is_base_of<linear_structure, typename MatA::orientation>::value, "A must be linearly stored");
+	static_assert(std::is_base_of<linear_structure, typename MatB::orientation>::value, "B must be linearly stored");
+	typedef detail::dense_triangular_proxy<MatA const,TriangularType> Wrapper;
+	return matrix_matrix_prod<Wrapper ,MatB>(Wrapper(A()), B());
 }
 
 namespace detail{
@@ -1056,7 +1215,7 @@ void sum_rows_impl(MatA const& matA, VecB& vecB, unknown_orientation){
 
 //dispatcher for triangular matrix
 template<class MatA,class VecB,class Orientation,class Triangular>
-void sum_rows_impl(MatA const& matA, VecB& vecB, packed<Orientation,Triangular>){
+void sum_rows_impl(MatA const& matA, VecB& vecB, triangular<Orientation,Triangular>){
 	sum_rows_impl(matA,vecB,Orientation());
 }
 
@@ -1093,7 +1252,7 @@ typename MatA::value_type sum_impl(MatA const& matA, unknown_orientation){
 
 //dispatcher for triangular matrix
 template<class MatA,class Orientation,class Triangular>
-typename MatA::value_type sum_impl(MatA const& matA, packed<Orientation,Triangular>){
+typename MatA::value_type sum_impl(MatA const& matA, triangular<Orientation,Triangular>){
 	return sum_impl(matA,Orientation());
 }
 
@@ -1128,7 +1287,7 @@ typename MatA::value_type max_impl(MatA const& matA, unknown_orientation){
 
 //dispatcher for triangular matrix
 template<class MatA,class Orientation,class Triangular>
-typename MatA::value_type max_impl(MatA const& matA, packed<Orientation,Triangular>){
+typename MatA::value_type max_impl(MatA const& matA, triangular<Orientation, Triangular>){
 	return std::max(max_impl(matA,Orientation()),0.0);
 }
 
@@ -1163,7 +1322,7 @@ typename MatA::value_type min_impl(MatA const& matA, unknown_orientation){
 
 //dispatcher for triangular matrix
 template<class MatA,class Orientation,class Triangular>
-typename MatA::value_type min_impl(MatA const& matA, packed<Orientation,Triangular>){
+typename MatA::value_type min_impl(MatA const& matA, triangular<Orientation,Triangular>){
 	return std::min(min_impl(matA,Orientation()),0.0);
 }
 

@@ -87,8 +87,7 @@ public:
 	/// in the given model. now there is a special case: if there is somewhere a zero
 	/// coefficient, then obviously this is the smallest element. in this case we
 	/// just proceed as usual. the caller must decide what to do with such a vector.
-	/// \par note: if the model is completely empty, we will give back infinity and index 0.
-	/// this is again for the caller to handle. for safety, we put an assert in there.
+	/// \par note: The model is not allowed to be empty and an exception is thrown in this case.
 	///
 	/// @param[in]  model       the model we want to search
 	/// @param[out] minIndex    the index of the vector with smallest coefficient
@@ -96,24 +95,24 @@ public:
 	///
 	static void findSmallestVector(ModelType const& model, size_t &minIndex, double &minAlpha)
 	{
+		if(model.alpha().size1() == 0)
+			throw SHARKEXCEPTION("[AbstractBudgetMaintainanceStrategy::findSmallestVector] Model is empty!");
 		// we do not have it, so we remove the vector with the
 		// smallest 'influcence', measured by the smallest alpha
 
-		minAlpha = std::numeric_limits<double>::infinity();
+		minAlpha = norm_2(row(model.alpha(), 0));
 		minIndex = 0;
 
-		for(size_t j = 0; j < model.alpha().size1(); j++)
+		for(size_t j = 1; j < model.alpha().size1(); j++)
 		{
 			double currentNorm = blas::norm_2(row(model.alpha(), j));
 
 			if(currentNorm < minAlpha)
 			{
-				minAlpha = blas::norm_2(row(model.alpha(), j));
+				minAlpha = norm_2(row(model.alpha(), j));
 				minIndex = j;
 			}
 		}
-
-		SHARK_ASSERT(minAlpha != std::numeric_limits<double>::infinity());
 	}
 
 

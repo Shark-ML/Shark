@@ -183,12 +183,12 @@ void assign(
 }
 
 
-// Spcial case packed - just calls the first two implementations.
+// Spcial case triangular packed - just calls the first two implementations.
 template<template <class T1, class T2> class F, class M, class Orientation, class Triangular>
 void assign(
 	matrix_expression<M> &m, 
 	typename M::value_type t, 
-	packed<Orientation,Triangular>
+	triangular<Orientation,Triangular>
 ){
 	assign<F>(m,t,Orientation());
 }
@@ -341,7 +341,7 @@ template<class M, class E,class Triangular>
 void assign(
 	matrix_expression<M> &m, 
 	matrix_expression<E> const& e,
-	packed<row_major,Triangular>, packed<row_major,Triangular>,
+	triangular<row_major,Triangular>, triangular<row_major,Triangular>,
 	packed_random_access_iterator_tag, packed_random_access_iterator_tag
 ) {
 	typedef typename M::row_iterator MIter;
@@ -364,7 +364,7 @@ template<class M, class E,class Triangular>
 void assign(
 	matrix_expression<M> &m, 
 	matrix_expression<E> const& e,
-	packed<row_major,Triangular>, packed<column_major,Triangular>,
+	triangular<row_major,Triangular>, triangular<column_major,Triangular>,
 	packed_random_access_iterator_tag, packed_random_access_iterator_tag
 ) {
 	typedef typename M::row_iterator MIter;
@@ -408,7 +408,7 @@ template<class M, class E,class EOrientation, class Triangular, class TagM, clas
 void assign(
 	matrix_expression<M> &m, 
 	matrix_expression<E> const& e,
-	packed<column_major,Triangular>, packed<EOrientation,Triangular>,
+	triangular<column_major,Triangular>, triangular<EOrientation,Triangular>,
 	TagM tagM, TagE tagE
 ) {
 	typedef typename M::orientation::transposed_orientation TMPacked;
@@ -594,7 +594,7 @@ template<template <class, class> class F, class M, class E, class Triangular>
 void assign(
 	matrix_expression<M> &m, 
 	matrix_expression<E> const& e,
-	packed<row_major,Triangular>, packed<row_major,Triangular>
+	triangular<row_major,Triangular>, triangular<row_major,Triangular>
 ) {
 	typedef typename M::row_iterator MIter;
 	typedef typename E::const_row_iterator EIter;
@@ -620,7 +620,7 @@ template<template <class, class> class F, class M, class E, class Triangular>
 void assign(
 	matrix_expression<M> &m, 
 	matrix_expression<E> const& e,
-	packed<row_major,Triangular>, packed<column_major,Triangular>
+	triangular<row_major,Triangular>, triangular<column_major,Triangular>
 ) {
 	typedef typename M::row_iterator MIter;
 	typedef typename E::const_row_iterator EIter;
@@ -701,7 +701,7 @@ template<template <class, class> class F, class M, class E,class EOrientation, c
 void assign(
 	matrix_expression<M> &m, 
 	matrix_expression<E> const& e,
-	packed<column_major,Triangular>, packed<EOrientation,Triangular>
+	triangular<column_major,Triangular>, triangular<EOrientation,Triangular>
 ) {
 	typedef typename M::orientation::transposed_orientation TMPacked;
 	typedef typename E::orientation::transposed_orientation TEPacked;

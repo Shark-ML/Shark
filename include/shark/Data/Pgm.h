@@ -140,7 +140,6 @@ void writePGM( std::string const& fileName, unsigned char const* pData, std::siz
 template <class T>
 void importPGM( std::string const& fileName, T& data, std::size_t& sx, std::size_t& sy ) {
 	unsigned char *pData;
-	unsigned i=0;
 	int isx;
 	int isy;
 	detail::importPGM(fileName, &pData, isx, isy);

@@ -18,10 +18,8 @@ RealMatrix createRandomTriangularMatrix(RealMatrix const& lambda,std::size_t Dim
 
 RealMatrix createRandomMatrix(RealMatrix const& lambda,std::size_t Dimensions){
 	RealMatrix R = blas::randomRotationMatrix(Dimensions);
-	RealMatrix Atemp(Dimensions,Dimensions);
-	RealMatrix A(Dimensions,Dimensions);
-	axpy_prod(R,lambda,Atemp);
-	axpy_prod(Atemp,trans(R),A);
+	RealMatrix Atemp = prod(R,lambda);
+	RealMatrix A = prod(Atemp,trans(R));
 	return A;
 }
 
@@ -50,8 +48,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_Triangular_FullRank ){
 		BOOST_CHECK_EQUAL(rank,Dimensions);
 
 		//create reconstruction of A
-		RealMatrix ATest(Dimensions,Dimensions);
-		axpy_prod(R,Q,ATest);
+		RealMatrix ATest = prod(R,Q);
 		//test reconstruction error after pivoting
 		swap_rows(P,A);
 		double errorA = norm_inf(A-ATest);
@@ -64,10 +61,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_Triangular_FullRank ){
 		BOOST_CHECK_SMALL(std::abs(logDetA)-std::abs(logDetR),1.e-10);
 		
 		//test orthonormal property of Q
-		RealMatrix testIdentity(Dimensions,Dimensions);
-		axpy_prod(Q,trans(Q),testIdentity);
-		RealMatrix testIdentity2(Dimensions,Dimensions);
-		axpy_prod(trans(Q),Q,testIdentity2);
+		RealMatrix testIdentity = prod(Q,trans(Q));
+		RealMatrix testIdentity2 = prod(trans(Q),Q);
 		double errorID1 = norm_inf(testIdentity-RealIdentityMatrix(Dimensions));
 		double errorID2 = norm_inf(testIdentity2-RealIdentityMatrix(Dimensions));
 		BOOST_CHECK(!(boost::math::isnan)(errorID1));
@@ -92,8 +87,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_Rotation_FullRank ){
 		BOOST_CHECK_EQUAL(rank,Dimensions);
 
 		//create reconstruction of A
-		RealMatrix ATest(Dimensions,Dimensions);
-		axpy_prod(R,Q,ATest);
+		RealMatrix ATest = prod(R,Q);
 		//test reconstruction error after pivoting
 		swap_rows(P,A);
 		double errorA = norm_inf(A-ATest);
@@ -106,10 +100,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_Rotation_FullRank ){
 		BOOST_CHECK_SMALL(std::abs(logDetA)-std::abs(logDetR),1.e-10);
 		
 		//test orthonormal property of Q
-		RealMatrix testIdentity(Dimensions,Dimensions);
-		axpy_prod(Q,trans(Q),testIdentity);
-		RealMatrix testIdentity2(Dimensions,Dimensions);
-		axpy_prod(trans(Q),Q,testIdentity2);
+		RealMatrix testIdentity = prod(Q,trans(Q));
+		RealMatrix testIdentity2 = prod(trans(Q),Q);
 		double errorID1 = norm_inf(testIdentity-RealIdentityMatrix(Dimensions));
 		double errorID2 = norm_inf(testIdentity2-RealIdentityMatrix(Dimensions));
 		BOOST_CHECK(!(boost::math::isnan)(errorID1));
@@ -140,8 +132,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_Square_FullRank ){
 		BOOST_CHECK_EQUAL(rank,Dimensions);
 
 		//create reconstruction of A
-		RealMatrix ATest(Dimensions,Dimensions);
-		axpy_prod(R,Q,ATest);
+		RealMatrix ATest = prod(R,Q);
 		//test reconstruction error after pivoting
 		swap_rows(P,A);
 		double errorA = norm_inf(A-ATest);
@@ -155,10 +146,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_Square_FullRank ){
 		BOOST_CHECK_SMALL(std::abs(logDetA)-std::abs(logDetR),1.e-12);
 		
 		//test orthonormal property of Q
-		RealMatrix testIdentity(Dimensions,Dimensions);
-		axpy_prod(Q,trans(Q),testIdentity);
-		RealMatrix testIdentity2(Dimensions,Dimensions);
-		axpy_prod(trans(Q),Q,testIdentity2);
+		RealMatrix testIdentity = prod(Q,trans(Q));
+		RealMatrix testIdentity2 = prod(trans(Q),Q);
 		double errorID1 = norm_inf(testIdentity-RealIdentityMatrix(Dimensions));
 		double errorID2 = norm_inf(testIdentity2-RealIdentityMatrix(Dimensions));
 		BOOST_CHECK(!(boost::math::isnan)(errorID1));
@@ -192,8 +181,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_Square ){
 		BOOST_CHECK_EQUAL(rank,Dimensions-3);
 
 		//create reconstruction of A
-		RealMatrix ATest(Dimensions,Dimensions);
-		axpy_prod(R,Q,ATest);
+		RealMatrix ATest = prod(R,Q);
 		//test reconstruction error after pivoting
 		swap_rows(P,A);
 		double errorA= norm_inf(A-ATest);
@@ -201,10 +189,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_Square ){
 		BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(ATest)));//test for nans
 
 		//test orthonormal property of Q
-		RealMatrix testIdentity(Dimensions,Dimensions);
-		axpy_prod(Q,trans(Q),testIdentity);
-		RealMatrix testIdentity2(Dimensions,Dimensions);
-		axpy_prod(trans(Q),Q,testIdentity2);
+		RealMatrix testIdentity = prod(Q,trans(Q));
+		RealMatrix testIdentity2 = prod(trans(Q),Q);
 		double errorID1 = norm_inf(testIdentity-RealIdentityMatrix(Dimensions));
 		double errorID2 = norm_inf(testIdentity2-RealIdentityMatrix(Dimensions));
 		BOOST_CHECK_SMALL(errorID1,1.e-12);
@@ -232,8 +218,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankN ){
 				RTest(i,i) = 0.7*i-10;
 		}
 		
-		RealMatrix ATest(M,N);
-		axpy_prod(RTest,QTest,ATest);
+		RealMatrix ATest = prod(RTest,QTest);
 		
 		//calculate RQ decomposition from the input
 		RealMatrix R(M,N);
@@ -245,8 +230,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankN ){
 		BOOST_CHECK_EQUAL(rank,N);
 
 		//create reconstruction of A
-		RealMatrix A(M,N);
-		axpy_prod(R,Q,A);
+		RealMatrix A = prod(R,Q);
 		
 		//test reconstruction error after pivoting
 		swap_rows(P,ATest);
@@ -255,10 +239,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankN ){
 		BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(A)));//test for nans
 
 		//test orthonormal property of Q
-		RealMatrix testIdentity(N,N);
-		axpy_prod(Q,trans(Q),testIdentity);
-		RealMatrix testIdentity2(N,N);
-		axpy_prod(trans(Q),Q,testIdentity2);
+		RealMatrix testIdentity = prod(Q,trans(Q));
+		RealMatrix testIdentity2 = prod(trans(Q),Q);
 		double errorID1 = norm_inf(testIdentity-RealIdentityMatrix(N));
 		double errorID2 = norm_inf(testIdentity2-RealIdentityMatrix(N));
 		BOOST_CHECK_SMALL(errorID1,1.e-12);
@@ -283,8 +265,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankM ){
 			}
 			RTest(i,i) = 0.7*i-10;
 		}
-		RealMatrix ATest(M,N);
-		axpy_prod(RTest,QTest,ATest);
+		RealMatrix ATest = prod(RTest,QTest);
 		
 		//calculate RQ decomposition from the input
 		RealMatrix R(M,N);
@@ -296,8 +277,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankM ){
 		BOOST_CHECK_EQUAL(rank,M);
 
 		//create reconstruction of A
-		RealMatrix A(M,N);
-		axpy_prod(R,Q,A);
+		RealMatrix A = prod(R,Q);
 		
 		//test reconstruction error after pivoting
 		swap_rows(P,ATest);
@@ -306,10 +286,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankM ){
 		BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(A)));//test for nans
 
 		//test orthonormal property of Q
-		RealMatrix testIdentity(N,N);
-		axpy_prod(Q,trans(Q),testIdentity);
-		RealMatrix testIdentity2(N,N);
-		axpy_prod(trans(Q),Q,testIdentity2);
+		RealMatrix testIdentity = prod(Q,trans(Q));
+		RealMatrix testIdentity2 = prod(trans(Q),Q);
 		double errorID1 = norm_inf(testIdentity-RealIdentityMatrix(N));
 		double errorID2 = norm_inf(testIdentity2-RealIdentityMatrix(N));
 		BOOST_CHECK_SMALL(errorID1,1.e-12);
@@ -338,8 +316,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankLowerN ){
 				RTest(i,i) = 0.7*i-10;
 		}
 		
-		RealMatrix ATest(M,N);
-		axpy_prod(RTest,QTest,ATest);
+		RealMatrix ATest = prod(RTest,QTest);
 		
 		//calculate RQ decomposition from the input
 		RealMatrix R(M,N);
@@ -351,8 +328,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankLowerN ){
 		BOOST_CHECK_EQUAL(rank,Rank);
 
 		//create reconstruction of A
-		RealMatrix A(M,N);
-		axpy_prod(R,Q,A);
+		RealMatrix A = prod(R,Q);
 		
 		//test reconstruction error after pivoting
 		swap_rows(P,ATest);
@@ -361,10 +337,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankLowerN ){
 		BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(A)));//test for nans
 
 		//test orthonormal property of Q
-		RealMatrix testIdentity(N,N);
-		axpy_prod(Q,trans(Q),testIdentity);
-		RealMatrix testIdentity2(N,N);
-		axpy_prod(trans(Q),Q,testIdentity2);
+		RealMatrix testIdentity = prod(Q,trans(Q));
+		RealMatrix testIdentity2 = prod(trans(Q),Q);
 		double errorID1 = norm_inf(testIdentity-RealIdentityMatrix(N));
 		double errorID2 = norm_inf(testIdentity2-RealIdentityMatrix(N));
 		BOOST_CHECK_SMALL(errorID1,1.e-12);
@@ -392,8 +366,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankLowerM ){
 				RTest(i,i) = 0.7*i-10;
 		}
 		
-		RealMatrix ATest(M,N);
-		axpy_prod(RTest,QTest,ATest);
+		RealMatrix ATest = prod(RTest,QTest);
 		
 		//calculate RQ decomposition from the input
 		RealMatrix R(M,N);
@@ -405,8 +378,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankLowerM ){
 		BOOST_CHECK_EQUAL(rank,Rank);
 
 		//create reconstruction of A
-		RealMatrix A(M,N);
-		axpy_prod(R,Q,A);
+		RealMatrix A = prod(R,Q);
 		
 		//test reconstruction error after pivoting
 		swap_rows(P,ATest);
@@ -415,10 +387,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingRQ_DiagonalR_RankLowerM ){
 		BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(A)));//test for nans
 
 		//test orthonormal property of Q
-		RealMatrix testIdentity(N,N);
-		axpy_prod(Q,trans(Q),testIdentity);
-		RealMatrix testIdentity2(N,N);
-		axpy_prod(trans(Q),Q,testIdentity2);
+		RealMatrix testIdentity = prod(Q,trans(Q));
+		RealMatrix testIdentity2 = prod(trans(Q),Q);
 		double errorID1 = norm_inf(testIdentity-RealIdentityMatrix(N));
 		double errorID2 = norm_inf(testIdentity2-RealIdentityMatrix(N));
 		BOOST_CHECK_SMALL(errorID1,1.e-12);

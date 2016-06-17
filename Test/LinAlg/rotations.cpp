@@ -119,11 +119,9 @@ BOOST_AUTO_TEST_CASE( LinAlg_Random_Rotation_Matrix ){
 			BOOST_CHECK_SMALL(norm_2(column(R,i))-1,1.e-12);
 		}
 		
-		result.clear();
-		axpy_prod(R,trans(R),result,0);
+		noalias(result) = prod(R,trans(R));
 		double errorID1 = norm_inf(result-RealIdentityMatrix(Dimensions));
-		result.clear();
-		axpy_prod(trans(R),R,result,0);
+		noalias(result) = prod(trans(R),R);
 		double errorID2 = norm_inf(result-RealIdentityMatrix(Dimensions));
 		
 		BOOST_CHECK_SMALL(errorID1,1.e-13);

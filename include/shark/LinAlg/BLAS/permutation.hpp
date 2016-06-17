@@ -70,7 +70,7 @@ template<class V, class Permutation>
 void swap_rows_inverted(Permutation const& P, vector_expression<V>& v){
 	for(std::size_t i = P.size(); i != 0; --i){
 		std::size_t k = i-1;
-		if(k != P(k)){
+		if(k != std::size_t(P(k))){
 			using std::swap;
 			swap(v()(k),v()(P(k)));
 		}

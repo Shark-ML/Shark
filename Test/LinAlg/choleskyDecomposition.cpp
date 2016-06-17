@@ -103,9 +103,7 @@ RealMatrix createRandomMatrix(RealVector const& lambda,std::size_t Dimensions){
 	for(std::size_t i = 0; i != Dimensions; ++i){
 		column(R,i) *= std::sqrt(lambda(i));
 	}
-	RealMatrix A(Dimensions,Dimensions);
-	axpy_prod(R,trans(R),A);
-	return A;
+	return prod(R,trans(R));
 }
 
 BOOST_AUTO_TEST_CASE( LinAlg_CholeskyDecomposition ){
@@ -128,9 +126,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_CholeskyDecomposition ){
 		BOOST_CHECK_SMALL(std::abs(logDetA)-std::abs(logDetC),1.e-12);
 
 		//create reconstruction of A
-		RealMatrix ATest(Dimensions,Dimensions);
-		
-		axpy_prod(C,trans(C),ATest);
+		RealMatrix ATest = prod(C,trans(C));
 		
 		//test reconstruction error
 		double errorA = norm_inf(A-ATest);
@@ -162,11 +158,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_FullRank ){
 		BOOST_CHECK_SMALL(std::abs(logDetA)-std::abs(logDetC),1.e-12);
 
 		//create reconstruction of A
-		RealMatrix ATest(Dimensions,Dimensions);
-		
-		swap_full(P,A);
-		
-		axpy_prod(C,trans(C),ATest);
+		swap_full(P,A);		
+		RealMatrix ATest = prod(C,trans(C));
 		
 		//test reconstruction error
 		double errorA = norm_inf(A-ATest);
@@ -195,10 +188,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_PivotingCholeskyDecomposition_RankK ){
 		BOOST_CHECK_EQUAL(rank,Rank);
 
 		//create reconstruction of A
-		RealMatrix ATest(Dimensions,Dimensions);
-		
 		swap_full(P,A);
-		axpy_prod(C,trans(C),ATest);
+		RealMatrix ATest = prod(C,trans(C));
 		
 		//test reconstruction error
 		double errorA = norm_inf(A-ATest);

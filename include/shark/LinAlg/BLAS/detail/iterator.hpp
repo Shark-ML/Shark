@@ -64,20 +64,8 @@ struct bidirectional_iterator_base:
 		return tmp;
 	}
 
-	friend derived_iterator_type operator ++ (derived_iterator_type &d, int) {
-		derived_iterator_type tmp(d);
-		++ d;
-		return tmp;
-	}
-
 	derived_iterator_type operator -- (int) {
 		derived_iterator_type &d(*static_cast<const derived_iterator_type *>(this));
-		derived_iterator_type tmp(d);
-		-- d;
-		return tmp;
-	}
-
-	friend derived_iterator_type operator -- (derived_iterator_type &d, int) {
 		derived_iterator_type tmp(d);
 		-- d;
 		return tmp;
@@ -109,70 +97,91 @@ struct random_access_iterator_base
 	typedef T derived_value_type;
 	typedef std::ptrdiff_t difference_type;
 
-	// Arithmetic
-	derived_iterator_type operator ++ (int) {
-		derived_iterator_type &d(*static_cast<derived_iterator_type *>(this));
-		derived_iterator_type tmp(d);
-		++ d;
-		return tmp;
-	}
-	friend derived_iterator_type operator ++ (derived_iterator_type &d, int) {
-		derived_iterator_type tmp(d);
-		++ d;
-		return tmp;
-	}
-
-	derived_iterator_type operator -- (int) {
-		derived_iterator_type &d(*static_cast<derived_iterator_type *>(this));
-		derived_iterator_type tmp(d);
-		-- d;
-		return tmp;
-	}
-	friend derived_iterator_type operator -- (derived_iterator_type &d, int) {
-		derived_iterator_type tmp(d);
-		-- d;
-		return tmp;
-	}
-
-	derived_iterator_type operator + (difference_type n) const {
-		derived_iterator_type tmp(*static_cast<const derived_iterator_type *>(this));
+	//~ I operator + (difference_type n) const {
+		//~ I tmp(*static_cast<const I *>(this));
+		//~ return tmp += n;
+	//~ }
+	//~ I operator - (difference_type n) const {
+		//~ I tmp(*static_cast<const I *>(this));
+		//~ return tmp -= n;
+	//~ }
+	friend I operator + (random_access_iterator_base const& it, difference_type n) {
+		I tmp(static_cast<const I&>(it));
 		return tmp += n;
 	}
-	friend derived_iterator_type operator + (const derived_iterator_type &d, difference_type n) {
-		derived_iterator_type tmp(d);
-		return tmp += n;
-	}
-	friend derived_iterator_type operator + (difference_type n, const derived_iterator_type &d) {
-		derived_iterator_type tmp(d);
-		return tmp += n;
-	}
-	derived_iterator_type operator - (difference_type n) const {
-		derived_iterator_type tmp(*static_cast<const derived_iterator_type *>(this));
+	friend I operator - (random_access_iterator_base const& it, difference_type n) {
+		I tmp(static_cast<const I&>(it));
 		return tmp -= n;
 	}
-	friend derived_iterator_type operator - (const derived_iterator_type &d, difference_type n) {
-		derived_iterator_type tmp(d);
+	
+	friend I operator + (difference_type n, random_access_iterator_base const& it) {
+		I tmp(static_cast<const I&>(it));
+		return tmp += n;
+	}
+	friend I operator - (difference_type n, random_access_iterator_base const& it) {
+		I tmp(static_cast<const I&>(it));
 		return tmp -= n;
-	}
-
-	// Comparison
-	bool operator != (const derived_iterator_type &it) const {
-		const derived_iterator_type *d = static_cast<const derived_iterator_type *>(this);
-		return !(*d == it);
-	}
-	bool operator <= (const derived_iterator_type &it) const {
-		const derived_iterator_type *d = static_cast<const derived_iterator_type *>(this);
-		return !(it < *d);
-	}
-	bool operator >= (const derived_iterator_type &it) const {
-		const derived_iterator_type *d = static_cast<const derived_iterator_type *>(this);
-		return !(*d < it);
-	}
-	bool operator > (const derived_iterator_type &it) const {
-		const derived_iterator_type *d = static_cast<const derived_iterator_type *>(this);
-		return it < *d;
 	}
 };
+//arithmetic for random_access_iterators
+template<class I, class T, class Tag>
+I operator ++ (random_access_iterator_base<I,T,Tag>& it,int) {
+	I& d = static_cast<I&>(it);
+	I tmp(d);
+	++ d;
+	return tmp;
+}
+
+template<class I, class T, class Tag>
+I operator -- (random_access_iterator_base<I,T,Tag>& it,int) {
+	I& d = static_cast<I&>(it);
+	I tmp(d);
+	-- d;
+	return tmp;
+}
+
+
+// Comparison of random_access_iterators
+template<class I1, class T1, class I2, class T2, class Tag>
+bool operator != (
+	random_access_iterator_base<I1,T1,Tag> const& it1, 
+	random_access_iterator_base<I2,T2,Tag> const& it2
+){
+	I1 const& d1 = static_cast<const I1&>(it1);
+	I2 const& d2 = static_cast<const I2&>(it2);
+	
+	return !(d1 == d2);
+}
+template<class I1, class T1, class I2, class T2, class Tag>
+bool operator <= (
+	random_access_iterator_base<I1,T1,Tag> const& it1, 
+	random_access_iterator_base<I2,T2,Tag> const& it2
+){
+	I1 const& d1 = static_cast<const I1&>(it1);
+	I2 const& d2 = static_cast<const I2&>(it2);
+	
+	return !(d2 < d1);
+}
+template<class I1, class T1, class I2, class T2, class Tag>
+bool operator >= (
+	random_access_iterator_base<I1,T1,Tag> const& it1, 
+	random_access_iterator_base<I2,T2,Tag> const& it2
+){
+	I1 const& d1 = static_cast<const I1&>(it1);
+	I2 const& d2 = static_cast<const I2&>(it2);
+	
+	return !(d1 < d2);
+}
+template<class I1, class T1, class I2, class T2, class Tag>
+bool operator > (
+	random_access_iterator_base<I1,T1,Tag> const& it1, 
+	random_access_iterator_base<I2,T2,Tag> const& it2
+){
+	I1 const& d1 = static_cast<const I1&>(it1);
+	I2 const& d2 = static_cast<const I2&>(it2);
+
+	return d2 < d1;
+}
 //traits lass for choosing the right base for wrapping iterators
 
 template<class IC>
@@ -291,7 +300,7 @@ private:
 template<class T, class Tag=dense_random_access_iterator_tag>
 class dense_storage_iterator:
 public random_access_iterator_base<
-	dense_storage_iterator<T>,
+	dense_storage_iterator<T,Tag>,
 	typename std::remove_const<T>::type, 
 	Tag
 >{
@@ -308,11 +317,11 @@ public:
 	:m_pos(pos), m_index(index), m_stride(stride) {}
 	
 	template<class U>
-	dense_storage_iterator(dense_storage_iterator<U> const& iter)
+	dense_storage_iterator(dense_storage_iterator<U,Tag> const& iter)
 	:m_pos(iter.m_pos), m_index(iter.m_index), m_stride(iter.m_stride){}
 		
 	template<class U>
-	dense_storage_iterator& operator=(dense_storage_iterator<U> const& iter){
+	dense_storage_iterator& operator=(dense_storage_iterator<U,Tag> const& iter){
 		m_pos = iter.m_pos;
 		m_index = iter.m_index;
 		m_stride = iter.m_stride;
@@ -341,7 +350,7 @@ public:
 		return *this;
 	}
 	template<class U>
-	difference_type operator - (dense_storage_iterator<U> const& it) const {
+	difference_type operator - (dense_storage_iterator<U,Tag> const& it) const {
 		//RANGE_CHECK(m_pos == it.m_pos);
 		return (difference_type)m_index - (difference_type)it.m_index;
 	}
@@ -361,13 +370,13 @@ public:
 
 	// Comparison
 	template<class U>
-	bool operator == (dense_storage_iterator<U> const& it) const {
+	bool operator == (dense_storage_iterator<U,Tag> const& it) const {
 		//RANGE_CHECK(m_pos == it.m_pos);
 		//~ RANGE_CHECK(m_index < it.m_index);
 		return m_index == it.m_index;
 	}
 	template<class U>
-	bool operator <  (dense_storage_iterator<U> const& it) const {
+	bool operator <  (dense_storage_iterator<U,Tag> const& it) const {
 		//RANGE_CHECK(m_pos == it.m_pos);
 		return m_index < it.m_index;
 	}
