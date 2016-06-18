@@ -93,7 +93,8 @@ public:
 		
 	/// \brief Move-constructor of a vector
 	/// \param v is the vector to be moved
-	vector(vector && v) = default;
+	//~ vector(vector && v) = default; //vc++ can not default this. true story
+	vector(vector && v): m_storage(std::move(v.m_storage)){}
 		
 	vector(std::initializer_list<T>  list) : m_storage(list.begin(),list.end()){}
 
@@ -117,7 +118,11 @@ public:
 	/// \brief Move-Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
 	/// \param v is the source vector container
 	/// \return a reference to a vector (i.e. the destination vector)
-	vector& operator = (vector && v) = default;
+	//~ vector& operator = (vector && v) = default; //vc++ can not default this. true story
+	vector& operator = (vector && v){
+		m_storage = std::move(v.m_storage);
+		return *this;
+	}
 	
 	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
 	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
@@ -391,7 +396,7 @@ public:
 	// Construction and assignment
 	vectorN() = default;
 	vectorN(vectorN const& v) = default;
-	vectorN(vectorN&& v) = default;
+	//~ vectorN(vectorN&& v) = default;
 	template<class... Init>
 	vectorN(Init&&... init):m_storage({T(init)...}){
 		static_assert(sizeof...(Init) == N, "initialisation must have same number of elements as array size");

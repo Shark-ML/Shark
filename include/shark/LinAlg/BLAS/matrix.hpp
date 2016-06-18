@@ -116,11 +116,12 @@ public:
 
 	/// \brief Copy-constructor of a dense matrix
 	///\param m is a dense matrix
-	matrix(const matrix& m) = default;
+	matrix(matrix const& m) = default;
 			
 	/// \brief Move-constructor of a dense matrix
 	///\param m is a dense matrix
-	matrix(matrix&& m) = default;
+	//~ matrix(matrix&& m) = default; //vc++ can not default this
+	matrix(matrix&& m):m_size1(m.m_size1), m_size2(m.m_size2), m_data(std::move(m.m_data)){}
 
 	/// \brief Constructor of a dense matrix from a matrix expression.
 	/// 
@@ -142,7 +143,14 @@ public:
 	matrix& operator = (matrix const& m) = default;
 	
 	/// \brief Move-Assigns m to this
-	matrix& operator = (matrix&& m) = default;
+	//~ matrix& operator = (matrix&& m) = default;//vc++ can not default this
+	matrix& operator = (matrix&& m) {
+		m_size1 = m.m_size1;
+		m_size2 = m.m_size2;
+		m_data = std::move(m.m_data);
+		return *this;
+	}
+
 	
 	/// \brief Assigns m to this
 	/// 
