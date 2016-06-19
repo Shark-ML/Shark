@@ -32,8 +32,7 @@
 #ifndef SHARK_STATISTICS_MULTINOMIALDISTRIBUTION_H
 #define SHARK_STATISTICS_MULTINOMIALDISTRIBUTION_H
 
-#include <shark/LinAlg/eigenvalues.h>
-#include <shark/LinAlg/Cholesky.h>
+#include <shark/LinAlg/Base.h>
 #include <shark/Rng/GlobalRng.h>
 
 namespace shark {
