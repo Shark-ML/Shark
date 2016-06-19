@@ -61,11 +61,11 @@ void testClassification(Dataset const& dataset, double lambda, unsigned int epoc
 	
 	trainer.setLambda(lambda);
 	trainer.setEpochs(epochs);
-	trainer.setLearningRate(0.1);
+	//~ trainer.setLearningRate(0.1);
 	trainer.setTrainOffset(trainOffset);
 	BOOST_CHECK_CLOSE(trainer.lambda(),lambda,1.e-10);
 	BOOST_CHECK_EQUAL(trainer.epochs(),epochs);
-	BOOST_CHECK_CLOSE(trainer.learningRate(),0.1,1.e-10);
+	//~ BOOST_CHECK_CLOSE(trainer.learningRate(),0.1,1.e-10);
 	BOOST_CHECK_EQUAL(trainer.trainOffset(),trainOffset);
 	
 	trainer.train(model, dataset);
@@ -99,11 +99,11 @@ void testRegression(Dataset const& dataset, double lambda, unsigned int epochs, 
 	
 	trainer.setLambda(lambda);
 	trainer.setEpochs(epochs);
-	trainer.setLearningRate(0.01);
+	//~ trainer.setLearningRate(0.01);
 	trainer.setTrainOffset(trainOffset);
 	BOOST_CHECK_CLOSE(trainer.lambda(),lambda,1.e-10);
 	BOOST_CHECK_EQUAL(trainer.epochs(),epochs);
-	BOOST_CHECK_CLOSE(trainer.learningRate(),0.01,1.e-10);
+	//~ BOOST_CHECK_CLOSE(trainer.learningRate(),0.01,1.e-10);
 	BOOST_CHECK_EQUAL(trainer.trainOffset(),trainOffset);
 	
 	trainer.train(model, dataset);

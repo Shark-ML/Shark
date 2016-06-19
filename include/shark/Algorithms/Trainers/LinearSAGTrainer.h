@@ -108,7 +108,6 @@ public:
 	, m_lambda(lambda)
 	, m_offset(offset)
 	, m_maxEpochs(0)
-	, m_eta(0.01)
 	{ }
 
 	/// \brief From INameable: return the class name.
@@ -147,15 +146,6 @@ public:
 	/// \brief Sets whether the model to be trained should include an offset term.
 	void setTrainOffset(bool offset)
 	{ m_offset = offset;}
-	
-	/// \brief Returns the constant learning rate used by the algorithm
-	double learningRate()const{
-		return m_eta;
-	}
-	/// \brief Sets the constant learning rate used by the algorithm.
-	void setLearningRate(double eta){
-		m_eta = eta;
-	}
 
 	/// \brief Returns the vector of hyper-parameters(same as lambda)
 	RealVector parameterVector() const
@@ -177,83 +167,47 @@ public:
 	}
 
 private:
+	//initializes the model in the classification case and calls iterate to train it
 	void trainImpl(
 		LinearClassifier<InputType>& classifier,
 		WeightedLabeledData<InputType, unsigned int> const& dataset,
 		AbstractLoss<unsigned int,RealVector> const& loss
 	){
-		//get elementwise access to the dataset and obtain its stats
-		DataView<LabeledData<InputType, unsigned int> const> data(dataset.data());
-		std::size_t ell = data.size();
+		//initialize model
 		std::size_t classes = numberOfClasses(dataset);
 		if(classes == 2) classes = 1;//special case: 2D classification is always encoded by the sign of the output
 		std::size_t dim = inputDimension(dataset);
-		
-		//initialize model
 		auto& model = classifier.decisionFunction();
 		model.setStructure(dim,classes, m_offset);
-		RealMatrix& matrix = model.matrix();
-
-		//set number of iterations
-		std::size_t iterations = m_maxEpochs * ell;
-		if(m_maxEpochs == 0)
-			iterations = std::max(10 * ell, std::size_t(std::ceil(dim * ell)));
 		
-		//picking distribution picks proportional to weight
-		RealVector probabilities = createBatch(dataset.weights().elements());
-		probabilities /= sum(probabilities);
-		MultiNomialDistribution dist(probabilities);
-			
-		//variables used for the SAG loop
-		RealMatrix gradD(classes,ell,0); // gradients of regularized loss minimization with a linear model have the form sum_i D_i*x_i. We store the last acquired estimate
-		RealMatrix grad(classes,dim);// gradient of the weight matrix.
-		RealVector gradOffset(classes,0); //sum_i D_i, gradient estimate for the offset
-		// preinitialize everything to prevent costly memory allocations in the loop
-		RealVector f_b(classes, 0.0); // prediction of the model
-		RealVector derivative(classes, 0.0); //derivative of the loss
-
-		// SAG loop
-		for(std::size_t iter = 0; iter < iterations; iter++)
-		{
-			// choose data point
-			std::size_t b = dist(Rng::globalRng);
-			
-			// compute prediction
-			noalias(f_b) = prod(matrix, data[b].input);
-			if(m_offset) noalias(f_b) += model.offset();
-			
-			// compute loss gradient
-			loss.evalDerivative(data[b].label, f_b, derivative);
-			
-			//update gradient
-			noalias(grad) += probabilities(b) * outer_prod(derivative-column(gradD,b), data[b].input);
-			if(m_offset) noalias(gradOffset) += probabilities(b) *(derivative-column(gradD,b));
-			noalias(column(gradD,b)) = derivative; //we got a new estimate for D of element b.
-			
-			// update gradient
-			//~ noalias(matrix) *= 1 - m_eta * m_lambda;//2-norm regularization
-			noalias(matrix) -= m_eta * m_lambda * matrix;//2-norm regularization
-			noalias(matrix) -= m_eta * grad;
-			if(m_offset) noalias(model.offset()) -= m_eta * gradOffset;
-		}
+		iterate(model,dataset,loss);
 	}
-	
-	template<class LabelT>//template parameter prevents problems when LabelType is unsigned int
+	//initializes the model in the regression case and calls iterate to train it
+	template<class LabelT>
 	void trainImpl(
 		LinearModel<InputType>& model,
 		WeightedLabeledData<InputType, LabelT> const& dataset,
 		AbstractLoss<LabelT,RealVector> const& loss
 	){
-		//get elementwise access to the dataset and obtain its stats
-		DataView<LabeledData<InputType, LabelT> const> data(dataset.data());
-		std::size_t ell = data.size();
+		//initialize model
 		std::size_t labelDim = labelDimension(dataset);
 		std::size_t dim = inputDimension(dataset);
-		
-		//initialize model
 		model.setStructure(dim,labelDim, m_offset);
-		RealMatrix& matrix = model.matrix();
-
+		iterate(model,dataset,loss);
+	}
+	
+	void iterate(
+		LinearModel<InputType>& model,
+		WeightedLabeledData<InputType, LabelType> const& dataset,
+		AbstractLoss<LabelType,RealVector> const& loss
+	){
+		
+		//get stats of the dataset
+		DataView<LabeledData<InputType, LabelType> const> data(dataset.data());
+		std::size_t ell = data.size();
+		std::size_t labelDim = model.outputSize();
+		std::size_t dim = model.inputSize();
+		
 		//set number of iterations
 		std::size_t iterations = m_maxEpochs * ell;
 		if(m_maxEpochs == 0)
@@ -268,10 +222,15 @@ private:
 		RealMatrix gradD(labelDim,ell,0); // gradients of regularized loss minimization with a linear model have the form sum_i D_i*x_i. We store the last acquired estimate
 		RealMatrix grad(labelDim,dim);// gradient of the weight matrix.
 		RealVector gradOffset(labelDim,0); //sum_i D_i, gradient estimate for the offset
+		RealVector pointNorms(ell); //norm of each point in the dataset
+		for(std::size_t  i = 0; i != ell; ++i){
+			pointNorms(i) = norm_sqr(data[i].input);
+		}
 		// preinitialize everything to prevent costly memory allocations in the loop
 		RealVector f_b(labelDim, 0.0); // prediction of the model
 		RealVector derivative(labelDim, 0.0); //derivative of the loss
-
+		double L = 1; // initial estimate for the lipschitz-constant
+		
 		// SAG loop
 		for(std::size_t iter = 0; iter < iterations; iter++)
 		{
@@ -279,11 +238,11 @@ private:
 			std::size_t b = dist(Rng::globalRng);
 			
 			// compute prediction
-			noalias(f_b) = prod(matrix, data[b].input);
+			noalias(f_b) = prod(model.matrix(), data[b].input);
 			if(m_offset) noalias(f_b) += model.offset();
 			
 			// compute loss gradient
-			loss.evalDerivative(data[b].label, f_b, derivative);
+			double currentValue = loss.evalDerivative(data[b].label, f_b, derivative);
 			
 			//update gradient
 			noalias(grad) += probabilities(b) * outer_prod(derivative-column(gradD,b), data[b].input);
@@ -291,10 +250,19 @@ private:
 			noalias(column(gradD,b)) = derivative; //we got a new estimate for D of element b.
 			
 			// update gradient
-			//~ noalias(matrix) *= 1 - m_eta * m_lambda;//2-norm regularization
-			noalias(matrix) -= m_eta * m_lambda * matrix;//2-norm regularization
-			noalias(matrix) -= m_eta * grad;
-			if(m_offset) noalias(model.offset()) -= m_eta * gradOffset;
+			double eta = 1/(L+m_lambda);
+			noalias(model.matrix()) *= 1 - eta * m_lambda;//2-norm regularization
+			noalias(model.matrix()) -= eta * grad;
+			if(m_offset) noalias(model.offset()) -= eta * gradOffset;
+			
+			//line-search procedure, 4.6 in the paper
+			noalias(f_b) -= derivative/L*pointNorms(b);
+			double newValue = loss.eval(data[b].label, f_b);
+			if(newValue > currentValue - 1/(2*L)*norm_sqr(derivative)*pointNorms(b)){
+				L *= 2;
+			}
+			L*= std::pow(2.0,-1.0/ell);//allow L to slightly shrink in case our initial estimate was too large
+			
 		}
 	}
 	
@@ -302,7 +270,6 @@ private:
 	double m_lambda;                          ///< regularization parameter
 	bool m_offset;                            ///< should the resulting model have an offset term?
 	std::size_t m_maxEpochs;                  ///< number of training epochs (sweeps over the data), or 0 for default = max(10, C)
-	double m_eta;                             ///< the used learning rate
 };
 
 }
