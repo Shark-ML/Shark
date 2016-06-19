@@ -62,8 +62,8 @@ public:
 
 	// Construction and destruction
 	// May be used as mutable expression.
-	vector_scalar_multiply(vector_expression<E> const &e, scalar_type scalar):
-		m_expression(e()), m_scalar(scalar) {}
+	vector_scalar_multiply(expression_closure_type const& e, scalar_type scalar):
+		m_expression(e), m_scalar(scalar) {}
 
 	// Accessors
 	size_type size() const {
@@ -125,7 +125,7 @@ typename boost::enable_if<
 >::type
 operator* (vector_expression<E> const& e, T scalar){
 	typedef typename E::scalar_type scalar_type;
-	return vector_scalar_multiply<E>(e, scalar_type(scalar));
+	return vector_scalar_multiply<E>(e(), scalar_type(scalar));
 }
 template<class T, class E>
 typename boost::enable_if<
@@ -134,13 +134,13 @@ typename boost::enable_if<
 >::type
 operator* (T scalar, vector_expression<E> const& e){
 	typedef typename E::scalar_type scalar_type;
-	return vector_scalar_multiply<E>(e, scalar_type(scalar));//explicit cast prevents warning, alternative would be to template vector_scalar_multiply on T as well
+	return vector_scalar_multiply<E>(e(), scalar_type(scalar));//explicit cast prevents warning, alternative would be to template vector_scalar_multiply on T as well
 }
 
 template<class E>
 vector_scalar_multiply<E> operator-(vector_expression<E> const& e){
 	typedef typename E::scalar_type scalar_type;
-	return vector_scalar_multiply<E>(e, scalar_type(-1));//explicit cast prevents warning, alternative would be to template vector_scalar_multiply on T as well
+	return vector_scalar_multiply<E>(e(), scalar_type(-1));//explicit cast prevents warning, alternative would be to template vector_scalar_multiply on T as well
 }
 	
 /// \brief Vector expression representing a constant valued vector.

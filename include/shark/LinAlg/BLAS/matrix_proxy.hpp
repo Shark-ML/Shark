@@ -937,7 +937,7 @@ public:
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
-	matrix_vector_range(matrix_type& expression, range const&r1, range const&r2):
+	matrix_vector_range(matrix_closure_type const& expression, range const&r1, range const&r2):
 		m_expression(expression), m_range1(r1), m_range2(r2) {
 		SIZE_CHECK (m_range1.start() <= expression.size1());
 		SIZE_CHECK (m_range1.start() + m_range1.size () <= expression.size1());
