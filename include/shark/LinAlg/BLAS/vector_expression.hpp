@@ -55,7 +55,7 @@ public:
 	typedef typename E::const_index_pointer const_index_pointer;
 	typedef typename index_pointer<E>::type index_pointer;
 
-	typedef self_type const const_closure_type;
+	typedef self_type const_closure_type;
 	typedef self_type closure_type;
 	typedef unknown_storage_tag storage_category;
 	typedef typename E::evaluation_category evaluation_category;
@@ -242,7 +242,7 @@ public:
 	typedef typename E::const_index_pointer const_index_pointer;
 	typedef typename index_pointer<E>::type index_pointer;
 
-	typedef self_type const const_closure_type;
+	typedef self_type const_closure_type;
 	typedef self_type closure_type;
 	typedef unknown_storage_tag storage_category;
 	typedef typename E::evaluation_category evaluation_category;
@@ -401,8 +401,8 @@ public:
 	typedef typename E1::const_closure_type expression_closure1_type;
 	typedef typename E2::const_closure_type expression_closure2_type;
 	
-	typedef vector_addition<E1,E2> const_closure_type;
-	typedef const_closure_type closure_type;
+	typedef vector_addition const_closure_type;
+	typedef vector_addition closure_type;
 	typedef unknown_storage_tag storage_category;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 
@@ -572,7 +572,7 @@ public:
 	typedef typename E1::const_closure_type expression_closure1_type;
 	typedef typename E2::const_closure_type expression_closure2_type;
 	
-	typedef self_type const const_closure_type;
+	typedef self_type const_closure_type;
 	typedef self_type closure_type;
 	typedef unknown_storage_tag storage_category;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;

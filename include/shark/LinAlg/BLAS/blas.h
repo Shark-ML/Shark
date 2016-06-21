@@ -40,7 +40,6 @@
 #include <shark/LinAlg/BLAS/matrix_expression.hpp>
 #include <shark/LinAlg/BLAS/vector_proxy.hpp>
 #include <shark/LinAlg/BLAS/matrix_proxy.hpp>
-#include <shark/LinAlg/BLAS/operation.hpp>
 #include <shark/LinAlg/BLAS/permutation.hpp>
 #include <shark/LinAlg/BLAS/io.hpp>
 
