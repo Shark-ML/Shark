@@ -36,7 +36,6 @@
 #include <shark/LinAlg/BLAS/vector_sparse.hpp>
 #include <shark/LinAlg/BLAS/vector_expression.hpp>
 #include <shark/LinAlg/BLAS/matrix.hpp>
-#include <shark/LinAlg/BLAS/matrix_set.hpp>
 #include <shark/LinAlg/BLAS/matrix_sparse.hpp>
 #include <shark/LinAlg/BLAS/matrix_expression.hpp>
 #include <shark/LinAlg/BLAS/vector_proxy.hpp>

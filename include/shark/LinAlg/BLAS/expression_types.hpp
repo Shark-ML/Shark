@@ -92,31 +92,6 @@ struct matrix_expression {
 	}
 };
 
-/** \brief Base class for expressions of matrix sets
- *
- * The matrix set expression type is similar to a tensor type. However it behaves
- * like a vector of matrices with elements of the vector being matrices. Moreover
- * all usual operations can be used. There is no distinction to the sizes of the matrices
- * and all matrices may have different dimensionalities.
- *
- * it does not model the Matrix Expression concept but all derived types should.
- * The class defines a common base type and some common interface for all
- * statically derived Matrix Expression classes
- * We iboost::mplement the casts to the statically derived type.
- */
-template<class E>
-struct matrix_set_expression {
-	typedef E expression_type;
-
-	const expression_type &operator()() const {
-		return *static_cast<const expression_type *>(this);
-	}
-
-	expression_type &operator()() {
-		return *static_cast<expression_type *>(this);
-	}
-};
-
 /** \brief Base class for expressions of vector sets
  *
  * The vector set expression type is similar to a matrix type. However it behaves

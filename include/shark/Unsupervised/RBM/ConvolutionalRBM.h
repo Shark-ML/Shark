@@ -61,7 +61,7 @@ private:
 	std::size_t m_inputSize2;
 
 	/// \brief The weight matrix connecting hidden and visible layer.
-	blas::matrix_set<RealMatrix> m_filters;
+	std::vector<RealMatrix> m_filters;
 
 	///The layer of hidden Neurons
 	HiddenType m_hiddenNeurons;
@@ -162,8 +162,8 @@ public:
 		std::size_t numVisible = newInputSize1*newInputSize2;
 		std::size_t numHidden = (newInputSize1-filterSize+1)*(newInputSize2-filterSize+1)*newNumFilters;
 		
-		m_filters= blas::matrix_set<RealMatrix>(newNumFilters,filterSize,filterSize);
 		m_filters.clear();
+		m_filters.resize(newNumFilters,RealMatrix(filterSize,filterSize,0.0));
 		
 		m_hiddenNeurons.resize(numHidden);
 		m_visibleNeurons.resize(numVisible);
@@ -216,11 +216,11 @@ public:
 	}
 	
 	///\brief Returns the weight matrix connecting the layers.
-	blas::matrix_set<RealMatrix>& filters(){
+	std::vector<RealMatrix>& filters(){
 		return m_filters;
 	}
 	///\brief Returns the weight matrix connecting the layers.
-	blas::matrix_set<RealMatrix> const& weightMatrix()const{
+	std::vector<RealMatrix> const& weightMatrix()const{
 		return m_filters;
 	}
 	

@@ -43,14 +43,13 @@ class ConvolutionalEnergyGradient{
 public:	
 	ConvolutionalEnergyGradient(RBM const* rbm)
 	: mpe_rbm(rbm)
-	, m_deltaWeights(rbm->numFilters(),rbm->filterSize1(), rbm->filterSize2())
+	, m_deltaWeights(rbm->numFilters(),RealMatrix(rbm->filterSize1(), rbm->filterSize2(),0.0))
 	, m_logWeightSum(-std::numeric_limits<double>::infinity()){
 		SHARK_CHECK(mpe_rbm != 0, "rbm is not allowed to be 0");
 		std::size_t const hiddenParameters = rbm->hiddenNeurons().numberOfParameters();
 		std::size_t const visibleParameters = rbm->visibleNeurons().numberOfParameters();
 		m_deltaBiasHidden.resize(hiddenParameters);
 		m_deltaBiasVisible.resize(visibleParameters);
-		m_deltaWeights.clear();
 	}
 	
 	///\brief Calculates the weighted expectation of the energy gradient with respect to p(h|v) for a complete Batch.
@@ -191,7 +190,7 @@ public:
 	
 private:
 	RBM const* mpe_rbm; //structure of the corresponding RBM
-	blas::matrix_set<RealMatrix> m_deltaWeights; //stores the average of the derivatives with respect to the weights
+	std::vector<RealMatrix> m_deltaWeights; //stores the average of the derivatives with respect to the weights
 	RealVector m_deltaBiasHidden; //stores the average of the derivative with respect to the hidden biases
 	RealVector m_deltaBiasVisible; //stores the average of the derivative with respect to the visible biases
 	double m_logWeightSum; //log of sum of weights. Usually equal to the log of the number of samples used.
@@ -204,10 +203,8 @@ private:
 		std::size_t responseSize1 = mpe_rbm->responseSize1();
 		std::size_t responseSize2 = mpe_rbm->responseSize2();
 		for(std::size_t i = 0; i != hiddens.size1();++i){
-			blas::dense_matrix_adaptor<double const> visible = 
-				to_matrix(row(visibles,i),mpe_rbm->inputSize1(),mpe_rbm->inputSize2());
-			blas::dense_matrix_adaptor<double const> hidden = 
-				to_matrix(row(hiddens,i),numFilters*responseSize1,responseSize2);
+			auto visible = to_matrix(row(visibles,i),mpe_rbm->inputSize1(),mpe_rbm->inputSize2());
+			auto hidden = to_matrix(row(hiddens,i),numFilters*responseSize1,responseSize2);
 			
 			for (std::size_t x1=0; x1 != responseSize1; ++x1) {
 				for(std::size_t x2=0; x2 != responseSize2; ++x2) {

@@ -548,10 +548,6 @@ noalias_proxy<C> noalias(vector_expression<C>& lvalue) {
 }
 
 template <class C>
-noalias_proxy<C> noalias(matrix_set_expression<C>& lvalue) {
-	return noalias_proxy<C> (lvalue());
-}
-template <class C>
 noalias_proxy<C> noalias(vector_set_expression<C>& lvalue) {
 	return noalias_proxy<C> (lvalue());
 }
