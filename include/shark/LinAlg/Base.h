@@ -47,7 +47,7 @@
 #include <shark/LinAlg/Initialize.h>
 #include <shark/LinAlg/Tools.h>
 #include <shark/LinAlg/Metrics.h>
-
+//this ensures, that Sequence is serializable
 #include <boost/serialization/deque.hpp>
 #include <deque>
 
@@ -80,48 +80,6 @@ namespace shark{
 	typedef blas::matrix_range< const Compressed##prefix##Matrix > ConstCompressed##prefix##SubMatrix;\
 	typedef blas::diagonal_matrix<blas::vector< basetype > > prefix##DiagonalMatrix;
 
-#define SHARK_VECTOR_MATRIX_ASSIGNMENT(prefix) \
-	template<> struct VectorMatrixTraits< prefix##Vector >{ \
-		typedef prefix##Matrix MatrixType;\
-		typedef prefix##Matrix DenseMatrixType;\
-		typedef prefix##Vector VectorType;\
-		typedef prefix##Vector DenseVectorType;\
-		typedef prefix##VectorRange SubType;\
-		typedef prefix##VectorRange DenseSubType;\
-		typedef Const##prefix##VectorRange ConstSubType;\
-		typedef Const##prefix##VectorRange ConstDenseSubType;\
-	};\
-	template<> struct VectorMatrixTraits< Compressed##prefix##Vector >{ \
-		typedef Compressed##prefix##Matrix MatrixType;\
-		typedef prefix##Matrix DenseMatrixType;\
-		typedef Compressed##prefix##Vector VectorType;\
-		typedef prefix##Vector DenseVectorType;\
-		typedef Compressed##prefix##VectorRange SubType;\
-		typedef prefix##VectorRange DenseSubType;\
-		typedef ConstCompressed##prefix##VectorRange ConstSubType;\
-		typedef Const##prefix##VectorRange ConstDenseSubType;\
-	};\
-	template<> struct VectorMatrixTraits< prefix##VectorRange > { \
-		typedef prefix##Matrix MatrixType;\
-		typedef prefix##Matrix DenseMatrixType;\
-		typedef prefix##Vector VectorType;\
-		typedef prefix##Vector DenseVectorType;\
-		typedef prefix##VectorRange SubType;\
-		typedef prefix##VectorRange DenseSubType;\
-		typedef Const##prefix##VectorRange ConstSubType;\
-		typedef Const##prefix##VectorRange ConstDenseSubType;\
-	};\
-	template<> struct VectorMatrixTraits< Compressed##prefix##VectorRange > { \
-		typedef Compressed##prefix##Matrix MatrixType;\
-		typedef prefix##Matrix DenseMatrixType;\
-		typedef Compressed##prefix##Vector VectorType;\
-		typedef prefix##Vector DenseVectorType;\
-		typedef Compressed##prefix##VectorRange SubType;\
-		typedef prefix##VectorRange DenseSubType;\
-		typedef ConstCompressed##prefix##VectorRange ConstSubType;\
-		typedef Const##prefix##VectorRange ConstDenseSubType;\
-	};
-
 	SHARK_VECTOR_MATRIX_TYPEDEFS(long double, BigReal);
 	SHARK_VECTOR_MATRIX_TYPEDEFS(double, Real)
 	SHARK_VECTOR_MATRIX_TYPEDEFS(float, Float)
@@ -131,33 +89,8 @@ namespace shark{
         SHARK_VECTOR_MATRIX_TYPEDEFS(bool, Bool);
 #undef SHARK_VECTOR_MATRIX_TYPEDEFS
 
-///\brief Template which finds for every Vector type the best fitting Matrix.
-///
-///As default a RealMatrix is used
-template<class VectorType>
-struct VectorMatrixTraits {
-	typedef RealMatrix MatrixType;
-	typedef RealMatrix DenseMatrixType;
-	typedef RealVector SuperType;
-	typedef RealVector DenseSuperType;
-	typedef RealVectorRange SubType;
-	typedef RealVectorRange DenseSubType;
-	typedef ConstRealVectorRange ConstSubType;
-	typedef ConstRealVectorRange ConstDenseSubType;
-};
-
 typedef blas::range Range;
 typedef blas::permutation_matrix PermutationMatrix;
-
-SHARK_VECTOR_MATRIX_ASSIGNMENT(BigReal);
-SHARK_VECTOR_MATRIX_ASSIGNMENT(Real)
-SHARK_VECTOR_MATRIX_ASSIGNMENT(Float)
-SHARK_VECTOR_MATRIX_ASSIGNMENT(Complex)
-SHARK_VECTOR_MATRIX_ASSIGNMENT(Int)
-SHARK_VECTOR_MATRIX_ASSIGNMENT(UInt)
-SHARK_VECTOR_MATRIX_ASSIGNMENT(Bool)
-
-//this ensures, that Sequence is serializable
 
 ///Type of Data sequences.
 typedef std::deque<RealVector> Sequence;

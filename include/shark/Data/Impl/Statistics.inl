@@ -77,7 +77,7 @@ void meanvar
 template<class Vec1T,class Vec2T,class MatT>
 void meanvar
 (
-	const Data<Vec1T>& data,
+	Data<Vec1T> const& data,
 	blas::vector_container<Vec2T>& meanVec,
 	blas::matrix_container<MatT>& covariance
 ){
@@ -162,7 +162,7 @@ VectorType mean(Data<VectorType> const& data){
  *      \return the variance vector of \em x
  */
 template<class VectorType>
-VectorType variance(const Data<VectorType>& data)
+VectorType variance(Data<VectorType> const& data)
 {
 	RealVector m;   // vector of mean values.
 	RealVector v;   // vector of variance values
@@ -191,7 +191,7 @@ VectorType variance(const Data<VectorType>& data)
  *  \return \f$N \times N\f$ matrix of covariance values.
  */
 template<class VectorType>
-typename VectorMatrixTraits<VectorType>::DenseMatrixType covariance(const Data<VectorType>& data) {
+blas::matrix<typename VectorType::value_type> covariance(Data<VectorType> const& data) {
 	RealVector mean;
 	RealMatrix covariance;
 	meanvar(data,mean,covariance);

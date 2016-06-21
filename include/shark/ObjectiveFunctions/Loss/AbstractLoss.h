@@ -62,7 +62,7 @@ public:
 	typedef AbstractCost<LabelT, OutputT> base_type;
 	typedef OutputT OutputType;
 	typedef LabelT LabelType;
-	typedef typename VectorMatrixTraits<OutputType>::DenseMatrixType MatrixType;
+	typedef RealMatrix MatrixType;
 
 	typedef typename Batch<OutputType>::type BatchOutputType;
 	typedef typename Batch<LabelType>::type BatchLabelType;

@@ -48,7 +48,7 @@ namespace shark{
 template<class Vec1T,class Vec2T,class Vec3T>
 void meanvar
 (
-	const Data<Vec1T>& data,
+	Data<Vec1T> const& data,
 	blas::vector_container<Vec2T>& mean,
 	blas::vector_container<Vec3T>& variance
 );
@@ -56,7 +56,7 @@ void meanvar
 template<class Vec1T,class Vec2T,class MatT>
 void meanvar
 (
-	const Data<Vec1T>& data,
+	Data<Vec1T> const& data,
 	blas::vector_container<Vec2T>& mean,
 	blas::matrix_container<MatT>& variance
 );
@@ -72,11 +72,11 @@ VectorType mean(UnlabeledData<VectorType> const& data){
 
 //! Calculates the variance vector of the input vectors
 template<class VectorType>
-VectorType variance(const Data<VectorType>& data);
+VectorType variance(Data<VectorType> const& data);
 
 //! Calculates the covariance matrix of the data vectors
 template<class VectorType>
-typename VectorMatrixTraits<VectorType>::DenseMatrixType covariance(const Data<VectorType>& data);
+blas::matrix<typename VectorType::value_type> covariance(Data<VectorType> const& data);
 	
 }
 /** @}*/
