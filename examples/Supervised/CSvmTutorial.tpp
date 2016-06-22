@@ -40,18 +40,7 @@ int main(int argc, char** argv)
 	//###begin<trainer>
 	CSvmTrainer<RealVector> trainer(&kernel, C, bias);
 	//###end<trainer>
-
-//	// ADDITIONAL/ADVANCED SVM SOLVER OPTIONS:
-//	//to use "double" as kernel matrix cache type internally instead of float:
-//	CSvmTrainer<RealVector, double> trainer(&kernel, C);
-//	//to keep non-support vectors after training:
-//	trainer.sparsify() = false;
-//	//to relax or tighten the stopping criterion from 1e-3 (here, tightened to 1e-6)
-//	trainer.stoppingCondition().minAccuracy = 1e-6;
-//	//to set the cache size to 128MB for double (16**6 times sizeof(double), when double was selected as cache type above)
-//	//or to 64MB for float (16**6 times sizeof(float), when the CSvmTrainer is declared without second template argument)
-//	trainer.setCacheSize( 0x1000000 );
-
+	
 	// train the machine
 	cout << "Algorithm: " << trainer.name() << "\ntraining ..." << flush; // Shark algorithms know their names
 	trainer.train(kc, training);
@@ -69,4 +58,21 @@ int main(int argc, char** argv)
 	double test_error = loss.eval(test.labels(), output);
 	cout << "test error:\t" << test_error << endl;
 	//###end<eval>
+	
+	// ADDITIONAL/ADVANCED SVM SOLVER OPTIONS:
+	//###begin<AlternativeConfig>
+	{
+		//to use "double" as kernel matrix cache type internally instead of float:
+		CSvmTrainer<RealVector, double> trainer(&kernel, C, bias);
+		//to keep non-support vectors after training:
+		trainer.sparsify() = false;
+		//to relax or tighten the stopping criterion from 1e-3 (here, tightened to 1e-6)
+		trainer.stoppingCondition().minAccuracy = 1e-6;
+		//to set the cache size to 128MB for double (16**6 times sizeof(double), when double was selected as cache type above)
+		//or to 64MB for float (16**6 times sizeof(float), when the CSvmTrainer is declared without second template argument)
+		trainer.setCacheSize( 0x1000000 );
+		trainer.train(kc, training);
+		std::cout << "Needed " << trainer.solutionProperties().seconds << " seconds to reach a dual of " << trainer.solutionProperties().value << std::endl;
+	}
+	//###end<AlternativeConfig>
 }

@@ -124,13 +124,8 @@ but uses unique features [GlasmachersIgel2006]_.
     stopping criterion for the solver might be varied. Consider
     the following lines of code::
 
-        CSvmTrainer<RealVector, double> trainer(&kernel, C);
-        trainer.sparsify() = false;
-        trainer.stoppingCondition().minAccuracy = 1e-6;
-        trainer.setCacheSize( 0x1000000 );
-        trainer.train(ke, training);
-        std::cout << "Needed " << trainer.solutionProperties().seconds << " seconds to reach a dual of " << trainer.solutionProperties().value << std::endl;
-
+    ..sharkcode<Supervised/CSvmTutorial.tpp,AlternativeConfig>
+       
     The first line uses one more template parameter in this alternative
     trainer declaration, requesting it to use ``double`` for the matrix
     cache internally (instead of the default ``float``). Note that this

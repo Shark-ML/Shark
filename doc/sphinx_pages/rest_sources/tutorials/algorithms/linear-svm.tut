@@ -70,15 +70,16 @@ baseline: ::
 ..sharkcode<Supervised/McSvmLinear.tpp,trainer>
 
 Other possibilities are the machines proposed by Weston and Watkins
-(:doxy:`LinearMcSvmWWTrainer`), Crammer and Singer (:doxy:`LinearMcSvmCSTrainer`),
-Lee, Lin and Wahba (:doxy:`LinearMcSvmLLWTrainer`), and many more
-(:doxy:`LinearMcSvmMMRTrainer`, :doxy:`LinearMcSvmADMTrainer`,
-:doxy:`LinearMcSvmATMTrainer`, and :doxy:`LinearMcSvmATSTrainer`).
+(:doxy:`McSvm::WW`), Crammer and Singer (:doxy:`McSvm::CS`),
+Lee, Lin and Wahba (:doxy:`McSvm::LLW`), and many more
+(:doxy:`McSvm::ReinforcedSvm`, :doxy:`McSvm::MMR`, :doxy:`McSvm::ADM`,
+:doxy:`McSvm::ATM`, and :doxy:`McSvm::ATS`).
 
 Being left with this much choice is probably not helpful. In our
 experience the best strategy for picking a machine is to try WW and CS
 first, and LLW and ATS for high-dimensional feature spaces. OVA can be
-useful at times, and MMR, ADM and ATM can usually be ignored.
+useful at times, and MMR, ADM and ATM can usually be ignored. The
+default choice by the Trainer is WW.
 
 Currently Shark does not provide a specialized trainer for linear SVM
 regression. Of course the non-linear :doxy:`EpsilonSvmTrainer` can be
