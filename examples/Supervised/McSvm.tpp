@@ -53,24 +53,24 @@ int main()
 
 	// There are 9 trainers for multi-class SVMs in Shark which can train with or without bias:
 	std::tuple<std::string,McSvm,bool> machines[18] ={
-		{"OVA", McSvm::OVA,false},
-		{"CS", McSvm::CS,false},
-		{"WW",McSvm::WW,false},
-		{"LLW",McSvm::LLW,false},
-		{"ADM",McSvm::ADM,false},
-		{"ATS",McSvm::ATS,false},
-		{"ATM",McSvm::ATM,false},
-		{"MMR",McSvm::MMR,false},
-		{"ReinforcedSvm",McSvm::ReinforcedSvm,false},
-		{"OVA", McSvm::OVA,true},
-		{"CS", McSvm::CS,true},
-		{"WW",McSvm::WW,true},
-		{"LLW",McSvm::LLW,true},
-		{"ADM",McSvm::ADM,true},
-		{"ATS",McSvm::ATS,true},
-		{"ATM",McSvm::ATM,true},
-		{"MMR",McSvm::MMR,true},
-		{"ReinforcedSvm",McSvm::ReinforcedSvm,true}
+		std::make_tuple("OVA", McSvm::OVA,false),
+		std::make_tuple("CS", McSvm::CS,false),
+		std::make_tuple("WW",McSvm::WW,false),
+		std::make_tuple("LLW",McSvm::LLW,false),
+		std::make_tuple("ADM",McSvm::ADM,false),
+		std::make_tuple("ATS",McSvm::ATS,false),
+		std::make_tuple("ATM",McSvm::ATM,false),
+		std::make_tuple("MMR",McSvm::MMR,false),
+		std::make_tuple("ReinforcedSvm",McSvm::ReinforcedSvm,false),
+		std::make_tuple("OVA", McSvm::OVA,true),
+		std::make_tuple("CS", McSvm::CS,true),
+		std::make_tuple("WW",McSvm::WW,true),
+		std::make_tuple("LLW",McSvm::LLW,true),
+		std::make_tuple("ADM",McSvm::ADM,true),
+		std::make_tuple("ATS",McSvm::ATS,true),
+		std::make_tuple("ATM",McSvm::ATM,true),
+		std::make_tuple("MMR",McSvm::MMR,true),
+		std::make_tuple("ReinforcedSvm",McSvm::ReinforcedSvm,true)
 	};
 
 	std::printf("SHARK multi-class SVM example - training 18 machines:\n");
