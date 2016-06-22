@@ -739,7 +739,7 @@ protected:
 			varsum = m_C;
 	}
 	
-	void gradientUpdate(std::size_t r, double mu, float* q)
+	void gradientUpdate(std::size_t r, double mu, QpFloatType* q)
 	{
 		for ( std::size_t a= 0; a< m_activeEx; a++)
 		{

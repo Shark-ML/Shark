@@ -34,8 +34,8 @@
 //===========================================================================
 
 
-#ifndef SHARK_ALGORITHMS_MCREINFORCEDSVMTRAINER_H
-#define SHARK_ALGORITHMS_MCREINFORCEDSVMTRAINER_H
+#ifndef SHARK_ALGORITHMS_TRAINERS_MCSVM_MCREINFORCEDSVMTRAINER_H
+#define SHARK_ALGORITHMS_TRAINERS_MCSVM_MCREINFORCEDSVMTRAINER_H
 
 
 #include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
@@ -46,7 +46,7 @@
 #include <shark/LinAlg/PrecomputedMatrix.h>
 
 
-namespace shark {
+namespace shark { namespace detail{
 
 
 ///
@@ -201,30 +201,5 @@ public:
 };
 
 
-template <class InputType>
-class LinearMcSvmReinforcedTrainer : public AbstractLinearSvmTrainer<InputType>
-{
-public:
-	typedef AbstractLinearSvmTrainer<InputType> base_type;
-
-	LinearMcSvmReinforcedTrainer(double C, bool unconstrained = false)
-	: AbstractLinearSvmTrainer<InputType>(C, unconstrained){ }
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "LinearMcSvmReinforcedTrainer"; }
-
-	void train(LinearClassifier<InputType>& model, const LabeledData<InputType, unsigned int>& dataset)
-	{
-		std::size_t dim = inputDimension(dataset);
-		std::size_t classes = numberOfClasses(dataset);
-
-		QpMcLinearReinforced<InputType> solver(dataset, dim, classes);
-		RealMatrix w = solver.solve(this->C(), this->stoppingCondition(), &this->solutionProperties(), this->verbosity() > 0);
-		model.decisionFunction().setStructure(w);
-	}
-};
-
-
-}
+}}
 #endif

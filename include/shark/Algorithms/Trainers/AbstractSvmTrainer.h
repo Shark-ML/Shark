@@ -44,8 +44,8 @@
 //===========================================================================
 
 
-#ifndef SHARK_ALGORITHMS_ABSTRACTSVMTRAINER_H
-#define SHARK_ALGORITHMS_ABSTRACTSVMTRAINER_H
+#ifndef SHARK_ALGORITHMS_TRAINERS_ABSTRACTSVMTRAINER_H
+#define SHARK_ALGORITHMS_TRAINERS_ABSTRACTSVMTRAINER_H
 
 
 #include <shark/LinAlg/Base.h>
@@ -251,7 +251,7 @@ public:
 	bool trainOffset() const
 	{ return m_trainOffset; }
 
-	double CacheSize() const
+	double cacheSize() const
 	{ return m_cacheSize; }
 	void setCacheSize( std::size_t size )
 	{ m_cacheSize = size; }

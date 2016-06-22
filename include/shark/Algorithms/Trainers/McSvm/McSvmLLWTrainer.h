@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       Trainer for the Maximum Margin Regression Multi-class Support Vector Machine
+ * \brief       Trainer for the Multi-class Support Vector Machine by Lee, Lin, and Wahba
  * 
  * 
  * 
@@ -34,23 +34,21 @@
 //===========================================================================
 
 
-#ifndef SHARK_ALGORITHMS_MCSVMMMRTRAINER_H
-#define SHARK_ALGORITHMS_MCSVMMMRTRAINER_H
-
+#ifndef SHARK_ALGORITHMS_TRAINERS_MCSVM_MCSVMLLWTRAINER_H
+#define SHARK_ALGORITHMS_TRAINERS_MCSVM_MCSVMLLWTRAINER_H
 
 #include <shark/Algorithms/Trainers/AbstractSvmTrainer.h>
-#include <shark/Algorithms/QP/QpMcDecomp.h>
-#include <shark/Algorithms/QP/QpMcLinear.h>
+#include <shark/Algorithms/QP/QpMcBoxDecomp.h>
+
 #include <shark/LinAlg/KernelMatrix.h>
-#include <shark/LinAlg/CachedMatrix.h>
 #include <shark/LinAlg/PrecomputedMatrix.h>
+#include <shark/LinAlg/CachedMatrix.h>
 
-
-namespace shark {
+namespace shark { namespace detail{
 
 
 ///
-/// \brief Training of the maximum margin regression (MMR) multi-category SVM.
+/// \brief Training of the multi-category SVM by Lee, Lin and Wahba (LLW).
 ///
 /// This is a special support vector machine variant for
 /// classification of more than two classes. Given are data
@@ -74,27 +72,29 @@ namespace shark {
 /// with class-wise coefficients w_c and b_c given by the
 /// (primal) optimization problem
 /// \f[
-///     \min \frac{1}{2} \sum_c \|w_c\|^2 + C \sum_i L(y_i, f(x_i)),
+///     \min \frac{1}{2} \sum_c \|w_c\|^2 + C \sum_i L(y_i, f(x_i))
 /// \f]
-/// The special property of the so-called MMR-machine is its
-/// loss function, which measures the self-component of the
-/// absolute margin violation.
+/// \f[
+///     \text{s.t. } \sum_c f_c = 0
+/// \f]
+/// The special property of the so-called LLW-machine is its
+/// loss function, which arises from the application of the
+/// discriminative sum operator to absolute margin violations.
 /// Let \f$ h(m) = \max\{0, 1-m\} \f$ denote the hinge loss
-/// as a function of the margin m, then the MMR loss is given
+/// as a function of the margin m, then the LLW loss is given
 /// by
 /// \f[
-///     L(y, f(x)) = h(f_y(x))
+///     L(y, f(x)) = \sum_{c \not= y} h(-f_c(x))
 /// \f]
 ///
-/// For more details see the report:<br/>
-/// <p>Learning via linear operators: Maximum margin regression.
-/// S. Szedmak, J. Shawe-Taylor, and E. Parado-Hernandez,
-/// PASCAL, 2006.</p>
+/// For more details refer to the paper:<br/>
+/// <p>Multicategory Support Vector Machines: Theory and Application to the Classification of Microarray %Data and Satellite Radiance %Data. Y. Lee, Y. Lin, and G. Wahba. Journal of the American Statistical Association 99(465), 2004.</p>
 ///
 template <class InputType, class CacheType = float>
-class McSvmMMRTrainer : public AbstractSvmTrainer<InputType, unsigned int>
+class McSvmLLWTrainer : public AbstractSvmTrainer<InputType, unsigned int>
 {
 public:
+
 	typedef CacheType QpFloatType;
 
 	typedef AbstractModel<InputType, RealVector> ModelType;
@@ -106,38 +106,51 @@ public:
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
 	//! \param offset    whether to train with offset/bias parameter or not
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	McSvmMMRTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false)
+	McSvmLLWTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false)
 	: base_type(kernel, C, offset, unconstrained)
 	{ }
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
-	{ return "McSvmMMRTrainer"; }
+	{ return "McSvmLLWTrainer"; }
 
 	void train(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset)
 	{
 		std::size_t ic = dataset.numberOfElements();
 		std::size_t classes = numberOfClasses(dataset);
-		
-		// prepare the problem description
-		RealVector alpha(ic,0.0);
-		RealVector bias(classes,0.0);
-		RealMatrix gamma(classes, 1,1.0);
-		UIntVector rho(1,0);
-		
-		QpSparseArray<QpFloatType> nu(classes, classes, classes);
-		for (unsigned int y=0; y<classes; y++) 
-			nu.add(y, y, 1.0);
 
-		QpSparseArray<QpFloatType> M(classes * classes, 1, classes);
+		RealMatrix linear(ic, classes-1,1.0);
+		UIntVector rho(classes-1);
+		for (unsigned int p=0; p<classes-1; p++) 
+			rho(p) = p;
+		
+		QpSparseArray<QpFloatType> nu(classes * (classes-1), classes, classes*(classes-1));
+		for (unsigned int r=0, y=0; y<classes; y++)
+		{
+			for (unsigned int p=0, pp=0; p<classes-1; p++, pp++, r++)
+			{
+				if (pp == y) pp++;
+				nu.add(r, pp, (QpFloatType)-1.0);
+			}
+		}
+		
+		QpSparseArray<QpFloatType> M(classes * (classes-1) * classes, classes-1, classes * (classes-1) * (classes-1));
 		QpFloatType mood = (QpFloatType)(-1.0 / (double)classes);
 		QpFloatType val = (QpFloatType)1.0 + mood;
 		for (unsigned int r=0, yv=0; yv<classes; yv++)
 		{
-			for (unsigned int yw=0; yw<classes; yw++, r++)
+			for (unsigned int pv=0, ppv=0; pv<classes-1; pv++, ppv++)
 			{
-				M.setDefaultValue(r, mood);
-				if (yv == yw) M.add(r, 0, val);
+				if (ppv == yv) ppv++;
+				for (unsigned int yw=0; yw<classes; yw++, r++)
+				{
+					M.setDefaultValue(r, mood);
+					if (ppv != yw)
+					{
+						unsigned int pw = ppv - (ppv > yw ? 1 : 0);
+						M.add(r, pw, val);
+					}
+				}
 			}
 		}
 		
@@ -145,30 +158,41 @@ public:
 		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
 		typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
 		
-		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
-
 		// solve the problem
+		RealMatrix alpha(ic,classes-1);
+		RealVector bias(classes,0);
+		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
 		if (base_type::precomputeKernel())
 		{
 			PrecomputedMatrixType matrix(&km);
-			QpMcDecomp< PrecomputedMatrixType > solver(matrix, gamma, rho, nu, M, true);
+			QpMcBoxDecomp< PrecomputedMatrixType > problem(matrix, M, dataset.labels(), linear, this->C());
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			solver.setShrinking(base_type::m_shrinking);
-			if (base_type::m_s2do) 
-				solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
-			else 
-				solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
+			problem.setShrinking(base_type::m_shrinking);
+			if(this->m_trainOffset){
+				BiasSolver<  PrecomputedMatrixType > biasSolver(&problem);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu,true, &prop);
+			}
+			else{
+				QpSolver<QpMcBoxDecomp< PrecomputedMatrixType > > solver(problem);
+				solver.solve( base_type::m_stoppingcondition, &prop);
+			}
+			alpha = problem.solution();
 		}
 		else
 		{
 			CachedMatrixType matrix(&km, base_type::m_cacheSize);
-			QpMcDecomp< CachedMatrixType > solver(matrix, gamma, rho, nu, M, true);
+			QpMcBoxDecomp< CachedMatrixType> problem(matrix, M, dataset.labels(), linear, this->C());
 			QpSolutionProperties& prop = base_type::m_solutionproperties;
-			solver.setShrinking(base_type::m_shrinking);
-			if (base_type::m_s2do)
-				solver.solve(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
-			else
-				solver.solveSMO(dataset.labels(), this->C(), alpha, base_type::m_stoppingcondition, &prop, (this->m_trainOffset ? &bias : NULL));
+			problem.setShrinking(base_type::m_shrinking);
+			if(this->m_trainOffset){
+				BiasSolver<CachedMatrixType> biasSolver(&problem);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu,true, &prop);
+			}
+			else{
+				QpSolver<QpMcBoxDecomp< CachedMatrixType> > solver(problem);
+				solver.solve( base_type::m_stoppingcondition, &prop);
+			}
+			alpha = problem.solution();
 		}
 		
 		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
@@ -177,9 +201,13 @@ public:
 		for (std::size_t i=0; i<ic; i++)
 		{
 			unsigned int y = dataset.element(i).label;
-			for (unsigned int c=0; c<classes; c++)
+			for (std::size_t c=0; c<classes; c++)
 			{
-				svm.decisionFunction().alpha(i,c) = nu(y, c) * alpha(i);
+				double sum = 0.0;
+				unsigned int r = (classes-1) * y;
+				for (std::size_t p=0; p<classes-1; p++, r++) 
+					sum += nu(r, c) * alpha(i,p);
+				svm.decisionFunction().alpha(i,c) = sum;
 			}
 		}
 		if (this->m_trainOffset) 
@@ -190,32 +218,5 @@ public:
 			svm.decisionFunction().sparsify();
 	}
 };
-
-
-template <class InputType>
-class LinearMcSvmMMRTrainer : public AbstractLinearSvmTrainer<InputType>
-{
-public:
-	typedef AbstractLinearSvmTrainer<InputType> base_type;
-
-	LinearMcSvmMMRTrainer(double C, bool unconstrained = false)
-	: AbstractLinearSvmTrainer<InputType>(C, false, unconstrained){}
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "LinearMcSvmMMRTrainer"; }
-
-	void train(LinearClassifier<InputType>& model, const LabeledData<InputType, unsigned int>& dataset)
-	{
-		std::size_t dim = inputDimension(dataset);
-		std::size_t classes = numberOfClasses(dataset);
-
-		QpMcLinearMMR<InputType> solver(dataset, dim, classes);
-		RealMatrix w = solver.solve(this->C(), this->stoppingCondition(), &this->solutionProperties(), this->verbosity() > 0);
-		model.decisionFunction().setStructure(w);
-	}
-};
-
-
-}
+}}
 #endif

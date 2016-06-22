@@ -40,15 +40,7 @@
 #define SHARK_COUNT_KERNEL_LOOKUPS //in this example, we want to count the kernel lookups
 
 
-#include <shark/Algorithms/Trainers/McSvmOVATrainer.h>
-#include <shark/Algorithms/Trainers/McSvmMMRTrainer.h>
-#include <shark/Algorithms/Trainers/McSvmCSTrainer.h>
-#include <shark/Algorithms/Trainers/McSvmWWTrainer.h>
-#include <shark/Algorithms/Trainers/McSvmLLWTrainer.h>
-#include <shark/Algorithms/Trainers/McSvmADMTrainer.h>
-#include <shark/Algorithms/Trainers/McSvmATSTrainer.h>
-#include <shark/Algorithms/Trainers/McSvmATMTrainer.h>
-#include <shark/Algorithms/Trainers/McReinforcedSvmTrainer.h>
+#include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/Models/Kernels/LinearKernel.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
@@ -56,29 +48,6 @@
 
 using namespace shark;
 
-
-/*
-// verbose version:
-#define CHECK_ALPHAS(input, is, should ) { \
-	std::cout << "    # iterations: " << trainer.solutionProperties().iterations << std::endl; \
-	for (unsigned int i=0; i<is.size(); i++) printf("alpha[%d]:  %g  %g\n", i, is(i), should[i]); \
-	double w1[3][2] = {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}}; \
-	double w2[3][2] = {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}}; \
-	for (unsigned int i=0; i<is.size(); i++) { \
-		w1[i % 3][0] += is(i) * input[i / 3](0); \
-		w1[i % 3][1] += is(i) * input[i / 3](1); \
-		w2[i % 3][0] += should[i] * input[i / 3](0); \
-		w2[i % 3][1] += should[i] * input[i / 3](1); \
-	} \
-	printf("w[1] = (%g, %g)   (%g, %g)\n", w1[0][0], w1[0][1], w2[0][0], w2[0][1]); \
-	printf("w[2] = (%g, %g)   (%g, %g)\n", w1[1][0], w1[1][1], w2[1][0], w2[1][1]); \
-	printf("w[3] = (%g, %g)   (%g, %g)\n", w1[2][0], w1[2][1], w2[2][0], w2[2][1]); \
-	BOOST_CHECK_SMALL((w1[0][0] - w1[1][0]) - (w2[0][0] - w2[1][0]) , 1e-4); \
-	BOOST_CHECK_SMALL((w1[0][1] - w1[1][1]) - (w2[0][1] - w2[1][1]) , 1e-4); \
-	BOOST_CHECK_SMALL((w1[1][0] - w1[2][0]) - (w2[1][0] - w2[2][0]) , 1e-4); \
-	BOOST_CHECK_SMALL((w1[1][1] - w1[2][1]) - (w2[1][1] - w2[2][1]) , 1e-4); \
-}
-*/
 
 template<class T, class U>
 void CHECK_ALPHAS(std::vector<RealVector> const& input, T const& is, U const& should ) {
@@ -122,8 +91,9 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	{
 		double alpha[15] = {0.0, -0.5, -0.5, -0.5, 0.0, -0.5, -0.5, -0.5, 0.0, -0.25, -0.25, 0.0, 0.0, 0.0, 0.0};
 		KernelClassifier<RealVector> svm;
-		McSvmOVATrainer<RealVector> trainer(&kernel, 0.5, false);
-		std::cout << "testing " << trainer.name() << std::endl;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
+		trainer.setMcSvmType(McSvm::OVA);
+		std::cout << "testing OVA" << std::endl;
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
@@ -135,8 +105,9 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	{
 		double alpha[15] = {0.5, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 		KernelClassifier<RealVector> svm;
-		McSvmMMRTrainer<RealVector> trainer(&kernel, 0.5, false);
-		std::cout << "testing " << trainer.name() << std::endl;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
+		trainer.setMcSvmType(McSvm::MMR);
+		std::cout << "testing MMR" << std::endl;
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
@@ -148,8 +119,9 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	{
 		double alpha[15] = {0.4375, -0.25, -0.1875, -0.25, 0.4375, -0.1875, -0.25, -0.25, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 		KernelClassifier<RealVector> svm;
-		McSvmWWTrainer<RealVector> trainer(&kernel, 0.5, false);
-		std::cout << "testing " << trainer.name() << std::endl;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
+		trainer.setMcSvmType(McSvm::WW);
+		std::cout << "testing WW" << std::endl;
 		trainer.sparsify() = false;
 		trainer.shrinking() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
@@ -163,8 +135,9 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	{
 		double alpha[15] = {0.25, -0.25, 0.0, -0.25, 0.25, 0.0, -0.000163, -0.25, 0.250163, -0.1666, -0.04166, 0.2083, 0.0, 0.0, 0.0};
 		KernelClassifier<RealVector> svm;
-		McSvmCSTrainer<RealVector> trainer(&kernel, 0.5, false);
-		std::cout << "testing " << trainer.name() << std::endl;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
+		trainer.setMcSvmType(McSvm::CS);
+		std::cout << "testing CS" << std::endl;
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
@@ -176,8 +149,9 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	{
 		double alpha[15] = {0.0, -0.5, -0.5, -0.5, 0.0, -0.5, -0.5, -0.5, 0.0, -0.25, -0.25, 0.0, 0.0, 0.0, 0.0};
 		KernelClassifier<RealVector> svm;
-		McSvmLLWTrainer<RealVector> trainer(&kernel, 0.5, false);
-		std::cout << "testing " << trainer.name() << std::endl;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
+		trainer.setMcSvmType(McSvm::LLW);
+		std::cout << "testing LLW" << std::endl;
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
@@ -189,8 +163,9 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	{
 		double alpha[15] = {0.0, -0.4375, -0.0625, -0.4375, 0.0, -0.0625, 0.0, -0.5, 0.0, -0.375, -0.125, 0.0, 0.0, 0.0, 0.0};
 		KernelClassifier<RealVector> svm;
-		McSvmADMTrainer<RealVector> trainer(&kernel, 0.5, false);
-		std::cout << "testing " << trainer.name() << std::endl;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
+		trainer.setMcSvmType(McSvm::ADM);
+		std::cout << "testing ADM" << std::endl;
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
@@ -202,8 +177,9 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	{
 		double alpha[15] = {0.0, -0.5, 0.0, -0.5, 0.0, 0.0, -0.5, -0.5, 0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 0.0};
 		KernelClassifier<RealVector> svm;
-		McSvmATSTrainer<RealVector> trainer(&kernel, 0.5, false);
-		std::cout << "testing " << trainer.name() << std::endl;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
+		trainer.setMcSvmType(McSvm::ATS);
+		std::cout << "testing ATS" << std::endl;
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
@@ -215,8 +191,9 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	{
 		double alpha[15] = {0.0, -0.4375, -0.0625, -0.4375, 0.0, -0.0625, 0.0, -0.5, 0.0, -0.375, -0.125, 0.0, 0.0, 0.0, 0.0};
 		KernelClassifier<RealVector> svm;
-		McSvmATMTrainer<RealVector> trainer(&kernel, 0.5, false);
-		std::cout << "testing " << trainer.name() << std::endl;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
+		trainer.setMcSvmType(McSvm::ATM);
+		std::cout << "testing ATM" << std::endl;
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
@@ -228,67 +205,15 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	{
 		double alpha[15] = {0.5, -0.5, 0.0, -0.5, 0.5, 0.0, -0.5, -0.5, 0.5, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0};
 		KernelClassifier<RealVector> svm;
-		McReinforcedSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
-		std::cout << "testing " << trainer.name() << std::endl;
+		CSvmTrainer<RealVector> trainer(&kernel, 0.5, false);
+		trainer.setMcSvmType(McSvm::ReinforcedSvm);
+		std::cout << "testing ReinforcedSVM" << std::endl;
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-8;
 		trainer.train(svm, dataset);
 		std::cout << "kernel computations: " << trainer.accessCount() << std::endl;
-		std::cout << svm.parameterVector() << std::endl;
 		CHECK_ALPHAS(input,svm.parameterVector(), alpha);
 	}
 }
-//~ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_ITERATIVE_BIAS_TEST )
-//~ {
-	//~ //Chessboard problem;
-	//~ CircleInSquare problem(2,0.0,true);
-	//~ ClassificationDataset dataset = problem.generateDataset(1000);
-	
-
-	//~ //GaussianRbfKernel<> kernel(0.5);
-	//~ LinearKernel<> kernel;
-	
-	//~ KernelClassifier<RealVector> svmTruth(false);
-	//~ KernelClassifier<RealVector> svmTruth2(true);
-	//~ KernelClassifier<RealVector> svmTruth3(true);
-	//~ KernelClassifier<RealVector> svmTest1(false,2);
-	//~ KernelClassifier<RealVector> svmTest2(true,2);
-	
-	//~ double C = 3;
-
-	//~ {//train as a binary svm problem
-		//~ CSvmTrainer<RealVector> trainerTruth(&kernel, C, false);
-		//~ trainerTruth.sparsify() = false;
-		//~ trainerTruth.shrinking() = false;
-		//~ trainerTruth.stoppingCondition().minAccuracy = 1e-4;
-		//~ trainerTruth.train(svmTruth, dataset);
-		//~ std::cout<<"a"<<std::endl;
-		//~ trainerTruth.train(svmTruth2, dataset);
-		//~ trainerTruth.setUseIterativeBiasComputation(true);
-		//~ trainerTruth.train(svmTruth3, dataset);
-		//~ std::cout<<"b"<<std::endl;
-	//~ }
-	
-	//~ //train as multiclass svm problem
-	//~ McSvmWWTrainer<RealVector> trainer(&kernel, 2*C);
-	//~ trainer.sparsify() = false;
-	//~ trainer.shrinking() = false;
-	//~ trainer.stoppingCondition().minAccuracy = 1e-4;
-	//~ trainer.train(svmTest1, dataset);
-	//~ std::cout<<"c"<<std::endl;
-	//~ trainer.train(svmTest2, dataset);
-	//~ std::cout<<"d"<<std::endl;
-	
-	
-	//~ //compare bias
-	//~ //BOOST_CHECK_CLOSE(svmTest.offset(0),svmTruth.offset(0),1.e-2);
-	//~ ZeroOneLoss<unsigned int, RealVector> loss;
-	//~ std::cout<<"CSVM: "<<loss.eval(dataset.labels(),svmTruth(dataset.inputs()))<<std::endl;
-	//~ std::cout<<"CSVM with bias : "<<loss.eval(dataset.labels(),svmTruth2(dataset.inputs()))<<" "<<svmTruth2.offset()<<std::endl;
-	//~ std::cout<<"CSVM with bias iterative : "<<loss.eval(dataset.labels(),svmTruth3(dataset.inputs()))<<" "<<svmTruth3.offset()<<std::endl;
-	//~ std::cout<<"WW: "<<loss.eval(dataset.labels(),svmTest1(dataset.inputs()))<<std::endl;
-	//~ std::cout<<"WW with bias: "<<loss.eval(dataset.labels(),svmTest2(dataset.inputs()))<<" "<<svmTest2.offset()<<std::endl;
-//~ }
-
 
 BOOST_AUTO_TEST_SUITE_END()
