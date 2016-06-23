@@ -46,7 +46,6 @@
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataView.h>
 
-
 namespace shark {
 
 

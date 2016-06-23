@@ -7,10 +7,10 @@
  * 
  *
  * \author      T. Glasmachers, O.Krause
- * \date        2007-2013
+ * \date        2007-2016
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -41,8 +41,8 @@
 #include <shark/Data/Dataset.h>
 
 namespace shark{
-	
-/// \brief Most gneral problem formualtion, needs to be configured by hand.
+
+/// \brief Most general problem formulation, needs to be configured by hand.
 template<class MatrixT>
 class GeneralQuadraticProblem{
 public:
@@ -132,7 +132,7 @@ public:
 	/// representation of the quadratic part of the objective function
 	MatrixType& quadratic;
 
-	///\brief Linear part of the problem
+	/// \brief Linear part of the problem
 	RealVector linear;
 
 	/// Solution candidate
@@ -145,8 +145,10 @@ public:
 	/// permutation of the variables alpha, gradient, etc.
 	std::vector<std::size_t> permutation;
 
+	/// \brief component-wise lower bound
 	RealVector boxMin;
 
+	/// \brief component-wise upper bound
 	RealVector boxMax;
 };
 
@@ -333,6 +335,9 @@ public:
 	/// The diagonal array is of fixed size and not subject to shrinking.
 	RealVector diagonal;
 
+	/// permutation of the variables alpha, gradient, etc.
+	std::vector<std::size_t> permutation;
+
 	/// exchange two variables via the permutation
 	void flipCoordinates(std::size_t i, std::size_t j)
 	{
@@ -364,8 +369,6 @@ public:
 		m_Cn = newCn;
 	}
 
-	/// permutation of the variables alpha, gradient, etc.
-	std::vector<std::size_t> permutation;
 private:
 	///\brief whether the label of the point is positive
 	std::vector<char> positive;
@@ -395,6 +398,11 @@ public:
 		Problem& problem
 	):m_problem(problem){}
 
+	/// \brief Solve the quadratic program.
+	///
+	/// The function iteratively refines the solution by applying the
+	/// SMO (subset descent) algorithm until one of the stopping
+	/// criteria is fulfilled.
 	void solve(
 		QpStoppingCondition& stop,
 		QpSolutionProperties* prop = NULL
@@ -420,6 +428,7 @@ public:
 					break;
 				}
 			}
+
 			// select a working set and check for optimality
 			std::size_t i = 0, j = 0;
 			if (workingSet(m_problem,i, j) < stop.minAccuracy){
@@ -432,7 +441,7 @@ public:
 				workingSet(m_problem,i,j);
 				workingSet.reset();
 			}
-			
+
 			//update smo with the selected working set
 			m_problem.updateSMO(i,j);
 			

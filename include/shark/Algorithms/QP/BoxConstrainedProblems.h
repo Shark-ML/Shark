@@ -273,6 +273,49 @@ public:
 	void reshrink(){}
 	void unshrink(){}
 
+	/// \brief Define the initial solution for the iterative solver.
+	///
+	/// This method can be used to warm-start the solver. It requires a
+	/// feasible solution (alpha) and the corresponding gradient of the
+	/// dual objective function.
+	void setInitialSolution(RealVector const& alpha, RealVector const& gradient)
+	{
+		std::size_t n = dimensions();
+		SIZE_CHECK(alpha.size() == n);
+		SIZE_CHECK(gradient.size() == n);
+		for (std::size_t i=0; i<n; i++)
+		{
+			SHARK_ASSERT(alpha(i) >= boxMin(i) && alpha(i) <= boxMax(i));
+			std::size_t j = permutation(i);
+			m_problem.alpha(i) = alpha(j);
+			m_gradient(i) = gradient(j);
+			m_alphaStatus[i] = ((alpha(i) == boxMin(i)) ? AlphaLowerBound : 0)
+			                 | ((alpha(i) == boxMax(i)) ? AlphaUpperBound : 0);
+		}
+	}
+
+	/// \brief Define the initial solution for the iterative solver.
+	///
+	/// This method can be used to warm-start the solver. It requires a
+	/// feasible solution (alpha), for which it computes the gradient of
+	/// the dual objective function. Note that this is a quadratic time
+	/// operation in the number of non-zero coefficients.
+	void setInitialSolution(RealVector const& alpha)
+	{
+		std::size_t n = dimensions();
+		SIZE_CHECK(alpha.size() == n);
+		RealVector gradient = m_problem.linear;
+		std::vector<QpFloatType> q(n);
+		for (std::size_t i=0; i<n; i++)
+		{
+			double a = alpha(i);
+			if (a == 0.0) continue;
+			m_problem.quadratic.row(i, 0, n, q.data());
+			for (std::size_t j=0; j<n; j++) gradient(j) -= a * q[j];
+		}
+		setInitialSolution(alpha, gradient);
+	}
+
 	///\brief Remove the i-th example from the problem.
 	virtual void deactivateVariable(std::size_t i){
 		SIZE_CHECK(i < dimensions());
@@ -370,7 +413,8 @@ public:
 	using base_type::isUpperBound;
 	using base_type::boxMin;
 	using base_type::boxMax;
-		
+	using base_type::setInitialSolution;
+
 	virtual void updateSMO(std::size_t i, std::size_t j){
 		double aiOld = alpha(i);
 		double ajOld = alpha(j);

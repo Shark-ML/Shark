@@ -34,14 +34,14 @@
 
 namespace shark{
  
-///Working-Set-Selection-Kriteria anwendung:
-///Kriterium krit;
-/// value=krit(problem,i,j);
+// Working-Set-Selection-Criteria are applied as follows:
+// Criterium crit;
+// value = crit(problem, i, j);
 struct MVPSelectionCriterion{
-	/// \brief Select the most violatig pair (MVP)
+	/// \brief Select the most violating pair (MVP)
 	///
-	/// \return maximal KKT vioation
-	/// \param problem the svm problem to select the working set for
+	/// \return maximal KKT violation
+	/// \param problem the SVM problem to select the working set for
 	/// \param i  first working set component
 	/// \param j  second working set component
 	template<class Problem>
@@ -385,7 +385,50 @@ public:
 	bool shrink(double){return false;}
 	void reshrink(){}
 	void unshrink(){}
-		
+
+	/// \brief Define the initial solution for the iterative solver.
+	///
+	/// This method can be used to warm-start the solver. It requires a
+	/// feasible solution (alpha) and the corresponding gradient of the
+	/// dual objective function.
+	void setInitialSolution(RealVector const& alpha, RealVector const& gradient)
+	{
+		std::size_t n = dimensions();
+		SIZE_CHECK(alpha.size() == n);
+		SIZE_CHECK(gradient.size() == n);
+		for (std::size_t i=0; i<n; i++)
+		{
+			SHARK_ASSERT(alpha(i) >= boxMin(i) && alpha(i) <= boxMax(i));
+			std::size_t j = permutation(i);
+			m_problem.alpha(i) = alpha(j);
+			m_gradient(i) = gradient(j);
+			m_alphaStatus[i] = ((alpha(i) == boxMin(i)) ? AlphaLowerBound : 0)
+			                 | ((alpha(i) == boxMax(i)) ? AlphaUpperBound : 0);
+		}
+	}
+
+	/// \brief Define the initial solution for the iterative solver.
+	///
+	/// This method can be used to warm-start the solver. It requires a
+	/// feasible solution (alpha), for which it computes the gradient of
+	/// the dual objective function. Note that this is a quadratic time
+	/// operation in the number of non-zero coefficients.
+	void setInitialSolution(RealVector const& alpha)
+	{
+		std::size_t n = dimensions();
+		SIZE_CHECK(alpha.size() == n);
+		RealVector gradient = m_problem.linear;
+		std::vector<QpFloatType> q(n);
+		for (std::size_t i=0; i<n; i++)
+		{
+			double a = alpha(i);
+			if (a == 0.0) continue;
+			m_problem.quadratic.row(i, 0, n, q.data());
+			for (std::size_t j=0; j<n; j++) gradient(j) -= a * q[j];
+		}
+		setInitialSolution(alpha, gradient);
+	}
+
 	///\brief Remove the i-th example from the problem while taking the equality constraint into account.
 	///
 	/// The i-th element is first set to zero and as well as an unspecified set corrected so
@@ -559,6 +602,7 @@ public:
 	using base_type::isUpperBound;
 	using base_type::boxMin;
 	using base_type::boxMax;
+	using base_type::setInitialSolution;
 
 	bool shrink(double epsilon){
 		if(!m_shrink) return false;
@@ -615,7 +659,7 @@ public:
 		if(!shrinking)
 			unshrink();
 	}
-	
+
 	/// \brief Scales all box constraints by a constant factor and adapts the solution by scaling it by the same factor.
 	void scaleBoxConstraints(double factor, double variableScalingFactor){
 		base_type::scaleBoxConstraints(factor,variableScalingFactor);
@@ -639,8 +683,9 @@ public:
 		m_gradientEdge(i) += newValue;
 		base_type::setLinear(i,newValue);
 	}
+
 protected:
-	///\brief Update the problem by a proposed step i taking the box constraints into account.
+	/// \brief Update the problem by a proposed step i taking the box constraints into account.
 	///
 	/// A step length 0<=lambda<=1 is found so that 
 	/// boxMin(i) <= alpha(i)+lambda*step <= boxMax(i) 
@@ -724,7 +769,7 @@ private:
 	///\brief true if shrinking is to be used.
 	bool m_shrink;
 
-	///\brief Stores the gradient of the alpha dimeensions which are either 0 or C
+	///\brief Stores the gradient of the alpha dimensions which are either 0 or C
 	RealVector m_gradientEdge;
 };
 
