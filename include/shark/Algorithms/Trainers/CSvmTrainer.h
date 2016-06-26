@@ -156,8 +156,8 @@ public:
 		// prepare model
 		std::size_t n = dataset.numberOfElements();
 		auto& f = svm.decisionFunction();
-		if (f.alpha().size1() == n && f.alpha().size2() == 1 && f.kernel() == base_type::m_kernel) {
-			// warm start, keep the alphas
+		if (f.basis() == dataset.inputs() && f.kernel() == base_type::m_kernel && f.alpha().size1() == n && f.alpha().size2() == 1) {
+			// warm start, keep the alphas (possibly clipped)
 			if (this->m_trainOffset) f.offset() = RealVector(1);
 			else f.offset() = RealVector();
 		}
@@ -177,7 +177,7 @@ public:
 		// prepare model
 		std::size_t n = dataset.numberOfElements();
 		auto& f = svm.decisionFunction();
-		if (f.alpha().size1() == n && f.alpha().size2() == 1 && f.kernel() == base_type::m_kernel) {
+		if (f.basis() == dataset.inputs() && f.kernel() == base_type::m_kernel && f.alpha().size1() == n && f.alpha().size2() == 1) {
 			// warm start, keep the alphas
 			if (this->m_trainOffset) f.offset() = RealVector(1);
 			else f.offset() = RealVector();
@@ -266,9 +266,22 @@ private:
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 			ProblemType problem(svmProblem,base_type::m_shrinking);
 			QpSolver< ProblemType > solver(problem);
-			if (svm.alpha().size1() > 0 && svm.alpha().size2() == 1) {
-				problem.setInitialSolution(blas::column(svm.alpha(), 0));
+			// truncate the existing solution to the bounds
+			RealVector const& reg = this->regularizationParameters();
+			double C_minus = reg(0);
+			double C_plus = (reg.size() == 1) ? reg(0) : reg(1);
+			for (std::size_t i=0, b=0; b<dataset.labels().numberOfBatches(); b++)
+			{
+				auto const& batch = dataset.labels().batch(b);
+				for (std::size_t j=0; j<boost::size(batch); j++)
+				{
+					double a = svm.alpha()(i, 0);
+					if (shark::get(batch, j) == 0) a = std::min(std::max(a, 0.0), -C_minus);
+					else                           a = std::max(std::min(a, 0.0), C_plus);
+					svm.alpha()(i, 0) = a;
+				}
 			}
+			problem.setInitialSolution(blas::column(svm.alpha(), 0));
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
 			column(svm.alpha(),0)= problem.getUnpermutedAlpha();
 			svm.offset(0) = computeBias(problem,dataset);
@@ -278,9 +291,22 @@ private:
 			typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
 			ProblemType problem(svmProblem,base_type::m_shrinking);
 			QpSolver< ProblemType> solver(problem);
-			if (svm.alpha().size1() > 0 && svm.alpha().size2() == 1) {
-				problem.setInitialSolution(blas::column(svm.alpha(), 0));
+			// truncate the existing solution to the bounds
+			RealVector const& reg = this->regularizationParameters();
+			double C_minus = reg(0);
+			double C_plus = (reg.size() == 1) ? reg(0) : reg(1);
+			for (std::size_t i=0, b=0; b<dataset.labels().numberOfBatches(); b++)
+			{
+				auto const& batch = dataset.labels().batch(b);
+				for (std::size_t j=0; j<boost::size(batch); j++)
+				{
+					double a = svm.alpha()(i, 0);
+					if (shark::get(batch, j) == 0) a = std::min(std::max(a, 0.0), -C_minus);
+					else                           a = std::max(std::min(a, 0.0), C_plus);
+					svm.alpha()(i, 0) = a;
+				}
 			}
+			problem.setInitialSolution(blas::column(svm.alpha(), 0));
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
 			column(svm.alpha(),0) = problem.getUnpermutedAlpha();
 		}

@@ -212,6 +212,28 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_SIMPLE_TEST )
 	}
 }
 
+BOOST_AUTO_TEST_CASE( CSVM_TRAINER_WARM_START )
+{
+	std::size_t n = 250;
+	std::vector<RealVector> input(n);
+	std::vector<unsigned int> target(n);
+	for (std::size_t i=0; i<n; i++)
+	{
+		input[i].resize(2);
+		input[i](0) = 0.01 * i;
+		input[i](1) = 0.1 * (i % 37);
+		target[i] = (double)(i / (n/2));   // 0-1-labels
+	}
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
+
+	GaussianRbfKernel<> kernel(0.5);
+	KernelClassifier<RealVector> svm;
+	CSvmTrainer<RealVector> trainer(&kernel, 0.1, true);
+	trainer.sparsify() = false;    // needed for seamless warm-start test
+	trainer.train(svm, dataset);   // training from scratch
+	trainer.train(svm, dataset);   // warm-start from optimal solution
+	BOOST_CHECK_EQUAL(trainer.solutionProperties().iterations, 0);
+}
 
 template<class Model1, class Model2, class Dataset>
 void checkSVMSolutionsEqual(

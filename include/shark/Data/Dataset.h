@@ -146,7 +146,15 @@ public:
 
 	typedef std::vector<std::size_t> IndexSet;
 
-	template <class T> friend bool operator == (const Data<T>& op1, const Data<T>& op2);
+	/// \brief Two containers compare equal if they share the same data.
+	template <class T> friend bool operator == (const Data<T>& op1, const Data<T>& op2) {
+		return (op1.m_data == op2.m_data);
+	}
+
+	/// \brief Two containers compare different if they don't share the same data.
+	template <class T> friend bool operator != (const Data<T>& op1, const Data<T>& op2) {
+		return (! (op1 == op2));
+	}
 	template <class InputT, class LabelT> friend class LabeledData;
 
 

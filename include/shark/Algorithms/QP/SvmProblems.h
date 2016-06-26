@@ -418,13 +418,13 @@ public:
 		std::size_t n = dimensions();
 		SIZE_CHECK(alpha.size() == n);
 		RealVector gradient = m_problem.linear;
-		std::vector<QpFloatType> q(n);
+		blas::vector<QpFloatType> q(n);
 		for (std::size_t i=0; i<n; i++)
 		{
 			double a = alpha(i);
 			if (a == 0.0) continue;
-			m_problem.quadratic.row(i, 0, n, q.data());
-			for (std::size_t j=0; j<n; j++) gradient(j) -= a * q[j];
+			m_problem.quadratic.row(i, 0, n, q.storage());
+			noalias(gradient) -= a * q;
 		}
 		setInitialSolution(alpha, gradient);
 	}

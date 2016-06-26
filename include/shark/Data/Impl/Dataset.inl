@@ -113,7 +113,9 @@ public:
 	typedef typename Batch<Type>::type BatchType;
 	typedef typename Batch<Type>::reference reference;
 	typedef typename Batch<Type>::const_reference const_reference;
-	template <class T> friend bool operator == (const SharedContainer<T>& op1, const SharedContainer<T>& op2);
+	template <class T> friend bool operator == (const SharedContainer<T>& op1, const SharedContainer<T>& op2) {
+		return (op1.m_data == op2.m_data);
+	}
 private:
 	typedef Batch<Type> BatchTraits;
 	typedef std::vector<boost::shared_ptr<BatchType> > Container;
