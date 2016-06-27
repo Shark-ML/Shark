@@ -153,28 +153,43 @@ public:
 	/// \brief Train the C-SVM.
 	void train(KernelClassifier<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
 	{
+		// prepare model
+		std::size_t n = dataset.numberOfElements();
+		auto& f = svm.decisionFunction();
+		if (f.basis() == dataset.inputs() && f.kernel() == base_type::m_kernel && f.alpha().size1() == n && f.alpha().size2() == 1) {
+			// warm start, keep the alphas (possibly clipped)
+			if (this->m_trainOffset) f.offset() = RealVector(1);
+			else f.offset() = RealVector();
+		}
+		else {
+			f.setStructure(base_type::m_kernel, dataset.inputs(), this->m_trainOffset);
+		}
 
-		//prepare model
-		svm.decisionFunction().setStructure(base_type::m_kernel, dataset.inputs(),this->m_trainOffset);
-		
 		//dispatch to use the optimal implementation and solve the problem
-		trainInternal(svm.decisionFunction(),dataset);
-		
-		if (base_type::sparsify())
-			svm.decisionFunction().sparsify();
+		trainInternal(f, dataset);
+
+		if (base_type::sparsify()) f.sparsify();
 	}
-	
+
 	/// \brief Train the C-SVM using weights.
 	void train(KernelClassifier<InputType>& svm, WeightedLabeledData<InputType, unsigned int> const& dataset)
 	{
-		//prepare model
-		svm.decisionFunction().setStructure(base_type::m_kernel, dataset.inputs(),this->m_trainOffset);
-		
+		// prepare model
+		std::size_t n = dataset.numberOfElements();
+		auto& f = svm.decisionFunction();
+		if (f.basis() == dataset.inputs() && f.kernel() == base_type::m_kernel && f.alpha().size1() == n && f.alpha().size2() == 1) {
+			// warm start, keep the alphas
+			if (this->m_trainOffset) f.offset() = RealVector(1);
+			else f.offset() = RealVector();
+		}
+		else {
+			f.setStructure(base_type::m_kernel, dataset.inputs(), this->m_trainOffset);
+		}
+
 		//dispatch to use the optimal implementation and solve the problem
-		trainInternal(svm.decisionFunction(),dataset);
-		
-		if (base_type::sparsify())
-			svm.decisionFunction().sparsify();
+		trainInternal(f, dataset);
+
+		if (base_type::sparsify()) f.sparsify();
 	}
 
 private:
@@ -251,6 +266,19 @@ private:
 			typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 			ProblemType problem(svmProblem,base_type::m_shrinking);
 			QpSolver< ProblemType > solver(problem);
+			// truncate the existing solution to the bounds
+			RealVector const& reg = this->regularizationParameters();
+			double C_minus = reg(0);
+			double C_plus = (reg.size() == 1) ? reg(0) : reg(1);
+			std::size_t i=0;
+			for (auto label : dataset.labels().elements()) {
+				double a = svm.alpha()(i, 0);
+				if (label == 0) a = std::max(std::min(a, 0.0), -C_minus);
+				else            a = std::min(std::max(a, 0.0), C_plus);
+				svm.alpha()(i, 0) = a;
+				i++;
+			}
+			problem.setInitialSolution(blas::column(svm.alpha(), 0));
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
 			column(svm.alpha(),0)= problem.getUnpermutedAlpha();
 			svm.offset(0) = computeBias(problem,dataset);
@@ -260,6 +288,19 @@ private:
 			typedef BoxConstrainedShrinkingProblem<SVMProblemType> ProblemType;
 			ProblemType problem(svmProblem,base_type::m_shrinking);
 			QpSolver< ProblemType> solver(problem);
+			// truncate the existing solution to the bounds
+			RealVector const& reg = this->regularizationParameters();
+			double C_minus = reg(0);
+			double C_plus = (reg.size() == 1) ? reg(0) : reg(1);
+			std::size_t i=0;
+			for (auto label : dataset.labels().elements()) {
+				double a = svm.alpha()(i, 0);
+				if (label == 0) a = std::max(std::min(a, 0.0), -C_minus);
+				else            a = std::min(std::max(a, 0.0), C_plus);
+				svm.alpha()(i, 0) = a;
+				i++;
+			}
+			problem.setInitialSolution(blas::column(svm.alpha(), 0));
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
 			column(svm.alpha(),0) = problem.getUnpermutedAlpha();
 		}
