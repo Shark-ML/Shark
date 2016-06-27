@@ -147,16 +147,16 @@ public:
 	typedef std::vector<std::size_t> IndexSet;
 
 	/// \brief Two containers compare equal if they share the same data.
-	template <class T> friend bool operator == (const Data<T>& op1, const Data<T>& op2) {
-		return (op1.m_data == op2.m_data);
+	template <class T> bool operator == (const Data<T>& rhs) {
+		return (m_data == rhs.m_data);
 	}
 
 	/// \brief Two containers compare different if they don't share the same data.
-	template <class T> friend bool operator != (const Data<T>& op1, const Data<T>& op2) {
-		return (! (op1 == op2));
+	template <class T> bool operator != (const Data<T>& rhs) {
+		return (! (*this == rhs));
 	}
-	template <class InputT, class LabelT> friend class LabeledData;
 
+	template <class InputT, class LabelT> friend class LabeledData;
 
 	// RANGES
 	typedef boost::iterator_range<typename Container::element_iterator> element_range;
