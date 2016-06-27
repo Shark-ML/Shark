@@ -229,10 +229,18 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_WARM_START )
 	GaussianRbfKernel<> kernel(0.5);
 	KernelClassifier<RealVector> svm;
 	CSvmTrainer<RealVector> trainer(&kernel, 0.1, true);
+	CSvmTrainer<RealVector> trainer2(&kernel, 0.11, true);
 	trainer.sparsify() = false;    // needed for seamless warm-start test
+	trainer2.sparsify() = false;   // needed for seamless warm-start test
+
 	trainer.train(svm, dataset);   // training from scratch
+	std::size_t iter = trainer.solutionProperties().iterations;
 	trainer.train(svm, dataset);   // warm-start from optimal solution
 	BOOST_CHECK_EQUAL(trainer.solutionProperties().iterations, 0);
+	trainer2.train(svm, dataset);  // warm-start from sub-optimal solution, increased C
+	BOOST_CHECK_LE(trainer.solutionProperties().iterations, iter);
+	trainer.train(svm, dataset);   // warm-start from sub-optimal solution, decreased C
+	BOOST_CHECK_LE(trainer.solutionProperties().iterations, iter);
 }
 
 template<class Model1, class Model2, class Dataset>

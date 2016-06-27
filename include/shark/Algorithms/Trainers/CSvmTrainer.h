@@ -270,16 +270,13 @@ private:
 			RealVector const& reg = this->regularizationParameters();
 			double C_minus = reg(0);
 			double C_plus = (reg.size() == 1) ? reg(0) : reg(1);
-			for (std::size_t i=0, b=0; b<dataset.labels().numberOfBatches(); b++)
-			{
-				auto const& batch = dataset.labels().batch(b);
-				for (std::size_t j=0; j<boost::size(batch); j++)
-				{
-					double a = svm.alpha()(i, 0);
-					if (shark::get(batch, j) == 0) a = std::min(std::max(a, 0.0), -C_minus);
-					else                           a = std::max(std::min(a, 0.0), C_plus);
-					svm.alpha()(i, 0) = a;
-				}
+			std::size_t i=0;
+			for (auto label : dataset.labels().elements()) {
+				double a = svm.alpha()(i, 0);
+				if (label == 0) a = std::max(std::min(a, 0.0), -C_minus);
+				else            a = std::min(std::max(a, 0.0), C_plus);
+				svm.alpha()(i, 0) = a;
+				i++;
 			}
 			problem.setInitialSolution(blas::column(svm.alpha(), 0));
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
@@ -295,16 +292,13 @@ private:
 			RealVector const& reg = this->regularizationParameters();
 			double C_minus = reg(0);
 			double C_plus = (reg.size() == 1) ? reg(0) : reg(1);
-			for (std::size_t i=0, b=0; b<dataset.labels().numberOfBatches(); b++)
-			{
-				auto const& batch = dataset.labels().batch(b);
-				for (std::size_t j=0; j<boost::size(batch); j++)
-				{
-					double a = svm.alpha()(i, 0);
-					if (shark::get(batch, j) == 0) a = std::min(std::max(a, 0.0), -C_minus);
-					else                           a = std::max(std::min(a, 0.0), C_plus);
-					svm.alpha()(i, 0) = a;
-				}
+			std::size_t i=0;
+			for (auto label : dataset.labels().elements()) {
+				double a = svm.alpha()(i, 0);
+				if (label == 0) a = std::max(std::min(a, 0.0), -C_minus);
+				else            a = std::min(std::max(a, 0.0), C_plus);
+				svm.alpha()(i, 0) = a;
+				i++;
 			}
 			problem.setInitialSolution(blas::column(svm.alpha(), 0));
 			solver.solve(base_type::stoppingCondition(), &base_type::solutionProperties());
