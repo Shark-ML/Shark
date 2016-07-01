@@ -107,6 +107,7 @@ shark_add_example( Statistics/Statistics Statistics "Statistiscs" )
 shark_add_example( Data/Datasets Datasets "Data" )
 shark_add_example( Data/Normalization Normalization "Data" )
 shark_add_example( Data/Subsets Subsets "Data" )
+shark_add_example( Data/Import Import "Data" )
 
 #Unsupervisd
 shark_add_example( Unsupervised/PCA PCA "Unsupervised" )

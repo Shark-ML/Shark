@@ -38,6 +38,8 @@
 #include <shark/Data/DataDistribution.h>
 #include <shark/Data/Csv.h>
 #include <shark/Data/SparseData.h>
+#include <shark/Data/Download.h>
+#include <iostream>
 using namespace shark;
 //###end<includes>
 
@@ -59,6 +61,7 @@ public:
 
 int main(int argc, char** argv)
 {
+/*
 //###begin<datasets>
 	Data<RealVector> points;
 	ClassificationDataset dataset;
@@ -93,4 +96,13 @@ int main(int argc, char** argv)
 	LabeledData<CompressedRealVector, unsigned int> sparse_dataset;
 	importSparseData(sparse_dataset, "data.libsvm");
 //###end<libsvm-sparse>
+*/
+
+//###begin<download>
+	LabeledData<RealVector, unsigned int> banana;
+	downloadSparseData(banana, "mldata.org", "/repository/data/download/libsvm/banana-ida/");
+	std::cout << "n=" << banana.numberOfElements() << " data points" << std::endl;
+	std::cout << "p=" << inputDimension(banana) << " features" << std::endl;
+	std::cout << "c=" << numberOfClasses(banana) << " classes" << std::endl;
+//###end<download>
 }
