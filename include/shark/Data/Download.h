@@ -60,31 +60,51 @@ namespace shark {
 /// \brief Download data from a sparse data (libSVM) file.
 ///
 /// \param  dataset       container storing the loaded data
-/// \param  domain        internet domain name or IP address
-/// \param  resource      resource identifier within that domain
+/// \param  url           http URL
 /// \param  port          TCP/IP port, default is 80
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 /// \param  batchSize     size of batch
 SHARK_EXPORT_SYMBOL template <class InputType, class LabelType> void downloadSparseData(
 	LabeledData<InputType, LabelType>& dataset,
-	std::string const& domain,
-	std::string const& resource,
+	std::string const& url,
 	unsigned short port = 80,
 	unsigned int highestIndex = 0,
 	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 )
 {
-	std::string content = download(domain, resource, port);
+	std::string content = download(url, port);
 	std::stringstream ss(content);
 	importSparseData(dataset, ss, highestIndex, batchSize);
+}
+
+
+/// \brief Download a data set from mldata.org.
+///
+/// \param  dataset       container storing the loaded data
+/// \param  name          data set name
+/// \param  batchSize     size of batch
+SHARK_EXPORT_SYMBOL template <class InputType, class LabelType> void downloadFromMLData(
+	LabeledData<InputType, LabelType>& dataset,
+	std::string const& name,
+	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+)
+{
+	std::string filename;
+	for (char c : name)
+	{
+		if (c == ' ') c = '-';
+		else if (c >= 'A' && c <= 'Z') c += 32;
+		else if (c == '[' || c == '(' || c == ')' || c == '.' || c == ']') continue;
+		filename += c;
+	}
+	downloadSparseData(dataset, "mldata.org/repository/data/download/libsvm/" + filename + "/", 80, 0, batchSize);
 }
 
 
 /// \brief Download classification data from a CSV file.
 ///
 /// \param  dataset       container storing the loaded data
-/// \param  domain        internet domain name or IP address
-/// \param  resource      resource identifier within that domain
+/// \param  url           http URL
 /// \param  lp            Position of the label in the record, either first or last column
 /// \param  separator     Optional separator between entries, typically a comma, spaces ar automatically ignored
 /// \param  comment       Trailing character indicating comment line. By dfault it is '#'
@@ -92,8 +112,7 @@ SHARK_EXPORT_SYMBOL template <class InputType, class LabelType> void downloadSpa
 /// \param  maximumBatchSize   size of batches in the dataset
 SHARK_EXPORT_SYMBOL template <class InputType> void downloadCsvData(
 	LabeledData<InputType, unsigned int>& dataset,
-	std::string const& domain,
-	std::string const& resource,
+	std::string const& url,
 	LabelPosition lp,
 	char separator = ',',
 	char comment = '#',
@@ -101,17 +120,15 @@ SHARK_EXPORT_SYMBOL template <class InputType> void downloadCsvData(
 	std::size_t maximumBatchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
 )
 {
-	std::string content = download(domain, resource, port);
-	std::stringstream ss(content);
-	importCSV(dataset, ss, lp, separator, comment, maximumBatchSize);
+	std::string content = download(url, port);
+	csvStringToData(dataset, content, lp, separator, comment, maximumBatchSize);
 }
 
 
 /// \brief Download regression data from a CSV file.
 ///
 /// \param  dataset       container storing the loaded data
-/// \param  domain        internet domain name or IP address
-/// \param  resource      resource identifier within that domain
+/// \param  url           http URL
 /// \param  lp            Position of the label in the record, either first or last column
 /// \param  numberOfOutputs   dimensionality of the labels
 /// \param  separator     Optional separator between entries, typically a comma, spaces ar automatically ignored
@@ -120,8 +137,7 @@ SHARK_EXPORT_SYMBOL template <class InputType> void downloadCsvData(
 /// \param  maximumBatchSize   size of batches in the dataset
 SHARK_EXPORT_SYMBOL template <class InputType> void downloadCsvData(
 	LabeledData<InputType, RealVector>& dataset,
-	std::string const& domain,
-	std::string const& resource,
+	std::string const& url,
 	LabelPosition lp,
 	std::size_t numberOfOutputs = 1,
 	char separator = ',',
@@ -130,9 +146,8 @@ SHARK_EXPORT_SYMBOL template <class InputType> void downloadCsvData(
 	std::size_t maximumBatchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
 )
 {
-	std::string content = download(domain, resource, port);
-	std::stringstream ss(content);
-	importCSV(dataset, ss, lp, numberOfOutputs, separator, comment, maximumBatchSize);
+	std::string content = download(url, port);
+	csvStringToData(dataset, content, lp, numberOfOutputs, separator, comment, maximumBatchSize);
 }
 
 

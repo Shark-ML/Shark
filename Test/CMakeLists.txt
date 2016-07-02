@@ -211,6 +211,7 @@ shark_add_test( Core/Math.cpp Core_Math )
 
 # Data Tests
 shark_add_test( Data/Csv.cpp Data_Csv )
+shark_add_test( Data/Download.cpp Data_Download )
 shark_add_test( Data/Bootstrap.cpp Data_Bootstrap )
 shark_add_test( Data/CVDatasetTools.cpp Data_CVDatasetTools )
 shark_add_test( Data/Dataset.cpp Data_Dataset )

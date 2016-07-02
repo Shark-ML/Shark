@@ -27,7 +27,7 @@ comma(character)-separated-values (CSV), and the LIBSVM format
 (http://www.csie.ntu.edu.tw/~cjlin/libsvm/). Shark does not come
 with its own data set format any more in order to avoid further
 growth of the jungle of data set formats. However, data can be
-serialized, which practially amounts to a data file format.
+serialized, which practically amounts to a data file format.
 
 Most data formats in common use are restricted to (sparse)
 vectorial input data. Thus, when dealing with non-vectorial data
@@ -95,13 +95,13 @@ LabeledData object from the two containers::
 ..sharkcode<Data/Import.tpp,csv-regression>
 
 
-LibSVM
+Sparse Format (e.g., LibSVM)
 ++++++++++++++++++++++++++++++++++++++++
 
 Shark can import sparse vectorial data files. This data format is in
 widespread use for SVM software packages such as libSVM. It represents
-sparse vectorial data augmented with integer class labels in an
-ASCII-based format.
+sparse vectorial data augmented with integer class labels or regression
+labels in an ASCII-based format.
 
 Similar to the CSV import functions we can call ::
 
@@ -129,4 +129,24 @@ left at its default.
 HDF5 and MLData
 ++++++++++++++++++++++++++++++++++++++++
 
-.. todo:: The tutorial section on HDF5 and MLData imports will be part of the official Shark release.
+.. todo:: Write this section!
+
+
+Downloading Data from Online Resources
+++++++++++++++++++++++++++++++++++++++++
+
+Shark supports downloading data from websites. This is of interest for
+quick experimentation, as well as for benchmark studies. The mldata.org
+website acts as a central repository for machine learning data sets.
+
+Shark supports HTTP downloads of dense (CSV) and sparse (libSVM) data.
+Simply provide the URL to the data file to populate a LabeledData object:
+
+..sharkcode<Data/Import.tpp,download-url>
+
+Shark has special support for the MLData platform. If allows to download
+a data set by name. The download uses the sparse (libSVM) format, hence
+every data set available in that format can be obtained directly from
+MLData with a single command:
+
+..sharkcode<Data/Import.tpp,download-mldata>

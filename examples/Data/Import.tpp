@@ -8,10 +8,10 @@
  * By itself, it does not do anything particularly useful.
  *
  * \author      T. Glasmachers
- * \date        2014
+ * \date        2014, 2016
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -61,7 +61,6 @@ public:
 
 int main(int argc, char** argv)
 {
-/*
 //###begin<datasets>
 	Data<RealVector> points;
 	ClassificationDataset dataset;
@@ -88,6 +87,7 @@ int main(int argc, char** argv)
 //###end<csv-regression>
 }
 
+{
 //###begin<libsvm-dense>
 	importSparseData(dataset, "data.libsvm");
 //###end<libsvm-dense>
@@ -96,13 +96,23 @@ int main(int argc, char** argv)
 	LabeledData<CompressedRealVector, unsigned int> sparse_dataset;
 	importSparseData(sparse_dataset, "data.libsvm");
 //###end<libsvm-sparse>
-*/
+}
 
-//###begin<download>
-	LabeledData<RealVector, unsigned int> banana;
-	downloadSparseData(banana, "mldata.org", "/repository/data/download/libsvm/banana-ida/");
-	std::cout << "n=" << banana.numberOfElements() << " data points" << std::endl;
-	std::cout << "p=" << inputDimension(banana) << " features" << std::endl;
-	std::cout << "c=" << numberOfClasses(banana) << " classes" << std::endl;
-//###end<download>
+{
+	ClassificationDataset dataset;
+//###begin<download-url>
+	// download dense data
+	downloadCsvData(dataset, "http://mldata.org/repository/data/download/csv/banana-ida/", FIRST_COLUMN);
+
+	// download sparse data
+	downloadSparseData(dataset, "http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/svmguide1");
+//###end<download-url>
+}
+{
+	ClassificationDataset dataset;
+//###begin<download-mldata>
+	// fetch data set by name from mldata.org
+	downloadFromMLData(dataset, "iris");
+//###end<download-mldata>
+}
 }

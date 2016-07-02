@@ -208,8 +208,7 @@ std::string readChunkFromSocket(Socket& socket, std::size_t length)
 
 /// \brief Download a document with the HTTP protocol.
 ///
-/// \param  domain    fomain name or IP address, for example "www.shark-ml.org"
-/// \param  resource  resource identifier relative to the domain, for example "/index.html"
+/// \param  url       download URL, for example "www.shark-ml.org/index.html"
 /// \param  port      TCP/IP port, defaults to 80
 ///
 /// The function returns the HTTP request body. In case of success this
@@ -218,8 +217,17 @@ std::string readChunkFromSocket(Socket& socket, std::size_t length)
 /// of browsers, e.g., execute javascript or even follow http redirects.
 /// All HTTP response status codes other than 200 are interpreted as
 /// failure to download the document and trigger an exception.
-std::string download(std::string const& domain, std::string const& resource, unsigned short port = 80)
+std::string download(std::string const& url, unsigned short port = 80)
 {
+	// split the URL into domain and resource
+	std::size_t start = 0;
+	if (url.size() >= 7 && url.substr(0, 7) == "http://") start = 7;
+	std::size_t slash = url.find('/', start);
+	if (slash == std::string::npos) throw std::runtime_error("[download] invalid URL (failed to split into domain and resource)");
+	std::string domain = url.substr(start, slash - start);
+	std::string resource = url.substr(slash);
+
+	// open a TCP/IP socket connection
 	detail::Socket socket(domain, port);
 	std::string request = "GET " + resource + " HTTP/1.1\r\nhost: " + domain + "\r\n\r\n";
 	socket.writeAll(request.c_str(), request.size());
@@ -232,7 +240,7 @@ std::string download(std::string const& domain, std::string const& resource, uns
 	std::string reply = detail::readLineFromSocket(socket);
 	if (reply.size() < 12) throw std::runtime_error("[download] http protocol violation");
 	if (reply.substr(0, 9) != "HTTP/1.0 " && reply.substr(0, 9) != "HTTP/1.1 ") throw std::runtime_error("[download] http protocol violation");
-	if (reply.substr(9, 3) != "200") throw std::runtime_error("[download] failed with HTTP status code " + reply.substr(9, 3));
+	if (reply.substr(9, 3) != "200") throw std::runtime_error("[download] failed with HTTP status " + reply.substr(9));
 
 	// parse http headers
 	while (true)
