@@ -61,6 +61,13 @@ public:
 
 int main(int argc, char** argv)
 {
+	std::cout <<
+			"\n"
+			"WARNING: This program loads several data sets from disk.\n"
+			"         If the files are not found then it will terminate\n"
+			"         with an exception.\n"
+			"\n";
+
 //###begin<datasets>
 	Data<RealVector> points;
 	ClassificationDataset dataset;

@@ -32,8 +32,6 @@
 #include <map>
 #include <stdexcept>
 #include <cstring>
-// #include <cerrno>
-// #include <csignal>
 
 #ifdef _WIN32
 	#include <winsock2.h>
@@ -132,6 +130,40 @@ public:
 		return ret;
 	}
 
+	/// \brief Read a CR-LF terminated line by from the socket.
+	std::string readLine()
+	{
+		std::string ret;
+		char c;
+		while (true)
+		{
+			if (read(&c, 1) == 0) return ret;
+			if (c == '\r')
+			{
+				if (read(&c, 1) == 0) return ret;
+				if (c != '\n') throw std::runtime_error("[Socket::readLine] broken CR-LF");
+				return ret;
+			}
+			else ret += c;
+		}
+	}
+
+	/// \brief Read a chunk of pre-specified size from the socket.
+	std::string readChunk(std::size_t size)
+	{
+		std::string ret(size, ' ');
+		if (size == 0) return ret;
+		char* p = &ret[0];
+		while (size > 0)
+		{
+			std::size_t r = read(p, size);
+			if (r == 0) throw std::runtime_error("[Socket::readChunk] read failed");
+			p += r;
+			size -= r;
+		}
+		return ret;
+	}
+
 	/// \brief Write data to the socket.
 	///
 	/// The operation may write only a part of the buffer, the
@@ -168,42 +200,6 @@ private:
 	int m_handle;                      ///< POSIX socket handle
 };
 
-/// \brief Read a line terminated by CR-LF from the socket.
-std::string readLineFromSocket(Socket& socket)
-{
-	std::string ret;
-	char c;
-	while (true)
-	{
-		socket.read(&c, 1);
-		if (c == '\r')
-		{
-			std::size_t r = socket.read(&c, 1);
-			if (r == 0) throw std::runtime_error("[download] socket error");
-			if (c != '\n') throw std::runtime_error("[download] http protocol violation");
-			return ret;
-		}
-		else ret += c;
-	}
-}
-
-/// \brief Read a chunk of pre-specified size from the socket.
-std::string readChunkFromSocket(Socket& socket, std::size_t length)
-{
-	std::string ret(length, ' ');
-	if (length == 0) return ret;
-	char* p = &ret[0];
-	while (length > 0)
-	{
-		std::size_t n = length; if (n > 4096) n = 4096;
-		std::size_t r = socket.read(p, length);
-		if (r == 0) throw std::runtime_error("[download] socket error");
-		p += r;
-		length -= r;
-	}
-	return ret;
-}
-
 } // namespace detail
 
 /// \brief Download a document with the HTTP protocol.
@@ -213,10 +209,11 @@ std::string readChunkFromSocket(Socket& socket, std::size_t length)
 ///
 /// The function returns the HTTP request body. In case of success this
 /// is the requested document. In case of an error the function throws
-/// an exception. Note that the class does not perform standard actions
-/// of browsers, e.g., execute javascript or even follow http redirects.
-/// All HTTP response status codes other than 200 are interpreted as
-/// failure to download the document and trigger an exception.
+/// an exception. Note that the function does not perform standard
+/// actions of web browsers, e.g., execute javascript or follow http
+/// redirects. All HTTP response status codes other than 200 are
+/// reported as failure to download the document and trigger an
+/// exception.
 std::string download(std::string const& url, unsigned short port = 80)
 {
 	// split the URL into domain and resource
@@ -237,7 +234,7 @@ std::string download(std::string const& url, unsigned short port = 80)
 	std::string body;
 
 	// parse http reply line
-	std::string reply = detail::readLineFromSocket(socket);
+	std::string reply = socket.readLine();
 	if (reply.size() < 12) throw std::runtime_error("[download] http protocol violation");
 	if (reply.substr(0, 9) != "HTTP/1.0 " && reply.substr(0, 9) != "HTTP/1.1 ") throw std::runtime_error("[download] http protocol violation");
 	if (reply.substr(9, 3) != "200") throw std::runtime_error("[download] failed with HTTP status " + reply.substr(9));
@@ -245,7 +242,7 @@ std::string download(std::string const& url, unsigned short port = 80)
 	// parse http headers
 	while (true)
 	{
-		std::string h = detail::readLineFromSocket(socket);
+		std::string h = socket.readLine();
 		if (h.empty()) break;
 		std::size_t colon = h.find(":");
 		if (colon == std::string::npos) throw std::runtime_error("[download] http protocol violation");
@@ -265,17 +262,17 @@ std::string download(std::string const& url, unsigned short port = 80)
 	if (! len.empty())
 	{
 		std::size_t length = strtol(len.c_str(), NULL, 10);
-		body = detail::readChunkFromSocket(socket, length);
+		body = socket.readChunk(length);
 	}
 	else
 	{
 		if (headers["transfer-encoding"] != "chunked") throw std::runtime_error("[download] transfer encoding not supported");
 		while (true)
 		{
-			std::string len = detail::readLineFromSocket(socket);
+			std::string len = socket.readLine();
 			std::size_t length = strtol(len.c_str(), NULL, 16);
-			body += detail::readChunkFromSocket(socket, length);
-			std::string x = readLineFromSocket(socket);
+			body += socket.readChunk(length);
+			std::string x = socket.readLine();
 			if (! x.empty()) throw std::runtime_error("[download] http protocol violation");
 			if (length == 0) break;
 		}
