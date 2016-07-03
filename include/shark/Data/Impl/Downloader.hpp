@@ -220,7 +220,8 @@ private:
 /// \param  url       download URL, for example "www.shark-ml.org/index.html"
 /// \param  port      TCP/IP port, defaults to 80
 ///
-/// The function returns the HTTP request body. In case of success this
+/// The function requests the document with a HTTP request and returns
+/// the body of the corresponding HTTP reply. In case of success this
 /// is the requested document. In case of an error the function throws
 /// an exception. Note that the function does not perform standard
 /// actions of web browsers, e.g., execute javascript or follow http
@@ -261,12 +262,12 @@ std::string download(std::string const& url, unsigned short port = 80)
 		if (colon == std::string::npos) throw std::runtime_error("[download] http protocol violation");
 		std::string tag = h.substr(0, colon);
 		// convert plain ASCII to lower case
-		for (std::size_t i=0; i<tag.size(); i++) if (tag[i] >= 65 && tag[i] <= 90) tag[i] += 32;
+		for (std::size_t i=0; i<tag.size(); i++) tag[i] = std::tolower(tag[i]);
 		std::string value = h.substr(colon + 1);
 		while (! value.empty() && value[0] == ' ') value.erase(0, 1);
 		while (! value.empty() && value[value.size() - 1] == ' ') value.erase(value.size() - 1);
 		// convert plain ASCII to lower case
-		for (std::size_t i=0; i<value.size(); i++) if (value[i] >= 65 && value[i] <= 90) value[i] += 32;
+		for (std::size_t i=0; i<value.size(); i++) value[i] = std::tolower(value[i]);
 		headers[tag] = value;
 	}
 
@@ -274,11 +275,13 @@ std::string download(std::string const& url, unsigned short port = 80)
 	std::string len = headers["content-length"];
 	if (! len.empty())
 	{
+		// a priori known content length
 		std::size_t length = strtol(len.c_str(), NULL, 10);
 		body = socket.readChunk(length);
 	}
 	else
 	{
+		// chunked encoding
 		if (headers["transfer-encoding"] != "chunked") throw std::runtime_error("[download] transfer encoding not supported");
 		while (true)
 		{
