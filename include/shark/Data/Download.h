@@ -57,7 +57,7 @@ namespace shark {
 
 
 
-/// \brief Download data from a sparse data (libSVM) file.
+/// \brief Download and import a sparse data (libSVM) file.
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  url           http URL
@@ -101,7 +101,7 @@ SHARK_EXPORT_SYMBOL template <class InputType, class LabelType> void downloadFro
 }
 
 
-/// \brief Download classification data from a CSV file.
+/// \brief Download and import a dense data (CSV) file for classification.
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  url           http URL
@@ -125,7 +125,7 @@ SHARK_EXPORT_SYMBOL template <class InputType> void downloadCsvData(
 }
 
 
-/// \brief Download regression data from a CSV file.
+/// \brief Download and import a dense data (CSV) file for regression.
 ///
 /// \param  dataset       container storing the loaded data
 /// \param  url           http URL

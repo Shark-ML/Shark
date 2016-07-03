@@ -1,11 +1,11 @@
 /*!
- * \brief       Implementation of the Cross Validation methods
+ * \brief       This file provides a simplistic TCP/IP socket class and an HTTP download function.
  * 
- * \author      O. Krause
- * \date        2015
+ * \author      T. Glasmachers
+ * \date        2016
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -60,6 +60,11 @@ namespace shark {
 namespace detail {
 
 /// \brief Simple TCP/IP socket abstraction.
+///
+/// This socket class encapsulates the most basic functionality of
+/// POSIX TCP/IP sockets. It is designed to act as a client, not as a
+/// server of a web service. Its functionality is somewhat tailored to
+/// what's needed for an HTTP download.
 class Socket
 {
 public:
@@ -115,7 +120,7 @@ public:
 
 	/// \brief Read data from the socket (blocking).
 	///
-	/// The operation reads at must #buffersize bytes from the socket
+	/// The operation reads at most #buffersize bytes from the socket
 	/// into the buffer. The number of bytes read is returned. A return
 	/// value of zero indicates an error, e.g., that the remote socket
 	/// was closed.
@@ -131,6 +136,10 @@ public:
 	}
 
 	/// \brief Read a CR-LF terminated line by from the socket.
+	///
+	/// The returned string does not contain the CR-LF code.
+	/// An exception is thrown if reading fails or if a CR not
+	/// followed by an LF is encountered.
 	std::string readLine()
 	{
 		std::string ret;
@@ -149,6 +158,10 @@ public:
 	}
 
 	/// \brief Read a chunk of pre-specified size from the socket.
+	///
+	/// In contrast to the read function, this function is guaranteed
+	/// to return the requested number of bytes. An exception is thrown
+	/// if reading fails.
 	std::string readChunk(std::size_t size)
 	{
 		std::string ret(size, ' ');
