@@ -209,8 +209,6 @@ Model                                         Description
 :doxy:`CrossEntropy`                          Logarithmic likelihood function if the model outputs are 
                                               interpreted as exponents of a softmax classifier;
                                               useful, e.g., for training of neural networks with linear outputs
-:doxy:`CrossEntropyIndependent`               Logarithmic likelihood function with
-                                              additional independence assumptions
 :doxy:`HingeLoss`			      Loss used in Maximum margin classification. Binary and multiclass implemented.
 :doxy:`SquaredHingeLoss`		      Loss used in Maximum margin classification. It is the pointwise
 					      Square of the HingeLoss. It is differentiable everywhere.
