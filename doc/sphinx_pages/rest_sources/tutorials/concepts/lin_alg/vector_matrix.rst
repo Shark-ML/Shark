@@ -46,7 +46,7 @@ We use the following notation for vectors, arguments and scalars:
 ======================= ====================================
 Symbol           	Meaning
 ======================= ====================================
-A,B,C		Matrix expression
+A,B,C			Matrix expression
 x,y			Vector expression
 C,z			Matrix or vector container or proxy to a
 			subset of the matrix or vector.
