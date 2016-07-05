@@ -9,26 +9,20 @@ General
 Is there a mailing list for users of the Shark library?
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-Yes, the mailing list is available at
-https://lists.sourceforge.net/lists/listinfo/shark-project-user.
+No. The mailing list ceased to exist  when we moved the repository to GitHub.
 
 .. _help:
 
 Where can I get help if my problem is not covered by the available documentation or this FAQ?
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-Multiple support channels are available for the Shark machine learning library:
 
-* Shark Mailing List Archive: http://sourceforge.net/mailarchive/forum.php?forum_name=shark-project-user
-* Shark Mailing List Interface: https://lists.sourceforge.net/lists/listinfo/shark-project-user
-* Shark bug tracker: http://sourceforge.net/tracker/?group_id=93510&atid=604542
-* Shark feature request tracker: http://sourceforge.net/tracker/?group_id=93510&atid=604545
+Please report the bug via `https://github.com/Shark-ML/Shark/issues <https://github.com/Shark-ML/Shark/issues>`_.
 
 Whenever you are reporting a bug, you should briefly scan over our below bug
 reporting guidelines to help our developers in resolving the issue:
 
-* Check the `bug database <http://sourceforge.net/tracker/?group_id=93510&atid=604542>`_
-  if your problem has already been reported.
+* Check whether the bug has already been reported.
 
 * Provide information on the Shark version you are using and the platform you are working on.
   To this end, you can execute the program ``Version`` that is part of the default Shark
