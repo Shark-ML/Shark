@@ -36,6 +36,7 @@
 #ifndef SHARK_CORE_SHARK_H
 #define SHARK_CORE_SHARK_H
 
+#include <boost/version.hpp>
 #include <boost/assign.hpp>
 #include <boost/config.hpp>
 #include <boost/property_tree/ptree.hpp>
