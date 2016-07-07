@@ -316,6 +316,7 @@ private:
 		m_db_dParams.clear();
 		
 		std::size_t ic = problem.dimensions();
+		if (ic == 0) return 0.0;
 
 		// compute the offset from the KKT conditions
 		double lowerBound = -1e100;
