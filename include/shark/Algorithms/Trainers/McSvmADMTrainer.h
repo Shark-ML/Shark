@@ -107,9 +107,10 @@ public:
 	//! Constructor
 	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
+	//! \param offset    whether to train with offset/bias parameter or not
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	McSvmADMTrainer(KernelType* kernel, double C, bool unconstrained = false)
-	: base_type(kernel, C, unconstrained)
+	McSvmADMTrainer(KernelType* kernel, double C, bool offset, bool unconstrained = false)
+	: base_type(kernel, C, offset, unconstrained)
 	{ }
 
 	/// \brief From INameable: return the class name.
@@ -171,7 +172,7 @@ public:
 			//problem.setShrinking(false);
 			if(this->m_trainOffset){
 				BiasSolverSimplex<PrecomputedMatrixType> biasSolver(&problem);
-				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu, true, &prop);
 			}
 			else{
 				QpSolver<QpMcSimplexDecomp< PrecomputedMatrixType> > solver(problem);
@@ -188,7 +189,7 @@ public:
 			//problem.setShrinking(false);
 			if(this->m_trainOffset){
 				BiasSolverSimplex<CachedMatrixType> biasSolver(&problem);
-				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu, true, &prop);
 			}
 			else{
 				QpSolver<QpMcSimplexDecomp< CachedMatrixType> > solver(problem);

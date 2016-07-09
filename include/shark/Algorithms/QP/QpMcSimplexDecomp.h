@@ -897,7 +897,8 @@ public:
 		RealVector& bias,
 		QpStoppingCondition& stop,
 		QpSparseArray<QpFloatType> const& nu,
-		bool sumToZero = false
+		bool sumToZero,
+		QpSolutionProperties* prop = NULL
 	){
 		std::size_t classes = bias.size();
 		std::size_t numExamples = m_problem->getNumExamples();
@@ -906,9 +907,15 @@ public:
 		RealVector prev(classes,0);
 		RealVector step(classes);
 		
+		double start_time = Timer::now();
+		unsigned int iterations = 0;
+		
 		do{
+			QpSolutionProperties propInner;
 			QpSolver<QpMcSimplexDecomp<Matrix> > solver(*m_problem);
-			solver.solve(stop);
+			solver.solve(stop, &propInner);
+			iterations += propInner.iterations;
+
 
 			// Rprop loop to update the bias
 			while (true)
@@ -973,6 +980,16 @@ public:
 				if (max(stepsize) < 0.01 * stop.minAccuracy) break;
 			}
 		}while(m_problem->checkKKT()> stop.minAccuracy);
+		
+		if (prop != NULL)
+		{
+			double finish_time = Timer::now();
+			
+			prop->accuracy = m_problem->checkKKT();
+			prop->value = m_problem->functionValue();
+			prop->iterations = iterations;
+			prop->seconds = finish_time - start_time;
+		}
 	}
 private:
 	void performBiasUpdate(

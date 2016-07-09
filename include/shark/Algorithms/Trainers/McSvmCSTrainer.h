@@ -193,7 +193,7 @@ public:
 			//problem.setShrinking(false);
 			if(this->m_trainOffset){
 				BiasSolverSimplex<PrecomputedMatrixType> biasSolver(&problem);
-				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu,false, &prop);
 			}
 			else{
 				QpSolver<QpMcSimplexDecomp< PrecomputedMatrixType> > solver(problem);
@@ -210,7 +210,7 @@ public:
 			//problem.setShrinking(false);
 			if(this->m_trainOffset){
 				BiasSolverSimplex<CachedMatrixType> biasSolver(&problem);
-				biasSolver.solve(bias,base_type::m_stoppingcondition,nu);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu, false, &prop);
 			}
 			else{
 				QpSolver<QpMcSimplexDecomp< CachedMatrixType> > solver(problem);
