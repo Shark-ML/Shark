@@ -431,7 +431,8 @@ public:
 
 			// select a working set and check for optimality
 			std::size_t i = 0, j = 0;
-			if (workingSet(m_problem,i, j) < stop.minAccuracy){
+			double acc = workingSet(m_problem,i, j);
+			if (acc < stop.minAccuracy) {
 				m_problem.unshrink();
 				if(m_problem.checkKKT() < stop.minAccuracy){
 					if (prop != NULL) prop->type = QpAccuracyReached;

@@ -314,7 +314,7 @@ private:
 		std::size_t nkp = base_type::m_kernel->numberOfParameters();
 		m_db_dParams.resize(nkp+1);
 		m_db_dParams.clear();
-		
+
 		std::size_t ic = problem.dimensions();
 		if (ic == 0) return 0.0;
 
@@ -353,12 +353,12 @@ private:
 
 		if(!m_computeDerivative)
 			return 0.5 * (lowerBound + upperBound);	//best estimate
-		
+
 		lower_i = problem.permutation(lower_i);
 		upper_i = problem.permutation(upper_i);
-		
+
 		SHARK_CHECK(base_type::m_regularizers.size() == 1, "derivative only implemented for SVM with one C" );
-		
+
 		// We next compute the derivative of lowerBound and upperBound wrt C, in order to then get that of b wrt C.
 		// The equation at the foundation of this simply is g_i = y_i - \sum_j \alpha_j K_{ij} .
 		double dlower_dC = 0.0;
