@@ -69,6 +69,49 @@ importSparseDataReader(std::istream& stream) {
 	return fileContents;
 }
 
+template<class T>
+void copySparsePoints(Data<blas::vector<T> >& dataset, std::vector<LibSVMPoint> const& points, bool hasZero){
+	std::size_t delta = (hasZero ? 0 : 1);
+	std::size_t i = 0;
+	for(auto element: dataset.elements()){
+		element.clear();
+
+		auto const& inputs = points[i].second;
+		for(std::size_t j = 0; j != inputs.size(); ++j)
+			element(inputs[j].first - delta) = inputs[j].second;
+		++i;
+	}
+}
+
+//sparse vectors need some pre-allocation for fast insertion
+template<class T>
+void copySparsePoints(Data<blas::compressed_vector<T> >& dataset, std::vector<LibSVMPoint> const& points, bool hasZero){
+	std::size_t delta = (hasZero ? 0 : 1);
+	
+	std::size_t start = 0;//first element of the batch in points
+	for(auto& batch: dataset.batches()){
+		//allocate nonzeros for every batch and every row in the batch
+		std::size_t nnz = 0;
+		for(std::size_t i = 0; i != batch.size1(); ++i){
+			nnz += points[start+i].second.size();
+		}
+		batch.reserve(nnz);
+		
+		//copy data into the batch
+		for(std::size_t i = 0; i != batch.size1(); ++i){
+			//allocate nonzeros for the row
+			batch.reserve_row(i,points[start+i].second.size());
+			//copy elements
+			auto const& inputs = points[start+i].second;
+			auto pos = batch.row_end(i);
+			for(std::size_t j = 0; j != inputs.size(); ++j,++pos){
+				pos = batch.set_element(pos,inputs[j].first - delta,inputs[j].second);
+			}
+		}
+		start += batch.size1();
+	}
+}
+	
 template<class T>//We assume T to be vectorial
 shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 	std::istream& stream,
@@ -114,34 +157,29 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 	}
 
 	// check for feature index zero (non-standard, but it happens)
-	bool haszero = false;
+	bool hasZero = false;
 	for (std::size_t i=0; i<numPoints; i++)
 	{
 		std::vector<std::pair<std::size_t, double> > const& input = contents[i].second;
 		if (input.empty()) continue;
 		if (input[0].first == 0)
 		{
-			haszero = true;
+			hasZero = true;
 			break;
 		}
 	}
 
 	//copy contents into a new dataset
-	typename shark::LabeledData<T, unsigned int>::element_type blueprint(T(maxIndex + (haszero ? 1 : 0)),0);
+	typename shark::LabeledData<T, unsigned int>::element_type blueprint(T(maxIndex + (hasZero ? 1 : 0)),0);
 	shark::LabeledData<T, unsigned int> data(numPoints,blueprint, batchSize);//create dataset with the right structure
+	copySparsePoints(data.inputs(),contents, hasZero);
 	{
-		size_t delta = (haszero ? 0 : 1);
 		std::size_t i = 0;
 		for(auto element: data.elements()){
-			element.input.clear();
 			//todo: check label
 			//we subtract minPositiveLabel to ensure that class indices starting from 0 and 1 are supported
 			int label = static_cast<int>(contents[i].first);
 			element.label = binaryLabels? 1 + (label-1)/2 : label-minPositiveLabel;
-
-			auto const& inputs = contents[i].second;
-			for(std::size_t j = 0; j != inputs.size(); ++j)
-				element.input(inputs[j].first - delta) = inputs[j].second;//LibSVM is one-indexed
 			++i;
 		}
 	}
@@ -171,31 +209,27 @@ shark::LabeledData<T, RealVector> libsvm_importer_regression(
 	}
 
 	// check for feature index zero (non-standard, but it happens)
-	bool haszero = false;
+	bool hasZero = false;
 	for (std::size_t i=0; i<numPoints; i++)
 	{
 		auto const& input = contents[i].second;
 		if (input.empty()) continue;
 		if (input[0].first == 0)
 		{
-			haszero = true;
+			hasZero = true;
 			break;
 		}
 	}
 
 	//copy contents into a new dataset
-	typename shark::LabeledData<T, RealVector>::element_type blueprint(T(maxIndex + (haszero ? 1 : 0)), RealVector(1));
+	typename shark::LabeledData<T, RealVector>::element_type blueprint(T(maxIndex + (hasZero ? 1 : 0)), RealVector(1));
 	shark::LabeledData<T, RealVector> data(numPoints, blueprint, batchSize);//create dataset with the right structure
+	copySparsePoints(data.inputs(),contents, hasZero);
 	{
-		size_t delta = (haszero ? 0 : 1);
+		size_t delta = (hasZero ? 0 : 1);
 		std::size_t i = 0;
 		for(auto element: data.elements()) {
-			element.input.clear();
 			element.label = RealVector(1, contents[i].first);
-
-			auto const& inputs = contents[i].second;
-			for(std::size_t j = 0; j != inputs.size(); ++j)
-				element.input(inputs[j].first - delta) = inputs[j].second;//LibSVM is one-indexed
 			++i;
 		}
 	}
