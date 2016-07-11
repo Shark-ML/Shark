@@ -171,12 +171,23 @@ public:
 		Index const& index = m_indices[position];
 		return get(m_dataset.batch(index.batch),index.positionInBatch);
 	}
-	/// \brief returns the position of the element inside the dataset
+
+	/// \brief Position of the element in the dataset.
 	///
 	/// This is useful for bagging, when identical elements among
 	/// several subsets are to be identified.
 	std::size_t index(std::size_t position)const{
 		return m_indices[position].datasetIndex;
+	}
+
+	/// \brief Index of the batch holding the element.
+	std::size_t batch(std::size_t position) const {
+		return m_indices[position].batch;
+	}
+
+	/// \brief Index inside the batch holding the element.
+	std::size_t positionInBatch(std::size_t position) const {
+		return m_indices[position].positionInBatch;
 	}
 
 	std::size_t size() const{

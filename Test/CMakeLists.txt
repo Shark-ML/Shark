@@ -122,6 +122,7 @@ shark_add_test( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_Steepest
 
 # Trainers
 shark_add_test( Algorithms/Trainers/CSvmTrainer.cpp Trainers_CSvmTrainer )
+shark_add_test( Algorithms/Trainers/RankingSvmTrainer.cpp Trainers_RankingSvmTrainer )
 shark_add_test( Algorithms/Trainers/FisherLDA.cpp Trainers_FisherLDA )
 shark_add_test( Algorithms/Trainers/KernelMeanClassifier.cpp Trainers_KernelMeanClassifier )
 shark_add_test( Algorithms/Trainers/EpsilonSvmTrainer.cpp Trainers_EpsilonSvmTrainer )

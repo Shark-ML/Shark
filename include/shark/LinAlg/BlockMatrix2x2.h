@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       Precomputed version of a matrix for quadratic programming
+ * \brief       Kernel matrix for SVM regression.
  * 
  * 
  * \par
