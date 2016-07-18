@@ -230,16 +230,16 @@ if( ENABLE_CBLAS )
 	else()
 		#todo: do a propper vendor check
 		find_library(OPENBLAS_LIBRARY openblas
-			HINTS ${CBLAS_ROOT}/lib /opt/local/lib
+			HINTS ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib/openblas-base
 		)
-		find_library(CBLAS_LIBRARY cblas
-			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+		find_library(CBLAS_LIBRARY blas
+			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/ /usr/lib/libblas
 		)
 		find_library(CLAPACK_LIBRARY lapack
-			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/ /usr/lib/lapack
 		)
 		find_library(ATLAS_LIBRARY atlas
-			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/
+			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/ /usr/lib/atlas-base
 		)
 		mark_as_advanced(
 			OPENBLAS_LIBRARY
