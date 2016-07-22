@@ -15,6 +15,8 @@ CONFIGURE_FILE (
   "${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/conf.py"
 )
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doxygen_pages/tag_files/)
+
 set( SPHINX_EXECUTABLE sphinx-build )
 set( SPHINX_PARAMETERS -b html )
 
