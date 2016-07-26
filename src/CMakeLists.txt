@@ -58,7 +58,4 @@ install(TARGETS shark
 	    ARCHIVE DESTINATION lib)
 	
 install(TARGETS SharkVersion
-	    EXPORT SharkTargets
 	    RUNTIME DESTINATION bin)
-
-
