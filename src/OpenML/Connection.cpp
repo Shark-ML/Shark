@@ -36,6 +36,7 @@
 
 #include <shark/OpenML/OpenML.h>
 #include <shark/OpenML/detail/Tools.h>
+#include <shark/OpenML/detail/LZ77.h>
 #include <shark/Core/Exception.h>
 
 #include <boost/lexical_cast.hpp>
@@ -112,6 +113,7 @@ detail::HttpResponse Connection::getHTTP(std::string const& request, ParamType c
 
 	std::string msg = "GET " + url + " HTTP/1.1\r\n"
 			"host: " + m_host + "\r\n"
+			"accept-encoding: gzip\r\n"
 			"\r\n";
 
 	if (! m_socket.writeAll(msg.c_str(), msg.size()))
@@ -225,6 +227,7 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 
 		msg = "POST " + url + " HTTP/1.1\r\n"
 				"host: " + m_host + "\r\n"
+				"accept-encoding: gzip\r\n"
 				"content-length: " + boost::lexical_cast<std::string>(body.size()) + "\r\n"
 				"content-type: multipart/form-data; boundary=" + boundary + "\r\n"
 				"\r\n"
@@ -391,6 +394,23 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 		}
 		response.m_body = m_readbuffer.substr(0, length);
 		m_readbuffer.erase(0, length);
+	}
+
+	// recompress content if appropriate
+	auto it = response.m_header.find("content-encoding");
+	if (it != response.m_header.end())
+	{
+		if (it->second == "gzip")
+		{
+			try
+			{
+				response.m_body = detail::unzip(response.m_body);
+			}
+			catch (...)
+			{
+				return false;
+			}
+		}
 	}
 
 	return true;
