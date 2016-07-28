@@ -86,8 +86,8 @@ public:
 		// pre-compute squared norms
 		for (std::size_t i=0; i<m_data.size(); i++)
 		{
-			ElementType x_i = m_data[i];
-			m_xSquared(i) = inner_prod(x_i.input, x_i.input);
+			auto const& x_i = m_data[i];
+			m_xSquared(i) = norm_sqr(x_i.input);
 		}
 	}
 
@@ -164,7 +164,7 @@ public:
 			{
 				// active variable
 				std::size_t i = schedule[j];
-				ElementType e_i = m_data[i];
+				auto const& e_i = m_data[i];
 				double y_i = (e_i.label > 0) ? +1.0 : -1.0;
 
 				// compute gradient and projected gradient
@@ -199,7 +199,7 @@ public:
 
 					// update both representations of the weight vector: alpha and w
 					alpha(i) = new_a;
-					w += (mu * y_i) * e_i.input;
+					noalias(w) += (mu * y_i) * e_i.input;
 					gain = mu * (g - 0.5 * q * mu);
 
 					steps++;
@@ -267,7 +267,7 @@ public:
 		// compute solution statistics
 		std::size_t free_SV = 0;
 		std::size_t bounded_SV = 0;
-		double objective = -0.5 * shark::blas::inner_prod(w, w);
+		double objective = -0.5 * norm_sqr(w);
 		for (std::size_t i=0; i<ell; i++)
 		{
 			double a = alpha(i);
@@ -343,13 +343,13 @@ public:
 			DatasetType::const_batch_reference batch = dataset.batch(b);
 			for (std::size_t i=0; i<batch.size(); i++)
 			{
-				CompressedRealVector x_i = shark::get(batch, i).input;
+				auto const& x_i = shark::get(batch, i).input;
 				// if (x_i.nnz() == 0) continue;
 
 				unsigned int y_i = shark::get(batch, i).label;
 				y[j] = 2.0 * y_i - 1.0;
 				double d = 0.0;
-				for (CompressedRealVector::const_iterator it=x_i.begin(); it != x_i.end(); ++it)
+				for (auto it=x_i.begin(); it != x_i.end(); ++it)
 				{
 					double v = *it;
 					sparse.index = it.index();
@@ -368,7 +368,7 @@ public:
 			DatasetType::const_batch_reference batch = dataset.batch(b);
 			for (std::size_t i=0; i<batch.size(); i++)
 			{
-				CompressedRealVector x_i = shark::get(batch, i).input;
+				auto const& x_i = shark::get(batch, i).input;
 				// if (x_i.nnz() == 0) continue;
 
 				x[j] = &storage[k];   // cannot be done in the first loop because of vector reallocation
