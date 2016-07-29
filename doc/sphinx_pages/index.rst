@@ -55,6 +55,7 @@
    rest_sources/tutorials/algorithms/nearestNeighbor
    rest_sources/tutorials/algorithms/kmeans
    rest_sources/tutorials/algorithms/LASSO
+   rest_sources/tutorials/algorithms/Benchmark
 
    rest_sources/tutorials/algorithms/ffnet
    rest_sources/tutorials/algorithms/autoencoders
