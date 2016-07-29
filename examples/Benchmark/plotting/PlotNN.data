@@ -1,0 +1,4 @@
+Algorithm		Shark	Scikit-Learn
+"Kd-tree (cod-rna)"	0.486	0.271
+"brute-force (cod-rna)"	7.308	50.65
+"brute-force (mnist)"	58.41	87.16
