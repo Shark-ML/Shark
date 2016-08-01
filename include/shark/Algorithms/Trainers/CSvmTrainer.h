@@ -423,8 +423,8 @@ class LinearCSvmTrainer : public AbstractLinearSvmTrainer<InputType>
 public:
 	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
-	LinearCSvmTrainer(double C, bool unconstrained = false) 
-	: AbstractLinearSvmTrainer<InputType>(C, unconstrained){}
+	LinearCSvmTrainer(double C, bool offset, bool unconstrained = false) 
+	: AbstractLinearSvmTrainer<InputType>(C, offset, unconstrained){}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -434,14 +434,46 @@ public:
 	{
 		std::size_t dim = inputDimension(dataset);
 		QpBoxLinear<InputType> solver(dataset, dim);
-		RealMatrix w(1, dim, 0.0);
-		row(w, 0) = solver.solve(
+		solver.solve(
 				base_type::C(),
 				0.0,
 				QpConfig::stoppingCondition(),
 				&QpConfig::solutionProperties(),
 				QpConfig::verbosity() > 0);
-		model.decisionFunction().setStructure(w);
+		
+		if(!this->trainOffset()){
+			RealMatrix w(1, dim, 0.0);
+			row(w,0) = solver.solutionWeightVector();
+			model.decisionFunction().setStructure(w);
+			return;
+		}
+		
+		double offset = 0;
+		double stepSize = 0.1;
+		double grad = solver.offsetGradient();
+		while(stepSize > 0.1*QpConfig::stoppingCondition().minAccuracy){
+			offset+= (grad < 0? -stepSize:stepSize);
+			solver.setOffset(offset);
+			solver.solve(
+				base_type::C(),
+				0.0,
+				QpConfig::stoppingCondition(),
+				&QpConfig::solutionProperties(),
+				QpConfig::verbosity() > 0);
+			double newGrad = solver.offsetGradient();
+			if(newGrad == 0)
+				break;
+			if(newGrad*grad < 0)
+				stepSize *= 0.5;
+			else
+				stepSize *= 1.6;
+			grad = newGrad;
+		}
+		
+		RealMatrix w(1, dim, 0.0);
+		row(w,0) = solver.solutionWeightVector();
+		model.decisionFunction().setStructure(w,RealVector(1,offset));
+		
 	}
 };
 
@@ -557,7 +589,7 @@ public:
 	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
 	SquaredHingeLinearCSvmTrainer(double C, bool unconstrained = false) 
-	: AbstractLinearSvmTrainer<InputType>(C, unconstrained){}
+	: AbstractLinearSvmTrainer<InputType>(C, false, unconstrained){}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -568,12 +600,13 @@ public:
 		std::size_t dim = inputDimension(dataset);
 		QpBoxLinear<InputType> solver(dataset, dim);
 		RealMatrix w(1, dim, 0.0);
-		row(w, 0) = solver.solve(
+		solver.solve(
 				1e100,
 				1.0 / base_type::C(),
 				QpConfig::stoppingCondition(),
 				&QpConfig::solutionProperties(),
 				QpConfig::verbosity() > 0);
+		row(w,0) = solver.solutionWeightVector();
 		model.decisionFunction().setStructure(w);
 	}
 };

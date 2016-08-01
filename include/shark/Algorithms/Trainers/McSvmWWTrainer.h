@@ -254,7 +254,7 @@ public:
 	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
 	LinearMcSvmWWTrainer(double C, bool unconstrained = false) 
-	: AbstractLinearSvmTrainer<InputType>(C, unconstrained)
+	: AbstractLinearSvmTrainer<InputType>(C, false, unconstrained)
 	{ }
 
 	/// \brief From INameable: return the class name.

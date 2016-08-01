@@ -319,10 +319,12 @@ public:
 	typedef LinearClassifier<InputType> ModelType;
 
 	//! Constructor
-	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
-	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
-	AbstractLinearSvmTrainer(double C, bool unconstrained = false)
+	//! \param C              regularization parameter - always the 'true' value of C, even when unconstrained is set
+	//! \param offset         train svm with offset - this is not supported for all SVM solvers.
+	//! \param unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
+	AbstractLinearSvmTrainer(double C, bool offset, bool unconstrained)
 	: m_C(C)
+	, m_trainOffset(offset)
 	, m_unconstrained(unconstrained)
 	{ RANGE_CHECK( C > 0 ); }
 
@@ -339,6 +341,9 @@ public:
 	/// \brief Is the regularization parameter provided in logarithmic (unconstrained) form as a parameter?
 	bool isUnconstrained() const
 	{ return m_unconstrained; }
+	
+	bool trainOffset() const
+	{ return m_trainOffset; }
 
 	/// \brief Get the hyper-parameter vector.
 	RealVector parameterVector() const
@@ -365,7 +370,9 @@ public:
 
 protected:
 	double m_C;                         ///< Regularization parameter. The exact meaning depends on the sub-class, but the value is always positive, and higher implies a less regular solution.
+	bool m_trainOffset;		    ///< Is the SVM trained with or without bias?
 	bool m_unconstrained;               ///< Is log(C) stored internally as a parameter instead of C? If yes, then we get rid of the constraint C > 0 on the level of the parameter interface.
+	
 };
 
 

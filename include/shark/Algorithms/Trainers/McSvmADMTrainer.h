@@ -230,7 +230,7 @@ public:
 	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
 	LinearMcSvmADMTrainer(double C, bool unconstrained = false)
-	: AbstractLinearSvmTrainer<InputType>(C, unconstrained){ }
+	: AbstractLinearSvmTrainer<InputType>(C, false, unconstrained){}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
