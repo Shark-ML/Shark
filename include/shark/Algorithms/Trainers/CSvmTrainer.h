@@ -13,15 +13,11 @@
 #include <shark/LinAlg/PrecomputedMatrix.h>
 #include <shark/LinAlg/RegularizedKernelMatrix.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
-#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 
-//all MCSVMs!
-#include <shark/Algorithms/Trainers/McSvm/McSvmADMTrainer.h>
-#include <shark/Algorithms/Trainers/McSvm/McSvmATMTrainer.h>
-#include <shark/Algorithms/Trainers/McSvm/McSvmATSTrainer.h>
-#include <shark/Algorithms/Trainers/McSvm/McSvmCSTrainer.h>
-#include <shark/Algorithms/Trainers/McSvm/McSvmLLWTrainer.h>
-#include <shark/Algorithms/Trainers/McSvm/McSvmWWTrainer.h>
+//for MCSVMs!
+#include <shark/Algorithms/QP/QpMcSimplexDecomp.h>
+#include <shark/Algorithms/QP/QpMcBoxDecomp.h>
+#include <shark/Algorithms/QP/QpMcLinear.h>
 #include <shark/Algorithms/Trainers/McSvm/McSvmMMRTrainer.h>
 #include <shark/Algorithms/Trainers/McSvm/McReinforcedSvmTrainer.h>
 
@@ -42,10 +38,10 @@ enum class McSvm{
 
 
 ///
-/// \brief Training of C-SVMs for binary classification.
+/// \brief Training of C-SVMs for binary classifellation.
 ///
 /// The C-SVM is the "standard" support vector machine for
-/// binary (two-class) classification. Given are data tuples
+/// binary (two-class) classifellation. Given are data tuples
 /// \f$ (x_i, y_i) \f$ with x-component denoting input and
 /// y-component denoting the label +1 or -1 (see the tutorial on
 /// label conventions; the implementation uses values 0/1),
@@ -60,7 +56,7 @@ enum class McSvm{
 /// \f[
 ///     f(x) = \langle w, \phi(x) \rangle + b
 /// \f]
-/// with coefficients w and b given by the (primal)
+/// with coeffellients w and b given by the (primal)
 /// optimization problem
 /// \f[
 ///     \min \frac{1}{2} \|w\|^2 + C \sum_i L(y_i, f(x_i)),
@@ -71,7 +67,7 @@ enum class McSvm{
 /// For details refer to the paper:<br/>
 /// <p>Support-Vector Networks. Corinna Cortes and Vladimir Vapnik,
 /// Machine Learning, vol. 20 (1995), pp. 273-297.</p>
-/// or simply to the Wikipedia article:<br/>
+/// or simply to the Wikipedia artellle:<br/>
 /// http://en.wikipedia.org/wiki/Support_vector_machine
 ///
 template <class InputType, class CacheType = float>
@@ -93,7 +89,7 @@ public:
 	/// this and many of the below typedefs build on the class template type CacheType.
 	/// Simply changing that one template parameter CacheType thus allows to flexibly
 	/// switch between using float or double as type for caching the kernel values.
-	/// The default is float, offering sufficient accuracy in the vast majority
+	/// The default is float, offering suffellient accuracy in the vast majority
 	/// of cases, at a memory cost of only four bytes. However, the template
 	/// parameter makes it easy to use double instead, (e.g., in case high
 	/// accuracy training is needed).
@@ -102,7 +98,7 @@ public:
 	typedef AbstractKernelFunction<InputType> KernelType;
 
 	//! Constructor
-	//! \param  kernel         kernel function to use for training and prediction
+	//! \param  kernel         kernel function to use for training and predelltion
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
 	//! \param offset whether to train the svm with offset term
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
@@ -111,7 +107,7 @@ public:
 	{ }
 	
 	//! Constructor
-	//! \param  kernel         kernel function to use for training and prediction
+	//! \param  kernel         kernel function to use for training and predelltion
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
 	//! \param  positiveC    regularization parameter of the positive class (label 1)
 	//! \param offset whether to train the svm with offset term
@@ -138,11 +134,12 @@ public:
 	void train(KernelClassifier<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
 	{
 		std::size_t classes = numberOfClasses(dataset);
+		std::size_t ell = dataset.numberOfElements();
 		if(classes == 2){
 			// prepare model
-			std::size_t n = dataset.numberOfElements();
+			
 			auto& f = svm.decisionFunction();
-			if (f.basis() == dataset.inputs() && f.kernel() == base_type::m_kernel && f.alpha().size1() == n && f.alpha().size2() == 1) {
+			if (f.basis() == dataset.inputs() && f.kernel() == base_type::m_kernel && f.alpha().size1() == ell && f.alpha().size2() == 1) {
 				// warm start, keep the alphas (possibly clipped)
 				if (this->m_trainOffset) f.offset() = RealVector(1);
 				else f.offset() = RealVector();
@@ -158,36 +155,82 @@ public:
 				f.sparsify();
 			return;
 		}
-		//multiclass case: dispatch to the chosen Svm-type
+		//multelllass case: find correct dual formulation
+		bool sumToZero = false;
+		bool simplex = false;
+		QpSparseArray<QpFloatType> nu;
+		QpSparseArray<QpFloatType> M;
+		
 		switch (m_McSvmType){
 			case McSvm::WW:
-				trainMc<detail::McSvmWWTrainer<InputType,CacheType> >(svm,dataset);
+				setupMcParametersWWCS(nu,M, classes);
 			break;
 			case McSvm::CS:
-				trainMc<detail::McSvmCSTrainer<InputType,CacheType> >(svm,dataset);
+				simplex=true;
+				setupMcParametersWWCS(nu,M, classes);
 			break;
 			case McSvm::LLW:
-				trainMc<detail::McSvmLLWTrainer<InputType,CacheType> >(svm,dataset);
+				sumToZero=true;
+				setupMcParametersADMLLW(nu,M, classes);
 			break;
 			case McSvm::ATM:
-				trainMc<detail::McSvmATMTrainer<InputType,CacheType> >(svm,dataset);
+				sumToZero=true;
+				simplex=true;
+				setupMcParametersATMATS(nu,M, classes);
 			break;
 			case McSvm::ATS:
-				trainMc<detail::McSvmATSTrainer<InputType,CacheType> >(svm,dataset);
+				sumToZero=true;
+				setupMcParametersATMATS(nu,M, classes);
 			break;
 			case McSvm::ADM:
-				trainMc<detail::McSvmADMTrainer<InputType,CacheType> >(svm,dataset);
+				sumToZero=true;
+				simplex=true;
+				setupMcParametersADMLLW(nu,M, classes);
 			break;
 			case McSvm::MMR:
 				trainMc<detail::McSvmMMRTrainer<InputType,CacheType> >(svm,dataset);
+				return;
 			break;
 			case McSvm::ReinforcedSvm:
 				trainMc<detail::McReinforcedSvmTrainer<InputType,CacheType> >(svm,dataset);
+				return;
 			break;
 			case McSvm::OVA://OVA is a special case and implemented here
 				trainOVA(svm,dataset);
+				return;
 			break;
 		}
+		
+		//solve dual
+		RealMatrix alpha(ell,M.width(),0.0);
+		RealVector bias(classes,0.0);
+		if(simplex)
+			trainMcSimplex(sumToZero,nu,M,alpha,bias,dataset);
+		else
+			trainMcBox(sumToZero,nu,M,alpha,bias,dataset);
+		
+		
+		// write the solution into the model
+		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
+		
+		for (std::size_t i=0; i<ell; i++)
+		{
+			unsigned int y = dataset.element(i).label;
+			for (std::size_t c=0; c<classes; c++)
+			{
+				double sum = 0.0;
+				std::size_t r = alpha.size2() * y;
+				for (std::size_t p=0; p != alpha.size2(); p++, r++)
+					sum += nu(r, c) * alpha(i, p);
+				svm.decisionFunction().alpha(i,c) = sum;
+			}
+		}
+		
+		if (this->m_trainOffset) 
+			svm.decisionFunction().offset() = bias;
+
+		if (this->sparsify()) 
+			svm.decisionFunction().sparsify();
 	}
 
 	/// \brief Train the C-SVM using weights.
@@ -219,6 +262,100 @@ public:
 
 private:
 	
+	void trainMcSimplex(
+	bool sumToZero, QpSparseArray<QpFloatType>& nu,QpSparseArray<QpFloatType>& M,
+		RealMatrix& alpha, RealVector& bias, 
+		LabeledData<InputType, unsigned int> const& dataset
+){
+		RealMatrix linear(alpha.size1(),M.width(),1.0);
+		typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
+		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
+		typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
+		
+		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
+		// solve the problem
+		if (base_type::precomputeKernel())
+		{
+			PrecomputedMatrixType matrix(&km);
+			QpMcSimplexDecomp< PrecomputedMatrixType> problem(matrix, M, dataset.labels(), linear, this->C());
+			QpSolutionProperties& prop = base_type::m_solutionproperties;
+			problem.setShrinking(base_type::m_shrinking);
+			if(this->m_trainOffset){
+				BiasSolverSimplex<PrecomputedMatrixType> biasSolver(&problem);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu,sumToZero, &prop);
+			}
+			else{
+				QpSolver<QpMcSimplexDecomp< PrecomputedMatrixType> > solver(problem);
+				solver.solve( base_type::m_stoppingcondition, &prop);
+			}
+			alpha = problem.solution();
+		}
+		else
+		{
+			CachedMatrixType matrix(&km, base_type::m_cacheSize);
+			QpMcSimplexDecomp< CachedMatrixType> problem(matrix, M, dataset.labels(), linear, this->C());
+			QpSolutionProperties& prop = base_type::m_solutionproperties;
+			problem.setShrinking(base_type::m_shrinking);
+			if(this->m_trainOffset){
+				BiasSolverSimplex<CachedMatrixType> biasSolver(&problem);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu,sumToZero, &prop);
+			}
+			else{
+				QpSolver<QpMcSimplexDecomp< CachedMatrixType> > solver(problem);
+				solver.solve( base_type::m_stoppingcondition, &prop);
+			}
+			alpha = problem.solution();
+		}
+		base_type::m_accessCount = km.getAccessCount();
+	}
+	
+	void trainMcBox(
+	bool sumToZero, QpSparseArray<QpFloatType>& nu,QpSparseArray<QpFloatType>& M,
+		RealMatrix& alpha, RealVector& bias, 
+		LabeledData<InputType, unsigned int> const& dataset
+	){
+		RealMatrix linear(alpha.size1(),M.width(),1.0);
+		typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
+		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
+		typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
+		
+		KernelMatrixType km(*base_type::m_kernel, dataset.inputs());
+		// solve the problem
+		if (base_type::precomputeKernel())
+		{
+			PrecomputedMatrixType matrix(&km);
+			QpMcBoxDecomp< PrecomputedMatrixType> problem(matrix, M, dataset.labels(), linear, this->C());
+			QpSolutionProperties& prop = base_type::m_solutionproperties;
+			problem.setShrinking(base_type::m_shrinking);
+			if(this->m_trainOffset){
+				BiasSolver<PrecomputedMatrixType> biasSolver(&problem);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu, sumToZero, &prop);
+			}
+			else{
+				QpSolver<QpMcBoxDecomp< PrecomputedMatrixType> > solver(problem);
+				solver.solve( base_type::m_stoppingcondition, &prop);
+			}
+			alpha = problem.solution();
+		}
+		else
+		{
+			CachedMatrixType matrix(&km, base_type::m_cacheSize);
+			QpMcBoxDecomp< CachedMatrixType> problem(matrix, M, dataset.labels(), linear, this->C());
+			QpSolutionProperties& prop = base_type::m_solutionproperties;
+			problem.setShrinking(base_type::m_shrinking);
+			if(this->m_trainOffset){
+				BiasSolver<CachedMatrixType> biasSolver(&problem);
+				biasSolver.solve(bias,base_type::m_stoppingcondition,nu, sumToZero, &prop);
+			}
+			else{
+				QpSolver<QpMcBoxDecomp< CachedMatrixType> > solver(problem);
+				solver.solve( base_type::m_stoppingcondition, &prop);
+			}
+			alpha = problem.solution();
+		}
+		base_type::m_accessCount = km.getAccessCount();
+	}
+	
 	template<class Trainer>
 	void trainMc(KernelClassifier<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset){
 		Trainer trainer(base_type::m_kernel,this->C(),this->m_trainOffset);
@@ -234,6 +371,131 @@ private:
 		base_type::m_accessCount = trainer.accessCount();
 	}
 	
+	void setupMcParametersWWCS(QpSparseArray<QpFloatType>& nu,QpSparseArray<QpFloatType>& M, std::size_t classes)const{
+		nu.resize(classes * (classes-1), classes, 2*classes*(classes-1));
+		for (unsigned int r=0, y=0; y<classes; y++)
+		{
+			for (unsigned int p=0, pp=0; p<classes-1; p++, pp++, r++)
+			{
+				if (pp == y) pp++;
+				if (y < pp)
+				{
+					nu.add(r, y, 0.5);
+					nu.add(r, pp, -0.5);
+				}
+				else
+				{
+					nu.add(r, pp, -0.5);
+					nu.add(r, y, 0.5);
+				}
+			}
+		}
+		
+		M.resize(classes * (classes-1) * classes, classes-1, 2 * classes * (classes-1) * (classes-1));
+		for (unsigned int r=0, yv=0; yv<classes; yv++)
+		{
+			for (unsigned int pv=0, ppv=0; pv<classes-1; pv++, ppv++)
+			{
+				if (ppv == yv) ppv++;
+				for (unsigned int yw=0; yw<classes; yw++, r++)
+				{
+					QpFloatType baseM = (yv == yw ? (QpFloatType)0.25 : (QpFloatType)0.0) - (ppv == yw ? (QpFloatType)0.25 : (QpFloatType)0.0);
+					M.setDefaultValue(r, baseM);
+					if (yv == yw)
+					{
+						M.add(r, ppv - (ppv >= yw ? 1 : 0), baseM + (QpFloatType)0.25);
+					}
+					else if (ppv == yw)
+					{
+						M.add(r, yv - (yv >= yw ? 1 : 0), baseM - (QpFloatType)0.25);
+					}
+					else
+					{
+						unsigned int pw = ppv - (ppv >= yw ? 1 : 0);
+						unsigned int pw2 = yv - (yv >= yw ? 1 : 0);
+						if (pw < pw2)
+						{
+							M.add(r, pw, baseM + (QpFloatType)0.25);
+							M.add(r, pw2, baseM - (QpFloatType)0.25);
+						}
+						else
+						{
+							M.add(r, pw2, baseM - (QpFloatType)0.25);
+							M.add(r, pw, baseM + (QpFloatType)0.25);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	void setupMcParametersATMATS(QpSparseArray<QpFloatType>& nu,QpSparseArray<QpFloatType>& M, std::size_t classes)const{
+		nu.resize(classes*classes, classes, classes*classes);
+		for (unsigned int r=0, y=0; y<classes; y++)
+		{
+			for (unsigned int p=0; p<classes; p++, r++)
+			{
+				nu.add(r, p, (QpFloatType)((p == y) ? 1.0 : -1.0));
+			}
+		}
+		
+		M.resize(classes * classes * classes, classes, 2 * classes * classes * classes);
+		QpFloatType c_ne = (QpFloatType)(-1.0 / (double)classes);
+		QpFloatType c_eq = (QpFloatType)1.0 + c_ne;
+		for (unsigned int r=0, yv=0; yv<classes; yv++)
+		{
+			for (unsigned int pv=0; pv<classes; pv++)
+			{
+				QpFloatType sign = QpFloatType((yv == pv) ? -1 : 1);//cast to keep MSVC happy...
+				for (unsigned int yw=0; yw<classes; yw++, r++)
+				{
+					M.setDefaultValue(r, sign * c_ne);
+					if (yw == pv)
+					{
+						M.add(r, pv, -sign * c_eq);
+					}
+					else
+					{
+						M.add(r, pv, sign * c_eq);
+						M.add(r, yw, -sign * c_ne);
+					}
+				}
+			}
+		}
+	}
+	
+	void setupMcParametersADMLLW(QpSparseArray<QpFloatType>& nu,QpSparseArray<QpFloatType>& M, std::size_t classes)const{
+		nu.resize(classes * (classes-1), classes, classes*(classes-1));
+		for (unsigned int r=0, y=0; y<classes; y++)
+		{
+			for (unsigned int p=0, pp=0; p<classes-1; p++, pp++, r++)
+			{
+				if (pp == y) pp++;
+				nu.add(r, pp, (QpFloatType)-1.0);
+			}
+		}
+		
+		M.resize(classes * (classes-1) * classes, classes-1, classes * (classes-1) * (classes-1));
+		QpFloatType mood = (QpFloatType)(-1.0 / (double)classes);
+		QpFloatType val = (QpFloatType)1.0 + mood;
+		for (unsigned int r=0, yv=0; yv<classes; yv++)
+		{
+			for (unsigned int pv=0, ppv=0; pv<classes-1; pv++, ppv++)
+			{
+				if (ppv == yv) ppv++;
+				for (unsigned int yw=0; yw<classes; yw++, r++)
+				{
+					M.setDefaultValue(r, mood);
+					if (ppv != yw)
+					{
+						unsigned int pw = ppv - (ppv > yw ? 1 : 0);
+						M.add(r, pw, val);
+					}
+				}
+			}
+		}
+	}
+	
 	void trainOVA(KernelClassifier<InputType>& svm, const LabeledData<InputType, unsigned int>& dataset){
 		std::size_t classes = numberOfClasses(dataset);
 		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
@@ -247,9 +509,9 @@ private:
 		{
 			LabeledData<InputType, unsigned int> bindata = oneVersusRestProblem(dataset, c);
 			KernelClassifier<InputType> binsvm;
-// TODO: maybe build the quadratic programs directly,
+// TODO: maybe build the Quadratic programs directly,
 //       in order to profit from cached and
-//       in particular from precomputed kernel
+//       in partellular from precomputed kernel
 //       entries!
 			CSvmTrainer<InputType, QpFloatType> bintrainer(base_type::m_kernel, this->C(),this->m_trainOffset);
 			bintrainer.setCacheSize(this->cacheSize());
@@ -335,8 +597,6 @@ private:
 		}
 		base_type::m_accessCount = km.getAccessCount();
 	}
-
-private:
 	
 	template<class SVMProblemType>
 	void optimize(KernelExpansion<InputType>& svm, SVMProblemType& svmProblem, LabeledData<InputType, unsigned int> const& dataset){
@@ -396,8 +656,8 @@ private:
 		m_db_dParams.resize(nkp+1);
 		m_db_dParams.clear();
 
-		std::size_t ic = problem.dimensions();
-		if (ic == 0) return 0.0;
+		std::size_t ell = problem.dimensions();
+		if (ell == 0) return 0.0;
 
 		// compute the offset from the KKT conditions
 		double lowerBound = -1e100;
@@ -406,7 +666,7 @@ private:
 		std::size_t freeVars = 0;
 		std::size_t lower_i = 0;
 		std::size_t upper_i = 0;
-		for (std::size_t i=0; i<ic; i++)
+		for (std::size_t i=0; i<ell; i++)
 		{
 			double value = problem.gradient(i);
 			if (problem.alpha(i) == problem.boxMin(i))
@@ -463,7 +723,7 @@ private:
 		RealMatrix one(1,1,1); //weight of input
 		RealMatrix result(1,1); //stores the result of the call
 
-		for (std::size_t i=0; i<ic; i++) {
+		for (std::size_t i=0; i<ell; i++) {
 			double cur_alpha = problem.alpha(problem.permutation(i));
 			if ( cur_alpha != 0 ) {
 				int cur_label = ( cur_alpha>0.0 ? 1 : -1 );
@@ -651,7 +911,7 @@ public:
 	typedef AbstractSvmTrainer<InputType, unsigned int> base_type;
 
 	//! Constructor
-	//! \param  kernel         kernel function to use for training and prediction
+	//! \param  kernel         kernel function to use for training and predelltion
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver??
 	SquaredHingeCSvmTrainer(KernelType* kernel, double C, bool unconstrained = false)
@@ -659,7 +919,7 @@ public:
 	{ }
 	
 	//! Constructor
-	//! \param  kernel         kernel function to use for training and prediction
+	//! \param  kernel         kernel function to use for training and predelltion
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
 	//! \param  positiveC    regularization parameter of the positive class (label 1)
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
