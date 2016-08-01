@@ -97,6 +97,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET )
 		KernelClassifier<RealVector> kc;
 		KernelExpansion<RealVector>& svm = kc.decisionFunction();
 		CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
+		trainer.setComputeBinaryDerivative(true);
 		trainer.sparsify() = false;
 		trainer.stoppingCondition().minAccuracy = 1e-10;
 		trainer.train(kc, dataset);
@@ -190,6 +191,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET_UNCONSTRA
 		KernelExpansion<RealVector>& svm = kc.decisionFunction();
 		CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i], true,UNCONSTRAINED );
 		trainer.sparsify() = false;
+		trainer.setComputeBinaryDerivative(true);
 		trainer.stoppingCondition().minAccuracy = 1e-14;
 		trainer.train(kc, dataset);
 		RealVector param = svm.parameterVector();
@@ -286,6 +288,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET_RBF )
 			KernelExpansion<RealVector>& svm = kc.decisionFunction();
 			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
+			trainer.setComputeBinaryDerivative(true);
 			trainer.stoppingCondition().minAccuracy = 1e-15;
 			trainer.train(kc, dataset);
 			RealVector param = svm.parameterVector();
@@ -366,6 +369,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_SECOND_DATASET )
 		KernelExpansion<RealVector>& svm = kc.decisionFunction();
 		CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 		trainer.sparsify() = false;
+		trainer.setComputeBinaryDerivative(true);
 		trainer.stoppingCondition().minAccuracy = 1e-10;
 		trainer.train(kc, dataset);
 		RealVector param = svm.parameterVector();
@@ -461,6 +465,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_KERNEL_PARAMS )
 			KernelExpansion<RealVector>& svm = kc.decisionFunction();
 			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
+			trainer.setComputeBinaryDerivative(true);
 			trainer.stoppingCondition().minAccuracy = 1e-15;
 			trainer.train(kc, dataset);
 			RealVector param = svm.parameterVector();
@@ -553,6 +558,7 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 			KernelExpansion<RealVector>& svm = kc.decisionFunction();
 			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
+			trainer.setComputeBinaryDerivative(true);
 			trainer.stoppingCondition().minAccuracy = 1e-15;
 			trainer.train(kc, d1);
 			RealVector param = svm.parameterVector();
@@ -642,6 +648,7 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 			KernelExpansion<RealVector>& svm = kc.decisionFunction();
 			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
+			trainer.setComputeBinaryDerivative(true);
 			trainer.stoppingCondition().minAccuracy = 1e-15;
 			trainer.train(kc, d2);
 			RealVector param = svm.parameterVector();
@@ -739,6 +746,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_KERNEL_PARAMS_UNCONSTRAIN
 			KernelExpansion<RealVector>& svm = kc.decisionFunction();
 			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
+			trainer.setComputeBinaryDerivative(true);
 			trainer.stoppingCondition().minAccuracy = 1e-15;
 			trainer.train(kc, dataset);
 			RealVector param = svm.parameterVector();
@@ -843,6 +851,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 			KernelExpansion<RealVector>& svm = kc.decisionFunction();
 			CSvmTrainer<RealVector, double> trainer( &kernel, Cs[i],true );
 			trainer.sparsify() = false;
+			trainer.setComputeBinaryDerivative(true);
 			trainer.stoppingCondition().minAccuracy = 1e-15;
 			trainer.train(kc, dataset);
 			RealVector param = svm.parameterVector();

@@ -230,6 +230,7 @@ public:
 			KernelClassifier<InputType> svm;   //the SVM
 			CSvmTrainer<InputType, double> csvm_trainer(mep_kernel, C_reg, true, m_svmCIsUnconstrained);   //the trainer
 			csvm_trainer.sparsify() = false;
+			csvm_trainer.setComputeBinaryDerivative(true);
 			if (mep_svmStoppingCondition != NULL) {
 				csvm_trainer.stoppingCondition() = *mep_svmStoppingCondition;
 			} else {
