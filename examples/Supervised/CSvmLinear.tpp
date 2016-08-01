@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 
 	// define the machine
 //###begin<trainer>
-	LinearCSvmTrainer<VectorType> trainer(C);
+	LinearCSvmTrainer<VectorType> trainer(C, false);
 //###end<trainer>
 
 	// train the machine

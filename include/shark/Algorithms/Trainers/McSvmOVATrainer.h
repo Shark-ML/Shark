@@ -146,7 +146,7 @@ public:
 	typedef AbstractLinearSvmTrainer<InputType> base_type;
 
 	LinearMcSvmOVATrainer(double C, bool unconstrained = false)
-	: AbstractLinearSvmTrainer<InputType>(C, unconstrained){ }
+	: AbstractLinearSvmTrainer<InputType>(C, false, unconstrained){}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -168,7 +168,8 @@ public:
 			LabeledData<InputType, unsigned int> bindata = oneVersusRestProblem(dataset, c);
 			QpBoxLinear<InputType> solver(bindata, dim);
 			QpSolutionProperties prop;
-			row(w, c) = solver.solve(this->C(), 0.0, base_type::m_stoppingcondition, &prop, base_type::m_verbosity > 0);
+			solver.solve(this->C(), 0.0, base_type::m_stoppingcondition, &prop, base_type::m_verbosity > 0);
+			row(w,c) = solver.solutionWeightVector();
 			base_type::m_solutionproperties.iterations += prop.iterations;
 			base_type::m_solutionproperties.seconds += prop.seconds;
 			base_type::m_solutionproperties.accuracy = std::max(base_type::solutionProperties().accuracy, prop.accuracy);
