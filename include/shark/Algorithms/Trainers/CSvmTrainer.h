@@ -19,7 +19,7 @@
 #include <shark/Algorithms/QP/QpMcBoxDecomp.h>
 #include <shark/Algorithms/QP/QpMcLinear.h>
 #include <shark/Algorithms/Trainers/McSvm/McSvmMMRTrainer.h>
-#include <shark/Algorithms/Trainers/McSvm/McReinforcedSvmTrainer.h>
+//~ #include <shark/Algorithms/Trainers/McSvm/McReinforcedSvmTrainer.h>
 
 namespace shark {
 	
@@ -155,7 +155,17 @@ public:
 				f.sparsify();
 			return;
 		}
-		//multelllass case: find correct dual formulation
+		
+		//special cases OVA and MMR
+		if(m_McSvmType == McSvm::OVA){
+			trainOVA(svm,dataset);
+			return;
+		}else if(m_McSvmType == McSvm::MMR){
+			trainMc<detail::McSvmMMRTrainer<InputType,CacheType> >(svm,dataset);
+			return;
+		}
+		
+		//general multiclass case: find correct dual formulation
 		bool sumToZero = false;
 		bool simplex = false;
 		QpSparseArray<QpFloatType> nu;
@@ -187,27 +197,29 @@ public:
 				simplex=true;
 				setupMcParametersADMLLW(nu,M, classes);
 			break;
-			case McSvm::MMR:
-				trainMc<detail::McSvmMMRTrainer<InputType,CacheType> >(svm,dataset);
-				return;
-			break;
 			case McSvm::ReinforcedSvm:
-				trainMc<detail::McReinforcedSvmTrainer<InputType,CacheType> >(svm,dataset);
-				return;
+				setupMcParametersATMATS(nu,M, classes);
 			break;
-			case McSvm::OVA://OVA is a special case and implemented here
-				trainOVA(svm,dataset);
-				return;
-			break;
+		}
+		
+		//setup linear part
+		RealMatrix linear(ell,M.width(),1.0);
+		if(m_McSvmType == McSvm::ReinforcedSvm){
+			auto const& labels = dataset.labels();
+			std::size_t i=0;
+			for(unsigned int y: labels.elements()){
+				linear(i, y) = classes - 1.0;   // self-margin target value of reinforced SVM loss
+				i++;
+			}
 		}
 		
 		//solve dual
 		RealMatrix alpha(ell,M.width(),0.0);
 		RealVector bias(classes,0.0);
 		if(simplex)
-			trainMcSimplex(sumToZero,nu,M,alpha,bias,dataset);
+			trainMcSimplex(sumToZero,nu,M,linear,alpha,bias,dataset);
 		else
-			trainMcBox(sumToZero,nu,M,alpha,bias,dataset);
+			trainMcBox(sumToZero,nu,M,linear,alpha,bias,dataset);
 		
 		
 		// write the solution into the model
@@ -263,11 +275,10 @@ public:
 private:
 	
 	void trainMcSimplex(
-	bool sumToZero, QpSparseArray<QpFloatType>& nu,QpSparseArray<QpFloatType>& M,
+		bool sumToZero, QpSparseArray<QpFloatType> const& nu,QpSparseArray<QpFloatType> const& M, RealMatrix const& linear,
 		RealMatrix& alpha, RealVector& bias, 
 		LabeledData<InputType, unsigned int> const& dataset
-){
-		RealMatrix linear(alpha.size1(),M.width(),1.0);
+	){
 		typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
 		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
 		typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
@@ -310,11 +321,10 @@ private:
 	}
 	
 	void trainMcBox(
-	bool sumToZero, QpSparseArray<QpFloatType>& nu,QpSparseArray<QpFloatType>& M,
+		bool sumToZero, QpSparseArray<QpFloatType> const& nu,QpSparseArray<QpFloatType> const& M, RealMatrix const& linear,
 		RealMatrix& alpha, RealVector& bias, 
 		LabeledData<InputType, unsigned int> const& dataset
 	){
-		RealMatrix linear(alpha.size1(),M.width(),1.0);
 		typedef KernelMatrix<InputType, QpFloatType> KernelMatrixType;
 		typedef CachedMatrix< KernelMatrixType > CachedMatrixType;
 		typedef PrecomputedMatrix< KernelMatrixType > PrecomputedMatrixType;
