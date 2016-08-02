@@ -18,7 +18,7 @@
 #include <shark/Algorithms/QP/QpMcSimplexDecomp.h>
 #include <shark/Algorithms/QP/QpMcBoxDecomp.h>
 #include <shark/Algorithms/QP/QpMcLinear.h>
-#include <shark/Algorithms/Trainers/McSvm/McSvmMMRTrainer.h>
+//~ #include <shark/Algorithms/Trainers/McSvm/McSvmMMRTrainer.h>
 //~ #include <shark/Algorithms/Trainers/McSvm/McReinforcedSvmTrainer.h>
 
 namespace shark {
@@ -156,12 +156,9 @@ public:
 			return;
 		}
 		
-		//special cases OVA and MMR
+		//special case OVA 
 		if(m_McSvmType == McSvm::OVA){
 			trainOVA(svm,dataset);
-			return;
-		}else if(m_McSvmType == McSvm::MMR){
-			trainMc<detail::McSvmMMRTrainer<InputType,CacheType> >(svm,dataset);
 			return;
 		}
 		
@@ -173,14 +170,18 @@ public:
 		
 		switch (m_McSvmType){
 			case McSvm::WW:
+				sumToZero = false;
+				simplex = false;
 				setupMcParametersWWCS(nu,M, classes);
 			break;
 			case McSvm::CS:
+				sumToZero = false;
 				simplex=true;
 				setupMcParametersWWCS(nu,M, classes);
 			break;
 			case McSvm::LLW:
 				sumToZero=true;
+				simplex = false;
 				setupMcParametersADMLLW(nu,M, classes);
 			break;
 			case McSvm::ATM:
@@ -190,6 +191,7 @@ public:
 			break;
 			case McSvm::ATS:
 				sumToZero=true;
+				simplex = false;
 				setupMcParametersATMATS(nu,M, classes);
 			break;
 			case McSvm::ADM:
@@ -198,7 +200,14 @@ public:
 				setupMcParametersADMLLW(nu,M, classes);
 			break;
 			case McSvm::ReinforcedSvm:
+				sumToZero = false;
+				simplex = false;
 				setupMcParametersATMATS(nu,M, classes);
+			break;
+			case McSvm::MMR:
+				sumToZero = true;
+				simplex = true;
+				setupMcParametersMMR(nu,M, classes);
 			break;
 		}
 		
@@ -217,9 +226,9 @@ public:
 		RealMatrix alpha(ell,M.width(),0.0);
 		RealVector bias(classes,0.0);
 		if(simplex)
-			trainMcSimplex(sumToZero,nu,M,linear,alpha,bias,dataset);
+			solveMcSimplex(sumToZero,nu,M,linear,alpha,bias,dataset);
 		else
-			trainMcBox(sumToZero,nu,M,linear,alpha,bias,dataset);
+			solveMcBox(sumToZero,nu,M,linear,alpha,bias,dataset);
 		
 		
 		// write the solution into the model
@@ -274,7 +283,7 @@ public:
 
 private:
 	
-	void trainMcSimplex(
+	void solveMcSimplex(
 		bool sumToZero, QpSparseArray<QpFloatType> const& nu,QpSparseArray<QpFloatType> const& M, RealMatrix const& linear,
 		RealMatrix& alpha, RealVector& bias, 
 		LabeledData<InputType, unsigned int> const& dataset
@@ -320,7 +329,7 @@ private:
 		base_type::m_accessCount = km.getAccessCount();
 	}
 	
-	void trainMcBox(
+	void solveMcBox(
 		bool sumToZero, QpSparseArray<QpFloatType> const& nu,QpSparseArray<QpFloatType> const& M, RealMatrix const& linear,
 		RealMatrix& alpha, RealVector& bias, 
 		LabeledData<InputType, unsigned int> const& dataset
@@ -502,6 +511,24 @@ private:
 						M.add(r, pw, val);
 					}
 				}
+			}
+		}
+	}
+	
+	void setupMcParametersMMR(QpSparseArray<QpFloatType>& nu,QpSparseArray<QpFloatType>& M, std::size_t classes)const{
+		nu.resize(classes, classes, classes);
+		for (unsigned int y=0; y<classes; y++) 
+			nu.add(y, y, 1.0);
+
+		M.resize(classes * classes, 1, classes);
+		QpFloatType mood = (QpFloatType)(-1.0 / (double)classes);
+		QpFloatType val = (QpFloatType)1.0 + mood;
+		for (unsigned int r=0, yv=0; yv<classes; yv++)
+		{
+			for (unsigned int yw=0; yw<classes; yw++, r++)
+			{
+				M.setDefaultValue(r, mood);
+				if (yv == yw) M.add(r, 0, val);
 			}
 		}
 	}
