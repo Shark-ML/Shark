@@ -443,11 +443,10 @@ CARTTrainer::TreeType CARTTrainer::buildTree(AttributeTables const& tables, Regr
 			//Continue recursively
 			nodeInfo.attributeIndex = bestAttributeIndex;
 			nodeInfo.attributeValue = bestAttributeVal;
-			nodeInfo.leftNodeId = 2*nodeId+1;
-			nodeInfo.rightNodeId = 2*nodeId+2;
-
+			nodeInfo.leftNodeId = nodeId+1;
 			lTree = buildTree(lTables, dataset, lLabels, nodeInfo.leftNodeId, trainSize);
-			rTree = buildTree(rTables, dataset, rLabels, nodeInfo.rightNodeId, trainSize);
+                        nodeInfo.rightNodeId = nodeInfo.leftNodeId + lTree.size();
+                        rTree = buildTree(rTables, dataset, rLabels, nodeInfo.rightNodeId, trainSize);
 		}
 	}
 
