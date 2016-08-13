@@ -5,6 +5,8 @@
 #include <shark/LinAlg/BLAS/triangular_matrix.hpp>
 #include <shark/LinAlg/BLAS/matrix.hpp>
 
+#include <iostream>
+
 using namespace shark;
 using namespace blas;
 
