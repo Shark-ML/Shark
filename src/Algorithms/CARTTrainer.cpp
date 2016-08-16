@@ -46,7 +46,7 @@ void CARTTrainer::train(ModelType& model, RegressionDataset const& dataset)
 		CARTClassifier<RealVector>::TreeType tree = buildTree(tables, dataTrain, labels, 0, dataTrain.numberOfElements());
 		//Add the tree to the model and prune
 		model.setTree(tree);
-		while(tree.size()!=1){
+		while(true){
 			//evaluate the error of current tree
 			SquaredLoss<> loss;
 			double error = loss.eval(dataTest.labels(), model(dataTest.inputs()));
@@ -56,10 +56,12 @@ void CARTTrainer::train(ModelType& model, RegressionDataset const& dataset)
 				bestErrorRate = error;
 				bestTree = tree;
 			}
+                        if(tree.size() == 1) break;
 			pruneTree(tree);
 			model.setTree(tree);
 		}
 	}
+        SHARK_CHECK(bestTree.size() > 0, "We should never set a tree that is empty.");
 	model.setTree(bestTree);
 }
 
@@ -97,7 +99,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 		CARTClassifier<RealVector>::TreeType tree = buildTree(tables, dataTrain, cAbove, 0);
 		model.setTree(tree);
 		
-		while(tree.size()!=1){
+		while(true){
 			ZeroOneLoss<unsigned int, RealVector> loss;
 			double errorRate = loss.eval(dataTest.labels(), model(dataTest.inputs()));
 			if(errorRate < bestErrorRate){
@@ -105,11 +107,12 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 				bestErrorRate = errorRate;
 				bestTree = tree;
 			}
+                        if(tree.size()!=1) break;
 			pruneTree(tree);
 			model.setTree(tree);
 		}
 	}
-
+        SHARK_CHECK(bestTree.size() > 0, "We should never set a tree that is empty.");
 	model.setTree(bestTree);
 
 }
