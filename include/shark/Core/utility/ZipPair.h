@@ -142,7 +142,7 @@ boost::iterator_range<
 >
 zipPairRange(Iterator1 begin1, Iterator1 end1, Iterator2 begin2,Iterator2 end2){
 	typedef PairIterator<PairType,Iterator1,Iterator2> iterator;
-	return make_iterator_range(iterator(begin1,begin2),iterator(end1,end2));
+	return boost::make_iterator_range(iterator(begin1,begin2),iterator(end1,end2));
 }
 
 template<class PairType, class Range1, class Range2>
