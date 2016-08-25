@@ -45,6 +45,8 @@
 
 #define SYNCHRONIZE std::unique_lock<std::mutex> lock(m_mutex);
 
+#define ACCEPT_ZIP
+
 
 namespace shark {
 namespace openML {
@@ -113,7 +115,9 @@ detail::HttpResponse Connection::getHTTP(std::string const& request, ParamType c
 
 	std::string msg = "GET " + url + " HTTP/1.1\r\n"
 			"host: " + m_host + "\r\n"
+#ifdef ACCEPT_ZIP
 			"accept-encoding: gzip\r\n"
+#endif
 			"\r\n";
 
 	if (! m_socket.writeAll(msg.c_str(), msg.size()))
@@ -121,7 +125,11 @@ detail::HttpResponse Connection::getHTTP(std::string const& request, ParamType c
 		m_socket.close();
 		return response;
 	}
-	receiveResponse(response);
+	if (! receiveResponse(response))
+	{
+		response.m_statusCode = 0;
+		response.m_returnPhrase = "";
+	}
 	return response;
 }
 
@@ -227,7 +235,9 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 
 		msg = "POST " + url + " HTTP/1.1\r\n"
 				"host: " + m_host + "\r\n"
+#ifdef ACCEPT_ZIP
 				"accept-encoding: gzip\r\n"
+#endif
 				"content-length: " + boost::lexical_cast<std::string>(body.size()) + "\r\n"
 				"content-type: multipart/form-data; boundary=" + boundary + "\r\n"
 				"\r\n"
@@ -367,21 +377,15 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 					if (! read()) { m_socket.close(); return false; }
 				}
 				unsigned long length = std::stoul(m_readbuffer.substr(0, endline), 0, 16);
-				if (length == 0) break;
-				while (m_readbuffer.size() < endline + length + 2)
+				while (m_readbuffer.size() < endline + length + 4)
 				{
 					if (! read()) { m_socket.close(); return false; }
 				}
-				response.m_body += m_readbuffer.substr(endline, length);
-				if (m_readbuffer.substr(endline + length, 2) != "\r\n") { m_socket.close(); return false; }
-				m_readbuffer.erase(0, endline + length + 2);
+				response.m_body += m_readbuffer.substr(endline + 2, length);
+				if (m_readbuffer.substr(endline + length + 2, 2) != "\r\n") { m_socket.close(); return false; }
+				m_readbuffer.erase(0, endline + length + 4);
+				if (length == 0) break;
 			}
-			while (m_readbuffer.size() < 2)
-			{
-				if (! read()) { m_socket.close(); return false; }
-			}
-			if (m_readbuffer.substr(0, 2) != "\r\n") { m_socket.close(); return false; }
-			m_readbuffer.erase(0, 2);
 		}
 		else { m_socket.close(); return false; }
 	}
@@ -396,7 +400,7 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 		m_readbuffer.erase(0, length);
 	}
 
-	// recompress content if appropriate
+	// decompress content if appropriate
 	auto it = response.m_header.find("content-encoding");
 	if (it != response.m_header.end())
 	{

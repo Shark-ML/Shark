@@ -375,7 +375,7 @@ ReturnType decodeRFC1952(ContainerType const& compressed)
 		pos += io.first;
 		ret.insert(ret.end(), buffer, buffer + io.second);
 	}
-	if (pos != compressed.size()) throw std::runtime_error("[lz77::decodeRFC1952] excess input bytes");
+	if (pos != compressed.size()) throw std::runtime_error("[decodeRFC1952] excess input bytes");
 	return ret;
 }
 

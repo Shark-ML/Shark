@@ -11,7 +11,7 @@ using namespace shark;
 using namespace openML;
 
 
-static const std::string demo_api_key = "3e8001889d849f1dbdb109b3ac87c7eb";
+static const std::string demo_api_key = "0076c004519625ecc7ad51e553f40dff";
 
 
 BOOST_AUTO_TEST_SUITE (OpenML_OpenML)
