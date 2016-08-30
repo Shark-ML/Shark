@@ -278,6 +278,12 @@ shark_add_test( RBM/PCDTraining.cpp RBM_PCDTraining)
 shark_add_test( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceTraining)
 shark_add_test( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 
+
+#marking tests as slow
+set_tests_properties( DirectSearch_HypervolumeContribution PROPERTIES LABELS "slow" )
+set_tests_properties( Models_CMAC PROPERTIES LABELS "slow" )
+set_tests_properties( ObjFunct_KernelBasisDistance PROPERTIES LABELS "slow" )
+
 # Copy test file
 if(HDF5_FOUND)
     add_custom_command(
