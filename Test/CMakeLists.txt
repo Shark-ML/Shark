@@ -263,9 +263,12 @@ shark_add_test( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 
 
 #marking tests as slow
-set_tests_properties( DirectSearch_HypervolumeContribution PROPERTIES LABELS "slow" )
 set_tests_properties( Models_CMAC PROPERTIES LABELS "slow" )
 set_tests_properties( ObjFunct_KernelBasisDistance PROPERTIES LABELS "slow" )
+set_tests_properties( DirectSearch_MOCMA PROPERTIES LABELS "slow" )
+set_tests_properties( DirectSearch_SteadyStateMOCMA PROPERTIES LABELS "slow" )
+set_tests_properties( DirectSearch_RealCodedNSGAII PROPERTIES LABELS "slow" )
+set_tests_properties( DirectSearch_SMS-EMOA PROPERTIES LABELS "slow" )
 
 # Copy test file
 if(HDF5_FOUND)
