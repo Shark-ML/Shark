@@ -36,7 +36,7 @@ public:
 			list_of(10.0)(11.0)(12.0);
 
 		// vector of 4 elements
-		m_expectedFromLabel1 = list_of(80.0)(81.0)(82.0)(83.0);
+		m_expectedFromLabel1 += 80,81,82,83;
 	}
 
 	/// Verify the @a actual matrix is the same as @a expected
@@ -59,7 +59,7 @@ public:
 	/// dataset: data/label1
 	const std::string m_labelNameLabel1;
 	const std::string m_labelNameWrongLabel;
-	std::vector<boost::int32_t> m_expectedFromLabel1;
+	std::vector<int> m_expectedFromLabel1;
 
 	const std::string m_dsNameOneDimension;
 	const std::string m_dsNameThreeDimension;
