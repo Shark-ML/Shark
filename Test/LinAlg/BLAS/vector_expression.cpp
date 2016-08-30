@@ -407,7 +407,7 @@ void checkSparseExpressionEquality(
 	for(;posResult != result.end();++posOp,++posResult){
 		BOOST_REQUIRE(posOp != op.end());
 		BOOST_REQUIRE_EQUAL(posOp.index(), posResult.index());
-		BOOST_CHECK_SMALL(*posOp-*posResult,1.e-4);
+		BOOST_CHECK_SMALL(*posOp-*posResult,1.e-3);
 	}
 }
 
