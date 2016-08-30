@@ -2,8 +2,6 @@
 
 #include "shark/Data/HDF5.h"
 
-#include <boost/assign/list_of.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/bind.hpp>
@@ -29,14 +27,14 @@ public:
 		using namespace boost::assign;
 
 		// 3 x 4 matrix
-		m_expectedFromData1 +=
-			list_of(1.0)(2.0)(3.0),
-			list_of(4.0)(5.0)(6.0),
-			list_of(7.0)(8.0)(9.0),
-			list_of(10.0)(11.0)(12.0);
-
+		m_expectedFromData1 ={
+			{1.0,2.0,3.0},
+			{4.0,5.0,6.0},
+			{7.0,8.0,9.0},
+			{10.0,11.0,12.0}
+		};
 		// vector of 4 elements
-		m_expectedFromLabel1 = list_of(80.0)(81.0)(82.0)(83.0).convert_to_container<std::vector<boost::int32_t> >();
+		m_expectedFromLabel1 = {80,81,82,83};
 	}
 
 	/// Verify the @a actual matrix is the same as @a expected
@@ -169,11 +167,11 @@ BOOST_AUTO_TEST_CASE(CscTests)
 		Data<RealVector> data;
 		importHDF5<RealVector>(data, m_exampleFileName, csc);
 
-		std::vector<std::vector<double> > expected;
-		expected +=
-			list_of(1.0)(0.0)(2.0),
-			list_of(0.0)(0.0)(3.0),
-			list_of(4.0)(5.0)(6.0);
+		std::vector<std::vector<double> > expected = {
+			{1.0,0.0,2.0},
+			{0.0,0.0,3.0},
+			{4.0,5.0,6.0}
+		};
 
 		BOOST_CHECK(verify(data, expected));
 	}
@@ -199,14 +197,14 @@ BOOST_AUTO_TEST_CASE(CscTests)
 		LabeledData<CompressedIntVector, boost::int32_t> data;
 		importHDF5<CompressedIntVector, boost::int32_t>(data, m_exampleFileName, csc, "csc2/label");
 
-		std::vector<std::vector<boost::int32_t> > expectedInputs;
-		expectedInputs +=
-			list_of(10)(0)(0)(0),
-			list_of(20)(30)(0)(0),
-			list_of(0)(0)(50)(0),
-			list_of(0)(40)(60)(0),
-			list_of(0)(0)(70)(0),
-			list_of(0)(0)(0)(80);
+		std::vector<std::vector<boost::int32_t> > expectedInputs ={
+			{10,0,0,0},
+			{20,30,0,0},
+			{0,0,50,0},
+			{0,40,60,0},
+			{0,0,70,0},
+			{0,0,0,80}
+		};
 
 		std::vector<boost::int32_t> expectedLabels;
 		expectedLabels += 100,200,300,400,500,600;
