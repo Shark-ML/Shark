@@ -33,345 +33,15 @@
 #include "../kernels/trmv.hpp"
 #include "../kernels/gemm.hpp"
 #include "../kernels/trmm.hpp"
+#include "../kernels/sum_rows.hpp"
 #include "../vector_expression.hpp"
 #include "../matrix_proxy.hpp"
 #include <type_traits>
 
 namespace shark {
 namespace blas {
-
-template<class V>
-class vector_repeater:public blas::matrix_expression<vector_repeater<V> > {
-private:
-	typedef V expression_type;
-	typedef vector_repeater<V> self_type;
-	typedef typename V::const_iterator const_subiterator_type;
-public:
-	typedef typename V::const_closure_type expression_closure_type;
-	typedef typename V::size_type size_type;
-	typedef typename V::difference_type difference_type;
-	typedef typename V::value_type value_type;
-	typedef value_type scalar_type;
-	typedef value_type const_reference;
-	typedef const_reference reference;
-	typedef value_type const* pointer;
-	typedef value_type const* const_pointer;
-
-	typedef typename V::index_type index_type;
-	typedef typename V::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<V>::type index_pointer;
-
-	typedef self_type const_closure_type;
-	typedef const_closure_type closure_type;
-	typedef blas::row_major orientation;
-	typedef blas::unknown_storage_tag storage_category;
-	typedef typename V::evaluation_category evaluation_category;
-
-	// Construction and destruction
-	explicit vector_repeater (expression_type const& e, std::size_t rows):
-	m_vector(e), m_rows(rows) {}
-
-	// Accessors
-	size_type size1() const {
-		return m_rows;
-	}
-	size_type size2() const {
-		return m_vector.size();
-	}
-
-	// Expression accessors
-	const expression_closure_type &expression () const {
-		return m_vector;
-	}
-
-	// Element access
-	const_reference operator() (index_type i, index_type j) const {
-		return m_vector(j);
-	}
-
-	// Iterator types
-	typedef typename V::const_iterator const_row_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef blas::constant_iterator<value_type>  const_column_iterator;
-	typedef const_column_iterator column_iterator;
-
-	// Element lookup
 	
-	const_row_iterator row_begin(std::size_t i) const {
-		RANGE_CHECK( i < size1());
-		return m_vector.begin();
-	}
-	const_row_iterator row_end(std::size_t i) const {
-		RANGE_CHECK( i < size1());
-		return m_vector.end();
-	}
 	
-	const_column_iterator column_begin(std::size_t j) const {
-		RANGE_CHECK( j < size2());
-		return const_column_iterator(0,m_vector(j));
-	}
-	const_column_iterator column_end(std::size_t j) const {
-		RANGE_CHECK( j < size2());
-		return const_column_iterator(size1(),m_vector(j));
-	}
-private:
-	expression_closure_type m_vector;
-	std::size_t m_rows;
-};
-
-/// \brief A matrix with all values of type \c T equal to the same value
-///
-/// \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
-template<class T>
-class scalar_matrix:
-	public matrix_container<scalar_matrix<T> > {
-
-	typedef scalar_matrix<T> self_type;
-public:
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
-	typedef T value_type;
-	typedef const T& const_reference;
-	typedef const_reference reference;
-	typedef value_type const* const_pointer;
-	typedef value_type scalar_type;
-	typedef const_pointer pointer;
-
-	typedef std::size_t index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type index_pointer;
-
-	typedef self_type const_closure_type;
-	typedef self_type closure_type;
-	typedef dense_tag storage_category;
-	typedef unknown_orientation orientation;
-	typedef elementwise_tag evaluation_category;
-
-	// Construction and destruction
-	scalar_matrix():
-		m_size1(0), m_size2(0), m_value() {}
-	scalar_matrix(size_type size1, size_type size2, const value_type& value = value_type(1)):
-		m_size1(size1), m_size2(size2), m_value(value) {}
-	scalar_matrix(const scalar_matrix& m):
-		m_size1(m.m_size1), m_size2(m.m_size2), m_value(m.m_value) {}
-
-	// Accessors
-	size_type size1() const {
-		return m_size1;
-	}
-	size_type size2() const {
-		return m_size2;
-	}
-
-	// Element access
-	const_reference operator()(size_type /*i*/, size_type /*j*/) const {
-		return m_value;
-	}
-	
-	//Iterators
-	typedef constant_iterator<value_type> const_row_iterator;
-	typedef constant_iterator<value_type> const_column_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef const_column_iterator column_iterator;
-
-	const_row_iterator row_begin(std::size_t i) const {
-		return const_row_iterator(0, m_value);
-	}
-	const_row_iterator row_end(std::size_t i) const {
-		return const_row_iterator(size2(), m_value);
-	}
-	
-	const_row_iterator column_begin(std::size_t j) const {
-		return const_row_iterator(0, m_value);
-	}
-	const_row_iterator column_end(std::size_t j) const {
-		return const_row_iterator(size1(), m_value);
-	}
-private:
-	size_type m_size1;
-	size_type m_size2;
-	value_type m_value;
-};
-
-///\brief class which allows for matrix transformations
-///
-///transforms a matrix expression e of type E using a Function f of type F as an elementwise transformation f(e(i,j))
-///This transformation needs to leave f constant, meaning that applying f(x), f(y), f(z) yields the same results independent of the
-///order of application.
-///F must provide a boolean flag F::zero_identity which indicates that f(0) = 0. This is needed for correct usage with sparse
-///arguments - if f(0) != 0 this expression will be dense!
-template<class E, class F>
-class matrix_unary:public blas::matrix_expression<matrix_unary<E, F> > {
-private:
-	typedef matrix_unary<E, F> self_type;
-	typedef E expression_type;
-	typedef typename expression_type::const_row_iterator const_subrow_iterator_type;
-	typedef typename expression_type::const_column_iterator const_subcolumn_iterator_type;
-
-public:
-	typedef typename expression_type::const_closure_type expression_closure_type;
-
-	typedef F functor_type;
-	typedef typename std::result_of<F(typename E::value_type)>::type value_type;
-	typedef value_type scalar_type;
-	typedef value_type const_reference;
-	typedef const_reference reference;
-	typedef value_type const *const_pointer;
-	typedef value_type *pointer;
-	typedef typename expression_type::size_type size_type;
-	typedef typename expression_type::difference_type difference_type;
-
-	typedef typename E::index_type index_type;
-	typedef typename E::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E>::type index_pointer;
-
-	typedef self_type const_closure_type;
-	typedef const_closure_type closure_type;
-	typedef typename E::orientation orientation;
-	typedef blas::unknown_storage_tag storage_category;
-	typedef typename E::evaluation_category evaluation_category;
-
-	// Construction and destruction
-	explicit matrix_unary(blas::matrix_expression<E> const &e, F const &functor):
-		m_expression(e()), m_functor(functor) {}
-
-	// Accessors
-	size_type size1() const {
-		return m_expression.size1();
-	}
-	size_type size2() const {
-		return m_expression.size2();
-	}
-
-	// Element access
-	const_reference operator()(index_type i, index_type j) const {
-		return m_functor(m_expression(i, j));
-	}
-
-	// Iterator types
-	typedef transform_iterator<typename E::const_row_iterator, F> const_row_iterator;
-	typedef transform_iterator<typename E::const_column_iterator, F> const_column_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef const_column_iterator column_iterator;
-	
-	const_row_iterator row_begin(index_type i) const {
-		return const_row_iterator(m_expression.row_begin(i),m_functor);
-	}
-	const_row_iterator row_end(index_type i) const {
-		return const_row_iterator(m_expression.row_end(i),m_functor);
-	}
-
-	const_column_iterator column_begin(index_type i) const {
-		return const_row_iterator(m_expression.column_begin(i),m_functor);
-	}
-	const_column_iterator column_end(index_type i) const {
-		return const_row_iterator(m_expression.column_end(i),m_functor);
-	}
-
-private:
-	expression_closure_type m_expression;
-	functor_type m_functor;
-};
-
-template<class E1, class E2, class F>
-class matrix_binary:
-	public blas::matrix_expression<matrix_binary<E1, E2, F> > {
-private:
-	typedef matrix_binary<E1, E2, F> self_type;
-public:
-	typedef E1 lhs_type;
-	typedef E2 rhs_type;
-	typedef typename E1::const_closure_type lhs_closure_type;
-	typedef typename E2::const_closure_type rhs_closure_type;
-
-	typedef typename E1::size_type size_type;
-	typedef typename E1::difference_type difference_type;
-	typedef typename F::result_type value_type;
-	typedef value_type scalar_type;
-	typedef value_type const_reference;
-	typedef const_reference reference;
-	typedef value_type const* const_pointer;
-	typedef const_pointer pointer;
-
-	typedef typename E1::index_type index_type;
-	typedef typename E1::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E1>::type index_pointer;
-
-	typedef self_type const_closure_type;
-	typedef const_closure_type closure_type;
-	typedef typename E1::orientation orientation;
-	typedef blas::unknown_storage_tag storage_category;
-	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
-
-	typedef F functor_type;
-
-        // Construction and destruction
-
-        explicit matrix_binary (
-		matrix_expression<E1> const&e1,  matrix_expression<E2> const& e2, functor_type functor 
-	): m_lhs (e1()), m_rhs (e2()),m_functor(functor) {}
-
-        // Accessors
-        size_type size1 () const {
-		return m_lhs.size1 ();
-        }
-        size_type size2 () const {
-		return m_lhs.size2 ();
-        }
-
-        const_reference operator () (index_type i, index_type j) const {
-		return m_functor( m_lhs (i, j), m_rhs(i,j));
-        }
-
-	// Iterator types
-private:
-	typedef typename E1::const_row_iterator const_row_iterator1_type;
-	typedef typename E1::const_column_iterator const_row_column_iterator_type;
-	typedef typename E2::const_row_iterator const_column_iterator1_type;
-	typedef typename E2::const_column_iterator const_column_iterator2_type;
-
-public:
-	typedef binary_transform_iterator<
-		typename E1::const_row_iterator,typename E2::const_row_iterator,functor_type
-	> const_row_iterator;
-	typedef binary_transform_iterator<
-		typename E1::const_column_iterator,typename E2::const_column_iterator,functor_type
-	> const_column_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef const_column_iterator column_iterator;
-
-	const_row_iterator row_begin(std::size_t i) const {
-		return const_row_iterator (m_functor,
-			m_lhs.row_begin(i),m_lhs.row_end(i),
-			m_rhs.row_begin(i),m_rhs.row_end(i)
-		);
-	}
-	const_row_iterator row_end(std::size_t i) const {
-		return const_row_iterator (m_functor,
-			m_lhs.row_end(i),m_lhs.row_end(i),
-			m_rhs.row_end(i),m_rhs.row_end(i)
-		);
-	}
-
-	const_column_iterator column_begin(std::size_t j) const {
-		return const_column_iterator (m_functor,
-			m_lhs.column_begin(j),m_lhs.column_end(j),
-			m_rhs.column_begin(j),m_rhs.column_end(j)
-		);
-	}
-	const_column_iterator column_end(std::size_t j) const {
-		return const_column_iterator (m_functor,
-			m_lhs.column_begin(j),m_lhs.column_end(j),
-			m_rhs.column_begin(j),m_rhs.column_end(j)
-		);
-	}
-
-private:
-	lhs_closure_type m_lhs;
-        rhs_closure_type m_rhs;
-	functor_type m_functor;
-};
-
 template<class E1, class E2>
 class matrix_addition: public blas::matrix_expression<matrix_addition<E1, E2> > {
 private:
@@ -584,6 +254,393 @@ private:
 	scalar_type m_scalar;
 };
 
+template<class V>
+class vector_repeater:public blas::matrix_expression<vector_repeater<V> > {
+private:
+	typedef V expression_type;
+	typedef vector_repeater<V> self_type;
+	typedef typename V::const_iterator const_subiterator_type;
+public:
+	typedef typename V::const_closure_type expression_closure_type;
+	typedef typename V::size_type size_type;
+	typedef typename V::difference_type difference_type;
+	typedef typename V::value_type value_type;
+	typedef value_type scalar_type;
+	typedef value_type const_reference;
+	typedef const_reference reference;
+	typedef value_type const* pointer;
+	typedef value_type const* const_pointer;
+
+	typedef typename V::index_type index_type;
+	typedef typename V::const_index_pointer const_index_pointer;
+	typedef typename index_pointer<V>::type index_pointer;
+
+	typedef self_type const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef blas::row_major orientation;
+	typedef blas::unknown_storage_tag storage_category;
+	typedef typename V::evaluation_category evaluation_category;
+
+	// Construction and destruction
+	explicit vector_repeater (expression_type const& e, std::size_t rows):
+	m_vector(e), m_rows(rows) {}
+
+	// Accessors
+	size_type size1() const {
+		return m_rows;
+	}
+	size_type size2() const {
+		return m_vector.size();
+	}
+
+	// Expression accessors
+	const expression_closure_type &expression () const {
+		return m_vector;
+	}
+
+	// Element access
+	const_reference operator() (index_type i, index_type j) const {
+		return m_vector(j);
+	}
+
+	// Iterator types
+	typedef typename V::const_iterator const_row_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef blas::constant_iterator<value_type>  const_column_iterator;
+	typedef const_column_iterator column_iterator;
+
+	// Element lookup
+	
+	const_row_iterator row_begin(std::size_t i) const {
+		RANGE_CHECK( i < size1());
+		return m_vector.begin();
+	}
+	const_row_iterator row_end(std::size_t i) const {
+		RANGE_CHECK( i < size1());
+		return m_vector.end();
+	}
+	
+	const_column_iterator column_begin(std::size_t j) const {
+		RANGE_CHECK( j < size2());
+		return const_column_iterator(0,m_vector(j));
+	}
+	const_column_iterator column_end(std::size_t j) const {
+		RANGE_CHECK( j < size2());
+		return const_column_iterator(size1(),m_vector(j));
+	}
+private:
+	expression_closure_type m_vector;
+	std::size_t m_rows;
+};
+
+/// \brief A matrix with all values of type \c T equal to the same value
+///
+/// \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
+template<class T>
+class scalar_matrix:
+	public matrix_container<scalar_matrix<T> > {
+
+	typedef scalar_matrix<T> self_type;
+public:
+	typedef std::size_t size_type;
+	typedef std::ptrdiff_t difference_type;
+	typedef T value_type;
+	typedef const T& const_reference;
+	typedef const_reference reference;
+	typedef value_type const* const_pointer;
+	typedef value_type scalar_type;
+	typedef const_pointer pointer;
+
+	typedef std::size_t index_type;
+	typedef index_type const* const_index_pointer;
+	typedef index_type index_pointer;
+
+	typedef self_type const_closure_type;
+	typedef self_type closure_type;
+	typedef dense_tag storage_category;
+	typedef unknown_orientation orientation;
+	typedef elementwise_tag evaluation_category;
+
+	// Construction and destruction
+	scalar_matrix():
+		m_size1(0), m_size2(0), m_value() {}
+	scalar_matrix(size_type size1, size_type size2, const value_type& value = value_type(1)):
+		m_size1(size1), m_size2(size2), m_value(value) {}
+	scalar_matrix(const scalar_matrix& m):
+		m_size1(m.m_size1), m_size2(m.m_size2), m_value(m.m_value) {}
+
+	// Accessors
+	size_type size1() const {
+		return m_size1;
+	}
+	size_type size2() const {
+		return m_size2;
+	}
+
+	// Element access
+	const_reference operator()(size_type /*i*/, size_type /*j*/) const {
+		return m_value;
+	}
+	
+	//Iterators
+	typedef constant_iterator<value_type> const_row_iterator;
+	typedef constant_iterator<value_type> const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+
+	const_row_iterator row_begin(std::size_t i) const {
+		return const_row_iterator(0, m_value);
+	}
+	const_row_iterator row_end(std::size_t i) const {
+		return const_row_iterator(size2(), m_value);
+	}
+	
+	const_row_iterator column_begin(std::size_t j) const {
+		return const_row_iterator(0, m_value);
+	}
+	const_row_iterator column_end(std::size_t j) const {
+		return const_row_iterator(size1(), m_value);
+	}
+private:
+	size_type m_size1;
+	size_type m_size2;
+	value_type m_value;
+};
+
+///\brief class which allows for matrix transformations
+///
+///transforms a matrix expression e of type E using a Function f of type F as an elementwise transformation f(e(i,j))
+///This transformation needs to leave f constant, meaning that applying f(x), f(y), f(z) yields the same results independent of the
+///order of application.
+///F must provide a boolean flag F::zero_identity which indicates that f(0) = 0. This is needed for correct usage with sparse
+///arguments - if f(0) != 0 this expression will be dense!
+template<class E, class F>
+class matrix_unary:public blas::matrix_expression<matrix_unary<E, F> > {
+private:
+	typedef matrix_unary<E, F> self_type;
+	typedef E expression_type;
+	typedef typename expression_type::const_row_iterator const_subrow_iterator_type;
+	typedef typename expression_type::const_column_iterator const_subcolumn_iterator_type;
+
+public:
+	typedef typename expression_type::const_closure_type expression_closure_type;
+
+	typedef F functor_type;
+	typedef typename std::result_of<F(typename E::value_type)>::type value_type;
+	typedef value_type scalar_type;
+	typedef value_type const_reference;
+	typedef const_reference reference;
+	typedef value_type const *const_pointer;
+	typedef value_type *pointer;
+	typedef typename expression_type::size_type size_type;
+	typedef typename expression_type::difference_type difference_type;
+
+	typedef typename E::index_type index_type;
+	typedef typename E::const_index_pointer const_index_pointer;
+	typedef typename index_pointer<E>::type index_pointer;
+
+	typedef self_type const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef typename E::orientation orientation;
+	typedef blas::unknown_storage_tag storage_category;
+	typedef typename E::evaluation_category evaluation_category;
+
+	// Construction and destruction
+	explicit matrix_unary(blas::matrix_expression<E> const& e, functor_type const& functor):
+		m_expression(e()), m_functor(functor) {}
+
+	// Accessors
+	size_type size1() const {
+		return m_expression.size1();
+	}
+	size_type size2() const {
+		return m_expression.size2();
+	}
+	
+	expression_closure_type const& expression() const {
+		return m_expression;
+	}
+	
+	functor_type const& functor() const {
+		return m_functor;
+	}
+	
+	
+	//computation kernels
+	template<class MatX>
+	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) ) const {
+		X().clear();
+		plus_assign_to(X,eval_block(m_expression), alpha);
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) ) const {
+		plus_assign_to(X,eval_block(m_expression), alpha);
+	}
+	
+	template<class MatX>
+	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) ) const {
+		plus_assign_to(X,eval_block(m_expression), -alpha);
+	}
+
+	// Element access
+	const_reference operator()(index_type i, index_type j) const {
+		return m_functor(m_expression(i, j));
+	}
+
+	// Iterator types
+	typedef transform_iterator<typename E::const_row_iterator, F> const_row_iterator;
+	typedef transform_iterator<typename E::const_column_iterator, F> const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+	
+	const_row_iterator row_begin(index_type i) const {
+		return const_row_iterator(m_expression.row_begin(i),m_functor);
+	}
+	const_row_iterator row_end(index_type i) const {
+		return const_row_iterator(m_expression.row_end(i),m_functor);
+	}
+
+	const_column_iterator column_begin(index_type i) const {
+		return const_row_iterator(m_expression.column_begin(i),m_functor);
+	}
+	const_column_iterator column_end(index_type i) const {
+		return const_row_iterator(m_expression.column_end(i),m_functor);
+	}
+
+private:
+	expression_closure_type m_expression;
+	functor_type m_functor;
+
+	template<class MatX, class MatA>
+	void plus_assign_to(
+		matrix_expression<MatX>& X,
+		matrix_expression<MatA> const& m,
+		scalar_type alpha
+	)const{
+		matrix_unary<MatA, F> e(m(), m_functor);
+		matrix_scalar_multiply<matrix_unary<MatA,F> > e1(e,alpha);
+		plus_assign(X,e1);
+	}
+};
+
+template<class E1, class E2, class F>
+class matrix_binary:
+	public blas::matrix_expression<matrix_binary<E1, E2, F> > {
+private:
+	typedef matrix_binary<E1, E2, F> self_type;
+public:
+	typedef E1 lhs_type;
+	typedef E2 rhs_type;
+	typedef typename E1::const_closure_type lhs_closure_type;
+	typedef typename E2::const_closure_type rhs_closure_type;
+
+	typedef typename E1::size_type size_type;
+	typedef typename E1::difference_type difference_type;
+	typedef typename F::result_type value_type;
+	typedef value_type scalar_type;
+	typedef value_type const_reference;
+	typedef const_reference reference;
+	typedef value_type const* const_pointer;
+	typedef const_pointer pointer;
+
+	typedef typename E1::index_type index_type;
+	typedef typename E1::const_index_pointer const_index_pointer;
+	typedef typename index_pointer<E1>::type index_pointer;
+
+	typedef self_type const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef typename E1::orientation orientation;
+	typedef blas::unknown_storage_tag storage_category;
+	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
+
+	typedef F functor_type;
+
+        // Construction and destruction
+
+        explicit matrix_binary (
+		matrix_expression<E1> const&e1,  matrix_expression<E2> const& e2, functor_type functor 
+	): m_lhs (e1()), m_rhs (e2()),m_functor(functor) {}
+
+        // Accessors
+        size_type size1 () const {
+		return m_lhs.size1 ();
+        }
+        size_type size2 () const {
+		return m_lhs.size2 ();
+        }
+
+        const_reference operator () (index_type i, index_type j) const {
+		return m_functor( m_lhs (i, j), m_rhs(i,j));
+        }
+	
+	template<class MatX>
+	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		X().clear();
+		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), alpha);
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), alpha);
+	}
+	
+	template<class MatX>
+	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), -alpha);
+	}
+
+	typedef binary_transform_iterator<
+		typename E1::const_row_iterator,typename E2::const_row_iterator,functor_type
+	> const_row_iterator;
+	typedef binary_transform_iterator<
+		typename E1::const_column_iterator,typename E2::const_column_iterator,functor_type
+	> const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+
+	const_row_iterator row_begin(std::size_t i) const {
+		return const_row_iterator (m_functor,
+			m_lhs.row_begin(i),m_lhs.row_end(i),
+			m_rhs.row_begin(i),m_rhs.row_end(i)
+		);
+	}
+	const_row_iterator row_end(std::size_t i) const {
+		return const_row_iterator (m_functor,
+			m_lhs.row_end(i),m_lhs.row_end(i),
+			m_rhs.row_end(i),m_rhs.row_end(i)
+		);
+	}
+
+	const_column_iterator column_begin(std::size_t j) const {
+		return const_column_iterator (m_functor,
+			m_lhs.column_begin(j),m_lhs.column_end(j),
+			m_rhs.column_begin(j),m_rhs.column_end(j)
+		);
+	}
+	const_column_iterator column_end(std::size_t j) const {
+		return const_column_iterator (m_functor,
+			m_lhs.column_begin(j),m_lhs.column_end(j),
+			m_rhs.column_begin(j),m_rhs.column_end(j)
+		);
+	}
+
+private:
+	lhs_closure_type m_lhs;
+        rhs_closure_type m_rhs;
+	functor_type m_functor;
+
+	template<class MatX, class LHS, class RHS>
+	void plus_assign_to(
+		matrix_expression<MatX>& X,
+		matrix_expression<LHS> const& lhs, matrix_expression<RHS> const& rhs,
+		scalar_type alpha
+	)const{
+		//we know that lhs and rhs are elementwise expressions so we can now create the elementwise expression and assign it.
+		matrix_binary<LHS,RHS,F> e(lhs(),rhs());
+		matrix_scalar_multiply<matrix_binary<LHS,RHS,F> > e1(e,alpha);
+		plus_assign(X,e1);
+	}
+};
+
 template<class E1, class E2>
 class outer_product:public matrix_expression<outer_product<E1, E2> > {
 	typedef scalar_multiply1<typename E1::value_type, typename E2::value_type> functor_type;
@@ -772,6 +829,81 @@ private:
 	vector_closure_type m_vector;
 };
 
+
+template<class MatA>
+class sum_matrix_rows:
+	public vector_expression<sum_matrix_rows<MatA> > {
+public:
+	typedef typename MatA::const_closure_type matrix_closure_type;
+public:
+	typedef typename MatA::scalar_type scalar_type;
+	typedef scalar_type value_type;
+	typedef typename MatA::size_type size_type;
+	typedef typename MatA::difference_type difference_type;
+	typedef typename MatA::index_type index_type;
+	typedef value_type const_reference;
+	typedef const_reference reference;
+	typedef value_type const* const_pointer;
+	typedef const_pointer pointer;
+	typedef typename MatA::index_pointer index_pointer;
+	typedef typename MatA::const_index_pointer const_index_pointer;
+
+	typedef sum_matrix_rows const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef unknown_storage_tag storage_category;
+	typedef typename boost::mpl::if_<
+		boost::is_same<typename MatA::orientation::orientation, row_major>,
+		blockwise_tag,
+		typename MatA::evaluation_category
+	>::type evaluation_category;
+
+	explicit sum_matrix_rows(
+		matrix_closure_type const& matrix
+	):m_matrix(matrix){}
+
+	size_type size() const {
+		return m_matrix.size2();
+	}
+	
+	matrix_closure_type const& matrix() const {
+		return m_matrix;
+	}
+
+	// Element access for elementwise case
+	const_reference operator() (index_type i) const {
+		SIZE_CHECK(i < size());
+		return sum(column(m_matrix,i));
+	}
+	
+	typedef indexed_iterator<const_closure_type> const_iterator;
+	typedef const_iterator iterator;
+
+	const_iterator begin() const {
+		return const_iterator(*this,0);
+	}
+	const_iterator end() const {
+		return const_iterator(*this,size());
+	}
+
+	//dispatcher to computation kernels for blockwise case
+	template<class VecX>
+	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+		x().clear();
+		plus_assign_to(x,alpha);
+	}
+	template<class VecX>
+	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+		kernels::sum_rows(eval_block(m_matrix), x, alpha);
+	}
+	
+	template<class VecX>
+	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+		plus_assign_to(x,-alpha);
+	}
+private:
+	matrix_closure_type m_matrix;
+};
+
 namespace detail{
 template<class M, class TriangularType>
 class dense_triangular_proxy: public matrix_expression<dense_triangular_proxy<M, TriangularType> > {
@@ -945,13 +1077,24 @@ struct matrix_transpose_optimizer{
 	}
 };
 
-//(M1^T)^T = M1
+//(M^T)^T = M
 template<class M>
 struct matrix_transpose_optimizer<matrix_transpose<M> >{
 	typedef typename closure<M>::type type;
 	
 	static type create(matrix_transpose<M> const& m){
 		return m.expression();
+	}
+};
+
+//f(M)^T = f(M^T) for f(M)_ij=f(M_ij)
+template<class M, class F>
+struct matrix_transpose_optimizer<matrix_unary<M,F> >{
+	typedef matrix_transpose_optimizer<typename const_expression<M>::type > opt;
+	typedef matrix_unary<typename opt::type, F> type;
+	
+	static type create(matrix_unary<M,F> const& m){
+		return type(opt::create(m.expression()),m.functor());
 	}
 };
 

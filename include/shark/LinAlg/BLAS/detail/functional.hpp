@@ -722,56 +722,6 @@ private:
 	}
 	functor_type m_functor;
 };
-// Unary returning scalar norm
-template<class M>
-struct matrix_norm_1 {
-	typedef typename M::value_type value_type;
-	typedef typename  real_traits<value_type>::type result_type;
-
-	template<class E>
-	static 
-	result_type apply(const matrix_expression<E> &e) {
-		scalar_abs<value_type> abs;
-		result_type t = result_type();
-		
-		typedef typename E::size_type matrix_size_type;
-		matrix_size_type size2(e().size2());
-		matrix_size_type size1(e().size1());
-		for (matrix_size_type j = 0; j < size2; ++ j) {
-			result_type u = result_type();
-			for (matrix_size_type i = 0; i < size1; ++ i) {
-				u += abs(e()(i, j));
-			}
-			if (u > t)
-				t = u;
-		}
-		return t;
-	}
-};
-
-template<class M>
-struct matrix_norm_inf{
-	typedef typename M::value_type value_type;
-	typedef typename  real_traits<value_type>::type result_type;
-
-	template<class E>
-	static result_type apply(const matrix_expression<E> &e) {
-		scalar_abs<value_type> abs;
-		result_type t = result_type();
-		typedef typename E::size_type matrix_size_type;
-		matrix_size_type size1(e().size1());
-		matrix_size_type size2(e().size2());
-		for (matrix_size_type i = 0; i < size1; ++ i) {
-			result_type u = result_type();
-			for (matrix_size_type j = 0; j < size2; ++ j) {
-				u += abs(e()(i, j));
-			}
-			if (u > t)
-				t = u;
-		}
-		return t;
-	}
-};
 
 struct range {
 	typedef std::size_t size_type;

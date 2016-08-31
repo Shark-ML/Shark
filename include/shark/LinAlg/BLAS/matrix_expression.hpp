@@ -336,38 +336,6 @@ triangular_prod(
 }
 
 namespace detail{
-	
-template<class MatA,class VecB>
-void sum_rows_impl(MatA const& matA, VecB& vecB, column_major){
-	for(std::size_t i = 0; i != matA.size2(); ++i){ 
-		vecB(i)+=sum(column(matA,i));
-	}
-}
-
-template<class MatA,class VecB>
-void sum_rows_impl(MatA const& matA, VecB& vecB, row_major){
-	for(std::size_t i = 0; i != matA.size1(); ++i){ 
-		noalias(vecB) += row(matA,i);
-	}
-}
-
-template<class MatA,class VecB>
-void sum_rows_impl(MatA const& matA, VecB& vecB, unknown_orientation){
-	sum_rows_impl(matA,vecB,row_major());
-}
-
-//dispatcher for triangular matrix
-template<class MatA,class VecB,class Orientation,class Triangular>
-void sum_rows_impl(MatA const& matA, VecB& vecB, triangular<Orientation,Triangular>){
-	sum_rows_impl(matA,vecB,Orientation());
-}
-
-
-//dispatcher 
-template<class MatA,class VecB>
-void sum_rows_impl(MatA const& matA, VecB& vecB){
-	sum_rows_impl(matA,vecB,typename MatA::orientation());
-}
 
 template<class MatA>
 typename MatA::value_type sum_impl(MatA const& matA, column_major){
@@ -477,34 +445,19 @@ typename MatA::value_type min_impl(MatA const& matA){
 
 }//end detail
 
-//dispatcher
+
 template<class MatA>
-typename vector_temporary_type<
-	typename MatA::value_type,
-	dense_random_access_iterator_tag
->::type
+sum_matrix_rows<MatA>
 sum_rows(matrix_expression<MatA> const& A){
-	typename vector_temporary_type<
-		typename MatA::value_type,
-		dense_random_access_iterator_tag
-	>::type result(A().size2(),0.0);
-	detail::sum_rows_impl(eval_block(A),result);
-	return result;
+	return sum_matrix_rows<MatA>(A());
 }
 
 template<class MatA>
-typename vector_temporary_type<
-	typename MatA::value_type,
-	dense_random_access_iterator_tag
->::type
+sum_matrix_rows<typename detail::matrix_transpose_optimizer<typename MatA::const_closure_type>::type >
 sum_columns(matrix_expression<MatA> const& A){
-	//implemented using sum_rows_impl by transposing A
-	typename vector_temporary_type<
-		typename MatA::value_type,
-		dense_random_access_iterator_tag
-	>::type result(A().size1(),0);
-	detail::sum_rows_impl(eval_block(trans(A)),result);
-	return result;
+	typedef typename MatA::const_closure_type closure_type;
+	typedef typename detail::matrix_transpose_optimizer<closure_type> ExpressionOptimizer;
+	return sum_matrix_rows<typename ExpressionOptimizer::type >(ExpressionOptimizer::create(closure_type(A())));
 }
 
 
@@ -536,24 +489,32 @@ frobenius_prod(
 	return sum(eval_block(e1)*eval_block(e2));
 }
 
-
-template<class E>
-typename matrix_norm_1<E>::result_type
-norm_1(const matrix_expression<E> &e) {
-	return matrix_norm_1<E>::apply(eval_block(e));
-}
-
+/// \brief Computes the matrix 1-norm |A|_1
+/// 
+/// It is defined as \f$ \max_i \sum_j |A_{ij}| \f$ 
 template<class E>
 typename real_traits<typename E::value_type>::type
-norm_frobenius(const matrix_expression<E> &e) {
+norm_1(matrix_expression<E> const& e) {
+	return max(sum_rows(abs(e)));
+}
+
+/// \brief computes the frobenius norm |A|_F
+///
+/// It is defined as \f$ Tr(A^TA)=\sum_{ij} A_{ij}^2 \f$
+template<class E>
+typename real_traits<typename E::value_type>::type
+norm_frobenius(matrix_expression<E> const& e) {
 	using std::sqrt;
 	return sqrt(sum(abs_sqr(eval_block(e))));
 }
 
+/// \brief Computes the matrix inf-norm |A|_inf
+/// 
+/// It is defined as \f$ \max_i \sum_j |A_{ij}| \f$ 
 template<class E>
-typename matrix_norm_inf<E>::result_type
-norm_inf(const matrix_expression<E> &e) {
-	return matrix_norm_inf<E>::apply(eval_block(e));
+typename real_traits<typename E::value_type>::type
+norm_inf(matrix_expression<E> const& e) {
+	return max(sum_columns(abs(e)));
 }
 
 /// \brief Evaluates the trace of matrix m
