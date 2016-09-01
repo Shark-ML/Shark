@@ -226,7 +226,6 @@ shark::LabeledData<T, RealVector> libsvm_importer_regression(
 	shark::LabeledData<T, RealVector> data(numPoints, blueprint, batchSize);//create dataset with the right structure
 	copySparsePoints(data.inputs(),contents, hasZero);
 	{
-		size_t delta = (hasZero ? 0 : 1);
 		std::size_t i = 0;
 		for(auto element: data.elements()) {
 			element.label = RealVector(1, contents[i].first);
