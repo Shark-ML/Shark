@@ -53,14 +53,14 @@ void trsm_impl(
 	std::size_t size1 = B().size1();
 	std::size_t size2 = B().size2();
 	for (std::size_t n = 0; n < size1; ++ n) {
-		matrix_column<MatA const> columnTriangular = column(A(),n);
+		auto  columnTriangular = column(A(),n);
 		for (std::size_t l = 0; l < size2; ++ l) {
 			if(!Unit){
 				RANGE_CHECK(A()(n, n) != value_type());//matrix is singular
 				B()(n, l) /= A()(n, n);
 			}
 			if (B()(n, l) != value_type/*zero*/()) {
-				matrix_column<MatB> columnMatrix = column(B(),l);
+				auto columnMatrix = column(B(),l);
 				noalias(subrange(columnMatrix,n+1,size1)) -= B()(n,l) * subrange(columnTriangular,n+1,size1);
 			}
 		}
@@ -104,14 +104,14 @@ void trsm_impl(
 	std::size_t size2 = B().size2();
 	for (std::size_t i = 0; i < size1; ++ i) {
 		std::size_t n = size1-i-1;
-		matrix_column<MatA const> columnTriangular = column(A(),n);
+		auto columnTriangular = column(A(),n);
 		if(!Unit){
 			RANGE_CHECK(A()(n, n) != value_type());//matrix is singular
 			row(B(),n) /= A()(n, n);
 		}
 		for (std::size_t l = 0; l < size2; ++ l) {
 			if (B()(n, l) != value_type/*zero*/()) {
-				matrix_column<MatB> columnMatrix = column(B(),l);
+				auto columnMatrix = column(B(),l);
 				noalias(subrange(columnMatrix,0,n)) -= B()(n,l) * subrange(columnTriangular,0,n);
 			}
 		}

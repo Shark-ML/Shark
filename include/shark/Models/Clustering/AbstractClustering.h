@@ -139,7 +139,7 @@ public:
 		SHARK_ASSERT(f.size1() == numPatterns);
 		BatchOutputType outputs(numPatterns);
 		for(std::size_t i = 0; i != numPatterns;++i){
-			RealMatrixRow membership(f,i);
+			auto membership = row(f,i);
 			outputs(i) = (unsigned int)(std::max_element(membership.begin(),membership.end())-membership.begin());
 		}
 		return outputs;

@@ -194,8 +194,6 @@ public:
 	// (e.g., in case high accuracy training is needed).
 	typedef typename Matrix::QpFloatType QpFloatType;
 	typedef blas::matrix<QpFloatType> QpMatrixType;
-	typedef blas::matrix_row<QpMatrixType> QpMatrixRowType;
-	typedef blas::matrix_column<QpMatrixType> QpMatrixColumnType;
 
 	//! Constructor
 	//! \param  kernel               kernel matrix - cache or pre-computed matrix

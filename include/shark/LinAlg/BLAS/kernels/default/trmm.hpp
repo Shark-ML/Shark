@@ -47,8 +47,8 @@ void trmm(
 	
 	std::size_t numCols=B().size2();
 	
-	for(std::size_t  i = 0; i != numCols; ++i){
-		matrix_column<MatB> col = column(B,i);
+	for(std::size_t  j = 0; j != numCols; ++j){
+		auto col = column(B,j);
 		kernels::trmv<Upper,Unit>(A,col);
 	}
 }

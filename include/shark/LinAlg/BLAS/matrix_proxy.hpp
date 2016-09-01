@@ -66,6 +66,8 @@ trans(temporary_proxy<M> m){
 ////////////////////////////////////
 //// Matrix Row and Column
 ////////////////////////////////////
+
+/// \brief Returns a vector-proxy representing the i-th row of the Matrix
 template<class M>
 temporary_proxy< matrix_row<M> > row(matrix_expression<M>& expression, typename M::index_type i){
 	return matrix_row<M> (expression(), i);
@@ -81,19 +83,22 @@ temporary_proxy<matrix_row<M> > row(temporary_proxy<M> expression, typename M::i
 	return row(static_cast<M&>(expression), i);
 }
 
+/// \brief Returns a vector-proxy representing the j-th column of the Matrix
 template<class M>
-temporary_proxy<matrix_column<M> > column(matrix_expression<M>& expression, typename M::index_type j){
-	return matrix_column<M> (expression(), j);
+temporary_proxy<matrix_row<typename detail::matrix_transpose_optimizer<M>::type> >
+column(matrix_expression<M>& expression, typename M::index_type j){
+	return row(trans(expression),j);
 }
 template<class M>
-matrix_column<typename const_expression<M>::type>
+matrix_row<typename detail::matrix_transpose_optimizer<typename const_expression<M>::type >::type>
 column(matrix_expression<M> const& expression, typename M::index_type j){
-	return matrix_column<typename const_expression<M>::type> (expression(), j);
+	return row(trans(expression),j);
 }
 
 template<class M>
-temporary_proxy<matrix_column<M> > column(temporary_proxy<M> expression, typename M::index_type j){
-	return column(static_cast<M&>(expression), j);
+temporary_proxy<matrix_row<typename detail::matrix_transpose_optimizer<M>::type> >
+column(temporary_proxy<M> expression, typename M::index_type j){
+	return row(trans(static_cast<M&>(expression)),j);
 }
 
 ////////////////////////////////////

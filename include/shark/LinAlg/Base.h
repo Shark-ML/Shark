@@ -62,20 +62,12 @@ namespace shark{
 	typedef blas::scalar_matrix< basetype > prefix##ScalarMatrix; \
 	typedef blas::vector_range< prefix##Vector > prefix##VectorRange; \
 	typedef blas::vector_range< const prefix##Vector > Const##prefix##VectorRange; \
-	typedef blas::matrix_row< prefix##Matrix > prefix##MatrixRow; \
-	typedef blas::matrix_row< const prefix##Matrix > Const##prefix##MatrixRow; \
-	typedef blas::matrix_column< prefix##Matrix > prefix##MatrixColumn; \
-	typedef blas::matrix_column< const prefix##Matrix > Const##prefix##MatrixColumn; \
 	typedef blas::matrix_range< prefix##Matrix > prefix##SubMatrix; \
 	typedef blas::matrix_range< const prefix##Matrix > Const##prefix##SubMatrix; \
 	typedef blas::compressed_vector< basetype > Compressed##prefix##Vector; \
 	typedef blas::vector_range< Compressed##prefix##Vector > Compressed##prefix##VectorRange; \
 	typedef blas::vector_range< const Compressed##prefix##Vector > ConstCompressed##prefix##VectorRange; \
 	typedef blas::compressed_matrix< basetype > Compressed##prefix##Matrix; \
-	typedef blas::matrix_row< Compressed##prefix##Matrix > Compressed##prefix##MatrixRow; \
-	typedef blas::matrix_row< const Compressed##prefix##Matrix > ConstCompressed##prefix##MatrixRow; \
-	typedef blas::matrix_column< Compressed##prefix##Matrix > Compressed##prefix##MatrixColumn; \
-	typedef blas::matrix_column< const Compressed##prefix##Matrix > ConstCompressed##prefix##MatrixColumn; \
 	typedef blas::matrix_range< Compressed##prefix##Matrix > Compressed##prefix##SubMatrix; \
 	typedef blas::matrix_range< const Compressed##prefix##Matrix > ConstCompressed##prefix##SubMatrix;\
 	typedef blas::diagonal_matrix<blas::vector< basetype > > prefix##DiagonalMatrix;

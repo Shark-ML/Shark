@@ -59,7 +59,7 @@ void trsv_impl(
 			b()(n) /= A()(n, n);
 		}
 		if (b()(n) != value_type/*zero*/()){
-			matrix_column<TriangularA const> col = column(A(),n);
+			auto col = column(A(),n);
 			noalias(subrange(b(),n+1,size)) -= b()(n) * subrange(col,n+1,size);
 		}
 	}
@@ -78,7 +78,7 @@ void trsv_impl(
 	
 	std::size_t size = b().size();
 	for (std::size_t n = 0; n < size; ++ n) {
-		matrix_row<TriangularA const> matRow = row(A(),n);
+		auto matRow = row(A(),n);
 		b()(n) -= inner_prod(subrange(matRow,0,n),subrange(b(),0,n));
 
 		if(!Unit){
@@ -108,7 +108,7 @@ void trsv_impl(
 			b()(n) /= A()(n, n);
 		}
 		if (b()(n) != value_type/*zero*/()) {
-			matrix_column<TriangularA const> col = column(A(),n);
+			auto col = column(A(),n);
 			noalias(subrange(b(),0,n)) -= b()(n) * subrange(col,0,n);
 		}
 	}
@@ -128,7 +128,7 @@ void trsv_impl(
 	std::size_t size = A().size1();
 	for (std::size_t i = 0; i < size; ++ i) {
 		std::size_t n = size-i-1;
-		matrix_row<TriangularA const> matRow = row(A(),n);
+		auto matRow = row(A(),n);
 		b()(n) -= inner_prod(subrange(matRow,n+1,size),subrange(b(),n+1,size));
 		if(!Unit){
 			RANGE_CHECK(A()(n, n) != value_type());//matrix is singular
