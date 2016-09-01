@@ -568,6 +568,16 @@ public:
         size_type size2 () const {
 		return m_lhs.size2 ();
         }
+	
+	lhs_closure_type const& lhs() const {
+		return m_lhs;
+	}
+	rhs_closure_type const& rhs() const {
+		return m_rhs;
+	}
+	functor_type const& functor() const {
+		return m_functor;
+	}
 
         const_reference operator () (index_type i, index_type j) const {
 		return m_functor( m_lhs (i, j), m_rhs(i,j));
@@ -1061,169 +1071,6 @@ private:
 	matrix_closure_typeA m_lhs;
 	matrix_closure_typeB m_rhs;
 };
-
-namespace detail{
-//  a traits class which optimizes and matrix-vector expressions to be more efficient. This is useful in case a user
-// gives a complex expression as an argument to a function, e.g. a general CG implementation.
-	
-//while not crucial for speed, it makes most expressions much easier to handle if they get simplified
-//e.g. we do not have to look two steps deep in to the matrix-vector product if the matrix is transposed (e.g. transpose of matrix-sum)
-template<class M>
-struct matrix_transpose_optimizer{
-	typedef matrix_transpose<M> type;
-	
-	static type create(typename closure<M>::type const& m){
-		return type(m);
-	}
-};
-
-//(M^T)^T = M
-template<class M>
-struct matrix_transpose_optimizer<matrix_transpose<M> >{
-	typedef typename closure<M>::type type;
-	
-	static type create(matrix_transpose<M> const& m){
-		return m.expression();
-	}
-};
-
-//f(M)^T = f(M^T) for f(M)_ij=f(M_ij)
-template<class M, class F>
-struct matrix_transpose_optimizer<matrix_unary<M,F> >{
-	typedef matrix_transpose_optimizer<typename const_expression<M>::type > opt;
-	typedef matrix_unary<typename opt::type, F> type;
-	
-	static type create(matrix_unary<M,F> const& m){
-		return type(opt::create(m.expression()),m.functor());
-	}
-};
-
-//(M1+M2)^T=M1^T+M2^T
-template<class M1, class M2>
-struct matrix_transpose_optimizer<matrix_addition<M1,M2> >{
-	typedef matrix_transpose_optimizer<typename const_expression<M1>::type > left_opt;
-	typedef matrix_transpose_optimizer<typename const_expression<M2>::type > right_opt;
-	typedef matrix_addition<typename left_opt::type,typename right_opt::type > type;
-	
-	static type create(matrix_addition<M1,M2> const& m){
-		return type(left_opt::create(m.lhs()),right_opt::create(m.rhs()));
-	}
-};
-
-//(v1v2^T)^T = v2 v1^T
-template<class V1, class V2>
-struct matrix_transpose_optimizer<outer_product<V1,V2> >{
-	typedef outer_product<V2,V1> type;
-	
-	static type create(outer_product<V1,V2> const& m){
-		return type(m.rhs(),m.lhs());
-	}
-};
-
-//(M1M2)^T = M2^T M1^T
-template<class M1, class M2>
-struct matrix_transpose_optimizer<matrix_matrix_prod<M1,M2> >{
-	typedef matrix_transpose_optimizer<typename const_expression<M2>::type> left_opt;
-	typedef matrix_transpose_optimizer<typename const_expression<M1>::type> right_opt;
-	typedef matrix_matrix_prod<typename left_opt::type,typename right_opt::type > type;
-	
-	static type create(matrix_matrix_prod<M1,M2> const& m){
-		return type(left_opt::create(m.rhs()),right_opt::create(m.lhs()));
-	}
-};
-	
-//matrix-vector multiplications
-template<class M, class V>
-struct matrix_vector_prod_optimizer{
-	typedef matrix_vector_prod<M,V> type;
-	
-	static type create(typename M::const_closure_type const& m, typename V::const_closure_type const& v){
-		return type(m,v);
-	}
-};
-
-//the helper guards against the case that applying the simplifications of matrix_transpose
-//can be the identity -> guard against infinite loops
-template<class M1, class M1Simplified, class V>
-struct matrix_vector_prod_transpose_helper{
-private:
-	typedef matrix_vector_prod_optimizer<M1Simplified, V> inner_opt;
-public:
-	typedef typename inner_opt::type type;
-	static type create(typename M1Simplified::const_closure_type const& m, typename V::const_closure_type const& v){
-		return inner_opt::create(m,v);
-	}
-};
-template<class M, class V>
-struct matrix_vector_prod_transpose_helper<M,M,V>{
-	typedef matrix_vector_prod<M,V> type;
-	
-	static type create(typename M::const_closure_type const& m, typename V::const_closure_type const& v){
-		return type(m,v);
-	}
-};
-
-//simplify expressions with transposed matrix arguments.(used for product of types xA=>A^Tx)
-template<class M, class V>
-struct matrix_vector_prod_optimizer<matrix_transpose<M>,V>{
-private:
-	typedef typename matrix_transpose<M>::const_closure_type closure;
-	typedef matrix_transpose_optimizer<typename const_expression<M>::type > transpose_opt;//simplify the matrix transpose statement
-	typedef matrix_vector_prod_transpose_helper<
-		closure, 
-		typename transpose_opt::type,V
-	> inner_opt;//call recursively on the simplified type and guard against identity transformations
-public:
-	typedef typename inner_opt::type type;
-	static type create(closure const& m, typename V::const_closure_type const& v){
-		return inner_opt::create(transpose_opt::create(m.expression()),v);
-	}
-};
-
-//(M1*M2)*V=M1*(M2*V)
-template<class M1,class M2, class V>
-struct matrix_vector_prod_optimizer<matrix_matrix_prod<M1,M2>,V>{
-private:
-	typedef matrix_vector_prod_optimizer<M2,V> inner_opt;
-	typedef matrix_vector_prod_optimizer<M1, typename inner_opt::type> outer_opt;
-public:
-	typedef typename outer_opt::type type;
-	
-	static type create(matrix_matrix_prod<M1,M2> const& m, typename V::const_closure_type const& v){
-		auto inner_result = inner_opt::create(m.rhs(),v);
-		return outer_opt::create(m.lhs(),inner_result);
-	}
-};
-
-//(M1+M2)*V=M1*V+M2*V
-template<class M1,class M2, class V>
-struct matrix_vector_prod_optimizer<matrix_addition<M1,M2>,V>{
-private:
-	typedef matrix_vector_prod_optimizer<M1,V> left_opt;
-	typedef matrix_vector_prod_optimizer<M2,V> right_opt;
-public:
-	typedef vector_addition<typename left_opt::type ,typename right_opt::type> type;
-	
-	static type create(matrix_addition<M1,M2> const& m, typename V::const_closure_type const& v){
-		auto lhs = left_opt::create(m.lhs(),v);
-		auto rhs = right_opt::create(m.rhs(),v);
-		return type(lhs,rhs);
-	}
-};
-
-//(v1*v2^T)*v3= v1*(v2^T*v3)
-template<class V1,class V2, class V3>
-struct matrix_vector_prod_optimizer<outer_product<V1,V2>,V3>{
-	typedef vector_scalar_multiply<V1> type;
-	
-	static type create(outer_product<V1,V2> const& m, typename V3::const_closure_type const& v){
-		auto alpha = inner_prod(m.rhs(),v);
-		return type(m.lhs(),alpha);
-	}
-};
-
-}
-
 
 }}
 #endif

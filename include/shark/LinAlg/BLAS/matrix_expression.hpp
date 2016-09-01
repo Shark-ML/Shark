@@ -29,6 +29,7 @@
 #define SHARK_LINALG_BLAS_MATRIX_EXPRESSION_HPP
 
 #include "detail/matrix_expression_classes.hpp"
+#include "detail/matrix_expression_optimizers.hpp"
 #include <boost/utility/enable_if.hpp>
 
 
@@ -453,11 +454,9 @@ sum_rows(matrix_expression<MatA> const& A){
 }
 
 template<class MatA>
-sum_matrix_rows<typename detail::matrix_transpose_optimizer<typename MatA::const_closure_type>::type >
+sum_matrix_rows<typename detail::matrix_transpose_optimizer<typename const_expression<MatA>::type >::type >
 sum_columns(matrix_expression<MatA> const& A){
-	typedef typename MatA::const_closure_type closure_type;
-	typedef typename detail::matrix_transpose_optimizer<closure_type> ExpressionOptimizer;
-	return sum_matrix_rows<typename ExpressionOptimizer::type >(ExpressionOptimizer::create(closure_type(A())));
+	return sum_rows(trans(A));
 }
 
 
