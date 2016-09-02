@@ -463,7 +463,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Sparse_Vector_Abs )
 	
 	for (size_t i = 0; i < VectorNNZ; i++)
 	{
-		x(i) = -i+3.0;
+		x(i) = -double(i)+3.0;
 		result(i)= std::abs(x(i));
 	}
 	checkSparseExpressionEquality(abs(x),result);
