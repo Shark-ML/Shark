@@ -14,7 +14,6 @@ using namespace shark;
 double const noise = 1.0;
 typedef CompressedRealVector VectorType;
 typedef CompressedRealMatrix MatrixType;
-typedef CompressedRealMatrixRow RowType;
 
 
 // data generating distribution for our toy
