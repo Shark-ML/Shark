@@ -475,7 +475,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Sparse_Vector_Sqr )
 	
 	for (size_t i = 0; i < VectorNNZ; i++)
 	{
-		x(i) = -i+3.0;
+		x(i) = -double(i)+3.0;
 		result(i)= x(i)*x(i);
 	}
 	checkSparseExpressionEquality(sqr(x),result);
