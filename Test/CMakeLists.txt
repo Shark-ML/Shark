@@ -66,6 +66,7 @@ shark_add_test( LinAlg/BLAS/matrix_proxy.cpp BLAS_Matrix_Proxy)
 shark_add_test( LinAlg/BLAS/vector_expression.cpp BLAS_Vector_Expression)
 shark_add_test( LinAlg/BLAS/matrix_expression.cpp BLAS_Matrix_Expression)
 shark_add_test( LinAlg/BLAS/prod.cpp BLAS_Prod)
+shark_add_test( LinAlg/BLAS/expression_optimizer.cpp BLAS_Expression_Optimizer)
 shark_add_test( LinAlg/BLAS/triangular_prod.cpp BLAS_Triangular_Prod)
 shark_add_test( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
 

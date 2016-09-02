@@ -284,9 +284,8 @@ typename detail::matrix_vector_prod_optimizer<MatA,VecV>::type prod(matrix_expre
 /// it returns an expression-object which can compute it. In contrast to other expression,
 /// this expression is optimized to make use of well known mathematical identities to reduce run time of the algorithm.
 template<class MatA, class VecV>
-typename detail::matrix_vector_prod_optimizer<matrix_transpose<MatA>,VecV>::type prod(vector_expression<VecV> const& v,matrix_expression<MatA> const& A) {
-	typedef typename matrix_transpose<MatA>::const_closure_type closure;
-	return detail::matrix_vector_prod_optimizer<matrix_transpose<MatA>,VecV>::create(closure(A()),v());
+auto prod(vector_expression<VecV> const& v,matrix_expression<MatA> const& A) -> decltype(prod(trans(A),v)){
+	return prod(trans(A),v);
 }
 
 /// \brief Computes the matrix-vector product x+= alpha * Av or x= alpha * Av

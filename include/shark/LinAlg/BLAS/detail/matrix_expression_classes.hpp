@@ -214,6 +214,13 @@ public:
 		return m_scalar * m_expression(i, j);
 	}
 	
+	scalar_type scalar()const{
+		return m_scalar;
+	}
+	expression_closure_type const& expression() const{
+		return m_expression;
+	};
+	
 	//computation kernels
 	template<class MatX>
 	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{

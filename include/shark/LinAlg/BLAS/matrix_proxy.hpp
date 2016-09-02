@@ -33,8 +33,7 @@
 #ifndef SHARK_LINALG_BLAS_MATRIX_PROXY_HPP
 #define SHARK_LINALG_BLAS_MATRIX_PROXY_HPP
 
-#include "detail/matrix_proxy_classes.hpp"
-#include "detail/matrix_proxy_optimizers.hpp"
+#include "detail/matrix_expression_optimizers.hpp"
 
 namespace shark {
 namespace blas {
@@ -69,35 +68,34 @@ trans(temporary_proxy<M> m){
 
 /// \brief Returns a vector-proxy representing the i-th row of the Matrix
 template<class M>
-temporary_proxy< matrix_row<M> > row(matrix_expression<M>& expression, typename M::index_type i){
-	return matrix_row<M> (expression(), i);
+temporary_proxy<typename detail::matrix_row_optimizer<M>::type>
+row(matrix_expression<M>& expression, typename M::index_type i){
+	return detail::matrix_row_optimizer<M>::create(expression(), i);
 }
 template<class M>
-matrix_row<typename const_expression<M>::type>
+typename detail::matrix_row_optimizer<typename const_expression<M>::type>::type
 row(matrix_expression<M> const& expression, typename M::index_type i){
-	return matrix_row<typename const_expression<M>::type> (expression(), i);
+	return detail::matrix_row_optimizer<typename const_expression<M>::type>::create(expression(), i);
 }
 
 template<class M>
-temporary_proxy<matrix_row<M> > row(temporary_proxy<M> expression, typename M::index_type i){
+temporary_proxy<typename detail::matrix_row_optimizer<M>::type>
+row(temporary_proxy<M> expression, typename M::index_type i){
 	return row(static_cast<M&>(expression), i);
 }
 
 /// \brief Returns a vector-proxy representing the j-th column of the Matrix
 template<class M>
-temporary_proxy<matrix_row<typename detail::matrix_transpose_optimizer<M>::type> >
-column(matrix_expression<M>& expression, typename M::index_type j){
+auto column(matrix_expression<M>& expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
 	return row(trans(expression),j);
 }
 template<class M>
-matrix_row<typename detail::matrix_transpose_optimizer<typename const_expression<M>::type >::type>
-column(matrix_expression<M> const& expression, typename M::index_type j){
+auto column(matrix_expression<M> const& expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
 	return row(trans(expression),j);
 }
 
 template<class M>
-temporary_proxy<matrix_row<typename detail::matrix_transpose_optimizer<M>::type> >
-column(temporary_proxy<M> expression, typename M::index_type j){
+auto column(temporary_proxy<M> expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
 	return row(trans(static_cast<M&>(expression)),j);
 }
 
