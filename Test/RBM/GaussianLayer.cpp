@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_SufficientStatistics){
 		
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
-				BOOST_CHECK_SMALL(testInput(i,j)-statistics(i,j),1.e-15);
+				BOOST_CHECK_SMALL(testInput(i,j)-statistics(i,j),1.e-13);
 			}
 		}
 	}
