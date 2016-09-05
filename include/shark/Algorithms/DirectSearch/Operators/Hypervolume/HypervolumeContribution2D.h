@@ -49,7 +49,7 @@ private:
 		, f2(f2)
 		, index(index)
 		{}
-			
+
 		bool operator<(Point const& rhs) const{//for lexicographic sorting
 			if (f1 < rhs.f1) return true;
 			if (f1 > rhs.f1) return false;
