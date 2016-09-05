@@ -146,7 +146,7 @@ temporary_proxy< matrix_vector_range<M> > diag(temporary_proxy<M> mat){
 ////////////////////////////////////
 
 template<class M>
-temporary_proxy< matrix_range<M> > subrange(
+temporary_proxy< typename detail::matrix_range_optimizer<M>::type > subrange(
 	matrix_expression<M>& expression, 
 	std::size_t start1, std::size_t stop1,
 	std::size_t start2, std::size_t stop2
@@ -155,10 +155,10 @@ temporary_proxy< matrix_range<M> > subrange(
 	RANGE_CHECK(start2 <= stop2);
 	SIZE_CHECK(stop1 <= expression().size1());
 	SIZE_CHECK(stop2 <= expression().size2());
-	return matrix_range<M> (expression(), range(start1, stop1), range(start2, stop2));
+	return detail::matrix_range_optimizer<M>::create(expression(), start1, stop1, start2, stop2);
 }
 template<class M>
-matrix_range<typename const_expression<M>::type> subrange(
+typename detail::matrix_range_optimizer<typename const_expression<M>::type>::type subrange(
 	matrix_expression<M> const& expression, 
 	std::size_t start1, std::size_t stop1,
 	std::size_t start2, std::size_t stop2
@@ -167,71 +167,71 @@ matrix_range<typename const_expression<M>::type> subrange(
 	RANGE_CHECK(start2 <= stop2);
 	SIZE_CHECK(stop1 <= expression().size1());
 	SIZE_CHECK(stop2 <= expression().size2());
-	return matrix_range<typename const_expression<M>::type> (expression(), range(start1, stop1), range(start2, stop2));
+	return detail::matrix_range_optimizer<typename const_expression<M>::type>::create(expression(), start1, stop1, start2, stop2);
 }
 
 template<class M>
-temporary_proxy< matrix_range<M> > subrange(
+auto subrange(
 	temporary_proxy<M> expression, 
 	std::size_t start1, std::size_t stop1,
 	std::size_t start2, std::size_t stop2
-){
+) -> decltype(subrange(static_cast<M&>(expression),start1,stop1,start2,stop2)){
 	return subrange(static_cast<M&>(expression),start1,stop1,start2,stop2);
 }
 
 template<class M>
-temporary_proxy<matrix_range<M> > rows(
+auto rows(
 	matrix_expression<M>& expression, 
 	std::size_t start, std::size_t stop
-){
+) -> decltype(subrange(expression, start, stop, 0,expression().size2())){
 	RANGE_CHECK(start <= stop);
 	SIZE_CHECK(stop <= expression().size1());
 	return subrange(expression, start, stop, 0,expression().size2());
 }
 
 template<class M>
-matrix_range<typename const_expression<M>::type> rows(
+auto rows(
 	matrix_expression<M> const& expression, 
 	std::size_t start, std::size_t stop
-){
+) -> decltype(subrange(expression, start, stop, 0,expression().size2())){
 	RANGE_CHECK(start <= stop);
 	SIZE_CHECK(stop <= expression().size1());
 	return subrange(expression, start, stop, 0,expression().size2());
 }
 
 template<class M>
-temporary_proxy<matrix_range<M> > rows(
+auto rows(
 	temporary_proxy<M> expression, 
 	std::size_t start, std::size_t stop
-){
+) -> decltype( rows(static_cast<M&>(expression),start,stop)){
 	return rows(static_cast<M&>(expression),start,stop);
 }
 
 template<class M>
-temporary_proxy< matrix_range<M> > columns(
+auto columns(
 	matrix_expression<M>& expression, 
 	typename M::index_type start, typename M::index_type stop
-){
+) -> decltype(subrange(expression, 0,expression().size1(), start, stop)){
 	RANGE_CHECK(start <= stop);
 	SIZE_CHECK(stop <= expression().size2());
 	return subrange(expression, 0,expression().size1(), start, stop);
 }
 
 template<class M>
-matrix_range<typename const_expression<M>::type> columns(
+auto columns(
 	matrix_expression<M> const& expression, 
 	typename M::index_type start, typename M::index_type stop
-){
+) -> decltype(subrange(expression, 0,expression().size1(), start, stop)){
 	RANGE_CHECK(start <= stop);
 	SIZE_CHECK(stop <= expression().size2());
 	return subrange(expression, 0,expression().size1(), start, stop);
 }
 
 template<class M>
-temporary_proxy<matrix_range<M> > columns(
+auto columns(
 	temporary_proxy<M> expression, 
 	std::size_t start, std::size_t stop
-){
+) -> decltype(columns(static_cast<M&>(expression),start,stop)){
 	return columns(static_cast<M&>(expression),start,stop);
 }
 

@@ -38,8 +38,13 @@ template<class M>
 struct matrix_transpose_optimizer;
 template<class M>
 struct matrix_row_optimizer;
+template<class M>
+struct matrix_range_optimizer;
 template<class M, class V>
 struct matrix_vector_prod_optimizer;
+template<class M, class V>
+struct matrix_matrix_prod_optimizer;
+
 
 	
 ////////////////////////////////////
@@ -209,6 +214,114 @@ struct matrix_row_optimizer<matrix_matrix_prod<M1,M2> >{
 	}
 };
 
+////////////////////////////////////
+//// Matrix Range
+////////////////////////////////////
+template<class M>
+struct matrix_range_optimizer{
+	typedef matrix_range<M> type;
+	
+	static type create(typename closure<M>::type const& m,
+		std::size_t start1, std::size_t stop1, std::size_t start2, std::size_t stop2 ){
+		return type(m,range(start1, stop1), range(start2, stop2));
+	}
+};
+
+//range(alpha * M) = alpha * range(M)
+template<class M>
+struct matrix_range_optimizer<matrix_scalar_multiply<M> >{
+	typedef matrix_range_optimizer<typename const_expression<M>::type > opt;
+	typedef matrix_scalar_multiply<typename opt::type > type;
+	
+	static type create(matrix_scalar_multiply<M> const& m,
+		std::size_t start1, std::size_t stop1, std::size_t start2, std::size_t stop2
+	){
+		return type(opt::create(m.expression(),start1,stop1,start2,stop2), m.scalar());
+	}
+};
+
+//range(M1+M2) = range(M1) + range(M2)
+template<class M1, class M2>
+struct matrix_range_optimizer<matrix_addition<M1,M2> >{
+	typedef matrix_range_optimizer<typename const_expression<M1>::type > left_opt;
+	typedef matrix_range_optimizer<typename const_expression<M2>::type > right_opt;
+	typedef matrix_addition<typename left_opt::type, typename right_opt::type > type;
+	
+	static type create(matrix_addition<M1,M2> const& m,
+		std::size_t start1, std::size_t stop1, std::size_t start2, std::size_t stop2
+	){
+		return type(
+			left_opt::create(m.lhs(),start1,stop1,start2,stop2),
+			right_opt::create(m.rhs(),start1,stop1,start2,stop2)
+		);
+	}
+};
+
+//range(f(M)) = f(range(M))
+template<class M, class F>
+struct matrix_range_optimizer<matrix_unary<M, F> >{
+	typedef matrix_range_optimizer<typename const_expression<M>::type > opt;
+	typedef matrix_unary<typename opt::type, F > type;
+	
+	static type create(matrix_unary<M, F> const& m,
+		std::size_t start1, std::size_t stop1, std::size_t start2, std::size_t stop2
+	){
+		return type(opt::create(m,start1,stop1,start2,stop2), m.functor());
+	}
+};
+
+//range(f(M1,M2)) = f(range(M1),range(M2))
+template<class M1, class M2, class F>
+struct matrix_range_optimizer<matrix_binary<M1,M2, F> >{
+	typedef matrix_range_optimizer<typename const_expression<M1>::type > left_opt;
+	typedef matrix_range_optimizer<typename const_expression<M2>::type > right_opt;
+	typedef matrix_binary<typename left_opt::type, typename right_opt::type, F > type;
+	
+	static type create(matrix_binary<M1,M2,F> const& m,
+		std::size_t start1, std::size_t stop1, std::size_t start2, std::size_t stop2
+	){
+		return type(
+			left_opt::create(m.lhs(),start1,stop1,start2,stop2),
+			right_opt::create(m.rhs(),start1,stop1,start2,stop2),
+			m.functor()
+		);
+	}
+};
+
+//~ //range(uv^T) = range(u) range(v)^T
+//~ template<class V1, class V2>
+//~ struct matrix_range_optimizer<outer_prod<V1,V2> >{
+	//~ typedef vector_range_optimizer<typename const_expression<V1>::type > left_opt;
+	//~ typedef vector_range_optimizer<typename const_expression<V2>::type > right_opt;
+	//~ typedef outer_prod<typename left_opt::type, typename right_opt::type> type;
+	
+	//~ static type create(outer_prod<V1,V2> const& m,
+		//~ std::size_t start1, std::size_t stop1, std::size_t start2, std::size_t stop2
+	//~ ){
+		//~ return type(
+			//~ opt::create(m.lhs(),start1,stop1),
+			//~ opt::create(m.rhs(),start2,stop2)
+		//~ );
+	//~ }
+//~ };
+
+//~ //range(prod(A,B),i) = prod(range(B),range(A)) 
+template<class M1, class M2>
+struct matrix_range_optimizer<matrix_matrix_prod<M1,M2> >{
+	typedef matrix_range_optimizer<typename const_expression<M1>::type> left_opt;
+	typedef matrix_range_optimizer<typename const_expression<M2>::type> right_opt;
+	typedef matrix_matrix_prod_optimizer<typename left_opt::type, typename right_opt::type> opt;
+	typedef typename opt::type type;
+	
+	static type create(matrix_matrix_prod<M1,M2> const& m,
+		std::size_t start1, std::size_t stop1, std::size_t start2, std::size_t stop2
+	){
+		return opt::create(
+			opt::create(m.lhs(),start1,stop1,0,m.lhs().size2()),
+			opt::create(m.rhs(),0,m.rhs().size1(),start2,stop2)
+		);
+	}
+};
 
 ////////////////////////////////////
 //// Matrix Vector Product
