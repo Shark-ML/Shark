@@ -141,7 +141,7 @@ public:
 			double error = 0;
 			for(std::size_t i = 0; i != prediction.size1(); ++i){
 				RANGE_CHECK ( target(i) < prediction.size2() );
-				RealMatrixRow gradRow=row(gradient,i);
+				auto gradRow=row(gradient,i);
 				
 				//calculate the log norm in a numerically stable way
 				//we subtract the maximum prior to exponentiation to 

@@ -175,7 +175,7 @@ public:
 		std::size_t ic = m_basis.numberOfElements();
 		std::vector<std::size_t> svIndices;
 		for (std::size_t i=0; i != ic; ++i){
-			if (blas::norm_1(RealMatrixRow(m_alpha, i)) > 0.0){
+			if (blas::norm_1(row(m_alpha, i)) > 0.0){
 				svIndices.push_back(i);
 			}
 		}

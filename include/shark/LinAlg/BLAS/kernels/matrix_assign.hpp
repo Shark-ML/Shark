@@ -165,7 +165,7 @@ void assign(
 	row_major
 ){
 	for(std::size_t i = 0; i != m().size1(); ++i){
-		matrix_row<M> rowM(m(),i);
+		auto rowM = row(m,i);
 		assign<F>(rowM,t);
 	}
 }
@@ -176,8 +176,8 @@ void assign(
 	typename M::value_type t, 
 	column_major
 ){
-	for(std::size_t i = 0; i != m().size2(); ++i){
-		matrix_column<M> columnM(m(),i);
+	for(std::size_t j = 0; j != m().size2(); ++j){
+		auto columnM = column(m,j);
 		assign<F>(columnM,t);
 	}
 }
@@ -204,7 +204,7 @@ void assign(
 }
 
 /////////////////////////////////////////////////////////////////
-//////Matrix Assignment implmenting op=
+//////Matrix Assignment implementing op=
 ////////////////////////////////////////////////////////////////
 
 //direct assignment without functor
@@ -216,7 +216,7 @@ void assign(
 	row_major, row_major,TagE, TagM
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
-		matrix_row<M> rowM(m(),i);
+		auto rowM = row(m,i);
 		kernels::assign(rowM,row(e,i));
 	}
 }
@@ -266,9 +266,9 @@ void assign(
 	matrix_expression<E> const& e,
 	row_major, column_major,dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag
 ) {
-	for(std::size_t i = 0; i != m().size2(); ++i){
-		matrix_column<M> columnM(m(),i);
-		kernels::assign(columnM,column(e,i));
+	for(std::size_t j = 0; j != m().size2(); ++j){
+		auto columnM = column(m,j);
+		kernels::assign(columnM,column(e,j));
 	}
 }
 
@@ -281,7 +281,7 @@ void assign(
 	row_major, column_major, sparse_bidirectional_iterator_tag, dense_random_access_iterator_tag
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
-		matrix_column<M> rowM(m(),i);
+		auto rowM = row(m,i);
 		kernels::assign(rowM,row(e,i));
 	}
 }
@@ -497,9 +497,9 @@ void assign(
 	matrix_expression<E> const& e,
 	row_major, column_major,dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag
 ) {
-	for(std::size_t i = 0; i != m().size2(); ++i){
-		matrix_column<M> columnM(m(),i);
-		kernels::assign<F>(columnM,column(e,i));
+	for(std::size_t j = 0; j != m().size2(); ++j){
+		auto columnM = column(m,j);
+		kernels::assign<F>(columnM,column(e,j));
 	}
 }
 
@@ -511,7 +511,7 @@ void assign(
 	row_major, column_major, sparse_bidirectional_iterator_tag, dense_random_access_iterator_tag
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
-		matrix_column<M> rowM(m(),i);
+		auto rowM = row(m,i);
 		kernels::assign<F>(rowM,row(e,i));
 	}
 }

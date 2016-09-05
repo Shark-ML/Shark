@@ -90,12 +90,6 @@ detail::ADLVector<matrix_row<Source> >
 init(const matrix_row<Source>& source){
 	return detail::ADLVector<matrix_row<Source> >(source);
 }
-///\brief Specialization for matrix columns.
-template<class Source>
-detail::ADLVector<matrix_column<Source> > 
-init(const matrix_row<Source>& source){
-	return detail::ADLVector<matrix_column<Source> >(source);
-}
 
 //matrices as arguments
 

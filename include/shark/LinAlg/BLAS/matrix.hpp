@@ -28,9 +28,7 @@
 #ifndef SHARK_LINALG_BLAS_MATRIX_HPP
 #define SHARK_LINALG_BLAS_MATRIX_HPP
 
-#include "matrix_proxy.hpp"
-#include "vector_proxy.hpp"
-#include "kernels/matrix_assign.hpp"
+#include "assignment.hpp"
 #include <array>
 #include <initializer_list>
 #include <boost/serialization/collection_size_type.hpp>
@@ -71,7 +69,7 @@ public:
 	typedef index_type const* const_index_pointer;
 	typedef index_type index_pointer;
 
-	typedef matrix_reference<self_type const> const const_closure_type;
+	typedef matrix_reference<self_type const> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
 	typedef dense_tag storage_category;
 	typedef elementwise_tag evaluation_category;

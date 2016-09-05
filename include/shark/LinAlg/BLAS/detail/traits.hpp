@@ -187,6 +187,7 @@ struct row_major:public linear_structure{
 struct column_major:public linear_structure{
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
+	typedef column_major orientation;
 	typedef row_major transposed_orientation;
 	template<class T>
 	struct sparse_element{
@@ -236,8 +237,10 @@ struct column_major:public linear_structure{
 		return size_i;
 	}
 };
-struct unknown_orientation:public linear_structure
-{typedef unknown_orientation transposed_orientation;};
+struct unknown_orientation:public linear_structure{
+	typedef unknown_orientation orientation;
+	typedef unknown_orientation transposed_orientation;
+};
 
 //storage schemes for packed matrices
 template<class Orientation, class TriangularType>

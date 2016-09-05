@@ -56,8 +56,6 @@ class vector_range;
 template<class M>
 class matrix_row;
 template<class M>
-class matrix_column;
-template<class M>
 class matrix_vector_range;
 template<class M>
 class matrix_range;

@@ -97,6 +97,10 @@ public:
 	vector(vector && v): m_storage(std::move(v.m_storage)){}
 		
 	vector(std::initializer_list<T>  list) : m_storage(list.begin(),list.end()){}
+		
+	/// \brief Constructs the vector from a predefined range
+	template<class Iter>
+	vector(Iter begin, Iter end):m_storage(begin,end){}
 
 	/// \brief Copy-constructor of a vector from a vector_expression
 	/// \param e the vector_expression whose values will be duplicated into the vector

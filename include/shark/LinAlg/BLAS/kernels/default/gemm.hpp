@@ -32,6 +32,7 @@
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_GEMM_HPP
 
 #include "../gemv.hpp"
+#include "../../matrix.hpp"
 #include "../../matrix_proxy.hpp"
 #include "../../vector.hpp"
 #include <boost/mpl/bool.hpp>

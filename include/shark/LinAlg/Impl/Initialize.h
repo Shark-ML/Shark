@@ -515,8 +515,6 @@ operator>>(const ADLVector<Source>& source,Argument sink){\
 SHARK_SPLIT_PROXY_INIT(shark::blas::vector_range<Sink>)
 ///\brief Appends a matrix row.
 SHARK_SPLIT_PROXY_INIT(shark::blas::matrix_row<Sink>)
-///\brief Appends a matrix column.
-SHARK_SPLIT_PROXY_INIT(shark::blas::matrix_column<Sink>)
 #undef SHARK_SPLIT_PROXY_INIT
 
 
@@ -563,7 +561,6 @@ operator,(const VectorSplitter<Source,Init >& source, Argument vec){\
 }
 SHARK_SPLIT_PROXY_COMMA(shark::blas::vector_range<Sink>)
 SHARK_SPLIT_PROXY_COMMA(shark::blas::matrix_row<Sink>)
-SHARK_SPLIT_PROXY_COMMA(shark::blas::matrix_column<Sink>)
 #undef SHARK_SPLIT_PROXY_COMMA
 
 }}}

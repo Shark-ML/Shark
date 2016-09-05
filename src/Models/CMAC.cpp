@@ -53,7 +53,7 @@ std::size_t CMACMap::getArrayIndexForTiling(std::size_t indexOfTiling,RealVector
 	return index;
 }
 
-std::vector<std::size_t> CMACMap::getIndizes(ConstRealMatrixRow const &point)const {
+std::vector<std::size_t> CMACMap::getIndizes(blas::matrix_row< const RealMatrix> const &point)const {
 	std::vector<size_t> output(m_tilings,0);
 
 	for (size_t tiling = 0; tiling != m_tilings; ++tiling) {

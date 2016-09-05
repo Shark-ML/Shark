@@ -64,7 +64,9 @@ shark_add_test( LinAlg/BLAS/compressed_matrix.cpp BLAS_Compressed_Matrix)
 shark_add_test( LinAlg/BLAS/vector_proxy.cpp BLAS_Vector_Proxy)
 shark_add_test( LinAlg/BLAS/matrix_proxy.cpp BLAS_Matrix_Proxy)
 shark_add_test( LinAlg/BLAS/vector_expression.cpp BLAS_Vector_Expression)
+shark_add_test( LinAlg/BLAS/matrix_expression.cpp BLAS_Matrix_Expression)
 shark_add_test( LinAlg/BLAS/prod.cpp BLAS_Prod)
+shark_add_test( LinAlg/BLAS/expression_optimizer.cpp BLAS_Expression_Optimizer)
 shark_add_test( LinAlg/BLAS/triangular_prod.cpp BLAS_Triangular_Prod)
 shark_add_test( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
 
@@ -277,6 +279,12 @@ shark_add_test( RBM/ParallelTemperingTraining.cpp RBM_PTTraining)
 shark_add_test( RBM/PCDTraining.cpp RBM_PCDTraining)
 shark_add_test( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceTraining)
 shark_add_test( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
+
+
+#marking tests as slow
+set_tests_properties( DirectSearch_HypervolumeContribution PROPERTIES LABELS "slow" )
+set_tests_properties( Models_CMAC PROPERTIES LABELS "slow" )
+set_tests_properties( ObjFunct_KernelBasisDistance PROPERTIES LABELS "slow" )
 
 # Copy test file
 if(HDF5_FOUND)

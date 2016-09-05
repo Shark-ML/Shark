@@ -196,7 +196,7 @@ public:
 				InputReferenceType x_i = m_data[i].input;
 				const unsigned int y_i = m_data[i].label;
 				const double q = m_xSquared(i);
-				RealMatrixRow a = row(alpha, i);
+				blas::matrix_row<RealMatrix> a = row(alpha, i);
 
 				// compute gradient and KKT violation
 				RealVector wx = prod(w,x_i);
@@ -349,7 +349,7 @@ protected:
 	/// \param  y         label of the current sample
 	///
 	/// \return  The function must return the violation of the KKT conditions.
-	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y) = 0;
+	virtual double calcGradient(RealVector& gradient, RealVector wx, blas::matrix_row<RealMatrix> const& alpha, double C, unsigned int y) = 0;
 
 	/// \brief Update the weight vectors (primal variables) after a step on the dual variables.
 	///
@@ -369,7 +369,7 @@ protected:
 	/// \param  mu        step from initial point to final point
 	///
 	/// \return  The function must return the gain of the step, i.e., the improvement of the objective function.
-	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu) = 0;
+	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, blas::matrix_row<RealMatrix>& alpha, RealVector& mu) = 0;
 
 	DataView<const DatasetType> m_data;               ///< view on training data
 	RealVector m_xSquared;                            ///< diagonal entries of the quadratic matrix
@@ -517,7 +517,7 @@ protected:
 				//~ const SparseVector* x_i = m_data[i].input;
 				//~ const unsigned int y_i = m_data[i].label;
 				//~ const double q = m_xSquared(i);
-				//~ RealMatrixRow a = row(alpha, i);
+				//~ blas::matrix_row<RealMatrix> a = row(alpha, i);
 
 				//~ // compute gradient and KKT violation
 				//~ RealVector wx(m_classes, 0.0);
@@ -668,7 +668,7 @@ protected:
 	//~ /// \param  y         label of the current sample
 	//~ ///
 	//~ /// \return  The function must return the violation of the KKT conditions.
-	//~ virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y) = 0;
+	//~ virtual double calcGradient(RealVector& gradient, RealVector wx, blas::matrix_row<RealMatrix> const& alpha, double C, unsigned int y) = 0;
 
 	//~ /// \brief Update the weight vectors (primal variables) after a step on the dual variables.
 	//~ ///
@@ -688,7 +688,7 @@ protected:
 	//~ /// \param  mu        step from initial point to final point
 	//~ ///
 	//~ /// \return  The function must return the gain of the step, i.e., the improvement of the objective function.
-	//~ virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu) = 0;
+	//~ virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, blas::matrix_row<RealMatrix>& alpha, RealVector& mu) = 0;
 
 	//~ std::vector<SparseVector> storage;                ///< storage for sparse vectors
 	//~ std::vector<ElementType> m_data;                  ///< resembles data view interface
@@ -715,7 +715,7 @@ public:
 
 protected:
 	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
-	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y)
+	virtual double calcGradient(RealVector& gradient, RealVector wx, blas::matrix_row<RealMatrix> const& alpha, double C, unsigned int y)
 	{
 		double violation = 0.0;
 		for (std::size_t c=0; c<wx.size(); c++)
@@ -747,7 +747,7 @@ protected:
 	}
 
 	/// \brief Solve the sub-problem posed by a single training example.
-	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu)
+	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, blas::matrix_row<RealMatrix>& alpha, RealVector& mu)
 	{
 		const double qq = 0.5 * q;
 		double gain = 0.0;
@@ -825,7 +825,7 @@ public:
 
 protected:
 	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
-	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y)
+	virtual double calcGradient(RealVector& gradient, RealVector wx, blas::matrix_row<RealMatrix> const& alpha, double C, unsigned int y)
 	{
 		double violation = 0.0;
 		for (std::size_t c=0; c<m_classes; c++)
@@ -857,7 +857,7 @@ protected:
 	}
 
 	/// \brief Solve the sub-problem posed by a single training example.
-	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu)
+	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, blas::matrix_row<RealMatrix>& alpha, RealVector& mu)
 	{
 		const double ood = 1.0 / m_classes;
 		const double qq = (1.0 - ood) * q;
@@ -937,7 +937,7 @@ public:
 
 protected:
 	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
-	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y)
+	virtual double calcGradient(RealVector& gradient, RealVector wx, blas::matrix_row<RealMatrix> const& alpha, double C, unsigned int y)
 	{
 		double violation = 0.0;
 		for (std::size_t c=0; c<m_classes; c++)
@@ -963,7 +963,7 @@ protected:
 	}
 
 	/// \brief Solve the sub-problem posed by a single training example.
-	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu)
+	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, blas::matrix_row<RealMatrix>& alpha, RealVector& mu)
 	{
 		const double ood = 1.0 / m_classes;
 		const double qq = (1.0 - ood) * q;
@@ -1049,7 +1049,7 @@ public:
 
 protected:
 	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
-	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y)
+	virtual double calcGradient(RealVector& gradient, RealVector wx, blas::matrix_row<RealMatrix> const& alpha, double C, unsigned int y)
 	{
 		for (std::size_t c=0; c<m_classes; c++) gradient(c) = 0.0;
 		const double g = 1.0 - wx(y);
@@ -1080,7 +1080,7 @@ protected:
 	}
 
 	/// \brief Solve the sub-problem posed by a single training example.
-	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu)
+	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, blas::matrix_row<RealMatrix>& alpha, RealVector& mu)
 	{
 		const double ood = 1.0 / m_classes;
 		const double qq = (1.0 - ood) * q;
@@ -1138,7 +1138,7 @@ public:
 
 protected:
 	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
-	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y)
+	virtual double calcGradient(RealVector& gradient, RealVector wx, blas::matrix_row<RealMatrix> const& alpha, double C, unsigned int y)
 	{
 		if (alpha(m_classes) < C)
 		{
@@ -1193,7 +1193,7 @@ protected:
 	}
 
 	/// \brief Solve the sub-problem posed by a single training example.
-	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu)
+	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, blas::matrix_row<RealMatrix>& alpha, RealVector& mu)
 	{
 		const double qq = 0.5 * q;
 		double gain = 0.0;
@@ -1335,7 +1335,7 @@ public:
 
 protected:
 	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
-	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y)
+	virtual double calcGradient(RealVector& gradient, RealVector wx, blas::matrix_row<RealMatrix> const& alpha, double C, unsigned int y)
 	{
 		if (alpha(m_classes) < C)
 		{
@@ -1389,7 +1389,7 @@ protected:
 	}
 
 	/// \brief Solve the sub-problem posed by a single training example.
-	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu)
+	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, blas::matrix_row<RealMatrix>& alpha, RealVector& mu)
 	{
 		const double ood = 1.0 / m_classes;
 		const double qq = (1.0 - ood) * q;
@@ -1534,7 +1534,7 @@ public:
 
 protected:
 	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
-	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y)
+	virtual double calcGradient(RealVector& gradient, RealVector wx, blas::matrix_row<RealMatrix> const& alpha, double C, unsigned int y)
 	{
 		if (alpha(m_classes) < C)
 		{
@@ -1575,7 +1575,7 @@ protected:
 	}
 
 	/// \brief Solve the sub-problem posed by a single training example.
-	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu)
+	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, blas::matrix_row<RealMatrix>& alpha, RealVector& mu)
 	{
 		const double ood = 1.0 / m_classes;
 		const double qq = (1.0 - ood) * q;
@@ -1738,7 +1738,7 @@ public:
 
 protected:
 	/// \brief Compute the gradient from the inner products of the weight vectors with the current sample.
-	virtual double calcGradient(RealVector& gradient, RealVector wx, RealMatrixRow const& alpha, double C, unsigned int y)
+	virtual double calcGradient(RealVector& gradient, RealVector wx, blas::matrix_row<RealMatrix> const& alpha, double C, unsigned int y)
 	{
 		double violation = 0.0;
 		for (std::size_t c=0; c<m_classes; c++)
@@ -1764,7 +1764,7 @@ protected:
 	}
 
 	/// \brief Solve the sub-problem posed by a single training example.
-	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, RealMatrixRow& alpha, RealVector& mu)
+	virtual double solveSub(double epsilon, RealVector gradient, double q, double C, unsigned int y, blas::matrix_row<RealMatrix>& alpha, RealVector& mu)
 	{
 		const double ood = 1.0 / m_classes;
 		const double qq = (1.0 - ood) * q;

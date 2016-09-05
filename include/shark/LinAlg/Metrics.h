@@ -219,7 +219,7 @@ namespace detail{
 			}
 		}else{
 			for(std::size_t i = 0; i != sizeY; ++i){
-				matrix_column<Result> distanceCol = column(distances,i);
+				auto distanceCol = column(distances,i);
 				distanceSqrBlockVector(
 					X,row(Y,i),distanceCol
 				);

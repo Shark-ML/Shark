@@ -410,50 +410,50 @@ public:
 	explicit vector_addition (
 		expression_closure1_type e1, 
 		expression_closure2_type e2
-	):m_expression1(e1),m_expression2(e2){
+	):m_lhs(e1),m_rhs(e2){
 		SIZE_CHECK(e1.size() == e2.size());
 	}
 
 	// Accessors
 	size_type size() const {
-		return m_expression1.size();
+		return m_lhs.size();
 	}
 
 	// Expression accessors
-	expression_closure1_type const& expression1() const {
-		return m_expression1;
+	expression_closure1_type const& lhs() const {
+		return m_lhs;
 	}
-	expression_closure2_type const& expression2() const {
-		return m_expression2;
+	expression_closure2_type const& rhs() const {
+		return m_rhs;
 	}
 
 	// Element access
 	const_reference operator() (index_type i) const {
 		SIZE_CHECK(i < size());
-		return m_expression1(i) + m_expression2(i);
+		return m_lhs(i) + m_rhs(i);
 	}
 
 	const_reference operator[] (index_type i) const {
 		SIZE_CHECK(i < size());
-		return m_expression1(i) + m_expression2(i);
+		return m_lhs(i) + m_rhs(i);
 	}
 	
 	//computation kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		assign(x,alpha*m_expression1);
-		plus_assign(x,alpha*m_expression2);
+		assign(x,alpha*m_lhs);
+		plus_assign(x,alpha*m_rhs);
 	}
 	template<class VecX>
 	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		plus_assign(x,alpha*m_expression1);
-		plus_assign(x,alpha*m_expression2);
+		plus_assign(x,alpha*m_lhs);
+		plus_assign(x,alpha*m_rhs);
 	}
 	
 	template<class VecX>
 	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		minus_assign(x,alpha*m_expression1);
-		minus_assign(x,alpha*m_expression2);
+		minus_assign(x,alpha*m_lhs);
+		minus_assign(x,alpha*m_rhs);
 	}
 
 	// Iterator types
@@ -466,20 +466,20 @@ public:
 
 	const_iterator begin () const {
 		return const_iterator(functor_type(),
-			m_expression1.begin(),m_expression1.end(),
-			m_expression2.begin(),m_expression2.end()
+			m_lhs.begin(),m_lhs.end(),
+			m_rhs.begin(),m_rhs.end()
 		);
 	}
 	const_iterator end() const {
 		return const_iterator(functor_type(),
-			m_expression1.end(),m_expression1.end(),
-			m_expression2.end(),m_expression2.end()
+			m_lhs.end(),m_lhs.end(),
+			m_rhs.end(),m_rhs.end()
 		);
 	}
 
 private:
-	expression_closure1_type m_expression1;
-	expression_closure2_type m_expression2;
+	expression_closure1_type m_lhs;
+	expression_closure2_type m_rhs;
 };
 
 ///\brief Adds two vectors
@@ -552,8 +552,8 @@ template<class E1, class E2, class F>
 class vector_binary:
 	public vector_expression<vector_binary<E1,E2, F> > {
 	typedef vector_binary<E1,E2, F> self_type;
-	typedef E1 const expression1_type;
-	typedef E2 const expression2_type;
+	typedef E1 const lhs_type;
+	typedef E2 const rhs_type;
 public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
@@ -582,32 +582,47 @@ public:
 		expression_closure1_type e1, 
 		expression_closure2_type e2,
 		F functor
-	):m_expression1(e1),m_expression2(e2), m_functor(functor) {
+	):m_lhs(e1),m_rhs(e2), m_functor(functor) {
 		SIZE_CHECK(e1.size() == e2.size());
 	}
 
 	// Accessors
 	size_type size() const {
-		return m_expression1.size ();
+		return m_lhs.size ();
 	}
 
 	// Expression accessors
-	expression_closure1_type const& expression1() const {
-		return m_expression1;
+	expression_closure1_type const& lhs() const {
+		return m_lhs;
 	}
-	expression_closure2_type const& expression2() const {
-		return m_expression2;
+	expression_closure2_type const& rhs() const {
+		return m_rhs;
 	}
 
 	// Element access
 	const_reference operator() (index_type i) const {
 		SIZE_CHECK(i < size());
-		return m_functor(m_expression1(i),m_expression2(i));
+		return m_functor(m_lhs(i),m_rhs(i));
 	}
 
 	const_reference operator[] (index_type i) const {
 		SIZE_CHECK(i < size());
-		return m_functor(m_expression1(i),m_expression2(i));
+		return m_functor(m_lhs(i),m_rhs(i));
+	}
+	
+	template<class VecX>
+	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+		x().clear();
+		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), alpha);
+	}
+	template<class VecX>
+	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), alpha);
+	}
+	
+	template<class VecX>
+	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), -alpha);
 	}
 
 	// Iterator types
@@ -623,21 +638,33 @@ public:
 
 	const_iterator begin () const {
 		return const_iterator (m_functor,
-			m_expression1.begin(),m_expression1.end(),
-			m_expression2.begin(),m_expression2.end()
+			m_lhs.begin(),m_lhs.end(),
+			m_rhs.begin(),m_rhs.end()
 		);
 	}
 	const_iterator end() const {
 		return const_iterator (m_functor,
-			m_expression1.end(),m_expression1.end(),
-			m_expression2.end(),m_expression2.end()
+			m_lhs.end(),m_lhs.end(),
+			m_rhs.end(),m_rhs.end()
 		);
 	}
 
 private:
-	expression_closure1_type m_expression1;
-	expression_closure2_type m_expression2;
+	expression_closure1_type m_lhs;
+	expression_closure2_type m_rhs;
 	F m_functor;
+
+	template<class VecX, class LHS, class RHS>
+	void plus_assign_to(
+		vector_expression<VecX>& x,
+		vector_expression<LHS> const& lhs, vector_expression<RHS> const& rhs,
+		scalar_type alpha
+	)const{
+		//we know that lhs and rhs are elementwise expressions so we can now create the elementwise expression and assign it.
+		vector_binary<LHS,RHS, F> e(lhs(),rhs(), m_functor);
+		vector_scalar_multiply<vector_binary<LHS,RHS,F> > e1(e,alpha);
+		plus_assign(x,e);
+	}
 };
 
 #define SHARK_BINARY_VECTOR_EXPRESSION(name, F)\
@@ -678,7 +705,7 @@ typename E::value_type
 sum(const vector_expression<E> &e) {
 	typedef typename E::value_type value_type;
 	vector_fold<scalar_binary_plus<value_type, value_type> > kernel;
-	return kernel(e,value_type());
+	return kernel(eval_block(e),value_type());
 }
 
 /// \brief max v = max_i v_i
@@ -687,7 +714,8 @@ typename E::value_type
 max(const vector_expression<E> &e) {
 	typedef typename E::value_type value_type;
 	vector_fold<scalar_binary_max<value_type, value_type> > kernel;
-	return kernel(e,e()(0));
+	auto const& elem_result = eval_block(e);
+	return kernel(elem_result,elem_result(0));
 }
 
 /// \brief min v = min_i v_i
@@ -696,14 +724,16 @@ typename E::value_type
 min(const vector_expression<E> &e) {
 	typedef typename E::value_type value_type;
 	vector_fold<scalar_binary_min<value_type, value_type> > kernel;
-	return kernel(e,e()(0));
+	auto const& elem_result = eval_block(e);
+	return kernel(elem_result,elem_result(0));
 }
 
 /// \brief arg_max v = arg max_i v_i
 template<class E>
 std::size_t arg_max(const vector_expression<E> &e) {
 	SIZE_CHECK(e().size() > 0);
-	return std::max_element(e().begin(),e().end()).index();
+	auto const& elem_result = eval_block(e);
+	return std::max_element(elem_result.begin(),elem_result.end()).index();
 }
 
 /// \brief arg_min v = arg min_i v_i

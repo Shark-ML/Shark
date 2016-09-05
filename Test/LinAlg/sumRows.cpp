@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_sum_rows){
 
 	//test implementation
 	for(std::size_t i = 0; i != rows; ++i){
-		testResult+=row(A,i);
+		noalias(testResult) += row(A,i);
 	}
 	
 	//sum_rows with row major argument

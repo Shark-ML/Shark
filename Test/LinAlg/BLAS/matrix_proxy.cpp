@@ -274,15 +274,15 @@ BOOST_AUTO_TEST_CASE( LinAlg_Dense_column){
 		checkDenseVectorEqual(column(denseData,c),vecTest);
 		blas::matrix<double> newData(Dimensions1,Dimensions2,0);
 		blas::matrix<double,blas::column_major> newDataColMajor(Dimensions1,Dimensions2,0);
-		blas::matrix_column<blas::matrix<double> > columnTest = column(newData,c);
-		blas::matrix_column<blas::matrix<double,blas::column_major> > columnTestColMajor = column(newDataColMajor,c);
+		auto columnTest = column(newData,c);
+		auto columnTestColMajor = column(newDataColMajor,c);
 		checkDenseVectorAssignment(columnTest,vecTest);
 		checkDenseVectorAssignment(columnTestColMajor,vecTest);
 		
 		{
 			columnTest=vecTest;
 			blas::matrix<double> newData2(Dimensions1,Dimensions2,0);
-			blas::matrix_column<blas::matrix<double> > columnTest2 = column(newData2,c);
+			auto columnTest2 = column(newData2,c);
 			columnTest2=columnTest;
 			for(std::size_t i = 0; i != Dimensions1; ++i){
 				BOOST_CHECK_EQUAL(newData(i,c),vecTest(i));

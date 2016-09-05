@@ -34,12 +34,6 @@
 
 namespace shark {
 namespace blas{
-
-/**
-* \ingroup shark_globals
-* 
-* @{
-*/
 	
 ///\brief partitions the matrix in 4 blocks defined by one splitting point (i,j).
 ///
@@ -99,88 +93,6 @@ private:
 	matrix_range<Matrix> m_lowerLeft;
 	matrix_range<Matrix> m_lowerRight;
 };
-	
-//////////////////////////////////////MATRIX BLOCKS////////////////////////////////////////
 
-/// \brief Returns the ith row of an upper triangular matrix excluding the elements right of the diagonal
-template<class Matrix>
-vector_range<matrix_row<Matrix const> >triangularRow(
-	matrix_expression<Matrix> const& mat,
-	std::size_t i
-){
-	matrix_row<Matrix const> matRow = row(mat(),i);
-	return subrange(matRow,0,i);
-}
-/// \brief Returns the ith row of an upper triangular matrix excluding the elements right of the diagonal
-template<class Matrix>
-temporary_proxy< vector_range<matrix_row<Matrix> > >
-triangularRow(
-	matrix_expression<Matrix>& mat,
-	std::size_t i
-){
-	matrix_row<Matrix> matRow = row(mat(),i);
-	return subrange(matRow,0,i);
-}
-/// \brief Returns the elements in the ith row of a lower triangular matrix left of the diagonal 
-template<class Matrix>
-vector_range<matrix_row<Matrix const> > unitTriangularRow(
-	matrix_expression<Matrix> const& mat,
-	std::size_t i
-){
-	matrix_row<Matrix const> matRow = row(mat(),i);
-	return subrange(matRow,0,i+1);
-}
-/// \brief Returns the elements in the ith row of a lower triangular matrix left of the diagonal 
-template<class Matrix>
-temporary_proxy< vector_range<matrix_row<Matrix> > >
-unitTriangularRow(
-	matrix_expression<Matrix>& mat,
-	std::size_t i
-){
-	matrix_row<Matrix> matRow = row(mat(),i);
-	return subrange(matRow,0,i+1);
-}
-
-
-
-/// \brief Returns the elements in the i-th column of the matrix below the diagonal 
-template<class Matrix>
-vector_range<matrix_column<Matrix const> > unitTriangularColumn(
-	matrix_expression<Matrix> const& mat,
-	std::size_t i
-){
-	matrix_column<Matrix const> col = column(mat(),i);
-	return subrange(col,i+1,mat().size2());
-}
-/// \brief Returns the elements in the i-th column of the matrix below the diagonal 
-template<class Matrix>
-temporary_proxy< vector_range<matrix_column<Matrix> > >
-unitTriangularColumn(
-	matrix_expression<Matrix>& mat,
-	std::size_t i
-){
-	matrix_column<Matrix> col = column(mat(),i);
-	return subrange(col,i+1,mat().size2());
-}
-
-/// \brief Returns the elements in the i-th column of the matrix excluding the zero elements
-template<class Matrix>
-vector_range<matrix_column<Matrix const> > triangularColumn(
-	matrix_expression<Matrix> const& mat,
-	std::size_t i
-){
-	matrix_column<Matrix const> col = column(mat(),i);
-	return subrange(col,i,mat().size2());
-}
-/// \brief Returns the elements in the i-th column of the matrix excluding the zero elements
-template<class Matrix>
-vector_range<matrix_column<Matrix> > triangularColumn(
-	matrix_expression<Matrix>& mat,
-	std::size_t i
-){
-	matrix_column<Matrix> col = column(mat(),i);
-	return subrange(col,i,mat().size2());
-}
-/** @}*/
 }}
 #endif
