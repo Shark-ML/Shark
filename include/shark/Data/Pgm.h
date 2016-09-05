@@ -35,10 +35,7 @@
 #ifndef SHARK_DATA_IMPORT_PGM_H
 #define SHARK_DATA_IMPORT_PGM_H
 
-#include <iostream>
-#include <exception>
-
-#include <stdio.h>
+#include <fstream>
 
 #include <boost/format.hpp>
 #include <boost/filesystem.hpp>
@@ -51,56 +48,35 @@
 namespace shark {
 
 namespace detail {
-void importPGM( std::string const& fileName, unsigned char ** ppData, int & sx, int & sy )
+void importPGM( std::string const& fileName, std::vector<unsigned char>& ppData, std::size_t& sx, std::size_t& sy )
 {
-	FILE * fp = fopen(fileName.c_str(), "rb");
+	std::ifstream file(fileName.c_str(), std::ios::binary);
 	
-	if( !fp ) throw SHARKEXCEPTION( "[importPGM] cannot open file: " + fileName);
-
-	char format[16];
-	const int nParamRead0 = fscanf(fp, "%s\n", (char *) &format);
-	if ( 0 == nParamRead0 ) throw SHARKEXCEPTION( "[importPGM] error reading file: " + fileName );
+	if( !file) throw SHARKEXCEPTION( "[importPGM] cannot open file: " + fileName);
 	
-	// Ignore comments
-	char tmpCharBuf[256];
-	fpos_t position;
-	fgetpos (fp, &position);
-	while ( true ) {
-		char *s = fgets( tmpCharBuf, 255, fp );
-		if (!s)  throw SHARKEXCEPTION( "[importPGM] error reading file: " + fileName );
-		const int cnt = strncmp( tmpCharBuf, "#", 1 );
-		if (0 != cnt) {
-			fsetpos(fp, &position);
-			break;
-		} else {
-			fgetpos (fp, &position);
-		}
+	std::string id;
+	std::size_t nGrayValues = 0;
+	file>> id;
+	if(id != "P5")
+		throw SHARKEXCEPTION( "[importPGM] " + fileName+ "is not a pgm");
+	//ignore comments
+	file >> std::ws;//skip white space
+	while(file.peek() == '#'){
+		file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	}
+	file >> sx >> sy >> nGrayValues;
+	
+	if(nGrayValues > 255){
+		throw SHARKEXCEPTION( "[importPGM] " + fileName+ "unsupported format");
 	}
 	
-	int nGrayValues;
-	const int nParamRead1 = fscanf( fp, "%d %d\n", &sx, &sy );
-	const int nParamRead2 = fscanf( fp, "%d\n", &nGrayValues );
+	if(!file)
+		throw SHARKEXCEPTION( "[importPGM] error reading file: " + fileName );
 	
-	if ( (nParamRead1 != 2) || (nParamRead2 != 1) ) {
-		fclose(fp);
-		throw SHARKEXCEPTION( "[importPGM] file corrupted or format not recognized in file: " + fileName );
-	} else {
-		if ( (0 == strncmp("P5", format, 2)) && ( (255 == nGrayValues) || (256 == nGrayValues) ) ) {
-			//delete[] *ppData;
-			*ppData = new unsigned char[sx*sy];
-			fseek(fp, -sx*sy*sizeof(unsigned char), SEEK_END);
-			
-			const int readcount = (int)( fread(*ppData, sx*sizeof(unsigned char), sy, fp));
-			if (sy != readcount) {
-				fclose(fp);
-				throw SHARKEXCEPTION( "[importPGM] file corrupted or format not recognized in file: " + fileName );
-			}
-		} else 	{
-			fclose(fp);
-			throw SHARKEXCEPTION( "[importPGM] file corrupted or format not recognized in file: " + fileName );
-		}
-	}
-	fclose(fp);
+	ppData.resize(sx*sy);
+	file.read((char*)ppData.data(),sx*sy);
+	if(!file)
+		throw SHARKEXCEPTION( "[importPGM] error reading file: " + fileName );
 }
 
 /**
@@ -115,19 +91,13 @@ void importPGM( std::string const& fileName, unsigned char ** ppData, int & sx, 
 /// \param  pData      unsigned char pointer to the data
 /// \param  sx         Width of image
 /// \param  sy         Height of image
-void writePGM( std::string const& fileName, unsigned char const* pData, std::size_t sx, std::size_t sy )
+void writePGM( std::string const& fileName, std::vector<unsigned char> const& data, std::size_t sx, std::size_t sy )
 {
-	FILE* fp = fopen(fileName.c_str(), "wb");
-	if( !fp ) throw SHARKEXCEPTION( "[writePGM] cannot open file: " + fileName);
+	std::ofstream file(fileName.c_str(), std::ios::binary);
+	if( !file ) throw SHARKEXCEPTION( "[writePGM] cannot open file: " + fileName);
 
-	fprintf(fp, "P5\n");
-	fprintf(fp, "%d %d\n255\n", (int)sx, (int)sy);
-	
-	if( 1 != fwrite(pData, sx*sy, 1, fp) ) 	{
-		fclose(fp);
-		throw SHARKEXCEPTION( "[writePGM] can not write data to file: "+ fileName );
-	}
-	fclose(fp);
+	file<<"P5\n"<<sx<<" "<<sy<<"\n"<<255<<"\n";
+	file.write((char*)data.data(),sx*sy);
 }
 } // end namespace detail
 
@@ -139,15 +109,10 @@ void writePGM( std::string const& fileName, unsigned char const* pData, std::siz
 /// \param  sy         Height of imported image
 template <class T>
 void importPGM( std::string const& fileName, T& data, std::size_t& sx, std::size_t& sy ) {
-	unsigned char *pData;
-	int isx;
-	int isy;
-	detail::importPGM(fileName, &pData, isx, isy);
-	sx = std::size_t(isx);
-	sy = std::size_t(isy);
+	std::vector<unsigned char> rawData;
+	detail::importPGM(fileName, rawData, sx, sy);
 	data.resize(sx*sy);
-	std::copy(pData, pData + sx*sy, data.begin());
-	delete [] pData;
+	std::copy(rawData.begin(), rawData.end(), data.begin());
 }
 
 /// \brief Export a PGM image to file
@@ -159,20 +124,20 @@ void importPGM( std::string const& fileName, T& data, std::size_t& sx, std::size
 /// \param  normalize  Adjust values to [0,255], default false
 template <class T>
 void exportPGM(std::string const& fileName, T const& data, std::size_t sx, std::size_t sy, bool normalize = false) {
-	unsigned i = 0;
-	unsigned char *pData = new unsigned char[data.size()];
+	SIZE_CHECK(sx*sy == data.size());
+	std::vector<unsigned char> rawData(data.size());
 	typename T::const_iterator it = data.begin();
+	std::size_t i = 0;
 	if(normalize) {
 		double lb = *std::min_element(data.begin(),data.end());
 		double ub = *std::max_element(data.begin(), data.end());
 		for( it = data.begin() ; it != data.end(); ++it, ++i )
-			pData[i] = (unsigned char)( (*it - lb) / (ub - lb) * 255 );
+			rawData[i] = (unsigned char)( (*it - lb) / (ub - lb) * 255 );
 	} else {
 		for( it = data.begin() ; it != data.end(); ++it, ++i )
-			pData[i] = (unsigned char)( *it );
+			rawData[i] = (unsigned char)( *it );
 	}
-	detail::writePGM(fileName, pData, sx, sy);
-	delete [] pData;
+	detail::writePGM(fileName, rawData, sx, sy);
 }
 
 /// \brief Exports a set of filters as a grid image
