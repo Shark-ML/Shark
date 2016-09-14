@@ -28,7 +28,7 @@
 #ifndef SHARK_LINALG_BLAS_MATRIX_HPP
 #define SHARK_LINALG_BLAS_MATRIX_HPP
 
-#include "assignment.hpp"
+#include "detail/matrix_proxy_classes.hpp"
 #include <array>
 #include <initializer_list>
 #include <boost/serialization/collection_size_type.hpp>

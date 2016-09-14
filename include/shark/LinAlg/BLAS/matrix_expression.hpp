@@ -28,8 +28,7 @@
 #ifndef SHARK_LINALG_BLAS_MATRIX_EXPRESSION_HPP
 #define SHARK_LINALG_BLAS_MATRIX_EXPRESSION_HPP
 
-#include "detail/matrix_expression_classes.hpp"
-#include "detail/matrix_expression_optimizers.hpp"
+#include "detail/expression_optimizers.hpp"
 #include <boost/utility/enable_if.hpp>
 
 

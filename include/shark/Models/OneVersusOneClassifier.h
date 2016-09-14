@@ -87,7 +87,7 @@ public:
 		for (std::size_t i=0; i<m_binary.size(); i++)
 		{
 			std::size_t n = m_binary[i]->numberOfParameters();
-			RealVectorRange(ret, Range(used, used + n)) = m_binary[i]->parameterVector();
+			noalias(subrange(ret, used, used + n)) = m_binary[i]->parameterVector();
 			used += n;
 		}
 		return ret;
@@ -99,7 +99,7 @@ public:
 		for (std::size_t i=0; i<m_binary.size(); i++)
 		{
 			std::size_t n = m_binary[i]->numberOfParameters();
-			m_binary[i]->setParameterVector(ConstRealVectorRange(newParameters, Range(used, used + n)));
+			m_binary[i]->setParameterVector(subrange(newParameters, used, used + n));
 			used += n;
 		}
 		SHARK_CHECK(used == newParameters.size(),

@@ -28,7 +28,7 @@
 #ifndef SHARK_LINALG_BLAS_VECTOR_HPP
 #define SHARK_LINALG_BLAS_VECTOR_HPP
 
-#include "vector_proxy.hpp"
+#include "detail/vector_proxy_classes.hpp"
 #include <boost/container/vector.hpp>
 #include <array>
 #include <initializer_list>
@@ -65,7 +65,7 @@ public:
 	typedef index_type const* const_index_pointer;
 	typedef index_type index_pointer;
 
-	typedef const vector_reference<const self_type> const_closure_type;
+	typedef vector_reference<const self_type> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
 	typedef self_type vector_temporary_type;
 	typedef dense_tag storage_category;

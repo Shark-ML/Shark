@@ -33,7 +33,7 @@
 #ifndef SHARK_LINALG_BLAS_MATRIX_PROXY_HPP
 #define SHARK_LINALG_BLAS_MATRIX_PROXY_HPP
 
-#include "detail/matrix_expression_optimizers.hpp"
+#include "detail/expression_optimizers.hpp"
 
 namespace shark {
 namespace blas {
@@ -115,7 +115,7 @@ auto column(temporary_proxy<M> expression, typename M::index_type j) -> decltype
 template<class M>
 matrix_vector_range<typename const_expression<M>::type > diag(matrix_expression<M> const& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
-	matrix_vector_range<typename const_expression<M>::type > diagonal(mat(),range(0,mat().size1()),range(0,mat().size1()));
+	matrix_vector_range<typename const_expression<M>::type > diagonal(mat(),0,mat().size1(),0,mat().size1());
 	return diagonal;
 }
 
@@ -131,7 +131,7 @@ matrix_vector_range<typename const_expression<M>::type > diag(matrix_expression<
 template<class M>
 temporary_proxy< matrix_vector_range<M> > diag(matrix_expression<M>& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
-	matrix_vector_range<M> diagonal(mat(),range(0,mat().size1()),range(0,mat().size1()));
+	matrix_vector_range<M> diagonal(mat(),0,mat().size1(),0,mat().size1());
 	return diagonal;
 }
 

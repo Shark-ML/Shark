@@ -125,7 +125,7 @@ public:
 	{
 		size_t kp = m_kernel->numberOfParameters();
 		RealVector ret(kp + 1);
-		RealVectorRange(ret, Range(0, kp)) = m_kernel->parameterVector();
+		noalias(subrange(ret, 0, kp)) = m_kernel->parameterVector();
 		ret(kp) = m_nu;
 		return ret;
 	}
@@ -135,7 +135,7 @@ public:
 	{
 		size_t kp = m_kernel->numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == kp + 1);
-		m_kernel->setParameterVector(ConstRealVectorRange(newParameters, Range(0, kp)));
+		m_kernel->setParameterVector(subrange(newParameters, 0, kp));
 		setNu(newParameters(kp));
 	}
 

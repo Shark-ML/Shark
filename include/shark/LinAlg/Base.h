@@ -81,7 +81,6 @@ namespace shark{
         SHARK_VECTOR_MATRIX_TYPEDEFS(bool, Bool);
 #undef SHARK_VECTOR_MATRIX_TYPEDEFS
 
-typedef blas::range Range;
 typedef blas::permutation_matrix PermutationMatrix;
 
 ///Type of Data sequences.

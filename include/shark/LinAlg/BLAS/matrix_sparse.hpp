@@ -28,7 +28,8 @@
 #ifndef SHARK_LINALG_BLAS_MATRIX_SPARSE_HPP
 #define SHARK_LINALG_BLAS_MATRIX_SPARSE_HPP
 
-#include "matrix_proxy.hpp"
+#include "assignment.hpp"
+#include "detail/matrix_proxy_classes.hpp"
 
 namespace shark {
 namespace blas {

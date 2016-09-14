@@ -446,7 +446,7 @@ void assign(
 	row_major, row_major,TagM, TagE
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
-		matrix_row<M> rowM(m(),i);
+		auto rowM = row(m,i);
 		kernels::assign<F>(rowM,row(e,i));
 	}
 }

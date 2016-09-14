@@ -32,7 +32,6 @@
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMM_HPP
 
 #include <shark/LinAlg/BLAS/kernels/trmv.hpp>
-#include "../../matrix_proxy.hpp"
 
 namespace shark { namespace blas { namespace bindings {
 

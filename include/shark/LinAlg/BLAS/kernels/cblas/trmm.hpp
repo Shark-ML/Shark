@@ -33,8 +33,6 @@
 #define SHARK_LINALG_BLAS_KERNELS_CBLAS_TRMM_HPP
 
 #include "cblas_inc.hpp"
-#include "../../matrix_proxy.hpp"
-#include "../../vector_expression.hpp"
 #include <boost/mpl/bool.hpp>
 
 namespace shark {namespace blas {namespace bindings {

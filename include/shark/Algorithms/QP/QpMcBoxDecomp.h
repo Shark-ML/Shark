@@ -143,6 +143,10 @@ public:
 		}
 		return solutionMatrix;
 	}
+	
+	double alpha(std::size_t i, std::size_t p)const{
+		return m_alpha(m_cardP * i + p);
+	}
 	/// \brief Return the gradient of the solution.
 	RealMatrix solutionGradient() const{
 		RealMatrix solutionGradientMatrix(m_numVariables,m_cardP,0);
@@ -327,7 +331,7 @@ public:
 		return true;
 	}
 
-	///Activate all m_numVariables
+	///Activate all variables
 	void unshrink()
 	{
 		if (m_activeVar == m_numVariables) return;
@@ -683,10 +687,21 @@ public:
 						}
 					}
 				}
+				
+				//~ for (std::size_t i=0; i<numExamples; i++){
+					//~ unsigned int y = m_problem->label(i);
+					//~ for (std::size_t p=0; p<cardP; p++){
+						//~ double a = m_problem->alpha(i,p);
+						//~ if(a == 0) continue;
+						//~ typename QpSparseArray<QpFloatType>::Row const& row = nu.row(y * cardP + p);
+						//~ for (std::size_t b=0; b<row.size; b++) 
+							//~ grad(row.entry[b].index) -= row.entry[b].value * a;
+					//~ }
+				//~ }
 
 				if (sumToZero)
 				{
-					// project the m_gradient
+					// project the gradient
 					grad -= sum(grad) / classes;
 				}
 

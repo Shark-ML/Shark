@@ -34,8 +34,6 @@
 #include "../kernels/gemm.hpp"
 #include "../kernels/trmm.hpp"
 #include "../kernels/sum_rows.hpp"
-#include "../vector_expression.hpp"
-#include "../matrix_proxy.hpp"
 #include <type_traits>
 
 namespace shark {
@@ -115,13 +113,6 @@ public:
 		minus_assign(X,alpha * m_lhs);
 		minus_assign(X,alpha * m_rhs);
 	}
-
-	// Iterator types
-private:
-	typedef typename E1::const_row_iterator const_row_iterator1_type;
-	typedef typename E1::const_column_iterator const_row_column_iterator_type;
-	typedef typename E2::const_row_iterator const_column_iterator1_type;
-	typedef typename E2::const_column_iterator const_column_iterator2_type;
 
 public:
 	typedef binary_transform_iterator<

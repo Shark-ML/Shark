@@ -1838,7 +1838,7 @@ printf(")\n");
 		double mu;
 
 		// compute the inactive gradient components (quadratic time complexity)
-		RealVectorRange(gradient, Range(activeVar, variables)) = ConstRealVectorRange(linear, Range(activeVar, variables));
+		subrange(gradient, activeVar, variables) = subrange(linear, activeVar, variables);
 // 		for (v=activeVar; v<variables; v++)
 // 		{
 // 			gradient(v) = linear(v);

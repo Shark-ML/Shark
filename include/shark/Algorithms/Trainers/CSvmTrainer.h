@@ -57,6 +57,7 @@
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 
+
 namespace shark {
 
 

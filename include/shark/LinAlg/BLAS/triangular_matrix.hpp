@@ -28,9 +28,9 @@
 #ifndef SHARK_LINALG_BLAS_TRIANGULAR_MATRIX_HPP
 #define SHARK_LINALG_BLAS_TRIANGULAR_MATRIX_HPP
 
-#include "matrix_proxy.hpp"
-#include "vector_proxy.hpp"
-#include "kernels/matrix_assign.hpp"
+
+#include "assignment.hpp"
+#include "detail/matrix_proxy_classes.hpp"
 
 #include <boost/serialization/collection_size_type.hpp>
 #include <boost/serialization/array.hpp>

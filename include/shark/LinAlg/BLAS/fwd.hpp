@@ -31,9 +31,6 @@
 namespace shark {
 namespace blas {
 
-// Storage types
-struct range;
-
 // Expression types
 
 template<class E>
@@ -49,16 +46,6 @@ template<class C>
 struct matrix_container;
 template<class E>
 class matrix_reference;
-
-template<class V>
-class vector_range;
-
-template<class M>
-class matrix_row;
-template<class M>
-class matrix_vector_range;
-template<class M>
-class matrix_range;
 
 
 // Sparse vectors

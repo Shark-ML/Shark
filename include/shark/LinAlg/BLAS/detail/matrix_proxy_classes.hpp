@@ -684,25 +684,27 @@ public:
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
-	matrix_vector_range(matrix_closure_type const& expression, range const&r1, range const&r2):
-		m_expression(expression), m_range1(r1), m_range2(r2) {
-		SIZE_CHECK (m_range1.start() <= expression.size1());
-		SIZE_CHECK (m_range1.start() + m_range1.size () <= expression.size1());
-		SIZE_CHECK (m_range2.start() <= expression.size2());
-		SIZE_CHECK (m_range2.start() + m_range2.size() <= expression.size2());
-		SIZE_CHECK (m_range1.size() == m_range2.size());
+	matrix_vector_range(matrix_closure_type expression, size_type start1, size_type end1, size_type start2, size_type end2)
+	:m_expression(expression), m_start1(start1), m_start2(start2), m_size(end1-start1){
+		SIZE_CHECK(start1 <= expression.size1());
+		SIZE_CHECK(end1 <= expression.size1());
+		SIZE_CHECK(start2 <= expression.size2());
+		SIZE_CHECK(end2 <= expression.size2());
+		SIZE_CHECK(m_size == end2-start2);
 	}
 	
 	template<class E>
 	matrix_vector_range(matrix_vector_range<E> const& other)
-	:m_expression(other.expression()),m_range1(other.range1()),m_range2(other.range2()){}
-
+	: m_expression(other.expression())
+	, m_start1(other.start1())
+	, m_start2(other.start2()), m_size(other.size()){}
+	
 	// Accessors
 	size_type start1() const {
-		return m_range1.start();
+		return m_start1;
 	}
 	size_type start2() const {
-		return m_range2.start();
+		return m_start2;
 	}
 	
 	const matrix_closure_type& expression() const {
@@ -712,20 +714,13 @@ public:
 		return m_expression;
 	}
 	
-	range const& range1() const{
-		return m_range1;
-	}
-	range const& range2() const{
-		return m_range2;
-	}
-	
 	// ---------
 	// Dense low level interface
 	// ---------
 	
 	///\brief Returns the size of the vector
 	size_type size() const {
-		return m_range1.size();
+		return m_size;
 	}
 	
 	///\brief Returns the stride in memory between two elements
@@ -734,7 +729,7 @@ public:
 	}
 	
 	void set_element(size_type i,value_type t){
-		expression().set_element(m_range1(i),m_range2(i),t);
+		expression().set_element(start1()+i,start2()+i,t);
 	}
 
 	
@@ -752,7 +747,7 @@ public:
 
 	// Element access
 	reference operator()(index_type i) const {
-		return m_expression(m_range1(i), m_range2(i));
+		return m_expression(start1()+i,start2()+i);
 	}
 	reference operator [](index_type i) const {
 		return (*this)(i);
@@ -789,8 +784,9 @@ public:
 
 private:
 	matrix_closure_type m_expression;
-	range m_range1;
-	range m_range2;
+	size_type m_start1;
+	size_type m_start2;
+	size_type m_size;
 };
 
 // Matrix based range class
@@ -820,12 +816,14 @@ public:
 
 	// Construction and destruction
 
-	matrix_range(matrix_closure_type expression, range const&r1, range const&r2)
-	:m_expression(expression), m_range1(r1), m_range2(r2) {
-		SIZE_CHECK(r1.start() <= expression.size1());
-		SIZE_CHECK(r1.start() +r1.size() <= expression.size1());
-		SIZE_CHECK(r2.start() <= expression.size2());
-		SIZE_CHECK(r2.start() +r2.size() <= expression.size2());
+	matrix_range(matrix_closure_type expression, size_type start1, size_type end1, size_type start2, size_type end2)
+	:m_expression(expression), m_start1(start1), m_size1(end1-start1), m_start2(start2), m_size2(end2-start2){
+		SIZE_CHECK(start1 <= expression.size1());
+		SIZE_CHECK(end1 <= expression.size1());
+		SIZE_CHECK(start2 <= expression.size2());
+		SIZE_CHECK(end2 <= expression.size2());
+		SIZE_CHECK(start1 <= end1);
+		SIZE_CHECK(start2 <= end2);
 	}
 	
 	//conversion closure->const_closure
@@ -836,15 +834,15 @@ public:
 			boost::is_same<E,matrix_range>
 		>::type* dummy = 0
 	):m_expression(other.expression())
-	, m_range1(other.range1())
-	, m_range2(other.range2()){}
+	, m_start1(other.start1()), m_size1(other.size1())
+	, m_start2(other.start2()), m_size2(other.size2()){}
 		
 	// Accessors
 	size_type start1() const {
-		return m_range1.start();
+		return m_start1;
 	}
 	size_type start2() const {
-		return m_range2.start();
+		return m_start2;
 	}
 
 	matrix_closure_type expression() const {
@@ -854,24 +852,17 @@ public:
 		return m_expression;
 	}
 	
-	range const& range1() const{
-		return m_range1;
-	}
-	range const& range2() const{
-		return m_range2;
-	}
-	
 	// ---------
 	// Dense Low level interface
 	// ---------
 	
 	///\brief Returns the number of rows of the matrix.
 	size_type size1() const {
-		return m_range1.size();
+		return m_size1;
 	}
 	///\brief Returns the number of columns of the matrix.
 	size_type size2() const {
-		return m_range2.size();
+		return m_size2;
 	}
 	
 	///\brief Returns the stride in memory between two rows.
@@ -898,7 +889,7 @@ public:
 
 	// Element access
 	reference operator()(index_type i, index_type j)const{
-		return m_expression(m_range1(i), m_range2(j));
+		return m_expression(start1() +i, start2() + j);
 	}
 
 	// Assignment
@@ -990,8 +981,10 @@ public:
 	void reserve_column(size_type, size_type ){}
 private:
 	matrix_closure_type m_expression;
-	range m_range1;
-	range m_range2;
+	size_type m_start1;
+	size_type m_size1;
+	size_type m_start2;
+	size_type m_size2;
 };
 
 template<class T,class Orientation=row_major>

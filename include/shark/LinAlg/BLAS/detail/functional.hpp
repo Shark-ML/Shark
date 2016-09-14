@@ -723,59 +723,6 @@ private:
 	functor_type m_functor;
 };
 
-struct range {
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
-	typedef size_type value_type;
-	typedef value_type const_reference;
-	typedef const_reference reference;
-	typedef const value_type *const_pointer;
-	typedef value_type *pointer;
-
-	// Construction and destruction
-
-	range():m_start(0), m_size(0) {}
-
-	range(size_type start, size_type stop):m_start(start), m_size(stop - start) {
-		RANGE_CHECK(start <= stop);
-	}
-
-	size_type start() const {
-		return m_start;
-	}
-	size_type size() const {
-		return m_size;
-	}
-
-	// Random Access Container
-	size_type max_size() const {
-		return m_size;
-	}
-
-
-	bool empty() const {
-		return m_size == 0;
-	}
-	    
-	// Element access
-	const_reference operator()(size_type i) const {
-		RANGE_CHECK(i < m_size);
-		return m_start + i;
-	}
-
-	// Comparison
-	bool operator ==(range const& r) const {
-		return m_start == r.m_start && m_size == r.m_size;
-	}
-	bool operator !=(range const& r) const {
-		return !(*this == r);
-	}
-
-private:
-	size_type m_start;
-	size_type m_size;
-};
-
 }}
 
 #endif

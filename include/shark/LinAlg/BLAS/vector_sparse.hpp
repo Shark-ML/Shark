@@ -28,7 +28,8 @@
 #ifndef SHARK_LINALG_BLAS_VECTOR_SPARSE_HPP
 #define SHARK_LINALG_BLAS_VECTOR_SPARSE_HPP
 
-#include "vector_proxy.hpp"
+#include "assignment.hpp"
+#include "detail/vector_proxy_classes.hpp"
 #include <vector>
 
 namespace shark {

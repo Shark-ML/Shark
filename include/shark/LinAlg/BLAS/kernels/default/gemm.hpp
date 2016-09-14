@@ -32,8 +32,6 @@
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_GEMM_HPP
 
 #include "../gemv.hpp"
-#include "../../matrix.hpp"
-#include "../../matrix_proxy.hpp"
 #include "../../vector.hpp"
 #include <boost/mpl/bool.hpp>
 
@@ -69,7 +67,7 @@ void gemm_impl(
 	Tag1, Tag2
 ) {
 	for (std::size_t i = 0; i != e1().size1(); ++i) {
-		matrix_row<M> mat_row(m(),i);
+		auto mat_row = row(m,i);
 		kernels::gemv(trans(e2),row(e1,i),mat_row,alpha);
 	}
 }
@@ -119,7 +117,7 @@ void gemm_impl(
 ) {
 	typedef typename M::value_type value_type;
 	value_type zero = value_type();
-	vector<value_type> temporary(e2().size2(), zero);
+	typename vector_temporary<E1>::type temporary(e2().size2(), zero);
 	for (std::size_t i = 0; i != e1().size1(); ++i) {
 		kernels::gemv(trans(e2),row(e1,i),temporary,alpha);
 		for (std::size_t j = 0; j != temporary.size(); ++ j) {
@@ -150,7 +148,7 @@ void gemm_impl(
 ) {
 	//compute the product row-wise
 	for (std::size_t i = 0; i != m().size1(); ++i) {
-		matrix_row<M> mat_row(m(),i);
+		auto mat_row = row(m,i);
 		kernels::gemv(trans(e2),row(e1,i),mat_row,alpha);
 	}
 }
@@ -167,7 +165,6 @@ void gemm_impl(
 ) {
 	//compute blockwise and write the transposed block.
 	std::size_t blockSize = 16;
-	typedef typename M::value_type value_type;
 	typedef typename matrix_temporary<M>::type BlockStorage;
 	BlockStorage blockStorage(blockSize,blockSize);
 	
@@ -178,7 +175,7 @@ void gemm_impl(
 		for (size_type j = 0; j < size2; j+= blockSize){
 			std::size_t blockSizei = std::min(blockSize,size1-i);
 			std::size_t blockSizej = std::min(blockSize,size2-j);
-			matrix_range<matrix<value_type> > transBlock=subrange(blockStorage,0,blockSizej,0,blockSizei);
+			auto transBlock=subrange(blockStorage,0,blockSizej,0,blockSizei);
 			transBlock.clear();
 			//reduce to all row-major case by using
 			//A_ij=B^iC_j <=> A_ij^T = (C_j)^T (B^i)^T  

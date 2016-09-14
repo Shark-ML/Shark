@@ -916,15 +916,14 @@ public:
 			solver.solve(stop, &propInner);
 			iterations += propInner.iterations;
 
-
 			// Rprop loop to update the bias
 			while (true)
 			{
 				RealMatrix dualGradient = m_problem->solutionGradient();
 				// compute the primal m_gradient w.r.t. bias
 				RealVector grad(classes,0);
-				for (std::size_t i=0; i<numExamples; i++)
-				{
+				
+				for (std::size_t i=0; i<numExamples; i++){
 					std::size_t largestP = cardP;
 					double largest_value = 0.0;
 					for (std::size_t p=0; p<cardP; p++)
@@ -1001,7 +1000,6 @@ private:
 		for (std::size_t i=0; i<numExamples; i++){
 			for (std::size_t p=0; p<cardP; p++){
 				unsigned int y = m_problem->label(i);
-				// delta = \sum_m \nu_{m,p,y_i} \Delta b(m)
 				typename QpSparseArray<QpFloatType>::Row const& row = nu.row(y * cardP +p);
 				for (std::size_t b=0; b<row.size; b++)
 				{

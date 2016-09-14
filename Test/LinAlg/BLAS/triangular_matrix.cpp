@@ -3,8 +3,8 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/LinAlg/BLAS/triangular_matrix.hpp>
+#include <shark/LinAlg/BLAS/matrix_proxy.hpp>
 #include <shark/LinAlg/BLAS/matrix.hpp>
-
 #include <iostream>
 
 using namespace shark;
