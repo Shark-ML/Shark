@@ -1070,5 +1070,144 @@ private:
 	matrix_closure_typeB m_rhs;
 };
 
+/// \brief An diagonal matrix with values stored inside a diagonal vector
+///
+/// the matrix stores a Vector representing the diagonal.
+template<class VectorType>
+class diagonal_matrix: public matrix_expression<diagonal_matrix< VectorType > > {
+	typedef diagonal_matrix< VectorType > self_type;
+public:
+	typedef std::size_t size_type;
+	typedef std::ptrdiff_t difference_type;
+	typedef typename VectorType::value_type value_type;
+	typedef typename VectorType::scalar_type scalar_type;
+	typedef typename VectorType::const_reference const_reference;
+	typedef typename VectorType::reference reference;
+	typedef typename VectorType::pointer pointer;
+	typedef typename VectorType::const_pointer const_pointer;
+
+	typedef std::size_t index_type;
+	typedef index_type const* const_index_pointer;
+	typedef index_type index_pointer;
+
+	typedef const matrix_reference<const self_type> const_closure_type;
+	typedef matrix_reference<self_type> closure_type;
+	typedef sparse_tag storage_category;
+	typedef elementwise_tag evaluation_category;
+	typedef row_major orientation;
+
+	// Construction and destruction
+	diagonal_matrix():m_zero(){}
+	diagonal_matrix(VectorType const& diagonal):m_zero(),m_diagonal(diagonal){}
+
+	// Accessors
+	size_type size1() const {
+		return m_diagonal.size();
+	}
+	size_type size2() const {
+		return m_diagonal.size();
+	}
+	
+	// Element access
+	const_reference operator()(index_type i, index_type j) const {
+		if (i == j)
+			return m_diagonal(i);
+		else
+			return m_zero;
+	}
+
+	void set_element(size_type i, size_type j,value_type t){
+		RANGE_CHECK(i == j);
+		m_diagonal(i) = t;
+	}
+
+	// Assignment
+	diagonal_matrix& operator = (diagonal_matrix const& m) {
+		m_diagonal = m.m_diagonal;
+		return *this;
+	}
+
+	// Swapping
+	void swap(diagonal_matrix& m) {
+		swap(m_diagonal,m.m_diagonal);
+	}
+	friend void swap(diagonal_matrix& m1, diagonal_matrix& m2) {
+		m1.swap(m2);
+	}
+	
+	//Iterators
+	
+	class const_row_iterator:public bidirectional_iterator_base<const_row_iterator, value_type> {
+	public:
+		typedef typename diagonal_matrix::value_type value_type;
+		typedef typename diagonal_matrix::difference_type difference_type;
+		typedef typename diagonal_matrix::const_reference reference;
+		typedef value_type const* pointer;
+
+		// Construction and destruction
+		const_row_iterator(){}
+		const_row_iterator(index_type index, value_type value, bool isEnd)
+			:m_index(index),m_value(value),m_isEnd(isEnd){}
+
+		// Arithmetic
+		const_row_iterator& operator ++ () {
+			m_isEnd = true;
+			return *this;
+		}
+		const_row_iterator& operator -- () {
+			m_isEnd = false;
+			return *this;
+		}
+
+		// Dereference
+		const_reference operator*() const {
+			return m_value;
+		}
+
+		// Indices
+		index_type index() const{
+			return m_index;
+		}
+
+		// Assignment
+		const_row_iterator& operator = (const_row_iterator const& it) {
+			m_index = it.m_index;
+			return *this;
+		}
+
+		// Comparison
+		bool operator == (const_row_iterator const& it) const {
+			RANGE_CHECK(m_index == it.m_index);
+			return m_isEnd == it.m_isEnd;
+		}
+
+	private:
+		index_type m_index;
+		value_type m_value;
+		bool m_isEnd;
+	};
+	typedef const_row_iterator const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+
+	
+	const_row_iterator row_begin(index_type i) const {
+		return row_iterator(i, m_diagonal(i),false);
+	}
+	const_row_iterator row_end(index_type i) const {
+		return const_row_iterator(i, m_zero,true);
+	}
+	const_column_iterator column_begin(index_type i) const {
+		return column_iterator(i, m_diagonal(i),false);
+	}
+	const_column_iterator column_end(index_type i) const {
+		return const_column_iterator(i, m_zero,true);
+	}
+
+private:
+	value_type const m_zero;
+	VectorType m_diagonal; 
+};
+
 }}
 #endif

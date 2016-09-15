@@ -35,29 +35,29 @@
 namespace shark {
 namespace blas {
 
-template<class T, class E>
+template<class T, class VecV>
 typename boost::enable_if<
-	std::is_convertible<T, typename E::scalar_type >,
-        vector_scalar_multiply<E>
+	std::is_convertible<T, typename VecV::scalar_type >,
+        vector_scalar_multiply<VecV>
 >::type
-operator* (vector_expression<E> const& e, T scalar){
-	typedef typename E::scalar_type scalar_type;
-	return vector_scalar_multiply<E>(e(), scalar_type(scalar));
+operator* (vector_expression<VecV> const& v, T scalar){
+	typedef typename VecV::scalar_type scalar_type;
+	return vector_scalar_multiply<VecV>(v(), scalar_type(scalar));
 }
-template<class T, class E>
+template<class T, class VecV>
 typename boost::enable_if<
-	std::is_convertible<T, typename E::scalar_type >,
-        vector_scalar_multiply<E>
+	std::is_convertible<T, typename VecV::scalar_type >,
+        vector_scalar_multiply<VecV>
 >::type
-operator* (T scalar, vector_expression<E> const& e){
-	typedef typename E::scalar_type scalar_type;
-	return vector_scalar_multiply<E>(e(), scalar_type(scalar));//explicit cast prevents warning, alternative would be to template vector_scalar_multiply on T as well
+operator* (T scalar, vector_expression<VecV> const& v){
+	typedef typename VecV::scalar_type scalar_type;
+	return vector_scalar_multiply<VecV>(v(), scalar_type(scalar));//explicit cast prevents warning, alternative would be to template vector_scalar_multiply on T as well
 }
 
-template<class E>
-vector_scalar_multiply<E> operator-(vector_expression<E> const& e){
-	typedef typename E::scalar_type scalar_type;
-	return vector_scalar_multiply<E>(e(), scalar_type(-1));//explicit cast prevents warning, alternative would be to template vector_scalar_multiply on T as well
+template<class VecV>
+vector_scalar_multiply<VecV> operator-(vector_expression<VecV> const& v){
+	typedef typename VecV::scalar_type scalar_type;
+	return vector_scalar_multiply<VecV>(v(), scalar_type(-1));//explicit cast prevents warning, alternative would be to template vector_scalar_multiply on T as well
 }
 
 ///\brief Creates a vector having a constant value.
@@ -72,11 +72,11 @@ repeat(T scalar, std::size_t elements){
 
 
 #define SHARK_UNARY_VECTOR_TRANSFORMATION(name, F)\
-template<class E>\
-vector_unary<E,F<typename E::value_type> >\
-name(vector_expression<E> const& e){\
-	typedef F<typename E::value_type> functor_type;\
-	return vector_unary<E, functor_type>(e(), functor_type());\
+template<class VecV>\
+vector_unary<VecV,F<typename VecV::value_type> >\
+name(vector_expression<VecV> const& v){\
+	typedef F<typename VecV::value_type> functor_type;\
+	return vector_unary<VecV, functor_type>(v(), functor_type());\
 }
 SHARK_UNARY_VECTOR_TRANSFORMATION(abs, scalar_abs)
 SHARK_UNARY_VECTOR_TRANSFORMATION(log, scalar_log)
@@ -96,14 +96,14 @@ SHARK_UNARY_VECTOR_TRANSFORMATION(elem_inv, scalar_inverse)
 
 //operations of the form op(v,t)[i] = op(v[i],t)
 #define SHARK_VECTOR_SCALAR_TRANSFORMATION(name, F)\
-template<class T, class E> \
+template<class T, class VecV> \
 typename boost::enable_if< \
-	std::is_convertible<T, typename E::value_type >,\
-        vector_unary<E,F<typename E::value_type,T> > \
+	std::is_convertible<T, typename VecV::value_type >,\
+        vector_unary<VecV,F<typename VecV::value_type,T> > \
 >::type \
-name (vector_expression<E> const& e, T scalar){ \
-	typedef F<typename E::value_type,T> functor_type; \
-	return vector_unary<E, functor_type>(e(), functor_type(scalar)); \
+name (vector_expression<VecV> const& v, T scalar){ \
+	typedef F<typename VecV::value_type,T> functor_type; \
+	return vector_unary<VecV, functor_type>(v(), functor_type(scalar)); \
 }
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator/, scalar_divide)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<, scalar_less_than)
@@ -119,14 +119,14 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(pow, scalar_pow)
 
 // operations of the form op(t,v)[i] = op(t,v[i])
 #define SHARK_VECTOR_SCALAR_TRANSFORMATION_2(name, F)\
-template<class T, class E> \
+template<class T, class VecV> \
 typename boost::enable_if< \
-	std::is_convertible<T, typename E::value_type >,\
-        vector_unary<E,F<typename E::value_type,T> > \
+	std::is_convertible<T, typename VecV::value_type >,\
+        vector_unary<VecV,F<typename VecV::value_type,T> > \
 >::type \
-name (T scalar, vector_expression<E> const& e){ \
-	typedef F<typename E::value_type,T> functor_type; \
-	return vector_unary<E, functor_type>(e(), functor_type(scalar)); \
+name (T scalar, vector_expression<VecV> const& v){ \
+	typedef F<typename VecV::value_type,T> functor_type; \
+	return vector_unary<VecV, functor_type>(v(), functor_type(scalar)); \
 }
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(min, scalar_min)
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, scalar_max)
@@ -135,79 +135,82 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, scalar_max)
 
 
 ///\brief Adds two vectors
-template<class E1, class E2>
-vector_addition<E1, E2 > operator+ (
-	vector_expression<E1> const& e1,
-	vector_expression<E2> const& e2
+template<class VecV1, class VecV2>
+vector_addition<VecV1, VecV2 > operator+ (
+	vector_expression<VecV1> const& v1,
+	vector_expression<VecV2> const& v2
 ){
-	return vector_addition<E1, E2>(e1(),e2());
+	SIZE_CHECK(v1().size() == v2().size());
+	return vector_addition<VecV1, VecV2>(v1(),v2());
 }
 ///\brief Subtracts two vectors
-template<class E1, class E2>
-vector_addition<E1, vector_scalar_multiply<E2> > operator- (
-	vector_expression<E1> const& e1,
-	vector_expression<E2> const& e2
+template<class VecV1, class VecV2>
+vector_addition<VecV1, vector_scalar_multiply<VecV2> > operator- (
+	vector_expression<VecV1> const& v1,
+	vector_expression<VecV2> const& v2
 ){
-	return vector_addition<E1, vector_scalar_multiply<E2> >(e1(),-e2());
+	SIZE_CHECK(v1().size() == v2().size());
+	return vector_addition<VecV1, vector_scalar_multiply<VecV2> >(v1(),-v2());
 }
 
 ///\brief Adds a vector plus a scalr which is interpreted as a constant vector
-template<class E, class T>
+template<class VecV, class T>
 typename boost::enable_if<
-	std::is_convertible<T, typename E::value_type>, 
-	vector_addition<E, scalar_vector<T> >
+	std::is_convertible<T, typename VecV::value_type>, 
+	vector_addition<VecV, scalar_vector<T> >
 >::type operator+ (
-	vector_expression<E> const& e,
+	vector_expression<VecV> const& v,
 	T t
 ){
-	return e + scalar_vector<T>(e().size(),t);
+	return v + scalar_vector<T>(v().size(),t);
 }
 
 ///\brief Adds a vector plus a scalar which is interpreted as a constant vector
-template<class T, class E>
+template<class T, class VecV>
 typename boost::enable_if<
-	std::is_convertible<T, typename E::value_type>,
-	vector_addition<E, scalar_vector<T> >
+	std::is_convertible<T, typename VecV::value_type>,
+	vector_addition<VecV, scalar_vector<T> >
 >::type operator+ (
 	T t,
-	vector_expression<E> const& e
+	vector_expression<VecV> const& v
 ){
-	return e + scalar_vector<T>(e().size(),t);
+	return v + scalar_vector<T>(v().size(),t);
 }
 
 ///\brief Subtracts a scalar which is interpreted as a constant vector from a vector.
-template<class E, class T>
+template<class VecV, class T>
 typename boost::enable_if<
-	std::is_convertible<T, typename E::value_type> ,
-	vector_addition<E, vector_scalar_multiply<scalar_vector<T> > >
+	std::is_convertible<T, typename VecV::value_type> ,
+	vector_addition<VecV, vector_scalar_multiply<scalar_vector<T> > >
 >::type operator- (
-	vector_expression<E> const& e,
+	vector_expression<VecV> const& v,
 	T t
 ){
-	return e - scalar_vector<T>(e().size(),t);
+	return v - scalar_vector<T>(v().size(),t);
 }
 
 ///\brief Subtracts a vector from a scalar which is interpreted as a constant vector
-template<class E, class T>
+template<class VecV, class T>
 typename boost::enable_if<
-	std::is_convertible<T, typename E::value_type>,
-	vector_addition<scalar_vector<T>, vector_scalar_multiply<E> >
+	std::is_convertible<T, typename VecV::value_type>,
+	vector_addition<scalar_vector<T>, vector_scalar_multiply<VecV> >
 >::type operator- (
 	T t,
-	vector_expression<E> const& e
+	vector_expression<VecV> const& v
 ){
-	return scalar_vector<T>(e().size(),t) - e;
+	return scalar_vector<T>(v().size(),t) - v;
 }
 
 
 
 
 #define SHARK_BINARY_VECTOR_EXPRESSION(name, F)\
-template<class E1, class E2>\
-vector_binary<E1, E2, F<typename E1::value_type, typename E2::value_type> >\
-name(vector_expression<E1> const& e1, vector_expression<E2> const& e2){\
-	typedef F<typename E1::value_type, typename E2::value_type> functor_type;\
-	return vector_binary<E1, E2, functor_type>(e1(),e2(), functor_type());\
+template<class VecV1, class VecV2>\
+vector_binary<VecV1, VecV2, F<typename VecV1::value_type, typename VecV2::value_type> >\
+name(vector_expression<VecV1> const& v1, vector_expression<VecV2> const& v2){\
+	SIZE_CHECK(v1().size() == v2().size());\
+	typedef F<typename VecV1::value_type, typename VecV2::value_type> functor_type;\
+	return vector_binary<VecV1, VecV2, functor_type>(v1(),v2(), functor_type());\
 }
 SHARK_BINARY_VECTOR_EXPRESSION(operator*, scalar_binary_multiply)
 SHARK_BINARY_VECTOR_EXPRESSION(element_prod, scalar_binary_multiply)
@@ -217,65 +220,66 @@ SHARK_BINARY_VECTOR_EXPRESSION(min, scalar_binary_min)
 SHARK_BINARY_VECTOR_EXPRESSION(max, scalar_binary_max)
 #undef SHARK_BINARY_VECTOR_EXPRESSION
 
-template<class E1, class E2>
-vector_binary<E1, E2, 
-	scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type> 
+template<class VecV1, class VecV2>
+vector_binary<VecV1, VecV2, 
+	scalar_binary_safe_divide<typename VecV1::value_type, typename VecV2::value_type> 
 >
 safe_div(
-	vector_expression<E1> const& e1, 
-	vector_expression<E2> const& e2, 
+	vector_expression<VecV1> const& v1, 
+	vector_expression<VecV2> const& v2, 
 	decltype(
-		typename E1::value_type() * typename E2::value_type()
+		typename VecV1::value_type() * typename VecV2::value_type()
 	) defaultValue
 ){
-	typedef scalar_binary_safe_divide<typename E1::value_type, typename E2::value_type> functor_type;
-	return vector_binary<E1, E2, functor_type>(e1(),e2(), functor_type(defaultValue));
+	SIZE_CHECK(v1().size() == v2().size());
+	typedef scalar_binary_safe_divide<typename VecV1::value_type, typename VecV2::value_type> functor_type;
+	return vector_binary<VecV1, VecV2, functor_type>(v1(),v2(), functor_type(defaultValue));
 }
 
 /////VECTOR REDUCTIONS
 
 /// \brief sum v = sum_i v_i
-template<class E>
-typename E::value_type
-sum(const vector_expression<E> &e) {
-	typedef typename E::value_type value_type;
+template<class VecV>
+typename VecV::value_type
+sum(vector_expression<VecV> const& v) {
+	typedef typename VecV::value_type value_type;
 	vector_fold<scalar_binary_plus<value_type, value_type> > kernel;
-	return kernel(eval_block(e),value_type());
+	return kernel(eval_block(v),value_type());
 }
 
 /// \brief max v = max_i v_i
-template<class E>
-typename E::value_type
-max(const vector_expression<E> &e) {
-	typedef typename E::value_type value_type;
+template<class VecV>
+typename VecV::value_type
+max(vector_expression<VecV> const& v) {
+	typedef typename VecV::value_type value_type;
 	vector_fold<scalar_binary_max<value_type, value_type> > kernel;
-	auto const& elem_result = eval_block(e);
+	auto const& elem_result = eval_block(v);
 	return kernel(elem_result,elem_result(0));
 }
 
 /// \brief min v = min_i v_i
-template<class E>
-typename E::value_type
-min(const vector_expression<E> &e) {
-	typedef typename E::value_type value_type;
+template<class VecV>
+typename VecV::value_type
+min(vector_expression<VecV> const& v) {
+	typedef typename VecV::value_type value_type;
 	vector_fold<scalar_binary_min<value_type, value_type> > kernel;
-	auto const& elem_result = eval_block(e);
+	auto const& elem_result = eval_block(v);
 	return kernel(elem_result,elem_result(0));
 }
 
 /// \brief arg_max v = arg max_i v_i
-template<class E>
-std::size_t arg_max(const vector_expression<E> &e) {
-	SIZE_CHECK(e().size() > 0);
-	auto const& elem_result = eval_block(e);
+template<class VecV>
+std::size_t arg_max(vector_expression<VecV> const& v) {
+	SIZE_CHECK(v().size() > 0);
+	auto const& elem_result = eval_block(v);
 	return std::max_element(elem_result.begin(),elem_result.end()).index();
 }
 
 /// \brief arg_min v = arg min_i v_i
-template<class E>
-std::size_t arg_min(const vector_expression<E> &e) {
-	SIZE_CHECK(e().size() > 0);
-	return arg_max(-e);
+template<class VecV>
+std::size_t arg_min(vector_expression<VecV> const& v) {
+	SIZE_CHECK(v().size() > 0);
+	return arg_max(-v);
 }
 
 /// \brief soft_max v = ln(sum(exp(v)))
@@ -285,65 +289,66 @@ std::size_t arg_min(const vector_expression<E> &e) {
 /// The function is computed in an numerically stable way to prevent that too high values of v_i produce inf or nan.
 /// The name of the function comes from the fact that it behaves like a continuous version of max in the respect that soft_max v <= v.size()*max(v)
 /// max is reached in the limit as the gap between the biggest value and the rest grows to infinity.
-template<class E>
-typename E::value_type
-soft_max(const vector_expression<E> &e) {
-	typename E::value_type maximum = max(e);
-	return std::log(sum(exp(e - maximum))) + maximum;
+template<class VecV>
+typename VecV::value_type
+soft_max(vector_expression<VecV> const& v) {
+	typename VecV::value_type maximum = max(v);
+	return std::log(sum(exp(v - maximum))) + maximum;
 }
 
 
 ////implement all the norms based on sum!
 
 /// \brief norm_1 v = sum_i |v_i|
-template<class E>
-typename real_traits<typename E::value_type >::type
-norm_1(const vector_expression<E> &e) {
-	return sum(abs(eval_block(e)));
+template<class VecV>
+typename real_traits<typename VecV::value_type >::type
+norm_1(vector_expression<VecV> const& v) {
+	return sum(abs(eval_block(v)));
 }
 
 /// \brief norm_2 v = sum_i |v_i|^2
-template<class E>
-typename real_traits<typename E::value_type >::type
-norm_sqr(const vector_expression<E> &e) {
-	return sum(abs_sqr(eval_block(e)));
+template<class VecV>
+typename real_traits<typename VecV::value_type >::type
+norm_sqr(vector_expression<VecV> const& v) {
+	return sum(abs_sqr(eval_block(v)));
 }
 
 /// \brief norm_2 v = sqrt (sum_i |v_i|^2 )
-template<class E>
-typename real_traits<typename E::value_type >::type
-norm_2(const vector_expression<E> &e) {
+template<class VecV>
+typename real_traits<typename VecV::value_type >::type
+norm_2(vector_expression<VecV> const& v) {
 	using std::sqrt;
-	return sqrt(norm_sqr(e));
+	return sqrt(norm_sqr(v));
 }
 
 /// \brief norm_inf v = max_i |v_i|
-template<class E>
-typename real_traits<typename E::value_type >::type
-norm_inf(vector_expression<E> const &e){
-	return max(abs(eval_block(e)));
+template<class VecV>
+typename real_traits<typename VecV::value_type >::type
+norm_inf(vector_expression<VecV> const& v){
+	return max(abs(eval_block(v)));
 }
 
 /// \brief index_norm_inf v = arg max_i |v_i|
-template<class E>
-std::size_t index_norm_inf(vector_expression<E> const &e){
-	return arg_max(abs(eval_block(e)));
+template<class VecV>
+std::size_t index_norm_inf(vector_expression<VecV> const& v){
+	return arg_max(abs(eval_block(v)));
 }
 
 // inner_prod (v1, v2) = sum_i v1_i * v2_i
-template<class E1, class E2>
+template<class VecV1, class VecV2>
 decltype(
-	typename E1::value_type() * typename E2::value_type()
+	typename VecV1::value_type() * typename VecV2::value_type()
 )
 inner_prod(
-	vector_expression<E1> const& e1,
-	vector_expression<E2> const& e2
+	vector_expression<VecV1> const& v1,
+	vector_expression<VecV2> const& v2
 ) {
+	SIZE_CHECK(v1().size() == v2().size());
 	typedef decltype(
-		typename E1::value_type() * typename E2::value_type()
+		typename VecV1::value_type() * typename VecV2::value_type()
 	) value_type;
 	value_type result = value_type();
-	kernels::dot(eval_block(e1),eval_block(e2),result);
+	kernels::dot(eval_block(v1),eval_block(v2),result);
 	return result;
 }
 

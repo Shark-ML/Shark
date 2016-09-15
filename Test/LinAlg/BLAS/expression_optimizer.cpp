@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_vector_expression_optimize ){
 	}
 	{
 		M1 m1 = create_matrix(5,10);
-		V v = create_vector(10);
+		V v = create_vector(5);
 		matrix_vector_prod<matrix_transpose<M1 const>,V> e = prod(v,m1);
 		BOOST_CHECK_SMALL(norm_inf(trans(m1) - e.matrix()), 1.e-10);
 		BOOST_CHECK_SMALL(norm_inf(v - e.vector()), 1.e-10);
