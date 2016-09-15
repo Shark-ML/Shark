@@ -212,9 +212,9 @@ public:
 		std::size_t sizeX1=shark::size(batchX1);
 		std::size_t sizeX2=shark::size(batchX2);
 		RealMatrix result=(*this)(batchX1,batchX2);
-		result*=-2;
+		result *= -2.0;
 		if (isNormalized()){
-			noalias(result)+=RealScalarMatrix(sizeX1,sizeX2,2.0);
+			noalias(result) += 2.0;
 		} else {
 			//compute self-product
 			RealVector kx2(sizeX2);

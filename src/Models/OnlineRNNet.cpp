@@ -106,7 +106,7 @@ void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const R
 	}
 	
 	//calculate the derivative for every weight using the derivative of the last time step
-	ConstRealSubMatrix hiddenWeights = columns(
+	auto hiddenWeights = columns(
 		mpe_structure->weights(),
 		inputSize()+1,numUnits
 	);

@@ -72,7 +72,7 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	RealMatrix XTL(inputDim + 1,outputDim,0.0);
 	for (std::size_t b=0; b != numBatches; b++){
 		BatchRef batch = dataset.batch(b);
-		RealSubMatrix PTL = subrange(XTL,0,inputDim,0,outputDim);
+		auto PTL = subrange(XTL,0,inputDim,0,outputDim);
 		noalias(PTL) += prod(trans(batch.input),batch.label);
 		noalias(row(XTL,inputDim))+=sum_rows(batch.label);
 	}	

@@ -539,8 +539,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_solveSymmSemiDefiniteSystemInPlace_fullRank_Matrix_
 			RealMatrix resultRight = prod(A,AInv);
 			
 			double errorSame = norm_inf(resultLeft-resultRight);
-			double errorLeft = norm_inf(resultLeft - RealIdentityMatrix(Dimensions));
-			double errorRight = norm_inf(resultRight - RealIdentityMatrix(Dimensions));
+			double errorLeft = norm_inf(resultLeft - blas::identity_matrix<double>(Dimensions));
+			double errorRight = norm_inf(resultRight - blas::identity_matrix<double>(Dimensions));
 			BOOST_CHECK_SMALL(errorSame,1.e-13);
 			BOOST_CHECK_SMALL(errorLeft,1.e-10);
 			BOOST_CHECK_SMALL(errorRight,1.e-10);
@@ -558,8 +558,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_solveSymmSemiDefiniteSystemInPlace_fullRank_Matrix_
 			RealMatrix resultRight = prod(A,AInv);
 			
 			double errorSame = norm_inf(resultLeft-resultRight);
-			double errorLeft = norm_inf(resultLeft - RealIdentityMatrix(Dimensions));
-			double errorRight = norm_inf(resultRight - RealIdentityMatrix(Dimensions));
+			double errorLeft = norm_inf(resultLeft - blas::identity_matrix<double>(Dimensions));
+			double errorRight = norm_inf(resultRight - blas::identity_matrix<double>(Dimensions));
 			BOOST_CHECK_SMALL(errorSame,1.e-13);
 			BOOST_CHECK_SMALL(errorLeft,1.e-10);
 			BOOST_CHECK_SMALL(errorRight,1.e-10);

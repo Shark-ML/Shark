@@ -121,7 +121,7 @@ public:
 		
 		derivative = calculateKernelMatrixParameterDerivative(
 			*mep_kernel, m_dataset.inputs(),
-			result.w2*(RealDiagonalMatrix(result.beta)-outer_prod(result.beta,result.beta))
+			result.w2*(to_diagonal(result.beta)-outer_prod(result.beta,result.beta))
 			-result.R2*outer_prod(result.alpha,result.alpha)
 		);
 		

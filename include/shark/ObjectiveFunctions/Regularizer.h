@@ -210,7 +210,7 @@ public:
 	/// its Hessian.
 	virtual ResultType evalDerivative( const SearchPointType & input, SecondOrderDerivative & derivative )const {
 		derivative.gradient = input;
-		derivative.hessian = RealIdentityMatrix(input.size());
+		derivative.hessian = blas::identity_matrix<double>(input.size());
 		return 0.5 * norm_sqr(input);
 	}
 private:

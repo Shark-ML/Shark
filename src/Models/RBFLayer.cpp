@@ -163,7 +163,7 @@ void RBFLayer::weightedParameterDerivative(
 		//the gamma stems from the fact, that the parameter pgamma_i are log encoded 
 		//and so gamma_i is in fact e^(pgamma_i) which leads to the fact, that 
 		//we have to derive with respect to pgamma_i.
-		RealVectorRange gammaDerivative = subrange(gradient,currentParameter,gradient.size());
+		auto gammaDerivative = subrange(gradient,currentParameter,gradient.size());
 		noalias(gammaDerivative) = sum_rows(-element_prod(delta,s.norm2));
 		noalias(gammaDerivative) = element_prod(gammaDerivative,m_gamma);
 		noalias(gammaDerivative) += 0.5*inputSize()*deltaSum;

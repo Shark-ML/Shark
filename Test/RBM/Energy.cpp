@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedProbabilityHidden )
 	initRandomNormal(rbm,2);
 
 	//the hiddenstate to test is the most complex (1,1,1,1) case
-	RealMatrix hiddenState = RealScalarMatrix(4,4,1.0);
+	RealMatrix hiddenState = blas::repeat(1.0,4,4);
 
 	//calculate energies for the state space, we now from the previous tests, that this result is correct
 	Energy<BinaryRBM> energy(rbm.energy());
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedProbabilityVisible )
 	initRandomNormal(rbm,2);
 
 	//the hiddenstate to test is the most complex (1,1,1,1) case
-	RealMatrix visibleState = RealScalarMatrix(4,4,1.0);
+	RealMatrix visibleState = blas::repeat(1.0,4,4);
 
 	//calculate energies for the state space, we now from the previous tests, that this result is correct
 	Energy<BinaryRBM> energy(rbm.energy());

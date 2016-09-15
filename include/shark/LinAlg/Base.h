@@ -55,22 +55,9 @@ namespace shark{
 
 #define SHARK_VECTOR_MATRIX_TYPEDEFS(basetype, prefix) \
 	typedef blas::vector< basetype > prefix##Vector; \
-	typedef blas::vector< const basetype > Const##prefix##Vector; \
 	typedef blas::matrix< basetype, blas::row_major > prefix##Matrix; \
-	typedef blas::identity_matrix< basetype > prefix##Identity; \
-	typedef blas::identity_matrix< basetype > prefix##IdentityMatrix; \
-	typedef blas::scalar_matrix< basetype > prefix##ScalarMatrix; \
-	typedef blas::vector_range< prefix##Vector > prefix##VectorRange; \
-	typedef blas::vector_range< const prefix##Vector > Const##prefix##VectorRange; \
-	typedef blas::matrix_range< prefix##Matrix > prefix##SubMatrix; \
-	typedef blas::matrix_range< const prefix##Matrix > Const##prefix##SubMatrix; \
 	typedef blas::compressed_vector< basetype > Compressed##prefix##Vector; \
-	typedef blas::vector_range< Compressed##prefix##Vector > Compressed##prefix##VectorRange; \
-	typedef blas::vector_range< const Compressed##prefix##Vector > ConstCompressed##prefix##VectorRange; \
-	typedef blas::compressed_matrix< basetype > Compressed##prefix##Matrix; \
-	typedef blas::matrix_range< Compressed##prefix##Matrix > Compressed##prefix##SubMatrix; \
-	typedef blas::matrix_range< const Compressed##prefix##Matrix > ConstCompressed##prefix##SubMatrix;\
-	typedef blas::diagonal_matrix<blas::vector< basetype > > prefix##DiagonalMatrix;
+	typedef blas::compressed_matrix< basetype > Compressed##prefix##Matrix;
 
 	SHARK_VECTOR_MATRIX_TYPEDEFS(long double, BigReal);
 	SHARK_VECTOR_MATRIX_TYPEDEFS(double, Real)

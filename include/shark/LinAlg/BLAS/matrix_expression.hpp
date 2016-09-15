@@ -679,6 +679,12 @@ public:
 	identity_matrix(std::size_t size):base_type(scalar_vector<T>(size,T(1))){}
 };
 
+
+template<class E>
+diagonal_matrix<E> to_diagonal(blas::vector_expression<E> const& e){
+	return diagonal_matrix<E>(e());
+}
+
 }
 }
 

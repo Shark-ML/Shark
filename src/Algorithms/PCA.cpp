@@ -77,14 +77,14 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 			for(std::size_t b2 = 0; b2 != b1; ++b2){
 				std::size_t batchSize2 = inputs.batch(b2).size1();
 				RealMatrix X2 = inputs.batch(b2)-repeat(m_mean,batchSize2);
-				RealSubMatrix X1X2T= subrange(S,start1,start1+batchSize1,start2,start2+batchSize2);
-				RealSubMatrix X2X1T= subrange(S,start2,start2+batchSize2,start1,start1+batchSize1);
+				auto X1X2T= subrange(S,start1,start1+batchSize1,start2,start2+batchSize2);
+				auto X2X1T= subrange(S,start2,start2+batchSize2,start1,start1+batchSize1);
 				noalias(X1X2T) = prod(X1,trans(X2));// X1 X2^T
 				noalias(X2X1T) = trans(X1X2T);// X2 X1^T
 				start2+=batchSize2;
 			}
 			//diagonal block
-			RealSubMatrix X1X1T= subrange(S,start1,start1+batchSize1,start1,start1+batchSize1);
+			auto X1X1T= subrange(S,start1,start1+batchSize1,start1,start1+batchSize1);
 			noalias(X1X1T) = prod(X1,trans(X1));
 			start1+=batchSize1;
 		}

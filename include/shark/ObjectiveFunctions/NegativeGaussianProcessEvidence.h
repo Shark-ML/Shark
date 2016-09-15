@@ -191,7 +191,7 @@ public:
 		
 		//compute inverse matrix from the cholesky dcomposition 
 		//using forward-backward substitution,
-		RealMatrix W=RealIdentityMatrix(N);
+		RealMatrix W= blas::identity_matrix<double>(N);
 		blas::solveTriangularCholeskyInPlace<blas::SolveAXB>(choleskyFactor,W);
 		
 		//calculate z = Wt=M^-1 t

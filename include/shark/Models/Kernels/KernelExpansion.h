@@ -250,7 +250,7 @@ public:
 			RealMatrix kernelEvaluations = (*mep_kernel)(m_basis.batch(i),patterns);
 			
 			//get the part of the alpha matrix which is suitable for this batch
-			ConstRealSubMatrix batchAlpha = subrange(m_alpha,batchStart,batchEnd,0,outputSize());
+			auto batchAlpha = subrange(m_alpha,batchStart,batchEnd,0,outputSize());
 			noalias(output) += prod(trans(kernelEvaluations),batchAlpha);
 			batchStart = batchEnd;
 		}

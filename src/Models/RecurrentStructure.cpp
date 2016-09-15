@@ -106,7 +106,7 @@ void RecurrentStructure::setStructure(std::size_t in, std::size_t hidden, std::s
 	// Calculate total number of neurons from the
 	// number of neurons per layer:
 	std::size_t n = in+hidden+out;
-	IntMatrix connections = IntScalarMatrix(hidden+out,n+1,1);
+	IntMatrix connections = blas::repeat(1,hidden+out,n+1);
 
 	if(!bias){
 		column(connections,in).clear();

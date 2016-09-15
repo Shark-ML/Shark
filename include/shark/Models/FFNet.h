@@ -312,21 +312,21 @@ public:
 		std::size_t beginNeuron = m_inputNeurons;
 		
 		for(std::size_t layer = 0; layer != m_layerMatrix.size();++layer){
-			const RealMatrix& weights = m_layerMatrix[layer];
+			RealMatrix const& weights = m_layerMatrix[layer];
 			//number of rows of the layer is also the number of neurons
 			std::size_t endNeuron = beginNeuron + weights.size1();
 			//some subranges of vectors
 			//inputs are the last n neurons, where n is the number of columns of the matrix
-			RealSubMatrix const input = rows(s.responses,beginNeuron - weights.size2(),beginNeuron);
+			auto const input = rows(s.responses,beginNeuron - weights.size2(),beginNeuron);
 			//the neurons responses
-			RealSubMatrix responses = rows(s.responses,beginNeuron,endNeuron);
+			auto responses = rows(s.responses,beginNeuron,endNeuron);
 
 			//calculate activation. first compute the linear part and the optional bias and then apply
 			// the non-linearity
 			noalias(responses) = prod(weights,input);
 			if(!bias().empty()){
 				//the bias of the layer is shifted as input units can not have bias.
-				ConstRealVectorRange bias = subrange(m_bias,beginNeuron-inputSize(),endNeuron-inputSize());
+				auto bias = subrange(m_bias,beginNeuron-inputSize(),endNeuron-inputSize());
 				noalias(responses) += trans(repeat(bias,numPatterns));
 			}
 			SHARK_CRITICAL_REGION{//beware Dropout Neurons!
@@ -364,7 +364,7 @@ public:
 		//initialize delta using coefficients and clear the rest. also don't compute the delta for
 		// the input neurons as they are not needed.
 		RealMatrix delta(numberOfNeurons(),numPatterns,0.0);
-		RealSubMatrix outputDelta = rows(delta,delta.size1()-outputSize(),delta.size1());
+		auto outputDelta = rows(delta,delta.size1()-outputSize(),delta.size1());
 		noalias(outputDelta) = trans(coefficients);
 
 		computeDelta(delta,state,false);
@@ -382,7 +382,7 @@ public:
 		//initialize delta using coefficients and clear the rest
 		//we compute the full set of delta values here. the delta values of the inputs are the inputDerivative
 		RealMatrix delta(numberOfNeurons(),numPatterns,0.0);
-		RealSubMatrix outputDelta = rows(delta,delta.size1()-outputSize(),delta.size1());
+		auto outputDelta = rows(delta,delta.size1()-outputSize(),delta.size1());
 		noalias(outputDelta) = trans(coefficients);
 
 		computeDelta(delta,state,true);
@@ -404,7 +404,7 @@ public:
 		
 		//compute full delta and thus the input derivative
 		RealMatrix delta(numberOfNeurons(),numPatterns,0.0);
-		RealSubMatrix outputDelta = rows(delta,delta.size1()-outputSize(),delta.size1());
+		auto outputDelta = rows(delta,delta.size1()-outputSize(),delta.size1());
 		noalias(outputDelta) = trans(coefficients);
 		
 		computeDelta(delta,state,true);

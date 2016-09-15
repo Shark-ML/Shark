@@ -271,7 +271,6 @@ protected:
 
 typedef ARDKernelUnconstrained<> DenseARDKernel;
 typedef ARDKernelUnconstrained<CompressedRealVector> CompressedARDKernel;
-typedef ARDKernelUnconstrained<ConstRealVectorRange> DenseARDMklKernel;
 
 }
 #endif

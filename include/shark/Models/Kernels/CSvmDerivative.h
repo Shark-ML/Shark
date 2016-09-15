@@ -151,7 +151,7 @@ public:
 	void modelCSvmParameterDerivative(const InputType& input, RealVector& derivative )
 	{
 		// create temporary batch helpers
-		RealIdentityMatrix unit_weights(1);
+		RealMatrix unit_weights(1,1,1.0);
 		RealMatrix bof_results(1,1);
 		typename Batch<InputType>::type bof_xi = Batch<InputType>::createBatch(input,1);
 		typename Batch<InputType>::type bof_input = Batch<InputType>::createBatch(input,1);
@@ -278,7 +278,7 @@ private:
 		boost::shared_ptr<State> state = mep_k->createState(); //state object for derivatives
 
 		// create temporary batch helpers
-		RealIdentityMatrix unit_weights(1);
+		RealMatrix unit_weights(1,1,1.0);
 		RealMatrix bof_results(1,1);
 		typename Batch<InputType>::type bof_xi;
 		typename Batch<InputType>::type bof_xj;

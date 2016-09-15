@@ -158,8 +158,6 @@ protected:
 
 typedef ScaledKernel<> DenseScaledKernel;
 typedef ScaledKernel<CompressedRealVector> CompressedScaledKernel;
-typedef ScaledKernel<ConstRealVectorRange> DenseScaledMklKernel;
-
 
 }
 #endif
