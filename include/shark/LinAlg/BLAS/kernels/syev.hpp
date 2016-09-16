@@ -48,9 +48,9 @@ namespace shark { namespace blas {namespace kernels{
 /// The wholee matrix will in the end contain the eigenvectors of A and thus
 /// A is replaced by Q. 
 /// Additionally the eigenvalues are stored in the second argument. 
-template <typename MatrA, typename VectorB>
+template <typename MatA, typename VectorB>
 void syev(
-	matrix_expression<MatrA>& matA,
+	matrix_expression<MatA>& matA,
 	vector_expression<VectorB>& eigenValues
 ) {
 	bindings::syev(matA,eigenValues);

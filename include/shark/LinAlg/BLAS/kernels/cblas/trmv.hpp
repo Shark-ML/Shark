@@ -98,9 +98,9 @@ inline void trmv(
 	);
 }
 
-template <bool upper, bool unit, typename MatrA, typename VectorX>
+template <bool upper, bool unit, typename MatA, typename VectorX>
 void trmv(
-	matrix_expression<MatrA> const& A,
+	matrix_expression<MatA> const& A,
 	vector_expression<VectorX> &x,
 	boost::mpl::true_
 ){
@@ -109,7 +109,7 @@ void trmv(
 	std::size_t n = A().size1();
 	CBLAS_DIAG cblasUnit = unit?CblasUnit:CblasNonUnit;
 	CBLAS_UPLO cblasUplo = upper?CblasUpper:CblasLower;
-	CBLAS_ORDER stor_ord= (CBLAS_ORDER)storage_order<typename MatrA::orientation>::value;
+	CBLAS_ORDER stor_ord= (CBLAS_ORDER)storage_order<typename MatA::orientation>::value;
 	
 	auto storageA = A().raw_storage();
 	auto storagex = x().raw_storage();

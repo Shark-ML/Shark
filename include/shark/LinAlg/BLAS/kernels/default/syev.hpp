@@ -36,10 +36,10 @@
 
 namespace shark { namespace blas { namespace bindings {
 	
-template <typename MatrA, typename VectorB>
+template <typename MatA, typename VectorB>
 void eigensort
 (
-	matrix_expression<MatrA>& matA,
+	matrix_expression<MatA>& matA,
 	vector_expression<VectorB>& eigenValues
 ){
 	SIZE_CHECK(eigenValues().size() == matA().size1());
@@ -61,9 +61,9 @@ void eigensort
 	}
 }
 
-template <typename MatrA, typename VectorB>
+template <typename MatA, typename VectorB>
 void syev(
-	matrix_expression<MatrA>& vmatA,
+	matrix_expression<MatA>& vmatA,
 	vector_expression<VectorB>& dvecA
 ) {
 	SIZE_CHECK(vmatA().size1() == vmatA().size2());

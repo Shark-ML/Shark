@@ -66,9 +66,9 @@ inline void syev(
 }
 
 
-template <typename MatrA, typename VectorB>
+template <typename MatA, typename VectorB>
 void syev(
-	matrix_expression<MatrA>& A,
+	matrix_expression<MatA>& A,
 	vector_expression<VectorB>& eigenValues
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
@@ -77,7 +77,7 @@ void syev(
 	std::size_t n = A().size1();
 	bool upper = false;
 	//lapack is column major storage.
-	if(boost::is_same<typename MatrA::orientation, blas::row_major>::value){
+	if(boost::is_same<typename MatA::orientation, blas::row_major>::value){
 		upper = !upper;
 	}
 	auto storageA = A().raw_storage();

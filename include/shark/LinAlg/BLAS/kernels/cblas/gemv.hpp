@@ -97,9 +97,9 @@ inline void gemv(CBLAS_ORDER const Order,
 
 // y <- alpha * op (A) * x + beta * y
 // op (A) == A || A^T || A^H
-template <typename MatrA, typename VectorX, typename VectorY>
+template <typename MatA, typename VectorX, typename VectorY>
 void gemv(
-	matrix_expression<MatrA> const &A,
+	matrix_expression<MatA> const &A,
 	vector_expression<VectorX> const &x,
         vector_expression<VectorY> &y,
 	typename VectorY::value_type alpha,
@@ -111,7 +111,7 @@ void gemv(
 	SIZE_CHECK(x().size() == A().size2());
 	SIZE_CHECK(y().size() == A().size1());
 
-	CBLAS_ORDER const stor_ord= (CBLAS_ORDER)storage_order<typename MatrA::orientation>::value;
+	CBLAS_ORDER const stor_ord= (CBLAS_ORDER)storage_order<typename MatA::orientation>::value;
 	
 	auto storageA = A().raw_storage();
 	auto storagex = x().raw_storage();

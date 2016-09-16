@@ -115,24 +115,24 @@ inline void gemm(
 }
 
 // C <- alpha * A * B + beta * C
-template <typename MatrA, typename MatrB, typename MatrC>
+template <typename MatA, typename MatB, typename MatC>
 void gemm(
-	matrix_expression<MatrA> const& A,
-	matrix_expression<MatrB> const& B,
-	matrix_expression<MatrC>& C, 
-	typename MatrC::value_type alpha,
+	matrix_expression<MatA> const& A,
+	matrix_expression<MatB> const& B,
+	matrix_expression<MatC>& C, 
+	typename MatC::value_type alpha,
 	boost::mpl::true_
 ) {
 	SIZE_CHECK(A().size1() == C().size1());
 	SIZE_CHECK(B().size2() == C().size2());
 	SIZE_CHECK(A().size2()== B().size1());
 	
-	CBLAS_TRANSPOSE transA = std::is_same<typename MatrA::orientation,typename MatrC::orientation>::value?CblasNoTrans:CblasTrans;
-	CBLAS_TRANSPOSE transB = std::is_same<typename MatrB::orientation,typename MatrC::orientation>::value?CblasNoTrans:CblasTrans;
+	CBLAS_TRANSPOSE transA = std::is_same<typename MatA::orientation,typename MatC::orientation>::value?CblasNoTrans:CblasTrans;
+	CBLAS_TRANSPOSE transB = std::is_same<typename MatB::orientation,typename MatC::orientation>::value?CblasNoTrans:CblasTrans;
 	std::size_t m = C().size1();
 	std::size_t n = C().size2();
 	std::size_t k = A().size2();
-	CBLAS_ORDER stor_ord = (CBLAS_ORDER) storage_order<typename MatrC::orientation >::value;
+	CBLAS_ORDER stor_ord = (CBLAS_ORDER) storage_order<typename MatC::orientation >::value;
 
 	auto storageA = A().raw_storage();
 	auto storageB = B().raw_storage();
@@ -142,7 +142,7 @@ void gemm(
 	        storageA.leading_dimension,
 		storageB.values,
 	        storageB.leading_dimension,
-		typename MatrC::value_type(1),
+		typename MatC::value_type(1),
 		storageC.values,
 	        storageC.leading_dimension
 	);
