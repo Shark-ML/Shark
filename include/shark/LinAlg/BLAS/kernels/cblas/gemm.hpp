@@ -127,8 +127,8 @@ void gemm(
 	SIZE_CHECK(B().size2() == C().size2());
 	SIZE_CHECK(A().size2()== B().size1());
 	
-	CBLAS_TRANSPOSE transA = traits::same_orientation(A,C)?CblasNoTrans:CblasTrans;
-	CBLAS_TRANSPOSE transB = traits::same_orientation(B,C)?CblasNoTrans:CblasTrans;
+	CBLAS_TRANSPOSE transA = std::is_same<typename MatrA::orientation,typename MatrC::orientation>::value?CblasNoTrans:CblasTrans;
+	CBLAS_TRANSPOSE transB = std::is_same<typename MatrB::orientation,typename MatrC::orientation>::value?CblasNoTrans:CblasTrans;
 	std::size_t m = C().size1();
 	std::size_t n = C().size2();
 	std::size_t k = A().size2();

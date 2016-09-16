@@ -93,7 +93,7 @@ void trsm(
 	//orientation is defined by the second argument
 	CBLAS_ORDER const storOrd = (CBLAS_ORDER)storage_order<typename MatB::orientation>::value;
 	//if orientations do not match, wecan interpret this as transposing A
-	bool transposeA =  !traits::same_orientation(A,B);
+	bool transposeA =  !std::is_same<typename TriangularA::orientation,typename MatB::orientation>::value;
 	
 	CBLAS_DIAG cblasUnit = unit?CblasUnit:CblasNonUnit;
 	CBLAS_UPLO cblasUplo = (upper != transposeA)?CblasUpper:CblasLower;

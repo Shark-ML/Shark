@@ -79,7 +79,7 @@ extern "C" {
 #include <shark/Core/Exception.h>
 #include <complex>
 #include <boost/mpl/bool.hpp>
-#include "../traits.hpp"
+#include "../../detail/traits.hpp"
 
 namespace shark {
 namespace blas {

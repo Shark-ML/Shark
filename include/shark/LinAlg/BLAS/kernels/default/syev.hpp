@@ -32,7 +32,7 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_SYEV_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_SYEV_HPP
 
-#include "../traits.hpp"
+#include "../../detail/traits.hpp"
 
 namespace shark { namespace blas { namespace bindings {
 	

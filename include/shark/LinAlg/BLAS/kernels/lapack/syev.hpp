@@ -33,7 +33,7 @@
 #define SHARK_LINALG_BLAS_KERNELS_LAPACK_SYEV_HPP
 
 #include "fortran.hpp"
-#include "../traits.hpp"
+#include "../../detail/traits.hpp"
 
 #define SHARK_LAPACK_DSYEV FORTRAN_ID(dsyev)
 

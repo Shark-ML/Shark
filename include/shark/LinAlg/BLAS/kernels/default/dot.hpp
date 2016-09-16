@@ -30,7 +30,7 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_DOT_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_DOT_HPP
 
-#include "../traits.hpp"
+#include "../../detail/traits.hpp"
 #include <boost/mpl/bool.hpp>
 
 namespace shark { namespace blas {namespace bindings{
