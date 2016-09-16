@@ -68,26 +68,28 @@ inline void syev(
 
 template <typename MatrA, typename VectorB>
 void syev(
-	matrix_expression<MatrA>& matA,
+	matrix_expression<MatrA>& A,
 	vector_expression<VectorB>& eigenValues
 ) {
-	SIZE_CHECK(matA().size1() == matA().size2());
-	SIZE_CHECK(matA().size1() == eigenValues().size());
+	SIZE_CHECK(A().size1() == A().size2());
+	SIZE_CHECK(A().size1() == eigenValues().size());
 	
-	std::size_t n = matA().size1();
+	std::size_t n = A().size1();
 	bool upper = false;
 	//lapack is column major storage.
 	if(boost::is_same<typename MatrA::orientation, blas::row_major>::value){
 		upper = !upper;
 	}
+	auto storageA = A().raw_storage();
+	auto storageEig = eigenValues().raw_storage();
 	syev(
 		n, upper,
-		traits::storage(matA()),
-		traits::leading_dimension(matA()),
-		traits::storage(eigenValues())
+		storageA.values,
+	        storageA.leading_dimension,
+		storageEig.values
 	);
 	
-	matA() = trans(matA);
+	A() = trans(A);
 	
 	//reverse eigenvectors and eigenvalues
 	for (int i = 0; i < (int)n-i-1; i++)
@@ -99,7 +101,7 @@ void syev(
 		for (int i = 0; i < (int)n-i-1; i++)
 		{
 			int l =  n-i-1;
-			std::swap(matA()( j , l ), matA()( j , i ));
+			std::swap(A()( j , l ), A()( j , i ));
 		}
 	}
 }

@@ -99,7 +99,7 @@ inline void gemv(CBLAS_ORDER const Order,
 // op (A) == A || A^T || A^H
 template <typename MatrA, typename VectorX, typename VectorY>
 void gemv(
-	 matrix_expression<MatrA> const &A,
+	matrix_expression<MatrA> const &A,
 	vector_expression<VectorX> const &x,
         vector_expression<VectorY> &y,
 	typename VectorY::value_type alpha,
@@ -113,14 +113,17 @@ void gemv(
 
 	CBLAS_ORDER const stor_ord= (CBLAS_ORDER)storage_order<typename MatrA::orientation>::value;
 	
+	auto storageA = A().raw_storage();
+	auto storagex = x().raw_storage();
+	auto storagey = y().raw_storage();
 	gemv(stor_ord, CblasNoTrans, (int)m, (int)n, alpha,
-	        traits::storage(A),
-		traits::leading_dimension(A),
-	        traits::storage(x),
-	        traits::stride(x),
+		storageA.values,
+	        storageA.leading_dimension,
+		storagex.values,
+	        storagex.stride,
 	        typename VectorY::value_type(1),
-	        traits::storage(y),
-	        traits::stride(y)
+		storagey.values,
+	        storagey.stride
 	);
 }
 
@@ -161,9 +164,9 @@ struct optimized_gemv_detail<
 template<class M1, class M2, class M3>
 struct  has_optimized_gemv
 : public optimized_gemv_detail<
-	typename M1::storage_category,
-	typename M2::storage_category,
-	typename M3::storage_category,
+	typename M1::storage_type::storage_tag,
+	typename M2::storage_type::storage_tag,
+	typename M3::storage_type::storage_tag,
 	typename M1::value_type,
 	typename M2::value_type,
 	typename M3::value_type

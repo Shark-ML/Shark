@@ -37,22 +37,16 @@ namespace blas {
 template<class V>
 class vector_reference:public vector_expression<vector_reference<V> >{
 public:
-	typedef typename V::size_type size_type;
-	typedef typename V::difference_type difference_type;
+	typedef typename V::index_type index_type;
 	typedef typename V::value_type value_type;
 	typedef typename V::scalar_type scalar_type;
 	typedef typename V::const_reference const_reference;
 	typedef typename reference<V>::type reference;
-	typedef typename V::const_pointer const_pointer;
-	typedef typename pointer<V>::type pointer;
 
-	typedef typename V::index_type index_type;
-	typedef typename V::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<V>::type index_pointer;
-	
 	typedef vector_reference<V const> const_closure_type;
 	typedef vector_reference<V> closure_type;
-	typedef typename V::storage_category storage_category;
+	typedef typename storage<V>::type storage_type;
+	typedef typename V::const_storage_type const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction
@@ -68,7 +62,7 @@ public:
 	}
 	
 	/// \brief Return the size of the vector.
-	size_type size() const {
+	index_type size() const {
 		return expression().size();
 	}
 	
@@ -76,39 +70,8 @@ public:
 		expression().clear();
 	}
 
-	// ---------
-	// Dense low level interface
-	// ---------
-	
-	///\brief Returns the pointer to the beginning of the vector storage
-	///
-	/// Low-level access to the vectors internals. Elements storage()[i*stride()] for i=1,...,size()-1 are valid
-	pointer storage()const{
-		return expression().storage();
-	}
-	
-	///\brief Returns th stride between the elements in storage()
-	///
-	/// In general elements of dense storage entities are spaced like storage()[i*stride()] for i=1,...,size()-1
-	difference_type stride()const{
-		return expression().stride();
-	}
-	
-	// ---------
-	// Sparse low level interface
-	// ---------
-	
-	/// \brief Number of nonzero elements of the vector.
-	size_type nnz()const{
-		return expression().nnz();
-	}
-	/// \brief Array of values of the nonzero elements.
-	const_pointer values()const{
-		return expression().values();
-	}
-	/// \brief Array of indices of the nonzero elements.
-	index_pointer indices()const{
-		return expression().indices();
+	storage_type raw_storage()const{
+		return expression().raw_storage();
 	}
 	
 	// ---------
@@ -135,9 +98,11 @@ public:
 
 	// Iterator types
 	typedef typename V::const_iterator const_iterator;
-	typedef typename boost::mpl::if_<boost::is_const<V>,
-	        typename V::const_iterator,
-	        typename V::iterator>::type iterator;
+	typedef typename  boost::mpl::if_<
+		std::is_const<V>,
+		typename V::const_iterator,
+		typename V::iterator
+	>::type iterator;
 
 	// Iterator is the iterator of the referenced expression.
 	const_iterator begin() const{
@@ -165,7 +130,7 @@ public:
 		return expression().clear_range(start,end);
 	}
 	
-	void reserve(size_type non_zeros){
+	void reserve(index_type non_zeros){
 		expression().reserve(non_zeros);
 	}
 
@@ -185,27 +150,21 @@ private:
 template<class V>
 class vector_range:public vector_expression<vector_range<V> >{
 public:
-	typedef typename V::size_type size_type;
-	typedef typename V::difference_type difference_type;
+	typedef typename V::index_type index_type;
 	typedef typename V::value_type value_type;
 	typedef typename V::scalar_type scalar_type;
 	typedef typename V::const_reference const_reference;
 	typedef typename reference<V>::type reference;
-	typedef typename V::const_pointer const_pointer;
-	typedef typename pointer<V>::type pointer;
-
-	typedef typename V::index_type index_type;
-	typedef typename V::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<V>::type index_pointer;
 
 	typedef typename closure<V>::type vector_closure_type;
 	typedef vector_range<typename const_expression<V>::type> const_closure_type;
 	typedef vector_range<V> closure_type;
-	typedef typename V::storage_category storage_category;
+	typedef typename storage<V>::type storage_type;
+	typedef typename V::const_storage_type const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
-	vector_range(vector_closure_type const& data, size_type start, size_type end):
+	vector_range(vector_closure_type const& data, index_type start, index_type end):
 		m_expression(data), m_start(start), m_size(end-start){
 		RANGE_CHECK(start <= end);
 		RANGE_CHECK(start <= m_expression.size());
@@ -226,7 +185,7 @@ public:
 	// Internal Accessors
 	// ---------
 	
-	size_type start() const{
+	index_type start() const{
 		return m_start;
 	}
 	
@@ -238,26 +197,12 @@ public:
 	}
 	
 	/// \brief Return the size of the vector.
-	size_type size() const {
+	index_type size() const {
 		return m_size;
 	}
 
-	// ---------
-	// Dense low level interface
-	// ---------
-	
-	///\brief Returns the pointer to the beginning of the vector storage
-	///
-	/// Low-level access to the vectors internals. Elements storage()[i*stride()] for i=1,...,size()-1 are valid
-	pointer storage()const{
-		return expression().storage()+start()*stride();
-	}
-	
-	///\brief Returns the stride between the elements in storage()
-	///
-	/// In general elements of dense storage entities are spaced like storage()[i*stride()] for i=1,...,size()-1
-	difference_type stride()const{
-		return expression().stride();
+	storage_type raw_storage()const{
+		return expression().raw_storage().sub_region(start());
 	}
 	
 	// ---------
@@ -323,13 +268,13 @@ public:
 		return iterator(m_expression.clear_element(pos.inner()),start());
 	}
 	
-	void reserve(size_type non_zeros){
+	void reserve(index_type non_zeros){
 		m_expression.reserve(non_zeros);
 	}
 private:
 	vector_closure_type m_expression;
-	size_type m_start;
-	size_type m_size;
+	index_type m_start;
+	index_type m_size;
 };
 
 /// \brief Represents a given chunk of memory as a dense vector of elements of type T.
@@ -340,23 +285,16 @@ class dense_vector_adaptor: public vector_expression<dense_vector_adaptor<T> > {
 	typedef dense_vector_adaptor<T> self_type;
 public:
 
-	//std::container types
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
+	typedef std::size_t index_type;
 	typedef typename boost::remove_const<T>::type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const& const_reference;
 	typedef T&  reference;
-	typedef T* pointer;
-	typedef value_type const* const_pointer;
 
-	typedef std::size_t index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type* index_pointer;
-
-	typedef vector_reference<self_type const> const const_closure_type;
-	typedef vector_reference<self_type> closure_type;
-	typedef dense_tag storage_category;
+	typedef dense_vector_adaptor<T const> const_closure_type;
+	typedef dense_vector_adaptor closure_type;
+	typedef dense_vector_storage<T> storage_type;
+	typedef dense_vector_storage<value_type const> const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
@@ -367,9 +305,9 @@ public:
 	/// \param expression The Expression from which to construct the Proxy
  	template<class E>
 	dense_vector_adaptor(vector_expression<E> const& expression)
-	: m_values(expression().storage())
+	: m_values(expression().raw_storage().values)
 	, m_size(expression().size())
-	, m_stride(expression().stride()){}
+	, m_stride(expression().raw_storage().stride){}
 	
 	/// \brief Constructor of a self_type proxy from a Dense VectorExpression
 	///
@@ -377,50 +315,34 @@ public:
 	/// \param expression The Expression from which to construct the Proxy
  	template<class E>
 	dense_vector_adaptor(vector_expression<E>& expression)
-	: m_values(expression().storage())
+	: m_values(expression().raw_storage().values)
 	, m_size(expression().size())
-	, m_stride(expression().stride()){}
+	, m_stride(expression().raw_storage().stride){}
 		
 	/// \brief Constructor of a self_type proxy from a block of memory
 	/// \param values the block of memory used
 	/// \param size size of the self_type
  	/// \param stride distance between elements of the self_type in memory
-	dense_vector_adaptor(pointer values, size_type size, difference_type stride = 1 ):
+	dense_vector_adaptor(T* values, index_type size, index_type stride = 1 ):
 		m_values(values),m_size(size),m_stride(stride){}	
 
 	/// \brief Copy-constructor of a self_type
 	/// \param v is the proxy to be copied
 	template<class U>
 	dense_vector_adaptor(dense_vector_adaptor<U> const& v)
-	:m_values(v.storage()),m_size(v.size()),m_stride(v.stride())
-	{}
-		
-	// ---------
-	// Dense low level interface
-	// ---------
+	: m_values(v.raw_storage().values)
+	, m_size(v.size())
+	, m_stride(v.raw_storage().stride){}
 	
 	/// \brief Return the size of the vector.
-	size_type size() const {
+	index_type size() const {
 		return m_size;
 	}
 	
-	///\brief Returns the pointer to the beginning of the vector storage
-	///
-	/// Low-level access to the vectors internals. Elements storage()[i*stride()] for i=1,...,size()-1 are valid
-	pointer storage()const{
-		return m_values;
+	///\brief Returns the underlying storage_type structure for low level access
+	storage_type raw_storage() const{
+		return {m_values,m_stride};
 	}
-	
-	///\brief Returns th stride between the elements in storage()
-	///
-	/// In general elements of dense storage entities are spaced like storage()[i*stride()] for i=1,...,size()-1
-	difference_type stride()const{
-		return m_stride;
-	}
-	
-	// ---------
-	// High level interface
-	// ---------
 	
 	// --------------
 	// Element access
@@ -491,7 +413,7 @@ public:
 
 	/// \brief return an iterator after the last element of the vector
 	const_iterator end() const {
-		return const_iterator(m_values+size()*stride(),size());
+		return const_iterator(m_values+size()*m_stride,size());
 	}
 
 	/// \brief Return an iterator on the first element of the vector
@@ -501,7 +423,7 @@ public:
 
 	/// \brief Return an iterator at the end of the vector
 	iterator end(){
-		return iterator(m_values+size()*stride(),size());
+		return iterator(m_values+size()*m_stride,size());
 	}
 	
 	//insertion and erasing of elements
@@ -527,9 +449,9 @@ public:
 		return end;
 	}
 private:
-	pointer m_values;
-	std::size_t m_size;
-	std::ptrdiff_t m_stride;
+	T* m_values;
+	index_type m_size;
+	index_type m_stride;
 };
 
 template<class T,class I>
@@ -538,23 +460,17 @@ class sparse_vector_adaptor: public vector_expression<sparse_vector_adaptor<T,I>
 public:
 
 	//std::container types
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
+	typedef typename boost::remove_const<I>::type index_type;
 	typedef typename boost::remove_const<T>::type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const& const_reference;
-	typedef const_reference  reference;
-	typedef value_type const* const_pointer;
-	typedef const_pointer pointer;
+	typedef const_reference reference;
 	
-	typedef typename boost::remove_const<I>::type index_type;
-	typedef index_type const* const_index_pointer;
-	typedef const_index_pointer index_pointer;
-
-	typedef sparse_tag storage_category;
+	typedef sparse_vector_adaptor<value_type const,index_type const> const_closure_type;
+	typedef sparse_vector_adaptor closure_type;
+	typedef sparse_vector_storage<T const,I const> storage_type;
+	typedef sparse_vector_storage<value_type const,index_type const> const_storage_type;
 	typedef elementwise_tag evaluation_category;
-	typedef vector_reference<self_type const> const const_closure_type;
-	typedef vector_reference<self_type> closure_type;
 
 	// Construction and destruction
 
@@ -564,9 +480,9 @@ public:
 	/// \param expression Expression from which to construct the Proxy
  	template<class E>
 	sparse_vector_adaptor(vector_expression<E> const& expression)
-	: m_nonZeros(expression().nnz())
-	, m_indices(expression().indices())
-	, m_values(expression().values())
+	: m_nonZeros(expression().raw_storage().nnz)
+	, m_indices(expression().raw_storage().indices)
+	, m_values(expression().raw_storage().values)
 	, m_size(expression().size()){}
 	
 	
@@ -578,45 +494,34 @@ public:
 	/// \param indices the block of memory used to store the indices
 	/// \param memoryLength length of the strip of memory
 	sparse_vector_adaptor(
-		size_type size, const_pointer values,
-		const_index_pointer indices, 
-		size_type memoryLength
+		index_type size, 
+		value_type const* values,
+		index_type const* indices, 
+		index_type memoryLength
 	): m_nonZeros(memoryLength)
 	, m_indices(indices)
 	, m_values(values)
 	, m_size(size){}
 	
 	/// \brief Return the size of the vector
-	size_type size() const {
+	index_type size() const {
 		return m_size;
 	}
 	
-	// ---------
-	// Sparse low level interface
-	// ---------
-	
-	/// \brief Number of nonzero elements of the vector.
-	size_type nnz()const{
-		return m_nonZeros;
-	}
-	/// \brief Array of values of the nonzero elements.
-	const_pointer values()const{
-		return m_values;
-	}
-	/// \brief Array of indices of the nonzero elements.
-	index_pointer indices()const{
-		return m_indices;
+	///\brief Returns the underlying storage_type structure for low level access
+	storage_type raw_storage() const{
+		return {m_values,m_indices, m_nonZeros};
 	}
 
 	/// \brief Return a const reference to the element \f$i\f$
 	/// \param i index of the element
 	value_type operator()(index_type i) const {
 		SIZE_CHECK(i < m_size);
-		const_index_pointer pos = std::lower_bound(indices(),indices()+nnz(), i);
-		difference_type diff = pos-indices();
-		if(diff == (difference_type) nnz() || *pos != i)
+		index_type const* pos = std::lower_bound(m_indices,m_indices+m_nonZeros, i);
+		std::ptrdiff_t diff = pos-m_indices;
+		if(diff == (std::ptrdiff_t) m_nonZeros || *pos != i)
 			return value_type();
-		return values()[diff];
+		return m_values[diff];
 	}
 
 	/// \brief Return a const reference to the element \f$i\f$
@@ -634,17 +539,17 @@ public:
 
 	/// \brief return an iterator behind the last non-zero element of the vector
 	const_iterator begin() const {
-		return const_iterator(values(),indices(),0);
+		return const_iterator(m_values,m_indices,0);
 	}
 
 	/// \brief return an iterator behind the last non-zero element of the vector
 	const_iterator end() const {
-		return const_iterator(values(),indices(),nnz());
+		return const_iterator(m_values,m_indices,m_nonZeros);
 	}
 private:
 	std::size_t m_nonZeros;
-	const_index_pointer m_indices;
-	const_pointer m_values;
+	index_type const* m_indices;
+	value_type const* m_values;
 
 	std::size_t m_size;
 };

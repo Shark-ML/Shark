@@ -42,22 +42,16 @@ class vector_scalar_multiply:
 	typedef vector_scalar_multiply<E> self_type;
 public:
 	typedef typename E::const_closure_type expression_closure_type;
-	typedef typename E::size_type size_type;
-	typedef typename E::difference_type difference_type;
+	typedef typename E::index_type index_type;
 	typedef typename E::value_type value_type;
 	typedef typename E::scalar_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
-	typedef value_type const * const_pointer;
-	typedef value_type const*  pointer;
-
-	typedef typename E::index_type index_type;
-	typedef typename E::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E>::type index_pointer;
 
 	typedef self_type const_closure_type;
 	typedef self_type closure_type;
-	typedef unknown_storage_tag storage_category;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef typename E::evaluation_category evaluation_category;
 
 	// Construction and destruction
@@ -66,7 +60,7 @@ public:
 		m_expression(e), m_scalar(scalar) {}
 
 	// Accessors
-	size_type size() const {
+	index_type size() const {
 		return m_expression.size();
 	}
 
@@ -127,35 +121,28 @@ class scalar_vector:public vector_expression<scalar_vector<T> > {
 
 	typedef scalar_vector<T> self_type;
 public:
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
+	typedef std::size_t index_type;
 	typedef T value_type;
 	typedef T scalar_type;
 	typedef const T& const_reference;
 	typedef const_reference reference;
-	typedef T const* const_pointer;
-	typedef const_pointer pointer;
-	
-
-	typedef std::size_t index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type index_pointer;
 
 	typedef self_type const_closure_type;
 	typedef self_type closure_type;
-	typedef unknown_storage_tag storage_category;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	scalar_vector()
 	:m_size(0), m_value() {}
-	explicit scalar_vector(size_type size, value_type value)
+	explicit scalar_vector(index_type size, value_type value)
 	:m_size(size), m_value(value) {}
 	scalar_vector(const scalar_vector& v)
 	:m_size(v.m_size), m_value(v.m_value) {}
 
 	// Accessors
-	size_type size() const {
+	index_type size() const {
 		return m_size;
 	}
 
@@ -180,7 +167,7 @@ public:
 	}
 
 private:
-	size_type m_size;
+	index_type m_size;
 	value_type m_value;
 };
 
@@ -196,22 +183,15 @@ class vector_unary:
 public:
 	typedef F functor_type;
 	typedef typename E::const_closure_type expression_closure_type;
-	typedef typename E::size_type size_type;
-	typedef typename E::difference_type difference_type;
+	typedef typename E::index_type index_type;
 	typedef typename F::result_type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
-	typedef value_type const * const_pointer;
-	typedef value_type const*  pointer;
-
-	typedef typename E::index_type index_type;
-	typedef typename E::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E>::type index_pointer;
-
 	typedef self_type const_closure_type;
 	typedef self_type closure_type;
-	typedef unknown_storage_tag storage_category;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef typename E::evaluation_category evaluation_category;
 
 	// Construction and destruction
@@ -220,7 +200,7 @@ public:
 		m_expression(e), m_functor(functor) {}
 
 	// Accessors
-	size_type size() const {
+	index_type size() const {
 		return m_expression.size();
 	}
 
@@ -236,31 +216,19 @@ public:
 	//computation kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		//compute this by first assigning the result of the argument and then applying
-		//the function to every element
-		assign(x,m_expression);
-		typename VecX::iterator end=x().end();
-		for(typename VecX::iterator pos =x().begin(); pos != end; ++pos){
-			*pos= alpha * m_functor(*pos);
-		}
+		x().clear();
+		plus_assign_to(x,eval_block(m_expression), alpha);
 	}
 	template<class VecX>
 	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		//First assign result of this expression to a temporary and then perform plus_assignment to x
-		typename vector_temporary<self_type>::type temporary(size());
-		assign_to(temporary,alpha);
-		plus_assign_to(x,temporary);
+		plus_assign_to(x,eval_block(m_expression), alpha);
 	}
 	
 	template<class VecX>
 	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		//First assign result of this expression to a temporary and then perform minus_assignment to x
-		typename vector_temporary<self_type>::type temporary(size());
-		assign_to(temporary,alpha);
-		minus_assign_to(x,temporary);
+		plus_assign_to(x,eval_block(m_expression), -alpha);
 	}
 
-public:
 	// Element access
 	const_reference operator()(index_type i) const {
 		return m_functor(m_expression(i));
@@ -281,6 +249,17 @@ public:
 		return const_iterator(m_expression.end(),m_functor);
 	}
 private:
+	template<class VecX, class VecV>
+	void plus_assign_to(
+		vector_expression<VecX>& x,
+		vector_expression<VecV> const& v,
+		scalar_type alpha
+	)const{
+		vector_unary<VecV, F> e(v(), m_functor);
+		vector_scalar_multiply<vector_unary<VecV,F> > e1(e,alpha);
+		plus_assign(x,e1);
+	}
+
 	expression_closure_type m_expression;
 	F m_functor;
 };
@@ -293,45 +272,39 @@ private:
 		typename E2::value_type
 	> functor_type;
 public:
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
 	typedef typename functor_type::result_type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
-	typedef value_type const * const_pointer;
-	typedef value_type const*  pointer;
-
 	typedef typename E1::index_type index_type;
-	typedef typename E1::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E1>::type index_pointer;
 
-	typedef typename E1::const_closure_type expression_closure1_type;
-	typedef typename E2::const_closure_type expression_closure2_type;
+	typedef typename E1::const_closure_type lhs_closure_type;
+	typedef typename E2::const_closure_type rhs_closure_type;
 	
 	typedef vector_addition const_closure_type;
 	typedef vector_addition closure_type;
-	typedef unknown_storage_tag storage_category;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 
 	// Construction and destruction
 	explicit vector_addition (
-		expression_closure1_type e1, 
-		expression_closure2_type e2
+		lhs_closure_type e1, 
+		rhs_closure_type e2
 	):m_lhs(e1),m_rhs(e2){
 		SIZE_CHECK(e1.size() == e2.size());
 	}
 
 	// Accessors
-	size_type size() const {
+	index_type size() const {
 		return m_lhs.size();
 	}
 
 	// Expression accessors
-	expression_closure1_type const& lhs() const {
+	lhs_closure_type const& lhs() const {
 		return m_lhs;
 	}
-	expression_closure2_type const& rhs() const {
+	rhs_closure_type const& rhs() const {
 		return m_rhs;
 	}
 
@@ -386,58 +359,47 @@ public:
 	}
 
 private:
-	expression_closure1_type m_lhs;
-	expression_closure2_type m_rhs;
+	lhs_closure_type m_lhs;
+	rhs_closure_type m_rhs;
 };
 
 template<class E1, class E2, class F>
-class vector_binary:
-	public vector_expression<vector_binary<E1,E2, F> > {
-	typedef vector_binary<E1,E2, F> self_type;
-	typedef E1 const lhs_type;
-	typedef E2 const rhs_type;
+class vector_binary:public vector_expression<vector_binary<E1,E2, F> > {
+	typedef typename E1::const_closure_type lhs_closure_type;
+	typedef typename E2::const_closure_type rhs_closure_type;
 public:
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
-	typedef typename F::result_type value_type;
+	typedef F functor_type;
+	typedef typename functor_type::result_type value_type;
+	typedef typename E1::index_type index_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
-	typedef value_type const * const_pointer;
-	typedef value_type const*  pointer;
-
-	typedef typename E1::index_type index_type;
-	typedef typename E1::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E1>::type index_pointer;
-
-	typedef F functor_type;
-	typedef typename E1::const_closure_type expression_closure1_type;
-	typedef typename E2::const_closure_type expression_closure2_type;
 	
-	typedef self_type const_closure_type;
-	typedef self_type closure_type;
-	typedef unknown_storage_tag storage_category;
+	typedef vector_binary const_closure_type;
+	typedef vector_binary closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 
 	// Construction and destruction
 	explicit vector_binary (
-		expression_closure1_type e1, 
-		expression_closure2_type e2,
+		lhs_closure_type e1, 
+		rhs_closure_type e2,
 		F functor
 	):m_lhs(e1),m_rhs(e2), m_functor(functor) {
 		SIZE_CHECK(e1.size() == e2.size());
 	}
 
 	// Accessors
-	size_type size() const {
+	index_type size() const {
 		return m_lhs.size ();
 	}
 
 	// Expression accessors
-	expression_closure1_type const& lhs() const {
+	lhs_closure_type const& lhs() const {
 		return m_lhs;
 	}
-	expression_closure2_type const& rhs() const {
+	rhs_closure_type const& rhs() const {
 		return m_rhs;
 	}
 	
@@ -496,9 +458,9 @@ public:
 	}
 
 private:
-	expression_closure1_type m_lhs;
-	expression_closure2_type m_rhs;
-	F m_functor;
+	lhs_closure_type m_lhs;
+	rhs_closure_type m_rhs;
+	functor_type m_functor;
 
 	template<class VecX, class LHS, class RHS>
 	void plus_assign_to(

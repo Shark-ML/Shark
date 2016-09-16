@@ -111,11 +111,13 @@ void trmv(
 	CBLAS_UPLO cblasUplo = upper?CblasUpper:CblasLower;
 	CBLAS_ORDER stor_ord= (CBLAS_ORDER)storage_order<typename MatrA::orientation>::value;
 	
+	auto storageA = A().raw_storage();
+	auto storagex = x().raw_storage();
 	trmv(stor_ord, cblasUplo, CblasNoTrans, cblasUnit, (int)n,
-	        traits::storage(A),
-		traits::leading_dimension(A),
-	        traits::storage(x),
-	        traits::stride(x)
+		storageA.values,
+	        storageA.leading_dimension,
+		storagex.values,
+	        storagex.stride
 	);
 }
 
@@ -156,8 +158,8 @@ struct optimized_trmv_detail<
 template<class M1, class M2>
 struct  has_optimized_trmv
 : public optimized_trmv_detail<
-	typename M1::storage_category,
-	typename M2::storage_category,
+	typename M1::storage_type::storage_tag,
+	typename M2::storage_type::storage_tag,
 	typename M1::value_type,
 	typename M2::value_type
 >{};

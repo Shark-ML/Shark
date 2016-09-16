@@ -91,12 +91,13 @@ void trsv(
 	
 
 	int const n = A().size1();
-
+	auto storageA = A().raw_storage();
+	auto storageb = b().raw_storage();
 	trsv(storOrd, uplo, CblasNoTrans,cblasUnit, n,
-	        traits::storage(A),
-	        traits::leading_dimension(A),
-	        traits::storage(b),
-	        traits::stride(b)
+	        storageA.values,
+	        storageA.leading_dimension,
+		storageb.values,
+	        storageb.stride
 	);
 }
 
@@ -137,8 +138,8 @@ struct optimized_trsv_detail<
 template<class M, class V>
 struct  has_optimized_trsv
 : public optimized_trsv_detail<
-	typename M::storage_category,
-	typename V::storage_category,
+	typename M::storage_type::storage_tag,
+	typename V::storage_type::storage_tag,
 	typename M::value_type,
 	typename V::value_type
 >{};

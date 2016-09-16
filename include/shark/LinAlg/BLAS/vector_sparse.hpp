@@ -32,6 +32,9 @@
 #include "detail/vector_proxy_classes.hpp"
 #include <vector>
 
+#include <boost/serialization/collection_size_type.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/vector.hpp>
 namespace shark {
 namespace blas {
 
@@ -60,18 +63,11 @@ class compressed_vector:public vector_container<compressed_vector<T, I> > {
 	typedef T& true_reference;
 	typedef compressed_vector<T, I> self_type;
 public:
-
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
 	typedef T value_type;
 	typedef value_type scalar_type;
-	typedef T *pointer;
-	typedef const T *const_pointer;
 	typedef const T& const_reference;
 
 	typedef I index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type index_pointer;
 	
 	class reference {
 	private:
@@ -81,7 +77,7 @@ public:
 		}
 		value_type& ref() const {
 			//find position of the index in the array
-			index_type const* start = m_vector.indices();
+			index_type const* start = m_vector.m_indices.data();
 			index_type const* end = start + m_vector.nnz();
 			index_type const *pos = std::lower_bound(start,end,m_i);
 
@@ -89,14 +85,14 @@ public:
 				return m_vector.m_values[pos-start];
 			else {
 				//create iterator to the insertion position and insert new element
-				iterator posIter(m_vector.values(),m_vector.indices(),pos-start);
+				iterator posIter(m_vector.m_values.data(),m_vector.m_indices.data(),pos-start);
 				return *m_vector.set_element(posIter, m_i, m_vector.m_zero);
 			}
 		}
 
 	public:
 		// Construction and destruction
-		reference(self_type& m, size_type i):
+		reference(self_type& m, index_type i):
 			m_vector(m), m_i(i) {}
 
 		// Assignment
@@ -134,68 +130,57 @@ public:
 		}
 	private:
 		self_type& m_vector;
-		size_type m_i;
+		index_type m_i;
 	};
 
-	typedef const vector_reference<const self_type> const_closure_type;
+	typedef vector_reference<self_type const> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
-	typedef sparse_tag storage_category;
+	typedef sparse_vector_storage<T,I> storage_type;
+	typedef sparse_vector_storage<value_type const,index_type const> const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	compressed_vector():m_size(0), m_nnz(0),m_indices(1,0),m_zero(0){}
-	explicit compressed_vector(size_type size, value_type value = value_type(), size_type non_zeros = 0)
+	explicit compressed_vector(index_type size, value_type value = value_type(), index_type non_zeros = 0)
 	:m_size(size), m_nnz(0), m_indices(non_zeros,0), m_values(non_zeros),m_zero(0){}
 	template<class AE>
-	compressed_vector(vector_expression<AE> const& ae, size_type non_zeros = 0)
+	compressed_vector(vector_expression<AE> const& ae, index_type non_zeros = 0)
 	:m_size(ae().size()), m_nnz(0), m_indices(non_zeros,0), m_values(non_zeros),m_zero(0)
 	{
 		assign(*this, ae);
 	}
 
 	// Accessors
-	size_type size() const {
+	index_type size() const {
 		return m_size;
 	}
-	size_type nnz_capacity() const {
+	index_type nnz_capacity() const {
 		return m_indices.size();
 	}
-	size_type nnz() const {
+	index_type nnz() const {
 		return m_nnz;
 	}
 
-	// Storage accessors
-	void set_filled(size_type filled) {
+	void set_filled(index_type filled) {
 		SIZE_CHECK(filled <= nnz_capacity());
 		m_nnz = filled;
 	}
 	
-	index_type const* indices() const{
-		if(nnz_capacity() == 0)
-			return 0;
-		return& m_indices[0];
+	///\brief Returns the underlying storage structure for low level access
+	storage_type raw_storage(){
+		return {m_values.data(), m_indices.data(), m_nnz};
 	}
-	index_type* indices(){
-		if(nnz_capacity() == 0)
-			return 0;
-		return& m_indices[0];
-	}
-	value_type const* values() const {
-		if(nnz_capacity() == 0)
-			return 0;
-		return& m_values[0];
-	}
-	value_type* values(){
-		if(nnz_capacity() == 0)
-			return 0;
-		return& m_values[0];
+	
+	///\brief Returns the underlying storage structure for low level access
+	const_storage_type raw_storage() const{
+		return {m_values.data(), m_indices.data(), m_nnz};
 	}
 
-	void resize(size_type size) {
+	void resize(index_type size) {
 		m_size = size;
 		m_nnz = 0;
 	}
-	void reserve(size_type non_zeros) {
+	void reserve(index_type non_zeros) {
 		if(non_zeros <= nnz_capacity()) return;
 		non_zeros = std::min(size(),non_zeros);
 		m_indices.resize(non_zeros);
@@ -203,22 +188,22 @@ public:
 	}
 
 	// Element access
-	const_reference operator()(size_type i) const {
+	const_reference operator()(index_type i) const {
 		SIZE_CHECK(i < m_size);
 		std::size_t pos = lower_bound(i);
 		if (pos == nnz() || m_indices[pos] != i)
 			return m_zero;
 		return m_values [pos];
 	}
-	reference operator()(size_type i) {
+	reference operator()(index_type i) {
 		return reference(*this,i);
 	}
 
 
-	const_reference operator [](size_type i) const {
+	const_reference operator [](index_type i) const {
 		return (*this)(i);
 	}
-	reference operator [](size_type i) {
+	reference operator [](index_type i) {
 		return (*this)(i);
 	}
 
@@ -265,31 +250,31 @@ public:
 	typedef compressed_storage_iterator<value_type, index_type const> iterator;
 
 	const_iterator begin() const {
-		return const_iterator(values(),indices(),0);
+		return const_iterator(m_values.data(),m_indices.data(),0);
 	}
 
 	const_iterator end() const {
-		return const_iterator(values(),indices(),nnz());
+		return const_iterator(m_values.data(),m_indices.data(),nnz());
 	}
 
 	iterator begin() {
-		return iterator(values(),indices(),0);
+		return iterator(m_values.data(),m_indices.data(),0);
 	}
 
 	iterator end() {
-		return iterator(values(),indices(),nnz());
+		return iterator(m_values.data(),m_indices.data(),nnz());
 	}
 	
 	// Element assignment
-	iterator set_element(iterator pos, size_type index, value_type value) {
-		RANGE_CHECK(size_type(pos - begin()) <=m_size);
+	iterator set_element(iterator pos, index_type index, value_type value) {
+		RANGE_CHECK(index_type(pos - begin()) <=m_size);
 		
 		if(pos != end() && pos.index() == index){
 			*pos = value;
 			return pos;
 		}
 		//get position of the new element in the array.
-		difference_type arrayPos = pos - begin();
+		std::ptrdiff_t arrayPos = pos - begin();
 		if (m_nnz <= nnz_capacity())//reserve more space if needed, this invalidates pos.
 			reserve(std::max<std::size_t>(2 * nnz_capacity(),1));
 		
@@ -307,13 +292,13 @@ public:
 		
 		
 		//return new iterator to the inserted element.
-		return iterator(values(),indices(),arrayPos);
+		return iterator(m_values.data(),m_indices.data(),arrayPos);
 	}
 	
 	iterator clear_range(iterator start, iterator end) {
 		//get position of the elements in the array.
-		difference_type startPos = start - begin();
-		difference_type endPos = end - begin();
+		std::ptrdiff_t startPos = start - begin();
+		std::ptrdiff_t endPos = end - begin();
 		
 		//remove the elements in the range
 		std::copy(
@@ -324,12 +309,12 @@ public:
 		);
 		m_nnz -= endPos - startPos;
 		//return new iterator to the next element
-		return iterator(values(),indices(), startPos);
+		return iterator(m_values.data(),m_indices.data(), startPos);
 	}
 
 	iterator clear_element(iterator pos){
 		//get position of the element in the array.
-		difference_type arrayPos = pos - begin();
+		std::ptrdiff_t arrayPos = pos - begin();
 		if(arrayPos == m_nnz-1){//last element
 			--m_nnz;
 			return end();
@@ -342,7 +327,7 @@ public:
 			m_indices.begin()+arrayPos+1,m_indices.begin() + m_nnz , m_indices.begin() + arrayPos
 		);
 		//return new iterator to the next element
-		return iterator(values(),indices(),arrayPos);
+		return iterator(m_values.data(),m_indices.data(),arrayPos);
 	}
 
 	// Serialization
@@ -361,13 +346,13 @@ public:
 
 private:
 	std::size_t lower_bound( index_type t)const{
-		index_type const* begin = indices();
-		index_type const* end = indices()+nnz();
+		index_type const* begin = m_indices.data();
+		index_type const* end = m_indices.data()+nnz();
 		return std::lower_bound(begin, end, t)-begin;
 	}
 
-	size_type m_size;
-	size_type m_nnz;
+	index_type m_size;
+	index_type m_nnz;
 	std::vector<index_type> m_indices;
 	std::vector<value_type> m_values;
 	value_type m_zero;

@@ -301,12 +301,12 @@ void assign(
 	sparse_bidirectional_iterator_tag tag, dense_random_access_iterator_tag
 ){	
 	typedef typename V::value_type value_type;
-	typedef typename V::size_type size_type;
+	typedef typename V::index_type index_type;
 	value_type zero = value_type();
-	size_type size = e().size();
+	index_type size = e().size();
 	
 	typename V::iterator it = v().begin();
-	for(size_type i = 0; i != size; ++i,++it){
+	for(index_type i = 0; i != size; ++i,++it){
 		if(it == v().end() || it.index() != i){//insert missing elements
 			it = v().set_element(it,i,zero); 
 		}
@@ -331,15 +331,15 @@ void assign_sparse(
 	F f
 ){	
 	typedef typename V::value_type value_type;
-	typedef typename V::size_type size_type;
+	typedef typename V::index_type index_type;
 	value_type zero = value_type();
 
 	typename V::iterator it = v().begin();
 	typename E::const_iterator ite = e().begin();
 	typename E::const_iterator ite_end = e().end();
 	while(it != v().end() && ite != ite_end) {
-		size_type it_index = it.index();
-		size_type ite_index = ite.index();
+		index_type it_index = it.index();
+		index_type ite_index = ite.index();
 		if (it_index == ite_index) {
 			f(*it, *ite);
 			++ ite;

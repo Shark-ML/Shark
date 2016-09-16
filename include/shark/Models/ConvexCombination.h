@@ -157,7 +157,7 @@ public:
 		SIZE_CHECK(coefficients.size1()==patterns.size1());
 
 		gradient.resize(numberOfParameters());
-		blas::dense_matrix_adaptor<double> weightGradient = blas::adapt_matrix(outputSize(),inputSize(),gradient.storage());
+		blas::dense_matrix_adaptor<double> weightGradient = blas::to_matrix(gradient,outputSize(),inputSize());
 
 		//derivative is
 		//sum_i sum_j c_ij sum_k x_ik grad_q w_jk= sum_k sum_j grad_q w_jk (sum_i c_ij x_ik)

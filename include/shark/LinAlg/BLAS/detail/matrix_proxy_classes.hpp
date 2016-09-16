@@ -38,23 +38,17 @@ namespace blas {
 template<class M>
 class matrix_reference:public matrix_expression<matrix_reference<M> > {
 public:
-	typedef typename M::size_type size_type;
-	typedef typename M::difference_type difference_type;
+	typedef typename M::index_type index_type;
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
-	typedef typename M::const_pointer const_pointer;
-	typedef typename pointer<M>::type pointer;
-
-	typedef typename M::index_type index_type;
-	typedef typename M::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef matrix_reference<M const> const_closure_type;
 	typedef matrix_reference<M> closure_type;
 	typedef typename M::orientation orientation;
-	typedef typename M::storage_category storage_category;
+	typedef typename storage<M>::type storage_type;
+	typedef typename M::const_storage_type const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 
@@ -65,7 +59,6 @@ public:
 		:m_expression(&other.expression()){}
 		
 	// Accessors
-
 	M& expression() const {
 		return *m_expression;
 	}
@@ -74,89 +67,26 @@ public:
 	}
 	
 	///\brief Returns the number of rows of the matrix.
-	size_type size1() const {
+	index_type size1() const {
 		return m_expression->size1();
 	}
 	///\brief Returns the number of columns of the matrix.
-	size_type size2() const {
+	index_type size2() const {
 		return m_expression->size2();
 	}
 	
-	// ---------
-	// Dense low level interface
-	// ---------
-	
-	///\brief Returns the stride in memory between two rows.
-	difference_type stride1()const{
-		return m_expression->stride1();
-	}
-	///\brief Returns the stride in memory between two columns.
-	difference_type stride2()const{
-		return m_expression->stride2();
-	}
-	
-	///\brief Returns the pointer to the beginning of the matrix storage.
-	///
-	/// Grants low-level access to the matrix internals. Element order depends on whether the matrix is row_major or column_major.
-	/// to access element (i,j) use storage()[i*stride1()+j*stride2()].
-	pointer storage()const{
-		return m_expression->storage();
-	}
-	
-	// ---------
-	// Sparse low level interface
-	// ---------
-	
-	/// \brief Number of nonzero elements of the matrix.
-	size_type nnz()const{
-		return m_expression->nnz();
-	}
-	/// \brief Array of values of the nonzero elements.
-	const_pointer values()const{
-		return m_expression->values();
-	}
-	
-	/// \brief Array of indices of the nonzero elements.
-	///
-	/// Note that there is a pair of indices needed:
-	/// When accessing the j-th element in row i you have to write code like this:
-	/// index_type start = outer_indices()[i] //aquire start of the i-th row
-	/// index = inner_indices()[start+j];
-	/// All elements in the row are contained in the range [outer_indices()[i],outer_indices_end()[i])
-	/// there might be gaps between the end of the one line and the start of the next!
-	index_pointer inner_indices()const{
-		return m_expression->inner_indices();
-	}
-	
-	///\brief Returns an array containing the start of the rows.
-	///
-	/// See documentation of inner_indices() for more details
-	index_pointer outer_indices()const{
-		return m_expression->outer_indices();
-	}
-	
-	///\brief Returns an array containing the end of the rows.
-	///
-	/// See documentation of inner_indices() for more details
-	index_pointer outer_indices_end()const{
-		return m_expression->outer_indices_end();
-	}
-	
-	/// \brief Returns the number of nonzero elements in the i-th row/column.
-	size_type inner_nnz(index_type i) const {
-		return m_expression->inner_nnz(i);
+	///\brief Returns the underlying storage_type structure for low level access
+	storage_type raw_storage()const{
+		return m_expression->raw_storage();
 	}
 
-	// ---------
-	// High level interface
-	// ---------
 
 	// Element access
 	reference operator()(index_type i, index_type j) const {
 		return (*m_expression)(i, j);
 	}
 	
-	void set_element(size_type i, size_type j,value_type t){
+	void set_element(index_type i, index_type j,value_type t){
 		m_expression->set_element(i,j,t);
 	}
 
@@ -217,15 +147,15 @@ public:
 		m_expression->clear();
 	}
 	
-	void reserve(size_type non_zeros) {
+	void reserve(index_type non_zeros) {
 		m_expression->reserve(non_zeros);
 	}
 	
-	void reserve_row(size_type row, size_type non_zeros) {
+	void reserve_row(index_type row, index_type non_zeros) {
 		m_expression->reserve_row(row,non_zeros);
 	}
 	
-	void reserve_column(size_type column, size_type non_zeros) {
+	void reserve_column(index_type column, index_type non_zeros) {
 		m_expression->reserve_column(column,non_zeros);
 	}
 	
@@ -253,24 +183,18 @@ private:
 template<class M>
 class matrix_transpose: public matrix_expression<matrix_transpose<M> > {
 public:
-	typedef typename M::size_type size_type;
-	typedef typename M::difference_type difference_type;
+	typedef typename M::index_type index_type;
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
-	typedef typename M::const_pointer const_pointer;
-	typedef typename pointer<M>::type pointer;
-
-	typedef typename M::index_type index_type;
-	typedef typename M::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef typename closure<M>::type matrix_closure_type;
 	typedef matrix_transpose<typename const_expression<M>::type> const_closure_type;
 	typedef matrix_transpose<M> closure_type;
 	typedef typename M::orientation::transposed_orientation orientation;
-	typedef typename M::storage_category storage_category;
+	typedef typename storage<M>::type storage_type;
+	typedef typename M::const_storage_type const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
@@ -298,77 +222,17 @@ public:
 	}
 	
 	///\brief Returns the number of rows of the matrix.
-	size_type size1() const {
+	index_type size1() const {
 		return expression().size2();
 	}
 	///\brief Returns the number of columns of the matrix.
-	size_type size2() const {
+	index_type size2() const {
 		return expression().size1();
 	}
 	
-	// ---------
-	// Dense low level interface
-	// ---------
-	
-	///\brief Returns the stride in memory between two rows.
-	difference_type stride1()const{
-		return expression().stride2();
-	}
-	///\brief Returns the stride in memory between two columns.
-	difference_type stride2()const{
-		return expression().stride1();
-	}
-	
-	// ---------
-	// Sparse low level interface
-	// ---------
-	
-	/// \brief Number of nonzero elements of the matrix.
-	size_type nnz()const{
-		return expression().nnz();
-	}
-	/// \brief Array of values of the nonzero elements.
-	const_pointer values()const{
-		return expression().values();
-	}
-	
-	/// \brief Array of indices of the nonzero elements.
-	///
-	/// Note that there is a pair of indices needed:
-	/// When accessing the j-th element in row i you have to write code like this:
-	/// index_type start = outer_indices()[i] //aquire start of the i-th row
-	/// index = inner_indices()[start+j];
-	/// All elements in the row are contained in the range [outer_indices()[i],outer_indices_end()[i])
-	/// there might be gaps between the end of the one line and the start of the next!
-	index_pointer inner_indices()const{
-		return expression().inner_indices();
-	}
-	
-	///\brief Returns an array containing the start of the rows.
-	///
-	/// See documentation of inner_indices() for more details.
-	index_pointer outer_indices()const{
-		return expression().outer_indices();
-	}
-	
-	///\brief Returns an array containing the end of the rows.
-	///
-	/// See documentation of inner_indices() for more details.
-	index_pointer outer_indices_end()const{
-		return expression().outer_indices_end();
-	}
-	
-	/// \brief Returns the number of nonzero elements in the i-th row/column.
-	size_type inner_nnz(index_type i) const {
-		return expression().inner_nnz(i);
-	}
-	
-	///\brief Returns the pointer to the beginning of the matrix storage
-	///
-	/// Grants low-level access to the matrix internals. Element order depends on whether the matrix is row_major or column_major.
-	/// to access element (i,j) use storage()[i*stride1()+j*stride2()].
-	pointer storage()const{
-		return expression().storage();
+	///\brief Returns the underlying storage_type structure for low level access
+	storage_type raw_storage()const{
+		return m_expression.raw_storage();
 	}
 
 	// ---------
@@ -380,7 +244,7 @@ public:
 		return expression()(j, i);
 	}
 	
-	void set_element(size_type i, size_type j,value_type t){
+	void set_element(index_type i, index_type j,value_type t){
 		expression().set_element(j,i,t);
 	}
 
@@ -434,14 +298,14 @@ public:
 		expression().clear();
 	}
 	
-	void reserve(size_type non_zeros) {
+	void reserve(index_type non_zeros) {
 		expression().reserve(non_zeros);
 	}
 	
-	void reserve_row(size_type row, size_type non_zeros) {
+	void reserve_row(index_type row, index_type non_zeros) {
 		expression().reserve_row(row,non_zeros);
 	}
-	void reserve_column(size_type column, size_type non_zeros) {
+	void reserve_column(index_type column, index_type non_zeros) {
 		expression().reserve_column(column,non_zeros);
 	}
 	
@@ -463,24 +327,17 @@ private:
 template<class M>
 class matrix_row: public vector_expression<matrix_row<M> > {
 public:
-	typedef M matrix_type;
-	typedef std::size_t size_type;
-	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
-	typedef typename M::const_pointer const_pointer;
-	typedef typename pointer<M>::type pointer;
-
 	typedef typename M::index_type index_type;
-	typedef typename M::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef typename closure<M>::type matrix_closure_type;
 	typedef matrix_row<typename const_expression<M>::type> const_closure_type;
 	typedef matrix_row<M> closure_type;
-	typedef typename M::storage_category storage_category;
+	typedef typename storage<M>::type::row_storage storage_type;
+	typedef typename M::const_storage_type::row_storage const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
@@ -504,43 +361,13 @@ public:
 	}
 	
 	///\brief Returns the size of the vector
-	size_type size() const {
+	index_type size() const {
 		return expression().size2();
 	}
-
-	// ---------
-	// Dense low level interface
-	// ---------
 	
-	///\brief Returns the stride in memory between two elements
-	difference_type stride()const{
-		return expression().stride2();
-	}
-	
-	///\brief Returns the pointer to the beginning of the vector storage
-	///
-	/// Grants low-level access to the vector internals.
-	/// to access element i use storage()[i*stride()].
-	pointer storage()const{
-		return expression().storage()+index()*expression().stride1();
-	}
-	
-	// ---------
-	// Sparse low level interface
-	// ---------
-	
-	/// \brief Number of nonzero elements of the vector.
-	size_type nnz()const{
-		return expression().inner_nnz(m_i);
-	}
-	/// \brief Array of values of the nonzero elements.
-	const_pointer values()const{
-		return expression().values()+expression().outer_indices()[m_i];
-	}
-	
-	/// \brief Array of indices of the nonzero elements.
-	index_pointer indices()const{
-		return expression().inner_indices()+expression().outer_indices()[m_i];
+	/// \brief Returns the underlying storage_type structure for low level access
+	storage_type raw_storage()const{
+		return m_expression.raw_storage().row(m_i, typename M::orientation());
 	}
 	
 	// ---------
@@ -555,7 +382,7 @@ public:
 		return (*this)(j);
 	}
 	
-	void set_element(size_type j,value_type t){
+	void set_element(index_type j,value_type t){
 		expression().set_element(m_i,j,t);
 	}
 
@@ -608,7 +435,7 @@ public:
 		clear_range(begin(),end());
 	}
 	
-	void reserve(size_type non_zeros) {
+	void reserve(index_type non_zeros) {
 		expression().reserve_row(m_i,non_zeros);
 	}
 	
@@ -656,35 +483,28 @@ private:
 	//todo: sparse column major case.
 
 	matrix_closure_type m_expression;
-	size_type m_i;
+	index_type m_i;
 };
 
 // Matrix based vector range class representing (off-)diagonals of a matrix.
 template<class M>
 class matrix_vector_range: public vector_expression<matrix_vector_range<M> > {
 public:
-	typedef M matrix_type;
-	typedef std::size_t size_type;
-	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
-	typedef typename M::const_pointer const_pointer;
-	typedef typename pointer<M>::type pointer;
-
 	typedef typename M::index_type index_type;
-	typedef typename M::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef typename closure<M>::type matrix_closure_type;
 	typedef matrix_vector_range<typename const_expression<M>::type> const_closure_type;
 	typedef matrix_vector_range<M>  closure_type;
-	typedef typename M::storage_category storage_category;
+	typedef typename storage<M>::type storage_type;
+	typedef typename M::const_storage_type const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
-	matrix_vector_range(matrix_closure_type expression, size_type start1, size_type end1, size_type start2, size_type end2)
+	matrix_vector_range(matrix_closure_type expression, index_type start1, index_type end1, index_type start2, index_type end2)
 	:m_expression(expression), m_start1(start1), m_start2(start2), m_size(end1-start1){
 		SIZE_CHECK(start1 <= expression.size1());
 		SIZE_CHECK(end1 <= expression.size1());
@@ -700,10 +520,10 @@ public:
 	, m_start2(other.start2()), m_size(other.size()){}
 	
 	// Accessors
-	size_type start1() const {
+	index_type start1() const {
 		return m_start1;
 	}
-	size_type start2() const {
+	index_type start2() const {
 		return m_start2;
 	}
 	
@@ -714,31 +534,14 @@ public:
 		return m_expression;
 	}
 	
-	// ---------
-	// Dense low level interface
-	// ---------
-	
 	///\brief Returns the size of the vector
-	size_type size() const {
+	index_type size() const {
 		return m_size;
 	}
 	
-	///\brief Returns the stride in memory between two elements
-	difference_type stride()const{
-		return expression().stride1()+expression().stride2();
-	}
-	
-	void set_element(size_type i,value_type t){
-		expression().set_element(start1()+i,start2()+i,t);
-	}
-
-	
-	///\brief Returns the pointer to the beginning of the vector storage
-	///
-	/// Grants low-level access to the vector internals.
-	/// to access element i use storage()[i*stride()].
-	pointer storage()const{
-		return expression().storage()+start1()*expression().stride1()+start2()*expression().stride1();
+	/// \brief Returns the underlying storage_type structure for low level access
+	storage_type raw_storage()const{
+		return m_expression.raw_storage().diag();
 	}
 	
 	// ---------
@@ -751,6 +554,10 @@ public:
 	}
 	reference operator [](index_type i) const {
 		return (*this)(i);
+	}
+	
+	void set_element(index_type i,value_type t){
+		expression().set_element(start1()+i,start2()+i,t);
 	}
 
 	// Assignment
@@ -779,44 +586,37 @@ public:
 	}
 	
 	void reserve(){}
-	void reserve_row(size_type, size_type) {}
-	void reserve_column(size_type, size_type ){}
+	void reserve_row(index_type, index_type) {}
+	void reserve_column(index_type, index_type ){}
 
 private:
 	matrix_closure_type m_expression;
-	size_type m_start1;
-	size_type m_start2;
-	size_type m_size;
+	index_type m_start1;
+	index_type m_start2;
+	index_type m_size;
 };
 
 // Matrix based range class
 template<class M>
 class matrix_range:public matrix_expression<matrix_range<M> > {
 public:
-	typedef M matrix_type;
-	typedef std::size_t size_type;
-	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
-	typedef typename M::const_pointer const_pointer;
-	typedef typename pointer<M>::type pointer;
-
 	typedef typename M::index_type index_type;
-	typedef typename M::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef typename closure<M>::type matrix_closure_type;
 	typedef matrix_range<typename const_expression<M>::type> const_closure_type;
 	typedef matrix_range<M> closure_type;
-	typedef typename M::storage_category storage_category;
+	typedef typename storage<M>::type storage_type;
+	typedef typename M::const_storage_type const_storage_type;
 	typedef elementwise_tag evaluation_category;
 	typedef typename M::orientation orientation;
 
 	// Construction and destruction
 
-	matrix_range(matrix_closure_type expression, size_type start1, size_type end1, size_type start2, size_type end2)
+	matrix_range(matrix_closure_type expression, index_type start1, index_type end1, index_type start2, index_type end2)
 	:m_expression(expression), m_start1(start1), m_size1(end1-start1), m_start2(start2), m_size2(end2-start2){
 		SIZE_CHECK(start1 <= expression.size1());
 		SIZE_CHECK(end1 <= expression.size1());
@@ -838,10 +638,10 @@ public:
 	, m_start2(other.start2()), m_size2(other.size2()){}
 		
 	// Accessors
-	size_type start1() const {
+	index_type start1() const {
 		return m_start1;
 	}
-	size_type start2() const {
+	index_type start2() const {
 		return m_start2;
 	}
 
@@ -852,34 +652,18 @@ public:
 		return m_expression;
 	}
 	
-	// ---------
-	// Dense Low level interface
-	// ---------
-	
 	///\brief Returns the number of rows of the matrix.
-	size_type size1() const {
+	index_type size1() const {
 		return m_size1;
 	}
 	///\brief Returns the number of columns of the matrix.
-	size_type size2() const {
+	index_type size2() const {
 		return m_size2;
 	}
 	
-	///\brief Returns the stride in memory between two rows.
-	difference_type stride1()const{
-		return expression().stride1();
-	}
-	///\brief Returns the stride in memory between two columns.
-	difference_type stride2()const{
-		return expression().stride2();
-	}
-	
-	///\brief Returns the pointer to the beginning of the matrix storage
-	///
-	/// Grants low-level access to the matrix internals. Element order depends on whether the matrix is row_major or column_major.
-	/// to access element (i,j) use storage()[i*stride1()+j*stride2()].
-	pointer storage()const{
-		return expression().storage()+start1()*stride1()+start2()*stride2();
+	/// \brief Returns the underlying storage_type structure for low level access
+	storage_type raw_storage()const{
+		return m_expression.raw_storage().sub_region(m_start1, m_start2, typename M::orientation());
 	}
 	
 	// ---------
@@ -976,52 +760,42 @@ public:
 			clear_range(major_begin(*this,i),major_end(*this,i));
 	}
 	
-	void reserve(size_type){}
-	void reserve_row(size_type, size_type) {}
-	void reserve_column(size_type, size_type ){}
+	void reserve(index_type){}
+	void reserve_row(index_type, index_type) {}
+	void reserve_column(index_type, index_type ){}
 private:
 	matrix_closure_type m_expression;
-	size_type m_start1;
-	size_type m_size1;
-	size_type m_start2;
-	size_type m_size2;
+	index_type m_start1;
+	index_type m_size1;
+	index_type m_start2;
+	index_type m_size2;
 };
 
 template<class T,class Orientation=row_major>
 class dense_matrix_adaptor: public matrix_expression<dense_matrix_adaptor<T,Orientation> > {
 	typedef dense_matrix_adaptor<T,Orientation> self_type;
 public:
-
-	//std::container types
-	typedef typename Orientation::orientation orientation;
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
+	typedef std::size_t index_type;
 	typedef typename boost::remove_const<T>::type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const& const_reference;
-	typedef T&  reference;
-	typedef T* pointer;
-	typedef value_type const* const_pointer;
+	typedef T& reference;
 
-	typedef std::size_t index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type* index_pointer;
-
-	//ublas types
 	typedef matrix_reference<self_type const> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
-	typedef dense_tag storage_category;
+	typedef dense_matrix_storage<T> storage_type;
+	typedef dense_matrix_storage<value_type const> const_storage_type;
 	typedef elementwise_tag evaluation_category;
-        
+        typedef Orientation orientation;
 
 	// Construction and destruction
 	
 	dense_matrix_adaptor(dense_matrix_adaptor<value_type, Orientation> const& expression)
-	: m_values(expression.storage())
+	: m_values(expression.m_values)
 	, m_size1(expression.size1())
 	, m_size2(expression.size2())
-	, m_stride1(expression.stride1())
-	, m_stride2(expression.stride2())
+	, m_stride1(expression.m_stride1)
+	, m_stride2(expression.m_stride2)
 	{}
 
 	/// \brief Constructor of a vector proxy from a Dense MatrixExpression
@@ -1030,12 +804,13 @@ public:
 	/// \param expression Expression from which to construct the Proxy
  	template<class E>
 	dense_matrix_adaptor(matrix_expression<E> const& expression)
-	: m_values(expression().storage())
-	, m_size1(expression().size1())
+	: m_size1(expression().size1())
 	, m_size2(expression().size2())
-	, m_stride1(expression().stride1())
-	, m_stride2(expression().stride2())
 	{
+		auto storage_type = expression().raw_storage();
+		m_values = storage_type.values;
+		m_stride1 = Orientation::index_M(storage_type.leading_dimension,1);
+		m_stride2 = Orientation::index_m(storage_type.leading_dimension,1);
 		static_assert(boost::is_same<typename E::orientation,orientation>::value, "matrix orientation mismatch");
 	}
 
@@ -1045,12 +820,13 @@ public:
 	/// \param expression Expression from which to construct the Proxy
  	template<class E>
 	dense_matrix_adaptor(matrix_expression<E>& expression)
-	: m_values(expression().storage())
-	, m_size1(expression().size1())
+	: m_size1(expression().size1())
 	, m_size2(expression().size2())
-	, m_stride1(expression().stride1())
-	, m_stride2(expression().stride2())
 	{
+		auto storage_type = expression().raw_storage();
+		m_values = storage_type.values;
+		m_stride1 = Orientation::index_M(storage_type.leading_dimension,1);
+		m_stride2 = Orientation::index_m(storage_type.leading_dimension,1);
 		static_assert(boost::is_same<typename E::orientation,orientation>::value, "matrix orientation mismatch");
 	}
 		
@@ -1061,9 +837,9 @@ public:
  	/// \param stride1 distance in 1st direction between elements of the self_type in memory
  	/// \param stride2 distance in 2nd direction between elements of the self_type in memory
 	dense_matrix_adaptor(
-		pointer values, 
-		size_type size1, size_type size2,
-		difference_type stride1 = 0,difference_type stride2 = 0 
+		T* values, 
+		index_type size1, index_type size2,
+		index_type stride1 = 0, index_type stride2 = 0 
 	)
 	: m_values(values)
 	, m_size1(size1)
@@ -1082,23 +858,17 @@ public:
 	// ---------
 		
 	/// \brief Return the number of rows of the matrix
-	size_type size1() const {
+	index_type size1() const {
 		return m_size1;
 	}
 	/// \brief Return the number of columns of the matrix
-	size_type size2() const {
+	index_type size2() const {
 		return m_size2;
 	}
 	
-	difference_type stride1()const{
-		return m_stride1;
-	}
-	difference_type stride2()const{
-		return m_stride2;
-	}
-	
-	pointer storage()const{
-		return m_values;
+	///\brief Returns the underlying storage_type structure for low level access
+	storage_type raw_storage()const{
+		return {m_values, orientation::index_M(m_stride1,m_stride2)};
 	}
 	
 	// ---------
@@ -1125,13 +895,13 @@ public:
 	// Element access
 	// --------------
 	
-	const_reference operator () (index_type i, index_type j) const {
+	const_reference operator() (index_type i, index_type j) const {
 		return m_values[i*m_stride1+j*m_stride2];
         }
-        reference operator () (index_type i, index_type j) {
+        reference operator() (index_type i, index_type j) {
 		return m_values[i*m_stride1+j*m_stride2];
         }
-	void set_element(size_type i, size_type j,value_type t){
+	void set_element(index_type i, index_type j,value_type t){
 		m_values[i*m_stride1+j*m_stride2]  = t;
 	}
 
@@ -1145,29 +915,29 @@ public:
 	typedef dense_storage_iterator<value_type const> const_column_iterator;
 
 	const_row_iterator row_begin(index_type i) const {
-		return const_row_iterator(m_values+i*stride1(),0,stride2());
+		return const_row_iterator(m_values+i*m_stride1,0,m_stride2);
 	}
 	const_row_iterator row_end(index_type i) const {
-		return const_row_iterator(m_values+i*stride1()+size2()*stride2(),size2(),stride2());
+		return const_row_iterator(m_values+i*m_stride1+size2()*m_stride2,size2(),m_stride2);
 	}
 	row_iterator row_begin(index_type i){
-		return row_iterator(m_values+i*stride1(),0,stride2());
+		return row_iterator(m_values+i*m_stride1,0,m_stride2);
 	}
 	row_iterator row_end(index_type i){
-		return row_iterator(m_values+i*stride1()+size2()*stride2(),size2(),stride2());
+		return row_iterator(m_values+i*m_stride1+size2()*m_stride2,size2(),m_stride2);
 	}
 	
 	const_column_iterator column_begin(index_type j) const {
-		return const_column_iterator(m_values+j*stride2(),0,stride1());
+		return const_column_iterator(m_values+j*m_stride2,0,m_stride1);
 	}
 	const_column_iterator column_end(index_type j) const {
-		return const_column_iterator(m_values+j*stride2()+size1()*stride1(),size1(),stride1());
+		return const_column_iterator(m_values+j*m_stride2+size1()*m_stride1,size1(),m_stride1);
 	}
 	column_iterator column_begin(index_type j){
-		return column_iterator(m_values+j*stride2(),0,stride1());
+		return column_iterator(m_values+j*m_stride2,0,m_stride1);
 	}
 	column_iterator column_end(index_type j){
-		return column_iterator(m_values+j*stride2()+size1()*stride1(),size1(),stride1());
+		return column_iterator(m_values+j*m_stride2+size1()*m_stride1,size1(),m_stride1);
 	}
 	
 	typedef typename major_iterator<self_type>::type major_iterator;
@@ -1197,11 +967,11 @@ public:
 		}
 	}
 private:
-	pointer m_values;
-	size_type m_size1;
-	size_type m_size2;
-	difference_type m_stride1;
-	difference_type m_stride2;
+	T* m_values;
+	index_type m_size1;
+	index_type m_size2;
+	index_type m_stride1;
+	index_type m_stride2;
 };
 
 

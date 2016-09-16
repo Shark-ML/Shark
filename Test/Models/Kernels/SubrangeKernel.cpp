@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE( DenseSubrangeKernel_Test)
 	std::vector<AbstractKernelFunction<RealVector>*> kernels;
 	kernels.push_back(&baseKernelV1);
 	kernels.push_back(&baseKernelV2);
-	
+
 	SubrangeKernel<RealVector> kernel(kernels,ranges);
 	
 	//check correct number of parameters

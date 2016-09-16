@@ -135,12 +135,14 @@ void trmm(
 		cblasUplo=  upper?CblasLower:CblasUpper;
 	}
 	
+	auto storageA = A().raw_storage();
+	auto storageB = B().raw_storage();
 	trmm(stor_ordB, CblasLeft, cblasUplo, trans, cblasUnit,
 		(int)n, int(m),
-	        traits::storage(A),
-		traits::leading_dimension(A),
-	        traits::storage(B),
-	        traits::leading_dimension(B)
+		storageA.values,
+	        storageA.leading_dimension,
+		storageB.values,
+	        storageB.leading_dimension
 	);
 }
 
@@ -181,8 +183,8 @@ struct optimized_trmm_detail<
 template<class M1, class M2>
 struct  has_optimized_trmm
 : public optimized_trmm_detail<
-	typename M1::storage_category,
-	typename M2::storage_category,
+	typename M1::storage_type::storage_tag,
+	typename M2::storage_type::storage_tag,
 	typename M1::value_type,
 	typename M2::value_type
 >{};

@@ -34,6 +34,7 @@
 #include "../kernels/gemm.hpp"
 #include "../kernels/trmm.hpp"
 #include "../kernels/sum_rows.hpp"
+#include "../assignment.hpp"
 #include <type_traits>
 
 namespace shark {
@@ -47,27 +48,21 @@ private:
 		typename E1::value_type,
 		typename E2::value_type
 	> functor_type;
-public:
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
+public:
 
-	typedef typename E1::size_type size_type;
-	typedef typename E1::difference_type difference_type;
+	typedef typename E1::index_type index_type;
 	typedef typename functor_type::result_type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef value_type const* const_pointer;
-	typedef const_pointer pointer;
-
-	typedef typename E1::index_type index_type;
-	typedef typename E1::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E1>::type index_pointer;
 
 	typedef matrix_addition const_closure_type;
 	typedef const_closure_type closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef typename E1::orientation orientation;
-	typedef blas::unknown_storage_tag storage_category;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 
         // Construction
@@ -77,10 +72,10 @@ public:
 	): m_lhs (e1), m_rhs (e2){}
 
         // Accessors
-        size_type size1 () const {
+        index_type size1 () const {
 		return m_lhs.size1 ();
         }
-        size_type size2 () const {
+        index_type size2 () const {
 		return m_lhs.size2 ();
         }
 	
@@ -128,26 +123,26 @@ public:
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 
-	const_row_iterator row_begin(std::size_t i) const {
+	const_row_iterator row_begin(index_type i) const {
 		return const_row_iterator (functor_type(),
 			m_lhs.row_begin(i),m_lhs.row_end(i),
 			m_rhs.row_begin(i),m_rhs.row_end(i)
 		);
 	}
-	const_row_iterator row_end(std::size_t i) const {
+	const_row_iterator row_end(index_type i) const {
 		return const_row_iterator (functor_type(),
 			m_lhs.row_end(i),m_lhs.row_end(i),
 			m_rhs.row_end(i),m_rhs.row_end(i)
 		);
 	}
 
-	const_column_iterator column_begin(std::size_t j) const {
+	const_column_iterator column_begin(index_type j) const {
 		return const_column_iterator (functor_type(),
 			m_lhs.column_begin(j),m_lhs.column_end(j),
 			m_rhs.column_begin(j),m_rhs.column_end(j)
 		);
 	}
-	const_column_iterator column_end(std::size_t j) const {
+	const_column_iterator column_end(index_type j) const {
 		return const_column_iterator (functor_type(),
 			m_lhs.column_end(j),m_lhs.column_end(j),
 			m_rhs.column_end(j),m_rhs.column_end(j)
@@ -173,19 +168,13 @@ public:
 	typedef typename E::scalar_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef value_type const *const_pointer;
-	typedef value_type *pointer;
-	typedef typename E::size_type size_type;
-	typedef typename E::difference_type difference_type;
-
 	typedef typename E::index_type index_type;
-	typedef typename E::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E>::type index_pointer;
 
 	typedef matrix_scalar_multiply const_closure_type;
 	typedef const_closure_type closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef typename E::orientation orientation;
-	typedef blas::unknown_storage_tag storage_category;
 	typedef typename E::evaluation_category evaluation_category;
 
 	// Construction and destruction
@@ -193,10 +182,10 @@ public:
 		m_expression(e()), m_scalar(scalar){}
 
 	// Accessors
-	size_type size1() const {
+	index_type size1() const {
 		return m_expression.size1();
 	}
-	size_type size2() const {
+	index_type size2() const {
 		return m_expression.size2();
 	}
 
@@ -260,34 +249,28 @@ private:
 	typedef typename V::const_iterator const_subiterator_type;
 public:
 	typedef typename V::const_closure_type expression_closure_type;
-	typedef typename V::size_type size_type;
-	typedef typename V::difference_type difference_type;
+	typedef typename V::index_type index_type;
 	typedef typename V::value_type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef value_type const* pointer;
-	typedef value_type const* const_pointer;
-
-	typedef typename V::index_type index_type;
-	typedef typename V::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<V>::type index_pointer;
 
 	typedef self_type const_closure_type;
 	typedef const_closure_type closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef blas::row_major orientation;
-	typedef blas::unknown_storage_tag storage_category;
 	typedef typename V::evaluation_category evaluation_category;
 
 	// Construction and destruction
-	explicit vector_repeater (expression_type const& e, std::size_t rows):
+	explicit vector_repeater (expression_type const& e, index_type rows):
 	m_vector(e), m_rows(rows) {}
 
 	// Accessors
-	size_type size1() const {
+	index_type size1() const {
 		return m_rows;
 	}
-	size_type size2() const {
+	index_type size2() const {
 		return m_vector.size();
 	}
 
@@ -309,26 +292,26 @@ public:
 
 	// Element lookup
 	
-	const_row_iterator row_begin(std::size_t i) const {
+	const_row_iterator row_begin(index_type i) const {
 		RANGE_CHECK( i < size1());
 		return m_vector.begin();
 	}
-	const_row_iterator row_end(std::size_t i) const {
+	const_row_iterator row_end(index_type i) const {
 		RANGE_CHECK( i < size1());
 		return m_vector.end();
 	}
 	
-	const_column_iterator column_begin(std::size_t j) const {
+	const_column_iterator column_begin(index_type j) const {
 		RANGE_CHECK( j < size2());
 		return const_column_iterator(0,m_vector(j));
 	}
-	const_column_iterator column_end(std::size_t j) const {
+	const_column_iterator column_end(index_type j) const {
 		RANGE_CHECK( j < size2());
 		return const_column_iterator(size1(),m_vector(j));
 	}
 private:
 	expression_closure_type m_vector;
-	std::size_t m_rows;
+	index_type m_rows;
 };
 
 /// \brief A matrix with all values of type \c T equal to the same value
@@ -340,43 +323,37 @@ class scalar_matrix:
 
 	typedef scalar_matrix<T> self_type;
 public:
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
+	typedef std::size_t index_type;
 	typedef T value_type;
 	typedef const T& const_reference;
 	typedef const_reference reference;
-	typedef value_type const* const_pointer;
 	typedef value_type scalar_type;
-	typedef const_pointer pointer;
-
-	typedef std::size_t index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type index_pointer;
 
 	typedef self_type const_closure_type;
 	typedef self_type closure_type;
-	typedef dense_tag storage_category;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef unknown_orientation orientation;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
 	scalar_matrix():
 		m_size1(0), m_size2(0), m_value() {}
-	scalar_matrix(size_type size1, size_type size2, const value_type& value = value_type(1)):
+	scalar_matrix(index_type size1, index_type size2, const value_type& value = value_type(1)):
 		m_size1(size1), m_size2(size2), m_value(value) {}
 	scalar_matrix(const scalar_matrix& m):
 		m_size1(m.m_size1), m_size2(m.m_size2), m_value(m.m_value) {}
 
 	// Accessors
-	size_type size1() const {
+	index_type size1() const {
 		return m_size1;
 	}
-	size_type size2() const {
+	index_type size2() const {
 		return m_size2;
 	}
 
 	// Element access
-	const_reference operator()(size_type /*i*/, size_type /*j*/) const {
+	const_reference operator()(index_type /*i*/, index_type /*j*/) const {
 		return m_value;
 	}
 	
@@ -386,22 +363,22 @@ public:
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 
-	const_row_iterator row_begin(std::size_t i) const {
+	const_row_iterator row_begin(index_type i) const {
 		return const_row_iterator(0, m_value);
 	}
-	const_row_iterator row_end(std::size_t i) const {
+	const_row_iterator row_end(index_type i) const {
 		return const_row_iterator(size2(), m_value);
 	}
 	
-	const_row_iterator column_begin(std::size_t j) const {
+	const_row_iterator column_begin(index_type j) const {
 		return const_row_iterator(0, m_value);
 	}
-	const_row_iterator column_end(std::size_t j) const {
+	const_row_iterator column_end(index_type j) const {
 		return const_row_iterator(size1(), m_value);
 	}
 private:
-	size_type m_size1;
-	size_type m_size2;
+	index_type m_size1;
+	index_type m_size2;
 	value_type m_value;
 };
 
@@ -428,19 +405,13 @@ public:
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef value_type const *const_pointer;
-	typedef value_type *pointer;
-	typedef typename expression_type::size_type size_type;
-	typedef typename expression_type::difference_type difference_type;
-
 	typedef typename E::index_type index_type;
-	typedef typename E::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E>::type index_pointer;
 
 	typedef self_type const_closure_type;
 	typedef const_closure_type closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef typename E::orientation orientation;
-	typedef blas::unknown_storage_tag storage_category;
 	typedef typename E::evaluation_category evaluation_category;
 
 	// Construction and destruction
@@ -448,10 +419,10 @@ public:
 		m_expression(e()), m_functor(functor) {}
 
 	// Accessors
-	size_type size1() const {
+	index_type size1() const {
 		return m_expression.size1();
 	}
-	size_type size2() const {
+	index_type size2() const {
 		return m_expression.size2();
 	}
 	
@@ -532,23 +503,17 @@ public:
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
 
-	typedef typename E1::size_type size_type;
-	typedef typename E1::difference_type difference_type;
+	typedef typename E1::index_type index_type;
 	typedef typename F::result_type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef value_type const* const_pointer;
-	typedef const_pointer pointer;
-
-	typedef typename E1::index_type index_type;
-	typedef typename E1::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E1>::type index_pointer;
 
 	typedef self_type const_closure_type;
 	typedef const_closure_type closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef typename E1::orientation orientation;
-	typedef blas::unknown_storage_tag storage_category;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 
 	typedef F functor_type;
@@ -560,10 +525,10 @@ public:
 	): m_lhs (e1()), m_rhs (e2()),m_functor(functor) {}
 
         // Accessors
-        size_type size1 () const {
+        index_type size1 () const {
 		return m_lhs.size1 ();
         }
-        size_type size2 () const {
+        index_type size2 () const {
 		return m_lhs.size2 ();
         }
 	
@@ -605,26 +570,26 @@ public:
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 
-	const_row_iterator row_begin(std::size_t i) const {
+	const_row_iterator row_begin(index_type i) const {
 		return const_row_iterator (m_functor,
 			m_lhs.row_begin(i),m_lhs.row_end(i),
 			m_rhs.row_begin(i),m_rhs.row_end(i)
 		);
 	}
-	const_row_iterator row_end(std::size_t i) const {
+	const_row_iterator row_end(index_type i) const {
 		return const_row_iterator (m_functor,
 			m_lhs.row_end(i),m_lhs.row_end(i),
 			m_rhs.row_end(i),m_rhs.row_end(i)
 		);
 	}
 
-	const_column_iterator column_begin(std::size_t j) const {
+	const_column_iterator column_begin(index_type j) const {
 		return const_column_iterator (m_functor,
 			m_lhs.column_begin(j),m_lhs.column_end(j),
 			m_rhs.column_begin(j),m_rhs.column_end(j)
 		);
 	}
-	const_column_iterator column_end(std::size_t j) const {
+	const_column_iterator column_end(index_type j) const {
 		return const_column_iterator (m_functor,
 			m_lhs.column_begin(j),m_lhs.column_end(j),
 			m_rhs.column_begin(j),m_rhs.column_end(j)
@@ -657,23 +622,17 @@ public:
 	typedef typename E2::const_closure_type rhs_closure_type;
 
 	
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
 	typedef typename functor_type::result_type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef value_type const* const_pointer;
-	typedef const_pointer pointer;
-
 	typedef typename E1::index_type index_type;
-	typedef typename E1::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<E1>::type index_pointer;
 
 	typedef outer_product const_closure_type;
 	typedef outer_product closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef unknown_orientation orientation;
-	typedef unknown_storage_tag storage_category;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 
 	// Construction and destruction
@@ -682,10 +641,10 @@ public:
 	:m_lhs(e1), m_rhs(e2){}
 
 	// Accessors
-	size_type size1() const {
+	index_type size1() const {
 		return m_lhs.size();
 	}
-	size_type size2() const {
+	index_type size2() const {
 		return m_rhs.size();
 	}
 
@@ -743,19 +702,14 @@ public:
 		typename MatA::scalar_type() * typename VecV::scalar_type()
 	) scalar_type;
 	typedef scalar_type value_type;
-	typedef typename MatA::size_type size_type;
-	typedef typename MatA::difference_type difference_type;
 	typedef typename MatA::index_type index_type;
 	typedef value_type const& const_reference;
 	typedef const_reference reference;
-	typedef value_type const* const_pointer;
-	typedef const_pointer pointer;
-	typedef typename MatA::index_pointer index_pointer;
-	typedef typename MatA::const_index_pointer const_index_pointer;
 
 	typedef matrix_vector_prod<MatA, VecV> const_closure_type;
 	typedef const_closure_type closure_type;
-	typedef unknown_storage_tag storage_category;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef blockwise_tag evaluation_category;
 
 
@@ -770,7 +724,7 @@ public:
 		vector_closure_type  const& vector
 	):m_matrix(matrix), m_vector(vector) {}
 
-	size_type size() const {
+	index_type size() const {
 		return m_matrix.size1();
 	}
 	
@@ -784,16 +738,16 @@ public:
 	//dispatcher to computation kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		assign_to(x, alpha, typename MatA::orientation(), typename MatA::storage_category());
+		assign_to(x, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	template<class VecX>
 	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		plus_assign_to(x, alpha, typename MatA::orientation(), typename MatA::storage_category());
+		plus_assign_to(x, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 	template<class VecX>
 	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
-		plus_assign_to(x,-alpha, typename MatA::orientation(), typename MatA::storage_category());
+		plus_assign_to(x,-alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 private:
@@ -846,19 +800,14 @@ public:
 public:
 	typedef typename MatA::scalar_type scalar_type;
 	typedef scalar_type value_type;
-	typedef typename MatA::size_type size_type;
-	typedef typename MatA::difference_type difference_type;
 	typedef typename MatA::index_type index_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef value_type const* const_pointer;
-	typedef const_pointer pointer;
-	typedef typename MatA::index_pointer index_pointer;
-	typedef typename MatA::const_index_pointer const_index_pointer;
 
 	typedef sum_matrix_rows const_closure_type;
 	typedef const_closure_type closure_type;
-	typedef unknown_storage_tag storage_category;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef typename boost::mpl::if_<
 		boost::is_same<typename MatA::orientation::orientation, row_major>,
 		blockwise_tag,
@@ -869,7 +818,7 @@ public:
 		matrix_closure_type const& matrix
 	):m_matrix(matrix){}
 
-	size_type size() const {
+	index_type size() const {
 		return m_matrix.size2();
 	}
 	
@@ -916,27 +865,20 @@ namespace detail{
 template<class M, class TriangularType>
 class dense_triangular_proxy: public matrix_expression<dense_triangular_proxy<M, TriangularType> > {
 	typedef dense_triangular_proxy<M, TriangularType> self_type;
+	typedef typename closure<M>::type matrix_closure_type;
 public:
-	static_assert(std::is_same<typename M::storage_category, dense_tag>::value, "Can only create triangular proxies of dense matrices");
+	static_assert(std::is_same<typename M::storage_type::storage_tag, dense_tag>::value, "Can only create triangular proxies of dense matrices");
 
-	typedef typename M::size_type size_type;
-	typedef typename M::difference_type difference_type;
+	typedef typename M::index_type index_type;
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
-	typedef typename M::const_pointer const_pointer;
-	typedef typename pointer<M>::type pointer;
-
-	typedef typename M::index_type index_type;
-	typedef typename M::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<M>::type index_pointer;
-
-	typedef typename closure<M>::type matrix_closure_type;
 	typedef dense_triangular_proxy<typename const_expression<M>::type,TriangularType> const_closure_type;
 	typedef dense_triangular_proxy<M,TriangularType> closure_type;
 
-	typedef dense_tag storage_category;
+	typedef dense_matrix_storage<value_type> storage_type;
+	typedef dense_matrix_storage<value_type const> const_storage_type;
 	typedef elementwise_tag evaluation_category;
 	typedef triangular<typename M::orientation,TriangularType> orientation;
 
@@ -954,12 +896,17 @@ public:
 		return m_expression;
 	}
 	
-	 size_type size1 () const {
+	 index_type size1 () const {
 		return expression().size1 ();
         }
-        size_type size2 () const {
+        index_type size2 () const {
 		return expression().size2 ();
         }
+	
+	///\brief Returns the underlying storage_type structure for low level access
+	storage_type raw_storage_type(){
+		return expression().raw_storage_type();
+	}
 	
 	typedef typename row_iterator<M>::type row_iterator;
 	typedef row_iterator const_row_iterator;
@@ -981,20 +928,14 @@ public:
 		typename MatA::scalar_type() * typename MatB::scalar_type()
 	) scalar_type;
 	typedef scalar_type value_type;
-	typedef typename MatA::size_type size_type;
-	typedef typename MatA::difference_type difference_type;
 	typedef typename MatA::index_type index_type;
 	typedef value_type const& const_reference;
 	typedef const_reference reference;
-	typedef value_type const* const_pointer;
-	typedef const_pointer pointer;
-
-	typedef typename MatA::index_pointer index_pointer;
-	typedef typename MatA::const_index_pointer const_index_pointer;
 
 	typedef matrix_matrix_prod<MatA, MatB> const_closure_type;
 	typedef const_closure_type closure_type;
-	typedef unknown_storage_tag storage_category;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef blockwise_tag evaluation_category;
 	typedef unknown_orientation orientation;
 
@@ -1012,10 +953,10 @@ public:
 		matrix_closure_typeB const& rhs
 	):m_lhs(lhs), m_rhs(rhs) {}
 
-	size_type size1() const {
+	index_type size1() const {
 		return m_lhs.size1();
 	}
-	size_type size2() const {
+	index_type size2() const {
 		return m_rhs.size2();
 	}
 	
@@ -1029,16 +970,16 @@ public:
 	//dispatcher to computation kernels
 	template<class MatX>
 	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
-		assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_category());
+		assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	template<class MatX>
 	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
-		plus_assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_category());
+		plus_assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 	template<class MatX>
 	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
-		plus_assign_to(X, -alpha, typename MatA::orientation(), typename MatA::storage_category());
+		plus_assign_to(X, -alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 private:
@@ -1075,36 +1016,29 @@ private:
 /// the matrix stores a Vector representing the diagonal.
 template<class VectorType>
 class diagonal_matrix: public matrix_expression<diagonal_matrix< VectorType > > {
-	typedef diagonal_matrix< VectorType > self_type;
+	typedef typename VectorType::const_closure_type vector_closure_type;
 public:
-	typedef std::size_t size_type;
-	typedef std::ptrdiff_t difference_type;
+	typedef typename VectorType::index_type index_type;
 	typedef typename VectorType::value_type value_type;
 	typedef typename VectorType::scalar_type scalar_type;
-	typedef typename VectorType::const_reference const_reference;
-	typedef typename VectorType::reference reference;
-	typedef typename VectorType::pointer pointer;
-	typedef typename VectorType::const_pointer const_pointer;
+	typedef value_type  const_reference;
+	typedef value_type reference;
 
-	typedef std::size_t index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type index_pointer;
-
-	typedef const matrix_reference<const self_type> const_closure_type;
-	typedef matrix_reference<self_type> closure_type;
-	typedef sparse_tag storage_category;
+	typedef diagonal_matrix const_closure_type;
+	typedef diagonal_matrix closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
 	typedef elementwise_tag evaluation_category;
-	typedef row_major orientation;
+	typedef unknown_orientation orientation;
 
 	// Construction and destruction
-	diagonal_matrix():m_zero(){}
-	diagonal_matrix(VectorType const& diagonal):m_zero(),m_diagonal(diagonal){}
+	diagonal_matrix(vector_closure_type const& diagonal):m_diagonal(diagonal){}
 
 	// Accessors
-	size_type size1() const {
+	index_type size1() const {
 		return m_diagonal.size();
 	}
-	size_type size2() const {
+	index_type size2() const {
 		return m_diagonal.size();
 	}
 	
@@ -1113,10 +1047,10 @@ public:
 		if (i == j)
 			return m_diagonal(i);
 		else
-			return m_zero;
+			return value_type();
 	}
 
-	void set_element(size_type i, size_type j,value_type t){
+	void set_element(index_type i, index_type j,value_type t){
 		RANGE_CHECK(i == j);
 		m_diagonal(i) = t;
 	}
@@ -1140,7 +1074,7 @@ public:
 	class const_row_iterator:public bidirectional_iterator_base<const_row_iterator, value_type> {
 	public:
 		typedef typename diagonal_matrix::value_type value_type;
-		typedef typename diagonal_matrix::difference_type difference_type;
+		typedef std::ptrdiff_t difference_type;
 		typedef typename diagonal_matrix::const_reference reference;
 		typedef value_type const* pointer;
 
@@ -1195,18 +1129,17 @@ public:
 		return row_iterator(i, m_diagonal(i),false);
 	}
 	const_row_iterator row_end(index_type i) const {
-		return const_row_iterator(i, m_zero,true);
+		return const_row_iterator(i, value_type(),true);
 	}
 	const_column_iterator column_begin(index_type i) const {
 		return column_iterator(i, m_diagonal(i),false);
 	}
 	const_column_iterator column_end(index_type i) const {
-		return const_column_iterator(i, m_zero,true);
+		return const_column_iterator(i, value_type(),true);
 	}
 
 private:
-	value_type const m_zero;
-	VectorType m_diagonal; 
+	vector_closure_type m_diagonal; 
 };
 
 }}

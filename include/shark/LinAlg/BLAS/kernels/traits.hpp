@@ -34,46 +34,6 @@
 #include "../detail/traits.hpp"
 
 namespace shark {namespace blas {namespace bindings{ namespace traits {
-	
-///////////////Vector Traits//////////////////////////
-	
-template <typename V>
-typename V::difference_type stride(vector_expression<V> const&v) { 
-	return v().stride();
-}
-
-template <typename V>
-typename pointer<V>::type storage(vector_expression<V>& v) { 
-	return v().storage();
-}
-template <typename V>
-typename pointer<V const>::type storage(vector_expression<V> const& v) { 
-	return v().storage();
-}
-
-//////////////////Matrix Traits/////////////////////
-template <typename M>
-typename M::difference_type stride1(matrix_expression<M> const& m) { 
-	return m().stride1();
-}
-template <typename M>
-typename M::difference_type stride2(matrix_expression<M> const& m) { 
-	return m().stride2();
-}
-
-template <typename M>
-typename pointer<M>::type storage(matrix_expression<M>& m) { 
-	return m().storage();
-}
-template <typename M>
-typename pointer<M const>::type storage(matrix_expression<M> const& m) { 
-	return m().storage();
-}
-
-template <typename M>
-typename M::difference_type leading_dimension(matrix_expression<M> const& m) {
-	return  M::orientation::index_M(stride1(m),stride2(m));
-}
 
 template<class M1, class M2>
 bool same_orientation(matrix_expression<M1> const& m1, matrix_expression<M2> const& m2){

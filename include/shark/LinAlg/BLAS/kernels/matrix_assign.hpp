@@ -41,24 +41,18 @@ namespace detail{
 template<class M>
 class internal_transpose_proxy: public matrix_expression<internal_transpose_proxy<M> > {
 public:
-	typedef typename M::size_type size_type;
-	typedef typename M::difference_type difference_type;
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
-	typedef typename M::const_pointer const_pointer;
-	typedef typename M::pointer pointer;
-
 	typedef typename M::index_type index_type;
-	typedef typename M::const_index_pointer const_index_pointer;
-	typedef typename index_pointer<M>::type index_pointer;
 
 	typedef typename closure<M>::type matrix_closure_type;
 	typedef const internal_transpose_proxy<M> const_closure_type;
 	typedef internal_transpose_proxy<M> closure_type;
+	typedef typename storage<M>::type storage_type;
+	typedef typename M::const_storage_type const_storage_type;
 	typedef typename M::orientation::transposed_orientation orientation;
-	typedef typename M::storage_category storage_category;
 	typedef typename M::evaluation_category evaluation_category;
 
 	// Construction and destruction
@@ -66,10 +60,10 @@ public:
 		m_expression(m) {}
 
 	// Accessors
-	size_type size1() const {
+	index_type size1() const {
 		return m_expression.size2();
 	}
-	size_type size2() const {
+	index_type size2() const {
 		return m_expression.size1();
 	}
 
@@ -82,7 +76,7 @@ public:
 	}
 
 	// Element access
-	reference operator()(size_type i, size_type j)const{
+	reference operator()(index_type i, index_type j)const{
 		return m_expression(j, i);
 	}
 
@@ -120,7 +114,7 @@ public:
 	
 	typedef typename major_iterator<internal_transpose_proxy<M> >::type major_iterator;
 	
-	major_iterator set_element(major_iterator pos, size_type index, value_type value){
+	major_iterator set_element(major_iterator pos, index_type index, value_type value){
 		return m_expression.set_element(pos,index,value);
 	}
 	
@@ -136,14 +130,14 @@ public:
 		expression().clear();
 	}
 	
-	void reserve(size_type non_zeros) {
+	void reserve(index_type non_zeros) {
 		m_expression.reserve(non_zeros);
 	}
 	
-	void reserve_row(size_type row, size_type non_zeros) {
+	void reserve_row(index_type row, index_type non_zeros) {
 		m_expression.reserve_row(row,non_zeros);
 	}
-	void reserve_column(size_type column, size_type non_zeros) {
+	void reserve_column(index_type column, index_type non_zeros) {
 		m_expression.reserve_column(column,non_zeros);
 	}
 private:
@@ -234,24 +228,24 @@ void assign(
 	std::size_t const blockSize = 16;
 	typename M::value_type blockStorage[blockSize][blockSize];
 	
-	typedef typename M::size_type size_type;
-	size_type size1 = m().size1();
-	size_type size2 = m().size2();
-	for (size_type iblock = 0; iblock < size1; iblock += blockSize){
-		for (size_type jblock = 0; jblock < size2; jblock += blockSize){
+	typedef typename M::index_type index_type;
+	index_type size1 = m().size1();
+	index_type size2 = m().size2();
+	for (index_type iblock = 0; iblock < size1; iblock += blockSize){
+		for (index_type jblock = 0; jblock < size2; jblock += blockSize){
 			std::size_t blockSizei = std::min(blockSize,size1-iblock);
 			std::size_t blockSizej = std::min(blockSize,size2-jblock);
 			
 			//compute block values
-			for (size_type j = 0; j < blockSizej; ++j){
-				for (size_type i = 0; i < blockSizei; ++i){
+			for (index_type j = 0; j < blockSizej; ++j){
+				for (index_type i = 0; i < blockSizei; ++i){
 					blockStorage[i][j] = e()(iblock+i,jblock+j);
 				}
 			}
 			
 			//copy block in a different order to m
-			for (size_type i = 0; i < blockSizei; ++i){
-				for (size_type j = 0; j < blockSizej; ++j){
+			for (index_type i = 0; i < blockSizei; ++i){
+				for (index_type j = 0; j < blockSizej; ++j){
 					m()(iblock+i,jblock+j) = blockStorage[i][j];
 				}
 			}
@@ -298,13 +292,13 @@ void assign(
 	//this gives this algorithm a run time of  O(eval(e)+k*log(k))
 	//where eval(e) is the time to evaluate and k*log(k) the number of non-zero elements
 	typedef typename M::value_type value_type;
-	typedef typename M::size_type size_type;
+	typedef typename M::index_type index_type;
 	typedef row_major::sparse_element<value_type> Element;
 	std::vector<Element> elements;
 	
-	size_type size2 = m().size2();
-	size_type size1 = m().size1();
-	for(size_type j = 0; j != size2; ++j){
+	index_type size2 = m().size2();
+	index_type size1 = m().size1();
+	for(index_type j = 0; j != size2; ++j){
 		typename E::const_column_iterator pos_e = e().column_begin(j);
 		typename E::const_column_iterator end_e = e().column_end(j);
 		for(; pos_e != end_e; ++pos_e){
@@ -319,10 +313,10 @@ void assign(
 	//fill m with the contents
 	m().clear();
 	m().reserve(elements.size());//reserve a bit of space
-	for(size_type current = 0; current != elements.size();){
+	for(index_type current = 0; current != elements.size();){
 		//count elements in row and reserve enough space for it
-		size_type row = elements[current].i;
-		size_type row_end = current;
+		index_type row = elements[current].i;
+		index_type row_end = current;
 		while(row_end != elements.size() && elements[row_end].i == row) 
 			++ row_end;
 		m().reserve_row(row,row_end - current);
@@ -465,24 +459,24 @@ void assign(
 	std::size_t const blockSize = 16;
 	typename M::value_type blockStorage[blockSize][blockSize];
 	
-	typedef typename M::size_type size_type;
-	size_type size1 = m().size1();
-	size_type size2 = m().size2();
-	for (size_type iblock = 0; iblock < size1; iblock += blockSize){
-		for (size_type jblock = 0; jblock < size2; jblock += blockSize){
+	typedef typename M::index_type index_type;
+	index_type size1 = m().size1();
+	index_type size2 = m().size2();
+	for (index_type iblock = 0; iblock < size1; iblock += blockSize){
+		for (index_type jblock = 0; jblock < size2; jblock += blockSize){
 			std::size_t blockSizei = std::min(blockSize,size1-iblock);
 			std::size_t blockSizej = std::min(blockSize,size2-jblock);
 			
 			//fill the block with the values of e
-			for (size_type j = 0; j < blockSizej; ++j){
-				for (size_type i = 0; i < blockSizei; ++i){
+			for (index_type j = 0; j < blockSizej; ++j){
+				for (index_type i = 0; i < blockSizei; ++i){
 					blockStorage[i][j] = e()(iblock+i,jblock+j);
 				}
 			}
 			
 			//compute block values and store in m
-			for (size_type i = 0; i < blockSizei; ++i){
-				for (size_type j = 0; j < blockSizej; ++j){
+			for (index_type i = 0; i < blockSizei; ++i){
+				for (index_type j = 0; j < blockSizej; ++j){
 					f(m()(iblock+i,jblock+j), blockStorage[i][j]);
 				}
 			}
@@ -531,13 +525,13 @@ void assign(
 	//~ //this gives this algorithm a run time of  O(eval(e)+k*log(k))
 	//~ //where eval(e) is the time to evaluate and k*log(k) the number of non-zero elements
 	//~ typedef typename M::value_type value_type;
-	//~ typedef typename M::size_type size_type;
+	//~ typedef typename M::index_type index_type;
 	//~ typedef row_major::sparse_element<value_type> Element;
 	//~ std::vector<Element> elements;
 	
-	//~ size_type size2 = m().size2();
-	//~ size_type size1 = m().size1();
-	//~ for(size_type j = 0; j != size2; ++j){
+	//~ index_type size2 = m().size2();
+	//~ index_type size1 = m().size1();
+	//~ for(index_type j = 0; j != size2; ++j){
 		//~ typename E::const_column_iterator pos_e = e().column_begin(j);
 		//~ typename E::const_column_iterator end_e = e().column_end(j);
 		//~ for(; pos_e != end_e; ++pos_e){
@@ -557,13 +551,13 @@ void assign(
 	//~ std::vector<Element>::const_iterator elem = elements.begin();
 	//~ std::vector<Element>::const_iterator elem_end = elements.end();
 	//~ value_type zero = value_type();
-	//~ for(size_type row = 0; row != m().size2(); ++row){
+	//~ for(index_type row = 0; row != m().size2(); ++row){
 		//~ //todo pre-reserve enough space in the row of m()
 		//~ //merge both rows with f as functor
 		//~ typename M::row_iterator it = m().row_begin(row);
 		//~ while(it != m().row_end(row) && elem != elem_end && elem->i == row) {
-			//~ size_type it_index = it.index();
-			//~ size_type elem_index = elem->j;
+			//~ index_type it_index = it.index();
+			//~ index_type elem_index = elem->j;
 			//~ if (it_index == elem_index) {
 				//~ f(*it, *elem);
 				//~ ++ elem;

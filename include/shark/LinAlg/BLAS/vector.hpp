@@ -51,24 +51,17 @@ class vector: public vector_container<vector<T> > {
 	typedef vector<T> self_type;
 	typedef boost::container::vector<T> array_type;
 public:
-	
-	typedef typename array_type::size_type size_type;
-	typedef typename array_type::difference_type difference_type;
-	typedef typename array_type::value_type value_type;
+	typedef T value_type;
 	typedef value_type scalar_type;
 	typedef typename array_type::const_reference const_reference;
 	typedef typename array_type::reference reference;
-	typedef T *pointer;
-	typedef const T *const_pointer;
+	typedef typename array_type::size_type index_type;
 
-	typedef std::size_t index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type index_pointer;
-
-	typedef vector_reference<const self_type> const_closure_type;
+	typedef vector_reference<self_type const> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
 	typedef self_type vector_temporary_type;
-	typedef dense_tag storage_category;
+	typedef dense_vector_storage<T> storage_type;
+	typedef dense_vector_storage<T const> const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and destruction
@@ -80,12 +73,12 @@ public:
 	/// \brief Constructor of a vector with a predefined size
 	/// By default, its elements are initialized to 0.
 	/// \param size initial size of the vector
-	explicit vector(size_type size):m_storage(size) {}
+	explicit vector(index_type size):m_storage(size) {}
 
 	/// \brief Constructor of a vector with a predefined size and a unique initial value
 	/// \param size of the vector
 	/// \param init value to assign to each element of the vector
-	vector(size_type size, const value_type& init):m_storage(size, init) {}
+	vector(index_type size, const value_type& init):m_storage(size, init) {}
 
 	/// \brief Copy-constructor of a vector
 	/// \param v is the vector to be duplicated
@@ -150,34 +143,22 @@ public:
 	}
 
 	// ---------
-	// Dense low level interface
+	// Storage interface
 	// ---------
 	
 	/// \brief Return the size of the vector.
-	size_type size() const {
+	index_type size() const {
 		return m_storage.size();
 	}
 	
-	///\brief Returns the pointer to the beginning of the vector storage
-	///
-	/// Grants low-level access to the vectors internals. Elements storage()[0]...storage()[size()-1] are valid.
-	pointer storage(){
-		return m_storage.data();
+	///\brief Returns the underlying storage structure for low level access
+	storage_type raw_storage(){
+		return {m_storage.data(),1};
 	}
 	
-	///\brief Returns the pointer to the beginning of the vector storage
-	///
-	/// Grants low-level access to the vectors internals. Elements storage()[0]...storage()[size()-1] are valid.
-	const_pointer storage()const{
-		return m_storage.data();
-	}
-	
-	///\brief Returns the stride between the elements in storage()
-	///
-	/// In general elements of dense storage entities are spaced like storage()[i*stride()] for i=1,...,size()-1
-	/// However for vector strid is guaranteed to be 1.
-	difference_type stride()const{
-		return 1;
+	///\brief Returns the underlying storage structure for low level access
+	const_storage_type raw_storage() const{
+		return {m_storage.data(),1};
 	}
 	
 	// ---------
@@ -186,7 +167,7 @@ public:
 
 	/// \brief Return the maximum size of the data container.
 	/// Return the upper bound (maximum size) on the data container. Depending on the container, it can be bigger than the current size of the vector.
-	size_type max_size() const {
+	index_type max_size() const {
 		return m_storage.max_size();
 	}
 
@@ -198,7 +179,7 @@ public:
 
 	/// \brief Resize the vector
 	/// \param size new size of the vector
-	void resize(size_type size) {
+	void resize(index_type size) {
 		m_storage.resize(size);
 	}
 
@@ -238,19 +219,19 @@ public:
 	
 	///\brief Returns the first element of the vector
 	reference front(){
-		return storage()[0];
+		return m_storage[0];
 	}
 	///\brief Returns the first element of the vector
 	const_reference front()const{
-		return storage()[0];
+		return m_storage[0];
 	}
 	///\brief Returns the last element of the vector
 	reference back(){
-		return storage()[size()-1];
+		return m_storage[size()-1];
 	}
 	///\brief Returns the last element of the vector
 	const_reference back()const{
-		return storage()[size()-1];
+		return m_storage[size()-1];
 	}
 	
 	///\brief resizes the vector by appending a new element to the end. this invalidates storage 
@@ -269,12 +250,12 @@ public:
 	
 	/// \brief return an iterator on the first element of the vector
 	const_iterator cbegin() const {
-		return const_iterator(storage(),0);
+		return const_iterator(m_storage.data(),0);
 	}
 
 	/// \brief return an iterator after the last element of the vector
 	const_iterator cend() const {
-		return const_iterator(storage()+size(),size());
+		return const_iterator(m_storage.data()+size(),size());
 	}
 
 	/// \brief return an iterator on the first element of the vector
@@ -289,12 +270,12 @@ public:
 
 	/// \brief Return an iterator on the first element of the vector
 	iterator begin(){
-		return iterator(storage(),0);
+		return iterator(m_storage.data(),0);
 	}
 
 	/// \brief Return an iterator at the end of the vector
 	iterator end(){
-		return iterator(storage()+size(),size());
+		return iterator(m_storage.data()+size(),size());
 	}
 	
 	/////////////////sparse interface///////////////////////////////
@@ -319,7 +300,7 @@ public:
 		return end;
 	}
 	
-	void reserve(size_type) {}
+	void reserve(index_type) {}
 	
 	/// \brief Swap the content of two vectors
 	/// \param v1 is the first vector. It takes values from v2
@@ -342,7 +323,7 @@ public:
 			resize(count);
 		}
 		if (!empty())
-			ar & boost::serialization::make_array(storage(),size());
+			ar & boost::serialization::make_array(m_storage.data(),size());
 		(void) file_version;//prevent warning
 	}
 
@@ -378,23 +359,17 @@ class vectorN: public vector_container<vectorN<T,N> > {
 	typedef std::array<T,N> array_type;
 public:
 	
-	typedef typename array_type::size_type size_type;
-	typedef typename array_type::difference_type difference_type;
+	typedef typename array_type::index_type index_type;
 	typedef typename array_type::value_type value_type;
 	typedef value_type scalar_type;
 	typedef typename array_type::const_reference const_reference;
 	typedef typename array_type::reference reference;
-	typedef T *pointer;
-	typedef const T *const_pointer;
 
-	typedef std::size_t index_type;
-	typedef index_type const* const_index_pointer;
-	typedef index_type index_pointer;
-
-	typedef const vector_reference<const self_type> const_closure_type;
+	typedef const vector_reference<self_type const> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
 	typedef self_type vector_temporary_type;
-	typedef dense_tag storage_category;
+	typedef dense_vector_storage<T> storage_type;
+	typedef dense_vector_storage<T const> const_storage_type;
 	typedef elementwise_tag evaluation_category;
 
 	// Construction and assignment
@@ -412,46 +387,20 @@ public:
 		SIZE_CHECK(e().size() == N);
 		assign(*this, e);
 	}
-
-	// ---------
-	// Dense low level interface
-	// ---------
 	
 	/// \brief Return the size of the vector.
-	size_type size() const {
+	index_type size() const {
 		return m_storage.size();
 	}
 	
-	///\brief Returns the pointer to the beginning of the vector storage
-	///
-	/// Grants low-level access to the vectors internals. Elements storage()[0]...storage()[size()-1] are valid.
-	pointer storage(){
-		return m_storage.data();
+	///\brief Returns the underlying storage structure for low level access
+	storage_type raw_storage(){
+		return {m_storage.data(),1};
 	}
 	
-	///\brief Returns the pointer to the beginning of the vector storage
-	///
-	/// Grants low-level access to the vectors internals. Elements storage()[0]...storage()[size()-1] are valid.
-	const_pointer storage()const{
-		return m_storage.data();
-	}
-	
-	///\brief Returns the stride between the elements in storage()
-	///
-	/// In general elements of dense storage entities are spaced like storage()[i*stride()] for i=1,...,size()-1
-	/// However for vector strid is guaranteed to be 1.
-	difference_type stride()const{
-		return 1;
-	}
-	
-	// ---------
-	// High level interface
-	// ---------
-
-	/// \brief Return the maximum size of the data container.
-	/// Return the upper bound (maximum size) on the data container. Depending on the container, it can be bigger than the current size of the vector.
-	size_type max_size() const {
-		return m_storage.max_size();
+	///\brief Returns the underlying storage structure for low level access
+	const_storage_type raw_storage() const{
+		return {m_storage.data(),1};
 	}
 
 	/// \brief Return true if the vector is empty (\c size==0)
@@ -469,7 +418,7 @@ public:
 	/// \param i index of the element
 	const_reference operator()(index_type i) const {
 		RANGE_CHECK(i < size());
-		return storage()[i];
+		return m_storage[i];
 	}
 
 	/// \brief Return a reference to the element \f$i\f$
@@ -477,7 +426,7 @@ public:
 	/// \param i index of the element
 	reference operator()(index_type i) {
 		RANGE_CHECK(i < size());
-		return storage()[i];
+		return m_storage[i];
 	}
 
 	/// \brief Return a const reference to the element \f$i\f$
@@ -496,19 +445,19 @@ public:
 	
 	///\brief Returns the first element of the vector
 	reference front(){
-		return storage().front();
+		return m_storage.front();
 	}
 	///\brief Returns the first element of the vector
 	const_reference front()const{
-		return storage().front();
+		return m_storage.front();
 	}
 	///\brief Returns the last element of the vector
 	reference back(){
-		return storage().back();
+		return m_storage.back();
 	}
 	///\brief Returns the last element of the vector
 	const_reference back()const{
-		return storage().back();
+		return m_storage.back();
 	}
 
 	/// \brief Clear the vector, i.e. set all values to the \c zero value.
@@ -555,12 +504,12 @@ public:
 	
 	/// \brief return an iterator on the first element of the vector
 	const_iterator cbegin() const {
-		return const_iterator(storage(),0);
+		return const_iterator(m_storage,0);
 	}
 
 	/// \brief return an iterator after the last element of the vector
 	const_iterator cend() const {
-		return const_iterator(storage()+size(),size());
+		return const_iterator(m_storage+size(),size());
 	}
 
 	/// \brief return an iterator on the first element of the vector
@@ -575,12 +524,12 @@ public:
 
 	/// \brief Return an iterator on the first element of the vector
 	iterator begin(){
-		return iterator(storage(),0);
+		return iterator(m_storage.data(),0);
 	}
 
 	/// \brief Return an iterator at the end of the vector
 	iterator end(){
-		return iterator(storage()+size(),size());
+		return iterator(m_storage.data()+size(),size());
 	}
 	
 	/////////////////sparse interface///////////////////////////////
@@ -605,7 +554,7 @@ public:
 		return end;
 	}
 	
-	void reserve(size_type) {}
+	void reserve(index_type) {}
 	
 	/// \brief Swap the content of two vectors
 	/// \param v1 is the first vector. It takes values from v2
@@ -619,7 +568,7 @@ public:
 
 	template<class Archive>
 	void serialize(Archive &ar, const unsigned int) {
-		ar & boost::serialization::make_array(storage(),size());
+		ar & boost::serialization::make_array(m_storage,size());
 	}
 
 private:

@@ -46,6 +46,10 @@
 namespace shark {
 namespace blas {
 	
+// forward declaration
+struct row_major;
+struct column_major;
+	
 // Storage tags -- hierarchical definition of storage characteristics
 // this gives the real storage layout of the matix in memory
 // packed_tag ->BLAS packed format and supports packed interface
@@ -56,6 +60,78 @@ struct unknown_storage_tag {};
 struct sparse_tag:public unknown_storage_tag{};
 struct dense_tag: public unknown_storage_tag{};
 struct packed_tag: public unknown_storage_tag{};
+
+struct unknown_storage{
+	typedef unknown_storage_tag storage_tag;
+	typedef unknown_storage row_storage;
+};
+
+template<class T>
+struct dense_vector_storage{
+	typedef dense_tag storage_tag;
+	T* values;
+	std::size_t stride;
+	
+	dense_vector_storage<T> sub_region(std::size_t offset){
+		return {values+offset*stride, stride};
+	}
+};
+
+template<class T, class I>
+struct sparse_vector_storage{
+	typedef sparse_tag storage_tag;
+	T* values;
+	I* indices;
+	std::size_t nnz;
+};
+
+template<class T>
+struct dense_matrix_storage{
+	typedef dense_tag storage_tag;
+	typedef dense_vector_storage<T> row_storage;
+	T* values;
+	std::size_t leading_dimension;
+	
+	template<class Orientation>
+	dense_matrix_storage<T> sub_region(std::size_t offset1, std::size_t offset2, Orientation){
+		std::size_t offset_major = Orientation::index_M(offset1,offset2);
+		std::size_t offset_minor = Orientation::index_m(offset1,offset2);
+		return {values+offset_major*leading_dimension+offset_minor, leading_dimension};
+	}
+	
+	template<class Orientation>
+	row_storage row(std::size_t i, Orientation){
+		return {values + i * Orientation::index_M(leading_dimension,1), Orientation::index_m(leading_dimension,1)};
+	}
+	template<class Orientation>
+	row_storage diag(){
+		return {values, leading_dimension+1};
+	}
+};
+
+template<class T>
+struct packed_matrix_storage{
+	typedef packed_tag storage_tag;
+	typedef dense_vector_storage<T> row_storage;
+	T* values;
+	std::size_t nnz;
+};
+
+template<class T, class I>
+struct sparse_matrix_storage{
+	typedef sparse_tag storage_tag;
+	typedef sparse_vector_storage<T,I> row_storage;
+	T* values;
+	I* indices;
+	I* outer_indices_begin;
+	I* outer_indices_end;
+	
+	template<class Orientation>
+	row_storage row(std::size_t i, Orientation){
+		static_assert(std::is_same<Orientation,row_major>::value);
+		return {values + outer_indices_begin[i], indices + outer_indices_begin[i],outer_indices_end[i] - outer_indices_begin[i]};
+	}
+};
 
 //evaluation tags
 struct elementwise_tag{};
@@ -122,9 +198,6 @@ struct unit_upper{
 //structure types
 struct linear_structure{};
 struct triangular_structure{};
-
-// forward declaration
-struct column_major;
 
 // This traits class defines storage layout and it's properties
 // matrix (i,j) -> storage [i * size_i + j]
@@ -286,7 +359,6 @@ private:
 	}
 };
 
-
 template<class E>
 struct closure: public boost::mpl::if_<
 	std::is_const<E>,
@@ -307,16 +379,10 @@ struct reference: public boost::mpl::if_<
 >{};
 
 template<class E>
-struct pointer: public boost::mpl::if_<
+struct storage: public boost::mpl::if_<
 	std::is_const<E>,
-	typename E::const_pointer,
-	typename E::pointer
->{};
-template<class E>
-struct index_pointer: public boost::mpl::if_<
-	std::is_const<E>,
-	typename E::const_index_pointer,
-	typename E::index_pointer
+	typename E::const_storage_type,
+	typename E::storage_type
 >{};
 	
 template<class M>

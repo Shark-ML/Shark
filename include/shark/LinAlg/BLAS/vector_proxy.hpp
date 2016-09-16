@@ -48,19 +48,19 @@ namespace blas{
 /// The vector starts with first index being 0 for the element that is indexed with start in the original vector.
 template<class V>
 temporary_proxy<typename detail::vector_range_optimizer<V>::type>
-subrange(vector_expression<V>& expression, typename V::size_type start, typename V::size_type stop){
+subrange(vector_expression<V>& expression, std::size_t start, std::size_t stop){
 	return detail::vector_range_optimizer<V>::create(expression(), start, stop);
 }
 
 template<class V>
 typename detail::vector_range_optimizer<typename const_expression<V>::type>::type
-subrange(vector_expression<V> const& expression, typename V::size_type start, typename V::size_type stop){
+subrange(vector_expression<V> const& expression, std::size_t start, std::size_t stop){
 	return detail::vector_range_optimizer<typename const_expression<V>::type>::create(expression(), start, stop);
 }
 
 template<class V>
 temporary_proxy<typename detail::vector_range_optimizer<V>::type>
-subrange(temporary_proxy<V> expression, typename V::size_type start, typename V::size_type stop){
+subrange(temporary_proxy<V> expression, std::size_t start, std::size_t stop){
 	return subrange(static_cast<V&>(expression), start, stop);
 }
 

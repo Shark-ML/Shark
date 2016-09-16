@@ -528,7 +528,7 @@ public:
 		{
 			double a = alpha(i);
 			if (a == 0.0) continue;
-			this->m_problem.quadratic.row(i, 0, n, q.storage());
+			this->m_problem.quadratic.row(i, 0, n, q.raw_storage().values);
 			noalias(gradient) -= a * q;
 			std::size_t j = inverse[i];
 			if (a == boxMin(j) || a == boxMax(j)) gradientEdge -= a * q;

@@ -220,10 +220,10 @@ struct TriangularMatrixFixture
 		result4 = trans(result1);
 		
 		for(std::size_t elem=0;elem != elements;++elem){
-			matrix1.storage()[elem]=elem+1;
-			matrix2.storage()[elem]=elem+1;
-			matrix3.storage()[elem]=elem+1;
-			matrix4.storage()[elem]=elem+1;
+			matrix1.raw_storage().values[elem]=elem+1;
+			matrix2.raw_storage().values[elem]=elem+1;
+			matrix3.raw_storage().values[elem]=elem+1;
+			matrix4.raw_storage().values[elem]=elem+1;
 		}
 	}
 };
@@ -234,10 +234,10 @@ BOOST_FIXTURE_TEST_SUITE (LinAlg_BLAS_triangular_matrix,TriangularMatrixFixture)
 //Check that reading entries of the matrix works and it is the same structure
 //as demanded by the BLAS Standard
 BOOST_AUTO_TEST_CASE( triangular_matrix_structure){
-	BOOST_REQUIRE_EQUAL(matrix1.nnz(),elements);
-	BOOST_REQUIRE_EQUAL(matrix2.nnz(),elements);
-	BOOST_REQUIRE_EQUAL(matrix3.nnz(),elements);
-	BOOST_REQUIRE_EQUAL(matrix4.nnz(),elements);
+	BOOST_REQUIRE_EQUAL(matrix1.raw_storage().nnz,elements);
+	BOOST_REQUIRE_EQUAL(matrix2.raw_storage().nnz,elements);
+	BOOST_REQUIRE_EQUAL(matrix3.raw_storage().nnz,elements);
+	BOOST_REQUIRE_EQUAL(matrix4.raw_storage().nnz,elements);
 
 	//test that matrices are the same
 	

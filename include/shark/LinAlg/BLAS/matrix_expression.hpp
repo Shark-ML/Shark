@@ -514,7 +514,7 @@ norm_1(matrix_expression<MatA> const& A) {
 
 /// \brief computes the frobenius norm |A|_F
 ///
-/// It is defined as \f$ Tr(A^TA)=\sum_{ij} A_{ij}^2 \f$
+/// It is defined as \f$ \sqrt{Tr(A^TA)}=\sqrt{\sum_{ij} A_{ij}^2} \f$
 template<class MatA>
 typename real_traits<typename MatA::value_type>::type
 norm_frobenius(matrix_expression<MatA> const& A) {

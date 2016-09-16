@@ -113,10 +113,12 @@ void tpmv(
 	CBLAS_UPLO cblasUplo = upper?CblasUpper:CblasLower;
 	CBLAS_ORDER stor_ord= (CBLAS_ORDER)storage_order<typename TriangularA::orientation::orientation>::value;
 	
+	auto storageA = A().raw_storage();
+	auto storagex = x().raw_storage();
 	tpmv(stor_ord, cblasUplo, CblasNoTrans, cblasUnit, (int)n,
-	        traits::storage(A),
-	        traits::storage(x),
-	        traits::stride(x)
+	        storageA.values,
+		storagex.values,
+	        storagex.stride
 	);
 }
 
@@ -157,8 +159,8 @@ struct optimized_tpmv_detail<
 template<class M, class V>
 struct  has_optimized_tpmv
 : public optimized_tpmv_detail<
-	typename M::storage_category,
-	typename V::storage_category,
+	typename M::storage_type::storage_tag,
+	typename V::storage_type::storage_tag,
 	typename M::value_type,
 	typename V::value_type
 >{};

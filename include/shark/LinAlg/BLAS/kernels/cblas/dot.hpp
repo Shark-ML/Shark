@@ -81,17 +81,19 @@ inline void dot(int N,
 // op (A) == A || A^T || A^H
 template <typename VectorX, typename VectorY>
 void dot(
-	vector_expression<VectorX> const&   x,
+	vector_expression<VectorX> const& x,
         vector_expression<VectorY> const& y,
 	typename VectorX::value_type& result,
 	boost::mpl::true_
 ){
 	SIZE_CHECK(x().size() == y().size());
 
+	auto storageX= x().raw_storage();
+	auto storageY= Y().raw_storage();
 	dot(
 		x().size(),
-		traits::storage(x), traits::stride(x),
-		traits::storage(y), traits::stride(y),
+		storageX.values, storageX.stride,
+		storageY.values, storageY.stride,
 		result
 	);
 }
@@ -133,8 +135,8 @@ struct optimized_dot_detail<
 template<class V1, class V2, class result_type>
 struct  has_optimized_dot
 : public optimized_dot_detail<
-	typename V1::storage_category,
-	typename V2::storage_category,
+	typename V1::storage_type::storage_tag,
+	typename V2::storage_type::storage_tag,
 	typename V1::value_type,
 	typename V2::value_type,
 	result_type

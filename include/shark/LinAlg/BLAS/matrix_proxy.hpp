@@ -254,7 +254,7 @@ temporary_proxy<dense_matrix_adaptor<T> > adapt_matrix(T (&array)[M][N]){
 /// \brief Converts a dense vector to a matrix of a given size
 template <class V>
 typename boost::enable_if<
-	boost::is_same<typename V::storage_category,dense_tag>,
+	boost::is_same<typename V::storage_type::storage_tag,dense_tag>,
 	temporary_proxy< dense_matrix_adaptor<
 		typename boost::remove_reference<typename V::reference>::type
 	> >
@@ -264,25 +264,25 @@ to_matrix(
 	std::size_t size1, std::size_t size2
 ){
 	typedef typename boost::remove_reference<typename V::reference>::type ElementType;
-	return dense_matrix_adaptor<ElementType>(v().storage(), size1, size2);
+	return dense_matrix_adaptor<ElementType>(v().raw_storage().values, size1, size2);
 }
 
 /// \brief Converts a dense vector to a matrix of a given size
 template <class V>
 typename boost::enable_if<
-	boost::is_same<typename V::storage_category,dense_tag>,
+	boost::is_same<typename V::storage_type::storage_tag,dense_tag>,
 	temporary_proxy< dense_matrix_adaptor<typename V::value_type const> >
 >::type 
 to_matrix(
 	vector_expression<V> const& v,
 	std::size_t size1, std::size_t size2
 ){
-	return dense_matrix_adaptor<typename V::value_type const>(v().storage(), size1, size2);
+	return dense_matrix_adaptor<typename V::value_type const>(v().raw_storage().values, size1, size2);
 }
 
 template <class E>
 typename boost::enable_if<
-	boost::is_same<typename E::storage_category,dense_tag>,
+	boost::is_same<typename E::storage_type::storage_tag,dense_tag>,
 	temporary_proxy< dense_matrix_adaptor<
 		typename boost::remove_reference<typename E::reference>::type
 	> >

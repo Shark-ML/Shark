@@ -199,7 +199,7 @@ public:
 		std::size_t outputs = outputSize();
 		gradient.clear();
 
-		blas::dense_matrix_adaptor<double> weightGradient = blas::adapt_matrix(outputs,inputs,gradient.storage());
+		auto weightGradient = blas::to_matrix(gradient, outputs,inputs);
 		//sum_i coefficients(output,i)*pattern(i))
 		noalias(weightGradient) = prod(trans(coefficients),patterns);
 

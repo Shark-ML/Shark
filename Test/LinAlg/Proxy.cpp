@@ -30,17 +30,17 @@ BOOST_AUTO_TEST_CASE( BLAS_dense_vector_adaptor )
 	
 	//check internal variables
 	BOOST_REQUIRE_EQUAL(proxy.size() ,3);
-	BOOST_REQUIRE_EQUAL(proxy.stride() ,1);
-	BOOST_REQUIRE_EQUAL(proxy.storage() ,&x(0));
+	BOOST_REQUIRE_EQUAL(proxy.raw_storage().stride ,1);
+	BOOST_REQUIRE_EQUAL(proxy.raw_storage().values ,&x(0));
 	BOOST_REQUIRE_EQUAL(proxym.size() ,4);
-	BOOST_REQUIRE_EQUAL(proxym.stride() ,2);
-	BOOST_REQUIRE_EQUAL(proxym.storage() ,mem);
+	BOOST_REQUIRE_EQUAL(proxym.raw_storage().stride ,2);
+	BOOST_REQUIRE_EQUAL(proxym.raw_storage().values ,mem);
 	
 	//check traits
-	BOOST_REQUIRE_EQUAL(proxy.stride() ,1);
-	BOOST_REQUIRE_EQUAL(proxy.storage() ,&x(0));
-	BOOST_REQUIRE_EQUAL(proxym.stride() ,2);
-	BOOST_REQUIRE_EQUAL(proxym.storage() ,mem);
+	BOOST_REQUIRE_EQUAL(proxy.raw_storage().stride ,1);
+	BOOST_REQUIRE_EQUAL(proxy.raw_storage().values ,&x(0));
+	BOOST_REQUIRE_EQUAL(proxym.raw_storage().stride ,2);
+	BOOST_REQUIRE_EQUAL(proxym.raw_storage().values ,mem);
 	
 	//check values
 	for(std::size_t i = 0; i != 3; ++i){
@@ -65,7 +65,7 @@ template<class Proxy, class Vector>
 void checkProxyBase(Vector& vec, std::size_t nnz){
 	Proxy proxy(vec);
 	//check basic properties
-	BOOST_REQUIRE_EQUAL(proxy.nnz(),nnz);
+	//~ BOOST_REQUIRE_EQUAL(proxy.nnz(),nnz);
 	BOOST_REQUIRE_EQUAL(proxy.size(),vec.size());
 	
 	//check iterators

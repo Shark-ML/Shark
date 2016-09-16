@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE LinAlg_Diagonal_Matrix
+#define BOOST_TEST_MODULE BLAS_Diagonal_Matrix
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -20,9 +20,9 @@ void checkDiagonalMatrix(M const& diagonal, D const& diagonalElements, std::size
 	}
 }
 
-BOOST_AUTO_TEST_SUITE (LinAlg_DiagonalMatrix)
+BOOST_AUTO_TEST_SUITE (BLAS_DiagonalMatrix)
 
-BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_Basic ){
+BOOST_AUTO_TEST_CASE( BLAS_Diagonal_Matrix_Basic ){
 	std::size_t const Dimensions = 10;
 	IntVector diagonalElements(Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i)
@@ -32,48 +32,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_Basic ){
 	checkDiagonalMatrix(diagonal,diagonalElements,Dimensions);
 }
 
-BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_Copy ){
-	std::size_t const Dimensions = 10;
-	IntVector diagonalElements(Dimensions);
-	for(std::size_t i = 0; i != Dimensions; ++i)
-		diagonalElements(i) = (unsigned int)i;
-	
-	blas::diagonal_matrix<IntVector> diagonal(diagonalElements);
-	
-	blas::diagonal_matrix<IntVector> diagonal2(diagonal);
-	checkDiagonalMatrix(diagonal2,diagonalElements,Dimensions);
-}
-
-BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_DefaultCtorAndAssignment){
-	std::size_t const Dimensions = 10;
-	IntVector diagonalElements(Dimensions);
-	for(std::size_t i = 0; i != Dimensions; ++i)
-		diagonalElements(i) = (unsigned int)i;
-	
-	blas::diagonal_matrix<IntVector> diagonal(diagonalElements);
-	
-	blas::diagonal_matrix<IntVector> diagonal2;
-	BOOST_REQUIRE_EQUAL(diagonal2.size1(),0);
-	BOOST_REQUIRE_EQUAL(diagonal2.size2(),0);
-	
-	//assignment
-	diagonal2 = diagonal;
-	checkDiagonalMatrix(diagonal2,diagonalElements,Dimensions);
-}
-
-BOOST_AUTO_TEST_CASE( LinAlg_Diagonal_Matrix_Assignment){
-	std::size_t const Dimensions = 10;
-	IntVector diagonalElements(Dimensions);
-	for(std::size_t i = 0; i != Dimensions; ++i)
-		diagonalElements(i) = (unsigned int)i;
-	
-	blas::diagonal_matrix<IntVector> diagonal(diagonalElements);
-	
-	IntMatrix diagonal2(diagonal);
-	checkDiagonalMatrix(diagonal2,diagonalElements,Dimensions);
-}
-
-BOOST_AUTO_TEST_CASE( LinAlg_Identity_Matrix ){
+BOOST_AUTO_TEST_CASE( BLAS_Identity_Matrix ){
 	std::size_t const Dimensions = 10;
 	IntVector diagonalElements(Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i)

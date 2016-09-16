@@ -74,7 +74,7 @@ private:
 		Point(): frt(1){}
 
 		Point(RealVector const& objvec)
-		: obj(objvec.storage())
+		: obj(objvec.raw_storage().values)
 		, frt(1)
 		, m_size(objvec.size())
 		{}

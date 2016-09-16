@@ -103,12 +103,13 @@ void trsm(
 	
 	int m = B().size1();
 	int nrhs = B().size2();
-	
+	auto storageA = A().raw_storage();
+	auto storageB = B().raw_storage();
 	trsm(storOrd, cblasUplo, transA, CblasLeft,cblasUnit, m, nrhs,
-		traits::storage(A),
-		traits::leading_dimension(A),
-		traits::storage(B),
-		traits::leading_dimension(B)
+		storageA.values,
+	        storageA.leading_dimension,
+		storageB.values,
+	        storageB.leading_dimension
 	);
 }
 
@@ -149,8 +150,8 @@ struct optimized_trsm_detail<
 template<class M1, class M2>
 struct  has_optimized_trsm
 : public optimized_trsm_detail<
-	typename M1::storage_category,
-	typename M2::storage_category,
+	typename M1::storage_type::storage_tag,
+	typename M2::storage_type::storage_tag,
 	typename M1::value_type,
 	typename M2::value_type
 >{};
