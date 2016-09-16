@@ -41,7 +41,7 @@ namespace shark {namespace blas {namespace bindings {
 // Lower triangular(column major) - matrix
 template<bool Unit, class MatA, class MatB>
 void trsm_impl(
-	matrix_expression<MatA> const& A, matrix_expression<MatB>& B, 
+	matrix_expression<MatA, cpu_tag> const& A, matrix_expression<MatB, cpu_tag>& B, 
 	boost::mpl::false_, column_major
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
@@ -68,7 +68,7 @@ void trsm_impl(
 // Lower triangular(row major) - matrix
 template<bool Unit, class MatA, class MatB>
 void trsm_impl(
-	matrix_expression<MatA> const& A, matrix_expression<MatB>& B, 
+	matrix_expression<MatA, cpu_tag> const& A, matrix_expression<MatB, cpu_tag>& B, 
 	boost::mpl::false_, row_major
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
@@ -91,7 +91,7 @@ void trsm_impl(
 //Upper triangular(column major) - matrix
 template<bool Unit, class MatA, class MatB>
 void trsm_impl(
-	matrix_expression<MatA> const& A, matrix_expression<MatB>& B,
+	matrix_expression<MatA, cpu_tag> const& A, matrix_expression<MatB, cpu_tag>& B,
         boost::mpl::true_, column_major
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
@@ -120,7 +120,7 @@ void trsm_impl(
 //Upper triangular(row major) - matrix
 template<bool Unit, class MatA, class MatB>
 void trsm_impl(
-	matrix_expression<MatA> const& A, matrix_expression<MatB>& B,
+	matrix_expression<MatA, cpu_tag> const& A, matrix_expression<MatB, cpu_tag>& B,
         boost::mpl::true_, row_major
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
@@ -141,16 +141,16 @@ void trsm_impl(
 	}
 }
 
-template <bool Upper, bool Unit,typename TriangularA, typename MatB>
+template <bool Upper, bool Unit,typename MatA, typename MatB>
 void trsm(
-	matrix_expression<TriangularA> const& A,
-	matrix_expression<MatB>& B,
+	matrix_expression<MatA, cpu_tag> const& A,
+	matrix_expression<MatB, cpu_tag>& B,
 	boost::mpl::false_
 ){
 	trsm_impl<Unit>(
 		A,B,
 		boost::mpl::bool_<Upper>(),
-		typename TriangularA::orientation()
+		typename MatA::orientation()
 	);
 }
 

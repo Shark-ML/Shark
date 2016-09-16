@@ -35,7 +35,7 @@ namespace shark {
 namespace blas {
 
 template<class V>
-class vector_reference:public vector_expression<vector_reference<V> >{
+class vector_reference:public vector_expression<vector_reference<V>, typename V::device_type >{
 public:
 	typedef typename V::index_type index_type;
 	typedef typename V::value_type value_type;
@@ -91,7 +91,7 @@ public:
 		return *this;
 	}
 	template<class E>
-	vector_reference& operator = (vector_expression<E> const& e){
+	vector_reference& operator = (vector_expression<E, typename V::device_type> const& e){
 		expression() = e();
 		return *this;
 	}
@@ -148,7 +148,7 @@ private:
  * \tparam V the type of vector referenced (for exaboost::mple \c vector<double>)
  */
 template<class V>
-class vector_range:public vector_expression<vector_range<V> >{
+class vector_range:public vector_expression<vector_range<V>, typename V::device_type >{
 public:
 	typedef typename V::index_type index_type;
 	typedef typename V::value_type value_type;
@@ -220,7 +220,7 @@ public:
 	}
 
 	template<class E>
-	vector_range& operator = (vector_expression<E> const& e){
+	vector_range& operator = (vector_expression<E, typename V::device_type> const& e){
 		return assign(*this, typename vector_temporary<E>::type(e));
 	}
 
@@ -281,7 +281,7 @@ private:
 ///
 /// This adaptor is read/write if T is non-const and read-only if T is const.
 template<class T>
-class dense_vector_adaptor: public vector_expression<dense_vector_adaptor<T> > {
+class dense_vector_adaptor: public vector_expression<dense_vector_adaptor<T>, cpu_tag > {
 	typedef dense_vector_adaptor<T> self_type;
 public:
 
@@ -304,7 +304,7 @@ public:
 	/// Be aware that the expression must live longer than the proxy!
 	/// \param expression The Expression from which to construct the Proxy
  	template<class E>
-	dense_vector_adaptor(vector_expression<E> const& expression)
+	dense_vector_adaptor(vector_expression<E, cpu_tag> const& expression)
 	: m_values(expression().raw_storage().values)
 	, m_size(expression().size())
 	, m_stride(expression().raw_storage().stride){}
@@ -314,7 +314,7 @@ public:
 	/// Be aware that the expression must live longer than the proxy!
 	/// \param expression The Expression from which to construct the Proxy
  	template<class E>
-	dense_vector_adaptor(vector_expression<E>& expression)
+	dense_vector_adaptor(vector_expression<E,cpu_tag>& expression)
 	: m_values(expression().raw_storage().values)
 	, m_size(expression().size())
 	, m_stride(expression().raw_storage().stride){}
@@ -394,7 +394,7 @@ public:
 		return assign(typename vector_temporary<self_type>::type(e));
 	}
 	template<class E>
-	dense_vector_adaptor& operator = (const vector_expression<E>& e) {
+	dense_vector_adaptor& operator = (vector_expression<E, cpu_tag> const& e) {
 		return assign(typename vector_temporary<E>::type(e));
 	}
 	
@@ -455,7 +455,7 @@ private:
 };
 
 template<class T,class I>
-class sparse_vector_adaptor: public vector_expression<sparse_vector_adaptor<T,I> > {
+class sparse_vector_adaptor: public vector_expression<sparse_vector_adaptor<T,I>, cpu_tag > {
 	typedef sparse_vector_adaptor<T,I> self_type;
 public:
 
@@ -479,7 +479,7 @@ public:
 	/// Be aware that the expression must live longer than the proxy!
 	/// \param expression Expression from which to construct the Proxy
  	template<class E>
-	sparse_vector_adaptor(vector_expression<E> const& expression)
+	sparse_vector_adaptor(vector_expression<E, cpu_tag> const& expression)
 	: m_nonZeros(expression().raw_storage().nnz)
 	, m_indices(expression().raw_storage().indices)
 	, m_values(expression().raw_storage().values)

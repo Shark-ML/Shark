@@ -50,15 +50,15 @@ namespace shark { namespace blas {namespace kernels{
 ///\brief Implements the TRiangular Matrix Matrix multiply.
 ///
 /// It computes B=A*B in place, where A is a triangular matrix and B a dense matrix
-template <bool Upper,bool Unit,typename TriangularA, typename MatB>
+template <bool Upper,bool Unit,typename MatA, typename MatB>
 void trmm(
-	matrix_expression<TriangularA> const &A, 
-	matrix_expression<MatB>& B
+	matrix_expression<MatA, cpu_tag> const &A, 
+	matrix_expression<MatB, cpu_tag>& B
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size1() == B().size1());
 	
-	bindings::trmm<Upper,Unit>(A,B,typename bindings::has_optimized_trmm<TriangularA, MatB>::type());
+	bindings::trmm<Upper,Unit>(A,B,typename bindings::has_optimized_trmm<MatA, MatB>::type());
 }
 
 }}}

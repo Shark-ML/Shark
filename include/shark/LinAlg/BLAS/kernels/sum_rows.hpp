@@ -74,8 +74,8 @@ namespace detail{
 /// This is equivalent to the operation v=1^TA where 1 is the vector of all-ones
 template <class M, class V>
 void sum_rows(
-	matrix_expression<M> const & A, 
-	vector_expression<V>& b,
+	matrix_expression<M, cpu_tag> const & A, 
+	vector_expression<V, cpu_tag>& b,
 	typename M::scalar_type alpha
 ){
 	SIZE_CHECK(A().size2() == b().size());

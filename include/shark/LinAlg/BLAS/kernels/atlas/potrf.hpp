@@ -72,7 +72,7 @@ inline int potrf(
 
 template <typename Triangular, typename SymmA>
 inline int potrf(
-	matrix_container<SymmA>& A,
+	matrix_container<SymmA, cpu_tag>& A,
 	boost::mpl::true_
 ) {
 	CBLAS_UPLO const uplo = Triangular::is_upper ? CblasUpper : CblasLower;

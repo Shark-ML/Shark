@@ -41,7 +41,7 @@ namespace bindings {
 //upper potrf(row-major)
 template<class MatA>
 std::size_t potrf_impl(
-    matrix_expression<MatA>& A,
+    matrix_expression<MatA, cpu_tag>& A,
     row_major, lower
 ) {
 	std::size_t m = A().size1();
@@ -66,7 +66,7 @@ std::size_t potrf_impl(
 //lower potrf(row-major)
 template<class MatA>
 std::size_t potrf_impl(
-    matrix_expression<MatA>& A,
+    matrix_expression<MatA, cpu_tag>& A,
     row_major, upper
 ) {
 	std::size_t m = A().size1();
@@ -94,7 +94,7 @@ std::size_t potrf_impl(
 //dispatcher for column major
 template<class MatA, class Triangular>
 std::size_t potrf_impl(
-    matrix_container<MatA>& A,
+    matrix_container<MatA, cpu_tag>& A,
     column_major, Triangular
 ) {
 	blas::matrix_transpose<MatA> transA(A());
@@ -105,7 +105,7 @@ std::size_t potrf_impl(
 
 template <class Triangular, typename MatA>
 std::size_t potrf(
-    matrix_container<MatA>& A,
+    matrix_container<MatA, cpu_tag>& A,
     boost::mpl::false_//unoptimized
 ) {
 	return potrf_impl(A, typename MatA::orientation(), Triangular());

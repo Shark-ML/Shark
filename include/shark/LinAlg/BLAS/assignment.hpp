@@ -45,45 +45,45 @@ namespace blas {
 ////////////////////////////////////////////////////////////////////////////////////
 	
 namespace detail{
-	template<class VecX, class VecV>
-	void assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,elementwise_tag){
+	template<class VecX, class VecV, class Device>
+	void assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
 		kernels::assign(x,v);
 	}
-	template<class VecX, class VecV>
-	void assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,blockwise_tag){
+	template<class VecX, class VecV, class Device>
+	void assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
 		v().assign_to(x);
 	}
-	template<class VecX, class VecV>
-	void plus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,elementwise_tag){
+	template<class VecX, class VecV, class Device>
+	void plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
 		kernels::assign<scalar_plus_assign> (x, v);
 	}
-	template<class VecX, class VecV>
-	void plus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,blockwise_tag){
+	template<class VecX, class VecV, class Device>
+	void plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
 		v().plus_assign_to(x);
 	}
-	template<class VecX, class VecV>
-	void minus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,elementwise_tag){
+	template<class VecX, class VecV, class Device>
+	void minus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
 		kernels::assign<scalar_minus_assign> (x, v);
 	}
-	template<class VecX, class VecV>
-	void minus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,blockwise_tag){
+	template<class VecX, class VecV, class Device>
+	void minus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
 		v().minus_assign_to(x);
 	}
-	template<class VecX, class VecV>
-	void multiply_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,elementwise_tag){
+	template<class VecX, class VecV, class Device>
+	void multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
 		kernels::assign<scalar_multiply_assign> (x, v);
 	}
-	template<class VecX, class VecV>
-	void multiply_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,blockwise_tag){
+	template<class VecX, class VecV, class Device>
+	void multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
 		typename vector_temporary<VecX>::type temporary(v);
 		kernels::assign<scalar_multiply_assign> (x, temporary);
 	}
-	template<class VecX, class VecV>
-	void divide_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,elementwise_tag){
+	template<class VecX, class VecV, class Device>
+	void divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
 		kernels::assign<scalar_divide_assign> (x, v);
 	}
-	template<class VecX, class VecV>
-	void divide_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v,blockwise_tag){
+	template<class VecX, class VecV, class Device>
+	void divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
 		typename vector_temporary<VecX>::type temporary(v);
 		kernels::assign<scalar_divide_assign> (x, temporary);
 	}
@@ -94,8 +94,8 @@ namespace detail{
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
-template<class VecX, class VecV>
-VecX& assign(vector_expression<VecX>& x, vector_expression<VecV> const& v){
+template<class VecX, class VecV, class Device>
+VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
 	detail::assign(x,v,typename VecV::evaluation_category());
 	return x();
@@ -105,8 +105,8 @@ VecX& assign(vector_expression<VecX>& x, vector_expression<VecV> const& v){
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
-template<class VecX, class VecV>
-VecX& plus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v){
+template<class VecX, class VecV, class Device>
+VecX& plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
 	detail::plus_assign(x,v,typename VecV::evaluation_category());
 	return x();
@@ -116,8 +116,8 @@ VecX& plus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v){
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
-template<class VecX, class VecV>
-VecX& minus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v){
+template<class VecX, class VecV, class Device>
+VecX& minus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
 	detail::minus_assign(x,v,typename VecV::evaluation_category());
 	return x();
@@ -127,8 +127,8 @@ VecX& minus_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v)
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
-template<class VecX, class VecV>
-VecX& multiply_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v){
+template<class VecX, class VecV, class Device>
+VecX& multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
 	detail::multiply_assign(x,v,typename VecV::evaluation_category());
 	return x();
@@ -138,8 +138,8 @@ VecX& multiply_assign(vector_expression<VecX>& x, vector_expression<VecV> const&
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
-template<class VecX, class VecV>
-VecX& divide_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v){
+template<class VecX, class VecV, class Device>
+VecX& divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
 	detail::divide_assign(x,v,typename VecV::evaluation_category());
 	return x();
@@ -150,45 +150,45 @@ VecX& divide_assign(vector_expression<VecX>& x, vector_expression<VecV> const& v
 ////////////////////////////////////////////////////////////////////////////////////
 	
 namespace detail{
-	template<class MatA, class MatB>
-	void assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B,elementwise_tag){
+	template<class MatA, class MatB, class Device>
+	void assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
 		kernels::assign(A,B);
 	}
-	template<class MatA, class MatB>
-	void assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B,blockwise_tag){
+	template<class MatA, class MatB, class Device>
+	void assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
 		B().assign_to(A);
 	}
-	template<class MatA, class MatB>
-	void plus_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B,elementwise_tag){
+	template<class MatA, class MatB, class Device>
+	void plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
 		kernels::assign<scalar_plus_assign> (A, B);
 	}
-	template<class MatA, class MatB>
-	void plus_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B,blockwise_tag){
+	template<class MatA, class MatB, class Device>
+	void plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
 		B().plus_assign_to(A);
 	}
-	template<class MatA, class MatB>
-	void minus_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B,elementwise_tag){
+	template<class MatA, class MatB, class Device>
+	void minus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
 		kernels::assign<scalar_minus_assign> (A, B);
 	}
-	template<class MatA, class MatB>
-	void minus_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B,blockwise_tag){
+	template<class MatA, class MatB, class Device>
+	void minus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
 		B().minus_assign_to(A);
 	}
-	template<class MatA, class MatB>
-	void multiply_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B,elementwise_tag){
+	template<class MatA, class MatB, class Device>
+	void multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
 		kernels::assign<scalar_multiply_assign> (A, B);
 	}
-	template<class MatA, class MatB>
-	void multiply_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B,blockwise_tag){
+	template<class MatA, class MatB, class Device>
+	void multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
 		typename matrix_temporary<MatA>::type temporary(B);
 		kernels::assign<scalar_multiply_assign> (A, B);
 	}
-	template<class MatA, class MatB>
-	void divide_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B,elementwise_tag){
+	template<class MatA, class MatB, class Device>
+	void divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
 		kernels::assign<scalar_divide_assign> (A, B);
 	}
-	template<class MatA, class MatB>
-	void divide_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B,blockwise_tag){
+	template<class MatA, class MatB, class Device>
+	void divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
 		typename matrix_temporary<MatA>::type temporary(B);
 		kernels::assign<scalar_divide_assign> (A, B);
 	}
@@ -199,8 +199,8 @@ namespace detail{
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
-template<class MatA, class MatB>
-MatA& assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
+template<class MatA, class MatB, class Device>
+MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	detail::assign(A,B, typename MatB::evaluation_category());
@@ -211,8 +211,8 @@ MatA& assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
-template<class MatA, class MatB>
-MatA& plus_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
+template<class MatA, class MatB, class Device>
+MatA& plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	detail::plus_assign(A,B, typename MatB::evaluation_category());
@@ -223,8 +223,8 @@ MatA& plus_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
-template<class MatA, class MatB>
-MatA& minus_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
+template<class MatA, class MatB, class Device>
+MatA& minus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	detail::minus_assign(A,B, typename MatB::evaluation_category());
@@ -235,8 +235,8 @@ MatA& minus_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B)
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
-template<class MatA, class MatB>
-MatA& multiply_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
+template<class MatA, class MatB, class Device>
+MatA& multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	detail::multiply_assign(A,B, typename MatB::evaluation_category());
@@ -247,8 +247,8 @@ MatA& multiply_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const&
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
-template<class MatA, class MatB>
-MatA& divide_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
+template<class MatA, class MatB, class Device>
+MatA& divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	detail::divide_assign(A,B, typename MatB::evaluation_category());
@@ -265,8 +265,8 @@ MatA& divide_assign(matrix_expression<MatA>& A, matrix_expression<MatB> const& B
 /// Assumes that the right and left hand side aliases and therefore 
 /// performs a copy of the right hand side before assigning
 /// use noalias as in noalias(x)+=v to avoid this if A and B do not alias
-template<class VecX, class VecV>
-VecX& operator+=(vector_expression<VecX>& x, vector_expression<VecV> const& v){
+template<class VecX, class VecV, class Device>
+VecX& operator+=(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
 	return plus_assign(x,temporary);
@@ -278,8 +278,8 @@ VecX& operator+=(vector_expression<VecX>& x, vector_expression<VecV> const& v){
 /// Assumes that the right and left hand side aliases and therefore 
 /// performs a copy of the right hand side before assigning
 /// use noalias as in noalias(x)-=v to avoid this if A and B do not alias
-template<class VecX, class VecV>
-VecX& operator-=(vector_expression<VecX>& x, vector_expression<VecV> const& v){
+template<class VecX, class VecV, class Device>
+VecX& operator-=(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
 	return minus_assign(x,temporary);
@@ -291,8 +291,8 @@ VecX& operator-=(vector_expression<VecX>& x, vector_expression<VecV> const& v){
 /// Assumes that the right and left hand side aliases and therefore 
 /// performs a copy of the right hand side before assigning
 /// use noalias as in noalias(x)*=v to avoid this if A and B do not alias
-template<class VecX, class VecV>
-VecX& operator*=(vector_expression<VecX>& x, vector_expression<VecV> const& v){
+template<class VecX, class VecV, class Device>
+VecX& operator*=(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
 	return multiply_assign(x,temporary);
@@ -304,8 +304,8 @@ VecX& operator*=(vector_expression<VecX>& x, vector_expression<VecV> const& v){
 /// Assumes that the right and left hand side aliases and therefore 
 /// performs a copy of the right hand side before assigning
 /// use noalias as in noalias(x)/=v to avoid this if A and B do not alias
-template<class VecX, class VecV>
-VecX& operator/=(vector_expression<VecX>& x, vector_expression<VecV> const& v){
+template<class VecX, class VecV, class Device>
+VecX& operator/=(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
 	return divide_assign(x,temporary);
@@ -314,8 +314,8 @@ VecX& operator/=(vector_expression<VecX>& x, vector_expression<VecV> const& v){
 /// \brief  Adds a scalar to all elements of the vector
 ///
 /// Performs the operation x_i += t for all elements.
-template<class VecX>
-VecX& operator+=(vector_expression<VecX>& x, typename VecX::scalar_type t){
+template<class VecX, class Device>
+VecX& operator+=(vector_expression<VecX, Device>& x, typename VecX::scalar_type t){
 	kernels::assign<scalar_plus_assign> (x, t);
 	return x();
 }
@@ -323,8 +323,8 @@ VecX& operator+=(vector_expression<VecX>& x, typename VecX::scalar_type t){
 /// \brief  Subtracts a scalar from all elements of the vector
 ///
 /// Performs the operation x_i += t for all elements.
-template<class VecX>
-VecX& operator-=(vector_expression<VecX>& x, typename VecX::scalar_type t){
+template<class VecX, class Device>
+VecX& operator-=(vector_expression<VecX, Device>& x, typename VecX::scalar_type t){
 	kernels::assign<scalar_minus_assign> (x, t);
 	return x();
 }
@@ -332,8 +332,8 @@ VecX& operator-=(vector_expression<VecX>& x, typename VecX::scalar_type t){
 /// \brief  Multiplies a scalar with all elements of the vector
 ///
 /// Performs the operation x_i *= t for all elements.
-template<class VecX>
-VecX& operator*=(vector_expression<VecX>& x, typename VecX::scalar_type t){
+template<class VecX, class Device>
+VecX& operator*=(vector_expression<VecX, Device>& x, typename VecX::scalar_type t){
 	kernels::assign<scalar_multiply_assign> (x, t);
 	return x();
 }
@@ -341,8 +341,8 @@ VecX& operator*=(vector_expression<VecX>& x, typename VecX::scalar_type t){
 /// \brief  Divides all elements of the vector by a scalar
 ///
 /// Performs the operation x_i /= t for all elements.
-template<class VecX>
-VecX& operator/=(vector_expression<VecX>& x, typename VecX::scalar_type t){
+template<class VecX, class Device>
+VecX& operator/=(vector_expression<VecX, Device>& x, typename VecX::scalar_type t){
 	kernels::assign<scalar_divide_assign> (x, t);
 	return x();
 }
@@ -359,8 +359,8 @@ VecX& operator/=(vector_expression<VecX>& x, typename VecX::scalar_type t){
 /// Assumes that the right and left hand side aliases and therefore 
 /// performs a copy of the right hand side before assigning
 /// use noalias as in noalias(A)+=B to avoid this if A and B do not alias
-template<class MatA, class MatB>
-MatA& operator+=(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
+template<class MatA, class MatB, class Device>
+MatA& operator+=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
@@ -373,8 +373,8 @@ MatA& operator+=(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
 /// Assumes that the right and left hand side aliases and therefore 
 /// performs a copy of the right hand side before assigning
 /// use noalias as in noalias(A)-=B to avoid this if A and B do not alias
-template<class MatA, class MatB>
-MatA& operator-=(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
+template<class MatA, class MatB, class Device>
+MatA& operator-=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
@@ -387,8 +387,8 @@ MatA& operator-=(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
 /// Assumes that the right and left hand side aliases and therefore 
 /// performs a copy of the right hand side before assigning
 /// use noalias as in noalias(A)*=B to avoid this if A and B do not alias
-template<class MatA, class MatB>
-MatA& operator*=(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
+template<class MatA, class MatB, class Device>
+MatA& operator*=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
@@ -401,8 +401,8 @@ MatA& operator*=(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
 /// Assumes that the right and left hand side aliases and therefore 
 /// performs a copy of the right hand side before assigning
 /// use noalias as in noalias(A)/=B to avoid this if A and B do not alias
-template<class MatA, class MatB>
-MatA& operator/=(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
+template<class MatA, class MatB, class Device>
+MatA& operator/=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
@@ -412,8 +412,8 @@ MatA& operator/=(matrix_expression<MatA>& A, matrix_expression<MatB> const& B){
 /// \brief  Adds a scalar to all elements of the matrix
 ///
 /// Performs the operation A_ij += t for all elements.
-template<class MatA>
-MatA& operator+=(matrix_expression<MatA>& A, typename MatA::scalar_type t){
+template<class MatA, class Device>
+MatA& operator+=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type t){
 	kernels::assign<scalar_plus_assign> (A, t);
 	return A();
 }
@@ -421,8 +421,8 @@ MatA& operator+=(matrix_expression<MatA>& A, typename MatA::scalar_type t){
 /// \brief  Subtracts a scalar from all elements of the matrix
 ///
 /// Performs the operation A_ij -= t for all elements.
-template<class MatA>
-MatA& operator-=(matrix_expression<MatA>& A, typename MatA::scalar_type t){
+template<class MatA, class Device>
+MatA& operator-=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type t){
 	kernels::assign<scalar_minus_assign> (A, t);
 	return A();
 }
@@ -430,8 +430,8 @@ MatA& operator-=(matrix_expression<MatA>& A, typename MatA::scalar_type t){
 /// \brief  Multiplies a scalar to all elements of the matrix
 ///
 /// Performs the operation A_ij *= t for all elements.
-template<class MatA>
-MatA& operator*=(matrix_expression<MatA>& A, typename MatA::scalar_type t){
+template<class MatA, class Device>
+MatA& operator*=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type t){
 	kernels::assign<scalar_multiply_assign> (A, t);
 	return A();
 }
@@ -439,8 +439,8 @@ MatA& operator*=(matrix_expression<MatA>& A, typename MatA::scalar_type t){
 /// \brief  Divides all elements of the matrix by a scalar
 ///
 /// Performs the operation A_ij /= t for all elements.
-template<class MatA>
-MatA& operator /=(matrix_expression<MatA>& A, typename MatA::scalar_type t){
+template<class MatA, class Device>
+MatA& operator /=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type t){
 	kernels::assign<scalar_divide_assign> (A, t);
 	return A();
 }
@@ -538,16 +538,16 @@ private:
 
 // Improve syntax of efficient assignment where no aliases of LHS appear on the RHS
 //  noalias(lhs) = rhs_expression
-template <class C>
-noalias_proxy<C> noalias(matrix_expression<C>& lvalue) {
+template <class C, class Device>
+noalias_proxy<C> noalias(matrix_expression<C, Device>& lvalue) {
 	return noalias_proxy<C> (lvalue());
 }
-template <class C>
-noalias_proxy<C> noalias(vector_expression<C>& lvalue) {
+template <class C, class Device>
+noalias_proxy<C> noalias(vector_expression<C, Device>& lvalue) {
 	return noalias_proxy<C> (lvalue());
 }
 
-template <class C>
+template <class C, class Device>
 noalias_proxy<C> noalias(vector_set_expression<C>& lvalue) {
 	return noalias_proxy<C> (lvalue());
 }
@@ -568,7 +568,7 @@ noalias_proxy<C> noalias(temporary_proxy<C> lvalue) {
 /// If the expression is a block expression, a temporary vector is created to which
 /// the expression is assigned, which is then returned, otherwise the expression itself
 /// is returned
-template<class E>
+template<class E, class Device>
 typename boost::mpl::eval_if<
 	boost::is_same<
 		typename E::evaluation_category,
@@ -577,7 +577,7 @@ typename boost::mpl::eval_if<
 	vector_temporary<E>,
 	boost::mpl::identity<E const&>
 >::type
-eval_block(blas::vector_expression<E> const& e){
+eval_block(blas::vector_expression<E, Device> const& e){
 	return e();//either casts to E const& or returns the copied expression
 }
 ///\brief conditionally evaluates a matrix expression if it is a block expression
@@ -585,7 +585,7 @@ eval_block(blas::vector_expression<E> const& e){
 /// If the expression is a block expression, a temporary matrix is created to which
 /// the expression is assigned, which is then returned, otherwise the expression itself
 /// is returned
-template<class E>
+template<class E, class Device>
 typename boost::mpl::eval_if<
 	boost::is_same<
 		typename E::evaluation_category,
@@ -594,7 +594,7 @@ typename boost::mpl::eval_if<
 	matrix_temporary<E>,
 	boost::mpl::identity<E const&>
 >::type
-eval_block(blas::matrix_expression<E> const& e){
+eval_block(blas::matrix_expression<E, Device> const& e){
 	return e();//either casts to E const& or returns the copied expression
 }
 

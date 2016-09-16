@@ -31,10 +31,10 @@
 #include "../Cholesky.h"
 
 // Symmetric solvers
-template<class System,class MatT,class Mat1T>
+template<class System,class MatA, class MatB, class Device>
 void shark::blas::solveSymmPosDefSystemInPlace(
-	matrix_expression<MatT> const& A, 
-	matrix_expression<Mat1T>& B
+	matrix_expression<MatA, Device> const& A, 
+	matrix_expression<MatB, Device>& B
 ){
 	if(System::left){
 		SIZE_CHECK(A().size1() == B().size1());
@@ -43,30 +43,30 @@ void shark::blas::solveSymmPosDefSystemInPlace(
 	}
 	SIZE_CHECK(A().size1() == A().size2());
 	
-	matrix<typename MatT::value_type> cholesky;
+	matrix<typename MatA::value_type> cholesky;
 	choleskyDecomposition(A(),cholesky);
 
 	solveTriangularCholeskyInPlace<System>(cholesky,B);
 }
 
-template<class System,class MatT,class VecT>
+template<class System,class MatA,class VecV, class Device>
 void shark::blas::solveSymmPosDefSystemInPlace(
-	matrix_expression<MatT> const& A, 
-	vector_expression<VecT>& b
+	matrix_expression<MatA, Device> const& A, 
+	vector_expression<VecV, Device>& b
 ){
 	SIZE_CHECK(A().size1() == b().size());
 	SIZE_CHECK(A().size1() == A().size2());
 	
-	matrix<typename MatT::value_type> cholesky;
+	matrix<typename MatA::value_type> cholesky;
 	choleskyDecomposition(A(),cholesky);
 	solveTriangularCholeskyInPlace<System>(cholesky,b);
 }
 
-template<class System,class MatT,class Vec1T,class Vec2T>
+template<class System,class MatA,class VecX,class VecV, class Device>
 void shark::blas::solveSymmPosDefSystem(
-	const matrix_expression<MatT>& A, 
-	vector_expression<Vec1T>& x,
-	const vector_expression<Vec2T>& b
+	const matrix_expression<MatA, Device>& A, 
+	vector_expression<VecX, Device>& x,
+	const vector_expression<VecV, Device>& b
 ){
 	SIZE_CHECK(A().size1() == b().size());
 	SIZE_CHECK(A().size1() == A().size2());
@@ -74,11 +74,11 @@ void shark::blas::solveSymmPosDefSystem(
 	noalias(x()) = b();
 	solveSymmPosDefSystemInPlace<System>(A,x);
 }
-template<class System,class MatT,class Mat1T,class Mat2T>
+template<class System,class MatA,class MatX,class MatB, class Device>
 void shark::blas::solveSymmPosDefSystem(
-	const matrix_expression<MatT>& A, 
-	matrix_expression<Mat1T>& X,
-	const matrix_expression<Mat2T>& B
+	const matrix_expression<MatA, Device>& A, 
+	matrix_expression<MatX, Device>& X,
+	const matrix_expression<MatB, Device>& B
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	if(System::left){
@@ -91,10 +91,10 @@ void shark::blas::solveSymmPosDefSystem(
 	solveSymmPosDefSystemInPlace<System>(A,X);
 }
 
-template<class System,class MatT,class VecT>
+template<class System,class MatA,class VecV, class Device>
 void shark::blas::solveSymmSemiDefiniteSystemInPlace(
-	matrix_expression<MatT> const& A, 
-	vector_expression<VecT>& b
+	matrix_expression<MatA, Device> const& A, 
+	vector_expression<VecV, Device>& b
 ){
 	//we will ignore the "System" parameter in the vector
 	//version as A is symmetric
@@ -154,10 +154,10 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 	swap_rows_inverted(permutation,b);
 }
 
-template<class System,class Mat1T,class Mat2T>
+template<class System,class MatA,class MatB, class Device>
 void shark::blas::solveSymmSemiDefiniteSystemInPlace(
-	matrix_expression<Mat1T> const& A, 
-	matrix_expression<Mat2T>& B
+	matrix_expression<MatA, Device> const& A, 
+	matrix_expression<MatB, Device>& B
 ){
 	SIZE_CHECK(A().size2() == A().size1());
 	if(System::left){
@@ -231,10 +231,10 @@ void shark::blas::solveSymmSemiDefiniteSystemInPlace(
 		swap_columns_inverted(permutation,B);
 }
 
-template<class System,class MatT,class VecT>
+template<class System,class MatA,class VecV, class Device>
 void shark::blas::generalSolveSystemInPlace(
-	matrix_expression<MatT> const& A, 
-	vector_expression<VecT>& b
+	matrix_expression<MatA, Device> const& A, 
+	vector_expression<VecV, Device>& b
 ){
 	if( System::left){
 		SIZE_CHECK(A().size1() == b().size());
@@ -268,10 +268,10 @@ void shark::blas::generalSolveSystemInPlace(
 	}
 }
 
-template<class System,class MatA,class MatB>
+template<class System,class MatA,class MatB, class Device>
 void shark::blas::generalSolveSystemInPlace(
-	matrix_expression<MatA> const& A, 
-	matrix_expression<MatB>& B
+	matrix_expression<MatA, Device> const& A, 
+	matrix_expression<MatB, Device>& B
 ){	
 	if( System::left){
 		SIZE_CHECK(A().size1() == B().size1());

@@ -45,20 +45,20 @@
 namespace shark{
 	
 //! Calculates the mean and variance values of the input data
-template<class Vec1T,class Vec2T,class Vec3T>
+template<class Vec1T,class Vec2T,class Vec3T, class Device>
 void meanvar
 (
 	Data<Vec1T> const& data,
-	blas::vector_container<Vec2T>& mean,
-	blas::vector_container<Vec3T>& variance
+	blas::vector_container<Vec2T, Device>& mean,
+	blas::vector_container<Vec3T, Device>& variance
 );
 //! Calculates the mean, variance and covariance values of the input data
-template<class Vec1T,class Vec2T,class MatT>
+template<class Vec1T,class Vec2T,class MatT, class Device>
 void meanvar
 (
 	Data<Vec1T> const& data,
-	blas::vector_container<Vec2T>& mean,
-	blas::matrix_container<MatT>& variance
+	blas::vector_container<Vec2T, Device>& mean,
+	blas::matrix_container<MatT, Device>& variance
 );
 
 //! Calculates the mean vector of the input vectors.

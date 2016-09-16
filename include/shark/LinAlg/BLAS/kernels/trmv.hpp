@@ -51,15 +51,15 @@ namespace shark { namespace blas {namespace kernels{
 ///
 /// It solves Systems of the form Ax = b where A is a square lower or upper triangular matrix.
 /// It can optionally assume that the diagonal is 1 and won't access the diagonal elements.
-template <bool Upper,bool Unit,typename TriangularA, typename VecB>
+template <bool Upper,bool Unit,typename MatA, typename VecB>
 void trmv(
-	matrix_expression<TriangularA> const &A, 
-	vector_expression<VecB>& b
+	matrix_expression<MatA, cpu_tag> const &A, 
+	vector_expression<VecB, cpu_tag>& b
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size1() == b().size());
 	
-	bindings::trmv<Upper,Unit>(A,b,typename bindings::has_optimized_trmv<TriangularA, VecB>::type());
+	bindings::trmv<Upper,Unit>(A,b,typename bindings::has_optimized_trmv<MatA, VecB>::type());
 }
 
 }}}

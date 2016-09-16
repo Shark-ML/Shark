@@ -42,7 +42,7 @@ namespace blas {
 	
 	
 template<class E1, class E2>
-class matrix_addition: public blas::matrix_expression<matrix_addition<E1, E2> > {
+class matrix_addition: public blas::matrix_expression<matrix_addition<E1, E2>, typename E1::device_type > {
 private:
 	typedef scalar_binary_plus<
 		typename E1::value_type,
@@ -64,6 +64,7 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef typename E1::orientation orientation;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
+	typedef typename E1::device_type device_type;
 
         // Construction
         explicit matrix_addition(
@@ -93,18 +94,18 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		assign(X,alpha * m_lhs);
 		plus_assign(X,alpha * m_rhs);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		plus_assign(X,alpha * m_lhs);
 		plus_assign(X,alpha * m_rhs);
 	}
 	
 	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		minus_assign(X,alpha * m_lhs);
 		minus_assign(X,alpha * m_rhs);
 	}
@@ -156,10 +157,8 @@ private:
 };
 
 template<class E>
-class matrix_scalar_multiply:public blas::matrix_expression<matrix_scalar_multiply<E> > {
+class matrix_scalar_multiply:public blas::matrix_expression<matrix_scalar_multiply<E>, typename E::device_type > {
 private:
-	typedef typename E::const_row_iterator const_subrow_iterator_type;
-	typedef typename E::const_column_iterator const_subcolumn_iterator_type;
 	typedef scalar_multiply1<typename E::value_type, typename E::scalar_type> functor_type;
 public:
 	typedef typename E::const_closure_type expression_closure_type;
@@ -176,10 +175,11 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef typename E::orientation orientation;
 	typedef typename E::evaluation_category evaluation_category;
+	typedef typename E::device_type device_type;
 
 	// Construction and destruction
-	explicit matrix_scalar_multiply(blas::matrix_expression<E> const &e, scalar_type scalar):
-		m_expression(e()), m_scalar(scalar){}
+	explicit matrix_scalar_multiply(expression_closure_type const& e, scalar_type scalar):
+		m_expression(e), m_scalar(scalar){}
 
 	// Accessors
 	index_type size1() const {
@@ -203,16 +203,16 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		m_expression.assign_to(X,alpha*m_scalar);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		m_expression.plus_assign_to(X,alpha*m_scalar);
 	}
 	
 	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		m_expression.minus_assign_to(X,alpha*m_scalar);
 	}
 
@@ -242,11 +242,7 @@ private:
 };
 
 template<class V>
-class vector_repeater:public blas::matrix_expression<vector_repeater<V> > {
-private:
-	typedef V expression_type;
-	typedef vector_repeater<V> self_type;
-	typedef typename V::const_iterator const_subiterator_type;
+class vector_repeater:public blas::matrix_expression<vector_repeater<V>, typename V::device_type > {
 public:
 	typedef typename V::const_closure_type expression_closure_type;
 	typedef typename V::index_type index_type;
@@ -255,7 +251,7 @@ public:
 	typedef value_type const_reference;
 	typedef const_reference reference;
 
-	typedef self_type const_closure_type;
+	typedef vector_repeater const_closure_type;
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
@@ -263,7 +259,7 @@ public:
 	typedef typename V::evaluation_category evaluation_category;
 
 	// Construction and destruction
-	explicit vector_repeater (expression_type const& e, index_type rows):
+	explicit vector_repeater (expression_closure_type const& e, index_type rows):
 	m_vector(e), m_rows(rows) {}
 
 	// Accessors
@@ -275,7 +271,7 @@ public:
 	}
 
 	// Expression accessors
-	const expression_closure_type &expression () const {
+	const expression_closure_type& expression () const {
 		return m_vector;
 	}
 
@@ -318,10 +314,7 @@ private:
 ///
 /// \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
 template<class T>
-class scalar_matrix:
-	public matrix_container<scalar_matrix<T> > {
-
-	typedef scalar_matrix<T> self_type;
+class scalar_matrix:public matrix_container<scalar_matrix<T>, cpu_tag > {
 public:
 	typedef std::size_t index_type;
 	typedef T value_type;
@@ -329,8 +322,8 @@ public:
 	typedef const_reference reference;
 	typedef value_type scalar_type;
 
-	typedef self_type const_closure_type;
-	typedef self_type closure_type;
+	typedef scalar_matrix const_closure_type;
+	typedef scalar_matrix closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef unknown_orientation orientation;
@@ -390,15 +383,9 @@ private:
 ///F must provide a boolean flag F::zero_identity which indicates that f(0) = 0. This is needed for correct usage with sparse
 ///arguments - if f(0) != 0 this expression will be dense!
 template<class E, class F>
-class matrix_unary:public blas::matrix_expression<matrix_unary<E, F> > {
-private:
-	typedef matrix_unary<E, F> self_type;
-	typedef E expression_type;
-	typedef typename expression_type::const_row_iterator const_subrow_iterator_type;
-	typedef typename expression_type::const_column_iterator const_subcolumn_iterator_type;
-
+class matrix_unary:public blas::matrix_expression<matrix_unary<E, F>, typename E::device_type > {
 public:
-	typedef typename expression_type::const_closure_type expression_closure_type;
+	typedef typename E::const_closure_type expression_closure_type;
 
 	typedef F functor_type;
 	typedef typename std::result_of<F(typename E::value_type)>::type value_type;
@@ -407,16 +394,17 @@ public:
 	typedef const_reference reference;
 	typedef typename E::index_type index_type;
 
-	typedef self_type const_closure_type;
+	typedef matrix_unary const_closure_type;
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef typename E::orientation orientation;
 	typedef typename E::evaluation_category evaluation_category;
+	typedef typename E::device_type device_type;
 
 	// Construction and destruction
-	explicit matrix_unary(blas::matrix_expression<E> const& e, functor_type const& functor):
-		m_expression(e()), m_functor(functor) {}
+	explicit matrix_unary(expression_closure_type const& e, functor_type const& functor):
+		m_expression(e), m_functor(functor) {}
 
 	// Accessors
 	index_type size1() const {
@@ -437,17 +425,17 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) ) const {
+	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) ) const {
 		X().clear();
 		plus_assign_to(X,eval_block(m_expression), alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) ) const {
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) ) const {
 		plus_assign_to(X,eval_block(m_expression), alpha);
 	}
 	
 	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) ) const {
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) ) const {
 		plus_assign_to(X,eval_block(m_expression), -alpha);
 	}
 
@@ -482,8 +470,8 @@ private:
 
 	template<class MatX, class MatA>
 	void plus_assign_to(
-		matrix_expression<MatX>& X,
-		matrix_expression<MatA> const& m,
+		matrix_expression<MatX, device_type>& X,
+		matrix_expression<MatA, device_type> const& m,
 		scalar_type alpha
 	)const{
 		matrix_unary<MatA, F> e(m(), m_functor);
@@ -493,10 +481,7 @@ private:
 };
 
 template<class E1, class E2, class F>
-class matrix_binary:
-	public blas::matrix_expression<matrix_binary<E1, E2, F> > {
-private:
-	typedef matrix_binary<E1, E2, F> self_type;
+class matrix_binary:public blas::matrix_expression<matrix_binary<E1, E2, F>, typename E1::device_type > {
 public:
 	typedef E1 lhs_type;
 	typedef E2 rhs_type;
@@ -509,20 +494,21 @@ public:
 	typedef value_type const_reference;
 	typedef const_reference reference;
 
-	typedef self_type const_closure_type;
+	typedef matrix_binary const_closure_type;
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef typename E1::orientation orientation;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
+	typedef typename E1::device_type device_type;
 
 	typedef F functor_type;
 
         // Construction and destruction
 
         explicit matrix_binary (
-		matrix_expression<E1> const&e1,  matrix_expression<E2> const& e2, functor_type functor 
-	): m_lhs (e1()), m_rhs (e2()),m_functor(functor) {}
+		lhs_closure_type const& e1,  rhs_closure_type const& e2, functor_type functor 
+	): m_lhs (e1), m_rhs (e2),m_functor(functor) {}
 
         // Accessors
         index_type size1 () const {
@@ -547,17 +533,17 @@ public:
         }
 	
 	template<class MatX>
-	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		X().clear();
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	
 	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), -alpha);
 	}
 
@@ -603,8 +589,9 @@ private:
 
 	template<class MatX, class LHS, class RHS>
 	void plus_assign_to(
-		matrix_expression<MatX>& X,
-		matrix_expression<LHS> const& lhs, matrix_expression<RHS> const& rhs,
+		matrix_expression<MatX, device_type>& X,
+		matrix_expression<LHS, device_type> const& lhs,
+		matrix_expression<RHS, device_type> const& rhs,
 		scalar_type alpha
 	)const{
 		//we know that lhs and rhs are elementwise expressions so we can now create the elementwise expression and assign it.
@@ -615,7 +602,7 @@ private:
 };
 
 template<class E1, class E2>
-class outer_product:public matrix_expression<outer_product<E1, E2> > {
+class outer_product:public matrix_expression<outer_product<E1, E2>, typename E1::device_type > {
 	typedef scalar_multiply1<typename E1::value_type, typename E2::value_type> functor_type;
 public:
 	typedef typename E1::const_closure_type lhs_closure_type;
@@ -693,7 +680,7 @@ private:
 
 template<class MatA, class VecV>
 class matrix_vector_prod:
-	public vector_expression<matrix_vector_prod<MatA, VecV> > {
+	public vector_expression<matrix_vector_prod<MatA, VecV>, typename MatA::device_type > {
 public:
 	typedef typename MatA::const_closure_type matrix_closure_type;
 	typedef typename VecV::const_closure_type vector_closure_type;
@@ -711,6 +698,7 @@ public:
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef blockwise_tag evaluation_category;
+	typedef typename MatA::device_type device_type;
 
 
 	//FIXME: This workaround is required to be able to generate
@@ -737,38 +725,38 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		assign_to(x, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(x, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(x,-alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 private:
 	//gemv
 	template<class VecX, class Category>
-	void assign_to(vector_expression<VecX>& x, scalar_type alpha, linear_structure, Category c)const{
+	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, linear_structure, Category c)const{
 		x().clear();
 		plus_assign_to(x,alpha, linear_structure(), c);
 	}
 	template<class VecX, class Category>
-	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha, linear_structure, Category )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, linear_structure, Category )const{
 		kernels::gemv(eval_block(m_matrix), eval_block(m_vector), x, alpha);
 	}
 	//tpmv
 	template<class VecX>
-	void assign_to(vector_expression<VecX>& x, scalar_type alpha, triangular_structure, packed_tag )const{
+	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, triangular_structure, packed_tag )const{
 		noalias(x) = eval_block(alpha * m_vector);
 		kernels::tpmv(eval_block(m_matrix), x);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha, triangular_structure, packed_tag )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, triangular_structure, packed_tag )const{
 		//computation of tpmv is in-place so we need a temporary for plus-assign.
 		typename vector_temporary<VecX>::type temp( eval_block(alpha * m_vector));
 		kernels::tpmv(eval_block(m_matrix), temp);
@@ -776,12 +764,12 @@ private:
 	}
 	//trmv
 	template<class VecX>
-	void assign_to(vector_expression<VecX>& x, scalar_type alpha, triangular_structure, dense_tag )const{
+	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, triangular_structure, dense_tag )const{
 		noalias(x) = eval_block(alpha * m_vector);
 		kernels::trmv<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_matrix.expression(), x);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha, triangular_structure, dense_tag )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, triangular_structure, dense_tag )const{
 		//computation of tpmv is in-place so we need a temporary for plus-assign.
 		typename vector_temporary<VecX>::type temp( eval_block(alpha * m_vector));
 		kernels::trmv<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_matrix.expression(), temp);
@@ -794,7 +782,7 @@ private:
 
 template<class MatA>
 class sum_matrix_rows:
-	public vector_expression<sum_matrix_rows<MatA> > {
+	public vector_expression<sum_matrix_rows<MatA>, typename MatA::device_type > {
 public:
 	typedef typename MatA::const_closure_type matrix_closure_type;
 public:
@@ -813,6 +801,7 @@ public:
 		blockwise_tag,
 		typename MatA::evaluation_category
 	>::type evaluation_category;
+	typedef typename MatA::device_type device_type;
 
 	explicit sum_matrix_rows(
 		matrix_closure_type const& matrix
@@ -844,17 +833,17 @@ public:
 
 	//dispatcher to computation kernels for blockwise case
 	template<class VecX>
-	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		x().clear();
 		plus_assign_to(x,alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		kernels::sum_rows(eval_block(m_matrix), x, alpha);
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(x,-alpha);
 	}
 private:
@@ -863,8 +852,7 @@ private:
 
 namespace detail{
 template<class M, class TriangularType>
-class dense_triangular_proxy: public matrix_expression<dense_triangular_proxy<M, TriangularType> > {
-	typedef dense_triangular_proxy<M, TriangularType> self_type;
+class dense_triangular_proxy: public matrix_expression<dense_triangular_proxy<M, TriangularType>, typename M::device_type > {
 	typedef typename closure<M>::type matrix_closure_type;
 public:
 	static_assert(std::is_same<typename M::storage_type::storage_tag, dense_tag>::value, "Can only create triangular proxies of dense matrices");
@@ -919,7 +907,7 @@ private:
 
 //matrix-matrix prod
 template<class MatA, class MatB>
-class matrix_matrix_prod: public matrix_expression<matrix_matrix_prod<MatA, MatB> > {
+class matrix_matrix_prod: public matrix_expression<matrix_matrix_prod<MatA, MatB>, typename MatA::device_type > {
 public:
 	typedef typename MatA::const_closure_type matrix_closure_typeA;
 	typedef typename MatB::const_closure_type matrix_closure_typeB;
@@ -938,7 +926,7 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef blockwise_tag evaluation_category;
 	typedef unknown_orientation orientation;
-
+	typedef typename MatA::device_type device_type;
 
 	//FIXME: This workaround is required to be able to generate
 	// temporary matrices
@@ -969,38 +957,38 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX>& X, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(X, -alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 private:
 	//gemm
 	template<class MatX, class Category>
-	void assign_to(matrix_expression<MatX>& X, scalar_type alpha, linear_structure, Category c )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha, linear_structure, Category c )const{
 		X().clear();
 		plus_assign_to(X,alpha, linear_structure(), c);
 	}
 	template<class MatX, class Category>
-	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha, linear_structure, Category )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha, linear_structure, Category )const{
 		kernels::gemm(eval_block(m_lhs), eval_block(m_rhs), X, alpha);
 	}
 	//trmv
 	template<class MatX>
-	void assign_to(matrix_expression<MatX>& X, scalar_type alpha, triangular_structure, dense_tag)const{
+	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha, triangular_structure, dense_tag)const{
 		noalias(X) = eval_block(alpha * m_rhs);
 		kernels::trmm<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_lhs.expression(), X);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX>& X, scalar_type alpha, triangular_structure, dense_tag )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha, triangular_structure, dense_tag )const{
 		//computation of tpmv is in-place so we need a temporary for plus-assign.
 		typename matrix_temporary<MatX>::type temp( eval_block(alpha * m_rhs));
 		kernels::trmm<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_lhs.expression(), temp);
@@ -1015,7 +1003,7 @@ private:
 ///
 /// the matrix stores a Vector representing the diagonal.
 template<class VectorType>
-class diagonal_matrix: public matrix_expression<diagonal_matrix< VectorType > > {
+class diagonal_matrix: public matrix_expression<diagonal_matrix< VectorType >, typename VectorType::device_type > {
 	typedef typename VectorType::const_closure_type vector_closure_type;
 public:
 	typedef typename VectorType::index_type index_type;

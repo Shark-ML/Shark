@@ -59,9 +59,9 @@ namespace shark { namespace blas { namespace bindings {
 //=> compute as a sequence of matrix-vector products over the rows of the first argument
 template<class M, class E1, class E2, class Orientation2,class Tag1,class Tag2>
 void gemm_impl(
-	matrix_expression<E1> const& e1,
-	matrix_expression<E2> const& e2,
-	matrix_expression<M>& m,
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major, row_major, Orientation2, 
 	Tag1, Tag2
@@ -76,9 +76,9 @@ void gemm_impl(
 //=> transpose in memory
 template<class M, class E1, class E2, class Orientation, class Tag>
 void gemm_impl(
-	matrix_expression<E1> const& e1,
-	matrix_expression<E2> const& e2,
-	matrix_expression<M>& m,
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major, column_major, Orientation o,
 	sparse_bidirectional_iterator_tag t1, Tag t2
@@ -93,9 +93,9 @@ void gemm_impl(
 // M as sparse is stupid in most cases.
 template<class M, class E1, class E2,class Tag>
 void gemm_impl(
-	matrix_expression<E1> const& e1,
-	matrix_expression<E2> const& e2,
-	matrix_expression<M>& m,
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major, column_major, row_major,
 	dense_random_access_iterator_tag, Tag
@@ -108,9 +108,9 @@ void gemm_impl(
 //special case of all row-major for sparse matrices
 template<class M, class E1, class E2>
 void gemm_impl(
-	matrix_expression<E1> const& e1,
-	matrix_expression<E2> const& e2,
-	matrix_expression<M>& m,
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major, row_major, row_major, 
 	sparse_bidirectional_iterator_tag, sparse_bidirectional_iterator_tag
@@ -139,9 +139,9 @@ void gemm_impl(
 //dense-sparse
 template<class M, class E1, class E2>
 void gemm_impl(
-	matrix_expression<E1> const& e1,
-	matrix_expression<E2> const& e2,
-	matrix_expression<M>& m,
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major, column_major, column_major,
 	dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag
@@ -156,9 +156,9 @@ void gemm_impl(
 //dense-dense
 template<class M, class E1, class E2>
 void gemm_impl(
-	matrix_expression<E1> const& e1,
-	matrix_expression<E2> const& e2,
-	matrix_expression<M>& m,
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major r, column_major, column_major, 
 	dense_random_access_iterator_tag t, dense_random_access_iterator_tag
@@ -196,9 +196,9 @@ void gemm_impl(
 //=> transformed to row_major using A=B*C <=> A^T = C^T B^T
 template<class M, class E1, class E2, class Orientation1, class Orientation2, class Tag1, class Tag2>
 void gemm_impl(
-	matrix_expression<E1> const& e1,
-	matrix_expression<E2> const& e2,
-	matrix_expression<M>& m,
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	column_major, Orientation1, Orientation2, 
 	Tag1, Tag2
@@ -212,9 +212,9 @@ void gemm_impl(
 //dispatcher
 template<class M, class E1, class E2>
 void gemm(
-	matrix_expression<E1> const& e1,
-	matrix_expression<E2> const& e2,
-	matrix_expression<M>& m,
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	boost::mpl::false_
 ) {

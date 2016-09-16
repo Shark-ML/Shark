@@ -36,7 +36,7 @@ namespace blas {
 	
 ///\brief Wraps another expression as a reference.
 template<class M>
-class matrix_reference:public matrix_expression<matrix_reference<M> > {
+class matrix_reference:public matrix_expression<matrix_reference<M>, typename M::device_type > {
 public:
 	typedef typename M::index_type index_type;
 	typedef typename M::value_type value_type;
@@ -50,8 +50,7 @@ public:
 	typedef typename storage<M>::type storage_type;
 	typedef typename M::const_storage_type const_storage_type;
 	typedef elementwise_tag evaluation_category;
-
-
+	
 	// Construction and destruction
 	matrix_reference(M& m):m_expression(&m) {}
 	template<class E>
@@ -93,7 +92,7 @@ public:
 
 	// Assignment
 	template<class E>
-	matrix_reference& operator = (matrix_expression<E> const& e) {
+	matrix_reference& operator = (matrix_expression<E, typename M::device_type> const& e) {
 		expression() = e();
 		return *this;
 	}
@@ -181,7 +180,7 @@ private:
 
 /// \brief Matrix transpose.
 template<class M>
-class matrix_transpose: public matrix_expression<matrix_transpose<M> > {
+class matrix_transpose: public matrix_expression<matrix_transpose<M>, typename M::device_type > {
 public:
 	typedef typename M::index_type index_type;
 	typedef typename M::value_type value_type;
@@ -316,7 +315,7 @@ public:
 		return *this;
 	}
 	template<class E>
-	matrix_transpose& operator = (matrix_expression<E> const& e) {
+	matrix_transpose& operator = (matrix_expression<E, typename M::device_type> const& e) {
 		expression() = matrix_transpose<E const>(e());
 		return *this;
 	}
@@ -325,7 +324,7 @@ private:
 };
 
 template<class M>
-class matrix_row: public vector_expression<matrix_row<M> > {
+class matrix_row: public vector_expression<matrix_row<M>, typename M::device_type > {
 public:
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
@@ -389,7 +388,7 @@ public:
 	// Assignment
 	
 	template<class E>
-	matrix_row& operator = (vector_expression<E> const& e) {
+	matrix_row& operator = (vector_expression<E,typename M::device_type> const& e) {
 		return assign(*this, typename vector_temporary<M>::type(e));
 	}
 	matrix_row& operator = (matrix_row const& e) {
@@ -488,7 +487,7 @@ private:
 
 // Matrix based vector range class representing (off-)diagonals of a matrix.
 template<class M>
-class matrix_vector_range: public vector_expression<matrix_vector_range<M> > {
+class matrix_vector_range: public vector_expression<matrix_vector_range<M>, typename M::device_type > {
 public:
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
@@ -563,7 +562,7 @@ public:
 	// Assignment
 	
 	template<class E>
-	matrix_vector_range& operator = (vector_expression<E> const& e) {
+	matrix_vector_range& operator = (vector_expression<E, typename M::device_type> const& e) {
 		return assign(*this, typename vector_temporary<M>::type(e));
 	}
 
@@ -598,7 +597,7 @@ private:
 
 // Matrix based range class
 template<class M>
-class matrix_range:public matrix_expression<matrix_range<M> > {
+class matrix_range:public matrix_expression<matrix_range<M>, typename M::device_type > {
 public:
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
@@ -682,7 +681,7 @@ public:
 		return assign(*this, typename matrix_temporary<matrix_range>::type(e));
 	}
 	template<class E>
-	matrix_range& operator = (matrix_expression<E> const& e) {
+	matrix_range& operator = (matrix_expression<E, typename M::device_type> const& e) {
 		return assign(*this, typename matrix_temporary<E>::type(e));
 	}
 
@@ -772,7 +771,7 @@ private:
 };
 
 template<class T,class Orientation=row_major>
-class dense_matrix_adaptor: public matrix_expression<dense_matrix_adaptor<T,Orientation> > {
+class dense_matrix_adaptor: public matrix_expression<dense_matrix_adaptor<T,Orientation>, cpu_tag > {
 	typedef dense_matrix_adaptor<T,Orientation> self_type;
 public:
 	typedef std::size_t index_type;
@@ -803,7 +802,7 @@ public:
 	/// Be aware that the expression must live longer than the proxy!
 	/// \param expression Expression from which to construct the Proxy
  	template<class E>
-	dense_matrix_adaptor(matrix_expression<E> const& expression)
+	dense_matrix_adaptor(matrix_expression<E, cpu_tag> const& expression)
 	: m_size1(expression().size1())
 	, m_size2(expression().size2())
 	{
@@ -819,7 +818,7 @@ public:
 	/// Be aware that the expression must live longer than the proxy!
 	/// \param expression Expression from which to construct the Proxy
  	template<class E>
-	dense_matrix_adaptor(matrix_expression<E>& expression)
+	dense_matrix_adaptor(matrix_expression<E, cpu_tag>& expression)
 	: m_size1(expression().size1())
 	, m_size2(expression().size2())
 	{
@@ -885,7 +884,7 @@ public:
 		return assign(*this, typename matrix_temporary<self_type>::type(e));
 	}
 	template<class E>
-	self_type& operator = (matrix_expression<E> const& e) {
+	self_type& operator = (matrix_expression<E, cpu_tag> const& e) {
 		SIZE_CHECK(size1() == e().size1());
 		SIZE_CHECK(size2() == e().size2());
 		return assign(*this, typename matrix_temporary<self_type>::type(e));

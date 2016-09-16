@@ -34,20 +34,20 @@
 namespace shark{ namespace blas{ namespace detail{
 
 ////////////////SOLVE MATRIX_VECTOR///////////////////
-template<class MatT,class VecT, class MatrixTag>
+template<class MatA,class VecV, class MatrixTag, class Device>
 void solveTriangularSystemInPlace(
-	const matrix_expression<MatT>& A, 
-	vector_expression<VecT>& b,
+	matrix_expression<MatA, Device> const& A, 
+	vector_expression<VecV, Device>& b,
 	SolveAXB,
 	MatrixTag
 ){
 	kernels::trsv<MatrixTag::is_upper,MatrixTag::is_unit>(A,b);
 }
 ///solving xA=b is equal to transposing A
-template<class MatT,class VecT,class MatrixTag>
+template<class MatA,class VecV,class MatrixTag, class Device>
 void solveTriangularSystemInPlace(
-	const matrix_expression<MatT>& A, 
-	vector_expression<VecT>& b,
+	matrix_expression<MatA, Device> const& A, 
+	vector_expression<VecV, Device>& b,
 	SolveXAB,
 	MatrixTag
 ){
@@ -55,18 +55,18 @@ void solveTriangularSystemInPlace(
 }
 
 //////////////////SOLVE CHOLESKY////////////////////////////////
-template<class MatL,class Arg>
+template<class MatL,class Arg, class Device>
 void solveTriangularCholeskyInPlace(
-	matrix_expression<MatL> const& L, 
+	matrix_expression<MatL, Device> const& L, 
 	Arg& b,
 	SolveAXB
 ){
 	shark::blas::solveTriangularSystemInPlace<SolveAXB,lower>(L,b);
 	shark::blas::solveTriangularSystemInPlace<SolveAXB,upper>(trans(L),b);
 }
-template<class MatL,class Arg>
+template<class MatL,class Arg, class Device>
 void solveTriangularCholeskyInPlace(
-	matrix_expression<MatL> const& L, 
+	matrix_expression<MatL, Device> const& L, 
 	Arg& b,
 	SolveXAB
 ){
@@ -76,10 +76,10 @@ void solveTriangularCholeskyInPlace(
 
 }}}
 
-template<class System,class DiagType,class MatT,class VecT>
+template<class System,class DiagType,class MatA,class VecV, class Device>
 void shark::blas::solveTriangularSystemInPlace(
-	matrix_expression<MatT> const& A, 
-	vector_expression<VecT>& b
+	matrix_expression<MatA, Device> const& A, 
+	vector_expression<VecV, Device>& b
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
@@ -89,10 +89,10 @@ void shark::blas::solveTriangularSystemInPlace(
 
 }
 
-template<class System, class DiagType,class MatA,class MatB>
+template<class System, class DiagType,class MatA,class MatB, class Device>
 void shark::blas::solveTriangularSystemInPlace(
-	matrix_expression<MatA> const& A, 
-	matrix_expression<MatB>& B
+	matrix_expression<MatA, Device> const& A, 
+	matrix_expression<MatB, Device>& B
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	if(System::left){
@@ -107,10 +107,10 @@ void shark::blas::solveTriangularSystemInPlace(
 	
 }
 
-template<class System,class MatL,class MatB>
+template<class System,class MatL,class MatB, class Device>
 void shark::blas::solveTriangularCholeskyInPlace(
-	matrix_expression<MatL> const& L, 
-	matrix_expression<MatB>& B
+	matrix_expression<MatL, Device> const& L, 
+	matrix_expression<MatB, Device>& B
 ){
 	SIZE_CHECK(L().size1() == L().size2());
 	if(System::left){
@@ -121,10 +121,10 @@ void shark::blas::solveTriangularCholeskyInPlace(
 	
 	detail::solveTriangularCholeskyInPlace(L,B(),System());
 }
-template<class System,class MatL,class VecB>
+template<class System,class MatL,class VecB, class Device>
 void shark::blas::solveTriangularCholeskyInPlace(
-	const matrix_expression<MatL>& L, 
-	vector_expression<VecB>& b
+	matrix_expression<MatL, Device> const& L, 
+	vector_expression<VecB, Device>& b
 ){
 	SIZE_CHECK(L().size1() == L().size2());
 	SIZE_CHECK(L().size2() == b().size());

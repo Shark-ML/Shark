@@ -61,7 +61,7 @@ namespace shark{ namespace blas{
     template<class E, class T, class VE>
     //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os,
-                                           const vector_expression<VE> &v) {
+                                           const vector_expression<VE, cpu_tag> &v) {
         typedef typename VE::index_type index_type;
         index_type size = v ().size ();
         std::basic_ostringstream<E, T, std::allocator<E> > s;
@@ -103,7 +103,7 @@ namespace shark{ namespace blas{
     template<class E, class T, class ME>
     //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os,
-                                           const matrix_expression<ME> &m) {
+                                           const matrix_expression<ME, cpu_tag> &m) {
         typedef typename ME::index_type index_type;
         index_type size1 = m ().size1 ();
         index_type size2 = m ().size2 ();

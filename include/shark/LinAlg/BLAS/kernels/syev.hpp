@@ -50,8 +50,8 @@ namespace shark { namespace blas {namespace kernels{
 /// Additionally the eigenvalues are stored in the second argument. 
 template <typename MatA, typename VectorB>
 void syev(
-	matrix_expression<MatA>& matA,
-	vector_expression<VectorB>& eigenValues
+	matrix_expression<MatA, cpu_tag>& matA,
+	vector_expression<VectorB, cpu_tag>& eigenValues
 ) {
 	bindings::syev(matA,eigenValues);
 }

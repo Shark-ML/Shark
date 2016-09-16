@@ -41,16 +41,16 @@ namespace shark{ namespace blas{ namespace bindings{
 // starting with row 0 and stores the result in b(i)
 //this does not interfere with the next products as 
 // the element b(i) is not needed for iterations j > i
-template<class TriangularA, class V>
+template<class MatA, class V>
 void tpmv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V>& b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag>& b,
 	row_major,
 	upper
 ){
 	typedef typename V::value_type value_type;
 	typedef typename V::size_type size_type;
-	typedef typename TriangularA::const_row_iterator row_iterator;
+	typedef typename MatA::const_row_iterator row_iterator;
 	size_type size = A().size1();
 	
 	for(size_type i = 0; i != size; ++i){
@@ -68,16 +68,16 @@ void tpmv_impl(
 // starting with the last row and stores the result in b(i)
 // this does not interfere with the next products as 
 // the element b(i) is not needed for row products j < i
-template<class TriangularA, class V>
+template<class MatA, class V>
 void tpmv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V>& b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag>& b,
 	row_major,
 	lower
 ){
 	typedef typename V::value_type value_type;
 	typedef typename V::size_type size_type;
-	typedef typename TriangularA::const_row_iterator row_iterator;
+	typedef typename MatA::const_row_iterator row_iterator;
 	size_type size = A().size1();
 	
 	for(size_type irev = size; irev != 0; --irev){
@@ -94,14 +94,14 @@ void tpmv_impl(
 //Upper triangular(column-major) - vector product
 //computes the product as a series of vector-additions
 //on b starting with the last column of A.
-template<class TriangularA, class V>
+template<class MatA, class V>
 void tpmv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V>& b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag>& b,
 	column_major,
 	upper
 ){
-	typedef typename TriangularA::const_column_iterator column_iterator;
+	typedef typename MatA::const_column_iterator column_iterator;
 	typedef typename V::size_type size_type;
 	typedef typename V::value_type value_type;
 	size_type size = A().size1();
@@ -119,14 +119,14 @@ void tpmv_impl(
 //Lower triangular(column-major) - vector product
 // computes the product as a series of vector-additions
 // on b starting with the first column of A.
-template<class TriangularA, class V>
+template<class MatA, class V>
 void tpmv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V>& b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag>& b,
 	column_major,
 	lower
 ){
-	typedef typename TriangularA::const_column_iterator column_iterator;
+	typedef typename MatA::const_column_iterator column_iterator;
 	typedef typename V::size_type size_type;
 	typedef typename V::value_type value_type;
 	size_type size = A().size1();
@@ -143,18 +143,18 @@ void tpmv_impl(
 }
 
 //dispatcher
-template <typename TriangularA, typename V>
+template <typename MatA, typename V>
 void tpmv(
-	matrix_expression<TriangularA> const& A, 
-	vector_expression<V>& b,
+	matrix_expression<MatA, cpu_tag> const& A, 
+	vector_expression<V, cpu_tag>& b,
 	boost::mpl::false_//unoptimized
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());	
 	tpmv_impl(
 		A, b,
-		typename TriangularA::orientation::orientation(),
-		typename TriangularA::orientation::triangular_type()
+		typename MatA::orientation::orientation(),
+		typename MatA::orientation::triangular_type()
 	);
 }
 

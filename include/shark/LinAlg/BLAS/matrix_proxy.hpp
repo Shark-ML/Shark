@@ -43,15 +43,25 @@ namespace blas {
 //// Matrix Transpose
 ////////////////////////////////////
 
-// (trans m) [i] [j] = m [j] [i]
-template<class M>
+/// \brief Returns a proxy which transposes the matrix
+///
+/// given a matrix 
+/// A = (1 2 3)
+///     (4 5 6)
+///     (7 8 9)
+///
+/// the trans(A) operation results in
+/// trans(A) = (1 4 7)
+///            (2 5 8)
+///            (3 6 9)
+template<class M, class Device>
 temporary_proxy<typename detail::matrix_transpose_optimizer<M>::type>
-trans(matrix_expression<M> & m){
+trans(matrix_expression<M, Device> & m){
 	return detail::matrix_transpose_optimizer<M>::create(m());
 }
-template<class M>
+template<class M, class Device>
 typename detail::matrix_transpose_optimizer<typename const_expression<M>::type >::type
-trans(matrix_expression<M> const& m){
+trans(matrix_expression<M, Device> const& m){
 	typedef typename const_expression<M>::type closure_type;
 	return detail::matrix_transpose_optimizer<closure_type>::create(m());
 }
@@ -67,14 +77,22 @@ trans(temporary_proxy<M> m){
 ////////////////////////////////////
 
 /// \brief Returns a vector-proxy representing the i-th row of the Matrix
-template<class M>
+///
+/// given a matrix 
+/// A = (1 2 3)
+///     (4 5 6)
+///     (7 8 9)
+///
+/// the row(A,1) operation results in
+/// row(A,1) = (4,5,6)
+template<class M, class Device>
 temporary_proxy<typename detail::matrix_row_optimizer<M>::type>
-row(matrix_expression<M>& expression, typename M::index_type i){
+row(matrix_expression<M, Device>& expression, typename M::index_type i){
 	return detail::matrix_row_optimizer<M>::create(expression(), i);
 }
-template<class M>
+template<class M, class Device>
 typename detail::matrix_row_optimizer<typename const_expression<M>::type>::type
-row(matrix_expression<M> const& expression, typename M::index_type i){
+row(matrix_expression<M, Device> const& expression, typename M::index_type i){
 	return detail::matrix_row_optimizer<typename const_expression<M>::type>::create(expression(), i);
 }
 
@@ -85,16 +103,24 @@ row(temporary_proxy<M> expression, typename M::index_type i){
 }
 
 /// \brief Returns a vector-proxy representing the j-th column of the Matrix
-template<class M>
-auto column(matrix_expression<M>& expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
+///
+/// given a matrix 
+/// A = (1 2 3)
+///     (4 5 6)
+///     (7 8 9)
+///
+/// the column(A,1) operation results in
+/// column(A,1) = (2,5,8)
+template<class M, class Device>
+auto column(matrix_expression<M, Device>& expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
 	return row(trans(expression),j);
 }
-template<class M>
-auto column(matrix_expression<M> const& expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
+template<class M, class Device>
+auto column(matrix_expression<M, Device> const& expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
 	return row(trans(expression),j);
 }
 
-template<class M>
+template<class M, class Device>
 auto column(temporary_proxy<M> expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
 	return row(trans(static_cast<M&>(expression)),j);
 }
@@ -112,24 +138,15 @@ auto column(temporary_proxy<M> expression, typename M::index_type j) -> decltype
 ///
 /// the diag operation results in
 /// diag(A) = (1,5,9)
-template<class M>
-matrix_vector_range<typename const_expression<M>::type > diag(matrix_expression<M> const& mat){
+template<class M, class Device>
+matrix_vector_range<typename const_expression<M>::type > diag(matrix_expression<M, Device> const& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
 	matrix_vector_range<typename const_expression<M>::type > diagonal(mat(),0,mat().size1(),0,mat().size1());
 	return diagonal;
 }
 
-///\brief Returns the diagonal of a square matrix as vector.
-///
-/// given a matrix 
-/// A = (1 2 3)
-///     (4 5 6)
-///     (7 8 9)
-///
-/// the diag operation results in
-/// diag(A) = (1,5,9)
-template<class M>
-temporary_proxy< matrix_vector_range<M> > diag(matrix_expression<M>& mat){
+template<class M, class Device>
+temporary_proxy< matrix_vector_range<M> > diag(matrix_expression<M, Device>& mat){
 	SIZE_CHECK(mat().size1() == mat().size2());
 	matrix_vector_range<M> diagonal(mat(),0,mat().size1(),0,mat().size1());
 	return diagonal;
@@ -145,9 +162,20 @@ temporary_proxy< matrix_vector_range<M> > diag(temporary_proxy<M> mat){
 //// Matrix Subranges
 ////////////////////////////////////
 
-template<class M>
+
+///\brief Returns a submatrix of a given matrix.
+///
+/// given a matrix 
+/// A = (1 2 3)
+///     (4 5 6)
+///     (7 8 9)
+///
+/// the subrange(A,0,2,1,3) operation results in
+/// subrange(A,0,2,1,3) = (4 5)
+///                       (7 8)
+template<class M, class Device>
 temporary_proxy< typename detail::matrix_range_optimizer<M>::type > subrange(
-	matrix_expression<M>& expression, 
+	matrix_expression<M, Device>& expression, 
 	std::size_t start1, std::size_t stop1,
 	std::size_t start2, std::size_t stop2
 ){
@@ -157,9 +185,9 @@ temporary_proxy< typename detail::matrix_range_optimizer<M>::type > subrange(
 	SIZE_CHECK(stop2 <= expression().size2());
 	return detail::matrix_range_optimizer<M>::create(expression(), start1, stop1, start2, stop2);
 }
-template<class M>
+template<class M, class Device>
 typename detail::matrix_range_optimizer<typename const_expression<M>::type>::type subrange(
-	matrix_expression<M> const& expression, 
+	matrix_expression<M, Device> const& expression, 
 	std::size_t start1, std::size_t stop1,
 	std::size_t start2, std::size_t stop2
 ){
@@ -170,7 +198,7 @@ typename detail::matrix_range_optimizer<typename const_expression<M>::type>::typ
 	return detail::matrix_range_optimizer<typename const_expression<M>::type>::create(expression(), start1, stop1, start2, stop2);
 }
 
-template<class M>
+template<class M, class Device>
 auto subrange(
 	temporary_proxy<M> expression, 
 	std::size_t start1, std::size_t stop1,
@@ -179,9 +207,9 @@ auto subrange(
 	return subrange(static_cast<M&>(expression),start1,stop1,start2,stop2);
 }
 
-template<class M>
+template<class M, class Device>
 auto rows(
-	matrix_expression<M>& expression, 
+	matrix_expression<M, Device>& expression, 
 	std::size_t start, std::size_t stop
 ) -> decltype(subrange(expression, start, stop, 0,expression().size2())){
 	RANGE_CHECK(start <= stop);
@@ -189,9 +217,9 @@ auto rows(
 	return subrange(expression, start, stop, 0,expression().size2());
 }
 
-template<class M>
+template<class M, class Device>
 auto rows(
-	matrix_expression<M> const& expression, 
+	matrix_expression<M, Device> const& expression, 
 	std::size_t start, std::size_t stop
 ) -> decltype(subrange(expression, start, stop, 0,expression().size2())){
 	RANGE_CHECK(start <= stop);
@@ -207,9 +235,9 @@ auto rows(
 	return rows(static_cast<M&>(expression),start,stop);
 }
 
-template<class M>
+template<class M, class Device>
 auto columns(
-	matrix_expression<M>& expression, 
+	matrix_expression<M, Device>& expression, 
 	typename M::index_type start, typename M::index_type stop
 ) -> decltype(subrange(expression, 0,expression().size1(), start, stop)){
 	RANGE_CHECK(start <= stop);
@@ -217,9 +245,9 @@ auto columns(
 	return subrange(expression, 0,expression().size1(), start, stop);
 }
 
-template<class M>
+template<class M, class Device>
 auto columns(
-	matrix_expression<M> const& expression, 
+	matrix_expression<M, Device> const& expression, 
 	typename M::index_type start, typename M::index_type stop
 ) -> decltype(subrange(expression, 0,expression().size1(), start, stop)){
 	RANGE_CHECK(start <= stop);
@@ -260,7 +288,7 @@ typename boost::enable_if<
 	> >
 >::type
 to_matrix(
-	vector_expression<V>& v,
+	vector_expression<V, cpu_tag>& v,
 	std::size_t size1, std::size_t size2
 ){
 	typedef typename boost::remove_reference<typename V::reference>::type ElementType;
@@ -274,7 +302,7 @@ typename boost::enable_if<
 	temporary_proxy< dense_matrix_adaptor<typename V::value_type const> >
 >::type 
 to_matrix(
-	vector_expression<V> const& v,
+	vector_expression<V, cpu_tag> const& v,
 	std::size_t size1, std::size_t size2
 ){
 	return dense_matrix_adaptor<typename V::value_type const>(v().raw_storage().values, size1, size2);

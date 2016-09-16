@@ -46,7 +46,7 @@ namespace blas {
 ///
 /// \tparam T type of the objects stored in the vector (like int, double, complex,...)
 template<class T>
-class vector: public vector_container<vector<T> > {
+class vector: public vector_container<vector<T>, cpu_tag > {
 
 	typedef vector<T> self_type;
 	typedef boost::container::vector<T> array_type;
@@ -98,7 +98,7 @@ public:
 	/// \brief Copy-constructor of a vector from a vector_expression
 	/// \param e the vector_expression whose values will be duplicated into the vector
 	template<class E>
-	vector(vector_expression<E> const& e):m_storage(e().size()) {
+	vector(vector_expression<E, cpu_tag> const& e):m_storage(e().size()) {
 		assign(*this, e);
 	}
 	
@@ -126,7 +126,7 @@ public:
 	/// \param v is the source vector container
 	/// \return a reference to a vector (i.e. the destination vector)
 	template<class C>          // Container assignment without temporary
-	vector& operator = (vector_container<C> const& v) {
+	vector& operator = (vector_container<C, cpu_tag> const& v) {
 		resize(v().size());
 		return assign(*this, v);
 	}
@@ -136,7 +136,7 @@ public:
 	/// \param e is a const reference to the vector_expression
 	/// \return a reference to the resulting vector
 	template<class E>
-	vector& operator = (vector_expression<E> const& e) {
+	vector& operator = (vector_expression<E, cpu_tag> const& e) {
 		self_type temporary(e);
 		swap(*this,temporary);
 		return *this;
@@ -353,7 +353,7 @@ struct const_expression<vector<T> const>{
 ///
 /// \tparam T type of the objects stored in the vector (like int, double, complex,...)
 template<class T, std::size_t N>
-class vectorN: public vector_container<vectorN<T,N> > {
+class vectorN: public vector_container<vectorN<T,N>, cpu_tag > {
 
 	typedef vectorN<T,N> self_type;
 	typedef std::array<T,N> array_type;
@@ -383,7 +383,7 @@ public:
 	/// \brief Copy-constructor of a vector from a vector_expression
 	/// \param e the vector_expression which values will be duplicated into the vector. Must have size N.
 	template<class E>
-	vectorN(vector_expression<E> const& e){
+	vectorN(vector_expression<E, cpu_tag> const& e){
 		SIZE_CHECK(e().size() == N);
 		assign(*this, e);
 	}
@@ -480,7 +480,7 @@ public:
 	/// \param v is the source vector container
 	/// \return a reference to a vector (i.e. the destination vector)
 	template<class C>          // Container assignment without temporary
-	vectorN& operator = (vector_container<C> const& v) {
+	vectorN& operator = (vector_container<C, cpu_tag> const& v) {
 		SIZE_CHECK(v().size() == N);
 		resize(v().size());
 		return assign(*this, v);
@@ -491,7 +491,7 @@ public:
 	/// \param e is a const reference to the vector_expression
 	/// \return a reference to the resulting vector
 	template<class E>
-	vectorN& operator = (vector_expression<E> const& e) {
+	vectorN& operator = (vector_expression<E, cpu_tag> const& e) {
 		SIZE_CHECK(e().size() == N);
 		self_type temporary(e);
 		swap(*this,temporary);

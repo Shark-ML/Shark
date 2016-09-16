@@ -50,8 +50,8 @@ namespace shark{ namespace blas{
 //! and v = (x0-c,x1,x2,...,xn)
 template<class X, class R>
 typename X::value_type createHouseholderReflection(
-	vector_expression<X> const& x, 
-	vector_expression<R>& reflection
+	vector_expression<X, cpu_tag> const& x, 
+	vector_expression<R, cpu_tag>& reflection
 ){
 	SIZE_CHECK(x().size() != 0);
 	SIZE_CHECK(x().size() == reflection().size());
@@ -81,10 +81,10 @@ typename X::value_type createHouseholderReflection(
 //\brief rotates a matrix using a householder reflection 
 //
 //calculates A*(1-beta*xx^T)
-template<class Mat, class R, class T>
+template<class Mat, class R, class T, class Device>
 void applyHouseholderOnTheRight(
-	matrix_expression<Mat> & matrix,
-	vector_expression<R> const& reflection, 
+	matrix_expression<Mat, Device> & matrix,
+	vector_expression<R, Device> const& reflection, 
 	T beta
 ){
 	SIZE_CHECK(matrix().size2() == reflection().size());
@@ -108,10 +108,10 @@ void applyHouseholderOnTheRight(
 /// \brief rotates a matrix using a householder reflection 
 ///
 /// calculates (1-beta*xx^T)*A
-template<class Mat, class R, class T>
+template<class Mat, class R, class T, class Device>
 void applyHouseholderOnTheLeft(
-	matrix_expression<Mat> & matrix,
-	vector_expression<R> const& reflection, 
+	matrix_expression<Mat, Device> & matrix,
+	vector_expression<R, Device> const& reflection, 
 	T const& beta
 ){
 
@@ -133,10 +133,10 @@ void applyHouseholderOnTheLeft(
 /// \brief rotates a matrix using a householder reflection 
 ///
 /// calculates (1-beta*xx^T)*A
-template<class Mat, class R, class T>
+template<class Mat, class R, class T, class Device>
 void applyHouseholderOnTheLeft(
 	temporary_proxy<Mat> matrix,
-	vector_expression<R> const& reflection, 
+	vector_expression<R, Device> const& reflection, 
 	T const& beta
 ){
 	applyHouseholderOnTheLeft(static_cast<Mat&>(matrix),reflection,beta);
@@ -165,7 +165,7 @@ void applyHouseholderOnTheLeft(
 /// this requires less operations and is thus preferable. Also only half the
 /// random numbers need to be generated
 template< class MatrixT, typename RngType >
-void randomRotationMatrix(matrix_container<MatrixT>& matrixC,RngType& rng){
+void randomRotationMatrix(matrix_container<MatrixT, cpu_tag>& matrixC,RngType& rng){
 	MatrixT& matrix = matrixC();
 	SIZE_CHECK(matrix.size1() == matrix.size2());
 	SIZE_CHECK(matrix.size1() > 0);
@@ -200,7 +200,7 @@ void randomRotationMatrix(matrix_container<MatrixT>& matrixC,RngType& rng){
 ///matrix.  The matrix needs to be quadratic and have the proper size
 ///(e.g. call matrix::resize before) uses the global RNG.
 template<class MatrixT>
-void randomRotationMatrix(matrix_container<MatrixT>& matrixC){
+void randomRotationMatrix(matrix_container<MatrixT, cpu_tag>& matrixC){
 	randomRotationMatrix( matrixC, Rng::globalRng );
 }
 

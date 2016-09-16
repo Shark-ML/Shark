@@ -63,8 +63,8 @@ namespace shark{ namespace blas{
  */
 template<class MatrixT,class MatrixL>
 void choleskyDecomposition(
-	matrix_expression<MatrixT> const& A, 
-	matrix_expression<MatrixL>& L
+	matrix_expression<MatrixT, cpu_tag> const& A, 
+	matrix_expression<MatrixL, cpu_tag>& L
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	size_t m = A().size1();
@@ -99,8 +99,8 @@ void choleskyDecomposition(
 /// \param beta the update factor. it Can be positive or negative
 template<class Matrix,class Vector>
 void choleskyUpdate(
-	matrix_expression<Matrix>& L, 
-	vector_expression<Vector> const& v, 
+	matrix_expression<Matrix, cpu_tag>& L, 
+	vector_expression<Vector, cpu_tag> const& v, 
 	double alpha, double beta
 ){
 	//implementation blatantly stolen from Eigen
@@ -159,7 +159,7 @@ void choleskyUpdate(
  */
 template<class MatrixL>
 std::size_t pivotingCholeskyDecompositionInPlace(
-	shark::blas::matrix_expression<MatrixL>& Lref,
+	shark::blas::matrix_expression<MatrixL, cpu_tag>& Lref,
 	PermutationMatrix& P
 );
 
@@ -187,9 +187,9 @@ std::size_t pivotingCholeskyDecompositionInPlace(
  */
 template<class MatrixA,class MatrixL>
 std::size_t pivotingCholeskyDecomposition(
-	matrix_expression<MatrixA> const& A,
+	matrix_expression<MatrixA, cpu_tag> const& A,
 	PermutationMatrix& P,
-	matrix_expression<MatrixL>& L
+	matrix_expression<MatrixL, cpu_tag>& L
 ){	
 	//ensure sizes are correct
 	SIZE_CHECK(A().size1() == A().size2());

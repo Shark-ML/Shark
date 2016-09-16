@@ -99,9 +99,9 @@ inline void gemv(CBLAS_ORDER const Order,
 // op (A) == A || A^T || A^H
 template <typename MatA, typename VectorX, typename VectorY>
 void gemv(
-	matrix_expression<MatA> const &A,
-	vector_expression<VectorX> const &x,
-        vector_expression<VectorY> &y,
+	matrix_expression<MatA, cpu_tag> const &A,
+	vector_expression<VectorX, cpu_tag> const &x,
+        vector_expression<VectorY, cpu_tag> &y,
 	typename VectorY::value_type alpha,
 	boost::mpl::true_
 ){

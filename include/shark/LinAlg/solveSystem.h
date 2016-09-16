@@ -55,10 +55,10 @@ namespace shark{ namespace blas{
 /// A must be symmetric.
 /// This method is in no way optimized for sparse matrices.
 /// Be aware, that the matrix must have full rank!
-template<class System, class MatT,class VecT>
+template<class System, class MatT,class VecT, class Device>
 void solveSymmPosDefSystemInPlace(
-	matrix_expression<MatT> const& A,
-	vector_expression<VecT>& b
+	matrix_expression<MatT, Device> const& A,
+	vector_expression<VecT, Device>& b
 );
 
 /// \brief System of symmetric linear equations solver.
@@ -79,10 +79,10 @@ void solveSymmPosDefSystemInPlace(
 /// Also the result is stored in B directly so it"s contents are destroyed.
 /// @param A the system matrix A
 /// @param B the right hand side of the LGS, also stores the result
-template<class System, class MatT,class Mat1T>
+template<class System, class MatT,class Mat1T, class Device>
 void solveSymmPosDefSystemInPlace(
-	matrix_expression<MatT> const& A,
-	matrix_expression<Mat1T>& B
+	matrix_expression<MatT, Device> const& A,
+	matrix_expression<Mat1T, Device>& B
 );
 
 /// \brief System of symmetric linear equations solver.
@@ -93,11 +93,11 @@ void solveSymmPosDefSystemInPlace(
 /// backward substitution. A must be symmetric.
 /// This Method is in no way optimized for sparse matrices.
 /// Be aware, that the matrix must have full rank!
-template<class System,class MatT,class Vec1T,class Vec2T>
+template<class System,class MatT,class Vec1T,class Vec2T, class Device>
 void solveSymmPosDefSystem(
-	matrix_expression<MatT> const& A, 
-	vector_expression<Vec1T>& x,
-	vector_expression<Vec2T> const& b
+	matrix_expression<MatT, Device> const& A, 
+	vector_expression<Vec1T, Device>& x,
+	vector_expression<Vec2T, Device> const& b
 );
 /// \brief System of symmetric linear equations solver.
 /// 
@@ -117,11 +117,11 @@ void solveSymmPosDefSystem(
 /// @param A the system matrix A
 /// @param X the stored result of the solution of LGS
 /// @param B the right hand side of the LGS
-template<class System,class MatT,class Mat1T,class Mat2T>
+template<class System,class MatT,class Mat1T,class Mat2T, class Device>
 void solveSymmPosDefSystem(
-	matrix_expression<MatT> const& A, 
-	matrix_expression<Mat1T>& X,
-	matrix_expression<Mat2T> const& B
+	matrix_expression<MatT, Device> const& A, 
+	matrix_expression<Mat1T, Device>& X,
+	matrix_expression<Mat2T, Device> const& B
 );
 
 
@@ -139,10 +139,10 @@ void solveSymmPosDefSystem(
 /// 
 /// \param A \f$ n \times n \f$ input matrix.
 /// \param b right hand side vector.
-template<class System,class MatT,class VecT>
+template<class System,class MatT,class VecT, class Device>
 void solveSymmSemiDefiniteSystemInPlace(
-	matrix_expression<MatT> const& A, 
-	vector_expression<VecT>& b
+	matrix_expression<MatT, Device> const& A, 
+	vector_expression<VecT, Device>& b
 );
 
 /// \brief Solves multiple square system of linear equations without full rank.
@@ -165,10 +165,10 @@ void solveSymmSemiDefiniteSystemInPlace(
 /// 
 /// \param A \f$ n \times n \f$ input matrix.
 /// \param B \f$ n \times k \f$ right hand side matrix.
-template<class System,class Mat1T,class Mat2T>
+template<class System,class Mat1T,class Mat2T, class Device>
 void solveSymmSemiDefiniteSystemInPlace(
-	matrix_expression<Mat1T> const& A, 
-	matrix_expression<Mat2T>& B
+	matrix_expression<Mat1T, Device> const& A, 
+	matrix_expression<Mat2T, Device>& B
 );
 
 /// \brief Solves a non-square system of linear equations.
@@ -182,10 +182,10 @@ void solveSymmSemiDefiniteSystemInPlace(
 ///
 /// \param A \f$ n \times m \f$ input matrix.
 /// \param b right hand side of the problem.
-template<class System,class MatT,class VecT>
+template<class System,class MatT,class VecT, class Device>
 void generalSolveSystemInPlace(
-	matrix_expression<MatT> const& A, 
-	vector_expression<VecT>& b
+	matrix_expression<MatT, Device> const& A, 
+	vector_expression<VecT, Device>& b
 );
 
 
@@ -200,10 +200,10 @@ void generalSolveSystemInPlace(
 ///
 /// \param A \f$ n \times m \f$ input matrix.
 /// \param B \f$ n \times k \f$ right hand sied matrix.
-template<class System,class MatA,class MatB>
+template<class System,class MatA,class MatB, class Device>
 void generalSolveSystemInPlace(
-	matrix_expression<MatA> const& A, 
-	matrix_expression<MatB>& B
+	matrix_expression<MatA, Device> const& A, 
+	matrix_expression<MatB, Device>& B
 );
 
 /// \brief Approximates the solution of a linear system of equation Ax=b.
@@ -234,11 +234,11 @@ void generalSolveSystemInPlace(
 /// \param epsilon stopping criterium for the residual
 /// \param maxIterations the maximum number of iterations
 /// \param initialSolution if this is true, x stores an initial guess of the solution
-template<class MatT, class VecT, class VecT2>
+template<class MatT, class VecT, class VecT2, class Device>
 void approxsolveSymmPosDefSystem(
-	matrix_expression<MatT> const& A,
-	vector_expression<VecT>& x,
-	vector_expression<VecT2> const& b,
+	matrix_expression<MatT, Device> const& A,
+	vector_expression<VecT, Device>& x,
+	vector_expression<VecT2, Device> const& b,
 	double epsilon = 1.e-10,
 	bool initialSolution = false,
 	unsigned int maxIterations = 0
@@ -303,10 +303,10 @@ void approxsolveSymmPosDefSystem(
 /// \param b the right hand side which also stores the final solution
 /// \param epsilon stopping criterium for the residual
 /// \param maxIterations the maximum number of iterations
-template<class MatT, class VecT>
+template<class MatT, class VecT, class Device>
 void approxsolveSymmPosDefSystemInPlace(
-	matrix_expression<MatT> const& A,
-	vector_expression<VecT>& b,
+	matrix_expression<MatT, Device> const& A,
+	vector_expression<VecT, Device>& b,
 	double epsilon = 1.e-10,
 	unsigned int maxIterations = 0
 ){

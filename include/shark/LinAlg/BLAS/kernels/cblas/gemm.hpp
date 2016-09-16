@@ -117,9 +117,9 @@ inline void gemm(
 // C <- alpha * A * B + beta * C
 template <typename MatA, typename MatB, typename MatC>
 void gemm(
-	matrix_expression<MatA> const& A,
-	matrix_expression<MatB> const& B,
-	matrix_expression<MatC>& C, 
+	matrix_expression<MatA, cpu_tag> const& A,
+	matrix_expression<MatB, cpu_tag> const& B,
+	matrix_expression<MatC, cpu_tag>& C, 
 	typename MatC::value_type alpha,
 	boost::mpl::true_
 ) {

@@ -100,8 +100,8 @@ inline void trmv(
 
 template <bool upper, bool unit, typename MatA, typename VectorX>
 void trmv(
-	matrix_expression<MatA> const& A,
-	vector_expression<VectorX> &x,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<VectorX, cpu_tag> &x,
 	boost::mpl::true_
 ){
 	SIZE_CHECK(x().size() == A().size2());

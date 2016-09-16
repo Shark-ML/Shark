@@ -61,10 +61,10 @@ struct SolveXAB{
 ///system is to be solved : Ax=b or xA=b
 ///The second flag indicates which type of diagonal is used:
 ///lower unit, upper unit or non unit lower/upper.
-template<class System, class DiagType,class MatT,class VecT>
+template<class System, class DiagType,class MatT,class VecT, class Device>
 void solveTriangularSystemInPlace(
-	const matrix_expression<MatT>& A, 
-	vector_expression<VecT>& b
+	const matrix_expression<MatT, Device>& A, 
+	vector_expression<VecT, Device>& b
 );
 /// \brief  In-place triangular linear equation solver.
 ///
@@ -81,10 +81,10 @@ void solveTriangularSystemInPlace(
 ///system is to be solved : Ax=b or xA=b
 ///The second flag indicates which type of diagonal is used:
 ///lower unit, upper unit or non unit lower/upper.
-template<class System, class DiagType,class MatA,class MatB>
+template<class System, class DiagType,class MatA,class MatB, class Device>
 void solveTriangularSystemInPlace(
-	const matrix_expression<MatA>& A, 
-	matrix_expression<MatB>& B
+	const matrix_expression<MatA, Device>& A, 
+	matrix_expression<MatB, Device>& B
 );
 
 /// \brief In-Place solver if A was already cholesky decomposed
@@ -95,10 +95,10 @@ void solveTriangularSystemInPlace(
 ///=>AX=B or XA=B
 ///given an A which was already Cholesky-decomposed as
 ///A=LL^T where L is a lower triangular matrix.
-template<class System,class MatL,class MatB>
+template<class System,class MatL,class MatB, class Device>
 void solveTriangularCholeskyInPlace(
-	const matrix_expression<MatL>&L, 
-	matrix_expression<MatB>& B
+	const matrix_expression<MatL, Device>&L, 
+	matrix_expression<MatB, Device>& B
 );
 
 /// \brief In-Place solver if A was already cholesky decomposed
@@ -106,10 +106,10 @@ void solveTriangularCholeskyInPlace(
 ///Ax=b
 ///given an A which was already Cholesky-decomposed as
 ///A=LL^T where L is a lower triangular matrix.
-template<class System,class MatL,class VecB>
+template<class System,class MatL,class VecB, class Device>
 void solveTriangularCholeskyInPlace(
-	const matrix_expression<MatL>& L, 
-	vector_expression<VecB>& b
+	const matrix_expression<MatL, Device>& L, 
+	vector_expression<VecB, Device>& b
 );
 
 }}

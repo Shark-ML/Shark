@@ -61,9 +61,9 @@ namespace shark{ namespace blas{
 template<class MatrixT,class MatrixU,class VectorT>
 void eigensymm
 (
-	matrix_expression<MatrixT> const& A,
-	matrix_expression<MatrixU>& eigenVectors,
-	vector_expression<VectorT>& eigenValues
+	matrix_expression<MatrixT, cpu_tag> const& A,
+	matrix_expression<MatrixU, cpu_tag>& eigenVectors,
+	vector_expression<VectorT, cpu_tag>& eigenValues
 )
 {
 	SIZE_CHECK(A().size2() == A().size1());

@@ -38,8 +38,8 @@ namespace shark { namespace blas {namespace bindings{
 // Dense case
 template<class E1, class E2, class result_type>
 static void dot_impl(
-	vector_expression<E1> const& v1,
-	vector_expression<E2> const& v2,
+	vector_expression<E1, cpu_tag> const& v1,
+	vector_expression<E2, cpu_tag> const& v2,
 	result_type& result,
 	dense_random_access_iterator_tag,
 	dense_random_access_iterator_tag
@@ -53,8 +53,8 @@ static void dot_impl(
 // Sparse case
 template<class E1, class E2, class result_type>
 static void dot_impl(
-	vector_expression<E1> const& v1,
-	vector_expression<E2> const& v2,
+	vector_expression<E1, cpu_tag> const& v1,
+	vector_expression<E2, cpu_tag> const& v2,
 	result_type& result,
 	sparse_bidirectional_iterator_tag,
 	sparse_bidirectional_iterator_tag
@@ -86,8 +86,8 @@ static void dot_impl(
 // Dense-Sparse case
 template<class E1, class E2, class result_type>
 static void dot_impl(
-	vector_expression<E1> const& v1,
-	vector_expression<E2> const& v2,
+	vector_expression<E1, cpu_tag> const& v1,
+	vector_expression<E2, cpu_tag> const& v2,
 	result_type& result,
 	dense_random_access_iterator_tag,
 	sparse_bidirectional_iterator_tag
@@ -102,8 +102,8 @@ static void dot_impl(
 //Sparse-Dense case is reduced to Dense-Sparse using symmetry.
 template<class E1, class E2, class result_type>
 static void dot_impl(
-	vector_expression<E1> const& v1,
-	vector_expression<E2> const& v2,
+	vector_expression<E1, cpu_tag> const& v1,
+	vector_expression<E2, cpu_tag> const& v2,
 	result_type& result,
 	sparse_bidirectional_iterator_tag t1,
 	dense_random_access_iterator_tag t2
@@ -115,8 +115,8 @@ static void dot_impl(
 ///\brief Implements the dot or inner product kernel s = x^Ty.
 template<class E1, class E2,class result_type>
 void dot(
-	vector_expression<E1> const& v1,
-	vector_expression<E2> const& v2,
+	vector_expression<E1, cpu_tag> const& v1,
+	vector_expression<E2, cpu_tag> const& v2,
 	result_type& result,
 	boost::mpl::false_
 ) {

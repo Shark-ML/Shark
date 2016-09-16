@@ -40,16 +40,16 @@ namespace shark {namespace blas {namespace bindings {
 // Lower matrix -> boost::mpl::false_
 	
 //Lower triangular(row-major) - vector
-template<bool Unit, class TriangularA, class V>
+template<bool Unit, class MatA, class V>
 void trsv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V> &b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag> &b,
         boost::mpl::false_, column_major
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
 	
-	typedef typename TriangularA::value_type value_type;
+	typedef typename MatA::value_type value_type;
 	
 	std::size_t size = b().size();
 	for (std::size_t n = 0; n != size; ++ n) {
@@ -64,16 +64,16 @@ void trsv_impl(
 	}
 }
 //Lower triangular(column-major) - vector
-template<bool Unit, class TriangularA, class V>
+template<bool Unit, class MatA, class V>
 void trsv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V> &b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag> &b,
         boost::mpl::false_, row_major
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
 	
-	typedef typename TriangularA::value_type value_type;
+	typedef typename MatA::value_type value_type;
 	
 	std::size_t size = b().size();
 	for (std::size_t n = 0; n < size; ++ n) {
@@ -88,16 +88,16 @@ void trsv_impl(
 }
 
 //upper triangular(column-major)-vector
-template<bool Unit, class TriangularA, class V>
+template<bool Unit, class MatA, class V>
 void trsv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V> &b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag> &b,
         boost::mpl::true_, column_major
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
 	
-	typedef typename TriangularA::value_type value_type;
+	typedef typename MatA::value_type value_type;
 	
 	std::size_t size = b().size();
 	for (std::size_t i = 0; i < size; ++ i) {
@@ -113,16 +113,16 @@ void trsv_impl(
 	}
 }
 //upper triangular(row-major)-vector
-template<bool Unit, class TriangularA, class V>
+template<bool Unit, class MatA, class V>
 void trsv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V> &b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag> &b,
         boost::mpl::true_, row_major
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
 	
-	typedef typename TriangularA::value_type value_type;
+	typedef typename MatA::value_type value_type;
 	
 	std::size_t size = A().size1();
 	for (std::size_t i = 0; i < size; ++ i) {
@@ -138,13 +138,13 @@ void trsv_impl(
 
 //dispatcher
 
-template <bool Upper,bool Unit,typename TriangularA, typename V>
+template <bool Upper,bool Unit,typename MatA, typename V>
 void trsv(
-	matrix_expression<TriangularA> const& A, 
-	vector_expression<V> & b,
+	matrix_expression<MatA, cpu_tag> const& A, 
+	vector_expression<V, cpu_tag> & b,
 	boost::mpl::false_//unoptimized
 ){
-	trsv_impl<Unit>(A, b, boost::mpl::bool_<Upper>(), typename TriangularA::orientation());
+	trsv_impl<Unit>(A, b, boost::mpl::bool_<Upper>(), typename MatA::orientation());
 }
 
 }}}

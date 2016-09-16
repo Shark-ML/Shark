@@ -108,7 +108,7 @@ public:
     /// \brief Computes the kernel-matrix
     template<class M>
     void matrix(
-        blas::matrix_expression<M> & storage
+        blas::matrix_expression<M, blas::cpu_tag> & storage
     ) const{
         for(std::size_t i = 0; i != size(); ++i){
             row(i,0,size(),&storage()(i,0));

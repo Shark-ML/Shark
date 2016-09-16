@@ -45,10 +45,10 @@ namespace shark{ namespace blas{
 * \f$ n^2(v) = \sum_i w_i v_i^2 \f$
 * nb: the weights themselves are not squared, but multiplied onto the squared components
 */
-template<class VectorT, class WeightT>
+template<class VectorT, class WeightT, class Device>
 typename VectorT::value_type diagonalMahalanobisNormSqr(
-	vector_expression<VectorT> const& vector, 
-	vector_expression<WeightT> const& weights
+	vector_expression<VectorT, Device> const& vector, 
+	vector_expression<WeightT, Device> const& weights
 ) {
 	SIZE_CHECK( vector().size() == weights().size() );
 	return inner_prod(weights(),sqr(vector()));
@@ -61,10 +61,10 @@ typename VectorT::value_type diagonalMahalanobisNormSqr(
 * \f$ n^2(v) = \sqrt{\sum_i w_i v_i^2} \f$
 * nb: the weights themselves are not squared, but multiplied onto the squared components
 */
-template<class VectorT, class WeightT>
+template<class VectorT, class WeightT, class Device>
 typename VectorT::value_type diagonalMahalanobisNorm(
-	vector_expression<VectorT> const& vector, 
-	vector_expression<WeightT> const& weights
+	vector_expression<VectorT, Device> const& vector, 
+	vector_expression<WeightT, Device> const& weights
 ) {
 	SIZE_CHECK( vector().size() == weights().size() );
 	return std::sqrt(diagonalMahalanobisNormSqr(vector,weights));
@@ -283,11 +283,11 @@ namespace detail{
 *
 * NOTE: The weights themselves are not squared, but multiplied onto the squared components.
 */
-template<class VectorT, class VectorU, class WeightT>
+template<class VectorT, class VectorU, class WeightT, class Device>
 typename VectorT::value_type diagonalMahalanobisDistanceSqr(
-	vector_expression<VectorT> const& op1,
-	vector_expression<VectorU> const& op2, 
-	vector_expression<WeightT> const& weights
+	vector_expression<VectorT, Device> const& op1,
+	vector_expression<VectorU, Device> const& op2, 
+	vector_expression<WeightT, Device> const& weights
 ){
 	SIZE_CHECK(op1().size()==op2().size());
 	SIZE_CHECK(op1().size()==weights().size());
@@ -302,10 +302,10 @@ typename VectorT::value_type diagonalMahalanobisDistanceSqr(
 /**
 * \brief Squared distance between two vectors.
 */
-template<class VectorT,class VectorU>
+template<class VectorT,class VectorU, class Device>
 typename VectorT::value_type distanceSqr(
-	vector_expression<VectorT> const& op1,
-	vector_expression<VectorU> const& op2
+	vector_expression<VectorT, Device> const& op1,
+	vector_expression<VectorU, Device> const& op2
 ){
 	SIZE_CHECK(op1().size()==op2().size());
 	typedef typename VectorT::value_type value_type;
@@ -319,11 +319,11 @@ typename VectorT::value_type distanceSqr(
 * The squared distance between the vector and every row-vector of the matrix is calculated.
 * This can be implemented much more efficiently.
 */
-template<class MatrixT,class VectorU, class VectorR>
+template<class MatrixT,class VectorU, class VectorR, class Device>
 void distanceSqr(
-	matrix_expression<MatrixT> const& operands,
-	vector_expression<VectorU> const& op2,
-	vector_expression<VectorR>& distances
+	matrix_expression<MatrixT, Device> const& operands,
+	vector_expression<VectorU, Device> const& op2,
+	vector_expression<VectorR, Device>& distances
 ){
 	SIZE_CHECK(operands().size2()==op2().size());
 	ensure_size(distances,operands().size1());
@@ -338,10 +338,10 @@ void distanceSqr(
 * The squared distance between the vector and every row-vector of the matrix is calculated.
 * This can be implemented much more efficiently.
 */
-template<class MatrixT,class VectorU>
+template<class MatrixT,class VectorU, class Device>
 vector<typename MatrixT::value_type> distanceSqr(
-	matrix_expression<MatrixT> const& operands,
-	vector_expression<VectorU> const& op2
+	matrix_expression<MatrixT, Device> const& operands,
+	vector_expression<VectorU, Device> const& op2
 ){
 	SIZE_CHECK(operands().size2()==op2().size());
 	vector<typename MatrixT::value_type> distances(operands().size1());
@@ -355,10 +355,10 @@ vector<typename MatrixT::value_type> distanceSqr(
 * The squared distance between the vector and every row-vector of the matrix is calculated.
 * This can be implemented much more efficiently.
 */
-template<class MatrixT,class VectorU>
+template<class MatrixT,class VectorU, class Device>
 vector<typename MatrixT::value_type> distanceSqr(
-	vector_expression<VectorU> const& op1,
-	matrix_expression<MatrixT> const& operands
+	vector_expression<VectorU, Device> const& op1,
+	matrix_expression<MatrixT, Device> const& operands
 ){
 	SIZE_CHECK(operands().size2()==op1().size());
 	vector<typename MatrixT::value_type> distances(operands().size1());
@@ -375,10 +375,10 @@ vector<typename MatrixT::value_type> distanceSqr(
 * The results are returned as a matrix, where the element in the i-th 
 * row and the j-th column is distanceSqr(x_i,y_j).
 */
-template<class MatrixT,class MatrixU>
+template<class MatrixT,class MatrixU, class Device>
 matrix<typename MatrixT::value_type> distanceSqr(
-	matrix_expression<MatrixT> const& X,
-	matrix_expression<MatrixU> const& Y
+	matrix_expression<MatrixT, Device> const& X,
+	matrix_expression<MatrixU, Device> const& Y
 ){
 	typedef matrix<typename MatrixT::value_type> Matrix;
 	SIZE_CHECK(X().size2()==Y().size2());
@@ -398,10 +398,10 @@ matrix<typename MatrixT::value_type> distanceSqr(
 /**
 * \brief Calculates distance between two vectors.
 */
-template<class VectorT,class VectorU>
+template<class VectorT,class VectorU, class Device>
 typename VectorT::value_type distance(
-	vector_expression<VectorT> const& op1,
-	vector_expression<VectorU> const& op2
+	vector_expression<VectorT, Device> const& op1,
+	vector_expression<VectorU, Device> const& op2
 ){
 	SIZE_CHECK(op1().size()==op2().size());
 	return std::sqrt(distanceSqr(op1,op2));
@@ -414,11 +414,11 @@ typename VectorT::value_type distance(
 * \f$ d(v) = \left( \sum_i w_i (x_i-z_i)^2 \right)^{1/2} \f$
 * nb: the weights themselves are not squared, but multiplied onto the squared components
 */
-template<class VectorT, class VectorU, class WeightT>
+template<class VectorT, class VectorU, class WeightT, class Device>
 typename VectorT::value_type diagonalMahalanobisDistance(
-	vector_expression<VectorT> const& op1,
-	vector_expression<VectorU> const& op2, 
-	vector_expression<WeightT> const& weights
+	vector_expression<VectorT, Device> const& op1,
+	vector_expression<VectorU, Device> const& op2, 
+	vector_expression<WeightT, Device> const& weights
 ){
 	SIZE_CHECK(op1().size()==op2().size());
 	SIZE_CHECK(op1().size()==weights().size());

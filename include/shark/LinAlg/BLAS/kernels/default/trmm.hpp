@@ -35,10 +35,10 @@
 
 namespace shark { namespace blas { namespace bindings {
 
-template <bool Upper,bool Unit,typename TriangularA, typename MatB>
+template <bool Upper,bool Unit,typename MatA, typename MatB>
 void trmm(
-	matrix_expression<TriangularA> const &A, 
-	matrix_expression<MatB>& B,
+	matrix_expression<MatA, cpu_tag> const &A, 
+	matrix_expression<MatB, cpu_tag>& B,
 	boost::mpl::false_
 ) {
 	SIZE_CHECK(A().size1() == A().size2());

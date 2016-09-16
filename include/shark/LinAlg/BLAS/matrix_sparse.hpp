@@ -35,7 +35,7 @@ namespace shark {
 namespace blas {
 
 template<class T, class I=std::size_t>
-class compressed_matrix:public matrix_container<compressed_matrix<T, I> > {
+class compressed_matrix:public matrix_container<compressed_matrix<T, I>, cpu_tag > {
 	typedef compressed_matrix<T, I> self_type;
 public:
 	typedef I index_type;
@@ -123,7 +123,7 @@ public:
 		, m_indices(non_zeros), m_values(non_zeros), m_zero(0) {}
 
 	template<class E>
-	compressed_matrix(const matrix_expression<E> &e, index_type non_zeros = 0)
+	compressed_matrix(matrix_expression<E, cpu_tag> const& e, index_type non_zeros = 0)
 		: m_size1(e().size1()), m_size2(e().size2()), m_nnz(0)
 		, m_rowStart(e().size1() + 1, 0)
 		, m_rowEnd(e().size1(), 0)
@@ -248,13 +248,13 @@ public:
 
 	// Assignment
 	template<class C>          // Container assignment without temporary
-	compressed_matrix &operator = (matrix_container<C> const& m) {
+	compressed_matrix &operator = (matrix_container<C, cpu_tag> const& m) {
 		resize(m().size1(), m().size2());
 		assign(*this, m);
 		return *this;
 	}
 	template<class E>
-	compressed_matrix &operator = (matrix_expression<E> const& e) {
+	compressed_matrix &operator = (matrix_expression<E, cpu_tag> const& e) {
 		self_type temporary(e, nnz_capacity());
 		swap(temporary);
 		return *this;

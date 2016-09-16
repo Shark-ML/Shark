@@ -37,13 +37,13 @@
 namespace shark{ namespace blas{ namespace bindings{
 	
 //Lower triangular(row-major) - vector
-template<bool Unit, class TriangularA, class V>
+template<bool Unit, class MatA, class V>
 void trmv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V> &b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag> &b,
         boost::mpl::false_, row_major
 ){
-	typedef typename TriangularA::value_type value_typeA;
+	typedef typename MatA::value_type value_typeA;
 	typedef typename V::value_type value_typeV;
 	std::size_t size = A().size1();
 	std::size_t const blockSize = 128;
@@ -84,10 +84,10 @@ void trmv_impl(
 }
 
 //upper triangular(row-major)-vector
-template<bool Unit, class TriangularA, class V>
+template<bool Unit, class MatA, class V>
 void trmv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V>& b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag>& b,
         boost::mpl::true_, row_major
 ){
 	std::size_t size = A().size1();
@@ -100,10 +100,10 @@ void trmv_impl(
 }
 
 //Lower triangular(column-major) - vector
-template<bool Unit, class TriangularA, class V>
+template<bool Unit, class MatA, class V>
 void trmv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V> &b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag> &b,
         boost::mpl::false_, column_major
 ){
 	
@@ -119,13 +119,13 @@ void trmv_impl(
 }
 
 //upper triangular(column-major)-vector
-template<bool Unit, class TriangularA, class V>
+template<bool Unit, class MatA, class V>
 void trmv_impl(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<V>& b,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag>& b,
         boost::mpl::true_, column_major
 ){
-	typedef typename TriangularA::value_type value_typeA;
+	typedef typename MatA::value_type value_typeA;
 	typedef typename V::value_type value_typeV;
 	std::size_t size = A().size1();
 	std::size_t const blockSize = 128;
@@ -165,15 +165,15 @@ void trmv_impl(
 }
 
 //dispatcher
-template <bool Upper,bool Unit,typename TriangularA, typename V>
+template <bool Upper,bool Unit,typename MatA, typename V>
 void trmv(
-	matrix_expression<TriangularA> const& A, 
-	vector_expression<V> & b,
+	matrix_expression<MatA, cpu_tag> const& A, 
+	vector_expression<V, cpu_tag> & b,
 	boost::mpl::false_//unoptimized
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
-	trmv_impl<Unit>(A, b, boost::mpl::bool_<Upper>(), typename TriangularA::orientation());
+	trmv_impl<Unit>(A, b, boost::mpl::bool_<Upper>(), typename MatA::orientation());
 }
 
 }}}

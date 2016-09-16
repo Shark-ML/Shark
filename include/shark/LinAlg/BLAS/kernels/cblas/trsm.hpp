@@ -81,10 +81,10 @@ inline void trsm(
 
 // trsm(): solves A system of linear equations A * X = B
 //             when A is A triangular matrix
-template <bool upper, bool unit,typename TriangularA, typename MatB>
+template <bool upper, bool unit,typename MatA, typename MatB>
 void trsm(
-	matrix_expression<TriangularA> const &A,
-	matrix_expression<MatB> &B,
+	matrix_expression<MatA, cpu_tag> const &A,
+	matrix_expression<MatB, cpu_tag> &B,
 	boost::mpl::true_
 ){
 	SIZE_CHECK(A().size1() == A().size2());
@@ -93,7 +93,7 @@ void trsm(
 	//orientation is defined by the second argument
 	CBLAS_ORDER const storOrd = (CBLAS_ORDER)storage_order<typename MatB::orientation>::value;
 	//if orientations do not match, wecan interpret this as transposing A
-	bool transposeA =  !std::is_same<typename TriangularA::orientation,typename MatB::orientation>::value;
+	bool transposeA =  !std::is_same<typename MatA::orientation,typename MatB::orientation>::value;
 	
 	CBLAS_DIAG cblasUnit = unit?CblasUnit:CblasNonUnit;
 	CBLAS_UPLO cblasUplo = (upper != transposeA)?CblasUpper:CblasLower;

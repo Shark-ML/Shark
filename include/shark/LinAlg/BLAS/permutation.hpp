@@ -49,7 +49,7 @@ struct permutation_matrix:public vector<int> {
 ///
 ///by convention it is not allowed that P(i) < i. 
 template<class M>
-void swap_rows(permutation_matrix const& P, matrix_expression<M>& A){
+void swap_rows(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for (std::size_t i = 0; i != P.size(); ++ i)
 		swap_rows(A(),i,P(i));
 }
@@ -58,7 +58,7 @@ void swap_rows(permutation_matrix const& P, matrix_expression<M>& A){
 ///
 ///by convention it is not allowed that P(i) < i. 
 template<class V>
-void swap_rows(permutation_matrix const& P, vector_expression<V>& v){
+void swap_rows(permutation_matrix const& P, vector_expression<V, cpu_tag>& v){
 	for (std::size_t i = 0; i != P.size(); ++ i)
 		std::swap(v()(i),v()(P(i)));
 }
@@ -67,7 +67,7 @@ void swap_rows(permutation_matrix const& P, vector_expression<V>& v){
 ///
 ///This is the inverse operation to swap_rows. 
 template<class V, class Permutation>
-void swap_rows_inverted(Permutation const& P, vector_expression<V>& v){
+void swap_rows_inverted(Permutation const& P, vector_expression<V, cpu_tag>& v){
 	for(std::size_t i = P.size(); i != 0; --i){
 		std::size_t k = i-1;
 		if(k != std::size_t(P(k))){
@@ -81,7 +81,7 @@ void swap_rows_inverted(Permutation const& P, vector_expression<V>& v){
 ///
 ///by convention it is not allowed that P(i) < i. 
 template<class M>
-void swap_columns(permutation_matrix const& P, matrix_expression<M>& A){
+void swap_columns(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for(std::size_t i = 0; i != P.size(); ++i)
 		swap_columns(A(),i,P(i));
 }
@@ -90,7 +90,7 @@ void swap_columns(permutation_matrix const& P, matrix_expression<M>& A){
 ///
 ///This is the inverse operation to swapRows. 
 template<class M>
-void swap_rows_inverted(permutation_matrix const& P, matrix_expression<M>& A){
+void swap_rows_inverted(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for(std::size_t i = P.size(); i != 0; --i){
 		swap_rows(A(),i-1,P(i-1));
 	}
@@ -100,7 +100,7 @@ void swap_rows_inverted(permutation_matrix const& P, matrix_expression<M>& A){
 ///
 ///This is the inverse operation to swapColumns. 
 template<class M>
-void swap_columns_inverted(permutation_matrix const& P, matrix_expression<M>& A){
+void swap_columns_inverted(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for(std::size_t i = P.size(); i != 0; --i){
 		swap_columns(A(),i-1,P(i-1));
 	}
@@ -112,7 +112,7 @@ void swap_columns_inverted(permutation_matrix const& P, matrix_expression<M>& A)
 ///A_ii is then at position A_P(i)P(i)
 ///by convention it is not allowed that P(i) < i. 
 template<class M>
-void swap_full(permutation_matrix const& P, matrix_expression<M>& A){
+void swap_full(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for(std::size_t i = 0; i != P.size(); ++i){
 		swap_rows(A(),i,P(i));
 		swap_columns(A(),i,P(i));
@@ -122,7 +122,7 @@ void swap_full(permutation_matrix const& P, matrix_expression<M>& A){
 ///
 ///This is the inverse operation to swap_full. 
 template<class M>
-void swap_full_inverted(permutation_matrix const& P, matrix_expression<M>& A){
+void swap_full_inverted(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for(std::size_t i = P.size(); i != 0; --i){
 		swap_rows(A(),i-1,P(i-1));
 		swap_columns(A(),i-1,P(i-1));

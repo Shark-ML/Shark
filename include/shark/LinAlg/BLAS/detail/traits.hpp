@@ -425,20 +425,20 @@ namespace detail{
 	}
 }
 
-template<class M>
-typename major_iterator<M const>::type major_begin(matrix_expression<M> const& m, std::size_t i){
+template<class M, class Device>
+typename major_iterator<M const>::type major_begin(matrix_expression<M, Device> const& m, std::size_t i){
 	return detail::major_begin(m(),i, typename M::orientation());
 }
-template<class M>
-typename major_iterator<M const>::type major_end(matrix_expression<M> const& m, std::size_t i){
+template<class M, class Device>
+typename major_iterator<M const>::type major_end(matrix_expression<M, Device> const& m, std::size_t i){
 	return detail::major_end(m(),i, typename M::orientation());
 }
-template<class M>
-typename major_iterator<M>::type major_begin(matrix_expression<M>& m, std::size_t i){
+template<class M, class Device>
+typename major_iterator<M>::type major_begin(matrix_expression<M, Device>& m, std::size_t i){
 	return detail::major_begin(m(),i, typename M::orientation());
 }
-template<class M>
-typename major_iterator<M>::type major_end(matrix_expression<M>& m, std::size_t i){
+template<class M, class Device>
+typename major_iterator<M>::type major_end(matrix_expression<M, Device>& m, std::size_t i){
 	return detail::major_end(m(),i, typename M::orientation());
 }
 
@@ -455,7 +455,7 @@ struct vector_temporary{
 	typedef typename vector_temporary_type<
 		typename E::value_type,
 		typename boost::mpl::eval_if<
-			typename std::is_base_of<vector_expression<E>,E>::type,
+			typename std::is_base_of<vector_expression<E, typename E::device_type>,E>::type,
 			boost::range_iterator<E>,
 			major_iterator<E>
 		>::type::iterator_category
@@ -469,7 +469,7 @@ struct matrix_temporary{
 		typename E::value_type,
 		typename E::orientation,
 		typename boost::mpl::eval_if<
-			typename std::is_base_of<vector_expression<E>,E>::type,
+			typename std::is_base_of<vector_expression<E, typename E::device_type>,E>::type,
 			boost::range_iterator<E>,
 			major_iterator<E>
 		>::type::iterator_category
@@ -483,7 +483,7 @@ struct transposed_matrix_temporary{
 		typename E::value_type,
 		typename E::orientation::transposed_orientation,
 		typename boost::mpl::eval_if<
-			typename std::is_base_of<vector_expression<E>,E>::type,
+			typename std::is_base_of<vector_expression<E, typename E::device_type>,E>::type,
 			boost::range_iterator<E>,
 			major_iterator<E>
 		>::type::iterator_category
@@ -491,21 +491,21 @@ struct transposed_matrix_temporary{
 };
 
 namespace detail{
-	template<class Matrix>
-	void ensure_size(matrix_expression<Matrix>& mat,std::size_t rows, std::size_t columns){
+	template<class Matrix, class Device>
+	void ensure_size(matrix_expression<Matrix, Device>& mat,std::size_t rows, std::size_t columns){
 		SIZE_CHECK(mat().size1() == rows);
 		SIZE_CHECK(mat().size2() == columns);
 	}
-	template<class Matrix>
-	void ensure_size(matrix_container<Matrix>& mat,std::size_t rows, std::size_t columns){
+	template<class Matrix, class Device>
+	void ensure_size(matrix_container<Matrix, Device>& mat,std::size_t rows, std::size_t columns){
 		mat().resize(rows,columns);
 	}
-	template<class Vector>
-	void ensure_size(vector_expression<Vector>& vec,std::size_t size){
+	template<class Vector, class Device>
+	void ensure_size(vector_expression<Vector, Device>& vec,std::size_t size){
 		SIZE_CHECK(vec().size() == size);
 	}
-	template<class Vector>
-	void ensure_size(vector_container<Vector>& vec,std::size_t size){
+	template<class Vector, class Device>
+	void ensure_size(vector_container<Vector, Device>& vec,std::size_t size){
 		vec().resize(size);
 	}
 }
@@ -513,15 +513,15 @@ namespace detail{
 ///\brief Ensures that the matrix has the right size.
 ///
 ///Tries to resize mat. If the matrix expression can't be resized a debug assertion is thrown.
-template<class Matrix>
-void ensure_size(matrix_expression<Matrix>& mat,std::size_t rows, std::size_t columns){
+template<class Matrix, class Device>
+void ensure_size(matrix_expression<Matrix, Device>& mat,std::size_t rows, std::size_t columns){
 	detail::ensure_size(mat(),rows,columns);
 }
 ///\brief Ensures that the vector has the right size.
 ///
 ///Tries to resize vec. If the vector expression can't be resized a debug assertion is thrown.
-template<class Vector>
-void ensure_size(vector_expression<Vector>& vec,std::size_t size){
+template<class Vector, class Device>
+void ensure_size(vector_expression<Vector, Device>& vec,std::size_t size){
 	detail::ensure_size(vec(),size);
 }
 

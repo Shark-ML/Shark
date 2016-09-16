@@ -31,17 +31,20 @@
 namespace shark {
 namespace blas {
 
-/** \brief Base class for Vector Expression models
- *
- * it does not model the Vector Expression concept but all derived types should.
- * The class defines a common base type and some common interface for all
- * statically derived Vector Expression classes.
- * We implement the casts to the statically derived type.
- */
-template<class E>
+struct cpu_tag{};
+struct gpu_tag{};
+	
+	
+/// \brief Base class for Vector Expression models
+///
+/// it does not model the Vector Expression concept but all derived types should.
+/// The class defines a common base type and some common interface for all
+/// statically derived Vector Expression classes.
+/// We implement the casts to the statically derived type.
+template<class E, class Device>
 struct vector_expression {
 	typedef E expression_type;
-
+	typedef Device device_type;
 	const expression_type &operator()() const {
 		return *static_cast<const expression_type *>(this);
 	}
@@ -51,15 +54,14 @@ struct vector_expression {
 	}
 };
 
-/** \brief Base class for Vector container models
- *
- * it does not model the Vector concept but all derived types should.
- * The class defines a common base type and some common interface for all
- * statically derived Vector classes
- * We implement the casts to the statically derived type.
- */
-template<class C>
-struct vector_container:public vector_expression<C> {
+/// \brief Base class for Vector container models
+///
+/// it does not model the Vector concept but all derived types should.
+/// The class defines a common base type and some common interface for all
+/// statically derived Vector classes
+/// We implement the casts to the statically derived type.
+template<class C, class Device>
+struct vector_container:public vector_expression<C, Device> {
 	typedef C container_type;
 
 	const container_type &operator()() const {
@@ -72,17 +74,17 @@ struct vector_container:public vector_expression<C> {
 };
 
 
-/** \brief Base class for Matrix Expression models
- *
- * it does not model the Matrix Expression concept but all derived types should.
- * The class defines a common base type and some common interface for all
- * statically derived Matrix Expression classes
- * We iboost::mplement the casts to the statically derived type.
- */
-template<class E>
+/// \brief Base class for Matrix Expression models
+///
+/// it does not model the Matrix Expression concept but all derived types should.
+/// The class defines a common base type and some common interface for all
+/// statically derived Matrix Expression classes
+/// We iboost::mplement the casts to the statically derived type.
+template<class E, class Device>
 struct matrix_expression {
 	typedef E expression_type;
-
+	typedef Device device_type;
+	
 	const expression_type &operator()() const {
 		return *static_cast<const expression_type *>(this);
 	}
@@ -92,18 +94,17 @@ struct matrix_expression {
 	}
 };
 
-/** \brief Base class for expressions of vector sets
- *
- * The vector set expression type is similar to a matrix type. However it behaves
- * like a vector of vectors with elements of the vector being vectors. Moreover
- * all usual vector-space operations can be used . There is no distinction to the sizes of the elements
- * and all vectors may have different dimensionalities.
- *
- * it does not model the Matrix Expression concept but all derived types should.
- * The class defines a common base type and some common interface for all
- * statically derived Matrix Expression classes
- * We iboost::mplement the casts to the statically derived type.
- */
+/// \brief Base class for expressions of vector sets
+///
+/// The vector set expression type is similar to a matrix type. However it behaves
+/// like a vector of vectors with elements of the vector being vectors. Moreover
+/// all usual vector-space operations can be used . There is no distinction to the sizes of the elements
+/// and all vectors may have different dimensionalities.
+///
+/// it does not model the Matrix Expression concept but all derived types should.
+/// The class defines a common base type and some common interface for all
+/// statically derived Matrix Expression classes
+/// We iboost::mplement the casts to the statically derived type.
 template<class E>
 struct vector_set_expression {
 	typedef E expression_type;
@@ -117,15 +118,14 @@ struct vector_set_expression {
 	}
 };
 
-/** \brief Base class for Matrix container models
- *
- * it does not model the Matrix concept but all derived types should.
- * The class defines a common base type and some common interface for all
- * statically derived Matrix classes
- * We implement the casts to the statically derived type.
- */
-template<class C>
-struct matrix_container: public matrix_expression<C> {
+/// \brief Base class for Matrix container models
+///
+/// it does not model the Matrix concept but all derived types should.
+/// The class defines a common base type and some common interface for all
+/// statically derived Matrix classes
+/// We implement the casts to the statically derived type.
+template<class C, class Device>
+struct matrix_container: public matrix_expression<C, Device> {
 	typedef C container_type;
 
 	const container_type &operator()() const {

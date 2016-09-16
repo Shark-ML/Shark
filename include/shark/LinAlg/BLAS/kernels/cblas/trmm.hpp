@@ -114,8 +114,8 @@ inline void trmm(
 
 template <bool upper, bool unit, typename MatA, typename MatB>
 void trmm(
-	matrix_expression<MatA> const& A,
-	matrix_expression<MatB>& B,
+	matrix_expression<MatA, cpu_tag> const& A,
+	matrix_expression<MatB, cpu_tag>& B,
 	boost::mpl::true_
 ){
 	SIZE_CHECK(A().size1() == A().size2());

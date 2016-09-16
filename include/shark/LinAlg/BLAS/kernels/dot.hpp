@@ -55,8 +55,8 @@ namespace shark { namespace blas {namespace kernels{
 /// The kernels themselves are implemented in blas::bindings::dot.
 template<class E1, class E2,class result_type>
 void dot(
-	vector_expression<E1> const& e1,
-	vector_expression<E2> const& e2,
+	vector_expression<E1, cpu_tag> const& e1,
+	vector_expression<E2, cpu_tag> const& e2,
 	result_type& result
 ) {
 	SIZE_CHECK(e1().size() == e2().size());

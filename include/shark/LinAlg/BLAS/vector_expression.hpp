@@ -35,27 +35,27 @@
 namespace shark {
 namespace blas {
 
-template<class T, class VecV>
+template<class T, class VecV, class Device>
 typename boost::enable_if<
 	std::is_convertible<T, typename VecV::scalar_type >,
         vector_scalar_multiply<VecV>
 >::type
-operator* (vector_expression<VecV> const& v, T scalar){
+operator* (vector_expression<VecV, Device> const& v, T scalar){
 	typedef typename VecV::scalar_type scalar_type;
 	return vector_scalar_multiply<VecV>(v(), scalar_type(scalar));
 }
-template<class T, class VecV>
+template<class T, class VecV, class Device>
 typename boost::enable_if<
 	std::is_convertible<T, typename VecV::scalar_type >,
         vector_scalar_multiply<VecV>
 >::type
-operator* (T scalar, vector_expression<VecV> const& v){
+operator* (T scalar, vector_expression<VecV, Device> const& v){
 	typedef typename VecV::scalar_type scalar_type;
 	return vector_scalar_multiply<VecV>(v(), scalar_type(scalar));//explicit cast prevents warning, alternative would be to template vector_scalar_multiply on T as well
 }
 
-template<class VecV>
-vector_scalar_multiply<VecV> operator-(vector_expression<VecV> const& v){
+template<class VecV, class Device>
+vector_scalar_multiply<VecV> operator-(vector_expression<VecV, Device> const& v){
 	typedef typename VecV::scalar_type scalar_type;
 	return vector_scalar_multiply<VecV>(v(), scalar_type(-1));//explicit cast prevents warning, alternative would be to template vector_scalar_multiply on T as well
 }
@@ -72,9 +72,9 @@ repeat(T scalar, std::size_t elements){
 
 
 #define SHARK_UNARY_VECTOR_TRANSFORMATION(name, F)\
-template<class VecV>\
+template<class VecV, class Device>\
 vector_unary<VecV,F<typename VecV::value_type> >\
-name(vector_expression<VecV> const& v){\
+name(vector_expression<VecV, Device> const& v){\
 	typedef F<typename VecV::value_type> functor_type;\
 	return vector_unary<VecV, functor_type>(v(), functor_type());\
 }
@@ -96,12 +96,12 @@ SHARK_UNARY_VECTOR_TRANSFORMATION(elem_inv, scalar_inverse)
 
 //operations of the form op(v,t)[i] = op(v[i],t)
 #define SHARK_VECTOR_SCALAR_TRANSFORMATION(name, F)\
-template<class T, class VecV> \
+template<class T, class VecV, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename VecV::value_type >,\
         vector_unary<VecV,F<typename VecV::value_type,T> > \
 >::type \
-name (vector_expression<VecV> const& v, T scalar){ \
+name (vector_expression<VecV, Device> const& v, T scalar){ \
 	typedef F<typename VecV::value_type,T> functor_type; \
 	return vector_unary<VecV, functor_type>(v(), functor_type(scalar)); \
 }
@@ -119,12 +119,12 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(pow, scalar_pow)
 
 // operations of the form op(t,v)[i] = op(t,v[i])
 #define SHARK_VECTOR_SCALAR_TRANSFORMATION_2(name, F)\
-template<class T, class VecV> \
+template<class T, class VecV, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename VecV::value_type >,\
         vector_unary<VecV,F<typename VecV::value_type,T> > \
 >::type \
-name (T scalar, vector_expression<VecV> const& v){ \
+name (T scalar, vector_expression<VecV, Device> const& v){ \
 	typedef F<typename VecV::value_type,T> functor_type; \
 	return vector_unary<VecV, functor_type>(v(), functor_type(scalar)); \
 }
@@ -135,68 +135,68 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, scalar_max)
 
 
 ///\brief Adds two vectors
-template<class VecV1, class VecV2>
+template<class VecV1, class VecV2, class Device>
 vector_addition<VecV1, VecV2 > operator+ (
-	vector_expression<VecV1> const& v1,
-	vector_expression<VecV2> const& v2
+	vector_expression<VecV1, Device> const& v1,
+	vector_expression<VecV2, Device> const& v2
 ){
 	SIZE_CHECK(v1().size() == v2().size());
 	return vector_addition<VecV1, VecV2>(v1(),v2());
 }
 ///\brief Subtracts two vectors
-template<class VecV1, class VecV2>
+template<class VecV1, class VecV2, class Device>
 vector_addition<VecV1, vector_scalar_multiply<VecV2> > operator- (
-	vector_expression<VecV1> const& v1,
-	vector_expression<VecV2> const& v2
+	vector_expression<VecV1, Device> const& v1,
+	vector_expression<VecV2, Device> const& v2
 ){
 	SIZE_CHECK(v1().size() == v2().size());
 	return vector_addition<VecV1, vector_scalar_multiply<VecV2> >(v1(),-v2());
 }
 
 ///\brief Adds a vector plus a scalr which is interpreted as a constant vector
-template<class VecV, class T>
+template<class VecV, class T, class Device>
 typename boost::enable_if<
 	std::is_convertible<T, typename VecV::value_type>, 
 	vector_addition<VecV, scalar_vector<T> >
 >::type operator+ (
-	vector_expression<VecV> const& v,
+	vector_expression<VecV, Device> const& v,
 	T t
 ){
 	return v + scalar_vector<T>(v().size(),t);
 }
 
 ///\brief Adds a vector plus a scalar which is interpreted as a constant vector
-template<class T, class VecV>
+template<class T, class VecV, class Device>
 typename boost::enable_if<
 	std::is_convertible<T, typename VecV::value_type>,
 	vector_addition<VecV, scalar_vector<T> >
 >::type operator+ (
 	T t,
-	vector_expression<VecV> const& v
+	vector_expression<VecV, Device> const& v
 ){
 	return v + scalar_vector<T>(v().size(),t);
 }
 
 ///\brief Subtracts a scalar which is interpreted as a constant vector from a vector.
-template<class VecV, class T>
+template<class VecV, class T, class Device>
 typename boost::enable_if<
 	std::is_convertible<T, typename VecV::value_type> ,
 	vector_addition<VecV, vector_scalar_multiply<scalar_vector<T> > >
 >::type operator- (
-	vector_expression<VecV> const& v,
+	vector_expression<VecV, Device> const& v,
 	T t
 ){
 	return v - scalar_vector<T>(v().size(),t);
 }
 
 ///\brief Subtracts a vector from a scalar which is interpreted as a constant vector
-template<class VecV, class T>
+template<class VecV, class T, class Device>
 typename boost::enable_if<
 	std::is_convertible<T, typename VecV::value_type>,
 	vector_addition<scalar_vector<T>, vector_scalar_multiply<VecV> >
 >::type operator- (
 	T t,
-	vector_expression<VecV> const& v
+	vector_expression<VecV, Device> const& v
 ){
 	return scalar_vector<T>(v().size(),t) - v;
 }
@@ -205,9 +205,9 @@ typename boost::enable_if<
 
 
 #define SHARK_BINARY_VECTOR_EXPRESSION(name, F)\
-template<class VecV1, class VecV2>\
+template<class VecV1, class VecV2, class Device>\
 vector_binary<VecV1, VecV2, F<typename VecV1::value_type, typename VecV2::value_type> >\
-name(vector_expression<VecV1> const& v1, vector_expression<VecV2> const& v2){\
+name(vector_expression<VecV1, Device> const& v1, vector_expression<VecV2, Device> const& v2){\
 	SIZE_CHECK(v1().size() == v2().size());\
 	typedef F<typename VecV1::value_type, typename VecV2::value_type> functor_type;\
 	return vector_binary<VecV1, VecV2, functor_type>(v1(),v2(), functor_type());\
@@ -220,13 +220,13 @@ SHARK_BINARY_VECTOR_EXPRESSION(min, scalar_binary_min)
 SHARK_BINARY_VECTOR_EXPRESSION(max, scalar_binary_max)
 #undef SHARK_BINARY_VECTOR_EXPRESSION
 
-template<class VecV1, class VecV2>
+template<class VecV1, class VecV2, class Device>
 vector_binary<VecV1, VecV2, 
 	scalar_binary_safe_divide<typename VecV1::value_type, typename VecV2::value_type> 
 >
 safe_div(
-	vector_expression<VecV1> const& v1, 
-	vector_expression<VecV2> const& v2, 
+	vector_expression<VecV1, Device> const& v1, 
+	vector_expression<VecV2, Device> const& v2, 
 	decltype(
 		typename VecV1::value_type() * typename VecV2::value_type()
 	) defaultValue
@@ -239,18 +239,18 @@ safe_div(
 /////VECTOR REDUCTIONS
 
 /// \brief sum v = sum_i v_i
-template<class VecV>
+template<class VecV, class Device>
 typename VecV::value_type
-sum(vector_expression<VecV> const& v) {
+sum(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
 	vector_fold<scalar_binary_plus<value_type, value_type> > kernel;
 	return kernel(eval_block(v),value_type());
 }
 
 /// \brief max v = max_i v_i
-template<class VecV>
+template<class VecV, class Device>
 typename VecV::value_type
-max(vector_expression<VecV> const& v) {
+max(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
 	vector_fold<scalar_binary_max<value_type, value_type> > kernel;
 	auto const& elem_result = eval_block(v);
@@ -258,9 +258,9 @@ max(vector_expression<VecV> const& v) {
 }
 
 /// \brief min v = min_i v_i
-template<class VecV>
+template<class VecV, class Device>
 typename VecV::value_type
-min(vector_expression<VecV> const& v) {
+min(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
 	vector_fold<scalar_binary_min<value_type, value_type> > kernel;
 	auto const& elem_result = eval_block(v);
@@ -268,16 +268,16 @@ min(vector_expression<VecV> const& v) {
 }
 
 /// \brief arg_max v = arg max_i v_i
-template<class VecV>
-std::size_t arg_max(vector_expression<VecV> const& v) {
+template<class VecV, class Device>
+std::size_t arg_max(vector_expression<VecV, Device> const& v) {
 	SIZE_CHECK(v().size() > 0);
 	auto const& elem_result = eval_block(v);
 	return std::max_element(elem_result.begin(),elem_result.end()).index();
 }
 
 /// \brief arg_min v = arg min_i v_i
-template<class VecV>
-std::size_t arg_min(vector_expression<VecV> const& v) {
+template<class VecV, class Device>
+std::size_t arg_min(vector_expression<VecV, Device> const& v) {
 	SIZE_CHECK(v().size() > 0);
 	return arg_max(-v);
 }
@@ -289,9 +289,9 @@ std::size_t arg_min(vector_expression<VecV> const& v) {
 /// The function is computed in an numerically stable way to prevent that too high values of v_i produce inf or nan.
 /// The name of the function comes from the fact that it behaves like a continuous version of max in the respect that soft_max v <= v.size()*max(v)
 /// max is reached in the limit as the gap between the biggest value and the rest grows to infinity.
-template<class VecV>
+template<class VecV, class Device>
 typename VecV::value_type
-soft_max(vector_expression<VecV> const& v) {
+soft_max(vector_expression<VecV, Device> const& v) {
 	typename VecV::value_type maximum = max(v);
 	return std::log(sum(exp(v - maximum))) + maximum;
 }
@@ -300,48 +300,48 @@ soft_max(vector_expression<VecV> const& v) {
 ////implement all the norms based on sum!
 
 /// \brief norm_1 v = sum_i |v_i|
-template<class VecV>
+template<class VecV, class Device>
 typename real_traits<typename VecV::value_type >::type
-norm_1(vector_expression<VecV> const& v) {
+norm_1(vector_expression<VecV, Device> const& v) {
 	return sum(abs(eval_block(v)));
 }
 
 /// \brief norm_2 v = sum_i |v_i|^2
-template<class VecV>
+template<class VecV, class Device>
 typename real_traits<typename VecV::value_type >::type
-norm_sqr(vector_expression<VecV> const& v) {
+norm_sqr(vector_expression<VecV, Device> const& v) {
 	return sum(abs_sqr(eval_block(v)));
 }
 
 /// \brief norm_2 v = sqrt (sum_i |v_i|^2 )
-template<class VecV>
+template<class VecV, class Device>
 typename real_traits<typename VecV::value_type >::type
-norm_2(vector_expression<VecV> const& v) {
+norm_2(vector_expression<VecV, Device> const& v) {
 	using std::sqrt;
 	return sqrt(norm_sqr(v));
 }
 
 /// \brief norm_inf v = max_i |v_i|
-template<class VecV>
+template<class VecV, class Device>
 typename real_traits<typename VecV::value_type >::type
-norm_inf(vector_expression<VecV> const& v){
+norm_inf(vector_expression<VecV, Device> const& v){
 	return max(abs(eval_block(v)));
 }
 
 /// \brief index_norm_inf v = arg max_i |v_i|
-template<class VecV>
-std::size_t index_norm_inf(vector_expression<VecV> const& v){
+template<class VecV, class Device>
+std::size_t index_norm_inf(vector_expression<VecV, Device> const& v){
 	return arg_max(abs(eval_block(v)));
 }
 
 // inner_prod (v1, v2) = sum_i v1_i * v2_i
-template<class VecV1, class VecV2>
+template<class VecV1, class VecV2, class Device>
 decltype(
 	typename VecV1::value_type() * typename VecV2::value_type()
 )
 inner_prod(
-	vector_expression<VecV1> const& v1,
-	vector_expression<VecV2> const& v2
+	vector_expression<VecV1, Device> const& v1,
+	vector_expression<VecV2, Device> const& v2
 ) {
 	SIZE_CHECK(v1().size() == v2().size());
 	typedef decltype(

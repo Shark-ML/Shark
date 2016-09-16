@@ -41,7 +41,7 @@ namespace shark {
 namespace blas {
 
 template<class T, class Orientation, class TriangularType>
-class triangular_matrix:public matrix_container<triangular_matrix<T,Orientation,TriangularType> > {
+class triangular_matrix:public matrix_container<triangular_matrix<T,Orientation,TriangularType>, cpu_tag > {
 	typedef triangular_matrix<T, Orientation,TriangularType> self_type;
 	typedef std::vector<T> array_type;
 public:
@@ -77,13 +77,13 @@ public:
 	/** Copy-constructor of a dense matrix
 	 * \param m is a dense matrix
 	 */
-	triangular_matrix(const triangular_matrix& m):m_size(m.m_size), m_data(m.m_data) {}
+	triangular_matrix(triangular_matrix const& m):m_size(m.m_size), m_data(m.m_data) {}
 
 	/** Copy-constructor of a dense matrix from a matrix expression
 	 * \param e is a matrix expression which has to be triangular
 	 */
 	template<class E>
-	triangular_matrix(matrix_expression<E> const& e)
+	triangular_matrix(matrix_expression<E, cpu_tag> const& e)
 		:m_size(e().size1()), m_data(m_size * (m_size+1)/2)
 	{
 		assign(*this, e);
@@ -156,14 +156,14 @@ public:
 		return *this;
 	}
 	template<class C>          // Container assignment without temporary
-	triangular_matrix& operator = (const matrix_container<C>& m) {
+	triangular_matrix& operator = (matrix_container<C, cpu_tag> const& m) {
 		SIZE_CHECK(m().size1()==m().size2());
 		resize(m().size1());
 		assign(*this, m);
 		return *this;
 	}
 	template<class E>
-	triangular_matrix& operator = (matrix_expression<E> const& e) {
+	triangular_matrix& operator = (matrix_expression<E, cpu_tag> const& e) {
 		self_type temporary(e);
 		swap(temporary);
 		return *this;

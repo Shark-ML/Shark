@@ -98,20 +98,20 @@ inline void tpmv(
 	);
 }
 
-template <typename TriangularA, typename VectorX>
+template <typename MatA, typename VectorX>
 void tpmv(
-	matrix_expression<TriangularA> const& A,
-	vector_expression<VectorX> &x,
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<VectorX, cpu_tag> &x,
 	boost::mpl::true_
 ){
 	SIZE_CHECK(x().size() == A().size2());
 	SIZE_CHECK(A().size2() == A().size1());
-	bool upper = TriangularA::orientation::triangular_type::is_upper;
-	bool unit = TriangularA::orientation::triangular_type::is_unit;
+	bool upper = MatA::orientation::triangular_type::is_upper;
+	bool unit = MatA::orientation::triangular_type::is_unit;
 	std::size_t n = A().size1();
 	CBLAS_DIAG cblasUnit = unit?CblasUnit:CblasNonUnit;
 	CBLAS_UPLO cblasUplo = upper?CblasUpper:CblasLower;
-	CBLAS_ORDER stor_ord= (CBLAS_ORDER)storage_order<typename TriangularA::orientation::orientation>::value;
+	CBLAS_ORDER stor_ord= (CBLAS_ORDER)storage_order<typename MatA::orientation::orientation>::value;
 	
 	auto storageA = A().raw_storage();
 	auto storagex = x().raw_storage();

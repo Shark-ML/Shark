@@ -56,7 +56,7 @@ namespace shark{ namespace blas{
 ///Usage: init(vector)<<a,b,c where vector is a ublas vector or sub-vector and a,b,c are either scalars or vectors.
 ///In debug mode, it is checked that size(vector) == size(a,b,c)
 template<class Source>
-detail::ADLVector<Source&> init(vector_container<Source>& source){
+detail::ADLVector<Source&> init(vector_container<Source, cpu_tag>& source){
 	return detail::ADLVector<Source&>(source());
 }
 ///\brief Starting-point for the initialization sequence.
@@ -64,7 +64,7 @@ detail::ADLVector<Source&> init(vector_container<Source>& source){
 ///Usage: init(vector)<<a,b,c where vector is a ublas vector or sub-vector and a,b,c are either scalars or vectors.
 ///In debug mode, it is checked that size(vector) == size(a,b,c)
 template<class Source>
-detail::ADLVector<const Source&> init(const vector_container<Source>& source){
+detail::ADLVector<const Source&> init(vector_container<Source, cpu_tag> const& source){
 	return detail::ADLVector<const Source&>(source());
 }
 ///\brief Starting-point for the initialization sequence when used for splitting the vector.
@@ -95,12 +95,12 @@ init(const matrix_row<Source>& source){
 
 ///\brief Linearizes a matrix as a set of row vectors and treats them as a set of vectors for initialization.
 template<class Matrix>
-detail::MatrixExpression<const Matrix> toVector(const matrix_expression<Matrix>& matrix){
+detail::MatrixExpression<const Matrix> toVector(const matrix_expression<Matrix, cpu_tag>& matrix){
 	return detail::MatrixExpression<const Matrix>(matrix());
 }
 ///\brief Linearizes a matrix as a set of row vectors and treats them as a set of vectors for initialization.
 template<class Matrix>
-detail::MatrixExpression<Matrix> toVector(matrix_expression<Matrix>& matrix){
+detail::MatrixExpression<Matrix> toVector(matrix_expression<Matrix, cpu_tag>& matrix){
 	return detail::MatrixExpression<Matrix>(matrix());
 }
 

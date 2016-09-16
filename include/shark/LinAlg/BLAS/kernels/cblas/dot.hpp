@@ -81,8 +81,8 @@ inline void dot(int N,
 // op (A) == A || A^T || A^H
 template <typename VectorX, typename VectorY>
 void dot(
-	vector_expression<VectorX> const& x,
-        vector_expression<VectorY> const& y,
+	vector_expression<VectorX, cpu_tag> const& x,
+        vector_expression<VectorY, cpu_tag> const& y,
 	typename VectorX::value_type& result,
 	boost::mpl::true_
 ){

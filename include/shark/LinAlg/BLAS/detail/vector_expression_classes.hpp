@@ -38,7 +38,7 @@ namespace blas {
 ///\brief Implements multiplications of a vector by a scalar
 template<class E>
 class vector_scalar_multiply:
-	public vector_expression<vector_scalar_multiply <E> > {
+	public vector_expression<vector_scalar_multiply <E>, typename E::device_type > {
 	typedef vector_scalar_multiply<E> self_type;
 public:
 	typedef typename E::const_closure_type expression_closure_type;
@@ -53,6 +53,7 @@ public:
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef typename E::evaluation_category evaluation_category;
+	typedef typename E::device_type device_type;
 
 	// Construction and destruction
 	// May be used as mutable expression.
@@ -86,16 +87,16 @@ public:
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		m_expression.assign_to(x,alpha*m_scalar);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		m_expression.plus_assign_to(x,alpha*m_scalar);
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		m_expression.minus_assign_to(x,alpha*m_scalar);
 	}
 
@@ -117,7 +118,7 @@ private:
 
 /// \brief Vector expression representing a constant valued vector.
 template<class T>
-class scalar_vector:public vector_expression<scalar_vector<T> > {
+class scalar_vector:public vector_expression<scalar_vector<T>, cpu_tag > {
 
 	typedef scalar_vector<T> self_type;
 public:
@@ -132,7 +133,7 @@ public:
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef elementwise_tag evaluation_category;
-
+	
 	// Construction and destruction
 	scalar_vector()
 	:m_size(0), m_value() {}
@@ -178,7 +179,7 @@ private:
 ///order of application. Also F must provide a type F::result_type indicating the result type of the functor.
 template<class E, class F>
 class vector_unary:
-	public vector_expression<vector_unary<E, F> > {
+	public vector_expression<vector_unary<E, F>, typename E::device_type > {
 	typedef vector_unary<E, F> self_type;
 public:
 	typedef F functor_type;
@@ -193,7 +194,7 @@ public:
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef typename E::evaluation_category evaluation_category;
-
+	typedef typename E::device_type device_type;
 	// Construction and destruction
 	// May be used as mutable expression.
 	vector_unary(expression_closure_type const& e, F const &functor):
@@ -215,17 +216,17 @@ public:
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		x().clear();
 		plus_assign_to(x,eval_block(m_expression), alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(x,eval_block(m_expression), alpha);
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(x,eval_block(m_expression), -alpha);
 	}
 
@@ -251,8 +252,8 @@ public:
 private:
 	template<class VecX, class VecV>
 	void plus_assign_to(
-		vector_expression<VecX>& x,
-		vector_expression<VecV> const& v,
+		vector_expression<VecX, device_type>& x,
+		vector_expression<VecV, device_type> const& v,
 		scalar_type alpha
 	)const{
 		vector_unary<VecV, F> e(v(), m_functor);
@@ -265,7 +266,7 @@ private:
 };
 
 template<class E1, class E2>
-class vector_addition: public vector_expression<vector_addition<E1,E2> > {
+class vector_addition: public vector_expression<vector_addition<E1,E2>, typename E1::device_type > {
 private:
 	typedef scalar_binary_plus<
 		typename E1::value_type,
@@ -286,6 +287,7 @@ public:
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
+	typedef typename E1::device_type device_type;
 
 	// Construction and destruction
 	explicit vector_addition (
@@ -321,18 +323,18 @@ public:
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		assign(x,alpha*m_lhs);
 		plus_assign(x,alpha*m_rhs);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		plus_assign(x,alpha*m_lhs);
 		plus_assign(x,alpha*m_rhs);
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		minus_assign(x,alpha*m_lhs);
 		minus_assign(x,alpha*m_rhs);
 	}
@@ -364,7 +366,7 @@ private:
 };
 
 template<class E1, class E2, class F>
-class vector_binary:public vector_expression<vector_binary<E1,E2, F> > {
+class vector_binary:public vector_expression<vector_binary<E1,E2, F>,typename E1::device_type > {
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
 public:
@@ -380,7 +382,7 @@ public:
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
-
+	typedef typename E1::device_type device_type;
 	// Construction and destruction
 	explicit vector_binary (
 		lhs_closure_type e1, 
@@ -419,17 +421,17 @@ public:
 	}
 	
 	template<class VecX>
-	void assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		x().clear();
 		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
 		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), -alpha);
 	}
 
@@ -464,8 +466,8 @@ private:
 
 	template<class VecX, class LHS, class RHS>
 	void plus_assign_to(
-		vector_expression<VecX>& x,
-		vector_expression<LHS> const& lhs, vector_expression<RHS> const& rhs,
+		vector_expression<VecX, device_type>& x,
+		vector_expression<LHS, device_type> const& lhs, vector_expression<RHS, device_type> const& rhs,
 		scalar_type alpha
 	)const{
 		//we know that lhs and rhs are elementwise expressions so we can now create the elementwise expression and assign it.

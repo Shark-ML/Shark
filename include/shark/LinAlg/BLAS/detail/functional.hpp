@@ -680,7 +680,7 @@ struct vector_fold{
 	
 	template<class E>
 	result_type operator()(
-		vector_expression<E> const& v,
+		vector_expression<E, cpu_tag> const& v,
 		result_type seed
 	) {
 		return apply(v(),seed, typename E::const_iterator::iterator_category());

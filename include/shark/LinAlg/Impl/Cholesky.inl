@@ -33,7 +33,7 @@
 
 template<class MatrixL>
 std::size_t shark::blas::pivotingCholeskyDecompositionInPlace(
-	shark::blas::matrix_expression<MatrixL> &Lref,
+	shark::blas::matrix_expression<MatrixL, cpu_tag> &Lref,
 	PermutationMatrix& P
 ){
 	

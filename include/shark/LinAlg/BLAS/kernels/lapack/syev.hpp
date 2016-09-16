@@ -68,8 +68,8 @@ inline void syev(
 
 template <typename MatA, typename VectorB>
 void syev(
-	matrix_expression<MatA>& A,
-	vector_expression<VectorB>& eigenValues
+	matrix_expression<MatA, cpu_tag>& A,
+	vector_expression<VectorB, cpu_tag>& eigenValues
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size1() == eigenValues().size());

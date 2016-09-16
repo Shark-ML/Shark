@@ -58,7 +58,7 @@ namespace blas {
  * \tparam I the indices stored in the vector
  */
 template<class T, class I = std::size_t>
-class compressed_vector:public vector_container<compressed_vector<T, I> > {
+class compressed_vector:public vector_container<compressed_vector<T, I>, cpu_tag > {
 
 	typedef T& true_reference;
 	typedef compressed_vector<T, I> self_type;
@@ -144,7 +144,7 @@ public:
 	explicit compressed_vector(index_type size, value_type value = value_type(), index_type non_zeros = 0)
 	:m_size(size), m_nnz(0), m_indices(non_zeros,0), m_values(non_zeros),m_zero(0){}
 	template<class AE>
-	compressed_vector(vector_expression<AE> const& ae, index_type non_zeros = 0)
+	compressed_vector(vector_expression<AE, cpu_tag> const& ae, index_type non_zeros = 0)
 	:m_size(ae().size()), m_nnz(0), m_indices(non_zeros,0), m_values(non_zeros),m_zero(0)
 	{
 		assign(*this, ae);
@@ -221,13 +221,13 @@ public:
 		return *this;
 	}
 	template<class C>          // Container assignment without temporary
-	compressed_vector& operator = (vector_container<C> const& v) {
+	compressed_vector& operator = (vector_container<C, cpu_tag> const& v) {
 		resize(v().size(), false);
 		assign(*this, v);
 		return *this;
 	}
 	template<class AE>
-	compressed_vector& operator = (vector_expression<AE> const& ae) {
+	compressed_vector& operator = (vector_expression<AE, cpu_tag> const& ae) {
 		self_type temporary(ae, nnz_capacity());
 		swap(temporary);
 		return *this;

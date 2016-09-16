@@ -38,12 +38,12 @@ namespace shark{
  *      \param  varianceVec Vector of variances.
  *
  */
-template<class Vec1T,class Vec2T,class Vec3T>
+template<class Vec1T,class Vec2T,class Vec3T, class Device>
 void meanvar
 (
 	Data<Vec1T> const& data,
-	blas::vector_container<Vec2T>& meanVec,
-	blas::vector_container<Vec3T>& varianceVec
+	blas::vector_container<Vec2T, Device>& meanVec,
+	blas::vector_container<Vec3T, Device>& varianceVec
 )
 {
 	SIZE_CHECK(!data.empty());
@@ -74,12 +74,12 @@ void meanvar
  *      \param  covariance Covariance matrix.
  *
  */
-template<class Vec1T,class Vec2T,class MatT>
+template<class Vec1T,class Vec2T,class MatT, class Device>
 void meanvar
 (
 	Data<Vec1T> const& data,
-	blas::vector_container<Vec2T>& meanVec,
-	blas::matrix_container<MatT>& covariance
+	blas::vector_container<Vec2T, Device>& meanVec,
+	blas::matrix_container<MatT, Device>& covariance
 ){
 	SIZE_CHECK(!data.empty());
 	typedef typename Batch<Vec1T>::type BatchType;

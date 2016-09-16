@@ -52,7 +52,7 @@ namespace blas {
  * \tparam L the storage organization. It can be either \c row_major or \c column_major. Default is \c row_major
  */
 template<class T, class L=row_major>
-class matrix:public matrix_container<matrix<T, L> > {
+class matrix:public matrix_container<matrix<T, L>, cpu_tag > {
 	typedef matrix<T, L> self_type;
 	typedef std::vector<T> array_type;
 public:
@@ -122,7 +122,7 @@ public:
 	///
 	/// \param e is a matrix expression
 	template<class E>
-	matrix(matrix_expression<E> const& e)
+	matrix(matrix_expression<E, cpu_tag> const& e)
 	: m_size1(e().size1())
 	, m_size2(e().size2())
 	, m_data(m_size1 * m_size2) {
@@ -152,7 +152,7 @@ public:
 	///
 	/// \param m is a matrix expression
 	template<class C>
-	matrix& operator = (matrix_container<C> const& m) {
+	matrix& operator = (matrix_container<C, cpu_tag> const& m) {
 		resize(m().size1(), m().size2());
 		assign(*this, m);
 		return *this;
@@ -165,7 +165,7 @@ public:
 	///
 	/// \param e is a matrix expression
 	template<class E>
-	matrix& operator = (matrix_expression<E> const& e) {
+	matrix& operator = (matrix_expression<E, cpu_tag> const& e) {
 		self_type temporary(e);
 		swap(temporary);
 		return *this;

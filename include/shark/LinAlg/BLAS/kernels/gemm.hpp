@@ -55,9 +55,9 @@ namespace shark { namespace blas {namespace kernels{
 /// The kernels themselves are implemented in blas::bindings::gemm.
 template<class M, class E1, class E2>
 void gemm(
-	matrix_expression<E1> const& e1,
-	matrix_expression<E2> const& e2,
-	matrix_expression<M>& m,
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha
 ) {
 	SIZE_CHECK(m().size1() == e1().size1());

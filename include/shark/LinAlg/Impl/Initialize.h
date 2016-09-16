@@ -36,6 +36,7 @@
 #include <shark/Core/Exception.h>
 #include <shark/LinAlg/BLAS/blas.h>
 #include <iterator>
+#include <boost/preprocessor/punctuation/comma.hpp>
 namespace shark{
 namespace blas{
 namespace detail{
@@ -386,7 +387,7 @@ VectorInitializer<Sink,InitializerNode<InitializerEnd, Type> > operator<<(const 
 	return VectorInitializer<Sink, Init>(sink.vector,Init(InitializerEnd(),source()));\
 }
 ///\brief Begins the initialization argument with a vector as first right hand side argument.
-SHARK_INIT_INIT(VectorExpression<const Source&>,shark::blas::vector_expression<Source>)
+SHARK_INIT_INIT(VectorExpression<const Source&>,shark::blas::vector_expression<Source BOOST_PP_COMMA() cpu_tag>)
 ///\brief Begins the initialization argument with a arbitrary source as first right hand side argument.
 SHARK_INIT_INIT(Source,InitializerBase<Source>)
 #undef SHARK_INIT_INIT
@@ -415,7 +416,7 @@ VectorInitializer<Sink,InitializerNode<Init,Type > > operator,(const VectorIniti
 	return VectorInitializer<Sink, newExpression>(init.m_vector,newExpression(init.expression(),vec()));\
 }
 ///\brief Appends a single vector expression c to the expression vec<<a,b -> vec<<a,b,c.
-SHARK_INIT_COMMA(VectorExpression<const Source&>,shark::blas::vector_expression<Source>)
+SHARK_INIT_COMMA(VectorExpression<const Source&>,shark::blas::vector_expression<Source BOOST_PP_COMMA() cpu_tag>)
 ///\brief Appends a initialization expression c to the expression vec<<a,b -> vec<<a,b,c.
 SHARK_INIT_COMMA(Source,InitializerBase<Source>)
 #undef SHARK_INIT_COMMA
@@ -485,7 +486,7 @@ operator>>(const ADLVector<Source>& source,Argument& sink){\
 	return VectorSplitter<Source, Init>(source.vector,Init(InitializerEnd(),sink()));\
 }
 ///\brief Appends a single mutable vector expression.
-SHARK_SPLIT_INIT(VectorExpression<Sink&>,shark::blas::vector_expression<Sink>)
+SHARK_SPLIT_INIT(VectorExpression<Sink&>,shark::blas::vector_expression<Sink BOOST_PP_COMMA() cpu_tag>)
 ///\brief Appends an arbitrary source.
 SHARK_SPLIT_INIT(Sink,const InitializerBase<Sink>)
 #undef SHARK_SPLIT_INIT
@@ -522,7 +523,7 @@ SHARK_SPLIT_PROXY_INIT(shark::blas::matrix_row<Sink>)
 ///\brief Appends a single vector expression.
 template<class Source,class Init,class Sink>
 VectorSplitter<Source,InitializerNode<Init,VectorExpression<Sink&> > >
-operator,(const VectorSplitter<Source,Init >& source, shark::blas::vector_expression<Sink>& vec){
+operator,(const VectorSplitter<Source,Init >& source, shark::blas::vector_expression<Sink, cpu_tag>& vec){
 	source.disable();
 	typedef InitializerNode<Init,VectorExpression<Sink&> > newExpression;
 	return VectorSplitter<Source, newExpression>(source.m_vector,newExpression(source.expression(),vec()));
