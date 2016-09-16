@@ -57,7 +57,7 @@ namespace blas {
  * \tparam T the type of object stored in the vector (like double, float, complex, etc...)
  * \tparam I the indices stored in the vector
  */
-template<class T, class I>
+template<class T, class I = std::size_t>
 class compressed_vector:public vector_container<compressed_vector<T, I> > {
 
 	typedef T& true_reference;

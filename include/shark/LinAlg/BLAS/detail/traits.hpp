@@ -33,7 +33,6 @@
 #ifndef SHARK_LINALG_BLAS_DETAIL_TRAITS_HPP
 #define SHARK_LINALG_BLAS_DETAIL_TRAITS_HPP
 
-#include "../fwd.hpp"
 #include "iterator.hpp"
 #include "../expression_types.hpp"
 
