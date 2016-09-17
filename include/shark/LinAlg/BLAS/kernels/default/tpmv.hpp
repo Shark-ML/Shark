@@ -49,11 +49,11 @@ void tpmv_impl(
 	upper
 ){
 	typedef typename V::value_type value_type;
-	typedef typename V::size_type size_type;
+	typedef typename V::index_type index_type;
 	typedef typename MatA::const_row_iterator row_iterator;
-	size_type size = A().size1();
+	index_type size = A().size1();
 	
-	for(size_type i = 0; i != size; ++i){
+	for(index_type i = 0; i != size; ++i){
 		value_type sum(0);
 		row_iterator end = A().row_end(i);
 		for(row_iterator pos = A().row_begin(i); pos != end; ++pos){
@@ -76,12 +76,12 @@ void tpmv_impl(
 	lower
 ){
 	typedef typename V::value_type value_type;
-	typedef typename V::size_type size_type;
+	typedef typename V::index_type index_type;
 	typedef typename MatA::const_row_iterator row_iterator;
-	size_type size = A().size1();
+	index_type size = A().size1();
 	
-	for(size_type irev = size; irev != 0; --irev){
-		size_type i= irev-1;
+	for(index_type irev = size; irev != 0; --irev){
+		index_type i= irev-1;
 		value_type sum(0);
 		row_iterator end = A().row_end(i);
 		for(row_iterator pos = A().row_begin(i); pos != end; ++pos){
@@ -102,10 +102,10 @@ void tpmv_impl(
 	upper
 ){
 	typedef typename MatA::const_column_iterator column_iterator;
-	typedef typename V::size_type size_type;
+	typedef typename V::index_type index_type;
 	typedef typename V::value_type value_type;
-	size_type size = A().size1();
-	for(size_type i = 0; i != size; ++i){
+	index_type size = A().size1();
+	for(index_type i = 0; i != size; ++i){
 		value_type bi = b()(i);
 		b()(i)= value_type/*zero*/();
 		column_iterator end = A().column_end(i);
@@ -127,12 +127,12 @@ void tpmv_impl(
 	lower
 ){
 	typedef typename MatA::const_column_iterator column_iterator;
-	typedef typename V::size_type size_type;
+	typedef typename V::index_type index_type;
 	typedef typename V::value_type value_type;
-	size_type size = A().size1();
+	index_type size = A().size1();
 	
-	for(size_type irev = size; irev != 0; --irev){
-		size_type i= irev-1;
+	for(index_type irev = size; irev != 0; --irev){
+		index_type i= irev-1;
 		value_type bi = b()(i);
 		b()(i)= value_type/*zero*/();
 		column_iterator end = A().column_end(i);
