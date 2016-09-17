@@ -127,7 +127,7 @@ struct sparse_matrix_storage{
 	
 	template<class Orientation>
 	row_storage row(std::size_t i, Orientation){
-		static_assert(std::is_same<Orientation,row_major>::value);
+		static_assert(std::is_same<Orientation,row_major>::value, "sparse matrix has wrong orientation for row/column");
 		return {values + outer_indices_begin[i], indices + outer_indices_begin[i],outer_indices_end[i] - outer_indices_begin[i]};
 	}
 };
