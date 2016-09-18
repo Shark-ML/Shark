@@ -32,119 +32,6 @@
 #include <algorithm>
 namespace shark {
 namespace blas {
-
-namespace detail{
-
-//base version of the matrix_transpose proxy which does not rely on the existence of the assignment functions
-//we define it here so that we don't need to duplicate all versions of assign for the case of row/column major
-//first argument
-template<class M>
-class internal_transpose_proxy: public matrix_expression<internal_transpose_proxy<M>, cpu_tag > {
-public:
-	typedef typename M::value_type value_type;
-	typedef typename M::scalar_type scalar_type;
-	typedef typename M::const_reference const_reference;
-	typedef typename reference<M>::type reference;
-	typedef typename M::index_type index_type;
-
-	typedef typename closure<M>::type matrix_closure_type;
-	typedef const internal_transpose_proxy<M> const_closure_type;
-	typedef internal_transpose_proxy<M> closure_type;
-	typedef typename storage<M>::type storage_type;
-	typedef typename M::const_storage_type const_storage_type;
-	typedef typename M::orientation::transposed_orientation orientation;
-	typedef typename M::evaluation_category evaluation_category;
-
-	// Construction and destruction
-	explicit internal_transpose_proxy(matrix_closure_type m):
-		m_expression(m) {}
-
-	// Accessors
-	index_type size1() const {
-		return m_expression.size2();
-	}
-	index_type size2() const {
-		return m_expression.size1();
-	}
-
-	// Expression accessors
-	matrix_closure_type const &expression() const{
-		return m_expression;
-	}
-	matrix_closure_type &expression(){
-		return m_expression;
-	}
-
-	// Element access
-	reference operator()(index_type i, index_type j)const{
-		return m_expression(j, i);
-	}
-
-	typedef typename matrix_closure_type::const_column_iterator const_row_iterator;
-	typedef typename matrix_closure_type::column_iterator row_iterator;
-	typedef typename matrix_closure_type::const_row_iterator const_column_iterator;
-	typedef typename matrix_closure_type::row_iterator column_iterator;
-
-	//iterators
-	const_row_iterator row_begin(std::size_t i) const {
-		return m_expression.column_begin(i);
-	}
-	const_row_iterator row_end(std::size_t i) const {
-		return m_expression.column_end(i);
-	}
-	const_column_iterator column_begin(std::size_t j) const {
-		return m_expression.row_begin(j);
-	}
-	const_column_iterator column_end(std::size_t j) const {
-		return m_expression.row_end(j);
-	}
-
-	row_iterator row_begin(std::size_t i) {
-		return m_expression.column_begin(i);
-	}
-	row_iterator row_end(std::size_t i) {
-		return m_expression.column_end(i);
-	}
-	column_iterator column_begin(std::size_t j) {
-		return m_expression.row_begin(j);
-	}
-	column_iterator column_end(std::size_t j) {
-		return m_expression.row_end(j);
-	}
-	
-	typedef typename major_iterator<internal_transpose_proxy<M> >::type major_iterator;
-	
-	major_iterator set_element(major_iterator pos, index_type index, value_type value){
-		return m_expression.set_element(pos,index,value);
-	}
-	
-	major_iterator clear_range(major_iterator start, major_iterator end){
-		return m_expression.clear_range(start,end);
-	}
-	
-	major_iterator clear_element(major_iterator elem){
-		return m_expression.clear_element(elem);
-	}
-	
-	void clear(){
-		expression().clear();
-	}
-	
-	void reserve(index_type non_zeros) {
-		m_expression.reserve(non_zeros);
-	}
-	
-	void reserve_row(index_type row, index_type non_zeros) {
-		m_expression.reserve_row(row,non_zeros);
-	}
-	void reserve_column(index_type column, index_type non_zeros) {
-		m_expression.reserve_column(column,non_zeros);
-	}
-private:
-	matrix_closure_type m_expression;
-};
-	
-}
 	
 //////////////////////////////////////////////////////
 ////Scalar Assignment to Matrix
@@ -392,8 +279,8 @@ void assign(
 	column_major, EOrientation,TagE tagE, TagM tagM
 ) {
 	typedef typename EOrientation::transposed_orientation TEOrientation;
-	detail::internal_transpose_proxy<M> transM(m());
-	detail::internal_transpose_proxy<E const> transE(e());
+	auto transM = trans(m);
+	auto transE = trans(e);
 	assign(transM,transE,row_major(),TEOrientation(),tagE,tagM);
 }
 
@@ -407,8 +294,8 @@ void assign(
 ) {
 	typedef typename M::orientation::transposed_orientation TMPacked;
 	typedef typename E::orientation::transposed_orientation TEPacked;
-	detail::internal_transpose_proxy<M> transM(m());
-	detail::internal_transpose_proxy<E const> transE(e());
+	auto transM = trans(m);
+	auto transE = trans(e);
 	assign(transM,transE,TMPacked(),TEPacked(),tagM,tagE);
 }
 
@@ -682,8 +569,8 @@ void assign(
 	column_major, EOrientation
 ) {
 	typedef typename EOrientation::transposed_orientation TEOrientation;
-	detail::internal_transpose_proxy<M> transM(m());
-	detail::internal_transpose_proxy<E const> transE(e());
+	auto transM = trans(m);
+	auto transE = trans(e);
 	assign<F>(transM,transE,row_major(),TEOrientation());
 }
 
@@ -699,8 +586,8 @@ void assign(
 ) {
 	typedef typename M::orientation::transposed_orientation TMPacked;
 	typedef typename E::orientation::transposed_orientation TEPacked;
-	detail::internal_transpose_proxy<M> transM(m());
-	detail::internal_transpose_proxy<E const> transE(e());
+	auto transM = trans(m);
+	auto transE = trans(e);
 	assign<F>(transM,transE,TMPacked(),TEPacked());
 }
 
