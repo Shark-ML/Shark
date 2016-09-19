@@ -59,9 +59,8 @@ struct WS2MaximumGradientCriterion{
 				j = a;
 			}
 			if(secondLargestGradient > largestGradient){
-				using namespace std;
-				swap(secondLargestGradient,largestGradient);
-				swap(i,j);
+				std::swap(secondLargestGradient,largestGradient);
+				std::swap(i,j);
 			}
 		}
 		if(secondLargestGradient == 0)
