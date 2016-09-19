@@ -59,8 +59,9 @@ struct WS2MaximumGradientCriterion{
 				j = a;
 			}
 			if(secondLargestGradient > largestGradient){
-				std::swap(secondLargestGradient,largestGradient);
-				std::swap(i,j);
+				using namespace std;
+				swap(secondLargestGradient,largestGradient);
+				swap(i,j);
 			}
 		}
 		if(secondLargestGradient == 0)
@@ -77,8 +78,8 @@ struct WS2MaximumGradientCriterion{
 struct MaximumGradientCriterion{
 	template<class Problem>
 	double operator()(Problem& problem, std::size_t& i, std::size_t& j){
-		WS2MaximumGradientCriterion criterium;
-		double value = criterium(problem, i,j);
+		WS2MaximumGradientCriterion criterion;
+		double value = criterion(problem, i,j);
 		j = i; //we just use one variable here
 		return value;
 	}

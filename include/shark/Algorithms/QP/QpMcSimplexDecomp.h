@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       Quadratic programming m_problem for multi-class SVMs
+ * \brief       Quadratic programming problem for multi-class SVMs
  * 
  * 
  * 
@@ -11,7 +11,7 @@
  * \date        2007-2012
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -98,7 +98,7 @@ public:
 		SHARK_CHECK(
 			target.numberOfElements() == m_numExamples 
 			&& linearMat.size1() == kernel.size(),
-			"[QpMcDecomp::QpMcDecomp] dimension conflict"
+			"[QpMcSimplexDecomp::QpMcSimplexDecomp] dimension conflict"
 		);
 		
 		// prepare problem internal variables

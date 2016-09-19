@@ -548,7 +548,7 @@ private:
 			KernelClassifier<InputType> binsvm;
 // TODO: maybe build the Quadratic programs directly,
 //       in order to profit from cached and
-//       in partellular from precomputed kernel
+//       in particular from precomputed kernel
 //       entries!
 			CSvmTrainer<InputType, QpFloatType> bintrainer(base_type::m_kernel, this->C(),this->m_trainOffset);
 			bintrainer.setCacheSize(this->cacheSize());
