@@ -327,7 +327,7 @@ public:
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef unknown_orientation orientation;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<dense_tag> evaluation_category;
 
 	// Construction and destruction
 	scalar_matrix():
@@ -679,8 +679,7 @@ private:
 };
 
 template<class MatA, class VecV>
-class matrix_vector_prod:
-	public vector_expression<matrix_vector_prod<MatA, VecV>, typename MatA::device_type > {
+class matrix_vector_prod:public vector_expression<matrix_vector_prod<MatA, VecV>, typename MatA::device_type > {
 public:
 	typedef typename MatA::const_closure_type matrix_closure_type;
 	typedef typename VecV::const_closure_type vector_closure_type;
@@ -697,7 +696,10 @@ public:
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
-	typedef blockwise_tag evaluation_category;
+	typedef blockwise<typename evaluation_tag_restrict_traits<
+		typename MatA::evaluation_category::tag,
+		typename VecV::evaluation_category::tag
+	>::type> evaluation_category;
 	typedef typename MatA::device_type device_type;
 
 
@@ -709,7 +711,7 @@ public:
 	// Construction and destruction
 	explicit matrix_vector_prod(
 		matrix_closure_type const& matrix,
-		vector_closure_type  const& vector
+		vector_closure_type const& vector
 	):m_matrix(matrix), m_vector(vector) {}
 
 	index_type size() const {
@@ -726,16 +728,16 @@ public:
 	//dispatcher to computation kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
-		assign_to(x, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
+		assign_to(x, alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
 	}
 	template<class VecX>
 	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
-		plus_assign_to(x, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
+		plus_assign_to(x, alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
 	}
 	
 	template<class VecX>
 	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
-		plus_assign_to(x,-alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
+		plus_assign_to(x,-alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
 	}
 	
 private:
@@ -781,8 +783,7 @@ private:
 
 
 template<class MatA>
-class sum_matrix_rows:
-	public vector_expression<sum_matrix_rows<MatA>, typename MatA::device_type > {
+class sum_matrix_rows:public vector_expression<sum_matrix_rows<MatA>, typename MatA::device_type > {
 public:
 	typedef typename MatA::const_closure_type matrix_closure_type;
 public:
@@ -798,7 +799,7 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef typename boost::mpl::if_<
 		boost::is_same<typename MatA::orientation::orientation, row_major>,
-		blockwise_tag,
+		blockwise<typename MatA::evaluation_category::tag>,
 		typename MatA::evaluation_category
 	>::type evaluation_category;
 	typedef typename MatA::device_type device_type;
@@ -867,7 +868,7 @@ public:
 
 	typedef dense_matrix_storage<value_type> storage_type;
 	typedef dense_matrix_storage<value_type const> const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<dense_tag> evaluation_category;
 	typedef triangular<typename M::orientation,TriangularType> orientation;
 
 	// Construction and destruction
@@ -924,7 +925,10 @@ public:
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
-	typedef blockwise_tag evaluation_category;
+	typedef blockwise<typename evaluation_tag_restrict_traits<
+		typename MatA::evaluation_category::tag,
+		typename MatB::evaluation_category::tag
+	>::type> evaluation_category;
 	typedef unknown_orientation orientation;
 	typedef typename MatA::device_type device_type;
 
@@ -1016,7 +1020,7 @@ public:
 	typedef diagonal_matrix closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<dense_tag> evaluation_category;
 	typedef unknown_orientation orientation;
 
 	// Construction and destruction

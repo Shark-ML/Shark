@@ -66,7 +66,7 @@ public:
 	typedef matrix_reference<self_type> closure_type;
 	typedef dense_matrix_storage<T> storage_type;
 	typedef dense_matrix_storage<T const> const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<dense_tag> evaluation_category;
 	typedef L orientation;
 
 	// Construction
@@ -354,22 +354,13 @@ private:
 	array_type m_data;
 };
 template<class T, class L>
-struct matrix_temporary_type<T,L,dense_random_access_iterator_tag>{
+struct matrix_temporary_type<T,L,dense_tag, cpu_tag>{
 	typedef matrix<T,L> type;
 };
 
 template<class T>
-struct matrix_temporary_type<T,unknown_orientation,dense_random_access_iterator_tag>{
+struct matrix_temporary_type<T,unknown_orientation,dense_tag, cpu_tag>{
 	typedef matrix<T,row_major> type;
-};
-
-template<class T, class Orientation>
-struct const_expression<matrix<T,Orientation> >{
-	typedef matrix<T,Orientation> const type;
-};
-template<class T, class Orientation>
-struct const_expression<matrix<T,Orientation> const>{
-	typedef matrix<T,Orientation> const type;
 };
 
 }

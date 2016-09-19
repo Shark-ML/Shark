@@ -570,9 +570,9 @@ noalias_proxy<C> noalias(temporary_proxy<C> lvalue) {
 /// is returned
 template<class E, class Device>
 typename boost::mpl::eval_if<
-	boost::is_same<
-		typename E::evaluation_category,
-		blockwise_tag
+	std::is_base_of<
+		blockwise_tag,
+		typename E::evaluation_category
 	>,
 	vector_temporary<E>,
 	boost::mpl::identity<E const&>
@@ -587,9 +587,9 @@ eval_block(blas::vector_expression<E, Device> const& e){
 /// is returned
 template<class E, class Device>
 typename boost::mpl::eval_if<
-	boost::is_same<
-		typename E::evaluation_category,
-		blockwise_tag
+	std::is_base_of<
+		blockwise_tag,
+		typename E::evaluation_category
 	>,
 	matrix_temporary<E>,
 	boost::mpl::identity<E const&>

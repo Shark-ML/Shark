@@ -108,7 +108,7 @@ public:
 	typedef matrix_reference<self_type> closure_type;
 	typedef sparse_matrix_storage<T,I> storage_type;
 	typedef sparse_matrix_storage<value_type const,index_type const> const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<sparse_tag> evaluation_category;
 	typedef row_major orientation;
 
 	// Construction and destruction
@@ -437,22 +437,13 @@ private:
 };
 
 template<class T>
-struct matrix_temporary_type<T,row_major,sparse_bidirectional_iterator_tag> {
+struct matrix_temporary_type<T,row_major,sparse_tag, cpu_tag> {
 	typedef compressed_matrix<T> type;
 };
 
 template<class T>
-struct matrix_temporary_type<T,unknown_orientation,sparse_bidirectional_iterator_tag> {
+struct matrix_temporary_type<T,unknown_orientation,sparse_tag, cpu_tag> {
 	typedef compressed_matrix<T> type;
-};
-
-template<class T, class I>
-struct const_expression<compressed_matrix<T,I> >{
-	typedef compressed_matrix<T,I> const type;
-};
-template<class T, class I>
-struct const_expression<compressed_matrix<T,I> const>{
-	typedef compressed_matrix<T,I> const type;
 };
 
 }

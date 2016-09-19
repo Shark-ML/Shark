@@ -55,7 +55,7 @@ public:
 	typedef matrix_reference<self_type> closure_type;
 	typedef packed_matrix_storage<T> storage_type;
 	typedef packed_matrix_storage<T const> const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<packed_tag> evaluation_category;
 	typedef triangular<Orientation,TriangularType> orientation;
 
 	// Construction and destruction

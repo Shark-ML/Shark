@@ -34,6 +34,7 @@
 #define SHARK_LINALG_BLAS_DETAIL_TRAITS_HPP
 
 #include "iterator.hpp"
+#include "evaluation_tags.hpp"
 #include "../expression_types.hpp"
 
 #include <boost/mpl/eval_if.hpp>
@@ -48,20 +49,9 @@ namespace blas {
 // forward declaration
 struct row_major;
 struct column_major;
-	
-// Storage tags -- hierarchical definition of storage characteristics
-// this gives the real storage layout of the matix in memory
-// packed_tag ->BLAS packed format and supports packed interface
-// dense_tag -> dense storage scheme an dense interface supported
-// sparse_tag -> sparse storage scheme and supports sparse interface.
-// unknown_storage_tag -> no known storage scheme, only supports basic interface
-struct unknown_storage_tag {};
-struct sparse_tag:public unknown_storage_tag{};
-struct dense_tag: public unknown_storage_tag{};
-struct packed_tag: public unknown_storage_tag{};
 
 struct unknown_storage{
-	typedef unknown_storage_tag storage_tag;
+	typedef unknown_tag storage_tag;
 	typedef unknown_storage row_storage;
 };
 
@@ -131,27 +121,6 @@ struct sparse_matrix_storage{
 		return {values + outer_indices_begin[i], indices + outer_indices_begin[i],outer_indices_end[i] - outer_indices_begin[i]};
 	}
 };
-
-//evaluation tags
-struct elementwise_tag{};
-struct blockwise_tag{};
-
-namespace detail{
-	template<class S1, class S2>
-	struct evaluation_restrict_traits {
-		typedef S1 type;
-	};
-	template<>
-	struct evaluation_restrict_traits<elementwise_tag, blockwise_tag> {
-		typedef blockwise_tag type;
-	};
-}
-
-template<class E1, class E2>
-struct evaluation_restrict_traits: public detail::evaluation_restrict_traits<
-	typename E1::evaluation_category,
-	typename E2::evaluation_category
->{};
 	
 template<class T>
 struct real_traits{
@@ -366,9 +335,12 @@ struct closure: public boost::mpl::if_<
 >{};
 	
 template<class E>
-struct const_expression{
-	typedef typename E::const_closure_type type;
-};
+struct const_expression : public boost::mpl::if_c<
+	std::is_base_of<blas::vector_container<typename std::remove_const<E>::type,typename E::device_type>, E >::value
+	||std::is_base_of<blas::matrix_container<typename std::remove_const<E>::type,typename E::device_type>, E >::value,
+	E const,
+	typename E::const_closure_type
+>{};
 
 template<class E>
 struct reference: public boost::mpl::if_<
@@ -442,11 +414,11 @@ typename major_iterator<M>::type major_end(matrix_expression<M, Device>& m, std:
 	return detail::major_end(m(),i, typename M::orientation());
 }
 
-///\brief Determines a good vector type storing an expression returning values of type T and having a certain iterator category.
-template<class ValueType, class IteratorTag>
+///\brief Determines a good vector type storing an expression returning values of type T having a certain evaluation category on a specific device.
+template<class ValueType, class Cateogry, class Device>
 struct vector_temporary_type;
-///\brief Determines a good vector type storing an expression returning values of type T and having a certain iterator category.
-template<class ValueType, class Orientation, class IteratorTag>
+///\brief Determines a good vector type storing an expression returning values of type T having a certain evaluation category on a specific device.
+template<class ValueType, class Orientation, class Cateogry, class Device>
 struct matrix_temporary_type;
 
 /// For the creation of temporary vectors in the assignment of proxies
@@ -454,11 +426,8 @@ template <class E>
 struct vector_temporary{
 	typedef typename vector_temporary_type<
 		typename E::value_type,
-		typename boost::mpl::eval_if<
-			typename std::is_base_of<vector_expression<E, typename E::device_type>,E>::type,
-			boost::range_iterator<E>,
-			major_iterator<E>
-		>::type::iterator_category
+		typename E::evaluation_category::tag,
+		typename E::device_type
 	>::type type;
 };
 
@@ -468,11 +437,8 @@ struct matrix_temporary{
 	typedef typename matrix_temporary_type<
 		typename E::value_type,
 		typename E::orientation,
-		typename boost::mpl::eval_if<
-			typename std::is_base_of<vector_expression<E, typename E::device_type>,E>::type,
-			boost::range_iterator<E>,
-			major_iterator<E>
-		>::type::iterator_category
+		typename E::evaluation_category::tag,
+		typename E::device_type
 	>::type type;
 };
 
@@ -482,11 +448,8 @@ struct transposed_matrix_temporary{
 	typedef typename matrix_temporary_type<
 		typename E::value_type,
 		typename E::orientation::transposed_orientation,
-		typename boost::mpl::eval_if<
-			typename std::is_base_of<vector_expression<E, typename E::device_type>,E>::type,
-			boost::range_iterator<E>,
-			major_iterator<E>
-		>::type::iterator_category
+		typename E::evaluation_category::tag,
+		typename E::device_type
 	>::type type;
 };
 

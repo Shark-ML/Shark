@@ -46,10 +46,10 @@ public:
 
 	typedef matrix_reference<M const> const_closure_type;
 	typedef matrix_reference<M> closure_type;
-	typedef typename M::orientation orientation;
 	typedef typename storage<M>::type storage_type;
 	typedef typename M::const_storage_type const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef typename M::evaluation_category evaluation_category;
+	typedef typename M::orientation orientation;
 	
 	// Construction and destruction
 	matrix_reference(M& m):m_expression(&m) {}
@@ -181,6 +181,8 @@ private:
 /// \brief Matrix transpose.
 template<class M>
 class matrix_transpose: public matrix_expression<matrix_transpose<M>, typename M::device_type > {
+private:
+	typedef typename closure<M>::type matrix_closure_type;
 public:
 	typedef typename M::index_type index_type;
 	typedef typename M::value_type value_type;
@@ -188,13 +190,12 @@ public:
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 
-	typedef typename closure<M>::type matrix_closure_type;
 	typedef matrix_transpose<typename const_expression<M>::type> const_closure_type;
 	typedef matrix_transpose<M> closure_type;
-	typedef typename M::orientation::transposed_orientation orientation;
 	typedef typename storage<M>::type storage_type;
 	typedef typename M::const_storage_type const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef typename M::evaluation_category evaluation_category;
+	typedef typename M::orientation::transposed_orientation orientation;
 
 	// Construction and destruction
 	explicit matrix_transpose(matrix_closure_type const& m):
@@ -325,6 +326,11 @@ private:
 
 template<class M>
 class matrix_row: public vector_expression<matrix_row<M>, typename M::device_type > {
+private:
+	typedef typename closure<M>::type matrix_closure_type;
+	static_assert((!std::is_same<typename M::evaluation_category::tag,sparse_tag>::value ||
+			!boost::is_same<typename M::orientation::orientation, column_major>::value),
+			"Can not get row of sparse column major matrix");
 public:
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
@@ -332,12 +338,11 @@ public:
 	typedef typename reference<M>::type reference;
 	typedef typename M::index_type index_type;
 
-	typedef typename closure<M>::type matrix_closure_type;
-	typedef matrix_row<typename const_expression<M>::type> const_closure_type;
 	typedef matrix_row<M> closure_type;
+	typedef matrix_row<typename const_expression<M>::type> const_closure_type;
 	typedef typename storage<M>::type::row_storage storage_type;
 	typedef typename M::const_storage_type::row_storage const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef typename M::evaluation_category evaluation_category;
 
 	// Construction and destruction
 	matrix_row(matrix_closure_type const& expression, index_type i):m_expression(expression), m_i(i) {
@@ -413,21 +418,15 @@ public:
 	}
 	
 	iterator set_element(iterator pos, index_type index, value_type value) {
-		return set_element(pos, index, value, 
-			typename M::orientation(), typename  iterator::iterator_category()
-		);
+		return set_element(pos, index, value, typename M::orientation());
 	}
 	
 	iterator clear_range(iterator start, iterator end) {
-		return clear_range(start,end,
-			typename M::orientation(), typename  iterator::iterator_category()
-		);
+		return clear_range(start,end,typename M::orientation());
 	}
 
 	iterator clear_element(iterator pos) {
-		return clear_element(pos, 
-			typename M::orientation(), typename  iterator::iterator_category()
-		);
+		return clear_element(pos, typename M::orientation());
 	}
 	
 	void clear(){
@@ -439,47 +438,32 @@ public:
 	}
 	
 private:
-	//we need two implementations of the sparse-interface, 
-	//depending on whether M is row or column major.
 	
 	//row major case is trivial
-	template<class Tag>
-	iterator set_element(iterator pos, index_type index, value_type value, row_major, Tag) {
+	iterator set_element(iterator pos, index_type index, value_type value, row_major) {
 		return expression().set_element(pos,index,value);
 	}
-	template<class Tag>
-	iterator clear_range(iterator start, iterator end, row_major, Tag) {
+	iterator clear_range(iterator start, iterator end, row_major) {
 		return expression().clear_range(start,end);
 	}
-	template<class Tag>
-	iterator clear_element(iterator pos, row_major, Tag) {
+	iterator clear_element(iterator pos, row_major) {
 		return expression().clear_element(pos);
 	}
 	//dense row major case
-	iterator set_element(iterator pos, index_type index, value_type value, 
-		column_major, 
-		dense_random_access_iterator_tag
-	) {
+	iterator set_element(iterator pos, index_type index, value_type value, column_major ) {
 		RANGE_CHECK(pos.index() == index);
 		*pos = value;
 		return pos;
 	}
 	
-	iterator clear_element(iterator pos,
-		column_major m, 
-		dense_random_access_iterator_tag t
-	) {
-		return set_element(pos,pos.index(),value_type(),m,t);
+	iterator clear_element(iterator pos,column_major m) {
+		return set_element(pos,pos.index(),value_type(),m);
 	}
-	iterator clear_range(iterator start, iterator end, 
-		column_major m, 
-		dense_random_access_iterator_tag t
-	) {
+	iterator clear_range(iterator start, iterator end, column_major m) {
 		for(;start != end; ++start)
-			clear_element(start,m,t);
+			clear_element(start,m);
 		return end;
 	}
-	//todo: sparse column major case.
 
 	matrix_closure_type m_expression;
 	index_type m_i;
@@ -488,6 +472,8 @@ private:
 // Matrix based vector range class representing (off-)diagonals of a matrix.
 template<class M>
 class matrix_vector_range: public vector_expression<matrix_vector_range<M>, typename M::device_type > {
+private:
+	typedef typename closure<M>::type matrix_closure_type;
 public:
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
@@ -495,12 +481,11 @@ public:
 	typedef typename reference<M>::type reference;
 	typedef typename M::index_type index_type;
 
-	typedef typename closure<M>::type matrix_closure_type;
+	typedef matrix_vector_range<M> closure_type;
 	typedef matrix_vector_range<typename const_expression<M>::type> const_closure_type;
-	typedef matrix_vector_range<M>  closure_type;
 	typedef typename storage<M>::type storage_type;
 	typedef typename M::const_storage_type const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef typename M::evaluation_category evaluation_category;
 
 	// Construction and destruction
 	matrix_vector_range(matrix_closure_type expression, index_type start1, index_type end1, index_type start2, index_type end2)
@@ -526,7 +511,7 @@ public:
 		return m_start2;
 	}
 	
-	const matrix_closure_type& expression() const {
+	matrix_closure_type const& expression() const {
 		return m_expression;
 	}
 	matrix_closure_type& expression() {
@@ -598,20 +583,21 @@ private:
 // Matrix based range class
 template<class M>
 class matrix_range:public matrix_expression<matrix_range<M>, typename M::device_type > {
+private:
+	typedef typename closure<M>::type matrix_closure_type;
 public:
 	typedef typename M::value_type value_type;
 	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 	typedef typename M::index_type index_type;
-
-	typedef typename closure<M>::type matrix_closure_type;
-	typedef matrix_range<typename const_expression<M>::type> const_closure_type;
+	
 	typedef matrix_range<M> closure_type;
+	typedef matrix_range<typename const_expression<M>::type> const_closure_type;
 	typedef typename storage<M>::type storage_type;
 	typedef typename M::const_storage_type const_storage_type;
-	typedef elementwise_tag evaluation_category;
 	typedef typename M::orientation orientation;
+	typedef typename M::evaluation_category evaluation_category;
 
 	// Construction and destruction
 
@@ -780,12 +766,12 @@ public:
 	typedef value_type const& const_reference;
 	typedef T& reference;
 
-	typedef matrix_reference<self_type const> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
+	typedef matrix_reference<self_type const> const_closure_type;
 	typedef dense_matrix_storage<T> storage_type;
 	typedef dense_matrix_storage<value_type const> const_storage_type;
-	typedef elementwise_tag evaluation_category;
         typedef Orientation orientation;
+	typedef elementwise<dense_tag> evaluation_category;
 
 	// Construction and destruction
 	

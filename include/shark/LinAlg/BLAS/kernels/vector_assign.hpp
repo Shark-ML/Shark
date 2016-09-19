@@ -54,7 +54,7 @@ void assign(vector_expression<V, cpu_tag>& v, typename V::value_type t) {
 template< class V, class E>
 void assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
-	dense_random_access_iterator_tag, dense_random_access_iterator_tag
+	dense_tag, dense_tag
 ) {
 	SIZE_CHECK(v().size() == e().size());
 	for(std::size_t i = 0; i != v().size(); ++i){
@@ -65,7 +65,7 @@ void assign(
 template< class V, class E>
 void assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
-	dense_random_access_iterator_tag, packed_random_access_iterator_tag
+	dense_tag, packed_tag
 ) {
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename E::const_iterator EIterator;
@@ -99,7 +99,7 @@ void assign(
 template< class V, class E>
 void assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
-	packed_random_access_iterator_tag, packed_random_access_iterator_tag
+	packed_tag, packed_tag
 ) {
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename E::const_iterator EIterator;
@@ -132,8 +132,8 @@ template<class V, class E>
 void assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e, 
-	dense_random_access_iterator_tag, 
-	sparse_bidirectional_iterator_tag
+	dense_tag, 
+	sparse_tag
 ) {
 	v().clear();
 	typedef typename E::const_iterator iterator;
@@ -147,8 +147,8 @@ template<class V, class E>
 void assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
-	sparse_bidirectional_iterator_tag,
-	dense_random_access_iterator_tag
+	sparse_tag,
+	dense_tag
 ) {
 	v().clear();
 	v().reserve(e().size());
@@ -163,8 +163,8 @@ template<class V, class E>
 void assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
-	sparse_bidirectional_iterator_tag,
-	sparse_bidirectional_iterator_tag
+	sparse_tag,
+	sparse_tag
 ) {
 	v().clear();
 	typedef typename E::const_iterator iteratorE;
@@ -180,9 +180,9 @@ void assign(
 template< class V, class E>
 void assign(vector_expression<V, cpu_tag>& v, const vector_expression<E, cpu_tag> &e) {
 	SIZE_CHECK(v().size() == e().size());
-	typedef typename V::const_iterator::iterator_category CategoryV;
-	typedef typename E::const_iterator::iterator_category CategoryE;
-	assign(v, e, CategoryV(),CategoryE());
+	typedef typename V::evaluation_category::tag TagV;
+	typedef typename E::evaluation_category::tag TagE;
+	assign(v, e, TagV(),TagE());
 }
 
 ////////////////////////////////////////////
@@ -195,7 +195,7 @@ void assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
-	dense_random_access_iterator_tag, dense_random_access_iterator_tag
+	dense_tag, dense_tag
 ) {
 	SIZE_CHECK(v().size() == e().size());
 	for(std::size_t i = 0; i != v().size(); ++i){
@@ -209,7 +209,7 @@ void assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
-	dense_random_access_iterator_tag, packed_random_access_iterator_tag
+	dense_tag, packed_tag
 ) {
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename E::const_iterator EIterator;
@@ -242,7 +242,7 @@ void assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
-	packed_random_access_iterator_tag, packed_random_access_iterator_tag
+	packed_tag, packed_tag
 ) {
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename E::const_iterator EIterator;
@@ -283,7 +283,7 @@ void assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
-	dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag
+	dense_tag, sparse_tag
 ) {
 	typedef typename E::const_iterator iterator;
 	iterator end = e().end();
@@ -298,7 +298,7 @@ void assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
-	sparse_bidirectional_iterator_tag tag, dense_random_access_iterator_tag
+	sparse_tag tag, dense_tag
 ){	
 	typedef typename V::value_type value_type;
 	typedef typename V::index_type index_type;
@@ -368,7 +368,7 @@ void assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_container<E, cpu_tag> const& e,
 	F f,
-	sparse_bidirectional_iterator_tag tag, sparse_bidirectional_iterator_tag
+	sparse_tag tag, sparse_tag
 ){	
 	assign_sparse(v,e);
 }
@@ -377,7 +377,7 @@ void assign(
 	vector_container<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
-	sparse_bidirectional_iterator_tag tag, sparse_bidirectional_iterator_tag
+	sparse_tag tag, sparse_tag
 ){	
 	assign_sparse(v,e,f);
 }
@@ -386,7 +386,7 @@ void assign(
 	vector_container<V, cpu_tag>& v,
 	vector_container<E, cpu_tag> const& e,
 	F f,
-	sparse_bidirectional_iterator_tag tag, sparse_bidirectional_iterator_tag
+	sparse_tag tag, sparse_tag
 ){	
 	assign_sparse(v,e,f);
 }
@@ -400,7 +400,7 @@ void assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
-	sparse_bidirectional_iterator_tag tag, sparse_bidirectional_iterator_tag
+	sparse_tag tag, sparse_tag
 ){	
 	typename vector_temporary<V>::type temporary(v());
 	assign_sparse(temporary,e, f);
@@ -412,10 +412,10 @@ void assign(
 template<template <class T1, class T2> class F, class V, class E>
 void assign(vector_expression<V, cpu_tag>& v, const vector_expression<E, cpu_tag> &e) {
 	SIZE_CHECK(v().size() == e().size());
-	typedef typename V::const_iterator::iterator_category CategoryV;
-	typedef typename E::const_iterator::iterator_category CategoryE;
+	typedef typename V::evaluation_category::tag TagV;
+	typedef typename E::evaluation_category::tag TagE;
 	typedef F<typename V::iterator::reference, typename E::value_type> functor_type;
-	assign(v(), e(), functor_type(), CategoryV(),CategoryE());
+	assign(v(), e(), functor_type(), TagV(),TagE());
 }
 
 }}}

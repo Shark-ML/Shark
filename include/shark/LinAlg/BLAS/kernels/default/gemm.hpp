@@ -81,7 +81,7 @@ void gemm_impl(
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major, column_major, Orientation o,
-	sparse_bidirectional_iterator_tag t1, Tag t2
+	sparse_tag t1, Tag t2
 ) {
 	typename transposed_matrix_temporary<E1>::type e1_trans(e1);
 	gemm_impl(e1_trans,e2,m,alpha,row_major(),row_major(),o,t1,t2);
@@ -98,7 +98,7 @@ void gemm_impl(
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major, column_major, row_major,
-	dense_random_access_iterator_tag, Tag
+	dense_tag, Tag
 ) {
 	for (std::size_t j = 0; j != e1().size2(); ++j) {
 		noalias(m) += alpha * outer_prod(column(e1,j),row(e2,j));
@@ -113,7 +113,7 @@ void gemm_impl(
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major, row_major, row_major, 
-	sparse_bidirectional_iterator_tag, sparse_bidirectional_iterator_tag
+	sparse_tag, sparse_tag
 ) {
 	typedef typename M::value_type value_type;
 	value_type zero = value_type();
@@ -144,7 +144,7 @@ void gemm_impl(
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major, column_major, column_major,
-	dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag
+	dense_tag, sparse_tag
 ) {
 	//compute the product row-wise
 	for (std::size_t i = 0; i != m().size1(); ++i) {
@@ -161,7 +161,7 @@ void gemm_impl(
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major r, column_major, column_major, 
-	dense_random_access_iterator_tag t, dense_random_access_iterator_tag
+	dense_tag t, dense_tag
 ) {
 	//compute blockwise and write the transposed block.
 	std::size_t blockSize = 16;
@@ -224,12 +224,12 @@ void gemm(
 	typedef typename M::orientation ResultOrientation;
 	typedef typename E1::orientation E1Orientation;
 	typedef typename E2::orientation E2Orientation;
-	typedef typename major_iterator<E1>::type::iterator_category E1Category;
-	typedef typename major_iterator<E2>::type::iterator_category E2Category;
+	typedef typename E1::evaluation_category::tag E1Tag;
+	typedef typename E2::evaluation_category::tag E2Tag;
 	
 	gemm_impl(e1, e2, m,alpha,
 		ResultOrientation(),E1Orientation(),E2Orientation(),
-		E1Category(),E2Category()
+		E1Tag(),E2Tag()
 	);
 }
 

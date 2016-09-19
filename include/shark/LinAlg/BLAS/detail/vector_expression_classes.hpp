@@ -37,9 +37,7 @@ namespace blas {
 
 ///\brief Implements multiplications of a vector by a scalar
 template<class E>
-class vector_scalar_multiply:
-	public vector_expression<vector_scalar_multiply <E>, typename E::device_type > {
-	typedef vector_scalar_multiply<E> self_type;
+class vector_scalar_multiply:public vector_expression<vector_scalar_multiply <E>, typename E::device_type > {
 public:
 	typedef typename E::const_closure_type expression_closure_type;
 	typedef typename E::index_type index_type;
@@ -48,8 +46,8 @@ public:
 	typedef value_type const_reference;
 	typedef value_type reference;
 
-	typedef self_type const_closure_type;
-	typedef self_type closure_type;
+	typedef vector_scalar_multiply const_closure_type;
+	typedef vector_scalar_multiply closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef typename E::evaluation_category evaluation_category;
@@ -119,8 +117,6 @@ private:
 /// \brief Vector expression representing a constant valued vector.
 template<class T>
 class scalar_vector:public vector_expression<scalar_vector<T>, cpu_tag > {
-
-	typedef scalar_vector<T> self_type;
 public:
 	typedef std::size_t index_type;
 	typedef T value_type;
@@ -128,11 +124,11 @@ public:
 	typedef const T& const_reference;
 	typedef const_reference reference;
 
-	typedef self_type const_closure_type;
-	typedef self_type closure_type;
+	typedef scalar_vector const_closure_type;
+	typedef scalar_vector closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<dense_tag> evaluation_category;
 	
 	// Construction and destruction
 	scalar_vector()
@@ -178,9 +174,7 @@ private:
 ///This transformation needs f to be constant, meaning that applying f(x), f(y), f(z) yields the same results independent of the
 ///order of application. Also F must provide a type F::result_type indicating the result type of the functor.
 template<class E, class F>
-class vector_unary:
-	public vector_expression<vector_unary<E, F>, typename E::device_type > {
-	typedef vector_unary<E, F> self_type;
+class vector_unary: public vector_expression<vector_unary<E, F>, typename E::device_type > {
 public:
 	typedef F functor_type;
 	typedef typename E::const_closure_type expression_closure_type;
@@ -189,8 +183,8 @@ public:
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
-	typedef self_type const_closure_type;
-	typedef self_type closure_type;
+	typedef vector_unary const_closure_type;
+	typedef vector_unary closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
 	typedef typename E::evaluation_category evaluation_category;

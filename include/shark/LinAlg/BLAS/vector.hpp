@@ -59,10 +59,9 @@ public:
 
 	typedef vector_reference<self_type const> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
-	typedef self_type vector_temporary_type;
 	typedef dense_vector_storage<T> storage_type;
 	typedef dense_vector_storage<T const> const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<dense_tag> evaluation_category;
 
 	// Construction and destruction
 
@@ -332,258 +331,237 @@ private:
 };
 
 template<class T>
-struct vector_temporary_type<T,dense_random_access_iterator_tag>{
+struct vector_temporary_type<T,dense_tag, cpu_tag>{
 	typedef vector<T> type;
 };
 
-template<class T>
-struct const_expression<vector<T> >{
-	typedef vector<T> const type;
-};
-template<class T>
-struct const_expression<vector<T> const>{
-	typedef vector<T> const type;
-};
+//~ /// \brief A dense vector of values of type \c T.
+//~ ///
+//~ /// For a \f$N\f$-dimensional vector \f$v\f$ and \f$0\leq i < N\f$ every element \f$v_i\f$ is mapped
+//~ /// to the \f$i\f$-th element of the container.
+//~ ///
+//~ /// \tparam T type of the objects stored in the vector (like int, double, complex,...)
+//~ template<class T, std::size_t N>
+//~ class vectorN: public vector_container<vectorN<T,N>, cpu_tag > {
 
-
-/// \brief A dense vector of values of type \c T.
-///
-/// For a \f$N\f$-dimensional vector \f$v\f$ and \f$0\leq i < N\f$ every element \f$v_i\f$ is mapped
-/// to the \f$i\f$-th element of the container.
-///
-/// \tparam T type of the objects stored in the vector (like int, double, complex,...)
-template<class T, std::size_t N>
-class vectorN: public vector_container<vectorN<T,N>, cpu_tag > {
-
-	typedef vectorN<T,N> self_type;
-	typedef std::array<T,N> array_type;
-public:
+	//~ typedef vectorN<T,N> self_type;
+	//~ typedef std::array<T,N> array_type;
+//~ public:
 	
-	typedef typename array_type::index_type index_type;
-	typedef typename array_type::value_type value_type;
-	typedef value_type scalar_type;
-	typedef typename array_type::const_reference const_reference;
-	typedef typename array_type::reference reference;
+	//~ typedef typename array_type::index_type index_type;
+	//~ typedef typename array_type::value_type value_type;
+	//~ typedef value_type scalar_type;
+	//~ typedef typename array_type::const_reference const_reference;
+	//~ typedef typename array_type::reference reference;
 
-	typedef const vector_reference<self_type const> const_closure_type;
-	typedef vector_reference<self_type> closure_type;
-	typedef self_type vector_temporary_type;
-	typedef dense_vector_storage<T> storage_type;
-	typedef dense_vector_storage<T const> const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	//~ typedef const vector_reference<self_type const> const_closure_type;
+	//~ typedef vector_reference<self_type> closure_type;
+	//~ typedef self_type vector_temporary_type;
+	//~ typedef dense_vector_storage<T> storage_type;
+	//~ typedef dense_vector_storage<T const> const_storage_type;
+	//~ typedef elementwise_tag evaluation_category;
 
-	// Construction and assignment
-	vectorN() = default;
-	vectorN(vectorN const& v) = default;
-	//~ vectorN(vectorN&& v) = default;
-	template<class... Init>
-	vectorN(Init&&... init):m_storage({T(init)...}){
-		static_assert(sizeof...(Init) == N, "initialisation must have same number of elements as array size");
-	}
-	/// \brief Copy-constructor of a vector from a vector_expression
-	/// \param e the vector_expression which values will be duplicated into the vector. Must have size N.
-	template<class E>
-	vectorN(vector_expression<E, cpu_tag> const& e){
-		SIZE_CHECK(e().size() == N);
-		assign(*this, e);
-	}
+	//~ // Construction and assignment
+	//~ vectorN() = default;
+	//~ vectorN(vectorN const& v) = default;
+	//~ template<class... Init>
+	//~ vectorN(Init&&... init):m_storage({T(init)...}){
+		//~ static_assert(sizeof...(Init) == N, "initialisation must have same number of elements as array size");
+	//~ }
+	//~ /// \brief Copy-constructor of a vector from a vector_expression
+	//~ /// \param e the vector_expression which values will be duplicated into the vector. Must have size N.
+	//~ template<class E>
+	//~ vectorN(vector_expression<E, cpu_tag> const& e){
+		//~ SIZE_CHECK(e().size() == N);
+		//~ assign(*this, e);
+	//~ }
 	
-	/// \brief Return the size of the vector.
-	index_type size() const {
-		return m_storage.size();
-	}
+	//~ /// \brief Return the size of the vector.
+	//~ index_type size() const {
+		//~ return m_storage.size();
+	//~ }
 	
-	///\brief Returns the underlying storage structure for low level access
-	storage_type raw_storage(){
-		return {m_storage.data(),1};
-	}
+	//~ ///\brief Returns the underlying storage structure for low level access
+	//~ storage_type raw_storage(){
+		//~ return {m_storage.data(),1};
+	//~ }
 	
-	///\brief Returns the underlying storage structure for low level access
-	const_storage_type raw_storage() const{
-		return {m_storage.data(),1};
-	}
+	//~ ///\brief Returns the underlying storage structure for low level access
+	//~ const_storage_type raw_storage() const{
+		//~ return {m_storage.data(),1};
+	//~ }
 
-	/// \brief Return true if the vector is empty (\c size==0)
-	/// \return \c true if empty, \c false otherwise
-	bool empty() const {
-		return m_storage.empty();
-	}
+	//~ /// \brief Return true if the vector is empty (\c size==0)
+	//~ /// \return \c true if empty, \c false otherwise
+	//~ bool empty() const {
+		//~ return m_storage.empty();
+	//~ }
 
-	// --------------
-	// Element access
-	// --------------
+	//~ // --------------
+	//~ // Element access
+	//~ // --------------
 
-	/// \brief Return a const reference to the element \f$i\f$
-	/// Return a const reference to the element \f$i\f$.
-	/// \param i index of the element
-	const_reference operator()(index_type i) const {
-		RANGE_CHECK(i < size());
-		return m_storage[i];
-	}
+	//~ /// \brief Return a const reference to the element \f$i\f$
+	//~ /// Return a const reference to the element \f$i\f$.
+	//~ /// \param i index of the element
+	//~ const_reference operator()(index_type i) const {
+		//~ RANGE_CHECK(i < size());
+		//~ return m_storage[i];
+	//~ }
 
-	/// \brief Return a reference to the element \f$i\f$
-	/// Return a reference to the element \f$i\f$.
-	/// \param i index of the element
-	reference operator()(index_type i) {
-		RANGE_CHECK(i < size());
-		return m_storage[i];
-	}
+	//~ /// \brief Return a reference to the element \f$i\f$
+	//~ /// Return a reference to the element \f$i\f$.
+	//~ /// \param i index of the element
+	//~ reference operator()(index_type i) {
+		//~ RANGE_CHECK(i < size());
+		//~ return m_storage[i];
+	//~ }
 
-	/// \brief Return a const reference to the element \f$i\f$
-	/// \param i index of the element
-	const_reference operator [](index_type i) const {
-		RANGE_CHECK(i < size());
-		return (*this)(i);
-	}
+	//~ /// \brief Return a const reference to the element \f$i\f$
+	//~ /// \param i index of the element
+	//~ const_reference operator [](index_type i) const {
+		//~ RANGE_CHECK(i < size());
+		//~ return (*this)(i);
+	//~ }
 
-	/// \brief Return a reference to the element \f$i\f$
-	/// \param i index of the element
-	reference operator [](index_type i) {
-		RANGE_CHECK(i < size());
-		return (*this)(i);
-	}
+	//~ /// \brief Return a reference to the element \f$i\f$
+	//~ /// \param i index of the element
+	//~ reference operator [](index_type i) {
+		//~ RANGE_CHECK(i < size());
+		//~ return (*this)(i);
+	//~ }
 	
-	///\brief Returns the first element of the vector
-	reference front(){
-		return m_storage.front();
-	}
-	///\brief Returns the first element of the vector
-	const_reference front()const{
-		return m_storage.front();
-	}
-	///\brief Returns the last element of the vector
-	reference back(){
-		return m_storage.back();
-	}
-	///\brief Returns the last element of the vector
-	const_reference back()const{
-		return m_storage.back();
-	}
+	//~ ///\brief Returns the first element of the vector
+	//~ reference front(){
+		//~ return m_storage.front();
+	//~ }
+	//~ ///\brief Returns the first element of the vector
+	//~ const_reference front()const{
+		//~ return m_storage.front();
+	//~ }
+	//~ ///\brief Returns the last element of the vector
+	//~ reference back(){
+		//~ return m_storage.back();
+	//~ }
+	//~ ///\brief Returns the last element of the vector
+	//~ const_reference back()const{
+		//~ return m_storage.back();
+	//~ }
 
-	/// \brief Clear the vector, i.e. set all values to the \c zero value.
-	void clear() {
-		std::fill(m_storage.begin(), m_storage.end(), value_type/*zero*/());
-	}
+	//~ /// \brief Clear the vector, i.e. set all values to the \c zero value.
+	//~ void clear() {
+		//~ std::fill(m_storage.begin(), m_storage.end(), value_type/*zero*/());
+	//~ }
 
-	// -------------------
-	// Assignment operators
-	// -------------------
+	//~ // -------------------
+	//~ // Assignment operators
+	//~ // -------------------
 	
-	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
-	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
-	/// \param v is the source vector container
-	/// \return a reference to a vector (i.e. the destination vector)
-	vectorN& operator=(vectorN const&) = default;
+	//~ /// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
+	//~ /// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
+	//~ /// \param v is the source vector container
+	//~ /// \return a reference to a vector (i.e. the destination vector)
+	//~ vectorN& operator=(vectorN const&) = default;
 	
-	/// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
-	/// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
-	/// \param v is the source vector container
-	/// \return a reference to a vector (i.e. the destination vector)
-	template<class C>          // Container assignment without temporary
-	vectorN& operator = (vector_container<C, cpu_tag> const& v) {
-		SIZE_CHECK(v().size() == N);
-		resize(v().size());
-		return assign(*this, v);
-	}
+	//~ /// \brief Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector)
+	//~ /// Assign a full vector (\e RHS-vector) to the current vector (\e LHS-vector). This method does not create any temporary.
+	//~ /// \param v is the source vector container
+	//~ /// \return a reference to a vector (i.e. the destination vector)
+	//~ template<class C>          // Container assignment without temporary
+	//~ vectorN& operator = (vector_container<C, cpu_tag> const& v) {
+		//~ SIZE_CHECK(v().size() == N);
+		//~ resize(v().size());
+		//~ return assign(*this, v);
+	//~ }
 
-	/// \brief Assign the result of a vector_expression to the vector
-	/// Assign the result of a vector_expression to the vector.
-	/// \param e is a const reference to the vector_expression
-	/// \return a reference to the resulting vector
-	template<class E>
-	vectorN& operator = (vector_expression<E, cpu_tag> const& e) {
-		SIZE_CHECK(e().size() == N);
-		self_type temporary(e);
-		swap(*this,temporary);
-		return *this;
-	}
+	//~ /// \brief Assign the result of a vector_expression to the vector
+	//~ /// Assign the result of a vector_expression to the vector.
+	//~ /// \param e is a const reference to the vector_expression
+	//~ /// \return a reference to the resulting vector
+	//~ template<class E>
+	//~ vectorN& operator = (vector_expression<E, cpu_tag> const& e) {
+		//~ SIZE_CHECK(e().size() == N);
+		//~ self_type temporary(e);
+		//~ swap(*this,temporary);
+		//~ return *this;
+	//~ }
 
-	// Iterator types
-	typedef dense_storage_iterator<value_type> iterator;
-	typedef dense_storage_iterator<value_type const> const_iterator;
+	//~ // Iterator types
+	//~ typedef dense_storage_iterator<value_type> iterator;
+	//~ typedef dense_storage_iterator<value_type const> const_iterator;
 	
-	/// \brief return an iterator on the first element of the vector
-	const_iterator cbegin() const {
-		return const_iterator(m_storage,0);
-	}
+	//~ /// \brief return an iterator on the first element of the vector
+	//~ const_iterator cbegin() const {
+		//~ return const_iterator(m_storage,0);
+	//~ }
 
-	/// \brief return an iterator after the last element of the vector
-	const_iterator cend() const {
-		return const_iterator(m_storage+size(),size());
-	}
+	//~ /// \brief return an iterator after the last element of the vector
+	//~ const_iterator cend() const {
+		//~ return const_iterator(m_storage+size(),size());
+	//~ }
 
-	/// \brief return an iterator on the first element of the vector
-	const_iterator begin() const {
-		return cbegin();
-	}
+	//~ /// \brief return an iterator on the first element of the vector
+	//~ const_iterator begin() const {
+		//~ return cbegin();
+	//~ }
 
-	/// \brief return an iterator after the last element of the vector
-	const_iterator end() const {
-		return cend();
-	}
+	//~ /// \brief return an iterator after the last element of the vector
+	//~ const_iterator end() const {
+		//~ return cend();
+	//~ }
 
-	/// \brief Return an iterator on the first element of the vector
-	iterator begin(){
-		return iterator(m_storage.data(),0);
-	}
+	//~ /// \brief Return an iterator on the first element of the vector
+	//~ iterator begin(){
+		//~ return iterator(m_storage.data(),0);
+	//~ }
 
-	/// \brief Return an iterator at the end of the vector
-	iterator end(){
-		return iterator(m_storage.data()+size(),size());
-	}
+	//~ /// \brief Return an iterator at the end of the vector
+	//~ iterator end(){
+		//~ return iterator(m_storage.data()+size(),size());
+	//~ }
 	
-	/////////////////sparse interface///////////////////////////////
-	iterator set_element(iterator pos, index_type index, value_type value) {
-		SIZE_CHECK(pos.index() == index);
-		(*this)(index) = value;
+	//~ /////////////////sparse interface///////////////////////////////
+	//~ iterator set_element(iterator pos, index_type index, value_type value) {
+		//~ SIZE_CHECK(pos.index() == index);
+		//~ (*this)(index) = value;
 		
-		return pos;
-	}
+		//~ return pos;
+	//~ }
 
-	iterator clear_element(iterator pos) {
-		SIZE_CHECK(pos != end());
-		v(pos.index()) = value_type();
+	//~ iterator clear_element(iterator pos) {
+		//~ SIZE_CHECK(pos != end());
+		//~ v(pos.index()) = value_type();
 		
-		//return new iterator to the next element
-		return pos+1;
-	}
+		//~ //return new iterator to the next element
+		//~ return pos+1;
+	//~ }
 	
-	iterator clear_range(iterator start, iterator end) {
-		RANGE_CHECK(start <= end);
-		std::fill(start,end,value_type());
-		return end;
-	}
+	//~ iterator clear_range(iterator start, iterator end) {
+		//~ RANGE_CHECK(start <= end);
+		//~ std::fill(start,end,value_type());
+		//~ return end;
+	//~ }
 	
-	void reserve(index_type) {}
+	//~ void reserve(index_type) {}
 	
-	/// \brief Swap the content of two vectors
-	/// \param v1 is the first vector. It takes values from v2
-	/// \param v2 is the second vector It takes values from v1
-	friend void swap(vectorN& v1, vectorN& v2) {
-		v1.m_storage.swap(v2.m_storage);
-	}
-	// -------------
-	// Serialization
-	// -------------
+	//~ /// \brief Swap the content of two vectors
+	//~ /// \param v1 is the first vector. It takes values from v2
+	//~ /// \param v2 is the second vector It takes values from v1
+	//~ friend void swap(vectorN& v1, vectorN& v2) {
+		//~ v1.m_storage.swap(v2.m_storage);
+	//~ }
+	//~ // -------------
+	//~ // Serialization
+	//~ // -------------
 
-	template<class Archive>
-	void serialize(Archive &ar, const unsigned int) {
-		ar & boost::serialization::make_array(m_storage,size());
-	}
+	//~ template<class Archive>
+	//~ void serialize(Archive &ar, const unsigned int) {
+		//~ ar & boost::serialization::make_array(m_storage,size());
+	//~ }
 
-private:
-	array_type m_storage;
-};
-
-template<class T, std::size_t N>
-struct const_expression<vectorN<T,N> >{
-	typedef vectorN<T,N> const type;
-};
-template<class T, std::size_t N>
-struct const_expression<vectorN<T,N> const>{
-	typedef vectorN<T,N> const type;
-};
-
+//~ private:
+	//~ array_type m_storage;
+//~ };
 
 }
 }

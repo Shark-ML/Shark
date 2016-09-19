@@ -47,7 +47,7 @@ public:
 	typedef vector_reference<V> closure_type;
 	typedef typename storage<V>::type storage_type;
 	typedef typename V::const_storage_type const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef typename V::evaluation_category evaluation_category;
 
 	// Construction
 	vector_reference(V& v):m_expression(&v){}
@@ -161,7 +161,7 @@ public:
 	typedef vector_range<V> closure_type;
 	typedef typename storage<V>::type storage_type;
 	typedef typename V::const_storage_type const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef typename V::evaluation_category evaluation_category;
 
 	// Construction and destruction
 	vector_range(vector_closure_type const& data, index_type start, index_type end):
@@ -295,7 +295,7 @@ public:
 	typedef dense_vector_adaptor closure_type;
 	typedef dense_vector_storage<T> storage_type;
 	typedef dense_vector_storage<value_type const> const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<dense_tag> evaluation_category;
 
 	// Construction and destruction
 
@@ -470,7 +470,7 @@ public:
 	typedef sparse_vector_adaptor closure_type;
 	typedef sparse_vector_storage<T const,I const> storage_type;
 	typedef sparse_vector_storage<value_type const,index_type const> const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<sparse_tag> evaluation_category;
 
 	// Construction and destruction
 

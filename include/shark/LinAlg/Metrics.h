@@ -86,8 +86,8 @@ namespace detail{
 		VectorT const& op1,
 		VectorU const& op2,
 		WeightT const& weights,
-		sparse_bidirectional_iterator_tag, 
-		sparse_bidirectional_iterator_tag
+		sparse_tag, 
+		sparse_tag
 	){
 		using shark::sqr;
 		typename VectorT::value_type sum=0;
@@ -138,8 +138,8 @@ namespace detail{
 		VectorT const& op1,
 		VectorU const& op2,
 		WeightT const& weights,
-		sparse_bidirectional_iterator_tag, 
-		dense_random_access_iterator_tag
+		sparse_tag, 
+		dense_tag
 	){
 		using shark::sqr;
 		typename VectorT::const_iterator iter=op1.begin();
@@ -166,8 +166,8 @@ namespace detail{
 		VectorT const& op1,
 		VectorU const& op2,
 		WeightT const& weights,
-		dense_random_access_iterator_tag arg1tag,
-		sparse_bidirectional_iterator_tag arg2tag
+		dense_tag arg1tag,
+		sparse_tag arg2tag
 	){
 		return diagonalMahalanobisDistanceSqr(op2,op1,weights,arg2tag,arg1tag);
 	}
@@ -177,8 +177,8 @@ namespace detail{
 		VectorT const& op1,
 		VectorU const& op2,
 		WeightT const& weights,
-		dense_random_access_iterator_tag,
-		dense_random_access_iterator_tag
+		dense_tag,
+		dense_tag
 	){
 		return inner_prod(op1-op2,(op1-op2)*weights);
 	}
@@ -195,8 +195,8 @@ namespace detail{
 		for(std::size_t i = 0; i != operands.size1(); ++i){
 			result(i) = diagonalMahalanobisDistanceSqr(
 				row(operands,i),op2,one,
-				typename major_iterator<MatrixT>::type::iterator_category(),
-				typename VectorU::iterator::iterator_category()
+				typename MatrixT::evaluation_category::tag(),
+				typename VectorU::evaluation_category::tag()
 			);
 		}
 	}
@@ -233,8 +233,8 @@ namespace detail{
 		MatrixX const& X,
 		MatrixY const& Y,
 		Result& distances,
-		dense_random_access_iterator_tag,
-		dense_random_access_iterator_tag
+		dense_tag,
+		dense_tag
 	){
 		typedef typename Result::value_type value_type;
 		std::size_t sizeX=X.size1();
@@ -264,8 +264,8 @@ namespace detail{
 		MatrixX const& X,
 		MatrixY const& Y,
 		Result& distances,
-		sparse_bidirectional_iterator_tag,
-		sparse_bidirectional_iterator_tag
+		sparse_tag,
+		sparse_tag
 	){
 		distanceSqrBlockBlockRowWise(X,Y,distances);
 	}
@@ -294,8 +294,8 @@ typename VectorT::value_type diagonalMahalanobisDistanceSqr(
 	//dispatch given the types of the argument
 	return detail::diagonalMahalanobisDistanceSqr(
 		op1(), op2(), weights(),
-		typename VectorT::iterator::iterator_category(),
-		typename VectorU::iterator::iterator_category()
+		typename VectorT::evaluation_category::tag(),
+		typename VectorU::evaluation_category::tag()
 	);
 }
 
@@ -387,8 +387,8 @@ matrix<typename MatrixT::value_type> distanceSqr(
 	Matrix distances(sizeX, sizeY);
 	detail::distanceSqrBlockBlock(
 		X(),Y(),distances,
-		typename major_iterator<MatrixT>::type::iterator_category(),
-		typename major_iterator<MatrixU>::type::iterator_category()
+		typename MatrixT::evaluation_category::tag(),
+		typename MatrixU::evaluation_category::tag()
 	);
 	return distances;
 	

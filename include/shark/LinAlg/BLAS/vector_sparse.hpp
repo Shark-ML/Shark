@@ -137,7 +137,7 @@ public:
 	typedef vector_reference<self_type> closure_type;
 	typedef sparse_vector_storage<T,I> storage_type;
 	typedef sparse_vector_storage<value_type const,index_type const> const_storage_type;
-	typedef elementwise_tag evaluation_category;
+	typedef elementwise<sparse_tag> evaluation_category;
 
 	// Construction and destruction
 	compressed_vector():m_size(0), m_nnz(0),m_indices(1,0),m_zero(0){}
@@ -359,17 +359,8 @@ private:
 };
 
 template<class T>
-struct vector_temporary_type<T,sparse_bidirectional_iterator_tag>{
+struct vector_temporary_type<T,sparse_tag, cpu_tag>{
 	typedef compressed_vector<T> type;
-};
-
-template<class T,class I>
-struct const_expression<compressed_vector<T,I> >{
-	typedef compressed_vector<T,I> const type;
-};
-template<class T,class I>
-struct const_expression<compressed_vector<T,I> const>{
-	typedef compressed_vector<T,I> const type;
 };
 
 }}

@@ -109,7 +109,7 @@ template<class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
-	row_major, column_major,dense_random_access_iterator_tag, dense_random_access_iterator_tag
+	row_major, column_major,dense_tag, dense_tag
 ) {
 	//compute blockwise and wrelem the transposed block.
 	std::size_t const blockSize = 16;
@@ -145,7 +145,7 @@ template<class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
-	row_major, column_major,dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag
+	row_major, column_major,dense_tag, sparse_tag
 ) {
 	for(std::size_t j = 0; j != m().size2(); ++j){
 		auto columnM = column(m,j);
@@ -159,7 +159,7 @@ template<class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
-	row_major, column_major, sparse_bidirectional_iterator_tag, dense_random_access_iterator_tag
+	row_major, column_major, sparse_tag, dense_tag
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		auto rowM = row(m,i);
@@ -172,7 +172,7 @@ template<class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
-	row_major, column_major,sparse_bidirectional_iterator_tag,sparse_bidirectional_iterator_tag
+	row_major, column_major,sparse_tag,sparse_tag
 ) {
 	//apply the transposition of e()
 	//first evaluate e and fill the values into a vector which is then sorted by row_major order
@@ -223,7 +223,7 @@ void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	triangular<row_major,Triangular>, triangular<row_major,Triangular>,
-	packed_random_access_iterator_tag, packed_random_access_iterator_tag
+	packed_tag, packed_tag
 ) {
 	typedef typename M::row_iterator MIter;
 	typedef typename E::const_row_iterator EIter;
@@ -246,7 +246,7 @@ void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	triangular<row_major,Triangular>, triangular<column_major,Triangular>,
-	packed_random_access_iterator_tag, packed_random_access_iterator_tag
+	packed_tag, packed_tag
 ) {
 	typedef typename M::row_iterator MIter;
 
@@ -306,8 +306,8 @@ void assign(matrix_expression<M, cpu_tag> &m, const matrix_expression<E, cpu_tag
 	SIZE_CHECK(m().size2() == e().size2());
 	typedef typename M::orientation MOrientation;
 	typedef typename E::orientation EOrientation;
-	typedef typename major_iterator<M>::type::iterator_category MCategory;
-	typedef typename major_iterator<E>::type::iterator_category ECategory;
+	typedef typename M::evaluation_category::tag MCategory;
+	typedef typename E::evaluation_category::tag ECategory;
 	assign(m, e, MOrientation(),EOrientation(),MCategory(), ECategory());
 }
 
@@ -339,7 +339,7 @@ template<template <class, class> class F,class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
-	row_major, column_major,dense_random_access_iterator_tag, dense_random_access_iterator_tag
+	row_major, column_major,dense_tag, dense_tag
 ) {
 	F<typename major_iterator<M>::type::reference, typename E::value_type> f;
 	//compute blockwise and wrelem the transposed block.
@@ -376,7 +376,7 @@ template<template <class, class> class F,class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
-	row_major, column_major,dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag
+	row_major, column_major,dense_tag, sparse_tag
 ) {
 	for(std::size_t j = 0; j != m().size2(); ++j){
 		auto columnM = column(m,j);
@@ -389,7 +389,7 @@ template<template <class, class> class F,class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
-	row_major, column_major, sparse_bidirectional_iterator_tag, dense_random_access_iterator_tag
+	row_major, column_major, sparse_tag, dense_tag
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		auto rowM = row(m,i);
@@ -402,7 +402,7 @@ template<template <class, class> class F,class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
-	row_major, column_major,sparse_bidirectional_iterator_tag t,sparse_bidirectional_iterator_tag
+	row_major, column_major,sparse_tag t,sparse_tag
 ) {
 	typename matrix_temporary<M>::type eTrans = e;//explicit calculation of the transpose for now
 	assign<F>(m,eTrans,row_major(),row_major(),t,t);
@@ -534,8 +534,8 @@ void assign(
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, row_major
 ) {
-	typedef typename M::const_row_iterator::iterator_category MCategory;
-	typedef typename E::const_row_iterator::iterator_category ECategory;
+	typedef typename M::evaluation_category::tag MCategory;
+	typedef typename E::evaluation_category::tag ECategory;
 	assign<F>(m,e,row_major(),row_major(),MCategory(),ECategory());
 }
 //everything fulfilled -> dispatch sparse/dense computing versions
@@ -545,8 +545,8 @@ void assign(
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major
 ) {
-	typedef typename M::const_row_iterator::iterator_category MCategory;
-	typedef typename E::const_column_iterator::iterator_category ECategory;
+	typedef typename M::evaluation_category::tag MCategory;
+	typedef typename E::evaluation_category::tag ECategory;
 	assign<F>(m,e,row_major(),column_major(),MCategory(),ECategory());
 }
 
