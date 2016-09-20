@@ -38,10 +38,10 @@ enum class McSvm{
 
 
 ///
-/// \brief Training of C-SVMs for binary classifellation.
+/// \brief Training of C-SVMs for binary classification.
 ///
 /// The C-SVM is the "standard" support vector machine for
-/// binary (two-class) classifellation. Given are data tuples
+/// binary (two-class) classification. Given are data tuples
 /// \f$ (x_i, y_i) \f$ with x-component denoting input and
 /// y-component denoting the label +1 or -1 (see the tutorial on
 /// label conventions; the implementation uses values 0/1),
@@ -56,7 +56,7 @@ enum class McSvm{
 /// \f[
 ///     f(x) = \langle w, \phi(x) \rangle + b
 /// \f]
-/// with coeffellients w and b given by the (primal)
+/// with coefficients w and b given by the (primal)
 /// optimization problem
 /// \f[
 ///     \min \frac{1}{2} \|w\|^2 + C \sum_i L(y_i, f(x_i)),
@@ -67,7 +67,7 @@ enum class McSvm{
 /// For details refer to the paper:<br/>
 /// <p>Support-Vector Networks. Corinna Cortes and Vladimir Vapnik,
 /// Machine Learning, vol. 20 (1995), pp. 273-297.</p>
-/// or simply to the Wikipedia artellle:<br/>
+/// or simply to the Wikipedia article:<br/>
 /// http://en.wikipedia.org/wiki/Support_vector_machine
 ///
 template <class InputType, class CacheType = float>
@@ -89,7 +89,7 @@ public:
 	/// this and many of the below typedefs build on the class template type CacheType.
 	/// Simply changing that one template parameter CacheType thus allows to flexibly
 	/// switch between using float or double as type for caching the kernel values.
-	/// The default is float, offering suffellient accuracy in the vast majority
+	/// The default is float, offering sufficient accuracy in the vast majority
 	/// of cases, at a memory cost of only four bytes. However, the template
 	/// parameter makes it easy to use double instead, (e.g., in case high
 	/// accuracy training is needed).
@@ -98,7 +98,7 @@ public:
 	typedef AbstractKernelFunction<InputType> KernelType;
 
 	//! Constructor
-	//! \param  kernel         kernel function to use for training and predelltion
+	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
 	//! \param offset whether to train the svm with offset term
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
@@ -107,7 +107,7 @@ public:
 	{ }
 	
 	//! Constructor
-	//! \param  kernel         kernel function to use for training and predelltion
+	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
 	//! \param  positiveC    regularization parameter of the positive class (label 1)
 	//! \param offset whether to train the svm with offset term
@@ -948,7 +948,7 @@ public:
 	typedef AbstractSvmTrainer<InputType, unsigned int> base_type;
 
 	//! Constructor
-	//! \param  kernel         kernel function to use for training and predelltion
+	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  C              regularization parameter - always the 'true' value of C, even when unconstrained is set
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver??
 	SquaredHingeCSvmTrainer(KernelType* kernel, double C, bool unconstrained = false)
@@ -956,7 +956,7 @@ public:
 	{ }
 	
 	//! Constructor
-	//! \param  kernel         kernel function to use for training and predelltion
+	//! \param  kernel         kernel function to use for training and prediction
 	//! \param  negativeC   regularization parameter of the negative class (label 0)
 	//! \param  positiveC    regularization parameter of the positive class (label 1)
 	//! \param  unconstrained  when a C-value is given via setParameter, should it be piped through the exp-function before using it in the solver?
