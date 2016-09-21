@@ -35,10 +35,9 @@ namespace shark {
 namespace blas {
 namespace kernels {
 
-template<template <class T1, class T2> class F, class V>
+template<class F, class V>
 void assign(vector_expression<V, cpu_tag>& v, typename V::value_type t) {
-	typedef F<typename V::iterator::reference, typename V::value_type> Function;
-	Function f;
+	F f;
 	typedef typename V::iterator iterator;
 	iterator end = v().end();
 	for (iterator it = v().begin(); it != end; ++it){
@@ -409,13 +408,12 @@ void assign(
 }
 
 // Dispatcher
-template<template <class T1, class T2> class F, class V, class E>
+template<class F, class V, class E>
 void assign(vector_expression<V, cpu_tag>& v, const vector_expression<E, cpu_tag> &e) {
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename V::evaluation_category::tag TagV;
 	typedef typename E::evaluation_category::tag TagE;
-	typedef F<typename V::iterator::reference, typename E::value_type> functor_type;
-	assign(v(), e(), functor_type(), TagV(),TagE());
+	assign(v(), e(), F(), TagV(),TagE());
 }
 
 }}}

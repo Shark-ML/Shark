@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_row_optimize ){
 	//matrix unary
 	{
 		M1 m1 = create_matrix(5,10);
-		typedef scalar_sqr<double> F;
+		typedef functors::scalar_sqr F;
 		vector_unary<matrix_row<M1 const>, F> e1 = row(sqr(m1),1);
 		vector_unary<matrix_row<matrix_transpose<M1 const> >,F> e2 = column(sqr(m1),1);
 		BOOST_CHECK_SMALL(norm_inf(e1 - row(matrix<double>(sqr(m1)),1)), 1.e-10);
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_row_optimize ){
 	{
 		M1 m1 = create_matrix(5,10);
 		M2 m2 = create_matrix(5,10);
-		typedef scalar_binary_multiply<double,double> F;
+		typedef functors::scalar_binary_multiply F;
 		vector_binary<matrix_row<M1 const>,matrix_row<M2 const>,F> e1 = row(m1*m2,1);
 		vector_binary<matrix_row<matrix_transpose<M1 const>>,matrix_row<matrix_transpose<M2 const> >,F> e2 = column(m1*m2,1);
 		BOOST_CHECK_SMALL(norm_inf(e1 - row(matrix<double>(m1*m2),1)), 1.e-10);
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_vector_range_optimize ){
 	//vector unary
 	{
 		V1 v1 = create_vector(10);
-		typedef scalar_sqr<double> F;
+		typedef functors::scalar_sqr F;
 		vector_unary<vector_range<V1 const>, F> e1 = subrange(sqr(v1),1,4);
 		BOOST_CHECK_SMALL(norm_inf(e1 - subrange(vector<double>(sqr(v1)),1,4)), 1.e-10);
 	}
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_vector_range_optimize ){
 	{
 		V1 v1 = create_vector(10);
 		V2 v2 = create_vector(10);
-		typedef scalar_binary_multiply<double,float> F;
+		typedef functors::scalar_binary_multiply F;
 		vector_binary<vector_range<V1 const>,vector_range<V2 const>,F> e1 = subrange(v1*v2,1,4);
 		BOOST_CHECK_SMALL(norm_inf(e1 - subrange(vector<double>(v1*v2),1,4)), 1.e-10);
 	}
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_range_optimize ){
 	//matrix unary
 	{
 		M1 m1 = create_matrix(5,10);
-		typedef scalar_sqr<double> F;
+		typedef functors::scalar_sqr F;
 		matrix_unary<matrix_range<M1 const>, F> e1 = subrange(sqr(m1),1,4,3,7);
 		BOOST_CHECK_SMALL(norm_inf(e1 - subrange(matrix<double>(sqr(m1)),1,4,3,7)), 1.e-10);
 	}
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_range_optimize ){
 	{
 		M1 m1 = create_matrix(5,10);
 		M2 m2 = create_matrix(5,10);
-		typedef scalar_binary_multiply<double,double> F;
+		typedef functors::scalar_binary_multiply F;
 		matrix_binary<matrix_range<M1 const>,matrix_range<M2 const>,F> e1 = subrange(m1*m2,1,4,3,7);
 		BOOST_CHECK_SMALL(norm_inf(e1 - subrange(matrix<double>(m1*m2),1,4,3,7)), 1.e-10);
 	}

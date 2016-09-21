@@ -31,18 +31,6 @@
 #define SHARK_LINALG_BLAS_KERNELS_DOT_HPP
 
 #include "default/dot.hpp"
-
-//~ #ifdef SHARK_USE_CBLAS 
-//~ #include "cblas/dot.hpp" // not faster in many cases, the compiler optimizes quite well.
-//~ #else
-// if no bindings are included, we have to provide the default has_optimized_dot
-// otherwise the binding will take care of this
-namespace shark { namespace blas { namespace bindings{
-template<class V1, class V2,class result_type>
-struct  has_optimized_dot
-: public boost::mpl::false_{};
-}}}
-//~ #endif
 	
 namespace shark { namespace blas {namespace kernels{
 	
@@ -63,9 +51,12 @@ void dot(
 	
 	bindings::dot(
 		e1, e2,result,
-		typename bindings::has_optimized_dot<E1,E2,result_type>::type()
+		boost::mpl::false_()
 	);
 }
+#ifdef SHARK_USE_CLBLAS
+#include "clblas/dot.hpp"
+#endif
 
 }}}
 #endif

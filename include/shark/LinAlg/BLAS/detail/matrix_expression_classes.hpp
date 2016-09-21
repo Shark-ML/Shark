@@ -39,141 +39,15 @@
 
 namespace shark {
 namespace blas {
-	
-	
-template<class E1, class E2>
-class matrix_addition: public blas::matrix_expression<matrix_addition<E1, E2>, typename E1::device_type > {
-private:
-	typedef scalar_binary_plus<
-		typename E1::value_type,
-		typename E2::value_type
-	> functor_type;
-	typedef typename E1::const_closure_type lhs_closure_type;
-	typedef typename E2::const_closure_type rhs_closure_type;
-public:
-
-	typedef typename E1::index_type index_type;
-	typedef typename functor_type::result_type value_type;
-	typedef value_type scalar_type;
-	typedef value_type const_reference;
-	typedef const_reference reference;
-
-	typedef matrix_addition const_closure_type;
-	typedef const_closure_type closure_type;
-	typedef unknown_storage storage_type;
-	typedef unknown_storage const_storage_type;
-	typedef typename boost::mpl::if_< //the orientation is only known if E1 and E2 have the same
-		std::is_same<typename E1::orientation, typename E2::orientation>,
-		typename E1::orientation,
-		unknown_orientation
-	>::type orientation;
-	//the evaluation category is blockwise if one of the expressions is blockwise or
-	// if the orientation is unknown (efficient for expressions like A=B+C^T
-	typedef typename boost::mpl::if_<
-		std::is_same<orientation, unknown_orientation>,
-		blockwise<typename evaluation_restrict_traits<E1,E2>::type::tag>,
-		typename evaluation_restrict_traits<E1,E2>::type
-	>::type evaluation_category;
-	typedef typename E1::device_type device_type;
-
-        // Construction
-        explicit matrix_addition(
-		lhs_closure_type const& e1,
-		rhs_closure_type const& e2
-	): m_lhs (e1), m_rhs (e2){}
-
-        // Accessors
-        index_type size1 () const {
-		return m_lhs.size1 ();
-        }
-        index_type size2 () const {
-		return m_lhs.size2 ();
-        }
-	
-	lhs_closure_type const& lhs()const{
-		return m_lhs;
-	}
-	
-	rhs_closure_type const& rhs()const{
-		return m_rhs;
-	}
-
-        const_reference operator () (index_type i, index_type j) const {
-		return m_lhs(i, j) + m_rhs(i,j);
-        }
-	
-	//computation kernels
-	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
-		assign(X,alpha * m_lhs);
-		plus_assign(X,alpha * m_rhs);
-	}
-	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
-		plus_assign(X,alpha * m_lhs);
-		plus_assign(X,alpha * m_rhs);
-	}
-	
-	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
-		minus_assign(X,alpha * m_lhs);
-		minus_assign(X,alpha * m_rhs);
-	}
-
-public:
-	typedef binary_transform_iterator<
-		typename E1::const_row_iterator,
-		typename E2::const_row_iterator,
-		functor_type
-	> const_row_iterator;
-	typedef binary_transform_iterator<
-		typename E1::const_column_iterator,
-		typename E2::const_column_iterator,
-		functor_type
-	> const_column_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef const_column_iterator column_iterator;
-
-	const_row_iterator row_begin(index_type i) const {
-		return const_row_iterator (functor_type(),
-			m_lhs.row_begin(i),m_lhs.row_end(i),
-			m_rhs.row_begin(i),m_rhs.row_end(i)
-		);
-	}
-	const_row_iterator row_end(index_type i) const {
-		return const_row_iterator (functor_type(),
-			m_lhs.row_end(i),m_lhs.row_end(i),
-			m_rhs.row_end(i),m_rhs.row_end(i)
-		);
-	}
-
-	const_column_iterator column_begin(index_type j) const {
-		return const_column_iterator (functor_type(),
-			m_lhs.column_begin(j),m_lhs.column_end(j),
-			m_rhs.column_begin(j),m_rhs.column_end(j)
-		);
-	}
-	const_column_iterator column_end(index_type j) const {
-		return const_column_iterator (functor_type(),
-			m_lhs.column_end(j),m_lhs.column_end(j),
-			m_rhs.column_end(j),m_rhs.column_end(j)
-		);
-	}
-
-private:
-	lhs_closure_type m_lhs;
-        rhs_closure_type m_rhs;
-	functor_type m_functor;
-};
 
 template<class E>
 class matrix_scalar_multiply:public blas::matrix_expression<matrix_scalar_multiply<E>, typename E::device_type > {
 private:
-	typedef scalar_multiply1<typename E::value_type, typename E::scalar_type> functor_type;
+	typedef functors::scalar_multiply1<typename E::scalar_type> functor_type;
 public:
 	typedef typename E::const_closure_type expression_closure_type;
 
-	typedef typename functor_type::result_type value_type;
+	typedef typename std::result_of<functor_type(typename E::value_type) >::type value_type;
 	typedef typename E::scalar_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
@@ -249,6 +123,128 @@ public:
 private:
 	expression_closure_type m_expression;
 	scalar_type m_scalar;
+};	
+	
+template<class E1, class E2>
+class matrix_addition: public blas::matrix_expression<matrix_addition<E1, E2>, typename E1::device_type > {
+private:
+	typedef functors::scalar_binary_plus functor_type;
+	typedef typename E1::const_closure_type lhs_closure_type;
+	typedef typename E2::const_closure_type rhs_closure_type;
+public:
+
+	typedef typename E1::index_type index_type;
+	typedef decltype(typename E1::value_type() + typename E2::value_type()) value_type;
+	typedef value_type scalar_type;
+	typedef value_type const_reference;
+	typedef const_reference reference;
+
+	typedef matrix_addition const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
+	typedef typename boost::mpl::if_< //the orientation is only known if E1 and E2 have the same
+		std::is_same<typename E1::orientation, typename E2::orientation>,
+		typename E1::orientation,
+		unknown_orientation
+	>::type orientation;
+	//the evaluation category is blockwise if one of the expressions is blockwise or
+	// if the orientation is unknown (efficient for expressions like A=B+C^T
+	typedef typename boost::mpl::if_<
+		std::is_same<orientation, unknown_orientation>,
+		blockwise<typename evaluation_restrict_traits<E1,E2>::type::tag>,
+		typename evaluation_restrict_traits<E1,E2>::type
+	>::type evaluation_category;
+	typedef typename E1::device_type device_type;
+
+        // Construction
+        explicit matrix_addition(
+		lhs_closure_type const& e1,
+		rhs_closure_type const& e2
+	): m_lhs (e1), m_rhs (e2){}
+
+        // Accessors
+        index_type size1 () const {
+		return m_lhs.size1 ();
+        }
+        index_type size2 () const {
+		return m_lhs.size2 ();
+        }
+	
+	lhs_closure_type const& lhs()const{
+		return m_lhs;
+	}
+	
+	rhs_closure_type const& rhs()const{
+		return m_rhs;
+	}
+
+        const_reference operator () (index_type i, index_type j) const {
+		return m_lhs(i, j) + m_rhs(i,j);
+        }
+	
+	//computation kernels
+	template<class MatX>
+	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+		assign(X, matrix_scalar_multiply<lhs_closure_type>(m_lhs,alpha));
+		plus_assign(X,matrix_scalar_multiply<rhs_closure_type>(m_rhs,alpha));
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+		plus_assign(X,matrix_scalar_multiply<lhs_closure_type>(m_lhs,alpha));
+		plus_assign(X,matrix_scalar_multiply<rhs_closure_type>(m_rhs,alpha));
+	}
+	
+	template<class MatX>
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+		minus_assign(X,matrix_scalar_multiply<lhs_closure_type>(m_lhs,alpha));
+		minus_assign(X,matrix_scalar_multiply<rhs_closure_type>(m_rhs,alpha));
+	}
+
+public:
+	typedef binary_transform_iterator<
+		typename E1::const_row_iterator,
+		typename E2::const_row_iterator,
+		functor_type
+	> const_row_iterator;
+	typedef binary_transform_iterator<
+		typename E1::const_column_iterator,
+		typename E2::const_column_iterator,
+		functor_type
+	> const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+
+	const_row_iterator row_begin(index_type i) const {
+		return const_row_iterator (functor_type(),
+			m_lhs.row_begin(i),m_lhs.row_end(i),
+			m_rhs.row_begin(i),m_rhs.row_end(i)
+		);
+	}
+	const_row_iterator row_end(index_type i) const {
+		return const_row_iterator (functor_type(),
+			m_lhs.row_end(i),m_lhs.row_end(i),
+			m_rhs.row_end(i),m_rhs.row_end(i)
+		);
+	}
+
+	const_column_iterator column_begin(index_type j) const {
+		return const_column_iterator (functor_type(),
+			m_lhs.column_begin(j),m_lhs.column_end(j),
+			m_rhs.column_begin(j),m_rhs.column_end(j)
+		);
+	}
+	const_column_iterator column_end(index_type j) const {
+		return const_column_iterator (functor_type(),
+			m_lhs.column_end(j),m_lhs.column_end(j),
+			m_rhs.column_end(j),m_rhs.column_end(j)
+		);
+	}
+
+private:
+	lhs_closure_type m_lhs;
+        rhs_closure_type m_rhs;
+	functor_type m_functor;
 };
 
 template<class V>
@@ -499,7 +495,7 @@ public:
 	typedef typename E2::const_closure_type rhs_closure_type;
 
 	typedef typename E1::index_type index_type;
-	typedef typename F::result_type value_type;
+	typedef typename std::result_of<F(typename E1::value_type, typename E2::value_type)>::type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
@@ -609,7 +605,7 @@ private:
 		scalar_type alpha
 	)const{
 		//we know that lhs and rhs are elementwise expressions so we can now create the elementwise expression and assign it.
-		matrix_binary<LHS,RHS,F> e(lhs(),rhs());
+		matrix_binary<LHS,RHS,F> e(lhs(),rhs(), m_functor);
 		matrix_scalar_multiply<matrix_binary<LHS,RHS,F> > e1(e,alpha);
 		plus_assign(X,e1);
 	}
@@ -617,13 +613,13 @@ private:
 
 template<class E1, class E2>
 class outer_product:public matrix_expression<outer_product<E1, E2>, typename E1::device_type > {
-	typedef scalar_multiply1<typename E1::value_type, typename E2::value_type> functor_type;
+	typedef functors::scalar_multiply1<typename E1::value_type> functor_type;
 public:
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
 
 	
-	typedef typename functor_type::result_type value_type;
+	typedef decltype(typename E1::value_type() * typename E2::value_type()) value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;

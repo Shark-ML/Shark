@@ -39,7 +39,7 @@ namespace blas {
 
 namespace kernels{
 // Explicitly iterating row major
-template<template <class T1, class T2> class F, class M>
+template<class F, class M>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	typename M::value_type t, 
@@ -51,7 +51,7 @@ void assign(
 	}
 }
 // Explicitly iterating column major
-template<template <class T1, class T2> class F, class M>
+template<class F, class M>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	typename M::value_type t, 
@@ -65,7 +65,7 @@ void assign(
 
 
 // Spcial case triangular packed - just calls the first two implementations.
-template<template <class T1, class T2> class F, class M, class Orientation, class Triangular>
+template<class F, class M, class Orientation, class Triangular>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	typename M::value_type t, 
@@ -75,7 +75,7 @@ void assign(
 }
 
 // Dispatcher
-template<template <class T1, class T2> class F, class M>
+template<class F, class M>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	typename M::value_type t
@@ -320,7 +320,7 @@ void assign(matrix_expression<M, cpu_tag> &m, const matrix_expression<E, cpu_tag
 	
 //when both are row-major we can map to vector case
 //this is not necessarily efficient if m is sparse.
-template<template <class, class> class F, class M, class E, class TagE, class TagM>
+template<class F, class M, class E, class TagE, class TagM>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -335,13 +335,13 @@ void assign(
 //we only need to implement the remaining versions for column major second argument
 
 //dense-dense case
-template<template <class, class> class F,class M, class E>
+template<class F,class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major,dense_tag, dense_tag
 ) {
-	F<typename major_iterator<M>::type::reference, typename E::value_type> f;
+	F f;
 	//compute blockwise and wrelem the transposed block.
 	std::size_t const blockSize = 16;
 	typename M::value_type blockStorage[blockSize][blockSize];
@@ -372,7 +372,7 @@ void assign(
 }
 
 //dense-sparse case
-template<template <class, class> class F,class M, class E>
+template<class F,class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -385,7 +385,7 @@ void assign(
 }
 
 //sparse-dense case
-template<template <class, class> class F,class M, class E>
+template<class F,class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -398,7 +398,7 @@ void assign(
 }
 
 //sparse-sparse
-template<template <class, class> class F,class M, class E>
+template<class F,class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -471,7 +471,7 @@ void assign(
 
 
 //kernels for packed
-template<template <class, class> class F, class M, class E, class Triangular>
+template<class F, class M, class E, class Triangular>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -479,12 +479,11 @@ void assign(
 ) {
 	typedef typename M::row_iterator MIter;
 	typedef typename E::const_row_iterator EIter;
-	typedef F<typename MIter::reference,typename  EIter::value_type> Function;
 	//there is nothing we can do if F does not leave the non-stored elements 0
 	//this is the case for all current assignment functors, but you never know :)
-	static_assert(Function::left_zero_identity || Function::right_zero_identity, "cannot handle the given packed matrix assignment function");
+	static_assert(F::left_zero_identity || F::right_zero_identity, "cannot handle the given packed matrix assignment function");
 
-	Function f;
+	F f;
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		MIter mpos = m().row_begin(i);
 		EIter epos = e().row_begin(i);
@@ -497,7 +496,7 @@ void assign(
 }
 
 //todo: this is suboptimal as we do strided access!!!!
-template<template <class, class> class F, class M, class E, class Triangular>
+template<class F, class M, class E, class Triangular>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -505,11 +504,10 @@ void assign(
 ) {
 	typedef typename M::row_iterator MIter;
 	typedef typename E::const_row_iterator EIter;
-	typedef F<typename MIter::reference,typename EIter::value_type> Function;
 	//there is nothing we can do, if F does not leave the non-stored elements 0
-	static_assert(Function::left_zero_identity, "cannot handle the given packed matrix assignment function");
+	static_assert(F::left_zero_identity, "cannot handle the given packed matrix assignment function");
 	
-	Function f;
+	F f;
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		MIter mpos = m().row_begin(i);
 		MIter mend = m().row_end(i);
@@ -528,7 +526,7 @@ void assign(
 
 
 //everything fulfilled -> dispatch sparse/dense computing versions
-template<template <class, class> class F, class M, class E>
+template<class F, class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -539,7 +537,7 @@ void assign(
 	assign<F>(m,e,row_major(),row_major(),MCategory(),ECategory());
 }
 //everything fulfilled -> dispatch sparse/dense computing versions
-template<template <class, class> class F, class M, class E>
+template<class F, class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -551,7 +549,7 @@ void assign(
 }
 
 //first argument is row_major, second is unknown->choose unknown to be row_major
-template<template <class, class> class F,class M, class E>
+template<class F,class M, class E>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -562,7 +560,7 @@ void assign(
 
 
 //first argument is column_major->transpose to row_major
-template<template <class, class> class F, class M, class E,class EOrientation>
+template<class F, class M, class E,class EOrientation>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -578,7 +576,7 @@ void assign(
 //we also ensure here that the triangular structure is compatible
 
 //first argument is column_major->transpose to row_major
-template<template <class, class> class F, class M, class E,class EOrientation, class Triangular>
+template<class F, class M, class E,class EOrientation, class Triangular>
 void assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
@@ -593,7 +591,7 @@ void assign(
 
 
 //First Level Dispatcher, dispatches by orientation
-template<template <class,class> class F, class M, class E>
+template<class F, class M, class E>
 void assign(matrix_expression<M, cpu_tag> &m, const matrix_expression<E, cpu_tag> &e) {
 	SIZE_CHECK(m().size1()  == e().size1());
 	SIZE_CHECK(m().size2()  == e().size2());

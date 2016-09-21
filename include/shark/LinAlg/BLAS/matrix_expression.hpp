@@ -40,13 +40,13 @@ namespace blas {
 ///
 /// The outer product of two vectors v1 and v2 is defined as the matrix
 /// (outer_prod (v1, v2))_ij [i] [j] = v1[i] * v2 [j]
-template<class MatA, class MatB, class Device>
-outer_product<MatA, MatB >
+template<class VecA, class VecB, class Device>
+outer_product<VecA, VecB >
 outer_prod(
-	vector_expression<MatA, Device> const& A,
-        vector_expression<MatB, Device> const& B
+	vector_expression<VecA, Device> const& v1,
+        vector_expression<VecB, Device> const& v2
 ) {
-	return outer_product<MatA, MatB>(A(), B());
+	return outer_product<VecA, VecB>(v1(), v2());
 }
 
 
@@ -111,65 +111,20 @@ matrix_scalar_multiply<MatA> operator-(matrix_expression<MatA, Device> const& A)
 
 #define SHARK_UNARY_MATRIX_TRANSFORMATION(name, F)\
 template<class MatA, class Device>\
-matrix_unary<MatA,F<typename MatA::scalar_type> >\
-name(matrix_expression<MatA, Device> const& A){\
-	typedef F<typename MatA::scalar_type> functor_type;\
-	return matrix_unary<MatA, functor_type>(A(), functor_type());\
+matrix_unary<MatA,F >\
+name(matrix_expression<MatA, Device> const& v){\
+	return matrix_unary<MatA, F>(v(), F());\
 }
-SHARK_UNARY_MATRIX_TRANSFORMATION(conj, scalar_conj)
-SHARK_UNARY_MATRIX_TRANSFORMATION(real, scalar_real)
-SHARK_UNARY_MATRIX_TRANSFORMATION(imag, scalar_imag)
-SHARK_UNARY_MATRIX_TRANSFORMATION(abs, scalar_abs)
-SHARK_UNARY_MATRIX_TRANSFORMATION(log, scalar_log)
-SHARK_UNARY_MATRIX_TRANSFORMATION(exp, scalar_exp)
-SHARK_UNARY_MATRIX_TRANSFORMATION(sin, scalar_sin)
-SHARK_UNARY_MATRIX_TRANSFORMATION(cos, scalar_cos)
-SHARK_UNARY_MATRIX_TRANSFORMATION(tanh,scalar_tanh)
-SHARK_UNARY_MATRIX_TRANSFORMATION(atanh,scalar_atanh)
-SHARK_UNARY_MATRIX_TRANSFORMATION(sqr, scalar_sqr)
-SHARK_UNARY_MATRIX_TRANSFORMATION(abs_sqr, scalar_abs_sqr)
-SHARK_UNARY_MATRIX_TRANSFORMATION(sqrt, scalar_sqrt)
-SHARK_UNARY_MATRIX_TRANSFORMATION(sigmoid, scalar_sigmoid)
-SHARK_UNARY_MATRIX_TRANSFORMATION(softPlus, scalar_soft_plus)
-SHARK_UNARY_MATRIX_TRANSFORMATION(elem_inv, scalar_inverse)
+SHARK_UNARY_MATRIX_TRANSFORMATION(abs, functors::scalar_abs)
+SHARK_UNARY_MATRIX_TRANSFORMATION(log, functors::scalar_log)
+SHARK_UNARY_MATRIX_TRANSFORMATION(exp, functors::scalar_exp)
+SHARK_UNARY_MATRIX_TRANSFORMATION(tanh,functors::scalar_tanh)
+SHARK_UNARY_MATRIX_TRANSFORMATION(sqr, functors::scalar_sqr)
+SHARK_UNARY_MATRIX_TRANSFORMATION(sqrt, functors::scalar_sqrt)
+SHARK_UNARY_MATRIX_TRANSFORMATION(sigmoid, functors::scalar_sigmoid)
+SHARK_UNARY_MATRIX_TRANSFORMATION(softPlus, functors::scalar_soft_plus)
+SHARK_UNARY_MATRIX_TRANSFORMATION(elem_inv, functors::scalar_inverse)
 #undef SHARK_UNARY_MATRIX_TRANSFORMATION
-
-#define SHARK_MATRIX_SCALAR_TRANSFORMATION(name, F)\
-template<class MatA, class T, class Device> \
-typename boost::enable_if< \
-	std::is_convertible<T, typename MatA::scalar_type >,\
-        matrix_unary<MatA,F<typename MatA::scalar_type,T> > \
->::type \
-name (matrix_expression<MatA, Device> const& A, T scalar){ \
-	typedef F<typename MatA::scalar_type, T> functor_type; \
-	return matrix_unary<MatA, functor_type>(A(), functor_type(scalar)); \
-}
-SHARK_MATRIX_SCALAR_TRANSFORMATION(operator/, scalar_divide)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<, scalar_less_than)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<=, scalar_less_equal_than)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(operator>, scalar_bigger_than)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(operator>=, scalar_bigger_equal_than)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(operator==, scalar_equal)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(operator!=, scalar_not_equal)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(min, scalar_min)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(max, scalar_max)
-SHARK_MATRIX_SCALAR_TRANSFORMATION(pow, scalar_pow)
-#undef SHARK_MATRIX_SCALAR_TRANSFORMATION
-
-// operations of the form op(t,v)[i,j] = op(t,v[i,j])
-#define SHARK_MATRIX_SCALAR_TRANSFORMATION_2(name, F)\
-template<class T, class MatA, class Device> \
-typename boost::enable_if< \
-	std::is_convertible<T, typename MatA::scalar_type >,\
-        matrix_unary<MatA,F<typename MatA::scalar_type,T> > \
->::type \
-name (T scalar, matrix_expression<MatA, Device> const& A){ \
-	typedef F<typename MatA::scalar_type, T> functor_type; \
-	return matrix_unary<MatA, functor_type>(A(), functor_type(scalar)); \
-}
-SHARK_MATRIX_SCALAR_TRANSFORMATION_2(min, scalar_min)
-SHARK_MATRIX_SCALAR_TRANSFORMATION_2(max, scalar_max)
-#undef SHARK_MATRIX_SCALAR_TRANSFORMATION_2
 
 ///\brief Adds two Matrices
 template<class MatA, class MatB, class Device>
@@ -243,23 +198,57 @@ typename boost::enable_if<
 
 #define SHARK_BINARY_MATRIX_EXPRESSION(name, F)\
 template<class MatA, class MatB, class Device>\
-matrix_binary<MatA, MatB, F<typename MatA::value_type, typename MatB::value_type> >\
-name(matrix_expression<MatA, Device> const& A, matrix_expression<MatB, Device> const& B){\
-	SIZE_CHECK(A().size1() == B().size1());\
-	SIZE_CHECK(A().size2() == B().size2());\
-	typedef F<typename MatA::value_type, typename MatB::value_type> functor_type;\
-	return matrix_binary<MatA, MatB, functor_type>(A(),B(), functor_type());\
+matrix_binary<MatA, MatB, F >\
+name(matrix_expression<MatA, Device> const& m1, matrix_expression<MatB, Device> const& m2){\
+	SIZE_CHECK(m1().size1() == m2().size1());\
+	SIZE_CHECK(m1().size2() == m2().size2());\
+	return matrix_binary<MatA, MatB, F>(m1(),m2(), F());\
 }
-SHARK_BINARY_MATRIX_EXPRESSION(operator*, scalar_binary_multiply)
-SHARK_BINARY_MATRIX_EXPRESSION(element_prod, scalar_binary_multiply)
-SHARK_BINARY_MATRIX_EXPRESSION(operator/, scalar_binary_divide)
-SHARK_BINARY_MATRIX_EXPRESSION(pow,scalar_binary_pow)
-SHARK_BINARY_MATRIX_EXPRESSION(element_div, scalar_binary_divide)
+SHARK_BINARY_MATRIX_EXPRESSION(operator*, functors::scalar_binary_multiply)
+SHARK_BINARY_MATRIX_EXPRESSION(element_prod, functors::scalar_binary_multiply)
+SHARK_BINARY_MATRIX_EXPRESSION(operator/, functors::scalar_binary_divide)
+SHARK_BINARY_MATRIX_EXPRESSION(pow,functors::scalar_binary_pow)
+SHARK_BINARY_MATRIX_EXPRESSION(element_div, functors::scalar_binary_divide)
 #undef SHARK_BINARY_MATRIX_EXPRESSION
+
+#define SHARK_MATRIX_SCALAR_TRANSFORMATION(name, F)\
+template<class T, class MatA, class Device> \
+typename boost::enable_if< \
+	std::is_convertible<T, typename MatA::value_type >,\
+        matrix_binary<MatA, scalar_matrix<T>, F> \
+>::type \
+name (matrix_expression<MatA, Device> const& m, T t){ \
+	return matrix_binary<MatA, scalar_matrix<T>, F>(m(), scalar_matrix<T>(m().size1(), m().size2(), t) ,F()); \
+}
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator/, functors::scalar_binary_divide)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<, functors::scalar_less_than)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<=, functors::scalar_less_equal_than)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator>, functors::scalar_bigger_than)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator>=, functors::scalar_bigger_equal_than)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator==, functors::scalar_equal)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(operator!=, functors::scalar_not_equal)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(min, functors::scalar_binary_min)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(max, functors::scalar_binary_max)
+SHARK_MATRIX_SCALAR_TRANSFORMATION(pow, functors::scalar_binary_pow)
+#undef SHARK_MATRIX_SCALAR_TRANSFORMATION
+
+// operations of the form op(t,v)[i,j] = op(t,v[i,j])
+#define SHARK_MATRIX_SCALAR_TRANSFORMATION_2(name, F)\
+template<class T, class MatA, class Device> \
+typename boost::enable_if< \
+	std::is_convertible<T, typename MatA::value_type >,\
+	matrix_binary<scalar_matrix<T>, MatA, F> \
+>::type \
+name (T t, matrix_expression<MatA, Device> const& m){ \
+	return  matrix_binary<scalar_matrix<T>, MatA, F>(scalar_matrix<T>(m().size1(), m().size2(), t), m(), F()); \
+}
+SHARK_MATRIX_SCALAR_TRANSFORMATION_2(min, functors::scalar_binary_min)
+SHARK_MATRIX_SCALAR_TRANSFORMATION_2(max, functors::scalar_binary_max)
+#undef SHARK_MATRIX_SCALAR_TRANSFORMATION_2
 
 template<class MatA, class MatB, class Device>
 matrix_binary<MatA, MatB, 
-	scalar_binary_safe_divide<typename MatA::value_type, typename MatB::value_type> 
+	functors::scalar_binary_safe_divide<decltype(typename MatA::value_type() * typename MatB::value_type()) > 
 >
 safe_div(
 	matrix_expression<MatA, Device> const& A, 
@@ -268,7 +257,8 @@ safe_div(
 ){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
-	typedef scalar_binary_safe_divide<typename MatA::value_type, typename MatB::value_type> functor_type;
+	typedef decltype(typename MatA::value_type() * typename MatB::value_type()) result_type;
+	typedef functors::scalar_binary_safe_divide<result_type> functor_type;
 	return matrix_binary<MatA, MatB, functor_type>(A(),B(), functor_type(defaultValue));
 }
 
@@ -521,7 +511,7 @@ template<class MatA, class Device>
 typename real_traits<typename MatA::scalar_type>::type
 norm_frobenius(matrix_expression<MatA, Device> const& A) {
 	using std::sqrt;
-	return sqrt(sum(abs_sqr(eval_block(A))));
+	return sqrt(sum(sqr(eval_block(A))));
 }
 
 /// \brief Computes the matrix inf-norm |A|_inf

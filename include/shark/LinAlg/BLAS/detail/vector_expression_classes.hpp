@@ -25,7 +25,7 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
- #ifndef SHARK_LINALG_BLAS_VECTOR_EXPRESSION_CLASSES_HPP
+#ifndef SHARK_LINALG_BLAS_VECTOR_EXPRESSION_CLASSES_HPP
 #define SHARK_LINALG_BLAS_VECTOR_EXPRESSION_CLASSES_HPP
 
 #include "../assignment.hpp"
@@ -38,11 +38,13 @@ namespace blas {
 ///\brief Implements multiplications of a vector by a scalar
 template<class E>
 class vector_scalar_multiply:public vector_expression<vector_scalar_multiply <E>, typename E::device_type > {
+private:
+	typedef functors::scalar_multiply1<typename E::scalar_type> functor_type;
 public:
 	typedef typename E::const_closure_type expression_closure_type;
 	typedef typename E::index_type index_type;
-	typedef typename E::value_type value_type;
-	typedef typename E::scalar_type scalar_type;
+	typedef typename std::result_of<functor_type(typename E::value_type) >::type value_type;
+	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
 
@@ -100,14 +102,14 @@ public:
 
 	
 	//iterators
-	typedef transform_iterator<typename E::const_iterator,scalar_multiply1<value_type, scalar_type> > const_iterator;
+	typedef transform_iterator<typename E::const_iterator,functor_type > const_iterator;
 	typedef const_iterator iterator;
 	
 	const_iterator begin() const {
-		return const_iterator(m_expression.begin(),scalar_multiply1<value_type, scalar_type>(m_scalar));
+		return const_iterator(m_expression.begin(),functor_type(m_scalar));
 	}
 	const_iterator end() const {
-		return const_iterator(m_expression.end(),scalar_multiply1<value_type, scalar_type>(m_scalar));
+		return const_iterator(m_expression.end(),functor_type(m_scalar));
 	}
 private:
 	expression_closure_type m_expression;
@@ -172,14 +174,14 @@ private:
 ///
 ///transforms a vector Expression e of type E using a Function f of type F as an elementwise transformation f(e(i))
 ///This transformation needs f to be constant, meaning that applying f(x), f(y), f(z) yields the same results independent of the
-///order of application. Also F must provide a type F::result_type indicating the result type of the functor.
+///order of application. 
 template<class E, class F>
 class vector_unary: public vector_expression<vector_unary<E, F>, typename E::device_type > {
 public:
 	typedef F functor_type;
 	typedef typename E::const_closure_type expression_closure_type;
 	typedef typename E::index_type index_type;
-	typedef typename F::result_type value_type;
+	typedef typename std::result_of<F(typename E::value_type) >::type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
@@ -262,12 +264,9 @@ private:
 template<class E1, class E2>
 class vector_addition: public vector_expression<vector_addition<E1,E2>, typename E1::device_type > {
 private:
-	typedef scalar_binary_plus<
-		typename E1::value_type,
-		typename E2::value_type
-	> functor_type;
+	typedef functors::scalar_binary_plus functor_type;
 public:
-	typedef typename functor_type::result_type value_type;
+	typedef typename std::result_of<functor_type(typename E1::value_type,typename E2::value_type) >::type value_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
@@ -365,7 +364,7 @@ class vector_binary:public vector_expression<vector_binary<E1,E2, F>,typename E1
 	typedef typename E2::const_closure_type rhs_closure_type;
 public:
 	typedef F functor_type;
-	typedef typename functor_type::result_type value_type;
+	typedef typename std::result_of<F(typename E1::value_type, typename E2::value_type)>::type value_type;
 	typedef typename E1::index_type index_type;
 	typedef value_type scalar_type;
 	typedef value_type const_reference;

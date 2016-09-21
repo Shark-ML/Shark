@@ -674,7 +674,7 @@ public:
 	typedef typename BaseIterator::iterator_category iterator_category;
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
-	typedef typename F::result_type value_type;
+	typedef typename std::result_of<F(typename BaseIterator::value_type)>::type value_type;
 	typedef value_type reference;
 	typedef value_type *pointer;
 
@@ -768,7 +768,7 @@ public iterator_base_traits<
 	>::iterator_category
 >::template iterator_base<
 	binary_transform_iterator<Iterator1,Iterator2,F>,
-	typename F::result_type
+	typename std::result_of<F(typename Iterator1::value_type, typename Iterator2::value_type)>::type
 >::type{
 private:
 	typedef typename Iterator1::iterator_category category1;
@@ -780,7 +780,7 @@ public:
 	>::iterator_category iterator_category;
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
-	typedef typename F::result_type value_type;
+	typedef typename std::result_of<F(typename Iterator1::value_type, typename Iterator2::value_type)>::type value_type;
 	typedef value_type reference;
 	typedef value_type *pointer;
 
