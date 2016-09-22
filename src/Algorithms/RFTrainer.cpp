@@ -172,10 +172,8 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 	m_inputDimension = inputDimension(dataset);
 
 	model.setInputDimension(m_inputDimension);
-	model.setLabelDimension(numberOfClasses(dataset));
 
-	//Find the largest label, so we know how big the histogram should be
-	m_maxLabel = static_cast<unsigned int>(numberOfClasses(dataset))-1;
+	m_labelCardinality = numberOfClasses(dataset);
 
 	m_regressionLearner = false;
 	setDefaults();
@@ -282,8 +280,8 @@ buildTree(AttributeTables& tables,
 		isLeaf = true;
 	}else{
 		//Count vectors
-		ClassVector cBelow(m_maxLabel+1),cBestBelow(m_maxLabel+1),
-				cBestAbove(m_maxLabel+1);
+		ClassVector cBelow(m_labelCardinality),cBestBelow(m_labelCardinality),
+				cBestAbove(m_labelCardinality);
 
 		//Randomly select the attributes to test for split
 		set<std::size_t> tableIndicies;
@@ -365,7 +363,7 @@ buildTree(AttributeTables& tables,
 
 RealVector RFTrainer::hist(ClassVector const& countVector) const {
 
-	RealVector histogram(m_maxLabel+1,0.0);
+	RealVector histogram(m_labelCardinality,0.0);
 
 	std::size_t totalElements = 0;
 
@@ -612,7 +610,7 @@ void RFTrainer::createAttributeTables(Data<RealVector> const& dataset, Attribute
 
 RFTrainer::ClassVector RFTrainer::
 createCountVector(ClassificationDataset const& dataset) const {
-	ClassVector cAbove = ClassVector(m_maxLabel+1);
+	ClassVector cAbove = ClassVector(m_labelCardinality);
 	std::size_t elements = dataset.numberOfElements();
 	for(std::size_t i = 0 ; i < elements; i++){
 		++cAbove[dataset.element(i).label];

@@ -74,8 +74,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 	//Pass input dimension (i.e., number of attributes) to tree model
 	model.setInputDimension(m_inputDimension);
 
-	//Find the largest label, so we know how big the histogram should be
-	m_maxLabel = static_cast<unsigned int>(numberOfClasses(dataset))-1;
+	m_labelCardinality = numberOfClasses(dataset);
 
 	// create cross-validation folds
 	ClassificationDataset set=dataset;
@@ -124,7 +123,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 	//~ m_inputDimension = inputDimension(dataset);
 
 	//~ //Find the largest label, so we know how big the histogram should be
-	//~ m_maxLabel = numberOfClasses(dataset)-1;
+	//~ m_labelCardinality = numberOfClasses(dataset);
 
 	//~ // create cross-validation folds
 	//~ ClassificationDataset set=dataset;
@@ -273,8 +272,8 @@ buildTree(AttributeTables const &tables,
 		//search the split with the best impurity
 		double bestImpurity = n+1.0;
 		std::size_t bestAttributeIndex = 0, bestAttributeValIndex = 0;//index of the best split
-		ClassVector cBelow(m_maxLabel+1),cBestBelow(m_maxLabel+1),
-				cBestAbove(m_maxLabel+1);//labels of best split
+		ClassVector cBelow(m_labelCardinality),cBestBelow(m_labelCardinality),
+				cBestAbove(m_labelCardinality);//labels of best split
 
 		for (std::size_t attributeIndex=0; attributeIndex < m_inputDimension; ++attributeIndex){
 			AttributeTable const& table = tables[attributeIndex];
@@ -339,7 +338,7 @@ RealVector CARTTrainer::hist(ClassVector const& countVector) const {
 
 	//create a normed histogram
 	std::size_t totalElements = 0;
-	RealVector normedHistogram(m_maxLabel+1);
+	RealVector normedHistogram(m_labelCardinality);
 	normedHistogram.clear();
 	for (std::size_t i=0, s=countVector.size(); i<s; ++i){
 		normedHistogram(i) = countVector[i];
@@ -569,7 +568,7 @@ CARTTrainer::AttributeTables CARTTrainer::createAttributeTables(Data<RealVector>
 
 CARTTrainer::ClassVector CARTTrainer::
 createCountVector(ClassificationDataset const& dataset) const {
-	auto cAbove = ClassVector(m_maxLabel+1);
+	auto cAbove = ClassVector(m_labelCardinality);
 	for(std::size_t i = 0 ; i < dataset.numberOfElements(); i++){
 		cAbove[dataset.element(i).label]++;
 	}

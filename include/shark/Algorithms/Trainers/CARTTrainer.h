@@ -116,14 +116,13 @@ protected:
 	///Number of attributes in the dataset
 	std::size_t m_inputDimension;
 
-	///Size of labels
+	///Dimension of a label. Used in Regression
 	std::size_t m_labelDimension;
+	///Holds the number of distinct labels. Used in Classification
+	std::size_t m_labelCardinality;
 
 	///Controls the number of samples in the terminal nodes
 	std::size_t m_nodeSize;
-
-	///Holds the maximum label. Used in allocating the histograms
-	unsigned int m_maxLabel;
 
 	///Number of folds used to create the tree.
 	unsigned int m_numberOfFolds;
