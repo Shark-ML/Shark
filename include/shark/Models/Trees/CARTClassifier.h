@@ -156,7 +156,7 @@ public:
 		optimizeTree(m_tree);
 	}
 	
-	/// Get the model split matrix.
+	/// Get the model tree.
 	TreeType getTree() const {
 		return m_tree;
 	}

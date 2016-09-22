@@ -91,7 +91,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 		//Create attribute tables
 		//O.K. stores how often label(i) can be found in the dataset
 		//O.K. TODO: std::vector<unsigned int> is sufficient
-		boost::unordered_map<std::size_t, std::size_t> cAbove = createCountMatrix(dataTrain);
+		auto cAbove = createCountVector(dataTrain);
 		AttributeTables tables = createAttributeTables(dataTrain.inputs());
 		
 
@@ -138,7 +138,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 		//~ ClassificationDataset dataTrain = folds.training(fold);
 		//~ ClassificationDataset dataTest = folds.validation(fold);
 		//~ //Create attribute tables
-		//~ boost::unordered_map<size_t, size_t> cAbove = createCountMatrix(dataTrain);
+		//~ auto cAbove = createCountVector(dataTrain);
 		//~ AttributeTables tables = createAttributeTables(dataTrain.inputs());
 
 		//~ //create initial tree for the fold
@@ -245,42 +245,46 @@ void CARTTrainer::measureStrength(TreeType & tree, std::size_t nodeId, std::size
 }
 
 //Classification case
-CARTTrainer::TreeType CARTTrainer::buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
-	//Construct tree
+CARTTrainer::TreeType CARTTrainer::
+buildTree(AttributeTables const &tables,
+		  ClassificationDataset const &dataset,
+		  ClassVector &cAbove, std::size_t nodeId) {
+    //Construct tree
 	ModelType::NodeInfo nodeInfo;
 	nodeInfo.nodeId = nodeId;
 	nodeInfo.leftNodeId = 0;
 	nodeInfo.rightNodeId = 0;
-	// calculate the label of the node, which is the propability of class c 
+	// calculate the label of the node, which is the propability of class c
 	// given all points in this split for every class
 	nodeInfo.label = hist(cAbove);
 	// calculate the misclassification propability,
 	// 1-p(j*|t) where j* is the class the node t is most likely to belong to;
 	nodeInfo.misclassProp = 1- *std::max_element(nodeInfo.label.begin(), nodeInfo.label.end());
-	
+
 	//calculate leaves from the data
-	
+
 	//n = Total number of cases in the split
 	std::size_t n = tables[0].size();
 
 	if(!(gini(cAbove,n)==0 || n <= m_nodeSize)){
 		//Count matrices
-		
+
 
 		//search the split with the best impurity
 		double bestImpurity = n+1.0;
-		std::size_t bestAttributeIndex, bestAttributeValIndex;//index of the best split
-		boost::unordered_map<std::size_t, std::size_t> cBestBelow, cBestAbove;//labels of best split
+		std::size_t bestAttributeIndex = 0, bestAttributeValIndex = 0;//index of the best split
+		ClassVector cBelow(m_maxLabel+1),cBestBelow(m_maxLabel+1),
+				cBestAbove(m_maxLabel+1);//labels of best split
 
-		for (std::size_t attributeIndex=0; attributeIndex < m_inputDimension; attributeIndex++){
+		for (std::size_t attributeIndex=0; attributeIndex < m_inputDimension; ++attributeIndex){
 			AttributeTable const& table = tables[attributeIndex];
-			boost::unordered_map<std::size_t, std::size_t> cTmpAbove = cAbove;
-			boost::unordered_map<std::size_t, std::size_t> cBelow;
-			for(std::size_t i=0; i<n-1; i++){//go through all possible splits
+			auto cTmpAbove = cAbove;
+			std::fill(cBelow.begin(),cBelow.end(),0);
+			for(std::size_t i=0; i<n-1; ++i){//go through all possible splits
 				//Update the count classes of both splits after element i moved to the left split
 				unsigned int label = dataset.element(table[i].id).label;
-				cBelow[label]++;
-				cTmpAbove[label]--;
+				++cBelow[label];
+				--cTmpAbove[label];
 
 				if(table[i].value != table[i+1].value){
 					//n1 = Number of cases to the left child node
@@ -310,14 +314,14 @@ CARTTrainer::TreeType CARTTrainer::buildTree(AttributeTables const& tables, Clas
 			//Continue recursively
 			nodeInfo.attributeIndex = bestAttributeIndex;
 			nodeInfo.attributeValue = bestAttributeVal;
-			
+
 
 			//Store entry in the tree
 			nodeInfo.leftNodeId = nodeId+1;
 			TreeType lTree = buildTree(lTables, dataset, cBestBelow, nodeInfo.leftNodeId);
 			nodeInfo.rightNodeId = nodeInfo.leftNodeId+ lTree.size();
 			TreeType rTree = buildTree(rTables, dataset, cBestAbove, nodeInfo.rightNodeId);
-			
+
 			TreeType tree;
 			tree.push_back(nodeInfo);
 			tree.insert(tree.end(), lTree.begin(), lTree.end());
@@ -325,22 +329,21 @@ CARTTrainer::TreeType CARTTrainer::buildTree(AttributeTables const& tables, Clas
 			return tree;
 		}
 	}
-	
+
 	TreeType tree;
 	tree.push_back(nodeInfo);
 	return tree;
 }
 
-RealVector CARTTrainer::hist(boost::unordered_map<std::size_t, std::size_t> countMatrix){
+RealVector CARTTrainer::hist(ClassVector const& countVector) const {
 
 	//create a normed histogram
 	std::size_t totalElements = 0;
 	RealVector normedHistogram(m_maxLabel+1);
 	normedHistogram.clear();
-	boost::unordered_map<std::size_t, std::size_t>::iterator it;
-	for ( it=countMatrix.begin() ; it != countMatrix.end(); it++ ){
-		normedHistogram(it->first) = it->second;
-		totalElements += it->second;
+	for (std::size_t i=0, s=countVector.size(); i<s; ++i){
+		normedHistogram(i) = countVector[i];
+		totalElements += countVector[i];
 	}
 	normedHistogram /= totalElements;
 	return normedHistogram;
@@ -349,7 +352,11 @@ RealVector CARTTrainer::hist(boost::unordered_map<std::size_t, std::size_t> coun
 
 
 //Build CART tree in the regression case
-CARTTrainer::TreeType CARTTrainer::buildTree(AttributeTables const& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, std::size_t trainSize){
+CARTTrainer::TreeType CARTTrainer::
+buildTree(AttributeTables const& tables,
+		  RegressionDataset const& dataset,
+		  std::vector<RealVector> const& labels,
+		  std::size_t nodeId, std::size_t trainSize){
 
 	//Construct tree
 	CARTClassifier<RealVector>::NodeInfo nodeInfo;
@@ -382,7 +389,7 @@ CARTTrainer::TreeType CARTTrainer::buildTree(AttributeTables const& tables, Regr
 		RealVector labelSumAbove(m_labelDimension), labelSumBelow(m_labelDimension);
 
 		//Index of attributes
-		std::size_t attributeIndex, bestAttributeIndex, bestAttributeValIndex;
+		std::size_t bestAttributeIndex = 0, bestAttributeValIndex = 0;
 
 		//Attribute values
 		double bestAttributeVal;
@@ -390,7 +397,7 @@ CARTTrainer::TreeType CARTTrainer::buildTree(AttributeTables const& tables, Regr
 
 		std::size_t prev;
 		bool doSplit = false;
-		for ( attributeIndex = 0; attributeIndex< m_inputDimension; attributeIndex++){
+		for ( std::size_t attributeIndex = 0; attributeIndex< m_inputDimension; attributeIndex++){
 
 			labelSumBelow.clear();
 			labelSumAbove.clear();
@@ -529,12 +536,10 @@ void CARTTrainer::splitAttributeTables(AttributeTables const& tables, std::size_
 ///Calculates the Gini impurity of a node. The impurity is defined as
 ///1-sum_j p(j|t)^2
 ///i.e the 1 minus the sum of the squared probability of observing class j in node t
-double CARTTrainer::gini(boost::unordered_map<std::size_t, std::size_t>& countMatrix, std::size_t n){
+double CARTTrainer::gini(ClassVector const& countVector, std::size_t n) const {
 	double res = 0;
-	boost::unordered_map<std::size_t, std::size_t>::iterator it;
-	double denominator = n;
-	for ( it=countMatrix.begin() ; it != countMatrix.end(); it++ ){
-		res += sqr(it->second/denominator);
+	for ( auto i : countVector){
+		res += sqr(i/ static_cast<double>(n));
 	}
 	return 1-res;
 }
@@ -562,8 +567,9 @@ CARTTrainer::AttributeTables CARTTrainer::createAttributeTables(Data<RealVector>
 	return tables;
 }
 
-boost::unordered_map<std::size_t, std::size_t> CARTTrainer::createCountMatrix(ClassificationDataset const& dataset){
-	boost::unordered_map<std::size_t, std::size_t> cAbove;
+CARTTrainer::ClassVector CARTTrainer::
+createCountVector(ClassificationDataset const& dataset) const {
+	auto cAbove = ClassVector(m_maxLabel+1);
 	for(std::size_t i = 0 ; i < dataset.numberOfElements(); i++){
 		cAbove[dataset.element(i).label]++;
 	}

@@ -110,6 +110,8 @@ protected:
 
 	typedef ModelType::TreeType TreeType;
 
+	// LabelVector
+	using ClassVector = UIntVector;
 
 	///Number of attributes in the dataset
 	std::size_t m_inputDimension;
@@ -129,14 +131,14 @@ protected:
 	//Classification functions
 	///Builds a single decision tree from a classification dataset
 	///The method requires the attribute tables,
-	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId );
+	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, ClassVector& cAbove, std::size_t nodeId );
 
 	///Calculates the Gini impurity of a node. The impurity is defined as
 	///1-sum_j p(j|t)^2
 	///i.e the 1 minus the sum of the squared probability of observing class j in node t
-	SHARK_EXPORT_SYMBOL double gini(boost::unordered_map<std::size_t, std::size_t>& countMatrix, std::size_t n);
-	///Creates a histogram from the count matrix.
-	SHARK_EXPORT_SYMBOL RealVector hist(boost::unordered_map<std::size_t, std::size_t> countMatrix);
+	SHARK_EXPORT_SYMBOL double gini(ClassVector const& countVector, std::size_t n) const;
+	///Creates a histogram from the count vector.
+	SHARK_EXPORT_SYMBOL RealVector hist(ClassVector const& countVector) const;
 
 	///Regression functions
 	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables const& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, std::size_t trainSize);
@@ -162,7 +164,7 @@ protected:
 	///Splits the attribute tables by a attribute index and value. Returns a left and a right attribute table in the variables LAttributeTables and RAttributeTables
 	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
 	///Crates count matrices from a classification dataset
-	SHARK_EXPORT_SYMBOL boost::unordered_map<std::size_t, std::size_t> createCountMatrix(ClassificationDataset const& dataset);
+	SHARK_EXPORT_SYMBOL CARTTrainer::ClassVector createCountVector(ClassificationDataset const& dataset) const;
 
 
 };

@@ -134,19 +134,22 @@ protected:
 	/// collecting of attribute tables
 	typedef std::vector < AttributeTable > AttributeTables;
 
-	/// Create attribute tables from a data set, and in the process create a count matrix (cAbove).
+	/// ClassVector
+	using ClassVector = UIntVector;
+
+	/// Create attribute tables from a data set, and in the process create a count vector (cAbove).
 	/// A dataset with m features results in m attribute tables.
 	/// [attribute | class/value | row id ]
 	SHARK_EXPORT_SYMBOL void createAttributeTables(Data<RealVector> const& dataset, AttributeTables& tables);
 
-	/// Create a count matrix as used in the classification case.
-	SHARK_EXPORT_SYMBOL void createCountMatrix(ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove);
+	/// Create a count vector as used in the classification case.
+	SHARK_EXPORT_SYMBOL RFTrainer::ClassVector createCountVector(ClassificationDataset const& dataset) const;
 
 	// Split attribute tables into left and right parts.
 	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
 
 	/// Build a decision tree for classification
-	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId);
+	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, ClassificationDataset const& dataset, ClassVector& cAbove, std::size_t nodeId);
 
 	/// Builds a decision tree for regression
 	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId);
@@ -154,14 +157,14 @@ protected:
 	/// comparison function for sorting an attributeTable
 	SHARK_EXPORT_SYMBOL static bool tableSort(RFAttribute const& v1, RFAttribute const& v2);
 
-	/// Generate a histogram from the count matrix.
-	SHARK_EXPORT_SYMBOL RealVector hist(boost::unordered_map<std::size_t, std::size_t> countMatrix);
+	/// Generate a histogram from the count vector.
+	SHARK_EXPORT_SYMBOL RealVector hist(ClassVector const& countVector) const;
 
 	/// Average label over a vector.
 	SHARK_EXPORT_SYMBOL RealVector average(std::vector<RealVector> const& labels);
 
-	/// Calculate the Gini impurity of the countMatrix
-	SHARK_EXPORT_SYMBOL double gini(boost::unordered_map<std::size_t, std::size_t> & countMatrix, std::size_t n);
+	/// Calculate the Gini impurity of the countVector
+	SHARK_EXPORT_SYMBOL double gini(ClassVector const& countVector, std::size_t n) const;
 
 	/// Total Sum Of Squares
 	SHARK_EXPORT_SYMBOL double totalSumOfSquares(std::vector<RealVector>& labels, std::size_t from, std::size_t to, RealVector const& sumLabel);
@@ -186,7 +189,7 @@ protected:
 	std::size_t m_try;
 
 	/// number of trees in the forest
-	std::size_t m_B;
+	std::uint32_t m_B;
 
 	/// number of samples in the terminal nodes
 	std::size_t m_nodeSize;

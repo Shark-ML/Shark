@@ -39,6 +39,7 @@
 #include <boost/range/algorithm/random_shuffle.hpp>
 #include <shark/Data/DataView.h>
 #include <set>
+#include <unordered_map>
 #include <shark/Core/OpenMP.h>
 
 using namespace shark;
@@ -107,7 +108,7 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 	DataView<RegressionDataset const> elements(dataset);
 
 	//Generate m_B trees
-	SHARK_PARALLEL_FOR(int i = 0; i < (int)m_B; ++i){
+	SHARK_PARALLEL_FOR(std::uint32_t b = 0; b < m_B; ++b){
 		//For each tree generate a subset of the dataset
 		//generate indices of the dataset (pick k out of n elements)
 		std::vector<std::size_t> subsetIndices(dataset.numberOfElements());
@@ -184,7 +185,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 	DataView<ClassificationDataset const> elements(dataset);
 
 	//Generate m_B trees
-	SHARK_PARALLEL_FOR(int i = 0; i < (int)m_B; ++i){
+	SHARK_PARALLEL_FOR(std::uint32_t b = 0; b < m_B; ++b){
 		//For each tree generate a subset of the dataset
 		//generate indices of the dataset (pick k out of n elements)
 		std::vector<std::size_t> subsetIndices(dataset.numberOfElements());
@@ -200,10 +201,9 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		ClassificationDataset dataTrain = toDataset(subset(elements,subsetIndices));
 
 		//Create attribute tables
-		boost::unordered_map<std::size_t, std::size_t> cAbove;
 		AttributeTables tables;
 		createAttributeTables(dataTrain.inputs(), tables);
-		createCountMatrix(dataTrain, cAbove);
+		auto cAbove = createCountVector(dataTrain);
 
 		CARTClassifier<RealVector>::TreeType tree = buildTree(tables, dataTrain, cAbove, 0);
 		CARTClassifier<RealVector> cart(tree, m_inputDimension);
@@ -256,7 +256,10 @@ void RFTrainer::setOOBratio(double ratio){
 
 
 
-CARTClassifier<RealVector>::TreeType RFTrainer::buildTree(AttributeTables& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId ){
+CARTClassifier<RealVector>::TreeType RFTrainer::
+buildTree(AttributeTables& tables,
+		  ClassificationDataset const& dataset,
+		  ClassVector& cAbove, std::size_t nodeId ){
 	CARTClassifier<RealVector>::TreeType lTree, rTree;
 
 	//Construct tree
@@ -278,30 +281,30 @@ CARTClassifier<RealVector>::TreeType RFTrainer::buildTree(AttributeTables& table
 	if(gini(cAbove,tables[0].size())==0 || n <= m_nodeSize){
 		isLeaf = true;
 	}else{
-		//Count matrices
-		boost::unordered_map<std::size_t, std::size_t> cBelow, cBestBelow, cBestAbove;
+		//Count vectors
+		ClassVector cBelow(m_maxLabel+1),cBestBelow(m_maxLabel+1),
+				cBestAbove(m_maxLabel+1);
 
 		//Randomly select the attributes to test for split
 		set<std::size_t> tableIndicies;
 		generateRandomTableIndicies(tableIndicies);
 
 		//Index of attributes
-		std::size_t bestAttributeIndex, bestAttributeValIndex;
+		std::size_t bestAttributeIndex = 0, bestAttributeValIndex = 0;
 
 		//Attribute values
 		double bestAttributeVal;
 		double bestImpurity = n+1.0;
 
-		for (set<std::size_t>::iterator it=tableIndicies.begin() ; it != tableIndicies.end(); it++ ){
-			std::size_t attributeIndex = *it;
-			boost::unordered_map<std::size_t, std::size_t> cTmpAbove = cAbove;
-			cBelow.clear();
-			for(std::size_t i=1; i<n; i++){
+		for (std::size_t attributeIndex : tableIndicies){
+			auto cTmpAbove = cAbove;
+			std::fill(cBelow.begin(),cBelow.end(),0);
+			for(std::size_t i=1; i<n; ++i){
 				std::size_t prev = i-1;
 
 				//Update the count of the label
-				cBelow[dataset.element(tables[attributeIndex][prev].id).label]++;
-				cTmpAbove[dataset.element(tables[attributeIndex][prev].id).label]--;
+				++cBelow[dataset.element(tables[attributeIndex][prev].id).label];
+				--cTmpAbove[dataset.element(tables[attributeIndex][prev].id).label];
 
 				if(tables[attributeIndex][prev].value!=tables[attributeIndex][i].value){
 					//n1 = Number of cases to the left child node
@@ -360,16 +363,15 @@ CARTClassifier<RealVector>::TreeType RFTrainer::buildTree(AttributeTables& table
 	return tree;
 }
 
-RealVector RFTrainer::hist(boost::unordered_map<std::size_t, std::size_t> countMatrix){
+RealVector RFTrainer::hist(ClassVector const& countVector) const {
 
 	RealVector histogram(m_maxLabel+1,0.0);
 
 	std::size_t totalElements = 0;
 
-	boost::unordered_map<std::size_t, std::size_t>::iterator it;
-	for ( it=countMatrix.begin() ; it != countMatrix.end(); it++ ){
-		histogram(it->first) = (double)it->second;
-		totalElements += it->second;
+	for (std::size_t i = 0, s = countVector.size(); i<s; ++i){
+		histogram(i) = countVector[i];
+		totalElements += countVector[i];
 	}
 	histogram /= totalElements;
 
@@ -409,7 +411,7 @@ CARTClassifier<RealVector>::TreeType RFTrainer::buildTree(AttributeTables& table
 		generateRandomTableIndicies(tableIndicies);
 
 		//Index of attributes
-		std::size_t attributeIndex, bestAttributeIndex, bestAttributeValIndex;
+		std::size_t bestAttributeIndex = 0, bestAttributeValIndex = 0;
 
 		//Attribute values
 		double bestAttributeVal;
@@ -417,8 +419,7 @@ CARTClassifier<RealVector>::TreeType RFTrainer::buildTree(AttributeTables& table
 
 		std::size_t prev;
 		bool doSplit = false;
-		for (set<std::size_t>::iterator it=tableIndicies.begin() ; it != tableIndicies.end(); it++ ){
-			attributeIndex = *it;
+		for (std::size_t attributeIndex : tableIndicies){
 
 			labelSumBelow.clear();
 			labelSumAbove.clear();
@@ -539,7 +540,7 @@ void RFTrainer::splitAttributeTables(AttributeTables const& tables, std::size_t 
 	AttributeTable table;
 
 	//Build a hash table for fast lookup
-	boost::unordered_map<std::size_t, bool> hash;
+	std::unordered_map<std::size_t, bool> hash;
 	for(std::size_t i = 0; i< tables[index].size(); i++){
 		hash[tables[index][i].id] = (i<=valIndex);
 	}
@@ -572,20 +573,19 @@ void RFTrainer::generateRandomTableIndicies(set<std::size_t>& tableIndicies){
 ///Calculates the Gini impurity of a node. The impurity is defined as
 ///1-sum_j p(j|t)^2
 ///i.e the 1 minus the sum of the squared probability of observing class j in node t
-double RFTrainer::gini(boost::unordered_map<std::size_t, std::size_t> & countMatrix, std::size_t n){
-	double res = 0;
-	boost::unordered_map<std::size_t, std::size_t>::iterator it;
+double RFTrainer::gini(ClassVector const& countVector, std::size_t n) const{
+	double res = 0.;
 	if(n){
 		n = n*n;
-		for ( it=countMatrix.begin() ; it != countMatrix.end(); it++ ){
-			res += sqr(it->second)/(double)n;
+		for(auto const& i: countVector){
+			res += sqr(i)/ static_cast<double>(n);
 		}
 	}
 	return 1-res;
 }
 
 
-/// Creates the attribute tables, and in the process creates a count Matrix (cAbove).
+/// Creates the attribute tables, and in the process creates a count vector (cAbove).
 /// A dataset consisting of m input variables has m attribute tables.
 /// [attribute | class/value | rid ]
 void RFTrainer::createAttributeTables(Data<RealVector> const& dataset, AttributeTables& tables){
@@ -610,11 +610,14 @@ void RFTrainer::createAttributeTables(Data<RealVector> const& dataset, Attribute
 }
 
 
-void RFTrainer::createCountMatrix(ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove){
+RFTrainer::ClassVector RFTrainer::
+createCountVector(ClassificationDataset const& dataset) const {
+	ClassVector cAbove = ClassVector(m_maxLabel+1);
 	std::size_t elements = dataset.numberOfElements();
 	for(std::size_t i = 0 ; i < elements; i++){
-		cAbove[dataset.element(i).label]++;
+		++cAbove[dataset.element(i).label];
 	}
+	return cAbove;
 }
 
 bool RFTrainer::tableSort(RFAttribute const& v1, RFAttribute const& v2) {
