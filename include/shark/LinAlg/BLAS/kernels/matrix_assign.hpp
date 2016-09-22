@@ -38,41 +38,45 @@ namespace blas {
 /////////////////////////////////////////////////////
 
 namespace kernels{
+namespace detail{
 // Explicitly iterating row major
 template<class F, class M>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	typename M::value_type t, 
 	row_major
 ){
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		auto rowM = row(m,i);
-		assign<F>(rowM,t);
+		kernels::assign<F>(rowM,t);
 	}
 }
 // Explicitly iterating column major
 template<class F, class M>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	typename M::value_type t, 
 	column_major
 ){
 	for(std::size_t j = 0; j != m().size2(); ++j){
 		auto columnM = column(m,j);
-		assign<F>(columnM,t);
+		kernels::assign<F>(columnM,t);
 	}
 }
-
-
 // Spcial case triangular packed - just calls the first two implementations.
 template<class F, class M, class Orientation, class Triangular>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	typename M::value_type t, 
 	triangular<Orientation,Triangular>
 ){
-	assign<F>(m,t,Orientation());
+	matrix_assign<F>(m,t,Orientation());
 }
+
+}
+
+
+
 
 // Dispatcher
 template<class F, class M>
@@ -81,17 +85,18 @@ void assign(
 	typename M::value_type t
 ){
 	typedef typename M::orientation orientation;
-	assign<F> (m, t, orientation());
+	detail::matrix_assign<F> (m, t, orientation());
 }
 
 /////////////////////////////////////////////////////////////////
 //////Matrix Assignment implementing op=
 ////////////////////////////////////////////////////////////////
 
+namespace detail{
 //direct assignment without functor
 //the cases were both arguments have the same orientation can be implemented using assign.
 template<class M, class E,class TagE, class TagM>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, row_major,TagE, TagM
@@ -106,7 +111,7 @@ void assign(
 
 //dense-dense case
 template<class M, class E>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major,dense_tag, dense_tag
@@ -142,7 +147,7 @@ void assign(
 
 // dense-sparse
 template<class M, class E>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major,dense_tag, sparse_tag
@@ -156,7 +161,7 @@ void assign(
 
 //sparse-dense
 template<class M, class E>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major, sparse_tag, dense_tag
@@ -169,7 +174,7 @@ void assign(
 
 //sparse-sparse
 template<class M, class E>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major,sparse_tag,sparse_tag
@@ -219,7 +224,7 @@ void assign(
 
 //packed row_major,row_major
 template<class M, class E,class Triangular>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	triangular<row_major,Triangular>, triangular<row_major,Triangular>,
@@ -242,7 +247,7 @@ void assign(
 ////packed row_major,column_major
 //todo: this is suboptimal as we do strided access!!!!
 template<class M, class E,class Triangular>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	triangular<row_major,Triangular>, triangular<column_major,Triangular>,
@@ -262,18 +267,18 @@ void assign(
 //general dispatcher: if the second argument has an unknown orientation
 // it is chosen the same as the first one
 template<class M, class E, class TagE, class TagM>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, unknown_orientation ,TagE tagE, TagM tagM
 ) {
-	assign(m,e,row_major(),row_major(),tagE,tagM);
+	matrix_assign(m,e,row_major(),row_major(),tagE,tagM);
 }
 
 //general dispatcher: if the first argumeent is column major, we transpose the whole expression
 //so that it  is row-major, this saves us to implment everything twice.
 template<class M, class E,class EOrientation, class TagE, class TagM>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	column_major, EOrientation,TagE tagE, TagM tagM
@@ -281,12 +286,12 @@ void assign(
 	typedef typename EOrientation::transposed_orientation TEOrientation;
 	auto transM = trans(m);
 	auto transE = trans(e);
-	assign(transM,transE,row_major(),TEOrientation(),tagE,tagM);
+	matrix_assign(transM,transE,row_major(),TEOrientation(),tagE,tagM);
 }
 
 //first argument is column_major->transpose to row_major
 template<class M, class E,class EOrientation, class Triangular, class TagM, class TagE>
-void assign(
+void matrix_assign(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	triangular<column_major,Triangular>, triangular<EOrientation,Triangular>,
@@ -296,19 +301,20 @@ void assign(
 	typedef typename E::orientation::transposed_orientation TEPacked;
 	auto transM = trans(m);
 	auto transE = trans(e);
-	assign(transM,transE,TMPacked(),TEPacked(),tagM,tagE);
+	matrix_assign(transM,transE,TMPacked(),TEPacked(),tagM,tagE);
+}
 }
 
 // Dispatcher
 template<class M, class E>
-void assign(matrix_expression<M, cpu_tag> &m, const matrix_expression<E, cpu_tag> &e) {
+void assign(matrix_expression<M, cpu_tag>& m, matrix_expression<E, cpu_tag> const& e) {
 	SIZE_CHECK(m().size1() == e().size1());
 	SIZE_CHECK(m().size2() == e().size2());
 	typedef typename M::orientation MOrientation;
 	typedef typename E::orientation EOrientation;
 	typedef typename M::evaluation_category::tag MCategory;
 	typedef typename E::evaluation_category::tag ECategory;
-	assign(m, e, MOrientation(),EOrientation(),MCategory(), ECategory());
+	detail::matrix_assign(m, e, MOrientation(),EOrientation(),MCategory(), ECategory());
 }
 
 
@@ -316,12 +322,13 @@ void assign(matrix_expression<M, cpu_tag> &m, const matrix_expression<E, cpu_tag
 //////Matrix Assignment With Functor implementing +=,-=...
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+namespace detail{
 //we only implement the case where the target is row major and than map the rest into these
 	
 //when both are row-major we can map to vector case
 //this is not necessarily efficient if m is sparse.
 template<class F, class M, class E, class TagE, class TagM>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, row_major,TagM, TagE
@@ -336,7 +343,7 @@ void assign(
 
 //dense-dense case
 template<class F,class M, class E>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major,dense_tag, dense_tag
@@ -373,7 +380,7 @@ void assign(
 
 //dense-sparse case
 template<class F,class M, class E>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major,dense_tag, sparse_tag
@@ -386,7 +393,7 @@ void assign(
 
 //sparse-dense case
 template<class F,class M, class E>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major, sparse_tag, dense_tag
@@ -399,13 +406,13 @@ void assign(
 
 //sparse-sparse
 template<class F,class M, class E>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major,sparse_tag t,sparse_tag
 ) {
 	typename matrix_temporary<M>::type eTrans = e;//explicit calculation of the transpose for now
-	assign<F>(m,eTrans,row_major(),row_major(),t,t);
+	matrix_assign_functor<F>(m,eTrans,row_major(),row_major(),t,t);
 	//~ F<typename M::iterator::reference, typename E::value_type> f;
 	//~ //first evaluate e and fill the values  togethe into a vector which 
 	//~ //is then sorted by row_major order
@@ -472,7 +479,7 @@ void assign(
 
 //kernels for packed
 template<class F, class M, class E, class Triangular>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	triangular<row_major,Triangular>, triangular<row_major,Triangular>
@@ -497,7 +504,7 @@ void assign(
 
 //todo: this is suboptimal as we do strided access!!!!
 template<class F, class M, class E, class Triangular>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	triangular<row_major,Triangular>, triangular<column_major,Triangular>
@@ -527,41 +534,41 @@ void assign(
 
 //everything fulfilled -> dispatch sparse/dense computing versions
 template<class F, class M, class E>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, row_major
 ) {
 	typedef typename M::evaluation_category::tag MCategory;
 	typedef typename E::evaluation_category::tag ECategory;
-	assign<F>(m,e,row_major(),row_major(),MCategory(),ECategory());
+	matrix_assign_functor<F>(m,e,row_major(),row_major(),MCategory(),ECategory());
 }
 //everything fulfilled -> dispatch sparse/dense computing versions
 template<class F, class M, class E>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major
 ) {
 	typedef typename M::evaluation_category::tag MCategory;
 	typedef typename E::evaluation_category::tag ECategory;
-	assign<F>(m,e,row_major(),column_major(),MCategory(),ECategory());
+	matrix_assign_functor<F>(m,e,row_major(),column_major(),MCategory(),ECategory());
 }
 
 //first argument is row_major, second is unknown->choose unknown to be row_major
 template<class F,class M, class E>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, unknown_orientation
 ) {
-	assign<F>(m,e,row_major(),row_major());
+	matrix_assign_functor<F>(m,e,row_major(),row_major());
 }
 
 
 //first argument is column_major->transpose to row_major
 template<class F, class M, class E,class EOrientation>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	column_major, EOrientation
@@ -569,7 +576,7 @@ void assign(
 	typedef typename EOrientation::transposed_orientation TEOrientation;
 	auto transM = trans(m);
 	auto transE = trans(e);
-	assign<F>(transM,transE,row_major(),TEOrientation());
+	matrix_assign_functor<F>(transM,transE,row_major(),TEOrientation());
 }
 
 //now dispatch packed matrices. Again we dispatch so that the default is row_major
@@ -577,7 +584,7 @@ void assign(
 
 //first argument is column_major->transpose to row_major
 template<class F, class M, class E,class EOrientation, class Triangular>
-void assign(
+void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
 	triangular<column_major,Triangular>, triangular<EOrientation,Triangular>
@@ -586,7 +593,9 @@ void assign(
 	typedef typename E::orientation::transposed_orientation TEPacked;
 	auto transM = trans(m);
 	auto transE = trans(e);
-	assign<F>(transM,transE,TMPacked(),TEPacked());
+	matrix_assign_functor<F>(transM,transE,TMPacked(),TEPacked());
+}
+
 }
 
 
@@ -598,7 +607,7 @@ void assign(matrix_expression<M, cpu_tag> &m, const matrix_expression<E, cpu_tag
 	typedef typename M::orientation MOrientation;
 	typedef typename E::orientation EOrientation;
 	
-	assign<F>(m, e, MOrientation(),EOrientation());
+	detail::matrix_assign_functor<F>(m, e, MOrientation(),EOrientation());
 }
 
 }}}

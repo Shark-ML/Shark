@@ -31,9 +31,7 @@
 #include "../detail/functional.hpp"
 #include "../expression_types.hpp"
 
-namespace shark {
-namespace blas {
-namespace kernels {
+namespace shark {namespace blas {namespace kernels {
 
 template<class F, class V>
 void assign(vector_expression<V, cpu_tag>& v, typename V::value_type t) {
@@ -49,9 +47,11 @@ void assign(vector_expression<V, cpu_tag>& v, typename V::value_type t) {
 //direct assignment of two vectors
 ////////////////////////////////////////////////////////
 
+namespace detail{
+
 // Dense-Dense case
 template< class V, class E>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
 	dense_tag, dense_tag
 ) {
@@ -62,7 +62,7 @@ void assign(
 }
 // Dense-packed case
 template< class V, class E>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
 	dense_tag, packed_tag
 ) {
@@ -96,7 +96,7 @@ void assign(
 
 // packed-packed case
 template< class V, class E>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
 	packed_tag, packed_tag
 ) {
@@ -128,7 +128,7 @@ void assign(
 
 //Dense-Sparse case
 template<class V, class E>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e, 
 	dense_tag, 
@@ -143,7 +143,7 @@ void assign(
 }
 //Sparse-Dense
 template<class V, class E>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	sparse_tag,
@@ -159,7 +159,7 @@ void assign(
 }
 // Sparse-Sparse case
 template<class V, class E>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	sparse_tag,
@@ -174,6 +174,7 @@ void assign(
 		targetPos = v().set_element(targetPos,it.index(),*it);
 	}
 }
+}
 
 //dispatcher
 template< class V, class E>
@@ -181,16 +182,17 @@ void assign(vector_expression<V, cpu_tag>& v, const vector_expression<E, cpu_tag
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename V::evaluation_category::tag TagV;
 	typedef typename E::evaluation_category::tag TagE;
-	assign(v, e, TagV(),TagE());
+	detail::vector_assign(v, e, TagV(),TagE());
 }
 
 ////////////////////////////////////////////
 //assignment with functor
 ////////////////////////////////////////////
 
+namespace detail{
 //dense dense case
 template<class V, class E, class F>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
@@ -204,7 +206,7 @@ void assign(
 
 //dense packed case
 template<class V, class E, class F>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
@@ -237,7 +239,7 @@ void assign(
 
 //packed-packed case
 template<class V, class E, class F>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
@@ -278,7 +280,7 @@ void assign(
 
 //Dense-Sparse case
 template<class V, class E, class F>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
@@ -293,7 +295,7 @@ void assign(
 
 //sparse-dense case
 template<class V, class E, class F>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
@@ -363,7 +365,7 @@ void assign_sparse(
 }
 //as long as one argument is not a proxy, we are in the good case.
 template<class V, class E, class F>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_container<E, cpu_tag> const& e,
 	F f,
@@ -372,7 +374,7 @@ void assign(
 	assign_sparse(v,e);
 }
 template<class V, class E, class F>
-void assign(
+void vector_assign(
 	vector_container<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
@@ -381,7 +383,7 @@ void assign(
 	assign_sparse(v,e,f);
 }
 template<class V, class E, class F>
-void assign(
+void vector_assign(
 	vector_container<V, cpu_tag>& v,
 	vector_container<E, cpu_tag> const& e,
 	F f,
@@ -390,12 +392,13 @@ void assign(
 	assign_sparse(v,e,f);
 }
 
+
 //In the general case we have to take one bullet: 
 //either use a temporary, which has copying time and allocation time
 //or count the non-zero elements of e which might be expensive as well. we decide
 //to take the first route for now.
 template<class V, class E, class F>
-void assign(
+void vector_assign(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
 	F f,
@@ -406,6 +409,7 @@ void assign(
 	v().clear();
 	kernels::assign(v, temporary);
 }
+}
 
 // Dispatcher
 template<class F, class V, class E>
@@ -413,7 +417,7 @@ void assign(vector_expression<V, cpu_tag>& v, const vector_expression<E, cpu_tag
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename V::evaluation_category::tag TagV;
 	typedef typename E::evaluation_category::tag TagE;
-	assign(v(), e(), F(), TagV(),TagE());
+	detail::vector_assign(v(), e(), F(), TagV(),TagE());
 }
 
 }}}
