@@ -149,10 +149,10 @@ protected:
 	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
 
 	/// Build a decision tree for classification
-	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, ClassificationDataset const& dataset, ClassVector& cAbove, std::size_t nodeId);
+	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, ClassificationDataset const& dataset, ClassVector& cAbove, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// Builds a decision tree for regression
-	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId);
+	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// comparison function for sorting an attributeTable
 	SHARK_EXPORT_SYMBOL static bool tableSort(RFAttribute const& v1, RFAttribute const& v2);
@@ -170,7 +170,7 @@ protected:
 	SHARK_EXPORT_SYMBOL double totalSumOfSquares(std::vector<RealVector>& labels, std::size_t from, std::size_t to, RealVector const& sumLabel);
 
 	/// Generate random table indices.
-	SHARK_EXPORT_SYMBOL void generateRandomTableIndicies(std::set<std::size_t>& tableIndicies);
+	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndicies(Rng::rng_type& rng) const;
 
 	/// Reset the training to its default parameters.
 	SHARK_EXPORT_SYMBOL void setDefaults();

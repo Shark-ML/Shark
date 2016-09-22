@@ -246,7 +246,7 @@ public:
 	}
 
 	/// Compute feature importances, given an oob dataset (Classification)
-	void computeFeatureImportances(ClassificationDataset const& dataOOB){
+	void computeFeatureImportances(ClassificationDataset const& dataOOB, Rng::rng_type& rng){
 		m_featureImportances.resize(m_inputDimension);
 
 		// define loss
@@ -266,7 +266,7 @@ public:
 
 			// permute current dimension
 			RealVector v = getColumn(pDataOOB.inputs(), i);
-			std::random_shuffle(v.begin(), v.end());
+			std::random_shuffle(v.begin(), v.end(), DiscreteUniform<>{rng});
 			setColumn(pDataOOB.inputs(), i, v);
 
 			// evaluate the data set for which one feature dimension was permuted with this tree
@@ -281,7 +281,7 @@ public:
 	}
 
 	/// Compute feature importances, given an oob dataset (Regression)
-	void computeFeatureImportances(RegressionDataset const& dataOOB){
+	void computeFeatureImportances(RegressionDataset const& dataOOB, Rng::rng_type& rng){
 		m_featureImportances.resize(m_inputDimension);
 
 		// define loss
@@ -301,7 +301,7 @@ public:
 
 			// permute current dimension
 			RealVector v = getColumn(pDataOOB.inputs(), i);
-			std::random_shuffle(v.begin(), v.end());
+			std::random_shuffle(v.begin(), v.end(), DiscreteUniform<>{rng});
 			setColumn(pDataOOB.inputs(), i, v);
 
 			// evaluate the data set for which one feature dimension was permuted with this tree
