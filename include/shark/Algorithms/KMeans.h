@@ -10,7 +10,7 @@
  * \date        2011
  *
  *
- * \par Copyright 1995-2015 Shark Development Team
+ * \par Copyright 1995-2016 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -52,7 +52,7 @@ namespace shark{
 ///
 /// \par
 /// The k-means algorithm takes vector-valued data
-/// \f$ \{x_1, \dots, x_\ell\} \subset \mathbb R^d \f$
+/// \f$ \{x_1, \dots, x_n\} \subset \mathbb R^d \f$
 /// and splits it into k clusters, based on centroids
 /// \f$ \{c_1, \dots, c_k\} \f$.
 /// The result is stored in a Centroids object that can be used to
@@ -82,7 +82,7 @@ SHARK_EXPORT_SYMBOL std::size_t kMeans(Data<RealVector> const& data, std::size_t
 ///
 /// \par
 /// The k-means algorithm takes vector-valued data
-/// \f$ \{x_1, \dots, x_\ell\} \subset \mathbb R^d \f$
+/// \f$ \{x_1, \dots, x_n\} \subset \mathbb R^d \f$
 /// and splits it into k clusters, based on centroids
 /// \f$ \{c_1, \dots, c_k\} \f$.
 /// The result is stored in a RBFLayer object that can be used to
@@ -90,7 +90,7 @@ SHARK_EXPORT_SYMBOL std::size_t kMeans(Data<RealVector> const& data, std::size_t
 ///
 /// \par
 /// This is just an alternative frontend to the version using Centroids. it creates a centroid object,
-///  with as many clusters as are outputs in the RBFLayer and copis the result into the model.
+///  with as many clusters as are outputs in the RBFLayer and copies the result into the model.
 ///
 /// \par
 /// Note that the data set needs to include at least k data points
@@ -104,6 +104,39 @@ SHARK_EXPORT_SYMBOL std::size_t kMeans(Data<RealVector> const& data, std::size_t
 ///
 SHARK_EXPORT_SYMBOL std::size_t kMeans(Data<RealVector> const& data, RBFLayer& model, std::size_t maxIterations = 0);
 
+///
+/// \brief The kernel k-means clustering algorithm
+///
+/// \par
+/// The kernel k-means algorithm takes data
+/// \f$ \{x_1, \dots, x_n\} \f$
+/// and splits it into k clusters, based on centroids
+/// \f$ \{c_1, \dots, c_k\} \f$.
+/// The centroids are elements of the reproducing kernel Hilbert space
+/// (RHKS) induced by the kernel function. They are functions, represented
+/// as the components of a KernelExpansion object. I.e., given a data point
+/// x, the kernel expansion returns a k-dimensional vector f(x), which is
+/// the evaluation of the centroid functions on x. The value of the
+/// centroid function represents the inner product of the centroid with
+/// the kernel-induced feature vector of x (embedding of x into the RKHS).
+/// The distance of x from the centroid \f$ c_i \f$ is computes as the
+/// kernel-induced distance
+/// \f$ \sqrt{ kernel(x, x) + kernel(c_i, c_i) - 2 kernel(x, c_i) } \f$.
+/// For the Gaussian kernel (and other normalized kernels) is simplifies to
+/// \f$ \sqrt{ 2 - 2 kernel(x, c_i) } \f$. Hence, larger function values
+/// indicate smaller distance to the centroid.
+///
+/// \par
+/// Note that the data set needs to include at least k data points
+/// for k-means to work. This is because the current implementation
+/// does not allow for empty clusters.
+///
+/// \param data           vector-valued data to be clustered
+/// \param k              number of clusters
+/// \param kernel         kernel function object
+/// \param maxIterations  maximum number of k-means iterations; 0: unlimited
+/// \return               centroids (represented as functions, see description)
+///
 template<class InputType>
 KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k, AbstractKernelFunction<InputType>& kernel, std::size_t maxIterations = 0){
 	if(!maxIterations)
@@ -191,5 +224,6 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 
 	return expansion;
 }
-}
+
+} // namespace shark
 #endif
